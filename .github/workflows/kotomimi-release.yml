@@ -7,7 +7,7 @@
 #   1. Set the version in package.json (the fork's scheme: upstream's version
 #      with a two-digit build after it — upstream 0.42.2 is 0.42.201, 0.42.202…).
 #   2. Commit, then tag that commit `v<version>` and push the tag:
-#        git tag -a v0.42.213 -m "Kotomimi 0.42.213" && git push origin v0.42.213
+#        git tag -a v0.42.214 -m "Kotomimi 0.42.214" && git push origin v0.42.214
 #   3. When the run is green, open the draft under Releases and publish it.
 #      The installed app's "Check for updates" reads published releases only.
 #
@@ -303,7 +303,7 @@ jobs:
         run: |
           mkdir -p release-assets
           find artifacts -type f \( -name '*.exe' -o -name '*.nupkg' -o -name 'RELEASES' -o -name '*.dmg' -o -name '*.zip' -o -name '*.blockmap' -o -name 'latest-mac.yml' \) -exec cp {} release-assets/ \;
-          # Squirrel names its files with a space ("Kotomimi-0.42.213 Setup.exe"); the
+          # Squirrel names its files with a space ("Kotomimi-0.42.214 Setup.exe"); the
           # updater asks for the name with a dot, and an address is better without one.
           cd release-assets
           for f in *' '*; do
