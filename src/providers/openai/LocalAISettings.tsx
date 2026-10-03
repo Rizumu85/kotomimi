@@ -8,6 +8,7 @@ import { CustomModels } from '../../components/CustomModels/CustomModels';
 import { LanSharingSection } from '../../components/LanSharing/LanSharingSection';
 import { getManifestEntry } from '../../lib/local-inference/modelManifest';
 import { shortenModelName } from '../../lib/local-inference/modelName';
+import { modelLabel } from '../../lib/lan/modelLabel';
 import { resolveInstructions } from '../../lib/provider/instructions';
 import type { SettingsProps } from '../../lib/provider/types';
 import { useModelStatuses } from '../../stores/modelStore';
@@ -47,6 +48,15 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
+/**
+ * A model another device lists, by a name a person reads: the catalog's own name for one of the app's models (a
+ * Kotomimi shares those under their catalog ids), else its id written out (`modelLabel`). The id stays what is sent.
+ */
+function shownName(id: string): string {
+  const entry = getManifestEntry(id);
+  return entry ? shortenModelName(entry.name, entry.shortName) : modelLabel(id);
+}
+
 interface TextModelFieldsProps {
   /** Distinguishes the two groups' ids. */
   id: string;
@@ -78,8 +88,8 @@ function TextModelFields({ id, baseUrl, model, needsKey, blankLabel, options, on
           <select id={`${id}-model`} className="select-dropdown" aria-label={t('providers.localai.textModel')} value={model} onChange={(e) => onChange({ model: e.target.value })} disabled={disabled}>
             <option value="">{blankLabel}</option>
             {/* A saved model the server no longer lists stays visible, so the setting is not silently another. */}
-            {!listed && <option value={model}>{model}</option>}
-            {options.map((m) => <option key={m.id} value={m.id}>{m.id}</option>)}
+            {!listed && <option value={model}>{shownName(model)}</option>}
+            {options.map((m) => <option key={m.id} value={m.id}>{shownName(m.id)}</option>)}
           </select>
         ) : (
           <input id={`${id}-model`} type="text" className="text-input" aria-label={t('providers.localai.textModel')} value={model} onChange={(e) => onChange({ model: e.target.value })} placeholder={blankLabel} disabled={disabled} />
@@ -234,8 +244,8 @@ export function LocalAISettingsView({ settings, update, disabled = false, pair, 
             <Field label={t('providers.localai.recognizer')}>
               <select className="select-dropdown" aria-label={t('providers.localai.recognizer')} value={settings.asrModel} onChange={(e) => update({ asrModel: e.target.value })} disabled={disabled || everyLegTranscribes}>
                 <option value="">{t('providers.localai.asrModelServer')}</option>
-                {!asrListed && <option value={settings.asrModel}>{settings.asrModel}</option>}
-                {recognizers.map((m) => <option key={m.id} value={m.id}>{m.id}</option>)}
+                {!asrListed && <option value={settings.asrModel}>{shownName(settings.asrModel)}</option>}
+                {recognizers.map((m) => <option key={m.id} value={m.id}>{shownName(m.id)}</option>)}
               </select>
               {someLegTranscribes && <p className="kt-note">{t('providers.localai.asrFixedNote')}</p>}
             </Field>
