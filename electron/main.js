@@ -607,8 +607,14 @@ app.whenReady().then(async () => {
     console.log('[Sokuji] [Main] Microphone permission status:', micStatus);
 
     if (micStatus === 'not-determined') {
-      const granted = await systemPreferences.askForMediaAccess('microphone');
-      console.log('[Sokuji] [Main] Microphone permission granted:', granted);
+      // Fork: asked, not waited for. The question stays on screen until someone answers it, and the window used to
+      // wait with it: a computer that only lends its models — nobody at its screen, the app reopened after an
+      // update, which macOS takes for a new app and asks again — never opened its window, and so never started
+      // the LocalAI it runs. The microphone is not needed until a session starts; the answer can come when it comes.
+      void systemPreferences.askForMediaAccess('microphone').then(
+        (granted) => console.log('[Sokuji] [Main] Microphone permission granted:', granted),
+        (error) => console.warn('[Sokuji] [Main] Microphone permission could not be asked:', error?.message),
+      );
     } else if (micStatus === 'denied') {
       console.warn('[Sokuji] [Main] Microphone permission denied - please enable in System Preferences > Privacy & Security > Microphone');
     }
