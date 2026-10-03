@@ -72,6 +72,8 @@ export const LEGACY_SLICE_KEYS: Readonly<Record<string, string>> = {
   local_inference: 'localInference',
   local_native: 'localNative',
   soniox: 'soniox',
+  // Fork: LocalAI Realtime (`src/providers/openai/localai.ts`). No old build stored it; listed because every released id is.
+  localai: 'localai',
 };
 
 /** Where the stored provider kept its turn mode; null when the value names no old provider. */

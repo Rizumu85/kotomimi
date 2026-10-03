@@ -242,6 +242,8 @@ export function realtimeLanguageName(code: string): string {
 
 export interface RealtimeCredentials {
   apiKey: string;
+  /** Fork (LocalAI): the WebSocket endpoint to dial instead of OpenAI's (`localai.ts`). Absent: `REALTIME_WS_URL`. */
+  endpoint?: string;
 }
 
 export const realtimeCredentials: Provider<RealtimeSettings, RealtimeCredentials, never>['credentials'] = {

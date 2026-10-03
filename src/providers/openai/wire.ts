@@ -32,8 +32,9 @@ export { decodeServerEvent, errorWords, type ServerEvent } from '../../lib/provi
 /** The GA endpoint the SDK dials (`openai/realtime/internal-base.js:41-50`); the model rides in its query, fixed at creation. */
 export const REALTIME_WS_URL = 'wss://api.openai.com/v1/realtime';
 
-export function realtimeUrl(c: Pick<RealtimeConfig, 'model'>): string {
-  return `${REALTIME_WS_URL}?model=${encodeURIComponent(c.model)}`;
+export function realtimeUrl(c: Pick<RealtimeConfig, 'model'>, endpoint: string = REALTIME_WS_URL): string {
+  // Fork (LocalAI): a self-hosted endpoint, when the leg's credentials name one. Handed in as a plain string: only `realtimeProtocols` reads the credentials here.
+  return `${endpoint}?model=${encodeURIComponent(c.model)}`;
 }
 
 /**
@@ -45,6 +46,8 @@ export function realtimeUrl(c: Pick<RealtimeConfig, 'model'>): string {
  * key; what it returns is never framed, worded or logged.
  */
 export function realtimeProtocols(k: RealtimeCredentials): string[] {
+  // Fork (LocalAI): no key, no subprotocol. LocalAI's handshake echoes none, and a browser fails a socket whose offered subprotocols go unanswered.
+  if (!k.apiKey) return [];
   return ['realtime', `openai-insecure-api-key.${k.apiKey}`];
 }
 
@@ -81,6 +84,18 @@ function turnDetectionOf(d: TurnDetection | null): RealtimeAudioInputTurnDetecti
  * (ruling 6), which the GA session never took.
  */
 export function sessionUpdate(c: RealtimeConfig): WireSessionUpdate {
+  // Fork (LocalAI): a transcription session takes the input's settings alone, and its detection answers nothing, so it carries no answering switches.
+  if (c.transcribeOnly) {
+    const detection = turnDetectionOf(c.turnDetection);
+    const { create_response: _create, interrupt_response: _interrupt, ...turnDetection } = (detection ?? {}) as Record<string, unknown>;
+    return {
+      type: 'session.update',
+      session: {
+        type: 'transcription',
+        audio: { input: { turn_detection: detection === null ? null : turnDetection, transcription: c.transcription, noise_reduction: c.noiseReduction === null ? null : { type: c.noiseReduction } } },
+      },
+    } as unknown as WireSessionUpdate;
+  }
   return {
     type: 'session.update',
     session: {

@@ -152,7 +152,7 @@ class RealtimeLeg implements AdapterSession {
         queued: (asked, waiting) => this.frame('out', 'response.queued', { for: asked.kind, waiting }),
       },
     });
-    const url = realtimeUrl(config);
+    const url = realtimeUrl(config, request.credentials.endpoint);
     const protocols = realtimeProtocols(request.credentials);
     try {
       this.socket = openSocket(url, protocols);
@@ -208,7 +208,8 @@ class RealtimeLeg implements AdapterSession {
     // A commit that did not go up made no input: no response is asked for it.
     if (!this.send(JSON.stringify(COMMIT))) return;
     this.frame('out', 'input_audio_buffer.commit');
-    this.queue.push({ kind: 'turn' });
+    // Fork (LocalAI): a server that answers its commits is asked nothing.
+    if (!this.request.config.commitAnswers) this.queue.push({ kind: 'turn' });
   }
 
   /** A release without speech: the press's audio is cleared, never left to join the next turn (spec, "Defects removed by construction"; choice 12). */
@@ -331,6 +332,8 @@ class RealtimeLeg implements AdapterSession {
 
   private committed(e: InputAudioBufferCommittedEvent): void {
     this.frame('in', e.type, { itemId: e.item_id ?? null, previousItemId: e.previous_item_id ?? null });
+    // Fork (LocalAI): a manual commit's id is not the id its transcript comes under, so the transcript opens the source, and this id none.
+    if (this.request.config.commitAnswers && this.request.context.turns === 'manual') return;
     if (this.phase === 'live' && typeof e.item_id === 'string') this.items.committed(e.item_id);
   }
 
@@ -451,7 +454,7 @@ class RealtimeLeg implements AdapterSession {
    * request of the queue's: nothing waits for it, and it waits for nothing.
    */
   private anchor(): void {
-    if (this.phase !== 'live' || this.anchoredAt === this.completed) return;
+    if (this.phase !== 'live' || this.anchoredAt === this.completed || this.request.config.anchor === false) return;
     this.anchoredAt = this.completed;
     const eventId = `sokuji_${++this.ids}`;
     if (!this.send(JSON.stringify(anchorResponse(eventId, this.request.config.instructions)))) return;

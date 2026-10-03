@@ -498,7 +498,31 @@
       "name": "অজানা",
       "description": "অজানা প্রদানকারী"
     },
-    "poweredBy": "<brand>{{name}}</brand> দ্বারা চালিত"
+    "poweredBy": "<brand>{{name}}</brand> দ্বারা চালিত",
+    "localai": {
+      "name": "LocalAI Realtime",
+      "description": "Your own LocalAI server on the network · text only · stages chosen apart",
+      "endpoint": "Server address",
+      "endpointPlaceholder": "Server address, e.g. 192.168.1.10:8080",
+      "translateKey": "API key of the translation model",
+      "coachKey": "API key of the feedback model",
+      "modelTooltip": "The Realtime pipeline model, exactly as your server names it. The server's list only suggests: what you type is what runs.",
+      "asrModelTooltip": "The speech-recognition model that writes the source text. Leave it to the server unless you want another of its models.",
+      "asrModelServer": "Server default",
+      "translateStage": "Translation",
+      "translateStageTooltip": "What answers speech. The server's own pipeline does everything in one session. A text model lets you run recognition on the server and translation anywhere that speaks the OpenAI chat API: another machine, Ollama or LM Studio on this one, or a hosted API.",
+      "viaServer": "The server's own pipeline",
+      "viaModel": "The text model below",
+      "textBaseUrl": "Address of the text model's server",
+      "textBaseUrlPlaceholder": "Blank: the same server · or e.g. http://localhost:11434/v1",
+      "textModel": "Text model",
+      "translateModelPlaceholder": "Model name, e.g. hy-mt2-1.8b",
+      "needsKey": "This server needs an API key",
+      "coachStage": "Grammar feedback",
+      "coachStageTooltip": "For when you speak the other side's language yourself. Your speech is not translated: a model checks it and answers ✓, or the corrected sentence and why. What you type is still translated.",
+      "coach": "I speak the other side's language: check my grammar",
+      "coachModelPlaceholder": "Blank: the translation text model"
+    }
   },
   "logsPanel": {
     "autoScrollOn": "অটো স্ক্রল চালু",
@@ -1298,5 +1322,9 @@
     "no_microphone": "শুরু করতে এই মোডের জন্য ডিভাইস কনফিগার করুন।",
     "silent_no_permission": "নির্বাচিত উৎস থেকে এখনও কোনো অডিও আসেনি। এটি চলছে অথচ কিছুই অনুবাদ হচ্ছে না হলে, System Settings > Privacy & Security > System Audio Recording Only-তে Sokuji-কে অনুমতি দিন (macOS), তারপর সেশনটি আবার শুরু করুন।",
     "loopback_denied": "সিস্টেম অডিও ক্যাপচার করতে অন্যের অডিওর জন্য স্ক্রিন রেকর্ডিং অনুমতি প্রয়োজন।"
+  },
+  "fork": {
+    "furigana": "Furigana over kanji (Japanese)",
+    "romanization": "Romanization (Japanese, Korean, Russian)"
   }
 }

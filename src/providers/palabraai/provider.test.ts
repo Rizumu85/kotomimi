@@ -75,7 +75,8 @@ describe('the Palabra AI definition', () => {
   });
 
   it('sits last, after Soniox (ruling 14)', () => {
-    const ids = PROVIDERS.filter((p) => !p.id.startsWith('fake')).map((p) => p.id);
+    // Fork: LocalAI Realtime is appended after the upstream list, so Palabra is last of that list.
+    const ids = PROVIDERS.filter((p) => !p.id.startsWith('fake') && p.id !== 'localai').map((p) => p.id);
     expect(ids[ids.length - 1]).toBe('palabraai');
     expect(ids.indexOf('palabraai')).toBe(ids.indexOf('soniox') + 1);
   });

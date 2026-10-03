@@ -41,6 +41,12 @@ export interface RealtimeConfig {
   reasoningEffort?: ReasoningEffort;
   /** WebSocket only (ruling 12; choice 18): the owner abandoned WebRTC for this provider (2026-09-29). It reaches `info.transport`, which analytics reports. */
   transport: 'websocket';
+  /** Fork (LocalAI): `false` sends no drift anchor — LocalAI answers it as a real turn, and keeps its answer in the conversation. Absent: anchored. */
+  anchor?: false;
+  /** Fork (LocalAI): the server answers a manual commit itself, once it has transcribed it; a `response.create` sent after the commit cancels that transcription. Its transcript then comes under an id of its own, not the commit's. Absent: the adapter asks. */
+  commitAnswers?: true;
+  /** Fork (LocalAI): a transcription session — the server detects turns and writes the source text, and answers nothing; a text model elsewhere does (`pipeline.ts`). Absent: a conversation session. */
+  transcribeOnly?: true;
 }
 
 const NOISE: Readonly<Record<NoiseReduction, RealtimeConfig['noiseReduction']>> = {
