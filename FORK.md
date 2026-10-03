@@ -328,22 +328,20 @@ macOS 把钥匙串和麦克风的许可记在应用的签名上，Squirrel.Mac �
 | `MACOS_CSC_LINK` | 证书和私钥导出的 `.p12`，base64 编码 |
 | `MACOS_CSC_KEY_PASSWORD` | 这个 `.p12` 的密码 |
 
-证书的名字必须是 `Kotomimi Code Signing`（`package.json` 的 `build.mac.identity`）。生成和存放：
+证书的名字必须是 `Kotomimi Code Signing`（`package.json` 的 `build.mac.identity`）。生成证书并存进密钥由一个脚本完成（`scripts/kotomimi-mac-signing-cert.sh`）。把它复制到一个单独的文件夹里再运行，证书、私钥和密码会留在那个文件夹里：
 
 ```bash
-mkdir -p ~/kotomimi-signing && cd ~/kotomimi-signing
-openssl rand -hex 16 > pass.txt
-MSYS_NO_PATHCONV=1 openssl req -x509 -newkey rsa:2048 -sha256 -days 7300 -nodes \
-  -keyout key.pem -out cert.pem -subj "/CN=Kotomimi Code Signing" \
-  -addext "basicConstraints=critical,CA:false" \
-  -addext "keyUsage=critical,digitalSignature" \
-  -addext "extendedKeyUsage=critical,codeSigning"
-# -legacy：OpenSSL 3 默认的加密方式 macOS 导不进去
-openssl pkcs12 -export -legacy -inkey key.pem -in cert.pem \
-  -name "Kotomimi Code Signing" -out signing.p12 -passout file:pass.txt
-base64 -w0 signing.p12 | gh secret set MACOS_CSC_LINK -R Rizumu85/kotomimi
-gh secret set MACOS_CSC_KEY_PASSWORD -R Rizumu85/kotomimi < pass.txt
+mkdir -p ~/kotomimi-signing && cp scripts/kotomimi-mac-signing-cert.sh ~/kotomimi-signing/make-cert.sh
+bash ~/kotomimi-signing/make-cert.sh
 ```
+
+在 Windows 的 PowerShell 里没有 `openssl` 和 `base64`，要让 Git Bash 来跑：
+
+```powershell
+& "C:\Program Files\Gitinash.exe" "$HOME\kotomimi-signing\make-cert.sh"
+```
+
+再运行一次不会换证书，只会把现有的那张重新存进密钥。
 
 有了这两个密钥，发布流程会：把证书加入信任（否则 electron-builder 找不到它，会悄悄跳过签名）、用它签名、检查签名确实钉在证书上，并把 `.zip`、`.blockmap` 和 `latest-mac.yml` 一起放进 Release，Mac 上的"检查更新"就能原地更新。没有密钥时流程照旧做临时签名，也不发布更新器要的那几个文件。
 
