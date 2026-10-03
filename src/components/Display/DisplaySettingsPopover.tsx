@@ -29,6 +29,7 @@ import {
   CONVERSATION_DISPLAY_DEFAULT_SOURCE_TEXT_COLOR,
   CONVERSATION_DISPLAY_DEFAULT_TRANSLATION_TEXT_COLOR,
 } from '../../stores/conversationDisplayStore';
+import { ReadingAidToggles } from '../Annotated/ReadingAidToggles';
 import './DisplaySettingsPopover.scss';
 
 const BG_PRESETS = ['#000000', '#1a1a1a', '#0d2032', '#0f2419', '#FFFFFF', '#2a2a2a'];
@@ -191,6 +192,8 @@ const DisplaySettingsPopoverInner: React.FC<{ bindings: InnerBindings }> = ({ bi
           />
         </div>
       )}
+      {/* Fork: furigana and romanization, the same pair on every surface. */}
+      <ReadingAidToggles />
     </div>
   );
 };

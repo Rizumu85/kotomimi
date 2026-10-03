@@ -5,6 +5,7 @@ import type { Entry } from '../../lib/projection/types';
 import { buildBands, type BandPiece } from '../../lib/subtitle/bands';
 import { displayItems, type LegFilters } from '../../lib/view/filter';
 import { noticeText } from '../../lib/view/noticeText';
+import { AnnotatedLines, useAnnotation } from '../Annotated/AnnotatedText';
 import { ConversationList } from '../Conversation/ConversationList';
 import './SubtitleStream.scss';
 import '../../styles/karaoke.scss';
@@ -75,6 +76,17 @@ function SubtitleBands({ entries, lit, filters, newItemHighlightEnabled }: Pick<
   // A stretch is highlighted once, on the first draw after it arrives; what was
   // there at the first draw never is. Keyed by segment — rows re-cut, segments
   // do not — and segment ids carry the session, so the map never collides.
+  // Fork: each segment's language — what the provider detected, else its leg's pair — for the reading aids.
+  const languages = useMemo(() => {
+    const map = new Map<SegmentId, string>();
+    for (const entry of entries) {
+      if (entry.kind !== 'exchange') continue;
+      for (const row of entry.source) map.set(row.segmentId, row.language || entry.languages.source);
+      for (const row of entry.translation) map.set(row.segmentId, row.language || entry.languages.target);
+    }
+    return map;
+  }, [entries]);
+
   const seen = useRef(new Map<string, 'existing' | 'new'>());
   const firstDraw = useRef(true);
   const stateOf = (id: string) => seen.current.get(id) ?? (firstDraw.current ? 'existing' : 'new');
@@ -98,6 +110,7 @@ function SubtitleBands({ entries, lit, filters, newItemHighlightEnabled }: Pick<
                 key={run.key}
                 run={run}
                 lit={lit}
+                language={run.segmentId === undefined ? undefined : languages.get(run.segmentId)}
                 isNew={newItemHighlightEnabled && stateOf(run.key) === 'new'}
               />
             ))}
@@ -135,19 +148,22 @@ function runsOf(pieces: readonly BandPiece[]): RunOf[] {
   return runs;
 }
 
-function Run({ run, lit, isNew }: { run: RunOf; lit: ReadonlyMap<SegmentId, number>; isNew: boolean }) {
+function Run({ run, lit, isNew, language }: { run: RunOf; lit: ReadonlyMap<SegmentId, number>; isNew: boolean; language?: string }) {
   const className = isNew ? 'subtitle-stream__item subtitle-stream__item--new' : 'subtitle-stream__item';
   const upTo = run.segmentId === undefined ? undefined : lit.get(run.segmentId);
   return (
     <span className={className} data-segment={run.segmentId}>
       {run.before}
-      {run.pieces.map((piece) => <Stretch key={piece.key} piece={piece} upTo={upTo} />)}
+      {run.pieces.map((piece) => <Stretch key={piece.key} piece={piece} upTo={upTo} language={language} />)}
     </span>
   );
 }
 
-function Stretch({ piece, upTo }: { piece: BandPiece; upTo: number | undefined }) {
+function Stretch({ piece, upTo, language }: { piece: BandPiece; upTo: number | undefined; language?: string }) {
+  // Fork: reading aids, for a row's piece (a notice has no language and stays plain).
+  const annotated = useAnnotation(piece.text, piece.notice ? undefined : language);
   const played = upTo === undefined || piece.start === undefined ? 0 : Math.min(piece.text.length, Math.max(0, upTo - piece.start));
+  if (annotated) return <AnnotatedLines lines={annotated} inline className={played > 0 && played >= piece.text.length ? 'karaoke-played' : undefined} />;
   if (played <= 0) return <span>{piece.text}</span>;
   if (played >= piece.text.length) return <span className="karaoke-played">{piece.text}</span>;
   return (

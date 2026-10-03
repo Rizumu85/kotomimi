@@ -1,4 +1,5 @@
 import { memo, useCallback, useLayoutEffect, useRef, type CSSProperties, type ReactNode } from 'react';
+import { AnnotatedLines, useAnnotation } from '../Annotated/AnnotatedText';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle, Play, User, Users } from 'lucide-react';
 import type { LegName, SegmentId } from '../../lib/conversation/types';
@@ -129,6 +130,8 @@ const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, r
   const text = row.text.trim();
   const lead = row.text.length - row.text.trimStart().length;
   const played = upTo === undefined ? 0 : Math.min(text.length, Math.max(0, upTo - row.start - lead));
+  // Fork: furigana and romanization, when the row's language has them and they are switched on.
+  const annotated = useAnnotation(text, lang);
   const segmentId = row.segmentId;
   // The tint marks only the row that holds the karaoke boundary — not every
   // row of a segment lit is on, or a row karaoke has already passed.
@@ -155,7 +158,10 @@ const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, r
           <span className={`lang-badge ${isTranslation ? 'tr' : 'src'} source-${leg}`}>{lang.toUpperCase()}</span>
         )}
         <span className={`row-text ${isTranslation ? 'tr' : 'src'}`}>
-          {played <= 0 ? (
+          {annotated ? (
+            // Fork: reading aids replace the karaoke split; a row is lit whole once it has been spoken through.
+            <AnnotatedLines lines={annotated} className={played > 0 && played >= text.length ? 'karaoke-played' : undefined} />
+          ) : played <= 0 ? (
             <span>{text}</span>
           ) : played >= text.length ? (
             <span className="karaoke-played">{text}</span>
