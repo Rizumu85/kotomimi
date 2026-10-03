@@ -36,7 +36,7 @@ class UpdateManager {
     // Configure GitHub provider
     autoUpdater.setFeedURL({
       provider: 'github',
-      owner: 'kizuna-ai-lab',
+      owner: 'Rizumu85', // Fork: this build updates from the fork's own releases, never upstream's.
       repo: 'sokuji',
     });
 
@@ -220,7 +220,7 @@ class UpdateManager {
     if (exeFile) {
       return {
         fileName: exeFile.url,
-        url: `https://github.com/kizuna-ai-lab/sokuji/releases/download/v${version}/${exeFile.url}`,
+        url: `https://github.com/Rizumu85/sokuji/releases/download/v${version}/${exeFile.url}`,
       };
     }
 
@@ -228,7 +228,7 @@ class UpdateManager {
     const exeFileName = `Sokuji-${version}.Setup.exe`;
     return {
       fileName: exeFileName,
-      url: `https://github.com/kizuna-ai-lab/sokuji/releases/download/v${version}/${exeFileName}`,
+      url: `https://github.com/Rizumu85/sokuji/releases/download/v${version}/${exeFileName}`,
     };
   }
 

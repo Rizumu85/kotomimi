@@ -9,7 +9,8 @@
 // to be an Apple one — makes that check pass. See
 // docs/build/macos-auto-update.md.
 
-const RELEASE_BASE = 'https://github.com/kizuna-ai-lab/sokuji/releases';
+// Fork: the fork's own releases.
+const RELEASE_BASE = 'https://github.com/Rizumu85/sokuji/releases';
 
 /**
  * Does this platform hand the download and install to electron-updater,

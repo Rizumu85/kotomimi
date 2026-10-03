@@ -589,7 +589,8 @@ app.whenReady().then(async () => {
   global.updateManager = new UpdateManager(mainWindow, {
     beforeInstall: (fn) => closeHandshake.endSessionThen(fn),
   });
-  global.updateManager.checkAfterDelay(5000);
+  // Fork: no check at startup. The fork has published no release yet, and a check with nothing to find reports an error
+  // on every launch. "Check for updates" in Help still asks, and asks the fork's releases alone (update-manager.js).
 
   // electron-audio-loopback handles setDisplayMediaRequestHandler automatically via initMain()
 });
