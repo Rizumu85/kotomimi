@@ -59,9 +59,9 @@ describe('the LocalAI of this computer, in the settings', () => {
   it('shows what it serves while it runs, and offers Stop', async () => {
     show({ ...installed, state: 'running', models: Array.from({ length: 10 }, (_, i) => `model-${i}`) });
     expect(screen.getByRole('status').textContent).toBe('fork.server.running {"count":10}');
-    expect(screen.getByText('model-0')).toBeTruthy();
+    expect(screen.getByText('Model 0')).toBeTruthy();
     expect(screen.getByText('fork.server.more {"count":2}')).toBeTruthy();
-    expect(screen.queryByText('model-9')).toBeNull();
+    expect(screen.queryByText('Model 9')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'fork.server.stop' }));
     await waitFor(() => expect(stop).toHaveBeenCalledTimes(1));
   });

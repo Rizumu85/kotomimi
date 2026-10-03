@@ -35,6 +35,39 @@ export function localServerStatus(value: unknown): LocalServerStatus {
   };
 }
 
+/** One Realtime pipeline of the LocalAI: the recognizer and the text model it names. */
+export interface LocalPipeline { name: string; transcription: string; llm: string }
+
+/** Its pipelines, and the models each stage could name instead. */
+export interface LocalPipelines {
+  pipelines: LocalPipeline[];
+  recognizers: string[];
+  translators: string[];
+  /** After a change: whether it took, and LocalAI's words when it did not. */
+  ok?: boolean;
+  error?: string;
+}
+
+export const NO_PIPELINES: LocalPipelines = { pipelines: [], recognizers: [], translators: [] };
+
+const names = (value: unknown): string[] => (Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string' && v !== '').slice(0, 200) : []);
+
+/** The main process's answer, held to its shape. */
+export function localPipelines(value: unknown): LocalPipelines {
+  const answer = value as Partial<LocalPipelines> | null;
+  if (!answer || typeof answer !== 'object') return NO_PIPELINES;
+  const pipelines = (Array.isArray(answer.pipelines) ? answer.pipelines : [])
+    .filter((p): p is LocalPipeline => Boolean(p) && typeof p.name === 'string' && p.name !== '')
+    .map((p) => ({ name: p.name, transcription: typeof p.transcription === 'string' ? p.transcription : '', llm: typeof p.llm === 'string' ? p.llm : '' }));
+  return {
+    pipelines,
+    recognizers: names(answer.recognizers),
+    translators: names(answer.translators),
+    ...(typeof answer.ok === 'boolean' ? { ok: answer.ok } : {}),
+    ...(typeof answer.error === 'string' && answer.error ? { error: answer.error.slice(0, 400) } : {}),
+  };
+}
+
 interface ElectronApi {
   invoke(channel: string, data?: unknown): Promise<unknown>;
   receive(channel: string, listener: (payload: never) => void): void;
@@ -50,6 +83,28 @@ export async function askLocalServer(action: 'get' | 'start' | 'stop'): Promise<
     return localServerStatus(await api.invoke(`local-server:${action}`));
   } catch {
     return NO_LOCAL_SERVER;
+  }
+}
+
+/** Its pipelines as they are now. Never rejects. */
+export async function askLocalPipelines(): Promise<LocalPipelines> {
+  const api = electron();
+  if (!api) return NO_PIPELINES;
+  try {
+    return localPipelines(await api.invoke('local-server:pipelines'));
+  } catch {
+    return NO_PIPELINES;
+  }
+}
+
+/** Names another recognizer or text model in a pipeline. Never rejects: a failure is `ok: false` with why. */
+export async function setLocalPipeline(name: string, change: { transcription?: string; llm?: string }): Promise<LocalPipelines> {
+  const api = electron();
+  if (!api) return { ...NO_PIPELINES, ok: false, error: 'Not available here.' };
+  try {
+    return localPipelines(await api.invoke('local-server:set-pipeline', { name, ...change }));
+  } catch (cause) {
+    return { ...NO_PIPELINES, ok: false, error: cause instanceof Error ? cause.message : String(cause) };
   }
 }
 

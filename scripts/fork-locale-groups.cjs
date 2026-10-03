@@ -195,6 +195,14 @@ module.exports = {
     openPage: ['Open LocalAI\'s page to install or remove models', '打开 LocalAI 的页面，安装或删除模型', '開啟 LocalAI 的頁面，安裝或刪除模型'],
     more: ['and {{count}} more', '还有 {{count}} 个', '還有 {{count}} 個'],
     lastWords: ['What LocalAI said last', 'LocalAI 最后的输出', 'LocalAI 最後的輸出'],
+    pipelineTitle: ['What it uses by default', '默认用哪个模型', '預設用哪個模型'],
+    pipelineSwitching: ['Switching…', '正在切换…', '正在切換…'],
+    pipelineFailed: ['Could not switch: {{message}}', '切换失败：{{message}}', '切換失敗：{{message}}'],
+    pipelineNote: [
+      'A device that leaves both recognition and translation to "Another device" gets these two. A change takes effect from the next session.',
+      '别的设备把识别和翻译都交给「另一台设备」时，用的就是这两个。改动从下一次会话开始生效。',
+      '別的裝置把辨識和翻譯都交給「另一台裝置」時，用的就是這兩個。改動從下一次工作階段開始生效。',
+    ],
   },
   lan: {
     title: ['Share with other devices', '共享给其他设备', '共享給其他裝置'],

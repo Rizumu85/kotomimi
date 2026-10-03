@@ -1272,6 +1272,8 @@ const getLocalServer = () => {
 ipcMain.handle('local-server:get', () => getLocalServer().refresh());
 ipcMain.handle('local-server:start', () => getLocalServer().start());
 ipcMain.handle('local-server:stop', () => getLocalServer().stop());
+ipcMain.handle('local-server:pipelines', () => getLocalServer().pipelines());
+ipcMain.handle('local-server:set-pipeline', (event, args) => getLocalServer().setPipeline(String(args?.name ?? ''), { transcription: args?.transcription, llm: args?.llm }));
 // The one this app started goes with it: asked to stop, not waited for.
 app.on('will-quit', () => { void localServer?.stop(); });
 

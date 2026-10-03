@@ -74,6 +74,8 @@ export const INVOKE_CHANNELS = [
   'local-server:get',
   'local-server:start',
   'local-server:stop',
+  'local-server:pipelines',
+  'local-server:set-pipeline',
   // Native local-inference sidecar lifecycle
   'native-host:start',
   'native-host:stop',

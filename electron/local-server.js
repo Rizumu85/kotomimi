@@ -8,6 +8,13 @@
 // LocalAI's own business (its web page); to the rest of the app, and to any
 // other device, it is the same server it always was (`FORK.md`).
 //
+// A LocalAI's Realtime pipeline strings a recognizer and a text model
+// together, and a session on it runs whichever the pipeline names. Which
+// those are is read here, and changed, through LocalAI's own API
+// (`/api/models/config-json/<name>`) — what its web page does, and what a
+// helper app's menu used to. The models are whatever this LocalAI lists:
+// nothing here knows one by name.
+//
 // What it will not do: touch a LocalAI something else started. One that
 // already answers on the port is reported as running, and left alone.
 //
@@ -101,6 +108,30 @@ function localGet(port, pathname, timeoutMs = 1500) {
   });
 }
 
+/** One request of this computer with a JSON body. Resolves with the status and the body, or null. */
+function localSend(port, method, pathname, body, timeoutMs = 8000) {
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = (value) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      request.destroy();
+      resolve(value);
+    };
+    const text = JSON.stringify(body ?? {});
+    const request = http.request({ host: '127.0.0.1', port, path: pathname, method, agent: false, headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(text) } }, (response) => {
+      const chunks = [];
+      response.on('data', (chunk) => { if (chunks.length < 512) chunks.push(chunk); });
+      response.on('end', () => finish({ status: response.statusCode, body: Buffer.concat(chunks).toString('utf8') }));
+      response.on('error', () => finish(null));
+    });
+    const timer = setTimeout(() => finish(null), timeoutMs);
+    request.on('error', () => finish(null));
+    request.end(text);
+  });
+}
+
 const helpOf = (bin, cwd) => new Promise((resolve) => {
   execFile(bin, ['run', '--help'], { cwd, timeout: 8000, windowsHide: true }, (error, stdout, stderr) => resolve(`${stdout ?? ''}${stderr ?? ''}`));
 });
@@ -125,6 +156,7 @@ function createLocalServer(deps = {}) {
     readFile = (file) => fs.readFileSync(file, 'utf8'),
     spawn = nodeSpawn,
     get = localGet,
+    send = localSend,
     help = helpOf,
     sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
     log = null,
@@ -235,7 +267,66 @@ function createLocalServer(deps = {}) {
     return set({ state: 'stopped', models: [], tail: '' });
   }
 
-  return { status: () => current, refresh, start, stop, bin, port };
+  const json = (answer) => {
+    try {
+      return answer && answer.status === 200 ? JSON.parse(answer.body) : null;
+    } catch {
+      return null;
+    }
+  };
+  const configPath = (name) => `/api/models/config-json/${encodeURIComponent(name)}`;
+
+  /**
+   * The pipelines this LocalAI lists — the models with no capability of their
+   * own — each with the recognizer and the text model it names, and the
+   * models either could be: `{ pipelines: [{ name, transcription, llm }],
+   * recognizers, translators }`. Empty while it is not up.
+   */
+  async function pipelines() {
+    const none = { pipelines: [], recognizers: [], translators: [] };
+    const [list, kinds] = await Promise.all([get(port, '/v1/models', 4000), get(port, '/v1/models/capabilities', 4000)]);
+    const ids = (json(list)?.data ?? []).map((m) => m?.id).filter((id) => typeof id === 'string');
+    const caps = json(kinds)?.data;
+    // No capability list (an older LocalAI): nothing says which model is a pipeline, and nothing is offered.
+    if (!Array.isArray(caps)) return none;
+    const of = new Map(caps.filter((m) => typeof m?.id === 'string').map((m) => [m.id, Array.isArray(m.capabilities) ? m.capabilities : []]));
+    const has = (id, ...wanted) => wanted.some((c) => (of.get(id) ?? []).includes(c));
+    const out = { pipelines: [], recognizers: ids.filter((id) => has(id, 'transcript')), translators: ids.filter((id) => has(id, 'chat', 'completion')) };
+    for (const name of ids.filter((id) => (of.get(id) ?? []).length === 0)) {
+      const pipeline = json(await get(port, configPath(name), 4000))?.pipeline;
+      if (!pipeline || typeof pipeline !== 'object' || (!pipeline.transcription && !pipeline.llm)) continue;
+      out.pipelines.push({ name, transcription: String(pipeline.transcription ?? ''), llm: String(pipeline.llm ?? '') });
+    }
+    return out;
+  }
+
+  /**
+   * Names another recognizer or text model in a pipeline — only one this
+   * LocalAI lists for that work — and lets the one it replaces go from memory.
+   * Answers `{ ok, error?, ...pipelines() }`.
+   */
+  async function setPipeline(name, change = {}) {
+    const before = await pipelines();
+    const pipeline = before.pipelines.find((p) => p.name === name);
+    if (!pipeline) return { ok: false, error: 'LocalAI lists no such pipeline.', ...before };
+    const patch = {};
+    if (typeof change.transcription === 'string' && before.recognizers.includes(change.transcription)) patch.transcription = change.transcription;
+    if (typeof change.llm === 'string' && before.translators.includes(change.llm)) patch.llm = change.llm;
+    if (Object.keys(patch).length === 0) return { ok: false, error: 'LocalAI lists no such model for that stage.', ...before };
+    // The pipeline goes up whole: nothing says a partial update merges what is nested, and the rest of it must stay.
+    const whole = json(await get(port, configPath(name), 4000))?.pipeline ?? {};
+    const answer = await send(port, 'PATCH', configPath(name), { pipeline: { ...whole, ...patch } });
+    if (!answer || answer.status < 200 || answer.status >= 300) {
+      return { ok: false, error: answer ? `LocalAI answered HTTP ${answer.status}: ${String(answer.body).replace(/\s+/g, ' ').slice(0, 200)}` : 'LocalAI did not answer.', ...before };
+    }
+    // What it replaced is no longer asked for: unloaded, so two recognizers do not sit in memory. It loads again if named again.
+    for (const [stage, was] of [['transcription', pipeline.transcription], ['llm', pipeline.llm]]) {
+      if (patch[stage] && was && was !== patch[stage]) await send(port, 'POST', '/backend/shutdown', { model: was }, 15000);
+    }
+    return { ok: true, ...(await pipelines()) };
+  }
+
+  return { status: () => current, refresh, start, stop, pipelines, setPipeline, bin, port };
 }
 
-module.exports = { createLocalServer, buildArgs, buildEnv, candidates, portOf, localGet };
+module.exports = { createLocalServer, buildArgs, buildEnv, candidates, portOf, localGet, localSend };

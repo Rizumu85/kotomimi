@@ -8,6 +8,7 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { cleanFamily, fontCss, fontLanguage, NO_FONTS, normalizeFonts, type FontSettings } from '../lib/fonts/fontCss';
+import { faceNames, listFontFamilies } from '../lib/fonts/systemFonts';
 
 interface FontState extends FontSettings {
   setUi(family: string): void;
@@ -41,7 +42,7 @@ export function applyFonts(settings: FontSettings, doc: Document | undefined = t
   if (style.textContent !== css) style.textContent = css;
 }
 
-const settingsOf = (s: FontSettings): FontSettings => ({ ui: s.ui, latin: s.latin, text: s.text, ruby: s.ruby });
+const settingsOf = (s: FontSettings): FontSettings => ({ ui: s.ui, latin: s.latin, latinFaces: s.latinFaces, text: s.text, ruby: s.ruby });
 
 /** A table with one language set, or — a blank family — without it. */
 function withLanguage(table: Readonly<Record<string, string>>, language: string, family: string): Record<string, string> {
@@ -68,7 +69,8 @@ export const useFontStore = create<FontState>()(
     return {
       ...NO_FONTS,
       setUi: (family) => commit({ ui: cleanFamily(family) }),
-      setLatin: (family) => commit({ latin: cleanFamily(family) }),
+      // Chosen from the platform's list, so its face's own names are known: kept with it, for the next start.
+      setLatin: (family) => commit({ latin: cleanFamily(family), latinFaces: faceNames(family) }),
       setText: (language, family) => commit({ text: withLanguage(get().text, language, family) }),
       setRuby: (language, family) => commit({ ruby: withLanguage(get().ruby, language, family) }),
       clearLanguage: (language) => commit({ text: withLanguage(get().text, language, ''), ruby: withLanguage(get().ruby, language, '') }),
@@ -78,6 +80,17 @@ export const useFontStore = create<FontState>()(
         const fonts = normalizeFonts(stored);
         set(fonts);
         applyFonts(fonts);
+        // A Latin font saved before its face's names were kept: they are looked up the first time the person
+        // touches the app — the platform lists its fonts only after a gesture — and saved from then on.
+        if (fonts.latin && fonts.latinFaces.length === 0 && typeof window !== 'undefined') {
+          const lookUp = () => {
+            void listFontFamilies().then(() => {
+              const names = faceNames(get().latin);
+              if (names.length > 0 && get().latinFaces.length === 0) commit({ latinFaces: names });
+            });
+          };
+          window.addEventListener('pointerdown', lookUp, { once: true, capture: true });
+        }
       },
     };
   }),

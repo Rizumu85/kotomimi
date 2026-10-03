@@ -1463,7 +1463,11 @@
       "useHere": "To use it on this computer too: choose \"Another device\" under the provider, and pick \"LocalAI on this computer\" from the list.",
       "openPage": "Open LocalAI's page to install or remove models",
       "more": "and {{count}} more",
-      "lastWords": "What LocalAI said last"
+      "lastWords": "What LocalAI said last",
+      "pipelineTitle": "What it uses by default",
+      "pipelineSwitching": "Switching…",
+      "pipelineFailed": "Could not switch: {{message}}",
+      "pipelineNote": "A device that leaves both recognition and translation to \"Another device\" gets these two. A change takes effect from the next session."
     },
     "lan": {
       "title": "Share with other devices",

@@ -12,10 +12,18 @@
  * in front of the stack it replaces, never instead of it: a glyph the chosen
  * font lacks still falls to the app's own fonts.
  *
- * In a language written in another script the Latin font goes first — it
- * has no glyphs of that script, so it takes the Latin letters alone and the
- * language's font takes the rest. In a language written in Latin letters the
- * language's own font goes first: it is the more particular choice.
+ * In a language written in another script the Latin font goes first and
+ * takes the Latin letters alone; the language's font takes the rest. It is
+ * held to Latin letters by its own `@font-face`, limited by `unicode-range` —
+ * many fonts chosen for their Latin letters draw Chinese and Japanese too,
+ * and named plainly at the head of the stack one of those would take the
+ * whole line and the language's font would never be reached. In a language
+ * written in Latin letters the language's own font goes first: it is the
+ * more particular choice.
+ *
+ * The interface font is put on the page and on the app's root: the root
+ * names the app's stack itself, so a font set on the page alone would stop
+ * there.
  *
  * Pure: settings in, CSS text out.
  */
@@ -23,12 +31,23 @@
 export interface FontSettings {
   ui: string;
   latin: string;
+  /**
+   * The Latin font's own face, by the names `local()` finds a face by (its full name, its PostScript name), as the
+   * platform listed them when it was chosen. Empty: the family name is tried, which is the face's name for most fonts.
+   */
+  latinFaces: readonly string[];
   /** By language tag, lower-cased: a base (`ja`) or a fuller tag (`zh-tw`). */
   text: Readonly<Record<string, string>>;
   ruby: Readonly<Record<string, string>>;
 }
 
-export const NO_FONTS: FontSettings = { ui: '', latin: '', text: {}, ruby: {} };
+export const NO_FONTS: FontSettings = { ui: '', latin: '', latinFaces: [], text: {}, ruby: {} };
+
+/** The family the Latin font is used under: its Latin letters, digits and punctuation, and nothing else. */
+export const LATIN_FAMILY = 'kt-latin';
+
+/** Basic Latin, Latin-1, Latin Extended A and B, IPA, the combining marks and Latin Extended Additional: what romanization and European languages are written in. */
+const LATIN_RANGE = 'U+0020-007E, U+00A0-024F, U+0250-02AF, U+0300-036F, U+1E00-1EFF';
 
 /** The attribute a surface puts on conversation text, beside its `lang`. */
 export const TEXT_MARK = 'data-kt-text';
@@ -66,7 +85,9 @@ export function normalizeFonts(stored: unknown): FontSettings {
     }
     return out;
   };
-  return { ui: cleanFamily(o.ui), latin: cleanFamily(o.latin), text: table(o.text), ruby: table(o.ruby) };
+  const latin = cleanFamily(o.latin);
+  const latinFaces = latin && Array.isArray(o.latinFaces) ? [...new Set(o.latinFaces.map(cleanFamily).filter(Boolean))].slice(0, 6) : [];
+  return { ui: cleanFamily(o.ui), latin, latinFaces, text: table(o.text), ruby: table(o.ruby) };
 }
 
 /** The style sheet for these settings; '' when nothing is chosen. */
@@ -78,16 +99,23 @@ export function fontCss(settings: FontSettings): string {
   const stack = (...names: string[]) => [...names.filter(Boolean).map(quote), base].join(', ');
   if (f.ui) {
     rules.push(`:root { --kt-font-base: ${quote(f.ui)}, var(--font-sans); }`);
-    rules.push('body { font-family: var(--kt-font-base); }');
+    // The app's root names the app's stack itself: the page alone would not reach what is drawn inside it.
+    rules.push('body, .App { font-family: var(--kt-font-base); }');
   }
-  if (f.latin) rules.push(`[${TEXT_MARK}] { font-family: ${stack(f.latin)}; }`);
+  // The Latin font, as a family of its own that holds Latin letters only.
+  const latin = f.latin ? LATIN_FAMILY : '';
+  if (f.latin) {
+    const faces = [...new Set([...f.latinFaces, f.latin, `${f.latin} Regular`])];
+    rules.push(`@font-face { font-family: ${quote(LATIN_FAMILY)}; src: ${faces.map((name) => `local(${quote(name)})`).join(', ')}; unicode-range: ${LATIN_RANGE}; }`);
+    rules.push(`[${TEXT_MARK}] { font-family: ${stack(latin)}; }`);
+  }
   // Shorter tags first: `zh-tw` then overrides `zh` for the rows it matches.
   const languages = [...new Set([...Object.keys(f.text), ...Object.keys(f.ruby)])].sort((a, b) => a.length - b.length || a.localeCompare(b));
   for (const lang of languages) {
     const text = f.text[lang] ?? '';
     const ruby = f.ruby[lang] ?? '';
     const latinFirst = OTHER_SCRIPTS.has(lang.split('-')[0]);
-    if (text) rules.push(`[${TEXT_MARK}]:lang(${lang}) { font-family: ${latinFirst ? stack(f.latin, text) : stack(text, f.latin)}; }`);
+    if (text) rules.push(`[${TEXT_MARK}]:lang(${lang}) { font-family: ${latinFirst ? stack(latin, text) : stack(text, latin)}; }`);
     // A reading is the language's own script: its font first, then the text's.
     if (ruby) rules.push(`[${TEXT_MARK}]:lang(${lang}) rt { font-family: ${stack(ruby, text)}; }`);
   }

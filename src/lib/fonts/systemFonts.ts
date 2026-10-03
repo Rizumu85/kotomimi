@@ -14,7 +14,31 @@
  */
 import { cleanFamily } from './fontCss';
 
-interface LocalFontData { family: string }
+interface LocalFontData { family: string; fullName?: string; postscriptName?: string; style?: string }
+
+/** Each family's own regular face, by the names `local()` finds it by: kept from the listing, for the font used under a `unicode-range`. */
+const faces = new Map<string, string[]>();
+/** What a family calls its plain face, most usual first. */
+const REGULAR = ['regular', 'normal', 'book', 'roman', 'medium'];
+
+/** The names a family's regular face goes by, as the platform listed them; empty when it has not been listed. */
+export function faceNames(family: string): string[] {
+  return faces.get(cleanFamily(family)) ?? [];
+}
+
+function remember(fonts: readonly LocalFontData[]) {
+  const byFamily = new Map<string, LocalFontData[]>();
+  for (const font of fonts) {
+    const family = cleanFamily(font.family);
+    if (family) byFamily.set(family, [...(byFamily.get(family) ?? []), font]);
+  }
+  for (const [family, list] of byFamily) {
+    const styled = (style: string) => list.find((f) => String(f.style ?? '').trim().toLowerCase() === style);
+    const face = REGULAR.map(styled).find(Boolean) ?? list[0];
+    const names = [face.fullName, face.postscriptName].map(cleanFamily).filter(Boolean);
+    if (names.length > 0) faces.set(family, [...new Set(names)]);
+  }
+}
 
 /** Families tried when the platform cannot list its fonts: the usual ones of Windows, macOS and Linux, for Latin and CJK. */
 const WELL_KNOWN = [
@@ -37,7 +61,9 @@ export function listFontFamilies(): Promise<string[]> {
     let families: string[] = [];
     if (typeof query === 'function') {
       try {
-        families = (await query.call(window)).map((font) => font.family);
+        const fonts = await query.call(window);
+        remember(fonts);
+        families = fonts.map((font) => font.family);
       } catch {
         // Refused, or not allowed here: the short list below.
       }

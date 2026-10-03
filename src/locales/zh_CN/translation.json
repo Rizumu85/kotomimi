@@ -1463,7 +1463,11 @@
       "useHere": "这台电脑自己也想用它：在提供商下面选「另一台设备」，再从列表里选「这台电脑上的 LocalAI」。",
       "openPage": "打开 LocalAI 的页面，安装或删除模型",
       "more": "还有 {{count}} 个",
-      "lastWords": "LocalAI 最后的输出"
+      "lastWords": "LocalAI 最后的输出",
+      "pipelineTitle": "默认用哪个模型",
+      "pipelineSwitching": "正在切换…",
+      "pipelineFailed": "切换失败：{{message}}",
+      "pipelineNote": "别的设备把识别和翻译都交给「另一台设备」时，用的就是这两个。改动从下一次会话开始生效。"
     },
     "lan": {
       "title": "共享给其他设备",

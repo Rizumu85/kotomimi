@@ -126,6 +126,54 @@
     }
   }
 
+  .kt-ls__pipes {
+    margin: vars.$space-3 0 vars.$space-2;
+    padding-top: vars.$space-2;
+    border-top: 1px solid vars.$border-subtle;
+  }
+
+  .kt-ls__label {
+    margin-bottom: 6px;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    color: vars.$text-muted;
+  }
+
+  .kt-ls__pipe-name {
+    margin: 6px 0 4px;
+    font-size: vars.$font-caption;
+    font-weight: 600;
+    color: vars.$text-primary;
+  }
+
+  .kt-ls__choice {
+    display: flex;
+    align-items: center;
+    gap: vars.$space-2;
+    margin-bottom: 6px;
+    font-size: vars.$font-caption;
+    color: vars.$text-primary;
+
+    > span {
+      flex: 0 0 64px;
+    }
+
+    .select-dropdown {
+      @include vars.control-base;
+      flex: 1 1 auto;
+      min-width: 0;
+      padding: 6px 28px 6px 10px;
+      font-size: vars.$font-caption;
+    }
+  }
+
+  .kt-ls__error {
+    margin: 4px 0;
+    font-size: vars.$font-caption;
+    line-height: 1.5;
+    color: vars.$color-warning;
+  }
+
   .kt-ls__link {
     display: inline-flex;
     align-items: center;
