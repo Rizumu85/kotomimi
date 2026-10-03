@@ -1,9 +1,11 @@
 /**
- * Fork: the user's fonts as a style sheet. Four choices, each optional:
+ * Fork: the user's fonts as a style sheet. Five choices, each optional:
  *
  * - `ui`: the app's own font — menus, settings, buttons.
- * - `latin`: Latin letters and digits in conversation text, and the
- *   romanization line under it.
+ * - `latin`: Latin letters and digits inside conversation text.
+ * - `roman`: the romanization line under it — a line of its own, read for
+ *   its sounds, and often wanted in another face than the letters of a name
+ *   in the middle of a sentence. Blank: it follows `latin`.
  * - `text[lang]`: conversation and subtitle text in one language.
  * - `ruby[lang]`: the readings drawn above that language's text (furigana).
  *
@@ -36,12 +38,17 @@ export interface FontSettings {
    * platform listed them when it was chosen. Empty: the family name is tried, which is the face's name for most fonts.
    */
   latinFaces: readonly string[];
+  /** The romanization line's font; blank follows `latin`. */
+  roman: string;
   /** By language tag, lower-cased: a base (`ja`) or a fuller tag (`zh-tw`). */
   text: Readonly<Record<string, string>>;
   ruby: Readonly<Record<string, string>>;
 }
 
-export const NO_FONTS: FontSettings = { ui: '', latin: '', latinFaces: [], text: {}, ruby: {} };
+export const NO_FONTS: FontSettings = { ui: '', latin: '', latinFaces: [], roman: '', text: {}, ruby: {} };
+
+/** The element a surface draws the romanization line in (`AnnotatedText`). */
+export const ROMAN_CLASS = 'annot-roman';
 
 /** The family the Latin font is used under: its Latin letters, digits and punctuation, and nothing else. */
 export const LATIN_FAMILY = 'kt-latin';
@@ -87,7 +94,7 @@ export function normalizeFonts(stored: unknown): FontSettings {
   };
   const latin = cleanFamily(o.latin);
   const latinFaces = latin && Array.isArray(o.latinFaces) ? [...new Set(o.latinFaces.map(cleanFamily).filter(Boolean))].slice(0, 6) : [];
-  return { ui: cleanFamily(o.ui), latin, latinFaces, text: table(o.text), ruby: table(o.ruby) };
+  return { ui: cleanFamily(o.ui), latin, latinFaces, roman: cleanFamily(o.roman), text: table(o.text), ruby: table(o.ruby) };
 }
 
 /** The style sheet for these settings; '' when nothing is chosen. */
@@ -109,6 +116,8 @@ export function fontCss(settings: FontSettings): string {
     rules.push(`@font-face { font-family: ${quote(LATIN_FAMILY)}; src: ${faces.map((name) => `local(${quote(name)})`).join(', ')}; unicode-range: ${LATIN_RANGE}; }`);
     rules.push(`[${TEXT_MARK}] { font-family: ${stack(latin)}; }`);
   }
+  // The romanization line is Latin letters and nothing else: its font by name, then whatever the Latin letters use.
+  if (f.roman) rules.push(`[${TEXT_MARK}] .${ROMAN_CLASS} { font-family: ${stack(f.roman, latin)}; }`);
   // Shorter tags first: `zh-tw` then overrides `zh` for the rows it matches.
   const languages = [...new Set([...Object.keys(f.text), ...Object.keys(f.ruby)])].sort((a, b) => a.length - b.length || a.localeCompare(b));
   for (const lang of languages) {

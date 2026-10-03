@@ -13,6 +13,7 @@ import { faceNames, listFontFamilies } from '../lib/fonts/systemFonts';
 interface FontState extends FontSettings {
   setUi(family: string): void;
   setLatin(family: string): void;
+  setRoman(family: string): void;
   /** A blank family removes the choice. */
   setText(language: string, family: string): void;
   setRuby(language: string, family: string): void;
@@ -42,7 +43,7 @@ export function applyFonts(settings: FontSettings, doc: Document | undefined = t
   if (style.textContent !== css) style.textContent = css;
 }
 
-const settingsOf = (s: FontSettings): FontSettings => ({ ui: s.ui, latin: s.latin, latinFaces: s.latinFaces, text: s.text, ruby: s.ruby });
+const settingsOf = (s: FontSettings): FontSettings => ({ ui: s.ui, latin: s.latin, latinFaces: s.latinFaces, roman: s.roman, text: s.text, ruby: s.ruby });
 
 /** A table with one language set, or — a blank family — without it. */
 function withLanguage(table: Readonly<Record<string, string>>, language: string, family: string): Record<string, string> {
@@ -71,6 +72,7 @@ export const useFontStore = create<FontState>()(
       setUi: (family) => commit({ ui: cleanFamily(family) }),
       // Chosen from the platform's list, so its face's own names are known: kept with it, for the next start.
       setLatin: (family) => commit({ latin: cleanFamily(family), latinFaces: faceNames(family) }),
+      setRoman: (family) => commit({ roman: cleanFamily(family) }),
       setText: (language, family) => commit({ text: withLanguage(get().text, language, family) }),
       setRuby: (language, family) => commit({ ruby: withLanguage(get().ruby, language, family) }),
       clearLanguage: (language) => commit({ text: withLanguage(get().text, language, ''), ruby: withLanguage(get().ruby, language, '') }),

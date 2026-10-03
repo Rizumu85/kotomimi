@@ -89,9 +89,10 @@ export function FontSection() {
   const { t } = useTranslation();
   const ui = useFontStore((s) => s.ui);
   const latin = useFontStore((s) => s.latin);
+  const roman = useFontStore((s) => s.roman);
   const text = useFontStore((s) => s.text);
   const ruby = useFontStore((s) => s.ruby);
-  const { setUi, setLatin, setText, setRuby, clearLanguage } = useFontStore.getState();
+  const { setUi, setLatin, setRoman, setText, setRuby, clearLanguage } = useFontStore.getState();
   // The pair on screen: its two languages are listed whether or not they have a font yet.
   const pair = useProviderStore((s) => (s.selected ? s.entries[s.selected]?.pair : undefined));
   const [added, setAdded] = useState<string[]>([]);
@@ -123,6 +124,9 @@ export function FontSection() {
       </Row>
       <Row label={t('fork.fonts.latin')} hint={t('fork.fonts.latinHint')}>
         <FontPicker value={latin} onChange={setLatin} label={t('fork.fonts.latin')} sample="Ag" />
+      </Row>
+      <Row label={t('fork.fonts.roman')} hint={t('fork.fonts.romanHint')}>
+        <FontPicker value={roman} onChange={setRoman} label={t('fork.fonts.roman')} sample="Ag" />
       </Row>
 
       <div className="kt-fonts__subhead">{t('fork.fonts.languages')}</div>

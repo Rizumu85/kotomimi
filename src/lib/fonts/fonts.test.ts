@@ -31,6 +31,17 @@ describe('the fonts as a style sheet', () => {
     ]);
   });
 
+  it('gives the romanization line a font of its own, apart from the Latin letters inside a sentence', () => {
+    // Alone: the line's font, then the app's.
+    expect(fontCss({ ...NO_FONTS, roman: 'Cambria' })).toBe(`[data-kt-text] .annot-roman { font-family: "Cambria", ${BASE}; }`);
+    // With a Latin font too: the line falls back to it, and the letters in the sentence keep theirs.
+    const css = fontCss({ ...NO_FONTS, latin: 'Georgia', roman: 'Cambria' }).split('\n');
+    expect(css[1]).toBe(`[data-kt-text] { font-family: "kt-latin", ${BASE}; }`);
+    expect(css[2]).toBe(`[data-kt-text] .annot-roman { font-family: "Cambria", "kt-latin", ${BASE}; }`);
+    // Left blank it has no rule of its own: it follows the Latin letters.
+    expect(fontCss({ ...NO_FONTS, latin: 'Georgia' })).not.toContain('annot-roman');
+  });
+
   it('finds the Latin font\'s face by the names the platform gave for it, before the family\'s own', () => {
     expect(fontCss({ ...NO_FONTS, latin: 'MiSans VF', latinFaces: ['MiSans VF Normal', 'MiSansVF-Normal'] }).split('\n')[0])
       .toBe(`@font-face { font-family: "kt-latin"; src: local("MiSans VF Normal"), local("MiSansVF-Normal"), local("MiSans VF"), local("MiSans VF Regular"); unicode-range: ${RANGE}; }`);
@@ -82,7 +93,7 @@ describe('what is stored, made safe', () => {
 
   it('keeps well-formed settings, and drops blanks, bad tags and anything of the wrong type', () => {
     expect(normalizeFonts({ ui: 'Arial', latin: 3, text: { JA: 'Meiryo', 'not a tag': 'X', ko: '' }, ruby: 'nope' }))
-      .toEqual({ ui: 'Arial', latin: '', latinFaces: [], text: { ja: 'Meiryo' }, ruby: {} });
+      .toEqual({ ui: 'Arial', latin: '', latinFaces: [], roman: '', text: { ja: 'Meiryo' }, ruby: {} });
     // A face's names are kept only with the font they name.
     expect(normalizeFonts({ latin: 'Georgia', latinFaces: ['Georgia', 'Georgia', 7, 'X"}'] }).latinFaces).toEqual(['Georgia', 'X']);
     expect(normalizeFonts({ latin: '', latinFaces: ['Georgia'] }).latinFaces).toEqual([]);
@@ -132,7 +143,7 @@ describe('the fonts on the page', () => {
     await vi.waitFor(() => expect(persistSetting).toHaveBeenCalledTimes(6));
     const saved = vi.mocked(persistSetting).mock.calls;
     expect(saved.every(([key]) => key === 'settings.common.fonts')).toBe(true);
-    expect(saved[2][1]).toEqual({ ui: '', latin: 'Georgia', latinFaces: [], text: { ja: 'Yu Mincho' }, ruby: { ja: 'Meiryo' } });
+    expect(saved[2][1]).toEqual({ ui: '', latin: 'Georgia', latinFaces: [], roman: '', text: { ja: 'Yu Mincho' }, ruby: { ja: 'Meiryo' } });
     expect(saved[5][1]).toEqual(NO_FONTS);
   });
 });

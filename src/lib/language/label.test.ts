@@ -20,14 +20,26 @@ describe('languageLabel', () => {
     return label;
   };
 
-  it('names a tag in the UI language, script and region kept apart', () => {
+  it('names a tag in the UI language', () => {
     for (const ui of ['en', 'ja', 'zh_CN', 'zh_TW', 'ko', 'es']) {
-      const hant = named('zh-Hant', ui);
-      const tw = named('zh-TW', ui);
-      expect(hant).not.toBe(tw);
+      named('zh-Hant', ui);
       named('yue', ui);
       named('mul', ui);
     }
+  });
+
+  // Fork: what the choice decides is the script, so the script is what it is called.
+  it('names Chinese by how it is written, not by a region: Simplified and Traditional', () => {
+    for (const ui of ['en', 'ja', 'zh_CN', 'zh_TW', 'ko', 'es']) {
+      expect(named('zh-CN', ui)).toBe(named('zh-Hans', ui));
+      expect(named('zh-TW', ui)).toBe(named('zh-Hant', ui));
+      expect(named('zh-CN', ui)).not.toBe(named('zh-TW', ui));
+      // Chinese with no script named, and other regions, are left as they are.
+      expect(named('zh', ui)).not.toBe(named('zh-CN', ui));
+      expect(named('zh-HK', ui)).not.toBe(named('zh-TW', ui));
+    }
+    expect(languageLabel('zh-CN', 'en')).not.toMatch(/China/);
+    expect(languageLabel('zh-TW', 'en')).not.toMatch(/Taiwan/);
   });
 
   it('follows the UI language', () => {
@@ -51,5 +63,8 @@ describe('languageLabel', () => {
 
   it('names in English for the instructions', () => {
     expect(englishLanguageName('ja')).toBe(languageLabel('ja', 'en'));
+    // Fork: a model's instructions keep CLDR's own names; only what a person reads is named by script.
+    expect(englishLanguageName('zh-CN')).not.toBe(languageLabel('zh-CN', 'en'));
+    expect(englishLanguageName('zh-CN')).toMatch(/China/);
   });
 });
