@@ -40,14 +40,15 @@ describe('LanguagePairSection', () => {
       ...fakeProvider,
       languages: {
         ...fakeProvider.languages,
-        sources: () => [{ value: 'zh-Hant' }, { value: 'zh-TW' }],
-        targets: () => [{ value: 'zh-TW' }],
+        // Fork: `zh-TW` is named as `zh-Hant` is (label.ts), so the region here is one the fork leaves alone.
+        sources: () => [{ value: 'zh-Hant' }, { value: 'zh-HK' }],
+        targets: () => [{ value: 'zh-HK' }],
       },
     } as unknown as typeof fakeProvider;
-    draw({ source: 'zh-Hant', target: 'zh-TW' }, vi.fn(), { provider });
+    draw({ source: 'zh-Hant', target: 'zh-HK' }, vi.fn(), { provider });
     const texts = [...document.querySelectorAll('option')].map((o) => o.textContent);
-    expect([...new Set(texts.filter((x) => x !== '──────────'))].sort()).toEqual([languageLabel('zh-Hant', 'en'), languageLabel('zh-TW', 'en')].sort());
-    expect(languageLabel('zh-Hant', 'en')).not.toBe(languageLabel('zh-TW', 'en'));
+    expect([...new Set(texts.filter((x) => x !== '──────────'))].sort()).toEqual([languageLabel('zh-Hant', 'en'), languageLabel('zh-HK', 'en')].sort());
+    expect(languageLabel('zh-Hant', 'en')).not.toBe(languageLabel('zh-HK', 'en'));
   });
 
   it("offers exactly the provider's codes: its sources, and the targets of the chosen source", () => {

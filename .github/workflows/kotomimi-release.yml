@@ -72,6 +72,7 @@ jobs:
           src/providers
           src/lib/lan
           src/lib/fonts
+          src/lib/language
           src/lib/annotate
           src/lib/local-inference
           src/lib/brand.test.ts
