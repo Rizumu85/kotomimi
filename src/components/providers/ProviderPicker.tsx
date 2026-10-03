@@ -73,6 +73,7 @@ export function ProviderPicker({ providers, auth, disabled, openSlot }: Provider
   const { provider, entry, readiness } = selection;
   const { setCredential, refreshReadiness, select, updateSettings } = useProviderStore.getState();
   const credentialChoice = provider.credentials.choice;
+  const CredentialAssist = provider.credentials.Assist;
   // The first managed provider offered, as the wizard's managed card recommends it (today's ProviderSection.tsx:553-580).
   const recommendedId = providers.find((p) => p.kind === 'managed')?.id;
   const recommendedLabel = t('simpleSettings.recommended', 'Recommended');
@@ -214,6 +215,19 @@ export function ProviderPicker({ providers, auth, disabled, openSlot }: Provider
               });
             });
           } : undefined}
+          // Fork: a provider's own way to fill a field without typing it. What it fills is checked at once, as Validate would.
+          assist={CredentialAssist && (
+            <CredentialAssist
+              settings={entry.settings}
+              values={entry.credentials}
+              fill={(key, value) => {
+                setCredential(provider, key, value);
+                void refreshReadiness(provider, auth);
+              }}
+              update={(patch) => updateSettings(provider, patch)}
+              disabled={disabled}
+            />
+          )}
           disabled={disabled}
         />
       ))}

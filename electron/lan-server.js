@@ -31,6 +31,7 @@ const ROUTES = new Set(['GET /v1/models', 'GET /v1/models/capabilities', 'POST /
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
+  'Access-Control-Expose-Headers': 'X-Kotomimi-Name',
   'Access-Control-Allow-Headers': 'Authorization, Content-Type',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Max-Age': '600',
@@ -74,10 +75,13 @@ function sameKey(given, wanted) {
  *   socketMessage({ id, data })
  *   socketClose({ id })
  * Resolves once listening, with what the page then calls back; rejects when
- * the port cannot be bound.
+ * the port cannot be bound. `name` is this computer's: every answer carries it
+ * in a header, so a device searching the network (`lan-discover.js`) can list
+ * this one by a name its owner knows.
  */
-function startLanServer({ port, key = '', host = '0.0.0.0' }, handlers) {
+function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname() }, handlers) {
   const wanted = String(key ?? '');
+  const NAMED = { ...CORS, 'X-Kotomimi-Name': encodeURIComponent(String(name).slice(0, 80)) };
   const allowed = (request) => wanted === '' || sameKey(keyOf(request), wanted);
   let nextId = 0;
   /** Requests the page has not answered yet. */
@@ -87,7 +91,7 @@ function startLanServer({ port, key = '', host = '0.0.0.0' }, handlers) {
 
   const json = (response, status, body, headers = {}) => {
     const text = typeof body === 'string' ? body : JSON.stringify(body);
-    response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', ...CORS, ...headers });
+    response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', ...NAMED, ...headers });
     response.end(text);
   };
   const refuse = (response, status, code, message) => json(response, status, { error: { message, type: 'invalid_request_error', code } });
@@ -187,6 +191,7 @@ function startLanServer({ port, key = '', host = '0.0.0.0' }, handlers) {
       resolve({
         port: server.address().port,
         addresses: lanAddresses(),
+        name: String(name),
         /** The page's answer to a request: a status and a body — JSON, or text with its own content type. */
         reply(id, { status = 200, body = null, contentType } = {}) {
           const pending = waiting.get(id);
@@ -194,7 +199,7 @@ function startLanServer({ port, key = '', host = '0.0.0.0' }, handlers) {
           waiting.delete(id);
           clearTimeout(pending.timer);
           if (contentType) {
-            pending.response.writeHead(status, { 'Content-Type': contentType, ...CORS });
+            pending.response.writeHead(status, { 'Content-Type': contentType, ...NAMED });
             pending.response.end(String(body ?? ''));
           } else {
             json(pending.response, status, body);

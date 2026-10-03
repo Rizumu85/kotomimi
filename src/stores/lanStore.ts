@@ -14,7 +14,8 @@ import type { LanHost } from '../lib/lan/host';
 export type LanStatus =
   | { state: 'off' }
   | { state: 'starting' }
-  | { state: 'on'; port: number; addresses: string[] }
+  /** `name` is this computer's, as a device searching the network lists it. */
+  | { state: 'on'; port: number; addresses: string[]; name: string }
   /** `code` is the system's own (`EADDRINUSE`), where it gave one. */
   | { state: 'error'; code: string | null; message: string };
 
@@ -85,7 +86,7 @@ export const useLanStore = create<LanState>()(
           }
           await lanModelsLoaded();
           const started = await host.start({ port, key });
-          set({ status: started.ok ? { state: 'on', port: started.port, addresses: started.addresses } : { state: 'error', code: started.code, message: started.message } });
+          set({ status: started.ok ? { state: 'on', port: started.port, addresses: started.addresses, name: typeof started.name === 'string' ? started.name : '' } : { state: 'error', code: started.code, message: started.message } });
           // Not awaited: sharing is on whatever the firewall says, and the answer takes a moment.
           if (started.ok) void readFirewall('status');
         } catch (cause) {

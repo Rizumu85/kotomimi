@@ -1,4 +1,5 @@
 import { CheckCircle } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { CredentialChoice, CredentialField, CredentialValues } from '../../lib/provider/types';
 import type { Readiness } from '../../stores/providerStore';
@@ -15,6 +16,8 @@ interface CredentialFormProps {
   disabled?: boolean;
   /** The provider's credential choice (F4), drawn above the fields: its options, the setting's current value, and how to change it. */
   choice?: { options: CredentialChoice['options']; value: string; onChange(value: string): void };
+  /** Fork: the provider's `credentials.Assist`, drawn above the fields (below the choice, when there is one). */
+  assist?: ReactNode;
 }
 
 /**
@@ -23,7 +26,7 @@ interface CredentialFormProps {
  * multi-field credential groups; a credential choice (F4) is its Palabra
  * group's segmented control above them (`CredentialChoiceControl`).
  */
-export function CredentialForm({ fields, values, readiness, onChange, onCheck, disabled, choice }: CredentialFormProps) {
+export function CredentialForm({ fields, values, readiness, onChange, onCheck, disabled, choice, assist }: CredentialFormProps) {
   const { t } = useTranslation();
   const checking = readiness.state === 'checking';
   const status = readiness.state === 'ready' ? 'valid' : readiness.state === 'not-ready' ? 'invalid' : '';
@@ -41,6 +44,7 @@ export function CredentialForm({ fields, values, readiness, onChange, onCheck, d
 
   const form = (
     <>
+      {assist}
       {fields.length === 0 ? (
         check && <div className="api-key-input-group">{check}</div>
       ) : (

@@ -96,6 +96,7 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
         {t('fork.lan.title')}
         <Tooltip content={t('fork.lan.tooltip')} position="top">{helpIcon}</Tooltip>
       </h2>
+      <p className="kt-note kt-lan__intro">{t('fork.lan.intro')}</p>
       <ToggleSwitch checked={enabled} onChange={() => { void useLanStore.getState().setEnabled(!enabled); }} label={t('fork.lan.enable')} disabled={disabled} />
 
       {enabled && (
@@ -115,6 +116,7 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
                 <span className="kt-lan__dot" aria-hidden />
                 <span>{clients > 0 ? t('fork.lan.onWithClients', { count: clients }) : t('fork.lan.on')}</span>
               </div>
+              <p className="kt-lan__found">{status.name ? t('fork.lan.foundAs', { name: status.name }) : t('fork.lan.foundAsUnnamed')}</p>
               <div className="kt-lan__label">{t('fork.lan.address')}</div>
               {status.addresses.length > 0
                 ? status.addresses.map((address) => <Address key={address} value={`${address}:${status.port}`} />)
@@ -136,7 +138,6 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
               {firewall.state === 'allowed' && (
                 <div className="kt-lan__firewall-ok"><ShieldCheck size={13} aria-hidden /><span>{t('fork.lan.firewallOk')}</span></div>
               )}
-              <p className="kt-note">{t('fork.lan.howTo')}</p>
             </>
           )}
 

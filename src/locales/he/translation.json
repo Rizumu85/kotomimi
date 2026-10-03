@@ -501,16 +501,16 @@
     "poweredBy": "מופעל על ידי <brand>{{name}}</brand>",
     "localai": {
       "name": "Kotomimi Pipeline",
-      "description": "Choose where each stage runs: a server on your network, this computer, or any text model · text only",
-      "endpoint": "Server address",
-      "endpointPlaceholder": "e.g. 192.168.1.10:8080 — a LocalAI, or another Kotomimi",
+      "description": "Choose where each stage runs: another device on your network, this computer, or any text model · text only",
+      "endpoint": "Address of the other device",
+      "endpointPlaceholder": "Address of the other device, e.g. 192.168.1.10:8790",
       "serverKey": "Access key of the server",
       "translateKey": "API key of the translation model",
       "coachKey": "API key of the feedback model",
       "route": "Where each stage runs",
-      "placeServer": "Server",
+      "placeServer": "Another device",
       "placeDevice": "This computer",
-      "choiceServer": "Connect to a server",
+      "choiceServer": "Use another device",
       "choiceDevice": "Use this computer",
       "notDownloaded": "no model downloaded",
       "notChosen": "no model chosen",
@@ -543,8 +543,8 @@
       "coachPrompt": "Feedback instructions",
       "coachPromptPlaceholder": "Blank: written automatically for your two languages. Your own text may use {{spoken}} and {{native}}.",
       "coachPromptPreview": "Show the automatic instructions for this language pair",
-      "serverNeedsKey": "The server asks for an access key",
-      "serverNeedsKeyTooltip": "Turn this on when the server was given an access key — another Kotomimi with one set, for example. The key is entered beside the server address."
+      "serverNeedsKey": "The other device asks for an access key",
+      "serverNeedsKeyTooltip": "Turn this on when the other device was given an access key — a Kotomimi with one set under its sharing options, for example. The key is entered beside the address."
     }
   },
   "logsPanel": {
@@ -1291,7 +1291,7 @@
         "title": "הגדרות הספק",
         "content": "שנה את המפתח שלך או החלף ספק כאן.",
         "content_pending": "הדבק כאן את מפתח ה-API שלך. \"התחל\" נפתח ברגע שהמפתח מאומת.",
-        "content_kotomimi": "Here you choose a server or this computer. Under Advanced → Provider each stage — recognition, translation, grammar feedback — can be put where you like, and this computer's models can be shared with another device on your network."
+        "content_kotomimi": "Here you choose whose models to use: another device on your network, or this computer. Under Advanced → Provider each stage — recognition, translation, grammar feedback — can be put where you like, and this computer's models can be shared with another device on your network."
       },
       "models": {
         "title": "מודלים",
@@ -1320,7 +1320,7 @@
         "content": "Worth knowing before you start:",
         "typed": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
         "coach": "Speaking their language yourself? Turn on Grammar feedback under Advanced → Provider: your speech is checked instead of translated.",
-        "share": "Another device can use this computer's models: Advanced → Provider → Share on the local network."
+        "share": "Another device can use this computer's models: Advanced → Provider → Share with other devices."
       }
     }
   },
@@ -1367,19 +1367,19 @@
     "wizard": {
       "pathTitle": "Kotomimi Pipeline",
       "pathBadge": "This app's own",
-      "pathDesc": "Your own server on the network, or this computer's own models — and any mix of the two.",
-      "pathCost": "No account and no API key. Text only: subtitles with furigana, typed lookups and grammar feedback. A server means a LocalAI, or another Kotomimi sharing its models; this computer downloads models onto your disk.",
-      "title": "Where should it run?",
-      "intro": "Choose what listens and translates. You can change it, or mix the two stage by stage, later in Settings.",
-      "server": "A server on my network",
-      "serverDesc": "A LocalAI, or another computer running Kotomimi with sharing turned on. This computer stays light.",
+      "pathDesc": "Use the models of another device on your network, or this computer's own — and any mix of the two.",
+      "pathCost": "No account and no API key. Text only: subtitles with furigana, typed lookups and grammar feedback. Another device means a Kotomimi sharing its models, or a model server such as LocalAI; this computer downloads models onto your disk.",
+      "title": "Which device does the work?",
+      "intro": "Choose where the listening and translating run. You can change it, or mix the two stage by stage, later in Settings.",
+      "server": "Another device on my network",
+      "serverDesc": "The models run on another computer: a Kotomimi with sharing turned on, or a model server such as LocalAI. This computer stays light.",
       "device": "This computer",
       "deviceDesc": "Models downloaded by the app run right here. Nothing else is needed; a GPU helps.",
       "tryServer": "Connect",
-      "addressMissing": "Type the server's address first, for example 192.168.1.10:8080.",
-      "serverFound": "Connected — the server lists {{count}} model(s).",
-      "serverUnreachable": "Could not reach the server: {{message}}",
-      "pendingAddress": "No server address yet — add it in Settings before you start.",
+      "addressMissing": "Choose a device from the list above, or type its address, for example 192.168.1.10:8790.",
+      "serverFound": "Connected — it offers {{count}} model(s).",
+      "serverUnreachable": "Could not connect: {{message}}",
+      "pendingAddress": "No device chosen yet — choose one in Settings before you start.",
       "deviceNotice": "Nothing to enter. After setup, download a speech recognition model under Models — the tour shows where. Translation works at once with the online translator, and offline models can be downloaded too."
     },
     "custom": {
@@ -1422,20 +1422,36 @@
       "add": "Add a language…",
       "remove": "Reset {{language}}"
     },
+    "find": {
+      "title": "Found on your network",
+      "search": "Search my network for devices",
+      "again": "Search again",
+      "searching": "Looking for devices on your network…",
+      "none": "Nothing found. Check that the other device is on, is on the same Wi-Fi or router as this one, and has \"Share this computer's models\" turned on in its Kotomimi. You can also type its address below.",
+      "kindKotomimi": "Kotomimi",
+      "kindServer": "Model server",
+      "models": "{{count}} model(s)",
+      "needsKey": "asks for an access key",
+      "thisComputer": "On this computer",
+      "use": "Use {{name}}",
+      "manual": "Or type its address"
+    },
     "lan": {
-      "title": "Share on the local network",
-      "tooltip": "Lets another device on your network use the models this computer has downloaded — speech recognition and translation. The other device runs Kotomimi too, and types this computer's address where a server's goes. Sharing works while this app is open.",
+      "title": "Share with other devices",
+      "intro": "The other way round: this computer does the work, and another device on your network uses the models downloaded here.",
+      "tooltip": "Lets another device on your network use the models this computer has downloaded — speech recognition and translation. The other device runs Kotomimi too and chooses \"Use another device\": this computer then appears in its list. Sharing works while this app is open.",
       "enable": "Share this computer's models",
       "starting": "Starting…",
       "on": "Sharing — no device connected yet",
       "onWithClients": "Sharing — {{count}} connection(s) in use",
       "portInUse": "Port {{port}} is taken by another program. Choose another under Options.",
       "failed": "Sharing could not start: {{message}}",
-      "address": "Address for the other device",
+      "address": "If it does not appear there, type this address",
+      "foundAs": "On the other device, open Kotomimi and choose \"Use another device\". This computer appears in its list as {{name}}: click it.",
+      "foundAsUnnamed": "On the other device, open Kotomimi and choose \"Use another device\". This computer appears in its list: click it.",
       "copy": "Copy",
       "copied": "Copied",
       "noNetwork": "This computer is on no network.",
-      "howTo": "On the other device, choose Kotomimi Pipeline and type this address as the server address.",
       "models": "Models shared",
       "noRecognizer": "No speech recognition model downloaded yet",
       "showLibrary": "Download or manage models",

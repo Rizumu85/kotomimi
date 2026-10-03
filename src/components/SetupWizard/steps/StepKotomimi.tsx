@@ -1,8 +1,9 @@
 /**
  * Fork: the wizard's step for the Kotomimi provider, in place of "Your API
  * key" — it has none. One question instead: where the listening and the
- * translating run. A server on the network (a LocalAI, or another Kotomimi
- * sharing its models) is asked for its address and tried at once; this
+ * translating run. Another device on the network (a Kotomimi sharing its
+ * models, or a LocalAI) is found by searching — a click chooses it and tries
+ * it at once — with the address field kept for what the search cannot reach; this
  * computer needs nothing typed, and its models are downloaded after setup,
  * as on the offline path. The answer is the provider's `asrVia`, carried in
  * the draft as its credential choice and written at Finish like any other.
@@ -23,6 +24,7 @@ import { wizardProvider } from '../providerPaths';
 import Button from '../../Settings/shared/Button';
 import FormInput from '../../Settings/shared/FormInput';
 import StatusMessage from '../../Settings/shared/StatusMessage';
+import { ServerFinder } from '../../LanSharing/ServerFinder';
 import type { ProviderType } from '../../../types/Provider';
 import type { SetupAction, SetupDraft } from '../setupDraft';
 
@@ -72,13 +74,14 @@ const StepKotomimi: React.FC<Props> = ({ draft, dispatch, skipButton }) => {
     dispatch({ type: 'setCredentialChoice', setting: SETTING, value: next });
   };
 
-  const validate = async () => {
+  /** `address`: the one just picked from the list, which the draft does not hold yet. */
+  const validate = async (address?: string) => {
     inFlight.current?.abort();
     const mine = new AbortController();
     inFlight.current = mine;
     setMessage(null);
     const settings = { ...(entry.settings as Record<string, unknown>), [SETTING]: 'server' };
-    const credentials = readCredentials(p, settings, { ...saved, ...draft.credentials }, auth);
+    const credentials = readCredentials(p, settings, { ...saved, ...draft.credentials, ...(address ? { endpoint: address } : {}) }, auth);
     if (isMissing(credentials)) {
       setMessage({ ok: false, text: t('fork.wizard.addressMissing') });
       return;
@@ -122,8 +125,17 @@ const StepKotomimi: React.FC<Props> = ({ draft, dispatch, skipButton }) => {
 
       {place === 'server' ? (
         <>
+          <ServerFinder
+            auto
+            value={draft.credentials.endpoint ?? ''}
+            disabled={validating}
+            onPick={(server) => {
+              dispatch({ type: 'setCredential', key: 'endpoint', value: server.address });
+              void validate(server.address);
+            }}
+          />
           <label className="setup-field">
-            <span>{t('providers.localai.endpoint')}</span>
+            <span>{t('fork.find.manual')}</span>
             <FormInput
               type="text"
               value={draft.credentials.endpoint ?? ''}
@@ -136,7 +148,7 @@ const StepKotomimi: React.FC<Props> = ({ draft, dispatch, skipButton }) => {
             />
           </label>
           <div className="setup-actions">
-            <Button variant="primary" onClick={validate} loading={validating} disabled={validating || !(draft.credentials.endpoint ?? '').trim()}>
+            <Button variant="primary" onClick={() => { void validate(); }} loading={validating} disabled={validating || !(draft.credentials.endpoint ?? '').trim()}>
               {t('fork.wizard.tryServer')}
             </Button>
             {skipButton(draft.credentialsValidated && Boolean(saved.endpoint))}

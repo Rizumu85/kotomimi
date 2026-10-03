@@ -65,6 +65,7 @@ import { deviceChoices, deviceLanguage, deviceModelFor, deviceModelsLoaded, devi
 import { LocalAIEngine, LocalAIEngineSummary, LocalAITurnDetectionControls, LocalAITurnDetectionHelp, LocalAITurnDetectionSummary } from './LocalAIEngine';
 import { KotomimiIcon } from './LocalAIIcon';
 import { LocalAISettingsView } from './LocalAISettings';
+import { LocalAIAssist } from './LocalAIAssist';
 import { createPipelineAdapter, type AnswerStage, type DeviceHearing, type PipelineConfig, type PipelineCredentials, type StageKey, type Stages, type TextStage } from './pipeline';
 import {
   isRealtimeModelId, migrateRealtimeSettings, REALTIME_DEFAULTS, REALTIME_LANGUAGES, REALTIME_LEGACY_KEYS, realtimeLanguages,
@@ -238,6 +239,8 @@ export const localaiCredentials: Provider<LocalAISettings, LocalAICredentials, n
       { value: 'device', labelKey: 'providers.localai.choiceDevice' },
     ],
   },
+  // The devices found on the local network, above the address field: nobody should have to know an address.
+  Assist: LocalAIAssist,
 };
 
 export interface LocalAICheckDeps {

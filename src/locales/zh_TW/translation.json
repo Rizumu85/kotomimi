@@ -501,16 +501,16 @@
     "poweredBy": "<brand>{{name}}</brand> 驅動",
     "localai": {
       "name": "Kotomimi 自由搭配",
-      "description": "辨識、翻譯、文法回饋各自選在哪裡執行：區域網路裡的伺服器、這台電腦、或任意文字模型 · 僅文字",
-      "endpoint": "伺服器位址",
-      "endpointPlaceholder": "例如 192.168.1.10:8080（LocalAI，或另一台 Kotomimi）",
+      "description": "辨識、翻譯、文法回饋各自選在哪裡執行：區域網路裡的另一台裝置、這台電腦、或任意文字模型 · 僅文字",
+      "endpoint": "另一台裝置的位址",
+      "endpointPlaceholder": "另一台裝置的位址，例如 192.168.1.10:8790",
       "serverKey": "伺服器的存取金鑰",
       "translateKey": "翻譯模型的 API 金鑰",
       "coachKey": "文法回饋模型的 API 金鑰",
       "route": "各環節在哪裡執行",
-      "placeServer": "伺服器",
+      "placeServer": "另一台裝置",
       "placeDevice": "這台電腦",
-      "choiceServer": "連線伺服器",
+      "choiceServer": "用另一台裝置",
       "choiceDevice": "用這台電腦",
       "notDownloaded": "尚未下載模型",
       "notChosen": "尚未選模型",
@@ -543,8 +543,8 @@
       "coachPrompt": "文法回饋提示詞",
       "coachPromptPlaceholder": "留空：依你的母語和所練的語言自動產生。自己寫時可以用 {{spoken}} 和 {{native}} 代表這兩種語言。",
       "coachPromptPreview": "檢視目前語言對自動產生的提示詞",
-      "serverNeedsKey": "伺服器需要存取金鑰",
-      "serverNeedsKeyTooltip": "伺服器設了存取金鑰時開啟，例如對面那台 Kotomimi 設定了金鑰。金鑰在伺服器位址旁邊填寫。"
+      "serverNeedsKey": "另一台裝置需要存取金鑰",
+      "serverNeedsKeyTooltip": "另一台裝置設了存取金鑰時開啟，例如對面那台 Kotomimi 在共享的「選項」裡設定了金鑰。金鑰在位址旁邊填寫。"
     }
   },
   "logsPanel": {
@@ -1291,7 +1291,7 @@
         "title": "提供商設定",
         "content": "在這裡更換金鑰或切換提供商。",
         "content_pending": "在這裡貼上您的 API 金鑰。通過驗證後即可解鎖「開始」。",
-        "content_kotomimi": "在這裡選擇連線伺服器，還是用這台電腦的模型。到「進階 → 提供者」裡，可以分別指定辨識、翻譯、文法回饋各自在哪裡執行，也可以把這台電腦的模型共享給區域網路裡的另一台裝置。"
+        "content_kotomimi": "在這裡選擇用誰的模型：區域網路裡的另一台裝置，還是這台電腦。到「進階 → 提供者」裡，可以分別指定辨識、翻譯、文法回饋各自在哪裡執行，也可以把這台電腦的模型共享給區域網路裡的另一台裝置。"
       },
       "models": {
         "title": "模型",
@@ -1320,7 +1320,7 @@
         "content": "開始之前值得知道：",
         "typed": "工作階段開始後，底部會出現輸入框：打一句話就能翻譯。按 Ctrl+K 可以直接跳到輸入框。",
         "coach": "想自己直接說對方的語言？到「進階 → 提供者」開啟「文法回饋」：你說的話不再翻譯，而是幫你檢查文法。",
-        "share": "另一台裝置也能用這台電腦的模型：「進階 → 提供者 → 區域網路共享」。"
+        "share": "另一台裝置也能用這台電腦的模型：「進階 → 提供者 → 共享給其他裝置」。"
       }
     }
   },
@@ -1367,19 +1367,19 @@
     "wizard": {
       "pathTitle": "Kotomimi 自由搭配",
       "pathBadge": "本應用程式特色",
-      "pathDesc": "用區域網路裡你自己的伺服器，或這台電腦自己的模型，也可以兩邊混著用。",
-      "pathCost": "不需要帳號，也不需要 API 金鑰。僅文字：帶假名注音的字幕、打字翻譯和文法回饋。伺服器可以是 LocalAI，或另一台開啟了共享的 Kotomimi；用這台電腦則要把模型下載到本機。",
-      "title": "在哪裡執行？",
-      "intro": "選擇由誰來辨識和翻譯。之後可以在設定裡隨時更改，也可以按環節混搭。",
-      "server": "區域網路裡的伺服器",
-      "serverDesc": "LocalAI，或另一台開啟了「區域網路共享」的 Kotomimi。這台電腦幾乎不占資源。",
+      "pathDesc": "用區域網路裡另一台裝置的模型，或這台電腦自己的模型，也可以兩邊混著用。",
+      "pathCost": "不需要帳號，也不需要 API 金鑰。僅文字：帶假名注音的字幕、打字翻譯和文法回饋。另一台裝置可以是開了共享的 Kotomimi，或 LocalAI 這類模型伺服器；用這台電腦則要把模型下載到本機。",
+      "title": "由哪台裝置來執行？",
+      "intro": "選擇辨識和翻譯在哪台裝置上執行。之後可以在設定裡隨時更改，也可以按環節混搭。",
+      "server": "區域網路裡的另一台裝置",
+      "serverDesc": "模型在另一台電腦上執行：開了共享的 Kotomimi，或 LocalAI 這類模型伺服器。這台電腦幾乎不占資源。",
       "device": "這台電腦",
       "deviceDesc": "用應用程式下載的模型，全部在本機執行。不需要別的裝置；有獨立顯示卡會更快。",
       "tryServer": "連線",
-      "addressMissing": "請先填寫伺服器位址，例如 192.168.1.10:8080。",
-      "serverFound": "連線成功，伺服器上有 {{count}} 個模型。",
-      "serverUnreachable": "連線不上伺服器：{{message}}",
-      "pendingAddress": "還沒有填伺服器位址。開始之前請到設定裡補上。",
+      "addressMissing": "請先在上面的清單裡選一台裝置，或填寫它的位址，例如 192.168.1.10:8790。",
+      "serverFound": "連線成功，對方有 {{count}} 個模型可用。",
+      "serverUnreachable": "連線不上：{{message}}",
+      "pendingAddress": "還沒有選另一台裝置。開始之前請到設定裡選好。",
       "deviceNotice": "這裡不用填任何東西。精靈結束後，在「模型」裡下載一個語音辨識模型，導覽會指給你看。翻譯預設用線上翻譯，馬上可用，也可以再下載離線模型。"
     },
     "custom": {
@@ -1422,20 +1422,36 @@
       "add": "新增語言…",
       "remove": "恢復 {{language}} 的預設字型"
     },
+    "find": {
+      "title": "區域網路裡找到的裝置",
+      "search": "搜尋區域網路裡的裝置",
+      "again": "重新搜尋",
+      "searching": "正在搜尋區域網路裡的裝置…",
+      "none": "沒有找到。請確認另一台裝置已經開機、和這台電腦連著同一個 Wi-Fi 或路由器，並且在它的 Kotomimi 裡開啟了「共享這台電腦的模型」。也可以在下面手動填位址。",
+      "kindKotomimi": "Kotomimi 共享",
+      "kindServer": "模型伺服器",
+      "models": "{{count}} 個模型",
+      "needsKey": "需要存取金鑰",
+      "thisComputer": "這台電腦上的伺服器",
+      "use": "使用 {{name}}",
+      "manual": "或者手動填寫位址"
+    },
     "lan": {
-      "title": "區域網路共享",
-      "tooltip": "讓區域網路裡的另一台裝置使用這台電腦已下載的模型（語音辨識和翻譯）。對方同樣執行 Kotomimi，把這台電腦的位址填到「伺服器位址」裡即可。本應用程式開著的時候才能共享。",
+      "title": "共享給其他裝置",
+      "intro": "方向反過來：由這台電腦出力，區域網路裡的另一台裝置來用這裡下載好的模型。",
+      "tooltip": "讓區域網路裡的另一台裝置使用這台電腦已下載的模型（語音辨識和翻譯）。對方同樣執行 Kotomimi，選「用另一台裝置」，這台電腦就會出現在它的清單裡。本應用程式開著的時候才能共享。",
       "enable": "共享這台電腦的模型",
       "starting": "正在啟動…",
       "on": "正在共享，暫時沒有裝置連線",
       "onWithClients": "正在共享，目前有 {{count}} 路連線",
       "portInUse": "連接埠 {{port}} 已被其他程式占用。請在「選項」裡換一個連接埠。",
       "failed": "無法開始共享：{{message}}",
-      "address": "給另一台裝置填的位址",
+      "address": "沒出現的話，手動填這個位址",
+      "foundAs": "在另一台裝置的 Kotomimi 裡選「用另一台裝置」，這台電腦會以「{{name}}」出現在清單裡，點一下就連上了。",
+      "foundAsUnnamed": "在另一台裝置的 Kotomimi 裡選「用另一台裝置」，這台電腦會出現在清單裡，點一下就連上了。",
       "copy": "複製",
       "copied": "已複製",
       "noNetwork": "這台電腦目前沒有連上網路。",
-      "howTo": "在另一台裝置的 Kotomimi 裡選擇「Kotomimi 自由搭配」，把這個位址填到「伺服器位址」。",
       "models": "共享的模型",
       "noRecognizer": "尚未下載語音辨識模型",
       "showLibrary": "下載或管理模型",

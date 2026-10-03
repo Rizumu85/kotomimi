@@ -20,7 +20,7 @@ afterEach(async () => {
 /** A server on a free loopback port, and everything the page was handed. */
 async function start(key = '') {
   const seen = { requests: [], opened: [], messages: [], closed: [] };
-  const server = await startLanServer({ port: 0, key, host: '127.0.0.1' }, {
+  const server = await startLanServer({ port: 0, key, host: '127.0.0.1', name: '里兹 PC' }, {
     request: (r) => seen.requests.push(r),
     socketOpen: (s) => seen.opened.push(s),
     socketMessage: (m) => seen.messages.push(m),
@@ -56,6 +56,9 @@ describe('the shared models\' door: HTTP', () => {
     const response = await answer;
     expect(response.status).toBe(200);
     expect(response.headers.get('access-control-allow-origin')).toBe('*');
+    // This computer's name rides on every answer: a device searching the network lists it by that.
+    expect(decodeURIComponent(response.headers.get('x-kotomimi-name'))).toBe('里兹 PC');
+    expect(server.name).toBe('里兹 PC');
     expect(await response.json()).toEqual({ object: 'list', data: [{ id: 'kotomimi' }] });
     // Answered once: a second reply has no one to go to.
     expect(server.reply(seen.requests[0].id, { body: {} })).toBe(false);
@@ -88,6 +91,8 @@ describe('the shared models\' door: HTTP', () => {
     const { server, seen, base } = await start('s3cret');
     const refused = await fetch(`${base}/v1/models`);
     expect(refused.status).toBe(401);
+    // Named even when it will say nothing else without its key.
+    expect(decodeURIComponent(refused.headers.get('x-kotomimi-name'))).toBe('里兹 PC');
     expect((await refused.json()).error.code).toBe('invalid_api_key');
     expect((await fetch(`${base}/v1/models`, { headers: { Authorization: 'Bearer wrong!' } })).status).toBe(401);
     expect(seen.requests).toEqual([]);

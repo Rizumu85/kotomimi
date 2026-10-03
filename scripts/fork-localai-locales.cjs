@@ -17,24 +17,24 @@ const path = require('node:path');
 const PROVIDER = {
   name: ['Kotomimi Pipeline', 'Kotomimi 自由搭配', 'Kotomimi 自由搭配'],
   description: [
-    'Choose where each stage runs: a server on your network, this computer, or any text model · text only',
-    '识别、翻译、语法反馈各自选在哪里运行：局域网里的服务器、这台电脑、或任意文本模型 · 仅文本',
-    '辨識、翻譯、文法回饋各自選在哪裡執行：區域網路裡的伺服器、這台電腦、或任意文字模型 · 僅文字',
+    'Choose where each stage runs: another device on your network, this computer, or any text model · text only',
+    '识别、翻译、语法反馈各自选在哪里运行：局域网里的另一台设备、这台电脑、或任意文本模型 · 仅文本',
+    '辨識、翻譯、文法回饋各自選在哪裡執行：區域網路裡的另一台裝置、這台電腦、或任意文字模型 · 僅文字',
   ],
-  endpoint: ['Server address', '服务器地址', '伺服器位址'],
+  endpoint: ['Address of the other device', '另一台设备的地址', '另一台裝置的位址'],
   endpointPlaceholder: [
-    'e.g. 192.168.1.10:8080 — a LocalAI, or another Kotomimi',
-    '例如 192.168.1.10:8080（LocalAI，或另一台 Kotomimi）',
-    '例如 192.168.1.10:8080（LocalAI，或另一台 Kotomimi）',
+    'Address of the other device, e.g. 192.168.1.10:8790',
+    '另一台设备的地址，例如 192.168.1.10:8790',
+    '另一台裝置的位址，例如 192.168.1.10:8790',
   ],
   serverKey: ['Access key of the server', '服务器的访问密钥', '伺服器的存取金鑰'],
   translateKey: ['API key of the translation model', '翻译模型的 API 密钥', '翻譯模型的 API 金鑰'],
   coachKey: ['API key of the feedback model', '语法反馈模型的 API 密钥', '文法回饋模型的 API 金鑰'],
 
   route: ['Where each stage runs', '各环节在哪里运行', '各環節在哪裡執行'],
-  placeServer: ['Server', '服务器', '伺服器'],
+  placeServer: ['Another device', '另一台设备', '另一台裝置'],
   placeDevice: ['This computer', '这台电脑', '這台電腦'],
-  choiceServer: ['Connect to a server', '连接服务器', '連線伺服器'],
+  choiceServer: ['Use another device', '用另一台设备', '用另一台裝置'],
   choiceDevice: ['Use this computer', '用这台电脑', '用這台電腦'],
   notDownloaded: ['no model downloaded', '还没下载模型', '尚未下載模型'],
   notChosen: ['no model chosen', '还没选模型', '尚未選模型'],
@@ -123,11 +123,11 @@ const PROVIDER = {
   ],
   coachPromptPreview: ['Show the automatic instructions for this language pair', '查看当前语言对自动生成的提示词', '檢視目前語言對自動產生的提示詞'],
 
-  serverNeedsKey: ['The server asks for an access key', '服务器需要访问密钥', '伺服器需要存取金鑰'],
+  serverNeedsKey: ['The other device asks for an access key', '另一台设备需要访问密钥', '另一台裝置需要存取金鑰'],
   serverNeedsKeyTooltip: [
-    'Turn this on when the server was given an access key — another Kotomimi with one set, for example. The key is entered beside the server address.',
-    '服务器设了访问密钥时打开，例如对面那台 Kotomimi 设置了密钥。密钥在服务器地址旁边填写。',
-    '伺服器設了存取金鑰時開啟，例如對面那台 Kotomimi 設定了金鑰。金鑰在伺服器位址旁邊填寫。',
+    'Turn this on when the other device was given an access key — a Kotomimi with one set under its sharing options, for example. The key is entered beside the address.',
+    '另一台设备设了访问密钥时打开，例如对面那台 Kotomimi 在共享的「选项」里设置了密钥。密钥在地址旁边填写。',
+    '另一台裝置設了存取金鑰時開啟，例如對面那台 Kotomimi 在共享的「選項」裡設定了金鑰。金鑰在位址旁邊填寫。',
   ],
 };
 

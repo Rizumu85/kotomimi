@@ -35,6 +35,18 @@
     }
   }
 
+  .kt-lan__intro {
+    margin: 0 0 vars.$space-2;
+  }
+
+  // What to do on the other device, in the words its screen uses.
+  .kt-lan__found {
+    margin: vars.$space-2 0 0;
+    font-size: vars.$font-body;
+    line-height: 1.6;
+    color: vars.$text-primary;
+  }
+
   .kt-lan__dot {
     width: 8px;
     height: 8px;

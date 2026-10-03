@@ -68,6 +68,8 @@ export const INVOKE_CHANNELS = [
   // Fork: whether the system's firewall lets other devices reach it (electron/lan-firewall.js)
   'lan:firewall-status',
   'lan:firewall-allow',
+  // Fork: the devices of the local network whose models this app can use (electron/lan-discover.js)
+  'lan:discover',
   // Native local-inference sidecar lifecycle
   'native-host:start',
   'native-host:stop',

@@ -10,6 +10,7 @@ const { createCloseHandshake } = require('./close-handshake.js');
 const { createWsHeaderRules } = require('./ws-header-rules.js');
 const { startLanServer } = require('./lan-server');
 const { firewallStatus, allowThroughFirewall } = require('./lan-firewall');
+const { discoverServers } = require('./lan-discover');
 const { applyLinuxGpuFlags } = require('./linux-gpu-flags');
 const { acquireSingleInstanceLock, createFocusRelay } = require('./single-instance');
 
@@ -1234,7 +1235,7 @@ ipcMain.handle('lan:start', async (event, args) => {
       socketClose: (socket) => toPage('lan:socket-close', socket),
     });
     console.log(`[Kotomimi] [Main] Sharing models on port ${lanServer.port}`);
-    return { ok: true, port: lanServer.port, addresses: lanServer.addresses };
+    return { ok: true, port: lanServer.port, addresses: lanServer.addresses, name: lanServer.name };
   } catch (error) {
     console.warn('[Kotomimi] [Main] Could not start sharing:', error.message);
     return { ok: false, code: error.code ?? null, message: error.message };
@@ -1249,6 +1250,16 @@ ipcMain.handle('lan:stop', async () => {
 ipcMain.handle('lan:reply', (event, args) => lanServer?.reply(args?.id, args ?? {}) ?? false);
 ipcMain.handle('lan:send', (event, args) => lanServer?.send(args?.id, args?.data ?? '') ?? false);
 ipcMain.handle('lan:close-socket', (event, args) => { lanServer?.closeSocket(args?.id, args?.code, args?.reason); return true; });
+
+// Fork: the devices of the local network whose models this app can use (electron/lan-discover.js) —
+// asked for when the person is choosing one. One search at a time: a second asker waits for the first's answer.
+let lanSearch = null;
+ipcMain.handle('lan:discover', () => {
+  lanSearch ??= discoverServers({ ownPorts: lanServer ? [lanServer.port] : [] })
+    .catch((error) => { console.warn('[Kotomimi] [Main] The search of the local network failed:', error.message); return []; })
+    .finally(() => { lanSearch = null; });
+  return lanSearch;
+});
 
 // Fork: whether Windows' firewall lets another device reach the port being shared, and — at the user's
 // click, and with the consent Windows then asks for — a rule that does (electron/lan-firewall.js).

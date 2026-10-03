@@ -1,0 +1,198 @@
+@use '../Settings/shared/variables' as vars;
+
+// Fork: the devices found on the local network (ServerFinder.tsx). Rows in
+// the settings' own option dialect: a click chooses one.
+
+.kt-find {
+  margin: vars.$space-2 0 vars.$space-3;
+
+  .kt-find__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: vars.$space-2;
+    margin-bottom: 6px;
+  }
+
+  .kt-find__title {
+    font-size: vars.$font-caption;
+    color: vars.$text-secondary;
+  }
+
+  .kt-find__again {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    font: inherit;
+    font-size: vars.$font-caption;
+    color: vars.$text-muted;
+    background: transparent;
+    border: none;
+    border-radius: vars.$radius-sm;
+    cursor: pointer;
+    transition: color vars.$transition-fast, background-color vars.$transition-fast;
+
+    &:hover:not(:disabled) {
+      color: vars.$text-primary;
+      background: vars.$bg-hover;
+    }
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.6;
+    }
+
+    &:focus-visible {
+      @include vars.focus-ring;
+    }
+  }
+
+  .kt-find__search {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 9px 12px;
+    box-sizing: border-box;
+    font: inherit;
+    font-size: vars.$font-body;
+    color: vars.$text-secondary;
+    background: transparent;
+    border: 1px dashed vars.$border-default;
+    border-radius: vars.$radius-sm;
+    cursor: pointer;
+    transition: color vars.$transition-fast, border-color vars.$transition-fast, background-color vars.$transition-fast;
+
+    &:hover:not(:disabled) {
+      color: vars.$text-primary;
+      background: vars.$bg-hover;
+      border-color: vars.$color-primary;
+    }
+
+    &:disabled {
+      @include vars.disabled-state;
+    }
+
+    &:focus-visible {
+      @include vars.focus-ring;
+    }
+  }
+
+  .kt-find__state {
+    display: flex;
+    align-items: center;
+    gap: vars.$space-2;
+    padding: 9px 2px;
+    font-size: vars.$font-body;
+    color: vars.$text-secondary;
+  }
+
+  .kt-find__none {
+    margin: 0;
+    padding: 9px 10px;
+    font-size: vars.$font-caption;
+    line-height: 1.6;
+    color: vars.$text-secondary;
+    background: vars.$bg-surface;
+    border: 1px solid vars.$border-subtle;
+    border-radius: vars.$radius-sm;
+  }
+
+  .kt-find__list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .kt-find__row {
+    @include vars.option-row;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 10px;
+    box-sizing: border-box;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      @include vars.option-row-hover;
+    }
+
+    &.is-chosen {
+      @include vars.option-row-selected;
+    }
+
+    &:disabled {
+      @include vars.disabled-state;
+    }
+
+    &:focus-visible {
+      @include vars.focus-ring;
+    }
+  }
+
+  .kt-find__icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: vars.$color-primary;
+  }
+
+  .kt-find__text {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .kt-find__name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: vars.$font-body;
+    font-weight: vars.$weight-medium;
+    color: vars.$text-primary;
+  }
+
+  .kt-find__kind {
+    padding: 1px 6px;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 400;
+    color: vars.$color-primary;
+    background: rgba(vars.$color-primary, 0.15);
+    border-radius: 10px;
+  }
+
+  .kt-find__detail {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    font-size: vars.$font-caption;
+    color: vars.$text-muted;
+  }
+
+  .kt-find__check {
+    flex-shrink: 0;
+    color: vars.$color-primary;
+  }
+
+  .kt-find__spin {
+    animation: kt-find-spin 1.2s linear infinite;
+  }
+}
+
+@keyframes kt-find-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

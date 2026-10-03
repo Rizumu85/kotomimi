@@ -107,6 +107,17 @@ export type CheckResult =
   | { ok: true; models?: readonly ModelOption[] }
   | { ok: false; reason: string; code?: string; params?: Record<string, string | number> };
 
+/** Fork: what a provider's `credentials.Assist` is drawn with. */
+export interface CredentialAssistProps<S> {
+  settings: S;
+  /** The saved credential values. */
+  values: CredentialValues;
+  /** Writes one credential, as typing it would, and checks the provider again. */
+  fill(key: string, value: string): void;
+  update(patch: Partial<S>): void;
+  disabled?: boolean;
+}
+
 /** What a readiness check may consult besides the credentials and settings. */
 export interface CheckContext {
   /** The speaker's pair; the participant leg runs its reverse. A local engine's models are per direction. */
@@ -285,6 +296,8 @@ export interface Provider<S, K extends { missing?: never } & object, C extends {
     read(values: CredentialValues, auth: AuthContext): R | CredentialsMissing;
     /** A setting that picks which fields show, drawn by the credential form above them (F4). */
     choice?: CredentialChoice;
+    /** Fork: a view drawn between the choice and the fields — a way to fill a field without typing it (the Kotomimi provider's search of the local network). */
+    Assist?: ComponentType<CredentialAssistProps<S>>;
   };
   /**
    * Can this provider start now: a network validation, model readiness, or

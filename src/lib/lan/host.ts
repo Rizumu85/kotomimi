@@ -42,7 +42,7 @@ export interface LanHostDeps {
   onClients?(count: number): void;
 }
 
-export type LanStart = { ok: true; port: number; addresses: string[] } | { ok: false; code: string | null; message: string };
+export type LanStart = { ok: true; port: number; addresses: string[]; /** This computer's name, as a searching device lists it. */ name?: string } | { ok: false; code: string | null; message: string };
 
 interface WireRequest { id: string; method: string; path: string; body: unknown }
 
