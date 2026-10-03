@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="346" viewBox="0 0 1200 346" role="img" aria-labelledby="title desc">
+  <title id="title">两台设备一起用</title>
+  <desc id="desc">One computer shares the models it has downloaded; another device chooses "another device", finds it on the same network by itself, and uses its models.</desc>
+  <rect width="1200" height="346" rx="24" fill="#1c1c1c"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei UI', 'Hiragino Sans', 'Yu Gothic UI', 'Noto Sans CJK SC', sans-serif">
+    <g id="lender">
+      <rect x="56" y="48" width="452" height="250" rx="16" fill="#262626" stroke="#383838" stroke-width="1.5"/>
+      <text x="84" y="92" font-size="20" fill="#8f8a80">出力的电脑</text>
+      <text x="84" y="132" font-size="28" font-weight="700" fill="#f4efe6">共享给其他设备</text>
+      <rect x="84" y="160" width="56" height="30" rx="15" fill="#3f7f61"/>
+      <circle cx="125" cy="175" r="11" fill="#f4efe6"/>
+      <text x="154" y="182" font-size="20" fill="#6fc79c">共享这台电脑的模型</text>
+      <text x="84" y="240" font-size="20" fill="#bdb8ae">模型在这里下载、在这里运行</text>
+      <text x="84" y="268" font-size="18" fill="#8f8a80">它只决定有哪些模型可选</text>
+    </g>
+
+    <g id="link">
+      <path d="M 528 165 H 664" fill="none" stroke="#d9bf8f" stroke-width="2.5" stroke-dasharray="3 9" stroke-linecap="round"/>
+      <path d="M 656 155 l 12 10 l -12 10" fill="none" stroke="#d9bf8f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="596" y="138" font-size="18" text-anchor="middle" fill="#d9bf8f">同一个网络</text>
+      <text x="596" y="204" font-size="18" text-anchor="middle" fill="#d9bf8f">自动找到</text>
+    </g>
+
+    <g id="user">
+      <rect x="692" y="48" width="452" height="250" rx="16" fill="#262626" stroke="#383838" stroke-width="1.5"/>
+      <text x="720" y="92" font-size="20" fill="#8f8a80">使用的设备</text>
+      <text x="720" y="132" font-size="28" font-weight="700" fill="#f4efe6">另一台设备</text>
+      <rect x="720" y="156" width="396" height="58" rx="10" fill="#2a332e" stroke="#3f7f61" stroke-width="1.5"/>
+      <text x="738" y="181" font-size="20" font-weight="600" fill="#f4efe6">客厅的电脑</text>
+      <rect x="850" y="163" width="118" height="24" rx="12" fill="#294536"/>
+      <text x="909" y="180" font-size="14" text-anchor="middle" fill="#6fc79c">Kotomimi 共享</text>
+      <text x="738" y="204" font-size="16" fill="#8f8a80">3 个模型</text>
+      <path d="M 1086 180 l 7 8 l 13 -15" fill="none" stroke="#6fc79c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="720" y="248" font-size="20" fill="#bdb8ae">点一下就连上，不用知道地址</text>
+      <text x="720" y="276" font-size="18" fill="#8f8a80">语言、用哪个模型，在这台设备上选</text>
+    </g>
+  </g>
+</svg>

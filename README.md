@@ -1,241 +1,140 @@
 <p align="center">
-  <img width="200" src="https://github.com/kizuna-ai-lab/sokuji/raw/main/src/assets/logo.png" alt="Sokuji Logo">
-</p>
-
-<h3 align="center">Real-time two-way speech translation for bilingual meetings — cloud or fully offline on your device</h3>
-
-<p align="center">
-  <a href="LICENSE" target="_blank">
-    <img alt="AGPL-3.0 License" src="https://img.shields.io/badge/license-AGPL--3.0-blue.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/kizuna-ai-lab/sokuji/actions/workflows/build.yml" target="_blank">
-    <img alt="Build and Release" src="https://github.com/kizuna-ai-lab/sokuji/actions/workflows/build.yml/badge.svg" />
-  </a>
-  <a href="https://github.com/kizuna-ai-lab/sokuji/releases" target="_blank">
-    <img alt="Latest Release" src="https://img.shields.io/github/v/release/kizuna-ai-lab/sokuji?color=green&label=release&style=flat-square" />
-  </a>
-  <img alt="Platforms" src="https://img.shields.io/badge/Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Chrome%20%7C%20Edge-grey?style=flat-square" />
-  <a href="https://deepwiki.com/kizuna-ai-lab/sokuji" target="_blank">
-    <img alt="Ask DeepWiki" src="https://deepwiki.com/badge.svg" />
-  </a>
+  <img src="./assets/readme/hero.svg" width="100%" alt="Kotomimi：实时语音翻译，日语字幕带假名注音；识别和翻译各自选在这台电脑、局域网里另一台设备或任意 API 上运行">
 </p>
 
 <p align="center">
-  English | <a href="docs/README.ja.md">日本語</a> | <a href="docs/README.zh.md">中文</a>
+  <a href="https://github.com/Rizumu85/kotomimi/releases/latest"><b>下载最新版</b></a>
+  · <a href="#三步上手">三步上手</a>
+  · <a href="#两台设备一起用">两台设备一起用</a>
+  · <a href="#english">English</a>
 </p>
 
----
+<p align="center">
+  <img src="./assets/readme/session.png" width="100%" alt="一次真实的会话：说一句中文，得到汉字上方带假名的日语译文">
+</p>
 
-## Why Sokuji?
+## 这是什么
 
-Built by [Kizuna AI Lab](https://github.com/kizuna-ai-lab) — we use AI to break language and accessibility barriers, creating genuine human connections. "Kizuna" (絆) means "bond" in Japanese, and Sokuji (即時) is our flagship tool to make real-time communication possible across any language.
+Kotomimi（ことみみ）是一个实时语音翻译应用：你或对方开口说话，屏幕上马上出现原文和译文。它是 [Sokuji](https://github.com/kizuna-ai-lab/sokuji) 的个人分支，为"跟日本人聊天、顺便学日语"这件事加了几样东西：
 
-Sokuji is a cross-platform live speech translation app for desktop and browser. It supports **Local Inference** — on-device ASR, translation, and TTS powered by WASM and WebGPU, with no API key required, no expensive GPU needed, fully offline, and completely private. It also integrates with cloud providers including OpenAI, Google Gemini, Palabra.ai, Kizuna AI, Doubao AST 2.0, Soniox, and OpenAI-compatible APIs.
+- **读得懂的字幕**：日语汉字上方标假名，日语、韩语、俄语下面可以加一行罗马音。
+- **模型放哪儿自己定**：语音识别和翻译是两个环节，各自可以在这台电脑、局域网里另一台设备、或任意 API 上运行，随便混搭。
+- **两台设备一起用**：一台电脑出力，另一台设备直接用它的模型，自己什么都不用下载。
+- **打字也能翻**：会话中按 `Ctrl+K`，打一句母语，得到对方语言的译文。
+- **语法反馈**：想自己说对方的语言时，它不翻译，而是告诉你这句话说得对不对、该怎么改。
+- **字体自己选**：界面、拉丁字母、每种语言的正文和注音，分别选电脑上装的字体。
 
----
+Sokuji 原有的功能和云服务提供商（OpenAI、Gemini、Soniox 等）都还在。
 
-## How It Works
+## 三步上手
 
-```mermaid
-graph LR
-    A["🗣️ You speak<br/>(any language)"] --> B["🎙️ Sokuji"]
-    B --> C{"Choose one"}
-    C -->|"☁️ Cloud"| D["OpenAI · Gemini<br/>Palabra · Doubao..."]
-    C -->|"🖥️ Local"| E["On-device AI<br/>ASR → Translate → TTS<br/>(fully offline, no GPU)"]
-    D --> F["🔊 Translated voice"]
-    E --> F
-    F --> G["💻 Zoom · Teams · Meet<br/>Discord · Any app"]
+1. **下载安装。** 到 [Releases](https://github.com/Rizumu85/kotomimi/releases/latest) 下载：
 
-    style A fill:#4a9eff,stroke:#357abd,color:#fff
-    style B fill:#10a37f,stroke:#0d8a6a,color:#fff
-    style C fill:#ff9f43,stroke:#e88a2e,color:#fff
-    style D fill:#6c5ce7,stroke:#5a4bd1,color:#fff
-    style E fill:#00b894,stroke:#009d7e,color:#fff
-    style F fill:#fd79a8,stroke:#e56b96,color:#fff
-    style G fill:#636e72,stroke:#525c60,color:#fff
-```
+   - **Windows**：`Kotomimi-x.y.z.Setup.exe`。安装包没有代码签名，Windows 会提示"未知发布者"：点"更多信息"，再点"仍要运行"。
+   - **macOS（Apple 芯片）**：`Kotomimi-x.y.z-arm64.dmg`。没有经过 Apple 公证：拖进"应用程序"后，第一次要右键点应用，选"打开"。
 
-| | |
-|---|---|
-| **Providers** | 8 — OpenAI, Gemini, Palabra.ai, Kizuna AI, Doubao AST 2.0, Soniox, OpenAI Compatible, Local Inference |
-| **Local Models** | 44 ASR models, 75 translation models, 137 TTS models |
-| **Languages** | 99+ (speech recognition) · 55+ (translation) · 53 (text-to-speech) |
-| **Platforms** | Linux · Windows · macOS · Chrome · Edge |
-| **Privacy** | Local Inference = 100% on-device, no API key, no internet |
+2. **跟着向导走。** 选界面语言、用途，然后选"Kotomimi 自由搭配"。接下来它会问由哪台设备来运行：
+   - 只有这一台电脑：选"这台电脑"，向导结束后下载一个语音识别模型就能用。翻译默认用在线翻译，不用下载。
+   - 家里另一台电脑已经在共享模型：选"局域网里的另一台设备"，它会自己搜出来，点一下就连上。
 
----
+3. **点"开始会话"，开口说话。**
 
-## Demo
+不需要注册账号，也不需要 API 密钥。
 
-https://github.com/user-attachments/assets/1eaaa333-a7ce-4412-a295-16b7eb2310de
+## 每个环节各选各的
 
----
+一句话从说出口到变成译文，要过两个环节。每个环节有同样的三个去处：
 
-## Install
+<p align="center">
+  <img src="./assets/readme/places.png" width="335" alt="提供商下面的两行：语音识别和翻译各自在另一台设备、API 模型、这台电脑之间选">
+</p>
 
-Sokuji is available as a **Desktop App** and a **Browser Extension** — same features, different reach.
-
-| | Desktop App | Browser Extension |
+| 去处 | 是什么 | 适合 |
 |---|---|---|
-| **Features** | All features identical | All features identical |
-| **Use with** | Any app with mic input — Zoom, Teams, Discord, Slack, games, OBS, and more | Web-based meeting platforms — Google Meet, Teams, Zoom, Yandex Telemost, Discord, Slack, Gather.town, Whereby, Jitsi Meet |
-| **Install** | Download & install | Zero install — add from store |
-| **Platforms** | Windows · macOS · Linux | Chrome · Edge · Brave (coming soon) |
+| **另一台设备** | 局域网里开了共享的 Kotomimi，或 LocalAI 这类模型服务器 | 这台电脑配置一般，家里有台更好的 |
+| **API 模型** | 任何 OpenAI 兼容的接口：识别用 `/v1/audio/transcriptions`，翻译用 `/v1/chat/completions` | 想用云端的大模型 |
+| **这台电脑** | 应用自己下载的模型，可以完全离线 | 不想依赖别的设备和网络 |
 
-### Desktop App
+两个环节可以选不同的去处。比如上图：识别交给另一台设备，翻译留在这台电脑。
 
-Download from the [Releases page](https://github.com/kizuna-ai-lab/sokuji/releases):
+## 两台设备一起用
 
-| Platform | Package |
-|----------|---------|
-| Windows | `Sokuji-x.y.z.Setup.exe` |
-| macOS (Apple Silicon) | `Sokuji-x.y.z-arm64.pkg` |
-| macOS (Intel) | `Sokuji-x.y.z-x64.pkg` |
-| Linux (Debian/Ubuntu x64) | `sokuji_x.y.z_amd64.deb` |
-| Linux (Debian/Ubuntu ARM64) | `sokuji_x.y.z_arm64.deb` |
-
-### Browser Extension
-
-<p>
-  <a href="https://chromewebstore.google.com/detail/ppmihnhelgfpjomhjhpecobloelicnak?utm_source=item-share-cb" target="_blank">
-    <img alt="Available on Chrome Web Store" src="https://github.com/kizuna-ai-lab/sokuji/raw/main/assets/chrome-web-store-badge.png" style="height: 60px;" />
-  </a>
-  <a href="https://microsoftedge.microsoft.com/addons/detail/sokuji-aipowered-live-/dcmmcdkeibkalgdjlahlembodjhijhkm" target="_blank">
-    <img alt="Available on Microsoft Edge Add-ons" src="https://github.com/kizuna-ai-lab/sokuji/raw/main/assets/edge-addons-badge.png" style="height: 60px;" />
-  </a>
+<p align="center">
+  <img src="./assets/readme/two-devices.svg" width="100%" alt="一台电脑打开共享，另一台设备选另一台设备后自动找到它并使用它的模型">
 </p>
+
+1. 在**出力的电脑**上：打开设置，切到高级布局，在"提供商"页最下面打开"共享这台电脑的模型"。卡片上会显示这台电脑在对方列表里的名字。
+2. 在**另一台设备**上：选"另一台设备"。应用会搜索局域网，把找到的设备列出来，点一下就连上。
+
+要点：
+
+- 两台设备要连着同一个 Wi-Fi 或路由器，出力的电脑上应用要开着。
+- Windows 防火墙挡住时，共享卡片里会出现黄色提示和一个"允许"按钮，点它，再在 Windows 的确认窗口里点"是"。
+- 语言、用哪个模型、断句灵敏度，在**使用的那台设备**上设置。出力的电脑只决定有哪些模型可选。
+- 搜不到时（比如改过端口），可以手动填卡片上显示的地址。
+
+## 还有这些
 
 <details>
-<summary>Install extension in Developer Mode</summary>
+<summary><b>这台电脑上装了 LocalAI</b></summary>
 
-1. Download `sokuji-extension.zip` from the [Releases page](https://github.com/kizuna-ai-lab/sokuji/releases)
-2. Extract the zip file
-3. Go to `chrome://extensions/` and enable "Developer mode"
-4. Click "Load unpacked" and select the extracted folder
+<br>
+
+有些模型不归应用自己运行，比如 Apple 的语音识别、MLX 模型、GGUF 翻译模型。它们可以由同一台电脑上的 [LocalAI](https://localai.io) 来跑。电脑上装了 LocalAI 时，共享区域下面会多一张卡片：
+
+- 启动和停止由 Kotomimi 来做，可以设成随应用启动，应用退出时一起停。
+- 显示它提供的模型，可以选它的实时管线默认用哪个识别模型、哪个翻译模型。
+- 安装和删除模型仍然在 LocalAI 自己的页面里做，卡片上有链接。
+
+没装 LocalAI 的电脑看不到这张卡片，不影响任何别的功能。
 
 </details>
 
-### Build from Source
+<details>
+<summary><b>阅读辅助和字体</b></summary>
 
-```bash
-git clone https://github.com/kizuna-ai-lab/sokuji.git
-cd sokuji && npm install
-npm run electron:dev        # Development
-npm run electron:build      # Production
-```
+<br>
 
----
+- **假名注音和罗马音**在对话区右上角的显示设置里开关。注音在本机用词典和规则算出来，不调用任何模型，也不联网。
+- **字体**在设置的"字体"里选：界面字体、拉丁字母和罗马音的字体，以及每种语言的正文字体和注音字体。拉丁字体只作用于拉丁字母和数字，不会盖掉中文、日文的字体。
 
-## Two-Way Translation for Bilingual Meetings
+</details>
 
-Two people, two languages, one conversation. Sokuji auto-detects which
-language is being spoken and translates it into the other — in both
-directions, in real time. Set Language A and Language B, capture system
-audio and microphone together, and everyone follows along.
+<details>
+<summary><b>已经知道的限制</b></summary>
 
-- **Auto language detection** — no manual switching mid-conversation
-- **Both directions at once** — mic + system audio in a single session
-- **Live subtitles** — share your screen so the other side reads along too
-- Works in Zoom, Google Meet, Teams, Discord, or any app (desktop),
-  and directly inside web meeting platforms (browser extension)
+<br>
 
-> Powered by Soniox two-way mode — 60+ languages, 3,600+ language pairs.
+- "Kotomimi 自由搭配"只出文字，不合成语音。需要语音输出时，用 Sokuji 原有的提供商。
+- 内置的 SenseVoice 模型识别日语时会漏掉假名。日语建议用 Whisper，或在"自定义模型"里添加 `onnx-community/kotoba-whisper-v2.2-ONNX`。
+- 识别走 API 时，文字要等一句话说完才出现，没有逐字更新。
+- macOS 版只有 Apple 芯片的构建，而且不能自动更新，新版本要手动下载。
+- 这是个人分支，更新节奏和功能取舍以自用为准。
 
----
+</details>
 
-## Features
+## 想了解细节
 
-### Local Inference (Edge AI)
+- [FORK.md](FORK.md)：这个分支加了什么、各环节怎么搭配、和服务器之间的约定、怎么构建和发布。
+- 遇到问题：[提交 issue](https://github.com/Rizumu85/kotomimi/issues)。请不要去打扰 Sokuji 官方，这个分支的问题不是他们的。
 
-Run everything on your device — no API keys, no internet, no expensive GPU, complete privacy. Powered by WASM and WebGPU, Sokuji runs efficiently on any modern browser using your existing CPU and integrated graphics.
+## 致谢与许可
 
-- **44 ASR models** (23 offline + 10 streaming + 11 WebGPU including Whisper, Cohere Transcribe, Voxtral, Granite Speech) covering 99+ languages
-- **75 translation models** — 69 Opus-MT language pairs + 6 multilingual LLMs (Qwen 2.5 / 3 / 3.5, Hunyuan-MT 1.5, TranslateGemma) with WebGPU
-- **137 TTS models** across 53 languages (Piper, Piper-Plus, Coqui, Mimic3, Matcha, MMS, VITS, Supertonic engines)
-- One-click model download with IndexedDB caching
-
-### Cloud Providers
-
-| Provider | Key Feature |
-|----------|-------------|
-| **OpenAI** | `gpt-realtime-mini` / `gpt-realtime-1.5` · 10 voices · configurable turn detection (Normal / Semantic / Disabled) · noise reduction · 60+ languages |
-| **Google Gemini** | Dynamic model selection (audio/live models) · 30 voices · built-in turn detection · 34 language variants |
-| **Palabra.ai** | WebRTC low-latency · voice cloning · auto sentence segmentation · partial transcription translation · 60+ source / 40+ target languages |
-| **Kizuna AI** | Sign in and go — API key managed by backend · same OpenAI models with optimized defaults |
-| **Doubao AST 2.0** | Speech-to-speech with speaker voice cloning · bidirectional Chinese↔English · Ogg Opus audio output |
-| **Soniox** | Real-time speech-to-speech · **one-way & two-way translation (auto-detects speaker language)** · 60+ languages / 3,600+ pairs · 200 voices (filter by gender, age, accent, use case, style) · voice cloning · bring-your-own-key |
-| **OpenAI Compatible** | Bring your own endpoint — any OpenAI Realtime API-compatible service (Electron only) |
-| **Local Inference** | Fully offline · ASR → Translation → TTS on-device · no API key · no GPU required |
-
-### Audio
-
-- **Translate your voice** — speak in your language, others hear the translation as if you spoke it natively
-- **Translate others' voice** — capture meeting audio (extension) or any system audio (desktop) and get real-time translated subtitles
-- **Virtual Microphone** — route translated audio to Zoom, Meet, Teams, or any app
-- **Real-time Passthrough** — monitor your own voice while recording
-- **AI Noise Suppression** — removes background noise, keyboard sounds, and other distractions
-- **Echo Cancellation** — built-in with modern Web Audio API
-
-### Interface
-
-- **30 languages** — fully localized UI
-- **Simple Mode** — streamlined setup for non-technical users
-- **Advanced Mode** — waveform display and detailed controls
+Kotomimi 建立在 [Kizuna AI Lab](https://github.com/kizuna-ai-lab) 的 [Sokuji](https://github.com/kizuna-ai-lab/sokuji) 之上，绝大部分代码是他们的工作。本仓库沿用同一份许可：[AGPL-3.0](LICENSE)。各模型和依赖的许可见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
 ---
 
-## Privacy
+## English
 
-**Your audio stays on your device — if you choose Local Inference, nothing ever leaves.**
+Kotomimi is a personal fork of [Sokuji](https://github.com/kizuna-ai-lab/sokuji), a live speech translation app. It adds what its author wanted for talking with Japanese speakers while learning the language:
 
-- Cloud mode connects **directly** to provider APIs — no intermediary servers
-- API keys stored **locally only**, never transmitted to us
-- Local Inference processes everything **on-device** with zero network requests
-- Anonymous usage analytics via PostHog
+- **Subtitles you can read**: furigana over Japanese kanji, and an optional romanization line under Japanese, Korean and Russian.
+- **Stages you place yourself**: speech recognition and translation each run on this computer, on another device on your network, or on any OpenAI-compatible API, in any mix.
+- **Two devices together**: one computer shares the models it has downloaded; another device finds it on the network and uses them, downloading nothing.
+- **Typed lookups** (`Ctrl+K`), **grammar feedback** on your own speech, and **fonts** chosen per language.
 
----
+**Install**: download from [Releases](https://github.com/Rizumu85/kotomimi/releases/latest). The Windows installer is not code-signed, so Windows warns about an unknown publisher; the macOS build (Apple silicon) is not notarized, so right-click the app and choose Open the first time. Then follow the setup wizard and pick "Kotomimi Pipeline". No account and no API key are needed.
 
-## Tech Stack
+**Limits**: the Kotomimi provider is text-only; the built-in SenseVoice model drops kana in Japanese (use Whisper); recognition through an API shows text only when a sentence ends.
 
-- **Desktop**: [Electron](https://www.electronjs.org) (Windows, macOS, Linux)
-- **Extension**: Chrome/Edge Manifest V3
-- **UI**: [React](https://react.dev) + TypeScript + [Zustand](https://zustand-demo.pmnd.rs/)
-- **Local AI**: [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx) (WASM) · [Transformers.js](https://github.com/huggingface/transformers.js) · WebGPU
-- **Audio**: Web Audio API · AudioWorklet · WebRTC
-- **i18n**: [i18next](https://www.i18next.com/) (30 languages)
-
----
-
-## Contributing
-
-We welcome contributions! Please read our [Contributing Guidelines](.github/CONTRIBUTING.md) before getting started.
-
----
-
-## License
-
-[AGPL-3.0](LICENSE)
-
-## Sponsors
-
-<table>
-  <tr>
-    <td><a href="https://signpath.org/"><img src="https://avatars.githubusercontent.com/u/34448643?s=64" alt="SignPath" width="48" height="48" /></a></td>
-    <td>Free code signing on Windows provided by <a href="https://about.signpath.io/">SignPath.io</a>, certificate by <a href="https://signpath.org/">SignPath Foundation</a>.</td>
-  </tr>
-</table>
-
-## Support
-
-- [Issues](https://github.com/kizuna-ai-lab/sokuji/issues) — Bug reports
-- [Discussions](https://github.com/kizuna-ai-lab/sokuji/discussions) — Questions & ideas
-
-## Acknowledgments
-
-- **Cloud APIs**: [OpenAI](https://openai.com), [Google Gemini](https://ai.google.dev), [Volcengine](https://www.volcengine.com)
-- **ASR**: [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx), [OpenAI Whisper](https://github.com/openai/whisper), [SenseVoice](https://github.com/FunAudioLLM/SenseVoice), [Moonshine](https://github.com/usefulsensors/moonshine), [Cohere Transcribe](https://cohere.com), [Voxtral Mini 4B](https://github.com/mistralai)
-- **TTS**: [Piper](https://github.com/rhasspy/piper), [Piper-Plus](https://github.com/ayutaz/piper-plus), [Matcha-TTS](https://github.com/shivammehta25/Matcha-TTS), [Coqui TTS](https://github.com/coqui-ai/TTS), [Mimic 3](https://github.com/MycroftAI/mimic3)
-- **Translation**: [Opus-MT](https://github.com/Helsinki-NLP/Opus-MT), [Qwen](https://github.com/QwenLM/Qwen), [TranslateGemma](https://github.com/google-research/translate-gemma)
-- **Infra**: [Transformers.js](https://github.com/huggingface/transformers.js), [ONNX Runtime](https://github.com/microsoft/onnxruntime), [Electron](https://www.electronjs.org), [React](https://react.dev)
-
-For detailed model licenses, see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Everything else — how the stages combine, the wire contract, building and releasing — is in [FORK.md](FORK.md) (Chinese). Sokuji is the work of [Kizuna AI Lab](https://github.com/kizuna-ai-lab); this fork keeps its license, [AGPL-3.0](LICENSE). Please report this fork's problems [here](https://github.com/Rizumu85/kotomimi/issues), not upstream.
