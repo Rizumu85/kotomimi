@@ -84,11 +84,24 @@ describe("LocalAI Realtime's endpoint", () => {
   });
 
   it('is the one credential while every stage is the server\'s, and carries no Realtime key', () => {
-    expect(localaiCredentials.keys).toEqual(['endpoint', 'translateKey', 'coachKey']);
+    expect(localaiCredentials.keys).toEqual(['endpoint', 'serverKey', 'translateKey', 'coachKey']);
     expect(localaiCredentials.fields(LOCALAI_DEFAULTS).map((f) => [f.key, f.secret])).toEqual([['endpoint', false]]);
     expect(localaiCredentials.read({ endpoint: 'http://192.168.1.10:8080' }, noAuth)).toEqual(K);
     expect(localaiCredentials.read({ endpoint: '' }, noAuth)).toHaveProperty('missing');
-    expect(localaiCredentials.read({}, noAuth)).toHaveProperty('missing');
+  });
+
+  it('is not asked for while no stage is on a server, and a server that wants a key is given it as the Realtime key', () => {
+    const here = { ...LOCALAI_DEFAULTS, asrVia: 'device' as const };
+    // This computer hears, and so translates: no server at all.
+    expect(localaiCredentials.fields(here)).toEqual([]);
+    expect(localaiCredentials.read({}, noAuth)).toEqual({ apiKey: '', endpoint: '' });
+    // A text model on the Realtime server brings the address back; one with a server of its own does not.
+    expect(localaiCredentials.fields({ ...here, translateVia: 'model', translateModel: 'm' }).map((f) => f.key)).toEqual(['endpoint']);
+    expect(localaiCredentials.fields({ ...here, translateVia: 'model', translateModel: 'm', translateBaseUrl: 'http://localhost:11434/v1' })).toEqual([]);
+    expect(localaiCredentials.fields({ ...LOCALAI_DEFAULTS, serverNeedsKey: true }).map((f) => [f.key, f.secret])).toEqual([['endpoint', false], ['serverKey', true]]);
+    expect(localaiCredentials.read({ endpoint: '192.168.1.10:8080', serverKey: ' abc ' }, noAuth)).toEqual({ ...K, apiKey: 'abc' });
+    expect(localaiCredentials.read({ endpoint: '192.168.1.10:8080', serverKey: '' }, noAuth)).toHaveProperty('missing');
+    expect(realtimeProtocols({ ...K, apiKey: 'abc' })).toEqual(['realtime', 'openai-insecure-api-key.abc']);
   });
 });
 
@@ -111,7 +124,7 @@ describe("LocalAI Realtime's stage keys", () => {
   });
 
   it('declares every setting that decides a field or an endpoint the check reaches', () => {
-    expect(localaiProvider.checkReads).toEqual(['translateVia', 'translateBaseUrl', 'translateModel', 'translateNeedsKey', 'coach', 'coachBaseUrl', 'coachModel', 'coachNeedsKey']);
+    expect(localaiProvider.checkReads).toEqual(['asrVia', 'translateVia', 'translateBaseUrl', 'translateModel', 'translateNeedsKey', 'coach', 'coachBaseUrl', 'coachModel', 'coachNeedsKey', 'serverNeedsKey', 'selections']);
   });
 });
 
@@ -180,7 +193,7 @@ describe("LocalAI Realtime's check", () => {
     expect(fetch.mock.calls[2][0]).toBe('https://api.example.com/v1/models');
     expect((fetch.mock.calls[2][1]?.headers as Record<string, string>).Authorization).toBe('Bearer sk-a');
     expect(result).toMatchObject({ ok: true });
-    expect((result as { models: unknown[] }).models.slice(-2)).toEqual([
+    expect((result as unknown as { models: unknown[] }).models.slice(-2)).toEqual([
       { id: 'gpt-4.1-mini', kind: 'text', from: 'translate' },
       { id: 'gpt-4.1', kind: 'text', from: 'translate' },
     ]);

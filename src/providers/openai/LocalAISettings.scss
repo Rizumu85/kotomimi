@@ -1,0 +1,162 @@
+@use '../../components/Settings/shared/variables' as vars;
+
+// Fork: Kotomimi's own provider settings — a stage at a time, under a strip
+// that reads the whole route. Everything inside a stage is the settings'
+// own dialect (`.setting-item`, `.option-button`, `.text-input`); this file
+// only adds what that dialect lacks: the strip, a stage's icon, a quiet note.
+
+.kt-stages {
+  // The strip: where each stage runs, left to right, as it will run.
+  .kt-route {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: vars.$space-2;
+    margin-bottom: vars.$space-5;
+    padding: vars.$space-3;
+    background: vars.$bg-surface;
+    border: 1px solid vars.$border-subtle;
+    border-radius: vars.$radius-lg;
+  }
+
+  .kt-route__stop {
+    display: flex;
+    align-items: center;
+    gap: vars.$space-2;
+    min-width: 0;
+    flex: 1 1 120px;
+    padding: 6px vars.$space-2;
+    border-radius: vars.$radius-md;
+    background: rgba(255, 255, 255, 0.03);
+
+    &--missing {
+      background: vars.$color-warning-bg;
+
+      .kt-route__icon,
+      .kt-route__model {
+        color: vars.$color-warning;
+      }
+    }
+  }
+
+  .kt-route__icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    color: vars.$color-primary;
+    background: rgba(vars.$color-primary, 0.12);
+  }
+
+  .kt-route__text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.3;
+  }
+
+  .kt-route__stage {
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    color: vars.$text-muted;
+  }
+
+  .kt-route__place {
+    overflow: hidden;
+    font-size: vars.$font-caption;
+    color: vars.$text-primary;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .kt-route__model {
+    color: vars.$text-secondary;
+  }
+
+  .kt-route__arrow {
+    flex-shrink: 0;
+    align-self: center;
+    color: vars.$text-disabled;
+  }
+
+  // The last section here is not the tab's last: the turn-detection block follows it, so it keeps its divider.
+  > .settings-section:last-child {
+    margin-bottom: vars.$space-5;
+    padding-bottom: vars.$space-5;
+    border-bottom: 1px solid vars.$border-subtle;
+  }
+
+  // A stage: the settings' own section, its heading led by the stage's icon.
+  .kt-stage {
+    h2 {
+      display: flex;
+      align-items: center;
+    }
+
+    .kt-stage__icon {
+      flex-shrink: 0;
+    }
+
+    .kt-stage__body {
+      margin-top: vars.$space-3;
+    }
+
+    // A switch that follows a field belongs to it.
+    .setting-item .toggle-switch-component {
+      margin-top: vars.$space-2;
+    }
+
+    // A switch that leads a stage needs no gap above it.
+    > .toggle-switch-component {
+      margin-top: 0;
+    }
+  }
+
+  // Why a field is as it is, or where the rest of it lives: read after the control, never louder than it.
+  .kt-note {
+    margin: vars.$space-2 0 0;
+    font-size: vars.$font-caption;
+    line-height: 1.5;
+    color: vars.$text-muted;
+  }
+
+  .kt-prompt {
+    min-height: 84px;
+    resize: vertical;
+    font-family: inherit;
+    line-height: 1.5;
+  }
+
+  .kt-details {
+    margin-top: vars.$space-2;
+    font-size: vars.$font-caption;
+    color: vars.$text-muted;
+
+    summary {
+      cursor: pointer;
+      user-select: none;
+
+      &:hover {
+        color: vars.$text-secondary;
+      }
+    }
+
+    pre {
+      margin: vars.$space-2 0 0;
+      padding: vars.$space-2 vars.$space-3;
+      max-height: 220px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: inherit;
+      line-height: 1.5;
+      color: vars.$text-secondary;
+      background: vars.$bg-surface;
+      border: 1px solid vars.$border-subtle;
+      border-radius: vars.$radius-sm;
+    }
+  }
+}

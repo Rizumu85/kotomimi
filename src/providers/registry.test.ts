@@ -133,8 +133,9 @@ describe('the invariants every provider meets (F17)', () => {
   const signedOut: AuthContext = { signedIn: false, getToken: async () => null };
   const signedIn: AuthContext = { signedIn: true, getToken: async () => 'token' };
 
-  it('lets only LocalInference read the pair and the legs in its check, so a pick or an audio-mode switch checks no network provider again', () => {
-    expect(PROVIDERS.filter((p) => p.checkReadsDirection).map((p) => p.id)).toEqual(['localInference']);
+  it('lets only the providers that run models on this computer read the pair and the legs in their check, so a pick or an audio-mode switch checks no other network provider again', () => {
+    // Fork: Kotomimi's own provider can run a stage on this computer, and its models are per direction too.
+    expect(PROVIDERS.filter((p) => p.checkReadsDirection).map((p) => p.id)).toEqual(['localInference', 'localai']);
   });
 
   it('declares the settings each own-key check reads, so an edit to any other field checks nothing again', () => {
@@ -149,7 +150,7 @@ describe('the invariants every provider meets (F17)', () => {
       soniox: ['region'],
       palabraai: ['authMode'],
       // Fork: LocalAI Realtime — what decides its key fields, and the other servers its check reaches.
-      localai: ['translateVia', 'translateBaseUrl', 'translateModel', 'translateNeedsKey', 'coach', 'coachBaseUrl', 'coachModel', 'coachNeedsKey'],
+      localai: ['asrVia', 'translateVia', 'translateBaseUrl', 'translateModel', 'translateNeedsKey', 'coach', 'coachBaseUrl', 'coachModel', 'coachNeedsKey', 'serverNeedsKey', 'selections'],
     });
   });
 

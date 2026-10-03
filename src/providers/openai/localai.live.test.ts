@@ -19,6 +19,7 @@
  *
  * Run it after a rebase onto upstream, or after changing the server.
  */
+import './nodeWindow';
 import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import type { AdapterSession, SessionContext } from '../../lib/contract/adapter';

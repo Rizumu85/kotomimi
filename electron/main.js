@@ -85,6 +85,16 @@ app.setName('kotomimi');
 app.commandLine.appendSwitch('application-name', 'kotomimi');
 app.commandLine.appendSwitch('jack-name', 'kotomimi');
 
+// Fork: a development run can keep a profile of its own and be driven over the DevTools protocol,
+// so working on the app never touches the installed one's settings, or fights it for the
+// single-instance lock. Never in a packaged build.
+/** An unpackaged run loads the page from the dev server — unless it was asked to load the built files (`KOTOMIMI_LOAD_BUILD=1`), for a machine where the dev server will not stay up. */
+const loadsDevServer = () => (import.meta.env.MODE === 'development' || !app.isPackaged) && !(process.env.KOTOMIMI_LOAD_BUILD === '1' && !app.isPackaged);
+if (!app.isPackaged) {
+  if (process.env.KOTOMIMI_PROFILE) app.setPath('userData', process.env.KOTOMIMI_PROFILE);
+  if (process.env.KOTOMIMI_DEBUG_PORT) app.commandLine.appendSwitch('remote-debugging-port', process.env.KOTOMIMI_DEBUG_PORT);
+}
+
 /**
  * Fork: a first launch adopts upstream Sokuji's settings, so a user who moves over starts where
  * they were. Settings and saved keys live in the page's localStorage, and the sign-in in one file
@@ -94,7 +104,7 @@ app.commandLine.appendSwitch('jack-name', 'kotomimi');
  */
 (function adoptUpstreamProfile() {
   try {
-    if (app.commandLine.hasSwitch('user-data-dir')) return;
+    if (app.commandLine.hasSwitch('user-data-dir') || (!app.isPackaged && process.env.KOTOMIMI_PROFILE)) return;
     const fs = require('fs');
     const mine = app.getPath('userData');
     const theirs = path.join(app.getPath('appData'), 'sokuji');
@@ -403,7 +413,7 @@ function createWindow() {
     : path.join(__dirname, '../assets/icon.png');
 
   // Create the browser window
-  const isDev = import.meta.env.MODE === 'development' || !app.isPackaged;
+  const isDev = loadsDevServer();
 
   // Build custom User Agent to identify Electron app
   // Use standard OS names so PostHog's regex-based $os detection works
@@ -516,7 +526,7 @@ app.whenReady().then(async () => {
     return;
   }
 
-  const isDev = import.meta.env.MODE === 'development' || !app.isPackaged;
+  const isDev = loadsDevServer();
 
   // Initialize Better Auth adapter
   try {

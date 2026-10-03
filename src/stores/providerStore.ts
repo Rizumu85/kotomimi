@@ -74,8 +74,8 @@ export interface ProviderStore {
    * unknown and reports nothing.
    */
   refreshReadiness(p: AnyProvider, auth: AuthContext, from?: ReadinessInputs, signal?: AbortSignal): Promise<Readiness>;
-  /** Forgets `p`'s readiness — a sign-in flip, for a managed provider: it is unknown, and a check still in flight no longer counts. The last ready answer, kept with its inputs, stays: a check for exactly those inputs is served from it. */
-  forgetReadiness(p: Pick<AnyProvider, 'id'>): void;
+  /** Forgets `p`'s readiness — a sign-in flip, for a managed provider: it is unknown, and a check still in flight no longer counts. The last ready answer, kept with its inputs, stays: a check for exactly those inputs is served from it. Fork: `kept` drops that answer too, for a provider whose check reads something its inputs do not name. */
+  forgetReadiness(p: Pick<AnyProvider, 'id'>, also?: { kept: true }): void;
   /** The legs a start would open now, speaker first (appShape's `watchLegsFromStores` keeps them); the speaker alone until then. */
   legs: readonly LegName[];
   /** Other legs change what a check that reads them answers (`checkReadsDirection`): that provider's readiness is forgotten, and each pair derived again from the intent for the new language context. The same legs change nothing. */
@@ -157,8 +157,9 @@ export const useProviderStore = create<ProviderStore>()((set, get) => {
     return seq;
   };
   /** What `check` answered no longer describes these settings or credentials. */
-  const forgetReadiness = (p: Pick<AnyProvider, 'id'>) => {
+  const forgetReadiness = (p: Pick<AnyProvider, 'id'>, also?: { kept: true }) => {
     supersede(p);
+    if (also?.kept) lastAnswer.delete(p.id);
     setReadiness(p, UNKNOWN);
   };
   /** A pair or legs change outdates only the answer of a check that reads them (`checkReadsDirection`): a network one validates the credentials alone. */

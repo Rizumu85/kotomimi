@@ -5,31 +5,51 @@
  */
 import type { ModelOption } from '../../lib/provider/types';
 
-/** What a model on the Realtime server is for: a pipeline the socket runs, a recognizer, a text model, or something no stage uses (a VAD, a TTS voice). */
-export type LocalAIModelKind = 'pipeline' | 'asr' | 'text' | 'other';
+/**
+ * What a model on the Realtime server is for: a pipeline the socket runs, a
+ * recognizer, a text model, a translation model that is no chat model
+ * (another Kotomimi's own, `src/lib/lan`), or something no stage uses (a
+ * VAD, a TTS voice).
+ */
+export type LocalAIModelKind = 'pipeline' | 'asr' | 'text' | 'translate' | 'other';
+
+/** The name another Kotomimi gives as the owner of every model it shares. */
+export const KOTOMIMI_HOST = 'kotomimi';
 
 /** A model the check found: the Realtime server's own — with its kind, when the server says — or one a stage's other server lists (`from`). */
 export interface LocalAIModel extends ModelOption {
   kind?: LocalAIModelKind;
   /** Listed by the translation or the feedback model's own server, not the Realtime server. */
   from?: 'translate' | 'coach';
+  /** Served by another Kotomimi: it translates a named pair, and takes any of its recognizers in any session. */
+  host?: typeof KOTOMIMI_HOST;
 }
 
 /**
  * A model's kind from LocalAI's `/v1/models/capabilities`: `transcript` is a
- * recognizer, `chat` or `completion` a text model, and a model with no
- * capability of its own is a pipeline — it only strings other models
- * together. Anything else (`vad`, `tts`, `embeddings`) no stage here uses.
+ * recognizer, `chat` or `completion` a text model, `translate` a translation
+ * model, and a model with no capability of its own is a pipeline — it only
+ * strings other models together. Anything else (`vad`, `tts`, `embeddings`)
+ * no stage here uses.
  */
 export function kindOf(capabilities: unknown): LocalAIModelKind {
   const list = Array.isArray(capabilities) ? capabilities.filter((c): c is string => typeof c === 'string') : [];
   if (list.includes('transcript')) return 'asr';
   if (list.includes('chat') || list.includes('completion')) return 'text';
+  if (list.includes('translate')) return 'translate';
   return list.length === 0 ? 'pipeline' : 'other';
 }
 
 /** The slots a model is chosen for. */
 export type LocalAIModelSlot = 'pipeline' | 'asr' | 'translate' | 'coach';
+
+/** The kinds that can do a slot's work: a translation model translates, and gives no feedback. */
+const KINDS: Readonly<Record<LocalAIModelSlot, readonly LocalAIModelKind[]>> = {
+  pipeline: ['pipeline'],
+  asr: ['asr'],
+  translate: ['text', 'translate'],
+  coach: ['text'],
+};
 
 /**
  * The models a slot may choose from: only the ones that can do its work. The
@@ -38,9 +58,13 @@ export type LocalAIModelSlot = 'pipeline' | 'asr' | 'translate' | 'coach';
  * every slot, as before — nothing is hidden on a guess.
  */
 export function modelsFor(models: readonly LocalAIModel[], slot: LocalAIModelSlot, ownServer = true): LocalAIModel[] {
-  if ((slot === 'translate' || slot === 'coach') && !ownServer) return models.filter((m) => m.from === slot);
+  if ((slot === 'translate' || slot === 'coach') && !ownServer) return models.filter((m) => m.from === slot && (m.kind === undefined || KINDS[slot].includes(m.kind)));
   const server = models.filter((m) => m.from === undefined);
   if (!server.some((m) => m.kind !== undefined)) return server;
-  const kind: LocalAIModelKind = slot === 'pipeline' ? 'pipeline' : slot === 'asr' ? 'asr' : 'text';
-  return server.filter((m) => m.kind === kind);
+  return server.filter((m) => m.kind !== undefined && KINDS[slot].includes(m.kind));
+}
+
+/** The Realtime server is another Kotomimi: every model it lists says so. */
+export function isKotomimiServer(models: readonly LocalAIModel[]): boolean {
+  return models.some((m) => m.from === undefined && m.host === KOTOMIMI_HOST);
 }

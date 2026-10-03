@@ -70,6 +70,8 @@ export function driveReadiness({ runner, providers, auth, clock, watchSignIn, de
   const inputsChanged = () => {
     const p = current();
     if (!p) return;
+    // Fork: a network provider that watches inputs of its own (Kotomimi's on-device models) answered about the old ones, and a kept answer is about them too.
+    if (p.kind !== 'local') useProviderStore.getState().forgetReadiness(p, { kept: true });
     if (idle()) schedule(p, false);
     else stale = true;
   };

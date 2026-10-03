@@ -20,6 +20,13 @@ export interface TextRequest {
   /** Worked examples, sent as earlier turns of the chat: what was said, and the answer shown as the model's own. */
   shots?: ReadonlyArray<{ said: string; answer: string }>;
   user: string;
+  /**
+   * The pair being translated, for a server that runs a translation model
+   * and has to be told it — another Kotomimi sharing its own models
+   * (`src/lib/lan`). Sent as `source_language` and `target_language`, and
+   * only when set: a hosted API may refuse a field it does not know.
+   */
+  pair?: { source: string; target: string };
 }
 
 export interface TextDeps {
@@ -94,6 +101,7 @@ export async function completeText(request: TextRequest, deps: TextDeps): Promis
       body: JSON.stringify({
         model: request.model,
         stream: true,
+        ...(request.pair ? { source_language: request.pair.source, target_language: request.pair.target } : {}),
         messages: [
           { role: 'system', content: request.system },
           ...(request.shots ?? []).flatMap((shot) => [{ role: 'user', content: shot.said }, { role: 'assistant', content: shot.answer }]),
