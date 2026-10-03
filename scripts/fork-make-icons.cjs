@@ -155,10 +155,11 @@ async function icns(master) {
     const { outline, cleared } = removeBackground(data, info.width, info.height);
     console.log(`background removed: ${Math.round((cleared / (info.width * info.height)) * 100)}% of the picture; outline colour rgb(${outline.join(', ')})`);
   }
-  // The drawing alone, then centred on a square with a 4% margin: an icon is drawn edge to edge, so none of its little size is spent on air.
+  // The drawing alone, then centred on a square with a 1% margin each side — only enough that the outline's soft edge is not clipped.
+  // An icon is shown at 16 to 48 px with the system's own padding around it: none of that little size is spent on air.
   const drawing = await sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } }).trim({ threshold: 1 }).png().toBuffer({ resolveWithObject: true });
   const side = Math.max(drawing.info.width, drawing.info.height);
-  const canvas = Math.round(side / 0.92);
+  const canvas = Math.round(side / 0.98);
   const master = sharp(await sharp({ create: { width: canvas, height: canvas, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
     .composite([{ input: drawing.data, gravity: 'centre' }]).png().toBuffer()).resize(1024, 1024, { kernel: 'lanczos3' });
   const masterPng = sharp(await master.png().toBuffer());
