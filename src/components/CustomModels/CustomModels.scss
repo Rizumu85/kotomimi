@@ -1,0 +1,131 @@
+@use '../Settings/shared/variables' as vars;
+
+// Fork: adding a model from Hugging Face (CustomModels.tsx). Lives inside the
+// Kotomimi settings (`.kt-stages`), whose notes and disclosure it reuses.
+
+.kt-custom {
+  .kt-custom__form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: vars.$space-2;
+    margin-top: vars.$space-2;
+  }
+
+  // Outside a `.setting-item`, the settings' own input rule does not reach: the control's look is given here.
+  .kt-custom__repo {
+    @include vars.control-base;
+    flex: 1 1 100%;
+    min-width: 0;
+    padding: 7px 10px;
+    box-sizing: border-box;
+    font-size: vars.$font-caption;
+
+    &::placeholder {
+      color: vars.$text-disabled;
+    }
+  }
+
+  .kt-custom__language {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 6px 28px 6px 10px;
+    font-size: vars.$font-caption;
+  }
+
+  .kt-custom__add {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    font: inherit;
+    font-size: vars.$font-caption;
+    color: vars.$color-on-primary;
+    background: vars.$color-primary-fill;
+    border: none;
+    border-radius: vars.$radius-sm;
+    cursor: pointer;
+    transition: background-color vars.$transition-fast;
+
+    &:hover:not(:disabled) {
+      background: vars.$color-primary-fill-hover;
+    }
+
+    &:disabled {
+      @include vars.disabled-state;
+    }
+
+    &:focus-visible {
+      @include vars.focus-ring;
+    }
+  }
+
+  .kt-custom__message {
+    margin: vars.$space-2 0 0;
+    font-size: vars.$font-caption;
+    line-height: 1.5;
+
+    &.is-ok {
+      color: vars.$color-primary;
+    }
+
+    &.is-error {
+      color: vars.$color-warning;
+    }
+  }
+
+  .kt-custom__list {
+    margin: vars.$space-2 0 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: vars.$space-2;
+      padding: 5px 4px 5px 8px;
+      margin-bottom: 4px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid vars.$border-subtle;
+      border-radius: vars.$radius-sm;
+    }
+  }
+
+  .kt-custom__name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    color: vars.$text-primary;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .kt-custom__meta {
+    flex-shrink: 0;
+    color: vars.$text-muted;
+  }
+
+  .kt-custom__remove {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    color: vars.$text-muted;
+    background: transparent;
+    border: none;
+    border-radius: vars.$radius-sm;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      color: vars.$color-error;
+      background: vars.$bg-hover;
+    }
+
+    &:focus-visible {
+      @include vars.focus-ring;
+    }
+  }
+}

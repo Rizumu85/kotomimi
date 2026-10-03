@@ -3393,6 +3393,11 @@ export const MODEL_MANIFEST: ModelManifestEntry[] = [
 
 import { sortLanguageOptions } from '../../utils/languages';
 import { canonicalTag } from '../language/code';
+import { storedCustomModels } from './customModels';
+
+// Fork: the models the user added from Hugging Face (`customModels.ts`) join the catalog as it loads, so every reader below sees them.
+MODEL_MANIFEST.push(...storedCustomModels());
+
 import { EDGE_TTS_LANGUAGES, WHISPER_LANGUAGES } from './languageSupport';
 import type { LanguageOption } from '../provider/types';
 import { isSupportedByBing } from '../bing-translator';

@@ -183,6 +183,18 @@ describe('a Realtime socket of a sharing Kotomimi', () => {
     expect(s.sent[s.sent.length - 1]).toMatchObject({ type: 'conversation.item.input_audio_transcription.completed', transcript: '之后的话' });
   });
 
+  it('ends a turn committed while the model still loads once it has loaded, after the audio held for it', async () => {
+    const s = socket();
+    s.update('ja');
+    s.say({ type: 'input_audio_buffer.append', audio: pcmToBase64(new Int16Array(4800)) });
+    s.say({ type: 'input_audio_buffer.commit' });
+    expect(s.engine().flushes).toBe(0);
+    await s.engine().loaded();
+    // The speech first, then the silence that ends it, then the flush.
+    expect(s.engine().fed).toEqual([4800, 2400, 2400, 2400, 2400, 2400, 2400, 2400]);
+    expect(s.engine().flushes).toBe(1);
+  });
+
   it('answers a request for a response by saying where translations are asked for', () => {
     const s = socket();
     s.say({ type: 'response.create' });

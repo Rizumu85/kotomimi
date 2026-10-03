@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { InstructionsField } from '../../components/providers/fields/InstructionsField';
 import ToggleSwitch from '../../components/Settings/shared/ToggleSwitch';
 import Tooltip from '../../components/Tooltip/Tooltip';
+import { CustomModels } from '../../components/CustomModels/CustomModels';
 import { LanSharingSection } from '../../components/LanSharing/LanSharingSection';
 import { getManifestEntry } from '../../lib/local-inference/modelManifest';
 import { shortenModelName } from '../../lib/local-inference/modelName';
@@ -206,7 +207,10 @@ export function LocalAISettingsView({ settings, update, disabled = false, pair, 
         </h2>
         <Places label={t('providers.localai.hearStage')} value={settings.asrVia} options={hearOptions} onChange={(asrVia) => update({ asrVia })} disabled={disabled} />
         {hearsHere ? (
-          <p className="kt-note">{t('providers.localai.hearDeviceNote')}</p>
+          <>
+            <p className="kt-note">{t('providers.localai.hearDeviceNote')}</p>
+            <CustomModels disabled={disabled} />
+          </>
         ) : (
           <>
             <Field label={t('providers.localai.pipelineModel')}>

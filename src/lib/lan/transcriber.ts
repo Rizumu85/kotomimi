@@ -79,6 +79,8 @@ export class LanTranscriber {
   private running = '';
   private held: Int16Array[] = [];
   private heldSamples = 0;
+  /** A turn was ended while the model loaded: it ends once the held audio has been fed. */
+  private commitWhenReady = false;
   private items = 0;
   private item: Item | null = null;
   private clearedAt = Number.NEGATIVE_INFINITY;
@@ -147,6 +149,7 @@ export class LanTranscriber {
   private start(model: { modelId: string; streaming: boolean }, language: string, vad: VadWebConfig, asked: string): void {
     this.engine?.dispose();
     this.ready = false;
+    this.commitWhenReady = false;
     this.running = asked;
     this.item = null;
     const engine = this.deps.recognizer(model);
@@ -168,6 +171,10 @@ export class LanTranscriber {
         for (const samples of this.held) engine.feedAudio(samples, SAMPLE_RATE);
         this.held = [];
         this.heldSamples = 0;
+        if (this.commitWhenReady) {
+          this.commitWhenReady = false;
+          this.commit();
+        }
       },
       (cause: unknown) => {
         if (!mine()) return;
@@ -196,9 +203,18 @@ export class LanTranscriber {
     while (this.heldSamples > MAX_HELD_SAMPLES && this.held.length > 1) this.heldSamples -= this.held.shift()!.length;
   }
 
-  /** A client's own end of turn: a short silence, so the detection lets go, then whatever is held is recognized now. */
+  /**
+   * A client's own end of turn: a short silence, so the detection lets go,
+   * then whatever is held is recognized now. A turn that ends while the model
+   * is still loading ends when it has loaded, after the audio held for it: a
+   * large model takes longer to load than a short sentence takes to say.
+   */
   private commit(): void {
-    if (!this.engine || !this.ready) return;
+    if (!this.engine) return;
+    if (!this.ready) {
+      this.commitWhenReady = true;
+      return;
+    }
     for (let i = 0; i < 7; i += 1) this.engine.feedAudio(new Int16Array(SAMPLE_RATE / 10), SAMPLE_RATE);
     this.engine.flush();
   }

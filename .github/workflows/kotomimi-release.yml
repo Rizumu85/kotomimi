@@ -1,0 +1,260 @@
+# Fork: Kotomimi's own release. Upstream's `build.yml` signs with upstream's
+# certificate and is gated on upstream's repository; this one builds what the
+# fork ships — a Windows installer, and a macOS build when it can be made —
+# and gathers it into a DRAFT release for a person to read and publish.
+#
+# To release:
+#   1. Set the version in package.json (the fork's scheme: upstream's version
+#      with a two-digit build after it — upstream 0.42.2 is 0.42.201, 0.42.202…).
+#   2. Commit, then tag that commit `v<version>` and push the tag:
+#        git tag -a v0.42.204 -m "Kotomimi 0.42.204" && git push origin v0.42.204
+#   3. When the run is green, open the draft under Releases and publish it.
+#      The installed app's "Check for updates" reads published releases only.
+#
+# The tag must be `v<version>`: the app's updater builds its download address
+# from it (`electron/update-manager.js`). Upstream's own workflows also listen
+# for `v*` tags; they are switched off in this repository's Actions settings.
+#
+# A manual run (workflow_dispatch) builds everything and uploads the files as
+# workflow artifacts, without touching Releases: a rehearsal.
+name: Kotomimi release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # What the app is built with. No analytics key and no extension id: this is
+  # not upstream's build, and reports nothing to upstream.
+  VITE_BACKEND_URL: https://sokuji-api.kizuna.ai
+  VITE_ENVIRONMENT: production
+  VITE_ENABLE_KIZUNA_AI: 'true'
+  VITE_ENABLE_DEBUG: 'false'
+
+jobs:
+  test:
+    name: test (the fork's own suites)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - run: npm ci
+
+      # A tag that does not name the version in package.json would publish an
+      # installer whose own version disagrees with its address: refused here.
+      - name: The tag is the version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $VERSION"
+            exit 1
+          fi
+
+      # What the fork adds, and the guards that hold it to upstream's rules.
+      # Not the whole suite: upstream's has failures of its own that are not
+      # this fork's to fix, and a job red on arrival is a job nobody reads.
+      - name: Run the fork's tests
+        run: >-
+          npx vitest run
+          src/providers
+          src/lib/lan
+          src/lib/fonts
+          src/lib/annotate
+          src/lib/local-inference
+          src/lib/brand.test.ts
+          src/components/Annotated
+          src/components/Tour
+          src/components/SetupWizard
+          src/locales
+          src/stores/providerStore.test.ts
+          src/stores/providerStore.readiness.test.ts
+          electron/lan-server.test.js
+          electron/ipc-channels.test.js
+          electron/entry-map.consistency.test.js
+          electron/update-payload.test.js
+
+  windows:
+    name: build (Windows)
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Build the app
+        run: npm run build
+        env:
+          CI: false
+
+      # The per-application capture helper is built, not committed; packaging
+      # without it ships an app that can only capture the whole system.
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Build the capture helper
+        run: npm run build:audio-host
+
+      - name: Verify the helper was produced
+        shell: bash
+        run: test -f resources/bin/win32-x64/sokuji-audio-host.exe
+
+      - name: Make the installer
+        run: npx electron-forge make --arch=x64
+        env:
+          CI: false
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: windows
+          if-no-files-found: error
+          path: |
+            out/make/squirrel.windows/x64/*Setup*.exe
+            out/make/squirrel.windows/x64/*.nupkg
+            out/make/squirrel.windows/x64/RELEASES
+
+  # Unsigned: the fork has no Apple certificate. The app is ad-hoc signed by
+  # the build's own hook, so macOS asks before its first launch, and it cannot
+  # update itself in place. Allowed to fail: a release without it is still a
+  # release.
+  macos:
+    name: build (macOS, Apple silicon)
+    needs: test
+    runs-on: macos-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Build the app
+        run: npm run build
+        env:
+          CI: false
+
+      - name: Build the capture helper
+        run: npm run build:audio-host
+
+      - name: Make the disk image
+        run: npx electron-builder --mac dmg zip --arm64 --publish never -c.directories.output=out/make-mac
+        env:
+          CI: false
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: macos
+          if-no-files-found: error
+          path: |
+            out/make-mac/*.dmg
+            out/make-mac/*.zip
+
+  release:
+    name: draft the release
+    # Runs whenever Windows built, with or without macOS — and only for a tag.
+    if: always() && needs.windows.result == 'success' && startsWith(github.ref, 'refs/tags/v')
+    needs: [windows, macos]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/download-artifact@v6
+        with:
+          path: artifacts
+
+      - name: Collect the files
+        run: |
+          mkdir -p release-assets
+          find artifacts -type f \( -name '*.exe' -o -name '*.nupkg' -o -name 'RELEASES' -o -name '*.dmg' -o -name '*.zip' \) -exec cp {} release-assets/ \;
+          # Squirrel names its files with a space ("Kotomimi-0.42.204 Setup.exe"); the
+          # updater asks for the name with a dot, and an address is better without one.
+          cd release-assets
+          for f in *' '*; do
+            [ -e "$f" ] || continue
+            mv "$f" "${f// /.}"
+          done
+          ls -la
+
+      # What "Check for updates" reads: the version, and the installer's name and digest.
+      - name: Write latest.yml
+        run: |
+          EXE_FILE=$(find release-assets -name '*.exe' | head -1)
+          EXE_NAME=$(basename "$EXE_FILE")
+          VERSION=${GITHUB_REF_NAME#v}
+          SHA512=$(openssl dgst -sha512 -binary "$EXE_FILE" | openssl base64 -A)
+          SIZE=$(stat -c%s "$EXE_FILE")
+          DATE=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
+          {
+            echo "version: ${VERSION}"
+            echo "files:"
+            echo "  - url: ${EXE_NAME}"
+            echo "    sha512: ${SHA512}"
+            echo "    size: ${SIZE}"
+            echo "path: ${EXE_NAME}"
+            echo "sha512: ${SHA512}"
+            echo "releaseDate: '${DATE}'"
+          } > release-assets/latest.yml
+          cat release-assets/latest.yml
+
+      # The fork's own commits since the last release: upstream's are upstream's news.
+      - name: Write the notes
+        run: |
+          PREVIOUS=$(git describe --tags --abbrev=0 "$GITHUB_REF_NAME^" 2>/dev/null || echo "")
+          {
+            echo "Kotomimi ${GITHUB_REF_NAME#v} — an independent fork of [Sokuji](https://github.com/kizuna-ai-lab/sokuji)."
+            echo
+            echo "What the fork adds is described in [FORK.md](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/FORK.md)."
+            echo
+            echo "### Changes"
+            if [ -n "$PREVIOUS" ]; then
+              git log "${PREVIOUS}..${GITHUB_REF_NAME}" --pretty=format:'- %s' --grep='(fork)' || true
+            else
+              git log --pretty=format:'- %s' --grep='(fork)' -n 40 || true
+            fi
+            echo
+            echo
+            echo "### Installing"
+            echo "- **Windows**: run \`Kotomimi-${GITHUB_REF_NAME#v}.Setup.exe\`. Windows may warn that the publisher is unknown: the installer is not code-signed."
+            echo "- **macOS (Apple silicon)**: open the \`.dmg\` and drag Kotomimi to Applications. It is not notarized: the first time, right-click the app and choose Open."
+          } > NOTES.md
+          cat NOTES.md
+
+      - uses: softprops/action-gh-release@v3
+        with:
+          files: release-assets/*
+          body_path: NOTES.md
+          draft: true
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

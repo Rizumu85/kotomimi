@@ -86,6 +86,33 @@ module.exports = {
       '這裡不用填任何東西。精靈結束後，在「模型」裡下載一個語音辨識模型，導覽會指給你看。翻譯預設用線上翻譯，馬上可用，也可以再下載離線模型。',
     ],
   },
+  // Adding a model from Hugging Face (`src/components/CustomModels`).
+  custom: {
+    title: ['Add a Whisper model from Hugging Face', '添加 Hugging Face 上的 Whisper 模型', '新增 Hugging Face 上的 Whisper 模型'],
+    intro: [
+      'For a speech recognition model the library does not list — a Whisper fine-tuned for your language, say. Give the repository id; it must hold ONNX files in the Transformers.js layout (most onnx-community/… and Xenova/… Whisper repositories do), and it needs a GPU. Once added it appears in the model library to download.',
+      '用于模型库里没有的语音识别模型，比如专门为某种语言微调的 Whisper。填仓库名即可；仓库里要有 Transformers.js 用的 ONNX 文件（onnx-community/… 和 Xenova/… 的 Whisper 仓库大多符合），并且需要显卡。添加后它会出现在模型库里，可以下载。',
+      '用於模型庫裡沒有的語音辨識模型，比如專門為某種語言微調的 Whisper。填儲存庫名稱即可；儲存庫裡要有 Transformers.js 用的 ONNX 檔案（onnx-community/… 和 Xenova/… 的 Whisper 儲存庫大多符合），並且需要顯示卡。新增後它會出現在模型庫裡，可以下載。',
+    ],
+    repo: ['Repository id', '仓库名', '儲存庫名稱'],
+    language: ['The language it hears', '它识别的语言', '它辨識的語言'],
+    anyLanguage: ['Every language', '多语言', '多語言'],
+    add: ['Add', '添加', '新增'],
+    adding: ['Looking…', '正在查询…', '正在查詢…'],
+    added: ['Added {{name}} ({{size}} MB). Download it in the model library.', '已添加 {{name}}（{{size}} MB）。请到模型库里下载。', '已新增 {{name}}（{{size}} MB）。請到模型庫裡下載。'],
+    downloaded: ['downloaded', '已下载', '已下載'],
+    notDownloaded: ['not downloaded', '未下载', '未下載'],
+    remove: ['Remove {{name}}', '移除 {{name}}', '移除 {{name}}'],
+    error_bad_repo: ['That is not a repository id. It looks like owner/name.', '这不是仓库名。格式是 作者/名称。', '這不是儲存庫名稱。格式是 作者/名稱。'],
+    error_not_found: ['No public repository by that name.', '找不到这个公开仓库。', '找不到這個公開儲存庫。'],
+    error_unreachable: ['Could not reach Hugging Face: {{detail}}', '连接不上 Hugging Face：{{detail}}', '連線不上 Hugging Face：{{detail}}'],
+    error_not_whisper: [
+      'This repository is not a Whisper model in the ONNX layout. {{detail}}',
+      '这个仓库不是 ONNX 格式的 Whisper 模型。{{detail}}',
+      '這個儲存庫不是 ONNX 格式的 Whisper 模型。{{detail}}',
+    ],
+    error_exists: ['This model is already added.', '这个模型已经添加过了。', '這個模型已經新增過了。'],
+  },
   // Help: the fork's own link, in place of upstream's support address and discussion board.
   help: {
     issues: ['Report a problem', '反馈问题', '回報問題'],
@@ -149,6 +176,7 @@ module.exports = {
     noRecognizer: ['No speech recognition model downloaded yet', '还没有下载语音识别模型', '尚未下載語音辨識模型'],
     showLibrary: ['Download or manage models', '下载或管理模型', '下載或管理模型'],
     hideLibrary: ['Hide the model library', '收起模型库', '收起模型庫'],
+    direction: ['Which direction to show models for', '显示哪个方向的模型', '顯示哪個方向的模型'],
     options: ['Options', '选项', '選項'],
     port: ['Port', '端口', '連接埠'],
     key: ['Access key', '访问密钥', '存取金鑰'],

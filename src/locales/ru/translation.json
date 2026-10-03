@@ -1382,6 +1382,24 @@
       "pendingAddress": "No server address yet — add it in Settings before you start.",
       "deviceNotice": "Nothing to enter. After setup, download a speech recognition model under Models — the tour shows where. Translation works at once with the online translator, and offline models can be downloaded too."
     },
+    "custom": {
+      "title": "Add a Whisper model from Hugging Face",
+      "intro": "For a speech recognition model the library does not list — a Whisper fine-tuned for your language, say. Give the repository id; it must hold ONNX files in the Transformers.js layout (most onnx-community/… and Xenova/… Whisper repositories do), and it needs a GPU. Once added it appears in the model library to download.",
+      "repo": "Repository id",
+      "language": "The language it hears",
+      "anyLanguage": "Every language",
+      "add": "Add",
+      "adding": "Looking…",
+      "added": "Added {{name}} ({{size}} MB). Download it in the model library.",
+      "downloaded": "downloaded",
+      "notDownloaded": "not downloaded",
+      "remove": "Remove {{name}}",
+      "error_bad_repo": "That is not a repository id. It looks like owner/name.",
+      "error_not_found": "No public repository by that name.",
+      "error_unreachable": "Could not reach Hugging Face: {{detail}}",
+      "error_not_whisper": "This repository is not a Whisper model in the ONNX layout. {{detail}}",
+      "error_exists": "This model is already added."
+    },
     "help": {
       "issues": "Report a problem",
       "issuesTooltip": "Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page."
@@ -1422,6 +1440,7 @@
       "noRecognizer": "No speech recognition model downloaded yet",
       "showLibrary": "Download or manage models",
       "hideLibrary": "Hide the model library",
+      "direction": "Which direction to show models for",
       "options": "Options",
       "port": "Port",
       "key": "Access key",

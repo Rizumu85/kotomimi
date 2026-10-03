@@ -9,6 +9,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Check, CircleHelp, Copy, Languages, Loader, Mic, Share2, TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { CustomModels } from '../CustomModels/CustomModels';
+import { languageNameFor } from '../Settings/engine/languageName';
 import ToggleSwitch from '../Settings/shared/ToggleSwitch';
 import { ModelManagementSection } from '../Settings/sections/ModelManagementSection';
 import Tooltip from '../Tooltip/Tooltip';
@@ -55,6 +57,8 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
   const [portText, setPortText] = useState(String(port));
   const [keyText, setKeyText] = useState(key);
   const [managing, setManaging] = useState(false);
+  // The library lists the models of one direction: the other device may ask for either of the pair's.
+  const [reversed, setReversed] = useState(false);
   useEffect(() => setPortText(String(port)), [port]);
   useEffect(() => setKeyText(key), [key]);
 
@@ -68,8 +72,13 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
   };
   const recognizers = shared.filter((m) => m.kind === 'asr');
   const translators = shared.filter((m) => m.kind === 'translate');
-  // The library's own pair: the catalog's base codes.
-  const libraryPair = useMemo(() => ({ source: pair.source.split('-')[0], target: pair.target.split('-')[0] }), [pair.source, pair.target]);
+  // The library's own pair: the catalog's base codes, in the direction chosen.
+  const libraryPair = useMemo(() => {
+    const source = pair.source.split('-')[0];
+    const target = pair.target.split('-')[0];
+    return reversed ? { source: target, target: source } : { source, target };
+  }, [pair.source, pair.target, reversed]);
+  const directions = [false, true].map((back) => ({ back, label: back ? `${languageNameFor(pair.target)} → ${languageNameFor(pair.source)}` : `${languageNameFor(pair.source)} → ${languageNameFor(pair.target)}` }));
 
   const commitPort = () => {
     const next = Number(portText);
@@ -122,6 +131,14 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
           </button>
           {managing && (
             <div className="kt-lan__library">
+              <div className="setting-item">
+                <div className="turn-detection-options" role="group" aria-label={t('fork.lan.direction')}>
+                  {directions.map(({ back, label }) => (
+                    <button key={String(back)} type="button" className={`option-button ${back === reversed ? 'active' : ''}`} aria-pressed={back === reversed} onClick={() => setReversed(back)}>{label}</button>
+                  ))}
+                </div>
+              </div>
+              <CustomModels disabled={disabled} />
               <ModelManagementSection isSessionActive={disabled} stageFilter="asr" direction={`${libraryPair.source}→${libraryPair.target}`} settings={LOCAL_INFERENCE_DEFAULTS} update={noUpdate} pair={libraryPair} />
               <ModelManagementSection isSessionActive={disabled} stageFilter="translation" direction={`${libraryPair.source}→${libraryPair.target}`} settings={LOCAL_INFERENCE_DEFAULTS} update={noUpdate} pair={libraryPair} />
             </div>

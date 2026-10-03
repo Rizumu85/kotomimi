@@ -180,6 +180,18 @@
     &--wide {
       flex: 1 1 auto;
     }
+
+    // Outside a `.setting-item`, the settings' own input rule does not reach: the control's look is given here.
+    .text-input {
+      @include vars.control-base;
+      width: 100%;
+      padding: 7px 10px;
+      box-sizing: border-box;
+
+      &::placeholder {
+        color: vars.$text-disabled;
+      }
+    }
   }
 }
 

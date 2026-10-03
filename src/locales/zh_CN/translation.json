@@ -1382,6 +1382,24 @@
       "pendingAddress": "还没有填服务器地址。开始之前请到设置里补上。",
       "deviceNotice": "这里不用填任何东西。向导结束后，在「模型」里下载一个语音识别模型，引导会指给你看。翻译默认用在线翻译，马上可用，也可以再下载离线模型。"
     },
+    "custom": {
+      "title": "添加 Hugging Face 上的 Whisper 模型",
+      "intro": "用于模型库里没有的语音识别模型，比如专门为某种语言微调的 Whisper。填仓库名即可；仓库里要有 Transformers.js 用的 ONNX 文件（onnx-community/… 和 Xenova/… 的 Whisper 仓库大多符合），并且需要显卡。添加后它会出现在模型库里，可以下载。",
+      "repo": "仓库名",
+      "language": "它识别的语言",
+      "anyLanguage": "多语言",
+      "add": "添加",
+      "adding": "正在查询…",
+      "added": "已添加 {{name}}（{{size}} MB）。请到模型库里下载。",
+      "downloaded": "已下载",
+      "notDownloaded": "未下载",
+      "remove": "移除 {{name}}",
+      "error_bad_repo": "这不是仓库名。格式是 作者/名称。",
+      "error_not_found": "找不到这个公开仓库。",
+      "error_unreachable": "连接不上 Hugging Face：{{detail}}",
+      "error_not_whisper": "这个仓库不是 ONNX 格式的 Whisper 模型。{{detail}}",
+      "error_exists": "这个模型已经添加过了。"
+    },
     "help": {
       "issues": "反馈问题",
       "issuesTooltip": "Kotomimi 是 Sokuji 的独立分支。这个应用的问题请到它自己的 GitHub 页面反馈。"
@@ -1422,6 +1440,7 @@
       "noRecognizer": "还没有下载语音识别模型",
       "showLibrary": "下载或管理模型",
       "hideLibrary": "收起模型库",
+      "direction": "显示哪个方向的模型",
       "options": "选项",
       "port": "端口",
       "key": "访问密钥",
