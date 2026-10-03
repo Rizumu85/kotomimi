@@ -1433,6 +1433,9 @@
       "add": "Add a language…",
       "remove": "Reset {{language}}"
     },
+    "provider": {
+      "pointer": "Chosen and set up on the Provider page"
+    },
     "find": {
       "title": "Found on your network",
       "search": "Search my network for devices",

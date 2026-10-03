@@ -1433,6 +1433,9 @@
       "add": "添加语言…",
       "remove": "恢复 {{language}} 的默认字体"
     },
+    "provider": {
+      "pointer": "在「提供商」页选择和设置"
+    },
     "find": {
       "title": "局域网里找到的设备",
       "search": "搜索局域网里的设备",

@@ -146,6 +146,10 @@ module.exports = {
     remove: ['Reset {{language}}', '恢复 {{language}} 的默认字体', '恢復 {{language}} 的預設字型'],
   },
   // Sharing this computer's models on the local network (`src/components/LanSharing`).
+  // The General page's one line about the provider, on the Advanced layout (`src/components/providers/ProviderPointer.tsx`).
+  provider: {
+    pointer: ['Chosen and set up on the Provider page', '在「提供商」页选择和设置', '在「提供者」頁選擇和設定'],
+  },
   // The search of the local network for a device to use (`src/components/LanSharing/ServerFinder.tsx`).
   find: {
     title: ['Found on your network', '局域网里找到的设备', '區域網路裡找到的裝置'],

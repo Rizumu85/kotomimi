@@ -126,6 +126,27 @@ describe('SessionSettingsGeneral', () => {
   });
 });
 
+// Fork: on the Advanced layout the provider is drawn on its own page alone.
+describe('SessionSettingsGeneral, on the Advanced layout (fork)', () => {
+  it('draws no second provider block: one line names the provider and leads to the Provider page', () => {
+    const { container } = render(<SessionSettingsGeneral locked={false} layout="advanced" onOpenSlot={vi.fn()} />);
+    expect(container.querySelector('#provider-section')).toBeNull();
+    expect(container.querySelector('.provider-select')).toBeNull();
+    const pointer = container.querySelector('.kt-provider-pointer__row') as HTMLButtonElement;
+    expect(pointer.textContent).toContain('fork.provider.pointer');
+    fireEvent.click(pointer);
+    expect(useSettingsStore.getState().settingsNavigationTarget).toBe('provider');
+    // The rest of the page is as before.
+    for (const id of ['languages-section', 'output-section', 'turn-detection-section']) expect(container.querySelector(`#${id}`), id).toBeTruthy();
+  });
+
+  it('still draws the block itself on the Simple layout, which has no Provider page', () => {
+    const { container } = render(<SessionSettingsGeneral locked={false} layout="simple" onOpenSlot={vi.fn()} />);
+    expect(container.querySelector('#provider-section .provider-select')).toBeTruthy();
+    expect(container.querySelector('.kt-provider-pointer__row')).toBeNull();
+  });
+});
+
 describe('SessionSettingsProvider', () => {
   it("renders the picker, then .engine-surface, then LocalInferenceSettingsView's Speech Speed control — today's order", () => {
     const { container } = render(<SessionSettingsProvider locked={false} />);

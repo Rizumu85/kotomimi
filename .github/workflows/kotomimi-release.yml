@@ -87,6 +87,7 @@ jobs:
           electron/local-server.test.js
           electron/local-server.pipelines.test.js
           src/components/TitleBar
+          src/components/Settings/ProviderArea.test.tsx
           src/components/LanSharing
           src/components/providers
           electron/ipc-channels.test.js
