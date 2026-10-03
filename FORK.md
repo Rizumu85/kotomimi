@@ -12,39 +12,61 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 
 | 功能 | 说明 | 主要代码 |
 |---|---|---|
-| LocalAI Realtime 提供商 | 桌面版直接用 GA Realtime 协议连局域网里的 LocalAI，不需要中间代理 | `src/providers/openai/localai.ts` |
-| 环节自由搭配 | 识别、翻译、语法反馈三个环节各自指定服务器和模型 | `src/providers/openai/pipeline.ts`、`textModel.ts` |
-| 语法反馈 | 自己说对方语言时，不翻译，而是检查语法：没问题回 ✓，有问题给出改正句和原因。提示词按语言自动选择，也可以自己写 | 同上，`coachPrompt.ts` |
+| Kotomimi 自由搭配（提供商） | 识别、翻译、语法反馈三个环节，各自选在哪里运行：局域网里的服务器、这台电脑、或任意文本模型 | `src/providers/openai/localai.ts`、`pipeline.ts` |
+| 这台电脑的内置模型 | 识别和翻译可以用应用自己下载的模型，全部在本机完成，不需要服务器 | `localaiDevice.ts`、`LocalAIEngine.tsx` |
+| 局域网共享 | 把这台电脑的模型共享给局域网里的另一台 Kotomimi | `electron/lan-server.js`、`src/lib/lan/` |
+| 自定义模型 | 从 Hugging Face 添加模型库里没有的 Whisper 模型 | `src/lib/local-inference/customModels.ts` |
+| 语法反馈 | 自己说对方语言时，不翻译，而是检查语法：没问题回 ✓，有问题给出改正句和原因。提示词按语言自动选择，也可以自己写 | `coachPrompt.ts` |
 | 打字查词 | 会话中按 Ctrl+K，输入母语，得到对方语言的译文 | `src/components/MainPanel/panel/TypedText.tsx` |
-| 假名注音 | 日语汉字上方显示平假名 | `src/lib/annotate/`、`src/components/Annotated/` |
-| 罗马音 | 日语、韩语、俄语文本下方显示拉丁字母注音 | 同上 |
+| 假名注音、罗马音 | 日语汉字上方显示平假名；日语、韩语、俄语下方显示拉丁字母注音 | `src/lib/annotate/`、`src/components/Annotated/` |
+| 字体 | 界面、拉丁字母和罗马音、各语言的正文和注音，分别选字体 | `src/lib/fonts/`、`src/components/Fonts/` |
+| 设置向导和引导 | 向导里有 Kotomimi 自己的卡片和"在哪里运行"一步；引导会介绍上面这些功能 | `src/components/SetupWizard/steps/StepKotomimi.tsx`、`src/components/Tour/steps.ts` |
 
 注音在本机用词典和规则算出来，不调用任何模型，也不联网。
 
 ## 环节怎么搭配
 
-一条翻译链路有三个环节，每个环节可以放在不同的机器上：
+一条翻译链路有三个环节，每个环节可以放在不同的地方：
 
 ```
 麦克风 / 系统声音
       │
       ▼
- ① 识别（Realtime 服务器：断句 + 语音转文字）
+ ① 识别（断句 + 语音转文字）：服务器 │ 这台电脑
       │  原文
       ▼
- ② 翻译  ── 或 ──  ③ 语法反馈
+ ② 翻译：服务器管线 │ 文本模型 │ 这台电脑     ── 或 ──     ③ 语法反馈：文本模型
       │
       ▼
-   字幕（按语言加注音）
+   字幕（按语言加注音、按语言选字体）
 ```
 
-- **① 识别**：必须是一台支持 GA Realtime 协议的服务器。在"服务器地址"里填它。识别用哪个模型在"用户转录模型"里选，默认用服务器管线自带的。
+设置最上面有一条"路线"，一眼能看到每个环节现在在哪里跑、用的哪个模型；缺模型的环节会标黄。
 
-每个下拉菜单只列出能做这件事的模型：会话模型只列管线，识别只列识别模型，翻译和语法只列文本模型。分类来自 LocalAI 的 `/v1/models/capabilities`。服务器没有这个接口时不做过滤，所有模型都会列出。文本模型填了别的服务地址时，列的是那台服务器自己的模型。
-- **② 翻译**有两种做法，在"翻译"一栏里选：
-  - **服务器自带的管线**：识别和翻译都在 Realtime 会话里完成，一台机器全包。
-  - **文本模型**：服务器只做识别，翻译交给任何支持 OpenAI 聊天接口（`/v1/chat/completions`）的服务。地址留空表示同一台服务器，也可以填别的机器、本机的 Ollama / LM Studio，或云端 API。
-- **③ 语法反馈**：勾选"我自己说对方的语言"后，"我"这一路的语音不再翻译，而是交给一个文本模型检查。它可以有自己的地址和模型，留空则复用翻译用的文本模型。"对方"那一路不受影响，照常翻译。
+- **① 识别**
+  - **服务器**：一台支持 GA Realtime 协议的服务器（LocalAI，或另一台开启了共享的 Kotomimi）。地址填在"服务器地址"。识别模型默认用服务器管线自带的。
+  - **这台电脑**：用应用下载的识别模型，断句也在本机做。模型在"模型"里选择和下载，断句灵敏度在"VAD 设置"里调。这时不能选"自动检测"作为源语言，因为本机的识别模型不检测语言。
+- **② 翻译**
+  - **服务器管线**：识别和翻译都在 Realtime 会话里完成。识别放在这台电脑时没有这个选项。
+  - **文本模型**：翻译交给任何支持 OpenAI 聊天接口（`/v1/chat/completions`）的服务。地址留空表示上面那台服务器，也可以填别的机器、本机的 Ollama / LM Studio，或云端 API。
+  - **这台电脑**：用应用下载的翻译模型。没下载任何翻译模型时会用在线的 Bing 翻译，装好就能用。
+- **③ 语法反馈**：打开"我自己说对方的语言"后，"我"这一路的语音不再翻译，而是交给一个文本模型检查。它可以有自己的地址和模型，留空则复用翻译用的文本模型。"对方"那一路不受影响，照常翻译。应用下载的翻译模型不是聊天模型，做不了语法反馈。
+
+所有环节都在这台电脑上时，不需要填服务器地址。在"常规"页提供商下方有一个"连接服务器 / 用这台电脑"的开关，和提供商页的"语音识别"是同一个设置。
+
+每个下拉菜单只列出能做这件事的模型：会话模型只列管线，识别只列识别模型，翻译列文本模型和翻译模型，语法只列文本模型。分类来自服务器的 `/v1/models/capabilities`。服务器没有这个接口时不做过滤。
+
+几种搭配示例（地址仅为示意）：
+
+| 目标 | 识别 | 翻译 | 语法反馈 |
+|---|---|---|---|
+| 全部交给 Mac | 服务器 `mac:8080` | 服务器管线 | 关 |
+| Mac 识别，Mac 上换一个翻译模型 | 服务器 `mac:8080` | 文本模型，地址留空，模型 `hy-mt2-1.8b` | 关 |
+| Mac 识别，本机翻译 | 服务器 `mac:8080` | 这台电脑 | 关 |
+| 本机识别，Mac 翻译 | 这台电脑 | 文本模型，地址 `http://mac:8080/v1` | 关 |
+| 全部在这台电脑 | 这台电脑 | 这台电脑 | 关 |
+| 另一台 Kotomimi 全包 | 服务器 `192.168.1.20:8790` | 服务器管线 | 关 |
+| Mac 识别和翻译，云端查语法 | 服务器 `mac:8080` | 服务器管线（并填一个文本模型供打字查词） | 开，`https://api.openai.com/v1` + 密钥 |
 
 **语法反馈的提示词**按两种语言自动生成：
 
@@ -53,31 +75,54 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 - 例句作为对话的前几轮发给模型，而不是写在提示词正文里。小模型看到正文里的例句会接着往下编。
 - 想自己写就填"语法反馈提示词"。里面的 `{{SPOKEN}}` 和 `{{NATIVE}}` 会被替换成两种语言的名字。自己写的提示词不附带例句。
 
-用真实模型比较提示词和模型的效果：
-
-```bash
-COACH_LIVE_BASE=http://<host>:8080/v1 COACH_LIVE_MODELS=qwen3-4b npx vitest run --silent=false --reporter=verbose src/providers/openai/coachPrompt.live.test.ts
-```
-
-它会打印每句话的判断是否正确、解释是不是用母语写的、每句耗时。
-
-日志面板里每次调用文本模型都会记一行 `text.done`，带 `firstMs`（首字耗时）和 `totalMs`（总耗时），可以用来对比不同搭配的速度。
-
-几种搭配示例（地址仅为示意）：
-
-| 目标 | 服务器地址 | 翻译 | 语法反馈 |
-|---|---|---|---|
-| 全部交给 Mac | `mac:8080` | 服务器管线 | 关 |
-| Mac 识别，Mac 上换一个翻译模型 | `mac:8080` | 文本模型，地址留空，模型 `hy-mt2-1.8b` | 关 |
-| Mac 识别，本机翻译 | `mac:8080` | 文本模型，`http://localhost:11434/v1` | 关 |
-| Mac 识别和翻译，云端查语法 | `mac:8080` | 服务器管线（并填一个文本模型供打字查词） | 开，`https://api.openai.com/v1` + 密钥 |
+日志面板里每次调用文本模型或本机翻译模型都会记一行 `text.done`，带 `firstMs`（首字耗时）和 `totalMs`（总耗时），可以用来对比不同搭配的速度。
 
 限制：
 
-- 识别环节目前只支持 Realtime 协议的服务器。普通的 `/v1/audio/transcriptions` 接口还不能作为识别来源。
 - 只输出文本，不合成语音。
 - 文本模型由应用的渲染进程直接请求，所以对方服务必须允许跨域（CORS）。LocalAI 和 Ollama 默认允许；LM Studio 需要在服务器设置里打开 CORS。
 - 语法反馈的质量取决于模型。实测 4B 级别的本地模型能发现时态错误，但解释经常不按要求用母语写，建议用更强的模型。
+- **内置的 SenseVoice 识别日语会丢假名**（实测 2026-10-03："今日は天気がいいので、公園に行きましょう" 被识别成 "日天気公演行"）。识别日语请用 Whisper 系列或下面的自定义模型。中文没有这个问题。
+
+## 自定义模型
+
+"语音识别"选"这台电脑"时，下面有"添加 Hugging Face 上的 Whisper 模型"。填仓库名（例如 `onnx-community/kotoba-whisper-v2.2-ONNX`，一个专门为日语微调的 Whisper），选它识别的语言，添加后它会出现在模型库里，像内置模型一样下载、选择和共享。
+
+- 仓库要是 Transformers.js 用的 ONNX 格式：有 `config.json`、`tokenizer.json` 等配置文件，以及 `onnx/encoder_model*.onnx` 和 `onnx/decoder_model_merged*.onnx`。`onnx-community/…` 和 `Xenova/…` 的 Whisper 仓库大多符合。
+- 量化版本按 q4、8 位、全精度的顺序取第一个有的。
+- 需要显卡（WebGPU）。
+- 实测 `onnx-community/kotoba-whisper-v2.2-ONNX`（698 MB）识别上面那句日语完全正确。
+- 翻译和语法想用别的模型，走"文本模型"一路更合适：用 Ollama 或 LM Studio 加载任意模型，把地址填进去。
+
+## 局域网共享
+
+"提供商"页最下面的"局域网共享"打开后，这台电脑会在局域网上提供它已下载的识别和翻译模型。另一台设备上的 Kotomimi 选"Kotomimi 自由搭配"，把这里显示的地址填到"服务器地址"，就能用这台电脑的模型，自己不需要下载任何东西。
+
+- 默认端口 8790。可以设访问密钥；对方在"服务器需要访问密钥"里填同一个。
+- 应用开着的时候才能共享。开关的状态会记住，下次启动自动恢复。
+- 第一次开启时，系统防火墙可能询问是否允许访问网络，要允许专用网络。
+- 共享的是应用自己下载的模型（包括自定义模型）。要共享哪个，就在共享区域的模型库里下载哪个。
+- 每个连接占用一个识别模型的内存。最多同时 6 个连接。
+
+对另一台设备来说，这就是一台说同一套协议的服务器，所以下一节的约定对它同样适用。它和 LocalAI 有三处不同，客户端从模型列表里的 `owned_by: "kotomimi"` 认出它并自动处理：
+
+- **Realtime 套接字里只做识别，不生成回答。** 客户端选"服务器管线"时，会改用聊天接口向管线名 `kotomimi` 要翻译，由共享的那台电脑按语言对自己挑最合适的翻译模型。
+- **翻译模型不是聊天模型**，在 `capabilities` 里标为 `translate`。请求聊天接口时客户端会多带两个字段 `source_language` 和 `target_language`；系统提示词不被采用，每个翻译模型用自己的提示词。
+- **转写会话里可以指定任何一个识别模型**，不像 LocalAI 只接受默认的那个。
+
+握手带密钥时用 GA 的方式：子协议 `realtime` 加 `openai-insecure-api-key.<密钥>`，服务器回 `realtime`。HTTP 请求用 `Authorization: Bearer <密钥>`。
+
+## 字体
+
+"设置 → 字体"里从这台电脑已安装的字体中选：
+
+- **界面**：菜单、设置和按钮。
+- **拉丁字母和罗马音**：对话文字里的英文字母和数字，以及罗马音那一行。
+- **各语言的文字**：对话和字幕文字按语言各选一种正文字体；日语还可以另选假名注音的字体。当前语言对的两种语言总是列出，其他语言可以自己添加。
+
+每种语言下面有一行示例，按对话里实际的样子画出来。选择器里每个字体用它自己的样子显示；选非拉丁文字的字体时，能显示这种文字的字体排在前面。
+
+字体只在它有对应字形时生效，缺的字仍由应用默认字体显示。对话文字现在带语言标记，所以即使不选字体，日语里的汉字也会用日文字形而不是中文字形显示。
 
 ## 给服务器一侧（Mac）的约定
 
@@ -85,13 +130,13 @@ COACH_LIVE_BASE=http://<host>:8080/v1 COACH_LIVE_MODELS=qwen3-4b npx vitest run 
 
 **握手**
 
-- `ws://<host>:<port>/v1/realtime?model=<模型名>`，不带任何子协议，不带密钥。
+- `ws://<host>:<port>/v1/realtime?model=<模型名>`。没有密钥时不带任何子协议。
 - 服务器先发 `session.created`，客户端回 `session.update`，服务器回 `session.updated` 后会话才算开始。30 秒内没等到就判失败。
 
 **会话类型**
 
 - 翻译走服务器管线时：`session.type = "realtime"`，`output_modalities = ["text"]`，带 `instructions`、`audio.input.turn_detection`、`audio.input.transcription`、`audio.input.noise_reduction = null`、`tool_choice = "none"`、`tools = []`、`max_output_tokens`。
-- 翻译走文本模型或开了语法反馈时：`session.type = "transcription"`，只带 `audio.input.{turn_detection, transcription, noise_reduction}`。**这种会话里服务器不能自己生成回答。**
+- 翻译走文本模型、走这台电脑，或开了语法反馈时：`session.type = "transcription"`，只带 `audio.input.{turn_detection, transcription, noise_reduction}`。**这种会话里服务器不能自己生成回答。**
 - `audio.input.transcription` 里客户端总是带 `language`（两位语言码），`model` 只在用户另选了识别模型时才带。
 - 手动模式（按住说话）下 `turn_detection = null`，客户端松开时发 `input_audio_buffer.commit`，之后**不发** `response.create`：服务器要在转写完成后自己回答（管线会话），或只给转写（转写会话）。
 
@@ -112,7 +157,7 @@ COACH_LIVE_BASE=http://<host>:8080/v1 COACH_LIVE_MODELS=qwen3-4b npx vitest run 
 
 - `POST <base>/chat/completions`，`{model, stream: true, messages: [system, user]}`，按 SSE 流式返回；不流式也能读。
 - `GET <base>/models` 用于校验和列出模型。
-- `GET <base>/models/capabilities`（可选，LocalAI 自带）用于给模型分类：`capabilities` 含 `transcript` 的是识别模型，含 `chat` 或 `completion` 的是文本模型，为空的是管线，其他的（`vad`、`tts`）不出现在任何下拉里。
+- `GET <base>/models/capabilities`（可选，LocalAI 自带）用于给模型分类：`capabilities` 含 `transcript` 的是识别模型，含 `chat` 或 `completion` 的是文本模型，含 `translate` 的是翻译模型，为空的是管线，其他的（`vad`、`tts`）不出现在任何下拉里。
 - 回答里的 `<think>…</think>` 会被客户端去掉。
 
 **实测到的 LocalAI 行为（2026-10-02）**
@@ -126,7 +171,7 @@ COACH_LIVE_BASE=http://<host>:8080/v1 COACH_LIVE_MODELS=qwen3-4b npx vitest run 
 - 手动模式下，转写事件用的 `item_id` 和 `input_audio_buffer.committed` 的不一样。
 - 请求语音输出时会报错，并且不发 `response.done`。
 - `apple-speech-transcriber` 不给 `language` 会报错，所以源语言不能选"自动检测"。
-- **换识别模型只在管线会话里有效（2026-10-03）。** `session.type = "realtime"` 时，`audio.input.transcription.model` 填 `whisper-large-turbo`、`sensevoice-small-mlx` 都能正常识别，首次使用要加载 12 到 20 秒。`session.type = "transcription"` 时，除默认的 `apple-speech-transcriber` 外都被拒绝：`Failed to update session: model is not a valid pipeline model`。所以"服务器只识别、翻译交给文本模型"的搭配目前换不了识别模型：客户端在这种会话里不发识别模型名，界面上也把下拉禁用并说明原因。这一条需要服务器一侧解决，解决后客户端去掉这个限制即可（`localai.ts` 的 `transcriptionFor`）。
+- **换识别模型只在管线会话里有效（2026-10-03）。** `session.type = "realtime"` 时，`audio.input.transcription.model` 填 `whisper-large-turbo`、`sensevoice-small-mlx` 都能正常识别，首次使用要加载 12 到 20 秒。`session.type = "transcription"` 时，除默认的 `apple-speech-transcriber` 外都被拒绝：`Failed to update session: model is not a valid pipeline model`。所以"服务器只识别、翻译交给别处"的搭配目前换不了识别模型：客户端在这种会话里不发识别模型名，界面上也把下拉禁用并说明原因。这一条需要服务器一侧解决，解决后客户端去掉这个限制即可（`localai.ts` 的 `transcriptionFor`）。
 - `parakeet-cpp-nemotron-3.5-asr-streaming-0.6b` 的转写结果带 `<en-US>` 这样的语言标记，会进入原文，也会干扰管线里的翻译。
 
 ## 两台机器之间怎么协作
@@ -137,7 +182,9 @@ COACH_LIVE_BASE=http://<host>:8080/v1 COACH_LIVE_MODELS=qwen3-4b npx vitest run 
 
 ## 实机测试
 
-不设环境变量时这些测试会跳过，普通测试不会连任何服务器。
+不设环境变量时这些测试会跳过，普通测试不会连任何服务器。WAV 要求 24 kHz、单声道、PCM16，几秒钟的语音即可。各变量的含义写在测试文件开头。
+
+对 LocalAI：
 
 ```bash
 LOCALAI_LIVE=<host>:8080 \
@@ -148,7 +195,25 @@ LOCALAI_LIVE_COACH_MODEL=qwen3-4b \
 npx vitest run src/providers/openai/localai.live.test.ts
 ```
 
-WAV 要求 24 kHz、单声道、PCM16，几秒钟的语音即可。各变量的含义写在测试文件开头。
+对另一台开了共享的 Kotomimi：
+
+```bash
+KOTOMIMI_LIVE=<host>:8790 \
+KOTOMIMI_LIVE_WAV=speech-ja.wav KOTOMIMI_LIVE_SOURCE=ja KOTOMIMI_LIVE_TARGET=zh-CN \
+npx vitest run src/providers/openai/kotomimi.live.test.ts --disable-console-intercept
+```
+
+比较语法反馈的提示词和模型：
+
+```bash
+COACH_LIVE_BASE=http://<host>:8080/v1 COACH_LIVE_MODELS=qwen3-4b npx vitest run --silent=false --reporter=verbose src/providers/openai/coachPrompt.live.test.ts
+```
+
+测试用的日语语音要是真的日语。用中文语音合成去读日文，只会读出汉字，测出来的"识别错误"其实是音频的问题。macOS 上可以这样生成：
+
+```bash
+say -v Kyoko "今日は天気がいいので、公園に行きましょう。" -o ja.aiff && afconvert -f WAVE -d LEI16@24000 -c 1 ja.aiff ja.wav
+```
 
 ## 构建
 
@@ -159,14 +224,23 @@ npm run build:audio-host   # Windows 需要 VS Build Tools 的 C++ 组件
 npx electron-forge make --arch=x64
 ```
 
-- Windows 上仓库路径不能太深，否则安装包工具会因为路径超过 260 字符失败。放在类似 `C:\src\sokuji` 的短路径下。也不要直接放在盘符根目录（例如用 `subst` 映射出来的 `S:\`），那样打包时会漏掉文件。
+- Windows 上仓库路径不能太深，否则安装包工具会因为路径超过 260 字符失败。放在类似 `C:\src\kotomimi` 的短路径下。也不要直接放在盘符根目录（例如用 `subst` 映射出来的 `S:\`），那样打包时会漏掉文件。
 - `npm ci` 如果加了 `--ignore-scripts`，需要手动补三步：`node node_modules/electron/install.js`、`bash scripts/copy-ort-wasm.sh`、在 `node_modules/electron-winstaller` 里运行 `node script/select-7z-arch.js`。
 - 安装包没有代码签名。
+
+开发时不打包也能跑。未打包的 Electron 认三个环境变量（打包后的应用不认）：
+
+| 变量 | 作用 |
+|---|---|
+| `KOTOMIMI_PROFILE=<目录>` | 用单独的设置目录，不碰已安装应用的设置，也不和它抢单实例锁 |
+| `KOTOMIMI_DEBUG_PORT=9333` | 打开 DevTools 协议端口，供脚本驱动界面 |
+| `KOTOMIMI_LOAD_BUILD=1` | 加载 `npm run build` 的产物，而不是开发服务器。开发服务器在某些盘上会不停重启，这时用这个 |
 
 ## 名字和图标
 
 - 名字集中在几处：`forge.config.js`（安装目录、可执行文件名、应用 ID）、`package.json` 的 `productName`、`electron/main.js` 的 `app.setName`（设置目录）。
 - 界面文字不改语言包。上游的语言包里写的是 Sokuji，由 `src/lib/brand.ts` 在显示时替换成 Kotomimi。虚拟音频设备的名字保持 Sokuji 不变，因为设备确实还叫那个名字。
+- 本分支自己的文字写在 `scripts/fork-localai-locales.cjs` 和 `scripts/fork-locale-groups.cjs` 里，每条是 [英文, 简体, 繁体]，由脚本写进全部 30 个语言包。
 - 图标由一张图生成全套：
 
 ```bash
@@ -174,14 +248,22 @@ node scripts/fork-make-icons.cjs assets/logo-source.svg
 ```
 
   原图是矢量图（.svg）时直接用。原图是白底的 PNG 时，脚本会从四边把背景去掉；已经透明的 PNG 加 `--keep-background`。
-- "关于"里保留了对 Sokuji 和 Kizuna AI Lab 的署名。
+- "关于"里保留了对 Sokuji 和 Kizuna AI Lab 的署名。"帮助"里的反馈链接指向本仓库的 issues，不再指向上游的支持邮箱和讨论区。
 
-## 版本号和更新
+## 版本号和发布
 
-- 版本号是"上游版本 + 两位分支序号"：上游 0.42.2 的第 1 个分支构建是 `0.42.201`，现在是 `0.42.203`。每次要让别人覆盖安装的构建都要加一，否则安装程序会认为已经装过。五处版本号要一起改：`package.json`、`extension/package.json`、`extension/manifest.json` 和两个 lockfile。
-- 更新源指向本仓库的 Releases，不再指向上游，所以不会被提示换回官方版。
-- 启动时不自动检查更新，因为本仓库还没有发布过 Release，检查会报错。"帮助"里的"检查更新"仍然可用。
-- 上游的发布流程（`.github/workflows/build.yml`）在分支仓库里跑不通：Windows 签名那一步只在上游仓库执行，而发布步骤依赖它。要用 GitHub Actions 给本仓库出安装包，需要先改这个流程。
+- 版本号是"上游版本 + 两位分支序号"：上游 0.42.2 的第 1 个分支构建是 `0.42.201`。每次要让别人覆盖安装的构建都要加一，否则安装程序会认为已经装过。五处版本号要一起改：`package.json`、`extension/package.json`、`extension/manifest.json` 和两个 lockfile。
+- 更新源指向本仓库的 Releases，不再指向上游，所以不会被提示换回官方版。启动时不自动检查更新，"帮助"里的"检查更新"可用。
+- 发布用本分支自己的流程 `.github/workflows/kotomimi-release.yml`：
+
+```bash
+git tag -a v0.42.204 -m "Kotomimi 0.42.204" && git push origin v0.42.204
+```
+
+  它会跑本分支的测试，构建 Windows 安装包，尽量构建 macOS（Apple 芯片）版本，然后生成一个**草稿** Release。到 GitHub 的 Releases 页面检查后点发布。只有发布了的 Release 才会被"检查更新"看到。
+- 标签必须是 `v<版本号>`，并且和 `package.json` 里的版本一致，否则流程会拒绝。
+- 上游的三个流程（`build.yml` 等）在本仓库的 Actions 设置里停用了：它们也监听 `v*` 标签，但签名步骤只在上游仓库执行，在这里只会白跑。
+- macOS 版本没有 Apple 证书，没有公证：第一次要右键点"打开"，并且不能自动更新。
 
 ## 跟进上游
 
@@ -191,7 +273,7 @@ node scripts/fork-make-icons.cjs assets/logo-source.svg
 git fetch upstream
 git rebase upstream/main          # 在 localai 分支上
 node scripts/fork-localai-locales.cjs   # 语言包冲突时：先取上游版本，再跑这一行
-npx vitest run src/providers src/lib/annotate src/components/Annotated
+npx vitest run src/providers src/lib/lan src/lib/fonts src/lib/annotate src/components/Annotated src/components/Tour src/components/SetupWizard src/locales electron/lan-server.test.js
 ```
 
 改动过的上游文件：
@@ -199,21 +281,28 @@ npx vitest run src/providers src/lib/annotate src/components/Annotated
 | 文件 | 改了什么 |
 |---|---|
 | `src/providers/openai/{adapter,config,wire,settings}.ts` | 给适配器加了几个开关：自定义地址、无密钥时不带子协议、关闭锚点、手动提交不催答、转写会话 |
-| `src/providers/registry.ts` | 注册新提供商 |
-| `src/lib/session/storedSettings.ts` | 新提供商的存储键 |
-| `src/components/Conversation/ConversationList.tsx`、`src/components/Subtitle/SubtitleBands.tsx` | 文本渲染处接入注音 |
+| `src/providers/registry.ts`、`src/lib/session/storedSettings.ts` | 注册新提供商和它的存储键 |
+| `src/app/readiness.ts`、`src/stores/providerStore.ts` | 网络类提供商也能在模型下载完成后重新检查就绪状态 |
+| `src/lib/local-inference/modelManifest.ts` | 启动时把自定义模型并入模型库 |
+| `src/lib/local-inference/engine/AsrEngine.ts`、`public/workers/sherpa-onnx-asr.worker.js` | 把语言传给 SenseVoice |
+| `src/components/Conversation/ConversationList.tsx`、`src/components/Subtitle/SubtitleBands.tsx` | 文本渲染处接入注音，并给文字加语言标记 |
 | `src/components/Display/DisplaySettingsPopover.tsx` | 显示设置里加两个注音开关 |
-| `src/components/MainPanel/panel/TypedText.tsx` | Ctrl+K 聚焦输入框 |
+| `src/components/MainPanel/panel/TypedText.tsx`、`PanelToolbar.tsx` | Ctrl+K 聚焦输入框；引导用的锚点 |
+| `src/components/Settings/SimpleSettings/SimpleSettings.tsx`、`AdvancedSettings/AdvancedSettings.tsx` | 加入"字体"一节 |
+| `src/components/Settings/sections/HelpSection.tsx` | 反馈链接换成本仓库的 issues |
+| `src/components/SetupWizard/steps/{StepProviderPath,StepCredentials,StepFinish}.tsx`、`SetupWizard.tsx` | Kotomimi 的卡片和它自己的一步 |
+| `src/components/Tour/{steps,tourContext,useStartBasicsTour}.ts` | Kotomimi 提供商的引导步骤 |
 | `src/components/TitleBar/TitleBar.tsx`、`src/components/Subtitle/SubtitleBar.tsx`、`index.html`、`shared/index.html` | 显示的名字和标题栏图标 |
 | `src/locales/index.ts` | 注册名字替换 |
-| `electron/main.js` | 应用名、设置迁移、"关于"、启动时不查更新 |
+| `src/routes/Home.tsx` | 启动时读取注音开关、字体和共享状态 |
+| `electron/main.js` | 应用名、设置迁移、"关于"、启动时不查更新、共享用的 IPC、开发用的环境变量 |
+| `electron/ipc-channels.js`、`electron/preload.js`、`vite.config.ts` | 共享用的通道和构建入口 |
 | `electron/update-manager.js`、`electron/update-payload.js` | 更新源和安装包文件名 |
 | `forge.config.js` | 应用身份 |
 | `assets/icon.*`、`public/favicon.ico`、`public/logo*.png` | 图标 |
-| `src/routes/Home.tsx` | 启动时读取注音开关 |
-| `src/providers/registry.test.ts`、`src/providers/palabraai/provider.test.ts` | 跟着提供商列表更新的断言 |
+| 几个测试文件（`registry.test.ts`、`palabraai/provider.test.ts`、`SimpleSettings.order.test.tsx`、`HelpSection.test.tsx`） | 跟着上面的改动更新的断言 |
 | `src/locales/*/translation.json` | 由脚本生成的文字 |
-| `package.json` | 三个依赖：`@sglkc/kuromoji`、`wanakana`、`es-hangul` |
+| `package.json`、`package-lock.json` | 三个新依赖：`@sglkc/kuromoji`、`wanakana`、`es-hangul`；`ws` 从开发依赖移到运行依赖（共享的服务端要用） |
 
 ## 许可
 
