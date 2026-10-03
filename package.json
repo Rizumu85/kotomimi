@@ -1,7 +1,7 @@
 {
   "name": "sokuji",
-  "productName": "Sokuji",
-  "version": "0.42.201",
+  "productName": "Kotomimi",
+  "version": "0.42.202",
   "sidecarVersion": "0.4.0",
   "private": true,
   "main": "dist-electron/main.js",
@@ -12,8 +12,8 @@
     "email": "contact@kizuna.ai"
   },
   "build": {
-    "appId": "ai.kizunaai.sokuji",
-    "productName": "Sokuji",
+    "appId": "io.github.rizumu85.kotomimi",
+    "productName": "Kotomimi",
     "asar": true,
     "electronLanguages": [
       "en",
@@ -62,7 +62,7 @@
       ],
       "category": "AudioVideo",
       "icon": "assets/icon.png",
-      "executableName": "sokuji"
+      "executableName": "kotomimi"
     },
     "mac": {
       "target": [

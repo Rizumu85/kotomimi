@@ -3,10 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { InstructionsField } from '../../components/providers/fields/InstructionsField';
 import Tooltip from '../../components/Tooltip/Tooltip';
 import { resolveInstructions } from '../../lib/provider/instructions';
-import type { ModelOption, SettingsProps } from '../../lib/provider/types';
+import type { SettingsProps } from '../../lib/provider/types';
 import { coachPrompt } from './coachPrompt';
 // Type only: `localai.ts` imports this view, and a value import back would close a cycle.
 import type { LocalAISettings as S, TranslateVia } from './localai';
+import { modelsFor, type LocalAIModel } from './localaiModels';
 import { isRealtimeModelId, realtimeLanguageName, realtimeLanguages } from './settings';
 
 const helpIcon = <CircleHelp className="tooltip-trigger" size={14} style={{ marginLeft: '8px' }} />;
@@ -17,18 +18,24 @@ interface TextModelFieldsProps {
   baseUrl: string;
   model: string;
   needsKey: boolean;
-  /** Shown in an empty model field: what a blank one means. */
-  modelPlaceholder: string;
-  /** The Realtime server's models, suggested while the address is its own. */
-  models: readonly ModelOption[];
+  /** What a blank model means: the list's first entry, or an empty field's placeholder. */
+  blankLabel: string;
+  /** The text models this slot's server lists — its own while the address is blank. Empty: none is known, and the name is typed. */
+  options: readonly LocalAIModel[];
   onChange(patch: { baseUrl?: string; model?: string; needsKey?: boolean }): void;
   disabled: boolean;
 }
 
-/** One text model: where it is served, what it is called, and whether it wants a key (the key itself is a credential, entered beside the server address). */
-function TextModelFields({ id, baseUrl, model, needsKey, modelPlaceholder, models, onChange, disabled }: TextModelFieldsProps) {
+/**
+ * One text model: where it is served, which it is, and whether its server
+ * wants a key (the key itself is a credential, entered beside the server
+ * address). The model is chosen from what that server lists as text models;
+ * a server that lists none — not asked yet, or one that does not list —
+ * leaves a field to type the name into.
+ */
+function TextModelFields({ id, baseUrl, model, needsKey, blankLabel, options, onChange, disabled }: TextModelFieldsProps) {
   const { t } = useTranslation();
-  const own = baseUrl.trim() === '';
+  const listed = model === '' || options.some((m) => m.id === model);
   return (
     <>
       <div className="setting-item">
@@ -43,20 +50,24 @@ function TextModelFields({ id, baseUrl, model, needsKey, modelPlaceholder, model
         />
       </div>
       <div className="setting-item">
-        <input
-          type="text"
-          className="text-input"
-          aria-label={t('providers.localai.textModel')}
-          list={own ? `${id}-models` : undefined}
-          value={model}
-          onChange={(e) => onChange({ model: e.target.value })}
-          placeholder={modelPlaceholder}
-          disabled={disabled}
-        />
-        {own && (
-          <datalist id={`${id}-models`}>
-            {models.map((m) => <option key={m.id} value={m.id} />)}
-          </datalist>
+        {options.length > 0 ? (
+          <select id={`${id}-model`} className="select-dropdown" aria-label={t('providers.localai.textModel')} value={model} onChange={(e) => onChange({ model: e.target.value })} disabled={disabled}>
+            <option value="">{blankLabel}</option>
+            {/* A saved model the server no longer lists stays visible, so the setting is not silently another. */}
+            {!listed && <option value={model}>{model}</option>}
+            {options.map((m) => <option key={m.id} value={m.id}>{m.id}</option>)}
+          </select>
+        ) : (
+          <input
+            id={`${id}-model`}
+            type="text"
+            className="text-input"
+            aria-label={t('providers.localai.textModel')}
+            value={model}
+            onChange={(e) => onChange({ model: e.target.value })}
+            placeholder={blankLabel}
+            disabled={disabled}
+          />
         )}
       </div>
       <div className="setting-item">
@@ -82,9 +93,16 @@ export function LocalAISettingsView({ settings, update, disabled = false, pair, 
   const source = pair?.source ?? initial?.source ?? '';
   const target = pair?.target ?? initial?.target ?? '';
   const preview = resolveInstructions(settings, { participant: false, source: realtimeLanguageName(source), target: realtimeLanguageName(target) });
-  // What a blank field runs (`effectiveLocalAIModel`): the server's first `gpt-realtime*` name, else its first model.
-  const fallback = models.find((m) => isRealtimeModelId(m.id))?.id ?? models[0]?.id ?? '';
-  const asrListed = settings.asrModel === '' || models.some((m) => m.id === settings.asrModel);
+  // Each slot offers only the models that can do its work (`modelsFor`).
+  const found: readonly LocalAIModel[] = models;
+  const pipelines = modelsFor(found, 'pipeline');
+  const recognizers = modelsFor(found, 'asr');
+  // What a blank field runs (`effectiveLocalAIModel`): the first pipeline named `gpt-realtime*`, else the first.
+  const fallback = pipelines.find((m) => isRealtimeModelId(m.id))?.id ?? pipelines[0]?.id ?? '';
+  const asrListed = settings.asrModel === '' || recognizers.some((m) => m.id === settings.asrModel);
+  // A leg whose answers come from a text model only transcribes, and takes the server's own recognizer (`localai.ts` `transcriptionFor`).
+  const everyLegTranscribes = settings.translateVia === 'model';
+  const someLegTranscribes = everyLegTranscribes || settings.coach;
   return (
     <>
       <InstructionsField value={settings} onChange={update} preview={preview} disabled={disabled} />
@@ -105,9 +123,9 @@ export function LocalAISettingsView({ settings, update, disabled = false, pair, 
             disabled={disabled}
           />
           <datalist id="localai-models">
-            {models.map((m) => <option key={m.id} value={m.id} />)}
+            {pipelines.map((m) => <option key={m.id} value={m.id} />)}
           </datalist>
-          {models.length > 0 && <div className="models-info">{t('settings.modelsFound', 'Found {{count}} available models', { count: models.length })}</div>}
+          {found.length > 0 && <div className="models-info">{t('settings.modelsFound', 'Found {{count}} available models', { count: found.filter((m) => m.from === undefined).length })}</div>}
         </div>
       </div>
       <div className="settings-section">
@@ -116,11 +134,12 @@ export function LocalAISettingsView({ settings, update, disabled = false, pair, 
           <Tooltip content={t('providers.localai.asrModelTooltip')} position="top">{helpIcon}</Tooltip>
         </h2>
         <div className="setting-item">
-          <select className="select-dropdown" aria-label={t('settings.userTranscriptModel')} value={settings.asrModel} onChange={(e) => update({ asrModel: e.target.value })} disabled={disabled}>
+          <select className="select-dropdown" aria-label={t('settings.userTranscriptModel')} value={settings.asrModel} onChange={(e) => update({ asrModel: e.target.value })} disabled={disabled || everyLegTranscribes}>
             <option value="">{t('providers.localai.asrModelServer')}</option>
             {!asrListed && <option value={settings.asrModel}>{settings.asrModel}</option>}
-            {models.map((m) => <option key={m.id} value={m.id}>{m.id}</option>)}
+            {recognizers.map((m) => <option key={m.id} value={m.id}>{m.id}</option>)}
           </select>
+          {someLegTranscribes && <div className="models-info localai-note">{t('providers.localai.asrFixedNote')}</div>}
         </div>
       </div>
       <div className="settings-section">
@@ -139,8 +158,8 @@ export function LocalAISettingsView({ settings, update, disabled = false, pair, 
           baseUrl={settings.translateBaseUrl}
           model={settings.translateModel}
           needsKey={settings.translateNeedsKey}
-          modelPlaceholder={t('providers.localai.translateModelPlaceholder')}
-          models={models}
+          blankLabel={t('providers.localai.translateModelPlaceholder')}
+          options={modelsFor(found, 'translate', settings.translateBaseUrl.trim() === '')}
           onChange={(p) => update({
             ...(p.baseUrl !== undefined ? { translateBaseUrl: p.baseUrl } : {}),
             ...(p.model !== undefined ? { translateModel: p.model } : {}),
@@ -166,8 +185,8 @@ export function LocalAISettingsView({ settings, update, disabled = false, pair, 
             baseUrl={settings.coachBaseUrl}
             model={settings.coachModel}
             needsKey={settings.coachNeedsKey}
-            modelPlaceholder={t('providers.localai.coachModelPlaceholder')}
-            models={models}
+            blankLabel={t('providers.localai.coachModelPlaceholder')}
+            options={modelsFor(found, 'coach', settings.coachBaseUrl.trim() === '')}
             onChange={(p) => update({
               ...(p.baseUrl !== undefined ? { coachBaseUrl: p.baseUrl } : {}),
               ...(p.model !== undefined ? { coachModel: p.model } : {}),

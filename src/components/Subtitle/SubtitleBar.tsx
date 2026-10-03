@@ -1,5 +1,6 @@
 // src/components/Subtitle/SubtitleBar.tsx
 import React, { useRef, useState } from 'react';
+import { BRAND } from '../../lib/brand';
 import { useTranslation } from 'react-i18next';
 import {
   AArrowDown, AArrowUp, ChevronsDownUp, ChevronsUpDown,
@@ -190,7 +191,7 @@ const SubtitleBar: React.FC<Props> = ({
                 : <Play size={14} />}
           </button>
         )}
-        <span className="subtitle-bar__logo">Sokuji</span>
+        <span className="subtitle-bar__logo">{BRAND}</span>
         <span className="subtitle-bar__quota" />
       </div>
 

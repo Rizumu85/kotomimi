@@ -56,7 +56,7 @@ function buildUpdatePayload(info, { platform, arch, isAppImage = false }) {
     const base = `${RELEASE_BASE}/download/v${version}`;
 
     payload.supportsAutoUpdate = Boolean(isAppImage);
-    payload.appImageUrl = `${base}/Sokuji-${version}-${appImageArch}.AppImage`;
+    payload.appImageUrl = `${base}/Kotomimi-${version}-${appImageArch}.AppImage`;
     payload.debUrl = `${base}/sokuji_${version}_${debArch}.deb`;
     payload.releasePageUrl = `${RELEASE_BASE}/tag/v${version}`;
     // Legacy field kept for Windows / backward compat callers of updateStore:

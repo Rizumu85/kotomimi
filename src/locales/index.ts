@@ -1,6 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import { brandPostProcessor } from '../lib/brand';
 
 // Only import English as the fallback language (always needed)
 import enTranslation from './en/translation.json';
@@ -141,9 +142,12 @@ export async function showLanguageUncached(lng: string): Promise<string> {
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
+  // Fork: every string is shown with this build's name in place of upstream's (`src/lib/brand.ts`).
+  .use(brandPostProcessor)
   .init({
     resources,
     fallbackLng: 'en',
+    postProcess: ['brand'],
     debug: false, // Disable debug mode to reduce startup overhead
     
     interpolation: {

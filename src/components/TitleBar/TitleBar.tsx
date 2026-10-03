@@ -1,5 +1,6 @@
 // src/components/TitleBar/TitleBar.tsx
 import React, { useCallback } from 'react';
+import { BRAND } from '../../lib/brand';
 import { useTranslation } from 'react-i18next';
 import { Minus, Square, X, Settings, Terminal } from 'lucide-react';
 import { isElectron, isMacOS } from '../../utils/environment';
@@ -58,7 +59,11 @@ const TitleBar: React.FC<TitleBarProps> = ({
       className={`title-bar ${platformClass}${showInAppWindowControls ? ' has-window-controls' : ''}`}
       role="banner"
     >
-      <span className="title-bar__title">Sokuji</span>
+      <span className="title-bar__title">
+        {/* Fork: the mark beside the name. */}
+        <img src={new URL('../../assets/kotomimi.png', import.meta.url).href} alt="" width={16} height={16} style={{ marginRight: 6, verticalAlign: '-3px' }} />
+        {BRAND}
+      </span>
       <div className="title-bar__actions">
         <AccountButton />
         <SubtitleEnterButton />

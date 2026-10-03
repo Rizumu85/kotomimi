@@ -33,9 +33,11 @@ module.exports = {
     asar: true,
     extraResource: ['assets', 'resources'],
     icon: process.platform === 'win32' ? 'assets/icon.ico' : 'assets/icon',
-    appId: 'ai.kizunaai.sokuji',
-    executableName: 'sokuji',
-    name: 'Sokuji',
+    // Fork: Kotomimi's own identity. The executable's company is what Squirrel names the Start-menu folder after.
+    appId: 'io.github.rizumu85.kotomimi',
+    executableName: 'kotomimi',
+    name: 'Kotomimi',
+    win32metadata: { CompanyName: 'Kotomimi', ProductName: 'Kotomimi', FileDescription: 'Kotomimi' },
     // Whitelist-based ignore: only include package.json, dist-electron/,
     // build/ (minus wasm/), and node_modules/ (pruned by Forge).
     // Everything else (src/, public/, model-packs/, extension/, etc.) is excluded.
@@ -96,19 +98,19 @@ module.exports = {
     {
       name: '@electron-forge/maker-squirrel',
       config: {
-        name: 'Sokuji',
-        authors: 'Kizuna AI Lab',
-        exe: 'sokuji.exe',
+        name: 'Kotomimi',
+        authors: 'Rizumu85 (a fork of Sokuji by Kizuna AI Lab)',
+        exe: 'kotomimi.exe',
         description: 'AI-powered live speech translation application',
         setupIcon: 'assets/icon.ico',
-        iconUrl: 'https://raw.githubusercontent.com/kizuna-ai-lab/sokuji/main/assets/icon.ico',
+        iconUrl: 'https://raw.githubusercontent.com/Rizumu85/sokuji/localai/assets/icon.ico',
         noMsi: true
       }
     },
     {
       name: '@electron-forge/maker-dmg',
       config: {
-        name: 'Sokuji',
+        name: 'Kotomimi',
         overwrite: true
       }
     }

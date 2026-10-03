@@ -79,9 +79,37 @@ const {
 }
 
 // Set application name for PulseAudio
-app.setName('sokuji');
-app.commandLine.appendSwitch('application-name', 'sokuji');
-app.commandLine.appendSwitch('jack-name', 'sokuji');
+// Fork: Kotomimi is its own application — its own name, and so its own profile directory and
+// single-instance lock. It can be installed beside upstream Sokuji, and run while it runs.
+app.setName('kotomimi');
+app.commandLine.appendSwitch('application-name', 'kotomimi');
+app.commandLine.appendSwitch('jack-name', 'kotomimi');
+
+/**
+ * Fork: a first launch adopts upstream Sokuji's settings, so a user who moves over starts where
+ * they were. Settings and saved keys live in the page's localStorage, and the sign-in in one file
+ * beside it; both are copied once, and only into a profile that has none of its own. Downloaded
+ * models are not copied — they are gigabytes — and are downloaded again when wanted. Not done
+ * under `--user-data-dir`: a profile named on the command line is a test's, and stays empty.
+ */
+(function adoptUpstreamProfile() {
+  try {
+    if (app.commandLine.hasSwitch('user-data-dir')) return;
+    const fs = require('fs');
+    const mine = app.getPath('userData');
+    const theirs = path.join(app.getPath('appData'), 'sokuji');
+    const marker = path.join(mine, 'adopted-from-sokuji');
+    if (fs.existsSync(marker) || fs.existsSync(path.join(mine, 'Local Storage')) || !fs.existsSync(path.join(theirs, 'Local Storage'))) return;
+    fs.mkdirSync(mine, { recursive: true });
+    // The store's LOCK is the running app's own; a copy of it would be a lock no one holds.
+    fs.cpSync(path.join(theirs, 'Local Storage'), path.join(mine, 'Local Storage'), { recursive: true, filter: (source) => path.basename(source) !== 'LOCK' });
+    if (fs.existsSync(path.join(theirs, '_better_auth'))) fs.copyFileSync(path.join(theirs, '_better_auth'), path.join(mine, '_better_auth'));
+    fs.writeFileSync(marker, new Date().toISOString());
+    console.log('[Kotomimi] [Main] Adopted the settings of an existing Sokuji profile');
+  } catch (error) {
+    console.warn('[Kotomimi] [Main] Could not adopt an existing Sokuji profile:', error.message);
+  }
+})();
 
 // Single instance. Sokuji was only ever single-instance on macOS, and that was
 // Launch Services refusing to start a second copy of the .app bundle rather
@@ -228,8 +256,8 @@ function createApplicationMenu() {
             dialog.showMessageBox({
               type: 'info',
               title: `About ${app.getName()}`,
-              message: 'Sokuji - Real-time AI Translation',
-              detail: `Version: ${app.getVersion()}\n\nAI-powered real-time translation application\n\n© 2026 Kizuna AI Lab`,
+              message: 'Kotomimi - Real-time AI Translation',
+              detail: `Version: ${app.getVersion()}\n\nAI-powered real-time translation application\n\nKotomimi is a fork of Sokuji (AGPL-3.0).\nSokuji © 2026 Kizuna AI Lab`,
               buttons: ['OK'],
               icon: path.join(__dirname, '../assets/icon.png')
             });
@@ -325,8 +353,8 @@ function createApplicationMenu() {
             dialog.showMessageBox({
               type: 'info',
               title: `About ${app.getName()}`,
-              message: 'Sokuji - Real-time AI Translation',
-              detail: `Version: ${app.getVersion()}\n\nAI-powered real-time translation application\n\n© 2026 Kizuna AI Lab`,
+              message: 'Kotomimi - Real-time AI Translation',
+              detail: `Version: ${app.getVersion()}\n\nAI-powered real-time translation application\n\nKotomimi is a fork of Sokuji (AGPL-3.0).\nSokuji © 2026 Kizuna AI Lab`,
               buttons: ['OK'],
               icon: path.join(__dirname, '../assets/icon.png')
             });
@@ -351,13 +379,13 @@ function createApplicationMenu() {
         {
           label: 'Source Code',
           click: async () => {
-            await shell.openExternal('https://github.com/kizuna-ai-lab/sokuji');
+            await shell.openExternal('https://github.com/Rizumu85/sokuji');
           }
         },
         {
           label: 'Report Issue',
           click: async () => {
-            await shell.openExternal('https://github.com/kizuna-ai-lab/sokuji/issues');
+            await shell.openExternal('https://github.com/Rizumu85/sokuji/issues');
           }
         }
       ]
@@ -387,7 +415,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    title: 'Sokuji',
+    title: 'Kotomimi',
     icon: iconPath,
     frame: false,
     transparent: true,

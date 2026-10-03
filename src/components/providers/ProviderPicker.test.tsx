@@ -371,7 +371,7 @@ describe('ProviderPicker', () => {
       // beside its name.
       const fakeOption = document.querySelector('.provider-select option[value="fake"]');
       expect(fakeOption?.querySelector('.provider-select__icon')?.firstElementChild).not.toBeNull();
-      expect(fakeOption?.querySelector('.powered-by-vendor')?.textContent).toBe('Sokuji');
+      expect(fakeOption?.querySelector('.powered-by-vendor')?.textContent).toBe('Kotomimi'); // Fork: the credit goes through i18n, which names this build (src/lib/brand.ts).
 
       // The closed control mirrors the selected option (today's <selectedcontent>).
       expect(document.querySelector('.provider-select selectedcontent')).not.toBeNull();

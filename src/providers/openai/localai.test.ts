@@ -116,50 +116,95 @@ describe("LocalAI Realtime's stage keys", () => {
 });
 
 describe("LocalAI Realtime's check", () => {
-  const check = (fetch: typeof globalThis.fetch) => createLocalAICheck({ fetch, clock: createVirtualClock(0) })(K, LOCALAI_DEFAULTS, ctx());
+  const SERVER = 'http://192.168.1.10:8080/v1';
+  /** The Mac's own answers, as LocalAI gave them (2026-10-03): a pipeline with no capability, recognizers, text models, a VAD. */
+  const CAPABILITIES = [
+    { id: 'apple-speech-transcriber', capabilities: ['transcript'] },
+    { id: 'hy-mt2-1.8b', capabilities: ['chat', 'completion', 'vision'] },
+    { id: 'qwen3-1.7b-mlx', capabilities: ['transcript'] },
+    { id: 'gpt-realtime', capabilities: null },
+    { id: 'qwen3-4b', capabilities: ['chat', 'vision', 'thinking'] },
+    { id: 'silero-vad-ggml', capabilities: ['vad'] },
+  ];
+  const list = (ids: string[]) => json({ object: 'list', data: ids.map((id) => ({ id, object: 'model' })) });
+  /** A fetch that answers by URL: the server's list, its capabilities (a 404 when it has none), and any other server's. */
+  function server(o: { ids?: string[]; capabilities?: unknown[] | null; other?: () => Promise<Response> } = {}) {
+    const ids = o.ids ?? CAPABILITIES.map((m) => m.id);
+    return vi.fn(async (input: RequestInfo | URL, _init?: RequestInit) => {
+      const url = String(input);
+      if (url === `${SERVER}/models`) return list(ids);
+      if (url === `${SERVER}/models/capabilities`) return o.capabilities === null ? json({}, 404) : json({ object: 'list', data: o.capabilities ?? CAPABILITIES });
+      if (o.other) return o.other();
+      throw new Error(`unexpected request: ${url}`);
+    });
+  }
+  const check = (fetch: typeof globalThis.fetch, s: LocalAISettings = LOCALAI_DEFAULTS, k: LocalAICredentials = K) => createLocalAICheck({ fetch, clock: createVirtualClock(0) })(k, s, ctx());
 
-  it('GETs the server\'s own model list, with no Authorization header', async () => {
-    const fetch = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => json({ object: 'list', data: [{ id: 'gpt-realtime', object: 'model' }] }));
+  it('GETs the server\'s model list and its capabilities, with no Authorization header', async () => {
+    const fetch = server();
     await check(fetch);
-    expect(fetch).toHaveBeenCalledTimes(1);
-    expect(fetch.mock.calls[0][0]).toBe('http://192.168.1.10:8080/v1/models');
-    expect(fetch.mock.calls[0][1]?.headers).toBeUndefined();
+    expect(fetch.mock.calls.map((c) => c[0])).toEqual([`${SERVER}/models`, `${SERVER}/models/capabilities`]);
+    for (const call of fetch.mock.calls) expect(call[1]?.headers).toBeUndefined();
   });
 
-  it('answers ready with every model the server lists, in its order, each id once', async () => {
-    const data = ['apple-speech-transcriber', 'hy-mt2-1.8b', 'gpt-realtime', 'gpt-realtime', 'silero-vad-ggml'].map((id) => ({ id, object: 'model' }));
-    expect(await check(async () => json({ object: 'list', data }))).toEqual({ ok: true, models: [{ id: 'apple-speech-transcriber' }, { id: 'hy-mt2-1.8b' }, { id: 'gpt-realtime' }, { id: 'silero-vad-ggml' }] });
+  it('answers ready with every model the server lists, in its order, each with what it is for', async () => {
+    expect(await check(server())).toEqual({
+      ok: true,
+      models: [
+        { id: 'apple-speech-transcriber', kind: 'asr' },
+        { id: 'hy-mt2-1.8b', kind: 'text' },
+        // A model named like an LLM that is a recognizer: the server's word, not the name, decides.
+        { id: 'qwen3-1.7b-mlx', kind: 'asr' },
+        { id: 'gpt-realtime', kind: 'pipeline' },
+        { id: 'qwen3-4b', kind: 'text' },
+        { id: 'silero-vad-ggml', kind: 'other' },
+      ],
+    });
+  });
+
+  it('lists the models unsorted when the server has no capability list: nothing is hidden on a guess', async () => {
+    expect(await check(server({ ids: ['a', 'b', 'a'], capabilities: null }))).toEqual({ ok: true, models: [{ id: 'a' }, { id: 'b' }] });
+    // A capability list that cannot be read is done without, too.
+    const broken = vi.fn(async (input: RequestInfo | URL) => (String(input).endsWith('/capabilities') ? Promise.reject(new TypeError('Failed to fetch')) : list(['a'])));
+    expect(await check(broken)).toEqual({ ok: true, models: [{ id: 'a' }] });
   });
 
   it('answers not ready when the server lists nothing', async () => {
-    expect(await check(async () => json({ object: 'list', data: [] }))).toMatchObject({ ok: false });
+    expect(await check(server({ ids: [] }))).toMatchObject({ ok: false });
   });
 
-  it('also reaches every other server a stage names, with its key: a 401 or 403 is a refusal, a server that cannot be reached throws', async () => {
+  it('also lists every other server a text stage names, with its key, as text models of that stage', async () => {
     const s = { ...LOCALAI_DEFAULTS, translateVia: 'model' as const, translateModel: 'gpt-4.1-mini', translateBaseUrl: 'https://api.example.com/v1/', translateNeedsKey: true };
-    const k = { ...K, translateKey: 'sk-a' };
-    const list = () => json({ object: 'list', data: [{ id: 'gpt-realtime' }] });
-    const run = (other: () => Promise<Response>) => {
-      const fetch = vi.fn(async (input: RequestInfo | URL, _init?: RequestInit) => (String(input).startsWith('http://192.168.1.10') ? list() : other()));
-      return { fetch, result: createLocalAICheck({ fetch, clock: createVirtualClock(0) })(k, s, ctx()) };
-    };
-    const ok = run(async () => json({ data: [] }));
-    expect(await ok.result).toMatchObject({ ok: true });
-    expect(ok.fetch.mock.calls[1][0]).toBe('https://api.example.com/v1/models');
-    expect((ok.fetch.mock.calls[1][1]?.headers as Record<string, string>).Authorization).toBe('Bearer sk-a');
-    expect(await run(async () => json({}, 401)).result).toMatchObject({ ok: false, code: 'auth' });
+    const fetch = server({ other: async () => list(['gpt-4.1-mini', 'gpt-4.1']) });
+    const result = await check(fetch, s, { ...K, translateKey: 'sk-a' });
+    expect(fetch.mock.calls[2][0]).toBe('https://api.example.com/v1/models');
+    expect((fetch.mock.calls[2][1]?.headers as Record<string, string>).Authorization).toBe('Bearer sk-a');
+    expect(result).toMatchObject({ ok: true });
+    expect((result as { models: unknown[] }).models.slice(-2)).toEqual([
+      { id: 'gpt-4.1-mini', kind: 'text', from: 'translate' },
+      { id: 'gpt-4.1', kind: 'text', from: 'translate' },
+    ]);
+  });
+
+  it('is refused by another server only when a run would call it: a 401 or 403 with a model chosen; unreachable throws', async () => {
+    const inUse = { ...LOCALAI_DEFAULTS, translateVia: 'model' as const, translateModel: 'gpt-4.1-mini', translateBaseUrl: 'https://api.example.com/v1' };
+    expect(await check(server({ other: async () => json({}, 401) }), inUse)).toMatchObject({ ok: false, code: 'auth' });
     // Not every API lists its models: any other answer passes.
-    expect(await run(async () => json({}, 404)).result).toMatchObject({ ok: true });
-    await expect(run(async () => { throw new TypeError('Failed to fetch'); }).result).rejects.toThrow(/translation model's server \(https:\/\/api\.example\.com\/v1\) could not be reached/);
+    expect(await check(server({ other: async () => json({}, 404) }), inUse)).toMatchObject({ ok: true });
+    await expect(check(server({ other: async () => { throw new TypeError('Failed to fetch'); } }), inUse)).rejects.toThrow(/translation model's server \(https:\/\/api\.example\.com\/v1\) could not be reached/);
+    // An address typed with no model chosen yet: asked for its list, and never a reason to refuse the start.
+    const browsing = { ...LOCALAI_DEFAULTS, translateBaseUrl: 'https://api.example.com/v1' };
+    expect(await check(server({ other: async () => json({}, 401) }), browsing)).toMatchObject({ ok: true });
+    expect(await check(server({ other: async () => { throw new TypeError('Failed to fetch'); } }), browsing)).toMatchObject({ ok: true });
   });
 
   it('reaches no other server while the stages are the Realtime server\'s own', async () => {
-    const fetch = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => json({ object: 'list', data: [{ id: 'gpt-realtime' }] }));
-    await createLocalAICheck({ fetch, clock: createVirtualClock(0) })(K, { ...LOCALAI_DEFAULTS, translateVia: 'model', translateModel: 'hy-mt2-1.8b' }, ctx());
-    expect(fetch).toHaveBeenCalledTimes(1);
+    const fetch = server();
+    await check(fetch, { ...LOCALAI_DEFAULTS, translateVia: 'model', translateModel: 'hy-mt2-1.8b' });
+    expect(fetch).toHaveBeenCalledTimes(2);
   });
 
-  it('throws on an HTTP error or a failed fetch: it could not find out', async () => {
+  it('throws on an HTTP error or a failed fetch of the server\'s own list: it could not find out', async () => {
     await expect(check(async () => json({}, 502))).rejects.toThrow(/HTTP 502/);
     await expect(check(async () => { throw new TypeError('Failed to fetch'); })).rejects.toThrow(/Failed to fetch/);
   });
@@ -175,6 +220,8 @@ describe("LocalAI Realtime's model and config", () => {
   it('falls to the server\'s list only when the field is blank', () => {
     expect(effectiveLocalAIModel({ model: '' }, SERVER_MODELS.models)).toBe('gpt-realtime');
     expect(effectiveLocalAIModel({ model: '' }, [{ id: 'qwen3-4b' }])).toBe('qwen3-4b');
+    // With the server's word on what each model is, only a pipeline: never a text model, or one another server lists.
+    expect(effectiveLocalAIModel({ model: '' }, [{ id: 'qwen3-4b', kind: 'text' }, { id: 'my-pipeline', kind: 'pipeline' }, { id: 'gpt-realtime-x', kind: 'text', from: 'translate' }])).toBe('my-pipeline');
     expect(buildLocalAI(AUTO, { ...LOCALAI_DEFAULTS, model: '' }, { ...SHARED, models: [] })).toMatchObject({ code: 'models_required' });
   });
 
@@ -199,6 +246,8 @@ describe("LocalAI Realtime's model and config", () => {
     expect(configFor({ ...AUTO, direction: { source: 'zh-CN', target: 'en' } }).transcription).toEqual({ language: 'zh' });
     expect(configFor({ ...AUTO, direction: { source: 'auto', target: 'en' } }).transcription).toEqual({});
     expect(configFor(AUTO, { asrModel: 'whisper-large-turbo' }).transcription).toEqual({ model: 'whisper-large-turbo', language: 'en' });
+    // A leg that only transcribes takes the server's own recognizer: LocalAI refuses any other in a transcription session.
+    expect(configFor(AUTO, { asrModel: 'whisper-large-turbo', translateVia: 'model', translateModel: 'hy-mt2-1.8b' }).transcription).toEqual({ language: 'en' });
     // OpenAI Realtime's own transcript model, inherited in `S`, is not read.
     expect(configFor(AUTO, { transcriptModel: 'gpt-4o-transcribe' }).transcription).toEqual({ language: 'en' });
   });

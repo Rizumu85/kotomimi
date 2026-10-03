@@ -37,14 +37,15 @@
  * (`session.type: 'transcription'`), which is what a leg with a stage of its
  * own opens.
  */
-import { OpenAIIcon } from '../../components/Icons/ProviderIcons';
 import type { SessionContext } from '../../lib/contract/adapter';
 import { realClock, type Clock } from '../../lib/contract/clock';
 import { boundedFetch } from '../../lib/provider/boundedFetch';
-import type { CheckContext, CheckResult, CredentialField, CredentialsMissing, MigrationInputs, ModelOption, Provider, ProviderRefusal, SharedSettings } from '../../lib/provider/types';
+import type { CheckContext, CheckResult, CredentialField, CredentialsMissing, MigrationInputs, Provider, ProviderRefusal, SharedSettings } from '../../lib/provider/types';
 import { CHECK_TIMEOUT_MS } from './check';
+import { kindOf, modelsFor, type LocalAIModel, type LocalAIModelKind } from './localaiModels';
 import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
+import { KotomimiIcon } from './LocalAIIcon';
 import { LocalAISettingsView } from './LocalAISettings';
 import { createPipelineAdapter, type PipelineConfig, type PipelineCredentials, type Stages, type TextStage } from './pipeline';
 import { RealtimeTurnDetectionControls, RealtimeTurnDetectionHelp, RealtimeTurnDetectionSummary } from './RealtimeTurnDetection';
@@ -149,6 +150,11 @@ export function localaiModelsUrl(endpoint: string): string {
   return `${httpBaseOf(endpoint)}/models`;
 }
 
+export { kindOf, modelsFor, type LocalAIModel, type LocalAIModelKind, type LocalAIModelSlot } from './localaiModels';
+
+/** A leg of this run only transcribes — its answers come from a text model — so the recognizer cannot be chosen (`transcriptionFor`). */
+export const hasTranscriptionLeg = (s: Pick<LocalAISettings, 'translateVia' | 'coach'>) => s.translateVia === 'model' || s.coach;
+
 /** The translation text model is in use: it answers speech, or — the speaker coached — typed text and, with no feedback model named, the feedback too. */
 const usesTranslateModel = (s: LocalAISettings) => s.translateModel.trim() !== '' && (s.translateVia === 'model' || s.coach);
 /** The feedback has a model of its own. */
@@ -179,22 +185,31 @@ export interface LocalAICheckDeps {
   clock?: Pick<Clock, 'setTimeout'>;
 }
 
-/** The text-model endpoints a run would call that are not the Realtime server's own, each with the key it is called with. */
-function otherEndpoints(k: LocalAICredentials, s: LocalAISettings): Array<{ name: string; base: string; key?: string }> {
-  const out: Array<{ name: string; base: string; key?: string }> = [];
-  if (usesTranslateModel(s) && s.translateBaseUrl.trim()) out.push({ name: 'translation', base: s.translateBaseUrl.trim().replace(/\/+$/, ''), key: k.translateKey });
-  if (ownCoachModel(s) && s.coachBaseUrl.trim()) out.push({ name: 'feedback', base: s.coachBaseUrl.trim().replace(/\/+$/, ''), key: k.coachKey });
+interface OtherServer { slot: 'translate' | 'coach'; name: string; base: string; key?: string; inUse: boolean }
+
+/** The servers the text stages name that are not the Realtime server: listed for their models, and — when a run would call them — required to accept the key. */
+function otherServers(k: LocalAICredentials, s: LocalAISettings): OtherServer[] {
+  const out: OtherServer[] = [];
+  const base = (url: string) => url.trim().replace(/\/+$/, '');
+  if (s.translateBaseUrl.trim()) out.push({ slot: 'translate', name: 'translation', base: base(s.translateBaseUrl), key: k.translateKey, inUse: usesTranslateModel(s) });
+  if (s.coach && s.coachBaseUrl.trim()) out.push({ slot: 'coach', name: 'feedback', base: base(s.coachBaseUrl), key: k.coachKey, inUse: ownCoachModel(s) });
   return out;
 }
 
+const idsOf = (body: unknown): string[] => [...new Set(((body as { data?: Array<{ id?: unknown }> } | null)?.data ?? []).flatMap((m) => (typeof m.id === 'string' && m.id ? [m.id] : [])))];
+
 /**
- * Readiness: the Realtime server answers its model list — every model kept,
- * in the server's order, since LocalAI lists pipelines, transcribers and
- * LLMs alike and says nothing of their kind — and every other endpoint a
- * stage names can be reached with its key. A failed fetch or an HTTP error
- * of the server's throws: it could not be asked, which is not a refusal.
- * Another endpoint refuses only by a 401 or a 403 to its model list; any
- * other answer passes, since not every API lists its models.
+ * Readiness: the Realtime server answers its model list, and every other
+ * server a run would call can be reached with its key. What comes back is
+ * every model with what it is for, so each slot of the settings offers only
+ * the models that fit it (`modelsFor`): the server's own by LocalAI's
+ * capability list — asked for, and done without when the server has none —
+ * and each text stage's other server's by its own list.
+ *
+ * A failed fetch or an HTTP error of the Realtime server's throws: it could
+ * not be asked, which is not a refusal. Another server refuses only by a 401
+ * or a 403, and only when a run would call it; any other answer passes,
+ * since not every API lists its models.
  */
 export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
   const clock = deps.clock ?? realClock;
@@ -204,20 +219,36 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
     return boundedFetch({ clock, ms: CHECK_TIMEOUT_MS, signal: ctx.signal, late }, async (signal): Promise<CheckResult> => {
       const response = await doFetch(localaiModelsUrl(k.endpoint), { method: 'GET', signal });
       if (!response.ok) throw new Error(`The server answered its model list with HTTP ${response.status}.`);
-      const body = (await response.json()) as { data?: Array<{ id?: unknown }> };
-      const ids = [...new Set((body.data ?? []).flatMap((m) => (typeof m.id === 'string' && m.id ? [m.id] : [])))];
+      const ids = idsOf(await response.json());
       if (ids.length === 0) return { ok: false, reason: 'The server lists no model.' };
-      for (const other of otherEndpoints(k, s)) {
+
+      // What each model is for. LocalAI's own endpoint; any other server answers 404, or nothing, and the models stay unsorted.
+      const kinds = new Map<string, LocalAIModelKind>();
+      try {
+        const answer = await doFetch(`${localaiModelsUrl(k.endpoint)}/capabilities`, { method: 'GET', signal });
+        if (answer.ok) {
+          for (const m of ((await answer.json()) as { data?: Array<{ id?: unknown; capabilities?: unknown }> }).data ?? []) {
+            if (typeof m.id === 'string') kinds.set(m.id, kindOf(m.capabilities));
+          }
+        }
+      } catch (error) {
+        if (signal.aborted) throw error;
+      }
+      const models: LocalAIModel[] = ids.map((id) => (kinds.has(id) ? { id, kind: kinds.get(id) } : { id }));
+
+      for (const other of otherServers(k, s)) {
         let answer: Response;
         try {
           answer = await doFetch(`${other.base}/models`, { method: 'GET', headers: other.key ? { Authorization: `Bearer ${other.key}` } : {}, signal });
         } catch (error) {
           if (signal.aborted) throw error;
+          if (!other.inUse) continue;
           throw new Error(`The ${other.name} model's server (${other.base}) could not be reached.`);
         }
-        if (answer.status === 401 || answer.status === 403) return { ok: false, code: 'auth', reason: `The ${other.name} model's server refused the key (HTTP ${answer.status}).` };
+        if ((answer.status === 401 || answer.status === 403) && other.inUse) return { ok: false, code: 'auth', reason: `The ${other.name} model's server refused the key (HTTP ${answer.status}).` };
+        if (answer.ok) for (const id of idsOf(await answer.json().catch(() => null))) models.push({ id, kind: 'text', from: other.slot });
       }
-      return { ok: true, models: ids.map((id) => ({ id })) };
+      return { ok: true, models };
     });
   };
 }
@@ -226,18 +257,25 @@ export const checkLocalAI = createLocalAICheck();
 
 /**
  * The model a session runs: what the user typed, as typed. Only a blank
- * field falls to the server's list — its first `gpt-realtime*` name, else
- * its first model.
+ * field falls to the server's pipelines — the first named `gpt-realtime*`,
+ * else the first.
  */
-export function effectiveLocalAIModel(s: Pick<LocalAISettings, 'model'>, models: readonly ModelOption[]): string {
+export function effectiveLocalAIModel(s: Pick<LocalAISettings, 'model'>, models: readonly LocalAIModel[]): string {
   const typed = s.model.trim();
   if (typed) return typed;
-  return models.find((m) => isRealtimeModelId(m.id))?.id ?? models[0]?.id ?? '';
+  const pipelines = modelsFor(models, 'pipeline');
+  return pipelines.find((m) => isRealtimeModelId(m.id))?.id ?? pipelines[0]?.id ?? '';
 }
 
-/** The hint for the server's transcriber: its own model unless one is chosen, and the language this leg hears when it has a code. */
-function transcriptionFor(s: Pick<LocalAISettings, 'asrModel'>, heard: string): TranscriptionHint {
-  const model = s.asrModel.trim();
+/**
+ * The hint for the server's transcriber: its own model unless one is chosen,
+ * and the language this leg hears when it has a code. A leg that only
+ * transcribes always takes the server's own: in a transcription session
+ * LocalAI refuses the whole `session.update` for any other recognizer
+ * ("not a valid pipeline model", 2026-10-03), which would fail the start.
+ */
+function transcriptionFor(s: Pick<LocalAISettings, 'asrModel'>, heard: string, transcribeOnly: boolean): TranscriptionHint {
+  const model = transcribeOnly ? '' : s.asrModel.trim();
   const language = normalizeTranscriptionLanguage(heard);
   // No `model` keeps the pipeline's own: the hint's type names one because OpenAI requires it.
   return { ...(model ? { model } : {}), ...(language ? { language } : {}) } as TranscriptionHint;
@@ -283,7 +321,7 @@ export function buildLocalAI(context: SessionContext, s: LocalAISettings, shared
   return {
     ...config,
     modalities: ['text'],
-    transcription: transcriptionFor(s, coached ? target : source),
+    transcription: transcriptionFor(s, coached ? target : source, Boolean(stages?.speech)),
     anchor: false,
     commitAnswers: true,
     ...(stages?.speech ? { transcribeOnly: true as const } : {}),
@@ -303,7 +341,7 @@ export const localaiProvider: Provider<LocalAISettings, LocalAICredentials, Loca
   kind: 'own-key',
   // A plain `ws://` to a LAN host: the extension's and the web app's content security policies allow neither.
   platforms: ['electron'],
-  icon: OpenAIIcon,
+  icon: KotomimiIcon,
 
   settings: { key: 'localai', defaults: LOCALAI_DEFAULTS, legacyKeys: REALTIME_LEGACY_KEYS, migrate: migrateLocalAISettings },
   Settings: LocalAISettingsView,

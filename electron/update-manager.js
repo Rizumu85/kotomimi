@@ -225,7 +225,7 @@ class UpdateManager {
     }
 
     // Fallback: matches Squirrel's naming with dots (spaces are replaced in CI)
-    const exeFileName = `Sokuji-${version}.Setup.exe`;
+    const exeFileName = `Kotomimi-${version}.Setup.exe`;
     return {
       fileName: exeFileName,
       url: `https://github.com/Rizumu85/sokuji/releases/download/v${version}/${exeFileName}`,
