@@ -84,7 +84,7 @@ describe("LocalAI Realtime's endpoint", () => {
   });
 
   it('is the one credential while every stage is the server\'s, and carries no Realtime key', () => {
-    expect(localaiCredentials.keys).toEqual(['endpoint', 'serverKey', 'translateKey', 'coachKey']);
+    expect(localaiCredentials.keys).toEqual(['endpoint', 'serverKey', 'asrKey', 'translateKey', 'coachKey']);
     expect(localaiCredentials.fields(LOCALAI_DEFAULTS).map((f) => [f.key, f.secret])).toEqual([['endpoint', false]]);
     expect(localaiCredentials.read({ endpoint: 'http://192.168.1.10:8080' }, noAuth)).toEqual(K);
     expect(localaiCredentials.read({ endpoint: '' }, noAuth)).toHaveProperty('missing');
@@ -124,7 +124,7 @@ describe("LocalAI Realtime's stage keys", () => {
   });
 
   it('declares every setting that decides a field or an endpoint the check reaches', () => {
-    expect(localaiProvider.checkReads).toEqual(['asrVia', 'translateVia', 'translateBaseUrl', 'translateModel', 'translateNeedsKey', 'coach', 'coachBaseUrl', 'coachModel', 'coachNeedsKey', 'serverNeedsKey', 'selections']);
+    expect(localaiProvider.checkReads).toEqual(['asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'translateVia', 'translateBaseUrl', 'translateModel', 'translateNeedsKey', 'coach', 'coachBaseUrl', 'coachModel', 'coachNeedsKey', 'serverNeedsKey', 'selections']);
   });
 });
 

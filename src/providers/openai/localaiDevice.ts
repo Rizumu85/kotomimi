@@ -23,7 +23,7 @@ export const deviceLanguage = (code: string): string => code.split('-')[0];
 
 /** The settings a device stage reads: where each stage runs, and the picks. */
 export interface DeviceChoices {
-  asrVia: 'server' | 'device';
+  asrVia: 'server' | 'api' | 'device';
   /** As `translateViaOf` answers it: never `server` while recognition is on the device. */
   translateVia: 'server' | 'model' | 'device';
   coach: boolean;
@@ -32,7 +32,7 @@ export interface DeviceChoices {
 
 /** What answers speech under these settings: a leg this computer hears has no server pipeline to answer it, so its own translation model does. */
 export function translateViaOf(s: Pick<DeviceChoices, 'asrVia' | 'translateVia'>): DeviceChoices['translateVia'] {
-  return s.asrVia === 'device' && s.translateVia === 'server' ? 'device' : s.translateVia;
+  return s.asrVia !== 'server' && s.translateVia === 'server' ? 'device' : s.translateVia;
 }
 
 /** The stage settings that decide which servers a run calls. */

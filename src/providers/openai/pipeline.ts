@@ -27,6 +27,7 @@ import { describeCause } from '../../lib/diagnostics/describeCause';
 import { createLocalInferenceAdapter } from '../localInference/adapter';
 import type { LocalInferenceConfig } from '../localInference/config';
 import { defaultEngines, type LocalEngines, type TranslationLike } from '../localInference/engines';
+import { createApiAsr } from './apiAsr';
 import { createRealtimeAdapter } from './adapter';
 import type { RealtimeConfig } from './config';
 import type { RealtimeCredentials } from './settings';
@@ -35,7 +36,7 @@ import { chatUrl, completeText, httpBaseOf } from './textModel';
 import { unwrapTranslationText } from './wire';
 
 /** The credential a stage's endpoint is called with, by its field. */
-export type StageKey = 'translateKey' | 'coachKey' | 'apiKey';
+export type StageKey = 'translateKey' | 'coachKey' | 'apiKey' | 'asrKey';
 
 /** A stage answered over chat completions, by a text model anywhere. */
 export interface TextStage {
@@ -83,6 +84,8 @@ export interface DeviceHearing {
   modelId: string;
   streaming: boolean;
   vad: LocalInferenceConfig['vad'];
+  /** Present: the recognizer is an API (`apiAsr.ts`) — this computer still cuts the sentences, and uploads each one. */
+  api?: { baseUrl: string; model: string; key?: StageKey };
 }
 
 export interface PipelineConfig extends RealtimeConfig {
@@ -97,6 +100,7 @@ export interface PipelineCredentials extends RealtimeCredentials {
   endpoint: string;
   translateKey?: string;
   coachKey?: string;
+  asrKey?: string;
 }
 
 export interface PipelineDeps {
@@ -479,6 +483,13 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
   const realtime = createRealtimeAdapter(deps.openSocket ? { openSocket: deps.openSocket } : {});
   const engines = deps.engines ?? defaultEngines;
   const local = createLocalInferenceAdapter(engines);
+  /** What hears on this computer: its own recognizer, or — the same adapter with that one engine changed — an API's. */
+  const hearing = (device: DeviceHearing, credentials: PipelineCredentials) => {
+    const { api } = device;
+    if (!api) return local;
+    const key = api.key ? credentials[api.key] : undefined;
+    return createLocalInferenceAdapter({ ...engines, asr: () => createApiAsr({ baseUrl: api.baseUrl, model: api.model, ...(key ? { key } : {}), fetch: deps.fetch ?? fetchNow }) });
+  };
   return {
     async start(request, events) {
       const { stages, device } = request.config;
@@ -489,7 +500,7 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
       opening.catch(() => {});
       let session: AdapterSession;
       try {
-        session = await (device ? local.start(hearingRequest(request, device, stages?.heard), leg.inner) : realtime.start(request, leg.inner));
+        session = await (device ? hearing(device, request.credentials).start(hearingRequest(request, device, stages?.heard), leg.inner) : realtime.start(request, leg.inner));
       } catch (error) {
         leg.abandon();
         throw error;

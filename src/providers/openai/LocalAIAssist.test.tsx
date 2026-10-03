@@ -25,13 +25,16 @@ const pressed = (buttons: Element[]) => buttons.find((b) => b.getAttribute('aria
 describe('where each stage runs, under the provider', () => {
   it('is a row per stage, each with its own places: two choices, not one switch', () => {
     const { hear, translate, update } = draw({ asrVia: 'server', translateVia: 'server' });
-    expect(hear().map((b) => b.textContent)).toEqual(['providers.localai.placeServer', 'providers.localai.placeDevice']);
+    // The same three places on both rows: another device, an API, this computer.
+    expect(hear().map((b) => b.textContent)).toEqual(['providers.localai.placeServer', 'providers.localai.viaModel', 'providers.localai.placeDevice']);
     expect(translate().map((b) => b.textContent)).toEqual(['providers.localai.placeServer', 'providers.localai.viaModel', 'providers.localai.placeDevice']);
     expect(pressed(hear())).toBe('providers.localai.placeServer');
     // The translation moves by itself: recognition stays where it is.
     fireEvent.click(translate()[2]);
     expect(update).toHaveBeenCalledWith({ translateVia: 'device' });
     fireEvent.click(hear()[1]);
+    expect(update).toHaveBeenLastCalledWith({ asrVia: 'api' });
+    fireEvent.click(hear()[2]);
     expect(update).toHaveBeenLastCalledWith({ asrVia: 'device' });
   });
 
@@ -42,9 +45,18 @@ describe('where each stage runs, under the provider', () => {
     expect(pressed(translate())).toBe('providers.localai.placeDevice');
   });
 
-  it('says what is still to choose when an API model translates and none is named', () => {
-    draw({ asrVia: 'device', translateVia: 'model', translateModel: '' });
+  it('says what is still to fill in when an API hears or translates and is not named yet', () => {
+    draw({ asrVia: 'api', translateVia: 'model', translateModel: '' });
+    expect(screen.getByText('providers.localai.asrTodo')).toBeTruthy();
     expect(screen.getByText('providers.localai.modelTodo')).toBeTruthy();
+  });
+
+  it('says nothing more once they are named', () => {
+    draw({ asrVia: 'api', asrApiBaseUrl: 'https://api.example.com/v1', asrApiModel: 'whisper-1', translateVia: 'model', translateModel: 'gpt-x', translateBaseUrl: 'https://api.example.com/v1' });
+    expect(screen.queryByText('providers.localai.asrTodo')).toBeNull();
+    expect(screen.queryByText('providers.localai.modelTodo')).toBeNull();
+    // Nothing runs on another device: no list of devices to pick from.
+    expect(screen.queryByText('finder')).toBeNull();
   });
 
   it('shows the devices found only while a stage is on another device, and a pick fills the address and asks for its key', () => {

@@ -84,6 +84,29 @@
 
   // The last section here is not the tab's last: the turn-detection block follows it, so it keeps its divider.
   // The class is doubled to outweigh the Advanced layout's own `:last-child` reset.
+  // Where a stage runs: said here, chosen under the provider.
+  .kt-place {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 vars.$space-2;
+  }
+
+  .kt-place__chip {
+    padding: 3px 10px;
+    font-size: vars.$font-caption;
+    font-weight: 600;
+    color: vars.$color-primary;
+    background: rgba(vars.$color-primary, 0.15);
+    border-radius: 999px;
+  }
+
+  .kt-place__hint {
+    font-size: vars.$font-caption;
+    color: vars.$text-muted;
+  }
+
   &.kt-stages > .settings-section.settings-section:last-child {
     margin-bottom: vars.$space-5;
     padding-bottom: vars.$space-5;

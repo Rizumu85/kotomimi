@@ -26,34 +26,41 @@ function StageRow<T extends string>({ icon, label, value, options, onChange, dis
 
 /**
  * Fork: under the provider, where each stage runs — recognition and
- * translation each on its own row, so it reads as two choices to mix and not
- * as one switch between "another device" and "this computer". Then, while a
- * stage is on another device, the devices the app found on the local network
- * (`ServerFinder`): a click fills the address, and says whether that device
- * asks for a key so the key's field shows. It searches by itself only while
- * no address is set: a settings panel opened for something else asks the
- * network nothing. The finer settings of each stage are the provider's own
- * view, under Advanced.
+ * translation each on its own row, with the same three places: another
+ * device, an API, this computer. Two rows, so it reads as two choices to mix
+ * and not as one switch; and the one spot these are chosen in — the
+ * provider's own page says where each runs and holds what that place needs,
+ * but asks nothing a second time.
+ *
+ * Then, while a stage is on another device, the devices the app found on the
+ * local network (`ServerFinder`): a click fills the address, and says whether
+ * that device asks for a key so the key's field shows. It searches by itself
+ * only while no address is set: a settings panel opened for something else
+ * asks the network nothing.
  */
 export function LocalAIAssist({ settings, values, fill, update, disabled }: CredentialAssistProps<LocalAISettings>) {
   const { t } = useTranslation();
   const other = t('providers.localai.placeServer');
+  const api = t('providers.localai.viaModel');
   const here = t('providers.localai.placeDevice');
   const via = translateViaOf(settings);
-  const hearOptions: ReadonlyArray<{ value: AsrVia; label: string }> = [{ value: 'server', label: other }, { value: 'device', label: here }];
+  const hearOptions: ReadonlyArray<{ value: AsrVia; label: string }> = [{ value: 'server', label: other }, { value: 'api', label: api }, { value: 'device', label: here }];
   const translateOptions: ReadonlyArray<{ value: TranslateVia; label: string }> = [
-    // This computer's recognizer has no session on the other device for its pipeline to answer in.
+    // Only what hears on the other device has a session there for its pipeline to answer in.
     ...(settings.asrVia === 'server' ? [{ value: 'server' as const, label: other }] : []),
-    { value: 'model', label: t('providers.localai.viaModel') },
+    { value: 'model', label: api },
     { value: 'device', label: here },
   ];
+  const asrTodo = settings.asrVia === 'api' && (!settings.asrApiBaseUrl.trim() || !settings.asrApiModel.trim());
+  const translateTodo = via === 'model' && !settings.translateModel.trim();
   return (
     <>
       <div className="credential-choice-group kt-places">
         <span className="kt-places__hint">{t('providers.localai.mixHint')}</span>
         <StageRow icon={<Mic size={13} />} label={t('providers.localai.hearStage')} value={settings.asrVia} options={hearOptions} onChange={(asrVia) => update({ asrVia })} disabled={disabled} />
         <StageRow icon={<Languages size={13} />} label={t('providers.localai.translateStage')} value={via} options={translateOptions} onChange={(translateVia) => update({ translateVia })} disabled={disabled} />
-        {via === 'model' && !settings.translateModel.trim() && <span className="kt-places__todo">{t('providers.localai.modelTodo')}</span>}
+        {asrTodo && <span className="kt-places__todo">{t('providers.localai.asrTodo')}</span>}
+        {translateTodo && <span className="kt-places__todo">{t('providers.localai.modelTodo')}</span>}
       </div>
       {needsServer(settings) && (
         <ServerFinder

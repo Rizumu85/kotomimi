@@ -13,7 +13,7 @@ import type { SettingsProps } from '../../lib/provider/types';
 import { useModelStatuses } from '../../stores/modelStore';
 import { coachPrompt } from './coachPrompt';
 // Type only: `localai.ts` imports this view, and a value import back would close a cycle.
-import type { AsrVia, LocalAISettings as S, TranslateVia } from './localai';
+import type { LocalAISettings as S } from './localai';
 import { deviceRecognizer, deviceTranslator, needsServer, translateViaOf } from './localaiDevice';
 import { isKotomimiServer, modelsFor, type LocalAIModel } from './localaiModels';
 import { isRealtimeModelId, realtimeLanguageName, realtimeLanguages } from './settings';
@@ -21,18 +21,19 @@ import './LocalAISettings.scss';
 
 const helpIcon = <CircleHelp className="tooltip-trigger" size={14} style={{ marginLeft: '8px' }} />;
 
-/** A choice between a few places a stage can run: the settings' own segmented buttons. */
-function Places<T extends string>({ value, options, onChange, disabled, label }: { value: T; options: ReadonlyArray<{ value: T; label: string }>; onChange(value: T): void; disabled: boolean; label: string }) {
+/**
+ * Where a stage runs, said and not asked. The place is chosen in one spot —
+ * the two rows under the provider (`LocalAIAssist`), wherever the provider is
+ * drawn — so there is no second control here to wonder about: these sections
+ * hold what each place then needs.
+ */
+function PlaceLine({ place }: { place: string }) {
+  const { t } = useTranslation();
   return (
-    <div className="setting-item">
-      <div className="turn-detection-options" role="group" aria-label={label}>
-        {options.map((option) => (
-          <button key={option.value} type="button" className={`option-button ${option.value === value ? 'active' : ''}`} aria-pressed={option.value === value} onClick={() => { if (option.value !== value) onChange(option.value); }} disabled={disabled}>
-            {option.label}
-          </button>
-        ))}
-      </div>
-    </div>
+    <p className="kt-place">
+      <span className="kt-place__chip">{place}</span>
+      <span className="kt-place__hint">{t('providers.localai.placeHint')}</span>
+    </p>
   );
 }
 
@@ -136,12 +137,15 @@ export function LocalAISettingsView({ settings, update, disabled = false, pair, 
   const fallback = pipelines.find((m) => isRealtimeModelId(m.id))?.id ?? pipelines[0]?.id ?? '';
   const asrListed = settings.asrModel === '' || recognizers.some((m) => m.id === settings.asrModel);
 
+  const onServer = settings.asrVia === 'server';
   const hearsHere = settings.asrVia === 'device';
+  const hearsByApi = settings.asrVia === 'api';
+  const apiModels = found.filter((m) => m.from === 'asr');
   const via = translateViaOf(settings);
-  const kotomimi = !hearsHere && isKotomimiServer(found);
+  const kotomimi = onServer && isKotomimiServer(found);
   // A leg whose answers come from elsewhere only transcribes, and on a LocalAI takes the server's own recognizer (`localai.ts` `transcriptionFor`).
-  const everyLegTranscribes = !hearsHere && via !== 'server' && !kotomimi;
-  const someLegTranscribes = !hearsHere && !kotomimi && (via !== 'server' || settings.coach);
+  const everyLegTranscribes = onServer && via !== 'server' && !kotomimi;
+  const someLegTranscribes = onServer && !kotomimi && (via !== 'server' || settings.coach);
   const serverInUse = needsServer(settings);
   // Asked where the server is first used: with what hears when it hears, else with the translation.
   const serverKeySwitch = (
@@ -155,17 +159,9 @@ export function LocalAISettingsView({ settings, update, disabled = false, pair, 
   const hereRecognizer = hearsHere ? deviceRecognizer(coached ? target : source, coached ? source : target, settings.selections)?.modelId : undefined;
   const hereTranslator = via === 'device' ? deviceTranslator(source, target, settings.selections) : undefined;
 
-  const places = { server: t('providers.localai.placeServer'), device: t('providers.localai.placeDevice') };
-  const hearOptions: ReadonlyArray<{ value: AsrVia; label: string }> = [
-    { value: 'server', label: places.server },
-    { value: 'device', label: places.device },
-  ];
-  const translateOptions: ReadonlyArray<{ value: TranslateVia; label: string }> = [
-    // This computer's recognizer has no server session for a pipeline to answer in.
-    ...(hearsHere ? [] : [{ value: 'server' as const, label: t('providers.localai.viaServer') }]),
-    { value: 'model', label: t('providers.localai.viaModel') },
-    { value: 'device', label: places.device },
-  ];
+  const places = { server: t('providers.localai.placeServer'), api: t('providers.localai.viaModel'), device: t('providers.localai.placeDevice') };
+  const hearPlace = hearsHere ? places.device : hearsByApi ? places.api : places.server;
+  const translatePlace = via === 'device' ? places.device : via === 'model' ? places.api : places.server;
 
   return (
     <div className="kt-stages">
@@ -173,15 +169,15 @@ export function LocalAISettingsView({ settings, update, disabled = false, pair, 
         <Stop
           icon={<Mic size={14} />}
           stage={t('providers.localai.hearStage')}
-          place={hearsHere ? places.device : places.server}
-          model={hearsHere ? deviceModelName(hereRecognizer) ?? t('providers.localai.notDownloaded') : settings.asrModel || undefined}
-          missing={hearsHere && !hereRecognizer}
+          place={hearPlace}
+          model={hearsHere ? deviceModelName(hereRecognizer) ?? t('providers.localai.notDownloaded') : hearsByApi ? settings.asrApiModel || t('providers.localai.notChosen') : settings.asrModel || undefined}
+          missing={(hearsHere && !hereRecognizer) || (hearsByApi && (!settings.asrApiModel.trim() || !settings.asrApiBaseUrl.trim()))}
         />
         <ChevronRight size={14} className="kt-route__arrow" aria-hidden />
         <Stop
           icon={<Languages size={14} />}
           stage={t('providers.localai.translateStage')}
-          place={via === 'device' ? places.device : via === 'model' ? t('providers.localai.viaModel') : t('providers.localai.viaServer')}
+          place={translatePlace}
           model={via === 'device' ? deviceModelName(hereTranslator) ?? t('providers.localai.notDownloaded') : via === 'model' ? settings.translateModel || t('providers.localai.notChosen') : undefined}
           missing={(via === 'device' && !hereTranslator) || (via === 'model' && !settings.translateModel)}
         />
@@ -205,11 +201,26 @@ export function LocalAISettingsView({ settings, update, disabled = false, pair, 
           {t('providers.localai.hearStage')}
           <Tooltip content={t('providers.localai.hearStageTooltip')} position="top">{helpIcon}</Tooltip>
         </h2>
-        <Places label={t('providers.localai.hearStage')} value={settings.asrVia} options={hearOptions} onChange={(asrVia) => update({ asrVia })} disabled={disabled} />
+        <PlaceLine place={hearPlace} />
         {hearsHere ? (
           <>
             <p className="kt-note">{t('providers.localai.hearDeviceNote')}</p>
             <CustomModels disabled={disabled} />
+          </>
+        ) : hearsByApi ? (
+          <>
+            <p className="kt-note">{t('providers.localai.hearApiNote')}</p>
+            <Field label={t('providers.localai.asrApiBaseUrl')}>
+              <input type="text" className="text-input" aria-label={t('providers.localai.asrApiBaseUrl')} value={settings.asrApiBaseUrl} onChange={(e) => update({ asrApiBaseUrl: e.target.value })} placeholder={t('providers.localai.asrApiBaseUrlPlaceholder')} spellCheck={false} disabled={disabled} />
+            </Field>
+            <Field label={t('providers.localai.asrApiModel')}>
+              {/* The API's own list only suggests: what is typed is what is asked for. */}
+              <input type="text" className="text-input" aria-label={t('providers.localai.asrApiModel')} list="localai-asr-api-models" value={settings.asrApiModel} onChange={(e) => update({ asrApiModel: e.target.value })} placeholder={t('providers.localai.asrApiModelPlaceholder')} spellCheck={false} disabled={disabled} />
+              <datalist id="localai-asr-api-models">
+                {apiModels.map((m) => <option key={m.id} value={m.id} />)}
+              </datalist>
+            </Field>
+            <ToggleSwitch checked={settings.asrApiNeedsKey} onChange={() => update({ asrApiNeedsKey: !settings.asrApiNeedsKey })} label={t('providers.localai.asrApiNeedsKey')} disabled={disabled} />
           </>
         ) : (
           <>
@@ -239,7 +250,7 @@ export function LocalAISettingsView({ settings, update, disabled = false, pair, 
           {t('providers.localai.translateStage')}
           <Tooltip content={t('providers.localai.translateStageTooltip')} position="top">{helpIcon}</Tooltip>
         </h2>
-        <Places label={t('providers.localai.translateStage')} value={via} options={translateOptions} onChange={(translateVia) => update({ translateVia })} disabled={disabled} />
+        <PlaceLine place={translatePlace} />
         {via === 'device' && <p className="kt-note">{t('providers.localai.viaDeviceNote')}</p>}
         {via === 'server' && <p className="kt-note">{kotomimi ? t('providers.localai.viaServerKotomimiNote') : t('providers.localai.viaServerNote')}</p>}
         {/* Under the server's pipeline the text model still answers what a coached speaker types, and the feedback when it has no model of its own. */}
@@ -259,7 +270,7 @@ export function LocalAISettingsView({ settings, update, disabled = false, pair, 
             disabled={disabled}
           />
         )}
-        {hearsHere && serverInUse && serverKeySwitch}
+        {!onServer && serverInUse && serverKeySwitch}
       </div>
 
       <div className="settings-section kt-stage">

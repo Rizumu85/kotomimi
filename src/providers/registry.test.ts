@@ -150,7 +150,7 @@ describe('the invariants every provider meets (F17)', () => {
       soniox: ['region'],
       palabraai: ['authMode'],
       // Fork: LocalAI Realtime — what decides its key fields, and the other servers its check reaches.
-      localai: ['asrVia', 'translateVia', 'translateBaseUrl', 'translateModel', 'translateNeedsKey', 'coach', 'coachBaseUrl', 'coachModel', 'coachNeedsKey', 'serverNeedsKey', 'selections'],
+      localai: ['asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'translateVia', 'translateBaseUrl', 'translateModel', 'translateNeedsKey', 'coach', 'coachBaseUrl', 'coachModel', 'coachNeedsKey', 'serverNeedsKey', 'selections'],
     });
   });
 

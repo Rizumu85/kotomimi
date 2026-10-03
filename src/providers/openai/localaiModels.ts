@@ -19,8 +19,8 @@ export const KOTOMIMI_HOST = 'kotomimi';
 /** A model the check found: the Realtime server's own — with its kind, when the server says — or one a stage's other server lists (`from`). */
 export interface LocalAIModel extends ModelOption {
   kind?: LocalAIModelKind;
-  /** Listed by the translation or the feedback model's own server, not the Realtime server. */
-  from?: 'translate' | 'coach';
+  /** Listed by the translation or the feedback model's own server, or by the speech recognition API — not the Realtime server. */
+  from?: 'translate' | 'coach' | 'asr';
   /** Served by another Kotomimi: it translates a named pair, and takes any of its recognizers in any session. */
   host?: typeof KOTOMIMI_HOST;
 }

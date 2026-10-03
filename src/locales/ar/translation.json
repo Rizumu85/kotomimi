@@ -528,7 +528,7 @@
       "translateStageTooltip": "What turns the recognized text into the other language. The server's own pipeline does it inside the same session. A text model can be anywhere that speaks the OpenAI chat API: another machine, Ollama or LM Studio on this one, a hosted API. Or a translation model this computer runs itself.",
       "viaServer": "Another device",
       "viaModel": "API model",
-      "mixHint": "Each stage has its own place — mix them freely:",
+      "mixHint": "Each stage can have its own place, and they can be mixed.",
       "modelTodo": "No API model chosen yet: set it under Advanced → Provider → Translation.",
       "viaServerNote": "The other device recognizes and translates in one session, with the model it is set up with.",
       "viaServerKotomimiNote": "The other Kotomimi picks its best downloaded translation model for your languages.",
@@ -545,6 +545,15 @@
       "coachPrompt": "Feedback instructions",
       "coachPromptPlaceholder": "Blank: written automatically for your two languages. Your own text may use {{spoken}} and {{native}}.",
       "coachPromptPreview": "Show the automatic instructions for this language pair",
+      "asrKey": "API key of the speech recognition API",
+      "asrApiBaseUrl": "API address",
+      "asrApiBaseUrlPlaceholder": "e.g. https://api.openai.com/v1",
+      "asrApiModel": "Model",
+      "asrApiModelPlaceholder": "e.g. whisper-1, whisper-large-v3",
+      "asrApiNeedsKey": "The API asks for a key",
+      "hearApiNote": "Any service with OpenAI's transcription API (/v1/audio/transcriptions): OpenAI, Groq, a LocalAI. This computer still decides where a sentence ends (Voice activity detection), then uploads each sentence to be recognized, so the text appears when the sentence is finished.",
+      "asrTodo": "The speech recognition API is not set yet: fill it in under Advanced → Provider → Speech recognition.",
+      "placeHint": "Where it runs is chosen in the two rows under the provider.",
       "serverNeedsKey": "The other device asks for an access key",
       "serverNeedsKeyTooltip": "Turn this on when the other device was given an access key — a Kotomimi with one set under its sharing options, for example. The key is entered beside the address."
     }
@@ -1435,6 +1444,7 @@
       "models": "{{count}} model(s)",
       "needsKey": "asks for an access key",
       "thisComputer": "On this computer",
+      "productHere": "{{product}} on this computer",
       "use": "Use {{name}}",
       "manual": "Or type its address"
     },
@@ -1450,7 +1460,7 @@
       "stop": "Stop",
       "autoStart": "Start it when Kotomimi opens",
       "externalNote": "Kotomimi did not start it — another program did, such as Sokuji Remote — so it cannot be stopped from here. To let Kotomimi run it, quit that program, then come back and press Start.",
-      "useHere": "To use it on this computer too: choose \"Another device\" above, and pick \"On this computer\" from the list.",
+      "useHere": "To use it on this computer too: choose \"Another device\" under the provider, and pick \"LocalAI on this computer\" from the list.",
       "openPage": "Open LocalAI's page to install or remove models",
       "more": "and {{count}} more",
       "lastWords": "What LocalAI said last"

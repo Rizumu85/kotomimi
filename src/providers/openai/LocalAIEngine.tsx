@@ -152,11 +152,11 @@ function DeviceTurnHelp(props: SettingsProps<S>) {
 
 /** Turn detection is whoever hears: this computer's own knobs, or the Realtime server's. */
 export function LocalAITurnDetectionSummary(props: SettingsProps<S>) {
-  return props.settings.asrVia === 'device' ? <DeviceTurnSummary {...props} /> : <RealtimeTurnDetectionSummary {...props} />;
+  return props.settings.asrVia !== 'server' ? <DeviceTurnSummary {...props} /> : <RealtimeTurnDetectionSummary {...props} />;
 }
 export function LocalAITurnDetectionControls(props: SettingsProps<S>) {
-  return props.settings.asrVia === 'device' ? <DeviceTurnControls {...props} /> : <RealtimeTurnDetectionControls {...props} />;
+  return props.settings.asrVia !== 'server' ? <DeviceTurnControls {...props} /> : <RealtimeTurnDetectionControls {...props} />;
 }
 export function LocalAITurnDetectionHelp(props: SettingsProps<S>) {
-  return props.settings.asrVia === 'device' ? <DeviceTurnHelp {...props} /> : <RealtimeTurnDetectionHelp {...props} />;
+  return props.settings.asrVia !== 'server' ? <DeviceTurnHelp {...props} /> : <RealtimeTurnDetectionHelp {...props} />;
 }

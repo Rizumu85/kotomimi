@@ -82,7 +82,7 @@ const PROVIDER = {
   ],
   viaServer: ['Another device', '另一台设备', '另一台裝置'],
   viaModel: ['API model', 'API 模型', 'API 模型'],
-  mixHint: ['Each stage has its own place — mix them freely:', '每个环节各选各的，可以混搭：', '每個環節各選各的，可以混搭：'],
+  mixHint: ['Each stage can have its own place, and they can be mixed.', '每个环节可以各选各的，可以混搭。', '每個環節可以各選各的，可以混搭。'],
   modelTodo: [
     'No API model chosen yet: set it under Advanced → Provider → Translation.',
     'API 模型还没选：到「高级 → 提供商 → 翻译」里填。',
@@ -129,6 +129,23 @@ const PROVIDER = {
   ],
   coachPromptPreview: ['Show the automatic instructions for this language pair', '查看当前语言对自动生成的提示词', '檢視目前語言對自動產生的提示詞'],
 
+  asrKey: ['API key of the speech recognition API', '语音识别 API 的密钥', '語音辨識 API 的金鑰'],
+  asrApiBaseUrl: ['API address', 'API 地址', 'API 位址'],
+  asrApiBaseUrlPlaceholder: ['e.g. https://api.openai.com/v1', '例如 https://api.openai.com/v1', '例如 https://api.openai.com/v1'],
+  asrApiModel: ['Model', '模型', '模型'],
+  asrApiModelPlaceholder: ['e.g. whisper-1, whisper-large-v3', '例如 whisper-1、whisper-large-v3', '例如 whisper-1、whisper-large-v3'],
+  asrApiNeedsKey: ['The API asks for a key', '这个 API 需要密钥', '這個 API 需要金鑰'],
+  hearApiNote: [
+    'Any service with OpenAI\'s transcription API (/v1/audio/transcriptions): OpenAI, Groq, a LocalAI. This computer still decides where a sentence ends (Voice activity detection), then uploads each sentence to be recognized, so the text appears when the sentence is finished.',
+    '任何提供 OpenAI 转写接口（/v1/audio/transcriptions）的服务都行：OpenAI、Groq、LocalAI 等。断句仍由这台电脑来做（见「VAD 设置」），每句话说完后上传识别，所以文字在一句话说完时才出现。',
+    '任何提供 OpenAI 轉寫介面（/v1/audio/transcriptions）的服務都行：OpenAI、Groq、LocalAI 等。斷句仍由這台電腦來做（見「VAD 設定」），每句話說完後上傳辨識，所以文字在一句話說完時才出現。',
+  ],
+  asrTodo: [
+    'The speech recognition API is not set yet: fill it in under Advanced → Provider → Speech recognition.',
+    '语音识别的 API 还没填：到「高级 → 提供商 → 语音识别」里填。',
+    '語音辨識的 API 還沒填：到「進階 → 提供者 → 語音辨識」裡填。',
+  ],
+  placeHint: ['Where it runs is chosen in the two rows under the provider.', '运行位置在提供商下面那两行里选。', '執行位置在提供者下面那兩行裡選。'],
   serverNeedsKey: ['The other device asks for an access key', '另一台设备需要访问密钥', '另一台裝置需要存取金鑰'],
   serverNeedsKeyTooltip: [
     'Turn this on when the other device was given an access key — a Kotomimi with one set under its sharing options, for example. The key is entered beside the address.',

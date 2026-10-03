@@ -528,7 +528,7 @@
       "translateStageTooltip": "把识别出的文字翻成另一种语言的一环。服务器管线：和识别在同一个会话里完成。文本模型：任何支持 OpenAI 聊天接口的地方都行，另一台机器、本机的 Ollama 或 LM Studio、云端 API。这台电脑：用应用下载的翻译模型。",
       "viaServer": "另一台设备",
       "viaModel": "API 模型",
-      "mixHint": "每个环节各选各的，可以混搭：",
+      "mixHint": "每个环节可以各选各的，可以混搭。",
       "modelTodo": "API 模型还没选：到「高级 → 提供商 → 翻译」里填。",
       "viaServerNote": "识别和翻译都由另一台设备在同一个会话里完成，用它自己配置好的模型。",
       "viaServerKotomimiNote": "由对面那台 Kotomimi 按你的语言对，自动选它已下载的最合适的翻译模型。",
@@ -545,6 +545,15 @@
       "coachPrompt": "语法反馈提示词",
       "coachPromptPlaceholder": "留空：按你的母语和所练的语言自动生成。自己写时可以用 {{spoken}} 和 {{native}} 代表这两种语言。",
       "coachPromptPreview": "查看当前语言对自动生成的提示词",
+      "asrKey": "语音识别 API 的密钥",
+      "asrApiBaseUrl": "API 地址",
+      "asrApiBaseUrlPlaceholder": "例如 https://api.openai.com/v1",
+      "asrApiModel": "模型",
+      "asrApiModelPlaceholder": "例如 whisper-1、whisper-large-v3",
+      "asrApiNeedsKey": "这个 API 需要密钥",
+      "hearApiNote": "任何提供 OpenAI 转写接口（/v1/audio/transcriptions）的服务都行：OpenAI、Groq、LocalAI 等。断句仍由这台电脑来做（见「VAD 设置」），每句话说完后上传识别，所以文字在一句话说完时才出现。",
+      "asrTodo": "语音识别的 API 还没填：到「高级 → 提供商 → 语音识别」里填。",
+      "placeHint": "运行位置在提供商下面那两行里选。",
       "serverNeedsKey": "另一台设备需要访问密钥",
       "serverNeedsKeyTooltip": "另一台设备设了访问密钥时打开，例如对面那台 Kotomimi 在共享的「选项」里设置了密钥。密钥在地址旁边填写。"
     }
@@ -1435,6 +1444,7 @@
       "models": "{{count}} 个模型",
       "needsKey": "需要访问密钥",
       "thisComputer": "这台电脑上的服务器",
+      "productHere": "这台电脑上的 {{product}}",
       "use": "使用 {{name}}",
       "manual": "或者手动填写地址"
     },
@@ -1450,7 +1460,7 @@
       "stop": "停止",
       "autoStart": "打开 Kotomimi 时自动启动",
       "externalNote": "它不是 Kotomimi 启动的，而是别的程序启动的（比如 Sokuji Remote），所以这里不能停止它。想让 Kotomimi 来管，先退出那个程序，再回到这里点「启动」。",
-      "useHere": "这台电脑自己也想用它：在上面选「另一台设备」，再从列表里选「这台电脑上的服务器」。",
+      "useHere": "这台电脑自己也想用它：在提供商下面选「另一台设备」，再从列表里选「这台电脑上的 LocalAI」。",
       "openPage": "打开 LocalAI 的页面，安装或删除模型",
       "more": "还有 {{count}} 个",
       "lastWords": "LocalAI 最后的输出"

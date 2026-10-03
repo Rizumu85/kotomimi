@@ -54,7 +54,7 @@ export function ServerFinder({ value, onPick, disabled = false, auto = false, fi
 
   const current = plainAddress(value);
   // By the name its owner knows it by; else what it is; else where it is.
-  const title = (server: FoundServer) => server.name || (server.self ? t('fork.find.thisComputer') : server.product || server.address.replace(/:\d+$/, ''));
+  const title = (server: FoundServer) => server.name || (server.self ? (server.product ? t('fork.find.productHere', { product: server.product }) : t('fork.find.thisComputer')) : server.product || server.address.replace(/:\d+$/, ''));
 
   return (
     <div className="kt-find">
