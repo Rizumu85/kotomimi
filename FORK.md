@@ -119,6 +119,8 @@ COACH_LIVE_BASE=http://<host>:8080/v1 COACH_LIVE_MODELS=qwen3-4b npx vitest run 
 - 手动模式下，转写事件用的 `item_id` 和 `input_audio_buffer.committed` 的不一样。
 - 请求语音输出时会报错，并且不发 `response.done`。
 - `apple-speech-transcriber` 不给 `language` 会报错，所以源语言不能选"自动检测"。
+- **换识别模型只在管线会话里有效（2026-10-03）。** `session.type = "realtime"` 时，`audio.input.transcription.model` 填 `whisper-large-turbo`、`sensevoice-small-mlx` 都能正常识别，首次使用要加载 12 到 20 秒。`session.type = "transcription"` 时，除默认的 `apple-speech-transcriber` 外都被拒绝：`Failed to update session: model is not a valid pipeline model`。所以"服务器只识别、翻译交给文本模型"的搭配目前换不了识别模型。这一条需要服务器一侧解决。
+- `parakeet-cpp-nemotron-3.5-asr-streaming-0.6b` 的转写结果带 `<en-US>` 这样的语言标记，会进入原文，也会干扰管线里的翻译。
 
 ## 两台机器之间怎么协作
 
