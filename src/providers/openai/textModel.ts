@@ -17,6 +17,8 @@ export interface TextRequest {
   /** Sent as a Bearer token when present; never framed or worded. */
   key?: string;
   system: string;
+  /** Worked examples, sent as earlier turns of the chat: what was said, and the answer shown as the model's own. */
+  shots?: ReadonlyArray<{ said: string; answer: string }>;
   user: string;
 }
 
@@ -89,7 +91,15 @@ export async function completeText(request: TextRequest, deps: TextDeps): Promis
     const response = await deps.fetch(request.url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...(request.key ? { Authorization: `Bearer ${request.key}` } : {}) },
-      body: JSON.stringify({ model: request.model, stream: true, messages: [{ role: 'system', content: request.system }, { role: 'user', content: request.user }] }),
+      body: JSON.stringify({
+        model: request.model,
+        stream: true,
+        messages: [
+          { role: 'system', content: request.system },
+          ...(request.shots ?? []).flatMap((shot) => [{ role: 'user', content: shot.said }, { role: 'assistant', content: shot.answer }]),
+          { role: 'user', content: request.user },
+        ],
+      }),
       signal: controller.signal,
     });
     if (!response.ok) throw new Error(await refusal(response));

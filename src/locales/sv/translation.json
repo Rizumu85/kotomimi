@@ -521,7 +521,10 @@
       "coachStage": "Grammar feedback",
       "coachStageTooltip": "For when you speak the other side's language yourself. Your speech is not translated: a model checks it and answers ✓, or the corrected sentence and why. What you type is still translated.",
       "coach": "I speak the other side's language: check my grammar",
-      "coachModelPlaceholder": "Blank: the translation text model"
+      "coachModelPlaceholder": "Blank: the translation text model",
+      "coachPrompt": "Feedback instructions",
+      "coachPromptPlaceholder": "Blank: written automatically for your two languages. Your own text may use {{spoken}} and {{native}}.",
+      "coachPromptPreview": "The automatic instructions for this language pair"
     }
   },
   "logsPanel": {

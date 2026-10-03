@@ -3,8 +3,8 @@ import type { SessionContext } from '../../lib/contract/adapter';
 import { recordEvents, type AdapterEvent } from '../../lib/contract/events';
 import { fakeSockets } from '../../lib/contract/testing/fakeSocket';
 import { trackedClock } from '../../lib/contract/testing/trackedClock';
-import { realtimeLanguageName } from './settings';
-import { buildLocalAI, coachInstructions, LOCALAI_DEFAULTS, localaiProvider, type LocalAICredentials, type LocalAISettings } from './localai';
+import { coachPrompt } from './coachPrompt';
+import { buildLocalAI, LOCALAI_DEFAULTS, localaiProvider, type LocalAICredentials, type LocalAISettings } from './localai';
 import { createPipelineAdapter, FIRST_REF, tidyAnswer } from './pipeline';
 import { SHARED } from './testing';
 
@@ -193,8 +193,22 @@ describe('a coached speaker', () => {
     // The source is Japanese, though the leg's source language is Chinese: the row is told so.
     expect(h.lastText(1)).toMatchObject({ text: '昨日映画を見ます。', language: 'ja' });
     expect(h.calls[0].body.model).toBe('qwen3-4b');
-    expect(h.calls[0].body.messages[0].content).toBe(coachInstructions(realtimeLanguageName('ja'), realtimeLanguageName('zh-CN')));
+    // The prompt for this pair — a Chinese speaker practising Japanese — and its worked examples as earlier turns, then what was said.
+    const prompt = coachPrompt('ja', 'zh-CN');
+    expect(h.calls[0].body.messages).toEqual([
+      { role: 'system', content: prompt.system },
+      ...prompt.shots.flatMap((shot) => [{ role: 'user', content: shot.said }, { role: 'assistant', content: shot.answer }]),
+      { role: 'user', content: '昨日映画を見ます。' },
+    ]);
     expect(h.lastText(FIRST_REF + 1)).toEqual({ ref: FIRST_REF + 1, text: '昨日映画を見ました。\n“见”要用过去式。', language: 'zh-CN' });
+  });
+
+  it('is coached with the user\'s own prompt when there is one: the pair filled in, no examples', async () => {
+    const h = await live(SPEAKER, { ...COACH, coachPrompt: '只检查{{SPOKEN}}的敬语，用{{NATIVE}}回答。' }, [sse('✓')]);
+    h.receive(...heard('item_1', 'ありがとう'));
+    await h.settled();
+    expect(h.calls[0].body.messages).toHaveLength(2);
+    expect(h.calls[0].body.messages[0].content).toMatch(/^只检查日语的敬语，用.*中文.*回答。$/);
   });
 
   it('still translates what they type, with the translation model', async () => {

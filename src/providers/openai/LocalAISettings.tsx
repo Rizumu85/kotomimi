@@ -4,6 +4,7 @@ import { InstructionsField } from '../../components/providers/fields/Instruction
 import Tooltip from '../../components/Tooltip/Tooltip';
 import { resolveInstructions } from '../../lib/provider/instructions';
 import type { ModelOption, SettingsProps } from '../../lib/provider/types';
+import { coachPrompt } from './coachPrompt';
 // Type only: `localai.ts` imports this view, and a value import back would close a cycle.
 import type { LocalAISettings as S, TranslateVia } from './localai';
 import { isRealtimeModelId, realtimeLanguageName, realtimeLanguages } from './settings';
@@ -174,6 +175,25 @@ export function LocalAISettingsView({ settings, update, disabled = false, pair, 
             })}
             disabled={disabled}
           />
+        )}
+        {settings.coach && (
+          <div className="setting-item">
+            <textarea
+              className="text-input localai-prompt"
+              aria-label={t('providers.localai.coachPrompt')}
+              rows={4}
+              value={settings.coachPrompt}
+              onChange={(e) => update({ coachPrompt: e.target.value })}
+              // The two placeholder names are handed in as values, so i18next prints them instead of reading them as its own.
+              placeholder={t('providers.localai.coachPromptPlaceholder', { spoken: '{{SPOKEN}}', native: '{{NATIVE}}' })}
+              disabled={disabled}
+            />
+            {/* What goes up while the box is blank: chosen by the two languages of the pair. */}
+            <details className="localai-prompt-preview">
+              <summary>{t('providers.localai.coachPromptPreview')}</summary>
+              <pre>{coachPrompt(target, source).system}</pre>
+            </details>
+          </div>
         )}
       </div>
     </>

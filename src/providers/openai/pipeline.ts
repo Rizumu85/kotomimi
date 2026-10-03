@@ -41,6 +41,8 @@ export interface TextStage {
   /** Absent: the endpoint takes no key. */
   key?: StageKey;
   system: string;
+  /** Worked examples sent before each source, as earlier turns (`coachPrompt.ts`). */
+  shots?: ReadonlyArray<{ said: string; answer: string }>;
   /** The language its answers are written in, when that is not the leg's target. */
   language?: string;
 }
@@ -248,7 +250,7 @@ class PipelineLeg implements AdapterSession {
     this.frame('out', 'text.request', { stage: stage.kind, model: stage.model, chars: job.text.length });
     try {
       const answer = await completeText(
-        { url: chatUrl(stage.baseUrl || httpBaseOf(credentials.endpoint)), model: stage.model, key: stage.key ? credentials[stage.key] : undefined, system: stage.system, user: job.text },
+        { url: chatUrl(stage.baseUrl || httpBaseOf(credentials.endpoint)), model: stage.model, key: stage.key ? credentials[stage.key] : undefined, system: stage.system, ...(stage.shots?.length ? { shots: stage.shots } : {}), user: job.text },
         { fetch: this.doFetch, clock, signal, onText: (text) => show(tidyAnswer(stage.kind, text)) },
       );
       if (this.ended) return;

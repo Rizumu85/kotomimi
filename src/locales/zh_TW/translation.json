@@ -521,7 +521,10 @@
       "coachStage": "文法回饋",
       "coachStageTooltip": "適合自己直接說對方語言的場合。你說的話不再翻譯，而是交給模型檢查：沒問題回 ✓，有問題給出改正後的句子和原因。打字輸入的內容仍然會翻譯。",
       "coach": "我自己說對方的語言：檢查我的文法",
-      "coachModelPlaceholder": "留空：使用翻譯文字模型"
+      "coachModelPlaceholder": "留空：使用翻譯文字模型",
+      "coachPrompt": "文法回饋提示詞",
+      "coachPromptPlaceholder": "留空：依你的母語和所練的語言自動產生。自己寫時可以用 {{spoken}} 和 {{native}} 代表這兩種語言。",
+      "coachPromptPreview": "檢視目前語言對自動產生的提示詞"
     }
   },
   "logsPanel": {

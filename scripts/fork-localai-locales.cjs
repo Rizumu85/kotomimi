@@ -37,6 +37,9 @@ const EN = {
     coachStageTooltip: 'For when you speak the other side\'s language yourself. Your speech is not translated: a model checks it and answers ✓, or the corrected sentence and why. What you type is still translated.',
     coach: 'I speak the other side\'s language: check my grammar',
     coachModelPlaceholder: 'Blank: the translation text model',
+    coachPrompt: 'Feedback instructions',
+    coachPromptPlaceholder: 'Blank: written automatically for your two languages. Your own text may use {{spoken}} and {{native}}.',
+    coachPromptPreview: 'The automatic instructions for this language pair',
   },
   fork: {
     furigana: 'Furigana over kanji (Japanese)',
@@ -68,6 +71,9 @@ const ZH_CN = {
     coachStageTooltip: '适合自己直接说对方语言的场合。你说的话不再翻译，而是交给模型检查：没问题回 ✓，有问题给出改正后的句子和原因。打字输入的内容仍然会翻译。',
     coach: '我自己说对方的语言：检查我的语法',
     coachModelPlaceholder: '留空：使用翻译文本模型',
+    coachPrompt: '语法反馈提示词',
+    coachPromptPlaceholder: '留空：按你的母语和所练的语言自动生成。自己写时可以用 {{spoken}} 和 {{native}} 代表这两种语言。',
+    coachPromptPreview: '查看当前语言对自动生成的提示词',
   },
   fork: {
     furigana: '汉字上方显示假名（日语）',
@@ -99,6 +105,9 @@ const ZH_TW = {
     coachStageTooltip: '適合自己直接說對方語言的場合。你說的話不再翻譯，而是交給模型檢查：沒問題回 ✓，有問題給出改正後的句子和原因。打字輸入的內容仍然會翻譯。',
     coach: '我自己說對方的語言：檢查我的文法',
     coachModelPlaceholder: '留空：使用翻譯文字模型',
+    coachPrompt: '文法回饋提示詞',
+    coachPromptPlaceholder: '留空：依你的母語和所練的語言自動產生。自己寫時可以用 {{spoken}} 和 {{native}} 代表這兩種語言。',
+    coachPromptPreview: '檢視目前語言對自動產生的提示詞',
   },
   fork: {
     furigana: '漢字上方顯示假名（日語）',

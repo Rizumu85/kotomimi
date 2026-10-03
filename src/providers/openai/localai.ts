@@ -43,12 +43,13 @@ import { realClock, type Clock } from '../../lib/contract/clock';
 import { boundedFetch } from '../../lib/provider/boundedFetch';
 import type { CheckContext, CheckResult, CredentialField, CredentialsMissing, MigrationInputs, ModelOption, Provider, ProviderRefusal, SharedSettings } from '../../lib/provider/types';
 import { CHECK_TIMEOUT_MS } from './check';
+import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
 import { LocalAISettingsView } from './LocalAISettings';
 import { createPipelineAdapter, type PipelineConfig, type PipelineCredentials, type Stages, type TextStage } from './pipeline';
 import { RealtimeTurnDetectionControls, RealtimeTurnDetectionHelp, RealtimeTurnDetectionSummary } from './RealtimeTurnDetection';
 import {
-  isRealtimeModelId, migrateRealtimeSettings, REALTIME_DEFAULTS, REALTIME_LEGACY_KEYS, realtimeLanguageName, realtimeLanguages,
+  isRealtimeModelId, migrateRealtimeSettings, REALTIME_DEFAULTS, REALTIME_LEGACY_KEYS, realtimeLanguages,
   type RealtimeSettings,
 } from './settings';
 import { httpBaseOf } from './textModel';
@@ -74,6 +75,8 @@ export interface LocalAISettings extends RealtimeSettings {
   /** Blank: the translation text model gives the feedback too. */
   coachModel: string;
   coachNeedsKey: boolean;
+  /** The user's own feedback instructions; blank: chosen by the two languages (`coachPrompt.ts`). `{{SPOKEN}}` and `{{NATIVE}}` are filled in. */
+  coachPrompt: string;
 }
 
 export type LocalAIConfig = PipelineConfig;
@@ -97,10 +100,11 @@ export const LOCALAI_DEFAULTS: LocalAISettings = {
   coachBaseUrl: '',
   coachModel: '',
   coachNeedsKey: false,
+  coachPrompt: '',
 };
 
 export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>, inputs: MigrationInputs): LocalAISettings {
-  const text = (k: 'asrModel' | 'translateBaseUrl' | 'translateModel' | 'coachBaseUrl' | 'coachModel') => (typeof stored[k] === 'string' ? (stored[k] as string) : LOCALAI_DEFAULTS[k]);
+  const text = (k: 'asrModel' | 'translateBaseUrl' | 'translateModel' | 'coachBaseUrl' | 'coachModel' | 'coachPrompt') => (typeof stored[k] === 'string' ? (stored[k] as string) : LOCALAI_DEFAULTS[k]);
   const flag = (k: 'translateNeedsKey' | 'coach' | 'coachNeedsKey') => (typeof stored[k] === 'boolean' ? (stored[k] as boolean) : LOCALAI_DEFAULTS[k]);
   return {
     ...migrateRealtimeSettings(stored, inputs),
@@ -113,6 +117,7 @@ export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>
     coachBaseUrl: text('coachBaseUrl'),
     coachModel: text('coachModel'),
     coachNeedsKey: flag('coachNeedsKey'),
+    coachPrompt: text('coachPrompt'),
   };
 }
 
@@ -238,25 +243,6 @@ function transcriptionFor(s: Pick<LocalAISettings, 'asrModel'>, heard: string): 
   return { ...(model ? { model } : {}), ...(language ? { language } : {}) } as TranscriptionHint;
 }
 
-/**
- * The feedback model's instructions. It is told what it is reading — a
- * recognizer's writing of speech, so punctuation and homophones are not the
- * speaker's — and held to two shapes of answer the row can show: a bare ✓,
- * or the corrected sentence over one line of why, in the speaker's own
- * language.
- */
-export function coachInstructions(spoken: string, native: string): string {
-  return [
-    `You are a ${spoken} speaking coach for a native ${native} speaker.`,
-    `Each user message is one thing the learner just said aloud in ${spoken}, written down by a speech recognizer. Ignore punctuation, spacing and the spelling of homophones: judge only grammar, word choice and naturalness.`,
-    '',
-    'If it is correct and natural, reply with exactly: ✓',
-    `Otherwise reply with two lines and nothing else: first the corrected ${spoken} sentence, then one short sentence in ${native} explaining the mistake.`,
-    '',
-    'Never answer the utterance, never translate it, never number the lines, never add a greeting or a label.',
-  ].join('\n');
-}
-
 export function buildLocalAI(context: SessionContext, s: LocalAISettings, shared: SharedSettings): LocalAIConfig | ProviderRefusal {
   const model = effectiveLocalAIModel(s, shared.models);
   if (!model) return { refused: 'No model is named, and the server lists none.', code: 'models_required' };
@@ -283,7 +269,8 @@ export function buildLocalAI(context: SessionContext, s: LocalAISettings, shared
       baseUrl: own ? s.coachBaseUrl.trim() : s.translateBaseUrl.trim(),
       model: own || translateModel,
       ...((own ? s.coachNeedsKey : s.translateNeedsKey) ? { key: own ? ('coachKey' as const) : ('translateKey' as const) } : {}),
-      system: coachInstructions(realtimeLanguageName(target), realtimeLanguageName(source)),
+      // The speaker practises the target language; their own is the source.
+      ...(({ system, shots }) => ({ system, ...(shots.length ? { shots } : {}) }))(coachPrompt(target, source, s.coachPrompt)),
       // Feedback is written in the speaker's own language, around a sentence in the one they practise.
       language: source,
     };
