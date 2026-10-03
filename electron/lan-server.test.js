@@ -112,9 +112,9 @@ describe('the addresses another device is told', () => {
     expect(lanAddresses({
       Tailscale: [{ family: 'IPv4', internal: false, address: '100.95.1.2' }],
       Loopback: [{ family: 'IPv4', internal: true, address: '127.0.0.1' }],
-      'Wi-Fi': [{ family: 'IPv6', internal: false, address: 'fe80::1' }, { family: 'IPv4', internal: false, address: '192.168.4.29' }],
+      'Wi-Fi': [{ family: 'IPv6', internal: false, address: 'fe80::1' }, { family: 'IPv4', internal: false, address: '192.168.1.20' }],
       Ethernet: [{ family: 'IPv4', internal: false, address: '10.0.0.5' }],
-    })).toEqual(['192.168.4.29', '10.0.0.5', '100.95.1.2']);
+    })).toEqual(['192.168.1.20', '10.0.0.5', '100.95.1.2']);
   });
 });
 
