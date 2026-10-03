@@ -1,8 +1,12 @@
-# Sokuji 个人分支：LocalAI + 学习辅助
+# Kotomimi（ことみみ）
+
+Kotomimi 是 Sokuji 的一个分支：在实时翻译之外，加上了自建模型的自由搭配和学语言用的辅助功能。名字取自"言葉"（话语）和"耳"（耳朵）。
 
 基于上游 [kizuna-ai-lab/sokuji](https://github.com/kizuna-ai-lab/sokuji) v0.42.2（`6cbdf9e`）。上游的说明见 [README.md](README.md)，这份文件只讲本分支多出来的东西。
 
 本分支的工作在 `localai` 分支上，`main` 保持与上游一致。
+
+Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录，可以和官方 Sokuji 同时安装、同时运行。第一次启动时会把已有的 Sokuji 设置和登录状态复制过来；下载过的模型不复制，需要时重新下载。
 
 ## 这个分支加了什么
 
@@ -35,6 +39,8 @@
 ```
 
 - **① 识别**：必须是一台支持 GA Realtime 协议的服务器。在"服务器地址"里填它。识别用哪个模型在"用户转录模型"里选，默认用服务器管线自带的。
+
+每个下拉菜单只列出能做这件事的模型：会话模型只列管线，识别只列识别模型，翻译和语法只列文本模型。分类来自 LocalAI 的 `/v1/models/capabilities`。服务器没有这个接口时不做过滤，所有模型都会列出。文本模型填了别的服务地址时，列的是那台服务器自己的模型。
 - **② 翻译**有两种做法，在"翻译"一栏里选：
   - **服务器自带的管线**：识别和翻译都在 Realtime 会话里完成，一台机器全包。
   - **文本模型**：服务器只做识别，翻译交给任何支持 OpenAI 聊天接口（`/v1/chat/completions`）的服务。地址留空表示同一台服务器，也可以填别的机器、本机的 Ollama / LM Studio，或云端 API。
@@ -106,6 +112,7 @@ COACH_LIVE_BASE=http://<host>:8080/v1 COACH_LIVE_MODELS=qwen3-4b npx vitest run 
 
 - `POST <base>/chat/completions`，`{model, stream: true, messages: [system, user]}`，按 SSE 流式返回；不流式也能读。
 - `GET <base>/models` 用于校验和列出模型。
+- `GET <base>/models/capabilities`（可选，LocalAI 自带）用于给模型分类：`capabilities` 含 `transcript` 的是识别模型，含 `chat` 或 `completion` 的是文本模型，为空的是管线，其他的（`vad`、`tts`）不出现在任何下拉里。
 - 回答里的 `<think>…</think>` 会被客户端去掉。
 
 **实测到的 LocalAI 行为（2026-10-02）**
@@ -119,7 +126,7 @@ COACH_LIVE_BASE=http://<host>:8080/v1 COACH_LIVE_MODELS=qwen3-4b npx vitest run 
 - 手动模式下，转写事件用的 `item_id` 和 `input_audio_buffer.committed` 的不一样。
 - 请求语音输出时会报错，并且不发 `response.done`。
 - `apple-speech-transcriber` 不给 `language` 会报错，所以源语言不能选"自动检测"。
-- **换识别模型只在管线会话里有效（2026-10-03）。** `session.type = "realtime"` 时，`audio.input.transcription.model` 填 `whisper-large-turbo`、`sensevoice-small-mlx` 都能正常识别，首次使用要加载 12 到 20 秒。`session.type = "transcription"` 时，除默认的 `apple-speech-transcriber` 外都被拒绝：`Failed to update session: model is not a valid pipeline model`。所以"服务器只识别、翻译交给文本模型"的搭配目前换不了识别模型。这一条需要服务器一侧解决。
+- **换识别模型只在管线会话里有效（2026-10-03）。** `session.type = "realtime"` 时，`audio.input.transcription.model` 填 `whisper-large-turbo`、`sensevoice-small-mlx` 都能正常识别，首次使用要加载 12 到 20 秒。`session.type = "transcription"` 时，除默认的 `apple-speech-transcriber` 外都被拒绝：`Failed to update session: model is not a valid pipeline model`。所以"服务器只识别、翻译交给文本模型"的搭配目前换不了识别模型：客户端在这种会话里不发识别模型名，界面上也把下拉禁用并说明原因。这一条需要服务器一侧解决，解决后客户端去掉这个限制即可（`localai.ts` 的 `transcriptionFor`）。
 - `parakeet-cpp-nemotron-3.5-asr-streaming-0.6b` 的转写结果带 `<en-US>` 这样的语言标记，会进入原文，也会干扰管线里的翻译。
 
 ## 两台机器之间怎么协作
@@ -156,9 +163,22 @@ npx electron-forge make --arch=x64
 - `npm ci` 如果加了 `--ignore-scripts`，需要手动补三步：`node node_modules/electron/install.js`、`bash scripts/copy-ort-wasm.sh`、在 `node_modules/electron-winstaller` 里运行 `node script/select-7z-arch.js`。
 - 安装包没有代码签名。
 
+## 名字和图标
+
+- 名字集中在几处：`forge.config.js`（安装目录、可执行文件名、应用 ID）、`package.json` 的 `productName`、`electron/main.js` 的 `app.setName`（设置目录）。
+- 界面文字不改语言包。上游的语言包里写的是 Sokuji，由 `src/lib/brand.ts` 在显示时替换成 Kotomimi。虚拟音频设备的名字保持 Sokuji 不变，因为设备确实还叫那个名字。
+- 图标由一张图生成全套：
+
+```bash
+node scripts/fork-make-icons.cjs assets/logo-source.png --keep-background
+```
+
+  原图已经是透明背景时加 `--keep-background`。原图是白底时不加，脚本会从四边把背景去掉。
+- "关于"里保留了对 Sokuji 和 Kizuna AI Lab 的署名。
+
 ## 版本号和更新
 
-- 版本号是"上游版本 + 两位分支序号"：上游 0.42.2 的第 1 个分支构建是 `0.42.201`。每次要让别人覆盖安装的构建都要加一，否则安装程序会认为已经装过。五处版本号要一起改：`package.json`、`extension/package.json`、`extension/manifest.json` 和两个 lockfile。
+- 版本号是"上游版本 + 两位分支序号"：上游 0.42.2 的第 1 个分支构建是 `0.42.201`，现在是 `0.42.202`。每次要让别人覆盖安装的构建都要加一，否则安装程序会认为已经装过。五处版本号要一起改：`package.json`、`extension/package.json`、`extension/manifest.json` 和两个 lockfile。
 - 更新源指向本仓库的 Releases，不再指向上游，所以不会被提示换回官方版。
 - 启动时不自动检查更新，因为本仓库还没有发布过 Release，检查会报错。"帮助"里的"检查更新"仍然可用。
 - 上游的发布流程（`.github/workflows/build.yml`）在分支仓库里跑不通：Windows 签名那一步只在上游仓库执行，而发布步骤依赖它。要用 GitHub Actions 给本仓库出安装包，需要先改这个流程。
@@ -184,6 +204,12 @@ npx vitest run src/providers src/lib/annotate src/components/Annotated
 | `src/components/Conversation/ConversationList.tsx`、`src/components/Subtitle/SubtitleBands.tsx` | 文本渲染处接入注音 |
 | `src/components/Display/DisplaySettingsPopover.tsx` | 显示设置里加两个注音开关 |
 | `src/components/MainPanel/panel/TypedText.tsx` | Ctrl+K 聚焦输入框 |
+| `src/components/TitleBar/TitleBar.tsx`、`src/components/Subtitle/SubtitleBar.tsx`、`index.html`、`shared/index.html` | 显示的名字和标题栏图标 |
+| `src/locales/index.ts` | 注册名字替换 |
+| `electron/main.js` | 应用名、设置迁移、"关于"、启动时不查更新 |
+| `electron/update-manager.js`、`electron/update-payload.js` | 更新源和安装包文件名 |
+| `forge.config.js` | 应用身份 |
+| `assets/icon.*`、`public/favicon.ico`、`public/logo*.png` | 图标 |
 | `src/routes/Home.tsx` | 启动时读取注音开关 |
 | `src/providers/registry.test.ts`、`src/providers/palabraai/provider.test.ts` | 跟着提供商列表更新的断言 |
 | `src/locales/*/translation.json` | 由脚本生成的文字 |
