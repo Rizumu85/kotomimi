@@ -55,9 +55,9 @@ module.exports = {
     ],
     title: ['Which device does the work?', '由哪台设备来运行？', '由哪台裝置來執行？'],
     intro: [
-      'Choose where the listening and translating run. You can change it, or mix the two stage by stage, later in Settings.',
-      '选择识别和翻译在哪台设备上运行。之后可以在设置里随时更改，也可以按环节混搭。',
-      '選擇辨識和翻譯在哪台裝置上執行。之後可以在設定裡隨時更改，也可以按環節混搭。',
+      'Pick a starting point. It is not either-or: later, in Settings, recognition and translation can each run in a different place.',
+      '先选一个起点。这不是二选一：之后在设置里，识别和翻译可以各选各的地方，混着用。',
+      '先選一個起點。這不是二選一：之後在設定裡，辨識和翻譯可以各選各的地方，混著用。',
     ],
     server: ['Another device on my network', '局域网里的另一台设备', '區域網路裡的另一台裝置'],
     serverDesc: [

@@ -17,9 +17,9 @@ const path = require('node:path');
 const PROVIDER = {
   name: ['Kotomimi Pipeline', 'Kotomimi 自由搭配', 'Kotomimi 自由搭配'],
   description: [
-    'Choose where each stage runs: another device on your network, this computer, or any text model · text only',
-    '识别、翻译、语法反馈各自选在哪里运行：局域网里的另一台设备、这台电脑、或任意文本模型 · 仅文本',
-    '辨識、翻譯、文法回饋各自選在哪裡執行：區域網路裡的另一台裝置、這台電腦、或任意文字模型 · 僅文字',
+    'Recognition, translation and grammar feedback — and you mix where each model runs: this computer, another device on your network, or any API model.',
+    '能识别、翻译、语法反馈，并且可以混搭选择运行的模型：本地电脑、局域网的另一台设备，或任意 API 模型。',
+    '能辨識、翻譯、文法回饋，並且可以混搭選擇執行的模型：本機電腦、區域網路的另一台裝置，或任意 API 模型。',
   ],
   endpoint: ['Address of the other device', '另一台设备的地址', '另一台裝置的位址'],
   endpointPlaceholder: [
@@ -80,12 +80,18 @@ const PROVIDER = {
     '把识别出的文字翻成另一种语言的一环。服务器管线：和识别在同一个会话里完成。文本模型：任何支持 OpenAI 聊天接口的地方都行，另一台机器、本机的 Ollama 或 LM Studio、云端 API。这台电脑：用应用下载的翻译模型。',
     '把辨識出的文字翻成另一種語言的一環。伺服器管線：和辨識在同一個工作階段完成。文字模型：任何支援 OpenAI 聊天介面的地方都行，另一台機器、本機的 Ollama 或 LM Studio、雲端 API。這台電腦：用應用程式下載的翻譯模型。',
   ],
-  viaServer: ['Server pipeline', '服务器管线', '伺服器管線'],
-  viaModel: ['Text model', '文本模型', '文字模型'],
+  viaServer: ['Another device', '另一台设备', '另一台裝置'],
+  viaModel: ['API model', 'API 模型', 'API 模型'],
+  mixHint: ['Each stage has its own place — mix them freely:', '每个环节各选各的，可以混搭：', '每個環節各選各的，可以混搭：'],
+  modelTodo: [
+    'No API model chosen yet: set it under Advanced → Provider → Translation.',
+    'API 模型还没选：到「高级 → 提供商 → 翻译」里填。',
+    'API 模型還沒選：到「進階 → 提供者 → 翻譯」裡填。',
+  ],
   viaServerNote: [
-    'The server recognizes and translates in one session, with the model it is set up with.',
-    '识别和翻译都由服务器在同一个会话里完成，用它自己配置好的模型。',
-    '辨識和翻譯都由伺服器在同一個工作階段完成，用它自己設定好的模型。',
+    'The other device recognizes and translates in one session, with the model it is set up with.',
+    '识别和翻译都由另一台设备在同一个会话里完成，用它自己配置好的模型。',
+    '辨識和翻譯都由另一台裝置在同一個工作階段完成，用它自己設定好的模型。',
   ],
   viaServerKotomimiNote: [
     'The other Kotomimi picks its best downloaded translation model for your languages.',

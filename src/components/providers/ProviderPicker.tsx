@@ -197,11 +197,12 @@ export function ProviderPicker({ providers, auth, disabled, openSlot }: Provider
           readiness={readiness}
           onChange={(key, value) => setCredential(provider, key, value)}
           // F4: which fields show is a setting, written as any settings edit is (the readiness driver re-checks the other fields).
-          choice={credentialChoice && {
+          // Fork: a provider with an `Assist` draws its choice there, in its own way.
+          choice={credentialChoice && !CredentialAssist ? {
             options: credentialChoice.options,
             value: String((entry.settings as Record<string, unknown>)[credentialChoice.setting] ?? ''),
             onChange: (value) => updateSettings(provider, { [credentialChoice.setting]: value }),
-          }}
+          } : undefined}
           // A local provider checks itself, and a managed one follows the sign-in (F1): only an own-key provider offers Validate.
           onCheck={provider.kind === 'own-key' ? () => {
             void refreshReadiness(provider, auth).then((answer) => {

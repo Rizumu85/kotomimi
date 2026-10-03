@@ -296,7 +296,11 @@ export interface Provider<S, K extends { missing?: never } & object, C extends {
     read(values: CredentialValues, auth: AuthContext): R | CredentialsMissing;
     /** A setting that picks which fields show, drawn by the credential form above them (F4). */
     choice?: CredentialChoice;
-    /** Fork: a view drawn between the choice and the fields — a way to fill a field without typing it (the Kotomimi provider's search of the local network). */
+    /**
+     * Fork: a view drawn above the fields in Settings, in place of the choice's own control — which it then draws
+     * itself, its own way — and a way to fill a field without typing it (the Kotomimi provider: a row per stage,
+     * and its search of the local network). The wizard still reads `choice`.
+     */
     Assist?: ComponentType<CredentialAssistProps<S>>;
   };
   /**

@@ -239,7 +239,8 @@ export const localaiCredentials: Provider<LocalAISettings, LocalAICredentials, n
       { value: 'device', labelKey: 'providers.localai.choiceDevice' },
     ],
   },
-  // The devices found on the local network, above the address field: nobody should have to know an address.
+  // In Settings the choice is drawn here instead, as a row per stage — two things to mix, not one switch — with the devices
+  // found on the local network above the address field: nobody should have to know an address.
   Assist: LocalAIAssist,
 };
 

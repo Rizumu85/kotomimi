@@ -1,0 +1,57 @@
+@use '../../components/Settings/shared/variables' as vars;
+
+// Fork: where each stage runs, under the provider (LocalAIAssist.tsx). Two
+// rows, a stage each, so the places read as a mix and not as one switch. The
+// buttons are the credential choice's own (`.credential-choice-group` in
+// Settings.scss).
+
+.kt-places {
+  gap: 6px;
+
+  .kt-places__hint {
+    font-size: vars.$font-caption;
+    color: vars.$text-secondary;
+  }
+
+  .kt-places__row {
+    display: flex;
+    align-items: center;
+    gap: vars.$space-2;
+  }
+
+  .kt-places__stage {
+    display: inline-flex;
+    flex: 0 0 76px;
+    align-items: center;
+    gap: 5px;
+    font-size: vars.$font-caption;
+    color: vars.$text-primary;
+
+    svg {
+      flex-shrink: 0;
+      color: vars.$color-primary;
+    }
+  }
+
+  // The stage's name takes the left; the places share what is left, evenly.
+  .segmented-control {
+    display: flex;
+    flex: 1 1 auto;
+    align-self: auto;
+    min-width: 0;
+
+    .segmented-option {
+      flex: 1 1 0;
+      justify-content: center;
+      min-width: 0;
+      padding: 0 6px;
+      white-space: nowrap;
+    }
+  }
+
+  .kt-places__todo {
+    font-size: vars.$font-caption;
+    line-height: 1.5;
+    color: vars.$color-warning;
+  }
+}
