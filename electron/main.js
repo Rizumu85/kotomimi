@@ -8,6 +8,7 @@ const { setupPopoverWindowHandlers } = require('./popover-windows.js');
 const { setupTranscriptSaveHandler } = require('./transcript-save.js');
 const { createCloseHandshake } = require('./close-handshake.js');
 const { createWsHeaderRules } = require('./ws-header-rules.js');
+const { startLanServer } = require('./lan-server');
 const { applyLinuxGpuFlags } = require('./linux-gpu-flags');
 const { acquireSingleInstanceLock, createFocusRelay } = require('./single-instance');
 
@@ -1208,6 +1209,45 @@ ipcMain.handle('ws-headers-clear', (event, args) => {
   if (result.success) console.log(`[Sokuji] [Main] WS headers cleared for ${args.host}${args.path || ''}`);
   return result;
 });
+
+// Fork: sharing this computer's models on the local network (electron/lan-server.js). This process
+// holds the listening socket; the page, where the models run, answers everything that comes in.
+let lanServer = null;
+const toPage = (channel, payload) => {
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send(channel, payload);
+};
+const stopLanServer = async () => {
+  const running = lanServer;
+  lanServer = null;
+  if (running) await running.close();
+};
+
+ipcMain.handle('lan:start', async (event, args) => {
+  await stopLanServer();
+  const port = Number(args?.port);
+  try {
+    lanServer = await startLanServer({ port: Number.isInteger(port) && port > 0 && port < 65536 ? port : 8790, key: String(args?.key ?? '') }, {
+      request: (request) => toPage('lan:request', request),
+      socketOpen: (socket) => toPage('lan:socket-open', socket),
+      socketMessage: (message) => toPage('lan:socket-message', message),
+      socketClose: (socket) => toPage('lan:socket-close', socket),
+    });
+    console.log(`[Kotomimi] [Main] Sharing models on port ${lanServer.port}`);
+    return { ok: true, port: lanServer.port, addresses: lanServer.addresses };
+  } catch (error) {
+    console.warn('[Kotomimi] [Main] Could not start sharing:', error.message);
+    return { ok: false, code: error.code ?? null, message: error.message };
+  }
+});
+
+ipcMain.handle('lan:stop', async () => {
+  await stopLanServer();
+  return { ok: true };
+});
+
+ipcMain.handle('lan:reply', (event, args) => lanServer?.reply(args?.id, args ?? {}) ?? false);
+ipcMain.handle('lan:send', (event, args) => lanServer?.send(args?.id, args?.data ?? '') ?? false);
+ipcMain.handle('lan:close-socket', (event, args) => { lanServer?.closeSocket(args?.id, args?.code, args?.reason); return true; });
 
 // Screen recording permission check for macOS system audio capture
 // This only checks the permission status, does NOT trigger any permission dialogs

@@ -66,10 +66,15 @@ function downsampleInt16ToFloat32(input, inputSampleRate, outputSampleRate) {
 // The engine type is passed explicitly from the manifest via AsrEngine.ts,
 // matching the TTS worker pattern (no filesystem probing).
 
-function buildSenseVoiceConfig() {
-  return {
-    senseVoice: { model: './sense-voice.onnx', useInverseTextNormalization: 1 },
-  };
+// Fork: SenseVoice is told the language when it is one of the five it knows. Left to detect it, a short
+// Japanese sentence is often heard as Chinese — its kana dropped, its kanji written as hanzi.
+var SENSEVOICE_LANGUAGES = { zh: 1, en: 1, ja: 1, ko: 1, yue: 1 };
+
+function buildSenseVoiceConfig(language) {
+  var base = String(language || '').toLowerCase().split(/[-_]/)[0];
+  var senseVoice = { model: './sense-voice.onnx', useInverseTextNormalization: 1 };
+  if (SENSEVOICE_LANGUAGES[base]) senseVoice.language = base;
+  return { senseVoice: senseVoice };
 }
 
 function buildWhisperConfig() {
@@ -172,12 +177,12 @@ function buildOmnilingualConfig() {
  * Build OfflineRecognizer config for the given engine type.
  * Engine type comes from modelManifest.ts asrEngine field.
  */
-function buildAsrConfig(engine) {
+function buildAsrConfig(engine, language) {
   var base = { modelConfig: { debug: 1, tokens: './tokens.txt' } };
   var engineConfig;
 
   switch (engine) {
-    case 'sensevoice':       engineConfig = buildSenseVoiceConfig(); break;
+    case 'sensevoice':       engineConfig = buildSenseVoiceConfig(language); break;
     case 'whisper':          engineConfig = buildWhisperConfig(); break;
     case 'transducer':       engineConfig = buildTransducerConfig(); break;
     case 'nemo-transducer':  engineConfig = buildNemoTransducerConfig(); break;
@@ -301,7 +306,7 @@ function handleInit(msg) {
       postMessage({ type: 'status', message: 'Creating recognizer (' + asrEngine + ')...' });
 
       // Build engine-specific config and create OfflineRecognizer
-      recognizer = new OfflineRecognizer(buildAsrConfig(asrEngine), Module);
+      recognizer = new OfflineRecognizer(buildAsrConfig(asrEngine, msg.language), Module);
 
       isReady = true;
       var elapsed = Math.round(performance.now() - startTime);

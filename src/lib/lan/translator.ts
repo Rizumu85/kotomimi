@@ -1,0 +1,126 @@
+/**
+ * Fork: `POST /v1/chat/completions` of a Kotomimi sharing its models — one
+ * sentence in, its translation out, by one of this computer's translation
+ * models. OpenAI's shape on both sides, with one addition a translation
+ * model needs and a chat model does not: the pair, as `source_language` and
+ * `target_language`. The system message is not read: each model here has its
+ * own prompt for a pair, and a prompt written for a large chat model only
+ * confuses a small translator.
+ *
+ * `model` names a shared translation model, or the pipeline, which leaves
+ * the choice to this computer: the best one downloaded for the pair. A model
+ * is loaded for a pair at its first request and kept, the least recently
+ * used let go when there are more than a few.
+ */
+import type { Clock } from '../contract/clock';
+import { buildDefaultLocalPrompt } from '../local-inference/prompts';
+import { baseLanguage, LAN_PIPELINE, wireError } from './protocol';
+
+/** The translation engine as the sharing host drives it: `engines.ts`'s `TranslationLike`, named here so `lib` imports no provider. */
+export interface Translator {
+  init(sourceLang: string, targetLang: string, modelId?: string): Promise<unknown>;
+  translate(text: string, systemPrompt: string, wrapTranscript: boolean): Promise<{ translatedText: string }>;
+  dispose(): void;
+  onError: ((error: string) => void) | null;
+}
+
+export interface TranslatorDeps {
+  translator(): Translator;
+  /** The model for a pair: the one named when it is shared and translates that pair, else the best shared. Null: none. */
+  resolve(source: string, target: string, wanted: string): string | null;
+  clock: Clock;
+}
+
+export interface HttpAnswer { status: number; body: unknown; contentType?: string }
+
+/** Models kept loaded at once: both directions of one conversation, and one to spare. */
+const MAX_LOADED = 3;
+
+interface Loaded { engine: Translator; ready: Promise<unknown>; usedAt: number }
+
+const refusal = (status: number, code: string, message: string): HttpAnswer => ({ status, body: { error: wireError(code, message) } });
+
+/** The text to translate: the last user message, whether its content is a string or OpenAI's list of parts. */
+function userText(messages: unknown): string {
+  if (!Array.isArray(messages)) return '';
+  for (let i = messages.length - 1; i >= 0; i -= 1) {
+    const m = messages[i] as { role?: unknown; content?: unknown };
+    if (m?.role !== 'user') continue;
+    if (typeof m.content === 'string') return m.content.trim();
+    if (Array.isArray(m.content)) return m.content.map((part) => (typeof (part as { text?: unknown })?.text === 'string' ? (part as { text: string }).text : '')).join('').trim();
+  }
+  return '';
+}
+
+export class LanTranslator {
+  private readonly loaded = new Map<string, Loaded>();
+  private ids = 0;
+
+  constructor(private readonly deps: TranslatorDeps) {}
+
+  async complete(body: unknown): Promise<HttpAnswer> {
+    const request = (body ?? {}) as { model?: unknown; messages?: unknown; stream?: unknown; source_language?: unknown; target_language?: unknown };
+    const source = baseLanguage(request.source_language);
+    const target = baseLanguage(request.target_language);
+    if (!source || !target) return refusal(400, 'languages_required', 'Name the pair: this Kotomimi runs translation models, and they are told what to translate from and into (source_language, target_language).');
+    const text = userText(request.messages);
+    if (!text) return refusal(400, 'no_text', 'There is no user message to translate.');
+    const named = typeof request.model === 'string' && request.model !== LAN_PIPELINE ? request.model : '';
+    const model = this.deps.resolve(source, target, named);
+    if (!model) return refusal(404, 'model_not_found', `This Kotomimi shares no translation model for ${source} → ${target}.`);
+
+    let translated: string;
+    try {
+      const engine = await this.engineFor(model, source, target);
+      translated = (await engine.translate(text, buildDefaultLocalPrompt(source, target), true)).translatedText ?? '';
+    } catch (cause) {
+      return refusal(500, 'server_error', `The translation failed: ${cause instanceof Error ? cause.message : String(cause)}`);
+    }
+    const id = `chatcmpl-kotomimi-${++this.ids}`;
+    const created = Math.floor(this.deps.clock.now() / 1000);
+    if (request.stream === true) {
+      // A client that asked for a stream reads one: the whole answer as its only piece.
+      const chunk = (delta: Record<string, unknown>, finish: string | null) => `data: ${JSON.stringify({ id, object: 'chat.completion.chunk', created, model, choices: [{ index: 0, delta, finish_reason: finish }] })}\n\n`;
+      return { status: 200, contentType: 'text/event-stream', body: `${chunk({ role: 'assistant', content: translated }, null)}${chunk({}, 'stop')}data: [DONE]\n\n` };
+    }
+    return { status: 200, body: { id, object: 'chat.completion', created, model, choices: [{ index: 0, message: { role: 'assistant', content: translated }, finish_reason: 'stop' }] } };
+  }
+
+  /** Sharing stopped: every model is let go. */
+  dispose(): void {
+    for (const { engine } of this.loaded.values()) engine.dispose();
+    this.loaded.clear();
+  }
+
+  private async engineFor(model: string, source: string, target: string): Promise<Translator> {
+    const key = `${model}|${source}|${target}`;
+    let entry = this.loaded.get(key);
+    if (!entry) {
+      const engine = this.deps.translator();
+      const created: Loaded = { engine, ready: engine.init(source, target, model), usedAt: this.deps.clock.now() };
+      entry = created;
+      this.loaded.set(key, created);
+      // A model that cannot load, or dies later, is forgotten: the next request loads it afresh.
+      const forget = () => {
+        if (this.loaded.get(key) === created) this.loaded.delete(key);
+        engine.dispose();
+      };
+      created.ready.catch(forget);
+      engine.onError = forget;
+      this.trim(key);
+    }
+    entry.usedAt = this.deps.clock.now();
+    await entry.ready;
+    return entry.engine;
+  }
+
+  /** Lets the least recently used models go, never the one just asked for. */
+  private trim(keep: string): void {
+    while (this.loaded.size > MAX_LOADED) {
+      const oldest = [...this.loaded.entries()].filter(([key]) => key !== keep).sort((a, b) => a[1].usedAt - b[1].usedAt)[0];
+      if (!oldest) return;
+      this.loaded.delete(oldest[0]);
+      oldest[1].engine.dispose();
+    }
+  }
+}

@@ -1346,6 +1346,30 @@
   },
   "fork": {
     "furigana": "汉字上方显示假名（日语）",
-    "romanization": "显示罗马音（日语、韩语、俄语）"
+    "romanization": "显示罗马音（日语、韩语、俄语）",
+    "lan": {
+      "title": "局域网共享",
+      "tooltip": "让局域网里的另一台设备使用这台电脑已下载的模型（语音识别和翻译）。对方同样运行 Kotomimi，把这台电脑的地址填到\"服务器地址\"里即可。本应用开着的时候才能共享。",
+      "enable": "共享这台电脑的模型",
+      "starting": "正在启动…",
+      "on": "正在共享，暂时没有设备连接",
+      "onWithClients": "正在共享，当前有 {{count}} 路连接",
+      "portInUse": "端口 {{port}} 已被其他程序占用。请在\"选项\"里换一个端口。",
+      "failed": "无法开始共享：{{message}}",
+      "address": "给另一台设备填的地址",
+      "copy": "复制",
+      "copied": "已复制",
+      "noNetwork": "这台电脑当前没有连接网络。",
+      "howTo": "在另一台设备的 Kotomimi 里选择\"Kotomimi 自由搭配\"，把这个地址填到\"服务器地址\"。",
+      "models": "共享的模型",
+      "noRecognizer": "还没有下载语音识别模型",
+      "showLibrary": "下载或管理模型",
+      "hideLibrary": "收起模型库",
+      "options": "选项",
+      "port": "端口",
+      "key": "访问密钥",
+      "keyPlaceholder": "留空：局域网里任何设备都能连接",
+      "firewall": "第一次开启时，系统防火墙可能询问是否允许 Kotomimi 访问网络：请允许它在专用网络上通信。"
+    }
   }
 }

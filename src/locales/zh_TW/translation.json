@@ -1346,6 +1346,30 @@
   },
   "fork": {
     "furigana": "漢字上方顯示假名（日語）",
-    "romanization": "顯示羅馬拼音（日語、韓語、俄語）"
+    "romanization": "顯示羅馬拼音（日語、韓語、俄語）",
+    "lan": {
+      "title": "區域網路共享",
+      "tooltip": "讓區域網路裡的另一台裝置使用這台電腦已下載的模型（語音辨識和翻譯）。對方同樣執行 Kotomimi，把這台電腦的位址填到「伺服器位址」裡即可。本應用程式開著的時候才能共享。",
+      "enable": "共享這台電腦的模型",
+      "starting": "正在啟動…",
+      "on": "正在共享，暫時沒有裝置連線",
+      "onWithClients": "正在共享，目前有 {{count}} 路連線",
+      "portInUse": "連接埠 {{port}} 已被其他程式占用。請在「選項」裡換一個連接埠。",
+      "failed": "無法開始共享：{{message}}",
+      "address": "給另一台裝置填的位址",
+      "copy": "複製",
+      "copied": "已複製",
+      "noNetwork": "這台電腦目前沒有連上網路。",
+      "howTo": "在另一台裝置的 Kotomimi 裡選擇「Kotomimi 自由搭配」，把這個位址填到「伺服器位址」。",
+      "models": "共享的模型",
+      "noRecognizer": "尚未下載語音辨識模型",
+      "showLibrary": "下載或管理模型",
+      "hideLibrary": "收起模型庫",
+      "options": "選項",
+      "port": "連接埠",
+      "key": "存取金鑰",
+      "keyPlaceholder": "留空：區域網路裡任何裝置都能連線",
+      "firewall": "第一次開啟時，系統防火牆可能詢問是否允許 Kotomimi 存取網路：請允許它在私人網路上通訊。"
+    }
   }
 }

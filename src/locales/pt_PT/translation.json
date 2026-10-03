@@ -1346,6 +1346,30 @@
   },
   "fork": {
     "furigana": "Furigana over kanji (Japanese)",
-    "romanization": "Romanization (Japanese, Korean, Russian)"
+    "romanization": "Romanization (Japanese, Korean, Russian)",
+    "lan": {
+      "title": "Share on the local network",
+      "tooltip": "Lets another device on your network use the models this computer has downloaded — speech recognition and translation. The other device runs Kotomimi too, and types this computer's address where a server's goes. Sharing works while this app is open.",
+      "enable": "Share this computer's models",
+      "starting": "Starting…",
+      "on": "Sharing — no device connected yet",
+      "onWithClients": "Sharing — {{count}} connection(s) in use",
+      "portInUse": "Port {{port}} is taken by another program. Choose another under Options.",
+      "failed": "Sharing could not start: {{message}}",
+      "address": "Address for the other device",
+      "copy": "Copy",
+      "copied": "Copied",
+      "noNetwork": "This computer is on no network.",
+      "howTo": "On the other device, choose Kotomimi Pipeline and type this address as the server address.",
+      "models": "Models shared",
+      "noRecognizer": "No speech recognition model downloaded yet",
+      "showLibrary": "Download or manage models",
+      "hideLibrary": "Hide the model library",
+      "options": "Options",
+      "port": "Port",
+      "key": "Access key",
+      "keyPlaceholder": "Blank: anyone on the network may connect",
+      "firewall": "The first time, your system's firewall may ask whether to allow Kotomimi on the network: allow it for private networks."
+    }
   }
 }

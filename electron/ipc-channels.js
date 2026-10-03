@@ -59,6 +59,12 @@ export const INVOKE_CHANNELS = [
   // WebSocket header injection (renderer → main)
   'ws-headers-set',
   'ws-headers-clear',
+  // Fork: sharing this computer's models on the local network (electron/lan-server.js)
+  'lan:start',
+  'lan:stop',
+  'lan:reply',
+  'lan:send',
+  'lan:close-socket',
   // Native local-inference sidecar lifecycle
   'native-host:start',
   'native-host:stop',

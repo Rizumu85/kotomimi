@@ -75,6 +75,11 @@ const validReceiveChannels = [
   'app-audio:event',
   // Window close / app quit: end the session before the window goes
   'app:close-requested',
+  // Fork: what another device asks of the models this computer shares (electron/lan-server.js)
+  'lan:request',
+  'lan:socket-open',
+  'lan:socket-message',
+  'lan:socket-close',
 ];
 
 // Expose protected methods that allow the renderer process to use

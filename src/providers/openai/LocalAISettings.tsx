@@ -305,7 +305,7 @@ export function LocalAISettingsView({ settings, update, disabled = false, pair, 
       {/* The instructions are the server pipeline's and the text model's: this computer's translation models carry their own. */}
       {via !== 'device' && <InstructionsField value={settings} onChange={update} preview={preview} disabled={disabled} />}
 
-      <LanSharingSection disabled={disabled} />
+      <LanSharingSection disabled={disabled} pair={pair} />
     </div>
   );
 }

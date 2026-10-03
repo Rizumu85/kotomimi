@@ -83,7 +83,8 @@
   }
 
   // The last section here is not the tab's last: the turn-detection block follows it, so it keeps its divider.
-  > .settings-section:last-child {
+  // The class is doubled to outweigh the Advanced layout's own `:last-child` reset.
+  &.kt-stages > .settings-section.settings-section:last-child {
     margin-bottom: vars.$space-5;
     padding-bottom: vars.$space-5;
     border-bottom: 1px solid vars.$border-subtle;

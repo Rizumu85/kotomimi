@@ -6,6 +6,7 @@ import useAudioStore from '../stores/audioStore';
 import { useLoadSettings } from '../stores/settingsStore';
 import { useSubtitleStore } from '../stores/subtitleStore';
 import { useAnnotationStore } from '../stores/annotationStore';
+import { useLanStore } from '../stores/lanStore';
 import { useConversationDisplayStore } from '../stores/conversationDisplayStore';
 import { useSetupStore } from '../stores/setupStore';
 import { SettingsInitializer } from '../components/SettingsInitializer/SettingsInitializer';
@@ -37,6 +38,9 @@ export function Home() {
     // turn mode migrated, the routing switches, the punctuation pack — read by
     // the session from the first Start.
     void loadSessionStores();
+
+    // Fork: sharing this computer's models, left on, starts again with the app. On its own: it waits for the model scan, which nothing else here should.
+    void useLanStore.getState().hydrate();
   }, []); // Empty dependency array - only run once on mount
 
   return (

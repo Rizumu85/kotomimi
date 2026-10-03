@@ -1,0 +1,190 @@
+@use '../Settings/shared/variables' as vars;
+
+// Fork: "share this computer's models". A card that appears under the switch,
+// in the settings' own dialect: the state on top, then what to type on the
+// other device, then what it will find here.
+
+.kt-lan {
+  .kt-lan__card {
+    margin-top: vars.$space-3;
+    padding: vars.$space-3;
+    background: vars.$bg-surface;
+    border: 1px solid vars.$border-subtle;
+    border-radius: vars.$radius-lg;
+  }
+
+  .kt-lan__status {
+    display: flex;
+    align-items: center;
+    gap: vars.$space-2;
+    font-size: vars.$font-body;
+    color: vars.$text-secondary;
+
+    &--on {
+      color: vars.$color-primary;
+    }
+
+    &--error {
+      align-items: flex-start;
+      color: vars.$color-warning;
+
+      svg {
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+    }
+  }
+
+  .kt-lan__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: vars.$color-primary;
+    box-shadow: 0 0 0 3px rgba(vars.$color-primary, 0.2);
+  }
+
+  .kt-lan__spin {
+    animation: kt-lan-spin 1.2s linear infinite;
+  }
+
+  .kt-lan__label {
+    margin: vars.$space-3 0 6px;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    color: vars.$text-muted;
+  }
+
+  .kt-lan__address {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: vars.$space-2;
+    padding: 6px 6px 6px 10px;
+    margin-bottom: 4px;
+    background: vars.$bg-control;
+    border: 1px solid vars.$border-default;
+    border-radius: vars.$radius-sm;
+
+    code {
+      overflow: hidden;
+      font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+      font-size: vars.$font-body;
+      color: vars.$text-primary;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      user-select: all;
+    }
+  }
+
+  .kt-lan__copy {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    font: inherit;
+    font-size: vars.$font-caption;
+    color: vars.$text-secondary;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: vars.$radius-sm;
+    cursor: pointer;
+    transition: background-color vars.$transition-fast, color vars.$transition-fast;
+
+    &:hover {
+      color: vars.$text-primary;
+      background: vars.$bg-hover;
+    }
+
+    &:focus-visible {
+      @include vars.focus-ring;
+    }
+  }
+
+  .kt-lan__models {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .kt-lan__model {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    font-size: vars.$font-caption;
+    color: vars.$text-secondary;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid vars.$border-subtle;
+    border-radius: 999px;
+
+    svg {
+      color: vars.$color-primary;
+    }
+
+    &--missing {
+      color: vars.$color-warning;
+      background: vars.$color-warning-bg;
+      border-color: vars.$color-warning-border;
+
+      svg {
+        color: vars.$color-warning;
+      }
+    }
+  }
+
+  .kt-lan__link {
+    margin-top: vars.$space-2;
+    padding: 0;
+    font: inherit;
+    font-size: vars.$font-caption;
+    color: vars.$color-primary;
+    text-decoration: underline;
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.8;
+    }
+
+    &:focus-visible {
+      @include vars.focus-ring;
+    }
+  }
+
+  .kt-lan__library {
+    margin-top: vars.$space-3;
+    padding-top: vars.$space-3;
+    border-top: 1px solid vars.$border-subtle;
+  }
+
+  .kt-lan__options {
+    margin-top: vars.$space-3;
+  }
+
+  .kt-lan__fields {
+    display: flex;
+    gap: vars.$space-2;
+    margin-top: vars.$space-2;
+  }
+
+  .kt-lan__field {
+    display: flex;
+    flex: 0 0 88px;
+    flex-direction: column;
+    gap: 4px;
+    font-size: vars.$font-caption;
+    color: vars.$text-muted;
+
+    &--wide {
+      flex: 1 1 auto;
+    }
+  }
+}
+
+@keyframes kt-lan-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
