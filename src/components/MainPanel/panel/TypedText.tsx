@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Send } from 'lucide-react';
 
@@ -20,6 +20,19 @@ const TypedText: React.FC<TypedTextProps> = ({ onSend }) => {
   const { t } = useTranslation();
   const [text, setText] = useState('');
   const [isSending, setIsSending] = useState(false);
+  // Fork: Ctrl+K (Cmd+K) puts the cursor here from anywhere in the window — a word looked up mid-conversation is one keystroke away.
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        input.current?.focus();
+        input.current?.select();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const submit = useCallback(() => {
     const trimmed = text.trim();
@@ -44,8 +57,10 @@ const TypedText: React.FC<TypedTextProps> = ({ onSend }) => {
     <div className="text-input-section">
       <div className="text-input-container">
         <input
+          ref={input}
           type="text"
           className="text-input"
+          title="Ctrl+K"
           placeholder={t('mainPanel.typeMessage', 'Text to translate...')}
           value={text}
           onChange={(e) => setText(e.target.value)}
