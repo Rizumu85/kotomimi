@@ -4,7 +4,7 @@ Kotomimi 是 Sokuji 的一个分支：在实时翻译之外，加上了自建模
 
 基于上游 [kizuna-ai-lab/sokuji](https://github.com/kizuna-ai-lab/sokuji) v0.42.2（`6cbdf9e`）。上游的说明见 [README.md](README.md)，这份文件只讲本分支多出来的东西。
 
-本分支的工作在 `localai` 分支上，`main` 保持与上游一致。
+仓库：<https://github.com/Rizumu85/kotomimi>。本分支的工作在 `localai` 分支上，`main` 保持与上游一致。
 
 Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录，可以和官方 Sokuji 同时安装、同时运行。第一次启动时会把已有的 Sokuji 设置和登录状态复制过来；下载过的模型不复制，需要时重新下载。
 
@@ -170,15 +170,15 @@ npx electron-forge make --arch=x64
 - 图标由一张图生成全套：
 
 ```bash
-node scripts/fork-make-icons.cjs assets/logo-source.png --keep-background
+node scripts/fork-make-icons.cjs assets/logo-source.svg
 ```
 
-  原图已经是透明背景时加 `--keep-background`。原图是白底时不加，脚本会从四边把背景去掉。
+  原图是矢量图（.svg）时直接用。原图是白底的 PNG 时，脚本会从四边把背景去掉；已经透明的 PNG 加 `--keep-background`。
 - "关于"里保留了对 Sokuji 和 Kizuna AI Lab 的署名。
 
 ## 版本号和更新
 
-- 版本号是"上游版本 + 两位分支序号"：上游 0.42.2 的第 1 个分支构建是 `0.42.201`，现在是 `0.42.202`。每次要让别人覆盖安装的构建都要加一，否则安装程序会认为已经装过。五处版本号要一起改：`package.json`、`extension/package.json`、`extension/manifest.json` 和两个 lockfile。
+- 版本号是"上游版本 + 两位分支序号"：上游 0.42.2 的第 1 个分支构建是 `0.42.201`，现在是 `0.42.203`。每次要让别人覆盖安装的构建都要加一，否则安装程序会认为已经装过。五处版本号要一起改：`package.json`、`extension/package.json`、`extension/manifest.json` 和两个 lockfile。
 - 更新源指向本仓库的 Releases，不再指向上游，所以不会被提示换回官方版。
 - 启动时不自动检查更新，因为本仓库还没有发布过 Release，检查会报错。"帮助"里的"检查更新"仍然可用。
 - 上游的发布流程（`.github/workflows/build.yml`）在分支仓库里跑不通：Windows 签名那一步只在上游仓库执行，而发布步骤依赖它。要用 GitHub Actions 给本仓库出安装包，需要先改这个流程。

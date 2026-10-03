@@ -2,9 +2,9 @@
 /**
  * Fork: turns one logo picture into every icon file the app ships.
  *
- *   node scripts/fork-make-icons.cjs <logo.png> [--keep-background]
+ *   node scripts/fork-make-icons.cjs <logo.svg | logo.png> [--keep-background]
  *
- * The picture is a drawing on a plain light background (what an image model
+ * A vector drawing (.svg) is used as it is. A raster picture is a drawing on a plain light background (what an image model
  * hands back when asked for a logo). The background is taken out — flooded
  * from the picture's edges, so light areas inside the drawing stay — the
  * drawing is cropped to its own bounds, centred on a transparent square with
@@ -26,7 +26,7 @@ const sharp = require('sharp');
 const root = path.resolve(__dirname, '..');
 const [input, ...flags] = process.argv.slice(2);
 if (!input) {
-  console.error('usage: node scripts/fork-make-icons.cjs <logo.png> [--keep-background]');
+  console.error('usage: node scripts/fork-make-icons.cjs <logo.svg | logo.png> [--keep-background]');
   process.exit(1);
 }
 
@@ -149,9 +149,11 @@ async function icns(master) {
 }
 
 (async () => {
-  const source = sharp(path.resolve(input)).ensureAlpha();
+  // A vector drawing is rasterized large, then cut down: every size comes from clean edges. It has no background to remove.
+  const vector = /.svg$/i.test(input);
+  const source = (vector ? sharp(path.resolve(input), { density: 288 }) : sharp(path.resolve(input))).ensureAlpha();
   const { data, info } = await source.raw().toBuffer({ resolveWithObject: true });
-  if (!flags.includes('--keep-background')) {
+  if (!vector && !flags.includes('--keep-background')) {
     const { outline, cleared } = removeBackground(data, info.width, info.height);
     console.log(`background removed: ${Math.round((cleared / (info.width * info.height)) * 100)}% of the picture; outline colour rgb(${outline.join(', ')})`);
   }

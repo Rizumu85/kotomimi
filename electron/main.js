@@ -379,13 +379,13 @@ function createApplicationMenu() {
         {
           label: 'Source Code',
           click: async () => {
-            await shell.openExternal('https://github.com/Rizumu85/sokuji');
+            await shell.openExternal('https://github.com/Rizumu85/kotomimi');
           }
         },
         {
           label: 'Report Issue',
           click: async () => {
-            await shell.openExternal('https://github.com/Rizumu85/sokuji/issues');
+            await shell.openExternal('https://github.com/Rizumu85/kotomimi/issues');
           }
         }
       ]

@@ -10,7 +10,7 @@
 // docs/build/macos-auto-update.md.
 
 // Fork: the fork's own releases.
-const RELEASE_BASE = 'https://github.com/Rizumu85/sokuji/releases';
+const RELEASE_BASE = 'https://github.com/Rizumu85/kotomimi/releases';
 
 /**
  * Does this platform hand the download and install to electron-updater,

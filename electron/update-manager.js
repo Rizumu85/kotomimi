@@ -37,7 +37,7 @@ class UpdateManager {
     autoUpdater.setFeedURL({
       provider: 'github',
       owner: 'Rizumu85', // Fork: this build updates from the fork's own releases, never upstream's.
-      repo: 'sokuji',
+      repo: 'kotomimi',
     });
 
     this._setupAutoUpdaterEvents();
@@ -220,7 +220,7 @@ class UpdateManager {
     if (exeFile) {
       return {
         fileName: exeFile.url,
-        url: `https://github.com/Rizumu85/sokuji/releases/download/v${version}/${exeFile.url}`,
+        url: `https://github.com/Rizumu85/kotomimi/releases/download/v${version}/${exeFile.url}`,
       };
     }
 
@@ -228,7 +228,7 @@ class UpdateManager {
     const exeFileName = `Kotomimi-${version}.Setup.exe`;
     return {
       fileName: exeFileName,
-      url: `https://github.com/Rizumu85/sokuji/releases/download/v${version}/${exeFileName}`,
+      url: `https://github.com/Rizumu85/kotomimi/releases/download/v${version}/${exeFileName}`,
     };
   }
 

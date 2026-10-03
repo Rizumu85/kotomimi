@@ -103,7 +103,7 @@ module.exports = {
         exe: 'kotomimi.exe',
         description: 'AI-powered live speech translation application',
         setupIcon: 'assets/icon.ico',
-        iconUrl: 'https://raw.githubusercontent.com/Rizumu85/sokuji/localai/assets/icon.ico',
+        iconUrl: 'https://raw.githubusercontent.com/Rizumu85/kotomimi/localai/assets/icon.ico',
         noMsi: true
       }
     },
