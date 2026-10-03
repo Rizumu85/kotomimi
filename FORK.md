@@ -10,7 +10,7 @@
 |---|---|---|
 | LocalAI Realtime 提供商 | 桌面版直接用 GA Realtime 协议连局域网里的 LocalAI，不需要中间代理 | `src/providers/openai/localai.ts` |
 | 环节自由搭配 | 识别、翻译、语法反馈三个环节各自指定服务器和模型 | `src/providers/openai/pipeline.ts`、`textModel.ts` |
-| 语法反馈 | 自己说对方语言时，不翻译，而是检查语法：没问题回 ✓，有问题给出改正句和原因 | 同上 |
+| 语法反馈 | 自己说对方语言时，不翻译，而是检查语法：没问题回 ✓，有问题给出改正句和原因。提示词按语言自动选择，也可以自己写 | 同上，`coachPrompt.ts` |
 | 打字查词 | 会话中按 Ctrl+K，输入母语，得到对方语言的译文 | `src/components/MainPanel/panel/TypedText.tsx` |
 | 假名注音 | 日语汉字上方显示平假名 | `src/lib/annotate/`、`src/components/Annotated/` |
 | 罗马音 | 日语、韩语、俄语文本下方显示拉丁字母注音 | 同上 |
@@ -39,6 +39,21 @@
   - **服务器自带的管线**：识别和翻译都在 Realtime 会话里完成，一台机器全包。
   - **文本模型**：服务器只做识别，翻译交给任何支持 OpenAI 聊天接口（`/v1/chat/completions`）的服务。地址留空表示同一台服务器，也可以填别的机器、本机的 Ollama / LM Studio，或云端 API。
 - **③ 语法反馈**：勾选"我自己说对方的语言"后，"我"这一路的语音不再翻译，而是交给一个文本模型检查。它可以有自己的地址和模型，留空则复用翻译用的文本模型。"对方"那一路不受影响，照常翻译。
+
+**语法反馈的提示词**按两种语言自动生成：
+
+- 你的母语决定提示词本身用什么语言写。目前有中文和英文两套，其他母语用英文那套，但仍会要求模型用你的母语解释。
+- 你在练的语言决定检查重点和例句。日语、韩语、英语、俄语、法语、德语、西班牙语有各自的检查重点；日语、英语、韩语带例句。
+- 例句作为对话的前几轮发给模型，而不是写在提示词正文里。小模型看到正文里的例句会接着往下编。
+- 想自己写就填"语法反馈提示词"。里面的 `{{SPOKEN}}` 和 `{{NATIVE}}` 会被替换成两种语言的名字。自己写的提示词不附带例句。
+
+用真实模型比较提示词和模型的效果：
+
+```bash
+COACH_LIVE_BASE=http://<host>:8080/v1 COACH_LIVE_MODELS=qwen3-4b npx vitest run --silent=false --reporter=verbose src/providers/openai/coachPrompt.live.test.ts
+```
+
+它会打印每句话的判断是否正确、解释是不是用母语写的、每句耗时。
 
 日志面板里每次调用文本模型都会记一行 `text.done`，带 `firstMs`（首字耗时）和 `totalMs`（总耗时），可以用来对比不同搭配的速度。
 
@@ -138,7 +153,13 @@ npx electron-forge make --arch=x64
 - Windows 上仓库路径不能太深，否则安装包工具会因为路径超过 260 字符失败。放在类似 `C:\src\sokuji` 的短路径下。也不要直接放在盘符根目录（例如用 `subst` 映射出来的 `S:\`），那样打包时会漏掉文件。
 - `npm ci` 如果加了 `--ignore-scripts`，需要手动补三步：`node node_modules/electron/install.js`、`bash scripts/copy-ort-wasm.sh`、在 `node_modules/electron-winstaller` 里运行 `node script/select-7z-arch.js`。
 - 安装包没有代码签名。
-- **不要接受应用里的更新提示**，那会换回官方版。
+
+## 版本号和更新
+
+- 版本号是"上游版本 + 两位分支序号"：上游 0.42.2 的第 1 个分支构建是 `0.42.201`。每次要让别人覆盖安装的构建都要加一，否则安装程序会认为已经装过。五处版本号要一起改：`package.json`、`extension/package.json`、`extension/manifest.json` 和两个 lockfile。
+- 更新源指向本仓库的 Releases，不再指向上游，所以不会被提示换回官方版。
+- 启动时不自动检查更新，因为本仓库还没有发布过 Release，检查会报错。"帮助"里的"检查更新"仍然可用。
+- 上游的发布流程（`.github/workflows/build.yml`）在分支仓库里跑不通：Windows 签名那一步只在上游仓库执行，而发布步骤依赖它。要用 GitHub Actions 给本仓库出安装包，需要先改这个流程。
 
 ## 跟进上游
 
