@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { HelpCircle, RefreshCw, Mail, MessageSquare, Globe, Wand2 } from 'lucide-react';
+import { HelpCircle, RefreshCw, MessageSquare, Globe, Wand2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Tooltip from '../../Tooltip/Tooltip';
 import { isElectron } from '../../../utils/environment';
@@ -221,16 +221,14 @@ const HelpSection: React.FC<HelpSectionProps> = ({ toggleSettings, isSessionActi
             <span>{t('settings.diagnosticLogs', 'Diagnostic logs')}</span>
           </button>
         </Tooltip>
-        <Tooltip content={t('settings.helpEmailTooltip', 'Report bugs or get help')} position="top">
-          <button type="button" className="help-link" onClick={() => openExternalUrl('mailto:support@kizuna.ai')}>
-            <Mail size={13} />
-            <span>support@kizuna.ai</span>
-          </button>
-        </Tooltip>
-        <Tooltip content={t('settings.helpDiscussionsTooltip', 'Feature requests, feedback, and community discussions')} position="top">
-          <button type="button" className="help-link" onClick={() => openExternalUrl('https://github.com/kizuna-ai-lab/sokuji/discussions')}>
+        {/*
+          Fork: upstream's support address and discussion board are Sokuji's own, and answer for Sokuji.
+          This build is not theirs to support: its one link goes to the fork's own issues.
+        */}
+        <Tooltip content={t('fork.help.issuesTooltip', 'Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page.')} position="top">
+          <button type="button" className="help-link" onClick={() => openExternalUrl('https://github.com/Rizumu85/kotomimi/issues')}>
             <MessageSquare size={13} />
-            <span>{t('settings.helpDiscussions', 'Discussions')}</span>
+            <span>{t('fork.help.issues', 'Report a problem')}</span>
           </button>
         </Tooltip>
       </div>

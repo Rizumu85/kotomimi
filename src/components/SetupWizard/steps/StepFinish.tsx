@@ -67,7 +67,10 @@ const StepFinish: React.FC<Props> = ({ draft, isSignedIn, error }) => {
         <StatusMessage variant="warning">
           {draft.providerPath === 'managed'
             ? t('setup.summary.pendingSignIn', 'Not signed in — sign in from the account button before you start.')
-            : t('setup.summary.pendingKey', 'No API key yet — add it in Settings → Provider before you start.')}
+            : (draft.provider as string | null) === 'localai'
+              // Fork: the Kotomimi provider waits for an address, not a key.
+              ? t('fork.wizard.pendingAddress')
+              : t('setup.summary.pendingKey', 'No API key yet — add it in Settings → Provider before you start.')}
         </StatusMessage>
       )}
       {error && <StatusMessage variant="error">{error}</StatusMessage>}

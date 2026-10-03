@@ -510,6 +510,8 @@
       "route": "Where each stage runs",
       "placeServer": "Server",
       "placeDevice": "This computer",
+      "choiceServer": "Connect to a server",
+      "choiceDevice": "Use this computer",
       "notDownloaded": "no model downloaded",
       "notChosen": "no model chosen",
       "hearStage": "Speech recognition",
@@ -1288,7 +1290,8 @@
       "provider-settings": {
         "title": "Налаштування постачальника",
         "content": "Тут можна змінити ключ або постачальника.",
-        "content_pending": "Вставте свій API-ключ тут. Кнопка «Почати» розблокується, щойно його буде перевірено."
+        "content_pending": "Вставте свій API-ключ тут. Кнопка «Почати» розблокується, щойно його буде перевірено.",
+        "content_kotomimi": "Here you choose a server or this computer. Under Advanced → Provider each stage — recognition, translation, grammar feedback — can be put where you like, and this computer's models can be shared with another device on your network."
       },
       "models": {
         "title": "Моделі",
@@ -1304,6 +1307,20 @@
       "done": {
         "title": "Це все",
         "content": "Розширені налаштування — виявлення мовлення, промпти, голоси, логи — доступні за перемикачем «Розширений» у верхньому правому куті Налаштувань. Повторити цей гід можна будь-коли в розділі «Допомога»."
+      },
+      "reading-aids": {
+        "title": "Reading aids",
+        "content": "Help for reading the other language, switched here:",
+        "furigana": "Furigana — kana above Japanese kanji.",
+        "romanization": "Romanization — a line in Latin letters under Japanese, Korean and Russian.",
+        "fonts": "Fonts for each language are under Settings → Fonts."
+      },
+      "kotomimi-tips": {
+        "title": "Three more things",
+        "content": "Worth knowing before you start:",
+        "typed": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
+        "coach": "Speaking their language yourself? Turn on Grammar feedback under Advanced → Provider: your speech is checked instead of translated.",
+        "share": "Another device can use this computer's models: Advanced → Provider → Share on the local network."
       }
     }
   },
@@ -1347,6 +1364,28 @@
   "fork": {
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
+    "wizard": {
+      "pathTitle": "Kotomimi Pipeline",
+      "pathBadge": "This app's own",
+      "pathDesc": "Your own server on the network, or this computer's own models — and any mix of the two.",
+      "pathCost": "No account and no API key. Text only: subtitles with furigana, typed lookups and grammar feedback. A server means a LocalAI, or another Kotomimi sharing its models; this computer downloads models onto your disk.",
+      "title": "Where should it run?",
+      "intro": "Choose what listens and translates. You can change it, or mix the two stage by stage, later in Settings.",
+      "server": "A server on my network",
+      "serverDesc": "A LocalAI, or another computer running Kotomimi with sharing turned on. This computer stays light.",
+      "device": "This computer",
+      "deviceDesc": "Models downloaded by the app run right here. Nothing else is needed; a GPU helps.",
+      "tryServer": "Connect",
+      "addressMissing": "Type the server's address first, for example 192.168.1.10:8080.",
+      "serverFound": "Connected — the server lists {{count}} model(s).",
+      "serverUnreachable": "Could not reach the server: {{message}}",
+      "pendingAddress": "No server address yet — add it in Settings before you start.",
+      "deviceNotice": "Nothing to enter. After setup, download a speech recognition model under Models — the tour shows where. Translation works at once with the online translator, and offline models can be downloaded too."
+    },
+    "help": {
+      "issues": "Report a problem",
+      "issuesTooltip": "Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page."
+    },
     "fonts": {
       "title": "Fonts",
       "tooltip": "Choose the fonts installed on this computer: one for the app itself, one for Latin letters and the romanization line, and one per language for conversation and subtitle text. A font is used where it has the glyphs; anything it lacks falls back to the app's own.",

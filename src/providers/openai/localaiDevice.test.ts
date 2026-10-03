@@ -12,6 +12,7 @@ import {
   type LocalAIConfig, type LocalAICredentials, type LocalAISettings,
 } from './localai';
 import { deviceChoices, deviceNeeds, deviceRecognizer, deviceTranslator, needsServer, translateViaOf } from './localaiDevice';
+import type { LocalAIModel } from './localaiModels';
 import { createPipelineAdapter, FIRST_REF, type DeviceStage } from './pipeline';
 import { SHARED } from './testing';
 
@@ -19,7 +20,7 @@ import { SHARED } from './testing';
 const SPEAKER: SessionContext = { direction: { source: 'zh-CN', target: 'ja' }, speech: false, turns: 'auto' };
 const PARTICIPANT: SessionContext = { direction: { source: 'ja', target: 'zh-CN' }, speech: false, turns: 'auto' };
 const PAIR = { source: 'zh-CN', target: 'ja' };
-const shared = { ...SHARED, reversed: (d: SessionContext['direction']) => d.source === 'ja', models: [] };
+const shared = { ...SHARED, reversed: (d: SessionContext['direction']) => d.source === 'ja', models: [] as LocalAIModel[] };
 const HERE: Partial<LocalAISettings> = { asrVia: 'device' };
 const NONE: LocalAICredentials = { apiKey: '', endpoint: '' };
 const SERVER: LocalAICredentials = { apiKey: '', endpoint: 'ws://192.168.1.10:8080/v1/realtime' };
@@ -165,7 +166,7 @@ describe('the memory this computer\'s models take', () => {
 
 describe('readiness with stages on this computer', () => {
   const ctx = (legs: CheckContext['legs'] = ['speaker']): CheckContext => ({ pair: PAIR, legs });
-  const check = (s: LocalAISettings, k: LocalAICredentials = NONE, legs?: CheckContext['legs'], fetch = vi.fn(async () => { throw new Error('no server should be asked'); })) =>
+  const check = (s: LocalAISettings, k: LocalAICredentials = NONE, legs?: CheckContext['legs'], fetch: ReturnType<typeof vi.fn> = vi.fn(async () => { throw new Error('no server should be asked'); })) =>
     createLocalAICheck({ fetch: fetch as unknown as typeof globalThis.fetch, clock: createVirtualClock(0) })(k, s, ctx(legs)).then((result) => ({ result, fetch }));
 
   it('asks no server while every stage is here, and is ready once the models are downloaded', async () => {
@@ -210,7 +211,7 @@ async function live(context: SessionContext, patch: Partial<LocalAISettings>, o:
   const { clock } = trackedClock();
   const { events, log } = recordEvents();
   const abort = new AbortController();
-  const fetch = vi.fn(async () => { throw new Error('no text model should be called'); });
+  const fetch = vi.fn(async (): Promise<Response> => { throw new Error('no text model should be called'); });
   const starting = createPipelineAdapter({ openSocket: sockets.create, fetch: fetch as unknown as typeof globalThis.fetch, engines: fakes.engines })
     .start({ context, config, credentials: config.device ? NONE : SERVER, clock, signal: abort.signal }, events);
   starting.catch(() => {});

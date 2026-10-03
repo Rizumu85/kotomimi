@@ -3,6 +3,98 @@
  * `fork-localai-locales.cjs`, each string as [English, 简体, 繁體].
  */
 module.exports = {
+  // The tour's fork steps and copy (`src/components/Tour/steps.ts`): written under `tour.steps.<id>`, beside upstream's own, not under `fork`.
+  tour: {
+    'provider-settings': {
+      content_kotomimi: [
+        'Here you choose a server or this computer. Under Advanced → Provider each stage — recognition, translation, grammar feedback — can be put where you like, and this computer\'s models can be shared with another device on your network.',
+        '在这里选择连接服务器，还是用这台电脑的模型。到「高级 → 提供商」里，可以分别指定识别、翻译、语法反馈各自在哪里运行，也可以把这台电脑的模型共享给局域网里的另一台设备。',
+        '在這裡選擇連線伺服器，還是用這台電腦的模型。到「進階 → 提供者」裡，可以分別指定辨識、翻譯、文法回饋各自在哪裡執行，也可以把這台電腦的模型共享給區域網路裡的另一台裝置。',
+      ],
+    },
+    'reading-aids': {
+      title: ['Reading aids', '阅读辅助', '閱讀輔助'],
+      content: ['Help for reading the other language, switched here:', '帮你读懂外语的辅助显示，在这里开关：', '幫你讀懂外語的輔助顯示，在這裡開關：'],
+      furigana: ['Furigana — kana above Japanese kanji.', '假名注音：日语汉字上方显示读音。', '假名注音：日語漢字上方顯示讀音。'],
+      romanization: ['Romanization — a line in Latin letters under Japanese, Korean and Russian.', '罗马音：日语、韩语、俄语下方加一行拉丁字母读音。', '羅馬拼音：日語、韓語、俄語下方加一行拉丁字母讀音。'],
+      fonts: ['Fonts for each language are under Settings → Fonts.', '各语言的字体在「设置 → 字体」里选。', '各語言的字型在「設定 → 字型」裡選。'],
+    },
+    'kotomimi-tips': {
+      title: ['Three more things', '还有三件事', '還有三件事'],
+      content: ['Worth knowing before you start:', '开始之前值得知道：', '開始之前值得知道：'],
+      typed: [
+        'During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.',
+        '会话开始后，底部会出现输入框：打一句话就能翻译。按 Ctrl+K 可以直接跳到输入框。',
+        '工作階段開始後，底部會出現輸入框：打一句話就能翻譯。按 Ctrl+K 可以直接跳到輸入框。',
+      ],
+      coach: [
+        'Speaking their language yourself? Turn on Grammar feedback under Advanced → Provider: your speech is checked instead of translated.',
+        '想自己直接说对方的语言？到「高级 → 提供商」打开「语法反馈」：你说的话不再翻译，而是帮你检查语法。',
+        '想自己直接說對方的語言？到「進階 → 提供者」開啟「文法回饋」：你說的話不再翻譯，而是幫你檢查文法。',
+      ],
+      share: [
+        'Another device can use this computer\'s models: Advanced → Provider → Share on the local network.',
+        '另一台设备也能用这台电脑的模型：「高级 → 提供商 → 局域网共享」。',
+        '另一台裝置也能用這台電腦的模型：「進階 → 提供者 → 區域網路共享」。',
+      ],
+    },
+  },
+  // The setup wizard's own step and card for the Kotomimi provider (`src/components/SetupWizard/steps/StepKotomimi.tsx`).
+  wizard: {
+    pathTitle: ['Kotomimi Pipeline', 'Kotomimi 自由搭配', 'Kotomimi 自由搭配'],
+    pathBadge: ['This app\'s own', '本应用特色', '本應用程式特色'],
+    pathDesc: [
+      'Your own server on the network, or this computer\'s own models — and any mix of the two.',
+      '用局域网里你自己的服务器，或这台电脑自己的模型，也可以两边混着用。',
+      '用區域網路裡你自己的伺服器，或這台電腦自己的模型，也可以兩邊混著用。',
+    ],
+    pathCost: [
+      'No account and no API key. Text only: subtitles with furigana, typed lookups and grammar feedback. A server means a LocalAI, or another Kotomimi sharing its models; this computer downloads models onto your disk.',
+      '不需要账号，也不需要 API 密钥。仅文本：带假名注音的字幕、打字翻译和语法反馈。服务器可以是 LocalAI，或另一台开启了共享的 Kotomimi；用这台电脑则要把模型下载到本地。',
+      '不需要帳號，也不需要 API 金鑰。僅文字：帶假名注音的字幕、打字翻譯和文法回饋。伺服器可以是 LocalAI，或另一台開啟了共享的 Kotomimi；用這台電腦則要把模型下載到本機。',
+    ],
+    title: ['Where should it run?', '在哪里运行？', '在哪裡執行？'],
+    intro: [
+      'Choose what listens and translates. You can change it, or mix the two stage by stage, later in Settings.',
+      '选择由谁来识别和翻译。之后可以在设置里随时更改，也可以按环节混搭。',
+      '選擇由誰來辨識和翻譯。之後可以在設定裡隨時更改，也可以按環節混搭。',
+    ],
+    server: ['A server on my network', '局域网里的服务器', '區域網路裡的伺服器'],
+    serverDesc: [
+      'A LocalAI, or another computer running Kotomimi with sharing turned on. This computer stays light.',
+      'LocalAI，或另一台开启了「局域网共享」的 Kotomimi。这台电脑几乎不占资源。',
+      'LocalAI，或另一台開啟了「區域網路共享」的 Kotomimi。這台電腦幾乎不占資源。',
+    ],
+    device: ['This computer', '这台电脑', '這台電腦'],
+    deviceDesc: [
+      'Models downloaded by the app run right here. Nothing else is needed; a GPU helps.',
+      '用应用下载的模型，全部在本机运行。不需要别的设备；有独立显卡会更快。',
+      '用應用程式下載的模型，全部在本機執行。不需要別的裝置；有獨立顯示卡會更快。',
+    ],
+    tryServer: ['Connect', '连接', '連線'],
+    addressMissing: ['Type the server\'s address first, for example 192.168.1.10:8080.', '请先填写服务器地址，例如 192.168.1.10:8080。', '請先填寫伺服器位址，例如 192.168.1.10:8080。'],
+    serverFound: ['Connected — the server lists {{count}} model(s).', '连接成功，服务器上有 {{count}} 个模型。', '連線成功，伺服器上有 {{count}} 個模型。'],
+    serverUnreachable: ['Could not reach the server: {{message}}', '连接不上服务器：{{message}}', '連線不上伺服器：{{message}}'],
+    pendingAddress: [
+      'No server address yet — add it in Settings before you start.',
+      '还没有填服务器地址。开始之前请到设置里补上。',
+      '還沒有填伺服器位址。開始之前請到設定裡補上。',
+    ],
+    deviceNotice: [
+      'Nothing to enter. After setup, download a speech recognition model under Models — the tour shows where. Translation works at once with the online translator, and offline models can be downloaded too.',
+      '这里不用填任何东西。向导结束后，在「模型」里下载一个语音识别模型，引导会指给你看。翻译默认用在线翻译，马上可用，也可以再下载离线模型。',
+      '這裡不用填任何東西。精靈結束後，在「模型」裡下載一個語音辨識模型，導覽會指給你看。翻譯預設用線上翻譯，馬上可用，也可以再下載離線模型。',
+    ],
+  },
+  // Help: the fork's own link, in place of upstream's support address and discussion board.
+  help: {
+    issues: ['Report a problem', '反馈问题', '回報問題'],
+    issuesTooltip: [
+      'Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page.',
+      'Kotomimi 是 Sokuji 的独立分支。这个应用的问题请到它自己的 GitHub 页面反馈。',
+      'Kotomimi 是 Sokuji 的獨立分支。這個應用程式的問題請到它自己的 GitHub 頁面回報。',
+    ],
+  },
   // The fonts (`src/components/Fonts`).
   fonts: {
     title: ['Fonts', '字体', '字型'],

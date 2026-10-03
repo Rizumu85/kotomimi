@@ -99,6 +99,8 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ variant, onClose }) => {
           provider: draft.provider!,
           mode: preset.mode, textOnly: preset.textOnly, isSignedIn,
           apiKeyValid: draft.providerPath === 'own-key' ? !draft.credentialsPending : null,
+          // Fork: the Kotomimi provider set to run on this computer has models to download.
+          deviceStages: (draft.provider as string | null) === 'localai' && draft.credentialChoice?.value === 'device',
           env: { isElectron: isElectron(), isExtension: isExtension(), isLinux: isLinux(), isMacOS: isMacOS(), isWindows: isWindows() },
         }));
       }

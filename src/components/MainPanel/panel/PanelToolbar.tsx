@@ -180,6 +180,7 @@ const PanelToolbar: React.FC<PanelToolbarProps> = ({ legs, exporter, hasConversa
           title={t('mainPanel.displaySettings', 'Display settings')}
           aria-label={t('mainPanel.displaySettings', 'Display settings')}
           type="button"
+          data-tour="display-settings"
         >
           <Settings size={14} />
         </button>

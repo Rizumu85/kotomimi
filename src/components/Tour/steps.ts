@@ -31,6 +31,8 @@ export interface TourStep {
 const speaks = (c: TourCtx) => c.mode !== 'participant' && !c.textOnly;
 const hasMic = (c: TourCtx) => c.mode !== 'participant';
 const hasParticipant = (c: TourCtx) => c.mode !== 'speaker';
+// Fork: the Kotomimi provider (`src/providers/openai/localai.ts`). Its steps show for it alone, so every other provider's tour is upstream's.
+const isKotomimi = (c: TourCtx) => (c.provider as string) === 'localai';
 
 export const BASICS_STEPS: readonly TourStep[] = [
   { id: 'welcome' },
@@ -59,9 +61,14 @@ export const BASICS_STEPS: readonly TourStep[] = [
   {
     id: 'provider-settings', anchor: 'provider-section', when: (c) => c.providerPath === 'own-key',
     prepare: (_c, a) => a.openSettings('provider'), placement: 'left',
-    copyVariant: (c) => (c.apiKeyValid === true ? null : 'pending'),
+    // Fork: the Kotomimi provider has no key to speak of: its copy says where its stages run.
+    copyVariant: (c) => (isKotomimi(c) ? 'kotomimi' : c.apiKeyValid === true ? null : 'pending'),
   },
-  { id: 'models', anchor: 'engine-chips', when: (c) => c.providerPath === 'offline', prepare: (_c, a) => a.openSettings('provider'), placement: 'left' },
+  // Fork: also for the Kotomimi provider while a stage runs on this computer: it draws the same chips.
+  { id: 'models', anchor: 'engine-chips', when: (c) => c.providerPath === 'offline' || c.deviceStages === true, prepare: (_c, a) => a.openSettings('provider'), placement: 'left' },
+  // Fork: the reading aids and the fonts, then what else this fork adds — for its own provider's users.
+  { id: 'reading-aids', anchor: 'display-settings', when: isKotomimi, prepare: (_c, a) => a.closeSettings(), placement: 'bottom', bullets: ['furigana', 'romanization', 'fonts'] },
+  { id: 'kotomimi-tips', when: isKotomimi, bullets: ['typed', 'coach', 'share'] },
   {
     id: 'start', anchor: 'main-action', prepare: (_c, a) => a.closeSettings(), placement: 'top',
     copyVariant: (c) =>

@@ -17,6 +17,7 @@ import Button from '../../Settings/shared/Button';
 import FormInput from '../../Settings/shared/FormInput';
 import StatusMessage from '../../Settings/shared/StatusMessage';
 import type { SetupAction, SetupDraft } from '../setupDraft';
+import StepKotomimi, { KOTOMIMI_PROVIDER } from './StepKotomimi';
 
 interface Props { draft: SetupDraft; dispatch: React.Dispatch<SetupAction> }
 
@@ -78,6 +79,9 @@ const StepCredentials: React.FC<Props> = ({ draft, dispatch }) => {
       </section>
     );
   }
+
+  // Fork: the Kotomimi provider has no key: its step asks where it runs instead.
+  if (draft.provider === KOTOMIMI_PROVIDER) return <StepKotomimi draft={draft} dispatch={dispatch} skipButton={skipButton} />;
 
   return <OwnKeyCredentials draft={draft} dispatch={dispatch} skipButton={skipButton} />;
 };

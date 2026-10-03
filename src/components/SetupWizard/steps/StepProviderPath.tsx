@@ -8,6 +8,7 @@ import type { ProviderType } from '../../../types/Provider';
 import type { ProviderPath } from '../../../lib/setup/types';
 import { availablePaths, managedProvider, managedOption, ownKeyOptions, offlineOptions, wizardProvider } from '../providerPaths';
 import type { SetupAction, SetupDraft } from '../setupDraft';
+import { KOTOMIMI_PROVIDER } from './StepKotomimi';
 
 interface Props { draft: SetupDraft; dispatch: React.Dispatch<SetupAction> }
 
@@ -45,6 +46,10 @@ const StepProviderPath: React.FC<Props> = ({ draft, dispatch }) => {
   // path whose fitness for the scenario is known before the user picks it.
   const managedFit = managedOption(scenario)?.fit ?? { ok: true as const };
 
+  // Fork: the Kotomimi provider, which is on the own-key path by its kind and needs no key: a card of its own, and off the key list.
+  const kotomimi = ownKeyOptions(scenario).find((option) => option.id === KOTOMIMI_PROVIDER);
+  const kotomimiChosen = draft.providerPath === 'own-key' && draft.provider === KOTOMIMI_PROVIDER;
+
   const choosePath = (path: ProviderPath) => {
     if (path === 'managed') dispatch({ type: 'setPath', path, provider: managedProvider() });
     else if (path === 'offline') dispatch({ type: 'setPath', path, provider: Provider.LOCAL_INFERENCE });
@@ -55,11 +60,26 @@ const StepProviderPath: React.FC<Props> = ({ draft, dispatch }) => {
     <section className="setup-step">
       <h2>{t('setup.steps.path.title', 'Choose an AI service provider')}</h2>
       <div className="setup-cards" role="radiogroup" aria-label={t('setup.steps.path.title', 'Choose an AI service provider')}>
+        {kotomimi && (
+          <label className={`setup-card${kotomimiChosen ? ' is-selected' : ''}${kotomimi.fit.ok ? '' : ' is-disabled'}`}>
+            <input type="radio" name="path" value="kotomimi" checked={kotomimiChosen} disabled={!kotomimi.fit.ok}
+              onChange={() => dispatch({ type: 'setPath', path: 'own-key', provider: KOTOMIMI_PROVIDER })} />
+            <span className="setup-card__title">
+              {t('fork.wizard.pathTitle')}
+              {kotomimi.fit.ok && <em className="setup-card__badge">{t('fork.wizard.pathBadge')}</em>}
+            </span>
+            <span className="setup-card__desc">{t('fork.wizard.pathDesc')}</span>
+            <span className="setup-card__cost">{t('fork.wizard.pathCost')}</span>
+            {!kotomimi.fit.ok && <span className="setup-card__reason">{reasonOf(kotomimi.fit.reason)}</span>}
+          </label>
+        )}
         {availablePaths().map((path) => {
           const unfit = path === 'managed' && !managedFit.ok ? managedFit : null;
+          // The own-key card is the other providers' while the Kotomimi card holds the choice.
+          const selected = draft.providerPath === path && !(path === 'own-key' && kotomimiChosen);
           return (
-            <label key={path} className={`setup-card${draft.providerPath === path ? ' is-selected' : ''}${unfit ? ' is-disabled' : ''}`}>
-              <input type="radio" name="path" value={path} checked={draft.providerPath === path} disabled={!!unfit}
+            <label key={path} className={`setup-card${selected ? ' is-selected' : ''}${unfit ? ' is-disabled' : ''}`}>
+              <input type="radio" name="path" value={path} checked={selected} disabled={!!unfit}
                 onChange={() => choosePath(path)} />
               <span className="setup-card__title">
                 {t(`setup.paths.${path}.title`, PATH_COPY[path].title)}
@@ -73,7 +93,7 @@ const StepProviderPath: React.FC<Props> = ({ draft, dispatch }) => {
         })}
       </div>
 
-      {draft.providerPath === 'own-key' && (
+      {draft.providerPath === 'own-key' && !kotomimiChosen && (
         <>
         <p className="setup-step__note">
           {t('setup.paths.ownKeyNote', 'Pick the provider you have an account with. Each one issues its own key:')}
@@ -88,7 +108,7 @@ const StepProviderPath: React.FC<Props> = ({ draft, dispatch }) => {
           </a>
         </p>
         <div className="setup-cards setup-cards--compact" role="radiogroup" aria-label={t('setup.paths.pickProvider', 'Which provider?')}>
-          {ownKeyOptions(scenario).map(({ id, fit }) => (
+          {ownKeyOptions(scenario).filter((option) => option.id !== KOTOMIMI_PROVIDER).map(({ id, fit }) => (
             <label key={id} className={`setup-card${draft.provider === id ? ' is-selected' : ''}${fit.ok ? '' : ' is-disabled'}`}>
               <input type="radio" name="provider" value={id} checked={draft.provider === id} disabled={!fit.ok}
                 onChange={() => dispatch({ type: 'setProvider', provider: id })} />

@@ -266,7 +266,9 @@ describe('interface language in Help', () => {
   it('leaves the other help links in place', () => {
     render(<HelpSection />);
     expect(screen.getByText(/restart setup guide/i)).toBeTruthy();
-    expect(screen.getByText('support@kizuna.ai')).toBeTruthy();
+    // Fork: upstream's support address and discussions are gone; the fork's own issues take their place.
+    expect(screen.queryByText('support@kizuna.ai')).toBeNull();
+    expect(screen.getByText('Report a problem')).toBeTruthy();
   });
 
   it('makes every help action reachable from the keyboard', () => {
@@ -324,7 +326,7 @@ describe('diagnostic logs switch in Help', () => {
     const links = Array.from(container.querySelectorAll('.help-links .help-link')).map((a) => a.textContent?.trim() ?? '');
     const logs = links.indexOf('Diagnostic logs');
     expect(logs).toBeGreaterThanOrEqual(0);
-    expect(links[logs + 1]).toBe('support@kizuna.ai');
+    expect(links[logs + 1]).toBe('Report a problem');
   });
 
   it('turns diagnostic logs on', () => {

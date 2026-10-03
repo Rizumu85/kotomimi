@@ -24,6 +24,8 @@ export interface TourCtx {
   isSignedIn: boolean;
   /** settingsStore.isApiKeyValid — or, right after the wizard, its outcome. */
   apiKeyValid: boolean | null;
+  /** Fork: the Kotomimi provider runs a stage on this computer, so it has models to download. Absent: none. */
+  deviceStages?: boolean;
 }
 
 export function buildTourCtx(i: {
@@ -33,6 +35,7 @@ export function buildTourCtx(i: {
   textOnly: boolean;
   isSignedIn: boolean;
   apiKeyValid: boolean | null;
+  deviceStages?: boolean;
   env: { isElectron: boolean; isExtension: boolean; isLinux: boolean; isMacOS: boolean; isWindows: boolean };
 }): TourCtx {
   const os: TourCtx['os'] = i.env.isLinux ? 'linux' : i.env.isMacOS ? 'mac' : i.env.isWindows ? 'windows' : 'other';
@@ -50,5 +53,6 @@ export function buildTourCtx(i: {
     textOnly: i.textOnly,
     isSignedIn: i.isSignedIn,
     apiKeyValid: i.apiKeyValid,
+    ...(i.deviceStages ? { deviceStages: true } : {}),
   };
 }

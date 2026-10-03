@@ -230,6 +230,14 @@ export const localaiCredentials: Provider<LocalAISettings, LocalAICredentials, n
     // No Realtime key (see the header) unless the server asks for one: the adapter then offers no subprotocol.
     return { apiKey: serverKey ?? '', endpoint, ...(translateKey ? { translateKey } : {}), ...(coachKey ? { coachKey } : {}) };
   },
+  // Where it listens, chosen right above the address: the one choice a user of the simple layout needs, and the one that decides whether an address is asked for at all.
+  choice: {
+    setting: 'asrVia',
+    options: [
+      { value: 'server', labelKey: 'providers.localai.choiceServer' },
+      { value: 'device', labelKey: 'providers.localai.choiceDevice' },
+    ],
+  },
 };
 
 export interface LocalAICheckDeps {

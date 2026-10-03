@@ -34,6 +34,8 @@ const PROVIDER = {
   route: ['Where each stage runs', '各环节在哪里运行', '各環節在哪裡執行'],
   placeServer: ['Server', '服务器', '伺服器'],
   placeDevice: ['This computer', '这台电脑', '這台電腦'],
+  choiceServer: ['Connect to a server', '连接服务器', '連線伺服器'],
+  choiceDevice: ['Use this computer', '用这台电脑', '用這台電腦'],
   notDownloaded: ['no model downloaded', '还没下载模型', '尚未下載模型'],
   notChosen: ['no model chosen', '还没选模型', '尚未選模型'],
 
@@ -134,8 +136,8 @@ const FORK = {
   romanization: ['Romanization (Japanese, Korean, Russian)', '显示罗马音（日语、韩语、俄语）', '顯示羅馬拼音（日語、韓語、俄語）'],
 };
 
-/** Further groups of the fork's own strings, each written under `fork.<group>`: filled in beside this file. */
-const GROUPS = require('./fork-locale-groups.cjs');
+/** Further groups of the fork's own strings, each written under `fork.<group>` — and the tour's fork copy, written beside upstream's under `tour.steps.<id>`: filled in beside this file. */
+const { tour: TOUR, ...GROUPS } = require('./fork-locale-groups.cjs');
 
 const COLUMN = { zh_CN: 1, zh_TW: 2 };
 const pick = (table, column) => Object.fromEntries(Object.entries(table).map(([key, value]) => [key, value[column] ?? value[0]]));
@@ -153,6 +155,8 @@ for (const lang of fs.readdirSync(root)) {
   const column = COLUMN[lang] ?? 0;
   catalog.providers.localai = pick(PROVIDER, column);
   catalog.fork = { ...pick(FORK, column), ...Object.fromEntries(Object.entries(GROUPS).map(([group, table]) => [group, pick(table, column)])) };
+  if (!catalog.tour || !catalog.tour.steps) throw new Error(`${lang}: no "tour.steps" block`);
+  for (const [step, table] of Object.entries(TOUR)) catalog.tour.steps[step] = { ...(catalog.tour.steps[step] ?? {}), ...pick(table, column) };
   const next = JSON.stringify(catalog, null, 2).replace(/\n/g, eol) + (text.endsWith('\n') ? eol : '');
   if (next !== text) {
     fs.writeFileSync(file, next);
