@@ -7,6 +7,7 @@ import { useLoadSettings } from '../stores/settingsStore';
 import { useSubtitleStore } from '../stores/subtitleStore';
 import { useAnnotationStore } from '../stores/annotationStore';
 import { useLanStore } from '../stores/lanStore';
+import { useLocalServerStore } from '../stores/localServerStore';
 import { useFontStore } from '../stores/fontStore';
 import { useConversationDisplayStore } from '../stores/conversationDisplayStore';
 import { useSetupStore } from '../stores/setupStore';
@@ -43,6 +44,8 @@ export function Home() {
 
     // Fork: sharing this computer's models, left on, starts again with the app. On its own: it waits for the model scan, which nothing else here should.
     void useLanStore.getState().hydrate();
+    // Fork: a LocalAI installed on this computer — whether it is up, and started with the app when that was asked for.
+    void useLocalServerStore.getState().hydrate();
   }, []); // Empty dependency array - only run once on mount
 
   return (

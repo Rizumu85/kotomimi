@@ -16,6 +16,7 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 | 这台电脑的内置模型 | 识别和翻译可以用应用自己下载的模型，全部在本机完成，不需要服务器 | `localaiDevice.ts`、`LocalAIEngine.tsx` |
 | 共享给其他设备 | 把这台电脑的模型共享给局域网里的另一台 Kotomimi | `electron/lan-server.js`、`src/lib/lan/` |
 | 自动找到另一台设备 | 选「用另一台设备」时，应用自己搜索局域网，把找到的 Kotomimi 和模型服务器列出来，点一下就连上，不用知道地址 | `electron/lan-discover.js`、`src/components/LanSharing/ServerFinder.tsx` |
+| 这台电脑上的 LocalAI | 电脑上装了 LocalAI 时，由应用启动和停止它，显示状态和模型 | `electron/local-server.js`、`src/components/LanSharing/LocalServerCard.tsx` |
 | 自定义模型 | 从 Hugging Face 添加模型库里没有的 Whisper 模型 | `src/lib/local-inference/customModels.ts` |
 | 语法反馈 | 自己说对方语言时，不翻译，而是检查语法：没问题回 ✓，有问题给出改正句和原因。提示词按语言自动选择，也可以自己写 | `coachPrompt.ts` |
 | 打字查词 | 会话中按 Ctrl+K，输入母语，得到对方语言的译文 | `src/components/MainPanel/panel/TypedText.tsx` |
@@ -124,6 +125,29 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 - 其他系统不处理：macOS 会自己询问，要允许。
 - 共享的是应用自己下载的模型（包括自定义模型）。要共享哪个，就在共享区域的模型库里下载哪个。
 - 每个连接占用一个识别模型的内存。最多同时 6 个连接。
+
+### 哪边的设置算数
+
+出力的那台电脑和使用的那台电脑各有一套设置，容易分不清以哪边为准。规则只有两条，共享卡片上也写着：
+
+- **使用的那台设备决定**：语言、用哪个模型、断句的灵敏度。这些随每次请求发过来。
+- **出力的这台电脑只决定**：有哪些模型可选（它下载了哪些），和访问密钥。它自己"语音识别 / 翻译"选在哪里，只管它自己开会话时用，不影响共享。
+
+出力的电脑在共享期间，标题栏会显示"共享中"，有设备在用时显示路数（`ServingBadge.tsx`）。
+
+### 这台电脑上的 LocalAI
+
+有些模型不归应用自己跑：Apple 的语音识别、MLX 模型、GGUF 翻译模型。它们由同一台电脑上的 LocalAI 运行。电脑上装了 LocalAI 时（`~/.localai/bin/local-ai`，或 Homebrew 装的），共享区域下面会多一张卡片（`electron/local-server.js`）：
+
+- **启动和停止**由应用来做，可以设成随应用启动。应用退出时，它启动的 LocalAI 一起停。输出记在应用日志目录的 `localai.log`。
+- 启动参数取自 `~/.localai` 下存在的目录（models、backends、data 等）和 `launcher.json` 里的监听地址，默认 `0.0.0.0:8080`。每个参数只在这个版本的 LocalAI 自己的帮助里出现时才给，避免旧版本因为不认识的参数起不来。Apple 芯片上会带 `LOCALAI_FORCE_META_BACKEND_CAPABILITY=metal`。
+- **别的程序启动的 LocalAI 不碰**：端口上已经有回应时，卡片显示"运行中 · 由其他程序启动"，没有停止按钮。想让应用来管，先退出那个程序。
+- 安装和删除模型仍然在 LocalAI 自己的网页里做，卡片上有链接。
+- 没装 LocalAI 的电脑看不到这张卡片。
+
+对其他设备和应用的其余部分来说，它还是原来那台服务器：搜索会找到它，显示为 LocalAI；这台电脑自己用它时，在列表里选"这台电脑上的服务器"。
+
+### 协议上的差别
 
 对另一台设备来说，这就是一台说同一套协议的服务器，所以下一节的约定对它同样适用。它和 LocalAI 有三处不同，客户端从模型列表里的 `owned_by: "kotomimi"` 认出它并自动处理：
 

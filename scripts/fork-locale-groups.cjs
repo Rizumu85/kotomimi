@@ -165,6 +165,36 @@ module.exports = {
     use: ['Use {{name}}', '使用 {{name}}', '使用 {{name}}'],
     manual: ['Or type its address', '或者手动填写地址', '或者手動填寫位址'],
   },
+  // The LocalAI installed on this computer, run by the app (`src/components/LanSharing/LocalServerCard.tsx`).
+  server: {
+    title: ['LocalAI on this computer', '这台电脑上的 LocalAI', '這台電腦上的 LocalAI'],
+    intro: [
+      'A LocalAI is installed here, with models of its own. Kotomimi starts and stops it. Other devices find it on your network, listed as LocalAI.',
+      '这台电脑装了 LocalAI，它有自己的一套模型。由 Kotomimi 负责启动和停止。别的设备会在局域网里搜到它，列表里显示为 LocalAI。',
+      '這台電腦裝了 LocalAI，它有自己的一套模型。由 Kotomimi 負責啟動和停止。別的裝置會在區域網路裡搜到它，清單裡顯示為 LocalAI。',
+    ],
+    stopped: ['Not running', '未启动', '未啟動'],
+    starting: ['Starting…', '正在启动…', '正在啟動…'],
+    running: ['Running · {{count}} model(s)', '运行中 · {{count}} 个模型', '執行中 · {{count}} 個模型'],
+    external: ['Running · {{count}} model(s) · started by another program', '运行中 · {{count}} 个模型 · 由其他程序启动', '執行中 · {{count}} 個模型 · 由其他程式啟動'],
+    failed: ['It would not start', '启动失败', '啟動失敗'],
+    start: ['Start', '启动', '啟動'],
+    stop: ['Stop', '停止', '停止'],
+    autoStart: ['Start it when Kotomimi opens', '打开 Kotomimi 时自动启动', '開啟 Kotomimi 時自動啟動'],
+    externalNote: [
+      'Kotomimi did not start it — another program did, such as Sokuji Remote — so it cannot be stopped from here. To let Kotomimi run it, quit that program, then come back and press Start.',
+      '它不是 Kotomimi 启动的，而是别的程序启动的（比如 Sokuji Remote），所以这里不能停止它。想让 Kotomimi 来管，先退出那个程序，再回到这里点「启动」。',
+      '它不是 Kotomimi 啟動的，而是別的程式啟動的（比如 Sokuji Remote），所以這裡不能停止它。想讓 Kotomimi 來管，先結束那個程式，再回到這裡按「啟動」。',
+    ],
+    useHere: [
+      'To use it on this computer too: choose "Another device" above, and pick "On this computer" from the list.',
+      '这台电脑自己也想用它：在上面选「另一台设备」，再从列表里选「这台电脑上的服务器」。',
+      '這台電腦自己也想用它：在上面選「另一台裝置」，再從清單裡選「這台電腦上的伺服器」。',
+    ],
+    openPage: ['Open LocalAI\'s page to install or remove models', '打开 LocalAI 的页面，安装或删除模型', '開啟 LocalAI 的頁面，安裝或刪除模型'],
+    more: ['and {{count}} more', '还有 {{count}} 个', '還有 {{count}} 個'],
+    lastWords: ['What LocalAI said last', 'LocalAI 最后的输出', 'LocalAI 最後的輸出'],
+  },
   lan: {
     title: ['Share with other devices', '共享给其他设备', '共享給其他裝置'],
     intro: [
@@ -202,6 +232,24 @@ module.exports = {
     copied: ['Copied', '已复制', '已複製'],
     noNetwork: ['This computer is on no network.', '这台电脑当前没有连接网络。', '這台電腦目前沒有連上網路。'],
     models: ['Models shared', '共享的模型', '共享的模型'],
+    rulesTitle: ['Which side\'s settings count', '哪边的设置算数', '哪邊的設定算數'],
+    rulesTheirs: [
+      'Set on the other device: the languages, which model to use, and how pauses split sentences.',
+      '在对方那台设备上设置：语言、用哪个模型、断句的灵敏度。',
+      '在對方那台裝置上設定：語言、用哪個模型、斷句的靈敏度。',
+    ],
+    rulesHere: [
+      'Set here: only which models are on offer (the ones downloaded on this computer) and the access key. The recognition and translation choices above are for this computer\'s own sessions and change nothing that is shared.',
+      '在这台电脑上只决定两件事：有哪些模型可选（这里下载了哪些），和访问密钥。上面「语音识别 / 翻译」的选择只管这台电脑自己用，不影响共享出去的内容。',
+      '在這台電腦上只決定兩件事：有哪些模型可選（這裡下載了哪些），和存取金鑰。上面「語音辨識 / 翻譯」的選擇只管這台電腦自己用，不影響共享出去的內容。',
+    ],
+    serving: ['Sharing', '共享中', '共享中'],
+    servingClients: ['Sharing · {{count}} in use', '共享中 · {{count}} 路在用', '共享中 · {{count}} 路在用'],
+    servingTip: [
+      'This computer is lending its models to other devices. The languages and the choice of model are set on those devices, not here.',
+      '这台电脑正在把模型借给其他设备用。语言和用哪个模型，在那些设备上设置，不在这里。',
+      '這台電腦正在把模型借給其他裝置用。語言和用哪個模型，在那些裝置上設定，不在這裡。',
+    ],
     noRecognizer: ['No speech recognition model downloaded yet', '还没有下载语音识别模型', '尚未下載語音辨識模型'],
     showLibrary: ['Download or manage models', '下载或管理模型', '下載或管理模型'],
     hideLibrary: ['Hide the model library', '收起模型库', '收起模型庫'],

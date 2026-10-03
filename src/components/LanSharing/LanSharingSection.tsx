@@ -4,12 +4,18 @@
  * address to type, with a button that copies it — and what it will find: the
  * models this computer has ready. The port and the access key sit behind
  * "Options", since most never touch them. Model management is here too: a
- * computer that only shares has no stage of its own to hang it on.
+ * computer that only shares has no stage of its own to hang it on. And it
+ * says which side's settings count — the other device chooses the languages
+ * and the model; this one only what there is to choose from — so nobody has
+ * to wonder which screen is the one to set. Below it, where one is installed,
+ * the LocalAI of this computer (`LocalServerCard`): the other thing it can
+ * lend.
  */
 import { useEffect, useMemo, useState } from 'react';
 import { Check, CircleHelp, Copy, Languages, Loader, Mic, Share2, ShieldAlert, ShieldCheck, TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CustomModels } from '../CustomModels/CustomModels';
+import { LocalServerCard } from './LocalServerCard';
 import { languageNameFor } from '../Settings/engine/languageName';
 import ToggleSwitch from '../Settings/shared/ToggleSwitch';
 import { ModelManagementSection } from '../Settings/sections/ModelManagementSection';
@@ -165,6 +171,14 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
             </div>
           )}
 
+          <div className="kt-lan__rules">
+            <div className="kt-lan__label">{t('fork.lan.rulesTitle')}</div>
+            <ul>
+              <li>{t('fork.lan.rulesTheirs')}</li>
+              <li>{t('fork.lan.rulesHere')}</li>
+            </ul>
+          </div>
+
           <details className="kt-details kt-lan__options">
             <summary>{t('fork.lan.options')}</summary>
             <div className="kt-lan__fields">
@@ -181,6 +195,8 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
           </details>
         </div>
       )}
+
+      <LocalServerCard disabled={disabled} />
     </div>
   );
 }

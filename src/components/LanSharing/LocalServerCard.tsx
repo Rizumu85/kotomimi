@@ -1,0 +1,105 @@
+/**
+ * Fork: the LocalAI installed on this computer, in the settings of what this
+ * computer lends to others. The app starts and stops it; it says whether it
+ * is up and which models it serves, and opens LocalAI's own page for
+ * installing more. Drawn only where a LocalAI is installed: nobody else
+ * needs to hear of it.
+ *
+ * One that something else started is shown as running and left alone — there
+ * is then no button to stop it, and a line that says why.
+ */
+import { useEffect, useState } from 'react';
+import { ExternalLink, Loader, Play, Server, Square, TriangleAlert } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import ToggleSwitch from '../Settings/shared/ToggleSwitch';
+import { useLocalServerStore } from '../../stores/localServerStore';
+import { openExternalUrl } from '../../utils/openExternalUrl';
+import './LocalServerCard.scss';
+
+/** Models named in the card before "and N more". */
+const SHOWN = 8;
+
+export function LocalServerCard({ disabled = false }: { disabled?: boolean }) {
+  const { t } = useTranslation();
+  const status = useLocalServerStore((s) => s.status);
+  const autoStart = useLocalServerStore((s) => s.autoStart);
+  const [busy, setBusy] = useState(false);
+  // Something else may have started or stopped it since the app opened: asked again each time the settings show it.
+  useEffect(() => { void useLocalServerStore.getState().refresh(); }, []);
+
+  if (!status.installed && status.state !== 'external') return null;
+
+  const up = status.state === 'running' || status.state === 'external';
+  const starting = status.state === 'starting' || (busy && !up);
+  const act = async (action: 'start' | 'stop') => {
+    setBusy(true);
+    try {
+      await useLocalServerStore.getState()[action]();
+    } finally {
+      setBusy(false);
+    }
+  };
+  const stateText = starting
+    ? t('fork.server.starting')
+    : status.state === 'running' ? t('fork.server.running', { count: status.models.length })
+      : status.state === 'external' ? t('fork.server.external', { count: status.models.length })
+        : status.state === 'failed' ? t('fork.server.failed')
+          : t('fork.server.stopped');
+
+  return (
+    <div className="kt-ls">
+      <div className="kt-ls__head">
+        <Server size={15} className="kt-ls__icon" />
+        <span className="kt-ls__title">{t('fork.server.title')}</span>
+      </div>
+      <p className="kt-note">{t('fork.server.intro')}</p>
+
+      <div className={`kt-ls__state kt-ls__state--${starting ? 'starting' : status.state}`} role="status">
+        {starting ? <Loader size={13} className="kt-ls__spin" /> : status.state === 'failed' ? <TriangleAlert size={13} /> : <span className="kt-ls__dot" aria-hidden />}
+        <span>{stateText}</span>
+      </div>
+
+      {status.state === 'external' ? (
+        <p className="kt-note">{t('fork.server.externalNote')}</p>
+      ) : (
+        <div className="kt-ls__actions">
+          {status.state === 'running' ? (
+            <button type="button" className="kt-ls__button" onClick={() => { void act('stop'); }} disabled={disabled || busy}>
+              <Square size={12} />{t('fork.server.stop')}
+            </button>
+          ) : (
+            <button type="button" className="kt-ls__button kt-ls__button--primary" onClick={() => { void act('start'); }} disabled={disabled || starting}>
+              <Play size={12} />{t('fork.server.start')}
+            </button>
+          )}
+        </div>
+      )}
+
+      {status.state === 'failed' && status.tail && (
+        <details className="kt-details" open>
+          <summary>{t('fork.server.lastWords')}</summary>
+          <pre>{status.tail}</pre>
+        </details>
+      )}
+
+      {up && status.models.length > 0 && (
+        <div className="kt-ls__models">
+          {status.models.slice(0, SHOWN).map((id) => <span key={id} className="kt-ls__model">{id}</span>)}
+          {status.models.length > SHOWN && <span className="kt-ls__model kt-ls__model--more">{t('fork.server.more', { count: status.models.length - SHOWN })}</span>}
+        </div>
+      )}
+      {up && (
+        <>
+          <p className="kt-note">{t('fork.server.useHere')}</p>
+          <button type="button" className="kt-ls__link" onClick={() => openExternalUrl(`http://127.0.0.1:${status.port}/`)}>
+            <ExternalLink size={12} />{t('fork.server.openPage')}
+          </button>
+        </>
+      )}
+
+      {status.state !== 'external' && (
+        <ToggleSwitch checked={autoStart} onChange={() => useLocalServerStore.getState().setAutoStart(!autoStart)} label={t('fork.server.autoStart')} disabled={disabled} />
+      )}
+    </div>
+  );
+}

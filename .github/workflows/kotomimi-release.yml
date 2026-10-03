@@ -84,6 +84,8 @@ jobs:
           electron/lan-server.test.js
           electron/lan-firewall.test.js
           electron/lan-discover.test.js
+          electron/local-server.test.js
+          src/components/TitleBar
           src/components/LanSharing
           src/components/providers
           electron/ipc-channels.test.js

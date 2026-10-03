@@ -256,6 +256,21 @@
     border-top: 1px solid vars.$border-subtle;
   }
 
+  // Which side's settings count: two plain lines.
+  .kt-lan__rules {
+    ul {
+      margin: 0;
+      padding-left: 16px;
+      font-size: vars.$font-caption;
+      line-height: 1.6;
+      color: vars.$text-secondary;
+    }
+
+    li + li {
+      margin-top: 2px;
+    }
+  }
+
   .kt-lan__options {
     margin-top: vars.$space-3;
   }

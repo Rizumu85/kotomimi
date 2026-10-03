@@ -165,7 +165,9 @@ export default defineConfig(({ command, mode }) => {
             // Fork: sharing this computer's models on the local network
             'lan-server': 'electron/lan-server.js',
             'lan-firewall': 'electron/lan-firewall.js',
-            'lan-discover': 'electron/lan-discover.js'
+            'lan-discover': 'electron/lan-discover.js',
+            // Fork: a LocalAI installed on this computer, run by the app
+            'local-server': 'electron/local-server.js'
           },
           onstart(args) {
             // SOKUJI_DEV_NO_ELECTRON=1 serves the renderer alone, for headless

@@ -70,6 +70,10 @@ export const INVOKE_CHANNELS = [
   'lan:firewall-allow',
   // Fork: the devices of the local network whose models this app can use (electron/lan-discover.js)
   'lan:discover',
+  // Fork: the LocalAI installed on this computer, started and stopped by the app (electron/local-server.js)
+  'local-server:get',
+  'local-server:start',
+  'local-server:stop',
   // Native local-inference sidecar lifecycle
   'native-host:start',
   'native-host:stop',

@@ -1,0 +1,32 @@
+// Fork: "this computer is serving other devices", in the title bar (ServingBadge.tsx).
+// The title bar's own sizes; green, the app's colour for what is on.
+
+.kt-serving {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  margin-right: 4px;
+  padding: 0 8px;
+  font-size: 11px;
+  line-height: 1;
+  color: #10a37f;
+  background: rgba(16, 163, 127, 0.12);
+  border: 1px solid rgba(16, 163, 127, 0.35);
+  border-radius: 999px;
+  white-space: nowrap;
+  cursor: default;
+
+  &.is-busy {
+    color: #fff;
+    background: rgba(16, 163, 127, 0.55);
+    border-color: transparent;
+  }
+}
+
+// A narrow window keeps the mark and drops the words.
+@media (max-width: 520px) {
+  .kt-serving .kt-serving__label {
+    display: none;
+  }
+}

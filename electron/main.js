@@ -11,6 +11,7 @@ const { createWsHeaderRules } = require('./ws-header-rules.js');
 const { startLanServer } = require('./lan-server');
 const { firewallStatus, allowThroughFirewall } = require('./lan-firewall');
 const { discoverServers } = require('./lan-discover');
+const { createLocalServer } = require('./local-server');
 const { applyLinuxGpuFlags } = require('./linux-gpu-flags');
 const { acquireSingleInstanceLock, createFocusRelay } = require('./single-instance');
 
@@ -1250,6 +1251,29 @@ ipcMain.handle('lan:stop', async () => {
 ipcMain.handle('lan:reply', (event, args) => lanServer?.reply(args?.id, args ?? {}) ?? false);
 ipcMain.handle('lan:send', (event, args) => lanServer?.send(args?.id, args?.data ?? '') ?? false);
 ipcMain.handle('lan:close-socket', (event, args) => { lanServer?.closeSocket(args?.id, args?.code, args?.reason); return true; });
+
+// Fork: a LocalAI installed on this computer, run by the app (electron/local-server.js): started and stopped from the
+// settings, its output kept in the app's log folder, and stopped with the app. One something else started is left alone.
+let localServer = null;
+const getLocalServer = () => {
+  if (localServer) return localServer;
+  let out = null;
+  const log = (text) => {
+    try {
+      out ??= require('fs').createWriteStream(path.join(app.getPath('logs'), 'localai.log'), { flags: 'a' });
+      out.write(text);
+    } catch { /* its output is a convenience: never a reason to fail */ }
+  };
+  // An unpackaged run can be pointed at another home (`KOTOMIMI_LOCALAI_HOME`): a stand-in installation to try this against.
+  const home = !app.isPackaged && process.env.KOTOMIMI_LOCALAI_HOME ? { home: process.env.KOTOMIMI_LOCALAI_HOME } : {};
+  localServer = createLocalServer({ ...home, log, onChange: (status) => toPage('local-server:status', status) });
+  return localServer;
+};
+ipcMain.handle('local-server:get', () => getLocalServer().refresh());
+ipcMain.handle('local-server:start', () => getLocalServer().start());
+ipcMain.handle('local-server:stop', () => getLocalServer().stop());
+// The one this app started goes with it: asked to stop, not waited for.
+app.on('will-quit', () => { void localServer?.stop(); });
 
 // Fork: the devices of the local network whose models this app can use (electron/lan-discover.js) —
 // asked for when the person is choosing one. One search at a time: a second asker waits for the first's answer.

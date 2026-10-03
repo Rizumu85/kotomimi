@@ -6,6 +6,7 @@ import { Minus, Square, X, Settings, Terminal } from 'lucide-react';
 import { isElectron, isMacOS } from '../../utils/environment';
 import SubtitleEnterButton from '../Subtitle/SubtitleEnterButton';
 import AccountButton from './AccountButton';
+import { ServingBadge } from '../LanSharing/ServingBadge';
 import './TitleBar.scss';
 
 interface TitleBarProps {
@@ -65,6 +66,8 @@ const TitleBar: React.FC<TitleBarProps> = ({
         {BRAND}
       </span>
       <div className="title-bar__actions">
+        {/* Fork: this computer is lending its models to other devices. */}
+        <ServingBadge />
         <AccountButton />
         <SubtitleEnterButton />
         <button
