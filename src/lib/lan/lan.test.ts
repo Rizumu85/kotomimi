@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { createVirtualClock } from '../contract/clock';
 import { pcmToBase64 } from '../contract/pcm64';
 import { createLanHost, type LanBridge, type LanModels } from './host';
-import { baseLanguage, capabilityList, LAN_OWNER, LAN_PIPELINE, modelList, type SharedModel } from './protocol';
+import { baseLanguage, capabilityList, firewallAnswer, LAN_OWNER, LAN_PIPELINE, modelList, type SharedModel } from './protocol';
 import { LanTranscriber, vadFrom, type Recognizer } from './transcriber';
 import { LanTranslator, type Translator } from './translator';
 
@@ -81,6 +81,16 @@ describe('what a sharing Kotomimi says of itself', () => {
     expect(vadFrom({ type: 'semantic_vad', eagerness: 'high' }).minSilenceDuration).toBe(0.8);
     expect(vadFrom({ type: 'semantic_vad', eagerness: 'low' }).minSilenceDuration).toBe(2);
     expect(vadFrom(null)).toMatchObject({ threshold: 0.3, minSilenceDuration: 1.4 });
+  });
+});
+
+describe('what the main process says of the firewall', () => {
+  it('is held to its shape, and anything else is unknown', () => {
+    expect(firewallAnswer({ state: 'allowed', public: false })).toEqual({ state: 'allowed', public: false });
+    expect(firewallAnswer({ state: 'blocked', public: true })).toEqual({ state: 'blocked', public: true });
+    // Nothing is shut on a public network once it is allowed.
+    expect(firewallAnswer({ state: 'allowed', public: true })).toEqual({ state: 'allowed', public: false });
+    for (const bad of [null, undefined, 'blocked', {}, { state: 'open' }, { state: 'unknown', public: true }]) expect(firewallAnswer(bad)).toEqual({ state: 'unknown', public: false });
   });
 });
 

@@ -1,6 +1,11 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanFamily, fontCss, fontLanguage, NO_FONTS, normalizeFonts, scriptSample } from './fontCss';
 import { applyFonts, useFontStore } from '../../stores/fontStore';
+import { persistSetting } from '../../services/persistSetting';
+
+// The store saves each choice through a module it imports when first used. Left
+// real, that import is still loading the settings service when this file ends.
+vi.mock('../../services/persistSetting', () => ({ persistSetting: vi.fn(async () => true) }));
 
 const BASE = 'var(--kt-font-base, var(--font-sans))';
 
@@ -80,6 +85,7 @@ describe('the fonts on the page', () => {
   beforeEach(() => {
     document.getElementById('kt-fonts')?.remove();
     useFontStore.setState({ ...NO_FONTS });
+    vi.mocked(persistSetting).mockClear();
   });
 
   it('writes one style element, rewrites it, and removes it when nothing is chosen', () => {
@@ -93,7 +99,7 @@ describe('the fonts on the page', () => {
     expect(document.getElementById('kt-fonts')).toBeNull();
   });
 
-  it('applies each choice as it is made, and a blank choice removes it', () => {
+  it('applies each choice as it is made, saves it, and a blank choice removes it', async () => {
     const { setLatin, setText, setRuby, clearLanguage } = useFontStore.getState();
     setLatin('Georgia');
     setText('JA', 'Yu Mincho');
@@ -106,5 +112,11 @@ describe('the fonts on the page', () => {
     setLatin('');
     expect(useFontStore.getState()).toMatchObject({ latin: '', text: {}, ruby: {} });
     expect(document.getElementById('kt-fonts')).toBeNull();
+    // One write per choice, each the whole of what was chosen by then.
+    await vi.waitFor(() => expect(persistSetting).toHaveBeenCalledTimes(6));
+    const saved = vi.mocked(persistSetting).mock.calls;
+    expect(saved.every(([key]) => key === 'settings.common.fonts')).toBe(true);
+    expect(saved[2][1]).toEqual({ ui: '', latin: 'Georgia', text: { ja: 'Yu Mincho' }, ruby: { ja: 'Meiryo' } });
+    expect(saved[5][1]).toEqual(NO_FONTS);
   });
 });

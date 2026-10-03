@@ -1445,6 +1445,13 @@
       "port": "Port",
       "key": "Access key",
       "keyPlaceholder": "Blank: anyone on the network may connect",
+      "firewallBlocked": "Windows Firewall is keeping other devices out",
+      "firewallPrivate": "Allow opens this port to devices on your network. Windows will ask you to confirm.",
+      "firewallPublic": "Windows treats this network as public. Allow opens this port to devices on this same network only. Windows will ask you to confirm.",
+      "firewallAllow": "Allow",
+      "firewallWaiting": "Waiting for Windows…",
+      "firewallDeclined": "Still blocked: Windows was not told yes.",
+      "firewallOk": "Windows Firewall lets other devices in",
       "firewall": "The first time, your system's firewall may ask whether to allow Kotomimi on the network: allow it for private networks."
     }
   }

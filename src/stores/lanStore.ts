@@ -8,7 +8,7 @@
  */
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import { LAN_DEFAULT_PORT } from '../lib/lan/protocol';
+import { FIREWALL_UNKNOWN, LAN_DEFAULT_PORT, type LanFirewall } from '../lib/lan/protocol';
 import type { LanHost } from '../lib/lan/host';
 
 export type LanStatus =
@@ -26,6 +26,14 @@ interface LanState {
   status: LanStatus;
   /** Sockets open now: devices being transcribed for. */
   clients: number;
+  /** Whether the system's firewall lets other devices in, read each time sharing starts. */
+  firewall: LanFirewall;
+  /** The system is asking the user, or being read. */
+  firewallBusy: boolean;
+  /** The user asked for the port to be let through, and it is still shut. */
+  firewallDeclined: boolean;
+  /** Lets the port through the system's firewall; the system asks the user first. */
+  allowFirewall(): Promise<void>;
   setEnabled(on: boolean): Promise<void>;
   /** A new port or key restarts the sharing when it is on. */
   setPort(port: number): Promise<void>;
@@ -38,6 +46,8 @@ type Field = 'enabled' | 'port' | 'key';
 const KEY = (field: Field) => `settings.common.lan.${field}`;
 export const validLanPort = (value: unknown): value is number => typeof value === 'number' && Number.isInteger(value) && value >= 1024 && value <= 65535;
 
+const NO_FIREWALL = { firewall: FIREWALL_UNKNOWN, firewallBusy: false, firewallDeclined: false };
+
 export const useLanStore = create<LanState>()(
   subscribeWithSelector((set, get) => {
     let host: LanHost | null = null;
@@ -47,16 +57,26 @@ export const useLanStore = create<LanState>()(
       const { persistSetting } = await import('../services/persistSetting');
       await persistSetting(KEY(field), value);
     };
+    /** Reads the firewall for the port now shared. An answer for a sharing since stopped or restarted is dropped. */
+    const readFirewall = async (action: 'status' | 'allow') => {
+      const asked = get().status;
+      if (asked.state !== 'on') return;
+      set({ firewallBusy: true });
+      const { askLanFirewall } = await import('../lib/lan/appHost');
+      const firewall = await askLanFirewall(action);
+      if (get().status !== asked) return;
+      set({ firewall, firewallBusy: false, firewallDeclined: action === 'allow' && firewall.state === 'blocked' });
+    };
     const apply = (): Promise<void> => {
       chain = chain.then(async () => {
         const { enabled, port, key } = get();
         try {
           if (!enabled) {
             if (host) await host.stop();
-            set({ status: { state: 'off' }, clients: 0 });
+            set({ status: { state: 'off' }, clients: 0, ...NO_FIREWALL });
             return;
           }
-          set({ status: { state: 'starting' } });
+          set({ status: { state: 'starting' }, ...NO_FIREWALL });
           const [{ createAppLanHost }, { lanModelsLoaded }] = await Promise.all([import('../lib/lan/appHost'), import('../lib/lan/appModels')]);
           host ??= createAppLanHost((clients) => set({ clients }));
           if (!host) {
@@ -66,6 +86,8 @@ export const useLanStore = create<LanState>()(
           await lanModelsLoaded();
           const started = await host.start({ port, key });
           set({ status: started.ok ? { state: 'on', port: started.port, addresses: started.addresses } : { state: 'error', code: started.code, message: started.message } });
+          // Not awaited: sharing is on whatever the firewall says, and the answer takes a moment.
+          if (started.ok) void readFirewall('status');
         } catch (cause) {
           set({ status: { state: 'error', code: null, message: cause instanceof Error ? cause.message : String(cause) } });
         }
@@ -78,6 +100,8 @@ export const useLanStore = create<LanState>()(
       key: '',
       status: { state: 'off' },
       clients: 0,
+      ...NO_FIREWALL,
+      allowFirewall: () => readFirewall('allow'),
       setEnabled: async (on) => {
         if (get().enabled === on) return;
         set({ enabled: on });

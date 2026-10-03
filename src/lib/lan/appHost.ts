@@ -7,6 +7,7 @@
 import { realClock } from '../contract/clock';
 import { defaultEngines } from '../../providers/localInference/engines';
 import { createLanHost, type LanBridge, type LanHost } from './host';
+import { FIREWALL_UNKNOWN, firewallAnswer, type LanFirewall } from './protocol';
 import { appLanModels } from './appModels';
 
 interface ElectronApi {
@@ -26,6 +27,20 @@ function electronBridge(): LanBridge | null {
       return () => api.removeListener(channel, listener);
     },
   };
+}
+
+/**
+ * Asks the main process of the system's firewall: `status` reads, `allow` adds
+ * the rule — after the system has asked the user. Never rejects: no answer is `unknown`.
+ */
+export async function askLanFirewall(action: 'status' | 'allow'): Promise<LanFirewall> {
+  const bridge = electronBridge();
+  if (!bridge) return FIREWALL_UNKNOWN;
+  try {
+    return firewallAnswer(await bridge.invoke(`lan:firewall-${action}`));
+  } catch {
+    return FIREWALL_UNKNOWN;
+  }
 }
 
 /** The app's sharing host; null where there is no main process to listen (the extension, the web). */

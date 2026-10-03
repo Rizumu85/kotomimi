@@ -56,11 +56,14 @@ function withLanguage(table: Readonly<Record<string, string>>, language: string,
 
 export const useFontStore = create<FontState>()(
   subscribeWithSelector((set, get) => {
+    /** Loaded once: the choices are then written in the order they were made. */
+    let saver: Promise<typeof import('../services/persistSetting')> | null = null;
     const commit = (patch: Partial<FontSettings>) => {
       set(patch);
       const next = settingsOf(get());
       applyFonts(next);
-      void import('../services/persistSetting').then(({ persistSetting }) => persistSetting(KEY, next));
+      saver ??= import('../services/persistSetting');
+      void saver.then(({ persistSetting }) => persistSetting(KEY, next));
     };
     return {
       ...NO_FONTS,

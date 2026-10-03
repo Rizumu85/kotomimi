@@ -9,6 +9,7 @@ const { setupTranscriptSaveHandler } = require('./transcript-save.js');
 const { createCloseHandshake } = require('./close-handshake.js');
 const { createWsHeaderRules } = require('./ws-header-rules.js');
 const { startLanServer } = require('./lan-server');
+const { firewallStatus, allowThroughFirewall } = require('./lan-firewall');
 const { applyLinuxGpuFlags } = require('./linux-gpu-flags');
 const { acquireSingleInstanceLock, createFocusRelay } = require('./single-instance');
 
@@ -1248,6 +1249,18 @@ ipcMain.handle('lan:stop', async () => {
 ipcMain.handle('lan:reply', (event, args) => lanServer?.reply(args?.id, args ?? {}) ?? false);
 ipcMain.handle('lan:send', (event, args) => lanServer?.send(args?.id, args?.data ?? '') ?? false);
 ipcMain.handle('lan:close-socket', (event, args) => { lanServer?.closeSocket(args?.id, args?.code, args?.reason); return true; });
+
+// Fork: whether Windows' firewall lets another device reach the port being shared, and — at the user's
+// click, and with the consent Windows then asks for — a rule that does (electron/lan-firewall.js).
+// The port is the one this process listens on, never one the page names.
+const NO_FIREWALL_ANSWER = { state: 'unknown', public: false };
+ipcMain.handle('lan:firewall-status', () => (lanServer ? firewallStatus(lanServer.port) : NO_FIREWALL_ANSWER));
+ipcMain.handle('lan:firewall-allow', async () => {
+  if (!lanServer) return NO_FIREWALL_ANSWER;
+  const answer = await allowThroughFirewall(lanServer.port);
+  console.log(`[Kotomimi] [Main] Firewall, port ${lanServer?.port}: ${answer.state}`);
+  return answer;
+});
 
 // Screen recording permission check for macOS system audio capture
 // This only checks the permission status, does NOT trigger any permission dialogs

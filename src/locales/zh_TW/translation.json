@@ -1445,6 +1445,13 @@
       "port": "連接埠",
       "key": "存取金鑰",
       "keyPlaceholder": "留空：區域網路裡任何裝置都能連線",
+      "firewallBlocked": "Windows 防火牆擋住了其他裝置",
+      "firewallPrivate": "按「允許」後，區域網路裡的裝置就能連上這個連接埠。Windows 會先請你確認。",
+      "firewallPublic": "Windows 把目前的網路當作「公用網路」。按「允許」後，只對同一網路裡的裝置開放這個連接埠。Windows 會先請你確認。",
+      "firewallAllow": "允許",
+      "firewallWaiting": "等待 Windows…",
+      "firewallDeclined": "仍然被擋住：Windows 那邊沒有得到確認。",
+      "firewallOk": "Windows 防火牆已放行其他裝置",
       "firewall": "第一次開啟時，系統防火牆可能詢問是否允許 Kotomimi 存取網路：請允許它在私人網路上通訊。"
     }
   }

@@ -163,7 +163,8 @@ export default defineConfig(({ command, mode }) => {
             'window-caption-menu': 'electron/window-caption-menu.js',
             'ws-header-rules': 'electron/ws-header-rules.js',
             // Fork: sharing this computer's models on the local network
-            'lan-server': 'electron/lan-server.js'
+            'lan-server': 'electron/lan-server.js',
+            'lan-firewall': 'electron/lan-firewall.js'
           },
           onstart(args) {
             // SOKUJI_DEV_NO_ELECTRON=1 serves the renderer alone, for headless

@@ -65,6 +65,9 @@ export const INVOKE_CHANNELS = [
   'lan:reply',
   'lan:send',
   'lan:close-socket',
+  // Fork: whether the system's firewall lets other devices reach it (electron/lan-firewall.js)
+  'lan:firewall-status',
+  'lan:firewall-allow',
   // Native local-inference sidecar lifecycle
   'native-host:start',
   'native-host:stop',

@@ -1445,6 +1445,13 @@
       "port": "端口",
       "key": "访问密钥",
       "keyPlaceholder": "留空：局域网里任何设备都能连接",
+      "firewallBlocked": "Windows 防火墙挡住了其他设备",
+      "firewallPrivate": "点「允许」后，局域网里的设备就能连上这个端口。Windows 会先请你确认。",
+      "firewallPublic": "Windows 把当前网络当作「公用网络」。点「允许」后，只对同一网络里的设备开放这个端口。Windows 会先请你确认。",
+      "firewallAllow": "允许",
+      "firewallWaiting": "等待 Windows…",
+      "firewallDeclined": "仍然被挡住：Windows 那边没有得到确认。",
+      "firewallOk": "Windows 防火墙已放行其他设备",
       "firewall": "第一次开启时，系统防火墙可能询问是否允许 Kotomimi 访问网络：请允许它在专用网络上通信。"
     }
   }

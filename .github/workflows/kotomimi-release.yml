@@ -82,6 +82,7 @@ jobs:
           src/stores/providerStore.test.ts
           src/stores/providerStore.readiness.test.ts
           electron/lan-server.test.js
+          electron/lan-firewall.test.js
           electron/ipc-channels.test.js
           electron/entry-map.consistency.test.js
           electron/update-payload.test.js

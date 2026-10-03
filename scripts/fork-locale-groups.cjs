@@ -181,6 +181,21 @@ module.exports = {
     port: ['Port', '端口', '連接埠'],
     key: ['Access key', '访问密钥', '存取金鑰'],
     keyPlaceholder: ['Blank: anyone on the network may connect', '留空：局域网里任何设备都能连接', '留空：區域網路裡任何裝置都能連線'],
+    firewallBlocked: ['Windows Firewall is keeping other devices out', 'Windows 防火墙挡住了其他设备', 'Windows 防火牆擋住了其他裝置'],
+    firewallPrivate: [
+      'Allow opens this port to devices on your network. Windows will ask you to confirm.',
+      '点「允许」后，局域网里的设备就能连上这个端口。Windows 会先请你确认。',
+      '按「允許」後，區域網路裡的裝置就能連上這個連接埠。Windows 會先請你確認。',
+    ],
+    firewallPublic: [
+      'Windows treats this network as public. Allow opens this port to devices on this same network only. Windows will ask you to confirm.',
+      'Windows 把当前网络当作「公用网络」。点「允许」后，只对同一网络里的设备开放这个端口。Windows 会先请你确认。',
+      'Windows 把目前的網路當作「公用網路」。按「允許」後，只對同一網路裡的裝置開放這個連接埠。Windows 會先請你確認。',
+    ],
+    firewallAllow: ['Allow', '允许', '允許'],
+    firewallWaiting: ['Waiting for Windows…', '等待 Windows…', '等待 Windows…'],
+    firewallDeclined: ['Still blocked: Windows was not told yes.', '仍然被挡住：Windows 那边没有得到确认。', '仍然被擋住：Windows 那邊沒有得到確認。'],
+    firewallOk: ['Windows Firewall lets other devices in', 'Windows 防火墙已放行其他设备', 'Windows 防火牆已放行其他裝置'],
     firewall: [
       'The first time, your system\'s firewall may ask whether to allow Kotomimi on the network: allow it for private networks.',
       '第一次开启时，系统防火墙可能询问是否允许 Kotomimi 访问网络：请允许它在专用网络上通信。',

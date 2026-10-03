@@ -7,7 +7,7 @@
  * computer that only shares has no stage of its own to hang it on.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { Check, CircleHelp, Copy, Languages, Loader, Mic, Share2, TriangleAlert } from 'lucide-react';
+import { Check, CircleHelp, Copy, Languages, Loader, Mic, Share2, ShieldAlert, ShieldCheck, TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CustomModels } from '../CustomModels/CustomModels';
 import { languageNameFor } from '../Settings/engine/languageName';
@@ -54,6 +54,9 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
   const clients = useLanStore((s) => s.clients);
   const port = useLanStore((s) => s.port);
   const key = useLanStore((s) => s.key);
+  const firewall = useLanStore((s) => s.firewall);
+  const firewallBusy = useLanStore((s) => s.firewallBusy);
+  const firewallDeclined = useLanStore((s) => s.firewallDeclined);
   const [portText, setPortText] = useState(String(port));
   const [keyText, setKeyText] = useState(key);
   const [managing, setManaging] = useState(false);
@@ -116,6 +119,23 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
               {status.addresses.length > 0
                 ? status.addresses.map((address) => <Address key={address} value={`${address}:${status.port}`} />)
                 : <p className="kt-note">{t('fork.lan.noNetwork')}</p>}
+              {firewall.state === 'blocked' && (
+                <div className="kt-lan__firewall" role="status">
+                  <ShieldAlert size={16} aria-hidden />
+                  <div className="kt-lan__firewall-text">
+                    <strong>{t('fork.lan.firewallBlocked')}</strong>
+                    <span>{firewall.public ? t('fork.lan.firewallPublic') : t('fork.lan.firewallPrivate')}</span>
+                    {firewallDeclined && !firewallBusy && <span className="kt-lan__firewall-declined">{t('fork.lan.firewallDeclined')}</span>}
+                    <button type="button" className="kt-lan__allow" disabled={firewallBusy} onClick={() => { void useLanStore.getState().allowFirewall(); }}>
+                      {firewallBusy && <Loader size={13} className="kt-lan__spin" />}
+                      {firewallBusy ? t('fork.lan.firewallWaiting') : t('fork.lan.firewallAllow')}
+                    </button>
+                  </div>
+                </div>
+              )}
+              {firewall.state === 'allowed' && (
+                <div className="kt-lan__firewall-ok"><ShieldCheck size={13} aria-hidden /><span>{t('fork.lan.firewallOk')}</span></div>
+              )}
               <p className="kt-note">{t('fork.lan.howTo')}</p>
             </>
           )}
@@ -156,7 +176,7 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
                 <input type="text" className="text-input" value={keyText} onChange={(e) => setKeyText(e.target.value)} onBlur={() => { void useLanStore.getState().setKey(keyText); }} onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }} placeholder={t('fork.lan.keyPlaceholder')} spellCheck={false} disabled={disabled} />
               </label>
             </div>
-            <p className="kt-note">{t('fork.lan.firewall')}</p>
+            {firewall.state === 'unknown' && <p className="kt-note">{t('fork.lan.firewall')}</p>}
           </details>
         </div>
       )}

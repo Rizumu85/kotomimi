@@ -11,6 +11,26 @@
  * pair it translates.
  */
 
+/**
+ * Whether the system's firewall lets another device reach the shared port
+ * (`electron/lan-firewall.js`): `unknown` where it cannot be asked — any
+ * system but Windows. `public` says a network Windows calls public is among
+ * those it is shut on.
+ */
+export interface LanFirewall {
+  state: 'unknown' | 'allowed' | 'blocked';
+  public: boolean;
+}
+
+export const FIREWALL_UNKNOWN: LanFirewall = { state: 'unknown', public: false };
+
+/** The main process's answer, held to its shape: anything else is `unknown`. */
+export function firewallAnswer(value: unknown): LanFirewall {
+  const answer = value as Partial<LanFirewall> | null;
+  if (!answer || (answer.state !== 'allowed' && answer.state !== 'blocked')) return FIREWALL_UNKNOWN;
+  return { state: answer.state, public: answer.state === 'blocked' && answer.public === true };
+}
+
 /** Where the server listens unless told otherwise. */
 export const LAN_DEFAULT_PORT = 8790;
 
