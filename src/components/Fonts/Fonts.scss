@@ -1,0 +1,290 @@
+@use '../Settings/shared/variables' as vars;
+
+// Fork: the font settings (FontSection.tsx) and the picker they use
+// (FontPicker.tsx). The picker's list is drawn in a portal, outside the
+// settings panel, so its rules stand on their own.
+
+.kt-fonts {
+  .kt-fonts__row {
+    display: flex;
+    align-items: center;
+    gap: vars.$space-3;
+    margin-bottom: vars.$space-3;
+  }
+
+  .kt-fonts__label {
+    display: flex;
+    flex: 0 0 38%;
+    flex-direction: column;
+    min-width: 0;
+    font-size: vars.$font-body;
+    color: vars.$text-primary;
+  }
+
+  .kt-fonts__hint {
+    margin-top: 2px;
+    font-size: 11px;
+    line-height: 1.35;
+    color: vars.$text-muted;
+  }
+
+  .kt-fonts__control {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .kt-fonts__subhead {
+    margin: vars.$space-4 0 vars.$space-2;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    color: vars.$text-muted;
+  }
+
+  // One language: its name, its pickers side by side, and a line of its script as a row would draw it.
+  .kt-fonts__language {
+    margin-bottom: vars.$space-2;
+    padding: vars.$space-3;
+    background: vars.$bg-surface;
+    border: 1px solid vars.$border-subtle;
+    border-radius: vars.$radius-lg;
+  }
+
+  .kt-fonts__language-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: vars.$space-2;
+  }
+
+  .kt-fonts__language-name {
+    font-size: vars.$font-body;
+    font-weight: vars.$weight-medium;
+    color: vars.$text-primary;
+  }
+
+  .kt-fonts__remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    color: vars.$text-muted;
+    background: transparent;
+    border: none;
+    border-radius: vars.$radius-sm;
+    cursor: pointer;
+    transition: background-color vars.$transition-fast, color vars.$transition-fast;
+
+    &:hover {
+      color: vars.$text-primary;
+      background: vars.$bg-hover;
+    }
+
+    &:focus-visible {
+      @include vars.focus-ring;
+    }
+  }
+
+  .kt-fonts__pickers {
+    display: flex;
+    gap: vars.$space-2;
+  }
+
+  .kt-fonts__picker {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    font-size: 11px;
+    color: vars.$text-muted;
+  }
+
+  .kt-fonts__preview {
+    margin-top: vars.$space-3;
+    padding: vars.$space-2 vars.$space-3;
+    overflow: hidden;
+    font-size: 17px;
+    line-height: 1.9;
+    color: vars.$text-primary;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: vars.$radius-md;
+
+    // Its reading aids are always shown here, whatever the switches say: they are what the fonts are chosen for.
+    .annot-roman {
+      line-height: 1.4;
+    }
+  }
+
+  .kt-fonts__add {
+    margin-top: vars.$space-1;
+    font-size: vars.$font-body;
+    color: vars.$text-secondary;
+  }
+}
+
+// The button that names the choice: a select, by its looks.
+.kt-font-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: vars.$space-2;
+  width: 100%;
+  min-width: 0;
+  padding: 7px 10px;
+  font: inherit;
+  font-size: vars.$font-body;
+  color: vars.$text-primary;
+  text-align: left;
+  background: vars.$bg-control;
+  border: 1px solid vars.$border-default;
+  border-radius: vars.$radius-sm;
+  cursor: pointer;
+  transition: border-color vars.$transition-fast;
+
+  &:hover:not(:disabled) {
+    border-color: vars.$border-strong;
+  }
+
+  &.is-open,
+  &:focus-visible {
+    outline: none;
+    border-color: vars.$color-primary;
+  }
+
+  &:disabled {
+    @include vars.disabled-state;
+  }
+}
+
+.kt-font-trigger__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &.is-default {
+    color: vars.$text-muted;
+  }
+}
+
+.kt-font-trigger__chevron {
+  flex-shrink: 0;
+  color: vars.$text-muted;
+}
+
+.kt-font-popover {
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: vars.$text-primary;
+  background: #2a2a2a;
+  border: 1px solid vars.$border-default;
+  border-radius: vars.$radius-lg;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.kt-font-search {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: vars.$space-2;
+  padding: vars.$space-2 vars.$space-3;
+  color: vars.$text-muted;
+  border-bottom: 1px solid vars.$border-subtle;
+
+  input {
+    flex: 1;
+    min-width: 0;
+    padding: 2px 0;
+    font: inherit;
+    font-size: vars.$font-body;
+    color: vars.$text-primary;
+    background: transparent;
+    border: none;
+    outline: none;
+
+    &::placeholder {
+      color: vars.$text-muted;
+    }
+  }
+}
+
+.kt-font-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 4px;
+  overflow-y: auto;
+}
+
+.kt-font-option {
+  display: flex;
+  align-items: center;
+  gap: vars.$space-2;
+  width: 100%;
+  min-height: 32px;
+  padding: 5px 8px;
+  font: inherit;
+  font-size: 14px;
+  color: vars.$text-primary;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: vars.$radius-sm;
+  cursor: pointer;
+  // A long list of faces: one off screen is not laid out, so its font is not read until it is scrolled to.
+  content-visibility: auto;
+  contain-intrinsic-size: auto 32px;
+
+  &.is-active {
+    background: vars.$bg-hover;
+  }
+
+  &.is-unfit .kt-font-option__name {
+    color: vars.$text-muted;
+  }
+}
+
+.kt-font-option__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &.is-default {
+    color: vars.$text-secondary;
+  }
+}
+
+.kt-font-option__sample {
+  flex-shrink: 0;
+  font-size: 15px;
+  color: vars.$text-secondary;
+}
+
+.kt-font-option__check {
+  flex-shrink: 0;
+  color: vars.$color-primary;
+}
+
+.kt-font-group {
+  margin: 6px 8px 2px;
+  padding-top: 6px;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: vars.$text-muted;
+  border-top: 1px solid vars.$border-subtle;
+}
+
+.kt-font-empty {
+  padding: vars.$space-3;
+  font-size: vars.$font-caption;
+  color: vars.$text-muted;
+  text-align: center;
+}

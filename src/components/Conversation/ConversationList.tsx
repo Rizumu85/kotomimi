@@ -1,5 +1,6 @@
 import { memo, useCallback, useLayoutEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import { AnnotatedLines, useAnnotation } from '../Annotated/AnnotatedText';
+import { fontLanguage } from '../../lib/fonts/fontCss';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle, Play, User, Users } from 'lucide-react';
 import type { LegName, SegmentId } from '../../lib/conversation/types';
@@ -157,7 +158,8 @@ const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, r
         {!compact && (
           <span className={`lang-badge ${isTranslation ? 'tr' : 'src'} source-${leg}`}>{lang.toUpperCase()}</span>
         )}
-        <span className={`row-text ${isTranslation ? 'tr' : 'src'}`}>
+        {/* Fork: marked with its language, so a font chosen for that language reaches it (`src/lib/fonts`). */}
+        <span className={`row-text ${isTranslation ? 'tr' : 'src'}`} data-kt-text="" lang={fontLanguage(lang) || undefined}>
           {annotated ? (
             // Fork: reading aids replace the karaoke split; a row is lit whole once it has been spoken through.
             <AnnotatedLines lines={annotated} className={played > 0 && played >= text.length ? 'karaoke-played' : undefined} />

@@ -101,6 +101,8 @@ describe('SimpleSettings - section order', () => {
       'microphone-section',
       'speaker-section',
       'participant-section',
+      // Fork: the fonts, before help.
+      'fonts-section',
       'help-section',
     ]);
   });

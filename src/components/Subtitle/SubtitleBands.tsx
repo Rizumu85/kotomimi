@@ -6,6 +6,7 @@ import { buildBands, type BandPiece } from '../../lib/subtitle/bands';
 import { displayItems, type LegFilters } from '../../lib/view/filter';
 import { noticeText } from '../../lib/view/noticeText';
 import { AnnotatedLines, useAnnotation } from '../Annotated/AnnotatedText';
+import { fontLanguage } from '../../lib/fonts/fontCss';
 import { ConversationList } from '../Conversation/ConversationList';
 import './SubtitleStream.scss';
 import '../../styles/karaoke.scss';
@@ -152,7 +153,8 @@ function Run({ run, lit, isNew, language }: { run: RunOf; lit: ReadonlyMap<Segme
   const className = isNew ? 'subtitle-stream__item subtitle-stream__item--new' : 'subtitle-stream__item';
   const upTo = run.segmentId === undefined ? undefined : lit.get(run.segmentId);
   return (
-    <span className={className} data-segment={run.segmentId}>
+    // Fork: marked with its language, so a font chosen for that language reaches it (`src/lib/fonts`).
+    <span className={className} data-segment={run.segmentId} data-kt-text="" lang={fontLanguage(language) || undefined}>
       {run.before}
       {run.pieces.map((piece) => <Stretch key={piece.key} piece={piece} upTo={upTo} language={language} />)}
     </span>

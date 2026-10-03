@@ -18,6 +18,7 @@ import {
   HelpSection
 } from '../sections';
 import { SessionEnginePage, SessionSettingsGeneral } from '../ProviderArea';
+import { FontSection } from '../../Fonts/FontSection';
 import './SimpleSettings.scss';
 
 interface SimpleSettingsProps {
@@ -188,6 +189,9 @@ const SimpleSettings: React.FC<SimpleSettingsProps> = ({ highlightSection }) => 
           isSessionActive={locked}
           isLocked={lockParticipant}
         />
+
+        {/* Fork: the fonts of the app and of conversation text */}
+        <FontSection />
 
         {/* Help & Updates */}
         <HelpSection isSessionActive={locked} />

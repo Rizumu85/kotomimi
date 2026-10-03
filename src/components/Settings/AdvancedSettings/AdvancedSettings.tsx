@@ -15,6 +15,7 @@ import {
   HelpSection
 } from '../sections';
 import { SessionSettingsGeneral, SessionSettingsProvider } from '../ProviderArea';
+import { FontSection } from '../../Fonts/FontSection';
 import './AdvancedSettings.scss';
 
 interface AdvancedSettingsProps {
@@ -87,6 +88,9 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({ toggleSettings, act
           <>
             {/* The pair, the provider with its chips, the output toggles, the speech mode — same as Simple mode */}
             <SessionSettingsGeneral locked={locked} layout="advanced" onOpenSlot={openSlot} />
+
+            {/* Fork: the fonts of the app and of conversation text */}
+            <FontSection />
 
             {/* Help & Updates */}
             <HelpSection toggleSettings={toggleSettings} isSessionActive={locked} />

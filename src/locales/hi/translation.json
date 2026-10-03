@@ -1347,6 +1347,24 @@
   "fork": {
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
+    "fonts": {
+      "title": "Fonts",
+      "tooltip": "Choose the fonts installed on this computer: one for the app itself, one for Latin letters and the romanization line, and one per language for conversation and subtitle text. A font is used where it has the glyphs; anything it lacks falls back to the app's own.",
+      "default": "App default",
+      "search": "Search fonts",
+      "loading": "Reading the installed fonts…",
+      "none": "No font matches",
+      "others": "Other fonts (may lack this script)",
+      "ui": "Interface",
+      "uiHint": "Menus, settings and buttons",
+      "latin": "Latin letters and romanization",
+      "latinHint": "Letters and digits in conversation text, and the romanization line",
+      "languages": "Conversation text, by language",
+      "text": "Text",
+      "reading": "Readings above the text",
+      "add": "Add a language…",
+      "remove": "Reset {{language}}"
+    },
     "lan": {
       "title": "Share on the local network",
       "tooltip": "Lets another device on your network use the models this computer has downloaded — speech recognition and translation. The other device runs Kotomimi too, and types this computer's address where a server's goes. Sharing works while this app is open.",

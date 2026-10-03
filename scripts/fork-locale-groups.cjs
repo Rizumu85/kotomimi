@@ -3,6 +3,29 @@
  * `fork-localai-locales.cjs`, each string as [English, 简体, 繁體].
  */
 module.exports = {
+  // The fonts (`src/components/Fonts`).
+  fonts: {
+    title: ['Fonts', '字体', '字型'],
+    tooltip: [
+      'Choose the fonts installed on this computer: one for the app itself, one for Latin letters and the romanization line, and one per language for conversation and subtitle text. A font is used where it has the glyphs; anything it lacks falls back to the app\'s own.',
+      '从这台电脑已安装的字体里选：界面用一种，拉丁字母和罗马音用一种，对话和字幕文字可以按语言各选一种。选中的字体只在它有对应字形时生效，缺的字仍由应用默认字体显示。',
+      '從這台電腦已安裝的字型裡選：介面用一種，拉丁字母和羅馬拼音用一種，對話和字幕文字可以按語言各選一種。選中的字型只在它有對應字形時生效，缺的字仍由應用程式預設字型顯示。',
+    ],
+    default: ['App default', '应用默认', '應用程式預設'],
+    search: ['Search fonts', '搜索字体', '搜尋字型'],
+    loading: ['Reading the installed fonts…', '正在读取已安装的字体…', '正在讀取已安裝的字型…'],
+    none: ['No font matches', '没有匹配的字体', '沒有相符的字型'],
+    others: ['Other fonts (may lack this script)', '其他字体（可能不含这种文字）', '其他字型（可能不含這種文字）'],
+    ui: ['Interface', '界面', '介面'],
+    uiHint: ['Menus, settings and buttons', '菜单、设置和按钮', '選單、設定和按鈕'],
+    latin: ['Latin letters and romanization', '拉丁字母和罗马音', '拉丁字母和羅馬拼音'],
+    latinHint: ['Letters and digits in conversation text, and the romanization line', '对话文字里的英文字母和数字，以及罗马音那一行', '對話文字裡的英文字母和數字，以及羅馬拼音那一行'],
+    languages: ['Conversation text, by language', '对话文字，按语言设置', '對話文字，按語言設定'],
+    text: ['Text', '正文', '正文'],
+    reading: ['Readings above the text', '上方的注音假名', '上方的注音假名'],
+    add: ['Add a language…', '添加语言…', '新增語言…'],
+    remove: ['Reset {{language}}', '恢复 {{language}} 的默认字体', '恢復 {{language}} 的預設字型'],
+  },
   // Sharing this computer's models on the local network (`src/components/LanSharing`).
   lan: {
     title: ['Share on the local network', '局域网共享', '區域網路共享'],
