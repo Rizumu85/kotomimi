@@ -315,7 +315,41 @@ git tag -a v0.42.211 -m "Kotomimi 0.42.211" && git push origin v0.42.211
   它会跑本分支的测试，构建 Windows 安装包，尽量构建 macOS（Apple 芯片）版本，然后生成一个**草稿** Release。到 GitHub 的 Releases 页面检查后点发布。只有发布了的 Release 才会被"检查更新"看到。
 - 标签必须是 `v<版本号>`，并且和 `package.json` 里的版本一致，否则流程会拒绝。
 - 上游的三个流程（`build.yml` 等）在本仓库的 Actions 设置里停用了：它们也监听 `v*` 标签，但签名步骤只在上游仓库执行，在这里只会白跑。
-- macOS 版本没有 Apple 证书，没有公证：第一次要右键点"打开"，并且不能自动更新。
+- macOS 版本没有 Apple 开发者证书，没有公证：第一次要右键点"打开"。
+
+### macOS 的签名
+
+macOS 把钥匙串和麦克风的许可记在应用的签名上，Squirrel.Mac 也只接受和当前应用签名一致的更新。没有固定签名时，构建脚本只做临时（ad-hoc）签名，每次构建的签名都不同：每更新一次，macOS 都当成新应用，钥匙串和麦克风要重新确认，而且在确认之前窗口打不开；应用也不能自己更新。
+
+解决办法是一张**自己签发的代码签名证书**，放在仓库的两个密钥里（上游的做法，原理见 `docs/build/macos-auto-update.md`）：
+
+| 密钥 | 内容 |
+|---|---|
+| `MACOS_CSC_LINK` | 证书和私钥导出的 `.p12`，base64 编码 |
+| `MACOS_CSC_KEY_PASSWORD` | 这个 `.p12` 的密码 |
+
+证书的名字必须是 `Kotomimi Code Signing`（`package.json` 的 `build.mac.identity`）。生成和存放：
+
+```bash
+mkdir -p ~/kotomimi-signing && cd ~/kotomimi-signing
+openssl rand -hex 16 > pass.txt
+MSYS_NO_PATHCONV=1 openssl req -x509 -newkey rsa:2048 -sha256 -days 7300 -nodes \
+  -keyout key.pem -out cert.pem -subj "/CN=Kotomimi Code Signing" \
+  -addext "basicConstraints=critical,CA:false" \
+  -addext "keyUsage=critical,digitalSignature" \
+  -addext "extendedKeyUsage=critical,codeSigning"
+# -legacy：OpenSSL 3 默认的加密方式 macOS 导不进去
+openssl pkcs12 -export -legacy -inkey key.pem -in cert.pem \
+  -name "Kotomimi Code Signing" -out signing.p12 -passout file:pass.txt
+base64 -w0 signing.p12 | gh secret set MACOS_CSC_LINK -R Rizumu85/kotomimi
+gh secret set MACOS_CSC_KEY_PASSWORD -R Rizumu85/kotomimi < pass.txt
+```
+
+有了这两个密钥，发布流程会：把证书加入信任（否则 electron-builder 找不到它，会悄悄跳过签名）、用它签名、检查签名确实钉在证书上，并把 `.zip`、`.blockmap` 和 `latest-mac.yml` 一起放进 Release，Mac 上的"检查更新"就能原地更新。没有密钥时流程照旧做临时签名，也不发布更新器要的那几个文件。
+
+- 这张证书要**一直用同一张**。换证书等于换签名：已安装的应用更新不了，许可也要重新确认一次。把 `~/kotomimi-signing` 备份好，不要提交进仓库。
+- 第一次从临时签名换到固定签名的那个版本，还要手动装一次、确认一次；之后就不用了。
+- 这不是公证，对"无法验证开发者"的提示没有帮助。
 
 ## 跟进上游
 

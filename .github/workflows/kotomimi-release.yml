@@ -140,15 +140,30 @@ jobs:
             out/make/squirrel.windows/x64/*.nupkg
             out/make/squirrel.windows/x64/RELEASES
 
-  # Unsigned: the fork has no Apple certificate. The app is ad-hoc signed by
-  # the build's own hook, so macOS asks before its first launch, and it cannot
-  # update itself in place. Allowed to fail: a release without it is still a
-  # release.
+  # Not notarized: the fork has no Apple Developer ID, so macOS asks before the
+  # first launch. What it can have is a signature that stays the same from one
+  # build to the next — a self-signed certificate of the fork's own, kept in two
+  # repository secrets:
+  #
+  #   MACOS_CSC_LINK           the certificate and its key as a .p12, base64
+  #   MACOS_CSC_KEY_PASSWORD   the .p12's password
+  #
+  # With them the app keeps its keychain and microphone permissions across
+  # updates (macOS ties both to the signature), and can update itself in place
+  # (Squirrel.Mac takes an update only from the same signature): the zip, its
+  # blockmap and latest-mac.yml are then published for the updater. Without them
+  # the build is ad-hoc signed by its own hook, as before: every update is a new
+  # app to macOS, and nothing is published for the updater, which could not
+  # install it. Upstream's notes on all of this: docs/build/macos-auto-update.md.
+  #
+  # Allowed to fail: a release without it is still a release.
   macos:
     name: build (macOS, Apple silicon)
     needs: test
     runs-on: macos-latest
     continue-on-error: true
+    env:
+      HAS_MAC_CERT: ${{ secrets.MACOS_CSC_LINK != '' }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -169,11 +184,91 @@ jobs:
       - name: Build the capture helper
         run: npm run build:audio-host
 
+      # electron-builder finds signing identities with `security find-identity -v`,
+      # which does not list a certificate nothing trusts: without this step the
+      # build would skip signing and say nothing. Upstream's step, with the
+      # fork's certificate name.
+      - name: Trust the fork's signing certificate
+        if: env.HAS_MAC_CERT == 'true'
+        env:
+          MACOS_CSC_LINK: ${{ secrets.MACOS_CSC_LINK }}
+          MACOS_CSC_KEY_PASSWORD: ${{ secrets.MACOS_CSC_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          echo "$MACOS_CSC_LINK" | base64 --decode > "$RUNNER_TEMP/signing.p12"
+          # LibreSSL has no -legacy and OpenSSL 3 needs it for a legacy .p12: try plain first.
+          openssl pkcs12 -in "$RUNNER_TEMP/signing.p12" -clcerts -nokeys \
+            -passin "pass:$MACOS_CSC_KEY_PASSWORD" -out "$RUNNER_TEMP/signing.pem" 2>/dev/null || \
+          openssl pkcs12 -legacy -in "$RUNNER_TEMP/signing.p12" -clcerts -nokeys \
+            -passin "pass:$MACOS_CSC_KEY_PASSWORD" -out "$RUNNER_TEMP/signing.pem"
+          sudo security add-trusted-cert -d -r trustRoot -p codeSign \
+            -k /Library/Keychains/System.keychain "$RUNNER_TEMP/signing.pem"
+          # Proof that the trust took, the way electron-builder will look.
+          SCRATCH="$RUNNER_TEMP/trust-check.keychain"
+          security create-keychain -p check "$SCRATCH"
+          security unlock-keychain -p check "$SCRATCH"
+          security set-keychain-settings "$SCRATCH"
+          security import "$RUNNER_TEMP/signing.p12" -k "$SCRATCH" \
+            -P "$MACOS_CSC_KEY_PASSWORD" -T /usr/bin/codesign >/dev/null
+          security set-key-partition-list -S apple-tool:,apple:,codesign: \
+            -s -k check "$SCRATCH" >/dev/null 2>&1
+          security find-identity -v -p codesigning "$SCRATCH" | sed 's/^/  /'
+          if ! security find-identity -v -p codesigning "$SCRATCH" | grep -q "Kotomimi Code Signing"; then
+            echo "::error::The certificate in MACOS_CSC_LINK is not a valid code-signing identity named 'Kotomimi Code Signing'."
+            security delete-keychain "$SCRATCH" || true
+            exit 1
+          fi
+          security delete-keychain "$SCRATCH"
+          rm -f "$RUNNER_TEMP/signing.p12" "$RUNNER_TEMP/signing.pem"
+
       - name: Make the disk image
-        run: npx electron-builder --mac dmg zip --arm64 --publish never -c.directories.output=out/make-mac
+        run: |
+          set -euo pipefail
+          # Exported here, not declared in `env:`: an empty CSC_LINK is not "unset" to electron-builder.
+          if [ "$HAS_MAC_CERT" = 'true' ]; then
+            export CSC_LINK="$MACOS_CSC_LINK" CSC_KEY_PASSWORD="$MACOS_CSC_KEY_PASSWORD"
+          fi
+          npx electron-builder --mac dmg zip --arm64 --publish never -c.directories.output=out/make-mac
         env:
           CI: false
-          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          # No certificate: signing is skipped and the build's own hook signs ad hoc.
+          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.MACOS_CSC_LINK != '' && 'true' || 'false' }}
+          MACOS_CSC_LINK: ${{ secrets.MACOS_CSC_LINK }}
+          MACOS_CSC_KEY_PASSWORD: ${{ secrets.MACOS_CSC_KEY_PASSWORD }}
+
+      # electron-builder says "skipped macOS code signing" and carries on when it
+      # finds no identity: a release that looked signed and was not would break
+      # every update after it. Upstream's checks.
+      - name: Check the signature and what the updater needs
+        if: env.HAS_MAC_CERT == 'true'
+        run: |
+          set -euo pipefail
+          APP=$(find out/make-mac -name 'Kotomimi.app' -maxdepth 3 | head -1)
+          [ -n "$APP" ] || { echo "::error::No Kotomimi.app under out/make-mac"; exit 1; }
+          DR=$(codesign -d -r- "$APP" 2>&1 | grep 'designated =>' | sed 's/^#* *designated => //')
+          echo "designated requirement: $DR"
+          case "$DR" in
+            *"certificate root = H"*|*"certificate leaf = H"*) echo "OK: pinned to the certificate, the same for every build." ;;
+            *) echo "::error::The app is not signed with the certificate (designated requirement: $DR)."; exit 1 ;;
+          esac
+          codesign --verify --deep --strict "$APP"
+          SIGNATURE=$(codesign -dv "$APP" 2>&1)
+          grep -Eq 'flags=0x[0-9a-f]+\([^)]*runtime' <<<"$SIGNATURE" || { echo "::error::Not signed with the Hardened Runtime."; exit 1; }
+          # Under the Hardened Runtime the microphone is refused, with no question asked, to a bundle without this entitlement.
+          for BUNDLE in "$APP" "$APP"/Contents/Frameworks/*.app; do
+            ENTITLEMENTS=$(codesign -d --entitlements - "$BUNDLE" 2>/dev/null)
+            grep -q 'com.apple.security.device.audio-input' <<<"$ENTITLEMENTS" || { echo "::error::$(basename "$BUNDLE") lacks the audio-input entitlement."; exit 1; }
+          done
+          ZIP=$(find out/make-mac -maxdepth 1 -name '*.zip' | head -1)
+          [ -n "$ZIP" ] || { echo "::error::No .zip: the updater has nothing to install."; exit 1; }
+          [ -f out/make-mac/latest-mac.yml ] || { echo "::error::No latest-mac.yml."; exit 1; }
+          grep -q "$(basename "$ZIP")" out/make-mac/latest-mac.yml || { echo "::error::latest-mac.yml does not name the zip."; exit 1; }
+          cat out/make-mac/latest-mac.yml
+
+      # An ad-hoc build cannot be installed by the updater: nothing is published that would offer it.
+      - name: Keep the updater's files out of an unsigned build
+        if: env.HAS_MAC_CERT != 'true'
+        run: rm -f out/make-mac/latest-mac.yml out/make-mac/*.blockmap
 
       - uses: actions/upload-artifact@v6
         with:
@@ -182,6 +277,8 @@ jobs:
           path: |
             out/make-mac/*.dmg
             out/make-mac/*.zip
+            out/make-mac/*.blockmap
+            out/make-mac/latest-mac.yml
 
   release:
     name: draft the release
@@ -204,7 +301,7 @@ jobs:
       - name: Collect the files
         run: |
           mkdir -p release-assets
-          find artifacts -type f \( -name '*.exe' -o -name '*.nupkg' -o -name 'RELEASES' -o -name '*.dmg' -o -name '*.zip' \) -exec cp {} release-assets/ \;
+          find artifacts -type f \( -name '*.exe' -o -name '*.nupkg' -o -name 'RELEASES' -o -name '*.dmg' -o -name '*.zip' -o -name '*.blockmap' -o -name 'latest-mac.yml' \) -exec cp {} release-assets/ \;
           # Squirrel names its files with a space ("Kotomimi-0.42.211 Setup.exe"); the
           # updater asks for the name with a dot, and an address is better without one.
           cd release-assets
