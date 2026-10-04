@@ -105,7 +105,9 @@ describe('a leg this computer hears', () => {
   it('is refused, in Local Inference\'s own words, while no recognizer is downloaded for the language', () => {
     downloaded();
     expect(buildLocalAI(SPEAKER, settings(HERE), shared)).toMatchObject({ code: 'no_asr', params: { source: 'zh-CN' } });
-    expect(buildLocalAI({ ...SPEAKER, direction: { source: 'auto', target: 'ja' } }, settings(HERE), shared)).toMatchObject({ code: 'no_asr' });
+    // No recognizer is downloaded for a language to be detected: the language is asked for, which a download would not answer.
+    expect(buildLocalAI({ ...SPEAKER, direction: { source: 'auto', target: 'ja' } }, settings(HERE), shared)).toMatchObject({ code: 'source_auto' });
+    expect(buildLocalAI({ ...SPEAKER, direction: { source: 'auto', target: 'ja' } }, settings({ ...HERE, translateAt: 'api', translateBaseUrl: 'http://x/v1', translateModel: 'm' }), shared)).toMatchObject({ code: 'no_asr' });
   });
 
   it('can be answered by a text model instead: an API\'s, or the other device\'s', () => {

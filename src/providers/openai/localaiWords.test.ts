@@ -6,6 +6,7 @@ import zhCN from '../../locales/zh_CN/translation.json';
 import zhTW from '../../locales/zh_TW/translation.json';
 import { useModelStore } from '../../stores/modelStore';
 import { buildLocalAI, createLocalAICheck, LOCALAI_DEFAULTS, localaiCredentials, type LocalAISettings } from './localai';
+import type { LocalAIModel } from './localaiModels';
 import { SHARED } from './testing';
 
 /**
@@ -84,5 +85,46 @@ describe('the words for another device not chosen yet', () => {
       expect(localai(catalog).serverKeyMissing).toBeTruthy();
       expect(said(catalog, { endpoint: '192.168.1.10:8790', serverKey: ' ' })).toBe(localai(catalog).serverKeyMissing);
     }
+  });
+});
+
+describe('the words for Auto Detect where nothing detects the language', () => {
+  const AUTO_PAIR = { source: 'auto', target: 'en' };
+  const autoCtx = { ...ctx, pair: AUTO_PAIR };
+  const AUTO_SPEAKER: SessionContext = { ...SPEAKER, direction: AUTO_PAIR };
+  const localai = (catalog: unknown) => (catalog as { providers: { localai: Record<string, string> } }).providers.localai;
+  /** A LocalAI hears: whether its recognizer detects the language is its own business. */
+  const localaiServer = createLocalAICheck({ fetch: (async (url: RequestInfo | URL) => new Response(JSON.stringify(String(url).endsWith('/capabilities')
+    ? { data: [{ id: 'gpt-realtime', capabilities: [] }, { id: 'whisper', capabilities: ['transcript'] }] }
+    : { data: [{ id: 'gpt-realtime' }, { id: 'whisper' }] }), { status: 200 })) as unknown as typeof fetch });
+  /** Another Kotomimi hears: its recognizers are told the language, and refuse a session that does not say it (`src/lib/lan/transcriber.ts`). */
+  const kotomimiServer = createLocalAICheck({ fetch: (async (url: RequestInfo | URL) => new Response(JSON.stringify(String(url).endsWith('/capabilities')
+    ? { data: [{ id: 'kotomimi', capabilities: null }, { id: 'sensevoice-int8', capabilities: ['transcript'] }] }
+    : { data: [{ id: 'kotomimi', owned_by: 'kotomimi' }, { id: 'sensevoice-int8', owned_by: 'kotomimi' }] }), { status: 200 })) as unknown as typeof fetch });
+  const SERVER = { apiKey: '', endpoint: 'ws://192.168.1.10:8790/v1/realtime' };
+
+  it('this computer translating asks for the language, not for a download no model can answer', async () => {
+    const s = settings({ translateAt: 'device' });
+    const checked = await localaiServer(SERVER, s, autoCtx);
+    const built = buildLocalAI(AUTO_SPEAKER, s, { ...SHARED, models: [{ id: 'gpt-realtime', kind: 'pipeline' as const }] as LocalAIModel[] });
+    expect(checked).toMatchObject({ ok: false, code: 'source_auto' });
+    expect(built).toMatchObject({ code: 'source_auto' });
+    for (const catalog of [zhCN, zhTW]) {
+      expect(localai(catalog).sourceAuto).toBeTruthy();
+      if (!checked.ok) expect(noticeText(tIn(catalog as Catalog), { code: checked.code, message: checked.reason })).toBe(localai(catalog).sourceAuto);
+    }
+  });
+
+  it('another Kotomimi listening is refused before Start, not at it in its English', async () => {
+    const s = settings({});
+    expect(await kotomimiServer(SERVER, s, autoCtx)).toMatchObject({ ok: false, code: 'source_auto' });
+    expect(buildLocalAI(AUTO_SPEAKER, s, { ...SHARED, models: KOTOMIMI })).toMatchObject({ code: 'source_auto' });
+  });
+
+  it('leaves Auto Detect to what can detect: a LocalAI listening, an API, and the language named', async () => {
+    expect(await localaiServer(SERVER, settings({}), autoCtx)).toMatchObject({ ok: true });
+    expect(await noServer({ apiKey: '', endpoint: '' }, settings({ asrVia: 'api', asrApiBaseUrl: 'http://x/v1', asrApiModel: 'm', translateAt: 'api', translateBaseUrl: 'http://x/v1', translateModel: 'm' }), autoCtx)).toMatchObject({ ok: true });
+    // The language named: this computer translates it (by the online translator, while nothing is downloaded).
+    expect(await localaiServer(SERVER, settings({ translateAt: 'device' }), ctx)).toMatchObject({ ok: true });
   });
 });

@@ -180,6 +180,13 @@ const PROVIDER = {
     '另一台裝置需要存取金鑰。請在設定的「另一台裝置」一欄裡填寫。',
   ],
 
+  // Auto Detect where nothing detects the language: said when it is checked, and when Start is pressed.
+  sourceAuto: [
+    'Choose the language you speak: Auto Detect cannot be used with this setup. Translation on this computer, and speech recognition by another Kotomimi, need to be told the language.',
+    '请选好你说的语言：这样搭配时不能用「自动检测」。在这台电脑上翻译、或由另一台 Kotomimi 做语音识别时，都需要知道说的是哪种语言。',
+    '請選好你說的語言：這樣搭配時不能用「自動辨識」。在這台電腦上翻譯、或由另一台 Kotomimi 做語音辨識時，都需要知道說的是哪種語言。',
+  ],
+
   // A stage with nothing to run: said when it is checked, and when Start is pressed.
   asrUnnamed: [
     'Speech recognition has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.',

@@ -53,6 +53,7 @@ import type { LegName } from '../../lib/conversation/types';
 import type { Selections } from '../../lib/local-inference/selection/types';
 import { buildDefaultLocalPrompt } from '../../lib/local-inference/prompts';
 import { boundedFetch } from '../../lib/provider/boundedFetch';
+import { AUTO } from '../../lib/provider/languages';
 import type { CheckContext, CheckResult, CredentialField, CredentialsMissing, MigrationInputs, Provider, ProviderRefusal, SharedSettings } from '../../lib/provider/types';
 import { admitLocalInference, type LocalInferenceConfig } from '../localInference/config';
 import { LOCAL_INFERENCE_DEFAULTS } from '../localInference/settings';
@@ -379,6 +380,21 @@ function unnamedStage(s: LocalAISettings, models: readonly LocalAIModel[], coach
   return null;
 }
 
+/**
+ * A leg whose language is to be detected, where nothing on its way detects
+ * one: this computer's translation models are told the pair, and another
+ * Kotomimi's recognizers are told the language (`src/lib/lan/transcriber.ts`
+ * refuses a session that does not say it). No model downloaded would help,
+ * so it is said as what it is. `source`: the language the leg hears; a
+ * coached speaker's is never detected, and only what they type is translated.
+ */
+function undetected(s: LocalAISettings, models: readonly LocalAIModel[], source: string, coached: boolean): ProviderRefusal | null {
+  if (source !== AUTO || coached) return null;
+  const kotomimiHears = s.asrVia === 'server' && isKotomimiServer(models);
+  if (s.translateAt !== 'device' && !kotomimiHears) return null;
+  return { refused: 'The language spoken is to be detected, and nothing on the way detects it.', code: 'source_auto' };
+}
+
 export interface LocalAICheckDeps {
   fetch?: typeof fetch;
   clock?: Pick<Clock, 'setTimeout'>;
@@ -514,7 +530,8 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
 
     // Only the speaker is coached.
     for (const leg of ctx.legs) {
-      const gap = unnamedStage(s, servers.models ?? [], s.coach && leg === 'speaker');
+      const coached = s.coach && leg === 'speaker';
+      const gap = unnamedStage(s, servers.models ?? [], coached) ?? undetected(s, servers.models ?? [], leg === 'speaker' ? ctx.pair.source : ctx.pair.target, coached);
       // What the servers listed goes with the refusal: a pick from it is often what answers it.
       if (gap) return { ok: false, reason: gap.refused, ...(gap.code ? { code: gap.code } : {}), ...(gap.params ? { params: gap.params } : {}), ...(servers.models?.length ? { models: servers.models } : {}) };
     }
@@ -581,7 +598,7 @@ export function buildLocalAI(context: SessionContext, s: LocalAISettings, shared
 
   // Every stage named, before anything is built: a run with none has nothing to say. A coached speaker's translation
   // is for what they type only: the run starts without it.
-  const gap = unnamedStage(s, models, coached);
+  const gap = unnamedStage(s, models, coached) ?? undetected(s, models, source, coached);
   if (gap) return gap;
   const apiBase = s.translateBaseUrl.trim();
   const apiModel = s.translateModel.trim();

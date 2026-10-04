@@ -94,6 +94,8 @@ export const NOTICE_ALIASES: Readonly<Record<string, string>> = {
   // Fork: the Kotomimi provider's other device is not chosen yet, or its access key is blank — no API key is involved.
   server_address_missing: 'providers.localai.addressMissing',
   server_key_missing: 'providers.localai.serverKeyMissing',
+  // Fork: Auto Detect where nothing on the Kotomimi provider's way detects the language — a language to choose, not a model to download.
+  source_auto: 'providers.localai.sourceAuto',
   connection_lost: 'mainPanel.sonioxConnectionLost',
   // Kizuna Soniox's lease refused a start (Stage 2 Kizuna Soniox, ruling 11): the sentences name Soniox, so the codes keep it.
   soniox_service_unavailable: 'mainPanel.sonioxServiceUnavailable',
