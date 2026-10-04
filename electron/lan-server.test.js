@@ -10,7 +10,7 @@ import net from 'node:net';
 import WebSocket from 'ws';
 
 const require = createRequire(import.meta.url);
-const { startLanServer, lanAddresses } = require('./lan-server.js');
+const { startLanServer, lanAddresses, closeReason } = require('./lan-server.js');
 
 let running = [];
 afterEach(async () => {
@@ -200,6 +200,26 @@ describe('the shared models\' door: the Realtime socket', () => {
     const closed = new Promise((resolve) => socket.on('close', (code, reason) => resolve({ code, reason: reason.toString() })));
     server.closeSocket(seen.opened[0].id, 1011, 'the model could not load');
     expect(await closed).toEqual({ code: 1011, reason: 'the model could not load' });
+  });
+
+  // `ws` throws on a reason over 123 bytes; one cut to 120 characters of another script is far over (main.js exits on what is thrown).
+  it('cuts a long reason to 123 bytes between characters, and still closes', async () => {
+    const { server, seen, ws } = await start();
+    const { socket } = await dial(`${ws}/v1/realtime`);
+    await until(() => seen.opened.length === 1);
+    const closed = new Promise((resolve) => socket.on('close', (code, reason) => resolve({ code, reason: reason.toString() })));
+    const long = `LocalAI answered HTTP 500: open C:\\Users\\山田太郎\\.localai\\models\\gpt-realtime.yaml: ${'使用中'.repeat(30)}`;
+    expect(() => server.closeSocket(seen.opened[0].id, 1011, long)).not.toThrow();
+    const { code, reason } = await closed;
+    expect(code).toBe(1011);
+    expect(Buffer.byteLength(reason)).toBeLessThanOrEqual(123);
+    expect(long.startsWith(reason)).toBe(true);
+  });
+
+  it('leaves a short reason as it is', () => {
+    expect(closeReason('idle')).toBe('idle');
+    expect(closeReason(undefined)).toBe('');
+    expect(Buffer.byteLength(closeReason('😀'.repeat(40)))).toBe(120);
   });
 });
 

@@ -97,6 +97,13 @@ function pathOf(target) {
   }
 }
 
+/** A close frame's reason: at most 123 bytes of UTF-8, cut between characters. `ws` throws on a longer one, and a reason may quote a server's own words. */
+function closeReason(text) {
+  const chars = [...String(text ?? '')];
+  while (Buffer.byteLength(chars.join('')) > 123) chars.pop();
+  return chars.join('');
+}
+
 /** Compared in constant time for equal lengths: a key is short, and a timing probe on a LAN is still a probe. */
 function sameKey(given, wanted) {
   if (given.length !== wanted.length) return false;
@@ -280,7 +287,7 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
           const link = upstream.bridge(route, {
             update,
             send: (data) => { out(id, ws, data); },
-            close: (code, reason) => ws.close(code, String(reason ?? '').slice(0, 120)),
+            close: (code, reason) => ws.close(code, closeReason(reason)),
           });
           links.set(id, link);
           for (const later of held.splice(0)) link.send(later);
@@ -352,7 +359,7 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
           return ws ? out(id, ws, data) : false;
         },
         closeSocket(id, code = 1000, reason = '') {
-          sockets.get(id)?.close(code, String(reason).slice(0, 120));
+          sockets.get(id)?.close(code, closeReason(reason));
         },
         /** How many sockets are open now. */
         count: () => sockets.size,
@@ -379,4 +386,4 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
   });
 }
 
-module.exports = { startLanServer, lanAddresses, MAX_SOCKETS, IDLE_SESSION_MS };
+module.exports = { startLanServer, lanAddresses, closeReason, MAX_SOCKETS, IDLE_SESSION_MS };
