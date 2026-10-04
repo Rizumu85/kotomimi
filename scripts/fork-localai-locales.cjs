@@ -167,6 +167,23 @@ const PROVIDER = {
     '留空：依你的母語和所練的語言自動產生。自己寫時可以用 {{spoken}} 和 {{native}} 代表這兩種語言。',
   ],
   coachPromptPreview: ['Used while the box is blank, for this language pair:', '留空时，当前语言对用的是这一份：', '留空時，目前語言對用的是這一份：'],
+
+  // A stage with nothing to run: said when it is checked, and when Start is pressed.
+  asrUnnamed: [
+    'Speech recognition has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.',
+    '语音识别还没有可用的模型。请在提供商下面的「语音识别」卡片里选好（用 API 模型时要填地址和模型名），或者换一个位置。',
+    '語音辨識還沒有可用的模型。請在提供商下面的「語音辨識」卡片裡選好（用 API 模型時要填位址和模型名稱），或者換一個位置。',
+  ],
+  translateUnnamed: [
+    'Translation has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.',
+    '翻译还没有可用的模型。请在提供商下面的「翻译」卡片里选好（用 API 模型时要填地址和模型名），或者换一个位置。',
+    '翻譯還沒有可用的模型。請在提供商下面的「翻譯」卡片裡選好（用 API 模型時要填位址和模型名稱），或者換一個位置。',
+  ],
+  coachUnnamed: [
+    'Grammar feedback has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.',
+    '语法反馈还没有可用的模型。请在提供商下面的「语法反馈」卡片里选好（用 API 模型时要填地址和模型名），或者换一个位置。',
+    '文法回饋還沒有可用的模型。請在提供商下面的「文法回饋」卡片裡選好（用 API 模型時要填位址和模型名稱），或者換一個位置。',
+  ],
 };
 
 const FORK = {

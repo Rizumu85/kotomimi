@@ -122,8 +122,8 @@ describe('a leg this computer hears', () => {
     const listed = [{ id: 'gpt-realtime', kind: 'pipeline' as const }, { id: 'whisper-large-turbo', kind: 'asr' as const }, { id: 'hy-mt2-1.8b', kind: 'text' as const }];
     expect(configFor(SPEAKER, { asrVia: 'device', translateAt: 'server' }, listed).stages?.speech).toMatchObject({ baseUrl: '', model: 'hy-mt2-1.8b' });
     // A device that does not say: nothing is run on a guess.
-    expect(buildLocalAI(SPEAKER, settings({ asrVia: 'device', translateAt: 'server' }), { ...shared, models: [{ id: 'some-model' }] })).toMatchObject({ code: 'models_required' });
-    expect(buildLocalAI(SPEAKER, settings({ asrVia: 'device', translateAt: 'api' }), shared)).toMatchObject({ code: 'models_required' });
+    expect(buildLocalAI(SPEAKER, settings({ asrVia: 'device', translateAt: 'server' }), { ...shared, models: [{ id: 'some-model' }] })).toMatchObject({ code: 'translate_unnamed' });
+    expect(buildLocalAI(SPEAKER, settings({ asrVia: 'device', translateAt: 'api' }), shared)).toMatchObject({ code: 'translate_unnamed' });
   });
 
   it('hears a coached speaker in the language they practise, and translates only what they type', () => {
@@ -131,7 +131,7 @@ describe('a leg this computer hears', () => {
     expect(c.device?.modelId).toBe('sensevoice-int8');
     expect(c.stages).toMatchObject({ heard: 'ja', speech: { kind: 'coach', model: 'qwen3-4b' }, typed: { via: 'device', model: 'bing-translator' } });
     // The feedback has a place of its own, and borrows no model from the translation's.
-    expect(buildLocalAI(SPEAKER, settings({ ...HERE, coach: true, coachAt: 'api', translateModel: 'left-over' }), shared)).toMatchObject({ code: 'models_required' });
+    expect(buildLocalAI(SPEAKER, settings({ ...HERE, coach: true, coachAt: 'api', translateModel: 'left-over' }), shared)).toMatchObject({ code: 'coach_unnamed' });
   });
 
   it('offers no "auto-detect" source: no recognizer here detects a language', () => {

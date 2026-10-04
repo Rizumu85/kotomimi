@@ -222,7 +222,7 @@ describe('a coached speaker', () => {
 
   it('is refused while the feedback has no model to run on, and takes typed text whenever something can translate it', () => {
     // The other device does not say what its models are for: nothing is run on a guess.
-    expect(buildLocalAI(SPEAKER, { ...LOCALAI_DEFAULTS, coach: true }, shared)).toMatchObject({ code: 'models_required' });
+    expect(buildLocalAI(SPEAKER, { ...LOCALAI_DEFAULTS, coach: true }, shared)).toMatchObject({ code: 'coach_unnamed' });
     // One that does: its first text model gives the feedback, and translates what is typed.
     const told = { ...shared, models: [{ id: 'gpt-realtime', kind: 'pipeline' as const }, { id: 'hy-mt2-1.8b', kind: 'text' as const }] };
     expect(buildLocalAI(SPEAKER, { ...LOCALAI_DEFAULTS, coach: true }, told)).toMatchObject({ stages: { speech: { kind: 'coach', model: 'hy-mt2-1.8b', baseUrl: '' }, typed: { kind: 'translate', model: 'hy-mt2-1.8b' } } });

@@ -353,7 +353,8 @@ export const localaiCredentials: Provider<LocalAISettings, LocalAICredentials, n
 
 /**
  * What a leg leaves unnamed — a stage with no model to run, or an API with no
- * address — in the words its start refuses it with. Asked by the builder, and
+ * address — in the words its start refuses it with, coded by the stage, whose
+ * card is where it is fixed (`noticeText`'s aliases). Asked by the builder, and
  * by the check for every leg, so the card never says "ready" to a run its
  * start would refuse. `coached`: the speaker's own leg, whose speech the
  * feedback answers and whose translation only what is typed needs.
@@ -361,19 +362,19 @@ export const localaiCredentials: Provider<LocalAISettings, LocalAICredentials, n
 function unnamedStage(s: LocalAISettings, models: readonly LocalAIModel[], coached: boolean): ProviderRefusal | null {
   const hearsHere = s.asrVia !== 'server';
   const pipeline = needsServer(s) ? effectiveLocalAIModel(s, models) : '';
-  if (!hearsHere && !pipeline) return { refused: 'No model is named, and the server lists none.', code: 'models_required' };
-  if (s.asrVia === 'api' && (!s.asrApiBaseUrl.trim() || !s.asrApiModel.trim())) return { refused: 'No speech recognition API is named.', code: 'models_required' };
+  if (!hearsHere && !pipeline) return { refused: 'No model is named, and the server lists none.', code: 'asr_unnamed' };
+  if (s.asrVia === 'api' && (!s.asrApiBaseUrl.trim() || !s.asrApiModel.trim())) return { refused: 'No speech recognition API is named.', code: 'asr_unnamed' };
   if (!coached) {
-    if (s.translateAt === 'api' && (!s.translateBaseUrl.trim() || !s.translateModel.trim())) return { refused: 'No translation model is named.', code: 'models_required' };
+    if (s.translateAt === 'api' && (!s.translateBaseUrl.trim() || !s.translateModel.trim())) return { refused: 'No translation model is named.', code: 'translate_unnamed' };
     const kotomimi = needsServer(s) && isKotomimiServer(models);
     const serverModel = s.translateServerModel.trim();
     // A model of the other device is asked by name: none is named, and none of its own fits.
     const asksServer = s.translateAt === 'server' && (serverModel !== '' || kotomimi || hearsHere);
-    if (asksServer && !(serverModel || (kotomimi && pipeline ? pipeline : serverDefaultModel(models, 'translate')))) return { refused: 'No translation model is named.', code: 'models_required' };
+    if (asksServer && !(serverModel || (kotomimi && pipeline ? pipeline : serverDefaultModel(models, 'translate')))) return { refused: 'No translation model is named.', code: 'translate_unnamed' };
     return null;
   }
-  if (s.coachAt === 'api' && (!s.coachBaseUrl.trim() || !s.coachModel.trim())) return { refused: 'No feedback model is named.', code: 'models_required' };
-  if (s.coachAt === 'server' && !(s.coachServerModel.trim() || serverDefaultModel(models, 'coach'))) return { refused: 'No feedback model is named.', code: 'models_required' };
+  if (s.coachAt === 'api' && (!s.coachBaseUrl.trim() || !s.coachModel.trim())) return { refused: 'No feedback model is named.', code: 'coach_unnamed' };
+  if (s.coachAt === 'server' && !(s.coachServerModel.trim() || serverDefaultModel(models, 'coach'))) return { refused: 'No feedback model is named.', code: 'coach_unnamed' };
   return null;
 }
 

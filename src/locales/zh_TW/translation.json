@@ -558,7 +558,10 @@
       "coachNoModel": "另一台裝置上沒有能給文法回饋的文字模型，可以改用 API 模型或這台電腦。",
       "coachPrompt": "文法回饋提示詞",
       "coachPromptPlaceholder": "留空：依你的母語和所練的語言自動產生。自己寫時可以用 {{spoken}} 和 {{native}} 代表這兩種語言。",
-      "coachPromptPreview": "留空時，目前語言對用的是這一份："
+      "coachPromptPreview": "留空時，目前語言對用的是這一份：",
+      "asrUnnamed": "語音辨識還沒有可用的模型。請在提供商下面的「語音辨識」卡片裡選好（用 API 模型時要填位址和模型名稱），或者換一個位置。",
+      "translateUnnamed": "翻譯還沒有可用的模型。請在提供商下面的「翻譯」卡片裡選好（用 API 模型時要填位址和模型名稱），或者換一個位置。",
+      "coachUnnamed": "文法回饋還沒有可用的模型。請在提供商下面的「文法回饋」卡片裡選好（用 API 模型時要填位址和模型名稱），或者換一個位置。"
     }
   },
   "logsPanel": {

@@ -87,6 +87,10 @@ export const NOTICE_ALIASES: Readonly<Record<string, string>> = {
   segment_ended: 'mainPanel.sonioxSegmentEnded',
   // Fork: the other device ended a session nobody had spoken in for a long while, to let its models go.
   session_idle: 'fork.lan.sessionIdle',
+  // Fork: a stage of the Kotomimi provider has no model to run — told by the card it is chosen in, not as a key to validate.
+  asr_unnamed: 'providers.localai.asrUnnamed',
+  translate_unnamed: 'providers.localai.translateUnnamed',
+  coach_unnamed: 'providers.localai.coachUnnamed',
   connection_lost: 'mainPanel.sonioxConnectionLost',
   // Kizuna Soniox's lease refused a start (Stage 2 Kizuna Soniox, ruling 11): the sentences name Soniox, so the codes keep it.
   soniox_service_unavailable: 'mainPanel.sonioxServiceUnavailable',

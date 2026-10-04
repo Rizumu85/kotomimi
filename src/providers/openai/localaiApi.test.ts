@@ -59,8 +59,8 @@ describe('recognition by an API: the run it builds', () => {
   });
 
   it('is refused while the API or its model is not named', () => {
-    expect(buildLocalAI(SPEAKER, settings({ ...API, asrApiModel: ' ' }), shared)).toMatchObject({ code: 'models_required' });
-    expect(buildLocalAI(SPEAKER, settings({ ...API, asrApiBaseUrl: '' }), shared)).toMatchObject({ code: 'models_required' });
+    expect(buildLocalAI(SPEAKER, settings({ ...API, asrApiModel: ' ' }), shared)).toMatchObject({ code: 'asr_unnamed' });
+    expect(buildLocalAI(SPEAKER, settings({ ...API, asrApiBaseUrl: '' }), shared)).toMatchObject({ code: 'asr_unnamed' });
   });
 
   it('counts none of this computer\'s memory for the recognizer', () => {

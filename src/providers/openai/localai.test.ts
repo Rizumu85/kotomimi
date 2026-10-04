@@ -247,7 +247,7 @@ describe("LocalAI Realtime's model and config", () => {
     expect(effectiveLocalAIModel({ model: '' }, [{ id: 'qwen3-4b' }])).toBe('qwen3-4b');
     // With the server's word on what each model is, only a pipeline: never a text model, or one another server lists.
     expect(effectiveLocalAIModel({ model: '' }, [{ id: 'qwen3-4b', kind: 'text' }, { id: 'my-pipeline', kind: 'pipeline' }, { id: 'gpt-realtime-x', kind: 'text', from: 'translate' }])).toBe('my-pipeline');
-    expect(buildLocalAI(AUTO, { ...LOCALAI_DEFAULTS, model: '' }, { ...SHARED, models: [] })).toMatchObject({ code: 'models_required' });
+    expect(buildLocalAI(AUTO, { ...LOCALAI_DEFAULTS, model: '' }, { ...SHARED, models: [] })).toMatchObject({ code: 'asr_unnamed' });
   });
 
   it('builds a text-only leg with no voice, no reasoning, no anchor, and commits that answer themselves', () => {
