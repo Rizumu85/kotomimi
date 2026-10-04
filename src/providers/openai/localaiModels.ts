@@ -64,6 +64,17 @@ export function modelsFor(models: readonly LocalAIModel[], slot: LocalAIModelSlo
   return server.filter((m) => m.kind !== undefined && KINDS[slot].includes(m.kind));
 }
 
+/**
+ * What the other device runs for a slot left blank: the first model it lists
+ * that can do the work. Only a device that says what its models are for is
+ * asked this way (a LocalAI, another Kotomimi): on any other, nothing is run
+ * on a guess, and the model has to be named.
+ */
+export function serverDefaultModel(models: readonly LocalAIModel[], slot: 'translate' | 'coach'): string {
+  if (!models.some((m) => m.from === undefined && m.kind !== undefined)) return '';
+  return modelsFor(models, slot)[0]?.id ?? '';
+}
+
 /** The Realtime server is another Kotomimi: every model it lists says so. */
 export function isKotomimiServer(models: readonly LocalAIModel[]): boolean {
   return models.some((m) => m.from === undefined && m.host === KOTOMIMI_HOST);

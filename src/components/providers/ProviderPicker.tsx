@@ -74,9 +74,23 @@ export function ProviderPicker({ providers, auth, disabled, openSlot }: Provider
   const { setCredential, refreshReadiness, select, updateSettings } = useProviderStore.getState();
   const credentialChoice = provider.credentials.choice;
   const CredentialAssist = provider.credentials.Assist;
-  // The first managed provider offered, as the wizard's managed card recommends it (today's ProviderSection.tsx:553-580).
-  const recommendedId = providers.find((p) => p.kind === 'managed')?.id;
+  // Fork: the provider that says so (`recommended`) — the fork's own, which needs no account. Upstream marks the first managed one.
+  const recommendedId = providers.find((p) => p.recommended)?.id;
   const recommendedLabel = t('simpleSettings.recommended', 'Recommended');
+
+  // A local provider checks itself, and a managed one follows the sign-in (F1): only an own-key provider offers Validate.
+  const runCheck = provider.kind === 'own-key' ? () => {
+    void refreshReadiness(provider, auth).then((answer) => {
+      // Superseded (an edit meanwhile, or a newer check still running): this press found nothing out.
+      if (answer.state === 'unknown' || answer.state === 'checking') return;
+      // Today's event (ProviderSection.tsx's handleValidateApiKey), for the button a person pressed.
+      trackEvent('api_key_validated', {
+        provider: storedProviderValue(provider.id),
+        success: answer.state === 'ready',
+        ...(answer.state === 'not-ready' && answer.code ? { error_type: answer.code } : {}),
+      });
+    });
+  } : undefined;
 
   // Today's `ProviderSection.tsx` keys dismissal by the old enum's spelling
   // (e.g. `local_inference`), so a dismissal made there carries over.
@@ -203,24 +217,18 @@ export function ProviderPicker({ providers, auth, disabled, openSlot }: Provider
             value: String((entry.settings as Record<string, unknown>)[credentialChoice.setting] ?? ''),
             onChange: (value) => updateSettings(provider, { [credentialChoice.setting]: value }),
           } : undefined}
-          // A local provider checks itself, and a managed one follows the sign-in (F1): only an own-key provider offers Validate.
-          onCheck={provider.kind === 'own-key' ? () => {
-            void refreshReadiness(provider, auth).then((answer) => {
-              // Superseded (an edit meanwhile, or a newer check still running): this press found nothing out.
-              if (answer.state === 'unknown' || answer.state === 'checking') return;
-              // Today's event (ProviderSection.tsx's handleValidateApiKey), for the button a person pressed.
-              trackEvent('api_key_validated', {
-                provider: storedProviderValue(provider.id),
-                success: answer.state === 'ready',
-                ...(answer.state === 'not-ready' && answer.code ? { error_type: answer.code } : {}),
-              });
-            });
-          } : undefined}
+          onCheck={runCheck}
           // Fork: a provider's own way to fill a field without typing it. What it fills is checked at once, as Validate would.
           assist={CredentialAssist && (
             <CredentialAssist
               settings={entry.settings}
               values={entry.credentials}
+              set={(key, value) => setCredential(provider, key, value)}
+              pair={entry.pair}
+              legs={legs}
+              models={selection.models}
+              readiness={readiness}
+              check={runCheck}
               fill={(key, value) => {
                 setCredential(provider, key, value);
                 void refreshReadiness(provider, auth);

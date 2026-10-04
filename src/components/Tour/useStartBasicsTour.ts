@@ -26,7 +26,7 @@ export function useStartBasicsTour(): () => void {
     const s = useSettingsStore.getState();
     // Fork: whether the Kotomimi provider runs a stage on this computer, from its own settings.
     const { selected, entries } = useProviderStore.getState();
-    const kotomimi = selected === 'localai' ? (entries.localai?.settings as { asrVia?: string; translateVia?: string } | undefined) : undefined;
+    const kotomimi = selected === 'localai' ? (entries.localai?.settings as { asrVia?: string; translateAt?: string } | undefined) : undefined;
     start(buildTourCtx({
       record: useSetupStore.getState().setup,
       // The selected provider, in the old enum's spelling — never the record's,
@@ -36,7 +36,7 @@ export function useStartBasicsTour(): () => void {
       textOnly: s.textOnly,
       isSignedIn,
       apiKeyValid: s.isApiKeyValid,
-      deviceStages: kotomimi?.asrVia === 'device' || kotomimi?.translateVia === 'device',
+      deviceStages: kotomimi?.asrVia === 'device' || kotomimi?.translateAt === 'device',
       env: { isElectron: isElectron(), isExtension: isExtension(), isLinux: isLinux(), isMacOS: isMacOS(), isWindows: isWindows() },
     }));
   }, [isSignedIn, start]);

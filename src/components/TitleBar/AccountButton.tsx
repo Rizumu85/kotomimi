@@ -18,6 +18,7 @@ import {
 } from '../../stores/settingsStore';
 import { compactBalanceLabel } from './compactBalance';
 import { useBalanceShortfall } from './useBalanceShortfall';
+import { useManagedSelected } from './useManagedSelected';
 import { useSessionRefreshOnReturn } from './useSessionRefreshOnReturn';
 import { useToast } from '../Toast';
 import AccountPopover from './AccountPopover';
@@ -31,6 +32,8 @@ const AccountButton: React.FC = () => {
   const { quota } = useUserProfile();
   // The start gate's own answer for the selected provider (Stage 2 Kizuna Soniox, choice 9).
   const lowBalance = useBalanceShortfall();
+  // Fork: the account is the managed provider's (see the early return below).
+  const managedSelected = useManagedSelected();
   const [open, setOpen] = useState(false);
   // The popover anchors to the button's own element, so the anchor never
   // travels between components. It is null on the first render and set by the
@@ -78,6 +81,11 @@ const AccountButton: React.FC = () => {
   // same guard before it was removed; it has to survive the move, not be lost
   // in it. Placed after every hook call so the hook order stays unconditional.
   if (!isKizunaAIEnabled()) return null;
+
+  // Fork: the account is the managed provider's. With any other provider chosen it buys nothing, and a "Sign In"
+  // at the top of the window reads as something the app needs; it stays for someone already signed in, as the way
+  // to sign out.
+  if (!isSignedIn && !managedSelected) return null;
 
   // One key, not one per state: both states name the same thing to the user.
   // Two keys holding an identical string only give a translator two chances to

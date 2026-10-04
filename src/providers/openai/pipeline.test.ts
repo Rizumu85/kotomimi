@@ -13,7 +13,8 @@ const K: LocalAICredentials = { apiKey: '', endpoint: 'ws://192.168.1.10:8080/v1
 const SPEAKER: SessionContext = { direction: { source: 'zh-CN', target: 'ja' }, speech: false, turns: 'auto' };
 const PARTICIPANT: SessionContext = { direction: { source: 'ja', target: 'zh-CN' }, speech: false, turns: 'auto' };
 const shared = { ...SHARED, reversed: (d: SessionContext['direction']) => d.source === 'ja', models: [{ id: 'gpt-realtime' }, { id: 'hy-mt2-1.8b' }] };
-const VIA_MODEL: Partial<LocalAISettings> = { translateVia: 'model', translateModel: 'hy-mt2-1.8b' };
+// A model of the other device's, named: the leg only transcribes there, and the model is asked over chat.
+const VIA_MODEL: Partial<LocalAISettings> = { translateServerModel: 'hy-mt2-1.8b' };
 
 const frame = (e: Record<string, unknown>) => JSON.stringify(e);
 const SERVER = {
@@ -96,7 +97,7 @@ describe('a leg whose translation runs on a text model', () => {
   });
 
   it('calls another server, with its key, when one is named', async () => {
-    const h = await live(PARTICIPANT, { ...VIA_MODEL, translateModel: 'gpt-4.1-mini', translateBaseUrl: 'https://api.openai.com/v1/', translateNeedsKey: true }, [sse('好')], { ...K, translateKey: 'sk-test-1' });
+    const h = await live(PARTICIPANT, { translateAt: 'api', translateModel: 'gpt-4.1-mini', translateBaseUrl: 'https://api.openai.com/v1/', translateNeedsKey: true }, [sse('好')], { ...K, translateKey: 'sk-test-1' });
     h.receive(...heard('item_1', 'いいね'));
     await h.settled();
     expect(h.calls[0].url).toBe('https://api.openai.com/v1/chat/completions');
@@ -183,7 +184,7 @@ describe('a leg on the server\'s own pipeline', () => {
 });
 
 describe('a coached speaker', () => {
-  const COACH: Partial<LocalAISettings> = { coach: true, coachModel: 'qwen3-4b', translateModel: 'hy-mt2-1.8b' };
+  const COACH: Partial<LocalAISettings> = { coach: true, coachServerModel: 'qwen3-4b', translateServerModel: 'hy-mt2-1.8b' };
 
   it('is heard in the language they practise, and their speech is answered with feedback in their own', async () => {
     const h = await live(SPEAKER, COACH, [sse('昨日映画を見ました。\n', '“见”要用过去式。')]);
@@ -219,20 +220,25 @@ describe('a coached speaker', () => {
     expect(h.lastText(FIRST_REF + 2)).toEqual({ ref: FIRST_REF + 2, text: '経費精算' });
   });
 
-  it('gives the feedback with the translation model when it has none of its own, and takes no typed text when there is neither', () => {
-    const config = buildLocalAI(SPEAKER, { ...LOCALAI_DEFAULTS, coach: true, translateModel: 'hy-mt2-1.8b', translateBaseUrl: 'http://localhost:11434/v1', translateNeedsKey: true }, shared);
-    expect(config).toMatchObject({ stages: { speech: { kind: 'coach', model: 'hy-mt2-1.8b', baseUrl: 'http://localhost:11434/v1', key: 'translateKey' } } });
+  it('is refused while the feedback has no model to run on, and takes typed text whenever something can translate it', () => {
+    // The other device does not say what its models are for: nothing is run on a guess.
     expect(buildLocalAI(SPEAKER, { ...LOCALAI_DEFAULTS, coach: true }, shared)).toMatchObject({ code: 'models_required' });
-    expect(localaiProvider.textInput({ ...LOCALAI_DEFAULTS, coach: true, coachModel: 'qwen3-4b' })).toBe(false);
-    expect(localaiProvider.textInput({ ...LOCALAI_DEFAULTS, coach: true, translateModel: 'hy-mt2-1.8b' })).toBe(true);
+    // One that does: its first text model gives the feedback, and translates what is typed.
+    const told = { ...shared, models: [{ id: 'gpt-realtime', kind: 'pipeline' as const }, { id: 'hy-mt2-1.8b', kind: 'text' as const }] };
+    expect(buildLocalAI(SPEAKER, { ...LOCALAI_DEFAULTS, coach: true }, told)).toMatchObject({ stages: { speech: { kind: 'coach', model: 'hy-mt2-1.8b', baseUrl: '' }, typed: { kind: 'translate', model: 'hy-mt2-1.8b' } } });
+    // An API of its own, with its own key; nothing then translates what is typed, and the run still starts.
+    expect(buildLocalAI(SPEAKER, { ...LOCALAI_DEFAULTS, coach: true, coachAt: 'api', coachModel: 'gpt-x', coachBaseUrl: 'http://localhost:11434/v1', coachNeedsKey: true }, shared))
+      .toMatchObject({ stages: { speech: { kind: 'coach', model: 'gpt-x', baseUrl: 'http://localhost:11434/v1', key: 'coachKey' }, typed: null } });
+    expect(localaiProvider.textInput({ ...LOCALAI_DEFAULTS, coach: true })).toBe(true);
+    expect(localaiProvider.textInput({ ...LOCALAI_DEFAULTS, coach: true, translateAt: 'api' })).toBe(false);
     expect(localaiProvider.textInput(LOCALAI_DEFAULTS)).toBe(true);
   });
 
-  it('leaves the participant leg alone: it hears the other side and translates, by the server or the text model', () => {
-    const server = buildLocalAI(PARTICIPANT, { ...LOCALAI_DEFAULTS, ...COACH }, shared);
+  it('leaves the participant leg alone: it hears the other side and translates, by the device\'s pipeline or the model named', () => {
+    const server = buildLocalAI(PARTICIPANT, { ...LOCALAI_DEFAULTS, coach: true, coachServerModel: 'qwen3-4b' }, shared);
     expect(server).not.toHaveProperty('stages');
     expect(server).toMatchObject({ transcription: { language: 'ja' } });
-    const model = buildLocalAI(PARTICIPANT, { ...LOCALAI_DEFAULTS, ...COACH, translateVia: 'model' }, shared);
+    const model = buildLocalAI(PARTICIPANT, { ...LOCALAI_DEFAULTS, ...COACH }, shared);
     expect(model).toMatchObject({ transcribeOnly: true, stages: { speech: { kind: 'translate', model: 'hy-mt2-1.8b' } } });
   });
 

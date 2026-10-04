@@ -9,6 +9,9 @@ vi.mock('react-i18next', () => ({
 
 const shortfall = vi.hoisted(() => ({ value: false }));
 vi.mock('./useBalanceShortfall', () => ({ useBalanceShortfall: () => shortfall.value }));
+// Fork: the entry is offered to a signed-out user only while the managed provider is the one chosen.
+const managed = vi.hoisted(() => ({ value: true }));
+vi.mock('./useManagedSelected', () => ({ useManagedSelected: () => managed.value }));
 
 // providerStore imports ServiceFactory at module scope, which chains into
 // SettingsService and into i18n's own setup. Stubbed, as every other test
@@ -69,6 +72,7 @@ beforeEach(() => {
   authUser = null;
   quota = null;
   shortfall.value = false;
+  managed.value = true;
   popoverRequested = false;
   setPopoverRequested.mockClear();
   refetchSpy.mockClear();
@@ -320,6 +324,23 @@ describe('AccountButton signed-out label', () => {
   it('still shows no balance while signed out', () => {
     render(<AccountButton />);
     expect(screen.queryByText(/\$/)).toBeNull();
+  });
+});
+
+// Fork: an account is the managed provider's. With any other chosen, a "Sign In" at the top of the window offers nothing.
+describe('AccountButton and the provider chosen', () => {
+  it('is not offered to a signed-out user while a provider that needs no account is chosen', () => {
+    managed.value = false;
+    render(<AccountButton />);
+    expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('stays for someone already signed in, as the way to their account and out of it', () => {
+    managed.value = false;
+    signedIn = true;
+    authUser = { name: 'J', email: 'you@example.com', emailVerified: true };
+    render(<AccountButton />);
+    expect(screen.getByRole('button')).toBeTruthy();
   });
 });
 

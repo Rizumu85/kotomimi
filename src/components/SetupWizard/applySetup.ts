@@ -44,7 +44,9 @@ export async function applySetupDraft(draft: SetupDraft, deps: ApplySetupDeps): 
   // skipped: Settings then shows the fields the user chose (Stage 2
   // Volcengine AST2, ruling 1).
   const choice = providerPath === 'own-key' ? draft.credentialChoice : null;
-  const settings = choice ? { [choice.setting]: choice.value } : {};
+  const settings: Record<string, string> = choice ? { [choice.setting]: choice.value } : {};
+  // Fork: the Kotomimi step asks one question for every stage — another device, or this computer.
+  if (choice && (provider as string) === 'localai' && choice.setting === 'asrVia') Object.assign(settings, { translateAt: choice.value, coachAt: choice.value });
   // Awaited: a rejected write has to reach Finish's error path rather than
   // becoming an unhandled rejection behind a "done" wizard.
   await deps.applyProvider(provider, { source: sourceLanguage, target: targetLanguage }, credentials, settings);

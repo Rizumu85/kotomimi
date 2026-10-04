@@ -1,71 +1,222 @@
-import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import type { Readiness } from '../../lib/provider/types';
+import { useModelStore } from '../../stores/modelStore';
 import { LocalAIAssist } from './LocalAIAssist';
 import { LOCALAI_DEFAULTS, type LocalAISettings } from './localai';
+import { PLACE_FIELDS } from './localaiDevice';
+import type { LocalAIModel } from './localaiModels';
 
 // The catalog's keys stand for its strings.
 vi.mock('react-i18next', async (importOriginal) => ({ ...(await importOriginal<typeof import('react-i18next')>()), useTranslation: () => ({ t: (key: string) => key }) }));
-// The search of the network is the finder's own test: here only whether it is drawn.
+// The search of the network is the finder's own test: here only that it is drawn, and what a pick does.
 vi.mock('../../components/LanSharing/ServerFinder', () => ({
-  ServerFinder: ({ onPick }: { onPick(server: unknown): void }) => (
-    <button type="button" onClick={() => onPick({ address: '192.168.1.9:8790', kind: 'kotomimi', name: 'DESK', product: '', models: 2, needsKey: true, self: false })}>finder</button>
+  ServerFinder: ({ onPick, auto, hint }: { onPick(server: unknown): void; auto?: boolean; hint?: string }) => (
+    <button type="button" data-auto={String(Boolean(auto))} data-hint={hint} onClick={() => onPick({ address: '192.168.1.9:8790', kind: 'kotomimi', name: 'DESK', product: '', models: 2, needsKey: true, self: false })}>finder</button>
   ),
 }));
+// The library is Local Inference's own, tested beside it: here only which one opens.
+vi.mock('../../components/Settings/sections/ModelManagementSection', () => ({
+  ModelManagementSection: ({ stageFilter, direction }: { stageFilter?: string; direction?: string }) => <div data-testid="library">{`${stageFilter}:${direction}`}</div>,
+}));
+vi.mock('../../components/CustomModels/CustomModels', () => ({ CustomModels: () => null }));
 
-function draw(settings: Partial<LocalAISettings>) {
+/** What a LocalAI lists: a pipeline, a recognizer, two text models. */
+const LISTED: LocalAIModel[] = [
+  { id: 'gpt-realtime', kind: 'pipeline' },
+  { id: 'whisper-large-turbo', kind: 'asr' },
+  { id: 'hy-mt2-1.8b', kind: 'text' },
+  { id: 'qwen3-4b', kind: 'text' },
+];
+
+interface Drawn { settings?: Partial<LocalAISettings>; values?: Record<string, string>; models?: LocalAIModel[]; readiness?: Readiness }
+
+function draw({ settings = {}, values = { endpoint: '' }, models = [], readiness = { state: 'unknown' } }: Drawn = {}) {
   const update = vi.fn();
   const fill = vi.fn();
-  render(<LocalAIAssist settings={{ ...LOCALAI_DEFAULTS, ...settings }} values={{ endpoint: '' }} fill={fill} update={update} />);
+  const set = vi.fn();
+  const check = vi.fn();
+  const view = render(
+    <LocalAIAssist settings={{ ...LOCALAI_DEFAULTS, ...settings }} values={values} set={set} fill={fill} update={update} pair={{ source: 'zh-CN', target: 'ja' }} legs={['speaker']} models={models} readiness={readiness} check={check} />,
+  );
+  const card = (stage: string) => within(screen.getByRole('region', { name: stage }));
   const places = (stage: string) => [...screen.getByRole('group', { name: stage }).querySelectorAll('button')];
-  return { update, fill, hear: () => places('providers.localai.hearStage'), translate: () => places('providers.localai.translateStage') };
+  return { ...view, update, fill, set, check, card, places };
 }
 
+const HEAR = 'providers.localai.hearStage';
+const TRANSLATE = 'providers.localai.translateStage';
+const COACH = 'providers.localai.coachStage';
+const THREE = ['providers.localai.placeServer', 'providers.localai.viaModel', 'providers.localai.placeDevice'];
 const pressed = (buttons: Element[]) => buttons.find((b) => b.getAttribute('aria-pressed') === 'true')?.textContent;
+const options = (select: HTMLElement) => [...(select as HTMLSelectElement).options].map((o) => o.value);
 
-describe('where each stage runs, under the provider', () => {
-  it('is a row per stage, each with its own places: two choices, not one switch', () => {
-    const { hear, translate, update } = draw({ asrVia: 'server', translateVia: 'server' });
-    // The same three places on both rows: another device, an API, this computer.
-    expect(hear().map((b) => b.textContent)).toEqual(['providers.localai.placeServer', 'providers.localai.viaModel', 'providers.localai.placeDevice']);
-    expect(translate().map((b) => b.textContent)).toEqual(['providers.localai.placeServer', 'providers.localai.viaModel', 'providers.localai.placeDevice']);
-    expect(pressed(hear())).toBe('providers.localai.placeServer');
-    // The translation moves by itself: recognition stays where it is.
-    fireEvent.click(translate()[2]);
-    expect(update).toHaveBeenCalledWith({ translateVia: 'device' });
-    fireEvent.click(hear()[1]);
+beforeEach(() => {
+  // Nothing downloaded; the online translator is always there.
+  useModelStore.setState({ initialized: true, webgpuAvailable: true, deviceFeatures: [], modelStatuses: {}, downloads: {} });
+});
+
+describe('the stage cards: where each stage runs', () => {
+  it('gives every stage the same three places, each chosen by itself', () => {
+    const { places, update } = draw({ settings: { asrVia: 'device', translateAt: 'server', coach: true, coachAt: 'api' } });
+    for (const stage of [HEAR, TRANSLATE, COACH]) expect(places(stage).map((b) => b.textContent)).toEqual(THREE);
+    // What hears decides nothing about what translates.
+    expect(pressed(places(HEAR))).toBe('providers.localai.placeDevice');
+    expect(pressed(places(TRANSLATE))).toBe('providers.localai.placeServer');
+    expect(pressed(places(COACH))).toBe('providers.localai.viaModel');
+    fireEvent.click(places(TRANSLATE)[2]);
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ translateAt: 'device' }));
+    fireEvent.click(places(HEAR)[1]);
     expect(update).toHaveBeenLastCalledWith({ asrVia: 'api' });
-    fireEvent.click(hear()[2]);
-    expect(update).toHaveBeenLastCalledWith({ asrVia: 'device' });
+    fireEvent.click(places(COACH)[2]);
+    expect(update).toHaveBeenLastCalledWith({ coachAt: 'device' });
   });
 
-  it('offers the other device\'s pipeline for the translation only while it also hears', () => {
-    const { translate } = draw({ asrVia: 'device', translateVia: 'server' });
-    expect(translate().map((b) => b.textContent)).toEqual(['providers.localai.viaModel', 'providers.localai.placeDevice']);
-    // What then answers: this computer's own model (`translateViaOf`).
-    expect(pressed(translate())).toBe('providers.localai.placeDevice');
+  it('writes the places read out of an earlier build\'s settings with the first edit, and only with the first', () => {
+    const { places, update } = draw({ settings: { translateAt: 'server', translateServerModel: 'translategemma-4b', coachAt: 'server', coachServerModel: 'translategemma-4b' } });
+    fireEvent.click(places(HEAR)[2]);
+    const first = update.mock.calls[0][0] as Record<string, unknown>;
+    expect(Object.keys(first).sort()).toEqual([...PLACE_FIELDS, 'asrVia'].sort());
+    expect(first).toMatchObject({ asrVia: 'device', translateAt: 'server', translateServerModel: 'translategemma-4b', coachAt: 'server', coachServerModel: 'translategemma-4b' });
+    fireEvent.click(places(HEAR)[1]);
+    expect(update).toHaveBeenLastCalledWith({ asrVia: 'api' });
   });
 
-  it('says what is still to fill in when an API hears or translates and is not named yet', () => {
-    draw({ asrVia: 'api', translateVia: 'model', translateModel: '' });
-    expect(screen.getByText('providers.localai.asrTodo')).toBeTruthy();
-    expect(screen.getByText('providers.localai.modelTodo')).toBeTruthy();
+  it('asks where the feedback runs only once it is switched on', () => {
+    const off = draw();
+    expect(screen.queryByRole('group', { name: COACH })).toBeNull();
+    fireEvent.click(off.card(COACH).getByText('providers.localai.coach'));
+    expect(off.update).toHaveBeenLastCalledWith(expect.objectContaining({ coach: true }));
+    off.unmount();
+    draw({ settings: { coach: true } });
+    expect(screen.getByRole('group', { name: COACH })).toBeTruthy();
+  });
+});
+
+describe('the stage cards: on the other device', () => {
+  it('chooses each stage\'s model from what the device lists for it, in the card itself', () => {
+    const { card, update } = draw({ settings: { coach: true }, values: { endpoint: '192.168.1.10:8080' }, models: LISTED });
+    const hear = card(HEAR).getByRole('combobox', { name: 'providers.localai.model' });
+    expect(options(hear)).toEqual(['', 'whisper-large-turbo']);
+    const translate = card(TRANSLATE).getByRole('combobox', { name: 'providers.localai.model' });
+    expect(options(translate)).toEqual(['', 'hy-mt2-1.8b', 'qwen3-4b']);
+    // Left blank while the device also hears: its own pipeline translates, in the same session.
+    expect((translate as HTMLSelectElement).options[0].textContent).toBe('providers.localai.translateInSession');
+    fireEvent.change(translate, { target: { value: 'qwen3-4b' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ translateServerModel: 'qwen3-4b' }));
+    expect(options(card(COACH).getByRole('combobox', { name: 'providers.localai.model' }))).toEqual(['', 'hy-mt2-1.8b', 'qwen3-4b']);
   });
 
-  it('says nothing more once they are named', () => {
-    draw({ asrVia: 'api', asrApiBaseUrl: 'https://api.example.com/v1', asrApiModel: 'whisper-1', translateVia: 'model', translateModel: 'gpt-x', translateBaseUrl: 'https://api.example.com/v1' });
-    expect(screen.queryByText('providers.localai.asrTodo')).toBeNull();
-    expect(screen.queryByText('providers.localai.modelTodo')).toBeNull();
-    // Nothing runs on another device: no list of devices to pick from.
-    expect(screen.queryByText('finder')).toBeNull();
+  it('offers the translation there to a leg this computer hears, too: the device\'s first model that translates when none is named', () => {
+    const { card } = draw({ settings: { asrVia: 'device' }, values: { endpoint: '192.168.1.10:8080' }, models: LISTED });
+    const translate = card(TRANSLATE).getByRole('combobox', { name: 'providers.localai.model' }) as HTMLSelectElement;
+    expect(translate.options[0].textContent).toBe('providers.localai.auto');
+    expect(options(translate)).toEqual(['', 'hy-mt2-1.8b', 'qwen3-4b']);
   });
 
-  it('shows the devices found only while a stage is on another device, and a pick fills the address and asks for its key', () => {
-    const here = draw({ asrVia: 'device', translateVia: 'device' });
-    expect(screen.queryByText('finder')).toBeNull();
-    here.update.mockClear();
-    const there = draw({ asrVia: 'server', translateVia: 'server', serverNeedsKey: false });
-    fireEvent.click(screen.getByText('finder'));
-    expect(there.update).toHaveBeenCalledWith({ serverNeedsKey: true });
-    expect(there.fill).toHaveBeenCalledWith('endpoint', '192.168.1.9:8790');
+  it('keeps a saved model the device no longer lists visible, and shows no recognizer a LocalAI would refuse', () => {
+    const { card } = draw({ settings: { asrModel: 'whisper-large-turbo', translateServerModel: 'gone-model' }, values: { endpoint: '192.168.1.10:8080' }, models: LISTED });
+    expect(options(card(TRANSLATE).getByRole('combobox', { name: 'providers.localai.model' }))).toEqual(['', 'gone-model', 'hy-mt2-1.8b', 'qwen3-4b']);
+    // The translation is by a model named here: the leg only transcribes, with the device's own recognizer.
+    const hear = card(HEAR).getByRole('combobox', { name: 'providers.localai.model' }) as HTMLSelectElement;
+    expect(hear.disabled).toBe(true);
+    expect(hear.value).toBe('');
+    expect(card(HEAR).getByText('providers.localai.asrFixedNote')).toBeTruthy();
+  });
+
+  it('says so when the device has no text model for the feedback', () => {
+    const { card } = draw({ settings: { coach: true }, values: { endpoint: '192.168.1.10:8080' }, models: [{ id: 'kotomimi', kind: 'pipeline', host: 'kotomimi' }, { id: 'bing-translator', kind: 'translate', host: 'kotomimi' }] });
+    expect(card(COACH).getByText('providers.localai.coachNoModel')).toBeTruthy();
+    expect(card(COACH).queryByRole('combobox')).toBeNull();
+  });
+
+  it('is found by searching, above the cards: a pick fills its address and asks for its key', () => {
+    const { fill, update, set } = draw();
+    const finder = screen.getByText('finder');
+    // A stage wants the device and no address is set: the search runs by itself.
+    expect(finder.dataset.auto).toBe('true');
+    expect(finder.dataset.hint).toBe('providers.localai.otherDeviceHint');
+    expect(screen.getAllByText('providers.localai.connectFirst').length).toBeGreaterThan(0);
+    fireEvent.click(finder);
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ serverNeedsKey: true }));
+    expect(fill).toHaveBeenCalledWith('endpoint', '192.168.1.9:8790');
+    // Typed by hand, the address is a credential like any other.
+    fireEvent.change(screen.getByRole('textbox', { name: 'providers.localai.endpoint' }), { target: { value: '192.168.1.20:8080' } });
+    expect(set).toHaveBeenLastCalledWith('endpoint', '192.168.1.20:8080');
+  });
+
+  it('stays out of the way while no stage is placed on it: a search to press, and no address to fill', () => {
+    draw({ settings: { asrVia: 'device', translateAt: 'device' } });
+    expect(screen.getByText('finder').dataset.auto).toBe('false');
+    expect(screen.queryByRole('textbox', { name: 'providers.localai.endpoint' })).toBeNull();
+    expect(screen.queryByText('providers.localai.connectFirst')).toBeNull();
+  });
+});
+
+describe('the stage cards: at an API', () => {
+  it('asks for the address, the model and the key in the stage that uses them', () => {
+    const { card, update, set } = draw({ settings: { asrVia: 'api', translateAt: 'api', translateNeedsKey: false } });
+    const hear = card(HEAR);
+    fireEvent.change(hear.getByRole('textbox', { name: 'providers.localai.asrApiBaseUrl' }), { target: { value: 'https://api.example.com/v1' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrApiBaseUrl: 'https://api.example.com/v1' }));
+    fireEvent.change(hear.getByRole('combobox', { name: 'providers.localai.model' }), { target: { value: 'whisper-1' } });
+    expect(update).toHaveBeenLastCalledWith({ asrApiModel: 'whisper-1' });
+    // The key is a credential, written as typing writes one: no check at every letter.
+    fireEvent.change(hear.getByLabelText('providers.localai.apiKey', { selector: 'input' }), { target: { value: 'sk-1' } });
+    expect(set).toHaveBeenLastCalledWith('asrKey', 'sk-1');
+    // An API that wants no key shows no field for one.
+    expect(card(TRANSLATE).queryByLabelText('providers.localai.apiKey', { selector: 'input' })).toBeNull();
+  });
+});
+
+describe('the stage cards: on this computer', () => {
+  it('chooses the model in the card, and opens the library under it by itself while a model is missing', () => {
+    const { card } = draw({ settings: { asrVia: 'device', translateAt: 'device' } });
+    // No recognizer is downloaded: the library is the first thing seen, for the language heard; the tour points here.
+    expect(card(HEAR).getByTestId('library').textContent).toBe('asr:zh→ja');
+    expect(card(HEAR).getByRole('combobox').closest('[data-tour="engine-chips"]')).toBeTruthy();
+    expect((card(HEAR).getByRole('combobox') as HTMLSelectElement).options[0].textContent).toBe('providers.localai.notDownloaded');
+    // The online translator is always there: the translation has its model, and its library waits to be opened.
+    expect(card(TRANSLATE).queryByTestId('library')).toBeNull();
+    expect((card(TRANSLATE).getByRole('combobox') as HTMLSelectElement).options[0].textContent).toBe('providers.localai.auto');
+    fireEvent.click(card(TRANSLATE).getByRole('button', { name: 'providers.localai.browse' }));
+    expect(card(TRANSLATE).getByTestId('library').textContent).toBe('translation:zh→ja');
+    fireEvent.click(card(TRANSLATE).getByRole('button', { name: 'providers.localai.browse' }));
+    expect(card(TRANSLATE).queryByTestId('library')).toBeNull();
+  });
+
+  it('gives feedback with one of the catalog\'s chat models, downloaded from the card', () => {
+    const downloadModel = vi.fn(async () => {});
+    useModelStore.setState({ downloadModel });
+    const { card, update } = draw({ settings: { coach: true, coachAt: 'device' } });
+    const coach = card(COACH);
+    // None downloaded: the list of them is open, each with its download.
+    expect(coach.getByText('providers.localai.chatModelsNote')).toBeTruthy();
+    const downloads = coach.getAllByRole('button', { name: 'providers.localai.download' });
+    expect(downloads).toHaveLength(4);
+    fireEvent.click(downloads[0]);
+    expect(downloadModel).toHaveBeenCalledWith('qwen2.5-0.5b-translation');
+    // Downloaded ones can be picked.
+    act(() => useModelStore.setState({ modelStatuses: { 'qwen3-0.6b-translation': 'downloaded', 'qwen3.5-2b-translation': 'downloaded' } }));
+    const select = coach.getByRole('combobox', { name: 'providers.localai.model' });
+    expect(options(select)).toEqual(['', 'qwen3-0.6b-translation', 'qwen3.5-2b-translation']);
+    fireEvent.change(select, { target: { value: 'qwen3-0.6b-translation' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ coachDeviceModel: 'qwen3-0.6b-translation' }));
+  });
+});
+
+describe('the stage cards: whether it can all start', () => {
+  it('says so in words, and asks again on a press', () => {
+    const ready = draw({ readiness: { state: 'ready', models: [] } });
+    expect(screen.getByText('providers.localai.ready')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'providers.localai.recheck' }));
+    expect(ready.check).toHaveBeenCalledTimes(1);
+    ready.unmount();
+    const checking = draw({ readiness: { state: 'checking' } });
+    expect(screen.getByText('providers.localai.checking')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'providers.localai.recheck' })).toBeNull();
+    checking.unmount();
+    draw({ readiness: { state: 'not-ready', reason: 'no' } });
+    expect(screen.getByRole('button', { name: 'providers.localai.checkNow' })).toBeTruthy();
   });
 });

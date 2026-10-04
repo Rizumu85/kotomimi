@@ -93,10 +93,11 @@ describe('the registry', () => {
     expect(control.filter((p) => isPresent(p, env)).map((p) => p.id)).toEqual(['fake']);
   });
 
-  it('a release build offers Kizuna Soniox first on every platform, unflagged: the Kizuna umbrella alone decides it (ruling 6)', () => {
+  it('a release build offers Kizuna Soniox first of upstream\'s providers on every platform, unflagged: the Kizuna umbrella alone decides it (ruling 6)', () => {
     for (const platform of ['electron', 'extension', 'web'] as const) {
       // No provider enabled by name and no tester switch on: nothing but the umbrella can bring it in.
-      const offered = presentProviders({ platform, dev: false, enabled: new Set(), kizuna: true, switchOn: () => false });
+      // Fork: the fork's own provider leads the list where it is offered at all (the desktop app).
+      const offered = presentProviders({ platform, dev: false, enabled: new Set(), kizuna: true, switchOn: () => false }).filter((p) => p.id !== 'localai');
       expect(offered[0].id, platform).toBe('kizunaai_soniox');
       expect(offered[0].flagged, platform).not.toBe(true);
       const withoutUmbrella = presentProviders({ platform, dev: false, enabled: new Set(), kizuna: false, switchOn: () => false });
@@ -135,7 +136,7 @@ describe('the invariants every provider meets (F17)', () => {
 
   it('lets only the providers that run models on this computer read the pair and the legs in their check, so a pick or an audio-mode switch checks no other network provider again', () => {
     // Fork: Kotomimi's own provider can run a stage on this computer, and its models are per direction too.
-    expect(PROVIDERS.filter((p) => p.checkReadsDirection).map((p) => p.id)).toEqual(['localInference', 'localai']);
+    expect(PROVIDERS.filter((p) => p.checkReadsDirection).map((p) => p.id)).toEqual(['localai', 'localInference']);
   });
 
   it('declares the settings each own-key check reads, so an edit to any other field checks nothing again', () => {
@@ -150,7 +151,7 @@ describe('the invariants every provider meets (F17)', () => {
       soniox: ['region'],
       palabraai: ['authMode'],
       // Fork: LocalAI Realtime — what decides its key fields, and the other servers its check reaches.
-      localai: ['asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'translateVia', 'translateBaseUrl', 'translateModel', 'translateNeedsKey', 'coach', 'coachBaseUrl', 'coachModel', 'coachNeedsKey', 'serverNeedsKey', 'selections'],
+      localai: ['asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'coachDeviceModel', 'serverNeedsKey', 'selections'],
     });
   });
 
@@ -345,7 +346,9 @@ describe('the invariants every provider meets (F17)', () => {
     // each provider plan adds its id where the owner orders it (spec: "one line in the order test").
     // Kizuna Soniox first, unflagged (Stage 2 Kizuna Soniox, ruling 6): the owner's 2026-09-12
     // product order put the managed provider first; then LocalInference, Gemini (Stage 2 Gemini, ruling 6), Doubao AST 2.0 (Stage 2 Volcengine AST2, ruling 5), OpenAI Realtime (Stage 2 OpenAI Realtime, ruling 18), OpenAI Translate (Stage 2 OpenAI Translate, ruling 11), OpenAI Live (Stage 2 OpenAI Live, ruling 9), Soniox with your own key, and Palabra AI last (Stage 2 Palabra, ruling 14).
-    expect(releaseBuild.PROVIDERS.map((p) => p.id)).toEqual(['kizunaai_soniox', 'localInference', 'gemini', 'volcengine_ast2', 'openai', 'openai_translate', 'openai_live', 'soniox', 'palabraai', 'localai']);
+    // Fork: the fork's own provider leads, and is the one the picker recommends.
+    expect(releaseBuild.PROVIDERS.map((p) => p.id)).toEqual(['localai', 'kizunaai_soniox', 'localInference', 'gemini', 'volcengine_ast2', 'openai', 'openai_translate', 'openai_live', 'soniox', 'palabraai']);
+    expect(releaseBuild.PROVIDERS.filter((p) => p.recommended).map((p) => p.id)).toEqual(['localai']);
   });
 
   it('a development build adds exactly the two fakes', () => {

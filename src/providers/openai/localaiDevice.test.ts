@@ -11,7 +11,7 @@ import {
   admitLocalAI, buildLocalAI, createLocalAICheck, describeLocalAI, LOCALAI_DEFAULTS, localaiCredentials, localaiProvider, migrateLocalAISettings,
   type LocalAIConfig, type LocalAICredentials, type LocalAISettings,
 } from './localai';
-import { deviceChoices, deviceNeeds, deviceRecognizer, deviceTranslator, needsServer, translateViaOf } from './localaiDevice';
+import { deviceChatModels, deviceChoices, deviceCoachModel, deviceNeeds, deviceRecognizer, deviceTranslator, needsServer } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
 import { createPipelineAdapter, FIRST_REF, type DeviceStage } from './pipeline';
 import { SHARED } from './testing';
@@ -21,7 +21,8 @@ const SPEAKER: SessionContext = { direction: { source: 'zh-CN', target: 'ja' }, 
 const PARTICIPANT: SessionContext = { direction: { source: 'ja', target: 'zh-CN' }, speech: false, turns: 'auto' };
 const PAIR = { source: 'zh-CN', target: 'ja' };
 const shared = { ...SHARED, reversed: (d: SessionContext['direction']) => d.source === 'ja', models: [] as LocalAIModel[] };
-const HERE: Partial<LocalAISettings> = { asrVia: 'device' };
+// Every stage of a translation on this computer.
+const HERE: Partial<LocalAISettings> = { asrVia: 'device', translateAt: 'device' };
 const NONE: LocalAICredentials = { apiKey: '', endpoint: '' };
 const SERVER: LocalAICredentials = { apiKey: '', endpoint: 'ws://192.168.1.10:8080/v1/realtime' };
 const settings = (patch: Partial<LocalAISettings> = {}): LocalAISettings => ({ ...LOCALAI_DEFAULTS, ...patch });
@@ -40,21 +41,22 @@ function configFor(context: SessionContext, patch: Partial<LocalAISettings>, mod
 }
 
 describe('where each stage runs', () => {
-  it('has this computer translate whatever it hears: it has no server pipeline to answer in', () => {
-    expect(translateViaOf({ asrVia: 'device', translateVia: 'server' })).toBe('device');
-    expect(translateViaOf({ asrVia: 'device', translateVia: 'model' })).toBe('model');
-    expect(translateViaOf({ asrVia: 'server', translateVia: 'server' })).toBe('server');
-    expect(translateViaOf({ asrVia: 'server', translateVia: 'device' })).toBe('device');
+  it('places each stage by itself: what hears decides nothing about what translates', () => {
+    expect(deviceChoices(settings({ asrVia: 'device' })).translateAt).toBe('server');
+    expect(deviceChoices(settings({ asrVia: 'device', translateAt: 'api' })).translateAt).toBe('api');
+    expect(deviceChoices(settings({ translateAt: 'device' })).asrVia).toBe('server');
   });
 
-  it('needs the server only while a stage is on it', () => {
+  it('needs the other device only while a stage is on it', () => {
     expect(needsServer(settings())).toBe(true);
     expect(needsServer(settings(HERE))).toBe(false);
-    expect(needsServer(settings({ ...HERE, translateVia: 'model', translateModel: 'm' }))).toBe(true);
-    expect(needsServer(settings({ ...HERE, translateVia: 'model', translateModel: 'm', translateBaseUrl: 'http://localhost:11434/v1' }))).toBe(false);
-    // The feedback's own model on the Realtime server.
-    expect(needsServer(settings({ ...HERE, coach: true, coachModel: 'c' }))).toBe(true);
-    expect(needsServer(settings({ ...HERE, coach: true, coachModel: 'c', coachBaseUrl: 'https://api.example.com/v1' }))).toBe(false);
+    // The translation on the other device brings it back, whatever hears; an API does not.
+    expect(needsServer(settings({ ...HERE, translateAt: 'server' }))).toBe(true);
+    expect(needsServer(settings({ ...HERE, translateAt: 'api' }))).toBe(false);
+    // The feedback's place counts only while the speaker is coached.
+    expect(needsServer(settings({ ...HERE, coachAt: 'server' }))).toBe(false);
+    expect(needsServer(settings({ ...HERE, coach: true, coachAt: 'server' }))).toBe(true);
+    expect(needsServer(settings({ ...HERE, coach: true, coachAt: 'api' }))).toBe(false);
   });
 
   it('lists the models a run loads here: a recognizer per leg heard, a translation per leg translated', () => {
@@ -64,9 +66,11 @@ describe('where each stage runs', () => {
     expect(needs(HERE, ['speaker'])).toEqual(['speaker:asr:zh→ja', 'speaker:translation:zh→ja']);
     expect(needs(HERE, ['speaker', 'participant'])).toEqual(['speaker:asr:zh→ja', 'speaker:translation:zh→ja', 'participant:asr:ja→zh', 'participant:translation:ja→zh']);
     // The server hears, this computer translates.
-    expect(needs({ translateVia: 'device' }, ['participant'])).toEqual(['participant:translation:ja→zh']);
+    expect(needs({ translateAt: 'device' }, ['participant'])).toEqual(['participant:translation:ja→zh']);
+    // This computer hears, another place translates: a recognizer and nothing else.
+    expect(needs({ asrVia: 'device' }, ['speaker'])).toEqual(['speaker:asr:zh→ja']);
     // A coached speaker speaks Japanese: their recognizer is the Japanese one, and only what they type is translated.
-    expect(needs({ ...HERE, coach: true, coachModel: 'c' }, ['speaker'])).toEqual(['speaker:asr:ja→zh', 'speaker:translation:zh→ja?']);
+    expect(needs({ ...HERE, coach: true }, ['speaker'])).toEqual(['speaker:asr:ja→zh', 'speaker:translation:zh→ja?']);
   });
 
   it('resolves a slot to the pick, else to the best model downloaded, and to nothing for a language no one hears', () => {
@@ -104,19 +108,30 @@ describe('a leg this computer hears', () => {
     expect(buildLocalAI({ ...SPEAKER, direction: { source: 'auto', target: 'ja' } }, settings(HERE), shared)).toMatchObject({ code: 'no_asr' });
   });
 
-  it('can still be answered by a text model, on a server of its own or the Realtime server', () => {
-    const c = configFor(SPEAKER, { ...HERE, translateVia: 'model', translateModel: 'hy-mt2-1.8b', translateBaseUrl: 'http://192.168.1.10:8080/v1' });
+  it('can be answered by a text model instead: an API\'s, or the other device\'s', () => {
+    const c = configFor(SPEAKER, { asrVia: 'device', translateAt: 'api', translateModel: 'hy-mt2-1.8b', translateBaseUrl: 'http://192.168.1.10:8080/v1', translateNeedsKey: false });
     expect(c.device?.modelId).toBe('sensevoice-int8');
     expect(c.stages?.speech).toMatchObject({ kind: 'translate', baseUrl: 'http://192.168.1.10:8080/v1', model: 'hy-mt2-1.8b' });
     expect(c.stages?.speech).not.toHaveProperty('via');
+    expect(c.stages?.speech).not.toHaveProperty('key');
+    // On the other device: the model named, asked over chat at the device's own address.
+    const there = configFor(SPEAKER, { asrVia: 'device', translateAt: 'server', translateServerModel: 'hy-mt2-1.8b', serverNeedsKey: true });
+    expect(there.device?.modelId).toBe('sensevoice-int8');
+    expect(there.stages?.speech).toMatchObject({ kind: 'translate', baseUrl: '', model: 'hy-mt2-1.8b', key: 'apiKey' });
+    // None named: the first model the device lists that translates — when it says what its models are for.
+    const listed = [{ id: 'gpt-realtime', kind: 'pipeline' as const }, { id: 'whisper-large-turbo', kind: 'asr' as const }, { id: 'hy-mt2-1.8b', kind: 'text' as const }];
+    expect(configFor(SPEAKER, { asrVia: 'device', translateAt: 'server' }, listed).stages?.speech).toMatchObject({ baseUrl: '', model: 'hy-mt2-1.8b' });
+    // A device that does not say: nothing is run on a guess.
+    expect(buildLocalAI(SPEAKER, settings({ asrVia: 'device', translateAt: 'server' }), { ...shared, models: [{ id: 'some-model' }] })).toMatchObject({ code: 'models_required' });
+    expect(buildLocalAI(SPEAKER, settings({ asrVia: 'device', translateAt: 'api' }), shared)).toMatchObject({ code: 'models_required' });
   });
 
   it('hears a coached speaker in the language they practise, and translates only what they type', () => {
-    const c = configFor(SPEAKER, { ...HERE, coach: true, coachModel: 'qwen3-4b', coachBaseUrl: 'http://192.168.1.10:8080/v1' });
+    const c = configFor(SPEAKER, { ...HERE, coach: true, coachAt: 'api', coachModel: 'qwen3-4b', coachBaseUrl: 'http://192.168.1.10:8080/v1', coachNeedsKey: false });
     expect(c.device?.modelId).toBe('sensevoice-int8');
     expect(c.stages).toMatchObject({ heard: 'ja', speech: { kind: 'coach', model: 'qwen3-4b' }, typed: { via: 'device', model: 'bing-translator' } });
-    // With this computer translating, the feedback has no text model to borrow.
-    expect(buildLocalAI(SPEAKER, settings({ ...HERE, coach: true, translateModel: 'left-over' }), shared)).toMatchObject({ code: 'models_required' });
+    // The feedback has a place of its own, and borrows no model from the translation's.
+    expect(buildLocalAI(SPEAKER, settings({ ...HERE, coach: true, coachAt: 'api', translateModel: 'left-over' }), shared)).toMatchObject({ code: 'models_required' });
   });
 
   it('offers no "auto-detect" source: no recognizer here detects a language', () => {
@@ -126,15 +141,17 @@ describe('a leg this computer hears', () => {
 
   it('takes typed text whenever something translates it', () => {
     expect(localaiProvider.textInput(settings(HERE))).toBe(true);
-    expect(localaiProvider.textInput(settings({ ...HERE, coach: true, coachModel: 'c' }))).toBe(true);
-    expect(localaiProvider.textInput(settings({ coach: true, coachModel: 'c' }))).toBe(false);
+    expect(localaiProvider.textInput(settings({ ...HERE, coach: true }))).toBe(true);
+    // An API with no model named answers nothing a coached speaker types.
+    expect(localaiProvider.textInput(settings({ coach: true, translateAt: 'api' }))).toBe(false);
+    expect(localaiProvider.textInput(settings({ coach: true, translateAt: 'api', translateBaseUrl: 'https://api.example.com/v1', translateModel: 'm' }))).toBe(true);
   });
 
   it('keeps stored picks and knobs, and defaults what is missing or of the wrong type', () => {
     const inputs = { legacy: {}, credentials: {} };
     const picks = { 'zh→ja': { asr: { modelId: 'sensevoice-int8' }, translation: { modelId: '' }, tts: { modelId: '' } } };
-    expect(migrateLocalAISettings({ ...LOCALAI_DEFAULTS, asrVia: 'device', translateVia: 'device', selections: picks, vadThreshold: 0.6, serverNeedsKey: true }, inputs))
-      .toMatchObject({ asrVia: 'device', translateVia: 'device', selections: picks, vadThreshold: 0.6, serverNeedsKey: true });
+    expect(migrateLocalAISettings({ ...LOCALAI_DEFAULTS, asrVia: 'device', coachDeviceModel: 'qwen3-0.6b-translation', selections: picks, vadThreshold: 0.6, serverNeedsKey: true }, { legacy: { translateAt: 'device', coachAt: 'device' }, credentials: {} }))
+      .toMatchObject({ asrVia: 'device', translateAt: 'device', coachAt: 'device', coachDeviceModel: 'qwen3-0.6b-translation', selections: picks, vadThreshold: 0.6, serverNeedsKey: true });
     expect(migrateLocalAISettings({ ...LOCALAI_DEFAULTS, asrVia: 'cloud', selections: ['x'], vadThreshold: 'high', serverNeedsKey: 1 }, inputs))
       .toMatchObject({ asrVia: 'server', selections: {}, vadThreshold: 0.3, serverNeedsKey: false });
   });
@@ -142,7 +159,7 @@ describe('a leg this computer hears', () => {
 
 describe('a leg the server hears and this computer translates', () => {
   it('opens a transcription session and answers with the device stage', () => {
-    const c = configFor(PARTICIPANT, { translateVia: 'device' }, [{ id: 'gpt-realtime' }]);
+    const c = configFor(PARTICIPANT, { translateAt: 'device' }, [{ id: 'gpt-realtime' }]);
     expect(c).toMatchObject({ model: 'gpt-realtime', transcribeOnly: true });
     expect(c).not.toHaveProperty('device');
     expect(c.stages?.speech).toMatchObject({ via: 'device', model: 'bing-translator' });
@@ -164,6 +181,52 @@ describe('the memory this computer\'s models take', () => {
   });
 });
 
+describe('grammar feedback on this computer', () => {
+  const COACHED: Partial<LocalAISettings> = { ...HERE, coach: true, coachAt: 'device' };
+
+  it('is written by one of the catalog\'s chat models: the pick, else the largest downloaded', () => {
+    expect(deviceChatModels().map((m) => m.id)).toEqual(['qwen2.5-0.5b-translation', 'qwen3-0.6b-translation', 'qwen3.5-0.8b-translation', 'qwen3.5-2b-translation']);
+    downloaded('sensevoice-int8', 'qwen3-0.6b-translation', 'qwen3.5-2b-translation', 'opus-mt-ja-en');
+    expect(deviceCoachModel('')).toBe('qwen3.5-2b-translation');
+    expect(deviceCoachModel('qwen3-0.6b-translation')).toBe('qwen3-0.6b-translation');
+    // A pick that cannot run falls back; a translation model that is no chat model is never one.
+    expect(deviceCoachModel('qwen2.5-0.5b-translation')).toBe('qwen3.5-2b-translation');
+    expect(deviceCoachModel('opus-mt-ja-en')).toBe('qwen3.5-2b-translation');
+    const c = configFor(SPEAKER, COACHED);
+    expect(c.stages).toMatchObject({
+      heard: 'ja',
+      // The feedback's own instructions, the sentence as it was said, and answers in the speaker's own language.
+      speech: { via: 'device', kind: 'coach', model: 'qwen3.5-2b-translation', wrapTranscript: false, language: 'zh-CN' },
+      typed: { via: 'device', kind: 'translate', model: 'bing-translator' },
+    });
+    expect((c.stages?.speech as DeviceStage).system).toContain('日语');
+    // The participant's leg is never coached: it translates.
+    expect(configFor(PARTICIPANT, COACHED).stages?.speech).toMatchObject({ via: 'device', kind: 'translate' });
+  });
+
+  it('is refused, in the words for a missing model, while none is downloaded', () => {
+    expect(deviceCoachModel('')).toBeNull();
+    expect(buildLocalAI(SPEAKER, settings(COACHED), shared)).toMatchObject({ code: 'local_models_missing' });
+  });
+
+  it('counts both of the leg\'s models when the feedback\'s is not the translation\'s', () => {
+    downloaded('sensevoice-int8', 'qwen3.5-2b-translation');
+    expect(admitLocalAI({ speaker: configFor(SPEAKER, COACHED) })).toBe(true);
+    // A chat model runs on the graphics card: counted against its memory, when a budget for it is set.
+    localStorage.setItem('debug:vram-budget', '1');
+    try {
+      // Beside the online translator, which takes none.
+      expect(admitLocalAI({ speaker: configFor(SPEAKER, COACHED) })).toMatchObject({ code: 'memory_exceeded' });
+      // The other device hears and translates; this computer only gives the feedback: its model alone is still counted.
+      expect(admitLocalAI({ speaker: configFor(SPEAKER, { coach: true, coachAt: 'device', translateServerModel: 'hy-mt2-1.8b' }, [{ id: 'gpt-realtime' }]) })).toMatchObject({ code: 'memory_exceeded' });
+      // With the feedback elsewhere nothing of the graphics card's is.
+      expect(admitLocalAI({ speaker: configFor(SPEAKER, HERE) })).toBe(true);
+    } finally {
+      localStorage.removeItem('debug:vram-budget');
+    }
+  });
+});
+
 describe('readiness with stages on this computer', () => {
   const ctx = (legs: CheckContext['legs'] = ['speaker']): CheckContext => ({ pair: PAIR, legs });
   const check = (s: LocalAISettings, k: LocalAICredentials = NONE, legs?: CheckContext['legs'], fetch: ReturnType<typeof vi.fn> = vi.fn(async () => { throw new Error('no server should be asked'); })) =>
@@ -180,13 +243,20 @@ describe('readiness with stages on this computer', () => {
     downloaded();
     expect((await check(settings(HERE))).result).toMatchObject({ ok: false, code: 'no_asr', params: { source: 'zh-CN' } });
     // A coached speaker is heard in the other language.
-    expect((await check(settings({ ...HERE, coach: true, coachModel: 'c', coachBaseUrl: 'https://api.example.com/v1' }), NONE, ['speaker'], vi.fn(async () => new Response('{}', { status: 404 })))).result)
+    expect((await check(settings({ ...HERE, coach: true, coachAt: 'api', coachModel: 'c', coachBaseUrl: 'https://api.example.com/v1' }), NONE, ['speaker'], vi.fn(async () => new Response('{}', { status: 404 })))).result)
       .toMatchObject({ ok: false, code: 'no_asr', params: { source: 'ja' } });
+  });
+
+  it('is not ready while the feedback\'s model here is missing, and only for a run that coaches', async () => {
+    expect((await check(settings({ ...HERE, coach: true, coachAt: 'device' }))).result).toMatchObject({ ok: false, code: 'local_models_missing' });
+    expect((await check(settings({ ...HERE, coach: true, coachAt: 'device' }), NONE, ['participant'])).result).toMatchObject({ ok: true });
+    downloaded('sensevoice-int8', 'qwen3-0.6b-translation');
+    expect((await check(settings({ ...HERE, coach: true, coachAt: 'device' }))).result).toMatchObject({ ok: true });
   });
 
   it('still asks the server when one stage stays on it', async () => {
     const list = vi.fn(async (input: RequestInfo | URL) => (String(input).endsWith('/capabilities') ? new Response('{}', { status: 404 }) : new Response(JSON.stringify({ data: [{ id: 'hy-mt2-1.8b' }] }), { headers: { 'Content-Type': 'application/json' } })));
-    const { result } = await check(settings({ ...HERE, translateVia: 'model', translateModel: 'hy-mt2-1.8b' }), SERVER, ['speaker'], list as never);
+    const { result } = await check(settings({ asrVia: 'device', translateAt: 'server', translateServerModel: 'hy-mt2-1.8b' }), SERVER, ['speaker'], list as never);
     expect(result).toEqual({ ok: true, models: [{ id: 'hy-mt2-1.8b' }] });
     expect(list.mock.calls[0][0]).toBe('http://192.168.1.10:8080/v1/models');
   });
@@ -292,7 +362,7 @@ describe('a session this computer hears and translates', () => {
   });
 
   it('hears a coached speaker in the language they practise, and marks what they said as that language', async () => {
-    const h = await live(SPEAKER, { ...HERE, coach: true, coachModel: 'c', coachBaseUrl: 'https://api.example.com/v1' });
+    const h = await live(SPEAKER, { ...HERE, coach: true, coachAt: 'api', coachModel: 'c', coachBaseUrl: 'https://api.example.com/v1', coachNeedsKey: false });
     await h.starting;
     expect(h.asr.inits[0].options.language).toBe('ja');
     h.fetch.mockImplementationOnce(async () => new Response(JSON.stringify({ choices: [{ message: { content: '✓' } }] }), { headers: { 'Content-Type': 'application/json' } }));
@@ -351,7 +421,7 @@ describe('a session this computer hears and translates', () => {
 
 describe('a session the server hears and this computer translates', () => {
   it('opens a transcription session, and answers each source with the device model', async () => {
-    const h = await live(PARTICIPANT, { translateVia: 'device' }, { models: [{ id: 'gpt-realtime' }] });
+    const h = await live(PARTICIPANT, { translateAt: 'device' }, { models: [{ id: 'gpt-realtime' }] });
     await h.starting;
     const socket = h.sockets.last();
     expect((socket.sentJson<{ session: { type: string } }>()[0]).session.type).toBe('transcription');

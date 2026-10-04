@@ -56,13 +56,13 @@ export interface TextStage {
   pair?: { source: string; target: string };
 }
 
-/** A translation this computer runs itself (`localaiDevice.ts`). */
+/** A stage this computer runs itself (`localaiDevice.ts`): a translation, or — by one of the catalog's chat models — feedback. */
 export interface DeviceStage {
   via: 'device';
-  kind: 'translate';
+  kind: 'translate' | 'coach';
   /** The model's id in the app's own catalog. */
   model: string;
-  /** The model's own translation prompt for this direction, and whether the source goes up wrapped in the tags it names. */
+  /** The instructions: the model's own translation prompt for this direction, or the feedback's; and whether the source goes up wrapped in the tags a translation prompt names. */
   system: string;
   wrapTranscript: boolean;
   language?: string;
@@ -429,10 +429,10 @@ class PipelineLeg implements AdapterSession {
     );
   }
 
-  /** This computer's own translation: whole when it comes, since its engines write nothing before the end. */
+  /** This computer's own answer: whole when it comes, since its engines write nothing before the end. */
   private async translateHere(stage: DeviceStage, text: string, started: number): Promise<{ text: string; totalMs: number }> {
     const engine = this.translators.get(stage.model);
-    if (!engine) throw new Error('the translation model is not loaded');
+    if (!engine) throw new Error('the model is not loaded');
     const result = await engine.translate(text, stage.system, stage.wrapTranscript);
     return { text: result.translatedText ?? '', totalMs: this.request.clock.now() - started };
   }

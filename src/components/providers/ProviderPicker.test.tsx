@@ -274,30 +274,30 @@ describe('ProviderPicker', () => {
   });
 
   describe('the recommended provider', () => {
-    it('recommends the first managed provider — rich option', async () => {
+    // Fork: the provider that says so is the one recommended — the fork's own, which needs no account — and a managed one no longer is by being managed.
+    it('recommends the provider that says so — rich option', async () => {
       baseSelectSupported.value = true;
-      const managedA = { ...fakeProvider, id: 'managed-a', kind: 'managed' as const, settings: { ...fakeProvider.settings, key: 'managedA' } };
-      const managedB = { ...fakeProvider, id: 'managed-b', kind: 'managed' as const, settings: { ...fakeProvider.settings, key: 'managedB' } };
-      render(<ProviderPicker providers={[fakeProvider, managedA, managedB]} auth={noAuth} />);
+      const managed = { ...fakeProvider, id: 'managed-a', kind: 'managed' as const, settings: { ...fakeProvider.settings, key: 'managedA' } };
+      const own = { ...fakeProvider, id: 'own-a', recommended: true as const, settings: { ...fakeProvider.settings, key: 'ownA' } };
+      render(<ProviderPicker providers={[fakeProvider, managed, own]} auth={noAuth} />);
       await screen.findByLabelText('simpleSettings.provider');
 
       expect(document.querySelectorAll('.provider-select em.provider-recommended')).toHaveLength(1);
-      const managedAOption = document.querySelector('.provider-select option[value="managed-a"]');
-      const tag = managedAOption?.querySelector('em.provider-recommended');
+      const tag = document.querySelector('.provider-select option[value="own-a"]')?.querySelector('em.provider-recommended');
       expect(tag).not.toBeNull();
       expect(tag?.textContent).toBe('simpleSettings.recommended');
     });
 
     it('recommends it in text on the extension floor', async () => {
       baseSelectSupported.value = false;
-      const managedA = { ...fakeProvider, id: 'managed-a', kind: 'managed' as const, settings: { ...fakeProvider.settings, key: 'managedA' } };
-      const managedB = { ...fakeProvider, id: 'managed-b', kind: 'managed' as const, settings: { ...fakeProvider.settings, key: 'managedB' } };
-      render(<ProviderPicker providers={[fakeProvider, managedA, managedB]} auth={noAuth} />);
+      const managed = { ...fakeProvider, id: 'managed-a', kind: 'managed' as const, settings: { ...fakeProvider.settings, key: 'managedA' } };
+      const own = { ...fakeProvider, id: 'own-a', recommended: true as const, settings: { ...fakeProvider.settings, key: 'ownA' } };
+      render(<ProviderPicker providers={[fakeProvider, managed, own]} auth={noAuth} />);
       await screen.findByLabelText('simpleSettings.provider');
 
-      expect(document.querySelector('.provider-select option[value="managed-a"]')?.textContent).toBe('simpleSettings.recommendedOption');
+      expect(document.querySelector('.provider-select option[value="own-a"]')?.textContent).toBe('simpleSettings.recommendedOption');
       expect(document.querySelector('.provider-select option[value="fake"]')?.textContent).toBe('providers.fake.name');
-      expect(document.querySelector('.provider-select option[value="managed-b"]')?.textContent).toBe('providers.managed-b.name');
+      expect(document.querySelector('.provider-select option[value="managed-a"]')?.textContent).toBe('providers.managed-a.name');
     });
 
     it('recommends nothing when no managed provider is offered', async () => {

@@ -44,7 +44,14 @@ export interface CredentialChoice {
  * (`settings.<settings.key>.<key>`); `labelKey` and `placeholderKey` are i18n
  * keys.
  */
-export interface CredentialField { key: string; labelKey: string; secret: boolean; placeholderKey?: string }
+export interface CredentialField {
+  key: string;
+  labelKey: string;
+  secret: boolean;
+  placeholderKey?: string;
+  /** Fork: the provider's `credentials.Assist` draws this field itself, where it belongs; the credential form leaves it out, and still counts it. */
+  drawnByAssist?: true;
+}
 
 /** Credential values by field key; a field with nothing saved reads as ''. */
 export type CredentialValues = Readonly<Record<string, string>>;
@@ -112,10 +119,19 @@ export interface CredentialAssistProps<S> {
   settings: S;
   /** The saved credential values. */
   values: CredentialValues;
-  /** Writes one credential, as typing it would, and checks the provider again. */
+  /** Writes one credential, as typing it does: for a field the view draws itself (`CredentialField.drawnByAssist`). */
+  set(key: string, value: string): void;
+  /** Writes one credential and checks the provider again at once: for a value that is whole when it arrives, as one picked from a list. */
   fill(key: string, value: string): void;
   update(patch: Partial<S>): void;
   disabled?: boolean;
+  /** The provider's language pair, the legs a start would open, and the models its latest ready answer found: as its `Settings` gets them. */
+  pair: LanguagePair;
+  legs: readonly LegName[];
+  models: readonly ModelOption[];
+  /** Whether the provider can start now, and a way to ask again: a view that draws every field says so itself, where the form would have put its check button. */
+  readiness: Readiness;
+  check?(): void;
 }
 
 /** What a readiness check may consult besides the credentials and settings. */
@@ -217,6 +233,8 @@ export interface Provider<S, K extends { missing?: never } & object, C extends {
   /** Hidden in release builds unless `VITE_ENABLED_PROVIDERS` lists the id (D19). */
   flagged?: true;
   icon: ComponentType<{ size?: string | number }>;
+  /** Fork: the picker marks this one "Recommended". */
+  recommended?: true;
   docs?: string;
   vendor?: string;
   /**
@@ -298,7 +316,7 @@ export interface Provider<S, K extends { missing?: never } & object, C extends {
     choice?: CredentialChoice;
     /**
      * Fork: a view drawn above the fields in Settings, in place of the choice's own control — which it then draws
-     * itself, its own way — and a way to fill a field without typing it (the Kotomimi provider: a row per stage,
+     * itself, its own way — and a way to fill a field without typing it (the Kotomimi provider: a card per stage,
      * and its search of the local network). The wizard still reads `choice`.
      */
     Assist?: ComponentType<CredentialAssistProps<S>>;

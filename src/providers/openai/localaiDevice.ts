@@ -1,17 +1,17 @@
 /**
  * Fork: the stages this computer runs itself — the models the app downloads
  * and runs in its own workers (`src/lib/local-inference`), the ones the
- * built-in Local Inference provider uses. Here they are two more places a
+ * built-in Local Inference provider uses. Here they are one more place each
  * stage can run: speech recognition, with its own turn detection, in place
- * of the Realtime server; and translation, in place of the server's pipeline
- * or a text model.
+ * of the Realtime server; translation, in place of the server's pipeline or
+ * a text model; and grammar feedback, by one of the catalog's chat models.
  *
  * Which model a stage runs is chosen as Local Inference chooses it: one
  * selection per stage of a direction (`src→tgt`), blank meaning the best
  * one downloaded. The model store answers; this module only asks it, for the
  * builder, the readiness check and the settings' own views.
  */
-import { getManifestEntry } from '../../lib/local-inference/modelManifest';
+import { deviceReady, getManifestByType, getManifestEntry, type ModelManifestEntry } from '../../lib/local-inference/modelManifest';
 import { directionKey, emptyDirection, type Selections } from '../../lib/local-inference/selection/types';
 import type { LegName } from '../../lib/conversation/types';
 import type { EngineSlot, LanguagePair } from '../../lib/provider/types';
@@ -21,43 +21,66 @@ import { useModelStore } from '../../stores/modelStore';
 /** What the model manifest calls a language: its base (`zh-CN` → `zh`). */
 export const deviceLanguage = (code: string): string => code.split('-')[0];
 
-/** The settings a device stage reads: where each stage runs, and the picks. */
-export interface DeviceChoices {
-  asrVia: 'server' | 'api' | 'device';
-  /** As `translateViaOf` answers it: never `server` while recognition is on the device. */
-  translateVia: 'server' | 'model' | 'device';
+/** Where a stage runs: another device on the network, an API anywhere, or this computer. The same three for every stage. */
+export const PLACES = ['server', 'api', 'device'] as const;
+export type Place = (typeof PLACES)[number];
+
+/**
+ * The settings an earlier build's words for the places are read into
+ * (`localai.ts` `migratePlaces`). Nothing is written by a load, so the
+ * reading would be done again at every start, over whatever was edited
+ * since: the first edit made in the stage cards writes these together
+ * (`LocalAIAssist`), and from then on they are read as stored.
+ */
+export const PLACE_FIELDS = ['translateAt', 'translateServerModel', 'translateModel', 'translateNeedsKey', 'coachAt', 'coachServerModel', 'coachBaseUrl', 'coachModel', 'coachNeedsKey'] as const;
+
+/** Where each stage runs. The feedback's place counts only while the speaker is coached. */
+export interface StagePlacement {
+  asrVia: Place;
+  translateAt: Place;
   coach: boolean;
+  coachAt: Place;
+}
+
+/** The settings a device stage reads: where each stage runs, and the picks. */
+export interface DeviceChoices extends StagePlacement {
   selections: Selections;
 }
 
-/** What answers speech under these settings: a leg this computer hears has no server pipeline to answer it, so its own translation model does. */
-export function translateViaOf(s: Pick<DeviceChoices, 'asrVia' | 'translateVia'>): DeviceChoices['translateVia'] {
-  return s.asrVia !== 'server' && s.translateVia === 'server' ? 'device' : s.translateVia;
-}
+/** The feedback runs at this place: the speaker is coached, and that is where. */
+export const coachIs = (s: Pick<StagePlacement, 'coach' | 'coachAt'>, place: Place): boolean => s.coach && s.coachAt === place;
 
-/** The stage settings that decide which servers a run calls. */
-export interface StagePlacement extends Pick<DeviceChoices, 'asrVia' | 'translateVia' | 'coach'> {
-  translateBaseUrl: string;
-  translateModel: string;
-  coachBaseUrl: string;
-  coachModel: string;
-}
-
-/** The translation text model is in use: it answers speech, or — the speaker coached — typed text and, with no feedback model named, the feedback too. Never while this computer translates. */
-export const usesTranslateModel = (s: StagePlacement): boolean => s.translateModel.trim() !== '' && translateViaOf(s) !== 'device' && (translateViaOf(s) === 'model' || s.coach);
-/** The feedback has a model of its own. */
-export const ownCoachModel = (s: StagePlacement): boolean => s.coach && s.coachModel.trim() !== '';
-
-/** A stage of this run is on the Realtime server: it hears, or a text model in use names no server of its own. */
+/** A stage of this run is on the other device. */
 export function needsServer(s: StagePlacement): boolean {
-  return s.asrVia === 'server'
-    || (usesTranslateModel(s) && s.translateBaseUrl.trim() === '')
-    || (ownCoachModel(s) && s.coachBaseUrl.trim() === '');
+  return s.asrVia === 'server' || s.translateAt === 'server' || coachIs(s, 'server');
 }
 
 /** The stored settings as the device stages read them. */
 export function deviceChoices(s: DeviceChoices): DeviceChoices {
-  return { asrVia: s.asrVia, translateVia: translateViaOf(s), coach: s.coach, selections: s.selections };
+  return { asrVia: s.asrVia, translateAt: s.translateAt, coach: s.coach, coachAt: s.coachAt, selections: s.selections };
+}
+
+/**
+ * The catalog's chat models: the translation models that are a chat model
+ * underneath and take any instructions (the Qwen family), so they can give
+ * grammar feedback as well as translate. Smallest first, as the catalog
+ * lists them.
+ */
+export function deviceChatModels(): ModelManifestEntry[] {
+  return getManifestByType('translation').filter((m) => m.translationWorkerType === 'qwen' || m.translationWorkerType === 'qwen35');
+}
+
+/** The chat models this computer can run now: downloaded, and on hardware that runs them. */
+export function deviceChatModelsReady(): ModelManifestEntry[] {
+  const { modelStatuses, webgpuAvailable } = useModelStore.getState();
+  return deviceChatModels().filter((m) => modelStatuses[m.id] === 'downloaded' && deviceReady(m, webgpuAvailable));
+}
+
+/** The feedback model on this computer: the pick while it can run, else the largest that can; null when none can. */
+export function deviceCoachModel(picked: string): string | null {
+  const ready = deviceChatModelsReady();
+  if (picked && ready.some((m) => m.id === picked)) return picked;
+  return ready.length > 0 ? ready[ready.length - 1].id : null;
 }
 
 /** The model store, loaded: its first scan of what is downloaded may still be running. */
@@ -136,7 +159,7 @@ export function deviceNeeds(s: DeviceChoices, pair: LanguagePair, legs: readonly
       const other = coached ? source : target;
       out.push({ leg, dir: slot(heard, other), stage: 'asr', source: heard, target: other, required: true });
     }
-    if (s.translateVia === 'device') out.push({ leg, dir: slot(source, target), stage: 'translation', source, target, required: !coached });
+    if (s.translateAt === 'device') out.push({ leg, dir: slot(source, target), stage: 'translation', source, target, required: !coached });
   }
   return out;
 }

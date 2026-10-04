@@ -7,9 +7,9 @@ module.exports = {
   tour: {
     'provider-settings': {
       content_kotomimi: [
-        'Here you choose whose models to use: another device on your network, or this computer. Under Advanced → Provider each stage — recognition, translation, grammar feedback — can be put where you like, and this computer\'s models can be shared with another device on your network.',
-        '在这里选择用谁的模型：局域网里的另一台设备，还是这台电脑。到「高级 → 提供商」里，可以分别指定识别、翻译、语法反馈各自在哪里运行，也可以把这台电脑的模型共享给局域网里的另一台设备。',
-        '在這裡選擇用誰的模型：區域網路裡的另一台裝置，還是這台電腦。到「進階 → 提供者」裡，可以分別指定辨識、翻譯、文法回饋各自在哪裡執行，也可以把這台電腦的模型共享給區域網路裡的另一台裝置。',
+        'Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Advanced → Provider this computer\'s models can also be shared with another device.',
+        '这里每个环节一张卡片：语音识别、翻译、语法反馈。在卡片里选它在哪里运行（局域网里的另一台设备、API 模型、这台电脑），模型也在同一处选。到「高级 → 提供商」里，还可以把这台电脑的模型共享给另一台设备。',
+        '這裡每個環節一張卡片：語音辨識、翻譯、文法回饋。在卡片裡選它在哪裡執行（區域網路裡的另一台裝置、API 模型、這台電腦），模型也在同一處選。到「進階 → 提供者」裡，還可以把這台電腦的模型共享給另一台裝置。',
       ],
     },
     'reading-aids': {
@@ -28,9 +28,9 @@ module.exports = {
         '工作階段開始後，底部會出現輸入框：打一句話就能翻譯。按 Ctrl+K 可以直接跳到輸入框。',
       ],
       coach: [
-        'Speaking their language yourself? Turn on Grammar feedback under Advanced → Provider: your speech is checked instead of translated.',
-        '想自己直接说对方的语言？到「高级 → 提供商」打开「语法反馈」：你说的话不再翻译，而是帮你检查语法。',
-        '想自己直接說對方的語言？到「進階 → 提供者」開啟「文法回饋」：你說的話不再翻譯，而是幫你檢查文法。',
+        'Speaking their language yourself? Turn on the Grammar feedback card in Settings: your speech is checked instead of translated.',
+        '想自己直接说对方的语言？在设置里打开「语法反馈」那张卡片：你说的话不再翻译，而是帮你检查语法。',
+        '想自己直接說對方的語言？在設定裡開啟「文法回饋」那張卡片：你說的話不再翻譯，而是幫你檢查文法。',
       ],
       share: [
         'Another device can use this computer\'s models: Advanced → Provider → Share with other devices.',
@@ -42,7 +42,7 @@ module.exports = {
   // The setup wizard's own step and card for the Kotomimi provider (`src/components/SetupWizard/steps/StepKotomimi.tsx`).
   wizard: {
     pathTitle: ['Kotomimi Pipeline', 'Kotomimi 自由搭配', 'Kotomimi 自由搭配'],
-    pathBadge: ['This app\'s own', '本应用特色', '本應用程式特色'],
+    pathBadge: ['Recommended', '推荐', '推薦'],
     pathDesc: [
       'Use the models of another device on your network, or this computer\'s own — and any mix of the two.',
       '用局域网里另一台设备的模型，或这台电脑自己的模型，也可以两边混着用。',
@@ -81,9 +81,9 @@ module.exports = {
     serverUnreachable: ['Could not connect: {{message}}', '连接不上：{{message}}', '連線不上：{{message}}'],
     pendingAddress: ['No device chosen yet — choose one in Settings before you start.', '还没有选另一台设备。开始之前请到设置里选好。', '還沒有選另一台裝置。開始之前請到設定裡選好。'],
     deviceNotice: [
-      'Nothing to enter. After setup, download a speech recognition model under Models — the tour shows where. Translation works at once with the online translator, and offline models can be downloaded too.',
-      '这里不用填任何东西。向导结束后，在「模型」里下载一个语音识别模型，引导会指给你看。翻译默认用在线翻译，马上可用，也可以再下载离线模型。',
-      '這裡不用填任何東西。精靈結束後，在「模型」裡下載一個語音辨識模型，導覽會指給你看。翻譯預設用線上翻譯，馬上可用，也可以再下載離線模型。',
+      'Nothing to enter. After setup, download a speech recognition model in the Speech recognition card in Settings — the tour shows where. Translation works at once with the online translator, and offline models can be downloaded too.',
+      '这里不用填任何东西。向导结束后，在设置的「语音识别」卡片里下载一个模型，引导会指给你看。翻译默认用在线翻译，马上可用，也可以再下载离线模型。',
+      '這裡不用填任何東西。精靈結束後，在設定的「語音辨識」卡片裡下載一個模型，導覽會指給你看。翻譯預設用線上翻譯，馬上可用，也可以再下載離線模型。',
     ],
   },
   // Adding a model from Hugging Face (`src/components/CustomModels`).
@@ -149,9 +149,6 @@ module.exports = {
   },
   // Sharing this computer's models on the local network (`src/components/LanSharing`).
   // The General page's one line about the provider, on the Advanced layout (`src/components/providers/ProviderPointer.tsx`).
-  provider: {
-    pointer: ['Chosen and set up on the Provider page', '在「提供商」页选择和设置', '在「提供者」頁選擇和設定'],
-  },
   // The search of the local network for a device to use (`src/components/LanSharing/ServerFinder.tsx`).
   find: {
     title: ['Found on your network', '局域网里找到的设备', '區域網路裡找到的裝置'],

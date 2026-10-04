@@ -302,7 +302,7 @@ describe('SetupWizard', () => {
     expect(screen.getByRole('button', { name: 'Next' })).toBeEnabled();
   });
 
-  it('walks the managed path to Finish, the card recommended', async () => {
+  it('walks the managed path to Finish', async () => {
     signedIn = true;
     useProviderStore.setState({
       entries: { kizunaai_soniox: { settings: SONIOX_DEFAULTS, credentials: {}, pair: { source: 'ja', target: 'en' } } },
@@ -314,7 +314,8 @@ describe('SetupWizard', () => {
     next();
 
     const managedRadio = screen.getByRole('radio', { name: /Start right away/ });
-    expect(managedRadio.closest('label')).toHaveTextContent('Recommended');
+    // Fork: the recommendation is on the fork's own card; the managed one no longer carries it.
+    expect(managedRadio.closest('label')).not.toHaveTextContent('Recommended');
     fireEvent.click(managedRadio);
     next();                                           // the account step, signed in
     next();                                           // the pair

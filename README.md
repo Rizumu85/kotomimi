@@ -18,7 +18,7 @@
 Kotomimi（ことみみ）是一个实时语音翻译应用：你或对方开口说话，屏幕上马上出现原文和译文。它是 [Sokuji](https://github.com/kizuna-ai-lab/sokuji) 的个人分支，为"跟日本人聊天、顺便学日语"这件事加了几样东西：
 
 - **读得懂的字幕**：日语汉字上方标假名，日语、韩语、俄语下面可以加一行罗马音。
-- **模型放哪儿自己定**：语音识别和翻译是两个环节，各自可以在这台电脑、局域网里另一台设备、或任意 API 上运行，随便混搭。
+- **模型放哪儿自己定**：语音识别、翻译、语法反馈是三个环节，各自可以在这台电脑、局域网里另一台设备、或任意 API 上运行，随便混搭。
 - **两台设备一起用**：一台电脑出力，另一台设备直接用它的模型，自己什么都不用下载。
 - **打字也能翻**：会话中按 `Ctrl+K`，打一句母语，得到对方语言的译文。
 - **语法反馈**：想自己说对方的语言时，它不翻译，而是告诉你这句话说得对不对、该怎么改。
@@ -43,19 +43,19 @@ Sokuji 原有的功能和云服务提供商（OpenAI、Gemini、Soniox 等）都
 
 ## 每个环节各选各的
 
-一句话从说出口到变成译文，要过两个环节。每个环节有同样的三个去处：
+一句话从说出口到变成译文，要过语音识别和翻译两个环节；想练口语时，还可以打开语法反馈。设置里每个环节一张卡片，都有同样的三个去处，用哪个模型也在同一张卡片里选：
 
 <p align="center">
-  <img src="./assets/readme/places.png" width="335" alt="提供商下面的两行：语音识别和翻译各自在另一台设备、API 模型、这台电脑之间选">
+  <img src="./assets/readme/places.png" width="335" alt="提供商下面每个环节一张卡片：语音识别、翻译、语法反馈各自在另一台设备、API 模型、这台电脑之间选，模型也在卡片里选">
 </p>
 
 | 去处 | 是什么 | 适合 |
 |---|---|---|
 | **另一台设备** | 局域网里开了共享的 Kotomimi，或 LocalAI 这类模型服务器 | 这台电脑配置一般，家里有台更好的 |
-| **API 模型** | 任何 OpenAI 兼容的接口：识别用 `/v1/audio/transcriptions`，翻译用 `/v1/chat/completions` | 想用云端的大模型 |
-| **这台电脑** | 应用自己下载的模型，可以完全离线 | 不想依赖别的设备和网络 |
+| **API 模型** | 任何 OpenAI 兼容的接口：识别用 `/v1/audio/transcriptions`，翻译和语法反馈用 `/v1/chat/completions` | 想用云端的大模型 |
+| **这台电脑** | 应用自己下载的模型，模型库就在卡片里，可以完全离线 | 不想依赖别的设备和网络 |
 
-两个环节可以选不同的去处。比如上图：识别交给另一台设备，翻译留在这台电脑。
+各个环节可以选不同的去处。比如上图：这台电脑负责听，翻译交给另一台设备上的模型。
 
 ## 两台设备一起用
 
@@ -129,7 +129,7 @@ Kotomimi 建立在 [Kizuna AI Lab](https://github.com/kizuna-ai-lab) 的 [Sokuji
 Kotomimi is a personal fork of [Sokuji](https://github.com/kizuna-ai-lab/sokuji), a live speech translation app. It adds what its author wanted for talking with Japanese speakers while learning the language:
 
 - **Subtitles you can read**: furigana over Japanese kanji, and an optional romanization line under Japanese, Korean and Russian.
-- **Stages you place yourself**: speech recognition and translation each run on this computer, on another device on your network, or on any OpenAI-compatible API, in any mix.
+- **Stages you place yourself**: speech recognition, translation and grammar feedback each run on this computer, on another device on your network, or on any OpenAI-compatible API, in any mix.
 - **Two devices together**: one computer shares the models it has downloaded; another device finds it on the network and uses them, downloading nothing.
 - **Typed lookups** (`Ctrl+K`), **grammar feedback** on your own speech, and **fonts** chosen per language.
 

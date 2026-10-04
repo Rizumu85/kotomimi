@@ -21,98 +21,124 @@ const PROVIDER = {
     '能识别、翻译、语法反馈，并且可以混搭选择运行的模型：本地电脑、局域网的另一台设备，或任意 API 模型。',
     '能辨識、翻譯、文法回饋，並且可以混搭選擇執行的模型：本機電腦、區域網路的另一台裝置，或任意 API 模型。',
   ],
-  endpoint: ['Address of the other device', '另一台设备的地址', '另一台裝置的位址'],
-  endpointPlaceholder: [
-    'Address of the other device, e.g. 192.168.1.10:8790',
-    '另一台设备的地址，例如 192.168.1.10:8790',
-    '另一台裝置的位址，例如 192.168.1.10:8790',
-  ],
-  serverKey: ['Access key of the server', '服务器的访问密钥', '伺服器的存取金鑰'],
-  translateKey: ['API key of the translation model', '翻译模型的 API 密钥', '翻譯模型的 API 金鑰'],
-  coachKey: ['API key of the feedback model', '语法反馈模型的 API 密钥', '文法回饋模型的 API 金鑰'],
+  mixHint: ['Each stage can have its own place, and they can be mixed.', '每个环节可以各选各的，可以混搭。', '每個環節可以各選各的，可以混搭。'],
 
-  route: ['Where each stage runs', '各环节在哪里运行', '各環節在哪裡執行'],
+  // The three places.
   placeServer: ['Another device', '另一台设备', '另一台裝置'],
+  viaModel: ['API model', 'API 模型', 'API 模型'],
   placeDevice: ['This computer', '这台电脑', '這台電腦'],
+  // The wizard's one question.
   choiceServer: ['Use another device', '用另一台设备', '用另一台裝置'],
   choiceDevice: ['Use this computer', '用这台电脑', '用這台電腦'],
-  notDownloaded: ['no model downloaded', '还没下载模型', '尚未下載模型'],
-  notChosen: ['no model chosen', '还没选模型', '尚未選模型'],
 
+  // The other device.
+  otherDeviceHint: [
+    'To use the models of another device on your local network, search the network for it.',
+    '如需配合本地局域网的另一台设备使用模型，可以查找局域网的设备。',
+    '如需搭配本地區域網路的另一台裝置使用模型，可以尋找區域網路的裝置。',
+  ],
+  endpoint: ['Address', '地址', '位址'],
+  endpointPlaceholder: ['e.g. 192.168.1.10:8790', '例如 192.168.1.10:8790', '例如 192.168.1.10:8790'],
+  serverNeedsKey: ['It asks for an access key', '它需要访问密钥', '它需要存取金鑰'],
+  serverNeedsKeyTooltip: [
+    'Turn this on when the other device was given an access key — a Kotomimi with one set under its sharing options, for example.',
+    '另一台设备设了访问密钥时打开，例如对面那台 Kotomimi 在共享的「选项」里设置了密钥。',
+    '另一台裝置設了存取金鑰時開啟，例如對面那台 Kotomimi 在共享的「選項」裡設定了金鑰。',
+  ],
+  serverKey: ['Access key', '访问密钥', '存取金鑰'],
+  kotomimiServer: [
+    'It is another Kotomimi sharing its models.',
+    '它是另一台正在共享模型的 Kotomimi。',
+    '它是另一台正在共享模型的 Kotomimi。',
+  ],
+  connectFirst: [
+    'No other device is connected yet: search for one above, or type its address.',
+    '还没有连接另一台设备：先在上面查找，或填写它的地址。',
+    '還沒有連線另一台裝置：先在上面尋找，或填寫它的位址。',
+  ],
+
+  // Whether it can all start.
+  ready: ['Ready to start', '可以开始了', '可以開始了'],
+  checking: ['Checking…', '正在检查…', '正在檢查…'],
+  checkNow: ['Check', '检查', '檢查'],
+  recheck: ['Check again', '重新检查', '重新檢查'],
+
+  // What every card shares.
+  model: ['Model', '模型', '模型'],
+  auto: ['Automatic · {{name}}', '自动 · {{name}}', '自動 · {{name}}'],
+  deviceDefault: ['The device\'s own choice', '由那台设备决定', '由那台裝置決定'],
+  advanced: ['Advanced', '高级', '進階'],
+  apiKey: ['API key', 'API 密钥', 'API 金鑰'],
+  asrApiBaseUrl: ['API address', 'API 地址', 'API 位址'],
+  asrApiNeedsKey: ['The API asks for a key', '这个 API 需要密钥', '這個 API 需要金鑰'],
+  asrKey: ['API key of the speech recognition API', '语音识别 API 的密钥', '語音辨識 API 的金鑰'],
+  translateKey: ['API key of the translation model', '翻译模型的 API 密钥', '翻譯模型的 API 金鑰'],
+  coachKey: ['API key of the feedback model', '语法反馈模型的 API 密钥', '文法回饋模型的 API 金鑰'],
+  textBaseUrlPlaceholder: ['e.g. https://api.openai.com/v1 or http://localhost:11434/v1', '例如 https://api.openai.com/v1 或 http://localhost:11434/v1', '例如 https://api.openai.com/v1 或 http://localhost:11434/v1'],
+  textModelPlaceholder: ['The model\'s name, e.g. gpt-4o-mini', '模型名称，例如 gpt-4o-mini', '模型名稱，例如 gpt-4o-mini'],
+
+  // This computer's models.
+  notDownloaded: ['No model downloaded yet', '还没下载模型', '尚未下載模型'],
+  browse: ['Model library', '模型库', '模型庫'],
+  hears: ['Hears {{language}}', '听{{language}}', '聽{{language}}'],
+  download: ['Download', '下载', '下載'],
+  downloaded: ['Downloaded', '已下载', '已下載'],
+  chatModelsNote: [
+    'On this computer, feedback is written by one of these small chat models. They answer quickly, but a larger model on another device or an API explains better.',
+    '这台电脑用下面这些小型对话模型来写反馈。它们回答很快，但讲解不如另一台设备或 API 上的大模型准确。',
+    '這台電腦用下面這些小型對話模型來寫回饋。它們回答很快，但講解不如另一台裝置或 API 上的大模型準確。',
+  ],
+  chatModelsNoGpu: [
+    'These models need a graphics card with WebGPU, which this computer does not offer. Use another device or an API model for the feedback.',
+    '这些模型需要支持 WebGPU 的显卡，这台电脑没有。语法反馈请改用另一台设备或 API 模型。',
+    '這些模型需要支援 WebGPU 的顯示卡，這台電腦沒有。文法回饋請改用另一台裝置或 API 模型。',
+  ],
+
+  // Speech recognition.
   hearStage: ['Speech recognition', '语音识别', '語音辨識'],
   hearStageTooltip: [
-    'What listens: it decides when a sentence ends and writes down what was said. A server on your network (a LocalAI, or another Kotomimi sharing its models), or a model this computer runs itself.',
-    '负责"听"的一环：判断一句话什么时候说完，并把说的内容写成文字。可以交给局域网里的服务器（LocalAI，或另一台共享模型的 Kotomimi），也可以用这台电脑自己运行的模型。',
-    '負責「聽」的一環：判斷一句話什麼時候說完，並把說的內容寫成文字。可以交給區域網路裡的伺服器（LocalAI，或另一台共享模型的 Kotomimi），也可以用這台電腦自己執行的模型。',
+    'What listens: it decides when a sentence ends and writes down what was said.',
+    '负责「听」的一环：判断一句话什么时候说完，并把说的内容写成文字。',
+    '負責「聽」的一環：判斷一句話什麼時候說完，並把說的內容寫成文字。',
   ],
-  hearDeviceNote: [
-    'This computer listens with a model downloaded by the app. Choose or download it under Models; its pause detection is under Voice activity detection.',
-    '由这台电脑用应用下载的模型来识别。在"模型"里选择或下载；断句的灵敏度在"VAD 设置"里调。',
-    '由這台電腦用應用程式下載的模型來辨識。在「模型」裡選擇或下載；斷句的靈敏度在「VAD 設定」裡調整。',
-  ],
-  pipelineModel: ['Realtime model', 'Realtime 管线模型', 'Realtime 管線模型'],
-  modelTooltip: [
-    'The Realtime pipeline model, exactly as your server names it. The server\'s list only suggests: what you type is what runs.',
-    'Realtime 管线模型，名称与服务器上的一致。服务器的列表只作提示：填什么就运行什么。',
-    'Realtime 管線模型，名稱與伺服器上的一致。伺服器的清單只作提示：填什麼就執行什麼。',
-  ],
-  kotomimiServer: [
-    'This server is another Kotomimi sharing its models.',
-    '这台服务器是另一台正在共享模型的 Kotomimi。',
-    '這台伺服器是另一台正在共享模型的 Kotomimi。',
-  ],
-  recognizer: ['Recognizer', '识别模型', '辨識模型'],
-  asrModelTooltip: [
-    'The speech-recognition model that writes the source text. Leave it to the server unless you want another of its models.',
-    '生成原文的语音识别模型。保持服务器默认即可，除非想换成服务器上的其他模型。',
-    '產生原文的語音辨識模型。保持伺服器預設即可，除非想換成伺服器上的其他模型。',
-  ],
-  asrModelServer: ['Server default', '服务器默认', '伺服器預設'],
   asrFixedNote: [
-    'A leg whose answers come from elsewhere uses the server\'s own recognizer: LocalAI accepts no other there.',
-    '翻译或语法不由服务器管线完成的那一路，只能用服务器默认的识别模型：LocalAI 在这种会话里不接受别的。',
-    '翻譯或文法不由伺服器管線完成的那一路，只能用伺服器預設的辨識模型：LocalAI 在這種工作階段不接受別的。',
+    'While the translation or the feedback is done by a model chosen here, a LocalAI hears with its own recognizer and accepts no other.',
+    '翻译或语法反馈由这里选的模型完成时，LocalAI 只能用它自己默认的识别模型，不接受别的。',
+    '翻譯或文法回饋由這裡選的模型完成時，LocalAI 只能用它自己預設的辨識模型，不接受別的。',
+  ],
+  pipelineModel: ['Realtime pipeline', '实时管线', '即時管線'],
+  pipelineNote: [
+    'Normally left alone: it is the pipeline the other device runs its live session with. Change it only when that device is a LocalAI set up with more than one.',
+    '一般不用改：这是另一台设备跑实时会话用的管线。只有那台设备是 LocalAI，而且配了不止一条管线时才需要改。',
+    '一般不用改：這是另一台裝置跑即時工作階段用的管線。只有那台裝置是 LocalAI，而且設了不只一條管線時才需要改。',
+  ],
+  asrApiBaseUrlPlaceholder: ['e.g. https://api.openai.com/v1', '例如 https://api.openai.com/v1', '例如 https://api.openai.com/v1'],
+  asrApiModelPlaceholder: ['e.g. whisper-1, whisper-large-v3', '例如 whisper-1、whisper-large-v3', '例如 whisper-1、whisper-large-v3'],
+  hearApiNote: [
+    'Any service with OpenAI\'s transcription API works (OpenAI, Groq, a LocalAI). This computer cuts the sentences and uploads each one, so the text appears when a sentence is finished.',
+    '任何提供 OpenAI 转写接口的服务都行（OpenAI、Groq、LocalAI 等）。断句由这台电脑来做，每句话说完后上传识别，所以文字在一句话说完时才出现。',
+    '任何提供 OpenAI 轉寫介面的服務都行（OpenAI、Groq、LocalAI 等）。斷句由這台電腦來做，每句話說完後上傳辨識，所以文字在一句話說完時才出現。',
   ],
 
+  // Translation.
   translateStage: ['Translation', '翻译', '翻譯'],
   translateStageTooltip: [
-    'What turns the recognized text into the other language. The server\'s own pipeline does it inside the same session. A text model can be anywhere that speaks the OpenAI chat API: another machine, Ollama or LM Studio on this one, a hosted API. Or a translation model this computer runs itself.',
-    '把识别出的文字翻成另一种语言的一环。服务器管线：和识别在同一个会话里完成。文本模型：任何支持 OpenAI 聊天接口的地方都行，另一台机器、本机的 Ollama 或 LM Studio、云端 API。这台电脑：用应用下载的翻译模型。',
-    '把辨識出的文字翻成另一種語言的一環。伺服器管線：和辨識在同一個工作階段完成。文字模型：任何支援 OpenAI 聊天介面的地方都行，另一台機器、本機的 Ollama 或 LM Studio、雲端 API。這台電腦：用應用程式下載的翻譯模型。',
+    'What turns the recognized text into the other language. An API model is any service that speaks the OpenAI chat API: a hosted one, or Ollama or LM Studio on this computer.',
+    '把识别出的文字翻成另一种语言的一环。API 模型可以是任何支持 OpenAI 聊天接口的服务：云端的，或这台电脑上的 Ollama、LM Studio。',
+    '把辨識出的文字翻成另一種語言的一環。API 模型可以是任何支援 OpenAI 聊天介面的服務：雲端的，或這台電腦上的 Ollama、LM Studio。',
   ],
-  viaServer: ['Another device', '另一台设备', '另一台裝置'],
-  viaModel: ['API model', 'API 模型', 'API 模型'],
-  mixHint: ['Each stage can have its own place, and they can be mixed.', '每个环节可以各选各的，可以混搭。', '每個環節可以各選各的，可以混搭。'],
-  modelTodo: [
-    'No API model chosen yet: set it under Advanced → Provider → Translation.',
-    'API 模型还没选：到「高级 → 提供商 → 翻译」里填。',
-    'API 模型還沒選：到「進階 → 提供者 → 翻譯」裡填。',
+  translateInSession: [
+    'The device\'s own choice (translated in the same session it hears in)',
+    '由那台设备决定（和识别在同一个会话里完成）',
+    '由那台裝置決定（和辨識在同一個工作階段完成）',
   ],
-  viaServerNote: [
-    'The other device recognizes and translates in one session, with the model it is set up with.',
-    '识别和翻译都由另一台设备在同一个会话里完成，用它自己配置好的模型。',
-    '辨識和翻譯都由另一台裝置在同一個工作階段完成，用它自己設定好的模型。',
+  translateKotomimiOwn: [
+    'The device\'s own choice (its best model for your languages)',
+    '由那台设备决定（按语言对自动选最合适的）',
+    '由那台裝置決定（依語言對自動選最合適的）',
   ],
-  viaServerKotomimiNote: [
-    'The other Kotomimi picks its best downloaded translation model for your languages.',
-    '由对面那台 Kotomimi 按你的语言对，自动选它已下载的最合适的翻译模型。',
-    '由對面那台 Kotomimi 依你的語言對，自動選它已下載的最合適的翻譯模型。',
-  ],
-  viaDeviceNote: [
-    'This computer translates with a model downloaded by the app. Choose or download it under Models.',
-    '由这台电脑用应用下载的翻译模型来翻译。在"模型"里选择或下载。',
-    '由這台電腦用應用程式下載的翻譯模型來翻譯。在「模型」裡選擇或下載。',
-  ],
-  textModel: ['Model', '模型', '模型'],
-  textBaseUrl: ['Served at', '服务地址', '服務位址'],
-  textBaseUrlPlaceholder: [
-    'Blank: the server above · or e.g. http://localhost:11434/v1',
-    '留空：上面那台服务器 · 或如 http://localhost:11434/v1',
-    '留空：上面那台伺服器 · 或如 http://localhost:11434/v1',
-  ],
-  translateModelPlaceholder: ['Choose a text model', '选择文本模型', '選擇文字模型'],
-  needsKey: ['It needs an API key', '这个服务需要 API 密钥', '這個服務需要 API 金鑰'],
 
+  // Grammar feedback.
   coachStage: ['Grammar feedback', '语法反馈', '文法回饋'],
   coachStageTooltip: [
     'For when you speak the other side\'s language yourself. Your speech is not translated: a model checks it and answers ✓, or the corrected sentence and why. What you type is still translated.',
@@ -120,38 +146,18 @@ const PROVIDER = {
     '適合自己直接說對方語言的場合。你說的話不再翻譯，而是交給模型檢查：沒問題回 ✓，有問題給出改正後的句子和原因。打字輸入的內容仍然會翻譯。',
   ],
   coach: ['I speak their language: check my grammar', '我自己说对方的语言：检查我的语法', '我自己說對方的語言：檢查我的文法'],
-  coachModelPlaceholder: ['Blank: the translation text model', '留空：使用翻译的文本模型', '留空：使用翻譯的文字模型'],
+  coachNoModel: [
+    'The other device has no text model that can give feedback. Use an API model or this computer instead.',
+    '另一台设备上没有能给语法反馈的文本模型，可以改用 API 模型或这台电脑。',
+    '另一台裝置上沒有能給文法回饋的文字模型，可以改用 API 模型或這台電腦。',
+  ],
   coachPrompt: ['Feedback instructions', '语法反馈提示词', '文法回饋提示詞'],
   coachPromptPlaceholder: [
     'Blank: written automatically for your two languages. Your own text may use {{spoken}} and {{native}}.',
     '留空：按你的母语和所练的语言自动生成。自己写时可以用 {{spoken}} 和 {{native}} 代表这两种语言。',
     '留空：依你的母語和所練的語言自動產生。自己寫時可以用 {{spoken}} 和 {{native}} 代表這兩種語言。',
   ],
-  coachPromptPreview: ['Show the automatic instructions for this language pair', '查看当前语言对自动生成的提示词', '檢視目前語言對自動產生的提示詞'],
-
-  asrKey: ['API key of the speech recognition API', '语音识别 API 的密钥', '語音辨識 API 的金鑰'],
-  asrApiBaseUrl: ['API address', 'API 地址', 'API 位址'],
-  asrApiBaseUrlPlaceholder: ['e.g. https://api.openai.com/v1', '例如 https://api.openai.com/v1', '例如 https://api.openai.com/v1'],
-  asrApiModel: ['Model', '模型', '模型'],
-  asrApiModelPlaceholder: ['e.g. whisper-1, whisper-large-v3', '例如 whisper-1、whisper-large-v3', '例如 whisper-1、whisper-large-v3'],
-  asrApiNeedsKey: ['The API asks for a key', '这个 API 需要密钥', '這個 API 需要金鑰'],
-  hearApiNote: [
-    'Any service with OpenAI\'s transcription API (/v1/audio/transcriptions): OpenAI, Groq, a LocalAI. This computer still decides where a sentence ends (Voice activity detection), then uploads each sentence to be recognized, so the text appears when the sentence is finished.',
-    '任何提供 OpenAI 转写接口（/v1/audio/transcriptions）的服务都行：OpenAI、Groq、LocalAI 等。断句仍由这台电脑来做（见「VAD 设置」），每句话说完后上传识别，所以文字在一句话说完时才出现。',
-    '任何提供 OpenAI 轉寫介面（/v1/audio/transcriptions）的服務都行：OpenAI、Groq、LocalAI 等。斷句仍由這台電腦來做（見「VAD 設定」），每句話說完後上傳辨識，所以文字在一句話說完時才出現。',
-  ],
-  asrTodo: [
-    'The speech recognition API is not set yet: fill it in under Advanced → Provider → Speech recognition.',
-    '语音识别的 API 还没填：到「高级 → 提供商 → 语音识别」里填。',
-    '語音辨識的 API 還沒填：到「進階 → 提供者 → 語音辨識」裡填。',
-  ],
-  placeHint: ['Where it runs is chosen in the two rows under the provider.', '运行位置在提供商下面那两行里选。', '執行位置在提供者下面那兩行裡選。'],
-  serverNeedsKey: ['The other device asks for an access key', '另一台设备需要访问密钥', '另一台裝置需要存取金鑰'],
-  serverNeedsKeyTooltip: [
-    'Turn this on when the other device was given an access key — a Kotomimi with one set under its sharing options, for example. The key is entered beside the address.',
-    '另一台设备设了访问密钥时打开，例如对面那台 Kotomimi 在共享的「选项」里设置了密钥。密钥在地址旁边填写。',
-    '另一台裝置設了存取金鑰時開啟，例如對面那台 Kotomimi 在共享的「選項」裡設定了金鑰。金鑰在位址旁邊填寫。',
-  ],
+  coachPromptPreview: ['Used while the box is blank, for this language pair:', '留空时，当前语言对用的是这一份：', '留空時，目前語言對用的是這一份：'],
 };
 
 const FORK = {

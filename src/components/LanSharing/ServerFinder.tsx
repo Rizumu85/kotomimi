@@ -5,8 +5,8 @@
  * a model server — each a row to click. The address field stays below for
  * whatever the search cannot reach; nobody has to know an address to start.
  *
- * Drawn by the setup wizard's Kotomimi step and, in the settings, between the
- * provider's "another device / this computer" choice and its address field.
+ * Drawn by the setup wizard's Kotomimi step and, in the settings, in the
+ * provider's "another device" block, above its address field.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Check, KeyRound, Loader, Monitor, RefreshCw, Search, Server } from 'lucide-react';
@@ -21,11 +21,13 @@ interface ServerFinderProps {
   disabled?: boolean;
   /** Search as soon as it is shown; without it the search waits for its button. */
   auto?: boolean;
+  /** What stands above the search in place of its own title: the settings say what the search is for. */
+  hint?: string;
   /** For tests: the search itself. */
   find?(): Promise<FoundServer[]>;
 }
 
-export function ServerFinder({ value, onPick, disabled = false, auto = false, find = findServers }: ServerFinderProps) {
+export function ServerFinder({ value, onPick, disabled = false, auto = false, hint, find = findServers }: ServerFinderProps) {
   const { t } = useTranslation();
   const [searching, setSearching] = useState(false);
   /** null: not searched yet. */
@@ -59,7 +61,7 @@ export function ServerFinder({ value, onPick, disabled = false, auto = false, fi
   return (
     <div className="kt-find">
       <div className="kt-find__head">
-        <span className="kt-find__title">{t('fork.find.title')}</span>
+        <span className="kt-find__title">{hint ?? t('fork.find.title')}</span>
         {servers !== null && (
           <button type="button" className="kt-find__again" onClick={() => { void search(); }} disabled={disabled || searching}>
             <RefreshCw size={12} className={searching ? 'kt-find__spin' : undefined} />

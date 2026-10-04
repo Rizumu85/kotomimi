@@ -4,7 +4,6 @@ import SentenceSegmentationSection from './sections/SentenceSegmentationSection'
 import { ProviderEngine, ProviderOwnSettings, ProviderTurnDetectionControls } from '../providers/ProviderOwnSettings';
 import { ProviderLanguages } from '../providers/ProviderLanguages';
 import { ProviderPicker } from '../providers/ProviderPicker';
-import { ProviderPointer } from '../providers/ProviderPointer';
 import { useAuthContext } from '../providers/useAuthContext';
 import type { EngineSlot } from '../../lib/provider/types';
 import { presentProviders } from '../../providers/registry';
@@ -30,10 +29,8 @@ export function SessionSettingsGeneral({ locked, layout, onOpenSlot }: { locked:
     <>
       {/* The owner's order of 2026-10-01: the pair, the provider, Text only and Keep audio, then the speech mode. */}
       <ProviderLanguages providers={providers} disabled={locked} sentence={{ mode, textOnly }} />
-      {/* Fork: the Advanced layout draws the provider on its Provider page alone; here, one line that leads there. */}
-      {layout === 'advanced'
-        ? <ProviderPointer providers={providers} />
-        : <ProviderPicker providers={providers} auth={auth} disabled={locked} openSlot={onOpenSlot} />}
+      {/* Fork: the Advanced layout draws the provider on its Provider page alone, and says nothing of it here. */}
+      {layout !== 'advanced' && <ProviderPicker providers={providers} auth={auth} disabled={locked} openSlot={onOpenSlot} />}
       <OutputToggles locked={locked} />
       <SpeechSection locked={locked} layout={layout} />
       {SENTENCE_SEGMENTATION_SHOWN && <SentenceSegmentationSection isSessionActive={locked} />}

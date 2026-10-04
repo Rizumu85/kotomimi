@@ -73,7 +73,8 @@ describe('the Gemini definition', () => {
   });
 
   it('sits after LocalInference (ruling 6)', () => {
-    expect(PROVIDERS.slice(0, 3).map((p) => p.id)).toEqual(['kizunaai_soniox', 'localInference', 'gemini']);
+    // Fork: the fork's own provider leads the registry; upstream's order follows it.
+    expect(PROVIDERS.slice(1, 4).map((p) => p.id)).toEqual(['kizunaai_soniox', 'localInference', 'gemini']);
   });
 
   it("lets the participant speak when its switch is on, voiced with Gemini's own voice (ruling 5)", () => {

@@ -93,7 +93,8 @@ describe('localInferenceProvider', () => {
   });
 
   it('follows Kizuna Soniox in the registry (Stage 2 Kizuna Soniox, ruling 6)', () => {
-    expect(PROVIDERS.slice(0, 2).map((p) => p.id)).toEqual(['kizunaai_soniox', 'localInference']);
+    // Fork: the fork's own provider leads the registry; upstream's order follows it.
+    expect(PROVIDERS.slice(1, 3).map((p) => p.id)).toEqual(['kizunaai_soniox', 'localInference']);
   });
 
   it('shows its EngineSummary under the picker', () => {

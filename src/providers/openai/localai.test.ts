@@ -91,13 +91,13 @@ describe("LocalAI Realtime's endpoint", () => {
   });
 
   it('is not asked for while no stage is on a server, and a server that wants a key is given it as the Realtime key', () => {
-    const here = { ...LOCALAI_DEFAULTS, asrVia: 'device' as const };
-    // This computer hears, and so translates: no server at all.
+    const here = { ...LOCALAI_DEFAULTS, asrVia: 'device' as const, translateAt: 'device' as const };
+    // This computer hears and translates: no other device at all.
     expect(localaiCredentials.fields(here)).toEqual([]);
     expect(localaiCredentials.read({}, noAuth)).toEqual({ apiKey: '', endpoint: '' });
-    // A text model on the Realtime server brings the address back; one with a server of its own does not.
-    expect(localaiCredentials.fields({ ...here, translateVia: 'model', translateModel: 'm' }).map((f) => f.key)).toEqual(['endpoint']);
-    expect(localaiCredentials.fields({ ...here, translateVia: 'model', translateModel: 'm', translateBaseUrl: 'http://localhost:11434/v1' })).toEqual([]);
+    // A translation left on the other device brings the address back; one at an API does not.
+    expect(localaiCredentials.fields({ ...here, translateAt: 'server' }).map((f) => f.key)).toEqual(['endpoint']);
+    expect(localaiCredentials.fields({ ...here, translateAt: 'api', translateNeedsKey: false })).toEqual([]);
     expect(localaiCredentials.fields({ ...LOCALAI_DEFAULTS, serverNeedsKey: true }).map((f) => [f.key, f.secret])).toEqual([['endpoint', false], ['serverKey', true]]);
     expect(localaiCredentials.read({ endpoint: '192.168.1.10:8080', serverKey: ' abc ' }, noAuth)).toEqual({ ...K, apiKey: 'abc' });
     expect(localaiCredentials.read({ endpoint: '192.168.1.10:8080', serverKey: '' }, noAuth)).toHaveProperty('missing');
@@ -108,13 +108,20 @@ describe("LocalAI Realtime's endpoint", () => {
 describe("LocalAI Realtime's stage keys", () => {
   const fields = (patch: Partial<LocalAISettings>) => localaiCredentials.fields({ ...LOCALAI_DEFAULTS, ...patch }).map((f) => [f.key, f.secret]);
 
-  it('asks for a text model\'s key only when that model is in use and its server wants one', () => {
-    expect(fields({ translateVia: 'model', translateModel: 'm', translateNeedsKey: true })).toEqual([['endpoint', false], ['translateKey', true]]);
-    // Named but not in use: the server's pipeline translates, and no one is coached.
-    expect(fields({ translateModel: 'm', translateNeedsKey: true })).toEqual([['endpoint', false]]);
-    expect(fields({ coach: true, translateModel: 'm', translateNeedsKey: true })).toEqual([['endpoint', false], ['translateKey', true]]);
-    expect(fields({ coach: true, coachModel: 'c', coachNeedsKey: true })).toEqual([['endpoint', false], ['coachKey', true]]);
-    expect(fields({ coachModel: 'c', coachNeedsKey: true })).toEqual([['endpoint', false]]);
+  it('asks for an API\'s key only while a stage runs there and the API wants one', () => {
+    expect(fields({ translateAt: 'api' })).toEqual([['endpoint', false], ['translateKey', true]]);
+    expect(fields({ translateAt: 'api', translateNeedsKey: false })).toEqual([['endpoint', false]]);
+    // Not in use: the other device translates.
+    expect(fields({ translateNeedsKey: true })).toEqual([['endpoint', false]]);
+    expect(fields({ coach: true, coachAt: 'api' })).toEqual([['endpoint', false], ['coachKey', true]]);
+    // No one is coached: the feedback's place asks for nothing.
+    expect(fields({ coachAt: 'api' })).toEqual([['endpoint', false]]);
+  });
+
+  it('leaves every field to the stage cards to draw, beside the stage it belongs to', () => {
+    const all = localaiCredentials.fields({ ...LOCALAI_DEFAULTS, serverNeedsKey: true, translateAt: 'api', coach: true, coachAt: 'api' });
+    expect(all.map((f) => f.key)).toEqual(['endpoint', 'serverKey', 'translateKey', 'coachKey']);
+    expect(all.every((f) => f.drawnByAssist)).toBe(true);
   });
 
   it('reads the keys shown, and is missing while one is blank', () => {
@@ -124,7 +131,7 @@ describe("LocalAI Realtime's stage keys", () => {
   });
 
   it('declares every setting that decides a field or an endpoint the check reaches', () => {
-    expect(localaiProvider.checkReads).toEqual(['asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'translateVia', 'translateBaseUrl', 'translateModel', 'translateNeedsKey', 'coach', 'coachBaseUrl', 'coachModel', 'coachNeedsKey', 'serverNeedsKey', 'selections']);
+    expect(localaiProvider.checkReads).toEqual(['asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'coachDeviceModel', 'serverNeedsKey', 'selections']);
   });
 });
 
@@ -187,7 +194,7 @@ describe("LocalAI Realtime's check", () => {
   });
 
   it('also lists every other server a text stage names, with its key, as text models of that stage', async () => {
-    const s = { ...LOCALAI_DEFAULTS, translateVia: 'model' as const, translateModel: 'gpt-4.1-mini', translateBaseUrl: 'https://api.example.com/v1/', translateNeedsKey: true };
+    const s = { ...LOCALAI_DEFAULTS, translateAt: 'api' as const, translateModel: 'gpt-4.1-mini', translateBaseUrl: 'https://api.example.com/v1/', translateNeedsKey: true };
     const fetch = server({ other: async () => list(['gpt-4.1-mini', 'gpt-4.1']) });
     const result = await check(fetch, s, { ...K, translateKey: 'sk-a' });
     expect(fetch.mock.calls[2][0]).toBe('https://api.example.com/v1/models');
@@ -199,21 +206,22 @@ describe("LocalAI Realtime's check", () => {
     ]);
   });
 
-  it('is refused by another server only when a run would call it: a 401 or 403 with a model chosen; unreachable throws', async () => {
-    const inUse = { ...LOCALAI_DEFAULTS, translateVia: 'model' as const, translateModel: 'gpt-4.1-mini', translateBaseUrl: 'https://api.example.com/v1' };
+  it('is refused by an API\'s 401 or 403; any other answer passes, and unreachable throws', async () => {
+    const inUse = { ...LOCALAI_DEFAULTS, translateAt: 'api' as const, translateModel: 'gpt-4.1-mini', translateBaseUrl: 'https://api.example.com/v1', translateNeedsKey: false };
     expect(await check(server({ other: async () => json({}, 401) }), inUse)).toMatchObject({ ok: false, code: 'auth' });
     // Not every API lists its models: any other answer passes.
     expect(await check(server({ other: async () => json({}, 404) }), inUse)).toMatchObject({ ok: true });
     await expect(check(server({ other: async () => { throw new TypeError('Failed to fetch'); } }), inUse)).rejects.toThrow(/translation model's server \(https:\/\/api\.example\.com\/v1\) could not be reached/);
-    // An address typed with no model chosen yet: asked for its list, and never a reason to refuse the start.
-    const browsing = { ...LOCALAI_DEFAULTS, translateBaseUrl: 'https://api.example.com/v1' };
-    expect(await check(server({ other: async () => json({}, 401) }), browsing)).toMatchObject({ ok: true });
-    expect(await check(server({ other: async () => { throw new TypeError('Failed to fetch'); } }), browsing)).toMatchObject({ ok: true });
+    // An address left from when the stage ran there: not asked at all while it runs elsewhere.
+    const elsewhere = { ...LOCALAI_DEFAULTS, translateBaseUrl: 'https://api.example.com/v1' };
+    const fetch = server({ other: async () => json({}, 401) });
+    expect(await check(fetch, elsewhere)).toMatchObject({ ok: true });
+    expect(fetch).toHaveBeenCalledTimes(2);
   });
 
   it('reaches no other server while the stages are the Realtime server\'s own', async () => {
     const fetch = server();
-    await check(fetch, { ...LOCALAI_DEFAULTS, translateVia: 'model', translateModel: 'hy-mt2-1.8b' });
+    await check(fetch, { ...LOCALAI_DEFAULTS, translateServerModel: 'hy-mt2-1.8b', coach: true, coachServerModel: 'qwen3-4b' });
     expect(fetch).toHaveBeenCalledTimes(2);
   });
 
@@ -260,7 +268,7 @@ describe("LocalAI Realtime's model and config", () => {
     expect(configFor({ ...AUTO, direction: { source: 'auto', target: 'en' } }).transcription).toEqual({});
     expect(configFor(AUTO, { asrModel: 'whisper-large-turbo' }).transcription).toEqual({ model: 'whisper-large-turbo', language: 'en' });
     // A leg that only transcribes takes the server's own recognizer: LocalAI refuses any other in a transcription session.
-    expect(configFor(AUTO, { asrModel: 'whisper-large-turbo', translateVia: 'model', translateModel: 'hy-mt2-1.8b' }).transcription).toEqual({ language: 'en' });
+    expect(configFor(AUTO, { asrModel: 'whisper-large-turbo', translateServerModel: 'hy-mt2-1.8b' }).transcription).toEqual({ language: 'en' });
     // OpenAI Realtime's own transcript model, inherited in `S`, is not read.
     expect(configFor(AUTO, { transcriptModel: 'gpt-4o-transcribe' }).transcription).toEqual({ language: 'en' });
   });
@@ -270,10 +278,47 @@ describe("LocalAI Realtime's model and config", () => {
     expect(migrateLocalAISettings({ ...LOCALAI_DEFAULTS, asrModel: 'sensevoice-small-mlx' }, inputs).asrModel).toBe('sensevoice-small-mlx');
     expect(migrateLocalAISettings({ ...LOCALAI_DEFAULTS, asrModel: 7 }, inputs).asrModel).toBe('');
     expect(migrateLocalAISettings({ ...LOCALAI_DEFAULTS }, inputs)).toMatchObject({ model: 'gpt-realtime', turnDetectionMode: 'Semantic', semanticEagerness: 'High' });
-    // The stages: stored values kept, anything of the wrong type back to the server's own.
-    expect(migrateLocalAISettings({ ...LOCALAI_DEFAULTS, translateVia: 'model', translateModel: 'm', translateNeedsKey: true, coach: true, coachBaseUrl: 'http://x/v1' }, inputs))
-      .toMatchObject({ translateVia: 'model', translateModel: 'm', translateNeedsKey: true, coach: true, coachBaseUrl: 'http://x/v1' });
-    expect(migrateLocalAISettings({ ...LOCALAI_DEFAULTS, translateVia: 'cloud', translateModel: 3, coach: 'yes' }, inputs)).toMatchObject({ translateVia: 'server', translateModel: '', coach: false });
+    // The stages: stored values kept, anything of the wrong type back to the default.
+    expect(migrateLocalAISettings({ ...LOCALAI_DEFAULTS, translateModel: 'm', translateNeedsKey: true, coach: true, coachBaseUrl: 'http://x/v1' }, { legacy: { translateAt: 'api', coachAt: 'device' }, credentials: {} }))
+      .toMatchObject({ translateAt: 'api', translateModel: 'm', translateNeedsKey: true, coach: true, coachAt: 'device', coachBaseUrl: 'http://x/v1' });
+    expect(migrateLocalAISettings({ ...LOCALAI_DEFAULTS, translateModel: 3, coach: 'yes' }, { legacy: { translateAt: 'cloud' }, credentials: {} })).toMatchObject({ translateAt: 'server', translateModel: '', coach: false });
+  });
+});
+
+describe("LocalAI Realtime's settings from an earlier build", () => {
+  // What the store hands a migration: every field, a default where nothing was stored; and beside it, the raw values of the legacy keys.
+  const old = (stored: Record<string, unknown>, legacy: Record<string, unknown>) => migrateLocalAISettings({ ...LOCALAI_DEFAULTS, ...stored }, { legacy, credentials: {} });
+
+  it('reads the earlier words for where the translation ran, until the places are stored', () => {
+    expect(localaiProvider.settings.legacyKeys).toEqual(expect.arrayContaining(['translateAt', 'coachAt', 'translateVia', 'translateNeedsKey', 'coachNeedsKey']));
+    // Nothing stored: every stage on the other device.
+    expect(old({}, {})).toMatchObject({ translateAt: 'server', translateServerModel: '', coachAt: 'server' });
+    // This computer translated: by choice, or because it heard, and no pipeline of the other device could answer what it heard.
+    expect(old({}, { translateVia: 'device' })).toMatchObject({ translateAt: 'device', coachAt: 'device' });
+    expect(old({ asrVia: 'device' }, { translateVia: 'server' })).toMatchObject({ translateAt: 'device' });
+    expect(old({ asrVia: 'device' }, {})).toMatchObject({ translateAt: 'device' });
+    // A text model: on the other device while its address was blank, else an API — whose key was asked for only when switched on.
+    expect(old({ translateModel: 'hy-mt2-1.8b' }, { translateVia: 'model' })).toMatchObject({ translateAt: 'server', translateServerModel: 'hy-mt2-1.8b', translateModel: '' });
+    expect(old({ translateModel: 'gpt-x', translateBaseUrl: 'https://api.example.com/v1' }, { translateVia: 'model' })).toMatchObject({ translateAt: 'api', translateModel: 'gpt-x', translateNeedsKey: false });
+    expect(old({ translateModel: 'gpt-x', translateBaseUrl: 'https://api.example.com/v1' }, { translateVia: 'model', translateNeedsKey: true })).toMatchObject({ translateAt: 'api', translateNeedsKey: true });
+    // A model named under the pipeline is what the page showed it as: the translation's.
+    expect(old({ translateModel: 'translategemma-4b' }, { translateVia: 'server' })).toMatchObject({ translateAt: 'server', translateServerModel: 'translategemma-4b', translateModel: '' });
+  });
+
+  it('gives the feedback the model it ran on', () => {
+    expect(old({ coach: true, coachModel: 'qwen3-4b' }, {})).toMatchObject({ coachAt: 'server', coachServerModel: 'qwen3-4b', coachModel: '' });
+    expect(old({ coach: true, coachModel: 'gpt-x', coachBaseUrl: 'https://api.example.com/v1' }, { coachNeedsKey: true })).toMatchObject({ coachAt: 'api', coachModel: 'gpt-x', coachNeedsKey: true });
+    // None of its own: the translation's text model.
+    expect(old({ coach: true, translateModel: 'translategemma-4b' }, {})).toMatchObject({ coachAt: 'server', coachServerModel: 'translategemma-4b' });
+    expect(old({ coach: true, translateModel: 'gpt-x', translateBaseUrl: 'https://api.example.com/v1' }, { translateVia: 'model', translateNeedsKey: true }))
+      .toMatchObject({ coachAt: 'api', coachBaseUrl: 'https://api.example.com/v1', coachModel: 'gpt-x', coachNeedsKey: true });
+    // While this computer translated there was none to take: the feedback stands beside the translation.
+    expect(old({ coach: true, translateModel: 'left-over' }, { translateVia: 'device' })).toMatchObject({ coachAt: 'device', coachServerModel: '' });
+  });
+
+  it('reads the places as stored from then on, whatever the earlier words still say', () => {
+    expect(old({ asrVia: 'device', translateModel: 'left-over', translateNeedsKey: false }, { translateAt: 'server', coachAt: 'api', translateVia: 'device' }))
+      .toMatchObject({ translateAt: 'server', translateServerModel: '', translateModel: 'left-over', translateNeedsKey: false, coachAt: 'api' });
   });
 });
 

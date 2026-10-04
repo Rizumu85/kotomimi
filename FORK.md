@@ -12,8 +12,8 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 
 | 功能 | 说明 | 主要代码 |
 |---|---|---|
-| Kotomimi 自由搭配（提供商） | 识别、翻译、语法反馈三个环节，各自选在哪里运行：局域网里的另一台设备、这台电脑、或任意文本模型 | `src/providers/openai/localai.ts`、`pipeline.ts` |
-| 这台电脑的内置模型 | 识别和翻译可以用应用自己下载的模型，全部在本机完成，不需要服务器 | `localaiDevice.ts`、`LocalAIEngine.tsx` |
+| Kotomimi 自由搭配（提供商） | 识别、翻译、语法反馈三个环节，各自选在哪里运行：局域网里的另一台设备、任意 API 模型、或这台电脑。排在提供商列表第一个，带"推荐" | `src/providers/openai/localai.ts`、`pipeline.ts`、`LocalAIAssist.tsx` |
+| 这台电脑的内置模型 | 识别、翻译和语法反馈都可以用应用自己下载的模型，全部在本机完成，不需要服务器 | `localaiDevice.ts`、`LocalAIEngine.tsx` |
 | 共享给其他设备 | 把这台电脑的模型共享给局域网里的另一台 Kotomimi | `electron/lan-server.js`、`src/lib/lan/` |
 | 自动找到另一台设备 | 选「用另一台设备」时，应用自己搜索局域网，把找到的 Kotomimi 和模型服务器列出来，点一下就连上，不用知道地址 | `electron/lan-discover.js`、`src/components/LanSharing/ServerFinder.tsx` |
 | 这台电脑上的 LocalAI | 电脑上装了 LocalAI 时，由应用启动和停止它，显示状态和模型 | `electron/local-server.js`、`src/components/LanSharing/LocalServerCard.tsx` |
@@ -28,48 +28,56 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 
 ## 环节怎么搭配
 
-一条翻译链路有三个环节，每个环节可以放在不同的地方：
+一条翻译链路有三个环节，每个环节都可以放在三个地方之一，互不牵连：
 
 ```
 麦克风 / 系统声音
       │
       ▼
- ① 识别（断句 + 语音转文字）：服务器 │ 这台电脑
+ ① 语音识别（断句 + 语音转文字）：另一台设备 │ API 模型 │ 这台电脑
       │  原文
       ▼
- ② 翻译：服务器管线 │ 文本模型 │ 这台电脑     ── 或 ──     ③ 语法反馈：文本模型
+ ② 翻译：另一台设备 │ API 模型 │ 这台电脑     ── 或 ──     ③ 语法反馈：另一台设备 │ API 模型 │ 这台电脑
       │
       ▼
    字幕（按语言加注音、按语言选字体）
 ```
 
-设置最上面有一条"路线"，一眼能看到每个环节现在在哪里跑、用的哪个模型；缺模型的环节会标黄。
+提供商下面，每个环节一张卡片（`LocalAIAssist.tsx`）。卡片里先是三个位置的切换，紧接着就是这个位置需要的东西：模型，API 的地址和密钥，或这台电脑的模型库。一个环节的所有设置都在它自己的卡片里，简单布局和高级布局画的是同一组卡片。卡片下面有一行字说明现在能不能开始，旁边可以手动重新检查。
 
-- **① 识别**
-  - **另一台设备**：一台支持 GA Realtime 协议的服务器（另一台开启了共享的 Kotomimi，或 LocalAI）。从搜索到的列表里点选，或把地址填在"另一台设备的地址"。识别模型默认用服务器管线自带的。
-  - **API 模型**：任何提供 OpenAI 转写接口（`POST /v1/audio/transcriptions`）的服务，比如 OpenAI、Groq、LocalAI（`apiAsr.ts`）。断句仍在这台电脑上做，用的是和"这台电脑"同一套 VAD 设置；每句话说完后作为一个 WAV 文件上传，文字在句子结束时才出现，没有逐字更新。源语言可以选"自动检测"。需要填 API 地址（OpenAI 风格的 base URL，如 `https://api.openai.com/v1`）和模型名，需要密钥时密钥在提供商下面填。
-  - **这台电脑**：用应用下载的识别模型，断句也在本机做。模型在"模型"里选择和下载，断句灵敏度在"VAD 设置"里调。这时不能选"自动检测"作为源语言，因为本机的识别模型不检测语言。
+卡片上方是"另一台设备"：应用搜索局域网（见下文"怎么找到另一台设备"），点一下就填好地址；也可以手填地址和访问密钥。它对三个环节是同一台设备，所以只问一次。没有任何环节放在另一台设备上时，这一块只留一句说明和搜索按钮。
+
+- **① 语音识别**
+  - **另一台设备**：一台支持 GA Realtime 协议的服务器（另一台开启了共享的 Kotomimi，或 LocalAI）。模型默认由那台设备决定，也可以从它列出的识别模型里选。"高级"里有实时管线的名字，一般不用改：留空时自动用那台设备的管线，只有它是 LocalAI 并且配了不止一条管线时才需要选。
+  - **API 模型**：任何提供 OpenAI 转写接口（`POST /v1/audio/transcriptions`）的服务，比如 OpenAI、Groq、LocalAI（`apiAsr.ts`）。断句仍在这台电脑上做，用的是和"这台电脑"同一套 VAD 设置；每句话说完后作为一个 WAV 文件上传，文字在句子结束时才出现，没有逐字更新。源语言可以选"自动检测"。
+  - **这台电脑**：用应用下载的识别模型，断句也在本机做。每个要听的语言一行，选用哪个已下载的模型；旁边的"模型库"就在卡片里展开，缺模型时自动展开。断句灵敏度在"VAD 设置"里调。这时不能选"自动检测"作为源语言，因为本机的识别模型不检测语言。
 - **② 翻译**
-  - **另一台设备**：识别和翻译都在那台设备的 Realtime 会话里完成。识别放在这台电脑时没有这个选项。
-  - **API 模型**：翻译交给任何支持 OpenAI 聊天接口（`/v1/chat/completions`）的服务。地址留空表示上面那台服务器，也可以填别的机器、本机的 Ollama / LM Studio，或云端 API。
-  - **这台电脑**：用应用下载的翻译模型。没下载任何翻译模型时会用在线的 Bing 翻译，装好就能用。
-- **③ 语法反馈**：打开"我自己说对方的语言"后，"我"这一路的语音不再翻译，而是交给一个文本模型检查。它可以有自己的地址和模型，留空则复用翻译用的文本模型。"对方"那一路不受影响，照常翻译。应用下载的翻译模型不是聊天模型，做不了语法反馈。
+  - **另一台设备**：模型留空时由那台设备决定。识别也在那台设备上时，就是它的管线在同一个 Realtime 会话里完成；对方是 Kotomimi 时，由它按语言对挑最合适的翻译模型；识别不在那台设备上（这台电脑或 API 在听）时，用它列出的第一个能翻译的模型。也可以指定它的某个文本模型或翻译模型，这时那台设备只做转写，译文通过聊天接口另外请求。
+  - **API 模型**：任何支持 OpenAI 聊天接口（`/v1/chat/completions`）的服务：云端 API，或这台电脑上的 Ollama / LM Studio。
+  - **这台电脑**：用应用下载的翻译模型，每个方向一行。没下载任何翻译模型时会用在线的 Bing 翻译，装好就能用。
+- **③ 语法反馈**：打开"我自己说对方的语言"后，"我"这一路的语音不再翻译，而是交给一个文本模型检查。"对方"那一路不受影响，照常翻译；打字输入的内容仍然由翻译环节翻译。
+  - **另一台设备**：它的某个文本模型，留空用它列出的第一个。另一台 Kotomimi 共享的翻译模型不是聊天模型，做不了语法反馈，卡片会直接说明。
+  - **API 模型**：自己的地址、模型和密钥。
+  - **这台电脑**：模型库里的小型对话模型（Qwen 系列，需要 WebGPU），留空用已下载的里最大的那个。它们也是翻译模型，所以翻译和语法反馈选同一个时只加载一次。这类模型只有几百 MB 到 1 GB 多，反馈不如大模型准确，例句也不随提示词发送（本机引擎只接收提示词和一句话）。
 
-所有环节都在这台电脑上时，不需要另一台设备的地址。提供商下方，"语音识别"和"翻译"各占一行，各自在"另一台设备 / API 模型 / 这台电脑"里选在哪里运行（`LocalAIAssist.tsx`）。分成两行是为了让人一眼看出可以混搭，而不是二选一。运行位置只在这两行里选：下面各环节的区域只显示当前位置和这个位置需要填的东西，不再有第二个选择按钮。高级布局里提供商这一块只画在"提供商"页（引导和各处跳转本来就指向那里），"常规"页只留一行当前提供商的名字，点了跳过去（`ProviderPointer.tsx`）。上游原来两页各画一遍，容易让人问以哪边为准。简单布局只有一页，照旧画在那里。
+每个下拉菜单只列出能做这件事的模型：识别只列识别模型，翻译列文本模型和翻译模型，语法只列文本模型。分类来自那台设备的 `/v1/models/capabilities`。没有这个接口的服务器不做过滤，留空的模型也不会替你猜一个，需要自己选。
 
-每个下拉菜单只列出能做这件事的模型：会话模型只列管线，识别只列识别模型，翻译列文本模型和翻译模型，语法只列文本模型。分类来自服务器的 `/v1/models/capabilities`。服务器没有这个接口时不做过滤。
+高级布局里提供商这一块只画在"提供商"页（引导和各处跳转本来就指向那里），"常规"页不再出现提供商。上游原来两页各画一遍，容易让人问以哪边为准。简单布局只有一页，照旧画在那里。标题栏的"登录"是 Kizuna AI 的账号，只在选了 Kizuna AI 提供商（或已经登录）时显示。
+
+旧版本的设置会自动读成新的样子（`localai.ts` 的 `migratePlaces`）：以前"文本模型、地址留空"就是现在的"另一台设备 + 指定模型"；以前识别在这台电脑时翻译自动落到这台电脑，现在照样读成"这台电脑"；以前语法反馈留空复用翻译的文本模型，现在读成那个模型本身。第一次在卡片里改任何东西时，这些读出来的值会一起存下来。
 
 几种搭配示例（地址仅为示意）：
 
 | 目标 | 识别 | 翻译 | 语法反馈 |
 |---|---|---|---|
-| 全部交给 Mac | 服务器 `mac:8080` | 服务器管线 | 关 |
-| Mac 识别，Mac 上换一个翻译模型 | 服务器 `mac:8080` | 文本模型，地址留空，模型 `hy-mt2-1.8b` | 关 |
-| Mac 识别，本机翻译 | 服务器 `mac:8080` | 这台电脑 | 关 |
-| 本机识别，Mac 翻译 | 这台电脑 | 文本模型，地址 `http://mac:8080/v1` | 关 |
+| 全部交给 Mac | 另一台设备 `mac:8080` | 另一台设备，模型留空 | 关 |
+| Mac 识别，Mac 上换一个翻译模型 | 另一台设备 | 另一台设备，模型 `hy-mt2-1.8b` | 关 |
+| Mac 识别，本机翻译 | 另一台设备 | 这台电脑 | 关 |
+| 本机识别，Mac 翻译 | 这台电脑 | 另一台设备，模型 `hy-mt2-1.8b` | 关 |
 | 全部在这台电脑 | 这台电脑 | 这台电脑 | 关 |
-| 另一台 Kotomimi 全包 | 服务器 `192.168.1.20:8790` | 服务器管线 | 关 |
-| Mac 识别和翻译，云端查语法 | 服务器 `mac:8080` | 服务器管线（并填一个文本模型供打字查词） | 开，`https://api.openai.com/v1` + 密钥 |
+| 另一台 Kotomimi 全包 | 另一台设备 `192.168.1.20:8790` | 另一台设备，模型留空 | 关 |
+| Mac 识别和翻译，云端查语法 | 另一台设备 | 另一台设备 | 开，API 模型 `https://api.openai.com/v1` + 密钥 |
+| 完全离线，还要语法反馈 | 这台电脑 | 这台电脑 | 开，这台电脑（下载一个 Qwen 模型） |
 
 **语法反馈的提示词**按两种语言自动生成：
 
@@ -84,7 +92,7 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 
 - 只输出文本，不合成语音。
 - 文本模型由应用的渲染进程直接请求，所以对方服务必须允许跨域（CORS）。LocalAI 和 Ollama 默认允许；LM Studio 需要在服务器设置里打开 CORS。
-- 语法反馈的质量取决于模型。实测 4B 级别的本地模型能发现时态错误，但解释经常不按要求用母语写，建议用更强的模型。
+- 语法反馈的质量取决于模型。实测 4B 级别的本地模型能发现时态错误，但解释经常不按要求用母语写，建议用更强的模型。这台电脑上的小型对话模型更弱，适合完全离线时凑合用。
 - **内置的 SenseVoice 识别日语会丢假名**（实测 2026-10-03："今日は天気がいいので、公園に行きましょう" 被识别成 "日天気公演行"）。识别日语请用 Whisper 系列或下面的自定义模型。中文没有这个问题。
 
 ## 自定义模型
@@ -95,13 +103,13 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 - 量化版本按 q4、8 位、全精度的顺序取第一个有的。
 - 需要显卡（WebGPU）。
 - 实测 `onnx-community/kotoba-whisper-v2.2-ONNX`（698 MB）识别上面那句日语完全正确。
-- 翻译和语法想用别的模型，走"文本模型"一路更合适：用 Ollama 或 LM Studio 加载任意模型，把地址填进去。
+- 翻译和语法想用别的模型，走"API 模型"更合适：用 Ollama 或 LM Studio 加载任意模型，把地址填进去。
 
 ## 两个方向：用另一台设备，和共享给其他设备
 
 界面上这是两件相反的事，名字也按方向起：
 
-- **用另一台设备**：这台电脑不出力，识别和翻译交给局域网里的另一台。在提供商下面选「用另一台设备」。
+- **用另一台设备**：这台电脑不出力，环节交给局域网里的另一台。在提供商下面那个环节的卡片里选「另一台设备」。
 - **共享给其他设备**：这台电脑出力，别的设备来用它下载好的模型。在"提供商"页最下面打开「共享这台电脑的模型」。
 
 一台开共享，另一台选「用另一台设备」，两边就接上了。
@@ -153,7 +161,7 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 
 对另一台设备来说，这就是一台说同一套协议的服务器，所以下一节的约定对它同样适用。它和 LocalAI 有三处不同，客户端从模型列表里的 `owned_by: "kotomimi"` 认出它并自动处理：
 
-- **Realtime 套接字里只做识别，不生成回答。** 客户端选"服务器管线"时，会改用聊天接口向管线名 `kotomimi` 要翻译，由共享的那台电脑按语言对自己挑最合适的翻译模型。
+- **Realtime 套接字里只做识别，不生成回答。** 客户端把翻译留给这台设备决定时，会改用聊天接口向管线名 `kotomimi` 要翻译，由共享的那台电脑按语言对自己挑最合适的翻译模型。
 - **翻译模型不是聊天模型**，在 `capabilities` 里标为 `translate`。请求聊天接口时客户端会多带两个字段 `source_language` 和 `target_language`；系统提示词不被采用，每个翻译模型用自己的提示词。
 - **转写会话里可以指定任何一个识别模型**，不像 LocalAI 只接受默认的那个。
 
@@ -188,8 +196,8 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 
 **会话类型**
 
-- 翻译走服务器管线时：`session.type = "realtime"`，`output_modalities = ["text"]`，带 `instructions`、`audio.input.turn_detection`、`audio.input.transcription`、`audio.input.noise_reduction = null`、`tool_choice = "none"`、`tools = []`、`max_output_tokens`。
-- 翻译走文本模型、走这台电脑，或开了语法反馈时：`session.type = "transcription"`，只带 `audio.input.{turn_detection, transcription, noise_reduction}`。**这种会话里服务器不能自己生成回答。**
+- 翻译留给另一台设备的管线时（识别也在它上面，翻译没指定模型）：`session.type = "realtime"`，`output_modalities = ["text"]`，带 `instructions`、`audio.input.turn_detection`、`audio.input.transcription`、`audio.input.noise_reduction = null`、`tool_choice = "none"`、`tools = []`、`max_output_tokens`。
+- 翻译指定了模型、走 API、走这台电脑，或开了语法反馈时：`session.type = "transcription"`，只带 `audio.input.{turn_detection, transcription, noise_reduction}`。**这种会话里服务器不能自己生成回答。**
 - `audio.input.transcription` 里客户端总是带 `language`（两位语言码），`model` 只在用户另选了识别模型时才带。
 - 手动模式（按住说话）下 `turn_detection = null`，客户端松开时发 `input_audio_buffer.commit`，之后**不发** `response.create`：服务器要在转写完成后自己回答（管线会话），或只给转写（转写会话）。
 
@@ -366,7 +374,11 @@ npx vitest run src/providers src/lib/lan src/lib/fonts src/lib/annotate src/comp
 | 文件 | 改了什么 |
 |---|---|
 | `src/providers/openai/{adapter,config,wire,settings}.ts` | 给适配器加了几个开关：自定义地址、无密钥时不带子协议、关闭锚点、手动提交不催答、转写会话 |
-| `src/providers/registry.ts`、`src/lib/session/storedSettings.ts` | 注册新提供商和它的存储键 |
+| `src/providers/registry.ts`、`src/lib/session/storedSettings.ts` | 注册新提供商（排在第一个）和它的存储键 |
+| `src/lib/provider/types.ts`、`src/components/providers/{ProviderPicker,CredentialForm}.tsx` | 提供商可以自己画凭据区（`credentials.Assist`、`drawnByAssist`）；"推荐"标在声明了 `recommended` 的提供商上，不再是第一个托管提供商 |
+| `src/components/Settings/ProviderArea.tsx` | 高级布局的"常规"页不再画提供商 |
+| `src/components/TitleBar/AccountButton.tsx` | "登录"只在选了托管提供商或已登录时显示 |
+| `src/components/SetupWizard/applySetup.ts` | Kotomimi 那一步的选择同时写入翻译和语法反馈的位置 |
 | `src/app/readiness.ts`、`src/stores/providerStore.ts` | 网络类提供商也能在模型下载完成后重新检查就绪状态 |
 | `src/lib/local-inference/modelManifest.ts` | 启动时把自定义模型并入模型库 |
 | `src/lib/local-inference/engine/AsrEngine.ts`、`public/workers/sherpa-onnx-asr.worker.js` | 把语言传给 SenseVoice |
@@ -375,7 +387,7 @@ npx vitest run src/providers src/lib/lan src/lib/fonts src/lib/annotate src/comp
 | `src/components/MainPanel/panel/TypedText.tsx`、`PanelToolbar.tsx` | Ctrl+K 聚焦输入框；引导用的锚点 |
 | `src/components/Settings/SimpleSettings/SimpleSettings.tsx`、`AdvancedSettings/AdvancedSettings.tsx` | 加入"字体"一节 |
 | `src/components/Settings/sections/HelpSection.tsx` | 反馈链接换成本仓库的 issues |
-| `src/components/SetupWizard/steps/{StepProviderPath,StepCredentials,StepFinish}.tsx`、`SetupWizard.tsx` | Kotomimi 的卡片和它自己的一步 |
+| `src/components/SetupWizard/steps/{StepProviderPath,StepCredentials,StepFinish}.tsx`、`SetupWizard.tsx` | Kotomimi 的卡片（带"推荐"，托管那张不再带）和它自己的一步 |
 | `src/components/Tour/{steps,tourContext,useStartBasicsTour}.ts` | Kotomimi 提供商的引导步骤 |
 | `src/components/TitleBar/TitleBar.tsx`、`src/components/Subtitle/SubtitleBar.tsx`、`index.html`、`shared/index.html` | 显示的名字和标题栏图标 |
 | `src/locales/index.ts` | 注册名字替换 |
@@ -385,7 +397,7 @@ npx vitest run src/providers src/lib/lan src/lib/fonts src/lib/annotate src/comp
 | `electron/update-manager.js`、`electron/update-payload.js` | 更新源和安装包文件名 |
 | `forge.config.js` | 应用身份 |
 | `assets/icon.*`、`public/favicon.ico`、`public/logo*.png` | 图标 |
-| 几个测试文件（`registry.test.ts`、`palabraai/provider.test.ts`、`SimpleSettings.order.test.tsx`、`HelpSection.test.tsx`） | 跟着上面的改动更新的断言 |
+| 几个测试文件（`registry.test.ts`、`palabraai/provider.test.ts`、`gemini/provider.test.ts`、`localInference/provider.test.ts`、`ProviderPicker.test.tsx`、`AccountButton.test.tsx`、`LanguagePairSection.test.tsx`、`SimpleSettings.order.test.tsx`、`HelpSection.test.tsx`） | 跟着上面的改动更新的断言 |
 | `src/locales/*/translation.json` | 由脚本生成的文字 |
 | `package.json`、`package-lock.json` | 三个新依赖：`@sglkc/kuromoji`、`wanakana`、`es-hangul`；`ws` 从开发依赖移到运行依赖（共享的服务端要用） |
 

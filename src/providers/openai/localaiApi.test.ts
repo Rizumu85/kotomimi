@@ -7,13 +7,13 @@ import { describe, expect, it, vi } from 'vitest';
 import type { SessionContext } from '../../lib/contract/adapter';
 import type { CheckContext } from '../../lib/provider/types';
 import { admitLocalAI, buildLocalAI, createLocalAICheck, LOCALAI_DEFAULTS, localaiCredentials, type LocalAIConfig, type LocalAISettings } from './localai';
-import { needsServer, translateViaOf } from './localaiDevice';
+import { needsServer } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
 import { SHARED } from './testing';
 
 const SPEAKER: SessionContext = { direction: { source: 'zh-CN', target: 'ja' }, speech: false, turns: 'auto' };
 const shared = { ...SHARED, reversed: (d: SessionContext['direction']) => d.source === 'ja', models: [] as LocalAIModel[] };
-const API: Partial<LocalAISettings> = { asrVia: 'api', asrApiBaseUrl: 'https://api.example.com/v1/', asrApiModel: 'whisper-large-v3', translateVia: 'model', translateModel: 'gpt-x', translateBaseUrl: 'https://api.example.com/v1' };
+const API: Partial<LocalAISettings> = { asrVia: 'api', asrApiBaseUrl: 'https://api.example.com/v1/', asrApiModel: 'whisper-large-v3', translateAt: 'api', translateModel: 'gpt-x', translateBaseUrl: 'https://api.example.com/v1', translateNeedsKey: false };
 const settings = (patch: Partial<LocalAISettings> = {}): LocalAISettings => ({ ...LOCALAI_DEFAULTS, ...patch });
 const noAuth = { session: null } as never;
 
@@ -24,12 +24,10 @@ function configFor(context: SessionContext, patch: Partial<LocalAISettings>): Lo
 }
 
 describe('recognition by an API: where the stages then run', () => {
-  it('has no pipeline of the other device to translate in, and needs that device for nothing', () => {
-    expect(translateViaOf({ asrVia: 'api', translateVia: 'server' })).toBe('device');
-    expect(translateViaOf({ asrVia: 'api', translateVia: 'model' })).toBe('model');
+  it('needs the other device for nothing while no stage is placed on it', () => {
     expect(needsServer(settings(API))).toBe(false);
-    // A text model left on the other device still does.
-    expect(needsServer(settings({ ...API, translateBaseUrl: '' }))).toBe(true);
+    // A translation left on the other device still does.
+    expect(needsServer(settings({ ...API, translateAt: 'server' }))).toBe(true);
   });
 
   it('asks for the API\'s key while it wants one, and for no address of another device', () => {
@@ -86,7 +84,7 @@ describe('recognition by an API: the check', () => {
 
   it('is refused by the API\'s 401: the key is wrong', async () => {
     const fetch = vi.fn(async () => new Response('{}', { status: 401 }));
-    const result = await createLocalAICheck({ fetch: fetch as unknown as typeof globalThis.fetch })(K, settings({ ...API, translateVia: 'device' }), ctx);
+    const result = await createLocalAICheck({ fetch: fetch as unknown as typeof globalThis.fetch })(K, settings({ ...API, translateAt: 'device' }), ctx);
     expect(result).toMatchObject({ ok: false, code: 'auth' });
   });
 });

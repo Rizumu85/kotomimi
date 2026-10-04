@@ -83,7 +83,7 @@ const StepProviderPath: React.FC<Props> = ({ draft, dispatch }) => {
                 onChange={() => choosePath(path)} />
               <span className="setup-card__title">
                 {t(`setup.paths.${path}.title`, PATH_COPY[path].title)}
-                {path === 'managed' && !unfit && <em className="setup-card__badge">{t('setup.paths.recommended', 'Recommended')}</em>}
+                {/* Fork: the fork's own path carries the recommendation (its card above); the managed one no longer does. */}
               </span>
               <span className="setup-card__desc">{t(`setup.paths.${path}.desc`, PATH_COPY[path].desc)}</span>
               <span className="setup-card__cost">{t(`setup.paths.${path}.cost`, PATH_COPY[path].cost)}</span>

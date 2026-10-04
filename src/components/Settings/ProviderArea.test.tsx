@@ -128,14 +128,11 @@ describe('SessionSettingsGeneral', () => {
 
 // Fork: on the Advanced layout the provider is drawn on its own page alone.
 describe('SessionSettingsGeneral, on the Advanced layout (fork)', () => {
-  it('draws no second provider block: one line names the provider and leads to the Provider page', () => {
+  it('draws no provider block at all: the Provider page is where it is chosen and set up', () => {
     const { container } = render(<SessionSettingsGeneral locked={false} layout="advanced" onOpenSlot={vi.fn()} />);
     expect(container.querySelector('#provider-section')).toBeNull();
     expect(container.querySelector('.provider-select')).toBeNull();
-    const pointer = container.querySelector('.kt-provider-pointer__row') as HTMLButtonElement;
-    expect(pointer.textContent).toContain('fork.provider.pointer');
-    fireEvent.click(pointer);
-    expect(useSettingsStore.getState().settingsNavigationTarget).toBe('provider');
+    expect(container.querySelector('.kt-provider-pointer')).toBeNull();
     // The rest of the page is as before.
     for (const id of ['languages-section', 'output-section', 'turn-detection-section']) expect(container.querySelector(`#${id}`), id).toBeTruthy();
   });

@@ -148,7 +148,7 @@ describe.skipIf(!SERVER)('LocalAI Realtime, live: the server\'s own pipeline', (
 });
 
 describe.skipIf(!SERVER || !TEXT_MODEL)('LocalAI Realtime, live: translation on a text model', () => {
-  const VIA_MODEL: Partial<LocalAISettings> = { translateVia: 'model', translateModel: TEXT_MODEL, translateBaseUrl: TEXT_BASE };
+  const VIA_MODEL: Partial<LocalAISettings> = TEXT_BASE ? { translateAt: 'api', translateModel: TEXT_MODEL, translateBaseUrl: TEXT_BASE, translateNeedsKey: false } : { translateServerModel: TEXT_MODEL };
 
   it('translates a typed text with the text model, and asks the Realtime server for nothing', async () => {
     const h = await start({ patch: VIA_MODEL });
@@ -198,7 +198,7 @@ describe.skipIf(!SERVER || !TEXT_MODEL)('LocalAI Realtime, live: translation on 
 describe.skipIf(!SERVER || !JA_WAV || !COACH_MODEL)('LocalAI Realtime, live: a coached speaker', () => {
   // "I read Chinese, the other side speaks Japanese", and I speak Japanese myself.
   const direction = { source: 'zh-CN', target: 'ja' };
-  const COACH: Partial<LocalAISettings> = { coach: true, coachModel: COACH_MODEL, translateModel: TEXT_MODEL };
+  const COACH: Partial<LocalAISettings> = { coach: true, coachServerModel: COACH_MODEL, translateServerModel: TEXT_MODEL };
 
   it('is heard in Japanese and answered with feedback, not a translation', async () => {
     const h = await start({ direction, patch: COACH });

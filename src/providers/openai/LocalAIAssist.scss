@@ -1,57 +1,432 @@
 @use '../../components/Settings/shared/variables' as vars;
 
-// Fork: where each stage runs, under the provider (LocalAIAssist.tsx). Two
-// rows, a stage each, so the places read as a mix and not as one switch. The
-// buttons are the credential choice's own (`.credential-choice-group` in
-// Settings.scss).
+// Fork: the stages under the provider (LocalAIAssist.tsx) — the other device,
+// then a card per stage. A card is one surface holding everything of its
+// stage: the three places as a row of buttons, and under it the fields of the
+// place chosen. The controls are spelled out here rather than borrowed: the
+// settings' own input and section rules are scoped to pages this block is not
+// always drawn in (the Simple layout draws it too).
 
-.kt-places {
-  gap: 6px;
+.kt-stages-assist {
+  display: flex;
+  flex-direction: column;
+  gap: vars.$space-3;
+  margin-bottom: vars.$space-3;
 
-  .kt-places__hint {
+  .kt-mix {
+    margin: 0;
+    font-size: vars.$font-caption;
+    line-height: 1.5;
+    color: vars.$text-secondary;
+  }
+
+  // A card: a stage, or the other device.
+  .kt-card,
+  .kt-device {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: vars.$space-3;
+    background: vars.$bg-surface;
+    border: 1px solid vars.$border-subtle;
+    border-radius: vars.$radius-lg;
+  }
+
+  // The other device is a thing the stages use, not one of them: quieter until one does.
+  .kt-device {
+    background: transparent;
+    border-style: dashed;
+
+    &.is-used {
+      background: vars.$bg-surface;
+      border-style: solid;
+    }
+
+    .kt-find {
+      margin: 0;
+    }
+  }
+
+  .kt-card__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: vars.$font-body;
+    font-weight: vars.$weight-semibold;
+    color: vars.$text-primary;
+
+    .tooltip-trigger {
+      color: vars.$text-muted;
+      cursor: help;
+    }
+  }
+
+  .kt-card__icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    color: vars.$color-primary;
+    background: rgba(vars.$color-primary, 0.12);
+  }
+
+  .kt-card__title {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  // The three places: one row, three equal buttons, the chosen one filled.
+  .kt-seg {
+    display: flex;
+    align-items: stretch;
+    height: 30px;
+    overflow: hidden;
+    border: 1px solid vars.$border-default;
+    border-radius: vars.$radius-md;
+  }
+
+  .kt-seg__option {
+    display: inline-flex;
+    flex: 1 1 0;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    padding: 0 6px;
+    font: inherit;
+    font-size: vars.$font-caption;
+    line-height: 1;
+    white-space: nowrap;
+    color: #aaa;
+    background: vars.$bg-control;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    &:not(:last-child) {
+      border-right: 1px solid vars.$border-default;
+    }
+
+    &:hover:not(.is-active):not(:disabled) {
+      background: vars.$bg-hover;
+    }
+
+    &.is-active {
+      color: vars.$color-on-primary;
+      background: vars.$color-primary-fill;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: vars.$disabled-opacity;
+    }
+
+    &:focus-visible {
+      outline: vars.$focus-ring-width solid vars.$focus-ring-color;
+      outline-offset: -2px;
+    }
+  }
+
+  // A labelled control: the label above, small; the control the full width.
+  .kt-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+  }
+
+  .kt-field__label {
     font-size: vars.$font-caption;
     color: vars.$text-secondary;
   }
 
-  .kt-places__row {
-    display: flex;
-    align-items: center;
-    gap: vars.$space-2;
+  .kt-input {
+    width: 100%;
+    padding: 8px 10px;
+    box-sizing: border-box;
+    font: inherit;
+    font-size: vars.$font-body;
+    color: vars.$text-primary;
+    background: vars.$bg-control;
+    border: 1px solid vars.$border-default;
+    border-radius: vars.$radius-sm;
+    transition: border-color vars.$transition-fast;
+
+    &::placeholder {
+      color: vars.$text-disabled;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: vars.$color-primary;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: vars.$disabled-opacity;
+    }
   }
 
-  .kt-places__stage {
+  .kt-prompt {
+    min-height: 84px;
+    margin-top: vars.$space-2;
+    resize: vertical;
+    line-height: 1.5;
+  }
+
+  .toggle-switch-component {
+    margin: 0;
+  }
+
+  // Why a field is as it is: read after the control, never louder than it.
+  .kt-note {
+    margin: 0;
+    font-size: vars.$font-caption;
+    line-height: 1.5;
+    color: vars.$text-muted;
+
+    &--todo {
+      color: vars.$color-warning;
+    }
+  }
+
+  // What is rarely wanted, folded away under its own name.
+  .kt-details {
+    font-size: vars.$font-caption;
+    color: vars.$text-muted;
+
+    summary {
+      cursor: pointer;
+      user-select: none;
+
+      &:hover {
+        color: vars.$text-secondary;
+      }
+    }
+
+    &[open] > summary {
+      margin-bottom: vars.$space-2;
+    }
+
+    .kt-note {
+      margin-top: 6px;
+    }
+
+    pre {
+      margin: 6px 0 0;
+      padding: vars.$space-2 vars.$space-3;
+      max-height: 200px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: inherit;
+      line-height: 1.5;
+      color: vars.$text-secondary;
+      background: vars.$bg-page;
+      border: 1px solid vars.$border-subtle;
+      border-radius: vars.$radius-sm;
+    }
+  }
+
+  // This computer's models: per direction, the model in use and the way into the library.
+  .kt-here {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .kt-here__row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+  }
+
+  // The row's name, and the way into its library.
+  .kt-here__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: vars.$space-2;
+    min-width: 0;
+  }
+
+  .kt-here__select--missing {
+    color: vars.$color-warning;
+    border-color: vars.$color-warning-border;
+  }
+
+  .kt-here__browse {
     display: inline-flex;
-    flex: 0 0 76px;
+    flex-shrink: 0;
     align-items: center;
     gap: 5px;
+    padding: 3px 9px;
+    font: inherit;
     font-size: vars.$font-caption;
-    color: vars.$text-primary;
+    white-space: nowrap;
+    color: vars.$text-secondary;
+    background: vars.$bg-control;
+    border: 1px solid vars.$border-default;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background-color vars.$transition-fast, color vars.$transition-fast, border-color vars.$transition-fast;
 
-    svg {
-      flex-shrink: 0;
+    &:hover {
+      color: vars.$text-primary;
+      background: vars.$bg-hover;
+    }
+
+    &.is-open {
+      color: vars.$color-primary;
+      border-color: vars.$color-primary;
+    }
+
+    &:focus-visible {
+      @include vars.focus-ring;
+    }
+  }
+
+  // The library, opened under the choice it serves: the card's full width, so its rows are as wide as on a page of their own.
+  .kt-here__library {
+    display: flex;
+    flex-direction: column;
+    gap: vars.$space-2;
+    margin: 0 (-(vars.$space-3));
+    padding: vars.$space-2;
+    background: vars.$bg-page;
+    border-top: 1px solid vars.$border-subtle;
+    border-bottom: 1px solid vars.$border-subtle;
+  }
+
+  // The last thing in its card: it closes the card.
+  .kt-here:last-child > .kt-here__library:last-child {
+    margin-bottom: -(vars.$space-3);
+    border-bottom: none;
+    border-radius: 0 0 vars.$radius-lg vars.$radius-lg;
+  }
+
+  // Whether all of it can start.
+  .kt-ready {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 24px;
+    font-size: vars.$font-caption;
+    color: vars.$text-muted;
+
+    &--ready {
       color: vars.$color-primary;
     }
   }
 
-  // The stage's name takes the left; the places share what is left, evenly.
-  .segmented-control {
-    display: flex;
-    flex: 1 1 auto;
-    align-self: auto;
-    min-width: 0;
+  .kt-ready__spin {
+    animation: kt-ready-spin 1s linear infinite;
+  }
 
-    .segmented-option {
-      flex: 1 1 0;
-      justify-content: center;
-      min-width: 0;
-      padding: 0 6px;
-      white-space: nowrap;
+  .kt-ready__again {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    padding: 3px 8px;
+    font: inherit;
+    color: vars.$text-secondary;
+    background: transparent;
+    border: 1px solid vars.$border-default;
+    border-radius: vars.$radius-sm;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      color: vars.$text-primary;
+      background: vars.$bg-hover;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: vars.$disabled-opacity;
+    }
+
+    &:focus-visible {
+      @include vars.focus-ring;
     }
   }
 
-  .kt-places__todo {
+  // The chat models: a short list, a row each.
+  .kt-chat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .kt-chat__row {
+    display: flex;
+    align-items: center;
+    gap: vars.$space-2;
+    padding: 6px 8px;
     font-size: vars.$font-caption;
-    line-height: 1.5;
-    color: vars.$color-warning;
+    background: vars.$bg-surface;
+    border-radius: vars.$radius-sm;
+  }
+
+  .kt-chat__name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    color: vars.$text-primary;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .kt-chat__size {
+    flex-shrink: 0;
+    color: vars.$text-muted;
+  }
+
+  .kt-chat__done {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 4px;
+    color: vars.$color-primary;
+  }
+
+  .kt-chat__action {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    font: inherit;
+    color: vars.$text-primary;
+    background: vars.$bg-control;
+    border: 1px solid vars.$border-default;
+    border-radius: vars.$radius-sm;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: vars.$bg-hover;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: vars.$disabled-opacity;
+    }
+
+    &:focus-visible {
+      @include vars.focus-ring;
+    }
+  }
+}
+
+@keyframes kt-ready-spin {
+  to {
+    transform: rotate(360deg);
   }
 }

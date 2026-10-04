@@ -75,7 +75,7 @@ describe('another Kotomimi\'s model lists', () => {
       if (url.startsWith('http://192.168.1.30:8790')) return url.endsWith('/capabilities') ? json(capabilityList(THEIRS)) : json(modelList(THEIRS));
       return url.endsWith('/capabilities') ? json({}, 404) : json({ data: [{ id: 'gpt-realtime' }] });
     });
-    const result = await check(elsewhere as never, settings({ translateVia: 'model', translateModel: 'bing-translator', translateBaseUrl: 'http://192.168.1.30:8790/v1' }));
+    const result = await check(elsewhere as never, settings({ translateAt: 'api', translateModel: 'bing-translator', translateBaseUrl: 'http://192.168.1.30:8790/v1', translateNeedsKey: false }));
     expect(result).toEqual({
       ok: true,
       models: [
@@ -98,18 +98,24 @@ describe('a leg another Kotomimi hears', () => {
   });
 
   it('names a translation model of that Kotomimi when one is chosen, still with the pair', () => {
-    const stage = configFor({ translateVia: 'model', translateModel: 'bing-translator' }).stages?.speech as TextStage;
+    const stage = configFor({ translateServerModel: 'bing-translator' }).stages?.speech as TextStage;
     expect(stage).toMatchObject({ model: 'bing-translator', pair: { source: 'zh-CN', target: 'ja' } });
   });
 
   it('tells no pair to a chat model elsewhere: a hosted API may refuse a field it does not know', () => {
-    const stage = configFor({ translateVia: 'model', translateModel: 'gpt-4.1-mini', translateBaseUrl: 'https://api.example.com/v1' }).stages?.speech as TextStage;
+    const stage = configFor({ translateAt: 'api', translateModel: 'gpt-4.1-mini', translateBaseUrl: 'https://api.example.com/v1', translateNeedsKey: false }).stages?.speech as TextStage;
     expect(stage).not.toHaveProperty('pair');
   });
 
   it('takes the recognizer chosen, which a LocalAI would refuse in a transcription session', () => {
     expect(configFor({ asrModel: 'whisper-large-v3-turbo-webgpu' }).transcription).toEqual({ model: 'whisper-large-v3-turbo-webgpu', language: 'zh' });
     expect(configFor().transcription).toEqual({ language: 'zh' });
+  });
+
+  it('asks its pipeline for the translation of a leg heard elsewhere, too', () => {
+    const c = configFor({ asrVia: 'api', asrApiBaseUrl: 'https://api.example.com/v1', asrApiModel: 'whisper-1' });
+    expect(c.model).toBe('');
+    expect(c.stages?.speech).toMatchObject({ kind: 'translate', baseUrl: '', model: LAN_PIPELINE, pair: { source: 'zh-CN', target: 'ja' } });
   });
 
   it('uses that Kotomimi\'s access key for its chat requests too', () => {

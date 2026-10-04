@@ -42,13 +42,16 @@ export function CredentialForm({ fields, values, readiness, onChange, onCheck, d
     </button>
   );
 
+  // Fork: a field the provider's own view draws is left out here; the check above still waits for it.
+  const drawn = fields.filter((f) => !f.drawnByAssist);
   const form = (
     <>
       {assist}
-      {fields.length === 0 ? (
-        check && <div className="api-key-input-group">{check}</div>
+      {drawn.length === 0 ? (
+        // Fork: a view that draws every field says whether the provider is ready itself: no button stands alone under it.
+        check && !assist && <div className="api-key-input-group">{check}</div>
       ) : (
-        fields.map((f, i) => (
+        drawn.map((f, i) => (
           <div className="api-key-input-group" key={f.key}>
             <input
               type={f.secret ? 'password' : 'text'}
@@ -59,7 +62,7 @@ export function CredentialForm({ fields, values, readiness, onChange, onCheck, d
               className={`api-key-input ${status}`.trim()}
               disabled={disabled}
             />
-            {i === fields.length - 1 && check}
+            {i === drawn.length - 1 && check}
           </div>
         ))
       )}
