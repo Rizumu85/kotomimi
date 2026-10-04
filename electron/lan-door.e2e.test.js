@@ -658,6 +658,8 @@ describe('the shared door, end to end: a session on one of LocalAI\'s recognizer
     fake.sessions[0].ws.close(4002, 'pipeline reloaded');
     await until(() => device.closed !== null, 'the device\'s socket closes');
     expect(device.closed).toEqual({ code: 4002, reason: 'pipeline reloaded' });
+    // The device did not ask for it: it is told, in LocalAI's words.
+    expect(device.events().pop()).toMatchObject({ type: 'error', error: { code: 'upstream_failed', message: 'The model server closed the session: pipeline reloaded' } });
     await until(() => door.count() === 0 && page.seen.closed.length === 1 && fake.connections() === 0, 'nothing left open');
     await nothingLeftSince(ready);
   });
@@ -823,15 +825,15 @@ describe('the shared door, end to end: a session left silent', () => {
 });
 
 describe('the shared door, end to end: LocalAI going away', () => {
-  it.fails('mid-session: the device is told why, its socket closes, and nothing is left open on this computer', async () => {
+  it('mid-session: the device is told why, its socket closes, and nothing is left open on this computer', async () => {
     const fake = await fakeLocalAI();
     const { realtime, door, page, ready } = await share(fake.port);
     const device = await session(realtime, 'whisper-large-turbo');
     expect(await speak(device)).toBe('2 chunks heard by whisper-large-turbo');
     await fake.stop();
     await until(() => device.closed !== null, 'the device\'s socket closes');
-    expect(device.events().pop()).toMatchObject({ type: 'error', error: { code: 'upstream_failed' } });
-    expect(device.closed.code).toBe(1011);
+    expect(device.events().pop()).toMatchObject({ type: 'error', error: { code: 'upstream_failed', message: 'The model server closed the session.' } });
+    expect(device.closed).toEqual({ code: 1011, reason: 'The model server closed the session.' });
     expect(door.count()).toBe(0);
     await until(() => page.seen.closed.length === 1, 'the page hears the close');
     // Everything the session made — its socket, the door's socket to LocalAI, every timer — is gone, with the door still listening.

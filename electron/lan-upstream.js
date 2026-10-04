@@ -140,11 +140,12 @@ function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect 
     let ready = false;
     let ended = false;
     const queue = [];
-    const fail = (message) => {
+    /** The session ends without the device asking: it is told why, then closed — with the model server's own code, when there was one. */
+    const fail = (message, code = 1011, reason = message) => {
       if (ended) return;
       ended = true;
       send(JSON.stringify(wireError('upstream_failed', message)));
-      close(1011, message);
+      close(code, reason);
     };
     prepare(route).then(() => {
       if (ended) return;
@@ -169,10 +170,10 @@ function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect 
         send(text);
       });
       ws.on('close', (code, reason) => {
-        if (ended) return;
-        ended = true;
-        if (sendable(code)) close(code, String(reason ?? ''));
-        else close(1011, 'The model server closed the session.');
+        const said = String(reason ?? '');
+        const message = said ? `The model server closed the session: ${said}` : 'The model server closed the session.';
+        if (sendable(code)) fail(message, code, said);
+        else fail(message);
       });
       ws.on('error', (error) => fail(`The model server could not be reached: ${error?.message ?? error}`));
     }, (error) => fail(error?.message ?? String(error)));

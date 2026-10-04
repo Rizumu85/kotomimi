@@ -215,11 +215,13 @@ describe('a socket joined to the model server', () => {
     expect(seen.sockets).toHaveLength(0);
 
     const { upstream } = upstreamOf({ port });
+    const told = [];
     const closed = vi.fn();
-    upstream.bridge({ pipeline: 'gpt-realtime', transcription: '' }, { update: UPDATE, send: () => {}, close: closed });
+    upstream.bridge({ pipeline: 'gpt-realtime', transcription: '' }, { update: UPDATE, send: (t) => told.push(JSON.parse(t)), close: closed });
     await until(() => seen.frames.length === 1);
     seen.sockets[0].ws.close();
     await until(() => closed.mock.calls.length === 1);
+    expect(told.pop()).toMatchObject({ type: 'error', error: { code: 'upstream_failed', message: 'The model server closed the session.' } });
     expect(closed.mock.calls[0][0]).toBe(1011);
   });
 });
