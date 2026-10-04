@@ -27,6 +27,8 @@ export interface ApplySetupDeps {
     settings: Record<string, string>,
   ) => Promise<void>;
   completeSetup: (r: { scenario: ScenarioId; providerPath: ProviderPath; provider: string }) => Promise<void>;
+  /** Fork: turns on the sharing of this computer's models (the Kotomimi step's third start). Absent where nothing can be shared. */
+  shareModels?: () => Promise<void>;
 }
 
 export async function applySetupDraft(draft: SetupDraft, deps: ApplySetupDeps): Promise<void> {
@@ -45,10 +47,19 @@ export async function applySetupDraft(draft: SetupDraft, deps: ApplySetupDeps): 
   // Volcengine AST2, ruling 1).
   const choice = providerPath === 'own-key' ? draft.credentialChoice : null;
   const settings: Record<string, string> = choice ? { [choice.setting]: choice.value } : {};
-  // Fork: the Kotomimi step asks one question for every stage — another device, or this computer.
-  if (choice && (provider as string) === 'localai' && choice.setting === 'asrVia') Object.assign(settings, { translateAt: choice.value, coachAt: choice.value });
+  // Fork: the Kotomimi step asks one question for every stage — another device, or this computer. Its third start
+  // (`share`) is this computer too, lending its models to the other devices: no place of its own.
+  const kotomimi = choice !== null && (provider as string) === 'localai' && choice.setting === 'asrVia';
+  const shares = kotomimi && choice.value === 'share';
+  if (kotomimi) {
+    const place = shares ? 'device' : choice.value;
+    Object.assign(settings, { asrVia: place, translateAt: place, coachAt: place });
+  }
   // Awaited: a rejected write has to reach Finish's error path rather than
   // becoming an unhandled rejection behind a "done" wizard.
   await deps.applyProvider(provider, { source: sourceLanguage, target: targetLanguage }, credentials, settings);
+  // Fork: the sharing is a convenience of this setup, not a condition of it — a port that is taken must not leave
+  // the setup undone. Its section in Settings says what is wrong, and how to put it right.
+  if (shares) await deps.shareModels?.().catch(() => undefined);
   await deps.completeSetup({ scenario, providerPath, provider });
 }

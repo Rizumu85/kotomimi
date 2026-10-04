@@ -24,6 +24,38 @@ const draft = (over: Partial<SetupDraft>): SetupDraft => ({
   credentials: { apiKey: 'sk-1' }, credentialsValidated: true, sourceLanguage: 'en', targetLanguage: 'ja', ...over,
 });
 
+describe('the Kotomimi step\'s answer (fork)', () => {
+  const kotomimi = (value: string) => draft({ provider: 'localai' as Provider, credentials: {}, credentialChoice: { setting: 'asrVia', value } });
+
+  it('places every stage where the card said', async () => {
+    const d = deps();
+    await applySetupDraft(kotomimi('server'), d);
+    expect(d.applyProvider).toHaveBeenCalledWith('localai', { source: 'en', target: 'ja' }, {}, { asrVia: 'server', translateAt: 'server', coachAt: 'server' });
+  });
+
+  it('is this computer for every stage, and turns the sharing on, for the third card — after the settings, before the record', async () => {
+    const d = deps({ shareModels: vi.fn(async () => {}) });
+    await applySetupDraft(kotomimi('share'), d);
+    expect(d.applyProvider).toHaveBeenCalledWith('localai', { source: 'en', target: 'ja' }, {}, { asrVia: 'device', translateAt: 'device', coachAt: 'device' });
+    expect(d.shareModels).toHaveBeenCalledTimes(1);
+    const seq = order([d.applyProvider, d.shareModels, d.completeSetup] as any);
+    expect([...seq].sort((a, b) => a - b)).toEqual(seq);
+  });
+
+  it('shares nothing for the other cards, and is not undone by a sharing that would not start', async () => {
+    const plain = deps({ shareModels: vi.fn(async () => {}) });
+    await applySetupDraft(kotomimi('device'), plain);
+    expect(plain.shareModels).not.toHaveBeenCalled();
+
+    const taken = deps({ shareModels: vi.fn(async () => { throw new Error('EADDRINUSE'); }) });
+    await expect(applySetupDraft(kotomimi('share'), taken)).resolves.toBeUndefined();
+    expect(taken.completeSetup).toHaveBeenCalled();
+    // Nowhere to share from (the extension): the setup is this computer's all the same.
+    const none = deps();
+    await expect(applySetupDraft(kotomimi('share'), none)).resolves.toBeUndefined();
+  });
+});
+
 describe('applySetupDraft (spec §1.5)', () => {
   it('writes preset, provider, record — in that order — and not uiMode', async () => {
     const d = deps();

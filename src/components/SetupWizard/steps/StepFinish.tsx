@@ -50,6 +50,10 @@ const StepFinish: React.FC<Props> = ({ draft, isSignedIn, error }) => {
         <dt>{t('setup.summary.scenario', 'Scenario')}</dt><dd>{t(`setup.scenarios.${preset.id}.title`, preset.id)}</dd>
         <dt>{t('setup.summary.mode', 'Mode')}</dt><dd>{modeLabel} · {output}</dd>
         <dt>{t('setup.summary.provider', 'Provider')}</dt><dd>{providerName}</dd>
+        {/* Fork: the Kotomimi step's third start — what Finish does besides writing the settings. */}
+        {(draft.provider as string | null) === 'localai' && draft.credentialChoice?.value === 'share' && (
+          <><dt>{t('fork.wizard.shareSummary')}</dt><dd>{t('fork.wizard.shareSummaryOn')}</dd></>
+        )}
         <dt>{t('setup.summary.languages', 'Languages')}</dt>
         <dd>
           {forwardLine}
