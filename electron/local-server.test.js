@@ -80,6 +80,10 @@ describe('where a LocalAI is looked for, and what it is started with', () => {
     expect(buildArgs({ base: BASE, address: '0.0.0.0:8080', help: '--models-path --address', exists })).toEqual(['run', '--models-path', path.join(BASE, 'models'), '--address', '0.0.0.0:8080']);
     // Bound to this computer alone, nothing is insecure about it.
     expect(buildArgs({ base: BASE, address: '127.0.0.1:8080', help: ALL_FLAGS, exists: () => false })).toEqual(['run', '--address', '127.0.0.1:8080']);
+    // Help could not be read (a --help that timed out): --address is still passed, so the bind is pinned to this
+    // computer rather than left to LocalAI's own config, which could open it to the whole network with no key.
+    expect(buildArgs({ base: BASE, address: '127.0.0.1:8080', help: '', exists: () => false })).toEqual(['run', '--address', '127.0.0.1:8080']);
+    expect(buildArgs({ base: BASE, address: '127.0.0.1:8080', help: '   ', exists: () => false })).toContain('--address');
   });
 
   it('adds what an app started from the Finder lacks: the usual PATH, and Metal on Apple silicon', () => {

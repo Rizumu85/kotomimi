@@ -70,15 +70,24 @@ function portOf(address) {
  * they exist, and the address. A flag is given only when this LocalAI's own
  * help names it — the flags have changed between versions, and an unknown
  * one stops it from starting at all.
+ *
+ * `--address` is the exception: it pins the bind to this computer alone, and
+ * the whole point of starting LocalAI here rather than leaving it open is that
+ * a LocalAI asks for no key, so one bound to the network hands its models to
+ * anyone on it. It is passed whenever help names it OR help could not be read
+ * (an empty string — a `--help` that timed out or failed), since the flag is a
+ * long-standing one and a LocalAI that will not start is far safer than one
+ * that silently binds to every interface its own config names.
  */
 function buildArgs({ base, address, help, exists }) {
   const knows = (flag) => help.includes(flag);
   const dir = (flag, name) => (knows(flag) && exists(path.join(base, name)) ? [flag, path.join(base, name)] : []);
+  const helpUnread = help.trim() === '';
   return [
     'run',
     ...dir('--models-path', 'models'),
     ...dir('--backends-path', 'backends'),
-    ...(knows('--address') ? ['--address', address] : []),
+    ...(knows('--address') || helpUnread ? ['--address', address] : []),
     // A LocalAI on the local network with no key of its own: newer versions refuse the bind unless told it is meant.
     ...(knows('--allow-insecure-public-bind') && !/^(127\.|localhost)/.test(address) ? ['--allow-insecure-public-bind'] : []),
     // Models left idle are unloaded: without this LocalAI keeps each one in memory until it stops.
