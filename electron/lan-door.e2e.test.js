@@ -64,7 +64,7 @@ const hook = createHook({
   init(asyncId, type) {
     if (type !== 'TCPWRAP' && type !== 'TCPSERVERWRAP' && type !== 'Timeout') return;
     const { first, all } = maker();
-    // A timer of the test's own (a poll, a pause) or of the runner's is not the door's.
+    // A timer this file sets (a poll, a pause, the stand-ins') or the runner sets is not what is under test.
     if (type === 'Timeout' && (THIS_FILE.test(first) || RUNNER.test(all))) return;
     live.set(asyncId, { n: ++made, type, at: first });
   },
@@ -706,7 +706,7 @@ describe('the shared door, end to end: a session on one of LocalAI\'s recognizer
 });
 
 describe('the shared door, end to end: changing recognizers', () => {
-  it('rewrites the pipeline for a later session that asks for another recognizer, and leaves it for one that asks for the same', async () => {
+  it('rewrites the pipeline for a later session that asks for another recognizer, and leaves it for one that asks for the same or leaves the choice', async () => {
     const fake = await fakeLocalAI();
     const { realtime, ready } = await share(fake.port);
     for (const recognizer of ['whisper-large-turbo', 'qwen3-asr-mlx', 'qwen3-asr-mlx', '']) {
@@ -794,6 +794,10 @@ describe('the shared door, end to end: changing recognizers', () => {
     await until(() => fake.sessions.every((s) => s.closed), 'both LocalAI sessions close');
     await nothingLeftSince(ready);
   });
+
+  // The two tests above are what happens today. What should is a choice, not a fix (see the PR): the later device waits
+  // while another session holds the pipeline, or the earlier one is told its recognizer was replaced, or keeps it.
+  it.todo('two devices on different recognizers at once: neither runs on a recognizer it did not ask for without being told');
 });
 
 describe('the shared door, end to end: a session left silent', () => {
@@ -908,6 +912,24 @@ describe('the shared door, end to end: LocalAI going away', () => {
     await nothingLeftSince(ready);
   });
 
+  // Not changed (see the PR): the upstream is handed `pipelines()` alone, which answers alike for a LocalAI that is down
+  // and one that lists no such pipeline; so a device that names a recognizer just after LocalAI went hears the latter.
+  it.fails('after it went: a session that names one of its recognizers is told LocalAI could not be reached', async () => {
+    const fake = await fakeLocalAI();
+    const { realtime, ready } = await share(fake.port);
+    const first = await session(realtime, '');
+    first.socket.close();
+    await until(() => fake.sessions[0].closed !== null, 'LocalAI\'s session closes');
+    await fake.stop();
+    const device = await dial(realtime);
+    await device.next('session.created');
+    device.send(UPDATE('qwen3-asr-mlx'));
+    await until(() => device.closed !== null, 'the session is closed');
+    const { error } = device.events().pop();
+    expect(error.message).toContain('could not be reached');
+    await nothingLeftSince(ready);
+  });
+
   it('a device that goes before LocalAI\'s session is up leaves nothing open on either side', async () => {
     const fake = await fakeLocalAI();
     const { realtime, door, page, ready } = await share(fake.port);
@@ -943,6 +965,31 @@ describe('the shared door, end to end: LocalAI going away', () => {
     expect(chat.pieces.join('')).toBe('data: {"choices":[{"delta":{"content":"今日は"}}]}\n\n');
     // A client that reads to the end (`textModel.ts`) would otherwise show half a translation as the whole of it.
     expect(chat.complete).toBe(false);
+    await nothingLeftSince(ready);
+  });
+});
+
+describe('the shared door, end to end: sharing switched off', () => {
+  it('ends every session — LocalAI\'s side too — and every answer under way, and leaves nothing open', async () => {
+    const fake = await fakeLocalAI();
+    const { door, base, realtime, ready } = await share(fake.port);
+    const bridged = await session(realtime, 'whisper-large-turbo');
+    const own = await session(realtime, 'sensevoice-int8');
+    fake.chat = (body, response) => {
+      response.writeHead(200, { 'Content-Type': 'text/event-stream' });
+      response.write('data: {"choices":[{"delta":{"content":"今"}}]}\n\n');
+    };
+    const chat = streamChat(base, { model: 'hy-mt2-1.8b', stream: true, messages: [] });
+    await until(() => chat.pieces.length === 1, 'the chat is under way');
+    await door.close();
+    await until(() => bridged.closed !== null && own.closed !== null && chat.complete !== null, 'every device hears the end');
+    // Ended at once, with no close frame: a client reports this as a lost connection.
+    expect(bridged.closed.code).toBe(1006);
+    expect(own.closed.code).toBe(1006);
+    expect(chat.complete).toBe(false);
+    await until(() => fake.sessions[0].closed !== null, 'LocalAI\'s session closes');
+    await until(() => fake.log.find((e) => e.url === '/v1/chat/completions')?.aborted, 'LocalAI\'s answer is ended');
+    await until(() => fake.connections() === 0, 'no connection to LocalAI is left');
     await nothingLeftSince(ready);
   });
 });
