@@ -13,12 +13,26 @@ import type { SharedModel } from './protocol';
 
 const isRecognizer = (entry: ModelManifestEntry | undefined): entry is ModelManifestEntry => entry?.type === 'asr' || entry?.type === 'asr-stream';
 
-/** A model this computer can run now: downloaded (a cloud model needs none) and its device present. */
+/**
+ * A model this computer can run itself for another device: downloaded and its
+ * device present. A cloud model (Bing translation, Edge TTS) is never shared —
+ * sharing is this computer lending the models it holds, and a remote device's
+ * speech must not leave this network through an online service it never chose
+ * (FORK.md: "共享的是应用自己下载的模型"). The local user's own device stage
+ * may still fall back to a cloud model; only what is offered on the network
+ * is held to what is downloaded here.
+ */
 function usable(entry: ModelManifestEntry | undefined): entry is ModelManifestEntry {
-  if (!entry) return false;
+  if (!entry || entry.isCloudModel) return false;
   const { modelStatuses, webgpuAvailable } = useModelStore.getState();
-  return (Boolean(entry.isCloudModel) || modelStatuses[entry.id] === 'downloaded') && deviceReady(entry, webgpuAvailable);
+  return modelStatuses[entry.id] === 'downloaded' && deviceReady(entry, webgpuAvailable);
 }
+
+/** A model the store's own resolution picked: taken only when it is one this computer actually holds, never a cloud fallback. */
+const localPick = (modelId: string | undefined): ModelManifestEntry | undefined => {
+  const entry = modelId ? getManifestEntry(modelId) : undefined;
+  return entry && usable(entry) ? entry : undefined;
+};
 
 /** What the model store answers, for the sharing host. */
 export const appLanModels: LanModels = {
@@ -34,15 +48,19 @@ export const appLanModels: LanModels = {
     if (isRecognizer(named) && usable(named) && (named.multilingual || named.languages.includes(language))) {
       return { modelId: named.id, streaming: named.type === 'asr-stream' };
     }
-    // The best one downloaded for the language, as the app would pick for itself; the other side of the pair does not matter to a recognizer.
-    const picked = useModelStore.getState().resolve(language, language, {}).asr;
-    return picked ? { modelId: picked.modelId, streaming: getManifestEntry(picked.modelId)?.type === 'asr-stream' } : null;
+    // The best one downloaded for the language, as the app would pick for itself; a cloud fallback is not shared (see `usable`).
+    const entry = localPick(useModelStore.getState().resolve(language, language, {}).asr?.modelId);
+    return isRecognizer(entry) ? { modelId: entry.id, streaming: entry.type === 'asr-stream' } : null;
   },
   translator(source, target, wanted) {
     const named = getManifestEntry(wanted);
     if (named?.type === 'translation' && usable(named) && isTranslationModelCompatible(named, source, target)) return named.id;
-    const picked = useModelStore.getState().resolve(source, target, {}).translation;
-    return picked && getManifestEntry(picked.modelId)?.type === 'translation' ? picked.modelId : null;
+    // The best translation model downloaded here for the pair. The store's own pick is not used: it favours the
+    // recommended cloud model (Bing), which sharing never offers, and would hide a local model ranked under it.
+    const best = getManifestByType('translation')
+      .filter((m) => usable(m) && isTranslationModelCompatible(m, source, target))
+      .sort((a, b) => Number(Boolean(b.recommended)) - Number(Boolean(a.recommended)) || (a.sortOrder ?? 0) - (b.sortOrder ?? 0))[0];
+    return best?.id ?? null;
   },
 };
 
