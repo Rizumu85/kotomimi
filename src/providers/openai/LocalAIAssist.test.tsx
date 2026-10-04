@@ -256,6 +256,28 @@ describe('the stage cards: on this computer', () => {
     expect(update).toHaveBeenLastCalledWith({ coachDeviceModel: 'qwen3.5-2b-translation' });
   });
 
+  it('loads the model store itself, and says nothing of the graphics card before it has looked', async () => {
+    // The other device is away: the readiness check never gets as far as this computer's models.
+    const initialize = vi.fn(async () => { useModelStore.setState({ initialized: true, webgpuAvailable: true }); });
+    useModelStore.setState({ initialized: false, webgpuAvailable: false, initialize });
+    const { card } = draw({ settings: { coach: true, coachAt: 'device' }, values: { endpoint: '192.168.1.10:8080' }, readiness: { state: 'not-ready', reason: 'The other device could not be reached (192.168.1.10:8080): Failed to fetch' } });
+    expect(initialize).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(useModelStore.getState().initialized).toBe(true));
+    expect(card(COACH).queryByText('providers.localai.chatModelsNoGpu')).toBeNull();
+    expect(card(COACH).queryByText('settings.webgpuNotSupported')).toBeNull();
+  });
+
+  it('says so once the store has looked and found no graphics card for them, and loads nothing while no stage is here', () => {
+    const initialize = vi.fn(async () => {});
+    useModelStore.setState({ initialized: true, webgpuAvailable: false, initialize });
+    const { card, unmount } = draw({ settings: { coach: true, coachAt: 'device' } });
+    expect(card(COACH).getByText('providers.localai.chatModelsNoGpu')).toBeTruthy();
+    unmount();
+    useModelStore.setState({ initialized: false });
+    draw({ settings: { asrVia: 'server', translateAt: 'server', coach: false }, values: { endpoint: '192.168.1.10:8790' } });
+    expect(initialize).not.toHaveBeenCalled();
+  });
+
   it('says that an address on this computer is this computer\'s own model server', () => {
     draw({ values: { endpoint: '127.0.0.1:8080' } });
     expect(screen.getByText('providers.localai.localServerNote')).toBeTruthy();

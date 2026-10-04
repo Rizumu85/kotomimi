@@ -13,11 +13,11 @@ import { modelLabel } from '../../lib/lan/modelLabel';
 import { deviceReady, getManifestEntry, getModelSizeMb } from '../../lib/local-inference/modelManifest';
 import { shortenModelName } from '../../lib/local-inference/modelName';
 import type { CredentialAssistProps } from '../../lib/provider/types';
-import { useDeviceFeatures, useDownloadErrors, useModelDownloads, useModelStatuses, useModelStore, useWebGPUAvailable } from '../../stores/modelStore';
+import { useDeviceFeatures, useDownloadErrors, useModelDownloads, useModelInitialized, useModelStatuses, useModelStore, useWebGPUAvailable } from '../../stores/modelStore';
 import { coachPrompt } from './coachPrompt';
 // Type only: `localai.ts` imports this view, and a value import back would close a cycle.
 import type { LocalAISettings as S } from './localai';
-import { deviceChatModels, deviceCoachModel, deviceLanguage, needsServer, PLACE_FIELDS, PLACES, type DeviceNeed, type Place } from './localaiDevice';
+import { deviceChatModels, deviceCoachModel, deviceLanguage, deviceModelsLoaded, needsServer, PLACE_FIELDS, PLACES, type DeviceNeed, type Place } from './localaiDevice';
 import { useDeviceSettings, useDeviceSlots } from './LocalAIEngine';
 import { isKotomimiServer, modelsFor, SERVER_SILENT, serverDefaultModel, type LocalAIModel } from './localaiModels';
 import { isRealtimeModelId } from './settings';
@@ -235,7 +235,10 @@ function DeviceChat({ value, onChange, disabled }: { value: string; onChange(id:
   const statuses = useModelStatuses();
   const downloads = useModelDownloads();
   const errors = useDownloadErrors();
-  const webgpu = useWebGPUAvailable();
+  // Whether this computer has a graphics card for them is only known once the model store has looked: until then
+  // "no" is the store's blank, not an answer, and nothing is said of it.
+  const looked = useModelInitialized();
+  const webgpu = useWebGPUAvailable() || !looked;
   const features = useDeviceFeatures();
   const all = deviceChatModels();
   const ready = all.filter((m) => statuses[m.id] === 'downloaded' && deviceReady(m, webgpu));
@@ -327,6 +330,14 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
     const now = latest.current;
     update({ ...Object.fromEntries(PLACE_FIELDS.map((field) => [field, now[field]])), ...patch } as Partial<S>);
   }, [update]);
+
+  // A stage on this computer needs the model store loaded — what is downloaded, and what the graphics card can run.
+  // The readiness check loads it too, but only after the other device has answered: with that device away, the
+  // cards here would show an empty library and a computer without a graphics card.
+  const here = settings.asrVia === 'device' || settings.translateAt === 'device' || (settings.coach && settings.coachAt === 'device');
+  useEffect(() => {
+    if (here) deviceModelsLoaded().catch(() => { /* The library's own card says why, with a retry. */ });
+  }, [here]);
 
   const found: readonly LocalAIModel[] = models;
   const onServer = settings.asrVia === 'server';
