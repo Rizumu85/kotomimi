@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { createVirtualClock } from '../contract/clock';
 import { pcmToBase64 } from '../contract/pcm64';
 import { createLanHost, type LanBridge, type LanModels } from './host';
-import { baseLanguage, capabilityList, firewallAnswer, LAN_OWNER, LAN_PIPELINE, modelList, type SharedModel } from './protocol';
+import { baseLanguage, capabilityList, firewallAnswer, LAN_OWNER, LAN_PIPELINE, modelList, safeLanKey, type SharedModel } from './protocol';
 import { LanTranscriber, vadFrom, type Recognizer } from './transcriber';
 import { LanTranslator, type Translator } from './translator';
 
@@ -68,6 +68,16 @@ describe('what a sharing Kotomimi says of itself', () => {
       { id: 'sensevoice-int8', capabilities: ['transcript'], languages: ['zh', 'en', 'ja', 'ko', 'yue'] },
       { id: 'bing-translator', capabilities: ['translate'], languages: [] },
     ]);
+  });
+
+  it('keeps an access key to what a using device can send', () => {
+    // The key rides the GA WebSocket subprotocol, an HTTP token: a space or a `/` in it would pass the server's
+    // model-list check (a header takes anything) and then fail the socket on the using side.
+    expect(safeLanKey('my key')).toBe('mykey');
+    expect(safeLanKey('a/b:c@d e')).toBe('abcde');
+    expect(safeLanKey('Good-Key_123.~')).toBe('Good-Key_123.~');
+    expect(safeLanKey(123 as unknown)).toBe('');
+    expect(safeLanKey('x'.repeat(300)).length).toBe(256);
   });
 
   it('reads a language as the catalog codes it', () => {

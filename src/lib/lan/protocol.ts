@@ -34,6 +34,20 @@ export function firewallAnswer(value: unknown): LanFirewall {
 /** Where the server listens unless told otherwise. */
 export const LAN_DEFAULT_PORT = 8790;
 
+/**
+ * An access key kept to what a client can actually send. A key reaches the
+ * server two ways — a `Bearer` header, and the GA WebSocket subprotocol
+ * `openai-insecure-api-key.<key>` a browser sets — and the subprotocol is an
+ * HTTP token: a space, `/`, `:`, `@` or a control character in it makes the
+ * browser refuse the socket, so the key would pass the model-list check (a
+ * header takes anything) and then fail at the first session. Both ends run a
+ * typed key through this, so what the server stores and what a using device
+ * sends agree. Kept to the RFC 7230 token characters, and to a sane length.
+ */
+export function safeLanKey(key: unknown): string {
+  return typeof key === 'string' ? key.replace(/[^!#$%&'*+\-.^_`|~0-9A-Za-z]/g, '').slice(0, 256) : '';
+}
+
 /** The owner every shared model names: the client's mark of another Kotomimi. */
 export const LAN_OWNER = 'kotomimi';
 

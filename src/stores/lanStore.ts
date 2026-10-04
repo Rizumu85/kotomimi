@@ -8,7 +8,7 @@
  */
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import { FIREWALL_UNKNOWN, LAN_DEFAULT_PORT, type LanFirewall } from '../lib/lan/protocol';
+import { FIREWALL_UNKNOWN, LAN_DEFAULT_PORT, safeLanKey, type LanFirewall } from '../lib/lan/protocol';
 import type { LanHost } from '../lib/lan/host';
 
 export type LanStatus =
@@ -116,10 +116,12 @@ export const useLanStore = create<LanState>()(
         if (get().enabled) await apply();
       },
       setKey: async (key) => {
-        const trimmed = key.trim();
-        if (trimmed === get().key) return;
-        set({ key: trimmed });
-        void persist('key', trimmed);
+        // Kept to what a using device can actually send back (`safeLanKey`): a space or a `/` in it would pass this
+        // computer's check and then fail the socket on the other side.
+        const safe = safeLanKey(key);
+        if (safe === get().key) return;
+        set({ key: safe });
+        void persist('key', safe);
         if (get().enabled) await apply();
       },
       hydrate: async () => {
@@ -130,8 +132,9 @@ export const useLanStore = create<LanState>()(
           service.getSetting<unknown>(KEY('port'), LAN_DEFAULT_PORT),
           service.getSetting<unknown>(KEY('key'), ''),
         ]);
-        // A key of digits comes back from storage as a number: it is still the key that was typed.
-        set({ enabled: enabled === true, port: validLanPort(port) ? port : LAN_DEFAULT_PORT, key: typeof key === 'string' || typeof key === 'number' ? String(key) : '' });
+        // A key of digits comes back from storage as a number: it is still the key that was typed. An older build may
+        // have stored one with a space; it is kept to what a using device can send, the same as a newly typed one.
+        set({ enabled: enabled === true, port: validLanPort(port) ? port : LAN_DEFAULT_PORT, key: typeof key === 'string' || typeof key === 'number' ? safeLanKey(String(key)) : '' });
         if (get().enabled) await apply();
       },
     };

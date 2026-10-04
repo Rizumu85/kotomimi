@@ -53,6 +53,7 @@ import type { LegName } from '../../lib/conversation/types';
 import type { Selections } from '../../lib/local-inference/selection/types';
 import { buildDefaultLocalPrompt } from '../../lib/local-inference/prompts';
 import { boundedFetch } from '../../lib/provider/boundedFetch';
+import { safeLanKey } from '../../lib/lan/protocol';
 import type { CheckContext, CheckResult, CredentialField, CredentialsMissing, MigrationInputs, Provider, ProviderRefusal, SharedSettings } from '../../lib/provider/types';
 import { admitLocalInference, type LocalInferenceConfig } from '../localInference/config';
 import { LOCAL_INFERENCE_DEFAULTS } from '../localInference/settings';
@@ -328,7 +329,10 @@ export const localaiCredentials: Provider<LocalAISettings, LocalAICredentials, n
   read: (values): LocalAICredentials | CredentialsMissing => {
     const endpoint = values.endpoint === undefined ? '' : localaiEndpoint(values.endpoint);
     if (endpoint === null) return { missing: 'Enter the address of your LocalAI server.' };
-    const serverKey = values.serverKey?.trim();
+    // The server's own key rides the GA WebSocket subprotocol, which an API's Bearer-only keys do not: it is kept to
+    // what a browser can send (`safeLanKey`), the same as the sharing side stores, so a key with a space in it is not
+    // waved through the model-list check only to fail the socket. The API keys below reach headers alone — left as typed.
+    const serverKey = values.serverKey === undefined ? undefined : safeLanKey(values.serverKey);
     const asrKey = values.asrKey?.trim();
     const translateKey = values.translateKey?.trim();
     const coachKey = values.coachKey?.trim();
