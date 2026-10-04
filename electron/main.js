@@ -10,6 +10,7 @@ const { createCloseHandshake } = require('./close-handshake.js');
 const { createWsHeaderRules } = require('./ws-header-rules.js');
 const { startLanServer } = require('./lan-server');
 const { createUpstream } = require('./lan-upstream');
+const { keepMaximizeHonest } = require('./window-maximize');
 const { firewallStatus, allowThroughFirewall } = require('./lan-firewall');
 const { discoverServers } = require('./lan-discover');
 const { createLocalServer } = require('./local-server');
@@ -453,6 +454,9 @@ function createWindow() {
   // getting here left its focus request waiting; honour it now.
   focusRelay.windowCreated();
 
+  // Fork, Windows only: on a display scaled by a fraction Electron loses track of this window being maximized, and it
+  // could not be restored (electron/window-maximize.js). Before anything below asks the window whether it is.
+  keepMaximizeHonest(mainWindow, (bounds) => require('electron').screen.getDisplayMatching(bounds).workArea);
   setupSubtitleHandlers(mainWindow);
   // Windows only: frame:false + transparent:true above costs the window its
   // WS_CAPTION style, and with it the native double-click-to-maximize on the

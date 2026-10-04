@@ -87,6 +87,7 @@ jobs:
           electron/lan-firewall.test.js
           electron/lan-discover.test.js
           electron/lan-upstream.test.js
+          electron/window-maximize.test.js
           electron/local-server.test.js
           electron/local-server.pipelines.test.js
           src/components/TitleBar

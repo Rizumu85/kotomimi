@@ -160,6 +160,7 @@ export default defineConfig(({ command, mode }) => {
             'update-manager': 'electron/update-manager.js',
             'update-payload': 'electron/update-payload.js',
             'window-caption-dblclick': 'electron/window-caption-dblclick.js',
+            'window-maximize': 'electron/window-maximize.js',
             'window-caption-menu': 'electron/window-caption-menu.js',
             'ws-header-rules': 'electron/ws-header-rules.js',
             // Fork: sharing this computer's models on the local network
