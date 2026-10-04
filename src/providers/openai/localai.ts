@@ -501,6 +501,23 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
       }
       if (coachHere && !deviceCoachModel(s.coachDeviceModel)) return { ok: false, reason: NO_COACH_HERE, code: 'local_models_missing' };
     }
+
+    // The same build a run does, over the models just found: a stage left to the other device, or to an API, with no
+    // model it offers and none named refuses here — so the settings say "not ready" with that reason, rather than a
+    // green check that fails the moment Start is pressed. `build` is the run's own function, so it can refuse nothing a
+    // run would allow; what the device checks above already reported is caught by them first, in their own words.
+    const foundModels = servers.ok && 'models' in servers ? servers.models ?? [] : [];
+    const sharedForCheck: SharedSettings = {
+      pauses: { sourceSeconds: 0, translationSeconds: 0 },
+      segmentation: { mode: 'off', sentencesPerRow: 1 },
+      reversed: (direction) => direction.source === ctx.pair.target && direction.target === ctx.pair.source,
+      models: foundModels,
+    };
+    for (const leg of ctx.legs) {
+      const direction = leg === 'participant' ? { source: ctx.pair.target, target: ctx.pair.source } : { source: ctx.pair.source, target: ctx.pair.target };
+      const built = buildLocalAI({ direction, speech: false, turns: 'auto' }, s, sharedForCheck);
+      if (built && typeof built === 'object' && 'refused' in built) return { ok: false, reason: built.refused, ...(built.code ? { code: built.code } : {}), ...(built.params ? { params: built.params } : {}) };
+    }
     return servers;
   };
 }

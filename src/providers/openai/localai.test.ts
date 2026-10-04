@@ -233,6 +233,25 @@ describe("LocalAI Realtime's check", () => {
     await expect(check(async () => json({}, 502))).rejects.toThrow(/HTTP 502/);
     await expect(check(async () => { throw new TypeError('Failed to fetch'); })).rejects.toThrow(/Failed to fetch/);
   });
+
+  // The check runs the run's own `build` over what it found: a stage left to the other device with no model it offers
+  // and none named is "not ready" here, not a green check that fails the moment Start is pressed.
+  it('is not ready when a server stage has no model to run and none is named', async () => {
+    // A LocalAI with a recognizer and a pipeline but no chat model: feedback left to it has nothing to run.
+    const noChat = [
+      { id: 'apple-speech-transcriber', capabilities: ['transcript'] },
+      { id: 'gpt-realtime', capabilities: null },
+    ];
+    const coach = { ...LOCALAI_DEFAULTS, coach: true, coachAt: 'server' as const };
+    expect(await check(server({ ids: noChat.map((m) => m.id), capabilities: noChat }), coach)).toMatchObject({ ok: false, reason: 'No feedback model is named.' });
+    // Translation left to a server that offers none, recognizer on an API: the participant leg has nothing to translate with.
+    const noText = { ...LOCALAI_DEFAULTS, asrVia: 'api' as const, asrApiBaseUrl: 'https://api.example.com/v1', asrApiModel: 'whisper-1', asrApiNeedsKey: false, translateAt: 'server' as const };
+    const fetch = server({ ids: noChat.map((m) => m.id), capabilities: noChat, other: async () => list(['whisper-1']) });
+    expect(await check(fetch, noText)).toMatchObject({ ok: false, reason: 'No translation model is named.' });
+    // The same server, with a chat model, is ready.
+    const withChat = [...noChat, { id: 'qwen3-4b', capabilities: ['chat'] }];
+    expect(await check(server({ ids: withChat.map((m) => m.id), capabilities: withChat }), coach)).toMatchObject({ ok: true });
+  });
 });
 
 describe("LocalAI Realtime's model and config", () => {
