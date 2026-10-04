@@ -112,7 +112,8 @@ export interface ProviderAccount { credentials: CredentialValues; auth: AuthCont
 /** `models`, when present, is newest first. A refusal's `code` (and `params`) put it into the user's words (`notices.<code>`); `reason` stays diagnostic English. */
 export type CheckResult =
   | { ok: true; models?: readonly ModelOption[] }
-  | { ok: false; reason: string; code?: string; params?: Record<string, string | number> };
+  /** Fork: `models`, what the check found before it refused — kept for the settings to choose from, when a choice there is what would answer the refusal. */
+  | { ok: false; reason: string; code?: string; params?: Record<string, string | number>; models?: readonly ModelOption[] };
 
 /** Fork: what a provider's `credentials.Assist` is drawn with. */
 export interface CredentialAssistProps<S> {
@@ -150,7 +151,7 @@ export type Readiness =
   | { state: 'checking' }
   | { state: 'ready'; models: readonly ModelOption[] }
   /** `code` / `params` as a refusal's: the provider's own code puts `reason` into the user's words. */
-  | { state: 'not-ready'; reason: string; code?: string; params?: Record<string, string | number> };
+  | { state: 'not-ready'; reason: string; code?: string; params?: Record<string, string | number>; models?: readonly ModelOption[] };
 
 /** What a builder may read beyond its own settings; a builder never reaches into a store. The system instructions are each provider's own setting (`instructions.ts`; Stage 2 Gemini, ruling 4). */
 export interface SharedSettings {

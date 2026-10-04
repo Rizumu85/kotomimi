@@ -130,8 +130,8 @@ describe("LocalAI Realtime's stage keys", () => {
     expect(localaiCredentials.read({ endpoint: '192.168.1.10:8080', coachKey: ' ' }, noAuth)).toHaveProperty('missing');
   });
 
-  it('declares every setting that decides a field or an endpoint the check reaches', () => {
-    expect(localaiProvider.checkReads).toEqual(['asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'coachDeviceModel', 'serverNeedsKey', 'selections']);
+  it('declares every setting that decides a field, an endpoint the check reaches, or a model a start needs named', () => {
+    expect(localaiProvider.checkReads).toEqual(['asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'coachDeviceModel', 'serverNeedsKey', 'selections', 'model', 'translateModel', 'translateServerModel', 'coachModel', 'coachServerModel']);
   });
 });
 

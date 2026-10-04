@@ -47,7 +47,7 @@ export interface ProviderStore {
   entries: Readonly<Record<string, ProviderEntry>>;
   /** One readiness per provider, by id; absent means unknown. */
   readiness: Readonly<Record<string, Readiness>>;
-  /** The models the latest ready answer found, per provider (F2; choice 3): kept while a re-check runs and through a check that threw, so a model list does not empty on every edit or while offline; emptied when the provider said no or the credentials are missing. */
+  /** The models the latest ready answer found, per provider (F2; choice 3): kept while a re-check runs and through a check that threw, so a model list does not empty on every edit or while offline; emptied when the provider said no or the credentials are missing — unless its refusal names what it found (fork: `CheckResult`). */
   models: Readonly<Record<string, readonly ModelOption[]>>;
   /** The pair the user picked, for every provider: undefined until storage is read, null when nothing was ever picked. Only `setPair` changes it. */
   intent: LanguagePair | null | undefined;
@@ -311,7 +311,8 @@ export const useProviderStore = create<ProviderStore>()((set, get) => {
         if (foundOut && (readiness.state === 'ready' || readiness.state === 'not-ready')) {
           // One write: a subscriber never sees the models land while readiness is still unknown (the readiness driver would ask again).
           set((st) => ({
-            models: { ...st.models, [p.id]: readiness.state === 'ready' ? readiness.models : NO_MODELS },
+            // Fork: a refusal that names what it found keeps it (`CheckResult`): the settings choose from it to answer the refusal.
+            models: { ...st.models, [p.id]: readiness.state === 'ready' ? readiness.models : readiness.state === 'not-ready' && readiness.models ? readiness.models : NO_MODELS },
             readiness: { ...st.readiness, [p.id]: readiness },
           }));
           return readiness;
@@ -355,7 +356,7 @@ export const useProviderStore = create<ProviderStore>()((set, get) => {
         answer = result.ok
           // No models found: the one shared empty list, so a component's `models` keeps its identity across answers.
           ? { state: 'ready', models: result.models?.length ? result.models : NO_MODELS }
-          : { state: 'not-ready', reason: result.reason, ...(result.code ? { code: result.code } : {}), ...(result.params ? { params: result.params } : {}) };
+          : { state: 'not-ready', reason: result.reason, ...(result.code ? { code: result.code } : {}), ...(result.params ? { params: result.params } : {}), ...(result.models?.length ? { models: result.models } : {}) };
         if (p.kind !== 'local' && result.ok) lastAnswer.set(p.id, { inputs: key, readiness: answer });
       } catch (error) {
         if (signal?.aborted) return cancelled();
