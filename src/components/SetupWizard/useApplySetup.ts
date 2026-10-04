@@ -37,8 +37,9 @@ export function useApplySetup(): (draft: SetupDraft) => Promise<void> {
           written.push(choice);
         }
         // Fork: the Kotomimi step's one answer places every stage, not only the one its choice is named after
-        // (`applySetup.ts`). Without these a re-run would move the listening and leave the rest where it was.
-        for (const key of (p.id as string) === 'localai' ? ['translateAt', 'coachAt'] : []) {
+        // (`applySetup.ts`). Without these a re-run would move the listening and leave the rest where it was. And
+        // an access key given there is asked for: before the credentials below, which are the fields it shows.
+        for (const key of (p.id as string) === 'localai' ? ['translateAt', 'coachAt', 'serverNeedsKey'] : []) {
           if (settings[key] === undefined) continue;
           store.updateSettings(p, { [key]: settings[key] });
           written.push(key);

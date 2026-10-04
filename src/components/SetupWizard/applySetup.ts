@@ -24,7 +24,7 @@ export interface ApplySetupDeps {
     provider: ProviderType,
     pair: { source: string; target: string },
     credentials: Record<string, string>,
-    settings: Record<string, string>,
+    settings: Record<string, string | boolean>,
   ) => Promise<void>;
   completeSetup: (r: { scenario: ScenarioId; providerPath: ProviderPath; provider: string }) => Promise<void>;
   /** Fork: turns on the sharing of this computer's models (the Kotomimi step's third start). Absent where nothing can be shared. */
@@ -46,7 +46,7 @@ export async function applySetupDraft(draft: SetupDraft, deps: ApplySetupDeps): 
   // skipped: Settings then shows the fields the user chose (Stage 2
   // Volcengine AST2, ruling 1).
   const choice = providerPath === 'own-key' ? draft.credentialChoice : null;
-  const settings: Record<string, string> = choice ? { [choice.setting]: choice.value } : {};
+  const settings: Record<string, string | boolean> = choice ? { [choice.setting]: choice.value } : {};
   // Fork: the Kotomimi step asks one question for every stage — another device, or this computer. Its third start
   // (`share`) is this computer too, lending its models to the other devices: no place of its own.
   const kotomimi = choice !== null && (provider as string) === 'localai' && choice.setting === 'asrVia';
@@ -54,6 +54,8 @@ export async function applySetupDraft(draft: SetupDraft, deps: ApplySetupDeps): 
   if (kotomimi) {
     const place = shares ? 'device' : choice.value;
     Object.assign(settings, { asrVia: place, translateAt: place, coachAt: place });
+    // The other device's access key, given in the step: it is asked for from then on (the setting shows its field).
+    if (place === 'server' && credentials.serverKey?.trim()) settings.serverNeedsKey = true;
   }
   // Awaited: a rejected write has to reach Finish's error path rather than
   // becoming an unhandled rejection behind a "done" wizard.

@@ -89,6 +89,11 @@ module.exports = {
       '完成後開啟，區域網路裡的其他裝置可以用這台電腦的模型',
     ],
     tryServer: ['Connect', '连接', '連線'],
+    keyNeeded: [
+      'This device asks for an access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options), then press Connect.',
+      '这台设备需要访问密钥。请填写那台设备设置的密钥（另一台 Kotomimi 的密钥在它共享的「选项」里），再点「连接」。',
+      '這台裝置需要存取金鑰。請填寫那台裝置設定的金鑰（另一台 Kotomimi 的金鑰在它共享的「選項」裡），再按「連線」。',
+    ],
     addressMissing: [
       'Choose a device from the list above, or type its address, for example 192.168.1.10:8790.',
       '请先在上面的列表里选一台设备，或填写它的地址，例如 192.168.1.10:8790。',

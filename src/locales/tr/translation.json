@@ -1411,6 +1411,7 @@
       "shareSummary": "Sharing",
       "shareSummaryOn": "Turned on when you finish: other devices on your network can use this computer's models",
       "tryServer": "Connect",
+      "keyNeeded": "This device asks for an access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options), then press Connect.",
       "addressMissing": "Choose a device from the list above, or type its address, for example 192.168.1.10:8790.",
       "serverFound": "Connected — it offers {{count}} model(s).",
       "serverUnreachable": "Could not connect: {{message}}",

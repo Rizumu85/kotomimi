@@ -1411,6 +1411,7 @@
       "shareSummary": "共享",
       "shareSummaryOn": "完成後開啟，區域網路裡的其他裝置可以用這台電腦的模型",
       "tryServer": "連線",
+      "keyNeeded": "這台裝置需要存取金鑰。請填寫那台裝置設定的金鑰（另一台 Kotomimi 的金鑰在它共享的「選項」裡），再按「連線」。",
       "addressMissing": "請先在上面的清單裡選一台裝置，或填寫它的位址，例如 192.168.1.10:8790。",
       "serverFound": "連線成功，對方有 {{count}} 個模型可用。",
       "serverUnreachable": "連線不上：{{message}}",
