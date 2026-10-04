@@ -5,8 +5,14 @@
 // them. It used to need a helper of its own to keep it up. The app does that
 // now: it finds the installation, starts it, says whether it is up and what
 // it serves, and stops it when the app quits. Installing models stays
-// LocalAI's own business (its web page); to the rest of the app, and to any
-// other device, it is the same server it always was (`FORK.md`).
+// LocalAI's own business (its web page).
+//
+// It listens on this computer alone (`127.0.0.1`, on the port its launcher
+// names): a LocalAI asks for no key, and one left open to the network would
+// hand its models to anybody on it, by a second address beside the app's own.
+// Other devices reach its models through the app's sharing, one port and one
+// key for everything this computer lends (electron/lan-upstream.js); to this
+// computer's own app it is the server it always was.
 //
 // A LocalAI's Realtime pipeline strings a recognizer and a text model
 // together, and a session on it runs whichever the pipeline names. Which
@@ -31,7 +37,9 @@ const os = require('os');
 const path = require('path');
 const { spawn: nodeSpawn, execFile } = require('child_process');
 
-const DEFAULT_ADDRESS = '0.0.0.0:8080';
+/** Where the app's LocalAI listens: this computer alone. */
+const LOOPBACK = '127.0.0.1';
+const DEFAULT_ADDRESS = `${LOOPBACK}:8080`;
 /** A LocalAI that loads its backends takes a while to answer: this long is waited for it. */
 const READY_TIMEOUT_MS = 120_000;
 const READY_POLL_MS = 500;
@@ -183,7 +191,8 @@ function createLocalServer(deps = {}) {
   } catch {
     launcher = {};
   }
-  const address = wanted ?? (typeof launcher.address === 'string' && launcher.address.trim() ? launcher.address.trim() : DEFAULT_ADDRESS);
+  // The launcher's port, never its host: it listens to the whole network by default.
+  const address = wanted ?? (typeof launcher.address === 'string' && launcher.address.trim() ? `${LOOPBACK}:${portOf(launcher.address.trim())}` : DEFAULT_ADDRESS);
   const port = portOf(address);
 
   let child = null;

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { CircleCheck, CircleHelp, GraduationCap, Languages, LibraryBig, Loader, Mic, MonitorSmartphone, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CustomModels } from '../../components/CustomModels/CustomModels';
@@ -8,6 +8,7 @@ import { ModelGroup } from '../../components/Settings/sections/ModelManagementCo
 import { ModelCard, ModelManagementSection } from '../../components/Settings/sections/ModelManagementSection';
 import ToggleSwitch from '../../components/Settings/shared/ToggleSwitch';
 import Tooltip from '../../components/Tooltip/Tooltip';
+import { canFindServers, findServers, plainAddress, type FoundServer } from '../../lib/lan/discover';
 import { modelLabel } from '../../lib/lan/modelLabel';
 import { deviceReady, getManifestEntry, getModelSizeMb } from '../../lib/local-inference/modelManifest';
 import { shortenModelName } from '../../lib/local-inference/modelName';
@@ -18,7 +19,7 @@ import { coachPrompt } from './coachPrompt';
 import type { LocalAISettings as S } from './localai';
 import { deviceChatModels, deviceCoachModel, deviceLanguage, needsServer, PLACE_FIELDS, PLACES, type DeviceNeed, type Place } from './localaiDevice';
 import { useDeviceSettings, useDeviceSlots } from './LocalAIEngine';
-import { isKotomimiServer, modelsFor, serverDefaultModel, type LocalAIModel } from './localaiModels';
+import { isKotomimiServer, modelsFor, SERVER_SILENT, serverDefaultModel, type LocalAIModel } from './localaiModels';
 import { isRealtimeModelId } from './settings';
 import './LocalAIAssist.scss';
 
@@ -85,6 +86,36 @@ function ServerModel({ label, value, blank, options, onChange, disabled }: { lab
         {options.map((m) => <option key={m.id} value={m.id}>{shownName(m.id)}</option>)}
       </select>
     </Field>
+  );
+}
+
+/**
+ * The way out of a recognizer that cannot be chosen. The other device is a plain model server (a LocalAI), which
+ * hears with its own recognizer whenever the answers come from a model chosen here; a Kotomimi sharing on the same
+ * device takes any of its recognizers. This looks for one there, and switches the address to it.
+ */
+function KotomimiThere({ address, onPick, disabled }: { address: string; onPick(server: FoundServer): void; disabled?: boolean }) {
+  // Also where the address no longer answers: a Kotomimi keeps its LocalAI to its own computer, and lends its models itself.
+  const { t } = useTranslation();
+  const [state, setState] = useState<'idle' | 'looking' | 'none'>('idle');
+  const alive = useRef(true);
+  useEffect(() => () => { alive.current = false; }, []);
+  const host = plainAddress(address).replace(/:\d+$/, '');
+  const look = async () => {
+    setState('looking');
+    const there = (await findServers()).find((server) => server.kind === 'kotomimi' && !server.self && server.address.replace(/:\d+$/, '') === host);
+    if (!alive.current) return;
+    if (there) onPick(there);
+    setState(there ? 'idle' : 'none');
+  };
+  return (
+    <div className="kt-there">
+      <button type="button" className="kt-there__switch" onClick={() => { void look(); }} disabled={disabled || state === 'looking'}>
+        {state === 'looking' ? <Loader size={12} className="kt-ready__spin" /> : <MonitorSmartphone size={12} />}
+        <span>{t(state === 'looking' ? 'providers.localai.kotomimiThereLooking' : 'providers.localai.kotomimiThere')}</span>
+      </button>
+      {state === 'none' && <p className="kt-note kt-note--todo" role="status">{t('providers.localai.kotomimiThereNone')}</p>}
+    </div>
   );
 }
 
@@ -328,6 +359,15 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   // The device says what its models are for, and none of them is a text model.
   const coachNone = ownModels.some((m) => m.kind !== undefined) && coachOptions.length === 0;
 
+  // The same as a pick in the search above the cards.
+  const useServer = (server: FoundServer) => {
+    if (server.needsKey !== settings.serverNeedsKey) put({ serverNeedsKey: server.needsKey });
+    fill('endpoint', server.address);
+  };
+
+  // The other device does not answer at its address (the check's `SERVER_SILENT`). The models shown are the last it listed.
+  const silent = serverInUse && !onThisComputer && readiness.state === 'not-ready' && readiness.reason.startsWith(SERVER_SILENT);
+
   const connectFirst = !address.trim() && <p className="kt-note kt-note--todo">{t('providers.localai.connectFirst')}</p>;
   // The first card with a stage on this computer carries the tour's anchor.
   const tourAt = settings.asrVia === 'device' ? 'asr' : settings.translateAt === 'device' ? 'translation' : null;
@@ -344,10 +384,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
           value={address}
           auto={serverInUse && !address.trim()}
           disabled={disabled}
-          onPick={(server) => {
-            if (server.needsKey !== settings.serverNeedsKey) put({ serverNeedsKey: server.needsKey });
-            fill('endpoint', server.address);
-          }}
+          onPick={useServer}
         />
         {(serverInUse || address.trim() !== '') && (
           <>
@@ -364,6 +401,12 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
             {serverInUse && ownModels.length > 0 && (
               <p className="kt-note">{kotomimi ? t('providers.localai.kotomimiServer') : t('settings.modelsFound', 'Found {{count}} available models', { count: ownModels.length })}</p>
             )}
+            {silent && canFindServers() && (
+              <>
+                <p className="kt-note kt-note--todo">{t('providers.localai.serverSilent')}</p>
+                <KotomimiThere address={address} onPick={useServer} disabled={disabled} />
+              </>
+            )}
           </>
         )}
       </section>
@@ -374,7 +417,12 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
           <>
             {connectFirst}
             <ServerModel label={t('providers.localai.model')} value={everyLegTranscribes ? '' : settings.asrModel} blank={t('providers.localai.deviceDefault')} options={everyLegTranscribes ? [] : recognizers} onChange={(asrModel) => put({ asrModel })} disabled={disabled || everyLegTranscribes} />
-            {someLegTranscribes && recognizers.length > 0 && <p className="kt-note">{t('providers.localai.asrFixedNote')}</p>}
+            {someLegTranscribes && recognizers.length > 0 && (
+              <>
+                <p className="kt-note">{t('providers.localai.asrFixedNote')}</p>
+                {!onThisComputer && canFindServers() && <KotomimiThere address={address} onPick={useServer} disabled={disabled} />}
+              </>
+            )}
             <details className="kt-details">
               <summary>{t('providers.localai.advanced')}</summary>
               <Field label={t('providers.localai.pipelineModel')}>

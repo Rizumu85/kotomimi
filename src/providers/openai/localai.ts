@@ -57,7 +57,7 @@ import type { CheckContext, CheckResult, CredentialField, CredentialsMissing, Mi
 import { admitLocalInference, type LocalInferenceConfig } from '../localInference/config';
 import { LOCAL_INFERENCE_DEFAULTS } from '../localInference/settings';
 import { CHECK_TIMEOUT_MS } from './check';
-import { isKotomimiServer, kindOf, KOTOMIMI_HOST, modelsFor, serverDefaultModel, type LocalAIModel, type LocalAIModelKind } from './localaiModels';
+import { SERVER_SILENT, isKotomimiServer, kindOf, KOTOMIMI_HOST, modelsFor, serverDefaultModel, type LocalAIModel, type LocalAIModelKind } from './localaiModels';
 import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
 import { coachIs, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, needsServer, PLACE_FIELDS, PLACES, watchDeviceModels, type Place } from './localaiDevice';
@@ -413,7 +413,15 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
       ? await boundedFetch({ clock, ms: CHECK_TIMEOUT_MS, signal: ctx.signal, late }, async (signal): Promise<CheckResult> => {
         const models: LocalAIModel[] = [];
         if (needsServer(s)) {
-          const response = await doFetch(localaiModelsUrl(k.endpoint), listing(k.apiKey, signal));
+          let response: Response;
+          try {
+            response = await doFetch(localaiModelsUrl(k.endpoint), listing(k.apiKey, signal));
+          } catch (error) {
+            if (signal.aborted) throw error;
+            // Still a check that could not find out — thrown, the models it listed last are kept — but in words the cards
+            // can tell, to offer the same device's Kotomimi (`SERVER_SILENT`).
+            throw new Error(`${SERVER_SILENT} (${k.endpoint}): ${error instanceof Error ? error.message : String(error)}`);
+          }
           if (response.status === 401 || response.status === 403) return { ok: false, code: 'auth', reason: `The server refused the access key (HTTP ${response.status}).` };
           if (!response.ok) throw new Error(`The server answered its model list with HTTP ${response.status}.`);
           const own = listed(await response.json());

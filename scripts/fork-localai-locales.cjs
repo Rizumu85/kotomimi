@@ -99,9 +99,21 @@ const PROVIDER = {
     '負責「聽」的一環：判斷一句話什麼時候說完，並把說的內容寫成文字。',
   ],
   asrFixedNote: [
-    'While the translation or the feedback is done by a model chosen here, a LocalAI hears with its own recognizer and accepts no other.',
-    '翻译或语法反馈由这里选的模型完成时，LocalAI 只能用它自己默认的识别模型，不接受别的。',
-    '翻譯或文法回饋由這裡選的模型完成時，LocalAI 只能用它自己預設的辨識模型，不接受別的。',
+    'That device is reached as a plain LocalAI, which always hears with its own default recognizer when the translation or the feedback uses a model chosen here. Through the Kotomimi on that device, the recognizer can be chosen here.',
+    '现在连的是那台设备上的 LocalAI 本身：翻译或语法反馈另选了模型时，它只用自己默认的识别模型。改连那台设备上的 Kotomimi，就能在这里选识别模型。',
+    '現在連的是那台裝置上的 LocalAI 本身：翻譯或文法回饋另選了模型時，它只用自己預設的辨識模型。改連那台裝置上的 Kotomimi，就能在這裡選辨識模型。',
+  ],
+  serverSilent: [
+    'This address does not answer. A Kotomimi on that device lends its models, and its LocalAI\'s, through its own sharing.',
+    '这个地址连不上。那台设备上的 Kotomimi 会通过自己的共享提供模型（包括它的 LocalAI 里的）。',
+    '這個位址連不上。那台裝置上的 Kotomimi 會透過自己的共享提供模型（包括它的 LocalAI 裡的）。',
+  ],
+  kotomimiThere: ['Use the Kotomimi on that device', '改连那台设备的 Kotomimi', '改連那台裝置的 Kotomimi'],
+  kotomimiThereLooking: ['Looking for it…', '正在查找…', '正在尋找…'],
+  kotomimiThereNone: [
+    'No Kotomimi is sharing on that device. Open Kotomimi there, turn on "Share with other devices", then try again.',
+    '那台设备上没有正在共享的 Kotomimi。请在那台设备上打开 Kotomimi，开启「共享给其他设备」，再试一次。',
+    '那台裝置上沒有正在共享的 Kotomimi。請在那台裝置上打開 Kotomimi，開啟「共享給其他裝置」，再試一次。',
   ],
   pipelineModel: ['Realtime pipeline', '实时管线', '即時管線'],
   pipelineNote: [

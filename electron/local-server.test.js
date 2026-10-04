@@ -108,8 +108,10 @@ describe('the LocalAI of this computer', () => {
     expect(world.asked).toBe(8085);
     expect(world.started).toHaveLength(1);
     expect(world.started[0].bin).toBe(BIN);
-    expect(world.started[0].args).toContain('--allow-insecure-public-bind');
-    expect(world.started[0].args.slice(-0)).toContain('0.0.0.0:8085');
+    // On the launcher's port, and on this computer alone: the launcher's own host would open it to the network.
+    expect(world.started[0].args).toContain('127.0.0.1:8085');
+    expect(world.started[0].args).not.toContain('0.0.0.0:8085');
+    expect(world.started[0].args).not.toContain('--allow-insecure-public-bind');
     expect(world.started[0].options.cwd).toBe(HOME);
     expect(world.started[0].options.env).toMatchObject({ DEBUG: 'true', LOCALAI_FORCE_META_BACKEND_CAPABILITY: 'metal' });
     // Asked again while it runs: nothing more is started.

@@ -189,6 +189,10 @@ describe("LocalAI Realtime's check", () => {
     expect(await check(broken)).toEqual({ ok: true, models: [{ id: 'a' }] });
   });
 
+  it('says in words the cards can tell that the other device does not answer, and still could not find out', async () => {
+    await expect(check(async () => { throw new TypeError('Failed to fetch'); })).rejects.toThrow(/^The other device could not be reached \(.+\): Failed to fetch$/);
+  });
+
   it('answers not ready when the server lists nothing', async () => {
     expect(await check(server({ ids: [] }))).toMatchObject({ ok: false });
   });

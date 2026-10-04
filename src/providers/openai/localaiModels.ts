@@ -79,3 +79,6 @@ export function serverDefaultModel(models: readonly LocalAIModel[], slot: 'trans
 export function isKotomimiServer(models: readonly LocalAIModel[]): boolean {
   return models.some((m) => m.from === undefined && m.host === KOTOMIMI_HOST);
 }
+
+/** How a readiness check's reason starts when the other device's address did not answer (`localai.ts`'s check; read by the stage cards). */
+export const SERVER_SILENT = 'The other device could not be reached';

@@ -176,9 +176,9 @@ module.exports = {
   server: {
     title: ['LocalAI on this computer', '这台电脑上的 LocalAI', '這台電腦上的 LocalAI'],
     intro: [
-      'A LocalAI is installed here, with models of its own. Kotomimi starts and stops it. With sharing turned on above, its models are shared together with the ones downloaded here.',
-      '这台电脑装了 LocalAI，它有自己的一套模型。由 Kotomimi 负责启动和停止。打开上面的共享后，它的模型会和这里下载的模型一起共享出去。',
-      '這台電腦裝了 LocalAI，它有自己的一套模型。由 Kotomimi 負責啟動和停止。開啟上面的共享後，它的模型會和這裡下載的模型一起共享出去。',
+      'A LocalAI is installed here, with models of its own. Kotomimi starts and stops it, and keeps it to this computer: other devices reach its models only through the sharing above, together with the ones downloaded here.',
+      '这台电脑装了 LocalAI，它有自己的一套模型。由 Kotomimi 负责启动和停止，并且只让它在本机监听：别的设备只能通过上面的共享用到它的模型，和这里下载的模型一起。',
+      '這台電腦裝了 LocalAI，它有自己的一套模型。由 Kotomimi 負責啟動和停止，並且只讓它在本機監聽：別的裝置只能透過上面的共享用到它的模型，和這裡下載的模型一起。',
     ],
     idleNote: [
       'A model nobody has used for 10 minutes is unloaded from memory by itself, and loaded again when it is next asked for.',

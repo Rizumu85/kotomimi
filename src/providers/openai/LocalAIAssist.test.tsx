@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { Readiness } from '../../lib/provider/types';
 import { useModelStore } from '../../stores/modelStore';
 import { LocalAIAssist } from './LocalAIAssist';
@@ -21,6 +21,13 @@ vi.mock('../../components/Settings/sections/ModelManagementSection', async (impo
   ModelManagementSection: ({ stageFilter, direction }: { stageFilter?: string; direction?: string }) => <div data-testid="library">{`${stageFilter}:${direction}`}</div>,
 }));
 vi.mock('../../components/CustomModels/CustomModels', () => ({ CustomModels: () => null }));
+// What the network holds, for the one search the cards make themselves (`KotomimiThere`).
+const network = vi.hoisted(() => ({ servers: [] as unknown[] }));
+vi.mock('../../lib/lan/discover', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../lib/lan/discover')>()),
+  canFindServers: () => true,
+  findServers: async () => network.servers,
+}));
 
 /** What a LocalAI lists: a pipeline, a recognizer, two text models. */
 const LISTED: LocalAIModel[] = [
@@ -123,6 +130,45 @@ describe('the stage cards: on the other device', () => {
     expect(hear.disabled).toBe(true);
     expect(hear.value).toBe('');
     expect(card(HEAR).getByText('providers.localai.asrFixedNote')).toBeTruthy();
+  });
+
+  it('offers the way out of a recognizer that cannot be chosen: the Kotomimi on the same device, one press away', async () => {
+    const kotomimi = (address: string) => ({ address, kind: 'kotomimi', name: 'MAC', product: '', models: 3, needsKey: true, self: false });
+    // Another device's Kotomimi is not it; the same device's is.
+    network.servers = [kotomimi('192.168.1.77:8790'), { address: '192.168.1.10:8080', kind: 'server', name: '', product: 'LocalAI', models: 4, needsKey: false, self: false }, kotomimi('192.168.1.10:8790')];
+    const { card, fill, update } = draw({ settings: { translateServerModel: 'hy-mt2-1.8b' }, values: { endpoint: 'http://192.168.1.10:8080/' }, models: LISTED });
+    fireEvent.click(card(HEAR).getByRole('button', { name: 'providers.localai.kotomimiThere' }));
+    await waitFor(() => expect(fill).toHaveBeenCalledWith('endpoint', '192.168.1.10:8790'));
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ serverNeedsKey: true }));
+  });
+
+  it('says what to do on that device when no Kotomimi is sharing there, and offers nothing where the recognizer can be chosen', async () => {
+    network.servers = [{ address: '192.168.1.10:8080', kind: 'server', name: '', product: 'LocalAI', models: 4, needsKey: false, self: false }];
+    const { card, fill, unmount } = draw({ settings: { translateServerModel: 'hy-mt2-1.8b' }, values: { endpoint: '192.168.1.10:8080' }, models: LISTED });
+    fireEvent.click(card(HEAR).getByRole('button', { name: 'providers.localai.kotomimiThere' }));
+    expect(await card(HEAR).findByText('providers.localai.kotomimiThereNone')).toBeTruthy();
+    expect(fill).not.toHaveBeenCalled();
+    unmount();
+    // Translated in the session itself: the recognizer is chosen freely, and nothing is offered.
+    const free = draw({ values: { endpoint: '192.168.1.10:8080' }, models: LISTED });
+    expect(free.card(HEAR).queryByRole('button', { name: 'providers.localai.kotomimiThere' })).toBeNull();
+    free.unmount();
+    // A model server on this very computer: there is no other device to look on.
+    const here = draw({ settings: { translateServerModel: 'hy-mt2-1.8b' }, values: { endpoint: '127.0.0.1:8080' }, models: LISTED });
+    expect(here.card(HEAR).getByText('providers.localai.asrFixedNote')).toBeTruthy();
+    expect(here.card(HEAR).queryByRole('button', { name: 'providers.localai.kotomimiThere' })).toBeNull();
+  });
+
+  it('offers the same way where the address no longer answers, and not where its key is refused', async () => {
+    network.servers = [{ address: '192.168.1.10:8790', kind: 'kotomimi', name: 'MAC', product: '', models: 3, needsKey: false, self: false }];
+    // The models are the last the device listed: it is the check that says it no longer answers.
+    const silent = draw({ values: { endpoint: '192.168.1.10:8080' }, models: LISTED, readiness: { state: 'not-ready', reason: 'The other device could not be reached (192.168.1.10:8080): Failed to fetch' } });
+    expect(screen.getByText('providers.localai.serverSilent')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'providers.localai.kotomimiThere' }));
+    await waitFor(() => expect(silent.fill).toHaveBeenCalledWith('endpoint', '192.168.1.10:8790'));
+    silent.unmount();
+    draw({ values: { endpoint: '192.168.1.10:8080' }, readiness: { state: 'not-ready', reason: 'refused', code: 'auth' } });
+    expect(screen.queryByText('providers.localai.serverSilent')).toBeNull();
   });
 
   it('says so when the device has no text model for the feedback', () => {
