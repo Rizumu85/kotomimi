@@ -87,7 +87,7 @@ describe('where each stage runs', () => {
 describe('a leg this computer hears', () => {
   it('is built with its own recognizer and translation, no transcription session, and nothing of the server', () => {
     const c = configFor(SPEAKER, HERE);
-    expect(c.device).toEqual({ modelId: 'sensevoice-int8', streaming: false, vad: { threshold: 0.3, minSilenceDuration: 1.4, minSpeechDuration: 0.4, maxSpeechDuration: 30 } });
+    expect(c.device).toEqual({ modelId: 'sensevoice-int8', streaming: false, vad: { threshold: 0.3, minSilenceDuration: 1.4, minSpeechDuration: 0.4, maxSpeechDuration: 15 } });
     expect(c).not.toHaveProperty('transcribeOnly');
     expect(c.model).toBe('');
     const speech = c.stages?.speech as DeviceStage;
@@ -99,7 +99,7 @@ describe('a leg this computer hears', () => {
 
   it('hands the stored turn-detection knobs to the recognizer', () => {
     const c = configFor(SPEAKER, { ...HERE, vadThreshold: 0.5, vadMinSilenceDuration: 0.8, vadNegativeThreshold: 0.2 });
-    expect(c.device?.vad).toEqual({ threshold: 0.5, minSilenceDuration: 0.8, minSpeechDuration: 0.4, maxSpeechDuration: 30, negativeThreshold: 0.2 });
+    expect(c.device?.vad).toEqual({ threshold: 0.5, minSilenceDuration: 0.8, minSpeechDuration: 0.4, maxSpeechDuration: 15, negativeThreshold: 0.2 });
   });
 
   it('is refused, in Local Inference\'s own words, while no recognizer is downloaded for the language', () => {

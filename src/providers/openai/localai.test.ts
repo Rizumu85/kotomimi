@@ -216,6 +216,9 @@ describe("LocalAI Realtime's check", () => {
     expect(await check(server({ other: async () => json({}, 401) }), inUse)).toMatchObject({ ok: false, code: 'api_key_needed', params: { address: 'https://api.example.com/v1' } });
     // Not every API lists its models: any other answer passes.
     expect(await check(server({ other: async () => json({}, 404) }), inUse)).toMatchObject({ ok: true });
+    // Google says a key it does not know with 400, in words: refused all the same. A 400 about anything else passes.
+    expect(await check(server({ other: async () => json({ error: { code: 400, message: 'Please pass a valid API key', status: 'INVALID_ARGUMENT' } }, 400) }), inUse)).toMatchObject({ ok: false, code: 'api_key_needed', params: { address: 'https://api.example.com/v1' } });
+    expect(await check(server({ other: async () => json({ error: { message: 'Bad request' } }, 400) }), inUse)).toMatchObject({ ok: true });
     await expect(check(server({ other: async () => { throw new TypeError('Failed to fetch'); } }), inUse)).rejects.toThrow(/translation model's server \(https:\/\/api\.example\.com\/v1\) could not be reached/);
     // An address left from when the stage ran there: not asked at all while it runs elsewhere.
     const elsewhere = { ...LOCALAI_DEFAULTS, translateBaseUrl: 'https://api.example.com/v1' };

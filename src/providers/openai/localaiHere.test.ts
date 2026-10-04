@@ -41,6 +41,15 @@ function configFor(patch: Partial<LocalAISettings>, models: LocalAIModel[] = [])
 // Nothing of the app's own is downloaded: whatever is needed here is the LocalAI's.
 beforeEach(() => useModelStore.setState({ initialized: true, webgpuAvailable: true, deviceFeatures: [], modelStatuses: {} }));
 
+describe('the longest turn of this computer\'s recognizers', () => {
+  it('is fifteen seconds unless the user set another: a recognizer here says nothing until its turn ends', () => {
+    expect(LOCALAI_DEFAULTS.vadMaxSpeechDuration).toBe(15);
+    // Never stored reads the default; a value the user set is kept.
+    expect(migrateLocalAISettings({ ...LOCALAI_DEFAULTS }, { legacy: {}, credentials: {} }).vadMaxSpeechDuration).toBe(15);
+    expect(migrateLocalAISettings({ ...LOCALAI_DEFAULTS, vadMaxSpeechDuration: 30 }, { legacy: {}, credentials: {} }).vadMaxSpeechDuration).toBe(30);
+  });
+});
+
 describe('who runs a stage on this computer', () => {
   it('is the app\'s own models unless said otherwise, and kept as stored', () => {
     expect(LOCALAI_DEFAULTS).toMatchObject({ asrHere: 'app', translateHere: 'app', coachHere: 'app', hereAddress: '127.0.0.1:8080' });

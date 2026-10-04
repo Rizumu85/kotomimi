@@ -143,6 +143,9 @@ export type LocalAICredentials = PipelineCredentials;
 /** LocalAI's pipeline model is named by its operator; `gpt-realtime` is the name its docs use. */
 export const LOCALAI_DEFAULT_MODEL = 'gpt-realtime';
 
+/** The longest turn of this computer's recognizers, unless the user sets another (see `LOCALAI_DEFAULTS`). */
+export const LOCALAI_MAX_SPEECH_SECONDS = 15;
+
 const VAD_FIELDS = ['vadThreshold', 'vadNegativeThreshold', 'vadMinSilenceDuration', 'vadMinSpeechDuration', 'vadMaxSpeechDuration'] as const;
 
 /** OpenAI Realtime's defaults, but the model, and semantic detection at the eagerness LocalAI's own session starts with; every stage on the other device. */
@@ -184,7 +187,11 @@ export const LOCALAI_DEFAULTS: LocalAISettings = {
   vadNegativeThreshold: LOCAL_INFERENCE_DEFAULTS.vadNegativeThreshold,
   vadMinSilenceDuration: LOCAL_INFERENCE_DEFAULTS.vadMinSilenceDuration,
   vadMinSpeechDuration: LOCAL_INFERENCE_DEFAULTS.vadMinSpeechDuration,
-  vadMaxSpeechDuration: LOCAL_INFERENCE_DEFAULTS.vadMaxSpeechDuration,
+  // Shorter than Local Inference's thirty: a recognizer here says nothing until its turn ends, and where two people
+  // talk without a pause a turn ends only at this limit — measured on a real conversation, the first line came after
+  // 30 to 37 seconds, and after 15 with this (the other device cuts at about 12). A value the user set is kept: only
+  // what was never stored reads the default.
+  vadMaxSpeechDuration: LOCALAI_MAX_SPEECH_SECONDS,
 };
 
 /**
@@ -597,6 +604,12 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
           }
           if (answer.status === 401 || answer.status === 403) {
             return { ok: false, code: other.key ? 'api_key_refused' : 'api_key_needed', params: { address: other.base }, reason: `The ${other.name} model's server refused the key (HTTP ${answer.status}).` };
+          }
+          if (answer.status === 400) {
+            // Google answers a key it does not know with 400 and says so in words; any other 400 is a server that lists nothing.
+            const said = await answer.text().catch(() => '');
+            if (/api[ _-]?key/i.test(said)) return { ok: false, code: other.key ? 'api_key_refused' : 'api_key_needed', params: { address: other.base }, reason: `The ${other.name} model's server refused the key (HTTP 400).` };
+            continue;
           }
           if (!answer.ok) continue;
           const theirs = listed(await answer.json().catch(() => null));

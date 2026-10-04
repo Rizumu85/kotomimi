@@ -23,6 +23,9 @@ vi.mock('../../components/Settings/sections/ModelManagementSection', async (impo
   ModelManagementSection: ({ stageFilter, direction }: { stageFilter?: string; direction?: string }) => <div data-testid="library">{`${stageFilter}:${direction}`}</div>,
 }));
 vi.mock('../../components/CustomModels/CustomModels', () => ({ CustomModels: () => null }));
+// The keys the built-in providers keep, by their settings prefix.
+const saved = vi.hoisted(() => ({ keys: {} as Record<string, string> }));
+vi.mock('./apiServiceKey', () => ({ savedKeyOf: async (prefix: string) => saved.keys[prefix] ?? '' }));
 // This computer's LocalAI, as the main process would answer: none, unless a test says so.
 const localai = vi.hoisted(() => ({ pipes: { pipelines: [] as unknown[], recognizers: [] as string[], translators: [] as string[] } }));
 vi.mock('../../lib/lan/localServer', async (importOriginal) => ({
@@ -73,6 +76,7 @@ beforeEach(() => {
   // No LocalAI on this computer.
   useLocalServerStore.setState({ status: NO_LOCAL_SERVER });
   localai.pipes = { pipelines: [], recognizers: [], translators: [] };
+  saved.keys = {};
 });
 
 describe('the stage cards: where each stage runs', () => {
@@ -224,6 +228,105 @@ describe('the stage cards: at an API', () => {
     expect(set).toHaveBeenLastCalledWith('asrKey', 'sk-1');
     // An API that wants no key shows no field for one.
     expect(card(TRANSLATE).queryByLabelText('providers.localai.apiKey', { selector: 'input' })).toBeNull();
+  });
+});
+
+describe('the stage cards: an API chosen by its service', () => {
+  const SERVICE = 'providers.localai.apiService';
+  const names = (select: HTMLElement) => [...(select as HTMLSelectElement).options].map((o) => o.textContent);
+
+  it('offers each stage the services that serve it, and a custom address last', () => {
+    const { card } = draw({ settings: { asrVia: 'api', translateAt: 'api' } });
+    expect(names(card(HEAR).getByRole('combobox', { name: SERVICE }))).toEqual(['OpenAI', 'Groq', 'providers.localai.apiServiceSiliconFlow', 'providers.localai.apiServiceCustom']);
+    expect(names(card(TRANSLATE).getByRole('combobox', { name: SERVICE }))).toEqual(['OpenAI', 'Google Gemini', 'providers.localai.apiServiceArk', 'DeepSeek', 'Groq', 'providers.localai.apiServiceSiliconFlow', 'OpenRouter', 'providers.localai.apiServiceOllama', 'providers.localai.apiServiceCustom']);
+    // Nothing chosen yet is a custom address: the fields as they were.
+    expect((card(TRANSLATE).getByRole('combobox', { name: SERVICE }) as HTMLSelectElement).value).toBe('custom');
+    expect(card(TRANSLATE).getByRole('textbox', { name: 'providers.localai.asrApiBaseUrl' })).toBeTruthy();
+  });
+
+  it('fills the address and whether a key is wanted on a pick, and no longer asks for either', () => {
+    const { card, update, set } = draw({ settings: { translateAt: 'api', translateNeedsKey: false } });
+    fireEvent.change(card(TRANSLATE).getByRole('combobox', { name: SERVICE }), { target: { value: 'deepseek' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ translateBaseUrl: 'https://api.deepseek.com/v1', translateNeedsKey: true, translateModel: '' }));
+    // The key that was in the field was another address's: it is sent to no other.
+    expect(set).toHaveBeenLastCalledWith('translateKey', '');
+    // Ollama on this computer wants none.
+    fireEvent.change(card(TRANSLATE).getByRole('combobox', { name: SERVICE }), { target: { value: 'ollama' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ translateBaseUrl: 'http://localhost:11434/v1', translateNeedsKey: false }));
+  });
+
+  it('shows the service of an address already set, with its address and the key question out of the way', () => {
+    const { card } = draw({ settings: { translateAt: 'api', translateBaseUrl: 'https://api.openai.com/v1/', translateModel: 'gpt-5.4-mini', translateNeedsKey: true }, values: { endpoint: '', translateKey: 'sk-1' } });
+    const translate = card(TRANSLATE);
+    expect((translate.getByRole('combobox', { name: SERVICE }) as HTMLSelectElement).value).toBe('openai');
+    expect(translate.queryByRole('textbox', { name: 'providers.localai.asrApiBaseUrl' })).toBeNull();
+    expect(translate.queryByRole('switch', { name: 'providers.localai.asrApiNeedsKey' })).toBeNull();
+    expect(translate.queryByText('providers.localai.asrApiNeedsKey')).toBeNull();
+    expect(translate.getByLabelText('providers.localai.apiKey', { selector: 'input' })).toBeTruthy();
+  });
+
+  it('goes back to an address typed by hand on "custom": the address and the model are emptied', () => {
+    const { card, update } = draw({ settings: { translateAt: 'api', translateBaseUrl: 'https://api.openai.com/v1', translateModel: 'gpt-5.4-mini' } });
+    fireEvent.change(card(TRANSLATE).getByRole('combobox', { name: SERVICE }), { target: { value: 'custom' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ translateBaseUrl: '', translateModel: '' }));
+  });
+
+  it('names the model by itself from what the service lists: the one that suits the stage', () => {
+    const models: LocalAIModel[] = [
+      { id: 'gpt-5.5', kind: 'text', from: 'translate' },
+      { id: 'gpt-5.4-mini', kind: 'text', from: 'translate' },
+      { id: 'gpt-4.1-mini', kind: 'text', from: 'translate' },
+      { id: 'whisper-1', kind: 'asr', from: 'asr' },
+      { id: 'gpt-4o-mini-transcribe', kind: 'asr', from: 'asr' },
+    ];
+    const { update } = draw({ settings: { asrVia: 'api', asrApiBaseUrl: 'https://api.openai.com/v1', translateAt: 'api', translateBaseUrl: 'https://api.openai.com/v1' }, models });
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ translateModel: 'gpt-5.4-mini' }));
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ asrApiModel: 'gpt-4o-mini-transcribe' }));
+  });
+
+  it('leaves a model that is named alone, and one of a custom address to the user', () => {
+    const models: LocalAIModel[] = [{ id: 'gpt-5.4-mini', kind: 'text', from: 'translate' }];
+    expect(draw({ settings: { translateAt: 'api', translateBaseUrl: 'https://api.openai.com/v1', translateModel: 'gpt-5.5' }, models }).update).not.toHaveBeenCalled();
+    expect(draw({ settings: { translateAt: 'api', translateBaseUrl: 'https://api.example.com/v1' }, models }).update).not.toHaveBeenCalled();
+  });
+
+  it('does not fill the model in under the user\'s hands: only once the field is left', () => {
+    const models: LocalAIModel[] = [{ id: 'gpt-5.4-mini', kind: 'text', from: 'translate' }];
+    const settings = { ...LOCALAI_DEFAULTS, translateAt: 'api' as const, translateBaseUrl: 'https://api.openai.com/v1', translateModel: 'gpt-5.5' };
+    const update = vi.fn();
+    const props = { values: { endpoint: '' }, set: vi.fn(), fill: vi.fn(), update, pair: { source: 'zh-CN', target: 'ja' }, legs: ['speaker' as const], models, readiness: { state: 'unknown' } as Readiness, check: vi.fn() };
+    const view = render(<LocalAIAssist settings={settings} {...props} />);
+    const field = within(screen.getByRole('region', { name: TRANSLATE })).getByRole('combobox', { name: 'providers.localai.model' });
+    fireEvent.focus(field);
+    // Emptied while typing: nothing is written for the user.
+    view.rerender(<LocalAIAssist settings={{ ...settings, translateModel: '' }} {...props} />);
+    expect(update).not.toHaveBeenCalled();
+    fireEvent.blur(field);
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ translateModel: 'gpt-5.4-mini' }));
+  });
+
+  it('takes the key from another stage that already uses the same service', () => {
+    const { card, set } = draw({ settings: { translateAt: 'api', translateBaseUrl: 'https://api.groq.com/openai/v1', translateNeedsKey: true, asrVia: 'api' }, values: { endpoint: '', translateKey: 'gsk-1', asrKey: '' } });
+    fireEvent.change(card(HEAR).getByRole('combobox', { name: SERVICE }), { target: { value: 'groq' } });
+    expect(set).toHaveBeenLastCalledWith('asrKey', 'gsk-1');
+  });
+
+  it('takes the key the built-in provider of that service keeps, and says where it came from', async () => {
+    saved.keys = { gemini: 'AIza-1' };
+    const settings = { ...LOCALAI_DEFAULTS, translateAt: 'api' as const };
+    const set = vi.fn();
+    const props = { set, fill: vi.fn(), update: vi.fn(), pair: { source: 'zh-CN', target: 'ja' }, legs: ['speaker' as const], models: [], readiness: { state: 'unknown' } as Readiness, check: vi.fn() };
+    const view = render(<LocalAIAssist settings={settings} values={{ endpoint: '', translateKey: '' }} {...props} />);
+    fireEvent.change(within(screen.getByRole('region', { name: TRANSLATE })).getByRole('combobox', { name: SERVICE }), { target: { value: 'gemini' } });
+    await waitFor(() => expect(set).toHaveBeenLastCalledWith('translateKey', 'AIza-1'));
+    view.rerender(<LocalAIAssist settings={{ ...settings, translateBaseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', translateNeedsKey: true }} values={{ endpoint: '', translateKey: 'AIza-1' }} {...props} />);
+    expect(screen.getByText('providers.localai.apiKeyReused')).toBeTruthy();
+    // A service with no built-in provider, or none saved: the field is left empty to be typed in.
+    set.mockClear();
+    fireEvent.change(within(screen.getByRole('region', { name: TRANSLATE })).getByRole('combobox', { name: SERVICE }), { target: { value: 'openai' } });
+    await act(async () => { await Promise.resolve(); });
+    expect(set).toHaveBeenCalledTimes(1);
+    expect(set).toHaveBeenLastCalledWith('translateKey', '');
   });
 });
 

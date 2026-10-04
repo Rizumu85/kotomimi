@@ -16,6 +16,8 @@ import { shortenModelName } from '../../lib/local-inference/modelName';
 import type { CredentialAssistProps } from '../../lib/provider/types';
 import { useLocalServerStore } from '../../stores/localServerStore';
 import { useDeviceFeatures, useDownloadErrors, useModelDownloads, useModelInitialized, useModelStatuses, useModelStore, useWebGPUAvailable } from '../../stores/modelStore';
+import { savedKeyOf } from './apiServiceKey';
+import { API_SERVICES, preferredModel, serviceOf, servicesFor, type ApiKind, type ApiService } from './apiServices';
 import { coachPrompt } from './coachPrompt';
 // Type only: `localai.ts` imports this view, and a value import back would close a cycle.
 import type { LocalAISettings as S } from './localai';
@@ -121,9 +123,16 @@ function KotomimiThere({ address, onPick, disabled }: { address: string; onPick(
   );
 }
 
+/** One more stage's API, with the key that opens it. */
+interface OtherApi { baseUrl: string; key: string }
+
 interface ApiFieldsProps {
   /** Distinguishes the three groups' ids. */
   id: string;
+  /** What the stage asks of an API: it is offered the services that serve it, and given a model of that kind. */
+  kind: ApiKind;
+  /** The other stages' APIs: a service one of them already opens is not asked for its key a second time. */
+  others: readonly OtherApi[];
   baseUrl: string;
   model: string;
   needsKey: boolean;
@@ -137,26 +146,100 @@ interface ApiFieldsProps {
   disabled?: boolean;
 }
 
-/** An API: where it is, which model, and its key — all in the stage that uses it. */
-function ApiFields({ id, baseUrl, model, needsKey, apiKey, urlPlaceholder, modelPlaceholder, options, onChange, onKey, disabled }: ApiFieldsProps) {
+/** The menu's entry for an address of the user's own. No service's id. */
+const CUSTOM_API = 'custom';
+const sameAddress = (a: string, b: string) => a.trim().replace(/\/+$/, '').toLowerCase() === b.trim().replace(/\/+$/, '').toLowerCase();
+
+/**
+ * An API: which service, which model, and its key — all in the stage that uses it.
+ *
+ * The service is a menu (`apiServices.ts`): choosing one fills its address and whether it wants a key, takes the key
+ * from where it is already saved — another stage that uses the same service, or the built-in provider of that
+ * service — and leaves the model to be picked from what the service lists, the one that suits the stage by itself.
+ * "Custom address" is what the fields were before: an address, a model and a key, typed.
+ */
+function ApiFields({ id, kind, others, baseUrl, model, needsKey, apiKey, urlPlaceholder, modelPlaceholder, options, onChange, onKey, disabled }: ApiFieldsProps) {
   const { t } = useTranslation();
+  const service = serviceOf(baseUrl, kind);
+  const nameOf = (s: ApiService) => (s.nameKey ? t(s.nameKey) : s.name);
+  // Where the key in the field came from, when it was not typed: said under it, once.
+  const [reused, setReused] = useState<string | null>(null);
+  // The model field is not filled in under the user's hands: only while it is not being typed in.
+  const [typing, setTyping] = useState(false);
+  const change = useRef(onChange);
+  change.current = onChange;
+  const key = useRef(onKey);
+  key.current = onKey;
+
+  const choose = (chosen: string) => {
+    const next = API_SERVICES.find((s) => s.id === chosen);
+    setReused(null);
+    // The key in the field opens the service it was typed for, and is sent to no other.
+    key.current('');
+    if (!next) {
+      change.current({ baseUrl: '', model: '' });
+      return;
+    }
+    change.current({ baseUrl: next.baseUrl, needsKey: next.needsKey, model: '' });
+    if (!next.needsKey) return;
+    const beside = others.find((o) => o.key.trim() && sameAddress(o.baseUrl, next.baseUrl));
+    if (beside) {
+      key.current(beside.key);
+      return;
+    }
+    if (!next.keyOf) return;
+    void savedKeyOf(next.keyOf).then((saved) => {
+      if (!saved) return;
+      key.current(saved);
+      setReused(nameOf(next));
+    });
+  };
+
+  // A service's model, when none is named: the one of its own list that suits the stage (`preferredModel`).
+  const pick = service && !model.trim() ? preferredModel(service, kind, options.map((m) => m.id)) : undefined;
+  useEffect(() => {
+    if (pick && !typing && !disabled) change.current({ model: pick });
+  }, [pick, typing, disabled]);
+
   return (
     <>
-      <Field label={t('providers.localai.asrApiBaseUrl')}>
-        <input type="text" className="kt-input" aria-label={t('providers.localai.asrApiBaseUrl')} value={baseUrl} onChange={(e) => onChange({ baseUrl: e.target.value })} placeholder={urlPlaceholder} spellCheck={false} disabled={disabled} />
+      <Field label={t('providers.localai.apiService')}>
+        <select className="select-dropdown" aria-label={t('providers.localai.apiService')} value={service?.id ?? CUSTOM_API} onChange={(e) => choose(e.target.value)} disabled={disabled}>
+          {servicesFor(kind).map((s) => <option key={s.id} value={s.id}>{nameOf(s)}</option>)}
+          <option value={CUSTOM_API}>{t('providers.localai.apiServiceCustom')}</option>
+        </select>
       </Field>
+      {!service && (
+        <Field label={t('providers.localai.asrApiBaseUrl')}>
+          <input type="text" className="kt-input" aria-label={t('providers.localai.asrApiBaseUrl')} value={baseUrl} onChange={(e) => onChange({ baseUrl: e.target.value })} placeholder={urlPlaceholder} spellCheck={false} disabled={disabled} />
+        </Field>
+      )}
       <Field label={t('providers.localai.model')}>
-        <input type="text" className="kt-input" aria-label={t('providers.localai.model')} list={`${id}-models`} value={model} onChange={(e) => onChange({ model: e.target.value })} placeholder={modelPlaceholder} spellCheck={false} disabled={disabled} />
+        <input
+          type="text"
+          className="kt-input"
+          aria-label={t('providers.localai.model')}
+          list={`${id}-models`}
+          value={model}
+          onChange={(e) => onChange({ model: e.target.value })}
+          onFocus={() => setTyping(true)}
+          onBlur={() => setTyping(false)}
+          placeholder={service ? t(service.modelHintKey ?? 'providers.localai.apiServiceModel') : modelPlaceholder}
+          spellCheck={false}
+          disabled={disabled}
+        />
         <datalist id={`${id}-models`}>
           {options.map((m) => <option key={m.id} value={m.id} />)}
         </datalist>
       </Field>
-      <ToggleSwitch checked={needsKey} onChange={() => onChange({ needsKey: !needsKey })} label={t('providers.localai.asrApiNeedsKey')} disabled={disabled} />
+      {/* Whether a service wants a key is known; of an address typed by hand it is asked. */}
+      {!service && <ToggleSwitch checked={needsKey} onChange={() => onChange({ needsKey: !needsKey })} label={t('providers.localai.asrApiNeedsKey')} disabled={disabled} />}
       {needsKey && (
         <Field label={t('providers.localai.apiKey')}>
-          <input type="password" className="kt-input" aria-label={t('providers.localai.apiKey')} value={apiKey} onChange={(e) => onKey(e.target.value)} placeholder={t('providers.localai.apiKey')} autoComplete="off" disabled={disabled} />
+          <input type="password" className="kt-input" aria-label={t('providers.localai.apiKey')} value={apiKey} onChange={(e) => { setReused(null); onKey(e.target.value); }} placeholder={t('providers.localai.apiKey')} autoComplete="off" disabled={disabled} />
         </Field>
       )}
+      {needsKey && reused && apiKey && <p className="kt-note">{t('providers.localai.apiKeyReused', { name: reused })}</p>}
     </>
   );
 }
@@ -550,6 +633,8 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
           <>
             <ApiFields
               id="localai-asr-api"
+              kind="asr"
+              others={[{ baseUrl: settings.translateBaseUrl, key: values.translateKey ?? '' }, { baseUrl: settings.coachBaseUrl, key: values.coachKey ?? '' }]}
               baseUrl={settings.asrApiBaseUrl}
               model={settings.asrApiModel}
               needsKey={settings.asrApiNeedsKey}
@@ -584,6 +669,8 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
         {settings.translateAt === 'api' && (
           <ApiFields
             id="localai-translate-api"
+            kind="text"
+            others={[{ baseUrl: settings.coachBaseUrl, key: values.coachKey ?? '' }, { baseUrl: settings.asrApiBaseUrl, key: values.asrKey ?? '' }]}
             baseUrl={settings.translateBaseUrl}
             model={settings.translateModel}
             needsKey={settings.translateNeedsKey}
@@ -625,6 +712,8 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
             {settings.coachAt === 'api' && (
               <ApiFields
                 id="localai-coach-api"
+                kind="text"
+                others={[{ baseUrl: settings.translateBaseUrl, key: values.translateKey ?? '' }, { baseUrl: settings.asrApiBaseUrl, key: values.asrKey ?? '' }]}
                 baseUrl={settings.coachBaseUrl}
                 model={settings.coachModel}
                 needsKey={settings.coachNeedsKey}
