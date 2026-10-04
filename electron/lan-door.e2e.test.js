@@ -208,7 +208,7 @@ async function fakeLocalAI() {
 
   const wss = new WebSocketServer({ server, path: '/v1/realtime' });
   wss.on('connection', (ws, request) => {
-    const session = { seq: ++seq, url: request.url, headers: { ...request.headers }, ws, received: [], sent: [], recognizer: null, appended: 0, closed: null };
+    const session = { seq: ++seq, url: request.url, headers: { ...request.headers }, ws, received: [], sent: [], recognizer: null, configuredAt: null, appended: 0, closed: null };
     log.push({ seq: session.seq, kind: 'ws', url: request.url, headers: session.headers });
     sessions.push(session);
     session.say = (event) => {
@@ -229,6 +229,7 @@ async function fakeLocalAI() {
         }
         // The pipeline is read when the session is configured: the recognizer it names now is the one this session runs.
         session.recognizer = config.pipeline.transcription;
+        session.configuredAt = ++seq;
         session.say({ type: 'session.updated', session: { ...event.session, audio: { input: { ...event.session?.audio?.input, transcription: { ...transcription, model: session.recognizer } } } } });
       } else if (event.type === 'input_audio_buffer.append') {
         session.appended += 1;
@@ -303,9 +304,9 @@ function fakePage() {
 }
 
 /** The door, opened as main.js opens it on `lan:start`, in front of the LocalAI on `localaiPort`. */
-async function share(localaiPort, { key = '', idleSessionMs, idleCheckMs } = {}) {
+async function share(localaiPort, { key = '', idleSessionMs, idleCheckMs, configureTimeoutMs } = {}) {
   const local = createLocalServer({ address: `127.0.0.1:${localaiPort}`, home: path.join(os.tmpdir(), 'kotomimi-e2e-no-home'), exists: () => false, readFile: () => { throw new Error('ENOENT'); } });
-  const upstream = createUpstream({ port: local.port, pipelines: () => local.pipelines(), setPipeline: (name, change) => local.setPipeline(name, change) });
+  const upstream = createUpstream({ port: local.port, pipelines: () => local.pipelines(), setPipeline: (name, change) => local.setPipeline(name, change), ...(configureTimeoutMs ? { configureTimeoutMs } : {}) });
   const page = fakePage();
   const idle = { ...(idleSessionMs ? { idleSessionMs } : {}), ...(idleCheckMs ? { idleCheckMs } : {}) };
   const door = await startLanServer({ port: 0, host: '127.0.0.1', key, name: NAME, upstream, ...idle }, page.handlers);
@@ -736,8 +737,8 @@ describe('the shared door, end to end: changing recognizers', () => {
     await nothingLeftSince(ready);
   });
 
-  // Current behaviour, written down (see the PR): the pipeline is LocalAI-wide, and the later session's choice wins.
-  // The earlier session is not told, and the recognizer it runs on is unloaded under it.
+  // Current behaviour, written down (see the PR): the pipeline is LocalAI-wide, and the later session's choice wins once
+  // the earlier one is confirmed. The earlier session is not told, and the recognizer it runs on is unloaded under it.
   it('two sessions at once on different recognizers: the later rewrites the pipeline and unloads the earlier one\'s recognizer while it is still open', async () => {
     const fake = await fakeLocalAI();
     const { realtime, ready } = await share(fake.port);
@@ -764,10 +765,10 @@ describe('the shared door, end to end: changing recognizers', () => {
     await nothingLeftSince(ready);
   });
 
-  // Current behaviour, written down (see the PR): pipeline changes are taken one at a time, but a session is not
-  // configured inside its turn. When LocalAI is slow to bring a session up (loading a model takes 12-20 s, FORK.md),
-  // a second device's change lands first, and the first device's session runs on the second device's recognizer.
-  it('two sessions starting at once on different recognizers: the earlier one can come up on the later one\'s recognizer, and is not told', async () => {
+  // Setting a session up is one turn: a session that names another recognizer waits until LocalAI has confirmed the
+  // earlier one, so it cannot change the pipeline under it — even while LocalAI takes its time (loading a model takes
+  // 12-20 s, FORK.md).
+  it('two sessions starting at once on different recognizers: the later waits until the earlier is confirmed, and each comes up on what it asked for', async () => {
     const fake = await fakeLocalAI();
     const { realtime, ready } = await share(fake.port);
     const release = fake.hold();
@@ -778,26 +779,74 @@ describe('the shared door, end to end: changing recognizers', () => {
     const second = await dial(realtime);
     await second.next('session.created');
     second.send(UPDATE('qwen3-asr-mlx'));
-    await until(() => fake.sessions.length === 2, 'the second LocalAI session opens');
-    expect(fake.patches().map((p) => p.transcription)).toEqual(['whisper-large-turbo', 'qwen3-asr-mlx']);
+    // LocalAI has not confirmed the first yet: the second changes nothing, and opens nothing.
+    await sleep(150);
+    expect(fake.patches().map((p) => p.transcription)).toEqual(['whisper-large-turbo']);
+    expect(fake.sessions).toHaveLength(1);
     release();
     await first.next('session.updated');
     await second.next('session.updated');
 
-    // The first device asked for whisper; LocalAI's session for it runs qwen3, and says so only in its own confirmation.
-    expect(fake.sessions.map((s) => s.recognizer)).toEqual(['qwen3-asr-mlx', 'qwen3-asr-mlx']);
-    expect((await first.next('session.updated')).session.audio.input.transcription.model).toBe('qwen3-asr-mlx');
-    expect(await speak(first)).toBe('2 chunks heard by qwen3-asr-mlx');
-    expect(first.events().filter((e) => e.type === 'error')).toEqual([]);
+    expect(fake.patches().map((p) => p.transcription)).toEqual(['whisper-large-turbo', 'qwen3-asr-mlx']);
+    const secondPatch = fake.log.filter((e) => e.method === 'PATCH')[1];
+    expect(secondPatch.seq).toBeGreaterThan(fake.sessions[0].configuredAt);
+    expect(fake.sessions.map((s) => s.recognizer)).toEqual(['whisper-large-turbo', 'qwen3-asr-mlx']);
+    expect((await first.next('session.updated')).session.audio.input.transcription.model).toBe('whisper-large-turbo');
+    expect((await second.next('session.updated')).session.audio.input.transcription.model).toBe('qwen3-asr-mlx');
+    expect([...first.events(), ...second.events()].filter((e) => e.type === 'error')).toEqual([]);
     first.socket.close();
     second.socket.close();
     await until(() => fake.sessions.every((s) => s.closed), 'both LocalAI sessions close');
     await nothingLeftSince(ready);
   });
 
-  // The two tests above are what happens today. What should is a choice, not a fix (see the PR): the later device waits
-  // while another session holds the pipeline, or the earlier one is told its recognizer was replaced, or keeps it.
-  it.todo('two devices on different recognizers at once: neither runs on a recognizer it did not ask for without being told');
+  it('two sessions starting at once: one LocalAI never confirms holds the other for the limit, and no longer', async () => {
+    const fake = await fakeLocalAI();
+    const { realtime, ready } = await share(fake.port, { configureTimeoutMs: 200 });
+    const release = fake.hold();
+    const first = await dial(realtime);
+    await first.next('session.created');
+    first.send(UPDATE('whisper-large-turbo'));
+    await until(() => fake.sessions.length === 1, 'the first LocalAI session opens');
+    const second = await dial(realtime);
+    await second.next('session.created');
+    second.send(UPDATE('qwen3-asr-mlx'));
+    await sleep(50);
+    expect(fake.patches()).toHaveLength(1);
+    // The limit passes: the second goes ahead.
+    await until(() => fake.patches().length === 2 && fake.sessions.length === 2, 'the second goes ahead', 2000);
+    release();
+    first.socket.close();
+    second.socket.close();
+    await until(() => fake.sessions.every((s) => s.closed), 'both LocalAI sessions close');
+    await nothingLeftSince(ready);
+  });
+
+  it('a session that leaves the choice to this computer waits for no one', async () => {
+    const fake = await fakeLocalAI();
+    const { realtime, ready } = await share(fake.port);
+    const release = fake.hold();
+    const named = await dial(realtime);
+    await named.next('session.created');
+    named.send(UPDATE('whisper-large-turbo'));
+    await until(() => fake.sessions.length === 1, 'the named session opens');
+    const left = await dial(realtime);
+    await left.next('session.created');
+    left.send(UPDATE(''));
+    await until(() => fake.sessions.length === 2, 'the session that left the choice opens at once');
+    release();
+    await named.next('session.updated');
+    await left.next('session.updated');
+    named.socket.close();
+    left.socket.close();
+    await until(() => fake.sessions.every((s) => s.closed), 'both LocalAI sessions close');
+    await nothingLeftSince(ready);
+  });
+
+  // Left until a real LocalAI is checked (see the PR): whether a confirmed session keeps its recognizer once the pipeline
+  // names another. If it does, the replaced one should not be unloaded while a session still uses it; if not, the later
+  // device should be refused with words that say so.
+  it.todo('two devices on different recognizers at once: the earlier one\'s recognizer is not unloaded while it is still in use');
 });
 
 describe('the shared door, end to end: a session left silent', () => {
