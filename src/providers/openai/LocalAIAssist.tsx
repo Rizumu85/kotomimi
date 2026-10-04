@@ -1,17 +1,18 @@
 import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Check, CircleCheck, CircleHelp, Download, GraduationCap, Languages, LibraryBig, Loader, Mic, MonitorSmartphone, RefreshCw, X } from 'lucide-react';
+import { CircleCheck, CircleHelp, GraduationCap, Languages, LibraryBig, Loader, Mic, MonitorSmartphone, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CustomModels } from '../../components/CustomModels/CustomModels';
 import { ServerFinder } from '../../components/LanSharing/ServerFinder';
 import { useWasmEngineAdapter } from '../../components/Settings/engine/useWasmEngineAdapter';
-import { ModelManagementSection } from '../../components/Settings/sections/ModelManagementSection';
+import { ModelGroup } from '../../components/Settings/sections/ModelManagementControls';
+import { ModelCard, ModelManagementSection } from '../../components/Settings/sections/ModelManagementSection';
 import ToggleSwitch from '../../components/Settings/shared/ToggleSwitch';
 import Tooltip from '../../components/Tooltip/Tooltip';
 import { modelLabel } from '../../lib/lan/modelLabel';
 import { deviceReady, getManifestEntry, getModelSizeMb } from '../../lib/local-inference/modelManifest';
 import { shortenModelName } from '../../lib/local-inference/modelName';
 import type { CredentialAssistProps } from '../../lib/provider/types';
-import { useDeviceFeatures, useModelDownloads, useModelStatuses, useModelStore, useWebGPUAvailable } from '../../stores/modelStore';
+import { useDeviceFeatures, useDownloadErrors, useModelDownloads, useModelStatuses, useModelStore, useWebGPUAvailable } from '../../stores/modelStore';
 import { coachPrompt } from './coachPrompt';
 // Type only: `localai.ts` imports this view, and a value import back would close a cycle.
 import type { LocalAISettings as S } from './localai';
@@ -194,13 +195,15 @@ function DeviceModels({ stage, settings, update, pair, legs, disabled, tour }: P
 
 /**
  * This computer's feedback model: one of the catalog's chat models. The same
- * shape as the other stages' — the model in use, and the library under it —
- * but a library of its own: only a chat model can be told what feedback is.
+ * shape as the other stages' — the model in use, and the library under it,
+ * in the library's own cards — but a list of its own: only a chat model can
+ * be told what feedback is.
  */
 function DeviceChat({ value, onChange, disabled }: { value: string; onChange(id: string): void; disabled?: boolean }) {
   const { t } = useTranslation();
   const statuses = useModelStatuses();
   const downloads = useModelDownloads();
+  const errors = useDownloadErrors();
   const webgpu = useWebGPUAvailable();
   const features = useDeviceFeatures();
   const all = deviceChatModels();
@@ -227,32 +230,34 @@ function DeviceChat({ value, onChange, disabled }: { value: string; onChange(id:
       </div>
       {open && (
         <div className="kt-here__library">
-          <p className="kt-note">{webgpu ? t('providers.localai.chatModelsNote') : t('providers.localai.chatModelsNoGpu')}</p>
-          <ul className="kt-chat">
-            {all.map((m) => {
-              const status = statuses[m.id];
-              const progress = downloads[m.id];
-              return (
-                <li key={m.id} className="kt-chat__row">
-                  <span className="kt-chat__name">{name(m.id)}</span>
-                  <span className="kt-chat__size">{getModelSizeMb(m, features)} MB</span>
-                  {status === 'downloaded' ? (
-                    <span className="kt-chat__done"><Check size={13} />{t('providers.localai.downloaded')}</span>
-                  ) : status === 'downloading' ? (
-                    <button type="button" className="kt-chat__action" onClick={() => useModelStore.getState().cancelDownload(m.id)}>
-                      <X size={13} />
-                      <span>{`${Math.round(progress?.percent ?? 0)}%`}</span>
-                    </button>
-                  ) : (
-                    <button type="button" className="kt-chat__action" onClick={() => { void useModelStore.getState().downloadModel(m.id); }} disabled={disabled || !webgpu}>
-                      <Download size={13} />
-                      <span>{t('providers.localai.download')}</span>
-                    </button>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+          {!webgpu && <p className="kt-note kt-note--todo">{t('providers.localai.chatModelsNoGpu')}</p>}
+          <div className="model-management-section">
+            <ModelGroup title={label} bare>
+              {all.map((m) => {
+                const runs = deviceReady(m, webgpu);
+                return (
+                  <ModelCard
+                    key={m.id}
+                    entry={m}
+                    status={statuses[m.id] || 'not_downloaded'}
+                    download={downloads[m.id]}
+                    errorMessage={errors[m.id]}
+                    isSessionActive={Boolean(disabled)}
+                    // The one a run would load: the pick while it can run, else what a blank choice falls to.
+                    isSelected={deviceCoachModel(value) === m.id}
+                    isAutoSelected={!ready.some((r) => r.id === value) && auto === m.id}
+                    isCompatible={runs}
+                    compatibilityHint={runs ? undefined : t('settings.webgpuNotSupported', 'Not available in current environment')}
+                    deviceFeatures={features}
+                    onSelect={() => onChange(m.id)}
+                    onDownload={() => { useModelStore.getState().downloadModel(m.id).catch(() => { /* The store keeps the reason, and the card shows it. */ }); }}
+                    onCancel={() => useModelStore.getState().cancelDownload(m.id)}
+                    onDelete={() => { void useModelStore.getState().deleteModel(m.id); }}
+                  />
+                );
+              })}
+            </ModelGroup>
+          </div>
         </div>
       )}
     </div>
@@ -269,7 +274,9 @@ function DeviceChat({ value, onChange, disabled }: { value: string; onChange(id:
  * is asked anywhere else, in either layout.
  *
  * Above the cards, the other device: the app's search of the local network
- * (`ServerFinder`), its address, and its access key. It is one device for
+ * (`ServerFinder`), its address, and its access key. A model server on this
+ * very computer (a LocalAI) is found by the same search and used the same
+ * way; the card then says that it is this computer's. It is one device for
  * every stage placed on it, so it is asked once. The search runs by itself
  * only while a stage wants the device and no address is set: a settings
  * panel opened for something else asks the network nothing.
@@ -294,6 +301,8 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   const onServer = settings.asrVia === 'server';
   const serverInUse = needsServer(settings);
   const address = values.endpoint ?? '';
+  // The address names this computer itself: a model server running here (a LocalAI), reached the way another device is.
+  const onThisComputer = /^(?:[a-z]+:\/\/)?(?:127\.0\.0\.1|localhost|\[::1\])(?::|\/|$)/i.test(address.trim());
   const kotomimi = serverInUse && isKotomimiServer(found);
   const ownModels = found.filter((m) => m.from === undefined);
 
@@ -325,8 +334,6 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
 
   return (
     <div className="kt-stages-assist">
-      <p className="kt-mix">{t('providers.localai.mixHint')}</p>
-
       <section className={`kt-device${serverInUse ? ' is-used' : ''}`} aria-label={t('providers.localai.placeServer')}>
         <h4 className="kt-card__head">
           <span className="kt-card__icon"><MonitorSmartphone size={14} /></span>
@@ -347,6 +354,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
             <Field label={t('providers.localai.endpoint')}>
               <input type="text" className="kt-input" aria-label={t('providers.localai.endpoint')} value={address} onChange={(e) => set('endpoint', e.target.value)} placeholder={t('providers.localai.endpointPlaceholder')} spellCheck={false} disabled={disabled} />
             </Field>
+            {onThisComputer && <p className="kt-note">{t('providers.localai.localServerNote')}</p>}
             <ToggleSwitch checked={settings.serverNeedsKey} onChange={() => put({ serverNeedsKey: !settings.serverNeedsKey })} label={t('providers.localai.serverNeedsKey')} disabled={disabled} tooltip={t('providers.localai.serverNeedsKeyTooltip')} />
             {settings.serverNeedsKey && (
               <Field label={t('providers.localai.serverKey')}>

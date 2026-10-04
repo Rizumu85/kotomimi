@@ -13,13 +13,6 @@
   gap: vars.$space-3;
   margin-bottom: vars.$space-3;
 
-  .kt-mix {
-    margin: 0;
-    font-size: vars.$font-caption;
-    line-height: 1.5;
-    color: vars.$text-secondary;
-  }
-
   // A card: a stage, or the other device.
   .kt-card,
   .kt-device {
@@ -355,73 +348,10 @@
     }
   }
 
-  // The chat models: a short list, a row each.
-  .kt-chat {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+  // The library's own cards, drawn here for the chat models: no page margin of the section's.
+  .kt-here__library .model-management-section {
     margin: 0;
     padding: 0;
-    list-style: none;
-  }
-
-  .kt-chat__row {
-    display: flex;
-    align-items: center;
-    gap: vars.$space-2;
-    padding: 6px 8px;
-    font-size: vars.$font-caption;
-    background: vars.$bg-surface;
-    border-radius: vars.$radius-sm;
-  }
-
-  .kt-chat__name {
-    flex: 1 1 auto;
-    min-width: 0;
-    overflow: hidden;
-    color: vars.$text-primary;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .kt-chat__size {
-    flex-shrink: 0;
-    color: vars.$text-muted;
-  }
-
-  .kt-chat__done {
-    display: inline-flex;
-    flex-shrink: 0;
-    align-items: center;
-    gap: 4px;
-    color: vars.$color-primary;
-  }
-
-  .kt-chat__action {
-    display: inline-flex;
-    flex-shrink: 0;
-    align-items: center;
-    gap: 4px;
-    padding: 3px 8px;
-    font: inherit;
-    color: vars.$text-primary;
-    background: vars.$bg-control;
-    border: 1px solid vars.$border-default;
-    border-radius: vars.$radius-sm;
-    cursor: pointer;
-
-    &:hover:not(:disabled) {
-      background: vars.$bg-hover;
-    }
-
-    &:disabled {
-      cursor: not-allowed;
-      opacity: vars.$disabled-opacity;
-    }
-
-    &:focus-visible {
-      @include vars.focus-ring;
-    }
   }
 }
 

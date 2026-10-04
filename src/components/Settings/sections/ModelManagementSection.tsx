@@ -68,7 +68,8 @@ interface ModelManagementSectionProps {
 
 // ─── ModelCard ─────────────────────────────────────────────────────────────
 
-function ModelCard({
+// Fork: exported, so a list of models drawn elsewhere — the Kotomimi provider's chat models — is drawn with the same card.
+export function ModelCard({
   entry,
   status,
   download,

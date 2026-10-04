@@ -15,8 +15,9 @@ vi.mock('../../components/LanSharing/ServerFinder', () => ({
     <button type="button" data-auto={String(Boolean(auto))} data-hint={hint} onClick={() => onPick({ address: '192.168.1.9:8790', kind: 'kotomimi', name: 'DESK', product: '', models: 2, needsKey: true, self: false })}>finder</button>
   ),
 }));
-// The library is Local Inference's own, tested beside it: here only which one opens.
-vi.mock('../../components/Settings/sections/ModelManagementSection', () => ({
+// The library is Local Inference's own, tested beside it: here only which one opens. Its card is the real one: the chat models are drawn with it.
+vi.mock('../../components/Settings/sections/ModelManagementSection', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../components/Settings/sections/ModelManagementSection')>()),
   ModelManagementSection: ({ stageFilter, direction }: { stageFilter?: string; direction?: string }) => <div data-testid="library">{`${stageFilter}:${direction}`}</div>,
 }));
 vi.mock('../../components/CustomModels/CustomModels', () => ({ CustomModels: () => null }));
@@ -185,23 +186,39 @@ describe('the stage cards: on this computer', () => {
     expect(card(TRANSLATE).queryByTestId('library')).toBeNull();
   });
 
-  it('gives feedback with one of the catalog\'s chat models, downloaded from the card', () => {
+  it('gives feedback with one of the catalog\'s chat models, downloaded from the card — in the library\'s own cards', () => {
     const downloadModel = vi.fn(async () => {});
     useModelStore.setState({ downloadModel });
     const { card, update } = draw({ settings: { coach: true, coachAt: 'device' } });
     const coach = card(COACH);
-    // None downloaded: the list of them is open, each with its download.
-    expect(coach.getByText('providers.localai.chatModelsNote')).toBeTruthy();
-    const downloads = coach.getAllByRole('button', { name: 'providers.localai.download' });
+    // None downloaded: the list of them is open, a card each, as the other stages' libraries draw theirs.
+    const ids = ['qwen2.5-0.5b-translation', 'qwen3-0.6b-translation', 'qwen3.5-0.8b-translation', 'qwen3.5-2b-translation'];
+    for (const id of ids) expect(coach.getByTestId(`model-card-${id}`).className).toContain('model-card');
+    const downloads = coach.getAllByTitle('models.download');
     expect(downloads).toHaveLength(4);
     fireEvent.click(downloads[0]);
     expect(downloadModel).toHaveBeenCalledWith('qwen2.5-0.5b-translation');
-    // Downloaded ones can be picked.
+    // Downloaded ones can be picked: from the menu, or by their card. Left alone, the largest is the one in use.
     act(() => useModelStore.setState({ modelStatuses: { 'qwen3-0.6b-translation': 'downloaded', 'qwen3.5-2b-translation': 'downloaded' } }));
+    fireEvent.click(coach.getByRole('button', { name: 'providers.localai.browse' }));
+    expect(coach.getByTestId('model-card-qwen3.5-2b-translation').className).toContain('model-card--selected');
     const select = coach.getByRole('combobox', { name: 'providers.localai.model' });
     expect(options(select)).toEqual(['', 'qwen3-0.6b-translation', 'qwen3.5-2b-translation']);
     fireEvent.change(select, { target: { value: 'qwen3-0.6b-translation' } });
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ coachDeviceModel: 'qwen3-0.6b-translation' }));
+    fireEvent.click(coach.getByTestId('model-card-qwen3.5-2b-translation'));
+    expect(update).toHaveBeenLastCalledWith({ coachDeviceModel: 'qwen3.5-2b-translation' });
+  });
+
+  it('says that an address on this computer is this computer\'s own model server', () => {
+    draw({ values: { endpoint: '127.0.0.1:8080' } });
+    expect(screen.getByText('providers.localai.localServerNote')).toBeTruthy();
+  });
+
+  it('says nothing of the kind for an address elsewhere, and no longer explains that the stages can be mixed', () => {
+    draw({ values: { endpoint: '192.168.1.10:8080' } });
+    expect(screen.queryByText('providers.localai.localServerNote')).toBeNull();
+    expect(screen.queryByText('providers.localai.mixHint')).toBeNull();
   });
 });
 

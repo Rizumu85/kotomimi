@@ -21,7 +21,6 @@ const PROVIDER = {
     '能识别、翻译、语法反馈，并且可以混搭选择运行的模型：本地电脑、局域网的另一台设备，或任意 API 模型。',
     '能辨識、翻譯、文法回饋，並且可以混搭選擇執行的模型：本機電腦、區域網路的另一台裝置，或任意 API 模型。',
   ],
-  mixHint: ['Each stage can have its own place, and they can be mixed.', '每个环节可以各选各的，可以混搭。', '每個環節可以各選各的，可以混搭。'],
 
   // The three places.
   placeServer: ['Another device', '另一台设备', '另一台裝置'],
@@ -50,6 +49,11 @@ const PROVIDER = {
     'It is another Kotomimi sharing its models.',
     '它是另一台正在共享模型的 Kotomimi。',
     '它是另一台正在共享模型的 Kotomimi。',
+  ],
+  localServerNote: [
+    'This address is this computer itself: a model server running here, such as LocalAI. Choose "Another device" in a stage to use its models.',
+    '这个地址就是这台电脑：本机上运行的模型服务器（例如 LocalAI）。在环节里选「另一台设备」就会用它的模型。',
+    '這個位址就是這台電腦：本機上執行的模型伺服器（例如 LocalAI）。在環節裡選「另一台裝置」就會用它的模型。',
   ],
   connectFirst: [
     'No other device is connected yet: search for one above, or type its address.',
@@ -81,13 +85,6 @@ const PROVIDER = {
   notDownloaded: ['No model downloaded yet', '还没下载模型', '尚未下載模型'],
   browse: ['Model library', '模型库', '模型庫'],
   hears: ['Hears {{language}}', '听{{language}}', '聽{{language}}'],
-  download: ['Download', '下载', '下載'],
-  downloaded: ['Downloaded', '已下载', '已下載'],
-  chatModelsNote: [
-    'On this computer, feedback is written by one of these small chat models. They answer quickly, but a larger model on another device or an API explains better.',
-    '这台电脑用下面这些小型对话模型来写反馈。它们回答很快，但讲解不如另一台设备或 API 上的大模型准确。',
-    '這台電腦用下面這些小型對話模型來寫回饋。它們回答很快，但講解不如另一台裝置或 API 上的大模型準確。',
-  ],
   chatModelsNoGpu: [
     'These models need a graphics card with WebGPU, which this computer does not offer. Use another device or an API model for the feedback.',
     '这些模型需要支持 WebGPU 的显卡，这台电脑没有。语法反馈请改用另一台设备或 API 模型。',
