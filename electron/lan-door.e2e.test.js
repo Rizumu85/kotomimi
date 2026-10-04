@@ -149,6 +149,8 @@ async function fakeLocalAI() {
     shutdowns: () => log.filter((e) => e.url === '/backend/shutdown').map((e) => JSON.parse(e.body).model),
     /** Open TCP connections to it, sockets included. */
     connections: () => connections.size,
+    /** Set, a pipeline change is refused with these words, as LocalAI refuses one it cannot write. */
+    refusePatch: '',
     /** How it answers a chat request; a test may swap it. */
     chat(body, response) {
       if (!body.stream) return json(response, 200, { object: 'chat.completion', model: body.model, choices: [{ index: 0, message: { role: 'assistant', content: 'こんにちは' }, finish_reason: 'stop' }] });
@@ -189,6 +191,7 @@ async function fakeLocalAI() {
       if (route === 'GET /v1/models') return json(response, 200, { object: 'list', data: [...CAPABILITIES.keys()].map((id) => ({ id, object: 'model' })) });
       if (route === 'GET /v1/models/capabilities') return json(response, 200, { data: [...CAPABILITIES].map(([id, capabilities]) => ({ id, capabilities })) });
       if (route === 'GET /api/models/config-json/gpt-realtime') return json(response, 200, config);
+      if (route === 'PATCH /api/models/config-json/gpt-realtime' && fake.refusePatch) return json(response, 500, { error: { message: fake.refusePatch } });
       if (route === 'PATCH /api/models/config-json/gpt-realtime') {
         config = { ...config, ...JSON.parse(entry.body) };
         return json(response, 200, { success: true });
@@ -661,6 +664,29 @@ describe('the shared door, end to end: a session on one of LocalAI\'s recognizer
     // The device did not ask for it: it is told, in LocalAI's words.
     expect(device.events().pop()).toMatchObject({ type: 'error', error: { code: 'upstream_failed', message: 'The model server closed the session: pipeline reloaded' } });
     await until(() => door.count() === 0 && page.seen.closed.length === 1 && fake.connections() === 0, 'nothing left open');
+    await nothingLeftSince(ready);
+  });
+
+  it('tells the device LocalAI\'s own words when it refuses the recognizer, and closes the socket, whatever script the words are in', async () => {
+    const fake = await fakeLocalAI();
+    fake.refusePatch = 'モデルの設定を書き込めません：/Users/里兹/.localai/models は読み取り専用のファイルシステムです';
+    const { realtime, door, ready } = await share(fake.port);
+    const device = await dial(realtime);
+    await device.next('session.created');
+    device.send(UPDATE('whisper-large-turbo'));
+    await until(() => device.closed !== null, 'the device\'s socket closes');
+    const { error } = device.events().pop();
+    expect(error).toMatchObject({ code: 'upstream_failed', message: expect.stringContaining(fake.refusePatch) });
+    expect(device.closed.code).toBe(1011);
+    // A close frame holds 123 bytes of reason: the same words, cut there on a character's edge.
+    expect(Buffer.byteLength(device.closed.reason)).toBeLessThanOrEqual(123);
+    expect(device.closed.reason.length).toBeGreaterThan(20);
+    expect(error.message.startsWith(device.closed.reason)).toBe(true);
+    // Nothing was changed or unloaded, and no session was opened on LocalAI.
+    expect(fake.pipeline().transcription).toBe('apple-speech-transcriber');
+    expect(fake.shutdowns()).toEqual([]);
+    expect(fake.sessions).toEqual([]);
+    expect(door.count()).toBe(0);
     await nothingLeftSince(ready);
   });
 
