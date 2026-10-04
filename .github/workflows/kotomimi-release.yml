@@ -66,9 +66,12 @@ jobs:
       # What the fork adds, and the guards that hold it to upstream's rules.
       # Not the whole suite: upstream's has failures of its own that are not
       # this fork's to fix, and a job red on arrival is a job nobody reads.
+      # The timeout is four times vitest's own: the guards that read the whole
+      # source tree take seconds on a busy runner, and one of them missing 5s by
+      # half a second failed a release (v0.42.220, first attempt).
       - name: Run the fork's tests
         run: >-
-          npx vitest run
+          npx vitest run --testTimeout=20000
           src/providers
           src/lib/lan
           src/lib/windowShape.test.ts
