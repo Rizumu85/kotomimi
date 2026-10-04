@@ -559,6 +559,8 @@
       "coachPrompt": "Feedback instructions",
       "coachPromptPlaceholder": "Blank: written automatically for your two languages. Your own text may use {{spoken}} and {{native}}.",
       "coachPromptPreview": "Used while the box is blank, for this language pair:",
+      "addressMissing": "No other device is chosen yet. In Settings, under \"Another device\", search for it or type its address.",
+      "serverKeyMissing": "The other device asks for an access key. Enter it in Settings, under \"Another device\".",
       "asrUnnamed": "Speech recognition has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
       "translateUnnamed": "Translation has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
       "coachUnnamed": "Grammar feedback has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place."

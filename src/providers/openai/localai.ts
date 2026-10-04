@@ -327,12 +327,13 @@ export const localaiCredentials: Provider<LocalAISettings, LocalAICredentials, n
   // `values` holds exactly the fields shown: the address is in it only while a stage is on the other device, a key only when its stage asks for one.
   read: (values): LocalAICredentials | CredentialsMissing => {
     const endpoint = values.endpoint === undefined ? '' : localaiEndpoint(values.endpoint);
-    if (endpoint === null) return { missing: 'Enter the address of your LocalAI server.' };
+    // Coded, so they are worded as what they are: a device to choose and its access key, not an API key.
+    if (endpoint === null) return { missing: 'Enter the address of your LocalAI server.', code: 'server_address_missing' };
     const serverKey = values.serverKey?.trim();
     const asrKey = values.asrKey?.trim();
     const translateKey = values.translateKey?.trim();
     const coachKey = values.coachKey?.trim();
-    if (values.serverKey !== undefined && !serverKey) return { missing: 'Enter the access key of the server.' };
+    if (values.serverKey !== undefined && !serverKey) return { missing: 'Enter the access key of the server.', code: 'server_key_missing' };
     if (values.asrKey !== undefined && !asrKey) return { missing: 'Enter the API key of the speech recognition API.' };
     if (values.translateKey !== undefined && !translateKey) return { missing: 'Enter the API key of the translation model.' };
     if (values.coachKey !== undefined && !coachKey) return { missing: 'Enter the API key of the feedback model.' };

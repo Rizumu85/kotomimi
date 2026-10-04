@@ -5,7 +5,7 @@ import { noticeText } from '../../lib/view/noticeText';
 import zhCN from '../../locales/zh_CN/translation.json';
 import zhTW from '../../locales/zh_TW/translation.json';
 import { useModelStore } from '../../stores/modelStore';
-import { buildLocalAI, createLocalAICheck, LOCALAI_DEFAULTS, type LocalAISettings } from './localai';
+import { buildLocalAI, createLocalAICheck, LOCALAI_DEFAULTS, localaiCredentials, type LocalAISettings } from './localai';
 import { SHARED } from './testing';
 
 /**
@@ -59,5 +59,30 @@ describe('the words for a stage with nothing to run', () => {
   it('grammar feedback on another Kotomimi, which shares no chat model, is named the same way', () => {
     const built = buildLocalAI(SPEAKER, settings({ coach: true, coachAt: 'server' }), { ...SHARED, reversed: () => false, models: KOTOMIMI });
     expect(built).toMatchObject({ code: 'coach_unnamed' });
+  });
+});
+
+describe('the words for another device not chosen yet', () => {
+  const noAuth = { signedIn: false, getToken: async () => null };
+  const localai = (catalog: unknown) => (catalog as { providers: { localai: Record<string, string> } }).providers.localai;
+  /** What a missing credential reads as: its own code, else the runner's `credentials_missing` (`providerStore.refreshReadiness`, `run.ts`). */
+  const said = (catalog: unknown, values: Record<string, string>) => {
+    const read = localaiCredentials.read(values, noAuth);
+    if (!('missing' in read)) throw new Error('nothing is missing');
+    return noticeText(tIn(catalog as Catalog), { code: read.code ?? 'credentials_missing', params: read.params, message: read.missing });
+  };
+
+  it('asks for the device, not for an API key: every stage starts on it, with no address', () => {
+    for (const catalog of [zhCN, zhTW]) {
+      expect(localai(catalog).addressMissing).toBeTruthy();
+      expect(said(catalog, { endpoint: '' })).toBe(localai(catalog).addressMissing);
+    }
+  });
+
+  it('asks for the access key by the name its field has', () => {
+    for (const catalog of [zhCN, zhTW]) {
+      expect(localai(catalog).serverKeyMissing).toBeTruthy();
+      expect(said(catalog, { endpoint: '192.168.1.10:8790', serverKey: ' ' })).toBe(localai(catalog).serverKeyMissing);
+    }
   });
 });

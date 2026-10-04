@@ -168,6 +168,18 @@ const PROVIDER = {
   ],
   coachPromptPreview: ['Used while the box is blank, for this language pair:', '留空时，当前语言对用的是这一份：', '留空時，目前語言對用的是這一份：'],
 
+  // The other device not chosen yet, or its access key blank: said when it is checked, and when Start is pressed.
+  addressMissing: [
+    'No other device is chosen yet. In Settings, under "Another device", search for it or type its address.',
+    '还没有选另一台设备。请在设置的「另一台设备」一栏里搜索它，或填写它的地址。',
+    '還沒有選另一台裝置。請在設定的「另一台裝置」一欄裡搜尋它，或填寫它的位址。',
+  ],
+  serverKeyMissing: [
+    'The other device asks for an access key. Enter it in Settings, under "Another device".',
+    '另一台设备需要访问密钥。请在设置的「另一台设备」一栏里填写。',
+    '另一台裝置需要存取金鑰。請在設定的「另一台裝置」一欄裡填寫。',
+  ],
+
   // A stage with nothing to run: said when it is checked, and when Start is pressed.
   asrUnnamed: [
     'Speech recognition has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.',
