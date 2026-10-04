@@ -1534,6 +1534,7 @@
       "hideLibrary": "Hide the model library",
       "direction": "Which direction to show models for",
       "options": "Options",
+      "otherAddresses": "This computer's other addresses",
       "port": "Port",
       "key": "Access key",
       "keyPlaceholder": "Blank: anyone on the network may connect",

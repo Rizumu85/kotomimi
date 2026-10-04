@@ -1534,6 +1534,7 @@
       "hideLibrary": "收起模型庫",
       "direction": "顯示哪個方向的模型",
       "options": "選項",
+      "otherAddresses": "這台電腦的其他位址",
       "port": "連接埠",
       "key": "存取金鑰",
       "keyPlaceholder": "留空：區域網路裡任何裝置都能連線",

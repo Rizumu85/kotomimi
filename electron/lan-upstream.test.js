@@ -167,7 +167,8 @@ describe('a socket joined to the model server', () => {
     // Audio that comes before the server's session is up waits for it, in order.
     link.send(JSON.stringify({ type: 'input_audio_buffer.append', audio: 'AAAA' }));
     await until(() => seen.frames.length === 2);
-    expect(setPipeline).toHaveBeenCalledWith('gpt-realtime', { transcription: 'whisper-large-turbo' });
+    // With the recognizers open sessions still run on: none here.
+    expect(setPipeline).toHaveBeenCalledWith('gpt-realtime', { transcription: 'whisper-large-turbo' }, { keep: [] });
     expect(seen.sockets[0].url).toBe('/v1/realtime?model=gpt-realtime');
     expect(seen.frames[0]).toEqual({ type: 'session.update', session: { type: 'transcription', audio: { input: { transcription: { language: 'ja' }, turn_detection: { type: 'server_vad' } } } } });
     expect(seen.frames[1]).toEqual({ type: 'input_audio_buffer.append', audio: 'AAAA' });

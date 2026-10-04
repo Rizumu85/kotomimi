@@ -66,6 +66,14 @@ describe('the pipelines of a LocalAI', () => {
     ]);
   });
 
+  it('leave loaded what a change replaces while a session still runs on it, and unload it otherwise', async () => {
+    for (const [options, shutdowns] of [[{ keep: ['apple-speech'] }, 0], [{ keep: ['whisper'] }, 1], [undefined, 1]]) {
+      const { server, sent } = localai();
+      expect((await server.setPipeline('gpt-realtime', { transcription: 'whisper' }, options)).ok).toBe(true);
+      expect(sent.filter((call) => call.pathname === '/backend/shutdown')).toHaveLength(shutdowns);
+    }
+  });
+
   it('take another translation model the same way', async () => {
     const { server, sent } = localai();
     expect((await server.setPipeline('gpt-realtime', { llm: 'gemma' })).pipelines[0].llm).toBe('gemma');

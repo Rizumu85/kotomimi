@@ -306,7 +306,7 @@ function fakePage() {
 /** The door, opened as main.js opens it on `lan:start`, in front of the LocalAI on `localaiPort`. */
 async function share(localaiPort, { key = '', idleSessionMs, idleCheckMs, configureTimeoutMs } = {}) {
   const local = createLocalServer({ address: `127.0.0.1:${localaiPort}`, home: path.join(os.tmpdir(), 'kotomimi-e2e-no-home'), exists: () => false, readFile: () => { throw new Error('ENOENT'); } });
-  const upstream = createUpstream({ port: local.port, pipelines: () => local.pipelines(), setPipeline: (name, change) => local.setPipeline(name, change), ...(configureTimeoutMs ? { configureTimeoutMs } : {}) });
+  const upstream = createUpstream({ port: local.port, pipelines: () => local.pipelines(), setPipeline: (name, change, options) => local.setPipeline(name, change, options), ...(configureTimeoutMs ? { configureTimeoutMs } : {}) });
   const page = fakePage();
   const idle = { ...(idleSessionMs ? { idleSessionMs } : {}), ...(idleCheckMs ? { idleCheckMs } : {}) };
   const door = await startLanServer({ port: 0, host: '127.0.0.1', key, name: NAME, upstream, ...idle }, page.handlers);
@@ -737,9 +737,10 @@ describe('the shared door, end to end: changing recognizers', () => {
     await nothingLeftSince(ready);
   });
 
-  // Current behaviour, written down (see the PR): the pipeline is LocalAI-wide, and the later session's choice wins once
-  // the earlier one is confirmed. The earlier session is not told, and the recognizer it runs on is unloaded under it.
-  it('two sessions at once on different recognizers: the later rewrites the pipeline and unloads the earlier one\'s recognizer while it is still open', async () => {
+  // The pipeline is LocalAI-wide, and the later session's choice wins once the earlier one is confirmed. The earlier
+  // session keeps the recognizer it was set up on (a real LocalAI's does too: measured on the Mac, 2026-10-04), so that
+  // recognizer is left loaded while the session is open.
+  it('two sessions at once on different recognizers: the later rewrites the pipeline, and the earlier one\'s recognizer stays loaded while it is still open', async () => {
     const fake = await fakeLocalAI();
     const { realtime, ready } = await share(fake.port);
     const first = await session(realtime, 'whisper-large-turbo');
@@ -749,8 +750,8 @@ describe('the shared door, end to end: changing recognizers', () => {
 
     expect(fake.patches().map((p) => p.transcription)).toEqual(['whisper-large-turbo', 'qwen3-asr-mlx']);
     expect(fake.pipeline().transcription).toBe('qwen3-asr-mlx');
-    // The first session's recognizer is shut down while that session is open...
-    expect(fake.shutdowns()).toEqual(['apple-speech-transcriber', 'whisper-large-turbo']);
+    // Only what nobody runs on was unloaded: the pipeline's first recognizer, not the first session's.
+    expect(fake.shutdowns()).toEqual(['apple-speech-transcriber']);
     expect(fake.sessions[0].closed).toBeNull();
     expect(first.closed).toBeNull();
     // ...and nobody tells it: no error, and its socket still carries what it carried.
@@ -846,7 +847,33 @@ describe('the shared door, end to end: changing recognizers', () => {
   // Left until a real LocalAI is checked (see the PR): whether a confirmed session keeps its recognizer once the pipeline
   // names another. If it does, the replaced one should not be unloaded while a session still uses it; if not, the later
   // device should be refused with words that say so.
-  it.todo('two devices on different recognizers at once: the earlier one\'s recognizer is not unloaded while it is still in use');
+  it('two devices on different recognizers at once: each hears with its own, and a recognizer is unloaded only once nobody is on it', async () => {
+    const fake = await fakeLocalAI();
+    const { realtime, ready } = await share(fake.port);
+    const first = await session(realtime, 'whisper-large-turbo');
+    const second = await session(realtime, 'qwen3-asr-mlx');
+    // Each on the recognizer it was set up on, after the pipeline has moved on.
+    expect(await speak(first)).toBe('2 chunks heard by whisper-large-turbo');
+    expect(await speak(second)).toBe('2 chunks heard by qwen3-asr-mlx');
+    expect(fake.shutdowns()).toEqual(['apple-speech-transcriber']);
+
+    // The first leaves: a third device now moves the pipeline off the second's recognizer, which is still in use and
+    // stays; the first's is nobody's now, but it is not what the pipeline replaced — LocalAI's idle watchdog has it.
+    first.socket.close();
+    await until(() => fake.sessions[0].closed !== null, 'the first session is closed at LocalAI');
+    const third = await session(realtime, 'apple-speech-transcriber');
+    expect(await speak(third)).toBe('2 chunks heard by apple-speech-transcriber');
+    expect(fake.shutdowns()).toEqual(['apple-speech-transcriber']);
+
+    // The second leaves too: the next change replaces a recognizer nobody is on, and unloads it.
+    third.socket.close();
+    await until(() => fake.sessions[2].closed !== null, 'the third session is closed at LocalAI');
+    const fourth = await session(realtime, 'qwen3-asr-mlx');
+    expect(fake.shutdowns()).toEqual(['apple-speech-transcriber', 'apple-speech-transcriber']);
+    for (const device of [second, fourth]) device.socket.close();
+    await until(() => fake.sessions.every((s) => s.closed), 'every LocalAI session closes');
+    await nothingLeftSince(ready);
+  });
 });
 
 describe('the shared door, end to end: a session left silent', () => {

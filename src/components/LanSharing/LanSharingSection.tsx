@@ -143,7 +143,7 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
               {status.addresses.length > 0 ? (
                 <div className="kt-lan__where">
                   {status.name && <span className="kt-lan__name">{status.name}</span>}
-                  {status.addresses.map((address) => <Address key={address} value={`${address}:${status.port}`} />)}
+                  <Address value={`${status.addresses[0]}:${status.port}`} />
                 </div>
               ) : <p className="kt-note">{t('fork.lan.noNetwork')}</p>}
               {firewall.state === 'blocked' && (
@@ -208,6 +208,13 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
                 <input type="text" className="text-input" value={keyText} onChange={(e) => setKeyText(e.target.value)} onBlur={() => { void useLanStore.getState().setKey(keyText); }} onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }} placeholder={t('fork.lan.keyPlaceholder')} spellCheck={false} disabled={disabled} />
               </label>
             </div>
+            {/* A computer on several networks (a VPN, a virtual switch) has an address on each: the others, for a device on one of those. */}
+            {status.state === 'on' && status.addresses.length > 1 && (
+              <>
+                <div className="kt-lan__label">{t('fork.lan.otherAddresses')}</div>
+                {status.addresses.slice(1).map((address) => <Address key={address} value={`${address}:${status.port}`} />)}
+              </>
+            )}
             {firewall.state === 'unknown' && <p className="kt-note">{t('fork.lan.firewall')}</p>}
           </details>
         </div>

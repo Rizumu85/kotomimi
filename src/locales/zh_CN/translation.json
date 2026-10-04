@@ -1534,6 +1534,7 @@
       "hideLibrary": "收起模型库",
       "direction": "显示哪个方向的模型",
       "options": "选项",
+      "otherAddresses": "这台电脑的其他地址",
       "port": "端口",
       "key": "访问密钥",
       "keyPlaceholder": "留空：局域网里任何设备都能连接",

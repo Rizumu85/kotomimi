@@ -1276,7 +1276,7 @@ ipcMain.handle('lan:start', async (event, args) => {
   try {
     // A LocalAI on this computer is shared through the same door (electron/lan-upstream.js): asked each time, so one started later joins by itself.
     const local = getLocalServer();
-    const upstream = createUpstream({ port: local.port, pipelines: () => local.pipelines(), setPipeline: (name, change) => local.setPipeline(name, change) });
+    const upstream = createUpstream({ port: local.port, pipelines: () => local.pipelines(), setPipeline: (name, change, options) => local.setPipeline(name, change, options) });
     lanServer = await startLanServer({ port: Number.isInteger(port) && port > 0 && port < 65536 ? port : 8790, key: String(args?.key ?? ''), upstream }, {
       request: (request) => toPage('lan:request', request),
       socketOpen: (socket) => toPage('lan:socket-open', socket),

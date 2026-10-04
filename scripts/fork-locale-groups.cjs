@@ -273,6 +273,7 @@ module.exports = {
     hideLibrary: ['Hide the model library', '收起模型库', '收起模型庫'],
     direction: ['Which direction to show models for', '显示哪个方向的模型', '顯示哪個方向的模型'],
     options: ['Options', '选项', '選項'],
+    otherAddresses: ['This computer\'s other addresses', '这台电脑的其他地址', '這台電腦的其他位址'],
     port: ['Port', '端口', '連接埠'],
     key: ['Access key', '访问密钥', '存取金鑰'],
     keyPlaceholder: ['Blank: anyone on the network may connect', '留空：局域网里任何设备都能连接', '留空：區域網路裡任何裝置都能連線'],

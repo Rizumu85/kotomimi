@@ -25,11 +25,13 @@ describe('sharing: what is seen at a glance', () => {
 
   it('is its state, and the name and address another device finds it by; the rest is one disclosure away', () => {
     useModelStore.setState({ initialized: true, modelStatuses: { 'sensevoice-int8': 'downloaded' }, webgpuAvailable: true });
-    useLanStore.setState({ enabled: true, status: { state: 'on', port: 8790, addresses: ['192.168.1.20'], name: 'DESK' }, clients: 2 });
+    useLanStore.setState({ enabled: true, status: { state: 'on', port: 8790, addresses: ['192.168.1.20', '100.64.0.7'], name: 'DESK' }, clients: 2 });
     const { container } = render(<LanSharingSection />);
     expect(screen.getByText('fork.lan.onWithClients')).toBeTruthy();
     expect(screen.getByText('DESK')).toBeTruthy();
     expect(screen.getByText('192.168.1.20:8790')).toBeTruthy();
+    // Its address on another network is with the options, not in the way.
+    expect(screen.getByText('100.64.0.7:8790').closest('details')?.querySelector('summary')?.textContent).toBe('fork.lan.options');
     // What is lent, and the options: closed until asked for.
     const more = [...container.querySelectorAll('details')];
     expect(more.map((d) => d.querySelector('summary')?.textContent)).toEqual(['fork.lan.models', 'fork.lan.options']);

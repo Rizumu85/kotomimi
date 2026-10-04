@@ -323,7 +323,8 @@ function createLocalServer(deps = {}) {
    * LocalAI lists for that work — and lets the one it replaces go from memory.
    * Answers `{ ok, error?, ...pipelines() }`.
    */
-  async function setPipeline(name, change = {}) {
+  /** `keep`: models other sessions still run on — what the change replaces is not unloaded while it is one of them. */
+  async function setPipeline(name, change = {}, { keep = [] } = {}) {
     const before = await pipelines();
     const pipeline = before.pipelines.find((p) => p.name === name);
     // Nothing listed at all is what a LocalAI that is down answers too: it is asked which, so the words say what happened.
@@ -338,9 +339,12 @@ function createLocalServer(deps = {}) {
     if (!answer || answer.status < 200 || answer.status >= 300) {
       return { ok: false, error: answer ? `LocalAI answered HTTP ${answer.status}: ${String(answer.body).replace(/\s+/g, ' ').slice(0, 200)}` : 'LocalAI did not answer.', ...before };
     }
-    // What it replaced is no longer asked for: unloaded, so two recognizers do not sit in memory. It loads again if named again.
+    // What it replaced is no longer asked for: unloaded, so two recognizers do not sit in memory. It loads again if
+    // named again. Not while a session still runs on it: a session keeps the recognizer its pipeline named when it was
+    // set up, and unloading it only makes its next sentence wait for it to load again (measured 2026-10-04). LocalAI's
+    // own idle watchdog lets it go once nobody uses it.
     for (const [stage, was] of [['transcription', pipeline.transcription], ['llm', pipeline.llm]]) {
-      if (patch[stage] && was && was !== patch[stage]) await send(port, 'POST', '/backend/shutdown', { model: was }, 15000);
+      if (patch[stage] && was && was !== patch[stage] && !keep.includes(was)) await send(port, 'POST', '/backend/shutdown', { model: was }, 15000);
     }
     return { ok: true, ...(await pipelines()) };
   }

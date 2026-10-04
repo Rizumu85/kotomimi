@@ -161,16 +161,24 @@ function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect 
     });
   }
 
-  /** One pipeline change at a time: the two legs of a run ask for the same recognizer at once. */
+  /** The recognizers the open sessions were set up on, with how many sessions each: none of them is unloaded by a change of the pipeline. */
+  const using = new Map();
+
+  /**
+   * One pipeline change at a time: the two legs of a run ask for the same
+   * recognizer at once. Answers the recognizer the session will run on — the
+   * one it named, or the pipeline's own when it named none.
+   */
   let chain = Promise.resolve();
   function prepare(route) {
     const next = chain.then(async () => {
-      if (!route.transcription) return;
-      const found = await info(true);
-      if (found.pipelines.find((p) => p.name === route.pipeline)?.transcription === route.transcription) return;
-      const answer = await setPipeline(route.pipeline, { transcription: route.transcription });
+      const found = await info(Boolean(route.transcription));
+      const current = found.pipelines.find((p) => p.name === route.pipeline)?.transcription ?? '';
+      if (!route.transcription || current === route.transcription) return route.transcription || current;
+      const answer = await setPipeline(route.pipeline, { transcription: route.transcription }, { keep: [...using.keys()] });
       cached = null;
       if (!answer?.ok) throw new Error(answer?.error || 'The model could not be chosen.');
+      return route.transcription;
     });
     chain = next.catch(() => {});
     return next;
@@ -191,6 +199,20 @@ function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect 
     const queue = [];
     let leaveTurn = () => {};
     let limit = null;
+    /** The recognizer this session runs on, counted among those in use until it ends. */
+    let held = '';
+    const hold = (recognizer) => {
+      if (!recognizer || ended) return;
+      held = recognizer;
+      using.set(held, (using.get(held) ?? 0) + 1);
+    };
+    const release = () => {
+      if (!held) return;
+      const left = (using.get(held) ?? 1) - 1;
+      if (left > 0) using.set(held, left);
+      else using.delete(held);
+      held = '';
+    };
     /** The session is set up — confirmed, refused, or over: the pipeline may change from here on. */
     const settled = () => {
       configured = true;
@@ -202,6 +224,7 @@ function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect 
       if (ended) return;
       ended = true;
       settled();
+      release();
       send(JSON.stringify(wireError('upstream_failed', message)));
       close(code, reason);
     };
@@ -210,8 +233,9 @@ function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect 
       if (ended) return settled();
       limit = setTimeout(settled, configureTimeoutMs);
       limit.unref?.();
-      return prepare(route).then(() => {
+      return prepare(route).then((recognizer) => {
         if (ended) return;
+        hold(recognizer);
         ws = connect(`ws://127.0.0.1:${port}/v1/realtime?model=${encodeURIComponent(route.pipeline)}`);
         ws.on('message', (data, isBinary) => {
           if (ended || isBinary) return;
@@ -246,6 +270,7 @@ function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect 
       close(code, reason) {
         ended = true;
         settled();
+        release();
         try {
           if (sendable(code)) ws?.close(code, String(reason ?? ''));
           else ws?.close();
