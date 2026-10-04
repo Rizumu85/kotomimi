@@ -93,6 +93,13 @@ export interface PipelineConfig extends RealtimeConfig {
   stages?: Stages;
   /** Present: nothing of the Realtime session is opened; `stages.speech` answers what it hears. */
   device?: DeviceHearing;
+  /**
+   * Present: the Realtime socket is this one, with no key — the LocalAI of this computer — whatever the credentials'
+   * endpoint is. The stages keep the credentials' own: a text model on the other device is still asked there.
+   */
+  socket?: { endpoint: string };
+  /** Present: before the socket opens, that server's pipeline is told its recognizer (`PipelineDeps.prepare`). */
+  prepare?: { pipeline: string; transcription: string };
 }
 
 export interface PipelineCredentials extends RealtimeCredentials {
@@ -108,6 +115,12 @@ export interface PipelineDeps {
   fetch: typeof fetch;
   /** This computer's own engines: the app's by default, fakes in tests. */
   engines: LocalEngines;
+  /**
+   * Names the recognizer in a pipeline of this computer's LocalAI (`PipelineConfig.prepare`). A LocalAI takes no
+   * recognizer but its pipeline's own in a session that only transcribes, and a session keeps the one the pipeline
+   * named when it was configured (measured 2026-10-04): so it is named first. Absent: nothing is done.
+   */
+  prepare(pipeline: string, transcription: string): Promise<unknown>;
 }
 
 /** The wrapper's own refs start here: the inner adapter counts from 1 and never reaches it. */
@@ -490,17 +503,26 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
     const key = api.key ? request.credentials[api.key] : undefined;
     return createLocalInferenceAdapter({ ...engines, asr: () => createApiAsr({ baseUrl: api.baseUrl, model: api.model, ...(key ? { key } : {}), fetch: deps.fetch ?? fetchNow, clock: request.clock }) });
   };
+  /** The Realtime session's own request: on the socket the config names, when it names one. */
+  const dialled = (request: StartRequest<PipelineConfig, PipelineCredentials>): StartRequest<PipelineConfig, PipelineCredentials> => {
+    const { socket } = request.config;
+    return socket ? { ...request, credentials: { ...request.credentials, endpoint: socket.endpoint, apiKey: '' } } : request;
+  };
   return {
     async start(request, events) {
-      const { stages, device } = request.config;
-      if (!device && (!stages || (!stages.speech && !stages.typed))) return realtime.start(request, events);
+      const { stages, device, prepare } = request.config;
+      // The pipeline is told its recognizer before any socket opens. Best done, not a condition: one that could not be
+      // told keeps the recognizer it has, and the session still hears. (Nothing is waited for where nothing is asked:
+      // a start opens its socket in the same turn.)
+      if (prepare && deps.prepare && !device) await deps.prepare(prepare.pipeline, prepare.transcription).catch(() => undefined);
+      if (!device && (!stages || (!stages.speech && !stages.typed))) return realtime.start(dialled(request), events);
       const leg = new PipelineLeg(request, stages ?? { speech: null, typed: null }, events, deps.fetch ?? fetchNow, engines);
       // What hears and what answers load together; either failing lets the other go.
       const opening = leg.open();
       opening.catch(() => {});
       let session: AdapterSession;
       try {
-        session = await (device ? hearing(device, request).start(hearingRequest(request, device, stages?.heard), leg.inner) : realtime.start(request, leg.inner));
+        session = await (device ? hearing(device, request).start(hearingRequest(request, device, stages?.heard), leg.inner) : realtime.start(dialled(request), leg.inner));
       } catch (error) {
         leg.abandon();
         throw error;

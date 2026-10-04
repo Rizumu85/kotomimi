@@ -62,7 +62,8 @@ import { CHECK_TIMEOUT_MS } from './check';
 import { SERVER_SILENT, isKotomimiServer, kindOf, KOTOMIMI_HOST, modelsFor, serverDefaultModel, type LocalAIModel, type LocalAIModelKind } from './localaiModels';
 import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
-import { coachIs, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, needsServer, PLACE_FIELDS, PLACES, watchDeviceModels, type Place } from './localaiDevice';
+import { coachIs, cutsSentencesHere, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, HERES, needsServer, PLACE_FIELDS, PLACES, watchDeviceModels, type Here, type Place } from './localaiDevice';
+import { setLocalPipeline } from '../../lib/lan/localServer';
 import { LocalAITurnDetectionControls, LocalAITurnDetectionHelp, LocalAITurnDetectionSummary } from './LocalAIEngine';
 import { KotomimiIcon } from './LocalAIIcon';
 import { LocalAISettingsView } from './LocalAISettings';
@@ -110,6 +111,19 @@ export interface LocalAISettings extends RealtimeSettings {
   coachDeviceModel: string;
   /** The user's own feedback instructions; blank: chosen by the two languages (`coachPrompt.ts`). `{{SPOKEN}}` and `{{NATIVE}}` are filled in. */
   coachPrompt: string;
+  /**
+   * On this computer, who runs each stage: the app's own models, or the LocalAI installed here — and then which of
+   * its models. The recognizer may be blank: the one its pipeline names.
+   */
+  asrHere: Here;
+  asrHereModel: string;
+  translateHere: Here;
+  translateHereModel: string;
+  coachHere: Here;
+  coachHereModel: string;
+  /** That LocalAI's address (`127.0.0.1:8080`) and its Realtime pipeline, as they were when it was chosen. */
+  hereAddress: string;
+  herePipeline: string;
   /** The other device wants an access key: a credential field appears. */
   serverNeedsKey: boolean;
   /** This computer's own models, picked per stage of a direction as Local Inference picks them; a blank pick is the best one downloaded. */
@@ -155,6 +169,14 @@ export const LOCALAI_DEFAULTS: LocalAISettings = {
   coachNeedsKey: true,
   coachDeviceModel: '',
   coachPrompt: '',
+  asrHere: 'app',
+  asrHereModel: '',
+  translateHere: 'app',
+  translateHereModel: '',
+  coachHere: 'app',
+  coachHereModel: '',
+  hereAddress: '127.0.0.1:8080',
+  herePipeline: '',
   serverNeedsKey: false,
   selections: {},
   vadThreshold: LOCAL_INFERENCE_DEFAULTS.vadThreshold,
@@ -254,7 +276,8 @@ function migratePlaces(stored: Readonly<Record<string, unknown>>, legacy: Readon
 }
 
 export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>, inputs: MigrationInputs): LocalAISettings {
-  const text = (k: 'asrModel' | 'asrApiBaseUrl' | 'asrApiModel' | 'translateBaseUrl' | 'coachDeviceModel' | 'coachPrompt') => (typeof stored[k] === 'string' ? (stored[k] as string) : LOCALAI_DEFAULTS[k]);
+  const text = (k: 'asrModel' | 'asrApiBaseUrl' | 'asrApiModel' | 'translateBaseUrl' | 'coachDeviceModel' | 'coachPrompt' | 'asrHereModel' | 'translateHereModel' | 'coachHereModel' | 'hereAddress' | 'herePipeline') => (typeof stored[k] === 'string' ? (stored[k] as string) : LOCALAI_DEFAULTS[k]);
+  const here = (k: 'asrHere' | 'translateHere' | 'coachHere'): Here => (HERES.includes(stored[k] as Here) ? (stored[k] as Here) : LOCALAI_DEFAULTS[k]);
   const flag = (k: 'asrApiNeedsKey' | 'coach' | 'serverNeedsKey') => (typeof stored[k] === 'boolean' ? (stored[k] as boolean) : LOCALAI_DEFAULTS[k]);
   const number = (k: (typeof VAD_FIELDS)[number]) => (typeof stored[k] === 'number' && Number.isFinite(stored[k]) ? (stored[k] as number) : LOCALAI_DEFAULTS[k]);
   const selections = stored.selections;
@@ -269,6 +292,14 @@ export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>
     coach: flag('coach'),
     coachDeviceModel: text('coachDeviceModel'),
     coachPrompt: text('coachPrompt'),
+    asrHere: here('asrHere'),
+    asrHereModel: text('asrHereModel'),
+    translateHere: here('translateHere'),
+    translateHereModel: text('translateHereModel'),
+    coachHere: here('coachHere'),
+    coachHereModel: text('coachHereModel'),
+    hereAddress: text('hereAddress'),
+    herePipeline: text('herePipeline'),
     ...migratePlaces(stored, inputs.legacy ?? {}),
     serverNeedsKey: flag('serverNeedsKey'),
     selections: selections && typeof selections === 'object' && !Array.isArray(selections) ? (selections as Selections) : {},
@@ -313,6 +344,29 @@ export { needsServer, PLACES, type Place } from './localaiDevice';
 
 /** A leg of this run only transcribes on the other device — its answers come from a stage of its own — so LocalAI lets no recognizer be chosen (`transcriptionFor`). */
 export const hasTranscriptionLeg = (s: Pick<LocalAISettings, 'asrVia' | 'translateAt' | 'translateServerModel' | 'coach'>) => s.asrVia === 'server' && (s.translateAt !== 'server' || s.translateServerModel.trim() !== '' || s.coach);
+
+/** This computer's LocalAI: where its models are asked over HTTP, and where its Realtime socket is. */
+const hereHost = (s: Pick<LocalAISettings, 'hereAddress'>) => s.hereAddress.trim() || LOCALAI_DEFAULTS.hereAddress;
+export const hereBaseUrl = (s: Pick<LocalAISettings, 'hereAddress'>) => `http://${hereHost(s)}/v1`;
+const hereSocket = (s: Pick<LocalAISettings, 'hereAddress'>) => `ws://${hereHost(s)}/v1/realtime`;
+
+/**
+ * The settings as everything past the stage cards reads them. A text stage
+ * this computer's LocalAI runs is a text model at an address — what an API
+ * is — with no key: read as one, it is checked, built and run by the code an
+ * API's is. (What hears there is no API: a Realtime session, built as such.)
+ */
+export function settled(s: LocalAISettings): LocalAISettings {
+  const translates = s.translateAt === 'device' && s.translateHere === 'localai';
+  const coaches = s.coachAt === 'device' && s.coachHere === 'localai';
+  if (!translates && !coaches) return s;
+  const base = hereBaseUrl(s);
+  return {
+    ...s,
+    ...(translates ? { translateAt: 'api' as const, translateBaseUrl: base, translateModel: s.translateHereModel, translateNeedsKey: false } : {}),
+    ...(coaches ? { coachAt: 'api' as const, coachBaseUrl: base, coachModel: s.coachHereModel, coachNeedsKey: false } : {}),
+  };
+}
 
 /** Every field is drawn by the provider's own view, beside the stage it belongs to (`LocalAIAssist`): the address with the search that finds it, a key with the API it opens. */
 const own = (key: string, labelKey: string, secret: boolean, placeholderKey = labelKey): CredentialField => ({ key, labelKey, secret, placeholderKey, drawnByAssist: true });
@@ -424,6 +478,8 @@ function otherServers(k: LocalAICredentials, s: LocalAISettings): OtherServer[] 
   const out: OtherServer[] = [];
   const base = (url: string) => url.trim().replace(/\/+$/, '');
   if (s.asrVia === 'api' && s.asrApiBaseUrl.trim()) out.push({ slot: 'asr', name: 'speech recognition', base: base(s.asrApiBaseUrl), key: k.asrKey });
+  // This computer's LocalAI, when it hears: reached like any other, so that one that is not running is said before Start.
+  if (hearsByLocalServer(s)) out.push({ slot: 'asr', name: 'speech recognition', base: hereBaseUrl(s), key: undefined });
   if (s.translateAt === 'api' && s.translateBaseUrl.trim()) out.push({ slot: 'translate', name: 'translation', base: base(s.translateBaseUrl), key: k.translateKey });
   if (coachIs(s, 'api') && s.coachBaseUrl.trim()) out.push({ slot: 'coach', name: 'feedback', base: base(s.coachBaseUrl), key: k.coachKey });
   return out;
@@ -634,11 +690,13 @@ const serverKeyOf = (s: Pick<LocalAISettings, 'serverNeedsKey'>): { key?: StageK
 export function buildLocalAI(context: SessionContext, s: LocalAISettings, shared: SharedSettings): LocalAIConfig | ProviderRefusal {
   const models: readonly LocalAIModel[] = shared.models;
   const { source, target } = context.direction;
-  // Heard without the other device: by this computer's own recognizer, or by an API it uploads each sentence to.
-  const hearsHere = s.asrVia !== 'server';
+  // Heard by this computer's LocalAI: a Realtime session as the other device's is, on its own socket.
+  const hearsLocal = hearsByLocalServer(s);
+  // Heard without any Realtime session: by this computer's own recognizer, or by an API it uploads each sentence to.
+  const hearsHere = cutsSentencesHere(s);
   // The other device's pipeline: what its Realtime socket runs, and — on another Kotomimi — the name its own choice of translation model is asked by.
   const pipeline = needsServer(s) ? effectiveLocalAIModel(s, models) : '';
-  const model = hearsHere ? '' : pipeline;
+  const model = hearsLocal ? s.herePipeline.trim() || LOCALAI_DEFAULT_MODEL : hearsHere ? '' : pipeline;
   const kotomimi = needsServer(s) && isKotomimiServer(models);
   // The speaker alone is coached: the participant leg always hears the other side, and translates it.
   const coached = s.coach && !shared.reversed(context.direction);
@@ -651,7 +709,7 @@ export function buildLocalAI(context: SessionContext, s: LocalAISettings, shared
   const apiModel = s.translateModel.trim();
   const serverModel = s.translateServerModel.trim();
   // No session of the device's own pipeline answers this leg's text: one of its models is asked instead.
-  const asksServer = s.translateAt === 'server' && (serverModel !== '' || kotomimi || hearsHere || coached);
+  const asksServer = s.translateAt === 'server' && (serverModel !== '' || kotomimi || hearsHere || hearsLocal || coached);
   const askedServerModel = serverModel || (kotomimi && pipeline ? pipeline : serverDefaultModel(models, 'translate'));
 
   // OpenAI Realtime's builder for the instructions and the detection, with the model pinned so it picks no other.
@@ -737,12 +795,15 @@ export function buildLocalAI(context: SessionContext, s: LocalAISettings, shared
     ...config,
     model,
     modalities: ['text'],
-    transcription: transcriptionFor(s, heard, Boolean(stages?.speech), kotomimi),
+    // This computer's LocalAI is told its recognizer through its pipeline, before the socket opens: the session names none.
+    transcription: transcriptionFor(s, heard, Boolean(stages?.speech) || hearsLocal, kotomimi && !hearsLocal),
     anchor: false,
     commitAnswers: true,
     ...(stages?.speech && !device ? { transcribeOnly: true as const } : {}),
     ...(stages ? { stages } : {}),
     ...(device ? { device } : {}),
+    ...(hearsLocal ? { socket: { endpoint: hereSocket(s) } } : {}),
+    ...(hearsLocal && s.asrHereModel.trim() ? { prepare: { pipeline: model, transcription: s.asrHereModel.trim() } } : {}),
   };
 }
 
@@ -783,7 +844,7 @@ export const localaiLanguages: Provider<LocalAISettings, never, never>['language
   sources: (s, context) => (s.asrVia === 'device' ? REALTIME_LANGUAGES : realtimeLanguages.sources(s, context)),
 };
 
-const adapter = createPipelineAdapter();
+const adapter = createPipelineAdapter({ prepare: (pipeline, transcription) => setLocalPipeline(pipeline, { transcription }) });
 
 export const localaiProvider: Provider<LocalAISettings, LocalAICredentials, LocalAIConfig> & { id: 'localai' } = {
   id: 'localai',
@@ -798,13 +859,16 @@ export const localaiProvider: Provider<LocalAISettings, LocalAICredentials, Loca
   // This computer's own models are chosen and downloaded in the stage's own card (`LocalAIAssist`): there is no page of them apart.
   TurnDetection: { Summary: LocalAITurnDetectionSummary, Controls: LocalAITurnDetectionControls, Help: LocalAITurnDetectionHelp },
 
-  credentials: localaiCredentials,
-  check: checkLocalAI,
+  // A stage this computer's LocalAI runs is read as the text model at an address it is (`settled`): no key is asked for it.
+  credentials: { ...localaiCredentials, fields: (s) => localaiCredentials.fields(settled(s)) },
+  check: (k, s, ctx) => checkLocalAI(k, settled(s), ctx),
   // What decides the credential fields, the endpoints the check reaches, and the models it asks this computer for.
   checkReads: [
     'asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'coachDeviceModel', 'serverNeedsKey', 'selections',
     // The models a start needs named (`unnamedStage`).
     'model', 'translateModel', 'translateServerModel', 'coachModel', 'coachServerModel',
+    // On this computer: by the app's own models, or by the LocalAI installed here, and then which of its models.
+    'asrHere', 'translateHere', 'translateHereModel', 'coachHere', 'coachHereModel', 'hereAddress',
   ],
   // This computer's models are per direction, and each leg needs its own.
   checkReadsDirection: true,
@@ -814,11 +878,11 @@ export const localaiProvider: Provider<LocalAISettings, LocalAICredentials, Loca
 
   speech: 'never',
   // A coached speaker's session only transcribes: typed text is answered by the translation stage, which an API with no model named cannot be.
-  textInput: (s) => !s.coach || s.translateAt !== 'api' || (s.translateBaseUrl.trim() !== '' && s.translateModel.trim() !== ''),
+  textInput: (stored) => { const s = settled(stored); return !s.coach || s.translateAt !== 'api' || (s.translateBaseUrl.trim() !== '' && s.translateModel.trim() !== ''); },
   boundaries: () => 'provider',
   turns: () => ['auto', 'manual'],
 
-  build: buildLocalAI,
+  build: (context, s, shared) => buildLocalAI(context, settled(s), shared),
   describe: describeLocalAI,
   start: adapter.start,
 

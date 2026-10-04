@@ -12,7 +12,7 @@ import { LocalInferenceTurnDetectionControls, LocalInferenceTurnDetectionHelp, L
 import { LOCAL_INFERENCE_DEFAULTS, type LocalInferenceSettings } from '../localInference/settings';
 // Type only: `localai.ts` imports these views, and a value import back would close a cycle.
 import type { LocalAISettings as S } from './localai';
-import { deviceChoices, deviceLanguage, deviceNeeds, type DeviceNeed } from './localaiDevice';
+import { cutsSentencesHere, deviceChoices, deviceLanguage, deviceNeeds, type DeviceNeed } from './localaiDevice';
 import { RealtimeTurnDetectionControls, RealtimeTurnDetectionHelp, RealtimeTurnDetectionSummary } from './RealtimeTurnDetection';
 
 const FALLBACK_PAIR: LanguagePair = { source: 'ja', target: 'en' };
@@ -42,13 +42,13 @@ export function useDeviceSettings(settings: S, update: (patch: Partial<S>) => vo
 
 /** The slots a run would load on this computer, each once: both legs' recognizers may be the same slot. */
 export function useDeviceSlots(settings: S, pair: LanguagePair, legs: readonly LegName[]): DeviceNeed[] {
-  const { asrVia, translateAt, coach, coachAt, selections } = settings;
+  const { asrVia, translateAt, coach, coachAt, selections, asrHere, translateHere, coachHere } = settings;
   const { source, target } = pair;
   return useMemo(() => {
     const seen = new Set<string>();
-    return deviceNeeds(deviceChoices({ asrVia, translateAt, coach, coachAt, selections }), { source, target }, legs)
+    return deviceNeeds(deviceChoices({ asrVia, translateAt, coach, coachAt, selections, asrHere, translateHere, coachHere }), { source, target }, legs)
       .filter((need) => !seen.has(`${need.dir}|${need.stage}`) && Boolean(seen.add(`${need.dir}|${need.stage}`)));
-  }, [asrVia, translateAt, coach, coachAt, selections, source, target, legs]);
+  }, [asrVia, translateAt, coach, coachAt, selections, asrHere, translateHere, coachHere, source, target, legs]);
 }
 
 /** Local Inference's turn-detection views over this provider's settings: the knobs of the recognizer the speaker's leg loads. */
@@ -72,13 +72,13 @@ function DeviceTurnHelp(props: SettingsProps<S>) {
   return <LocalInferenceTurnDetectionHelp {...useDeviceTurnProps(props)} />;
 }
 
-/** Turn detection is whoever hears: this computer's own knobs, or the Realtime server's. */
+/** Turn detection is whoever hears: this computer's own knobs, or a Realtime server's — the other device's, or this computer's LocalAI. */
 export function LocalAITurnDetectionSummary(props: SettingsProps<S>) {
-  return props.settings.asrVia !== 'server' ? <DeviceTurnSummary {...props} /> : <RealtimeTurnDetectionSummary {...props} />;
+  return cutsSentencesHere(props.settings) ? <DeviceTurnSummary {...props} /> : <RealtimeTurnDetectionSummary {...props} />;
 }
 export function LocalAITurnDetectionControls(props: SettingsProps<S>) {
-  return props.settings.asrVia !== 'server' ? <DeviceTurnControls {...props} /> : <RealtimeTurnDetectionControls {...props} />;
+  return cutsSentencesHere(props.settings) ? <DeviceTurnControls {...props} /> : <RealtimeTurnDetectionControls {...props} />;
 }
 export function LocalAITurnDetectionHelp(props: SettingsProps<S>) {
-  return props.settings.asrVia !== 'server' ? <DeviceTurnHelp {...props} /> : <RealtimeTurnDetectionHelp {...props} />;
+  return cutsSentencesHere(props.settings) ? <DeviceTurnHelp {...props} /> : <RealtimeTurnDetectionHelp {...props} />;
 }

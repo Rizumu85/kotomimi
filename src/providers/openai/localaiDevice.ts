@@ -34,18 +34,38 @@ export type Place = (typeof PLACES)[number];
  */
 export const PLACE_FIELDS = ['translateAt', 'translateServerModel', 'translateModel', 'translateNeedsKey', 'coachAt', 'coachServerModel', 'coachBaseUrl', 'coachModel', 'coachNeedsKey'] as const;
 
+/**
+ * Who runs a stage placed on this computer: the app's own models, or the
+ * LocalAI installed here (`electron/local-server.js`) — a model server on
+ * the same computer, with models the app cannot run itself. To the stage
+ * cards both are "this computer"; to everything that loads the app's own
+ * models, a stage the LocalAI runs is somewhere else.
+ */
+export const HERES = ['app', 'localai'] as const;
+export type Here = (typeof HERES)[number];
+
 /** Where each stage runs. The feedback's place counts only while the speaker is coached. */
 export interface StagePlacement {
   asrVia: Place;
   translateAt: Place;
   coach: boolean;
   coachAt: Place;
+  /** On this computer: by whom. Absent: the app's own models. */
+  asrHere?: Here;
+  translateHere?: Here;
+  coachHere?: Here;
 }
 
 /** The settings a device stage reads: where each stage runs, and the picks. */
 export interface DeviceChoices extends StagePlacement {
   selections: Selections;
 }
+
+/** This computer's LocalAI hears: a Realtime session, as another device's is, on the loopback. */
+export const hearsByLocalServer = (s: Pick<StagePlacement, 'asrVia' | 'asrHere'>): boolean => s.asrVia === 'device' && s.asrHere === 'localai';
+
+/** The app's own recognizer hears, or an API it uploads each sentence to: this computer cuts the sentences itself. */
+export const cutsSentencesHere = (s: Pick<StagePlacement, 'asrVia' | 'asrHere'>): boolean => s.asrVia !== 'server' && !hearsByLocalServer(s);
 
 /** The feedback runs at this place: the speaker is coached, and that is where. */
 export const coachIs = (s: Pick<StagePlacement, 'coach' | 'coachAt'>, place: Place): boolean => s.coach && s.coachAt === place;
@@ -55,9 +75,10 @@ export function needsServer(s: StagePlacement): boolean {
   return s.asrVia === 'server' || s.translateAt === 'server' || coachIs(s, 'server');
 }
 
-/** The stored settings as the device stages read them. */
+/** The stored settings as the device stages read them: a stage this computer's LocalAI runs asks nothing of the app's own models. */
 export function deviceChoices(s: DeviceChoices): DeviceChoices {
-  return { asrVia: s.asrVia, translateAt: s.translateAt, coach: s.coach, coachAt: s.coachAt, selections: s.selections };
+  const own = (place: Place, here: Here | undefined): Place => (place === 'device' && here === 'localai' ? 'api' : place);
+  return { asrVia: own(s.asrVia, s.asrHere), translateAt: own(s.translateAt, s.translateHere), coach: s.coach, coachAt: own(s.coachAt, s.coachHere), selections: s.selections };
 }
 
 /**
