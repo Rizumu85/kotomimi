@@ -67,9 +67,9 @@ module.exports = {
     ],
     device: ['This computer', '这台电脑', '這台電腦'],
     deviceDesc: [
-      'Models downloaded by the app run right here. Nothing else is needed; a GPU helps.',
-      '用应用下载的模型，全部在本机运行。不需要别的设备；有独立显卡会更快。',
-      '用應用程式下載的模型，全部在本機執行。不需要別的裝置；有獨立顯示卡會更快。',
+      'Speech recognition runs right here, on models the app downloads; translation uses the online translator until you download a model for it. Nothing else is needed; a GPU helps.',
+      '语音识别用应用下载的模型在本机运行；翻译先用在线翻译，下载翻译模型后也能在本机完成。不需要别的设备；有独立显卡会更快。',
+      '語音辨識用應用程式下載的模型在本機執行；翻譯先用線上翻譯，下載翻譯模型後也能在本機完成。不需要別的裝置；有獨立顯示卡會更快。',
     ],
     tryServer: ['Connect', '连接', '連線'],
     addressMissing: [

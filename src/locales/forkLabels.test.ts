@@ -50,3 +50,13 @@ describe("the fork's instructions name what the screen shows", () => {
     expect(forkStrings(CATALOGS.zh_TW).filter(([, text]) => text.includes('提供者')).map(([path]) => path)).toEqual([]);
   });
 });
+
+describe("the wizard's card for this computer", () => {
+  it('says the translation starts online, as the step under it does: the card is chosen to keep things here', () => {
+    // Chosen, the translation runs on this computer, and with no model downloaded yet that is the online translator (`bing-translator`).
+    for (const [lang, online] of [['en', 'online translator'], ['zh_CN', '在线翻译'], ['zh_TW', '線上翻譯']] as const) {
+      expect(at(CATALOGS[lang], 'fork.wizard.deviceNotice'), lang).toContain(online);
+      expect(at(CATALOGS[lang], 'fork.wizard.deviceDesc'), lang).toContain(online);
+    }
+  });
+});

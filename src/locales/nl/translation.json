@@ -1393,7 +1393,7 @@
       "server": "Another device on my network",
       "serverDesc": "The models run on another computer: a Kotomimi with sharing turned on, or a model server such as LocalAI. This computer stays light.",
       "device": "This computer",
-      "deviceDesc": "Models downloaded by the app run right here. Nothing else is needed; a GPU helps.",
+      "deviceDesc": "Speech recognition runs right here, on models the app downloads; translation uses the online translator until you download a model for it. Nothing else is needed; a GPU helps.",
       "tryServer": "Connect",
       "addressMissing": "Choose a device from the list above, or type its address, for example 192.168.1.10:8790.",
       "serverFound": "Connected — it offers {{count}} model(s).",
