@@ -85,6 +85,6 @@ describe('recognition by an API: the check', () => {
   it('is refused by the API\'s 401: the key is wrong', async () => {
     const fetch = vi.fn(async () => new Response('{}', { status: 401 }));
     const result = await createLocalAICheck({ fetch: fetch as unknown as typeof globalThis.fetch })(K, settings({ ...API, translateAt: 'device' }), ctx);
-    expect(result).toMatchObject({ ok: false, code: 'auth' });
+    expect(result).toMatchObject({ ok: false, code: 'api_key_refused' });
   });
 });

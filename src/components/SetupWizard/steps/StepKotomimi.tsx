@@ -24,6 +24,7 @@ import { useProviderStore } from '../../../stores/providerStore';
 import { useLanStore } from '../../../stores/lanStore';
 import { canFindServers } from '../../../lib/lan/discover';
 import { useAuthContext } from '../../providers/useAuthContext';
+import { checkErrorWords } from '../../../lib/provider/checkError';
 import { readCredentials, isMissing } from '../../../lib/provider/credentials';
 import { noticeText } from '../../../lib/view/noticeText';
 import { describeCause } from '../../../lib/diagnostics/describeCause';
@@ -119,8 +120,10 @@ const StepKotomimi: React.FC<Props> = ({ draft, dispatch, skipButton }) => {
         setMessage({ ok: false, text: noticeText(t, { code: result.code, params: result.params, message: result.reason }) });
       }
     } catch (error) {
-      // It could not be reached: say why, in the server's own words where it has any.
-      if (!mine.signal.aborted) setMessage({ ok: false, text: t('fork.wizard.serverUnreachable', { message: describeCause(error) }) });
+      // It could not be reached: in the words the settings use where the check says what went wrong (`CheckError`), else the server's own.
+      if (mine.signal.aborted) return;
+      const words = checkErrorWords(error);
+      setMessage({ ok: false, text: words ? noticeText(t, { ...words, message: describeCause(error) }) : t('fork.wizard.serverUnreachable', { message: describeCause(error) }) });
     } finally {
       if (inFlight.current === mine) setValidating(false);
     }

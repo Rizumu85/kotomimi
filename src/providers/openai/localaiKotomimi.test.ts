@@ -66,7 +66,7 @@ describe('another Kotomimi\'s model lists', () => {
   it('are asked with the access key when that Kotomimi has one, and a wrong key is the key\'s refusal', async () => {
     const fetch = serve('s3cret');
     expect(await check(fetch, settings({ serverNeedsKey: true }), { ...K, apiKey: 's3cret' })).toMatchObject({ ok: true });
-    expect(await check(fetch, settings({ serverNeedsKey: true }), { ...K, apiKey: 'wrong' })).toMatchObject({ ok: false, code: 'auth' });
+    expect(await check(fetch, settings({ serverNeedsKey: true }), { ...K, apiKey: 'wrong' })).toMatchObject({ ok: false, code: 'server_key_refused' });
   });
 
   it('list, for a text stage that names it as its own server, its pipeline and translation models only', async () => {

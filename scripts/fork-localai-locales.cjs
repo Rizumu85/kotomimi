@@ -180,6 +180,53 @@ const PROVIDER = {
     '另一台裝置需要存取金鑰。請在設定的「另一台裝置」一欄裡填寫。',
   ],
 
+  // The other device, or a stage's API, did not answer as it should: where to look. Said in the cards, the wizard, and at Start.
+  serverUnreachable: [
+    'The other device ({{address}}) did not answer. Check that it is on and on the same network as this computer, and that Kotomimi there is sharing (or its model server is running); then check again.',
+    '另一台设备（{{address}}）没有回应。请确认它开着、和这台电脑连着同一个网络，那边的 Kotomimi 开着共享（或者模型服务器在运行），然后再检查一次。',
+    '另一台裝置（{{address}}）沒有回應。請確認它開著、和這台電腦連著同一個網路，那邊的 Kotomimi 開著共享（或者模型伺服器在執行），然後再檢查一次。',
+  ],
+  checkSlow: [
+    'No answer within {{seconds}} s. The address may be wrong, or the device busy loading a model; check again in a moment.',
+    '等了 {{seconds}} 秒还没有回应。可能是地址不对，或者那台设备正忙着加载模型；稍等一下再检查一次。',
+    '等了 {{seconds}} 秒還沒有回應。可能是位址不對，或者那台裝置正忙著載入模型；稍等一下再檢查一次。',
+  ],
+  serverHttp: [
+    'The other device answered with an error (HTTP {{status}}). Restarting the app or the model server there usually helps.',
+    '另一台设备回应了错误（HTTP {{status}}）。通常重启那边的应用或模型服务器就好。',
+    '另一台裝置回應了錯誤（HTTP {{status}}）。通常重新啟動那邊的應用程式或模型伺服器就好。',
+  ],
+  serverNoModels: [
+    'The other device has no model yet: install or download one there first.',
+    '另一台设备上还没有任何模型，请先在那台设备上安装或下载。',
+    '另一台裝置上還沒有任何模型，請先在那台裝置上安裝或下載。',
+  ],
+  serverKeyNeeded: [
+    'The other device asks for an access key. Under "Another device", turn on "It asks for an access key" and enter the key set on that device.',
+    '另一台设备需要访问密钥。请在「另一台设备」一栏打开「它需要访问密钥」，填写那台设备设置的密钥。',
+    '另一台裝置需要存取金鑰。請在「另一台裝置」一欄開啟「它需要存取金鑰」，填寫那台裝置設定的金鑰。',
+  ],
+  serverKeyRefused: [
+    'The other device did not accept the access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options).',
+    '另一台设备不接受这个访问密钥。请填写那台设备设置的密钥（另一台 Kotomimi 的密钥在它共享的「选项」里）。',
+    '另一台裝置不接受這個存取金鑰。請填寫那台裝置設定的金鑰（另一台 Kotomimi 的金鑰在它共享的「選項」裡）。',
+  ],
+  apiUnreachable: [
+    'The API at {{address}} could not be reached. Check the address in its card, and that this computer is online.',
+    '连不上 API（{{address}}）。请检查对应卡片里的地址，以及这台电脑能不能上网。',
+    '連不上 API（{{address}}）。請檢查對應卡片裡的位址，以及這台電腦能不能上網。',
+  ],
+  apiKeyNeeded: [
+    'The API at {{address}} asks for a key. In its card, turn on "The API asks for a key" and enter it.',
+    'API（{{address}}）需要密钥。请在对应卡片里打开「这个 API 需要密钥」并填写。',
+    'API（{{address}}）需要金鑰。請在對應卡片裡開啟「這個 API 需要金鑰」並填寫。',
+  ],
+  apiKeyRefused: [
+    'The API at {{address}} did not accept the key. Check the API key in its card.',
+    'API（{{address}}）不接受这个密钥。请检查对应卡片里的 API 密钥。',
+    'API（{{address}}）不接受這個金鑰。請檢查對應卡片裡的 API 金鑰。',
+  ],
+
   // Auto Detect where nothing detects the language: said when it is checked, and when Start is pressed.
   sourceAuto: [
     'Choose the language you speak: Auto Detect cannot be used with this setup. Translation on this computer, and speech recognition by another Kotomimi, need to be told the language.',

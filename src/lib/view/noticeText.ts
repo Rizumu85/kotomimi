@@ -96,6 +96,16 @@ export const NOTICE_ALIASES: Readonly<Record<string, string>> = {
   server_key_missing: 'providers.localai.serverKeyMissing',
   // Fork: Auto Detect where nothing on the Kotomimi provider's way detects the language — a language to choose, not a model to download.
   source_auto: 'providers.localai.sourceAuto',
+  // Fork: the Kotomimi provider's other device or a stage's API did not answer as it should — where to look, not the check's English.
+  server_unreachable: 'providers.localai.serverUnreachable',
+  check_slow: 'providers.localai.checkSlow',
+  server_http: 'providers.localai.serverHttp',
+  server_no_models: 'providers.localai.serverNoModels',
+  server_key_needed: 'providers.localai.serverKeyNeeded',
+  server_key_refused: 'providers.localai.serverKeyRefused',
+  api_unreachable: 'providers.localai.apiUnreachable',
+  api_key_needed: 'providers.localai.apiKeyNeeded',
+  api_key_refused: 'providers.localai.apiKeyRefused',
   connection_lost: 'mainPanel.sonioxConnectionLost',
   // Kizuna Soniox's lease refused a start (Stage 2 Kizuna Soniox, ruling 11): the sentences name Soniox, so the codes keep it.
   soniox_service_unavailable: 'mainPanel.sonioxServiceUnavailable',

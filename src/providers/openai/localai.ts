@@ -53,6 +53,7 @@ import type { LegName } from '../../lib/conversation/types';
 import type { Selections } from '../../lib/local-inference/selection/types';
 import { buildDefaultLocalPrompt } from '../../lib/local-inference/prompts';
 import { boundedFetch } from '../../lib/provider/boundedFetch';
+import { CheckError } from '../../lib/provider/checkError';
 import { AUTO } from '../../lib/provider/languages';
 import type { CheckContext, CheckResult, CredentialField, CredentialsMissing, MigrationInputs, Provider, ProviderRefusal, SharedSettings } from '../../lib/provider/types';
 import { admitLocalInference, type LocalInferenceConfig } from '../localInference/config';
@@ -412,6 +413,15 @@ function otherServers(k: LocalAICredentials, s: LocalAISettings): OtherServer[] 
   return out;
 }
 
+/** Where a Realtime endpoint is, as a person reads it: `ws://192.168.1.20:8790/v1/realtime` → `192.168.1.20:8790`. */
+function hostOf(endpoint: string): string {
+  try {
+    return new URL(endpoint).host || endpoint;
+  } catch {
+    return endpoint;
+  }
+}
+
 interface Listed { id: string; kotomimi: boolean }
 
 /** A model list's entries, each once; another Kotomimi names itself the owner of every model it shares. */
@@ -453,6 +463,12 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
   return async (k: LocalAICredentials, s: LocalAISettings, ctx: CheckContext): Promise<CheckResult> => {
     const doFetch = deps.fetch ?? ((input: RequestInfo | URL, init?: RequestInit) => fetch(input, init));
     const late = `A server did not answer its model list within ${CHECK_TIMEOUT_MS / 1000} s.`;
+    // The other device's and the APIs' failures are coded (`CheckError`, `providers.localai.*` by `noticeText`): a person reads
+    // where to look, not the check's English, which stays the message for the logs. The bound passing is one more.
+    const slow = (error: unknown): never => {
+      if (!ctx.signal?.aborted && error instanceof Error && error.message === late) throw new CheckError(late, 'check_slow', { seconds: CHECK_TIMEOUT_MS / 1000 });
+      throw error;
+    };
     const servers = needsServer(s) || otherServers(k, s).length > 0
       ? await boundedFetch({ clock, ms: CHECK_TIMEOUT_MS, signal: ctx.signal, late }, async (signal): Promise<CheckResult> => {
         const models: LocalAIModel[] = [];
@@ -464,12 +480,15 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
             if (signal.aborted) throw error;
             // Still a check that could not find out — thrown, the models it listed last are kept — but in words the cards
             // can tell, to offer the same device's Kotomimi (`SERVER_SILENT`).
-            throw new Error(`${SERVER_SILENT} (${k.endpoint}): ${error instanceof Error ? error.message : String(error)}`);
+            throw new CheckError(`${SERVER_SILENT} (${k.endpoint}): ${error instanceof Error ? error.message : String(error)}`, 'server_unreachable', { address: hostOf(k.endpoint) });
           }
-          if (response.status === 401 || response.status === 403) return { ok: false, code: 'auth', reason: `The server refused the access key (HTTP ${response.status}).` };
-          if (!response.ok) throw new Error(`The server answered its model list with HTTP ${response.status}.`);
+          if (response.status === 401 || response.status === 403) {
+            // None was sent: the key is asked for. One was: it is not the device's.
+            return { ok: false, code: k.apiKey ? 'server_key_refused' : 'server_key_needed', reason: `The server refused the access key (HTTP ${response.status}).` };
+          }
+          if (!response.ok) throw new CheckError(`The server answered its model list with HTTP ${response.status}.`, 'server_http', { status: response.status });
           const own = listed(await response.json());
-          if (own.length === 0) return { ok: false, reason: 'The server lists no model.' };
+          if (own.length === 0) return { ok: false, code: 'server_no_models', reason: 'The server lists no model.' };
 
           // What each model is for. LocalAI's own endpoint; any other server answers 404, or nothing, and the models stay unsorted.
           const kinds = new Map<string, LocalAIModelKind>();
@@ -492,9 +511,11 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
             answer = await doFetch(`${other.base}/models`, listing(other.key, signal));
           } catch (error) {
             if (signal.aborted) throw error;
-            throw new Error(`The ${other.name} model's server (${other.base}) could not be reached.`);
+            throw new CheckError(`The ${other.name} model's server (${other.base}) could not be reached.`, 'api_unreachable', { address: other.base });
           }
-          if (answer.status === 401 || answer.status === 403) return { ok: false, code: 'auth', reason: `The ${other.name} model's server refused the key (HTTP ${answer.status}).` };
+          if (answer.status === 401 || answer.status === 403) {
+            return { ok: false, code: other.key ? 'api_key_refused' : 'api_key_needed', params: { address: other.base }, reason: `The ${other.name} model's server refused the key (HTTP ${answer.status}).` };
+          }
           if (!answer.ok) continue;
           const theirs = listed(await answer.json().catch(() => null));
           // The speech recognition API's list is offered for its model field as it is: nothing says which of them hear.
@@ -524,7 +545,7 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
           }
         }
         return { ok: true, models };
-      })
+      }).catch(slow)
       : ({ ok: true, models: [] } as CheckResult);
     if (!servers.ok) return servers;
 

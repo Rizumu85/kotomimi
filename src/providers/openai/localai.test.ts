@@ -212,7 +212,8 @@ describe("LocalAI Realtime's check", () => {
 
   it('is refused by an API\'s 401 or 403; any other answer passes, and unreachable throws', async () => {
     const inUse = { ...LOCALAI_DEFAULTS, translateAt: 'api' as const, translateModel: 'gpt-4.1-mini', translateBaseUrl: 'https://api.example.com/v1', translateNeedsKey: false };
-    expect(await check(server({ other: async () => json({}, 401) }), inUse)).toMatchObject({ ok: false, code: 'auth' });
+    // No key was sent: the API is said to ask for one, by its address.
+    expect(await check(server({ other: async () => json({}, 401) }), inUse)).toMatchObject({ ok: false, code: 'api_key_needed', params: { address: 'https://api.example.com/v1' } });
     // Not every API lists its models: any other answer passes.
     expect(await check(server({ other: async () => json({}, 404) }), inUse)).toMatchObject({ ok: true });
     await expect(check(server({ other: async () => { throw new TypeError('Failed to fetch'); } }), inUse)).rejects.toThrow(/translation model's server \(https:\/\/api\.example\.com\/v1\) could not be reached/);

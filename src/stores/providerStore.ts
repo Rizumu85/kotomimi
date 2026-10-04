@@ -9,6 +9,7 @@
 import { create } from 'zustand';
 import type { LegName } from '../lib/conversation/types';
 import { describeCause, reportError, reportWarning } from '../lib/diagnostics/report';
+import { checkErrorWords } from '../lib/provider/checkError';
 import { isMissing, readCredentials } from '../lib/provider/credentials';
 import { normalizePair } from '../lib/provider/languages';
 import type { AnyProvider, AuthContext, CredentialValues, LanguagePair, ModelOption, Readiness } from '../lib/provider/types';
@@ -366,7 +367,8 @@ export const useProviderStore = create<ProviderStore>()((set, get) => {
           cause: error,
           dedupeKey: `readiness:${p.id}`,
         });
-        answer = { state: 'not-ready', reason: describeCause(error) };
+        // Fork: one that says what went wrong in a code of its own (`CheckError`) is worded by it, as a refusal is.
+        answer = { state: 'not-ready', reason: describeCause(error), ...(checkErrorWords(error) ?? {}) };
       }
       if (!newest()) return from ? answer : get().readiness[p.id] ?? UNKNOWN;
       return answered(answer, !threw);

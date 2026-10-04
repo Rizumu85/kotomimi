@@ -4,6 +4,7 @@ import type { SessionContext } from '../../lib/contract/adapter';
 import { noticeText } from '../../lib/view/noticeText';
 import zhCN from '../../locales/zh_CN/translation.json';
 import zhTW from '../../locales/zh_TW/translation.json';
+import { createVirtualClock } from '../../lib/contract/clock';
 import { useModelStore } from '../../stores/modelStore';
 import { buildLocalAI, createLocalAICheck, LOCALAI_DEFAULTS, localaiCredentials, type LocalAISettings } from './localai';
 import type { LocalAIModel } from './localaiModels';
@@ -126,5 +127,70 @@ describe('the words for Auto Detect where nothing detects the language', () => {
     expect(await noServer({ apiKey: '', endpoint: '' }, settings({ asrVia: 'api', asrApiBaseUrl: 'http://x/v1', asrApiModel: 'm', translateAt: 'api', translateBaseUrl: 'http://x/v1', translateModel: 'm' }), autoCtx)).toMatchObject({ ok: true });
     // The language named: this computer translates it (by the online translator, while nothing is downloaded).
     expect(await localaiServer(SERVER, settings({ translateAt: 'device' }), ctx)).toMatchObject({ ok: true });
+  });
+});
+
+describe('the words for another device or an API that does not answer as it should', () => {
+  const DEVICE = { apiKey: '', endpoint: 'ws://192.168.1.20:8790/v1/realtime' };
+  const localai = (catalog: unknown) => (catalog as { providers: { localai: Record<string, string> } }).providers.localai;
+  /** The catalog's sentence, its `{{name}}`s filled in: what the person reads. */
+  const filled = (text: string, params: Record<string, string | number> = {}) => text.replace(/\{\{(\w+)\}\}/g, (_, name: string) => String(params[name]));
+  type Answer = Response | Error | 'never';
+  /** The other device answers with `device`, any API with `api`. */
+  const checkWith = (device: Answer, api: Answer = new Response('{"data":[{"id":"m"}]}', { status: 200 }), clock = createVirtualClock(0)) => createLocalAICheck({
+    clock,
+    fetch: (async (url: RequestInfo | URL, init?: RequestInit) => {
+      const answer = String(url).startsWith('http://192.168.1.20:8790') ? device : api;
+      // As a real fetch does: no answer, until it is aborted.
+      if (answer === 'never') return new Promise<Response>((_, reject) => init?.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError'))));
+      if (answer instanceof Error) throw answer;
+      return answer.clone();
+    }) as unknown as typeof fetch,
+  });
+  /** What a check that answered or threw says, in each Chinese catalog: as the store holds it, and `noticeText` words it. */
+  async function said(run: Promise<unknown>): Promise<{ code?: string; params?: Record<string, string | number>; zh: string[] }> {
+    let notice: { code?: string; params?: Record<string, string | number>; message: string };
+    try {
+      const result = (await run) as { ok: boolean; code?: string; params?: Record<string, string | number>; reason?: string };
+      notice = { code: result.code, params: result.params, message: result.reason ?? '' };
+    } catch (error) {
+      const e = error as { code?: unknown; params?: Record<string, string | number>; message: string };
+      notice = { code: typeof e.code === 'string' ? e.code : undefined, params: e.params, message: e.message };
+    }
+    return { code: notice.code, params: notice.params, zh: [zhCN, zhTW].map((catalog) => noticeText(tIn(catalog as Catalog), notice)) };
+  }
+  const expectWords = (got: { code?: string; params?: Record<string, string | number>; zh: string[] }, key: string, params: Record<string, string | number> = {}) => {
+    expect(got.params ?? {}).toEqual(params);
+    expect(got.zh).toEqual([zhCN, zhTW].map((catalog) => {
+      expect(localai(catalog)[key], key).toBeTruthy();
+      return filled(localai(catalog)[key], params);
+    }));
+  };
+
+  it('a device that does not answer: where it is, and what to look at — not "Failed to fetch"', async () => {
+    expectWords(await said(checkWith(new TypeError('Failed to fetch'))(DEVICE, settings({}), ctx)), 'serverUnreachable', { address: '192.168.1.20:8790' });
+  });
+
+  it('a check that takes too long, a device that answers with an error, one with nothing to offer', async () => {
+    const clock = createVirtualClock(0);
+    const slow = said(checkWith('never', undefined, clock)(DEVICE, settings({}), ctx));
+    await Promise.resolve();
+    clock.advance(15_000);
+    expectWords(await slow, 'checkSlow', { seconds: 15 });
+    expectWords(await said(checkWith(new Response('', { status: 500 }))(DEVICE, settings({}), ctx)), 'serverHttp', { status: 500 });
+    expectWords(await said(checkWith(new Response('{"data":[]}', { status: 200 }))(DEVICE, settings({}), ctx)), 'serverNoModels');
+  });
+
+  it('an access key the device asks for, or does not take', async () => {
+    expectWords(await said(checkWith(new Response('', { status: 401 }))(DEVICE, settings({}), ctx)), 'serverKeyNeeded');
+    expectWords(await said(checkWith(new Response('', { status: 401 }))({ ...DEVICE, apiKey: 'wrong' }, settings({ serverNeedsKey: true }), ctx)), 'serverKeyRefused');
+  });
+
+  it('an API of a stage: unreachable, or asking for a key it was not given, or refusing the one it was', async () => {
+    const API = { asrVia: 'device', translateAt: 'api', translateBaseUrl: 'https://api.example.com/v1', translateModel: 'm' } as const;
+    const ok = new Response('{"data":[]}', { status: 200 });
+    expectWords(await said(checkWith(ok, new TypeError('Failed to fetch'))({ apiKey: '', endpoint: '' }, settings({ ...API, translateNeedsKey: false }), ctx)), 'apiUnreachable', { address: 'https://api.example.com/v1' });
+    expectWords(await said(checkWith(ok, new Response('', { status: 401 }))({ apiKey: '', endpoint: '' }, settings({ ...API, translateNeedsKey: false }), ctx)), 'apiKeyNeeded', { address: 'https://api.example.com/v1' });
+    expectWords(await said(checkWith(ok, new Response('', { status: 401 }))({ apiKey: '', endpoint: '', translateKey: 'sk-wrong' }, settings({ ...API, translateNeedsKey: true }), ctx)), 'apiKeyRefused', { address: 'https://api.example.com/v1' });
   });
 });
