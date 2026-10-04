@@ -223,14 +223,14 @@ describe('SubtitleBar exit button', () => {
   it('✕ calls onExit, on the electron surface', () => {
     const onExit = vi.fn();
     render(<SubtitleBar {...baseProps} surface="electron" onExit={onExit} />);
-    fireEvent.click(screen.getByLabelText('Exit subtitle mode'));
+    fireEvent.click(screen.getByLabelText('Back to the main window'));
     expect(onExit).toHaveBeenCalledTimes(1);
   });
 
   it('✕ calls onExit, on the extension-overlay surface', () => {
     const onExit = vi.fn();
     render(<SubtitleBar {...baseProps} surface="extension-overlay" onExit={onExit} />);
-    fireEvent.click(screen.getByLabelText('Exit subtitle mode'));
+    fireEvent.click(screen.getByLabelText('Back to the main window'));
     expect(onExit).toHaveBeenCalledTimes(1);
   });
 });

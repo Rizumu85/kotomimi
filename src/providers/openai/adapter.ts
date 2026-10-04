@@ -321,7 +321,8 @@ class RealtimeLeg implements AdapterSession {
       return;
     }
     // The 60-minute cap ends the run at once, in its words, whether or not the server closes the socket after it (ruling 14; choice 14).
-    if (refusal.code === 'segment_ended') {
+    // Fork: so does a sharing Kotomimi's end of a session left silent (`session_idle`).
+    if (refusal.code === 'segment_ended' || refusal.code === 'session_idle') {
       this.end({ failed: refusal });
       return;
     }

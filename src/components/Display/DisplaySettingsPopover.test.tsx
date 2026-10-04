@@ -196,8 +196,9 @@ describe('DisplaySettingsPopover', () => {
     subtitleRender.unmount();
 
     const conversationRender = render(<DisplaySettingsPopover source="conversation" />);
+    // Fork: the reading aids' two switches are drawn on every surface; none of the popover's own is.
     expect(
-      conversationRender.container.querySelector('.toggle-switch-component'),
+      conversationRender.container.querySelector('.toggle-switch-component:not(.reading-aid-toggle)'),
     ).toBeNull();
   });
 

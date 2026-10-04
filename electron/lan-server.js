@@ -18,6 +18,15 @@
 //   POST /v1/chat/completions
 //   WS   /v1/realtime
 //
+// A session left running is not left holding a model. A device that forgot
+// to stop keeps sending its microphone's silence, and whatever hears it stays
+// in memory for as long as the socket is open. So a device whose sockets
+// have carried no speech for `idleSessionMs` has them ended, with an error
+// that says why (`session_idle`, which the client words for its user); the
+// recognizer is then let go, as at any close. A device is judged by all its
+// sockets together: one leg of a run may be silent for as long as the other
+// is spoken in.
+//
 // Kept apart from main.js, with no Electron import, so its tests start a real
 // server on the loopback and talk to it.
 const http = require('http');
@@ -30,6 +39,12 @@ const MAX_BODY_BYTES = 1024 * 1024;
 const MAX_MESSAGE_BYTES = 4 * 1024 * 1024;
 /** The page has this long to answer a request before the caller is told it did not. */
 const REPLY_TIMEOUT_MS = 120_000;
+/** A device none of whose sockets has carried speech for this long has them ended. */
+const IDLE_SESSION_MS = 30 * 60_000;
+/** How often that is looked at. */
+const IDLE_CHECK_MS = 30_000;
+/** What a frame that means "someone is speaking" holds: the start of speech, or any word of a transcript. */
+const SPEECH = /"input_audio_buffer\.speech_started"|"conversation\.item\.input_audio_transcription\./;
 /** Sockets at once: each holds a recognizer in memory. */
 const MAX_SOCKETS = 6;
 
@@ -95,7 +110,7 @@ function sameKey(given, wanted) {
  * in a header, so a device searching the network (`lan-discover.js`) can list
  * this one by a name its owner knows.
  */
-function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname(), upstream = null }, handlers) {
+function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname(), upstream = null, idleSessionMs = IDLE_SESSION_MS, idleCheckMs = IDLE_CHECK_MS }, handlers) {
   const wanted = String(key ?? '');
   const NAMED = { ...CORS, 'X-Kotomimi-Name': encodeURIComponent(String(name).slice(0, 80)) };
   const allowed = (request) => wanted === '' || sameKey(keyOf(request), wanted);
@@ -106,6 +121,26 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
   const sockets = new Map();
   /** The model server's side of a socket that was passed on to it, by the same id. */
   const links = new Map();
+  /** The device each socket came from, and when speech was last carried for each device. */
+  const devices = new Map();
+  const spoken = new Map();
+  /** What goes to a device: noted when it says someone is speaking. */
+  const out = (id, ws, data) => {
+    if (ws.readyState !== 1) return false;
+    const text = String(data);
+    if (SPEECH.test(text)) spoken.set(devices.get(id), Date.now());
+    ws.send(text);
+    return true;
+  };
+  const idle = setInterval(() => {
+    const now = Date.now();
+    for (const [id, ws] of sockets) {
+      if (now - (spoken.get(devices.get(id)) ?? now) < idleSessionMs) continue;
+      if (ws.readyState === 1) ws.send(JSON.stringify({ type: 'error', error: { type: 'invalid_request_error', code: 'session_idle', message: `No speech for ${Math.round(idleSessionMs / 60_000)} minutes: the session was ended so this computer can let its models go. Start again to continue.` } }));
+      ws.close(1000, 'idle');
+    }
+  }, idleCheckMs);
+  idle.unref?.();
 
   const json = (response, status, body, headers = {}) => {
     const text = typeof body === 'string' ? body : JSON.stringify(body);
@@ -199,6 +234,10 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
     wss.handleUpgrade(request, socket, head, (ws) => {
       const id = `s${++nextId}`;
       sockets.set(id, ws);
+      const device = request.socket.remoteAddress ?? id;
+      devices.set(id, device);
+      // A device that opens a session is using this computer now: its quiet time starts over.
+      spoken.set(device, Date.now());
       // Whose the socket is. The page opens every session; the first `session.update` then says which recognizer is
       // wanted, and one of the model server's makes the socket its own from there on.
       let whose = upstream ? 'undecided' : 'page';
@@ -224,7 +263,7 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
           }
           const link = upstream.bridge(route, {
             update,
-            send: (data) => { if (ws.readyState === 1) ws.send(String(data)); },
+            send: (data) => { out(id, ws, data); },
             close: (code, reason) => ws.close(code, String(reason ?? '').slice(0, 120)),
           });
           links.set(id, link);
@@ -251,6 +290,8 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
       ws.on('close', () => {
         links.get(id)?.close();
         links.delete(id);
+        devices.delete(id);
+        if (![...devices.values()].includes(device)) spoken.delete(device);
         if (sockets.delete(id)) handlers.socketClose({ id });
       });
       ws.on('error', () => {});
@@ -292,9 +333,7 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
         /** One JSON text frame to a socket. */
         send(id, data) {
           const ws = sockets.get(id);
-          if (!ws || ws.readyState !== 1) return false;
-          ws.send(String(data));
-          return true;
+          return ws ? out(id, ws, data) : false;
         },
         closeSocket(id, code = 1000, reason = '') {
           sockets.get(id)?.close(code, String(reason).slice(0, 120));
@@ -303,6 +342,7 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
         count: () => sockets.size,
         /** Stops listening, ends every socket and answers every waiting request. */
         close() {
+          clearInterval(idle);
           for (const [id, pending] of waiting) {
             clearTimeout(pending.timer);
             refuse(pending.response, 503, 'stopped', 'Kotomimi stopped sharing.');
@@ -323,4 +363,4 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
   });
 }
 
-module.exports = { startLanServer, lanAddresses, MAX_SOCKETS };
+module.exports = { startLanServer, lanAddresses, MAX_SOCKETS, IDLE_SESSION_MS };

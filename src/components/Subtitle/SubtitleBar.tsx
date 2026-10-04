@@ -4,7 +4,7 @@ import { BRAND } from '../../lib/brand';
 import { useTranslation } from 'react-i18next';
 import {
   AArrowDown, AArrowUp, ChevronsDownUp, ChevronsUpDown,
-  Pin, Lock, X, Settings, Trash2, Maximize, Minimize,
+  Pin, Lock, Undo2, Settings, Trash2, Maximize, Minimize,
   Play, Square, Loader,
 } from 'lucide-react';
 import {
@@ -313,14 +313,16 @@ const SubtitleBar: React.FC<Props> = ({
         >
           <Lock size={14} />
         </button>
+        {/* Fork: the way back to the main window, drawn as one. A cross at the right end of a bar reads as "close
+            the app", and what it did was neither that nor obvious. */}
         <button
           type="button"
-          className="subtitle-bar__btn"
+          className="subtitle-bar__btn subtitle-bar__btn--back"
           onClick={onExit}
-          title={t('subtitle.bar.exit', 'Exit subtitle mode')}
-          aria-label={t('subtitle.bar.exit', 'Exit subtitle mode')}
+          title={t('fork.subtitle.back', 'Back to the main window')}
+          aria-label={t('fork.subtitle.back', 'Back to the main window')}
         >
-          <X size={14} />
+          <Undo2 size={14} />
         </button>
       </div>
 

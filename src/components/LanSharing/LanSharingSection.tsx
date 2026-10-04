@@ -197,6 +197,7 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
             <ul>
               <li>{t('fork.lan.rulesTheirs')}</li>
               <li>{t('fork.lan.rulesHere')}</li>
+              <li>{t('fork.lan.rulesIdle')}</li>
             </ul>
           </div>
 

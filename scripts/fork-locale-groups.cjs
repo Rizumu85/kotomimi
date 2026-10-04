@@ -123,6 +123,9 @@ module.exports = {
     ],
   },
   // The fonts (`src/components/Fonts`).
+  subtitle: {
+    back: ['Back to the main window', '返回主窗口', '返回主視窗'],
+  },
   fonts: {
     title: ['Fonts', '字体', '字型'],
     tooltip: [
@@ -264,6 +267,16 @@ module.exports = {
       'Set here: only which models are on offer (the ones downloaded here, and the ones installed in this computer\'s LocalAI) and the access key. The stage cards above are for this computer\'s own sessions and change nothing that is shared.',
       '在这台电脑上只决定两件事：有哪些模型可选（这里下载的，和这台电脑的 LocalAI 里装的），和访问密钥。上面各环节卡片的选择只管这台电脑自己用，不影响共享出去的内容。',
       '在這台電腦上只決定兩件事：有哪些模型可選（這裡下載的，和這台電腦的 LocalAI 裡裝的），和存取金鑰。上面各環節卡片的選擇只管這台電腦自己用，不影響共享出去的內容。',
+    ],
+    rulesIdle: [
+      'A model takes memory only while it is used: nothing is loaded until a device asks for it, a session nobody speaks in for 30 minutes is ended, and a model left idle for 10 minutes is unloaded.',
+      '模型只在用的时候占内存：没有设备来用就不加载；对方的会话 30 分钟没人说话会被结束；用过的模型空闲 10 分钟后自动卸载。',
+      '模型只在用的時候占記憶體：沒有裝置來用就不載入；對方的工作階段 30 分鐘沒人說話會被結束；用過的模型閒置 10 分鐘後自動卸載。',
+    ],
+    sessionIdle: [
+      'The other device ended the session: nobody had spoken for a long while, and it let its models go. Start again to continue.',
+      '另一台设备结束了这次会话：太久没有人说话，它把模型从内存里释放了。重新点「开始」就能继续。',
+      '另一台裝置結束了這次工作階段：太久沒有人說話，它把模型從記憶體釋放了。重新按「開始」就能繼續。',
     ],
     serving: ['Sharing', '共享中', '共享中'],
     servingClients: ['Sharing · {{count}} in use', '共享中 · {{count}} 路在用', '共享中 · {{count}} 路在用'],

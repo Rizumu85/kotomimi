@@ -85,6 +85,8 @@ export const NOTICE_ALIASES: Readonly<Record<string, string>> = {
   budget_exhausted: 'mainPanel.sonioxBudgetExhausted',
   // A provider ended the session under the user, and a new Start continues it.
   segment_ended: 'mainPanel.sonioxSegmentEnded',
+  // Fork: the other device ended a session nobody had spoken in for a long while, to let its models go.
+  session_idle: 'fork.lan.sessionIdle',
   connection_lost: 'mainPanel.sonioxConnectionLost',
   // Kizuna Soniox's lease refused a start (Stage 2 Kizuna Soniox, ruling 11): the sentences name Soniox, so the codes keep it.
   soniox_service_unavailable: 'mainPanel.sonioxServiceUnavailable',

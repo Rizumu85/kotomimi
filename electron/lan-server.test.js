@@ -281,3 +281,48 @@ describe('the shared models\' door: a model server on this computer', () => {
     await until(() => seen.closed.length === 1);
   });
 });
+
+describe('the shared models\' door: a session left running', () => {
+  async function startIdle(idleSessionMs) {
+    const seen = { opened: [], closed: [] };
+    const server = await startLanServer({ port: 0, host: '127.0.0.1', name: 'MAC', idleSessionMs, idleCheckMs: 20 }, {
+      request: () => {},
+      socketOpen: (s) => seen.opened.push(s),
+      socketMessage: () => {},
+      socketClose: (c) => seen.closed.push(c),
+    });
+    running.push(server);
+    return { server, seen, ws: `ws://127.0.0.1:${server.port}` };
+  }
+
+  it('is ended, with the reason, once its device has carried no speech for long enough: the model it held is let go', async () => {
+    const { seen, ws } = await startIdle(120);
+    const { socket } = await dial(`${ws}/v1/realtime?model=kotomimi`);
+    const got = [];
+    let closed = null;
+    socket.on('message', (data) => got.push(JSON.parse(data.toString())));
+    socket.on('close', (code, reason) => { closed = { code, reason: reason.toString() }; });
+    await until(() => closed !== null);
+    expect(got.pop()).toMatchObject({ type: 'error', error: { code: 'session_idle' } });
+    expect(closed).toEqual({ code: 1000, reason: 'idle' });
+    await until(() => seen.closed.length === 1);
+  });
+
+  it('is kept while anything of its device is spoken in: one silent leg beside a spoken one stays', async () => {
+    const { server, seen, ws } = await startIdle(250);
+    const quiet = await dial(`${ws}/v1/realtime?model=kotomimi`);
+    const spoken = await dial(`${ws}/v1/realtime?model=kotomimi`);
+    await until(() => seen.opened.length === 2);
+    let closes = 0;
+    quiet.socket.on('close', () => { closes += 1; });
+    spoken.socket.on('close', () => { closes += 1; });
+    // Someone speaks on the second socket, again and again: both stay, well past the limit.
+    for (let i = 0; i < 6; i += 1) {
+      server.send(seen.opened[1].id, JSON.stringify({ type: 'input_audio_buffer.speech_started', item_id: `i${i}` }));
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    expect(closes).toBe(0);
+    // Then no one does: both go.
+    await until(() => closes === 2);
+  });
+});

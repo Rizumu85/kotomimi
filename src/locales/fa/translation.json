@@ -1414,6 +1414,9 @@
       "issues": "Report a problem",
       "issuesTooltip": "Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page."
     },
+    "subtitle": {
+      "back": "Back to the main window"
+    },
     "fonts": {
       "title": "Fonts",
       "tooltip": "Choose the fonts installed on this computer: one for the app itself, one for Latin letters, one for the romanization line, and one per language for conversation and subtitle text. A font is used where it has the glyphs; anything it lacks falls back to the app's own.",
@@ -1492,6 +1495,8 @@
       "rulesTitle": "Which side's settings count",
       "rulesTheirs": "Set on the other device: the languages, which model to use, and how pauses split sentences.",
       "rulesHere": "Set here: only which models are on offer (the ones downloaded here, and the ones installed in this computer's LocalAI) and the access key. The stage cards above are for this computer's own sessions and change nothing that is shared.",
+      "rulesIdle": "A model takes memory only while it is used: nothing is loaded until a device asks for it, a session nobody speaks in for 30 minutes is ended, and a model left idle for 10 minutes is unloaded.",
+      "sessionIdle": "The other device ended the session: nobody had spoken for a long while, and it let its models go. Start again to continue.",
       "serving": "Sharing",
       "servingClients": "Sharing · {{count}} in use",
       "servingTip": "This computer is lending its models to other devices. The languages and the choice of model are set on those devices, not here.",

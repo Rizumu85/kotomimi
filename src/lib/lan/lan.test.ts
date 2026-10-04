@@ -330,6 +330,22 @@ describe('a sharing Kotomimi\'s translations', () => {
     expect(x.made.map((m) => m.disposes)).toEqual([1, 0, 0, 0]);
   });
 
+  it('lets a model go that no request has asked for in a while, and loads it afresh when one does', async () => {
+    const x = translator();
+    await x.ask();
+    x.clock.advance(9 * 60_000);
+    await x.ask({ target_language: 'en' });
+    // Ten minutes after the first was last used: it goes, the second stays.
+    x.clock.advance(2 * 60_000);
+    expect(x.made.map((m) => m.disposes)).toEqual([1, 0]);
+    x.clock.advance(10 * 60_000);
+    expect(x.made.map((m) => m.disposes)).toEqual([1, 1]);
+    // Nothing is loaded, and nothing is watched.
+    expect(x.clock.pending()).toBe(0);
+    await x.ask();
+    expect(x.made).toHaveLength(3);
+  });
+
   it('asks the named model of the catalog, and the pipeline\'s name for the best', async () => {
     const asked: string[] = [];
     const x = translator((_s, _t, wanted) => { asked.push(wanted); return wanted || 'bing-translator'; });

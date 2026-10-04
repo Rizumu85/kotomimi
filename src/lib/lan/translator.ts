@@ -9,8 +9,10 @@
  *
  * `model` names a shared translation model, or the pipeline, which leaves
  * the choice to this computer: the best one downloaded for the pair. A model
- * is loaded for a pair at its first request and kept, the least recently
- * used let go when there are more than a few.
+ * is loaded for a pair at its first request and kept while it is used: the
+ * least recently used is let go when there are more than a few, and any that
+ * no request has asked for in a while — a computer that lends its models
+ * holds the ones in use, and no others.
  */
 import type { Clock } from '../contract/clock';
 import { buildDefaultLocalPrompt } from '../local-inference/prompts';
@@ -35,6 +37,8 @@ export interface HttpAnswer { status: number; body: unknown; contentType?: strin
 
 /** Models kept loaded at once: both directions of one conversation, and one to spare. */
 const MAX_LOADED = 3;
+/** A model no request has asked for this long is let go; the next request loads it again. */
+export const TRANSLATOR_IDLE_MS = 10 * 60_000;
 
 interface Loaded { engine: Translator; ready: Promise<unknown>; usedAt: number }
 
@@ -55,6 +59,8 @@ function userText(messages: unknown): string {
 export class LanTranslator {
   private readonly loaded = new Map<string, Loaded>();
   private ids = 0;
+  /** Cancels the look at what has gone idle. */
+  private cancelSweep: (() => void) | null = null;
 
   constructor(private readonly deps: TranslatorDeps) {}
 
@@ -88,8 +94,25 @@ export class LanTranslator {
 
   /** Sharing stopped: every model is let go. */
   dispose(): void {
+    this.cancelSweep?.();
+    this.cancelSweep = null;
     for (const { engine } of this.loaded.values()) engine.dispose();
     this.loaded.clear();
+  }
+
+  /** Looks, once the model just used could have gone idle, at which have: one look at a time, armed only while a model is loaded. */
+  private watchIdle(): void {
+    if (this.cancelSweep || this.loaded.size === 0) return;
+    this.cancelSweep = this.deps.clock.setTimeout(() => {
+      this.cancelSweep = null;
+      const now = this.deps.clock.now();
+      for (const [key, entry] of [...this.loaded]) {
+        if (now - entry.usedAt < TRANSLATOR_IDLE_MS) continue;
+        this.loaded.delete(key);
+        entry.engine.dispose();
+      }
+      this.watchIdle();
+    }, TRANSLATOR_IDLE_MS);
   }
 
   private async engineFor(model: string, source: string, target: string): Promise<Translator> {
@@ -110,6 +133,7 @@ export class LanTranslator {
       this.trim(key);
     }
     entry.usedAt = this.deps.clock.now();
+    this.watchIdle();
     await entry.ready;
     return entry.engine;
   }

@@ -200,7 +200,7 @@ export function unwrapTranslationText(text: string): string {
   return trimmed;
 }
 
-export type ErrorCode = 'auth' | 'rate_limit' | 'client' | 'server' | 'segment_ended';
+export type ErrorCode = 'auth' | 'rate_limit' | 'client' | 'server' | 'segment_ended' | 'session_idle';
 
 /**
  * A server `error` as a notice code (choice 14): OpenAI Translate's mapping
@@ -209,8 +209,13 @@ export type ErrorCode = 'auth' | 'rate_limit' | 'client' | 'server' | 'segment_e
  * the segment ended (`segment_ended`: "This segment has ended — tap Start
  * Session to continue."), not a refused request. A hypothesis the live
  * test's `session.error` frames settle.
+ *
+ * Fork: `session_idle` is a sharing Kotomimi's (`electron/lan-server.js`): it
+ * ended a session nobody had spoken in for a long while, to let its models
+ * go. The run's end too, worded as what it is.
  */
 export function errorCode(e: Partial<RealtimeError>): ErrorCode {
   if (e.code === 'session_expired') return 'segment_ended';
+  if (e.code === 'session_idle') return 'session_idle';
   return openaiErrorCode(e);
 }
