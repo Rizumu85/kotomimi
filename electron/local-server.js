@@ -285,6 +285,24 @@ function createLocalServer(deps = {}) {
     return set({ state: 'stopped', models: [], tail: '' });
   }
 
+  /**
+   * Kills the started LocalAI now, without waiting. The app's clean quit stops
+   * it through `stop()`; a quit that cannot wait — a crash, a signal, the
+   * uncaughtException handler's `process.exit` — never reaches `will-quit`, so
+   * the cleanup that handler runs synchronously calls this instead, to leave no
+   * LocalAI behind for the next launch to find as "started by something else".
+   */
+  function stopSync() {
+    const mine = child;
+    if (!mine) return;
+    child = null;
+    try {
+      mine.kill('SIGTERM');
+    } catch {
+      // Already gone.
+    }
+  }
+
   const json = (answer) => {
     try {
       return answer && answer.status === 200 ? JSON.parse(answer.body) : null;
@@ -344,7 +362,7 @@ function createLocalServer(deps = {}) {
     return { ok: true, ...(await pipelines()) };
   }
 
-  return { status: () => current, refresh, start, stop, pipelines, setPipeline, bin, port };
+  return { status: () => current, refresh, start, stop, stopSync, pipelines, setPipeline, bin, port };
 }
 
 module.exports = { createLocalServer, buildArgs, buildEnv, candidates, portOf, localGet, localSend, IDLE_TIMEOUT };

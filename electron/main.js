@@ -655,6 +655,10 @@ const cleanupAndExit = () => {
   console.log('[Sokuji] [Main] Cleaning up virtual audio devices before exit...');
   removeVirtualAudioDevices();
   nativeHost.stop();
+  // Fork: the LocalAI this app started goes with it, even on a crash or a signal. The clean quit stops it through
+  // `will-quit` below; that path does not run on process.exit (the uncaughtException/signal handlers), so it is killed
+  // here too — synchronously — or the next launch finds it still up and reports it as "started by something else".
+  try { localServer?.stopSync(); } catch { /* leaving one behind is the only harm, and this is the last breath */ }
   console.log('[Sokuji] [Main] Virtual audio devices cleaned up successfully');
 };
 

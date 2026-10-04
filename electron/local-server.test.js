@@ -131,6 +131,24 @@ describe('the LocalAI of this computer', () => {
     expect(world.started[0].child.killed).toEqual(['SIGTERM']);
   });
 
+  // The app's crash and signal handlers exit with process.exit, which never reaches the clean `will-quit` stop, so the
+  // cleanup they run synchronously kills the child here — or the next launch finds it still up, "started by something else".
+  it('kills the one it started at once, without waiting, and only its own', async () => {
+    const { server, world } = computer();
+    world.onWait = () => { world.answering = true; };
+    await server.start();
+    server.stopSync();
+    expect(world.started[0].child.killed).toEqual(['SIGTERM']);
+    // A second call, and one with nothing started, do nothing and do not throw.
+    expect(() => server.stopSync()).not.toThrow();
+    expect(world.started[0].child.killed).toEqual(['SIGTERM']);
+    const external = computer();
+    external.world.answering = true; // up before the app looked: not this app's to kill.
+    await external.server.refresh();
+    external.server.stopSync();
+    expect(external.world.started).toHaveLength(0);
+  });
+
   it('leaves alone a LocalAI something else started: it is running, and not this app\'s to stop', async () => {
     const { server, world } = computer({ answering: true });
     expect((await server.refresh()).state).toBe('external');
