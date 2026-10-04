@@ -95,6 +95,10 @@ export const INVOKE_CHANNELS = [
   // Window controls (custom title bar)
   'window:minimize',
   'window:maximize-toggle',
+  // Fork: a maximize or restore played by the page — where the window is to be meanwhile, and that the change itself
+  // may be made (electron/window-maximize.js)
+  'window:shift-place',
+  'window:shift-ready',
   'window:close',
   // Subtitle mode
   'subtitle:enter',

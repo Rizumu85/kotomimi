@@ -409,7 +409,7 @@ npx vitest run src/providers src/lib/lan src/lib/fonts src/lib/annotate src/comp
 | `src/components/TitleBar/TitleBar.tsx`、`src/components/Subtitle/SubtitleBar.tsx`、`index.html`、`shared/index.html` | 显示的名字和标题栏图标 |
 | `src/locales/index.ts` | 注册名字替换 |
 | `src/routes/Home.tsx`、`src/App.scss` | 启动时读取注音开关、字体和共享状态；Windows 上由页面自己给窗口加圆角（`src/lib/windowShape.ts`：窗口无边框又透明，系统不给圆角；最大化和全屏时恢复直角） |
-| `electron/main.js` | 应用名、设置迁移、"关于"、启动时不查更新、共享用的 IPC、开发用的环境变量；Windows 上接入 `electron/window-maximize.js`（显示缩放不是整数倍时，Electron 认不出透明窗口已最大化，最大化后还原不了；这里记住最大化前的位置，自己还原） |
+| `electron/main.js` | 应用名、设置迁移、"关于"、启动时不查更新、共享用的 IPC、开发用的环境变量；Windows 上接入 `electron/window-maximize.js`（显示缩放不是整数倍时，Electron 认不出透明窗口已最大化，最大化后还原不了；这里记住最大化前的位置，自己还原；最大化和还原没有系统动画，由页面自己播放窗口大小变化的动画，`window:shift` / `window:shift-place` / `window:shift-ready`） |
 | `electron/ipc-channels.js`、`electron/preload.js`、`vite.config.ts` | 共享用的通道和构建入口 |
 | `electron/update-manager.js`、`electron/update-payload.js` | 更新源和安装包文件名 |
 | `forge.config.js` | 应用身份 |

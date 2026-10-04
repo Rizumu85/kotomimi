@@ -10,7 +10,7 @@ const { createCloseHandshake } = require('./close-handshake.js');
 const { createWsHeaderRules } = require('./ws-header-rules.js');
 const { startLanServer } = require('./lan-server');
 const { createUpstream } = require('./lan-upstream');
-const { keepMaximizeHonest } = require('./window-maximize');
+const { keepMaximizeHonest, pageShift } = require('./window-maximize');
 const { firewallStatus, allowThroughFirewall } = require('./lan-firewall');
 const { discoverServers } = require('./lan-discover');
 const { createLocalServer } = require('./local-server');
@@ -456,7 +456,8 @@ function createWindow() {
 
   // Fork, Windows only: on a display scaled by a fraction Electron loses track of this window being maximized, and it
   // could not be restored (electron/window-maximize.js). Before anything below asks the window whether it is.
-  keepMaximizeHonest(mainWindow, (bounds) => require('electron').screen.getDisplayMatching(bounds).workArea);
+  // The change itself is played by the page (`windowShift` below), the system's animation being lost with the frame.
+  keepMaximizeHonest(mainWindow, (bounds) => require('electron').screen.getDisplayMatching(bounds).workArea, process.platform, windowShift.shift);
   setupSubtitleHandlers(mainWindow);
   // Windows only: frame:false + transparent:true above costs the window its
   // WS_CAPTION style, and with it the native double-click-to-maximize on the
@@ -835,6 +836,14 @@ ipcMain.handle('get-audio-status', () => lastAudioStatus);
 ipcMain.handle('window:minimize', () => {
   if (mainWindow) mainWindow.minimize();
 });
+// Fork: maximize and restore, played by the page before the bounds change (electron/window-maximize.js).
+const windowShift = pageShift((move) => {
+  if (!mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isLoading()) return false;
+  mainWindow.webContents.send('window:shift', move);
+  return true;
+}, { put: (bounds) => { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.setBounds(bounds); } });
+ipcMain.handle('window:shift-place', (_event, bounds) => { windowShift.place(bounds); });
+ipcMain.handle('window:shift-ready', () => { windowShift.ready(); });
 ipcMain.handle('window:maximize-toggle', () => {
   if (!mainWindow) return;
   if (mainWindow.isMaximized()) mainWindow.unmaximize();

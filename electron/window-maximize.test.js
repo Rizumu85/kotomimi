@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { keepMaximizeHonest, covers, setExactly } = require('./window-maximize.js');
+const { keepMaximizeHonest, pageShift, covers, setExactly, sane } = require('./window-maximize.js');
 
 const WORK = { x: 0, y: 0, width: 1897, height: 1028 };
 const HOME = { x: 300, y: 120, width: 1200, height: 800 };
@@ -105,5 +105,119 @@ describe('a maximized window on a scaled display', () => {
     expect(covers({ x: 0, y: 0, width: 1894, height: 1025 }, WORK)).toBe(true);
     expect(covers({ x: 0, y: 0, width: 1800, height: 1028 }, WORK)).toBe(false);
     expect(covers({ x: 60, y: 0, width: 1897, height: 1028 }, WORK)).toBe(false);
+  });
+});
+
+describe('a change of the window played by the page', () => {
+  /** A page that is told of every change and answers when the test says so. */
+  const page = (there = true, put = () => {}) => {
+    const timers = [];
+    const told = [];
+    const shifts = pageShift((move) => { told.push(move); return there; }, {
+      put,
+      later: (fn) => { timers.push(fn); return timers.length; },
+      cancel: (n) => { if (n) timers[n - 1] = () => {}; },
+    });
+    return { ...shifts, told, timeout: () => timers.forEach((fn) => fn()) };
+  };
+
+  it('waits for the page before the bounds change, both ways, and tells it from where to where', () => {
+    const win = scaledWindow();
+    const p = page();
+    keepMaximizeHonest(win, () => WORK, 'win32', p.shift);
+    win.maximize();
+    expect(p.told).toEqual([{ kind: 'maximize', from: HOME, to: WORK }]);
+    // Not yet moved, and already on its way: a second press meanwhile does not turn it round.
+    expect(win.getBounds()).toEqual(HOME);
+    expect(win.isMaximized()).toBe(true);
+    win.unmaximize();
+    win.maximize();
+    expect(p.told).toHaveLength(1);
+    p.ready();
+    expect(win.getBounds().width).toBe(1898);
+    expect(win.isMaximized()).toBe(true);
+
+    win.unmaximize();
+    expect(p.told[1]).toEqual({ kind: 'restore', from: win.getBounds(), to: HOME });
+    expect(win.isMaximized()).toBe(false);
+    expect(win.getBounds().width).toBe(1898);
+    p.ready();
+    expect(win.getBounds()).toEqual(HOME);
+    // An answer nobody is waiting for changes nothing.
+    p.ready();
+    expect(win.getBounds()).toEqual(HOME);
+  });
+
+  it('does not wait for a page that never answers, nor for one that is not there', () => {
+    const win = scaledWindow();
+    const silent = page();
+    keepMaximizeHonest(win, () => WORK, 'win32', silent.shift);
+    win.maximize();
+    silent.timeout();
+    expect(win.getBounds().width).toBe(1898);
+    // Its answer, late: the change is not made twice.
+    win.setBounds(HOME);
+    silent.ready();
+    expect(win.getBounds().width).toBe(HOME.width + 1);
+
+    const other = scaledWindow();
+    keepMaximizeHonest(other, () => WORK, 'win32', page(false).shift);
+    other.maximize();
+    expect(other.getBounds().width).toBe(1898);
+  });
+
+  it('lets the page move the window while it plays, and not otherwise', () => {
+    const win = scaledWindow(0);
+    const p = page(true, (bounds) => win.setBounds(bounds));
+    keepMaximizeHonest(win, () => WORK, 'win32', p.shift);
+    const step = { x: 100, y: 40, width: 1897, height: 1028 };
+    p.place(step);
+    expect(win.getBounds()).toEqual(HOME);
+    win.maximize();
+    p.place(step);
+    expect(win.getBounds()).toEqual(step);
+    // Not bounds: left alone.
+    p.place({ x: 0.5, y: 0, width: 100, height: 100 });
+    p.place({ x: 0, y: 0, width: 0, height: 100 });
+    p.place(null);
+    expect(win.getBounds()).toEqual(step);
+    p.ready();
+    p.place(HOME);
+    expect(win.getBounds()).toEqual(WORK);
+    expect(sane(HOME)).toBe(true);
+    expect(sane({ ...HOME, width: NaN })).toBe(false);
+  });
+
+  it('puts the window back where it was though the page has moved it meanwhile', () => {
+    const win = scaledWindow();
+    const p = page(true, (bounds) => win.setBounds(bounds));
+    keepMaximizeHonest(win, () => WORK, 'win32', p.shift);
+    win.maximize();
+    p.ready();
+    win.unmaximize();
+    // The page has walked the window to where it goes, still at its full size: it no longer fills the screen.
+    p.place({ x: HOME.x, y: HOME.y, width: 1897, height: 1028 });
+    p.ready();
+    expect(win.getBounds()).toEqual(HOME);
+    expect(win.isMaximized()).toBe(false);
+  });
+
+  it('plays nothing where there is nothing to change', () => {
+    const win = scaledWindow();
+    const p = page();
+    keepMaximizeHonest(win, () => WORK, 'win32', p.shift);
+    win.unmaximize();
+    expect(p.told).toEqual([]);
+    expect(win.getBounds()).toEqual(HOME);
+  });
+
+  it('leaves a window that is gone by the time the page answers', () => {
+    const win = scaledWindow();
+    const p = page();
+    keepMaximizeHonest(win, () => WORK, 'win32', p.shift);
+    win.maximize();
+    win.isDestroyed = () => true;
+    p.ready();
+    expect(win.getBounds()).toEqual(HOME);
   });
 });

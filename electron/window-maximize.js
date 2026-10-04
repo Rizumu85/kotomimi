@@ -21,7 +21,14 @@
 // 1207x814 asked for, 1208x816 got), so a window maximized and restored a few
 // times would creep. What came out too large is taken off again, once.
 //
-// No Electron import: the window and the work area are handed in.
+// The same lack costs the window the system's animation: Electron's stand-in
+// is one jump of the bounds. So the change is handed to the page to play
+// (`pageShift`, and `playShift` in src/lib/windowShape.ts, which says how):
+// the page asks for each step of the window's way there (`place`), and says
+// when the change itself may be made (`ready`).
+//
+// No Electron import: the window, the work area and the way to the page are
+// handed in.
 
 /** How far a maximized window's bounds may be from the work area's: what a fractional display scale rounds away. */
 const SLACK = 4;
@@ -45,13 +52,53 @@ function setExactly(win, bounds) {
   win.setBounds({ ...bounds, width: bounds.width - wide, height: bounds.height - tall });
 }
 
+/** How long the page is given to play a change before it is made without it. */
+const SHIFT_WAIT_MS = 1000;
+
+/** Bounds a page may ask for: four whole numbers, and a size. */
+function sane(bounds) {
+  return !!bounds
+    && ['x', 'y', 'width', 'height'].every((key) => Number.isInteger(bounds[key]) && Math.abs(bounds[key]) < 100000)
+    && bounds.width > 0 && bounds.height > 0;
+}
+
+/**
+ * The page's part in a change of the window's bounds. `send(move)` hands
+ * `{ kind, from, to }` to the page and answers whether there is a page to
+ * play it. While it plays, the page asks for the window's bounds through
+ * `place(bounds)`, handed on to `put`; it answers through `ready()` when the
+ * change itself may be made. Outside a change `place` does nothing, and a
+ * page that never answers is not waited for beyond `wait`.
+ * @returns {{ shift: (move: object, run: () => void) => void, ready: () => void, place: (bounds: object) => void }}
+ */
+function pageShift(send, { put = () => {}, wait = SHIFT_WAIT_MS, later = setTimeout, cancel = clearTimeout } = {}) {
+  let go = null;
+  const shift = (move, run) => {
+    let done = false;
+    let timer = null;
+    const once = () => {
+      if (done) return;
+      done = true;
+      if (go === once) go = null;
+      cancel(timer);
+      run();
+    };
+    if (!send(move)) return once();
+    go = once;
+    timer = later(once, wait);
+  };
+  return { shift, ready: () => { if (go) go(); }, place: (bounds) => { if (go && sane(bounds)) put(bounds); } };
+}
+
 /**
  * Replaces `win.isMaximized`, `win.maximize` and `win.unmaximize` with ones
  * that hold on a scaled display. `workAreaOf(bounds)` answers the work area
- * of the display the bounds are on. No-op off Windows.
+ * of the display the bounds are on. `shift(move, run)` plays the change and
+ * calls `run` when the bounds are to change (`pageShift`); without one they
+ * change at once. No-op off Windows.
  * @returns {boolean} whether the window was changed.
  */
-function keepMaximizeHonest(win, workAreaOf, platform = process.platform) {
+function keepMaximizeHonest(win, workAreaOf, platform = process.platform, shift = (move, run) => run()) {
   if (platform !== 'win32' || !win) return false;
   const native = {
     isMaximized: win.isMaximized.bind(win),
@@ -64,20 +111,40 @@ function keepMaximizeHonest(win, workAreaOf, platform = process.platform) {
     const bounds = win.getBounds();
     return covers(bounds, workAreaOf(bounds));
   };
+  /** What the window is on its way to being while a change is played: asked again meanwhile, it answers that and stays its course. */
+  let heading = null;
+  const gone = () => typeof win.isDestroyed === 'function' && win.isDestroyed();
   // Moved or resized since: it is a window again, and the next maximize starts over.
-  win.isMaximized = () => native.isMaximized() || (before !== null && fills());
+  win.isMaximized = () => (heading !== null ? heading : native.isMaximized() || (before !== null && fills()));
   win.maximize = () => {
-    if (!win.isMaximized()) before = win.getBounds();
-    native.maximize();
+    if (heading !== null) return;
+    if (win.isMaximized()) return native.maximize();
+    before = win.getBounds();
+    heading = true;
+    shift({ kind: 'maximize', from: before, to: workAreaOf(before) }, () => {
+      heading = null;
+      if (!gone()) native.maximize();
+    });
   };
   win.unmaximize = () => {
+    if (heading !== null) return;
     const back = before;
-    before = null;
-    native.unmaximize();
-    // Electron's own restore did nothing — it did not think the window maximized: put it back by hand.
-    if (back && fills()) setExactly(win, back);
+    const restore = (played = false) => {
+      before = null;
+      native.unmaximize();
+      // Electron's own restore did nothing — it did not think the window maximized — or the window is where the
+      // page's playing left it: put it back by hand.
+      if (back && (played || fills())) setExactly(win, back);
+    };
+    // Nothing to play: not maximized, or by Electron's own account alone, which knows where it goes back to and this does not.
+    if (!back || !win.isMaximized()) return restore();
+    heading = false;
+    shift({ kind: 'restore', from: win.getBounds(), to: back }, () => {
+      heading = null;
+      if (!gone()) restore(true);
+    });
   };
   return true;
 }
 
-module.exports = { keepMaximizeHonest, covers, setExactly, SLACK };
+module.exports = { keepMaximizeHonest, pageShift, covers, setExactly, sane, SLACK, SHIFT_WAIT_MS };
