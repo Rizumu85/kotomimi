@@ -37,7 +37,7 @@ describe("the fork's instructions name what the screen shows", () => {
       // The wizard and the settings never draw the provider's own choice (`ProviderPicker`: a provider with an Assist draws its own).
       const neverDrawn = at(catalog, 'providers.localai.choiceServer');
       const block = at(catalog, 'providers.localai.placeServer');
-      for (const key of ['fork.lan.tooltip', 'fork.lan.foundAs', 'fork.lan.foundAsUnnamed']) {
+      for (const key of ['fork.lan.tooltip']) {
         expect(at(catalog, key), `${lang} ${key}`).not.toContain(neverDrawn);
         expect(at(catalog, key), `${lang} ${key}`).toContain(block);
       }

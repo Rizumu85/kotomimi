@@ -1,22 +1,20 @@
 /**
  * Fork: the settings of "share this computer's models on the local network".
- * One switch; and while it is on, what another device needs to use it — the
- * address to type, with a button that copies it — and what it will find: the
- * models this computer has ready. The port and the access key sit behind
- * "Options", since most never touch them. Model management is here too: a
- * computer that only shares has no stage of its own to hang it on. And it
- * says which side's settings count — the other device chooses the languages
- * and the model; this one only what there is to choose from — so nobody has
- * to wonder which screen is the one to set. Below it, where one is installed,
- * the LocalAI of this computer (`LocalServerCard`): its models are shared
- * through the same switch (`electron/lan-upstream.js`), and are listed here
- * beside the app's own.
+ *
+ * One idea holds the page together: this computer has models — the ones the
+ * app downloaded, and the ones of a LocalAI installed here — its own stages
+ * choose among them in their cards, and sharing lends the same models to the
+ * other devices. So this section is one switch and, while it is on, what is
+ * to be seen at a glance: that it is sharing and how many use it, the name
+ * and address another device finds it by, and whatever stands in the way (a
+ * firewall, a port that is taken, no recognizer to lend). What is lent, the
+ * port and the access key are each one disclosure away; how sharing works is
+ * behind the question mark, for whoever asks.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { Check, CircleHelp, Copy, Languages, Loader, Mic, Share2, ShieldAlert, ShieldCheck, TriangleAlert } from 'lucide-react';
+import { Check, CircleHelp, Copy, Languages, Loader, Mic, Share2, ShieldAlert, TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CustomModels } from '../CustomModels/CustomModels';
-import { LocalServerCard } from './LocalServerCard';
 import { languageNameFor } from '../Settings/engine/languageName';
 import ToggleSwitch from '../Settings/shared/ToggleSwitch';
 import { ModelManagementSection } from '../Settings/sections/ModelManagementSection';
@@ -98,7 +96,9 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
     void askLocalPipelines().then((found) => { if (live) setTheirs(found); });
     return () => { live = false; };
   }, [enabled, localUp, localModels]);
-  const lent = theirs.recognizers.length + theirs.translators.length;
+  const lentCount = recognizers.length + translators.length + theirs.recognizers.length + theirs.translators.length;
+  // Looked, and nothing here hears: another device would find nothing to listen with.
+  const deaf = initialized && recognizers.length === 0 && theirs.recognizers.length === 0;
   // The library's own pair: the catalog's base codes, in the direction chosen.
   const libraryPair = useMemo(() => {
     const source = pair.source.split('-')[0];
@@ -120,7 +120,6 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
         {t('fork.lan.title')}
         <Tooltip content={t('fork.lan.tooltip')} position="top">{helpIcon}</Tooltip>
       </h2>
-      <p className="kt-note kt-lan__intro">{t('fork.lan.intro')}</p>
       <ToggleSwitch checked={enabled} onChange={() => { void useLanStore.getState().setEnabled(!enabled); }} label={t('fork.lan.enable')} disabled={disabled} />
 
       {enabled && (
@@ -140,11 +139,13 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
                 <span className="kt-lan__dot" aria-hidden />
                 <span>{clients > 0 ? t('fork.lan.onWithClients', { count: clients }) : t('fork.lan.on')}</span>
               </div>
-              <p className="kt-lan__found">{status.name ? t('fork.lan.foundAs', { name: status.name }) : t('fork.lan.foundAsUnnamed')}</p>
-              <div className="kt-lan__label">{t('fork.lan.address')}</div>
-              {status.addresses.length > 0
-                ? status.addresses.map((address) => <Address key={address} value={`${address}:${status.port}`} />)
-                : <p className="kt-note">{t('fork.lan.noNetwork')}</p>}
+              {/* What another device finds it by: its name in the search, and the address for a search that cannot reach it. */}
+              {status.addresses.length > 0 ? (
+                <div className="kt-lan__where">
+                  {status.name && <span className="kt-lan__name">{status.name}</span>}
+                  {status.addresses.map((address) => <Address key={address} value={`${address}:${status.port}`} />)}
+                </div>
+              ) : <p className="kt-note">{t('fork.lan.noNetwork')}</p>}
               {firewall.state === 'blocked' && (
                 <div className="kt-lan__firewall" role="status">
                   <ShieldAlert size={16} aria-hidden />
@@ -159,50 +160,43 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
                   </div>
                 </div>
               )}
-              {firewall.state === 'allowed' && (
-                <div className="kt-lan__firewall-ok"><ShieldCheck size={13} aria-hidden /><span>{t('fork.lan.firewallOk')}</span></div>
-              )}
             </>
           )}
-
-          <div className="kt-lan__label">{t('fork.lan.models')}</div>
-          <div className="kt-lan__models">
-            {recognizers.map((m) => <span key={m.id} className="kt-lan__model"><Mic size={12} />{nameOf(m.id)}</span>)}
-            {translators.map((m) => <span key={m.id} className="kt-lan__model"><Languages size={12} />{nameOf(m.id)}</span>)}
-            {theirs.recognizers.map((id) => <span key={`localai:${id}`} className="kt-lan__model kt-lan__model--theirs" title={id}><Mic size={12} />{modelLabel(id)}</span>)}
-            {theirs.translators.map((id) => <span key={`localai:${id}`} className="kt-lan__model kt-lan__model--theirs" title={id}><Languages size={12} />{modelLabel(id)}</span>)}
-            {/* Missing only once the model store has looked: before, nothing is known to be downloaded, which is not the same. */}
-            {initialized && recognizers.length === 0 && theirs.recognizers.length === 0 && <span className="kt-lan__model kt-lan__model--missing"><TriangleAlert size={12} />{t('fork.lan.noRecognizer')}</span>}
-          </div>
-          {lent > 0 && <p className="kt-note kt-lan__lent">{t('fork.lan.localaiToo')}</p>}
-          <button type="button" className="kt-lan__link" aria-expanded={managing} onClick={() => setManaging(!managing)}>
-            {managing ? t('fork.lan.hideLibrary') : t('fork.lan.showLibrary')}
-          </button>
-          {managing && (
-            <div className="kt-lan__library">
-              <div className="setting-item">
-                <div className="turn-detection-options" role="group" aria-label={t('fork.lan.direction')}>
-                  {directions.map(({ back, label }) => (
-                    <button key={String(back)} type="button" className={`option-button ${back === reversed ? 'active' : ''}`} aria-pressed={back === reversed} onClick={() => setReversed(back)}>{label}</button>
-                  ))}
-                </div>
-              </div>
-              <CustomModels disabled={disabled} />
-              <ModelManagementSection isSessionActive={disabled} stageFilter="asr" direction={`${libraryPair.source}→${libraryPair.target}`} settings={LOCAL_INFERENCE_DEFAULTS} update={noUpdate} pair={libraryPair} />
-              <ModelManagementSection isSessionActive={disabled} stageFilter="translation" direction={`${libraryPair.source}→${libraryPair.target}`} settings={LOCAL_INFERENCE_DEFAULTS} update={noUpdate} pair={libraryPair} />
+          {deaf && (
+            <div className="kt-lan__status kt-lan__status--error">
+              <TriangleAlert size={14} />
+              <span>{t('fork.lan.noRecognizer')}</span>
             </div>
           )}
 
-          <div className="kt-lan__rules">
-            <div className="kt-lan__label">{t('fork.lan.rulesTitle')}</div>
-            <ul>
-              <li>{t('fork.lan.rulesTheirs')}</li>
-              <li>{t('fork.lan.rulesHere')}</li>
-              <li>{t('fork.lan.rulesIdle')}</li>
-            </ul>
-          </div>
+          <details className="kt-details kt-lan__more">
+            <summary>{t('fork.lan.models', { count: lentCount })}</summary>
+            <div className="kt-lan__models">
+              {recognizers.map((m) => <span key={m.id} className="kt-lan__model"><Mic size={12} />{nameOf(m.id)}</span>)}
+              {translators.map((m) => <span key={m.id} className="kt-lan__model"><Languages size={12} />{nameOf(m.id)}</span>)}
+              {theirs.recognizers.map((id) => <span key={`localai:${id}`} className="kt-lan__model kt-lan__model--theirs" title={t('fork.lan.fromLocalAI', { id })}><Mic size={12} />{modelLabel(id)}</span>)}
+              {theirs.translators.map((id) => <span key={`localai:${id}`} className="kt-lan__model kt-lan__model--theirs" title={t('fork.lan.fromLocalAI', { id })}><Languages size={12} />{modelLabel(id)}</span>)}
+            </div>
+            <button type="button" className="kt-lan__link" aria-expanded={managing} onClick={() => setManaging(!managing)}>
+              {managing ? t('fork.lan.hideLibrary') : t('fork.lan.showLibrary')}
+            </button>
+            {managing && (
+              <div className="kt-lan__library">
+                <div className="setting-item">
+                  <div className="turn-detection-options" role="group" aria-label={t('fork.lan.direction')}>
+                    {directions.map(({ back, label }) => (
+                      <button key={String(back)} type="button" className={`option-button ${back === reversed ? 'active' : ''}`} aria-pressed={back === reversed} onClick={() => setReversed(back)}>{label}</button>
+                    ))}
+                  </div>
+                </div>
+                <CustomModels disabled={disabled} />
+                <ModelManagementSection isSessionActive={disabled} stageFilter="asr" direction={`${libraryPair.source}→${libraryPair.target}`} settings={LOCAL_INFERENCE_DEFAULTS} update={noUpdate} pair={libraryPair} />
+                <ModelManagementSection isSessionActive={disabled} stageFilter="translation" direction={`${libraryPair.source}→${libraryPair.target}`} settings={LOCAL_INFERENCE_DEFAULTS} update={noUpdate} pair={libraryPair} />
+              </div>
+            )}
+          </details>
 
-          <details className="kt-details kt-lan__options">
+          <details className="kt-details kt-lan__more">
             <summary>{t('fork.lan.options')}</summary>
             <div className="kt-lan__fields">
               <label className="kt-lan__field">
@@ -218,8 +212,6 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
           </details>
         </div>
       )}
-
-      <LocalServerCard disabled={disabled} />
     </div>
   );
 }

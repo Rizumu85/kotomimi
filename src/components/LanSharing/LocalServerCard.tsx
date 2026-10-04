@@ -1,31 +1,34 @@
 /**
- * Fork: the LocalAI installed on this computer, in the settings of what this
- * computer lends to others. The app starts and stops it; it says whether it
- * is up and which models it serves, and opens LocalAI's own page for
- * installing more. Drawn only where a LocalAI is installed: nobody else
- * needs to hear of it.
+ * Fork: the LocalAI installed on this computer, in the settings: one more
+ * source of "this computer's models", beside the ones the app downloaded.
+ * One line says whether it is up and how many models it has, with the button
+ * that starts or stops it; under it, whether it starts with the app, and the
+ * way to LocalAI's own page for installing more. Its models are chosen in the
+ * stage cards (`LocalAIAssist`) and lent by the sharing section: neither is
+ * repeated here. What it is and does is behind the question mark. Drawn only
+ * where a LocalAI is installed: nobody else needs to hear of it.
  *
  * One that something else started is shown as running and left alone — there
  * is then no button to stop it, and a line that says why.
  *
- * While it is up, its Realtime pipelines are shown with the recognizer and
- * the translation model each names, each a menu of the models this LocalAI
- * has for that work: what another device gets when it leaves both stages to
- * "another device". The models are listed by readable names made from their
- * ids (`modelLabel`); nothing here knows a model in particular.
+ * While it is up, a disclosure holds its Realtime pipelines, with the
+ * recognizer and the translation model each names, each a menu of the models
+ * this LocalAI has for that work: what another device gets when it leaves
+ * both stages to "another device". The models are listed by readable names
+ * made from their ids (`modelLabel`); nothing here knows a model in particular.
  */
 import { useEffect, useState } from 'react';
-import { ExternalLink, Loader, Play, Server, Square, TriangleAlert } from 'lucide-react';
+import { CircleHelp, ExternalLink, Loader, Play, Server, Square, TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ToggleSwitch from '../Settings/shared/ToggleSwitch';
+import Tooltip from '../Tooltip/Tooltip';
 import { askLocalPipelines, NO_PIPELINES, setLocalPipeline, type LocalPipelines } from '../../lib/lan/localServer';
 import { modelLabel } from '../../lib/lan/modelLabel';
 import { useLocalServerStore } from '../../stores/localServerStore';
 import { openExternalUrl } from '../../utils/openExternalUrl';
 import './LocalServerCard.scss';
 
-/** Models named in the card before "and N more". */
-const SHOWN = 8;
+const helpIcon = <CircleHelp className="tooltip-trigger" size={14} style={{ marginLeft: '8px' }} />;
 
 export function LocalServerCard({ disabled = false }: { disabled?: boolean }) {
   const { t } = useTranslation();
@@ -76,35 +79,30 @@ export function LocalServerCard({ disabled = false }: { disabled?: boolean }) {
           : t('fork.server.stopped');
 
   return (
-    <div className="kt-ls">
-      <div className="kt-ls__head">
-        <Server size={15} className="kt-ls__icon" />
-        <span className="kt-ls__title">{t('fork.server.title')}</span>
-      </div>
-      <p className="kt-note">{t('fork.server.intro')}</p>
+    <div className="settings-section kt-stage kt-ls">
+      <h2>
+        <Server size={15} className="kt-stage__icon" />
+        {t('fork.server.title')}
+        <Tooltip content={t('fork.server.tooltip')} position="top">{helpIcon}</Tooltip>
+      </h2>
 
-      <div className={`kt-ls__state kt-ls__state--${starting ? 'starting' : status.state}`} role="status">
-        {starting ? <Loader size={13} className="kt-ls__spin" /> : status.state === 'failed' ? <TriangleAlert size={13} /> : <span className="kt-ls__dot" aria-hidden />}
-        <span>{stateText}</span>
-      </div>
-
-      {status.state === 'external' ? (
-        <p className="kt-note">{t('fork.server.externalNote')}</p>
-      ) : (
-        <div className="kt-ls__actions">
-          {status.state === 'running' ? (
-            <button type="button" className="kt-ls__button" onClick={() => { void act('stop'); }} disabled={disabled || busy}>
-              <Square size={12} />{t('fork.server.stop')}
-            </button>
-          ) : (
-            <button type="button" className="kt-ls__button kt-ls__button--primary" onClick={() => { void act('start'); }} disabled={disabled || starting}>
-              <Play size={12} />{t('fork.server.start')}
-            </button>
-          )}
+      <div className="kt-ls__row">
+        <div className={`kt-ls__state kt-ls__state--${starting ? 'starting' : status.state}`} role="status">
+          {starting ? <Loader size={13} className="kt-ls__spin" /> : status.state === 'failed' ? <TriangleAlert size={13} /> : <span className="kt-ls__dot" aria-hidden />}
+          <span>{stateText}</span>
         </div>
-      )}
+        {status.state !== 'external' && (status.state === 'running' ? (
+          <button type="button" className="kt-ls__button" onClick={() => { void act('stop'); }} disabled={disabled || busy}>
+            <Square size={12} />{t('fork.server.stop')}
+          </button>
+        ) : (
+          <button type="button" className="kt-ls__button kt-ls__button--primary" onClick={() => { void act('start'); }} disabled={disabled || starting}>
+            <Play size={12} />{t('fork.server.start')}
+          </button>
+        ))}
+      </div>
 
-      {status.state === 'running' && <p className="kt-note">{t('fork.server.idleNote')}</p>}
+      {status.state === 'external' && <p className="kt-note">{t('fork.server.externalNote')}</p>}
 
       {status.state === 'failed' && status.tail && (
         <details className="kt-details" open>
@@ -113,15 +111,13 @@ export function LocalServerCard({ disabled = false }: { disabled?: boolean }) {
         </details>
       )}
 
-      {up && status.models.length > 0 && (
-        <div className="kt-ls__models">
-          {status.models.slice(0, SHOWN).map((id) => <span key={id} className="kt-ls__model" title={id}>{modelLabel(id)}</span>)}
-          {status.models.length > SHOWN && <span className="kt-ls__model kt-ls__model--more">{t('fork.server.more', { count: status.models.length - SHOWN })}</span>}
-        </div>
+      {status.state !== 'external' && (
+        <ToggleSwitch checked={autoStart} onChange={() => useLocalServerStore.getState().setAutoStart(!autoStart)} label={t('fork.server.autoStart')} disabled={disabled} />
       )}
+
       {up && pipes.pipelines.length > 0 && (
-        <div className="kt-ls__pipes">
-          <div className="kt-ls__label">{t('fork.server.pipelineTitle')}</div>
+        <details className="kt-details kt-ls__pipes">
+          <summary>{t('fork.server.pipelineTitle')}</summary>
           {pipes.pipelines.map((pipe) => (
             <div key={pipe.name} className="kt-ls__pipe">
               {pipes.pipelines.length > 1 && <div className="kt-ls__pipe-name">{modelLabel(pipe.name)}</div>}
@@ -144,19 +140,13 @@ export function LocalServerCard({ disabled = false }: { disabled?: boolean }) {
           {switching && <div className="kt-ls__state kt-ls__state--starting"><Loader size={13} className="kt-ls__spin" /><span>{t('fork.server.pipelineSwitching')}</span></div>}
           {!switching && pipes.ok === false && <p className="kt-ls__error">{t('fork.server.pipelineFailed', { message: pipes.error ?? '' })}</p>}
           <p className="kt-note">{t('fork.server.pipelineNote')}</p>
-        </div>
-      )}
-      {up && (
-        <>
-          <p className="kt-note">{t('fork.server.useHere')}</p>
-          <button type="button" className="kt-ls__link" onClick={() => openExternalUrl(`http://127.0.0.1:${status.port}/`)}>
-            <ExternalLink size={12} />{t('fork.server.openPage')}
-          </button>
-        </>
+        </details>
       )}
 
-      {status.state !== 'external' && (
-        <ToggleSwitch checked={autoStart} onChange={() => useLocalServerStore.getState().setAutoStart(!autoStart)} label={t('fork.server.autoStart')} disabled={disabled} />
+      {up && (
+        <button type="button" className="kt-ls__link" onClick={() => openExternalUrl(`http://127.0.0.1:${status.port}/`)}>
+          <ExternalLink size={12} />{t('fork.server.openPage')}
+        </button>
       )}
     </div>
   );

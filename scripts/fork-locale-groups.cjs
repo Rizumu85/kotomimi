@@ -71,11 +71,11 @@ module.exports = {
       '语音识别用应用下载的模型在本机运行；翻译先用在线翻译，下载翻译模型后也能在本机完成。不需要别的设备；有独立显卡会更快。',
       '語音辨識用應用程式下載的模型在本機執行；翻譯先用線上翻譯，下載翻譯模型後也能在本機完成。不需要別的裝置；有獨立顯示卡會更快。',
     ],
-    share: ['This computer, for my other devices too', '这台电脑，也给其他设备用', '這台電腦，也給其他裝置用'],
+    share: ['This computer, for my other devices', '这台电脑给其他设备用', '這台電腦給其他裝置用'],
     shareDesc: [
-      'A capable computer? The models run here, for itself and for the other devices on your network.',
-      '这台电脑性能好？模型都在这里运行：自己照常用，局域网里的其他设备也能来用。',
-      '這台電腦效能好？模型都在這裡執行：自己照常用，區域網路裡的其他裝置也能來用。',
+      'Computing power to spare here? Let the models run on this computer for the other devices on your network — and for this computer itself.',
+      '这台电脑算力闲置？让模型在这里运行，给局域网里的其他设备用，这台电脑自己也能用。',
+      '這台電腦算力閒置？讓模型在這裡執行，給區域網路裡的其他裝置用，這台電腦自己也能用。',
     ],
     shareNotice: [
       'Nothing to enter. Finishing turns on "Share with other devices": another Kotomimi on your network finds this computer when it searches for devices. After setup, download models in the Speech recognition card in Settings — what is downloaded here is what the others can use. If another device cannot find this computer, see Settings → Provider → Share with other devices.',
@@ -197,15 +197,10 @@ module.exports = {
   // The LocalAI installed on this computer, run by the app (`src/components/LanSharing/LocalServerCard.tsx`).
   server: {
     title: ['LocalAI on this computer', '这台电脑上的 LocalAI', '這台電腦上的 LocalAI'],
-    intro: [
-      'A LocalAI is installed here, with models of its own. Kotomimi starts and stops it, and keeps it to this computer: other devices reach its models only through the sharing above, together with the ones downloaded here.',
-      '这台电脑装了 LocalAI，它有自己的一套模型。由 Kotomimi 负责启动和停止，并且只让它在本机监听：别的设备只能通过上面的共享用到它的模型，和这里下载的模型一起。',
-      '這台電腦裝了 LocalAI，它有自己的一套模型。由 Kotomimi 負責啟動和停止，並且只讓它在本機監聽：別的裝置只能透過上面的共享用到它的模型，和這裡下載的模型一起。',
-    ],
-    idleNote: [
-      'A model nobody has used for 10 minutes is unloaded from memory by itself, and loaded again when it is next asked for.',
-      '模型 10 分钟没人用，就会自动从内存里卸载；下次有人用到时再加载。',
-      '模型 10 分鐘沒人用，就會自動從記憶體卸載；下次有人用到時再載入。',
+    tooltip: [
+      'A LocalAI is installed on this computer, with models of its own. Kotomimi starts and stops it, and keeps it to this computer. Choose its models in the cards above, under "This computer"; with sharing on, they are lent to the other devices together with the ones Kotomimi downloaded. A model nobody has used for 10 minutes is unloaded from memory by itself.',
+      '这台电脑装了 LocalAI，它有自己的一套模型。由 Kotomimi 负责启动和停止，只在本机监听。上面各环节选「这台电脑」时，可以直接选它的模型；打开共享后，它的模型和 Kotomimi 下载的模型一起借给别的设备。模型 10 分钟没人用，会自动从内存里卸载。',
+      '這台電腦裝了 LocalAI，它有自己的一套模型。由 Kotomimi 負責啟動和停止，只在本機監聽。上面各環節選「這台電腦」時，可以直接選它的模型；開啟共享後，它的模型和 Kotomimi 下載的模型一起借給別的裝置。模型 10 分鐘沒人用，會自動從記憶體卸載。',
     ],
     stopped: ['Not running', '未启动', '未啟動'],
     starting: ['Starting…', '正在启动…', '正在啟動…'],
@@ -220,15 +215,13 @@ module.exports = {
       '它不是 Kotomimi 启动的，而是别的程序启动的，所以这里不能停止它，空闲的模型也不会自动卸载。想让 Kotomimi 来管，先退出那个程序，再回到这里点「启动」。',
       '它不是 Kotomimi 啟動的，而是別的程式啟動的，所以這裡不能停止它，閒置的模型也不會自動卸載。想讓 Kotomimi 來管，先結束那個程式，再回到這裡按「啟動」。',
     ],
-    useHere: [
-      'To use it on this computer too: choose "Another device" under the provider, and pick "LocalAI on this computer" from the list.',
-      '这台电脑自己也想用它：在提供商下面选「另一台设备」，再从列表里选「这台电脑上的 LocalAI」。',
-      '這台電腦自己也想用它：在提供商下面選「另一台裝置」，再從清單裡選「這台電腦上的 LocalAI」。',
-    ],
     openPage: ['Open LocalAI\'s page to install or remove models', '打开 LocalAI 的页面，安装或删除模型', '開啟 LocalAI 的頁面，安裝或刪除模型'],
-    more: ['and {{count}} more', '还有 {{count}} 个', '還有 {{count}} 個'],
     lastWords: ['What LocalAI said last', 'LocalAI 最后的输出', 'LocalAI 最後的輸出'],
-    pipelineTitle: ['What it uses when the other device does not choose', '对方没指定模型时用哪个', '對方沒指定模型時用哪個'],
+    pipelineTitle: [
+      'What another device gets when it does not choose',
+      '别的设备没指定模型时用哪个',
+      '別的裝置沒指定模型時用哪個',
+    ],
     pipelineSwitching: ['Switching…', '正在切换…', '正在切換…'],
     pipelineFailed: ['Could not switch: {{message}}', '切换失败：{{message}}', '切換失敗：{{message}}'],
     pipelineNote: [
@@ -239,15 +232,10 @@ module.exports = {
   },
   lan: {
     title: ['Share with other devices', '共享给其他设备', '共享給其他裝置'],
-    intro: [
-      'The other way round: this computer does the work, and another device on your network uses the models downloaded here.',
-      '方向反过来：由这台电脑出力，局域网里的另一台设备来用这里下载好的模型。',
-      '方向反過來：由這台電腦出力，區域網路裡的另一台裝置來用這裡下載好的模型。',
-    ],
     tooltip: [
-      'Lets another device on your network use the models this computer has downloaded — speech recognition and translation. The other device runs Kotomimi too and searches under "Another device" in its settings: this computer then appears in its list. Sharing works while this app is open.',
-      '让局域网里的另一台设备使用这台电脑已下载的模型（语音识别和翻译）。对方同样运行 Kotomimi，在设置的「另一台设备」一栏里搜索，这台电脑就会出现在它的列表里。本应用开着的时候才能共享。',
-      '讓區域網路裡的另一台裝置使用這台電腦已下載的模型（語音辨識和翻譯）。對方同樣執行 Kotomimi，在設定的「另一台裝置」一欄裡搜尋，這台電腦就會出現在它的清單裡。本應用程式開著的時候才能共享。',
+      'Lends this computer\'s models to the other devices on your network: the ones Kotomimi downloaded, and the ones of a LocalAI installed here. The other device runs Kotomimi too, searches under "Another device" in its settings, and finds this computer by its name. Which model and which language is chosen there; here, only what there is to choose from, and the access key. A model is loaded when it is asked for and unloaded after 10 idle minutes; a session nobody has spoken in for 30 minutes is ended. Sharing works while Kotomimi is open.',
+      '把这台电脑的模型借给局域网里的其他设备：Kotomimi 下载的，和这台电脑的 LocalAI 里装的。对方同样运行 Kotomimi，在设置的「另一台设备」一栏里搜索，就能按名字找到这台电脑。用哪个模型、什么语言，在对方那边选；这里只决定有哪些模型可选，和访问密钥。模型用到才加载，空闲 10 分钟自动卸载；对方 30 分钟没人说话，会话会被结束。Kotomimi 开着的时候才能共享。',
+      '把這台電腦的模型借給區域網路裡的其他裝置：Kotomimi 下載的，和這台電腦的 LocalAI 裡裝的。對方同樣執行 Kotomimi，在設定的「另一台裝置」一欄裡搜尋，就能按名字找到這台電腦。用哪個模型、什麼語言，在對方那邊選；這裡只決定有哪些模型可選，和存取金鑰。模型用到才載入，閒置 10 分鐘自動卸載；對方 30 分鐘沒人說話，工作階段會被結束。Kotomimi 開著的時候才能共享。',
     ],
     enable: ['Share this computer\'s models', '共享这台电脑的模型', '共享這台電腦的模型'],
     starting: ['Starting…', '正在启动…', '正在啟動…'],
@@ -259,42 +247,15 @@ module.exports = {
       '連接埠 {{port}} 已被其他程式占用。請在「選項」裡換一個連接埠。',
     ],
     failed: ['Sharing could not start: {{message}}', '无法开始共享：{{message}}', '無法開始共享：{{message}}'],
-    address: ['If it does not appear there, type this address', '没出现的话，手动填这个地址', '沒出現的話，手動填這個位址'],
-    foundAs: [
-      'On the other device, open Kotomimi\'s settings and search under "Another device". This computer appears in its list as {{name}}: click it.',
-      '在另一台设备的 Kotomimi 设置里，到「另一台设备」一栏搜索，这台电脑会以「{{name}}」出现在列表里，点一下就连上了。',
-      '在另一台裝置的 Kotomimi 設定裡，到「另一台裝置」一欄搜尋，這台電腦會以「{{name}}」出現在清單裡，點一下就連上了。',
-    ],
-    foundAsUnnamed: [
-      'On the other device, open Kotomimi\'s settings and search under "Another device". This computer appears in its list: click it.',
-      '在另一台设备的 Kotomimi 设置里，到「另一台设备」一栏搜索，这台电脑会出现在列表里，点一下就连上了。',
-      '在另一台裝置的 Kotomimi 設定裡，到「另一台裝置」一欄搜尋，這台電腦會出現在清單裡，點一下就連上了。',
-    ],
     copy: ['Copy', '复制', '複製'],
     copied: ['Copied', '已复制', '已複製'],
     noNetwork: ['This computer is on no network.', '这台电脑当前没有连接网络。', '這台電腦目前沒有連上網路。'],
-    models: ['Models shared', '共享的模型', '共享的模型'],
-    localaiToo: [
-      'The dashed ones are the LocalAI\'s on this computer. They are shared too, and none is loaded until the other device chooses it.',
-      '虚线框的是这台电脑上 LocalAI 的模型，同样共享出去；对方选了哪个，才加载哪个，不会全部打开。',
-      '虛線框的是這台電腦上 LocalAI 的模型，同樣共享出去；對方選了哪個，才載入哪個，不會全部開啟。',
+    models: [
+      'Models shared · {{count}}',
+      '共享的模型 · {{count}} 个',
+      '共享的模型 · {{count}} 個',
     ],
-    rulesTitle: ['Which side\'s settings count', '哪边的设置算数', '哪邊的設定算數'],
-    rulesTheirs: [
-      'Set on the other device: the languages, which model to use, and how pauses split sentences.',
-      '在对方那台设备上设置：语言、用哪个模型、断句的灵敏度。',
-      '在對方那台裝置上設定：語言、用哪個模型、斷句的靈敏度。',
-    ],
-    rulesHere: [
-      'Set here: only which models are on offer (the ones downloaded here, and the ones installed in this computer\'s LocalAI) and the access key. The stage cards above are for this computer\'s own sessions and change nothing that is shared.',
-      '在这台电脑上只决定两件事：有哪些模型可选（这里下载的，和这台电脑的 LocalAI 里装的），和访问密钥。上面各环节卡片的选择只管这台电脑自己用，不影响共享出去的内容。',
-      '在這台電腦上只決定兩件事：有哪些模型可選（這裡下載的，和這台電腦的 LocalAI 裡裝的），和存取金鑰。上面各環節卡片的選擇只管這台電腦自己用，不影響共享出去的內容。',
-    ],
-    rulesIdle: [
-      'A model takes memory only while it is used: nothing is loaded until a device asks for it, a session nobody speaks in for 30 minutes is ended, and a model left idle for 10 minutes is unloaded.',
-      '模型只在用的时候占内存：没有设备来用就不加载；对方的会话 30 分钟没人说话会被结束；用过的模型空闲 10 分钟后自动卸载。',
-      '模型只在用的時候占記憶體：沒有裝置來用就不載入；對方的工作階段 30 分鐘沒人說話會被結束；用過的模型閒置 10 分鐘後自動卸載。',
-    ],
+    fromLocalAI: ['From this computer\'s LocalAI ({{id}})', '来自这台电脑的 LocalAI（{{id}}）', '來自這台電腦的 LocalAI（{{id}}）'],
     sessionIdle: [
       'The other device ended the session: nobody had spoken for a long while, and it let its models go. Start again to continue.',
       '另一台设备结束了这次会话：太久没有人说话，它把模型从内存里释放了。重新点「开始」就能继续。',
@@ -329,7 +290,6 @@ module.exports = {
     firewallAllow: ['Allow', '允许', '允許'],
     firewallWaiting: ['Waiting for Windows…', '等待 Windows…', '等待 Windows…'],
     firewallDeclined: ['Still blocked: Windows was not told yes.', '仍然被挡住：Windows 那边没有得到确认。', '仍然被擋住：Windows 那邊沒有得到確認。'],
-    firewallOk: ['Windows Firewall lets other devices in', 'Windows 防火墙已放行其他设备', 'Windows 防火牆已放行其他裝置'],
     firewall: [
       'The first time, your system\'s firewall may ask whether to allow Kotomimi on the network: allow it for private networks.',
       '第一次开启时，系统防火墙可能询问是否允许 Kotomimi 访问网络：请允许它在专用网络上通信。',

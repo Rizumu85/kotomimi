@@ -1,5 +1,6 @@
 import { InstructionsField } from '../../components/providers/fields/InstructionsField';
 import { LanSharingSection } from '../../components/LanSharing/LanSharingSection';
+import { LocalServerCard } from '../../components/LanSharing/LocalServerCard';
 import { resolveInstructions } from '../../lib/provider/instructions';
 import type { SettingsProps } from '../../lib/provider/types';
 // Type only: `localai.ts` imports this view, and a value import back would close a cycle.
@@ -23,6 +24,7 @@ export function LocalAISettingsView({ settings, update, disabled = false, pair }
     <div className="kt-stages">
       {/* The instructions are the other device's pipeline's and a text model's: this computer's translation models carry their own. */}
       {settings.translateAt !== 'device' && <InstructionsField value={settings} onChange={update} preview={preview} disabled={disabled} />}
+      <LocalServerCard disabled={disabled} />
       <LanSharingSection disabled={disabled} pair={pair} />
     </div>
   );

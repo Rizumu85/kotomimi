@@ -35,16 +35,31 @@
     }
   }
 
-  .kt-lan__intro {
-    margin: 0 0 vars.$space-2;
+  // A second line of state under the first: what stands in the way.
+  .kt-lan__status + .kt-lan__status {
+    margin-top: vars.$space-2;
   }
 
-  // What to do on the other device, in the words its screen uses.
-  .kt-lan__found {
-    margin: vars.$space-2 0 0;
-    font-size: vars.$font-body;
-    line-height: 1.6;
-    color: vars.$text-primary;
+  // What another device finds this one by: its name, and its address.
+  .kt-lan__where {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: vars.$space-2;
+  }
+
+  .kt-lan__name {
+    font-size: vars.$font-caption;
+    color: vars.$text-muted;
+  }
+
+  // What is lent, and the options: one line each until opened.
+  .kt-lan__more {
+    margin-top: vars.$space-2;
+
+    &[open] > summary {
+      margin-bottom: vars.$space-2;
+    }
   }
 
   .kt-lan__dot {

@@ -1,37 +1,24 @@
 @use '../Settings/shared/variables' as vars;
 
-// Fork: the LocalAI installed on this computer (LocalServerCard.tsx). A card
-// beside the sharing card, in the same dialect.
+// Fork: the LocalAI installed on this computer (LocalServerCard.tsx). A
+// section of the provider's settings, beside the sharing section and in the
+// same dialect.
 
 .kt-ls {
-  margin-top: vars.$space-3;
-  padding: vars.$space-3;
-  background: vars.$bg-surface;
-  border: 1px solid vars.$border-subtle;
-  border-radius: vars.$radius-lg;
-
-  .kt-ls__head {
+  // Its state, and the button that changes it, on one line.
+  .kt-ls__row {
     display: flex;
     align-items: center;
-    gap: vars.$space-2;
-    margin-bottom: 4px;
-  }
-
-  .kt-ls__icon {
-    color: vars.$color-primary;
-  }
-
-  .kt-ls__title {
-    font-size: vars.$font-body;
-    font-weight: 600;
-    color: vars.$text-primary;
+    justify-content: space-between;
+    gap: vars.$space-3;
+    margin-bottom: vars.$space-2;
   }
 
   .kt-ls__state {
     display: flex;
     align-items: center;
     gap: vars.$space-2;
-    margin: vars.$space-2 0;
+    min-width: 0;
     font-size: vars.$font-body;
     color: vars.$text-secondary;
 
@@ -59,12 +46,6 @@
 
   .kt-ls__spin {
     animation: kt-ls-spin 1.2s linear infinite;
-  }
-
-  .kt-ls__actions {
-    display: flex;
-    gap: vars.$space-2;
-    margin-bottom: vars.$space-2;
   }
 
   .kt-ls__button {
@@ -102,27 +83,6 @@
 
     &:focus-visible {
       @include vars.focus-ring;
-    }
-  }
-
-  .kt-ls__models {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin: vars.$space-2 0;
-  }
-
-  .kt-ls__model {
-    padding: 3px 8px;
-    font-size: vars.$font-caption;
-    color: vars.$text-secondary;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid vars.$border-subtle;
-    border-radius: 999px;
-
-    &--more {
-      color: vars.$text-muted;
-      border-style: dashed;
     }
   }
 

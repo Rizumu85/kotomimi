@@ -56,12 +56,11 @@ describe('the LocalAI of this computer, in the settings', () => {
     expect(setAutoStart).toHaveBeenCalledWith(true);
   });
 
-  it('shows what it serves while it runs, and offers Stop', async () => {
+  it('says how many models it serves while it runs, and offers Stop', async () => {
     show({ ...installed, state: 'running', models: Array.from({ length: 10 }, (_, i) => `model-${i}`) });
     expect(screen.getByRole('status').textContent).toBe('fork.server.running {"count":10}');
-    expect(screen.getByText('Model 0')).toBeTruthy();
-    expect(screen.getByText('fork.server.more {"count":2}')).toBeTruthy();
-    expect(screen.queryByText('Model 9')).toBeNull();
+    // How many, not which: its models are chosen in the stage cards and listed with what is lent.
+    expect(screen.queryByText('Model 0')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'fork.server.stop' }));
     await waitFor(() => expect(stop).toHaveBeenCalledTimes(1));
   });
