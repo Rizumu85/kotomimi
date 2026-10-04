@@ -68,7 +68,7 @@ jobs:
       # this fork's to fix, and a job red on arrival is a job nobody reads.
       # The timeout is four times vitest's own: the guards that read the whole
       # source tree take seconds on a busy runner, and one of them missing 5s by
-      # half a second failed a release (v0.42.223, first attempt).
+      # half a second failed a release once (October 2026).
       - name: Run the fork's tests
         run: >-
           npx vitest run --testTimeout=20000
