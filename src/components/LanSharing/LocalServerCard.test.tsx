@@ -100,11 +100,12 @@ describe('the title bar\'s mark of a computer that is lending its models', () =>
     expect(screen.getByRole('status').textContent).toBe('fork.lan.servingClients {"count":2}');
   });
 
-  it('shows while a LocalAI this app started is up, and not for one it did not start', () => {
-    useLocalServerStore.setState({ status: { ...installed, state: 'external' } });
+  it('says nothing of a LocalAI alone: it listens on this computer only, and lends nothing until sharing is on', () => {
+    // Since the LocalAI the app starts listens on 127.0.0.1, only the sharing lends its models.
+    useLocalServerStore.setState({ status: { ...installed, state: 'running' } });
     const { container, rerender } = render(<ServingBadge />);
     expect(container.innerHTML).toBe('');
-    useLocalServerStore.setState({ status: { ...installed, state: 'running' } });
+    useLanStore.setState({ status: { state: 'on', port: 8790, addresses: [], name: 'DESK' }, clients: 0 });
     rerender(<ServingBadge />);
     expect(screen.getByRole('status').textContent).toBe('fork.lan.serving');
   });
