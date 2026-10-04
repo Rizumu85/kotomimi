@@ -2,7 +2,7 @@
 
 Kotomimi 是 Sokuji 的一个分支：在实时翻译之外，加上了自建模型的自由搭配和学语言用的辅助功能。名字取自"言葉"（话语）和"耳"（耳朵）。
 
-基于上游 [kizuna-ai-lab/sokuji](https://github.com/kizuna-ai-lab/sokuji) v0.42.2（`6cbdf9e`）。上游的说明见 [README.md](README.md)，这份文件只讲本分支多出来的东西。
+基于上游 [kizuna-ai-lab/sokuji](https://github.com/kizuna-ai-lab/sokuji) v0.42.3（`d2f8001`）。上游的说明见 [README.md](README.md)，这份文件只讲本分支多出来的东西。
 
 仓库：<https://github.com/Rizumu85/kotomimi>。本分支的工作在 `localai` 分支上，`main` 保持与上游一致。
 
@@ -381,10 +381,12 @@ bash ~/kotomimi-signing/make-cert.sh
 
 ```bash
 git fetch upstream
-git rebase upstream/main          # 在 localai 分支上
+git checkout -b sync/upstream-<日期> localai
+git merge upstream/main                 # merge，不 rebase：localai 的历史不改写
 node scripts/fork-localai-locales.cjs   # 语言包冲突时：先取上游版本，再跑这一行
-npx vitest run src/providers src/lib/lan src/lib/fonts src/lib/annotate src/components/Annotated src/components/Tour src/components/SetupWizard src/locales electron/lan-server.test.js
 ```
+
+测试跑 `.github/workflows/kotomimi-release.yml` 里"Run the fork's tests"那一步的完整命令（清单以那里为准），再跑 `npx tsc --noEmit -p .`。然后开 PR 到 `localai`。
 
 改动过的上游文件：
 
@@ -416,7 +418,8 @@ npx vitest run src/providers src/lib/lan src/lib/fonts src/lib/annotate src/comp
 | `assets/icon.*`、`public/favicon.ico`、`public/logo*.png` | 图标 |
 | 几个测试文件（`registry.test.ts`、`palabraai/provider.test.ts`、`gemini/provider.test.ts`、`localInference/provider.test.ts`、`ProviderPicker.test.tsx`、`AccountButton.test.tsx`、`LanguagePairSection.test.tsx`、`SimpleSettings.order.test.tsx`、`HelpSection.test.tsx`） | 跟着上面的改动更新的断言 |
 | `src/locales/*/translation.json` | 由脚本生成的文字 |
-| `package.json`、`package-lock.json` | 三个新依赖：`@sglkc/kuromoji`、`wanakana`、`es-hangul`；`ws` 从开发依赖移到运行依赖（共享的服务端要用） |
+| `package.json`、`package-lock.json` | 三个新依赖：`@sglkc/kuromoji`、`wanakana`、`es-hangul`；`ws` 从开发依赖移到运行依赖（共享的服务端要用）。另外是本分支的版本号（见"版本号和发布"），`productName` 和 `build` 里的应用 ID、可执行文件名、macOS 签名证书名、更新源 |
+| `extension/package.json`、`extension/package-lock.json`、`extension/manifest.json` | 只有版本号，和根目录的一起改（见"版本号和发布"）。上游每次发版都会在这里冲突：保留本分支的版本号 |
 
 ## 许可
 
