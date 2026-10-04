@@ -6,6 +6,7 @@
 // here: this file holds only what the door itself decides.
 import { afterEach, describe, expect, it } from 'vitest';
 import { createRequire } from 'node:module';
+import net from 'node:net';
 import WebSocket from 'ws';
 
 const require = createRequire(import.meta.url);
@@ -37,6 +38,21 @@ const until = async (check) => {
   }
   throw new Error('never happened');
 };
+
+/** The status line's code for a request written byte for byte: what no fetch can send, any program on the network can. */
+const rawStatus = (port, text) => new Promise((resolve, reject) => {
+  const socket = net.connect(port, '127.0.0.1', () => socket.write(text));
+  let got = '';
+  socket.on('data', (chunk) => {
+    got += chunk.toString('latin1');
+    const line = got.split('\r\n')[0];
+    if (got.includes('\r\n')) {
+      socket.destroy();
+      resolve(Number(line.split(' ')[1]));
+    }
+  });
+  socket.on('error', reject);
+});
 
 /** A socket, settled: open with its subprotocol, or refused with the HTTP status. */
 const dial = (url, protocols) => new Promise((resolve) => {
@@ -100,6 +116,17 @@ describe('the shared models\' door: HTTP', () => {
     await until(() => seen.requests.length === 1);
     server.reply(seen.requests[0].id, { body: {} });
     expect((await answer).status).toBe(200);
+  });
+
+  it('answers a request whose address cannot be read with 400, before the key, and keeps serving', async () => {
+    const { server, seen, base } = await start('k');
+    // `new URL` throws on these: thrown in the listener, it took the whole app down (main.js exits on an uncaught exception).
+    for (const target of ['//%', 'http://x:99999/']) {
+      expect(await rawStatus(server.port, `GET ${target} HTTP/1.1\r\nHost: x\r\n\r\n`)).toBe(400);
+      expect(await rawStatus(server.port, `GET ${target} HTTP/1.1\r\nHost: x\r\nConnection: Upgrade\r\nUpgrade: websocket\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n\r\n`)).toBe(400);
+    }
+    expect(seen.requests).toEqual([]);
+    expect((await fetch(`${base}/v1/models`)).status).toBe(401);
   });
 
   it('answers the waiting requests when it stops', async () => {

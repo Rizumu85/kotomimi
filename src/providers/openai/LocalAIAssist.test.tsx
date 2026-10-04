@@ -267,6 +267,24 @@ describe('the stage cards: on this computer', () => {
     expect(card(COACH).queryByText('settings.webgpuNotSupported')).toBeNull();
   });
 
+  it('says nothing is downloaded only once the store has looked: while it scans, every choice is still being checked', async () => {
+    // A model is downloaded; the store has not finished its first look at what is.
+    let finish: () => void = () => {};
+    const initialize = vi.fn(() => new Promise<void>((resolve) => { finish = () => { useModelStore.setState({ initialized: true, modelStatuses: { 'sensevoice-int8': 'downloaded', 'qwen3-0.6b-translation': 'downloaded' } }); resolve(); }; }));
+    useModelStore.setState({ initialized: false, webgpuAvailable: false, modelStatuses: {}, initialize });
+    const { card } = draw({ settings: { asrVia: 'device', translateAt: 'device', coach: true, coachAt: 'device' } });
+    for (const stage of [HEAR, TRANSLATE, COACH]) {
+      expect(card(stage).queryByText('providers.localai.notDownloaded'), stage).toBeNull();
+      expect(card(stage).getAllByText('providers.localai.checking').length, stage).toBeGreaterThan(0);
+      expect(card(stage).queryAllByRole('combobox').filter((select) => select.className.includes('kt-here__select--missing')), stage).toEqual([]);
+    }
+    // Nothing opens by itself on a gap that is not known to be one.
+    expect(screen.queryByTestId('library')).toBeNull();
+    for (const button of screen.getAllByRole('button', { name: 'providers.localai.browse' })) expect(button.getAttribute('aria-expanded')).toBe('false');
+    await act(async () => { finish(); });
+    expect(card(HEAR).queryByText('providers.localai.checking')).toBeNull();
+  });
+
   it('says so once the store has looked and found no graphics card for them, and loads nothing while no stage is here', () => {
     const initialize = vi.fn(async () => {});
     useModelStore.setState({ initialized: true, webgpuAvailable: false, initialize });

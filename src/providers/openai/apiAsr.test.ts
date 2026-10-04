@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { apiLanguage, createApiAsr, transcriptionsUrl, wavOf, type VadWorker } from './apiAsr';
+import { createVirtualClock } from '../../lib/contract/clock';
+import { apiLanguage, createApiAsr, transcriptionsUrl, UPLOAD_TIMEOUT_MS, wavOf, type VadWorker } from './apiAsr';
 
 const RATE = 24000;
 const VAD = { threshold: 0.5, minSilenceDuration: 1.4, minSpeechDuration: 0.4, maxSpeechDuration: 20 };
@@ -193,5 +194,40 @@ describe('a recognizer that is an API', () => {
     const { vad: live, seen } = await started(fakeApi());
     live.worker.onerror?.({ message: 'worker crashed' });
     expect(seen.fatal).toEqual(['worker crashed']);
+  });
+
+  it('gives up on an upload that never answers, says so, and sends the next stretch', async () => {
+    // The first upload hangs (a server stuck loading a model, a computer gone to sleep); the second is answered.
+    const calls: Array<{ signal?: AbortSignal | null }> = [];
+    const fetch = vi.fn((_url: RequestInfo | URL, init?: RequestInit) => {
+      calls.push({ signal: init?.signal });
+      if (calls.length > 1) return Promise.resolve(new Response(JSON.stringify({ text: 'second' }), { status: 200 }));
+      return new Promise<Response>((_, reject) => init?.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError'))));
+    });
+    const clock = createVirtualClock();
+    const vad = fakeVad();
+    const asr = createApiAsr({ baseUrl: 'http://x/v1', model: 'm', fetch: fetch as unknown as typeof globalThis.fetch, vad: () => vad.worker, clock });
+    const errors: string[] = [];
+    const results: string[] = [];
+    asr.onError = (error) => errors.push(error);
+    asr.onResult = (result) => results.push(result.text);
+    const ready = asr.init('m', { vadConfig: VAD, language: 'ja' });
+    vad.worker.say('ready');
+    await ready;
+    for (let i = 0; i < 2; i += 1) {
+      vad.worker.say('speech_start');
+      asr.feedAudio(seconds(1), RATE);
+      vad.worker.say('speech_end');
+    }
+    await settled();
+    expect(calls).toHaveLength(1);
+    clock.advance(UPLOAD_TIMEOUT_MS);
+    await settled();
+    await settled();
+    expect(errors).toEqual([`The speech recognition API did not answer within ${UPLOAD_TIMEOUT_MS / 1000} s.`]);
+    expect(calls).toHaveLength(2);
+    expect(results).toEqual(['second']);
+    // Nothing is left armed once the answers are in.
+    expect(clock.pending()).toBe(0);
   });
 });

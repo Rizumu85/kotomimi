@@ -130,8 +130,8 @@ describe("LocalAI Realtime's stage keys", () => {
     expect(localaiCredentials.read({ endpoint: '192.168.1.10:8080', coachKey: ' ' }, noAuth)).toHaveProperty('missing');
   });
 
-  it('declares every setting that decides a field or an endpoint the check reaches', () => {
-    expect(localaiProvider.checkReads).toEqual(['asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'coachDeviceModel', 'serverNeedsKey', 'selections']);
+  it('declares every setting that decides a field, an endpoint the check reaches, or a model a start needs named', () => {
+    expect(localaiProvider.checkReads).toEqual(['asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'coachDeviceModel', 'serverNeedsKey', 'selections', 'model', 'translateModel', 'translateServerModel', 'coachModel', 'coachServerModel']);
   });
 });
 
@@ -212,7 +212,8 @@ describe("LocalAI Realtime's check", () => {
 
   it('is refused by an API\'s 401 or 403; any other answer passes, and unreachable throws', async () => {
     const inUse = { ...LOCALAI_DEFAULTS, translateAt: 'api' as const, translateModel: 'gpt-4.1-mini', translateBaseUrl: 'https://api.example.com/v1', translateNeedsKey: false };
-    expect(await check(server({ other: async () => json({}, 401) }), inUse)).toMatchObject({ ok: false, code: 'auth' });
+    // No key was sent: the API is said to ask for one, by its address.
+    expect(await check(server({ other: async () => json({}, 401) }), inUse)).toMatchObject({ ok: false, code: 'api_key_needed', params: { address: 'https://api.example.com/v1' } });
     // Not every API lists its models: any other answer passes.
     expect(await check(server({ other: async () => json({}, 404) }), inUse)).toMatchObject({ ok: true });
     await expect(check(server({ other: async () => { throw new TypeError('Failed to fetch'); } }), inUse)).rejects.toThrow(/translation model's server \(https:\/\/api\.example\.com\/v1\) could not be reached/);
@@ -247,7 +248,7 @@ describe("LocalAI Realtime's model and config", () => {
     expect(effectiveLocalAIModel({ model: '' }, [{ id: 'qwen3-4b' }])).toBe('qwen3-4b');
     // With the server's word on what each model is, only a pipeline: never a text model, or one another server lists.
     expect(effectiveLocalAIModel({ model: '' }, [{ id: 'qwen3-4b', kind: 'text' }, { id: 'my-pipeline', kind: 'pipeline' }, { id: 'gpt-realtime-x', kind: 'text', from: 'translate' }])).toBe('my-pipeline');
-    expect(buildLocalAI(AUTO, { ...LOCALAI_DEFAULTS, model: '' }, { ...SHARED, models: [] })).toMatchObject({ code: 'models_required' });
+    expect(buildLocalAI(AUTO, { ...LOCALAI_DEFAULTS, model: '' }, { ...SHARED, models: [] })).toMatchObject({ code: 'asr_unnamed' });
   });
 
   it('builds a text-only leg with no voice, no reasoning, no anchor, and commits that answer themselves', () => {

@@ -59,8 +59,8 @@ describe('recognition by an API: the run it builds', () => {
   });
 
   it('is refused while the API or its model is not named', () => {
-    expect(buildLocalAI(SPEAKER, settings({ ...API, asrApiModel: ' ' }), shared)).toMatchObject({ code: 'models_required' });
-    expect(buildLocalAI(SPEAKER, settings({ ...API, asrApiBaseUrl: '' }), shared)).toMatchObject({ code: 'models_required' });
+    expect(buildLocalAI(SPEAKER, settings({ ...API, asrApiModel: ' ' }), shared)).toMatchObject({ code: 'asr_unnamed' });
+    expect(buildLocalAI(SPEAKER, settings({ ...API, asrApiBaseUrl: '' }), shared)).toMatchObject({ code: 'asr_unnamed' });
   });
 
   it('counts none of this computer\'s memory for the recognizer', () => {
@@ -85,6 +85,6 @@ describe('recognition by an API: the check', () => {
   it('is refused by the API\'s 401: the key is wrong', async () => {
     const fetch = vi.fn(async () => new Response('{}', { status: 401 }));
     const result = await createLocalAICheck({ fetch: fetch as unknown as typeof globalThis.fetch })(K, settings({ ...API, translateAt: 'device' }), ctx);
-    expect(result).toMatchObject({ ok: false, code: 'auth' });
+    expect(result).toMatchObject({ ok: false, code: 'api_key_refused' });
   });
 });

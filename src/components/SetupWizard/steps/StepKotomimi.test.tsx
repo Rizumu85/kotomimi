@@ -1,15 +1,33 @@
 // Fork: the wizard's Kotomimi step — which starts it offers, and what each writes into the draft.
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { initialDraft, type SetupAction, type SetupDraft } from '../setupDraft';
 
 vi.mock('react-i18next', async (importOriginal) => ({ ...(await importOriginal<typeof import('react-i18next')>()), useTranslation: () => ({ t: (key: string) => key }) }));
 const world = vi.hoisted(() => ({ canShare: true, sharing: false, settings: { asrVia: 'server' } as Record<string, unknown> }));
 vi.mock('../../../lib/lan/discover', () => ({ canFindServers: () => world.canShare }));
 vi.mock('../../../stores/lanStore', () => ({ useLanStore: (pick: (s: { enabled: boolean }) => unknown) => pick({ enabled: world.sharing }) }));
-vi.mock('../../LanSharing/ServerFinder', () => ({ ServerFinder: () => <div data-testid="finder" /> }));
+vi.mock('../../LanSharing/ServerFinder', () => ({
+  ServerFinder: ({ onPick }: { onPick(server: unknown): void }) => (
+    <div data-testid="finder">
+      <button type="button" onClick={() => onPick({ address: '192.168.1.20:8790', kind: 'kotomimi', name: 'DESK', product: '', models: 2, needsKey: false, self: false })}>pick-open</button>
+      <button type="button" onClick={() => onPick({ address: '192.168.1.21:8790', kind: 'kotomimi', name: 'MAC', product: '', models: 0, needsKey: true, self: false })}>pick-keyed</button>
+    </div>
+  ),
+}));
 vi.mock('../../providers/useAuthContext', () => ({ useAuthContext: () => ({ signedIn: false }) }));
-const provider = { id: 'localai', check: vi.fn(), credentials: { keys: ['endpoint'], fields: () => [] } };
+const provider = {
+  id: 'localai',
+  check: vi.fn(),
+  // The provider's own fields and reading, as far as the step uses them: an address, and an access key when the device asks for one.
+  credentials: {
+    keys: ['endpoint', 'serverKey'],
+    fields: (s: { serverNeedsKey?: boolean }) => [{ key: 'endpoint', labelKey: 'e' }, ...(s.serverNeedsKey ? [{ key: 'serverKey', labelKey: 'k', secret: true }] : [])],
+    read: (values: Record<string, string>) => (!values.endpoint?.trim() ? { missing: 'no address', code: 'server_address_missing' }
+      : values.serverKey !== undefined && !values.serverKey.trim() ? { missing: 'no key', code: 'server_key_missing' }
+      : { apiKey: values.serverKey ?? '', endpoint: `ws://${values.endpoint}/v1/realtime` }),
+  },
+};
 vi.mock('../providerPaths', () => ({ wizardProvider: () => provider }));
 vi.mock('../../../stores/providerStore', () => ({
   useProviderStore: Object.assign(
@@ -29,6 +47,7 @@ function draw(over: Partial<SetupDraft> = {}) {
 }
 
 beforeEach(() => {
+  provider.check.mockReset();
   world.canShare = true;
   world.sharing = false;
   world.settings = { asrVia: 'server' };
@@ -74,5 +93,46 @@ describe('the wizard\'s Kotomimi step', () => {
     // Another device does the work: sharing left on from before does not make this the sharing computer's start.
     world.settings = { asrVia: 'server' };
     expect(draw().picked()).toBe('server');
+  });
+
+  it('says why a device did not answer in the words the settings use, not in the check\'s English', async () => {
+    const { CheckError } = await import('../../../lib/provider/checkError');
+    provider.check.mockRejectedValueOnce(new CheckError('The other device could not be reached (192.168.1.20:8790): Failed to fetch', 'server_unreachable', { address: '192.168.1.20:8790' }));
+    draw();
+    fireEvent.click(screen.getByText('pick-open'));
+    // The catalog's key stands for its sentence: the notice's own, not "connection failed: <English>".
+    await waitFor(() => expect(screen.getByText('providers.localai.serverUnreachable')).toBeTruthy());
+    expect(screen.queryByText('fork.wizard.serverUnreachable')).toBeNull();
+  });
+
+  it('asks for the access key of a device that wants one, there in the step, before trying it', () => {
+    const { dispatch } = draw();
+    fireEvent.click(screen.getByText('pick-keyed'));
+    expect(dispatch).toHaveBeenCalledWith({ type: 'setCredential', key: 'endpoint', value: '192.168.1.21:8790' });
+    // Tried without its key it could only refuse: the field comes first, and says why.
+    expect(provider.check).not.toHaveBeenCalled();
+    expect(screen.getByLabelText('providers.localai.serverKey')).toBeTruthy();
+    expect(screen.getByText('fork.wizard.keyNeeded')).toBeTruthy();
+    fireEvent.change(screen.getByLabelText('providers.localai.serverKey'), { target: { value: 's3cret' } });
+    expect(dispatch).toHaveBeenCalledWith({ type: 'setCredential', key: 'serverKey', value: 's3cret' });
+  });
+
+  it('tries the device with the key typed, and opens the field when a device it was not told of asks for one', async () => {
+    provider.check.mockResolvedValueOnce({ ok: true, models: [] });
+    draw({ credentials: { endpoint: '192.168.1.21:8790', serverKey: 's3cret' } });
+    fireEvent.click(screen.getByText('fork.wizard.tryServer'));
+    await waitFor(() => expect(provider.check).toHaveBeenCalled());
+    expect(provider.check.mock.calls[0][0]).toMatchObject({ apiKey: 's3cret' });
+    expect(provider.check.mock.calls[0][1]).toMatchObject({ serverNeedsKey: true });
+    document.body.replaceChildren();
+    provider.check.mockReset();
+
+    // A typed address whose device turns out to want a key.
+    provider.check.mockResolvedValueOnce({ ok: false, code: 'server_key_needed', reason: 'The server refused the access key (HTTP 401).' });
+    draw({ credentials: { endpoint: '192.168.1.22:8790' } });
+    expect(screen.queryByLabelText('providers.localai.serverKey')).toBeNull();
+    fireEvent.click(screen.getByText('fork.wizard.tryServer'));
+    await waitFor(() => expect(screen.getByLabelText('providers.localai.serverKey')).toBeTruthy());
+    expect(screen.getByText('fork.wizard.keyNeeded')).toBeTruthy();
   });
 });

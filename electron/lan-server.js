@@ -99,6 +99,18 @@ function closeReason(text) {
   return chars.join('');
 }
 
+/**
+ * The address a request names, or null when it cannot be read (`GET //%`, `GET http://x:99999/`). Never thrown:
+ * a throw in a listener is an uncaught exception, and the main process ends the app on one.
+ */
+function urlOf(target) {
+  try {
+    return new URL(target ?? '/', 'http://kotomimi');
+  } catch {
+    return null;
+  }
+}
+
 /** Compared in constant time for equal lengths: a key is short, and a timing probe on a LAN is still a probe. */
 function sameKey(given, wanted) {
   if (given.length !== wanted.length) return false;
@@ -161,8 +173,12 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
   const refuse = (response, status, code, message) => json(response, status, { error: { message, type: 'invalid_request_error', code } });
 
   const server = http.createServer((request, response) => {
-    const { pathname } = new URL(request.url ?? '/', 'http://kotomimi');
-    const path = pathname.replace(/\/+$/, '') || '/';
+    const url = urlOf(request.url);
+    if (!url) {
+      refuse(response, 400, 'bad_request', 'The request names no readable address.');
+      return;
+    }
+    const path = url.pathname.replace(/\/+$/, '') || '/';
     if (request.method === 'OPTIONS') {
       response.writeHead(204, CORS);
       response.end();
@@ -234,11 +250,12 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
   });
 
   server.on('upgrade', (request, socket, head) => {
-    const url = new URL(request.url ?? '/', 'http://kotomimi');
+    const url = urlOf(request.url);
     const reject = (status, text) => {
       socket.write(`HTTP/1.1 ${status} ${text}\r\nConnection: close\r\n\r\n`);
       socket.destroy();
     };
+    if (!url) return reject(400, 'Bad Request');
     if (url.pathname.replace(/\/+$/, '') !== REALTIME_PATH) return reject(404, 'Not Found');
     if (!allowed(request)) return reject(401, 'Unauthorized');
     if (sockets.size >= MAX_SOCKETS) return reject(503, 'Busy');

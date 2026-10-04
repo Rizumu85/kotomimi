@@ -11,6 +11,7 @@
  * results — and the texts come back in the order the speech was spoken, one
  * request at a time.
  */
+import { realClock, type Clock } from '../../lib/contract/clock';
 import type { AsrInit, AsrLike } from '../localInference/engines';
 
 /** The detector's worker, as far as it is used here (`native-vad.worker.ts`: it posts the edges of speech and nothing else). */
@@ -31,12 +32,20 @@ export interface ApiAsrOptions {
   /** The app's detector by default; a stand-in in tests. */
   vad?: () => VadWorker;
   now?: () => number;
+  /** What an upload's time limit is kept on: the session's clock. */
+  clock?: Pick<Clock, 'setTimeout'>;
 }
 
 /** Audio kept from before the detector says speech began: it says so a moment after the first sound. */
 const PRE_ROLL_SECONDS = 0.8;
 /** Of the silence that ended a stretch, this much stays on the upload. */
 const TAIL_KEPT_SECONDS = 0.3;
+/**
+ * How long one upload may take, to its text. The uploads go one at a time, so
+ * one that never answers — a server stuck loading a model, a computer gone to
+ * sleep — would hold every sentence after it, with nothing said.
+ */
+export const UPLOAD_TIMEOUT_MS = 60_000;
 
 const appVad = (): VadWorker => new Worker(new URL('../../lib/local-inference/workers/native-vad.worker.ts', import.meta.url), { type: 'module' }) as unknown as VadWorker;
 
@@ -85,6 +94,7 @@ const joined = (chunks: readonly Int16Array[]): Int16Array => {
 
 export function createApiAsr(options: ApiAsrOptions): AsrLike {
   const now = options.now ?? (() => Date.now());
+  const clock = options.clock ?? realClock;
   const stop = new AbortController();
   let worker: VadWorker | null = null;
   let language: string | undefined;
@@ -190,12 +200,18 @@ export function createApiAsr(options: ApiAsrOptions): AsrLike {
       form.append('model', options.model);
       form.append('response_format', 'json');
       if (language) form.append('language', language);
+      // Stopped with the recognizer, or given up on once the time is up: the body's reading included.
+      const attempt = new AbortController();
+      const onStop = () => attempt.abort();
+      stop.signal.addEventListener('abort', onStop, { once: true });
+      let late = false;
+      const cancelTimer = clock.setTimeout(() => { late = true; attempt.abort(); }, UPLOAD_TIMEOUT_MS);
       try {
         const response = await options.fetch(transcriptionsUrl(options.baseUrl), {
           method: 'POST',
           ...(options.key ? { headers: { Authorization: `Bearer ${options.key}` } } : {}),
           body: form,
-          signal: stop.signal,
+          signal: attempt.signal,
         });
         if (!response.ok) {
           const said = (await response.text().catch(() => '')).replace(/\s+/g, ' ').slice(0, 200);
@@ -206,7 +222,12 @@ export function createApiAsr(options: ApiAsrOptions): AsrLike {
         if (text) asr.onResult?.({ text, durationMs: Math.round((trimmed.length / sampleRate) * 1000), recognitionTimeMs: now() - started });
       } catch (error) {
         if (stop.signal.aborted) return;
-        asr.onError?.(`The speech recognition API could not be reached: ${error instanceof Error ? error.message : String(error)}`);
+        asr.onError?.(late
+          ? `The speech recognition API did not answer within ${UPLOAD_TIMEOUT_MS / 1000} s.`
+          : `The speech recognition API could not be reached: ${error instanceof Error ? error.message : String(error)}`);
+      } finally {
+        cancelTimer();
+        stop.signal.removeEventListener('abort', onStop);
       }
     });
   }

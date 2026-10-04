@@ -87,6 +87,27 @@ export const NOTICE_ALIASES: Readonly<Record<string, string>> = {
   segment_ended: 'mainPanel.sonioxSegmentEnded',
   // Fork: the other device ended a session nobody had spoken in for a long while, to let its models go.
   session_idle: 'fork.lan.sessionIdle',
+  // Fork: a stage of the Kotomimi provider has no model to run — told by the card it is chosen in, not as a key to validate.
+  asr_unnamed: 'providers.localai.asrUnnamed',
+  translate_unnamed: 'providers.localai.translateUnnamed',
+  coach_unnamed: 'providers.localai.coachUnnamed',
+  // Fork: the Kotomimi provider's other device is not chosen yet, or its access key is blank — no API key is involved.
+  server_address_missing: 'providers.localai.addressMissing',
+  server_key_missing: 'providers.localai.serverKeyMissing',
+  // Fork: Auto Detect where nothing on the Kotomimi provider's way detects the language — a language to choose, not a model to download.
+  source_auto: 'providers.localai.sourceAuto',
+  // Fork: the Kotomimi provider's other device or a stage's API did not answer as it should — where to look, not the check's English.
+  server_unreachable: 'providers.localai.serverUnreachable',
+  check_slow: 'providers.localai.checkSlow',
+  server_http: 'providers.localai.serverHttp',
+  server_no_models: 'providers.localai.serverNoModels',
+  server_key_needed: 'providers.localai.serverKeyNeeded',
+  server_key_refused: 'providers.localai.serverKeyRefused',
+  api_unreachable: 'providers.localai.apiUnreachable',
+  api_key_needed: 'providers.localai.apiKeyNeeded',
+  api_key_refused: 'providers.localai.apiKeyRefused',
+  // Fork: another Kotomimi hears a leg's language with none of its recognizers.
+  server_no_asr: 'providers.localai.serverNoAsr',
   connection_lost: 'mainPanel.sonioxConnectionLost',
   // Kizuna Soniox's lease refused a start (Stage 2 Kizuna Soniox, ruling 11): the sentences name Soniox, so the codes keep it.
   soniox_service_unavailable: 'mainPanel.sonioxServiceUnavailable',

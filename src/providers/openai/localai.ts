@@ -53,6 +53,8 @@ import type { LegName } from '../../lib/conversation/types';
 import type { Selections } from '../../lib/local-inference/selection/types';
 import { buildDefaultLocalPrompt } from '../../lib/local-inference/prompts';
 import { boundedFetch } from '../../lib/provider/boundedFetch';
+import { CheckError } from '../../lib/provider/checkError';
+import { AUTO } from '../../lib/provider/languages';
 import type { CheckContext, CheckResult, CredentialField, CredentialsMissing, MigrationInputs, Provider, ProviderRefusal, SharedSettings } from '../../lib/provider/types';
 import { admitLocalInference, type LocalInferenceConfig } from '../localInference/config';
 import { LOCAL_INFERENCE_DEFAULTS } from '../localInference/settings';
@@ -327,12 +329,13 @@ export const localaiCredentials: Provider<LocalAISettings, LocalAICredentials, n
   // `values` holds exactly the fields shown: the address is in it only while a stage is on the other device, a key only when its stage asks for one.
   read: (values): LocalAICredentials | CredentialsMissing => {
     const endpoint = values.endpoint === undefined ? '' : localaiEndpoint(values.endpoint);
-    if (endpoint === null) return { missing: 'Enter the address of your LocalAI server.' };
+    // Coded, so they are worded as what they are: a device to choose and its access key, not an API key.
+    if (endpoint === null) return { missing: 'Enter the address of your LocalAI server.', code: 'server_address_missing' };
     const serverKey = values.serverKey?.trim();
     const asrKey = values.asrKey?.trim();
     const translateKey = values.translateKey?.trim();
     const coachKey = values.coachKey?.trim();
-    if (values.serverKey !== undefined && !serverKey) return { missing: 'Enter the access key of the server.' };
+    if (values.serverKey !== undefined && !serverKey) return { missing: 'Enter the access key of the server.', code: 'server_key_missing' };
     if (values.asrKey !== undefined && !asrKey) return { missing: 'Enter the API key of the speech recognition API.' };
     if (values.translateKey !== undefined && !translateKey) return { missing: 'Enter the API key of the translation model.' };
     if (values.coachKey !== undefined && !coachKey) return { missing: 'Enter the API key of the feedback model.' };
@@ -351,6 +354,64 @@ export const localaiCredentials: Provider<LocalAISettings, LocalAICredentials, n
   Assist: LocalAIAssist,
 };
 
+/**
+ * What a leg leaves unnamed — a stage with no model to run, or an API with no
+ * address — in the words its start refuses it with, coded by the stage, whose
+ * card is where it is fixed (`noticeText`'s aliases). Asked by the builder, and
+ * by the check for every leg, so the card never says "ready" to a run its
+ * start would refuse. `coached`: the speaker's own leg, whose speech the
+ * feedback answers and whose translation only what is typed needs.
+ */
+function unnamedStage(s: LocalAISettings, models: readonly LocalAIModel[], coached: boolean): ProviderRefusal | null {
+  const hearsHere = s.asrVia !== 'server';
+  const pipeline = needsServer(s) ? effectiveLocalAIModel(s, models) : '';
+  if (!hearsHere && !pipeline) return { refused: 'No model is named, and the server lists none.', code: 'asr_unnamed' };
+  if (s.asrVia === 'api' && (!s.asrApiBaseUrl.trim() || !s.asrApiModel.trim())) return { refused: 'No speech recognition API is named.', code: 'asr_unnamed' };
+  if (!coached) {
+    if (s.translateAt === 'api' && (!s.translateBaseUrl.trim() || !s.translateModel.trim())) return { refused: 'No translation model is named.', code: 'translate_unnamed' };
+    const kotomimi = needsServer(s) && isKotomimiServer(models);
+    const serverModel = s.translateServerModel.trim();
+    // A model of the other device is asked by name: none is named, and none of its own fits.
+    const asksServer = s.translateAt === 'server' && (serverModel !== '' || kotomimi || hearsHere);
+    if (asksServer && !(serverModel || (kotomimi && pipeline ? pipeline : serverDefaultModel(models, 'translate')))) return { refused: 'No translation model is named.', code: 'translate_unnamed' };
+    return null;
+  }
+  if (s.coachAt === 'api' && (!s.coachBaseUrl.trim() || !s.coachModel.trim())) return { refused: 'No feedback model is named.', code: 'coach_unnamed' };
+  if (s.coachAt === 'server' && !(s.coachServerModel.trim() || serverDefaultModel(models, 'coach'))) return { refused: 'No feedback model is named.', code: 'coach_unnamed' };
+  return null;
+}
+
+/**
+ * A leg whose language is to be detected, where nothing on its way detects
+ * one: this computer's translation models are told the pair, and another
+ * Kotomimi's recognizers are told the language (`src/lib/lan/transcriber.ts`
+ * refuses a session that does not say it). No model downloaded would help,
+ * so it is said as what it is. `source`: the language the leg hears; a
+ * coached speaker's is never detected, and only what they type is translated.
+ */
+function undetected(s: LocalAISettings, models: readonly LocalAIModel[], source: string, coached: boolean): ProviderRefusal | null {
+  if (source !== AUTO || coached) return null;
+  const kotomimiHears = s.asrVia === 'server' && isKotomimiServer(models);
+  if (s.translateAt !== 'device' && !kotomimiHears) return null;
+  return { refused: 'The language spoken is to be detected, and nothing on the way detects it.', code: 'source_auto' };
+}
+
+/**
+ * A leg another Kotomimi hears in a language none of its recognizers takes:
+ * its socket would refuse the session ("shares no speech recognition model",
+ * `src/lib/lan/transcriber.ts`), which a start would show in that device's
+ * English. It says which languages each recognizer takes, as it picks among
+ * them (`appModels.ts`); one that says none takes any, and so does one it
+ * lends from a model server beside it (a LocalAI), whose languages it does
+ * not know. `heard`: the language the leg hears.
+ */
+function unheard(s: LocalAISettings, models: readonly LocalAIModel[], heard: string): ProviderRefusal | null {
+  if (s.asrVia !== 'server' || heard === AUTO || !isKotomimiServer(models)) return null;
+  const language = deviceLanguage(heard);
+  if (modelsFor(models, 'asr').some((m) => m.host !== KOTOMIMI_HOST || !m.languages?.length || m.languages.includes(language))) return null;
+  return { refused: `The other device shares no speech recognition model for ${heard}.`, code: 'server_no_asr', params: { source: heard } };
+}
+
 export interface LocalAICheckDeps {
   fetch?: typeof fetch;
   clock?: Pick<Clock, 'setTimeout'>;
@@ -366,6 +427,15 @@ function otherServers(k: LocalAICredentials, s: LocalAISettings): OtherServer[] 
   if (s.translateAt === 'api' && s.translateBaseUrl.trim()) out.push({ slot: 'translate', name: 'translation', base: base(s.translateBaseUrl), key: k.translateKey });
   if (coachIs(s, 'api') && s.coachBaseUrl.trim()) out.push({ slot: 'coach', name: 'feedback', base: base(s.coachBaseUrl), key: k.coachKey });
   return out;
+}
+
+/** Where a Realtime endpoint is, as a person reads it: `ws://192.168.1.20:8790/v1/realtime` → `192.168.1.20:8790`. */
+function hostOf(endpoint: string): string {
+  try {
+    return new URL(endpoint).host || endpoint;
+  } catch {
+    return endpoint;
+  }
 }
 
 interface Listed { id: string; kotomimi: boolean }
@@ -409,6 +479,12 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
   return async (k: LocalAICredentials, s: LocalAISettings, ctx: CheckContext): Promise<CheckResult> => {
     const doFetch = deps.fetch ?? ((input: RequestInfo | URL, init?: RequestInit) => fetch(input, init));
     const late = `A server did not answer its model list within ${CHECK_TIMEOUT_MS / 1000} s.`;
+    // The other device's and the APIs' failures are coded (`CheckError`, `providers.localai.*` by `noticeText`): a person reads
+    // where to look, not the check's English, which stays the message for the logs. The bound passing is one more.
+    const slow = (error: unknown): never => {
+      if (!ctx.signal?.aborted && error instanceof Error && error.message === late) throw new CheckError(late, 'check_slow', { seconds: CHECK_TIMEOUT_MS / 1000 });
+      throw error;
+    };
     const servers = needsServer(s) || otherServers(k, s).length > 0
       ? await boundedFetch({ clock, ms: CHECK_TIMEOUT_MS, signal: ctx.signal, late }, async (signal): Promise<CheckResult> => {
         const models: LocalAIModel[] = [];
@@ -420,26 +496,36 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
             if (signal.aborted) throw error;
             // Still a check that could not find out — thrown, the models it listed last are kept — but in words the cards
             // can tell, to offer the same device's Kotomimi (`SERVER_SILENT`).
-            throw new Error(`${SERVER_SILENT} (${k.endpoint}): ${error instanceof Error ? error.message : String(error)}`);
+            throw new CheckError(`${SERVER_SILENT} (${k.endpoint}): ${error instanceof Error ? error.message : String(error)}`, 'server_unreachable', { address: hostOf(k.endpoint) });
           }
-          if (response.status === 401 || response.status === 403) return { ok: false, code: 'auth', reason: `The server refused the access key (HTTP ${response.status}).` };
-          if (!response.ok) throw new Error(`The server answered its model list with HTTP ${response.status}.`);
+          if (response.status === 401 || response.status === 403) {
+            // None was sent: the key is asked for. One was: it is not the device's.
+            return { ok: false, code: k.apiKey ? 'server_key_refused' : 'server_key_needed', reason: `The server refused the access key (HTTP ${response.status}).` };
+          }
+          if (!response.ok) throw new CheckError(`The server answered its model list with HTTP ${response.status}.`, 'server_http', { status: response.status });
           const own = listed(await response.json());
-          if (own.length === 0) return { ok: false, reason: 'The server lists no model.' };
+          if (own.length === 0) return { ok: false, code: 'server_no_models', reason: 'The server lists no model.' };
 
           // What each model is for. LocalAI's own endpoint; any other server answers 404, or nothing, and the models stay unsorted.
           const kinds = new Map<string, LocalAIModelKind>();
+          // Another Kotomimi says which languages each of its models takes, too.
+          const languages = new Map<string, readonly string[]>();
           try {
             const answer = await doFetch(`${localaiModelsUrl(k.endpoint)}/capabilities`, listing(k.apiKey, signal));
             if (answer.ok) {
-              for (const m of ((await answer.json()) as { data?: Array<{ id?: unknown; capabilities?: unknown }> }).data ?? []) {
-                if (typeof m.id === 'string') kinds.set(m.id, kindOf(m.capabilities));
+              for (const m of ((await answer.json()) as { data?: Array<{ id?: unknown; capabilities?: unknown; languages?: unknown }> }).data ?? []) {
+                if (typeof m.id !== 'string') continue;
+                kinds.set(m.id, kindOf(m.capabilities));
+                if (Array.isArray(m.languages)) languages.set(m.id, m.languages.filter((l): l is string => typeof l === 'string'));
               }
             }
           } catch (error) {
             if (signal.aborted) throw error;
           }
-          for (const m of own) models.push({ id: m.id, ...(kinds.has(m.id) ? { kind: kinds.get(m.id) } : {}), ...(m.kotomimi ? { host: KOTOMIMI_HOST } : {}) });
+          for (const m of own) {
+            const taken = m.kotomimi ? languages.get(m.id) : undefined;
+            models.push({ id: m.id, ...(kinds.has(m.id) ? { kind: kinds.get(m.id) } : {}), ...(m.kotomimi ? { host: KOTOMIMI_HOST } : {}), ...(taken?.length ? { languages: taken } : {}) });
+          }
         }
 
         for (const other of otherServers(k, s)) {
@@ -448,9 +534,11 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
             answer = await doFetch(`${other.base}/models`, listing(other.key, signal));
           } catch (error) {
             if (signal.aborted) throw error;
-            throw new Error(`The ${other.name} model's server (${other.base}) could not be reached.`);
+            throw new CheckError(`The ${other.name} model's server (${other.base}) could not be reached.`, 'api_unreachable', { address: other.base });
           }
-          if (answer.status === 401 || answer.status === 403) return { ok: false, code: 'auth', reason: `The ${other.name} model's server refused the key (HTTP ${answer.status}).` };
+          if (answer.status === 401 || answer.status === 403) {
+            return { ok: false, code: other.key ? 'api_key_refused' : 'api_key_needed', params: { address: other.base }, reason: `The ${other.name} model's server refused the key (HTTP ${answer.status}).` };
+          }
           if (!answer.ok) continue;
           const theirs = listed(await answer.json().catch(() => null));
           // The speech recognition API's list is offered for its model field as it is: nothing says which of them hear.
@@ -480,12 +568,22 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
           }
         }
         return { ok: true, models };
-      })
+      }).catch(slow)
       : ({ ok: true, models: [] } as CheckResult);
     if (!servers.ok) return servers;
 
-    const needs = deviceNeeds(deviceChoices(s), ctx.pair, ctx.legs);
     // Only the speaker is coached.
+    for (const leg of ctx.legs) {
+      const coached = s.coach && leg === 'speaker';
+      const found = servers.models ?? [];
+      // What the leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
+      const heard = leg === 'speaker' && !coached ? ctx.pair.source : ctx.pair.target;
+      const gap = unnamedStage(s, found, coached) ?? undetected(s, found, leg === 'speaker' ? ctx.pair.source : ctx.pair.target, coached) ?? unheard(s, found, heard);
+      // What the servers listed goes with the refusal: a pick from it is often what answers it.
+      if (gap) return { ok: false, reason: gap.refused, ...(gap.code ? { code: gap.code } : {}), ...(gap.params ? { params: gap.params } : {}), ...(servers.models?.length ? { models: servers.models } : {}) };
+    }
+
+    const needs = deviceNeeds(deviceChoices(s), ctx.pair, ctx.legs);
     const coachHere = coachIs(s, 'device') && ctx.legs.includes('speaker');
     if (needs.length > 0 || coachHere) {
       await deviceModelsLoaded(ctx.signal);
@@ -541,21 +639,20 @@ export function buildLocalAI(context: SessionContext, s: LocalAISettings, shared
   // The other device's pipeline: what its Realtime socket runs, and — on another Kotomimi — the name its own choice of translation model is asked by.
   const pipeline = needsServer(s) ? effectiveLocalAIModel(s, models) : '';
   const model = hearsHere ? '' : pipeline;
-  if (!hearsHere && !model) return { refused: 'No model is named, and the server lists none.', code: 'models_required' };
   const kotomimi = needsServer(s) && isKotomimiServer(models);
   // The speaker alone is coached: the participant leg always hears the other side, and translates it.
   const coached = s.coach && !shared.reversed(context.direction);
 
-  // The translation named, before anything is built: a run with none has nothing to say.
+  // Every stage named, before anything is built: a run with none has nothing to say. A coached speaker's translation
+  // is for what they type only: the run starts without it.
+  const gap = unnamedStage(s, models, coached) ?? undetected(s, models, source, coached);
+  if (gap) return gap;
   const apiBase = s.translateBaseUrl.trim();
   const apiModel = s.translateModel.trim();
-  // A coached speaker's translation is for what they type only: the run starts without it.
-  if (s.translateAt === 'api' && (!apiBase || !apiModel) && !coached) return { refused: 'No translation model is named.', code: 'models_required' };
   const serverModel = s.translateServerModel.trim();
   // No session of the device's own pipeline answers this leg's text: one of its models is asked instead.
   const asksServer = s.translateAt === 'server' && (serverModel !== '' || kotomimi || hearsHere || coached);
   const askedServerModel = serverModel || (kotomimi && pipeline ? pipeline : serverDefaultModel(models, 'translate'));
-  if (asksServer && !askedServerModel && !coached) return { refused: 'No translation model is named.', code: 'models_required' };
 
   // OpenAI Realtime's builder for the instructions and the detection, with the model pinned so it picks no other.
   const pinned = model || LOCALAI_DEFAULT_MODEL;
@@ -571,7 +668,6 @@ export function buildLocalAI(context: SessionContext, s: LocalAISettings, shared
     if (s.asrVia === 'api') {
       const baseUrl = s.asrApiBaseUrl.trim();
       const named = s.asrApiModel.trim();
-      if (!baseUrl || !named) return { refused: 'No speech recognition API is named.', code: 'models_required' };
       recognizer = { modelId: named, streaming: false, api: { baseUrl, model: named, ...(s.asrApiNeedsKey ? { key: 'asrKey' as const } : {}) } };
     } else {
       recognizer = deviceRecognizer(heard, coached ? source : target, s.selections);
@@ -620,7 +716,6 @@ export function buildLocalAI(context: SessionContext, s: LocalAISettings, shared
       const api = s.coachAt === 'api';
       const baseUrl = api ? s.coachBaseUrl.trim() : '';
       const named = api ? s.coachModel.trim() : s.coachServerModel.trim() || serverDefaultModel(models, 'coach');
-      if (!named || (api && !baseUrl)) return { refused: 'No feedback model is named.', code: 'models_required' };
       coach = {
         kind: 'coach',
         baseUrl,
@@ -706,7 +801,11 @@ export const localaiProvider: Provider<LocalAISettings, LocalAICredentials, Loca
   credentials: localaiCredentials,
   check: checkLocalAI,
   // What decides the credential fields, the endpoints the check reaches, and the models it asks this computer for.
-  checkReads: ['asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'coachDeviceModel', 'serverNeedsKey', 'selections'],
+  checkReads: [
+    'asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'coachDeviceModel', 'serverNeedsKey', 'selections',
+    // The models a start needs named (`unnamedStage`).
+    'model', 'translateModel', 'translateServerModel', 'coachModel', 'coachServerModel',
+  ],
   // This computer's models are per direction, and each leg needs its own.
   checkReadsDirection: true,
   watchReadiness: watchDeviceModels,

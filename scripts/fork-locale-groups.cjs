@@ -9,7 +9,7 @@ module.exports = {
       content_kotomimi: [
         'Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Advanced → Provider this computer\'s models can also be shared with another device.',
         '这里每个环节一张卡片：语音识别、翻译、语法反馈。在卡片里选它在哪里运行（局域网里的另一台设备、API 模型、这台电脑），模型也在同一处选。到「高级 → 提供商」里，还可以把这台电脑的模型共享给另一台设备。',
-        '這裡每個環節一張卡片：語音辨識、翻譯、文法回饋。在卡片裡選它在哪裡執行（區域網路裡的另一台裝置、API 模型、這台電腦），模型也在同一處選。到「進階 → 提供者」裡，還可以把這台電腦的模型共享給另一台裝置。',
+        '這裡每個環節一張卡片：語音辨識、翻譯、文法回饋。在卡片裡選它在哪裡執行（區域網路裡的另一台裝置、API 模型、這台電腦），模型也在同一處選。到「進階 → 提供商」裡，還可以把這台電腦的模型共享給另一台裝置。',
       ],
     },
     'reading-aids': {
@@ -35,7 +35,7 @@ module.exports = {
       share: [
         'Another device can use this computer\'s models: Advanced → Provider → Share with other devices.',
         '另一台设备也能用这台电脑的模型：「高级 → 提供商 → 共享给其他设备」。',
-        '另一台裝置也能用這台電腦的模型：「進階 → 提供者 → 共享給其他裝置」。',
+        '另一台裝置也能用這台電腦的模型：「進階 → 提供商 → 共享給其他裝置」。',
       ],
     },
   },
@@ -67,9 +67,9 @@ module.exports = {
     ],
     device: ['This computer', '这台电脑', '這台電腦'],
     deviceDesc: [
-      'Models downloaded by the app run right here. Nothing else is needed; a GPU helps.',
-      '用应用下载的模型，全部在本机运行。不需要别的设备；有独立显卡会更快。',
-      '用應用程式下載的模型，全部在本機執行。不需要別的裝置；有獨立顯示卡會更快。',
+      'Speech recognition runs right here, on models the app downloads; translation uses the online translator until you download a model for it. Nothing else is needed; a GPU helps.',
+      '语音识别用应用下载的模型在本机运行；翻译先用在线翻译，下载翻译模型后也能在本机完成。不需要别的设备；有独立显卡会更快。',
+      '語音辨識用應用程式下載的模型在本機執行；翻譯先用線上翻譯，下載翻譯模型後也能在本機完成。不需要別的裝置；有獨立顯示卡會更快。',
     ],
     share: ['This computer, for my other devices too', '这台电脑，也给其他设备用', '這台電腦，也給其他裝置用'],
     shareDesc: [
@@ -80,7 +80,7 @@ module.exports = {
     shareNotice: [
       'Nothing to enter. Finishing turns on "Share with other devices": another Kotomimi on your network finds this computer when it searches for devices. After setup, download models in the Speech recognition card in Settings — what is downloaded here is what the others can use. If another device cannot find this computer, see Settings → Provider → Share with other devices.',
       '这里不用填任何东西。完成后会自动打开「共享给其他设备」：局域网里的其他 Kotomimi 搜索设备时，就能找到这台电脑。向导结束后，在设置的「语音识别」卡片里下载模型，这里下载了哪些，别的设备就能用哪些。如果别的设备找不到这台电脑，到「设置 → 提供商 → 共享给其他设备」里看提示。',
-      '這裡不用填任何東西。完成後會自動開啟「共享給其他裝置」：區域網路裡的其他 Kotomimi 搜尋裝置時，就能找到這台電腦。精靈結束後，在設定的「語音辨識」卡片裡下載模型，這裡下載了哪些，別的裝置就能用哪些。如果別的裝置找不到這台電腦，到「設定 → 提供者 → 共享給其他裝置」裡看提示。',
+      '這裡不用填任何東西。完成後會自動開啟「共享給其他裝置」：區域網路裡的其他 Kotomimi 搜尋裝置時，就能找到這台電腦。精靈結束後，在設定的「語音辨識」卡片裡下載模型，這裡下載了哪些，別的裝置就能用哪些。如果別的裝置找不到這台電腦，到「設定 → 提供商 → 共享給其他裝置」裡看提示。',
     ],
     shareSummary: ['Sharing', '共享', '共享'],
     shareSummaryOn: [
@@ -89,6 +89,11 @@ module.exports = {
       '完成後開啟，區域網路裡的其他裝置可以用這台電腦的模型',
     ],
     tryServer: ['Connect', '连接', '連線'],
+    keyNeeded: [
+      'This device asks for an access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options), then press Connect.',
+      '这台设备需要访问密钥。请填写那台设备设置的密钥（另一台 Kotomimi 的密钥在它共享的「选项」里），再点「连接」。',
+      '這台裝置需要存取金鑰。請填寫那台裝置設定的金鑰（另一台 Kotomimi 的金鑰在它共享的「選項」裡），再按「連線」。',
+    ],
     addressMissing: [
       'Choose a device from the list above, or type its address, for example 192.168.1.10:8790.',
       '请先在上面的列表里选一台设备，或填写它的地址，例如 192.168.1.10:8790。',
@@ -218,7 +223,7 @@ module.exports = {
     useHere: [
       'To use it on this computer too: choose "Another device" under the provider, and pick "LocalAI on this computer" from the list.',
       '这台电脑自己也想用它：在提供商下面选「另一台设备」，再从列表里选「这台电脑上的 LocalAI」。',
-      '這台電腦自己也想用它：在提供者下面選「另一台裝置」，再從清單裡選「這台電腦上的 LocalAI」。',
+      '這台電腦自己也想用它：在提供商下面選「另一台裝置」，再從清單裡選「這台電腦上的 LocalAI」。',
     ],
     openPage: ['Open LocalAI\'s page to install or remove models', '打开 LocalAI 的页面，安装或删除模型', '開啟 LocalAI 的頁面，安裝或刪除模型'],
     more: ['and {{count}} more', '还有 {{count}} 个', '還有 {{count}} 個'],
@@ -240,9 +245,9 @@ module.exports = {
       '方向反過來：由這台電腦出力，區域網路裡的另一台裝置來用這裡下載好的模型。',
     ],
     tooltip: [
-      'Lets another device on your network use the models this computer has downloaded — speech recognition and translation. The other device runs Kotomimi too and chooses "Use another device": this computer then appears in its list. Sharing works while this app is open.',
-      '让局域网里的另一台设备使用这台电脑已下载的模型（语音识别和翻译）。对方同样运行 Kotomimi，选「用另一台设备」，这台电脑就会出现在它的列表里。本应用开着的时候才能共享。',
-      '讓區域網路裡的另一台裝置使用這台電腦已下載的模型（語音辨識和翻譯）。對方同樣執行 Kotomimi，選「用另一台裝置」，這台電腦就會出現在它的清單裡。本應用程式開著的時候才能共享。',
+      'Lets another device on your network use the models this computer has downloaded — speech recognition and translation. The other device runs Kotomimi too and searches under "Another device" in its settings: this computer then appears in its list. Sharing works while this app is open.',
+      '让局域网里的另一台设备使用这台电脑已下载的模型（语音识别和翻译）。对方同样运行 Kotomimi，在设置的「另一台设备」一栏里搜索，这台电脑就会出现在它的列表里。本应用开着的时候才能共享。',
+      '讓區域網路裡的另一台裝置使用這台電腦已下載的模型（語音辨識和翻譯）。對方同樣執行 Kotomimi，在設定的「另一台裝置」一欄裡搜尋，這台電腦就會出現在它的清單裡。本應用程式開著的時候才能共享。',
     ],
     enable: ['Share this computer\'s models', '共享这台电脑的模型', '共享這台電腦的模型'],
     starting: ['Starting…', '正在启动…', '正在啟動…'],
@@ -256,14 +261,14 @@ module.exports = {
     failed: ['Sharing could not start: {{message}}', '无法开始共享：{{message}}', '無法開始共享：{{message}}'],
     address: ['If it does not appear there, type this address', '没出现的话，手动填这个地址', '沒出現的話，手動填這個位址'],
     foundAs: [
-      'On the other device, open Kotomimi and choose "Use another device". This computer appears in its list as {{name}}: click it.',
-      '在另一台设备的 Kotomimi 里选「用另一台设备」，这台电脑会以「{{name}}」出现在列表里，点一下就连上了。',
-      '在另一台裝置的 Kotomimi 裡選「用另一台裝置」，這台電腦會以「{{name}}」出現在清單裡，點一下就連上了。',
+      'On the other device, open Kotomimi\'s settings and search under "Another device". This computer appears in its list as {{name}}: click it.',
+      '在另一台设备的 Kotomimi 设置里，到「另一台设备」一栏搜索，这台电脑会以「{{name}}」出现在列表里，点一下就连上了。',
+      '在另一台裝置的 Kotomimi 設定裡，到「另一台裝置」一欄搜尋，這台電腦會以「{{name}}」出現在清單裡，點一下就連上了。',
     ],
     foundAsUnnamed: [
-      'On the other device, open Kotomimi and choose "Use another device". This computer appears in its list: click it.',
-      '在另一台设备的 Kotomimi 里选「用另一台设备」，这台电脑会出现在列表里，点一下就连上了。',
-      '在另一台裝置的 Kotomimi 裡選「用另一台裝置」，這台電腦會出現在清單裡，點一下就連上了。',
+      'On the other device, open Kotomimi\'s settings and search under "Another device". This computer appears in its list: click it.',
+      '在另一台设备的 Kotomimi 设置里，到「另一台设备」一栏搜索，这台电脑会出现在列表里，点一下就连上了。',
+      '在另一台裝置的 Kotomimi 設定裡，到「另一台裝置」一欄搜尋，這台電腦會出現在清單裡，點一下就連上了。',
     ],
     copy: ['Copy', '复制', '複製'],
     copied: ['Copied', '已复制', '已複製'],

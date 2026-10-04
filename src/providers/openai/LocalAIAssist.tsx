@@ -176,7 +176,9 @@ function DeviceModels({ stage, settings, update, pair, legs, disabled, tour }: P
   const override = useMemo(() => ({ settings: device.settings, update: device.update, pair: basePair }), [device.settings, device.update, basePair]);
   const adapter = useWasmEngineAdapter(Boolean(disabled), override);
   const slots = useDeviceSlots(settings, pair, legs).filter((slot) => slot.stage === stage);
-  const missing = slots.find((slot) => !adapter.resolved(slot));
+  // What is downloaded is known only once the model store has looked: until then a blank is its blank, not an answer.
+  const looked = useModelInitialized();
+  const missing = looked ? slots.find((slot) => !adapter.resolved(slot)) : undefined;
   // undefined: as it falls — open on what is missing. A direction's key: opened for it. null: closed by hand.
   const [picked, setPicked] = useState<string | null | undefined>(undefined);
   const open = picked === undefined ? missing?.dir ?? null : picked;
@@ -202,13 +204,13 @@ function DeviceModels({ stage, settings, update, pair, legs, disabled, tour }: P
               </button>
             </div>
             <select
-              className={`select-dropdown${resolved ? '' : ' kt-here__select--missing'}`}
+              className={`select-dropdown${resolved || !looked ? '' : ' kt-here__select--missing'}`}
               aria-label={label}
               value={resolved?.source === 'explicit' ? resolved.modelId : ''}
               onChange={(e) => { void adapter.select(slot, e.target.value); }}
               disabled={disabled}
             >
-              <option value="">{auto ? t('providers.localai.auto', { name: adapter.displayName(auto) }) : t('providers.localai.notDownloaded')}</option>
+              <option value="">{!looked ? t('providers.localai.checking') : auto ? t('providers.localai.auto', { name: adapter.displayName(auto) }) : t('providers.localai.notDownloaded')}</option>
               {adapter.readyCandidates(slot).map((c) => <option key={c.id} value={c.id}>{c.sizeLabel ? `${c.name} · ${c.sizeLabel}` : c.name}</option>)}
             </select>
           </div>
@@ -244,7 +246,8 @@ function DeviceChat({ value, onChange, disabled }: { value: string; onChange(id:
   const ready = all.filter((m) => statuses[m.id] === 'downloaded' && deviceReady(m, webgpu));
   const auto = deviceCoachModel('');
   const [picked, setPicked] = useState<boolean | undefined>(undefined);
-  const open = picked ?? ready.length === 0;
+  // Opened by itself on a gap the store has found, not on its blank before it has looked.
+  const open = picked ?? (looked && ready.length === 0);
   const name = (id: string) => { const entry = getManifestEntry(id); return entry ? shortenModelName(entry.name, entry.shortName) : id; };
   const label = t('providers.localai.model');
   return (
@@ -257,8 +260,8 @@ function DeviceChat({ value, onChange, disabled }: { value: string; onChange(id:
             <span>{t('providers.localai.browse')}</span>
           </button>
         </div>
-        <select className={`select-dropdown${auto ? '' : ' kt-here__select--missing'}`} aria-label={label} value={ready.some((m) => m.id === value) ? value : ''} onChange={(e) => onChange(e.target.value)} disabled={disabled}>
-          <option value="">{auto ? t('providers.localai.auto', { name: name(auto) }) : t('providers.localai.notDownloaded')}</option>
+        <select className={`select-dropdown${auto || !looked ? '' : ' kt-here__select--missing'}`} aria-label={label} value={ready.some((m) => m.id === value) ? value : ''} onChange={(e) => onChange(e.target.value)} disabled={disabled}>
+          <option value="">{!looked ? t('providers.localai.checking') : auto ? t('providers.localai.auto', { name: name(auto) }) : t('providers.localai.notDownloaded')}</option>
           {ready.map((m) => <option key={m.id} value={m.id}>{`${name(m.id)} · ${getModelSizeMb(m, features)} MB`}</option>)}
         </select>
       </div>

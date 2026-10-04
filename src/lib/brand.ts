@@ -8,8 +8,9 @@
  *
  * What keeps the upstream name, because it names a thing that is still
  * called that: the virtual audio devices (`Sokuji_Virtual_Speaker`, "Sokuji
- * Virtual Microphone", "Sokuji Virtual Audio"), and anything inside a URL,
- * a path or an identifier.
+ * Virtual Microphone", "Sokuji Virtual Audio"), anything inside a URL, a path
+ * or an identifier, and a string that names this build already — one of the
+ * fork's own, which names upstream on purpose ("Kotomimi is a fork of Sokuji").
  */
 export const BRAND = 'Kotomimi';
 
@@ -18,7 +19,7 @@ const UPSTREAM_NAME = /(?<![\w.-])Sokuji(?![\w.-]| Virtual)/g;
 
 /** A user-facing string with the product named as this build is. */
 export function branded(text: string): string {
-  return text.replace(UPSTREAM_NAME, BRAND);
+  return text.includes(BRAND) ? text : text.replace(UPSTREAM_NAME, BRAND);
 }
 
 /** `branded`, as i18next applies it to every string it hands out (`src/locales/index.ts`). */

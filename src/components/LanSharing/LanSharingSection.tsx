@@ -171,7 +171,8 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
             {translators.map((m) => <span key={m.id} className="kt-lan__model"><Languages size={12} />{nameOf(m.id)}</span>)}
             {theirs.recognizers.map((id) => <span key={`localai:${id}`} className="kt-lan__model kt-lan__model--theirs" title={id}><Mic size={12} />{modelLabel(id)}</span>)}
             {theirs.translators.map((id) => <span key={`localai:${id}`} className="kt-lan__model kt-lan__model--theirs" title={id}><Languages size={12} />{modelLabel(id)}</span>)}
-            {recognizers.length === 0 && theirs.recognizers.length === 0 && <span className="kt-lan__model kt-lan__model--missing"><TriangleAlert size={12} />{t('fork.lan.noRecognizer')}</span>}
+            {/* Missing only once the model store has looked: before, nothing is known to be downloaded, which is not the same. */}
+            {initialized && recognizers.length === 0 && theirs.recognizers.length === 0 && <span className="kt-lan__model kt-lan__model--missing"><TriangleAlert size={12} />{t('fork.lan.noRecognizer')}</span>}
           </div>
           {lent > 0 && <p className="kt-note kt-lan__lent">{t('fork.lan.localaiToo')}</p>}
           <button type="button" className="kt-lan__link" aria-expanded={managing} onClick={() => setManaging(!managing)}>

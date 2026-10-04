@@ -26,7 +26,8 @@ const THEIRS: SharedModel[] = [
 /** What the check answers for that server. */
 const FOUND: LocalAIModel[] = [
   { id: LAN_PIPELINE, kind: 'pipeline', host: 'kotomimi' },
-  { id: 'sensevoice-int8', kind: 'asr', host: 'kotomimi' },
+  // The languages a recognizer takes come along; one that takes any says none.
+  { id: 'sensevoice-int8', kind: 'asr', host: 'kotomimi', languages: ['zh', 'en', 'ja', 'ko', 'yue'] },
   { id: 'whisper-large-v3-turbo-webgpu', kind: 'asr', host: 'kotomimi' },
   { id: 'bing-translator', kind: 'translate', host: 'kotomimi' },
 ];
@@ -66,7 +67,7 @@ describe('another Kotomimi\'s model lists', () => {
   it('are asked with the access key when that Kotomimi has one, and a wrong key is the key\'s refusal', async () => {
     const fetch = serve('s3cret');
     expect(await check(fetch, settings({ serverNeedsKey: true }), { ...K, apiKey: 's3cret' })).toMatchObject({ ok: true });
-    expect(await check(fetch, settings({ serverNeedsKey: true }), { ...K, apiKey: 'wrong' })).toMatchObject({ ok: false, code: 'auth' });
+    expect(await check(fetch, settings({ serverNeedsKey: true }), { ...K, apiKey: 'wrong' })).toMatchObject({ ok: false, code: 'server_key_refused' });
   });
 
   it('list, for a text stage that names it as its own server, its pipeline and translation models only', async () => {
@@ -157,5 +158,37 @@ describe('a leg another Kotomimi hears', () => {
     expect(of('segmentOpened').map((e) => e.payload.origin)).toEqual(['item_1', 'item_1']);
     // The key is never framed.
     expect(JSON.stringify(of('frame'))).not.toContain('s3cret');
+  });
+});
+
+describe('another Kotomimi that hears none of a leg\'s language', () => {
+  /** That Kotomimi lends `theirs`, and — as a sharing computer with a LocalAI does — `lent`, its LocalAI's recognizers. */
+  const serving = (theirs: SharedModel[], lent: string[] = []) => vi.fn(async (input: RequestInfo | URL) => {
+    const caps = capabilityList(theirs);
+    const list = modelList(theirs);
+    for (const id of lent) {
+      caps.data.push({ id, capabilities: ['transcript'] });
+      list.data.push({ id, object: 'model', owned_by: 'localai' });
+    }
+    return String(input).endsWith('/capabilities') ? json(caps) : json(list);
+  });
+  const JA_ONLY: SharedModel[] = [{ id: 'custom-kotoba-whisper', kind: 'asr', languages: ['ja'] }, { id: 'bing-translator', kind: 'translate', languages: [] }];
+  const ask = (fetch: ReturnType<typeof serving>, legs: Array<'speaker' | 'participant'>, patch: Partial<LocalAISettings> = {}) =>
+    createLocalAICheck({ fetch: fetch as unknown as typeof globalThis.fetch, clock: createVirtualClock(0) })(K, settings(patch), { pair: { source: 'zh-CN', target: 'ja' }, legs, signal: new AbortController().signal });
+
+  it('is refused before Start, naming the language, where its socket would refuse the session', async () => {
+    // I speak Chinese; it hears Japanese only.
+    expect(await ask(serving(JA_ONLY), ['speaker'])).toMatchObject({ ok: false, code: 'server_no_asr', params: { source: 'zh-CN' } });
+    // What it lists stays: another place, or a model there, is chosen from it.
+    expect(await ask(serving(JA_ONLY), ['speaker'])).toMatchObject({ models: expect.arrayContaining([expect.objectContaining({ id: 'custom-kotoba-whisper' })]) });
+  });
+
+  it('passes what it hears: the other side\'s Japanese, a coached speaker\'s Japanese, a recognizer that hears any language, the LocalAI it lends', async () => {
+    expect(await ask(serving(JA_ONLY), ['participant'])).toMatchObject({ ok: true });
+    expect(await ask(serving(JA_ONLY), ['speaker'], { coach: true, coachAt: 'api', coachBaseUrl: 'http://x/v1', coachModel: 'm', coachNeedsKey: false })).toMatchObject({ ok: true });
+    expect(await ask(serving([...JA_ONLY, { id: 'whisper-large-v3-turbo-webgpu', kind: 'asr', languages: [] }]), ['speaker'])).toMatchObject({ ok: true });
+    expect(await ask(serving(JA_ONLY, ['apple-speech-transcriber']), ['speaker'])).toMatchObject({ ok: true });
+    // Heard elsewhere: what that Kotomimi hears does not matter.
+    expect(await ask(serving(JA_ONLY), ['speaker'], { asrVia: 'api', asrApiBaseUrl: 'http://x/v1', asrApiModel: 'm', asrApiNeedsKey: false })).toMatchObject({ ok: true });
   });
 });

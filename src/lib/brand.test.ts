@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { BRAND, branded, brandPostProcessor } from './brand';
+import en from '../locales/en/translation.json';
+import zhCN from '../locales/zh_CN/translation.json';
+import zhTW from '../locales/zh_TW/translation.json';
 
 describe('the build\'s own name in user-facing text', () => {
   it('replaces the product\'s name where it stands as a word of its own', () => {
@@ -28,5 +31,15 @@ describe('the build\'s own name in user-facing text', () => {
     expect(brandPostProcessor).toMatchObject({ type: 'postProcessor', name: 'brand' });
     expect(brandPostProcessor.process('About Sokuji')).toBe('About Kotomimi');
     expect(brandPostProcessor.process(42)).toBe(42);
+  });
+});
+
+describe('a string that names this build already', () => {
+  it('names upstream on purpose, and keeps it: the fork says whose fork it is', () => {
+    expect(branded('Kotomimi 是 Sokuji 的独立分支。')).toBe('Kotomimi 是 Sokuji 的独立分支。');
+    for (const catalog of [en, zhCN, zhTW]) {
+      const tooltip = (catalog as unknown as { fork: { help: { issuesTooltip: string } } }).fork.help.issuesTooltip;
+      expect(branded(tooltip)).toBe(tooltip);
+    }
   });
 });

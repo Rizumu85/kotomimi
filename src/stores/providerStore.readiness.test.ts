@@ -426,6 +426,37 @@ describe('refreshReadiness — the models a ready answer found (F2; choice 3)', 
     expect(models()).toEqual([{ id: 'm1' }]);
   });
 
+  it('keeps the code of a check that could not find out, so it is worded; and the models it found before', async () => {
+    // Fork: a thrown `CheckError` (`src/lib/provider/checkError.ts`) is still "could not find out" — the list stays — with words of its own.
+    const { CheckError } = await import('../lib/provider/checkError');
+    let throws = false;
+    const p = probe('own-key', async () => {
+      if (throws) throw new CheckError('The other device could not be reached (192.168.1.20:8790): Failed to fetch', 'server_unreachable', { address: '192.168.1.20:8790' });
+      return { ok: true, models: [{ id: 'm1' }] };
+    });
+    await loadedWithKey(p);
+    await store.useProviderStore.getState().refreshReadiness(p, noAuth);
+    store.useProviderStore.getState().updateSettings(p, { mode: 'b' });
+    throws = true;
+    await store.useProviderStore.getState().refreshReadiness(p, noAuth);
+    expect(readiness()).toMatchObject({ state: 'not-ready', code: 'server_unreachable', params: { address: '192.168.1.20:8790' } });
+    expect(models()).toEqual([{ id: 'm1' }]);
+  });
+
+  it('keeps the models a refusal names: what the check found, for the settings to choose from', async () => {
+    // Fork: a refusal a choice in the settings would answer — the list to choose from is not emptied under it.
+    const answers: CheckResult[] = [{ ok: false, reason: 'No model is chosen.', code: 'pick_one', models: [{ id: 'm1' }] }, { ok: false, reason: 'no' }];
+    const p = probe('own-key', async () => answers.shift()!);
+    await loadedWithKey(p);
+    await store.useProviderStore.getState().refreshReadiness(p, noAuth);
+    expect(readiness()).toMatchObject({ state: 'not-ready', code: 'pick_one' });
+    expect(models()).toEqual([{ id: 'm1' }]);
+    // A refusal that names none still empties the list.
+    store.useProviderStore.getState().setCredential(p, 'apiKey', 'k2');
+    await store.useProviderStore.getState().refreshReadiness(p, noAuth);
+    expect(models()).toBe(store.NO_MODELS);
+  });
+
   it('records one shared empty list for a ready answer that found no models', async () => {
     const answers: CheckResult[] = [{ ok: true }, { ok: true, models: [] }];
     const p = probe('local', async () => answers.shift()!);
