@@ -8,7 +8,7 @@ import http from 'node:http';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { discoverServers, targets, neighbours, readAnswer, probe, productOf, nameOf, NAME_HEADER } = require('./lan-discover.js');
+const { discoverServers, targets, neighbours, readAnswer, probe, productOf, nameOf, shown, NAME_HEADER, INCLUDES_HEADER } = require('./lan-discover.js');
 
 let running = [];
 afterEach(async () => {
@@ -64,16 +64,18 @@ describe('the addresses that are asked', () => {
 
 describe('what an answer says of a server', () => {
   it('knows a Kotomimi by the owner of its models, its name by the header, and counts what it shares', () => {
-    expect(readAnswer(200, { [NAME_HEADER]: encodeURIComponent('里兹的电脑') }, JSON.stringify(kotomimiList))).toEqual({ kind: 'kotomimi', name: '里兹的电脑', models: 2, needsKey: false });
+    expect(readAnswer(200, { [NAME_HEADER]: encodeURIComponent('里兹的电脑') }, JSON.stringify(kotomimiList))).toEqual({ kind: 'kotomimi', name: '里兹的电脑', models: 2, needsKey: false, includes: false });
+    // One that shares its computer's model server too says so.
+    expect(readAnswer(200, { [NAME_HEADER]: 'MAC', [INCLUDES_HEADER]: 'model-server' }, JSON.stringify(kotomimiList)).includes).toBe(true);
   });
 
   it('takes any other model list for a server', () => {
-    expect(readAnswer(200, {}, JSON.stringify(localaiList))).toEqual({ kind: 'server', name: '', models: 2, needsKey: false });
+    expect(readAnswer(200, {}, JSON.stringify(localaiList))).toEqual({ kind: 'server', name: '', models: 2, needsKey: false, includes: false });
   });
 
   it('lists a server that asks for a key as wanting one', () => {
-    expect(readAnswer(401, { [NAME_HEADER]: 'DESK' }, '{"error":{}}')).toEqual({ kind: 'kotomimi', name: 'DESK', models: 0, needsKey: true });
-    expect(readAnswer(403, {}, '')).toEqual({ kind: 'server', name: '', models: 0, needsKey: true });
+    expect(readAnswer(401, { [NAME_HEADER]: 'DESK' }, '{"error":{}}')).toEqual({ kind: 'kotomimi', name: 'DESK', models: 0, needsKey: true, includes: false });
+    expect(readAnswer(403, {}, '')).toEqual({ kind: 'server', name: '', models: 0, needsKey: true, includes: false });
   });
 
   it('is nothing for a router\'s page, a 404, or JSON that is no list', () => {
@@ -87,7 +89,7 @@ describe('what an answer says of a server', () => {
 describe('asking an address', () => {
   it('finds a server that answers, and nothing where none listens', async () => {
     const port = await serve(200, kotomimiList, { 'X-Kotomimi-Name': 'DESK' });
-    expect(await probe({ host: '127.0.0.1', port, self: true })).toEqual({ address: `127.0.0.1:${port}`, host: '127.0.0.1', port, self: true, kind: 'kotomimi', name: 'DESK', models: 2, needsKey: false });
+    expect(await probe({ host: '127.0.0.1', port, self: true })).toEqual({ address: `127.0.0.1:${port}`, host: '127.0.0.1', port, self: true, kind: 'kotomimi', name: 'DESK', models: 2, needsKey: false, includes: false });
     const closed = await serve(200, {});
     await new Promise((done) => running.pop().close(done));
     expect(await probe({ host: '127.0.0.1', port: closed, self: true })).toBeNull();
@@ -135,5 +137,28 @@ describe('the search', () => {
     const closed = await serve(200, {});
     await new Promise((done) => running.pop().close(done));
     expect(await discoverServers({ interfaces: {}, ports: [closed], timeoutMs: 200 })).toEqual([]);
+  });
+});
+
+describe('what is listed', () => {
+  const at = (host, port, kind, more = {}) => ({ address: `${host}:${port}`, host, port, self: false, kind, name: '', models: 3, needsKey: false, includes: false, ...more });
+
+  it('is one row for a computer whose Kotomimi shares its model server too', () => {
+    const mac = at('192.168.4.105', 8790, 'kotomimi', { includes: true });
+    const itsLocalAI = at('192.168.4.105', 8080, 'server');
+    const another = at('192.168.4.50', 8080, 'server');
+    expect(shown([itsLocalAI, mac, another])).toEqual([mac, another]);
+  });
+
+  it('keeps a model server listed beside a Kotomimi that does not share it', () => {
+    const pc = at('192.168.4.20', 8790, 'kotomimi');
+    const itsLocalAI = at('192.168.4.20', 8080, 'server');
+    expect(shown([pc, itsLocalAI])).toEqual([pc, itsLocalAI]);
+  });
+
+  it('keeps this computer\'s own model server: it is how this computer uses it', () => {
+    const second = at('127.0.0.1', 8791, 'kotomimi', { self: true, includes: true });
+    const mine = at('127.0.0.1', 8080, 'server', { self: true });
+    expect(shown([second, mine])).toEqual([mine]);
   });
 });

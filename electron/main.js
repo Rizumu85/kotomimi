@@ -9,6 +9,7 @@ const { setupTranscriptSaveHandler } = require('./transcript-save.js');
 const { createCloseHandshake } = require('./close-handshake.js');
 const { createWsHeaderRules } = require('./ws-header-rules.js');
 const { startLanServer } = require('./lan-server');
+const { createUpstream } = require('./lan-upstream');
 const { firewallStatus, allowThroughFirewall } = require('./lan-firewall');
 const { discoverServers } = require('./lan-discover');
 const { createLocalServer } = require('./local-server');
@@ -1235,11 +1236,15 @@ ipcMain.handle('lan:start', async (event, args) => {
   await stopLanServer();
   const port = Number(args?.port);
   try {
-    lanServer = await startLanServer({ port: Number.isInteger(port) && port > 0 && port < 65536 ? port : 8790, key: String(args?.key ?? '') }, {
+    // A LocalAI on this computer is shared through the same door (electron/lan-upstream.js): asked each time, so one started later joins by itself.
+    const local = getLocalServer();
+    const upstream = createUpstream({ port: local.port, pipelines: () => local.pipelines(), setPipeline: (name, change) => local.setPipeline(name, change) });
+    lanServer = await startLanServer({ port: Number.isInteger(port) && port > 0 && port < 65536 ? port : 8790, key: String(args?.key ?? ''), upstream }, {
       request: (request) => toPage('lan:request', request),
       socketOpen: (socket) => toPage('lan:socket-open', socket),
       socketMessage: (message) => toPage('lan:socket-message', message),
       socketClose: (socket) => toPage('lan:socket-close', socket),
+      socketProxied: (socket) => toPage('lan:socket-proxied', socket),
     });
     console.log(`[Kotomimi] [Main] Sharing models on port ${lanServer.port}`);
     return { ok: true, port: lanServer.port, addresses: lanServer.addresses, name: lanServer.name };

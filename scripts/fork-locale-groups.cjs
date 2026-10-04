@@ -173,9 +173,9 @@ module.exports = {
   server: {
     title: ['LocalAI on this computer', '这台电脑上的 LocalAI', '這台電腦上的 LocalAI'],
     intro: [
-      'A LocalAI is installed here, with models of its own. Kotomimi starts and stops it. Other devices find it on your network, listed as LocalAI.',
-      '这台电脑装了 LocalAI，它有自己的一套模型。由 Kotomimi 负责启动和停止。别的设备会在局域网里搜到它，列表里显示为 LocalAI。',
-      '這台電腦裝了 LocalAI，它有自己的一套模型。由 Kotomimi 負責啟動和停止。別的裝置會在區域網路裡搜到它，清單裡顯示為 LocalAI。',
+      'A LocalAI is installed here, with models of its own. Kotomimi starts and stops it. With sharing turned on above, its models are shared together with the ones downloaded here.',
+      '这台电脑装了 LocalAI，它有自己的一套模型。由 Kotomimi 负责启动和停止。打开上面的共享后，它的模型会和这里下载的模型一起共享出去。',
+      '這台電腦裝了 LocalAI，它有自己的一套模型。由 Kotomimi 負責啟動和停止。開啟上面的共享後，它的模型會和這裡下載的模型一起共享出去。',
     ],
     stopped: ['Not running', '未启动', '未啟動'],
     starting: ['Starting…', '正在启动…', '正在啟動…'],
@@ -198,13 +198,13 @@ module.exports = {
     openPage: ['Open LocalAI\'s page to install or remove models', '打开 LocalAI 的页面，安装或删除模型', '開啟 LocalAI 的頁面，安裝或刪除模型'],
     more: ['and {{count}} more', '还有 {{count}} 个', '還有 {{count}} 個'],
     lastWords: ['What LocalAI said last', 'LocalAI 最后的输出', 'LocalAI 最後的輸出'],
-    pipelineTitle: ['What it uses by default', '默认用哪个模型', '預設用哪個模型'],
+    pipelineTitle: ['What it uses when the other device does not choose', '对方没指定模型时用哪个', '對方沒指定模型時用哪個'],
     pipelineSwitching: ['Switching…', '正在切换…', '正在切換…'],
     pipelineFailed: ['Could not switch: {{message}}', '切换失败：{{message}}', '切換失敗：{{message}}'],
     pipelineNote: [
-      'A device that leaves both recognition and translation to "Another device" gets these two. A change takes effect from the next session.',
-      '别的设备把识别和翻译都交给「另一台设备」时，用的就是这两个。改动从下一次会话开始生效。',
-      '別的裝置把辨識和翻譯都交給「另一台裝置」時，用的就是這兩個。改動從下一次工作階段開始生效。',
+      'A device that leaves the model to this computer gets these two. One that names a recognizer changes the first by itself. A change takes effect from the next session.',
+      '别的设备把模型留给这台电脑决定时，用的就是这两个。对方指定了识别模型时，第一个会自动跟着换。改动从下一次会话开始生效。',
+      '別的裝置把模型留給這台電腦決定時，用的就是這兩個。對方指定了辨識模型時，第一個會自動跟著換。改動從下一次工作階段開始生效。',
     ],
   },
   lan: {
@@ -244,6 +244,11 @@ module.exports = {
     copied: ['Copied', '已复制', '已複製'],
     noNetwork: ['This computer is on no network.', '这台电脑当前没有连接网络。', '這台電腦目前沒有連上網路。'],
     models: ['Models shared', '共享的模型', '共享的模型'],
+    localaiToo: [
+      'The dashed ones are the LocalAI\'s on this computer. They are shared too, and none is loaded until the other device chooses it.',
+      '虚线框的是这台电脑上 LocalAI 的模型，同样共享出去；对方选了哪个，才加载哪个，不会全部打开。',
+      '虛線框的是這台電腦上 LocalAI 的模型，同樣共享出去；對方選了哪個，才載入哪個，不會全部開啟。',
+    ],
     rulesTitle: ['Which side\'s settings count', '哪边的设置算数', '哪邊的設定算數'],
     rulesTheirs: [
       'Set on the other device: the languages, which model to use, and how pauses split sentences.',
@@ -251,9 +256,9 @@ module.exports = {
       '在對方那台裝置上設定：語言、用哪個模型、斷句的靈敏度。',
     ],
     rulesHere: [
-      'Set here: only which models are on offer (the ones downloaded on this computer) and the access key. The recognition and translation choices above are for this computer\'s own sessions and change nothing that is shared.',
-      '在这台电脑上只决定两件事：有哪些模型可选（这里下载了哪些），和访问密钥。上面「语音识别 / 翻译」的选择只管这台电脑自己用，不影响共享出去的内容。',
-      '在這台電腦上只決定兩件事：有哪些模型可選（這裡下載了哪些），和存取金鑰。上面「語音辨識 / 翻譯」的選擇只管這台電腦自己用，不影響共享出去的內容。',
+      'Set here: only which models are on offer (the ones downloaded here, and the ones installed in this computer\'s LocalAI) and the access key. The stage cards above are for this computer\'s own sessions and change nothing that is shared.',
+      '在这台电脑上只决定两件事：有哪些模型可选（这里下载的，和这台电脑的 LocalAI 里装的），和访问密钥。上面各环节卡片的选择只管这台电脑自己用，不影响共享出去的内容。',
+      '在這台電腦上只決定兩件事：有哪些模型可選（這裡下載的，和這台電腦的 LocalAI 裡裝的），和存取金鑰。上面各環節卡片的選擇只管這台電腦自己用，不影響共享出去的內容。',
     ],
     serving: ['Sharing', '共享中', '共享中'],
     servingClients: ['Sharing · {{count}} in use', '共享中 · {{count}} 路在用', '共享中 · {{count}} 路在用'],

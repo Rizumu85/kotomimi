@@ -170,3 +170,114 @@ describe('the shared models\' door: the Realtime socket', () => {
     expect(await closed).toEqual({ code: 1011, reason: 'the model could not load' });
   });
 });
+
+// Fork: a model server on this computer, shared through the same door (`lan-upstream.js`, which has its own test).
+// Here it is a recorder: this file holds what the door asks it, and what the door then does.
+describe('the shared models\' door: a model server on this computer', () => {
+  async function startWith(upstream) {
+    const seen = { requests: [], opened: [], messages: [], closed: [], proxied: [] };
+    const server = await startLanServer({ port: 0, host: '127.0.0.1', name: 'MAC', upstream }, {
+      request: (r) => seen.requests.push(r),
+      socketOpen: (s) => seen.opened.push(s),
+      socketMessage: (m) => seen.messages.push(m),
+      socketClose: (c) => seen.closed.push(c),
+      socketProxied: (p) => seen.proxied.push(p),
+    });
+    running.push(server);
+    return { server, seen, base: `http://127.0.0.1:${server.port}`, ws: `ws://127.0.0.1:${server.port}` };
+  }
+  const THEIRS = [{ id: 'whisper-large-turbo', capabilities: ['transcript'] }, { id: 'hy-mt2-1.8b', capabilities: ['chat'] }];
+  const upstreamOf = (more = {}) => ({ models: async () => THEIRS, chatModel: async () => null, recognizer: async () => null, complete: () => {}, bridge: () => ({ send() {}, close() {} }), ...more });
+
+  it('adds its models to the lists the page answers, each once, as models that are not the app\'s own', async () => {
+    const { server, seen, base } = await startWith(upstreamOf());
+    const list = fetch(`${base}/v1/models`);
+    await until(() => seen.requests.length === 1);
+    server.reply(seen.requests[0].id, { body: { object: 'list', data: [{ id: 'kotomimi', object: 'model', owned_by: 'kotomimi' }, { id: 'hy-mt2-1.8b', object: 'model', owned_by: 'kotomimi' }] } });
+    const response = await list;
+    // A searching device then lists this computer once.
+    expect(response.headers.get('x-kotomimi-includes')).toBe('model-server');
+    expect((await response.json()).data).toEqual([
+      { id: 'kotomimi', object: 'model', owned_by: 'kotomimi' },
+      { id: 'hy-mt2-1.8b', object: 'model', owned_by: 'kotomimi' },
+      { id: 'whisper-large-turbo', object: 'model', owned_by: 'localai' },
+    ]);
+    const kinds = fetch(`${base}/v1/models/capabilities`);
+    await until(() => seen.requests.length === 2);
+    server.reply(seen.requests[1].id, { body: { object: 'list', data: [{ id: 'kotomimi', capabilities: null }] } });
+    expect((await (await kinds).json()).data).toEqual([{ id: 'kotomimi', capabilities: null }, ...THEIRS]);
+  });
+
+  it('says nothing of a model server that has no model to add, or cannot be asked', async () => {
+    const { server, seen, base } = await startWith(upstreamOf({ models: async () => { throw new Error('down'); } }));
+    const list = fetch(`${base}/v1/models`);
+    await until(() => seen.requests.length === 1);
+    server.reply(seen.requests[0].id, { body: { object: 'list', data: [{ id: 'kotomimi' }] } });
+    const response = await list;
+    expect(response.headers.get('x-kotomimi-includes')).toBeNull();
+    expect(await response.json()).toEqual({ object: 'list', data: [{ id: 'kotomimi' }] });
+  });
+
+  it('passes a chat request on when the model server takes it, and hands it to the page when it does not', async () => {
+    const passed = [];
+    const upstream = upstreamOf({
+      chatModel: async (wanted) => (wanted === 'hy-mt2-1.8b' ? 'hy-mt2-1.8b' : null),
+      complete: (body, model, response, headers) => { passed.push({ body, model, named: headers['X-Kotomimi-Name'] }); response.writeHead(200, { 'Content-Type': 'application/json' }); response.end('{"from":"model server"}'); },
+    });
+    const { server, seen, base } = await startWith(upstream);
+    const post = (model) => fetch(`${base}/v1/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model, messages: [] }) });
+    expect(await (await post('hy-mt2-1.8b')).json()).toEqual({ from: 'model server' });
+    expect(passed).toEqual([{ body: { model: 'hy-mt2-1.8b', messages: [] }, model: 'hy-mt2-1.8b', named: encodeURIComponent('MAC') }]);
+    expect(seen.requests).toHaveLength(0);
+    const own = post('bing-translator');
+    await until(() => seen.requests.length === 1);
+    server.reply(seen.requests[0].id, { body: { from: 'page' } });
+    expect(await (await own).json()).toEqual({ from: 'page' });
+  });
+
+  it('joins a socket to the model server once its session names one of that server\'s recognizers', async () => {
+    const link = { got: [], closed: false, send(text) { this.got.push(text); }, close() { this.closed = true; } };
+    const bridged = [];
+    const upstream = upstreamOf({
+      recognizer: async (wanted) => (wanted === 'whisper-large-turbo' ? { pipeline: 'gpt-realtime', transcription: wanted } : null),
+      bridge: (route, device) => { bridged.push({ route, device }); return link; },
+    });
+    const { seen, ws } = await startWith(upstream);
+    const { socket } = await dial(`${ws}/v1/realtime?model=kotomimi`);
+    // The page opens every session: it is the one that announces it.
+    await until(() => seen.opened.length === 1);
+    const { id } = seen.opened[0];
+    const update = { type: 'session.update', session: { audio: { input: { transcription: { model: 'whisper-large-turbo', language: 'ja' } } } } };
+    socket.send(JSON.stringify(update));
+    socket.send(JSON.stringify({ type: 'input_audio_buffer.append', audio: 'AAAA' }));
+    await until(() => link.got.length === 1);
+    expect(seen.proxied).toEqual([{ id }]);
+    expect(bridged[0].route).toEqual({ pipeline: 'gpt-realtime', transcription: 'whisper-large-turbo' });
+    expect(bridged[0].device.update).toEqual(update);
+    // The page hears nothing of it; what follows goes to the model server, in order.
+    expect(seen.messages).toEqual([]);
+    expect(link.got).toEqual([JSON.stringify({ type: 'input_audio_buffer.append', audio: 'AAAA' })]);
+    // What the model server says reaches the device.
+    const got = [];
+    socket.on('message', (data) => got.push(data.toString()));
+    bridged[0].device.send('{"type":"session.updated"}');
+    await until(() => got.length === 1);
+    socket.close();
+    await until(() => link.closed && seen.closed.length === 1);
+  });
+
+  it('leaves a socket with the page when the session asks for one of the app\'s own recognizers', async () => {
+    const { seen, ws } = await startWith(upstreamOf());
+    const { socket } = await dial(`${ws}/v1/realtime?model=kotomimi`);
+    await until(() => seen.opened.length === 1);
+    const update = JSON.stringify({ type: 'session.update', session: { audio: { input: { transcription: { model: 'sensevoice-int8', language: 'zh' } } } } });
+    const audio = JSON.stringify({ type: 'input_audio_buffer.append', audio: 'AAAA' });
+    socket.send(update);
+    socket.send(audio);
+    await until(() => seen.messages.length === 2);
+    expect(seen.messages.map((m) => m.data)).toEqual([update, audio]);
+    expect(seen.proxied).toEqual([]);
+    socket.close();
+    await until(() => seen.closed.length === 1);
+  });
+});

@@ -204,6 +204,15 @@
     gap: 6px;
   }
 
+  // A model of the LocalAI on this computer: lent through the same door, loaded when asked for.
+  .kt-lan__model--theirs {
+    border-style: dashed;
+  }
+
+  .kt-lan__lent {
+    margin-top: 6px;
+  }
+
   .kt-lan__model {
     display: inline-flex;
     align-items: center;

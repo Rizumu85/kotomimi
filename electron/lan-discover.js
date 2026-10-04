@@ -30,6 +30,8 @@ const CONCURRENCY = 170;
 const MAX_LIST_BYTES = 512 * 1024;
 /** The header a sharing Kotomimi names its computer in (`lan-server.js`). */
 const NAME_HEADER = 'x-kotomimi-name';
+/** Set by a Kotomimi whose model list holds the models of a model server on its own computer (`lan-server.js`). */
+const INCLUDES_HEADER = 'x-kotomimi-includes';
 
 /** A home or office network's own range. */
 const isPrivate = (address) => /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(address);
@@ -84,7 +86,9 @@ function readAnswer(status, headers, body) {
   } catch {
     name = '';
   }
-  if (status === 401 || status === 403) return { kind: named ? 'kotomimi' : 'server', name, models: 0, needsKey: true };
+  // A Kotomimi that shares the models of a model server on its own computer says so: that server is then not listed apart.
+  const includes = headers[INCLUDES_HEADER] === 'model-server';
+  if (status === 401 || status === 403) return { kind: named ? 'kotomimi' : 'server', name, models: 0, needsKey: true, includes: false };
   if (status !== 200) return null;
   let list;
   try {
@@ -96,7 +100,7 @@ function readAnswer(status, headers, body) {
   const models = list.data.filter((m) => m && typeof m.id === 'string');
   const kotomimi = models.some((m) => m.owned_by === 'kotomimi');
   // A sharing Kotomimi lists its pipeline first, which is no model of its own to count.
-  return { kind: kotomimi ? 'kotomimi' : 'server', name, models: kotomimi ? Math.max(models.length - 1, 0) : models.length, needsKey: false };
+  return { kind: kotomimi ? 'kotomimi' : 'server', name, models: kotomimi ? Math.max(models.length - 1, 0) : models.length, needsKey: false, includes: kotomimi && includes };
 }
 
 /** One GET. Resolves with the answer, or null when there was none in time: never rejects. */
@@ -156,6 +160,14 @@ function nameOf(host, reverse = dns.promises.reverse, waitMs = 400) {
   ]);
 }
 
+/** What of everything that answered is listed. */
+function shown(found) {
+  // A Kotomimi that shares its computer's model server speaks for it: that computer is listed once, by its Kotomimi.
+  const spokenFor = new Set(found.filter((s) => s.kind === 'kotomimi' && s.includes && !s.self).map((s) => s.host));
+  // A Kotomimi on this very computer — a second copy of the app — is no other device: "this computer" is the choice for it.
+  return found.filter((s) => !(s.self && s.kind === 'kotomimi') && !(s.kind === 'server' && spokenFor.has(s.host)));
+}
+
 /**
  * Everything found, Kotomimis first, then by address. `ownPorts` are the
  * ports this app listens on now: it is not shown itself.
@@ -170,8 +182,7 @@ async function discoverServers({ interfaces, ports, ownPorts = [], timeoutMs = P
     }
   };
   await Promise.all(Array.from({ length: Math.min(concurrency, queue.length) }, worker));
-  // A Kotomimi on this very computer — a second copy of the app — is no other device: "this computer" is the choice for it.
-  const others = found.filter((s) => !(s.self && s.kind === 'kotomimi'));
+  const others = shown(found);
   await Promise.all(others.map(async (s) => {
     // A server that did not name itself: the network may know its computer's name, and the server what it is.
     const [name, product] = await Promise.all([
@@ -185,4 +196,4 @@ async function discoverServers({ interfaces, ports, ownPorts = [], timeoutMs = P
   return others.sort((a, b) => order(a).localeCompare(order(b))).map(({ address, kind, name, product, models, needsKey, self }) => ({ address, kind, name, product, models, needsKey, self }));
 }
 
-module.exports = { discoverServers, targets, neighbours, readAnswer, probe, productOf, nameOf, KOTOMIMI_PORT, SERVER_PORT, NAME_HEADER };
+module.exports = { discoverServers, targets, neighbours, readAnswer, probe, productOf, nameOf, shown, KOTOMIMI_PORT, SERVER_PORT, NAME_HEADER, INCLUDES_HEADER };

@@ -1451,7 +1451,7 @@
     },
     "server": {
       "title": "LocalAI on this computer",
-      "intro": "A LocalAI is installed here, with models of its own. Kotomimi starts and stops it. Other devices find it on your network, listed as LocalAI.",
+      "intro": "A LocalAI is installed here, with models of its own. Kotomimi starts and stops it. With sharing turned on above, its models are shared together with the ones downloaded here.",
       "stopped": "Not running",
       "starting": "Starting…",
       "running": "Running · {{count}} model(s)",
@@ -1465,10 +1465,10 @@
       "openPage": "Open LocalAI's page to install or remove models",
       "more": "and {{count}} more",
       "lastWords": "What LocalAI said last",
-      "pipelineTitle": "What it uses by default",
+      "pipelineTitle": "What it uses when the other device does not choose",
       "pipelineSwitching": "Switching…",
       "pipelineFailed": "Could not switch: {{message}}",
-      "pipelineNote": "A device that leaves both recognition and translation to \"Another device\" gets these two. A change takes effect from the next session."
+      "pipelineNote": "A device that leaves the model to this computer gets these two. One that names a recognizer changes the first by itself. A change takes effect from the next session."
     },
     "lan": {
       "title": "Share with other devices",
@@ -1487,9 +1487,10 @@
       "copied": "Copied",
       "noNetwork": "This computer is on no network.",
       "models": "Models shared",
+      "localaiToo": "The dashed ones are the LocalAI's on this computer. They are shared too, and none is loaded until the other device chooses it.",
       "rulesTitle": "Which side's settings count",
       "rulesTheirs": "Set on the other device: the languages, which model to use, and how pauses split sentences.",
-      "rulesHere": "Set here: only which models are on offer (the ones downloaded on this computer) and the access key. The recognition and translation choices above are for this computer's own sessions and change nothing that is shared.",
+      "rulesHere": "Set here: only which models are on offer (the ones downloaded here, and the ones installed in this computer's LocalAI) and the access key. The stage cards above are for this computer's own sessions and change nothing that is shared.",
       "serving": "Sharing",
       "servingClients": "Sharing · {{count}} in use",
       "servingTip": "This computer is lending its models to other devices. The languages and the choice of model are set on those devices, not here.",

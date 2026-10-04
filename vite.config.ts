@@ -166,6 +166,7 @@ export default defineConfig(({ command, mode }) => {
             'lan-server': 'electron/lan-server.js',
             'lan-firewall': 'electron/lan-firewall.js',
             'lan-discover': 'electron/lan-discover.js',
+            'lan-upstream': 'electron/lan-upstream.js',
             // Fork: a LocalAI installed on this computer, run by the app
             'local-server': 'electron/local-server.js'
           },

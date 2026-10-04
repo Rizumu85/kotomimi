@@ -425,6 +425,19 @@ describe('the sharing host', () => {
     expect(x.clients.mock.calls.pop()?.[0]).toBe(1);
   });
 
+  it('lets go of a socket the door passed on to a model server on this computer, and still counts it as someone using this computer', async () => {
+    const x = host();
+    await x.h.start({ port: 8790, key: '' });
+    x.door.deliver('lan:socket-open', { id: 's1', model: LAN_PIPELINE });
+    x.door.deliver('lan:socket-proxied', { id: 's1' });
+    expect(x.clients.mock.calls.pop()?.[0]).toBe(1);
+    // What it says from here on is the model server's to hear: nothing is loaded for it.
+    x.door.deliver('lan:socket-message', { id: 's1', data: JSON.stringify({ type: 'session.update', session: { audio: { input: { transcription: { language: 'ja' } } } } }) });
+    expect(x.recognizers).toHaveLength(0);
+    x.door.deliver('lan:socket-close', { id: 's1' });
+    expect(x.clients.mock.calls.pop()?.[0]).toBe(0);
+  });
+
   it('lets everything go when it stops, and hears the door no more', async () => {
     const x = host();
     await x.h.start({ port: 8790, key: '' });

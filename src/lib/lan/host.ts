@@ -54,11 +54,13 @@ export interface LanHost {
 export function createLanHost(deps: LanHostDeps): LanHost {
   const { bridge, models, clock } = deps;
   const sockets = new Map<string, LanTranscriber>();
+  /** Sockets the door passed on to a model server on this computer: none of this module's work, and still someone using this computer. */
+  const proxied = new Set<string>();
   let translator: LanTranslator | null = null;
   let unsubscribe: Array<() => void> = [];
   let sessions = 0;
 
-  const clients = () => deps.onClients?.(sockets.size);
+  const clients = () => deps.onClients?.(sockets.size + proxied.size);
 
   const answer = async (request: WireRequest): Promise<void> => {
     let reply: { status: number; body: unknown; contentType?: string };
@@ -78,6 +80,7 @@ export function createLanHost(deps: LanHostDeps): LanHost {
     unsubscribe = [];
     for (const socket of sockets.values()) socket.dispose();
     sockets.clear();
+    proxied.clear();
     translator?.dispose();
     translator = null;
     clients();
@@ -104,9 +107,17 @@ export function createLanHost(deps: LanHostDeps): LanHost {
           clients();
         }),
         bridge.on('lan:socket-message', ({ id, data }: { id: string; data: string }) => sockets.get(id)?.receive(data)),
+        // The session asked for a recognizer of the model server's: the one opened here for it is let go, with nothing loaded yet.
+        bridge.on('lan:socket-proxied', ({ id }: { id: string }) => {
+          sockets.get(id)?.dispose();
+          sockets.delete(id);
+          proxied.add(id);
+          clients();
+        }),
         bridge.on('lan:socket-close', ({ id }: { id: string }) => {
           sockets.get(id)?.dispose();
           sockets.delete(id);
+          proxied.delete(id);
           clients();
         }),
       ];

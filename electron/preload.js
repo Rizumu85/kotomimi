@@ -80,6 +80,7 @@ const validReceiveChannels = [
   'lan:socket-open',
   'lan:socket-message',
   'lan:socket-close',
+  'lan:socket-proxied',
   // Fork: the state of the LocalAI installed on this computer, as it changes (electron/local-server.js)
   'local-server:status',
 ];
