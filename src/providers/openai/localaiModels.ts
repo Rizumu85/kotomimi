@@ -23,6 +23,8 @@ export interface LocalAIModel extends ModelOption {
   from?: 'translate' | 'coach' | 'asr';
   /** Served by another Kotomimi: it translates a named pair, and takes any of its recognizers in any session. */
   host?: typeof KOTOMIMI_HOST;
+  /** The languages it takes, as another Kotomimi lists them (`src/lib/lan/protocol.ts`); empty or absent: any. */
+  languages?: readonly string[];
 }
 
 /**

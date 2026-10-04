@@ -227,6 +227,12 @@ const PROVIDER = {
     'API（{{address}}）不接受這個金鑰。請檢查對應卡片裡的 API 金鑰。',
   ],
 
+  serverNoAsr: [
+    'The other device has no speech recognition model for {{source}}. Download one there first (in the model library of its sharing card), or let this computer listen.',
+    '另一台设备上没有能识别{{source}}的语音识别模型。请先在那台设备上下载一个（在它共享卡片的模型库里），或者改由这台电脑识别。',
+    '另一台裝置上沒有能辨識{{source}}的語音辨識模型。請先在那台裝置上下載一個（在它共享卡片的模型庫裡），或者改由這台電腦辨識。',
+  ],
+
   // Auto Detect where nothing detects the language: said when it is checked, and when Start is pressed.
   sourceAuto: [
     'Choose the language you speak: Auto Detect cannot be used with this setup. Translation on this computer, and speech recognition by another Kotomimi, need to be told the language.',

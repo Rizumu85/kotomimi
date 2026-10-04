@@ -396,6 +396,22 @@ function undetected(s: LocalAISettings, models: readonly LocalAIModel[], source:
   return { refused: 'The language spoken is to be detected, and nothing on the way detects it.', code: 'source_auto' };
 }
 
+/**
+ * A leg another Kotomimi hears in a language none of its recognizers takes:
+ * its socket would refuse the session ("shares no speech recognition model",
+ * `src/lib/lan/transcriber.ts`), which a start would show in that device's
+ * English. It says which languages each recognizer takes, as it picks among
+ * them (`appModels.ts`); one that says none takes any, and so does one it
+ * lends from a model server beside it (a LocalAI), whose languages it does
+ * not know. `heard`: the language the leg hears.
+ */
+function unheard(s: LocalAISettings, models: readonly LocalAIModel[], heard: string): ProviderRefusal | null {
+  if (s.asrVia !== 'server' || heard === AUTO || !isKotomimiServer(models)) return null;
+  const language = deviceLanguage(heard);
+  if (modelsFor(models, 'asr').some((m) => m.host !== KOTOMIMI_HOST || !m.languages?.length || m.languages.includes(language))) return null;
+  return { refused: `The other device shares no speech recognition model for ${heard}.`, code: 'server_no_asr', params: { source: heard } };
+}
+
 export interface LocalAICheckDeps {
   fetch?: typeof fetch;
   clock?: Pick<Clock, 'setTimeout'>;
@@ -492,17 +508,24 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
 
           // What each model is for. LocalAI's own endpoint; any other server answers 404, or nothing, and the models stay unsorted.
           const kinds = new Map<string, LocalAIModelKind>();
+          // Another Kotomimi says which languages each of its models takes, too.
+          const languages = new Map<string, readonly string[]>();
           try {
             const answer = await doFetch(`${localaiModelsUrl(k.endpoint)}/capabilities`, listing(k.apiKey, signal));
             if (answer.ok) {
-              for (const m of ((await answer.json()) as { data?: Array<{ id?: unknown; capabilities?: unknown }> }).data ?? []) {
-                if (typeof m.id === 'string') kinds.set(m.id, kindOf(m.capabilities));
+              for (const m of ((await answer.json()) as { data?: Array<{ id?: unknown; capabilities?: unknown; languages?: unknown }> }).data ?? []) {
+                if (typeof m.id !== 'string') continue;
+                kinds.set(m.id, kindOf(m.capabilities));
+                if (Array.isArray(m.languages)) languages.set(m.id, m.languages.filter((l): l is string => typeof l === 'string'));
               }
             }
           } catch (error) {
             if (signal.aborted) throw error;
           }
-          for (const m of own) models.push({ id: m.id, ...(kinds.has(m.id) ? { kind: kinds.get(m.id) } : {}), ...(m.kotomimi ? { host: KOTOMIMI_HOST } : {}) });
+          for (const m of own) {
+            const taken = m.kotomimi ? languages.get(m.id) : undefined;
+            models.push({ id: m.id, ...(kinds.has(m.id) ? { kind: kinds.get(m.id) } : {}), ...(m.kotomimi ? { host: KOTOMIMI_HOST } : {}), ...(taken?.length ? { languages: taken } : {}) });
+          }
         }
 
         for (const other of otherServers(k, s)) {
@@ -552,7 +575,10 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
     // Only the speaker is coached.
     for (const leg of ctx.legs) {
       const coached = s.coach && leg === 'speaker';
-      const gap = unnamedStage(s, servers.models ?? [], coached) ?? undetected(s, servers.models ?? [], leg === 'speaker' ? ctx.pair.source : ctx.pair.target, coached);
+      const found = servers.models ?? [];
+      // What the leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
+      const heard = leg === 'speaker' && !coached ? ctx.pair.source : ctx.pair.target;
+      const gap = unnamedStage(s, found, coached) ?? undetected(s, found, leg === 'speaker' ? ctx.pair.source : ctx.pair.target, coached) ?? unheard(s, found, heard);
       // What the servers listed goes with the refusal: a pick from it is often what answers it.
       if (gap) return { ok: false, reason: gap.refused, ...(gap.code ? { code: gap.code } : {}), ...(gap.params ? { params: gap.params } : {}), ...(servers.models?.length ? { models: servers.models } : {}) };
     }
