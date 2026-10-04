@@ -88,6 +88,15 @@ function keyOf(request) {
   return carried ? carried.slice('openai-insecure-api-key.'.length) : '';
 }
 
+/** A request's path, or null when its target is no URL at all: `new URL` throws on some (`//`), and nothing from the network may throw out of this door. */
+function pathOf(target) {
+  try {
+    return new URL(target ?? '/', 'http://kotomimi');
+  } catch {
+    return null;
+  }
+}
+
 /** Compared in constant time for equal lengths: a key is short, and a timing probe on a LAN is still a probe. */
 function sameKey(given, wanted) {
   if (given.length !== wanted.length) return false;
@@ -150,8 +159,12 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
   const refuse = (response, status, code, message) => json(response, status, { error: { message, type: 'invalid_request_error', code } });
 
   const server = http.createServer((request, response) => {
-    const { pathname } = new URL(request.url ?? '/', 'http://kotomimi');
-    const path = pathname.replace(/\/+$/, '') || '/';
+    const url = pathOf(request.url);
+    if (!url) {
+      refuse(response, 400, 'bad_request', 'The request names no path.');
+      return;
+    }
+    const path = url.pathname.replace(/\/+$/, '') || '/';
     if (request.method === 'OPTIONS') {
       response.writeHead(204, CORS);
       response.end();
@@ -223,11 +236,14 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
   });
 
   server.on('upgrade', (request, socket, head) => {
-    const url = new URL(request.url ?? '/', 'http://kotomimi');
+    // Until `ws` takes the socket it has no listener for its errors: one that resets now must not throw.
+    socket.on('error', () => {});
     const reject = (status, text) => {
       socket.write(`HTTP/1.1 ${status} ${text}\r\nConnection: close\r\n\r\n`);
       socket.destroy();
     };
+    const url = pathOf(request.url);
+    if (!url) return reject(400, 'Bad Request');
     if (url.pathname.replace(/\/+$/, '') !== REALTIME_PATH) return reject(404, 'Not Found');
     if (!allowed(request)) return reject(401, 'Unauthorized');
     if (sockets.size >= MAX_SOCKETS) return reject(503, 'Busy');

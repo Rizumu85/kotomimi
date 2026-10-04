@@ -6,6 +6,7 @@
 // here: this file holds only what the door itself decides.
 import { afterEach, describe, expect, it } from 'vitest';
 import { createRequire } from 'node:module';
+import net from 'node:net';
 import WebSocket from 'ws';
 
 const require = createRequire(import.meta.url);
@@ -109,6 +110,37 @@ describe('the shared models\' door: HTTP', () => {
     running = [];
     await server.close();
     expect((await answer).status).toBe(503);
+  });
+});
+
+/** One raw request, as no client library would send it: the status line that comes back, or null when the connection just closes. */
+const raw = (port, text) => new Promise((resolve) => {
+  const socket = net.connect(port, '127.0.0.1', () => socket.write(text));
+  let got = '';
+  socket.on('data', (chunk) => { got += chunk; });
+  socket.on('close', () => resolve(got ? got.split('\r\n')[0] : null));
+  socket.on('error', () => {});
+  setTimeout(() => socket.destroy(), 2000);
+});
+
+describe('the shared models\' door: a request target that is no URL', () => {
+  // `new URL('//', base)` throws. Thrown from the server's listener it would end the app (main.js exits on an uncaught exception).
+  it('answers 400 to an HTTP request, keeps serving, and troubles no page', async () => {
+    const { seen, server } = await start('the-key');
+    expect(await raw(server.port, 'GET // HTTP/1.1\r\nHost: x\r\nConnection: close\r\n\r\n')).toBe('HTTP/1.1 400 Bad Request');
+    expect(await raw(server.port, 'GET http:// HTTP/1.1\r\nHost: x\r\nConnection: close\r\n\r\n')).toBe('HTTP/1.1 400 Bad Request');
+    expect((await fetch(`http://127.0.0.1:${server.port}/v1/models`)).status).toBe(401);
+    expect(seen.requests).toEqual([]);
+  });
+
+  it('refuses such an upgrade with 400, and keeps serving', async () => {
+    const { seen, server } = await start();
+    const upgrade = 'GET // HTTP/1.1\r\nHost: x\r\nConnection: Upgrade\r\nUpgrade: websocket\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n\r\n';
+    expect(await raw(server.port, upgrade)).toBe('HTTP/1.1 400 Bad Request');
+    const { socket } = await dial(`ws://127.0.0.1:${server.port}/v1/realtime`);
+    expect(socket).toBeDefined();
+    socket.close();
+    expect(seen.opened).toHaveLength(1);
   });
 });
 
