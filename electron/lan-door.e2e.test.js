@@ -904,7 +904,7 @@ describe('the shared door, end to end: LocalAI going away', () => {
     await nothingLeftSince(ready);
   });
 
-  it.fails('mid-stream: the device\'s chat answer is cut off as HTTP says, not ended as if whole', async () => {
+  it('mid-stream: the device\'s chat answer is cut off as HTTP says, not ended as if whole', async () => {
     const fake = await fakeLocalAI();
     const { base, ready } = await share(fake.port);
     fake.chat = (body, response) => {

@@ -195,12 +195,16 @@ function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect 
     };
   }
 
-  /** Passes a chat request on, and its answer back as it comes — a stream as a stream. */
+  /**
+   * Passes a chat request on, and its answer back as it comes — a stream as a
+   * stream, and one cut off as cut off: a client reads a stream to its end, and
+   * an end written for it would pass half an answer off as the whole.
+   */
   function complete(body, model, response, headers = {}) {
     const text = JSON.stringify(chatBody(body, model));
     const refuse = (status, message) => {
       if (response.headersSent) {
-        response.end();
+        response.destroy();
         return;
       }
       response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', ...headers });
@@ -209,7 +213,7 @@ function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect 
     const passed = request({ host: '127.0.0.1', port, path: '/v1/chat/completions', method: 'POST', agent: false, headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(text) } }, (answer) => {
       response.writeHead(answer.statusCode ?? 502, { 'Content-Type': answer.headers['content-type'] ?? 'application/json', ...headers });
       answer.pipe(response);
-      answer.on('error', () => response.end());
+      answer.on('error', () => response.destroy());
     });
     passed.on('error', (error) => refuse(502, `The model server could not be reached: ${error?.message ?? error}`));
     // The device went away: the model server need not finish for no one.
