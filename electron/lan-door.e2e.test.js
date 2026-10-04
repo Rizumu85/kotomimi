@@ -892,12 +892,12 @@ describe('the shared door, end to end: LocalAI going away', () => {
     await until(() => left.closed !== null, 'the session that left the choice is closed');
     expect(left.events().pop()).toMatchObject({ type: 'error', error: { code: 'upstream_failed', message: expect.stringContaining('could not be reached') } });
     expect(left.closed.code).toBe(1011);
-    // ...and one that names another recognizer (the pipeline change finds LocalAI gone; see the PR on the words).
+    // ...and one that names another recognizer: the pipeline change finds LocalAI gone.
     const named = await dial(realtime);
     await named.next('session.created');
     named.send(UPDATE('qwen3-asr-mlx'));
     await until(() => named.closed !== null, 'the session that named a recognizer is closed');
-    expect(named.events().pop()).toMatchObject({ type: 'error', error: { code: 'upstream_failed' } });
+    expect(named.events().pop()).toMatchObject({ type: 'error', error: { code: 'upstream_failed', message: 'LocalAI could not be reached.' } });
     expect(named.closed.code).toBe(1011);
 
     // Known to be gone now: the page has the session, and the lists are the app's alone.
@@ -912,9 +912,7 @@ describe('the shared door, end to end: LocalAI going away', () => {
     await nothingLeftSince(ready);
   });
 
-  // Not changed (see the PR): the upstream is handed `pipelines()` alone, which answers alike for a LocalAI that is down
-  // and one that lists no such pipeline; so a device that names a recognizer just after LocalAI went hears the latter.
-  it.fails('after it went: a session that names one of its recognizers is told LocalAI could not be reached', async () => {
+  it('after it went: a session that names one of its recognizers is told LocalAI could not be reached', async () => {
     const fake = await fakeLocalAI();
     const { realtime, ready } = await share(fake.port);
     const first = await session(realtime, '');

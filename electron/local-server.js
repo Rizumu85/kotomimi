@@ -326,7 +326,8 @@ function createLocalServer(deps = {}) {
   async function setPipeline(name, change = {}) {
     const before = await pipelines();
     const pipeline = before.pipelines.find((p) => p.name === name);
-    if (!pipeline) return { ok: false, error: 'LocalAI lists no such pipeline.', ...before };
+    // Nothing listed at all is what a LocalAI that is down answers too: it is asked which, so the words say what happened.
+    if (!pipeline) return { ok: false, error: before.pipelines.length === 0 && !(await up()) ? 'LocalAI could not be reached.' : 'LocalAI lists no such pipeline.', ...before };
     const patch = {};
     if (typeof change.transcription === 'string' && before.recognizers.includes(change.transcription)) patch.transcription = change.transcription;
     if (typeof change.llm === 'string' && before.translators.includes(change.llm)) patch.llm = change.llm;
