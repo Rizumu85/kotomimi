@@ -7,13 +7,22 @@
  * computer needs nothing typed, and its models are downloaded after setup,
  * as on the offline path. The answer is the provider's `asrVia`, carried in
  * the draft as its credential choice and written at Finish like any other.
- * Everything finer — a text model for the translation, grammar feedback,
- * sharing — is in Settings, and the tour that follows says so.
+ *
+ * A third start, where there is a main process to listen: this computer, and
+ * lending its models to the other devices on the network — the computer the
+ * first card's "another device" is, set up from its own side. It is this
+ * computer for every stage, and Finish turns the sharing on (`applySetup.ts`:
+ * the draft carries it as the choice's value `share`, which is no place).
+ *
+ * Everything finer — a text model for the translation, grammar feedback, the
+ * sharing's key — is in Settings, and the tour that follows says so.
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Monitor, Server } from 'lucide-react';
+import { Monitor, Server, Share2 } from 'lucide-react';
 import { useProviderStore } from '../../../stores/providerStore';
+import { useLanStore } from '../../../stores/lanStore';
+import { canFindServers } from '../../../lib/lan/discover';
 import { useAuthContext } from '../../providers/useAuthContext';
 import { readCredentials, isMissing } from '../../../lib/provider/credentials';
 import { noticeText } from '../../../lib/view/noticeText';
@@ -32,6 +41,10 @@ import type { SetupAction, SetupDraft } from '../setupDraft';
 export const KOTOMIMI_PROVIDER = 'localai' as ProviderType;
 const SETTING = 'asrVia';
 type Place = 'server' | 'device';
+/** What a card answers: a place for every stage, or this computer lending its models too. */
+type Start = Place | 'share';
+/** The draft's value for the third card (`applySetup.ts` reads it). */
+export const SHARE_START = 'share';
 
 interface Props {
   draft: SetupDraft;
@@ -52,7 +65,16 @@ const StepKotomimi: React.FC<Props> = ({ draft, dispatch, skipButton }) => {
 
   const saved = entry?.credentials ?? {};
   const stored = (entry?.settings as Record<string, unknown> | undefined)?.[SETTING];
-  const place: Place = (draft.credentialChoice?.setting === SETTING ? draft.credentialChoice.value : stored) === 'device' ? 'device' : 'server';
+  // Sharing needs a main process to listen: the extension and the web have none.
+  const canShare = canFindServers();
+  const sharing = useLanStore((s) => s.enabled);
+  const chosen = draft.credentialChoice?.setting === SETTING ? draft.credentialChoice.value : undefined;
+  // Nothing chosen yet: as this computer is set up now, so a re-run shows what is saved.
+  const start: Start = chosen === 'server' || chosen === 'device' ? chosen
+    : chosen === SHARE_START && canShare ? 'share'
+    : chosen === SHARE_START ? 'device'
+    : stored === 'device' ? (canShare && sharing ? 'share' : 'device') : 'server';
+  const place: Place = start === 'server' ? 'server' : 'device';
 
   // The saved address, shown once: a re-run must not look as if none was ever set.
   const endpoint = draft.credentials.endpoint;
@@ -67,8 +89,8 @@ const StepKotomimi: React.FC<Props> = ({ draft, dispatch, skipButton }) => {
 
   if (!p || !entry) return <section className="setup-step"><h2>{t('fork.wizard.title')}</h2></section>;
 
-  const choose = (next: Place) => {
-    if (next === place) return;
+  const choose = (next: Start) => {
+    if (next === start) return;
     inFlight.current?.abort();
     setMessage(null);
     dispatch({ type: 'setCredentialChoice', setting: SETTING, value: next });
@@ -104,9 +126,10 @@ const StepKotomimi: React.FC<Props> = ({ draft, dispatch, skipButton }) => {
     }
   };
 
-  const cards: Array<{ place: Place; icon: React.ReactNode; title: string; desc: string }> = [
-    { place: 'server', icon: <Server size={16} />, title: t('fork.wizard.server'), desc: t('fork.wizard.serverDesc') },
-    { place: 'device', icon: <Monitor size={16} />, title: t('fork.wizard.device'), desc: t('fork.wizard.deviceDesc') },
+  const cards: Array<{ start: Start; icon: React.ReactNode; title: string; desc: string }> = [
+    { start: 'server', icon: <Server size={16} />, title: t('fork.wizard.server'), desc: t('fork.wizard.serverDesc') },
+    { start: 'device', icon: <Monitor size={16} />, title: t('fork.wizard.device'), desc: t('fork.wizard.deviceDesc') },
+    ...(canShare ? [{ start: 'share' as const, icon: <Share2 size={16} />, title: t('fork.wizard.share'), desc: t('fork.wizard.shareDesc') }] : []),
   ];
 
   return (
@@ -115,8 +138,8 @@ const StepKotomimi: React.FC<Props> = ({ draft, dispatch, skipButton }) => {
       <p>{t('fork.wizard.intro')}</p>
       <div className="setup-cards" role="radiogroup" aria-label={t('fork.wizard.title')}>
         {cards.map((card) => (
-          <label key={card.place} className={`setup-card${place === card.place ? ' is-selected' : ''}`}>
-            <input type="radio" name="kotomimi-place" value={card.place} checked={place === card.place} onChange={() => choose(card.place)} disabled={validating} />
+          <label key={card.start} className={`setup-card${start === card.start ? ' is-selected' : ''}`}>
+            <input type="radio" name="kotomimi-place" value={card.start} checked={start === card.start} onChange={() => choose(card.start)} disabled={validating} />
             <span className="setup-card__title">{card.icon}&nbsp;{card.title}</span>
             <span className="setup-card__desc">{card.desc}</span>
           </label>
@@ -157,7 +180,7 @@ const StepKotomimi: React.FC<Props> = ({ draft, dispatch, skipButton }) => {
           {draft.credentialsPending && <StatusMessage variant="warning">{t('fork.wizard.pendingAddress')}</StatusMessage>}
         </>
       ) : (
-        <StatusMessage variant="info">{t('fork.wizard.deviceNotice')}</StatusMessage>
+        <StatusMessage variant="info">{t(start === 'share' ? 'fork.wizard.shareNotice' : 'fork.wizard.deviceNotice')}</StatusMessage>
       )}
     </section>
   );

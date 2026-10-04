@@ -22,7 +22,7 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 | 打字查词 | 会话中按 Ctrl+K，输入母语，得到对方语言的译文 | `src/components/MainPanel/panel/TypedText.tsx` |
 | 假名注音、罗马音 | 日语汉字上方显示平假名；日语、韩语、俄语下方显示拉丁字母注音 | `src/lib/annotate/`、`src/components/Annotated/` |
 | 字体 | 界面、拉丁字母、罗马音、各语言的正文和注音，分别选字体 | `src/lib/fonts/`、`src/components/Fonts/` |
-| 设置向导和引导 | 向导里有 Kotomimi 自己的卡片和"由哪台设备来运行"一步；引导会介绍上面这些功能 | `src/components/SetupWizard/steps/StepKotomimi.tsx`、`src/components/Tour/steps.ts` |
+| 设置向导和引导 | 向导里有 Kotomimi 自己的卡片和"由哪台设备来运行"一步，三个起点：局域网里的另一台设备、这台电脑、这台电脑并共享给其他设备（第三个只在桌面版有，等于"这台电脑"再加上完成时打开共享；向导的选择同时写入三个环节的位置）；引导会介绍上面这些功能 | `src/components/SetupWizard/steps/StepKotomimi.tsx`、`src/components/Tour/steps.ts` |
 
 注音在本机用词典和规则算出来，不调用任何模型，也不联网。
 
@@ -335,7 +335,7 @@ node scripts/fork-make-icons.cjs assets/logo-source.svg
 - 发布用本分支自己的流程 `.github/workflows/kotomimi-release.yml`：
 
 ```bash
-git tag -a v0.42.223 -m "Kotomimi 0.42.223" && git push origin v0.42.223
+git tag -a v0.42.224 -m "Kotomimi 0.42.224" && git push origin v0.42.224
 ```
 
   它会跑本分支的测试，构建 Windows 安装包，尽量构建 macOS（Apple 芯片）版本，然后生成一个**草稿** Release。到 GitHub 的 Releases 页面检查后点发布。只有发布了的 Release 才会被"检查更新"看到。

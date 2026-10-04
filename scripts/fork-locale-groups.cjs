@@ -55,9 +55,9 @@ module.exports = {
     ],
     title: ['Which device does the work?', '由哪台设备来运行？', '由哪台裝置來執行？'],
     intro: [
-      'Pick a starting point. It is not either-or: later, in Settings, recognition and translation can each run in a different place.',
-      '先选一个起点。这不是二选一：之后在设置里，识别和翻译可以各选各的地方，混着用。',
-      '先選一個起點。這不是二選一：之後在設定裡，辨識和翻譯可以各選各的地方，混著用。',
+      'Pick a starting point. Later, in Settings, recognition and translation can each run in a different place.',
+      '先选一个起点。之后在设置里，识别和翻译可以各选各的地方，混着用。',
+      '先選一個起點。之後在設定裡，辨識和翻譯可以各選各的地方，混著用。',
     ],
     server: ['Another device on my network', '局域网里的另一台设备', '區域網路裡的另一台裝置'],
     serverDesc: [
@@ -70,6 +70,23 @@ module.exports = {
       'Speech recognition runs right here, on models the app downloads; translation uses the online translator until you download a model for it. Nothing else is needed; a GPU helps.',
       '语音识别用应用下载的模型在本机运行；翻译先用在线翻译，下载翻译模型后也能在本机完成。不需要别的设备；有独立显卡会更快。',
       '語音辨識用應用程式下載的模型在本機執行；翻譯先用線上翻譯，下載翻譯模型後也能在本機完成。不需要別的裝置；有獨立顯示卡會更快。',
+    ],
+    share: ['This computer, for my other devices too', '这台电脑，也给其他设备用', '這台電腦，也給其他裝置用'],
+    shareDesc: [
+      'A capable computer? The models run here, for itself and for the other devices on your network.',
+      '这台电脑性能好？模型都在这里运行：自己照常用，局域网里的其他设备也能来用。',
+      '這台電腦效能好？模型都在這裡執行：自己照常用，區域網路裡的其他裝置也能來用。',
+    ],
+    shareNotice: [
+      'Nothing to enter. Finishing turns on "Share with other devices": another Kotomimi on your network finds this computer when it searches for devices. After setup, download models in the Speech recognition card in Settings — what is downloaded here is what the others can use. If another device cannot find this computer, see Settings → Provider → Share with other devices.',
+      '这里不用填任何东西。完成后会自动打开「共享给其他设备」：局域网里的其他 Kotomimi 搜索设备时，就能找到这台电脑。向导结束后，在设置的「语音识别」卡片里下载模型，这里下载了哪些，别的设备就能用哪些。如果别的设备找不到这台电脑，到「设置 → 提供商 → 共享给其他设备」里看提示。',
+      '這裡不用填任何東西。完成後會自動開啟「共享給其他裝置」：區域網路裡的其他 Kotomimi 搜尋裝置時，就能找到這台電腦。精靈結束後，在設定的「語音辨識」卡片裡下載模型，這裡下載了哪些，別的裝置就能用哪些。如果別的裝置找不到這台電腦，到「設定 → 提供商 → 共享給其他裝置」裡看提示。',
+    ],
+    shareSummary: ['Sharing', '共享', '共享'],
+    shareSummaryOn: [
+      'Turned on when you finish: other devices on your network can use this computer\'s models',
+      '完成后打开，局域网里的其他设备可以用这台电脑的模型',
+      '完成後開啟，區域網路裡的其他裝置可以用這台電腦的模型',
     ],
     tryServer: ['Connect', '连接', '連線'],
     addressMissing: [

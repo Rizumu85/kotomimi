@@ -36,6 +36,13 @@ export function useApplySetup(): (draft: SetupDraft) => Promise<void> {
           store.updateSettings(p, { [choice]: settings[choice] });
           written.push(choice);
         }
+        // Fork: the Kotomimi step's one answer places every stage, not only the one its choice is named after
+        // (`applySetup.ts`). Without these a re-run would move the listening and leave the rest where it was.
+        for (const key of (p.id as string) === 'localai' ? ['translateAt', 'coachAt'] : []) {
+          if (settings[key] === undefined) continue;
+          store.updateSettings(p, { [key]: settings[key] });
+          written.push(key);
+        }
         for (const [key, value] of Object.entries(credentials)) {
           if (!p.credentials.keys.includes(key)) continue;
           store.setCredential(p, key, value);
@@ -52,6 +59,8 @@ export function useApplySetup(): (draft: SetupDraft) => Promise<void> {
         if (!await store.flush(p, written)) throw new SetupPersistError();
       },
       completeSetup: useSetupStore.getState().completeSetup,
+      // Fork: loaded when asked for — the sharing brings the app's engines with it.
+      shareModels: async () => { await (await import('../../stores/lanStore')).useLanStore.getState().setEnabled(true); },
     });
   }, []);
 }
