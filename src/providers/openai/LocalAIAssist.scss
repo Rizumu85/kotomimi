@@ -247,6 +247,13 @@
     min-width: 0;
   }
 
+  // The second step of a choice: which of the LocalAI's models, right under "LocalAI".
+  .kt-here__row--under {
+    margin-top: -4px;
+    padding-left: 12px;
+    border-left: 2px solid vars.$border-default;
+  }
+
   .kt-here__select--missing {
     color: vars.$color-warning;
     border-color: vars.$color-warning-border;

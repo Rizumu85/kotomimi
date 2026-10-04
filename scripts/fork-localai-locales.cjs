@@ -108,6 +108,16 @@ const PROVIDER = {
     '这个地址连不上。那台设备上的 Kotomimi 会通过自己的共享提供模型（包括它的 LocalAI 里的）。',
     '這個位址連不上。那台裝置上的 Kotomimi 會透過自己的共享提供模型（包括它的 LocalAI 裡的）。',
   ],
+  // Under "this computer": the LocalAI installed here, as one more choice in the model's own menu (`LocalAIHere`).
+  hereLocalAI: ['LocalAI (on this computer)', 'LocalAI（这台电脑上的）', 'LocalAI（這台電腦上的）'],
+  hereApp: ['Models Kotomimi downloaded', 'Kotomimi 下载的模型', 'Kotomimi 下載的模型'],
+  hereModel: ['LocalAI\'s model', 'LocalAI 的模型', 'LocalAI 的模型'],
+  hereModelOwn: ['LocalAI\'s own choice', '由 LocalAI 决定', '由 LocalAI 決定'],
+  hereModelPick: ['Choose a model', '请选择模型', '請選擇模型'],
+  hereStopped: ['LocalAI is not running.', 'LocalAI 没有在运行。', 'LocalAI 沒有在執行。'],
+  hereStarting: ['Starting LocalAI…', '正在启动 LocalAI…', '正在啟動 LocalAI…'],
+  hereAbsent: ['No LocalAI was found on this computer.', '这台电脑上没有找到 LocalAI。', '這台電腦上沒有找到 LocalAI。'],
+  hereStart: ['Start LocalAI', '启动 LocalAI', '啟動 LocalAI'],
   kotomimiThere: ['Use the Kotomimi on that device', '改连那台设备的 Kotomimi', '改連那台裝置的 Kotomimi'],
   kotomimiThereLooking: ['Looking for it…', '正在查找…', '正在尋找…'],
   kotomimiThereNone: [

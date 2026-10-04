@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { Readiness } from '../../lib/provider/types';
+import { useLocalServerStore } from '../../stores/localServerStore';
 import { useModelStore } from '../../stores/modelStore';
+import { NO_LOCAL_SERVER } from '../../lib/lan/localServer';
 import { LocalAIAssist } from './LocalAIAssist';
 import { LOCALAI_DEFAULTS, type LocalAISettings } from './localai';
 import { PLACE_FIELDS } from './localaiDevice';
@@ -21,6 +23,12 @@ vi.mock('../../components/Settings/sections/ModelManagementSection', async (impo
   ModelManagementSection: ({ stageFilter, direction }: { stageFilter?: string; direction?: string }) => <div data-testid="library">{`${stageFilter}:${direction}`}</div>,
 }));
 vi.mock('../../components/CustomModels/CustomModels', () => ({ CustomModels: () => null }));
+// This computer's LocalAI, as the main process would answer: none, unless a test says so.
+const localai = vi.hoisted(() => ({ pipes: { pipelines: [] as unknown[], recognizers: [] as string[], translators: [] as string[] } }));
+vi.mock('../../lib/lan/localServer', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../lib/lan/localServer')>()),
+  askLocalPipelines: async () => localai.pipes,
+}));
 // What the network holds, for the one search the cards make themselves (`KotomimiThere`).
 const network = vi.hoisted(() => ({ servers: [] as unknown[] }));
 vi.mock('../../lib/lan/discover', async (importOriginal) => ({
@@ -62,6 +70,9 @@ const options = (select: HTMLElement) => [...(select as HTMLSelectElement).optio
 beforeEach(() => {
   // Nothing downloaded; the online translator is always there.
   useModelStore.setState({ initialized: true, webgpuAvailable: true, deviceFeatures: [], modelStatuses: {}, downloads: {} });
+  // No LocalAI on this computer.
+  useLocalServerStore.setState({ status: NO_LOCAL_SERVER });
+  localai.pipes = { pipelines: [], recognizers: [], translators: [] };
 });
 
 describe('the stage cards: where each stage runs', () => {
@@ -321,5 +332,78 @@ describe('the stage cards: whether it can all start', () => {
     checking.unmount();
     draw({ readiness: { state: 'not-ready', reason: 'no' } });
     expect(screen.getByRole('button', { name: 'providers.localai.checkNow' })).toBeTruthy();
+  });
+});
+
+describe('the stage cards: this computer\'s LocalAI', () => {
+  const LOCALAI = 'providers.localai.hereLocalAI';
+  /** A LocalAI installed here and up, with a pipeline, two recognizers and two text models. */
+  const installed = (state: 'running' | 'stopped' = 'running') => {
+    useLocalServerStore.setState({ status: { installed: true, state, port: 8085, models: state === 'running' ? ['gpt-realtime'] : [], tail: '' } });
+    localai.pipes = { pipelines: [{ name: 'gpt-realtime', transcription: 'apple-speech-transcriber', llm: 'hy-mt2-1.8b' }], recognizers: ['apple-speech-transcriber', 'whisper-large-turbo'], translators: ['hy-mt2-1.8b', 'qwen3-4b'] };
+  };
+  const menu = (stage: string) => [...within(screen.getByRole('region', { name: stage })).getAllByRole('combobox')] as HTMLSelectElement[];
+  const labels = (select: HTMLSelectElement) => [...select.options].map((o) => o.textContent);
+
+  it('is not offered where this computer has none', () => {
+    draw({ settings: { asrVia: 'device', translateAt: 'device' } });
+    for (const stage of [HEAR, TRANSLATE]) for (const select of menu(stage)) expect(labels(select)).not.toContain(LOCALAI);
+  });
+
+  it('is one more entry in the model\'s own menu, for every stage placed here', async () => {
+    installed();
+    draw({ settings: { asrVia: 'device', translateAt: 'device', coach: true, coachAt: 'device' } });
+    for (const stage of [HEAR, TRANSLATE, COACH]) expect(labels(menu(stage)[0]).pop()).toBe(LOCALAI);
+  });
+
+  it('hands the stage to it on a pick: with its address, its pipeline, and the model the pipeline names', async () => {
+    installed();
+    const { update } = draw({ settings: { asrVia: 'device', translateAt: 'device' } });
+    // Its pipelines are asked for once it is seen to be up.
+    await act(async () => {});
+    const hear = menu(HEAR)[0];
+    fireEvent.change(hear, { target: { value: [...hear.options].pop()!.value } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'localai', asrHereModel: 'apple-speech-transcriber', hereAddress: '127.0.0.1:8085', herePipeline: 'gpt-realtime' }));
+    const translate = menu(TRANSLATE)[0];
+    fireEvent.change(translate, { target: { value: [...translate.options].pop()!.value } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ translateHere: 'localai', translateHereModel: 'hy-mt2-1.8b' }));
+  });
+
+  it('shows its models right under the choice, and the way back to the app\'s own', async () => {
+    installed();
+    const { update } = draw({ settings: { asrVia: 'device', asrHere: 'localai', asrHereModel: 'whisper-large-turbo', translateAt: 'device', translateHere: 'localai', translateHereModel: '' } });
+    await act(async () => {});
+    const [who, which] = menu(HEAR);
+    expect(labels(who)).toEqual(['providers.localai.hereApp', LOCALAI]);
+    expect(which.value).toBe('whisper-large-turbo');
+    // The recognizer may be left to its pipeline; a text model has to be named.
+    expect(labels(which)[0]).toBe('providers.localai.hereModelOwn');
+    expect(labels(menu(TRANSLATE)[1])[0]).toBe('providers.localai.hereModelPick');
+    expect([...menu(TRANSLATE)[1].options].map((o) => o.value)).toEqual(['', 'hy-mt2-1.8b', 'qwen3-4b']);
+    fireEvent.change(menu(TRANSLATE)[1], { target: { value: 'qwen3-4b' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ translateHereModel: 'qwen3-4b' }));
+    fireEvent.change(who, { target: { value: '' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'app' }));
+    // No library of the app's models under a stage the LocalAI runs.
+    expect(within(screen.getByRole('region', { name: HEAR })).queryByRole('button', { name: 'providers.localai.browse' })).toBeNull();
+  });
+
+  it('is started from the card while it is down, and keeps a model it no longer lists visible', async () => {
+    installed('stopped');
+    const start = vi.fn(async () => {});
+    useLocalServerStore.setState({ start });
+    draw({ settings: { asrVia: 'device', asrHere: 'localai', asrHereModel: 'whisper-large-turbo' } });
+    const hear = within(screen.getByRole('region', { name: HEAR }));
+    expect(hear.getByText('providers.localai.hereStopped')).toBeTruthy();
+    expect(menu(HEAR)[1].value).toBe('whisper-large-turbo');
+    fireEvent.click(hear.getByRole('button', { name: 'providers.localai.hereStart' }));
+    expect(start).toHaveBeenCalledTimes(1);
+  });
+
+  it('says so where the settings name a LocalAI this computer does not have', () => {
+    draw({ settings: { asrVia: 'device', asrHere: 'localai' } });
+    const hear = within(screen.getByRole('region', { name: HEAR }));
+    expect(hear.getByText('providers.localai.hereAbsent')).toBeTruthy();
+    expect(hear.queryByRole('button', { name: 'providers.localai.hereStart' })).toBeNull();
   });
 });
