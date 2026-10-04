@@ -169,6 +169,19 @@ describe('the shared models\' door: the Realtime socket', () => {
     server.closeSocket(seen.opened[0].id, 1011, 'the model could not load');
     expect(await closed).toEqual({ code: 1011, reason: 'the model could not load' });
   });
+
+  it('cuts a long reason to what a close frame holds — 123 bytes, not 123 characters — on a character\'s edge', async () => {
+    const { server, seen, ws } = await start();
+    const { socket } = await dial(`${ws}/v1/realtime`);
+    await until(() => seen.opened.length === 1);
+    const closed = new Promise((resolve) => socket.on('close', (code, reason) => resolve({ code, reason: reason.toString() })));
+    // 60 characters, 180 bytes: cut by characters alone, the socket would throw instead of closing.
+    server.closeSocket(seen.opened[0].id, 1011, 'モデルを読み込めませんでした'.repeat(5).slice(0, 60));
+    const { code, reason } = await closed;
+    expect(code).toBe(1011);
+    expect(reason).toBe('モデルを読み込めませんでした'.repeat(5).slice(0, 41));
+    expect(Buffer.byteLength(reason)).toBe(123);
+  });
 });
 
 // Fork: a model server on this computer, shared through the same door (`lan-upstream.js`, which has its own test).

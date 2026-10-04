@@ -59,10 +59,10 @@ async function standIn() {
   return { port: server.address().port, seen };
 }
 
-function upstreamOf({ port = 1, found = LOCALAI(), setPipeline, now } = {}) {
+function upstreamOf({ port = 1, found = LOCALAI(), setPipeline, now, configureTimeoutMs } = {}) {
   const pipelines = vi.fn(async () => found);
   const set = setPipeline ?? vi.fn(async (name, change) => { found.pipelines[0] = { ...found.pipelines[0], ...change }; return { ok: true }; });
-  return { upstream: createUpstream({ port, pipelines, setPipeline: set, ...(now ? { now } : {}) }), pipelines, setPipeline: set };
+  return { upstream: createUpstream({ port, pipelines, setPipeline: set, ...(now ? { now } : {}), ...(configureTimeoutMs ? { configureTimeoutMs } : {}) }), pipelines, setPipeline: set };
 }
 
 describe('what a model server on this computer adds to the lists', () => {
@@ -204,6 +204,51 @@ describe('a socket joined to the model server', () => {
     b.close();
   });
 
+  it('sets up a session that names another recognizer only once the server has answered the earlier one\'s settings', async () => {
+    const { port, seen } = await standIn();
+    const { upstream, setPipeline } = upstreamOf({ port });
+    const a = upstream.bridge({ pipeline: 'gpt-realtime', transcription: 'whisper-large-turbo' }, { update: UPDATE, send: () => {}, close: () => {} });
+    const b = upstream.bridge({ pipeline: 'gpt-realtime', transcription: 'qwen3-asr-mlx' }, { update: UPDATE, send: () => {}, close: () => {} });
+    await until(() => seen.frames.length === 1);
+    await new Promise((r) => setTimeout(r, 50));
+    expect(setPipeline.mock.calls.map((c) => c[1].transcription)).toEqual(['whisper-large-turbo']);
+    expect(seen.sockets).toHaveLength(1);
+    // The server's answer to the first session's settings: the second goes ahead.
+    seen.sockets[0].ws.send(JSON.stringify({ type: 'session.updated' }));
+    await until(() => seen.sockets.length === 2 && seen.frames.length === 2);
+    expect(setPipeline.mock.calls.map((c) => c[1].transcription)).toEqual(['whisper-large-turbo', 'qwen3-asr-mlx']);
+    // A refusal of the settings ends a turn too, and so does a limit when the server answers nothing.
+    const c = upstream.bridge({ pipeline: 'gpt-realtime', transcription: 'whisper-large-turbo' }, { update: UPDATE, send: () => {}, close: () => {} });
+    await new Promise((r) => setTimeout(r, 50));
+    expect(seen.sockets).toHaveLength(2);
+    seen.sockets[1].ws.send(JSON.stringify({ type: 'error', error: { message: 'no' } }));
+    await until(() => seen.sockets.length === 3);
+    a.close();
+    b.close();
+    c.close();
+  });
+
+  it('lets the next session go after a limit when the server never answers the settings, and at once when the device goes', async () => {
+    const { port, seen } = await standIn();
+    const limited = upstreamOf({ port, configureTimeoutMs: 100 });
+    const a = limited.upstream.bridge({ pipeline: 'gpt-realtime', transcription: 'whisper-large-turbo' }, { update: UPDATE, send: () => {}, close: () => {} });
+    const b = limited.upstream.bridge({ pipeline: 'gpt-realtime', transcription: 'qwen3-asr-mlx' }, { update: UPDATE, send: () => {}, close: () => {} });
+    await until(() => seen.sockets.length === 2);
+    expect(limited.setPipeline).toHaveBeenCalledTimes(2);
+    a.close();
+    b.close();
+    // With the limit far off (30 s), only the device going lets the next one go.
+    const { upstream } = upstreamOf({ port });
+    const c = upstream.bridge({ pipeline: 'gpt-realtime', transcription: 'whisper-large-turbo' }, { update: UPDATE, send: () => {}, close: () => {} });
+    await until(() => seen.sockets.length === 3);
+    const d = upstream.bridge({ pipeline: 'gpt-realtime', transcription: 'qwen3-asr-mlx' }, { update: UPDATE, send: () => {}, close: () => {} });
+    await new Promise((r) => setTimeout(r, 50));
+    expect(seen.sockets).toHaveLength(3);
+    c.close();
+    await until(() => seen.sockets.length === 4);
+    d.close();
+  });
+
   it('tells the device why, and closes, when the recognizer cannot be chosen or the server goes', async () => {
     const { port, seen } = await standIn();
     const refused = upstreamOf({ port, setPipeline: vi.fn(async () => ({ ok: false, error: 'LocalAI lists no such model for that stage.' })) });
@@ -215,11 +260,13 @@ describe('a socket joined to the model server', () => {
     expect(seen.sockets).toHaveLength(0);
 
     const { upstream } = upstreamOf({ port });
+    const told = [];
     const closed = vi.fn();
-    upstream.bridge({ pipeline: 'gpt-realtime', transcription: '' }, { update: UPDATE, send: () => {}, close: closed });
+    upstream.bridge({ pipeline: 'gpt-realtime', transcription: '' }, { update: UPDATE, send: (t) => told.push(JSON.parse(t)), close: closed });
     await until(() => seen.frames.length === 1);
     seen.sockets[0].ws.close();
     await until(() => closed.mock.calls.length === 1);
+    expect(told.pop()).toMatchObject({ type: 'error', error: { code: 'upstream_failed', message: 'The model server closed the session.' } });
     expect(closed.mock.calls[0][0]).toBe(1011);
   });
 });

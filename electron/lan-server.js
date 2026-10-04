@@ -88,6 +88,17 @@ function keyOf(request) {
   return carried ? carried.slice('openai-insecure-api-key.'.length) : '';
 }
 
+/**
+ * A close's reason as a close frame can carry it: 123 bytes of UTF-8 at most
+ * (RFC 6455), cut on a character's edge. Longer, the socket throws rather than
+ * close — and words from LocalAI or a path in a user's home need not be ASCII.
+ */
+function closeReason(text) {
+  const chars = Array.from(String(text ?? '')).slice(0, 123);
+  while (Buffer.byteLength(chars.join('')) > 123) chars.pop();
+  return chars.join('');
+}
+
 /** Compared in constant time for equal lengths: a key is short, and a timing probe on a LAN is still a probe. */
 function sameKey(given, wanted) {
   if (given.length !== wanted.length) return false;
@@ -264,7 +275,7 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
           const link = upstream.bridge(route, {
             update,
             send: (data) => { out(id, ws, data); },
-            close: (code, reason) => ws.close(code, String(reason ?? '').slice(0, 120)),
+            close: (code, reason) => ws.close(code, closeReason(reason)),
           });
           links.set(id, link);
           for (const later of held.splice(0)) link.send(later);
@@ -287,8 +298,8 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
         const named = event.session?.audio?.input?.transcription?.model;
         return decide(text, typeof named === 'string' ? named : '');
       });
-      ws.on('close', () => {
-        links.get(id)?.close();
+      ws.on('close', (code, reason) => {
+        links.get(id)?.close(code, reason);
         links.delete(id);
         devices.delete(id);
         if (![...devices.values()].includes(device)) spoken.delete(device);
@@ -336,7 +347,7 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
           return ws ? out(id, ws, data) : false;
         },
         closeSocket(id, code = 1000, reason = '') {
-          sockets.get(id)?.close(code, String(reason).slice(0, 120));
+          sockets.get(id)?.close(code, closeReason(reason));
         },
         /** How many sockets are open now. */
         count: () => sockets.size,

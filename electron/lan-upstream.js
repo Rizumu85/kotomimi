@@ -23,6 +23,14 @@
 // pipeline, as it is set here — its owner installed it to be used — and the
 // app's own models only when no LocalAI answers.
 //
+// The pipeline is one for the whole LocalAI, and a session takes its
+// recognizer from it when the session is configured. So setting a session up
+// — the pipeline changed, LocalAI's session opened and confirmed — is one
+// turn: a session that names another recognizer waits until it is over, and
+// cannot change the pipeline under a session not yet confirmed. Sessions that
+// name the same recognizer share a turn (a run's two legs); one that leaves
+// the choice to this computer takes none.
+//
 // No Electron import, and everything it touches is handed in, so its tests
 // run with no LocalAI.
 const http = require('http');
@@ -30,6 +38,8 @@ const { WebSocket } = require('ws');
 
 /** What the LocalAI serves is asked again after this long: a model installed since joins the lists. */
 const CACHE_MS = 5000;
+/** A session LocalAI never confirms holds the turn this long, and no longer: it does not keep every other device waiting. */
+const CONFIGURE_TIMEOUT_MS = 30_000;
 /** The name the app's own pipeline answers to (`src/lib/lan/protocol.ts`): what a device asks when it leaves the model to this computer. */
 const OWN_PIPELINE = 'kotomimi';
 const NONE = { pipelines: [], recognizers: [], translators: [] };
@@ -50,13 +60,26 @@ function chatBody(body, model) {
 
 const wireError = (code, message) => ({ type: 'error', error: { type: 'server_error', code, message } });
 
+/** A frame's type, or '' for what is not JSON. */
+function typeOf(text) {
+  try {
+    return JSON.parse(text)?.type ?? '';
+  } catch {
+    return '';
+  }
+}
+
+/** A close code one side may send on to the other: not 1005 or 1006, which only say no code came or the connection dropped. */
+const sendable = (code) => (code >= 1000 && code <= 1014 && code !== 1004 && code !== 1005 && code !== 1006) || (code >= 3000 && code <= 4999);
+
 /**
  * The LocalAI of this computer, as the door asks it.
  *   port                      where it listens, on the loopback
  *   pipelines()               `local-server.js`'s: its pipelines, recognizers and text models; empty while it is down
  *   setPipeline(name, change) `local-server.js`'s
+ *   configureTimeoutMs        how long a session LocalAI does not confirm holds its turn
  */
-function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect = (url) => new WebSocket(url), request = http.request }) {
+function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect = (url) => new WebSocket(url), request = http.request, configureTimeoutMs = CONFIGURE_TIMEOUT_MS }) {
   let cached = null;
   async function info(fresh = false) {
     if (!fresh && cached && now() - cached.at < CACHE_MS) return cached.value;
@@ -110,6 +133,34 @@ function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect 
     return { pipeline: pipeline.name, transcription: '' };
   }
 
+  /** The turn: the recognizer the sessions being set up named, how many there are, and who waits for another. */
+  let turn = { recognizer: '', holders: 0 };
+  const waiting = [];
+  /** Resolves when a session that names `recognizer` may be set up, with what ends its part of the turn (once). */
+  function takeTurn(recognizer) {
+    if (!recognizer) return Promise.resolve(() => {});
+    return new Promise((resolve) => {
+      const start = () => {
+        turn = { recognizer, holders: turn.holders + 1 };
+        let holding = true;
+        resolve(() => {
+          if (!holding) return;
+          holding = false;
+          turn.holders -= 1;
+          if (turn.holders > 0) return;
+          // The next to wait goes, and with it everyone waiting for the same recognizer.
+          const next = waiting.shift();
+          if (!next) return;
+          const together = [next, ...waiting.filter((w) => w.recognizer === next.recognizer)];
+          for (const w of together.slice(1)) waiting.splice(waiting.indexOf(w), 1);
+          for (const w of together) w.start();
+        });
+      };
+      if (turn.holders === 0 || (turn.recognizer === recognizer && waiting.length === 0)) start();
+      else waiting.push({ recognizer, start });
+    });
+  }
+
   /** One pipeline change at a time: the two legs of a run ask for the same recognizer at once. */
   let chain = Promise.resolve();
   function prepare(route) {
@@ -129,58 +180,75 @@ function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect 
    * Joins a device's socket to a session of the LocalAI's. `update` is the
    * device's first `session.update`, which said what it wants; `send` and
    * `close` reach the device. Answers what the door then hands every later
-   * message to, and closes when the device goes.
+   * message to, and closes when the device goes. A close carries its code
+   * and reason across, either way, when it had one to carry.
    */
   function bridge(route, { update, send, close }) {
     let ws = null;
     let ready = false;
+    let configured = false;
     let ended = false;
     const queue = [];
-    const fail = (message) => {
+    let leaveTurn = () => {};
+    let limit = null;
+    /** The session is set up — confirmed, refused, or over: the pipeline may change from here on. */
+    const settled = () => {
+      configured = true;
+      clearTimeout(limit);
+      leaveTurn();
+    };
+    /** The session ends without the device asking: it is told why, then closed — with the model server's own code, when there was one. */
+    const fail = (message, code = 1011, reason = message) => {
       if (ended) return;
       ended = true;
+      settled();
       send(JSON.stringify(wireError('upstream_failed', message)));
-      close(1011, message);
+      close(code, reason);
     };
-    prepare(route).then(() => {
-      if (ended) return;
-      ws = connect(`ws://127.0.0.1:${port}/v1/realtime?model=${encodeURIComponent(route.pipeline)}`);
-      ws.on('message', (data, isBinary) => {
-        if (ended || isBinary) return;
-        const text = data.toString('utf8');
-        if (!ready) {
-          // Its own announcement: the device was already told a session began, by the door's first answer.
-          let type = '';
-          try {
-            type = JSON.parse(text)?.type ?? '';
-          } catch {
-            type = '';
-          }
-          if (type !== 'session.created') return;
-          ready = true;
-          ws.send(JSON.stringify(withoutRecognizer(update)));
-          for (const held of queue.splice(0)) ws.send(held);
-          return;
-        }
-        send(text);
-      });
-      ws.on('close', () => {
+    takeTurn(route.transcription).then((leave) => {
+      leaveTurn = leave;
+      if (ended) return settled();
+      limit = setTimeout(settled, configureTimeoutMs);
+      limit.unref?.();
+      return prepare(route).then(() => {
         if (ended) return;
-        ended = true;
-        close(1011, 'The model server closed the session.');
-      });
-      ws.on('error', (error) => fail(`The model server could not be reached: ${error?.message ?? error}`));
-    }, (error) => fail(error?.message ?? String(error)));
+        ws = connect(`ws://127.0.0.1:${port}/v1/realtime?model=${encodeURIComponent(route.pipeline)}`);
+        ws.on('message', (data, isBinary) => {
+          if (ended || isBinary) return;
+          const text = data.toString('utf8');
+          if (!ready) {
+            // Its own announcement: the device was already told a session began, by the door's first answer.
+            if (typeOf(text) !== 'session.created') return;
+            ready = true;
+            ws.send(JSON.stringify(withoutRecognizer(update)));
+            for (const held of queue.splice(0)) ws.send(held);
+            return;
+          }
+          // Its answer to the session's settings, either way, ends the turn.
+          if (!configured && ['session.updated', 'error'].includes(typeOf(text))) settled();
+          send(text);
+        });
+        ws.on('close', (code, reason) => {
+          const said = String(reason ?? '');
+          const message = said ? `The model server closed the session: ${said}` : 'The model server closed the session.';
+          if (sendable(code)) fail(message, code, said);
+          else fail(message);
+        });
+        ws.on('error', (error) => fail(`The model server could not be reached: ${error?.message ?? error}`));
+      }, (error) => fail(error?.message ?? String(error)));
+    });
     return {
       send(text) {
         if (ended) return;
         if (ready) ws.send(text);
         else queue.push(text);
       },
-      close() {
+      close(code, reason) {
         ended = true;
+        settled();
         try {
-          ws?.close();
+          if (sendable(code)) ws?.close(code, String(reason ?? ''));
+          else ws?.close();
         } catch {
           // Already gone.
         }
@@ -188,12 +256,16 @@ function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect 
     };
   }
 
-  /** Passes a chat request on, and its answer back as it comes — a stream as a stream. */
+  /**
+   * Passes a chat request on, and its answer back as it comes — a stream as a
+   * stream, and one cut off as cut off: a client reads a stream to its end, and
+   * an end written for it would pass half an answer off as the whole.
+   */
   function complete(body, model, response, headers = {}) {
     const text = JSON.stringify(chatBody(body, model));
     const refuse = (status, message) => {
       if (response.headersSent) {
-        response.end();
+        response.destroy();
         return;
       }
       response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', ...headers });
@@ -202,7 +274,7 @@ function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect 
     const passed = request({ host: '127.0.0.1', port, path: '/v1/chat/completions', method: 'POST', agent: false, headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(text) } }, (answer) => {
       response.writeHead(answer.statusCode ?? 502, { 'Content-Type': answer.headers['content-type'] ?? 'application/json', ...headers });
       answer.pipe(response);
-      answer.on('error', () => response.end());
+      answer.on('error', () => response.destroy());
     });
     passed.on('error', (error) => refuse(502, `The model server could not be reached: ${error?.message ?? error}`));
     // The device went away: the model server need not finish for no one.
