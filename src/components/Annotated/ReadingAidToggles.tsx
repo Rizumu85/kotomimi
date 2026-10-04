@@ -7,6 +7,7 @@
 import { useTranslation } from 'react-i18next';
 import ToggleSwitch from '../Settings/shared/ToggleSwitch';
 import { useAnnotationStore } from '../../stores/annotationStore';
+import './ReadingAidToggles.scss';
 
 export function ReadingAidToggles() {
   const { t } = useTranslation();

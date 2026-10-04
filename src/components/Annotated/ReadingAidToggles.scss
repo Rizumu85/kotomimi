@@ -1,0 +1,19 @@
+// Fork: the reading aids at the foot of the display popover (ReadingAidToggles.tsx). The popover spaces its rows by
+// a margin under each; a switch brings a margin of its own above it. Here the two are set so the gaps read as the
+// rows above them do, and the last row ends where the popover's own padding does.
+
+.display-settings-popover .field.reading-aid-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 0;
+
+  .toggle-switch-component {
+    margin-top: 0;
+  }
+}
+
+// The popover's own switch (the subtitle's "highlight new text") is a row like the others, and is spaced as they are.
+.display-settings-popover .field > .toggle-switch-component {
+  margin-top: 0;
+}

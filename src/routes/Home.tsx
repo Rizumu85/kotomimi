@@ -15,6 +15,7 @@ import { SettingsInitializer } from '../components/SettingsInitializer/SettingsI
 import AuthOverlay from '../components/Auth/AuthOverlay';
 import { AppSessionRoot } from '../app/AppSessionRoot';
 import { loadSessionStores } from '../app/loadStores';
+import { watchWindowShape } from '../lib/windowShape';
 
 export function Home() {
   const loadSettings = useLoadSettings();
@@ -46,6 +47,8 @@ export function Home() {
     void useLanStore.getState().hydrate();
     // Fork: a LocalAI installed on this computer — whether it is up, and started with the app when that was asked for.
     void useLocalServerStore.getState().hydrate();
+    // Fork: on Windows the page rounds the window's corners itself, and squares them while it fills the screen.
+    return watchWindowShape();
   }, []); // Empty dependency array - only run once on mount
 
   return (

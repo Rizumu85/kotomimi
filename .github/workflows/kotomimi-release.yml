@@ -71,6 +71,7 @@ jobs:
           npx vitest run
           src/providers
           src/lib/lan
+          src/lib/windowShape.test.ts
           src/lib/fonts
           src/lib/language
           src/lib/annotate
