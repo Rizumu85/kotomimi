@@ -7,6 +7,7 @@
 // answer it.
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createRequire } from 'node:module';
+import { EventEmitter } from 'node:events';
 import http from 'node:http';
 import { WebSocketServer } from 'ws';
 
@@ -221,5 +222,25 @@ describe('a socket joined to the model server', () => {
     seen.sockets[0].ws.close();
     await until(() => closed.mock.calls.length === 1);
     expect(closed.mock.calls[0][0]).toBe(1011);
+  });
+
+  // A LocalAI slow to announce its session (loading a recognizer), or one that never does, must not let a device
+  // stream the door process out of memory: what waits for the session is held to a few seconds of audio, oldest first out.
+  it('bounds what it holds while the server\'s session is not up, keeping the most recent', async () => {
+    // A fake socket in hand, so its session.created comes only when this test says so.
+    const fake = Object.assign(new EventEmitter(), { sent: [], send(t) { this.sent.push(t); }, close() {} });
+    const { upstream } = upstreamOf({ port: 1 });
+    const live = createUpstream({ port: 1, pipelines: async () => LOCALAI(), setPipeline: async () => ({ ok: true }), connect: () => fake });
+    const link = live.bridge({ pipeline: 'gpt-realtime', transcription: '' }, { update: UPDATE, send: () => {}, close: () => {} });
+    // The pipeline change resolves, the socket opens — but no session.created yet.
+    await until(() => fake.listenerCount('message') > 0);
+    const chunk = JSON.stringify({ type: 'input_audio_buffer.append', audio: 'A'.repeat(1_000_000) });
+    for (let i = 0; i < 40; i += 1) link.send(chunk); // ~40 MB offered
+    // Now the server announces: what it flushes is bounded (far below 40), and it is the most recent.
+    fake.emit('message', Buffer.from(JSON.stringify({ type: 'session.created' })), false);
+    const flushed = fake.sent.length - 1; // the first send is the session.update
+    expect(flushed).toBeGreaterThan(0);
+    expect(flushed).toBeLessThan(12); // 8 MB / ~1 MB each, never the 40 offered
+    link.close();
   });
 });

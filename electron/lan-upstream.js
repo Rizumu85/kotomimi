@@ -30,6 +30,8 @@ const { WebSocket } = require('ws');
 
 /** What the LocalAI serves is asked again after this long: a model installed since joins the lists. */
 const CACHE_MS = 5000;
+/** What a socket may hold waiting for the LocalAI to announce its session: a few seconds of a device's audio, no more, so a LocalAI slow to load (or one that never answers) cannot grow this process without bound. */
+const MAX_QUEUED_BYTES = 8 * 1024 * 1024;
 /** The name the app's own pipeline answers to (`src/lib/lan/protocol.ts`): what a device asks when it leaves the model to this computer. */
 const OWN_PIPELINE = 'kotomimi';
 const NONE = { pipelines: [], recognizers: [], translators: [] };
@@ -136,6 +138,7 @@ function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect 
     let ready = false;
     let ended = false;
     const queue = [];
+    let queuedBytes = 0;
     const fail = (message) => {
       if (ended) return;
       ended = true;
@@ -160,6 +163,7 @@ function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect 
           ready = true;
           ws.send(JSON.stringify(withoutRecognizer(update)));
           for (const held of queue.splice(0)) ws.send(held);
+          queuedBytes = 0;
           return;
         }
         send(text);
@@ -174,8 +178,11 @@ function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect 
     return {
       send(text) {
         if (ended) return;
-        if (ready) ws.send(text);
-        else queue.push(text);
+        if (ready) { ws.send(text); return; }
+        // Held until the session is up; the oldest let go once there is more than a few seconds of it, so a slow or silent LocalAI cannot grow this process without bound.
+        queue.push(text);
+        queuedBytes += Buffer.byteLength(text);
+        while (queuedBytes > MAX_QUEUED_BYTES && queue.length > 1) queuedBytes -= Buffer.byteLength(queue.shift());
       },
       close() {
         ended = true;
