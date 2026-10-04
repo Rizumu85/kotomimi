@@ -104,6 +104,7 @@ export const NOTICE_ALIASES: Readonly<Record<string, string>> = {
   server_key_needed: 'providers.localai.serverKeyNeeded',
   server_key_refused: 'providers.localai.serverKeyRefused',
   api_unreachable: 'providers.localai.apiUnreachable',
+  localai_here_down: 'providers.localai.hereDown',
   api_key_needed: 'providers.localai.apiKeyNeeded',
   api_key_refused: 'providers.localai.apiKeyRefused',
   // Fork: another Kotomimi hears a leg's language with none of its recognizers.

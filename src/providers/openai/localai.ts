@@ -64,6 +64,7 @@ import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
 import { coachIs, cutsSentencesHere, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, HERES, needsServer, PLACE_FIELDS, PLACES, watchDeviceModels, type Here, type Place } from './localaiDevice';
 import { setLocalPipeline } from '../../lib/lan/localServer';
+import { useLocalServerStore } from '../../stores/localServerStore';
 import { LocalAITurnDetectionControls, LocalAITurnDetectionHelp, LocalAITurnDetectionSummary } from './LocalAIEngine';
 import { KotomimiIcon } from './LocalAIIcon';
 import { LocalAISettingsView } from './LocalAISettings';
@@ -590,6 +591,8 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
             answer = await doFetch(`${other.base}/models`, listing(other.key, signal));
           } catch (error) {
             if (signal.aborted) throw error;
+            // This computer's own LocalAI is no address to check, and nothing the internet has to do with: it is not up (yet).
+            if (other.base === hereBaseUrl(s)) throw new CheckError(`The LocalAI of this computer (${other.base}) is not running.`, 'localai_here_down');
             throw new CheckError(`The ${other.name} model's server (${other.base}) could not be reached.`, 'api_unreachable', { address: other.base });
           }
           if (answer.status === 401 || answer.status === 403) {
@@ -872,7 +875,11 @@ export const localaiProvider: Provider<LocalAISettings, LocalAICredentials, Loca
   ],
   // This computer's models are per direction, and each leg needs its own.
   checkReadsDirection: true,
-  watchReadiness: watchDeviceModels,
+  // This computer's models as they are downloaded, and its LocalAI as it comes up or goes: a stage it runs is ready when it is.
+  watchReadiness: (onChange) => {
+    const stops = [watchDeviceModels(onChange), useLocalServerStore.subscribe((state) => state.status.state, () => onChange())];
+    return () => { for (const stop of stops) stop(); };
+  },
 
   languages: localaiLanguages,
 

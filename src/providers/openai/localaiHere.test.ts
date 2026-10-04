@@ -6,6 +6,7 @@ import { recordEvents } from '../../lib/contract/events';
 import { fakeSockets } from '../../lib/contract/testing/fakeSocket';
 import { trackedClock } from '../../lib/contract/testing/trackedClock';
 import type { CheckContext } from '../../lib/provider/types';
+import { useLocalServerStore } from '../../stores/localServerStore';
 import { useModelStore } from '../../stores/modelStore';
 import {
   buildLocalAI, createLocalAICheck, hereBaseUrl, localaiProvider, LOCALAI_DEFAULTS, migrateLocalAISettings, settled,
@@ -179,10 +180,25 @@ describe('readiness with a stage the LocalAI runs', () => {
     for (const call of fetch.mock.calls) expect(JSON.stringify(call[1]?.headers ?? {})).not.toContain('Bearer');
   });
 
-  it('is not ready while that LocalAI does not answer', async () => {
+  it('says that this computer\'s LocalAI is not running while it does not answer — not that an address or the internet is at fault', async () => {
     const fetch = vi.fn(async () => { throw new TypeError('Failed to fetch'); });
-    const outcome = await check(settings(ALL_LOCALAI), fetch).then((result) => result, (error: unknown) => ({ ok: false, thrown: String(error) }));
-    expect(outcome.ok).toBe(false);
+    await expect(check(settings(ALL_LOCALAI), fetch)).rejects.toMatchObject({ name: 'CheckError', code: 'localai_here_down' });
+    // The translation alone is the LocalAI's: the same.
+    await expect(check(settings({ translateAt: 'device', translateHere: 'localai', translateHereModel: 'hy-mt2-1.8b', asrVia: 'api', asrApiBaseUrl: 'https://api.example.com/v1', asrApiModel: 'whisper-1', asrApiNeedsKey: false }), vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input).startsWith(HERE_BASE)) throw new TypeError('Failed to fetch');
+      return list(['whisper-1']);
+    }))).rejects.toMatchObject({ code: 'localai_here_down' });
+  });
+
+  it('is checked again when that LocalAI comes up or goes', () => {
+    const onChange = vi.fn();
+    const stop = localaiProvider.watchReadiness!(onChange);
+    useLocalServerStore.setState({ status: { installed: true, state: 'starting', port: 8080, models: [], tail: '' } });
+    useLocalServerStore.setState({ status: { installed: true, state: 'running', port: 8080, models: ['gpt-realtime'], tail: '' } });
+    expect(onChange).toHaveBeenCalledTimes(2);
+    stop();
+    useLocalServerStore.setState({ status: { installed: true, state: 'stopped', port: 8080, models: [], tail: '' } });
+    expect(onChange).toHaveBeenCalledTimes(2);
   });
 
   it('declares what it reads, so a change of who runs a stage is checked again', () => {

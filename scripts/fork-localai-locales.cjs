@@ -118,6 +118,11 @@ const PROVIDER = {
   hereStarting: ['Starting LocalAI…', '正在启动 LocalAI…', '正在啟動 LocalAI…'],
   hereAbsent: ['No LocalAI was found on this computer.', '这台电脑上没有找到 LocalAI。', '這台電腦上沒有找到 LocalAI。'],
   hereStart: ['Start LocalAI', '启动 LocalAI', '啟動 LocalAI'],
+  hereDown: [
+    'The LocalAI on this computer is not running yet. Start it in the stage\'s card — or, if Kotomimi has only just opened, give it a moment.',
+    '这台电脑的 LocalAI 还没有运行。在环节卡片里点「启动 LocalAI」；如果刚打开 Kotomimi，稍等一会儿它就会起来。',
+    '這台電腦的 LocalAI 還沒有執行。在環節卡片裡按「啟動 LocalAI」；如果剛開啟 Kotomimi，稍等一會兒它就會起來。',
+  ],
   kotomimiThere: ['Use the Kotomimi on that device', '改连那台设备的 Kotomimi', '改連那台裝置的 Kotomimi'],
   kotomimiThereLooking: ['Looking for it…', '正在查找…', '正在尋找…'],
   kotomimiThereNone: [

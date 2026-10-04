@@ -549,6 +549,7 @@
       "hereStarting": "Starting LocalAI…",
       "hereAbsent": "No LocalAI was found on this computer.",
       "hereStart": "Start LocalAI",
+      "hereDown": "The LocalAI on this computer is not running yet. Start it in the stage's card — or, if Kotomimi has only just opened, give it a moment.",
       "kotomimiThere": "Use the Kotomimi on that device",
       "kotomimiThereLooking": "Looking for it…",
       "kotomimiThereNone": "No Kotomimi is sharing on that device. Open Kotomimi there, turn on \"Share with other devices\", then try again.",

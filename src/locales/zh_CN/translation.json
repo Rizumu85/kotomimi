@@ -549,6 +549,7 @@
       "hereStarting": "正在启动 LocalAI…",
       "hereAbsent": "这台电脑上没有找到 LocalAI。",
       "hereStart": "启动 LocalAI",
+      "hereDown": "这台电脑的 LocalAI 还没有运行。在环节卡片里点「启动 LocalAI」；如果刚打开 Kotomimi，稍等一会儿它就会起来。",
       "kotomimiThere": "改连那台设备的 Kotomimi",
       "kotomimiThereLooking": "正在查找…",
       "kotomimiThereNone": "那台设备上没有正在共享的 Kotomimi。请在那台设备上打开 Kotomimi，开启「共享给其他设备」，再试一次。",
