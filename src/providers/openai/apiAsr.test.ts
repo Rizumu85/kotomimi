@@ -119,7 +119,7 @@ describe('a recognizer that is an API', () => {
     vad.worker.say('speech_end');
     await settled();
     await settled();
-    expect(api.calls[0].headers).toBeUndefined();
+    expect(api.calls[0].headers).toEqual({ Authorization: 'Bearer no-key' });
     expect(api.calls[0].form.get('language')).toBeNull();
   });
 

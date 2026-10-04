@@ -8,6 +8,15 @@
 import type { Clock } from '../../lib/contract/clock';
 
 /** How long one answer may take, from the request to its last token. */
+/**
+ * What a request with no key carries as its Bearer token. A server that asks
+ * for no key takes any — the OpenAI clients always send one — and a LocalAI
+ * needs to see one: a POST from a page with no Authorization header is asked
+ * for a CSRF token and refused (`missing csrf token in request header`,
+ * measured 2026-10-04 on the Mac: with any Bearer token it answers).
+ */
+export const NO_KEY = 'no-key';
+
 export const TEXT_TIMEOUT_MS = 60_000;
 
 export interface TextRequest {
@@ -97,7 +106,7 @@ export async function completeText(request: TextRequest, deps: TextDeps): Promis
   try {
     const response = await deps.fetch(request.url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(request.key ? { Authorization: `Bearer ${request.key}` } : {}) },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${request.key || NO_KEY}` },
       body: JSON.stringify({
         model: request.model,
         stream: true,

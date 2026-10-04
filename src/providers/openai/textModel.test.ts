@@ -32,14 +32,15 @@ describe('what of an answer is shown', () => {
 });
 
 describe('one answer from a text model', () => {
-  it('POSTs the system and user messages to the model, streamed, with no Authorization when there is no key', async () => {
+  it('POSTs the system and user messages to the model, streamed, with the placeholder token when there is no key', async () => {
     const fetch = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => sse('こん', 'にちは'));
     const answer = await completeText(REQUEST, deps(fetch));
     expect(answer.text).toBe('こんにちは');
     const [url, init] = fetch.mock.calls[0];
     expect(url).toBe(REQUEST.url);
     expect(init?.method).toBe('POST');
-    expect(init?.headers).toEqual({ 'Content-Type': 'application/json' });
+    // Never without an Authorization header: a LocalAI takes a page's POST without one for a forged request.
+    expect(init?.headers).toEqual({ 'Content-Type': 'application/json', Authorization: 'Bearer no-key' });
     expect(JSON.parse(init?.body as string)).toEqual({ model: 'hy-mt2-1.8b', stream: true, messages: [{ role: 'system', content: 'Translate.' }, { role: 'user', content: '你好' }] });
   });
 

@@ -83,7 +83,8 @@ describe('a leg whose translation runs on a text model', () => {
     expect(h.calls[0].body.messages[1]).toEqual({ role: 'user', content: '今日は天気がいいですね。' });
     // The leg's own instructions are the model's: the interpreter's prompt, in this direction.
     expect(h.calls[0].body.messages[0].content).toContain('Japanese');
-    expect(h.calls[0].headers).not.toHaveProperty('Authorization');
+    // No key of the user's: the placeholder a keyless server takes.
+    expect(h.calls[0].headers.Authorization).toBe('Bearer no-key');
     expect(h.of('segmentOpened').map((e) => e.payload)).toEqual([
       { ref: 1, side: 'source', origin: 'item_1' },
       { ref: FIRST_REF + 1, side: 'translation', origin: 'item_1' },

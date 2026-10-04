@@ -256,6 +256,7 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 这些是客户端已经绕开的地方。如果服务器一侧修掉了，可以提 issue，客户端可以去掉对应的处理。
 
 - 握手不回子协议，所以客户端不带子协议。
+- **页面直接发来的 POST 不带 Authorization 头会被拒绝（2026-10-04）。** LocalAI 默认开着 CSRF 检查：浏览器环境发来的跨站 POST（聊天、上传转写）没有 Authorization 头时，回 `400 missing csrf token in request header`；带任意 Bearer 就放行（它没设密钥时什么 token 都收）。所以文本模型请求和转写上传在没有密钥时带一个占位的 `Bearer no-key`（`textModel.ts` 的 `NO_KEY`），和 OpenAI 的客户端总带一个 key 是同一个做法。经共享端口转发的请求由主进程发出，不受这条影响。
 - `turn_detection.create_response = false` 被忽略，所以"只识别"用的是转写会话。
 - 带外的 `response.create`（`conversation: "none"`）会被当成真实对话回答，所以客户端不发它。
 - 手动提交后立刻收到 `response.create` 会取消正在进行的转写。
