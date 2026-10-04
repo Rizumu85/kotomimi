@@ -640,7 +640,7 @@ describe('the shared door, end to end: a session on one of LocalAI\'s recognizer
     await nothingLeftSince(ready);
   });
 
-  it.fails('closes LocalAI\'s side when the device closes, with the device\'s close code', async () => {
+  it('closes LocalAI\'s side when the device closes, with the device\'s close code', async () => {
     const fake = await fakeLocalAI();
     const { realtime, door, ready } = await share(fake.port);
     const device = await session(realtime, 'whisper-large-turbo');
@@ -651,7 +651,7 @@ describe('the shared door, end to end: a session on one of LocalAI\'s recognizer
     await nothingLeftSince(ready);
   });
 
-  it.fails('closes the device\'s side when LocalAI closes, with LocalAI\'s close code', async () => {
+  it('closes the device\'s side when LocalAI closes, with LocalAI\'s close code', async () => {
     const fake = await fakeLocalAI();
     const { realtime, door, page, ready } = await share(fake.port);
     const device = await session(realtime, 'whisper-large-turbo');
@@ -779,6 +779,8 @@ describe('the shared door, end to end: a session left silent', () => {
     expect(device.events().pop()).toMatchObject({ type: 'error', error: { code: 'session_idle' } });
     expect(device.closed).toEqual({ code: 1000, reason: 'idle' });
     await until(() => fake.sessions[0].closed !== null && door.count() === 0 && page.seen.closed.length === 1, 'every side closes');
+    // LocalAI is told why, too.
+    expect(fake.sessions[0].closed).toEqual({ code: 1000, reason: 'idle' });
     await until(() => fake.connections() === 0, 'no connection to LocalAI is left');
     await nothingLeftSince(ready);
   });

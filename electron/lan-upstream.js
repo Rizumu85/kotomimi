@@ -50,6 +50,9 @@ function chatBody(body, model) {
 
 const wireError = (code, message) => ({ type: 'error', error: { type: 'server_error', code, message } });
 
+/** A close code one side may send on to the other: not 1005 or 1006, which only say no code came or the connection dropped. */
+const sendable = (code) => (code >= 1000 && code <= 1014 && code !== 1004 && code !== 1005 && code !== 1006) || (code >= 3000 && code <= 4999);
+
 /**
  * The LocalAI of this computer, as the door asks it.
  *   port                      where it listens, on the loopback
@@ -129,7 +132,8 @@ function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect 
    * Joins a device's socket to a session of the LocalAI's. `update` is the
    * device's first `session.update`, which said what it wants; `send` and
    * `close` reach the device. Answers what the door then hands every later
-   * message to, and closes when the device goes.
+   * message to, and closes when the device goes. A close carries its code
+   * and reason across, either way, when it had one to carry.
    */
   function bridge(route, { update, send, close }) {
     let ws = null;
@@ -164,10 +168,11 @@ function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect 
         }
         send(text);
       });
-      ws.on('close', () => {
+      ws.on('close', (code, reason) => {
         if (ended) return;
         ended = true;
-        close(1011, 'The model server closed the session.');
+        if (sendable(code)) close(code, String(reason ?? ''));
+        else close(1011, 'The model server closed the session.');
       });
       ws.on('error', (error) => fail(`The model server could not be reached: ${error?.message ?? error}`));
     }, (error) => fail(error?.message ?? String(error)));
@@ -177,10 +182,11 @@ function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect 
         if (ready) ws.send(text);
         else queue.push(text);
       },
-      close() {
+      close(code, reason) {
         ended = true;
         try {
-          ws?.close();
+          if (sendable(code)) ws?.close(code, String(reason ?? ''));
+          else ws?.close();
         } catch {
           // Already gone.
         }

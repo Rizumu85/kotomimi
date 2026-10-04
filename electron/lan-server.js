@@ -287,8 +287,8 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
         const named = event.session?.audio?.input?.transcription?.model;
         return decide(text, typeof named === 'string' ? named : '');
       });
-      ws.on('close', () => {
-        links.get(id)?.close();
+      ws.on('close', (code, reason) => {
+        links.get(id)?.close(code, reason);
         links.delete(id);
         devices.delete(id);
         if (![...devices.values()].includes(device)) spoken.delete(device);
