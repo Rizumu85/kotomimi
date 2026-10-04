@@ -484,11 +484,11 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
   const engines = deps.engines ?? defaultEngines;
   const local = createLocalInferenceAdapter(engines);
   /** What hears on this computer: its own recognizer, or — the same adapter with that one engine changed — an API's. */
-  const hearing = (device: DeviceHearing, credentials: PipelineCredentials) => {
+  const hearing = (device: DeviceHearing, request: StartRequest<PipelineConfig, PipelineCredentials>) => {
     const { api } = device;
     if (!api) return local;
-    const key = api.key ? credentials[api.key] : undefined;
-    return createLocalInferenceAdapter({ ...engines, asr: () => createApiAsr({ baseUrl: api.baseUrl, model: api.model, ...(key ? { key } : {}), fetch: deps.fetch ?? fetchNow }) });
+    const key = api.key ? request.credentials[api.key] : undefined;
+    return createLocalInferenceAdapter({ ...engines, asr: () => createApiAsr({ baseUrl: api.baseUrl, model: api.model, ...(key ? { key } : {}), fetch: deps.fetch ?? fetchNow, clock: request.clock }) });
   };
   return {
     async start(request, events) {
@@ -500,7 +500,7 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
       opening.catch(() => {});
       let session: AdapterSession;
       try {
-        session = await (device ? hearing(device, request.credentials).start(hearingRequest(request, device, stages?.heard), leg.inner) : realtime.start(request, leg.inner));
+        session = await (device ? hearing(device, request).start(hearingRequest(request, device, stages?.heard), leg.inner) : realtime.start(request, leg.inner));
       } catch (error) {
         leg.abandon();
         throw error;
