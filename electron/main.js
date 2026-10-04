@@ -256,6 +256,11 @@ async function buildAudioStatus(devicesCreated) {
     };
   }
 
+  // Fork: on Windows the device is VB-CABLE's, and what is wrong is that it is not installed.
+  if (process.platform === 'win32') {
+    return { ok: false, platform: 'win32', reason: 'vbcable-missing', message: 'VB-CABLE is not installed' };
+  }
+
   return { ok: false, platform: process.platform, reason: 'other', message: 'Failed to create virtual audio devices' };
 }
 
@@ -576,7 +581,11 @@ app.whenReady().then(async () => {
 
   // Start virtual audio devices before creating the window
   try {
-    const devicesCreated = await createVirtualAudioDevices();
+    // Fork, Windows: only looked for at start, never installed. Upstream asks to download and install VB-CABLE here,
+    // before there is a window: a dialog in English, then a download with no progress and no time limit that reads as
+    // "nothing happened" — for a driver that only a translation spoken into a meeting needs, which the fork's own
+    // provider never does. The banner offers the install to whoever needs it (`create-virtual-speaker`, below).
+    const devicesCreated = process.platform === 'win32' ? await audioUtils.isVBCableInstalled() : await createVirtualAudioDevices();
     lastAudioStatus = await buildAudioStatus(devicesCreated);
     if (!devicesCreated) {
       console.error('[Sokuji] [Main] Virtual audio device status:', lastAudioStatus.reason, '-', lastAudioStatus.message);

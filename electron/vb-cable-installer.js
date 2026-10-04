@@ -15,6 +15,13 @@ const { app, dialog } = require('electron');
 async function downloadFile(url, destPath) {
   return new Promise((resolve, reject) => {
     const file = require('fs').createWriteStream(destPath);
+    // Fork: a download that stalls is given up after two minutes (a slow network read as "nothing happens").
+    const limit = setTimeout(() => {
+      file.destroy();
+      require('fs').unlink(destPath, () => {});
+      reject(new Error('The download of VB-CABLE did not finish within two minutes.'));
+    }, 120000);
+    file.on('finish', () => clearTimeout(limit));
 
     https.get(url, (response) => {
       if (response.statusCode === 302 || response.statusCode === 301) {

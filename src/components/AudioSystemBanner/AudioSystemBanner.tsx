@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, RefreshCw, Wrench, X } from 'lucide-react';
+import { AlertTriangle, Download, RefreshCw, Wrench, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
   useAudioSystemStatus,
@@ -14,7 +14,12 @@ import {
 } from '../../stores/audioSystemStore';
 import './AudioSystemBanner.scss';
 
-const AudioSystemBanner: React.FC = () => {
+/**
+ * `speaks` (fork): whether the provider in use ever speaks a translation. The virtual microphone carries a spoken
+ * translation into a meeting: a provider that never speaks (the fork's own, which writes subtitles) has no use for it,
+ * and is told nothing of its absence. Handed in by the panel, which knows the provider: the banner loads no store of it.
+ */
+const AudioSystemBanner: React.FC<{ speaks?: boolean }> = ({ speaks = true }) => {
   const { t } = useTranslation();
   const status = useAudioSystemStatus();
   const reason = useAudioSystemReason();
@@ -26,7 +31,7 @@ const AudioSystemBanner: React.FC = () => {
   const repair = useAudioSystemRepair();
   const dismiss = useAudioSystemDismiss();
 
-  if (status !== 'unavailable' || dismissed) {
+  if (status !== 'unavailable' || dismissed || !speaks) {
     return null;
   }
 
@@ -34,10 +39,14 @@ const AudioSystemBanner: React.FC = () => {
   // macOS: the driver is installed but was never loaded; the fix is a re-sign
   // behind macOS's administrator prompt, not another retry.
   const isMacDriverNotLoaded = reason === 'mac-driver-not-loaded';
+  // Fork, Windows: the driver is VB-CABLE, and it is not installed. Said as that, with the install one press away:
+  // the retry asks whether to download it, as upstream's start did.
+  const isVbCableMissing = reason === 'vbcable-missing';
 
   let body = t('audioSystem.unavailableBody');
   if (isPactlMissing) body = t('audioSystem.pactlMissingBody');
   if (isMacDriverNotLoaded) body = repairFailed ? t('audioSystem.macRepairFailedBody') : t('audioSystem.macDriverNotLoadedBody');
+  if (isVbCableMissing) body = t('fork.audio.vbcableMissing');
 
   return (
     <div className="audio-system-banner">
@@ -66,8 +75,8 @@ const AudioSystemBanner: React.FC = () => {
             onClick={() => retry()}
             disabled={retrying}
           >
-            <RefreshCw size={12} className={retrying ? 'spinning' : ''} />
-            {retrying ? t('audioSystem.retrying') : t('audioSystem.retry')}
+            {isVbCableMissing && !retrying ? <Download size={12} /> : <RefreshCw size={12} className={retrying ? 'spinning' : ''} />}
+            {isVbCableMissing ? (retrying ? t('fork.audio.vbcableInstalling') : t('fork.audio.vbcableInstall')) : retrying ? t('audioSystem.retrying') : t('audioSystem.retry')}
           </button>
         )}
         <button className="dismiss-button" onClick={dismiss} aria-label="Dismiss">

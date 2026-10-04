@@ -1493,6 +1493,11 @@
       "use": "使用 {{name}}",
       "manual": "或者手動填寫位址"
     },
+    "audio": {
+      "vbcableMissing": "沒有安裝 VB-CABLE 虛擬音效卡，所以翻譯出來的語音送不進會議軟體。只看字幕不需要它。",
+      "vbcableInstall": "安裝 VB-CABLE",
+      "vbcableInstalling": "正在下載，可能要等一會兒…"
+    },
     "server": {
       "title": "這台電腦上的 LocalAI",
       "tooltip": "這台電腦裝了 LocalAI，它有自己的一套模型。由 Kotomimi 負責啟動和停止，只在本機監聽。上面各環節選「這台電腦」時，可以直接選它的模型；開啟共享後，它的模型和 Kotomimi 下載的模型一起借給別的裝置。模型 10 分鐘沒人用，會自動從記憶體卸載。",

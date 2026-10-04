@@ -46,6 +46,20 @@ describe('AudioSystemBanner', () => {
     expect((screen.getByText('audioSystem.repairing').closest('button') as HTMLButtonElement).disabled).toBe(true);
   });
 
+  it('says on Windows that VB-CABLE is not installed, and offers to install it (fork)', () => {
+    useAudioSystemStore.setState({ status: 'unavailable', platform: 'win32', reason: 'vbcable-missing', dismissed: false });
+    render(<AudioSystemBanner />);
+    expect(screen.getByText('fork.audio.vbcableMissing')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'fork.audio.vbcableInstall' })).toBeTruthy();
+    expect(screen.queryByText('audioSystem.unavailableBody')).toBeNull();
+  });
+
+  it('says nothing to a provider that never speaks: subtitles need no virtual microphone (fork)', () => {
+    useAudioSystemStore.setState({ status: 'unavailable', platform: 'win32', reason: 'vbcable-missing', dismissed: false });
+    const { container } = render(<AudioSystemBanner speaks={false} />);
+    expect(container.innerHTML).toBe('');
+  });
+
   it('keeps the retry for the other reasons', () => {
     unavailable('pulseaudio-unavailable');
     render(<AudioSystemBanner />);

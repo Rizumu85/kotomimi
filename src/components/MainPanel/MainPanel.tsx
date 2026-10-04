@@ -268,7 +268,8 @@ export default function MainPanel() {
   return (
     <div className="main-panel-wrapper" style={{ '--conversation-bg-color': display.bgColor, '--conversation-source-color': display.sourceTextColor, '--conversation-translation-color': display.translationTextColor } as CSSProperties}>
       <UpdateBanner />
-      <AudioSystemBanner />
+      {/* Fork: nothing about a missing virtual microphone to a provider that never speaks. */}
+      <AudioSystemBanner speaks={provider?.speech !== 'never'} />
       <UpdateDialog />
       <div className="main-panel">
         {(!takeover || run.phase !== 'idle' || hasConversation) && (

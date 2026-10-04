@@ -194,6 +194,16 @@ module.exports = {
     use: ['Use {{name}}', '使用 {{name}}', '使用 {{name}}'],
     manual: ['Or type its address', '或者手动填写地址', '或者手動填寫位址'],
   },
+  // Windows' virtual audio driver, asked about in the banner and no longer at start (`AudioSystemBanner.tsx`).
+  audio: {
+    vbcableMissing: [
+      'The VB-CABLE virtual audio driver is not installed, so a spoken translation cannot be sent into a meeting. Subtitles do not need it.',
+      '没有安装 VB-CABLE 虚拟声卡，所以翻译出来的语音送不进会议软件。只看字幕不需要它。',
+      '沒有安裝 VB-CABLE 虛擬音效卡，所以翻譯出來的語音送不進會議軟體。只看字幕不需要它。',
+    ],
+    vbcableInstall: ['Install VB-CABLE', '安装 VB-CABLE', '安裝 VB-CABLE'],
+    vbcableInstalling: ['Downloading… this can take a minute', '正在下载，可能要等一会儿…', '正在下載，可能要等一會兒…'],
+  },
   // The LocalAI installed on this computer, run by the app (`src/components/LanSharing/LocalServerCard.tsx`).
   server: {
     title: ['LocalAI on this computer', '这台电脑上的 LocalAI', '這台電腦上的 LocalAI'],

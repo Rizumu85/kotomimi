@@ -1493,6 +1493,11 @@
       "use": "Use {{name}}",
       "manual": "Or type its address"
     },
+    "audio": {
+      "vbcableMissing": "The VB-CABLE virtual audio driver is not installed, so a spoken translation cannot be sent into a meeting. Subtitles do not need it.",
+      "vbcableInstall": "Install VB-CABLE",
+      "vbcableInstalling": "Downloading… this can take a minute"
+    },
     "server": {
       "title": "LocalAI on this computer",
       "tooltip": "A LocalAI is installed on this computer, with models of its own. Kotomimi starts and stops it, and keeps it to this computer. Choose its models in the cards above, under \"This computer\"; with sharing on, they are lent to the other devices together with the ones Kotomimi downloaded. A model nobody has used for 10 minutes is unloaded from memory by itself.",

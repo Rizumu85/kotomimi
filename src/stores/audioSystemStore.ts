@@ -3,7 +3,7 @@ import { isElectron } from '../utils/environment';
 import { reportError, describeCause } from '../lib/diagnostics/report';
 
 export type AudioSystemStatus = 'unknown' | 'ok' | 'unavailable';
-export type AudioSystemReason = 'pactl-missing' | 'pulseaudio-unavailable' | 'mac-driver-not-loaded' | 'other' | null;
+export type AudioSystemReason = 'pactl-missing' | 'pulseaudio-unavailable' | 'mac-driver-not-loaded' | 'vbcable-missing' | 'other' | null;
 
 interface AudioSystemState {
   status: AudioSystemStatus;

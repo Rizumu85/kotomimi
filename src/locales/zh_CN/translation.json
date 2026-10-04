@@ -1493,6 +1493,11 @@
       "use": "使用 {{name}}",
       "manual": "或者手动填写地址"
     },
+    "audio": {
+      "vbcableMissing": "没有安装 VB-CABLE 虚拟声卡，所以翻译出来的语音送不进会议软件。只看字幕不需要它。",
+      "vbcableInstall": "安装 VB-CABLE",
+      "vbcableInstalling": "正在下载，可能要等一会儿…"
+    },
     "server": {
       "title": "这台电脑上的 LocalAI",
       "tooltip": "这台电脑装了 LocalAI，它有自己的一套模型。由 Kotomimi 负责启动和停止，只在本机监听。上面各环节选「这台电脑」时，可以直接选它的模型；打开共享后，它的模型和 Kotomimi 下载的模型一起借给别的设备。模型 10 分钟没人用，会自动从内存里卸载。",
