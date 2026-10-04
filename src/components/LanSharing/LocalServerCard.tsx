@@ -104,6 +104,8 @@ export function LocalServerCard({ disabled = false }: { disabled?: boolean }) {
         </div>
       )}
 
+      {status.state === 'running' && <p className="kt-note">{t('fork.server.idleNote')}</p>}
+
       {status.state === 'failed' && status.tail && (
         <details className="kt-details" open>
           <summary>{t('fork.server.lastWords')}</summary>

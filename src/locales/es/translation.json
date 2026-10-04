@@ -1452,6 +1452,7 @@
     "server": {
       "title": "LocalAI on this computer",
       "intro": "A LocalAI is installed here, with models of its own. Kotomimi starts and stops it. With sharing turned on above, its models are shared together with the ones downloaded here.",
+      "idleNote": "A model nobody has used for 10 minutes is unloaded from memory by itself, and loaded again when it is next asked for.",
       "stopped": "Not running",
       "starting": "Starting…",
       "running": "Running · {{count}} model(s)",
@@ -1460,7 +1461,7 @@
       "start": "Start",
       "stop": "Stop",
       "autoStart": "Start it when Kotomimi opens",
-      "externalNote": "Kotomimi did not start it — another program did, such as Sokuji Remote — so it cannot be stopped from here. To let Kotomimi run it, quit that program, then come back and press Start.",
+      "externalNote": "Kotomimi did not start it — another program did — so it cannot be stopped from here, and its models are not unloaded when idle. To let Kotomimi run it, quit that program, then come back and press Start.",
       "useHere": "To use it on this computer too: choose \"Another device\" under the provider, and pick \"LocalAI on this computer\" from the list.",
       "openPage": "Open LocalAI's page to install or remove models",
       "more": "and {{count}} more",

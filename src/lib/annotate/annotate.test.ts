@@ -8,7 +8,7 @@ import { annotateJapanese, furiganaParts, katakanaToHiragana, romaji } from './j
 import { buildJapaneseTokenizer } from './japaneseTokenizer';
 import { romanizeKorean } from './korean';
 import { transliterateRussian } from './russian';
-import { annotatedLanguage, scriptLanguage } from './script';
+import { annotatedLanguage, isChinese, quotesJapanese, scriptLanguage } from './script';
 import type { JapaneseTokenizer } from './types';
 
 const DICT = resolve(__dirname, '../../../node_modules/@sglkc/kuromoji/dict');
@@ -112,6 +112,23 @@ describe('a text, line by line', () => {
 
   it('is plain when nothing is asked for', () => {
     expect(annotateLine('今日は天気です', { furigana: false, roman: false, language: 'ja', japanese: ja })).toEqual({ parts: [{ text: '今日は天気です' }] });
+  });
+
+  it('leaves a Chinese sentence that quotes Japanese alone, in a Chinese row: feedback explains in Chinese', () => {
+    expect(isChinese('zh-CN')).toBe(true);
+    expect(isChinese('zh_TW')).toBe(true);
+    expect(isChinese('ja')).toBe(false);
+    // What no Japanese sentence holds, or kana as a small part of the line.
+    expect(quotesJapanese('“一度”后面接动词时要用过去式“見た”，不能用现在时“見ます”。')).toBe(true);
+    expect(quotesJapanese('“は”和“が”的区别：这里应该用“が”。')).toBe(true);
+    expect(quotesJapanese('動詞時態與過去時間不符，“見ます”要改成“見た”。')).toBe(true);
+    // The corrected sentence above the explanation is Japanese, however many kanji it holds.
+    expect(quotesJapanese('一度映画を見た。とても面白かったです。')).toBe(false);
+    expect(quotesJapanese('東京大学卒業予定です')).toBe(false);
+    // Only a Chinese row is read this way: anywhere else kana are Japanese.
+    expect(needsJapanese('“見ます”要改成“見た”。这里时态不对。', { furigana: true, roman: false, language: null, chinese: true })).toBe(false);
+    expect(needsJapanese('“見ます”要改成“見た”。这里时态不对。', { furigana: true, roman: false, language: null })).toBe(true);
+    expect(needsJapanese('一度映画を見た。\n“見ます”要改成“見た”。这里时态不对。', { furigana: true, roman: false, language: null, chinese: true })).toBe(true);
   });
 
   it('reads a line of Han characters alone as Japanese only in a Japanese row', () => {

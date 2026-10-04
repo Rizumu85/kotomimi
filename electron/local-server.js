@@ -15,6 +15,11 @@
 // helper app's menu used to. The models are whatever this LocalAI lists:
 // nothing here knows one by name.
 //
+// A model nobody has asked for in a while is let go from memory (LocalAI's own
+// idle watchdog, switched on when the app starts it): a computer that lends
+// its models to other devices loads what they choose, and should not keep
+// every model it was ever asked for.
+//
 // What it will not do: touch a LocalAI something else started. One that
 // already answers on the port is reported as running, and left alone.
 //
@@ -32,6 +37,8 @@ const READY_TIMEOUT_MS = 120_000;
 const READY_POLL_MS = 500;
 /** After it is asked to stop: this long, then it is killed. */
 const STOP_TIMEOUT_MS = 8_000;
+/** A model no request has named for this long is unloaded; the next request that names it loads it again. */
+const IDLE_TIMEOUT = '10m';
 /** Lines of its output kept, for the settings to show when it would not start. */
 const TAIL_LINES = 30;
 
@@ -66,6 +73,8 @@ function buildArgs({ base, address, help, exists }) {
     ...(knows('--address') ? ['--address', address] : []),
     // A LocalAI on the local network with no key of its own: newer versions refuse the bind unless told it is meant.
     ...(knows('--allow-insecure-public-bind') && !/^(127\.|localhost)/.test(address) ? ['--allow-insecure-public-bind'] : []),
+    // Models left idle are unloaded: without this LocalAI keeps each one in memory until it stops.
+    ...(knows('--enable-watchdog-idle') && knows('--watchdog-idle-timeout') ? ['--enable-watchdog-idle', `--watchdog-idle-timeout=${IDLE_TIMEOUT}`] : []),
     ...dir('--data-path', 'data'),
     ...dir('--localai-config-dir', 'configuration'),
     ...dir('--generated-content-path', 'generated'),
@@ -329,4 +338,4 @@ function createLocalServer(deps = {}) {
   return { status: () => current, refresh, start, stop, pipelines, setPipeline, bin, port };
 }
 
-module.exports = { createLocalServer, buildArgs, buildEnv, candidates, portOf, localGet, localSend };
+module.exports = { createLocalServer, buildArgs, buildEnv, candidates, portOf, localGet, localSend, IDLE_TIMEOUT };

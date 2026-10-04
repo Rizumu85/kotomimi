@@ -8,7 +8,7 @@
 import { Fragment, useEffect, useMemo, useSyncExternalStore } from 'react';
 import { annotateText, needsJapanese } from '../../lib/annotate/annotate';
 import { japaneseTokenizer, loadJapanese, subscribeJapanese } from '../../lib/annotate/japaneseStore';
-import { annotatedLanguage } from '../../lib/annotate/script';
+import { annotatedLanguage, isChinese } from '../../lib/annotate/script';
 import type { AnnotatedLine } from '../../lib/annotate/types';
 import { useAnnotationStore } from '../../stores/annotationStore';
 import './AnnotatedText.scss';
@@ -22,7 +22,8 @@ export function useAnnotation(text: string, language: string | null | undefined)
   const furigana = useAnnotationStore((s) => s.furigana);
   const roman = useAnnotationStore((s) => s.romanization);
   const hint = annotatedLanguage(language);
-  const wantsJapanese = needsJapanese(text, { furigana, roman, language: hint });
+  const chinese = isChinese(language);
+  const wantsJapanese = needsJapanese(text, { furigana, roman, language: hint, chinese });
   // The snapshot is the tokenizer alone: a load that fails changes nothing a row draws, so it re-renders none.
   const japanese = useSyncExternalStore(subscribeJapanese, japaneseTokenizer, japaneseTokenizer);
   useEffect(() => {
@@ -30,9 +31,9 @@ export function useAnnotation(text: string, language: string | null | undefined)
   }, [wantsJapanese]);
   return useMemo(() => {
     if (!furigana && !roman) return null;
-    const lines = annotateText(text, { furigana, roman, language: hint, japanese });
+    const lines = annotateText(text, { furigana, roman, language: hint, chinese, japanese });
     return lines.some((line) => line.roman !== undefined || line.parts.some((part) => part.ruby !== undefined)) ? lines : null;
-  }, [text, furigana, roman, hint, japanese]);
+  }, [text, furigana, roman, hint, chinese, japanese]);
 }
 
 export interface AnnotatedLinesProps {

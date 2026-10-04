@@ -1452,6 +1452,7 @@
     "server": {
       "title": "這台電腦上的 LocalAI",
       "intro": "這台電腦裝了 LocalAI，它有自己的一套模型。由 Kotomimi 負責啟動和停止。開啟上面的共享後，它的模型會和這裡下載的模型一起共享出去。",
+      "idleNote": "模型 10 分鐘沒人用，就會自動從記憶體卸載；下次有人用到時再載入。",
       "stopped": "未啟動",
       "starting": "正在啟動…",
       "running": "執行中 · {{count}} 個模型",
@@ -1460,7 +1461,7 @@
       "start": "啟動",
       "stop": "停止",
       "autoStart": "開啟 Kotomimi 時自動啟動",
-      "externalNote": "它不是 Kotomimi 啟動的，而是別的程式啟動的（比如 Sokuji Remote），所以這裡不能停止它。想讓 Kotomimi 來管，先結束那個程式，再回到這裡按「啟動」。",
+      "externalNote": "它不是 Kotomimi 啟動的，而是別的程式啟動的，所以這裡不能停止它，閒置的模型也不會自動卸載。想讓 Kotomimi 來管，先結束那個程式，再回到這裡按「啟動」。",
       "useHere": "這台電腦自己也想用它：在提供者下面選「另一台裝置」，再從清單裡選「這台電腦上的 LocalAI」。",
       "openPage": "開啟 LocalAI 的頁面，安裝或刪除模型",
       "more": "還有 {{count}} 個",

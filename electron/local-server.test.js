@@ -74,6 +74,8 @@ describe('where a LocalAI is looked for, and what it is started with', () => {
     expect(buildArgs({ base: BASE, address: '0.0.0.0:8080', help: ALL_FLAGS, exists })).toEqual([
       'run', '--models-path', path.join(BASE, 'models'), '--backends-path', path.join(BASE, 'backends'), '--address', '0.0.0.0:8080', '--allow-insecure-public-bind', '--data-path', path.join(BASE, 'data'),
     ]);
+    // One that has an idle watchdog is told to use it: a model nobody asks for is let go from memory.
+    expect(buildArgs({ base: BASE, address: '127.0.0.1:8080', help: `${ALL_FLAGS} --enable-watchdog-idle --watchdog-idle-timeout`, exists: () => false })).toEqual(['run', '--address', '127.0.0.1:8080', '--enable-watchdog-idle', '--watchdog-idle-timeout=10m']);
     // An older LocalAI: the flag it does not know would stop it from starting.
     expect(buildArgs({ base: BASE, address: '0.0.0.0:8080', help: '--models-path --address', exists })).toEqual(['run', '--models-path', path.join(BASE, 'models'), '--address', '0.0.0.0:8080']);
     // Bound to this computer alone, nothing is insecure about it.

@@ -177,6 +177,11 @@ module.exports = {
       '这台电脑装了 LocalAI，它有自己的一套模型。由 Kotomimi 负责启动和停止。打开上面的共享后，它的模型会和这里下载的模型一起共享出去。',
       '這台電腦裝了 LocalAI，它有自己的一套模型。由 Kotomimi 負責啟動和停止。開啟上面的共享後，它的模型會和這裡下載的模型一起共享出去。',
     ],
+    idleNote: [
+      'A model nobody has used for 10 minutes is unloaded from memory by itself, and loaded again when it is next asked for.',
+      '模型 10 分钟没人用，就会自动从内存里卸载；下次有人用到时再加载。',
+      '模型 10 分鐘沒人用，就會自動從記憶體卸載；下次有人用到時再載入。',
+    ],
     stopped: ['Not running', '未启动', '未啟動'],
     starting: ['Starting…', '正在启动…', '正在啟動…'],
     running: ['Running · {{count}} model(s)', '运行中 · {{count}} 个模型', '執行中 · {{count}} 個模型'],
@@ -186,9 +191,9 @@ module.exports = {
     stop: ['Stop', '停止', '停止'],
     autoStart: ['Start it when Kotomimi opens', '打开 Kotomimi 时自动启动', '開啟 Kotomimi 時自動啟動'],
     externalNote: [
-      'Kotomimi did not start it — another program did, such as Sokuji Remote — so it cannot be stopped from here. To let Kotomimi run it, quit that program, then come back and press Start.',
-      '它不是 Kotomimi 启动的，而是别的程序启动的（比如 Sokuji Remote），所以这里不能停止它。想让 Kotomimi 来管，先退出那个程序，再回到这里点「启动」。',
-      '它不是 Kotomimi 啟動的，而是別的程式啟動的（比如 Sokuji Remote），所以這裡不能停止它。想讓 Kotomimi 來管，先結束那個程式，再回到這裡按「啟動」。',
+      'Kotomimi did not start it — another program did — so it cannot be stopped from here, and its models are not unloaded when idle. To let Kotomimi run it, quit that program, then come back and press Start.',
+      '它不是 Kotomimi 启动的，而是别的程序启动的，所以这里不能停止它，空闲的模型也不会自动卸载。想让 Kotomimi 来管，先退出那个程序，再回到这里点「启动」。',
+      '它不是 Kotomimi 啟動的，而是別的程式啟動的，所以這裡不能停止它，閒置的模型也不會自動卸載。想讓 Kotomimi 來管，先結束那個程式，再回到這裡按「啟動」。',
     ],
     useHere: [
       'To use it on this computer too: choose "Another device" under the provider, and pick "LocalAI on this computer" from the list.',
