@@ -1,6 +1,7 @@
 // Fork: the native feedback engine as what gives the grammar feedback on this computer.
 import { describe, expect, it, vi } from 'vitest';
-import type { CheckResult, SessionContext } from '../../lib/provider/types';
+import type { SessionContext } from '../../lib/contract/adapter';
+import type { CheckResult } from '../../lib/provider/types';
 import type { NativeEngineStatus } from '../../lib/native/nativeEngine';
 import { buildLocalAI, checkLocalAIWithNative, LOCALAI_DEFAULTS, localaiProvider, migrateLocalAISettings, type LocalAISettings } from './localai';
 import { coachGap, coachIdle } from './localaiNative';
@@ -103,23 +104,23 @@ describe('the check of the provider, with the feedback engine', () => {
   it('asks the engine when the speaker is coached by it, and lets it rest otherwise', async () => {
     const native = deps();
     const check = vi.fn(async () => OK);
-    expect(await checkLocalAIWithNative({ endpoint: '' }, settings(), CTX, check, native)).toBe(OK);
+    expect(await checkLocalAIWithNative({ apiKey: '', endpoint: '' }, settings(), CTX, check, native)).toBe(OK);
     expect(native.coachGap).toHaveBeenCalledWith('gemma-4-e2b');
     expect(native.coachIdle).not.toHaveBeenCalled();
     // Not coached, or coached by another runner, or only the other side runs: it rests.
     for (const other of [settings({ coach: false }), settings({ coachHere: 'app' }), settings({ coachAt: 'api' })]) {
       const rest = deps();
-      await checkLocalAIWithNative({ endpoint: '' }, other, CTX, check, rest);
+      await checkLocalAIWithNative({ apiKey: '', endpoint: '' }, other, CTX, check, rest);
       expect(rest.coachGap).not.toHaveBeenCalled();
       expect(rest.coachIdle).toHaveBeenCalledTimes(1);
     }
     const heard = deps();
-    await checkLocalAIWithNative({ endpoint: '' }, settings(), { ...CTX, legs: ['participant'] }, check, heard);
+    await checkLocalAIWithNative({ apiKey: '', endpoint: '' }, settings(), { ...CTX, legs: ['participant'] }, check, heard);
     expect(heard.coachGap).not.toHaveBeenCalled();
   });
 
   it('says what the engine lacks when everything else passes', async () => {
     const native = { ...deps(), coachGap: vi.fn(async () => ({ ok: false as const, reason: 'Gemma 4 E2B is not downloaded.', code: 'native_coach_missing', params: { name: 'Gemma 4 E2B' } })) };
-    expect(await checkLocalAIWithNative({ endpoint: '' }, settings(), CTX, vi.fn(async () => OK), native)).toMatchObject({ ok: false, code: 'native_coach_missing' });
+    expect(await checkLocalAIWithNative({ apiKey: '', endpoint: '' }, settings(), CTX, vi.fn(async () => OK), native)).toMatchObject({ ok: false, code: 'native_coach_missing' });
   });
 });

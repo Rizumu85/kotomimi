@@ -26,6 +26,8 @@ export interface NativeModel {
   languages: readonly string[];
   /** How long one recognition of it may run, where that is not the default (`nativeAsr.ts`). */
   limits?: Partial<NativeLimits>;
+  /** It finds the language itself when told none: it can hear a leg whose language is left to be detected. */
+  detects?: boolean;
 }
 
 /**
@@ -68,7 +70,10 @@ const WINDOW_LIMITS: Partial<NativeLimits> = { rollAfter: 8, rollAt: 8, rollHard
  */
 export const NATIVE_MODELS: readonly NativeModel[] = [
   ...APPLE_LANGUAGES.map((language) => ({ id: `${APPLE_PREFIX}${language}`, name: 'Apple Speech', bytes: 0, languages: [language], limits: APPLE_LIMITS })),
-  { id: 'qwen3-asr-1.7b-q8', name: 'Qwen3-ASR 1.7B GGUF', bytes: 2473010048, languages: QWEN_LANGUAGES, limits: WINDOW_LIMITS },
+  // It reads a whole stretch before it writes, and names the language right from that: measured 2026-10-05 on
+  // Korean, Russian, Spanish, English, Chinese and noisy Japanese with no language given. (R2T2 can be left to
+  // detect too, but writes the first words of a stretch in the wrong language: it is not offered for that.)
+  { id: 'qwen3-asr-1.7b-q8', name: 'Qwen3-ASR 1.7B GGUF', bytes: 2473010048, languages: QWEN_LANGUAGES, limits: WINDOW_LIMITS, detects: true },
   { id: 'r2t2-q8', name: 'Confucius4 R2T2 GGUF', bytes: 2477512064, languages: ['ja', 'zh', 'en', 'ko', 'fr', 'de', 'it', 'pt', 'ru', 'es', 'ar'] },
 ];
 
@@ -79,6 +84,8 @@ export const NATIVE_DEFAULT_MODEL = 'qwen3-asr-1.7b-q8';
 export const nativeModel = (id: string): NativeModel => NATIVE_MODELS.find((m) => m.id === id) ?? NATIVE_MODELS.find((m) => m.id === NATIVE_DEFAULT_MODEL)!;
 
 const baseOf = (code: string): string => code.trim().toLowerCase().split(/[-_]/)[0];
+/** A leg's language left to be detected. */
+export const isAutoLanguage = (code: string): boolean => baseOf(code) === 'auto';
 
 /**
  * The model that hears a language, for a setting: the one it names — or, where
@@ -87,6 +94,8 @@ const baseOf = (code: string): string => code.trim().toLowerCase().split(/[-_]/)
  */
 export function nativeModelFor(id: string, language: string): NativeModel | null {
   const named = nativeModel(id);
+  // A language left to be detected is heard by a model that detects one, and by no other.
+  if (isAutoLanguage(language)) return named.detects ? named : null;
   const model = isApple(named.id) ? NATIVE_MODELS.find((m) => m.id === `${APPLE_PREFIX}${baseOf(language)}`) : named;
   return model && model.languages.includes(baseOf(language)) ? model : null;
 }
@@ -133,7 +142,7 @@ export function chooseNative(pick: NativePick, id: string, languages: readonly s
 }
 
 /** Whether a model hears speech in this language. */
-export const nativeHears = (model: NativeModel, language: string): boolean => model.languages.includes(baseOf(language));
+export const nativeHears = (model: NativeModel, language: string): boolean => (isAutoLanguage(language) ? model.detects === true : model.languages.includes(baseOf(language)));
 
 /** The engine is this model's and ready to hear. The Mac's recognition, once asked for, is ready for every language of its own. */
 export const nativeReady = (status: NativeEngineStatus, id: string): boolean => status.up.includes(id) || (status.run.state === 'ready' && (status.run.model === id || (isApple(id) && isApple(status.run.model))));

@@ -84,6 +84,20 @@ export const coachesNatively = (s: Pick<StagePlacement, 'coach' | 'coachAt' | 'c
 /** The native engine hears: none of the app's own models is asked for. */
 export const hearsNatively = (s: Pick<StagePlacement, 'asrVia' | 'asrHere'>): boolean => s.asrVia === 'device' && s.asrHere === 'native';
 
+/**
+ * The other side's language is left to be detected, and what hears can do
+ * that: the native engine (with a model that detects), or an API the sentence
+ * is uploaded to. Anywhere else the switch is not offered, and counts for
+ * nothing.
+ */
+export const detectsOther = (s: { asrDetectOther?: boolean; asrVia: Place; asrHere?: AsrHere }): boolean => s.asrDetectOther === true && (hearsNatively(s) || s.asrVia === 'api');
+
+/** What a leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs, or whatever it turns out to be. */
+export function heardBy(s: { asrDetectOther?: boolean; asrVia: Place; asrHere?: AsrHere; coach: boolean }, pair: { source: string; target: string }, leg: 'speaker' | 'participant'): string {
+  if (leg === 'speaker') return s.coach ? pair.target : pair.source;
+  return detectsOther(s) ? AUTO : pair.target;
+}
+
 /** The feedback runs at this place: the speaker is coached, and that is where. */
 export const coachIs = (s: Pick<StagePlacement, 'coach' | 'coachAt'>, place: Place): boolean => s.coach && s.coachAt === place;
 

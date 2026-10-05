@@ -63,7 +63,7 @@ import { CHECK_TIMEOUT_MS } from './check';
 import { SERVER_SILENT, isKotomimiServer, kindOf, KOTOMIMI_HOST, modelsFor, serverDefaultModel, type LocalAIModel, type LocalAIModelKind } from './localaiModels';
 import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
-import { ASR_HERES, coachIs, coachesNatively, cutsSentencesHere, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
+import { ASR_HERES, coachIs, coachesNatively, cutsSentencesHere, detectsOther, heardBy, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
 import { NATIVE_DEFAULT_MODEL, coachBaseUrl, coachGap, coachIdle, nativeGap, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
 import { NATIVE_DEFAULT_TRANSLATOR, nativeTranslates, nativeTranslator, translatorRequest } from './nativeTranslators';
@@ -94,6 +94,13 @@ export interface LocalAISettings extends RealtimeSettings {
   asrApiBaseUrl: string;
   asrApiModel: string;
   asrApiNeedsKey: boolean;
+  /**
+   * The other side's language is left to be detected: whoever they are, they
+   * are heard and translated into the speaker's language, and the speaker's
+   * own speech still goes into the pair's target. It takes a recognizer that
+   * detects the language (`detectsOther`).
+   */
+  asrDetectOther: boolean;
   /** Where it translates. */
   translateAt: Place;
   /** On the other device: the model asked over chat. Blank: the device's own — its pipeline, inside the session it hears in; else the first model it lists that translates. */
@@ -172,6 +179,7 @@ export const LOCALAI_DEFAULTS: LocalAISettings = {
   asrApiModel: '',
   // An API usually wants a key: its field shows as soon as the API is chosen.
   asrApiNeedsKey: true,
+  asrDetectOther: false,
   translateAt: 'server',
   translateServerModel: '',
   translateBaseUrl: '',
@@ -309,7 +317,7 @@ const quick = (baseUrl: string): { extra?: Readonly<Record<string, unknown>> } =
 
 export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>, inputs: MigrationInputs): LocalAISettings {
   const text = (k: 'asrModel' | 'asrApiBaseUrl' | 'asrApiModel' | 'translateBaseUrl' | 'coachDeviceModel' | 'coachPrompt' | 'asrHereModel' | 'asrNativeModel' | 'translateHereModel' | 'translateNativeModel' | 'coachHereModel' | 'coachNativeModel' | 'hereAddress' | 'herePipeline') => (typeof stored[k] === 'string' ? (stored[k] as string) : LOCALAI_DEFAULTS[k]);
-  const flag = (k: 'asrApiNeedsKey' | 'coach' | 'serverNeedsKey') => (typeof stored[k] === 'boolean' ? (stored[k] as boolean) : LOCALAI_DEFAULTS[k]);
+  const flag = (k: 'asrApiNeedsKey' | 'asrDetectOther' | 'coach' | 'serverNeedsKey') => (typeof stored[k] === 'boolean' ? (stored[k] as boolean) : LOCALAI_DEFAULTS[k]);
   const number = (k: (typeof VAD_FIELDS)[number]) => (typeof stored[k] === 'number' && Number.isFinite(stored[k]) ? (stored[k] as number) : LOCALAI_DEFAULTS[k]);
   const selections = stored.selections;
   return {
@@ -319,6 +327,7 @@ export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>
     asrApiBaseUrl: text('asrApiBaseUrl'),
     asrApiModel: text('asrApiModel'),
     asrApiNeedsKey: flag('asrApiNeedsKey'),
+    asrDetectOther: flag('asrDetectOther'),
     translateBaseUrl: text('translateBaseUrl'),
     coach: flag('coach'),
     coachDeviceModel: text('coachDeviceModel'),
@@ -375,7 +384,7 @@ export function localaiModelsUrl(endpoint: string): string {
 }
 
 export { kindOf, modelsFor, serverDefaultModel, type LocalAIModel, type LocalAIModelKind, type LocalAIModelSlot } from './localaiModels';
-export { needsServer, PLACES, type Place } from './localaiDevice';
+export { detectsOther, heardBy, needsServer, PLACES, type Place } from './localaiDevice';
 
 /** A leg of this run only transcribes on the other device — its answers come from a stage of its own — so LocalAI lets no recognizer be chosen (`transcriptionFor`). */
 export const hasTranscriptionLeg = (s: Pick<LocalAISettings, 'asrVia' | 'translateAt' | 'translateServerModel' | 'coach'>) => s.asrVia === 'server' && (s.translateAt !== 'server' || s.translateServerModel.trim() !== '' || s.coach);
@@ -481,7 +490,8 @@ function unnamedStage(s: LocalAISettings, models: readonly LocalAIModel[], coach
 function undetected(s: LocalAISettings, models: readonly LocalAIModel[], source: string, coached: boolean): ProviderRefusal | null {
   if (source !== AUTO || coached) return null;
   const kotomimiHears = s.asrVia === 'server' && isKotomimiServer(models);
-  if (s.translateAt !== 'device' && !kotomimiHears) return null;
+  // The native translation engine reads what it is given; the app's own translation models are told the pair.
+  if ((s.translateAt !== 'device' || translatesNatively(s)) && !kotomimiHears) return null;
   return { refused: 'The language spoken is to be detected, and nothing on the way detects it.', code: 'source_auto' };
 }
 
@@ -676,8 +686,8 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
       const coached = s.coach && leg === 'speaker';
       const found = servers.models ?? [];
       // What the leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
-      const heard = leg === 'speaker' && !coached ? ctx.pair.source : ctx.pair.target;
-      const gap = unnamedStage(s, found, coached) ?? undetected(s, found, leg === 'speaker' ? ctx.pair.source : ctx.pair.target, coached) ?? unheard(s, found, heard);
+      const heard = heardBy(s, ctx.pair, leg);
+      const gap = unnamedStage(s, found, coached) ?? undetected(s, found, leg === 'speaker' ? ctx.pair.source : heard, coached) ?? unheard(s, found, heard);
       // What the servers listed goes with the refusal: a pick from it is often what answers it.
       if (gap) return { ok: false, reason: gap.refused, ...(gap.code ? { code: gap.code } : {}), ...(gap.params ? { params: gap.params } : {}), ...(servers.models?.length ? { models: servers.models } : {}) };
     }
@@ -712,7 +722,7 @@ export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISe
   let hears: ReturnType<typeof nativeGap> | null = null;
   if (hearsNatively(s)) {
     // What each leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
-    hears = native.gap({ model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage }, ctx.legs.map((leg) => (leg === 'speaker' && !s.coach ? ctx.pair.source : ctx.pair.target)));
+    hears = native.gap({ model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage }, ctx.legs.map((leg) => heardBy(s, ctx.pair, leg)));
     hears.catch(() => undefined);
   } else {
     native.idle();
@@ -768,8 +778,11 @@ function transcriptionFor(s: Pick<LocalAISettings, 'asrModel'>, heard: string, t
 /** The key a stage on the other device is called with: the device's own access key, when it asks for one. */
 const serverKeyOf = (s: Pick<LocalAISettings, 'serverNeedsKey'>): { key?: StageKey } => (s.serverNeedsKey ? { key: 'apiKey' } : {});
 
-export function buildLocalAI(context: SessionContext, s: LocalAISettings, shared: SharedSettings): LocalAIConfig | ProviderRefusal {
+export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: SharedSettings): LocalAIConfig | ProviderRefusal {
   const models: readonly LocalAIModel[] = shared.models;
+  // The other side's leg, with their language left to be detected: built as a leg whose source is to be detected.
+  const detected = detectsOther(s) && shared.reversed(asked.direction);
+  const context: SessionContext = detected ? { ...asked, direction: { source: AUTO, target: asked.direction.target } } : asked;
   const { source, target } = context.direction;
   // Heard by this computer's LocalAI: a Realtime session as the other device's is, on its own socket.
   const hearsLocal = hearsByLocalServer(s);
@@ -886,7 +899,8 @@ export function buildLocalAI(context: SessionContext, s: LocalAISettings, shared
     // The speaker speaks the target language; what they type is still their own, and is translated.
     stages = { speech: coach, typed: translate, heard: target };
   } else if (translate) {
-    stages = { speech: translate, typed: translate };
+    // A detected leg says so to what runs it: the recognizer is told no language, and each sentence is given its own.
+    stages = { speech: translate, typed: translate, ...(detected ? { heard: AUTO } : {}) };
   }
 
   return {
@@ -962,7 +976,7 @@ export const localaiProvider: Provider<LocalAISettings, LocalAICredentials, Loca
   check: (k, s, ctx) => checkLocalAIWithNative(k, s, ctx),
   // What decides the credential fields, the endpoints the check reaches, and the models it asks this computer for.
   checkReads: [
-    'asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'coachDeviceModel', 'serverNeedsKey', 'selections',
+    'asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'asrDetectOther', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'coachDeviceModel', 'serverNeedsKey', 'selections',
     // The models a start needs named (`unnamedStage`).
     'model', 'translateModel', 'translateServerModel', 'coachModel', 'coachServerModel',
     // On this computer: by the app's own models, or by the LocalAI installed here, and then which of its models.

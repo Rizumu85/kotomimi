@@ -29,6 +29,8 @@ import type { LocalInferenceConfig } from '../localInference/config';
 import { defaultEngines, type LocalEngines, type TranslationLike } from '../localInference/engines';
 import { createApiAsr } from './apiAsr';
 import { createNativeAsr, type NativeLimits } from './nativeAsr';
+import { languageByScript } from '../../lib/language/script';
+import { AUTO } from '../../lib/provider/languages';
 import { TEXT_SLOT } from './nativeTranslators';
 import { askNativeEngine, ipcNativeBridge, type NativeBridge, type NativeEngineStatus } from '../../lib/native/nativeEngine';
 import { createRealtimeAdapter } from './adapter';
@@ -84,7 +86,13 @@ export interface Stages {
   speech: AnswerStage | null;
   /** What answers typed text. Null: the Realtime session does. */
   typed: AnswerStage | null;
-  /** The language heard, when it is not the leg's source: a speaker practising the target language. */
+  /**
+   * The language heard, when it is not the leg's source: a speaker practising
+   * the target language — or `auto`, the other side's language left to be
+   * detected: the recognizer is told none, each sentence is given the
+   * language its writing shows (`languageByScript`), and one already in the
+   * leg's target language is not translated.
+   */
   heard?: string;
 }
 
@@ -328,7 +336,9 @@ class PipelineLeg implements AdapterSession {
       case 'segmentText': {
         const source = this.sources.get(e.payload.ref);
         if (source) source.text = e.payload.text;
-        const heard = source && e.payload.language === undefined ? this.stages.heard : undefined;
+        const told = source && e.payload.language === undefined ? this.stages.heard : undefined;
+        // Left to be detected: the language its writing shows, or none — which also keeps the leg's own from being assumed.
+        const heard = told === AUTO ? languageByScript(e.payload.text) ?? AUTO : told;
         this.events.segmentText(heard ? { ...e.payload, language: heard } : e.payload);
         return;
       }
@@ -337,7 +347,9 @@ class PipelineLeg implements AdapterSession {
         this.sources.delete(e.payload.ref);
         this.events.segmentClosed(e.payload);
         const text = source?.text.trim();
-        if (source && text && this.stages.speech) this.push({ stage: this.stages.speech, text, origin: e.payload.origin ?? source.origin, typed: false });
+        // What was said in the reader's own language needs no translating.
+        const already = this.stages.heard === AUTO && text !== undefined && languageByScript(text) === baseOf(this.request.context.direction.target);
+        if (source && text && this.stages.speech && !already) this.push({ stage: this.stages.speech, text, origin: e.payload.origin ?? source.origin, typed: false });
         return;
       }
       case 'busy':

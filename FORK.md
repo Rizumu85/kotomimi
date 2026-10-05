@@ -21,6 +21,7 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 | Mac 自带的语音识别 | Mac 上（macOS 26 及以上）排第一的原生识别引擎是系统自己的语音识别：应用带一个小程序去调用它，边听边出字，不需要 LocalAI。系统不支持的语言（比如俄语）由上一行的 Qwen3-ASR 来听，两个引擎对页面来说是一个 | `native/apple-speech/SpeechHelper.swift`、`electron/apple-speech.js`、`electron/native-engines.js` |
 | 原生翻译引擎 | 同样的做法用在翻译上：应用自己下载 llama.cpp 的服务器和翻译模型的 GGUF 文件（Index-Translate 2B、Hunyuan MT 2、Hunyuan MT 1.5），在本机运行。Windows 和 Apple 芯片的 Mac 都提供 | `electron/native-engine.js`（`LLAMA`、`TRANSLATORS`）、`src/providers/openai/nativeTranslators.ts` |
 | 原生语法反馈引擎 | 语法反馈也可以由应用自己下载的 llama.cpp 来跑：一个小的对话模型（Gemma 4 E2B），几乎即时给出反馈，不需要 API | `electron/native-engine.js`（`COACHES`）、`src/providers/openai/nativeCoaches.ts` |
+| 自动识别对方说的语言 | 一个开关：对方说哪种语言都识别并翻成你的语言，不用手动切换；你自己说的仍按选好的语言翻译。需要 Qwen3-ASR（原生引擎）或 API 来识别 | `localaiDevice.ts`（`detectsOther`、`heardBy`）、`src/lib/language/script.ts` |
 | 模型说明和实测排序 | 模型库里每个实测过的识别模型，名字旁有一个说明气泡：实测错字率、出字快慢、适合什么情况；日语的排序和"推荐"标记按实测来 | `src/lib/local-inference/selection/measuredRank.ts` |
 | 自定义模型 | 从 Hugging Face 添加模型库里没有的 Whisper 模型 | `src/lib/local-inference/customModels.ts` |
 | 语法反馈 | 自己说对方语言时，不翻译，而是检查语法：没问题回 ✓，有问题给出改正句和原因。提示词按语言自动选择，也可以自己写 | `coachPrompt.ts` |
@@ -163,6 +164,17 @@ macOS 26 起系统里有一个在本机运行的语音识别（`SpeechAnalyzer` 
 - 说话时的暂定文字怎么给对方：协议里的增量只能往后加字，不能改已经发出去的。所以发出去的是"连续两次暂定结果从头数一致的那一段"（去掉末尾的标点，`transcriber.ts` 的 `agreed`）。只会往后加字的识别器因此晚一拍；会改写句尾的识别器（Mac 自带的、原生引擎里的 Qwen3-ASR）以前一改写对方就只能等整句定稿，现在能一直看到实时文字。已经发出去的部分后来被改写了，就等定稿（定稿带整句文字）。
 - 别的设备正在用的时候，这台电脑自己的就绪检查不会因为"我自己没选它"而把引擎停掉（`holdNative`）。
 - 实测（PC 通过局域网用 Mac 的共享，Mac 上同时装着 LocalAI）：不指名时识别由 Apple 语音识别回答、实时出字，翻译由 Index-Translate 回答、约 0.3 秒一句。
+
+## 自动识别对方说的语言
+
+VRChat 里对面的人说什么语言是不一定的。"语音识别"卡片里有一个开关"自动识别对方说的语言"（`asrDetectOther`）：打开后，"对方"那一路不告诉识别器语言，对方说哪种语言都识别出来、翻译成你的语言；你自己那一路不变，仍按语言菜单里选的来翻译，所以和"两者"模式不冲突。
+
+- **谁能做到**：原生引擎里的 Qwen3-ASR（它读完整段再写，自己判断语言；`NATIVE_MODELS` 里的 `detects`），或者一个 API（比如 Whisper 的接口）。所以开关只在这两种情况下显示（`detectsOther`）。R2T2 也能不给语言，但每段开头几个词常认错语言，不提供。打开后那一行显示为"听对方（自动识别语言）"，只列出能自己识别语言的模型；当前模型做不到时显示"未选择模型"并说明要选 Qwen3-ASR。
+- **翻译**：原生翻译引擎（Index-Translate 的请求里不写源语言，实测译文几乎一样）和 API 模型都可以。应用自带的翻译模型要知道语言对，这时会提示换成原生引擎或 API。
+- **每句话是什么语言**：引擎的回答里不带它判断出的语言，所以按文字来认（`src/lib/language/script.ts`）：有假名是日语，谚文是韩语，西里尔字母按俄语，只有汉字按中文……拉丁字母的句子按最常用的小词在英、西、法、德、意、葡里认，认不准就不标（照常翻译，只是没有注音这些辅助）。这样每一行有自己的语言标签，日语行照样有假名注音。
+- **对方说的就是你的语言**时，这一句原样显示，不翻译。
+- **实测**（韩、俄、日、英、中、西六种语言连着说，喂给"对方"一路）：六句都识别成各自的语言并翻成中文，中文那句原样显示。
+- 怎么做的：`buildLocalAI` 把这一路当作"源语言待识别"的一路来搭（`heardBy`），`stages.heard` 记为 `auto`，包装层（`pipeline.ts`）据此不给识别器语言、给每句标上语言、跳过不需要翻译的句子。
 
 ## 模型库里怎么摆
 

@@ -4,6 +4,7 @@ import type { SessionContext } from '../../lib/contract/adapter';
 import { NO_NATIVE_ENGINE, nativeEngineStatus, nativeStreamEvent, type NativeEngineStatus } from '../../lib/native/nativeEngine';
 import type { CheckContext, CheckResult } from '../../lib/provider/types';
 import { useModelStore } from '../../stores/modelStore';
+import { detectsOther, heardBy } from './localaiDevice';
 import { buildLocalAI, admitLocalAI, checkLocalAIWithNative, describeLocalAI, localaiProvider, LOCALAI_DEFAULTS, migrateLocalAISettings, type LocalAICredentials, type LocalAISettings } from './localai';
 import { cutsSentencesHere, deviceChoices, deviceNeeds, hearsByLocalServer, hearsNatively } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
@@ -147,6 +148,72 @@ describe('the native recognizer, language by language', () => {
     expect(kept.asrNativeByLanguage).toEqual({ ru: 'qwen3-asr-1.7b-q8' });
     expect(migrateLocalAISettings({ asrNativeByLanguage: ['x'] }, { legacy: {}, credentials: {} }).asrNativeByLanguage).toEqual({});
     expect(LOCALAI_DEFAULTS.asrNativeByLanguage).toEqual({});
+  });
+});
+
+describe('the other side\u2019s language left to be detected', () => {
+  const PARTICIPANT: SessionContext = { direction: { source: 'zh-CN', target: 'ja' }, speech: false, turns: 'auto' };
+  const DETECT: Partial<LocalAISettings> = { ...NATIVE, asrNativeModel: 'qwen3-asr-1.7b-q8', asrDetectOther: true, translateAt: 'device', translateHere: 'native', translateNativeModel: 'index-translate-2b' };
+
+  it('counts only where what hears can detect a language: the native engine, or an API', () => {
+    expect(LOCALAI_DEFAULTS.asrDetectOther).toBe(false);
+    expect(detectsOther(settings(DETECT))).toBe(true);
+    expect(detectsOther(settings({ ...DETECT, asrVia: 'api' }))).toBe(true);
+    expect(detectsOther(settings({ ...DETECT, asrHere: 'app' }))).toBe(false);
+    expect(detectsOther(settings({ ...DETECT, asrVia: 'server' }))).toBe(false);
+    expect(detectsOther(settings({ ...DETECT, asrDetectOther: false }))).toBe(false);
+    expect(migrateLocalAISettings({ asrDetectOther: true }, { legacy: {}, credentials: {} }).asrDetectOther).toBe(true);
+    expect(localaiProvider.checkReads).toContain('asrDetectOther');
+  });
+
+  it('leaves the speaker\u2019s own language as chosen: only the other side\u2019s is detected', () => {
+    const pair = { source: 'zh-CN', target: 'ja' };
+    expect(heardBy(settings(DETECT), pair, 'speaker')).toBe('zh-CN');
+    expect(heardBy(settings(DETECT), pair, 'participant')).toBe('auto');
+    expect(heardBy(settings({ ...DETECT, asrDetectOther: false }), pair, 'participant')).toBe('ja');
+    // A coached speaker is heard in the language they practise, detected or not.
+    expect(heardBy(settings({ ...DETECT, coach: true }), pair, 'speaker')).toBe('ja');
+  });
+
+  it('is heard by a native model that detects one, and by no other', () => {
+    expect(nativePicked({ model: 'qwen3-asr-1.7b-q8' }, 'auto')?.id).toBe('qwen3-asr-1.7b-q8');
+    expect(nativePicked({ model: 'r2t2-q8' }, 'auto')).toBeNull();
+    expect(nativePicked({ model: `${APPLE_PREFIX}ja` }, 'auto')).toBeNull();
+    // Chosen for it by name, as for any language.
+    expect(nativePicked({ model: 'r2t2-q8', byLanguage: { auto: 'qwen3-asr-1.7b-q8' } }, 'auto')?.id).toBe('qwen3-asr-1.7b-q8');
+    expect(chooseNative({ model: 'r2t2-q8' }, 'qwen3-asr-1.7b-q8', ['auto'], ['ja', 'auto']).byLanguage).toEqual({ ja: 'r2t2-q8', auto: 'qwen3-asr-1.7b-q8' });
+  });
+
+  it('builds the other side\u2019s leg with no language to hear, and a translation that is told no source', () => {
+    // The pair is Chinese → Japanese: the other side's leg is its reverse, and `reversed` says so.
+    const other = { ...PARTICIPANT, direction: { source: 'ja', target: 'zh-CN' } };
+    const reversed = { ...shared, reversed: (d: SessionContext['direction']) => d.target === 'zh-CN' };
+    const config = buildLocalAI(other, settings(DETECT), reversed);
+    if ('refused' in config) throw new Error(config.refused);
+    expect(config.device).toMatchObject({ modelId: 'qwen3-asr-1.7b-q8', native: { model: 'qwen3-asr-1.7b-q8' } });
+    expect(config.stages).toMatchObject({ heard: 'auto', speech: { kind: 'translate', model: 'index-translate-2b' } });
+    const wrap = (config.stages?.speech as { wrap?: string }).wrap ?? '';
+    expect(wrap).toContain('请将以下文本翻译为中文');
+    expect(wrap).not.toContain('日语');
+    // The speaker's own leg is built as ever.
+    const mine = buildLocalAI(PARTICIPANT, settings(DETECT), reversed);
+    if ('refused' in mine) throw new Error(mine.refused);
+    expect(mine.stages?.heard).toBeUndefined();
+    expect((mine.stages?.speech as { wrap?: string }).wrap).toContain('请将以下中文文本翻译为日语');
+  });
+
+  it('is refused in words of its own where the model in use does not detect, or the translation has to be told the pair', () => {
+    const other = { ...PARTICIPANT, direction: { source: 'ja', target: 'zh-CN' } };
+    const reversed = { ...shared, reversed: (d: SessionContext['direction']) => d.target === 'zh-CN' };
+    expect(buildLocalAI(other, settings({ ...DETECT, asrNativeModel: 'r2t2-q8' }), reversed)).toMatchObject({ code: 'native_unchosen', params: { source: 'auto' } });
+    expect(buildLocalAI(other, settings({ ...DETECT, translateHere: 'app' }), reversed)).toMatchObject({ code: 'source_auto' });
+  });
+
+  it('asks the engine for a model that detects, for the other side\u2019s leg', async () => {
+    const gap = vi.fn(async () => null);
+    const check = vi.fn(async () => ({ ok: true as const }));
+    await checkLocalAIWithNative(NONE, settings(DETECT), { pair: PAIR, legs: ['speaker', 'participant'] }, check, { gap, idle: vi.fn(), translatorGap: vi.fn(async () => null), translatorIdle: vi.fn(), coachGap: vi.fn(async () => null), coachIdle: vi.fn() });
+    expect(gap).toHaveBeenCalledWith({ model: 'qwen3-asr-1.7b-q8', byLanguage: {} }, ['ja', 'auto']);
   });
 });
 

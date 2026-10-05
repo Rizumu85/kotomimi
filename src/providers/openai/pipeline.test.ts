@@ -4,7 +4,7 @@ import { recordEvents, type AdapterEvent } from '../../lib/contract/events';
 import { fakeSockets } from '../../lib/contract/testing/fakeSocket';
 import { trackedClock } from '../../lib/contract/testing/trackedClock';
 import { coachPrompt } from './coachPrompt';
-import { buildLocalAI, LOCALAI_DEFAULTS, localaiProvider, type LocalAICredentials, type LocalAISettings } from './localai';
+import { buildLocalAI, LOCALAI_DEFAULTS, localaiProvider, type LocalAIConfig, type LocalAICredentials, type LocalAISettings } from './localai';
 import { createPipelineAdapter, FIRST_REF, tidyAnswer } from './pipeline';
 import { SHARED } from './testing';
 
@@ -34,10 +34,11 @@ const sse = (...pieces: string[]) => new Response(
 type Call = { url: string; body: { model: string; messages: Array<{ role: string; content: string }> }; headers: Record<string, string>; signal: AbortSignal | undefined };
 
 /** A leg over a `FakeSocket` and a scripted text model: started, opened, created and configured. */
-async function live(context: SessionContext, patch: Partial<LocalAISettings>, answers: Array<Response | Error | 'hang'> = [], credentials: LocalAICredentials = K) {
+async function live(context: SessionContext, patch: Partial<LocalAISettings>, answers: Array<Response | Error | 'hang'> = [], credentials: LocalAICredentials = K, tweak: (config: LocalAIConfig) => void = () => {}) {
   const settings = { ...LOCALAI_DEFAULTS, ...patch };
   const config = buildLocalAI(context, settings, shared);
   if ('refused' in config) throw new Error(config.refused);
+  tweak(config);
   const sockets = fakeSockets();
   const { clock } = trackedClock();
   const { events, log } = recordEvents();
@@ -181,6 +182,43 @@ describe('a leg on the server\'s own pipeline', () => {
     h.session.appendText('你好');
     expect(h.sent().slice(1).map((m) => m.type)).toEqual(['conversation.item.create', 'response.create']);
     expect(h.calls).toEqual([]);
+  });
+});
+
+describe('a leg whose language is left to be detected', () => {
+  // The leg's stages say so (`heard: 'auto'`): here it is said to a leg heard over a socket, which shows what the wrapper does with it.
+  const detected = (config: LocalAIConfig) => { if (config.stages) config.stages.heard = 'auto'; };
+
+  it('gives each sentence the language its writing shows, and translates it', async () => {
+    const h = await live(PARTICIPANT, VIA_MODEL, [sse('你好。'), sse('你好！')], K, detected);
+    h.receive(...heard('item_1', '안녕하세요.'));
+    await h.settled();
+    expect(h.lastText(1)).toMatchObject({ text: '안녕하세요.', language: 'ko' });
+    h.receive(...heard('item_2', 'Привет!'));
+    await h.settled();
+    expect(h.lastText(2)).toMatchObject({ text: 'Привет!', language: 'ru' });
+    expect(h.calls).toHaveLength(2);
+  });
+
+  it('names no language for a few words in Latin letters — the leg\u2019s own is not assumed — and still translates them', async () => {
+    const h = await live(PARTICIPANT, VIA_MODEL, [sse('你好。')], K, detected);
+    h.receive(...heard('item_1', 'Hello there.'));
+    await h.settled();
+    expect(h.lastText(1)).toMatchObject({ text: 'Hello there.', language: 'auto' });
+    expect(h.calls).toHaveLength(1);
+  });
+
+  it('does not translate what was said in the reader\u2019s own language', async () => {
+    const h = await live(PARTICIPANT, VIA_MODEL, [sse('こんにちは')], K, detected);
+    h.receive(...heard('item_1', '你好，今天天气真不错。'));
+    await vi.waitFor(() => expect(h.lastText(1)).toMatchObject({ language: 'zh' }));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(h.calls).toHaveLength(0);
+    // The next one, in another language, is translated as ever.
+    h.receive(...heard('item_2', '今日は天気がいいですね。'));
+    await h.settled();
+    expect(h.calls).toHaveLength(1);
+    expect(h.lastText(2)).toMatchObject({ language: 'ja' });
   });
 });
 

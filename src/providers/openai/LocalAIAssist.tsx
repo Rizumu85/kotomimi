@@ -23,7 +23,9 @@ import { coachPrompt } from './coachPrompt';
 // Type only: `localai.ts` imports this view, and a value import back would close a cycle.
 import type { LocalAISettings as S } from './localai';
 import { deviceChatModels, deviceCoachModel, deviceLanguage, deviceModelsLoaded, needsServer, PLACE_FIELDS, PLACES, type DeviceNeed, type Place } from './localaiDevice';
-import { NATIVE_MODELS, chooseNative, nativeDownloaded, nativeHears, nativeModel, nativePicked, type NativePick } from './localaiNative';
+import { NATIVE_MODELS, chooseNative, isAutoLanguage, nativeDownloaded, nativeHears, nativeModel, nativePicked, type NativePick } from './localaiNative';
+import { detectsOther, heardBy } from './localaiDevice';
+import { AUTO } from '../../lib/provider/languages';
 import { languageLabel } from '../../lib/language/label';
 import { NativeEngineCard, nativeStoreOf, type NativeCardModel, type NativeKind } from './NativeEngineCard';
 import { NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator } from './nativeTranslators';
@@ -341,13 +343,15 @@ const NONE_ENTRY = '\u0000none';
  * it hears it, else none, said as that — and under them the engines' models,
  * in the library's own cards.
  */
-function NativeHearing({ pick, heard, onPick, onBack, other, disabled }: { pick: NativePick; /** The language each leg hears. */ heard: readonly string[]; /** A model chosen, for these languages. */ onPick(id: string, languages: readonly string[]): void; onBack(): void; other?: OtherRunner; disabled?: boolean }) {
+function NativeHearing({ pick, heard, onPick, onBack, other, disabled, below }: { pick: NativePick; /** The language each leg hears. */ heard: readonly string[]; /** A model chosen, for these languages. */ onPick(id: string, languages: readonly string[]): void; onBack(): void; other?: OtherRunner; disabled?: boolean; /** What stands between the rows and the models' cards. */ below?: React.ReactNode }) {
   const { t, i18n } = useTranslation();
   const { offered } = useNativeModels('asr');
   const languages = [...new Set(heard)];
   const rows = languages.map((language) => ({
     language,
     name: languageLabel(language, i18n.language),
+    // A leg whose language is left to be detected is the other side's, and is said so.
+    label: isAutoLanguage(language) ? t('providers.localai.hearsOther') : t('providers.localai.hears', { language: languageLabel(language, i18n.language) }),
     model: nativePicked(pick, language),
     // What this computer has that hears it, best first.
     choices: NATIVE_MODELS.filter((m) => offered.some((one) => one.id === m.id) && nativeHears(m, language)),
@@ -362,10 +366,10 @@ function NativeHearing({ pick, heard, onPick, onBack, other, disabled }: { pick:
     <div className="kt-here">
       {rows.map((row) => (
         <div className="kt-here__row" key={row.language}>
-          <div className="kt-here__head"><span className="kt-field__label">{t('providers.localai.hears', { language: row.name })}</span></div>
+          <div className="kt-here__head"><span className="kt-field__label">{row.label}</span></div>
           <select
             className={`select-dropdown${row.model ? '' : ' kt-here__select--missing'}`}
-            aria-label={t('providers.localai.hears', { language: row.name })}
+            aria-label={row.label}
             value={row.model ? `${NATIVE_ENTRY}${row.model.id}` : NONE_ENTRY}
             onChange={(e) => {
               const picked = e.target.value;
@@ -380,9 +384,10 @@ function NativeHearing({ pick, heard, onPick, onBack, other, disabled }: { pick:
             {row.choices.map((m) => <option key={m.id} value={`${NATIVE_ENTRY}${m.id}`}>{t('providers.localai.nativeEntry', { name: m.name })}</option>)}
             {other && <option value={LOCALAI_ENTRY}>{other.label}</option>}
           </select>
-          {!row.model && <p className="kt-note kt-note--todo" role="status">{t('providers.localai.nativeUnchosen', { source: row.name })}</p>}
+          {!row.model && <p className="kt-note kt-note--todo" role="status">{isAutoLanguage(row.language) ? t('providers.localai.detectOtherNeeds') : t('providers.localai.nativeUnchosen', { source: row.name })}</p>}
         </div>
       ))}
+      {below}
       <div className="kt-here__library">
         <div className="model-management-section">
           {/* The ones in use, then the engines' others that hear a language of this run: downloaded and chosen right here. */}
@@ -767,7 +772,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   const tourAt = settings.asrVia === 'device' && settings.asrHere === 'app' ? 'asr' : settings.translateAt === 'device' && settings.translateHere === 'app' ? 'translation' : null;
   const asrToLocalAI = toLocalAI({ asrHere: 'localai', asrHereModel: settings.asrHereModel || pipe?.transcription || '' });
   // What each leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
-  const heardByLegs = legs.map((leg) => (leg === 'speaker' && !settings.coach ? pair.source : pair.target));
+  const heardByLegs = legs.map((leg) => heardBy(settings, pair, leg));
   // The native recognizer, language by language: a choice is the model in use from then on, and that language's by name.
   const nativePick: NativePick = { model: settings.asrNativeModel, byLanguage: settings.asrNativeByLanguage };
   const pickNative = (id: string, languages: readonly string[]) => {
@@ -776,7 +781,11 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   };
   const translateToLocalAI = toLocalAI({ translateHere: 'localai', translateHereModel: settings.translateHereModel || firstText });
   // What each leg translates: the speaker the pair, the other side its reverse.
-  const translatedByLegs = legs.map((leg) => (leg === 'speaker' ? pair : { source: pair.target, target: pair.source }));
+  const translatedByLegs = legs.map((leg) => (leg === 'speaker' ? pair : { source: detectsOther(settings) ? AUTO : pair.target, target: pair.source }));
+  // Offered where what hears can detect a language: the native engine, or an API.
+  const detectOther = (settings.asrVia === 'api' || (settings.asrVia === 'device' && settings.asrHere === 'native'))
+    ? <ToggleSwitch checked={settings.asrDetectOther} onChange={() => put({ asrDetectOther: !settings.asrDetectOther })} label={t('providers.localai.detectOther')} disabled={disabled} tooltip={t('providers.localai.detectOtherTooltip')} />
+    : null;
 
   return (
     <div className="kt-stages-assist">
@@ -863,12 +872,13 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
               disabled={disabled}
             />
             <p className="kt-note">{t('providers.localai.hearApiNote')}</p>
+            {detectOther}
           </>
         )}
         {settings.asrVia === 'device' && (settings.asrHere === 'localai'
           ? <LocalAIHere kind="asr" model={settings.asrHereModel} onModel={(asrHereModel) => put({ asrHereModel })} onBack={() => put({ asrHere: 'app' })} local={local} disabled={disabled} />
           : settings.asrHere === 'native'
-            ? <NativeHearing pick={nativePick} heard={heardByLegs} onPick={(id, languages) => pickNative(id, languages)} onBack={() => put({ asrHere: 'app' })} other={asrToLocalAI} disabled={disabled} />
+            ? <NativeHearing pick={nativePick} heard={heardByLegs} onPick={(id, languages) => pickNative(id, languages)} onBack={() => put({ asrHere: 'app' })} other={asrToLocalAI} disabled={disabled} below={detectOther} />
             : <DeviceModels stage="asr" settings={settings} update={put} pair={pair} legs={legs} disabled={disabled} tour={tourAt === 'asr'} other={asrToLocalAI} native={{ onPick: (id) => pickNative(id, heardByLegs.filter((language) => nativeHears(nativeModel(id), language))) }} />)}
       </StageCard>
 

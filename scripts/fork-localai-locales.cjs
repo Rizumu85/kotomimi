@@ -259,9 +259,9 @@ const PROVIDER = {
 
   // Auto Detect where nothing detects the language: said when it is checked, and when Start is pressed.
   sourceAuto: [
-    'Choose the language you speak: Auto Detect cannot be used with this setup. Translation on this computer, and speech recognition by another Kotomimi, need to be told the language.',
-    '请选好你说的语言：这样搭配时不能用「自动检测」。在这台电脑上翻译、或由另一台 Kotomimi 做语音识别时，都需要知道说的是哪种语言。',
-    '請選好你說的語言：這樣搭配時不能用「自動辨識」。在這台電腦上翻譯、或由另一台 Kotomimi 做語音辨識時，都需要知道說的是哪種語言。',
+    "The language cannot be detected with this setup: the app's own translation models, and speech recognition by another Kotomimi, need to be told it. Translate with the native engine or an API model, or choose the language.",
+    "这样搭配时不能自动识别语言：应用自带的翻译模型、另一台 Kotomimi 的语音识别，都需要知道说的是哪种语言。请把翻译换成原生引擎或 API 模型，或者选好语言。",
+    "這樣搭配時不能自動辨識語言：應用程式內建的翻譯模型、另一台 Kotomimi 的語音辨識，都需要知道說的是哪種語言。請把翻譯換成原生引擎或 API 模型，或者選好語言。",
   ],
 
   // A stage with nothing to run: said when it is checked, and when Start is pressed.
@@ -282,6 +282,18 @@ const PROVIDER = {
   ],
 
   // The native recognition engine: a runtime the app downloads and runs beside itself.
+  detectOther: ["Detect the other side's language", '自动识别对方说的语言', '自動辨識對方說的語言'],
+  detectOtherTooltip: [
+    'Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.',
+    '对方说哪种语言都能识别并翻译成你的语言，不用手动切换；你自己说的话仍按上面选的语言翻译。识别要用 Qwen3-ASR 1.7B GGUF 或 API，翻译要用原生引擎或 API。',
+    '對方說哪種語言都能辨識並翻譯成你的語言，不用手動切換；你自己說的話仍按上面選的語言翻譯。辨識要用 Qwen3-ASR 1.7B GGUF 或 API，翻譯要用原生引擎或 API。',
+  ],
+  hearsOther: ['Hears the other side (any language)', '听对方（自动识别语言）', '聽對方（自動辨識語言）'],
+  detectOtherNeeds: [
+    'Only Qwen3-ASR 1.7B GGUF can tell the language by itself. Choose it here.',
+    '只有 Qwen3-ASR 1.7B GGUF 能自己识别语言，请在这里选它。',
+    '只有 Qwen3-ASR 1.7B GGUF 能自己辨識語言，請在這裡選它。',
+  ],
   nativeNone: ['No model chosen', '未选择模型', '未選擇模型'],
   nativeUnchosen: [
     'No speech recognition model is chosen for {{source}} yet. Choose one in the Speech recognition card.',
