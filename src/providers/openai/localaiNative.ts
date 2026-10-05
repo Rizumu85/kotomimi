@@ -11,7 +11,8 @@
  */
 import type { CheckResult } from '../../lib/provider/types';
 import type { NativeEngineStatus } from '../../lib/native/nativeEngine';
-import { useNativeEngineStore } from '../../stores/nativeEngineStore';
+import { useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
+import { nativeTranslates, nativeTranslator } from './nativeTranslators';
 
 /** A model of the engine, as the settings show it. Its file, address and checksum are the main process's. */
 export interface NativeModel {
@@ -78,10 +79,39 @@ export function nativeIdle(deps: NativeCheckDeps = {}): void {
   (deps.stop ?? (() => { void store.stop(); }))();
 }
 
-/** Calls back when the engine's readiness may have changed: it came up, a download ended, a model was deleted. */
+/**
+ * The same, for a run that translates by the native translation engine: its
+ * model downloaded for the pairs the legs translate, and the engine up —
+ * brought up when it is not.
+ */
+export async function translatorGap(id: string, pairs: ReadonlyArray<{ source: string; target: string }>, deps: NativeCheckDeps = {}): Promise<Extract<CheckResult, { ok: false }> | null> {
+  const store = useNativeTranslatorStore.getState();
+  const status = await (deps.status ?? store.refresh)();
+  const model = nativeTranslator(id);
+  if (!status.supported) return { ok: false, reason: 'The native translation engine is not available for this system.', code: 'native_translator_unsupported' };
+  const untranslated = pairs.find((pair) => !nativeTranslates(model, pair.source, pair.target));
+  if (untranslated) return { ok: false, reason: `${model.name} does not translate ${untranslated.source} → ${untranslated.target}.`, code: 'local_models_missing' };
+  if (!nativeDownloaded(status, model.id)) return { ok: false, reason: `${model.name} is not downloaded.`, code: 'native_translator_missing', params: { name: model.name } };
+  if (nativeReady(status, model.id)) return null;
+  if (status.run.state === 'failed' && status.run.model === model.id) return { ok: false, reason: `The native translation engine could not start: ${status.run.tail.trim().split('\n').pop() ?? ''}`, code: 'native_translator_failed' };
+  if (status.run.state === 'stopped' || status.run.model !== model.id) (deps.start ?? ((which: string) => { void store.start(which); }))(model.id);
+  return { ok: false, reason: 'The native translation engine is starting.', code: 'native_translator_warming' };
+}
+
+/** A run that does not translate by the engine has no use for it. */
+export function translatorIdle(deps: NativeCheckDeps = {}): void {
+  const store = useNativeTranslatorStore.getState();
+  if (store.status.run.state === 'stopped') return;
+  (deps.stop ?? (() => { void store.stop(); }))();
+}
+
+/** Where the translation engine answers now: its chat base URL; a port of 0 while it is not up. */
+export const translatorBaseUrl = (): string => `http://127.0.0.1:${useNativeTranslatorStore.getState().status.run.port}/v1`;
+
+const stamp = (state: { status: NativeEngineStatus }): string => `${state.status.engine}|${state.status.run.state}|${state.status.run.model ?? ''}|${Object.entries(state.status.models).map(([id, m]) => `${id}:${m.state}`).join(',')}`;
+
+/** Calls back when an engine's readiness may have changed: it came up, a download ended, a model was deleted. */
 export function watchNativeEngine(onChange: () => void): () => void {
-  return useNativeEngineStore.subscribe(
-    (state) => `${state.status.engine}|${state.status.run.state}|${state.status.run.model ?? ''}|${Object.entries(state.status.models).map(([id, m]) => `${id}:${m.state}`).join(',')}`,
-    () => onChange(),
-  );
+  const stops = [useNativeEngineStore.subscribe(stamp, () => onChange()), useNativeTranslatorStore.subscribe(stamp, () => onChange())];
+  return () => { for (const stop of stops) stop(); };
 }

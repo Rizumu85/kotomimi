@@ -60,7 +60,7 @@ export interface StagePlacement {
   coachAt: Place;
   /** On this computer: by whom. Absent: the app's own models. */
   asrHere?: AsrHere;
-  translateHere?: Here;
+  translateHere?: AsrHere;
   coachHere?: Here;
 }
 
@@ -74,6 +74,9 @@ export const hearsByLocalServer = (s: Pick<StagePlacement, 'asrVia' | 'asrHere'>
 
 /** The app's own recognizer hears, or an API it uploads each sentence to: this computer cuts the sentences itself. */
 export const cutsSentencesHere = (s: Pick<StagePlacement, 'asrVia' | 'asrHere'>): boolean => s.asrVia !== 'server' && !hearsByLocalServer(s);
+
+/** The native translation engine translates (`nativeTranslators.ts`): none of the app's own models is asked for. */
+export const translatesNatively = (s: Pick<StagePlacement, 'translateAt' | 'translateHere'>): boolean => s.translateAt === 'device' && s.translateHere === 'native';
 
 /** The native engine hears: none of the app's own models is asked for. */
 export const hearsNatively = (s: Pick<StagePlacement, 'asrVia' | 'asrHere'>): boolean => s.asrVia === 'device' && s.asrHere === 'native';

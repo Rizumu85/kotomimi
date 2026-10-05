@@ -26,6 +26,13 @@
 // HTTP/2), so it is held here, and the page sends the sound and receives the
 // text over IPC.
 //
+// The same goes for translation, with another runtime: llama.cpp's server
+// and a translation model as a GGUF file — the models a LocalAI would run,
+// without the LocalAI. It is asked over the OpenAI chat wire, which the page
+// speaks itself, so nothing of it is held here but the process. One manager
+// (`createNativeEngine`) runs either: what differs is what is fetched (the
+// `catalog`) and how the runtime is started and warmed (the `runtime`).
+//
 // No Electron import, and everything it touches is handed in, so its tests
 // run with no network, no runtime and no process.
 const crypto = require('crypto');
@@ -77,6 +84,51 @@ const MODELS = {
     // (measured 2026-10-05), so a Mac is not offered it.
     platforms: ['win32-x64'],
     options: { 'confucius4_r2t2.chunk_size_ms': '160', 'confucius4_r2t2.unfixed_chunk_num': '0', 'confucius4_r2t2.unfixed_token_num': '3' },
+  },
+};
+
+/** llama.cpp's server, for the translation models: the project's own release archives, as published. */
+const LLAMA = {
+  version: 'b11401',
+  builds: {
+    'win32-x64': {
+      url: 'https://github.com/ggml-org/llama.cpp/releases/download/b11401/llama-b11401-bin-win-vulkan-x64.zip',
+      bytes: 33308209,
+      sha256: '4bdbc0b2e79f04ef3e66ecd34a996499401d94501e8387dec0c8963544ef6419',
+      archive: 'engine.zip',
+      exe: 'llama-server.exe',
+      backend: 'vulkan',
+    },
+    'darwin-arm64': {
+      url: 'https://github.com/ggml-org/llama.cpp/releases/download/b11401/llama-b11401-bin-macos-arm64.tar.gz',
+      bytes: 11921253,
+      sha256: 'cf6410ec5cb373e7f161852a0e2ad30e96c190b9282e75cbd7eae00bd96736b4',
+      archive: 'engine.tar.gz',
+      exe: 'llama-b11401/llama-server',
+      backend: 'metal',
+    },
+  },
+};
+
+/** The translation models, by the id the page asks with: each a Q4_K_M file from its makers' own repository, at a fixed revision. */
+const TRANSLATORS = {
+  'index-translate-2b': {
+    file: 'Index-Translate-2B.Q4_K_M.gguf',
+    url: 'https://huggingface.co/IndexTeam/Index-Translate-2B-GGUF/resolve/449c9e6457b3632d328c6cbb78ae8e8e0c8059a5/Index-Translate-2B.Q4_K_M.gguf',
+    bytes: 1312164352,
+    sha256: '044b313d29342bd3b2c77cbb64023ca0d209bd9b3247763f9d162767ef2d746a',
+  },
+  'hy-mt2-1.8b': {
+    file: 'Hy-MT2-1.8B-Q4_K_M.gguf',
+    url: 'https://huggingface.co/tencent/Hy-MT2-1.8B-GGUF/resolve/a0c709d9fac510f2c807aa3af52872340dc37a4a/Hy-MT2-1.8B-Q4_K_M.gguf',
+    bytes: 1133080448,
+    sha256: 'dc5f44fcf1fa496ee7ad725982c0c8c553a4de00259b53af84c4b89fb0c06699',
+  },
+  'hy-mt1.5-1.8b': {
+    file: 'HY-MT1.5-1.8B-Q4_K_M.gguf',
+    url: 'https://huggingface.co/tencent/HY-MT1.5-1.8B-GGUF/resolve/265b2e615a7dc9b06c435dc878829ad99a512ba2/HY-MT1.5-1.8B-Q4_K_M.gguf',
+    bytes: 1133080512,
+    sha256: '4383ac0c3c8e476de98ff979c2a3f069f8c4fb385e7860cf2d28da896cc477c7',
   },
 };
 
@@ -145,6 +197,74 @@ function loopGet(port, pathname, timeoutMs = 1500) {
   });
 }
 
+/** POST of a JSON body on this computer: `{ status, body }`, or null when nothing answers in time. */
+function loopPost(port, pathname, json, timeoutMs = 60_000) {
+  return new Promise((resolve) => {
+    const payload = Buffer.from(JSON.stringify(json));
+    const request = http.request({ host: LOOPBACK, port, method: 'POST', path: pathname, timeout: timeoutMs, headers: { 'Content-Type': 'application/json', 'Content-Length': payload.length, Authorization: 'Bearer no-key' } }, (response) => {
+      let body = '';
+      response.setEncoding('utf8');
+      response.on('data', (chunk) => { if (body.length < 100_000) body += chunk; });
+      response.on('end', () => resolve({ status: response.statusCode, body }));
+      response.on('error', () => resolve(null));
+    });
+    request.on('timeout', () => { request.destroy(); resolve(null); });
+    request.on('error', () => resolve(null));
+    request.end(payload);
+  });
+}
+
+/**
+ * audio.cpp: started with a config that sits beside the model and names it by
+ * its file alone — the runtime is started in that folder, so a user folder
+ * whose name it could not read (Windows, letters outside the system's code
+ * page) is never spelled out — and warmed by one second of faint noise.
+ */
+const AUDIO_RUNTIME = {
+  launch({ id, model, port, build, modelsDir, files }) {
+    files.writeFileSync(path.join(modelsDir, 'server.json'), JSON.stringify({
+      host: LOOPBACK,
+      port,
+      backend: build.backend,
+      device: 0,
+      lazy_load: false,
+      models: [{ id, family: model.family, path: model.file, task: 'asr', mode: model.mode, session_options: model.options }],
+    }, null, 1));
+    return ['--config', 'server.json', '--no-ui'];
+  },
+  warm({ port, id, live, timeoutMs }) {
+    return new Promise((resolve) => {
+      let timer = null;
+      let stream = null;
+      const done = (ok) => { clearTimeout(timer); resolve(ok); };
+      timer = setTimeout(() => { stream?.abort(); done(false); }, timeoutMs);
+      stream = live({ port, model: id, sampleRate: 16000, language: null }, (event) => {
+        if (event.type === 'done') done(true);
+        else if (event.type === 'error') done(false);
+      });
+      const pcm = Buffer.alloc(16000 * 2);
+      for (let i = 0; i < 16000; i += 1) pcm.writeInt16LE(Math.round((Math.random() - 0.5) * 60), i * 2);
+      stream.write(pcm);
+      stream.end();
+    });
+  },
+};
+
+/**
+ * llama.cpp's server: one model, named by its file (it too is started in the
+ * models' folder), everything on the graphics card, no page of its own; and
+ * warmed by one short answer.
+ */
+const LLAMA_RUNTIME = {
+  launch({ model, port }) {
+    return ['-m', model.file, '--host', LOOPBACK, '--port', String(port), '-ngl', '99', '-c', String(model.context ?? 4096), '--no-webui'];
+  },
+  async warm({ port, post, timeoutMs }) {
+    const answer = await post(port, '/v1/chat/completions', { messages: [{ role: 'user', content: 'Hello' }], max_tokens: 4, temperature: 0, chat_template_kwargs: { enable_thinking: false } }, timeoutMs);
+    return answer?.status === 200;
+  },
+};
+
 /**
  * A live recognition on the runtime: the request that carries the sound up
  * and the text back. `onEvent` is called with `{ type: 'delta', text }` for
@@ -211,7 +331,10 @@ function createNativeEngine(deps = {}) {
     hash = hashOf,
     freePort = freePortOf,
     get = loopGet,
+    post = loopPost,
     live = openLive,
+    /** How the runtime is started and warmed: audio.cpp's way, unless another is handed in. */
+    runtime = AUDIO_RUNTIME,
     setPriority = (pid, priority) => { try { os.setPriority(pid, priority); } catch { /* a courtesy to the rest of the computer, never a condition */ } },
     sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
     now = () => Date.now(),
@@ -375,24 +498,6 @@ function createNativeEngine(deps = {}) {
   const streams = new Map();
   let nextStream = 1;
 
-  /** One second of faint noise through the model: what makes the first real sentence as quick as the rest. */
-  function warm(port, id) {
-    return new Promise((resolve) => {
-      let timer = null;
-      let stream = null;
-      const done = (ok) => { clearTimeout(timer); resolve(ok); };
-      timer = setTimeout(() => { stream?.abort(); done(false); }, warmTimeoutMs);
-      stream = live({ port, model: id, sampleRate: 16000, language: null }, (event) => {
-        if (event.type === 'done') done(true);
-        else if (event.type === 'error') done(false);
-      });
-      const pcm = Buffer.alloc(16000 * 2);
-      for (let i = 0; i < 16000; i += 1) pcm.writeInt16LE(Math.round((Math.random() - 0.5) * 60), i * 2);
-      stream.write(pcm);
-      stream.end();
-    });
-  }
-
   /** A start under way, and the model it is for: asked again meanwhile, the same start answers. */
   let starting = null;
 
@@ -419,19 +524,9 @@ function createNativeEngine(deps = {}) {
     }
     setRun({ state: 'starting', model: id, port, tail: '' });
     const model = MODELS_[id];
-    // The config sits beside the model and names it by its file alone: the runtime is started in that folder, so a
-    // user folder whose name it could not read (Windows, letters outside the system's code page) is never spelled out.
-    files.writeFileSync(path.join(modelsDir, 'server.json'), JSON.stringify({
-      host: LOOPBACK,
-      port,
-      backend: build.backend,
-      device: 0,
-      lazy_load: false,
-      models: [{ id, family: model.family, path: model.file, task: 'asr', mode: model.mode, session_options: model.options }],
-    }, null, 1));
     let mine;
     try {
-      mine = spawn(exe, ['--config', 'server.json', '--no-ui'], { cwd: modelsDir, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+      mine = spawn(exe, runtime.launch({ id, model, port, build, modelsDir, files }), { cwd: modelsDir, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
     } catch (error) {
       return setRun({ state: 'failed', tail: String(error?.message ?? error) });
     }
@@ -467,7 +562,8 @@ function createNativeEngine(deps = {}) {
       await sleep(READY_POLL_MS);
     }
     setRun({ state: 'warming' });
-    const warmed = await warm(port, id);
+    // One short piece of work through the model: what makes the first real sentence as quick as the rest.
+    const warmed = await Promise.resolve(runtime.warm({ port, id, live, post, timeoutMs: warmTimeoutMs })).catch(() => false);
     if (child !== mine) return status();
     if (mine.pid) setPriority(mine.pid, os.constants.priority.PRIORITY_NORMAL);
     // A warm-up that did not come back is not a reason to refuse: the first sentence will be the slow one.
@@ -521,4 +617,4 @@ function createNativeEngine(deps = {}) {
   return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream };
 }
 
-module.exports = { createNativeEngine, openLive, languageName, systemTar, ENGINE, MODELS, LOOPBACK };
+module.exports = { createNativeEngine, openLive, languageName, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };

@@ -14,7 +14,7 @@ const { keepMaximizeHonest, pageShift } = require('./window-maximize');
 const { firewallStatus, allowThroughFirewall } = require('./lan-firewall');
 const { discoverServers } = require('./lan-discover');
 const { createLocalServer } = require('./local-server');
-const { createNativeEngine } = require('./native-engine');
+const { createNativeEngine, LLAMA, TRANSLATORS, LLAMA_RUNTIME } = require('./native-engine');
 const { createAutostart } = require('./autostart');
 const { applyLinuxGpuFlags } = require('./linux-gpu-flags');
 const { acquireSingleInstanceLock, createFocusRelay } = require('./single-instance');
@@ -1387,6 +1387,41 @@ ipcMain.handle('native-engine:stream-audio', (event, args) => getNativeEngine().
 ipcMain.handle('native-engine:stream-end', (event, args) => getNativeEngine().endStream(args?.id));
 ipcMain.handle('native-engine:stream-abort', (event, args) => getNativeEngine().abortStream(args?.id));
 app.on('will-quit', () => { void nativeEngine?.stop(); });
+
+// Fork: the native translation engine — the same manager with llama.cpp's server and the translation models, in a
+// folder of its own. It is asked over the chat wire by the page itself: only its state crosses here.
+let nativeTranslator = null;
+const getNativeTranslator = () => {
+  if (nativeTranslator) return nativeTranslator;
+  let out = null;
+  const log = (text) => {
+    try {
+      out ??= require('fs').createWriteStream(path.join(app.getPath('logs'), 'native-translator.log'), { flags: 'a' });
+      out.write(text);
+    } catch { /* its output is a convenience: never a reason to fail */ }
+  };
+  const { net } = require('electron');
+  nativeTranslator = createNativeEngine({
+    // As the recognition engine's folder: an unpackaged run can keep it elsewhere (`KOTOMIMI_NATIVE_DIR`, beside it).
+    dir: !app.isPackaged && process.env.KOTOMIMI_NATIVE_DIR ? `${process.env.KOTOMIMI_NATIVE_DIR}-translator` : path.join(app.getPath('userData'), 'native-translator'),
+    catalog: { engine: LLAMA, models: TRANSLATORS },
+    runtime: LLAMA_RUNTIME,
+    fetch: (url, init) => net.fetch(url, init),
+    log,
+    onChange: (status) => toPage('native-translator:status', status),
+  });
+  return nativeTranslator;
+};
+ipcMain.handle('native-translator:get', () => getNativeTranslator().status());
+ipcMain.handle('native-translator:download', (event, args) => getNativeTranslator().download(String(args?.id ?? '')));
+ipcMain.handle('native-translator:cancel', (event, args) => getNativeTranslator().cancel(String(args?.id ?? '')));
+ipcMain.handle('native-translator:remove', (event, args) => getNativeTranslator().remove(String(args?.id ?? '')));
+ipcMain.handle('native-translator:start', async (event, args) => {
+  await autostart.quiet;
+  return getNativeTranslator().start(String(args?.id ?? ''));
+});
+ipcMain.handle('native-translator:stop', () => getNativeTranslator().stop());
+app.on('will-quit', () => { void nativeTranslator?.stop(); });
 
 // Fork: the devices of the local network whose models this app can use (electron/lan-discover.js) —
 // asked for when the person is choosing one. One search at a time: a second asker waits for the first's answer.

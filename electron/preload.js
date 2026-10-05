@@ -88,6 +88,8 @@ const validReceiveChannels = [
   // Fork: the native recognition engine — its state as it changes, and the text of a live recognition (electron/native-engine.js)
   'native-engine:status',
   'native-engine:stream',
+  // Fork: the native translation engine's state as it changes
+  'native-translator:status',
 ];
 
 // Expose protected methods that allow the renderer process to use

@@ -25,6 +25,7 @@ export interface TextRequest {
   model: string;
   /** Sent as a Bearer token when present; never framed or worded. */
   key?: string;
+  /** Blank: no system message is sent — a translation model asked in its own form, all of it in `user`. */
   system: string;
   /** Worked examples, sent as earlier turns of the chat: what was said, and the answer shown as the model's own. */
   shots?: ReadonlyArray<{ said: string; answer: string }>;
@@ -36,6 +37,8 @@ export interface TextRequest {
    * only when set: a hosted API may refuse a field it does not know.
    */
   pair?: { source: string; target: string };
+  /** What else the body carries: the sampling a model's makers name (`nativeTranslators.ts`). Never the model, the stream or the messages. */
+  extra?: Readonly<Record<string, unknown>>;
 }
 
 export interface TextDeps {
@@ -108,11 +111,12 @@ export async function completeText(request: TextRequest, deps: TextDeps): Promis
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${request.key || NO_KEY}` },
       body: JSON.stringify({
+        ...(request.extra ?? {}),
         model: request.model,
         stream: true,
         ...(request.pair ? { source_language: request.pair.source, target_language: request.pair.target } : {}),
         messages: [
-          { role: 'system', content: request.system },
+          ...(request.system ? [{ role: 'system', content: request.system }] : []),
           ...(request.shots ?? []).flatMap((shot) => [{ role: 'user', content: shot.said }, { role: 'assistant', content: shot.answer }]),
           { role: 'user', content: request.user },
         ],

@@ -90,6 +90,8 @@ Sokuji 原有的功能和云服务提供商（OpenAI、Gemini、Soniox 等）都
 - 偶尔会有十几秒不出字、然后一口气补上的情况，这是模型本身的特点。
 - Mac 上不提供（M 系列芯片上它跟不上说话速度），Mac 请继续用 LocalAI 里的 Apple 语音识别。
 
+翻译也有同样的做法："翻译 → 这台电脑"的模型库最上面是 **Index-Translate 2B**（约 1.3 GB，一百多种语言），点下载后应用自己装好运行它的引擎。实测它比应用自带的翻译模型翻得更准，一句话只要 0.1 秒左右。这个在 Windows 和 Apple 芯片的 Mac 上都能用。
+
 </details>
 
 <details>
@@ -152,7 +154,7 @@ Kotomimi is a personal fork of [Sokuji](https://github.com/kizuna-ai-lab/sokuji)
 - **Subtitles you can read**: furigana over Japanese kanji, and an optional romanization line under Japanese, Korean and Russian.
 - **Stages you place yourself**: speech recognition, translation and grammar feedback each run on this computer, on another device on your network, or on any OpenAI-compatible API, in any mix.
 - **Two devices together**: one computer shares the models it has downloaded; another device finds it on the network and uses them, downloading nothing.
-- **Text while they speak** (Windows): a recognition engine the app downloads and runs itself (audio.cpp with Confucius4 R2T2) writes a couple of seconds behind the voice, with nothing else to install.
+- **Text while they speak** (Windows): a recognition engine the app downloads and runs itself (audio.cpp with Confucius4 R2T2) writes a couple of seconds behind the voice, with nothing else to install. Translation has one too (llama.cpp with Index-Translate 2B), on Windows and Apple-silicon Macs.
 - **Typed lookups** (`Ctrl+K`), **grammar feedback** on your own speech, **fonts** chosen per language, and the languages you switch between **pinned** to the top of the language menus.
 
 **Install**: download from [Releases](https://github.com/Rizumu85/kotomimi/releases/latest). The Windows installer is not code-signed, so Windows warns about an unknown publisher; the macOS build (Apple silicon) is not notarized, so right-click the app and choose Open the first time. Then follow the setup wizard and pick "Kotomimi Pipeline". No account and no API key are needed.

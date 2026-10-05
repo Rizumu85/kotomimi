@@ -54,8 +54,8 @@ describe('what the main process says of the engine, held to its shape', () => {
 describe('the native engine as what hears on this computer', () => {
   it('is kept as stored, with its model, and is only the hearing stage\'s', () => {
     expect(LOCALAI_DEFAULTS).toMatchObject({ asrHere: 'app', asrNativeModel: NATIVE_DEFAULT_MODEL });
-    const kept = migrateLocalAISettings({ asrHere: 'native', asrNativeModel: 'r2t2-q8', translateHere: 'native' }, { legacy: {}, credentials: {} });
-    expect(kept).toMatchObject({ asrHere: 'native', asrNativeModel: 'r2t2-q8', translateHere: 'app' });
+    const kept = migrateLocalAISettings({ asrHere: 'native', asrNativeModel: 'r2t2-q8', coachHere: 'native' }, { legacy: {}, credentials: {} });
+    expect(kept).toMatchObject({ asrHere: 'native', asrNativeModel: 'r2t2-q8', coachHere: 'app' });
   });
 
   it('cuts the sentences here, with no Realtime session, and asks nothing of the app\'s own models', () => {

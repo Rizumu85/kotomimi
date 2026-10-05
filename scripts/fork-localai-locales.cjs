@@ -324,6 +324,50 @@ const PROVIDER = {
     '日语 VRChat 闲聊实测：错字率约 18%，和 Qwen3-ASR 1.7B 相当；但它边听边出字，文字只比声音慢 3 秒左右（其他模型约 10 秒）。它在独立的引擎里用显卡运行（约占 3 GB 显存），开机后第一次启动要半分钟左右。偶尔会十几秒不出字，然后一口气补上。',
     '日語 VRChat 閒聊實測：錯字率約 18%，和 Qwen3-ASR 1.7B 相當；但它邊聽邊出字，文字只比聲音慢 3 秒左右（其他模型約 10 秒）。它在獨立的引擎裡用顯示卡執行（約佔 3 GB 顯示記憶體），開機後第一次啟動要半分鐘左右。偶爾會十幾秒不出字，然後一口氣補上。',
   ],
+  // The native translation engine (llama.cpp's server) and what was found of its models.
+  translatorReady: ['The translation engine is ready.', '翻译引擎已就绪。', '翻譯引擎已就緒。'],
+  translatorWarmingShort: ['Starting the translation engine…', '正在启动翻译引擎…', '正在啟動翻譯引擎…'],
+  translatorFailedShort: ['The translation engine could not start.', '翻译引擎没能启动。', '翻譯引擎沒能啟動。'],
+  translatorUnfit: [
+    '{{name}} does not translate between your two languages. Choose another model for it.',
+    '{{name}} 不支持你选的这两种语言，请换一个模型。',
+    '{{name}} 不支援你選的這兩種語言，請換一個模型。',
+  ],
+  translatorUnsupported: [
+    'The native translation engine is not available for this system. Choose another model in the Translation card.',
+    '这个系统暂不支持原生翻译引擎。请在「翻译」卡片里换一个模型。',
+    '這個系統暫不支援原生翻譯引擎。請在「翻譯」卡片裡換一個模型。',
+  ],
+  translatorMissing: [
+    '{{name}} is not downloaded yet. Download it in the Translation card, or choose another model.',
+    '{{name}} 还没有下载。请在「翻译」卡片里下载，或者换一个模型。',
+    '{{name}} 還沒有下載。請在「翻譯」卡片裡下載，或者換一個模型。',
+  ],
+  translatorWarming: [
+    'The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.',
+    '这台电脑的翻译引擎还在启动，只要几秒。准备好后就可以开始。',
+    '這台電腦的翻譯引擎還在啟動，只要幾秒。準備好後就可以開始。',
+  ],
+  translatorFailed: [
+    'The translation engine of this computer could not start. In the Translation card, press "Try again" — or choose another model.',
+    '这台电脑的翻译引擎没能启动。请在「翻译」卡片里点「重试」，或者换一个模型。',
+    '這台電腦的翻譯引擎沒能啟動。請在「翻譯」卡片裡點「重試」，或者換一個模型。',
+  ],
+  noteIndexTranslate: [
+    'Measured on thirty sentences of Japanese VRChat talk into Chinese: serious mistakes in about 3 of them — the best of the three here — and a sentence takes about a tenth of a second. Over a hundred languages. It runs in an engine of its own on the graphics card (about 2 GB of video memory).',
+    '日语 VRChat 闲聊 30 句译成中文实测：严重错误约 3 句，是这三个里最好的；一句话约 0.1 秒。支持一百多种语言。它在独立的引擎里用显卡运行（约占 2 GB 显存）。',
+    '日語 VRChat 閒聊 30 句譯成中文實測：嚴重錯誤約 3 句，是這三個裡最好的；一句話約 0.1 秒。支援一百多種語言。它在獨立的引擎裡用顯示卡執行（約佔 2 GB 顯示記憶體）。',
+  ],
+  noteHyMt2: [
+    'Measured on thirty sentences of Japanese VRChat talk into Chinese: serious mistakes in about 8 of them. A sentence takes about a tenth of a second.',
+    '日语 VRChat 闲聊 30 句译成中文实测：严重错误约 8 句。一句话约 0.1 秒。',
+    '日語 VRChat 閒聊 30 句譯成中文實測：嚴重錯誤約 8 句。一句話約 0.1 秒。',
+  ],
+  noteHyMt15: [
+    'Measured on thirty sentences of Japanese VRChat talk into Chinese: serious mistakes in about 8 of them, and it tends to add words of its own. The same model as the one the app runs itself, several times quicker here.',
+    '日语 VRChat 闲聊 30 句译成中文实测：严重错误约 8 句，还喜欢自己加词。和应用自带的那个是同一个模型，在这里快好几倍。',
+    '日語 VRChat 閒聊 30 句譯成中文實測：嚴重錯誤約 8 句，還喜歡自己加詞。和應用內建的那個是同一個模型，在這裡快好幾倍。',
+  ],
   noteQwen17: [
     "Measured on Japanese VRChat talk: about 19% of the characters wrong — accurate. It writes only once a sentence has ended, so the text is about 10 s behind the voice.",
     "日语 VRChat 闲聊实测：错字率约 19%，很准。但要等一句话说完才出字，文字比声音慢 10 秒左右。",

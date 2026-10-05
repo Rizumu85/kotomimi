@@ -73,24 +73,31 @@ const electron = (): ElectronApi | undefined => (typeof window === 'undefined' ?
 
 export type NativeEngineAction = 'get' | 'download' | 'cancel' | 'remove' | 'start' | 'stop';
 
+/**
+ * The two engines the main process runs this way, by the name their channels
+ * go by: the one that hears (audio.cpp), and the one that translates
+ * (llama.cpp's server).
+ */
+export type NativeEngineName = 'native-engine' | 'native-translator';
+
 /** Asks the main process; resolves with the state of things, which says what failed. Never rejects. */
-export async function askNativeEngine(action: NativeEngineAction, id?: string): Promise<NativeEngineStatus> {
+export async function askNativeEngine(action: NativeEngineAction, id?: string, engine: NativeEngineName = 'native-engine'): Promise<NativeEngineStatus> {
   const api = electron();
   if (!api) return NO_NATIVE_ENGINE;
   try {
-    return nativeEngineStatus(await api.invoke(`native-engine:${action}`, id === undefined ? undefined : { id }));
+    return nativeEngineStatus(await api.invoke(`${engine}:${action}`, id === undefined ? undefined : { id }));
   } catch {
     return NO_NATIVE_ENGINE;
   }
 }
 
 /** Its state as it changes — a download's progress, a start's steps. Returns the way to stop listening. */
-export function onNativeEngineStatus(listener: (status: NativeEngineStatus) => void): () => void {
+export function onNativeEngineStatus(listener: (status: NativeEngineStatus) => void, engine: NativeEngineName = 'native-engine'): () => void {
   const api = electron();
   if (!api) return () => {};
   const mine = (payload: unknown) => listener(nativeEngineStatus(payload));
-  api.receive('native-engine:status', mine as (payload: never) => void);
-  return () => api.removeListener('native-engine:status', mine as (payload: never) => void);
+  api.receive(`${engine}:status`, mine as (payload: never) => void);
+  return () => api.removeListener(`${engine}:status`, mine as (payload: never) => void);
 }
 
 /** What a live recognition says: a piece of text, the whole of it at its end, or why it failed. */

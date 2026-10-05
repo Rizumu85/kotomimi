@@ -18,6 +18,7 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 | 自动找到另一台设备 | 选「用另一台设备」时，应用自己搜索局域网，把找到的 Kotomimi 和模型服务器列出来，点一下就连上，不用知道地址 | `electron/lan-discover.js`、`src/components/LanSharing/ServerFinder.tsx` |
 | 这台电脑上的 LocalAI | 电脑上装了 LocalAI 时，由应用启动和停止它，显示状态和模型 | `electron/local-server.js`、`src/components/LanSharing/LocalServerCard.tsx` |
 | 原生识别引擎 | 应用自己下载一个运行库（audio.cpp）和模型（Confucius4 R2T2），在本机用显卡边听边出字；不用装任何别的东西。Windows 版提供 | `electron/native-engine.js`、`src/providers/openai/nativeAsr.ts`、`localaiNative.ts`、`NativeEngineCard.tsx` |
+| 原生翻译引擎 | 同样的做法用在翻译上：应用自己下载 llama.cpp 的服务器和翻译模型的 GGUF 文件（Index-Translate 2B、Hunyuan MT 2、Hunyuan MT 1.5），在本机运行。Windows 和 Apple 芯片的 Mac 都提供 | `electron/native-engine.js`（`LLAMA`、`TRANSLATORS`）、`src/providers/openai/nativeTranslators.ts` |
 | 模型说明和实测排序 | 模型库里每个实测过的识别模型，名字旁有一个说明气泡：实测错字率、出字快慢、适合什么情况；日语的排序和"推荐"标记按实测来 | `src/lib/local-inference/selection/measuredRank.ts` |
 | 自定义模型 | 从 Hugging Face 添加模型库里没有的 Whisper 模型 | `src/lib/local-inference/customModels.ts` |
 | 语法反馈 | 自己说对方语言时，不翻译，而是检查语法：没问题回 ✓，有问题给出改正句和原因。提示词按语言自动选择，也可以自己写 | `coachPrompt.ts` |
@@ -122,6 +123,22 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 - **只在 Windows 提供**：Apple M2 上（Metal 版）一分钟的话要处理两分多钟，跟不上说话，所以 Mac 上不显示它（`MODELS` 里的 `platforms`）。显卡较弱的 Windows 电脑也可能跟不上，这一点应用目前不会自己判断。
 - **开发**：非打包运行时，`KOTOMIMI_NATIVE_DIR` 让它用别的目录（免得测试用的配置目录里再下一遍 2.4 GB），`KOTOMIMI_NATIVE_DUMP` 把每次识别实际送给引擎的声音存成 PCM 文件，用来和引擎自带的客户端对照。
 - **以后加模型**：audio.cpp 还能跑 Qwen3-ASR、Voxtral Realtime、Fun-ASR Nano（韩语）、GigaAM（俄语）、Parakeet 等。加一个模型是在 `electron/native-engine.js` 的 `MODELS` 里加一项（地址、大小、SHA-256、家族、参数），再在 `localaiNative.ts` 的 `NATIVE_MODELS` 里加它的名字和语言。
+
+## 原生翻译引擎
+
+和原生识别引擎是同一套管理代码（`createNativeEngine`），换了运行库和模型清单：运行库是 [llama.cpp](https://github.com/ggml-org/llama.cpp) b11401 的官方发行包里的 `llama-server`（Windows x64 是 Vulkan 版约 33 MB，Apple 芯片的 Mac 是 Metal 版约 12 MB），模型是三个翻译模型的 Q4_K_M GGUF，各自来自官方仓库的固定提交：
+
+| 模型 | 大小 | 日语闲聊 30 句译成中文，严重错误 | 语言 |
+|---|---|---|---|
+| Index-Translate 2B（哔哩哔哩 Index 团队，Apache-2.0） | 1.25 GB | 约 3 句 | 一百多种 |
+| Hunyuan MT 2 1.8B（腾讯，Apache-2.0） | 1.08 GB | 约 8 句 | 36 种 |
+| Hunyuan MT 1.5 1.8B（腾讯） | 1.08 GB | 约 8 句，还喜欢自己加词 | 36 种 |
+
+- 放在 `<用户数据>/native-translator/`。在"翻译 → 这台电脑"的模型库里排在最前面，下载完自动启用；启动只要几秒，一句话约 0.1 秒（应用自带的 WebGPU 版 Hunyuan MT 1.5 是 0.4～0.9 秒）。
+- **怎么问它**：它们是翻译模型，不是聊天模型，各有训练时用的固定句式，所以请求按模型写在 `nativeTranslators.ts` 里：只有一条用户消息，没有系统提示词。Index-Translate 用它模型卡上的中文句式（"请将以下日语文本翻译为中文，直接输出翻译结果，不要进行任何解释。"），语言用中文名，源语言是"自动检测"时省略；贪心解码，关闭思考。Hunyuan MT 一边是中文时用中文句式，否则用英文句式，采样参数用官方建议的。
+- 请求走的就是"API 模型"那条聊天接口的路，只是地址是本机引擎的端口（每次启动随机选一个空闲端口，只监听 127.0.0.1）。所以翻译会像 API 模型一样边写边显示。
+- 就绪检查和识别引擎一样：选了它、已下载但还没起来时自动启动，起来之前"开始"旁边有说明；不用了就停掉。
+- 共享给其他设备的还是应用自己的翻译模型；原生翻译引擎目前只给这台电脑自己用。
 
 ## 开机时在后台启动
 

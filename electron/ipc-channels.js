@@ -88,6 +88,13 @@ export const INVOKE_CHANNELS = [
   'native-engine:stream-audio',
   'native-engine:stream-end',
   'native-engine:stream-abort',
+  // Fork: the native translation engine — llama.cpp's server, run the same way (electron/native-engine.js)
+  'native-translator:get',
+  'native-translator:download',
+  'native-translator:cancel',
+  'native-translator:remove',
+  'native-translator:start',
+  'native-translator:stop',
   // Fork: starting with the computer, in the background (electron/autostart.js)
   'autostart:get',
   'autostart:set',

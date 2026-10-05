@@ -29,6 +29,7 @@ import type { LocalInferenceConfig } from '../localInference/config';
 import { defaultEngines, type LocalEngines, type TranslationLike } from '../localInference/engines';
 import { createApiAsr } from './apiAsr';
 import { createNativeAsr } from './nativeAsr';
+import { TEXT_SLOT } from './nativeTranslators';
 import { askNativeEngine, ipcNativeBridge, type NativeBridge, type NativeEngineStatus } from '../../lib/native/nativeEngine';
 import { createRealtimeAdapter } from './adapter';
 import type { RealtimeConfig } from './config';
@@ -56,6 +57,12 @@ export interface TextStage {
   language?: string;
   /** The pair, for a server that runs a translation model rather than a chat model and must be told (another Kotomimi, `src/lib/lan`). Absent: not sent. */
   pair?: { source: string; target: string };
+  /**
+   * Present: the model is asked in a form of its own (`nativeTranslators.ts`) — one user message, these words with
+   * the sentence where `TEXT_SLOT` stands, no system message — and `extra` goes with the request.
+   */
+  wrap?: string;
+  extra?: Readonly<Record<string, unknown>>;
 }
 
 /** A stage this computer runs itself (`localaiDevice.ts`): a translation, or — by one of the catalog's chat models — feedback. */
@@ -439,10 +446,12 @@ class PipelineLeg implements AdapterSession {
         url: chatUrl(stage.baseUrl || httpBaseOf(credentials.endpoint)),
         model: stage.model,
         ...(key ? { key } : {}),
-        system: stage.system,
+        system: stage.wrap ? '' : stage.system,
         ...(stage.shots?.length ? { shots: stage.shots } : {}),
         ...(stage.pair ? { pair: stage.pair } : {}),
-        user: text,
+        ...(stage.extra ? { extra: stage.extra } : {}),
+        // A function, so that nothing in the sentence is read as a pattern.
+        user: stage.wrap ? stage.wrap.replace(TEXT_SLOT, () => text) : text,
       },
       { fetch: this.doFetch, clock, signal, onText: (shown) => show(tidyAnswer(stage.kind, shown)) },
     );

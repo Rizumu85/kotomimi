@@ -16,7 +16,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { createNativeEngine, openLive, languageName, systemTar, ENGINE, MODELS } = require('./native-engine.js');
+const { createNativeEngine, openLive, languageName, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, LLAMA_RUNTIME } = require('./native-engine.js');
 
 const sha = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
 const ARCHIVE = Buffer.from('an archive of the engine');
@@ -120,6 +120,55 @@ describe('the tool that unpacks the runtime', () => {
     expect(systemTar('win32', { SystemRoot: 'D:\\Win' })).toBe('D:\\Win\\System32\\tar.exe');
     expect(systemTar('win32', {})).toBe('C:\\Windows\\System32\\tar.exe');
     expect(systemTar('darwin', {})).toBe('/usr/bin/tar');
+  });
+});
+
+describe('the translation runtime', () => {
+  it('is fixed the same way: the server by its release, each model by a revision of its makers own repository', () => {
+    expect(Object.keys(LLAMA.builds).sort()).toEqual(['darwin-arm64', 'win32-x64']);
+    for (const build of Object.values(LLAMA.builds)) {
+      expect(build.url).toMatch(/^https:\/\/github\.com\/ggml-org\/llama\.cpp\/releases\/download\/b\d+\//);
+      expect(build.sha256).toMatch(/^[0-9a-f]{64}$/);
+      expect(build.exe).toMatch(/llama-server(\.exe)?$/);
+    }
+    expect(Object.keys(TRANSLATORS)).toEqual(['index-translate-2b', 'hy-mt2-1.8b', 'hy-mt1.5-1.8b']);
+    for (const model of Object.values(TRANSLATORS)) {
+      expect(model.url).toMatch(/^https:\/\/huggingface\.co\/(IndexTeam|tencent)\/[^/]+\/resolve\/[0-9a-f]{40}\//);
+      expect(model.url.endsWith(`/${model.file}`)).toBe(true);
+      expect(model.sha256).toMatch(/^[0-9a-f]{64}$/);
+      expect(model.bytes).toBeGreaterThan(1_000_000_000);
+    }
+  });
+
+  it('is started on one model by its file, on this computer alone, and warmed by one short answer', async () => {
+    const posted = [];
+    const { world, engine } = computer();
+    const translator = createNativeEngine({
+      dir,
+      platform: 'win32',
+      arch: 'x64',
+      catalog: CATALOG,
+      runtime: LLAMA_RUNTIME,
+      fetch: async (url) => answer([url.endsWith('.zip') ? ARCHIVE : MODEL]),
+      spawn: (bin, args, options) => { const child = new EventEmitter(); child.pid = 7; child.stdout = new EventEmitter(); child.stderr = new EventEmitter(); child.kill = () => { queueMicrotask(() => child.emit('exit', null)); return true; }; world.started.push({ bin, args, options, child }); return child; },
+      extract: async (archive, into) => { fs.writeFileSync(path.join(into, 'server.exe'), 'exe'); },
+      freePort: async () => 45200,
+      get: async () => ({ status: 200, body: '{"status":"ok"}' }),
+      post: async (port, pathname, body) => { posted.push({ port, pathname, body }); return { status: 200, body: '{}' }; },
+      setPriority: () => {},
+      sleep: async () => {},
+    });
+    void engine;
+    await translator.download('m1');
+    const status = await translator.start('m1');
+    expect(status.run).toMatchObject({ state: 'ready', model: 'm1', port: 45200 });
+    expect(world.started[0].args).toEqual(['-m', 'm1.gguf', '--host', '127.0.0.1', '--port', '45200', '-ngl', '99', '-c', '4096', '--no-webui']);
+    expect(world.started[0].options.cwd).toBe(path.join(dir, 'models'));
+    // No config file of the other runtime's is written.
+    expect(fs.existsSync(path.join(dir, 'models', 'server.json'))).toBe(false);
+    expect(posted).toHaveLength(1);
+    expect(posted[0]).toMatchObject({ port: 45200, pathname: '/v1/chat/completions', body: { max_tokens: 4 } });
+    await translator.stop();
   });
 });
 
