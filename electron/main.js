@@ -1385,16 +1385,30 @@ const dropTray = () => { tray?.destroy(); tray = null; };
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') dropTray(); });
 app.on('will-quit', dropTray);
 
-let nativeEngine = null;
-const getNativeEngine = () => {
-  if (nativeEngine) return nativeEngine;
+/**
+ * A native engine's log: what its runtime prints, added to a file of its own. Begun again once it is over a few
+ * megabytes — llama.cpp's server writes a line for every request, and nothing else ever empties it.
+ */
+const ENGINE_LOG_MOST = 5 * 1024 * 1024;
+const engineLog = (name) => {
   let out = null;
-  const log = (text) => {
+  return (text) => {
     try {
-      out ??= require('fs').createWriteStream(path.join(app.getPath('logs'), 'native-engine.log'), { flags: 'a' });
+      if (!out) {
+        const file = path.join(app.getPath('logs'), name);
+        let size = 0;
+        try { size = require('fs').statSync(file).size; } catch { /* not there yet */ }
+        out = require('fs').createWriteStream(file, { flags: size > ENGINE_LOG_MOST ? 'w' : 'a' });
+      }
       out.write(text);
     } catch { /* its output is a convenience: never a reason to fail */ }
   };
+};
+
+let nativeEngine = null;
+const getNativeEngine = () => {
+  if (nativeEngine) return nativeEngine;
+  const log = engineLog('native-engine.log');
   const toStatus = (status) => toPage('native-engine:status', status);
   const toStream = (event) => toPage('native-engine:stream', event);
   const { net } = require('electron');
@@ -1442,13 +1456,7 @@ app.on('will-quit', () => { void nativeEngine?.stop(); });
 let nativeTranslator = null;
 const getNativeTranslator = () => {
   if (nativeTranslator) return nativeTranslator;
-  let out = null;
-  const log = (text) => {
-    try {
-      out ??= require('fs').createWriteStream(path.join(app.getPath('logs'), 'native-translator.log'), { flags: 'a' });
-      out.write(text);
-    } catch { /* its output is a convenience: never a reason to fail */ }
-  };
+  const log = engineLog('native-translator.log');
   const { net } = require('electron');
   nativeTranslator = createNativeEngine({
     // As the recognition engine's folder: an unpackaged run can keep it elsewhere (`KOTOMIMI_NATIVE_DIR`, beside it).
@@ -1477,13 +1485,7 @@ app.on('will-quit', () => { void nativeTranslator?.stop(); });
 let nativeCoach = null;
 const getNativeCoach = () => {
   if (nativeCoach) return nativeCoach;
-  let out = null;
-  const log = (text) => {
-    try {
-      out ??= require('fs').createWriteStream(path.join(app.getPath('logs'), 'native-coach.log'), { flags: 'a' });
-      out.write(text);
-    } catch { /* its output is a convenience: never a reason to fail */ }
-  };
+  const log = engineLog('native-coach.log');
   const { net } = require('electron');
   nativeCoach = createNativeEngine({
     dir: !app.isPackaged && process.env.KOTOMIMI_NATIVE_DIR ? `${process.env.KOTOMIMI_NATIVE_DIR}-coach` : path.join(app.getPath('userData'), 'native-coach'),
@@ -1509,11 +1511,29 @@ app.on('will-quit', () => { void nativeCoach?.stop(); });
 // Fork: on a Mac the app stays in the Dock after its window is closed. The engines are let go by the page, a minute
 // after the last session (`restNative`): with the page gone nothing would, and they would hold their memory until
 // the app is quit. So they stop with the last window.
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') return;
+const stopNativeEngines = () => {
   void nativeEngine?.stop();
   void nativeTranslator?.stop();
   void nativeCoach?.stop();
+};
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') return;
+  stopNativeEngines();
+});
+// Every other way out as well — a signal, an error nothing caught: those leave by `process.exit`, which the
+// `will-quit` handlers above never hear of, and a runtime is a process of its own that would stay, with its video
+// memory. Ending one is told at once; nothing here is waited for.
+process.on('exit', stopNativeEngines);
+// The page that held the engines is gone — it crashed, or was loaded again — and with it the count of who uses them
+// and every recognition it had open: the page that comes next starts what it needs.
+app.on('web-contents-created', (created, contents) => {
+  const mine = () => Boolean(mainWindow) && !mainWindow.isDestroyed() && contents === mainWindow.webContents;
+  contents.on('render-process-gone', () => { if (mine()) stopNativeEngines(); });
+  contents.on('did-start-navigation', (details, url, isInPlace, isMainFrame) => {
+    const sameDocument = details?.isSameDocument ?? isInPlace;
+    const mainFrame = details?.isMainFrame ?? isMainFrame;
+    if (mine() && mainFrame && !sameDocument) stopNativeEngines();
+  });
 });
 
 // Fork: the devices of the local network whose models this app can use (electron/lan-discover.js) —

@@ -210,7 +210,7 @@ const COACHES = {
 const LANGUAGE_NAMES = {
   ja: 'Japanese', zh: 'Chinese', en: 'English', ko: 'Korean', fr: 'French', de: 'German', it: 'Italian', pt: 'Portuguese', ru: 'Russian', es: 'Spanish', ar: 'Arabic',
 };
-const languageCode = (code) => String(code ?? '').trim().toLowerCase().split(/[-_]/)[0] || null;
+const languageCode = (code) => /^[a-z]{2,8}$/.exec(String(code ?? '').trim().toLowerCase().split(/[-_]/)[0])?.[0] ?? null;
 const languageName = (code) => LANGUAGE_NAMES[languageCode(code) ?? ''] ?? null;
 /** The locale Nemotron is told for a language of the app: its own regional one where it has it, the language's usual one otherwise. */
 const languageLocale = (code) => NEMOTRON_REGIONAL[String(code ?? '').trim().toLowerCase().replace('_', '-')] ?? NEMOTRON_LOCALES[languageCode(code) ?? ''] ?? null;
@@ -222,6 +222,7 @@ const READY_TIMEOUT_MS = 240_000;
 const READY_POLL_MS = 400;
 /** How long the first stretch of sound may take to come back: the slow one, after the computer starts. */
 const WARM_TIMEOUT_MS = 240_000;
+const STOP_PATIENCE_MS = 3000;
 /** Progress is told this often at most. */
 const PROGRESS_MS = 300;
 const TAIL_LINES = 30;
@@ -254,10 +255,31 @@ function systemTar(platform = process.platform, env = process.env) {
   return platform === 'win32' ? path.win32.join(env.SystemRoot || env.windir || 'C:\\Windows', 'System32', 'tar.exe') : '/usr/bin/tar';
 }
 
-/** Unpacks an archive with it. */
+/**
+ * Unpacks an archive with it, from inside the folder it goes to, so that neither is spelled out: a user folder with
+ * letters outside the system's code page reaches this program as question marks, and it opens nothing (seen
+ * 2026-10-06 on Windows, a folder named in Korean on a Chinese system; from inside the folder it unpacked).
+ */
 function untar(archive, into) {
   return new Promise((resolve, reject) => {
-    execFile(systemTar(), ['-xf', archive, '-C', into], { windowsHide: true }, (error) => (error ? reject(error) : resolve()));
+    execFile(systemTar(), ['-xf', path.relative(into, archive), '-C', '.'], { cwd: into, windowsHide: true }, (error) => (error ? reject(error) : resolve()));
+  });
+}
+
+/** The name of the program a process runs, in small letters; null where there is no such process or it cannot be asked. */
+function imageOfPid(pid, platform = process.platform, env = process.env) {
+  return new Promise((resolve) => {
+    if (platform === 'win32') {
+      execFile(path.win32.join(env.SystemRoot || env.windir || 'C:\\Windows', 'System32', 'tasklist.exe'), ['/FI', `PID eq ${pid}`, '/FO', 'CSV', '/NH'], { windowsHide: true }, (error, out) => {
+        const found = error ? null : /^"([^"]+)","(\d+)"/m.exec(String(out));
+        resolve(found && Number(found[2]) === pid ? found[1].toLowerCase() : null);
+      });
+      return;
+    }
+    execFile('/bin/ps', ['-p', String(pid), '-o', 'comm='], (error, out) => {
+      const name = error ? '' : path.posix.basename(String(out).trim());
+      resolve(name ? name.toLowerCase() : null);
+    });
   });
 }
 
@@ -277,10 +299,10 @@ function loopGet(port, pathname, timeoutMs = 1500) {
 }
 
 /** POST of a JSON body on this computer: `{ status, body }`, or null when nothing answers in time. */
-function loopPost(port, pathname, json, timeoutMs = 60_000) {
+function loopPost(port, pathname, json, timeoutMs = 60_000, key = null) {
   return new Promise((resolve) => {
     const payload = Buffer.from(JSON.stringify(json));
-    const request = http.request({ host: LOOPBACK, port, method: 'POST', path: pathname, timeout: timeoutMs, headers: { 'Content-Type': 'application/json', 'Content-Length': payload.length, Authorization: 'Bearer no-key' } }, (response) => {
+    const request = http.request({ host: LOOPBACK, port, method: 'POST', path: pathname, timeout: timeoutMs, headers: { 'Content-Type': 'application/json', 'Content-Length': payload.length, Authorization: `Bearer ${key || 'no-key'}` } }, (response) => {
       let body = '';
       response.setEncoding('utf8');
       response.on('data', (chunk) => { if (body.length < 100_000) body += chunk; });
@@ -335,11 +357,17 @@ const AUDIO_RUNTIME = {
  * warmed by one short answer.
  */
 const LLAMA_RUNTIME = {
-  launch({ model, port }) {
-    return ['-m', model.file, '--host', LOOPBACK, '--port', String(port), '-ngl', '99', '-c', String(model.context ?? 4096), '--no-webui'];
+  /**
+   * It answers only who has the key of this run. Without one it answers every page open in a browser of this
+   * computer — its answers to another origin carry that origin's leave — and a name on the internet pointed at
+   * 127.0.0.1 besides.
+   */
+  keyed: true,
+  launch({ model, port, key }) {
+    return ['-m', model.file, '--host', LOOPBACK, '--port', String(port), '-ngl', '99', '-c', String(model.context ?? 4096), '--no-webui', '--no-slots', ...(key ? ['--api-key', key] : [])];
   },
-  async warm({ port, post, timeoutMs }) {
-    const answer = await post(port, '/v1/chat/completions', { messages: [{ role: 'user', content: 'Hello' }], max_tokens: 4, temperature: 0, chat_template_kwargs: { enable_thinking: false } }, timeoutMs);
+  async warm({ port, post, timeoutMs, key }) {
+    const answer = await post(port, '/v1/chat/completions', { messages: [{ role: 'user', content: 'Hello' }], max_tokens: 4, temperature: 0, chat_template_kwargs: { enable_thinking: false } }, timeoutMs, key);
     return answer?.status === 200;
   },
 };
@@ -457,16 +485,36 @@ function readWhole({ port, model, sampleRate, language, pcm, timeoutMs }) {
  * point of a stretch and writes the same few characters until it is stopped (measured 2026-10-05: 「波で」 two hundred
  * and fifty times, three seconds of writing, for one stretch in about a hundred — and for that stretch at some lengths
  * only). Nothing after that point is the speech.
+ *
+ * It is told from what people say by how it ends: a model that lost its way writes on until it is stopped, so the
+ * repeating runs to the end of the reading and is long. A number written in digits (「1400000000人」), a laugh
+ * (「哈哈哈哈哈哈哈哈」), a 「はいはいはいはい…」 are short, and more speech follows them.
  */
-const LOOP = /(.{1,20}?)\1{7,}/su;
+const LOOP = /(.{1,20}?)\1{7,}/gsu;
+/** The repeating is at least this long in all… */
+const LOOP_CHARS = 40;
+/** …and no more than this follows it: a piece of the thing repeated, cut off. */
+const LOOP_REST_CHARS = 20;
+function lostAt(text) {
+  for (const found of String(text).matchAll(LOOP)) {
+    if (found[0].length >= LOOP_CHARS && text.length - (found.index + found[0].length) <= LOOP_REST_CHARS) return found;
+  }
+  return null;
+}
 function loopAt(text) {
-  const found = LOOP.exec(text);
-  return found ? found.index : -1;
+  return lostAt(text)?.index ?? -1;
 }
 /** A reading up to where it lost its way, with the thing it repeated said once. */
 function unloop(text) {
-  const found = LOOP.exec(text);
+  const found = lostAt(text);
   return found ? (text.slice(0, found.index) + found[1]).trim() : text;
+}
+
+/** Two halves of a stretch, as one text: with a space between them, except where the writing has none between its words. */
+const UNSPACED = /[\u3000-\u30ff\u3400-\u9fff\uff00-\uffef]/u;
+function joinHalves(first, second) {
+  if (!first || !second) return first || second;
+  return UNSPACED.test(first.at(-1)) || UNSPACED.test(second[0]) ? first + second : `${first} ${second}`;
 }
 
 /**
@@ -509,7 +557,16 @@ const WINDOW_NEW_SECONDS = 0.4;
 const WINDOW_TAIL_SECONDS = 3;
 const WINDOW_QUIET_PEAK = 600;
 const WINDOW_QUIET_OF_PEAK = 0.1;
+/**
+ * …and "nothing loud" is never louder than this (about -30 dB of full scale), however loud the stretch was: a word
+ * said softly after a laugh is a tenth of the laugh, and is still a word.
+ */
+const WINDOW_QUIET_MOST = 1000;
 const WINDOW_READ_TIMEOUT_MS = 30_000;
+/** Once the stretch has ended, a reading that lost its way is read in halves only while no more than this has passed: the page waits for the last words, not for ever. */
+const WINDOW_LAST_MS = 8000;
+/** A stretch is never longer than this: the page ends one long before, and what it never ends is not kept for ever. */
+const WINDOW_MOST_SECONDS = 120;
 
 /**
  * A recognition by a model that reads a whole stretch at once, with the
@@ -532,6 +589,7 @@ function openWindow({ port, model, sampleRate, language, timeoutMs = WINDOW_READ
   let reading = null;
   let timer = null;
   let ended = false;
+  let endedAt = 0;
   let over = false;
 
   const finish = (event) => {
@@ -542,7 +600,7 @@ function openWindow({ port, model, sampleRate, language, timeoutMs = WINDOW_READ
     onEvent(event);
   };
   /** What no reading has had is the silence after the voice. */
-  const restIsQuiet = () => bytes - readBytes <= WINDOW_TAIL_SECONDS * sampleRate * 2 && unreadPeak <= Math.max(WINDOW_QUIET_PEAK, peak * WINDOW_QUIET_OF_PEAK);
+  const restIsQuiet = () => bytes - readBytes <= WINDOW_TAIL_SECONDS * sampleRate * 2 && unreadPeak <= Math.max(WINDOW_QUIET_PEAK, Math.min(WINDOW_QUIET_MOST, peak * WINDOW_QUIET_OF_PEAK));
 
   /** One more reading, of this sound; `then` is given its answer unless the recognition was dropped meanwhile. */
   function ask(pcm, then) {
@@ -563,13 +621,13 @@ function openWindow({ port, model, sampleRate, language, timeoutMs = WINDOW_READ
   function reread(sound, whole) {
     ask(Buffer.concat([Buffer.alloc(Math.round(sampleRate * LOOP_LEAD_SECONDS) * 2), sound]), (again) => {
       if (again.ok && loopAt(again.text) < 0) { finish({ type: 'done', text: again.text }); return; }
-      const at = sound.length >= LOOP_SPLIT_SECONDS * sampleRate * 2 ? quietMiddle(sound, sampleRate) : 0;
+      const at = sound.length >= LOOP_SPLIT_SECONDS * sampleRate * 2 && now() - endedAt <= WINDOW_LAST_MS ? quietMiddle(sound, sampleRate) : 0;
       if (at <= 0 || at >= sound.length) { finish({ type: 'done', text: unloop(whole) }); return; }
       ask(sound.subarray(0, at), (first) => {
         // A half that cannot be read leaves what the whole had before it lost its way.
         if (!first.ok) { finish({ type: 'done', text: unloop(whole) }); return; }
         ask(sound.subarray(at), (second) => {
-          finish({ type: 'done', text: [unloop(first.text), second.ok ? unloop(second.text) : ''].filter(Boolean).join(' ').trim() });
+          finish({ type: 'done', text: joinHalves(unloop(first.text), second.ok ? unloop(second.text) : '').trim() });
         });
       });
     });
@@ -585,9 +643,10 @@ function openWindow({ port, model, sampleRate, language, timeoutMs = WINDOW_READ
     mine.done.then((answer) => {
       if (reading === mine) reading = null;
       if (over) return;
-      lastTook = now() - started;
+      const took = now() - started;
+      if (answer.ok) lastTook = took;
       const lost = answer.ok && loopAt(answer.text) >= 0;
-      if (lost) note(`A reading of ${(sound.length / 2 / sampleRate).toFixed(1)} s lost its way after ${loopAt(answer.text)} characters, and took ${lastTook} ms${last ? ': the last one, read again' : ''}.
+      if (lost) note(`A reading of ${(sound.length / 2 / sampleRate).toFixed(1)} s lost its way after ${loopAt(answer.text)} characters, and took ${took} ms${last ? ': the last one, read again' : ''}.
 `);
       // A reading that lost its way is not one to end on.
       lastText = answer.ok && !lost ? answer.text : null;
@@ -625,11 +684,17 @@ function openWindow({ port, model, sampleRate, language, timeoutMs = WINDOW_READ
       if (unreadPeak > peak) peak = unreadPeak;
       chunks.push(sound);
       bytes += sound.length;
+      if (bytes > WINDOW_MOST_SECONDS * sampleRate * 2) {
+        reading?.abort();
+        finish({ type: 'error', message: 'The stretch of speech is too long to read.' });
+        return;
+      }
       plan();
     },
     end() {
       if (over || ended) return;
       ended = true;
+      endedAt = now();
       if (timer) clearTimer(timer);
       timer = null;
       // A reading under way decides when it comes back.
@@ -664,6 +729,12 @@ function createNativeEngine(deps = {}) {
     /** How the runtime is started and warmed: audio.cpp's way, unless another is handed in. */
     runtime = AUDIO_RUNTIME,
     setPriority = (pid, priority) => { try { os.setPriority(pid, priority); } catch { /* a courtesy to the rest of the computer, never a condition */ } },
+    /** What a process left by an earlier run of the app is known by, and how it is ended. */
+    imageOf = imageOfPid,
+    killPid = (pid) => process.kill(pid),
+    /** A runtime told to stop is waited for this long, then told so that it cannot refuse. */
+    stopPatienceMs = STOP_PATIENCE_MS,
+    env = process.env,
     sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
     now = () => Date.now(),
     log = null,
@@ -679,8 +750,11 @@ function createNativeEngine(deps = {}) {
   } = deps;
   const { engine: ENGINE_ } = catalog;
   const system = `${platform}-${arch}`;
-  /** The models this system is offered: one that names its systems is offered on those alone. */
-  const MODELS_ = Object.fromEntries(Object.entries(catalog.models).filter(([, model]) => !model.platforms || model.platforms.includes(system)));
+  /**
+   * The models this system is offered: one that names its systems is offered on those alone. A list with nothing
+   * behind it: the page names a model by its id, and `constructor` is no model.
+   */
+  const MODELS_ = Object.assign(Object.create(null), Object.fromEntries(Object.entries(catalog.models).filter(([, model]) => !model.platforms || model.platforms.includes(system))));
 
   // A system with no model to run has no use for the runtime either.
   const build = Object.keys(MODELS_).length > 0 ? ENGINE_.builds[system] ?? null : null;
@@ -690,10 +764,21 @@ function createNativeEngine(deps = {}) {
   const fileOf = (id) => path.join(modelsDir, MODELS_[id].file);
   const has = (file) => { try { return files.statSync(file).isFile(); } catch { return false; } };
   const sizeOf = (file) => { try { return files.statSync(file).size; } catch { return 0; } };
+  /**
+   * The runtime is being unpacked while this file is beside it. An unpacking that stopped halfway — the app closed,
+   * the disk full, the archive refused — can leave the program and not the libraries it needs: with this left
+   * behind, that is not a runtime, and it is fetched again.
+   */
+  const unpackingMark = build ? path.join(engineDir, '.unpacking') : null;
+  const engineReady = () => Boolean(exe) && has(exe) && !has(unpackingMark);
+  /** The runtime that is up, written down: what the next run of the app ends, should this one go without ending it. */
+  const runFile = path.join(dir, 'run.json');
+  /** The runtime's own surroundings: none of the settings a person keeps for a llama.cpp of their own (a key among them, which it would then ask of the app). */
+  const childEnv = Object.fromEntries(Object.entries(env).filter(([name]) => !/^LLAMA_/i.test(name)));
 
   let child = null;
   let tail = [];
-  let run = { state: 'stopped', model: null, port: 0, tail: '' };
+  let run = { state: 'stopped', model: null, port: 0, key: null, tail: '' };
   /** What is being fetched: id (or `engine`) → `{ received, total, abort }`. */
   const fetching = new Map();
   /** The runtime's archive is here and being unpacked: still on its way, to whoever asks. */
@@ -710,7 +795,7 @@ function createNativeEngine(deps = {}) {
   };
   const status = () => ({
     supported: Boolean(build),
-    engine: !build ? 'unsupported' : fetching.has('engine') || unpacking ? 'downloading' : has(exe) ? 'ready' : 'absent',
+    engine: !build ? 'unsupported' : fetching.has('engine') || unpacking ? 'downloading' : engineReady() ? 'ready' : 'absent',
     engineBytes: build?.bytes ?? 0,
     models: Object.fromEntries(Object.keys(MODELS_).map((id) => [id, modelState(id)])),
     run: { ...run },
@@ -749,18 +834,25 @@ function createNativeEngine(deps = {}) {
         const out = files.createWriteStream(part, { flags: state.received > 0 ? 'a' : 'w' });
         const failedWrite = new Promise((_, reject) => out.once('error', reject));
         failedWrite.catch(() => {});
+        const reader = response.body.getReader();
+        let whole = false;
         try {
-          const reader = response.body.getReader();
           for (;;) {
             const { done, value } = await Promise.race([reader.read(), failedWrite]);
             if (done) break;
             if (!out.write(Buffer.from(value))) await Promise.race([new Promise((resolve) => out.once('drain', resolve)), failedWrite]);
             state.received += value.byteLength;
+            if (state.received > bytes) throw new Error('The download is larger than the file expected.');
             tell(false);
           }
+          whole = true;
         } finally {
+          // Whatever stopped it, the rest of the answer is not waited for.
+          if (!whole) Promise.resolve(reader.cancel()).catch(() => {});
           await new Promise((resolve) => out.end(resolve));
         }
+        // An answer that ended early without saying so: what came is kept, and the next attempt goes on from it.
+        if (sizeOf(part) < bytes) throw new Error('The download stopped before the end. Start it again to go on.');
       }
       state.verifying = true;
       tell();
@@ -775,19 +867,30 @@ function createNativeEngine(deps = {}) {
   }
 
   async function ensureEngine() {
-    if (has(exe)) return;
+    if (engineReady()) return;
     files.mkdirSync(engineDir, { recursive: true });
     const archive = path.join(engineDir, build.archive);
     await fetchFile('engine', build, archive);
     unpacking = true;
     tell();
+    let whole = false;
     try {
+      // What an unpacking that stopped halfway left is not built upon.
+      for (const name of files.readdirSync(engineDir)) {
+        if (name !== build.archive) files.rmSync(path.join(engineDir, name), { recursive: true, force: true });
+      }
+      files.writeFileSync(unpackingMark, '');
       await extract(archive, engineDir);
+      // The program itself, not a link to one somewhere else.
+      whole = files.lstatSync(exe).isFile();
+      if (whole) files.rmSync(unpackingMark, { force: true });
+    } catch (error) {
+      note(`The engine could not be unpacked: ${String(error?.message ?? error)}\n`);
     } finally {
       unpacking = false;
       files.rmSync(archive, { force: true });
     }
-    if (!has(exe)) throw new Error('The engine could not be unpacked.');
+    if (!whole) throw new Error('The engine could not be unpacked.');
     if (platform !== 'win32') { try { files.chmodSync(exe, 0o755); } catch { /* already runnable, or it will say so when run */ } }
   }
 
@@ -795,6 +898,7 @@ function createNativeEngine(deps = {}) {
   async function download(id) {
     if (!build || !MODELS_[id] || fetching.has(id) || fetching.has('engine') || unpacking) return status();
     try {
+      engineFor = id;
       await ensureEngine();
       if (!has(fileOf(id))) {
         files.mkdirSync(modelsDir, { recursive: true });
@@ -808,16 +912,19 @@ function createNativeEngine(deps = {}) {
     return status();
   }
 
+  /** The model whose download is fetching the runtime: stopping another's leaves it. */
+  let engineFor = null;
   function cancel(id) {
     fetching.get(id)?.abort();
-    fetching.get('engine')?.abort();
+    if (engineFor === id) fetching.get('engine')?.abort();
     return status();
   }
 
   async function remove(id) {
     if (!MODELS_[id]) return status();
     cancel(id);
-    if (run.model === id) await stop();
+    // Up with it, or on the way up: the runtime has ended before its file is deleted — Windows deletes no file a process holds.
+    if (run.model === id || starting?.id === id) await stop();
     files.rmSync(fileOf(id), { force: true });
     files.rmSync(`${fileOf(id)}.part`, { force: true });
     failed.delete(id);
@@ -842,32 +949,104 @@ function createNativeEngine(deps = {}) {
     return mine.done;
   }
 
+  /**
+   * Each start and each stop is a turn. A start waits more than once — for the runtime before it to end, for a port —
+   * and another start, or a stop, may come meanwhile: the one that finds it is no longer the last gives way, and
+   * starts nothing. Two starts that crossed would otherwise each start a runtime, and only the second be known of:
+   * the first would hold its video memory until the computer is restarted.
+   */
+  let turn = 0;
+
+  /** A runtime told to end, and waited for: told again so that it cannot refuse when it has not gone in a while, and not waited for beyond that. */
+  function letGo(proc) {
+    return new Promise((resolve) => {
+      let hard = null;
+      let last = null;
+      const done = () => { clearTimeout(hard); clearTimeout(last); forget(proc.pid); resolve(); };
+      proc.once('exit', done);
+      try { proc.kill(); } catch { done(); return; }
+      hard = setTimeout(() => { try { proc.kill('SIGKILL'); } catch { /* gone already */ } }, stopPatienceMs);
+      last = setTimeout(done, stopPatienceMs + 2000);
+      hard.unref?.();
+      last.unref?.();
+    });
+  }
+
+  /** The note of the runtime that is up, taken away once that one has ended. */
+  function forget(pid) {
+    try {
+      if (JSON.parse(files.readFileSync(runFile, 'utf8'))?.pid === pid) files.rmSync(runFile, { force: true });
+    } catch { /* none, or not this one's */ }
+  }
+
+  /**
+   * A runtime an earlier run of the app left running — it crashed, or was ended from the task manager, and its
+   * runtimes are processes of their own — is ended: it holds gigabytes of video memory that nothing else would
+   * give back. Only a process that still runs this engine's program: the number alone may be another's by now.
+   */
+  async function reap() {
+    let left = null;
+    try { left = JSON.parse(files.readFileSync(runFile, 'utf8')); } catch { return; }
+    try {
+      if (exe && Number.isInteger(left?.pid) && left.pid > 0 && (await imageOf(left.pid)) === path.basename(exe).toLowerCase()) {
+        killPid(left.pid);
+        note(`A runtime left by an earlier run (process ${left.pid}) was ended.\n`);
+      }
+    } catch { /* gone already, or not ours to end */ }
+    try { files.rmSync(runFile, { force: true }); } catch { /* a note, not a condition */ }
+  }
+  const reaped = reap();
+  /** Every runtime that was told to end has ended. */
+  let leaving = Promise.resolve();
+
+  /** The runtime let go, with every recognition it had open told so: resolves once its process has ended — its video memory is free, and its files can be deleted. */
+  function halt() {
+    const mine = child;
+    child = null;
+    // Told, as when the runtime goes by itself: the page otherwise sends sound into nothing and waits for last words that never come.
+    for (const [streamId, stream] of streams) { stream.abort(); undump(streamId); onStream({ id: streamId, type: 'error', message: 'The recognition engine was stopped.' }); }
+    streams.clear();
+    // Whatever is still on its way out is waited for too: a stop and a start asked at once are two halts, and the second finds nothing to end.
+    if (mine) leaving = Promise.all([leaving, letGo(mine)]).then(() => {});
+    if (run.state !== 'stopped') setRun({ state: 'stopped', model: null, port: 0, key: null });
+    return leaving;
+  }
+
   async function bringUp(id) {
-    await stop();
-    if (!has(exe) || !has(fileOf(id))) return setRun({ state: 'failed', model: id, tail: 'The model is not downloaded.' });
+    turn += 1;
+    const myTurn = turn;
+    await halt();
+    await reaped;
+    if (myTurn !== turn) return status();
+    if (!engineReady() || !has(fileOf(id))) return setRun({ state: 'failed', model: id, tail: 'The model is not downloaded.' });
     tail = [];
     let port;
     try {
       port = await freePort();
     } catch (error) {
+      if (myTurn !== turn) return status();
       return setRun({ state: 'failed', model: id, tail: String(error?.message ?? error) });
     }
-    setRun({ state: 'starting', model: id, port, tail: '' });
+    if (myTurn !== turn) return status();
+    const key = runtime.keyed ? crypto.randomBytes(24).toString('hex') : null;
+    setRun({ state: 'starting', model: id, port, key, tail: '' });
     const model = MODELS_[id];
     let mine;
     try {
-      mine = spawn(exe, runtime.launch({ id, model, port, build, modelsDir, files }), { cwd: modelsDir, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+      mine = spawn(exe, runtime.launch({ id, model, port, key, build, modelsDir, files }), { cwd: modelsDir, env: childEnv, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
     } catch (error) {
       return setRun({ state: 'failed', tail: String(error?.message ?? error) });
     }
     child = mine;
+    if (mine.pid) { try { files.writeFileSync(runFile, JSON.stringify({ pid: mine.pid })); } catch { /* a note, not a condition */ } }
     let exited = false;
     const ended = (code) => {
       if (exited) return;
       exited = true;
+      forget(mine.pid);
       if (child !== mine) return;
       child = null;
-      for (const [streamId, stream] of streams) { stream.abort(); onStream({ id: streamId, type: 'error', message: 'The recognition engine stopped.' }); }
+      for (const [streamId, stream] of streams) { stream.abort(); undump(streamId); onStream({ id: streamId, type: 'error', message: 'The recognition engine stopped.' }); }
       streams.clear();
       if (run.state !== 'stopped') setRun({ state: code === 0 ? 'stopped' : 'failed', tail: tail.join('\n') });
     };
@@ -877,8 +1056,11 @@ function createNativeEngine(deps = {}) {
     mine.stderr?.on('error', () => {});
     mine.on('error', (error) => { note(error.message); ended(1); });
     mine.on('exit', ended);
-    // Loading and warming give way to whatever else is going on; hearing does not.
-    if (mine.pid) setPriority(mine.pid, os.constants.priority.PRIORITY_BELOW_NORMAL);
+    // Loading and warming give way to whatever else is going on; hearing does not. On Windows only: elsewhere a
+    // process that has stepped back may not step forward again unless it is the system's own, and would hear at a
+    // disadvantage for good.
+    const yields = platform === 'win32' && Boolean(mine.pid);
+    if (yields) setPriority(mine.pid, os.constants.priority.PRIORITY_BELOW_NORMAL);
 
     const deadline = now() + readyTimeoutMs;
     for (;;) {
@@ -893,30 +1075,25 @@ function createNativeEngine(deps = {}) {
     }
     setRun({ state: 'warming' });
     // One short piece of work through the model: what makes the first real sentence as quick as the rest.
-    const warmed = await Promise.resolve(runtime.warm({ port, id, model, live, window, post, timeoutMs: warmTimeoutMs })).catch(() => false);
+    const warmed = await Promise.resolve(runtime.warm({ port, id, model, key, live, window, post, timeoutMs: warmTimeoutMs })).catch(() => false);
     if (child !== mine) return status();
-    if (mine.pid) setPriority(mine.pid, os.constants.priority.PRIORITY_NORMAL);
+    if (yields) setPriority(mine.pid, os.constants.priority.PRIORITY_NORMAL);
     // A warm-up that did not come back is not a reason to refuse: the first sentence will be the slow one.
     if (!warmed) note('The warm-up did not finish.');
     return setRun({ state: 'ready' });
   }
 
   async function stop() {
-    const mine = child;
-    child = null;
-    for (const stream of streams.values()) stream.abort();
-    streams.clear();
-    if (mine) {
-      try { mine.kill(); } catch { /* gone already */ }
-    }
-    if (run.state !== 'stopped') setRun({ state: 'stopped', model: null, port: 0 });
+    turn += 1;
+    await halt();
     return status();
   }
 
-  /** A live recognition opened for the page: its id, or null while the runtime is not ready. */
+  /** A live recognition opened for the page: its id, or null while the runtime is not ready — or is up with another model than the one asked for. */
   const dumps = new Map();
-  function openStream({ language, sampleRate } = {}) {
+  function openStream({ language, sampleRate, model: asked } = {}) {
     if (run.state !== 'ready' || !run.model) return null;
+    if (typeof asked === 'string' && asked && asked !== run.model) return null;
     const id = nextStream++;
     const rate = Number.isInteger(sampleRate) && sampleRate >= 8000 && sampleRate <= 48000 ? sampleRate : 16000;
     const model = MODELS_[run.model];
@@ -953,4 +1130,4 @@ function createNativeEngine(deps = {}) {
   return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream };
 }
 
-module.exports = { createNativeEngine, openLive, openWindow, wavOf, loopAt, unloop, quietMiddle, languageName, languageCode, languageLocale, modelHears, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };
+module.exports = { createNativeEngine, openLive, openWindow, wavOf, loopAt, unloop, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };

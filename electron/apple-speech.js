@@ -119,7 +119,8 @@ function createAppleSpeech(deps = {}) {
       child.stderr?.on('data', (chunk) => log?.(String(chunk)));
       child.stderr?.on('error', () => {});
       child.on('error', (error) => resolve({ ok: false, message: error.message }));
-      child.on('exit', (code) => resolve({ ok: code === 0, message }));
+      // Over when its output is ('close'), not when the process is ('exit'): its last line may still be on its way then.
+      child.on('close', (code) => resolve({ ok: code === 0, message }));
     });
     return { done, kill: () => { try { child?.kill(); } catch { /* gone already */ } } };
   }
@@ -194,7 +195,8 @@ function createAppleSpeech(deps = {}) {
   let nextStream = 1;
 
   async function stop() {
-    for (const stream of streams.values()) stream.kill();
+    // Each open recognition is told, as the downloaded engine tells its own: the page otherwise waits for last words that never come.
+    for (const [id, stream] of [...streams]) { stream.kill(); onStream({ id, type: 'error', message: 'The speech recognizer was stopped.' }); }
     streams.clear();
     if (run.state !== 'stopped') { run = { state: 'stopped', model: null, port: 0, tail: '' }; tell(); }
     return snapshot();
@@ -229,7 +231,7 @@ function createAppleSpeech(deps = {}) {
     child.stderr?.on('error', () => {});
     child.stdin?.on('error', () => {});
     child.on('error', (error) => finish({ type: 'error', message: error.message }));
-    child.on('exit', () => finish({ type: 'error', message: 'The speech recognizer closed before it finished.' }));
+    child.on('close', () => finish({ type: 'error', message: 'The speech recognizer closed before it finished.' }));
     streams.set(id, {
       write: (line) => { if (!over && child.stdin?.writable) child.stdin.write(line); },
       kill: () => { over = true; try { child.kill(); } catch { /* gone already */ } },

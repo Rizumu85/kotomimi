@@ -14,7 +14,7 @@
  */
 import { ipcNativeBridge } from '../native/nativeEngine';
 import { createNativeAsr } from '../../providers/openai/nativeAsr';
-import { NATIVE_MODELS, holdNative, nativeDownloaded, nativeModel, nativeModelFor, nativePicked, nativePreference, nativeTaken, translatorBaseUrl } from '../../providers/openai/localaiNative';
+import { NATIVE_MODELS, holdNative, nativeDownloaded, nativeModel, nativeModelFor, nativePicked, nativePreference, nativeTaken, translatorBaseUrl, translatorKey } from '../../providers/openai/localaiNative';
 import { NATIVE_TRANSLATORS, TEXT_SLOT, nativeTranslates, translatorRequest } from '../../providers/openai/nativeTranslators';
 import { useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import type { SharedModel } from './protocol';
@@ -136,7 +136,7 @@ export function nativeOrOwnTranslator(other: () => Translator, doFetch: typeof f
       const request = translatorRequest(NATIVE_TRANSLATORS.find((m) => m.id === native!.id)!, native.source, native.target);
       const response = await doFetch(`${translatorBaseUrl()}/chat/completions`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer no-key' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${translatorKey() || 'no-key'}` },
         body: JSON.stringify({ ...request.extra, model: native.id, stream: false, messages: [{ role: 'user', content: request.wrap.replace(TEXT_SLOT, () => text) }] }),
       });
       if (!response.ok) throw new Error(`The translation engine answered HTTP ${response.status}.`);

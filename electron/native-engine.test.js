@@ -176,20 +176,33 @@ describe('the translation runtime', () => {
       extract: async (archive, into) => { fs.writeFileSync(path.join(into, 'server.exe'), 'exe'); },
       freePort: async () => 45200,
       get: async () => ({ status: 200, body: '{"status":"ok"}' }),
-      post: async (port, pathname, body) => { posted.push({ port, pathname, body }); return { status: 200, body: '{}' }; },
+      post: async (port, pathname, body, timeoutMs, key) => { posted.push({ port, pathname, body, key }); return { status: 200, body: '{}' }; },
       setPriority: () => {},
       sleep: async () => {},
+      env: { PATH: 'C:\\Windows', LLAMA_API_KEY: 'the-persons-own', LLAMA_ARG_CTX_SIZE: '512' },
     });
     void engine;
     await translator.download('m1');
     const status = await translator.start('m1');
     expect(status.run).toMatchObject({ state: 'ready', model: 'm1', port: 45200 });
-    expect(world.started[0].args).toEqual(['-m', 'm1.gguf', '--host', '127.0.0.1', '--port', '45200', '-ngl', '99', '-c', '4096', '--no-webui']);
+    // It answers only who has the key of this run — made for it, long, and told to the page with the port.
+    expect(status.run.key).toMatch(/^[0-9a-f]{48}$/);
+    expect(world.started[0].args).toEqual(['-m', 'm1.gguf', '--host', '127.0.0.1', '--port', '45200', '-ngl', '99', '-c', '4096', '--no-webui', '--no-slots', '--api-key', status.run.key]);
+    expect(posted[0].key).toBe(status.run.key);
+    // Nothing a person set for a llama.cpp of their own reaches it: their key would be asked of the app.
+    expect(world.started[0].options.env).toEqual({ PATH: 'C:\\Windows' });
+
     expect(world.started[0].options.cwd).toBe(path.join(dir, 'models'));
     // No config file of the other runtime's is written.
     expect(fs.existsSync(path.join(dir, 'models', 'server.json'))).toBe(false);
     expect(posted).toHaveLength(1);
     expect(posted[0]).toMatchObject({ port: 45200, pathname: '/v1/chat/completions', body: { max_tokens: 4 } });
+    // None is left once it is stopped; another run, another key.
+    await translator.stop();
+    expect(translator.status().run.key).toBeNull();
+    const again = await translator.start('m1');
+    expect(again.run.key).toMatch(/^[0-9a-f]{48}$/);
+    expect(again.run.key).not.toBe(status.run.key);
     await translator.stop();
   });
 });
@@ -519,5 +532,310 @@ describe('the request a live recognition is (a real socket on this computer)', (
   it('says so when nothing listens there', async () => {
     const event = await new Promise((resolve) => { openLive({ port: 1, model: 'r2t2', sampleRate: 16000, language: null }, resolve).end(); });
     expect(event.type).toBe('error');
+  });
+});
+
+// Review (REVIEW-native-engine.md): defects found by reading the code, each pinned by a test that fails until it is
+// put right. Production code is unchanged.
+describe('review: what the code should do and does not yet', () => {
+  /** A catalog of two models, so that a start of one can meet a start of the other. */
+  const TWO = { engine: CATALOG.engine, models: { ...CATALOG.models, m2: { ...CATALOG.models.m1, file: 'm2.gguf', url: 'https://example.test/m2.gguf' } } };
+  const SERVED_TWO = { 'https://example.test/engine.zip': ARCHIVE, 'https://example.test/m1.gguf': MODEL, 'https://example.test/m2.gguf': MODEL };
+  const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  /** An engine on models already downloaded, whose free port is handed out only when the test says so. */
+  async function heldAtThePort() {
+    const { engine: fetcher } = computer({ catalog: TWO, served: SERVED_TWO });
+    await fetcher.download('m1');
+    await fetcher.download('m2');
+    const world = { started: [], ports: [], streamEvents: [] };
+    const engine = createNativeEngine({
+      dir, platform: 'win32', arch: 'x64', catalog: TWO,
+      spawn: (bin, args, options) => {
+        const child = Object.assign(new EventEmitter(), { pid: 100 + world.started.length, stdout: new EventEmitter(), stderr: new EventEmitter() });
+        child.kill = () => { child.killed = true; queueMicrotask(() => child.emit('exit', null)); return true; };
+        world.started.push({ bin, args, options, child });
+        return child;
+      },
+      freePort: () => new Promise((resolve) => world.ports.push(resolve)),
+      get: async () => ({ status: 200, body: '{}' }),
+      live: (target, onEvent) => ({ write() {}, end() { queueMicrotask(() => onEvent({ type: 'done', text: '' })); }, abort() {} }),
+      setPriority: () => {}, sleep: async () => {},
+      onStream: (event) => world.streamEvents.push(event),
+    });
+    return { world, engine };
+  }
+
+  it('does not call a runtime ready that was unpacked only halfway', async () => {
+    // The unpacking stops after the program is written and before the libraries beside it are: the app closed, the
+    // disk filled, or the system tar refused an entry and exited with an error.
+    const { world, engine } = computer();
+    const broken = createNativeEngine({
+      dir, platform: 'win32', arch: 'x64', catalog: CATALOG,
+      fetch: async (url, init = {}) => { world.requests.push({ url, range: init.headers?.Range }); return answer([url.endsWith('.zip') ? ARCHIVE : MODEL]); },
+      extract: async (archive, into) => { fs.writeFileSync(path.join(into, 'server.exe'), 'ex'); throw new Error('tar exited with code 1'); },
+    });
+    void engine;
+    const after = await broken.download('m1');
+    expect(after.models.m1.state).toBe('failed');
+    // The program is on disk, the rest is not: the runtime is not there, and the next download fetches it again.
+    expect(after.engine).not.toBe('ready');
+    await broken.download('m1');
+    expect(world.requests.filter((r) => r.url.endsWith('engine.zip'))).toHaveLength(2);
+  });
+
+  it('leaves one runtime running, not two, when another model is started while one is being started', async () => {
+    const { world, engine } = await heldAtThePort();
+    const first = engine.start('m1');
+    await flush();
+    const second = engine.start('m2');
+    await flush();
+    // Both starts are waiting for a port: the second one's stop() found nothing to stop yet.
+    expect(world.ports).toHaveLength(2);
+    world.ports[0](45001);
+    world.ports[1](45002);
+    await Promise.all([first, second]);
+    const alive = world.started.filter((s) => !s.child.killed);
+    expect(alive).toHaveLength(1);
+    expect(engine.status().run).toMatchObject({ state: 'ready', model: 'm2' });
+    await engine.stop();
+    // Nothing is left running once the engine is stopped.
+    expect(world.started.filter((s) => !s.child.killed)).toHaveLength(0);
+  });
+
+  it('is not started after a stop that was asked for while the start was under way', async () => {
+    const { world, engine } = await heldAtThePort();
+    const starting = engine.start('m1');
+    await flush();
+    await engine.stop();
+    world.ports[0](45001);
+    await starting;
+    expect(world.started.filter((s) => !s.child.killed)).toHaveLength(0);
+    expect(engine.status().run.state).toBe('stopped');
+  });
+
+  it('takes no id for a model that is not one of its own: none of the names every object has', async () => {
+    const { world, engine } = computer();
+    // `MODELS_[id]` is a plain object's property: `constructor` and `__proto__` are "models" too.
+    await engine.download('constructor');
+    expect(world.requests).toEqual([]);
+    await engine.download('m1');
+    await engine.start('m1');
+    await engine.start('__proto__').catch(() => {});
+    // The runtime that was running is still running.
+    expect(world.started[0].child.killed).toBeUndefined();
+    expect(engine.status().run).toMatchObject({ state: 'ready', model: 'm1' });
+  });
+
+  it('tells an open recognition when the runtime under it is stopped, as it does when the runtime goes away by itself', async () => {
+    const { world, engine } = computer();
+    await engine.download('m1');
+    await engine.start('m1');
+    const id = engine.openStream({ language: 'ja', sampleRate: 16000 });
+    await engine.stop();
+    // Otherwise the page keeps sending sound into nothing, and waits for last words that never come.
+    expect(world.streamEvents).toEqual([{ id, type: 'error', message: expect.any(String) }]);
+  });
+});
+
+describe('a runtime an earlier run of the app left behind', () => {
+  const runFile = () => path.join(dir, 'run.json');
+  /** An engine that finds this note of an earlier run, on a computer where these processes run these programs. */
+  function after(note, images) {
+    if (note !== null) fs.writeFileSync(runFile(), typeof note === 'string' ? note : JSON.stringify(note));
+    const world = { killed: [], asked: [], started: [] };
+    const engine = createNativeEngine({
+      dir, platform: 'win32', arch: 'x64', catalog: CATALOG,
+      fetch: async (url) => answer([url.endsWith('.zip') ? ARCHIVE : MODEL]),
+      extract: async (archive, into) => { fs.writeFileSync(path.join(into, 'server.exe'), 'exe'); },
+      spawn: (bin, args, options) => {
+        const child = Object.assign(new EventEmitter(), { pid: 900 + world.started.length, stdout: new EventEmitter(), stderr: new EventEmitter() });
+        child.kill = () => { child.killed = true; queueMicrotask(() => child.emit('exit', null)); return true; };
+        world.started.push({ bin, args, options, child });
+        return child;
+      },
+      freePort: async () => 45300,
+      get: async () => ({ status: 200, body: '{}' }),
+      live: (target, onEvent) => ({ write() {}, end() { queueMicrotask(() => onEvent({ type: 'done', text: '' })); }, abort() {} }),
+      setPriority: () => {}, sleep: async () => {},
+      imageOf: async (pid) => { world.asked.push(pid); return images[pid] ?? null; },
+      killPid: (pid) => world.killed.push(pid),
+    });
+    return { world, engine };
+  }
+
+  it('is ended when its process still runs this engine\'s program, before another is started', async () => {
+    const { world, engine } = after({ pid: 4711 }, { 4711: 'server.exe' });
+    await engine.download('m1');
+    await engine.start('m1');
+    expect(world.killed).toEqual([4711]);
+    // The note is now of the runtime this run started.
+    expect(JSON.parse(fs.readFileSync(runFile(), 'utf8'))).toEqual({ pid: 900 });
+  });
+
+  it('is left alone when that number is another program\'s by now, or nobody\'s', async () => {
+    const taken = after({ pid: 4711 }, { 4711: 'notepad.exe' });
+    await taken.engine.status();
+    await taken.engine.start('m1');
+    expect(taken.world.asked).toEqual([4711]);
+    expect(taken.world.killed).toEqual([]);
+    expect(fs.existsSync(runFile())).toBe(false);
+    const gone = after({ pid: 4712 }, {});
+    await gone.engine.start('m1');
+    expect(gone.world.killed).toEqual([]);
+  });
+
+  it('is nothing to do where the note is not one: no process is asked about', async () => {
+    for (const note of ['not json', { pid: -1 }, { pid: '4711' }, {}]) {
+      const { world, engine } = after(note, { 4711: 'server.exe' });
+      await engine.start('m1');
+      expect(world.asked).toEqual([]);
+      expect(world.killed).toEqual([]);
+    }
+  });
+
+  it('has its note taken away when it ends, by a stop or by itself', async () => {
+    const { world, engine } = after(null, {});
+    await engine.download('m1');
+    await engine.start('m1');
+    expect(fs.existsSync(runFile())).toBe(true);
+    await engine.stop();
+    expect(fs.existsSync(runFile())).toBe(false);
+    await engine.start('m1');
+    expect(JSON.parse(fs.readFileSync(runFile(), 'utf8'))).toEqual({ pid: 901 });
+    world.started[1].child.emit('exit', 1);
+    expect(fs.existsSync(runFile())).toBe(false);
+  });
+});
+
+describe('starting and stopping, in whatever order they are asked', () => {
+  it('waits for the runtime before it to be gone before the next is started', async () => {
+    const order = [];
+    const engine = createNativeEngine({
+      dir, platform: 'win32', arch: 'x64', catalog: CATALOG,
+      fetch: async (url) => answer([url.endsWith('.zip') ? ARCHIVE : MODEL]),
+      extract: async (archive, into) => { fs.writeFileSync(path.join(into, 'server.exe'), 'exe'); },
+      spawn: () => {
+        const n = order.filter((line) => line.startsWith('started')).length + 1;
+        order.push(`started ${n}`);
+        const child = Object.assign(new EventEmitter(), { pid: n, stdout: new EventEmitter(), stderr: new EventEmitter() });
+        // It takes a moment to go, as a process holding gigabytes does.
+        child.kill = () => { order.push(`told ${n} to end`); setTimeout(() => { order.push(`${n} gone`); child.emit('exit', null); }, 20); return true; };
+        return child;
+      },
+      freePort: async () => 45400,
+      get: async () => ({ status: 200, body: '{}' }),
+      live: (target, onEvent) => ({ write() {}, end() { queueMicrotask(() => onEvent({ type: 'done', text: '' })); }, abort() {} }),
+      setPriority: () => {}, sleep: async () => {},
+    });
+    await engine.download('m1');
+    await engine.start('m1');
+    // Stopped and started again at once: the second is not started while the first still holds its memory.
+    void engine.stop();
+    await engine.start('m1');
+    expect(order).toEqual(['started 1', 'told 1 to end', '1 gone', 'started 2']);
+    await engine.stop();
+    expect(order.at(-1)).toBe('2 gone');
+  });
+
+  it('does not wait for ever for a runtime that will not go: it is told again, harder, and left', async () => {
+    const told = [];
+    const engine = createNativeEngine({
+      dir, platform: 'win32', arch: 'x64', catalog: CATALOG, stopPatienceMs: 30,
+      fetch: async (url) => answer([url.endsWith('.zip') ? ARCHIVE : MODEL]),
+      extract: async (archive, into) => { fs.writeFileSync(path.join(into, 'server.exe'), 'exe'); },
+      spawn: () => Object.assign(new EventEmitter(), { pid: 5, stdout: new EventEmitter(), stderr: new EventEmitter(), kill(signal) { told.push(signal ?? 'default'); if (signal === 'SIGKILL') queueMicrotask(() => this.emit('exit', null)); return true; } }),
+      freePort: async () => 45401,
+      get: async () => ({ status: 200, body: '{}' }),
+      live: (target, onEvent) => ({ write() {}, end() { queueMicrotask(() => onEvent({ type: 'done', text: '' })); }, abort() {} }),
+      setPriority: () => {}, sleep: async () => {},
+    });
+    await engine.download('m1');
+    await engine.start('m1');
+    const status = await engine.stop();
+    expect(told).toEqual(['default', 'SIGKILL']);
+    expect(status.run.state).toBe('stopped');
+  });
+
+  it('gives a recognition only to the model it was asked of', async () => {
+    const { engine } = computer();
+    await engine.download('m1');
+    await engine.start('m1');
+    expect(engine.openStream({ language: 'ja', sampleRate: 16000, model: 'another' })).toBeNull();
+    expect(engine.openStream({ language: 'ja', sampleRate: 16000, model: 'm1' })).toEqual(expect.any(Number));
+    // Asked of no model in particular: the one that is up.
+    expect(engine.openStream({ language: 'ja', sampleRate: 16000 })).toEqual(expect.any(Number));
+  });
+
+  it('lowers the runtime\'s priority while it loads only where it can be raised again', async () => {
+    const win = computer();
+    await win.engine.download('m1');
+    await win.engine.start('m1');
+    expect(win.world.priorities).toHaveLength(2);
+    const mac = computer({ platform: 'darwin', arch: 'arm64', catalog: { engine: { version: '1.0.0', builds: { 'darwin-arm64': { ...CATALOG.engine.builds['win32-x64'] } } }, models: CATALOG.models } });
+    await mac.engine.download('m1');
+    await mac.engine.start('m1');
+    expect(mac.engine.status().run.state).toBe('ready');
+    // A process that stepped back may not step forward again there: it would hear at a disadvantage for good.
+    expect(mac.world.priorities).toEqual([]);
+  });
+});
+
+describe('a download, once more', () => {
+  it('keeps what came of an answer that ended early without saying so, and goes on from it', async () => {
+    const requests = [];
+    let short = true;
+    const engine = createNativeEngine({
+      dir, platform: 'win32', arch: 'x64', catalog: CATALOG,
+      fetch: async (url, init = {}) => {
+        requests.push({ url, range: init.headers?.Range });
+        if (url.endsWith('.zip')) return answer([ARCHIVE]);
+        const from = init.headers?.Range ? Number(/bytes=(\d+)-/.exec(init.headers.Range)[1]) : 0;
+        if (short) { short = false; return answer([MODEL.subarray(0, 10)]); }
+        return answer([MODEL.subarray(from)], from > 0 ? 206 : 200);
+      },
+      extract: async (archive, into) => { fs.writeFileSync(path.join(into, 'server.exe'), 'exe'); },
+    });
+    const first = await engine.download('m1');
+    expect(first.models.m1).toMatchObject({ state: 'failed', received: 10 });
+    const second = await engine.download('m1');
+    expect(second.models.m1.state).toBe('downloaded');
+    expect(requests.filter((r) => r.url.endsWith('m1.gguf')).map((r) => r.range)).toEqual([undefined, 'bytes=10-']);
+  });
+
+  it('stops an answer that is longer than the file', async () => {
+    const engine = createNativeEngine({
+      dir, platform: 'win32', arch: 'x64', catalog: CATALOG,
+      fetch: async (url) => answer(url.endsWith('.zip') ? [ARCHIVE] : [MODEL, MODEL]),
+      extract: async (archive, into) => { fs.writeFileSync(path.join(into, 'server.exe'), 'exe'); },
+    });
+    const after = await engine.download('m1');
+    expect(after.models.m1).toMatchObject({ state: 'failed', error: expect.stringContaining('larger') });
+  });
+
+  it('builds nothing on what an unpacking that stopped halfway left, and is ready once one runs to its end', async () => {
+    let fails = true;
+    const engine = createNativeEngine({
+      dir, platform: 'win32', arch: 'x64', catalog: CATALOG,
+      fetch: async (url) => answer([url.endsWith('.zip') ? ARCHIVE : MODEL]),
+      extract: async (archive, into) => {
+        fs.writeFileSync(path.join(into, fails ? 'half.dll' : 'whole.dll'), 'lib');
+        fs.writeFileSync(path.join(into, 'server.exe'), 'exe');
+        if (fails) { fails = false; throw new Error('tar exited with code 1'); }
+      },
+    });
+    expect((await engine.download('m1')).engine).toBe('absent');
+    expect((await engine.download('m1')).engine).toBe('ready');
+    expect(fs.readdirSync(path.join(dir, 'engine-1.0.0')).sort()).toEqual(['server.exe', 'whole.dll']);
+  });
+
+  it('calls a runtime that was unpacked before this was watched for what it is: ready', async () => {
+    // The folder as every version before this one left it: the program, and no mark of any kind.
+    fs.mkdirSync(path.join(dir, 'engine-1.0.0'), { recursive: true });
+    fs.writeFileSync(path.join(dir, 'engine-1.0.0', 'server.exe'), 'exe');
+    const { world, engine } = computer();
+    expect(engine.status().engine).toBe('ready');
+    await engine.download('m1');
+    expect(world.requests.map((r) => r.url)).toEqual(['https://example.test/m1.gguf']);
   });
 });

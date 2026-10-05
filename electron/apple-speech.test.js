@@ -18,8 +18,9 @@ function mac({ platform = 'darwin', release = '26.0.0', offered = ['ja_JP', 'en_
     child.written = [];
     child.stdin = { writable: true, write: (line) => { child.written.push(JSON.parse(line)); return true; }, on: () => {} };
     child.say = (event) => child.stdout.emit('data', `${JSON.stringify(event)}\n`);
-    child.finish = (code = 0) => child.emit('exit', code);
-    child.kill = () => { child.killed = true; queueMicrotask(() => child.emit('exit', null)); return true; };
+    // As a real process ends: 'exit', then 'close' once its output has been read.
+    child.finish = (code = 0) => { child.emit('exit', code); child.emit('close', code); };
+    child.kill = () => { child.killed = true; queueMicrotask(() => child.finish(null)); return true; };
     world.started.push({ bin, args, child });
     // What the helper does by itself, for the commands that end by themselves.
     queueMicrotask(() => {
@@ -177,18 +178,36 @@ describe('a live recognition', () => {
     ]);
   });
 
-  it('is dropped without a word when aborted, and all of them when the run stops', async () => {
+  it('is dropped without a word when aborted; one still open when the run stops is told so', async () => {
     const { world, speech } = mac();
     await speech.start(`${PREFIX}ja`);
     const one = speech.openStream({ language: 'ja', sampleRate: 16000 });
     const first = world.started.at(-1).child;
     speech.abortStream(one);
-    speech.openStream({ language: 'ja', sampleRate: 16000 });
+    const two = speech.openStream({ language: 'ja', sampleRate: 16000 });
     const second = world.started.at(-1).child;
     await speech.stop();
     await settled();
     expect(first.killed).toBe(true);
     expect(second.killed).toBe(true);
-    expect(world.events).toEqual([]);
+    // The page asked for the first to be dropped; of the second it knows nothing unless it is told.
+    expect(world.events).toEqual([{ id: two, type: 'error', message: expect.any(String) }]);
+  });
+});
+
+// Review (REVIEW-native-engine.md): a defect found by reading the code, pinned by a test that fails until it is put
+// right. Production code is unchanged.
+describe('review: what the code should do and does not yet', () => {
+  it('reads the helper\'s last line even when its exit is heard first: the process\'s output may still be on its way', async () => {
+    const { world, speech } = mac();
+    await speech.start(`${PREFIX}ja`);
+    const id = speech.openStream({ language: 'ja', sampleRate: 16000 });
+    const { child } = world.started.at(-1);
+    // Node: "the 'exit' event … the child process stdio streams might still be open"; 'close' comes after them.
+    child.emit('exit', 0);
+    child.say({ type: 'final', text: 'こんにちは' });
+    child.emit('close', 0);
+    await settled();
+    expect(world.events).toEqual([{ id, type: 'done', text: 'こんにちは' }]);
   });
 });

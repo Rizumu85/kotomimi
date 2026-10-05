@@ -406,6 +406,8 @@ export const coachBaseUrl = (): string => `http://127.0.0.1:${useNativeCoachStor
 
 /** Where the translation engine answers now: its chat base URL; a port of 0 while it is not up. */
 export const translatorBaseUrl = (): string => `http://127.0.0.1:${useNativeTranslatorStore.getState().status.run.port}/v1`;
+/** The key the translation engine's present run answers to; empty while it is not up. */
+export const translatorKey = (): string => useNativeTranslatorStore.getState().status.run.key ?? '';
 
 const stamp = (state: { status: NativeEngineStatus }): string => `${state.status.engine}|${state.status.run.state}|${state.status.run.model ?? ''}|${Object.entries(state.status.models).map(([id, m]) => `${id}:${m.state}`).join(',')}`;
 

@@ -148,14 +148,17 @@ export interface PipelineDeps {
    */
   prepare(pipeline: string, transcription: string): Promise<unknown>;
   /** The native engine, when a leg hears by it: the main process's by default, stand-ins in tests. */
-  native: { bridge: NativeBridge; start(model: string): Promise<NativeEngineStatus>; /** Where a native text engine answers now, up with this model: its chat base URL. Rejects when it is not up and cannot be brought up. */ base?(engine: 'translator' | 'coach', model: string): Promise<string> };
+  native: { bridge: NativeBridge; start(model: string): Promise<NativeEngineStatus>; /** Where a native text engine answers now, up with this model, and the key its present run asks for. Rejects when it is not up and cannot be brought up. */ base?(engine: 'translator' | 'coach', model: string): Promise<EngineAddress> };
 }
 
+/** A native text engine's chat base URL, and the key of its run where it asks for one: both are new each time it starts. */
+export interface EngineAddress { base: string; key?: string }
+
 /** The native text engine's address, asked of the main process: it is started when it is not up, and answers at once when it is. */
-async function engineBaseNow(engine: 'translator' | 'coach', model: string): Promise<string> {
+async function engineBaseNow(engine: 'translator' | 'coach', model: string): Promise<EngineAddress> {
   const status = await askNativeEngine('start', model, engine === 'translator' ? 'native-translator' : 'native-coach');
   if (status.run.state !== 'ready' || status.run.model !== model || !status.run.port) throw new Error('The engine of this computer is not up.');
-  return `http://127.0.0.1:${status.run.port}/v1`;
+  return { base: `http://127.0.0.1:${status.run.port}/v1`, ...(status.run.key ? { key: status.run.key } : {}) };
 }
 
 /** The wrapper's own refs start here: the inner adapter counts from 1 and never reaches it. */
@@ -214,7 +217,7 @@ class PipelineLeg implements AdapterSession {
     private readonly events: AdapterEvents,
     private readonly doFetch: typeof fetch,
     private readonly engines: LocalEngines,
-    private readonly engineBase: (engine: 'translator' | 'coach', model: string) => Promise<string> = engineBaseNow,
+    private readonly engineBase: (engine: 'translator' | 'coach', model: string) => Promise<EngineAddress> = engineBaseNow,
   ) {
     this.inner = eventsFrom((e) => this.onInner(e));
   }
@@ -467,11 +470,13 @@ class PipelineLeg implements AdapterSession {
   /** A text model's answer, shown as it is written. */
   private async complete(stage: TextStage, text: string, signal: AbortSignal, show: (text: string) => void): Promise<{ text: string; firstMs?: number; totalMs: number }> {
     const { credentials, clock } = this.request;
-    const key = stage.key ? credentials[stage.key] : undefined;
+    let key = stage.key ? credentials[stage.key] : undefined;
     let base = stage.baseUrl || httpBaseOf(credentials.endpoint);
     if (stage.engine) {
       try {
-        base = await this.engineBase(stage.engine, stage.model);
+        const now = await this.engineBase(stage.engine, stage.model);
+        base = now.base;
+        key = now.key;
       } catch {
         // Not to be asked (a test, a build with no main process), or not up: the address it was built with.
       }

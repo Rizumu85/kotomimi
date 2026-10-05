@@ -24,7 +24,8 @@ export interface NativeEngineStatus {
   engine: 'unsupported' | 'absent' | 'downloading' | 'ready';
   engineBytes: number;
   models: Record<string, NativeModelStatus>;
-  run: { state: NativeRunState; model: string | null; port: number; tail: string };
+  /** `key`: what a runtime that answers only its own app is asked with (the text engines'); absent where it asks for none. */
+  run: { state: NativeRunState; model: string | null; port: number; tail: string; key?: string };
   /** The models that can hear now. More than the one `run` names where a computer has two engines up (a Mac). */
   up: string[];
 }
@@ -63,6 +64,7 @@ export function nativeEngineStatus(value: unknown): NativeEngineStatus {
       model: typeof run.model === 'string' && run.model ? run.model : null,
       port: Number.isInteger(run.port) && (run.port as number) > 0 && (run.port as number) < 65536 ? (run.port as number) : 0,
       tail: typeof run.tail === 'string' ? run.tail.slice(0, 4000) : '',
+      ...(typeof run.key === 'string' && /^[0-9a-f]{16,128}$/.test(run.key) ? { key: run.key } : {}),
     },
     up: Array.isArray(answer.up) ? answer.up.filter((id): id is string => typeof id === 'string').slice(0, 50) : [],
   };

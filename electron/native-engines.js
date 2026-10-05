@@ -122,8 +122,10 @@ function joinEngines(makers, deps = {}) {
     active = null;
     if (idleTimer) clearTimer(idleTimer);
     idleTimer = null;
-    for (const id of [...streams.keys()]) forget(id);
+    // Each engine tells the recognitions it had open that it stopped; those reach the page under its own ids, so
+    // the ids are forgotten only after.
     await Promise.all(engines.map(async (engine, at) => { last[at] = await engine.stop(); }));
+    for (const id of [...streams.keys()]) forget(id);
     return merge();
   }
 

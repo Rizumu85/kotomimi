@@ -216,7 +216,8 @@ describe('a reading in which the model lost its way', () => {
     await world.readings[2].answer(LOST, 3000);
     expect(world.readings[2].seconds + world.readings[3].seconds).toBeCloseTo(8, 5);
     await world.readings[3].answer('結構酔うか。じゃあ明日薬を飲もうかな。');
-    expect(world.events).toEqual([{ type: 'done', text: '飲んだ方がいいかもしれない。波で 結構酔うか。じゃあ明日薬を飲もうかな。' }]);
+    expect(world.events).toEqual([{ type: 'done', text: '飲んだ方がいいかもしれない。波で結構酔うか。じゃあ明日薬を飲もうかな。' }]);
+    // …with no space where the halves meet: Japanese has none between its words.
   });
 
   it('leaves what came before when the stretch is too short to cut, or a half cannot be read', async () => {
@@ -292,5 +293,78 @@ describe('the model read that way', () => {
   it('is Qwen3-ASR, for every system the runtime is published for, told the language by its code', () => {
     expect(MODELS['qwen3-asr-1.7b-q8']).toMatchObject({ family: 'qwen3_asr', mode: 'offline', languageAs: 'code' });
     expect(MODELS['qwen3-asr-1.7b-q8'].platforms).toBeUndefined();
+  });
+});
+
+// Review (REVIEW-native-engine.md): defects found by reading the code, each pinned by a test that fails until it is
+// put right. Production code is unchanged.
+describe('review: what the code should do and does not yet', () => {
+  it('does not take speech that repeats a character eight times for a model that lost its way', () => {
+    // A model that loses its way writes the same thing until it is stopped: to the end of the reading. These are
+    // followed by more speech, and are what people say (or what a recognizer writes for a number).
+    for (const said of [
+      '人口は1400000000人です。',
+      '予算は100000000円です。',
+      '哈哈哈哈哈哈哈哈，太好笑了。',
+      'ははははははははは、面白い。',
+      '对对对对对对对对，就是这样。',
+      'はいはいはいはいはいはいはいはい、わかりました。',
+      '네네네네네네네네, 알겠어요.',
+    ]) {
+      expect(loopAt(said), said).toBe(-1);
+      expect(unloop(said), said).toBe(said);
+    }
+  });
+
+  it('reads once more when the voice went on after the last reading, though more softly than its loudest moment', async () => {
+    const { world, stream } = recognition();
+    // A laugh or a plosive near full scale, then speech at an ordinary level.
+    stream.write(sound(0.2, 30000));
+    stream.write(sound(1.8, 6000));
+    world.tick();
+    await world.readings[0].answer('そうなんだ');
+    // The last word, said softly (about -22 dBFS, a tenth of the peak is 3000), then the pause.
+    stream.write(sound(0.6, 2500));
+    stream.write(sound(1.4, 0));
+    stream.end();
+    // Ended on the reading that never heard the last word.
+    expect(world.readings).toHaveLength(2);
+  });
+});
+
+describe('what the review changed besides', () => {
+  it('still takes for lost a reading that repeats to its end, however it began', () => {
+    const lost = `今日は天気がいいですね。${'波で'.repeat(250)}`;
+    expect(loopAt(lost)).toBe(12);
+    expect(unloop(lost)).toBe('今日は天気がいいですね。波で');
+    // Cut off in the middle of the thing repeated: the token limit does not end on a whole one.
+    expect(loopAt(`${'ありがとう、'.repeat(40)}ありが`)).toBe(0);
+    // A long repeating that the speech then leaves is what was said: a chant, a song.
+    const sung = `${'ラ'.repeat(60)}って歌ってたんだよね、あの人がずっと、ほんとうに長いあいだ。`;
+    expect(loopAt(sung)).toBe(-1);
+  });
+
+  it('ends a stretch that is never ended, rather than keep its sound for ever', () => {
+    const { world, stream } = recognition();
+    for (let i = 0; i < 13; i += 1) stream.write(sound(10));
+    expect(world.events).toEqual([{ type: 'error', message: expect.stringContaining('too long') }]);
+    // Over: nothing more is taken or read.
+    stream.write(sound(1));
+    stream.end();
+    expect(world.events).toHaveLength(1);
+  });
+
+  it('does not wait as long as a reading that never came back took, before the next', async () => {
+    const { world, stream } = recognition();
+    stream.write(sound(1));
+    world.tick();
+    await world.readings[0].answer('こん', 200);
+    stream.write(sound(1));
+    expect(world.tick()).toBe(600);
+    // This one times out, thirty seconds later.
+    await world.readings[1].answer({ ok: false, message: 'The engine did not answer in time.' }, 30000);
+    stream.write(sound(1));
+    // The next is asked as soon as after any other: the stretch is not left without its words for half a minute.
+    expect(world.tick()).toBe(600);
   });
 });

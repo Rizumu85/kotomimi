@@ -309,9 +309,10 @@ describe('a stage one of this computer\u2019s native engines answers', () => {
     const { clock } = trackedClock();
     const { events } = recordEvents();
     const urls: string[] = [];
-    const fetch = vi.fn(async (input: RequestInfo | URL) => { urls.push(String(input)); return sse('你好。'); });
+    const fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => { urls.push(String(input)); keys.push(new Headers(init?.headers).get('Authorization')); return sse('你好。'); });
     let port = 4200;
-    const base = vi.fn(async (_engine: 'translator' | 'coach', _model: string) => `http://127.0.0.1:${port}/v1`);
+    const keys: Array<string | null> = [];
+    const base = vi.fn(async (_engine: 'translator' | 'coach', _model: string) => ({ base: `http://127.0.0.1:${port}/v1`, key: `key-of-${port}` }));
     const starting = createPipelineAdapter({ openSocket: sockets.create, fetch: fetch as unknown as typeof globalThis.fetch, native: { bridge: {} as never, start: async () => { throw new Error('unused'); }, base } }).start({ context: SPEAKER, config, credentials: K, clock, signal: new AbortController().signal }, events);
     const socket = sockets.last();
     socket.open('');
@@ -327,6 +328,8 @@ describe('a stage one of this computer\u2019s native engines answers', () => {
     for (const frame of heard('item_2', 'ありがとう。')) socket.receive(frame);
     await vi.waitFor(() => expect(urls).toHaveLength(2));
     expect(urls[1]).toBe('http://127.0.0.1:4311/v1/chat/completions');
+    // …with the key of that run: each start of the engine makes another.
+    expect(keys.slice(0, 2)).toEqual(['Bearer key-of-4200', 'Bearer key-of-4311']);
     // Where it cannot be asked, the address the session was built with.
     base.mockRejectedValue(new Error('not up'));
     for (const frame of heard('item_3', 'はい。')) socket.receive(frame);

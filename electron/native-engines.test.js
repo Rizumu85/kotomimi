@@ -165,3 +165,18 @@ describe('two native recognizers as one', () => {
     expect(world.timers).toHaveLength(0);
   });
 });
+
+describe('stopping, with recognitions open', () => {
+  it('passes on what an engine tells its open recognitions when it is stopped, under the page’s ids', async () => {
+    const { world, engine, apple } = mac();
+    await engine.start('apple-speech:ja');
+    const mine = engine.openStream({ language: 'ja', sampleRate: 16000 });
+    // As the real engines do: each recognition still open is told, while the stop is under way.
+    const plain = apple.engine.stop;
+    apple.engine.stop = async () => { apple.tell.onStream({ id: 1, type: 'error', message: 'The speech recognizer was stopped.' }); return plain(); };
+    await engine.stop();
+    expect(world.events).toEqual([{ id: mine, type: 'error', message: 'The speech recognizer was stopped.' }]);
+    // Over: nothing more goes to it.
+    expect(engine.writeStream(mine, 'more')).toBe(false);
+  });
+});
