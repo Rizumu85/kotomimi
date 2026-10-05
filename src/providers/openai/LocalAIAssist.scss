@@ -333,6 +333,14 @@
     margin-bottom: 6px;
   }
 
+  // The label of the group that follows the native engines' models: the library's own sub-group label, with a line
+  // over it to set the two groups apart.
+  .kt-here__rest {
+    margin-top: 2px;
+    padding-top: 8px !important;
+    border-top: 1px solid vars.$border-subtle;
+  }
+
   // A wrapper that is not a box of its own: only a hook for the one rule below.
   .kt-native-card {
     display: contents;

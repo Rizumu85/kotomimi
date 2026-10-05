@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { CircleCheck, CircleHelp, GraduationCap, Languages, LibraryBig, Loader, Mic, MonitorSmartphone, Play, RefreshCw } from 'lucide-react';
+import { CircleCheck, CircleHelp, GraduationCap, Languages, LibraryBig, Loader, Mic, MonitorSmartphone, Play, RefreshCw, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CustomModels } from '../../components/CustomModels/CustomModels';
 import { ServerFinder } from '../../components/LanSharing/ServerFinder';
@@ -510,6 +510,9 @@ function DeviceModels({ stage, settings, update, pair, legs, disabled, tour, oth
     if (native && !disabled && slots.some((slot) => nativeFits(stage, done.id, slot.source, slot.target))) native.onPick(done.id);
   }, [engine]); // eslint-disable-line react-hooks/exhaustive-deps
   if (slots.length === 0) return null;
+  // The native models that serve the direction whose library is open, best first.
+  const openSlot = slots.find((slot) => slot.dir === open);
+  const fitting = native && openSlot ? engine.offered.filter((m) => nativeFits(stage, m.id, openSlot.source, openSlot.target)) : [];
 
   const title = (slot: DeviceNeed) => (stage === 'asr'
     ? t('providers.localai.hears', { language: adapter.languageName(deviceLanguage(slot.source)) })
@@ -552,14 +555,18 @@ function DeviceModels({ stage, settings, update, pair, legs, disabled, tour, oth
       })}
       {open !== null && slots.some((slot) => slot.dir === open) && (
         <div className="kt-here__library">
-          {/* The native engine's models first: what serves this direction best, where it was measured. */}
-          {native && engine.offered.filter((m) => { const slot = slots.find((one) => one.dir === open)!; return nativeFits(stage, m.id, slot.source, slot.target); }).map((m, _at, fitting) => (
-            <div className="model-management-section kt-here__native" key={m.id}>
-              <NativeEngineCard kind={stage} model={m} recommended={m.name === fitting[0].name} selected={false} onSelect={() => native.onPick(m.id)} disabled={disabled} />
+          {/* The native engines' models first, as a group of their own: what serves this direction best, where it was measured. */}
+          {fitting.length > 0 && (
+            <div className="model-management-section kt-here__native">
+              <div className="model-subgroup">
+                <div className="model-subgroup__label"><Star size={11} />{t('models.recommendedGroup', 'Recommended')}</div>
+                {fitting.map((m) => <NativeEngineCard key={m.id} kind={stage} model={m} recommended={m.name === fitting[0].name} selected={false} onSelect={() => native?.onPick(m.id)} disabled={disabled} />)}
+              </div>
             </div>
-          ))}
-          {/* A native model listed above carries the mark for this direction: the app's own are then listed without it. */}
-          <ModelManagementSection isSessionActive={Boolean(disabled)} stageFilter={stage} direction={open} settings={device.settings} update={device.update} pair={basePair} unmarked={Boolean(native) && engine.offered.some((m) => { const slot = slots.find((one) => one.dir === open)!; return nativeFits(stage, m.id, slot.source, slot.target); })} />
+          )}
+          {/* The app's own models under them, named as the rest and without the mark: a model above carries it for this direction. */}
+          {fitting.length > 0 && <div className="model-management-section kt-here__rest"><div className="model-subgroup__label">{t('models.othersGroup', 'Other models')}</div></div>}
+          <ModelManagementSection isSessionActive={Boolean(disabled)} stageFilter={stage} direction={open} settings={device.settings} update={device.update} pair={basePair} unmarked={fitting.length > 0} />
           {stage === 'asr' && <CustomModels disabled={Boolean(disabled)} />}
         </div>
       )}
