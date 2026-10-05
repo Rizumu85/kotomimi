@@ -1480,6 +1480,16 @@ ipcMain.handle('native-coach:start', async (event, args) => {
 ipcMain.handle('native-coach:stop', () => getNativeCoach().stop());
 app.on('will-quit', () => { void nativeCoach?.stop(); });
 
+// Fork: on a Mac the app stays in the Dock after its window is closed. The engines are let go by the page, a minute
+// after the last session (`restNative`): with the page gone nothing would, and they would hold their memory until
+// the app is quit. So they stop with the last window.
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') return;
+  void nativeEngine?.stop();
+  void nativeTranslator?.stop();
+  void nativeCoach?.stop();
+});
+
 // Fork: the devices of the local network whose models this app can use (electron/lan-discover.js) —
 // asked for when the person is choosing one. One search at a time: a second asker waits for the first's answer.
 let lanSearch = null;
