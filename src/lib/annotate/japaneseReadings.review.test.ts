@@ -1,11 +1,12 @@
 // @vitest-environment node
-// Fork: a review of `japaneseReadings.ts` against the real dictionary (REVIEW-japanese-readings.md at the repository
-// root has the tables and the reasoning). Three kinds of case:
-//   - "fires and is wrong": a rule's condition holds, it changes the reading, and the reading it gives is wrong. These
-//     FAIL today, by design: each one is a condition to narrow.
-//   - "keeps": readings that are right today and that a narrower or new rule must not break. These pass today.
-//   - "not yet put right": misreadings no rule covers yet, with the reading they should have. Skipped (`it.skip`);
-//     turn one on when its rule lands.
+// Fork: the cases of a review of `japaneseReadings.ts` against the real dictionary (2026-10-06; the report,
+// REVIEW-japanese-readings.md, is on the branch claude/intelligent-bohr-4ha0y4, and FORK.md says what was done with
+// it). Every case here is a line as the app would get it, and the reading a speaker gives it:
+//   - "fired and was wrong": a rule changed the reading to a wrong one. Each is a condition that was narrowed.
+//   - "keeps": readings that were right, and that the narrower or new rules must not break.
+//   - "was not put right": misreadings no rule covered, with the rule that now does.
+//   - "left alone": looked at, and left as the dictionary has them (skipped, with the reason).
+//   - "found while putting these right": what the rules above did to lines the review did not have.
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { gunzipSync } from 'node:zlib';
@@ -32,10 +33,11 @@ const lines = (cases: ReadonlyArray<readonly [string, string]>) => {
   for (const [line, reading] of cases) it(`${line} → ${reading}`, () => expect(read(line)).toBe(reading));
 };
 const skipped = (cases: ReadonlyArray<readonly [string, string]>) => {
-  for (const [line, reading] of cases) it.skip(`${line} → ${reading}`, () => expect(read(line)).toBe(reading));
+  // Skipped when the review wrote them; each is on now that its rule is there.
+  for (const [line, reading] of cases) it(`${line} → ${reading}`, () => expect(read(line)).toBe(reading));
 };
 
-describe('fires and is wrong (fails today)', () => {
+describe('fired and was wrong', () => {
   describe('方: この/その/あの方 before a particle other than が is a side or a choice, not a person', () => {
     lines([
       ['この方にする', 'このほうにする'],
@@ -143,9 +145,9 @@ describe('fires and is wrong (fails today)', () => {
   });
 });
 
-describe('romanized after a correction (fails today)', () => {
+describe('romanized after a correction', () => {
   // A numeral read with a doubled last sound (ろっ, はっ, いっ) is romanized as a word by itself, so the doubling is
-  // lost: 六百円 comes out "ro pyakuen". The furigana is right; only the Hepburn line is broken.
+  // lost: 六百円 came out "ro pyakuen". The furigana was right; only the Hepburn line was broken.
   it.each([
     ['六百円', /roppyaku/],
     ['八百円', /happyaku/],
@@ -156,7 +158,7 @@ describe('romanized after a correction (fails today)', () => {
   ] as const)('%s keeps its doubled consonant', (line, expected) => expect(roman(line)).toMatch(expected));
 });
 
-describe('keeps (passes today; a narrower or new rule must not break these)', () => {
+describe('keeps (a narrower or new rule must not break these)', () => {
   lines([
     // 方: the cases the rule was written for.
     ['配信されている方ですね', 'はいしんされているかたですね'],
@@ -207,7 +209,7 @@ describe('keeps (passes today; a narrower or new rule must not break these)', ()
 });
 
 // Ranked by how often the pattern comes up in casual talk (REVIEW-japanese-readings.md, "Misses").
-describe('not yet put right (skipped; turn on with the rule)', () => {
+describe('was not put right', () => {
   describe('1. 他 is ほか in talk; the dictionary always says た', () => {
     skipped([
       ['他の人', 'ほかのひと'],
@@ -269,19 +271,13 @@ describe('not yet put right (skipped; turn on with the rule)', () => {
       ['3本', '3ぼん'],
       ['6本', '6ぽん'],
       ['10分', '10ぷん'],
-      ['3日', '3か'],
+      // The digits themselves are given the reading nobody could guess: 3 with か after it would say nothing.
+      ['3日', 'みっか'],
     ]);
-    it.skip('1人, 2人 romanized as hitori, futari', () => {
+    it('1人, 2人 romanized as hitori, futari', () => {
       expect(roman('1人で')).toBe('hitori de');
       expect(roman('2人とも')).toBe('futari tomo');
     });
-  });
-
-  describe('8. 何時 is なんじ (the dictionary reads it いつ before まで)', () => {
-    skipped([
-      ['何時まで', 'なんじまで'],
-      ['何時までいる？', 'なんじまでいる？'],
-    ]);
   });
 
   describe('9. 何 before 曜日 and 月 is なん, and 月 after it がつ', () => {
@@ -365,17 +361,120 @@ describe('not yet put right (skipped; turn on with the rule)', () => {
       ['一ポイント', 'いっぽいんと'],
       ['二十歳になった', 'はたちになった'],
       ['何なら', 'なんなら'],
-      ['一足遅かった', 'ひとあしおそかった'],
-      ['三桁', 'みけた'],
-      ['角を曲がって', 'かどをまがって'],
-      ['表に出て', 'おもてにでて'],
       ['何と比べて', 'なにとくらべて'],
       ['日中', 'にっちゅう'],
       ['風邪薬', 'かぜぐすり'],
       ['両声類', 'りょうせいるい'],
-      ['他人事じゃない', 'ひとごとじゃない'],
       // Only where nothing follows it: 今日中に and 今日中だよ are already じゅう.
       ['今日中', 'きょうじゅう'],
+    ]);
+  });
+});
+
+// Looked at and left as the dictionary has them: the words around do not say which reading is meant, or both are said.
+describe('left alone', () => {
+  for (const [line, reading, why] of [
+    ['一足遅かった', 'ひとあしおそかった', 'a pair of shoes (いっそく) is written the same'],
+    // Rank 8 of the review. Speech recognition does write いつ this way: 「何時だかね」 was in what the app heard.
+    ['何時まで', 'なんじまで', 'いつまで is written the same'],
+    ['三桁', 'みけた', 'さんけた is said as often'],
+    ['角を曲がって', 'かどをまがって', 'かく and つの are written the same, and only the meaning tells them apart'],
+    ['表に出て', 'おもてにでて', 'a table (ひょう) is written the same'],
+    ['他人事じゃない', 'ひとごとじゃない', 'たにんごと is said too'],
+  ] as const) it.skip(`${line} → ${reading}: ${why}`, () => expect(read(line)).toBe(reading));
+});
+
+describe('found while putting these right', () => {
+  describe('声: the voice itself after a name or a verb that describes it, as it was in what the app heard', () => {
+    lines([
+      ['あんま声真似という声真似', 'あんまこえまねというこえまね'],
+      ['ムーイ声切った覚えない', 'むーいこえきったおぼえない'],
+      ['笑う声がする', 'わらうこえがする'],
+      ['アニメ声出して', 'あにめごえだして'],
+    ]);
+  });
+
+  describe('開く and 被る: only what opens by itself is あく, and only what is suffered こうむる', () => {
+    lines([
+      ['花が開いた', 'はながひらいた'],
+      ['差が開いた', 'さがひらいた'],
+      ['目が開いてる', 'めがあいてる'],
+      ['ドア開いて', 'どあひらいて'],
+      ['帽子を被った', 'ぼうしをかぶった'],
+      ['損害を被った', 'そんがいをこうむった'],
+    ]);
+  });
+
+  describe('何と: an exclamation before a word of quality stays なんと', () => {
+    lines([
+      ['何と素晴らしい', 'なんとすばらしい'],
+      ['何と比べて', 'なにとくらべて'],
+    ]);
+  });
+
+  describe('風: a wind that is described is a wind', () => {
+    lines([
+      ['爽やかな風だ', 'さわやかなかぜだ'],
+      ['ああいう風に', 'ああいうふうに'],
+      ['どういう風？', 'どういうふう？'],
+    ]);
+  });
+
+  describe('十分 at the end of what is said, after an hour, is minutes', () => {
+    lines([
+      ['今三時十分', 'いまさんじじゅっぷん'],
+      ['五時十分です', 'ごじじゅっぷんです'],
+    ]);
+  });
+
+  describe('a number in digits', () => {
+    lines([
+      // Given the reading nobody could guess, and shown it.
+      ['10日', 'とおか'],
+      ['20日間', 'はつかかん'],
+      ['14日', 'じゅうよっか'],
+      ['1人で', 'ひとりで'],
+      ['20歳です', 'はたちです'],
+      // Read as usual: the digits stand as they are, and only the counter changes.
+      ['12人', '12にん'],
+      ['3人', '3にん'],
+      ['21本', '21ぽん'],
+      ['100本', '100ぽん'],
+      ['3階', '3がい'],
+      ['4分', '4ぷん'],
+      ['1ヘルツ', '1へるつ'],
+      ['30日', '30にち'],
+      // A full-width digit is a word the dictionary reads; it shows a reading only where that was changed.
+      ['５個', '５こ'],
+      ['８本', 'はっぽん'],
+    ]);
+    it('is romanized with the reading it was given', () => {
+      expect(roman('10日')).toBe('tooka');
+      expect(roman('二十日')).toBe('hatsuka');
+      expect(roman('二十歳')).toBe('hatachi');
+      expect(roman('3本')).toBe('3bon');
+    });
+  });
+
+  describe('the days of the month keep にち where they are counted that way', () => {
+    lines([
+      ['十一日', 'じゅういちにち'],
+      ['三十日', 'さんじゅうにち'],
+      ['第三日', 'だいさんにち'],
+      ['二日酔い', 'ふつかよい'],
+    ]);
+  });
+
+  describe('single words', () => {
+    lines([
+      ['両声類なんだ', 'りょうせいるいなんだ'],
+      ['日中は暑い', 'にっちゅうはあつい'],
+      ['風邪薬飲んだ', 'かぜぐすりのんだ'],
+      ['今まで通り', 'いままでどおり'],
+      ['二十歳になった', 'はたちになった'],
+      ['三年一組', 'さんねんいちくみ'],
+      ['一パーセント', 'いっぱーせんと'],
+      ['六パーセント', 'ろくぱーせんと'],
     ]);
   });
 });

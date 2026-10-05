@@ -161,8 +161,9 @@ describe('a word with two readings', () => {
     expect(read('この辺り')).toBe('このあたり');
     expect(read('この後プラベ行くよ')).toBe('このあとぷらべいくよ');
     expect(read('後は任せた')).toBe('あとはまかせた');
-    expect(read('三日後')).toBe('さんにちご');
-    expect(read('8月10日なの')).toBe('8がつ10にちなの');
+    expect(read('三日後')).toBe('みっかご');
+    // A number in digits is given its reading where it is one nobody could guess: とおか.
+    expect(read('8月10日なの')).toBe('8がつとおかなの');
     expect(read('月が綺麗')).toBe('つきがきれい');
     expect(read('そういう風に聞こえた')).toBe('そういうふうにきこえた');
     expect(read('風が強い')).toBe('かぜがつよい');

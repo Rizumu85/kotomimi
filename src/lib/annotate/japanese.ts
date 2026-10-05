@@ -34,10 +34,14 @@ function runs(surface: string): Array<{ text: string; kanji: boolean }> {
  * of kanji takes what lies between them: お買い物 / オカイモノ → お 買[か] い
  * 物[もの]. When the kana do not line up with the reading — an irregular
  * spelling — the whole word carries the whole reading. A word with no
- * kanji, or no reading, is drawn plain.
+ * kanji, or no reading, is drawn plain — except, when `readDigits` says so,
+ * a number in digits: one that was given a reading the reader could not
+ * guess (`japaneseReadings.ts`: 1人 as ひと, 10日 as とお).
  */
-export function furiganaParts(surface: string, reading: string | undefined): RubyPart[] {
-  if (!reading || reading === '*' || !KANJI.test(surface)) return [{ text: surface }];
+export function furiganaParts(surface: string, reading: string | undefined, readDigits = false): RubyPart[] {
+  if (!reading || reading === '*') return [{ text: surface }];
+  if (readDigits && DIGITS.test(surface)) return [{ text: surface, ruby: katakanaToHiragana(reading) }];
+  if (!KANJI.test(surface)) return [{ text: surface }];
   const hiragana = katakanaToHiragana(reading);
   const pieces = runs(surface);
   const pattern = pieces.map((p) => (p.kanji ? '(.+)' : escape(katakanaToHiragana(p.text)))).join('');
@@ -52,6 +56,9 @@ const PARTICLES: Readonly<Record<string, string>> = { は: 'wa', へ: 'e', を: 
 /** The conjunctive particles written onto the verb before them: 行って, 読んで, 行けば. */
 const JOINED_PARTICLES = new Set(['て', 'で', 'ば', 'ちゃ', 'じゃ', 'たり', 'だり']);
 const PUNCTUATION = /^[\s\p{P}\p{S}]+$/u;
+
+const DIGITS = /^[0-9０-９]+$/;
+const isNumeral = (token: JapaneseToken | null): boolean => token !== null && token.pos === '名詞' && token.pos_detail_1 === '数';
 
 /** Whether a token is written onto the word before it: an auxiliary (ます, た, ない), a joined particle, a suffix. */
 function joins(token: JapaneseToken): boolean {
@@ -75,10 +82,16 @@ function kana(token: JapaneseToken): string {
 export function romaji(tokens: readonly JapaneseToken[]): string {
   const words: string[] = [];
   let word = '';
+  let last: JapaneseToken | null = null;
   const flush = () => {
     if (word) words.push(toRomaji(word));
     word = '';
   };
+  /**
+   * A numeral said in one breath with the numeral before it: the one before ends on a doubled sound (六百 as ろっ
+   * and ぴゃく — apart, the doubling is lost: "ro pyaku"), or the two share one reading (二十日 and 二十歳: は, and つ or た).
+   */
+  const oneBreath = (token: JapaneseToken): boolean => isNumeral(last) && isNumeral(token) && (word.endsWith('ッ') || (token.surface_form === '十' && (token.reading === 'ツ' || token.reading === 'タ')));
   for (const token of tokens) {
     const surface = token.surface_form;
     if (PUNCTUATION.test(surface)) {
@@ -94,8 +107,9 @@ export function romaji(tokens: readonly JapaneseToken[]): string {
       words.push(PARTICLES[surface]);
       continue;
     }
-    if (!joins(token)) flush();
+    if (!joins(token) && !oneBreath(token)) flush();
     word += kana(token);
+    last = token;
   }
   flush();
   return words.join(' ');
@@ -104,15 +118,17 @@ export function romaji(tokens: readonly JapaneseToken[]): string {
 /** One line of Japanese, annotated as asked. */
 export function annotateJapanese(line: string, tokenizer: JapaneseTokenizer, options: AnnotateOptions): AnnotatedLine {
   // The dictionary's readings, with the ones everyday speech gives differently put right (`japaneseReadings.ts`).
-  const tokens = correctReadings(tokenizer.tokenize(line));
+  const said = tokenizer.tokenize(line);
+  const tokens = correctReadings(said);
   const parts: RubyPart[] = [];
-  for (const token of tokens) {
-    for (const part of options.furigana ? furiganaParts(token.surface_form, token.reading) : [{ text: token.surface_form }]) {
+  tokens.forEach((token, at) => {
+    // A number in digits shows the reading it was given here; the dictionary's own for one (８ as はち) it never did.
+    for (const part of options.furigana ? furiganaParts(token.surface_form, token.reading, token.reading !== said[at].reading) : [{ text: token.surface_form }]) {
       const last = parts[parts.length - 1];
       // Plain runs are drawn as one, so a line with no reading to show is one text node.
       if (last && last.ruby === undefined && part.ruby === undefined) last.text += part.text;
       else parts.push(part);
     }
-  }
+  });
   return { parts, ...(options.roman ? { roman: romaji(tokens) } : {}) };
 }
