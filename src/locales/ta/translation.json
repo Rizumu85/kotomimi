@@ -1415,6 +1415,7 @@
     "loopback_denied": "கணினி ஆடியோவைப் பிடிக்க மற்றவரின் ஆடியோவுக்கு திரைப் பதிவு அனுமதி தேவை."
   },
   "fork": {
+    "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
     "wizard": {

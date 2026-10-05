@@ -1415,6 +1415,7 @@
     "loopback_denied": "Karşı tarafın sesi, sistem sesini yakalamak için Ekran Kaydı izni gerektirir."
   },
   "fork": {
+    "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
     "wizard": {

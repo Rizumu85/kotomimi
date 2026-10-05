@@ -1415,6 +1415,7 @@
     "loopback_denied": "Audio van de ander vereist toestemming voor schermopname om systeemaudio vast te leggen."
   },
   "fork": {
+    "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
     "wizard": {

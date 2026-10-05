@@ -1415,6 +1415,7 @@
     "loopback_denied": "Kailangan ng Audio ng kausap ang pahintulot sa Screen Recording para makuha ang system audio."
   },
   "fork": {
+    "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
     "wizard": {

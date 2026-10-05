@@ -283,6 +283,7 @@ const PROVIDER = {
 };
 
 const FORK = {
+  sourceItalic: ['Source text in italics', '原文用斜体', '原文用斜體'],
   furigana: ['Furigana over kanji (Japanese)', '汉字上方显示假名（日语）', '漢字上方顯示假名（日語）'],
   romanization: ['Romanization (Japanese, Korean, Russian)', '显示罗马音（日语、韩语、俄语）', '顯示羅馬拼音（日語、韓語、俄語）'],
 };

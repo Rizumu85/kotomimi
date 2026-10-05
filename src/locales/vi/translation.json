@@ -1415,6 +1415,7 @@
     "loopback_denied": "Âm thanh đối phương cần quyền Ghi Màn Hình để thu âm thanh hệ thống."
   },
   "fork": {
+    "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
     "wizard": {

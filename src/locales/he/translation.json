@@ -1415,6 +1415,7 @@
     "loopback_denied": "שמע הצד השני דורש הרשאת הקלטת מסך כדי ללכוד את שמע המערכת."
   },
   "fork": {
+    "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
     "wizard": {

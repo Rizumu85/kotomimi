@@ -1415,6 +1415,7 @@
     "loopback_denied": "صدای طرف مقابل برای ضبط صدای سیستم به مجوز ضبط صفحه نیاز دارد."
   },
   "fork": {
+    "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
     "wizard": {

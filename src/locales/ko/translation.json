@@ -1415,6 +1415,7 @@
     "loopback_denied": "상대방 오디오는 시스템 오디오를 캡처하기 위해 화면 기록 권한이 필요합니다."
   },
   "fork": {
+    "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
     "wizard": {

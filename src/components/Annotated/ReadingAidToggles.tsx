@@ -1,5 +1,6 @@
 /**
- * Fork: the reading aids' two switches, drawn at the foot of the display
+ * Fork: the reading aids' switches — and, with them, whether the source text
+ * is slanted — drawn at the foot of the display
  * popover of both the panel and the subtitle — the popover's own switch
  * (`ToggleSwitch`), so they read as part of it. Marked `reading-aid-toggle`,
  * by which the popover's tests tell them from its own.
@@ -15,8 +16,11 @@ export function ReadingAidToggles() {
   const romanization = useAnnotationStore((s) => s.romanization);
   const setFurigana = useAnnotationStore((s) => s.setFurigana);
   const setRomanization = useAnnotationStore((s) => s.setRomanization);
+  const sourceItalic = useAnnotationStore((s) => s.sourceItalic);
+  const setSourceItalic = useAnnotationStore((s) => s.setSourceItalic);
   return (
     <div className="field reading-aid-toggles">
+      <ToggleSwitch className="reading-aid-toggle" checked={sourceItalic} onChange={() => void setSourceItalic(!sourceItalic)} label={t('fork.sourceItalic', 'Source text in italics')} />
       <ToggleSwitch className="reading-aid-toggle" checked={furigana} onChange={() => void setFurigana(!furigana)} label={t('fork.furigana', 'Furigana over kanji (Japanese)')} />
       <ToggleSwitch className="reading-aid-toggle" checked={romanization} onChange={() => void setRomanization(!romanization)} label={t('fork.romanization', 'Romanization (Japanese, Korean, Russian)')} />
     </div>

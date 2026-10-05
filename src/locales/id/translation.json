@@ -1415,6 +1415,7 @@
     "loopback_denied": "Audio lawan bicara memerlukan izin Perekaman Layar untuk menangkap audio sistem."
   },
   "fork": {
+    "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
     "wizard": {

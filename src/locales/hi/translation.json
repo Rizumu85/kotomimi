@@ -1415,6 +1415,7 @@
     "loopback_denied": "सिस्टम ऑडियो कैप्चर करने के लिए दूसरे के ऑडियो को स्क्रीन रिकॉर्डिंग अनुमति चाहिए।"
   },
   "fork": {
+    "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
     "wizard": {

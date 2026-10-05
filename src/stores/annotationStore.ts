@@ -16,37 +16,60 @@ interface AnnotationState {
   furigana: boolean;
   /** A line in Latin letters under Japanese, Korean and Russian text. */
   romanization: boolean;
+  /**
+   * The source text in italics, as upstream sets it. A switch because slanted kana and hanzi are synthesized by the
+   * browser (few CJK fonts have an italic), and a reader of them may find the upright form easier. On by default:
+   * the look stays what it was.
+   */
+  sourceItalic: boolean;
   setFurigana: (on: boolean) => Promise<void>;
   setRomanization: (on: boolean) => Promise<void>;
+  setSourceItalic: (on: boolean) => Promise<void>;
   /** Called once at app boot (`src/routes/Home.tsx`). */
   hydrate: () => Promise<void>;
 }
 
-type Field = 'furigana' | 'romanization';
-const DEFAULTS: Record<Field, boolean> = { furigana: true, romanization: false };
+type Field = 'furigana' | 'romanization' | 'sourceItalic';
+const DEFAULTS: Record<Field, boolean> = { furigana: true, romanization: false, sourceItalic: true };
+
+/**
+ * The source text's slant, where the stylesheets read it (`ConversationRow.scss`, `SubtitleStream.scss`): a custom
+ * property on the document, so every list and band of the window follows without each being told.
+ */
+export const SOURCE_FONT_STYLE = '--kt-source-font-style';
+function slant(on: boolean): void {
+  if (typeof document !== 'undefined') document.documentElement.style.setProperty(SOURCE_FONT_STYLE, on ? 'italic' : 'normal');
+}
 const KEY = (field: Field) => `settings.common.annotation.${field}`;
 
 export const useAnnotationStore = create<AnnotationState>()(
   subscribeWithSelector((set, get) => {
     const write = (field: Field) => async (on: boolean) => {
       const previous = get()[field];
-      set(field === 'furigana' ? { furigana: on } : { romanization: on });
+      set({ [field]: on } as Pick<AnnotationState, Field>);
       const { persistSetting } = await import('../services/persistSetting');
-      if (!(await persistSetting(KEY(field), on))) set(field === 'furigana' ? { furigana: previous } : { romanization: previous });
+      if (!(await persistSetting(KEY(field), on))) set({ [field]: previous } as Pick<AnnotationState, Field>);
     };
     return {
       ...DEFAULTS,
       setFurigana: write('furigana'),
       setRomanization: write('romanization'),
+      setSourceItalic: write('sourceItalic'),
       hydrate: async () => {
         const { ServiceFactory } = await import('../services/ServiceFactory');
         const service = ServiceFactory.getSettingsService();
-        const [furigana, romanization] = await Promise.all([
+        const [furigana, romanization, sourceItalic] = await Promise.all([
           service.getSetting(KEY('furigana'), DEFAULTS.furigana),
           service.getSetting(KEY('romanization'), DEFAULTS.romanization),
+          service.getSetting(KEY('sourceItalic'), DEFAULTS.sourceItalic),
         ]);
-        set({ furigana: furigana === true, romanization: romanization === true });
+        // Only a stored "off" turns the slant off: anything else is the default.
+        set({ furigana: furigana === true, romanization: romanization === true, sourceItalic: sourceItalic !== false });
       },
     };
   }),
 );
+
+// The document follows the switch, from the moment the store exists.
+slant(useAnnotationStore.getState().sourceItalic);
+useAnnotationStore.subscribe((s) => s.sourceItalic, slant);

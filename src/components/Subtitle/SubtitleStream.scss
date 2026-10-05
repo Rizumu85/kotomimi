@@ -51,7 +51,8 @@
 
     .subtitle-stream__line--source p {
       color: var(--subtitle-source-color, #9aa0a6);
-      font-style: italic;
+      // Fork: a switch of the display popover (`annotationStore.ts`); slanted where nothing says otherwise.
+      font-style: var(--kt-source-font-style, italic);
     }
 
     .subtitle-stream__line--translation p {

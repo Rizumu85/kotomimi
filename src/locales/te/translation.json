@@ -1415,6 +1415,7 @@
     "loopback_denied": "సిస్టమ్ ఆడియోను క్యాప్చర్ చేయడానికి ఇతరుల ఆడియోకు స్క్రీన్ రికార్డింగ్ అనుమతి అవసరం."
   },
   "fork": {
+    "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
     "wizard": {

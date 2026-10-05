@@ -1415,6 +1415,7 @@
     "loopback_denied": "Other's audio requires Screen Recording permission to capture system audio."
   },
   "fork": {
+    "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
     "wizard": {

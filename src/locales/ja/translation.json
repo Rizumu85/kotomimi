@@ -1415,6 +1415,7 @@
     "loopback_denied": "相手の音声にはシステムオーディオをキャプチャするために画面録画の権限が必要です。"
   },
   "fork": {
+    "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
     "wizard": {

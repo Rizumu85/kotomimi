@@ -1415,6 +1415,7 @@
     "loopback_denied": "Für das Audio des Gegenübers ist die Berechtigung zur Bildschirmaufnahme erforderlich, um System-Audio zu erfassen."
   },
   "fork": {
+    "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
     "wizard": {

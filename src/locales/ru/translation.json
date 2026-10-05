@@ -1415,6 +1415,7 @@
     "loopback_denied": "Для аудио собеседника требуется разрешение на запись экрана, чтобы захватывать системный звук."
   },
   "fork": {
+    "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
     "wizard": {

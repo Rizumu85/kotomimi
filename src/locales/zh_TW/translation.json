@@ -1415,6 +1415,7 @@
     "loopback_denied": "對方音訊需要螢幕錄製權限才能擷取系統音訊。"
   },
   "fork": {
+    "sourceItalic": "原文用斜體",
     "furigana": "漢字上方顯示假名（日語）",
     "romanization": "顯示羅馬拼音（日語、韓語、俄語）",
     "wizard": {

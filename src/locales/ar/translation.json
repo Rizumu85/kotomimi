@@ -1415,6 +1415,7 @@
     "loopback_denied": "يتطلب صوت الآخر إذن تسجيل الشاشة لالتقاط صوت النظام."
   },
   "fork": {
+    "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
     "wizard": {

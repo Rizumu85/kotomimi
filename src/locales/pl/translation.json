@@ -1415,6 +1415,7 @@
     "loopback_denied": "Dźwięk rozmówcy wymaga uprawnienia do nagrywania ekranu, aby przechwycić dźwięk systemowy."
   },
   "fork": {
+    "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
     "wizard": {

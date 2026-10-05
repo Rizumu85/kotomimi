@@ -1415,6 +1415,7 @@
     "loopback_denied": "L'Audio dell'altro richiede l'autorizzazione alla Registrazione Schermo per acquisire l'audio di sistema."
   },
   "fork": {
+    "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
     "wizard": {
