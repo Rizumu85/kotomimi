@@ -230,6 +230,12 @@ describe('a coached speaker', () => {
     // An API of its own, with its own key; nothing then translates what is typed, and the run still starts.
     expect(buildLocalAI(SPEAKER, { ...LOCALAI_DEFAULTS, coach: true, coachAt: 'api', coachModel: 'gpt-x', coachBaseUrl: 'http://localhost:11434/v1', coachNeedsKey: true }, shared))
       .toMatchObject({ stages: { speech: { kind: 'coach', model: 'gpt-x', baseUrl: 'http://localhost:11434/v1', key: 'coachKey' }, typed: null } });
+    // A service whose models think before they answer is asked not to: with the feedback, and with a translation.
+    const deepseek = buildLocalAI(SPEAKER, { ...LOCALAI_DEFAULTS, coach: true, coachAt: 'api', coachModel: 'deepseek-flash', coachBaseUrl: 'https://api.deepseek.com/v1', coachNeedsKey: true, translateAt: 'api', translateBaseUrl: 'https://api.deepseek.com/v1', translateModel: 'deepseek-flash', translateNeedsKey: true }, shared);
+    expect(deepseek).toMatchObject({ stages: { speech: { kind: 'coach', extra: { thinking: { type: 'disabled' } } }, typed: { kind: 'translate', extra: { thinking: { type: 'disabled' } } } } });
+    const other = buildLocalAI(SPEAKER, { ...LOCALAI_DEFAULTS, coach: true, coachAt: 'api', coachModel: 'gpt-x', coachBaseUrl: 'https://api.openai.com/v1', coachNeedsKey: true }, shared);
+    if ('refused' in other) throw new Error(other.refused);
+    expect(other.stages?.speech).not.toHaveProperty('extra');
     expect(localaiProvider.textInput({ ...LOCALAI_DEFAULTS, coach: true })).toBe(true);
     expect(localaiProvider.textInput({ ...LOCALAI_DEFAULTS, coach: true, translateAt: 'api' })).toBe(false);
     expect(localaiProvider.textInput(LOCALAI_DEFAULTS)).toBe(true);

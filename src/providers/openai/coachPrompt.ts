@@ -11,6 +11,14 @@
  * instructions: a small model continues a list of examples it reads in its
  * instructions, and follows ones it is shown as its own past answers.
  *
+ * What is said is talk between friends, and the prompt says so: left to
+ * themselves, small models "correct" a dropped particle, a slang word or a
+ * missing full stop. Measured 2026-10-05 on fourteen wrong and fourteen right
+ * casual Japanese sentences, with and without that paragraph and the casual
+ * examples: Gemma 4 E2B passed 5 of the 14 right ones without, 13-14 with
+ * (and still caught 11 of the 14 wrong); Qwen3-4B 4, then 14; DeepSeek's
+ * hosted model 13, then 14, catching all 14 either way.
+ *
  * The answer has two shapes the row can show (`pipeline.ts` `tidyAnswer`):
  * a bare ✓, or the corrected sentence over one line of why.
  *
@@ -50,6 +58,7 @@ const ZH: Template = {
     '你是一位{{SPOKEN}}口语教练，学生的母语是{{NATIVE}}。',
     '用户发来的每条消息，都是学生刚刚用{{SPOKEN}}说出的一句话，由语音识别转成了文字。标点、空格和同音字的写法可能是识别造成的，不算学生的错。你只判断语法、用词和表达是否自然。',
     '{{HINTS}}',
+    '这是朋友之间的口头闲聊。口语里的省略（比如省掉助词或主语）、缩略、简体、俗语和流行语、不完整的句子，都是正确而自然的{{SPOKEN}}，不要改；没有标点也不算错。只有真正的语法或用词错误才改，拿不准就回答 ✓。',
     '回答规则：',
     '1. 如果这句话正确而且自然，只回答一个符号：✓',
     '2. 否则只回答两行，不要有任何其他内容。第一行是改正后的{{SPOKEN}}句子；第二行用{{NATIVE}}写一句简短的话，说明错在哪里。',
@@ -70,6 +79,10 @@ const ZH: Template = {
       { said: '昨日、友達と映画を見ます。', corrected: '昨日、友達と映画を見ました。', why: '“昨日”说的是过去的事，动词要用过去式“見ました”。' },
       { said: '今日は天気がいいですね。' },
       { said: '私は学校を行きます。', corrected: '私は学校に行きます。', why: '表示去的目的地要用助词“に”，不能用“を”。' },
+      { said: '今日めっちゃ寒いね早く帰ろう' },
+      { said: 'ごめん遅れた今向かってる' },
+      { said: 'この映画は面白いでした', corrected: 'この映画は面白かったです', why: '“面白い”是い形容词，过去式是“面白かったです”，不能加“でした”。' },
+      { said: 'あそれ知ってる前に友達から聞いた' },
     ],
     en: [
       { said: 'Yesterday I go to the cinema with my friend.', corrected: 'Yesterday I went to the cinema with my friend.', why: '“yesterday”说的是过去的事，动词要用过去式“went”。' },
@@ -87,6 +100,7 @@ const EN: Template = {
     'You are a {{SPOKEN}} speaking coach. The learner\'s native language is {{NATIVE}}.',
     'Each user message is one thing the learner just said aloud in {{SPOKEN}}, written down by a speech recognizer. Punctuation, spacing and the spelling of homophones may be the recognizer\'s doing and are not the learner\'s mistakes. Judge only grammar, word choice and naturalness.',
     '{{HINTS}}',
+    'This is talk between friends. What casual speech leaves out (a particle, a subject), contractions, plain forms, slang and unfinished sentences are correct, natural {{SPOKEN}}: do not change them, and missing punctuation is no mistake. Correct only real mistakes of grammar or word choice; when in doubt, reply ✓.',
     'Rules for your reply:',
     '1. If the sentence is correct and natural, reply with exactly one character: ✓',
     '2. Otherwise reply with exactly two lines and nothing else. Line one is the corrected {{SPOKEN}} sentence. Line two is one short sentence in {{NATIVE}} explaining the mistake.',
@@ -108,6 +122,10 @@ const EN: Template = {
       { said: '昨日、友達と映画を見ます。', corrected: '昨日、友達と映画を見ました。', why: '"昨日" is in the past, so the verb needs the past form "見ました".' },
       { said: '今日は天気がいいですね。' },
       { said: '私は学校を行きます。', corrected: '私は学校に行きます。', why: 'A destination takes the particle "に", not "を".' },
+      { said: '今日めっちゃ寒いね早く帰ろう' },
+      { said: 'ごめん遅れた今向かってる' },
+      { said: 'この映画は面白いでした', corrected: 'この映画は面白かったです', why: '"面白い" is an い-adjective: its past is "面白かったです", never with "でした".' },
+      { said: 'あそれ知ってる前に友達から聞いた' },
     ],
   },
 };

@@ -30,6 +30,11 @@ export interface ApiService {
   keyOf?: string;
   /** Wording for the model field where the service lists nothing to pick from. */
   modelHintKey?: string;
+  /**
+   * What goes with every request to it, so that a one-line answer comes at
+   * once: a model that thinks before it answers is told not to.
+   */
+  quick?: Readonly<Record<string, unknown>>;
 }
 
 export const API_SERVICES: readonly ApiService[] = [
@@ -65,7 +70,10 @@ export const API_SERVICES: readonly ApiService[] = [
     name: 'DeepSeek',
     baseUrl: 'https://api.deepseek.com/v1',
     needsKey: true,
-    prefer: { text: [/^deepseek-chat$/, /^deepseek-v[\d.]+-flash$/] },
+    prefer: { text: [/^deepseek-chat$/, /^deepseek-flash$/, /^deepseek-v[\d.]+-flash$/] },
+    // Its models think first unless told not to. Measured 2026-10-05 on the grammar-feedback sentences: 1.7-2 s an
+    // answer (5-7 s now and then) with about 700 characters of thought, 0.9 s without — and every answer the same.
+    quick: { thinking: { type: 'disabled' } },
   },
   {
     id: 'groq',
@@ -101,6 +109,9 @@ export const API_SERVICES: readonly ApiService[] = [
 ];
 
 const plain = (url: string): string => url.trim().replace(/\/+$/, '').toLowerCase();
+
+/** What goes with a request to an address, where the service there is one that is asked in a way of its own. */
+export const quickOf = (baseUrl: string): Readonly<Record<string, unknown>> | undefined => API_SERVICES.find((s) => plain(s.baseUrl) === plain(baseUrl))?.quick;
 
 /** The services that can serve a stage of this kind. */
 export const servicesFor = (kind: ApiKind): readonly ApiService[] => API_SERVICES.filter((s) => s.prefer[kind] !== undefined);

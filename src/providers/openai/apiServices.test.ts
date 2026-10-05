@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { API_SERVICES, preferredModel, serviceOf, servicesFor } from './apiServices';
+import { API_SERVICES, preferredModel, quickOf, serviceOf, servicesFor } from './apiServices';
 
 const service = (id: string) => API_SERVICES.find((s) => s.id === id)!;
 
@@ -22,6 +22,15 @@ describe('the services an API model usually is', () => {
   it('has an address with a scheme and no trailing slash, and each id once', () => {
     for (const s of API_SERVICES) expect(s.baseUrl).toMatch(/^https?:\/\/[^\s]+[^/]$/);
     expect(new Set(API_SERVICES.map((s) => s.id)).size).toBe(API_SERVICES.length);
+  });
+});
+
+describe('a service whose models think before they answer', () => {
+  it('is asked not to, by its address, however that was typed; any other service is asked as it was', () => {
+    expect(quickOf('https://api.deepseek.com/v1')).toEqual({ thinking: { type: 'disabled' } });
+    expect(quickOf(' HTTPS://API.DeepSeek.com/v1/ ')).toEqual({ thinking: { type: 'disabled' } });
+    expect(quickOf('https://api.openai.com/v1')).toBeUndefined();
+    expect(quickOf('http://localhost:1234/v1')).toBeUndefined();
   });
 });
 

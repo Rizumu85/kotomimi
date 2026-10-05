@@ -54,13 +54,21 @@ describe('the grammar-feedback prompt, chosen by language', () => {
     expect(system).toContain('one short sentence in Korean');
   });
 
+  it('says that casual speech is right speech, in the language being practised', () => {
+    expect(coachPrompt('ja', 'zh-CN').system).toContain('都是正确而自然的日语，不要改');
+    expect(coachPrompt('ko', 'en').system).toContain('are correct, natural Korean: do not change them');
+  });
+
   it('carries worked examples as chat turns in the shape the row shows: two lines for a mistake, a bare ✓ for none', () => {
     const { shots } = coachPrompt('ja', 'zh-CN');
-    expect(shots).toEqual([
+    expect(shots.slice(0, 3)).toEqual([
       { said: '昨日、友達と映画を見ます。', answer: '昨日、友達と映画を見ました。\n“昨日”说的是过去的事，动词要用过去式“見ました”。' },
       { said: '今日は天気がいいですね。', answer: '✓' },
       { said: '私は学校を行きます。', answer: '私は学校に行きます。\n表示去的目的地要用助词“に”，不能用“を”。' },
     ]);
+    // Casual speech among them, right as it is — with no particle, no full stop — and one casual mistake.
+    expect(shots.slice(3).map((shot) => shot.answer.split('\n')[0])).toEqual(['✓', '✓', 'この映画は面白かったです', '✓']);
+    expect(coachPrompt('ja', 'en').shots).toHaveLength(7);
     expect(coachPrompt('en', 'zh-CN').shots.map((s) => s.answer.split('\n')[0])).toEqual(['Yesterday I went to the cinema with my friend.', '✓']);
     // No examples for a pair that has none.
     expect(coachPrompt('ru', 'zh-CN').shots).toEqual([]);
@@ -71,7 +79,7 @@ describe('the grammar-feedback prompt, chosen by language', () => {
     expect(own).toEqual({ system: '用中文（中国）指出这句日语的敬语问题。'.replace('中文（中国）', languageNameInZh()), shots: [] });
     expect(coachPrompt('ko', 'zh-CN', '检查{{SPOKEN}}').system).toBe('检查韩语');
     // Blank is no prompt of the user's.
-    expect(coachPrompt('ja', 'zh-CN', '   ').shots).toHaveLength(3);
+    expect(coachPrompt('ja', 'zh-CN', '   ').shots).toHaveLength(7);
   });
 });
 

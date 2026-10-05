@@ -55,6 +55,7 @@ import { buildDefaultLocalPrompt } from '../../lib/local-inference/prompts';
 import { boundedFetch } from '../../lib/provider/boundedFetch';
 import { CheckError } from '../../lib/provider/checkError';
 import { AUTO } from '../../lib/provider/languages';
+import { quickOf } from './apiServices';
 import type { CheckContext, CheckResult, CredentialField, CredentialsMissing, MigrationInputs, Provider, ProviderRefusal, SharedSettings } from '../../lib/provider/types';
 import { admitLocalInference, type LocalInferenceConfig } from '../localInference/config';
 import { LOCAL_INFERENCE_DEFAULTS } from '../localInference/settings';
@@ -298,6 +299,9 @@ function migratePlaces(stored: Readonly<Record<string, unknown>>, legacy: Readon
 const byLanguage = (stored: unknown): Record<string, string> => (stored && typeof stored === 'object' && !Array.isArray(stored)
   ? Object.fromEntries(Object.entries(stored as Record<string, unknown>).filter((entry): entry is [string, string] => typeof entry[1] === 'string' && entry[1] !== ''))
   : {});
+
+/** A service that is asked in a way of its own (`apiServices.ts`): what goes with the request. */
+const quick = (baseUrl: string): { extra?: Readonly<Record<string, unknown>> } => { const extra = quickOf(baseUrl); return extra ? { extra } : {}; };
 
 export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>, inputs: MigrationInputs): LocalAISettings {
   const text = (k: 'asrModel' | 'asrApiBaseUrl' | 'asrApiModel' | 'translateBaseUrl' | 'coachDeviceModel' | 'coachPrompt' | 'asrHereModel' | 'asrNativeModel' | 'translateHereModel' | 'translateNativeModel' | 'coachHereModel' | 'hereAddress' | 'herePipeline') => (typeof stored[k] === 'string' ? (stored[k] as string) : LOCALAI_DEFAULTS[k]);
@@ -831,7 +835,7 @@ export function buildLocalAI(context: SessionContext, s: LocalAISettings, shared
     if (!id && !coached) return { refused: `No translation model is downloaded for ${source} → ${target}.`, code: 'local_models_missing' };
     if (id) translate = { via: 'device', kind: 'translate', model: id, system: buildDefaultLocalPrompt(deviceLanguage(source), deviceLanguage(target)), wrapTranscript: true };
   } else if (s.translateAt === 'api') {
-    if (apiBase && apiModel) translate = { kind: 'translate', baseUrl: apiBase, model: apiModel, ...(s.translateNeedsKey ? { key: 'translateKey' as const } : {}), system: base.instructions, ...pairFor(apiModel, 'translate') };
+    if (apiBase && apiModel) translate = { kind: 'translate', baseUrl: apiBase, model: apiModel, ...(s.translateNeedsKey ? { key: 'translateKey' as const } : {}), system: base.instructions, ...pairFor(apiModel, 'translate'), ...quick(apiBase) };
   } else if (asksServer && askedServerModel) {
     // Another Kotomimi answers nothing inside its socket: its pipeline's name, asked over chat, runs its own best translation model for the pair.
     const itsOwn = !serverModel && kotomimi && askedServerModel === pipeline;
@@ -861,6 +865,7 @@ export function buildLocalAI(context: SessionContext, s: LocalAISettings, shared
         ...(prompt.shots.length ? { shots: prompt.shots } : {}),
         // Feedback is written in the speaker's own language, around a sentence in the one they practise.
         language: source,
+        ...(api ? quick(baseUrl) : {}),
       };
     }
     // The speaker speaks the target language; what they type is still their own, and is translated.
