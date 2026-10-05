@@ -29,14 +29,16 @@ export interface NativeModel {
 
 /**
  * The Mac's own speech recognition (`electron/apple-speech.js`): one model to
- * a language, since the system fetches each language's assets apart. A
- * stretch the detector cuts is closed there — closed, the recognizer writes
- * all it heard at once, where its settled text otherwise comes ten seconds
- * late — and no recognition runs long.
+ * a language, since the system fetches each language's assets apart. Its
+ * settled text comes ten seconds late while a recognition runs, and all at
+ * once when it is closed: so one that has run ten seconds is closed at the
+ * next gap between words — not where the detector cuts, which is in the
+ * middle of one (measured: 「すごい大きいやつ」 came out as 「すごく。」 and
+ * 「いやつ」) — and at a cut only once it has run twice as long.
  */
 export const APPLE_PREFIX = 'apple-speech:';
 const APPLE_LANGUAGES = ['ja', 'en', 'ko', 'zh', 'es', 'fr', 'de', 'it', 'pt', 'hi', 'yue'] as const;
-const APPLE_LIMITS: Partial<NativeLimits> = { rollAfter: 20, rollAt: 0, rollHard: 40 };
+const APPLE_LIMITS: Partial<NativeLimits> = { rollAfter: 10, rollAt: 20, rollHard: 28 };
 const isApple = (id: string | null | undefined): boolean => typeof id === 'string' && id.startsWith(APPLE_PREFIX);
 
 export const NATIVE_MODELS: readonly NativeModel[] = [

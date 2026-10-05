@@ -110,13 +110,13 @@ describe('the system recognizer of a Mac, one model to a language', () => {
     // Another engine's model is the same for every language it hears.
     expect(nativeModelFor('r2t2-q8', 'zh-CN')?.id).toBe('r2t2-q8');
     expect(nativeModelFor('r2t2-q8', 'th')).toBeNull();
-    expect(nativeModel(`${APPLE_PREFIX}ja`).limits).toMatchObject({ rollAt: 0 });
+    expect(nativeModel(`${APPLE_PREFIX}ja`).limits).toMatchObject({ rollAfter: 10, rollAt: 20 });
   });
 
-  it('builds each leg with the model of its own language, closed at every cut of the detector', () => {
+  it('builds each leg with the model of its own language, and its own limits on how long a recognition runs', () => {
     const speaker = buildLocalAI(SPEAKER, settings({ ...NATIVE, asrNativeModel: `${APPLE_PREFIX}ja` }), shared);
     if ('refused' in speaker) throw new Error(speaker.refused);
-    expect(speaker.device).toMatchObject({ modelId: `${APPLE_PREFIX}ja`, native: { model: `${APPLE_PREFIX}ja`, limits: { rollAt: 0 } } });
+    expect(speaker.device).toMatchObject({ modelId: `${APPLE_PREFIX}ja`, native: { model: `${APPLE_PREFIX}ja`, limits: { rollAfter: 10 } } });
     const participant = buildLocalAI({ ...SPEAKER, direction: { source: 'zh-CN', target: 'ja' } }, settings({ ...NATIVE, asrNativeModel: `${APPLE_PREFIX}ja` }), shared);
     if ('refused' in participant) throw new Error(participant.refused);
     expect(participant.device).toMatchObject({ modelId: `${APPLE_PREFIX}zh`, native: { model: `${APPLE_PREFIX}zh` } });

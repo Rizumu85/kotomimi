@@ -75,9 +75,15 @@ export const ROLL_AFTER_SECONDS = 45;
 /** …or where the detector cuts, once it is this long, or anywhere at this: the engine's own limit is near two minutes. */
 export const ROLL_AT_SECONDS = 60;
 export const ROLL_HARD_SECONDS = 90;
-/** A gap between words: this long with no sample louder than this (of 32768). */
+/**
+ * A gap between words: this long with no sample louder than a tenth of how loud the voice has lately been — or than
+ * this (of 32768), for a voice that is very quiet itself.
+ */
 const GAP_SECONDS = 0.2;
 const GAP_PEAK = 600;
+const GAP_OF_LEVEL = 0.1;
+/** How loud the voice has lately been: the loudest sample, let down by this much with every piece of sound. */
+const LEVEL_DECAY = 0.995;
 /** How long a closed recognition's last words are waited for. Its sound is already heard: they come at once, or the engine is stuck. */
 export const LAST_WORDS_TIMEOUT_MS = 4000;
 
@@ -128,6 +134,8 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
   let live: Stream | null = null;
   /** Samples in a row with nothing loud, while the live recognition is old enough to begin again. */
   let quiet = 0;
+  /** How loud the voice has lately been (`LEVEL_DECAY`). */
+  let level = 0;
   /** The detector hears a voice now; and, while it does not but a recognition is open, for how many samples it has not. */
   let voice = false;
   let idle = 0;
@@ -345,11 +353,14 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
       if (live) {
         give(live, kept);
         const age = secondsOf(live.samples);
+        let peak = 0;
+        for (let i = 0; i < kept.length; i += 1) {
+          const size = kept[i] < 0 ? -kept[i] : kept[i];
+          if (size > peak) peak = size;
+        }
+        const loud = peak > Math.max(GAP_PEAK, level * GAP_OF_LEVEL);
+        level = Math.max(peak, level * LEVEL_DECAY);
         if (age >= limits.rollAfter) {
-          let loud = false;
-          for (let i = 0; i < kept.length; i += 1) {
-            if (kept[i] > GAP_PEAK || kept[i] < -GAP_PEAK) { loud = true; break; }
-          }
           quiet = loud ? 0 : quiet + kept.length;
           if (secondsOf(quiet) >= GAP_SECONDS || age >= limits.rollHard) roll(live);
         }
