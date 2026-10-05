@@ -41,6 +41,8 @@ const CACHE_MS = 5000;
 /** A session LocalAI never confirms holds the turn this long, and no longer: it does not keep every other device waiting. */
 const CONFIGURE_TIMEOUT_MS = 30_000;
 /** The name the app's own pipeline answers to (`src/lib/lan/protocol.ts`): what a device asks when it leaves the model to this computer. */
+/** What is kept of a session's messages while the model server comes up: a minute of audio is under 4 MiB as base64. */
+const QUEUE_MAX_BYTES = 8 * 1024 * 1024;
 const OWN_PIPELINE = 'kotomimi';
 const NONE = { pipelines: [], recognizers: [], translators: [] };
 
@@ -203,6 +205,7 @@ function createUpstream({ port, pipelines, setPipeline, ownFirst = async () => f
     let configured = false;
     let ended = false;
     const queue = [];
+    let queued = 0;
     let leaveTurn = () => {};
     let limit = null;
     /** The recognizer this session runs on, counted among those in use until it ends. */
@@ -252,6 +255,7 @@ function createUpstream({ port, pipelines, setPipeline, ownFirst = async () => f
             ready = true;
             ws.send(JSON.stringify(withoutRecognizer(update)));
             for (const held of queue.splice(0)) ws.send(held);
+            queued = 0;
             return;
           }
           // Its answer to the session's settings, either way, ends the turn.
@@ -270,8 +274,16 @@ function createUpstream({ port, pipelines, setPipeline, ownFirst = async () => f
     return {
       send(text) {
         if (ended) return;
-        if (ready) ws.send(text);
-        else queue.push(text);
+        if (ready) return void ws.send(text);
+        // Kept only up to a bound while the model server comes up: a device that streams meanwhile does not fill
+        // this computer's memory.
+        queued += String(text).length;
+        if (queued > QUEUE_MAX_BYTES) {
+          queue.length = 0;
+          fail('Too much was sent before the session was set up.', 1009);
+          return;
+        }
+        queue.push(text);
       },
       close(code, reason) {
         ended = true;

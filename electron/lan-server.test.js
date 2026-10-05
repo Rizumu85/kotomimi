@@ -7,10 +7,11 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { createRequire } from 'node:module';
 import net from 'node:net';
+import http from 'node:http';
 import WebSocket from 'ws';
 
 const require = createRequire(import.meta.url);
-const { startLanServer, lanAddresses } = require('./lan-server.js');
+const { startLanServer, lanAddresses, isNeighbour, isLocalHost, MAX_SOCKETS_PER_DEVICE } = require('./lan-server.js');
 
 let running = [];
 afterEach(async () => {
@@ -63,7 +64,7 @@ const dial = (url, protocols) => new Promise((resolve) => {
 });
 
 describe('the shared models\' door: HTTP', () => {
-  it('hands a GET to the page and answers with what the page replies, readable from any origin', async () => {
+  it('hands a GET to the page and answers with what the page replies', async () => {
     const { server, seen, base } = await start();
     const answer = fetch(`${base}/v1/models`);
     await until(() => seen.requests.length === 1);
@@ -71,7 +72,8 @@ describe('the shared models\' door: HTTP', () => {
     expect(server.reply(seen.requests[0].id, { body: { object: 'list', data: [{ id: 'kotomimi' }] } })).toBe(true);
     const response = await answer;
     expect(response.status).toBe(200);
-    expect(response.headers.get('access-control-allow-origin')).toBe('*');
+    // A program names no origin, and is owed no cross-origin header: there is no wildcard for a web page to read by.
+    expect(response.headers.get('access-control-allow-origin')).toBeNull();
     // This computer's name rides on every answer: a device searching the network lists it by that.
     expect(decodeURIComponent(response.headers.get('x-kotomimi-name'))).toBe('里兹 PC');
     expect(server.name).toBe('里兹 PC');
@@ -95,7 +97,7 @@ describe('the shared models\' door: HTTP', () => {
     const { seen, base } = await start();
     const preflight = await fetch(`${base}/v1/chat/completions`, { method: 'OPTIONS' });
     expect(preflight.status).toBe(204);
-    expect(preflight.headers.get('access-control-allow-headers')).toContain('Authorization');
+    expect(preflight.headers.get('access-control-allow-origin')).toBeNull();
     expect((await fetch(`${base}/v1/audio/speech`, { method: 'POST', body: '{}' })).status).toBe(404);
     expect((await fetch(`${base}/`)).status).toBe(404);
     expect((await fetch(`${base}/v1/chat/completions`, { method: 'POST', body: 'not json' })).status).toBe(400);
@@ -364,5 +366,169 @@ describe('the shared models\' door: a session left running', () => {
     expect(closes).toBe(0);
     // Then no one does: both go.
     await until(() => closes === 2);
+  });
+});
+
+// From the security review of 2026-10-06 (FORK.md, "共享的安全加固"): what the door refuses.
+describe('the shared models\' door: who is turned away', () => {
+  /** An HTTP request with its own headers, answered with the status and the headers. */
+  const ask = (port, path, headers) => new Promise((resolve, reject) => {
+    const request = http.get({ host: '127.0.0.1', port, path, headers }, (response) => {
+      response.resume();
+      resolve({ status: response.statusCode, headers: response.headers });
+    });
+    request.on('error', reject);
+  });
+
+  it('refuses a Realtime socket opened by a web page, key or not', async () => {
+    const { server, ws } = await start();
+    // A browser always sends Origin on a WebSocket; the app's own client runs in Node or Electron's main process, or sends its own origin.
+    const answer = await new Promise((resolve) => {
+      const socket = new WebSocket(`${ws}/v1/realtime`, { headers: { Origin: 'https://attacker.example' } });
+      socket.on('open', () => { socket.close(); resolve({ status: 101 }); });
+      socket.on('unexpected-response', (_request, response) => resolve({ status: response.statusCode }));
+      socket.on('error', () => {});
+    });
+    expect(answer.status).toBe(403);
+    expect(server.count()).toBe(0);
+  });
+
+  it('gives a cross-origin page no readable answer: no wildcard', async () => {
+    const { server, seen } = await start();
+    const answer = ask(server.port, '/v1/models', { Origin: 'https://attacker.example' });
+    await new Promise((r) => setTimeout(r, 50));
+    for (const r of seen.requests) server.reply(r.id, { body: { object: 'list', data: [] } });
+    const { headers } = await answer;
+    expect(headers['access-control-allow-origin']).not.toBe('*');
+  });
+
+  it('refuses a request sent to this computer under a site\u2019s name (DNS rebinding)', async () => {
+    const { server, seen } = await start();
+    const answer = ask(server.port, '/v1/models', { Host: `rebind.attacker.example:${server.port}` });
+    await new Promise((r) => setTimeout(r, 50));
+    for (const r of seen.requests) server.reply(r.id, { body: { object: 'list', data: [] } });
+    expect([403, 421]).toContain((await answer).status);
+    expect(seen.requests).toHaveLength(0);
+  });
+
+  it('answers the app\u2019s own page by its origin, and a web page not at all', async () => {
+    const { server, seen } = await start();
+    const own = ask(server.port, '/v1/models', { Origin: 'file://' });
+    await until(() => seen.requests.length === 1);
+    server.reply(seen.requests[0].id, { body: { object: 'list', data: [] } });
+    const answered = await own;
+    expect(answered.status).toBe(200);
+    expect(answered.headers['access-control-allow-origin']).toBe('file://');
+    // A web page, whether it reads the answer or only fires the request: refused before the page is troubled.
+    for (const origin of ['https://attacker.example', 'http://192.168.1.50', 'null']) {
+      expect((await ask(server.port, '/v1/models', { Origin: origin })).status, origin).toBe(403);
+    }
+    const blind = await fetch(`http://127.0.0.1:${server.port}/v1/chat/completions`, { method: 'POST', headers: { Origin: 'https://attacker.example', 'Content-Type': 'text/plain' }, body: '{"model":"x","messages":[]}' });
+    expect(blind.status).toBe(403);
+    expect(seen.requests).toHaveLength(1);
+  });
+
+  it('is reached by an address, a bare name or a local name, and by no site\u2019s name', () => {
+    for (const host of ['192.168.4.29:8790', '[fe80::1]:8790', 'localhost:8790', 'RizumPC:8790', 'rizum-mac.local:8790', 'pc.lan', '', undefined]) expect(isLocalHost(host), String(host)).toBe(true);
+    for (const host of ['rebind.attacker.example:8790', 'rizumpc.attacker.com', 'a b', 'evil.com.']) expect(isLocalHost(host), String(host)).toBe(false);
+  });
+
+  it('lets in this computer and private networks — a VPN\u2019s range among them — and no public address', async () => {
+    for (const address of ['127.0.0.1', '::1', '::ffff:192.168.4.105', '10.0.0.5', '172.16.3.4', '172.31.255.1', '169.254.1.1', '100.101.102.103', 'fe80::1%eth0', 'fd12::1']) expect(isNeighbour(address), address).toBe(true);
+    for (const address of ['203.0.113.7', '8.8.8.8', '172.32.0.1', '100.128.0.1', '2001:db8::1', '', undefined]) expect(isNeighbour(address), String(address)).toBe(false);
+    // The server itself: a caller from a public address is refused on both doors.
+    const seen = { requests: [] };
+    const server = await startLanServer({ port: 0, host: '127.0.0.1', addressOf: () => '203.0.113.7' }, { request: (r) => seen.requests.push(r), socketOpen() {}, socketMessage() {}, socketClose() {} });
+    running.push(server);
+    expect((await ask(server.port, '/v1/models', {})).status).toBe(403);
+    expect(await dial(`ws://127.0.0.1:${server.port}/v1/realtime`, ['realtime'])).toEqual({ status: 403 });
+    expect(seen.requests).toHaveLength(0);
+  });
+
+  it('still names itself to a device that has no key yet: that is how a search lists it, and the name is the network\u2019s to see anyway', async () => {
+    // Weighed in the review (F7) and kept: without the name a keyed computer is an address in the list.
+    const { server } = await start('the-key');
+    const { status, headers } = await ask(server.port, '/v1/models', {});
+    expect(status).toBe(401);
+    expect(decodeURIComponent(headers['x-kotomimi-name'])).toBe('里兹 PC');
+  });
+
+  it('turns an address away for a while after ten wrong keys, and counts neither a right key nor none', async () => {
+    const seen = { requests: [] };
+    const server = await startLanServer({ port: 0, key: 'the-key', host: '127.0.0.1', keyTries: 3, keyWindowMs: 150 }, { request: (r) => seen.requests.push(r), socketOpen() {}, socketMessage() {}, socketClose() {} });
+    running.push(server);
+    const wrong = () => ask(server.port, '/v1/models', { Authorization: 'Bearer nope' });
+    // A device only looking sends no key: answered 401 every time, and never counted.
+    for (let i = 0; i < 6; i += 1) expect((await ask(server.port, '/v1/models', {})).status).toBe(401);
+    for (let i = 0; i < 3; i += 1) expect((await wrong()).status).toBe(401);
+    expect((await wrong()).status).toBe(429);
+    // The right key too, for that while: the count is of the address.
+    expect((await ask(server.port, '/v1/models', { Authorization: 'Bearer the-key' })).status).toBe(429);
+    expect(await dial(`ws://127.0.0.1:${server.port}/v1/realtime`, ['realtime', 'openai-insecure-api-key.the-key'])).toEqual({ status: 429 });
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    const right = ask(server.port, '/v1/models', { Authorization: 'Bearer the-key' });
+    await until(() => seen.requests.length === 1);
+    server.reply(seen.requests[0].id, { body: { object: 'list', data: [] } });
+    expect((await right).status).toBe(200);
+  });
+
+  it('gives one device no more than its share of the sockets', async () => {
+    const { server, ws } = await start();
+    const mine = [];
+    for (let i = 0; i < MAX_SOCKETS_PER_DEVICE; i += 1) mine.push((await dial(`${ws}/v1/realtime`, ['realtime'])).socket);
+    expect(mine.every(Boolean)).toBe(true);
+    expect(await dial(`${ws}/v1/realtime`, ['realtime'])).toEqual({ status: 503 });
+    expect(server.count()).toBe(MAX_SOCKETS_PER_DEVICE);
+    // One closed makes room for one.
+    mine[0].close();
+    await until(() => server.count() === MAX_SOCKETS_PER_DEVICE - 1);
+    expect((await dial(`${ws}/v1/realtime`, ['realtime'])).socket).toBeTruthy();
+  });
+
+  it('closes a socket that never says what it wants, and leaves one that does', async () => {
+    const seen = { closed: [] };
+    const server = await startLanServer({ port: 0, host: '127.0.0.1', handshakeTimeoutMs: 80 }, { request() {}, socketOpen() {}, socketMessage() {}, socketClose: (c) => seen.closed.push(c) });
+    running.push(server);
+    const silent = await dial(`ws://127.0.0.1:${server.port}/v1/realtime`, ['realtime']);
+    const spoken = await dial(`ws://127.0.0.1:${server.port}/v1/realtime`, ['realtime']);
+    spoken.socket.send(JSON.stringify({ type: 'session.update', session: {} }));
+    let code = null;
+    silent.socket.on('close', (c) => { code = c; });
+    await until(() => code !== null);
+    expect(code).toBe(1008);
+    await new Promise((resolve) => setTimeout(resolve, 60));
+    expect(spoken.socket.readyState).toBe(1);
+    expect(server.count()).toBe(1);
+  });
+});
+
+describe('the shared models\' door: what a socket may make it hold', () => {
+  it('hands a socket to the page when the model server takes too long to say whose it is', async () => {
+    const upstream = { models: async () => [], chatModel: async () => null, recognizer: () => new Promise(() => {}), bridge: () => ({ send() {}, close() {} }) };
+    const seen = { messages: [] };
+    const server = await startLanServer({ port: 0, host: '127.0.0.1', upstream, decideTimeoutMs: 60 }, { request() {}, socketOpen() {}, socketMessage: (m) => seen.messages.push(m), socketClose() {} });
+    running.push(server);
+    const { socket } = await dial(`ws://127.0.0.1:${server.port}/v1/realtime`);
+    socket.send(JSON.stringify({ type: 'session.update', session: { audio: { input: { transcription: { model: 'x', language: 'en' } } } } }));
+    socket.send(JSON.stringify({ type: 'input_audio_buffer.append', audio: 'AAAA' }));
+    await until(() => seen.messages.length === 2);
+    expect(seen.messages.map((m) => JSON.parse(m.data).type)).toEqual(['session.update', 'input_audio_buffer.append']);
+    expect(socket.readyState).toBe(1);
+  });
+
+  it('does not keep every frame a device sends while it decides whose the socket is', async () => {
+    // A model server slow to say what it serves: the door holds the socket's frames until it has.
+    const upstream = { models: async () => [], chatModel: async () => null, recognizer: () => new Promise(() => {}), bridge: () => ({ send() {}, close() {} }) };
+    const server = await startLanServer({ port: 0, host: '127.0.0.1', upstream }, { request() {}, socketOpen() {}, socketMessage() {}, socketClose() {} });
+    running.push(server);
+    const { socket } = await dial(`ws://127.0.0.1:${server.port}/v1/realtime`);
+    let closed = null;
+    socket.on('close', (code) => { closed = code; });
+    socket.send(JSON.stringify({ type: 'session.update', session: { audio: { input: { transcription: { model: 'x', language: 'en' } } } } }));
+    const frame = JSON.stringify({ type: 'input_audio_buffer.append', audio: 'A'.repeat(4 * 1024 * 1024 - 64) });
+    // 64 MiB: far beyond a minute of audio, which is what the page itself keeps for a model still loading.
+    for (let i = 0; i < 16 && socket.readyState === 1; i += 1) socket.send(frame);
+    await until(() => closed !== null);
+    expect([1008, 1009]).toContain(closed);
   });
 });

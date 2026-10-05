@@ -67,8 +67,21 @@ export function capabilityList(models: readonly SharedModel[]): { object: 'list'
 }
 
 /** An error as OpenAI words one, for an HTTP body or a socket's `error` event. */
+/**
+ * A failure's words as another device may read them: a file of this computer
+ * is not named. An engine's own message often carries one — a model's file
+ * under the user's folder, with the user's name in it — and the device needs
+ * to know that it failed, not where things are kept here.
+ */
+export function withoutPaths(message: string): string {
+  return message
+    .replace(/file:\/\/[^\s"'<>)]+/gi, '…')
+    .replace(/[A-Za-z]:[\\/][^\s"'<>|)]+/g, '…')
+    .replace(/(^|[\s"'(=:])\/(?:Users|home|var|tmp|private|opt|usr|Applications|Library|Volumes|mnt)\/[^\s"'<>)]*/g, '$1…');
+}
+
 export function wireError(code: string, message: string): { message: string; type: 'invalid_request_error'; code: string } {
-  return { message, type: 'invalid_request_error', code };
+  return { message: withoutPaths(message), type: 'invalid_request_error', code };
 }
 
 /** What the catalog calls a language: its base (`zh-CN` → `zh`), lower-cased; '' for none. */

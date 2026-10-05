@@ -475,3 +475,17 @@ describe('the sharing host', () => {
     expect(x.door.listeners.size).toBe(0);
   });
 });
+
+describe('what another device is told of a failure', () => {
+  it('names no file of this computer', async () => {
+    const { withoutPaths, wireError } = await import('./protocol');
+    expect(withoutPaths('The speech recognition model could not load: ENOENT: no such file, open \'C:\\Users\\里兹\\AppData\\Roaming\\Kotomimi\\models\\x.onnx\'')).toBe('The speech recognition model could not load: ENOENT: no such file, open \'…\'');
+    expect(withoutPaths('failed to read /Users/rizum/Library/Application Support/Kotomimi/model.gguf: denied')).toBe('failed to read … Support/Kotomimi/model.gguf: denied');
+    expect(withoutPaths('could not fetch file:///S:/build/wasm/ort.wasm')).toBe('could not fetch …');
+    expect(withoutPaths('D:/models/a.bin is not a model')).toBe('… is not a model');
+    // What is no path stays: a route of the API, a ratio, a time.
+    expect(withoutPaths('Kotomimi shares no POST /v1/audio/speech.')).toBe('Kotomimi shares no POST /v1/audio/speech.');
+    expect(withoutPaths('The language is required: e.g. ja or zh-CN (3/4 done at 12:30).')).toBe('The language is required: e.g. ja or zh-CN (3/4 done at 12:30).');
+    expect(wireError('server_error', 'open C:\\secret\\a.txt failed')).toEqual({ message: 'open … failed', type: 'invalid_request_error', code: 'server_error' });
+  });
+});
