@@ -69,7 +69,21 @@ export function vadFrom(turnDetection: unknown): VadWebConfig {
   return DEFAULT_VAD;
 }
 
-interface Item { id: string; sent: string; committed: boolean }
+interface Item { id: string; sent: string; committed: boolean; /** The hypothesis before this one. */ last: string }
+
+/**
+ * What two hypotheses in a row have in common from their start, without the
+ * punctuation and space it ends with: the part a recognizer that reads a
+ * stretch again and again is not likely to write otherwise the next time. The
+ * mark a hypothesis ends with is the first thing the next one changes.
+ */
+export function agreed(before: string, now: string): string {
+  let n = 0;
+  while (n < before.length && n < now.length && before[n] === now[n]) n += 1;
+  // Never half of a character written in two units.
+  if (n > 0 && n < now.length && /[\uD800-\uDBFF]/.test(now[n - 1])) n -= 1;
+  return now.slice(0, n).replace(/[\s\p{P}]+$/u, '');
+}
 
 export class LanTranscriber {
   private engine: Recognizer | null = null;
@@ -227,7 +241,7 @@ export class LanTranscriber {
   }
 
   private open_(): Item {
-    if (!this.item) this.item = { id: `item_${this.sessionId}_${++this.items}`, sent: '', committed: false };
+    if (!this.item) this.item = { id: `item_${this.sessionId}_${++this.items}`, sent: '', committed: false, last: '' };
     return this.item;
   }
 
@@ -236,13 +250,22 @@ export class LanTranscriber {
     this.deps.send({ type: 'input_audio_buffer.speech_started', item_id: item.id });
   }
 
-  /** A partial is the whole hypothesis so far. It goes up as a delta while it only grows; a hypothesis that rewrites itself waits for the final, which carries the whole text. */
+  /**
+   * A partial is the whole hypothesis so far, and a delta can only add to what a device was shown: so what goes up is
+   * what this hypothesis and the one before it agree on (`agreed`), once that is more than was sent. A recognizer
+   * that only ever adds is one hypothesis behind for it; one that reads a stretch again and rewrites its end — the
+   * Mac's own, Qwen3-ASR in the native engine — is shown live all the same, where before its first rewriting left the
+   * device waiting for the final. What was sent and is then written otherwise waits for the final, which carries the
+   * whole text.
+   */
   private partial(raw: string): void {
     const text = raw.trim();
     const item = this.open_();
-    if (!text || !text.startsWith(item.sent) || text === item.sent) return;
-    this.deps.send({ type: 'conversation.item.input_audio_transcription.delta', item_id: item.id, content_index: 0, delta: text.slice(item.sent.length) });
-    item.sent = text;
+    const settled = agreed(item.last, text);
+    item.last = text;
+    if (!settled.startsWith(item.sent) || settled === item.sent) return;
+    this.deps.send({ type: 'conversation.item.input_audio_transcription.delta', item_id: item.id, content_index: 0, delta: settled.slice(item.sent.length) });
+    item.sent = settled;
   }
 
   private final(raw: string): void {

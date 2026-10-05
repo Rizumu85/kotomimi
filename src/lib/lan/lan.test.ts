@@ -138,16 +138,19 @@ describe('a Realtime socket of a sharing Kotomimi', () => {
     expect(s.types()).toEqual(['session.updated']);
   });
 
-  it('writes one utterance as the GA events: started, deltas while the text only grows, stopped, committed, completed', async () => {
+  it('writes one utterance as the GA events: started, deltas of what two hypotheses in a row agree on, stopped, committed, completed', async () => {
     const s = socket();
     s.update('zh');
     await s.engine().loaded();
     const e = s.engine();
     e.onSpeechStart?.();
+    // The first hypothesis has nothing before it to agree with.
     e.onPartialResult?.('今天');
     e.onPartialResult?.('今天天气');
-    // A hypothesis that rewrites itself is not a delta: the final carries the whole text.
+    e.onPartialResult?.('今天天气很');
+    // A hypothesis that rewrites what was sent is not a delta: the final carries the whole text.
     e.onPartialResult?.('今日天气');
+    e.onPartialResult?.('今日天气很好');
     e.onResult?.({ text: ' 今日天气很好 ', durationMs: 1000, recognitionTimeMs: 50 });
     const events = s.sent.slice(1);
     expect(events.map((x) => x.type)).toEqual([
