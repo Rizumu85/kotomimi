@@ -480,7 +480,7 @@ node scripts/fork-make-icons.cjs assets/logo-source.svg
 - 发布用本分支自己的流程 `.github/workflows/kotomimi-release.yml`：
 
 ```bash
-git tag -a v0.42.234 -m "Kotomimi 0.42.234" && git push origin v0.42.234
+git tag -a v0.42.235 -m "Kotomimi 0.42.235" && git push origin v0.42.235
 ```
 
   它会跑本分支的测试，构建 Windows 安装包，尽量构建 macOS（Apple 芯片）版本，然后生成一个**草稿** Release。到 GitHub 的 Releases 页面检查后点发布。只有发布了的 Release 才会被"检查更新"看到。
