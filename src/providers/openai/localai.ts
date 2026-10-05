@@ -64,6 +64,7 @@ import { SERVER_SILENT, isKotomimiServer, kindOf, KOTOMIMI_HOST, modelsFor, serv
 import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
 import { ASR_HERES, coachIs, coachesNatively, cutsSentencesHere, detectsOther, heardBy, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
+import { preferNative } from './localaiNative';
 import { NATIVE_DEFAULT_MODEL, coachBaseUrl, coachGap, coachIdle, coachUp, holdNativeForRun, nativeGap, nativeUp, restNative, translatorUp, nativeWaits, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
 import { NATIVE_DEFAULT_TRANSLATOR, nativeTranslates, nativeTranslator, translatorRequest } from './nativeTranslators';
@@ -737,10 +738,13 @@ async function bringUp(needs: NativeNeeds, ups: NativeUps): Promise<boolean> {
     ...(needs.coaches ? [ups.coaches(needs.coaches)] : []),
   ];
   if (starts.length === 0) return false;
+  // Held while they load: a rest that an earlier run left pending does not stop what this one is waiting for.
+  const loading = holdNativeForRun();
   try {
     await Promise.all(starts);
   } finally {
-    // Whatever came up is let go again if the run never opens: a run that does open holds it (`holdNativeForRun`).
+    // Let go here: whoever asked holds them on (a run, until it ends), or they rest a minute from now.
+    loading();
     ups.rest();
   }
   return true;
@@ -751,8 +755,17 @@ async function bringUp(needs: NativeNeeds, ups: NativeUps): Promise<boolean> {
  * for. Until now nothing held their models in memory; the translation and
  * the feedback are then built with the addresses the engines answer at.
  */
-export async function prepareLocalAI(shape: { pair: { source: string; target: string }; legs: readonly ('speaker' | 'participant')[] }, stored: LocalAISettings, ups: NativeUps = UPS): Promise<Record<string, never>> {
-  await bringUp(nativeNeeds(settled(stored), shape.pair, shape.legs), ups);
+export async function prepareLocalAI(shape: { pair: { source: string; target: string }; legs: readonly ('speaker' | 'participant')[] }, stored: LocalAISettings, ups: NativeUps = UPS, signal?: AbortSignal): Promise<Record<string, never>> {
+  const needs = nativeNeeds(settled(stored), shape.pair, shape.legs);
+  // The run holds its engines from here to its end, whatever that end is: a stop, a refusal after this step, a leg
+  // that never opened, the page going away — the run's signal is aborted on every one of them. Not only from the
+  // moment a leg opens: its source may take a minute to open, and the minute's rest would have stopped them by then.
+  if (signal && (needs.hears || needs.translates || needs.coaches)) {
+    const done = holdNativeForRun();
+    if (signal.aborted) done();
+    else signal.addEventListener('abort', done, { once: true });
+  }
+  await bringUp(needs, ups);
   return {};
 }
 
@@ -762,12 +775,19 @@ export async function prepareLocalAI(shape: { pair: { source: string; target: st
  * waits for it — the engines the settings name are loaded, and let go again a
  * minute later. The check says what they are, whenever it first runs.
  */
-let primeWanted = false;
+/** Until when a prime that was asked for is still wanted: the check that says what to load runs as the app starts, or never (another provider is selected). */
+const PRIME_PATIENCE_MS = 3 * 60_000;
+let primeUntil = 0;
+let primeUps: NativeUps = UPS;
 let lastNeeds: NativeNeeds | null = null;
 const primeNow = (needs: NativeNeeds, ups: NativeUps = UPS) => { void bringUp(needs, ups).catch(() => undefined); };
-export function primeNativeOnce(ups: NativeUps = UPS): void {
-  if (lastNeeds) primeNow(lastNeeds, ups);
-  else primeWanted = true;
+export function primeNativeOnce(ups: NativeUps = UPS, now: () => number = () => Date.now()): void {
+  if (lastNeeds) {
+    primeNow(lastNeeds, ups);
+    return;
+  }
+  primeUps = ups;
+  primeUntil = now() + PRIME_PATIENCE_MS;
 }
 
 /**
@@ -804,9 +824,14 @@ export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISe
   }
   // What a run would load, kept for a start in the background to load once (`primeNativeOnce`).
   lastNeeds = nativeNeeds(s, ctx.pair, ctx.legs);
-  if (primeWanted) {
-    primeWanted = false;
-    primeNow(lastNeeds);
+  // And what a device is given of this computer's engines when it names no model: its owner's own choice.
+  preferNative({ asr: lastNeeds.hears?.pick ?? null, translation: lastNeeds.translates ?? null });
+  if (primeUntil > 0) {
+    const wanted = Date.now() <= primeUntil;
+    primeUntil = 0;
+    // Asked for at sign-in and never answered until much later (another provider was selected then): too late to
+    // be the quiet load it was meant as.
+    if (wanted) primeNow(lastNeeds, primeUps);
   }
   const servers = await check(k, settled(s), ctx);
   // No model of the app's own hears the language, and one of the engine's is downloaded: it is not chosen, which is
@@ -924,7 +949,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
     if (!nativeTranslates(native, source, target)) {
       if (!coached) return { refused: `No translation model is downloaded for ${source} → ${target}.`, code: 'local_models_missing' };
     } else {
-      translate = { kind: 'translate', baseUrl: translatorBaseUrl(), model: native.id, system: '', ...translatorRequest(native, source, target) };
+      translate = { kind: 'translate', engine: 'translator', baseUrl: translatorBaseUrl(), model: native.id, system: '', ...translatorRequest(native, source, target) };
     }
   } else if (s.translateAt === 'device') {
     const id = deviceTranslator(source, target, s.selections);
@@ -945,7 +970,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
     let coach: AnswerStage;
     if (coachesNatively(s)) {
       // The native feedback engine: a chat model at an address on this computer, asked as an API's is — with the worked examples.
-      coach = { kind: 'coach', baseUrl: coachBaseUrl(), model: nativeCoach(s.coachNativeModel).id, system: prompt.system, ...(prompt.shots.length ? { shots: prompt.shots } : {}), language: source };
+      coach = { kind: 'coach', engine: 'coach', baseUrl: coachBaseUrl(), model: nativeCoach(s.coachNativeModel).id, system: prompt.system, ...(prompt.shots.length ? { shots: prompt.shots } : {}), language: source };
     } else if (s.coachAt === 'device') {
       const id = deviceCoachModel(s.coachDeviceModel);
       if (!id) return { refused: NO_COACH_HERE, code: 'local_models_missing' };
@@ -1093,5 +1118,5 @@ export const localaiProvider: Provider<LocalAISettings, LocalAICredentials, Loca
     }
   },
 
-  session: { admit: admitLocalAI, prepare: (shape, s) => prepareLocalAI(shape, s) },
+  session: { admit: admitLocalAI, prepare: (shape, s, signal) => prepareLocalAI(shape, s, UPS, signal) },
 };

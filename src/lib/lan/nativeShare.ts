@@ -14,7 +14,7 @@
  */
 import { ipcNativeBridge } from '../native/nativeEngine';
 import { createNativeAsr } from '../../providers/openai/nativeAsr';
-import { NATIVE_MODELS, holdNative, nativeDownloaded, nativeModel, nativeModelFor, translatorBaseUrl } from '../../providers/openai/localaiNative';
+import { NATIVE_MODELS, holdNative, nativeDownloaded, nativeModel, nativeModelFor, nativePicked, nativePreference, nativeTaken, translatorBaseUrl } from '../../providers/openai/localaiNative';
 import { NATIVE_TRANSLATORS, TEXT_SLOT, nativeTranslates, translatorRequest } from '../../providers/openai/nativeTranslators';
 import { useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import type { SharedModel } from './protocol';
@@ -45,11 +45,20 @@ export function nativeRecognizerFor(language: string, wanted: string): { modelId
   // language: starting another would stop it under whoever is using it.
   const running = status.run.state !== 'stopped' && status.run.state !== 'failed' && status.run.model ? nativeModelFor(status.run.model, language) : null;
   if (running && isNativeRecognizer(running.id) && usable(running.id)) return { modelId: running.id, streaming: true };
+  // The engine is someone's with a model that does not hear this language: it is not switched under them. The
+  // system's own recognition (a Mac) runs beside it, and is still offered.
+  const taken = nativeTaken('asr');
+  const free = (id: string) => usable(id) && (taken === null || id === taken || id.startsWith('apple-speech'));
   if (wanted) {
     const named = nativeModelFor(wanted, language);
-    return named && usable(named.id) ? { modelId: named.id, streaming: true } : null;
+    return named && free(named.id) ? { modelId: named.id, streaming: true } : null;
   }
-  const best = NATIVE_MODELS.find((m) => usable(m.id) && nativeModelFor(m.id, language)?.id === m.id);
+  // Nothing named: this computer's own choice for the language first, so that its owner's next run finds the engine
+  // on the model it would start anyway.
+  const own = nativePreference().asr;
+  const chosen = own ? nativePicked(own, language) : null;
+  if (chosen && free(chosen.id)) return { modelId: chosen.id, streaming: true };
+  const best = NATIVE_MODELS.find((m) => free(m.id) && nativeModelFor(m.id, language)?.id === m.id);
   return best ? { modelId: best.id, streaming: true } : null;
 }
 
@@ -63,8 +72,13 @@ export function nativeTranslatorFor(source: string, target: string, wanted: stri
   // stop it under whoever is using it.
   const running = status.run.state !== 'stopped' && status.run.state !== 'failed' ? status.run.model : null;
   if (running && isNativeTranslator(running) && fits(running)) return running;
-  if (wanted) return fits(wanted) ? wanted : null;
-  return NATIVE_TRANSLATORS.find((m) => fits(m.id))?.id ?? null;
+  // In use with a model that does not translate this pair: not switched under whoever is using it.
+  const taken = nativeTaken('translation');
+  const free = (id: string) => fits(id) && (taken === null || id === taken);
+  if (wanted) return free(wanted) ? wanted : null;
+  const own = nativePreference().translation;
+  if (own && free(own)) return own;
+  return NATIVE_TRANSLATORS.find((m) => free(m.id))?.id ?? null;
 }
 
 /** A recognizer for a native model, as the sharing host drives one; null for any other model. The engine is held while it listens: the app's own check does not stop it under a device that is using it. */

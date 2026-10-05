@@ -625,6 +625,8 @@
       "nativeUnsupported": "The native recognition engine is not available for this system. Choose another model in the Speech recognition card.",
       "nativeMissing": "{{name}} is not downloaded yet. Download it in the Speech recognition card, or choose another model.",
       "nativeWarming": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
+      "nativeInterrupted": "The engine stopped while it was starting. Press Start again.",
+      "nativeBusy": "A device you share with is using this engine with {{name}}. Wait for it to finish, or choose {{name}} here too.",
       "nativeFailed": "The recognition engine of this computer could not start. In the Speech recognition card, press \"Try again\" — or choose another model.",
       "noteNativeR2t2": "Japanese talk, measured: about 18% of the characters wrong. It writes as it listens (about 2.5 s behind) and never changes what it wrote. When the graphics card cannot keep up (a weaker card, or a game running), the text falls further and further behind. About 3 GB of video memory.",
       "noteNativeQwen": "Japanese talk, measured: about 16% of the characters wrong. It writes as you speak (about 1 s behind); the last few words settle when the sentence ends. When the graphics card is busy it only refreshes less often. About 3 GB of video memory, thirty languages.",

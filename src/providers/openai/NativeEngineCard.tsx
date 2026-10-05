@@ -5,6 +5,7 @@
  * use, what the engine is doing: coming up, ready, or why it is not. One
  * card for both engines: the one that hears and the one that translates.
  */
+import { restNative } from './localaiNative';
 import { useMemo } from 'react';
 import { CircleCheck, Loader, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -118,7 +119,7 @@ export function NativeEngineCard({ kind, model, recommended = true, selected, on
       ) : ours && run.state === 'failed' ? (
         <div className="kt-engine kt-engine--failed" role="status">
           <span>{t(words.failed)}</span>
-          <button type="button" className="kt-there__switch" onClick={() => { void store().start(model.id); }} disabled={disabled}>
+          <button type="button" className="kt-there__switch" onClick={() => { void store().start(model.id).finally(() => restNative()); }} disabled={disabled}>
             <RefreshCw size={12} />
             <span>{t('providers.localai.nativeRetry')}</span>
           </button>

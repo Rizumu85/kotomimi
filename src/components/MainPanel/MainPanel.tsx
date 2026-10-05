@@ -216,7 +216,7 @@ export default function MainPanel() {
     ? noticeText(t, { code: idle.code, params: idle.params, message: idle.message })
     : undefined;
   // Fork: this computer's engines are coming up for the run that is starting (`prepareLocalAI`).
-  const loadingEngines = run.phase === 'starting' && enginesComing;
+  const loadingEngines = run.phase === 'starting' && run.step === 'preparing' && provider?.id === 'localai' && enginesComing;
   const missingDevice = idle.kind === 'unready' && idle.code === NO_MICROPHONE ? 'speaker' as const : null;
 
   const speakerLive = run.phase === 'running' && run.legs.speaker === 'live';
@@ -278,6 +278,10 @@ export default function MainPanel() {
       <div className="main-panel">
         {(!takeover || run.phase !== 'idle' || hasConversation) && (
           <PanelToolbar legs={subtitle.legs} exporter={exporter} hasConversation={hasConversation} onClear={onClear} />
+        )}
+        {/* Fork: over a conversation that is still on screen from the last session, where the empty page's words cannot show. */}
+        {!takeover && loadingEngines && items.length > 0 && (
+          <p className="kt-warming__banner" role="status"><Loader size={14} className="kt-warming__spin" /><span>{t('providers.localai.nativeLoading')}</span></p>
         )}
         {takeover ? (
           <div className="conversation-display">

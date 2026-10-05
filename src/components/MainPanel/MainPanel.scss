@@ -667,6 +667,19 @@
   animation: spin 1.4s linear infinite;
 }
 
+.kt-warming__banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .empty-state .kt-warming__words {
   max-width: 460px;
   font-size: 14px;

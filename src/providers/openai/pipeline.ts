@@ -49,6 +49,13 @@ export interface TextStage {
   kind: 'translate' | 'coach';
   /** An OpenAI-style base URL (`http://host:11434/v1`); blank: the Realtime server's own. */
   baseUrl: string;
+  /**
+   * Present: one of this computer's native engines answers the stage, and is asked where it is before each request —
+   * it takes a new port every time it starts, so an address read once is wrong after any restart, and a session
+   * would translate nothing from then on. Asking also brings it back up when it is not. `baseUrl` is what it was
+   * when the session was built, and what is used where it cannot be asked.
+   */
+  engine?: 'translator' | 'coach';
   model: string;
   /** Absent: the endpoint takes no key. */
   key?: StageKey;
@@ -141,7 +148,14 @@ export interface PipelineDeps {
    */
   prepare(pipeline: string, transcription: string): Promise<unknown>;
   /** The native engine, when a leg hears by it: the main process's by default, stand-ins in tests. */
-  native: { bridge: NativeBridge; start(model: string): Promise<NativeEngineStatus> };
+  native: { bridge: NativeBridge; start(model: string): Promise<NativeEngineStatus>; /** Where a native text engine answers now, up with this model: its chat base URL. Rejects when it is not up and cannot be brought up. */ base?(engine: 'translator' | 'coach', model: string): Promise<string> };
+}
+
+/** The native text engine's address, asked of the main process: it is started when it is not up, and answers at once when it is. */
+async function engineBaseNow(engine: 'translator' | 'coach', model: string): Promise<string> {
+  const status = await askNativeEngine('start', model, engine === 'translator' ? 'native-translator' : 'native-coach');
+  if (status.run.state !== 'ready' || status.run.model !== model || !status.run.port) throw new Error('The engine of this computer is not up.');
+  return `http://127.0.0.1:${status.run.port}/v1`;
 }
 
 /** The wrapper's own refs start here: the inner adapter counts from 1 and never reaches it. */
@@ -200,6 +214,7 @@ class PipelineLeg implements AdapterSession {
     private readonly events: AdapterEvents,
     private readonly doFetch: typeof fetch,
     private readonly engines: LocalEngines,
+    private readonly engineBase: (engine: 'translator' | 'coach', model: string) => Promise<string> = engineBaseNow,
   ) {
     this.inner = eventsFrom((e) => this.onInner(e));
   }
@@ -450,12 +465,20 @@ class PipelineLeg implements AdapterSession {
   }
 
   /** A text model's answer, shown as it is written. */
-  private complete(stage: TextStage, text: string, signal: AbortSignal, show: (text: string) => void): Promise<{ text: string; firstMs?: number; totalMs: number }> {
+  private async complete(stage: TextStage, text: string, signal: AbortSignal, show: (text: string) => void): Promise<{ text: string; firstMs?: number; totalMs: number }> {
     const { credentials, clock } = this.request;
     const key = stage.key ? credentials[stage.key] : undefined;
+    let base = stage.baseUrl || httpBaseOf(credentials.endpoint);
+    if (stage.engine) {
+      try {
+        base = await this.engineBase(stage.engine, stage.model);
+      } catch {
+        // Not to be asked (a test, a build with no main process), or not up: the address it was built with.
+      }
+    }
     return completeText(
       {
-        url: chatUrl(stage.baseUrl || httpBaseOf(credentials.endpoint)),
+        url: chatUrl(base),
         model: stage.model,
         ...(key ? { key } : {}),
         system: stage.wrap ? '' : stage.system,
@@ -547,7 +570,7 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
       // a start opens its socket in the same turn.)
       if (prepare && deps.prepare && !device) await deps.prepare(prepare.pipeline, prepare.transcription).catch(() => undefined);
       if (!device && (!stages || (!stages.speech && !stages.typed))) return realtime.start(dialled(request), events);
-      const leg = new PipelineLeg(request, stages ?? { speech: null, typed: null }, events, deps.fetch ?? fetchNow, engines);
+      const leg = new PipelineLeg(request, stages ?? { speech: null, typed: null }, events, deps.fetch ?? fetchNow, engines, deps.native?.base ?? engineBaseNow);
       // What hears and what answers load together; either failing lets the other go.
       const opening = leg.open();
       opening.catch(() => {});

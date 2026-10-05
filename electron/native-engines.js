@@ -129,7 +129,8 @@ function joinEngines(makers, deps = {}) {
 
   /** Engines left up by an earlier start are let go once nobody has listened through them for a while. */
   function watchIdle() {
-    if (idleTimer) return;
+    // No limit: whoever started the engines says when they stop (the page, since it holds them for its runs).
+    if (idleTimer || !Number.isFinite(idleMs)) return;
     const waiting = last.some((status, at) => at !== active && isUp(status?.run));
     if (!waiting) return;
     idleTimer = setTimer(() => {

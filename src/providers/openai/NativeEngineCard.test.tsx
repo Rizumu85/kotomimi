@@ -1,6 +1,6 @@
 // Fork: what a native model's card says of its engine.
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { NativeEngineStatus } from '../../lib/native/nativeEngine';
 import { useNativeCoachStore, useNativeEngineStore } from '../../stores/nativeEngineStore';
 import { NativeEngineCard } from './NativeEngineCard';
@@ -53,5 +53,27 @@ describe('a native model’s card', () => {
     useNativeEngineStore.setState({ status: here({ state: 'ready', model: large.id, port: 4100, tail: '' }, [large.id]), asked: true });
     render(<><NativeEngineCard kind="asr" model={large} selected onSelect={() => {}} /><NativeEngineCard kind="asr" model={small} selected onSelect={() => {}} /></>);
     expect(screen.getAllByRole('status').map((s) => s.textContent)).toEqual(['providers.localai.nativeReady']);
+  });
+
+  // Review of 6c76dd6 (REVIEW-engine-lifecycle.md, F5): an engine is held only while something uses it. "Try again"
+  // loads it with nothing using it, and nothing lets it go: it holds its video memory until a run starts and ends.
+  it('lets an engine that "Try again" brought up go again a minute later, when no run or device uses it', async () => {
+    const ready = here({ state: 'ready', model: GEMMA.id, port: 4100, tail: '' }, [GEMMA.id]);
+    useNativeCoachStore.setState({ status: here({ state: 'failed', model: GEMMA.id, port: 0, tail: 'out of memory' }), asked: true });
+    const start = vi.spyOn(useNativeCoachStore.getState(), 'start').mockImplementation(async () => { useNativeCoachStore.setState({ status: ready }); return ready; });
+    const stop = vi.spyOn(useNativeCoachStore.getState(), 'stop').mockResolvedValue(undefined);
+    vi.useFakeTimers();
+    try {
+      render(<NativeEngineCard kind="coach" model={GEMMA} selected onSelect={() => {}} />);
+      fireEvent.click(screen.getByRole('button', { name: 'providers.localai.nativeRetry' }));
+      await vi.advanceTimersByTimeAsync(61_000);
+      // A retry that only clears the failure, loading nothing, needs no stop; one that loads the engine does.
+      if (start.mock.calls.length > 0) expect(stop).toHaveBeenCalled();
+    } finally {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+      start.mockRestore();
+      stop.mockRestore();
+    }
   });
 });

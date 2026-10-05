@@ -205,8 +205,24 @@ export interface NativeUpDeps {
   start?: (id: string) => Promise<NativeEngineStatus>;
 }
 
-/** An engine that did not come up, in the words its notice is looked up by. */
-const notUp = (code: string, status: NativeEngineStatus): AdapterStartError => new AdapterStartError(`The engine could not start: ${status.run.tail.trim().split('\n').pop() ?? ''}`, code);
+/**
+ * An engine that did not come up, in the words its notice is looked up by.
+ * One that failed says so (its card offers to try again); one that is merely
+ * not up — stopped while it started, or up with another model — is another
+ * thing to be told: starting again is all it takes.
+ */
+const notUp = (code: string, status: NativeEngineStatus, id: string): AdapterStartError => (status.run.state === 'failed' && status.run.model === id
+  ? new AdapterStartError(`The engine could not start: ${status.run.tail.trim().split('\n').pop() ?? ''}`, code)
+  : new AdapterStartError(`The engine was not up when its start ended (${status.run.state}).`, 'native_interrupted'));
+
+/** The model of the engine the app downloads that is up now, or coming up: it runs one at a time. Null: none. */
+const downloadedUp = (status: NativeEngineStatus): string | null => {
+  const coming = status.run.state === 'starting' || status.run.state === 'warming' || status.run.state === 'ready' ? status.run.model : null;
+  return [...status.up, ...(coming ? [coming] : [])].find((id) => !isApple(id)) ?? null;
+};
+
+/** An engine in use with another model: who asks is told, and what is using it is left alone. */
+const busy = (code: string, name: string): AdapterStartError => new AdapterStartError(`The engine is in use with ${name}.`, code, { name });
 
 /**
  * The engine brought up for a run that hears by it, and waited for: one start
@@ -222,23 +238,29 @@ export async function nativeUp(chosen: NativePick | string, heard: readonly stri
     const engine = isApple(one.id) ? APPLE_PREFIX : one.id;
     if (asked.has(engine)) return;
     asked.add(engine);
+    // A device this computer shares with is listening through another of the engine's models: starting this one
+    // would stop that one under it, and the device's next sentence would start it again under this run.
+    const up = isApple(one.id) ? null : downloadedUp(useNativeEngineStore.getState().status);
+    if (up && up !== one.id && using.asr > 0) throw busy('native_busy', nativeModel(up).name);
     const status = await start(one.id);
-    if (!nativeReady(status, one.id)) throw notUp('native_failed', status);
+    if (!nativeReady(status, one.id)) throw notUp('native_failed', status, one.id);
   }));
 }
 
 /** The same, for the native translation engine. */
 export async function translatorUp(id: string, deps: NativeUpDeps = {}): Promise<void> {
   const model = nativeTranslator(id);
+  const up = downloadedUp(useNativeTranslatorStore.getState().status);
+  if (up && up !== model.id && using.translation > 0) throw busy('native_translator_busy', nativeTranslator(up).name);
   const status = await (deps.start ?? ((which: string) => useNativeTranslatorStore.getState().start(which)))(model.id);
-  if (!nativeReady(status, model.id)) throw notUp('native_translator_failed', status);
+  if (!nativeReady(status, model.id)) throw notUp('native_translator_failed', status, model.id);
 }
 
 /** And for the native feedback engine. */
 export async function coachUp(id: string, deps: NativeUpDeps = {}): Promise<void> {
   const model = nativeCoach(id);
   const status = await (deps.start ?? ((which: string) => useNativeCoachStore.getState().start(which)))(model.id);
-  if (!nativeReady(status, model.id)) throw notUp('native_coach_failed', status);
+  if (!nativeReady(status, model.id)) throw notUp('native_coach_failed', status, model.id);
 }
 
 /** How long the engines stay up after the last run or device that used them: a stop and a start a moment later load nothing twice. */
@@ -290,6 +312,30 @@ const release = (kind: keyof typeof using, deps?: NativeRestDeps): (() => void) 
     restNative(deps);
   };
 };
+
+/**
+ * Whether an engine is someone's now — a run of this computer, or a device it
+ * shares with — and with which model. While it is, nobody else's request
+ * starts another model on it (`src/lib/lan/nativeShare.ts`): the engine the
+ * app downloads runs one at a time, and a start of another ends what the
+ * first is doing.
+ */
+export function nativeTaken(kind: 'asr' | 'translation'): string | null {
+  if (using.runs === 0 && using[kind] === 0) return null;
+  return downloadedUp((kind === 'asr' ? useNativeEngineStore : useNativeTranslatorStore).getState().status);
+}
+
+/**
+ * The models this computer's own settings name, as the check last saw them:
+ * what a device is given when it names none, so that the owner's next run
+ * finds the engine already on its own model, not on another to be switched.
+ */
+const preferred: { asr: NativePick | null; translation: string | null } = { asr: null, translation: null };
+export function preferNative(choice: { asr?: NativePick | null; translation?: string | null }): void {
+  if (choice.asr !== undefined) preferred.asr = choice.asr;
+  if (choice.translation !== undefined) preferred.translation = choice.translation;
+}
+export const nativePreference = (): Readonly<typeof preferred> => preferred;
 
 /** A run of this computer is open: its engines stay up until what is returned is called, and a while longer. */
 export const holdNativeForRun = (deps?: NativeRestDeps): (() => void) => release('runs', deps);

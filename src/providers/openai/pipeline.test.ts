@@ -297,3 +297,41 @@ describe('a coached speaker', () => {
     expect(tidyAnswer('translate', '{"translation":"こんにちは"}')).toBe('こんにちは');
   });
 });
+
+describe('a stage one of this computer\u2019s native engines answers', () => {
+  it('asks where the engine is before each request: a restart on another port loses nothing', async () => {
+    const config = buildLocalAI(SPEAKER, { ...LOCALAI_DEFAULTS, ...VIA_MODEL }, shared);
+    if ('refused' in config) throw new Error(config.refused);
+    const speech = config.stages?.speech as { engine?: string; baseUrl: string; model: string };
+    speech.engine = 'translator';
+    speech.baseUrl = 'http://127.0.0.1:4200/v1';
+    const sockets = fakeSockets();
+    const { clock } = trackedClock();
+    const { events } = recordEvents();
+    const urls: string[] = [];
+    const fetch = vi.fn(async (input: RequestInfo | URL) => { urls.push(String(input)); return sse('你好。'); });
+    let port = 4200;
+    const base = vi.fn(async (_engine: 'translator' | 'coach', _model: string) => `http://127.0.0.1:${port}/v1`);
+    const starting = createPipelineAdapter({ openSocket: sockets.create, fetch: fetch as unknown as typeof globalThis.fetch, native: { bridge: {} as never, start: async () => { throw new Error('unused'); }, base } }).start({ context: SPEAKER, config, credentials: K, clock, signal: new AbortController().signal }, events);
+    const socket = sockets.last();
+    socket.open('');
+    socket.receive(SERVER.created());
+    socket.receive(SERVER.updated(config.transcribeOnly ? 'transcription' : 'realtime'));
+    const session = await starting;
+    for (const frame of heard('item_1', '今日は天気がいいですね。')) socket.receive(frame);
+    await vi.waitFor(() => expect(urls).toHaveLength(1));
+    expect(urls[0]).toBe('http://127.0.0.1:4200/v1/chat/completions');
+    expect(base).toHaveBeenLastCalledWith('translator', speech.model);
+    // The engine came back on another port: the next sentence goes there.
+    port = 4311;
+    for (const frame of heard('item_2', 'ありがとう。')) socket.receive(frame);
+    await vi.waitFor(() => expect(urls).toHaveLength(2));
+    expect(urls[1]).toBe('http://127.0.0.1:4311/v1/chat/completions');
+    // Where it cannot be asked, the address the session was built with.
+    base.mockRejectedValue(new Error('not up'));
+    for (const frame of heard('item_3', 'はい。')) socket.receive(frame);
+    await vi.waitFor(() => expect(urls).toHaveLength(3));
+    expect(urls[2]).toBe('http://127.0.0.1:4200/v1/chat/completions');
+    await session.stop();
+  });
+});

@@ -358,6 +358,8 @@ const PROVIDER = {
     "识别引擎还在启动，开机后第一次大约要半分钟。准备好后就可以开始。",
     "辨識引擎還在啟動，開機後第一次大約要半分鐘。準備好後就可以開始。",
   ],
+  nativeInterrupted: ['The engine stopped while it was starting. Press Start again.', '引擎在启动途中被停下了，请再点一次开始。', '引擎在啟動途中被停下了，請再點一次開始。'],
+  nativeBusy: ['A device you share with is using this engine with {{name}}. Wait for it to finish, or choose {{name}} here too.', '共享的设备正在用这个引擎跑 {{name}}。等它用完，或者这里也选 {{name}}。', '共享的裝置正在用這個引擎跑 {{name}}。等它用完，或者這裡也選 {{name}}。'],
   nativeFailed: [
     "The recognition engine of this computer could not start. In the Speech recognition card, press \"Try again\" — or choose another model.",
     "这台电脑的识别引擎没能启动。请在「语音识别」卡片里点「重试」，或者换一个模型。",

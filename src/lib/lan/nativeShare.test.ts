@@ -1,7 +1,7 @@
 // Fork: this computer's native engines, as the sharing host lends them.
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NO_NATIVE_ENGINE, type NativeEngineStatus } from '../native/nativeEngine';
-import { nativeIdle, translatorIdle } from '../../providers/openai/localaiNative';
+import { holdNative, holdNativeForRun, nativeIdle, preferNative, translatorIdle } from '../../providers/openai/localaiNative';
 import { useModelStore } from '../../stores/modelStore';
 import { useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import { appLanModels } from './appModels';
@@ -170,5 +170,58 @@ describe('the translator a device gets', () => {
     const translator = nativeOrOwnTranslator(vi.fn() as unknown as () => Translator);
     await expect(translator.init('ja', 'zh', 'index-translate-2b')).rejects.toThrow('could not start');
     translator.dispose();
+  });
+});
+
+describe('an engine that is someone\u2019s is not switched to another model', () => {
+  const QUIET = { stop: { asr() {}, translation() {}, coach() {} }, setTimer: () => 0 as unknown as ReturnType<typeof setTimeout>, clearTimer: () => {} };
+  const BOTH = status({ 'r2t2-q8': downloaded, 'qwen3-asr-1.7b-q8': downloaded });
+
+  it('gives a device that names no model this computer\u2019s own choice, so that its owner\u2019s next run switches nothing', () => {
+    useNativeEngineStore.setState({ status: BOTH });
+    // Nothing is known of the owner's choice: the first of the list that hears the language.
+    preferNative({ asr: null });
+    expect(nativeRecognizerFor('ja', '')).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
+    preferNative({ asr: { model: 'r2t2-q8' } });
+    expect(nativeRecognizerFor('ja', '')).toEqual({ modelId: 'r2t2-q8', streaming: true });
+    // A language the owner's model does not hear: the one that does.
+    expect(nativeRecognizerFor('th', '')).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
+    preferNative({ asr: null });
+  });
+
+  it('leaves a recognizer that a run of this computer is using on its model: a device that needs another is given none of the engine\u2019s', () => {
+    useNativeEngineStore.setState({ status: { ...BOTH, run: { state: 'ready', model: 'r2t2-q8', port: 4100, tail: '' }, up: ['r2t2-q8'] } });
+    const done = holdNativeForRun(QUIET);
+    try {
+      // What it hears, it answers for, whichever of the engine's models was named.
+      expect(nativeRecognizerFor('ja', 'qwen3-asr-1.7b-q8')).toEqual({ modelId: 'r2t2-q8', streaming: true });
+      // Thai is not R2T2's: Qwen3-ASR would hear it, and starting it would stop the owner's session.
+      expect(nativeRecognizerFor('th', '')).toBeNull();
+      expect(nativeRecognizerFor('th', 'qwen3-asr-1.7b-q8')).toBeNull();
+    } finally {
+      done();
+    }
+    // Nobody's any more: the model that hears it may be started.
+    expect(nativeRecognizerFor('th', '')).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
+  });
+
+  it('does the same for the translation engine, held by a device or by a run', () => {
+    useNativeTranslatorStore.setState({ status: { ...TRANSLATORS, run: { state: 'ready', model: 'hy-mt2-1.8b', port: 4200, tail: '' }, up: ['hy-mt2-1.8b'] } });
+    const device = holdNative('translation', QUIET);
+    try {
+      expect(nativeTranslatorFor('ja', 'zh', '')).toBe('hy-mt2-1.8b');
+      // Swahili is not Hunyuan's: Index-Translate takes it, but not while the engine is in use with Hunyuan.
+      expect(nativeTranslatorFor('ja', 'sw', '')).toBeNull();
+      expect(nativeTranslatorFor('ja', 'sw', 'index-translate-2b')).toBeNull();
+    } finally {
+      device();
+    }
+    expect(nativeTranslatorFor('ja', 'sw', '')).toBe('index-translate-2b');
+    // The owner's own choice first, when nothing is running and none is named.
+    useNativeTranslatorStore.setState({ status: TRANSLATORS });
+    preferNative({ translation: 'hy-mt2-1.8b' });
+    expect(nativeTranslatorFor('ja', 'zh', '')).toBe('hy-mt2-1.8b');
+    preferNative({ translation: null });
+    expect(nativeTranslatorFor('ja', 'zh', '')).toBe('index-translate-2b');
   });
 });

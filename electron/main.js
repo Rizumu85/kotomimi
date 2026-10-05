@@ -1414,7 +1414,9 @@ const getNativeEngine = () => {
     const inBundle = path.join('resources', 'bin', 'darwin-arm64', 'Kotomimi Speech Helper.app', 'Contents', 'MacOS', 'speech-helper');
     const helper = [process.resourcesPath ? path.join(process.resourcesPath, inBundle) : null, path.join(__dirname, '..', inBundle)]
       .find((candidate) => candidate && require('fs').existsSync(candidate)) ?? null;
-    nativeEngine = joinEngines([(tell) => createAppleSpeech({ helper, log, ...tell }), downloaded], { onChange: toStatus, onStream: toStream });
+    // `idleMs: Infinity`: the page holds the engines while a run or a sharing device uses them and stops them a minute
+    // after (`restNative`); the joined engines' own idle stop would take one from under a leg that had been silent.
+    nativeEngine = joinEngines([(tell) => createAppleSpeech({ helper, log, ...tell }), downloaded], { onChange: toStatus, onStream: toStream, idleMs: Infinity });
     return nativeEngine;
   }
   nativeEngine = downloaded({ onChange: toStatus, onStream: toStream });
