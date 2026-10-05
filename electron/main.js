@@ -14,7 +14,7 @@ const { keepMaximizeHonest, pageShift } = require('./window-maximize');
 const { firewallStatus, allowThroughFirewall } = require('./lan-firewall');
 const { discoverServers } = require('./lan-discover');
 const { createLocalServer } = require('./local-server');
-const { createNativeEngine, LLAMA, TRANSLATORS, LLAMA_RUNTIME } = require('./native-engine');
+const { createNativeEngine, LLAMA, TRANSLATORS, LLAMA_RUNTIME, languageName: nativeLanguageName } = require('./native-engine');
 const { createAutostart } = require('./autostart');
 const { createAppleSpeech } = require('./apple-speech');
 const { applyLinuxGpuFlags } = require('./linux-gpu-flags');
@@ -1292,7 +1292,15 @@ ipcMain.handle('lan:start', async (event, args) => {
   try {
     // A LocalAI on this computer is shared through the same door (electron/lan-upstream.js): asked each time, so one started later joins by itself.
     const local = getLocalServer();
-    const upstream = createUpstream({ port: local.port, pipelines: () => local.pipelines(), setPipeline: (name, change, options) => local.setPipeline(name, change, options) });
+    // A request that names no model is the app's own to answer, though the LocalAI could, where the app has a native
+    // engine's model for it: the Mac's recognition for the language, the downloaded recognizer, a native translator.
+    const ownFirst = async (ask) => {
+      const base = String(ask?.language ?? '').trim().toLowerCase().split(/[-_]/)[0];
+      const has = (status, fits) => status.engine === 'ready' && Object.entries(status.models).some(([id, model]) => model.state === 'downloaded' && fits(id));
+      if (ask?.kind === 'asr') return has(await getNativeEngine().status(), (id) => (id.includes(':') ? id.endsWith(`:${base}`) : nativeLanguageName(base) !== null));
+      return has(await getNativeTranslator().status(), () => true);
+    };
+    const upstream = createUpstream({ port: local.port, pipelines: () => local.pipelines(), setPipeline: (name, change, options) => local.setPipeline(name, change, options), ownFirst });
     lanServer = await startLanServer({ port: Number.isInteger(port) && port > 0 && port < 65536 ? port : 8790, key: String(args?.key ?? ''), upstream }, {
       request: (request) => toPage('lan:request', request),
       socketOpen: (socket) => toPage('lan:socket-open', socket),

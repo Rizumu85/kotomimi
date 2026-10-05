@@ -235,7 +235,7 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
       if (!upstream) return hand();
       if (request.method === 'GET') return hand(Promise.resolve().then(() => upstream.models()).catch(() => []));
       // A chat request: the model server's when it names one of its models, or leaves the choice to a computer that has one.
-      Promise.resolve().then(() => upstream.chatModel(body?.model)).then((model) => {
+      Promise.resolve().then(() => upstream.chatModel(body?.model, body)).then((model) => {
         if (model) upstream.complete(body, model, response, NAMED);
         else hand();
       }, () => hand());
@@ -271,9 +271,9 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
       let whose = upstream ? 'undecided' : 'page';
       const held = [];
       const toPage = (text) => handlers.socketMessage({ id, data: text });
-      const decide = (text, wanted) => {
+      const decide = (text, wanted, language) => {
         whose = 'deciding';
-        Promise.resolve().then(() => upstream.recognizer(wanted)).catch(() => null).then((route) => {
+        Promise.resolve().then(() => upstream.recognizer(wanted, language)).catch(() => null).then((route) => {
           if (!sockets.has(id)) return;
           if (!route) {
             whose = 'page';
@@ -313,7 +313,8 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
         }
         if (event?.type !== 'session.update') return toPage(text);
         const named = event.session?.audio?.input?.transcription?.model;
-        return decide(text, typeof named === 'string' ? named : '');
+        const language = event.session?.audio?.input?.transcription?.language;
+        return decide(text, typeof named === 'string' ? named : '', typeof language === 'string' ? language : '');
       });
       ws.on('close', (code, reason) => {
         links.get(id)?.close(code, reason);

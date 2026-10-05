@@ -118,6 +118,32 @@ describe('whose a request is', () => {
     expect(await upstream.recognizer('sensevoice-int8')).toBeNull();
   });
 
+  it('leaves a request that names no model to the app where the app has a native model for it: those are the ones measured best', async () => {
+    const asked = [];
+    const upstream = createUpstream({
+      port: 1,
+      pipelines: async () => LOCALAI(),
+      setPipeline: async () => ({ ok: true }),
+      ownFirst: async (ask) => { asked.push(ask); return ask.kind === 'translate' || ask.language === 'ja'; },
+    });
+    // A recognizer for the language spoken: the app's. None for another: the server's, as before.
+    expect(await upstream.recognizer('', 'ja')).toBeNull();
+    expect(await upstream.recognizer('kotomimi', 'ja')).toBeNull();
+    expect(await upstream.recognizer('', 'ko')).toEqual({ pipeline: 'gpt-realtime', transcription: '' });
+    expect(await upstream.chatModel('kotomimi', { source_language: 'ja', target_language: 'zh' })).toBeNull();
+    expect(asked).toContainEqual({ kind: 'asr', language: 'ja' });
+    expect(asked).toContainEqual({ kind: 'translate', source: 'ja', target: 'zh' });
+    // One of the server's own models, named: the server's, whatever the app has.
+    expect(await upstream.recognizer('whisper-large-turbo', 'ja')).toEqual({ pipeline: 'gpt-realtime', transcription: 'whisper-large-turbo' });
+    expect(await upstream.chatModel('qwen3-4b', { source_language: 'ja', target_language: 'zh' })).toBe('qwen3-4b');
+  });
+
+  it('keeps the request for the server when the app cannot be asked', async () => {
+    const upstream = createUpstream({ port: 1, pipelines: async () => LOCALAI(), setPipeline: async () => ({ ok: true }), ownFirst: async () => { throw new Error('no page'); } });
+    expect(await upstream.recognizer('', 'ja')).toEqual({ pipeline: 'gpt-realtime', transcription: '' });
+    expect(await upstream.chatModel('', {})).toBe('hy-mt2-1.8b');
+  });
+
   it('leaves everything to the page while no model server answers', async () => {
     const { upstream } = upstreamOf({ found: DOWN });
     expect(await upstream.chatModel('kotomimi')).toBeNull();

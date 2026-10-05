@@ -78,8 +78,12 @@ const sendable = (code) => (code >= 1000 && code <= 1014 && code !== 1004 && cod
  *   pipelines()               `local-server.js`'s: its pipelines, recognizers and text models; empty while it is down
  *   setPipeline(name, change) `local-server.js`'s
  *   configureTimeoutMs        how long a session LocalAI does not confirm holds its turn
+ *   ownFirst(ask)             whether a request that names no model is the app's own to answer though this LocalAI
+ *                             could: the app has a native engine's model for it (`native-engine.js`,
+ *                             `apple-speech.js`), and those are the ones measured best. `ask` is
+ *                             `{ kind: 'asr', language }` or `{ kind: 'translate', source, target }`.
  */
-function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect = (url) => new WebSocket(url), request = http.request, configureTimeoutMs = CONFIGURE_TIMEOUT_MS }) {
+function createUpstream({ port, pipelines, setPipeline, ownFirst = async () => false, now = Date.now, connect = (url) => new WebSocket(url), request = http.request, configureTimeoutMs = CONFIGURE_TIMEOUT_MS }) {
   let cached = null;
   async function info(fresh = false) {
     if (!fresh && cached && now() - cached.at < CACHE_MS) return cached.value;
@@ -114,22 +118,24 @@ function createUpstream({ port, pipelines, setPipeline, now = Date.now, connect 
   }
 
   /** The text model a chat request is passed on to, or null when the request is the page's. */
-  async function chatModel(wanted) {
+  async function chatModel(wanted, body) {
     const found = await info();
     const name = typeof wanted === 'string' ? wanted : '';
     if (found.translators.includes(name)) return name;
     if (!leftToUs(found, name)) return null;
+    if (await ownFirst({ kind: 'translate', source: body?.source_language, target: body?.target_language }).catch(() => false)) return null;
     return pipelineOf(found)?.llm || null;
   }
 
   /** The pipeline a socket is joined to and the recognizer to name in it, or null when the socket is the page's. */
-  async function recognizer(wanted) {
+  async function recognizer(wanted, language) {
     const found = await info();
     const name = typeof wanted === 'string' ? wanted : '';
     const pipeline = pipelineOf(found);
     if (!pipeline) return null;
     if (found.recognizers.includes(name)) return { pipeline: pipeline.name, transcription: name };
     if (!leftToUs(found, name) || !pipeline.transcription) return null;
+    if (await ownFirst({ kind: 'asr', language }).catch(() => false)) return null;
     return { pipeline: pipeline.name, transcription: '' };
   }
 
