@@ -123,7 +123,8 @@ export function NativeEngineCard({ kind, model, recommended = true, selected, on
             <span>{t('providers.localai.nativeRetry')}</span>
           </button>
         </div>
-      ) : downloaded ? (
+      ) : ours && (run.state === 'starting' || run.state === 'warming') ? (
+        // Only while it is being started: a model that is downloaded and not in use says nothing, and is not "starting".
         <p className="kt-engine" role="status"><Loader size={13} className="kt-engine__spin" /><span>{t(words.warming)}</span></p>
       ) : null}
     </ModelCard>
