@@ -585,3 +585,62 @@ describe('the provider\'s check, with the engine', () => {
     expect(localaiProvider.checkReads).toContain('asrHere');
   });
 });
+
+// Review of 6c76dd6 (REVIEW-engine-lifecycle.md): what the minute's rest must not take from a run that is starting.
+// Both fail on 6c76dd6: nothing holds the engines between a run's first step and its legs' own holds.
+describe('the engines a starting run loads, against the minute’s rest (review)', () => {
+  it('are not stopped by a rest that comes due while the run’s first step is still loading them (F1)', async () => {
+    vi.useFakeTimers();
+    const stop = { asr: vi.fn(), translation: vi.fn(), coach: vi.fn() };
+    const timer: { fire: (() => void) | null } = { fire: null };
+    const deps = { stop, setTimer: (run: () => void) => { timer.fire = run; return 0 as unknown as ReturnType<typeof setTimeout>; }, clearTimer: () => { timer.fire = null; } };
+    let loaded: () => void = () => {};
+    try {
+      // The last run ended a little under a minute ago: its rest is due soon.
+      holdNativeForRun(deps)();
+      const due = timer.fire;
+      expect(due).not.toBeNull();
+      // Start is pressed with another model chosen, which takes longer to load than what is left of the minute.
+      const u: NativeUps = { hears: vi.fn(() => new Promise<void>((resolve) => { loaded = resolve; })), translates: vi.fn(async () => undefined), coaches: vi.fn(async () => undefined), rest: vi.fn() };
+      const preparing = prepareLocalAI({ pair: PAIR, legs: ['speaker'] }, settings(NATIVE), u);
+      await Promise.resolve();
+      expect(u.hears).toHaveBeenCalled();
+      due!();
+      // The engine this run is waiting for is not stopped under it.
+      expect(stop.asr).not.toHaveBeenCalled();
+      loaded();
+      await preparing;
+    } finally {
+      loaded();
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    }
+  });
+
+  it('stay held from the run’s first step until the run ends, whether or not a leg ever opens (F2)', async () => {
+    useNativeEngineStore.setState({ status: READY, asked: true });
+    const start = vi.spyOn(useNativeEngineStore.getState(), 'start').mockResolvedValue(READY);
+    const stop = vi.spyOn(useNativeEngineStore.getState(), 'stop').mockResolvedValue(undefined);
+    vi.useFakeTimers();
+    const run = new AbortController();
+    try {
+      await localaiProvider.session!.prepare!({ pair: PAIR, legs: ['speaker'] } as never, settings(NATIVE), run.signal);
+      expect(start).toHaveBeenCalledWith('r2t2-q8');
+      // A minute goes by before any leg takes its hold: a slow source, a picker left open. The translation and the
+      // feedback were built with these engines' addresses: stopping them now breaks the run that is about to open.
+      vi.advanceTimersByTime(61_000);
+      expect(stop).not.toHaveBeenCalled();
+      // The run ends without a leg ever opening (a build or admit refusal, a source that failed): let go a minute later.
+      run.abort();
+      vi.advanceTimersByTime(61_000);
+      expect(stop).toHaveBeenCalledTimes(1);
+    } finally {
+      run.abort();
+      vi.clearAllTimers();
+      vi.useRealTimers();
+      start.mockRestore();
+      stop.mockRestore();
+      useNativeEngineStore.setState({ status: NO_NATIVE_ENGINE });
+    }
+  });
+});
