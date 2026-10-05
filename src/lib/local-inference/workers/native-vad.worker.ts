@@ -52,7 +52,8 @@ type WorkerInbound =
 type WorkerOutbound =
   | { type: 'ready' }
   | { type: 'speech_start' }
-  | { type: 'speech_end' }
+  // Fork: `forced` marks an end the cap made, with the speaker still talking (`nativeAsr.ts` keeps its stream open over it).
+  | { type: 'speech_end'; forced?: true }
   | { type: 'speech_cancel' }
   | { type: 'error'; message: string };
 
@@ -161,7 +162,7 @@ async function feedAudio(samples: Int16Array, sampleRate: number): Promise<void>
         const endEvents: FrameProcessorEvent[] = [];
         frameProcessor.endSegment((ev) => endEvents.push(ev));
         for (const ev of endEvents) {
-          if (ev.msg === Message.SpeechEnd) post({ type: 'speech_end' });
+          if (ev.msg === Message.SpeechEnd) post({ type: 'speech_end', forced: true });
           else if (ev.msg === Message.VADMisfire) post({ type: 'speech_cancel' });
         }
         speechFramesSinceStart = 0;

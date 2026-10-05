@@ -77,6 +77,17 @@ export const INVOKE_CHANNELS = [
   'local-server:stop',
   'local-server:pipelines',
   'local-server:set-pipeline',
+  // Fork: the native recognition engine the app downloads and runs (electron/native-engine.js)
+  'native-engine:get',
+  'native-engine:download',
+  'native-engine:cancel',
+  'native-engine:remove',
+  'native-engine:start',
+  'native-engine:stop',
+  'native-engine:stream-open',
+  'native-engine:stream-audio',
+  'native-engine:stream-end',
+  'native-engine:stream-abort',
   // Native local-inference sidecar lifecycle
   'native-host:start',
   'native-host:stop',

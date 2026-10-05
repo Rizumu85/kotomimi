@@ -32,6 +32,8 @@ import { languageNameFor } from '../engine/languageName';
 import { ModelGroup, RecommendedOthers, ModelStorageFooter } from './ModelManagementControls';
 import { ModelImportModal } from './ModelImportModal';
 import { GpuAccelerationNotice } from './GpuAccelerationNotice';
+import Tooltip from '../../Tooltip/Tooltip';
+import { measuredEntries, measuredNote } from '../../../lib/local-inference/selection/measuredRank';
 import LocalInferenceVoiceSection from './LocalInferenceVoiceSection';
 import { type VoiceEntry } from './VoiceLibrarySection';
 import * as voiceStorage from '../../../lib/local-inference/voiceStorage';
@@ -85,6 +87,7 @@ export function ModelCard({
   onCancel,
   onDelete,
   onImport,
+  note,
   children,
 }: {
   entry: ModelManifestEntry | null; // null = "None" card
@@ -102,6 +105,8 @@ export function ModelCard({
   onCancel: () => void;
   onDelete: () => void;
   onImport?: () => void;
+  /** Fork: what is worth knowing before choosing this one — behind an info mark beside its name. */
+  note?: React.ReactNode;
   children?: React.ReactNode;
 }) {
   const { t } = useTranslation();
@@ -150,6 +155,12 @@ export function ModelCard({
             <div className="model-card__header">
               <span className="model-card__name">{entry.name}</span>
               {!isCloud && <span className="model-card__size">{getModelSizeMb(entry, deviceFeatures)} MB</span>}
+              {note && (
+                // stopPropagation: opening the note is not choosing the model.
+                <span className="model-card__note" onClick={(e) => e.stopPropagation()}>
+                  <Tooltip content={note} icon="info" trigger="click" position="top" maxWidth={320} />
+                </span>
+              )}
             </div>
             <div className="model-card__meta">
               <div className="model-card__languages">
@@ -488,10 +499,11 @@ export function ModelManagementSection({
   }, []);
 
   const compatibleAsrModels = useMemo(
-    () => asrModels.filter(m =>
+    // Fork: in the order measured for this language, where it was (`measuredRank.ts`).
+    () => measuredEntries(asrModels.filter(m =>
       (m.multilingual || m.languages.includes(sourceLanguage))
       && deviceReady(m, webgpuAvailable)
-    ),
+    ), sourceLanguage),
     [asrModels, sourceLanguage, webgpuAvailable],
   );
   const incompatibleAsrModels = useMemo(
@@ -719,10 +731,13 @@ export function ModelManagementSection({
     renderBody?: (entry: ModelManifestEntry) => React.ReactNode,
   ) => {
     const { hint, incompatible } = getVariantHint(entry);
+    // Fork: a recognizer measured on speech in this language says what was found of it.
+    const noteKey = entry.type === 'asr' || entry.type === 'asr-stream' ? measuredNote(entry.id, sourceLanguage) : undefined;
     return (
       <ModelCard
         key={entry.id}
         entry={entry}
+        note={noteKey ? t(`providers.localai.${noteKey}`) : undefined}
         status={statuses[entry.id] || 'not_downloaded'}
         download={downloads[entry.id]}
         errorMessage={downloadErrors[entry.id]}

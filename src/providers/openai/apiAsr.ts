@@ -18,7 +18,7 @@ import { NO_KEY } from './textModel';
 /** The detector's worker, as far as it is used here (`native-vad.worker.ts`: it posts the edges of speech and nothing else). */
 export interface VadWorker {
   postMessage(message: unknown, transfer?: Transferable[]): void;
-  onmessage: ((event: { data: { type: string; message?: string } }) => void) | null;
+  onmessage: ((event: { data: { type: string; message?: string; forced?: boolean } }) => void) | null;
   onerror: ((event: unknown) => void) | null;
   terminate(): void;
 }
@@ -48,7 +48,7 @@ const TAIL_KEPT_SECONDS = 0.3;
  */
 export const UPLOAD_TIMEOUT_MS = 60_000;
 
-const appVad = (): VadWorker => new Worker(new URL('../../lib/local-inference/workers/native-vad.worker.ts', import.meta.url), { type: 'module' }) as unknown as VadWorker;
+export const appVad = (): VadWorker => new Worker(new URL('../../lib/local-inference/workers/native-vad.worker.ts', import.meta.url), { type: 'module' }) as unknown as VadWorker;
 
 /** Where the transcription request goes, for a base URL as typed. */
 export function transcriptionsUrl(baseUrl: string): string {

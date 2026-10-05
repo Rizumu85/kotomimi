@@ -280,6 +280,95 @@ const PROVIDER = {
     '语法反馈还没有可用的模型。请在提供商下面的「语法反馈」卡片里选好（用 API 模型时要填地址和模型名），或者换一个位置。',
     '文法回饋還沒有可用的模型。請在提供商下面的「文法回饋」卡片裡選好（用 API 模型時要填位址和模型名稱），或者換一個位置。',
   ],
+
+  // The native recognition engine: a runtime the app downloads and runs beside itself.
+  nativeEntry: ["{{name}} (native engine)", "{{name}}（原生引擎）", "{{name}}（原生引擎）"],
+  nativeReady: ["The engine is ready.", "引擎已就绪。", "引擎已就緒。"],
+  nativeWarmingShort: [
+    "Starting the engine… The first start after the computer boots takes about half a minute; after that, a few seconds.",
+    "正在启动引擎…开机后第一次启动大约要半分钟，之后每次只要几秒。",
+    "正在啟動引擎…開機後第一次啟動大約要半分鐘，之後每次只要幾秒。",
+  ],
+  nativeFailedShort: ["The engine could not start.", "引擎没能启动。", "引擎沒能啟動。"],
+  nativeRetry: ["Try again", "重试", "重試"],
+  nativeUnsupportedShort: ["Not available for this system", "这个系统暂不支持", "這個系統暫不支援"],
+  nativeUnheard: [
+    "{{name}} does not hear one of your two languages. Choose another model for it.",
+    "{{name}} 听不了你选的其中一种语言，请换一个模型。",
+    "{{name}} 聽不了你選的其中一種語言，請換一個模型。",
+  ],
+  nativeUnsupported: [
+    "The native recognition engine is not available for this system. Choose another model in the Speech recognition card.",
+    "这个系统暂不支持原生识别引擎。请在「语音识别」卡片里换一个模型。",
+    "這個系統暫不支援原生辨識引擎。請在「語音辨識」卡片裡換一個模型。",
+  ],
+  nativeMissing: [
+    "{{name}} is not downloaded yet. Download it in the Speech recognition card, or choose another model.",
+    "{{name}} 还没有下载。请在「语音识别」卡片里下载，或者换一个模型。",
+    "{{name}} 還沒有下載。請在「語音辨識」卡片裡下載，或者換一個模型。",
+  ],
+  nativeWarming: [
+    "The recognition engine of this computer is still starting. The first start after the computer boots takes about half a minute — it loads a 2.5 GB model onto the graphics card; after that it takes a few seconds. You can start as soon as it is ready.",
+    "这台电脑的识别引擎还在启动。开机后第一次启动大约要半分钟（要把 2.5 GB 的模型装进显卡），之后每次只要几秒。准备好后就可以开始。",
+    "這台電腦的辨識引擎還在啟動。開機後第一次啟動大約要半分鐘（要把 2.5 GB 的模型載入顯示卡），之後每次只要幾秒。準備好後就可以開始。",
+  ],
+  nativeFailed: [
+    "The recognition engine of this computer could not start. In the Speech recognition card, press \"Try again\" — or choose another model.",
+    "这台电脑的识别引擎没能启动。请在「语音识别」卡片里点「重试」，或者换一个模型。",
+    "這台電腦的辨識引擎沒能啟動。請在「語音辨識」卡片裡點「重試」，或者換一個模型。",
+  ],
+
+  // What was found of each recognizer on Japanese VRChat talk (`measuredRank.ts`): for a person choosing, not a benchmark.
+  noteNativeR2t2: [
+    "Measured on Japanese VRChat talk: about 15% of the characters wrong — the most accurate on this computer — and it writes while it listens, about 1.5 s behind the voice. It runs in an engine of its own on the graphics card (about 3 GB of video memory). The first start after the computer boots takes about half a minute.",
+    "日语 VRChat 闲聊实测：错字率约 15%，是这台电脑上最准的；而且边听边出字，文字只比声音慢 1.5 秒左右。它在独立的引擎里用显卡运行（约占 3 GB 显存），开机后第一次启动要半分钟左右。",
+    "日語 VRChat 閒聊實測：錯字率約 15%，是這台電腦上最準的；而且邊聽邊出字，文字只比聲音慢 1.5 秒左右。它在獨立的引擎裡用顯示卡執行（約佔 3 GB 顯示記憶體），開機後第一次啟動要半分鐘左右。",
+  ],
+  noteQwen17: [
+    "Measured on Japanese VRChat talk: about 19% of the characters wrong — accurate. It writes only once a sentence has ended, and a long sentence takes 3–4 s more.",
+    "日语 VRChat 闲聊实测：错字率约 19%，很准。但要等一句话说完才出字，长句还要再等 3～4 秒。",
+    "日語 VRChat 閒聊實測：錯字率約 19%，很準。但要等一句話說完才出字，長句還要再等 3～4 秒。",
+  ],
+  noteWhisperTurbo: [
+    "Measured on Japanese VRChat talk: about 21% of the characters wrong, and steady. It writes only once a sentence has ended.",
+    "日语 VRChat 闲聊实测：错字率约 21%，表现稳定。同样要等一句话说完才出字。",
+    "日語 VRChat 閒聊實測：錯字率約 21%，表現穩定。同樣要等一句話說完才出字。",
+  ],
+  noteVoxtral4b: [
+    "Measured on Japanese VRChat talk: quick — the text is about 2.6 s behind the voice — but about 27% of the characters wrong. For when speed matters more than accuracy.",
+    "日语 VRChat 闲聊实测：出字快（比声音慢约 2.6 秒），但错字较多（约 27%）。更看重速度、能接受错字时选它。",
+    "日語 VRChat 閒聊實測：出字快（比聲音慢約 2.6 秒），但錯字較多（約 27%）。更看重速度、能接受錯字時選它。",
+  ],
+  noteCohere: [
+    "Measured on Japanese VRChat talk: about 33% of the characters wrong, and about a quarter of what was said left out. Not a good choice for Japanese conversation.",
+    "日语 VRChat 闲聊实测：错字率约 33%，还会漏掉大约四分之一的话。不建议用于日语对话。",
+    "日語 VRChat 閒聊實測：錯字率約 33%，還會漏掉大約四分之一的話。不建議用於日語對話。",
+  ],
+  noteWhisperMedium: [
+    "Measured on Japanese VRChat talk: about 34% of the characters wrong.",
+    "日语 VRChat 闲聊实测：错字率约 34%。",
+    "日語 VRChat 閒聊實測：錯字率約 34%。",
+  ],
+  noteQwen06: [
+    "Measured on Japanese VRChat talk: about 35% of the characters wrong. Small: for when the graphics card has little memory to spare.",
+    "日语 VRChat 闲聊实测：错字率约 35%。体积小，显存紧张时可以用。",
+    "日語 VRChat 閒聊實測：錯字率約 35%。體積小，顯示記憶體吃緊時可以用。",
+  ],
+  noteMoonshineJa: [
+    "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
+    "日语 VRChat 闲聊实测：错字率约 70%。只适合显卡完全用不了时应急。",
+    "日語 VRChat 閒聊實測：錯字率約 70%。只適合顯示卡完全用不了時應急。",
+  ],
+  noteGranite41: [
+    "Measured on Japanese VRChat talk: it keeps repeating the same sentence. Not usable for Japanese conversation.",
+    "日语 VRChat 闲聊实测：会不停重复同一句话，日语对话基本没法用。",
+    "日語 VRChat 閒聊實測：會不停重複同一句話，日語對話基本沒法用。",
+  ],
+  noteSenseVoice: [
+    "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
+    "日语 VRChat 闲聊实测：不会输出假名，日语基本读不通。",
+    "日語 VRChat 閒聊實測：不會輸出假名，日語基本讀不通。",
+  ],
 };
 
 const FORK = {

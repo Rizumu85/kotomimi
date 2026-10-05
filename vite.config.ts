@@ -169,7 +169,9 @@ export default defineConfig(({ command, mode }) => {
             'lan-discover': 'electron/lan-discover.js',
             'lan-upstream': 'electron/lan-upstream.js',
             // Fork: a LocalAI installed on this computer, run by the app
-            'local-server': 'electron/local-server.js'
+            'local-server': 'electron/local-server.js',
+            // Fork: the native recognition engine the app downloads and runs
+            'native-engine': 'electron/native-engine.js'
           },
           onstart(args) {
             // SOKUJI_DEV_NO_ELECTRON=1 serves the renderer alone, for headless

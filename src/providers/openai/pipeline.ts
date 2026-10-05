@@ -28,6 +28,8 @@ import { createLocalInferenceAdapter } from '../localInference/adapter';
 import type { LocalInferenceConfig } from '../localInference/config';
 import { defaultEngines, type LocalEngines, type TranslationLike } from '../localInference/engines';
 import { createApiAsr } from './apiAsr';
+import { createNativeAsr } from './nativeAsr';
+import { askNativeEngine, ipcNativeBridge, type NativeBridge, type NativeEngineStatus } from '../../lib/native/nativeEngine';
 import { createRealtimeAdapter } from './adapter';
 import type { RealtimeConfig } from './config';
 import type { RealtimeCredentials } from './settings';
@@ -86,6 +88,8 @@ export interface DeviceHearing {
   vad: LocalInferenceConfig['vad'];
   /** Present: the recognizer is an API (`apiAsr.ts`) — this computer still cuts the sentences, and uploads each one. */
   api?: { baseUrl: string; model: string; key?: StageKey };
+  /** Present: the recognizer is the native engine's (`nativeAsr.ts`), given the voice as it comes. */
+  native?: { model: string };
 }
 
 export interface PipelineConfig extends RealtimeConfig {
@@ -121,6 +125,8 @@ export interface PipelineDeps {
    * named when it was configured (measured 2026-10-04): so it is named first. Absent: nothing is done.
    */
   prepare(pipeline: string, transcription: string): Promise<unknown>;
+  /** The native engine, when a leg hears by it: the main process's by default, stand-ins in tests. */
+  native: { bridge: NativeBridge; start(model: string): Promise<NativeEngineStatus> };
 }
 
 /** The wrapper's own refs start here: the inner adapter counts from 1 and never reaches it. */
@@ -498,7 +504,11 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
   const local = createLocalInferenceAdapter(engines);
   /** What hears on this computer: its own recognizer, or — the same adapter with that one engine changed — an API's. */
   const hearing = (device: DeviceHearing, request: StartRequest<PipelineConfig, PipelineCredentials>) => {
-    const { api } = device;
+    const { api, native } = device;
+    if (native) {
+      const start = deps.native?.start ?? ((model: string) => askNativeEngine('start', model));
+      return createLocalInferenceAdapter({ ...engines, asr: () => createNativeAsr({ bridge: deps.native?.bridge ?? ipcNativeBridge, start: () => start(native.model), clock: request.clock }) });
+    }
     if (!api) return local;
     const key = api.key ? request.credentials[api.key] : undefined;
     return createLocalInferenceAdapter({ ...engines, asr: () => createApiAsr({ baseUrl: api.baseUrl, model: api.model, ...(key ? { key } : {}), fetch: deps.fetch ?? fetchNow, clock: request.clock }) });

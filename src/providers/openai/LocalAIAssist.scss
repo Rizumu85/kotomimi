@@ -328,6 +328,48 @@
   }
 
   // The way from a plain model server to the Kotomimi on the same device (`KotomimiThere`).
+  // The native engine's model, in the library's own card: first in the list, and what the engine is doing under it.
+  .kt-here__native {
+    margin-bottom: 6px;
+  }
+
+  .kt-engine {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-secondary, #a0a0a0);
+
+    svg {
+      flex: none;
+    }
+
+    &--ready {
+      color: #10a37f;
+    }
+
+    &--failed {
+      justify-content: space-between;
+      color: #e0a23c;
+    }
+  }
+
+  .kt-engine__spin {
+    animation: kt-engine-spin 1.2s linear infinite;
+  }
+
+  @keyframes kt-engine-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .model-card__note {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 2px;
+  }
+
   .kt-there {
     display: flex;
     flex-direction: column;

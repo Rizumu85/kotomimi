@@ -14,6 +14,7 @@ const { keepMaximizeHonest, pageShift } = require('./window-maximize');
 const { firewallStatus, allowThroughFirewall } = require('./lan-firewall');
 const { discoverServers } = require('./lan-discover');
 const { createLocalServer } = require('./local-server');
+const { createNativeEngine } = require('./native-engine');
 const { applyLinuxGpuFlags } = require('./linux-gpu-flags');
 const { acquireSingleInstanceLock, createFocusRelay } = require('./single-instance');
 
@@ -1334,6 +1335,42 @@ ipcMain.handle('local-server:pipelines', () => getLocalServer().pipelines());
 ipcMain.handle('local-server:set-pipeline', (event, args) => getLocalServer().setPipeline(String(args?.name ?? ''), { transcription: args?.transcription, llm: args?.llm }));
 // The one this app started goes with it: asked to stop, not waited for.
 app.on('will-quit', () => { void localServer?.stop(); });
+
+// Fork: the native recognition engine (electron/native-engine.js): a runtime and its models, fetched into the app's
+// own folder and run on this computer alone. Fetched over the system's own network stack (`net.fetch`: its proxy
+// settings included), its output kept in the app's log folder, and stopped with the app.
+let nativeEngine = null;
+const getNativeEngine = () => {
+  if (nativeEngine) return nativeEngine;
+  let out = null;
+  const log = (text) => {
+    try {
+      out ??= require('fs').createWriteStream(path.join(app.getPath('logs'), 'native-engine.log'), { flags: 'a' });
+      out.write(text);
+    } catch { /* its output is a convenience: never a reason to fail */ }
+  };
+  const { net } = require('electron');
+  nativeEngine = createNativeEngine({
+    // An unpackaged run can keep it elsewhere (`KOTOMIMI_NATIVE_DIR`): gigabytes a test profile need not fetch again.
+    dir: !app.isPackaged && process.env.KOTOMIMI_NATIVE_DIR ? process.env.KOTOMIMI_NATIVE_DIR : path.join(app.getPath('userData'), 'native-engine'),
+    fetch: (url, init) => net.fetch(url, init),
+    log,
+    onChange: (status) => toPage('native-engine:status', status),
+    onStream: (event) => toPage('native-engine:stream', event),
+  });
+  return nativeEngine;
+};
+ipcMain.handle('native-engine:get', () => getNativeEngine().status());
+ipcMain.handle('native-engine:download', (event, args) => getNativeEngine().download(String(args?.id ?? '')));
+ipcMain.handle('native-engine:cancel', (event, args) => getNativeEngine().cancel(String(args?.id ?? '')));
+ipcMain.handle('native-engine:remove', (event, args) => getNativeEngine().remove(String(args?.id ?? '')));
+ipcMain.handle('native-engine:start', (event, args) => getNativeEngine().start(String(args?.id ?? '')));
+ipcMain.handle('native-engine:stop', () => getNativeEngine().stop());
+ipcMain.handle('native-engine:stream-open', (event, args) => getNativeEngine().openStream({ language: args?.language, sampleRate: args?.sampleRate }));
+ipcMain.handle('native-engine:stream-audio', (event, args) => getNativeEngine().writeStream(args?.id, args?.pcm));
+ipcMain.handle('native-engine:stream-end', (event, args) => getNativeEngine().endStream(args?.id));
+ipcMain.handle('native-engine:stream-abort', (event, args) => getNativeEngine().abortStream(args?.id));
+app.on('will-quit', () => { void nativeEngine?.stop(); });
 
 // Fork: the devices of the local network whose models this app can use (electron/lan-discover.js) —
 // asked for when the person is choosing one. One search at a time: a second asker waits for the first's answer.

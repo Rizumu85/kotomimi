@@ -85,6 +85,9 @@ const validReceiveChannels = [
   'local-server:status',
   // Fork: the window is about to be maximized or restored, for the page to play (electron/window-maximize.js)
   'window:shift',
+  // Fork: the native recognition engine — its state as it changes, and the text of a live recognition (electron/native-engine.js)
+  'native-engine:status',
+  'native-engine:stream',
 ];
 
 // Expose protected methods that allow the renderer process to use

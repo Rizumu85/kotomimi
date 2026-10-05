@@ -44,6 +44,14 @@ export const PLACE_FIELDS = ['translateAt', 'translateServerModel', 'translateMo
 export const HERES = ['app', 'localai'] as const;
 export type Here = (typeof HERES)[number];
 
+/**
+ * The hearing stage has a third runner here: the native engine
+ * (`localaiNative.ts`) — a runtime the app downloads and runs beside
+ * itself, cutting the sentences as the app's own recognizers do.
+ */
+export const ASR_HERES = [...HERES, 'native'] as const;
+export type AsrHere = (typeof ASR_HERES)[number];
+
 /** Where each stage runs. The feedback's place counts only while the speaker is coached. */
 export interface StagePlacement {
   asrVia: Place;
@@ -51,7 +59,7 @@ export interface StagePlacement {
   coach: boolean;
   coachAt: Place;
   /** On this computer: by whom. Absent: the app's own models. */
-  asrHere?: Here;
+  asrHere?: AsrHere;
   translateHere?: Here;
   coachHere?: Here;
 }
@@ -67,6 +75,9 @@ export const hearsByLocalServer = (s: Pick<StagePlacement, 'asrVia' | 'asrHere'>
 /** The app's own recognizer hears, or an API it uploads each sentence to: this computer cuts the sentences itself. */
 export const cutsSentencesHere = (s: Pick<StagePlacement, 'asrVia' | 'asrHere'>): boolean => s.asrVia !== 'server' && !hearsByLocalServer(s);
 
+/** The native engine hears: none of the app's own models is asked for. */
+export const hearsNatively = (s: Pick<StagePlacement, 'asrVia' | 'asrHere'>): boolean => s.asrVia === 'device' && s.asrHere === 'native';
+
 /** The feedback runs at this place: the speaker is coached, and that is where. */
 export const coachIs = (s: Pick<StagePlacement, 'coach' | 'coachAt'>, place: Place): boolean => s.coach && s.coachAt === place;
 
@@ -75,9 +86,9 @@ export function needsServer(s: StagePlacement): boolean {
   return s.asrVia === 'server' || s.translateAt === 'server' || coachIs(s, 'server');
 }
 
-/** The stored settings as the device stages read them: a stage this computer's LocalAI runs asks nothing of the app's own models. */
+/** The stored settings as the device stages read them: a stage this computer's LocalAI runs, or its native engine, asks nothing of the app's own models. */
 export function deviceChoices(s: DeviceChoices): DeviceChoices {
-  const own = (place: Place, here: Here | undefined): Place => (place === 'device' && here === 'localai' ? 'api' : place);
+  const own = (place: Place, here: AsrHere | undefined): Place => (place === 'device' && here !== undefined && here !== 'app' ? 'api' : place);
   return { asrVia: own(s.asrVia, s.asrHere), translateAt: own(s.translateAt, s.translateHere), coach: s.coach, coachAt: own(s.coachAt, s.coachHere), selections: s.selections };
 }
 
