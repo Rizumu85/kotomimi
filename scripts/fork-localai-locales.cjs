@@ -131,6 +131,11 @@ const PROVIDER = {
   // Under "this computer": the LocalAI installed here, as one more choice in the model's own menu (`LocalAIHere`).
   hereLocalAI: ['LocalAI (on this computer)', 'LocalAI（这台电脑上的）', 'LocalAI（這台電腦上的）'],
   hereApp: ['Models Kotomimi downloaded', 'Kotomimi 下载的模型', 'Kotomimi 下載的模型'],
+  // The model menus' groups: every menu of "this computer" has the same three.
+  groupNative: ['Native engine', '原生引擎', '原生引擎'],
+  groupApp: ['The app\'s own models', '应用自带的模型', '應用程式內建的模型'],
+  groupOther: ['Other', '其他', '其他'],
+  appAuto: ['Chosen automatically', '自动选择', '自動選擇'],
   hereModel: ['LocalAI\'s model', 'LocalAI 的模型', 'LocalAI 的模型'],
   hereModelOwn: ['LocalAI\'s own choice', '由 LocalAI 决定', '由 LocalAI 決定'],
   hereModelPick: ['Choose a model', '请选择模型', '請選擇模型'],

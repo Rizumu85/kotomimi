@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import type { Readiness } from '../../lib/provider/types';
 import { useLocalServerStore } from '../../stores/localServerStore';
 import { useModelStore } from '../../stores/modelStore';
-import { useNativeEngineStore } from '../../stores/nativeEngineStore';
+import { useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import { NO_LOCAL_SERVER } from '../../lib/lan/localServer';
 import { LocalAIAssist } from './LocalAIAssist';
 import { LOCALAI_DEFAULTS, type LocalAISettings } from './localai';
@@ -339,7 +339,10 @@ describe('the stage cards: on this computer', () => {
       const { card } = draw({ settings: { asrVia: 'device', translateAt: 'device' } });
       const menu = card(HEAR).getByRole('combobox') as HTMLSelectElement;
       expect(menu.options[0].textContent).toBe('providers.localai.nativeNone');
-      expect([...menu.options].map((o) => o.textContent)).toContain('providers.localai.nativeEntry');
+      // The engine's model, under the engine's own group and by its own name.
+      // No model of the app's own is downloaded, so its group has nothing to offer and is not drawn.
+      expect([...menu.querySelectorAll('optgroup')].map((g) => g.label)).toEqual(['providers.localai.groupNative']);
+      expect([...menu.querySelectorAll('optgroup')[0].querySelectorAll('option')].map((o) => o.textContent)).toEqual(['Qwen3-ASR 1.7B GGUF']);
     } finally {
       useNativeEngineStore.setState({ status: before });
     }
@@ -492,7 +495,7 @@ describe('the stage cards: this computer\'s LocalAI', () => {
     const { update } = draw({ settings: { asrVia: 'device', asrHere: 'localai', asrHereModel: 'whisper-large-turbo', translateAt: 'device', translateHere: 'localai', translateHereModel: '' } });
     await act(async () => {});
     const [who, which] = menu(HEAR);
-    expect(labels(who)).toEqual(['providers.localai.hereApp', LOCALAI]);
+    expect(labels(who)).toEqual(['providers.localai.appAuto', LOCALAI]);
     expect(which.value).toBe('whisper-large-turbo');
     // The recognizer may be left to its pipeline; a text model has to be named.
     expect(labels(which)[0]).toBe('providers.localai.hereModelOwn');
@@ -556,5 +559,71 @@ describe('the other device’s recognizers in the menu', () => {
     const { card } = draw({ settings: { asrVia: 'server', asrModel: 'apple-speech-transcriber' }, values: { endpoint: '192.168.1.10:8790' }, models: MAC_MODELS });
     expect(menu(card).value).toBe('apple-speech-transcriber');
     expect(menu(card).selectedOptions[0].textContent).toBe('providers.localai.modelGone');
+  });
+});
+
+describe('one menu for a stage of this computer, whoever runs it', () => {
+  const engineOf = (models: Record<string, 'downloaded' | 'absent'>, run: { state: string; model: string | null } = { state: 'stopped', model: null }) => ({
+    supported: true, engine: 'ready', engineBytes: 1,
+    models: Object.fromEntries(Object.entries(models).map(([id, state]) => [id, { state, received: state === 'downloaded' ? 1 : 0, total: 1 }])),
+    run: { ...run, port: 0, tail: '' }, up: [],
+  }) as never;
+  const groups = (select: HTMLSelectElement) => [...select.querySelectorAll('optgroup')].map((g) => [g.label, [...g.querySelectorAll('option')].map((o) => o.textContent)]);
+  let before: { asr: unknown; translation: unknown };
+  beforeEach(() => {
+    before = { asr: useNativeEngineStore.getState().status, translation: useNativeTranslatorStore.getState().status };
+    useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'downloaded' }) });
+    useNativeTranslatorStore.setState({ status: engineOf({ 'index-translate-2b': 'downloaded', 'hy-mt2-1.8b': 'downloaded' }) });
+  });
+  afterEach(() => {
+    useNativeEngineStore.setState({ status: before.asr as never });
+    useNativeTranslatorStore.setState({ status: before.translation as never });
+  });
+
+  it('lists the same choices while a native engine translates as while the app’s own model does', () => {
+    const app = draw({ settings: { translateAt: 'device', translateHere: 'app' } });
+    const whileApp = groups(app.card(TRANSLATE).getByRole('combobox') as HTMLSelectElement);
+    app.unmount();
+    const native = draw({ settings: { translateAt: 'device', translateHere: 'native', translateNativeModel: 'index-translate-2b' } });
+    const menu = native.card(TRANSLATE).getByRole('combobox') as HTMLSelectElement;
+    // The engine's models under their own heading, by their own names; the app's own under theirs; nothing else.
+    expect(groups(menu)).toEqual(whileApp);
+    expect(groups(menu)[0]).toEqual(['providers.localai.groupNative', ['Index-Translate 2B', 'Hunyuan MT 2 1.8B']]);
+    expect(groups(menu)[1][0]).toBe('providers.localai.groupApp');
+    // What is in use is what the menu shows.
+    expect(menu.selectedOptions[0].textContent).toBe('Index-Translate 2B');
+  });
+
+  it('hands the stage back to the app’s own models when one of them is chosen, and to another of the engine’s when that is', () => {
+    const { card, update } = draw({ settings: { translateAt: 'device', translateHere: 'native', translateNativeModel: 'index-translate-2b' } });
+    const menu = card(TRANSLATE).getByRole('combobox') as HTMLSelectElement;
+    fireEvent.change(menu, { target: { value: '' } });
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ translateHere: 'app' }));
+    const other = [...menu.options].find((o) => o.textContent === 'Hunyuan MT 2 1.8B')!;
+    fireEvent.change(menu, { target: { value: other.value } });
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ translateHere: 'native', translateNativeModel: 'hy-mt2-1.8b' }));
+  });
+
+  it('keeps the library shut for a model that is chosen and here, and opens it for one that is not', () => {
+    const here = draw({ settings: { translateAt: 'device', translateHere: 'native', translateNativeModel: 'index-translate-2b' } });
+    expect(here.card(TRANSLATE).getByRole('button', { name: 'providers.localai.browse' }).getAttribute('aria-expanded')).toBe('false');
+    expect(here.container.querySelector('.kt-here__library')).toBeNull();
+    // By its button, as the app’s own library opens.
+    fireEvent.click(here.card(TRANSLATE).getByRole('button', { name: 'providers.localai.browse' }));
+    expect(here.container.querySelector('.kt-here__library')).not.toBeNull();
+    here.unmount();
+    useNativeTranslatorStore.setState({ status: engineOf({ 'index-translate-2b': 'absent', 'hy-mt2-1.8b': 'downloaded' }) });
+    const gone = draw({ settings: { translateAt: 'device', translateHere: 'native', translateNativeModel: 'index-translate-2b' } });
+    expect(gone.card(TRANSLATE).getByRole('button', { name: 'providers.localai.browse' }).getAttribute('aria-expanded')).toBe('true');
+    // Still what the menu shows: the choice is not silently another.
+    expect((gone.card(TRANSLATE).getByRole('combobox') as HTMLSelectElement).selectedOptions[0].textContent).toBe('Index-Translate 2B');
+  });
+
+  it('hears by the engine in the same row, with the same button', () => {
+    const { card } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'qwen3-asr-1.7b-q8', translateAt: 'device' } });
+    const menu = card(HEAR).getByRole('combobox') as HTMLSelectElement;
+    expect(menu.selectedOptions[0].textContent).toBe('Qwen3-ASR 1.7B GGUF');
+    expect(groups(menu)[0]).toEqual(['providers.localai.groupNative', ['Qwen3-ASR 1.7B GGUF']]);
+    expect(card(HEAR).getByRole('button', { name: 'providers.localai.browse' }).getAttribute('aria-expanded')).toBe('false');
   });
 });
