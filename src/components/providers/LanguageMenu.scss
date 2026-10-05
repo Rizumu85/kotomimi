@@ -3,10 +3,18 @@
 @use '../Settings/shared/variables' as vars;
 
 .kt-lang-option {
+  // A row here is not a button (it holds one), so its padding would be added to its full width: it would reach
+  // twelve pixels past the list, under the scrollbar — the pin with it — and the list would scroll sideways.
+  box-sizing: border-box;
+
   // The pin sits at the far right, after the mark of the current choice.
   .kt-font-option__check {
     margin-left: auto;
   }
+}
+
+.kt-lang-popover .kt-font-list {
+  overflow-x: hidden;
 }
 
 .kt-lang-pin {
@@ -16,7 +24,7 @@
   justify-content: center;
   width: 24px;
   height: 24px;
-  margin: -2px 6px -2px 0;
+  margin: -2px 0;
   padding: 0;
   color: vars.$text-muted;
   background: transparent;
