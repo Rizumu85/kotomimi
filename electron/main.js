@@ -16,6 +16,7 @@ const { discoverServers } = require('./lan-discover');
 const { createLocalServer } = require('./local-server');
 const { createNativeEngine, LLAMA, TRANSLATORS, LLAMA_RUNTIME } = require('./native-engine');
 const { createAutostart } = require('./autostart');
+const { createAppleSpeech } = require('./apple-speech');
 const { applyLinuxGpuFlags } = require('./linux-gpu-flags');
 const { acquireSingleInstanceLock, createFocusRelay } = require('./single-instance');
 
@@ -1360,6 +1361,17 @@ const getNativeEngine = () => {
       out.write(text);
     } catch { /* its output is a convenience: never a reason to fail */ }
   };
+  const toStatus = (status) => toPage('native-engine:status', status);
+  const toStream = (event) => toPage('native-engine:stream', event);
+  // On a Mac the native recognizer is the system's own (electron/apple-speech.js), through the helper the app ships
+  // beside its other one; it answers the same questions, so everything below this line is the same for both.
+  if (process.platform === 'darwin') {
+    const inBundle = path.join('resources', 'bin', 'darwin-arm64', 'Kotomimi Speech Helper.app', 'Contents', 'MacOS', 'speech-helper');
+    const helper = [process.resourcesPath ? path.join(process.resourcesPath, inBundle) : null, path.join(__dirname, '..', inBundle)]
+      .find((candidate) => candidate && require('fs').existsSync(candidate)) ?? null;
+    nativeEngine = createAppleSpeech({ helper, log, onChange: toStatus, onStream: toStream });
+    return nativeEngine;
+  }
   const { net } = require('electron');
   nativeEngine = createNativeEngine({
     // An unpackaged run can keep it elsewhere (`KOTOMIMI_NATIVE_DIR`): gigabytes a test profile need not fetch again.
@@ -1368,8 +1380,8 @@ const getNativeEngine = () => {
     // An unpackaged run can keep what the engine was given to hear (`KOTOMIMI_NATIVE_DUMP`), to measure with.
     dumpDir: !app.isPackaged && process.env.KOTOMIMI_NATIVE_DUMP ? process.env.KOTOMIMI_NATIVE_DUMP : null,
     log,
-    onChange: (status) => toPage('native-engine:status', status),
-    onStream: (event) => toPage('native-engine:stream', event),
+    onChange: toStatus,
+    onStream: toStream,
   });
   return nativeEngine;
 };

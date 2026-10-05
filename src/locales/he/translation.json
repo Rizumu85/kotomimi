@@ -616,6 +616,7 @@
       "noteIndexTranslate": "Measured on thirty sentences of Japanese VRChat talk into Chinese: serious mistakes in about 3 of them — the best of the three here — and a sentence takes about a tenth of a second. Over a hundred languages. It runs in an engine of its own on the graphics card (about 2 GB of video memory).",
       "noteHyMt2": "Measured on thirty sentences of Japanese VRChat talk into Chinese: serious mistakes in about 8 of them. A sentence takes about a tenth of a second.",
       "noteHyMt15": "Measured on thirty sentences of Japanese VRChat talk into Chinese: serious mistakes in about 8 of them, and it tends to add words of its own. The same model as the one the app runs itself, several times quicker here.",
+      "noteAppleSpeech": "Measured on Japanese VRChat talk: about 14% of the characters wrong — the most accurate of everything measured — and it writes while it listens. It is the speech recognition of macOS itself: nothing of the graphics memory is taken, and the system fetches each language itself.",
       "noteQwen17": "Measured on Japanese VRChat talk: about 19% of the characters wrong — accurate. It writes only once a sentence has ended, so the text is about 10 s behind the voice.",
       "noteWhisperTurbo": "Measured on Japanese VRChat talk: about 21% of the characters wrong, and steady. It writes only once a sentence has ended.",
       "noteVoxtral4b": "Measured on Japanese VRChat talk: quick — the text is about 2.6 s behind the voice — but about 27% of the characters wrong. For when speed matters more than accuracy.",

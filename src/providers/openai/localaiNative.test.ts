@@ -7,7 +7,7 @@ import { useModelStore } from '../../stores/modelStore';
 import { buildLocalAI, admitLocalAI, checkLocalAIWithNative, describeLocalAI, localaiProvider, LOCALAI_DEFAULTS, migrateLocalAISettings, type LocalAICredentials, type LocalAISettings } from './localai';
 import { cutsSentencesHere, deviceChoices, deviceNeeds, hearsByLocalServer, hearsNatively } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
-import { NATIVE_DEFAULT_MODEL, nativeDownloaded, nativeGap, nativeHears, nativeModel, nativeReady } from './localaiNative';
+import { APPLE_PREFIX, NATIVE_DEFAULT_MODEL, nativeDownloaded, nativeGap, nativeHears, nativeModel, nativeModelFor, nativeReady } from './localaiNative';
 import { SHARED } from './testing';
 
 const SPEAKER: SessionContext = { direction: { source: 'ja', target: 'zh-CN' }, speech: false, turns: 'auto' };
@@ -87,6 +87,54 @@ describe('the native engine as what hears on this computer', () => {
     expect(nativeModel('gone').id).toBe(NATIVE_DEFAULT_MODEL);
     expect(nativeHears(nativeModel('r2t2-q8'), 'zh-CN')).toBe(true);
     expect(nativeHears(nativeModel('r2t2-q8'), 'th')).toBe(false);
+  });
+});
+
+describe('the system recognizer of a Mac, one model to a language', () => {
+  const APPLE: NativeEngineStatus = {
+    supported: true,
+    engine: 'ready',
+    engineBytes: 0,
+    models: { [`${APPLE_PREFIX}ja`]: { state: 'downloaded', received: 0, total: 0 }, [`${APPLE_PREFIX}zh`]: { state: 'absent', received: 0, total: 0 } },
+    run: { state: 'stopped', model: null, port: 0, tail: '' },
+  };
+  const asked = (status: NativeEngineStatus, heard: string[]) => {
+    const start = vi.fn();
+    return { start, gap: nativeGap(`${APPLE_PREFIX}ja`, heard, { status: async () => status, start }) };
+  };
+
+  it('is named once, and resolved to the model of the language each leg hears', () => {
+    expect(nativeModelFor(`${APPLE_PREFIX}ja`, 'ja')?.id).toBe(`${APPLE_PREFIX}ja`);
+    expect(nativeModelFor(`${APPLE_PREFIX}ja`, 'zh-CN')?.id).toBe(`${APPLE_PREFIX}zh`);
+    expect(nativeModelFor(`${APPLE_PREFIX}ja`, 'ru')).toBeNull();
+    // Another engine's model is the same for every language it hears.
+    expect(nativeModelFor('r2t2-q8', 'zh-CN')?.id).toBe('r2t2-q8');
+    expect(nativeModelFor('r2t2-q8', 'th')).toBeNull();
+    expect(nativeModel(`${APPLE_PREFIX}ja`).limits).toMatchObject({ rollAt: 0 });
+  });
+
+  it('builds each leg with the model of its own language, closed at every cut of the detector', () => {
+    const speaker = buildLocalAI(SPEAKER, settings({ ...NATIVE, asrNativeModel: `${APPLE_PREFIX}ja` }), shared);
+    if ('refused' in speaker) throw new Error(speaker.refused);
+    expect(speaker.device).toMatchObject({ modelId: `${APPLE_PREFIX}ja`, native: { model: `${APPLE_PREFIX}ja`, limits: { rollAt: 0 } } });
+    const participant = buildLocalAI({ ...SPEAKER, direction: { source: 'zh-CN', target: 'ja' } }, settings({ ...NATIVE, asrNativeModel: `${APPLE_PREFIX}ja` }), shared);
+    if ('refused' in participant) throw new Error(participant.refused);
+    expect(participant.device).toMatchObject({ modelId: `${APPLE_PREFIX}zh`, native: { model: `${APPLE_PREFIX}zh` } });
+  });
+
+  it('needs the language of every leg installed, and names the one that is not', async () => {
+    expect(await asked(APPLE, ['ja', 'zh-CN']).gap).toMatchObject({ ok: false, code: 'native_missing' });
+    expect(await asked(APPLE, ['ja', 'ru']).gap).toMatchObject({ ok: false, code: 'no_asr', params: { source: 'ru' } });
+  });
+
+  it('is asked for once and is then ready for every language of its own', async () => {
+    const down = asked(APPLE, ['ja']);
+    expect(await down.gap).toMatchObject({ ok: false, code: 'native_warming' });
+    expect(down.start).toHaveBeenCalledWith(`${APPLE_PREFIX}ja`);
+    const both: NativeEngineStatus = { ...APPLE, models: { ...APPLE.models, [`${APPLE_PREFIX}zh`]: { state: 'downloaded', received: 0, total: 0 } }, run: { state: 'ready', model: `${APPLE_PREFIX}ja`, port: 0, tail: '' } };
+    expect(await asked(both, ['ja', 'zh-CN']).gap).toBeNull();
+    expect(nativeReady(both, `${APPLE_PREFIX}zh`)).toBe(true);
+    expect(nativeReady(both, 'r2t2-q8')).toBe(false);
   });
 });
 

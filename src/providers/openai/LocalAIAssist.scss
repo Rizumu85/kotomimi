@@ -333,6 +333,15 @@
     margin-bottom: 6px;
   }
 
+  // A wrapper that is not a box of its own: only a hook for the one rule below.
+  .kt-native-card {
+    display: contents;
+  }
+
+  .kt-native-card--unsized .model-card__size {
+    display: none;
+  }
+
   .kt-engine {
     display: flex;
     align-items: center;

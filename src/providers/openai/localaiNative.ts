@@ -11,6 +11,7 @@
  */
 import type { CheckResult } from '../../lib/provider/types';
 import type { NativeEngineStatus } from '../../lib/native/nativeEngine';
+import type { NativeLimits } from './nativeAsr';
 import { useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import { nativeTranslates, nativeTranslator } from './nativeTranslators';
 
@@ -18,14 +19,29 @@ import { nativeTranslates, nativeTranslator } from './nativeTranslators';
 export interface NativeModel {
   id: string;
   name: string;
-  /** The whole download: the model, in bytes. The runtime itself is fetched with the first one. */
+  /** The whole download: the model, in bytes. The runtime itself is fetched with the first one. 0: the system fetches it, and does not say how large it is. */
   bytes: number;
   /** What it hears, in the app's base codes. */
   languages: readonly string[];
+  /** How long one recognition of it may run, where that is not the default (`nativeAsr.ts`). */
+  limits?: Partial<NativeLimits>;
 }
+
+/**
+ * The Mac's own speech recognition (`electron/apple-speech.js`): one model to
+ * a language, since the system fetches each language's assets apart. A
+ * stretch the detector cuts is closed there — closed, the recognizer writes
+ * all it heard at once, where its settled text otherwise comes ten seconds
+ * late — and no recognition runs long.
+ */
+export const APPLE_PREFIX = 'apple-speech:';
+const APPLE_LANGUAGES = ['ja', 'en', 'ko', 'zh', 'es', 'fr', 'de', 'it', 'pt', 'hi', 'yue'] as const;
+const APPLE_LIMITS: Partial<NativeLimits> = { rollAfter: 20, rollAt: 0, rollHard: 40 };
+const isApple = (id: string | null | undefined): boolean => typeof id === 'string' && id.startsWith(APPLE_PREFIX);
 
 export const NATIVE_MODELS: readonly NativeModel[] = [
   { id: 'r2t2-q8', name: 'Confucius4 R2T2', bytes: 2477512064, languages: ['ja', 'zh', 'en', 'ko', 'fr', 'de', 'it', 'pt', 'ru', 'es', 'ar'] },
+  ...APPLE_LANGUAGES.map((language) => ({ id: `${APPLE_PREFIX}${language}`, name: 'Apple Speech', bytes: 0, languages: [language], limits: APPLE_LIMITS })),
 ];
 
 export const NATIVE_DEFAULT_MODEL = NATIVE_MODELS[0].id;
@@ -35,11 +51,22 @@ export const nativeModel = (id: string): NativeModel => NATIVE_MODELS.find((m) =
 
 const baseOf = (code: string): string => code.trim().toLowerCase().split(/[-_]/)[0];
 
+/**
+ * The model that hears a language, for a setting: the one it names — or, where
+ * it names the Mac's recognition, that recognition's model for the language,
+ * since each language there is a model of its own. Null: none of them hears it.
+ */
+export function nativeModelFor(id: string, language: string): NativeModel | null {
+  const named = nativeModel(id);
+  const model = isApple(named.id) ? NATIVE_MODELS.find((m) => m.id === `${APPLE_PREFIX}${baseOf(language)}`) : named;
+  return model && model.languages.includes(baseOf(language)) ? model : null;
+}
+
 /** Whether a model hears speech in this language. */
 export const nativeHears = (model: NativeModel, language: string): boolean => model.languages.includes(baseOf(language));
 
-/** The engine is this model's and ready to hear. */
-export const nativeReady = (status: NativeEngineStatus, id: string): boolean => status.run.state === 'ready' && status.run.model === id;
+/** The engine is this model's and ready to hear. The Mac's recognition, once asked for, is ready for every language of its own. */
+export const nativeReady = (status: NativeEngineStatus, id: string): boolean => status.run.state === 'ready' && (status.run.model === id || (isApple(id) && isApple(status.run.model)));
 
 /** The model is on disk, with the runtime that runs it. */
 export const nativeDownloaded = (status: NativeEngineStatus, id: string): boolean => status.engine === 'ready' && status.models[id]?.state === 'downloaded';
@@ -61,12 +88,15 @@ export interface NativeCheckDeps {
 export async function nativeGap(id: string, heard: readonly string[], deps: NativeCheckDeps = {}): Promise<Extract<CheckResult, { ok: false }> | null> {
   const store = useNativeEngineStore.getState();
   const status = await (deps.status ?? store.refresh)();
-  const model = nativeModel(id);
   if (!status.supported) return { ok: false, reason: 'The native recognition engine is not available for this system.', code: 'native_unsupported' };
-  const unheard = heard.find((language) => !nativeHears(model, language));
-  if (unheard !== undefined) return { ok: false, reason: `${model.name} does not hear ${unheard}.`, code: 'no_asr', params: { source: unheard } };
-  if (!nativeDownloaded(status, model.id)) return { ok: false, reason: `${model.name} is not downloaded.`, code: 'native_missing', params: { name: model.name } };
-  if (nativeReady(status, model.id)) return null;
+  // The model of each language heard: one for all of them, or — the Mac's recognition — one to a language.
+  const unheard = heard.find((language) => !nativeModelFor(id, language));
+  if (unheard !== undefined) return { ok: false, reason: `${nativeModel(id).name} does not hear ${unheard}.`, code: 'no_asr', params: { source: unheard } };
+  const models = heard.map((language) => nativeModelFor(id, language)!);
+  const absent = models.find((one) => !nativeDownloaded(status, one.id));
+  if (absent) return { ok: false, reason: `${absent.name} is not downloaded.`, code: 'native_missing', params: { name: absent.name } };
+  const model = models[0] ?? nativeModel(id);
+  if (models.every((one) => nativeReady(status, one.id))) return null;
   if (status.run.state === 'failed' && status.run.model === model.id) return { ok: false, reason: `The native recognition engine could not start: ${status.run.tail.trim().split('\n').pop() ?? ''}`, code: 'native_failed' };
   if (status.run.state === 'stopped' || status.run.model !== model.id) (deps.start ?? ((which: string) => { void store.start(which); }))(model.id);
   return { ok: false, reason: 'The native recognition engine is warming up.', code: 'native_warming' };

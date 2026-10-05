@@ -133,6 +133,10 @@ resources/bin/darwin-arm64/sokuji-audio-host
 resources/bin/darwin-x64/sokuji-audio-host
 native/audio-host/*/out/
 
+# Fork: the Mac's speech helper (native/apple-speech): a build artifact, as the capture helpers are.
+resources/bin/darwin-arm64/Kotomimi Speech Helper.app/
+native/apple-speech/out/
+
 # native super-project build outputs
 native/build/
 native/python/sokuji_native/_native/

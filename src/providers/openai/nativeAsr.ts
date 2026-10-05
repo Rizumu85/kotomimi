@@ -51,7 +51,16 @@ export interface NativeAsrOptions {
   now?: () => number;
   /** What the wait for a recognition's last words is kept on: the session's clock. */
   clock?: Pick<Clock, 'setTimeout'>;
+  /** How long one recognition may run, where the engine's own limits are not the default's (`NativeLimits`). */
+  limits?: Partial<NativeLimits>;
 }
+
+/**
+ * How long one recognition runs, in seconds of sound: begun again at a gap
+ * between words once it is `rollAfter` long; where the detector cuts, once it
+ * is `rollAt` long (0: at every cut); and anywhere at `rollHard`.
+ */
+export interface NativeLimits { rollAfter: number; rollAt: number; rollHard: number }
 
 /** Audio kept from before the detector says speech began: it says so a moment after the first sound. */
 const PRE_ROLL_SECONDS = 0.8;
@@ -84,6 +93,8 @@ interface Stream {
   /** Everything written so far, and how much of it has gone out as results. */
   text: string;
   emitted: number;
+  /** The engine says what it has heard before that is settled (`partial`): what shows is that, not the settled text, which comes late. */
+  tentative: boolean;
   /** Samples of sound given: in all, and since the last result. */
   samples: number;
   pieceSamples: number;
@@ -99,6 +110,7 @@ interface Stream {
 
 export function createNativeAsr(options: NativeAsrOptions): AsrLike {
   const { bridge } = options;
+  const limits: NativeLimits = { rollAfter: ROLL_AFTER_SECONDS, rollAt: ROLL_AT_SECONDS, rollHard: ROLL_HARD_SECONDS, ...options.limits };
   const now = options.now ?? (() => Date.now());
   const clock = options.clock ?? realClock;
   let worker: VadWorker | null = null;
@@ -138,7 +150,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
   /** A new recognition, taking sound from now on; the engine opens it when it is its turn. */
   function begin(): Stream {
     const resampler = createResampler(rate);
-    const s: Stream = { id: null, resampler, opening: false, backlog: [], text: '', emitted: 0, samples: 0, pieceSamples: 0, closed: false, closedAt: 0, misfire: false, over: false, cancelWait: null };
+    const s: Stream = { id: null, resampler, opening: false, backlog: [], text: '', emitted: 0, tentative: false, samples: 0, pieceSamples: 0, closed: false, closedAt: 0, misfire: false, over: false, cancelWait: null };
     queue.push(s);
     live = s;
     quiet = 0;
@@ -228,9 +240,13 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
   function onEvent(event: NativeStreamEvent) {
     const s = queue.find((candidate) => candidate.id === event.id);
     if (!s || s.over) return;
-    if (event.type === 'delta') {
+    if (event.type === 'partial') {
+      s.tentative = true;
+      // Everything heard so far, as it stands: what follows the results already given, by their length.
+      if (!s.misfire) asr.onPartialResult?.(event.text.slice(s.emitted));
+    } else if (event.type === 'delta') {
       s.text += event.text;
-      if (!s.misfire) asr.onPartialResult?.(pending(s));
+      if (!s.misfire && !s.tentative) asr.onPartialResult?.(pending(s));
     } else if (event.type === 'done') {
       finish(s, event.text || s.text);
     } else {
@@ -278,8 +294,12 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
             idle = 0;
             if (!live) return;
             if (data.forced) {
-              piece(live);
-              if (secondsOf(live.samples) >= ROLL_AT_SECONDS) roll(live);
+              // Closed here, the engine writes all it heard at once: no result is cut from what is settled so far.
+              if (secondsOf(live.samples) >= limits.rollAt) {
+                roll(live);
+              } else {
+                piece(live);
+              }
             } else {
               close(live);
             }
@@ -325,13 +345,13 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
       if (live) {
         give(live, kept);
         const age = secondsOf(live.samples);
-        if (age >= ROLL_AFTER_SECONDS) {
+        if (age >= limits.rollAfter) {
           let loud = false;
           for (let i = 0; i < kept.length; i += 1) {
             if (kept[i] > GAP_PEAK || kept[i] < -GAP_PEAK) { loud = true; break; }
           }
           quiet = loud ? 0 : quiet + kept.length;
-          if (secondsOf(quiet) >= GAP_SECONDS || age >= ROLL_HARD_SECONDS) roll(live);
+          if (secondsOf(quiet) >= GAP_SECONDS || age >= limits.rollHard) roll(live);
         }
         // Open after a cut of the detector's own, and no voice since: the speaker had just stopped. The pause has passed
         // in what the recognition was given, so it is closed as the detector would have closed it.

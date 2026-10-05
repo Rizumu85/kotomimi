@@ -48,10 +48,10 @@ function fakeEngine(options: { down?: boolean } = {}) {
   return { bridge, streams, state, say: (event: NativeStreamEvent) => listener?.(event) };
 }
 
-async function started(engine = fakeEngine(), options: { status?: NativeEngineStatus; vad?: typeof VAD } = {}) {
+async function started(engine = fakeEngine(), options: { status?: NativeEngineStatus; vad?: typeof VAD; limits?: { rollAfter?: number; rollAt?: number; rollHard?: number } } = {}) {
   const vad = fakeVad();
   const clock = createVirtualClock();
-  const asr = createNativeAsr({ bridge: engine.bridge, start: async () => options.status ?? READY, vad: () => vad.worker, now: () => clock.now(), clock });
+  const asr = createNativeAsr({ bridge: engine.bridge, start: async () => options.status ?? READY, vad: () => vad.worker, now: () => clock.now(), clock, ...(options.limits ? { limits: options.limits } : {}) });
   const seen = { partials: [] as string[], results: [] as string[], starts: 0, errors: [] as string[], fatal: [] as string[] };
   asr.onPartialResult = (text) => seen.partials.push(text);
   asr.onResult = (result) => seen.results.push(result.text);
@@ -214,13 +214,14 @@ describe('this computer\'s native recognizer', () => {
     talk(asr, engine, 1, ROLL_AT_SECONDS);
     engine.say({ id: 1, type: 'delta', text: 'ずっと話す' });
     vad.worker.say('speech_end', { forced: true });
-    expect(seen.results).toEqual(['ずっと話す']);
+    // Closed, not cut: what it has written and what it still writes come together, as its last result.
+    expect(seen.results).toEqual([]);
     expect(engine.streams[0].ended).toBe(true);
     // Closed on a voice: the second of silence the engine needs to write the end is added.
     expect(engine.streams[0].samples).toBe((ROLL_AT_SECONDS + 1) * HEARD);
     engine.say({ id: 1, type: 'done', text: 'ずっと話す人' });
     await settled();
-    expect(seen.results).toEqual(['ずっと話す', '人']);
+    expect(seen.results).toEqual(['ずっと話す人']);
     expect(engine.streams).toHaveLength(2);
   });
 
@@ -313,6 +314,37 @@ describe('this computer\'s native recognizer', () => {
     vad.worker.say('speech_start');
     await settled();
     expect(engine.streams[0]).toMatchObject({ sampleRate: 16000, samples: 16000 });
+  });
+
+  it('shows what an engine says it has heard so far, before that is settled, and keeps the settled text for the result', async () => {
+    const { asr, vad, engine, seen } = await started();
+    vad.worker.say('speech_start');
+    await settled();
+    asr.feedAudio(seconds(3), RATE);
+    engine.say({ id: 1, type: 'partial', text: 'この季節のもの' });
+    engine.say({ id: 1, type: 'partial', text: 'この季節のものなんだっけ。お正のイメージ' });
+    // The settled text comes late, and does not take the place of what shows.
+    engine.say({ id: 1, type: 'delta', text: 'この季節のものなんだっけ。' });
+    expect(seen.partials).toEqual(['この季節のもの', 'この季節のものなんだっけ。お正のイメージ']);
+    vad.worker.say('speech_end');
+    engine.say({ id: 1, type: 'done', text: 'この季節のものなんだっけ。お正月のイメージあるよね。' });
+    expect(seen.results).toEqual(['この季節のものなんだっけ。お正月のイメージあるよね。']);
+  });
+
+  it('closes a recognition at every cut of the detector where the engine is told to: closed, such an engine writes all it heard', async () => {
+    const { asr, vad, engine, seen } = await started(fakeEngine(), { limits: { rollAfter: 20, rollAt: 0, rollHard: 40 } });
+    vad.worker.say('speech_start');
+    await settled();
+    talk(asr, engine, 1, 15);
+    vad.worker.say('speech_end', { forced: true });
+    // No result is cut from the settled text: the close brings the whole.
+    expect(seen.results).toEqual([]);
+    expect(engine.streams[0].ended).toBe(true);
+    expect(engine.streams[0].samples).toBe((15 + 1) * HEARD);
+    engine.say({ id: 1, type: 'done', text: '前半の全部' });
+    await settled();
+    expect(seen.results).toEqual(['前半の全部']);
+    expect(engine.streams).toHaveLength(2);
   });
 
   it('lets go of everything when it is disposed of', async () => {

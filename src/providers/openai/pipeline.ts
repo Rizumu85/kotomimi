@@ -28,7 +28,7 @@ import { createLocalInferenceAdapter } from '../localInference/adapter';
 import type { LocalInferenceConfig } from '../localInference/config';
 import { defaultEngines, type LocalEngines, type TranslationLike } from '../localInference/engines';
 import { createApiAsr } from './apiAsr';
-import { createNativeAsr } from './nativeAsr';
+import { createNativeAsr, type NativeLimits } from './nativeAsr';
 import { TEXT_SLOT } from './nativeTranslators';
 import { askNativeEngine, ipcNativeBridge, type NativeBridge, type NativeEngineStatus } from '../../lib/native/nativeEngine';
 import { createRealtimeAdapter } from './adapter';
@@ -95,8 +95,8 @@ export interface DeviceHearing {
   vad: LocalInferenceConfig['vad'];
   /** Present: the recognizer is an API (`apiAsr.ts`) — this computer still cuts the sentences, and uploads each one. */
   api?: { baseUrl: string; model: string; key?: StageKey };
-  /** Present: the recognizer is the native engine's (`nativeAsr.ts`), given the voice as it comes. */
-  native?: { model: string };
+  /** Present: the recognizer is the native engine's (`nativeAsr.ts`), given the voice as it comes; `limits` where one recognition may not run as long as the default. */
+  native?: { model: string; limits?: Partial<NativeLimits> };
 }
 
 export interface PipelineConfig extends RealtimeConfig {
@@ -516,7 +516,7 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
     const { api, native } = device;
     if (native) {
       const start = deps.native?.start ?? ((model: string) => askNativeEngine('start', model));
-      return createLocalInferenceAdapter({ ...engines, asr: () => createNativeAsr({ bridge: deps.native?.bridge ?? ipcNativeBridge, start: () => start(native.model), clock: request.clock }) });
+      return createLocalInferenceAdapter({ ...engines, asr: () => createNativeAsr({ bridge: deps.native?.bridge ?? ipcNativeBridge, start: () => start(native.model), clock: request.clock, ...(native.limits ? { limits: native.limits } : {}) }) });
     }
     if (!api) return local;
     const key = api.key ? request.credentials[api.key] : undefined;

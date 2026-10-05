@@ -33,6 +33,7 @@ const WORDS: Record<NativeKind, { ready: string; warming: string; failed: string
 /** What was found of each model, as the key of a sentence under `providers.localai`. */
 const NOTES: Readonly<Record<string, string>> = {
   'r2t2-q8': 'noteNativeR2t2',
+  'apple-speech': 'noteAppleSpeech',
   'index-translate-2b': 'noteIndexTranslate',
   'hy-mt2-1.8b': 'noteHyMt2',
   'hy-mt1.5-1.8b': 'noteHyMt15',
@@ -54,7 +55,7 @@ function entryOf(kind: NativeKind, model: NativeCardModel, recommended: boolean)
     type: kind,
     name: model.name,
     languages: model.languages === 'any' ? MANY : [...model.languages],
-    multilingual: true,
+    multilingual: model.languages === 'any' || model.languages.length > 3,
     recommended,
     variants: { default: { dtype: 'gguf', files: [{ filename: `${model.id}.gguf`, sizeBytes: model.bytes }] } },
   };
@@ -76,8 +77,11 @@ export function NativeEngineCard({ kind, model, recommended = true, selected, on
   const { run } = status;
   const ours = run.model === model.id;
   const words = WORDS[kind];
-  const note = NOTES[model.id];
+  // A model of one family to a language (the Mac's recognition) shares its family's note.
+  const note = NOTES[model.id] ?? NOTES[model.id.split(':')[0]];
   return (
+    // No size is shown for a model the system fetches itself: it does not say how large it is.
+    <div className={`kt-native-card${model.bytes > 0 ? '' : ' kt-native-card--unsized'}`}>
     <ModelCard
       entry={entry}
       status={shown}
@@ -108,5 +112,6 @@ export function NativeEngineCard({ kind, model, recommended = true, selected, on
         <p className="kt-engine" role="status"><Loader size={13} className="kt-engine__spin" /><span>{t(words.warming)}</span></p>
       ) : null}
     </ModelCard>
+    </div>
   );
 }

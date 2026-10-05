@@ -368,6 +368,11 @@ const PROVIDER = {
     '日语 VRChat 闲聊 30 句译成中文实测：严重错误约 8 句，还喜欢自己加词。和应用自带的那个是同一个模型，在这里快好几倍。',
     '日語 VRChat 閒聊 30 句譯成中文實測：嚴重錯誤約 8 句，還喜歡自己加詞。和應用內建的那個是同一個模型，在這裡快好幾倍。',
   ],
+  noteAppleSpeech: [
+    'Measured on Japanese VRChat talk: about 14% of the characters wrong — the most accurate of everything measured — and it writes while it listens. It is the speech recognition of macOS itself: nothing of the graphics memory is taken, and the system fetches each language itself.',
+    '日语 VRChat 闲聊实测：错字率约 14%，是所有实测里最准的；而且边听边出字。用的是 Mac 系统自带的语音识别，不占显存，每种语言的语言包由系统自己下载。',
+    '日語 VRChat 閒聊實測：錯字率約 14%，是所有實測裡最準的；而且邊聽邊出字。用的是 Mac 系統內建的語音辨識，不佔顯示記憶體，每種語言的語言包由系統自己下載。',
+  ],
   noteQwen17: [
     "Measured on Japanese VRChat talk: about 19% of the characters wrong — accurate. It writes only once a sentence has ended, so the text is about 10 s behind the voice.",
     "日语 VRChat 闲聊实测：错字率约 19%，很准。但要等一句话说完才出字，文字比声音慢 10 秒左右。",

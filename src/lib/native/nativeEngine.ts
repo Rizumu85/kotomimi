@@ -100,9 +100,13 @@ export function onNativeEngineStatus(listener: (status: NativeEngineStatus) => v
   return () => api.removeListener(`${engine}:status`, mine as (payload: never) => void);
 }
 
-/** What a live recognition says: a piece of text, the whole of it at its end, or why it failed. */
+/**
+ * What a live recognition says: a piece of text that will not change, the whole of it at its end, or why it failed —
+ * and, from a recognizer that has one (the Mac's), everything heard so far as it stands now, before it is settled.
+ */
 export type NativeStreamEvent =
   | { id: number; type: 'delta'; text: string }
+  | { id: number; type: 'partial'; text: string }
   | { id: number; type: 'done'; text: string }
   | { id: number; type: 'error'; message: string };
 
@@ -123,6 +127,7 @@ export function nativeStreamEvent(value: unknown): NativeStreamEvent | null {
   if (!event || typeof event !== 'object' || !Number.isInteger(event.id)) return null;
   const id = event.id as number;
   if (event.type === 'delta' && typeof event.text === 'string') return { id, type: 'delta', text: event.text };
+  if (event.type === 'partial' && typeof event.text === 'string') return { id, type: 'partial', text: event.text };
   if (event.type === 'done') return { id, type: 'done', text: typeof event.text === 'string' ? event.text : '' };
   if (event.type === 'error') return { id, type: 'error', message: typeof event.message === 'string' ? event.message.slice(0, 300) : 'The engine failed.' };
   return null;

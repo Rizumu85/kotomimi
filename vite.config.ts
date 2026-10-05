@@ -173,7 +173,9 @@ export default defineConfig(({ command, mode }) => {
             // Fork: the native recognition engine the app downloads and runs
             'native-engine': 'electron/native-engine.js',
             // Fork: starting with the computer, in the background
-            'autostart': 'electron/autostart.js'
+            'autostart': 'electron/autostart.js',
+            // Fork: the Mac's own speech recognition, through the helper the app ships
+            'apple-speech': 'electron/apple-speech.js'
           },
           onstart(args) {
             // SOKUJI_DEV_NO_ELECTRON=1 serves the renderer alone, for headless
