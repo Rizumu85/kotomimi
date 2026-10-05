@@ -41,15 +41,41 @@ const APPLE_LANGUAGES = ['ja', 'en', 'ko', 'zh', 'es', 'fr', 'de', 'it', 'pt', '
 const APPLE_LIMITS: Partial<NativeLimits> = { rollAfter: 10, rollAt: 20, rollHard: 28 };
 const isApple = (id: string | null | undefined): boolean => typeof id === 'string' && id.startsWith(APPLE_PREFIX);
 
+/**
+ * Qwen3-ASR in the native engine reads a stretch at a time, and the engine
+ * keeps it live by reading the stretch again as it grows (`openWindow` in
+ * `electron/native-engine.js`). A reading takes longer the longer the stretch,
+ * and nothing of a stretch is translated before it ends: so a recognition is
+ * begun again at a gap between words once it has run eight seconds, and where
+ * the detector cuts once it is that old. Measured 2026-10-05 on the seven
+ * clips, in the app: begun again after 10 s and at cuts after 20 s, 17.2 %;
+ * after 8 s and at every cut, about the same but for one stretch cut short
+ * enough to be read badly; after 8 s and at cuts after 8 s, 16.4 %, a line
+ * every fifteen seconds at most. Its last words are a reading of the whole
+ * stretch, which a slow computer takes seconds over: they are waited for
+ * longer.
+ */
+const QWEN_LANGUAGES = ['zh', 'en', 'yue', 'ar', 'de', 'fr', 'es', 'pt', 'id', 'it', 'ko', 'ru', 'th', 'vi', 'ja', 'tr', 'hi', 'ms', 'nl', 'sv', 'da', 'fi', 'pl', 'cs', 'fil', 'fa', 'el', 'hu', 'mk', 'ro'] as const;
+const WINDOW_LIMITS: Partial<NativeLimits> = { rollAfter: 8, rollAt: 8, rollHard: 24, lastWordsMs: 15_000 };
+
+/**
+ * In the order they are offered, the one measured best for a language first
+ * (Japanese VRChat talk, in the app, 2026-10-05): the Mac's own recognition
+ * 12.5 % of the characters wrong; Qwen3-ASR 16.4 %, its text a second behind
+ * the voice; R2T2 18.2 %, two and a half seconds behind, and several times the
+ * work for the graphics card. A system is offered the ones it can run.
+ */
 export const NATIVE_MODELS: readonly NativeModel[] = [
-  { id: 'r2t2-q8', name: 'Confucius4 R2T2', bytes: 2477512064, languages: ['ja', 'zh', 'en', 'ko', 'fr', 'de', 'it', 'pt', 'ru', 'es', 'ar'] },
   ...APPLE_LANGUAGES.map((language) => ({ id: `${APPLE_PREFIX}${language}`, name: 'Apple Speech', bytes: 0, languages: [language], limits: APPLE_LIMITS })),
+  { id: 'qwen3-asr-1.7b-q8', name: 'Qwen3-ASR 1.7B GGUF', bytes: 2473010048, languages: QWEN_LANGUAGES, limits: WINDOW_LIMITS },
+  { id: 'r2t2-q8', name: 'Confucius4 R2T2', bytes: 2477512064, languages: ['ja', 'zh', 'en', 'ko', 'fr', 'de', 'it', 'pt', 'ru', 'es', 'ar'] },
 ];
 
-export const NATIVE_DEFAULT_MODEL = NATIVE_MODELS[0].id;
+/** The one every system the engine is published for can run. */
+export const NATIVE_DEFAULT_MODEL = 'qwen3-asr-1.7b-q8';
 
 /** The model a setting names; the default for a name the app no longer has. */
-export const nativeModel = (id: string): NativeModel => NATIVE_MODELS.find((m) => m.id === id) ?? NATIVE_MODELS[0];
+export const nativeModel = (id: string): NativeModel => NATIVE_MODELS.find((m) => m.id === id) ?? NATIVE_MODELS.find((m) => m.id === NATIVE_DEFAULT_MODEL)!;
 
 const baseOf = (code: string): string => code.trim().toLowerCase().split(/[-_]/)[0];
 

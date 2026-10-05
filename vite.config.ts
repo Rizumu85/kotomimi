@@ -172,6 +172,8 @@ export default defineConfig(({ command, mode }) => {
             'local-server': 'electron/local-server.js',
             // Fork: the native recognition engine the app downloads and runs
             'native-engine': 'electron/native-engine.js',
+            // Fork: a Mac's two native recognizers, joined
+            'native-engines': 'electron/native-engines.js',
             // Fork: starting with the computer, in the background
             'autostart': 'electron/autostart.js',
             // Fork: the Mac's own speech recognition, through the helper the app ships

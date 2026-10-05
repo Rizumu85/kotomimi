@@ -320,9 +320,14 @@ const PROVIDER = {
 
   // What was found of each recognizer on Japanese VRChat talk (`measuredRank.ts`): for a person choosing, not a benchmark.
   noteNativeR2t2: [
-    'Measured on Japanese VRChat talk: about 18% of the characters wrong — as accurate as Qwen3-ASR 1.7B — and it writes while it listens, about 3 s behind the voice where the others are 10 s behind. It runs in an engine of its own on the graphics card (about 3 GB of video memory). The first start after the computer boots takes about half a minute. Now and then it writes nothing for ten seconds or so and then catches up at once.',
-    '日语 VRChat 闲聊实测：错字率约 18%，和 Qwen3-ASR 1.7B 相当；但它边听边出字，文字只比声音慢 3 秒左右（其他模型约 10 秒）。它在独立的引擎里用显卡运行（约占 3 GB 显存），开机后第一次启动要半分钟左右。偶尔会十几秒不出字，然后一口气补上。',
-    '日語 VRChat 閒聊實測：錯字率約 18%，和 Qwen3-ASR 1.7B 相當；但它邊聽邊出字，文字只比聲音慢 3 秒左右（其他模型約 10 秒）。它在獨立的引擎裡用顯示卡執行（約佔 3 GB 顯示記憶體），開機後第一次啟動要半分鐘左右。偶爾會十幾秒不出字，然後一口氣補上。',
+    'Measured on Japanese VRChat talk: about 18% of the characters wrong, and it writes while it listens, about 2.5 s behind the voice; what it has written does not change. It keeps the graphics card busy all the while (about 3 GB of video memory): even an RTX 5070 Ti is only about twice as fast as it needs to be, so a slower card, or a game running beside it, may leave the text falling behind. The first start after the computer boots takes about half a minute. Now and then it writes nothing for ten seconds or so and then catches up at once.',
+    '日语 VRChat 闲聊实测：错字率约 18%；边听边出字，文字比声音慢 2.5 秒左右，写出来的字不会再改。它会一直占着显卡（约 3 GB 显存）：RTX 5070 Ti 上也只有约两倍的余量，显卡弱一些、或同时开着游戏时，文字可能越落越远。开机后第一次启动要半分钟左右。偶尔会十几秒不出字，然后一口气补上。',
+    '日語 VRChat 閒聊實測：錯字率約 18%；邊聽邊出字，文字比聲音慢 2.5 秒左右，寫出來的字不會再改。它會一直佔著顯示卡（約 3 GB 顯示記憶體）：RTX 5070 Ti 上也只有約兩倍的餘裕，顯示卡弱一些、或同時開著遊戲時，文字可能越落越遠。開機後第一次啟動要半分鐘左右。偶爾會十幾秒不出字，然後一口氣補上。',
+  ],
+  noteNativeQwen: [
+    'Measured on Japanese VRChat talk: about 16% of the characters wrong (R2T2: 18%), and the text is about a second behind the voice (about two on an M2 Mac). While someone speaks, what was heard so far is read again about once a second — so the last words may still change — and it is settled when the sentence ends, every fifteen seconds at most in a long one. It runs in an engine of its own (about 3 GB of video memory) and asks far less of the graphics card than R2T2: on a slower one the text only refreshes less often. Thirty languages. The first start after the computer boots takes about half a minute.',
+    '日语 VRChat 闲聊实测：错字率约 16%（R2T2 约 18%），文字只比声音慢 1 秒左右（M2 的 Mac 上约 2 秒）。说话时大约每秒把已听到的内容重新识别一遍，所以最后几个字可能还会变；一句话说完就定稿，连着说时最多 15 秒定稿一次。它在独立的引擎里运行（约占 3 GB 显存），对显卡的负担比 R2T2 小得多：显卡慢一些只是刷新得慢一些，不会越落越远。支持 30 种语言。开机后第一次启动要半分钟左右。',
+    '日語 VRChat 閒聊實測：錯字率約 16%（R2T2 約 18%），文字只比聲音慢 1 秒左右（M2 的 Mac 上約 2 秒）。說話時大約每秒把已聽到的內容重新辨識一遍，所以最後幾個字可能還會變；一句話說完就定稿，連著說時最多 15 秒定稿一次。它在獨立的引擎裡執行（約佔 3 GB 顯示記憶體），對顯示卡的負擔比 R2T2 小得多：顯示卡慢一些只是重新整理得慢一些，不會越落越遠。支援 30 種語言。開機後第一次啟動要半分鐘左右。',
   ],
   // The native translation engine (llama.cpp's server) and what was found of its models.
   translatorReady: ['The translation engine is ready.', '翻译引擎已就绪。', '翻譯引擎已就緒。'],
@@ -374,9 +379,9 @@ const PROVIDER = {
     '日語 VRChat 閒聊實測：錯字率約 13%，是所有實測裡最準的；而且邊聽邊出字，文字只比聲音慢 2.5 秒左右。用的是 Mac 系統內建的語音辨識，不佔顯示記憶體，每種語言的語言包由系統自己下載。',
   ],
   noteQwen17: [
-    "Measured on Japanese VRChat talk: about 19% of the characters wrong — accurate. It writes only once a sentence has ended, so the text is about 10 s behind the voice.",
-    "日语 VRChat 闲聊实测：错字率约 19%，很准。但要等一句话说完才出字，文字比声音慢 10 秒左右。",
-    "日語 VRChat 閒聊實測：錯字率約 19%，很準。但要等一句話說完才出字，文字比聲音慢 10 秒左右。",
+"Measured on Japanese VRChat talk: about 19% of the characters wrong — accurate. It writes only once a sentence has ended, so the text is about 10 s behind the voice. The same model in the native engine (Qwen3-ASR 1.7B GGUF, above) writes while the sentence is spoken.",
+    "日语 VRChat 闲聊实测：错字率约 19%，很准。但要等一句话说完才出字，文字比声音慢 10 秒左右。同一个模型的原生引擎版（上面的 Qwen3-ASR 1.7B GGUF）是边说边出字的。",
+    "日語 VRChat 閒聊實測：錯字率約 19%，很準。但要等一句話說完才出字，文字比聲音慢 10 秒左右。同一個模型的原生引擎版（上面的 Qwen3-ASR 1.7B GGUF）是邊說邊出字的。",
   ],
   noteWhisperTurbo: [
     "Measured on Japanese VRChat talk: about 21% of the characters wrong, and steady. It writes only once a sentence has ended.",

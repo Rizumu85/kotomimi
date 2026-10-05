@@ -516,7 +516,7 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
     const { api, native } = device;
     if (native) {
       const start = deps.native?.start ?? ((model: string) => askNativeEngine('start', model));
-      return createLocalInferenceAdapter({ ...engines, asr: () => createNativeAsr({ bridge: deps.native?.bridge ?? ipcNativeBridge, start: () => start(native.model), clock: request.clock, ...(native.limits ? { limits: native.limits } : {}) }) });
+      return createLocalInferenceAdapter({ ...engines, asr: () => createNativeAsr({ bridge: deps.native?.bridge ?? ipcNativeBridge, start: () => start(native.model), model: native.model, clock: request.clock, ...(native.limits ? { limits: native.limits } : {}) }) });
     }
     if (!api) return local;
     const key = api.key ? request.credentials[api.key] : undefined;

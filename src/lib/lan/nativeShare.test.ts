@@ -79,6 +79,21 @@ describe('the recognizer a device gets', () => {
     expect(appLanModels.recognizer('ja', 'whisper-large-v3-turbo-webgpu')).toEqual({ modelId: 'whisper-large-v3-turbo-webgpu', streaming: false });
   });
 
+  it('is, of two downloaded for the engine, the one measured better — unless the other is running: starting another would stop it under whoever listens', () => {
+    const both = { 'r2t2-q8': downloaded, 'qwen3-asr-1.7b-q8': downloaded };
+    useNativeEngineStore.setState({ status: status(both) });
+    expect(nativeRecognizerFor('ja', '')).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
+    expect(nativeRecognizerFor('ja', 'r2t2-q8')).toEqual({ modelId: 'r2t2-q8', streaming: true });
+    // The one running answers for either, where it hears the language.
+    useNativeEngineStore.setState({ status: status(both, { state: 'ready', model: 'r2t2-q8', port: 5000 }) });
+    expect(nativeRecognizerFor('ja', '')).toEqual({ modelId: 'r2t2-q8', streaming: true });
+    expect(nativeRecognizerFor('ja', 'qwen3-asr-1.7b-q8')).toEqual({ modelId: 'r2t2-q8', streaming: true });
+    // It does not hear Thai: the one that does.
+    expect(nativeRecognizerFor('th', '')).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
+    // A model of the app that was named is still the app to run.
+    expect(nativeRecognizerFor('ja', 'whisper-large-v3-turbo-webgpu')).toBeNull();
+  });
+
   it('is run by the native engine, which is held while a device listens through it', async () => {
     useNativeEngineStore.setState({ status: status({ 'r2t2-q8': downloaded }, { state: 'ready', model: 'r2t2-q8', port: 5000 }) });
     const stop = vi.fn();

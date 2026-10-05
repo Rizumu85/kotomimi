@@ -112,8 +112,8 @@ export type NativeStreamEvent =
 
 /** The live recognitions of the engine, as the recognizer uses them (`src/providers/openai/nativeAsr.ts`). */
 export interface NativeBridge {
-  /** Opens one: its id, or null while the engine is not ready. */
-  open(init: { language: string; sampleRate: number }): Promise<number | null>;
+  /** Opens one: its id, or null while the engine is not ready. `model` says whose it is, where a computer has more than one engine (a Mac). */
+  open(init: { language: string; sampleRate: number; model?: string }): Promise<number | null>;
   write(id: number, pcm: Int16Array): void;
   /** The sound is over: the rest of the text follows, then `done`. */
   end(id: number): void;

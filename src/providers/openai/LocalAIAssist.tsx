@@ -260,8 +260,11 @@ const NATIVE_ENTRY = '\u0000native:';
 /** A stage's native models, as their cards and menus read them. */
 const NATIVE_OF: Record<NativeKind, readonly NativeCardModel[]> = { asr: NATIVE_MODELS, translation: NATIVE_TRANSLATORS };
 
-/** The mark of the one measured best: every recognizer (a system has one family of them), and the first of the translators. */
-const recommendedNative = (kind: NativeKind, model: NativeCardModel): boolean => kind === 'asr' || NATIVE_OF[kind][0].id === model.id;
+/**
+ * The mark of the one measured best: the first of an engine's models, in the order they are listed, that serves what
+ * is asked of it — by its name, since a family of models to a language (the Mac's recognition) is one choice.
+ */
+const bestNative = (offered: readonly NativeCardModel[], fits: (model: NativeCardModel) => boolean): string | undefined => offered.find(fits)?.name;
 
 /** Whether a native model serves a direction: hears its language, or translates its pair. */
 const nativeFits = (kind: NativeKind, id: string, source: string, target: string): boolean => (kind === 'asr'
@@ -287,9 +290,10 @@ interface NativeRunner { onPick(id: string): void }
  * back to the app's own models and to a LocalAI — and under it the engine's
  * model, in the library's own card, with what the engine is doing.
  */
-function NativeHere({ kind, model, inUse, unfit, onModel, onBack, other, disabled }: { kind: NativeKind; model: NativeCardModel; /** The models a run would use: the one named — or, where each language has a model of its own, the one of each language. */ inUse?: readonly NativeCardModel[]; unfit: boolean; onModel(id: string): void; onBack(): void; other?: OtherRunner; disabled?: boolean }) {
+function NativeHere({ kind, model, inUse, unfit, fits, onModel, onBack, other, disabled }: { kind: NativeKind; model: NativeCardModel; /** The models a run would use: the one named — or, where each language has a model of its own, the one of each language. */ inUse?: readonly NativeCardModel[]; unfit: boolean; /** Whether a model serves every direction a run would go. */ fits(model: NativeCardModel): boolean; onModel(id: string): void; onBack(): void; other?: OtherRunner; disabled?: boolean }) {
   const { t } = useTranslation();
   const { offered } = useNativeModels(kind);
+  const best = bestNative(offered, fits);
   const used = inUse && inUse.length > 0 ? inUse : [model];
   // In the menu a family of models goes by one entry: the Mac's recognition is one choice, whatever the languages.
   const families = (offered.some((m) => m.id === model.id) ? offered : [model, ...offered]).filter((m, at, all) => m.id === model.id || (m.name !== model.name && all.findIndex((one) => one.name === m.name) === at));
@@ -318,8 +322,8 @@ function NativeHere({ kind, model, inUse, unfit, onModel, onBack, other, disable
       <div className="kt-here__library">
         <div className="model-management-section">
           {/* The one in use, then the engine's others: downloaded and chosen right here. */}
-          {used.map((m) => <NativeEngineCard key={m.id} kind={kind} model={m} recommended={recommendedNative(kind, m)} selected onSelect={() => undefined} disabled={disabled} />)}
-          {offered.filter((m) => m.name !== model.name && !used.some((one) => one.id === m.id)).map((m) => <NativeEngineCard key={m.id} kind={kind} model={m} recommended={recommendedNative(kind, m)} selected={false} onSelect={() => onModel(m.id)} disabled={disabled} />)}
+          {used.map((m) => <NativeEngineCard key={m.id} kind={kind} model={m} recommended={m.name === best} selected onSelect={() => undefined} disabled={disabled} />)}
+          {offered.filter((m) => m.name !== model.name && !used.some((one) => one.id === m.id)).map((m) => <NativeEngineCard key={m.id} kind={kind} model={m} recommended={m.name === best} selected={false} onSelect={() => onModel(m.id)} disabled={disabled} />)}
         </div>
       </div>
     </div>
@@ -486,9 +490,9 @@ function DeviceModels({ stage, settings, update, pair, legs, disabled, tour, oth
       {open !== null && slots.some((slot) => slot.dir === open) && (
         <div className="kt-here__library">
           {/* The native engine's models first: what serves this direction best, where it was measured. */}
-          {native && engine.offered.filter((m) => { const slot = slots.find((one) => one.dir === open)!; return nativeFits(stage, m.id, slot.source, slot.target); }).map((m) => (
+          {native && engine.offered.filter((m) => { const slot = slots.find((one) => one.dir === open)!; return nativeFits(stage, m.id, slot.source, slot.target); }).map((m, _at, fitting) => (
             <div className="model-management-section kt-here__native" key={m.id}>
-              <NativeEngineCard kind={stage} model={m} recommended={recommendedNative(stage, m)} selected={false} onSelect={() => native.onPick(m.id)} disabled={disabled} />
+              <NativeEngineCard kind={stage} model={m} recommended={m.name === fitting[0].name} selected={false} onSelect={() => native.onPick(m.id)} disabled={disabled} />
             </div>
           ))}
           <ModelManagementSection isSessionActive={Boolean(disabled)} stageFilter={stage} direction={open} settings={device.settings} update={device.update} pair={basePair} />
@@ -764,7 +768,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
         {settings.asrVia === 'device' && (settings.asrHere === 'localai'
           ? <LocalAIHere kind="asr" model={settings.asrHereModel} onModel={(asrHereModel) => put({ asrHereModel })} onBack={() => put({ asrHere: 'app' })} local={local} disabled={disabled} />
           : settings.asrHere === 'native'
-            ? <NativeHere kind="asr" model={nativeModel(settings.asrNativeModel)} inUse={[...new Map(heardByLegs.flatMap((language) => { const one = nativeModelFor(settings.asrNativeModel, language); return one ? [[one.id, one] as const] : []; })).values()]} unfit={heardByLegs.some((language) => !nativeModelFor(settings.asrNativeModel, language))} onModel={(asrNativeModel) => put({ asrNativeModel })} onBack={() => put({ asrHere: 'app' })} other={asrToLocalAI} disabled={disabled} />
+            ? <NativeHere kind="asr" model={nativeModel(settings.asrNativeModel)} inUse={[...new Map(heardByLegs.flatMap((language) => { const one = nativeModelFor(settings.asrNativeModel, language); return one ? [[one.id, one] as const] : []; })).values()]} unfit={heardByLegs.some((language) => !nativeModelFor(settings.asrNativeModel, language))} fits={(m) => heardByLegs.every((language) => nativeModelFor(m.id, language) !== null)} onModel={(asrNativeModel) => put({ asrNativeModel })} onBack={() => put({ asrHere: 'app' })} other={asrToLocalAI} disabled={disabled} />
             : <DeviceModels stage="asr" settings={settings} update={put} pair={pair} legs={legs} disabled={disabled} tour={tourAt === 'asr'} other={asrToLocalAI} native={{ onPick: (asrNativeModel) => put({ asrHere: 'native', asrNativeModel }) }} />)}
       </StageCard>
 
@@ -800,7 +804,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
         {settings.translateAt === 'device' && (settings.translateHere === 'localai'
           ? <LocalAIHere kind="text" model={settings.translateHereModel} onModel={(translateHereModel) => put({ translateHereModel })} onBack={() => put({ translateHere: 'app' })} local={local} disabled={disabled} />
           : settings.translateHere === 'native'
-            ? <NativeHere kind="translation" model={nativeTranslator(settings.translateNativeModel)} unfit={translatedByLegs.some((one) => !nativeTranslates(nativeTranslator(settings.translateNativeModel), one.source, one.target))} onModel={(translateNativeModel) => put({ translateNativeModel })} onBack={() => put({ translateHere: 'app' })} other={translateToLocalAI} disabled={disabled} />
+            ? <NativeHere kind="translation" model={nativeTranslator(settings.translateNativeModel)} unfit={translatedByLegs.some((one) => !nativeTranslates(nativeTranslator(settings.translateNativeModel), one.source, one.target))} fits={(m) => translatedByLegs.every((one) => nativeTranslates(nativeTranslator(m.id), one.source, one.target))} onModel={(translateNativeModel) => put({ translateNativeModel })} onBack={() => put({ translateHere: 'app' })} other={translateToLocalAI} disabled={disabled} />
             : <DeviceModels stage="translation" settings={settings} update={put} pair={pair} legs={legs} disabled={disabled} tour={tourAt === 'translation'} other={translateToLocalAI} native={{ onPick: (translateNativeModel) => put({ translateHere: 'native', translateNativeModel }) }} />)}
       </StageCard>
 

@@ -26,6 +26,12 @@
 // HTTP/2), so it is held here, and the page sends the sound and receives the
 // text over IPC.
 //
+// A model that reads a whole stretch at once (Qwen3-ASR) is given to the
+// page the same way: the sound is kept here as it comes, and read again and
+// again while it grows — each reading is what shows meanwhile — and once more
+// when it is over (`openWindow`). In this runtime such a reading takes a
+// fraction of a second, which is what makes that possible.
+//
 // The same goes for translation, with another runtime: llama.cpp's server
 // and a translation model as a GGUF file — the models a LocalAI would run,
 // without the LocalAI. It is asked over the OpenAI chat wire, which the page
@@ -85,6 +91,19 @@ const MODELS = {
     platforms: ['win32-x64'],
     options: { 'confucius4_r2t2.chunk_size_ms': '160', 'confucius4_r2t2.unfixed_chunk_num': '0', 'confucius4_r2t2.unfixed_token_num': '3' },
   },
+  'qwen3-asr-1.7b-q8': {
+    file: 'qwen3-asr-1.7b-q8_0.gguf',
+    url: 'https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/e36610ac69b5262e914a52635324050bee8f1ad2/Qwen3-ASR-1.7B-GGUF/qwen3-asr-1.7b-q8_0.gguf',
+    bytes: 2473010048,
+    sha256: 'da4fc2ac7f24dee784d1684eb1f35836cdbf559519452ae11777670734c0a4f8',
+    family: 'qwen3_asr',
+    // It reads a stretch at once (its own "streaming" writes once in thirty seconds): ten seconds of speech take
+    // 0.2-0.5 s on an RTX 5070 Ti and about 1.5 s on an Apple M2 (measured 2026-10-05).
+    mode: 'offline',
+    // It is told the language by its code, and these are the ones it hears.
+    languageAs: 'code',
+    languages: ['zh', 'en', 'yue', 'ar', 'de', 'fr', 'es', 'pt', 'id', 'it', 'ko', 'ru', 'th', 'vi', 'ja', 'tr', 'hi', 'ms', 'nl', 'sv', 'da', 'fi', 'pl', 'cs', 'fil', 'fa', 'el', 'hu', 'mk', 'ro'],
+  },
 };
 
 /** llama.cpp's server, for the translation models: the project's own release archives, as published. */
@@ -136,7 +155,10 @@ const TRANSLATORS = {
 const LANGUAGE_NAMES = {
   ja: 'Japanese', zh: 'Chinese', en: 'English', ko: 'Korean', fr: 'French', de: 'German', it: 'Italian', pt: 'Portuguese', ru: 'Russian', es: 'Spanish', ar: 'Arabic',
 };
-const languageName = (code) => LANGUAGE_NAMES[String(code ?? '').trim().toLowerCase().split(/[-_]/)[0]] ?? null;
+const languageCode = (code) => String(code ?? '').trim().toLowerCase().split(/[-_]/)[0] || null;
+const languageName = (code) => LANGUAGE_NAMES[languageCode(code) ?? ''] ?? null;
+/** Whether a model of the list above hears a language: one that lists its languages by those, any other by the names it was taught. */
+const modelHears = (id, code) => (MODELS[id]?.languages ? MODELS[id].languages.includes(languageCode(code) ?? '') : Boolean(MODELS[id]) && languageName(code) !== null);
 
 /** How long the runtime may take to load a model and answer. */
 const READY_TIMEOUT_MS = 240_000;
@@ -228,17 +250,17 @@ const AUDIO_RUNTIME = {
       backend: build.backend,
       device: 0,
       lazy_load: false,
-      models: [{ id, family: model.family, path: model.file, task: 'asr', mode: model.mode, session_options: model.options }],
+      models: [{ id, family: model.family, path: model.file, task: 'asr', mode: model.mode, session_options: model.options ?? {} }],
     }, null, 1));
     return ['--config', 'server.json', '--no-ui'];
   },
-  warm({ port, id, live, timeoutMs }) {
+  warm({ port, id, model, live, window, timeoutMs }) {
     return new Promise((resolve) => {
       let timer = null;
       let stream = null;
       const done = (ok) => { clearTimeout(timer); resolve(ok); };
       timer = setTimeout(() => { stream?.abort(); done(false); }, timeoutMs);
-      stream = live({ port, model: id, sampleRate: 16000, language: null }, (event) => {
+      stream = (model?.mode === 'offline' ? window : live)({ port, model: id, sampleRate: 16000, language: null, timeoutMs }, (event) => {
         if (event.type === 'done') done(true);
         else if (event.type === 'error') done(false);
       });
@@ -320,6 +342,254 @@ function openLive({ port, model, sampleRate, language }, onEvent) {
   };
 }
 
+/** A stretch of 16-bit mono sound as a WAV file. */
+function wavOf(pcm, sampleRate) {
+  const head = Buffer.alloc(44);
+  head.write('RIFF', 0);
+  head.writeUInt32LE(36 + pcm.length, 4);
+  head.write('WAVEfmt ', 8);
+  head.writeUInt32LE(16, 16);
+  head.writeUInt16LE(1, 20);
+  head.writeUInt16LE(1, 22);
+  head.writeUInt32LE(sampleRate, 24);
+  head.writeUInt32LE(sampleRate * 2, 28);
+  head.writeUInt16LE(2, 32);
+  head.writeUInt16LE(16, 34);
+  head.write('data', 36);
+  head.writeUInt32LE(pcm.length, 40);
+  return Buffer.concat([head, pcm]);
+}
+
+/**
+ * One stretch of sound read whole by the runtime (POST /v1/audio/transcriptions, a form): `done` resolves with
+ * `{ ok, text }` or `{ ok: false, message }`, and `abort` drops the request.
+ */
+function readWhole({ port, model, sampleRate, language, pcm, timeoutMs }) {
+  const boundary = `----kotomimi${crypto.randomBytes(12).toString('hex')}`;
+  const field = (name, value) => Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="${name}"\r\n\r\n${value}\r\n`);
+  const body = Buffer.concat([
+    field('model', model),
+    ...(language ? [field('language', language)] : []),
+    Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="stretch.wav"\r\nContent-Type: audio/wav\r\n\r\n`),
+    wavOf(pcm, sampleRate),
+    Buffer.from(`\r\n--${boundary}--\r\n`),
+  ]);
+  let request = null;
+  const done = new Promise((resolve) => {
+    request = http.request({ host: LOOPBACK, port, method: 'POST', path: '/v1/audio/transcriptions', timeout: timeoutMs, headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}`, 'Content-Length': body.length } }, (response) => {
+      let answer = '';
+      response.setEncoding('utf8');
+      response.on('data', (chunk) => { if (answer.length < 400_000) answer += chunk; });
+      response.on('end', () => {
+        if (response.statusCode !== 200) { resolve({ ok: false, message: `The engine answered HTTP ${response.statusCode}: ${answer.replace(/\s+/g, ' ').slice(0, 200)}` }); return; }
+        let text = answer;
+        try { text = JSON.parse(answer)?.text ?? ''; } catch { /* the text itself */ }
+        resolve({ ok: true, text: String(text).trim() });
+      });
+      response.on('error', (error) => resolve({ ok: false, message: error.message }));
+    });
+    request.on('timeout', () => { request.destroy(); resolve({ ok: false, message: 'The engine did not answer in time.' }); });
+    request.on('error', (error) => resolve({ ok: false, message: error.message }));
+    request.end(body);
+  });
+  return { done, abort: () => request?.destroy() };
+}
+
+/**
+ * Where a reading begins to say one thing over and over, or -1. Such a model now and then loses its way at some
+ * point of a stretch and writes the same few characters until it is stopped (measured 2026-10-05: 「波で」 two hundred
+ * and fifty times, three seconds of writing, for one stretch in about a hundred — and for that stretch at some lengths
+ * only). Nothing after that point is the speech.
+ */
+const LOOP = /(.{1,20}?)\1{7,}/su;
+function loopAt(text) {
+  const found = LOOP.exec(text);
+  return found ? found.index : -1;
+}
+/** A reading up to where it lost its way, with the thing it repeated said once. */
+function unloop(text) {
+  const found = LOOP.exec(text);
+  return found ? (text.slice(0, found.index) + found[1]).trim() : text;
+}
+
+/**
+ * Where to cut a stretch in two for reading the halves apart: the quietest fifth of a second in its middle third,
+ * as a count of bytes from its start.
+ */
+function quietMiddle(pcm, sampleRate) {
+  const frame = Math.round(sampleRate * 0.02) * 2;
+  const frames = Math.floor(pcm.length / frame);
+  const peaks = new Array(frames);
+  for (let f = 0; f < frames; f += 1) {
+    let peak = 0;
+    for (let i = f * frame; i < (f + 1) * frame; i += 2) { const size = Math.abs(pcm.readInt16LE(i)); if (size > peak) peak = size; }
+    peaks[f] = peak;
+  }
+  const span = 10;
+  let best = Math.floor(frames / 2);
+  let least = Infinity;
+  for (let f = Math.floor(frames / 3); f + span <= Math.ceil((frames * 2) / 3); f += 1) {
+    let loudest = 0;
+    for (let k = f; k < f + span; k += 1) if (peaks[k] > loudest) loudest = peaks[k];
+    if (loudest < least) { least = loudest; best = f + span / 2; }
+  }
+  return best * frame;
+}
+
+/** A stretch shorter than this is not cut in two: its halves would be too short to read. */
+const LOOP_SPLIT_SECONDS = 4;
+/** The silence put before a stretch that is read again. */
+const LOOP_LEAD_SECONDS = 0.5;
+
+/** A reading is asked for this long after the last one came back — or as long as that one took, where that is longer: a slow computer reads less often, and is never behind for it. */
+const WINDOW_REST_MS = 600;
+/** …and only once this much new sound has come. */
+const WINDOW_NEW_SECONDS = 0.4;
+/**
+ * A reading that left out only this much of the end, with nothing loud in what it left out — the pause that ended
+ * the stretch — is the last one: the stretch is not read again for its silence.
+ */
+const WINDOW_TAIL_SECONDS = 3;
+const WINDOW_QUIET_PEAK = 600;
+const WINDOW_QUIET_OF_PEAK = 0.1;
+const WINDOW_READ_TIMEOUT_MS = 30_000;
+
+/**
+ * A recognition by a model that reads a whole stretch at once, with the
+ * interface of a live one (`openLive`): `write` takes the sound as it comes,
+ * and while it comes the stretch so far is read again and again — each reading
+ * goes out as `{ type: 'partial', text }`, everything heard so far, which the
+ * next may write otherwise. `end` has it read once more, to `{ type: 'done',
+ * text }` — unless the last reading already had all but the closing silence.
+ */
+function openWindow({ port, model, sampleRate, language, timeoutMs = WINDOW_READ_TIMEOUT_MS, read = readWhole, now = () => Date.now(), setTimer = setTimeout, clearTimer = clearTimeout, note = () => {} }, onEvent) {
+  const chunks = [];
+  let bytes = 0;
+  /** The loudest sample so far, and the loudest that no reading has had yet. */
+  let peak = 0;
+  let unreadPeak = 0;
+  /** How much of the sound the reading under way — or the last — was given, and what it wrote; null where it wrote nothing to keep (it failed, or lost its way). */
+  let readBytes = 0;
+  let lastText = null;
+  let lastTook = 0;
+  let reading = null;
+  let timer = null;
+  let ended = false;
+  let over = false;
+
+  const finish = (event) => {
+    if (over) return;
+    over = true;
+    if (timer) clearTimer(timer);
+    timer = null;
+    onEvent(event);
+  };
+  /** What no reading has had is the silence after the voice. */
+  const restIsQuiet = () => bytes - readBytes <= WINDOW_TAIL_SECONDS * sampleRate * 2 && unreadPeak <= Math.max(WINDOW_QUIET_PEAK, peak * WINDOW_QUIET_OF_PEAK);
+
+  /** One more reading, of this sound; `then` is given its answer unless the recognition was dropped meanwhile. */
+  function ask(pcm, then) {
+    const mine = read({ port, model, sampleRate, language, pcm, timeoutMs });
+    reading = mine;
+    mine.done.then((answer) => {
+      if (reading === mine) reading = null;
+      if (!over) then(answer);
+    });
+  }
+
+  /**
+   * The last reading of a stretch the model lost its way in. Where it does that depends on where the stretch begins
+   * and ends, so it is read again with half a second of silence before it, which was enough where this was measured;
+   * and if it still repeats, in two halves cut at a quiet moment — a half that repeats is cut where it begins to,
+   * and what the other half heard is kept.
+   */
+  function reread(sound, whole) {
+    ask(Buffer.concat([Buffer.alloc(Math.round(sampleRate * LOOP_LEAD_SECONDS) * 2), sound]), (again) => {
+      if (again.ok && loopAt(again.text) < 0) { finish({ type: 'done', text: again.text }); return; }
+      const at = sound.length >= LOOP_SPLIT_SECONDS * sampleRate * 2 ? quietMiddle(sound, sampleRate) : 0;
+      if (at <= 0 || at >= sound.length) { finish({ type: 'done', text: unloop(whole) }); return; }
+      ask(sound.subarray(0, at), (first) => {
+        // A half that cannot be read leaves what the whole had before it lost its way.
+        if (!first.ok) { finish({ type: 'done', text: unloop(whole) }); return; }
+        ask(sound.subarray(at), (second) => {
+          finish({ type: 'done', text: [unloop(first.text), second.ok ? unloop(second.text) : ''].filter(Boolean).join(' ').trim() });
+        });
+      });
+    });
+  }
+
+  function start(last) {
+    const started = now();
+    readBytes = bytes;
+    unreadPeak = 0;
+    const sound = Buffer.concat(chunks, bytes);
+    const mine = read({ port, model, sampleRate, language, pcm: sound, timeoutMs });
+    reading = mine;
+    mine.done.then((answer) => {
+      if (reading === mine) reading = null;
+      if (over) return;
+      lastTook = now() - started;
+      const lost = answer.ok && loopAt(answer.text) >= 0;
+      if (lost) note(`A reading of ${(sound.length / 2 / sampleRate).toFixed(1)} s lost its way after ${loopAt(answer.text)} characters, and took ${lastTook} ms${last ? ': the last one, read again' : ''}.
+`);
+      // A reading that lost its way is not one to end on.
+      lastText = answer.ok && !lost ? answer.text : null;
+      // The stretch ended while this was read: it is the last reading if it had all the voice, else one more is.
+      if (ended) {
+        if (!answer.ok) { if (last) finish({ type: 'error', message: answer.message }); else start(true); }
+        else if (lost) { if (last) reread(sound, answer.text); else start(true); }
+        else if (last || restIsQuiet()) finish({ type: 'done', text: answer.text });
+        else start(true);
+        return;
+      }
+      if (answer.ok && answer.text) onEvent({ type: 'partial', text: unloop(answer.text) });
+      plan();
+    });
+  }
+
+  function plan() {
+    if (over || ended || reading || timer) return;
+    timer = setTimer(() => {
+      timer = null;
+      if (over || ended || reading) return;
+      if (bytes - readBytes >= WINDOW_NEW_SECONDS * sampleRate * 2) start(false);
+      else plan();
+    }, Math.max(WINDOW_REST_MS, lastTook));
+  }
+
+  return {
+    write(pcm) {
+      if (over || ended || !pcm?.length) return;
+      const sound = Buffer.from(pcm);
+      for (let i = 0; i + 1 < sound.length; i += 2) {
+        const size = Math.abs(sound.readInt16LE(i));
+        if (size > unreadPeak) unreadPeak = size;
+      }
+      if (unreadPeak > peak) peak = unreadPeak;
+      chunks.push(sound);
+      bytes += sound.length;
+      plan();
+    },
+    end() {
+      if (over || ended) return;
+      ended = true;
+      if (timer) clearTimer(timer);
+      timer = null;
+      // A reading under way decides when it comes back.
+      if (reading) return;
+      if (bytes === 0) finish({ type: 'done', text: '' });
+      else if (lastText !== null && restIsQuiet()) finish({ type: 'done', text: lastText });
+      else start(true);
+    },
+    abort() {
+      over = true;
+      if (timer) clearTimer(timer);
+      timer = null;
+      reading?.abort();
+    },
+  };
+}
+
 function createNativeEngine(deps = {}) {
   const {
     dir,
@@ -333,6 +603,7 @@ function createNativeEngine(deps = {}) {
     get = loopGet,
     post = loopPost,
     live = openLive,
+    window = openWindow,
     /** How the runtime is started and warmed: audio.cpp's way, unless another is handed in. */
     runtime = AUDIO_RUNTIME,
     setPriority = (pid, priority) => { try { os.setPriority(pid, priority); } catch { /* a courtesy to the rest of the computer, never a condition */ } },
@@ -563,7 +834,7 @@ function createNativeEngine(deps = {}) {
     }
     setRun({ state: 'warming' });
     // One short piece of work through the model: what makes the first real sentence as quick as the rest.
-    const warmed = await Promise.resolve(runtime.warm({ port, id, live, post, timeoutMs: warmTimeoutMs })).catch(() => false);
+    const warmed = await Promise.resolve(runtime.warm({ port, id, model, live, window, post, timeoutMs: warmTimeoutMs })).catch(() => false);
     if (child !== mine) return status();
     if (mine.pid) setPriority(mine.pid, os.constants.priority.PRIORITY_NORMAL);
     // A warm-up that did not come back is not a reason to refuse: the first sentence will be the slow one.
@@ -589,8 +860,13 @@ function createNativeEngine(deps = {}) {
     if (run.state !== 'ready' || !run.model) return null;
     const id = nextStream++;
     const rate = Number.isInteger(sampleRate) && sampleRate >= 8000 && sampleRate <= 48000 ? sampleRate : 16000;
-    const stream = live({ port: run.port, model: run.model, sampleRate: rate, language: languageName(language) }, (event) => {
-      if (event.type !== 'delta') streams.delete(id);
+    const model = MODELS_[run.model];
+    // A model that reads a stretch at once is given it as it grows; one told the language by its code is told that.
+    const windowed = model?.mode === 'offline';
+    const said = model?.languageAs === 'code' ? languageCode(language) : languageName(language);
+    const target = { port: run.port, model: run.model, sampleRate: rate, language: said };
+    const stream = (windowed ? window : live)(windowed ? { ...target, note } : target, (event) => {
+      if (event.type !== 'delta' && event.type !== 'partial') streams.delete(id);
       onStream({ id, ...event });
     });
     streams.set(id, stream);
@@ -617,4 +893,4 @@ function createNativeEngine(deps = {}) {
   return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream };
 }
 
-module.exports = { createNativeEngine, openLive, languageName, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };
+module.exports = { createNativeEngine, openLive, openWindow, wavOf, loopAt, unloop, quietMiddle, languageName, languageCode, modelHears, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };

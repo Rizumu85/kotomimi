@@ -46,6 +46,8 @@ export interface NativeAsrOptions {
   bridge: NativeBridge;
   /** Brings the engine up with this recognizer's model, and answers once it is ready — or how it failed. */
   start(): Promise<NativeEngineStatus>;
+  /** That model: named with every recognition, for a computer whose native recognizers are more than one engine. */
+  model?: string;
   /** The app's detector by default; a stand-in in tests. */
   vad?: () => VadWorker;
   now?: () => number;
@@ -60,7 +62,13 @@ export interface NativeAsrOptions {
  * between words once it is `rollAfter` long; where the detector cuts, once it
  * is `rollAt` long (0: at every cut); and anywhere at `rollHard`.
  */
-export interface NativeLimits { rollAfter: number; rollAt: number; rollHard: number }
+export interface NativeLimits {
+  rollAfter: number;
+  rollAt: number;
+  rollHard: number;
+  /** How long a closed recognition's last words are waited for, in milliseconds: longer for a model that reads the whole stretch once more at its end. */
+  lastWordsMs: number;
+}
 
 /** Audio kept from before the detector says speech began: it says so a moment after the first sound. */
 const PRE_ROLL_SECONDS = 0.8;
@@ -101,6 +109,8 @@ interface Stream {
   emitted: number;
   /** The engine says what it has heard before that is settled (`partial`): what shows is that, not the settled text, which comes late. */
   tentative: boolean;
+  /** The last of those: all there is of a recognition whose engine settles nothing before the end, should the end not come. */
+  heard: string;
   /** Samples of sound given: in all, and since the last result. */
   samples: number;
   pieceSamples: number;
@@ -116,7 +126,7 @@ interface Stream {
 
 export function createNativeAsr(options: NativeAsrOptions): AsrLike {
   const { bridge } = options;
-  const limits: NativeLimits = { rollAfter: ROLL_AFTER_SECONDS, rollAt: ROLL_AT_SECONDS, rollHard: ROLL_HARD_SECONDS, ...options.limits };
+  const limits: NativeLimits = { rollAfter: ROLL_AFTER_SECONDS, rollAt: ROLL_AT_SECONDS, rollHard: ROLL_HARD_SECONDS, lastWordsMs: LAST_WORDS_TIMEOUT_MS, ...options.limits };
   const now = options.now ?? (() => Date.now());
   const clock = options.clock ?? realClock;
   let worker: VadWorker | null = null;
@@ -158,7 +168,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
   /** A new recognition, taking sound from now on; the engine opens it when it is its turn. */
   function begin(): Stream {
     const resampler = createResampler(rate);
-    const s: Stream = { id: null, resampler, opening: false, backlog: [], text: '', emitted: 0, tentative: false, samples: 0, pieceSamples: 0, closed: false, closedAt: 0, misfire: false, over: false, cancelWait: null };
+    const s: Stream = { id: null, resampler, opening: false, backlog: [], text: '', emitted: 0, tentative: false, heard: '', samples: 0, pieceSamples: 0, closed: false, closedAt: 0, misfire: false, over: false, cancelWait: null };
     queue.push(s);
     live = s;
     quiet = 0;
@@ -172,7 +182,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     const head = queue[0];
     if (!head || head.id !== null || head.opening || disposed) return;
     head.opening = true;
-    void bridge.open({ language, sampleRate: head.resampler ? TARGET_RATE : rate }).then((id) => {
+    void bridge.open({ language, sampleRate: head.resampler ? TARGET_RATE : rate, ...(options.model ? { model: options.model } : {}) }).then((id) => {
       head.opening = false;
       if (head.over || disposed) {
         if (id !== null) bridge.abort(id);
@@ -200,8 +210,9 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     s.cancelWait = clock.setTimeout(() => {
       if (s.over) return;
       if (s.id !== null) bridge.abort(s.id);
-      finish(s, s.text);
-    }, LAST_WORDS_TIMEOUT_MS);
+      // What was last heard of it, where nothing was settled: better than nothing.
+      finish(s, s.text || s.heard);
+    }, limits.lastWordsMs);
   }
 
   /** No more sound for this recognition; `silence` is how much of it to add first, where the voice gave less. */
@@ -250,6 +261,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     if (!s || s.over) return;
     if (event.type === 'partial') {
       s.tentative = true;
+      s.heard = event.text;
       // Everything heard so far, as it stands: what follows the results already given, by their length.
       if (!s.misfire) asr.onPartialResult?.(event.text.slice(s.emitted));
     } else if (event.type === 'delta') {

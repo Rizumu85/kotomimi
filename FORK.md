@@ -17,8 +17,8 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 | 共享给其他设备 | 把这台电脑的模型共享给局域网里的另一台 Kotomimi；这台电脑上装了 LocalAI 时，它的模型也从同一个开关、同一个地址共享出去 | `electron/lan-server.js`、`electron/lan-upstream.js`、`src/lib/lan/` |
 | 自动找到另一台设备 | 选「用另一台设备」时，应用自己搜索局域网，把找到的 Kotomimi 和模型服务器列出来，点一下就连上，不用知道地址 | `electron/lan-discover.js`、`src/components/LanSharing/ServerFinder.tsx` |
 | 这台电脑上的 LocalAI | 电脑上装了 LocalAI 时，由应用启动和停止它，显示状态和模型 | `electron/local-server.js`、`src/components/LanSharing/LocalServerCard.tsx` |
-| 原生识别引擎 | 应用自己下载一个运行库（audio.cpp）和模型（Confucius4 R2T2），在本机用显卡边听边出字；不用装任何别的东西。Windows 版提供 | `electron/native-engine.js`、`src/providers/openai/nativeAsr.ts`、`localaiNative.ts`、`NativeEngineCard.tsx` |
-| Mac 自带的语音识别 | Mac 上（macOS 26 及以上）的原生识别引擎是系统自己的语音识别：应用带一个小程序去调用它，边听边出字，不需要 LocalAI | `native/apple-speech/SpeechHelper.swift`、`electron/apple-speech.js` |
+| 原生识别引擎 | 应用自己下载一个运行库（audio.cpp）和模型，在本机用显卡边听边出字；不用装任何别的东西。两个模型：Qwen3-ASR 1.7B（Windows 和 Apple 芯片的 Mac，实测更准、更快、更省显卡，30 种语言）和 Confucius4 R2T2（只在 Windows） | `electron/native-engine.js`、`src/providers/openai/nativeAsr.ts`、`localaiNative.ts`、`NativeEngineCard.tsx` |
+| Mac 自带的语音识别 | Mac 上（macOS 26 及以上）排第一的原生识别引擎是系统自己的语音识别：应用带一个小程序去调用它，边听边出字，不需要 LocalAI。系统不支持的语言（比如俄语）由上一行的 Qwen3-ASR 来听，两个引擎对页面来说是一个 | `native/apple-speech/SpeechHelper.swift`、`electron/apple-speech.js`、`electron/native-engines.js` |
 | 原生翻译引擎 | 同样的做法用在翻译上：应用自己下载 llama.cpp 的服务器和翻译模型的 GGUF 文件（Index-Translate 2B、Hunyuan MT 2、Hunyuan MT 1.5），在本机运行。Windows 和 Apple 芯片的 Mac 都提供 | `electron/native-engine.js`（`LLAMA`、`TRANSLATORS`）、`src/providers/openai/nativeTranslators.ts` |
 | 模型说明和实测排序 | 模型库里每个实测过的识别模型，名字旁有一个说明气泡：实测错字率、出字快慢、适合什么情况；日语的排序和"推荐"标记按实测来 | `src/lib/local-inference/selection/measuredRank.ts` |
 | 自定义模型 | 从 Hugging Face 添加模型库里没有的 Whisper 模型 | `src/lib/local-inference/customModels.ts` |
@@ -113,7 +113,7 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 
 应用自己的识别模型都跑在浏览器内核里（WebGPU / WASM），要等一句话说完才出字。原生识别引擎是另一条路：应用下载一个独立的运行库和一个模型，在本机启动它，把声音实时送过去，文字边听边回来。用户不需要装 llama、LocalAI 之类的任何东西，在"语音识别 → 这台电脑"的模型库里点下载就行；下载完自动启用。
 
-- **运行库**：[audio.cpp](https://github.com/0xShug0/audio.cpp) v0.9.0 的官方发行包（Windows x64 是 Vulkan 版，约 60 MB）。**模型**：[Confucius4 R2T2](https://huggingface.co/netease-youdao/Confucius4-R2T2)（网易有道，Qwen3-ASR 的流式微调）的 q8 GGUF，约 2.4 GB。两者的地址、大小和 SHA-256 都写死在 `electron/native-engine.js` 里（模型地址带提交号，不是分支），下载完校验不对就丢弃。下载可以取消，再点会从断点续传。
+- **运行库**：[audio.cpp](https://github.com/0xShug0/audio.cpp) v0.9.0 的官方发行包（Windows x64 是 Vulkan 版，约 60 MB；Apple 芯片的 Mac 是 Metal 版，约 29 MB）。**第一个接进来的模型**（下面各条讲的是它；现在排第一的 Qwen3-ASR 见本节末尾）：[Confucius4 R2T2](https://huggingface.co/netease-youdao/Confucius4-R2T2)（网易有道，Qwen3-ASR 的流式微调）的 q8 GGUF，约 2.4 GB。两者的地址、大小和 SHA-256 都写死在 `electron/native-engine.js` 里（模型地址带提交号，不是分支），下载完校验不对就丢弃。下载可以取消，再点会从断点续传。
 - **放在哪**：`<用户数据>/native-engine/`（`engine-<版本>/` 和 `models/`）。在模型卡片上点删除只删模型。
 - **启动**：语音识别选了它并且已下载时，就绪检查会让主进程启动引擎（`localaiNative.ts` 的 `nativeGap`）：写一份只监听 127.0.0.1 的配置、起进程、等 `/health`，再送一秒很轻的噪声把它预热一遍，然后才算就绪。加载和预热期间进程优先级调低。开机后第一次启动慢（实测约半分钟，主要是把模型读进显卡），之后每次几秒。没就绪时"开始"旁边会说明正在预热；不选它了，引擎就停掉，把显存还回来；退出应用时一起退出。
 - **声音怎么送**：页面的 fetch 不能在 HTTP/1.1 上边传边收，所以实时请求由主进程拿着（Node 的 `http`，`POST /v1/audio/transcriptions/live`），页面通过 IPC 送声音、收文字。送之前在页面里重采样到 16 kHz（`src/lib/native/resample.ts`：引擎自己也能降采样，但实测准确率低 0.8 个点）。
@@ -121,10 +121,24 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 - **两条实测出来的规矩**（2026-10-05）：① 结束一次识别前要有约一秒静音，引擎才会把最后听到的内容写完；紧贴着人声结束会丢掉最后好几秒的字。停顿本身通常已经够长，不够时（设置里把停顿调得很短，或在说话中途结束）应用补上。② 模型偶尔会"憋字"：继续听，但十几二十秒不出字，然后一口气全写出来（7 段里 1 段，引擎自带的客户端里也一样）。这时结束识别并不能让它写出来，反而会丢掉它之后本来会写的内容，所以目前不做处理，只能等。
 - **参数**：分块 160 ms、`unfixed_chunk_num` 0、`unfixed_token_num` 3。直连引擎、整段 60 秒不断开时，7 段的错字率：160/0/1 是 16.0%（文字落后 1.6 秒），160/0/3 是 14.5%（落后 2.1 秒），160/2/5 是 14.5%（落后 3.0 秒），320/0/1 是 16.0%。`unfixed_token_num` 设 0 会让模型卡死（33%）。
 - **应用里的实测**：同样 7 段，经过应用的采集和 VAD、每句话一次识别：错字率约 18%，文字平均落后约 3 秒。对照：Qwen3-ASR 1.7B 18.7%、落后约 10 秒；Whisper Large V3 Turbo 20.8%、落后约 10 秒。也就是说准确率和它们同一档，但文字快得多，而且是边听边出。比直连的 14.5% 差的那几个点，一半来自采集和 VAD（VAD 没检测到的轻声说话谁都听不到），一半来自按句断开后模型少了上文。
-- **只在 Windows 提供**：Apple M2 上（Metal 版）一分钟的话要处理两分多钟，跟不上说话，所以 Mac 上不显示它（`MODELS` 里的 `platforms`）；Mac 上的原生识别是系统自带的那个，见下一节。显卡较弱的 Windows 电脑也可能跟不上，这一点应用目前不会自己判断。
+- **R2T2 只在 Windows 提供**：Apple M2 上（Metal 版）一分钟的话要处理两分多钟，跟不上说话，所以 Mac 上不显示它（`MODELS` 里的 `platforms`）；Mac 上的原生识别是系统自带的那个，见下一节。显卡较弱的 Windows 电脑也可能跟不上，这一点应用目前不会自己判断——这种电脑用下面的 Qwen3-ASR。
 - **不指定语言不可靠**：R2T2 可以不给语言让它自己判断，但实测每段开头几个词经常认错语言（一段日语开头被写成英语，整段跟着跑偏），所以"这台电脑"识别时仍然要选好语言。常用的几种语言可以在语言菜单里置顶，切换快一些。
 - **开发**：非打包运行时，`KOTOMIMI_NATIVE_DIR` 让它用别的目录（免得测试用的配置目录里再下一遍 2.4 GB），`KOTOMIMI_NATIVE_DUMP` 把每次识别实际送给引擎的声音存成 PCM 文件，用来和引擎自带的客户端对照。
-- **以后加模型**：audio.cpp 还能跑 Qwen3-ASR、Voxtral Realtime、Fun-ASR Nano（韩语）、GigaAM（俄语）、Parakeet 等。加一个模型是在 `electron/native-engine.js` 的 `MODELS` 里加一项（地址、大小、SHA-256、家族、参数），再在 `localaiNative.ts` 的 `NATIVE_MODELS` 里加它的名字和语言。
+- **以后加模型**：加一个模型是在 `electron/native-engine.js` 的 `MODELS` 里加一项（地址、大小、SHA-256、家族、参数），再在 `localaiNative.ts` 的 `NATIVE_MODELS` 里加它的名字和语言。2026-10-05 直连引擎试过的其他模型（同样 7 段日语）：Nemotron 3.5 Streaming 0.6B 是真流式、最轻（M2 上也有 8 倍实时），但错字率 20.6%；Fun-ASR Nano 51%（两段陷入复读）；Parakeet TDT v3 和 GigaAM 不支持日语，没测。
+
+### 第二个模型：Qwen3-ASR 1.7B（整段识别的模型怎么做到边说边出字）
+
+模型是 [Qwen3-ASR-1.7B](https://huggingface.co/Qwen/Qwen3-ASR-1.7B)（阿里通义，Apache-2.0），用的是 [audio.cpp 自己的 GGUF 仓库](https://huggingface.co/audio-cpp/audio.cpp-gguf)里的 q8 文件（约 2.3 GB，地址带提交号）。
+
+Qwen3-ASR 不是流式模型：给它一段完整的声音，它写出整段文字（audio.cpp 里它自带的"流式"模式每 30 秒才写一次，没法用）。但它在这个运行库里非常快——RTX 5070 Ti 上 10 秒的话约 0.2–0.5 秒，M2 上约 1.5 秒——所以可以这样做（`native-engine.js` 的 `openWindow`）：
+
+- **边说边重读**：一段话的声音在主进程里攒着，说话期间每隔一会儿把"到目前为止的全部声音"交给引擎识别一遍（`POST /v1/audio/transcriptions`，一个 WAV 文件），结果作为"暂定文字"显示（`partial` 事件：整段文字，下一次可能改写）；这段话结束时再识别最后一遍作为定稿。如果最后一次重读之后只多了静音（结束一段话的那个停顿），就直接用它当定稿，不再识别一遍。
+- **慢的电脑不会越落越远**：两次识别之间至少歇 0.6 秒，并且至少歇"上一次识别花的时间"那么久。显卡慢，只是暂定文字刷新得慢，定稿照样准时。这和 R2T2 不同——R2T2 必须实时跟上，5070 Ti 上处理真实说话也只有约 2–2.8 倍实时的余量。
+- **断句**：一段话越长，每次重读越慢，而且定稿之前不会翻译，所以说满 8 秒后在词与词之间的空隙结束这一段、马上开下一段；VAD 强行切开的地方，这一段满 8 秒了也在那里结束（`localaiNative.ts` 的 `WINDOW_LIMITS`）。实测三组参数（同样 7 段、在应用里）：10 秒后找空隙 / 20 秒后才在 VAD 切点结束，17.2%，连着说时一行要 20 秒才定稿；8 秒 / 每个 VAD 切点，其余 6 段 16.1%，但有一段被切得太短读坏了；8 秒 / 8 秒，16.4%，最多 15 秒一行。用的是最后一组。
+- **复读的防护**：这类模型偶尔会在某一处"卡住"，把同样几个字一直写到上限（实测：「波で」写了 250 遍，花了 3 秒；约一百次定稿里一次，而且同一段声音只在某些长度下才会）。引擎的请求里没有能压住它的参数。所以：暂定文字里遇到复读就截到复读开始的地方；定稿遇到复读，先在声音前面加半秒静音重读一遍（实测这样就好了），还不行就从中间最安静的地方切成两半分别识别，仍然复读的那一半截断。判断标准是同一小段（最多 20 个字）连续出现 8 次以上，「そうそうそうそう」「ありがとう、ありがとう」这类正常的重复不受影响。
+- **实测**（同样 7 段、在应用里）：Windows（RTX 5070 Ti）错字率 16.4%，文字平均落后约 1 秒；M2 的 Mac 16.6%，落后约 2.3 秒。对照同一套打分：R2T2 18.2%、落后 2.5 秒；Mac 自带识别 12.5%、落后 1.7 秒。引擎进程约占 3 GB 显存（Mac 上约 3 GB 内存）。
+- **语言**：30 种（中、英、粤、日、韩、俄、西、法、德、意、葡、阿、泰、越、印尼、土、印地、马来、荷、瑞典、丹麦、芬兰、波兰、捷克、菲律宾、波斯、希腊、匈牙利、马其顿、罗马尼亚），语言用代码告诉它（`languageAs: 'code'`）。不给语言时它会自己判断，这一点还没有接进界面。
+- **推荐顺序**（`NATIVE_MODELS` 的顺序，模型库里第一个能听这种语言的带"推荐"）：Mac 自带识别 → Qwen3-ASR 1.7B → R2T2。R2T2 的长处是写出来的字不再改动；短处是吃显卡、语言少、Mac 上跑不动。
 
 ## Mac 自带的语音识别
 
@@ -135,6 +149,7 @@ macOS 26 起系统里有一个在本机运行的语音识别（`SpeechAnalyzer` 
 - **断句**：定稿在一次识别进行中要晚十秒左右才来，一结束就全部写出，所以说满 10 秒后会在词与词之间的空隙结束这一次、马上开下一次（`localaiNative.ts` 的 `APPLE_LIMITS`）；不在 VAD 强行切开的地方结束，那是切在词中间（实测「すごい大きいやつ」被切成「すごく。」和「いやつ」）。"空隙"按最近的音量来算（低于最近音量的十分之一），所以有底噪的麦克风也能找到。
 - **实测**（同样 7 段、在 M2 的应用里）：错字率 12.5%，文字平均落后 2.4 秒。通过 LocalAI 时是 14.1%、落后 5.4 秒。
 - **支持的语言**：日语、英语、韩语、中文（普通话）、西班牙语、法语、德语、意大利语、葡萄牙语、印地语、粤语——系统提供哪些，就列出哪些。没有俄语。
+- **和下载的引擎并存**（`electron/native-engines.js` 的 `joinEngines`）：Mac 上有两个原生识别引擎——系统自带的这个，和应用下载的 audio.cpp（跑 Qwen3-ASR，听系统不支持的语言）。主进程把两个合成一个来回答页面：模型列表是两边的合集，各自的下载、删除交给各自的引擎；"引擎是否就绪"折算进每个模型自己的状态；最后启动的那个算"正在运行"，先启动的那个不停掉（共享给别的设备的会话可能还在用它），十分钟没人用才停；每次识别带上模型的名字，按名字交给对应的引擎。实测（M2）：自己选 Apple 语音识别时，别的设备通过共享要俄语，由 Qwen3 回答；要日语，由 Apple 回答，互不打断。
 - **构建**：小程序不提交二进制，由 `native/apple-speech/build.sh` 编译成一个小的 .app（系统只把识别能力给有 bundle 标识的程序），放到 `resources/bin/darwin-arm64/` 下，随应用一起打包、一起签名。CI 的 macOS 任务里在打包前编译它；需要 macOS 26 的 SDK，没有时脚本只提示、不失败，那一版应用就不提供这个识别器。
 
 ## 共享原生引擎的模型
@@ -142,7 +157,7 @@ macOS 26 起系统里有一个在本机运行的语音识别（`SpeechAnalyzer` 
 开着共享时，这台电脑的原生引擎的模型和别的模型一样共享给局域网里的其他 Kotomimi（`src/lib/lan/nativeShare.ts`）：列在模型列表最前面；对方指名要就用它；对方没指名（交给这台电脑决定）时，只要这台电脑有能听那种语言的原生识别模型、或有下载好的原生翻译模型，就优先用它们——包括这台电脑同时装着 LocalAI 的情况（`lan-upstream.js` 的 `ownFirst`），因为它们是实测最好的。
 
 - 识别走的是和本机会话同一个识别器；翻译用模型自己的句式去问本机的翻译引擎。
-- 原生翻译引擎一次只跑一个模型：已经在跑的那个（这台电脑自己在用的，或正在给别的设备用的）会替引擎里的其他模型回答，只要它能翻那个语言对——否则换模型会把正在用的人打断。
+- 原生翻译引擎一次只跑一个模型：已经在跑的那个（这台电脑自己在用的，或正在给别的设备用的）会替引擎里的其他模型回答，只要它能翻那个语言对——否则换模型会把正在用的人打断。下载的识别引擎也一样（Qwen3-ASR 和 R2T2 是同一个引擎的两个模型）：正在跑的那个能听这种语言，就由它回答。
 - 别的设备正在用的时候，这台电脑自己的就绪检查不会因为"我自己没选它"而把引擎停掉（`holdNative`）。
 - 实测（PC 通过局域网用 Mac 的共享，Mac 上同时装着 LocalAI）：不指名时识别由 Apple 语音识别回答、实时出字，翻译由 Index-Translate 回答、约 0.3 秒一句。
 

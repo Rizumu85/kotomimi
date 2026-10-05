@@ -7,7 +7,7 @@ import { useModelStore } from '../../stores/modelStore';
 import { buildLocalAI, admitLocalAI, checkLocalAIWithNative, describeLocalAI, localaiProvider, LOCALAI_DEFAULTS, migrateLocalAISettings, type LocalAICredentials, type LocalAISettings } from './localai';
 import { cutsSentencesHere, deviceChoices, deviceNeeds, hearsByLocalServer, hearsNatively } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
-import { APPLE_PREFIX, NATIVE_DEFAULT_MODEL, nativeDownloaded, nativeGap, nativeHears, nativeModel, nativeModelFor, nativeReady } from './localaiNative';
+import { APPLE_PREFIX, NATIVE_DEFAULT_MODEL, NATIVE_MODELS, nativeDownloaded, nativeGap, nativeHears, nativeModel, nativeModelFor, nativeReady } from './localaiNative';
 import { SHARED } from './testing';
 
 const SPEAKER: SessionContext = { direction: { source: 'ja', target: 'zh-CN' }, speech: false, turns: 'auto' };
@@ -16,7 +16,7 @@ const CTX: CheckContext = { pair: PAIR, legs: ['speaker'] };
 const shared = { ...SHARED, reversed: (d: SessionContext['direction']) => d.source !== 'ja', models: [] as LocalAIModel[] };
 const settings = (patch: Partial<LocalAISettings> = {}): LocalAISettings => ({ ...LOCALAI_DEFAULTS, ...patch });
 const NONE: LocalAICredentials = { apiKey: '', endpoint: '' };
-const NATIVE: Partial<LocalAISettings> = { asrVia: 'device', asrHere: 'native', translateAt: 'api', translateBaseUrl: 'https://api.example.com/v1', translateModel: 'some-model', translateNeedsKey: false };
+const NATIVE: Partial<LocalAISettings> = { asrVia: 'device', asrHere: 'native', asrNativeModel: 'r2t2-q8', translateAt: 'api', translateBaseUrl: 'https://api.example.com/v1', translateModel: 'some-model', translateNeedsKey: false };
 
 const engine = (patch: Partial<NativeEngineStatus> = {}): NativeEngineStatus => ({
   supported: true,
@@ -82,11 +82,28 @@ describe('the native engine as what hears on this computer', () => {
     expect(config).toMatchObject({ refused: expect.stringContaining('th'), code: 'no_asr' });
   });
 
-  it('knows a model by its id, and falls to the first for one it no longer has', () => {
+  it('knows a model by its id, and falls to the default for one it no longer has', () => {
     expect(nativeModel('r2t2-q8').name).toBe('Confucius4 R2T2');
     expect(nativeModel('gone').id).toBe(NATIVE_DEFAULT_MODEL);
     expect(nativeHears(nativeModel('r2t2-q8'), 'zh-CN')).toBe(true);
     expect(nativeHears(nativeModel('r2t2-q8'), 'th')).toBe(false);
+  });
+
+  it('has, as its default, the model every system can run — which hears thirty languages, and is read a stretch at a time', () => {
+    expect(NATIVE_DEFAULT_MODEL).toBe('qwen3-asr-1.7b-q8');
+    const qwen = nativeModel(NATIVE_DEFAULT_MODEL);
+    expect(qwen.languages).toHaveLength(30);
+    for (const language of ['ja', 'ru', 'th', 'ko-KR', 'yue']) expect(nativeHears(qwen, language)).toBe(true);
+    expect(nativeHears(qwen, 'sw')).toBe(false);
+    // Begun again sooner than a model that writes as it listens, and waited for longer at its end.
+    expect(qwen.limits).toMatchObject({ rollAfter: 8, rollAt: 8, lastWordsMs: 15_000 });
+    const config = buildLocalAI({ ...SPEAKER, direction: { source: 'ru', target: 'zh-CN' } }, settings({ ...NATIVE, asrNativeModel: NATIVE_DEFAULT_MODEL }), shared);
+    expect(config).toMatchObject({ device: { modelId: 'qwen3-asr-1.7b-q8', streaming: true, native: { model: 'qwen3-asr-1.7b-q8', limits: { rollAfter: 8 } } } });
+  });
+
+  it('lists the models in the order they were measured: the recognition of the system itself, then the one read a stretch at a time, then the one that writes as it listens', () => {
+    const families = NATIVE_MODELS.map((m) => m.name).filter((name, at, all) => all.indexOf(name) === at);
+    expect(families).toEqual(['Apple Speech', 'Qwen3-ASR 1.7B GGUF', 'Confucius4 R2T2']);
   });
 });
 

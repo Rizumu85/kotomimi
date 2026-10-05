@@ -33,6 +33,7 @@ const WORDS: Record<NativeKind, { ready: string; warming: string; failed: string
 /** What was found of each model, as the key of a sentence under `providers.localai`. */
 const NOTES: Readonly<Record<string, string>> = {
   'r2t2-q8': 'noteNativeR2t2',
+  'qwen3-asr-1.7b-q8': 'noteNativeQwen',
   'apple-speech': 'noteAppleSpeech',
   'index-translate-2b': 'noteIndexTranslate',
   'hy-mt2-1.8b': 'noteHyMt2',

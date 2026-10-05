@@ -96,6 +96,8 @@ jobs:
           electron/local-server.test.js
           electron/local-server.pipelines.test.js
           electron/native-engine.test.js
+          electron/native-window.test.js
+          electron/native-engines.test.js
           electron/autostart.test.js
           electron/apple-speech.test.js
           src/components/TitleBar

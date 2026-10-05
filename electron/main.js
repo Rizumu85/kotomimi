@@ -14,7 +14,8 @@ const { keepMaximizeHonest, pageShift } = require('./window-maximize');
 const { firewallStatus, allowThroughFirewall } = require('./lan-firewall');
 const { discoverServers } = require('./lan-discover');
 const { createLocalServer } = require('./local-server');
-const { createNativeEngine, LLAMA, TRANSLATORS, LLAMA_RUNTIME, languageName: nativeLanguageName } = require('./native-engine');
+const { createNativeEngine, LLAMA, TRANSLATORS, LLAMA_RUNTIME, modelHears: nativeModelHears } = require('./native-engine');
+const { joinEngines } = require('./native-engines');
 const { createAutostart } = require('./autostart');
 const { createAppleSpeech } = require('./apple-speech');
 const { applyLinuxGpuFlags } = require('./linux-gpu-flags');
@@ -1297,7 +1298,7 @@ ipcMain.handle('lan:start', async (event, args) => {
     const ownFirst = async (ask) => {
       const base = String(ask?.language ?? '').trim().toLowerCase().split(/[-_]/)[0];
       const has = (status, fits) => status.engine === 'ready' && Object.entries(status.models).some(([id, model]) => model.state === 'downloaded' && fits(id));
-      if (ask?.kind === 'asr') return has(await getNativeEngine().status(), (id) => (id.includes(':') ? id.endsWith(`:${base}`) : nativeLanguageName(base) !== null));
+      if (ask?.kind === 'asr') return has(await getNativeEngine().status(), (id) => (id.includes(':') ? id.endsWith(`:${base}`) : nativeModelHears(id, base)));
       return has(await getNativeTranslator().status(), () => true);
     };
     const upstream = createUpstream({ port: local.port, pipelines: () => local.pipelines(), setPipeline: (name, change, options) => local.setPipeline(name, change, options), ownFirst });
@@ -1371,26 +1372,27 @@ const getNativeEngine = () => {
   };
   const toStatus = (status) => toPage('native-engine:status', status);
   const toStream = (event) => toPage('native-engine:stream', event);
-  // On a Mac the native recognizer is the system's own (electron/apple-speech.js), through the helper the app ships
-  // beside its other one; it answers the same questions, so everything below this line is the same for both.
-  if (process.platform === 'darwin') {
-    const inBundle = path.join('resources', 'bin', 'darwin-arm64', 'Kotomimi Speech Helper.app', 'Contents', 'MacOS', 'speech-helper');
-    const helper = [process.resourcesPath ? path.join(process.resourcesPath, inBundle) : null, path.join(__dirname, '..', inBundle)]
-      .find((candidate) => candidate && require('fs').existsSync(candidate)) ?? null;
-    nativeEngine = createAppleSpeech({ helper, log, onChange: toStatus, onStream: toStream });
-    return nativeEngine;
-  }
   const { net } = require('electron');
-  nativeEngine = createNativeEngine({
+  const downloaded = (tell) => createNativeEngine({
     // An unpackaged run can keep it elsewhere (`KOTOMIMI_NATIVE_DIR`): gigabytes a test profile need not fetch again.
     dir: !app.isPackaged && process.env.KOTOMIMI_NATIVE_DIR ? process.env.KOTOMIMI_NATIVE_DIR : path.join(app.getPath('userData'), 'native-engine'),
     fetch: (url, init) => net.fetch(url, init),
     // An unpackaged run can keep what the engine was given to hear (`KOTOMIMI_NATIVE_DUMP`), to measure with.
     dumpDir: !app.isPackaged && process.env.KOTOMIMI_NATIVE_DUMP ? process.env.KOTOMIMI_NATIVE_DUMP : null,
     log,
-    onChange: toStatus,
-    onStream: toStream,
+    ...tell,
   });
+  // On a Mac the first native recognizer is the system's own (electron/apple-speech.js), through the helper the app
+  // ships beside its other one; the runtime the app downloads stands behind it, for the languages the system does
+  // not hear. The two answer as one (electron/native-engines.js), so everything below this line is the same.
+  if (process.platform === 'darwin') {
+    const inBundle = path.join('resources', 'bin', 'darwin-arm64', 'Kotomimi Speech Helper.app', 'Contents', 'MacOS', 'speech-helper');
+    const helper = [process.resourcesPath ? path.join(process.resourcesPath, inBundle) : null, path.join(__dirname, '..', inBundle)]
+      .find((candidate) => candidate && require('fs').existsSync(candidate)) ?? null;
+    nativeEngine = joinEngines([(tell) => createAppleSpeech({ helper, log, ...tell }), downloaded], { onChange: toStatus, onStream: toStream });
+    return nativeEngine;
+  }
+  nativeEngine = downloaded({ onChange: toStatus, onStream: toStream });
   return nativeEngine;
 };
 ipcMain.handle('native-engine:get', () => getNativeEngine().status());
@@ -1402,7 +1404,7 @@ ipcMain.handle('native-engine:start', async (event, args) => {
   return getNativeEngine().start(String(args?.id ?? ''));
 });
 ipcMain.handle('native-engine:stop', () => getNativeEngine().stop());
-ipcMain.handle('native-engine:stream-open', (event, args) => getNativeEngine().openStream({ language: args?.language, sampleRate: args?.sampleRate }));
+ipcMain.handle('native-engine:stream-open', (event, args) => getNativeEngine().openStream({ language: args?.language, sampleRate: args?.sampleRate, model: typeof args?.model === 'string' ? args.model : undefined }));
 ipcMain.handle('native-engine:stream-audio', (event, args) => getNativeEngine().writeStream(args?.id, args?.pcm));
 ipcMain.handle('native-engine:stream-end', (event, args) => getNativeEngine().endStream(args?.id));
 ipcMain.handle('native-engine:stream-abort', (event, args) => getNativeEngine().abortStream(args?.id));

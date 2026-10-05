@@ -26,7 +26,7 @@ function fakeVad() {
 
 /** The engine as a recorder: each recognition it opened, with the samples it was given and how it was left. */
 function fakeEngine(options: { down?: boolean } = {}) {
-  const streams: Array<{ id: number; language: string; sampleRate: number; samples: number; ended: boolean; aborted: boolean }> = [];
+  const streams: Array<{ id: number; language: string; sampleRate: number; model?: string; samples: number; ended: boolean; aborted: boolean }> = [];
   let listener: ((event: NativeStreamEvent) => void) | null = null;
   const state = { down: options.down ?? false, listening: 0 };
   const bridge: NativeBridge = {
@@ -48,10 +48,10 @@ function fakeEngine(options: { down?: boolean } = {}) {
   return { bridge, streams, state, say: (event: NativeStreamEvent) => listener?.(event) };
 }
 
-async function started(engine = fakeEngine(), options: { status?: NativeEngineStatus; vad?: typeof VAD; limits?: { rollAfter?: number; rollAt?: number; rollHard?: number } } = {}) {
+async function started(engine = fakeEngine(), options: { status?: NativeEngineStatus; vad?: typeof VAD; limits?: { rollAfter?: number; rollAt?: number; rollHard?: number; lastWordsMs?: number }; model?: string } = {}) {
   const vad = fakeVad();
   const clock = createVirtualClock();
-  const asr = createNativeAsr({ bridge: engine.bridge, start: async () => options.status ?? READY, vad: () => vad.worker, now: () => clock.now(), clock, ...(options.limits ? { limits: options.limits } : {}) });
+  const asr = createNativeAsr({ bridge: engine.bridge, start: async () => options.status ?? READY, vad: () => vad.worker, now: () => clock.now(), clock, ...(options.limits ? { limits: options.limits } : {}), ...(options.model ? { model: options.model } : {}) });
   const seen = { partials: [] as string[], results: [] as string[], starts: 0, errors: [] as string[], fatal: [] as string[] };
   asr.onPartialResult = (text) => seen.partials.push(text);
   asr.onResult = (result) => seen.results.push(result.text);
@@ -256,6 +256,34 @@ describe('this computer\'s native recognizer', () => {
     expect(engine.streams[0].aborted).toBe(true);
     expect(engine.streams).toHaveLength(2);
     expect(engine.streams[1].samples).toBe(HEARD);
+  });
+
+  it('gives the last thing heard when an engine that settles nothing before the end never ends, after the longer wait it is allowed', async () => {
+    const { asr, vad, engine, seen, clock } = await started(fakeEngine(), { limits: { lastWordsMs: 15_000 } });
+    vad.worker.say('speech_start');
+    await settled();
+    asr.feedAudio(seconds(2), RATE);
+    engine.say({ id: 1, type: 'partial', text: 'こんにち' });
+    engine.say({ id: 1, type: 'partial', text: 'こんにちは' });
+    vad.worker.say('speech_end');
+    // Such an engine reads the whole stretch once more at its end: it is given the time.
+    clock.advance(LAST_WORDS_TIMEOUT_MS);
+    expect(seen.results).toEqual([]);
+    clock.advance(15_000 - LAST_WORDS_TIMEOUT_MS);
+    expect(engine.streams[0].aborted).toBe(true);
+    expect(seen.results).toEqual(['こんにちは']);
+  });
+
+  it('names its model with every recognition, for a computer whose native recognizers are more than one engine', async () => {
+    const { vad, engine } = await started(fakeEngine(), { model: 'qwen3-asr-1.7b-q8' });
+    vad.worker.say('speech_start');
+    await settled();
+    expect(engine.streams[0]).toMatchObject({ language: 'ja', sampleRate: HEARD, model: 'qwen3-asr-1.7b-q8' });
+    // Told none, it names none: the engine has one model to run.
+    const plain = await started();
+    plain.vad.worker.say('speech_start');
+    await settled();
+    expect(plain.engine.streams[0].model).toBeUndefined();
   });
 
   it('reports one recognition failing as one sentence lost, and goes on', async () => {

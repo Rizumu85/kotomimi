@@ -39,8 +39,13 @@ export function nativeShared(): SharedModel[] {
 export function nativeRecognizerFor(language: string, wanted: string): { modelId: string; streaming: boolean } | null {
   const status = useNativeEngineStore.getState().status;
   const usable = (id: string) => nativeDownloaded(status, id);
+  if (wanted && !isNativeRecognizer(wanted)) return null;
+  // The engine the app downloads runs one model at a time. The one running — this computer's own choice, or what
+  // another device is listening through — answers for whichever of the native models was named, where it hears the
+  // language: starting another would stop it under whoever is using it.
+  const running = status.run.state !== 'stopped' && status.run.state !== 'failed' && status.run.model ? nativeModelFor(status.run.model, language) : null;
+  if (running && isNativeRecognizer(running.id) && usable(running.id)) return { modelId: running.id, streaming: true };
   if (wanted) {
-    if (!isNativeRecognizer(wanted)) return null;
     const named = nativeModelFor(wanted, language);
     return named && usable(named.id) ? { modelId: named.id, streaming: true } : null;
   }
@@ -69,6 +74,7 @@ export function nativeRecognizer(model: { modelId: string }): Recognizer | null 
   const asr = createNativeAsr({
     bridge: ipcNativeBridge,
     start: () => useNativeEngineStore.getState().start(native.id),
+    model: native.id,
     ...(native.limits ? { limits: native.limits } : {}),
   });
   let release: (() => void) | null = null;

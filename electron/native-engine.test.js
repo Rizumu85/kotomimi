@@ -36,8 +36,8 @@ const answer = (pieces, status = 200) => new Response(new ReadableStream({
 }), { status });
 
 /** A computer: what the network serves, every process started, and whether the port answers. */
-function computer({ platform = 'win32', arch = 'x64', served = { 'https://example.test/engine.zip': ARCHIVE, 'https://example.test/m1.gguf': MODEL }, fetch: ownFetch, healthy = true, warmEvent = { type: 'done', text: '' } } = {}) {
-  const world = { requests: [], started: [], changes: [], streamEvents: [], lives: [], priorities: [], healthy };
+function computer({ platform = 'win32', arch = 'x64', served = { 'https://example.test/engine.zip': ARCHIVE, 'https://example.test/m1.gguf': MODEL }, fetch: ownFetch, healthy = true, warmEvent = { type: 'done', text: '' }, catalog = CATALOG } = {}) {
+  const world = { requests: [], started: [], changes: [], streamEvents: [], lives: [], windows: [], priorities: [], healthy };
   const fetchIt = ownFetch ?? (async (url, init = {}) => {
     world.requests.push({ url, range: init.headers?.Range });
     const whole = served[url];
@@ -54,19 +54,24 @@ function computer({ platform = 'win32', arch = 'x64', served = { 'https://exampl
     world.started.push({ bin, args, options, child });
     return child;
   };
-  const live = (target, onEvent) => {
-    const stream = { target, written: [], ended: false, aborted: false, onEvent, write(pcm) { stream.written.push(pcm); }, end() { stream.ended = true; if (world.lives.indexOf(stream) === 0 && warmEvent) queueMicrotask(() => onEvent(warmEvent)); }, abort() { stream.aborted = true; } };
-    world.lives.push(stream);
+  // A recognition of either kind: the first one opened is the warm-up, and is answered.
+  const recognition = (list) => (target, onEvent) => {
+    const first = world.lives.length + world.windows.length === 0;
+    const stream = { target, written: [], ended: false, aborted: false, onEvent, write(pcm) { stream.written.push(pcm); }, end() { stream.ended = true; if (first && warmEvent) queueMicrotask(() => onEvent(warmEvent)); }, abort() { stream.aborted = true; } };
+    list.push(stream);
     return stream;
   };
+  const live = recognition(world.lives);
+  const window = recognition(world.windows);
   const engine = createNativeEngine({
     dir,
     platform,
     arch,
-    catalog: CATALOG,
+    catalog,
     fetch: fetchIt,
     spawn,
     live,
+    window,
     extract: async (archive, into) => { world.extracted = fs.readFileSync(archive); fs.writeFileSync(path.join(into, 'server.exe'), 'exe'); },
     freePort: async () => 45123,
     get: async (port, pathname) => { world.asked = `${port}${pathname}`; return world.healthy ? { status: 200, body: '{"status":"ok"}' } : null; },
@@ -100,11 +105,16 @@ describe('what is fetched', () => {
   });
 
   it('offers a model only on the systems it names: a system left with none is not offered the runtime either', async () => {
-    const elsewhere = createNativeEngine({ dir, platform: 'darwin', arch: 'arm64', fetch: async () => { throw new Error('nothing is fetched'); } });
+    const nothing = async () => { throw new Error('nothing is fetched'); };
     expect(MODELS['r2t2-q8'].platforms).toEqual(['win32-x64']);
-    expect(elsewhere.status()).toMatchObject({ supported: false, engine: 'unsupported', models: {} });
-    const here = createNativeEngine({ dir, platform: 'win32', arch: 'x64', fetch: async () => { throw new Error('nothing is fetched'); } });
-    expect(here.status()).toMatchObject({ supported: true, models: { 'r2t2-q8': { state: 'absent' } } });
+    // A Mac is offered the model that is for every system, and not the one that names Windows alone.
+    const mac = createNativeEngine({ dir, platform: 'darwin', arch: 'arm64', fetch: nothing });
+    expect(Object.keys(mac.status().models)).toEqual(['qwen3-asr-1.7b-q8']);
+    const here = createNativeEngine({ dir, platform: 'win32', arch: 'x64', fetch: nothing });
+    expect(here.status()).toMatchObject({ supported: true, models: { 'r2t2-q8': { state: 'absent' }, 'qwen3-asr-1.7b-q8': { state: 'absent' } } });
+    // A catalog whose every model names another system leaves this one with nothing to run.
+    const only = createNativeEngine({ dir, platform: 'darwin', arch: 'arm64', fetch: nothing, catalog: { engine: ENGINE, models: { 'r2t2-q8': MODELS['r2t2-q8'] } } });
+    expect(only.status()).toMatchObject({ supported: false, engine: 'unsupported', models: {} });
   });
 
   it('says so where the runtime is not published, and fetches nothing there', async () => {
@@ -364,6 +374,26 @@ describe('a live recognition', () => {
     await engine.stop();
     expect(world.lives[1].aborted).toBe(true);
     expect(engine.status().run).toMatchObject({ state: 'stopped', model: null });
+  });
+
+  it('is, for a model that reads a stretch at once, that stretch read as it grows — warmed the same way, and told the language by its code', async () => {
+    const catalog = { engine: CATALOG.engine, models: { w1: { file: 'w1.gguf', url: 'https://example.test/w1.gguf', bytes: MODEL.length, sha256: sha(MODEL), family: 'fam2', mode: 'offline', languageAs: 'code' } } };
+    const { world, engine } = computer({ catalog, served: { 'https://example.test/engine.zip': ARCHIVE, 'https://example.test/w1.gguf': MODEL } });
+    await engine.download('w1');
+    await engine.start('w1');
+    expect(JSON.parse(fs.readFileSync(path.join(dir, 'models', 'server.json'), 'utf8')).models).toEqual([{ id: 'w1', family: 'fam2', path: 'w1.gguf', task: 'asr', mode: 'offline', session_options: {} }]);
+    // The warm-up went the way its recognitions go.
+    expect(world.lives).toHaveLength(0);
+    expect(world.windows).toHaveLength(1);
+    expect(world.windows[0].written[0].length).toBe(32000);
+    const id = engine.openStream({ language: 'zh-CN', sampleRate: 16000 });
+    expect(world.windows[1].target).toMatchObject({ port: 45123, model: 'w1', sampleRate: 16000, language: 'zh' });
+    // What it reads meanwhile is passed on, and the recognition goes on: only its end ends it.
+    world.windows[1].onEvent({ type: 'partial', text: '你' });
+    expect(engine.writeStream(id, new Int16Array([1]))).toBe(true);
+    world.windows[1].onEvent({ type: 'done', text: '你好' });
+    expect(world.streamEvents).toEqual([{ id, type: 'partial', text: '你' }, { id, type: 'done', text: '你好' }]);
+    expect(engine.writeStream(id, new Int16Array([2]))).toBe(false);
   });
 
   it('names the languages the model was taught by name', () => {
