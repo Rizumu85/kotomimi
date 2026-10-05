@@ -5,6 +5,7 @@
  * (食べる / タベル → 食[た]べる). Pure: the tokenizer is handed in.
  */
 import { toRomaji } from 'wanakana';
+import { correctReadings } from './japaneseReadings';
 import { KANJI } from './script';
 import type { AnnotatedLine, AnnotateOptions, JapaneseToken, JapaneseTokenizer, RubyPart } from './types';
 
@@ -102,7 +103,8 @@ export function romaji(tokens: readonly JapaneseToken[]): string {
 
 /** One line of Japanese, annotated as asked. */
 export function annotateJapanese(line: string, tokenizer: JapaneseTokenizer, options: AnnotateOptions): AnnotatedLine {
-  const tokens = tokenizer.tokenize(line);
+  // The dictionary's readings, with the ones everyday speech gives differently put right (`japaneseReadings.ts`).
+  const tokens = correctReadings(tokenizer.tokenize(line));
   const parts: RubyPart[] = [];
   for (const token of tokens) {
     for (const part of options.furigana ? furiganaParts(token.surface_form, token.reading) : [{ text: token.surface_form }]) {
