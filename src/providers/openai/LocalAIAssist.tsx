@@ -39,7 +39,11 @@ type Props = CredentialAssistProps<S>;
  */
 function shownName(id: string): string {
   const entry = getManifestEntry(id);
-  return entry ? shortenModelName(entry.name, entry.shortName) : modelLabel(id);
+  if (entry) return shortenModelName(entry.name, entry.shortName);
+  // A native engine's model the other Kotomimi shares: by the name it has here. The Mac's recognition is a model to a language.
+  const native = NATIVE_MODELS.find((m) => m.id === id) ?? NATIVE_TRANSLATORS.find((m) => m.id === id);
+  if (native) return id.includes(':') ? `${native.name} (${id.slice(id.indexOf(':') + 1)})` : native.name;
+  return modelLabel(id);
 }
 
 /** A labelled control. */

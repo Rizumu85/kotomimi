@@ -104,9 +104,26 @@ export async function nativeGap(id: string, heard: readonly string[], deps: Nati
   return { ok: false, reason: 'The native recognition engine is warming up.', code: 'native_warming' };
 }
 
+/**
+ * Who else is using an engine now: a device this computer shares its models
+ * with (`src/lib/lan/nativeShare.ts`). While anyone holds it, the app's own
+ * check does not stop it for not being this computer's own choice.
+ */
+const held = { asr: 0, translation: 0 };
+export function holdNative(kind: 'asr' | 'translation'): () => void {
+  held[kind] += 1;
+  let let_go = false;
+  return () => {
+    if (let_go) return;
+    let_go = true;
+    held[kind] -= 1;
+  };
+}
+
 /** A run that does not hear by the engine has no use for it: it gives its memory back. */
 export function nativeIdle(deps: NativeCheckDeps = {}): void {
   const store = useNativeEngineStore.getState();
+  if (held.asr > 0) return;
   if (store.status.run.state === 'stopped') return;
   (deps.stop ?? (() => { void store.stop(); }))();
 }
@@ -133,6 +150,7 @@ export async function translatorGap(id: string, pairs: ReadonlyArray<{ source: s
 /** A run that does not translate by the engine has no use for it. */
 export function translatorIdle(deps: NativeCheckDeps = {}): void {
   const store = useNativeTranslatorStore.getState();
+  if (held.translation > 0) return;
   if (store.status.run.state === 'stopped') return;
   (deps.stop ?? (() => { void store.stop(); }))();
 }

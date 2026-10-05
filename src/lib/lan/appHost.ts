@@ -9,6 +9,7 @@ import { defaultEngines } from '../../providers/localInference/engines';
 import { createLanHost, type LanBridge, type LanHost } from './host';
 import { FIREWALL_UNKNOWN, firewallAnswer, type LanFirewall } from './protocol';
 import { appLanModels } from './appModels';
+import { nativeOrOwnTranslator, nativeRecognizer } from './nativeShare';
 
 interface ElectronApi {
   invoke(channel: string, data?: unknown): Promise<unknown>;
@@ -51,8 +52,9 @@ export function createAppLanHost(onClients: (count: number) => void): LanHost | 
     bridge,
     models: appLanModels,
     engines: {
-      recognizer: (model) => defaultEngines.asr(model),
-      translator: () => defaultEngines.translation(),
+      // A native engine's model is run by that engine (`nativeShare.ts`); any other by the app's own.
+      recognizer: (model) => nativeRecognizer(model) ?? defaultEngines.asr(model),
+      translator: () => nativeOrOwnTranslator(() => defaultEngines.translation()),
     },
     clock: realClock,
     onClients,

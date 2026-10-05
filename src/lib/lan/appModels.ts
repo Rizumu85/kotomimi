@@ -9,6 +9,7 @@ import {
 } from '../local-inference/modelManifest';
 import { useModelStore } from '../../stores/modelStore';
 import type { LanModels } from './host';
+import { nativeRecognizerFor, nativeShared, nativeTranslatorFor } from './nativeShare';
 import type { SharedModel } from './protocol';
 
 const isRecognizer = (entry: ModelManifestEntry | undefined): entry is ModelManifestEntry => entry?.type === 'asr' || entry?.type === 'asr-stream';
@@ -27,9 +28,14 @@ export const appLanModels: LanModels = {
       .map((m): SharedModel => ({ id: m.id, kind: 'asr', languages: m.multilingual ? [] : [...new Set(asrEntryLanguages(m))] }));
     const translators = getManifestByType('translation').filter(usable)
       .map((m): SharedModel => ({ id: m.id, kind: 'translate', languages: m.sourceLang && m.targetLang ? [m.sourceLang, m.targetLang] : m.languages }));
-    return [...recognizers, ...translators];
+    // This computer's native engines' models first: the ones measured best, where it has them.
+    const native = nativeShared();
+    return [...native.filter((m) => m.kind === 'asr'), ...recognizers, ...native.filter((m) => m.kind !== 'asr'), ...translators];
   },
   recognizer(language, wanted) {
+    // A native recognizer when it is the one named — or nothing is named and one hears the language.
+    const native = nativeRecognizerFor(language, wanted);
+    if (native) return native;
     const named = getManifestEntry(wanted);
     if (isRecognizer(named) && usable(named) && (named.multilingual || named.languages.includes(language))) {
       return { modelId: named.id, streaming: named.type === 'asr-stream' };
@@ -39,6 +45,8 @@ export const appLanModels: LanModels = {
     return picked ? { modelId: picked.modelId, streaming: getManifestEntry(picked.modelId)?.type === 'asr-stream' } : null;
   },
   translator(source, target, wanted) {
+    const native = nativeTranslatorFor(source, target, wanted);
+    if (native) return native;
     const named = getManifestEntry(wanted);
     if (named?.type === 'translation' && usable(named) && isTranslationModelCompatible(named, source, target)) return named.id;
     const picked = useModelStore.getState().resolve(source, target, {}).translation;
