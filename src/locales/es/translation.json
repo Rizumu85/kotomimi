@@ -611,7 +611,8 @@
       "nativeUnchosen": "No speech recognition model is chosen for {{source}} yet. Choose one in the Speech recognition card.",
       "nativeTwoModels": "{{name}} and {{other}} cannot run at the same time. Choose the same model for both languages.",
       "tag_native": "Native engine",
-      "tagHint_native": "Runs on the graphics card in an engine the app downloads with it: quicker than the app's own way. The first start after the computer boots takes about half a minute.",
+      "tagHint_native": "Runs on the graphics card in an engine the app downloads with it: quicker than the app's own way. Loaded when a session starts (about half a minute the first time after the computer boots) and freed a minute after it ends.",
+      "nativeLoading": "Loading the models… About half a minute the first time after the computer boots.",
       "tag_system": "Built into macOS",
       "tagHint_system": "The speech recognition of macOS itself: no video memory taken, nothing to warm up. The system downloads each language.",
       "nativeEntry": "{{name}} (native engine)",
@@ -1487,7 +1488,7 @@
     "autostart": {
       "title": "Startup",
       "toggle": "Start in the background when I sign in to Windows",
-      "note": "Kotomimi waits in the background after you sign in, with the recognition engine ready: open it and start at once."
+      "note": "Kotomimi waits in the background after you sign in and loads the models once ahead of time, so the first session does not wait for it."
     },
     "languageMenu": {
       "search": "Type to find a language",

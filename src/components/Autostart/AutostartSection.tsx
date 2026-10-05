@@ -12,10 +12,21 @@ import ToggleSwitch from '../Settings/shared/ToggleSwitch';
 import './AutostartSection.scss';
 
 interface Autostart { supported: boolean; enabled: boolean }
+
 const NONE: Autostart = { supported: false, enabled: false };
 
 interface ElectronApi { invoke(channel: string, data?: unknown): Promise<unknown> }
 const electron = (): ElectronApi | undefined => (typeof window === 'undefined' ? undefined : (window as unknown as { electron?: ElectronApi }).electron);
+
+/** Whether this start was the computer's own, at sign-in, with no window shown. False wherever that cannot be asked. */
+export async function startedInBackground(): Promise<boolean> {
+  try {
+    const answer = (await electron()?.invoke('autostart:get')) as { startedHidden?: unknown } | null | undefined;
+    return answer?.startedHidden === true;
+  } catch {
+    return false;
+  }
+}
 
 /** The main process's answer, held to its shape. Never rejects. */
 export async function askAutostart(action: 'get' | 'set', enabled?: boolean): Promise<Autostart> {

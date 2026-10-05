@@ -5,10 +5,12 @@ import { NO_NATIVE_ENGINE, nativeEngineStatus, nativeStreamEvent, type NativeEng
 import type { CheckContext, CheckResult } from '../../lib/provider/types';
 import { useModelStore } from '../../stores/modelStore';
 import { detectsOther, heardBy } from './localaiDevice';
-import { buildLocalAI, admitLocalAI, checkLocalAIWithNative, describeLocalAI, localaiProvider, LOCALAI_DEFAULTS, migrateLocalAISettings, type LocalAICredentials, type LocalAISettings } from './localai';
+import { AdapterStartError } from '../../lib/contract/adapter';
+import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
+import { buildLocalAI, admitLocalAI, checkLocalAIWithNative, describeLocalAI, localaiProvider, prepareLocalAI, primeNativeOnce, type NativeUps, LOCALAI_DEFAULTS, migrateLocalAISettings, type LocalAICredentials, type LocalAISettings } from './localai';
 import { cutsSentencesHere, deviceChoices, deviceNeeds, hearsByLocalServer, hearsNatively } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
-import { APPLE_PREFIX, NATIVE_DEFAULT_MODEL, NATIVE_MODELS, chooseNative, nativePicked, nativeDownloaded, nativeGap, nativeHears, nativeModel, nativeModelFor, nativeReady, nativeWaits } from './localaiNative';
+import { APPLE_PREFIX, NATIVE_DEFAULT_MODEL, NATIVE_MODELS, chooseNative, nativePicked, nativeDownloaded, holdNative, holdNativeForRun, nativeGap, nativeHears, nativeIdle, nativeModel, nativeModelFor, nativeReady, nativeUp, nativeWaits, restNative, translatorUp } from './localaiNative';
 import { SHARED } from './testing';
 
 const SPEAKER: SessionContext = { direction: { source: 'ja', target: 'zh-CN' }, speech: false, turns: 'auto' };
@@ -253,10 +255,7 @@ describe('the system recognizer of a Mac, one model to a language', () => {
     run: { state: 'stopped', model: null, port: 0, tail: '' },
     up: [],
   };
-  const asked = (status: NativeEngineStatus, heard: string[]) => {
-    const start = vi.fn();
-    return { start, gap: nativeGap(`${APPLE_PREFIX}ja`, heard, { status: async () => status, start }) };
-  };
+  const asked = (status: NativeEngineStatus, heard: string[]) => ({ gap: nativeGap(`${APPLE_PREFIX}ja`, heard, { status: async () => status }) });
 
   it('is named once, and resolved to the model of the language each leg hears', () => {
     expect(nativeModelFor(`${APPLE_PREFIX}ja`, 'ja')?.id).toBe(`${APPLE_PREFIX}ja`);
@@ -282,40 +281,40 @@ describe('the system recognizer of a Mac, one model to a language', () => {
     expect(await asked(APPLE, ['ja', 'ru']).gap).toMatchObject({ ok: false, code: 'native_unchosen', params: { source: 'ru' } });
   });
 
-  it('is asked for once and is then ready for every language of its own', async () => {
-    const down = asked(APPLE, ['ja']);
-    expect(await down.gap).toMatchObject({ ok: false, code: 'native_warming' });
-    expect(down.start).toHaveBeenCalledWith(`${APPLE_PREFIX}ja`);
+  it('can start with its languages installed, up or not — and one start brings it up for every language of its own', async () => {
+    expect(await asked(APPLE, ['ja']).gap).toBeNull();
     const both: NativeEngineStatus = { ...APPLE, models: { ...APPLE.models, [`${APPLE_PREFIX}zh`]: { state: 'downloaded', received: 0, total: 0 } }, run: { state: 'ready', model: `${APPLE_PREFIX}ja`, port: 0, tail: '' } };
     expect(await asked(both, ['ja', 'zh-CN']).gap).toBeNull();
+    const start = vi.fn(async () => both);
+    await nativeUp(`${APPLE_PREFIX}ja`, ['ja', 'zh-CN'], { start });
+    expect(start.mock.calls).toEqual([[`${APPLE_PREFIX}ja`]]);
     expect(nativeReady(both, `${APPLE_PREFIX}zh`)).toBe(true);
     expect(nativeReady(both, 'r2t2-q8')).toBe(false);
   });
 });
 
 describe('whether a run that hears by the engine can start', () => {
-  const asked = (status: NativeEngineStatus, heard: string[] = ['ja']) => {
-    const start = vi.fn();
-    return { start, gap: nativeGap('r2t2-q8', heard, { status: async () => status, start }) };
-  };
+  const asked = (status: NativeEngineStatus, heard: string[] = ['ja']) => ({ gap: nativeGap('r2t2-q8', heard, { status: async () => status }) });
 
-  it('can, once the engine is up with its model', async () => {
-    const { gap, start } = asked(READY);
-    expect(await gap).toBeNull();
-    expect(start).not.toHaveBeenCalled();
+  it('can with its model downloaded: the engine does not have to be up, and the check does not bring it up', async () => {
+    expect(await asked(READY).gap).toBeNull();
+    expect(await asked(engine()).gap).toBeNull();
+    expect(await asked(engine({ run: { state: 'warming', model: 'r2t2-q8', port: 4100, tail: '' } })).gap).toBeNull();
     expect(nativeReady(READY, 'r2t2-q8')).toBe(true);
+    expect(nativeReady(engine(), 'r2t2-q8')).toBe(false);
     expect(nativeDownloaded(READY, 'r2t2-q8')).toBe(true);
+    // Nothing is asked of the engine but its state.
+    const start = vi.spyOn(useNativeEngineStore.getState(), 'start');
+    await nativeGap('r2t2-q8', ['ja'], { status: async () => engine() });
+    expect(start).not.toHaveBeenCalled();
+    start.mockRestore();
   });
 
-  it('cannot where the system has no engine, or the model is not downloaded — and starts nothing', async () => {
-    const none = asked(NO_NATIVE_ENGINE);
-    expect(await none.gap).toMatchObject({ ok: false, code: 'native_unsupported' });
+  it('cannot where the system has no engine, or the model is not downloaded', async () => {
+    expect(await asked(NO_NATIVE_ENGINE).gap).toMatchObject({ ok: false, code: 'native_unsupported' });
     const absent = asked(engine({ models: { 'r2t2-q8': { state: 'absent', received: 0, total: 2477512064 } } }));
     expect(await absent.gap).toMatchObject({ ok: false, code: 'native_missing', params: { name: 'Confucius4 R2T2 GGUF' } });
-    const noRuntime = asked(engine({ engine: 'absent' }));
-    expect(await noRuntime.gap).toMatchObject({ ok: false, code: 'native_missing' });
-    expect(none.start).not.toHaveBeenCalled();
-    expect(absent.start).not.toHaveBeenCalled();
+    expect(await asked(engine({ engine: 'absent' })).gap).toMatchObject({ ok: false, code: 'native_missing' });
   });
 
   it('cannot for a language the model does not hear', async () => {
@@ -324,39 +323,208 @@ describe('whether a run that hears by the engine can start', () => {
 
   it('cannot with two models of the engine the app downloads: it runs one at a time', async () => {
     const both = engine({ models: { 'r2t2-q8': { state: 'downloaded', received: 1, total: 1 }, 'qwen3-asr-1.7b-q8': { state: 'downloaded', received: 1, total: 1 } } });
-    const start = vi.fn();
-    const gap = await nativeGap({ model: 'r2t2-q8', byLanguage: { zh: 'qwen3-asr-1.7b-q8' } }, ['ja', 'zh-CN'], { status: async () => both, start });
+    const gap = await nativeGap({ model: 'r2t2-q8', byLanguage: { zh: 'qwen3-asr-1.7b-q8' } }, ['ja', 'zh-CN'], { status: async () => both });
     expect(gap).toMatchObject({ ok: false, code: 'native_two_models', params: { name: 'Confucius4 R2T2 GGUF', other: 'Qwen3-ASR 1.7B GGUF' } });
-    expect(start).not.toHaveBeenCalled();
   });
 
-  it('can with the system\u2019s recognition for one language and the downloaded engine for another: each is started, and both are up', async () => {
+  it('can with the system\u2019s recognition for one language and the downloaded engine for another', async () => {
     const models = { [`${APPLE_PREFIX}zh`]: { state: 'downloaded' as const, received: 0, total: 0 }, 'qwen3-asr-1.7b-q8': { state: 'downloaded' as const, received: 1, total: 1 } };
     const pick = { model: `${APPLE_PREFIX}zh`, byLanguage: { ru: 'qwen3-asr-1.7b-q8' } };
-    const start = vi.fn();
-    expect(await nativeGap(pick, ['zh-CN', 'ru'], { status: async () => engine({ models }), start })).toMatchObject({ ok: false, code: 'native_warming' });
-    expect(start.mock.calls.map((call) => call[0])).toEqual([`${APPLE_PREFIX}zh`, 'qwen3-asr-1.7b-q8']);
-    // The one started last is what `run` names; both can hear.
-    const up = engine({ models, run: { state: 'ready', model: `${APPLE_PREFIX}zh`, port: 0, tail: '' }, up: [`${APPLE_PREFIX}zh`, 'qwen3-asr-1.7b-q8'] });
-    start.mockClear();
-    expect(await nativeGap(pick, ['zh-CN', 'ru'], { status: async () => up, start })).toBeNull();
-    expect(start).not.toHaveBeenCalled();
+    expect(await nativeGap(pick, ['zh-CN', 'ru'], { status: async () => engine({ models }) })).toBeNull();
   });
 
-  it('brings the engine up when it is down, and says it is warming until it is ready', async () => {
-    const down = asked(engine());
-    expect(await down.gap).toMatchObject({ ok: false, code: 'native_warming' });
-    expect(down.start).toHaveBeenCalledWith('r2t2-q8');
-    // Already coming up: asked nothing more.
-    const warming = asked(engine({ run: { state: 'warming', model: 'r2t2-q8', port: 4100, tail: '' } }));
-    expect(await warming.gap).toMatchObject({ ok: false, code: 'native_warming' });
-    expect(warming.start).not.toHaveBeenCalled();
-  });
-
-  it('does not try a failed start again by itself', async () => {
+  it('says a start that failed, and does not try it again by itself', async () => {
     const failed = asked(engine({ run: { state: 'failed', model: 'r2t2-q8', port: 0, tail: 'loading\nno vulkan device' } }));
     expect(await failed.gap).toMatchObject({ ok: false, code: 'native_failed', reason: expect.stringContaining('no vulkan device') });
-    expect(failed.start).not.toHaveBeenCalled();
+  });
+});
+
+describe('the engines a run brings up', () => {
+  it('are started when the run begins, and waited for', async () => {
+    let up: (status: NativeEngineStatus) => void = () => {};
+    const start = vi.fn(() => new Promise<NativeEngineStatus>((resolve) => { up = resolve; }));
+    let done = false;
+    const coming = nativeUp('r2t2-q8', ['ja'], { start }).then(() => { done = true; });
+    await Promise.resolve();
+    expect(start.mock.calls).toEqual([['r2t2-q8']]);
+    expect(done).toBe(false);
+    up(READY);
+    await coming;
+    expect(done).toBe(true);
+  });
+
+  it('are each started once: the system\u2019s recognition, and the engine the app downloads', async () => {
+    const models = { [`${APPLE_PREFIX}zh`]: { state: 'downloaded' as const, received: 0, total: 0 }, [`${APPLE_PREFIX}ja`]: { state: 'downloaded' as const, received: 0, total: 0 }, 'qwen3-asr-1.7b-q8': { state: 'downloaded' as const, received: 1, total: 1 } };
+    const up = engine({ models, run: { state: 'ready', model: `${APPLE_PREFIX}zh`, port: 0, tail: '' }, up: [`${APPLE_PREFIX}zh`, 'qwen3-asr-1.7b-q8'] });
+    const start = vi.fn(async (_id: string) => up);
+    await nativeUp({ model: `${APPLE_PREFIX}zh`, byLanguage: { ru: 'qwen3-asr-1.7b-q8' } }, ['zh-CN', 'ja', 'ru'], { start });
+    expect(start.mock.calls.map((call) => call[0])).toEqual([`${APPLE_PREFIX}zh`, 'qwen3-asr-1.7b-q8']);
+  });
+
+  it('end the start in words of their own when one does not come up', async () => {
+    const failed = engine({ run: { state: 'failed', model: 'r2t2-q8', port: 0, tail: 'loading\nno vulkan device' } });
+    const refused = await nativeUp('r2t2-q8', ['ja'], { start: async () => failed }).catch((error: unknown) => error);
+    expect(refused).toBeInstanceOf(AdapterStartError);
+    expect(refused).toMatchObject({ code: 'native_failed', message: expect.stringContaining('no vulkan device') });
+    const translator = await translatorUp('index-translate-2b', { start: async () => engine({ models: {}, run: { state: 'failed', model: 'index-translate-2b', port: 0, tail: 'out of memory' } }) }).catch((error: unknown) => error);
+    expect(translator).toMatchObject({ code: 'native_translator_failed' });
+  });
+});
+
+describe('the engines at rest', () => {
+  const fake = () => {
+    let fire: (() => void) | null = null;
+    const stop = { asr: vi.fn(), translation: vi.fn(), coach: vi.fn() };
+    const set = vi.fn((run: () => void, ms: number) => { fire = run; return ms as unknown as ReturnType<typeof setTimeout>; });
+    const clear = vi.fn(() => { fire = null; });
+    return { stop, set, clear, deps: { stop, setTimer: set, clearTimer: clear }, pass: () => { const run = fire; fire = null; run?.(); }, waiting: () => fire !== null };
+  };
+
+  it('give their memory back a minute after the last run ends, and not before', () => {
+    const t = fake();
+    const done = holdNativeForRun(t.deps);
+    expect(t.waiting()).toBe(false);
+    done();
+    expect(t.set).toHaveBeenLastCalledWith(expect.any(Function), 60_000);
+    expect(t.stop.asr).not.toHaveBeenCalled();
+    t.pass();
+    expect(t.stop.asr).toHaveBeenCalledTimes(1);
+    expect(t.stop.translation).toHaveBeenCalledTimes(1);
+    expect(t.stop.coach).toHaveBeenCalledTimes(1);
+    // Let go once: a second call of the same release is nothing.
+    done();
+    expect(t.waiting()).toBe(false);
+  });
+
+  it('stay up when a run begins again within the minute, and while either of two legs is open', () => {
+    const t = fake();
+    const first = holdNativeForRun(t.deps);
+    first();
+    const again = holdNativeForRun(t.deps);
+    t.pass();
+    expect(t.stop.asr).not.toHaveBeenCalled();
+    const other = holdNativeForRun(t.deps);
+    again();
+    t.pass();
+    expect(t.stop.asr).not.toHaveBeenCalled();
+    other();
+    t.pass();
+    expect(t.stop.asr).toHaveBeenCalledTimes(1);
+  });
+
+  it('are not taken from a device that is listening or translating through one', () => {
+    const t = fake();
+    const listening = holdNative('asr', t.deps);
+    restNative(t.deps);
+    t.pass();
+    expect(t.stop.asr).not.toHaveBeenCalled();
+    expect(t.stop.translation).toHaveBeenCalledTimes(1);
+    expect(t.stop.coach).toHaveBeenCalledTimes(1);
+    listening();
+    t.pass();
+    expect(t.stop.asr).toHaveBeenCalledTimes(1);
+  });
+
+  it('are not stopped by the check while a run is open, whatever the settings say meanwhile', () => {
+    const t = fake();
+    const stop = vi.fn();
+    useNativeEngineStore.setState({ status: READY, asked: true });
+    const done = holdNativeForRun(t.deps);
+    nativeIdle({ stop });
+    expect(stop).not.toHaveBeenCalled();
+    done();
+    nativeIdle({ stop });
+    expect(stop).toHaveBeenCalledTimes(1);
+    useNativeEngineStore.setState({ status: NO_NATIVE_ENGINE });
+  });
+
+  it('stop only what is up, by the stores, when nothing else is said', () => {
+    vi.useFakeTimers();
+    try {
+      const stops = [useNativeEngineStore, useNativeTranslatorStore, useNativeCoachStore].map((store) => vi.spyOn(store.getState(), 'stop').mockResolvedValue(undefined));
+      useNativeEngineStore.setState({ status: READY });
+      useNativeTranslatorStore.setState({ status: engine({ models: {} }) });
+      useNativeCoachStore.setState({ status: engine({ models: {} }) });
+      restNative();
+      vi.advanceTimersByTime(59_000);
+      expect(stops[0]).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(1_000);
+      expect(stops.map((stop) => stop.mock.calls.length)).toEqual([1, 0, 0]);
+      for (const stop of stops) stop.mockRestore();
+      useNativeEngineStore.setState({ status: NO_NATIVE_ENGINE });
+      useNativeTranslatorStore.setState({ status: NO_NATIVE_ENGINE });
+      useNativeCoachStore.setState({ status: NO_NATIVE_ENGINE });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
+describe('a run\u2019s first step', () => {
+  const ups = (): NativeUps & { [K in keyof NativeUps]: ReturnType<typeof vi.fn> } => ({ hears: vi.fn(async () => undefined), translates: vi.fn(async () => undefined), coaches: vi.fn(async () => undefined), rest: vi.fn() }) as never;
+  const BOTH = { pair: PAIR, legs: ['speaker', 'participant'] as const };
+  const ALL: Partial<LocalAISettings> = { ...NATIVE, translateAt: 'device', translateHere: 'native', translateNativeModel: 'index-translate-2b', coach: true, coachAt: 'device', coachHere: 'native', coachNativeModel: 'gemma-4-e2b' };
+
+  it('brings up the engines the run needs, side by side, and waits for all of them', async () => {
+    const u = ups();
+    let heard: () => void = () => {};
+    u.hears.mockImplementation(() => new Promise<void>((resolve) => { heard = resolve; }));
+    let done = false;
+    const preparing = prepareLocalAI(BOTH, settings(ALL), u).then(() => { done = true; });
+    await Promise.resolve();
+    await Promise.resolve();
+    // A coached speaker is heard in the language they practise; the other side in its own.
+    expect(u.hears).toHaveBeenCalledWith({ model: 'r2t2-q8', byLanguage: {} }, ['zh-CN', 'zh-CN']);
+    expect(u.translates).toHaveBeenCalledWith('index-translate-2b');
+    expect(u.coaches).toHaveBeenCalledWith('gemma-4-e2b');
+    expect(done).toBe(false);
+    heard();
+    await preparing;
+    expect(done).toBe(true);
+    // Let go again a minute on if the run never opens: a run that opens holds them.
+    expect(u.rest).toHaveBeenCalledTimes(1);
+  });
+
+  it('brings up only what the stages name, and nothing where none is the engine\u2019s', async () => {
+    const hearing = ups();
+    await prepareLocalAI(BOTH, settings(NATIVE), hearing);
+    expect(hearing.hears).toHaveBeenCalledWith({ model: 'r2t2-q8', byLanguage: {} }, ['ja', 'zh-CN']);
+    expect(hearing.translates).not.toHaveBeenCalled();
+    expect(hearing.coaches).not.toHaveBeenCalled();
+    const none = ups();
+    await prepareLocalAI(BOTH, settings({ asrVia: 'api' }), none);
+    expect(none.hears).not.toHaveBeenCalled();
+    expect(none.rest).not.toHaveBeenCalled();
+    // The feedback is the speaker's: a run of the other side alone does not load it.
+    const other = ups();
+    await prepareLocalAI({ pair: PAIR, legs: ['participant'] }, settings(ALL), other);
+    expect(other.coaches).not.toHaveBeenCalled();
+    expect(other.hears).toHaveBeenCalledWith({ model: 'r2t2-q8', byLanguage: {} }, ['zh-CN']);
+  });
+
+  it('ends the start with the engine\u2019s own notice when one does not come up, and still lets the others go', async () => {
+    const u = ups();
+    u.translates.mockRejectedValue(new AdapterStartError('The engine could not start: out of memory', 'native_translator_failed'));
+    await expect(prepareLocalAI(BOTH, settings(ALL), u)).rejects.toMatchObject({ code: 'native_translator_failed' });
+    expect(u.rest).toHaveBeenCalledTimes(1);
+  });
+
+  it('is the provider\u2019s, before anything is built', () => {
+    expect(localaiProvider.session?.prepare).toBeTypeOf('function');
+  });
+
+  it('is done once, ahead of time, for a start in the background: with what the check next says the settings need', async () => {
+    const u = ups();
+    primeNativeOnce(u);
+    // Nothing is known yet of what to load, or it is what the check last saw: either way the next check settles it.
+    await checkLocalAIWithNative(NONE, settings(NATIVE), CTX, async () => ({ ok: true as const }), { gap: async () => null, idle: () => undefined });
+    await Promise.resolve();
+    await Promise.resolve();
+    primeNativeOnce(u);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(u.hears).toHaveBeenCalledWith({ model: 'r2t2-q8', byLanguage: {} }, ['ja']);
+    expect(u.rest).toHaveBeenCalled();
   });
 });
 
@@ -400,13 +568,13 @@ describe('the provider\'s check, with the engine', () => {
   });
 
   it('refuses in the engine\'s words, with what the servers listed', async () => {
-    const refusal = { ok: false as const, reason: 'The native recognition engine is warming up.', code: 'native_warming' };
+    const refusal = { ok: false as const, reason: 'The native recognition engine could not start: no vulkan device', code: 'native_failed' };
     const result = await checkLocalAIWithNative(NONE, settings(NATIVE), CTX, async () => OK, { gap: async () => refusal, idle: () => undefined });
     expect(result).toEqual({ ...refusal, models: OK.models });
   });
 
-  it('refuses in the servers\' words first: the engine is still asked, so that it warms meanwhile', async () => {
-    const gap = vi.fn(async () => ({ ok: false as const, reason: 'warming', code: 'native_warming' }));
+  it('refuses in the servers\' words first', async () => {
+    const gap = vi.fn(async () => ({ ok: false as const, reason: 'not downloaded', code: 'native_missing' }));
     const refused: CheckResult = { ok: false, reason: 'The server refused the key.', code: 'api_key_refused' };
     expect(await checkLocalAIWithNative(NONE, settings(NATIVE), CTX, async () => refused, { gap, idle: () => undefined })).toBe(refused);
     expect(gap).toHaveBeenCalledTimes(1);

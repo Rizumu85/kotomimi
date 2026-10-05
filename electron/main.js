@@ -1357,7 +1357,8 @@ app.on('will-quit', () => { void localServer?.stop(); });
 // Fork: starting with the computer, in the background (electron/autostart.js). Such a start shows no window — a
 // second launch shows the one it made — and leaves the engine's loading for a quiet minute, or for the window's showing.
 const autostart = createAutostart({ app, exists: (file) => require('fs').existsSync(file) });
-ipcMain.handle('autostart:get', () => autostart.get());
+// `startedHidden`: this start was the computer's own, so the page loads the engines once ahead of time (`primeNativeOnce`).
+ipcMain.handle('autostart:get', () => ({ ...autostart.get(), startedHidden: autostart.startedHidden }));
 ipcMain.handle('autostart:set', (event, args) => autostart.set(args?.enabled === true));
 
 let nativeEngine = null;

@@ -17,6 +17,8 @@ import { SettingsInitializer } from '../components/SettingsInitializer/SettingsI
 import AuthOverlay from '../components/Auth/AuthOverlay';
 import { AppSessionRoot } from '../app/AppSessionRoot';
 import { loadSessionStores } from '../app/loadStores';
+import { startedInBackground } from '../components/Autostart/AutostartSection';
+import { primeNativeOnce } from '../providers/openai/localai';
 import { watchWindowShape } from '../lib/windowShape';
 
 export function Home() {
@@ -53,6 +55,9 @@ export function Home() {
     void useNativeEngineStore.getState().hydrate();
     void useNativeTranslatorStore.getState().hydrate();
     void useNativeCoachStore.getState().hydrate();
+    // Fork: the engines are loaded when a session begins, and let go after it. A start in the background at sign-in
+    // loads them once ahead of time, so that the long first load after the computer starts is not waited for.
+    void startedInBackground().then((hidden) => { if (hidden) primeNativeOnce(); });
     // Fork: the languages pinned to the top of the language menus.
     void useLanguagePinStore.getState().hydrate();
     // Fork: on Windows the page rounds the window's corners itself, and squares them while it fills the screen.

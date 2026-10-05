@@ -317,10 +317,11 @@ const PROVIDER = {
   ],
   tag_native: ['Native engine', '原生引擎', '原生引擎'],
   tagHint_native: [
-    "Runs on the graphics card in an engine the app downloads with it: quicker than the app's own way. The first start after the computer boots takes about half a minute.",
-    '由应用一并下载的独立引擎用显卡运行，比应用自带的方式快。开机后第一次启动约半分钟。',
-    '由應用程式一併下載的獨立引擎用顯示卡執行，比應用程式內建的方式快。開機後第一次啟動約半分鐘。',
+    "Runs on the graphics card in an engine the app downloads with it: quicker than the app's own way. Loaded when a session starts (about half a minute the first time after the computer boots) and freed a minute after it ends.",
+    "由应用一并下载的独立引擎用显卡运行，比应用自带的方式快。开始会话时加载（开机后第一次约半分钟），结束一分钟后释放显存。",
+    "由應用程式一併下載的獨立引擎用顯示卡執行，比應用程式內建的方式快。開始工作階段時載入（開機後第一次約半分鐘），結束一分鐘後釋放顯示記憶體。",
   ],
+  nativeLoading: ['Loading the models… About half a minute the first time after the computer boots.', '正在加载模型…开机后第一次大约要半分钟。', '正在載入模型…開機後第一次大約要半分鐘。'],
   tag_system: ['Built into macOS', '系统自带', '系統內建'],
   tagHint_system: [
     'The speech recognition of macOS itself: no video memory taken, nothing to warm up. The system downloads each language.',

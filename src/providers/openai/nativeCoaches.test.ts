@@ -4,7 +4,7 @@ import type { SessionContext } from '../../lib/contract/adapter';
 import type { CheckResult } from '../../lib/provider/types';
 import type { NativeEngineStatus } from '../../lib/native/nativeEngine';
 import { buildLocalAI, checkLocalAIWithNative, LOCALAI_DEFAULTS, localaiProvider, migrateLocalAISettings, type LocalAISettings } from './localai';
-import { coachGap, coachIdle } from './localaiNative';
+import { coachGap, coachIdle, coachUp } from './localaiNative';
 import { deviceChoices } from './localaiDevice';
 import { NATIVE_COACHES, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
 import { SHARED } from './testing';
@@ -60,29 +60,31 @@ describe('the native feedback engine as what gives the feedback on this computer
 });
 
 describe('whether a run whose feedback the engine gives can start', () => {
-  const asked = (status: NativeEngineStatus) => { const start = vi.fn(); return { start, gap: coachGap('gemma-4-e2b', { status: async () => status, start }) }; };
+  const asked = (status: NativeEngineStatus) => ({ gap: coachGap('gemma-4-e2b', { status: async () => status }) });
 
-  it('can once its model is downloaded and the engine is up', async () => {
+  it('can once its model is downloaded: the engine is brought up when the run begins, not by the check', async () => {
     expect(await asked(READY).gap).toBeNull();
+    expect(await asked(engine()).gap).toBeNull();
+    expect(await asked(engine({ run: { state: 'warming', model: 'gemma-4-e2b', port: 4300, tail: '' } })).gap).toBeNull();
   });
 
   it('cannot where the engine is not published, or its model is not downloaded, in words of its own', async () => {
     expect(await asked(engine({ supported: false, engine: 'unsupported', models: {} })).gap).toMatchObject({ ok: false, code: 'native_coach_unsupported' });
     const absent = asked(engine({ models: { 'gemma-4-e2b': { state: 'absent', received: 0, total: 3106738272 } } }));
     expect(await absent.gap).toMatchObject({ ok: false, code: 'native_coach_missing', params: { name: 'Gemma 4 E2B' } });
-    expect(absent.start).not.toHaveBeenCalled();
   });
 
-  it('brings the engine up when it is down, waits while it comes, and does not try a failed start again by itself', async () => {
-    const down = asked(engine());
-    expect(await down.gap).toMatchObject({ ok: false, code: 'native_coach_warming' });
-    expect(down.start).toHaveBeenCalledWith('gemma-4-e2b');
-    const coming = asked(engine({ run: { state: 'warming', model: 'gemma-4-e2b', port: 4300, tail: '' } }));
-    expect(await coming.gap).toMatchObject({ ok: false, code: 'native_coach_warming' });
-    expect(coming.start).not.toHaveBeenCalled();
+  it('says a start that failed, and does not try it again by itself', async () => {
     const failed = asked(engine({ run: { state: 'failed', model: 'gemma-4-e2b', port: 0, tail: 'loading\nno vulkan device' } }));
     expect(await failed.gap).toMatchObject({ ok: false, code: 'native_coach_failed', reason: expect.stringContaining('no vulkan device') });
-    expect(failed.start).not.toHaveBeenCalled();
+  });
+
+  it('is brought up for a run, and waited for; a start that fails ends the run\u2019s start in its own words', async () => {
+    const start = vi.fn(async () => READY);
+    await coachUp('gemma-4-e2b', { start });
+    expect(start).toHaveBeenCalledWith('gemma-4-e2b');
+    const failed = engine({ run: { state: 'failed', model: 'gemma-4-e2b', port: 0, tail: 'no vulkan device' } });
+    await expect(coachUp('gemma-4-e2b', { start: async () => failed })).rejects.toMatchObject({ code: 'native_coach_failed' });
   });
 
   it('lets the engine rest when it is not this run\u2019s', () => {

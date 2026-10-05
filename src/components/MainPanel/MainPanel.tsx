@@ -4,6 +4,7 @@
  * controls, the toolbar with the export menu, the footers over the run's
  * state.
  */
+import { useNativeEnginesComing } from '../../stores/nativeEngineStore';
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Captions, Loader, MessageSquare } from 'lucide-react';
@@ -143,6 +144,7 @@ export default function MainPanel() {
   const session = getAppSession();
   const { runner } = session;
   const run = useRunState();
+  const enginesComing = useNativeEnginesComing();
   const viewState = useReadable(session.view);
   const { lit, replaying } = useReadable(session.karaoke);
   const subtitle = useReadable(session.subtitle);
@@ -213,6 +215,8 @@ export default function MainPanel() {
   const startBlockMessage = run.phase === 'idle' && !subtitle.canStart && idle.kind === 'unready'
     ? noticeText(t, { code: idle.code, params: idle.params, message: idle.message })
     : undefined;
+  // Fork: this computer's engines are coming up for the run that is starting (`prepareLocalAI`).
+  const loadingEngines = run.phase === 'starting' && enginesComing;
   const missingDevice = idle.kind === 'unready' && idle.code === NO_MICROPHONE ? 'speaker' as const : null;
 
   const speakerLive = run.phase === 'running' && run.legs.speaker === 'live';
@@ -292,10 +296,10 @@ export default function MainPanel() {
             }}
             replayBlocked={blocked} noticeAction={noticeAction}
             compact={display.compactMode} fontSize={display.fontSize}
-            // Fork: while this computer's recognition engine is still coming up, the empty page says so — why Start is
-            // not there yet, and that it will be by itself — where the words are otherwise only the button's tooltip.
-            empty={startBlockMessage && idle.kind === 'unready' && idle.code === 'native_warming'
-              ? <><Loader size={32} className="kt-warming__spin" /><p className="kt-warming__words" role="status">{startBlockMessage}</p></>
+            // Fork: a session's first step loads this computer's engines, which nothing held in memory until now:
+            // the empty page says so while it lasts.
+            empty={loadingEngines
+              ? <><Loader size={32} className="kt-warming__spin" /><p className="kt-warming__words" role="status">{t('providers.localai.nativeLoading')}</p></>
               : <><MessageSquare size={32} /><p>{t('simplePanel.startToBegin', 'Click Start to begin real-time translation')}</p></>}
           />
         )}

@@ -611,7 +611,8 @@
       "nativeUnchosen": "还没有为{{source}}选择语音识别模型。请在「语音识别」卡片里选一个。",
       "nativeTwoModels": "{{name}} 和 {{other}} 不能同时运行，请给两种语言选同一个模型。",
       "tag_native": "原生引擎",
-      "tagHint_native": "由应用一并下载的独立引擎用显卡运行，比应用自带的方式快。开机后第一次启动约半分钟。",
+      "tagHint_native": "由应用一并下载的独立引擎用显卡运行，比应用自带的方式快。开始会话时加载（开机后第一次约半分钟），结束一分钟后释放显存。",
+      "nativeLoading": "正在加载模型…开机后第一次大约要半分钟。",
       "tag_system": "系统自带",
       "tagHint_system": "Mac 系统自带的语音识别：不占显存，不需要预热。每种语言的语言包由系统下载。",
       "nativeEntry": "{{name}}（原生引擎）",
@@ -1487,7 +1488,7 @@
     "autostart": {
       "title": "启动",
       "toggle": "登录 Windows 时在后台启动",
-      "note": "登录后 Kotomimi 在后台待命，并提前准备好识别引擎，打开就能用。"
+      "note": "登录后 Kotomimi 在后台待命，并预先加载一次模型，第一次开始会话就不用多等。"
     },
     "languageMenu": {
       "search": "输入筛选语言",

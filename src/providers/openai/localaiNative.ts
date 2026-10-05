@@ -9,6 +9,7 @@
  * models it has, which languages they hear, and — for a run that would use
  * it — whether it is ready, with the engine brought up when it is not.
  */
+import { AdapterStartError } from '../../lib/contract/adapter';
 import type { CheckResult } from '../../lib/provider/types';
 import type { NativeEngineStatus } from '../../lib/native/nativeEngine';
 import type { NativeLimits } from './nativeAsr';
@@ -163,18 +164,19 @@ export const nativeDownloaded = (status: NativeEngineStatus, id: string): boolea
 export const nativeWaits = (language: string, status: NativeEngineStatus = useNativeEngineStore.getState().status): boolean => NATIVE_MODELS.some((m) => nativeHears(m, language) && nativeDownloaded(status, m.id));
 
 export interface NativeCheckDeps {
-  /** The engine's state now, and the two things asked of it; the store's by default. */
+  /** The engine's state now, and its stop; the store's by default. */
   status?: () => Promise<NativeEngineStatus>;
-  start?: (id: string) => void;
   stop?: () => void;
 }
 
 /**
  * What a run that hears by the engine would be refused for, or null when it
- * would start — and the engine kept in step with the choice: brought up when
- * its model is chosen and downloaded, so that it is warm by the time Start is
- * pressed. A start that failed is not tried again by itself: the stage's card
- * says so and offers it.
+ * could start: its models chosen, downloaded, and not two of the one engine
+ * at once. The engine itself is not asked to be up: it is brought up when a
+ * run begins (`nativeUp`) and let go a minute after the last one ends
+ * (`restNative`), so that no model holds video memory while nothing listens.
+ * A start that failed is said, and not tried again by itself: the stage's
+ * card offers it.
  */
 export async function nativeGap(chosen: NativePick | string, heard: readonly string[], deps: NativeCheckDeps = {}): Promise<Extract<CheckResult, { ok: false }> | null> {
   const pick: NativePick = typeof chosen === 'string' ? { model: chosen } : chosen;
@@ -184,57 +186,132 @@ export async function nativeGap(chosen: NativePick | string, heard: readonly str
   // The model of each language heard: the one chosen for it, or the one in use.
   const unchosen = heard.find((language) => !nativePicked(pick, language));
   if (unchosen !== undefined) return { ok: false, reason: `No native recognition model is chosen for ${unchosen}.`, code: 'native_unchosen', params: { source: unchosen } };
-  const models = [...new Map(heard.map((language) => { const one = nativePicked(pick, language)!; return [one.id, one] as const; })).values()];
+  const models = hearing(pick, heard);
   const absent = models.find((one) => !nativeDownloaded(status, one.id));
   if (absent) return { ok: false, reason: `${absent.name} is not downloaded.`, code: 'native_missing', params: { name: absent.name } };
   // The engine the app downloads runs one model at a time: two of its models cannot hear in one run.
   const run = models.filter((one) => !isApple(one.id));
   if (run.length > 1) return { ok: false, reason: `${run[0].name} and ${run[1].name} cannot run at the same time.`, code: 'native_two_models', params: { name: run[0].name, other: run[1].name } };
-  const waiting = models.filter((one) => !nativeReady(status, one.id));
-  if (waiting.length === 0) return null;
-  const failed = waiting.find((one) => status.run.state === 'failed' && status.run.model === one.id);
+  const failed = models.find((one) => !nativeReady(status, one.id) && status.run.state === 'failed' && status.run.model === one.id);
   if (failed) return { ok: false, reason: `The native recognition engine could not start: ${status.run.tail.trim().split('\n').pop() ?? ''}`, code: 'native_failed' };
-  const start = deps.start ?? ((which: string) => { void store.start(which); });
-  // One start for the system's recognition, whatever its languages, and one for the engine the app downloads; none for one already coming up.
+  return null;
+}
+
+/** The models that hear a run's languages: each once. */
+const hearing = (pick: NativePick, heard: readonly string[]): NativeModel[] => [...new Map(heard.flatMap((language) => { const one = nativePicked(pick, language); return one ? [[one.id, one] as const] : []; })).values()];
+
+/** What brings an engine up, and says how it went: the store's by default. */
+export interface NativeUpDeps {
+  start?: (id: string) => Promise<NativeEngineStatus>;
+}
+
+/** An engine that did not come up, in the words its notice is looked up by. */
+const notUp = (code: string, status: NativeEngineStatus): AdapterStartError => new AdapterStartError(`The engine could not start: ${status.run.tail.trim().split('\n').pop() ?? ''}`, code);
+
+/**
+ * The engine brought up for a run that hears by it, and waited for: one start
+ * for the system's recognition, whatever its languages, and one for the
+ * engine the app downloads. Rejects with the notice a failed start is told
+ * by.
+ */
+export async function nativeUp(chosen: NativePick | string, heard: readonly string[], deps: NativeUpDeps = {}): Promise<void> {
+  const pick: NativePick = typeof chosen === 'string' ? { model: chosen } : chosen;
+  const start = deps.start ?? ((id: string) => useNativeEngineStore.getState().start(id));
   const asked = new Set<string>();
-  for (const one of waiting) {
+  await Promise.all(hearing(pick, heard).map(async (one) => {
     const engine = isApple(one.id) ? APPLE_PREFIX : one.id;
-    if (asked.has(engine)) continue;
+    if (asked.has(engine)) return;
     asked.add(engine);
-    const coming = status.run.model === one.id && (status.run.state === 'starting' || status.run.state === 'warming');
-    if (!coming) start(one.id);
-  }
-  return { ok: false, reason: 'The native recognition engine is warming up.', code: 'native_warming' };
+    const status = await start(one.id);
+    if (!nativeReady(status, one.id)) throw notUp('native_failed', status);
+  }));
+}
+
+/** The same, for the native translation engine. */
+export async function translatorUp(id: string, deps: NativeUpDeps = {}): Promise<void> {
+  const model = nativeTranslator(id);
+  const status = await (deps.start ?? ((which: string) => useNativeTranslatorStore.getState().start(which)))(model.id);
+  if (!nativeReady(status, model.id)) throw notUp('native_translator_failed', status);
+}
+
+/** And for the native feedback engine. */
+export async function coachUp(id: string, deps: NativeUpDeps = {}): Promise<void> {
+  const model = nativeCoach(id);
+  const status = await (deps.start ?? ((which: string) => useNativeCoachStore.getState().start(which)))(model.id);
+  if (!nativeReady(status, model.id)) throw notUp('native_coach_failed', status);
+}
+
+/** How long the engines stay up after the last run or device that used them: a stop and a start a moment later load nothing twice. */
+export const NATIVE_REST_MS = 60_000;
+
+/** The runs of this computer that are open now, and the devices it shares its models with that are listening or translating through an engine (`src/lib/lan/nativeShare.ts`). */
+const using = { runs: 0, asr: 0, translation: 0 };
+let resting: ReturnType<typeof setTimeout> | null = null;
+
+export interface NativeRestDeps {
+  delayMs?: number;
+  setTimer?: (run: () => void, ms: number) => ReturnType<typeof setTimeout>;
+  clearTimer?: (timer: ReturnType<typeof setTimeout>) => void;
+  /** The three engines' stops; the stores' by default. */
+  stop?: { asr(): void; translation(): void; coach(): void };
 }
 
 /**
- * Who else is using an engine now: a device this computer shares its models
- * with (`src/lib/lan/nativeShare.ts`). While anyone holds it, the app's own
- * check does not stop it for not being this computer's own choice.
+ * The engines nobody is using give their memory back, a while after the last
+ * use: none while a run of this computer is open, and not the one a device is
+ * listening or translating through. Asked again before the while is over, it
+ * begins the while again.
  */
-const held = { asr: 0, translation: 0 };
-export function holdNative(kind: 'asr' | 'translation'): () => void {
-  held[kind] += 1;
+export function restNative(deps: NativeRestDeps = {}): void {
+  const setTimer = deps.setTimer ?? ((run, ms) => setTimeout(run, ms));
+  const clearTimer = deps.clearTimer ?? ((timer) => clearTimeout(timer));
+  if (resting) clearTimer(resting);
+  resting = setTimer(() => {
+    resting = null;
+    if (using.runs > 0) return;
+    const stop = deps.stop ?? {
+      asr: () => { if (useNativeEngineStore.getState().status.run.state !== 'stopped') void useNativeEngineStore.getState().stop(); },
+      translation: () => { if (useNativeTranslatorStore.getState().status.run.state !== 'stopped') void useNativeTranslatorStore.getState().stop(); },
+      coach: () => { if (useNativeCoachStore.getState().status.run.state !== 'stopped') void useNativeCoachStore.getState().stop(); },
+    };
+    if (using.asr === 0) stop.asr();
+    if (using.translation === 0) stop.translation();
+    stop.coach();
+  }, deps.delayMs ?? NATIVE_REST_MS);
+}
+
+const release = (kind: keyof typeof using, deps?: NativeRestDeps): (() => void) => {
+  using[kind] += 1;
   let let_go = false;
   return () => {
     if (let_go) return;
     let_go = true;
-    held[kind] -= 1;
+    using[kind] -= 1;
+    restNative(deps);
   };
-}
+};
+
+/** A run of this computer is open: its engines stay up until what is returned is called, and a while longer. */
+export const holdNativeForRun = (deps?: NativeRestDeps): (() => void) => release('runs', deps);
+
+/**
+ * A device this computer shares its models with is using an engine
+ * (`src/lib/lan/nativeShare.ts`): while it does, the engine is not stopped —
+ * not for being unused by this computer, and not for not being its choice.
+ */
+export const holdNative = (kind: 'asr' | 'translation', deps?: NativeRestDeps): (() => void) => release(kind, deps);
 
 /** A run that does not hear by the engine has no use for it: it gives its memory back. */
 export function nativeIdle(deps: NativeCheckDeps = {}): void {
   const store = useNativeEngineStore.getState();
-  if (held.asr > 0) return;
+  if (using.asr > 0 || using.runs > 0) return;
   if (store.status.run.state === 'stopped') return;
   (deps.stop ?? (() => { void store.stop(); }))();
 }
 
 /**
  * The same, for a run that translates by the native translation engine: its
- * model downloaded for the pairs the legs translate, and the engine up —
- * brought up when it is not.
+ * model downloaded, and one that translates the pairs the legs translate.
  */
 export async function translatorGap(id: string, pairs: ReadonlyArray<{ source: string; target: string }>, deps: NativeCheckDeps = {}): Promise<Extract<CheckResult, { ok: false }> | null> {
   const store = useNativeTranslatorStore.getState();
@@ -244,23 +321,21 @@ export async function translatorGap(id: string, pairs: ReadonlyArray<{ source: s
   const untranslated = pairs.find((pair) => !nativeTranslates(model, pair.source, pair.target));
   if (untranslated) return { ok: false, reason: `${model.name} does not translate ${untranslated.source} → ${untranslated.target}.`, code: 'local_models_missing' };
   if (!nativeDownloaded(status, model.id)) return { ok: false, reason: `${model.name} is not downloaded.`, code: 'native_translator_missing', params: { name: model.name } };
-  if (nativeReady(status, model.id)) return null;
-  if (status.run.state === 'failed' && status.run.model === model.id) return { ok: false, reason: `The native translation engine could not start: ${status.run.tail.trim().split('\n').pop() ?? ''}`, code: 'native_translator_failed' };
-  if (status.run.state === 'stopped' || status.run.model !== model.id) (deps.start ?? ((which: string) => { void store.start(which); }))(model.id);
-  return { ok: false, reason: 'The native translation engine is starting.', code: 'native_translator_warming' };
+  if (!nativeReady(status, model.id) && status.run.state === 'failed' && status.run.model === model.id) return { ok: false, reason: `The native translation engine could not start: ${status.run.tail.trim().split('\n').pop() ?? ''}`, code: 'native_translator_failed' };
+  return null;
 }
 
 /** A run that does not translate by the engine has no use for it. */
 export function translatorIdle(deps: NativeCheckDeps = {}): void {
   const store = useNativeTranslatorStore.getState();
-  if (held.translation > 0) return;
+  if (using.translation > 0 || using.runs > 0) return;
   if (store.status.run.state === 'stopped') return;
   (deps.stop ?? (() => { void store.stop(); }))();
 }
 
 /**
  * The same, for a run whose grammar feedback is given by the native feedback
- * engine: its model downloaded, and the engine up — brought up when it is not.
+ * engine: its model downloaded.
  */
 export async function coachGap(id: string, deps: NativeCheckDeps = {}): Promise<Extract<CheckResult, { ok: false }> | null> {
   const store = useNativeCoachStore.getState();
@@ -268,15 +343,14 @@ export async function coachGap(id: string, deps: NativeCheckDeps = {}): Promise<
   const model = nativeCoach(id);
   if (!status.supported) return { ok: false, reason: 'The native feedback engine is not available for this system.', code: 'native_coach_unsupported' };
   if (!nativeDownloaded(status, model.id)) return { ok: false, reason: `${model.name} is not downloaded.`, code: 'native_coach_missing', params: { name: model.name } };
-  if (nativeReady(status, model.id)) return null;
-  if (status.run.state === 'failed' && status.run.model === model.id) return { ok: false, reason: `The native feedback engine could not start: ${status.run.tail.trim().split('\n').pop() ?? ''}`, code: 'native_coach_failed' };
-  if (status.run.state === 'stopped' || status.run.model !== model.id) (deps.start ?? ((which: string) => { void store.start(which); }))(model.id);
-  return { ok: false, reason: 'The native feedback engine is starting.', code: 'native_coach_warming' };
+  if (!nativeReady(status, model.id) && status.run.state === 'failed' && status.run.model === model.id) return { ok: false, reason: `The native feedback engine could not start: ${status.run.tail.trim().split('\n').pop() ?? ''}`, code: 'native_coach_failed' };
+  return null;
 }
 
 /** A run with no feedback by the engine has no use for it. */
 export function coachIdle(deps: NativeCheckDeps = {}): void {
   const store = useNativeCoachStore.getState();
+  if (using.runs > 0) return;
   if (store.status.run.state === 'stopped') return;
   (deps.stop ?? (() => { void store.stop(); }))();
 }

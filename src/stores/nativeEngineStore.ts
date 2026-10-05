@@ -58,6 +58,16 @@ function createNativeEngineStore(engine: NativeEngineName) {
   );
 }
 
+const coming = (state: NativeEngineStoreState): boolean => state.status.run.state === 'starting' || state.status.run.state === 'warming';
+
+/** Whether any of this computer's engines is being brought up now. */
+export function useNativeEnginesComing(): boolean {
+  const hearing = useNativeEngineStore(coming);
+  const translating = useNativeTranslatorStore(coming);
+  const coaching = useNativeCoachStore(coming);
+  return hearing || translating || coaching;
+}
+
 /** The engine that hears: audio.cpp. */
 export const useNativeEngineStore = createNativeEngineStore('native-engine');
 /** The engine that translates: llama.cpp's server. */

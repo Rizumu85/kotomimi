@@ -64,7 +64,7 @@ import { SERVER_SILENT, isKotomimiServer, kindOf, KOTOMIMI_HOST, modelsFor, serv
 import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
 import { ASR_HERES, coachIs, coachesNatively, cutsSentencesHere, detectsOther, heardBy, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
-import { NATIVE_DEFAULT_MODEL, coachBaseUrl, coachGap, coachIdle, nativeGap, nativeWaits, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
+import { NATIVE_DEFAULT_MODEL, coachBaseUrl, coachGap, coachIdle, coachUp, holdNativeForRun, nativeGap, nativeUp, restNative, translatorUp, nativeWaits, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
 import { NATIVE_DEFAULT_TRANSLATOR, nativeTranslates, nativeTranslator, translatorRequest } from './nativeTranslators';
 import { setLocalPipeline } from '../../lib/lan/localServer';
@@ -711,14 +711,74 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
 
 export const checkLocalAI = createLocalAICheck();
 
+/** What a run would start of the native engines: the models that hear its legs, its translator, its feedback model. */
+interface NativeNeeds {
+  hears?: { pick: { model: string; byLanguage: Record<string, string> }; heard: string[] };
+  translates?: string;
+  coaches?: string;
+}
+
+function nativeNeeds(s: LocalAISettings, pair: { source: string; target: string }, legs: readonly ('speaker' | 'participant')[]): NativeNeeds {
+  return {
+    ...(hearsNatively(s) ? { hears: { pick: { model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage }, heard: legs.map((leg) => heardBy(s, pair, leg)) } } : {}),
+    ...(translatesNatively(s) ? { translates: s.translateNativeModel } : {}),
+    ...(coachesNatively(s) && legs.includes('speaker') ? { coaches: s.coachNativeModel } : {}),
+  };
+}
+
+export interface NativeUps { hears: typeof nativeUp; translates: typeof translatorUp; coaches: typeof coachUp; rest: typeof restNative }
+const UPS: NativeUps = { hears: nativeUp, translates: translatorUp, coaches: coachUp, rest: restNative };
+
+/** The engines a run needs, brought up side by side and waited for. Rejects with the first that did not come up. */
+async function bringUp(needs: NativeNeeds, ups: NativeUps): Promise<boolean> {
+  const starts = [
+    ...(needs.hears ? [ups.hears(needs.hears.pick, needs.hears.heard)] : []),
+    ...(needs.translates ? [ups.translates(needs.translates)] : []),
+    ...(needs.coaches ? [ups.coaches(needs.coaches)] : []),
+  ];
+  if (starts.length === 0) return false;
+  try {
+    await Promise.all(starts);
+  } finally {
+    // Whatever came up is let go again if the run never opens: a run that does open holds it (`holdNativeForRun`).
+    ups.rest();
+  }
+  return true;
+}
+
 /**
- * The check, with the native engine asked last: a run that hears by it needs
- * its model downloaded and the engine up — and is what brings it up, so that
- * it is warm before Start is pressed. What the servers listed goes with its
- * refusal, as with any other.
+ * A run's first step: the native engines it needs are loaded, and waited
+ * for. Until now nothing held their models in memory; the translation and
+ * the feedback are then built with the addresses the engines answer at.
+ */
+export async function prepareLocalAI(shape: { pair: { source: string; target: string }; legs: readonly ('speaker' | 'participant')[] }, stored: LocalAISettings, ups: NativeUps = UPS): Promise<Record<string, never>> {
+  await bringUp(nativeNeeds(settled(stored), shape.pair, shape.legs), ups);
+  return {};
+}
+
+/**
+ * A start in the background, at sign-in (`electron/autostart.js`): what takes
+ * long the first time after the computer starts is done once, before anyone
+ * waits for it — the engines the settings name are loaded, and let go again a
+ * minute later. The check says what they are, whenever it first runs.
+ */
+let primeWanted = false;
+let lastNeeds: NativeNeeds | null = null;
+const primeNow = (needs: NativeNeeds, ups: NativeUps = UPS) => { void bringUp(needs, ups).catch(() => undefined); };
+export function primeNativeOnce(ups: NativeUps = UPS): void {
+  if (lastNeeds) primeNow(lastNeeds, ups);
+  else primeWanted = true;
+}
+
+/**
+ * The check, with the native engines asked last: a run that hears, translates
+ * or gives feedback by one needs its model downloaded. It does not need the
+ * engine up, and does not bring it up: that is the run's own first step
+ * (`prepareLocalAI`), so that no model holds video memory while nothing
+ * listens. What the servers listed goes with its refusal, as with any other.
  */
 export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISettings, ctx: CheckContext, check: typeof checkLocalAI = checkLocalAI, native: { gap: typeof nativeGap; idle: typeof nativeIdle; translatorGap?: typeof translatorGap; translatorIdle?: typeof translatorIdle; coachGap?: typeof coachGap; coachIdle?: typeof coachIdle; waits?: typeof nativeWaits } = { gap: nativeGap, idle: nativeIdle }): Promise<CheckResult> {
-  // Asked first, so that an engine starts warming while the servers are asked.
+  // Asked first, beside the servers.
   let hears: ReturnType<typeof nativeGap> | null = null;
   if (hearsNatively(s)) {
     // What each leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
@@ -741,6 +801,12 @@ export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISe
     coaches.catch(() => undefined);
   } else {
     (native.coachIdle ?? coachIdle)();
+  }
+  // What a run would load, kept for a start in the background to load once (`primeNativeOnce`).
+  lastNeeds = nativeNeeds(s, ctx.pair, ctx.legs);
+  if (primeWanted) {
+    primeWanted = false;
+    primeNow(lastNeeds);
   }
   const servers = await check(k, settled(s), ctx);
   // No model of the app's own hears the language, and one of the engine's is downloaded: it is not chosen, which is
@@ -1007,7 +1073,25 @@ export const localaiProvider: Provider<LocalAISettings, LocalAICredentials, Loca
 
   build: (context, s, shared) => buildLocalAI(context, settled(s), shared),
   describe: describeLocalAI,
-  start: adapter.start,
+  // A run holds the native engines up for as long as a leg of it is open, and a minute more.
+  start: async (request, events) => {
+    const done = holdNativeForRun();
+    try {
+      const session = await adapter.start(request, events);
+      const stop = session.stop.bind(session);
+      session.stop = async () => {
+        try {
+          await stop();
+        } finally {
+          done();
+        }
+      };
+      return session;
+    } catch (error) {
+      done();
+      throw error;
+    }
+  },
 
-  session: { admit: admitLocalAI },
+  session: { admit: admitLocalAI, prepare: (shape, s) => prepareLocalAI(shape, s) },
 };

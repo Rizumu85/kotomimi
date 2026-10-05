@@ -121,15 +121,11 @@ describe('the native translation engine as what translates on this computer', ()
 });
 
 describe('whether a run that translates by the engine can start', () => {
-  const asked = (status: NativeEngineStatus, id = 'index-translate-2b', pairs = [PAIR, { source: 'zh-CN', target: 'ja' }]) => {
-    const start = vi.fn();
-    return { start, gap: translatorGap(id, pairs, { status: async () => status, start }) };
-  };
+  const asked = (status: NativeEngineStatus, id = 'index-translate-2b', pairs = [PAIR, { source: 'zh-CN', target: 'ja' }]) => ({ gap: translatorGap(id, pairs, { status: async () => status }) });
 
-  it('can, once the engine is up with its model', async () => {
-    const { gap, start } = asked(READY);
-    expect(await gap).toBeNull();
-    expect(start).not.toHaveBeenCalled();
+  it('can with its model downloaded: the engine is brought up when the run begins, not by the check', async () => {
+    expect(await asked(READY).gap).toBeNull();
+    expect(await asked(engine()).gap).toBeNull();
   });
 
   it('cannot while the model is not downloaded, or where the system has no engine', async () => {
@@ -142,13 +138,9 @@ describe('whether a run that translates by the engine can start', () => {
     expect(await asked(downloaded, 'hy-mt2-1.8b', [{ source: 'ja', target: 'sw' }]).gap).toMatchObject({ ok: false, code: 'local_models_missing' });
   });
 
-  it('brings the engine up when it is down, and says it is starting until it is ready', async () => {
-    const down = asked(engine());
-    expect(await down.gap).toMatchObject({ ok: false, code: 'native_translator_warming' });
-    expect(down.start).toHaveBeenCalledWith('index-translate-2b');
+  it('says a start that failed, and does not try it again by itself', async () => {
     const failed = asked(engine({ run: { state: 'failed', model: 'index-translate-2b', port: 0, tail: 'no vulkan device' } }));
     expect(await failed.gap).toMatchObject({ ok: false, code: 'native_translator_failed', reason: expect.stringContaining('no vulkan device') });
-    expect(failed.start).not.toHaveBeenCalled();
   });
 });
 
@@ -173,7 +165,7 @@ describe('the provider\'s check, with the translation engine', () => {
   });
 
   it('refuses in the engine\'s words', async () => {
-    const refusal = { ok: false as const, reason: 'The native translation engine is starting.', code: 'native_translator_warming' };
+    const refusal = { ok: false as const, reason: 'Index-Translate 2B is not downloaded.', code: 'native_translator_missing' };
     const native = deps((async () => refusal) as unknown as typeof translatorGap);
     expect(await checkLocalAIWithNative(NONE, settings(NATIVE), CTX, async () => OK, native)).toEqual(refusal);
   });
