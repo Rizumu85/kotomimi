@@ -106,6 +106,14 @@ jobs:
           src/components/Settings/ProviderArea.test.tsx
           src/components/LanSharing
           src/components/providers
+          src/components/Banner
+          src/components/CaptionShare
+          src/lib/share
+          src/viewer
+          electron/caption-share-core.test.js
+          electron/caption-share-net.test.js
+          electron/caption-share-server.test.js
+          electron/caption-share.test.js
           electron/ipc-channels.test.js
           electron/entry-map.consistency.test.js
           electron/update-payload.test.js
