@@ -525,3 +525,36 @@ describe('the stage cards: this computer\'s LocalAI', () => {
     expect(hear.queryByRole('button', { name: 'providers.localai.hereStart' })).toBeNull();
   });
 });
+
+describe('the other device’s recognizers in the menu', () => {
+  /** A Mac sharing: the system’s recognition for three languages, and a downloaded recognizer that hears many. */
+  const MAC_MODELS = [
+    { id: 'kotomimi', kind: 'pipeline', host: 'kotomimi' },
+    { id: 'apple-speech:ja', kind: 'asr', host: 'kotomimi', languages: ['ja'] },
+    { id: 'apple-speech:zh', kind: 'asr', host: 'kotomimi', languages: ['zh'] },
+    { id: 'apple-speech:ko', kind: 'asr', host: 'kotomimi', languages: ['ko'] },
+    { id: 'qwen3-asr-1.7b-q8', kind: 'asr', host: 'kotomimi', languages: ['ja', 'zh', 'en'] },
+    { id: 'kotoba-whisper', kind: 'asr', host: 'kotomimi', languages: ['ja'] },
+  ] as never;
+  const menu = (card: ReturnType<typeof draw>['card']) => card(HEAR).getByRole('combobox', { name: 'providers.localai.model' }) as HTMLSelectElement;
+
+  it('shows a recognizer that is one to a language once, and nothing that hears no language of this run', () => {
+    // Chinese is heard (the pair of these tests): Korean’s recognition and the Japanese-only model are not offered.
+    const { card } = draw({ settings: { asrVia: 'server' }, values: { endpoint: '192.168.1.10:8790' }, models: MAC_MODELS });
+    expect(options(menu(card))).toEqual(['', 'apple-speech', 'qwen3-asr-1.7b-q8']);
+    expect([...menu(card).options].map((o) => o.textContent)).toEqual(['providers.localai.deviceDefault', 'Apple Speech', expect.any(String)]);
+  });
+
+  it('shows a choice saved as one member of the family as the family, and stores the family', () => {
+    const { card, update } = draw({ settings: { asrVia: 'server', asrModel: 'apple-speech:ja' }, values: { endpoint: '192.168.1.10:8790' }, models: MAC_MODELS });
+    expect(menu(card).value).toBe('apple-speech');
+    fireEvent.change(menu(card), { target: { value: 'qwen3-asr-1.7b-q8' } });
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ asrModel: 'qwen3-asr-1.7b-q8' }));
+  });
+
+  it('says of a saved model the device no longer has that it is gone', () => {
+    const { card } = draw({ settings: { asrVia: 'server', asrModel: 'apple-speech-transcriber' }, values: { endpoint: '192.168.1.10:8790' }, models: MAC_MODELS });
+    expect(menu(card).value).toBe('apple-speech-transcriber');
+    expect(menu(card).selectedOptions[0].textContent).toBe('providers.localai.modelGone');
+  });
+});
