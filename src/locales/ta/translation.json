@@ -1381,7 +1381,8 @@
       },
       "models": {
         "title": "மாதிரிகள்",
-        "content": "மாதிரிகளை இங்கே பதிவிறக்கவும் — ஒவ்வொரு கட்டத்திற்கும் ஒன்று. சிலவற்றை முயற்சிக்கவும்; முதலில் தேர்ந்தெடுத்தது மட்டும் நல்லதல்ல."
+        "content": "மாதிரிகளை இங்கே பதிவிறக்கவும் — ஒவ்வொரு கட்டத்திற்கும் ஒன்று. சிலவற்றை முயற்சிக்கவும்; முதலில் தேர்ந்தெடுத்தது மட்டும் நல்லதல்ல.",
+        "content_kotomimi": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once."
       },
       "start": {
         "title": "துவங்கு",

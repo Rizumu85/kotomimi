@@ -1381,7 +1381,8 @@
       },
       "models": {
         "title": "মডেল",
-        "content": "এখানে মডেল ডাউনলোড করুন — প্রতিটি ধাপের জন্য একটি করে। কয়েকটি চেষ্টা করুন; প্রথম পছন্দটিই একমাত্র ভালো বিকল্প নয়।"
+        "content": "এখানে মডেল ডাউনলোড করুন — প্রতিটি ধাপের জন্য একটি করে। কয়েকটি চেষ্টা করুন; প্রথম পছন্দটিই একমাত্র ভালো বিকল্প নয়।",
+        "content_kotomimi": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once."
       },
       "start": {
         "title": "শুরু",

@@ -1381,7 +1381,8 @@
       },
       "models": {
         "title": "Modeller",
-        "content": "Modelleri buradan indirin — her aşama için bir tane. Birkaçını deneyin; ilk seçtiğiniz tek iyi seçenek olmak zorunda değil."
+        "content": "Modelleri buradan indirin — her aşama için bir tane. Birkaçını deneyin; ilk seçtiğiniz tek iyi seçenek olmak zorunda değil.",
+        "content_kotomimi": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once."
       },
       "start": {
         "title": "Başlat",

@@ -1381,7 +1381,8 @@
       },
       "models": {
         "title": "โมเดล",
-        "content": "ดาวน์โหลดโมเดลได้ที่นี่ — หนึ่งรายการต่อขั้นตอน ลองดูสักสองสามตัว ตัวเลือกแรกไม่ใช่ตัวเดียวที่ดี"
+        "content": "ดาวน์โหลดโมเดลได้ที่นี่ — หนึ่งรายการต่อขั้นตอน ลองดูสักสองสามตัว ตัวเลือกแรกไม่ใช่ตัวเดียวที่ดี",
+        "content_kotomimi": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once."
       },
       "start": {
         "title": "เริ่ม",

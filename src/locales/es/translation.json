@@ -1381,7 +1381,8 @@
       },
       "models": {
         "title": "Modelos",
-        "content": "Descarga aquí los modelos — uno por etapa. Prueba varios; la primera elección no es la única buena."
+        "content": "Descarga aquí los modelos — uno por etapa. Prueba varios; la primera elección no es la única buena.",
+        "content_kotomimi": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once."
       },
       "start": {
         "title": "Iniciar",

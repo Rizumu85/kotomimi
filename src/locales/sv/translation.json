@@ -1381,7 +1381,8 @@
       },
       "models": {
         "title": "Modeller",
-        "content": "Ladda ner modeller här — en per steg. Prova några olika; det första valet är inte det enda som fungerar bra."
+        "content": "Ladda ner modeller här — en per steg. Prova några olika; det första valet är inte det enda som fungerar bra.",
+        "content_kotomimi": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once."
       },
       "start": {
         "title": "Starta",

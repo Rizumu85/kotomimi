@@ -12,6 +12,13 @@ module.exports = {
         '這裡每個環節一張卡片：語音辨識、翻譯、文法回饋。在卡片裡選它在哪裡執行（區域網路裡的另一台裝置、API 模型、這台電腦），模型也在同一處選。到「進階 → 提供商」裡，還可以把這台電腦的模型共享給另一台裝置。',
       ],
     },
+    models: {
+      content_kotomimi: [
+        'Models are downloaded here: open "Model library" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.',
+        '模型在这里下载：在环节卡片里点「模型库」。带「推荐」的是用真实对话实测最好的，模型名字旁的小图标里写着实测结果。下载完会自动启用。',
+        '模型在這裡下載：在環節卡片裡點「模型庫」。帶「推薦」的是用真實對話實測最好的，模型名稱旁的小圖示裡寫著實測結果。下載完會自動啟用。',
+      ],
+    },
     'reading-aids': {
       title: ['Reading aids', '阅读辅助', '閱讀輔助'],
       content: ['Help for reading the other language, switched here:', '帮你读懂外语的辅助显示，在这里开关：', '幫你讀懂外語的輔助顯示，在這裡開關：'],

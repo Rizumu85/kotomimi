@@ -1381,7 +1381,8 @@
       },
       "models": {
         "title": "Mga Modelo",
-        "content": "I-download ang mga modelo dito — isa kada stage. Sumubok ng ilan; hindi lang ang unang pinili ang mabuti."
+        "content": "I-download ang mga modelo dito — isa kada stage. Sumubok ng ilan; hindi lang ang unang pinili ang mabuti.",
+        "content_kotomimi": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once."
       },
       "start": {
         "title": "Simulan",
