@@ -88,7 +88,9 @@ Sokuji 原有的功能和云服务提供商（OpenAI、Gemini、Soniox 等）都
 - 需要独立显卡，约占 3 GB 显存。开机后第一次启动要预热半分钟左右，之后每次几秒；还在预热时，"开始"旁边会有说明。
 - 想让它提前准备好，可以在设置的"启动"里打开"登录 Windows 时在后台启动"（默认关）：开机后 Kotomimi 不弹窗口地在后台待命，等你点开时已经预热完毕。
 - 偶尔会有十几秒不出字、然后一口气补上的情况，这是模型本身的特点。
-- Mac 上不提供（M 系列芯片上它跟不上说话速度），Mac 请继续用 LocalAI 里的 Apple 语音识别。
+- Mac 上不提供这个模型（M 系列芯片上它跟不上说话速度）。Mac（macOS 26 及以上）在同一个位置显示的是 **Apple Speech**：系统自带的语音识别，实测是最准的，同样边听边出字，不占显存；语言包由系统下载，点一下"下载"就行。有了它，Mac 上不需要再装 LocalAI。
+
+这些原生引擎的模型，在打开共享后也会共享给局域网里的其他设备；对方没有指定模型时，优先用它们。
 
 翻译也有同样的做法："翻译 → 这台电脑"的模型库最上面是 **Index-Translate 2B**（约 1.3 GB，一百多种语言），点下载后应用自己装好运行它的引擎。实测它比应用自带的翻译模型翻得更准，一句话只要 0.1 秒左右。这个在 Windows 和 Apple 芯片的 Mac 上都能用。
 
@@ -154,7 +156,7 @@ Kotomimi is a personal fork of [Sokuji](https://github.com/kizuna-ai-lab/sokuji)
 - **Subtitles you can read**: furigana over Japanese kanji, and an optional romanization line under Japanese, Korean and Russian.
 - **Stages you place yourself**: speech recognition, translation and grammar feedback each run on this computer, on another device on your network, or on any OpenAI-compatible API, in any mix.
 - **Two devices together**: one computer shares the models it has downloaded; another device finds it on the network and uses them, downloading nothing.
-- **Text while they speak** (Windows): a recognition engine the app downloads and runs itself (audio.cpp with Confucius4 R2T2) writes a couple of seconds behind the voice, with nothing else to install. Translation has one too (llama.cpp with Index-Translate 2B), on Windows and Apple-silicon Macs.
+- **Text while they speak** (Windows): a recognition engine the app downloads and runs itself (audio.cpp with Confucius4 R2T2) writes a couple of seconds behind the voice, with nothing else to install. Translation has one too (llama.cpp with Index-Translate 2B), on Windows and Apple-silicon Macs. On a Mac (macOS 26 or later) the recognizer is the system's own speech recognition, built in — no LocalAI needed.
 - **Typed lookups** (`Ctrl+K`), **grammar feedback** on your own speech, **fonts** chosen per language, and the languages you switch between **pinned** to the top of the language menus.
 
 **Install**: download from [Releases](https://github.com/Rizumu85/kotomimi/releases/latest). The Windows installer is not code-signed, so Windows warns about an unknown publisher; the macOS build (Apple silicon) is not notarized, so right-click the app and choose Open the first time. Then follow the setup wizard and pick "Kotomimi Pipeline". No account and no API key are needed.
