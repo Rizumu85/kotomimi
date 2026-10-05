@@ -60,6 +60,8 @@ const isApple = (id: string | null | undefined): boolean => typeof id === 'strin
  */
 const QWEN_LANGUAGES = ['zh', 'en', 'yue', 'ar', 'de', 'fr', 'es', 'pt', 'id', 'it', 'ko', 'ru', 'th', 'vi', 'ja', 'tr', 'hi', 'ms', 'nl', 'sv', 'da', 'fi', 'pl', 'cs', 'fil', 'fa', 'el', 'hu', 'mk', 'ro'] as const;
 const WINDOW_LIMITS: Partial<NativeLimits> = { rollAfter: 8, rollAt: 8, rollHard: 24, lastWordsMs: 15_000 };
+/** Nemotron's languages (`NEMOTRON_LOCALES` in `electron/native-engine.js`). */
+const NEMOTRON_LANGUAGES = ['ar', 'bg', 'cs', 'da', 'de', 'el', 'en', 'es', 'et', 'fi', 'fr', 'he', 'hi', 'hr', 'hu', 'it', 'ja', 'ko', 'lt', 'lv', 'mt', 'nb', 'nl', 'nn', 'no', 'pl', 'pt', 'ro', 'ru', 'sk', 'sl', 'sv', 'th', 'tr', 'uk', 'vi', 'zh'] as const;
 
 /**
  * In the order they are offered, the one measured best for a language first
@@ -79,6 +81,9 @@ export const NATIVE_MODELS: readonly NativeModel[] = [
   // and about 22 % of the characters wrong where the 1.7B has 16 (measured 2026-10-06 on the stretches the app
   // cuts). Left to detect the language it mixed Spanish with Portuguese: it is not offered for that.
   { id: 'qwen3-asr-0.6b-q8', name: 'Qwen3-ASR 0.6B GGUF', bytes: 1151272416, languages: QWEN_LANGUAGES, limits: WINDOW_LIMITS },
+  // The smallest, and the last choice: half the video memory of the small Qwen3 again, and about 27 % of the
+  // characters wrong in the app — of the sentences the app cuts, it writes nothing for one short one in five.
+  { id: 'nemotron-asr-0.6b-q8', name: 'Nemotron 3.5 ASR 0.6B GGUF', bytes: 930625888, languages: NEMOTRON_LANGUAGES, limits: WINDOW_LIMITS },
 ];
 
 /** The one every system the engine is published for can run. */

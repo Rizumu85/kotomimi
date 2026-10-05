@@ -628,6 +628,7 @@
       "noteNativeR2t2": "Japanese talk, measured: about 18% of the characters wrong. It writes as it listens (about 2.5 s behind) and never changes what it wrote. When the graphics card cannot keep up (a weaker card, or a game running), the text falls further and further behind. About 3 GB of video memory.",
       "noteNativeQwen": "Japanese talk, measured: about 16% of the characters wrong. It writes as you speak (about 1 s behind); the last few words settle when the sentence ends. When the graphics card is busy it only refreshes less often. About 3 GB of video memory, thirty languages.",
       "noteNativeQwenSmall": "The light one, for a computer that runs a game at the same time: about 2 GB of video memory instead of 3. Japanese talk, measured: about 22% of the characters wrong, more than the 1.7B. Otherwise it works the same way, with the same thirty languages.",
+      "noteNativeNemotron": "The lightest: about 1 GB of video memory. Japanese talk, measured: about 27% of the characters wrong, and a short sentence is sometimes left out altogether. Choose it only when the computer has no room for the ones above. Over thirty languages.",
       "nativeCoachReady": "The feedback engine is ready.",
       "nativeCoachWarmingShort": "Starting the feedback engine…",
       "nativeCoachFailedShort": "The feedback engine could not start.",

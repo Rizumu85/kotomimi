@@ -74,6 +74,15 @@ const ENGINE = {
   },
 };
 
+/** Nemotron's locales, by the app's base code: the one it is told where the app's own code is not of its list. */
+const NEMOTRON_LOCALES = {
+  ar: 'ar-AR', bg: 'bg-BG', cs: 'cs-CZ', da: 'da-DK', de: 'de-DE', el: 'el-GR', en: 'en-US', es: 'es-ES', et: 'et-EE', fi: 'fi-FI', fr: 'fr-FR', he: 'he-IL',
+  hi: 'hi-IN', hr: 'hr-HR', hu: 'hu-HU', it: 'it-IT', ja: 'ja-JP', ko: 'ko-KR', lt: 'lt-LT', lv: 'lv-LV', mt: 'mt-MT', nb: 'nb-NO', nl: 'nl-NL', nn: 'nn-NO',
+  no: 'nb-NO', pl: 'pl-PL', pt: 'pt-PT', ro: 'ro-RO', ru: 'ru-RU', sk: 'sk-SK', sl: 'sl-SI', sv: 'sv-SE', th: 'th-TH', tr: 'tr-TR', uk: 'uk-UA', vi: 'vi-VN', zh: 'zh-CN',
+};
+/** The regional ones it knows apart from those. */
+const NEMOTRON_REGIONAL = { 'en-gb': 'en-GB', 'es-us': 'es-US', 'es-419': 'es-US', 'es-mx': 'es-US', 'fr-ca': 'fr-CA', 'pt-br': 'pt-BR' };
+
 /** What Qwen3-ASR hears, either size, by the codes it is told a language with. */
 const QWEN_LANGUAGES = ['zh', 'en', 'yue', 'ar', 'de', 'fr', 'es', 'pt', 'id', 'it', 'ko', 'ru', 'th', 'vi', 'ja', 'tr', 'hi', 'ms', 'nl', 'sv', 'da', 'fi', 'pl', 'cs', 'fil', 'fa', 'el', 'hu', 'mk', 'ro'];
 
@@ -118,6 +127,23 @@ const MODELS = {
     mode: 'offline',
     languageAs: 'code',
     languages: QWEN_LANGUAGES,
+  },
+  // The smallest: about 1 GB of video memory, and ten seconds of speech read in 0.15 s on an RTX 5070 Ti. As
+  // accurate as the small Qwen3 on a whole clip, but of the sentences the app cuts it writes nothing for one short
+  // one in five (FORK.md, "小模型"): the last choice, for a computer with no memory for another. Read a stretch at
+  // a time, as Qwen3-ASR is: a reading costs it so little that its own streaming would save nothing worth a second
+  // path.
+  'nemotron-asr-0.6b-q8': {
+    file: 'nemotron-3.5-asr-streaming-0.6b-q8_0.gguf',
+    url: 'https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/e36610ac69b5262e914a52635324050bee8f1ad2/Nemotron-3.5-ASR-Streaming-0.6B-GGUF/nemotron-3.5-asr-streaming-0.6b-q8_0.gguf',
+    bytes: 930625888,
+    sha256: 'c58b62c1bdd6c5d7b14b08126c5bd16c1289fee6e0d6ac0761dbd3aa6d714935',
+    family: 'nemotron_asr',
+    mode: 'offline',
+    // It is told the language by a locale of its own list, and is not left to detect one: left to, it wrote the
+    // first words of a Japanese stretch as an English letter.
+    languageAs: 'locale',
+    languages: Object.keys(NEMOTRON_LOCALES),
   },
 };
 
@@ -186,6 +212,8 @@ const LANGUAGE_NAMES = {
 };
 const languageCode = (code) => String(code ?? '').trim().toLowerCase().split(/[-_]/)[0] || null;
 const languageName = (code) => LANGUAGE_NAMES[languageCode(code) ?? ''] ?? null;
+/** The locale Nemotron is told for a language of the app: its own regional one where it has it, the language's usual one otherwise. */
+const languageLocale = (code) => NEMOTRON_REGIONAL[String(code ?? '').trim().toLowerCase().replace('_', '-')] ?? NEMOTRON_LOCALES[languageCode(code) ?? ''] ?? null;
 /** Whether a model of the list above hears a language: one that lists its languages by those, any other by the names it was taught. */
 const modelHears = (id, code) => (MODELS[id]?.languages ? MODELS[id].languages.includes(languageCode(code) ?? '') : Boolean(MODELS[id]) && languageName(code) !== null);
 
@@ -892,9 +920,10 @@ function createNativeEngine(deps = {}) {
     const id = nextStream++;
     const rate = Number.isInteger(sampleRate) && sampleRate >= 8000 && sampleRate <= 48000 ? sampleRate : 16000;
     const model = MODELS_[run.model];
-    // A model that reads a stretch at once is given it as it grows; one told the language by its code is told that.
+    // A model that reads a stretch at once is given it as it grows; one told the language by its code, or by a
+    // locale, is told that.
     const windowed = model?.mode === 'offline';
-    const said = model?.languageAs === 'code' ? languageCode(language) : languageName(language);
+    const said = model?.languageAs === 'code' ? languageCode(language) : model?.languageAs === 'locale' ? languageLocale(language) : languageName(language);
     const target = { port: run.port, model: run.model, sampleRate: rate, language: said };
     const stream = (windowed ? window : live)(windowed ? { ...target, note } : target, (event) => {
       if (event.type !== 'delta' && event.type !== 'partial') streams.delete(id);
@@ -924,4 +953,4 @@ function createNativeEngine(deps = {}) {
   return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream };
 }
 
-module.exports = { createNativeEngine, openLive, openWindow, wavOf, loopAt, unloop, quietMiddle, languageName, languageCode, modelHears, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };
+module.exports = { createNativeEngine, openLive, openWindow, wavOf, loopAt, unloop, quietMiddle, languageName, languageCode, languageLocale, modelHears, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };

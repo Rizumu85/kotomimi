@@ -16,7 +16,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { createNativeEngine, openLive, languageName, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME } = require('./native-engine.js');
+const { createNativeEngine, openLive, languageName, languageLocale, modelHears, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME } = require('./native-engine.js');
 
 const sha = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
 const ARCHIVE = Buffer.from('an archive of the engine');
@@ -109,7 +109,7 @@ describe('what is fetched', () => {
     expect(MODELS['r2t2-q8'].platforms).toEqual(['win32-x64']);
     // A Mac is offered the model that is for every system, and not the one that names Windows alone.
     const mac = createNativeEngine({ dir, platform: 'darwin', arch: 'arm64', fetch: nothing });
-    expect(Object.keys(mac.status().models)).toEqual(['qwen3-asr-1.7b-q8', 'qwen3-asr-0.6b-q8']);
+    expect(Object.keys(mac.status().models)).toEqual(['qwen3-asr-1.7b-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
     const here = createNativeEngine({ dir, platform: 'win32', arch: 'x64', fetch: nothing });
     expect(here.status()).toMatchObject({ supported: true, models: { 'r2t2-q8': { state: 'absent' }, 'qwen3-asr-1.7b-q8': { state: 'absent' } } });
     // A catalog whose every model names another system leaves this one with nothing to run.
@@ -417,6 +417,38 @@ describe('a live recognition', () => {
     expect(file).toBe('qwen3-asr-0.6b-q8_0.gguf');
     expect(sha256).toMatch(/^[0-9a-f]{64}$/);
     expect([f, u, h].every(Boolean)).toBe(true);
+  });
+
+  it('tells a model that takes a locale the one of its own list: the app\u2019s regional one where it has it, the language\u2019s usual one otherwise', () => {
+    expect(MODELS['nemotron-asr-0.6b-q8']).toMatchObject({ family: 'nemotron_asr', mode: 'offline', languageAs: 'locale' });
+    expect(languageLocale('ja')).toBe('ja-JP');
+    expect(languageLocale('zh-TW')).toBe('zh-CN');
+    expect(languageLocale('en-AU')).toBe('en-US');
+    expect(languageLocale('en-GB')).toBe('en-GB');
+    expect(languageLocale('pt-BR')).toBe('pt-BR');
+    expect(languageLocale('pt')).toBe('pt-PT');
+    expect(languageLocale('es-419')).toBe('es-US');
+    expect(languageLocale('no')).toBe('nb-NO');
+    // One it was not taught is not told at all, and it is not offered for it.
+    expect(languageLocale('id')).toBeNull();
+    expect(languageLocale(null)).toBeNull();
+    expect(modelHears('nemotron-asr-0.6b-q8', 'ko-KR')).toBe(true);
+    expect(modelHears('nemotron-asr-0.6b-q8', 'id')).toBe(false);
+    // Every locale it is told is one of the model's own (audio.cpp's nemotron_asr spec, v0.9.0).
+    const known = ['ar-AR', 'bg-BG', 'cs-CZ', 'da-DK', 'de-DE', 'el-GR', 'en-GB', 'en-US', 'es-ES', 'es-US', 'et-EE', 'fi-FI', 'fr-CA', 'fr-FR', 'he-IL', 'hi-IN', 'hr-HR', 'hu-HU', 'it-IT', 'ja-JP', 'ko-KR', 'lt-LT', 'lv-LV', 'mt-MT', 'nb-NO', 'nl-NL', 'nn-NO', 'pl-PL', 'pt-BR', 'pt-PT', 'ro-RO', 'ru-RU', 'sk-SK', 'sl-SI', 'sv-SE', 'th-TH', 'tr-TR', 'uk-UA', 'vi-VN', 'zh-CN'];
+    for (const language of [...MODELS['nemotron-asr-0.6b-q8'].languages, 'en-GB', 'es-US', 'es-419', 'es-MX', 'fr-CA', 'pt-BR']) expect(known).toContain(languageLocale(language));
+  });
+
+  it('opens a recognition of such a model with that locale', async () => {
+    const catalog = { engine: CATALOG.engine, models: { w2: { file: 'w2.gguf', url: 'https://example.test/w2.gguf', bytes: MODEL.length, sha256: sha(MODEL), family: 'fam3', mode: 'offline', languageAs: 'locale' } } };
+    const { world, engine } = computer({ catalog, served: { 'https://example.test/engine.zip': ARCHIVE, 'https://example.test/w2.gguf': MODEL } });
+    await engine.download('w2');
+    await engine.start('w2');
+    engine.openStream({ language: 'ja', sampleRate: 24000 });
+    expect(world.windows[1].target).toMatchObject({ model: 'w2', sampleRate: 24000, language: 'ja-JP' });
+    engine.openStream({ language: 'pt-BR', sampleRate: 16000 });
+    expect(world.windows[2].target).toMatchObject({ language: 'pt-BR' });
+    await engine.stop();
   });
 
   it('names the languages the model was taught by name', () => {
