@@ -52,9 +52,9 @@ module.exports = {
     title: ['Startup', '启动', '啟動'],
     toggle: ['Start in the background when I sign in to Windows', '登录 Windows 时在后台启动', '登入 Windows 時在背景啟動'],
     note: [
-      "Kotomimi waits in the background after you sign in and loads the models once ahead of time, so the first session does not wait for it.",
-      "登录后 Kotomimi 在后台待命，并预先加载一次模型，第一次开始会话就不用多等。",
-      "登入後 Kotomimi 在背景待命，並預先載入一次模型，第一次開始工作階段就不用多等。",
+      "Kotomimi waits in the background after you sign in, with an icon in the notification area, and loads the models once ahead of time so the first session does not wait for it.",
+      "登录后 Kotomimi 在后台待命（右下角有图标），并预先加载一次模型，第一次开始会话就不用多等。",
+      "登入後 Kotomimi 在背景待命（右下角有圖示），並預先載入一次模型，第一次開始工作階段就不用多等。",
     ],
   },
   // The language menus' own list (`LanguageMenu.tsx`).

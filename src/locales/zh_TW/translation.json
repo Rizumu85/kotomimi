@@ -1488,7 +1488,7 @@
     "autostart": {
       "title": "啟動",
       "toggle": "登入 Windows 時在背景啟動",
-      "note": "登入後 Kotomimi 在背景待命，並預先載入一次模型，第一次開始工作階段就不用多等。"
+      "note": "登入後 Kotomimi 在背景待命（右下角有圖示），並預先載入一次模型，第一次開始工作階段就不用多等。"
     },
     "languageMenu": {
       "search": "輸入篩選語言",

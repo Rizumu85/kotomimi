@@ -19,7 +19,8 @@ const { joinEngines } = require('./native-engines');
 const { createAutostart } = require('./autostart');
 const { createAppleSpeech } = require('./apple-speech');
 const { applyLinuxGpuFlags } = require('./linux-gpu-flags');
-const { acquireSingleInstanceLock, createFocusRelay } = require('./single-instance');
+const { acquireSingleInstanceLock, createFocusRelay, focusWindow } = require('./single-instance');
+const { createTray, iconFile } = require('./tray');
 
 // Let the Windows sandbox read our own install folder before Electron checks it
 // and aborts (issue #352; electron/electron#54382). Runs ahead of the Squirrel
@@ -1360,6 +1361,29 @@ const autostart = createAutostart({ app, exists: (file) => require('fs').existsS
 // `startedHidden`: this start was the computer's own, so the page loads the engines once ahead of time (`primeNativeOnce`).
 ipcMain.handle('autostart:get', () => ({ ...autostart.get(), startedHidden: autostart.startedHidden }));
 ipcMain.handle('autostart:set', (event, args) => autostart.set(args?.enabled === true));
+
+// Fork: an icon in the notification area (electron/tray.js) — what says the app is running when a start in the
+// background shows no window. A click shows the window; "Quit" closes it, which ends the app as closing it by hand
+// does. Closing the window still quits: the icon does not keep the app alive.
+let tray = null;
+app.whenReady().then(() => {
+  if (isDuplicateInstance) return;
+  tray = createTray({
+    Tray: require('electron').Tray,
+    Menu,
+    locale: app.getLocale(),
+    icon: iconFile({ exists: (file) => require('fs').existsSync(file) }),
+    show: () => focusWindow(mainWindow),
+    quit: () => {
+      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.close();
+      else app.quit();
+    },
+  });
+});
+// Taken away before the process goes: Windows otherwise keeps a dead icon until the pointer passes over it.
+const dropTray = () => { tray?.destroy(); tray = null; };
+app.on('window-all-closed', () => { if (process.platform !== 'darwin') dropTray(); });
+app.on('will-quit', dropTray);
 
 let nativeEngine = null;
 const getNativeEngine = () => {

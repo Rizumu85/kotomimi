@@ -176,6 +176,8 @@ export default defineConfig(({ command, mode }) => {
             'native-engines': 'electron/native-engines.js',
             // Fork: starting with the computer, in the background
             'autostart': 'electron/autostart.js',
+            // Fork: the icon in the notification area
+            'tray': 'electron/tray.js',
             // Fork: the Mac's own speech recognition, through the helper the app ships
             'apple-speech': 'electron/apple-speech.js'
           },

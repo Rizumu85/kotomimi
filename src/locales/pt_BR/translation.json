@@ -1488,7 +1488,7 @@
     "autostart": {
       "title": "Startup",
       "toggle": "Start in the background when I sign in to Windows",
-      "note": "Kotomimi waits in the background after you sign in and loads the models once ahead of time, so the first session does not wait for it."
+      "note": "Kotomimi waits in the background after you sign in, with an icon in the notification area, and loads the models once ahead of time so the first session does not wait for it."
     },
     "languageMenu": {
       "search": "Type to find a language",

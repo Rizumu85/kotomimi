@@ -1488,7 +1488,7 @@
     "autostart": {
       "title": "启动",
       "toggle": "登录 Windows 时在后台启动",
-      "note": "登录后 Kotomimi 在后台待命，并预先加载一次模型，第一次开始会话就不用多等。"
+      "note": "登录后 Kotomimi 在后台待命（右下角有图标），并预先加载一次模型，第一次开始会话就不用多等。"
     },
     "languageMenu": {
       "search": "输入筛选语言",
