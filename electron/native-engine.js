@@ -151,6 +151,20 @@ const TRANSLATORS = {
   },
 };
 
+/**
+ * The chat models that give the grammar feedback, run by the same server: each a Q4_K_M file at a fixed revision.
+ * Gemma 4 E2B is the one that, of the small models measured 2026-10-05, caught most mistakes without "correcting"
+ * right casual speech (FORK.md, "原生语法反馈引擎").
+ */
+const COACHES = {
+  'gemma-4-e2b': {
+    file: 'gemma-4-E2B-it-Q4_K_M.gguf',
+    url: 'https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/0314792d7f1f7e229411f620751375812bb9faf2/gemma-4-E2B-it-Q4_K_M.gguf',
+    bytes: 3106738272,
+    sha256: '740185b21d22ceb83a11c3aa62ad5842ef32c70f6096d756bbee85a1e4ec34b8',
+  },
+};
+
 /** The model the runtime is told the language by: its name in English, as R2T2 was trained to read it. Any other is left to detection. */
 const LANGUAGE_NAMES = {
   ja: 'Japanese', zh: 'Chinese', en: 'English', ko: 'Korean', fr: 'French', de: 'German', it: 'Italian', pt: 'Portuguese', ru: 'Russian', es: 'Spanish', ar: 'Arabic',
@@ -895,4 +909,4 @@ function createNativeEngine(deps = {}) {
   return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream };
 }
 
-module.exports = { createNativeEngine, openLive, openWindow, wavOf, loopAt, unloop, quietMiddle, languageName, languageCode, modelHears, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };
+module.exports = { createNativeEngine, openLive, openWindow, wavOf, loopAt, unloop, quietMiddle, languageName, languageCode, modelHears, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };

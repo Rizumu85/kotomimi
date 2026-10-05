@@ -14,7 +14,7 @@ const { keepMaximizeHonest, pageShift } = require('./window-maximize');
 const { firewallStatus, allowThroughFirewall } = require('./lan-firewall');
 const { discoverServers } = require('./lan-discover');
 const { createLocalServer } = require('./local-server');
-const { createNativeEngine, LLAMA, TRANSLATORS, LLAMA_RUNTIME, modelHears: nativeModelHears } = require('./native-engine');
+const { createNativeEngine, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME, modelHears: nativeModelHears } = require('./native-engine');
 const { joinEngines } = require('./native-engines');
 const { createAutostart } = require('./autostart');
 const { createAppleSpeech } = require('./apple-speech');
@@ -1444,6 +1444,40 @@ ipcMain.handle('native-translator:start', async (event, args) => {
 });
 ipcMain.handle('native-translator:stop', () => getNativeTranslator().stop());
 app.on('will-quit', () => { void nativeTranslator?.stop(); });
+
+// Fork: the native feedback engine — the same server once more, with a small chat model that checks the grammar of
+// what the speaker says. A process of its own: the translation engine runs one model, and both are needed in one run.
+let nativeCoach = null;
+const getNativeCoach = () => {
+  if (nativeCoach) return nativeCoach;
+  let out = null;
+  const log = (text) => {
+    try {
+      out ??= require('fs').createWriteStream(path.join(app.getPath('logs'), 'native-coach.log'), { flags: 'a' });
+      out.write(text);
+    } catch { /* its output is a convenience: never a reason to fail */ }
+  };
+  const { net } = require('electron');
+  nativeCoach = createNativeEngine({
+    dir: !app.isPackaged && process.env.KOTOMIMI_NATIVE_DIR ? `${process.env.KOTOMIMI_NATIVE_DIR}-coach` : path.join(app.getPath('userData'), 'native-coach'),
+    catalog: { engine: LLAMA, models: COACHES },
+    runtime: LLAMA_RUNTIME,
+    fetch: (url, init) => net.fetch(url, init),
+    log,
+    onChange: (status) => toPage('native-coach:status', status),
+  });
+  return nativeCoach;
+};
+ipcMain.handle('native-coach:get', () => getNativeCoach().status());
+ipcMain.handle('native-coach:download', (event, args) => getNativeCoach().download(String(args?.id ?? '')));
+ipcMain.handle('native-coach:cancel', (event, args) => getNativeCoach().cancel(String(args?.id ?? '')));
+ipcMain.handle('native-coach:remove', (event, args) => getNativeCoach().remove(String(args?.id ?? '')));
+ipcMain.handle('native-coach:start', async (event, args) => {
+  await autostart.quiet;
+  return getNativeCoach().start(String(args?.id ?? ''));
+});
+ipcMain.handle('native-coach:stop', () => getNativeCoach().stop());
+app.on('will-quit', () => { void nativeCoach?.stop(); });
 
 // Fork: the devices of the local network whose models this app can use (electron/lan-discover.js) —
 // asked for when the person is choosing one. One search at a time: a second asker waits for the first's answer.

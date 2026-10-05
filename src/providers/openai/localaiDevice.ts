@@ -61,7 +61,7 @@ export interface StagePlacement {
   /** On this computer: by whom. Absent: the app's own models. */
   asrHere?: AsrHere;
   translateHere?: AsrHere;
-  coachHere?: Here;
+  coachHere?: AsrHere;
 }
 
 /** The settings a device stage reads: where each stage runs, and the picks. */
@@ -77,6 +77,9 @@ export const cutsSentencesHere = (s: Pick<StagePlacement, 'asrVia' | 'asrHere'>)
 
 /** The native translation engine translates (`nativeTranslators.ts`): none of the app's own models is asked for. */
 export const translatesNatively = (s: Pick<StagePlacement, 'translateAt' | 'translateHere'>): boolean => s.translateAt === 'device' && s.translateHere === 'native';
+
+/** The native feedback engine gives the feedback (`nativeCoaches.ts`): none of the app's own models is asked for. */
+export const coachesNatively = (s: Pick<StagePlacement, 'coach' | 'coachAt' | 'coachHere'>): boolean => s.coach && s.coachAt === 'device' && s.coachHere === 'native';
 
 /** The native engine hears: none of the app's own models is asked for. */
 export const hearsNatively = (s: Pick<StagePlacement, 'asrVia' | 'asrHere'>): boolean => s.asrVia === 'device' && s.asrHere === 'native';

@@ -27,6 +27,7 @@ import { NATIVE_MODELS, chooseNative, nativeDownloaded, nativeHears, nativeModel
 import { languageLabel } from '../../lib/language/label';
 import { NativeEngineCard, nativeStoreOf, type NativeCardModel, type NativeKind } from './NativeEngineCard';
 import { NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator } from './nativeTranslators';
+import { NATIVE_COACHES, nativeCoach } from './nativeCoaches';
 import { useDeviceSettings, useDeviceSlots } from './LocalAIEngine';
 import { isKotomimiServer, modelsFor, SERVER_SILENT, serverDefaultModel, type LocalAIModel } from './localaiModels';
 import { isRealtimeModelId } from './settings';
@@ -42,7 +43,7 @@ function shownName(id: string): string {
   const entry = getManifestEntry(id);
   if (entry) return shortenModelName(entry.name, entry.shortName);
   // A native engine's model the other Kotomimi shares: by the name it has here. The Mac's recognition is a model to a language.
-  const native = NATIVE_MODELS.find((m) => m.id === id) ?? NATIVE_TRANSLATORS.find((m) => m.id === id);
+  const native = NATIVE_MODELS.find((m) => m.id === id) ?? NATIVE_TRANSLATORS.find((m) => m.id === id) ?? NATIVE_COACHES.find((m) => m.id === id);
   if (native) return id.includes(':') ? `${native.name} (${id.slice(id.indexOf(':') + 1)})` : native.name;
   return modelLabel(id);
 }
@@ -259,7 +260,7 @@ const LOCALAI_ENTRY = '\u0000localai';
 const NATIVE_ENTRY = '\u0000native:';
 
 /** A stage's native models, as their cards and menus read them. */
-const NATIVE_OF: Record<NativeKind, readonly NativeCardModel[]> = { asr: NATIVE_MODELS, translation: NATIVE_TRANSLATORS };
+const NATIVE_OF: Record<NativeKind, readonly NativeCardModel[]> = { asr: NATIVE_MODELS, translation: NATIVE_TRANSLATORS, coach: NATIVE_COACHES };
 
 /**
  * The mark of the one measured best: the first of an engine's models, in the order they are listed, that serves what
@@ -270,7 +271,7 @@ const bestNative = (offered: readonly NativeCardModel[], fits: (model: NativeCar
 /** Whether a native model serves a direction: hears its language, or translates its pair. */
 const nativeFits = (kind: NativeKind, id: string, source: string, target: string): boolean => (kind === 'asr'
   ? nativeHears(nativeModel(id), source)
-  : nativeTranslates(nativeTranslator(id), source, target));
+  : kind === 'translation' ? nativeTranslates(nativeTranslator(id), source, target) : true);
 
 /** A stage's native models this computer can run, and which of them are downloaded or on their way. */
 function useNativeModels(kind: NativeKind): { offered: readonly NativeCardModel[]; ready: readonly NativeCardModel[]; fetching: readonly string[] } {
@@ -580,8 +581,18 @@ function DeviceModels({ stage, settings, update, pair, legs, disabled, tour, oth
  * in the library's own cards — but a list of its own: only a chat model can
  * be told what feedback is.
  */
-function DeviceChat({ value, onChange, disabled, other }: { value: string; onChange(id: string): void; disabled?: boolean; other?: OtherRunner }) {
+function DeviceChat({ value, onChange, disabled, other, native }: { value: string; onChange(id: string): void; disabled?: boolean; other?: OtherRunner; native?: NativeRunner }) {
   const { t } = useTranslation();
+  const engine = useNativeModels('coach');
+  // The native feedback engine's model whose download ends while this is shown is the one wanted: it is used from then on.
+  const sawFetching = useRef(new Set<string>());
+  useEffect(() => {
+    for (const id of engine.fetching) sawFetching.current.add(id);
+    const done = engine.ready.find((m) => sawFetching.current.has(m.id));
+    if (!done) return;
+    sawFetching.current.delete(done.id);
+    if (native && !disabled) native.onPick(done.id);
+  }, [engine]); // eslint-disable-line react-hooks/exhaustive-deps
   const statuses = useModelStatuses();
   const downloads = useModelDownloads();
   const errors = useDownloadErrors();
@@ -608,14 +619,25 @@ function DeviceChat({ value, onChange, disabled, other }: { value: string; onCha
             <span>{t('providers.localai.browse')}</span>
           </button>
         </div>
-        <select className={`select-dropdown${auto || !looked ? '' : ' kt-here__select--missing'}`} aria-label={label} value={ready.some((m) => m.id === value) ? value : ''} onChange={(e) => { if (e.target.value === LOCALAI_ENTRY) other?.onPick(); else onChange(e.target.value); }} disabled={disabled}>
+        <select className={`select-dropdown${auto || !looked ? '' : ' kt-here__select--missing'}`} aria-label={label} value={ready.some((m) => m.id === value) ? value : ''} onChange={(e) => { if (e.target.value === LOCALAI_ENTRY) other?.onPick(); else if (e.target.value.startsWith(NATIVE_ENTRY)) native?.onPick(e.target.value.slice(NATIVE_ENTRY.length)); else onChange(e.target.value); }} disabled={disabled}>
           <option value="">{!looked ? t('providers.localai.checking') : auto ? t('providers.localai.auto', { name: name(auto) }) : t('providers.localai.notDownloaded')}</option>
+          {native && engine.ready.map((m) => <option key={m.id} value={`${NATIVE_ENTRY}${m.id}`}>{t('providers.localai.nativeEntry', { name: m.name })}</option>)}
           {ready.map((m) => <option key={m.id} value={m.id}>{`${name(m.id)} · ${getModelSizeMb(m, features)} MB`}</option>)}
           {other && <option value={LOCALAI_ENTRY}>{other.label}</option>}
         </select>
       </div>
       {open && (
         <div className="kt-here__library">
+          {/* The native feedback engine's models first, as a group of their own. */}
+          {native && engine.offered.length > 0 && (
+            <div className="model-management-section kt-here__native">
+              <div className="model-subgroup">
+                <div className="model-subgroup__label"><Star size={11} />{t('models.recommendedGroup', 'Recommended')}</div>
+                {engine.offered.map((m, at) => <NativeEngineCard key={m.id} kind="coach" model={m} recommended={at === 0} selected={false} onSelect={() => native.onPick(m.id)} disabled={disabled} />)}
+              </div>
+            </div>
+          )}
+          {native && engine.offered.length > 0 && <div className="model-management-section kt-here__rest"><div className="model-subgroup__label">{t('models.othersGroup', 'Other models')}</div></div>}
           {!webgpu && <p className="kt-note kt-note--todo">{t('providers.localai.chatModelsNoGpu')}</p>}
           <div className="model-management-section">
             <ModelGroup title={label} bare>
@@ -624,7 +646,8 @@ function DeviceChat({ value, onChange, disabled, other }: { value: string; onCha
                 return (
                   <ModelCard
                     key={m.id}
-                    entry={m}
+                    // A native model above carries the mark: the app's own are then listed without it.
+                    entry={native && engine.offered.length > 0 && m.recommended ? { ...m, recommended: false } : m}
                     status={statuses[m.id] || 'not_downloaded'}
                     download={downloads[m.id]}
                     errorMessage={errors[m.id]}
@@ -925,7 +948,9 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
             )}
             {settings.coachAt === 'device' && (settings.coachHere === 'localai'
               ? <LocalAIHere kind="text" model={settings.coachHereModel} onModel={(coachHereModel) => put({ coachHereModel })} onBack={() => put({ coachHere: 'app' })} local={local} disabled={disabled} />
-              : <DeviceChat value={settings.coachDeviceModel} onChange={(coachDeviceModel) => put({ coachDeviceModel })} disabled={disabled} other={toLocalAI({ coachHere: 'localai', coachHereModel: settings.coachHereModel || firstText })} />)}
+              : settings.coachHere === 'native'
+                ? <NativeHere kind="coach" model={nativeCoach(settings.coachNativeModel)} unfit={false} fits={() => true} onModel={(coachNativeModel) => put({ coachNativeModel })} onBack={() => put({ coachHere: 'app' })} other={toLocalAI({ coachHere: 'localai', coachHereModel: settings.coachHereModel || firstText })} disabled={disabled} />
+                : <DeviceChat value={settings.coachDeviceModel} onChange={(coachDeviceModel) => put({ coachDeviceModel })} disabled={disabled} other={toLocalAI({ coachHere: 'localai', coachHereModel: settings.coachHereModel || firstText })} native={{ onPick: (coachNativeModel) => put({ coachHere: 'native', coachNativeModel }) }} />)}
             <details className="kt-details">
               <summary>{t('providers.localai.coachPrompt')}</summary>
               <textarea

@@ -353,6 +353,35 @@ const PROVIDER = {
     "日語閒聊實測錯字約 16%。邊說邊出字（慢約 1 秒），句尾幾個字要等這句說完才定稿。顯示卡忙不過來時只是重新整理慢一些。約佔 3 GB 顯示記憶體，支援 30 種語言。",
   ],
   // The native translation engine (llama.cpp's server) and what was found of its models.
+  // The native feedback engine (llama.cpp's server with a small chat model) and what was found of its model.
+  nativeCoachReady: ['The feedback engine is ready.', '语法反馈引擎已就绪。', '語法回饋引擎已就緒。'],
+  nativeCoachWarmingShort: ['Starting the feedback engine…', '正在启动语法反馈引擎…', '正在啟動語法回饋引擎…'],
+  nativeCoachFailedShort: ['The feedback engine could not start.', '语法反馈引擎没能启动。', '語法回饋引擎沒能啟動。'],
+  nativeCoachUnsupported: [
+    'The native feedback engine is not available for this system. Choose another model in the Grammar feedback card.',
+    '这个系统暂不支持原生语法反馈引擎。请在「语法反馈」卡片里换一个模型。',
+    '這個系統暫不支援原生語法回饋引擎。請在「語法回饋」卡片裡換一個模型。',
+  ],
+  nativeCoachMissing: [
+    '{{name}} is not downloaded yet. Download it in the Grammar feedback card, or choose another model.',
+    '{{name}} 还没有下载。请在「语法反馈」卡片里下载，或者换一个模型。',
+    '{{name}} 還沒有下載。請在「語法回饋」卡片裡下載，或者換一個模型。',
+  ],
+  nativeCoachWarming: [
+    'The feedback engine is still starting — a few seconds. You can start as soon as it is ready.',
+    '语法反馈引擎还在启动，只要几秒。准备好后就可以开始。',
+    '語法回饋引擎還在啟動，只要幾秒。準備好後就可以開始。',
+  ],
+  nativeCoachFailed: [
+    'The feedback engine could not start. In the Grammar feedback card, press "Try again" — or choose another model.',
+    '语法反馈引擎没能启动。请在「语法反馈」卡片里点「重试」，或者换一个模型。',
+    '語法回饋引擎沒能啟動。請在「語法回饋」卡片裡點「重試」，或者換一個模型。',
+  ],
+  noteGemma4: [
+    'Japanese grammar, measured: it caught 11 of 14 mistakes and left right casual speech alone; about 0.1 s an answer. About 1.5 GB of video memory.',
+    '日语语法实测：14 句错句抓到 11 句，正确的口语不会乱改；每句约 0.1 秒。约占 1.5 GB 显存。',
+    '日語語法實測：14 句錯句抓到 11 句，正確的口語不會亂改；每句約 0.1 秒。約佔 1.5 GB 顯示記憶體。',
+  ],
   translatorReady: ['The translation engine is ready.', '翻译引擎已就绪。', '翻譯引擎已就緒。'],
   translatorWarmingShort: ['Starting the translation engine…', '正在启动翻译引擎…', '正在啟動翻譯引擎…'],
   translatorFailedShort: ['The translation engine could not start.', '翻译引擎没能启动。', '翻譯引擎沒能啟動。'],

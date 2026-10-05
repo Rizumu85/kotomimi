@@ -10,10 +10,10 @@ import { CircleCheck, Loader, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ModelCard } from '../../components/Settings/sections/ModelManagementSection';
 import type { ModelManifestEntry } from '../../lib/local-inference/modelManifest';
-import { useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
+import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import { nativeReady } from './localaiNative';
 
-export type NativeKind = 'asr' | 'translation';
+export type NativeKind = 'asr' | 'translation' | 'coach';
 
 /** A model as its card shows it, whichever engine runs it. */
 export interface NativeCardModel {
@@ -28,6 +28,7 @@ export interface NativeCardModel {
 const WORDS: Record<NativeKind, { ready: string; warming: string; failed: string }> = {
   asr: { ready: 'providers.localai.nativeReady', warming: 'providers.localai.nativeWarmingShort', failed: 'providers.localai.nativeFailedShort' },
   translation: { ready: 'providers.localai.translatorReady', warming: 'providers.localai.translatorWarmingShort', failed: 'providers.localai.translatorFailedShort' },
+  coach: { ready: 'providers.localai.nativeCoachReady', warming: 'providers.localai.nativeCoachWarmingShort', failed: 'providers.localai.nativeCoachFailedShort' },
 };
 
 /** What was found of each model, as the key of a sentence under `providers.localai`. */
@@ -38,6 +39,7 @@ const NOTES: Readonly<Record<string, string>> = {
   'index-translate-2b': 'noteIndexTranslate',
   'hy-mt2-1.8b': 'noteHyMt2',
   'hy-mt1.5-1.8b': 'noteHyMt15',
+  'gemma-4-e2b': 'noteGemma4',
 };
 
 /**
@@ -50,7 +52,7 @@ const tagOf = (id: string): 'native' | 'system' => (id.startsWith('apple-speech'
 const MANY = ['zh', 'en', 'ja', 'ko', 'es', 'ru', 'fr', 'de', 'pt', 'it', 'ar', 'hi', 'th', 'vi', 'id', 'tr'];
 
 /** The store of the engine that runs models of this kind. */
-export const nativeStoreOf = (kind: NativeKind) => (kind === 'asr' ? useNativeEngineStore : useNativeTranslatorStore);
+export const nativeStoreOf = (kind: NativeKind) => (kind === 'asr' ? useNativeEngineStore : kind === 'translation' ? useNativeTranslatorStore : useNativeCoachStore);
 
 /** The id its card goes by in the library: no catalog model's. */
 export const nativeCardId = (model: NativeCardModel): string => `native:${model.id}`;
@@ -59,7 +61,8 @@ export const nativeCardId = (model: NativeCardModel): string => `native:${model.
 function entryOf(kind: NativeKind, model: NativeCardModel, recommended: boolean): ModelManifestEntry {
   return {
     id: nativeCardId(model),
-    type: kind,
+    // The library has no kind of its own for a feedback model: it is a text model, as a translator is.
+    type: kind === 'asr' ? 'asr' : 'translation',
     name: model.name,
     languages: model.languages === 'any' ? MANY : [...model.languages],
     multilingual: model.languages === 'any' || model.languages.length > 3,

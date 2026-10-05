@@ -16,7 +16,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { createNativeEngine, openLive, languageName, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, LLAMA_RUNTIME } = require('./native-engine.js');
+const { createNativeEngine, openLive, languageName, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME } = require('./native-engine.js');
 
 const sha = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
 const ARCHIVE = Buffer.from('an archive of the engine');
@@ -148,6 +148,18 @@ describe('the translation runtime', () => {
       expect(model.sha256).toMatch(/^[0-9a-f]{64}$/);
       expect(model.bytes).toBeGreaterThan(1_000_000_000);
     }
+  });
+
+  it('runs the feedback models too, each fixed by a revision, a size and a hash', () => {
+    expect(Object.keys(COACHES)).toEqual(['gemma-4-e2b']);
+    for (const model of Object.values(COACHES)) {
+      expect(model.url).toMatch(/^https:\/\/huggingface\.co\/[^/]+\/[^/]+\/resolve\/[0-9a-f]{40}\/[\w.-]+\.gguf$/);
+      expect(model.url.endsWith(`/${model.file}`)).toBe(true);
+      expect(model.sha256).toMatch(/^[0-9a-f]{64}$/);
+      expect(model.bytes).toBeGreaterThan(500_000_000);
+    }
+    const engine = createNativeEngine({ dir, platform: 'darwin', arch: 'arm64', catalog: { engine: LLAMA, models: COACHES }, runtime: LLAMA_RUNTIME, fetch: async () => { throw new Error('nothing is fetched'); } });
+    expect(engine.status()).toMatchObject({ supported: true, models: { 'gemma-4-e2b': { state: 'absent' } } });
   });
 
   it('is started on one model by its file, on this computer alone, and warmed by one short answer', async () => {

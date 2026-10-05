@@ -62,4 +62,6 @@ function createNativeEngineStore(engine: NativeEngineName) {
 export const useNativeEngineStore = createNativeEngineStore('native-engine');
 /** The engine that translates: llama.cpp's server. */
 export const useNativeTranslatorStore = createNativeEngineStore('native-translator');
+/** The engine that gives the grammar feedback: llama.cpp's server once more, with a chat model. */
+export const useNativeCoachStore = createNativeEngineStore('native-coach');
 export type NativeEngineStore = typeof useNativeEngineStore;

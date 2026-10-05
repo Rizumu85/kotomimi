@@ -56,9 +56,9 @@ describe('what the main process says of the engine, held to its shape', () => {
 });
 
 describe('the native engine as what hears on this computer', () => {
-  it('is kept as stored, with its model, and is only the hearing stage\'s', () => {
+  it('is kept as stored, with its model', () => {
     expect(LOCALAI_DEFAULTS).toMatchObject({ asrHere: 'app', asrNativeModel: NATIVE_DEFAULT_MODEL });
-    const kept = migrateLocalAISettings({ asrHere: 'native', asrNativeModel: 'r2t2-q8', coachHere: 'native' }, { legacy: {}, credentials: {} });
+    const kept = migrateLocalAISettings({ asrHere: 'native', asrNativeModel: 'r2t2-q8', coachHere: 'nonsense' }, { legacy: {}, credentials: {} });
     expect(kept).toMatchObject({ asrHere: 'native', asrNativeModel: 'r2t2-q8', coachHere: 'app' });
   });
 
@@ -92,7 +92,7 @@ describe('the native engine as what hears on this computer', () => {
   });
 
   it('knows a model by its id, and falls to the default for one it no longer has', () => {
-    expect(nativeModel('r2t2-q8').name).toBe('Confucius4 R2T2');
+    expect(nativeModel('r2t2-q8').name).toBe('Confucius4 R2T2 GGUF');
     expect(nativeModel('gone').id).toBe(NATIVE_DEFAULT_MODEL);
     expect(nativeHears(nativeModel('r2t2-q8'), 'zh-CN')).toBe(true);
     expect(nativeHears(nativeModel('r2t2-q8'), 'th')).toBe(false);
@@ -112,7 +112,7 @@ describe('the native engine as what hears on this computer', () => {
 
   it('lists the models in the order they were measured: the recognition of the system itself, then the one read a stretch at a time, then the one that writes as it listens', () => {
     const families = NATIVE_MODELS.map((m) => m.name).filter((name, at, all) => all.indexOf(name) === at);
-    expect(families).toEqual(['Apple Speech', 'Qwen3-ASR 1.7B GGUF', 'Confucius4 R2T2']);
+    expect(families).toEqual(['Apple Speech', 'Qwen3-ASR 1.7B GGUF', 'Confucius4 R2T2 GGUF']);
   });
 });
 
@@ -217,7 +217,7 @@ describe('whether a run that hears by the engine can start', () => {
     const none = asked(NO_NATIVE_ENGINE);
     expect(await none.gap).toMatchObject({ ok: false, code: 'native_unsupported' });
     const absent = asked(engine({ models: { 'r2t2-q8': { state: 'absent', received: 0, total: 2477512064 } } }));
-    expect(await absent.gap).toMatchObject({ ok: false, code: 'native_missing', params: { name: 'Confucius4 R2T2' } });
+    expect(await absent.gap).toMatchObject({ ok: false, code: 'native_missing', params: { name: 'Confucius4 R2T2 GGUF' } });
     const noRuntime = asked(engine({ engine: 'absent' }));
     expect(await noRuntime.gap).toMatchObject({ ok: false, code: 'native_missing' });
     expect(none.start).not.toHaveBeenCalled();
@@ -232,7 +232,7 @@ describe('whether a run that hears by the engine can start', () => {
     const both = engine({ models: { 'r2t2-q8': { state: 'downloaded', received: 1, total: 1 }, 'qwen3-asr-1.7b-q8': { state: 'downloaded', received: 1, total: 1 } } });
     const start = vi.fn();
     const gap = await nativeGap({ model: 'r2t2-q8', byLanguage: { zh: 'qwen3-asr-1.7b-q8' } }, ['ja', 'zh-CN'], { status: async () => both, start });
-    expect(gap).toMatchObject({ ok: false, code: 'native_two_models', params: { name: 'Confucius4 R2T2', other: 'Qwen3-ASR 1.7B GGUF' } });
+    expect(gap).toMatchObject({ ok: false, code: 'native_two_models', params: { name: 'Confucius4 R2T2 GGUF', other: 'Qwen3-ASR 1.7B GGUF' } });
     expect(start).not.toHaveBeenCalled();
   });
 

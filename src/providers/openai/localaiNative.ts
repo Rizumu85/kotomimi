@@ -12,7 +12,8 @@
 import type { CheckResult } from '../../lib/provider/types';
 import type { NativeEngineStatus } from '../../lib/native/nativeEngine';
 import type { NativeLimits } from './nativeAsr';
-import { useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
+import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
+import { nativeCoach } from './nativeCoaches';
 import { nativeTranslates, nativeTranslator } from './nativeTranslators';
 
 /** A model of the engine, as the settings show it. Its file, address and checksum are the main process's. */
@@ -68,7 +69,7 @@ const WINDOW_LIMITS: Partial<NativeLimits> = { rollAfter: 8, rollAt: 8, rollHard
 export const NATIVE_MODELS: readonly NativeModel[] = [
   ...APPLE_LANGUAGES.map((language) => ({ id: `${APPLE_PREFIX}${language}`, name: 'Apple Speech', bytes: 0, languages: [language], limits: APPLE_LIMITS })),
   { id: 'qwen3-asr-1.7b-q8', name: 'Qwen3-ASR 1.7B GGUF', bytes: 2473010048, languages: QWEN_LANGUAGES, limits: WINDOW_LIMITS },
-  { id: 'r2t2-q8', name: 'Confucius4 R2T2', bytes: 2477512064, languages: ['ja', 'zh', 'en', 'ko', 'fr', 'de', 'it', 'pt', 'ru', 'es', 'ar'] },
+  { id: 'r2t2-q8', name: 'Confucius4 R2T2 GGUF', bytes: 2477512064, languages: ['ja', 'zh', 'en', 'ko', 'fr', 'de', 'it', 'pt', 'ru', 'es', 'ar'] },
 ];
 
 /** The one every system the engine is published for can run. */
@@ -236,6 +237,32 @@ export function translatorIdle(deps: NativeCheckDeps = {}): void {
   (deps.stop ?? (() => { void store.stop(); }))();
 }
 
+/**
+ * The same, for a run whose grammar feedback is given by the native feedback
+ * engine: its model downloaded, and the engine up — brought up when it is not.
+ */
+export async function coachGap(id: string, deps: NativeCheckDeps = {}): Promise<Extract<CheckResult, { ok: false }> | null> {
+  const store = useNativeCoachStore.getState();
+  const status = await (deps.status ?? store.refresh)();
+  const model = nativeCoach(id);
+  if (!status.supported) return { ok: false, reason: 'The native feedback engine is not available for this system.', code: 'native_coach_unsupported' };
+  if (!nativeDownloaded(status, model.id)) return { ok: false, reason: `${model.name} is not downloaded.`, code: 'native_coach_missing', params: { name: model.name } };
+  if (nativeReady(status, model.id)) return null;
+  if (status.run.state === 'failed' && status.run.model === model.id) return { ok: false, reason: `The native feedback engine could not start: ${status.run.tail.trim().split('\n').pop() ?? ''}`, code: 'native_coach_failed' };
+  if (status.run.state === 'stopped' || status.run.model !== model.id) (deps.start ?? ((which: string) => { void store.start(which); }))(model.id);
+  return { ok: false, reason: 'The native feedback engine is starting.', code: 'native_coach_warming' };
+}
+
+/** A run with no feedback by the engine has no use for it. */
+export function coachIdle(deps: NativeCheckDeps = {}): void {
+  const store = useNativeCoachStore.getState();
+  if (store.status.run.state === 'stopped') return;
+  (deps.stop ?? (() => { void store.stop(); }))();
+}
+
+/** Where the feedback engine answers now: its chat base URL; a port of 0 while it is not up. */
+export const coachBaseUrl = (): string => `http://127.0.0.1:${useNativeCoachStore.getState().status.run.port}/v1`;
+
 /** Where the translation engine answers now: its chat base URL; a port of 0 while it is not up. */
 export const translatorBaseUrl = (): string => `http://127.0.0.1:${useNativeTranslatorStore.getState().status.run.port}/v1`;
 
@@ -243,6 +270,6 @@ const stamp = (state: { status: NativeEngineStatus }): string => `${state.status
 
 /** Calls back when an engine's readiness may have changed: it came up, a download ended, a model was deleted. */
 export function watchNativeEngine(onChange: () => void): () => void {
-  const stops = [useNativeEngineStore.subscribe(stamp, () => onChange()), useNativeTranslatorStore.subscribe(stamp, () => onChange())];
+  const stops = [useNativeEngineStore.subscribe(stamp, () => onChange()), useNativeTranslatorStore.subscribe(stamp, () => onChange()), useNativeCoachStore.subscribe(stamp, () => onChange())];
   return () => { for (const stop of stops) stop(); };
 }

@@ -116,6 +116,10 @@ export const NOTICE_ALIASES: Readonly<Record<string, string>> = {
   native_translator_missing: 'providers.localai.translatorMissing',
   native_translator_warming: 'providers.localai.translatorWarming',
   native_translator_failed: 'providers.localai.translatorFailed',
+  native_coach_unsupported: 'providers.localai.nativeCoachUnsupported',
+  native_coach_missing: 'providers.localai.nativeCoachMissing',
+  native_coach_warming: 'providers.localai.nativeCoachWarming',
+  native_coach_failed: 'providers.localai.nativeCoachFailed',
   api_key_needed: 'providers.localai.apiKeyNeeded',
   api_key_refused: 'providers.localai.apiKeyRefused',
   // Fork: another Kotomimi hears a leg's language with none of its recognizers.

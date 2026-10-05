@@ -63,8 +63,9 @@ import { CHECK_TIMEOUT_MS } from './check';
 import { SERVER_SILENT, isKotomimiServer, kindOf, KOTOMIMI_HOST, modelsFor, serverDefaultModel, type LocalAIModel, type LocalAIModelKind } from './localaiModels';
 import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
-import { ASR_HERES, coachIs, cutsSentencesHere, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, HERES, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Here, type Place } from './localaiDevice';
-import { NATIVE_DEFAULT_MODEL, nativeGap, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
+import { ASR_HERES, coachIs, coachesNatively, cutsSentencesHere, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
+import { NATIVE_DEFAULT_MODEL, coachBaseUrl, coachGap, coachIdle, nativeGap, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
+import { NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
 import { NATIVE_DEFAULT_TRANSLATOR, nativeTranslates, nativeTranslator, translatorRequest } from './nativeTranslators';
 import { setLocalPipeline } from '../../lib/lan/localServer';
 import { useLocalServerStore } from '../../stores/localServerStore';
@@ -129,8 +130,10 @@ export interface LocalAISettings extends RealtimeSettings {
   translateHereModel: string;
   /** The native translation engine's model, when it translates. */
   translateNativeModel: string;
-  coachHere: Here;
+  coachHere: AsrHere;
   coachHereModel: string;
+  /** The native feedback engine's model, when it gives the feedback. */
+  coachNativeModel: string;
   /** That LocalAI's address (`127.0.0.1:8080`) and its Realtime pipeline, as they were when it was chosen. */
   hereAddress: string;
   herePipeline: string;
@@ -191,6 +194,7 @@ export const LOCALAI_DEFAULTS: LocalAISettings = {
   translateNativeModel: NATIVE_DEFAULT_TRANSLATOR,
   coachHere: 'app',
   coachHereModel: '',
+  coachNativeModel: NATIVE_DEFAULT_COACH,
   hereAddress: '127.0.0.1:8080',
   herePipeline: '',
   serverNeedsKey: false,
@@ -304,8 +308,7 @@ const byLanguage = (stored: unknown): Record<string, string> => (stored && typeo
 const quick = (baseUrl: string): { extra?: Readonly<Record<string, unknown>> } => { const extra = quickOf(baseUrl); return extra ? { extra } : {}; };
 
 export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>, inputs: MigrationInputs): LocalAISettings {
-  const text = (k: 'asrModel' | 'asrApiBaseUrl' | 'asrApiModel' | 'translateBaseUrl' | 'coachDeviceModel' | 'coachPrompt' | 'asrHereModel' | 'asrNativeModel' | 'translateHereModel' | 'translateNativeModel' | 'coachHereModel' | 'hereAddress' | 'herePipeline') => (typeof stored[k] === 'string' ? (stored[k] as string) : LOCALAI_DEFAULTS[k]);
-  const here = (k: 'coachHere'): Here => (HERES.includes(stored[k] as Here) ? (stored[k] as Here) : LOCALAI_DEFAULTS[k]);
+  const text = (k: 'asrModel' | 'asrApiBaseUrl' | 'asrApiModel' | 'translateBaseUrl' | 'coachDeviceModel' | 'coachPrompt' | 'asrHereModel' | 'asrNativeModel' | 'translateHereModel' | 'translateNativeModel' | 'coachHereModel' | 'coachNativeModel' | 'hereAddress' | 'herePipeline') => (typeof stored[k] === 'string' ? (stored[k] as string) : LOCALAI_DEFAULTS[k]);
   const flag = (k: 'asrApiNeedsKey' | 'coach' | 'serverNeedsKey') => (typeof stored[k] === 'boolean' ? (stored[k] as boolean) : LOCALAI_DEFAULTS[k]);
   const number = (k: (typeof VAD_FIELDS)[number]) => (typeof stored[k] === 'number' && Number.isFinite(stored[k]) ? (stored[k] as number) : LOCALAI_DEFAULTS[k]);
   const selections = stored.selections;
@@ -327,8 +330,9 @@ export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>
     translateHere: ASR_HERES.includes(stored.translateHere as AsrHere) ? (stored.translateHere as AsrHere) : LOCALAI_DEFAULTS.translateHere,
     translateHereModel: text('translateHereModel'),
     translateNativeModel: text('translateNativeModel'),
-    coachHere: here('coachHere'),
+    coachHere: ASR_HERES.includes(stored.coachHere as AsrHere) ? (stored.coachHere as AsrHere) : LOCALAI_DEFAULTS.coachHere,
     coachHereModel: text('coachHereModel'),
+    coachNativeModel: text('coachNativeModel'),
     hereAddress: text('hereAddress'),
     herePipeline: text('herePipeline'),
     ...migratePlaces(stored, inputs.legacy ?? {}),
@@ -679,7 +683,8 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
     }
 
     const needs = deviceNeeds(deviceChoices(s), ctx.pair, ctx.legs);
-    const coachHere = coachIs(s, 'device') && ctx.legs.includes('speaker');
+    // The app's own chat model gives the feedback: not the native feedback engine, which is asked of itself.
+    const coachHere = coachIs(s, 'device') && !coachesNatively(s) && ctx.legs.includes('speaker');
     if (needs.length > 0 || coachHere) {
       await deviceModelsLoaded(ctx.signal);
       for (const need of needs) {
@@ -702,7 +707,7 @@ export const checkLocalAI = createLocalAICheck();
  * it is warm before Start is pressed. What the servers listed goes with its
  * refusal, as with any other.
  */
-export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISettings, ctx: CheckContext, check: typeof checkLocalAI = checkLocalAI, native: { gap: typeof nativeGap; idle: typeof nativeIdle; translatorGap?: typeof translatorGap; translatorIdle?: typeof translatorIdle } = { gap: nativeGap, idle: nativeIdle }): Promise<CheckResult> {
+export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISettings, ctx: CheckContext, check: typeof checkLocalAI = checkLocalAI, native: { gap: typeof nativeGap; idle: typeof nativeIdle; translatorGap?: typeof translatorGap; translatorIdle?: typeof translatorIdle; coachGap?: typeof coachGap; coachIdle?: typeof coachIdle } = { gap: nativeGap, idle: nativeIdle }): Promise<CheckResult> {
   // Asked first, so that an engine starts warming while the servers are asked.
   let hears: ReturnType<typeof nativeGap> | null = null;
   if (hearsNatively(s)) {
@@ -720,9 +725,16 @@ export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISe
   } else {
     (native.translatorIdle ?? translatorIdle)();
   }
+  let coaches: ReturnType<typeof coachGap> | null = null;
+  if (coachesNatively(s) && ctx.legs.includes('speaker')) {
+    coaches = (native.coachGap ?? coachGap)(s.coachNativeModel);
+    coaches.catch(() => undefined);
+  } else {
+    (native.coachIdle ?? coachIdle)();
+  }
   const servers = await check(k, settled(s), ctx);
   if (!servers.ok) return servers;
-  const refused = (hears ? await hears : null) ?? (translates ? await translates : null);
+  const refused = (hears ? await hears : null) ?? (translates ? await translates : null) ?? (coaches ? await coaches : null);
   return refused ? { ...refused, ...(servers.models?.length ? { models: servers.models } : {}) } : servers;
 }
 
@@ -847,7 +859,10 @@ export function buildLocalAI(context: SessionContext, s: LocalAISettings, shared
     // The speaker practises the target language; their own is the source.
     const prompt = coachPrompt(target, source, s.coachPrompt);
     let coach: AnswerStage;
-    if (s.coachAt === 'device') {
+    if (coachesNatively(s)) {
+      // The native feedback engine: a chat model at an address on this computer, asked as an API's is — with the worked examples.
+      coach = { kind: 'coach', baseUrl: coachBaseUrl(), model: nativeCoach(s.coachNativeModel).id, system: prompt.system, ...(prompt.shots.length ? { shots: prompt.shots } : {}), language: source };
+    } else if (s.coachAt === 'device') {
       const id = deviceCoachModel(s.coachDeviceModel);
       if (!id) return { refused: NO_COACH_HERE, code: 'local_models_missing' };
       // This computer's engines take instructions and one sentence: the worked examples, which go up as earlier turns, stay behind.
@@ -953,7 +968,7 @@ export const localaiProvider: Provider<LocalAISettings, LocalAICredentials, Loca
     // On this computer: by the app's own models, or by the LocalAI installed here, and then which of its models.
     'asrHere', 'translateHere', 'translateHereModel', 'coachHere', 'coachHereModel', 'hereAddress',
     // Or by the native engine, and then with which of its models.
-    'asrNativeModel', 'asrNativeByLanguage', 'translateNativeModel',
+    'asrNativeModel', 'asrNativeByLanguage', 'translateNativeModel', 'coachNativeModel',
   ],
   // This computer's models are per direction, and each leg needs its own.
   checkReadsDirection: true,

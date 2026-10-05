@@ -95,6 +95,13 @@ export const INVOKE_CHANNELS = [
   'native-translator:remove',
   'native-translator:start',
   'native-translator:stop',
+  // Fork: the native feedback engine — the same server with a chat model, run the same way
+  'native-coach:get',
+  'native-coach:download',
+  'native-coach:cancel',
+  'native-coach:remove',
+  'native-coach:start',
+  'native-coach:stop',
   // Fork: starting with the computer, in the background (electron/autostart.js)
   'autostart:get',
   'autostart:set',

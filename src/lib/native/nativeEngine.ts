@@ -82,7 +82,7 @@ export type NativeEngineAction = 'get' | 'download' | 'cancel' | 'remove' | 'sta
  * go by: the one that hears (audio.cpp), and the one that translates
  * (llama.cpp's server).
  */
-export type NativeEngineName = 'native-engine' | 'native-translator';
+export type NativeEngineName = 'native-engine' | 'native-translator' | 'native-coach';
 
 /** Asks the main process; resolves with the state of things, which says what failed. Never rejects. */
 export async function askNativeEngine(action: NativeEngineAction, id?: string, engine: NativeEngineName = 'native-engine'): Promise<NativeEngineStatus> {

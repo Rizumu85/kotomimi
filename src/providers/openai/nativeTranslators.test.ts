@@ -90,7 +90,7 @@ describe('a request in a model\'s own form, on the chat wire', () => {
 describe('the native translation engine as what translates on this computer', () => {
   it('is kept as stored, with its model', () => {
     expect(LOCALAI_DEFAULTS).toMatchObject({ translateHere: 'app', translateNativeModel: NATIVE_DEFAULT_TRANSLATOR });
-    const kept = migrateLocalAISettings({ translateHere: 'native', translateNativeModel: 'hy-mt2-1.8b', coachHere: 'native' }, { legacy: {}, credentials: {} });
+    const kept = migrateLocalAISettings({ translateHere: 'native', translateNativeModel: 'hy-mt2-1.8b' }, { legacy: {}, credentials: {} });
     expect(kept).toMatchObject({ translateHere: 'native', translateNativeModel: 'hy-mt2-1.8b', coachHere: 'app' });
   });
 

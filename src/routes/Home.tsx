@@ -7,7 +7,7 @@ import { useLoadSettings } from '../stores/settingsStore';
 import { useSubtitleStore } from '../stores/subtitleStore';
 import { useAnnotationStore } from '../stores/annotationStore';
 import { useLanStore } from '../stores/lanStore';
-import { useNativeEngineStore, useNativeTranslatorStore } from '../stores/nativeEngineStore';
+import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../stores/nativeEngineStore';
 import { useLanguagePinStore } from '../stores/languagePinStore';
 import { useLocalServerStore } from '../stores/localServerStore';
 import { useFontStore } from '../stores/fontStore';
@@ -52,6 +52,7 @@ export function Home() {
     // Fork: the native recognition engine — whether its model is downloaded, and whether it is up.
     void useNativeEngineStore.getState().hydrate();
     void useNativeTranslatorStore.getState().hydrate();
+    void useNativeCoachStore.getState().hydrate();
     // Fork: the languages pinned to the top of the language menus.
     void useLanguagePinStore.getState().hydrate();
     // Fork: on Windows the page rounds the window's corners itself, and squares them while it fills the screen.

@@ -90,6 +90,8 @@ const validReceiveChannels = [
   'native-engine:stream',
   // Fork: the native translation engine's state as it changes
   'native-translator:status',
+  // Fork: the native feedback engine's state as it changes
+  'native-coach:status',
 ];
 
 // Expose protected methods that allow the renderer process to use
