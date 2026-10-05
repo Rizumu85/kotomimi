@@ -489,3 +489,31 @@ describe('what another device is told of a failure', () => {
     expect(wireError('server_error', 'open C:\\secret\\a.txt failed')).toEqual({ message: 'open … failed', type: 'invalid_request_error', code: 'server_error' });
   });
 });
+
+describe('a sharing Kotomimi\'s translations, when more models are wanted than it keeps', () => {
+  it('is not let go while it is answering: a fourth model waits for room among those answering nobody', async () => {
+    // The first model's answer is slow in coming.
+    let release: () => void = () => {};
+    const made: Array<ReturnType<typeof fakeTranslator>> = [];
+    const t = new LanTranslator({
+      translator: () => {
+        const f = fakeTranslator();
+        if (made.length === 0) f.translate = () => new Promise((resolve) => { release = () => resolve({ translatedText: 'slow' }); });
+        made.push(f);
+        return f;
+      },
+      resolve: (_s, _t, wanted) => wanted,
+      clock: createVirtualClock(1_700_000_000_000),
+    });
+    const ask = (model: string) => t.complete({ model, source_language: 'zh-CN', target_language: 'ja', messages: [{ role: 'user', content: '你好' }] });
+    const first = ask('m1');
+    await ask('m2');
+    await ask('m3');
+    await ask('m4');
+    // Four are wanted and three are kept: the one let go is the oldest that is answering nobody, not the first.
+    expect(made[0].disposes).toBe(0);
+    expect(made[1].disposes).toBe(1);
+    release();
+    expect((await first).status).toBe(200);
+  });
+});

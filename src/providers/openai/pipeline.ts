@@ -509,8 +509,9 @@ class PipelineLeg implements AdapterSession {
   private unanswered(job: Job, why: string, cause?: unknown): void {
     const what = job.stage.kind === 'coach' ? 'The feedback model' : 'The translation model';
     this.events.degraded({
-      // Typed text that cannot be answered is said to be so (the contract's `text-input-answered`).
-      code: job.typed ? 'translation_unavailable' : 'translation_failed',
+      // Each said as what it was: a sentence with no feedback, a typed sentence with no translation (which the
+      // contract's `text-input-answered` wants said), a heard one with none.
+      code: job.stage.kind === 'coach' ? 'feedback_failed' : job.typed ? 'typed_translation_failed' : 'translation_failed',
       message: `${what} (${job.stage.model}) did not answer: ${why}`,
       ...(cause !== undefined ? { cause } : {}),
     });

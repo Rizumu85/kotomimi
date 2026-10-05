@@ -117,6 +117,9 @@ export const NOTICE_ALIASES: Readonly<Record<string, string>> = {
   native_warming: 'providers.localai.nativeWarming',
   native_failed: 'providers.localai.nativeFailed',
   native_interrupted: 'providers.localai.nativeInterrupted',
+  // Fork: one sentence the text model did not answer, said as what it was (the detail stays in the logs).
+  typed_translation_failed: 'providers.localai.typedFailed',
+  feedback_failed: 'providers.localai.feedbackFailed',
   native_busy: 'providers.localai.nativeBusy',
   native_translator_busy: 'providers.localai.nativeBusy',
   native_translator_unsupported: 'providers.localai.translatorUnsupported',

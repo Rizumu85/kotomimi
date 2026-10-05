@@ -625,6 +625,8 @@
       "nativeUnsupported": "The native recognition engine is not available for this system. Choose another model in the Speech recognition card.",
       "nativeMissing": "{{name}} is not downloaded yet. Download it in the Speech recognition card, or choose another model.",
       "nativeWarming": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
+      "typedFailed": "A sentence you typed was not translated: the translation model did not answer.",
+      "feedbackFailed": "One sentence got no grammar feedback: the feedback model did not answer.",
       "nativeInterrupted": "The engine stopped while it was starting. Press Start again.",
       "nativeBusy": "A device you share with is using this engine with {{name}}. Wait for it to finish, or choose {{name}} here too.",
       "nativeFailed": "The recognition engine of this computer could not start. In the Speech recognition card, press \"Try again\" — or choose another model.",

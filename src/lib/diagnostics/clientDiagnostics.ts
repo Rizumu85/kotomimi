@@ -38,6 +38,10 @@ export const CLIENT_DIAGNOSTICS = {
   translation_failed: { severity: 'warning' },
   /** This direction has no translation model: its speech is transcribed only. */
   translation_unavailable: { severity: 'warning' },
+  /** Fork: one sentence that was typed in was not translated — the model did not answer; the session continues. */
+  typed_translation_failed: { severity: 'warning' },
+  /** Fork: one sentence got no grammar feedback — the feedback model did not answer; the session continues. */
+  feedback_failed: { severity: 'warning' },
   /** One segment of spoken translation was lost (the provider killed it); the next one speaks. */
   tts_segment_lost: { severity: 'warning' },
   /** Spoken translation has stopped; transcription and text translation go on. */

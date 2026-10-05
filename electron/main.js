@@ -1326,7 +1326,7 @@ ipcMain.handle('lan:start', async (event, args) => {
       return has(await getNativeTranslator().status(), () => true);
     };
     const upstream = createUpstream({ port: local.port, pipelines: () => local.pipelines(), setPipeline: (name, change, options) => local.setPipeline(name, change, options), ownFirst });
-    lanServer = await startLanServer({ port: Number.isInteger(port) && port > 0 && port < 65536 ? port : 8790, key: String(args?.key ?? ''), upstream }, {
+    lanServer = await startLanServer({ port: Number.isInteger(port) && port >= 1024 && port < 65536 ? port : 8790, key: String(args?.key ?? ''), upstream }, {
       request: (request) => toPage('lan:request', request),
       socketOpen: (socket) => toPage('lan:socket-open', socket),
       socketMessage: (message) => toPage('lan:socket-message', message),

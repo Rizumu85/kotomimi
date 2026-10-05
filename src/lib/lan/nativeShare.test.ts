@@ -225,3 +225,17 @@ describe('an engine that is someone\u2019s is not switched to another model', ()
     expect(nativeTranslatorFor('ja', 'zh', '')).toBe('index-translate-2b');
   });
 });
+
+describe('a name this computer shares nothing under', () => {
+  it('is no name: the choice is this computer’s, as when a device names none', () => {
+    // A device still has chosen a model this computer had once — a LocalAI’s "Apple Speech Transcriber", since removed.
+    useNativeEngineStore.setState({ status: MAC });
+    useNativeTranslatorStore.setState({ status: TRANSLATORS });
+    expect(appLanModels.recognizer('ja', '')).toEqual({ modelId: 'apple-speech:ja', streaming: true });
+    expect(appLanModels.recognizer('ja', 'apple-speech-transcriber')).toEqual({ modelId: 'apple-speech:ja', streaming: true });
+    expect(appLanModels.translator('ja', 'zh', 'a-model-that-is-gone')).toBe(appLanModels.translator('ja', 'zh', ''));
+    expect(appLanModels.translator('ja', 'zh', '')).not.toBeNull();
+    // A name it does share is kept to.
+    expect(appLanModels.translator('ja', 'zh', 'hy-mt2-1.8b')).toBe('hy-mt2-1.8b');
+  });
+});

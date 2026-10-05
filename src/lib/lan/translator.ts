@@ -40,7 +40,8 @@ const MAX_LOADED = 3;
 /** A model no request has asked for this long is let go; the next request loads it again. */
 export const TRANSLATOR_IDLE_MS = 10 * 60_000;
 
-interface Loaded { engine: Translator; ready: Promise<unknown>; usedAt: number }
+/** `busy`: the requests it is answering, or loading for, now. */
+interface Loaded { engine: Translator; ready: Promise<unknown>; usedAt: number; busy: number }
 
 const refusal = (status: number, code: string, message: string): HttpAnswer => ({ status, body: { error: wireError(code, message) } });
 
@@ -76,11 +77,18 @@ export class LanTranslator {
     if (!model) return refusal(404, 'model_not_found', `This Kotomimi shares no translation model for ${source} → ${target}.`);
 
     let translated: string;
+    // Held while it loads and answers: room is made for another model only among those answering nobody.
+    const entry = this.entryFor(model, source, target);
+    entry.busy += 1;
     try {
-      const engine = await this.engineFor(model, source, target);
-      translated = (await engine.translate(text, buildDefaultLocalPrompt(source, target), true)).translatedText ?? '';
+      await entry.ready;
+      translated = (await entry.engine.translate(text, buildDefaultLocalPrompt(source, target), true)).translatedText ?? '';
     } catch (cause) {
       return refusal(500, 'server_error', `The translation failed: ${cause instanceof Error ? cause.message : String(cause)}`);
+    } finally {
+      entry.busy -= 1;
+      entry.usedAt = this.deps.clock.now();
+      this.trim('');
     }
     const id = `chatcmpl-kotomimi-${++this.ids}`;
     const created = Math.floor(this.deps.clock.now() / 1000);
@@ -107,7 +115,7 @@ export class LanTranslator {
       this.cancelSweep = null;
       const now = this.deps.clock.now();
       for (const [key, entry] of [...this.loaded]) {
-        if (now - entry.usedAt < TRANSLATOR_IDLE_MS) continue;
+        if (entry.busy > 0 || now - entry.usedAt < TRANSLATOR_IDLE_MS) continue;
         this.loaded.delete(key);
         entry.engine.dispose();
       }
@@ -115,12 +123,12 @@ export class LanTranslator {
     }, TRANSLATOR_IDLE_MS);
   }
 
-  private async engineFor(model: string, source: string, target: string): Promise<Translator> {
+  private entryFor(model: string, source: string, target: string): Loaded {
     const key = `${model}|${source}|${target}`;
     let entry = this.loaded.get(key);
     if (!entry) {
       const engine = this.deps.translator();
-      const created: Loaded = { engine, ready: engine.init(source, target, model), usedAt: this.deps.clock.now() };
+      const created: Loaded = { engine, ready: engine.init(source, target, model), usedAt: this.deps.clock.now(), busy: 0 };
       entry = created;
       this.loaded.set(key, created);
       // A model that cannot load, or dies later, is forgotten: the next request loads it afresh.
@@ -134,14 +142,17 @@ export class LanTranslator {
     }
     entry.usedAt = this.deps.clock.now();
     this.watchIdle();
-    await entry.ready;
-    return entry.engine;
+    return entry;
   }
 
-  /** Lets the least recently used models go, never the one just asked for. */
+  /**
+   * Lets the least recently used models go, never the one just asked for — and never one that is answering a
+   * request: its device would get an error for a sentence it was promised. More than a few stay loaded for as long
+   * as that many are in use at once.
+   */
   private trim(keep: string): void {
     while (this.loaded.size > MAX_LOADED) {
-      const oldest = [...this.loaded.entries()].filter(([key]) => key !== keep).sort((a, b) => a[1].usedAt - b[1].usedAt)[0];
+      const oldest = [...this.loaded.entries()].filter(([key, entry]) => key !== keep && entry.busy === 0).sort((a, b) => a[1].usedAt - b[1].usedAt)[0];
       if (!oldest) return;
       this.loaded.delete(oldest[0]);
       oldest[1].engine.dispose();

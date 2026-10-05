@@ -27,6 +27,7 @@ import { Monitor, Server, Share2 } from 'lucide-react';
 import { useProviderStore } from '../../../stores/providerStore';
 import { useLanStore } from '../../../stores/lanStore';
 import { canFindServers } from '../../../lib/lan/discover';
+import { LAN_PIPELINE } from '../../../lib/lan/protocol';
 import { useAuthContext } from '../../providers/useAuthContext';
 import { checkErrorWords } from '../../../lib/provider/checkError';
 import { readCredentials, isMissing } from '../../../lib/provider/credentials';
@@ -129,7 +130,7 @@ const StepKotomimi: React.FC<Props> = ({ draft, dispatch, skipButton }) => {
       if (mine.signal.aborted) return;
       if (result.ok) {
         dispatch({ type: 'credentialsValidated' });
-        setMessage({ ok: true, text: t('fork.wizard.serverFound', { count: result.models?.length ?? 0 }) });
+        setMessage({ ok: true, text: t('fork.wizard.serverFound', { count: (result.models ?? []).filter((m) => m.id !== LAN_PIPELINE).length }) });
       } else if (result.code === 'server_key_needed') {
         // It asks for a key it was not given: the field, and what to type in it.
         setKeyAsked(true);

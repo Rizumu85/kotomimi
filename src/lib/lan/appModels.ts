@@ -14,12 +14,19 @@ import type { SharedModel } from './protocol';
 
 const isRecognizer = (entry: ModelManifestEntry | undefined): entry is ModelManifestEntry => entry?.type === 'asr' || entry?.type === 'asr-stream';
 
-/** A model this computer can run now: downloaded (a cloud model needs none) and its device present. */
+/**
+ * A model this computer can lend now: downloaded, and its device present. An online service the app can use for
+ * itself (Bing, for translation with no model downloaded) is not one: what another device says would be sent on to
+ * it, and "sharing this computer's models" says nothing of that.
+ */
 function usable(entry: ModelManifestEntry | undefined): entry is ModelManifestEntry {
-  if (!entry) return false;
+  if (!entry || entry.isCloudModel) return false;
   const { modelStatuses, webgpuAvailable } = useModelStore.getState();
-  return (Boolean(entry.isCloudModel) || modelStatuses[entry.id] === 'downloaded') && deviceReady(entry, webgpuAvailable);
+  return modelStatuses[entry.id] === 'downloaded' && deviceReady(entry, webgpuAvailable);
 }
+
+/** A model's name as another device gave it, where this computer shares one by it; empty where it shares none. */
+const knownHere = (name: string): string => (name && appLanModels.shared().some((m) => m.id === name) ? name : '');
 
 /** What the model store answers, for the sharing host. */
 export const appLanModels: LanModels = {
@@ -32,7 +39,10 @@ export const appLanModels: LanModels = {
     const native = nativeShared();
     return [...native.filter((m) => m.kind === 'asr'), ...recognizers, ...native.filter((m) => m.kind !== 'asr'), ...translators];
   },
-  recognizer(language, wanted) {
+  recognizer(language, named_) {
+    // A name this computer shares nothing under — a model it had once, which a device still has chosen — is no name:
+    // the choice is this computer's, as when none is given, and not a refusal or a lesser model.
+    const wanted = knownHere(named_);
     // A native recognizer when it is the one named — or nothing is named and one hears the language.
     const native = nativeRecognizerFor(language, wanted);
     if (native) return native;
@@ -44,13 +54,16 @@ export const appLanModels: LanModels = {
     const picked = useModelStore.getState().resolve(language, language, {}).asr;
     return picked ? { modelId: picked.modelId, streaming: getManifestEntry(picked.modelId)?.type === 'asr-stream' } : null;
   },
-  translator(source, target, wanted) {
+  translator(source, target, named_) {
+    const wanted = knownHere(named_);
     const native = nativeTranslatorFor(source, target, wanted);
     if (native) return native;
     const named = getManifestEntry(wanted);
     if (named?.type === 'translation' && usable(named) && isTranslationModelCompatible(named, source, target)) return named.id;
+    // What the app would pick for itself — unless that is the online service it falls back to with nothing downloaded.
     const picked = useModelStore.getState().resolve(source, target, {}).translation;
-    return picked && getManifestEntry(picked.modelId)?.type === 'translation' ? picked.modelId : null;
+    const entry = picked ? getManifestEntry(picked.modelId) : undefined;
+    return entry?.type === 'translation' && usable(entry) ? entry.id : null;
   },
 };
 

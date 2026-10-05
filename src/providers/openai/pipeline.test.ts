@@ -141,7 +141,7 @@ describe('a leg whose translation runs on a text model', () => {
     await h.settled();
     expect(h.of('degraded').map((e) => [e.payload.code, e.payload.message])).toEqual([
       ['translation_failed', 'The translation model (hy-mt2-1.8b) did not answer: Failed to fetch'],
-      ['translation_unavailable', 'The translation model (hy-mt2-1.8b) did not answer: HTTP 404: model not found'],
+      ['typed_translation_failed', 'The translation model (hy-mt2-1.8b) did not answer: HTTP 404: model not found'],
     ]);
     expect(h.of('failed')).toEqual([]);
     // The next one is answered.

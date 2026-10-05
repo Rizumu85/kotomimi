@@ -187,3 +187,11 @@ describe('the LocalAI of this computer', () => {
     expect((await server.refresh()).state).toBe('stopped');
   });
 });
+
+describe('a LocalAI whose help could not be read', () => {
+  it('is still told where to listen: left to itself it listens on every network', () => {
+    expect(buildArgs({ base: '/x', address: '127.0.0.1:8080', help: '', exists: () => false })).toEqual(['run', '--address', '127.0.0.1:8080']);
+    // One whose help was read and names no such flag is not given it: an unknown flag stops it from starting.
+    expect(buildArgs({ base: '/x', address: '127.0.0.1:8080', help: '--models-path', exists: () => false })).toEqual(['run']);
+  });
+});

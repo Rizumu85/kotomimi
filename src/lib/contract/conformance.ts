@@ -197,7 +197,8 @@ export function checkConformance(log: ConformanceLog, context: SessionContext): 
         break;
       }
       case 'degraded':
-        if (entry.payload.code === 'translation_unavailable') translationUnavailable = true;
+        // Fork: `typed_translation_failed` says the same of one typed sentence — it has its source, and no translation.
+        if (entry.payload.code === 'translation_unavailable' || entry.payload.code === 'typed_translation_failed') translationUnavailable = true;
         break;
       case 'failed':
       case 'closed':

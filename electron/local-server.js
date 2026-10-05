@@ -73,12 +73,15 @@ function portOf(address) {
  */
 function buildArgs({ base, address, help, exists }) {
   const knows = (flag) => help.includes(flag);
+  // The address is given even where the help could not be read at all: left to itself a LocalAI listens on every
+  // network of the computer, and every version this app has met takes the flag.
+  const addressed = knows('--address') || !help.trim();
   const dir = (flag, name) => (knows(flag) && exists(path.join(base, name)) ? [flag, path.join(base, name)] : []);
   return [
     'run',
     ...dir('--models-path', 'models'),
     ...dir('--backends-path', 'backends'),
-    ...(knows('--address') ? ['--address', address] : []),
+    ...(addressed ? ['--address', address] : []),
     // A LocalAI on the local network with no key of its own: newer versions refuse the bind unless told it is meant.
     ...(knows('--allow-insecure-public-bind') && !/^(127\.|localhost)/.test(address) ? ['--allow-insecure-public-bind'] : []),
     // Models left idle are unloaded: without this LocalAI keeps each one in memory until it stops.

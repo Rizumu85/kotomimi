@@ -358,6 +358,8 @@ const PROVIDER = {
     "识别引擎还在启动，开机后第一次大约要半分钟。准备好后就可以开始。",
     "辨識引擎還在啟動，開機後第一次大約要半分鐘。準備好後就可以開始。",
   ],
+  typedFailed: ['A sentence you typed was not translated: the translation model did not answer.', '有一句打字没能翻译：翻译模型没有回应。', '有一句打字沒能翻譯：翻譯模型沒有回應。'],
+  feedbackFailed: ['One sentence got no grammar feedback: the feedback model did not answer.', '有一句话没有得到语法反馈：反馈模型没有回应。', '有一句話沒有得到語法回饋：回饋模型沒有回應。'],
   nativeInterrupted: ['The engine stopped while it was starting. Press Start again.', '引擎在启动途中被停下了，请再点一次开始。', '引擎在啟動途中被停下了，請再點一次開始。'],
   nativeBusy: ['A device you share with is using this engine with {{name}}. Wait for it to finish, or choose {{name}} here too.', '共享的设备正在用这个引擎跑 {{name}}。等它用完，或者这里也选 {{name}}。', '共享的裝置正在用這個引擎跑 {{name}}。等它用完，或者這裡也選 {{name}}。'],
   nativeFailed: [
