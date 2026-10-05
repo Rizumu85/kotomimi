@@ -40,6 +40,12 @@ const NOTES: Readonly<Record<string, string>> = {
   'hy-mt1.5-1.8b': 'noteHyMt15',
 };
 
+/**
+ * What every model of a kind shares, said once by a chip on its card rather than in each model's own note: one run
+ * by an engine the app downloads has to warm up; the system's own recognition needs nothing of the graphics card.
+ */
+const tagOf = (id: string): 'native' | 'system' => (id.startsWith('apple-speech') ? 'system' : 'native');
+
 /** Enough languages for the card to say "multilingual", for a model that lists none. */
 const MANY = ['zh', 'en', 'ja', 'ko', 'es', 'ru', 'fr', 'de', 'pt', 'it', 'ar', 'hi', 'th', 'vi', 'id', 'tr'];
 
@@ -94,6 +100,7 @@ export function NativeEngineCard({ kind, model, recommended = true, selected, on
       isCompatible={status.supported || !asked}
       compatibilityHint={status.supported || !asked ? undefined : t('providers.localai.nativeUnsupportedShort')}
       note={note ? t(`providers.localai.${note}`) : undefined}
+      tag={{ label: t(`providers.localai.tag_${tagOf(model.id)}`), hint: t(`providers.localai.tagHint_${tagOf(model.id)}`) }}
       onSelect={onSelect}
       onDownload={() => { void store().download(model.id); }}
       onCancel={() => { void store().cancel(model.id); }}

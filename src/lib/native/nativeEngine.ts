@@ -25,6 +25,8 @@ export interface NativeEngineStatus {
   engineBytes: number;
   models: Record<string, NativeModelStatus>;
   run: { state: NativeRunState; model: string | null; port: number; tail: string };
+  /** The models that can hear now. More than the one `run` names where a computer has two engines up (a Mac). */
+  up: string[];
 }
 
 export const NO_NATIVE_ENGINE: NativeEngineStatus = {
@@ -33,6 +35,7 @@ export const NO_NATIVE_ENGINE: NativeEngineStatus = {
   engineBytes: 0,
   models: {},
   run: { state: 'stopped', model: null, port: 0, tail: '' },
+  up: [],
 };
 
 const MODEL_STATES: readonly NativeModelState[] = ['absent', 'downloading', 'verifying', 'downloaded', 'failed'];
@@ -61,6 +64,7 @@ export function nativeEngineStatus(value: unknown): NativeEngineStatus {
       port: Number.isInteger(run.port) && (run.port as number) > 0 && (run.port as number) < 65536 ? (run.port as number) : 0,
       tail: typeof run.tail === 'string' ? run.tail.slice(0, 4000) : '',
     },
+    up: Array.isArray(answer.up) ? answer.up.filter((id): id is string => typeof id === 'string').slice(0, 50) : [],
   };
 }
 

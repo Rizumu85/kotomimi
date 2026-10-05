@@ -96,6 +96,8 @@ function createAppleSpeech(deps = {}) {
     // Only the languages the system itself offers: before it has been asked, none.
     models: supported ? Object.fromEntries(Object.keys(LOCALES).filter((language) => offered.has(LOCALES[language])).map((language) => [idOf(language), modelState(language)])) : {},
     run: { ...run },
+    // Once asked for, the system's recognition hears every language it has installed.
+    up: supported && run.state === 'ready' ? Object.keys(LOCALES).filter((language) => installed?.has(LOCALES[language])).map(idOf) : [],
   });
   const tell = () => onChange(snapshot());
 

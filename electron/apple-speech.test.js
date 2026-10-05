@@ -121,7 +121,11 @@ describe('its languages, as models', () => {
 describe('a run', () => {
   it('is ready as soon as it is asked for, when the language is installed: there is nothing to start', async () => {
     const { speech } = mac();
-    expect((await speech.start(`${PREFIX}ja`)).run).toEqual({ state: 'ready', model: `${PREFIX}ja`, port: 0, tail: '' });
+    const started = await speech.start(`${PREFIX}ja`);
+    expect(started.run).toEqual({ state: 'ready', model: `${PREFIX}ja`, port: 0, tail: '' });
+    // Once asked for, it hears every language installed.
+    expect(started.up).toEqual(Object.entries(started.models).filter(([, model]) => model.state === 'downloaded').map(([id]) => id));
+    expect(started.up).toContain(`${PREFIX}ja`);
     expect((await speech.start(`${PREFIX}en`)).run).toMatchObject({ state: 'failed', model: `${PREFIX}en` });
     expect((await speech.stop()).run).toMatchObject({ state: 'stopped', model: null });
   });

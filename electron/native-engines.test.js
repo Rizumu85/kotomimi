@@ -18,7 +18,7 @@ const absent = { state: 'absent', received: 0, total: 1 };
 /** An engine with these models, in the shape both real ones have; `log` takes what it was asked. */
 function standIn(name, { models, engine = 'ready', supported = true, log }) {
   return (tell) => {
-    const self = { tell, state: { supported, engine, engineBytes: 0, models: { ...models }, run: STOPPED }, streams: [], next: 1 };
+    const self = { tell, state: { supported, engine, engineBytes: 0, models: { ...models }, run: STOPPED, up: [] }, streams: [], next: 1 };
     const status = () => ({ ...self.state, models: { ...self.state.models }, run: { ...self.state.run } });
     const said = (what, id) => { log.push(`${name}.${what}${id === undefined ? '' : `(${id})`}`); };
     self.engine = {
@@ -26,7 +26,7 @@ function standIn(name, { models, engine = 'ready', supported = true, log }) {
       download: async (id) => { said('download', id); self.state.engine = 'ready'; self.state.models[id] = downloaded; tell.onChange(status()); return status(); },
       cancel: async (id) => { said('cancel', id); return status(); },
       remove: async (id) => { said('remove', id); self.state.models[id] = absent; return status(); },
-      start: async (id) => { said('start', id); self.state.run = { state: 'ready', model: id, port: 0, tail: '' }; tell.onChange(status()); return status(); },
+      start: async (id) => { said('start', id); self.state.run = { state: 'ready', model: id, port: 0, tail: '' }; self.state.up = [id]; tell.onChange(status()); return status(); },
       stop: async () => { said('stop'); self.state.run = STOPPED; return status(); },
       openStream: (init) => { if (self.state.run.state !== 'ready') return null; const id = self.next++; self.streams.push({ id, init, written: [], ended: false, aborted: false }); return id; },
       writeStream: (id, pcm) => { self.streams.find((s) => s.id === id).written.push(pcm); return true; },
@@ -96,7 +96,10 @@ describe('two native recognizers as one', () => {
   it('runs the one started last, and leaves the other up: someone may still be listening through it', async () => {
     const { world, engine } = mac();
     expect((await engine.start('qwen3-asr-1.7b-q8')).run).toMatchObject({ state: 'ready', model: 'qwen3-asr-1.7b-q8' });
-    expect((await engine.start('apple-speech:ja')).run).toMatchObject({ state: 'ready', model: 'apple-speech:ja' });
+    const both = await engine.start('apple-speech:ja');
+    expect(both.run).toMatchObject({ state: 'ready', model: 'apple-speech:ja' });
+    // Both can be asked now, whichever was started last.
+    expect(both.up).toEqual(['apple-speech:ja', 'qwen3-asr-1.7b-q8']);
     expect(world.log).toEqual(['runtime.start(qwen3-asr-1.7b-q8)', 'apple.start(apple-speech:ja)']);
     // Everything is stopped when the page says so.
     expect((await engine.stop()).run).toEqual(STOPPED);

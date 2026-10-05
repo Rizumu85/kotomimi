@@ -282,12 +282,35 @@ const PROVIDER = {
   ],
 
   // The native recognition engine: a runtime the app downloads and runs beside itself.
+  nativeNone: ['No model chosen', '未选择模型', '未選擇模型'],
+  nativeUnchosen: [
+    'No speech recognition model is chosen for {{source}} yet. Choose one in the Speech recognition card.',
+    '还没有为{{source}}选择语音识别模型。请在「语音识别」卡片里选一个。',
+    '還沒有為{{source}}選擇語音辨識模型。請在「語音辨識」卡片裡選一個。',
+  ],
+  nativeTwoModels: [
+    '{{name}} and {{other}} cannot run at the same time. Choose the same model for both languages.',
+    '{{name}} 和 {{other}} 不能同时运行，请给两种语言选同一个模型。',
+    '{{name}} 和 {{other}} 不能同時執行，請給兩種語言選同一個模型。',
+  ],
+  tag_native: ['Native engine', '原生引擎', '原生引擎'],
+  tagHint_native: [
+    "Runs on the graphics card in an engine the app downloads with it: quicker than the app's own way. The first start after the computer boots takes about half a minute.",
+    '由应用一并下载的独立引擎用显卡运行，比应用自带的方式快。开机后第一次启动约半分钟。',
+    '由應用程式一併下載的獨立引擎用顯示卡執行，比應用程式內建的方式快。開機後第一次啟動約半分鐘。',
+  ],
+  tag_system: ['Built into macOS', '系统自带', '系統內建'],
+  tagHint_system: [
+    'The speech recognition of macOS itself: no video memory taken, nothing to warm up. The system downloads each language.',
+    'Mac 系统自带的语音识别：不占显存，不需要预热。每种语言的语言包由系统下载。',
+    'Mac 系統內建的語音辨識：不佔顯示記憶體，不需要預熱。每種語言的語言包由系統下載。',
+  ],
   nativeEntry: ["{{name}} (native engine)", "{{name}}（原生引擎）", "{{name}}（原生引擎）"],
   nativeReady: ["The engine is ready.", "引擎已就绪。", "引擎已就緒。"],
   nativeWarmingShort: [
-    "Starting the engine… The first start after the computer boots takes about half a minute; after that, a few seconds.",
-    "正在启动引擎…开机后第一次启动大约要半分钟，之后每次只要几秒。",
-    "正在啟動引擎…開機後第一次啟動大約要半分鐘，之後每次只要幾秒。",
+    "Starting the engine… About half a minute the first time after the computer boots.",
+    "正在启动引擎…开机后第一次大约要半分钟。",
+    "正在啟動引擎…開機後第一次大約要半分鐘。",
   ],
   nativeFailedShort: ["The engine could not start.", "引擎没能启动。", "引擎沒能啟動。"],
   nativeRetry: ["Try again", "重试", "重試"],
@@ -308,9 +331,9 @@ const PROVIDER = {
     "{{name}} 還沒有下載。請在「語音辨識」卡片裡下載，或者換一個模型。",
   ],
   nativeWarming: [
-    "The recognition engine of this computer is still starting. The first start after the computer boots takes about half a minute — it loads a 2.5 GB model onto the graphics card; after that it takes a few seconds. You can start as soon as it is ready.",
-    "这台电脑的识别引擎还在启动。开机后第一次启动大约要半分钟（要把 2.5 GB 的模型装进显卡），之后每次只要几秒。准备好后就可以开始。",
-    "這台電腦的辨識引擎還在啟動。開機後第一次啟動大約要半分鐘（要把 2.5 GB 的模型載入顯示卡），之後每次只要幾秒。準備好後就可以開始。",
+    "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
+    "识别引擎还在启动，开机后第一次大约要半分钟。准备好后就可以开始。",
+    "辨識引擎還在啟動，開機後第一次大約要半分鐘。準備好後就可以開始。",
   ],
   nativeFailed: [
     "The recognition engine of this computer could not start. In the Speech recognition card, press \"Try again\" — or choose another model.",
@@ -320,14 +343,14 @@ const PROVIDER = {
 
   // What was found of each recognizer on Japanese VRChat talk (`measuredRank.ts`): for a person choosing, not a benchmark.
   noteNativeR2t2: [
-    'Measured on Japanese VRChat talk: about 18% of the characters wrong, and it writes while it listens, about 2.5 s behind the voice; what it has written does not change. It keeps the graphics card busy all the while (about 3 GB of video memory): even an RTX 5070 Ti is only about twice as fast as it needs to be, so a slower card, or a game running beside it, may leave the text falling behind. The first start after the computer boots takes about half a minute. Now and then it writes nothing for ten seconds or so and then catches up at once.',
-    '日语 VRChat 闲聊实测：错字率约 18%；边听边出字，文字比声音慢 2.5 秒左右，写出来的字不会再改。它会一直占着显卡（约 3 GB 显存）：RTX 5070 Ti 上也只有约两倍的余量，显卡弱一些、或同时开着游戏时，文字可能越落越远。开机后第一次启动要半分钟左右。偶尔会十几秒不出字，然后一口气补上。',
-    '日語 VRChat 閒聊實測：錯字率約 18%；邊聽邊出字，文字比聲音慢 2.5 秒左右，寫出來的字不會再改。它會一直佔著顯示卡（約 3 GB 顯示記憶體）：RTX 5070 Ti 上也只有約兩倍的餘裕，顯示卡弱一些、或同時開著遊戲時，文字可能越落越遠。開機後第一次啟動要半分鐘左右。偶爾會十幾秒不出字，然後一口氣補上。',
+    "Japanese talk, measured: about 18% of the characters wrong. It writes as it listens (about 2.5 s behind) and never changes what it wrote. When the graphics card cannot keep up (a weaker card, or a game running), the text falls further and further behind. About 3 GB of video memory.",
+    "日语闲聊实测错字约 18%。边听边出字（慢约 2.5 秒），写出的字不再改。显卡忙不过来时（显卡不强，或同时开着游戏），文字会越落越远。约占 3 GB 显存。",
+    "日語閒聊實測錯字約 18%。邊聽邊出字（慢約 2.5 秒），寫出的字不再改。顯示卡忙不過來時（顯示卡不強，或同時開著遊戲），文字會越落越遠。約佔 3 GB 顯示記憶體。",
   ],
   noteNativeQwen: [
-    'Measured on Japanese VRChat talk: about 16% of the characters wrong (R2T2: 18%), and the text is about a second behind the voice (about two on an M2 Mac). While someone speaks, what was heard so far is read again about once a second — so the last words may still change — and it is settled when the sentence ends, every fifteen seconds at most in a long one. It runs in an engine of its own (about 3 GB of video memory) and asks far less of the graphics card than R2T2: on a slower one the text only refreshes less often. Thirty languages. The first start after the computer boots takes about half a minute.',
-    '日语 VRChat 闲聊实测：错字率约 16%（R2T2 约 18%），文字只比声音慢 1 秒左右（M2 的 Mac 上约 2 秒）。说话时大约每秒把已听到的内容重新识别一遍，所以最后几个字可能还会变；一句话说完就定稿，连着说时最多 15 秒定稿一次。它在独立的引擎里运行（约占 3 GB 显存），对显卡的负担比 R2T2 小得多：显卡慢一些只是刷新得慢一些，不会越落越远。支持 30 种语言。开机后第一次启动要半分钟左右。',
-    '日語 VRChat 閒聊實測：錯字率約 16%（R2T2 約 18%），文字只比聲音慢 1 秒左右（M2 的 Mac 上約 2 秒）。說話時大約每秒把已聽到的內容重新辨識一遍，所以最後幾個字可能還會變；一句話說完就定稿，連著說時最多 15 秒定稿一次。它在獨立的引擎裡執行（約佔 3 GB 顯示記憶體），對顯示卡的負擔比 R2T2 小得多：顯示卡慢一些只是重新整理得慢一些，不會越落越遠。支援 30 種語言。開機後第一次啟動要半分鐘左右。',
+    "Japanese talk, measured: about 16% of the characters wrong. It writes as you speak (about 1 s behind); the last few words settle when the sentence ends. When the graphics card is busy it only refreshes less often. About 3 GB of video memory, thirty languages.",
+    "日语闲聊实测错字约 16%。边说边出字（慢约 1 秒），句尾几个字要等这句说完才定稿。显卡忙不过来时只是刷新慢一些。约占 3 GB 显存，支持 30 种语言。",
+    "日語閒聊實測錯字約 16%。邊說邊出字（慢約 1 秒），句尾幾個字要等這句說完才定稿。顯示卡忙不過來時只是重新整理慢一些。約佔 3 GB 顯示記憶體，支援 30 種語言。",
   ],
   // The native translation engine (llama.cpp's server) and what was found of its models.
   translatorReady: ['The translation engine is ready.', '翻译引擎已就绪。', '翻譯引擎已就緒。'],
@@ -359,29 +382,29 @@ const PROVIDER = {
     '這台電腦的翻譯引擎沒能啟動。請在「翻譯」卡片裡點「重試」，或者換一個模型。',
   ],
   noteIndexTranslate: [
-    'Measured on thirty sentences of Japanese VRChat talk into Chinese: serious mistakes in about 3 of them — the best of the three here — and a sentence takes about a tenth of a second. Over a hundred languages. It runs in an engine of its own on the graphics card (about 2 GB of video memory).',
-    '日语 VRChat 闲聊 30 句译成中文实测：严重错误约 3 句，是这三个里最好的；一句话约 0.1 秒。支持一百多种语言。它在独立的引擎里用显卡运行（约占 2 GB 显存）。',
-    '日語 VRChat 閒聊 30 句譯成中文實測：嚴重錯誤約 3 句，是這三個裡最好的；一句話約 0.1 秒。支援一百多種語言。它在獨立的引擎裡用顯示卡執行（約佔 2 GB 顯示記憶體）。',
+    "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best of the three; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
+    "日语译中文实测：30 句里严重错误约 3 句，是这三个里最好的；一句约 0.1 秒。约占 2 GB 显存，支持一百多种语言。",
+    "日語譯中文實測：30 句裡嚴重錯誤約 3 句，是這三個裡最好的；一句約 0.1 秒。約佔 2 GB 顯示記憶體，支援一百多種語言。",
   ],
   noteHyMt2: [
-    'Measured on thirty sentences of Japanese VRChat talk into Chinese: serious mistakes in about 8 of them. A sentence takes about a tenth of a second.',
-    '日语 VRChat 闲聊 30 句译成中文实测：严重错误约 8 句。一句话约 0.1 秒。',
-    '日語 VRChat 閒聊 30 句譯成中文實測：嚴重錯誤約 8 句。一句話約 0.1 秒。',
+    "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences; about 0.1 s a sentence.",
+    "日语译中文实测：30 句里严重错误约 8 句；一句约 0.1 秒。",
+    "日語譯中文實測：30 句裡嚴重錯誤約 8 句；一句約 0.1 秒。",
   ],
   noteHyMt15: [
-    'Measured on thirty sentences of Japanese VRChat talk into Chinese: serious mistakes in about 8 of them, and it tends to add words of its own. The same model as the one the app runs itself, several times quicker here.',
-    '日语 VRChat 闲聊 30 句译成中文实测：严重错误约 8 句，还喜欢自己加词。和应用自带的那个是同一个模型，在这里快好几倍。',
-    '日語 VRChat 閒聊 30 句譯成中文實測：嚴重錯誤約 8 句，還喜歡自己加詞。和應用內建的那個是同一個模型，在這裡快好幾倍。',
+    "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences, and it tends to add words of its own.",
+    "日语译中文实测：30 句里严重错误约 8 句，还会自己加词。",
+    "日語譯中文實測：30 句裡嚴重錯誤約 8 句，還會自己加詞。",
   ],
   noteAppleSpeech: [
-    'Measured on Japanese VRChat talk: about 13% of the characters wrong — the most accurate of everything measured — and it writes while it listens, about 2.5 s behind the voice. It is the speech recognition of macOS itself: nothing of the graphics memory is taken, and the system fetches each language itself.',
-    '日语 VRChat 闲聊实测：错字率约 13%，是所有实测里最准的；而且边听边出字，文字只比声音慢 2.5 秒左右。用的是 Mac 系统自带的语音识别，不占显存，每种语言的语言包由系统自己下载。',
-    '日語 VRChat 閒聊實測：錯字率約 13%，是所有實測裡最準的；而且邊聽邊出字，文字只比聲音慢 2.5 秒左右。用的是 Mac 系統內建的語音辨識，不佔顯示記憶體，每種語言的語言包由系統自己下載。',
+    "Japanese talk, measured: about 13% of the characters wrong, the most accurate of all. It writes as it listens (about 2 s behind).",
+    "日语闲聊实测错字约 13%，是所有里最准的。边听边出字（慢约 2 秒）。",
+    "日語閒聊實測錯字約 13%，是所有裡最準的。邊聽邊出字（慢約 2 秒）。",
   ],
   noteQwen17: [
-"Measured on Japanese VRChat talk: about 19% of the characters wrong — accurate. It writes only once a sentence has ended, so the text is about 10 s behind the voice. The same model in the native engine (Qwen3-ASR 1.7B GGUF, above) writes while the sentence is spoken.",
-    "日语 VRChat 闲聊实测：错字率约 19%，很准。但要等一句话说完才出字，文字比声音慢 10 秒左右。同一个模型的原生引擎版（上面的 Qwen3-ASR 1.7B GGUF）是边说边出字的。",
-    "日語 VRChat 閒聊實測：錯字率約 19%，很準。但要等一句話說完才出字，文字比聲音慢 10 秒左右。同一個模型的原生引擎版（上面的 Qwen3-ASR 1.7B GGUF）是邊說邊出字的。",
+"Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
+"日语闲聊实测错字约 19%。要等一句话说完才出字（慢约 10 秒）；上面的 GGUF 版边说边出字。",
+"日語閒聊實測錯字約 19%。要等一句話說完才出字（慢約 10 秒）；上面的 GGUF 版邊說邊出字。",
   ],
   noteWhisperTurbo: [
     "Measured on Japanese VRChat talk: about 21% of the characters wrong, and steady. It writes only once a sentence has ended.",

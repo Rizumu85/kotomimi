@@ -11,7 +11,7 @@ import type { Translator } from './translator';
 const downloaded = { state: 'downloaded' as const, received: 1, total: 1 };
 const absent = { state: 'absent' as const, received: 0, total: 1 };
 const status = (models: NativeEngineStatus['models'], run: Partial<NativeEngineStatus['run']> = {}): NativeEngineStatus => ({
-  supported: true, engine: 'ready', engineBytes: 0, models, run: { state: 'stopped', model: null, port: 0, tail: '', ...run },
+  supported: true, engine: 'ready', engineBytes: 0, models, run: { state: 'stopped', model: null, port: 0, tail: '', ...run }, up: [],
 });
 
 /** A Windows PC with the downloaded recognizer and one translator; a Mac with the system's Japanese and English. */

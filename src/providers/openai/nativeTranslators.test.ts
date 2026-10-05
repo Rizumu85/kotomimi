@@ -28,6 +28,7 @@ const engine = (patch: Partial<NativeEngineStatus> = {}): NativeEngineStatus => 
   engineBytes: 33_000_000,
   models: { 'index-translate-2b': { state: 'downloaded', received: 1312164352, total: 1312164352 }, 'hy-mt2-1.8b': { state: 'absent', received: 0, total: 1133080448 } },
   run: { state: 'stopped', model: null, port: 0, tail: '' },
+  up: [],
   ...patch,
 });
 const READY = engine({ run: { state: 'ready', model: 'index-translate-2b', port: 4200, tail: '' } });

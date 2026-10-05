@@ -657,6 +657,8 @@ function createNativeEngine(deps = {}) {
     engineBytes: build?.bytes ?? 0,
     models: Object.fromEntries(Object.keys(MODELS_).map((id) => [id, modelState(id)])),
     run: { ...run },
+    // The models that can be asked now: the one the runtime is up with.
+    up: run.state === 'ready' && run.model ? [run.model] : [],
   });
   const tell = (force = true) => {
     if (!force && now() - lastTold < PROGRESS_MS) return;

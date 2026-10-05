@@ -62,8 +62,8 @@ const WINDOW_LIMITS: Partial<NativeLimits> = { rollAfter: 8, rollAt: 8, rollHard
  * In the order they are offered, the one measured best for a language first
  * (Japanese VRChat talk, in the app, 2026-10-05): the Mac's own recognition
  * 12.5 % of the characters wrong; Qwen3-ASR 16.4 %, its text a second behind
- * the voice; R2T2 18.2 %, two and a half seconds behind, and several times the
- * work for the graphics card. A system is offered the ones it can run.
+ * the voice; R2T2 18.2 %, two and a half seconds behind — and R2T2 has to keep
+ * up with the voice, where Qwen3-ASR only refreshes less often on a busy card. A system is offered the ones it can run.
  */
 export const NATIVE_MODELS: readonly NativeModel[] = [
   ...APPLE_LANGUAGES.map((language) => ({ id: `${APPLE_PREFIX}${language}`, name: 'Apple Speech', bytes: 0, languages: [language], limits: APPLE_LIMITS })),
@@ -90,11 +90,52 @@ export function nativeModelFor(id: string, language: string): NativeModel | null
   return model && model.languages.includes(baseOf(language)) ? model : null;
 }
 
+/**
+ * Which native model hears what: the one in use, and — language by language —
+ * the one that was chosen for it.
+ */
+export interface NativePick { model: string; byLanguage?: Readonly<Record<string, string>> }
+
+/**
+ * The model a language is heard by: the one chosen for that language; else
+ * the one in use, where it hears it. Null: neither — the language has no
+ * model until one is chosen for it. No other model is taken in its place: a
+ * change of language is made with the session stopped, and what hears the
+ * new one is the user's to say.
+ */
+export function nativePicked(pick: NativePick, language: string): NativeModel | null {
+  const chosen = pick.byLanguage?.[baseOf(language)];
+  // A name the app no longer has is no choice.
+  const known = chosen !== undefined && NATIVE_MODELS.some((m) => m.id === chosen);
+  return (known ? nativeModelFor(chosen, language) : null) ?? nativeModelFor(pick.model, language);
+}
+
+/**
+ * A model chosen for some languages: it is the one in use from now on and
+ * theirs by name — and the other languages now heard keep, by name too, the
+ * model they were heard by, so that choosing for one does not change another.
+ */
+export function chooseNative(pick: NativePick, id: string, languages: readonly string[], heard: readonly string[] = languages): Required<NativePick> {
+  const byLanguage: Record<string, string> = { ...pick.byLanguage };
+  const chosenFor = new Set(languages.map(baseOf));
+  for (const language of heard) {
+    const base = baseOf(language);
+    if (chosenFor.has(base) || byLanguage[base]) continue;
+    const now = nativePicked(pick, language);
+    if (now) byLanguage[base] = now.id;
+  }
+  for (const language of languages) {
+    const model = nativeModelFor(id, language);
+    if (model) byLanguage[baseOf(language)] = model.id;
+  }
+  return { model: id, byLanguage };
+}
+
 /** Whether a model hears speech in this language. */
 export const nativeHears = (model: NativeModel, language: string): boolean => model.languages.includes(baseOf(language));
 
 /** The engine is this model's and ready to hear. The Mac's recognition, once asked for, is ready for every language of its own. */
-export const nativeReady = (status: NativeEngineStatus, id: string): boolean => status.run.state === 'ready' && (status.run.model === id || (isApple(id) && isApple(status.run.model)));
+export const nativeReady = (status: NativeEngineStatus, id: string): boolean => status.up.includes(id) || (status.run.state === 'ready' && (status.run.model === id || (isApple(id) && isApple(status.run.model))));
 
 /** The model is on disk, with the runtime that runs it. */
 export const nativeDownloaded = (status: NativeEngineStatus, id: string): boolean => status.engine === 'ready' && status.models[id]?.state === 'downloaded';
@@ -113,20 +154,34 @@ export interface NativeCheckDeps {
  * pressed. A start that failed is not tried again by itself: the stage's card
  * says so and offers it.
  */
-export async function nativeGap(id: string, heard: readonly string[], deps: NativeCheckDeps = {}): Promise<Extract<CheckResult, { ok: false }> | null> {
+export async function nativeGap(chosen: NativePick | string, heard: readonly string[], deps: NativeCheckDeps = {}): Promise<Extract<CheckResult, { ok: false }> | null> {
+  const pick: NativePick = typeof chosen === 'string' ? { model: chosen } : chosen;
   const store = useNativeEngineStore.getState();
   const status = await (deps.status ?? store.refresh)();
   if (!status.supported) return { ok: false, reason: 'The native recognition engine is not available for this system.', code: 'native_unsupported' };
-  // The model of each language heard: one for all of them, or — the Mac's recognition — one to a language.
-  const unheard = heard.find((language) => !nativeModelFor(id, language));
-  if (unheard !== undefined) return { ok: false, reason: `${nativeModel(id).name} does not hear ${unheard}.`, code: 'no_asr', params: { source: unheard } };
-  const models = heard.map((language) => nativeModelFor(id, language)!);
+  // The model of each language heard: the one chosen for it, or the one in use.
+  const unchosen = heard.find((language) => !nativePicked(pick, language));
+  if (unchosen !== undefined) return { ok: false, reason: `No native recognition model is chosen for ${unchosen}.`, code: 'native_unchosen', params: { source: unchosen } };
+  const models = [...new Map(heard.map((language) => { const one = nativePicked(pick, language)!; return [one.id, one] as const; })).values()];
   const absent = models.find((one) => !nativeDownloaded(status, one.id));
   if (absent) return { ok: false, reason: `${absent.name} is not downloaded.`, code: 'native_missing', params: { name: absent.name } };
-  const model = models[0] ?? nativeModel(id);
-  if (models.every((one) => nativeReady(status, one.id))) return null;
-  if (status.run.state === 'failed' && status.run.model === model.id) return { ok: false, reason: `The native recognition engine could not start: ${status.run.tail.trim().split('\n').pop() ?? ''}`, code: 'native_failed' };
-  if (status.run.state === 'stopped' || status.run.model !== model.id) (deps.start ?? ((which: string) => { void store.start(which); }))(model.id);
+  // The engine the app downloads runs one model at a time: two of its models cannot hear in one run.
+  const run = models.filter((one) => !isApple(one.id));
+  if (run.length > 1) return { ok: false, reason: `${run[0].name} and ${run[1].name} cannot run at the same time.`, code: 'native_two_models', params: { name: run[0].name, other: run[1].name } };
+  const waiting = models.filter((one) => !nativeReady(status, one.id));
+  if (waiting.length === 0) return null;
+  const failed = waiting.find((one) => status.run.state === 'failed' && status.run.model === one.id);
+  if (failed) return { ok: false, reason: `The native recognition engine could not start: ${status.run.tail.trim().split('\n').pop() ?? ''}`, code: 'native_failed' };
+  const start = deps.start ?? ((which: string) => { void store.start(which); });
+  // One start for the system's recognition, whatever its languages, and one for the engine the app downloads; none for one already coming up.
+  const asked = new Set<string>();
+  for (const one of waiting) {
+    const engine = isApple(one.id) ? APPLE_PREFIX : one.id;
+    if (asked.has(engine)) continue;
+    asked.add(engine);
+    const coming = status.run.model === one.id && (status.run.state === 'starting' || status.run.state === 'warming');
+    if (!coming) start(one.id);
+  }
   return { ok: false, reason: 'The native recognition engine is warming up.', code: 'native_warming' };
 }
 

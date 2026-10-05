@@ -443,6 +443,36 @@
     margin: 0;
     padding: 0;
   }
+
+  // The library stands in a narrow card here. With its buttons beside it, a model's name had a third of the width
+  // and broke over three or four lines, its size hanging beside them. So the name and size have the first line to
+  // themselves, and the buttons stand on the second, to the right of the chips.
+  .kt-here__library .model-card:not(.model-card--downloading):not(.model-card--error) {
+    .model-card__content {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 4px 8px;
+      align-items: center;
+    }
+
+    .model-card__info {
+      display: contents;
+    }
+
+    .model-card__header {
+      grid-column: 1 / -1;
+      align-items: baseline;
+    }
+
+    .model-card__meta {
+      grid-column: 1;
+    }
+
+    .model-card__actions {
+      grid-column: 2;
+      grid-row: 2;
+    }
+  }
 }
 
 @keyframes kt-ready-spin {

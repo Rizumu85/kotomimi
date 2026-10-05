@@ -269,6 +269,11 @@
   &__lang-tag--accel { border-color: tk.$color-success; color: tk.$color-success; }  // GPU live
   &__lang-tag--warn  { border-color: #e74c3c; color: #e74c3c; }  // degraded CPU
 
+  // Fork: the chip that says what kind of model this is (a native engine's); it answers on hover.
+  &__kind-tag {
+    cursor: help;
+  }
+
   &__recommended-badge {
     display: inline-flex;
     align-items: center;

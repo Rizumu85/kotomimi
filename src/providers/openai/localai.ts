@@ -63,7 +63,7 @@ import { SERVER_SILENT, isKotomimiServer, kindOf, KOTOMIMI_HOST, modelsFor, serv
 import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
 import { ASR_HERES, coachIs, cutsSentencesHere, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, HERES, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Here, type Place } from './localaiDevice';
-import { NATIVE_DEFAULT_MODEL, nativeGap, nativeIdle, nativeModelFor, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
+import { NATIVE_DEFAULT_MODEL, nativeGap, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_DEFAULT_TRANSLATOR, nativeTranslates, nativeTranslator, translatorRequest } from './nativeTranslators';
 import { setLocalPipeline } from '../../lib/lan/localServer';
 import { useLocalServerStore } from '../../stores/localServerStore';
@@ -122,6 +122,8 @@ export interface LocalAISettings extends RealtimeSettings {
   asrHereModel: string;
   /** The native engine's model, when it hears. */
   asrNativeModel: string;
+  /** The native model chosen for a language, by the language's base code: it is heard by that one whatever is in use (`nativePicked`). */
+  asrNativeByLanguage: Record<string, string>;
   translateHere: AsrHere;
   translateHereModel: string;
   /** The native translation engine's model, when it translates. */
@@ -182,6 +184,7 @@ export const LOCALAI_DEFAULTS: LocalAISettings = {
   asrHere: 'app',
   asrHereModel: '',
   asrNativeModel: NATIVE_DEFAULT_MODEL,
+  asrNativeByLanguage: {},
   translateHere: 'app',
   translateHereModel: '',
   translateNativeModel: NATIVE_DEFAULT_TRANSLATOR,
@@ -291,6 +294,11 @@ function migratePlaces(stored: Readonly<Record<string, unknown>>, legacy: Readon
   return { translateAt, translateServerModel, translateModel, translateNeedsKey, coachAt, coachServerModel, coachBaseUrl, coachModel, coachNeedsKey };
 }
 
+/** A stored map of language to model, held to its shape. */
+const byLanguage = (stored: unknown): Record<string, string> => (stored && typeof stored === 'object' && !Array.isArray(stored)
+  ? Object.fromEntries(Object.entries(stored as Record<string, unknown>).filter((entry): entry is [string, string] => typeof entry[1] === 'string' && entry[1] !== ''))
+  : {});
+
 export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>, inputs: MigrationInputs): LocalAISettings {
   const text = (k: 'asrModel' | 'asrApiBaseUrl' | 'asrApiModel' | 'translateBaseUrl' | 'coachDeviceModel' | 'coachPrompt' | 'asrHereModel' | 'asrNativeModel' | 'translateHereModel' | 'translateNativeModel' | 'coachHereModel' | 'hereAddress' | 'herePipeline') => (typeof stored[k] === 'string' ? (stored[k] as string) : LOCALAI_DEFAULTS[k]);
   const here = (k: 'coachHere'): Here => (HERES.includes(stored[k] as Here) ? (stored[k] as Here) : LOCALAI_DEFAULTS[k]);
@@ -311,6 +319,7 @@ export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>
     asrHere: ASR_HERES.includes(stored.asrHere as AsrHere) ? (stored.asrHere as AsrHere) : LOCALAI_DEFAULTS.asrHere,
     asrHereModel: text('asrHereModel'),
     asrNativeModel: text('asrNativeModel'),
+    asrNativeByLanguage: byLanguage(stored.asrNativeByLanguage),
     translateHere: ASR_HERES.includes(stored.translateHere as AsrHere) ? (stored.translateHere as AsrHere) : LOCALAI_DEFAULTS.translateHere,
     translateHereModel: text('translateHereModel'),
     translateNativeModel: text('translateNativeModel'),
@@ -694,7 +703,7 @@ export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISe
   let hears: ReturnType<typeof nativeGap> | null = null;
   if (hearsNatively(s)) {
     // What each leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
-    hears = native.gap(s.asrNativeModel, ctx.legs.map((leg) => (leg === 'speaker' && !s.coach ? ctx.pair.source : ctx.pair.target)));
+    hears = native.gap({ model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage }, ctx.legs.map((leg) => (leg === 'speaker' && !s.coach ? ctx.pair.source : ctx.pair.target)));
     hears.catch(() => undefined);
   } else {
     native.idle();
@@ -780,8 +789,10 @@ export function buildLocalAI(context: SessionContext, s: LocalAISettings, shared
   if (hearsHere) {
     let recognizer: Pick<DeviceHearing, 'modelId' | 'streaming' | 'api' | 'native'> | null;
     if (hearsNatively(s)) {
-      const native = nativeModelFor(s.asrNativeModel, heard);
-      recognizer = native ? { modelId: native.id, streaming: true, native: { model: native.id, ...(native.limits ? { limits: native.limits } : {}) } } : null;
+      const native = nativePicked({ model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage }, heard);
+      // The language has no native model chosen: said as that, since downloading one would not help.
+      if (!native) return { refused: `No native recognition model is chosen for ${heard}.`, code: 'native_unchosen', params: { source: heard } };
+      recognizer = { modelId: native.id, streaming: true, native: { model: native.id, ...(native.limits ? { limits: native.limits } : {}) } };
     } else if (s.asrVia === 'api') {
       const baseUrl = s.asrApiBaseUrl.trim();
       const named = s.asrApiModel.trim();
@@ -937,7 +948,7 @@ export const localaiProvider: Provider<LocalAISettings, LocalAICredentials, Loca
     // On this computer: by the app's own models, or by the LocalAI installed here, and then which of its models.
     'asrHere', 'translateHere', 'translateHereModel', 'coachHere', 'coachHereModel', 'hereAddress',
     // Or by the native engine, and then with which of its models.
-    'asrNativeModel', 'translateNativeModel',
+    'asrNativeModel', 'asrNativeByLanguage', 'translateNativeModel',
   ],
   // This computer's models are per direction, and each leg needs its own.
   checkReadsDirection: true,

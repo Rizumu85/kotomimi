@@ -7,7 +7,7 @@ import { useModelStore } from '../../stores/modelStore';
 import { buildLocalAI, admitLocalAI, checkLocalAIWithNative, describeLocalAI, localaiProvider, LOCALAI_DEFAULTS, migrateLocalAISettings, type LocalAICredentials, type LocalAISettings } from './localai';
 import { cutsSentencesHere, deviceChoices, deviceNeeds, hearsByLocalServer, hearsNatively } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
-import { APPLE_PREFIX, NATIVE_DEFAULT_MODEL, NATIVE_MODELS, nativeDownloaded, nativeGap, nativeHears, nativeModel, nativeModelFor, nativeReady } from './localaiNative';
+import { APPLE_PREFIX, NATIVE_DEFAULT_MODEL, NATIVE_MODELS, chooseNative, nativePicked, nativeDownloaded, nativeGap, nativeHears, nativeModel, nativeModelFor, nativeReady } from './localaiNative';
 import { SHARED } from './testing';
 
 const SPEAKER: SessionContext = { direction: { source: 'ja', target: 'zh-CN' }, speech: false, turns: 'auto' };
@@ -24,6 +24,7 @@ const engine = (patch: Partial<NativeEngineStatus> = {}): NativeEngineStatus => 
   engineBytes: 60_000_000,
   models: { 'r2t2-q8': { state: 'downloaded', received: 2477512064, total: 2477512064 } },
   run: { state: 'stopped', model: null, port: 0, tail: '' },
+  up: [],
   ...patch,
 });
 const READY = engine({ run: { state: 'ready', model: 'r2t2-q8', port: 4100, tail: '' } });
@@ -39,7 +40,10 @@ describe('what the main process says of the engine, held to its shape', () => {
     expect(nativeEngineStatus(null)).toEqual(NO_NATIVE_ENGINE);
     expect(nativeEngineStatus({ engine: 'nonsense' })).toEqual(NO_NATIVE_ENGINE);
     const odd = nativeEngineStatus({ supported: true, engine: 'ready', engineBytes: -3, models: { a: { state: 'nonsense' }, b: { state: 'failed', received: 'x', total: 5, error: 'no disk' } }, run: { state: 'flying', model: 7, port: 99999, tail: 3 } });
-    expect(odd).toEqual({ supported: true, engine: 'ready', engineBytes: 0, models: { b: { state: 'failed', received: 0, total: 5, error: 'no disk' } }, run: { state: 'stopped', model: null, port: 0, tail: '' } });
+    expect(odd).toEqual({ supported: true, engine: 'ready', engineBytes: 0, models: { b: { state: 'failed', received: 0, total: 5, error: 'no disk' } }, run: { state: 'stopped', model: null, port: 0, tail: '' }, up: [] });
+    // The models that can hear now: names, and nothing else.
+    expect(nativeEngineStatus({ engine: 'ready', up: ['a', 3, null, 'b'] }).up).toEqual(['a', 'b']);
+    expect(nativeEngineStatus({ engine: 'ready', up: 'a' }).up).toEqual([]);
   });
 
   it('reads a recognition\'s events, and nothing that is not one', () => {
@@ -77,9 +81,14 @@ describe('the native engine as what hears on this computer', () => {
     expect(admitLocalAI({ speaker: config })).toBe(true);
   });
 
-  it('refuses a language its model does not hear', () => {
+  it('has no model for a language the one in use does not hear, and says so: none is taken in its place', () => {
     const config = buildLocalAI({ ...SPEAKER, direction: { source: 'th', target: 'zh-CN' } }, settings(NATIVE), shared);
-    expect(config).toMatchObject({ refused: expect.stringContaining('th'), code: 'no_asr' });
+    expect(config).toMatchObject({ refused: expect.stringContaining('th'), code: 'native_unchosen', params: { source: 'th' } });
+    // Chosen for that language, it is heard by that one, whatever is in use.
+    const chosen = buildLocalAI({ ...SPEAKER, direction: { source: 'th', target: 'zh-CN' } }, settings({ ...NATIVE, asrNativeByLanguage: { th: 'qwen3-asr-1.7b-q8' } }), shared);
+    expect(chosen).toMatchObject({ device: { modelId: 'qwen3-asr-1.7b-q8' } });
+    // And the language the model in use hears is still heard by it.
+    expect(buildLocalAI(SPEAKER, settings({ ...NATIVE, asrNativeByLanguage: { th: 'qwen3-asr-1.7b-q8' } }), shared)).toMatchObject({ device: { modelId: 'r2t2-q8' } });
   });
 
   it('knows a model by its id, and falls to the default for one it no longer has', () => {
@@ -107,6 +116,40 @@ describe('the native engine as what hears on this computer', () => {
   });
 });
 
+describe('the native recognizer, language by language', () => {
+  it('is the one chosen for a language; else the one in use, where it hears it; else none', () => {
+    const pick = { model: 'r2t2-q8', byLanguage: { ru: 'qwen3-asr-1.7b-q8' } };
+    expect(nativePicked(pick, 'ru')?.id).toBe('qwen3-asr-1.7b-q8');
+    expect(nativePicked(pick, 'ja-JP')?.id).toBe('r2t2-q8');
+    expect(nativePicked(pick, 'th')).toBeNull();
+    // A name the app no longer has, or one that does not hear the language after all, is no choice.
+    expect(nativePicked({ model: 'r2t2-q8', byLanguage: { ja: 'gone' } }, 'ja')?.id).toBe('r2t2-q8');
+    expect(nativePicked({ model: 'qwen3-asr-1.7b-q8', byLanguage: { th: 'r2t2-q8' } }, 'th')?.id).toBe('qwen3-asr-1.7b-q8');
+  });
+
+  it('remembers a choice for the languages it was made for, and leaves the other language heard as it was', () => {
+    // Japanese by the Mac's own recognition; Russian has none, and Qwen3-ASR is chosen for it.
+    const before = { model: `${APPLE_PREFIX}ja`, byLanguage: {} };
+    expect(nativePicked(before, 'ru')).toBeNull();
+    const after = chooseNative(before, 'qwen3-asr-1.7b-q8', ['ru'], ['ja', 'ru']);
+    expect(after).toEqual({ model: 'qwen3-asr-1.7b-q8', byLanguage: { ja: `${APPLE_PREFIX}ja`, ru: 'qwen3-asr-1.7b-q8' } });
+    expect(nativePicked(after, 'ja')?.id).toBe(`${APPLE_PREFIX}ja`);
+    // A language met later, with no choice of its own, follows the one in use — it hears Korean.
+    expect(nativePicked(after, 'ko')?.id).toBe('qwen3-asr-1.7b-q8');
+    // The system's recognition chosen for a language is that language's model of it.
+    expect(chooseNative(after, `${APPLE_PREFIX}ja`, ['ko'], ['ko']).byLanguage.ko).toBe(`${APPLE_PREFIX}ko`);
+    // Chosen for a language it does not hear, nothing is written for that language.
+    expect(chooseNative({ model: 'qwen3-asr-1.7b-q8' }, 'r2t2-q8', ['th', 'ja'], ['th', 'ja']).byLanguage).toEqual({ ja: 'r2t2-q8' });
+  });
+
+  it('is kept across a restart as a map of language to model, and nothing else', () => {
+    const kept = migrateLocalAISettings({ asrNativeByLanguage: { ru: 'qwen3-asr-1.7b-q8', ja: 7, ko: '' } }, { legacy: {}, credentials: {} });
+    expect(kept.asrNativeByLanguage).toEqual({ ru: 'qwen3-asr-1.7b-q8' });
+    expect(migrateLocalAISettings({ asrNativeByLanguage: ['x'] }, { legacy: {}, credentials: {} }).asrNativeByLanguage).toEqual({});
+    expect(LOCALAI_DEFAULTS.asrNativeByLanguage).toEqual({});
+  });
+});
+
 describe('the system recognizer of a Mac, one model to a language', () => {
   const APPLE: NativeEngineStatus = {
     supported: true,
@@ -114,6 +157,7 @@ describe('the system recognizer of a Mac, one model to a language', () => {
     engineBytes: 0,
     models: { [`${APPLE_PREFIX}ja`]: { state: 'downloaded', received: 0, total: 0 }, [`${APPLE_PREFIX}zh`]: { state: 'absent', received: 0, total: 0 } },
     run: { state: 'stopped', model: null, port: 0, tail: '' },
+    up: [],
   };
   const asked = (status: NativeEngineStatus, heard: string[]) => {
     const start = vi.fn();
@@ -141,7 +185,7 @@ describe('the system recognizer of a Mac, one model to a language', () => {
 
   it('needs the language of every leg installed, and names the one that is not', async () => {
     expect(await asked(APPLE, ['ja', 'zh-CN']).gap).toMatchObject({ ok: false, code: 'native_missing' });
-    expect(await asked(APPLE, ['ja', 'ru']).gap).toMatchObject({ ok: false, code: 'no_asr', params: { source: 'ru' } });
+    expect(await asked(APPLE, ['ja', 'ru']).gap).toMatchObject({ ok: false, code: 'native_unchosen', params: { source: 'ru' } });
   });
 
   it('is asked for once and is then ready for every language of its own', async () => {
@@ -181,7 +225,28 @@ describe('whether a run that hears by the engine can start', () => {
   });
 
   it('cannot for a language the model does not hear', async () => {
-    expect(await asked(READY, ['ja', 'th']).gap).toMatchObject({ ok: false, code: 'no_asr', params: { source: 'th' } });
+    expect(await asked(READY, ['ja', 'th']).gap).toMatchObject({ ok: false, code: 'native_unchosen', params: { source: 'th' } });
+  });
+
+  it('cannot with two models of the engine the app downloads: it runs one at a time', async () => {
+    const both = engine({ models: { 'r2t2-q8': { state: 'downloaded', received: 1, total: 1 }, 'qwen3-asr-1.7b-q8': { state: 'downloaded', received: 1, total: 1 } } });
+    const start = vi.fn();
+    const gap = await nativeGap({ model: 'r2t2-q8', byLanguage: { zh: 'qwen3-asr-1.7b-q8' } }, ['ja', 'zh-CN'], { status: async () => both, start });
+    expect(gap).toMatchObject({ ok: false, code: 'native_two_models', params: { name: 'Confucius4 R2T2', other: 'Qwen3-ASR 1.7B GGUF' } });
+    expect(start).not.toHaveBeenCalled();
+  });
+
+  it('can with the system\u2019s recognition for one language and the downloaded engine for another: each is started, and both are up', async () => {
+    const models = { [`${APPLE_PREFIX}zh`]: { state: 'downloaded' as const, received: 0, total: 0 }, 'qwen3-asr-1.7b-q8': { state: 'downloaded' as const, received: 1, total: 1 } };
+    const pick = { model: `${APPLE_PREFIX}zh`, byLanguage: { ru: 'qwen3-asr-1.7b-q8' } };
+    const start = vi.fn();
+    expect(await nativeGap(pick, ['zh-CN', 'ru'], { status: async () => engine({ models }), start })).toMatchObject({ ok: false, code: 'native_warming' });
+    expect(start.mock.calls.map((call) => call[0])).toEqual([`${APPLE_PREFIX}zh`, 'qwen3-asr-1.7b-q8']);
+    // The one started last is what `run` names; both can hear.
+    const up = engine({ models, run: { state: 'ready', model: `${APPLE_PREFIX}zh`, port: 0, tail: '' }, up: [`${APPLE_PREFIX}zh`, 'qwen3-asr-1.7b-q8'] });
+    start.mockClear();
+    expect(await nativeGap(pick, ['zh-CN', 'ru'], { status: async () => up, start })).toBeNull();
+    expect(start).not.toHaveBeenCalled();
   });
 
   it('brings the engine up when it is down, and says it is warming until it is ready', async () => {
@@ -218,11 +283,11 @@ describe('the provider\'s check, with the engine', () => {
     const idle = vi.fn();
     const check = vi.fn(async () => OK);
     expect(await checkLocalAIWithNative(NONE, settings(NATIVE), { pair: PAIR, legs: ['speaker', 'participant'] }, check, { gap, idle })).toBe(OK);
-    expect(gap).toHaveBeenCalledWith('r2t2-q8', ['ja', 'zh-CN']);
+    expect(gap).toHaveBeenCalledWith({ model: 'r2t2-q8', byLanguage: {} }, ['ja', 'zh-CN']);
     expect(idle).not.toHaveBeenCalled();
     // A coached speaker speaks the target language.
     await checkLocalAIWithNative(NONE, settings({ ...NATIVE, coach: true }), CTX, check, { gap, idle });
-    expect(gap).toHaveBeenLastCalledWith('r2t2-q8', ['zh-CN']);
+    expect(gap).toHaveBeenLastCalledWith({ model: 'r2t2-q8', byLanguage: {} }, ['zh-CN']);
   });
 
   it('refuses in the engine\'s words, with what the servers listed', async () => {

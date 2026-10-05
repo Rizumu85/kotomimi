@@ -83,7 +83,9 @@ function joinEngines(makers, deps = {}) {
       for (const [id, model] of Object.entries(status.models)) models[id] ??= modelOf(status, model);
     }
     const run = active !== null && known[active].run.state !== 'stopped' ? known[active].run : known.map((status) => status.run).find((one) => one.state !== 'stopped') ?? STOPPED;
-    return { supported, engine: supported ? 'ready' : 'unsupported', engineBytes: 0, models, run: { ...run } };
+    // Every model that can be asked now, whichever engine was started last: two engines may be up at once.
+    const up = known.flatMap((status) => (Array.isArray(status.up) ? status.up : []));
+    return { supported, engine: supported ? 'ready' : 'unsupported', engineBytes: 0, models, run: { ...run }, up };
   }
 
   const tell = () => { if (last.every(Boolean)) onChange(merge()); };

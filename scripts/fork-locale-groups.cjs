@@ -52,9 +52,9 @@ module.exports = {
     title: ['Startup', '启动', '啟動'],
     toggle: ['Start in the background when I sign in to Windows', '登录 Windows 时在后台启动', '登入 Windows 時在背景啟動'],
     note: [
-      'Kotomimi starts without a window and gets this computer\'s recognition engine ready, so that it is warm when you open the app. To leave the computer alone while it starts, the engine begins loading about a minute after you sign in — or at once when you open Kotomimi.',
-      'Kotomimi 会不弹窗口地在后台启动，并提前把这台电脑的识别引擎准备好，等你打开应用时已经预热完毕。为了不拖慢开机，引擎会在登录约一分钟后才开始加载；你提前打开 Kotomimi 的话会立刻开始。',
-      'Kotomimi 會不彈出視窗地在背景啟動，並提前把這台電腦的辨識引擎準備好，等你開啟應用程式時已經預熱完畢。為了不拖慢開機，引擎會在登入約一分鐘後才開始載入；你提前開啟 Kotomimi 的話會立刻開始。',
+      "Kotomimi waits in the background after you sign in, with the recognition engine ready: open it and start at once.",
+      "登录后 Kotomimi 在后台待命，并提前准备好识别引擎，打开就能用。",
+      "登入後 Kotomimi 在背景待命，並提前準備好辨識引擎，開啟就能用。",
     ],
   },
   // The language menus' own list (`LanguageMenu.tsx`).
@@ -104,9 +104,9 @@ module.exports = {
       '這台電腦算力閒置？讓模型在這裡執行，給區域網路裡的其他裝置用，這台電腦自己也能用。',
     ],
     shareNotice: [
-      'Nothing to enter. Finishing turns on "Share with other devices": another Kotomimi on your network finds this computer when it searches for devices. After setup, download models in the Speech recognition card in Settings — what is downloaded here is what the others can use. If another device cannot find this computer, see Settings → Provider → Share with other devices.',
-      '这里不用填任何东西。完成后会自动打开「共享给其他设备」：局域网里的其他 Kotomimi 搜索设备时，就能找到这台电脑。向导结束后，在设置的「语音识别」卡片里下载模型，这里下载了哪些，别的设备就能用哪些。如果别的设备找不到这台电脑，到「设置 → 提供商 → 共享给其他设备」里看提示。',
-      '這裡不用填任何東西。完成後會自動開啟「共享給其他裝置」：區域網路裡的其他 Kotomimi 搜尋裝置時，就能找到這台電腦。精靈結束後，在設定的「語音辨識」卡片裡下載模型，這裡下載了哪些，別的裝置就能用哪些。如果別的裝置找不到這台電腦，到「設定 → 提供商 → 共享給其他裝置」裡看提示。',
+      "Nothing to enter. Finishing turns on sharing, so other Kotomimi devices on your network can find this computer. After setup, download models in the Speech recognition card: those are what the others can use.",
+      "这里不用填任何东西。完成后会自动打开共享，局域网里的其他 Kotomimi 就能找到这台电脑。向导结束后，在设置的「语音识别」卡片里下载模型，别的设备用的就是这些。",
+      "這裡不用填任何東西。完成後會自動開啟共享，區域網路裡的其他 Kotomimi 就能找到這台電腦。精靈結束後，在設定的「語音辨識」卡片裡下載模型，別的裝置用的就是這些。",
     ],
     shareSummary: ['Sharing', '共享', '共享'],
     shareSummaryOn: [
@@ -138,9 +138,9 @@ module.exports = {
   custom: {
     title: ['Add a Whisper model from Hugging Face', '添加 Hugging Face 上的 Whisper 模型', '新增 Hugging Face 上的 Whisper 模型'],
     intro: [
-      'For a speech recognition model the library does not list — a Whisper fine-tuned for your language, say. Give the repository id; it must hold ONNX files in the Transformers.js layout (most onnx-community/… and Xenova/… Whisper repositories do), and it needs a GPU. Once added it appears in the model library to download.',
-      '用于模型库里没有的语音识别模型，比如专门为某种语言微调的 Whisper。填仓库名即可；仓库里要有 Transformers.js 用的 ONNX 文件（onnx-community/… 和 Xenova/… 的 Whisper 仓库大多符合），并且需要显卡。添加后它会出现在模型库里，可以下载。',
-      '用於模型庫裡沒有的語音辨識模型，比如專門為某種語言微調的 Whisper。填儲存庫名稱即可；儲存庫裡要有 Transformers.js 用的 ONNX 檔案（onnx-community/… 和 Xenova/… 的 Whisper 儲存庫大多符合），並且需要顯示卡。新增後它會出現在模型庫裡，可以下載。',
+      "For a Whisper model the library does not list, such as one fine-tuned for your language. Give its Hugging Face repository id (most onnx-community/… and Xenova/… Whisper repositories work); it needs a graphics card.",
+      "用于模型库里没有的 Whisper 模型，比如为某种语言微调的。填 Hugging Face 仓库名即可（onnx-community/… 和 Xenova/… 的 Whisper 仓库大多可用），需要显卡。",
+      "用於模型庫裡沒有的 Whisper 模型，比如為某種語言微調的。填 Hugging Face 儲存庫名稱即可（onnx-community/… 和 Xenova/… 的 Whisper 儲存庫大多可用），需要顯示卡。",
     ],
     repo: ['Repository id', '仓库名', '儲存庫名稱'],
     language: ['The language it hears', '它识别的语言', '它辨識的語言'],
@@ -234,9 +234,9 @@ module.exports = {
   server: {
     title: ['LocalAI on this computer', '这台电脑上的 LocalAI', '這台電腦上的 LocalAI'],
     tooltip: [
-      'A LocalAI is installed on this computer, with models of its own. Kotomimi starts and stops it, and keeps it to this computer. Choose its models in the cards above, under "This computer"; with sharing on, they are lent to the other devices together with the ones Kotomimi downloaded. A model nobody has used for 10 minutes is unloaded from memory by itself.',
-      '这台电脑装了 LocalAI，它有自己的一套模型。由 Kotomimi 负责启动和停止，只在本机监听。上面各环节选「这台电脑」时，可以直接选它的模型；打开共享后，它的模型和 Kotomimi 下载的模型一起借给别的设备。模型 10 分钟没人用，会自动从内存里卸载。',
-      '這台電腦裝了 LocalAI，它有自己的一套模型。由 Kotomimi 負責啟動和停止，只在本機監聽。上面各環節選「這台電腦」時，可以直接選它的模型；開啟共享後，它的模型和 Kotomimi 下載的模型一起借給別的裝置。模型 10 分鐘沒人用，會自動從記憶體卸載。',
+      "A LocalAI is installed on this computer. Kotomimi starts and stops it; choose its models in the cards above, under \"This computer\". With sharing on, they are lent to other devices too.",
+      "这台电脑装了 LocalAI，由 Kotomimi 负责启动和停止。上面各环节选「这台电脑」时可以选它的模型；打开共享后，它的模型也一起借给别的设备。",
+      "這台電腦裝了 LocalAI，由 Kotomimi 負責啟動和停止。上面各環節選「這台電腦」時可以選它的模型；開啟共享後，它的模型也一起借給別的裝置。",
     ],
     stopped: ['Not running', '未启动', '未啟動'],
     starting: ['Starting…', '正在启动…', '正在啟動…'],
@@ -269,9 +269,9 @@ module.exports = {
   lan: {
     title: ['Share with other devices', '共享给其他设备', '共享給其他裝置'],
     tooltip: [
-      'Lends this computer\'s models to the other devices on your network: the ones Kotomimi downloaded, and the ones of a LocalAI installed here. The other device runs Kotomimi too, searches under "Another device" in its settings, and finds this computer by its name. Which model and which language is chosen there; here, only what there is to choose from, and the access key. A model is loaded when it is asked for and unloaded after 10 idle minutes; a session nobody has spoken in for 30 minutes is ended. Sharing works while Kotomimi is open.',
-      '把这台电脑的模型借给局域网里的其他设备：Kotomimi 下载的，和这台电脑的 LocalAI 里装的。对方同样运行 Kotomimi，在设置的「另一台设备」一栏里搜索，就能按名字找到这台电脑。用哪个模型、什么语言，在对方那边选；这里只决定有哪些模型可选，和访问密钥。模型用到才加载，空闲 10 分钟自动卸载；对方 30 分钟没人说话，会话会被结束。Kotomimi 开着的时候才能共享。',
-      '把這台電腦的模型借給區域網路裡的其他裝置：Kotomimi 下載的，和這台電腦的 LocalAI 裡裝的。對方同樣執行 Kotomimi，在設定的「另一台裝置」一欄裡搜尋，就能按名字找到這台電腦。用哪個模型、什麼語言，在對方那邊選；這裡只決定有哪些模型可選，和存取金鑰。模型用到才載入，閒置 10 分鐘自動卸載；對方 30 分鐘沒人說話，工作階段會被結束。Kotomimi 開著的時候才能共享。',
+      "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
+      "把这台电脑的模型借给局域网里的其他设备。对方在 Kotomimi 的「另一台设备」里搜索就能找到这台电脑，用哪个模型、什么语言在对方那边选。Kotomimi 开着时才能共享。",
+      "把這台電腦的模型借給區域網路裡的其他裝置。對方在 Kotomimi 的「另一台裝置」裡搜尋就能找到這台電腦，用哪個模型、什麼語言在對方那邊選。Kotomimi 開著時才能共享。",
     ],
     enable: ['Share this computer\'s models', '共享这台电脑的模型', '共享這台電腦的模型'],
     starting: ['Starting…', '正在启动…', '正在啟動…'],

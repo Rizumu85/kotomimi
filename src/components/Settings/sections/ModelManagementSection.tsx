@@ -66,6 +66,8 @@ interface ModelManagementSectionProps {
   settings: LocalInferenceSettings;
   update: (patch: Partial<LocalInferenceSettings>) => void;
   pair: LanguagePair;
+  /** Fork: a model listed above this library carries the "recommended" mark for this direction, so none here does. */
+  unmarked?: boolean;
 }
 
 // ─── ModelCard ─────────────────────────────────────────────────────────────
@@ -88,6 +90,7 @@ export function ModelCard({
   onDelete,
   onImport,
   note,
+  tag,
   children,
 }: {
   entry: ModelManifestEntry | null; // null = "None" card
@@ -107,6 +110,8 @@ export function ModelCard({
   onImport?: () => void;
   /** Fork: what is worth knowing before choosing this one — behind an info mark beside its name. */
   note?: React.ReactNode;
+  /** Fork: what kind of model this is, as a chip that says on hover what all of its kind share. */
+  tag?: { label: string; hint: string };
   children?: React.ReactNode;
 }) {
   const { t } = useTranslation();
@@ -160,6 +165,11 @@ export function ModelCard({
               <div className="model-card__languages">
                 <LanguageTags languages={entry.languages} />
               </div>
+              {tag && (
+                <Tooltip content={tag.hint} icon="none" position="top" maxWidth={260}>
+                  <span className="model-card__lang-tag model-card__kind-tag">{tag.label}</span>
+                </Tooltip>
+              )}
               {entry.recommended && (
                 <span className="model-card__recommended-badge">
                   <Star size={10} />
@@ -350,6 +360,7 @@ export function ModelManagementSection({
   settings,
   update,
   pair,
+  unmarked,
 }: ModelManagementSectionProps) {
   const { t } = useTranslation();
   // Stable identity: the edge-TTS voice auto-select effect holds it in its
@@ -481,8 +492,8 @@ export function ModelManagementSection({
     () => translationModels.filter(m =>
       isTranslationModelCompatible(m, sourceLanguage, targetLanguage)
       && deviceReady(m, webgpuAvailable)
-    ),
-    [translationModels, sourceLanguage, targetLanguage, webgpuAvailable],
+    ).map((m) => (unmarked && m.recommended ? { ...m, recommended: false } : m)),
+    [translationModels, sourceLanguage, targetLanguage, webgpuAvailable, unmarked],
   );
 
   const incompatibleTranslationModels = useMemo(
@@ -503,8 +514,8 @@ export function ModelManagementSection({
     () => measuredEntries(asrModels.filter(m =>
       (m.multilingual || m.languages.includes(sourceLanguage))
       && deviceReady(m, webgpuAvailable)
-    ), sourceLanguage),
-    [asrModels, sourceLanguage, webgpuAvailable],
+    ), sourceLanguage).map((m) => (unmarked && m.recommended ? { ...m, recommended: false } : m)),
+    [asrModels, sourceLanguage, webgpuAvailable, unmarked],
   );
   const incompatibleAsrModels = useMemo(
     () => asrModels.filter(m =>
