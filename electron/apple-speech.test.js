@@ -192,3 +192,20 @@ describe('a live recognition', () => {
     expect(world.events).toEqual([]);
   });
 });
+
+// Review (REVIEW-native-engine.md): a defect found by reading the code, pinned by a test that fails until it is put
+// right. Production code is unchanged.
+describe('review: what the code should do and does not yet', () => {
+  it('reads the helper\'s last line even when its exit is heard first: the process\'s output may still be on its way', async () => {
+    const { world, speech } = mac();
+    await speech.start(`${PREFIX}ja`);
+    const id = speech.openStream({ language: 'ja', sampleRate: 16000 });
+    const { child } = world.started.at(-1);
+    // Node: "the 'exit' event … the child process stdio streams might still be open"; 'close' comes after them.
+    child.emit('exit', 0);
+    child.say({ type: 'final', text: 'こんにちは' });
+    child.emit('close', 0);
+    await settled();
+    expect(world.events).toEqual([{ id, type: 'done', text: 'こんにちは' }]);
+  });
+});

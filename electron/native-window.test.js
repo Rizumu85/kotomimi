@@ -294,3 +294,39 @@ describe('the model read that way', () => {
     expect(MODELS['qwen3-asr-1.7b-q8'].platforms).toBeUndefined();
   });
 });
+
+// Review (REVIEW-native-engine.md): defects found by reading the code, each pinned by a test that fails until it is
+// put right. Production code is unchanged.
+describe('review: what the code should do and does not yet', () => {
+  it('does not take speech that repeats a character eight times for a model that lost its way', () => {
+    // A model that loses its way writes the same thing until it is stopped: to the end of the reading. These are
+    // followed by more speech, and are what people say (or what a recognizer writes for a number).
+    for (const said of [
+      '人口は1400000000人です。',
+      '予算は100000000円です。',
+      '哈哈哈哈哈哈哈哈，太好笑了。',
+      'ははははははははは、面白い。',
+      '对对对对对对对对，就是这样。',
+      'はいはいはいはいはいはいはいはい、わかりました。',
+      '네네네네네네네네, 알겠어요.',
+    ]) {
+      expect(loopAt(said), said).toBe(-1);
+      expect(unloop(said), said).toBe(said);
+    }
+  });
+
+  it('reads once more when the voice went on after the last reading, though more softly than its loudest moment', async () => {
+    const { world, stream } = recognition();
+    // A laugh or a plosive near full scale, then speech at an ordinary level.
+    stream.write(sound(0.2, 30000));
+    stream.write(sound(1.8, 6000));
+    world.tick();
+    await world.readings[0].answer('そうなんだ');
+    // The last word, said softly (about -22 dBFS, a tenth of the peak is 3000), then the pause.
+    stream.write(sound(0.6, 2500));
+    stream.write(sound(1.4, 0));
+    stream.end();
+    // Ended on the reading that never heard the last word.
+    expect(world.readings).toHaveLength(2);
+  });
+});

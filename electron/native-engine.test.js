@@ -521,3 +521,106 @@ describe('the request a live recognition is (a real socket on this computer)', (
     expect(event.type).toBe('error');
   });
 });
+
+// Review (REVIEW-native-engine.md): defects found by reading the code, each pinned by a test that fails until it is
+// put right. Production code is unchanged.
+describe('review: what the code should do and does not yet', () => {
+  /** A catalog of two models, so that a start of one can meet a start of the other. */
+  const TWO = { engine: CATALOG.engine, models: { ...CATALOG.models, m2: { ...CATALOG.models.m1, file: 'm2.gguf', url: 'https://example.test/m2.gguf' } } };
+  const SERVED_TWO = { 'https://example.test/engine.zip': ARCHIVE, 'https://example.test/m1.gguf': MODEL, 'https://example.test/m2.gguf': MODEL };
+  const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  /** An engine on models already downloaded, whose free port is handed out only when the test says so. */
+  async function heldAtThePort() {
+    const { engine: fetcher } = computer({ catalog: TWO, served: SERVED_TWO });
+    await fetcher.download('m1');
+    await fetcher.download('m2');
+    const world = { started: [], ports: [], streamEvents: [] };
+    const engine = createNativeEngine({
+      dir, platform: 'win32', arch: 'x64', catalog: TWO,
+      spawn: (bin, args, options) => {
+        const child = Object.assign(new EventEmitter(), { pid: 100 + world.started.length, stdout: new EventEmitter(), stderr: new EventEmitter() });
+        child.kill = () => { child.killed = true; queueMicrotask(() => child.emit('exit', null)); return true; };
+        world.started.push({ bin, args, options, child });
+        return child;
+      },
+      freePort: () => new Promise((resolve) => world.ports.push(resolve)),
+      get: async () => ({ status: 200, body: '{}' }),
+      live: (target, onEvent) => ({ write() {}, end() { queueMicrotask(() => onEvent({ type: 'done', text: '' })); }, abort() {} }),
+      setPriority: () => {}, sleep: async () => {},
+      onStream: (event) => world.streamEvents.push(event),
+    });
+    return { world, engine };
+  }
+
+  it('does not call a runtime ready that was unpacked only halfway', async () => {
+    // The unpacking stops after the program is written and before the libraries beside it are: the app closed, the
+    // disk filled, or the system tar refused an entry and exited with an error.
+    const { world, engine } = computer();
+    const broken = createNativeEngine({
+      dir, platform: 'win32', arch: 'x64', catalog: CATALOG,
+      fetch: async (url, init = {}) => { world.requests.push({ url, range: init.headers?.Range }); return answer([url.endsWith('.zip') ? ARCHIVE : MODEL]); },
+      extract: async (archive, into) => { fs.writeFileSync(path.join(into, 'server.exe'), 'ex'); throw new Error('tar exited with code 1'); },
+    });
+    void engine;
+    const after = await broken.download('m1');
+    expect(after.models.m1.state).toBe('failed');
+    // The program is on disk, the rest is not: the runtime is not there, and the next download fetches it again.
+    expect(after.engine).not.toBe('ready');
+    await broken.download('m1');
+    expect(world.requests.filter((r) => r.url.endsWith('engine.zip'))).toHaveLength(2);
+  });
+
+  it('leaves one runtime running, not two, when another model is started while one is being started', async () => {
+    const { world, engine } = await heldAtThePort();
+    const first = engine.start('m1');
+    await flush();
+    const second = engine.start('m2');
+    await flush();
+    // Both starts are waiting for a port: the second one's stop() found nothing to stop yet.
+    expect(world.ports).toHaveLength(2);
+    world.ports[0](45001);
+    world.ports[1](45002);
+    await Promise.all([first, second]);
+    const alive = world.started.filter((s) => !s.child.killed);
+    expect(alive).toHaveLength(1);
+    expect(engine.status().run).toMatchObject({ state: 'ready', model: 'm2' });
+    await engine.stop();
+    // Nothing is left running once the engine is stopped.
+    expect(world.started.filter((s) => !s.child.killed)).toHaveLength(0);
+  });
+
+  it('is not started after a stop that was asked for while the start was under way', async () => {
+    const { world, engine } = await heldAtThePort();
+    const starting = engine.start('m1');
+    await flush();
+    await engine.stop();
+    world.ports[0](45001);
+    await starting;
+    expect(world.started.filter((s) => !s.child.killed)).toHaveLength(0);
+    expect(engine.status().run.state).toBe('stopped');
+  });
+
+  it('takes no id for a model that is not one of its own: none of the names every object has', async () => {
+    const { world, engine } = computer();
+    // `MODELS_[id]` is a plain object's property: `constructor` and `__proto__` are "models" too.
+    await engine.download('constructor');
+    expect(world.requests).toEqual([]);
+    await engine.download('m1');
+    await engine.start('m1');
+    await engine.start('__proto__').catch(() => {});
+    // The runtime that was running is still running.
+    expect(world.started[0].child.killed).toBeUndefined();
+    expect(engine.status().run).toMatchObject({ state: 'ready', model: 'm1' });
+  });
+
+  it('tells an open recognition when the runtime under it is stopped, as it does when the runtime goes away by itself', async () => {
+    const { world, engine } = computer();
+    await engine.download('m1');
+    await engine.start('m1');
+    const id = engine.openStream({ language: 'ja', sampleRate: 16000 });
+    await engine.stop();
+    // Otherwise the page keeps sending sound into nothing, and waits for last words that never come.
+    expect(world.streamEvents).toEqual([{ id, type: 'error', message: expect.any(String) }]);
+  });
+});
