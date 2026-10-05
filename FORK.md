@@ -686,14 +686,25 @@ node scripts/fork-localai-locales.cjs   # 语言包冲突时：先取上游版�
 | `src/routes/Home.tsx`、`src/App.scss` | 启动时读取注音开关、字体和共享状态；Windows 上由页面自己给窗口加圆角（`src/lib/windowShape.ts`：窗口无边框又透明，系统不给圆角；最大化和全屏时恢复直角） |
 | `electron/main.js` | 应用名、设置迁移、"关于"、启动时不查更新、共享用的 IPC、开发用的环境变量；Windows 上接入 `electron/window-maximize.js`（显示缩放不是整数倍时，Electron 认不出透明窗口已最大化，最大化后还原不了；这里记住最大化前的位置，自己还原；最大化和还原没有系统动画，由页面自己播放窗口大小变化的动画，`window:shift` / `window:shift-place` / `window:shift-ready`） |
 | `electron/ipc-channels.js`、`electron/preload.js`、`vite.config.ts` | 共享用的通道和构建入口 |
-| `electron/main.js`（启动时的虚拟声卡一段）、`electron/vb-cable-installer.js`、`src/components/AudioSystemBanner/AudioSystemBanner.tsx`、`src/components/MainPanel/MainPanel.tsx`、`src/stores/audioSystemStore.ts` | Windows 上启动时不再弹窗要求下载安装 VB-CABLE（上游在窗口出现之前弹英文对话框，点"Install Now"后静默下载、没有进度也没有超时，看起来像没反应）：启动时只检测；没装时横幅说明"没有安装 VB-CABLE……只看字幕不需要它"，并给"安装 VB-CABLE"按钮（原因码 `vbcable-missing`，不再落到说 PulseAudio 的那句）；当前提供商从不出声时（Kotomimi 自由搭配）横幅不显示；下载加了两分钟超时 |
+| `electron/main.js`（启动时的虚拟声卡一段）、`electron/vb-cable-installer.js`、`src/components/Banner/useBanners.tsx`（上游 0.43.0 起所有横幅由它画；之前是 `AudioSystemBanner.tsx`）、`src/components/MainPanel/MainPanel.tsx`、`src/stores/audioSystemStore.ts` | Windows 上启动时不再弹窗要求下载安装 VB-CABLE（上游在窗口出现之前弹英文对话框，点"Install Now"后静默下载、没有进度也没有超时，看起来像没反应）：启动时只检测；没装时横幅说明"没有安装 VB-CABLE……只看字幕不需要它"，并给"安装 VB-CABLE"按钮（原因码 `vbcable-missing`，不再落到说 PulseAudio 的那句）；当前提供商从不出声时（Kotomimi 自由搭配）横幅不显示；下载加了两分钟超时 |
+| `src/viewer/strings.ts`、`viewer.html`、`electron/main.js`（`setupCaptionShare` 的 `isDev`） | 上游的"分享字幕"（0.43.0）：观众页的文字和标题也用本分支的名字；用 `KOTOMIMI_LOAD_BUILD` 运行时观众页也从构建产物里取，不去找开发服务器 |
 | `electron/update-manager.js`、`electron/update-payload.js` | 更新源和安装包文件名 |
 | `forge.config.js` | 应用身份 |
 | `assets/icon.*`、`public/favicon.ico`、`public/logo*.png` | 图标 |
-| 几个测试文件（`registry.test.ts`、`palabraai/provider.test.ts`、`gemini/provider.test.ts`、`localInference/provider.test.ts`、`ProviderPicker.test.tsx`、`AccountButton.test.tsx`、`LanguagePairSection.test.tsx`、`SimpleSettings.order.test.tsx`、`HelpSection.test.tsx`） | 跟着上面的改动更新的断言 |
+| 几个测试文件（`registry.test.ts`、`palabraai/provider.test.ts`、`gemini/provider.test.ts`、`localInference/provider.test.ts`、`ProviderPicker.test.tsx`、`AccountButton.test.tsx`、`LanguagePairSection.test.tsx`、`SimpleSettings.order.test.tsx`、`HelpSection.test.tsx`、`src/viewer/{ViewerApp,PresentApp,strings}.test.ts(x)`） | 跟着上面的改动更新的断言（观众页的三个：语言名和产品名是本分支的叫法） |
 | `src/locales/*/translation.json` | 由脚本生成的文字 |
 | `package.json`、`package-lock.json` | 三个新依赖：`@sglkc/kuromoji`、`wanakana`、`es-hangul`；`ws` 从开发依赖移到运行依赖（共享的服务端要用）。另外是本分支的版本号（见"版本号和发布"），`productName` 和 `build` 里的应用 ID、可执行文件名、macOS 签名证书名、更新源 |
 | `extension/package.json`、`extension/package-lock.json`、`extension/manifest.json` | 只有版本号，和根目录的一起改（见"版本号和发布"）。上游每次发版都会在这里冲突：保留本分支的版本号 |
+
+### 合并记录
+
+- **2026-10-06，上游 0.43.1**（分支 `sync/upstream-2026-10-06`，101 个提交）。带进来的：统一的提示（主界面底部上方一条状态行、一个横幅组件、对话里的系统行，不再有弹出提示）；"分享字幕"（同一网络里的手机或电脑用浏览器看这边的字幕，端口 7788–7797，和本分支"共享模型"的 8790 是两回事）；对话只在读者停在底部时才跟着滚动；麦克风跟随系统设备的插拔。
+  - 冲突 14 个代码文件加 30 个语言包。语言包取上游再跑脚本；版本号留本分支的；`preload.js`、`main.js`、`Home.tsx` 两边的新增都留。
+  - 上游把 `AudioSystemBanner` 并进了新的横幅组件：本分支的两处定制（不出声的提供商不提示缺虚拟麦克风、Windows 上提示安装 VB-CABLE）移到了 `useBanners.tsx`，测试在 `useBanners.fork.test.tsx`。
+  - 发布用的测试清单加了上游的横幅和字幕分享几组测试。
+  - 实测（测试窗口）：会话正常，首字 1.2 秒；开启分享字幕后，观众端收到了每一句的更新，页面标题和文字是 Kotomimi。
+  - 合并前就失败、与合并无关的上游测试（不在本分支的清单里）：`electron/audio-host-path.test.js`、`sandbox-recovery.test.js`、`wsHeaderRules.wiring.test.js`（Windows 上的路径和换行）、`src/services/providers/astGuard.test.ts`、`src/utils/featureGateForwarding.consistency.test.ts`。
+  - 下一次发版的版本号从上游 0.43.1 起算：`0.43.101`。
 
 ## 许可
 

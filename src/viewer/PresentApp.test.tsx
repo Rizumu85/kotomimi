@@ -30,7 +30,7 @@ describe('PresentApp', () => {
     expect(screen.getByRole('img', { name: 'http://192.168.1.23:7788/' })).toBeTruthy();
     expect(screen.getByText('Watching: 12')).toBeTruthy();
     expect(screen.queryByText(/^Join the Wi/)).toBeNull();
-    expect(document.title).toBe('Sokuji projector page');
+    expect(document.title).toBe('Kotomimi projector page');
   });
 
   // His live test 2026-10-05: Chrome on Android cannot reach a LAN address

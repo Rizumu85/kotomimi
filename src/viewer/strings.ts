@@ -7,6 +7,8 @@
  * of i18next keeps the page light.
  */
 import { VIEWER_WORDS } from './strings.generated';
+// Fork: the page names the product as this build does (`src/lib/brand.ts`), as the app's own strings do.
+import { branded } from '../lib/brand';
 
 export type Words = { [key: string]: string | Words };
 export type T = (key: string, params?: Record<string, string | number>) => string;
@@ -44,8 +46,8 @@ export function makeT(words: Words | undefined, fallback: Words | undefined): T 
   return (key, params) => {
     const local = key.startsWith('viewer.') ? key.slice('viewer.'.length) : key;
     const text = lookup(words, local) ?? lookup(fallback, local) ?? key;
-    if (!params) return text;
-    return text.replace(/\{\{(\w+)\}\}/g, (match, name: string) => (name in params ? String(params[name]) : match));
+    if (!params) return branded(text);
+    return branded(text).replace(/\{\{(\w+)\}\}/g, (match, name: string) => (name in params ? String(params[name]) : match));
   };
 }
 

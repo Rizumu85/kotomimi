@@ -54,6 +54,6 @@ describe('viewer strings', () => {
   it('builds a t for the browser languages', () => {
     const { t, catalog } = viewerT(['en-US']);
     expect(catalog).toBe('en');
-    expect(t('viewer.title')).toBe('Sokuji captions');
+    expect(t('viewer.title')).toBe('Kotomimi captions');
   });
 });

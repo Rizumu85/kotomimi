@@ -52,7 +52,9 @@ const captionShare = setupCaptionShare({
   app,
   isTrustedSender: (sender) => sender === mainWindow?.webContents,
   getMainWindow: () => mainWindow,
-  isDev: import.meta.env.MODE === 'development' || !app.isPackaged,
+  // Fork: an unpackaged run asked to load the built files (`KOTOMIMI_LOAD_BUILD=1`, as `loadsDevServer` below) serves
+  // the built viewer page too: there is no dev server to pass it on from.
+  isDev: (import.meta.env.MODE === 'development' || !app.isPackaged) && !(process.env.KOTOMIMI_LOAD_BUILD === '1' && !app.isPackaged),
 });
 
 // Config utility no longer needed - using localStorage in renderer process
