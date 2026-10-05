@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { wasmCandidates } from './candidates.wasm';
 import { getManifestByType } from '../modelManifest';
+import { byRank } from './resolveStage';
 
 const allDownloaded = () => {
   const out: Record<string, 'downloaded'> = {};
@@ -14,6 +15,32 @@ const ctx = () => ({
   modelStatuses: allDownloaded(),
   webgpuAvailable: true,
   deviceFeatures: [] as string[],
+});
+
+describe('the recognizers\' order where it was measured (fork)', () => {
+  const ranked = (language: string) => wasmCandidates(ctx()).pool('asr', language, 'en').filter((c) => c.autoEligible).sort(byRank).map((c) => c.id);
+
+  it('tries the recognizers measured best on Japanese conversation first, in that order', () => {
+    expect(ranked('ja').slice(0, 3)).toEqual(['qwen3-asr-1.7b-webgpu', 'whisper-large-v3-turbo-webgpu', 'voxtral-mini-4b-webgpu']);
+  });
+
+  it('keeps the ones measured unusable for Japanese to the end: picked by hand, or when nothing else is there', () => {
+    const ja = ranked('ja');
+    expect(ja.slice(-2)).toEqual(['granite-speech-4.1-2b', 'sensevoice-int8']);
+    // Still in the pool: with only one of them downloaded, it is what hears.
+    const only = wasmCandidates({ ...ctx(), modelStatuses: { 'sensevoice-int8': 'downloaded' } }).pool('asr', 'ja', 'en').filter((c) => c.ready).map((c) => c.id);
+    expect(only).toEqual(['sensevoice-int8']);
+  });
+
+  it('leaves the catalog\'s order alone for a language that was not measured', () => {
+    const source = wasmCandidates(ctx());
+    const catalog = [...getManifestByType('asr'), ...getManifestByType('asr-stream')];
+    for (const c of source.pool('asr', 'ko', 'en')) {
+      const entry = catalog.find((m) => m.id === c.id)!;
+      expect([c.id, c.recommended, c.sortOrder]).toEqual([entry.id, Boolean(entry.recommended), entry.sortOrder ?? 0]);
+    }
+    expect(ranked('ko')[0]).toBe('cohere-transcribe-webgpu');
+  });
 });
 
 describe('wasmCandidates', () => {

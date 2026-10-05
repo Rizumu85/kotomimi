@@ -3,6 +3,7 @@ import {
   isAstCompatible, getModelSizeMb, isVariantEligible,
   type ModelManifestEntry, type ModelStatus,
 } from '../modelManifest';
+import { measuredAsr } from './measuredRank';
 import type { Candidate, CandidateSource, Stage } from './types';
 
 export interface WasmCandidateCtx {
@@ -40,7 +41,8 @@ export function wasmCandidates(ctx: WasmCandidateCtx): CandidateSource {
   });
 
   const pool = (stage: Stage, src: string, tgt: string): Candidate[] => {
-    if (stage === 'asr') return asrEntries().filter((m) => asrOk(m, src)).map((m) => toCandidate(m));
+    // Fork: ranked as measured, for a language that was (`measuredRank.ts`).
+    if (stage === 'asr') return asrEntries().filter((m) => asrOk(m, src)).map((m) => measuredAsr(toCandidate(m), src));
     if (stage === 'tts') return getManifestByType('tts').filter((m) => ttsOk(m, tgt)).map((m) => toCandidate(m));
     return [
       ...getManifestByType('translation')
