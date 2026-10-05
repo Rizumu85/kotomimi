@@ -6,7 +6,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Captions, MessageSquare } from 'lucide-react';
+import { Captions, Loader, MessageSquare } from 'lucide-react';
 import { getAppSession, type AppSession, type LoadedAudio } from '../../app/session';
 import { useRunState } from '../../app/useRun';
 import { isDevelopment } from '../../config/analytics';
@@ -292,7 +292,11 @@ export default function MainPanel() {
             }}
             replayBlocked={blocked} noticeAction={noticeAction}
             compact={display.compactMode} fontSize={display.fontSize}
-            empty={<><MessageSquare size={32} /><p>{t('simplePanel.startToBegin', 'Click Start to begin real-time translation')}</p></>}
+            // Fork: while this computer's recognition engine is still coming up, the empty page says so — why Start is
+            // not there yet, and that it will be by itself — where the words are otherwise only the button's tooltip.
+            empty={startBlockMessage && idle.kind === 'unready' && idle.code === 'native_warming'
+              ? <><Loader size={32} className="kt-warming__spin" /><p className="kt-warming__words" role="status">{startBlockMessage}</p></>
+              : <><MessageSquare size={32} /><p>{t('simplePanel.startToBegin', 'Click Start to begin real-time translation')}</p></>}
           />
         )}
         {canSendText && <TypedText onSend={(text) => runner.sendText(text)} />}

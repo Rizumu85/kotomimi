@@ -661,3 +661,15 @@
     min-height: 0;
   }
 }
+
+// Fork: the empty page while this computer's recognition engine is still coming up (MainPanel.tsx).
+.kt-warming__spin {
+  animation: spin 1.4s linear infinite;
+}
+
+.empty-state .kt-warming__words {
+  max-width: 460px;
+  font-size: 14px;
+  line-height: 1.7;
+  text-align: center;
+}
