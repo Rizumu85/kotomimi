@@ -108,6 +108,8 @@ describe('the translator a device gets', () => {
     expect(nativeTranslatorFor('ja', 'sw', 'hy-mt2-1.8b')).toBeNull();
     useNativeTranslatorStore.setState({ status: { ...TRANSLATORS, run: { state: 'ready', model: 'hy-mt2-1.8b', port: 6000, tail: '' } } });
     expect(nativeTranslatorFor('ja', 'zh', '')).toBe('hy-mt2-1.8b');
+    // The engine runs one model at a time: the one running answers for another of its models that was named.
+    expect(nativeTranslatorFor('ja', 'zh', 'index-translate-2b')).toBe('hy-mt2-1.8b');
     // The running one does not translate this pair: the one that does.
     expect(nativeTranslatorFor('ja', 'sw', '')).toBe('index-translate-2b');
   });

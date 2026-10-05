@@ -52,10 +52,13 @@ export function nativeRecognizerFor(language: string, wanted: string): { modelId
 export function nativeTranslatorFor(source: string, target: string, wanted: string): string | null {
   const status = useNativeTranslatorStore.getState().status;
   const fits = (id: string) => nativeDownloaded(status, id) && nativeTranslates(NATIVE_TRANSLATORS.find((m) => m.id === id)!, source, target);
-  if (wanted) return isNativeTranslator(wanted) && fits(wanted) ? wanted : null;
-  // The one already running first: starting another would stop it under whoever is using it.
-  const running = status.run.model;
+  if (wanted && !isNativeTranslator(wanted)) return null;
+  // The engine runs one model at a time. The one running — this computer's own choice, or what another device is
+  // being served with — answers for any of the engine's models, where it translates the pair: starting another would
+  // stop it under whoever is using it.
+  const running = status.run.state !== 'stopped' && status.run.state !== 'failed' ? status.run.model : null;
   if (running && isNativeTranslator(running) && fits(running)) return running;
+  if (wanted) return fits(wanted) ? wanted : null;
   return NATIVE_TRANSLATORS.find((m) => fits(m.id))?.id ?? null;
 }
 
