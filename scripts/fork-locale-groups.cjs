@@ -75,7 +75,7 @@ module.exports = {
       '用區域網路裡另一台裝置的模型，或這台電腦自己的模型，也可以兩邊混著用。',
     ],
     pathCost: [
-      'No account and no API key. Text only: subtitles with furigana, typed lookups and grammar feedback. Another device means a Kotomimi sharing its models, or a model server such as LocalAI; this computer downloads models onto your disk.',
+      'No account and no API key. Text only: subtitles with furigana, typed translation and grammar feedback. Another device means a Kotomimi sharing its models, or a model server such as LocalAI; this computer downloads models onto your disk.',
       '不需要账号，也不需要 API 密钥。仅文本：带假名注音的字幕、打字翻译和语法反馈。另一台设备可以是开了共享的 Kotomimi，或 LocalAI 这类模型服务器；用这台电脑则要把模型下载到本地。',
       '不需要帳號，也不需要 API 金鑰。僅文字：帶假名注音的字幕、打字翻譯和文法回饋。另一台裝置可以是開了共享的 Kotomimi，或 LocalAI 這類模型伺服器；用這台電腦則要把模型下載到本機。',
     ],

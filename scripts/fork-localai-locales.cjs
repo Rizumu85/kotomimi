@@ -103,7 +103,7 @@ const PROVIDER = {
   // This computer's models.
   notDownloaded: ['No model downloaded yet', '还没下载模型', '尚未下載模型'],
   browse: ['Model library', '模型库', '模型庫'],
-  hears: ['Hears {{language}}', '听{{language}}', '聽{{language}}'],
+  hears: ['Recognizes {{language}}', '识别{{language}}', '辨識{{language}}'],
   chatModelsNoGpu: [
     'These models need a graphics card with WebGPU, which this computer does not offer. Use another device or an API model for the feedback.',
     '这些模型需要支持 WebGPU 的显卡，这台电脑没有。语法反馈请改用另一台设备或 API 模型。',
@@ -149,11 +149,11 @@ const PROVIDER = {
     '那台设备上没有正在共享的 Kotomimi。请在那台设备上打开 Kotomimi，开启「共享给其他设备」，再试一次。',
     '那台裝置上沒有正在共享的 Kotomimi。請在那台裝置上打開 Kotomimi，開啟「共享給其他裝置」，再試一次。',
   ],
-  pipelineModel: ['Realtime pipeline', '实时管线', '即時管線'],
+  pipelineModel: ['Setup name on that device', '那台设备上的配置名称', '那台裝置上的設定名稱'],
   pipelineNote: [
-    'Normally left alone: it is the pipeline the other device runs its live session with. Change it only when that device is a LocalAI set up with more than one.',
-    '一般不用改：这是另一台设备跑实时会话用的管线。只有那台设备是 LocalAI，而且配了不止一条管线时才需要改。',
-    '一般不用改：這是另一台裝置跑即時工作階段用的管線。只有那台裝置是 LocalAI，而且設了不只一條管線時才需要改。',
+    'Normally left alone. Change it only when that device is a LocalAI set up with more than one combination of recognition and translation.',
+    '一般不用改。只有那台设备是 LocalAI，并且配了不止一套识别和翻译的组合时才需要改。',
+    '一般不用改。只有那台裝置是 LocalAI，並且設了不只一套辨識和翻譯的組合時才需要改。',
   ],
   asrApiBaseUrlPlaceholder: ['e.g. https://api.openai.com/v1', '例如 https://api.openai.com/v1', '例如 https://api.openai.com/v1'],
   asrApiModelPlaceholder: ['e.g. whisper-1, whisper-large-v3', '例如 whisper-1、whisper-large-v3', '例如 whisper-1、whisper-large-v3'],

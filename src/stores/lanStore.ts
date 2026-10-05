@@ -45,6 +45,13 @@ interface LanState {
 
 type Field = 'enabled' | 'port' | 'key';
 const KEY = (field: Field) => `settings.common.lan.${field}`;
+/**
+ * An access key as it can be sent: a device gives it in a WebSocket subprotocol, which carries letters, digits and a
+ * few marks — no space, no slash or colon, nothing outside ASCII. A key with any of those would pass the check (sent
+ * there as a header) and fail every start, so what cannot be sent is not kept.
+ */
+export const lanKeyOf = (text: string): string => text.replace(/[^A-Za-z0-9._~!*+-]/g, '');
+
 export const validLanPort = (value: unknown): value is number => typeof value === 'number' && Number.isInteger(value) && value >= 1024 && value <= 65535;
 
 const NO_FIREWALL = { firewall: FIREWALL_UNKNOWN, firewallBusy: false, firewallDeclined: false };
@@ -116,7 +123,7 @@ export const useLanStore = create<LanState>()(
         if (get().enabled) await apply();
       },
       setKey: async (key) => {
-        const trimmed = key.trim();
+        const trimmed = lanKeyOf(key.trim());
         if (trimmed === get().key) return;
         set({ key: trimmed });
         void persist('key', trimmed);
@@ -131,7 +138,7 @@ export const useLanStore = create<LanState>()(
           service.getSetting<unknown>(KEY('key'), ''),
         ]);
         // A key of digits comes back from storage as a number: it is still the key that was typed.
-        set({ enabled: enabled === true, port: validLanPort(port) ? port : LAN_DEFAULT_PORT, key: typeof key === 'string' || typeof key === 'number' ? String(key) : '' });
+        set({ enabled: enabled === true, port: validLanPort(port) ? port : LAN_DEFAULT_PORT, key: typeof key === 'string' || typeof key === 'number' ? lanKeyOf(String(key)) : '' });
         if (get().enabled) await apply();
       },
     };

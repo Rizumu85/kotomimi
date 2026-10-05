@@ -3,6 +3,7 @@
  * every row that shows Japanese. A failed load is kept as failed — the rows
  * stay plain — and is not retried on every render.
  */
+import { describeCause, reportWarning } from '../diagnostics/report';
 import { appDictionaryFile } from './japaneseDictionary';
 import { buildJapaneseTokenizer, type DictionaryFile } from './japaneseTokenizer';
 import type { JapaneseTokenizer } from './types';
@@ -31,7 +32,11 @@ export function japaneseTokenizer(): JapaneseTokenizer | undefined {
 export function loadJapanese(file: DictionaryFile = appDictionaryFile): void {
   if (state.status !== 'idle') return;
   set({ status: 'loading' });
-  buildJapaneseTokenizer(file).then((tokenizer) => set({ status: 'ready', tokenizer }), () => set({ status: 'failed' }));
+  buildJapaneseTokenizer(file).then((tokenizer) => set({ status: 'ready', tokenizer }), (cause) => {
+    set({ status: 'failed' });
+    // The rows are drawn plain from then on: said once, so that "no furigana" has a reason someone can find.
+    reportWarning('Annotate', `The Japanese dictionary could not be loaded, so no furigana or romaji is shown: ${describeCause(cause)}`, { cause, dedupeKey: 'annotate.dictionary' });
+  });
 }
 
 /** Test only: back to not loaded. */

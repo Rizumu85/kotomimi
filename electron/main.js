@@ -1374,6 +1374,8 @@ ipcMain.handle('local-server:pipelines', () => getLocalServer().pipelines());
 ipcMain.handle('local-server:set-pipeline', (event, args) => getLocalServer().setPipeline(String(args?.name ?? ''), { transcription: args?.transcription, llm: args?.llm }));
 // The one this app started goes with it: asked to stop, not waited for.
 app.on('will-quit', () => { void localServer?.stop(); });
+// …and on the ways out that `will-quit` never hears of (a signal, an error nothing caught: `process.exit`).
+process.on('exit', () => { void localServer?.stop(); });
 
 // Fork: the native recognition engine (electron/native-engine.js): a runtime and its models, fetched into the app's
 // own folder and run on this computer alone. Fetched over the system's own network stack (`net.fetch`: its proxy

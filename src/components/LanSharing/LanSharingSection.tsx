@@ -26,7 +26,7 @@ import { getManifestEntry } from '../../lib/local-inference/modelManifest';
 import { shortenModelName } from '../../lib/local-inference/modelName';
 import type { LanguagePair } from '../../lib/provider/types';
 import { LOCAL_INFERENCE_DEFAULTS } from '../../providers/localInference/settings';
-import { useLanStore, validLanPort } from '../../stores/lanStore';
+import { useLanStore, validLanPort, lanKeyOf } from '../../stores/lanStore';
 import { useLocalServerStore } from '../../stores/localServerStore';
 import { useModelStatuses, useModelStore } from '../../stores/modelStore';
 import './LanSharingSection.scss';
@@ -205,7 +205,7 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
               </label>
               <label className="kt-lan__field kt-lan__field--wide">
                 <span>{t('fork.lan.key')}</span>
-                <input type="text" className="text-input" value={keyText} onChange={(e) => setKeyText(e.target.value)} onBlur={() => { void useLanStore.getState().setKey(keyText); }} onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }} placeholder={t('fork.lan.keyPlaceholder')} spellCheck={false} disabled={disabled} />
+                <input type="text" className="text-input" value={keyText} onChange={(e) => setKeyText(lanKeyOf(e.target.value))} onBlur={() => { void useLanStore.getState().setKey(keyText); }} onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }} placeholder={t('fork.lan.keyPlaceholder')} spellCheck={false} disabled={disabled} />
               </label>
             </div>
             {/* A computer on several networks (a VPN, a virtual switch) has an address on each: the others, for a device on one of those. */}
