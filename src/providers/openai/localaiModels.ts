@@ -11,7 +11,7 @@ import type { ModelOption } from '../../lib/provider/types';
  * (another Kotomimi's own, `src/lib/lan`), or something no stage uses (a
  * VAD, a TTS voice).
  */
-export type LocalAIModelKind = 'pipeline' | 'asr' | 'text' | 'translate' | 'other';
+export type LocalAIModelKind = 'pipeline' | 'asr' | 'text' | 'translate' | 'feedback' | 'other';
 
 /** The name another Kotomimi gives as the owner of every model it shares. */
 export const KOTOMIMI_HOST = 'kotomimi';
@@ -39,6 +39,8 @@ export function kindOf(capabilities: unknown): LocalAIModelKind {
   if (list.includes('transcript')) return 'asr';
   if (list.includes('chat') || list.includes('completion')) return 'text';
   if (list.includes('translate')) return 'translate';
+  // Another Kotomimi's feedback model (`src/lib/lan/protocol.ts`): lent for grammar feedback, and for that alone.
+  if (list.includes('feedback')) return 'feedback';
   return list.length === 0 ? 'pipeline' : 'other';
 }
 
@@ -50,7 +52,7 @@ const KINDS: Readonly<Record<LocalAIModelSlot, readonly LocalAIModelKind[]>> = {
   pipeline: ['pipeline'],
   asr: ['asr'],
   translate: ['text', 'translate'],
-  coach: ['text'],
+  coach: ['text', 'feedback'],
 };
 
 /**

@@ -4,6 +4,7 @@ import { pcmToBase64 } from '../contract/pcm64';
 import { createLanHost, type LanBridge, type LanModels } from './host';
 import { baseLanguage, capabilityList, firewallAnswer, LAN_OWNER, LAN_PIPELINE, modelList, type SharedModel } from './protocol';
 import { LanTranscriber, vadFrom, type Recognizer } from './transcriber';
+import { COACH_IDLE_MS, LanCoach } from './coach';
 import { LanTranslator, type Translator } from './translator';
 
 const SHARED: SharedModel[] = [
@@ -515,5 +516,98 @@ describe('a sharing Kotomimi\'s translations, when more models are wanted than i
     expect(made[1].disposes).toBe(1);
     release();
     expect((await first).status).toBe(200);
+  });
+});
+
+describe('a sharing Kotomimi\u2019s feedback model', () => {
+  const CHAT = { model: 'gemma-4-e2b', stream: false, temperature: 0.2, max_tokens: 9000, tools: [{ type: 'function' }], messages: [{ role: 'system', content: 'Check the grammar.' }, { role: 'user', content: '私は学生だ' }] };
+
+  function coach(answer: (model: string, messages: unknown, extra: Record<string, unknown>) => Promise<string> = async () => 'OK') {
+    const clock = createVirtualClock(1_700_000_000_000);
+    const asked: Array<{ model: string; messages: unknown; extra: Record<string, unknown> }> = [];
+    const holds = { held: 0, released: 0 };
+    const c = new LanCoach({
+      answer: async (model, messages, extra) => { asked.push({ model, messages, extra }); return answer(model, messages, extra); },
+      hold: () => { holds.held += 1; return () => { holds.released += 1; }; },
+      clock,
+    });
+    return { c, clock, asked, holds };
+  }
+
+  it('says what it is for: feedback, and nothing a translation or a recognition could be asked of', () => {
+    const lent = [{ id: 'index-translate-2b', kind: 'translate' as const, languages: [] }, { id: 'gemma-4-e2b', kind: 'feedback' as const, languages: [] }];
+    expect(capabilityList(lent).data.slice(1)).toEqual([
+      { id: 'index-translate-2b', capabilities: ['translate'], languages: [] },
+      { id: 'gemma-4-e2b', capabilities: ['feedback'], languages: [] },
+    ]);
+  });
+
+  it('passes the device\u2019s own messages to the engine, with what is the device\u2019s to choose and no more', async () => {
+    const x = coach(async () => 'The sentence is fine.');
+    const answer = await x.c.complete('gemma-4-e2b', CHAT);
+    expect(answer).toMatchObject({ status: 200, body: { object: 'chat.completion', model: 'gemma-4-e2b', choices: [{ message: { role: 'assistant', content: 'The sentence is fine.' }, finish_reason: 'stop' }] } });
+    expect(x.asked).toEqual([{ model: 'gemma-4-e2b', messages: CHAT.messages, extra: { temperature: 0.2, max_tokens: 1024 } }]);
+  });
+
+  it('answers a client that asked for a stream with one, and one with no message with a refusal', async () => {
+    const x = coach(async () => '好');
+    const streamed = await x.c.complete('gemma-4-e2b', { ...CHAT, stream: true });
+    expect(streamed.contentType).toBe('text/event-stream');
+    expect(String(streamed.body)).toContain('"content":"好"');
+    expect(String(streamed.body).trim().endsWith('data: [DONE]')).toBe(true);
+    expect(await x.c.complete('gemma-4-e2b', { model: 'gemma-4-e2b', messages: [] })).toMatchObject({ status: 400 });
+    expect(x.asked).toHaveLength(1);
+  });
+
+  it('holds the engine while devices ask, and lets it go once none has for a while', async () => {
+    const x = coach();
+    await x.c.complete('gemma-4-e2b', CHAT);
+    await x.c.complete('gemma-4-e2b', CHAT);
+    expect(x.holds).toEqual({ held: 1, released: 0 });
+    x.clock.advance(COACH_IDLE_MS - 1);
+    expect(x.holds.released).toBe(0);
+    // Asked again before the while is over: the while begins again.
+    await x.c.complete('gemma-4-e2b', CHAT);
+    x.clock.advance(COACH_IDLE_MS - 1);
+    expect(x.holds.released).toBe(0);
+    x.clock.advance(2);
+    expect(x.holds).toEqual({ held: 1, released: 1 });
+    // The next request holds it anew.
+    await x.c.complete('gemma-4-e2b', CHAT);
+    expect(x.holds.held).toBe(2);
+    x.c.dispose();
+    expect(x.holds.released).toBe(2);
+  });
+
+  it('says so when the engine fails, and keeps answering', async () => {
+    let fail = true;
+    const x = coach(async () => { if (fail) throw new Error('The feedback engine of this computer could not start.'); return 'OK'; });
+    expect(await x.c.complete('gemma-4-e2b', CHAT)).toMatchObject({ status: 500, body: { error: { code: 'server_error' } } });
+    fail = false;
+    expect((await x.c.complete('gemma-4-e2b', CHAT)).status).toBe(200);
+  });
+
+  it('is asked by the host only for a chat that names it: any other is a sentence to translate', async () => {
+    const door = bridge();
+    const feedback: string[] = [];
+    const translators: Array<ReturnType<typeof fakeTranslator>> = [];
+    const h = createLanHost({
+      bridge: door.b,
+      models: { ...MODELS, coach: (wanted) => (wanted === 'gemma-4-e2b' ? wanted : null) },
+      engines: {
+        recognizer: () => fakeRecognizer(),
+        translator: () => { const t = fakeTranslator(); translators.push(t); return t; },
+        coach: { answer: async (model) => { feedback.push(model); return 'fine'; }, hold: () => () => {} },
+      },
+      clock: createVirtualClock(0),
+    });
+    await h.start({ port: 8790, key: '' });
+    door.deliver('lan:request', { id: 'f1', method: 'POST', path: '/v1/chat/completions', body: CHAT });
+    door.deliver('lan:request', { id: 't1', method: 'POST', path: '/v1/chat/completions', body: { model: LAN_PIPELINE, source_language: 'zh', target_language: 'ja', messages: [{ role: 'user', content: '你好' }] } });
+    await vi.waitFor(() => expect(door.of('lan:reply')).toHaveLength(2));
+    expect(feedback).toEqual(['gemma-4-e2b']);
+    expect(translators).toHaveLength(1);
+    expect(door.of('lan:reply').find((r) => r.id === 'f1')).toMatchObject({ status: 200, body: { choices: [{ message: { content: 'fine' } }] } });
+    await h.stop();
   });
 });

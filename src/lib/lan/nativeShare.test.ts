@@ -3,9 +3,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NO_NATIVE_ENGINE, type NativeEngineStatus } from '../native/nativeEngine';
 import { holdNative, holdNativeForRun, nativeIdle, preferNative, translatorIdle } from '../../providers/openai/localaiNative';
 import { useModelStore } from '../../stores/modelStore';
-import { useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
+import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import { appLanModels } from './appModels';
-import { nativeOrOwnTranslator, nativeRecognizer, nativeRecognizerFor, nativeShared, nativeTranslatorFor } from './nativeShare';
+import { nativeCoachAnswer, nativeCoachFor, nativeOrOwnTranslator, nativeRecognizer, nativeRecognizerFor, nativeShared, nativeTranslatorFor } from './nativeShare';
 import type { Translator } from './translator';
 
 const downloaded = { state: 'downloaded' as const, received: 1, total: 1 };
@@ -237,5 +237,48 @@ describe('a name this computer shares nothing under', () => {
     expect(appLanModels.translator('ja', 'zh', '')).not.toBeNull();
     // A name it does share is kept to.
     expect(appLanModels.translator('ja', 'zh', 'hy-mt2-1.8b')).toBe('hy-mt2-1.8b');
+  });
+});
+
+describe('this computer\u2019s feedback model, lent', () => {
+  const COACH_HERE = status({ 'gemma-4-e2b': downloaded });
+
+  it('is listed among what is shared once it is downloaded, and found by its name alone', () => {
+    const before = useNativeCoachStore.getState().status;
+    try {
+      useNativeCoachStore.setState({ status: NO_NATIVE_ENGINE });
+      expect(nativeShared().some((m) => m.kind === 'feedback')).toBe(false);
+      expect(nativeCoachFor('gemma-4-e2b')).toBeNull();
+      useNativeCoachStore.setState({ status: COACH_HERE });
+      expect(nativeShared().filter((m) => m.kind === 'feedback')).toEqual([{ id: 'gemma-4-e2b', kind: 'feedback', languages: [] }]);
+      expect(nativeCoachFor('gemma-4-e2b')).toBe('gemma-4-e2b');
+      // No other name is the feedback model's: a translation request is never taken for one.
+      expect(nativeCoachFor('kotomimi')).toBeNull();
+      expect(nativeCoachFor('index-translate-2b')).toBeNull();
+      expect(nativeCoachFor('')).toBeNull();
+    } finally {
+      useNativeCoachStore.setState({ status: before });
+    }
+  });
+
+  it('is asked on this computer with the key of its run, started first when it is not up', async () => {
+    const before = useNativeCoachStore.getState();
+    const up = { ...COACH_HERE, run: { state: 'ready' as const, model: 'gemma-4-e2b', port: 4300, tail: '', key: 'abcdef0123456789abcdef' }, up: ['gemma-4-e2b'] };
+    const start = vi.fn(async () => { useNativeCoachStore.setState({ status: up }); return up; });
+    useNativeCoachStore.setState({ status: COACH_HERE, start } as never);
+    try {
+      const calls: Array<{ url: string; init: RequestInit }> = [];
+      const doFetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+        calls.push({ url: String(input), init: init ?? {} });
+        return new Response(JSON.stringify({ choices: [{ message: { content: '<think>hm</think> 没问题。' } }] }), { status: 200 });
+      }) as typeof fetch;
+      expect(await nativeCoachAnswer('gemma-4-e2b', [{ role: 'user', content: 'x' }], { temperature: 0 }, doFetch)).toBe('没问题。');
+      expect(start).toHaveBeenCalledWith('gemma-4-e2b');
+      expect(calls[0].url).toBe('http://127.0.0.1:4300/v1/chat/completions');
+      expect(new Headers(calls[0].init.headers).get('Authorization')).toBe('Bearer abcdef0123456789abcdef');
+      expect(JSON.parse(String(calls[0].init.body))).toEqual({ temperature: 0, model: 'gemma-4-e2b', stream: false, messages: [{ role: 'user', content: 'x' }] });
+    } finally {
+      useNativeCoachStore.setState(before as never, true);
+    }
   });
 });

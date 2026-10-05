@@ -14,9 +14,11 @@
  */
 import { ipcNativeBridge } from '../native/nativeEngine';
 import { createNativeAsr } from '../../providers/openai/nativeAsr';
+import { NATIVE_COACHES } from '../../providers/openai/nativeCoaches';
+import { coachBaseUrl, coachKey } from '../../providers/openai/localaiNative';
 import { NATIVE_MODELS, holdNative, nativeDownloaded, nativeModel, nativeModelFor, nativePicked, nativePreference, nativeTaken, translatorBaseUrl, translatorKey } from '../../providers/openai/localaiNative';
 import { NATIVE_TRANSLATORS, TEXT_SLOT, nativeTranslates, translatorRequest } from '../../providers/openai/nativeTranslators';
-import { useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
+import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import type { SharedModel } from './protocol';
 import type { Recognizer } from './transcriber';
 import type { Translator } from './translator';
@@ -32,7 +34,36 @@ export function nativeShared(): SharedModel[] {
     ...NATIVE_MODELS.filter((m) => nativeDownloaded(hearing, m.id)).map((m): SharedModel => ({ id: m.id, kind: 'asr', languages: [...m.languages] })),
     // A model of every language lists none: the list is what a device reads to rule a model out.
     ...NATIVE_TRANSLATORS.filter((m) => nativeDownloaded(translating, m.id)).map((m): SharedModel => ({ id: m.id, kind: 'translate', languages: m.languages === 'any' ? [] : [...m.languages] })),
+    // The feedback engine's models: chat models, lent for grammar feedback in whatever languages they are asked.
+    ...NATIVE_COACHES.filter((m) => nativeDownloaded(useNativeCoachStore.getState().status, m.id)).map((m): SharedModel => ({ id: m.id, kind: 'feedback', languages: [] })),
   ];
+}
+
+/** The native feedback model a device named, where it is downloaded; null for any other name. */
+export function nativeCoachFor(wanted: string): string | null {
+  const model = NATIVE_COACHES.find((m) => m.id === wanted);
+  return model && nativeDownloaded(useNativeCoachStore.getState().status, model.id) ? model.id : null;
+}
+
+/**
+ * The native feedback engine's answer to a chat a device sent: the engine is
+ * started when it is not up (the first sentence waits for the model to load),
+ * and asked on this computer with the key of its run. `extra`: the request's
+ * other fields that are its own to choose (temperature and the like).
+ */
+export async function nativeCoachAnswer(model: string, messages: unknown, extra: Record<string, unknown> = {}, doFetch: typeof fetch = (input, init) => fetch(input, init)): Promise<string> {
+  const status = await useNativeCoachStore.getState().start(model);
+  if (status.run.state !== 'ready' || status.run.model !== model) throw new Error('The feedback engine of this computer could not start.');
+  const response = await doFetch(`${coachBaseUrl()}/chat/completions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${coachKey() || 'no-key'}` },
+    body: JSON.stringify({ ...extra, model, stream: false, messages }),
+  });
+  if (!response.ok) throw new Error(`The feedback engine answered HTTP ${response.status}.`);
+  const body = (await response.json()) as { choices?: Array<{ message?: { content?: unknown } }> } | null;
+  const content = body?.choices?.[0]?.message?.content;
+  // A thinking model's thoughts are not the feedback.
+  return typeof content === 'string' ? content.replace(/<think>[\s\S]*?<\/think>/g, '').trim() : '';
 }
 
 /** The native recognizer for a language: the one named when it is downloaded and hears it, else — nothing named — the first downloaded that does. Null: none, and the app's own models answer. */

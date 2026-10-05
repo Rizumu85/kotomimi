@@ -12,7 +12,7 @@
  * behind the question mark, for whoever asks.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { Check, CircleHelp, Copy, Languages, Loader, Mic, Share2, ShieldAlert, TriangleAlert } from 'lucide-react';
+import { Check, CircleHelp, Copy, GraduationCap, Languages, Loader, Mic, Share2, ShieldAlert, TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CustomModels } from '../CustomModels/CustomModels';
 import { languageNameFor } from '../Settings/engine/languageName';
@@ -83,6 +83,7 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
   };
   const recognizers = shared.filter((m) => m.kind === 'asr');
   const translators = shared.filter((m) => m.kind === 'translate');
+  const coaches = shared.filter((m) => m.kind === 'feedback');
   // The LocalAI of this computer, while it is up: its models go out through the same door.
   const localUp = useLocalServerStore((s) => s.status.state === 'running' || s.status.state === 'external');
   const localModels = useLocalServerStore((s) => s.status.models.length);
@@ -96,7 +97,7 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
     void askLocalPipelines().then((found) => { if (live) setTheirs(found); });
     return () => { live = false; };
   }, [enabled, localUp, localModels]);
-  const lentCount = recognizers.length + translators.length + theirs.recognizers.length + theirs.translators.length;
+  const lentCount = recognizers.length + translators.length + coaches.length + theirs.recognizers.length + theirs.translators.length;
   // Looked, and nothing here hears: another device would find nothing to listen with.
   const deaf = initialized && recognizers.length === 0 && theirs.recognizers.length === 0;
   // The library's own pair: the catalog's base codes, in the direction chosen.
@@ -174,6 +175,7 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
             <div className="kt-lan__models">
               {recognizers.map((m) => <span key={m.id} className="kt-lan__model"><Mic size={12} />{nameOf(m.id)}</span>)}
               {translators.map((m) => <span key={m.id} className="kt-lan__model"><Languages size={12} />{nameOf(m.id)}</span>)}
+              {coaches.map((m) => <span key={m.id} className="kt-lan__model"><GraduationCap size={12} />{nameOf(m.id)}</span>)}
               {theirs.recognizers.map((id) => <span key={`localai:${id}`} className="kt-lan__model kt-lan__model--theirs" title={t('fork.lan.fromLocalAI', { id })}><Mic size={12} />{modelLabel(id)}</span>)}
               {theirs.translators.map((id) => <span key={`localai:${id}`} className="kt-lan__model kt-lan__model--theirs" title={t('fork.lan.fromLocalAI', { id })}><Languages size={12} />{modelLabel(id)}</span>)}
             </div>

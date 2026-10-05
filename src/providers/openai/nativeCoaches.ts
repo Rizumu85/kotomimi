@@ -27,5 +27,13 @@ export const NATIVE_COACHES: readonly NativeCoach[] = [
 
 export const NATIVE_DEFAULT_COACH = NATIVE_COACHES[0].id;
 
+/**
+ * What every request to the engine carries, as the models were measured: no
+ * thinking before the answer, and the likeliest words. Left to itself Gemma
+ * thinks first — the same sentence took 1.8 s where this takes 0.3 s
+ * (2026-10-06), and an answer cut short by its thoughts comes back empty.
+ */
+export const NATIVE_COACH_EXTRA: Readonly<Record<string, unknown>> = { temperature: 0, chat_template_kwargs: { enable_thinking: false } };
+
 /** The model a setting names; the first for a name the app no longer has. */
 export const nativeCoach = (id: string): NativeCoach => NATIVE_COACHES.find((m) => m.id === id) ?? NATIVE_COACHES[0];

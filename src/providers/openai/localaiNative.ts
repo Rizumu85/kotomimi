@@ -267,7 +267,7 @@ export async function coachUp(id: string, deps: NativeUpDeps = {}): Promise<void
 export const NATIVE_REST_MS = 60_000;
 
 /** The runs of this computer that are open now, and the devices it shares its models with that are listening or translating through an engine (`src/lib/lan/nativeShare.ts`). */
-const using = { runs: 0, asr: 0, translation: 0 };
+const using = { runs: 0, asr: 0, translation: 0, coach: 0 };
 let resting: ReturnType<typeof setTimeout> | null = null;
 
 export interface NativeRestDeps {
@@ -298,7 +298,7 @@ export function restNative(deps: NativeRestDeps = {}): void {
     };
     if (using.asr === 0) stop.asr();
     if (using.translation === 0) stop.translation();
-    stop.coach();
+    if (using.coach === 0) stop.coach();
   }, deps.delayMs ?? NATIVE_REST_MS);
 }
 
@@ -345,7 +345,7 @@ export const holdNativeForRun = (deps?: NativeRestDeps): (() => void) => release
  * (`src/lib/lan/nativeShare.ts`): while it does, the engine is not stopped —
  * not for being unused by this computer, and not for not being its choice.
  */
-export const holdNative = (kind: 'asr' | 'translation', deps?: NativeRestDeps): (() => void) => release(kind, deps);
+export const holdNative = (kind: 'asr' | 'translation' | 'coach', deps?: NativeRestDeps): (() => void) => release(kind, deps);
 
 /** A run that does not hear by the engine has no use for it: it gives its memory back. */
 export function nativeIdle(deps: NativeCheckDeps = {}): void {
@@ -396,13 +396,16 @@ export async function coachGap(id: string, deps: NativeCheckDeps = {}): Promise<
 /** A run with no feedback by the engine has no use for it. */
 export function coachIdle(deps: NativeCheckDeps = {}): void {
   const store = useNativeCoachStore.getState();
-  if (using.runs > 0) return;
+  // …unless a device this computer shares with is asking it for feedback (`src/lib/lan/coach.ts`).
+  if (using.coach > 0 || using.runs > 0) return;
   if (store.status.run.state === 'stopped') return;
   (deps.stop ?? (() => { void store.stop(); }))();
 }
 
 /** Where the feedback engine answers now: its chat base URL; a port of 0 while it is not up. */
 export const coachBaseUrl = (): string => `http://127.0.0.1:${useNativeCoachStore.getState().status.run.port}/v1`;
+/** The key the feedback engine's present run answers to; empty while it is not up. */
+export const coachKey = (): string => useNativeCoachStore.getState().status.run.key ?? '';
 
 /** Where the translation engine answers now: its chat base URL; a port of 0 while it is not up. */
 export const translatorBaseUrl = (): string => `http://127.0.0.1:${useNativeTranslatorStore.getState().status.run.port}/v1`;

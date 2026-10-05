@@ -9,7 +9,9 @@ import { defaultEngines } from '../../providers/localInference/engines';
 import { createLanHost, type LanBridge, type LanHost } from './host';
 import { FIREWALL_UNKNOWN, firewallAnswer, type LanFirewall } from './protocol';
 import { appLanModels } from './appModels';
-import { nativeOrOwnTranslator, nativeRecognizer } from './nativeShare';
+import { nativeCoachAnswer, nativeOrOwnTranslator, nativeRecognizer } from './nativeShare';
+import { holdNative } from '../../providers/openai/localaiNative';
+import { NATIVE_COACH_EXTRA } from '../../providers/openai/nativeCoaches';
 
 interface ElectronApi {
   invoke(channel: string, data?: unknown): Promise<unknown>;
@@ -55,6 +57,9 @@ export function createAppLanHost(onClients: (count: number) => void): LanHost | 
       // A native engine's model is run by that engine (`nativeShare.ts`); any other by the app's own.
       recognizer: (model) => nativeRecognizer(model) ?? defaultEngines.asr(model),
       translator: () => nativeOrOwnTranslator(() => defaultEngines.translation()),
+      // The feedback model is the native engine's alone: the app's own chat models are not lent.
+      // Asked as this computer asks it for itself, unless the device says otherwise.
+      coach: { answer: (model, messages, extra) => nativeCoachAnswer(model, messages, { ...NATIVE_COACH_EXTRA, ...extra }), hold: () => holdNative('coach') },
     },
     clock: realClock,
     onClients,

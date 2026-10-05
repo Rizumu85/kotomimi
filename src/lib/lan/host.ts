@@ -16,6 +16,7 @@
 import type { Clock } from '../contract/clock';
 import { LanTranscriber, type Recognizer } from './transcriber';
 import { LanTranslator, type Translator } from './translator';
+import { LanCoach, type CoachDeps } from './coach';
 import { capabilityList, modelList, wireError, type SharedModel } from './protocol';
 
 /** The page's side of the main process's door: calls up, and events down. */
@@ -31,12 +32,14 @@ export interface LanModels {
   shared(): SharedModel[];
   recognizer(language: string, wanted: string): { modelId: string; streaming: boolean } | null;
   translator(source: string, target: string, wanted: string): string | null;
+  /** The feedback model a device named, where this computer lends one by that name; null for any other name. */
+  coach?(wanted: string): string | null;
 }
 
 export interface LanHostDeps {
   bridge: LanBridge;
   models: LanModels;
-  engines: { recognizer(model: { modelId: string; streaming: boolean }): Recognizer; translator(): Translator };
+  engines: { recognizer(model: { modelId: string; streaming: boolean }): Recognizer; translator(): Translator; /** The feedback engine: its answer to a chat, and the hold that keeps it up. Absent: no feedback model is lent. */ coach?: Pick<CoachDeps, 'answer' | 'hold'> };
   clock: Clock;
   /** How many sockets are open changed: the settings show it. */
   onClients?(count: number): void;
@@ -57,6 +60,7 @@ export function createLanHost(deps: LanHostDeps): LanHost {
   /** Sockets the door passed on to a model server on this computer: none of this module's work, and still someone using this computer. */
   const proxied = new Set<string>();
   let translator: LanTranslator | null = null;
+  let coach: LanCoach | null = null;
   let unsubscribe: Array<() => void> = [];
   let sessions = 0;
 
@@ -67,7 +71,12 @@ export function createLanHost(deps: LanHostDeps): LanHost {
     try {
       if (request.path === '/v1/models') reply = { status: 200, body: modelList(models.shared()) };
       else if (request.path === '/v1/models/capabilities') reply = { status: 200, body: capabilityList(models.shared()) };
-      else if (request.path === '/v1/chat/completions' && translator) reply = await translator.complete(request.body);
+      else if (request.path === '/v1/chat/completions' && translator) {
+        // A chat that names the feedback model is the feedback engine's; any other is a sentence to translate.
+        const named = (request.body as { model?: unknown } | null)?.model;
+        const feedback = coach && typeof named === 'string' ? models.coach?.(named) ?? null : null;
+        reply = feedback && coach ? await coach.complete(feedback, request.body) : await translator.complete(request.body);
+      }
       else reply = { status: 404, body: { error: wireError('not_found', `Kotomimi shares no ${request.path}.`) } };
     } catch (cause) {
       reply = { status: 500, body: { error: wireError('server_error', cause instanceof Error ? cause.message : String(cause)) } };
@@ -83,6 +92,8 @@ export function createLanHost(deps: LanHostDeps): LanHost {
     proxied.clear();
     translator?.dispose();
     translator = null;
+    coach?.dispose();
+    coach = null;
     clients();
   };
 
@@ -92,6 +103,7 @@ export function createLanHost(deps: LanHostDeps): LanHost {
       const started = (await bridge.invoke('lan:start', { port, key })) as LanStart;
       if (!started.ok) return started;
       translator = new LanTranslator({ translator: deps.engines.translator, resolve: models.translator, clock });
+      coach = deps.engines.coach ? new LanCoach({ ...deps.engines.coach, clock }) : null;
       unsubscribe = [
         bridge.on('lan:request', (request: WireRequest) => { void answer(request); }),
         bridge.on('lan:socket-open', ({ id, model }: { id: string; model: string }) => {

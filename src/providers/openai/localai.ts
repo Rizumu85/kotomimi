@@ -67,7 +67,7 @@ import { recognizerAsked } from './serverRecognizers';
 import { ASR_HERES, coachIs, coachesNatively, cutsSentencesHere, detectsOther, heardBy, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
 import { preferNative } from './localaiNative';
 import { NATIVE_DEFAULT_MODEL, coachBaseUrl, coachGap, coachIdle, coachUp, holdNativeForRun, nativeGap, nativeUp, restNative, translatorUp, nativeWaits, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
-import { NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
+import { NATIVE_COACH_EXTRA, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
 import { NATIVE_DEFAULT_TRANSLATOR, nativeTranslates, nativeTranslator, translatorRequest } from './nativeTranslators';
 import { setLocalPipeline } from '../../lib/lan/localServer';
 import { useLocalServerStore } from '../../stores/localServerStore';
@@ -972,7 +972,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
     let coach: AnswerStage;
     if (coachesNatively(s)) {
       // The native feedback engine: a chat model at an address on this computer, asked as an API's is — with the worked examples.
-      coach = { kind: 'coach', engine: 'coach', baseUrl: coachBaseUrl(), model: nativeCoach(s.coachNativeModel).id, system: prompt.system, ...(prompt.shots.length ? { shots: prompt.shots } : {}), language: source };
+      coach = { kind: 'coach', engine: 'coach', baseUrl: coachBaseUrl(), model: nativeCoach(s.coachNativeModel).id, extra: NATIVE_COACH_EXTRA, system: prompt.system, ...(prompt.shots.length ? { shots: prompt.shots } : {}), language: source };
     } else if (s.coachAt === 'device') {
       const id = deviceCoachModel(s.coachDeviceModel);
       if (!id) return { refused: NO_COACH_HERE, code: 'local_models_missing' };

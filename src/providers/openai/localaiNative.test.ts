@@ -10,7 +10,7 @@ import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } f
 import { buildLocalAI, admitLocalAI, checkLocalAIWithNative, describeLocalAI, localaiProvider, prepareLocalAI, primeNativeOnce, type NativeUps, LOCALAI_DEFAULTS, migrateLocalAISettings, type LocalAICredentials, type LocalAISettings } from './localai';
 import { cutsSentencesHere, deviceChoices, deviceNeeds, hearsByLocalServer, hearsNatively } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
-import { APPLE_PREFIX, NATIVE_DEFAULT_MODEL, NATIVE_MODELS, chooseNative, nativePicked, nativeDownloaded, holdNative, holdNativeForRun, nativeGap, nativeHears, nativeIdle, nativeModel, nativeModelFor, nativeReady, nativeUp, nativeWaits, restNative, translatorUp } from './localaiNative';
+import { APPLE_PREFIX, NATIVE_DEFAULT_MODEL, NATIVE_MODELS, chooseNative, coachIdle, nativePicked, nativeDownloaded, holdNative, holdNativeForRun, nativeGap, nativeHears, nativeIdle, nativeModel, nativeModelFor, nativeReady, nativeUp, nativeWaits, restNative, translatorUp } from './localaiNative';
 import { SHARED } from './testing';
 
 const SPEAKER: SessionContext = { direction: { source: 'ja', target: 'zh-CN' }, speech: false, turns: 'auto' };
@@ -672,5 +672,24 @@ describe('a run and a device that want different models of one engine', () => {
     // Up, but with another model: the same as stopped, to the one who asked for this one.
     const other = engine({ run: { state: 'ready', model: 'qwen3-asr-1.7b-q8', port: 4100, tail: '' }, up: ['qwen3-asr-1.7b-q8'] });
     await expect(nativeUp('r2t2-q8', ['ja'], { start: async () => other })).rejects.toMatchObject({ code: 'native_interrupted' });
+  });
+});
+
+describe('the feedback engine while a device this computer shares with is using it', () => {
+  it('is not stopped for being of no use to this computer’s own settings', () => {
+    const QUIET = { stop: { asr() {}, translation() {}, coach() {} }, setTimer: () => 0 as unknown as ReturnType<typeof setTimeout>, clearTimer: () => {} };
+    const before = useNativeCoachStore.getState().status;
+    useNativeCoachStore.setState({ status: { ...NO_NATIVE_ENGINE, supported: true, engine: 'ready', run: { state: 'starting', model: 'gemma-4-e2b', port: 4300, tail: '' } } });
+    try {
+      const stop = vi.fn();
+      const device = holdNative('coach', QUIET);
+      coachIdle({ stop });
+      expect(stop).not.toHaveBeenCalled();
+      device();
+      coachIdle({ stop });
+      expect(stop).toHaveBeenCalledTimes(1);
+    } finally {
+      useNativeCoachStore.setState({ status: before });
+    }
   });
 });

@@ -9,7 +9,7 @@ import {
 } from '../local-inference/modelManifest';
 import { useModelStore } from '../../stores/modelStore';
 import type { LanModels } from './host';
-import { nativeRecognizerFor, nativeShared, nativeTranslatorFor } from './nativeShare';
+import { nativeCoachFor, nativeRecognizerFor, nativeShared, nativeTranslatorFor } from './nativeShare';
 import type { SharedModel } from './protocol';
 
 const isRecognizer = (entry: ModelManifestEntry | undefined): entry is ModelManifestEntry => entry?.type === 'asr' || entry?.type === 'asr-stream';
@@ -65,6 +65,7 @@ export const appLanModels: LanModels = {
     const entry = picked ? getManifestEntry(picked.modelId) : undefined;
     return entry?.type === 'translation' && usable(entry) ? entry.id : null;
   },
+  coach: (wanted) => nativeCoachFor(wanted),
 };
 
 /** The model store, scanned: what is downloaded is known only after its first scan. */

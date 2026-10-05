@@ -48,3 +48,18 @@ describe('the models a slot may choose from', () => {
     for (const slot of ['pipeline', 'asr', 'translate', 'coach'] as const) expect(ids(modelsFor(unsorted, slot)), slot).toEqual(['a', 'b']);
   });
 });
+
+describe('another Kotomimi\u2019s feedback model', () => {
+  it('is one the feedback stage can ask, and no other stage', () => {
+    expect(kindOf(['feedback'])).toBe('feedback');
+    const there: LocalAIModel[] = [
+      { id: 'kotomimi', kind: 'pipeline', host: 'kotomimi' },
+      { id: 'qwen3-asr-1.7b-q8', kind: 'asr', host: 'kotomimi' },
+      { id: 'index-translate-2b', kind: 'translate', host: 'kotomimi' },
+      { id: 'gemma-4-e2b', kind: 'feedback', host: 'kotomimi' },
+    ] as never;
+    expect(modelsFor(there, 'coach').map((m) => m.id)).toEqual(['gemma-4-e2b']);
+    expect(modelsFor(there, 'translate').map((m) => m.id)).toEqual(['index-translate-2b']);
+    expect(modelsFor(there, 'asr').map((m) => m.id)).toEqual(['qwen3-asr-1.7b-q8']);
+  });
+});
