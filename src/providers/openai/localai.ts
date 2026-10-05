@@ -63,6 +63,7 @@ import { CHECK_TIMEOUT_MS } from './check';
 import { SERVER_SILENT, isKotomimiServer, kindOf, KOTOMIMI_HOST, modelsFor, serverDefaultModel, type LocalAIModel, type LocalAIModelKind } from './localaiModels';
 import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
+import { recognizerAsked } from './serverRecognizers';
 import { ASR_HERES, coachIs, coachesNatively, cutsSentencesHere, detectsOther, heardBy, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
 import { preferNative } from './localaiNative';
 import { NATIVE_DEFAULT_MODEL, coachBaseUrl, coachGap, coachIdle, coachUp, holdNativeForRun, nativeGap, nativeUp, restNative, translatorUp, nativeWaits, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
@@ -864,8 +865,9 @@ export function effectiveLocalAIModel(s: Pick<LocalAISettings, 'model'>, models:
  * ("not a valid pipeline model", 2026-10-03), which would fail the start.
  * Another Kotomimi takes any of its recognizers in any session.
  */
-function transcriptionFor(s: Pick<LocalAISettings, 'asrModel'>, heard: string, transcribeOnly: boolean, kotomimi: boolean): TranscriptionHint {
-  const model = transcribeOnly && !kotomimi ? '' : s.asrModel.trim();
+function transcriptionFor(s: Pick<LocalAISettings, 'asrModel'>, heard: string, transcribeOnly: boolean, kotomimi: boolean, models: readonly LocalAIModel[]): TranscriptionHint {
+  // A recognizer the device has one of for each language is asked for by the language this leg hears (`serverRecognizers.ts`).
+  const model = transcribeOnly && !kotomimi ? '' : recognizerAsked(s.asrModel.trim(), heard, modelsFor(models, 'asr'));
   const language = normalizeTranscriptionLanguage(heard);
   // No `model` keeps the pipeline's own: the hint's type names one because OpenAI requires it.
   return { ...(model ? { model } : {}), ...(language ? { language } : {}) } as TranscriptionHint;
@@ -1004,7 +1006,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
     model,
     modalities: ['text'],
     // This computer's LocalAI is told its recognizer through its pipeline, before the socket opens: the session names none.
-    transcription: transcriptionFor(s, heard, Boolean(stages?.speech) || hearsLocal, kotomimi && !hearsLocal),
+    transcription: transcriptionFor(s, heard, Boolean(stages?.speech) || hearsLocal, kotomimi && !hearsLocal, models),
     anchor: false,
     commitAnswers: true,
     ...(stages?.speech && !device ? { transcribeOnly: true as const } : {}),

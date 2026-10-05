@@ -33,6 +33,7 @@ import { NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator } from './native
 import { NATIVE_COACHES, nativeCoach } from './nativeCoaches';
 import { useDeviceSettings, useDeviceSlots } from './LocalAIEngine';
 import { isKotomimiServer, modelsFor, SERVER_SILENT, serverDefaultModel, type LocalAIModel } from './localaiModels';
+import { choiceOf, perLanguage, recognizerChoices } from './serverRecognizers';
 import { isRealtimeModelId } from './settings';
 import './LocalAIAssist.scss';
 
@@ -92,14 +93,16 @@ function StageCard({ icon, title, tooltip, lead, children }: { icon: ReactNode; 
 }
 
 /** A model of the other device's, chosen from what it lists; the first option is what a blank choice runs. */
-function ServerModel({ label, value, blank, options, onChange, disabled }: { label: string; value: string; blank: string; options: readonly LocalAIModel[]; onChange(id: string): void; disabled?: boolean }) {
+function ServerModel({ label, value, blank, options, onChange, disabled }: { label: string; value: string; blank: string; options: ReadonlyArray<Pick<LocalAIModel, 'id'>>; onChange(id: string): void; disabled?: boolean }) {
+  const { t } = useTranslation();
   const listed = value === '' || options.some((m) => m.id === value);
   return (
     <Field label={label}>
       <select className="select-dropdown" aria-label={label} value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled}>
         <option value="">{blank}</option>
-        {/* A saved model the device no longer lists stays visible, so the setting is not silently another. */}
-        {!listed && <option value={value}>{shownName(value)}</option>}
+        {/* A saved model the device no longer lists stays visible, so the setting is not silently another — and where
+            the device did list its models, it is said that this one is not among them. */}
+        {!listed && <option value={value}>{options.length > 0 ? t('providers.localai.modelGone', { name: shownName(value) }) : shownName(value)}</option>}
         {options.map((m) => <option key={m.id} value={m.id}>{shownName(m.id)}</option>)}
       </select>
     </Field>
@@ -739,6 +742,10 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   // What hears on the other device.
   const pipelines = modelsFor(found, 'pipeline');
   const recognizers = modelsFor(found, 'asr');
+  // As a person chooses among them (`serverRecognizers.ts`): one to a language is one choice, and only what hears a
+  // language of this run is listed. A choice saved as one member of a family shows as the family.
+  const recognizerMenu = recognizerChoices(recognizers, legs.map((leg) => heardBy(settings, pair, leg))).map((id) => ({ id }));
+  const recognizerChosen = recognizers.some((m) => choiceOf(m.id) === choiceOf(settings.asrModel) && perLanguage(m.id)) ? choiceOf(settings.asrModel) : settings.asrModel;
   // What a blank pipeline field runs (`effectiveLocalAIModel`): the first pipeline named `gpt-realtime*`, else the first.
   const fallback = pipelines.find((m) => isRealtimeModelId(m.id))?.id ?? pipelines[0]?.id ?? '';
   // A leg whose answers come from a stage of its own only transcribes, and on a LocalAI takes the device's own recognizer (`localai.ts` `transcriptionFor`).
@@ -831,7 +838,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
         {settings.asrVia === 'server' && (
           <>
             {connectFirst}
-            <ServerModel label={t('providers.localai.model')} value={everyLegTranscribes ? '' : settings.asrModel} blank={t('providers.localai.deviceDefault')} options={everyLegTranscribes ? [] : recognizers} onChange={(asrModel) => put({ asrModel })} disabled={disabled || everyLegTranscribes} />
+            <ServerModel label={t('providers.localai.model')} value={everyLegTranscribes ? '' : recognizerChosen} blank={t('providers.localai.deviceDefault')} options={everyLegTranscribes ? [] : recognizerMenu} onChange={(asrModel) => put({ asrModel })} disabled={disabled || everyLegTranscribes} />
             {someLegTranscribes && recognizers.length > 0 && (
               <>
                 <p className="kt-note">{t('providers.localai.asrFixedNote')}</p>

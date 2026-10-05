@@ -522,6 +522,7 @@
       "recheck": "重新检查",
       "model": "模型",
       "auto": "自动 · {{name}}",
+      "modelGone": "{{name}}（那台设备上已经没有）",
       "deviceDefault": "由那台设备决定",
       "advanced": "高级",
       "apiKey": "API 密钥",

@@ -70,6 +70,7 @@ const PROVIDER = {
   // What every card shares.
   model: ['Model', '模型', '模型'],
   auto: ['Automatic · {{name}}', '自动 · {{name}}', '自動 · {{name}}'],
+  modelGone: ['{{name}} (no longer on that device)', '{{name}}（那台设备上已经没有）', '{{name}}（那台裝置上已經沒有）'],
   deviceDefault: ['The device\'s own choice', '由那台设备决定', '由那台裝置決定'],
   advanced: ['Advanced', '高级', '進階'],
   apiKey: ['API key', 'API 密钥', 'API 金鑰'],

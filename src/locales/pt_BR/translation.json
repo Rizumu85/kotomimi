@@ -522,6 +522,7 @@
       "recheck": "Check again",
       "model": "Model",
       "auto": "Automatic · {{name}}",
+      "modelGone": "{{name}} (no longer on that device)",
       "deviceDefault": "The device's own choice",
       "advanced": "Advanced",
       "apiKey": "API key",
