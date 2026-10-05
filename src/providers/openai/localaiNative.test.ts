@@ -8,7 +8,7 @@ import { detectsOther, heardBy } from './localaiDevice';
 import { buildLocalAI, admitLocalAI, checkLocalAIWithNative, describeLocalAI, localaiProvider, LOCALAI_DEFAULTS, migrateLocalAISettings, type LocalAICredentials, type LocalAISettings } from './localai';
 import { cutsSentencesHere, deviceChoices, deviceNeeds, hearsByLocalServer, hearsNatively } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
-import { APPLE_PREFIX, NATIVE_DEFAULT_MODEL, NATIVE_MODELS, chooseNative, nativePicked, nativeDownloaded, nativeGap, nativeHears, nativeModel, nativeModelFor, nativeReady } from './localaiNative';
+import { APPLE_PREFIX, NATIVE_DEFAULT_MODEL, NATIVE_MODELS, chooseNative, nativePicked, nativeDownloaded, nativeGap, nativeHears, nativeModel, nativeModelFor, nativeReady, nativeWaits } from './localaiNative';
 import { SHARED } from './testing';
 
 const SPEAKER: SessionContext = { direction: { source: 'ja', target: 'zh-CN' }, speech: false, turns: 'auto' };
@@ -357,6 +357,21 @@ describe('the provider\'s check, with the engine', () => {
     expect(await checkLocalAIWithNative(NONE, settings({ asrVia: 'api' }), CTX, check, { gap, idle })).toBe(OK);
     expect(idle).toHaveBeenCalledTimes(1);
     expect(gap).not.toHaveBeenCalled();
+  });
+
+  it('says "not chosen", not "not downloaded", where the app\u2019s own models hear nothing and one of the engine\u2019s is on the computer', async () => {
+    const none: CheckResult = { ok: false, reason: 'No speech recognition model is downloaded for ja.', code: 'no_asr', params: { source: 'ja' } };
+    const deps = { gap: vi.fn(async () => null), idle: vi.fn() };
+    const here = { asrVia: 'device' as const, asrHere: 'app' as const };
+    expect(await checkLocalAIWithNative(NONE, settings(here), CTX, vi.fn(async () => none), { ...deps, waits: (language: string) => language === 'ja' })).toMatchObject({ ok: false, code: 'native_unchosen', params: { source: 'ja' } });
+    // Nothing of the engine's either: it is as it was.
+    expect(await checkLocalAIWithNative(NONE, settings(here), CTX, vi.fn(async () => none), { ...deps, waits: () => false })).toBe(none);
+    // And the question itself: a downloaded model that hears the language, with the runtime that runs it.
+    expect(nativeWaits('ja', READY)).toBe(true);
+    expect(nativeWaits('zh-CN', READY)).toBe(true);
+    expect(nativeWaits('th', READY)).toBe(false);
+    expect(nativeWaits('ja', engine({ engine: 'absent' }))).toBe(false);
+    expect(nativeWaits('ja', engine({ models: { 'r2t2-q8': { state: 'absent', received: 0, total: 1 } } }))).toBe(false);
   });
 
   it('asks the engine for the language each leg hears, and passes when both it and the servers do', async () => {

@@ -154,6 +154,9 @@ export const nativeReady = (status: NativeEngineStatus, id: string): boolean => 
 /** The model is on disk, with the runtime that runs it. */
 export const nativeDownloaded = (status: NativeEngineStatus, id: string): boolean => status.engine === 'ready' && status.models[id]?.state === 'downloaded';
 
+/** A model of the engine that hears this language is already on this computer, chosen or not. */
+export const nativeWaits = (language: string, status: NativeEngineStatus = useNativeEngineStore.getState().status): boolean => NATIVE_MODELS.some((m) => nativeHears(m, language) && nativeDownloaded(status, m.id));
+
 export interface NativeCheckDeps {
   /** The engine's state now, and the two things asked of it; the store's by default. */
   status?: () => Promise<NativeEngineStatus>;

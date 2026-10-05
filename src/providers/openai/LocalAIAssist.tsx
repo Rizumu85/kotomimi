@@ -550,7 +550,8 @@ function DeviceModels({ stage, settings, update, pair, legs, disabled, tour, oth
               }}
               disabled={disabled}
             >
-              <option value="">{!looked ? t('providers.localai.checking') : auto ? t('providers.localai.auto', { name: adapter.displayName(auto) }) : t('providers.localai.notDownloaded')}</option>
+              {/* Nothing of the app's own to run: "not downloaded" only where the menu has nothing else that is. */}
+              <option value="">{!looked ? t('providers.localai.checking') : auto ? t('providers.localai.auto', { name: adapter.displayName(auto) }) : nativeFor(slot).length > 0 ? t('providers.localai.nativeNone') : t('providers.localai.notDownloaded')}</option>
               {nativeFor(slot).map((m) => <option key={m.id} value={`${NATIVE_ENTRY}${m.id}`}>{t('providers.localai.nativeEntry', { name: m.name })}</option>)}
               {adapter.readyCandidates(slot).map((c) => <option key={c.id} value={c.id}>{c.sizeLabel ? `${c.name} · ${c.sizeLabel}` : c.name}</option>)}
               {other && <option value={LOCALAI_ENTRY}>{other.label}</option>}
@@ -624,7 +625,7 @@ function DeviceChat({ value, onChange, disabled, other, native }: { value: strin
           </button>
         </div>
         <select className={`select-dropdown${auto || !looked ? '' : ' kt-here__select--missing'}`} aria-label={label} value={ready.some((m) => m.id === value) ? value : ''} onChange={(e) => { if (e.target.value === LOCALAI_ENTRY) other?.onPick(); else if (e.target.value.startsWith(NATIVE_ENTRY)) native?.onPick(e.target.value.slice(NATIVE_ENTRY.length)); else onChange(e.target.value); }} disabled={disabled}>
-          <option value="">{!looked ? t('providers.localai.checking') : auto ? t('providers.localai.auto', { name: name(auto) }) : t('providers.localai.notDownloaded')}</option>
+          <option value="">{!looked ? t('providers.localai.checking') : auto ? t('providers.localai.auto', { name: name(auto) }) : native && engine.ready.length > 0 ? t('providers.localai.nativeNone') : t('providers.localai.notDownloaded')}</option>
           {native && engine.ready.map((m) => <option key={m.id} value={`${NATIVE_ENTRY}${m.id}`}>{t('providers.localai.nativeEntry', { name: m.name })}</option>)}
           {ready.map((m) => <option key={m.id} value={m.id}>{`${name(m.id)} · ${getModelSizeMb(m, features)} MB`}</option>)}
           {other && <option value={LOCALAI_ENTRY}>{other.label}</option>}

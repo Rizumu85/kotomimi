@@ -64,7 +64,7 @@ import { SERVER_SILENT, isKotomimiServer, kindOf, KOTOMIMI_HOST, modelsFor, serv
 import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
 import { ASR_HERES, coachIs, coachesNatively, cutsSentencesHere, detectsOther, heardBy, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
-import { NATIVE_DEFAULT_MODEL, coachBaseUrl, coachGap, coachIdle, nativeGap, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
+import { NATIVE_DEFAULT_MODEL, coachBaseUrl, coachGap, coachIdle, nativeGap, nativeWaits, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
 import { NATIVE_DEFAULT_TRANSLATOR, nativeTranslates, nativeTranslator, translatorRequest } from './nativeTranslators';
 import { setLocalPipeline } from '../../lib/lan/localServer';
@@ -717,7 +717,7 @@ export const checkLocalAI = createLocalAICheck();
  * it is warm before Start is pressed. What the servers listed goes with its
  * refusal, as with any other.
  */
-export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISettings, ctx: CheckContext, check: typeof checkLocalAI = checkLocalAI, native: { gap: typeof nativeGap; idle: typeof nativeIdle; translatorGap?: typeof translatorGap; translatorIdle?: typeof translatorIdle; coachGap?: typeof coachGap; coachIdle?: typeof coachIdle } = { gap: nativeGap, idle: nativeIdle }): Promise<CheckResult> {
+export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISettings, ctx: CheckContext, check: typeof checkLocalAI = checkLocalAI, native: { gap: typeof nativeGap; idle: typeof nativeIdle; translatorGap?: typeof translatorGap; translatorIdle?: typeof translatorIdle; coachGap?: typeof coachGap; coachIdle?: typeof coachIdle; waits?: typeof nativeWaits } = { gap: nativeGap, idle: nativeIdle }): Promise<CheckResult> {
   // Asked first, so that an engine starts warming while the servers are asked.
   let hears: ReturnType<typeof nativeGap> | null = null;
   if (hearsNatively(s)) {
@@ -743,6 +743,11 @@ export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISe
     (native.coachIdle ?? coachIdle)();
   }
   const servers = await check(k, settled(s), ctx);
+  // No model of the app's own hears the language, and one of the engine's is downloaded: it is not chosen, which is
+  // another thing to be told than "nothing is downloaded".
+  if (!servers.ok && servers.code === 'no_asr' && typeof servers.params?.source === 'string' && (native.waits ?? nativeWaits)(servers.params.source)) {
+    return { ...servers, code: 'native_unchosen', reason: `A downloaded speech recognition model is not chosen for ${servers.params.source}.` };
+  }
   if (!servers.ok) return servers;
   const refused = (hears ? await hears : null) ?? (translates ? await translates : null) ?? (coaches ? await coaches : null);
   return refused ? { ...refused, ...(servers.models?.length ? { models: servers.models } : {}) } : servers;

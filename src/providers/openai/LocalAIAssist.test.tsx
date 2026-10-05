@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import type { Readiness } from '../../lib/provider/types';
 import { useLocalServerStore } from '../../stores/localServerStore';
 import { useModelStore } from '../../stores/modelStore';
+import { useNativeEngineStore } from '../../stores/nativeEngineStore';
 import { NO_LOCAL_SERVER } from '../../lib/lan/localServer';
 import { LocalAIAssist } from './LocalAIAssist';
 import { LOCALAI_DEFAULTS, type LocalAISettings } from './localai';
@@ -331,6 +332,20 @@ describe('the stage cards: an API chosen by its service', () => {
 });
 
 describe('the stage cards: on this computer', () => {
+  it('says "not chosen" where a model of the engine is downloaded and nothing hears yet, and "not downloaded" only where nothing is', () => {
+    const before = useNativeEngineStore.getState().status;
+    try {
+      useNativeEngineStore.setState({ status: { supported: true, engine: 'ready', engineBytes: 1, models: { 'qwen3-asr-1.7b-q8': { state: 'downloaded', received: 1, total: 1 } }, run: { state: 'stopped', model: null, port: 0, tail: '' }, up: [] } });
+      const { card } = draw({ settings: { asrVia: 'device', translateAt: 'device' } });
+      const menu = card(HEAR).getByRole('combobox') as HTMLSelectElement;
+      expect(menu.options[0].textContent).toBe('providers.localai.nativeNone');
+      expect([...menu.options].map((o) => o.textContent)).toContain('providers.localai.nativeEntry');
+    } finally {
+      useNativeEngineStore.setState({ status: before });
+    }
+  });
+
+
   it('chooses the model in the card, and opens the library under it by itself while a model is missing', () => {
     const { card } = draw({ settings: { asrVia: 'device', translateAt: 'device' } });
     // No recognizer is downloaded: the library is the first thing seen, for the language heard; the tour points here.
