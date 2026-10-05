@@ -1,0 +1,55 @@
+// Fork: the language menus' own list (`LanguageMenu.tsx`). The popover, its search box and its rows are the font
+// picker's (`Fonts.scss`); what is added is the pin at each row's right, and the line under the block at the top.
+@use '../Settings/shared/variables' as vars;
+
+.kt-lang-option {
+  // The pin sits at the far right, after the mark of the current choice.
+  .kt-font-option__check {
+    margin-left: auto;
+  }
+}
+
+.kt-lang-pin {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin: -2px 6px -2px 0;
+  padding: 0;
+  color: vars.$text-muted;
+  background: transparent;
+  border: none;
+  border-radius: vars.$radius-sm;
+  cursor: pointer;
+  // Shown on the row under the pointer or the keys; a pinned row keeps its pin in sight.
+  opacity: 0;
+  transition: opacity 0.12s ease, color 0.12s ease, background 0.12s ease;
+
+  .kt-lang-option.is-active &,
+  &:focus-visible {
+    opacity: 0.7;
+  }
+
+  &:hover {
+    opacity: 1;
+    color: vars.$text-primary;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  &[aria-pressed='true'] {
+    opacity: 1;
+    color: vars.$color-primary;
+
+    svg {
+      fill: currentColor;
+    }
+  }
+}
+
+.kt-lang-divider {
+  height: 1px;
+  margin: 4px 8px;
+  background: vars.$border-subtle;
+}

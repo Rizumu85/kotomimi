@@ -88,6 +88,9 @@ export const INVOKE_CHANNELS = [
   'native-engine:stream-audio',
   'native-engine:stream-end',
   'native-engine:stream-abort',
+  // Fork: starting with the computer, in the background (electron/autostart.js)
+  'autostart:get',
+  'autostart:set',
   // Native local-inference sidecar lifecycle
   'native-host:start',
   'native-host:stop',

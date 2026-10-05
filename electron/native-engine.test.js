@@ -16,7 +16,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { createNativeEngine, openLive, languageName, ENGINE, MODELS } = require('./native-engine.js');
+const { createNativeEngine, openLive, languageName, systemTar, ENGINE, MODELS } = require('./native-engine.js');
 
 const sha = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
 const ARCHIVE = Buffer.from('an archive of the engine');
@@ -99,11 +99,27 @@ describe('what is fetched', () => {
     }
   });
 
+  it('offers a model only on the systems it names: a system left with none is not offered the runtime either', async () => {
+    const elsewhere = createNativeEngine({ dir, platform: 'darwin', arch: 'arm64', fetch: async () => { throw new Error('nothing is fetched'); } });
+    expect(MODELS['r2t2-q8'].platforms).toEqual(['win32-x64']);
+    expect(elsewhere.status()).toMatchObject({ supported: false, engine: 'unsupported', models: {} });
+    const here = createNativeEngine({ dir, platform: 'win32', arch: 'x64', fetch: async () => { throw new Error('nothing is fetched'); } });
+    expect(here.status()).toMatchObject({ supported: true, models: { 'r2t2-q8': { state: 'absent' } } });
+  });
+
   it('says so where the runtime is not published, and fetches nothing there', async () => {
     const { world, engine } = computer({ platform: 'linux' });
     expect(engine.status()).toMatchObject({ supported: false, engine: 'unsupported' });
     await engine.download('m1');
     expect(world.requests).toEqual([]);
+  });
+});
+
+describe('the tool that unpacks the runtime', () => {
+  it('is the system tar by its full path: another tar first on the PATH reads a drive letter as a host', () => {
+    expect(systemTar('win32', { SystemRoot: 'D:\\Win' })).toBe('D:\\Win\\System32\\tar.exe');
+    expect(systemTar('win32', {})).toBe('C:\\Windows\\System32\\tar.exe');
+    expect(systemTar('darwin', {})).toBe('/usr/bin/tar');
   });
 });
 

@@ -16,6 +16,7 @@ import {
 } from '../sections';
 import { SessionSettingsGeneral, SessionSettingsProvider } from '../ProviderArea';
 import { FontSection } from '../../Fonts/FontSection';
+import { AutostartSection } from '../../Autostart/AutostartSection';
 import './AdvancedSettings.scss';
 
 interface AdvancedSettingsProps {
@@ -91,6 +92,9 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({ toggleSettings, act
 
             {/* Fork: the fonts of the app and of conversation text */}
             <FontSection />
+
+            {/* Fork: starting with the computer, in the background */}
+            <AutostartSection />
 
             {/* Help & Updates */}
             <HelpSection toggleSettings={toggleSettings} isSessionActive={locked} />

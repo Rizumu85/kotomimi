@@ -21,9 +21,23 @@
  * The engine runs one recognition at a time, so they queue: a stretch that
  * begins while the last one is still being finished keeps its sound until
  * the engine is free.
+ *
+ * Two things measured 2026-10-05 shape how a recognition is closed. The
+ * engine writes the end of what it heard only if about a second of silence
+ * came before the close: closed right on a voice, it leaves out the last
+ * several seconds. So a recognition closed while the speaker is still
+ * talking is given that second of silence first. And the model sometimes
+ * falls silent — it listens and writes nothing for ten or twenty seconds,
+ * then everything at once (one clip of seven, in the engine's own client as
+ * well). Closing does not make it write then, and loses what it would have
+ * written later; so nothing is done about it but to wait.
+ *
+ * The engine is given its sound at the 16 kHz it reads, brought down here
+ * (`resample.ts`): it would do that itself, less carefully.
  */
 import { realClock, type Clock } from '../../lib/contract/clock';
 import type { NativeBridge, NativeEngineStatus, NativeStreamEvent } from '../../lib/native/nativeEngine';
+import { createResampler, TARGET_RATE, type Resampler } from '../../lib/native/resample';
 import type { AsrInit, AsrLike } from '../localInference/engines';
 import { apiLanguage, appVad, type VadWorker } from './apiAsr';
 
@@ -41,8 +55,12 @@ export interface NativeAsrOptions {
 
 /** Audio kept from before the detector says speech began: it says so a moment after the first sound. */
 const PRE_ROLL_SECONDS = 0.8;
-/** The silence the engine needs after the last word to write it; added when the detector's own pause is shorter. */
-const TRAILING_SILENCE_SECONDS = 0.3;
+/**
+ * The silence the engine needs before a close to write the end of what it heard: with a quarter of a second it left
+ * out six seconds of speech, with half a second nothing. Added where the detector's own pause is shorter, and in
+ * full where a recognition is closed with the speaker still talking.
+ */
+const TRAILING_SILENCE_SECONDS = 1;
 /** A recognition this long is begun again at the next gap between words… */
 export const ROLL_AFTER_SECONDS = 45;
 /** …or where the detector cuts, once it is this long, or anywhere at this: the engine's own limit is near two minutes. */
@@ -58,6 +76,8 @@ export const LAST_WORDS_TIMEOUT_MS = 4000;
 interface Stream {
   /** Null until the engine has opened it: it opens one at a time. */
   id: number | null;
+  /** Brings its sound down to the engine's rate, a piece at a time; null where the engine takes the rate as it is. */
+  resampler: Resampler | null;
   opening: boolean;
   /** The sound it is owed while it is not open yet. */
   backlog: Int16Array[];
@@ -96,6 +116,11 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
   let live: Stream | null = null;
   /** Samples in a row with nothing loud, while the live recognition is old enough to begin again. */
   let quiet = 0;
+  /** The detector hears a voice now; and, while it does not but a recognition is open, for how many samples it has not. */
+  let voice = false;
+  let idle = 0;
+  /** The pause that ends a stretch, as the detector was told it. */
+  let pauseSeconds = 1.4;
 
   const secondsOf = (samples: number) => samples / rate;
   const pending = (s: Stream) => s.text.slice(s.emitted);
@@ -104,16 +129,20 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
   function give(s: Stream, pcm: Int16Array) {
     s.samples += pcm.length;
     s.pieceSamples += pcm.length;
-    if (s.id !== null) bridge.write(s.id, pcm);
-    else s.backlog.push(pcm);
+    const sound = s.resampler ? s.resampler.process(pcm) : pcm;
+    if (sound.length === 0) return;
+    if (s.id !== null) bridge.write(s.id, sound);
+    else s.backlog.push(sound);
   }
 
   /** A new recognition, taking sound from now on; the engine opens it when it is its turn. */
   function begin(): Stream {
-    const s: Stream = { id: null, opening: false, backlog: [], text: '', emitted: 0, samples: 0, pieceSamples: 0, closed: false, closedAt: 0, misfire: false, over: false, cancelWait: null };
+    const resampler = createResampler(rate);
+    const s: Stream = { id: null, resampler, opening: false, backlog: [], text: '', emitted: 0, samples: 0, pieceSamples: 0, closed: false, closedAt: 0, misfire: false, over: false, cancelWait: null };
     queue.push(s);
     live = s;
     quiet = 0;
+    idle = 0;
     advance();
     return s;
   }
@@ -123,7 +152,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     const head = queue[0];
     if (!head || head.id !== null || head.opening || disposed) return;
     head.opening = true;
-    void bridge.open({ language, sampleRate: rate }).then((id) => {
+    void bridge.open({ language, sampleRate: head.resampler ? TARGET_RATE : rate }).then((id) => {
       head.opening = false;
       if (head.over || disposed) {
         if (id !== null) bridge.abort(id);
@@ -155,10 +184,10 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     }, LAST_WORDS_TIMEOUT_MS);
   }
 
-  /** No more sound for this recognition. */
-  function close(s: Stream) {
+  /** No more sound for this recognition; `silence` is how much of it to add first, where the voice gave less. */
+  function close(s: Stream, silence = padSeconds) {
     if (s.closed) return;
-    if (padSeconds > 0) give(s, new Int16Array(Math.round(padSeconds * rate)));
+    if (silence > 0) give(s, new Int16Array(Math.round(silence * rate)));
     s.closed = true;
     s.closedAt = now();
     if (live === s) live = null;
@@ -182,16 +211,17 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     const at = queue.indexOf(s);
     if (at >= 0) queue.splice(at, 1);
     if (live === s) live = null;
-    // The engine's own account of the whole, where it agrees with what has already gone out.
-    const text = whole.startsWith(s.text.slice(0, s.emitted)) ? whole : s.text;
+    // The engine's own account of the whole: it ends with words no partial carried. Where it differs a little from
+    // what was written on the way — a character here and there — it is still read from where the results left off.
+    const text = whole.length >= s.text.length ? whole : s.text;
     // An empty result too: it closes what the partials opened.
     asr.onResult?.({ text: s.misfire ? '' : text.slice(s.emitted).trim(), durationMs: Math.round(secondsOf(s.pieceSamples) * 1000), recognitionTimeMs: s.closed ? Math.max(0, now() - s.closedAt) : 0 });
     advance();
   }
 
-  /** The live recognition is closed and another begun at once: the speaker has not stopped. */
+  /** The live recognition is closed and another begun at once: the speaker has not stopped, so the silence is added. */
   function roll(s: Stream) {
-    close(s);
+    close(s, TRAILING_SILENCE_SECONDS);
     begin();
   }
 
@@ -222,6 +252,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
 
     async init(_modelId: string, init: AsrInit) {
       language = apiLanguage(init.language) ?? '';
+      pauseSeconds = init.vadConfig.minSilenceDuration ?? pauseSeconds;
       padSeconds = Math.max(0, TRAILING_SILENCE_SECONDS - (init.vadConfig.minSilenceDuration ?? 0));
       unlisten = bridge.listen(onEvent);
       const detector = new Promise<void>((resolve, reject) => {
@@ -233,6 +264,8 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
             ready = true;
             resolve();
           } else if (data.type === 'speech_start') {
+            voice = true;
+            idle = 0;
             asr.onSpeechStart?.();
             // After a cut the detector made, the recognition is still open: the voice simply goes on.
             if (live) return;
@@ -241,6 +274,8 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
             before = [];
             beforeLength = 0;
           } else if (data.type === 'speech_end') {
+            voice = false;
+            idle = 0;
             if (!live) return;
             if (data.forced) {
               piece(live);
@@ -249,6 +284,8 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
               close(live);
             }
           } else if (data.type === 'speech_cancel') {
+            voice = false;
+            idle = 0;
             if (!live) return;
             // Too short to be speech — unless it is the tail of a stretch already heard.
             if (live.emitted === 0 && secondsOf(live.samples) < PRE_ROLL_SECONDS + 2) live.misfire = true;
@@ -295,6 +332,12 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
           }
           quiet = loud ? 0 : quiet + kept.length;
           if (secondsOf(quiet) >= GAP_SECONDS || age >= ROLL_HARD_SECONDS) roll(live);
+        }
+        // Open after a cut of the detector's own, and no voice since: the speaker had just stopped. The pause has passed
+        // in what the recognition was given, so it is closed as the detector would have closed it.
+        if (!voice && live) {
+          idle += kept.length;
+          if (secondsOf(idle) >= pauseSeconds) close(live);
         }
       } else {
         before.push(kept);

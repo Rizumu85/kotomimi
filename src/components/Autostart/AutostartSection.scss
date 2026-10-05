@@ -1,0 +1,9 @@
+// Fork: starting with the computer (`AutostartSection.tsx`): what the switch does, said under it.
+@use '../Settings/shared/variables' as vars;
+
+.kt-autostart__note {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: vars.$text-muted;
+}

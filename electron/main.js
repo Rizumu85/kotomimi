@@ -15,6 +15,7 @@ const { firewallStatus, allowThroughFirewall } = require('./lan-firewall');
 const { discoverServers } = require('./lan-discover');
 const { createLocalServer } = require('./local-server');
 const { createNativeEngine } = require('./native-engine');
+const { createAutostart } = require('./autostart');
 const { applyLinuxGpuFlags } = require('./linux-gpu-flags');
 const { acquireSingleInstanceLock, createFocusRelay } = require('./single-instance');
 
@@ -451,6 +452,8 @@ function createWindow() {
     frame: false,
     transparent: true,
     hasShadow: true,
+    // Fork: a start with the computer stays out of sight until the app is opened.
+    show: !autostart.startedHidden,
     backgroundColor: '#00000000',
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     webPreferences: {
@@ -484,6 +487,8 @@ function createWindow() {
   // An Electron-drawn Minimize/Maximize/Close menu takes its place.
   setupCaptionContextMenu(mainWindow);
   setupPopoverWindowHandlers(mainWindow);
+  // Fork: the person is here — what a start in the background left for later begins now.
+  mainWindow.on('show', () => autostart.wake());
   closeHandshake.attachWindow(mainWindow);
   mainWindow.on('close', (event) => closeHandshake.onWindowClose(event));
 
@@ -1339,6 +1344,12 @@ app.on('will-quit', () => { void localServer?.stop(); });
 // Fork: the native recognition engine (electron/native-engine.js): a runtime and its models, fetched into the app's
 // own folder and run on this computer alone. Fetched over the system's own network stack (`net.fetch`: its proxy
 // settings included), its output kept in the app's log folder, and stopped with the app.
+// Fork: starting with the computer, in the background (electron/autostart.js). Such a start shows no window — a
+// second launch shows the one it made — and leaves the engine's loading for a quiet minute, or for the window's showing.
+const autostart = createAutostart({ app, exists: (file) => require('fs').existsSync(file) });
+ipcMain.handle('autostart:get', () => autostart.get());
+ipcMain.handle('autostart:set', (event, args) => autostart.set(args?.enabled === true));
+
 let nativeEngine = null;
 const getNativeEngine = () => {
   if (nativeEngine) return nativeEngine;
@@ -1354,6 +1365,8 @@ const getNativeEngine = () => {
     // An unpackaged run can keep it elsewhere (`KOTOMIMI_NATIVE_DIR`): gigabytes a test profile need not fetch again.
     dir: !app.isPackaged && process.env.KOTOMIMI_NATIVE_DIR ? process.env.KOTOMIMI_NATIVE_DIR : path.join(app.getPath('userData'), 'native-engine'),
     fetch: (url, init) => net.fetch(url, init),
+    // An unpackaged run can keep what the engine was given to hear (`KOTOMIMI_NATIVE_DUMP`), to measure with.
+    dumpDir: !app.isPackaged && process.env.KOTOMIMI_NATIVE_DUMP ? process.env.KOTOMIMI_NATIVE_DUMP : null,
     log,
     onChange: (status) => toPage('native-engine:status', status),
     onStream: (event) => toPage('native-engine:stream', event),
@@ -1364,7 +1377,10 @@ ipcMain.handle('native-engine:get', () => getNativeEngine().status());
 ipcMain.handle('native-engine:download', (event, args) => getNativeEngine().download(String(args?.id ?? '')));
 ipcMain.handle('native-engine:cancel', (event, args) => getNativeEngine().cancel(String(args?.id ?? '')));
 ipcMain.handle('native-engine:remove', (event, args) => getNativeEngine().remove(String(args?.id ?? '')));
-ipcMain.handle('native-engine:start', (event, args) => getNativeEngine().start(String(args?.id ?? '')));
+ipcMain.handle('native-engine:start', async (event, args) => {
+  await autostart.quiet;
+  return getNativeEngine().start(String(args?.id ?? ''));
+});
 ipcMain.handle('native-engine:stop', () => getNativeEngine().stop());
 ipcMain.handle('native-engine:stream-open', (event, args) => getNativeEngine().openStream({ language: args?.language, sampleRate: args?.sampleRate }));
 ipcMain.handle('native-engine:stream-audio', (event, args) => getNativeEngine().writeStream(args?.id, args?.pcm));

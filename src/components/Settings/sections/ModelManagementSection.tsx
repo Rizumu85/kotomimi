@@ -155,12 +155,6 @@ export function ModelCard({
             <div className="model-card__header">
               <span className="model-card__name">{entry.name}</span>
               {!isCloud && <span className="model-card__size">{getModelSizeMb(entry, deviceFeatures)} MB</span>}
-              {note && (
-                // stopPropagation: opening the note is not choosing the model.
-                <span className="model-card__note" onClick={(e) => e.stopPropagation()}>
-                  <Tooltip content={note} icon="info" trigger="click" position="top" maxWidth={320} />
-                </span>
-              )}
             </div>
             <div className="model-card__meta">
               <div className="model-card__languages">
@@ -182,6 +176,12 @@ export function ModelCard({
                 <span className="model-card__compatibility-warning">
                   <AlertTriangle size={11} />
                   {compatibilityHint}
+                </span>
+              )}
+              {note && (
+                // Fork. stopPropagation: opening the note is not choosing the model.
+                <span className="model-card__note" onClick={(e) => e.stopPropagation()}>
+                  <Tooltip content={note} icon="info" trigger="click" position="top" maxWidth={320} />
                 </span>
               )}
             </div>

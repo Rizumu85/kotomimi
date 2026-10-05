@@ -40,6 +40,25 @@ module.exports = {
     },
   },
   // The setup wizard's own step and card for the Kotomimi provider (`src/components/SetupWizard/steps/StepKotomimi.tsx`).
+  // Starting with the computer (`AutostartSection.tsx`).
+  autostart: {
+    title: ['Startup', '启动', '啟動'],
+    toggle: ['Start in the background when I sign in to Windows', '登录 Windows 时在后台启动', '登入 Windows 時在背景啟動'],
+    note: [
+      'Kotomimi starts without a window and gets this computer\'s recognition engine ready, so that it is warm when you open the app. To leave the computer alone while it starts, the engine begins loading about a minute after you sign in — or at once when you open Kotomimi.',
+      'Kotomimi 会不弹窗口地在后台启动，并提前把这台电脑的识别引擎准备好，等你打开应用时已经预热完毕。为了不拖慢开机，引擎会在登录约一分钟后才开始加载；你提前打开 Kotomimi 的话会立刻开始。',
+      'Kotomimi 會不彈出視窗地在背景啟動，並提前把這台電腦的辨識引擎準備好，等你開啟應用程式時已經預熱完畢。為了不拖慢開機，引擎會在登入約一分鐘後才開始載入；你提前開啟 Kotomimi 的話會立刻開始。',
+    ],
+  },
+  // The language menus' own list (`LanguageMenu.tsx`).
+  languageMenu: {
+    search: ['Type to find a language', '输入筛选语言', '輸入篩選語言'],
+    none: ['No language by that name', '没有这个名字的语言', '沒有這個名稱的語言'],
+    pin: ['Pin {{name}} to the top', '把{{name}}置顶', '把{{name}}置頂'],
+    unpin: ['Unpin {{name}}', '取消置顶{{name}}', '取消置頂{{name}}'],
+    pinShort: ['Pin to the top', '置顶', '置頂'],
+    unpinShort: ['Unpin', '取消置顶', '取消置頂'],
+  },
   wizard: {
     pathTitle: ['Kotomimi Pipeline', 'Kotomimi 自由搭配', 'Kotomimi 自由搭配'],
     pathBadge: ['Recommended', '推荐', '推薦'],

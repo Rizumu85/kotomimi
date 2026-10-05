@@ -8,6 +8,7 @@ import { useSubtitleStore } from '../stores/subtitleStore';
 import { useAnnotationStore } from '../stores/annotationStore';
 import { useLanStore } from '../stores/lanStore';
 import { useNativeEngineStore } from '../stores/nativeEngineStore';
+import { useLanguagePinStore } from '../stores/languagePinStore';
 import { useLocalServerStore } from '../stores/localServerStore';
 import { useFontStore } from '../stores/fontStore';
 import { useConversationDisplayStore } from '../stores/conversationDisplayStore';
@@ -50,6 +51,8 @@ export function Home() {
     void useLocalServerStore.getState().hydrate();
     // Fork: the native recognition engine — whether its model is downloaded, and whether it is up.
     void useNativeEngineStore.getState().hydrate();
+    // Fork: the languages pinned to the top of the language menus.
+    void useLanguagePinStore.getState().hydrate();
     // Fork: on Windows the page rounds the window's corners itself, and squares them while it fills the screen.
     return watchWindowShape();
   }, []); // Empty dependency array - only run once on mount

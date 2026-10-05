@@ -74,6 +74,7 @@ jobs:
           npx vitest run --testTimeout=20000
           src/providers
           src/lib/lan
+          src/lib/native
           src/lib/windowShape.test.ts
           src/lib/fonts
           src/lib/language
@@ -94,6 +95,8 @@ jobs:
           electron/window-maximize.test.js
           electron/local-server.test.js
           electron/local-server.pipelines.test.js
+          electron/native-engine.test.js
+          electron/autostart.test.js
           src/components/TitleBar
           src/components/Settings/ProviderArea.test.tsx
           src/components/LanSharing

@@ -604,8 +604,8 @@
       "nativeMissing": "{{name}} is not downloaded yet. Download it in the Speech recognition card, or choose another model.",
       "nativeWarming": "The recognition engine of this computer is still starting. The first start after the computer boots takes about half a minute — it loads a 2.5 GB model onto the graphics card; after that it takes a few seconds. You can start as soon as it is ready.",
       "nativeFailed": "The recognition engine of this computer could not start. In the Speech recognition card, press \"Try again\" — or choose another model.",
-      "noteNativeR2t2": "Measured on Japanese VRChat talk: about 15% of the characters wrong — the most accurate on this computer — and it writes while it listens, about 1.5 s behind the voice. It runs in an engine of its own on the graphics card (about 3 GB of video memory). The first start after the computer boots takes about half a minute.",
-      "noteQwen17": "Measured on Japanese VRChat talk: about 19% of the characters wrong — accurate. It writes only once a sentence has ended, and a long sentence takes 3–4 s more.",
+      "noteNativeR2t2": "Measured on Japanese VRChat talk: about 18% of the characters wrong — as accurate as Qwen3-ASR 1.7B — and it writes while it listens, about 3 s behind the voice where the others are 10 s behind. It runs in an engine of its own on the graphics card (about 3 GB of video memory). The first start after the computer boots takes about half a minute. Now and then it writes nothing for ten seconds or so and then catches up at once.",
+      "noteQwen17": "Measured on Japanese VRChat talk: about 19% of the characters wrong — accurate. It writes only once a sentence has ended, so the text is about 10 s behind the voice.",
       "noteWhisperTurbo": "Measured on Japanese VRChat talk: about 21% of the characters wrong, and steady. It writes only once a sentence has ended.",
       "noteVoxtral4b": "Measured on Japanese VRChat talk: quick — the text is about 2.6 s behind the voice — but about 27% of the characters wrong. For when speed matters more than accuracy.",
       "noteCohere": "Measured on Japanese VRChat talk: about 33% of the characters wrong, and about a quarter of what was said left out. Not a good choice for Japanese conversation.",
@@ -1439,6 +1439,19 @@
     "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian)",
+    "autostart": {
+      "title": "Startup",
+      "toggle": "Start in the background when I sign in to Windows",
+      "note": "Kotomimi starts without a window and gets this computer's recognition engine ready, so that it is warm when you open the app. To leave the computer alone while it starts, the engine begins loading about a minute after you sign in — or at once when you open Kotomimi."
+    },
+    "languageMenu": {
+      "search": "Type to find a language",
+      "none": "No language by that name",
+      "pin": "Pin {{name}} to the top",
+      "unpin": "Unpin {{name}}",
+      "pinShort": "Pin to the top",
+      "unpinShort": "Unpin"
+    },
     "wizard": {
       "pathTitle": "Kotomimi Pipeline",
       "pathBadge": "Recommended",

@@ -73,7 +73,10 @@ const MODELS = {
     sha256: '19f5ccd624484bcb5d44301437de41560b0ecc40c430e8850dfeefefbe82ccf5',
     family: 'confucius4_r2t2',
     mode: 'streaming',
-    options: { 'confucius4_r2t2.chunk_size_ms': '160', 'confucius4_r2t2.unfixed_chunk_num': '0', 'confucius4_r2t2.unfixed_token_num': '1' },
+    // Where it keeps up with a voice. On an Apple M2 (Metal) it does not: a minute of speech took well over two
+    // (measured 2026-10-05), so a Mac is not offered it.
+    platforms: ['win32-x64'],
+    options: { 'confucius4_r2t2.chunk_size_ms': '160', 'confucius4_r2t2.unfixed_chunk_num': '0', 'confucius4_r2t2.unfixed_token_num': '3' },
   },
 };
 
@@ -112,10 +115,18 @@ function freePortOf() {
   });
 }
 
-/** Unpacks an archive with the system's own `tar` (Windows 10 and later have one that reads zip). */
+/**
+ * The system's own `tar`, by its full path: Windows 10 and later have one that reads zip, and whatever `tar` comes
+ * first on the PATH may be another — Git's reads `C:\…` as a host named C (seen 2026-10-05).
+ */
+function systemTar(platform = process.platform, env = process.env) {
+  return platform === 'win32' ? path.win32.join(env.SystemRoot || env.windir || 'C:\\Windows', 'System32', 'tar.exe') : '/usr/bin/tar';
+}
+
+/** Unpacks an archive with it. */
 function untar(archive, into) {
   return new Promise((resolve, reject) => {
-    execFile('tar', ['-xf', archive, '-C', into], { windowsHide: true }, (error) => (error ? reject(error) : resolve()));
+    execFile(systemTar(), ['-xf', archive, '-C', into], { windowsHide: true }, (error) => (error ? reject(error) : resolve()));
   });
 }
 
@@ -210,12 +221,18 @@ function createNativeEngine(deps = {}) {
     files = fs,
     readyTimeoutMs = READY_TIMEOUT_MS,
     warmTimeoutMs = WARM_TIMEOUT_MS,
+    /** A folder to keep each recognition's sound in, as the engine was given it: for comparing a run with the engine's own client. */
+    dumpDir = null,
     /** What is fetched: the lists above, unless a test brings its own. */
     catalog = { engine: ENGINE, models: MODELS },
   } = deps;
-  const { engine: ENGINE_, models: MODELS_ } = catalog;
+  const { engine: ENGINE_ } = catalog;
+  const system = `${platform}-${arch}`;
+  /** The models this system is offered: one that names its systems is offered on those alone. */
+  const MODELS_ = Object.fromEntries(Object.entries(catalog.models).filter(([, model]) => !model.platforms || model.platforms.includes(system)));
 
-  const build = ENGINE_.builds[`${platform}-${arch}`] ?? null;
+  // A system with no model to run has no use for the runtime either.
+  const build = Object.keys(MODELS_).length > 0 ? ENGINE_.builds[system] ?? null : null;
   const engineDir = path.join(dir, `engine-${ENGINE_.version}`);
   const modelsDir = path.join(dir, 'models');
   const exe = build ? path.join(engineDir, build.exe) : null;
@@ -228,6 +245,8 @@ function createNativeEngine(deps = {}) {
   let run = { state: 'stopped', model: null, port: 0, tail: '' };
   /** What is being fetched: id (or `engine`) → `{ received, total, abort }`. */
   const fetching = new Map();
+  /** The runtime's archive is here and being unpacked: still on its way, to whoever asks. */
+  let unpacking = false;
   const failed = new Map();
   let lastTold = 0;
 
@@ -240,7 +259,7 @@ function createNativeEngine(deps = {}) {
   };
   const status = () => ({
     supported: Boolean(build),
-    engine: !build ? 'unsupported' : fetching.has('engine') ? 'downloading' : has(exe) ? 'ready' : 'absent',
+    engine: !build ? 'unsupported' : fetching.has('engine') || unpacking ? 'downloading' : has(exe) ? 'ready' : 'absent',
     engineBytes: build?.bytes ?? 0,
     models: Object.fromEntries(Object.keys(MODELS_).map((id) => [id, modelState(id)])),
     run: { ...run },
@@ -307,9 +326,12 @@ function createNativeEngine(deps = {}) {
     files.mkdirSync(engineDir, { recursive: true });
     const archive = path.join(engineDir, build.archive);
     await fetchFile('engine', build, archive);
+    unpacking = true;
+    tell();
     try {
       await extract(archive, engineDir);
     } finally {
+      unpacking = false;
       files.rmSync(archive, { force: true });
     }
     if (!has(exe)) throw new Error('The engine could not be unpacked.');
@@ -318,7 +340,7 @@ function createNativeEngine(deps = {}) {
 
   /** The runtime and a model, fetched: resolves with the state of things, which says what failed. */
   async function download(id) {
-    if (!build || !MODELS_[id] || fetching.has(id) || fetching.has('engine')) return status();
+    if (!build || !MODELS_[id] || fetching.has(id) || fetching.has('engine') || unpacking) return status();
     try {
       await ensureEngine();
       if (!has(fileOf(id))) {
@@ -466,6 +488,7 @@ function createNativeEngine(deps = {}) {
   }
 
   /** A live recognition opened for the page: its id, or null while the runtime is not ready. */
+  const dumps = new Map();
   function openStream({ language, sampleRate } = {}) {
     if (run.state !== 'ready' || !run.model) return null;
     const id = nextStream++;
@@ -475,18 +498,27 @@ function createNativeEngine(deps = {}) {
       onStream({ id, ...event });
     });
     streams.set(id, stream);
+    if (dumpDir) {
+      try {
+        files.mkdirSync(dumpDir, { recursive: true });
+        dumps.set(id, files.createWriteStream(path.join(dumpDir, `stream-${String(id).padStart(4, '0')}-${rate}.pcm`)));
+      } catch { /* a convenience */ }
+    }
     return id;
   }
   function writeStream(id, pcm) {
     const stream = streams.get(id);
     if (!stream || !pcm) return false;
-    stream.write(Buffer.isBuffer(pcm) ? pcm : Buffer.from(pcm.buffer ?? pcm, pcm.byteOffset ?? 0, pcm.byteLength));
+    const bytes = Buffer.isBuffer(pcm) ? pcm : Buffer.from(pcm.buffer ?? pcm, pcm.byteOffset ?? 0, pcm.byteLength);
+    stream.write(bytes);
+    dumps.get(id)?.write(bytes);
     return true;
   }
-  function endStream(id) { streams.get(id)?.end(); return true; }
-  function abortStream(id) { streams.get(id)?.abort(); streams.delete(id); return true; }
+  const undump = (id) => { dumps.get(id)?.end(); dumps.delete(id); };
+  function endStream(id) { streams.get(id)?.end(); undump(id); return true; }
+  function abortStream(id) { streams.get(id)?.abort(); streams.delete(id); undump(id); return true; }
 
   return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream };
 }
 
-module.exports = { createNativeEngine, openLive, languageName, ENGINE, MODELS, LOOPBACK };
+module.exports = { createNativeEngine, openLive, languageName, systemTar, ENGINE, MODELS, LOOPBACK };

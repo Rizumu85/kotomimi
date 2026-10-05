@@ -19,6 +19,7 @@ import {
 } from '../sections';
 import { SessionEnginePage, SessionSettingsGeneral } from '../ProviderArea';
 import { FontSection } from '../../Fonts/FontSection';
+import { AutostartSection } from '../../Autostart/AutostartSection';
 import './SimpleSettings.scss';
 
 interface SimpleSettingsProps {
@@ -192,6 +193,9 @@ const SimpleSettings: React.FC<SimpleSettingsProps> = ({ highlightSection }) => 
 
         {/* Fork: the fonts of the app and of conversation text */}
         <FontSection />
+
+        {/* Fork: starting with the computer, in the background */}
+        <AutostartSection />
 
         {/* Help & Updates */}
         <HelpSection isSessionActive={locked} />

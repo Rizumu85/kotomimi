@@ -9,6 +9,7 @@ import type { AudioMode } from '../../stores/audioStore';
 import { useLanguageLabel } from '../../lib/language/useLanguageLabel';
 import { orderLanguages, pinnedLanguages, PIN_SEPARATOR, type OrderContext } from '../../lib/language/order';
 import { effectiveTextOnly } from '../../utils/effectiveTextOnly';
+import { useLanguageMenu } from './LanguageMenu';
 
 const SEPARATOR = '──────────';
 
@@ -75,6 +76,23 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
   });
   const sourceLabel = resolved ? t(resolved.my.key, resolved.my.fallback) : t('settings.sourceLanguage');
   const targetLabel = resolved ? t(resolved.their.key, resolved.their.fallback) : t('settings.targetLanguage');
+  // Fork: pressing a select opens the app's own list — every language with a pin at its right, the pinned ones first.
+  const sourceMenu = useLanguageMenu({
+    ordered: sourceOptions.ordered,
+    suggested: sourceOptions.pinned,
+    value: pair.source,
+    onPick: (source) => onChange(normalizePair(provider, settings, { source, target: pair.target }, context)),
+    label,
+    disabled,
+  });
+  const targetMenu = useLanguageMenu({
+    ordered: targetOptions.ordered,
+    suggested: targetOptions.pinned,
+    value: pair.target,
+    onPick: (target) => onChange({ source: pair.source, target }),
+    label,
+    disabled,
+  });
   const sourceLanguageName = label(pair.source);
   const targetLanguageName = label(pair.target);
 
@@ -98,9 +116,11 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
             value={pair.source}
             onChange={(e) => onChange(normalizePair(provider, settings, { source: e.target.value, target: pair.target }, context))}
             disabled={disabled}
+            {...sourceMenu.selectProps}
           >
             {options(sourceOptions)}
           </select>
+          {sourceMenu.list}
         </div>
         <div className="language-arrow">
           <button
@@ -121,9 +141,11 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
             value={pair.target}
             onChange={(e) => onChange({ source: pair.source, target: e.target.value })}
             disabled={disabled}
+            {...targetMenu.selectProps}
           >
             {options(targetOptions)}
           </select>
+          {targetMenu.list}
         </div>
       </div>
       {resolved?.showMirror && (
