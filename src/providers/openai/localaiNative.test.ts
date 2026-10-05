@@ -113,7 +113,21 @@ describe('the native engine as what hears on this computer', () => {
 
   it('lists the models in the order they were measured: the recognition of the system itself, then the one read a stretch at a time, then the one that writes as it listens', () => {
     const families = NATIVE_MODELS.map((m) => m.name).filter((name, at, all) => all.indexOf(name) === at);
-    expect(families).toEqual(['Apple Speech', 'Qwen3-ASR 1.7B GGUF', 'Confucius4 R2T2 GGUF']);
+    expect(families).toEqual(['Apple Speech', 'Qwen3-ASR 1.7B GGUF', 'Confucius4 R2T2 GGUF', 'Qwen3-ASR 0.6B GGUF']);
+  });
+
+  it('has a small model last, for a computer that runs a game beside it: read as the large one is, and never left to detect the language', () => {
+    const small = nativeModel('qwen3-asr-0.6b-q8');
+    const large = nativeModel('qwen3-asr-1.7b-q8');
+    expect(NATIVE_MODELS[NATIVE_MODELS.length - 1]).toBe(small);
+    expect(small.bytes).toBeLessThan(large.bytes / 2);
+    expect(small.languages).toEqual(large.languages);
+    expect(small.limits).toEqual(large.limits);
+    expect(nativeHears(small, 'ru')).toBe(true);
+    expect(nativeHears(small, 'auto')).toBe(false);
+    expect(nativePicked({ model: 'qwen3-asr-0.6b-q8' }, 'auto')).toBeNull();
+    const config = buildLocalAI(SPEAKER, settings({ ...NATIVE, asrNativeModel: 'qwen3-asr-0.6b-q8' }), shared);
+    expect(config).toMatchObject({ device: { modelId: 'qwen3-asr-0.6b-q8', streaming: true, native: { model: 'qwen3-asr-0.6b-q8', limits: { rollAfter: 8 } } } });
   });
 });
 

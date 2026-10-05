@@ -22,6 +22,8 @@ export interface NativeCardModel {
   bytes: number;
   /** `'any'`: a model of well over a hundred languages. */
   languages: readonly string[] | 'any';
+  /** No longer offered for download: another of the list does all it does. */
+  retired?: boolean;
 }
 
 /** The words of each engine: its note beside the name is per model (`noteKey`), these are what it is doing. */
@@ -35,6 +37,7 @@ const WORDS: Record<NativeKind, { ready: string; warming: string; failed: string
 const NOTES: Readonly<Record<string, string>> = {
   'r2t2-q8': 'noteNativeR2t2',
   'qwen3-asr-1.7b-q8': 'noteNativeQwen',
+  'qwen3-asr-0.6b-q8': 'noteNativeQwenSmall',
   'apple-speech': 'noteAppleSpeech',
   'index-translate-2b': 'noteIndexTranslate',
   'hy-mt2-1.8b': 'noteHyMt2',

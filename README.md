@@ -87,6 +87,7 @@ Sokuji 原有的功能和云服务提供商（OpenAI、Gemini、Soniox 等）都
 - 文字边说边出，一般只比声音慢 1 秒左右；日语闲聊实测错字率约 16%，比应用自带的模型都准。支持 30 种语言。每个模型名字旁的 ⓘ 里写了实测结果，可以对着选。
 - 说话时显示的是"暂定"文字，最后几个字可能还会变；一句话说完（连着说时最多 15 秒）就定稿并翻译。
 - 需要独立显卡，约占 3 GB 显存。显卡忙不过来时（显卡不强，或同时开着游戏）只是文字刷新得慢一些。开机后第一次启动要预热半分钟左右，之后每次几秒；还在预热时，"开始"旁边会有说明。
+- 只有一台电脑、同时还要开 VRChat？用最下面的 **Qwen3-ASR 0.6B GGUF**（约 1.1 GB）：显存从约 3 GB 降到约 2 GB，错字多一些（约 22%），其他都一样。
 - 它下面还有一个 **Confucius4 R2T2 GGUF**（只在 Windows）：写出来的字不会再改，但显卡忙不过来时文字会越落越远；偶尔会有十几秒不出字、然后一口气补上的情况。一般用上面那个就好。
 - 想让它提前准备好，可以在设置的"启动"里打开"登录 Windows 时在后台启动"（默认关）：开机后 Kotomimi 不弹窗口地在后台待命，等你点开时已经预热完毕。
 - Mac（macOS 26 及以上）在最上面显示的是 **Apple Speech**：系统自带的语音识别，实测是最准的，同样边听边出字，不占显存；语言包由系统下载，点一下"下载"就行。系统不支持的语言（比如俄语）用它下面的 Qwen3-ASR 1.7B GGUF。有了这两个，Mac 上不需要再装 LocalAI。
@@ -161,7 +162,7 @@ Kotomimi is a personal fork of [Sokuji](https://github.com/kizuna-ai-lab/sokuji)
 - **Subtitles you can read**: furigana over Japanese kanji, and an optional romanization line under Japanese, Korean and Russian.
 - **Stages you place yourself**: speech recognition, translation and grammar feedback each run on this computer, on another device on your network, or on any OpenAI-compatible API, in any mix.
 - **Two devices together**: one computer shares the models it has downloaded; another device finds it on the network and uses them, downloading nothing.
-- **Text while they speak**: a recognition engine the app downloads and runs itself (audio.cpp with Qwen3-ASR 1.7B, thirty languages; on Windows also Confucius4 R2T2) writes about a second behind the voice, with nothing else to install. Translation has one too (llama.cpp with Index-Translate 2B), on Windows and Apple-silicon Macs. On a Mac (macOS 26 or later) the first recognizer is the system's own speech recognition, built in, with Qwen3-ASR behind it for the languages the system does not hear — no LocalAI needed.
+- **Text while they speak**: a recognition engine the app downloads and runs itself (audio.cpp with Qwen3-ASR 1.7B, thirty languages, and its small 0.6B sibling for a computer that runs a game beside it; on Windows also Confucius4 R2T2) writes about a second behind the voice, with nothing else to install. Translation has one too (llama.cpp with Index-Translate 2B), on Windows and Apple-silicon Macs. On a Mac (macOS 26 or later) the first recognizer is the system's own speech recognition, built in, with Qwen3-ASR behind it for the languages the system does not hear — no LocalAI needed.
 - **Typed lookups** (`Ctrl+K`), **grammar feedback** on your own speech, **fonts** chosen per language, and the languages you switch between **pinned** to the top of the language menus.
 
 **Install**: download from [Releases](https://github.com/Rizumu85/kotomimi/releases/latest). The Windows installer is not code-signed, so Windows warns about an unknown publisher; the macOS build (Apple silicon) is not notarized, so right-click the app and choose Open the first time. Then follow the setup wizard and pick "Kotomimi Pipeline". No account and no API key are needed.

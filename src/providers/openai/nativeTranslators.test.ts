@@ -66,6 +66,8 @@ describe('the words each translation model is asked with', () => {
     expect(nativeTranslates(nativeTranslator('hy-mt2-1.8b'), 'ja', 'sw')).toBe(false);
     expect(nativeTranslator('gone').id).toBe(NATIVE_DEFAULT_TRANSLATOR);
     expect(NATIVE_TRANSLATORS.map((m) => m.id)).toEqual(['index-translate-2b', 'hy-mt2-1.8b', 'hy-mt1.5-1.8b']);
+    // The older Hunyuan model is no longer offered: its successor does all it does. It stays for a computer that has it.
+    expect(NATIVE_TRANSLATORS.filter((m) => m.retired).map((m) => m.id)).toEqual(['hy-mt1.5-1.8b']);
   });
 });
 

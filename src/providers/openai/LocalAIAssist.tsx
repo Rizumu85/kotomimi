@@ -17,6 +17,7 @@ import type { CredentialAssistProps } from '../../lib/provider/types';
 import { useLocalServerStore } from '../../stores/localServerStore';
 
 import { useDeviceFeatures, useDownloadErrors, useModelDownloads, useModelInitialized, useModelStatuses, useModelStore, useWebGPUAvailable } from '../../stores/modelStore';
+import { ApiModelPicker } from './ApiModelPicker';
 import { savedKeyOf } from './apiServiceKey';
 import { API_SERVICES, preferredModel, serviceOf, servicesFor, type ApiKind, type ApiService } from './apiServices';
 import { coachPrompt } from './coachPrompt';
@@ -226,24 +227,21 @@ function ApiFields({ id, kind, others, baseUrl, model, needsKey, apiKey, urlPlac
           <input type="text" className="kt-input" aria-label={t('providers.localai.asrApiBaseUrl')} value={baseUrl} onChange={(e) => onChange({ baseUrl: e.target.value })} placeholder={urlPlaceholder} spellCheck={false} disabled={disabled} />
         </Field>
       )}
-      <Field label={t('providers.localai.model')}>
-        <input
-          type="text"
-          className="kt-input"
-          aria-label={t('providers.localai.model')}
-          list={`${id}-models`}
-          value={model}
-          onChange={(e) => onChange({ model: e.target.value })}
-          onFocus={() => setTyping(true)}
-          onBlur={() => setTyping(false)}
-          placeholder={service ? t(service.modelHintKey ?? 'providers.localai.apiServiceModel') : modelPlaceholder}
-          spellCheck={false}
-          disabled={disabled}
-        />
-        <datalist id={`${id}-models`}>
-          {options.map((m) => <option key={m.id} value={m.id} />)}
-        </datalist>
-      </Field>
+      <ApiModelPicker
+        id={id}
+        label={t('providers.localai.model')}
+        model={model}
+        placeholder={service ? t(service.modelHintKey ?? 'providers.localai.apiServiceModel') : modelPlaceholder}
+        baseUrl={baseUrl}
+        needsKey={needsKey}
+        apiKey={apiKey}
+        known={options.map((m) => m.id)}
+        service={service}
+        kind={kind}
+        onModel={(next) => onChange({ model: next })}
+        onTyping={setTyping}
+        disabled={disabled}
+      />
       {/* Whether a service wants a key is known; of an address typed by hand it is asked. */}
       {!service && <ToggleSwitch checked={needsKey} onChange={() => onChange({ needsKey: !needsKey })} label={t('providers.localai.asrApiNeedsKey')} disabled={disabled} />}
       {needsKey && (
@@ -280,7 +278,8 @@ function useNativeModels(kind: NativeKind): { offered: readonly NativeCardModel[
   const status = nativeStoreOf(kind)((s) => s.status);
   return useMemo(() => {
     // The main process lists the models this system is offered: one it leaves out has no card here.
-    const offered = status.supported ? NATIVE_OF[kind].filter((m) => status.models[m.id] !== undefined) : [];
+    // One no longer offered (`retired`) keeps its card only where it is already on this computer: to be used, or removed.
+    const offered = status.supported ? NATIVE_OF[kind].filter((m) => status.models[m.id] !== undefined && (!m.retired || status.models[m.id].state !== 'absent')) : [];
     const fetching = offered.filter((m) => status.models[m.id]?.state === 'downloading' || status.models[m.id]?.state === 'verifying').map((m) => m.id);
     return { offered, ready: offered.filter((m) => nativeDownloaded(status, m.id)), fetching };
   }, [status, kind]);

@@ -163,6 +163,138 @@
     }
   }
 
+  // The model field of an API: what is typed, a button that opens the service's own list, and the list under them.
+  .kt-pick__row {
+    display: flex;
+    gap: vars.$space-2;
+    min-width: 0;
+
+    .kt-input {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  .kt-pick__open {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 34px;
+    padding: 0;
+    color: vars.$text-secondary;
+    background: vars.$bg-control;
+    border: 1px solid vars.$border-default;
+    border-radius: vars.$radius-sm;
+    cursor: pointer;
+    transition: border-color vars.$transition-fast, color vars.$transition-fast;
+
+    &:hover:not(:disabled),
+    &[aria-expanded='true'] {
+      color: vars.$text-primary;
+      border-color: vars.$color-primary;
+    }
+
+    &:focus-visible {
+      outline: vars.$focus-ring-width solid vars.$focus-ring-color;
+      outline-offset: -2px;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: vars.$disabled-opacity;
+    }
+  }
+
+  .kt-pick__menu {
+    display: flex;
+    flex-direction: column;
+    background: vars.$bg-control;
+    border: 1px solid vars.$border-default;
+    border-radius: vars.$radius-sm;
+    overflow: hidden;
+  }
+
+  // The search of a long list: one line above it, the caret already there.
+  .kt-pick__search {
+    display: flex;
+    align-items: center;
+    gap: vars.$space-2;
+    padding: 0 10px;
+    color: vars.$text-muted;
+    border-bottom: 1px solid vars.$border-subtle;
+
+    input {
+      flex: 1;
+      min-width: 0;
+      padding: 7px 0;
+      font: inherit;
+      font-size: vars.$font-body;
+      color: vars.$text-primary;
+      background: none;
+      border: 0;
+      outline: none;
+
+      &::placeholder {
+        color: vars.$text-disabled;
+      }
+    }
+
+    &:focus-within {
+      color: vars.$color-primary;
+    }
+  }
+
+  .kt-pick__list {
+    display: flex;
+    flex-direction: column;
+    max-height: 208px;
+    overflow-y: auto;
+  }
+
+  .kt-pick__option {
+    display: flex;
+    align-items: center;
+    gap: vars.$space-2;
+    flex: none;
+    padding: 6px 10px;
+    font: inherit;
+    font-size: vars.$font-body;
+    text-align: left;
+    color: vars.$text-primary;
+    background: none;
+    border: 0;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background: vars.$bg-hover;
+      outline: none;
+    }
+
+    &.is-chosen {
+      color: vars.$color-primary;
+    }
+  }
+
+  .kt-pick__name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .kt-pick__mark {
+    display: inline-flex;
+    flex: none;
+    color: vars.$color-warning;
+  }
+
+  .kt-pick__why {
+    margin: 0;
+    padding: 6px 10px;
+  }
+
   .kt-prompt {
     min-height: 84px;
     margin-top: vars.$space-2;

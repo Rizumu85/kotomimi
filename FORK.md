@@ -17,7 +17,7 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 | 共享给其他设备 | 把这台电脑的模型共享给局域网里的另一台 Kotomimi；这台电脑上装了 LocalAI 时，它的模型也从同一个开关、同一个地址共享出去 | `electron/lan-server.js`、`electron/lan-upstream.js`、`src/lib/lan/` |
 | 自动找到另一台设备 | 选「用另一台设备」时，应用自己搜索局域网，把找到的 Kotomimi 和模型服务器列出来，点一下就连上，不用知道地址 | `electron/lan-discover.js`、`src/components/LanSharing/ServerFinder.tsx` |
 | 这台电脑上的 LocalAI | 电脑上装了 LocalAI 时，由应用启动和停止它，显示状态和模型 | `electron/local-server.js`、`src/components/LanSharing/LocalServerCard.tsx` |
-| 原生识别引擎 | 应用自己下载一个运行库（audio.cpp）和模型，在本机用显卡边听边出字；不用装任何别的东西。两个模型：Qwen3-ASR 1.7B（Windows 和 Apple 芯片的 Mac，实测更准、出字更快，30 种语言，显卡忙不过来时也不会越落越远）和 Confucius4 R2T2（只在 Windows） | `electron/native-engine.js`、`src/providers/openai/nativeAsr.ts`、`localaiNative.ts`、`NativeEngineCard.tsx` |
+| 原生识别引擎 | 应用自己下载一个运行库（audio.cpp）和模型，在本机用显卡边听边出字；不用装任何别的东西。三个模型：Qwen3-ASR 1.7B（Windows 和 Apple 芯片的 Mac，实测更准、出字更快，30 种语言，显卡忙不过来时也不会越落越远）、Confucius4 R2T2（只在 Windows）和 Qwen3-ASR 0.6B（小模型，约占 2 GB 显存，给同一台电脑还要跑游戏的人） | `electron/native-engine.js`、`src/providers/openai/nativeAsr.ts`、`localaiNative.ts`、`NativeEngineCard.tsx` |
 | Mac 自带的语音识别 | Mac 上（macOS 26 及以上）排第一的原生识别引擎是系统自己的语音识别：应用带一个小程序去调用它，边听边出字，不需要 LocalAI。系统不支持的语言（比如俄语）由上一行的 Qwen3-ASR 来听，两个引擎对页面来说是一个 | `native/apple-speech/SpeechHelper.swift`、`electron/apple-speech.js`、`electron/native-engines.js` |
 | 原生翻译引擎 | 同样的做法用在翻译上：应用自己下载 llama.cpp 的服务器和翻译模型的 GGUF 文件（Index-Translate 2B、Hunyuan MT 2、Hunyuan MT 1.5），在本机运行。Windows 和 Apple 芯片的 Mac 都提供 | `electron/native-engine.js`（`LLAMA`、`TRANSLATORS`）、`src/providers/openai/nativeTranslators.ts` |
 | 原生语法反馈引擎 | 语法反馈也可以由应用自己下载的 llama.cpp 来跑：一个小的对话模型（Gemma 4 E2B），几乎即时给出反馈，不需要 API | `electron/native-engine.js`（`COACHES`）、`src/providers/openai/nativeCoaches.ts` |
@@ -141,7 +141,25 @@ Qwen3-ASR 不是流式模型：给它一段完整的声音，它写出整段文�
 - **实测**（同样 7 段、在应用里）：Windows（RTX 5070 Ti）错字率 16.4%，文字平均落后约 1 秒；M2 的 Mac 16.6%，落后约 2.3 秒。对照同一套打分：R2T2 18.2%、落后 2.5 秒；Mac 自带识别 12.5%、落后 1.7 秒。引擎进程约占 3 GB 显存（Mac 上约 3 GB 内存）。
 - **语言**：30 种（中、英、粤、日、韩、俄、西、法、德、意、葡、阿、泰、越、印尼、土、印地、马来、荷、瑞典、丹麦、芬兰、波兰、捷克、菲律宾、波斯、希腊、匈牙利、马其顿、罗马尼亚），语言用代码告诉它（`languageAs: 'code'`）。不给语言时它会自己判断，这一点还没有接进界面。
 - **按语言记住选择**（`nativePicked`、`chooseNative`）：原生识别模型是一种语言一行来选的。某种语言选过模型，就一直用那个；没选过的语言沿用当前在用的模型（它能听的话）；它听不了，那一行就显示"未选择模型"并提示去选，不会自动换成别的——换语言本来就要先停下会话，一步一步来。同一次会话里两种语言选了下载引擎的两个不同模型时会提示选成同一个（它一次只能跑一个）；Mac 上系统自带的识别和下载的引擎可以同时用（主进程的状态里有 `up`：现在能用的所有模型）。
-- **推荐顺序**（`NATIVE_MODELS` 的顺序，模型库里第一个能听这种语言的带"推荐"）：Mac 自带识别 → Qwen3-ASR 1.7B → R2T2。R2T2 的长处是写出来的字不再改动；短处是吃显卡、语言少、Mac 上跑不动。
+- **推荐顺序**（`NATIVE_MODELS` 的顺序，模型库里第一个能听这种语言的带"推荐"）：Mac 自带识别 → Qwen3-ASR 1.7B → R2T2 → Qwen3-ASR 0.6B。R2T2 的长处是写出来的字不再改动；短处是吃显卡、语言少、Mac 上跑不动。0.6B 排最后：它不是最准的，是最省的。
+
+### 小模型：Qwen3-ASR 0.6B
+
+给只有一台电脑、识别的同时还要跑 VRChat 的人：前两个模型都要占约 3 GB 显存，游戏已经把显存用得差不多时放不下。
+
+- **模型**：[Qwen3-ASR-0.6B](https://huggingface.co/Qwen/Qwen3-ASR-0.6B)（阿里通义，Apache-2.0），[audio.cpp 的 GGUF 仓库](https://huggingface.co/audio-cpp/audio.cpp-gguf)里的 q8 文件（约 1.1 GB，地址带提交号）。和 1.7B 是同一个家族，走同一条路（`openWindow`），语言、断句、防复读都一样，只是目录里多一项。
+- **怎么选出来的**（2026-10-06，RTX 5070 Ti，同样 7 段日语录音）。候选是它和 [Nemotron 3.5 ASR Streaming 0.6B](https://huggingface.co/nvidia/nemotron-3.5-asr-streaming-0.6b)（NVIDIA，约 0.9 GB）：
+
+  | 模型 | 整段直接识别 | 按应用切出来的句子识别 | 10 秒的话要读 | 占显存 |
+  |---|---|---|---|---|
+  | Qwen3-ASR 1.7B q8 | 16.0% | 16.4–17.2% | 0.29 秒 | 约 3.0 GB |
+  | Qwen3-ASR 0.6B q8 | 21.4% | 22.0% | 0.22 秒 | 约 1.8 GB |
+  | Nemotron 3.5 ASR 0.6B q8 | 20.8% | 26.8% | 0.15 秒 | 约 1.0 GB |
+
+  整段识别时两个小模型一样准，Nemotron 还省一半显存。但应用给模型的不是整段，而是 VAD 切出来的一句一句：这样 Nemotron 掉了 6 个点——短句经常整句不出字（约 60 句里 12 句是空的），一成的内容没了；句子前后补静音也没用。Qwen3-ASR 0.6B 几乎不受影响。所以接的是 Qwen3-ASR 0.6B。"按应用切出来的句子"那一列，是把应用实际发给引擎的每一段声音（`KOTOMIMI_NATIVE_DUMP`）原样再交给模型读一遍；Nemotron 这样测是 26.7%，在应用里跑是 26.8%，两种测法对得上。0.6B 在应用里抽测了 4 段，和这一列一致，文字平均落后约 1.3 秒。
+- **省多少**：显存约 1.8 GB 对 3.0 GB（省三分之一多），每次识别快四分之一。省得不算多，是因为它的声音编码器和 1.7B 差不多大。
+- **不用来自动识别语言**：让它自己判断时，韩、俄、英、日、中都对，但一段西班牙语被写成了半句葡萄牙语。所以它没有 `detects`，"自动识别对方说的语言"仍然只用 1.7B 或 API。
+- **旁证**：微软 2026 年 4 月的论文 [Pushing the Limits of On-Device Streaming ASR](https://arxiv.org/abs/2604.14493) 比了 Whisper、Parakeet、Canary、Qwen3-ASR 等五十多种配置，结论是 Qwen3-ASR 1.7B 整段识别最准，而 Nemotron（英语版）最适合在 CPU 上连续流式识别。和这里的结果不矛盾：Nemotron 的长处是不间断的流，而应用是按句送的。
 
 ## Mac 自带的语音识别
 
@@ -195,7 +213,18 @@ VRChat 里对面的人说什么语言是不一定的。"语音识别"卡片里�
 - 请求走的就是"API 模型"那条聊天接口的路，只是地址是本机引擎的端口（每次启动随机选一个空闲端口，只监听 127.0.0.1）。所以翻译会像 API 模型一样边写边显示。
 - 就绪检查和识别引擎一样：选了它、已下载但还没起来时自动启动，起来之前"开始"旁边有说明；不用了就停掉。
 - 开着共享时，它的模型也共享给其他设备（见上一节）。
+- **Hunyuan MT 1.5 不再提供下载**（`retired`）：它和 Hunyuan MT 2 支持的语言一样、大小一样，实测严重错误一样多，还会自己加词，没有哪一点比后者好。已经下载过的电脑上它的卡片还在，可以继续用，也可以删掉。
 - **Index 团队的其他模型**（2026-10-05 看过）：Index-Translate 9B（Q4_K_M 5.8 GB）同样 30 句实测，译文更自然，但严重错误和 2B 一样多（各 3–4 句，错的地方不同），慢一倍、多占约 4 GB 显存，没有接。官方的带约束写法（`【源文】…【约束要求】`，加"口语闲聊"或前两句上下文）也试了，错误没有减少。不写源语言时译文几乎一样。Index-Echo（语音直接出译文）官方只支持中文作源语言；Homura（控制音节数）和 Nailong（长文档）用不上。
+
+## API 模型栏的模型列表
+
+"API 模型"的模型栏原来只能手打（旁边有浏览器自带的输入提示，但已经填了名字时什么都不显示，等于没有）。现在栏的右边有一个按钮：点一下，向这个服务要它自己的模型列表（`GET {地址}/models`，密钥放在请求头里；`apiModelList.ts`），在栏的下面展开，点一个就填进去。
+
+- 最适合这一步的模型排第一并带一个星标（`preferredModel`，和不填时自动选的是同一个）；其余按服务给的顺序。
+- 模型多于 8 个时（OpenRouter 有四百多个），列表上方有一个搜索框，展开时光标已经在里面。搜索是模糊的（`searchModels`）：可以打几个词、顺序随意，漏掉连字符或一两个字母也能找到，词开头匹配的排前面；回车选第一个。模型栏本身不参与筛选，栏里打什么就用什么。
+- 搜索框不干涉输入法：用中文输入法打拉丁字母时，没上屏的拼音就已经在筛选（输入法在音节之间加的撇号不算字母）；输入法自己要用的按键（比如把字母上屏的回车）不会被当成"选第一个"。
+- 列表拿不到时说明原因（没填地址、没填密钥、密钥被拒绝、连不上、这个服务不提供列表），并且仍然可以手打。上一次"检查"列出过的模型在等待时先显示。
+- 语音识别、翻译、语法反馈三处的 API 都是同一个组件（`ApiModelPicker.tsx`）。
 
 ## 原生语法反馈引擎
 

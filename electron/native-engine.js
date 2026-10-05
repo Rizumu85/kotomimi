@@ -74,6 +74,9 @@ const ENGINE = {
   },
 };
 
+/** What Qwen3-ASR hears, either size, by the codes it is told a language with. */
+const QWEN_LANGUAGES = ['zh', 'en', 'yue', 'ar', 'de', 'fr', 'es', 'pt', 'id', 'it', 'ko', 'ru', 'th', 'vi', 'ja', 'tr', 'hi', 'ms', 'nl', 'sv', 'da', 'fi', 'pl', 'cs', 'fil', 'fa', 'el', 'hu', 'mk', 'ro'];
+
 /**
  * The models, by the id the page asks with. `options` are the runtime's
  * session options; R2T2's are the ones measured (FORK.md, "原生引擎").
@@ -102,7 +105,19 @@ const MODELS = {
     mode: 'offline',
     // It is told the language by its code, and these are the ones it hears.
     languageAs: 'code',
-    languages: ['zh', 'en', 'yue', 'ar', 'de', 'fr', 'es', 'pt', 'id', 'it', 'ko', 'ru', 'th', 'vi', 'ja', 'tr', 'hi', 'ms', 'nl', 'sv', 'da', 'fi', 'pl', 'cs', 'fil', 'fa', 'el', 'hu', 'mk', 'ro'],
+    languages: QWEN_LANGUAGES,
+  },
+  // The small one, for a computer that runs a game beside it: about 2 GB of video memory where the 1.7B holds 3, a
+  // reading a quarter shorter, and more characters wrong (FORK.md, "小模型"). The same family, read the same way.
+  'qwen3-asr-0.6b-q8': {
+    file: 'qwen3-asr-0.6b-q8_0.gguf',
+    url: 'https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/e36610ac69b5262e914a52635324050bee8f1ad2/Qwen3-ASR-0.6B-GGUF/qwen3-asr-0.6b-q8_0.gguf',
+    bytes: 1151272416,
+    sha256: '6c44ec2fb4cee513892d7863c1fcc3ea6b699ffa4d899b0ef4ab19956d9544f7',
+    family: 'qwen3_asr',
+    mode: 'offline',
+    languageAs: 'code',
+    languages: QWEN_LANGUAGES,
   },
 };
 

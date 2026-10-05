@@ -75,6 +75,10 @@ export const NATIVE_MODELS: readonly NativeModel[] = [
   // detect too, but writes the first words of a stretch in the wrong language: it is not offered for that.)
   { id: 'qwen3-asr-1.7b-q8', name: 'Qwen3-ASR 1.7B GGUF', bytes: 2473010048, languages: QWEN_LANGUAGES, limits: WINDOW_LIMITS, detects: true },
   { id: 'r2t2-q8', name: 'Confucius4 R2T2 GGUF', bytes: 2477512064, languages: ['ja', 'zh', 'en', 'ko', 'fr', 'de', 'it', 'pt', 'ru', 'es', 'ar'] },
+  // The small one, last: for a computer that runs a game beside it. Two thirds of the video memory of the two above,
+  // and about 22 % of the characters wrong where the 1.7B has 16 (measured 2026-10-06 on the stretches the app
+  // cuts). Left to detect the language it mixed Spanish with Portuguese: it is not offered for that.
+  { id: 'qwen3-asr-0.6b-q8', name: 'Qwen3-ASR 0.6B GGUF', bytes: 1151272416, languages: QWEN_LANGUAGES, limits: WINDOW_LIMITS },
 ];
 
 /** The one every system the engine is published for can run. */

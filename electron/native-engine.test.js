@@ -109,7 +109,7 @@ describe('what is fetched', () => {
     expect(MODELS['r2t2-q8'].platforms).toEqual(['win32-x64']);
     // A Mac is offered the model that is for every system, and not the one that names Windows alone.
     const mac = createNativeEngine({ dir, platform: 'darwin', arch: 'arm64', fetch: nothing });
-    expect(Object.keys(mac.status().models)).toEqual(['qwen3-asr-1.7b-q8']);
+    expect(Object.keys(mac.status().models)).toEqual(['qwen3-asr-1.7b-q8', 'qwen3-asr-0.6b-q8']);
     const here = createNativeEngine({ dir, platform: 'win32', arch: 'x64', fetch: nothing });
     expect(here.status()).toMatchObject({ supported: true, models: { 'r2t2-q8': { state: 'absent' }, 'qwen3-asr-1.7b-q8': { state: 'absent' } } });
     // A catalog whose every model names another system leaves this one with nothing to run.
@@ -406,6 +406,17 @@ describe('a live recognition', () => {
     world.windows[1].onEvent({ type: 'done', text: '你好' });
     expect(world.streamEvents).toEqual([{ id, type: 'partial', text: '你' }, { id, type: 'done', text: '你好' }]);
     expect(engine.writeStream(id, new Int16Array([2]))).toBe(false);
+  });
+
+  it('has a small model of the same family, read and told the language the same way', () => {
+    const { file, url, bytes, sha256, ...rest } = MODELS['qwen3-asr-0.6b-q8'];
+    const { file: f, url: u, bytes: b, sha256: h, ...big } = MODELS['qwen3-asr-1.7b-q8'];
+    expect(rest).toEqual(big);
+    expect(bytes).toBeLessThan(b / 2);
+    expect(url).toMatch(/\/resolve\/[0-9a-f]{40}\/Qwen3-ASR-0\.6B-GGUF\/qwen3-asr-0\.6b-q8_0\.gguf$/);
+    expect(file).toBe('qwen3-asr-0.6b-q8_0.gguf');
+    expect(sha256).toMatch(/^[0-9a-f]{64}$/);
+    expect([f, u, h].every(Boolean)).toBe(true);
   });
 
   it('names the languages the model was taught by name', () => {

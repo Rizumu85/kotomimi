@@ -81,7 +81,17 @@ const PROVIDER = {
   apiServiceArk: ['Doubao (Volcengine Ark)', '豆包（火山方舟）', '豆包（火山方舟）'],
   apiServiceSiliconFlow: ['SiliconFlow', '硅基流动 SiliconFlow', '矽基流動 SiliconFlow'],
   apiServiceOllama: ['Ollama on this computer', '这台电脑的 Ollama', '這台電腦的 Ollama'],
-  apiServiceModel: ['Pick from the list, or type a model\'s name', '从列表里选，或输入模型名称', '從清單裡選，或輸入模型名稱'],
+  apiServiceModel: ["Choose from the list on the right, or type a name", "点右边从列表里选，或直接输入名称", "點右邊從清單裡選，或直接輸入名稱"],
+  modelList: ["Choose from the models this service lists", "从这个服务的模型列表里选", "從這個服務的模型清單裡選"],
+  modelSuggested: ["Suits this step", "适合这一步", "適合這一步"],
+  modelListAsking: ["Getting the list…", "正在获取模型列表…", "正在取得模型清單…"],
+  modelListNoAddress: ["Fill in the address first.", "请先填写地址。", "請先填寫位址。"],
+  modelListKeyMissing: ["Fill in the API key first.", "请先填写 API 密钥。", "請先填寫 API 金鑰。"],
+  modelListKeyRefused: ["The service refused this key.", "这个服务不接受这个密钥。", "這個服務不接受這個金鑰。"],
+  modelListUnreachable: ["The service could not be reached.", "连不上这个服务。", "連不上這個服務。"],
+  modelListNone: ["This service lists no models. Type the name instead.", "这个服务没有提供模型列表，请直接输入名称。", "這個服務沒有提供模型清單，請直接輸入名稱。"],
+  modelSearch: ["Search models", "搜索模型", "搜尋模型"],
+  modelListNoMatch: ["No model found. Try fewer letters.", "没有找到，试试少打几个字。", "沒有找到，試試少打幾個字。"],
   apiServiceArkModel: ['A model\'s name, or your endpoint id (ep-…)', '模型名称，或你的接入点 ID（ep-…）', '模型名稱，或你的接入點 ID（ep-…）'],
   apiKeyReused: ['Filled in with the key saved under "{{name}}".', '已填入你在「{{name}}」里保存的密钥。', '已填入你在「{{name}}」裡儲存的金鑰。'],
   asrKey: ['API key of the speech recognition API', '语音识别 API 的密钥', '語音辨識 API 的金鑰'],
@@ -364,6 +374,11 @@ const PROVIDER = {
     "日语闲聊实测错字约 16%。边说边出字（慢约 1 秒），句尾几个字要等这句说完才定稿。显卡忙不过来时只是刷新慢一些。约占 3 GB 显存，支持 30 种语言。",
     "日語閒聊實測錯字約 16%。邊說邊出字（慢約 1 秒），句尾幾個字要等這句說完才定稿。顯示卡忙不過來時只是重新整理慢一些。約佔 3 GB 顯示記憶體，支援 30 種語言。",
   ],
+  noteNativeQwenSmall: [
+    "The light one, for a computer that runs a game at the same time: about 2 GB of video memory instead of 3. Japanese talk, measured: about 22% of the characters wrong, more than the 1.7B. Otherwise it works the same way, with the same thirty languages.",
+    "省资源的小模型，适合同一台电脑还开着游戏时用：约占 2 GB 显存（1.7B 约 3 GB）。日语闲聊实测错字约 22%，比 1.7B 多一些。其他和 1.7B 一样，同样支持 30 种语言。",
+    "省資源的小模型，適合同一台電腦還開著遊戲時用：約佔 2 GB 顯示記憶體（1.7B 約 3 GB）。日語閒聊實測錯字約 22%，比 1.7B 多一些。其他和 1.7B 一樣，同樣支援 30 種語言。",
+  ],
   // The native translation engine (llama.cpp's server) and what was found of its models.
   // The native feedback engine (llama.cpp's server with a small chat model) and what was found of its model.
   nativeCoachReady: ['The feedback engine is ready.', '语法反馈引擎已就绪。', '語法回饋引擎已就緒。'],
@@ -423,9 +438,9 @@ const PROVIDER = {
     '這台電腦的翻譯引擎沒能啟動。請在「翻譯」卡片裡點「重試」，或者換一個模型。',
   ],
   noteIndexTranslate: [
-    "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best of the three; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
-    "日语译中文实测：30 句里严重错误约 3 句，是这三个里最好的；一句约 0.1 秒。约占 2 GB 显存，支持一百多种语言。",
-    "日語譯中文實測：30 句裡嚴重錯誤約 3 句，是這三個裡最好的；一句約 0.1 秒。約佔 2 GB 顯示記憶體，支援一百多種語言。",
+    "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
+    "日语译中文实测：30 句里严重错误约 3 句，是测过的里面最好的；一句约 0.1 秒。约占 2 GB 显存，支持一百多种语言。",
+    "日語譯中文實測：30 句裡嚴重錯誤約 3 句，是測過的裡面最好的；一句約 0.1 秒。約佔 2 GB 顯示記憶體，支援一百多種語言。",
   ],
   noteHyMt2: [
     "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences; about 0.1 s a sentence.",

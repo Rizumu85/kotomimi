@@ -19,16 +19,24 @@ export interface NativeTranslator {
   prompt: 'index' | 'hunyuan';
   /** What it translates between, in the app's base codes; `'any'` for a model of well over a hundred languages. */
   languages: readonly string[] | 'any';
+  /** No longer offered for download: shown only where it is already on the computer. */
+  retired?: boolean;
 }
 
 /** Hunyuan MT's languages, as its card lists them. */
 const HUNYUAN = ['zh', 'en', 'fr', 'pt', 'es', 'ja', 'tr', 'ru', 'ar', 'ko', 'th', 'it', 'de', 'vi', 'ms', 'id', 'fil', 'hi', 'pl', 'cs', 'nl', 'km', 'my', 'fa', 'gu', 'ur', 'te', 'mr', 'he', 'bn', 'ta', 'uk', 'bo', 'kk', 'mn', 'ug'] as const;
 
-/** Best first, as measured on thirty sentences of Japanese VRChat talk into Chinese (2026-10-05): serious errors in about 3, 8 and 8 of them. */
+/**
+ * Best first, as measured on thirty sentences of Japanese VRChat talk into
+ * Chinese (2026-10-05): serious errors in about 3, 8 and 8 of them. Hunyuan MT
+ * 1.5 does nothing its successor does not — the same languages, the same
+ * size, as many errors, and words of its own added besides — so it is no
+ * longer offered: a computer that has it keeps it.
+ */
 export const NATIVE_TRANSLATORS: readonly NativeTranslator[] = [
   { id: 'index-translate-2b', name: 'Index-Translate 2B', bytes: 1312164352, prompt: 'index', languages: 'any' },
   { id: 'hy-mt2-1.8b', name: 'Hunyuan MT 2 1.8B', bytes: 1133080448, prompt: 'hunyuan', languages: HUNYUAN },
-  { id: 'hy-mt1.5-1.8b', name: 'Hunyuan MT 1.5 1.8B', bytes: 1133080512, prompt: 'hunyuan', languages: HUNYUAN },
+  { id: 'hy-mt1.5-1.8b', name: 'Hunyuan MT 1.5 1.8B', bytes: 1133080512, prompt: 'hunyuan', languages: HUNYUAN, retired: true },
 ];
 
 export const NATIVE_DEFAULT_TRANSLATOR = NATIVE_TRANSLATORS[0].id;
