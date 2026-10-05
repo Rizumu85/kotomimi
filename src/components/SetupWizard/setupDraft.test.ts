@@ -1,11 +1,15 @@
-import { describe, it, expect } from 'vitest';
-import { initialDraft, draftFromRecord, canAdvance, setupReducer } from './setupDraft';
+import { afterEach, beforeEach, describe, it, expect } from 'vitest';
+import { initialDraft, draftFromRecord, canAdvance, setupReducer, setHiddenSetupSteps, shownSteps, KOTOMIMI_HIDDEN_STEPS } from './setupDraft';
 import type { SetupDraft } from './setupDraft';
 import { Provider } from '../../types/Provider';
 
 const env = { isSignedIn: false };
 const run = (d: SetupDraft, ...actions: Parameters<typeof setupReducer>[1][]) =>
   actions.reduce((acc, a) => setupReducer(acc, a), d);
+
+// Fork: the rules below are of all six steps; the fork's shorter walk has its own block at the end.
+beforeEach(() => setHiddenSetupSteps([]));
+afterEach(() => setHiddenSetupSteps(KOTOMIMI_HIDDEN_STEPS));
 
 describe('setupReducer — stepping', () => {
   it('starts on step 0 and can always leave it', () => {
@@ -149,5 +153,33 @@ describe('draftFromRecord (Help re-run)', () => {
   it('leaves a migrated record (nulls) as a blank draft', () => {
     const d = draftFromRecord({ scenario: null, providerPath: null, provider: 'openai' }, { credentialsAlreadyValid: false });
     expect(d).toEqual(initialDraft());
+  });
+});
+
+describe('the steps the fork hides: which service, and which device', () => {
+  beforeEach(() => setHiddenSetupSteps(KOTOMIMI_HIDDEN_STEPS));
+
+  it('walks four steps, forward and back, never landing on a hidden one', () => {
+    expect(shownSteps()).toEqual([0, 1, 4, 5]);
+    let d = setupReducer(setupReducer(initialDraft(), { type: 'next' }), { type: 'setScenario', scenario: 'subtitle-myself', keepProvider: false });
+    d = setupReducer(d, { type: 'next' });
+    expect(d.step).toBe(4);
+    expect(setupReducer(d, { type: 'back' }).step).toBe(1);
+    expect(setupReducer(setupReducer(d, { type: 'next' }), { type: 'next' }).step).toBe(5);
+  });
+
+  it('answers them in passing: Kotomimi, with every stage on this computer, nothing left to enter', () => {
+    const at1 = { ...initialDraft(), step: 1 as const, scenario: 'subtitle-myself' as const };
+    const d = setupReducer(at1, { type: 'next' });
+    expect(d).toMatchObject({ providerPath: 'own-key', provider: 'localai', credentialChoice: { setting: 'asrVia', value: 'device' }, credentialsValidated: true, credentialsPending: false });
+    expect(canAdvance({ ...d, step: 3 }, { isSignedIn: false })).toBe(true);
+  });
+
+  it('keeps the provider a draft already names, and writes no choice over its saved places', () => {
+    const rerun = { ...draftFromRecord({ scenario: 'subtitle-myself', providerPath: 'own-key', provider: Provider.SONIOX }, { credentialsAlreadyValid: true }), step: 1 as const };
+    const d = setupReducer(rerun, { type: 'next' });
+    expect(d).toMatchObject({ step: 4, provider: Provider.SONIOX, credentialChoice: null });
+    const kotomimi = { ...draftFromRecord({ scenario: 'subtitle-myself', providerPath: 'own-key', provider: 'localai' }, { credentialsAlreadyValid: false }), step: 1 as const };
+    expect(setupReducer(kotomimi, { type: 'next' })).toMatchObject({ step: 4, provider: 'localai', credentialChoice: null });
   });
 });

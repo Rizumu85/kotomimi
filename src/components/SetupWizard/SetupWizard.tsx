@@ -1,6 +1,7 @@
 // src/components/SetupWizard/SetupWizard.tsx
 //
-// First-run setup (spec §1). Six steps over one draft; nothing is written until
+// First-run setup (spec §1). Six steps over one draft — four of them shown in the
+// fork (`setupDraft.ts` `HIDDEN_STEPS`); nothing is written until
 // Finish. `variant="first-run"` fills the window in place of MainLayout;
 // `variant="rerun"` is an overlay Help opens over the running app.
 import React, { useEffect, useReducer, useRef, useState } from 'react';
@@ -17,7 +18,7 @@ import { getScenario } from '../../lib/setup/scenarios';
 import { buildTourCtx } from '../Tour/tourContext';
 import { useTour } from '../Tour/TourProvider';
 import { isElectron, isExtension, isLinux, isMacOS, isWindows } from '../../utils/environment';
-import { initialDraft, draftFromRecord, setupReducer, canAdvance, LAST_STEP } from './setupDraft';
+import { initialDraft, draftFromRecord, setupReducer, canAdvance, LAST_STEP, shownSteps } from './setupDraft';
 import type { SetupDraft } from './setupDraft';
 import { useApplySetup } from './useApplySetup';
 import { offersRecord } from './providerPaths';
@@ -166,7 +167,8 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ variant, onClose }) => {
       <header className="setup-wizard__header">
         <h1 id="setup-wizard-title">{t('setup.title', 'Set up Sokuji')}</h1>
         <span className="setup-wizard__progress" aria-live="polite">
-          {t('setup.stepOf', 'Step {{current}} of {{total}}', { current: draft.step + 1, total: LAST_STEP + 1 })}
+          {/* Fork: counted over the steps that are shown (`shownSteps`). */}
+          {t('setup.stepOf', 'Step {{current}} of {{total}}', { current: shownSteps().indexOf(draft.step) + 1, total: shownSteps().length })}
         </span>
         {onClose && (
           <button type="button" className="setup-wizard__close" onClick={close} aria-label={t('setup.close', 'Close')}>

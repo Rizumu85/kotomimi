@@ -10,6 +10,37 @@ import type { ProviderType } from '../../types/Provider';
 export type SetupStep = 0 | 1 | 2 | 3 | 4 | 5;
 export const LAST_STEP: SetupStep = 5;
 
+/**
+ * Fork: the two steps the wizard no longer shows — which service (2), and
+ * which device runs it (3). They asked a newcomer to choose between things
+ * they had not seen yet, a wrong pick led into another product (an account
+ * to register, or a different engine), and both answers can be changed in
+ * Settings at any time. They are answered here instead (`kotomimiStart`).
+ * The steps keep their numbers, so that everything written against them —
+ * the step components, the tour's hand-off, the analytics ids — stands, and
+ * the steps themselves stay in the code: their tests show them again
+ * (`setHiddenSetupSteps([])`), which is the only use of that switch.
+ */
+export const KOTOMIMI_HIDDEN_STEPS: readonly SetupStep[] = [2, 3];
+let hidden: readonly SetupStep[] = KOTOMIMI_HIDDEN_STEPS;
+export function setHiddenSetupSteps(steps: readonly SetupStep[]): void {
+  hidden = steps;
+}
+/** The steps the wizard walks, in order. */
+export const shownSteps = (): SetupStep[] => ([0, 1, 2, 3, 4, 5] as SetupStep[]).filter((step) => !hidden.includes(step));
+
+/**
+ * What the hidden steps asked, answered for a draft that names no provider:
+ * Kotomimi's own, with every stage on this computer — the one start that
+ * needs nothing else to exist (no other device, no key). A draft that already
+ * names a provider (a Help re-run over a saved setup) keeps it, and its
+ * places: no choice is written, so the saved ones stand.
+ */
+function kotomimiStart(d: SetupDraft): SetupDraft {
+  if (d.providerPath !== null && d.provider !== null) return d;
+  return { ...d, providerPath: 'own-key', provider: 'localai' as ProviderType, credentials: {}, credentialChoice: { setting: 'asrVia', value: 'device' }, credentialsValidated: true, credentialsPending: false };
+}
+
 export interface SetupDraft {
   step: SetupStep;
   scenario: ScenarioId | null;
@@ -148,9 +179,16 @@ export function setupReducer(d: SetupDraft, a: SetupAction): SetupDraft {
         : { ...d, credentials: {}, credentialsValidated: false, credentialsPending: true };
     case 'setLanguages':
       return { ...d, sourceLanguage: a.source, targetLanguage: a.target };
-    case 'next':
-      return d.step < LAST_STEP ? { ...d, step: (d.step + 1) as SetupStep } : d;
-    case 'back':
-      return d.step > 0 ? { ...d, step: (d.step - 1) as SetupStep } : d;
+    case 'next': {
+      const next = shownSteps().find((step) => step > d.step);
+      if (next === undefined) return d;
+      // Passing the hidden steps answers them.
+      const passed = hidden.some((step) => step > d.step && step < next);
+      return { ...(passed ? kotomimiStart(d) : d), step: next };
+    }
+    case 'back': {
+      const previous = shownSteps().reverse().find((step) => step < d.step);
+      return previous === undefined ? d : { ...d, step: previous };
+    }
   }
 }

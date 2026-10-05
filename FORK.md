@@ -22,7 +22,7 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 | 打字查词 | 会话中按 Ctrl+K，输入母语，得到对方语言的译文 | `src/components/MainPanel/panel/TypedText.tsx` |
 | 假名注音、罗马音 | 日语汉字上方显示平假名；日语、韩语、俄语下方显示拉丁字母注音 | `src/lib/annotate/`、`src/components/Annotated/` |
 | 字体 | 界面、拉丁字母、罗马音、各语言的正文和注音，分别选字体 | `src/lib/fonts/`、`src/components/Fonts/` |
-| 设置向导和引导 | 向导里有 Kotomimi 自己的卡片和"由哪台设备来运行"一步，三个起点：局域网里的另一台设备、这台电脑、这台电脑并共享给其他设备（第三个只在桌面版有，等于"这台电脑"再加上完成时打开共享；向导的选择同时写入三个环节的位置）；引导会介绍上面这些功能 | `src/components/SetupWizard/steps/StepKotomimi.tsx`、`src/components/Tour/steps.ts` |
+| 设置向导和引导 | 向导只有四步：界面语言、用途、语言、完成。上游的"选服务提供商"和本分支加过的"由哪台设备来运行"两步不再显示（`setupDraft.ts` 的 `KOTOMIMI_HIDDEN_STEPS`）：新用户还没见过这些东西就要做选择，选错会走进另一个产品（要注册账号，或者换了一套引擎），而这两项在设置里随时能改。经过这两步时直接替用户答好：用 Kotomimi 自己的提供商，三个环节都放在这台电脑。重新运行向导时，已保存的提供商和各环节的去处保持不变。两步的组件和它们的测试还留在代码里（测试用 `setHiddenSetupSteps([])` 把它们显示回来）。引导会介绍上面这些功能 | `src/components/SetupWizard/steps/StepKotomimi.tsx`、`src/components/Tour/steps.ts` |
 
 注音在本机用词典和规则算出来，不调用任何模型，也不联网。
 

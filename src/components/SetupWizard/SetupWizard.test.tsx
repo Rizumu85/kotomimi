@@ -84,6 +84,7 @@ const startTourSpy = vi.fn();
 vi.mock('../Tour/TourProvider', () => ({ useTour: () => ({ start: startTourSpy }) }));
 
 import SetupWizard from './SetupWizard';
+import { KOTOMIMI_HIDDEN_STEPS, setHiddenSetupSteps } from './setupDraft';
 import { LOCAL_INFERENCE_DEFAULTS, localInferenceLanguages } from '../../providers/localInference/settings';
 import { languageLabel } from '../../lib/language/label';
 import { matchLanguage } from './languageDefaults';
@@ -105,6 +106,11 @@ afterEach(() => {
 
 const next = () => fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 const back = () => fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+
+// Fork: these walk every step, the two the fork hides among them — the steps are still in the code, and this is what
+// keeps them working. The fork's own shorter walk is in `SetupWizard.kotomimi.test.tsx`.
+beforeEach(() => setHiddenSetupSteps([]));
+afterEach(() => setHiddenSetupSteps(KOTOMIMI_HIDDEN_STEPS));
 
 describe('SetupWizard', () => {
   it('starts on the interface-language step with Next enabled and no Back', () => {
