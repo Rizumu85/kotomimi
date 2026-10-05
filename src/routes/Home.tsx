@@ -20,6 +20,7 @@ import { loadSessionStores } from '../app/loadStores';
 import { startedInBackground } from '../components/Autostart/AutostartSection';
 import { primeNativeOnce } from '../providers/openai/localai';
 import { watchWindowShape } from '../lib/windowShape';
+import { watchDevices } from '../lib/audio/deviceWatch';
 
 export function Home() {
   const loadSettings = useLoadSettings();
@@ -60,8 +61,33 @@ export function Home() {
     void startedInBackground().then((hidden) => { if (hidden) primeNativeOnce(); });
     // Fork: the languages pinned to the top of the language menus.
     void useLanguagePinStore.getState().hydrate();
+    // Follow the OS's devices from here on (spec 2026-10-04): plugging,
+    // unplugging, a Bluetooth reconnect, a repaired virtual device.
+    const unwatchDevices = watchDevices({
+      // A `devicechange` also tries the devices marked unusable again; the poll does not.
+      sync: (reason) => useAudioStore.getState().syncDevices({ retryUnusable: reason === 'change' }),
+      // While waiting for any microphone or while off the user's own: keep
+      // looking. Linux announces a USB device but not a Bluetooth or PipeWire
+      // one coming back, so without this it would never switch back or leave
+      // waiting. Each beat is only a device listing, so polling can run for as
+      // long as needed. A selection still on a device marked unusable counts
+      // too: after a failed open, a sync whose listing failed or came back
+      // incomplete leaves it there, and without another devicechange only the
+      // poll would ever move it on.
+      shouldPoll: () => {
+        const audio = useAudioStore.getState();
+        const selected = audio.selectedInputDevice;
+        return selected === null
+          || (audio.savedInputDeviceId !== null && selected.deviceId !== audio.savedInputDeviceId)
+          || audio.unusableInputIds.includes(selected.deviceId);
+      },
+    });
     // Fork: on Windows the page rounds the window's corners itself, and squares them while it fills the screen.
-    return watchWindowShape();
+    const unwatchShape = watchWindowShape();
+    return () => {
+      unwatchDevices();
+      unwatchShape();
+    };
   }, []); // Empty dependency array - only run once on mount
 
   return (

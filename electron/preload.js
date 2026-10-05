@@ -92,6 +92,8 @@ const validReceiveChannels = [
   'native-translator:status',
   // Fork: the native feedback engine's state as it changes
   'native-coach:status',
+  // LAN caption sharing status (main → renderer)
+  'caption-share:status',
 ];
 
 // Expose protected methods that allow the renderer process to use

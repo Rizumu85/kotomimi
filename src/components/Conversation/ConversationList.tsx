@@ -1,20 +1,17 @@
-import { memo, useCallback, useLayoutEffect, useRef, type CSSProperties, type ReactNode } from 'react';
+import { memo, useCallback, useRef, type CSSProperties, type ReactNode } from 'react';
 import { AnnotatedLines, useAnnotation } from '../Annotated/AnnotatedText';
 import { fontLanguage } from '../../lib/fonts/fontCss';
 import { useTranslation } from 'react-i18next';
-import { AlertCircle, Play, User, Users } from 'lucide-react';
+import { ArrowDown, Play, User, Users } from 'lucide-react';
 import type { LegName, SegmentId } from '../../lib/conversation/types';
 import type { DisplayItem, NoticeEntry } from '../../lib/view/filter';
-import { noticeText } from '../../lib/view/noticeText';
+import { SystemRow, type NoticeAction } from './SystemRow';
+import { useFollowLatest } from './useFollowLatest';
 import '../MainPanel/MainPanel.scss';
 import '../MainPanel/ConversationRow.scss';
 import '../../styles/karaoke.scss';
 
-/** What a notice's bubble offers below its words (plan 1e-3b-1 ruling 13). */
-export interface NoticeAction {
-  label: string;
-  run(): void;
-}
+export type { NoticeAction } from './SystemRow';
 
 export interface ConversationListProps {
   items: readonly DisplayItem[];
@@ -49,11 +46,9 @@ export function ConversationList({
   items, lit, replaying, replayLegs, canReplay, onReplay, replayBlocked, noticeAction, compact, fontSize, empty,
 }: ConversationListProps) {
   const display = useRef<HTMLDivElement>(null);
-  // Follow the newest line, as today's panel does; layout has run by the time this fires.
-  useLayoutEffect(() => {
-    const el = display.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [items]);
+  // The newest line stays in view while the reader is at the bottom; reading back
+  // stops that, and the row below the list brings them back.
+  const { docked, resume } = useFollowLatest(display, items, items.length === 0);
 
   // One stable callback identity for RowBubble's memo, whatever identity `onReplay` holds this render.
   const onReplayRef = useRef(onReplay);
@@ -70,37 +65,52 @@ export function ConversationList({
   };
 
   return (
-    <div className="conversation-display" ref={display} style={{ '--conversation-font-size': `${fontSize}px` } as CSSProperties}>
-      {items.length === 0 ? (
-        <div className="empty-state">{empty}</div>
-      ) : (
-        <div className="conversation-list">
-          {items.map((item) => {
-            if (item.kind === 'notice') {
-              return <NoticeBubble key={item.notice.id} notice={item.notice} action={actionFor(item.notice)} />;
-            }
-            // The slot is decided here, session-wide, so a row without one never
-            // re-renders for a replay-state change (plan 1e-3b-1 ruling 14).
-            const slot = !compact && item.row.side === 'translation' && item.endsSegment && replayLegs.has(item.leg);
-            const id = item.row.segmentId;
-            return (
-              <RowBubble
-                key={item.row.key}
-                item={item}
-                upTo={lit.get(id)}
-                replaySlot={slot}
-                canReplay={slot && canReplay(id)}
-                replayingThis={slot && replaying === id}
-                replayingOther={slot && replaying !== null && replaying !== id}
-                blocked={slot ? replayBlocked ?? null : null}
-                onReplay={replay}
-                compact={compact}
-              />
-            );
-          })}
-        </div>
-      )}
-    </div>
+    <>
+      <div className="conversation-display" ref={display} style={{ '--conversation-font-size': `${fontSize}px` } as CSSProperties}>
+        {items.length === 0 ? (
+          <div className="empty-state">{empty}</div>
+        ) : (
+          <div className="conversation-list">
+            {items.map((item) => {
+              if (item.kind === 'notice') {
+                return <SystemRow key={item.notice.id} notice={item.notice} action={actionFor(item.notice)} />;
+              }
+              // The slot is decided here, session-wide, so a row without one never
+              // re-renders for a replay-state change (plan 1e-3b-1 ruling 14).
+              const slot = !compact && item.row.side === 'translation' && item.endsSegment && replayLegs.has(item.leg);
+              const id = item.row.segmentId;
+              return (
+                <RowBubble
+                  key={item.row.key}
+                  item={item}
+                  upTo={lit.get(id)}
+                  replaySlot={slot}
+                  canReplay={slot && canReplay(id)}
+                  replayingThis={slot && replaying === id}
+                  replayingOther={slot && replaying !== null && replaying !== id}
+                  blocked={slot ? replayBlocked ?? null : null}
+                  onReplay={replay}
+                  compact={compact}
+                />
+              );
+            })}
+          </div>
+        )}
+      </div>
+      {/* Docked below the list, not floating over it (spec 2026-10-05 goal 4): it takes its
+          own height from the bottom, so the line being read does not move. */}
+      {docked && <FollowDock onClick={resume} />}
+    </>
+  );
+}
+
+function FollowDock({ onClick }: { onClick(): void }) {
+  const { t } = useTranslation();
+  return (
+    <button type="button" className="follow-dock" onClick={onClick}>
+      <ArrowDown size={14} aria-hidden="true" />
+      <span className="follow-dock__label">{t('mainPanel.backToLatest', 'Back to latest')}</span>
+    </button>
   );
 }
 
@@ -190,28 +200,6 @@ const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, r
           </button>
         )}
       </div>
-    </div>
-  );
-});
-
-const NoticeBubble = memo(function NoticeBubble({ notice, action }: { notice: NoticeEntry; action: NoticeAction | null }) {
-  const { t } = useTranslation();
-  const warning = notice.severity === 'warning';
-  // A code-less notice with an empty message has no words at all: today's
-  // bubble falls back to the same "Unknown error" rather than an empty line.
-  const words = noticeText(t, notice) || t('mainPanel.unknownError', 'Unknown error');
-  return (
-    <div className={`message-bubble error${warning ? ' warning' : ''}`}>
-      <div className="message-header">
-        <AlertCircle size={12} />
-        {warning ? t('mainPanel.warning', 'Warning') : t('mainPanel.error', 'Error')}
-      </div>
-      <div className="message-content error-content">{words}</div>
-      {action && (
-        <button type="button" className="message-action" onClick={action.run}>
-          {action.label}
-        </button>
-      )}
     </div>
   );
 });

@@ -45,6 +45,10 @@ export const NOTICE_WORDS: Readonly<Record<string, string>> = {
   app_capture_monitor_missing: "The app capture didn't start, so all system audio is being translated instead.",
   silent_no_permission: 'No audio has come through from the selected source yet. If it is playing and nothing is translated, allow Sokuji under System Settings > Privacy & Security > System Audio Recording Only (macOS), then start the session again.',
   loopback_denied: "Other's audio requires Screen Recording permission to capture system audio.",
+  // The microphone's device changing under it (#593).
+  mic_lost_using_other: 'The microphone “{{lost}}” went away, so “{{device}}” is being used instead.',
+  mic_lost_waiting: 'The microphone went away. Translation of your speech resumes when a microphone is connected.',
+  mic_now_using: 'Now using the microphone “{{device}}”.',
   no_microphone: 'Configure devices for this mode to start.',
   // Readiness (a provider's check).
   local_models_missing: 'Please download the required models in Settings to start.',
@@ -152,6 +156,12 @@ export const NOTICE_ALIASES: Readonly<Record<string, string>> = {
   // OpenAI Translate (Stage 2 OpenAI Translate, choice 11): a key that lists no gpt-realtime-translate model, and a region OpenAI does not serve — the old validation's sentences, which every locale already has.
   no_translate_model: 'settings.translateModelNotAvailable',
   region_unsupported: 'settings.regionNotSupported',
+  // The panel notes (spec 2026-10-05 §5): a result about the conversation,
+  // worded by the export menu's own sentences.
+  export_copied: 'mainPanel.export.copySuccess',
+  export_copy_failed: 'mainPanel.export.copyFailed',
+  autosave_saved: 'mainPanel.export.autoSave.saved',
+  autosave_failed: 'mainPanel.export.autoSave.failed',
 };
 
 /** The notice in the user's words; the message itself for a code with no words, as today's bubbles show it. */
