@@ -160,3 +160,11 @@ describe('letting the port through', () => {
     expect(await allowThroughFirewall(8790, { platform: 'win32', run: ps.run })).toEqual({ state: 'blocked', public: false });
   });
 });
+
+// Security review (REVIEW-lan-security.md): pins a defect and FAILS until it is fixed.
+describe('security review: the rule the elevated script adds (fails until fixed)', () => {
+  it('F6: lets the port through for this program alone, not for whatever listens on it', () => {
+    const script = elevatedScript(8790, { publicToo: false });
+    for (const line of script.split('\n').filter((l) => l.startsWith('New-NetFirewallRule'))) expect(line).toMatch(/-Program '/);
+  });
+});

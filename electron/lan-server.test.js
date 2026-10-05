@@ -7,6 +7,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { createRequire } from 'node:module';
 import net from 'node:net';
+import http from 'node:http';
 import WebSocket from 'ws';
 
 const require = createRequire(import.meta.url);
@@ -364,5 +365,73 @@ describe('the shared models\' door: a session left running', () => {
     expect(closes).toBe(0);
     // Then no one does: both go.
     await until(() => closes === 2);
+  });
+});
+
+// Security review (REVIEW-lan-security.md): each test below pins a defect and FAILS until it is fixed.
+describe('security review: what the door must refuse (fails until fixed)', () => {
+  /** An HTTP request with its own headers, answered with the status and the headers. */
+  const ask = (port, path, headers) => new Promise((resolve, reject) => {
+    const request = http.get({ host: '127.0.0.1', port, path, headers }, (response) => {
+      response.resume();
+      resolve({ status: response.statusCode, headers: response.headers });
+    });
+    request.on('error', reject);
+  });
+
+  it('F2: refuses a Realtime socket opened by a web page (any Origin header), key or not', async () => {
+    const { server, ws } = await start();
+    // A browser always sends Origin on a WebSocket; the app's own client runs in Node or Electron's main process, or sends its own origin.
+    const answer = await new Promise((resolve) => {
+      const socket = new WebSocket(`${ws}/v1/realtime`, { headers: { Origin: 'https://attacker.example' } });
+      socket.on('open', () => { socket.close(); resolve({ status: 101 }); });
+      socket.on('unexpected-response', (_request, response) => resolve({ status: response.statusCode }));
+      socket.on('error', () => {});
+    });
+    expect(answer.status).toBe(403);
+    expect(server.count()).toBe(0);
+  });
+
+  it('F2: gives a cross-origin page no readable answer: no wildcard CORS', async () => {
+    const { server, seen } = await start();
+    const answer = ask(server.port, '/v1/models', { Origin: 'https://attacker.example' });
+    await new Promise((r) => setTimeout(r, 50));
+    for (const r of seen.requests) server.reply(r.id, { body: { object: 'list', data: [] } });
+    const { headers } = await answer;
+    expect(headers['access-control-allow-origin']).not.toBe('*');
+  });
+
+  it('F2: refuses a request whose Host is a domain name (DNS rebinding)', async () => {
+    const { server, seen } = await start();
+    const answer = ask(server.port, '/v1/models', { Host: `rebind.attacker.example:${server.port}` });
+    await new Promise((r) => setTimeout(r, 50));
+    for (const r of seen.requests) server.reply(r.id, { body: { object: 'list', data: [] } });
+    expect([403, 421]).toContain((await answer).status);
+    expect(seen.requests).toHaveLength(0);
+  });
+
+  it('F7: tells a caller without the key nothing of the computer: no name on a 401', async () => {
+    const { server } = await start('the-key');
+    const { status, headers } = await ask(server.port, '/v1/models', {});
+    expect(status).toBe(401);
+    expect(headers['x-kotomimi-name']).toBeUndefined();
+  });
+});
+
+describe('security review: what a socket may make the main process hold (fails until fixed)', () => {
+  it('F3: does not keep every frame a device sends while it decides whose the socket is', async () => {
+    // A model server slow to say what it serves: the door holds the socket's frames until it has.
+    const upstream = { models: async () => [], chatModel: async () => null, recognizer: () => new Promise(() => {}), bridge: () => ({ send() {}, close() {} }) };
+    const server = await startLanServer({ port: 0, host: '127.0.0.1', upstream }, { request() {}, socketOpen() {}, socketMessage() {}, socketClose() {} });
+    running.push(server);
+    const { socket } = await dial(`ws://127.0.0.1:${server.port}/v1/realtime`);
+    let closed = null;
+    socket.on('close', (code) => { closed = code; });
+    socket.send(JSON.stringify({ type: 'session.update', session: { audio: { input: { transcription: { model: 'x', language: 'en' } } } } }));
+    const frame = JSON.stringify({ type: 'input_audio_buffer.append', audio: 'A'.repeat(4 * 1024 * 1024 - 64) });
+    // 64 MiB: far beyond a minute of audio, which is what the page itself keeps for a model still loading.
+    for (let i = 0; i < 16 && socket.readyState === 1; i += 1) socket.send(frame);
+    await until(() => closed !== null);
+    expect([1008, 1009]).toContain(closed);
   });
 });
