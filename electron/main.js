@@ -95,6 +95,13 @@ const {
 app.setName('kotomimi');
 app.commandLine.appendSwitch('application-name', 'kotomimi');
 app.commandLine.appendSwitch('jack-name', 'kotomimi');
+// Fork: on a Mac the app asks the system keychain for nothing. Chromium keeps a key there to encrypt its cookies with
+// ("kotomimi Safe Storage"), and macOS lets an app with no Apple team read it only after asking the person — again
+// after every update, since such an app is known by the hash of its program, which every build changes. Kotomimi
+// keeps nothing of its own under that key, so the key is Chromium's fixed one instead and nobody is asked. The cost:
+// cookies are no longer encrypted on disk with a key of this Mac's. Measured 2026-10-06 with this Electron: with
+// the switch no keychain item is made and what is written is written with the fixed key; without it one is made.
+if (process.platform === 'darwin') app.commandLine.appendSwitch('use-mock-keychain');
 
 // Fork: a development run can keep a profile of its own and be driven over the DevTools protocol,
 // so working on the app never touches the installed one's settings, or fights it for the
