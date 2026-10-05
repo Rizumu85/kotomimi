@@ -68,7 +68,8 @@ describe('the model field of an API', () => {
   it('has a search above a long list, the caret in it, that leaves the field itself alone', async () => {
     const { onModel, search } = await openMany();
     expect(names()).toHaveLength(MANY.length);
-    expect(document.activeElement).toBe(search);
+    // The caret is put there once the box is drawn: a moment after it is found.
+    await waitFor(() => expect(document.activeElement).toBe(search));
     fireEvent.change(search, { target: { value: 'gemni flash' } });
     expect(names()).toEqual(GEMINI);
     expect(onModel).not.toHaveBeenCalled();
