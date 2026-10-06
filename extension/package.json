@@ -1,6 +1,6 @@
 {
   "name": "sokuji-extension",
-  "version": "0.43.104",
+  "version": "0.43.105",
   "description": "Live speech translation browser extension powered by AI",
   "private": true,
   "scripts": {
