@@ -655,7 +655,7 @@ node scripts/fork-make-icons.cjs assets/logo-source.svg
 - 发布用本分支自己的流程 `.github/workflows/kotomimi-release.yml`：
 
 ```bash
-git tag -a v0.43.101 -m "Kotomimi 0.43.101" && git push origin v0.43.101
+git tag -a v0.43.102 -m "Kotomimi 0.43.102" && git push origin v0.43.102
 ```
 
   它会跑本分支的测试，构建 Windows 安装包，尽量构建 macOS（Apple 芯片）版本，然后生成一个**草稿** Release。到 GitHub 的 Releases 页面检查后点发布。只有发布了的 Release 才会被"检查更新"看到。
@@ -762,7 +762,7 @@ node scripts/fork-localai-locales.cjs   # 语言包冲突时：先取上游版�
   - 发布用的测试清单加了上游的横幅和字幕分享几组测试。
   - 实测（测试窗口）：会话正常，首字 1.2 秒；开启分享字幕后，观众端收到了每一句的更新，页面标题和文字是 Kotomimi。
   - 合并前就失败、与合并无关的上游测试（不在本分支的清单里）：`electron/audio-host-path.test.js`、`sandbox-recovery.test.js`、`wsHeaderRules.wiring.test.js`（Windows 上的路径和换行）、`src/services/providers/astGuard.test.ts`、`src/utils/featureGateForwarding.consistency.test.ts`。
-  - 下一次发版的版本号从上游 0.43.1 起算：`0.43.101`。
+  - 下一次发版的版本号从上游 0.43.1 起算：`0.43.102`。
 
 ## 许可
 
