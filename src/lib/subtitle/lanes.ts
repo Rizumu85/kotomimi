@@ -12,13 +12,20 @@
  * sentence, so each side's last sentence stays put, with its answer.
  *
  * The newest sentence is often still being said, and has no answer yet. A
- * pair is read as one thing — a sentence and its translation — so it stays
- * whole: the sentence before, with its own answer, until the newest has one,
- * and then both change together (`pending` says a newer one is on its way).
- * Drawn the other way, the newest sentence over the last one's answer, the
- * two lines never belonged together while anyone was talking. A row is the
- * user's own sentence: it shows the newest at once, so that they see they
- * were heard, and its answer when it comes. Pure.
+ * pair's answer is then still the sentence before's — and its small line is
+ * that sentence followed by everything said since, as one text whose end is
+ * what is being heard now. The strip keeps that end in sight (a line too
+ * long rolls), so the words appear as they are recognized; when the newest
+ * is answered, the line begins again at it, under its own answer.
+ *
+ * (At first the small line held only the answered sentence, the pair "kept
+ * whole" until the next was answered. With a stretch's sentences answered
+ * one by one that hid the recognition altogether: nothing moved on the
+ * screen while someone spoke, and it read as a slow recognizer — the user,
+ * 2026-10-06.)
+ *
+ * A row is the user's own sentence: it shows the newest at once, so that
+ * they see they were heard, and its answer when it comes. Pure.
  */
 import type { LegName, SegmentId } from '../conversation/types';
 import type { Entry, Row } from '../projection/types';
@@ -55,7 +62,7 @@ export interface Lane {
   source?: LaneText;
   /** What answers it. Absent: not shown. Empty text: nothing has answered yet. */
   answer?: LaneText & { notice?: NoticeEntry };
-  /** A sentence newer than the one shown is waiting for its answer (a pair), or the one shown is (a row). */
+  /** A sentence newer than the one answered is waiting for its answer (a pair), or the one shown is (a row). */
   pending: boolean;
 }
 
@@ -79,6 +86,24 @@ function piecesOf(rows: readonly Row[]): LanePiece[] {
 }
 
 const joined = (rows: readonly Row[]): string => rows.map((row) => row.text).join('').trim();
+
+/** A pair's small line holds no more sentences than this: the one answered, and the newest said since. */
+export const STREAM_MOST = 5;
+/** Written without spaces between sentences (Han, kana, Hangul, full-width marks): nothing is put between two of them. */
+const DENSE_END = /[\u2e80-\u9fff\uac00-\ud7af\uff00-\uffef]$/;
+
+/** Sentences as one text, each after the other: a space between two where the first does not end in a script written without. */
+function streamOf(sentences: ReadonlyArray<readonly Row[]>): { text: string; pieces: LanePiece[] } {
+  const pieces: LanePiece[] = [];
+  for (const rows of sentences) {
+    const next = piecesOf(rows);
+    if (next.length === 0) continue;
+    const before = pieces[pieces.length - 1];
+    if (before && !DENSE_END.test(before.text)) pieces[pieces.length - 1] = { ...before, text: `${before.text} ` };
+    pieces.push(...next);
+  }
+  return { text: pieces.map((piece) => piece.text).join(''), pieces };
+}
 
 /**
  * The lanes of a run, for the legs it hears. A leg both of whose sides are
@@ -125,7 +150,11 @@ export function buildLanes(
     if (said?.kind === 'exchange') {
       if (lane.source) {
         const row = said.source[0];
-        lane.source = { text: joined(said.source), pieces: piecesOf(said.source), language: row?.language || said.languages.source, ...(row ? { segmentId: row.segmentId } : {}) };
+        // A pair whose newest has no answer yet: the sentence shown, then all said since — or, before anything was
+        // answered, the last few said. Its end is what is being heard now.
+        const from = shape === 'pair' && waits ? Math.max(answered >= 0 ? answered : 0, newest - STREAM_MOST + 1) : at;
+        const sentences = mine.slice(from, (shape === 'pair' && waits ? newest : at) + 1).flatMap((entry) => (entry.kind === 'exchange' ? [entry.source] : []));
+        lane.source = { ...streamOf(sentences), language: row?.language || said.languages.source, ...(row ? { segmentId: row.segmentId } : {}) };
       }
       if (lane.answer && joined(said.translation)) {
         const row = said.translation[0];
@@ -166,25 +195,32 @@ export interface LaneSpacing {
   answerLine: number;
   sourceLine: number;
   rowLine: number;
+  /** What a small line has under it for its romanization, in ems of the small text: none, or `ROMAN_LINE`. */
+  roman: number;
 }
 
-export const ROOMY: LaneSpacing = { padTop: 10, padBottom: 12, gap: 17, inner: 2, answerLines: 2, answerLine: 1.4, sourceLine: 2.15, rowLine: 2.15 };
-export const TIGHT: LaneSpacing = { padTop: 4, padBottom: 5, gap: 7, inner: 0, answerLines: 1, answerLine: 1.22, sourceLine: 1.9, rowLine: 1.9 };
+/** A line of romanization: its size (0.72 of the small text) by its line height (1.3), and a hair. */
+export const ROMAN_LINE = 0.95;
+/** A spacing whose small lines each have a line of romanization under them. */
+export const withRoman = (spacing: LaneSpacing): LaneSpacing => ({ ...spacing, roman: ROMAN_LINE });
+
+export const ROOMY: LaneSpacing = { padTop: 10, padBottom: 12, gap: 17, inner: 2, answerLines: 2, answerLine: 1.4, sourceLine: 2.15, rowLine: 2.15, roman: 0 };
+export const TIGHT: LaneSpacing = { padTop: 4, padBottom: 5, gap: 7, inner: 0, answerLines: 1, answerLine: 1.22, sourceLine: 1.9, rowLine: 1.9, roman: 0 };
 
 /** The spacing a share of the way from roomy (0) to tight (1). */
-export function spacingAt(squeeze: number): LaneSpacing {
+export function spacingAt(squeeze: number, roomy: LaneSpacing = ROOMY, tight: LaneSpacing = TIGHT): LaneSpacing {
   const t = Math.min(1, Math.max(0, squeeze));
-  const mix = (key: keyof LaneSpacing) => ROOMY[key] + (TIGHT[key] - ROOMY[key]) * t;
+  const mix = (key: keyof LaneSpacing) => roomy[key] + (tight[key] - roomy[key]) * t;
   return {
     padTop: mix('padTop'), padBottom: mix('padBottom'), gap: mix('gap'), inner: mix('inner'),
-    answerLines: mix('answerLines'), answerLine: mix('answerLine'), sourceLine: mix('sourceLine'), rowLine: mix('rowLine'),
+    answerLines: mix('answerLines'), answerLine: mix('answerLine'), sourceLine: mix('sourceLine'), rowLine: mix('rowLine'), roman: mix('roman'),
   };
 }
 
 /** The height one lane takes at a font size, spaced so: in ems of that size, for its share of the strip. */
 export function laneEms(lane: Lane, spacing: LaneSpacing): number {
-  if (lane.shape === 'row') return ROW_SCALE * spacing.rowLine;
-  return (lane.source ? SOURCE_SCALE * spacing.sourceLine : 0) + (lane.answer ? spacing.answerLine * spacing.answerLines : 0);
+  if (lane.shape === 'row') return ROW_SCALE * (spacing.rowLine + spacing.roman);
+  return (lane.source ? SOURCE_SCALE * (spacing.sourceLine + spacing.roman) : 0) + (lane.answer ? spacing.answerLine * spacing.answerLines : 0);
 }
 
 /** The height a strip of these lanes takes at a font size, spaced so. */
@@ -221,13 +257,13 @@ const LINES_ORDER: ReadonlyArray<keyof LaneLines> = ['row', 'answer', 'source', 
  * higher window is asked for.) Each further line is given in turn, while
  * there is room for it. Pure.
  */
-export function linesFor(lanes: readonly Lane[], fontSize: number, spare: number): LaneLines {
-  const lines: LaneLines = { source: 1, answer: ROOMY.answerLines, row: 1 };
+export function linesFor(lanes: readonly Lane[], fontSize: number, spare: number, roomy: LaneSpacing = ROOMY): LaneLines {
+  const lines: LaneLines = { source: 1, answer: roomy.answerLines, row: 1 };
   const pair = lanes.find((lane) => lane.shape === 'pair');
   const cost: LaneLines = {
-    source: pair?.source ? fontSize * SOURCE_SCALE * ROOMY.sourceLine : Infinity,
-    answer: pair?.answer ? fontSize * ROOMY.answerLine : Infinity,
-    row: lanes.some((lane) => lane.shape === 'row') ? fontSize * ROW_SCALE * ROOMY.rowLine : Infinity,
+    source: pair?.source ? fontSize * SOURCE_SCALE * (roomy.sourceLine + roomy.roman) : Infinity,
+    answer: pair?.answer ? fontSize * roomy.answerLine : Infinity,
+    row: lanes.some((lane) => lane.shape === 'row') ? fontSize * ROW_SCALE * (roomy.rowLine + roomy.roman) : Infinity,
   };
   let left = spare;
   for (let turn = 0, passed = 0; passed < LINES_ORDER.length; turn++) {

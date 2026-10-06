@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { LegName } from '../conversation/types';
 import type { Entry, Row } from '../projection/types';
 import type { LegFilters } from '../view/filter';
-import { buildLanes, lanesHeight, linesFor, ROOMY, ROW_SCALE, SOURCE_SCALE, spacingAt, squeezeOf, TIGHT } from './lanes';
+import { buildLanes, lanesHeight, linesFor, ROMAN_LINE, ROOMY, ROW_SCALE, SOURCE_SCALE, spacingAt, squeezeOf, TIGHT, withRoman } from './lanes';
 
 const row = (segmentId: string, text: string, side: 'source' | 'translation' = 'source', language?: string): Row =>
   ({ key: `${segmentId}:0`, segmentId, side, start: 0, end: text.length, text, final: true, ...(language ? { language } : {}) });
@@ -43,13 +43,29 @@ describe('the subtitle view’s lanes', () => {
     expect(built[1]).toMatchObject({ leg: 'speaker', source: { text: '昨日映画を見ます。' }, answer: { text: '昨日映画を見ました。' }, pending: false });
   });
 
-  it('keeps a pair whole: the sentence before with its own answer, until the newest has one', () => {
-    // Seen 2026-10-06: the newest sentence over the last one's answer, dimmed — two lines that never belonged together.
+  it('writes what is being said after the sentence the answer belongs to, and begins again at the newest once that is answered', () => {
+    // First the small line held the answered sentence alone until the next was answered: with a stretch's sentences
+    // answered one by one nothing moved while someone spoke, and it read as a slow recognizer (the user, 2026-10-06).
     const talking = [said('a', 'participant', 'そうそうそう。', '对对对。'), said('b', 'participant', 'それが')];
-    expect(lanes(talking, ['participant'])[0]).toMatchObject({ source: { text: 'そうそうそう。' }, answer: { text: '对对对。' }, pending: true });
+    const lane = lanes(talking, ['participant'])[0];
+    expect(lane).toMatchObject({ source: { text: 'そうそうそう。それが' }, answer: { text: '对对对。' }, pending: true });
+    // Row by row still, for the readings above the words and the light that follows a voice.
+    expect(lane.source?.pieces.map((piece) => piece.text)).toEqual(['そうそうそう。', 'それが']);
     // Its answer has begun: both lines are the newest's.
     const answered = [said('a', 'participant', 'そうそうそう。', '对对对。'), said('b', 'participant', 'それが好きなんですよ。', '我就是')];
     expect(lanes(answered, ['participant'])[0]).toMatchObject({ source: { text: 'それが好きなんですよ。' }, answer: { text: '我就是' }, pending: false });
+    // Several said since the one answered: all of them, in order.
+    const more = [...talking.slice(0, 1), said('b', 'participant', 'それが好きなんですよ。'), said('c', 'participant', 'でも')];
+    expect(lanes(more, ['participant'])[0].source?.text).toBe('そうそうそう。それが好きなんですよ。でも');
+    // A space between two sentences of a script written with them, none after one written without.
+    const latin = [said('a', 'participant', 'I see.', '明白了。'), said('b', 'participant', 'Then we')];
+    expect(lanes(latin, ['participant'])[0].source?.text).toBe('I see. Then we');
+    // No more than a few: a side whose answers stopped coming does not grow a line without end.
+    const many = Array.from({ length: 9 }, (_, i) => said(`m${i}`, 'participant', `${i}番。`, i === 0 ? '零。' : undefined));
+    expect(lanes(many, ['participant'])[0]).toMatchObject({ source: { text: '4番。5番。6番。7番。8番。' }, answer: { text: '零。' } });
+    // Nothing answered yet: the last few said, so that a first sentence closed before its answer came stays in sight.
+    const first = [said('a', 'participant', 'そうそうそう。'), said('b', 'participant', 'それが')];
+    expect(lanes(first, ['participant'])[0]).toMatchObject({ source: { text: 'そうそうそう。それが' }, answer: { text: '', pieces: [] }, pending: false });
     // Nothing answered yet at all: the sentence itself, so that the strip is not empty while the first answer is made.
     expect(lanes([said('a', 'participant', 'それが')], ['participant'])[0]).toMatchObject({ source: { text: 'それが' }, answer: { text: '', pieces: [] }, pending: false });
     // The answers are not shown: there is nothing to wait for, and the newest sentence is shown as it is said.
@@ -165,5 +181,27 @@ describe('the height a strip of lanes is laid out for', () => {
     // The height a spacing takes is the one it was squeezed to.
     expect(lanesHeight(two, 24, spacingAt(0.5))).toBeGreaterThan(tight);
     expect(lanesHeight(two, 24, spacingAt(0.5))).toBeLessThan(roomy);
+  });
+});
+
+describe('a strip whose small lines have a romanization under them', () => {
+  const two = buildLanes([], ['speaker', 'participant'], { speaker: 'both', participant: 'both' }, (notice) => notice.message);
+
+  it('is higher by a line of it under each small line: the sentence’s, and the row’s', () => {
+    // Without the room the romanization took the sentence’s own line, and the sentence was cut off (seen 2026-10-06).
+    const plain = lanesHeight(two, 24);
+    // Each height is rounded up to a pixel: within one of the sum.
+    expect(Math.abs(lanesHeight(two, 24, withRoman(ROOMY)) - (plain + 2 * 24 * SOURCE_SCALE * ROMAN_LINE))).toBeLessThan(1);
+    expect(ROW_SCALE).toBe(SOURCE_SCALE);
+    // Squeezed, it keeps that line: the spacing between roomy and tight carries it.
+    expect(spacingAt(0.5, withRoman(ROOMY), withRoman(TIGHT)).roman).toBe(ROMAN_LINE);
+    expect(spacingAt(0.5).roman).toBe(0);
+  });
+
+  it('gives a further small line in a higher window only where there is room for its romanization too', () => {
+    const row = 24 * ROW_SCALE * ROOMY.rowLine;
+    expect(linesFor(two, 24, row).row).toBe(2);
+    expect(linesFor(two, 24, row, withRoman(ROOMY)).row).toBe(1);
+    expect(linesFor(two, 24, row + 24 * ROW_SCALE * ROMAN_LINE, withRoman(ROOMY)).row).toBe(2);
   });
 });

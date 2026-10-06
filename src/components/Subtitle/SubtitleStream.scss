@@ -140,7 +140,8 @@
     // one is the first thing lost where the panel is faint or gone.
     .subtitle-lane__source {
       flex: 0 0 auto;
-      height: calc(var(--lane-source-lines, 1) * var(--lane-source-line, 2.15) * 1em);
+      // A line, and under it the line of its romanization where one is written.
+      height: calc(var(--lane-source-lines, 1) * (var(--lane-source-line, 2.15) + var(--lane-roman, 0)) * 1em);
       font-size: 0.62em;
       line-height: var(--lane-source-line, 2.15);
       color: var(--subtitle-source-color, #9aa0a6);

@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next';
 import type { LegName, SegmentId } from '../../lib/conversation/types';
 import type { Entry } from '../../lib/projection/types';
 import { fontLanguage } from '../../lib/fonts/fontCss';
-import { buildLanes, lanesHeight, linesFor, ROW_SCALE, spacingAt, squeezeOf, TIGHT, type Lane, type LanePiece, type LaneText } from '../../lib/subtitle/lanes';
+import { annotatedLanguage } from '../../lib/annotate/script';
+import { buildLanes, lanesHeight, linesFor, ROOMY, ROW_SCALE, spacingAt, squeezeOf, TIGHT, withRoman, type Lane, type LanePiece, type LaneText } from '../../lib/subtitle/lanes';
+import { useAnnotationStore } from '../../stores/annotationStore';
 import type { LegFilters } from '../../lib/view/filter';
 import { noticeText } from '../../lib/view/noticeText';
 import { AnnotatedLines, useAnnotation } from '../Annotated/AnnotatedText';
@@ -67,10 +69,26 @@ function Stretch({ piece, language, upTo }: { piece: LanePiece; language?: strin
   );
 }
 
-/** A lane's text, row by row; a notice's words as they are. */
+/** A clause with the marks that close it: a romanization is written under each, so that it stays under its own words where the text wraps. */
+const CLAUSE = /[^。．！？!?、，,;；:：]+[。．！？!?、，,;；:：」』）)\s]*|[。．！？!?、，,;；:：」』）)\s]+/g;
+
+/** A piece as its clauses, each lit from where it begins. */
+function clausesOf(piece: LanePiece): LanePiece[] {
+  const out: LanePiece[] = [];
+  for (const match of piece.text.matchAll(CLAUSE)) out.push({ key: `${piece.key}:${match.index}`, text: match[0], segmentId: piece.segmentId, start: piece.start + (match.index ?? 0) });
+  return out.length > 1 ? out : [piece];
+}
+
+/**
+ * A lane's text, row by row; a notice's words as they are. Where a romanization is written under the text, clause by
+ * clause: under a whole sentence it is one block, which wraps as text first and romanization after — and a strip
+ * that shows one line of it showed the romanization alone (seen 2026-10-06).
+ */
 function Written({ text, lit }: { text: LaneText; lit: ReadonlyMap<SegmentId, number> }) {
+  const roman = useAnnotationStore((s) => s.romanization) && annotatedLanguage(text.language) !== null;
   if (text.pieces.length === 0) return <>{text.text}</>;
-  return <>{text.pieces.map((piece) => <Stretch key={piece.key} piece={piece} language={text.language} upTo={lit.get(piece.segmentId)} />)}</>;
+  const pieces = roman ? text.pieces.flatMap(clausesOf) : text.pieces;
+  return <>{pieces.map((piece) => <Stretch key={piece.key} piece={piece} language={text.language} upTo={lit.get(piece.segmentId)} />)}</>;
 }
 
 const langOf = (text: LaneText): string | undefined => fontLanguage(text.language) || undefined;
@@ -127,7 +145,13 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
   const lanes = useMemo(() => buildLanes(entries, legs, filters, (notice) => noticeText(t, notice)), [entries, legs, filters, t]);
   // The layout the window is fitted to: the size chosen and which texts there are, not what they say.
   const shape = lanes.map((lane) => `${lane.leg}:${lane.source ? 's' : ''}${lane.answer ? 'a' : ''}`).join(',');
-  const [roomy, least] = useMemo(() => [lanesHeight(lanes, fontSize), lanesHeight(lanes, fontSize, TIGHT)], [shape, fontSize]); // eslint-disable-line react-hooks/exhaustive-deps
+  // A romanization under the small lines has a line of its own there: while the switch is on and what is said is
+  // in a language that has one — or nothing is said yet, so that the window is not made higher at the first word.
+  const romanization = useAnnotationStore((s) => s.romanization);
+  const small = lanes.flatMap((lane) => [lane.source?.language, lane.shape === 'row' ? lane.answer?.language : undefined]).filter((language): language is string => !!language);
+  const roman = romanization && (small.length === 0 || small.some((language) => annotatedLanguage(language) !== null));
+  const [roomySpacing, tightSpacing] = roman ? [withRoman(ROOMY), withRoman(TIGHT)] : [ROOMY, TIGHT];
+  const [roomy, least] = useMemo(() => [lanesHeight(lanes, fontSize, roomySpacing), lanesHeight(lanes, fontSize, tightSpacing)], [shape, fontSize, roman]); // eslint-disable-line react-hooks/exhaustive-deps
   const strip = useRef<HTMLDivElement>(null);
   // The window is fitted to the lanes. A window the user made higher than that keeps what they added — the room a
   // long sentence is written out in — through a change of size or of lanes, and for the next time the view opens.
@@ -173,8 +197,8 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
     observer.observe(element);
     return () => { observer.disconnect(); clearTimeout(keeping); };
   }, [roomy, least]);
-  const spacing = spacingAt(squeeze);
-  const lines = useMemo(() => linesFor(lanes, fontSize, spare), [shape, fontSize, spare]); // eslint-disable-line react-hooks/exhaustive-deps
+  const spacing = spacingAt(squeeze, roomySpacing, tightSpacing);
+  const lines = useMemo(() => linesFor(lanes, fontSize, spare, roomySpacing), [shape, fontSize, spare, roman]); // eslint-disable-line react-hooks/exhaustive-deps
   // Squeezed, the answer has what the spacing leaves it; fitted or higher, what the window affords.
   const answerLines = squeeze > 0 ? spacing.answerLines : lines.answer;
   const style = {
@@ -185,9 +209,10 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
     '--lane-source-line': String(spacing.sourceLine),
     '--lane-answer-line': String(spacing.answerLine),
     '--lane-row-line': String(spacing.rowLine),
+    '--lane-roman': String(spacing.roman),
     // The user's own row is as high as its lines; everything else is the pair's.
     '--lane-row-lines': String(lines.row),
-    '--lane-row-height': `${fontSize * ROW_SCALE * spacing.rowLine * lines.row}px`,
+    '--lane-row-height': `${fontSize * ROW_SCALE * (spacing.rowLine + spacing.roman) * lines.row}px`,
     '--lane-source-lines': String(lines.source),
     // A pair's two texts share its height by what each is laid out for.
     // A pair's answer has this many lines, written in or not.
@@ -231,7 +256,6 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
               {lane.source && (
                 <Slot className="subtitle-lane__source" lang={langOf(lane.source)} fitKey={`${fontSize}:${squeeze}:${lines.source}:${lane.source.text}`}>
                   <Written text={lane.source} lit={lit} />
-                  {lane.pending && pending}
                 </Slot>
               )}
               {lane.answer && (

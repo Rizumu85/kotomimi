@@ -73,10 +73,10 @@ describe('SubtitleBody — compact: the fork\u2019s lanes', () => {
     ] })} />);
     const [other, mine] = [...container.querySelectorAll('.subtitle-lane')];
     expect(texts(mine)).toEqual(['Hello.', 'こんにちは。']);
-    // Their newest has no answer yet: the pair before stays whole, with a mark that more is coming.
-    const pair = (lane: Element) => texts(lane).map((text) => text?.replace('…', ''));
-    expect(pair(other)).toEqual(['いい天気ですね。', 'Nice weather.']);
-    expect(other.querySelector('.subtitle-lane__pending')).not.toBeNull();
+    // Their newest has no answer yet: the answer is still the sentence before's, and the small line goes on from
+    // that sentence into what is being said — which is itself the sign that more is coming.
+    expect(texts(other)).toEqual(['いい天気ですね。はい。', 'Nice weather.']);
+    expect(other.querySelector('.subtitle-lane__pending')).toBeNull();
     expect(mine.querySelector('.subtitle-lane__pending')).toBeNull();
   });
 
