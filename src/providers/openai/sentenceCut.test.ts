@@ -20,19 +20,34 @@ describe('where a stretch still being heard may be cut', () => {
     expect(text.slice(0, cutAt(text))).toBe('そうだね。やっぱりお正月のイメージあるよね。');
   });
 
-  it('leaves a very short sentence to go with the next', () => {
-    // Alone, "はい。" is a caption gone before it is read.
+  it('leaves a sentence of under two seconds to go with the next, as one caption', () => {
+    // Alone, each is a caption gone before it is read.
     expect(cutAt('はい。そうですね')).toBe(-1);
+    expect(cutAt('これで全種かな。あもう')).toBe(-1);
     const text = 'はい。そうですね、行きましょう。それで';
     expect(text.slice(0, cutAt(text))).toBe('はい。そうですね、行きましょう。');
+    const two = 'これで全種かな。あ、もう一種類あるか。はい';
+    expect(two.slice(0, cutAt(two))).toBe('これで全種かな。あ、もう一種類あるか。');
+  });
+
+  it('cuts a run that has gone on about eight seconds with no sentence end at its last clause mark', () => {
+    // A listener waiting for the full stop of a long sentence reads nothing meanwhile.
+    const run = '昨日は友達と一緒に新宿まで買い物に行ったんですけど、途中で雨が降ってきて、傘を持っていなかったので、近くの喫茶店';
+    expect(run.slice(0, cutAt(run))).toBe('昨日は友達と一緒に新宿まで買い物に行ったんですけど、途中で雨が降ってきて、傘を持っていなかったので、');
+    // Not yet that long: it waits for its end.
+    expect(cutAt('昨日は友達と一緒に新宿まで買い物に行ったんですけど、途中で雨が')).toBe(-1);
+    // And never where nothing follows the mark.
+    const tail = '昨日は友達と一緒に新宿まで買い物に行ったんですけど途中で雨が降ってきて傘を持っていなかったので近くの喫茶店に、';
+    expect(cutAt(tail)).toBe(-1);
   });
 
   it('reads a period as upstream’s sentence rule does, and wants more letters of a script written with spaces', () => {
     const text = 'I went to see Dr. Smith about it yesterday. Then we';
     expect(text.slice(0, cutAt(text))).toBe('I went to see Dr. Smith about it yesterday.');
     expect(cutAt('It costs 3.5 dollars and')).toBe(-1);
-    // Fourteen letters at least: "Yes. I see." is not cut after "Yes.".
+    // Twenty-eight letters at least: "Yes. I see." is not cut after either.
     expect(cutAt('Yes. I see what')).toBe(-1);
+    expect(cutAt('Yes. I see. So what')).toBe(-1);
   });
 
   it('keeps the marks that close a sentence with it', () => {
