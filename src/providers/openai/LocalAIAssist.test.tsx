@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { Readiness } from '../../lib/provider/types';
 import { useLocalServerStore } from '../../stores/localServerStore';
@@ -49,15 +49,15 @@ const LISTED: LocalAIModel[] = [
   { id: 'qwen3-4b', kind: 'text' },
 ];
 
-interface Drawn { settings?: Partial<LocalAISettings>; values?: Record<string, string>; models?: LocalAIModel[]; readiness?: Readiness }
+interface Drawn { settings?: Partial<LocalAISettings>; values?: Record<string, string>; models?: LocalAIModel[]; readiness?: Readiness; legs?: Array<'speaker' | 'participant'> }
 
-function draw({ settings = {}, values = { endpoint: '' }, models = [], readiness = { state: 'unknown' } }: Drawn = {}) {
+function draw({ settings = {}, values = { endpoint: '' }, models = [], readiness = { state: 'unknown' }, legs = ['speaker'] }: Drawn = {}) {
   const update = vi.fn();
   const fill = vi.fn();
   const set = vi.fn();
   const check = vi.fn();
   const view = render(
-    <LocalAIAssist settings={{ ...LOCALAI_DEFAULTS, ...settings }} values={values} set={set} fill={fill} update={update} pair={{ source: 'zh-CN', target: 'ja' }} legs={['speaker']} models={models} readiness={readiness} check={check} />,
+    <LocalAIAssist settings={{ ...LOCALAI_DEFAULTS, ...settings }} values={values} set={set} fill={fill} update={update} pair={{ source: 'zh-CN', target: 'ja' }} legs={legs} models={models} readiness={readiness} check={check} />,
   );
   const card = (stage: string) => within(screen.getByRole('region', { name: stage }));
   const places = (stage: string) => [...screen.getByRole('group', { name: stage }).querySelectorAll('button')];
@@ -625,5 +625,20 @@ describe('one menu for a stage of this computer, whoever runs it', () => {
     expect(menu.selectedOptions[0].textContent).toBe('Qwen3-ASR 1.7B GGUF');
     expect(groups(menu)[0]).toEqual(['providers.localai.groupNative', ['Qwen3-ASR 1.7B GGUF']]);
     expect(card(HEAR).getByRole('button', { name: 'providers.localai.browse' }).getAttribute('aria-expanded')).toBe('false');
+  });
+});
+
+describe('detecting the other side’s language', () => {
+  const NATIVE_HEARING = { asrVia: 'device', asrHere: 'native', asrNativeModel: 'qwen3-asr-1.7b-q8', translateAt: 'device' } as const;
+
+  it('is offered only while the other side is heard: the microphone alone has nobody whose language is unknown', () => {
+    const alone = draw({ settings: NATIVE_HEARING, legs: ['speaker'] });
+    expect(alone.card(HEAR).queryByText('providers.localai.detectOther')).toBeNull();
+    alone.unmount();
+    const both = draw({ settings: NATIVE_HEARING, legs: ['speaker', 'participant'] });
+    expect(both.card(HEAR).getByText('providers.localai.detectOther')).toBeTruthy();
+    both.unmount();
+    const other = draw({ settings: NATIVE_HEARING, legs: ['participant'] });
+    expect(other.card(HEAR).getByText('providers.localai.detectOther')).toBeTruthy();
   });
 });

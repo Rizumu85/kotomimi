@@ -776,7 +776,8 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   };
   const translateToLocalAI = toLocalAI({ translateHere: 'localai', translateHereModel: settings.translateHereModel || firstText });
   // Offered where what hears can detect a language: the native engine, or an API.
-  const detectOther = (settings.asrVia === 'api' || (settings.asrVia === 'device' && settings.asrHere === 'native'))
+  // Only while the other side is heard at all: with the microphone alone there is nobody whose language is unknown.
+  const detectOther = legs.includes('participant') && (settings.asrVia === 'api' || (settings.asrVia === 'device' && settings.asrHere === 'native'))
     ? <ToggleSwitch checked={settings.asrDetectOther} onChange={() => put({ asrDetectOther: !settings.asrDetectOther })} label={t('providers.localai.detectOther')} disabled={disabled} tooltip={t('providers.localai.detectOtherTooltip')} />
     : null;
 
