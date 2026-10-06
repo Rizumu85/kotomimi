@@ -17,6 +17,12 @@ interface SubtitleLookState {
   /** 0–100. */
   shadow: number;
   align: Align;
+  /**
+   * The mouse passes through the strip (`SubtitleView`): on until it is turned off by the strip's own button, and
+   * never kept — a strip nobody can click, found that way at the next start, would be a trap.
+   */
+  through: boolean;
+  setThrough: (on: boolean) => void;
   setLook: (look: Look) => Promise<void>;
   setShadow: (shadow: number) => Promise<void>;
   setAlign: (align: Align) => Promise<void>;
@@ -39,6 +45,8 @@ export const useSubtitleLookStore = create<SubtitleLookState>()(
     };
     return {
       ...DEFAULTS,
+      through: false,
+      setThrough: (on) => set({ through: on }),
       setLook: (look) => write('look', look),
       setShadow: (shadow) => write('shadow', strength(shadow)),
       setAlign: (align) => write('align', align),

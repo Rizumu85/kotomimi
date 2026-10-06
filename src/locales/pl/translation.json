@@ -1687,6 +1687,8 @@
       "align": "Alignment",
       "alignLeft": "Left",
       "alignCenter": "Centre",
+      "through": "Click-through: the mouse passes through the captions",
+      "throughOff": "Stop click-through",
       "moreColors": "More colours (source text, panel)",
       "back": "Back to the main window"
     },

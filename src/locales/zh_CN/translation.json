@@ -1687,6 +1687,8 @@
       "align": "对齐",
       "alignLeft": "靠左",
       "alignCenter": "居中",
+      "through": "鼠标穿透：点不到字幕，鼠标操作都交给下面的窗口",
+      "throughOff": "解除穿透",
       "moreColors": "更多颜色（原文、底色）",
       "back": "返回主窗口"
     },

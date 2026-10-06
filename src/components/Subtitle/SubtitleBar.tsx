@@ -5,8 +5,9 @@ import { useTranslation } from 'react-i18next';
 import {
   AArrowDown, AArrowUp, ChevronsDownUp, ChevronsUpDown,
   Pin, Lock, Undo2, Settings, Trash2, Maximize, Minimize,
-  Play, Square, Loader,
+  Play, Square, Loader, PointerOff,
 } from 'lucide-react';
+import { useSubtitleLookStore } from '../../stores/subtitleLookStore';
 import {
   useFloating, useClick, useDismiss, useRole, useInteractions, offset, flip, shift, size,
   autoUpdate, FloatingPortal,
@@ -100,6 +101,8 @@ const SubtitleBar: React.FC<Props> = ({
   const setCompactMode = useSetSubtitleCompactMode();
   const toggleAlwaysOnTop = useToggleSubtitleAlwaysOnTop();
   const togglePositionLocked = useToggleSubtitlePositionLocked();
+  // Fork: click-through, for the takeover's own window while a run is on (`SubtitleView`).
+  const setThrough = useSubtitleLookStore((state) => state.setThrough);
   const speakerMode = useSpeakerDisplayMode();
   const participantMode = useParticipantDisplayMode();
   const setSpeakerMode = useSetSpeakerDisplayMode();
@@ -303,6 +306,17 @@ const SubtitleBar: React.FC<Props> = ({
             aria-label={t('subtitle.bar.alwaysOnTop', 'Always on top')}
           >
             <Pin size={14} />
+          </button>
+        )}
+        {surface === 'electron' && sessionControl?.isSessionActive && (
+          <button
+            type="button"
+            className="subtitle-bar__btn"
+            onClick={() => setThrough(true)}
+            title={t('fork.subtitle.through', 'Click-through: the mouse passes through the captions')}
+            aria-label={t('fork.subtitle.through', 'Click-through: the mouse passes through the captions')}
+          >
+            <PointerOff size={14} />
           </button>
         )}
         <button

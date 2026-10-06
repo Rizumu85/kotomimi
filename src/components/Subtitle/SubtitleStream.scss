@@ -263,3 +263,30 @@
 .subtitle-ptt-hint {
   background: rgba(0, 0, 0, 0.72);
 }
+
+// Fork: the way out of click-through (`SubtitleView`): the one thing in the strip that takes a click while the mouse
+// passes through the rest. Shown while the pointer is over the strip, in its corner, on a panel of its own.
+.subtitle-through-unlock {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.78);
+  color: #f0f0f0;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.4;
+  text-shadow: none;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.92);
+    border-color: tk.$color-primary;
+  }
+}

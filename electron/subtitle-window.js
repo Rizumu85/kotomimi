@@ -160,8 +160,10 @@ ipcMain.handle('subtitle:enter', (_event, payload) => {
 ipcMain.handle('subtitle:exit', (_event, payload) => {
   const win = getLiveWindow();
   if (!win) return { ok: false };
-  // Fork: the least height the lanes asked for is the subtitle window's, not the main window's.
+  // Fork: the least height the lanes asked for is the subtitle window's, not the main window's — and the main window
+  // takes its own clicks.
   restoreLeastSize(win);
+  win.setIgnoreMouseEvents(false);
   // If the user exits subtitle mode while fullscreen, drop fullscreen first;
   // otherwise setBounds() fights the fullscreen state and the window can be
   // left stuck. Guarded to avoid a needless transition on the common path.
@@ -244,6 +246,18 @@ ipcMain.handle('subtitle:fit-height', (_event, payload) => {
   const next = clampToScreen({ x: bounds.x, y: bounds.y + bounds.height - height, width: bounds.width, height }, work);
   win.setBounds(next);
   return { ok: true, bounds: next };
+});
+
+// Fork: click-through. The strip is a caption over a game: the mouse is the game's. While it is on, the window
+// passes every click to whatever is under it; movement is still forwarded to the page, which shows one small button
+// while the pointer is over the strip and asks for clicks back while it is over that button — the one way out (as the
+// desktop lyrics of a music player have it). Only in subtitle mode; leaving it gives the window its clicks back.
+ipcMain.handle('subtitle:set-click-through', (_event, on) => {
+  const win = getLiveWindow();
+  if (!win || normalBoundsSnapshot === null) return { ok: false };
+  if (on) win.setIgnoreMouseEvents(true, { forward: true });
+  else win.setIgnoreMouseEvents(false);
+  return { ok: true };
 });
 
 ipcMain.handle('subtitle:set-locked', (_event, locked) => {

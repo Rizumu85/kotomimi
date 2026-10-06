@@ -1687,6 +1687,8 @@
       "align": "對齊",
       "alignLeft": "靠左",
       "alignCenter": "置中",
+      "through": "滑鼠穿透：點不到字幕，滑鼠操作都交給下面的視窗",
+      "throughOff": "解除穿透",
       "moreColors": "更多顏色（原文、底色）",
       "back": "返回主視窗"
     },

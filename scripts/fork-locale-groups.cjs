@@ -192,6 +192,8 @@ module.exports = {
     align: ['Alignment', '对齐', '對齊'],
     alignLeft: ['Left', '靠左', '靠左'],
     alignCenter: ['Centre', '居中', '置中'],
+    through: ['Click-through: the mouse passes through the captions', '鼠标穿透：点不到字幕，鼠标操作都交给下面的窗口', '滑鼠穿透：點不到字幕，滑鼠操作都交給下面的視窗'],
+    throughOff: ['Stop click-through', '解除穿透', '解除穿透'],
     moreColors: ['More colours (source text, panel)', '更多颜色（原文、底色）', '更多顏色（原文、底色）'],
     back: ['Back to the main window', '返回主窗口', '返回主視窗'],
   },

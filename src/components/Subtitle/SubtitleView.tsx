@@ -8,6 +8,8 @@ import { baseLang } from '../../lib/segmentation/sentenceEnd';
 import type { SubtitleIdleModel, SubtitleSession } from '../../lib/subtitle/session';
 import { settingsTargetForCode } from '../../lib/view/noticeTargets';
 import { noticeText } from '../../lib/view/noticeText';
+import { LockOpen } from 'lucide-react';
+import { useSubtitleLookStore } from '../../stores/subtitleLookStore';
 import {
   useSubtitleNewItemHighlightEnabled,
   useSubtitleParticipantDisplayMode,
@@ -133,6 +135,38 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
     if (!fitsWindow) return;
     void window.electron?.invoke?.('subtitle:fit-height', { height, least })?.catch?.(() => {});
   }, [fitsWindow]);
+  // Fork: click-through (`electron/subtitle-window.js`). While it is on the mouse is whatever's under the strip: the
+  // bar does not come out, nothing in the strip can be clicked, and the one way out is the small button that shows
+  // while the pointer is over the strip. Only during a run — a strip that is waiting to be started has to be clicked.
+  const wantsThrough = useSubtitleLookStore((state) => state.through);
+  const setThrough = useSubtitleLookStore((state) => state.setThrough);
+  const through = surface === 'electron' && running && wantsThrough;
+  const [pointerInside, setPointerInside] = useState(false);
+  const [overUnlock, setOverUnlock] = useState(false);
+  useEffect(() => {
+    if (surface !== 'electron') return;
+    // Over its button the strip takes clicks; everywhere else they pass through.
+    void window.electron?.invoke?.('subtitle:set-click-through', through && !overUnlock)?.catch?.(() => {});
+  }, [surface, through, overUnlock]);
+  // The run ended, or the view went: the next one starts clickable.
+  useEffect(() => {
+    if (!running && wantsThrough) setThrough(false);
+  }, [running, wantsThrough, setThrough]);
+  useEffect(() => () => {
+    useSubtitleLookStore.getState().setThrough(false);
+    if (surface === 'electron') void window.electron?.invoke?.('subtitle:set-click-through', false)?.catch?.(() => {});
+  }, [surface]);
+  const rootProps = through
+    ? {
+        ...chrome.rootProps,
+        // The bar stays in: movement over the strip shows the way out instead.
+        style: { ...chrome.rootProps.style, '--bar-opacity': 0, '--bar-pointer-events': 'none' },
+        onMouseEnter: () => setPointerInside(true),
+        onMouseMove: () => setPointerInside(true),
+        onMouseLeave: () => { setPointerInside(false); setOverUnlock(false); },
+      }
+    : chrome.rootProps;
+
   // No lanes on screen — the list, or no run: the window may be any height again.
   const lanesShown = running && subtitle.compactMode;
   useEffect(() => {
@@ -141,7 +175,19 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
   }, [surface, lanesShown]);
 
   return (
-    <div ref={chrome.rootRef} {...chrome.rootProps}>
+    <div ref={chrome.rootRef} {...rootProps}>
+      {through && pointerInside && (
+        <button
+          type="button"
+          className="subtitle-through-unlock"
+          onMouseEnter={() => setOverUnlock(true)}
+          onMouseLeave={() => setOverUnlock(false)}
+          onClick={() => { setOverUnlock(false); setThrough(false); }}
+        >
+          <LockOpen size={13} />
+          <span>{t('fork.subtitle.throughOff', 'Stop click-through')}</span>
+        </button>
+      )}
       <SubtitleBar
         sessionElapsedMs={elapsedMs}
         sourceLanguageCode={languageCodeShort(session?.pair?.source)}

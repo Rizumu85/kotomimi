@@ -71,6 +71,7 @@ function makeFakeWindow() {
     moveTop: vi.fn(),
     setResizable: vi.fn(),
     setMinimumSize: vi.fn(),
+    setIgnoreMouseEvents: vi.fn(),
     getMinimumSize: vi.fn(() => [0, 0]),
     setWindowButtonVisibility: vi.fn(),
     isFullScreen: () => false,
@@ -516,5 +517,44 @@ describe('subtitle-window fitted to the lanes (fork)', () => {
     win.isFullScreen = () => true;
     await fit({ height: 260 });
     expect(win.setBounds).not.toHaveBeenCalled();
+  });
+});
+
+describe('subtitle-window click-through (fork)', () => {
+  let win;
+  const enter = (payload) => ipcHandlers.get('subtitle:enter')({}, payload);
+  const exit = (payload = {}) => ipcHandlers.get('subtitle:exit')({}, payload);
+  const through = (on) => ipcHandlers.get('subtitle:set-click-through')({}, on);
+
+  beforeEach(() => {
+    ipcHandlers.clear();
+    const { setupSubtitleHandlers } = loadSubtitleWindowModule();
+    win = makeFakeWindow();
+    setupSubtitleHandlers(win);
+  });
+
+  afterEach(() => {
+    win.destroyed = true;
+    win.emit('closed');
+    delete nodeRequire.cache[electronPath];
+    delete nodeRequire.cache[modulePath];
+    delete nodeRequire.cache[popoverModulePath];
+  });
+
+  it('passes clicks to what is under the strip, movement still told to the page: its own button is the way out', async () => {
+    await enter({});
+    expect(await through(true)).toEqual({ ok: true });
+    expect(win.setIgnoreMouseEvents).toHaveBeenLastCalledWith(true, { forward: true });
+    await through(false);
+    expect(win.setIgnoreMouseEvents).toHaveBeenLastCalledWith(false);
+  });
+
+  it('belongs to the strip alone: nothing outside subtitle mode, and the main window takes its clicks when the mode is left', async () => {
+    expect(await through(true)).toEqual({ ok: false });
+    expect(win.setIgnoreMouseEvents).not.toHaveBeenCalled();
+    await enter({});
+    await through(true);
+    await exit();
+    expect(win.setIgnoreMouseEvents).toHaveBeenLastCalledWith(false);
   });
 });
