@@ -64,12 +64,18 @@ function nameIn(code: string, language: 'zh' | 'en'): string {
   return code;
 }
 
-/** Where the sentence goes in a request's words. */
+/** Where the sentence goes in a request's words, and — in a request that takes one — the sentence said before it. */
 export const TEXT_SLOT = '{{TEXT}}';
+export const BEFORE_SLOT = '{{BEFORE}}';
 
 /** A request for one sentence: the whole user message with `TEXT_SLOT` where the sentence goes, and what else the body carries. */
 export interface TranslatorRequest {
   wrap: string;
+  /**
+   * The request where a sentence was said just before this one: the same, with `BEFORE_SLOT` where that sentence
+   * goes. Only of a model trained on such a request; absent, the sentence is asked alone.
+   */
+  wrapAfter?: string;
   extra: Record<string, unknown>;
 }
 
@@ -81,7 +87,15 @@ export interface TranslatorRequest {
  * be detected; greedy, thinking off.
  *
  * Hunyuan MT: its card's two forms — in Chinese when either side is Chinese,
- * in English otherwise — with the sampling the card recommends.
+ * in English otherwise — with the sampling the card recommends. And, in
+ * Chinese, its card's form for a translation with what came before: a
+ * sentence of a talk is often half of a thought (Japanese leaves its subject
+ * out), and translated alone it is guessed at.
+ *
+ * Index-Translate is asked alone, always: its card has no such form, and
+ * given the sentence before in any of three ways it translated that sentence
+ * instead of its own in one to three of twelve (measured 2026-10-06; Hunyuan
+ * MT 2, by its card's form, in none, and better in three).
  */
 export function translatorRequest(model: NativeTranslator, source: string, target: string): TranslatorRequest {
   if (model.prompt === 'index') {
@@ -95,6 +109,7 @@ export function translatorRequest(model: NativeTranslator, source: string, targe
     wrap: chinese
       ? `将以下文本翻译为${nameIn(target, 'zh')}，注意只需要输出翻译后的结果，不要额外解释：\n\n${TEXT_SLOT}`
       : `Translate the following segment into ${nameIn(target, 'en')}, without additional explanation.\n\n${TEXT_SLOT}`,
+    ...(chinese ? { wrapAfter: `${BEFORE_SLOT}\n参考上面的信息，把下面的文本翻译成${nameIn(target, 'zh')}，注意不需要翻译上文，也不要额外解释：\n${TEXT_SLOT}` } : {}),
     extra: { temperature: 0.7, top_p: 0.6, top_k: 20, repeat_penalty: 1.05, max_tokens: 512 },
   };
 }

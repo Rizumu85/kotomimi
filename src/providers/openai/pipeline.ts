@@ -31,7 +31,7 @@ import { createApiAsr } from './apiAsr';
 import { createNativeAsr, type NativeLimits } from './nativeAsr';
 import { languageByScript, saidInOwn, sameSpeech } from '../../lib/language/script';
 import { AUTO } from '../../lib/provider/languages';
-import { TEXT_SLOT } from './nativeTranslators';
+import { BEFORE_SLOT, TEXT_SLOT } from './nativeTranslators';
 import { cutAt, letters, restFrom, SETTLE_MS } from './sentenceCut';
 import { askNativeEngine, ipcNativeBridge, type NativeBridge, type NativeEngineStatus } from '../../lib/native/nativeEngine';
 import { createRealtimeAdapter } from './adapter';
@@ -72,6 +72,8 @@ export interface TextStage {
    * the sentence where `TEXT_SLOT` stands, no system message — and `extra` goes with the request.
    */
   wrap?: string;
+  /** The same, of a model that takes the sentence said before with it: that sentence where `BEFORE_SLOT` stands. */
+  wrapAfter?: string;
   extra?: Readonly<Record<string, unknown>>;
 }
 
@@ -102,6 +104,8 @@ export interface Stages {
    * leg's target language is not translated.
    */
   heard?: string;
+  /** A stretch is answered whole, when the recognizer closes it: its sentences are not closed as they come (`sentenceCut.ts`). The user's choice. */
+  whole?: boolean;
 }
 
 /** This computer hears: its own recognizer and turn detection, and no socket. */
@@ -171,7 +175,13 @@ interface Job {
   origin: string | undefined;
   /** Typed text must be answered, or said to be unanswerable (the contract's `text-input-answered`). */
   typed: boolean;
+  /** The sentence this leg heard just before, for a translator that takes one with its request. */
+  before?: string;
 }
+
+/** A sentence is given to the translator of the next while it is this recent, and no more of it than its last letters. */
+const BEFORE_WITHIN_MS = 15_000;
+const BEFORE_MOST = 120;
 
 /** A stage's answer as it is shown: a translation unwrapped as the Realtime adapter unwraps one; feedback as a bare ✓ when that is all it says, else its lines. */
 export function tidyAnswer(kind: AnswerStage['kind'], text: string): string {
@@ -247,6 +257,8 @@ class PipelineLeg implements AdapterSession {
    */
   private readonly cuts = new Map<Ref, Cut>();
   private pieceIds = 0;
+  /** The last sentence heard that was sent to be translated, and when. */
+  private said: { text: string; at: number } | null = null;
   private readonly queue: Job[] = [];
   private running: AbortController | null = null;
   private innerBusy = false;
@@ -517,7 +529,7 @@ class PipelineLeg implements AdapterSession {
    */
   private cutsSentences(): boolean {
     const speech = this.stages.speech;
-    return !!speech && speech.kind !== 'coach';
+    return !!speech && speech.kind !== 'coach' && this.stages.whole !== true;
   }
 
   /** The segment that shows what is left of a stretch: opened when there first is something left. */
@@ -591,7 +603,13 @@ class PipelineLeg implements AdapterSession {
     // A coached speaker who says a sentence in their own language is not practising with it: it is translated, as what
     // they type is, and not sent for feedback. No translation in this run: it is shown as said.
     const stage = coached && other !== undefined ? this.stages.typed : this.stages.speech;
-    if (source && text && stage && !already) this.push({ stage, text, origin: payload.origin ?? source.origin, typed: false });
+    if (source && text && stage && !already) {
+      // A translation is told the sentence before, where its model takes one: what this side said last, not long ago.
+      const now = this.request.clock.now();
+      const before = stage.kind === 'translate' && this.said && now - this.said.at <= BEFORE_WITHIN_MS ? this.said.text.slice(-BEFORE_MOST) : undefined;
+      if (stage.kind === 'translate') this.said = { text, at: now };
+      this.push({ stage, text, origin: payload.origin ?? source.origin, typed: false, ...(before ? { before } : {}) });
+    }
   }
 
   private heardOf(ref: Ref): Heard | undefined {
@@ -688,7 +706,7 @@ class PipelineLeg implements AdapterSession {
     this.frame('out', 'text.request', { stage: stage.kind, model: stage.model, chars: job.text.length, ...where });
     try {
       const started = clock.now();
-      const answer: { text: string; firstMs?: number; totalMs: number } = stage.via === 'device' ? await this.translateHere(stage, job.text, started) : await this.complete(stage, job.text, signal, show);
+      const answer: { text: string; firstMs?: number; totalMs: number } = stage.via === 'device' ? await this.translateHere(stage, job.text, started) : await this.complete(stage, job.text, signal, show, job.before);
       if (this.ended) return;
       const final = tidyAnswer(stage.kind, answer.text);
       show(final);
@@ -705,7 +723,7 @@ class PipelineLeg implements AdapterSession {
   }
 
   /** A text model's answer, shown as it is written. */
-  private async complete(stage: TextStage, text: string, signal: AbortSignal, show: (text: string) => void): Promise<{ text: string; firstMs?: number; totalMs: number }> {
+  private async complete(stage: TextStage, text: string, signal: AbortSignal, show: (text: string) => void, before?: string): Promise<{ text: string; firstMs?: number; totalMs: number }> {
     const { credentials, clock } = this.request;
     let key = stage.key ? credentials[stage.key] : undefined;
     let base = stage.baseUrl || httpBaseOf(credentials.endpoint);
@@ -728,7 +746,9 @@ class PipelineLeg implements AdapterSession {
         ...(stage.pair ? { pair: stage.pair } : {}),
         ...(stage.extra ? { extra: stage.extra } : {}),
         // A function, so that nothing in the sentence is read as a pattern.
-        user: stage.wrap ? stage.wrap.replace(TEXT_SLOT, () => text) : text,
+        user: stage.wrapAfter && before
+          ? stage.wrapAfter.replace(BEFORE_SLOT, () => before).replace(TEXT_SLOT, () => text)
+          : stage.wrap ? stage.wrap.replace(TEXT_SLOT, () => text) : text,
       },
       { fetch: this.doFetch, clock, signal, onText: (shown) => show(tidyAnswer(stage.kind, shown)) },
     );

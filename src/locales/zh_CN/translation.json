@@ -511,6 +511,8 @@
       "endpoint": "地址",
       "endpointPlaceholder": "例如 192.168.1.10:8790",
       "serverNeedsKey": "它需要访问密钥",
+      "bySentence": "一句一译",
+      "bySentenceTooltip": "对方每说完一句就翻译，不等整段说完。关掉后整段一起翻译。",
       "serverNeedsKeyTooltip": "另一台设备设了访问密钥时打开，例如对面那台 Kotomimi 在共享的「选项」里设置了密钥。",
       "serverKey": "访问密钥",
       "kotomimiServer": "它是另一台正在共享模型的 Kotomimi。",

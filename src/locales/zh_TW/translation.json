@@ -511,6 +511,8 @@
       "endpoint": "位址",
       "endpointPlaceholder": "例如 192.168.1.10:8790",
       "serverNeedsKey": "它需要存取金鑰",
+      "bySentence": "一句一譯",
+      "bySentenceTooltip": "對方每說完一句就翻譯，不等整段說完。關掉後整段一起翻譯。",
       "serverNeedsKeyTooltip": "另一台裝置設了存取金鑰時開啟，例如對面那台 Kotomimi 在共享的「選項」裡設定了金鑰。",
       "serverKey": "存取金鑰",
       "kotomimiServer": "它是另一台正在共享模型的 Kotomimi。",

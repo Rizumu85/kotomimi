@@ -548,3 +548,59 @@ describe('a sentence the speaker stops at, the stretch still open', () => {
     expect(h.calls.map((c) => c.body.messages[1].content)).toEqual(['そうだね、やっぱりお正月のイメージあるよね。']);
   });
 });
+
+describe('a translator that takes the sentence said before', () => {
+  const taking = (config: LocalAIConfig) => {
+    const speech = config.stages?.speech as { wrap?: string; wrapAfter?: string } | null | undefined;
+    if (speech) { speech.wrap = 'T:{{TEXT}}'; speech.wrapAfter = 'B:{{BEFORE}}|T:{{TEXT}}'; }
+  };
+
+  it('is told what this side said last, while that is recent — and asked alone otherwise', async () => {
+    const h = await live(PARTICIPANT, VIA_MODEL, [sse('一'), sse('二'), sse('三')], K, taking);
+    h.receive(...heard('item_1', '彼女は医者です。'));
+    await h.settled();
+    // The first of a talk: nothing before it.
+    expect(h.calls[0].body.messages.slice(-1)[0]?.content).toBe('T:彼女は医者です。');
+    h.clock.advance(3000);
+    h.receive(...heard('item_2', '去年から働いています。'));
+    await h.settled();
+    expect(h.calls[1].body.messages.slice(-1)[0]?.content).toBe('B:彼女は医者です。|T:去年から働いています。');
+    // Long after: it is no longer what this is said about.
+    h.clock.advance(16_000);
+    h.receive(...heard('item_3', 'そうですか。'));
+    await h.settled();
+    expect(h.calls[2].body.messages.slice(-1)[0]?.content).toBe('T:そうですか。');
+  });
+
+  it('is asked alone where its request has no place for one', async () => {
+    const h = await live(PARTICIPANT, VIA_MODEL, [sse('一'), sse('二')]);
+    h.receive(...heard('item_1', '彼女は医者です。'), ...heard('item_2', '去年から働いています。'));
+    await h.settled();
+    expect(h.calls.map((c) => c.body.messages.slice(-1)[0]?.content)).toEqual(['彼女は医者です。', '去年から働いています。']);
+  });
+});
+
+describe('a leg told to answer a stretch whole', () => {
+  it('closes no sentence before the recognizer closes the stretch: the user\u2019s switch', async () => {
+    const whole = (config: LocalAIConfig) => { if (config.stages) config.stages.whole = true; };
+    const h = await live(PARTICIPANT, VIA_MODEL, [sse('一')], K, whole);
+    h.receive(SERVER.committed('item_1'), SERVER.inputDelta('item_1', '今日は本当に寒いですね。明日もきっと寒いでしょ'));
+    h.clock.advance(1000);
+    h.receive(SERVER.inputDelta('item_1', 'うね'));
+    h.clock.advance(1000);
+    expect(h.calls).toHaveLength(0);
+    h.receive(SERVER.inputDone('item_1', '今日は本当に寒いですね。明日もきっと寒いでしょうね。'));
+    await h.settled();
+    expect(h.calls.map((c) => c.body.messages.slice(-1)[0]?.content)).toEqual(['今日は本当に寒いですね。明日もきっと寒いでしょうね。']);
+    expect(h.of('segmentOpened').filter((e) => e.payload.side === 'source')).toHaveLength(1);
+  });
+
+  it('is what the setting builds: sentence by sentence unless switched off', () => {
+    const on = buildLocalAI(PARTICIPANT, { ...LOCALAI_DEFAULTS, ...VIA_MODEL }, shared);
+    const off = buildLocalAI(PARTICIPANT, { ...LOCALAI_DEFAULTS, ...VIA_MODEL, translateBySentence: false }, shared);
+    if ('refused' in on || 'refused' in off) throw new Error('refused');
+    expect(LOCALAI_DEFAULTS.translateBySentence).toBe(true);
+    expect(on.stages?.whole).toBeUndefined();
+    expect(off.stages?.whole).toBe(true);
+  });
+});

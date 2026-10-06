@@ -18,6 +18,8 @@ import {
 import type { ConversationListProps } from '../Conversation/ConversationList';
 import SubtitleBar from './SubtitleBar';
 import { SubtitleBody } from './SubtitleBands';
+import { restingHeights } from './SubtitleLanes';
+import { useAnnotationStore } from '../../stores/annotationStore';
 import SubtitleIdle from './SubtitleIdle';
 import type { SubtitleIdleState } from './subtitleIdleState';
 import { useSubtitleChrome, type SubtitleSurfaceKind } from './useSubtitleChrome';
@@ -203,12 +205,17 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
       }
     : shown;
 
-  // No lanes on screen — the list, or no run: the window may be any height again.
+  // No lanes on screen. With no run on, the window keeps the height its lanes will have — the frame is then the
+  // strip to come, and cannot be pressed flat; showing the list, or where it is not fitted at all, it may be any
+  // height again.
   const lanesShown = running && subtitle.compactMode;
+  const romanization = useAnnotationStore((state) => state.romanization);
   useEffect(() => {
     if (surface !== 'electron' || lanesShown) return;
-    void window.electron?.invoke?.('subtitle:fit-height', { least: 0 })?.catch?.(() => {});
-  }, [surface, lanesShown]);
+    const resting = !running && subtitle.compactMode && fitsWindow ? restingHeights(laneLegs, filters, subtitle.fontSize, romanization) : null;
+    if (resting) fitWindow(resting.height, resting.least);
+    else void window.electron?.invoke?.('subtitle:fit-height', { least: 0 })?.catch?.(() => {});
+  }, [surface, lanesShown, running, subtitle.compactMode, subtitle.fontSize, fitsWindow, fitWindow, laneLegs, filters, romanization]);
 
   return (
     <div ref={chrome.rootRef} {...rootProps}>

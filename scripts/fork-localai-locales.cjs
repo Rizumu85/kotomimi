@@ -39,6 +39,12 @@ const PROVIDER = {
   endpoint: ['Address', '地址', '位址'],
   endpointPlaceholder: ['e.g. 192.168.1.10:8790', '例如 192.168.1.10:8790', '例如 192.168.1.10:8790'],
   serverNeedsKey: ['It asks for an access key', '它需要访问密钥', '它需要存取金鑰'],
+  bySentence: ['Translate sentence by sentence', '一句一译', '一句一譯'],
+  bySentenceTooltip: [
+    'The other side is translated as each sentence ends, not when they stop talking. Off: a whole stretch at once.',
+    '对方每说完一句就翻译，不等整段说完。关掉后整段一起翻译。',
+    '對方每說完一句就翻譯，不等整段說完。關掉後整段一起翻譯。',
+  ],
   serverNeedsKeyTooltip: [
     'Turn this on when the other device was given an access key — a Kotomimi with one set under its sharing options, for example.',
     '另一台设备设了访问密钥时打开，例如对面那台 Kotomimi 在共享的「选项」里设置了密钥。',

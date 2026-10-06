@@ -10,7 +10,7 @@ import { admitLocalAI, buildLocalAI, checkLocalAIWithNative, localaiProvider, LO
 import { deviceChoices, deviceNeeds, translatesNatively } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
 import { translatorBaseUrl, translatorGap } from './localaiNative';
-import { NATIVE_DEFAULT_TRANSLATOR, NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator, TEXT_SLOT, translatorRequest } from './nativeTranslators';
+import { BEFORE_SLOT, NATIVE_DEFAULT_TRANSLATOR, NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator, TEXT_SLOT, translatorRequest } from './nativeTranslators';
 import { SHARED } from './testing';
 import { completeText } from './textModel';
 
@@ -173,5 +173,20 @@ describe('the provider\'s check, with the translation engine', () => {
   it('is told of the engine\'s model among what decides the check', () => {
     expect(localaiProvider.checkReads).toContain('translateNativeModel');
     expect(localaiProvider.checkReads).toContain('translateHere');
+  });
+});
+
+describe('a request with the sentence said before', () => {
+  it('is Hunyuan MT\u2019s own form for it, from its card, where the request is in Chinese', () => {
+    const request = translatorRequest(nativeTranslator('hy-mt2-1.8b'), 'ja', 'zh-CN');
+    expect(request.wrapAfter).toBe(`${BEFORE_SLOT}\n参考上面的信息，把下面的文本翻译成中文，注意不需要翻译上文，也不要额外解释：\n${TEXT_SLOT}`);
+    expect(translatorRequest(nativeTranslator('hy-mt2-1.8b'), 'zh-CN', 'ja').wrapAfter).toContain('翻译成日语');
+    // Its card writes that form in Chinese only: between two other languages a sentence is asked alone.
+    expect(translatorRequest(nativeTranslator('hy-mt2-1.8b'), 'ja', 'en').wrapAfter).toBeUndefined();
+  });
+
+  it('is not made for Index-Translate: given one, it translated that sentence instead of its own', () => {
+    // Measured 2026-10-06, three forms, twelve pairs of sentences: one to three of twelve each.
+    expect(translatorRequest(nativeTranslator('index-translate-2b'), 'ja', 'zh-CN').wrapAfter).toBeUndefined();
   });
 });

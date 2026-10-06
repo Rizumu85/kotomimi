@@ -98,6 +98,19 @@ const langOf = (text: LaneText): string | undefined => fontLanguage(text.languag
 const LEGS: readonly LegName[] = ['participant', 'speaker'];
 
 /**
+ * The height the lanes of these legs take before anything is said, and the least they can be squeezed into: what a
+ * strip with no run on is held at, so that its frame is the size of the strip to come — "set the window's place and
+ * size before you start" was not true of a window that took a height of its own the moment it started, and whose
+ * frame could meanwhile be pressed flat (the user, 2026-10-06). Null: no lanes.
+ */
+export function restingHeights(legs: readonly LegName[], filters: LegFilters, fontSize: number, romanization: boolean): { height: number; least: number } | null {
+  const lanes = buildLanes([], legs, filters, () => '');
+  if (lanes.length === 0) return null;
+  const [roomy, tight] = romanization ? [withRoman(ROOMY), withRoman(TIGHT)] : [ROOMY, TIGHT];
+  return { height: lanesHeight(lanes, fontSize, roomy) + addedBefore(), least: lanesHeight(lanes, fontSize, tight) };
+}
+
+/**
  * Which answered sentence each side's pair shows, by its entry: the newest — once the one before it has been on
  * the screen long enough to be read (`dwell.ts`). The clock is kept here; what is shown by it is `buildLanes`'.
  */

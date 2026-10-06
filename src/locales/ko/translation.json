@@ -511,6 +511,8 @@
       "endpoint": "Address",
       "endpointPlaceholder": "e.g. 192.168.1.10:8790",
       "serverNeedsKey": "It asks for an access key",
+      "bySentence": "Translate sentence by sentence",
+      "bySentenceTooltip": "The other side is translated as each sentence ends, not when they stop talking. Off: a whole stretch at once.",
       "serverNeedsKeyTooltip": "Turn this on when the other device was given an access key — a Kotomimi with one set under its sharing options, for example.",
       "serverKey": "Access key",
       "kotomimiServer": "It is another Kotomimi sharing its models.",

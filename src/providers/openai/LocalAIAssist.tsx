@@ -927,6 +927,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
               }}
             />
           ))}
+        <ToggleSwitch checked={settings.translateBySentence} onChange={() => put({ translateBySentence: !settings.translateBySentence })} label={t('providers.localai.bySentence')} disabled={disabled} tooltip={t('providers.localai.bySentenceTooltip')} />
       </StageCard>
 
       <StageCard

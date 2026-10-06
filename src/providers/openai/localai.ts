@@ -103,6 +103,12 @@ export interface LocalAISettings extends RealtimeSettings {
    * detects the language (`detectsOther`).
    */
   asrDetectOther: boolean;
+  /**
+   * What is heard is translated a sentence at a time, as it is said, where the recognizer writes as it hears
+   * (`sentenceCut.ts`). Off: a stretch is translated when the recognizer closes it, as upstream does — later, and by
+   * the recognizer's last word on it.
+   */
+  translateBySentence: boolean;
   /** Where it translates. */
   translateAt: Place;
   /** On the other device: the model asked over chat. Blank: the device's own — its pipeline, inside the session it hears in; else the first model it lists that translates. */
@@ -182,6 +188,7 @@ export const LOCALAI_DEFAULTS: LocalAISettings = {
   // An API usually wants a key: its field shows as soon as the API is chosen.
   asrApiNeedsKey: true,
   asrDetectOther: false,
+  translateBySentence: true,
   translateAt: 'server',
   translateServerModel: '',
   translateBaseUrl: '',
@@ -319,7 +326,7 @@ const quick = (baseUrl: string): { extra?: Readonly<Record<string, unknown>> } =
 
 export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>, inputs: MigrationInputs): LocalAISettings {
   const text = (k: 'asrModel' | 'asrApiBaseUrl' | 'asrApiModel' | 'translateBaseUrl' | 'coachDeviceModel' | 'coachPrompt' | 'asrHereModel' | 'asrNativeModel' | 'translateHereModel' | 'translateNativeModel' | 'coachHereModel' | 'coachNativeModel' | 'hereAddress' | 'herePipeline') => (typeof stored[k] === 'string' ? (stored[k] as string) : LOCALAI_DEFAULTS[k]);
-  const flag = (k: 'asrApiNeedsKey' | 'asrDetectOther' | 'coach' | 'serverNeedsKey') => (typeof stored[k] === 'boolean' ? (stored[k] as boolean) : LOCALAI_DEFAULTS[k]);
+  const flag = (k: 'asrApiNeedsKey' | 'asrDetectOther' | 'coach' | 'serverNeedsKey' | 'translateBySentence') => (typeof stored[k] === 'boolean' ? (stored[k] as boolean) : LOCALAI_DEFAULTS[k]);
   const number = (k: (typeof VAD_FIELDS)[number]) => (typeof stored[k] === 'number' && Number.isFinite(stored[k]) ? (stored[k] as number) : LOCALAI_DEFAULTS[k]);
   const selections = stored.selections;
   return {
@@ -330,6 +337,7 @@ export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>
     asrApiModel: text('asrApiModel'),
     asrApiNeedsKey: flag('asrApiNeedsKey'),
     asrDetectOther: flag('asrDetectOther'),
+    translateBySentence: flag('translateBySentence'),
     translateBaseUrl: text('translateBaseUrl'),
     coach: flag('coach'),
     coachDeviceModel: text('coachDeviceModel'),
@@ -1009,7 +1017,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
     stages = { speech: coach, typed: translate, heard: target };
   } else if (translate) {
     // A detected leg says so to what runs it: the recognizer is told no language, and each sentence is given its own.
-    stages = { speech: translate, typed: translate, ...(detected ? { heard: AUTO } : {}) };
+    stages = { speech: translate, typed: translate, ...(detected ? { heard: AUTO } : {}), ...(s.translateBySentence ? {} : { whole: true }) };
   }
 
   return {
