@@ -5,6 +5,7 @@ import type { LegName, SegmentId } from '../../lib/conversation/types';
 import type { Entry } from '../../lib/projection/types';
 import { fontLanguage } from '../../lib/fonts/fontCss';
 import { annotatedLanguage } from '../../lib/annotate/script';
+import { answeredOf, holdMs, nextShown } from '../../lib/subtitle/dwell';
 import { buildLanes, lanesHeight, linesFor, ROOMY, ROW_SCALE, spacingAt, squeezeOf, TIGHT, withRoman, type Lane, type LanePiece, type LaneText } from '../../lib/subtitle/lanes';
 import { useAnnotationStore } from '../../stores/annotationStore';
 import type { LegFilters } from '../../lib/view/filter';
@@ -94,6 +95,43 @@ function Written({ text, lit }: { text: LaneText; lit: ReadonlyMap<SegmentId, nu
 
 const langOf = (text: LaneText): string | undefined => fontLanguage(text.language) || undefined;
 
+const LEGS: readonly LegName[] = ['participant', 'speaker'];
+
+/**
+ * Which answered sentence each side's pair shows, by its entry: the newest — once the one before it has been on
+ * the screen long enough to be read (`dwell.ts`). The clock is kept here; what is shown by it is `buildLanes`'.
+ */
+function useHeld(entries: readonly Entry[]): Partial<Record<LegName, string>> {
+  const shown = useRef<Partial<Record<LegName, { id: string; since: number }>>>({});
+  const [held, setHeld] = useState<Partial<Record<LegName, string>>>({});
+  const [turn, setTurn] = useState(0);
+  useEffect(() => {
+    const now = Date.now();
+    let soonest = Infinity;
+    const next: Partial<Record<LegName, string>> = {};
+    for (const leg of LEGS) {
+      const answered = answeredOf(entries, leg);
+      const last = answered.length - 1;
+      if (last < 0) { delete shown.current[leg]; continue; }
+      let at = answered.findIndex((answer) => answer.id === shown.current[leg]?.id);
+      // Nothing shown yet, or what was shown is gone (the conversation was cleared): the newest, at once.
+      if (at < 0) { at = last; shown.current[leg] = { id: answered[last].id, since: now }; }
+      while (at < last) {
+        const due = shown.current[leg]!.since + holdMs(answered[at].text, answered[at].language, last - at);
+        if (due > now) { soonest = Math.min(soonest, due); break; }
+        at = nextShown(at, last);
+        shown.current[leg] = { id: answered[at].id, since: now };
+      }
+      next[leg] = answered[at].id;
+    }
+    setHeld((before) => (LEGS.every((leg) => before[leg] === next[leg]) ? before : next));
+    if (soonest === Infinity) return undefined;
+    const timer = setTimeout(() => setTurn((n) => n + 1), Math.max(0, soonest - now) + 10);
+    return () => clearTimeout(timer);
+  }, [entries, turn]);
+  return held;
+}
+
 /**
  * The height the user gave the strip over what its lanes are laid out for, kept on this computer: the room the
  * earlier sentences show in. A window made higher stays so the next time the view opens.
@@ -143,7 +181,8 @@ export interface SubtitleLanesProps {
  */
 export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight }: SubtitleLanesProps) {
   const { t } = useTranslation();
-  const lanes = useMemo(() => buildLanes(entries, legs, filters, (notice) => noticeText(t, notice)), [entries, legs, filters, t]);
+  const held = useHeld(entries);
+  const lanes = useMemo(() => buildLanes(entries, legs, filters, (notice) => noticeText(t, notice), held), [entries, legs, filters, t, held]);
   // The layout the window is fitted to: the size chosen and which texts there are, not what they say.
   const shape = lanes.map((lane) => `${lane.leg}:${lane.source ? 's' : ''}${lane.answer ? 'a' : ''}`).join(',');
   // A romanization under the small lines has a line of its own there: while the switch is on and what is said is

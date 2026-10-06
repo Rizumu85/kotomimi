@@ -898,8 +898,11 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   const pipeline = needsServer(s) ? effectiveLocalAIModel(s, models) : '';
   const model = hearsLocal ? s.herePipeline.trim() || LOCALAI_DEFAULT_MODEL : hearsHere ? '' : pipeline;
   const kotomimi = needsServer(s) && isKotomimiServer(models);
-  // The speaker alone is coached: the participant leg always hears the other side, and translates it.
-  const coached = s.coach && !shared.reversed(context.direction);
+  // The speaker alone is coached: the participant leg always hears the other side, and translates it. Asked of the
+  // direction the leg was given: with its source rewritten to be detected it is no longer the pair's reverse, and
+  // the other side's leg was taken for the speaker's — heard in the user's language and answered with feedback, no
+  // translation at all (feedback on, detection on; found 2026-10-06, in every build since detection was a choice).
+  const coached = s.coach && !shared.reversed(asked.direction);
 
   // Every stage named, before anything is built: a run with none has nothing to say. A coached speaker's translation
   // is for what they type only: the run starts without it.

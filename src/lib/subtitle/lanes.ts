@@ -115,6 +115,8 @@ export function buildLanes(
   legs: readonly LegName[],
   filters: LegFilters,
   words: (notice: NoticeEntry) => string,
+  /** Of a pair: the answered sentence it is to show for now, by its entry's id, where a newer one is to wait its turn (`dwell.ts`). */
+  held: Partial<Record<LegName, string>> = {},
 ): Lane[] {
   const shown = ORDER.filter((leg) => legs.includes(leg) && (showsSide(filters[leg], 'source') || showsSide(filters[leg], 'translation')));
   return shown.map((leg): Lane => {
@@ -137,6 +139,11 @@ export function buildLanes(
     for (let i = mine.length - 1; i >= 0 && (newest < 0 || answered < 0); i--) {
       if (newest < 0 && (written(i, 'source') || written(i, 'translation'))) newest = i;
       if (answered < 0 && written(i, 'translation')) answered = i;
+    }
+    // A pair holds the answer it shows until that has been read: a newer one waits its turn.
+    if (shape === 'pair' && held[leg] !== undefined) {
+      const at = mine.findIndex((entry) => entry.id === held[leg]);
+      if (at >= 0 && at < answered && written(at, 'translation')) answered = at;
     }
     // A notice after the newest sentence is what the side has to say now, where its answers are shown.
     const last = mine[mine.length - 1];

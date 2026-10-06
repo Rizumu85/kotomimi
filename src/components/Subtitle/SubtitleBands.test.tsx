@@ -189,3 +189,46 @@ describe('SubtitleBody — the look\u2019s shadow and alignment (fork)', () => {
     }
   });
 });
+
+describe('SubtitleBody — an answer stays long enough to be read (fork)', () => {
+  const theirs = (id: string, source: string, answer = ''): Entry => ({
+    kind: 'exchange', id, leg: 'participant', languages: { source: 'ja', target: 'zh-CN' }, pairing: 'stated',
+    source: [row(`s-${id}`, 0, 0, source)], translation: answer ? [row(`t-${id}`, 0, 0, answer, 'translation')] : [], t: 0,
+  });
+  const answer = (container: HTMLElement) => container.querySelector('[data-lane="participant"] .subtitle-lane__answer .subtitle-lane__text')?.textContent;
+
+  it('keeps the answer on screen for its reading time when the next comes at once, then shows the next', () => {
+    vi.useFakeTimers();
+    try {
+      const first = [theirs('a', 'これで全種かな。', '这样就是所有种类了。')];
+      const { container, rerender } = render(<SubtitleBody {...props({ entries: first, legs: ['participant'] })} />);
+      expect(answer(container)).toBe('这样就是所有种类了。');
+      // The next sentence is answered a moment later: gone at once, the first was never read (seen 2026-10-06).
+      act(() => { vi.advanceTimersByTime(300); });
+      const second = [...first, theirs('b', 'はい。', '好的。')];
+      rerender(<SubtitleBody {...props({ entries: second, legs: ['participant'] })} />);
+      expect(answer(container)).toBe('这样就是所有种类了。');
+      act(() => { vi.advanceTimersByTime(700); });
+      expect(answer(container)).toBe('这样就是所有种类了。');
+      // Ten characters of Chinese: the least a caption is held, 1.2 s from when it came.
+      act(() => { vi.advanceTimersByTime(300); });
+      expect(answer(container)).toBe('好的。');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('shows an answer at once where the one before has been read already', () => {
+    vi.useFakeTimers();
+    try {
+      const first = [theirs('a', 'これで全種かな。', '这样就是所有种类了。')];
+      const { container, rerender } = render(<SubtitleBody {...props({ entries: first, legs: ['participant'] })} />);
+      act(() => { vi.advanceTimersByTime(3000); });
+      rerender(<SubtitleBody {...props({ entries: [...first, theirs('b', 'はい。', '好的。')], legs: ['participant'] })} />);
+      act(() => { vi.advanceTimersByTime(20); });
+      expect(answer(container)).toBe('好的。');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});

@@ -352,9 +352,84 @@
 // Fork: with a look whose panel is faint or gone (`src/lib/subtitle/look.ts`), what the strip says while no run is
 // on — its start button's hints, "press Space to speak" — was light text over whatever is behind the window, and
 // could not be read. It stands on a dark panel of its own, whatever the look: the look is for the captions.
-.subtitle-idle,
 .subtitle-ptt-hint {
   background: rgba(0, 0, 0, 0.72);
+}
+
+// Fork: the strip with no run on — not begun, ended, starting, something to fix — is one row on a capsule of its
+// own in the middle of the window: what state it is in, the action, the way back. Stacked in the middle of a dark
+// panel over the whole window, the state was small grey words under the button and the way back an underlined
+// link, neither of which could be read (the user, 2026-10-06, who chose this from three sketches). The rest of the
+// window is left as the look has it. (The class twice: upstream's own rules for it load after these.)
+.subtitle-idle.subtitle-idle {
+  flex: 0 1 auto;
+  align-self: center;
+  margin: auto;
+  max-width: calc(100% - 32px);
+  flex-direction: row;
+  gap: 12px;
+  padding: 8px 10px 8px 14px;
+  background: #1d1f22;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  -webkit-app-region: no-drag;
+
+  // The state first, whichever element says it.
+  .subtitle-idle__hint,
+  .subtitle-idle__message,
+  .subtitle-idle__error {
+    order: -1;
+    min-width: 0;
+    font-size: 13px;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+
+  .subtitle-idle__hint,
+  .subtitle-idle__message {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #f2f2f2;
+
+    &::before {
+      content: '';
+      flex: none;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #9aa0a6;
+    }
+  }
+
+  .subtitle-idle__row {
+    flex: none;
+    gap: 12px;
+  }
+
+  .subtitle-idle__action {
+    flex: none;
+    padding: 7px 13px;
+    font-weight: 500;
+  }
+
+  // The way back is a button beside the action, not a link under it.
+  .subtitle-idle__link,
+  .subtitle-idle__return {
+    flex: none;
+    padding: 6px 11px;
+    font-size: 13px;
+    color: #e6e6e6;
+    text-decoration: none;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+
+    &:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
 }
 
 // Fork: click-through (`SubtitleView`, `SubtitleBar`). The bar is in the page but not drawn — but for the button that

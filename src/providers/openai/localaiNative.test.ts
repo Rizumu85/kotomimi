@@ -204,6 +204,20 @@ describe('the other side\u2019s language left to be detected', () => {
     expect(heardBy(settings({ ...DETECT, coach: true }), pair, 'speaker')).toBe('ja');
   });
 
+  it('still translates the other side where the speaker is given feedback: a detected leg is never the coached one', () => {
+    // `reversed` as the app has it: the pair's reverse, exactly — which the leg no longer is once its source is "auto".
+    const other = { ...PARTICIPANT, direction: { source: 'ja', target: 'zh-CN' } };
+    const reversed = { ...shared, reversed: (d: SessionContext['direction']) => d.source === 'ja' && d.target === 'zh-CN' };
+    const coaching = settings({ ...DETECT, coach: true, coachAt: 'api', coachModel: 'gpt-x', coachBaseUrl: 'http://localhost:11434/v1' });
+    const config = buildLocalAI(other, coaching, reversed);
+    if ('refused' in config) throw new Error(config.refused);
+    expect(config.stages).toMatchObject({ heard: 'auto', speech: { kind: 'translate', model: 'index-translate-2b' } });
+    // The speaker's own leg is the coached one.
+    const mine = buildLocalAI(PARTICIPANT, coaching, reversed);
+    if ('refused' in mine) throw new Error(mine.refused);
+    expect(mine.stages?.speech).toMatchObject({ kind: 'coach' });
+  });
+
   it('is heard by a native model that detects one, and by no other', () => {
     expect(nativePicked({ model: 'qwen3-asr-1.7b-q8' }, 'auto')?.id).toBe('qwen3-asr-1.7b-q8');
     expect(nativePicked({ model: 'r2t2-q8' }, 'auto')).toBeNull();

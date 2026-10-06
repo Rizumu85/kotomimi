@@ -205,3 +205,23 @@ describe('a strip whose small lines have a romanization under them', () => {
     expect(linesFor(two, 24, row + 24 * ROW_SCALE * ROMAN_LINE, withRoman(ROOMY)).row).toBe(2);
   });
 });
+
+describe('a pair that holds the answer it shows', () => {
+  const entries = [said('a', 'participant', 'そうそうそう。', '对对对。'), said('b', 'participant', 'それが好きなんですよ。', '我就是喜欢这个。'), said('c', 'participant', 'でも')];
+  const build = (held: Partial<Record<LegName, string>>) => buildLanes(entries, ['participant'], BOTH, words, held)[0];
+
+  it('shows the held sentence\u2019s answer, and goes on writing what is said after it', () => {
+    expect(build({ participant: 'a' })).toMatchObject({ source: { text: 'そうそうそう。それが好きなんですよ。でも' }, answer: { text: '对对对。' }, pending: true });
+    // Its turn over: the newest answered.
+    expect(build({ participant: 'b' })).toMatchObject({ source: { text: 'それが好きなんですよ。でも' }, answer: { text: '我就是喜欢这个。' } });
+    expect(build({})).toMatchObject({ answer: { text: '我就是喜欢这个。' } });
+  });
+
+  it('holds nothing that is not an answered sentence of the side, and never the user\u2019s own row', () => {
+    expect(build({ participant: 'gone' })).toMatchObject({ answer: { text: '我就是喜欢这个。' } });
+    expect(build({ participant: 'c' })).toMatchObject({ answer: { text: '我就是喜欢这个。' } });
+    const both = [...entries, said('m1', 'speaker', '一。', 'いち。'), said('m2', 'speaker', '二。', 'に。')];
+    const row = buildLanes(both, LEGS, BOTH, words, { speaker: 'm1' }).find((lane) => lane.leg === 'speaker');
+    expect(row).toMatchObject({ shape: 'row', source: { text: '二。' }, answer: { text: 'に。' } });
+  });
+});
