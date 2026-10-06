@@ -176,6 +176,9 @@ module.exports = {
   },
   // The fonts (`src/components/Fonts`).
   subtitle: {
+    // The two views of the subtitle window, by what they are: the caption lanes, and the conversation as a list.
+    lanesView: ['Subtitle view', '字幕视图', '字幕檢視'],
+    listView: ['List view', '列表视图', '列表檢視'],
     back: ['Back to the main window', '返回主窗口', '返回主視窗'],
   },
   fonts: {

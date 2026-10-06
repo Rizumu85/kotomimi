@@ -160,6 +160,8 @@ ipcMain.handle('subtitle:enter', (_event, payload) => {
 ipcMain.handle('subtitle:exit', (_event, payload) => {
   const win = getLiveWindow();
   if (!win) return { ok: false };
+  // Fork: the least height the lanes asked for is the subtitle window's, not the main window's.
+  restoreLeastSize(win);
   // If the user exits subtitle mode while fullscreen, drop fullscreen first;
   // otherwise setBounds() fights the fullscreen state and the window can be
   // left stuck. Guarded to avoid a needless transition on the common path.
@@ -207,6 +209,41 @@ ipcMain.handle('subtitle:set-always-on-top', (_event, flag) => {
     stopPinEnforcement();
   }
   return { ok: true };
+});
+
+// Fork: the subtitle view's lanes are laid out for a height that follows the font size chosen
+// (src/lib/subtitle/lanes.ts), and can be squeezed into no less than a least height. `height`: the window takes it,
+// with its bottom edge where it is — a caption strip sits low on the screen and grows upwards — and its place and
+// width as they are. `least`: the window can be dragged no lower than it; 0 lifts that. Only in subtitle mode, and
+// no height while the window fills the screen.
+const FIT_HEIGHT_MIN = 40;
+/** The window's least size as it was before the lanes asked for one. */
+let leastBefore = null;
+function restoreLeastSize(win) {
+  if (!leastBefore) return;
+  win.setMinimumSize(leastBefore[0], leastBefore[1]);
+  leastBefore = null;
+}
+ipcMain.handle('subtitle:fit-height', (_event, payload) => {
+  const win = getLiveWindow();
+  if (!win || normalBoundsSnapshot === null) return { ok: false };
+  const least = Math.round(Number(payload?.least));
+  if (Number.isFinite(least)) {
+    if (least >= FIT_HEIGHT_MIN) {
+      if (!leastBefore) leastBefore = win.getMinimumSize();
+      win.setMinimumSize(leastBefore[0], least);
+    } else {
+      restoreLeastSize(win);
+    }
+  }
+  const height = Math.round(Number(payload?.height));
+  if (!Number.isFinite(height) || height < FIT_HEIGHT_MIN || win.isFullScreen()) return { ok: true };
+  const bounds = win.getBounds();
+  if (bounds.height === height) return { ok: true, bounds };
+  const work = screen.getDisplayMatching(bounds).workArea;
+  const next = clampToScreen({ x: bounds.x, y: bounds.y + bounds.height - height, width: bounds.width, height }, work);
+  win.setBounds(next);
+  return { ok: true, bounds: next };
 });
 
 ipcMain.handle('subtitle:set-locked', (_event, locked) => {

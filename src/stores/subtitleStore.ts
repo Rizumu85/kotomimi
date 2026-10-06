@@ -63,7 +63,9 @@ export const SUBTITLE_DEFAULT_TRANSLATION_TEXT_COLOR = '#9ad0ff';
 
 const DEFAULTS = {
   fontSize: 24,
-  compactMode: false,
+  // Fork: the subtitle view opens on its lanes (`SubtitleLanes`), made for a caption strip; the conversation list
+  // is the other view of the same button. Upstream opens on the list.
+  compactMode: true,
   bgOpacity: 80,
   bgColor: SUBTITLE_DEFAULT_BG_COLOR,
   sourceTextColor: SUBTITLE_DEFAULT_SOURCE_TEXT_COLOR,

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import type { SegmentId } from '../../lib/conversation/types';
@@ -119,6 +119,26 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
   // only on the overlay surface — the Electron takeover shows the Space hint
   // instead (below).
   const showHoldToTalk = running && surface === 'extension-overlay' && session?.holdToTalk === true;
+  // Fork: the compact view's lanes, one for each leg this run hears — or has heard.
+  const laneLegs = useMemo(
+    () => (['participant', 'speaker'] as const).filter((leg) => (leg === 'speaker' ? speakerActive : participantActive)),
+    [speakerActive, participantActive],
+  );
+  // Fork: the window is fitted to the lanes — its height to the size chosen, so that a larger size shows the same
+  // lines in a taller window, not fewer of them — and held above the least they can be squeezed into. The takeover's
+  // own window only; not while it fills the screen or is locked. A height the user then drags stays until the size
+  // or the lanes change: the spacing and the text are fitted to the window.
+  const fitsWindow = surface === 'electron' && !chrome.fullscreen && !subtitle.positionLocked;
+  const fitWindow = useCallback((height: number, least: number) => {
+    if (!fitsWindow) return;
+    void window.electron?.invoke?.('subtitle:fit-height', { height, least })?.catch?.(() => {});
+  }, [fitsWindow]);
+  // No lanes on screen — the list, or no run: the window may be any height again.
+  const lanesShown = running && subtitle.compactMode;
+  useEffect(() => {
+    if (surface !== 'electron' || lanesShown) return;
+    void window.electron?.invoke?.('subtitle:fit-height', { least: 0 })?.catch?.(() => {});
+  }, [surface, lanesShown]);
 
   return (
     <div ref={chrome.rootRef} {...chrome.rootProps}>
@@ -159,6 +179,8 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
             newItemHighlightEnabled={newItemHighlightEnabled}
             notes={notes}
             noticeAction={noticeAction}
+            legs={laneLegs}
+            onHeight={fitWindow}
           />
         )
       ) : (

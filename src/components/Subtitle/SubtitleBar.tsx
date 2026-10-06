@@ -233,8 +233,9 @@ const SubtitleBar: React.FC<Props> = ({
           type="button"
           className="subtitle-bar__btn"
           onClick={() => setCompactMode(!subtitle.compactMode)}
-          title={subtitle.compactMode ? t('subtitle.bar.expand', 'Expanded view') : t('subtitle.bar.compact', 'Compact view')}
-          aria-label={subtitle.compactMode ? t('subtitle.bar.expand', 'Expanded view') : t('subtitle.bar.compact', 'Compact view')}
+          // Fork: the two views by what they are — the caption lanes, and the conversation as a list.
+          title={subtitle.compactMode ? t('fork.subtitle.listView', 'List view') : t('fork.subtitle.lanesView', 'Subtitle view')}
+          aria-label={subtitle.compactMode ? t('fork.subtitle.listView', 'List view') : t('fork.subtitle.lanesView', 'Subtitle view')}
         >
           {subtitle.compactMode ? <ChevronsUpDown size={14} /> : <ChevronsDownUp size={14} />}
         </button>

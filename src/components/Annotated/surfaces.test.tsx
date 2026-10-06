@@ -44,7 +44,7 @@ afterEach(() => { useAnnotationStore.setState({ furigana: true, romanization: fa
 describe('reading aids on the subtitle', () => {
   it('annotates the Japanese band by its leg\'s language, in the line, and leaves the Chinese band plain', () => {
     const { container } = render(<SubtitleBody {...props()} />);
-    const [source, translation] = [...container.querySelectorAll('.subtitle-stream__line')];
+    const [source, translation] = [container.querySelector('.subtitle-lane__source')!, container.querySelector('.subtitle-lane__answer')!];
     expect(rubies(source)).toEqual(['今日[きょう]', '天気[てんき]']);
     expect(source.querySelector('.annot--inline')).not.toBeNull();
     expect(translation.querySelector('ruby')).toBeNull();
@@ -54,12 +54,12 @@ describe('reading aids on the subtitle', () => {
   it('adds the romanization under the band\'s text when it is switched on, and drops both aids when they are off', () => {
     act(() => { useAnnotationStore.setState({ romanization: true }); });
     const on = render(<SubtitleBody {...props()} />);
-    expect(on.container.querySelector('.subtitle-stream__line--source .annot-roman')?.textContent).toBe('kyou wa tenki ga ii desu ne.');
+    expect(on.container.querySelector('.subtitle-lane__source .annot-roman')?.textContent).toBe('kyou wa tenki ga ii desu ne.');
     on.unmount();
     act(() => { useAnnotationStore.setState({ furigana: false, romanization: false }); });
     const off = render(<SubtitleBody {...props()} />);
     expect(off.container.querySelector('ruby')).toBeNull();
-    expect(off.container.querySelector('.subtitle-stream__line--source')?.textContent).toBe('今日は天気がいいですね。');
+    expect(off.container.querySelector('.subtitle-lane__source')?.textContent).toBe('今日は天気がいいですね。');
   });
 
   it('reads a row by the language its provider reported, over its leg\'s: a coached speaker\'s Japanese on a Chinese leg', () => {
@@ -69,7 +69,7 @@ describe('reading aids on the subtitle', () => {
       translation: [row('t2', '✓', 'translation', 'zh-CN')],
     };
     const { container } = render(<SubtitleBody {...props({ entries: [coached] })} />);
-    expect(rubies(container.querySelector('.subtitle-stream__line--source')!)).toEqual(['大丈夫[だいじょうぶ]']);
+    expect(rubies(container.querySelector('.subtitle-lane__source')!)).toEqual(['大丈夫[だいじょうぶ]']);
   });
 
   it('annotates the expanded list the same way', () => {

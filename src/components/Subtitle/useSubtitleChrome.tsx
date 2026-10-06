@@ -51,6 +51,8 @@ export function getHighlightOverlayForBg(hex: string): string {
 
 export interface SubtitleChrome {
   rootRef: MutableRefObject<HTMLDivElement | null>;
+  /** Fork: the window fills the screen. */
+  fullscreen?: boolean;
   rootProps: {
     className: string;
     style: CSSProperties;
@@ -222,6 +224,8 @@ export function useSubtitleChrome({ surface, onExit, forceVisible = false }: {
 
   return {
     rootRef,
+    // Fork: the window fills the screen — it is then not fitted to the lanes (`SubtitleView`).
+    fullscreen,
     rootProps: {
       className: `subtitle-app${fullscreen ? ' fullscreen' : ''}`,
       style: rootStyle,

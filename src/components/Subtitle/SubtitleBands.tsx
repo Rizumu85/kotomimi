@@ -1,16 +1,11 @@
-import { useLayoutEffect, useMemo, useRef, type CSSProperties } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useMemo, type CSSProperties } from 'react';
 import type { LegName, SegmentId } from '../../lib/conversation/types';
 import type { Entry } from '../../lib/projection/types';
-import { buildBands, type BandPiece } from '../../lib/subtitle/bands';
 import { displayItems, type LegFilters } from '../../lib/view/filter';
-import { noticeText } from '../../lib/view/noticeText';
-import { AnnotatedLines, useAnnotation } from '../Annotated/AnnotatedText';
-import { fontLanguage } from '../../lib/fonts/fontCss';
 import { ConversationList, type ConversationListProps } from '../Conversation/ConversationList';
 import { useVisibleEntries } from '../Conversation/useVisibleEntries';
+import { SubtitleLanes } from './SubtitleLanes';
 import './SubtitleStream.scss';
-import '../../styles/karaoke.scss';
 
 export interface SubtitleBodyProps {
   entries: readonly Entry[];
@@ -27,6 +22,10 @@ export interface SubtitleBodyProps {
   notes?: readonly Entry[];
   /** The action a system row in the expanded list offers, if any. */
   noticeAction?: ConversationListProps['noticeAction'];
+  /** Fork: the legs this run hears, for the compact view's lanes. Absent: the legs that have said something. */
+  legs?: readonly LegName[];
+  /** Fork: told the height the compact view is laid out for and the least it can be squeezed into, whenever either changes: the window is fitted to the one and held above the other. */
+  onHeight?(height: number, least: number): void;
 }
 
 const NO_REPLAY: ReadonlySet<LegName> = new Set();
@@ -34,13 +33,15 @@ const cannotReplay = () => false;
 const noReplay = () => {};
 
 /**
- * The subtitle's body: compact bands (four flowing lines) or, expanded, the
- * panel's own list with the subtitle's filters and no replay. The font size
- * and the two text colours are published under today's names for both
- * (`--subtitle-*` for the bands, `--conversation-*` for the list).
+ * The subtitle's body. Compact: the fork's lanes (`SubtitleLanes`) — each
+ * side's newest sentence with what answers it — in place of upstream's four
+ * flowing bands (`src/lib/subtitle/bands.ts`, kept and no longer drawn).
+ * Expanded: the panel's own list with the subtitle's filters and no replay.
+ * The font size and the two text colours are published under today's names
+ * for both (`--subtitle-*` for the lanes, `--conversation-*` for the list).
  */
 export function SubtitleBody(props: SubtitleBodyProps) {
-  const { lit, compact, fontSize, filters, sourceTextColor, translationTextColor, notes, noticeAction } = props;
+  const { lit, compact, fontSize, filters, sourceTextColor, translationTextColor, notes, noticeAction, onHeight } = props;
   // The panel notes join the expanded list only (the same merge MainPanel does).
   const listed = useMemo(
     () => (compact || !notes || notes.length === 0 ? props.entries : [...props.entries, ...notes]),
@@ -61,10 +62,15 @@ export function SubtitleBody(props: SubtitleBodyProps) {
     style['--conversation-translation-color'] = translationTextColor;
   }
   const items = useMemo(() => (compact ? [] : displayItems(entries, filters)), [compact, entries, filters]);
+  // A lane for each leg heard; where the caller does not say which, for each that has said something.
+  const legs = useMemo<readonly LegName[]>(
+    () => props.legs ?? (['participant', 'speaker'] as const).filter((leg) => entries.some((entry) => entry.leg === leg)),
+    [props.legs, entries],
+  );
   return (
     <div className={`subtitle-stream ${compact ? 'compact' : 'expanded'}`} style={style}>
       {compact ? (
-        <SubtitleBands entries={entries} lit={lit} filters={filters} newItemHighlightEnabled={props.newItemHighlightEnabled} />
+        <SubtitleLanes entries={entries} lit={lit} legs={legs} filters={filters} fontSize={fontSize} onHeight={onHeight} />
       ) : (
         <ConversationList
           items={items}
@@ -80,111 +86,5 @@ export function SubtitleBody(props: SubtitleBodyProps) {
         />
       )}
     </div>
-  );
-}
-
-function SubtitleBands({ entries, lit, filters, newItemHighlightEnabled }: Pick<SubtitleBodyProps, 'entries' | 'lit' | 'filters' | 'newItemHighlightEnabled'>) {
-  const { t } = useTranslation();
-  const bands = useMemo(() => buildBands(entries, filters, (notice) => noticeText(t, notice)), [entries, filters, t]);
-
-  // A stretch is highlighted once, on the first draw after it arrives; what was
-  // there at the first draw never is. Keyed by segment — rows re-cut, segments
-  // do not — and segment ids carry the session, so the map never collides.
-  // Fork: each segment's language — what the provider detected, else its leg's pair — for the reading aids.
-  const languages = useMemo(() => {
-    const map = new Map<SegmentId, string>();
-    for (const entry of entries) {
-      if (entry.kind !== 'exchange') continue;
-      for (const row of entry.source) map.set(row.segmentId, row.language || entry.languages.source);
-      for (const row of entry.translation) map.set(row.segmentId, row.language || entry.languages.target);
-    }
-    return map;
-  }, [entries]);
-
-  const seen = useRef(new Map<string, 'existing' | 'new'>());
-  const firstDraw = useRef(true);
-  const stateOf = (id: string) => seen.current.get(id) ?? (firstDraw.current ? 'existing' : 'new');
-  useLayoutEffect(() => {
-    for (const band of bands) {
-      for (const piece of band.pieces) {
-        const id = piece.segmentId ?? piece.key;
-        if (!seen.current.has(id)) seen.current.set(id, firstDraw.current ? 'existing' : 'new');
-      }
-    }
-    firstDraw.current = false;
-  });
-
-  return (
-    <>
-      {bands.map((band) => (
-        <div key={band.id} className={`subtitle-stream__line subtitle-stream__line--${band.side} subtitle-stream__line--${band.leg}`}>
-          <p>
-            {runsOf(band.pieces).map((run) => (
-              <Run
-                key={run.key}
-                run={run}
-                lit={lit}
-                language={run.segmentId === undefined ? undefined : languages.get(run.segmentId)}
-                isNew={newItemHighlightEnabled && stateOf(run.key) === 'new'}
-              />
-            ))}
-          </p>
-        </div>
-      ))}
-    </>
-  );
-}
-
-/** One segment's consecutive pieces (a notice is a run of its own). */
-interface RunOf {
-  /** The segment id, or the (single) piece's key for a notice. */
-  key: string;
-  segmentId?: SegmentId;
-  before: string;
-  pieces: BandPiece[];
-}
-
-/**
- * Groups a band's flat pieces into runs: consecutive pieces of one segment
- * join into a single run (so a re-cut segment draws one item, not one per
- * row); a notice, which carries no segment id, is always its own run.
- */
-function runsOf(pieces: readonly BandPiece[]): RunOf[] {
-  const runs: RunOf[] = [];
-  for (const piece of pieces) {
-    const last = runs[runs.length - 1];
-    if (last && piece.segmentId !== undefined && last.segmentId === piece.segmentId) {
-      last.pieces.push(piece);
-    } else {
-      runs.push({ key: piece.segmentId ?? piece.key, segmentId: piece.segmentId, before: piece.before, pieces: [piece] });
-    }
-  }
-  return runs;
-}
-
-function Run({ run, lit, isNew, language }: { run: RunOf; lit: ReadonlyMap<SegmentId, number>; isNew: boolean; language?: string }) {
-  const className = isNew ? 'subtitle-stream__item subtitle-stream__item--new' : 'subtitle-stream__item';
-  const upTo = run.segmentId === undefined ? undefined : lit.get(run.segmentId);
-  return (
-    // Fork: marked with its language, so a font chosen for that language reaches it (`src/lib/fonts`).
-    <span className={className} data-segment={run.segmentId} data-kt-text="" lang={fontLanguage(language) || undefined}>
-      {run.before}
-      {run.pieces.map((piece) => <Stretch key={piece.key} piece={piece} upTo={upTo} language={language} />)}
-    </span>
-  );
-}
-
-function Stretch({ piece, upTo, language }: { piece: BandPiece; upTo: number | undefined; language?: string }) {
-  // Fork: reading aids, for a row's piece (a notice has no language and stays plain).
-  const annotated = useAnnotation(piece.text, piece.notice ? undefined : language);
-  const played = upTo === undefined || piece.start === undefined ? 0 : Math.min(piece.text.length, Math.max(0, upTo - piece.start));
-  if (annotated) return <AnnotatedLines lines={annotated} inline className={played > 0 && played >= piece.text.length ? 'karaoke-played' : undefined} />;
-  if (played <= 0) return <span>{piece.text}</span>;
-  if (played >= piece.text.length) return <span className="karaoke-played">{piece.text}</span>;
-  return (
-    <>
-      <span className="karaoke-played">{piece.text.slice(0, played)}</span>
-      <span>{piece.text.slice(played)}</span>
-    </>
   );
 }

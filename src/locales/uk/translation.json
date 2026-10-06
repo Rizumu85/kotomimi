@@ -1673,6 +1673,8 @@
       "issuesTooltip": "Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page."
     },
     "subtitle": {
+      "lanesView": "Subtitle view",
+      "listView": "List view",
       "back": "Back to the main window"
     },
     "fonts": {

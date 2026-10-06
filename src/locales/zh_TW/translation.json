@@ -1673,6 +1673,8 @@
       "issuesTooltip": "Kotomimi 是 Sokuji 的獨立分支。這個應用程式的問題請到它自己的 GitHub 頁面回報。"
     },
     "subtitle": {
+      "lanesView": "字幕檢視",
+      "listView": "列表檢視",
       "back": "返回主視窗"
     },
     "fonts": {

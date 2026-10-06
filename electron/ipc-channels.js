@@ -135,6 +135,7 @@ export const INVOKE_CHANNELS = [
   'subtitle:set-always-on-top',
   'subtitle:set-locked',
   'subtitle:set-fullscreen',
+  'subtitle:fit-height',
   'subtitle:get-screen-bounds',
   // Popover child-window visibility (see popover-windows.js)
   'popover-window:set-visible',

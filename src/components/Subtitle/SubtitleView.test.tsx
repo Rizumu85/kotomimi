@@ -101,9 +101,9 @@ describe('SubtitleView', () => {
     expect(Number(screen.getByTestId('bar').dataset.elapsed)).toBe(0);
   });
 
-  it('draws the bands while a run is live', () => {
+  it('draws the lanes while a run is live', () => {
     const { container } = render(<SubtitleView surface="electron" model={{ entries: [entry], lit: new Map(), session: session() }} controls={controls()} />);
-    expect(container.querySelector('.subtitle-stream__line')?.textContent).toBe('Hello.');
+    expect(container.querySelector('.subtitle-lane .subtitle-lane__text')?.textContent).toBe('Hello.');
     expect(screen.getByTestId('bar').dataset).toMatchObject({ control: 'yes', legs: 'true/false', pair: 'EN' });
   });
 

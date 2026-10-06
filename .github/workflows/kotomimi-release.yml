@@ -117,6 +117,10 @@ jobs:
           electron/ipc-channels.test.js
           electron/entry-map.consistency.test.js
           electron/update-payload.test.js
+          src/lib/subtitle
+          src/components/Subtitle
+          src/stores/subtitleStore.test.ts
+          electron/subtitle-window.test.js
 
   windows:
     name: build (Windows)

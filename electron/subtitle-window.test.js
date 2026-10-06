@@ -35,6 +35,9 @@ const fakeElectron = {
     getPrimaryDisplay: () => ({
       workArea: { x: 0, y: 0, width: 1920, height: 1040 },
     }),
+    getDisplayMatching: () => ({
+      workArea: { x: 0, y: 0, width: 1920, height: 1040 },
+    }),
   },
 };
 
@@ -67,6 +70,8 @@ function makeFakeWindow() {
     setAlwaysOnTop: vi.fn(),
     moveTop: vi.fn(),
     setResizable: vi.fn(),
+    setMinimumSize: vi.fn(),
+    getMinimumSize: vi.fn(() => [0, 0]),
     setWindowButtonVisibility: vi.fn(),
     isFullScreen: () => false,
     setFullScreen: vi.fn(),
@@ -450,5 +455,66 @@ describe('subtitle bar bounds persistence', () => {
     vi.advanceTimersByTime(300);
 
     expect(boundsBroadcasts()).toHaveLength(1);
+  });
+});
+
+describe('subtitle-window fitted to the lanes (fork)', () => {
+  let win;
+  const enter = (payload) => ipcHandlers.get('subtitle:enter')({}, payload);
+  const exit = (payload = {}) => ipcHandlers.get('subtitle:exit')({}, payload);
+  const fit = (payload) => ipcHandlers.get('subtitle:fit-height')({}, payload);
+
+  beforeEach(() => {
+    ipcHandlers.clear();
+    const { setupSubtitleHandlers } = loadSubtitleWindowModule();
+    win = makeFakeWindow();
+    win.getBounds = vi.fn(() => ({ x: 100, y: 700, width: 1500, height: 200 }));
+    setupSubtitleHandlers(win);
+  });
+
+  afterEach(() => {
+    win.destroyed = true;
+    win.emit('closed');
+    delete nodeRequire.cache[electronPath];
+    delete nodeRequire.cache[modulePath];
+    delete nodeRequire.cache[popoverModulePath];
+  });
+
+  it('takes the height asked, its bottom edge where it was, and can be dragged no lower than the least', async () => {
+    await enter({});
+    win.setBounds.mockClear();
+    expect(await fit({ height: 260, least: 150 })).toMatchObject({ ok: true, bounds: { x: 100, y: 640, width: 1500, height: 260 } });
+    expect(win.setBounds).toHaveBeenCalledWith({ x: 100, y: 640, width: 1500, height: 260 });
+    expect(win.setMinimumSize).toHaveBeenCalledWith(0, 150);
+  });
+
+  it('stays on the screen it is on: a height that would lift it off the top is clamped', async () => {
+    win.getBounds = vi.fn(() => ({ x: 100, y: 10, width: 1500, height: 200 }));
+    await enter({});
+    win.setBounds.mockClear();
+    await fit({ height: 400 });
+    expect(win.setBounds).toHaveBeenCalledWith({ x: 100, y: 0, width: 1500, height: 400 });
+  });
+
+  it('gives the window its own least size back when the lanes go, and when subtitle mode is left', async () => {
+    win.getMinimumSize = vi.fn(() => [400, 300]);
+    await enter({});
+    await fit({ height: 260, least: 150 });
+    expect(win.setMinimumSize).toHaveBeenLastCalledWith(400, 150);
+    await fit({ least: 0 });
+    expect(win.setMinimumSize).toHaveBeenLastCalledWith(400, 300);
+    await fit({ height: 260, least: 150 });
+    await exit();
+    expect(win.setMinimumSize).toHaveBeenLastCalledWith(400, 300);
+  });
+
+  it('does nothing outside subtitle mode, and takes no height while the window fills the screen', async () => {
+    expect(await fit({ height: 260, least: 150 })).toEqual({ ok: false });
+    expect(win.setBounds).not.toHaveBeenCalled();
+    await enter({});
+    win.setBounds.mockClear();
+    win.isFullScreen = () => true;
+    await fit({ height: 260 });
+    expect(win.setBounds).not.toHaveBeenCalled();
   });
 });

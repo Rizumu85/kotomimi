@@ -19,77 +19,87 @@
     background: transparent;
   }
 
-  // Compact mode: up to four equal-height bands (speaker source,
-  // speaker translation, participant source, participant translation).
-  // Each visible band gets flex:1 so they share the height evenly. Long
-  // content inside a band clips to the bottom — the newest text stays
-  // pinned to the band's bottom edge and the top is hidden by overflow.
+  // Compact mode, the fork's lanes (`SubtitleLanes.tsx`, `src/lib/subtitle/lanes.ts`): the other side's newest
+  // sentence over its translation, then the user's own over what answers it. Each text is a box whose share of the
+  // height is what it is laid out for, so the texts keep their places whatever is said; a text too long for its box
+  // is drawn smaller (`FitText`). The spacing is the component's (`spacingAt`): roomy in a window fitted to the
+  // lanes, tighter in one the user made smaller.
   &.compact {
     overflow: hidden;
-    gap: 8px;
+    padding: 0;
 
-    .subtitle-stream__line {
+    .subtitle-lanes {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--lane-gap, 10px);
+      padding: var(--lane-pad-top, 8px) 12px var(--lane-pad-bottom, 10px);
+    }
+
+    .subtitle-lane {
       flex: 1 1 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--lane-inner-gap, 2px);
+      padding-left: 10px;
+      border-left: 3px solid rgba(tk.$color-participant, 0.7);
+    }
+
+    .subtitle-lane--speaker {
+      border-left-color: rgba(tk.$color-speaker, 0.7);
+    }
+
+    .subtitle-lane__source,
+    .subtitle-lane__answer {
       min-height: 0;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      justify-content: flex-end;
 
-      // Fade the top of the band so any partially-clipped character row
-      // melts into the background instead of getting cut in half. The
-      // fade height matches one line of text (line-height: 1.4em).
-      mask-image: linear-gradient(to bottom, transparent 0, black 1.4em, black 100%);
-      -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 1.4em, black 100%);
-
-      p {
-        margin: 0;
-        line-height: 1.4;
-        overflow-wrap: anywhere;
+      // What does not fit even at the smallest size keeps its end in sight: the newest words.
+      &[data-over] {
+        justify-content: flex-end;
       }
     }
 
-    .subtitle-stream__line--source p {
+    // The source sits on the answer: its one line at the foot of its box, the answer's first under it.
+    .subtitle-lane__source {
+      justify-content: flex-end;
+    }
+
+    .subtitle-lane__source {
+      flex: var(--lane-source-share, 1.18) 1 0;
+      font-size: 0.62em;
+      line-height: var(--lane-source-line, 1.9);
       color: var(--subtitle-source-color, #9aa0a6);
+      opacity: 0.85;
       // Fork: a switch of the display popover (`annotationStore.ts`); slanted where nothing says otherwise.
       font-style: var(--kt-source-font-style, italic);
     }
 
-    .subtitle-stream__line--translation p {
+    .subtitle-lane__answer {
+      flex: var(--lane-answer-share, 2.8) 1 0;
+      line-height: var(--lane-answer-line, 1.4);
       color: var(--subtitle-translation-color, #e8e8e8);
+      transition: opacity 0.2s ease;
     }
 
-    // Subtle visual marker so users can tell speaker vs participant
-    // apart when both are on screen.
-    .subtitle-stream__line--participant {
-      padding-left: 6px;
-      border-left: 2px solid rgba(tk.$color-participant, 0.6);
+    // It answers the sentence before: the newest has none yet.
+    .subtitle-lane__answer--stale {
+      opacity: 0.45;
     }
-    .subtitle-stream__line--speaker {
-      padding-left: 6px;
-      border-left: 2px solid rgba(tk.$color-speaker, 0.6);
+
+    .subtitle-lane__answer--notice {
+      opacity: 0.8;
     }
-  }
 
-  // ------------------------------------------------------------------
-  // Per-item highlight in compact mode.
-  // The item-aware spans created by SubtitleBands are styled here.
-  // The `--new` modifier triggers a one-shot fade-in + decaying overlay
-  // animation; the class persists on the span afterwards (harmless —
-  // CSS animations only fire once per class application).
-  // ------------------------------------------------------------------
-  // padding + border-radius live on every item (not just `--new`) so the
-  // post-animation layout matches items that were present at first mount.
-  // If they sat only on `--new`, items rendered after mount would keep a
-  // few extra px of padding forever and drift visually away from their
-  // pre-mount siblings.
-  .subtitle-stream__item {
-    border-radius: 2px;
-    padding: 1px 3px;
-  }
-
-  .subtitle-stream__item--new {
-    animation: subtitle-item-highlight 2s ease-out both;
+    .subtitle-lane__text {
+      overflow-wrap: anywhere;
+      // The size FitText settles on is a share of the box's own.
+      font-size: 1em;
+    }
   }
 
   // Expanded mode: ConversationList's RowBubble drives its own layout; we
@@ -141,20 +151,5 @@
         color: rgba(255, 255, 255, 0.9);
       }
     }
-  }
-}
-
-@keyframes subtitle-item-highlight {
-  0% {
-    opacity: 0;
-    background-color: var(--subtitle-highlight-overlay, rgba(255,255,255,0.3));
-  }
-  20% {
-    opacity: 1;
-    background-color: var(--subtitle-highlight-overlay, rgba(255,255,255,0.3));
-  }
-  100% {
-    opacity: 1;
-    background-color: transparent;
   }
 }

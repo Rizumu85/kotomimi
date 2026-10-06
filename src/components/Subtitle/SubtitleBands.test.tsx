@@ -25,84 +25,57 @@ const props = (over: Partial<SubtitleBodyProps> = {}): SubtitleBodyProps => ({
   ...over,
 });
 
-describe('SubtitleBody — compact', () => {
-  it("draws a band per leg and side with today's classes", () => {
-    const { container } = render(<SubtitleBody {...props()} />);
-    expect(container.querySelector('.subtitle-stream.compact')).not.toBeNull();
-    const lines = [...container.querySelectorAll('.subtitle-stream__line')];
-    expect(lines.map((line) => line.className)).toEqual([
-      'subtitle-stream__line subtitle-stream__line--source subtitle-stream__line--speaker',
-      'subtitle-stream__line subtitle-stream__line--translation subtitle-stream__line--speaker',
-    ]);
-    expect(lines.map((line) => line.textContent)).toEqual(['Hello.', 'こんにちは。']);
+describe('SubtitleBody — compact: the fork\u2019s lanes', () => {
+  const theirs = (id: string, source: string, answer = ''): Entry => ({
+    kind: 'exchange', id, leg: 'participant', languages: { source: 'ja', target: 'en' }, pairing: 'stated',
+    source: [row(`ps-${id}`, 0, 0, source)], translation: answer ? [row(`pt-${id}`, 0, 0, answer, 'translation')] : [], t: 0,
+  });
+  const texts = (lane: Element) => [...lane.querySelectorAll('.subtitle-lane__text')].map((el) => el.textContent);
+
+  it('draws a lane for each side that has spoken, the other side first: its newest sentence over what answers it', () => {
+    const { container } = render(<SubtitleBody {...props({ entries: [exchange('a', [row('s1', 0, 0, 'Hello.')], [row('t1', 0, 0, 'こんにちは。', 'translation')]), theirs('b', 'そうですね。', 'That is right.')] })} />);
+    const lanes = [...container.querySelectorAll('.subtitle-stream.compact .subtitle-lane')];
+    expect(lanes.map((lane) => lane.getAttribute('data-lane'))).toEqual(['participant', 'speaker']);
+    expect(texts(lanes[0])).toEqual(['そうですね。', 'That is right.']);
+    expect(texts(lanes[1])).toEqual(['Hello.', 'こんにちは。']);
+    expect(lanes[0].querySelector('.subtitle-lane__source .subtitle-lane__text')?.getAttribute('lang')).toBe('ja');
   });
 
-  it('joins Japanese segments without a space and English ones with one', () => {
-    const entries = [
-      exchange('a', [row('s1', 0, 0, 'One.')], [row('t1', 0, 0, '一つ。', 'translation')]),
-      exchange('b', [row('s2', 0, 0, 'Two.')], [row('t2', 0, 0, '二つ。', 'translation')]),
-    ];
-    const { container } = render(<SubtitleBody {...props({ entries })} />);
-    const lines = [...container.querySelectorAll('.subtitle-stream__line')].map((line) => line.textContent);
-    expect(lines).toEqual(['One. Two.', '一つ。二つ。']);
+  it('keeps a side\u2019s sentence and its answer in place while the other side goes on talking', () => {
+    const { container } = render(<SubtitleBody {...props({ entries: [
+      exchange('a', [row('s1', 0, 0, 'Hello.')], [row('t1', 0, 0, 'こんにちは。', 'translation')]),
+      theirs('b', 'そうですね。', 'That is right.'), theirs('c', 'いい天気ですね。', 'Nice weather.'), theirs('d', 'はい。'),
+    ] })} />);
+    const [other, mine] = [...container.querySelectorAll('.subtitle-lane')];
+    expect(texts(mine)).toEqual(['Hello.', 'こんにちは。']);
+    // Their newest has no answer yet: the last one stays, drawn as the sentence before's.
+    expect(texts(other)).toEqual(['はい。', 'Nice weather.']);
+    expect(other.querySelector('.subtitle-lane__answer')?.className).toContain('subtitle-lane__answer--stale');
+    expect(mine.querySelector('.subtitle-lane__answer')?.className).not.toContain('--stale');
   });
 
-  it('lights the spoken characters of a stretch', () => {
-    const { container } = render(<SubtitleBody {...props({ lit: new Map([['t1', 3]]) })} />);
-    expect(container.querySelector('.subtitle-stream__line--translation .karaoke-played')?.textContent).toBe('こんに');
+  it('has a lane, empty, for a leg the run hears that has said nothing yet', () => {
+    const { container } = render(<SubtitleBody {...props({ entries: [], legs: ['speaker', 'participant'] })} />);
+    expect([...container.querySelectorAll('.subtitle-lane')].map((lane) => lane.getAttribute('data-lane'))).toEqual(['participant', 'speaker']);
   });
 
-  it('highlights a segment that arrives after the first draw, once, and not the ones already there', () => {
-    const first = props();
-    const { container, rerender } = render(<SubtitleBody {...first} />);
-    expect(container.querySelector('.subtitle-stream__item--new')).toBeNull();
-    const later = [...first.entries, exchange('b', [row('s2', 0, 0, 'Again.')])];
-    rerender(<SubtitleBody {...props({ entries: later })} />);
-    const fresh = [...container.querySelectorAll('.subtitle-stream__item--new')].map((span) => span.textContent);
-    expect(fresh).toEqual([' Again.']);
+  it('shows only the sides the subtitle is set to show', () => {
+    const { container } = render(<SubtitleBody {...props({ filters: { speaker: 'translation', participant: 'both' } })} />);
+    expect(texts(container.querySelector('.subtitle-lane')!)).toEqual(['こんにちは。']);
+    expect(container.querySelector('.subtitle-lane__source')).toBeNull();
   });
 
-  it('draws no highlight when the setting is off', () => {
-    const first = props({ newItemHighlightEnabled: false });
-    const { container, rerender } = render(<SubtitleBody {...first} />);
-    rerender(<SubtitleBody {...props({ newItemHighlightEnabled: false, entries: [...first.entries, exchange('b', [row('s2', 0, 0, 'Again.')])] })} />);
-    expect(container.querySelector('.subtitle-stream__item--new')).toBeNull();
-  });
-
-  it('draws one item per segment run when a segment is cut into two rows', () => {
-    const entries = [exchange('a', [
-      row('s1', 0, 0, '今日は天気がいいですね。'),
-      row('s1', 1, 12, '公園に行きましょう。'),
-    ])];
-    const { container } = render(<SubtitleBody {...props({ entries })} />);
-    const items = [...container.querySelectorAll('.subtitle-stream__line--source .subtitle-stream__item')];
-    expect(items).toHaveLength(1);
-    expect(items[0].getAttribute('data-segment')).toBe('s1');
-    expect(items[0].textContent).toBe('今日は天気がいいですね。公園に行きましょう。');
-  });
-
-  it('does not re-mark an already-drawn segment as new when it is re-cut into more rows', () => {
-    const first = props({ entries: [exchange('a', [row('s1', 0, 0, '今日は天気がいいですね。公園に行きましょう。')])] });
-    const { container, rerender } = render(<SubtitleBody {...first} />);
-    expect(container.querySelector('.subtitle-stream__item--new')).toBeNull();
-    const recut = [exchange('a', [
-      row('s1', 0, 0, '今日は天気がいいですね。'),
-      row('s1', 1, 12, '公園に行きましょう。'),
-    ])];
-    rerender(<SubtitleBody {...props({ entries: recut })} />);
-    expect(container.querySelector('.subtitle-stream__item--new')).toBeNull();
-    const items = [...container.querySelectorAll('.subtitle-stream__line--source .subtitle-stream__item')];
-    expect(items).toHaveLength(1);
-  });
-
-  it('lights karaoke across a run of two rows', () => {
-    const entries = [exchange('a', [
-      row('s1', 0, 0, '今日は天気がいいですね。'),
-      row('s1', 1, 12, '公園に行きましょう。'),
-    ])];
-    const { container } = render(<SubtitleBody {...props({ entries, lit: new Map([['s1', 14]]) })} />);
-    const litSpans = [...container.querySelectorAll('.subtitle-stream__line--source .karaoke-played')].map((span) => span.textContent);
-    expect(litSpans).toEqual(['今日は天気がいいですね。', '公園']);
+  it('says the height it is laid out for and the least it can be squeezed into: again when the size changes, not when the words do', () => {
+    const onHeight = vi.fn();
+    const { rerender } = render(<SubtitleBody {...props({ onHeight })} />);
+    expect(onHeight).toHaveBeenCalledTimes(1);
+    const [height, least] = onHeight.mock.calls[0] as [number, number];
+    expect(least).toBeLessThan(height);
+    rerender(<SubtitleBody {...props({ onHeight, entries: [exchange('a', [row('s1', 0, 0, 'Hello again.')], [row('t1', 0, 0, 'また、こんにちは。', 'translation')])] })} />);
+    expect(onHeight).toHaveBeenCalledTimes(1);
+    rerender(<SubtitleBody {...props({ onHeight, fontSize: 36 })} />);
+    expect(onHeight).toHaveBeenCalledTimes(2);
+    expect((onHeight.mock.calls[1] as [number, number])[0]).toBeGreaterThan(height);
   });
 });
 
