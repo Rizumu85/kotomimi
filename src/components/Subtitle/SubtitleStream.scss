@@ -56,9 +56,9 @@
       flex: 0 1 auto;
       min-height: 0;
       display: grid;
-      // In pixels: the tag is one size whatever the text's.
-      grid-template-columns: var(--lane-tag-column, 34px) minmax(0, 1fr);
-      column-gap: 10px;
+      // In pixels: the bar is one size whatever the text's.
+      grid-template-columns: var(--lane-tag-column, 3px) minmax(0, 1fr);
+      column-gap: 11px;
       align-items: start;
       position: relative;
     }
@@ -190,52 +190,40 @@
       text-align: center;
 
       .subtitle-lane {
-        padding-right: calc(var(--lane-tag-column, 34px) + 10px);
+        padding-right: calc(var(--lane-tag-column, 3px) + 11px);
       }
     }
 
-    // Whose lane it is: a small word in the lane's colour, with the text's own shadow or outline — a speaker's name
-    // in a caption, not a badge laid over it. One size whatever the text's (a tag that grew and shrank with the font,
-    // and a pill of its own colours, were both wrong: the user, 2026-10-06). The box is as tall as the lane's first
-    // line, so the word sits level with it.
+    // Whose lane it is: a bar of the lane's colour down its left edge — amber the other side, green the user — as
+    // tall as the lane, in one place whatever is said. No word: a pill sized by the caption font, then a small word,
+    // were both more than the strip needed (the user chose the bar from four sketches, 2026-10-06). A hairline of
+    // ink around it keeps it in sight where there is no panel.
     .subtitle-lane__tag {
+      align-self: stretch;
       justify-self: start;
-      display: flex;
-      align-items: center;
-      height: calc(0.62em * var(--lane-source-line, 1.9));
-      font-style: normal;
-      white-space: nowrap;
+      width: 3px;
+      border-radius: 2px;
+      background: tk.$color-participant;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55);
     }
 
-    .subtitle-lane--row .subtitle-lane__tag {
-      height: calc(0.62em * var(--lane-row-line, 1.9));
+    .subtitle-lane__tag--speaker {
+      background: tk.$color-speaker;
     }
 
-    // Beside the large answer (the sentence is not shown) it is level with that line.
-    .subtitle-lane--large .subtitle-lane__tag {
-      height: calc(1em * var(--lane-answer-line, 1.4));
+    // Dark text (on a light edge): the ink around the bar is light too.
+    &[data-ink='dark'] .subtitle-lane__tag {
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.7);
     }
 
+    // The word stays for a screen reader.
     .subtitle-lane__who {
-      font-size: 12px;
-      font-weight: 600;
-      line-height: 16px;
-      letter-spacing: 0.04em;
-      color: #ffcf7a;
-      text-shadow: var(--subtitle-shadow-source, none);
-    }
-
-    .subtitle-lane__tag--speaker .subtitle-lane__who {
-      color: #8fe3c4;
-    }
-
-    // Dark text (on a light edge): the same two colours, dark.
-    &[data-ink='dark'] .subtitle-lane__who {
-      color: #7a4a00;
-    }
-
-    &[data-ink='dark'] .subtitle-lane__tag--speaker .subtitle-lane__who {
-      color: #0a5a40;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
     }
 
     .subtitle-lane__text {
