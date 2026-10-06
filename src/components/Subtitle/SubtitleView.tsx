@@ -197,13 +197,30 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
   // Fork: on the desktop the toolbar is a piece of its own above the caption box, not a strip laid over the box's
   // top (`SubtitleStream.scss`, "framed"). The window itself is clear; the box is drawn under the toolbar's room,
   // in the colour the hook gave the window.
+  // With no run on, the toolbar stays out: it is where the strip says what state it is in, and how it is started.
+  const idleInBar = !running && surface === 'electron';
   const rootProps = surface === 'electron'
     ? {
         ...shown,
         className: `${shown.className} subtitle-app--framed${through ? ' is-through' : ''}`,
-        style: { ...shown.style, '--kt-panel': shown.style.background as string, background: 'transparent' },
+        style: {
+          ...shown.style,
+          '--kt-panel': shown.style.background as string,
+          background: 'transparent',
+          ...(idleInBar ? { '--bar-opacity': 1, '--bar-pointer-events': 'auto' } : {}),
+        },
       }
     : shown;
+  const idle = running ? null : (
+    <SubtitleIdle
+      state={idleState(session?.idle, t)}
+      onStart={start ?? noop}
+      onReturn={controls.exit}
+      allowSessionControl={surface === 'electron'}
+      canStart={session?.canStart ?? false}
+      onOpenSettings={controls.openSettings}
+    />
+  );
 
   // No lanes on screen. With no run on, the window keeps the height its lanes will have — the frame is then the
   // strip to come, and cannot be pressed flat; showing the list, or where it is not fitted at all, it may be any
@@ -237,6 +254,7 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
           onStop: stop,
         } : undefined}
         holdToTalk={showHoldToTalk ? { onPress: controls.press, onRelease: controls.release, onHeldChange: setHoldHeld } : undefined}
+        status={idleInBar ? idle : undefined}
       />
       {running ? (
         surface === 'electron' && session.holdToTalk && entries.length === 0 ? (
@@ -261,14 +279,8 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
           />
         )
       ) : (
-        <SubtitleIdle
-          state={idleState(session?.idle, t)}
-          onStart={start ?? noop}
-          onReturn={controls.exit}
-          allowSessionControl={surface === 'electron'}
-          canStart={session?.canStart ?? false}
-          onOpenSettings={controls.openSettings}
-        />
+        // On the desktop the box is left clear, at the size the captions will have: the toolbar says the rest.
+        idleInBar ? <div className="subtitle-idle-room" /> : idle
       )}
       {/* The line belongs to the expanded view (spec 2026-10-05 §7); the compact bands carry none. */}
       {running && surface === 'electron' && !subtitle.compactMode && statusLine}

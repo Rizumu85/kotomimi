@@ -62,6 +62,11 @@ interface Props {
     onStop: () => void;
   };
   /**
+   * Fork: what the strip has to say while no run is on — not begun, ended, starting, something to fix — in place of
+   * the clock and the pair. The bar's own buttons start a run and leave the strip; this is the word on its state.
+   */
+  status?: React.ReactNode;
+  /**
    * The overlay's push-to-talk control, in the bar (plan follow-up D — it
    * used to sit under the bands). Extension-overlay surface only; SubtitleBar
    * still gates on `surface` itself rather than trusting the caller alone.
@@ -94,6 +99,7 @@ const SubtitleBar: React.FC<Props> = ({
   sessionControl,
   holdToTalk,
   onExit,
+  status,
 }) => {
   const { t } = useTranslation();
   const subtitle = useSubtitleSettings();
@@ -201,10 +207,14 @@ const SubtitleBar: React.FC<Props> = ({
       </div>
 
       <div className="subtitle-bar__center">
-        <span className="subtitle-bar__timer">{formatElapsed(sessionElapsedMs)}</span>
-        <span className="subtitle-bar__lang">
-          {sourceLanguageCode} → {targetLanguageCode}
-        </span>
+        {status ?? (
+          <>
+            <span className="subtitle-bar__timer">{formatElapsed(sessionElapsedMs)}</span>
+            <span className="subtitle-bar__lang">
+              {sourceLanguageCode} → {targetLanguageCode}
+            </span>
+          </>
+        )}
       </div>
 
       <div className="subtitle-bar__right">

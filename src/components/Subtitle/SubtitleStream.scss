@@ -356,97 +356,89 @@
   background: rgba(0, 0, 0, 0.72);
 }
 
-// Fork: the strip with no run on — not begun, ended, starting, something to fix — is one row on a capsule of its
-// own in the middle of the window: what state it is in, the action, the way back. Stacked in the middle of a dark
-// panel over the whole window, the state was small grey words under the button and the way back an underlined
-// link, neither of which could be read (the user, 2026-10-06, who chose this from three sketches). The rest of the
-// window is left as the look has it.
+// Fork: the strip with no run on — not begun, ended, starting, something to fix — says so in the toolbar, where the
+// clock is while a run is on, and the toolbar stays out for as long (`SubtitleView`, `SubtitleBar`'s `status`).
+// There it is a dot and a few words. Nothing else: the toolbar's own small button starts a run and its own arrow
+// leaves the strip, so the idle body's start button and its way back — upstream's, still in the page for a screen
+// reader and its tests — are not drawn twice. What stays a button is the one thing the toolbar has none for: where
+// something has to be put right first.
 //
-// It is a piece of the toolbar, which is on the screen with it whenever the pointer is over the window: the same
-// surface (`SubtitleBar.scss`: that black at that strength, no border), its height, its type, its green, and a way
-// back that is quiet until pointed at, as the bar's buttons are. Drawn as a thing of its own — a different black, a
-// hairline around it — the two did not belong together (the user, the same day). The class twice: upstream's own
-// rules for it load after these.
-.subtitle-idle.subtitle-idle {
+// It was a body of its own in the middle of the window first — a column on a dark panel, then a capsule: a second
+// control, of another shape, with the toolbar's own two actions over again; out together they did not match (the
+// user, 2026-10-06, who chose this from three sketches, with the start button kept as the small one it was).
+.subtitle-bar .subtitle-idle.subtitle-idle {
   flex: 0 1 auto;
-  align-self: center;
-  margin: auto;
-  max-width: calc(100% - 32px);
-  height: 36px;
+  min-width: 0;
+  max-width: 52vw;
+  margin: 0;
+  padding: 0;
   flex-direction: row;
-  gap: 10px;
-  padding: 0 5px 0 14px;
-  background: rgba(20, 20, 20, 0.95);
-  border-radius: 10px;
+  gap: 8px;
+  background: none;
   color: #e8e8e8;
   font-size: 12px;
-  -webkit-app-region: no-drag;
 
-  // The state first, whichever element says it.
   .subtitle-idle__hint,
   .subtitle-idle__message,
   .subtitle-idle__error {
-    order: -1;
     min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font-size: 12px;
     letter-spacing: 0;
-    white-space: nowrap;
   }
 
   .subtitle-idle__hint,
   .subtitle-idle__message {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
     color: #e8e8e8;
 
     &::before {
       content: '';
-      flex: none;
+      display: inline-block;
       width: 6px;
       height: 6px;
+      margin-right: 7px;
       border-radius: 50%;
       background: #9aa0a6;
+      vertical-align: 1px;
     }
   }
 
-  .subtitle-idle__row {
-    flex: none;
-    gap: 10px;
+  // The toolbar starts a run and leaves the strip itself.
+  .subtitle-idle__action:not(:disabled):not(.subtitle-idle__action--fix),
+  .subtitle-idle__row,
+  .subtitle-idle__link,
+  .subtitle-idle__return {
+    display: none;
   }
 
-  .subtitle-idle__action {
-    flex: none;
-    height: 26px;
-    padding: 0 12px;
+  // Starting, or waiting on something: the words and the spinner, as a state and not a button.
+  .subtitle-idle__action:disabled {
+    padding: 0;
+    gap: 6px;
+    background: none;
+    color: #e8e8e8;
+    font-size: 12px;
+    font-weight: 400;
+  }
+
+  // Something to put right first: the one button here, quiet as the toolbar's own.
+  .subtitle-idle__action--fix:not(:disabled) {
+    height: 24px;
+    padding: 0 9px;
     gap: 6px;
     border-radius: 6px;
     font-size: 12px;
-    font-weight: 600;
-
-    &:not(:disabled):not(.subtitle-idle__action--fix) {
-      background: tk.$color-primary;
-    }
+    font-weight: 500;
+    -webkit-app-region: no-drag;
   }
+}
 
-  // The way back is a button beside the action, not a link under it.
-  .subtitle-idle__link,
-  .subtitle-idle__return {
-    flex: none;
-    height: 26px;
-    padding: 0 9px;
-    font-size: 12px;
-    color: #c9c9c9;
-    text-decoration: none;
-    background: transparent;
-    border: none;
-    border-radius: 6px;
-
-    &:hover {
-      color: #fff;
-      background: rgba(255, 255, 255, 0.08);
-    }
-  }
+// The box with no run on: clear, at the size the captions will have.
+.subtitle-idle-room {
+  flex: 1;
+  min-height: 0;
 }
 
 // Fork: the desktop strip is two pieces, one above the other: the toolbar, and under a small gap the caption box.

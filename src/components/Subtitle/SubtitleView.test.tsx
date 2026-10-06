@@ -23,7 +23,7 @@ vi.mock('./useSubtitleChrome', () => ({
 }));
 type HoldToTalkProp = { onPress: () => void; onRelease: () => void; onHeldChange?: (held: boolean) => void };
 vi.mock('./SubtitleBar', () => ({
-  default: (p: { sessionControl?: unknown; speakerActive: boolean; participantActive: boolean; sourceLanguageCode: string; onExit?: () => void; sessionElapsedMs: number; exportMenu?: unknown; holdToTalk?: HoldToTalkProp }) =>
+  default: (p: { sessionControl?: unknown; speakerActive: boolean; participantActive: boolean; sourceLanguageCode: string; onExit?: () => void; sessionElapsedMs: number; exportMenu?: unknown; holdToTalk?: HoldToTalkProp; status?: unknown }) =>
     require('react').createElement('div', {
       'data-testid': 'bar',
       'data-control': p.sessionControl ? 'yes' : 'no',
@@ -43,7 +43,8 @@ vi.mock('./SubtitleBar', () => ({
       onMouseUp: p.holdToTalk?.onRelease,
       onFocus: () => p.holdToTalk?.onHeldChange?.(true),
       onBlur: () => p.holdToTalk?.onHeldChange?.(false),
-    }),
+      // Fork: what the strip says with no run on is handed to the bar on the desktop, and drawn in it.
+    }, p.status),
 }));
 // Compact unless a case says otherwise; reset before each.
 const view = vi.hoisted(() => ({ compactMode: true }));
@@ -196,6 +197,17 @@ describe('SubtitleView', () => {
     render(<SubtitleView surface="electron" model={{ entries: [], lit: new Map(), session: session({ phase: 'idle', since: null, canStart: true, idle: { kind: 'ready' } }) }} controls={acts} />);
     fireEvent.click(screen.getByRole('button', { name: 'Start translating' }));
     expect(acts.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('says what state the strip is in inside the toolbar on the desktop, and leaves the box clear', () => {
+    // Fork: a body of its own in the middle of the window was a second control beside the toolbar's (the user, 2026-10-06).
+    const { container } = render(<SubtitleView surface="electron" model={{ entries: [], lit: new Map(), session: session({ phase: 'idle', since: null, canStart: true, idle: { kind: 'ended' } }) }} controls={controls()} />);
+    const bar = screen.getByTestId('bar');
+    expect(bar.querySelector('.subtitle-idle__hint')?.textContent).toBe('This session has ended');
+    expect(container.querySelectorAll('.subtitle-idle')).toHaveLength(1);
+    expect(container.querySelector('.subtitle-idle-room')).not.toBeNull();
+    // The toolbar stays out for as long: it is the way to start.
+    expect((container.firstElementChild as HTMLElement).style.getPropertyValue('--bar-opacity')).toBe('1');
   });
 
   it('shows the overlay its idle body before the side panel has said anything', () => {
