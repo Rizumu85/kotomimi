@@ -217,41 +217,52 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
   // A newer sentence is waiting for its answer: said quietly, after what is shown.
   const pending = <span className="subtitle-lane__pending" aria-hidden="true">…</span>;
 
+  // Whether its first line is the small one (the sentence) or the large (the answer, where the sentence is not shown):
+  // the tag sits level with it.
+  const large = (lane: Lane) => lane.shape === 'pair' && !lane.source;
+
   return (
     <div ref={strip} className="subtitle-lanes" style={style}>
-      {lanes.map((lane) => (lane.shape === 'row' ? (
-        // The user's own, under the other side's: what they said and what answers it, on one small line.
-        <div key={lane.leg} className={`subtitle-lane subtitle-lane--row subtitle-lane--${lane.leg}${silent(lane) ? ' is-silent' : ''}`} data-lane={lane.leg}>
-          <FitText className="subtitle-lane__row" smallest={SMALLEST_ROW} fitKey={`${fontSize}:${squeeze}:${lines.row}:${lane.source?.text ?? ''}:${lane.answer?.text ?? ''}`}>
-            {tag(lane)}
-            {lane.source && <span className="subtitle-lane__said" lang={langOf(lane.source)}><Written text={lane.source} lit={lit} /></span>}
-            {lane.source && lane.answer && lane.source.text !== '' && (lane.answer.text !== '' || lane.pending) && <span className="subtitle-lane__arrow" aria-hidden="true">→</span>}
-            {lane.answer && lane.answer.text !== '' && <span className="subtitle-lane__reply" lang={langOf(lane.answer)}><Written text={lane.answer} lit={lit} /></span>}
-            {lane.answer && lane.answer.text === '' && lane.pending && pending}
-          </FitText>
-        </div>
-      ) : (
-        <div key={lane.leg} className={`subtitle-lane subtitle-lane--pair subtitle-lane--${lane.leg}${silent(lane) ? ' is-silent' : ''}`} data-lane={lane.leg}>
-          {lane.source && (
-            <FitText className="subtitle-lane__source" lang={langOf(lane.source)} fitKey={`${fontSize}:${squeeze}:${lines.source}:${lane.source.text}`}>
-              {tag(lane)}
-              <Written text={lane.source} lit={lit} />
-              {lane.pending && pending}
+      {lanes.length > 0 && lanes.every(silent) && (
+        // Nobody has spoken yet. A strip with no panel is then nothing at all on the screen, and cannot be found:
+        // a quiet mark says where it is, and that it is listening.
+        <div className="subtitle-lanes__waiting" aria-hidden="true">· · ·</div>
+      )}
+      {lanes.map((lane) => (
+        // Whose lane it is, in a column of its own at the left: in its place whatever the text beside it says, and
+        // wherever that text sits. Written into the text, it moved with every sentence of a centred strip.
+        <div key={lane.leg} className={`subtitle-lane subtitle-lane--${lane.shape} subtitle-lane--${lane.leg}${silent(lane) ? ' is-silent' : ''}${large(lane) ? ' subtitle-lane--large' : ''}`} data-lane={lane.leg}>
+          {tag(lane)}
+          {lane.shape === 'row' ? (
+            // The user's own, under the other side's: what they said and what answers it, on one small line.
+            <FitText className="subtitle-lane__row" smallest={SMALLEST_ROW} fitKey={`${fontSize}:${squeeze}:${lines.row}:${lane.source?.text ?? ''}:${lane.answer?.text ?? ''}`}>
+              {lane.source && <span className="subtitle-lane__said" lang={langOf(lane.source)}><Written text={lane.source} lit={lit} /></span>}
+              {lane.source && lane.answer && lane.source.text !== '' && (lane.answer.text !== '' || lane.pending) && <span className="subtitle-lane__arrow" aria-hidden="true">→</span>}
+              {lane.answer && lane.answer.text !== '' && <span className="subtitle-lane__reply" lang={langOf(lane.answer)}><Written text={lane.answer} lit={lit} /></span>}
+              {lane.answer && lane.answer.text === '' && lane.pending && pending}
             </FitText>
-          )}
-          {lane.answer && (
-            <FitText
-              className={`subtitle-lane__answer${lane.answer.notice ? ' subtitle-lane__answer--notice' : ''}`}
-              lang={langOf(lane.answer)}
-              fitKey={`${fontSize}:${squeeze}:${answerLines}:${lane.answer.text}`}
-            >
-              {!lane.source && tag(lane)}
-              <Written text={lane.answer} lit={lit} />
-              {!lane.source && lane.pending && pending}
-            </FitText>
+          ) : (
+            <div className="subtitle-lane__texts">
+              {lane.source && (
+                <FitText className="subtitle-lane__source" lang={langOf(lane.source)} fitKey={`${fontSize}:${squeeze}:${lines.source}:${lane.source.text}`}>
+                  <Written text={lane.source} lit={lit} />
+                  {lane.pending && pending}
+                </FitText>
+              )}
+              {lane.answer && (
+                <FitText
+                  className={`subtitle-lane__answer${lane.answer.notice ? ' subtitle-lane__answer--notice' : ''}`}
+                  lang={langOf(lane.answer)}
+                  fitKey={`${fontSize}:${squeeze}:${answerLines}:${lane.answer.text}`}
+                >
+                  <Written text={lane.answer} lit={lit} />
+                  {!lane.source && lane.pending && pending}
+                </FitText>
+              )}
+            </div>
           )}
         </div>
-      )))}
+      ))}
     </div>
   );
 }

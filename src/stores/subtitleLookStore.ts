@@ -23,6 +23,9 @@ interface SubtitleLookState {
    */
   through: boolean;
   setThrough: (on: boolean) => void;
+  /** While the mouse passes through: the pointer is over the strip, and the button that ends it is shown. */
+  near: boolean;
+  setNear: (near: boolean) => void;
   setLook: (look: Look) => Promise<void>;
   setShadow: (shadow: number) => Promise<void>;
   setAlign: (align: Align) => Promise<void>;
@@ -46,7 +49,9 @@ export const useSubtitleLookStore = create<SubtitleLookState>()(
     return {
       ...DEFAULTS,
       through: false,
-      setThrough: (on) => set({ through: on }),
+      setThrough: (on) => set(on ? { through: true } : { through: false, near: false }),
+      near: false,
+      setNear: (near) => set({ near }),
       setLook: (look) => write('look', look),
       setShadow: (shadow) => write('shadow', strength(shadow)),
       setAlign: (align) => write('align', align),

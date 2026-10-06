@@ -68,6 +68,8 @@ const validReceiveChannels = [
   // Subtitle window bounds change events
   'subtitle:window-bounds-changed',
   'subtitle:fullscreen-changed',
+  // Fork: where the pointer is while the strip passes clicks through (subtitle-window.js)
+  'subtitle:pointer',
   // Native sidecar bundle install progress (main → renderer)
   'sidecar-bundle-progress',
   // Per-application audio capture: PCM chunks and helper lifecycle events

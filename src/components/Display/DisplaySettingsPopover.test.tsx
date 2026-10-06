@@ -265,7 +265,7 @@ describe('the subtitle popover\u2019s looks (fork)', () => {
     const { container } = render(<DisplaySettingsPopover source="subtitle" />);
     await act(async () => { fireEvent.click(tiles(container)[2]); });
     expect(useSubtitleStore.getState()).toMatchObject({ bgOpacity: 0, sourceTextColor: '#f4f4f4', translationTextColor: '#ffffff' });
-    expect(useSubtitleLookStore.getState()).toMatchObject({ look: 'light', shadow: 60, align: 'center' });
+    expect(useSubtitleLookStore.getState()).toMatchObject({ look: 'light', shadow: 65, align: 'center' });
     // A value changed after stays changed, and the look stays the one chosen.
     await act(async () => { fireEvent.click(container.querySelector('.kt-look__sides button[aria-checked="false"]')!); });
     expect(useSubtitleLookStore.getState()).toMatchObject({ look: 'light', align: 'left' });

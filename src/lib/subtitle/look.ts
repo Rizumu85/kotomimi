@@ -9,10 +9,14 @@
  * around the text, and whether the text is centred. A look is chosen, then
  * any of its values changed: it is a starting point, not a mode.
  *
- * The shadow is the one the user's own lyrics mod for Folia draws
- * (`bilingual-ruby-lyrics`, 2026-10-06): a close, slight drop and a wide,
- * faint glow — text sitting on a little darkness, not an outline. Its colour
- * is not chosen: light text gets a dark one, dark text a light one. Pure.
+ * What is drawn around the text is an outline — a close ring of ink, with a
+ * little of it spread wider — as the desktop lyrics of a music player have
+ * it. The first version drew the soft shadow of the user's own lyrics mod
+ * for Folia, a close drop and a wide glow; that mod is shown over artwork
+ * made to be a background, and over a desktop — windows, text, white pages —
+ * it did not hold the letters apart from what was behind them (the user,
+ * 2026-10-06). The ink's colour is not chosen: light text gets a dark
+ * outline, dark text a light one. Pure.
  */
 
 export type Look = 'panel' | 'soft' | 'light' | 'dark';
@@ -35,13 +39,13 @@ export const LOOK_ORDER: readonly Look[] = ['panel', 'soft', 'light', 'dark'];
 export const LOOKS: Readonly<Record<Look, LookPreset>> = {
   // A dark panel under light text.
   panel: { bgColor: '#000000', bgOpacity: 80, shadow: 0, align: 'left', sourceTextColor: '#ffffff', translationTextColor: '#9ad0ff' },
-  // A faint panel, and the shadow doing half the work.
-  soft: { bgColor: '#000000', bgOpacity: 30, shadow: 50, align: 'left', sourceTextColor: '#f0f0f0', translationTextColor: '#cfe8ff' },
+  // A faint panel, and the outline doing half the work.
+  soft: { bgColor: '#000000', bgOpacity: 30, shadow: 45, align: 'left', sourceTextColor: '#f0f0f0', translationTextColor: '#cfe8ff' },
   // No panel: light text on its own shadow. Centred — with nothing behind it, a short line at the far left of a wide
   // strip is a long way from where the eyes are.
-  light: { bgColor: '#000000', bgOpacity: 0, shadow: 60, align: 'center', sourceTextColor: '#f4f4f4', translationTextColor: '#ffffff' },
+  light: { bgColor: '#000000', bgOpacity: 0, shadow: 65, align: 'center', sourceTextColor: '#f4f4f4', translationTextColor: '#ffffff' },
   // No panel: dark text on a light glow, for a scene that is dark throughout.
-  dark: { bgColor: '#000000', bgOpacity: 0, shadow: 70, align: 'center', sourceTextColor: '#2a2f38', translationTextColor: '#14202e' },
+  dark: { bgColor: '#000000', bgOpacity: 0, shadow: 65, align: 'center', sourceTextColor: '#1f242c', translationTextColor: '#0f1a26' },
 };
 
 /** A colour as `#rgb` or `#rrggbb` reads light (it wants a dark shadow) or dark. Anything else is taken for light. */
@@ -56,19 +60,21 @@ export function isLight(color: string): boolean {
 
 const share = (value: number): string => String(Math.round(Math.min(1, Math.max(0, value)) * 100) / 100);
 
+/** The eight directions of the ring: straight, and diagonal at the same distance. */
+const RING: ReadonlyArray<readonly [number, number]> = [[1, 0], [-1, 0], [0, 1], [0, -1], [0.707, 0.707], [-0.707, 0.707], [0.707, -0.707], [-0.707, -0.707]];
+const em = (value: number): string => (value === 0 ? '0' : `${Math.round(value * 1000) / 1000}em`);
+
 /**
- * The `text-shadow` for text of a colour, at a strength of 0–100. At 50 a
- * dark shadow is the Folia mod's own; past it a closer, harder layer comes
- * in, for a background that is both bright and busy. A light shadow is drawn
- * heavier at every strength: a glow has to be seen against the dark it lights.
+ * The `text-shadow` that outlines text of a colour, at a strength of 0–100:
+ * a ring of ink at a distance that grows with the strength, and a little of
+ * it spread wider to soften the ring's edge. In ems, so that the small text
+ * has a thinner outline than the large and neither is swallowed by its own.
  */
 export function shadowFor(color: string, strength: number): string {
   const s = Math.min(100, Math.max(0, strength)) / 100;
   if (s === 0) return 'none';
-  if (isLight(color)) {
-    const layers = [`0 1px 3px rgba(0,0,0,${share(1.1 * s)})`, `0 0 14px rgba(0,0,0,${share(0.7 * s)})`];
-    if (s > 0.5) layers.unshift(`0 1px 2px rgba(0,0,0,${share((s - 0.5) * 1.6)})`);
-    return layers.join(', ');
-  }
-  return [`0 0 2px rgba(255,255,255,${share(1.9 * s)})`, `0 1px 4px rgba(255,255,255,${share(1.6 * s)})`, `0 0 14px rgba(255,255,255,${share(1.2 * s)})`].join(', ');
+  const ink = isLight(color) ? '0,0,0' : '255,255,255';
+  const reach = 0.03 + 0.05 * s;
+  const ring = RING.map(([x, y]) => `${em(x * reach)} ${em(y * reach)} 0 rgba(${ink},${share(0.6 + 0.4 * s)})`);
+  return [...ring, `0 0 ${em(0.1 + 0.12 * s)} rgba(${ink},${share(0.55 * s)})`].join(', ');
 }

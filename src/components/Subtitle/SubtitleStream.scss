@@ -51,13 +51,33 @@
       padding: var(--lane-pad-top, 10px) 16px var(--lane-pad-bottom, 12px);
     }
 
+    // A lane: whose it is, in a column of its own at the left, and what it says beside it.
     .subtitle-lane {
       flex: 0 1 auto;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: var(--lane-tag-column, 2.3em) minmax(0, 1fr);
+      column-gap: 0.55em;
+      align-items: start;
+      position: relative;
+    }
+
+    .subtitle-lane__texts {
+      min-width: 0;
       min-height: 0;
       display: flex;
       flex-direction: column;
       gap: var(--lane-inner-gap, 2px);
-      position: relative;
+    }
+
+    // Nobody has spoken yet: where the strip is, and that it is listening.
+    .subtitle-lanes__waiting {
+      align-self: center;
+      font-size: 0.9em;
+      letter-spacing: 0.2em;
+      color: var(--subtitle-translation-color, #e8e8e8);
+      text-shadow: var(--subtitle-shadow-answer, none);
+      opacity: 0.6;
     }
 
     // Nothing said in it yet: it takes no room, and draws no line.
@@ -78,6 +98,7 @@
     // The user's own row keeps the height of its lines: a window made higher gives all it adds to the pair.
     .subtitle-lane--row {
       flex: 0 0 var(--lane-row-height, 1.18em);
+      grid-template-rows: minmax(0, 1fr);
     }
 
     .subtitle-lane__source,
@@ -117,9 +138,9 @@
     // The user's own, as a row: said, then what answers it. Its beginning is what matters — the sentence as it
     // should have been — so what does not fit is cut at the end.
     .subtitle-lane__row {
-      flex: 1 1 0;
       justify-content: flex-start;
       max-height: 100%;
+      height: 100%;
       font-size: 0.62em;
       line-height: var(--lane-row-line, 1.9);
 
@@ -162,24 +183,29 @@
       opacity: 0.85;
     }
 
-    // Centred, for a look with no panel behind the text.
+    // Centred, for a look with no panel behind the text: in the middle of the window, so the lane keeps as much
+    // room at its right as its tag takes at its left.
     &[data-align='center'] .subtitle-lanes {
       text-align: center;
+
+      .subtitle-lane {
+        padding-right: calc(var(--lane-tag-column, 2.3em) + 0.55em);
+      }
     }
 
-    // Whose lane it is, at the start of its first text: the pair's small line, or the row. A solid pill of its own,
-    // dark with a bright word: read over a panel, a faint one, or nothing at all.
+    // Whose lane it is: a solid pill of its own, dark with a bright word — read over a panel, a faint one, or nothing
+    // at all — level with the lane's first line.
     .subtitle-lane__tag {
-      text-shadow: none;
-      display: inline-block;
-      margin-right: 0.7em;
+      justify-self: start;
+      margin-top: 0.3em;
       padding: 0 0.65em;
       border-radius: 1em;
-      font-size: 0.82em;
+      font-size: 0.5em;
       font-weight: 500;
       line-height: 1.6;
       font-style: normal;
-      vertical-align: 0.08em;
+      white-space: nowrap;
+      text-shadow: none;
       background: #2a2213;
       border: 1px solid rgba(tk.$color-participant, 0.75);
       color: #ffd591;
@@ -191,10 +217,9 @@
       color: #b6f0dc;
     }
 
-    // Beside the large answer (the source is hidden) the tag keeps its small size.
-    .subtitle-lane__answer .subtitle-lane__tag {
-      font-size: 0.5em;
-      vertical-align: 0.5em;
+    // Beside the large answer (the sentence is not shown) the tag sits lower, level with that line.
+    .subtitle-lane--large .subtitle-lane__tag {
+      margin-top: 0.75em;
     }
 
     .subtitle-lane__text {
@@ -264,29 +289,26 @@
   background: rgba(0, 0, 0, 0.72);
 }
 
-// Fork: the way out of click-through (`SubtitleView`): the one thing in the strip that takes a click while the mouse
-// passes through the rest. Shown while the pointer is over the strip, in its corner, on a panel of its own.
-.subtitle-through-unlock {
-  position: absolute;
-  top: 6px;
-  right: 8px;
-  z-index: 5;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.78);
-  color: #f0f0f0;
-  font: inherit;
-  font-size: 12px;
-  line-height: 1.4;
-  text-shadow: none;
-  cursor: pointer;
+// Fork: click-through (`SubtitleView`, `SubtitleBar`). The bar is in the page but not drawn — but for the button that
+// ends it, alone in its usual place, on a small dark square of its own, while the pointer is over the strip.
+.subtitle-bar.subtitle-bar--through {
+  visibility: hidden;
+  background: transparent;
+  transition: none;
 
-  &:hover {
-    background: rgba(0, 0, 0, 0.92);
-    border-color: tk.$color-primary;
+  .subtitle-bar__through {
+    visibility: hidden;
+    pointer-events: auto;
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: rgba(0, 0, 0, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    color: #f0f0f0;
+    text-shadow: none;
+  }
+
+  &.is-near .subtitle-bar__through {
+    visibility: visible;
   }
 }

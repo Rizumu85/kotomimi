@@ -522,39 +522,112 @@ describe('subtitle-window fitted to the lanes (fork)', () => {
 
 describe('subtitle-window click-through (fork)', () => {
   let win;
+  let pointer;
   const enter = (payload) => ipcHandlers.get('subtitle:enter')({}, payload);
   const exit = (payload = {}) => ipcHandlers.get('subtitle:exit')({}, payload);
-  const through = (on) => ipcHandlers.get('subtitle:set-click-through')({}, on);
+  const through = (payload) => ipcHandlers.get('subtitle:set-click-through')({}, payload);
+  // The strip at (100, 800), 900 x 120; the button that ends it at its top right.
+  const hole = { x: 820, y: 6, width: 28, height: 28 };
+  const tick = () => vi.advanceTimersByTime(50);
+  const told = () => win.webContents.send.mock.calls.filter(([channel]) => channel === 'subtitle:pointer').map(([, state]) => state);
 
   beforeEach(() => {
+    vi.useFakeTimers();
     ipcHandlers.clear();
+    pointer = { x: 0, y: 0 };
+    fakeElectron.screen.getCursorScreenPoint = () => pointer;
     const { setupSubtitleHandlers } = loadSubtitleWindowModule();
     win = makeFakeWindow();
+    win.getContentBounds = vi.fn(() => ({ x: 100, y: 800, width: 900, height: 120 }));
+    win.webContents.getZoomFactor = () => 1;
     setupSubtitleHandlers(win);
   });
 
   afterEach(() => {
     win.destroyed = true;
     win.emit('closed');
+    vi.useRealTimers();
+    delete fakeElectron.screen.getCursorScreenPoint;
     delete nodeRequire.cache[electronPath];
     delete nodeRequire.cache[modulePath];
     delete nodeRequire.cache[popoverModulePath];
   });
 
-  it('passes clicks to what is under the strip, movement still told to the page: its own button is the way out', async () => {
+  it('passes clicks to what is under the strip, and gives the window its clicks back when it is turned off', async () => {
     await enter({});
-    expect(await through(true)).toEqual({ ok: true });
+    expect(await through({ on: true, hole })).toEqual({ ok: true });
     expect(win.setIgnoreMouseEvents).toHaveBeenLastCalledWith(true, { forward: true });
-    await through(false);
+    await through({ on: false });
+    expect(win.setIgnoreMouseEvents).toHaveBeenLastCalledWith(false);
+    // Nothing is watched after.
+    win.setIgnoreMouseEvents.mockClear();
+    pointer = { x: 930, y: 815 };
+    tick();
+    expect(win.setIgnoreMouseEvents).not.toHaveBeenCalled();
+  });
+
+  it('takes clicks only while the pointer is on the button that ends it, and tells the page when the pointer is over the strip', async () => {
+    // The first version left this to the page's hover: the button flickered and a click on it went through (2026-10-06).
+    await enter({});
+    await through({ on: true, hole });
+    win.setIgnoreMouseEvents.mockClear();
+    // Elsewhere on the screen: nothing changes, nothing is told.
+    tick();
+    expect(win.setIgnoreMouseEvents).not.toHaveBeenCalled();
+    expect(told()).toEqual([]);
+    // Onto the strip, away from the button: the page shows the button; clicks still pass.
+    pointer = { x: 300, y: 860 };
+    tick();
+    expect(told()).toEqual([{ inside: true, over: false }]);
+    expect(win.setIgnoreMouseEvents).not.toHaveBeenCalled();
+    // Onto the button — a few pixels outside what is drawn count: the window takes the click.
+    pointer = { x: 100 + 820 - 4, y: 800 + 6 + 10 };
+    tick();
+    expect(win.setIgnoreMouseEvents).toHaveBeenLastCalledWith(false);
+    expect(told().at(-1)).toEqual({ inside: true, over: true });
+    // It stays so while the pointer rests there: asked once, not at every look.
+    tick();
+    tick();
+    expect(win.setIgnoreMouseEvents).toHaveBeenCalledTimes(1);
+    // Off the button: clicks pass again. Off the strip: the page hides the button.
+    pointer = { x: 300, y: 860 };
+    tick();
+    expect(win.setIgnoreMouseEvents).toHaveBeenLastCalledWith(true, { forward: true });
+    pointer = { x: 300, y: 500 };
+    tick();
+    expect(told().at(-1)).toEqual({ inside: false, over: false });
+  });
+
+  it('follows the button when the page says it moved, and reads the page by its zoom', async () => {
+    await enter({});
+    await through({ on: true, hole });
+    win.setIgnoreMouseEvents.mockClear();
+    await through({ on: true, hole: { ...hole, x: 400 } });
+    // Still on: nothing asked of the window again.
+    expect(win.setIgnoreMouseEvents).not.toHaveBeenCalled();
+    pointer = { x: 100 + 410, y: 800 + 16 };
+    tick();
+    expect(win.setIgnoreMouseEvents).toHaveBeenLastCalledWith(false);
+    // At a zoom of 2 the same button is drawn twice as far in.
+    win.webContents.getZoomFactor = () => 2;
+    tick();
+    expect(win.setIgnoreMouseEvents).toHaveBeenLastCalledWith(true, { forward: true });
+    pointer = { x: 100 + 820, y: 800 + 32 };
+    tick();
     expect(win.setIgnoreMouseEvents).toHaveBeenLastCalledWith(false);
   });
 
   it('belongs to the strip alone: nothing outside subtitle mode, and the main window takes its clicks when the mode is left', async () => {
-    expect(await through(true)).toEqual({ ok: false });
+    expect(await through({ on: true, hole })).toEqual({ ok: false });
     expect(win.setIgnoreMouseEvents).not.toHaveBeenCalled();
     await enter({});
-    await through(true);
+    await through({ on: true, hole });
     await exit();
     expect(win.setIgnoreMouseEvents).toHaveBeenLastCalledWith(false);
+    win.setIgnoreMouseEvents.mockClear();
+    pointer = { x: 300, y: 860 };
+    tick();
+    expect(win.setIgnoreMouseEvents).not.toHaveBeenCalled();
+    expect(told()).toEqual([]);
   });
 });

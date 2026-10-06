@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import {
   AArrowDown, AArrowUp, ChevronsDownUp, ChevronsUpDown,
   Pin, Lock, Undo2, Settings, Trash2, Maximize, Minimize,
-  Play, Square, Loader, PointerOff,
+  Play, Square, Loader, Pointer, PointerOff,
 } from 'lucide-react';
 import { useSubtitleLookStore } from '../../stores/subtitleLookStore';
 import {
@@ -103,6 +103,8 @@ const SubtitleBar: React.FC<Props> = ({
   const togglePositionLocked = useToggleSubtitlePositionLocked();
   // Fork: click-through, for the takeover's own window while a run is on (`SubtitleView`).
   const setThrough = useSubtitleLookStore((state) => state.setThrough);
+  const through = useSubtitleLookStore((state) => state.through) && surface === 'electron' && sessionControl?.isSessionActive === true;
+  const near = useSubtitleLookStore((state) => state.near);
   const speakerMode = useSpeakerDisplayMode();
   const participantMode = useParticipantDisplayMode();
   const setSpeakerMode = useSetSpeakerDisplayMode();
@@ -158,7 +160,7 @@ const SubtitleBar: React.FC<Props> = ({
 
   return (
     <div
-      className={`subtitle-bar ${subtitle.positionLocked ? 'locked' : ''} ${surface === 'electron' ? 'surface-electron' : 'surface-overlay'}`}
+      className={`subtitle-bar ${subtitle.positionLocked ? 'locked' : ''} ${surface === 'electron' ? 'surface-electron' : 'surface-overlay'}${through ? ' subtitle-bar--through' : ''}${through && near ? ' is-near' : ''}`}
       role="toolbar"
       {...dragHandleProps}
     >
@@ -309,14 +311,17 @@ const SubtitleBar: React.FC<Props> = ({
           </button>
         )}
         {surface === 'electron' && sessionControl?.isSessionActive && (
+          // The same button turns it on and off, in the same place: while it is on, it is the one thing of the bar
+          // that is drawn, and only while the pointer is over the strip.
           <button
             type="button"
-            className="subtitle-bar__btn"
-            onClick={() => setThrough(true)}
-            title={t('fork.subtitle.through', 'Click-through: the mouse passes through the captions')}
-            aria-label={t('fork.subtitle.through', 'Click-through: the mouse passes through the captions')}
+            className={`subtitle-bar__btn subtitle-bar__through${through ? ' active' : ''}`}
+            onClick={() => setThrough(!through)}
+            title={through ? t('fork.subtitle.throughOff', 'Stop click-through') : t('fork.subtitle.through', 'Click-through: the mouse passes through the captions')}
+            aria-label={through ? t('fork.subtitle.throughOff', 'Stop click-through') : t('fork.subtitle.through', 'Click-through: the mouse passes through the captions')}
+            aria-pressed={through}
           >
-            <PointerOff size={14} />
+            {through ? <Pointer size={14} /> : <PointerOff size={14} />}
           </button>
         )}
         <button

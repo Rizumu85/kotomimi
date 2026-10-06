@@ -98,8 +98,11 @@ describe('SubtitleBody — compact: the fork\u2019s lanes', () => {
     expect(lanes.map((lane) => lane.getAttribute('data-lane'))).toEqual(['participant', 'speaker']);
     expect(lanes.every((lane) => lane.classList.contains('is-silent'))).toBe(true);
     expect(container.querySelector('.subtitle-lane__tag')).toBeNull();
-    // One side has spoken: it is tagged, the other still is not.
+    // A strip with no panel would then be nothing at all on the screen: a quiet mark says where it is.
+    expect(container.querySelector('.subtitle-lanes__waiting')?.textContent).toBe('· · ·');
+    // One side has spoken: it is tagged, the other still is not, and the mark is gone.
     const one = render(<SubtitleBody {...props({ legs: ['speaker', 'participant'] })} />);
+    expect(one.container.querySelector('.subtitle-lanes__waiting')).toBeNull();
     expect([...one.container.querySelectorAll('.subtitle-lane__tag')].map((tag) => tag.textContent)).toEqual(['Me']);
     expect(one.container.querySelector('[data-lane="participant"]')?.classList.contains('is-silent')).toBe(true);
   });

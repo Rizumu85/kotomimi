@@ -163,7 +163,7 @@ ipcMain.handle('subtitle:exit', (_event, payload) => {
   // Fork: the least height the lanes asked for is the subtitle window's, not the main window's — and the main window
   // takes its own clicks.
   restoreLeastSize(win);
-  win.setIgnoreMouseEvents(false);
+  stopThrough(win);
   // If the user exits subtitle mode while fullscreen, drop fullscreen first;
   // otherwise setBounds() fights the fullscreen state and the window can be
   // left stuck. Guarded to avoid a needless transition on the common path.
@@ -249,14 +249,62 @@ ipcMain.handle('subtitle:fit-height', (_event, payload) => {
 });
 
 // Fork: click-through. The strip is a caption over a game: the mouse is the game's. While it is on, the window
-// passes every click to whatever is under it; movement is still forwarded to the page, which shows one small button
-// while the pointer is over the strip and asks for clicks back while it is over that button — the one way out (as the
-// desktop lyrics of a music player have it). Only in subtitle mode; leaving it gives the window its clicks back.
-ipcMain.handle('subtitle:set-click-through', (_event, on) => {
+// passes every click to whatever is under it — but for one small rectangle of it, the button that turns this off (as
+// the desktop lyrics of a music player have it). Where the pointer is, is asked of the system here, a few times a
+// second: the window takes clicks while it is over that rectangle and passes them everywhere else, and the page is
+// told when the pointer comes onto the strip or leaves it, to show the button. (Left to the page — enter and leave
+// events, the window's clicks switched on a hover — the button flickered as the pointer neared it, and a click on it
+// as often went through: switching whether a window takes the mouse makes it enter and leave. Seen 2026-10-06.)
+// Only in subtitle mode; leaving it gives the window its clicks back.
+const THROUGH_EVERY_MS = 50;
+/** The pointer counts as on the button this far outside it: a target of a few pixels more than is drawn. */
+const THROUGH_MARGIN = 6;
+let through = null;
+function stopThrough(win) {
+  if (through) clearInterval(through.timer);
+  through = null;
+  if (win && !win.isDestroyed()) win.setIgnoreMouseEvents(false);
+}
+function watchPointer(win) {
+  if (!through) return;
+  if (win.isDestroyed()) { stopThrough(null); return; }
+  const point = screen.getCursorScreenPoint();
+  const bounds = win.getContentBounds();
+  const inside = point.x >= bounds.x && point.x < bounds.x + bounds.width && point.y >= bounds.y && point.y < bounds.y + bounds.height;
+  // The page's own pixels: the content's, by its zoom.
+  const zoom = win.webContents.getZoomFactor?.() || 1;
+  const x = (point.x - bounds.x) / zoom;
+  const y = (point.y - bounds.y) / zoom;
+  const hole = through.hole;
+  const over = inside && hole !== null
+    && x >= hole.x - THROUGH_MARGIN && x <= hole.x + hole.width + THROUGH_MARGIN
+    && y >= hole.y - THROUGH_MARGIN && y <= hole.y + hole.height + THROUGH_MARGIN;
+  if (over !== through.over) {
+    if (over) win.setIgnoreMouseEvents(false);
+    else win.setIgnoreMouseEvents(true, { forward: true });
+  }
+  if (inside !== through.inside || over !== through.over) win.webContents.send('subtitle:pointer', { inside, over });
+  through.inside = inside;
+  through.over = over;
+}
+const holeOf = (hole) => (hole && [hole.x, hole.y, hole.width, hole.height].every((n) => Number.isFinite(n)) && hole.width > 0 && hole.height > 0
+  ? { x: hole.x, y: hole.y, width: hole.width, height: hole.height }
+  : null);
+ipcMain.handle('subtitle:set-click-through', (_event, payload) => {
   const win = getLiveWindow();
   if (!win || normalBoundsSnapshot === null) return { ok: false };
-  if (on) win.setIgnoreMouseEvents(true, { forward: true });
-  else win.setIgnoreMouseEvents(false);
+  if (!(payload === true || payload?.on === true)) {
+    stopThrough(win);
+    return { ok: true };
+  }
+  const hole = holeOf(payload?.hole);
+  // Already on: the button's place is all that changed.
+  if (through) {
+    through.hole = hole;
+    return { ok: true };
+  }
+  through = { hole, inside: false, over: false, timer: setInterval(() => watchPointer(win), THROUGH_EVERY_MS) };
+  win.setIgnoreMouseEvents(true, { forward: true });
   return { ok: true };
 });
 
