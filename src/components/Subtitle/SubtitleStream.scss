@@ -449,6 +449,71 @@
   }
 }
 
+// Fork: the desktop strip is two pieces, one above the other: the toolbar, and under a small gap the caption box.
+// Upstream lays the toolbar over the top of the box — a strip from edge to edge with the box's corners, appearing
+// on top of the first caption line whenever the pointer comes near, and over whatever else is in the box (the
+// idle capsule, a rounded thing of another shape floating under it: two controls of two families, one glued to
+// the frame and one adrift, which is what read as "not matching" — the user, 2026-10-06). Here the window is
+// clear, the toolbar has room of its own at the top and its own rounded shape, and the box — the look's panel —
+// begins under that room. Nothing covers the captions, and the box is all captions: none of it is kept for a
+// toolbar. While the toolbar is away its room is simply clear.
+//
+// And the box shows its edge while the pointer is over the window: with a look that has no panel there was
+// nothing to say how large the window is or where it can be taken hold of. Not while the mouse passes through,
+// and not otherwise: a strip nobody is pointing at is only its words.
+.subtitle-app.subtitle-app--framed {
+  --kt-bar-room: 42px;
+  box-sizing: border-box;
+  padding-top: var(--kt-bar-room);
+  border-radius: 10px;
+  isolation: isolate;
+
+  // The box: the panel the look asks for.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: var(--kt-bar-room) 0 0 0;
+    z-index: -1;
+    border-radius: 10px;
+    background: var(--kt-panel, transparent);
+    pointer-events: none;
+  }
+
+  // Its edge, with the toolbar: a light line with a dark one inside it, so that it shows over anything.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: var(--kt-bar-room) 0 0 0;
+    z-index: 5;
+    border-radius: 10px;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7), inset 0 0 0 2px rgba(0, 0, 0, 0.35);
+    opacity: var(--bar-opacity, 0);
+    transition: opacity 200ms ease-in-out;
+    pointer-events: none;
+  }
+
+  &.is-through::after {
+    opacity: 0;
+  }
+
+  > .subtitle-bar {
+    border-radius: 10px;
+  }
+
+  // Filling the screen there is no window to show the edge of, and the box has the screen's corners.
+  &.fullscreen {
+    border-radius: 0;
+
+    &::before {
+      border-radius: 0;
+    }
+
+    &::after {
+      display: none;
+    }
+  }
+}
+
 // Fork: click-through (`SubtitleView`, `SubtitleBar`). The bar is in the page but not drawn — but for the button that
 // ends it, alone in its usual place, on a small dark square of its own, while the pointer is over the strip.
 .subtitle-bar.subtitle-bar--through {

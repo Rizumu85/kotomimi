@@ -414,16 +414,21 @@ describe('a stretch of several sentences, of a leg that translates what it hears
   // The recognizer goes on hearing one stretch; the leg closes its finished sentences as they come (`sentenceCut.ts`).
   const delta = (text: string) => SERVER.inputDelta('item_1', text);
 
-  it('closes a finished sentence once the speaker has gone on and it has stood a moment, and answers it at once', async () => {
+  it('closes a finished sentence once a good deal more has been said and it has stood a moment, and answers it at once', async () => {
     const h = await live(PARTICIPANT, VIA_MODEL, [sse('这个季节的东西是什么来着？'), sse('对啊，会想到新年呢。')]);
     h.receive(SERVER.committed('item_1'), delta('でこの季節のものなんだっけ？'));
     // The last thing said: its mark may yet be rewritten.
     expect(h.calls).toHaveLength(0);
-    h.receive(delta('そうだ'));
-    // Gone on from — but only just seen so.
+    h.receive(delta('そうだね、やっぱり'));
+    h.clock.advance(1000);
+    h.receive(delta('お'));
+    // Gone on from, but not far: what is left would be a scrap.
+    expect(h.calls).toHaveLength(0);
+    h.receive(delta('正'));
+    // Far enough — but only just seen so.
     expect(h.calls).toHaveLength(0);
     h.clock.advance(400);
-    h.receive(delta('ね、'));
+    h.receive(delta('月'));
     await vi.waitFor(() => expect(h.calls).toHaveLength(1));
     expect(h.calls[0].body.messages[1].content).toBe('でこの季節のものなんだっけ？');
     // The sentence is the stretch's own segment, closed with its text; what follows shows in a new one.
@@ -432,7 +437,7 @@ describe('a stretch of several sentences, of a leg that translates what it hears
     expect(sources).toHaveLength(2);
     const rest = sources[1];
     expect(rest).toBeGreaterThan(FIRST_REF);
-    expect(h.lastText(rest)?.text).toBe('そうだね、');
+    expect(h.lastText(rest)?.text).toBe('そうだね、やっぱりお正月');
     // The stretch ends: what is left of it is the last sentence, answered as any.
     h.receive(SERVER.inputDone('item_1', 'でこの季節のものなんだっけ？そうだね、やっぱりお正月だね。'));
     await h.settled();
@@ -444,34 +449,64 @@ describe('a stretch of several sentences, of a leg that translates what it hears
     const answers = opened.filter((p) => p.side === 'translation');
     expect(answers.map((p) => p.origin)).toEqual([closedOrigin(1), closedOrigin(rest)]);
     expect(new Set(answers.map((p) => p.origin)).size).toBe(2);
+    // The recognizer's last word began as the closed sentence did: nothing to say of it.
+    expect(h.of('frame').filter((e) => e.payload.type === 'speech.rewritten')).toHaveLength(0);
   });
 
   it('does not close a sentence the recognizer is still rewriting', async () => {
     const h = await live(PARTICIPANT, VIA_MODEL, [sse('一'), sse('二')]);
-    h.receive(SERVER.committed('item_1'), delta('今日は本当に寒いですね。明日'));
+    h.receive(SERVER.committed('item_1'), delta('今日は本当に寒いですね。明日もきっと寒いでしょ'));
     h.clock.advance(300);
-    h.receive(delta('も'));
+    h.receive(delta('う'));
     // Stood 300 ms: not yet.
     expect(h.calls).toHaveLength(0);
     h.clock.advance(300);
-    h.receive(delta('寒い'));
+    h.receive(delta('ね'));
     await vi.waitFor(() => expect(h.calls).toHaveLength(1));
     expect(h.calls[0].body.messages[1].content).toBe('今日は本当に寒いですね。');
   });
 
   it('closes nothing more where the stretch ends right after its last sentence', async () => {
     const h = await live(PARTICIPANT, VIA_MODEL, [sse('一')]);
-    h.receive(SERVER.committed('item_1'), delta('今日は本当に寒いですね。それ'));
+    h.receive(SERVER.committed('item_1'), delta('今日は本当に寒いですね。それでどうしようかなと'));
     h.clock.advance(400);
-    h.receive(delta('で'));
+    h.receive(delta('思'));
     await vi.waitFor(() => expect(h.calls).toHaveLength(1));
-    // The recognizer's last word on the stretch takes the three letters back.
+    // The recognizer's last word on the stretch takes what followed back.
     h.receive(SERVER.inputDone('item_1', '今日は本当に寒いですね。'));
     await h.settled();
     expect(h.calls).toHaveLength(1);
     const rest = h.of('segmentOpened').map((e) => e.payload).filter((p) => p.side === 'source')[1].ref;
     expect(h.lastText(rest)?.text).toBe('');
     expect(h.of('segmentClosed').map((e) => e.payload.ref)).toContain(rest);
+  });
+
+  it('finds what is left by its letters where the recognizer\u2019s last word rewrote the closed sentence, and says so in a frame', async () => {
+    const h = await live(PARTICIPANT, VIA_MODEL, [sse('一'), sse('二')]);
+    h.receive(SERVER.committed('item_1'), delta('今日は本当に寒いですね。それでどうしようかなと'));
+    h.clock.advance(400);
+    h.receive(delta('思'));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(1));
+    // A comma came and the full stop became another mark: the closed sentence stands as it was closed.
+    h.receive(SERVER.inputDone('item_1', '今日は、本当に寒いですね！それでどうしようかなと思って。'));
+    await h.settled();
+    expect(h.calls.map((c) => c.body.messages[1].content)).toEqual(['今日は本当に寒いですね。', 'それでどうしようかなと思って。']);
+    expect(h.of('frame').filter((e) => e.payload.type === 'speech.rewritten')).toHaveLength(1);
+  });
+
+  it('takes marks alone for nothing left: no caption of a full stop', async () => {
+    const h = await live(PARTICIPANT, VIA_MODEL, [sse('一')]);
+    h.receive(SERVER.committed('item_1'), delta('今日は本当に寒いですね。それでどうしようかなと'));
+    h.clock.advance(400);
+    h.receive(delta('思'));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(1));
+    // The recognizer's last word drops what followed and moves its full stop: all that is "left" is a mark.
+    h.receive(SERVER.inputDone('item_1', '今日は本当に寒いですね！。'));
+    await h.settled();
+    expect(h.calls).toHaveLength(1);
+    const rest = h.of('segmentOpened').map((e) => e.payload).filter((p) => p.side === 'source')[1].ref;
+    expect(h.lastText(rest)?.text).toBe('');
+    expect(h.of('segmentOpened').filter((e) => e.payload.side === 'translation')).toHaveLength(1);
   });
 
   it('answers a stretch whole where the recognizer writes it all at once', async () => {

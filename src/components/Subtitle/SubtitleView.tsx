@@ -50,6 +50,9 @@ function languageCodeShort(code: string | undefined): string {
   return code ? baseLang(code).slice(0, 2).toUpperCase() : '?';
 }
 
+/** The toolbar's room above the caption box on the desktop: its 36 pixels and the gap under it (`--kt-bar-room` in `SubtitleStream.scss`). */
+const BAR_ROOM = 42;
+
 function idleState(idle: SubtitleIdleModel | undefined, t: TFunction): SubtitleIdleState {
   if (!idle) return { kind: 'ended' };
   // An uncoded reason stays as it is — `noticeText` returns the message.
@@ -132,7 +135,8 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
   const fitsWindow = surface === 'electron' && !chrome.fullscreen && !subtitle.positionLocked;
   const fitWindow = useCallback((height: number, least: number) => {
     if (!fitsWindow) return;
-    void window.electron?.invoke?.('subtitle:fit-height', { height, least })?.catch?.(() => {});
+    // The window is the caption box and, above it, the room the toolbar comes out in.
+    void window.electron?.invoke?.('subtitle:fit-height', { height: height + BAR_ROOM, least: least + BAR_ROOM })?.catch?.(() => {});
   }, [fitsWindow]);
   // Fork: click-through (`electron/subtitle-window.js`). While it is on the mouse is whatever's under the strip: the
   // bar does not come out, nothing in the strip can be clicked, and the one way out is the bar's own button, drawn
@@ -178,7 +182,7 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
       if (surface === 'electron') void window.electron?.invoke?.('subtitle:set-click-through', { on: false })?.catch?.(() => {});
     };
   }, [surface]);
-  const rootProps = through
+  const shown = through
     ? {
         ...chrome.rootProps,
         // The bar is in the page, with only its one button to be seen: it neither fades in nor takes the mouse.
@@ -188,6 +192,16 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
         onMouseLeave: undefined,
       }
     : chrome.rootProps;
+  // Fork: on the desktop the toolbar is a piece of its own above the caption box, not a strip laid over the box's
+  // top (`SubtitleStream.scss`, "framed"). The window itself is clear; the box is drawn under the toolbar's room,
+  // in the colour the hook gave the window.
+  const rootProps = surface === 'electron'
+    ? {
+        ...shown,
+        className: `${shown.className} subtitle-app--framed${through ? ' is-through' : ''}`,
+        style: { ...shown.style, '--kt-panel': shown.style.background as string, background: 'transparent' },
+      }
+    : shown;
 
   // No lanes on screen — the list, or no run: the window may be any height again.
   const lanesShown = running && subtitle.compactMode;

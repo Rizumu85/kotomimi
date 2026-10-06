@@ -10,43 +10,54 @@
  * for its answer at once — while the recognizer goes on hearing the same
  * stretch: its sound is not cut, only its text.
  *
- * A sentence is finished when its closing mark has more said after it, and
- * its text has stood unchanged for a moment (`SETTLE_MS`): a recognizer that
- * shows what it has heard before that is settled rewrites its last words.
- * How long a piece is, is for the reader. A caption that changes has to be
- * found again by the eye each time, and one too long does not fit its two
- * lines or a glance: subtitling keeps to about one and a half to seven
- * seconds a caption. So a piece is at least about two seconds of speech
- * (`PIECE_LEAST`): shorter sentences ("はい。", "これもかな？") go with the
- * next, as one caption — alone each was gone before it was read, and a
- * translation with nothing to go on. And a run that reaches about eight
- * seconds with no sentence end (`PIECE_MOST`) is cut at its last clause
- * mark: a listener who keeps waiting for the full stop of a long sentence
- * reads nothing meanwhile. The counts are of letters, by the kind of
- * script: Japanese and Chinese are spoken at five or six letters a second,
- * a language written with spaces at about thirteen.
+ * What is handed on has to be right, more than it has to be early: a caption
+ * closed and translated cannot be taken back. So a sentence is closed only
+ * when:
  *
- * A sentence the speaker merely stops at is not closed here, however long
- * the stop: that is the recognizer's own pause to call. Closing it after
- * 0.9 s was tried (2026-10-06) and cut sentences in two — this computer's
- * recognizer ends whatever it has heard so far with a full stop, so a
- * breath in the middle of a sentence read as its end ("お正月の。" /
- * "イメージあるよね。", each translated alone, and wrongly).
+ * - a good deal more has been said after its closing mark — as much as a
+ *   piece holds at least (`PIECE_LEAST`, about two seconds of speech). A
+ *   recognizer that shows what it has heard before that is settled rewrites
+ *   its newest words, and ends whatever it has so far with a full stop; two
+ *   seconds on, a sentence is no longer its newest words. And what is left
+ *   of the stretch after a cut is then never a scrap ("柄的に。", closed
+ *   alone and "translated" as itself, when two letters were enough);
+ * - its text has stood unchanged for a moment (`SETTLE_MS`);
+ * - it is long enough itself (`PIECE_LEAST`): shorter sentences ("はい。",
+ *   "これもかな？") go with the next, as one caption — alone each was gone
+ *   before it was read, and a translation with nothing to go on.
+ *
+ * A caption that changes has to be found again by the eye each time, and
+ * one too long does not fit its two lines or a glance: subtitling keeps to
+ * about one and a half to seven seconds a caption, which is what these
+ * lengths come to. The counts are of letters, by the kind of script:
+ * Japanese and Chinese are spoken at five or six letters a second, a
+ * language written with spaces at about thirteen.
+ *
+ * Never anywhere but a sentence end. A sentence the speaker merely stops at
+ * is not closed here, however long the stop: that is the recognizer's own
+ * pause to call (closing it after 0.9 s cut "お正月の。" from "イメージ
+ * あるよね。", 2026-10-06). And a long run with no sentence end is not cut
+ * at a comma: that was tried the same day and taken out before anyone used
+ * it — half a Japanese sentence has no verb yet, and its translation is a
+ * guess. Such a run waits for its end, or for the recognizer's own limit, as
+ * it always did.
+ *
+ * So this only ever does something where a recognizer writes punctuation as
+ * it hears (Qwen3-ASR does; R2T2 writes next to none, and its stretches are
+ * answered whole, as before).
  *
  * Pure.
  */
-import { breakpoints, SENTENCE_CLOSERS, SENTENCE_TERMINALS, sentenceEnds } from '../../lib/segmentation/sentenceEnd';
+import { SENTENCE_CLOSERS, SENTENCE_TERMINALS, sentenceEnds } from '../../lib/segmentation/sentenceEnd';
 
 /** A piece's text has to stand this long, unchanged, before it is closed. */
 export const SETTLE_MS = 400;
-/** The least a piece holds, in letters: of a script written without spaces, and of any other. About two seconds said. */
+/**
+ * The least a piece holds, in letters — and the least that has to be said after a sentence before it is closed: of a
+ * script written without spaces, and of any other. About two seconds said.
+ */
 export const PIECE_LEAST_DENSE = 10;
 export const PIECE_LEAST = 28;
-/** A run this long with no sentence end is cut at a clause mark. About eight seconds said. */
-export const PIECE_MOST_DENSE = 45;
-export const PIECE_MOST = 110;
-/** The letters that have to follow a closing mark before the sentence counts as finished: the speaker has gone on. */
-export const PIECE_AFTER = 2;
 
 const LETTER = /[\p{L}\p{N}]/u;
 /** Kana, Han, Hangul and Thai: written without spaces, a few letters are a sentence. */
@@ -59,52 +70,62 @@ export function letters(text: string): number {
   return n;
 }
 
-/** The last of `marks` that more is said after, where what is before it is long enough to stand alone; else -1. */
-function lastCut(text: string, marks: readonly number[]): number {
-  for (let i = marks.length - 1; i >= 0; i--) {
-    const end = marks[i];
-    if (letters(text.slice(end)) < PIECE_AFTER) continue;
-    // Every earlier mark leaves less before it.
-    return letters(text.slice(0, end)) >= least(text) ? end : -1;
+/**
+ * Where `text` may be cut: just past its last sentence end that a piece's worth has been said after, where what is
+ * before it is a piece's worth too. -1: nowhere yet.
+ */
+export function cutAt(text: string): number {
+  const ends = sentenceEnds(text);
+  const few = least(text);
+  for (let i = ends.length - 1; i >= 0; i--) {
+    const end = ends[i];
+    if (letters(text.slice(end)) < few) continue;
+    // Every earlier end leaves less before it.
+    return letters(text.slice(0, end)) >= few ? end : -1;
   }
   return -1;
 }
 
-/**
- * Where `text` may be cut: just past its last sentence end that more is said
- * after, where what is before it is long enough to stand alone — or, of a
- * run grown too long with no such end, just past its last clause mark. -1:
- * nowhere yet.
- */
-export function cutAt(text: string): number {
-  const end = lastCut(text, sentenceEnds(text));
-  if (end >= 0) return end;
-  if (letters(text) < (DENSE.test(text) ? PIECE_MOST_DENSE : PIECE_MOST)) return -1;
-  return lastCut(text, breakpoints(text));
-}
-
 const least = (text: string): number => (DENSE.test(text) ? PIECE_LEAST_DENSE : PIECE_LEAST);
+
+/** How many of the closed text's last letters are looked for in the text as it now reads, and how far from where they are expected. */
+const ANCHOR_LETTERS = 5;
+const ANCHOR_REACH = 10;
 
 /**
  * Where what is left of a stretch begins in its text as it now reads, given
  * the text that was closed as pieces (`done`, the stretch's beginning as it
- * read then). A recognizer may have rewritten that beginning since — its
- * marks and spacing most of all — so where it no longer reads the same, the
- * place is found by its letters alone: as many as were closed, and the marks
- * that close them.
+ * read then). A recognizer's last word on a stretch often reads a little
+ * otherwise than what it showed on the way — its marks and spacing most of
+ * all, but letters too (of eight minutes of talk, measured 2026-10-06: a
+ * word added in front, "飲んどいた" become "飲んだ"). So where the text no
+ * longer begins as it was closed, the place is found by what the closed text
+ * ended with: its last few letters, nearest to where a count of letters
+ * expects them — and by that count alone where they are no longer there.
+ * Then past the marks that close them.
  */
 export function restFrom(text: string, done: string): number {
   if (!done) return 0;
   if (text.startsWith(done)) return done.length;
-  const want = letters(done);
-  let seen = 0;
-  let i = 0;
-  // By code units: a letter outside the basic plane is two of them, counted once at its first.
+  // The text's letters, and where each stands in it (in code units; a letter outside the basic plane is two).
+  const found: string[] = [];
+  const ends: number[] = [];
+  let at = 0;
   for (const ch of text) {
-    if (seen >= want) break;
-    if (LETTER.test(ch)) seen += 1;
-    i += ch.length;
+    at += ch.length;
+    if (LETTER.test(ch)) { found.push(ch.toLowerCase()); ends.push(at); }
   }
+  const closed = [...done].filter((ch) => LETTER.test(ch)).map((ch) => ch.toLowerCase());
+  const want = closed.length;
+  if (want === 0) return 0;
+  const tail = closed.slice(-ANCHOR_LETTERS);
+  // The nearest place the closed text's last letters end at, in letters.
+  let best = -1;
+  for (let end = Math.max(tail.length, want - ANCHOR_REACH); end <= Math.min(found.length, want + ANCHOR_REACH); end++) {
+    if (tail.every((ch, i) => found[end - tail.length + i] === ch) && (best < 0 || Math.abs(end - want) < Math.abs(best - want))) best = end;
+  }
+  const upTo = best >= 0 ? best : Math.min(want, found.length);
+  let i = upTo > 0 ? ends[upTo - 1] : 0;
   while (i < text.length && (SENTENCE_TERMINALS.includes(text[i]) || SENTENCE_CLOSERS.includes(text[i]) || /\s/.test(text[i]))) i += 1;
   return i;
 }

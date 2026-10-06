@@ -32,7 +32,7 @@ import { createNativeAsr, type NativeLimits } from './nativeAsr';
 import { languageByScript, saidInOwn, sameSpeech } from '../../lib/language/script';
 import { AUTO } from '../../lib/provider/languages';
 import { TEXT_SLOT } from './nativeTranslators';
-import { cutAt, restFrom, SETTLE_MS } from './sentenceCut';
+import { cutAt, letters, restFrom, SETTLE_MS } from './sentenceCut';
 import { askNativeEngine, ipcNativeBridge, type NativeBridge, type NativeEngineStatus } from '../../lib/native/nativeEngine';
 import { createRealtimeAdapter } from './adapter';
 import type { RealtimeConfig } from './config';
@@ -433,8 +433,13 @@ class PipelineLeg implements AdapterSession {
         this.cuts.delete(e.payload.ref);
         if (cut && cut.done && source) {
           const rest = source.text.slice(restFrom(source.text, cut.done)).trim();
-          // Nothing after the last one: a segment that waited for more goes, as one that heard nothing does.
-          if (!rest) {
+          // The recognizer's last word on the stretch no longer begins as the sentences closed from it did: said, for
+          // whoever reads the frames. What was closed stands; what is left is found by its letters (`restFrom`).
+          if (!source.text.startsWith(cut.done)) this.frame('in', 'speech.rewritten', { closed: cut.done.length, heard: source.text.length });
+          // Nothing after the last one — or its marks alone, where the recognizer's last word moved a full stop: a
+          // segment that waited for more goes, as one that heard nothing does. (A caption of "。", answered with "。",
+          // was seen 2026-10-06.)
+          if (letters(rest) === 0) {
             if (cut.rest) {
               this.events.segmentText({ ref: cut.rest.ref, text: '' });
               this.events.segmentClosed({ ref: cut.rest.ref });
@@ -571,7 +576,8 @@ class PipelineLeg implements AdapterSession {
   /** What is left of a stretch, as it now reads: in its segment, opened when there first is something to show. */
   private sayRest(cut: Cut, rest: string): void {
     const text = cut.done ? rest.trimStart() : rest;
-    if (!cut.rest && !text.trim()) return;
+    // A mark or two is not yet something to open a segment for.
+    if (!cut.rest && letters(text) === 0) return;
     this.events.segmentText({ ref: this.restOf(cut).ref, text, ...(cut.language ? { language: cut.language } : {}) });
   }
 
