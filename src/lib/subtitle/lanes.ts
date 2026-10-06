@@ -147,7 +147,13 @@ export const ROW_SCALE = 0.62;
  * window the user then makes smaller is paid for with the air first: the
  * spacing goes towards tight, where each text has one line at the size chosen
  * and the gaps are as small as still reads well. The window goes no smaller
- * than that; in between, a sentence too long for its box is drawn smaller.
+ * than that. Text is one size throughout: a sentence too long for its lines
+ * loses its oldest line (`SubtitleLanes`), and is never drawn smaller.
+ *
+ * A small line is 2.15 of its size high: what a line with readings written
+ * above it (furigana) takes in the app's fonts, measured — at 1.9 such a line
+ * came out four pixels taller than one without, and the text under it moved.
+ * Tight, 1.9: the readings then reach a little into the line's own leading.
  */
 export interface LaneSpacing {
   /** The strip's padding above and below, the space between two lanes (a hairline runs through the middle of it), and inside a pair between its two texts: pixels. */
@@ -162,8 +168,8 @@ export interface LaneSpacing {
   rowLine: number;
 }
 
-export const ROOMY: LaneSpacing = { padTop: 10, padBottom: 12, gap: 17, inner: 2, answerLines: 2, answerLine: 1.4, sourceLine: 1.9, rowLine: 1.9 };
-export const TIGHT: LaneSpacing = { padTop: 4, padBottom: 5, gap: 7, inner: 0, answerLines: 1, answerLine: 1.22, sourceLine: 1.6, rowLine: 1.6 };
+export const ROOMY: LaneSpacing = { padTop: 10, padBottom: 12, gap: 17, inner: 2, answerLines: 2, answerLine: 1.4, sourceLine: 2.15, rowLine: 2.15 };
+export const TIGHT: LaneSpacing = { padTop: 4, padBottom: 5, gap: 7, inner: 0, answerLines: 1, answerLine: 1.22, sourceLine: 1.9, rowLine: 1.9 };
 
 /** The spacing a share of the way from roomy (0) to tight (1). */
 export function spacingAt(squeeze: number): LaneSpacing {
@@ -198,7 +204,7 @@ export function squeezeOf(height: number, roomy: number, tight: number): number 
   return Math.min(1, (roomy - height) / (roomy - tight));
 }
 
-/** How many lines each text of a strip has room for before it is drawn smaller. */
+/** How many lines each text of a strip has: what is longer loses its oldest line. */
 export interface LaneLines { source: number; answer: number; row: number }
 
 /** No text is given more lines than this, however high the window. */
@@ -226,7 +232,8 @@ export function linesFor(lanes: readonly Lane[], fontSize: number, spare: number
   let left = spare;
   for (let turn = 0, passed = 0; passed < LINES_ORDER.length; turn++) {
     const text = LINES_ORDER[turn % LINES_ORDER.length];
-    if (cost[text] <= left && lines[text] < LINES_MOST[text]) {
+    // A hair of slack: heights added and taken away again do not come out exact.
+    if (cost[text] <= left + 1e-6 && lines[text] < LINES_MOST[text]) {
       lines[text] += 1;
       left -= cost[text];
       passed = 0;

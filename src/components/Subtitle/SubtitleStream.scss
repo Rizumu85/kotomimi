@@ -31,7 +31,7 @@
   // Compact mode, the fork's lanes (`SubtitleLanes.tsx`, `src/lib/subtitle/lanes.ts`): the other side's newest
   // sentence, small, over its translation, large; and under a hairline the user's own sentence with what answers it,
   // on one small line. Each text is a box whose share of the height is what it is laid out for, so the texts keep
-  // their places whatever is said; a text too long for its box is drawn smaller (`FitText`). The spacing is the
+  // their places and their one size whatever is said; a text too long for its box loses its oldest line (`Slot`). The spacing is the
   // component's (`spacingAt`): roomy in a window fitted to the lanes, tighter in one the user made smaller. Two
   // distances only: inside a pair its texts touch, between lanes there is one gap with the hairline in its middle.
   &.compact {
@@ -47,6 +47,7 @@
       flex-direction: column;
       justify-content: center;
       overflow: hidden;
+      position: relative;
       gap: var(--lane-gap, 17px);
       padding: var(--lane-pad-top, 10px) 16px var(--lane-pad-bottom, 12px);
     }
@@ -71,19 +72,25 @@
       gap: var(--lane-inner-gap, 2px);
     }
 
-    // Nobody has spoken yet: where the strip is, and that it is listening.
+    // Nobody has spoken yet: where the strip is, and that it is listening. Over the lanes, which keep their room.
     .subtitle-lanes__waiting {
-      align-self: center;
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 0.9em;
       letter-spacing: 0.2em;
       color: var(--subtitle-translation-color, #e8e8e8);
       text-shadow: var(--subtitle-shadow-answer, none);
       opacity: 0.6;
+      pointer-events: none;
     }
 
-    // Nothing said in it yet: it takes no room, and draws no line.
+    // Nothing said in it yet: it draws nothing, and keeps its room — a lane that came and went with its first
+    // sentence moved every other one.
     .subtitle-lane.is-silent {
-      display: none;
+      visibility: hidden;
     }
 
     // The hairline between two lanes, in the middle of the gap above the lower one — where the upper one has spoken.
@@ -110,20 +117,32 @@
       display: flex;
       flex-direction: column;
 
-      // What does not fit even at the smallest size keeps its end in sight: the newest words.
+      // What does not fit keeps its end in sight: the newest words, the oldest line gone.
       &[data-over] {
         justify-content: flex-end;
       }
     }
 
-    // Each of a pair's texts is as tall as what is written, up to the lines it has room for; past that it is drawn
-    // smaller (`FitText`). At full strength, both: dimmed, the small one is the first thing lost where the panel is
-    // faint or gone.
+    // The small lines stand on the foot of their box, as a caption that rolls up does: the newest line is the lowest,
+    // next to what answers it. A reading written above a word (furigana) makes its line a little taller than one
+    // without — two pixels at this height, measured — and on the foot that reaches up, into room kept for it, and
+    // the words themselves stay where they are.
+    .subtitle-lane__source,
+    .subtitle-lane__row {
+      justify-content: flex-end;
+      box-sizing: content-box;
+      padding-top: 0.3em;
+      margin-top: -0.3em;
+    }
+
+    // Each of a pair's texts has its lines, written in or not, and is drawn at one size: the sentence does not move
+    // when its answer comes, nor the answer when it grows a line (`Slot`). At full strength, both: dimmed, the small
+    // one is the first thing lost where the panel is faint or gone.
     .subtitle-lane__source {
       flex: 0 0 auto;
-      max-height: calc(var(--lane-source-lines, 1) * var(--lane-source-line, 1.9) * 1em);
+      height: calc(var(--lane-source-lines, 1) * var(--lane-source-line, 2.15) * 1em);
       font-size: 0.62em;
-      line-height: var(--lane-source-line, 1.9);
+      line-height: var(--lane-source-line, 2.15);
       color: var(--subtitle-source-color, #9aa0a6);
       // Fork: a switch of the display popover (`annotationStore.ts`); slanted where nothing says otherwise.
       font-style: var(--kt-source-font-style, italic);
@@ -131,7 +150,7 @@
 
     .subtitle-lane__answer {
       flex: 0 0 auto;
-      max-height: calc(var(--lane-answer-lines, 2) * var(--lane-answer-line, 1.4) * 1em);
+      height: calc(var(--lane-answer-lines, 2) * var(--lane-answer-line, 1.4) * 1em);
       line-height: var(--lane-answer-line, 1.4);
       color: var(--subtitle-translation-color, #e8e8e8);
     }
@@ -139,11 +158,10 @@
     // The user's own, as a row: said, then what answers it. Its beginning is what matters — the sentence as it
     // should have been — so what does not fit is cut at the end.
     .subtitle-lane__row {
-      justify-content: flex-start;
       max-height: 100%;
       height: 100%;
       font-size: 0.62em;
-      line-height: var(--lane-row-line, 1.9);
+      line-height: var(--lane-row-line, 2.15);
 
       &[data-over] {
         justify-content: flex-start;
@@ -222,7 +240,6 @@
 
     .subtitle-lane__text {
       overflow-wrap: anywhere;
-      // The size FitText settles on is a share of the box's own.
       font-size: 1em;
     }
   }

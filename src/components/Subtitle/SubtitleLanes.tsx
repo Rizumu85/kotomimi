@@ -9,53 +9,36 @@ import { noticeText } from '../../lib/view/noticeText';
 import { AnnotatedLines, useAnnotation } from '../Annotated/AnnotatedText';
 import '../../styles/karaoke.scss';
 
-/** Text is drawn no smaller than this much of the size chosen: under it, the oldest of it goes out of sight instead. */
-const SMALLEST = 0.5;
-/** …and a row's, small already, than this much of its own: under it, its end is cut off. */
-const SMALLEST_ROW = 0.8;
-/** Steps of the search for the largest size that fits: fine to a sixty-fourth. */
-const STEPS = 6;
-
 /**
- * Text in a box of fixed height, as large as fits and no larger than the
- * size chosen. A caption strip keeps its lines where they are whatever is
- * said: a sentence too long for its box is drawn smaller — and the window can
- * be made small under large text, which then shrinks only when it must.
+ * Text in a box of fixed height, at the size chosen — always. A caption is
+ * read while it changes, out of the corner of an eye: the frame has to hold
+ * still, and only the words move. So nothing here is ever drawn smaller to
+ * make it fit. (It was, at first: over 56 seconds of two people talking the
+ * other side's sentence changed size eleven times, between 17 and 11 pixels,
+ * and the lanes moved nine — the user, 2026-10-06: "the size goes up and
+ * down and the structure keeps changing".) What is too long for its box
+ * loses its oldest line, a whole line at a time: the stylesheet holds the
+ * text's end in sight where this says it is over (`data-over`).
  */
-function FitText({ className, lang, children, fitKey, smallest = SMALLEST }: { className: string; lang?: string; children: ReactNode; fitKey: string; smallest?: number }) {
+function Slot({ className, lang, children, fitKey }: { className: string; lang?: string; children: ReactNode; fitKey: string }) {
   const box = useRef<HTMLDivElement>(null);
   const text = useRef<HTMLDivElement>(null);
-  const fit = () => {
+  const measure = () => {
     const outer = box.current;
     const inner = text.current;
     if (!outer || !inner) return;
-    const fits = (scale: number) => {
-      inner.style.fontSize = `${scale}em`;
-      return inner.scrollHeight <= outer.clientHeight + 1;
-    };
-    // No layout (a test's document), or it fits as it is.
-    delete outer.dataset.over;
-    if (outer.clientHeight === 0 || fits(1)) return;
-    let low = smallest;
-    let high = 1;
-    if (fits(low)) {
-      for (let i = 0; i < STEPS; i++) {
-        const middle = (low + high) / 2;
-        if (fits(middle)) low = middle; else high = middle;
-      }
-    } else {
-      // Too long even at the smallest: its end stays in sight, the newest words (the stylesheet reads this).
-      outer.dataset.over = '';
-    }
-    inner.style.fontSize = `${low}em`;
+    // Over by a line, not by the pixels a reading above a word can add to one. No layout (a test's document): as written.
+    const line = parseFloat(getComputedStyle(inner).lineHeight) || 0;
+    if (outer.clientHeight > 0 && inner.scrollHeight > outer.clientHeight + Math.max(1, line / 2)) outer.dataset.over = '';
+    else delete outer.dataset.over;
   };
-  // What is written changed, or the size chosen.
-  useLayoutEffect(fit, [fitKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  // What is written changed, or the lines it has.
+  useLayoutEffect(measure, [fitKey]); // eslint-disable-line react-hooks/exhaustive-deps
   // The window was resized.
   useEffect(() => {
     const outer = box.current;
     if (!outer || typeof ResizeObserver === 'undefined') return undefined;
-    const observer = new ResizeObserver(fit);
+    const observer = new ResizeObserver(measure);
     observer.observe(outer);
     return () => observer.disconnect();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -207,11 +190,12 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
     '--lane-row-height': `${fontSize * ROW_SCALE * spacing.rowLine * lines.row}px`,
     '--lane-source-lines': String(lines.source),
     // A pair's two texts share its height by what each is laid out for.
-    // A pair's answer has room for this many lines before it is drawn smaller.
+    // A pair's answer has this many lines, written in or not.
     '--lane-answer-lines': String(answerLines),
   } as CSSProperties;
   const who = (leg: LegName) => (leg === 'speaker' ? t('modePicker.modeYou', 'Me') : t('modePicker.modeParticipants', 'Other'));
   // A lane nobody has spoken in yet says nothing — not even whose it is: a tag alone on the screen, waiting, is noise.
+  // It keeps its room, so that nothing moves when somebody does speak.
   const silent = (lane: Lane) => !lane.source?.text && !lane.answer?.text;
   // Whose lane it is, is a bar of the lane's colour down its left edge; the word is there for a screen reader.
   const tag = (lane: Lane) => (silent(lane) ? null : <span className={`subtitle-lane__tag subtitle-lane__tag--${lane.leg}`}><span className="subtitle-lane__who">{who(lane.leg)}</span></span>);
@@ -236,29 +220,29 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
           {tag(lane)}
           {lane.shape === 'row' ? (
             // The user's own, under the other side's: what they said and what answers it, on one small line.
-            <FitText className="subtitle-lane__row" smallest={SMALLEST_ROW} fitKey={`${fontSize}:${squeeze}:${lines.row}:${lane.source?.text ?? ''}:${lane.answer?.text ?? ''}`}>
+            <Slot className="subtitle-lane__row" fitKey={`${fontSize}:${squeeze}:${lines.row}:${lane.source?.text ?? ''}:${lane.answer?.text ?? ''}`}>
               {lane.source && <span className="subtitle-lane__said" lang={langOf(lane.source)}><Written text={lane.source} lit={lit} /></span>}
               {lane.source && lane.answer && lane.source.text !== '' && (lane.answer.text !== '' || lane.pending) && <span className="subtitle-lane__arrow" aria-hidden="true">→</span>}
               {lane.answer && lane.answer.text !== '' && <span className="subtitle-lane__reply" lang={langOf(lane.answer)}><Written text={lane.answer} lit={lit} /></span>}
               {lane.answer && lane.answer.text === '' && lane.pending && pending}
-            </FitText>
+            </Slot>
           ) : (
             <div className="subtitle-lane__texts">
               {lane.source && (
-                <FitText className="subtitle-lane__source" lang={langOf(lane.source)} fitKey={`${fontSize}:${squeeze}:${lines.source}:${lane.source.text}`}>
+                <Slot className="subtitle-lane__source" lang={langOf(lane.source)} fitKey={`${fontSize}:${squeeze}:${lines.source}:${lane.source.text}`}>
                   <Written text={lane.source} lit={lit} />
                   {lane.pending && pending}
-                </FitText>
+                </Slot>
               )}
               {lane.answer && (
-                <FitText
+                <Slot
                   className={`subtitle-lane__answer${lane.answer.notice ? ' subtitle-lane__answer--notice' : ''}`}
                   lang={langOf(lane.answer)}
                   fitKey={`${fontSize}:${squeeze}:${answerLines}:${lane.answer.text}`}
                 >
                   <Written text={lane.answer} lit={lit} />
                   {!lane.source && lane.pending && pending}
-                </FitText>
+                </Slot>
               )}
             </div>
           )}
