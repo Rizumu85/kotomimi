@@ -76,3 +76,27 @@ export function saidInOwn(text: string, own: string, practised: string): boolean
   if (mine === 'zh' && base(practised) === 'ja') return (text.match(HAN)?.length ?? 0) >= HAN_SENTENCE;
   return true;
 }
+
+/** Letters and digits only, lower case: what two recognizers' writing of one stretch of speech has in common. */
+const bare = (text: string): string => text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+
+/** How much of a sentence has to be found in the other for the two to be one stretch of speech, heard twice. */
+const SAME_SPEECH = 0.6;
+
+/**
+ * Whether `text` is — as far as writing shows — speech that `there` already
+ * holds: the same stretch, heard by another recognizer through another
+ * microphone. A few characters have to be found whole; a sentence, most of
+ * its pairs of neighbouring characters, since two recognizers seldom write a
+ * sentence alike to the letter.
+ */
+export function sameSpeech(text: string, there: string): boolean {
+  const mine = bare(text);
+  const theirs = bare(there);
+  if (!mine || !theirs) return false;
+  if (mine.length <= 3 || theirs.includes(mine)) return theirs.includes(mine);
+  const pairs = (s: string) => Array.from({ length: s.length - 1 }, (_, i) => s.slice(i, i + 2));
+  const held = new Set(pairs(theirs));
+  const own = pairs(mine);
+  return own.filter((pair) => held.has(pair)).length / own.length >= SAME_SPEECH;
+}

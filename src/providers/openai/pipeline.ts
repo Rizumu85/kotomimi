@@ -29,7 +29,7 @@ import type { LocalInferenceConfig } from '../localInference/config';
 import { defaultEngines, type LocalEngines, type TranslationLike } from '../localInference/engines';
 import { createApiAsr } from './apiAsr';
 import { createNativeAsr, type NativeLimits } from './nativeAsr';
-import { languageByScript, saidInOwn } from '../../lib/language/script';
+import { languageByScript, saidInOwn, sameSpeech } from '../../lib/language/script';
 import { AUTO } from '../../lib/provider/languages';
 import { TEXT_SLOT } from './nativeTranslators';
 import { askNativeEngine, ipcNativeBridge, type NativeBridge, type NativeEngineStatus } from '../../lib/native/nativeEngine';
@@ -191,6 +191,35 @@ function deviceStages(stages: Stages): DeviceStage[] {
   return out;
 }
 
+/**
+ * What the legs of the runs now open have lately heard, each stretch with
+ * when it began and ended. A coached speaker's leg asks it whether a sentence
+ * is its own: with loudspeakers near the microphone the other side's voice
+ * comes back through it, and — the leg being told the other side's language —
+ * is written as clearly as if the user had said it, and would be sent for
+ * feedback. Such a sentence began while the other leg was hearing one, and
+ * reads as that one does.
+ */
+interface Heard { leg: object; ref: Ref; text: string; from: number; until: number | null }
+const heardLately: Heard[] = [];
+/** A stretch ended this long ago is forgotten. */
+const HEARD_KEPT_MS = 30_000;
+/** Two recognizers do not hear one voice begin at the same instant. */
+const HEARD_SLACK_MS = 1000;
+/** A stretch is closed by the pause after it: a sentence begun in the last of that pause is an answer, not the same voice. */
+const HEARD_TRAIL_MS = 800;
+/**
+ * The other leg's writing of a stretch can come a second or two after the
+ * microphone's (a recognizer that reads a window at a time): while the other
+ * leg was hearing something as the sentence began, the question is asked
+ * again, this often and this many times, before the sentence is taken for
+ * the user's own.
+ */
+const HEARD_ASK_EVERY_MS = 500;
+/** …while the other leg is still hearing its stretch; once that has closed, its last writing is given this many more. */
+const HEARD_ASK_TIMES = 10;
+const HEARD_ASK_TIMES_CLOSED = 2;
+
 class PipelineLeg implements AdapterSession {
   readonly inner: AdapterEvents;
   info: { transport?: string } = {};
@@ -328,6 +357,7 @@ class PipelineLeg implements AdapterSession {
 
   private end(): void {
     this.ended = true;
+    for (let i = heardLately.length - 1; i >= 0; i--) if (heardLately[i].leg === this) heardLately.splice(i, 1);
     this.queue.length = 0;
     this.running?.abort(new Error('the session ended'));
     this.running = null;
@@ -348,12 +378,19 @@ class PipelineLeg implements AdapterSession {
     if (this.ended) return;
     switch (e.kind) {
       case 'segmentOpened':
-        if (e.payload.side === 'source') this.sources.set(e.payload.ref, { origin: e.payload.origin, text: '' });
+        if (e.payload.side === 'source') {
+          this.sources.set(e.payload.ref, { origin: e.payload.origin, text: '' });
+          heardLately.push({ leg: this, ref: e.payload.ref, text: '', from: this.request.clock.now(), until: null });
+        }
         this.events.segmentOpened(e.payload);
         return;
       case 'segmentText': {
         const source = this.sources.get(e.payload.ref);
-        if (source) source.text = e.payload.text;
+        if (source) {
+          source.text = e.payload.text;
+          const heard = this.heardOf(e.payload.ref);
+          if (heard) heard.text = e.payload.text;
+        }
         const open = source !== undefined && e.payload.language === undefined;
         const told = open ? this.stages.heard : undefined;
         // Left to be detected: the language its writing shows, or none — which also keeps the leg's own from being assumed.
@@ -365,16 +402,16 @@ class PipelineLeg implements AdapterSession {
       case 'segmentClosed': {
         const source = this.sources.get(e.payload.ref);
         this.sources.delete(e.payload.ref);
-        this.events.segmentClosed(e.payload);
         const text = source?.text.trim();
         const coached = this.stages.speech?.kind === 'coach';
-        const other = text !== undefined ? this.otherThanHeard(text) : undefined;
-        // What was said in the reader's own language needs no translating: detected, or told another and written in theirs.
-        const already = !coached && text !== undefined && (other !== undefined || (this.stages.heard === AUTO && languageByScript(text) === baseOf(this.request.context.direction.target)));
-        // A coached speaker who says a sentence in their own language is not practising with it: it is translated, as what
-        // they type is, and not sent for feedback. No translation in this run: it is shown as said.
-        const stage = coached && other !== undefined ? this.stages.typed : this.stages.speech;
-        if (source && text && stage && !already) this.push({ stage, text, origin: e.payload.origin ?? source.origin, typed: false });
+        const heard = this.heardOf(e.payload.ref);
+        if (heard) heard.until = this.request.clock.now();
+        // A coached speaker's sentence may be the other side's voice, come back through the microphone.
+        if (coached && source && text && heard) {
+          this.settleOwn(heard, e.payload, source.origin, text, HEARD_ASK_TIMES);
+          return;
+        }
+        this.closed(e.payload, source, text);
         return;
       }
       case 'busy':
@@ -402,6 +439,66 @@ class PipelineLeg implements AdapterSession {
         // Every other event as it came: frames, audio, reconnects.
         (this.events[e.kind] as (payload: unknown) => void)(e.payload);
     }
+  }
+
+  /**
+   * A coached speaker's sentence, closed: the other side's voice come back
+   * through the microphone is taken off the screen, and nothing is asked
+   * about it; the user's own goes on as any closed sentence. While the other
+   * leg was hearing something as it began, its writing is waited for
+   * (`HEARD_ASK_EVERY_MS`), the sentence staying open on the screen meanwhile.
+   */
+  private settleOwn(heard: Heard, closed: { ref: Ref; origin?: string }, origin: string | undefined, text: string, asksLeft: number): void {
+    if (this.ended) return;
+    const there = this.heardElsewhere(heard);
+    if (there === 'same') {
+      this.frame('in', 'speech.dropped', { reason: 'heard by the other leg', chars: text.length });
+      this.events.segmentText({ ref: closed.ref, text: '' });
+      this.events.segmentClosed(closed);
+      return;
+    }
+    if (there !== 'none' && asksLeft > 0) {
+      const left = there === 'open' ? asksLeft - 1 : Math.min(asksLeft - 1, HEARD_ASK_TIMES_CLOSED - 1);
+      this.request.clock.setTimeout(() => this.settleOwn(heard, closed, origin, text, left), HEARD_ASK_EVERY_MS);
+      return;
+    }
+    this.closed(closed, { origin, text }, text);
+  }
+
+  /** A source sentence, closed: said so, and handed to what answers it. */
+  private closed(payload: { ref: Ref; origin?: string }, source: { origin?: string; text: string } | undefined, text: string | undefined): void {
+    const coached = this.stages.speech?.kind === 'coach';
+    this.events.segmentClosed(payload);
+    const other = text !== undefined ? this.otherThanHeard(text) : undefined;
+    // What was said in the reader's own language needs no translating: detected, or told another and written in theirs.
+    const already = !coached && text !== undefined && (other !== undefined || (this.stages.heard === AUTO && languageByScript(text) === baseOf(this.request.context.direction.target)));
+    // A coached speaker who says a sentence in their own language is not practising with it: it is translated, as what
+    // they type is, and not sent for feedback. No translation in this run: it is shown as said.
+    const stage = coached && other !== undefined ? this.stages.typed : this.stages.speech;
+    if (source && text && stage && !already) this.push({ stage, text, origin: payload.origin ?? source.origin, typed: false });
+  }
+
+  private heardOf(ref: Ref): Heard | undefined {
+    return heardLately.find((h) => h.leg === this && h.ref === ref && h.until === null);
+  }
+
+  /**
+   * Whether a stretch this leg heard is one another leg was hearing as it
+   * began, by its writing (`sameSpeech`): 'same'. Where another leg was
+   * hearing something then and it reads otherwise so far: 'open' while that
+   * leg is still hearing it, 'other' once it has closed. 'none': no other leg
+   * was hearing anything. Older stretches are forgotten here.
+   */
+  private heardElsewhere(mine: Heard): 'same' | 'open' | 'other' | 'none' {
+    const now = this.request.clock.now();
+    for (let i = heardLately.length - 1; i >= 0; i--) {
+      const h = heardLately[i];
+      if (h.until !== null && now - h.until > HEARD_KEPT_MS) heardLately.splice(i, 1);
+    }
+    const there = heardLately.filter((h) => h.leg !== this && mine.from >= h.from - HEARD_SLACK_MS && (h.until === null || mine.from <= h.until - HEARD_TRAIL_MS));
+    if (there.length === 0) return 'none';
+    if (sameSpeech(mine.text, there.map((h) => h.text).join(' '))) return 'same';
+    return there.some((h) => h.until === null) ? 'open' : 'other';
   }
 
   /**

@@ -61,3 +61,19 @@ describe('a sentence in the speaker\u2019s own language, not the one they practi
     expect(saidInOwn('你好，今天天气真不错。', 'zh-CN', 'zh-TW')).toBe(false);
   });
 });
+
+describe('one stretch of speech, heard twice', () => {
+  it('is known by its writing, though two recognizers do not write it alike to the letter', async () => {
+    const { sameSpeech } = await import('./script');
+    // The other side, heard from the computer's sound and again — worse — through the microphone.
+    expect(sameSpeech('そうそうそれが好きなんですよ', 'そうそうそう、それが好きなんですよ。')).toBe(true);
+    expect(sameSpeech('今日は天気がいですね', 'こんにちは。今日は天気がいいですね。一緒に写真を撮りませんか？')).toBe(true);
+    // What the user said themselves is another sentence.
+    expect(sameSpeech('昨日映画を見ました。', 'そうそうそう、それが好きなんですよ。')).toBe(false);
+    // A word or two: found whole, or not at all.
+    expect(sameSpeech('うん。', 'うん、そうだね。')).toBe(true);
+    expect(sameSpeech('はい', 'うん、そうだね。')).toBe(false);
+    expect(sameSpeech('', 'うん')).toBe(false);
+    expect(sameSpeech('うん', '')).toBe(false);
+  });
+});

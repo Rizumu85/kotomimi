@@ -59,7 +59,7 @@ async function live(context: SessionContext, patch: Partial<LocalAISettings>, an
   const of = <T extends AdapterEvent['kind']>(kind: T) => log.filter((e): e is Extract<AdapterEvent, { kind: T }> => e.kind === kind);
   const lastText = (ref: number) => of('segmentText').filter((e) => e.payload.ref === ref).pop()?.payload;
   const settled = () => vi.waitFor(() => expect(of('busy').map((e) => e.payload).pop()).toBe(false));
-  return { config, socket, session, calls, log, of, lastText, settled, sent: () => socket.sentJson<Record<string, unknown>>(), receive: (...m: string[]) => { for (const x of m) socket.receive(x); } };
+  return { config, socket, session, calls, log, of, lastText, settled, clock, sent: () => socket.sentJson<Record<string, unknown>>(), receive: (...m: string[]) => { for (const x of m) socket.receive(x); } };
 }
 
 describe('a leg whose translation runs on a text model', () => {
@@ -267,6 +267,51 @@ describe('a coached speaker', () => {
     expect(h.calls).toHaveLength(1);
     expect(h.calls[0].body.model).toBe('hy-mt2-1.8b');
     expect(h.lastText(FIRST_REF + 1)).toMatchObject({ text: 'ちょっとソフトを更新しないと。' });
+  });
+
+  it('is not coached on the voice of the other side come back through the microphone: that sentence is taken off the screen', async () => {
+    // Asked by the user 2026-10-06: with loudspeakers on, what the other side said went to the feedback as the user's.
+    const theirs = await live(PARTICIPANT, { translateServerModel: 'hy-mt2-1.8b' }, [sse('never mind')]);
+    const mine = await live(SPEAKER, COACH, [sse('OK')]);
+    // The other side is speaking; the microphone hears the same words, a little worse.
+    theirs.receive(SERVER.committed('item_1'), SERVER.inputDelta('item_1', 'そうそうそう、それが好きなんですよ。'));
+    mine.receive(...heard('item_1', 'そうそうそれが好きなんですよ'));
+    await vi.waitFor(() => expect(mine.of('segmentClosed')).toHaveLength(1));
+    expect(mine.lastText(1)).toMatchObject({ text: '' });
+    expect(mine.calls).toHaveLength(0);
+    // The other leg's writing may come after the microphone's: the sentence waits for it, and is dropped when it does.
+    mine.receive(...heard('item_9', '今日は天気がいいですね'));
+    expect(mine.of('segmentClosed')).toHaveLength(1);
+    theirs.receive(SERVER.inputDelta('item_1', 'そうそうそう、それが好きなんですよ。今日は天気がいいですね。'));
+    mine.clock.advance(500);
+    expect(mine.of('segmentClosed')).toHaveLength(2);
+    expect(mine.lastText(2)).toMatchObject({ text: '' });
+    expect(mine.calls).toHaveLength(0);
+    // What the user says over them is their own: coached once the other leg's writing has had its time to catch up.
+    mine.receive(...heard('item_2', '昨日映画を見ました。'));
+    const closedSoFar = mine.of('segmentClosed').length;
+    mine.clock.advance(4900);
+    expect(mine.calls).toHaveLength(0);
+    expect(mine.of('segmentClosed')).toHaveLength(closedSoFar);
+    mine.clock.advance(200);
+    await mine.settled();
+    expect(mine.calls).toHaveLength(1);
+    expect(mine.calls[0].body.messages.slice(-1)[0]).toMatchObject({ content: '昨日映画を見ました。' });
+    await theirs.session.stop();
+    await mine.session.stop();
+  });
+
+  it('is coached on a sentence repeated after the other side has finished it', async () => {
+    const theirs = await live(PARTICIPANT, { translateServerModel: 'hy-mt2-1.8b' }, [sse('对对对，我就是喜欢这个。')]);
+    const mine = await live(SPEAKER, COACH, [sse('OK')]);
+    theirs.receive(...heard('item_1', 'そうそうそう、それが好きなんですよ。'));
+    await theirs.settled();
+    // Their sentence is over; the user says it after them, to practise.
+    mine.receive(...heard('item_1', 'そうそうそう、それが好きなんですよ。'));
+    await mine.settled();
+    expect(mine.calls).toHaveLength(1);
+    await theirs.session.stop();
+    await mine.session.stop();
   });
 
   it('is coached with the user\'s own prompt when there is one: the pair filled in, no examples', async () => {
