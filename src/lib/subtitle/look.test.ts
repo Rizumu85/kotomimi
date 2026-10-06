@@ -17,7 +17,8 @@ describe('the looks of the subtitle strip', () => {
     // Under a panel, however faint, it is a shadow: an outline there was too hard (the user, 2026-10-06).
     expect(LOOKS.soft.bgOpacity).toBeGreaterThan(0);
     expect(LOOKS.soft.edge).toBe('shadow');
-    expect(LOOKS.soft.shadow).toBe(50);
+    // At full strength: the user's own setting after trying it (2026-10-06).
+    expect(LOOKS.soft.shadow).toBe(100);
     // Light text for one, dark for the other: the outline's colour follows.
     expect(isLight(LOOKS.light.translationTextColor)).toBe(true);
     expect(isLight(LOOKS.dark.translationTextColor)).toBe(false);

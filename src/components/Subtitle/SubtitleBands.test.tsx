@@ -167,8 +167,6 @@ describe('SubtitleBody — the look\u2019s shadow and alignment (fork)', () => {
       const { container } = render(<SubtitleBody {...props({ sourceTextColor: '#f4f4f4', translationTextColor: '#14202e' })} />);
       const lit = container.querySelector('.subtitle-stream') as HTMLElement;
       expect(lit.getAttribute('data-align')).toBe('center');
-      // The tags' colours follow the small text's: light there, so light.
-      expect(lit.getAttribute('data-ink')).toBe('light');
       expect(lit.style.getPropertyValue('--subtitle-shadow-source')).toContain('rgba(0,0,0,');
       expect(lit.style.getPropertyValue('--subtitle-shadow-answer')).toContain('rgba(255,255,255,');
     } finally {

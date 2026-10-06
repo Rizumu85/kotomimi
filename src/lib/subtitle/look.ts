@@ -45,7 +45,7 @@ export const LOOKS: Readonly<Record<Look, LookPreset>> = {
   // A dark panel under light text.
   panel: { bgColor: '#000000', bgOpacity: 80, shadow: 0, edge: 'shadow', align: 'left', sourceTextColor: '#ffffff', translationTextColor: '#9ad0ff' },
   // A faint panel, and the shadow doing half the work.
-  soft: { bgColor: '#000000', bgOpacity: 30, shadow: 50, edge: 'shadow', align: 'left', sourceTextColor: '#f0f0f0', translationTextColor: '#cfe8ff' },
+  soft: { bgColor: '#000000', bgOpacity: 30, shadow: 100, edge: 'shadow', align: 'left', sourceTextColor: '#f0f0f0', translationTextColor: '#cfe8ff' },
   // No panel: light text in a dark outline. Centred — with nothing behind it, a short line at the far left of a wide
   // strip is a long way from where the eyes are.
   light: { bgColor: '#000000', bgOpacity: 0, shadow: 65, edge: 'outline', align: 'center', sourceTextColor: '#f4f4f4', translationTextColor: '#ffffff' },

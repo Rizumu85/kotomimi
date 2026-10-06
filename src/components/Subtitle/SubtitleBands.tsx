@@ -5,7 +5,7 @@ import { displayItems, type LegFilters } from '../../lib/view/filter';
 import { ConversationList, type ConversationListProps } from '../Conversation/ConversationList';
 import { useVisibleEntries } from '../Conversation/useVisibleEntries';
 import { SubtitleLanes } from './SubtitleLanes';
-import { isLight, LOOKS, shadowFor } from '../../lib/subtitle/look';
+import { LOOKS, shadowFor } from '../../lib/subtitle/look';
 import { useSubtitleLookStore } from '../../stores/subtitleLookStore';
 import './SubtitleStream.scss';
 
@@ -77,7 +77,7 @@ export function SubtitleBody(props: SubtitleBodyProps) {
     [props.legs, entries],
   );
   return (
-    <div className={`subtitle-stream ${compact ? 'compact' : 'expanded'}`} data-align={align} data-ink={isLight(sourceTextColor ?? '#ffffff') ? 'light' : 'dark'} style={style}>
+    <div className={`subtitle-stream ${compact ? 'compact' : 'expanded'}`} data-align={align} style={style}>
       {compact ? (
         <SubtitleLanes entries={entries} lit={lit} legs={legs} filters={filters} fontSize={fontSize} onHeight={onHeight} />
       ) : (

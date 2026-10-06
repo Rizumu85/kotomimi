@@ -196,24 +196,18 @@
 
     // Whose lane it is: a bar of the lane's colour down its left edge — amber the other side, green the user — as
     // tall as the lane, in one place whatever is said. No word: a pill sized by the caption font, then a small word,
-    // were both more than the strip needed (the user chose the bar from four sketches, 2026-10-06). A hairline of
-    // ink around it keeps it in sight where there is no panel.
+    // were both more than the strip needed (the user chose the bar from four sketches, 2026-10-06). Nothing around
+    // it: the colour is clear enough by itself, with a panel or without (the user, the same day).
     .subtitle-lane__tag {
       align-self: stretch;
       justify-self: start;
       width: 3px;
       border-radius: 2px;
       background: tk.$color-participant;
-      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55);
     }
 
     .subtitle-lane__tag--speaker {
       background: tk.$color-speaker;
-    }
-
-    // Dark text (on a light edge): the ink around the bar is light too.
-    &[data-ink='dark'] .subtitle-lane__tag {
-      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.7);
     }
 
     // The word stays for a screen reader.
