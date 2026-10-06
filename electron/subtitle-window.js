@@ -161,9 +161,10 @@ ipcMain.handle('subtitle:exit', (_event, payload) => {
   const win = getLiveWindow();
   if (!win) return { ok: false };
   // Fork: the least height the lanes asked for is the subtitle window's, not the main window's — and the main window
-  // takes its own clicks.
+  // takes its own clicks. What the last fit gave the strip is nothing to the window it becomes.
   restoreLeastSize(win);
   stopThrough(win);
+  fitGave = null;
   // If the user exits subtitle mode while fullscreen, drop fullscreen first;
   // otherwise setBounds() fights the fullscreen state and the window can be
   // left stuck. Guarded to avoid a needless transition on the common path.
@@ -226,6 +227,17 @@ function restoreLeastSize(win) {
   win.setMinimumSize(leastBefore[0], leastBefore[1]);
   leastBefore = null;
 }
+/**
+ * The size the last fit gave the window, to know the window by when it is asked again. A window on a display scaled by
+ * a fraction does not read back the size it was given: set 264 high at 135 %, it reads 265 or 266, and a pixel or two
+ * wider. Compared with what it reads, every ask — the same height, at each start and each stop of a run — found the
+ * window "wrong" and set it again from what it read: two pixels lower and one or two wider each time (the user,
+ * 2026-10-06: "the window still moves a little when a run starts and stops"). So a window that reads within this
+ * much of what the fit gave it is taken to be that size still.
+ */
+let fitGave = null;
+const FIT_READS_WITHIN = 2;
+const stillAs = (read, gave) => gave !== null && Math.abs(read - gave) <= FIT_READS_WITHIN;
 ipcMain.handle('subtitle:fit-height', (_event, payload) => {
   const win = getLiveWindow();
   if (!win || normalBoundsSnapshot === null) return { ok: false };
@@ -240,11 +252,19 @@ ipcMain.handle('subtitle:fit-height', (_event, payload) => {
   }
   const height = Math.round(Number(payload?.height));
   if (!Number.isFinite(height) || height < FIT_HEIGHT_MIN || win.isFullScreen()) return { ok: true };
-  const bounds = win.getBounds();
+  const read = win.getBounds();
+  // The size the fit left it at, where it still reads as that; else what it reads — the user has resized it since.
+  const bounds = {
+    x: read.x,
+    y: read.y,
+    width: stillAs(read.width, fitGave?.width ?? null) ? fitGave.width : read.width,
+    height: stillAs(read.height, fitGave?.height ?? null) ? fitGave.height : read.height,
+  };
   if (bounds.height === height) return { ok: true, bounds };
-  const work = screen.getDisplayMatching(bounds).workArea;
+  const work = screen.getDisplayMatching(read).workArea;
   const next = clampToScreen({ x: bounds.x, y: bounds.y + bounds.height - height, width: bounds.width, height }, work);
   win.setBounds(next);
+  fitGave = { width: next.width, height: next.height };
   return { ok: true, bounds: next };
 });
 

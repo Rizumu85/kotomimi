@@ -489,6 +489,38 @@ describe('subtitle-window fitted to the lanes (fork)', () => {
     expect(win.setMinimumSize).toHaveBeenCalledWith(0, 150);
   });
 
+  it('leaves a window alone that is asked for the height it was given, though it reads back a little larger', async () => {
+    // At a display scale of 135 % a window set 264 high reads 265 or 266, and a pixel or two wider. Every start and
+    // every stop of a run asks for the same height: set again each time from what it read, the window went two
+    // pixels down and one or two wider at each (measured 2026-10-06).
+    await enter({});
+    win.setBounds.mockClear();
+    await fit({ height: 264, least: 186 });
+    expect(win.setBounds).toHaveBeenCalledTimes(1);
+    expect(win.setBounds).toHaveBeenLastCalledWith({ x: 100, y: 636, width: 1500, height: 264 });
+    // What it then reads: a little larger than it was set.
+    win.getBounds = vi.fn(() => ({ x: 100, y: 636, width: 1502, height: 266 }));
+    await fit({ height: 264, least: 186 });
+    await fit({ height: 264, least: 186 });
+    expect(win.setBounds).toHaveBeenCalledTimes(1);
+    // Moved by the user, the same height: still nothing to set.
+    win.getBounds = vi.fn(() => ({ x: 300, y: 500, width: 1501, height: 265 }));
+    await fit({ height: 264, least: 186 });
+    expect(win.setBounds).toHaveBeenCalledTimes(1);
+    // Another height: from the size it was given, not the size it reads — its foot and its width stay where they were.
+    await fit({ height: 300, least: 186 });
+    expect(win.setBounds).toHaveBeenLastCalledWith({ x: 300, y: 464, width: 1500, height: 300 });
+  });
+
+  it('takes a window the user has resized as it is', async () => {
+    await enter({});
+    await fit({ height: 264 });
+    win.setBounds.mockClear();
+    win.getBounds = vi.fn(() => ({ x: 100, y: 600, width: 1200, height: 300 }));
+    await fit({ height: 264 });
+    expect(win.setBounds).toHaveBeenLastCalledWith({ x: 100, y: 636, width: 1200, height: 264 });
+  });
+
   it('stays on the screen it is on: a height that would lift it off the top is clamped', async () => {
     win.getBounds = vi.fn(() => ({ x: 100, y: 10, width: 1500, height: 200 }));
     await enter({});
