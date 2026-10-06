@@ -4,7 +4,7 @@ Kotomimi 是 Sokuji 的一个分支：在实时翻译之外，加上了自建模
 
 基于上游 [kizuna-ai-lab/sokuji](https://github.com/kizuna-ai-lab/sokuji) v0.42.3（`d2f8001`）。上游的说明见 [README.md](README.md)，这份文件只讲本分支多出来的东西。
 
-仓库：<https://github.com/Rizumu85/kotomimi>。本分支的工作在 `localai` 分支上，`main` 保持与上游一致。
+仓库：<https://github.com/Rizumu85/kotomimi>。Kotomimi 的工作在 `main` 分支上（默认分支）；`upstream` 分支是上游 Sokuji 的一份镜像。2026-10-06 之前它们分别叫 `localai` 和 `main`：`localai` 是这个 fork 只加了一个 LocalAI 提供商时起的名字，后来所有功能都长在它上面，名字就不对了。GitHub 会把旧名字转到新名字上。
 
 Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录，可以和官方 Sokuji 同时安装、同时运行。第一次启动时会把已有的 Sokuji 设置和登录状态复制过来；下载过的模型不复制，需要时重新下载。
 
@@ -848,12 +848,12 @@ Kotomimi 自己不往那把密钥下面存任何东西（主进程里没有用 `
 
 ```bash
 git fetch upstream
-git checkout -b sync/upstream-<日期> localai
-git merge upstream/main                 # merge，不 rebase：localai 的历史不改写
+git checkout -b sync/upstream-<日期> main
+git merge upstream/main                 # merge，不 rebase：main 的历史不改写。这里的 upstream 是上游的远端，不是本仓库的 upstream 分支
 node scripts/fork-localai-locales.cjs   # 语言包冲突时：先取上游版本，再跑这一行
 ```
 
-测试跑 `.github/workflows/kotomimi-release.yml` 里"Run the fork's tests"那一步的完整命令（清单以那里为准），再跑 `npx tsc --noEmit -p .`。然后开 PR 到 `localai`。
+测试跑 `.github/workflows/kotomimi-release.yml` 里"Run the fork's tests"那一步的完整命令（清单以那里为准），再跑 `npx tsc --noEmit -p .`。然后开 PR 到 `main`。本仓库的 `upstream` 分支只是一份放在 GitHub 上的镜像（现在停在 v0.42.2），合并不依赖它；想让它跟上，`git push origin upstream/main:upstream`。
 
 改动过的上游文件：
 
