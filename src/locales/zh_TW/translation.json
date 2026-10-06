@@ -587,6 +587,7 @@
       "translateKotomimiOwn": "由那台裝置決定（依語言對自動選最合適的）",
       "coachStage": "文法回饋",
       "coachStageTooltip": "適合自己直接說對方語言的場合。你說的話不再翻譯，而是交給模型檢查：沒問題回 ✓，有問題給出改正後的句子和原因。打字輸入的內容仍然會翻譯。",
+      "coachNeedsSpeaker": "文法回饋要聽到你說話：把模式切到「我」或「兩者」。",
       "coach": "我自己說對方的語言：檢查我的文法",
       "coachNoModel": "另一台裝置上沒有能給文法回饋的文字模型，可以改用 API 模型或這台電腦。",
       "coachPrompt": "文法回饋提示詞",
@@ -1620,7 +1621,16 @@
       "unpin": "取消置頂{{name}}",
       "pinShort": "置頂",
       "unpinShort": "取消置頂",
-      "detect": "自動偵測語言"
+      "mine": "我的語言",
+      "theirs": "對方的語言",
+      "mostly": "對方主要說",
+      "sumTheirs": "對方說{{their}} → 我讀到{{mine}}",
+      "sumTheirsAny": "對方說什麼語言都行 → 我讀到{{mine}}",
+      "sumMine": "我說{{mine}} → 翻譯成{{their}}",
+      "sumCoach": "我說{{their}} → 得到文法回饋",
+      "detectUnable": "要自動偵測，請在「語音辨識」裡選 Qwen3-ASR 1.7B。現在先按{{their}}辨識。",
+      "detectUnableServer": "要自動偵測，那台裝置需要裝有 Qwen3-ASR 1.7B，並更新到最新版。現在先按{{their}}辨識。",
+      "detect": "自動偵測"
     },
     "wizard": {
       "pathTitle": "Kotomimi 自由搭配",

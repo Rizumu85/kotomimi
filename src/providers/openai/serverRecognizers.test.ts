@@ -52,3 +52,21 @@ describe('the other device\u2019s recognizers, as a person chooses among them', 
     expect(recognizerAsked('', 'ja', MAC)).toBe('');
   });
 });
+
+describe('a language left to be detected, asked of the other device', () => {
+  const DETECTS: LocalAIModel[] = [
+    { id: 'apple-speech:ja', name: 'apple-speech:ja', kind: 'asr', languages: ['ja'] },
+    { id: 'qwen3-asr-1.7b-q8', name: 'qwen3-asr-1.7b-q8', kind: 'asr', languages: ['ja', 'zh', 'auto'] },
+    { id: 'r2t2-q8', name: 'r2t2-q8', kind: 'asr', languages: ['ja', 'zh'] },
+  ] as unknown as LocalAIModel[];
+
+  it('is asked of the one chosen where it tells languages apart, and left to the device otherwise', () => {
+    expect(recognizerAsked('qwen3-asr-1.7b-q8', AUTO, DETECTS)).toBe('qwen3-asr-1.7b-q8');
+    // One that is told its language — by its name, or at all — cannot: the device picks one that can.
+    expect(recognizerAsked('r2t2-q8', AUTO, DETECTS)).toBe('');
+    expect(recognizerAsked('apple-speech', AUTO, DETECTS)).toBe('');
+    // A language named is asked as ever.
+    expect(recognizerAsked('r2t2-q8', 'ja', DETECTS)).toBe('r2t2-q8');
+    expect(recognizerAsked('apple-speech', 'ja', DETECTS)).toBe('apple-speech:ja');
+  });
+});

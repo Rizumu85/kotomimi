@@ -233,7 +233,7 @@ describe('a sentence already in the language the leg translates into', () => {
     h.receive(...heard('item_2', '今日は天気がいいですね。'));
     await h.settled();
     expect(h.calls).toHaveLength(1);
-    expect(h.calls[0].body.messages.at(-1)).toMatchObject({ content: expect.stringContaining('今日は天気がいいですね。') });
+    expect(h.calls[0].body.messages.slice(-1)[0]).toMatchObject({ content: expect.stringContaining('今日は天気がいいですね。') });
   });
 });
 

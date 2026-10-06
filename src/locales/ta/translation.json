@@ -587,6 +587,7 @@
       "translateKotomimiOwn": "The device's own choice (its best model for your languages)",
       "coachStage": "Grammar feedback",
       "coachStageTooltip": "For when you speak the other side's language yourself. Your speech is not translated: a model checks it and answers ✓, or the corrected sentence and why. What you type is still translated.",
+      "coachNeedsSpeaker": "Feedback answers what you say. Switch the mode to \"Me\" or \"Both\".",
       "coach": "I speak their language: check my grammar",
       "coachNoModel": "The other device has no text model that can give feedback. Use an API model or this computer instead.",
       "coachPrompt": "Feedback instructions",
@@ -1620,7 +1621,16 @@
       "unpin": "Unpin {{name}}",
       "pinShort": "Pin to the top",
       "unpinShort": "Unpin",
-      "detect": "Detect the language"
+      "mine": "My language",
+      "theirs": "Their language",
+      "mostly": "They mostly speak",
+      "sumTheirs": "They speak {{their}} → I read {{mine}}",
+      "sumTheirsAny": "They speak any language → I read {{mine}}",
+      "sumMine": "I speak {{mine}} → translated into {{their}}",
+      "sumCoach": "I speak {{their}} → grammar feedback",
+      "detectUnable": "To detect it, choose Qwen3-ASR 1.7B under Speech recognition. {{their}} is assumed for now.",
+      "detectUnableServer": "To detect it, the other device needs Qwen3-ASR 1.7B and the latest Kotomimi. {{their}} is assumed for now.",
+      "detect": "Auto-detect"
     },
     "wizard": {
       "pathTitle": "Kotomimi Pipeline",

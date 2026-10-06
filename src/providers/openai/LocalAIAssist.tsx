@@ -734,7 +734,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   const recognizers = modelsFor(found, 'asr');
   // As a person chooses among them (`serverRecognizers.ts`): one to a language is one choice, and only what hears a
   // language of this run is listed. A choice saved as one member of a family shows as the family.
-  const recognizerMenu = recognizerChoices(recognizers, legs.map((leg) => heardBy(settings, pair, leg))).map((id) => ({ id }));
+  const recognizerMenu = recognizerChoices(recognizers, legs.map((leg) => heardBy(settings, pair, leg, models))).map((id) => ({ id }));
   const recognizerChosen = recognizers.some((m) => choiceOf(m.id) === choiceOf(settings.asrModel) && perLanguage(m.id)) ? choiceOf(settings.asrModel) : settings.asrModel;
   // What a blank pipeline field runs (`effectiveLocalAIModel`): the first pipeline named `gpt-realtime*`, else the first.
   const fallback = pipelines.find((m) => isRealtimeModelId(m.id))?.id ?? pipelines[0]?.id ?? '';
@@ -769,7 +769,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   const tourAt = settings.asrVia === 'device' && settings.asrHere === 'app' ? 'asr' : settings.translateAt === 'device' && settings.translateHere === 'app' ? 'translation' : null;
   const asrToLocalAI = toLocalAI({ asrHere: 'localai', asrHereModel: settings.asrHereModel || pipe?.transcription || '' });
   // What each leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
-  const heardByLegs = legs.map((leg) => heardBy(settings, pair, leg));
+  const heardByLegs = legs.map((leg) => heardBy(settings, pair, leg, models));
   // The native recognizer, language by language: a choice is the model in use from then on, and that language's by name.
   const nativePick: NativePick = { model: settings.asrNativeModel, byLanguage: settings.asrNativeByLanguage };
   const pickNative = (id: string, languages: readonly string[]) => {
@@ -779,7 +779,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   const translateToLocalAI = toLocalAI({ translateHere: 'localai', translateHereModel: settings.translateHereModel || firstText });
   // Offered where what hears can detect a language: the native engine, or an API.
   // While the other side's language is left to be detected (chosen among the languages, `LanguagePairSection`): what that takes.
-  const detectOther = legs.includes('participant') && detectsOther(settings)
+  const detectOther = legs.includes('participant') && detectsOther(settings, models)
     ? <p className="kt-note">{t('providers.localai.detectOtherNote')}</p>
     : null;
 
@@ -933,6 +933,8 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
         tooltip={t('providers.localai.coachStageTooltip')}
         lead={<ToggleSwitch checked={settings.coach} onChange={() => put({ coach: !settings.coach })} label={t('providers.localai.coach')} disabled={disabled} />}
       >
+        {/* Feedback answers what the user says: with the other side alone heard there is nothing for it to answer. */}
+        {settings.coach && !legs.includes('speaker') && <p className="kt-note kt-note--todo" role="status">{t('providers.localai.coachNeedsSpeaker')}</p>}
         {settings.coach && (
           <>
             <PlaceSwitch label={t('providers.localai.coachStage')} value={settings.coachAt} onChange={(coachAt) => put({ coachAt })} disabled={disabled} />

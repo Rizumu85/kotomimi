@@ -13,6 +13,7 @@
  * that know the app.
  */
 import { ipcNativeBridge } from '../native/nativeEngine';
+import { AUTO } from '../provider/languages';
 import { createNativeAsr } from '../../providers/openai/nativeAsr';
 import { NATIVE_COACHES } from '../../providers/openai/nativeCoaches';
 import { coachBaseUrl, coachKey } from '../../providers/openai/localaiNative';
@@ -31,7 +32,7 @@ export function nativeShared(): SharedModel[] {
   const hearing = useNativeEngineStore.getState().status;
   const translating = useNativeTranslatorStore.getState().status;
   return [
-    ...NATIVE_MODELS.filter((m) => nativeDownloaded(hearing, m.id)).map((m): SharedModel => ({ id: m.id, kind: 'asr', languages: [...m.languages] })),
+    ...NATIVE_MODELS.filter((m) => nativeDownloaded(hearing, m.id)).map((m): SharedModel => ({ id: m.id, kind: 'asr', languages: [...m.languages, ...(m.detects ? [AUTO] : [])] })),
     // A model of every language lists none: the list is what a device reads to rule a model out.
     ...NATIVE_TRANSLATORS.filter((m) => nativeDownloaded(translating, m.id)).map((m): SharedModel => ({ id: m.id, kind: 'translate', languages: m.languages === 'any' ? [] : [...m.languages] })),
     // The feedback engine's models: chat models, lent for grammar feedback in whatever languages they are asked.

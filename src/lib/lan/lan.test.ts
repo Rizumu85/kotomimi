@@ -115,6 +115,17 @@ describe('a Realtime socket of a sharing Kotomimi', () => {
     expect(dialled.asked).toEqual([['ja', 'sensevoice-nano-int8']]);
   });
 
+  it('takes "auto" for a language: it is for the recognizers to say whether one of them detects it', () => {
+    const s = socket();
+    s.update('auto');
+    expect(s.asked).toEqual([['auto', '']]);
+    expect(s.sent.some((e) => (e as { type?: string }).type === 'error')).toBe(false);
+    // None does: refused as any language nothing hears.
+    const none = socket(LAN_PIPELINE, () => null);
+    none.update('auto');
+    expect(none.sent[0]).toMatchObject({ type: 'error', error: { code: 'model_not_found' } });
+  });
+
   it('refuses a configuration with no language, or with no model to hear it, in words a client can show', () => {
     const s = socket(LAN_PIPELINE, () => null);
     s.update(undefined);

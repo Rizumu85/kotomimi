@@ -194,6 +194,11 @@ const PROVIDER = {
     '适合自己直接说对方语言的场合。你说的话不再翻译，而是交给模型检查：没问题回 ✓，有问题给出改正后的句子和原因。打字输入的内容仍然会翻译。',
     '適合自己直接說對方語言的場合。你說的話不再翻譯，而是交給模型檢查：沒問題回 ✓，有問題給出改正後的句子和原因。打字輸入的內容仍然會翻譯。',
   ],
+  coachNeedsSpeaker: [
+    'Feedback answers what you say. Switch the mode to "Me" or "Both".',
+    '语法反馈要听到你说话：把模式切到「我」或「两者」。',
+    '文法回饋要聽到你說話：把模式切到「我」或「兩者」。',
+  ],
   coach: ['I speak their language: check my grammar', '我自己说对方的语言：检查我的语法', '我自己說對方的語言：檢查我的文法'],
   coachNoModel: [
     'The other device has no text model that can give feedback. Use an API model or this computer instead.',

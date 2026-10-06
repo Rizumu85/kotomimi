@@ -282,3 +282,24 @@ describe('this computer\u2019s feedback model, lent', () => {
     }
   });
 });
+
+describe('a recognizer that tells languages apart, lent', () => {
+  const QWEN = status({ 'qwen3-asr-1.7b-q8': downloaded, 'r2t2-q8': downloaded });
+
+  it('says so to a device that asks: "auto" is among the languages it takes', () => {
+    useNativeEngineStore.setState({ status: QWEN });
+    const listed = nativeShared().filter((m) => m.kind === 'asr');
+    expect(listed.find((m) => m.id === 'qwen3-asr-1.7b-q8')?.languages).toContain('auto');
+    expect(listed.find((m) => m.id === 'r2t2-q8')?.languages).not.toContain('auto');
+  });
+
+  it('answers a session whose language is to be detected, and no other recognizer does', () => {
+    useNativeEngineStore.setState({ status: QWEN });
+    expect(nativeRecognizerFor('auto', '')).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
+    expect(nativeRecognizerFor('auto', 'qwen3-asr-1.7b-q8')).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
+    expect(nativeRecognizerFor('auto', 'r2t2-q8')).toBeNull();
+    // None that detects is here: none answers.
+    useNativeEngineStore.setState({ status: PC });
+    expect(nativeRecognizerFor('auto', '')).toBeNull();
+  });
+});

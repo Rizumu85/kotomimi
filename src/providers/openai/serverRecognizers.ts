@@ -54,7 +54,8 @@ export function recognizerAsked(chosen: string, heard: string, recognizers: read
   if (!chosen) return '';
   const family = choiceOf(chosen);
   const members = recognizers.filter((model) => perLanguage(model.id)?.family === family);
+  // Left to be detected: the one chosen where it tells languages apart ("auto" among what it takes), else the device's own choice.
+  if (heard === AUTO) return members.length === 0 && recognizers.find((model) => model.id === chosen)?.languages?.includes(AUTO) ? chosen : '';
   if (members.length === 0 && !perLanguage(chosen)) return chosen;
-  if (heard === AUTO) return '';
   return members.find((model) => base(perLanguage(model.id)!.language) === base(heard))?.id ?? '';
 }

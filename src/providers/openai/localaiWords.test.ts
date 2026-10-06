@@ -194,3 +194,30 @@ describe('the words for another device or an API that does not answer as it shou
     expectWords(await said(checkWith(ok, new Response('', { status: 401 }))({ apiKey: '', endpoint: '', translateKey: 'sk-wrong' }, settings({ ...API, translateNeedsKey: true }), ctx)), 'apiKeyRefused', { address: 'https://api.example.com/v1' });
   });
 });
+
+describe('the other side\u2019s language left to be detected, heard by another Kotomimi', () => {
+  const THEIRS: SessionContext = { direction: { source: 'ja', target: 'zh-CN' }, speech: false, turns: 'auto' };
+  const reversed = (d: SessionContext['direction']) => d.target === 'zh-CN';
+  const listing = (languages: string[]) => [
+    { id: 'kotomimi', kind: 'pipeline' as const, host: 'kotomimi' as const },
+    { id: 'apple-speech:ja', kind: 'asr' as const, host: 'kotomimi' as const, languages: ['ja'] },
+    { id: 'qwen3-asr-1.7b-q8', kind: 'asr' as const, host: 'kotomimi' as const, languages },
+    { id: 'index-translate-2b', kind: 'translate' as const, host: 'kotomimi' as const },
+  ] as unknown as LocalAIModel[];
+  const s = settings({ asrDetectOther: true, asrModel: 'apple-speech', translateAt: 'server' });
+
+  it('is asked of it as "auto", and of a recognizer of its own choice, where it lists one that detects', () => {
+    const built = buildLocalAI(THEIRS, s, { ...SHARED, reversed, models: listing(['ja', 'zh', 'auto']) });
+    if ('refused' in built) throw new Error(built.refused);
+    // No member of the family chosen hears "auto": the device picks.
+    expect(built.transcription).toEqual({ language: 'auto' });
+    expect(built.stages).toMatchObject({ heard: 'auto' });
+  });
+
+  it('is the pair\u2019s own language where it lists none: a Kotomimi not yet updated, or with no such model', () => {
+    const built = buildLocalAI(THEIRS, s, { ...SHARED, reversed, models: listing(['ja', 'zh']) });
+    if ('refused' in built) throw new Error(built.refused);
+    expect(built.transcription).toEqual({ model: 'apple-speech:ja', language: 'ja' });
+    expect(built.stages?.heard).toBeUndefined();
+  });
+});

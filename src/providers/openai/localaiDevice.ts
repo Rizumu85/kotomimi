@@ -84,23 +84,32 @@ export const coachesNatively = (s: Pick<StagePlacement, 'coach' | 'coachAt' | 'c
 /** The native engine hears: none of the app's own models is asked for. */
 export const hearsNatively = (s: Pick<StagePlacement, 'asrVia' | 'asrHere'>): boolean => s.asrVia === 'device' && s.asrHere === 'native';
 
+/** What the other device lists, as far as detection asks: its recognizers and the languages each takes. */
+type Listed = ReadonlyArray<object>;
+
+/** Another Kotomimi lists a recognizer that tells languages apart: "auto" is among the languages it takes (`src/lib/lan/nativeShare.ts`). */
+export const serverDetects = (models: Listed): boolean => (models as ReadonlyArray<{ kind?: string; languages?: readonly string[] }>).some((m) => m.kind === 'asr' && m.languages?.includes(AUTO) === true);
+
 /**
  * The other side's language is left to be detected, and what hears can do
- * that: the native engine (with a model that detects), or an API the sentence
- * is uploaded to. Anywhere else the switch is not offered, and counts for
- * nothing.
+ * that. Anywhere else the choice counts for nothing: the leg is told the
+ * pair's language, and the language section says so.
  */
-export const detectsOther = (s: { asrDetectOther?: boolean; asrVia: Place; asrHere?: AsrHere }): boolean => s.asrDetectOther === true && canDetectOther(s);
+export const detectsOther = (s: { asrDetectOther?: boolean; asrVia: Place; asrHere?: AsrHere }, models: Listed = []): boolean => s.asrDetectOther === true && canDetectOther(s, models);
 
-/** What hears can tell a language by itself: a native engine's model, or an API. Where it can, detecting the other side's language is offered. */
-export function canDetectOther(s: { asrVia: Place; asrHere?: AsrHere }): boolean {
-  return hearsNatively(s) || s.asrVia === 'api';
+/**
+ * What hears can tell a language by itself: a native engine's model, an API
+ * the sentence is uploaded to, or another Kotomimi that lists a recognizer
+ * which does. `models`: what the other device lists.
+ */
+export function canDetectOther(s: { asrVia: Place; asrHere?: AsrHere }, models: Listed = []): boolean {
+  return hearsNatively(s) || s.asrVia === 'api' || (s.asrVia === 'server' && serverDetects(models));
 }
 
 /** What a leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs, or whatever it turns out to be. */
-export function heardBy(s: { asrDetectOther?: boolean; asrVia: Place; asrHere?: AsrHere; coach: boolean }, pair: { source: string; target: string }, leg: 'speaker' | 'participant'): string {
+export function heardBy(s: { asrDetectOther?: boolean; asrVia: Place; asrHere?: AsrHere; coach: boolean }, pair: { source: string; target: string }, leg: 'speaker' | 'participant', models: Listed = []): string {
   if (leg === 'speaker') return s.coach ? pair.target : pair.source;
-  return detectsOther(s) ? AUTO : pair.target;
+  return detectsOther(s, models) ? AUTO : pair.target;
 }
 
 /** The feedback runs at this place: the speaker is coached, and that is where. */

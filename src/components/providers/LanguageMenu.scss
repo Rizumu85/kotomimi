@@ -62,26 +62,15 @@
   background: vars.$border-subtle;
 }
 
-// The line under the language pair, where what the other side speaks is chosen (LanguagePairSection, `detect`).
-.language-mirror-line--choice {
+// Under the language pair (LanguagePairSection): the language the other side mostly speaks, while theirs is detected;
+// and what the run does with the pair, a line for each side heard.
+.language-select-group--mostly {
+  grid-column: 3;
+  margin-top: -6px;
+}
+
+.language-summary {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-
-  .language-mirror-select {
-    font: inherit;
-    color: inherit;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 6px;
-    padding: 2px 6px;
-    max-width: 100%;
-    cursor: pointer;
-
-    &:hover:not(:disabled) { border-color: rgba(255, 255, 255, 0.28); }
-    &:focus-visible { outline: 2px solid #10a37f; outline-offset: 1px; }
-    &:disabled { opacity: 0.6; cursor: default; }
-    option { color: #e6e6e6; background: #2a2a2a; }
-  }
+  flex-direction: column;
+  gap: 2px;
 }

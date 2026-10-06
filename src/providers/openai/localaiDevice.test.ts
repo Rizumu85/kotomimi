@@ -11,7 +11,7 @@ import {
   admitLocalAI, buildLocalAI, createLocalAICheck, describeLocalAI, LOCALAI_DEFAULTS, localaiCredentials, localaiProvider, migrateLocalAISettings,
   type LocalAIConfig, type LocalAICredentials, type LocalAISettings,
 } from './localai';
-import { deviceChatModels, deviceChoices, deviceCoachModel, deviceNeeds, deviceRecognizer, deviceTranslator, needsServer } from './localaiDevice';
+import { canDetectOther, deviceChatModels, deviceChoices, deviceCoachModel, deviceNeeds, deviceRecognizer, deviceTranslator, heardBy, needsServer } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
 import { createPipelineAdapter, FIRST_REF, type DeviceStage } from './pipeline';
 import { SHARED } from './testing';
@@ -136,9 +136,27 @@ describe('a leg this computer hears', () => {
     expect(buildLocalAI(SPEAKER, settings({ ...HERE, coach: true, coachAt: 'api', translateModel: 'left-over' }), shared)).toMatchObject({ code: 'coach_unnamed' });
   });
 
-  it('offers no "auto-detect" source: no recognizer here detects a language', () => {
+  it('offers no "auto-detect" source, wherever it hears: the source is the user\u2019s own language', () => {
+    // Seen 2026-10-06: with the other side alone heard, the user's own language ("I read") offered "Auto Detect".
     expect(localaiProvider.languages.sources(settings(HERE)).map((o) => o.value)).not.toContain('auto');
-    expect(localaiProvider.languages.sources(settings()).map((o) => o.value)).toContain('auto');
+    expect(localaiProvider.languages.sources(settings()).map((o) => o.value)).not.toContain('auto');
+  });
+
+  it('can leave the other side\u2019s language to be detected by the native engine, an API, or another Kotomimi that lists a recognizer for it', () => {
+    const lists = (languages: string[]) => [{ id: 'qwen3-asr-1.7b-q8', kind: 'asr', languages }];
+    expect(canDetectOther({ asrVia: 'device', asrHere: 'native' })).toBe(true);
+    expect(canDetectOther({ asrVia: 'api' })).toBe(true);
+    expect(canDetectOther({ asrVia: 'device', asrHere: 'app' })).toBe(false);
+    // Another device: only where it says so, by "auto" among what a recognizer takes.
+    expect(canDetectOther({ asrVia: 'server' }, lists(['ja', 'zh']))).toBe(false);
+    expect(canDetectOther({ asrVia: 'server' }, lists(['ja', 'zh', 'auto']))).toBe(true);
+    expect(canDetectOther({ asrVia: 'server' }, [{ id: 'hy-mt2', kind: 'translate', languages: ['auto'] }])).toBe(false);
+    // The choice counts only where it can be kept.
+    const chosen = { asrDetectOther: true, coach: false, asrVia: 'server' as const };
+    const pair = { source: 'zh-CN', target: 'ja' };
+    expect(heardBy(chosen, pair, 'participant', lists(['ja']))).toBe('ja');
+    expect(heardBy(chosen, pair, 'participant', lists(['ja', 'auto']))).toBe('auto');
+    expect(heardBy(chosen, pair, 'speaker', lists(['ja', 'auto']))).toBe('zh-CN');
   });
 
   it('takes typed text whenever something translates it', () => {

@@ -494,10 +494,11 @@ function unnamedStage(s: LocalAISettings, models: readonly LocalAIModel[], coach
  * leg is not refused for it.
  */
 function undetected(s: LocalAISettings, models: readonly LocalAIModel[], source: string, coached: boolean, told?: string): ProviderRefusal | null {
-  if (source !== AUTO || coached) return null;
+  // The other side's leg is only ever left to be detected where what hears can (`detectsOther`).
+  if (source !== AUTO || coached || told !== undefined) return null;
   const kotomimiHears = s.asrVia === 'server' && isKotomimiServer(models);
   // The native translation engine reads what it is given; the app's own translation models are told the pair.
-  if ((s.translateAt !== 'device' || translatesNatively(s) || told !== undefined) && !kotomimiHears) return null;
+  if ((s.translateAt !== 'device' || translatesNatively(s)) && !kotomimiHears) return null;
   return { refused: 'The language spoken is to be detected, and nothing on the way detects it.', code: 'source_auto' };
 }
 
@@ -692,7 +693,7 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
       const coached = s.coach && leg === 'speaker';
       const found = servers.models ?? [];
       // What the leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
-      const heard = heardBy(s, ctx.pair, leg);
+      const heard = heardBy(s, ctx.pair, leg, found);
       const gap = unnamedStage(s, found, coached) ?? undetected(s, found, leg === 'speaker' ? ctx.pair.source : heard, coached, leg === 'participant' ? ctx.pair.target : undefined) ?? unheard(s, found, heard);
       // What the servers listed goes with the refusal: a pick from it is often what answers it.
       if (gap) return { ok: false, reason: gap.refused, ...(gap.code ? { code: gap.code } : {}), ...(gap.params ? { params: gap.params } : {}), ...(servers.models?.length ? { models: servers.models } : {}) };
@@ -872,7 +873,8 @@ export function effectiveLocalAIModel(s: Pick<LocalAISettings, 'model'>, models:
 function transcriptionFor(s: Pick<LocalAISettings, 'asrModel'>, heard: string, transcribeOnly: boolean, kotomimi: boolean, models: readonly LocalAIModel[]): TranscriptionHint {
   // A recognizer the device has one of for each language is asked for by the language this leg hears (`serverRecognizers.ts`).
   const model = transcribeOnly && !kotomimi ? '' : recognizerAsked(s.asrModel.trim(), heard, modelsFor(models, 'asr'));
-  const language = normalizeTranscriptionLanguage(heard);
+  // Another Kotomimi is told that the language is to be detected, in so many words: it refuses a session that says none.
+  const language = heard === AUTO && kotomimi ? AUTO : normalizeTranscriptionLanguage(heard);
   // No `model` keeps the pipeline's own: the hint's type names one because OpenAI requires it.
   return { ...(model ? { model } : {}), ...(language ? { language } : {}) } as TranscriptionHint;
 }
@@ -883,7 +885,7 @@ const serverKeyOf = (s: Pick<LocalAISettings, 'serverNeedsKey'>): { key?: StageK
 export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: SharedSettings): LocalAIConfig | ProviderRefusal {
   const models: readonly LocalAIModel[] = shared.models;
   // The other side's leg, with their language left to be detected: built as a leg whose source is to be detected.
-  const detected = detectsOther(s) && shared.reversed(asked.direction);
+  const detected = detectsOther(s, models) && shared.reversed(asked.direction);
   const context: SessionContext = detected ? { ...asked, direction: { source: AUTO, target: asked.direction.target } } : asked;
   const { source, target } = context.direction;
   // What a translation that has to be told a pair is told: the pair's own language, where the leg's is left to be detected.
@@ -1054,10 +1056,15 @@ export function admitLocalAI(configs: Partial<Record<LegName, LocalAIConfig>>): 
   return Object.keys(counted).length === 0 ? true : admitLocalInference(counted);
 }
 
-/** A leg this computer hears is told its language: no recognizer of its own detects one, so "auto-detect" is no source there. */
+/**
+ * The pair is the user's own language and the other side's. Their own is
+ * never "detect it": it is what they read, and what their words are
+ * translated from. The other side's can be left to be detected, which is
+ * chosen with it (`asrDetectOther`), not here.
+ */
 export const localaiLanguages: Provider<LocalAISettings, never, never>['languages'] = {
   ...realtimeLanguages,
-  sources: (s, context) => (s.asrVia === 'device' ? REALTIME_LANGUAGES : realtimeLanguages.sources(s, context)),
+  sources: () => REALTIME_LANGUAGES,
 };
 
 const adapter = createPipelineAdapter({ prepare: (pipeline, transcription) => setLocalPipeline(pipeline, { transcription }) });

@@ -145,7 +145,8 @@ export class LanTranscriber {
   private configure(session: unknown): void {
     const input = ((session ?? {}) as { audio?: { input?: { transcription?: { language?: unknown; model?: unknown }; turn_detection?: unknown } } }).audio?.input ?? {};
     const language = baseLanguage(input.transcription?.language);
-    if (!language) return this.error('language_required', 'Say which language is spoken: this Kotomimi\'s recognizers do not detect it (audio.input.transcription.language).');
+    // "auto" is a language here: answered by a recognizer that tells languages apart, where one is shared (`nativeShare.ts`).
+    if (!language) return this.error('language_required', 'Say which language is spoken, or "auto" to have it detected (audio.input.transcription.language).');
     const named = typeof input.transcription?.model === 'string' ? input.transcription.model : '';
     const wanted = named || (this.dialled !== LAN_PIPELINE ? this.dialled : '');
     const model = this.deps.resolve(language, wanted);
