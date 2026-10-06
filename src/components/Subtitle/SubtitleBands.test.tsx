@@ -30,15 +30,40 @@ describe('SubtitleBody — compact: the fork\u2019s lanes', () => {
     kind: 'exchange', id, leg: 'participant', languages: { source: 'ja', target: 'en' }, pairing: 'stated',
     source: [row(`ps-${id}`, 0, 0, source)], translation: answer ? [row(`pt-${id}`, 0, 0, answer, 'translation')] : [], t: 0,
   });
-  const texts = (lane: Element) => [...lane.querySelectorAll('.subtitle-lane__text')].map((el) => el.textContent);
+  /** A lane's texts as written, without the tag that says whose lane it is. */
+  const texts = (lane: Element) => [...lane.querySelectorAll('.subtitle-lane__source, .subtitle-lane__answer, .subtitle-lane__said, .subtitle-lane__reply')].map((el) => {
+    const copy = el.cloneNode(true) as Element;
+    copy.querySelectorAll('.subtitle-lane__tag').forEach((tag) => tag.remove());
+    return copy.textContent;
+  });
+  const tags = (root: Element) => [...root.querySelectorAll('.subtitle-lane__tag')].map((tag) => tag.textContent);
 
-  it('draws a lane for each side that has spoken, the other side first: its newest sentence over what answers it', () => {
+  it('draws a lane for each side that has spoken: the other side\u2019s newest sentence over what answers it, then the user\u2019s own on one row', () => {
     const { container } = render(<SubtitleBody {...props({ entries: [exchange('a', [row('s1', 0, 0, 'Hello.')], [row('t1', 0, 0, 'こんにちは。', 'translation')]), theirs('b', 'そうですね。', 'That is right.')] })} />);
     const lanes = [...container.querySelectorAll('.subtitle-stream.compact .subtitle-lane')];
     expect(lanes.map((lane) => lane.getAttribute('data-lane'))).toEqual(['participant', 'speaker']);
     expect(texts(lanes[0])).toEqual(['そうですね。', 'That is right.']);
     expect(texts(lanes[1])).toEqual(['Hello.', 'こんにちは。']);
     expect(lanes[0].querySelector('.subtitle-lane__source .subtitle-lane__text')?.getAttribute('lang')).toBe('ja');
+    // Each says whose it is, once; theirs is a pair, the user's own a row with an arrow between its two texts.
+    expect(tags(container)).toEqual(['Other', 'Me']);
+    expect(lanes[0].className).toContain('subtitle-lane--pair');
+    expect(lanes[1].className).toContain('subtitle-lane--row');
+    expect(lanes[1].querySelector('.subtitle-lane__arrow')).not.toBeNull();
+    expect(lanes[1].querySelector('.subtitle-lane__said')?.getAttribute('lang')).toBe('en');
+  });
+
+  it('draws the user\u2019s own lane as a pair where it is the only one, and no arrow before anything answers', () => {
+    const alone = render(<SubtitleBody {...props()} />);
+    const lane = alone.container.querySelector('.subtitle-lane')!;
+    expect(lane.className).toContain('subtitle-lane--pair');
+    expect(texts(lane)).toEqual(['Hello.', 'こんにちは。']);
+    alone.unmount();
+    // In its row, a sentence still waiting for its answer says so where the answer will be.
+    const waiting = render(<SubtitleBody {...props({ entries: [exchange('z', [row('s0', 0, 0, 'Hi.')], [row('t0', 0, 0, 'やあ。', 'translation')]), exchange('a', [row('s1', 0, 0, 'Hello.')]), theirs('b', 'はい。', 'Yes.')] })} />);
+    const mine = waiting.container.querySelector('.subtitle-lane--row')!;
+    expect(mine.querySelector('.subtitle-lane__reply')).toBeNull();
+    expect(mine.querySelector('.subtitle-lane__pending')).not.toBeNull();
   });
 
   it('keeps a side\u2019s sentence and its answer in place while the other side goes on talking', () => {
@@ -48,10 +73,11 @@ describe('SubtitleBody — compact: the fork\u2019s lanes', () => {
     ] })} />);
     const [other, mine] = [...container.querySelectorAll('.subtitle-lane')];
     expect(texts(mine)).toEqual(['Hello.', 'こんにちは。']);
-    // Their newest has no answer yet: the last one stays, drawn as the sentence before's.
-    expect(texts(other)).toEqual(['はい。', 'Nice weather.']);
-    expect(other.querySelector('.subtitle-lane__answer')?.className).toContain('subtitle-lane__answer--stale');
-    expect(mine.querySelector('.subtitle-lane__answer')?.className).not.toContain('--stale');
+    // Their newest has no answer yet: the pair before stays whole, with a mark that more is coming.
+    const pair = (lane: Element) => texts(lane).map((text) => text?.replace('…', ''));
+    expect(pair(other)).toEqual(['いい天気ですね。', 'Nice weather.']);
+    expect(other.querySelector('.subtitle-lane__pending')).not.toBeNull();
+    expect(mine.querySelector('.subtitle-lane__pending')).toBeNull();
   });
 
   it('has a lane, empty, for a leg the run hears that has said nothing yet', () => {

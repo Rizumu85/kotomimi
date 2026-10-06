@@ -103,7 +103,7 @@ describe('SubtitleView', () => {
 
   it('draws the lanes while a run is live', () => {
     const { container } = render(<SubtitleView surface="electron" model={{ entries: [entry], lit: new Map(), session: session() }} controls={controls()} />);
-    expect(container.querySelector('.subtitle-lane .subtitle-lane__text')?.textContent).toBe('Hello.');
+    expect(container.querySelector('.subtitle-lane .subtitle-lane__text')?.textContent).toBe('MeHello.');
     expect(screen.getByTestId('bar').dataset).toMatchObject({ control: 'yes', legs: 'true/false', pair: 'EN' });
   });
 

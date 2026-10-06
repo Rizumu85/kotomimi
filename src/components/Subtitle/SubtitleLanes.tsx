@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { LegName, SegmentId } from '../../lib/conversation/types';
 import type { Entry } from '../../lib/projection/types';
 import { fontLanguage } from '../../lib/fonts/fontCss';
-import { buildLanes, lanesHeight, SOURCE_SCALE, spacingAt, squeezeOf, TIGHT, type LanePiece, type LaneText } from '../../lib/subtitle/lanes';
+import { buildLanes, laneEms, lanesHeight, spacingAt, squeezeOf, TIGHT, type Lane, type LanePiece, type LaneText } from '../../lib/subtitle/lanes';
 import type { LegFilters } from '../../lib/view/filter';
 import { noticeText } from '../../lib/view/noticeText';
 import { AnnotatedLines, useAnnotation } from '../Annotated/AnnotatedText';
@@ -11,6 +11,8 @@ import '../../styles/karaoke.scss';
 
 /** Text is drawn no smaller than this much of the size chosen: under it, the oldest of it goes out of sight instead. */
 const SMALLEST = 0.5;
+/** …and a row's, small already, than this much of its own: under it, its end is cut off. */
+const SMALLEST_ROW = 0.8;
 /** Steps of the search for the largest size that fits: fine to a sixty-fourth. */
 const STEPS = 6;
 
@@ -20,7 +22,7 @@ const STEPS = 6;
  * said: a sentence too long for its box is drawn smaller — and the window can
  * be made small under large text, which then shrinks only when it must.
  */
-function FitText({ className, lang, children, fitKey }: { className: string; lang?: string; children: ReactNode; fitKey: string }) {
+function FitText({ className, lang, children, fitKey, smallest = SMALLEST }: { className: string; lang?: string; children: ReactNode; fitKey: string; smallest?: number }) {
   const box = useRef<HTMLDivElement>(null);
   const text = useRef<HTMLDivElement>(null);
   const fit = () => {
@@ -34,7 +36,7 @@ function FitText({ className, lang, children, fitKey }: { className: string; lan
     // No layout (a test's document), or it fits as it is.
     delete outer.dataset.over;
     if (outer.clientHeight === 0 || fits(1)) return;
-    let low = SMALLEST;
+    let low = smallest;
     let high = 1;
     if (fits(low)) {
       for (let i = 0; i < STEPS; i++) {
@@ -148,31 +150,51 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
     '--lane-inner-gap': `${spacing.inner}px`,
     '--lane-source-line': String(spacing.sourceLine),
     '--lane-answer-line': String(spacing.answerLine),
-    // Each text's share of the height: what it is laid out for.
-    '--lane-source-share': String(SOURCE_SCALE * spacing.sourceLine),
-    '--lane-answer-share': String(spacing.answerLine * spacing.answerLines),
+    '--lane-row-line': String(spacing.rowLine),
+    // A pair's two texts share its height by what each is laid out for.
+    // A pair's answer has room for this many lines before it is drawn smaller.
+    '--lane-answer-lines': String(spacing.answerLines),
   } as CSSProperties;
+  const who = (leg: LegName) => (leg === 'speaker' ? t('modePicker.modeYou', 'Me') : t('modePicker.modeParticipants', 'Other'));
+  const tag = (lane: Lane) => <span className={`subtitle-lane__tag subtitle-lane__tag--${lane.leg}`}>{who(lane.leg)}</span>;
+  // A newer sentence is waiting for its answer: said quietly, after what is shown.
+  const pending = <span className="subtitle-lane__pending" aria-hidden="true">…</span>;
 
   return (
     <div ref={strip} className="subtitle-lanes" style={style}>
-      {lanes.map((lane) => (
-        <div key={lane.leg} className={`subtitle-lane subtitle-lane--${lane.leg}`} data-lane={lane.leg}>
+      {lanes.map((lane) => (lane.shape === 'row' ? (
+        // The user's own, under the other side's: what they said and what answers it, on one small line.
+        <div key={lane.leg} className={`subtitle-lane subtitle-lane--row subtitle-lane--${lane.leg}`} data-lane={lane.leg} style={{ flexGrow: laneEms(lane, spacing) }}>
+          <FitText className="subtitle-lane__row" smallest={SMALLEST_ROW} fitKey={`${fontSize}:${squeeze}:${lane.source?.text ?? ''}:${lane.answer?.text ?? ''}`}>
+            {tag(lane)}
+            {lane.source && <span className="subtitle-lane__said" lang={langOf(lane.source)}><Written text={lane.source} lit={lit} /></span>}
+            {lane.source && lane.answer && lane.source.text !== '' && (lane.answer.text !== '' || lane.pending) && <span className="subtitle-lane__arrow" aria-hidden="true">→</span>}
+            {lane.answer && lane.answer.text !== '' && <span className="subtitle-lane__reply" lang={langOf(lane.answer)}><Written text={lane.answer} lit={lit} /></span>}
+            {lane.answer && lane.answer.text === '' && lane.pending && pending}
+          </FitText>
+        </div>
+      ) : (
+        <div key={lane.leg} className={`subtitle-lane subtitle-lane--pair subtitle-lane--${lane.leg}`} data-lane={lane.leg} style={{ flexGrow: laneEms(lane, spacing) }}>
           {lane.source && (
             <FitText className="subtitle-lane__source" lang={langOf(lane.source)} fitKey={`${fontSize}:${squeeze}:${lane.source.text}`}>
+              {tag(lane)}
               <Written text={lane.source} lit={lit} />
+              {lane.pending && pending}
             </FitText>
           )}
           {lane.answer && (
             <FitText
-              className={`subtitle-lane__answer${lane.answer.stale ? ' subtitle-lane__answer--stale' : ''}${lane.answer.notice ? ' subtitle-lane__answer--notice' : ''}`}
+              className={`subtitle-lane__answer${lane.answer.notice ? ' subtitle-lane__answer--notice' : ''}`}
               lang={langOf(lane.answer)}
               fitKey={`${fontSize}:${squeeze}:${lane.answer.text}`}
             >
+              {!lane.source && tag(lane)}
               <Written text={lane.answer} lit={lit} />
+              {!lane.source && lane.pending && pending}
             </FitText>
           )}
         </div>
-      ))}
+      )))}
     </div>
   );
 }

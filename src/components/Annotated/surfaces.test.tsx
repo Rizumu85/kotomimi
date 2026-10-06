@@ -59,7 +59,7 @@ describe('reading aids on the subtitle', () => {
     act(() => { useAnnotationStore.setState({ furigana: false, romanization: false }); });
     const off = render(<SubtitleBody {...props()} />);
     expect(off.container.querySelector('ruby')).toBeNull();
-    expect(off.container.querySelector('.subtitle-lane__source')?.textContent).toBe('今日は天気がいいですね。');
+    expect(off.container.querySelector('.subtitle-lane__source')?.textContent).toBe('Other今日は天気がいいですね。');
   });
 
   it('reads a row by the language its provider reported, over its leg\'s: a coached speaker\'s Japanese on a Chinese leg', () => {
