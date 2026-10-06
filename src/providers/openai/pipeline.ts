@@ -32,6 +32,7 @@ import { createNativeAsr, type NativeLimits } from './nativeAsr';
 import { languageByScript, saidInOwn, sameSpeech } from '../../lib/language/script';
 import { AUTO } from '../../lib/provider/languages';
 import { TEXT_SLOT } from './nativeTranslators';
+import { cutAt, restFrom, SETTLE_MS } from './sentenceCut';
 import { askNativeEngine, ipcNativeBridge, type NativeBridge, type NativeEngineStatus } from '../../lib/native/nativeEngine';
 import { createRealtimeAdapter } from './adapter';
 import type { RealtimeConfig } from './config';
@@ -220,6 +221,14 @@ const HEARD_ASK_EVERY_MS = 500;
 const HEARD_ASK_TIMES = 10;
 const HEARD_ASK_TIMES_CLOSED = 2;
 
+/** A stretch whose finished sentences are closed as they come: see `PipelineLeg.cuts`. */
+interface Cut {
+  done: string;
+  rest: { ref: Ref; origin?: string } | null;
+  waiting: { text: string; since: number } | null;
+  language?: string;
+}
+
 class PipelineLeg implements AdapterSession {
   readonly inner: AdapterEvents;
   info: { transport?: string } = {};
@@ -230,6 +239,14 @@ class PipelineLeg implements AdapterSession {
   private typedIds = 0;
   /** Open source segments of the inner session: what each says, and what it answers to. */
   private readonly sources = new Map<Ref, { origin?: string; text: string }>();
+  /**
+   * Of those, the ones of a leg that closes a stretch's finished sentences as they come (`sentenceCut.ts`): the
+   * stretch's beginning as it read when it was closed (none yet: `''`), the segment that shows what is left of it
+   * and what that answers to (none while nothing is left), the sentence waiting to have stood long enough, and the
+   * language the stretch was last said to be in.
+   */
+  private readonly cuts = new Map<Ref, Cut>();
+  private pieceIds = 0;
   private readonly queue: Job[] = [];
   private running: AbortController | null = null;
   private innerBusy = false;
@@ -357,6 +374,7 @@ class PipelineLeg implements AdapterSession {
 
   private end(): void {
     this.ended = true;
+    this.cuts.clear();
     for (let i = heardLately.length - 1; i >= 0; i--) if (heardLately[i].leg === this) heardLately.splice(i, 1);
     this.queue.length = 0;
     this.running?.abort(new Error('the session ended'));
@@ -396,6 +414,10 @@ class PipelineLeg implements AdapterSession {
         // Left to be detected: the language its writing shows, or none — which also keeps the leg's own from being assumed.
         // Told one, and written in the leg's other language: said to be in that one.
         const heard = told === AUTO ? languageByScript(e.payload.text) ?? AUTO : (open ? this.otherThanHeard(e.payload.text) : undefined) ?? told;
+        if (source && this.cutsSentences()) {
+          this.heardSoFar(e.payload.ref, source, heard);
+          return;
+        }
         this.events.segmentText(heard ? { ...e.payload, language: heard } : e.payload);
         return;
       }
@@ -406,6 +428,24 @@ class PipelineLeg implements AdapterSession {
         const coached = this.stages.speech?.kind === 'coach';
         const heard = this.heardOf(e.payload.ref);
         if (heard) heard.until = this.request.clock.now();
+        // Its finished sentences were closed as they came: what is left is the last of them.
+        const cut = this.cuts.get(e.payload.ref);
+        this.cuts.delete(e.payload.ref);
+        if (cut && cut.done && source) {
+          const rest = source.text.slice(restFrom(source.text, cut.done)).trim();
+          // Nothing after the last one: a segment that waited for more goes, as one that heard nothing does.
+          if (!rest) {
+            if (cut.rest) {
+              this.events.segmentText({ ref: cut.rest.ref, text: '' });
+              this.events.segmentClosed({ ref: cut.rest.ref });
+            }
+            return;
+          }
+          const last = this.restOf(cut);
+          this.events.segmentText({ ref: last.ref, text: rest, ...(cut.language ? { language: cut.language } : {}) });
+          this.closed({ ref: last.ref, origin: last.origin }, { origin: last.origin, text: rest }, rest);
+          return;
+        }
         // A coached speaker's sentence may be the other side's voice, come back through the microphone.
         if (coached && source && text && heard) {
           this.settleOwn(heard, e.payload, source.origin, text, HEARD_ASK_TIMES);
@@ -463,6 +503,76 @@ class PipelineLeg implements AdapterSession {
       return;
     }
     this.closed(closed, { origin, text }, text);
+  }
+
+  /**
+   * Whether this leg closes a stretch's finished sentences as they come: one that translates what it hears. A coached
+   * speaker's stretch is answered whole — the feedback is on what they said, and whether it was their own voice is
+   * asked of the stretch (`settleOwn`) — and a leg with no stage of its own is answered by its session.
+   */
+  private cutsSentences(): boolean {
+    const speech = this.stages.speech;
+    return !!speech && speech.kind !== 'coach';
+  }
+
+  /** The segment that shows what is left of a stretch: opened when there first is something left. */
+  private restOf(cut: Cut): { ref: Ref; origin?: string } {
+    if (!cut.rest) {
+      cut.rest = { ref: ++this.refs, origin: `kotomimi_piece_${++this.pieceIds}` };
+      this.events.segmentOpened({ ref: cut.rest.ref, side: 'source', origin: cut.rest.origin });
+    }
+    return cut.rest;
+  }
+
+  /**
+   * A stretch's text so far, of a leg that closes its sentences as they come. What is shown is what is left of it
+   * after the sentences already closed. A finished sentence the speaker has gone on from, once it has stood
+   * unchanged for a moment, is closed — its own segment, sent for its answer — and what follows shows in a segment
+   * of its own from then on.
+   */
+  private heardSoFar(ref: Ref, source: { origin?: string; text: string }, language: string | undefined): void {
+    const { clock } = this.request;
+    let cut = this.cuts.get(ref);
+    if (!cut) {
+      // Until its first sentence is closed, what is left of the stretch is all of it: the inner session's own segment.
+      cut = { done: '', rest: { ref, origin: source.origin }, waiting: null };
+      this.cuts.set(ref, cut);
+    }
+    cut.language = language;
+    const rest = source.text.slice(restFrom(source.text, cut.done));
+    const end = cutAt(rest);
+    if (end >= 0) {
+      const sentence = rest.slice(0, end).trim();
+      if (cut.waiting?.text !== sentence) cut.waiting = { text: sentence, since: clock.now() };
+      else if (clock.now() - cut.waiting.since >= SETTLE_MS) {
+        this.cutAfter(source, cut, source.text.length - rest.length + end, sentence);
+        this.sayRest(cut, rest.slice(end));
+        return;
+      }
+    } else {
+      cut.waiting = null;
+    }
+    this.sayRest(cut, rest);
+  }
+
+  /** Closes the stretch's text up to `upTo` as a sentence of its own, and sends it for its answer. */
+  private cutAfter(source: { origin?: string; text: string }, cut: Cut, upTo: number, sentence: string): void {
+    const shown = this.restOf(cut);
+    // The first of a stretch is the inner session's segment, which may not know yet what it answers to: said here.
+    const origin = shown.origin ?? `kotomimi_piece_${++this.pieceIds}`;
+    this.events.segmentText({ ref: shown.ref, text: sentence, ...(cut.language ? { language: cut.language } : {}) });
+    this.frame('in', 'speech.sentence', { chars: sentence.length });
+    cut.done = source.text.slice(0, upTo);
+    cut.rest = null;
+    cut.waiting = null;
+    this.closed({ ref: shown.ref, origin }, { origin, text: sentence }, sentence);
+  }
+
+  /** What is left of a stretch, as it now reads: in its segment, opened when there first is something to show. */
+  private sayRest(cut: Cut, rest: string): void {
+    const text = cut.done ? rest.trimStart() : rest;
+    if (!cut.rest && !text.trim()) return;
+    this.events.segmentText({ ref: this.restOf(cut).ref, text, ...(cut.language ? { language: cut.language } : {}) });
   }
 
   /** A source sentence, closed: said so, and handed to what answers it. */
