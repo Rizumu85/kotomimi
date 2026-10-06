@@ -78,6 +78,14 @@ const PRE_ROLL_SECONDS = 0.8;
  * full where a recognition is closed with the speaker still talking.
  */
 const TRAILING_SILENCE_SECONDS = 1;
+
+/**
+ * A recognizer's text as it is shown and handed on: no space before a mark of
+ * Chinese or Japanese punctuation. The Mac's own recognition writes Chinese
+ * with one ("今天天气很好 ，我们…", seen 2026-10-06). Only what goes out is
+ * changed: what was heard so far is still counted on the text as it came.
+ */
+export const tidyHeard = (text: string): string => text.replace(/[ \t\u3000]+(?=[，。！？、；：])/g, '');
 /** A recognition this long is begun again at the next gap between words… */
 export const ROLL_AFTER_SECONDS = 45;
 /** …or where the detector cuts, once it is this long, or anywhere at this: the engine's own limit is near two minutes. */
@@ -229,7 +237,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
   function piece(s: Stream) {
     const text = pending(s).trim();
     if (!text) return;
-    asr.onResult?.({ text, durationMs: Math.round(secondsOf(s.pieceSamples) * 1000), recognitionTimeMs: 0 });
+    asr.onResult?.({ text: tidyHeard(text), durationMs: Math.round(secondsOf(s.pieceSamples) * 1000), recognitionTimeMs: 0 });
     s.emitted = s.text.length;
     s.pieceSamples = 0;
   }
@@ -246,7 +254,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     // what was written on the way — a character here and there — it is still read from where the results left off.
     const text = whole.length >= s.text.length ? whole : s.text;
     // An empty result too: it closes what the partials opened.
-    asr.onResult?.({ text: s.misfire ? '' : text.slice(s.emitted).trim(), durationMs: Math.round(secondsOf(s.pieceSamples) * 1000), recognitionTimeMs: s.closed ? Math.max(0, now() - s.closedAt) : 0 });
+    asr.onResult?.({ text: s.misfire ? '' : tidyHeard(text.slice(s.emitted).trim()), durationMs: Math.round(secondsOf(s.pieceSamples) * 1000), recognitionTimeMs: s.closed ? Math.max(0, now() - s.closedAt) : 0 });
     advance();
   }
 
@@ -263,10 +271,10 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
       s.tentative = true;
       s.heard = event.text;
       // Everything heard so far, as it stands: what follows the results already given, by their length.
-      if (!s.misfire) asr.onPartialResult?.(event.text.slice(s.emitted));
+      if (!s.misfire) asr.onPartialResult?.(tidyHeard(event.text.slice(s.emitted)));
     } else if (event.type === 'delta') {
       s.text += event.text;
-      if (!s.misfire && !s.tentative) asr.onPartialResult?.(pending(s));
+      if (!s.misfire && !s.tentative) asr.onPartialResult?.(tidyHeard(pending(s)));
     } else if (event.type === 'done') {
       finish(s, event.text || s.text);
     } else {

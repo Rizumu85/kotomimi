@@ -387,3 +387,15 @@ describe('this computer\'s native recognizer', () => {
     expect(seen.results).toEqual([]);
   });
 });
+
+describe('what a recognizer wrote, as it is handed on', () => {
+  it('has no space before a mark of Chinese or Japanese punctuation, and every other space as it was', async () => {
+    const { tidyHeard } = await import('./nativeAsr');
+    // As the Mac's own recognition wrote a Chinese sentence.
+    expect(tidyHeard('今天天气很好 ，我们一起去公园散步吧 ，然后去吃拉面。')).toBe('今天天气很好，我们一起去公园散步吧，然后去吃拉面。');
+    expect(tidyHeard('そうだね 。いいよ\u3000、行こう')).toBe('そうだね。いいよ、行こう');
+    // Spaces that mean something stay: between words, and before Latin punctuation.
+    expect(tidyHeard('I think so , yes. VRChat で 遊ぶ')).toBe('I think so , yes. VRChat で 遊ぶ');
+    expect(tidyHeard('')).toBe('');
+  });
+});
