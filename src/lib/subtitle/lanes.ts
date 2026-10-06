@@ -42,16 +42,6 @@ export interface LaneText {
   segmentId?: SegmentId;
 }
 
-/** A sentence and what answered it, as a pair's history keeps them. */
-export interface LanePair {
-  key: string;
-  source?: LaneText;
-  answer?: LaneText;
-}
-
-/** How many earlier sentences a pair keeps: more than any window made higher shows whole. */
-export const HISTORY_MOST = 8;
-
 export interface Lane {
   leg: LegName;
   /**
@@ -67,11 +57,6 @@ export interface Lane {
   answer?: LaneText & { notice?: NoticeEntry };
   /** A sentence newer than the one shown is waiting for its answer (a pair), or the one shown is (a row). */
   pending: boolean;
-  /**
-   * A pair's earlier sentences, oldest first, each with its own answer: drawn above the one shown where the strip
-   * is taller than it is laid out for — a window the user made higher is given something to show.
-   */
-  history: LanePair[];
 }
 
 /** The other side first: theirs is what a caption strip is read for. */
@@ -113,7 +98,7 @@ export function buildLanes(
     // Under the other side's lane, the user's own is a row.
     const shape = leg === 'speaker' && shown.length > 1 ? 'row' : 'pair';
     const mine = entries.filter((entry) => entry.leg === leg);
-    const lane: Lane = { leg, shape, pending: false, history: [] };
+    const lane: Lane = { leg, shape, pending: false };
     if (showsSource) lane.source = { text: '', pieces: [] };
     if (showsAnswer) lane.answer = { text: '', pieces: [] };
 
@@ -148,24 +133,6 @@ export function buildLanes(
       }
     }
     if (lane.answer && notice) lane.answer = { text: words(notice), pieces: [], notice };
-    // What came before the sentence shown, for a pair: each sentence that has what the lane shows of it.
-    if (shape === 'pair') {
-      for (let i = at - 1; i >= 0 && lane.history.length < HISTORY_MOST; i--) {
-        const entry = mine[i];
-        if (entry.kind !== 'exchange') continue;
-        const source = showsSource ? joined(entry.source) : '';
-        const answer = showsAnswer ? joined(entry.translation) : '';
-        // A sentence never answered is left out where answers are shown: half a pair, among whole ones.
-        if (showsAnswer ? !answer : !source) continue;
-        const first = entry.source[0];
-        const reply = entry.translation[0];
-        lane.history.unshift({
-          key: entry.id,
-          ...(source ? { source: { text: source, pieces: piecesOf(entry.source), language: first?.language || entry.languages.source } } : {}),
-          ...(answer ? { answer: { text: answer, pieces: piecesOf(entry.translation), language: reply?.language || entry.languages.target } } : {}),
-        });
-      }
-    }
     return lane;
   });
 }
@@ -229,4 +196,43 @@ export function lanesHeight(lanes: readonly Lane[], fontSize: number, spacing: L
 export function squeezeOf(height: number, roomy: number, tight: number): number {
   if (!(roomy > tight) || height >= roomy) return 0;
   return Math.min(1, (roomy - height) / (roomy - tight));
+}
+
+/** How many lines each text of a strip has room for before it is drawn smaller. */
+export interface LaneLines { source: number; answer: number; row: number }
+
+/** No text is given more lines than this, however high the window. */
+const LINES_MOST: LaneLines = { source: 3, answer: 6, row: 3 };
+/** Whose turn it is for the next line a higher window affords: the user's own row first — one line is the least it can do with — then the answer twice for the source's once. */
+const LINES_ORDER: ReadonlyArray<keyof LaneLines> = ['row', 'answer', 'source', 'answer'];
+
+/**
+ * The lines a strip's texts have room for in a window `spare` pixels higher
+ * than the strip is laid out for. A window the user made higher is for the
+ * sentence on screen: a long one is written out on more lines at the size
+ * chosen, where the fitted window would draw it smaller. (Showing the
+ * sentences before in that room was tried, 2026-10-06; it is not what a
+ * higher window is asked for.) Each further line is given in turn, while
+ * there is room for it. Pure.
+ */
+export function linesFor(lanes: readonly Lane[], fontSize: number, spare: number): LaneLines {
+  const lines: LaneLines = { source: 1, answer: ROOMY.answerLines, row: 1 };
+  const pair = lanes.find((lane) => lane.shape === 'pair');
+  const cost: LaneLines = {
+    source: pair?.source ? fontSize * SOURCE_SCALE * ROOMY.sourceLine : Infinity,
+    answer: pair?.answer ? fontSize * ROOMY.answerLine : Infinity,
+    row: lanes.some((lane) => lane.shape === 'row') ? fontSize * ROW_SCALE * ROOMY.rowLine : Infinity,
+  };
+  let left = spare;
+  for (let turn = 0, passed = 0; passed < LINES_ORDER.length; turn++) {
+    const text = LINES_ORDER[turn % LINES_ORDER.length];
+    if (cost[text] <= left && lines[text] < LINES_MOST[text]) {
+      lines[text] += 1;
+      left -= cost[text];
+      passed = 0;
+    } else {
+      passed += 1;
+    }
+  }
+  return lines;
 }

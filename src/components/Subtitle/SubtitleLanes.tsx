@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { LegName, SegmentId } from '../../lib/conversation/types';
 import type { Entry } from '../../lib/projection/types';
 import { fontLanguage } from '../../lib/fonts/fontCss';
-import { buildLanes, laneEms, lanesHeight, ROW_SCALE, spacingAt, squeezeOf, TIGHT, type Lane, type LanePiece, type LaneText } from '../../lib/subtitle/lanes';
+import { buildLanes, laneEms, lanesHeight, linesFor, ROW_SCALE, spacingAt, squeezeOf, TIGHT, type Lane, type LanePiece, type LaneText } from '../../lib/subtitle/lanes';
 import type { LegFilters } from '../../lib/view/filter';
 import { noticeText } from '../../lib/view/noticeText';
 import { AnnotatedLines, useAnnotation } from '../Annotated/AnnotatedText';
@@ -146,9 +146,8 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
   const shape = lanes.map((lane) => `${lane.leg}:${lane.source ? 's' : ''}${lane.answer ? 'a' : ''}`).join(',');
   const [roomy, least] = useMemo(() => [lanesHeight(lanes, fontSize), lanesHeight(lanes, fontSize, TIGHT)], [shape, fontSize]); // eslint-disable-line react-hooks/exhaustive-deps
   const strip = useRef<HTMLDivElement>(null);
-  // The window is fitted to the lanes. A window the user made higher than that keeps what they added — it is where
-  // the earlier sentences show — through a change of size or of lanes, and when the view opens on a window already
-  // higher (its last height, kept from before).
+  // The window is fitted to the lanes. A window the user made higher than that keeps what they added — the room a
+  // long sentence is written out in — through a change of size or of lanes, and for the next time the view opens.
   const fitted = useRef(0);
   /** What was last asked for over the fitted height: a window comes out a pixel or two off what it was asked (the screen's scale). */
   const asked = useRef(0);
@@ -162,7 +161,7 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
     onHeight?.(roomy + added, least);
   }, [roomy, least]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // A strip lower than it is laid out for gives up its air first (`spacingAt`); a higher one has room for history.
+  // A strip lower than it is laid out for gives up its air first (`spacingAt`); a higher one has lines to give (`linesFor`).
   const [squeeze, setSqueeze] = useState(0);
   const [spare, setSpare] = useState(0);
   useLayoutEffect(() => {
@@ -192,6 +191,9 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
     return () => { observer.disconnect(); clearTimeout(keeping); };
   }, [roomy, least]);
   const spacing = spacingAt(squeeze);
+  const lines = useMemo(() => linesFor(lanes, fontSize, spare), [shape, fontSize, spare]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Squeezed, the answer has what the spacing leaves it; fitted or higher, what the window affords.
+  const answerLines = squeeze > 0 ? spacing.answerLines : lines.answer;
   const style = {
     '--lane-pad-top': `${spacing.padTop}px`,
     '--lane-pad-bottom': `${spacing.padBottom}px`,
@@ -200,13 +202,13 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
     '--lane-source-line': String(spacing.sourceLine),
     '--lane-answer-line': String(spacing.answerLine),
     '--lane-row-line': String(spacing.rowLine),
-    // The user's own row is as high as its one line; everything else is the pair's.
-    '--lane-row-height': `${fontSize * ROW_SCALE * spacing.rowLine}px`,
-    // What a strip higher than it is laid out for has over: the pair's earlier sentences show in it.
-    '--lane-history-room': `${spare}px`,
+    // The user's own row is as high as its lines; everything else is the pair's.
+    '--lane-row-lines': String(lines.row),
+    '--lane-row-height': `${fontSize * ROW_SCALE * spacing.rowLine * lines.row}px`,
+    '--lane-source-lines': String(lines.source),
     // A pair's two texts share its height by what each is laid out for.
     // A pair's answer has room for this many lines before it is drawn smaller.
-    '--lane-answer-lines': String(spacing.answerLines),
+    '--lane-answer-lines': String(answerLines),
   } as CSSProperties;
   const who = (leg: LegName) => (leg === 'speaker' ? t('modePicker.modeYou', 'Me') : t('modePicker.modeParticipants', 'Other'));
   const tag = (lane: Lane) => <span className={`subtitle-lane__tag subtitle-lane__tag--${lane.leg}`}>{who(lane.leg)}</span>;
@@ -218,7 +220,7 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
       {lanes.map((lane) => (lane.shape === 'row' ? (
         // The user's own, under the other side's: what they said and what answers it, on one small line.
         <div key={lane.leg} className={`subtitle-lane subtitle-lane--row subtitle-lane--${lane.leg}`} data-lane={lane.leg}>
-          <FitText className="subtitle-lane__row" smallest={SMALLEST_ROW} fitKey={`${fontSize}:${squeeze}:${lane.source?.text ?? ''}:${lane.answer?.text ?? ''}`}>
+          <FitText className="subtitle-lane__row" smallest={SMALLEST_ROW} fitKey={`${fontSize}:${squeeze}:${lines.row}:${lane.source?.text ?? ''}:${lane.answer?.text ?? ''}`}>
             {tag(lane)}
             {lane.source && <span className="subtitle-lane__said" lang={langOf(lane.source)}><Written text={lane.source} lit={lit} /></span>}
             {lane.source && lane.answer && lane.source.text !== '' && (lane.answer.text !== '' || lane.pending) && <span className="subtitle-lane__arrow" aria-hidden="true">→</span>}
@@ -228,19 +230,8 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
         </div>
       ) : (
         <div key={lane.leg} className={`subtitle-lane subtitle-lane--pair subtitle-lane--${lane.leg}`} data-lane={lane.leg} style={{ flexGrow: laneEms(lane, spacing) }}>
-          {spare > 0 && lane.history.length > 0 && (
-            // What was said before, in the room a window made higher has over: the same pairs, quieter, the oldest fading out at the top.
-            <div className="subtitle-lane__history" aria-hidden="true">
-              {lane.history.map((pair) => (
-                <div key={pair.key} className="subtitle-lane__past">
-                  {pair.source && <div className="subtitle-lane__past-source" data-kt-text="" lang={langOf(pair.source)}><Written text={pair.source} lit={lit} /></div>}
-                  {pair.answer && <div className="subtitle-lane__past-answer" data-kt-text="" lang={langOf(pair.answer)}><Written text={pair.answer} lit={lit} /></div>}
-                </div>
-              ))}
-            </div>
-          )}
           {lane.source && (
-            <FitText className="subtitle-lane__source" lang={langOf(lane.source)} fitKey={`${fontSize}:${squeeze}:${lane.source.text}`}>
+            <FitText className="subtitle-lane__source" lang={langOf(lane.source)} fitKey={`${fontSize}:${squeeze}:${lines.source}:${lane.source.text}`}>
               {tag(lane)}
               <Written text={lane.source} lit={lit} />
               {lane.pending && pending}
@@ -250,7 +241,7 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
             <FitText
               className={`subtitle-lane__answer${lane.answer.notice ? ' subtitle-lane__answer--notice' : ''}`}
               lang={langOf(lane.answer)}
-              fitKey={`${fontSize}:${squeeze}:${lane.answer.text}`}
+              fitKey={`${fontSize}:${squeeze}:${answerLines}:${lane.answer.text}`}
             >
               {!lane.source && tag(lane)}
               <Written text={lane.answer} lit={lit} />

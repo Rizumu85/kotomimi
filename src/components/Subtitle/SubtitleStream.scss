@@ -59,53 +59,6 @@
       flex: 0 0 var(--lane-row-height, 1.18em);
     }
 
-    // The pair's earlier sentences, in the height a window has over what the lanes are laid out for
-    // (`--lane-history-room`): none at the fitted height. The newest of them sits just above the pair; what does not
-    // fit goes out at the top, fading.
-    .subtitle-lane__history {
-      flex: 0 0 auto;
-      max-height: var(--lane-history-room, 0px);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      gap: 0.45em;
-      padding-bottom: 0.5em;
-      opacity: 0.55;
-      mask-image: linear-gradient(to bottom, transparent 0, black 1.6em);
-      -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 1.6em);
-    }
-
-    .subtitle-lane__past {
-      flex: 0 0 auto;
-    }
-
-    .subtitle-lane__past-source {
-      font-size: 0.62em;
-      line-height: var(--lane-source-line, 1.9);
-      color: var(--subtitle-source-color, #9aa0a6);
-      font-style: var(--kt-source-font-style, italic);
-      opacity: 0.8;
-      overflow-wrap: anywhere;
-    }
-
-    .subtitle-lane__past-answer {
-      font-size: 0.8em;
-      line-height: var(--lane-answer-line, 1.4);
-      color: var(--subtitle-translation-color, #e8e8e8);
-      overflow-wrap: anywhere;
-    }
-
-    // The hairline between two lanes, in the middle of the gap above the lower one.
-    .subtitle-lane + .subtitle-lane::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: calc(var(--lane-gap, 17px) / -2);
-      border-top: 1px solid rgba(255, 255, 255, 0.12);
-    }
-
     .subtitle-lane__source,
     .subtitle-lane__answer,
     .subtitle-lane__row {
@@ -124,7 +77,7 @@
     // drawn smaller (`FitText`).
     .subtitle-lane__source {
       flex: 0 0 auto;
-      max-height: calc(var(--lane-source-line, 1.9) * 1em);
+      max-height: calc(var(--lane-source-lines, 1) * var(--lane-source-line, 1.9) * 1em);
       font-size: 0.62em;
       line-height: var(--lane-source-line, 1.9);
       color: var(--subtitle-source-color, #9aa0a6);
@@ -147,7 +100,8 @@
     // should have been — so what does not fit is cut at the end.
     .subtitle-lane__row {
       flex: 1 1 0;
-      justify-content: center;
+      // Under the hairline, whatever lines a higher window leaves spare below it.
+      justify-content: flex-start;
       max-height: 100%;
       font-size: 0.62em;
       line-height: var(--lane-row-line, 1.9);
@@ -156,10 +110,13 @@
         justify-content: flex-start;
       }
 
+      // As many lines as the window affords (one, fitted); what is over is cut at the end.
       .subtitle-lane__text {
-        white-space: nowrap;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: var(--lane-row-lines, 1);
+        line-clamp: var(--lane-row-lines, 1);
         overflow: hidden;
-        text-overflow: ellipsis;
       }
     }
 

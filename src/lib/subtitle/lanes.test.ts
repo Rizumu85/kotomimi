@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { LegName } from '../conversation/types';
 import type { Entry, Row } from '../projection/types';
 import type { LegFilters } from '../view/filter';
-import { buildLanes, HISTORY_MOST, lanesHeight, ROOMY, ROW_SCALE, spacingAt, squeezeOf, TIGHT } from './lanes';
+import { buildLanes, lanesHeight, linesFor, ROOMY, ROW_SCALE, SOURCE_SCALE, spacingAt, squeezeOf, TIGHT } from './lanes';
 
 const row = (segmentId: string, text: string, side: 'source' | 'translation' = 'source', language?: string): Row =>
   ({ key: `${segmentId}:0`, segmentId, side, start: 0, end: text.length, text, final: true, ...(language ? { language } : {}) });
@@ -18,8 +18,8 @@ const lanes = (entries: Entry[], legs = LEGS, filters = BOTH) => buildLanes(entr
 describe('the subtitle view’s lanes', () => {
   it('has a lane for each side heard, the other side first, there from the start', () => {
     expect(lanes([])).toEqual([
-      { leg: 'participant', shape: 'pair', pending: false, history: [], source: { text: '', pieces: [] }, answer: { text: '', pieces: [] } },
-      { leg: 'speaker', shape: 'row', pending: false, history: [], source: { text: '', pieces: [] }, answer: { text: '', pieces: [] } },
+      { leg: 'participant', shape: 'pair', pending: false, source: { text: '', pieces: [] }, answer: { text: '', pieces: [] } },
+      { leg: 'speaker', shape: 'row', pending: false, source: { text: '', pieces: [] }, answer: { text: '', pieces: [] } },
     ]);
     expect(lanes([], ['participant']).map((lane) => lane.leg)).toEqual(['participant']);
   });
@@ -89,8 +89,8 @@ describe('the subtitle view’s lanes', () => {
   it('shows only the sides the subtitle is set to show, and no lane for a side wholly hidden', () => {
     const entries = [said('a', 'participant', 'そうそう。', '对对。'), said('b', 'speaker', '你好。', 'こんにちは。')];
     const built = lanes(entries, LEGS, { participant: 'translation', speaker: 'none' });
-    expect(built).toEqual([{ leg: 'participant', shape: 'pair', pending: false, history: [], answer: expect.objectContaining({ text: '对对。' }) }]);
-    expect(lanes(entries, LEGS, { participant: 'source', speaker: 'both' })[0]).toEqual({ leg: 'participant', shape: 'pair', pending: false, history: [], source: expect.objectContaining({ text: 'そうそう。' }) });
+    expect(built).toEqual([{ leg: 'participant', shape: 'pair', pending: false, answer: expect.objectContaining({ text: '对对。' }) }]);
+    expect(lanes(entries, LEGS, { participant: 'source', speaker: 'both' })[0]).toEqual({ leg: 'participant', shape: 'pair', pending: false, source: expect.objectContaining({ text: 'そうそう。' }) });
   });
 
   it('says a notice that came after the newest sentence where the answer is', () => {
@@ -103,40 +103,35 @@ describe('the subtitle view’s lanes', () => {
   });
 });
 
-describe('what a pair said before', () => {
-  const talk = [
-    said('a', 'participant', 'こんにちは。', '你好。'),
-    said('b', 'participant', 'えっと'),
-    said('c', 'participant', 'いい天気ですね。', '天气真好。'),
-    said('m', 'speaker', '你好。', 'こんにちは。'),
-    said('d', 'participant', 'そうですね。', '是啊。'),
-    said('e', 'participant', 'それで'),
-  ];
+describe('the lines a window made higher affords', () => {
+  const two = lanes([]);
+  const one = lanes([], ['participant']);
+  const row = 24 * ROW_SCALE * ROOMY.rowLine;
+  const answer = 24 * ROOMY.answerLine;
+  const source = 24 * SOURCE_SCALE * ROOMY.sourceLine;
 
-  it('is kept, oldest first, each sentence with its own answer: for a window made higher to show', () => {
-    const pair = lanes(talk, ['participant'])[0];
-    // The newest is still waiting: the pair shown is the one before it, and the history is what came before that.
-    expect(pair).toMatchObject({ source: { text: 'そうですね。' }, answer: { text: '是啊。' }, pending: true });
-    expect(pair.history.map((past) => [past.source?.text, past.answer?.text])).toEqual([['こんにちは。', '你好。'], ['いい天気ですね。', '天气真好。']]);
-    // A sentence never answered is not among them, and no other side's sentence is.
-    expect(pair.history.map((past) => past.key)).toEqual(['a', 'c']);
+  it('are, fitted, one for the sentence, two for its answer and one for the user\u2019s own row', () => {
+    expect(linesFor(two, 24, 0)).toEqual({ source: 1, answer: 2, row: 1 });
+    // Not quite a line more: none.
+    expect(linesFor(two, 24, row - 1)).toEqual({ source: 1, answer: 2, row: 1 });
   });
 
-  it('holds only what the lane shows, and nothing for a row', () => {
-    const answers = lanes(talk, ['participant'], { participant: 'translation', speaker: 'both' })[0];
-    expect(answers.history.map((past) => [past.source, past.answer?.text])).toEqual([[undefined, '你好。'], [undefined, '天气真好。']]);
-    // Sources alone: every sentence said is one of them, answered or not.
-    const sources = lanes(talk, ['participant'], { participant: 'source', speaker: 'both' })[0];
-    expect(sources.source?.text).toBe('それで');
-    expect(sources.history.map((past) => past.source?.text)).toEqual(['こんにちは。', 'えっと', 'いい天気ですね。', 'そうですね。']);
-    expect(lanes(talk)[1]).toMatchObject({ shape: 'row', history: [] });
+  it('go to the sentence on screen: the row\u2019s second first, then the answer\u2019s, then the source\u2019s', () => {
+    // Asked for by the user 2026-10-06: a higher window is room for a long sentence, not for the ones before it.
+    expect(linesFor(two, 24, row)).toEqual({ source: 1, answer: 2, row: 2 });
+    expect(linesFor(two, 24, row + answer)).toEqual({ source: 1, answer: 3, row: 2 });
+    expect(linesFor(two, 24, row + answer + source)).toEqual({ source: 2, answer: 3, row: 2 });
+    expect(linesFor(two, 24, row + answer + source + answer + 0.01)).toEqual({ source: 2, answer: 4, row: 2 });
   });
 
-  it('is no longer than a window made higher could show', () => {
-    const many = Array.from({ length: 30 }, (_, i) => said(`s${i}`, 'participant', `文${i}。`, `句${i}。`));
-    const pair = lanes(many, ['participant'])[0];
-    expect(pair.history).toHaveLength(HISTORY_MOST);
-    expect(pair.history[pair.history.length - 1].answer?.text).toBe('句28。');
+  it('are the pair\u2019s alone where there is no row, and the answer\u2019s alone where the source is not shown', () => {
+    expect(linesFor(one, 24, answer + source)).toEqual({ source: 2, answer: 3, row: 1 });
+    const answers = lanes([], ['participant'], { participant: 'translation', speaker: 'both' });
+    expect(linesFor(answers, 24, answer * 2)).toEqual({ source: 1, answer: 4, row: 1 });
+  });
+
+  it('stop at what still reads as a caption, however high the window', () => {
+    expect(linesFor(two, 24, 5000)).toEqual({ source: 3, answer: 6, row: 3 });
   });
 });
 

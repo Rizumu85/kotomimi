@@ -80,11 +80,15 @@ describe('SubtitleBody — compact: the fork\u2019s lanes', () => {
     expect(mine.querySelector('.subtitle-lane__pending')).toBeNull();
   });
 
-  it('draws no earlier sentence in a strip no higher than it is laid out for', () => {
-    // A test's document has no layout: the strip is taken as fitted, and has nothing over.
+  it('draws the newest sentence alone, whatever was said before: a higher window is room for it, not for those', () => {
     const { container } = render(<SubtitleBody {...props({ entries: [theirs('a', 'こんにちは。', 'Hello.'), theirs('b', 'そうですね。', 'That is right.')] })} />);
-    expect(container.querySelector('.subtitle-lane__history')).toBeNull();
     expect(texts(container.querySelector('.subtitle-lane')!)).toEqual(['そうですね。', 'That is right.']);
+    expect(container.textContent).not.toContain('こんにちは。');
+    // Fitted (a test's document has no layout): one line for the sentence, two for its answer.
+    const strip = container.querySelector('.subtitle-lanes') as HTMLElement;
+    expect(strip.style.getPropertyValue('--lane-source-lines')).toBe('1');
+    expect(strip.style.getPropertyValue('--lane-answer-lines')).toBe('2');
+    expect(strip.style.getPropertyValue('--lane-row-lines')).toBe('1');
   });
 
   it('has a lane, empty, for a leg the run hears that has said nothing yet', () => {
