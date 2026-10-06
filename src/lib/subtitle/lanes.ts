@@ -42,6 +42,16 @@ export interface LaneText {
   segmentId?: SegmentId;
 }
 
+/** A sentence and what answered it, as a pair's history keeps them. */
+export interface LanePair {
+  key: string;
+  source?: LaneText;
+  answer?: LaneText;
+}
+
+/** How many earlier sentences a pair keeps: more than any window made higher shows whole. */
+export const HISTORY_MOST = 8;
+
 export interface Lane {
   leg: LegName;
   /**
@@ -57,6 +67,11 @@ export interface Lane {
   answer?: LaneText & { notice?: NoticeEntry };
   /** A sentence newer than the one shown is waiting for its answer (a pair), or the one shown is (a row). */
   pending: boolean;
+  /**
+   * A pair's earlier sentences, oldest first, each with its own answer: drawn above the one shown where the strip
+   * is taller than it is laid out for — a window the user made higher is given something to show.
+   */
+  history: LanePair[];
 }
 
 /** The other side first: theirs is what a caption strip is read for. */
@@ -98,7 +113,7 @@ export function buildLanes(
     // Under the other side's lane, the user's own is a row.
     const shape = leg === 'speaker' && shown.length > 1 ? 'row' : 'pair';
     const mine = entries.filter((entry) => entry.leg === leg);
-    const lane: Lane = { leg, shape, pending: false };
+    const lane: Lane = { leg, shape, pending: false, history: [] };
     if (showsSource) lane.source = { text: '', pieces: [] };
     if (showsAnswer) lane.answer = { text: '', pieces: [] };
 
@@ -133,6 +148,24 @@ export function buildLanes(
       }
     }
     if (lane.answer && notice) lane.answer = { text: words(notice), pieces: [], notice };
+    // What came before the sentence shown, for a pair: each sentence that has what the lane shows of it.
+    if (shape === 'pair') {
+      for (let i = at - 1; i >= 0 && lane.history.length < HISTORY_MOST; i--) {
+        const entry = mine[i];
+        if (entry.kind !== 'exchange') continue;
+        const source = showsSource ? joined(entry.source) : '';
+        const answer = showsAnswer ? joined(entry.translation) : '';
+        // A sentence never answered is left out where answers are shown: half a pair, among whole ones.
+        if (showsAnswer ? !answer : !source) continue;
+        const first = entry.source[0];
+        const reply = entry.translation[0];
+        lane.history.unshift({
+          key: entry.id,
+          ...(source ? { source: { text: source, pieces: piecesOf(entry.source), language: first?.language || entry.languages.source } } : {}),
+          ...(answer ? { answer: { text: answer, pieces: piecesOf(entry.translation), language: reply?.language || entry.languages.target } } : {}),
+        });
+      }
+    }
     return lane;
   });
 }

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { LegName } from '../conversation/types';
 import type { Entry, Row } from '../projection/types';
 import type { LegFilters } from '../view/filter';
-import { buildLanes, lanesHeight, ROOMY, ROW_SCALE, spacingAt, squeezeOf, TIGHT } from './lanes';
+import { buildLanes, HISTORY_MOST, lanesHeight, ROOMY, ROW_SCALE, spacingAt, squeezeOf, TIGHT } from './lanes';
 
 const row = (segmentId: string, text: string, side: 'source' | 'translation' = 'source', language?: string): Row =>
   ({ key: `${segmentId}:0`, segmentId, side, start: 0, end: text.length, text, final: true, ...(language ? { language } : {}) });
@@ -18,8 +18,8 @@ const lanes = (entries: Entry[], legs = LEGS, filters = BOTH) => buildLanes(entr
 describe('the subtitle view’s lanes', () => {
   it('has a lane for each side heard, the other side first, there from the start', () => {
     expect(lanes([])).toEqual([
-      { leg: 'participant', shape: 'pair', pending: false, source: { text: '', pieces: [] }, answer: { text: '', pieces: [] } },
-      { leg: 'speaker', shape: 'row', pending: false, source: { text: '', pieces: [] }, answer: { text: '', pieces: [] } },
+      { leg: 'participant', shape: 'pair', pending: false, history: [], source: { text: '', pieces: [] }, answer: { text: '', pieces: [] } },
+      { leg: 'speaker', shape: 'row', pending: false, history: [], source: { text: '', pieces: [] }, answer: { text: '', pieces: [] } },
     ]);
     expect(lanes([], ['participant']).map((lane) => lane.leg)).toEqual(['participant']);
   });
@@ -89,8 +89,8 @@ describe('the subtitle view’s lanes', () => {
   it('shows only the sides the subtitle is set to show, and no lane for a side wholly hidden', () => {
     const entries = [said('a', 'participant', 'そうそう。', '对对。'), said('b', 'speaker', '你好。', 'こんにちは。')];
     const built = lanes(entries, LEGS, { participant: 'translation', speaker: 'none' });
-    expect(built).toEqual([{ leg: 'participant', shape: 'pair', pending: false, answer: expect.objectContaining({ text: '对对。' }) }]);
-    expect(lanes(entries, LEGS, { participant: 'source', speaker: 'both' })[0]).toEqual({ leg: 'participant', shape: 'pair', pending: false, source: expect.objectContaining({ text: 'そうそう。' }) });
+    expect(built).toEqual([{ leg: 'participant', shape: 'pair', pending: false, history: [], answer: expect.objectContaining({ text: '对对。' }) }]);
+    expect(lanes(entries, LEGS, { participant: 'source', speaker: 'both' })[0]).toEqual({ leg: 'participant', shape: 'pair', pending: false, history: [], source: expect.objectContaining({ text: 'そうそう。' }) });
   });
 
   it('says a notice that came after the newest sentence where the answer is', () => {
@@ -100,6 +100,43 @@ describe('the subtitle view’s lanes', () => {
     expect(built[0].pending).toBe(false);
     // A sentence after it takes the lane back.
     expect(lanes([notice, said('b', 'participant', 'はい。', '好的。')], ['participant'])[0].answer).toMatchObject({ text: '好的。' });
+  });
+});
+
+describe('what a pair said before', () => {
+  const talk = [
+    said('a', 'participant', 'こんにちは。', '你好。'),
+    said('b', 'participant', 'えっと'),
+    said('c', 'participant', 'いい天気ですね。', '天气真好。'),
+    said('m', 'speaker', '你好。', 'こんにちは。'),
+    said('d', 'participant', 'そうですね。', '是啊。'),
+    said('e', 'participant', 'それで'),
+  ];
+
+  it('is kept, oldest first, each sentence with its own answer: for a window made higher to show', () => {
+    const pair = lanes(talk, ['participant'])[0];
+    // The newest is still waiting: the pair shown is the one before it, and the history is what came before that.
+    expect(pair).toMatchObject({ source: { text: 'そうですね。' }, answer: { text: '是啊。' }, pending: true });
+    expect(pair.history.map((past) => [past.source?.text, past.answer?.text])).toEqual([['こんにちは。', '你好。'], ['いい天気ですね。', '天气真好。']]);
+    // A sentence never answered is not among them, and no other side's sentence is.
+    expect(pair.history.map((past) => past.key)).toEqual(['a', 'c']);
+  });
+
+  it('holds only what the lane shows, and nothing for a row', () => {
+    const answers = lanes(talk, ['participant'], { participant: 'translation', speaker: 'both' })[0];
+    expect(answers.history.map((past) => [past.source, past.answer?.text])).toEqual([[undefined, '你好。'], [undefined, '天气真好。']]);
+    // Sources alone: every sentence said is one of them, answered or not.
+    const sources = lanes(talk, ['participant'], { participant: 'source', speaker: 'both' })[0];
+    expect(sources.source?.text).toBe('それで');
+    expect(sources.history.map((past) => past.source?.text)).toEqual(['こんにちは。', 'えっと', 'いい天気ですね。', 'そうですね。']);
+    expect(lanes(talk)[1]).toMatchObject({ shape: 'row', history: [] });
+  });
+
+  it('is no longer than a window made higher could show', () => {
+    const many = Array.from({ length: 30 }, (_, i) => said(`s${i}`, 'participant', `文${i}。`, `句${i}。`));
+    const pair = lanes(many, ['participant'])[0];
+    expect(pair.history).toHaveLength(HISTORY_MOST);
+    expect(pair.history[pair.history.length - 1].answer?.text).toBe('句28。');
   });
 });
 

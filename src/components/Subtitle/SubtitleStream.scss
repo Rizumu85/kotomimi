@@ -51,6 +51,49 @@
     // do: a one-line answer leaves its spare line above the pair, where it reads as the window's own margin.
     .subtitle-lane--pair {
       justify-content: flex-end;
+      overflow: hidden;
+    }
+
+    // The user's own row keeps the height of its one line: a window made higher gives all it adds to the pair.
+    .subtitle-lane--row {
+      flex: 0 0 var(--lane-row-height, 1.18em);
+    }
+
+    // The pair's earlier sentences, in the height a window has over what the lanes are laid out for
+    // (`--lane-history-room`): none at the fitted height. The newest of them sits just above the pair; what does not
+    // fit goes out at the top, fading.
+    .subtitle-lane__history {
+      flex: 0 0 auto;
+      max-height: var(--lane-history-room, 0px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 0.45em;
+      padding-bottom: 0.5em;
+      opacity: 0.55;
+      mask-image: linear-gradient(to bottom, transparent 0, black 1.6em);
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 1.6em);
+    }
+
+    .subtitle-lane__past {
+      flex: 0 0 auto;
+    }
+
+    .subtitle-lane__past-source {
+      font-size: 0.62em;
+      line-height: var(--lane-source-line, 1.9);
+      color: var(--subtitle-source-color, #9aa0a6);
+      font-style: var(--kt-source-font-style, italic);
+      opacity: 0.8;
+      overflow-wrap: anywhere;
+    }
+
+    .subtitle-lane__past-answer {
+      font-size: 0.8em;
+      line-height: var(--lane-answer-line, 1.4);
+      color: var(--subtitle-translation-color, #e8e8e8);
+      overflow-wrap: anywhere;
     }
 
     // The hairline between two lanes, in the middle of the gap above the lower one.
@@ -80,7 +123,7 @@
     // Each of a pair's texts is as tall as what is written, up to the lines it is laid out for; past that it is
     // drawn smaller (`FitText`).
     .subtitle-lane__source {
-      flex: 0 1 auto;
+      flex: 0 0 auto;
       max-height: calc(var(--lane-source-line, 1.9) * 1em);
       font-size: 0.62em;
       line-height: var(--lane-source-line, 1.9);
@@ -94,7 +137,7 @@
     }
 
     .subtitle-lane__answer {
-      flex: 0 1 auto;
+      flex: 0 0 auto;
       max-height: calc(var(--lane-answer-lines, 2) * var(--lane-answer-line, 1.4) * 1em);
       line-height: var(--lane-answer-line, 1.4);
       color: var(--subtitle-translation-color, #e8e8e8);
@@ -105,6 +148,7 @@
     .subtitle-lane__row {
       flex: 1 1 0;
       justify-content: center;
+      max-height: 100%;
       font-size: 0.62em;
       line-height: var(--lane-row-line, 1.9);
 

@@ -80,6 +80,13 @@ describe('SubtitleBody — compact: the fork\u2019s lanes', () => {
     expect(mine.querySelector('.subtitle-lane__pending')).toBeNull();
   });
 
+  it('draws no earlier sentence in a strip no higher than it is laid out for', () => {
+    // A test's document has no layout: the strip is taken as fitted, and has nothing over.
+    const { container } = render(<SubtitleBody {...props({ entries: [theirs('a', 'こんにちは。', 'Hello.'), theirs('b', 'そうですね。', 'That is right.')] })} />);
+    expect(container.querySelector('.subtitle-lane__history')).toBeNull();
+    expect(texts(container.querySelector('.subtitle-lane')!)).toEqual(['そうですね。', 'That is right.']);
+  });
+
   it('has a lane, empty, for a leg the run hears that has said nothing yet', () => {
     const { container } = render(<SubtitleBody {...props({ entries: [], legs: ['speaker', 'participant'] })} />);
     expect([...container.querySelectorAll('.subtitle-lane')].map((lane) => lane.getAttribute('data-lane'))).toEqual(['participant', 'speaker']);
