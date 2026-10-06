@@ -1,7 +1,7 @@
 {
   "name": "sokuji",
   "productName": "Kotomimi",
-  "version": "0.43.102",
+  "version": "0.43.103",
   "sidecarVersion": "0.4.0",
   "private": true,
   "main": "dist-electron/main.js",
