@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { LegName, SegmentId } from '../../lib/conversation/types';
 import type { Entry } from '../../lib/projection/types';
 import { fontLanguage } from '../../lib/fonts/fontCss';
-import { buildLanes, laneEms, lanesHeight, linesFor, ROW_SCALE, spacingAt, squeezeOf, TIGHT, type Lane, type LanePiece, type LaneText } from '../../lib/subtitle/lanes';
+import { buildLanes, lanesHeight, linesFor, ROW_SCALE, spacingAt, squeezeOf, TIGHT, type Lane, type LanePiece, type LaneText } from '../../lib/subtitle/lanes';
 import type { LegFilters } from '../../lib/view/filter';
 import { noticeText } from '../../lib/view/noticeText';
 import { AnnotatedLines, useAnnotation } from '../Annotated/AnnotatedText';
@@ -211,7 +211,9 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
     '--lane-answer-lines': String(answerLines),
   } as CSSProperties;
   const who = (leg: LegName) => (leg === 'speaker' ? t('modePicker.modeYou', 'Me') : t('modePicker.modeParticipants', 'Other'));
-  const tag = (lane: Lane) => <span className={`subtitle-lane__tag subtitle-lane__tag--${lane.leg}`}>{who(lane.leg)}</span>;
+  // A lane nobody has spoken in yet says nothing — not even whose it is: a tag alone on the screen, waiting, is noise.
+  const silent = (lane: Lane) => !lane.source?.text && !lane.answer?.text;
+  const tag = (lane: Lane) => (silent(lane) ? null : <span className={`subtitle-lane__tag subtitle-lane__tag--${lane.leg}`}>{who(lane.leg)}</span>);
   // A newer sentence is waiting for its answer: said quietly, after what is shown.
   const pending = <span className="subtitle-lane__pending" aria-hidden="true">…</span>;
 
@@ -219,7 +221,7 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
     <div ref={strip} className="subtitle-lanes" style={style}>
       {lanes.map((lane) => (lane.shape === 'row' ? (
         // The user's own, under the other side's: what they said and what answers it, on one small line.
-        <div key={lane.leg} className={`subtitle-lane subtitle-lane--row subtitle-lane--${lane.leg}`} data-lane={lane.leg}>
+        <div key={lane.leg} className={`subtitle-lane subtitle-lane--row subtitle-lane--${lane.leg}${silent(lane) ? ' is-silent' : ''}`} data-lane={lane.leg}>
           <FitText className="subtitle-lane__row" smallest={SMALLEST_ROW} fitKey={`${fontSize}:${squeeze}:${lines.row}:${lane.source?.text ?? ''}:${lane.answer?.text ?? ''}`}>
             {tag(lane)}
             {lane.source && <span className="subtitle-lane__said" lang={langOf(lane.source)}><Written text={lane.source} lit={lit} /></span>}
@@ -229,7 +231,7 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
           </FitText>
         </div>
       ) : (
-        <div key={lane.leg} className={`subtitle-lane subtitle-lane--pair subtitle-lane--${lane.leg}`} data-lane={lane.leg} style={{ flexGrow: laneEms(lane, spacing) }}>
+        <div key={lane.leg} className={`subtitle-lane subtitle-lane--pair subtitle-lane--${lane.leg}${silent(lane) ? ' is-silent' : ''}`} data-lane={lane.leg}>
           {lane.source && (
             <FitText className="subtitle-lane__source" lang={langOf(lane.source)} fitKey={`${fontSize}:${squeeze}:${lines.source}:${lane.source.text}`}>
               {tag(lane)}

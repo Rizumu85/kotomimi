@@ -253,7 +253,7 @@ describe('the other side\u2019s language left to be detected', () => {
     const gap = vi.fn(async () => null);
     const check = vi.fn(async () => ({ ok: true as const }));
     await checkLocalAIWithNative(NONE, settings(DETECT), { pair: PAIR, legs: ['speaker', 'participant'] }, check, { gap, idle: vi.fn(), translatorGap: vi.fn(async () => null), translatorIdle: vi.fn(), coachGap: vi.fn(async () => null), coachIdle: vi.fn() });
-    expect(gap).toHaveBeenCalledWith({ model: 'qwen3-asr-1.7b-q8', byLanguage: {} }, ['ja', 'auto']);
+    expect(gap).toHaveBeenCalledWith({ model: 'qwen3-asr-1.7b-q8', byLanguage: {}, detecting: true }, ['ja', 'auto']);
   });
 });
 
@@ -737,6 +737,63 @@ describe('a language\u2019s model by default', () => {
     try {
       const next = chooseNative({ model: 'r2t2-q8' }, 'r2t2-q8', ['ja'], ['ja', 'th']);
       expect(next.byLanguage).toEqual({ ja: 'r2t2-q8' });
+    } finally {
+      useNativeEngineStore.setState({ status: NO_NATIVE_ENGINE });
+    }
+  });
+});
+
+describe('one model for a run that detects the other side\u2019s language', () => {
+  const HERE = (...ids: string[]) => (id: string) => ids.includes(id);
+  const here = HERE('r2t2-q8', 'qwen3-asr-0.6b-q8', 'qwen3-asr-1.7b-q8');
+
+  it('hears the user\u2019s own language too by the model that tells languages apart, whatever was chosen for it', () => {
+    // Seen 2026-10-06: R2T2 chosen for Japanese, detection chosen for the other side — two models asked of an engine
+    // that runs one, and "the recognition engine of this computer could not start".
+    const pick = { model: 'r2t2-q8', byLanguage: { ja: 'r2t2-q8' }, detecting: true };
+    expect(nativePicked(pick, 'ja', here)?.id).toBe('qwen3-asr-1.7b-q8');
+    expect(nativePicked(pick, 'auto', here)?.id).toBe('qwen3-asr-1.7b-q8');
+    // Not detecting: what was chosen.
+    expect(nativePicked({ ...pick, detecting: false }, 'ja', here)?.id).toBe('r2t2-q8');
+  });
+
+  it('leaves a language the detecting model does not hear to its own, and everything to its own where none detects', () => {
+    const pick = { model: 'r2t2-q8', detecting: true };
+    // Nothing here tells languages apart: each language as chosen (and the run is refused for the other side's).
+    expect(nativePicked(pick, 'ja', HERE('r2t2-q8'))?.id).toBe('r2t2-q8');
+    expect(nativePicked(pick, 'auto', HERE('r2t2-q8'))).toBeNull();
+  });
+
+  it('is not written down as anyone\u2019s choice', () => {
+    useNativeEngineStore.setState({ status: { ...NO_NATIVE_ENGINE, supported: true, engine: 'ready', models: { 'r2t2-q8': { state: 'downloaded', received: 1, total: 1 }, 'qwen3-asr-1.7b-q8': { state: 'downloaded', received: 1, total: 1 } } } });
+    try {
+      const next = chooseNative({ model: 'r2t2-q8', byLanguage: { ja: 'r2t2-q8' }, detecting: true }, 'qwen3-asr-1.7b-q8', ['auto'], ['ja', 'auto']);
+      expect(next.byLanguage.ja).toBe('r2t2-q8');
+      expect(next).not.toHaveProperty('detecting');
+    } finally {
+      useNativeEngineStore.setState({ status: NO_NATIVE_ENGINE });
+    }
+  });
+
+  it('builds both legs of such a run on the one model, and the check asks the engine for it alone', async () => {
+    const PARTICIPANT: SessionContext = { direction: { source: 'zh-CN', target: 'ja' }, speech: false, turns: 'auto' };
+    const DETECTING: Partial<LocalAISettings> = {
+      asrVia: 'device', asrHere: 'native', asrDetectOther: true, asrNativeModel: 'r2t2-q8', asrNativeByLanguage: { ja: 'r2t2-q8' },
+      translateAt: 'device', translateHere: 'native', translateNativeModel: 'index-translate-2b',
+    };
+    useNativeEngineStore.setState({ status: { ...NO_NATIVE_ENGINE, supported: true, engine: 'ready', models: { 'r2t2-q8': { state: 'downloaded', received: 1, total: 1 }, 'qwen3-asr-1.7b-q8': { state: 'downloaded', received: 1, total: 1 } } } });
+    try {
+      const reversed = { ...shared, reversed: (d: SessionContext['direction']) => d.target === 'zh-CN' };
+      const theirs = buildLocalAI({ ...PARTICIPANT, direction: { source: 'ja', target: 'zh-CN' } }, settings(DETECTING), reversed);
+      const mine = buildLocalAI(PARTICIPANT, settings(DETECTING), reversed);
+      if ('refused' in theirs) throw new Error(theirs.refused);
+      if ('refused' in mine) throw new Error(mine.refused);
+      expect(theirs.device?.modelId).toBe('qwen3-asr-1.7b-q8');
+      expect(mine.device?.modelId).toBe('qwen3-asr-1.7b-q8');
+      // The engine's own check, with the real rule: one model for both languages, so nothing to refuse.
+      expect(await nativeGap({ model: 'r2t2-q8', byLanguage: { ja: 'r2t2-q8' }, detecting: true }, ['zh-CN', 'auto'], { status: async () => useNativeEngineStore.getState().status })).toBeNull();
+      // Without the rule this is the run that could not start.
+      expect(await nativeGap({ model: 'r2t2-q8', byLanguage: { ja: 'r2t2-q8', zh: 'r2t2-q8' } }, ['zh-CN', 'auto'], { status: async () => useNativeEngineStore.getState().status })).toMatchObject({ code: 'native_two_models' });
     } finally {
       useNativeEngineStore.setState({ status: NO_NATIVE_ENGINE });
     }

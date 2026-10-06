@@ -65,7 +65,7 @@ import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
 import { recognizerAsked } from './serverRecognizers';
 import { ASR_HERES, coachIs, coachesNatively, cutsSentencesHere, detectsOther, heardBy, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
-import { preferNative } from './localaiNative';
+import { preferNative, type NativePick } from './localaiNative';
 import { NATIVE_DEFAULT_MODEL, coachBaseUrl, coachGap, coachIdle, coachUp, holdNativeForRun, nativeGap, nativeUp, restNative, translatorUp, nativeWaits, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_COACH_EXTRA, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
 import { NATIVE_DEFAULT_TRANSLATOR, nativeTranslates, nativeTranslator, translatorRequest } from './nativeTranslators';
@@ -720,14 +720,14 @@ export const checkLocalAI = createLocalAICheck();
 
 /** What a run would start of the native engines: the models that hear its legs, its translator, its feedback model. */
 interface NativeNeeds {
-  hears?: { pick: { model: string; byLanguage: Record<string, string> }; heard: string[] };
+  hears?: { pick: NativePick; heard: string[] };
   translates?: string;
   coaches?: string;
 }
 
 function nativeNeeds(s: LocalAISettings, pair: { source: string; target: string }, legs: readonly ('speaker' | 'participant')[]): NativeNeeds {
   return {
-    ...(hearsNatively(s) ? { hears: { pick: { model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage }, heard: legs.map((leg) => heardBy(s, pair, leg)) } } : {}),
+    ...(hearsNatively(s) ? { hears: { pick: { model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage, ...(detectsOther(s) ? { detecting: true } : {}) }, heard: legs.map((leg) => heardBy(s, pair, leg)) } } : {}),
     ...(translatesNatively(s) ? { translates: s.translateNativeModel } : {}),
     ...(coachesNatively(s) && legs.includes('speaker') ? { coaches: s.coachNativeModel } : {}),
   };
@@ -808,7 +808,7 @@ export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISe
   let hears: ReturnType<typeof nativeGap> | null = null;
   if (hearsNatively(s)) {
     // What each leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
-    hears = native.gap({ model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage }, ctx.legs.map((leg) => heardBy(s, ctx.pair, leg)));
+    hears = native.gap({ model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage, ...(detectsOther(s) ? { detecting: true } : {}) }, ctx.legs.map((leg) => heardBy(s, ctx.pair, leg)));
     hears.catch(() => undefined);
   } else {
     native.idle();
@@ -924,7 +924,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   if (hearsHere) {
     let recognizer: Pick<DeviceHearing, 'modelId' | 'streaming' | 'api' | 'native'> | null;
     if (hearsNatively(s)) {
-      const native = nativePicked({ model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage }, heard);
+      const native = nativePicked({ model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage, ...(detectsOther(s, models) ? { detecting: true } : {}) }, heard);
       // The language has no native model chosen: said as that, since downloading one would not help.
       if (!native) return { refused: `No native recognition model is chosen for ${heard}.`, code: 'native_unchosen', params: { source: heard } };
       recognizer = { modelId: native.id, streaming: true, native: { model: native.id, ...(native.limits ? { limits: native.limits } : {}) } };

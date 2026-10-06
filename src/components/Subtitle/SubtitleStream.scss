@@ -38,17 +38,21 @@
     overflow: hidden;
     padding: 0;
 
+    // The lanes sit in the middle of the window's height, whatever room is over shared above and below: text held
+    // at the foot left the top of a higher window empty, which read as space the toolbar had kept for itself.
     .subtitle-lanes {
       flex: 1;
       min-height: 0;
       display: flex;
       flex-direction: column;
+      justify-content: center;
+      overflow: hidden;
       gap: var(--lane-gap, 17px);
       padding: var(--lane-pad-top, 10px) 16px var(--lane-pad-bottom, 12px);
     }
 
     .subtitle-lane {
-      flex: 1 1 0;
+      flex: 0 1 auto;
       min-height: 0;
       display: flex;
       flex-direction: column;
@@ -56,14 +60,22 @@
       position: relative;
     }
 
-    // A pair sits at the foot of its lane — on the hairline, or the window's edge — and grows upwards, as captions
-    // do: a one-line answer leaves its spare line above the pair, where it reads as the window's own margin.
-    .subtitle-lane--pair {
-      justify-content: flex-end;
-      overflow: hidden;
+    // Nothing said in it yet: it takes no room, and draws no line.
+    .subtitle-lane.is-silent {
+      display: none;
     }
 
-    // The user's own row keeps the height of its one line: a window made higher gives all it adds to the pair.
+    // The hairline between two lanes, in the middle of the gap above the lower one — where the upper one has spoken.
+    .subtitle-lane:not(.is-silent) + .subtitle-lane::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(var(--lane-gap, 17px) / -2);
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    // The user's own row keeps the height of its lines: a window made higher gives all it adds to the pair.
     .subtitle-lane--row {
       flex: 0 0 var(--lane-row-height, 1.18em);
     }
@@ -82,8 +94,9 @@
       }
     }
 
-    // Each of a pair's texts is as tall as what is written, up to the lines it is laid out for; past that it is
-    // drawn smaller (`FitText`).
+    // Each of a pair's texts is as tall as what is written, up to the lines it has room for; past that it is drawn
+    // smaller (`FitText`). At full strength, both: dimmed, the small one is the first thing lost where the panel is
+    // faint or gone.
     .subtitle-lane__source {
       flex: 0 0 auto;
       max-height: calc(var(--lane-source-lines, 1) * var(--lane-source-line, 1.9) * 1em);
@@ -92,10 +105,6 @@
       color: var(--subtitle-source-color, #9aa0a6);
       // Fork: a switch of the display popover (`annotationStore.ts`); slanted where nothing says otherwise.
       font-style: var(--kt-source-font-style, italic);
-
-      .subtitle-lane__text {
-        opacity: 0.8;
-      }
     }
 
     .subtitle-lane__answer {
@@ -109,7 +118,6 @@
     // should have been — so what does not fit is cut at the end.
     .subtitle-lane__row {
       flex: 1 1 0;
-      // Under the hairline, whatever lines a higher window leaves spare below it.
       justify-content: flex-start;
       max-height: 100%;
       font-size: 0.62em;
@@ -131,13 +139,12 @@
 
     .subtitle-lane__said {
       color: var(--subtitle-source-color, #9aa0a6);
-      opacity: 0.8;
       font-style: var(--kt-source-font-style, italic);
     }
 
     .subtitle-lane__arrow {
       margin: 0 0.6em;
-      opacity: 0.4;
+      opacity: 0.5;
     }
 
     .subtitle-lane__reply {
@@ -147,12 +154,12 @@
     // A newer sentence is on its way.
     .subtitle-lane__pending {
       margin-left: 0.4em;
-      opacity: 0.5;
+      opacity: 0.6;
       font-style: normal;
     }
 
     .subtitle-lane__answer--notice {
-      opacity: 0.8;
+      opacity: 0.85;
     }
 
     // Centred, for a look with no panel behind the text.
@@ -160,32 +167,33 @@
       text-align: center;
     }
 
-    // Whose lane it is, at the start of its first text: the pair's small line, or the row.
+    // Whose lane it is, at the start of its first text: the pair's small line, or the row. A solid pill of its own,
+    // dark with a bright word: read over a panel, a faint one, or nothing at all.
     .subtitle-lane__tag {
       text-shadow: none;
       display: inline-block;
       margin-right: 0.7em;
-      padding: 0 0.6em;
+      padding: 0 0.65em;
       border-radius: 1em;
-      font-size: 0.78em;
+      font-size: 0.82em;
+      font-weight: 500;
       line-height: 1.6;
       font-style: normal;
       vertical-align: 0.08em;
-      // A dark pill of its own: read over a panel, and over anything at all where the look has none.
-      background: rgba(0, 0, 0, 0.55);
-      border: 1px solid rgba(tk.$color-participant, 0.5);
-      color: #fac775;
-      opacity: 1;
+      background: #2a2213;
+      border: 1px solid rgba(tk.$color-participant, 0.75);
+      color: #ffd591;
     }
 
     .subtitle-lane__tag--speaker {
-      border-color: rgba(tk.$color-speaker, 0.55);
-      color: #9fe1cb;
+      background: #12261f;
+      border-color: rgba(tk.$color-speaker, 0.8);
+      color: #b6f0dc;
     }
 
     // Beside the large answer (the source is hidden) the tag keeps its small size.
     .subtitle-lane__answer .subtitle-lane__tag {
-      font-size: 0.48em;
+      font-size: 0.5em;
       vertical-align: 0.5em;
     }
 
@@ -248,10 +256,10 @@
   }
 }
 
-// Fork: with a look that has no panel (`src/lib/subtitle/look.ts`), what the strip says while no run is on — its
-// start button's hints, "press Space to speak" — is light text over whatever is behind the window. A dark shadow of
-// its own, whatever the look's, so that it can always be read.
+// Fork: with a look whose panel is faint or gone (`src/lib/subtitle/look.ts`), what the strip says while no run is
+// on — its start button's hints, "press Space to speak" — was light text over whatever is behind the window, and
+// could not be read. It stands on a dark panel of its own, whatever the look: the look is for the captions.
 .subtitle-idle,
 .subtitle-ptt-hint {
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 12px rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.72);
 }

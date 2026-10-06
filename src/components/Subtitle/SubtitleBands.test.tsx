@@ -91,9 +91,17 @@ describe('SubtitleBody — compact: the fork\u2019s lanes', () => {
     expect(strip.style.getPropertyValue('--lane-row-lines')).toBe('1');
   });
 
-  it('has a lane, empty, for a leg the run hears that has said nothing yet', () => {
+  it('has a lane for a leg the run hears that has said nothing yet — and says nothing in it, not even whose it is', () => {
+    // Seen 2026-10-06: with nobody speaking, the other side's tag sat alone on the screen.
     const { container } = render(<SubtitleBody {...props({ entries: [], legs: ['speaker', 'participant'] })} />);
-    expect([...container.querySelectorAll('.subtitle-lane')].map((lane) => lane.getAttribute('data-lane'))).toEqual(['participant', 'speaker']);
+    const lanes = [...container.querySelectorAll('.subtitle-lane')];
+    expect(lanes.map((lane) => lane.getAttribute('data-lane'))).toEqual(['participant', 'speaker']);
+    expect(lanes.every((lane) => lane.classList.contains('is-silent'))).toBe(true);
+    expect(container.querySelector('.subtitle-lane__tag')).toBeNull();
+    // One side has spoken: it is tagged, the other still is not.
+    const one = render(<SubtitleBody {...props({ legs: ['speaker', 'participant'] })} />);
+    expect([...one.container.querySelectorAll('.subtitle-lane__tag')].map((tag) => tag.textContent)).toEqual(['Me']);
+    expect(one.container.querySelector('[data-lane="participant"]')?.classList.contains('is-silent')).toBe(true);
   });
 
   it('shows only the sides the subtitle is set to show', () => {

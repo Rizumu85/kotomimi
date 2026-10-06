@@ -114,7 +114,19 @@ export function nativeModelFor(id: string, language: string): NativeModel | null
  * Which native model hears what: the one in use, and — language by language —
  * the one that was chosen for it.
  */
-export interface NativePick { model: string; byLanguage?: Readonly<Record<string, string>> }
+export interface NativePick {
+  model: string;
+  byLanguage?: Readonly<Record<string, string>>;
+  /**
+   * The other side's language is left to be detected in this run. The engine
+   * the app downloads runs one model at a time, so the model that tells
+   * languages apart then hears every language it can — the user's own too —
+   * whatever was chosen for it: two legs asking the engine for two models is
+   * a run that cannot start (seen 2026-10-06, as "the recognition engine of
+   * this computer could not start").
+   */
+  detecting?: boolean;
+}
 
 /** A model is on this computer now, as the engine's store has it. */
 const hereNow = (id: string): boolean => nativeDownloaded(useNativeEngineStore.getState().status, id);
@@ -130,6 +142,10 @@ const hereNow = (id: string): boolean => nativeDownloaded(useNativeEngineStore.g
  * store's answer by default).
  */
 export function nativePicked(pick: NativePick, language: string, has: (id: string) => boolean = hereNow): NativeModel | null {
+  if (pick.detecting && !isAutoLanguage(language)) {
+    const detects = nativePicked({ ...pick, detecting: false }, 'auto', has);
+    if (detects && !isApple(detects.id) && nativeHears(detects, language)) return detects;
+  }
   const chosen = pick.byLanguage?.[baseOf(language)];
   // A name the app no longer has is no choice.
   const known = chosen !== undefined && NATIVE_MODELS.some((m) => m.id === chosen);
@@ -144,14 +160,15 @@ export function nativePicked(pick: NativePick, language: string, has: (id: strin
  * theirs by name — and the other languages now heard keep, by name too, the
  * model they were heard by, so that choosing for one does not change another.
  */
-export function chooseNative(pick: NativePick, id: string, languages: readonly string[], heard: readonly string[] = languages): Required<NativePick> {
+export function chooseNative(pick: NativePick, id: string, languages: readonly string[], heard: readonly string[] = languages): Required<Pick<NativePick, 'model' | 'byLanguage'>> {
   const byLanguage: Record<string, string> = { ...pick.byLanguage };
   const chosenFor = new Set(languages.map(baseOf));
   for (const language of heard) {
     const base = baseOf(language);
     if (chosenFor.has(base) || byLanguage[base]) continue;
-    // What it was heard by for want of a choice — a default — is not written down as one.
-    const now = nativePicked(pick, language, () => false);
+    // What it was heard by for want of a choice — a default — is not written down as one; nor is what hears it only
+    // while the other side's language is detected.
+    const now = nativePicked({ ...pick, detecting: false }, language, () => false);
     if (now) byLanguage[base] = now.id;
   }
   for (const language of languages) {

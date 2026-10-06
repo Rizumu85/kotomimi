@@ -467,10 +467,12 @@ function DeviceModels({ stage, settings, update, pair, legs, disabled, tour, oth
         const auto = adapter.autoPick(slot);
         const label = title(slot);
         const mine = using(slot);
-        const natives = nativeFor(slot);
+        const natives = stage === 'asr' && nativeRuns && detectsOther(settings) ? nativeFor(slot).filter((m) => nativeFits('asr', m.id, 'auto', slot.target)) : nativeFor(slot);
         const candidates = adapter.readyCandidates(slot);
-        // A language left to be detected is heard by a model that can tell languages apart: the app's own cannot, nor can it be known of a LocalAI's.
-        const detecting = stage === 'asr' && isAutoLanguage(heardIn(slot));
+        // A language left to be detected is heard by a model that can tell languages apart: the app's own cannot, nor
+        // can it be known of a LocalAI's. And while the other side's is, that model hears this computer's every
+        // language (the engine runs one at a time): each row offers only such models.
+        const detecting = stage === 'asr' && nativeRuns && detectsOther(settings);
         const explicit = mine === undefined && resolved?.source === 'explicit' ? resolved.modelId : '';
         // Nothing to run is a state, said above the groups: of the engine's choice, or of the app's own models.
         const nothing = mine === null ? t('providers.localai.nativeNone')
@@ -771,7 +773,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   // What each leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
   const heardByLegs = legs.map((leg) => heardBy(settings, pair, leg, models));
   // The native recognizer, language by language: a choice is the model in use from then on, and that language's by name.
-  const nativePick: NativePick = { model: settings.asrNativeModel, byLanguage: settings.asrNativeByLanguage };
+  const nativePick: NativePick = { model: settings.asrNativeModel, byLanguage: settings.asrNativeByLanguage, ...(detectsOther(settings, models) ? { detecting: true } : {}) };
   const pickNative = (id: string, languages: readonly string[]) => {
     const next = chooseNative(nativePick, id, languages, heardByLegs);
     put({ asrHere: 'native', asrNativeModel: next.model, asrNativeByLanguage: next.byLanguage });

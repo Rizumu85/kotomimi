@@ -69,7 +69,8 @@ const DisplayModeButton: React.FC<DisplayModeButtonProps> = ({ scope, value, onC
       aria-label={ariaLabel}
     >
       <Icon size={14} mode={value} />
-      <span className="display-mode-label">{modeLabel}</span>
+      {/* Fork: whose side it is, in words: two buttons that both read "Both" — or one that reads "Off" — said nothing of which was which. */}
+      <span className="display-mode-label">{scopeLabel} · {modeLabel}</span>
     </button>
   );
 };

@@ -647,10 +647,14 @@ describe('the other side\u2019s language left to be detected', () => {
     const other = menus.find((m) => m.getAttribute('aria-label') === 'providers.localai.hearsOther')!;
     expect(other.selectedOptions[0].textContent).toBe('Qwen3-ASR 1.7B GGUF');
     expect([...other.querySelectorAll('optgroup')[0].querySelectorAll('option')].map((o) => o.textContent)).toEqual(['Qwen3-ASR 1.7B GGUF']);
-    // The app's own models tell no language: that row lists none of them, while the row of a named language does.
+    // The app's own models tell no language: that row lists none of them.
     expect([...other.querySelectorAll('optgroup')].map((g) => g.label)).toEqual(['providers.localai.groupNative']);
+    // And while the other side's language is detected, the same model hears the user's own (the engine runs one at
+    // a time): its row shows that model, and offers only models that can.
     const named = menus.find((m) => m !== other)!;
-    expect([...named.querySelectorAll('optgroup')].map((g) => g.label)).toContain('providers.localai.groupApp');
+    expect(named.selectedOptions[0].textContent).toBe('Qwen3-ASR 1.7B GGUF');
+    expect([...named.querySelectorAll('optgroup')].map((g) => g.label)).toEqual(['providers.localai.groupNative']);
+    expect([...named.querySelectorAll('optgroup option')].map((o) => o.textContent)).toEqual(['Qwen3-ASR 1.7B GGUF']);
     // No switch in the card: the choice is made among the languages. What it takes is said here.
     expect(card(HEAR).queryByText('providers.localai.detectOther')).toBeNull();
     expect(card(HEAR).getByText('providers.localai.detectOtherNote')).toBeTruthy();
