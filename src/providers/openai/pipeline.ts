@@ -29,7 +29,7 @@ import type { LocalInferenceConfig } from '../localInference/config';
 import { defaultEngines, type LocalEngines, type TranslationLike } from '../localInference/engines';
 import { createApiAsr } from './apiAsr';
 import { createNativeAsr, type NativeLimits } from './nativeAsr';
-import { languageByScript } from '../../lib/language/script';
+import { languageByScript, saidInOwn } from '../../lib/language/script';
 import { AUTO } from '../../lib/provider/languages';
 import { TEXT_SLOT } from './nativeTranslators';
 import { askNativeEngine, ipcNativeBridge, type NativeBridge, type NativeEngineStatus } from '../../lib/native/nativeEngine';
@@ -354,9 +354,11 @@ class PipelineLeg implements AdapterSession {
       case 'segmentText': {
         const source = this.sources.get(e.payload.ref);
         if (source) source.text = e.payload.text;
-        const told = source && e.payload.language === undefined ? this.stages.heard : undefined;
+        const open = source !== undefined && e.payload.language === undefined;
+        const told = open ? this.stages.heard : undefined;
         // Left to be detected: the language its writing shows, or none — which also keeps the leg's own from being assumed.
-        const heard = told === AUTO ? languageByScript(e.payload.text) ?? AUTO : told;
+        // Told one, and written in the leg's other language: said to be in that one.
+        const heard = told === AUTO ? languageByScript(e.payload.text) ?? AUTO : (open ? this.otherThanHeard(e.payload.text) : undefined) ?? told;
         this.events.segmentText(heard ? { ...e.payload, language: heard } : e.payload);
         return;
       }
@@ -365,9 +367,14 @@ class PipelineLeg implements AdapterSession {
         this.sources.delete(e.payload.ref);
         this.events.segmentClosed(e.payload);
         const text = source?.text.trim();
-        // What was said in the reader's own language needs no translating.
-        const already = this.stages.heard === AUTO && text !== undefined && languageByScript(text) === baseOf(this.request.context.direction.target);
-        if (source && text && this.stages.speech && !already) this.push({ stage: this.stages.speech, text, origin: e.payload.origin ?? source.origin, typed: false });
+        const coached = this.stages.speech?.kind === 'coach';
+        const other = text !== undefined ? this.otherThanHeard(text) : undefined;
+        // What was said in the reader's own language needs no translating: detected, or told another and written in theirs.
+        const already = !coached && text !== undefined && (other !== undefined || (this.stages.heard === AUTO && languageByScript(text) === baseOf(this.request.context.direction.target)));
+        // A coached speaker who says a sentence in their own language is not practising with it: it is translated, as what
+        // they type is, and not sent for feedback. No translation in this run: it is shown as said.
+        const stage = coached && other !== undefined ? this.stages.typed : this.stages.speech;
+        if (source && text && stage && !already) this.push({ stage, text, origin: e.payload.origin ?? source.origin, typed: false });
         return;
       }
       case 'busy':
@@ -395,6 +402,23 @@ class PipelineLeg implements AdapterSession {
         // Every other event as it came: frames, audio, reconnects.
         (this.events[e.kind] as (payload: unknown) => void)(e.payload);
     }
+  }
+
+  /**
+   * The language of a sentence that is not in the one the leg was told it
+   * hears, where its writing says so (`saidInOwn`): the leg's other language.
+   * A coached speaker's own, said between sentences of the one they practise;
+   * or, of a leg that translates, the one it translates into — the other side
+   * speaking the reader's language, which needs no translating. Undefined: in
+   * the language told, or the writing does not say; and always of a leg with
+   * no stage of its own, whose session answers what it hears itself.
+   */
+  private otherThanHeard(text: string): string | undefined {
+    const speech = this.stages.speech;
+    if (!speech || this.stages.heard === AUTO) return undefined;
+    const { source, target } = this.request.context.direction;
+    if (speech.kind === 'coach') return saidInOwn(text, source, target) ? source : undefined;
+    return saidInOwn(text, target, source) ? target : undefined;
   }
 
   /** The inner session's models and this leg's own, as one count. */

@@ -65,6 +65,7 @@ module.exports = {
     unpin: ['Unpin {{name}}', '取消置顶{{name}}', '取消置頂{{name}}'],
     pinShort: ['Pin to the top', '置顶', '置頂'],
     unpinShort: ['Unpin', '取消置顶', '取消置頂'],
+    detect: ['Detect the language', '自动检测语言', '自動偵測語言'],
   },
   wizard: {
     pathTitle: ['Kotomimi Pipeline', 'Kotomimi 自由搭配', 'Kotomimi 自由搭配'],

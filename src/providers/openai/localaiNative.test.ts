@@ -231,11 +231,22 @@ describe('the other side\u2019s language left to be detected', () => {
     expect((mine.stages?.speech as { wrap?: string }).wrap).toContain('请将以下中文文本翻译为日语');
   });
 
-  it('is refused in words of its own where the model in use does not detect, or the translation has to be told the pair', () => {
+  it('is refused in words of its own where the model in use does not detect', () => {
     const other = { ...PARTICIPANT, direction: { source: 'ja', target: 'zh-CN' } };
     const reversed = { ...shared, reversed: (d: SessionContext['direction']) => d.target === 'zh-CN' };
     expect(buildLocalAI(other, settings({ ...DETECT, asrNativeModel: 'r2t2-q8' }), reversed)).toMatchObject({ code: 'native_unchosen', params: { source: 'auto' } });
-    expect(buildLocalAI(other, settings({ ...DETECT, translateHere: 'app' }), reversed)).toMatchObject({ code: 'source_auto' });
+  });
+
+  it('is not refused for a translation that has to be told the pair: that is told the pair\u2019s own language', () => {
+    // Seen 2026-10-06: detection with the app's own translation model was refused in red ("cannot be detected with
+    // this setup") while the run itself was what the user wanted.
+    const other = { ...PARTICIPANT, direction: { source: 'ja', target: 'zh-CN' } };
+    const reversed = { ...shared, reversed: (d: SessionContext['direction']) => d.target === 'zh-CN' };
+    const built = buildLocalAI(other, settings({ ...DETECT, translateHere: 'app' }), reversed);
+    // Whatever it says, it is not that the language cannot be detected: at most that no model for ja → zh is here.
+    expect(built).not.toMatchObject({ code: 'source_auto' });
+    if ('refused' in built) expect(built).toMatchObject({ code: 'local_models_missing', refused: expect.stringContaining('ja') });
+    else expect(built.stages).toMatchObject({ heard: 'auto' });
   });
 
   it('asks the engine for a model that detects, for the other side\u2019s leg', async () => {
@@ -690,6 +701,44 @@ describe('the feedback engine while a device this computer shares with is using 
       expect(stop).toHaveBeenCalledTimes(1);
     } finally {
       useNativeCoachStore.setState({ status: before });
+    }
+  });
+});
+
+describe('a language\u2019s model by default', () => {
+  const HERE = (...ids: string[]) => (id: string) => ids.includes(id);
+
+  it('is the best one on this computer that hears it, where none is chosen and the one in use does not', () => {
+    // Thai is not R2T2's: Qwen3-ASR hears it, and is here.
+    expect(nativePicked({ model: 'r2t2-q8' }, 'th', HERE('r2t2-q8', 'qwen3-asr-1.7b-q8'))?.id).toBe('qwen3-asr-1.7b-q8');
+    // The order is the one the models are recommended in: the larger before the smaller.
+    expect(nativePicked({ model: 'r2t2-q8' }, 'th', HERE('qwen3-asr-0.6b-q8', 'qwen3-asr-1.7b-q8'))?.id).toBe('qwen3-asr-1.7b-q8');
+    expect(nativePicked({ model: 'r2t2-q8' }, 'th', HERE('qwen3-asr-0.6b-q8'))?.id).toBe('qwen3-asr-0.6b-q8');
+    // Nothing here hears it: none, and one has to be downloaded.
+    expect(nativePicked({ model: 'r2t2-q8' }, 'th', HERE('r2t2-q8'))).toBeNull();
+  });
+
+  it('is, for a language left to be detected, one that can tell languages apart — and no other', () => {
+    expect(nativePicked({ model: 'r2t2-q8' }, 'auto', HERE('r2t2-q8', 'qwen3-asr-0.6b-q8', 'qwen3-asr-1.7b-q8'))?.id).toBe('qwen3-asr-1.7b-q8');
+    expect(nativePicked({ model: `${APPLE_PREFIX}ja` }, 'auto', HERE(`${APPLE_PREFIX}ja`, `${APPLE_PREFIX}en`, 'qwen3-asr-1.7b-q8'))?.id).toBe('qwen3-asr-1.7b-q8');
+    // The small models and the Mac's own tell no language: with only those here there is none.
+    expect(nativePicked({ model: 'r2t2-q8' }, 'auto', HERE('r2t2-q8', 'qwen3-asr-0.6b-q8', `${APPLE_PREFIX}ja`))).toBeNull();
+  });
+
+  it('gives way to a choice, and to the one in use where it hears the language', () => {
+    const here = HERE('r2t2-q8', 'qwen3-asr-1.7b-q8', 'qwen3-asr-0.6b-q8');
+    expect(nativePicked({ model: 'qwen3-asr-0.6b-q8' }, 'ja', here)?.id).toBe('qwen3-asr-0.6b-q8');
+    expect(nativePicked({ model: 'r2t2-q8', byLanguage: { th: 'qwen3-asr-0.6b-q8' } }, 'th', here)?.id).toBe('qwen3-asr-0.6b-q8');
+  });
+
+  it('is not written down as a choice when another language is chosen for', () => {
+    // Thai was heard by default; choosing for Japanese leaves Thai without a name of its own.
+    useNativeEngineStore.setState({ status: { ...NO_NATIVE_ENGINE, supported: true, engine: 'ready', models: { 'r2t2-q8': { state: 'downloaded', received: 1, total: 1 }, 'qwen3-asr-1.7b-q8': { state: 'downloaded', received: 1, total: 1 } } } });
+    try {
+      const next = chooseNative({ model: 'r2t2-q8' }, 'r2t2-q8', ['ja'], ['ja', 'th']);
+      expect(next.byLanguage).toEqual({ ja: 'r2t2-q8' });
+    } finally {
+      useNativeEngineStore.setState({ status: NO_NATIVE_ENGINE });
     }
   });
 });

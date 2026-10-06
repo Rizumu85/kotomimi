@@ -5,6 +5,7 @@ import type { AudioMode } from '../../stores/audioStore';
 import { useProviderStore } from '../../stores/providerStore';
 import { LanguagePairSection } from './LanguagePairSection';
 import { useSelectedProvider } from './useSelectedProvider';
+import { canDetectOther } from '../../providers/openai/localaiDevice';
 
 interface ProviderLanguagesProps {
   providers: readonly AnyProvider[];
@@ -27,7 +28,13 @@ export function ProviderLanguages({ providers, disabled, sentence }: ProviderLan
   const speech = useProviderStore((st) => st.speech);
   if (!selection?.entry) return null;
   const { provider, entry } = selection;
-  const { setPair } = useProviderStore.getState();
+  const { setPair, updateSettings } = useProviderStore.getState();
+  // Fork: the Kotomimi provider can leave the other side's language to be detected, where what hears can tell one —
+  // and only while the other side is heard at all.
+  const detects = (provider.id as string) === 'localai' && legs.includes('participant') && canDetectOther(entry.settings as never);
+  const detect = detects
+    ? { on: (entry.settings as { asrDetectOther?: boolean }).asrDetectOther === true, set: (on: boolean) => updateSettings(provider, { asrDetectOther: on }) }
+    : undefined;
 
   return (
     <LanguagePairSection
@@ -37,6 +44,7 @@ export function ProviderLanguages({ providers, disabled, sentence }: ProviderLan
       disabled={disabled}
       sentence={sentence}
       context={languageContext(provider, legs, speech)}
+      detect={detect}
       onChange={(pair) => {
         if (pair.source !== entry.pair.source) trackEvent('language_changed', { to_language: pair.source, language_type: 'source' });
         if (pair.target !== entry.pair.target) trackEvent('language_changed', { to_language: pair.target, language_type: 'target' });

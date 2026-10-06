@@ -116,18 +116,27 @@ export function nativeModelFor(id: string, language: string): NativeModel | null
  */
 export interface NativePick { model: string; byLanguage?: Readonly<Record<string, string>> }
 
+/** A model is on this computer now, as the engine's store has it. */
+const hereNow = (id: string): boolean => nativeDownloaded(useNativeEngineStore.getState().status, id);
+
 /**
  * The model a language is heard by: the one chosen for that language; else
- * the one in use, where it hears it. Null: neither — the language has no
- * model until one is chosen for it. No other model is taken in its place: a
- * change of language is made with the session stopped, and what hears the
- * new one is the user's to say.
+ * the one in use, where it hears it; else the best one on this computer that
+ * does — the first downloaded, in the order the models are recommended. So a
+ * language has a model by default, as each has its own: Japanese the one in
+ * use, a language it does not hear the one that does, and a language left to
+ * be detected the one that can tell languages apart. Null: no model here
+ * hears it, and one has to be downloaded. `has`: what is downloaded (the
+ * store's answer by default).
  */
-export function nativePicked(pick: NativePick, language: string): NativeModel | null {
+export function nativePicked(pick: NativePick, language: string, has: (id: string) => boolean = hereNow): NativeModel | null {
   const chosen = pick.byLanguage?.[baseOf(language)];
   // A name the app no longer has is no choice.
   const known = chosen !== undefined && NATIVE_MODELS.some((m) => m.id === chosen);
-  return (known ? nativeModelFor(chosen, language) : null) ?? nativeModelFor(pick.model, language);
+  return (known ? nativeModelFor(chosen, language) : null)
+    ?? nativeModelFor(pick.model, language)
+    ?? NATIVE_MODELS.find((m) => nativeHears(m, language) && has(m.id))
+    ?? null;
 }
 
 /**
@@ -141,7 +150,8 @@ export function chooseNative(pick: NativePick, id: string, languages: readonly s
   for (const language of heard) {
     const base = baseOf(language);
     if (chosenFor.has(base) || byLanguage[base]) continue;
-    const now = nativePicked(pick, language);
+    // What it was heard by for want of a choice — a default — is not written down as one.
+    const now = nativePicked(pick, language, () => false);
     if (now) byLanguage[base] = now.id;
   }
   for (const language of languages) {
@@ -184,9 +194,10 @@ export async function nativeGap(chosen: NativePick | string, heard: readonly str
   const status = await (deps.status ?? store.refresh)();
   if (!status.supported) return { ok: false, reason: 'The native recognition engine is not available for this system.', code: 'native_unsupported' };
   // The model of each language heard: the one chosen for it, or the one in use.
-  const unchosen = heard.find((language) => !nativePicked(pick, language));
+  const has = (id: string) => nativeDownloaded(status, id);
+  const unchosen = heard.find((language) => !nativePicked(pick, language, has));
   if (unchosen !== undefined) return { ok: false, reason: `No native recognition model is chosen for ${unchosen}.`, code: 'native_unchosen', params: { source: unchosen } };
-  const models = hearing(pick, heard);
+  const models = hearing(pick, heard, has);
   const absent = models.find((one) => !nativeDownloaded(status, one.id));
   if (absent) return { ok: false, reason: `${absent.name} is not downloaded.`, code: 'native_missing', params: { name: absent.name } };
   // The engine the app downloads runs one model at a time: two of its models cannot hear in one run.
@@ -198,7 +209,7 @@ export async function nativeGap(chosen: NativePick | string, heard: readonly str
 }
 
 /** The models that hear a run's languages: each once. */
-const hearing = (pick: NativePick, heard: readonly string[]): NativeModel[] => [...new Map(heard.flatMap((language) => { const one = nativePicked(pick, language); return one ? [[one.id, one] as const] : []; })).values()];
+const hearing = (pick: NativePick, heard: readonly string[], has?: (id: string) => boolean): NativeModel[] => [...new Map(heard.flatMap((language) => { const one = nativePicked(pick, language, has); return one ? [[one.id, one] as const] : []; })).values()];
 
 /** What brings an engine up, and says how it went: the store's by default. */
 export interface NativeUpDeps {

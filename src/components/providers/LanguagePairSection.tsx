@@ -27,7 +27,20 @@ interface LanguagePairSectionProps {
   sentence?: { mode: AudioMode; textOnly: boolean };
   /** Whether a run would speak (Stage 2 Volcengine AST2, choice 1): the lists are the offer for it. Absent: the provider's widest offer. */
   context?: LanguageContext;
+  /**
+   * Fork: the provider can tell the other side's language by itself. "Detect
+   * the language" is then a choice of what they SPEAK: in the pair's second
+   * select while that is what it says (the other side alone is heard), and in
+   * the line under the pair — "they speak … → I read …" — while both sides
+   * are, where the second select is what they read. Absent: not offered.
+   */
+  detect?: { on: boolean; set(on: boolean): void };
 }
+
+/** The choice that is no language: the other side's is left to be detected. */
+const DETECT = '\u0000detect';
+/** …and the one that is the pair's own language. */
+const SAME = '\u0000same';
 
 /**
  * Any provider's language pair (spec: "Languages are two functions"): the
@@ -35,7 +48,7 @@ interface LanguagePairSectionProps {
  * allowed whenever the provider supports the reversed pair. Markup is
  * LanguageSection's translation-languages block.
  */
-export function LanguagePairSection({ provider, settings, pair, onChange, disabled, sentence, context }: LanguagePairSectionProps) {
+export function LanguagePairSection({ provider, settings, pair, onChange, disabled, sentence, context, detect }: LanguagePairSectionProps) {
   const { t, i18n } = useTranslation();
   const id = useId();
   const label = useLanguageLabel();
@@ -85,13 +98,24 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
     label,
     disabled,
   });
+  const detecting = detect?.on === true;
+  // Where the choice is drawn: the line under the pair while both sides are heard; else the pair's second select.
+  const inMirror = Boolean(detect) && resolved?.showMirror === true;
+  const inSelect = Boolean(detect) && !inMirror;
+  /** What the other side speaks was chosen: a language (the pair's), or its detection. */
+  const pickTheirs = (target: string) => {
+    if (target === DETECT) { detect?.set(true); return; }
+    if (detecting && inSelect) detect?.set(false);
+    if (target !== pair.target) onChange({ source: pair.source, target });
+  };
   const targetMenu = useLanguageMenu({
     ordered: targetOptions.ordered,
     suggested: targetOptions.pinned,
-    value: pair.target,
-    onPick: (target) => onChange({ source: pair.source, target }),
+    value: detecting && inSelect ? DETECT : pair.target,
+    onPick: pickTheirs,
     label,
     disabled,
+    ...(inSelect ? { first: { code: DETECT, name: t('fork.languageMenu.detect') } } : {}),
   });
   const sourceLanguageName = label(pair.source);
   const targetLanguageName = label(pair.target);
@@ -138,22 +162,40 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
           <select
             id={`${id}-target`}
             className="language-select"
-            value={pair.target}
-            onChange={(e) => onChange({ source: pair.source, target: e.target.value })}
+            value={detecting && inSelect ? DETECT : pair.target}
+            onChange={(e) => pickTheirs(e.target.value)}
             disabled={disabled}
             {...targetMenu.selectProps}
           >
+            {inSelect && <option value={DETECT}>{t('fork.languageMenu.detect')}</option>}
             {options(targetOptions)}
           </select>
           {targetMenu.list}
         </div>
       </div>
-      {resolved?.showMirror && (
+      {resolved?.showMirror && !inMirror && (
         <div className="language-mirror-line" data-testid="language-mirror-line">
           {t('settings.langSentence.mirror', 'They speak {{their}} → I read {{mine}}', {
             their: targetLanguageName,
             mine: sourceLanguageName,
           })}
+        </div>
+      )}
+      {inMirror && (
+        // Fork: the same sentence, with what they speak to choose: the pair's language, or whatever it turns out to be.
+        <div className="language-mirror-line language-mirror-line--choice" data-testid="language-mirror-line">
+          <label htmlFor={`${id}-theirs`}>{t('settings.langSentence.theySpeak', 'they speak')}</label>
+          <select
+            id={`${id}-theirs`}
+            className="language-mirror-select"
+            value={detecting ? DETECT : SAME}
+            onChange={(e) => detect?.set(e.target.value === DETECT)}
+            disabled={disabled}
+          >
+            <option value={SAME}>{targetLanguageName}</option>
+            <option value={DETECT}>{t('fork.languageMenu.detect')}</option>
+          </select>
+          <span>{`→ ${t('settings.langSentence.iRead', 'I read')} ${sourceLanguageName}`}</span>
         </div>
       )}
     </div>

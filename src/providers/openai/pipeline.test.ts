@@ -135,7 +135,7 @@ describe('a leg whose translation runs on a text model', () => {
 
   it('keeps the session through a model that fails, and says so: a lost translation, or typed text that cannot be answered', async () => {
     const h = await live(SPEAKER, VIA_MODEL, [new TypeError('Failed to fetch'), new Response('{"error":{"message":"model not found"}}', { status: 404 }), sse('好')]);
-    h.receive(...heard('item_1', 'いち'));
+    h.receive(...heard('item_1', '一'));
     await h.settled();
     h.session.appendText('二');
     await h.settled();
@@ -145,7 +145,7 @@ describe('a leg whose translation runs on a text model', () => {
     ]);
     expect(h.of('failed')).toEqual([]);
     // The next one is answered.
-    h.receive(...heard('item_3', 'さん'));
+    h.receive(...heard('item_3', '三'));
     await h.settled();
     expect(h.of('segmentOpened').map((e) => e.payload).filter((p) => p.side === 'translation').map((p) => p.origin)).toEqual(['item_3']);
   });
@@ -222,6 +222,21 @@ describe('a leg whose language is left to be detected', () => {
   });
 });
 
+describe('a sentence already in the language the leg translates into', () => {
+  it('is shown as said, in that language, and not translated: the other side speaking the reader\u2019s own', async () => {
+    // Seen 2026-10-06: the other side, set to Japanese, spoke Chinese; each sentence was shown twice, the first marked JA.
+    const h = await live(PARTICIPANT, { translateServerModel: 'hy-mt2-1.8b' }, [sse('今天天气真好。')]);
+    h.receive(...heard('item_1', '毕竟VRC的朋友都是年轻人吧。'));
+    await vi.waitFor(() => expect(h.of('segmentClosed')).toHaveLength(1));
+    expect(h.lastText(1)).toMatchObject({ text: '毕竟VRC的朋友都是年轻人吧。', language: 'zh-CN' });
+    // A Japanese sentence after it is translated as ever, and is the only one asked.
+    h.receive(...heard('item_2', '今日は天気がいいですね。'));
+    await h.settled();
+    expect(h.calls).toHaveLength(1);
+    expect(h.calls[0].body.messages.at(-1)).toMatchObject({ content: expect.stringContaining('今日は天気がいいですね。') });
+  });
+});
+
 describe('a coached speaker', () => {
   const COACH: Partial<LocalAISettings> = { coach: true, coachServerModel: 'qwen3-4b', translateServerModel: 'hy-mt2-1.8b' };
 
@@ -241,6 +256,17 @@ describe('a coached speaker', () => {
       { role: 'user', content: '昨日映画を見ます。' },
     ]);
     expect(h.lastText(FIRST_REF + 1)).toEqual({ ref: FIRST_REF + 1, text: '昨日映画を見ました。\n“见”要用过去式。', language: 'zh-CN' });
+  });
+
+  it('is not given feedback on a sentence in their own language: that one is translated, and said to be in their language', async () => {
+    // Asked by the user 2026-10-06: with feedback on, a sentence said in Chinese went to the feedback model too.
+    const h = await live(SPEAKER, COACH, [sse('ちょっとソフトを更新しないと。')]);
+    h.receive(...heard('item_1', '我得更新一下这个软件。'));
+    await h.settled();
+    expect(h.lastText(1)).toMatchObject({ text: '我得更新一下这个软件。', language: 'zh-CN' });
+    expect(h.calls).toHaveLength(1);
+    expect(h.calls[0].body.model).toBe('hy-mt2-1.8b');
+    expect(h.lastText(FIRST_REF + 1)).toMatchObject({ text: 'ちょっとソフトを更新しないと。' });
   });
 
   it('is coached with the user\'s own prompt when there is one: the pair filled in, no examples', async () => {
@@ -319,20 +345,20 @@ describe('a stage one of this computer\u2019s native engines answers', () => {
     socket.receive(SERVER.created());
     socket.receive(SERVER.updated(config.transcribeOnly ? 'transcription' : 'realtime'));
     const session = await starting;
-    for (const frame of heard('item_1', '今日は天気がいいですね。')) socket.receive(frame);
+    for (const frame of heard('item_1', '今天天气真好。')) socket.receive(frame);
     await vi.waitFor(() => expect(urls).toHaveLength(1));
     expect(urls[0]).toBe('http://127.0.0.1:4200/v1/chat/completions');
     expect(base).toHaveBeenLastCalledWith('translator', speech.model);
     // The engine came back on another port: the next sentence goes there.
     port = 4311;
-    for (const frame of heard('item_2', 'ありがとう。')) socket.receive(frame);
+    for (const frame of heard('item_2', '谢谢你。')) socket.receive(frame);
     await vi.waitFor(() => expect(urls).toHaveLength(2));
     expect(urls[1]).toBe('http://127.0.0.1:4311/v1/chat/completions');
     // …with the key of that run: each start of the engine makes another.
     expect(keys.slice(0, 2)).toEqual(['Bearer key-of-4200', 'Bearer key-of-4311']);
     // Where it cannot be asked, the address the session was built with.
     base.mockRejectedValue(new Error('not up'));
-    for (const frame of heard('item_3', 'はい。')) socket.receive(frame);
+    for (const frame of heard('item_3', '好的。')) socket.receive(frame);
     await vi.waitFor(() => expect(urls).toHaveLength(3));
     expect(urls[2]).toBe('http://127.0.0.1:4200/v1/chat/completions');
     await session.stop();

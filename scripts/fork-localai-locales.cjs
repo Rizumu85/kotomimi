@@ -275,9 +275,9 @@ const PROVIDER = {
 
   // Auto Detect where nothing detects the language: said when it is checked, and when Start is pressed.
   sourceAuto: [
-    "The language cannot be detected with this setup: the app's own translation models, and speech recognition by another Kotomimi, need to be told it. Translate with the native engine or an API model, or choose the language.",
-    "这样搭配时不能自动识别语言：应用自带的翻译模型、另一台 Kotomimi 的语音识别，都需要知道说的是哪种语言。请把翻译换成原生引擎或 API 模型，或者选好语言。",
-    "這樣搭配時不能自動辨識語言：應用程式內建的翻譯模型、另一台 Kotomimi 的語音辨識，都需要知道說的是哪種語言。請把翻譯換成原生引擎或 API 模型，或者選好語言。",
+    'The language cannot be detected with this setup. Choose the language you speak.',
+    '这样搭配不能自动识别语言，请选好你说的语言。',
+    '這樣搭配不能自動辨識語言，請選好你說的語言。',
   ],
 
   // A stage with nothing to run: said when it is checked, and when Start is pressed.
@@ -303,6 +303,11 @@ const PROVIDER = {
     'Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.',
     '对方说哪种语言都能识别并翻译成你的语言，不用手动切换；你自己说的话仍按上面选的语言翻译。识别要用 Qwen3-ASR 1.7B GGUF 或 API，翻译要用原生引擎或 API。',
     '對方說哪種語言都能辨識並翻譯成你的語言，不用手動切換；你自己說的話仍按上面選的語言翻譯。辨識要用 Qwen3-ASR 1.7B GGUF 或 API，翻譯要用原生引擎或 API。',
+  ],
+  detectOtherNote: [
+    "The other side's language is detected, so a model that can tell languages apart hears them.",
+    "对方的语言自动识别，所以这里用能识别语言的模型。",
+    "對方的語言自動辨識，所以這裡用能辨識語言的模型。",
   ],
   hearsOther: ['Hears the other side (any language)', '听对方（自动识别语言）', '聽對方（自動辨識語言）'],
   detectOtherNeeds: [

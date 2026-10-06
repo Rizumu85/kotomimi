@@ -57,3 +57,22 @@ export function languageByScript(text: string): string | undefined {
   }
   return best ?? languageByWords(text);
 }
+
+/** Fewer Han characters than this, and no kana, may as well be Japanese ("大丈夫", "了解"): a sentence of them is Chinese. */
+const HAN_SENTENCE = 5;
+
+/**
+ * Whether a sentence is in the speaker's own language and not in the one they
+ * practise, as far as its writing says. A speaker who is given feedback on
+ * what they say in another language still says a sentence of their own now
+ * and then: that one is no practice, and is not sent for feedback. Where the
+ * writing leaves a doubt the answer is no — the sentence is taken as practice.
+ */
+export function saidInOwn(text: string, own: string, practised: string): boolean {
+  const base = (code: string) => code.toLowerCase().split(/[-_]/)[0];
+  const mine = base(own);
+  if (mine === base(practised) || languageByScript(text) !== mine) return false;
+  // Chinese and Japanese share their characters: a few of them alone say nothing.
+  if (mine === 'zh' && base(practised) === 'ja') return (text.match(HAN)?.length ?? 0) >= HAN_SENTENCE;
+  return true;
+}

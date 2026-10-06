@@ -628,17 +628,46 @@ describe('one menu for a stage of this computer, whoever runs it', () => {
   });
 });
 
-describe('detecting the other side’s language', () => {
-  const NATIVE_HEARING = { asrVia: 'device', asrHere: 'native', asrNativeModel: 'qwen3-asr-1.7b-q8', translateAt: 'device' } as const;
+describe('the other side\u2019s language left to be detected', () => {
+  const engineOf = (models: Record<string, 'downloaded' | 'absent'>) => ({
+    supported: true, engine: 'ready', engineBytes: 1,
+    models: Object.fromEntries(Object.entries(models).map(([id, state]) => [id, { state, received: state === 'downloaded' ? 1 : 0, total: 1 }])),
+    run: { state: 'stopped', model: null, port: 0, tail: '' }, up: [],
+  }) as never;
+  const BOTH: Array<'speaker' | 'participant'> = ['speaker', 'participant'];
+  let before: unknown;
+  beforeEach(() => { before = useNativeEngineStore.getState().status; });
+  afterEach(() => { useNativeEngineStore.setState({ status: before as never }); });
 
-  it('is offered only while the other side is heard: the microphone alone has nobody whose language is unknown', () => {
-    const alone = draw({ settings: NATIVE_HEARING, legs: ['speaker'] });
-    expect(alone.card(HEAR).queryByText('providers.localai.detectOther')).toBeNull();
-    alone.unmount();
-    const both = draw({ settings: NATIVE_HEARING, legs: ['speaker', 'participant'] });
-    expect(both.card(HEAR).getByText('providers.localai.detectOther')).toBeTruthy();
-    both.unmount();
-    const other = draw({ settings: NATIVE_HEARING, legs: ['participant'] });
-    expect(other.card(HEAR).getByText('providers.localai.detectOther')).toBeTruthy();
+  it('gives the other side\u2019s row a model that can tell languages apart, by itself: the one in use that cannot is not offered for it', () => {
+    useNativeEngineStore.setState({ status: engineOf({ 'r2t2-q8': 'downloaded', 'qwen3-asr-1.7b-q8': 'downloaded' }) });
+    // Japanese is heard by R2T2, which tells no language; the other side is whatever it turns out to be.
+    const { card } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'r2t2-q8', asrDetectOther: true, translateAt: 'device' }, legs: BOTH });
+    const menus = card(HEAR).getAllByRole('combobox') as HTMLSelectElement[];
+    const other = menus.find((m) => m.getAttribute('aria-label') === 'providers.localai.hearsOther')!;
+    expect(other.selectedOptions[0].textContent).toBe('Qwen3-ASR 1.7B GGUF');
+    expect([...other.querySelectorAll('optgroup')[0].querySelectorAll('option')].map((o) => o.textContent)).toEqual(['Qwen3-ASR 1.7B GGUF']);
+    // The app's own models tell no language: that row lists none of them, while the row of a named language does.
+    expect([...other.querySelectorAll('optgroup')].map((g) => g.label)).toEqual(['providers.localai.groupNative']);
+    const named = menus.find((m) => m !== other)!;
+    expect([...named.querySelectorAll('optgroup')].map((g) => g.label)).toContain('providers.localai.groupApp');
+    // No switch in the card: the choice is made among the languages. What it takes is said here.
+    expect(card(HEAR).queryByText('providers.localai.detectOther')).toBeNull();
+    expect(card(HEAR).getByText('providers.localai.detectOtherNote')).toBeTruthy();
+  });
+
+  it('says a model has to be downloaded only where none here can tell languages apart', () => {
+    useNativeEngineStore.setState({ status: engineOf({ 'r2t2-q8': 'downloaded' }) });
+    const { card } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'r2t2-q8', asrDetectOther: true, translateAt: 'device' }, legs: BOTH });
+    const other = (card(HEAR).getAllByRole('combobox') as HTMLSelectElement[]).find((m) => m.getAttribute('aria-label') === 'providers.localai.hearsOther')!;
+    expect(other.selectedOptions[0].textContent).toBe('providers.localai.nativeNone');
+    expect(card(HEAR).getByText('providers.localai.detectOtherNeeds')).toBeTruthy();
+  });
+
+  it('says nothing of it while only the microphone is heard', () => {
+    useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'downloaded' }) });
+    const { card } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'qwen3-asr-1.7b-q8', asrDetectOther: true, translateAt: 'device' }, legs: ['speaker'] });
+    expect(card(HEAR).queryByText('providers.localai.detectOtherNote')).toBeNull();
+    expect(card(HEAR).queryByRole('combobox', { name: 'providers.localai.hearsOther' })).toBeNull();
   });
 });

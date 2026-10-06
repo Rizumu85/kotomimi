@@ -25,7 +25,7 @@ import { coachPrompt } from './coachPrompt';
 import type { LocalAISettings as S } from './localai';
 import { deviceChatModels, deviceCoachModel, deviceLanguage, deviceModelsLoaded, needsServer, PLACE_FIELDS, PLACES, type DeviceNeed, type Place } from './localaiDevice';
 import { NATIVE_MODELS, chooseNative, isAutoLanguage, nativeDownloaded, nativeHears, nativeModel, nativePicked, type NativePick } from './localaiNative';
-import { heardBy } from './localaiDevice';
+import { detectsOther, heardBy } from './localaiDevice';
 import { languageLabel } from '../../lib/language/label';
 import { NativeEngineCard, nativeStoreOf, type NativeCardModel, type NativeKind } from './NativeEngineCard';
 import { NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator } from './nativeTranslators';
@@ -469,6 +469,8 @@ function DeviceModels({ stage, settings, update, pair, legs, disabled, tour, oth
         const mine = using(slot);
         const natives = nativeFor(slot);
         const candidates = adapter.readyCandidates(slot);
+        // A language left to be detected is heard by a model that can tell languages apart: the app's own cannot, nor can it be known of a LocalAI's.
+        const detecting = stage === 'asr' && isAutoLanguage(heardIn(slot));
         const explicit = mine === undefined && resolved?.source === 'explicit' ? resolved.modelId : '';
         // Nothing to run is a state, said above the groups: of the engine's choice, or of the app's own models.
         const nothing = mine === null ? t('providers.localai.nativeNone')
@@ -505,14 +507,14 @@ function DeviceModels({ stage, settings, update, pair, legs, disabled, tour, oth
                   {natives.map((m) => <option key={m.id} value={`${NATIVE_ENTRY}${m.id}`}>{m.name}</option>)}
                 </optgroup>
               )}
-              {looked && (auto || candidates.length > 0 || mine !== undefined) && (
+              {!detecting && looked && (auto || candidates.length > 0 || mine !== undefined) && (
                 <optgroup label={t('providers.localai.groupApp')}>
                   <option value="">{auto ? t('providers.localai.auto', { name: adapter.displayName(auto) }) : t('providers.localai.appAuto')}</option>
                   {/* The only one there is, is what "automatic" already names: it is listed by itself only once chosen so. */}
                   {candidates.filter((c) => candidates.length > 1 || !auto || explicit === c.id).map((c) => <option key={c.id} value={c.id}>{c.sizeLabel ? `${c.name} · ${c.sizeLabel}` : c.name}</option>)}
                 </optgroup>
               )}
-              {other && <optgroup label={t('providers.localai.groupOther')}><option value={LOCALAI_ENTRY}>{other.label}</option></optgroup>}
+              {other && !detecting && <optgroup label={t('providers.localai.groupOther')}><option value={LOCALAI_ENTRY}>{other.label}</option></optgroup>}
             </select>
             {mine === null && <p className="kt-note kt-note--todo" role="status">{isAutoLanguage(heardIn(slot)) ? t('providers.localai.detectOtherNeeds') : t('providers.localai.nativeUnchosen', { source: languageLabel(heardIn(slot), i18n.language) })}</p>}
             {mine && !fits(mine.id, slot) && <p className="kt-note kt-note--todo" role="status">{t(stage === 'asr' ? 'providers.localai.nativeUnheard' : 'providers.localai.translatorUnfit', { name: mine.name })}</p>}
@@ -776,9 +778,9 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   };
   const translateToLocalAI = toLocalAI({ translateHere: 'localai', translateHereModel: settings.translateHereModel || firstText });
   // Offered where what hears can detect a language: the native engine, or an API.
-  // Only while the other side is heard at all: with the microphone alone there is nobody whose language is unknown.
-  const detectOther = legs.includes('participant') && (settings.asrVia === 'api' || (settings.asrVia === 'device' && settings.asrHere === 'native'))
-    ? <ToggleSwitch checked={settings.asrDetectOther} onChange={() => put({ asrDetectOther: !settings.asrDetectOther })} label={t('providers.localai.detectOther')} disabled={disabled} tooltip={t('providers.localai.detectOtherTooltip')} />
+  // While the other side's language is left to be detected (chosen among the languages, `LanguagePairSection`): what that takes.
+  const detectOther = legs.includes('participant') && detectsOther(settings)
+    ? <p className="kt-note">{t('providers.localai.detectOtherNote')}</p>
     : null;
 
   return (

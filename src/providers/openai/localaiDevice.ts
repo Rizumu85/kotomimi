@@ -90,7 +90,12 @@ export const hearsNatively = (s: Pick<StagePlacement, 'asrVia' | 'asrHere'>): bo
  * is uploaded to. Anywhere else the switch is not offered, and counts for
  * nothing.
  */
-export const detectsOther = (s: { asrDetectOther?: boolean; asrVia: Place; asrHere?: AsrHere }): boolean => s.asrDetectOther === true && (hearsNatively(s) || s.asrVia === 'api');
+export const detectsOther = (s: { asrDetectOther?: boolean; asrVia: Place; asrHere?: AsrHere }): boolean => s.asrDetectOther === true && canDetectOther(s);
+
+/** What hears can tell a language by itself: a native engine's model, or an API. Where it can, detecting the other side's language is offered. */
+export function canDetectOther(s: { asrVia: Place; asrHere?: AsrHere }): boolean {
+  return hearsNatively(s) || s.asrVia === 'api';
+}
 
 /** What a leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs, or whatever it turns out to be. */
 export function heardBy(s: { asrDetectOther?: boolean; asrVia: Place; asrHere?: AsrHere; coach: boolean }, pair: { source: string; target: string }, leg: 'speaker' | 'participant'): string {

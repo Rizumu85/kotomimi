@@ -488,12 +488,16 @@ function unnamedStage(s: LocalAISettings, models: readonly LocalAIModel[], coach
  * refuses a session that does not say it). No model downloaded would help,
  * so it is said as what it is. `source`: the language the leg hears; a
  * coached speaker's is never detected, and only what they type is translated.
+ * `told`: the other side's leg, whose language the pair names all the same —
+ * a translation that has to be told one is told that (a sentence in the
+ * reader's own language is not translated at all, `pipeline.ts`), so the
+ * leg is not refused for it.
  */
-function undetected(s: LocalAISettings, models: readonly LocalAIModel[], source: string, coached: boolean): ProviderRefusal | null {
+function undetected(s: LocalAISettings, models: readonly LocalAIModel[], source: string, coached: boolean, told?: string): ProviderRefusal | null {
   if (source !== AUTO || coached) return null;
   const kotomimiHears = s.asrVia === 'server' && isKotomimiServer(models);
   // The native translation engine reads what it is given; the app's own translation models are told the pair.
-  if ((s.translateAt !== 'device' || translatesNatively(s)) && !kotomimiHears) return null;
+  if ((s.translateAt !== 'device' || translatesNatively(s) || told !== undefined) && !kotomimiHears) return null;
   return { refused: 'The language spoken is to be detected, and nothing on the way detects it.', code: 'source_auto' };
 }
 
@@ -689,7 +693,7 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
       const found = servers.models ?? [];
       // What the leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
       const heard = heardBy(s, ctx.pair, leg);
-      const gap = unnamedStage(s, found, coached) ?? undetected(s, found, leg === 'speaker' ? ctx.pair.source : heard, coached) ?? unheard(s, found, heard);
+      const gap = unnamedStage(s, found, coached) ?? undetected(s, found, leg === 'speaker' ? ctx.pair.source : heard, coached, leg === 'participant' ? ctx.pair.target : undefined) ?? unheard(s, found, heard);
       // What the servers listed goes with the refusal: a pick from it is often what answers it.
       if (gap) return { ok: false, reason: gap.refused, ...(gap.code ? { code: gap.code } : {}), ...(gap.params ? { params: gap.params } : {}), ...(servers.models?.length ? { models: servers.models } : {}) };
     }
@@ -882,6 +886,8 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   const detected = detectsOther(s) && shared.reversed(asked.direction);
   const context: SessionContext = detected ? { ...asked, direction: { source: AUTO, target: asked.direction.target } } : asked;
   const { source, target } = context.direction;
+  // What a translation that has to be told a pair is told: the pair's own language, where the leg's is left to be detected.
+  const told = detected ? asked.direction.source : source;
   // Heard by this computer's LocalAI: a Realtime session as the other device's is, on its own socket.
   const hearsLocal = hearsByLocalServer(s);
   // Heard without any Realtime session: by this computer's own recognizer, or by an API it uploads each sentence to.
@@ -895,7 +901,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
 
   // Every stage named, before anything is built: a run with none has nothing to say. A coached speaker's translation
   // is for what they type only: the run starts without it.
-  const gap = unnamedStage(s, models, coached) ?? undetected(s, models, source, coached);
+  const gap = unnamedStage(s, models, coached) ?? undetected(s, models, source, coached, detected ? told : undefined);
   if (gap) return gap;
   const apiBase = s.translateBaseUrl.trim();
   const apiModel = s.translateModel.trim();
@@ -941,7 +947,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   }
 
   /** A model another Kotomimi shares is told the pair: it runs a translation model, not a chat model. */
-  const pairFor = (id: string, from: 'translate' | undefined) => (models.some((m) => m.id === id && m.host === KOTOMIMI_HOST && m.from === from) ? { pair: { source, target } } : {});
+  const pairFor = (id: string, from: 'translate' | undefined) => (models.some((m) => m.id === id && m.host === KOTOMIMI_HOST && m.from === from) ? { pair: { source: told, target } } : {});
 
   // Null: the other device's pipeline answers, inside the session it hears in.
   let translate: AnswerStage | null = null;
@@ -954,15 +960,15 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
       translate = { kind: 'translate', engine: 'translator', baseUrl: translatorBaseUrl(), model: native.id, system: '', ...translatorRequest(native, source, target) };
     }
   } else if (s.translateAt === 'device') {
-    const id = deviceTranslator(source, target, s.selections);
-    if (!id && !coached) return { refused: `No translation model is downloaded for ${source} → ${target}.`, code: 'local_models_missing' };
-    if (id) translate = { via: 'device', kind: 'translate', model: id, system: buildDefaultLocalPrompt(deviceLanguage(source), deviceLanguage(target)), wrapTranscript: true };
+    const id = deviceTranslator(told, target, s.selections);
+    if (!id && !coached) return { refused: `No translation model is downloaded for ${told} → ${target}.`, code: 'local_models_missing' };
+    if (id) translate = { via: 'device', kind: 'translate', model: id, system: buildDefaultLocalPrompt(deviceLanguage(told), deviceLanguage(target)), wrapTranscript: true };
   } else if (s.translateAt === 'api') {
     if (apiBase && apiModel) translate = { kind: 'translate', baseUrl: apiBase, model: apiModel, ...(s.translateNeedsKey ? { key: 'translateKey' as const } : {}), system: base.instructions, ...pairFor(apiModel, 'translate'), ...quick(apiBase) };
   } else if (asksServer && askedServerModel) {
     // Another Kotomimi answers nothing inside its socket: its pipeline's name, asked over chat, runs its own best translation model for the pair.
     const itsOwn = !serverModel && kotomimi && askedServerModel === pipeline;
-    translate = { kind: 'translate', baseUrl: '', model: askedServerModel, ...serverKeyOf(s), system: base.instructions, ...(itsOwn ? { pair: { source, target } } : pairFor(askedServerModel, undefined)) };
+    translate = { kind: 'translate', baseUrl: '', model: askedServerModel, ...serverKeyOf(s), system: base.instructions, ...(itsOwn ? { pair: { source: told, target } } : pairFor(askedServerModel, undefined)) };
   }
 
   let stages: Stages | undefined;

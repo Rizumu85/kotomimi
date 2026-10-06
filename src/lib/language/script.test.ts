@@ -41,3 +41,23 @@ describe('the language a sentence\u2019s writing shows', () => {
     expect(languageByScript('')).toBeUndefined();
   });
 });
+
+describe('a sentence in the speaker\u2019s own language, not the one they practise', () => {
+  it('is known by its writing', async () => {
+    const { saidInOwn } = await import('./script');
+    // A Chinese speaker practising Japanese.
+    expect(saidInOwn('我得更新一下这个软件。', 'zh-CN', 'ja')).toBe(true);
+    expect(saidInOwn('昨日映画を見ました。', 'zh-CN', 'ja')).toBe(false);
+    // A few characters alone may be either: taken as practice.
+    expect(saidInOwn('大丈夫', 'zh-CN', 'ja')).toBe(false);
+    expect(saidInOwn('了解。', 'zh-CN', 'ja')).toBe(false);
+    // A Japanese speaker practising Chinese: kana is their own; characters alone are the practice.
+    expect(saidInOwn('ちょっと待ってね', 'ja', 'zh-CN')).toBe(true);
+    expect(saidInOwn('我昨天看了电影。', 'ja', 'zh-CN')).toBe(false);
+    // Latin letters: only where the words leave no doubt.
+    expect(saidInOwn('I think this is really what you have to do', 'en', 'ja')).toBe(true);
+    expect(saidInOwn('OK', 'en', 'ja')).toBe(false);
+    // The same language both ways is never "their own instead".
+    expect(saidInOwn('你好，今天天气真不错。', 'zh-CN', 'zh-TW')).toBe(false);
+  });
+});

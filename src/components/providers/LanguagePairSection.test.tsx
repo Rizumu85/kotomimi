@@ -167,3 +167,68 @@ describe('LanguagePairSection — a language context (Stage 2 Volcengine AST2, c
     expect(screen.getByTitle('simpleConfig.swapLanguages')).toBeDisabled();
   });
 });
+
+describe('LanguagePairSection — the other side\u2019s language left to be detected (fork)', () => {
+  const DETECT = '\u0000detect';
+  const SAME = '\u0000same';
+  type Mode = 'speaker' | 'participant' | 'both';
+  const show = (mode: Mode, detect: { on: boolean; set(on: boolean): void } | undefined, onChange = vi.fn()) => {
+    cleanup();
+    render(<LanguagePairSection provider={fakeProvider} settings={FAKE_DEFAULTS} pair={{ source: 'en', target: 'ja' }} onChange={onChange} sentence={{ mode, textOnly: true }} detect={detect} />);
+    return onChange;
+  };
+  const theirs = () => document.querySelector('select.language-mirror-select') as HTMLSelectElement | null;
+
+  it('is not among the choices of a provider that cannot detect it', () => {
+    show('both', undefined);
+    expect(theirs()).toBeNull();
+    expect(values(screen.getByLabelText('settings.langSentence.theyRead'))).not.toContain(DETECT);
+    expect(screen.getByTestId('language-mirror-line').textContent).toBe('settings.langSentence.mirror');
+  });
+
+  it('is chosen, while both sides are heard, in the line that says what they speak: the second select stays what they read', () => {
+    const set = vi.fn();
+    const onChange = show('both', { on: false, set });
+    // What they read — where the speaker's own words go — offers languages alone.
+    expect(values(screen.getByLabelText('settings.langSentence.theyRead'))).not.toContain(DETECT);
+    const menu = theirs()!;
+    expect([...menu.options].map((o) => o.value)).toEqual([SAME, DETECT]);
+    expect(menu.options[1].textContent).toBe('fork.languageMenu.detect');
+    expect(menu.value).toBe(SAME);
+    fireEvent.change(menu, { target: { value: DETECT } });
+    expect(set).toHaveBeenCalledWith(true);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('shows as chosen there while it is on, and is turned off there; the pair is left alone either way', () => {
+    const set = vi.fn();
+    const onChange = show('both', { on: true, set });
+    expect(theirs()!.value).toBe(DETECT);
+    // The language the speaker's own words go into is still the pair's, and still chosen above.
+    expect((screen.getByLabelText('settings.langSentence.theyRead') as HTMLSelectElement).value).toBe('ja');
+    fireEvent.change(theirs()!, { target: { value: SAME } });
+    expect(set).toHaveBeenCalledWith(false);
+    fireEvent.change(screen.getByLabelText('settings.langSentence.theyRead'), { target: { value: 'zh' } });
+    expect(onChange).toHaveBeenCalledWith({ source: 'en', target: 'zh' });
+    expect(set).toHaveBeenCalledTimes(1);
+  });
+
+  it('is the first choice of the second select while only the other side is heard: that select is what they speak', () => {
+    const set = vi.fn();
+    const onChange = show('participant', { on: false, set });
+    expect(theirs()).toBeNull();
+    const select = screen.getByLabelText('settings.langSentence.theySpeak') as HTMLSelectElement;
+    expect(select.options[0].value).toBe(DETECT);
+    fireEvent.change(select, { target: { value: DETECT } });
+    expect(set).toHaveBeenCalledWith(true);
+    expect(onChange).not.toHaveBeenCalled();
+    // On: it is what the select shows; a language chosen there turns it off and is the pair's.
+    const off = vi.fn();
+    const changed = show('participant', { on: true, set: off });
+    const again = screen.getByLabelText('settings.langSentence.theySpeak') as HTMLSelectElement;
+    expect(again.value).toBe(DETECT);
+    fireEvent.change(again, { target: { value: 'zh' } });
+    expect(off).toHaveBeenCalledWith(false);
+    expect(changed).toHaveBeenCalledWith({ source: 'en', target: 'zh' });
+  });
+});

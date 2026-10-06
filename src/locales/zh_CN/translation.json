@@ -604,12 +604,13 @@
       "apiKeyNeeded": "API（{{address}}）需要密钥。请在对应卡片里打开「这个 API 需要密钥」并填写。",
       "apiKeyRefused": "API（{{address}}）不接受这个密钥。请检查对应卡片里的 API 密钥。",
       "serverNoAsr": "另一台设备上没有能识别{{source}}的语音识别模型。请先在那台设备上下载一个（在它共享卡片的模型库里），或者改由这台电脑识别。",
-      "sourceAuto": "这样搭配时不能自动识别语言：应用自带的翻译模型、另一台 Kotomimi 的语音识别，都需要知道说的是哪种语言。请把翻译换成原生引擎或 API 模型，或者选好语言。",
+      "sourceAuto": "这样搭配不能自动识别语言，请选好你说的语言。",
       "asrUnnamed": "语音识别还没有可用的模型。请在提供商下面的「语音识别」卡片里选好（用 API 模型时要填地址和模型名），或者换一个位置。",
       "translateUnnamed": "翻译还没有可用的模型。请在提供商下面的「翻译」卡片里选好（用 API 模型时要填地址和模型名），或者换一个位置。",
       "coachUnnamed": "语法反馈还没有可用的模型。请在提供商下面的「语法反馈」卡片里选好（用 API 模型时要填地址和模型名），或者换一个位置。",
       "detectOther": "自动识别对方说的语言",
       "detectOtherTooltip": "对方说哪种语言都能识别并翻译成你的语言，不用手动切换；你自己说的话仍按上面选的语言翻译。识别要用 Qwen3-ASR 1.7B GGUF 或 API，翻译要用原生引擎或 API。",
+      "detectOtherNote": "对方的语言自动识别，所以这里用能识别语言的模型。",
       "hearsOther": "听对方（自动识别语言）",
       "detectOtherNeeds": "只有 Qwen3-ASR 1.7B GGUF 能自己识别语言，请在这里选它。",
       "nativeNone": "未选择模型",
@@ -1618,7 +1619,8 @@
       "pin": "把{{name}}置顶",
       "unpin": "取消置顶{{name}}",
       "pinShort": "置顶",
-      "unpinShort": "取消置顶"
+      "unpinShort": "取消置顶",
+      "detect": "自动检测语言"
     },
     "wizard": {
       "pathTitle": "Kotomimi 自由搭配",

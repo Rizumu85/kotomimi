@@ -28,9 +28,11 @@ export interface LanguageMenuOptions {
   /** A code's name, in the UI's language. */
   label(code: string): string;
   disabled?: boolean;
+  /** A choice that is no language, listed first and never pinned ("detect the language"). */
+  first?: { code: string; name: string };
 }
 
-interface Row { code: string; name: string; pinned: boolean; group: 'pinned' | 'suggested' | 'all' }
+interface Row { code: string; name: string; pinned: boolean; group: 'first' | 'pinned' | 'suggested' | 'all' }
 
 /** The rows as listed: the person's pins, then what the app suggests, then every other language — each once. */
 export function languageRows(ordered: readonly LanguageOption[], suggested: readonly LanguageOption[], pins: readonly string[], label: (code: string) => string, query = ''): Row[] {
@@ -49,7 +51,7 @@ export function languageRows(ordered: readonly LanguageOption[], suggested: read
   return [...pinned.map((code) => row(code, 'pinned')), ...next.map((code) => row(code, 'suggested')), ...ordered.filter((o) => !above.has(o.value)).map((o) => row(o.value, 'all'))];
 }
 
-export function useLanguageMenu({ ordered, suggested, value, onPick, label, disabled = false }: LanguageMenuOptions): {
+export function useLanguageMenu({ ordered, suggested, value, onPick, label, disabled = false, first }: LanguageMenuOptions): {
   /** For the select: pressing it opens this list, not the system's. */
   selectProps: { ref(node: HTMLSelectElement | null): void; onMouseDown(e: MouseEvent<HTMLSelectElement>): void; onKeyDown(e: KeyboardEvent<HTMLSelectElement>): void };
   list: ReactNode;
@@ -80,7 +82,15 @@ export function useLanguageMenu({ ordered, suggested, value, onPick, label, disa
   });
   const { getFloatingProps } = useInteractions([useDismiss(context)]);
 
-  const rows = useMemo(() => languageRows(ordered, suggested, pins, label, query), [ordered, suggested, pins, label, query]);
+  const firstCode = first?.code;
+  const firstName = first?.name;
+  const rows = useMemo(() => {
+    const languages = languageRows(ordered, suggested, pins, label, query);
+    if (firstCode === undefined || firstName === undefined) return languages;
+    // Found by its own name too, when letters are typed.
+    const wanted = query.trim().toLowerCase();
+    return !wanted || firstName.toLowerCase().includes(wanted) ? [{ code: firstCode, name: firstName, pinned: false, group: 'first' as const }, ...languages] : languages;
+  }, [ordered, suggested, pins, label, query, firstCode, firstName]);
 
   // Opening starts from an empty search, on the current choice.
   useEffect(() => {
@@ -140,7 +150,7 @@ export function useLanguageMenu({ ordered, suggested, value, onPick, label, disa
             {rows.map((row, i) => (
               <div key={row.code} role="presentation">
                 {/* A line under the block at the top: the pins and the suggestions are one block, every other language follows. */}
-                {i > 0 && row.group === 'all' && rows[i - 1].group !== 'all' && <div className="kt-lang-divider" role="separator" />}
+                {i > 0 && ((row.group === 'all' && rows[i - 1].group !== 'all') || rows[i - 1].group === 'first') && <div className="kt-lang-divider" role="separator" />}
                 <div
                   role="option"
                   aria-selected={row.code === value}
@@ -151,7 +161,7 @@ export function useLanguageMenu({ ordered, suggested, value, onPick, label, disa
                 >
                   <span className="kt-font-option__name">{row.name}</span>
                   {row.code === value && <Check size={14} className="kt-font-option__check" aria-hidden />}
-                  <button
+                  {row.group !== 'first' && <button
                     type="button"
                     className="kt-lang-pin"
                     aria-pressed={row.pinned}
@@ -160,7 +170,7 @@ export function useLanguageMenu({ ordered, suggested, value, onPick, label, disa
                     onClick={(e) => { e.stopPropagation(); useLanguagePinStore.getState().toggle(row.code); }}
                   >
                     <Pin size={13} aria-hidden />
-                  </button>
+                  </button>}
                 </div>
               </div>
             ))}
