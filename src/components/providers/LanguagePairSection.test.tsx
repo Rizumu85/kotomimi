@@ -171,16 +171,16 @@ describe('LanguagePairSection — a language context (Stage 2 Volcengine AST2, c
 describe('LanguagePairSection — my language and theirs (fork)', () => {
   const DETECT = '\u0000detect';
   type Mode = 'speaker' | 'participant' | 'both';
-  const show = (mode: Mode, detect: { on: boolean; set(on: boolean): void } | undefined, summary: string[] | undefined = ['a line'], onChange = vi.fn()) => {
+  const show = (mode: Mode, detect: { on: boolean; set(on: boolean): void } | undefined, onChange = vi.fn()) => {
     cleanup();
-    render(<LanguagePairSection provider={fakeProvider} settings={FAKE_DEFAULTS} pair={{ source: 'en', target: 'ja' }} onChange={onChange} sentence={{ mode, textOnly: true }} detect={detect} summary={summary} />);
+    render(<LanguagePairSection provider={fakeProvider} settings={FAKE_DEFAULTS} pair={{ source: 'en', target: 'ja' }} onChange={onChange} sentence={{ mode, textOnly: true }} detect={detect} owners />);
     return onChange;
   };
   const mine = () => screen.getByLabelText('fork.languageMenu.mine') as HTMLSelectElement;
   const theirs = () => screen.getByLabelText('fork.languageMenu.theirs') as HTMLSelectElement;
   const mostly = () => screen.queryByLabelText('fork.languageMenu.mostly') as HTMLSelectElement | null;
 
-  it('names the two selects for whose language they hold, the same in every mode', () => {
+  it('names the two selects for whose language they hold, the same in every mode, with nothing written under them', () => {
     for (const mode of ['speaker', 'participant', 'both'] as const) {
       show(mode, undefined);
       expect(mine().value).toBe('en');
@@ -189,12 +189,7 @@ describe('LanguagePairSection — my language and theirs (fork)', () => {
     }
   });
 
-  it('says what the run does with the pair, a line each, in place of the mirror line', () => {
-    show('both', undefined, ['they speak ja', 'I speak en']);
-    expect([...screen.getByTestId('language-summary').children].map((line) => line.textContent)).toEqual(['they speak ja', 'I speak en']);
-  });
-
-  it('offers no detection where none was handed in, and keeps upstream\u2019s labels where no summary was', () => {
+  it('offers no detection where none was handed in, and keeps upstream\u2019s labels for any other provider', () => {
     show('both', undefined);
     expect(values(theirs())).not.toContain(DETECT);
     cleanup();

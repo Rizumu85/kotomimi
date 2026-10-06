@@ -1623,13 +1623,7 @@
       "unpinShort": "Unpin",
       "mine": "My language",
       "theirs": "Their language",
-      "mostly": "They mostly speak",
-      "sumTheirs": "They speak {{their}} → I read {{mine}}",
-      "sumTheirsAny": "They speak any language → I read {{mine}}",
-      "sumMine": "I speak {{mine}} → translated into {{their}}",
-      "sumCoach": "I speak {{their}} → grammar feedback",
-      "detectUnable": "To detect it, choose Qwen3-ASR 1.7B under Speech recognition. {{their}} is assumed for now.",
-      "detectUnableServer": "To detect it, the other device needs Qwen3-ASR 1.7B and the latest Kotomimi. {{their}} is assumed for now.",
+      "mostly": "Translate into what they mostly speak",
       "detect": "Auto-detect"
     },
     "wizard": {

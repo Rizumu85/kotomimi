@@ -70,8 +70,11 @@ const StepLanguagePair: React.FC<Props> = ({ draft, dispatch }) => {
     capability: textOnlyCapabilityOf(p),
     source, target: draft.targetLanguage,
   });
-  const myLabel = t(sentence.my.key, sentence.my.fallback);
-  const theirLabel = t(sentence.their.key, sentence.their.fallback);
+  // Fork: the Kotomimi provider's pair is named for whose language each one is, as its Settings name it
+  // (`LanguagePairSection`, `owners`), and nothing is written under it.
+  const owners = (p?.id as string | undefined) === 'localai';
+  const myLabel = owners ? t('fork.languageMenu.mine', 'My language') : t(sentence.my.key, sentence.my.fallback);
+  const theirLabel = owners ? t('fork.languageMenu.theirs', 'Their language') : t(sentence.their.key, sentence.their.fallback);
   const nameOf = (v: string) => label(v);
 
   // Display only: the dropdowns use the app-wide order; the seeding above keeps
@@ -111,7 +114,7 @@ const StepLanguagePair: React.FC<Props> = ({ draft, dispatch }) => {
       </label>
       {/* Both mode runs a mirrored second leg off the same two fields. There
           are no controls for it — here or in Settings — so it is stated. */}
-      {sentence.showMirror && (
+      {sentence.showMirror && !owners && (
         <p className="setup-mirror">
           {t('settings.langSentence.mirror', 'They speak {{their}} → I read {{mine}}', {
             their: nameOf(draft.targetLanguage ?? ''),

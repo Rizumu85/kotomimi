@@ -62,15 +62,19 @@
   background: vars.$border-subtle;
 }
 
-// Under the language pair (LanguagePairSection): the language the other side mostly speaks, while theirs is detected;
-// and what the run does with the pair, a line for each side heard.
+// Under the language pair (LanguagePairSection), while the other side's language is detected: the language they
+// mostly speak, in a row of the pair's own grid — what it is for at the left, the choice under their language.
+.language-mostly-label {
+  grid-column: 1 / 3;
+  align-self: center;
+  margin-top: -6px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: vars.$text-secondary;
+}
+
 .language-select-group--mostly {
   grid-column: 3;
   margin-top: -6px;
 }
 
-.language-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}

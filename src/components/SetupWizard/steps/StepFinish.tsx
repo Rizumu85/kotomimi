@@ -32,6 +32,9 @@ const StepFinish: React.FC<Props> = ({ draft, isSignedIn, error }) => {
     myLabel: t(sentence.my.key, sentence.my.fallback), myLanguage: sourceName,
     theirLabel: t(sentence.their.key, sentence.their.fallback), theirLanguage: targetName,
   });
+  // Fork: the Kotomimi provider's pair is whose language each one is, as the pair step and its Settings name it.
+  const owners = (p.id as string) === 'localai';
+  const ownersLine = `${t('fork.languageMenu.mine', 'My language')} ${sourceName} · ${t('fork.languageMenu.theirs', 'Their language')} ${targetName}`;
   // Same source as the scenario cards and the ModePicker itself.
   const modeLabel = preset.mode === 'speaker'
     ? t('modePicker.modeYou', 'Me')
@@ -56,11 +59,11 @@ const StepFinish: React.FC<Props> = ({ draft, isSignedIn, error }) => {
         )}
         <dt>{t('setup.summary.languages', 'Languages')}</dt>
         <dd>
-          {forwardLine}
+          {owners ? ownersLine : forwardLine}
           {/* Both mode's mirrored leg has no controls anywhere; the pair step
               states it too, and the summary must not quietly drop half the
               session. */}
-          {sentence.showMirror && (
+          {sentence.showMirror && !owners && (
             <div className="setup-summary__mirror">
               {t('settings.langSentence.mirror', 'They speak {{their}} → I read {{mine}}', { their: targetName, mine: sourceName })}
             </div>

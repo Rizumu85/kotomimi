@@ -60,6 +60,11 @@ describe('the wizard, as Kotomimi shows it', () => {
     expect(screen.getByText('Step 3 of 4')).toBeTruthy();
     expect(screen.queryByText('fork.wizard.pathTitle')).toBeNull();
     expect(screen.queryByText('fork.wizard.title')).toBeNull();
+    // The pair is whose language each one is, as Settings name it — not what a run does with it — and no line under it.
+    expect(screen.getByLabelText('My language')).toBeTruthy();
+    expect(screen.getByLabelText('Their language')).toBeTruthy();
+    expect(document.querySelector('.setup-mirror')).toBeNull();
+    expect([...(screen.getByLabelText('My language') as HTMLSelectElement).options].map((o) => o.value)).not.toContain('auto');
     // And Back lands on the scenario, not on a hidden step.
     fireEvent.click(screen.getByRole('button', { name: 'Back' }));
     expect(screen.getByText('Step 2 of 4')).toBeTruthy();
@@ -67,6 +72,8 @@ describe('the wizard, as Kotomimi shows it', () => {
     await waitFor(() => expect((screen.getByRole('button', { name: 'Next' }) as HTMLButtonElement).disabled).toBe(false));
     next();
     expect(screen.getByText('Step 4 of 4')).toBeTruthy();
+    expect(screen.getByText(/^My language .+ · Their language .+$/)).toBeTruthy();
+    expect(document.querySelector('.setup-summary__mirror')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Finish' }));
     await waitFor(() => expect(applied).toHaveLength(1));
     expect(applied[0]).toMatchObject({ providerPath: 'own-key', provider: 'localai', credentialChoice: { setting: 'asrVia', value: 'device' }, credentialsPending: false });

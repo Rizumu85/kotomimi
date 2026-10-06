@@ -1623,13 +1623,7 @@
       "unpinShort": "取消置頂",
       "mine": "我的語言",
       "theirs": "對方的語言",
-      "mostly": "對方主要說",
-      "sumTheirs": "對方說{{their}} → 我讀到{{mine}}",
-      "sumTheirsAny": "對方說什麼語言都行 → 我讀到{{mine}}",
-      "sumMine": "我說{{mine}} → 翻譯成{{their}}",
-      "sumCoach": "我說{{their}} → 得到文法回饋",
-      "detectUnable": "要自動偵測，請在「語音辨識」裡選 Qwen3-ASR 1.7B。現在先按{{their}}辨識。",
-      "detectUnableServer": "要自動偵測，那台裝置需要裝有 Qwen3-ASR 1.7B，並更新到最新版。現在先按{{their}}辨識。",
+      "mostly": "翻譯對方主要說的語言",
       "detect": "自動偵測"
     },
     "wizard": {

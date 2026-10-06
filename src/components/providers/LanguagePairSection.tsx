@@ -36,8 +36,15 @@ interface LanguagePairSectionProps {
    * told. Absent: not offered.
    */
   detect?: { on: boolean; set(on: boolean): void };
-  /** Fork: what a run does with the pair, a short line for each side heard; and anything the user should know of it. */
-  summary?: readonly string[];
+  /**
+   * Fork: the two selects are named for whose language they hold — "my
+   * language", "their language" — whatever the mode, and nothing is written
+   * under them. Named for what the run does with them ("I read / they
+   * speak"), one select had two names, and the user's own language read as
+   * one that could be "detected". Lines that spelled out what the run does
+   * were tried and taken out again: more to read than they were worth.
+   */
+  owners?: boolean;
 }
 
 /** The choice that is no language: the other side's is left to be detected. */
@@ -49,7 +56,7 @@ const DETECT = '\u0000detect';
  * allowed whenever the provider supports the reversed pair. Markup is
  * LanguageSection's translation-languages block.
  */
-export function LanguagePairSection({ provider, settings, pair, onChange, disabled, sentence, context, detect, summary }: LanguagePairSectionProps) {
+export function LanguagePairSection({ provider, settings, pair, onChange, disabled, sentence, context, detect, owners }: LanguagePairSectionProps) {
   const { t, i18n } = useTranslation();
   const id = useId();
   const label = useLanguageLabel();
@@ -88,11 +95,8 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
     source: pair.source,
     target: pair.target,
   });
-  // Fork: a provider that says what its run does with the pair (`summary`) has the two selects named for whose
-  // language they hold, whatever the mode. Named for what the run does with them ("I read / they speak"), one select
-  // had two names, and the user's own language read as one that could be "detected".
-  const sourceLabel = summary ? t('fork.languageMenu.mine') : resolved ? t(resolved.my.key, resolved.my.fallback) : t('settings.sourceLanguage');
-  const targetLabel = summary ? t('fork.languageMenu.theirs') : resolved ? t(resolved.their.key, resolved.their.fallback) : t('settings.targetLanguage');
+  const sourceLabel = owners ? t('fork.languageMenu.mine') : resolved ? t(resolved.my.key, resolved.my.fallback) : t('settings.sourceLanguage');
+  const targetLabel = owners ? t('fork.languageMenu.theirs') : resolved ? t(resolved.their.key, resolved.their.fallback) : t('settings.targetLanguage');
   // Fork: pressing a select opens the app's own list — every language with a pin at its right, the pinned ones first.
   const sourceMenu = useLanguageMenu({
     ordered: sourceOptions.ordered,
@@ -181,29 +185,26 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
           {targetMenu.list}
         </div>
         {detecting && (
-          // In the pair's own grid, under their language: the columns line up.
-          <div className="language-select-group language-select-group--mostly">
-            <label htmlFor={`${id}-mostly`}>{t('fork.languageMenu.mostly')}</label>
-            <select
-              id={`${id}-mostly`}
-              className="language-select"
-              value={pair.target}
-              onChange={(e) => onChange({ source: pair.source, target: e.target.value })}
-              disabled={disabled}
-              {...mostlyMenu.selectProps}
-            >
-              {options(targetOptions)}
-            </select>
-            {mostlyMenu.list}
-          </div>
+          // In the pair's own grid, a row of its own: what it is for at the left, the choice under their language.
+          <>
+            <label className="language-mostly-label" htmlFor={`${id}-mostly`}>{t('fork.languageMenu.mostly')}</label>
+            <div className="language-select-group language-select-group--mostly">
+              <select
+                id={`${id}-mostly`}
+                className="language-select"
+                value={pair.target}
+                onChange={(e) => onChange({ source: pair.source, target: e.target.value })}
+                disabled={disabled}
+                {...mostlyMenu.selectProps}
+              >
+                {options(targetOptions)}
+              </select>
+              {mostlyMenu.list}
+            </div>
+          </>
         )}
       </div>
-      {summary ? summary.length > 0 && (
-        // Fork: what the run does with the pair, said outright.
-        <div className="language-mirror-line language-summary" data-testid="language-summary">
-          {summary.map((line) => <div key={line}>{line}</div>)}
-        </div>
-      ) : resolved?.showMirror && (
+      {resolved?.showMirror && !owners && (
         <div className="language-mirror-line" data-testid="language-mirror-line">
           {t('settings.langSentence.mirror', 'They speak {{their}} → I read {{mine}}', {
             their: label(pair.target),

@@ -1623,13 +1623,7 @@
       "unpinShort": "取消置顶",
       "mine": "我的语言",
       "theirs": "对方的语言",
-      "mostly": "对方主要说",
-      "sumTheirs": "对方说{{their}} → 我读到{{mine}}",
-      "sumTheirsAny": "对方说什么语言都行 → 我读到{{mine}}",
-      "sumMine": "我说{{mine}} → 翻译成{{their}}",
-      "sumCoach": "我说{{their}} → 得到语法反馈",
-      "detectUnable": "要自动检测，请在「语音识别」里选 Qwen3-ASR 1.7B。现在先按{{their}}识别。",
-      "detectUnableServer": "要自动检测，那台设备需要装有 Qwen3-ASR 1.7B，并更新到最新版。现在先按{{their}}识别。",
+      "mostly": "翻译对方主要说的语言",
       "detect": "自动检测"
     },
     "wizard": {
