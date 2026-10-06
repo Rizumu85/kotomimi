@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { ArrowRight, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { LegName, SegmentId } from '../../lib/conversation/types';
 import type { Entry } from '../../lib/projection/types';
@@ -224,6 +225,10 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
   const silent = (lane: Lane) => !lane.source?.text && !lane.answer?.text;
   // Whose lane it is, is a bar of the lane's colour down its left edge; the word is there for a screen reader.
   const tag = (lane: Lane) => (silent(lane) ? null : <span className={`subtitle-lane__tag subtitle-lane__tag--${lane.leg}`}><span className="subtitle-lane__who">{who(lane.leg)}</span></span>);
+  // Feedback that only approves is a bare tick (`tidyAnswer`): drawn as the app's own icon, in the user's colour. As
+  // a character it came from whatever font had one, and sat beside the sentence like something from another page.
+  const approves = (answer: LaneText | undefined) => answer?.text.trim() === '✓';
+  const tick = <Check className="subtitle-lane__ok" role="img" aria-label="✓" strokeWidth={3} />;
   // A newer sentence is waiting for its answer: said quietly, after what is shown.
   const pending = <span className="subtitle-lane__pending" aria-hidden="true">…</span>;
 
@@ -247,8 +252,8 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
             // The user's own, under the other side's: what they said and what answers it, on one small line.
             <Slot className="subtitle-lane__row" fitKey={`${fontSize}:${squeeze}:${lines.row}:${lane.source?.text ?? ''}:${lane.answer?.text ?? ''}`}>
               {lane.source && <span className="subtitle-lane__said" lang={langOf(lane.source)}><Written text={lane.source} lit={lit} /></span>}
-              {lane.source && lane.answer && lane.source.text !== '' && (lane.answer.text !== '' || lane.pending) && <span className="subtitle-lane__arrow" aria-hidden="true">→</span>}
-              {lane.answer && lane.answer.text !== '' && <span className="subtitle-lane__reply" lang={langOf(lane.answer)}><Written text={lane.answer} lit={lit} /></span>}
+              {lane.source && lane.answer && lane.source.text !== '' && (lane.answer.text !== '' || lane.pending) && !approves(lane.answer) && <ArrowRight className="subtitle-lane__arrow" aria-hidden="true" strokeWidth={2.5} />}
+              {lane.answer && lane.answer.text !== '' && (approves(lane.answer) ? tick : <span className="subtitle-lane__reply" lang={langOf(lane.answer)}><Written text={lane.answer} lit={lit} /></span>)}
               {lane.answer && lane.answer.text === '' && lane.pending && pending}
             </Slot>
           ) : (
@@ -264,7 +269,7 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
                   lang={langOf(lane.answer)}
                   fitKey={`${fontSize}:${squeeze}:${answerLines}:${lane.answer.text}`}
                 >
-                  <Written text={lane.answer} lit={lit} />
+                  {approves(lane.answer) ? tick : <Written text={lane.answer} lit={lit} />}
                   {!lane.source && lane.pending && pending}
                 </Slot>
               )}

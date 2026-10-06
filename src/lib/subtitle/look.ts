@@ -95,10 +95,25 @@ function soft(dark: boolean, s: number): string {
   return [`0 0 2px rgba(255,255,255,${share(1.9 * s)})`, `0 1px 4px rgba(255,255,255,${share(1.6 * s)})`, `0 0 14px rgba(255,255,255,${share(1.2 * s)})`].join(', ');
 }
 
-/** The `text-shadow` around text of a colour, at a strength of 0–100: the look's shadow, or its outline. */
-export function shadowFor(color: string, strength: number, edge: Edge): string {
+/**
+ * An outline for small writing — a reading above a word, a romanization under a line: one whole pixel of ink on
+ * every side, corners too, and nothing spread. In ems it comes out a fraction of a pixel wide at that size, which
+ * a screen draws as a haze (the user, 2026-10-06: "the romanization's outline looks blurred").
+ */
+function outlineSmall(ink: string, s: number): string {
+  const alpha = share(0.7 + 0.3 * s);
+  return [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, 1], [1, -1], [-1, -1]].map(([x, y]) => `${x}px ${y}px 0 rgba(${ink},${alpha})`).join(', ');
+}
+
+/**
+ * The `text-shadow` around text of a colour, at a strength of 0–100: the look's shadow, or its outline — `small`,
+ * the outline for writing a good deal smaller than the caption's own.
+ */
+export function shadowFor(color: string, strength: number, edge: Edge, small = false): string {
   const s = Math.min(100, Math.max(0, strength)) / 100;
   if (s === 0) return 'none';
   const light = isLight(color);
-  return edge === 'outline' ? outline(light ? '0,0,0' : '255,255,255', s) : soft(light, s);
+  const ink = light ? '0,0,0' : '255,255,255';
+  if (edge === 'outline') return small ? outlineSmall(ink, s) : outline(ink, s);
+  return soft(light, s);
 }

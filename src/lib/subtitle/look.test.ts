@@ -72,3 +72,18 @@ describe('what is drawn around the strip\u2019s text', () => {
     expect(isLight('rebeccapurple')).toBe(true);
   });
 });
+
+describe('the outline of the strip’s small writing', () => {
+  it('is one whole pixel of ink on every side, corners too, with nothing spread', () => {
+    // In ems it was a fraction of a pixel at that size, and read as a haze (the user, 2026-10-06).
+    const layers = shadowFor('#ffffff', 65, 'outline', true).split('), ');
+    expect(layers).toHaveLength(8);
+    expect(layers.every((layer) => /^-?[01]px -?[01]px 0 rgba\(0,0,0,/.test(layer))).toBe(true);
+    expect(shadowFor('#14202e', 65, 'outline', true)).toContain('rgba(255,255,255,');
+    expect(shadowFor('#ffffff', 0, 'outline', true)).toBe('none');
+  });
+
+  it('is the look’s own shadow where the look draws a shadow', () => {
+    expect(shadowFor('#ffffff', 50, 'shadow', true)).toBe(shadowFor('#ffffff', 50, 'shadow'));
+  });
+});

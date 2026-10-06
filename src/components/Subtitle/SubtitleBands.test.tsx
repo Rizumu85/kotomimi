@@ -80,6 +80,21 @@ describe('SubtitleBody — compact: the fork\u2019s lanes', () => {
     expect(mine.querySelector('.subtitle-lane__pending')).toBeNull();
   });
 
+  it('draws feedback that only approves as the app’s own tick, and keeps the arrow for a sentence put right', () => {
+    // As a character the tick came from whatever font had one, and did not look of a piece with the sentence (the user, 2026-10-06).
+    const approved = render(<SubtitleBody {...props({ entries: [exchange('a', [row('s1', 0, 0, 'Hello.')], [row('t1', 0, 0, '✓', 'translation')]), theirs('b', 'はい。', 'Yes.')] })} />);
+    const mine = approved.container.querySelector('[data-lane="speaker"]')!;
+    expect(mine.querySelector('.subtitle-lane__ok')).not.toBeNull();
+    expect(mine.querySelector('.subtitle-lane__arrow')).toBeNull();
+    expect(mine.textContent).not.toContain('✓');
+    approved.unmount();
+    const corrected = render(<SubtitleBody {...props({ entries: [exchange('a', [row('s1', 0, 0, 'Hello.')], [row('t1', 0, 0, 'Hello there.', 'translation')]), theirs('b', 'はい。', 'Yes.')] })} />);
+    const put = corrected.container.querySelector('[data-lane="speaker"]')!;
+    expect(put.querySelector('.subtitle-lane__ok')).toBeNull();
+    expect(put.querySelector('.subtitle-lane__arrow')).not.toBeNull();
+    expect(put.querySelector('.subtitle-lane__reply')?.textContent).toBe('Hello there.');
+  });
+
   it('draws the newest sentence alone, whatever was said before: a higher window is room for it, not for those', () => {
     const { container } = render(<SubtitleBody {...props({ entries: [theirs('a', 'こんにちは。', 'Hello.'), theirs('b', 'そうですね。', 'That is right.')] })} />);
     expect(texts(container.querySelector('.subtitle-lane')!)).toEqual(['そうですね。', 'That is right.']);
