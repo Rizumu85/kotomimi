@@ -131,8 +131,16 @@
     .subtitle-lane__row {
       justify-content: flex-end;
       box-sizing: content-box;
-      padding-top: 0.3em;
-      margin-top: -0.3em;
+      // Just the two pixels a reading reaches up by: with more, a line that has rolled away showed its feet above
+      // the one that took its place (the romanization's, cut in half; seen 2026-10-06).
+      padding-top: 0.12em;
+      margin-top: -0.12em;
+
+      // Rolled, not even that: the line above ends where this one begins.
+      &[data-over] {
+        padding-top: 0;
+        margin-top: 0;
+      }
       // …and a little under it: a line with a reading above comes out two pixels lower than its box says, which cut
       // the feet off the romanization under it (g, j, y; the user, 2026-10-06).
       padding-bottom: 0.2em;
@@ -441,20 +449,25 @@
   min-height: 0;
 }
 
-// Fork: the desktop strip is two pieces, one above the other: the toolbar, and under a small gap the caption box.
-// Upstream lays the toolbar over the top of the box — a strip from edge to edge with the box's corners, appearing
-// on top of the first caption line whenever the pointer comes near, and over whatever else is in the box (the
-// idle capsule, a rounded thing of another shape floating under it: two controls of two families, one glued to
-// the frame and one adrift, which is what read as "not matching" — the user, 2026-10-06). Here the window is
-// clear, the toolbar has room of its own at the top and its own rounded shape, and the box — the look's panel —
-// begins under that room. Nothing covers the captions, and the box is all captions: none of it is kept for a
-// toolbar. While the toolbar is away its room is simply clear.
+// Fork: on the desktop the toolbar stands on the caption box, and the two are one shape: the toolbar its head,
+// with the round corners at the top, the box under it with those at the foot. Upstream lays the toolbar over the
+// top of the box — it came out on top of the first caption line whenever the pointer came near. Here the window
+// is clear, the toolbar has its own room at the top, and the box — the look's panel — begins where it ends. Nothing
+// covers the captions, and none of the box is kept for a toolbar. While the toolbar is away its room is simply
+// clear, and the box has its own round corners back.
 //
-// And the box shows its edge while the pointer is over the window: with a look that has no panel there was
-// nothing to say how large the window is or where it can be taken hold of. Not while the mouse passes through,
-// and not otherwise: a strip nobody is pointing at is only its words.
+// (They were two pieces with a gap between, first, and the box had a line around it while the pointer was over the
+// window: the gap read as two things, and the line was plain ugly — the user, 2026-10-06, twice.)
+//
+// Where the look has no panel, the box has nothing to be seen by: while the pointer is over the window it shows a
+// faint surface — a little dark, a little light at its edges, so that it reads over a bright scene and a dark
+// one — and that is how its size and its edges are found. No line. With a panel, faint or dark, the panel is the
+// surface and nothing is added. Not while the mouse passes through, and not otherwise: a strip nobody is pointing
+// at is only its words.
 .subtitle-app.subtitle-app--framed {
-  --kt-bar-room: 42px;
+  --kt-bar-room: 36px;
+  // The top corners of the box: round while the toolbar is away, square where it joins.
+  --kt-box-top: calc((1 - var(--bar-opacity, 0)) * 10px);
   box-sizing: border-box;
   padding-top: var(--kt-bar-room);
   border-radius: 10px;
@@ -465,34 +478,41 @@
     content: '';
     position: absolute;
     inset: var(--kt-bar-room) 0 0 0;
-    z-index: -1;
-    border-radius: 10px;
+    z-index: -2;
+    border-radius: var(--kt-box-top) var(--kt-box-top) 10px 10px;
     background: var(--kt-panel, transparent);
     pointer-events: none;
+    transition: border-radius 200ms ease-in-out;
   }
 
-  // Its edge, with the toolbar: a light line with a dark one inside it, so that it shows over anything.
-  &::after {
+  // The surface a look with no panel shows under the pointer.
+  &.is-clear::after {
     content: '';
     position: absolute;
     inset: var(--kt-bar-room) 0 0 0;
-    z-index: 5;
-    border-radius: 10px;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7), inset 0 0 0 2px rgba(0, 0, 0, 0.35);
+    z-index: -1;
+    border-radius: 0 0 10px 10px;
+    background: rgba(0, 0, 0, 0.16);
+    box-shadow: inset 0 0 22px rgba(255, 255, 255, 0.1);
     opacity: var(--bar-opacity, 0);
     transition: opacity 200ms ease-in-out;
     pointer-events: none;
   }
 
-  &.is-through::after {
-    opacity: 0;
+  // The mouse passes through: the toolbar is not drawn, so nothing joins the box and nothing is under the pointer.
+  &.is-through {
+    --kt-box-top: 10px;
+
+    &::after {
+      opacity: 0;
+    }
   }
 
   > .subtitle-bar {
-    border-radius: 10px;
+    border-radius: 10px 10px 0 0;
   }
 
-  // Filling the screen there is no window to show the edge of, and the box has the screen's corners.
+  // Filling the screen the box has the screen's corners, and there is no window to find the edges of.
   &.fullscreen {
     border-radius: 0;
 
@@ -502,6 +522,10 @@
 
     &::after {
       display: none;
+    }
+
+    > .subtitle-bar {
+      border-radius: 0;
     }
   }
 }

@@ -52,8 +52,10 @@ function languageCodeShort(code: string | undefined): string {
   return code ? baseLang(code).slice(0, 2).toUpperCase() : '?';
 }
 
-/** The toolbar's room above the caption box on the desktop: its 36 pixels and the gap under it (`--kt-bar-room` in `SubtitleStream.scss`). */
-const BAR_ROOM = 42;
+/** The toolbar's room above the caption box on the desktop: its 36 pixels, the box beginning where it ends (`--kt-bar-room` in `SubtitleStream.scss`). */
+const BAR_ROOM = 36;
+/** A panel fainter than this (of 100) is none: the box then has nothing of its own to be seen by. */
+const CLEAR_UNDER = 8;
 
 function idleState(idle: SubtitleIdleModel | undefined, t: TFunction): SubtitleIdleState {
   if (!idle) return { kind: 'ended' };
@@ -202,7 +204,7 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
   const rootProps = surface === 'electron'
     ? {
         ...shown,
-        className: `${shown.className} subtitle-app--framed${through ? ' is-through' : ''}`,
+        className: `${shown.className} subtitle-app--framed${through ? ' is-through' : ''}${(subtitle.bgOpacity ?? 0) < CLEAR_UNDER ? ' is-clear' : ''}`,
         style: {
           ...shown.style,
           '--kt-panel': shown.style.background as string,
