@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import type { Entry, Row } from '../projection/types';
-import { answeredOf, HOLD_LEAST_MS, HOLD_MOST_MS, HOLD_MOST_WAITING_MS, holdMs, nextShown, readMs } from './dwell';
+import { answeredOf, HOLD_LEAST_MS, HOLD_MOST_MS, holdMs, nextShown, readMs } from './dwell';
 
 describe('how long a caption stays before the next takes its place', () => {
   it('is its length at the pace its language is read at', () => {
-    // Eighteen characters: two seconds of Chinese, 3.6 of Japanese, a little over one of English.
+    // Eighteen characters: two seconds of Chinese, 1.8 of Korean; Japanese would take 3.6, and is held the most.
     const text = '一二三四五六七八九十一二三四五六七八';
     expect(readMs(text, 'zh-CN')).toBe(2000);
-    expect(readMs(text, 'ja')).toBe(3600);
+    expect(readMs(text, 'ja')).toBe(HOLD_MOST_MS);
+    expect(readMs('一二三四五六七八九十', 'ja')).toBe(2000);
     expect(readMs(text, 'ko-KR')).toBe(1800);
     expect(readMs('It is nice today, I think so too.', 'en')).toBe(Math.round((33 / 17) * 1000));
     // A language nothing is known of reads as one written with spaces.
@@ -19,10 +20,12 @@ describe('how long a caption stays before the next takes its place', () => {
     expect(readMs('あ'.repeat(80), 'ja')).toBe(HOLD_MOST_MS);
   });
 
-  it('is cut short where more than one is waiting', () => {
+  it('is bounded, so that a fast speaker\u2019s captions do not fall behind: 2.5 s at most, and the least where a second one waits', () => {
+    // Asked by the user 2026-10-06: "if they talk fast, will the captions drift later and later?"
     const long = 'あ'.repeat(30);
+    expect(HOLD_MOST_MS).toBe(2500);
     expect(holdMs(long, 'ja', 1)).toBe(HOLD_MOST_MS);
-    expect(holdMs(long, 'ja', 2)).toBe(HOLD_MOST_WAITING_MS);
+    expect(holdMs(long, 'ja', 2)).toBe(HOLD_LEAST_MS);
     expect(holdMs('好。', 'zh', 3)).toBe(HOLD_LEAST_MS);
   });
 

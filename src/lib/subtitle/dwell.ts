@@ -9,10 +9,17 @@
  * its place: its length at the pace its language is read at, as subtitling
  * counts it — about nine characters a second of Chinese, five of Japanese
  * (broadcast captions count four), ten of Korean, seventeen of a language
- * written with spaces. Never under 1.2 s, never over 5 s; and where more
- * than one is waiting, no more than 2.5 s, and the oldest of a long queue
- * are passed over: a caption that is read but seconds behind the voice is
- * no better than one that is missed.
+ * written with spaces. Never under 1.2 s.
+ *
+ * And never so long that the captions fall behind a fast speaker: a hold
+ * only ever delays the next caption, so it is bounded. An answer is held
+ * no more than 2.5 s; with a second one waiting behind the next, only the
+ * least; and of a longer queue the oldest are passed over. A caption is
+ * then at most about two and a half seconds behind where it would have
+ * been, and the first pause in the talk brings it level — a caption read
+ * but seconds behind the voice is no better than one missed. (The first
+ * version held up to 5 s, and 2.5 s each of a queue: with captions coming
+ * every two seconds that drifts.)
  *
  * Pure: the component keeps the clock (`SubtitleLanes`).
  */
@@ -20,8 +27,7 @@ import type { LegName } from '../conversation/types';
 import type { Entry } from '../projection/types';
 
 export const HOLD_LEAST_MS = 1200;
-export const HOLD_MOST_MS = 5000;
-export const HOLD_MOST_WAITING_MS = 2500;
+export const HOLD_MOST_MS = 2500;
 
 /** Characters read in a second, by the language's base code; any other: `READ_CPS`. */
 const READ_CPS_OF: Readonly<Record<string, number>> = { zh: 9, yue: 9, ja: 5, ko: 10 };
@@ -34,10 +40,9 @@ export function readMs(text: string, language: string | undefined): number {
   return Math.min(HOLD_MOST_MS, Math.max(HOLD_LEAST_MS, Math.round(ms)));
 }
 
-/** How long an answer is held while `waiting` newer ones are ready (at least one). */
+/** How long an answer is held while `waiting` newer ones are ready (at least one): its reading time — the least, with more than one. */
 export function holdMs(text: string, language: string | undefined, waiting: number): number {
-  const need = readMs(text, language);
-  return waiting > 1 ? Math.min(need, HOLD_MOST_WAITING_MS) : need;
+  return waiting > 1 ? HOLD_LEAST_MS : readMs(text, language);
 }
 
 /** Which answer is shown after the one at `at`, the newest being at `last`: the next — or, far behind, the one before the newest. */
