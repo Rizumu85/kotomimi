@@ -6,6 +6,7 @@ import useAudioStore from '../stores/audioStore';
 import { useLoadSettings } from '../stores/settingsStore';
 import { useSubtitleStore } from '../stores/subtitleStore';
 import { useAnnotationStore } from '../stores/annotationStore';
+import { useSubtitleLookStore } from '../stores/subtitleLookStore';
 import { useLanStore } from '../stores/lanStore';
 import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../stores/nativeEngineStore';
 import { useLanguagePinStore } from '../stores/languagePinStore';
@@ -37,6 +38,7 @@ export function Home() {
       useSubtitleStore.getState().hydrate(),
       useConversationDisplayStore.getState().hydrate(),
       useAnnotationStore.getState().hydrate(),
+      useSubtitleLookStore.getState().hydrate(),
       useFontStore.getState().hydrate(),
       useSetupStore.getState().hydrate(),
     ]).catch((err) => {

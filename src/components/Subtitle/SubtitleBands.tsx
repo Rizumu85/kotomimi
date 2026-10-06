@@ -5,6 +5,8 @@ import { displayItems, type LegFilters } from '../../lib/view/filter';
 import { ConversationList, type ConversationListProps } from '../Conversation/ConversationList';
 import { useVisibleEntries } from '../Conversation/useVisibleEntries';
 import { SubtitleLanes } from './SubtitleLanes';
+import { shadowFor } from '../../lib/subtitle/look';
+import { useSubtitleLookStore } from '../../stores/subtitleLookStore';
 import './SubtitleStream.scss';
 
 export interface SubtitleBodyProps {
@@ -61,6 +63,11 @@ export function SubtitleBody(props: SubtitleBodyProps) {
     style['--subtitle-translation-color'] = translationTextColor;
     style['--conversation-translation-color'] = translationTextColor;
   }
+  // Fork: the look's shadow — dark around light text, light around dark — and where the lanes' text sits.
+  const shadow = useSubtitleLookStore((state) => state.shadow);
+  const align = useSubtitleLookStore((state) => state.align);
+  style['--subtitle-shadow-source'] = shadowFor(sourceTextColor ?? '#ffffff', shadow);
+  style['--subtitle-shadow-answer'] = shadowFor(translationTextColor ?? '#ffffff', shadow);
   const items = useMemo(() => (compact ? [] : displayItems(entries, filters)), [compact, entries, filters]);
   // A lane for each leg heard; where the caller does not say which, for each that has said something.
   const legs = useMemo<readonly LegName[]>(
@@ -68,7 +75,7 @@ export function SubtitleBody(props: SubtitleBodyProps) {
     [props.legs, entries],
   );
   return (
-    <div className={`subtitle-stream ${compact ? 'compact' : 'expanded'}`} style={style}>
+    <div className={`subtitle-stream ${compact ? 'compact' : 'expanded'}`} data-align={align} style={style}>
       {compact ? (
         <SubtitleLanes entries={entries} lit={lit} legs={legs} filters={filters} fontSize={fontSize} onHeight={onHeight} />
       ) : (

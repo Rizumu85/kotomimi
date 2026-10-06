@@ -19,6 +19,15 @@
     background: transparent;
   }
 
+  // Fork: the look's shadow (`src/lib/subtitle/look.ts`), each text's by its own colour: none where the look has none.
+  text-shadow: var(--subtitle-shadow-answer, none);
+
+  .subtitle-lane__source,
+  .subtitle-lane__said,
+  .row-text.src {
+    text-shadow: var(--subtitle-shadow-source, none);
+  }
+
   // Compact mode, the fork's lanes (`SubtitleLanes.tsx`, `src/lib/subtitle/lanes.ts`): the other side's newest
   // sentence, small, over its translation, large; and under a hairline the user's own sentence with what answers it,
   // on one small line. Each text is a box whose share of the height is what it is laid out for, so the texts keep
@@ -146,8 +155,14 @@
       opacity: 0.8;
     }
 
+    // Centred, for a look with no panel behind the text.
+    &[data-align='center'] .subtitle-lanes {
+      text-align: center;
+    }
+
     // Whose lane it is, at the start of its first text: the pair's small line, or the row.
     .subtitle-lane__tag {
+      text-shadow: none;
       display: inline-block;
       margin-right: 0.7em;
       padding: 0 0.6em;
@@ -156,13 +171,15 @@
       line-height: 1.6;
       font-style: normal;
       vertical-align: 0.08em;
-      background: rgba(tk.$color-participant, 0.22);
+      // A dark pill of its own: read over a panel, and over anything at all where the look has none.
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(tk.$color-participant, 0.5);
       color: #fac775;
       opacity: 1;
     }
 
     .subtitle-lane__tag--speaker {
-      background: rgba(tk.$color-speaker, 0.22);
+      border-color: rgba(tk.$color-speaker, 0.55);
       color: #9fe1cb;
     }
 
@@ -229,4 +246,12 @@
       }
     }
   }
+}
+
+// Fork: with a look that has no panel (`src/lib/subtitle/look.ts`), what the strip says while no run is on — its
+// start button's hints, "press Space to speak" — is light text over whatever is behind the window. A dark shadow of
+// its own, whatever the look's, so that it can always be read.
+.subtitle-idle,
+.subtitle-ptt-hint {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 12px rgba(0, 0, 0, 0.5);
 }

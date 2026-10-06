@@ -141,3 +141,25 @@ describe('SubtitleBody — a transient notice (#481)', () => {
     }
   });
 });
+
+describe('SubtitleBody — the look\u2019s shadow and alignment (fork)', () => {
+  it('draws no shadow and sits at the left as the strip always did, and follows the look when one is chosen', async () => {
+    const { useSubtitleLookStore } = await import('../../stores/subtitleLookStore');
+    const plain = render(<SubtitleBody {...props({ sourceTextColor: '#ffffff', translationTextColor: '#9ad0ff' })} />);
+    const stream = plain.container.querySelector('.subtitle-stream') as HTMLElement;
+    expect(stream.getAttribute('data-align')).toBe('left');
+    expect(stream.style.getPropertyValue('--subtitle-shadow-answer')).toBe('none');
+    plain.unmount();
+    act(() => { useSubtitleLookStore.setState({ shadow: 50, align: 'center' }); });
+    try {
+      // Dark text gets a light shadow, light text a dark one: each by its own colour.
+      const { container } = render(<SubtitleBody {...props({ sourceTextColor: '#f4f4f4', translationTextColor: '#14202e' })} />);
+      const lit = container.querySelector('.subtitle-stream') as HTMLElement;
+      expect(lit.getAttribute('data-align')).toBe('center');
+      expect(lit.style.getPropertyValue('--subtitle-shadow-source')).toContain('rgba(0,0,0,');
+      expect(lit.style.getPropertyValue('--subtitle-shadow-answer')).toContain('rgba(255,255,255,');
+    } finally {
+      act(() => { useSubtitleLookStore.setState({ shadow: 0, align: 'left' }); });
+    }
+  });
+});

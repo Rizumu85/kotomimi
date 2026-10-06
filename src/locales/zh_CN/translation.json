@@ -1675,6 +1675,19 @@
     "subtitle": {
       "lanesView": "字幕视图",
       "listView": "列表视图",
+      "look": "样式",
+      "lookPanel": "深色底",
+      "lookSoft": "淡底柔影",
+      "lookLight": "亮字黑影",
+      "lookDark": "暗字白影",
+      "lookSample": "字幕",
+      "backdrop": "底色深浅",
+      "shadow": "阴影强度",
+      "off": "关",
+      "align": "对齐",
+      "alignLeft": "靠左",
+      "alignCenter": "居中",
+      "moreColors": "更多颜色（原文、底色）",
       "back": "返回主窗口"
     },
     "fonts": {

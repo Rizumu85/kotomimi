@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus } from 'lucide-react';
+import { ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import {
   useSubtitleBgOpacity,
   useSubtitleBgColor,
@@ -30,6 +30,9 @@ import {
   CONVERSATION_DISPLAY_DEFAULT_TRANSLATION_TEXT_COLOR,
 } from '../../stores/conversationDisplayStore';
 import { ReadingAidToggles } from '../Annotated/ReadingAidToggles';
+import { LOOKS, type Look } from '../../lib/subtitle/look';
+import { useSubtitleLookStore } from '../../stores/subtitleLookStore';
+import { SubtitleLook } from './SubtitleLook';
 import './DisplaySettingsPopover.scss';
 
 const BG_PRESETS = ['#000000', '#1a1a1a', '#0d2032', '#0f2419', '#FFFFFF', '#2a2a2a'];
@@ -140,42 +143,78 @@ const DisplaySettingsPopoverInner: React.FC<{ bindings: InnerBindings }> = ({ bi
   // @floating-ui/react's useRole, which also wires aria-haspopup / aria-
   // expanded / aria-controls on the trigger. Keeping the role on a single
   // level avoids duplicate dialog announcements.
+  // Fork: the subtitle's popover opens on its looks (`SubtitleLook`); the colour most often changed stays in sight
+  // under them, and the other two fold away. The panel's popover, which has no looks, is as upstream drew it.
+  const [moreColors, setMoreColors] = useState(false);
+  const applyLook = useCallback((look: Look) => {
+    const preset = LOOKS[look];
+    const store = useSubtitleLookStore.getState();
+    void store.setLook(look);
+    void store.setShadow(preset.shadow);
+    void store.setAlign(preset.align);
+    void bindings.setBgOpacity?.(preset.bgOpacity);
+    void bindings.setBgColor(preset.bgColor);
+    void bindings.setSourceTextColor(preset.sourceTextColor);
+    void bindings.setTranslationTextColor(preset.translationTextColor);
+  }, [bindings]);
+  const bgRow = (
+    <ColorRow
+      labelKey="subtitle.settings.bgColor"
+      labelDefault="Display background"
+      defaultColor={bindings.defaultBgColor}
+      presets={BG_PRESETS}
+      value={bindings.bgColor}
+      onChange={bindings.setBgColor}
+      pickerOpen={openPicker === 'bg'}
+      onTogglePicker={() => togglePicker('bg')}
+    />
+  );
+  const sourceRow = (
+    <ColorRow
+      labelKey="subtitle.settings.sourceColor"
+      labelDefault="Source text"
+      defaultColor={bindings.defaultSourceTextColor}
+      presets={SOURCE_PRESETS}
+      value={bindings.sourceTextColor}
+      onChange={bindings.setSourceTextColor}
+      pickerOpen={openPicker === 'source'}
+      onTogglePicker={() => togglePicker('source')}
+    />
+  );
+  const translationRow = (
+    <ColorRow
+      labelKey="subtitle.settings.translationColor"
+      labelDefault="Translation text"
+      defaultColor={bindings.defaultTranslationTextColor}
+      presets={TRANSLATION_PRESETS}
+      value={bindings.translationTextColor}
+      onChange={bindings.setTranslationTextColor}
+      pickerOpen={openPicker === 'translation'}
+      onTogglePicker={() => togglePicker('translation')}
+    />
+  );
+
   return (
     <div className="display-settings-popover">
-      {includeOpacity && (
-        <OpacitySlider value={bindings.bgOpacity!} onCommit={bindings.setBgOpacity!} />
+      {includeOpacity ? (
+        <>
+          <SubtitleLook bgOpacity={bindings.bgOpacity!} onLook={applyLook} onBgOpacity={(value) => void bindings.setBgOpacity!(value)} />
+          {translationRow}
+          <div className="kt-more-colors">
+            <button type="button" aria-expanded={moreColors} onClick={() => setMoreColors((open) => !open)}>
+              <span>{t('fork.subtitle.moreColors', 'More colours (source text, panel)')}</span>
+              {moreColors ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            </button>
+            {moreColors && <div className="kt-more-colors__body">{sourceRow}{bgRow}</div>}
+          </div>
+        </>
+      ) : (
+        <>
+          {bgRow}
+          {sourceRow}
+          {translationRow}
+        </>
       )}
-
-      <ColorRow
-        labelKey="subtitle.settings.bgColor"
-        labelDefault="Display background"
-        defaultColor={bindings.defaultBgColor}
-        presets={BG_PRESETS}
-        value={bindings.bgColor}
-        onChange={bindings.setBgColor}
-        pickerOpen={openPicker === 'bg'}
-        onTogglePicker={() => togglePicker('bg')}
-      />
-      <ColorRow
-        labelKey="subtitle.settings.sourceColor"
-        labelDefault="Source text"
-        defaultColor={bindings.defaultSourceTextColor}
-        presets={SOURCE_PRESETS}
-        value={bindings.sourceTextColor}
-        onChange={bindings.setSourceTextColor}
-        pickerOpen={openPicker === 'source'}
-        onTogglePicker={() => togglePicker('source')}
-      />
-      <ColorRow
-        labelKey="subtitle.settings.translationColor"
-        labelDefault="Translation text"
-        defaultColor={bindings.defaultTranslationTextColor}
-        presets={TRANSLATION_PRESETS}
-        value={bindings.translationTextColor}
-        onChange={bindings.setTranslationTextColor}
-        pickerOpen={openPicker === 'translation'}
-        onTogglePicker={() => togglePicker('translation')}
-      />
       {includeHighlightToggle && (
         <div className="field">
           <ToggleSwitch
@@ -194,52 +233,6 @@ const DisplaySettingsPopoverInner: React.FC<{ bindings: InnerBindings }> = ({ bi
       )}
       {/* Fork: furigana and romanization, the same pair on every surface. */}
       <ReadingAidToggles />
-    </div>
-  );
-};
-
-// ──────────── Opacity slider (subtitle-only) ────────────
-// Local state during pointer drag so we don't fire setBgOpacity (and the
-// async persist behind it) for every intermediate value. The store is
-// updated only when the user releases the pointer or finishes a keyboard
-// interaction.
-
-const OpacitySlider: React.FC<{
-  value: number;
-  onCommit: (n: number) => Promise<void>;
-}> = ({ value, onCommit }) => {
-  const { t } = useTranslation();
-  const id = useId();
-  const [local, setLocal] = useState(value);
-
-  // Sync local state if the bound value changes externally (hydration,
-  // someone else's update).
-  useEffect(() => {
-    setLocal(value);
-  }, [value]);
-
-  const commit = useCallback(() => {
-    if (local !== value) {
-      void onCommit(local);
-    }
-  }, [local, value, onCommit]);
-
-  return (
-    <div className="field">
-      <label htmlFor={id}>
-        {t('subtitle.settings.bgOpacity', 'Background opacity')} ({local}%)
-      </label>
-      <input
-        id={id}
-        type="range"
-        min={0}
-        max={100}
-        step={1}
-        value={local}
-        onChange={(e) => setLocal(Number(e.target.value))}
-        onPointerUp={commit}
-        onKeyUp={commit}
-      />
     </div>
   );
 };

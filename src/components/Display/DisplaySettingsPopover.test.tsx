@@ -52,9 +52,12 @@ describe('DisplaySettingsPopover', () => {
 
   it('clicking a preset chip in subtitle mode updates only subtitleStore', async () => {
     const { container } = render(<DisplaySettingsPopover source="subtitle" />);
-    const whiteChip = container.querySelector(
+    // Fork: the panel's and the source text's colours are folded under "More colours".
+    await act(async () => { fireEvent.click(container.querySelector('.kt-more-colors > button')!); });
+    // The panel's row is the last of the three now.
+    const whiteChip = [...container.querySelectorAll(
       'button.swatch[aria-label="#FFFFFF"]',
-    ) as HTMLButtonElement;
+    )].pop() as HTMLButtonElement;
     expect(whiteChip).not.toBeNull();
     await act(async () => { fireEvent.click(whiteChip); });
     expect(useSubtitleStore.getState().bgColor).toBe('#FFFFFF');
@@ -218,13 +221,14 @@ describe('DisplaySettingsPopover', () => {
     expect(useSubtitleStore.getState().newItemHighlightEnabled).toBe(true);
   });
 
-  it('first chip in each row reflects the source store default (subtitle)', () => {
+  it('first chip in each row reflects the source store default (subtitle)', async () => {
     const { container } = render(<DisplaySettingsPopover source="subtitle" />);
+    // Fork: the translation's colour first, in sight; then, unfolded, the source text's and the panel's.
+    await act(async () => { fireEvent.click(container.querySelector('.kt-more-colors > button')!); });
     const fields = container.querySelectorAll('.field');
-    // Field 0 = opacity slider; fields 1-3 = bg/source/translation
-    const bgFirstChip = fields[1].querySelector('button.swatch') as HTMLButtonElement;
-    const sourceFirstChip = fields[2].querySelector('button.swatch') as HTMLButtonElement;
-    const translationFirstChip = fields[3].querySelector('button.swatch') as HTMLButtonElement;
+    const translationFirstChip = fields[0].querySelector('button.swatch') as HTMLButtonElement;
+    const sourceFirstChip = fields[1].querySelector('button.swatch') as HTMLButtonElement;
+    const bgFirstChip = fields[2].querySelector('button.swatch') as HTMLButtonElement;
     expect(bgFirstChip.getAttribute('aria-label')).toBe('#000000');
     expect(sourceFirstChip.getAttribute('aria-label')).toBe('#ffffff');
     expect(translationFirstChip.getAttribute('aria-label')).toBe('#9ad0ff');
@@ -240,5 +244,34 @@ describe('DisplaySettingsPopover', () => {
     expect(bgFirstChip.getAttribute('aria-label')).toBe('#1f1f1f');
     expect(sourceFirstChip.getAttribute('aria-label')).toBe('#9aa0a6');
     expect(translationFirstChip.getAttribute('aria-label')).toBe('#e8e8e8');
+  });
+});
+
+describe('the subtitle popover\u2019s looks (fork)', () => {
+  const tiles = (container: HTMLElement) => [...container.querySelectorAll('.kt-look__tile')] as HTMLButtonElement[];
+
+  it('offers four to start from, the one last chosen marked, over the panel\u2019s popover none', () => {
+    const subtitle = render(<DisplaySettingsPopover source="subtitle" />);
+    expect(tiles(subtitle.container)).toHaveLength(4);
+    expect(tiles(subtitle.container).map((tile) => tile.getAttribute('aria-checked'))).toEqual(['true', 'false', 'false', 'false']);
+    subtitle.unmount();
+    const panel = render(<DisplaySettingsPopover source="conversation" />);
+    expect(tiles(panel.container)).toHaveLength(0);
+    expect(panel.container.querySelector('.kt-more-colors')).toBeNull();
+  });
+
+  it('writes a look\u2019s whole set at once: the panel, the two colours, the shadow and where the text sits', async () => {
+    const { useSubtitleLookStore } = await import('../../stores/subtitleLookStore');
+    const { container } = render(<DisplaySettingsPopover source="subtitle" />);
+    await act(async () => { fireEvent.click(tiles(container)[2]); });
+    expect(useSubtitleStore.getState()).toMatchObject({ bgOpacity: 0, sourceTextColor: '#f4f4f4', translationTextColor: '#ffffff' });
+    expect(useSubtitleLookStore.getState()).toMatchObject({ look: 'light', shadow: 60, align: 'center' });
+    // A value changed after stays changed, and the look stays the one chosen.
+    await act(async () => { fireEvent.click(container.querySelector('.kt-look__sides button[aria-checked="false"]')!); });
+    expect(useSubtitleLookStore.getState()).toMatchObject({ look: 'light', align: 'left' });
+    // Back to what the strip was.
+    await act(async () => { fireEvent.click(tiles(container)[0]); });
+    expect(useSubtitleStore.getState()).toMatchObject({ bgOpacity: 80, sourceTextColor: '#ffffff', translationTextColor: '#9ad0ff' });
+    expect(useSubtitleLookStore.getState()).toMatchObject({ look: 'panel', shadow: 0, align: 'left' });
   });
 });

@@ -118,6 +118,7 @@ jobs:
           electron/entry-map.consistency.test.js
           electron/update-payload.test.js
           src/lib/subtitle
+          src/components/Display
           src/components/Subtitle
           src/stores/subtitleStore.test.ts
           electron/subtitle-window.test.js

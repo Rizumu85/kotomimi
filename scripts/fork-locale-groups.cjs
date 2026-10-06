@@ -179,6 +179,20 @@ module.exports = {
     // The two views of the subtitle window, by what they are: the caption lanes, and the conversation as a list.
     lanesView: ['Subtitle view', '字幕视图', '字幕檢視'],
     listView: ['List view', '列表视图', '列表檢視'],
+    // The looks of the strip (`src/lib/subtitle/look.ts`), at the head of its display popover.
+    look: ['Look', '样式', '樣式'],
+    lookPanel: ['Dark panel', '深色底', '深色底'],
+    lookSoft: ['Faint panel', '淡底柔影', '淡底柔影'],
+    lookLight: ['Light text', '亮字黑影', '亮字黑影'],
+    lookDark: ['Dark text', '暗字白影', '暗字白影'],
+    lookSample: ['Aa', '字幕', '字幕'],
+    backdrop: ['Panel', '底色深浅', '底色深淺'],
+    shadow: ['Shadow', '阴影强度', '陰影強度'],
+    off: ['Off', '关', '關'],
+    align: ['Alignment', '对齐', '對齊'],
+    alignLeft: ['Left', '靠左', '靠左'],
+    alignCenter: ['Centre', '居中', '置中'],
+    moreColors: ['More colours (source text, panel)', '更多颜色（原文、底色）', '更多顏色（原文、底色）'],
     back: ['Back to the main window', '返回主窗口', '返回主視窗'],
   },
   fonts: {

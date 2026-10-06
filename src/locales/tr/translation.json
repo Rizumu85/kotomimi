@@ -1675,6 +1675,19 @@
     "subtitle": {
       "lanesView": "Subtitle view",
       "listView": "List view",
+      "look": "Look",
+      "lookPanel": "Dark panel",
+      "lookSoft": "Faint panel",
+      "lookLight": "Light text",
+      "lookDark": "Dark text",
+      "lookSample": "Aa",
+      "backdrop": "Panel",
+      "shadow": "Shadow",
+      "off": "Off",
+      "align": "Alignment",
+      "alignLeft": "Left",
+      "alignCenter": "Centre",
+      "moreColors": "More colours (source text, panel)",
       "back": "Back to the main window"
     },
     "fonts": {
