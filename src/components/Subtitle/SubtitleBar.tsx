@@ -320,12 +320,14 @@ const SubtitleBar: React.FC<Props> = ({
             <Pin size={14} />
           </button>
         )}
-        {surface === 'electron' && sessionControl?.isSessionActive && (
+        {surface === 'electron' && sessionControl && (
           // The same button turns it on and off, in the same place: while it is on, it is the one thing of the bar
-          // that is drawn, and only while the pointer is over the strip.
+          // that is drawn, and only while the pointer is over the strip. It is there with no run on too, and cannot
+          // be pressed: coming and going with a run, it pushed every button to its left aside (the user, 2026-10-06).
           <button
             type="button"
             className={`subtitle-bar__btn subtitle-bar__through${through ? ' active' : ''}`}
+            disabled={!sessionControl.isSessionActive}
             onClick={() => setThrough(!through)}
             title={through ? t('fork.subtitle.throughOff', 'Stop click-through') : t('fork.subtitle.through', 'Click-through: the mouse passes through the captions')}
             aria-label={through ? t('fork.subtitle.throughOff', 'Stop click-through') : t('fork.subtitle.through', 'Click-through: the mouse passes through the captions')}

@@ -213,9 +213,10 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
         },
       }
     : shown;
+  const idleNow = idleState(session?.idle, t);
   const idle = running ? null : (
     <SubtitleIdle
-      state={idleState(session?.idle, t)}
+      state={idleNow}
       onStart={start ?? noop}
       onReturn={controls.exit}
       allowSessionControl={surface === 'electron'}
@@ -256,7 +257,10 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
           onStop: stop,
         } : undefined}
         holdToTalk={showHoldToTalk ? { onPress: controls.press, onRelease: controls.release, onHeldChange: setHoldHeld } : undefined}
-        status={idleInBar ? idle : undefined}
+        // Nothing to say of a strip that is simply ready to be started: the toolbar reads as it will while a run is
+        // on — the clock at nought, the pair — and its start button is the invitation. ("Set the window's place and
+        // size before you start" went: the user, 2026-10-06.)
+        status={idleInBar && idleNow.kind !== 'ready' ? idle : undefined}
       />
       {running ? (
         surface === 'electron' && session.holdToTalk && entries.length === 0 ? (

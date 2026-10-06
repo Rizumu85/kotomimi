@@ -192,11 +192,13 @@ describe('SubtitleView', () => {
     expect(failed.container.querySelector('.subtitle-idle__error')?.textContent).toBe('Failed to start: The provider ended the session.');
   });
 
-  it('starts from the idle body on the Electron takeover', () => {
-    const acts = controls();
-    render(<SubtitleView surface="electron" model={{ entries: [], lit: new Map(), session: session({ phase: 'idle', since: null, canStart: true, idle: { kind: 'ready' } }) }} controls={acts} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Start translating' }));
-    expect(acts.start).toHaveBeenCalledTimes(1);
+  it('says nothing of a strip that is simply ready on the desktop: the toolbar’s own button starts it', () => {
+    // Fork: upstream's idle body had a start button and a hint ("set the window's place and size first"); here the
+    // toolbar is out and reads as it will while a run is on (the user, 2026-10-06).
+    const { container } = render(<SubtitleView surface="electron" model={{ entries: [], lit: new Map(), session: session({ phase: 'idle', since: null, canStart: true, idle: { kind: 'ready' } }) }} controls={controls()} />);
+    expect(container.querySelector('.subtitle-idle')).toBeNull();
+    expect(screen.getByTestId('bar').dataset.control).toBe('yes');
+    expect((container.firstElementChild as HTMLElement).style.getPropertyValue('--bar-opacity')).toBe('1');
   });
 
   it('says what state the strip is in inside the toolbar on the desktop, and leaves the box clear', () => {
