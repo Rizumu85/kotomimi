@@ -56,8 +56,9 @@
       flex: 0 1 auto;
       min-height: 0;
       display: grid;
-      grid-template-columns: var(--lane-tag-column, 2.3em) minmax(0, 1fr);
-      column-gap: 0.55em;
+      // In pixels: the tag is one size whatever the text's.
+      grid-template-columns: var(--lane-tag-column, 34px) minmax(0, 1fr);
+      column-gap: 10px;
       align-items: start;
       position: relative;
     }
@@ -189,37 +190,52 @@
       text-align: center;
 
       .subtitle-lane {
-        padding-right: calc(var(--lane-tag-column, 2.3em) + 0.55em);
+        padding-right: calc(var(--lane-tag-column, 34px) + 10px);
       }
     }
 
-    // Whose lane it is: a solid pill of its own, dark with a bright word — read over a panel, a faint one, or nothing
-    // at all — level with the lane's first line.
+    // Whose lane it is: a small word in the lane's colour, with the text's own shadow or outline — a speaker's name
+    // in a caption, not a badge laid over it. One size whatever the text's (a tag that grew and shrank with the font,
+    // and a pill of its own colours, were both wrong: the user, 2026-10-06). The box is as tall as the lane's first
+    // line, so the word sits level with it.
     .subtitle-lane__tag {
       justify-self: start;
-      margin-top: 0.3em;
-      padding: 0 0.65em;
-      border-radius: 1em;
-      font-size: 0.5em;
-      font-weight: 500;
-      line-height: 1.6;
+      display: flex;
+      align-items: center;
+      height: calc(0.62em * var(--lane-source-line, 1.9));
       font-style: normal;
       white-space: nowrap;
-      text-shadow: none;
-      background: #2a2213;
-      border: 1px solid rgba(tk.$color-participant, 0.75);
-      color: #ffd591;
     }
 
-    .subtitle-lane__tag--speaker {
-      background: #12261f;
-      border-color: rgba(tk.$color-speaker, 0.8);
-      color: #b6f0dc;
+    .subtitle-lane--row .subtitle-lane__tag {
+      height: calc(0.62em * var(--lane-row-line, 1.9));
     }
 
-    // Beside the large answer (the sentence is not shown) the tag sits lower, level with that line.
+    // Beside the large answer (the sentence is not shown) it is level with that line.
     .subtitle-lane--large .subtitle-lane__tag {
-      margin-top: 0.75em;
+      height: calc(1em * var(--lane-answer-line, 1.4));
+    }
+
+    .subtitle-lane__who {
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 16px;
+      letter-spacing: 0.04em;
+      color: #ffcf7a;
+      text-shadow: var(--subtitle-shadow-source, none);
+    }
+
+    .subtitle-lane__tag--speaker .subtitle-lane__who {
+      color: #8fe3c4;
+    }
+
+    // Dark text (on a light edge): the same two colours, dark.
+    &[data-ink='dark'] .subtitle-lane__who {
+      color: #7a4a00;
+    }
+
+    &[data-ink='dark'] .subtitle-lane__tag--speaker .subtitle-lane__who {
+      color: #0a5a40;
     }
 
     .subtitle-lane__text {

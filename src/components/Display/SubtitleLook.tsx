@@ -63,7 +63,7 @@ export function SubtitleLook({ bgOpacity, onLook, onBgOpacity }: SubtitleLookPro
                   className="kt-look__sample"
                   style={{
                     color: preset.translationTextColor,
-                    textShadow: shadowFor(preset.translationTextColor, preset.shadow),
+                    textShadow: shadowFor(preset.translationTextColor, preset.shadow, preset.edge),
                     background: preset.bgOpacity > 0 ? `rgba(0, 0, 0, ${preset.bgOpacity / 100})` : 'transparent',
                   }}
                 >
@@ -76,7 +76,8 @@ export function SubtitleLook({ bgOpacity, onLook, onBgOpacity }: SubtitleLookPro
         })}
       </div>
       <Slider label={t('fork.subtitle.backdrop', 'Panel')} value={bgOpacity} shown={(value) => (value === 0 ? t('fork.subtitle.off', 'Off') : `${value}%`)} onCommit={onBgOpacity} />
-      <Slider label={t('fork.subtitle.shadow', 'Shadow')} value={shadow} shown={(value) => (value === 0 ? t('fork.subtitle.off', 'Off') : `${value}%`)} onCommit={(value) => void setShadow(value)} />
+      {/* Named for what the chosen look draws: a shadow under a panel, an outline with none. */}
+      <Slider label={LOOKS[look].edge === 'outline' ? t('fork.subtitle.outline', 'Outline') : t('fork.subtitle.shadow', 'Shadow')} value={shadow} shown={(value) => (value === 0 ? t('fork.subtitle.off', 'Off') : `${value}%`)} onCommit={(value) => void setShadow(value)} />
       <div className="kt-look__slider">
         <span className="kt-look__label" id="kt-look-align">{t('fork.subtitle.align', 'Alignment')}</span>
         <div className="kt-look__sides" role="radiogroup" aria-labelledby="kt-look-align">

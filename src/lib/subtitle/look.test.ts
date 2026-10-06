@@ -4,7 +4,7 @@ import { isLight, LOOK_ORDER, LOOKS, shadowFor } from './look';
 describe('the looks of the subtitle strip', () => {
   it('start from what the strip was: a dark panel, nothing around the text, text at the left', () => {
     expect(LOOK_ORDER[0]).toBe('panel');
-    expect(LOOKS.panel).toEqual({ bgColor: '#000000', bgOpacity: 80, shadow: 0, align: 'left', sourceTextColor: '#ffffff', translationTextColor: '#9ad0ff' });
+    expect(LOOKS.panel).toEqual({ bgColor: '#000000', bgOpacity: 80, shadow: 0, edge: 'shadow', align: 'left', sourceTextColor: '#ffffff', translationTextColor: '#9ad0ff' });
   });
 
   it('have no panel where the text stands on its outline alone, and are centred there', () => {
@@ -12,7 +12,12 @@ describe('the looks of the subtitle strip', () => {
       expect(LOOKS[look].bgOpacity).toBe(0);
       expect(LOOKS[look].shadow).toBeGreaterThan(0);
       expect(LOOKS[look].align).toBe('center');
+      expect(LOOKS[look].edge).toBe('outline');
     }
+    // Under a panel, however faint, it is a shadow: an outline there was too hard (the user, 2026-10-06).
+    expect(LOOKS.soft.bgOpacity).toBeGreaterThan(0);
+    expect(LOOKS.soft.edge).toBe('shadow');
+    expect(LOOKS.soft.shadow).toBe(50);
     // Light text for one, dark for the other: the outline's colour follows.
     expect(isLight(LOOKS.light.translationTextColor)).toBe(true);
     expect(isLight(LOOKS.dark.translationTextColor)).toBe(false);
@@ -22,13 +27,21 @@ describe('the looks of the subtitle strip', () => {
 
 describe('what is drawn around the strip\u2019s text', () => {
   it('is nothing at no strength', () => {
-    expect(shadowFor('#ffffff', 0)).toBe('none');
-    expect(shadowFor('#14202e', 0)).toBe('none');
+    expect(shadowFor('#ffffff', 0, 'outline')).toBe('none');
+    expect(shadowFor('#14202e', 0, 'shadow')).toBe('none');
   });
 
-  it('is an outline: a ring of ink on every side at one distance, and a little of it spread wider', () => {
+  it('is, as a shadow, the one the user\u2019s own lyrics mod for Folia draws at 50: a close drop and a wide glow', () => {
+    expect(shadowFor('#ffffff', 50, 'shadow')).toBe('0 1px 3px rgba(0,0,0,0.55), 0 0 14px rgba(0,0,0,0.35)');
+    // Past it a closer, harder layer comes in first.
+    expect(shadowFor('#ffffff', 100, 'shadow').split('), ')).toHaveLength(3);
+    // A light glow around dark text, heavier at every strength.
+    expect(shadowFor('#14202e', 50, 'shadow')).toBe('0 0 2px rgba(255,255,255,0.95), 0 1px 4px rgba(255,255,255,0.8), 0 0 14px rgba(255,255,255,0.6)');
+  });
+
+  it('is, as an outline, a ring of ink on every side at one distance, and a little of it spread wider', () => {
     // Asked for by the user 2026-10-06, after the soft shadow did not hold the letters apart from a desktop behind them.
-    const layers = shadowFor('#ffffff', 60).split('), ').map((layer) => layer.replace(/\)$/, ''));
+    const layers = shadowFor('#ffffff', 60, 'outline').split('), ').map((layer) => layer.replace(/\)$/, ''));
     expect(layers).toHaveLength(9);
     const ring = layers.slice(0, 8);
     // No blur in the ring: the third length of each is 0.
@@ -39,13 +52,13 @@ describe('what is drawn around the strip\u2019s text', () => {
   });
 
   it('reaches further the stronger it is, in ems: thinner around small text than around large', () => {
-    const reach = (strength: number) => Number(/^([\d.]+)em/.exec(shadowFor('#ffffff', strength))![1]);
+    const reach = (strength: number) => Number(/^([\d.]+)em/.exec(shadowFor('#ffffff', strength, 'outline'))![1]);
     expect(reach(100)).toBeGreaterThan(reach(50));
     expect(reach(50)).toBeGreaterThan(reach(10));
   });
 
   it('is light around dark text', () => {
-    const outline = shadowFor('#14202e', 70);
+    const outline = shadowFor('#14202e', 70, 'outline');
     expect(outline).toContain('rgba(255,255,255,');
     expect(outline).not.toContain('rgba(0,0,0,');
   });
