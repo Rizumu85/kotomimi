@@ -33,6 +33,8 @@ vi.mock('../../../stores/audioStore', () => ({
   useIsMonitorChannelInScope: () => true,
   useNoiseSuppressionMode: () => 'off',
   useSetNoiseSuppressionMode: () => vi.fn(),
+  useMicGateThreshold: () => 0,
+  useSetMicGateThreshold: () => vi.fn(),
   useAudioContext: () => ({
     audioInputDevices: inputDevices,
     audioMonitorDevices: [],

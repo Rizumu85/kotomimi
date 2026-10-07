@@ -1733,7 +1733,15 @@
     "audio": {
       "vbcableMissing": "沒有安裝 VB-CABLE 虛擬音效卡，所以翻譯出來的語音送不進會議軟體。只看字幕不需要它。",
       "vbcableInstall": "安裝 VB-CABLE",
-      "vbcableInstalling": "正在下載，可能要等一會兒…"
+      "vbcableInstalling": "正在下載，可能要等一會兒…",
+      "gate": "麥克風啟用閾值",
+      "gateTooltip": "比這個音量小的聲音當作靜音——揚聲器裡對方的聲音、鍵盤聲、房間裡的雜音——不翻譯，也不送去文法回饋。開著時麥克風的聲音會晚約 0.2 秒。關：全部送出。",
+      "gateOff": "關",
+      "gateTest": "測試麥克風：長條顯示目前音量",
+      "gateTestStop": "停止測試",
+      "gateHint": "按麥克風圖示，說幾句話：把標記設在自己說話時長條到達的位置之下、只有揚聲器出聲時的位置之上。",
+      "gateQuiet": "麥克風還沒有聲音。",
+      "echoAction": "使用耳機即可切斷回路；或者在「設定 → 麥克風」裡調高麥克風啟用閾值。"
     },
     "server": {
       "title": "這台電腦上的 LocalAI",

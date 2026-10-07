@@ -36,7 +36,13 @@ const STORAGE_KEYS = {
   // Set once a per-application capture has delivered audible audio on this
   // machine. Gates the "System Audio Recording" permission modal (#492).
   PARTICIPANT_TAP_AUDIO_SEEN: 'audio.participantTapAudioSeen',
+  // Fork: the microphone's activation threshold (`src/lib/audio/capture/micGate.ts`).
+  MIC_GATE_THRESHOLD: 'audio.micGateThreshold',
 };
+
+/** Fork: a threshold as the store keeps it — a whole number of 0–100, 0 being off; anything else is off. */
+export const micGateThresholdOf = (value: unknown): number =>
+  typeof value === 'number' && Number.isFinite(value) ? Math.min(100, Math.max(0, Math.round(value))) : 0;
 
 export interface AudioDevice {
   deviceId: string;
@@ -91,6 +97,13 @@ interface AudioStore {
   isRealVoicePassthroughEnabled: boolean;
   realVoicePassthroughVolume: number;
   noiseSuppressionMode: NoiseSuppressionMode;
+  /**
+   * Fork: the microphone's activation threshold, 0–100 on the level scale of
+   * `levelOf` (`src/lib/audio/capture/micGate.ts`); 0 is off. Sound under it
+   * is heard as silence — the other side's voice from the loudspeakers, which
+   * the microphone otherwise takes for the user's own.
+   */
+  micGateThreshold: number;
 
   // Symmetric mode + per-channel mute flags
   mode: AudioMode;
@@ -118,6 +131,8 @@ interface AudioStore {
   toggleRealVoicePassthrough: () => void;
   setRealVoicePassthroughVolume: (volume: number) => void;
   setNoiseSuppressionMode: (mode: NoiseSuppressionMode) => void;
+  /** Fork: 0–100, rounded; 0 turns the gate off. Persisted. */
+  setMicGateThreshold: (threshold: number) => void;
   setIsLoading: (loading: boolean) => void;
 
   // Mode + mute setters
@@ -162,6 +177,7 @@ const useAudioStore = create<AudioStore>()(
     isRealVoicePassthroughEnabled: false,
     realVoicePassthroughVolume: 0.2,
     noiseSuppressionMode: 'enhanced' as NoiseSuppressionMode,
+    micGateThreshold: 0,
 
     // Mode + per-channel mute flags
     mode: 'speaker' as AudioMode,
@@ -261,6 +277,13 @@ const useAudioStore = create<AudioStore>()(
       console.info('[Sokuji] [AudioStore] Setting noise suppression mode:', mode);
       set({ noiseSuppressionMode: mode });
       void persistSetting(STORAGE_KEYS.NOISE_SUPPRESSION_MODE, mode);
+    },
+
+    setMicGateThreshold: (threshold) => {
+      const next = micGateThresholdOf(threshold);
+      if (next === get().micGateThreshold) return;
+      set({ micGateThreshold: next });
+      void persistSetting(STORAGE_KEYS.MIC_GATE_THRESHOLD, next);
     },
 
     // Mode + per-channel mute setters
@@ -400,6 +423,10 @@ const useAudioStore = create<AudioStore>()(
             void persistSetting(STORAGE_KEYS.NOISE_SUPPRESSION_MODE, migratedMode, { silent: true });
           }
         }
+
+        // Fork: the microphone's activation threshold, where one was set.
+        const savedGate = await settingsService.getSetting<unknown>(STORAGE_KEYS.MIC_GATE_THRESHOLD, null);
+        if (savedGate !== null) set({ micGateThreshold: micGateThresholdOf(savedGate) });
 
         // Restore real voice passthrough state if saved
         if (savedPassthroughEnabled !== null) {
@@ -587,6 +614,9 @@ export const useIsRealVoicePassthroughEnabled = () => useAudioStore((state) => s
 export const useRealVoicePassthroughVolume = () => useAudioStore((state) => state.realVoicePassthroughVolume);
 export const useNoiseSuppressionMode = () => useAudioStore((state) => state.noiseSuppressionMode);
 export const useSetNoiseSuppressionMode = () => useAudioStore((state) => state.setNoiseSuppressionMode);
+// Fork: the microphone's activation threshold.
+export const useMicGateThreshold = () => useAudioStore((state) => state.micGateThreshold);
+export const useSetMicGateThreshold = () => useAudioStore((state) => state.setMicGateThreshold);
 
 // Backward-compatible wrappers
 export const useIsNoiseSuppressEnabled = () => useAudioStore((state) => state.noiseSuppressionMode !== 'off');

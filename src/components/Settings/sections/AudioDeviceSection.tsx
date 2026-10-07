@@ -7,6 +7,7 @@ import WarningModal from '../shared/WarningModal';
 import { useFilteredDevices, WarningType, AudioDevice, isVirtualMic } from '../shared/hooks';
 import { useAudioContext, useNoiseSuppressionMode, useSetNoiseSuppressionMode, useIsMonitorChannelInScope, NoiseSuppressionMode } from '../../../stores/audioStore';
 import { useAnalytics } from '../../../lib/analytics';
+import MicGateControl from './MicGateControl';
 
 interface AudioDeviceSectionProps {
   /** Real session-active state — used for analytics (during_session) only. */
@@ -237,6 +238,9 @@ const AudioDeviceSection: React.FC<AudioDeviceSectionProps> = ({
               ))}
             </div>
           </div>
+
+          {/* Fork: the activation threshold — sound under it is heard as silence (`src/lib/audio/capture/micGate.ts`). */}
+          <MicGateControl isSessionActive={isSessionActive} disabled={locked} />
         </div>
       )}
 

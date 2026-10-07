@@ -25,6 +25,21 @@ const props = (over: Partial<SubtitleBodyProps> = {}): SubtitleBodyProps => ({
   ...over,
 });
 
+describe('SubtitleBody — the panel, said on the stream (fork)', () => {
+  const stream = (over: Partial<SubtitleBodyProps>) => render(<SubtitleBody {...props(over)} />).container.querySelector('.subtitle-stream') as HTMLElement;
+
+  it('says there is no panel under a clear strip — the two outline looks, or a panel turned down to nothing', () => {
+    expect(stream({ bgOpacity: 0 }).dataset.panel).toBe('none');
+    expect(stream({ bgOpacity: 5 }).dataset.panel).toBe('none');
+  });
+
+  it('says nothing where a panel is drawn, or where it is not told of one', () => {
+    expect(stream({ bgOpacity: 80 }).dataset.panel).toBeUndefined();
+    expect(stream({ bgOpacity: 30 }).dataset.panel).toBeUndefined();
+    expect(stream({}).dataset.panel).toBeUndefined();
+  });
+});
+
 describe('SubtitleBody — compact: the fork\u2019s lanes', () => {
   const theirs = (id: string, source: string, answer = ''): Entry => ({
     kind: 'exchange', id, leg: 'participant', languages: { source: 'ja', target: 'en' }, pairing: 'stated',

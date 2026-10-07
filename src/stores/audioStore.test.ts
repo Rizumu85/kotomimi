@@ -428,6 +428,41 @@ describe('audioStore - participant tap audio seen', () => {
   });
 });
 
+describe('audioStore - mic activation threshold (fork)', () => {
+  const KEY = 'audio.micGateThreshold';
+
+  beforeEach(() => {
+    localStorage.clear();
+    useAudioStore.setState({ micGateThreshold: 0 } as any);
+  });
+
+  it('starts off', () => {
+    expect(useAudioStore.getState().micGateThreshold).toBe(0);
+  });
+
+  it('keeps a whole number of 0–100 and persists it', async () => {
+    useAudioStore.getState().setMicGateThreshold(42.6);
+    expect(useAudioStore.getState().micGateThreshold).toBe(43);
+    expect(await ServiceFactory.getSettingsService().getSetting<number>(KEY, 0)).toBe(43);
+    useAudioStore.getState().setMicGateThreshold(140);
+    expect(useAudioStore.getState().micGateThreshold).toBe(100);
+    useAudioStore.getState().setMicGateThreshold(-3);
+    expect(useAudioStore.getState().micGateThreshold).toBe(0);
+    useAudioStore.getState().setMicGateThreshold(Number.NaN);
+    expect(useAudioStore.getState().micGateThreshold).toBe(0);
+  });
+
+  it('restores it on the next launch, and reads junk as off', async () => {
+    await ServiceFactory.getSettingsService().setSetting(KEY, 35);
+    await useAudioStore.getState().refreshDevices();
+    expect(useAudioStore.getState().micGateThreshold).toBe(35);
+
+    await ServiceFactory.getSettingsService().setSetting(KEY, 'loud');
+    await useAudioStore.getState().refreshDevices();
+    expect(useAudioStore.getState().micGateThreshold).toBe(0);
+  });
+});
+
 describe('audioStore — following the OS (syncDevices)', () => {
   const real = (deviceId: string, label = deviceId): AudioDevice => ({ deviceId, label, isVirtual: false });
   const flush = () => new Promise((resolve) => setTimeout(resolve, 0));

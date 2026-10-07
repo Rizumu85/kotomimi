@@ -249,6 +249,28 @@ module.exports = {
     ],
     vbcableInstall: ['Install VB-CABLE', '安装 VB-CABLE', '安裝 VB-CABLE'],
     vbcableInstalling: ['Downloading… this can take a minute', '正在下载，可能要等一会儿…', '正在下載，可能要等一會兒…'],
+    // The microphone's activation threshold (`MicGateControl.tsx`, `src/lib/audio/capture/micGate.ts`).
+    gate: ['Mic activation threshold', '麦克风激活阈值', '麥克風啟用閾值'],
+    gateTooltip: [
+      "Sound quieter than this is heard as silence — the other side's voice from your speakers, the keyboard, the room — so it is neither translated nor checked. The microphone is heard about 0.2 s later while this is on. Off: everything is heard.",
+      '比这个音量小的声音当作静音——扬声器里对方的声音、键盘声、房间里的杂音——不翻译，也不送去语法反馈。开着时麦克风的声音会晚约 0.2 秒。关：全部送出。',
+      '比這個音量小的聲音當作靜音——揚聲器裡對方的聲音、鍵盤聲、房間裡的雜音——不翻譯，也不送去文法回饋。開著時麥克風的聲音會晚約 0.2 秒。關：全部送出。',
+    ],
+    gateOff: ['Off', '关', '關'],
+    gateTest: ['Test the microphone: the bar shows its level', '测试麦克风：条形显示当前音量', '測試麥克風：長條顯示目前音量'],
+    gateTestStop: ['Stop the test', '停止测试', '停止測試'],
+    gateHint: [
+      'Press the microphone, speak, and set the mark under where the bar reaches — and above where it sits while only your speakers are heard.',
+      '按麦克风图标，说几句话：把标记设在自己说话时条到达的位置之下、只有扬声器出声时的位置之上。',
+      '按麥克風圖示，說幾句話：把標記設在自己說話時長條到達的位置之下、只有揚聲器出聲時的位置之上。',
+    ],
+    gateQuiet: ['Nothing from the microphone yet.', '麦克风还没有声音。', '麥克風還沒有聲音。'],
+    // The echo notice's advice for meeting audio in the microphone (`src/lib/view/echoWords.ts`): the threshold is the other way out.
+    echoAction: [
+      'Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.',
+      '使用耳机即可切断回路；或者在「设置 → 麦克风」里调高麦克风激活阈值。',
+      '使用耳機即可切斷回路；或者在「設定 → 麥克風」裡調高麥克風啟用閾值。',
+    ],
   },
   // The LocalAI installed on this computer, run by the app (`src/components/LanSharing/LocalServerCard.tsx`).
   server: {

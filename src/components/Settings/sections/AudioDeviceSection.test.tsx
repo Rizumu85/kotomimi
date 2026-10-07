@@ -31,6 +31,8 @@ vi.mock('../../../stores/audioStore', () => ({
   useIsMonitorChannelInScope: () => false,
   useNoiseSuppressionMode: () => 'off',
   useSetNoiseSuppressionMode: () => vi.fn(),
+  useMicGateThreshold: () => 0,
+  useSetMicGateThreshold: () => vi.fn(),
   useAudioContext: () => ({
     audioInputDevices: [],
     audioMonitorDevices: devices,
@@ -58,6 +60,27 @@ const renderSpeaker = (props: Record<string, unknown> = {}) =>
       {...props}
     />
   );
+
+describe('AudioDeviceSection — the mic activation threshold (fork)', () => {
+  it('draws the threshold under the noise suppression in the microphone section, with its test while no run is on', () => {
+    render(<AudioDeviceSection isSessionActive={false} showMicrophone={true} showSpeaker={false} />);
+    expect(screen.getByText('Mic activation threshold')).toBeInTheDocument();
+    expect(screen.getByTestId('mic-gate-value')).toHaveTextContent('Off');
+    expect(screen.getByRole('button', { name: /test the microphone/i })).toBeInTheDocument();
+  });
+
+  it('offers no test while a run holds the microphone, and keeps the threshold movable', () => {
+    // As the layouts render it: the microphone's lock during a run is the mode's (`lockMic`), not the run's.
+    render(<AudioDeviceSection isSessionActive={true} isLocked={false} showMicrophone={true} showSpeaker={false} />);
+    expect(screen.queryByRole('button', { name: /test the microphone/i })).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Mic activation threshold')).not.toBeDisabled();
+  });
+
+  it('is not part of the speaker section', () => {
+    render(<AudioDeviceSection isSessionActive={false} showMicrophone={false} showSpeaker={true} />);
+    expect(screen.queryByText('Mic activation threshold')).not.toBeInTheDocument();
+  });
+});
 
 describe('AudioDeviceSection lockedReason', () => {
   it('renders the reason when the section is locked', () => {

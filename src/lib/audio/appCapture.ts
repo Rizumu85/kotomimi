@@ -14,6 +14,7 @@ import { openMic, type MicSettings } from './capture/mic';
 import { openSystemAudio, type SystemAudioSettings } from './capture/systemAudio';
 import { openTab, type TabSettings } from './capture/tab';
 import { createLevelMeter, type LevelMeter } from './levelMeter';
+import { micLevel } from './micLevel';
 import type { Playback } from './playback';
 import { targetTabIdFromSearch } from './tabMicrophone';
 
@@ -37,6 +38,9 @@ export function micSettings(): MicSettings {
     markUnusable: (id) => audio().markInputUnusable(id),
     noiseSuppression: () => audio().noiseSuppressionMode,
     muted: () => audio().isMicMuted,
+    // Fork: the activation threshold, and the meter it is set by (`micGate.ts`, `micLevel.ts`).
+    activation: () => audio().micGateThreshold,
+    level: (level) => micLevel.set(level),
     subscribe: onAudioChange,
   };
 }

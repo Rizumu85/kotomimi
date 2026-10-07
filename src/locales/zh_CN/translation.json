@@ -1733,7 +1733,15 @@
     "audio": {
       "vbcableMissing": "没有安装 VB-CABLE 虚拟声卡，所以翻译出来的语音送不进会议软件。只看字幕不需要它。",
       "vbcableInstall": "安装 VB-CABLE",
-      "vbcableInstalling": "正在下载，可能要等一会儿…"
+      "vbcableInstalling": "正在下载，可能要等一会儿…",
+      "gate": "麦克风激活阈值",
+      "gateTooltip": "比这个音量小的声音当作静音——扬声器里对方的声音、键盘声、房间里的杂音——不翻译，也不送去语法反馈。开着时麦克风的声音会晚约 0.2 秒。关：全部送出。",
+      "gateOff": "关",
+      "gateTest": "测试麦克风：条形显示当前音量",
+      "gateTestStop": "停止测试",
+      "gateHint": "按麦克风图标，说几句话：把标记设在自己说话时条到达的位置之下、只有扬声器出声时的位置之上。",
+      "gateQuiet": "麦克风还没有声音。",
+      "echoAction": "使用耳机即可切断回路；或者在「设置 → 麦克风」里调高麦克风激活阈值。"
     },
     "server": {
       "title": "这台电脑上的 LocalAI",

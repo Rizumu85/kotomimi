@@ -13,6 +13,7 @@ import { ModernAudioRecorder } from '../../modern-audio/ModernAudioRecorder';
 import { MicrophoneCaptureError } from '../../modern-audio/microphoneCaptureError';
 import type { Source } from '../../session/source';
 import { createSourceCore } from './core';
+import { createMicGate } from './micGate';
 
 /** The notices the microphone raises when its device changes under it (#593; spec 2026-10-04 §3). */
 export const MIC_LOST_USING_OTHER = 'mic_lost_using_other';
@@ -55,6 +56,13 @@ export interface MicSettings {
   markUnusable(deviceId: string): void;
   noiseSuppression(): NoiseSuppression;
   muted(): boolean;
+  /**
+   * Fork: the activation threshold, 0–100, read on every chunk (`micGate.ts`): sound under it is heard as silence.
+   * Absent or 0: everything is heard.
+   */
+  activation?(): number;
+  /** Fork: told every chunk's level, 0–100, before the gate — for the meter the threshold is set by. */
+  level?(level: number): void;
   /** Called when any of them may have changed. */
   subscribe(listener: () => void): () => void;
 }
@@ -96,11 +104,22 @@ export async function openMic(
   let unsubscribe = () => {};
   let chain: Promise<void> = Promise.resolve();
 
+  // Fork: the activation threshold (`micGate.ts`). Between the recorder and the listeners, so that every one of them
+  // — the leg's adapter, the passthrough, the meters, the echo monitor — hears the gated microphone; and before
+  // `deliver`, so that a mute still drops the chunk whole.
+  const gate = createMicGate({
+    threshold: () => settings.activation?.() ?? 0,
+    deliver: (pcm) => core.deliver(pcm),
+    onLevel: (level) => settings.level?.(level),
+  });
+
   const close = async () => {
     unwatch();
     unwatch = () => {};
     if (!open) return;
     open = false;
+    // What waited on its lookahead was the old device's: let go with it.
+    gate.reset();
     await recorder.end();
   };
 
@@ -117,6 +136,7 @@ export async function openMic(
       unwatch();
       unwatch = () => {};
       open = false;
+      gate.reset();
       // `quit()`, not `end()`: this recorder is not reused after this, so its GTCRN
       // worker (kept alive across `end()` for the device switch above) must go too.
       try {
@@ -141,7 +161,7 @@ export async function openMic(
     label = name;
     const mine = ++generation;
     unwatch = core.watch(recorder.getStream(), () => queue(() => trackEnded(mine)));
-    await recorder.record((data) => core.deliver(data.mono));
+    await recorder.record((data) => gate.push(data.mono));
   };
 
   // A device switch is a passing event: the surfaces hide its notice after a

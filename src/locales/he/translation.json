@@ -1733,7 +1733,15 @@
     "audio": {
       "vbcableMissing": "The VB-CABLE virtual audio driver is not installed, so a spoken translation cannot be sent into a meeting. Subtitles do not need it.",
       "vbcableInstall": "Install VB-CABLE",
-      "vbcableInstalling": "Downloading… this can take a minute"
+      "vbcableInstalling": "Downloading… this can take a minute",
+      "gate": "Mic activation threshold",
+      "gateTooltip": "Sound quieter than this is heard as silence — the other side's voice from your speakers, the keyboard, the room — so it is neither translated nor checked. The microphone is heard about 0.2 s later while this is on. Off: everything is heard.",
+      "gateOff": "Off",
+      "gateTest": "Test the microphone: the bar shows its level",
+      "gateTestStop": "Stop the test",
+      "gateHint": "Press the microphone, speak, and set the mark under where the bar reaches — and above where it sits while only your speakers are heard.",
+      "gateQuiet": "Nothing from the microphone yet.",
+      "echoAction": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone."
     },
     "server": {
       "title": "LocalAI on this computer",

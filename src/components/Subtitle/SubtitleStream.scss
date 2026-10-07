@@ -103,6 +103,12 @@
       border-top: 1px solid rgba(255, 255, 255, 0.14);
     }
 
+    // Fork: the hairline is the panel's. With none — the two outline looks, or a panel turned down to nothing — a line
+    // floating over the scene separated nothing from nothing (the user, 2026-10-07).
+    &[data-panel='none'] .subtitle-lane:not(.is-silent) + .subtitle-lane::before {
+      display: none;
+    }
+
     // The user's own row keeps the height of its lines: a window made higher gives all it adds to the pair.
     .subtitle-lane--row {
       flex: 0 0 var(--lane-row-height, 1.18em);

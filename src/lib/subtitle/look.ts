@@ -41,6 +41,12 @@ export interface LookPreset {
 /** In the order they are offered. `panel` is what the strip was before there were looks. */
 export const LOOK_ORDER: readonly Look[] = ['panel', 'soft', 'light', 'dark'];
 
+/** A panel fainter than this is no panel: the strip is clear, and what belongs to a panel — the hairline between its lanes, the box's edges — is not drawn. */
+export const PANEL_FROM = 8;
+
+/** Whether the strip draws a panel at this opacity (0–100). */
+export const hasPanel = (bgOpacity: number | undefined): boolean => (bgOpacity ?? 0) >= PANEL_FROM;
+
 export const LOOKS: Readonly<Record<Look, LookPreset>> = {
   // A dark panel under light text.
   panel: { bgColor: '#000000', bgOpacity: 80, shadow: 0, edge: 'shadow', align: 'left', sourceTextColor: '#ffffff', translationTextColor: '#9ad0ff' },

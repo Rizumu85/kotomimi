@@ -1,0 +1,166 @@
+@use '../shared/variables' as vars;
+@use '../../../styles/tokens' as tk;
+
+// Fork: the microphone's activation threshold (`MicGateControl.tsx`): a slider whose track is the meter of the
+// microphone's level, and beside it the button that tests the microphone while no run holds it.
+.kt-gate {
+  margin-top: 12px;
+
+  .kt-gate__header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: var(--text-secondary, #aaa);
+  }
+
+  .kt-gate__label {
+    font-size: 13px;
+  }
+
+  .kt-gate__value {
+    margin-left: auto;
+    color: vars.$color-primary;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .kt-gate__row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  // The meter: the bar under the slider, in the slider's own track.
+  .kt-gate__meter {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    height: 24px;
+  }
+
+  .kt-gate__track {
+    position: absolute;
+    inset: 6px 0;
+    border-radius: 6px;
+    background: vars.$bg-elevated;
+    overflow: hidden;
+  }
+
+  // The level: grey under the mark, the accent over it — the gate would open.
+  .kt-gate__fill {
+    height: 100%;
+    width: 0;
+    border-radius: 6px;
+    background: #7a7a7a;
+    transition: width 70ms linear, background-color 120ms ease;
+
+    &.is-over {
+      background: tk.$color-primary;
+    }
+  }
+
+  // No microphone reporting: the bar is dim, and the hint under it says how to see one.
+  .kt-gate__meter:not(.is-live) .kt-gate__fill {
+    background: #555;
+  }
+
+  // The slider itself is clear but for its thumb — the mark — over the meter.
+  .kt-gate__range {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid tk.$color-primary;
+      outline-offset: 2px;
+      border-radius: 6px;
+    }
+
+    &::-webkit-slider-runnable-track {
+      height: 24px;
+      background: transparent;
+    }
+
+    &::-webkit-slider-thumb {
+      appearance: none;
+      width: 8px;
+      height: 24px;
+      border-radius: 4px;
+      background: #f4f4f4;
+      border: 1px solid rgba(0, 0, 0, 0.55);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18);
+      cursor: ew-resize;
+    }
+
+    &::-moz-range-track {
+      height: 24px;
+      background: transparent;
+    }
+
+    &::-moz-range-thumb {
+      width: 8px;
+      height: 24px;
+      border-radius: 4px;
+      background: #f4f4f4;
+      border: 1px solid rgba(0, 0, 0, 0.55);
+      cursor: ew-resize;
+    }
+
+    &:disabled {
+      cursor: default;
+
+      &::-webkit-slider-thumb {
+        opacity: 0.5;
+        cursor: default;
+      }
+
+      &::-moz-range-thumb {
+        opacity: 0.5;
+        cursor: default;
+      }
+    }
+  }
+
+  // The test: a microphone, lit while it listens.
+  .kt-gate__test {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 6px;
+    border: 1px solid var(--border-color, #444);
+    background: var(--bg-secondary, #333);
+    color: var(--text-secondary, #aaa);
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: var(--bg-hover, #3a3a3a);
+      color: #e8e8e8;
+    }
+
+    &.is-on {
+      background: tk.$color-primary-fill;
+      border-color: tk.$color-primary-fill;
+      color: tk.$color-on-primary;
+    }
+  }
+
+  .kt-gate__hint {
+    margin-top: 5px;
+    font-size: vars.$font-caption;
+    line-height: 1.4;
+    color: vars.$text-muted;
+  }
+}

@@ -11,8 +11,9 @@ export const ECHO_WORDS: Readonly<Record<EchoCause, { message: string; fallback:
   'meeting-echo': {
     message: 'echoNotice.meetingEcho',
     fallback: 'Meeting audio from your speakers is reaching the microphone.',
-    action: 'echoNotice.actionHeadphones',
-    actionFallback: 'Using headphones will break the loop.',
+    // Fork: the other way out, the mic activation threshold (`src/lib/audio/capture/micGate.ts`), is named with the headphones.
+    action: 'fork.audio.echoAction',
+    actionFallback: 'Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.',
   },
   'far-end-echo': {
     message: 'echoNotice.farEndEcho',

@@ -1,6 +1,7 @@
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { MIC_LOST_USING_OTHER, MIC_LOST_WAITING, MIC_NOW_USING, openMic, type MicRecorder, type MicSettings, type NoiseSuppression } from './mic';
 import { MicrophoneCaptureError } from '../../modern-audio/microphoneCaptureError';
+import { GATE_LOOKAHEAD_MS } from './micGate';
 
 /** A begin past this many is a runaway reopen loop: it throws, so a broken source cannot spin a test forever. */
 const RUNAWAY_BEGINS = 50;
@@ -236,6 +237,64 @@ describe('openMic', () => {
     await source.stop();
     expect(fake.calls).toContain('track.stop');
     expect(fake.calls.indexOf('track.stop')).toBeLessThan(fake.calls.indexOf('quit'));
+  });
+});
+
+describe('openMic — the activation threshold (fork)', () => {
+  // The recorder's chunks: 2048 samples of 24 kHz, 85 ms; the lookahead holds two of them.
+  const CHUNK = 2048;
+  const tone = (amplitude: number) => new Int16Array(CHUNK).fill(Math.round(amplitude * 32767));
+  const zeros = (pcm: Int16Array) => pcm.every((s) => s === 0);
+  const chunksWaiting = Math.ceil((GATE_LOOKAHEAD_MS * 24) / CHUNK);
+
+  it('hears what is quieter than the threshold as silence, after the lookahead, and reports every chunk’s level', async () => {
+    const fake = fakeRecorder();
+    const levels: number[] = [];
+    const { settings } = settingsFixture();
+    const gated: MicSettings = { ...settings, activation: () => 50, level: (level) => levels.push(level) };
+    const source = await openMic(gated, live(), () => fake.recorder);
+    const heard: Int16Array[] = [];
+    source.onPcm((pcm) => heard.push(pcm));
+    // Quiet (−40 dBFS, level 33): silenced.
+    for (let i = 0; i <= chunksWaiting; i++) fake.push(tone(0.01));
+    expect(heard).toHaveLength(1);
+    expect(heard[0].length).toBe(CHUNK);
+    expect(zeros(heard[0])).toBe(true);
+    // Loud (−20 dBFS, level 67): heard, once its lookahead has come.
+    fake.push(tone(0.1));
+    for (let i = 0; i < chunksWaiting; i++) fake.push(tone(0.1));
+    expect(heard.some((pcm) => !zeros(pcm))).toBe(true);
+    expect(levels.map(Math.round)).toEqual([...Array(chunksWaiting + 1).fill(33), ...Array(chunksWaiting + 1).fill(67)]);
+  });
+
+  it('with no threshold given, delivers every chunk at once and as it is — as before the gate', async () => {
+    const fake = fakeRecorder();
+    const { settings } = settingsFixture();
+    const source = await openMic(settings, live(), () => fake.recorder);
+    const heard: Int16Array[] = [];
+    source.onPcm((pcm) => heard.push(pcm));
+    const quiet = tone(0.01);
+    fake.push(quiet);
+    expect(heard).toHaveLength(1);
+    expect(heard[0]).toBe(quiet);
+  });
+
+  it('forgets what waited on the lookahead when the device changes: nothing of the old device arrives after the switch', async () => {
+    const fake = fakeRecorder();
+    const { settings, set } = settingsFixture();
+    const gated: MicSettings = { ...settings, activation: () => 50 };
+    const source = await openMic(gated, live(), () => fake.recorder);
+    const heard: Int16Array[] = [];
+    source.onPcm((pcm) => heard.push(pcm));
+    fake.push(tone(0.1));
+    expect(heard).toHaveLength(0);
+    set({ deviceId: 'mic-2' });
+    await settle();
+    expect(fake.calls).toContain('begin:mic-2');
+    expect(heard).toHaveLength(0);
+    // The new device's first chunks wait their own lookahead.
+    for (let i = 0; i <= chunksWaiting; i++) fake.push(tone(0.1));
+    expect(heard).toHaveLength(1);
   });
 });
 
