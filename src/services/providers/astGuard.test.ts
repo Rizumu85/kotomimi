@@ -19,6 +19,12 @@ describe('AST cross-stage guard', () => {
     // resolver, not a stub.
     useModelStore.setState({
       modelStatuses: {
+        // Fork: for Japanese the automatic ASR follows the measured order
+        // (selection/measuredRank.ts), which places sensevoice-int8 last, so
+        // with only SenseVoice and Granite downloaded auto would resolve the
+        // ASR to granite-speech and the hazard below would not arise. Whisper
+        // Large V3 Turbo heads the measured order, so auto resolves to it.
+        'whisper-large-v3-turbo-webgpu': 'downloaded',
         'sensevoice-int8': 'downloaded',
         'opus-mt-ja-en': 'downloaded',
         'opus-mt-en-jap': 'downloaded',
@@ -46,8 +52,11 @@ describe('AST cross-stage guard', () => {
       expect(resolved.asr?.modelId).not.toBe('granite-speech');
 
       // What auto would pick with nothing explicit for translation — the
-      // manifest excludes AST-capable entries from auto-eligibility
-      // (candidates.wasm.ts), so this can never be granite-speech.
+      // translation pool marks AST-capable entries not auto-eligible
+      // (candidates.wasm.ts), so this can never be granite-speech. (The ASR
+      // pool has no such exclusion: an AST-capable ASR model is a normal
+      // auto candidate there, which is why the fixture needs a better-ranked
+      // non-AST recognizer downloaded.)
       const autoOnly = useModelStore.getState().resolve('ja', 'en', {});
 
       const guarded = guardAstCrossStage('ja', 'en', selections, resolved, reResolve);
