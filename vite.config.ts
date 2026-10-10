@@ -179,6 +179,8 @@ export default defineConfig(({ command, mode }) => {
             'native-engine': 'electron/native-engine.js',
             // Fork: a Mac's two native recognizers, joined
             'native-engines': 'electron/native-engines.js',
+            // Fork: a recognition engine on another device — a phone lent to this computer
+            'remote-engine': 'electron/remote-engine.js',
             // Fork: starting with the computer, in the background
             'autostart': 'electron/autostart.js',
             // Fork: the icon in the notification area

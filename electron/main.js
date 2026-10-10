@@ -17,6 +17,7 @@ const { discoverServers } = require('./lan-discover');
 const { createLocalServer } = require('./local-server');
 const { createNativeEngine, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME, modelHears: nativeModelHears } = require('./native-engine');
 const { joinEngines } = require('./native-engines');
+const { createRemoteEngine } = require('./remote-engine');
 const { createAutostart } = require('./autostart');
 const { createAppleSpeech } = require('./apple-speech');
 const { applyLinuxGpuFlags } = require('./linux-gpu-flags');
@@ -1476,6 +1477,14 @@ ipcMain.handle('native-engine:stream-end', (event, args) => getNativeEngine().en
 ipcMain.handle('native-engine:stream-abort', (event, args) => getNativeEngine().abortStream(args?.id));
 app.on('will-quit', () => { void nativeEngine?.stop(); });
 
+// Fork: a recognition engine on another device — a phone lent to this computer (electron/remote-engine.js). Its live
+// recognitions, for the page; nothing of it runs here.
+const remoteEngine = createRemoteEngine({ onStream: (event) => toPage('remote-engine:stream', event) });
+ipcMain.handle('remote-engine:stream-open', (event, args) => remoteEngine.openStream({ base: args?.base, model: args?.model, language: args?.language, sampleRate: args?.sampleRate }));
+ipcMain.handle('remote-engine:stream-audio', (event, args) => remoteEngine.writeStream(args?.id, args?.pcm));
+ipcMain.handle('remote-engine:stream-end', (event, args) => remoteEngine.endStream(args?.id));
+ipcMain.handle('remote-engine:stream-abort', (event, args) => remoteEngine.abortStream(args?.id));
+
 // Fork: the native translation engine — the same manager with llama.cpp's server and the translation models, in a
 // folder of its own. It is asked over the chat wire by the page itself: only its state crosses here.
 let nativeTranslator = null;
@@ -1537,6 +1546,7 @@ app.on('will-quit', () => { void nativeCoach?.stop(); });
 // after the last session (`restNative`): with the page gone nothing would, and they would hold their memory until
 // the app is quit. So they stop with the last window.
 const stopNativeEngines = () => {
+  remoteEngine.stop();
   void nativeEngine?.stop();
   void nativeTranslator?.stop();
   void nativeCoach?.stop();

@@ -471,7 +471,7 @@ function wavOf(pcm, sampleRate) {
  * One stretch of sound read whole by the runtime (POST /v1/audio/transcriptions, a form): `done` resolves with
  * `{ ok, text }` or `{ ok: false, message }`, and `abort` drops the request.
  */
-function readWhole({ port, model, sampleRate, language, pcm, timeoutMs }) {
+function readWhole({ host = LOOPBACK, port, pathname = '/v1/audio/transcriptions', model, sampleRate, language, pcm, timeoutMs }) {
   const boundary = `----kotomimi${crypto.randomBytes(12).toString('hex')}`;
   const field = (name, value) => Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="${name}"\r\n\r\n${value}\r\n`);
   const body = Buffer.concat([
@@ -483,7 +483,7 @@ function readWhole({ port, model, sampleRate, language, pcm, timeoutMs }) {
   ]);
   let request = null;
   const done = new Promise((resolve) => {
-    request = http.request({ host: LOOPBACK, port, method: 'POST', path: '/v1/audio/transcriptions', timeout: timeoutMs, headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}`, 'Content-Length': body.length } }, (response) => {
+    request = http.request({ host, port, method: 'POST', path: pathname, timeout: timeoutMs, headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}`, 'Content-Length': body.length } }, (response) => {
       let answer = '';
       response.setEncoding('utf8');
       response.on('data', (chunk) => { if (answer.length < 400_000) answer += chunk; });
@@ -1188,4 +1188,4 @@ function createNativeEngine(deps = {}) {
   return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream };
 }
 
-module.exports = { createNativeEngine, openLive, openWindow, wavOf, loopAt, unloop, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };
+module.exports = { createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };

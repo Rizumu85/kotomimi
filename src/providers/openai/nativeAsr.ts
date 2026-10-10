@@ -55,6 +55,8 @@ export interface NativeAsrOptions {
   clock?: Pick<Clock, 'setTimeout'>;
   /** How long one recognition may run, where the engine's own limits are not the default's (`NativeLimits`). */
   limits?: Partial<NativeLimits>;
+  /** What the engine is called when it cannot start, where it is not this computer's own. */
+  named?: string;
 }
 
 /**
@@ -201,7 +203,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
         for (const s of queue) { s.over = true; s.cancelWait?.(); }
         queue.length = 0;
         live = null;
-        asr.onFatal?.('The recognition engine of this computer is not running.');
+        asr.onFatal?.(`${options.named ?? 'The recognition engine of this computer'} is not running.`);
         return;
       }
       head.id = id;
@@ -358,7 +360,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
       const engine = options.start().then((status) => {
         if (status.run.state === 'ready') return;
         const said = status.run.tail.trim().split('\n').pop()?.slice(0, 200);
-        throw new Error(`The recognition engine of this computer could not start${said ? `: ${said}` : '.'}`);
+        throw new Error(`${options.named ?? 'The recognition engine of this computer'} could not start${said ? `: ${said}` : '.'}`);
       });
       // Either failing fails the start; the other's failure is then nobody's to hear.
       detector.catch(() => undefined);

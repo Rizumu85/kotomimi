@@ -88,6 +88,11 @@ export const INVOKE_CHANNELS = [
   'native-engine:stream-audio',
   'native-engine:stream-end',
   'native-engine:stream-abort',
+  // Fork: a recognition engine on another device — its live recognitions (electron/remote-engine.js)
+  'remote-engine:stream-open',
+  'remote-engine:stream-audio',
+  'remote-engine:stream-end',
+  'remote-engine:stream-abort',
   // Fork: the native translation engine — llama.cpp's server, run the same way (electron/native-engine.js)
   'native-translator:get',
   'native-translator:download',
