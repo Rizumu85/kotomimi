@@ -106,6 +106,7 @@ const MODELS = {
   'qwen3-asr-1.7b-q8': {
     file: 'qwen3-asr-1.7b-q8_0.gguf',
     url: 'https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/e36610ac69b5262e914a52635324050bee8f1ad2/Qwen3-ASR-1.7B-GGUF/qwen3-asr-1.7b-q8_0.gguf',
+    mirror: 'https://modelscope.cn/models/audio-cpp/audio.cpp-gguf/resolve/master/Qwen3-ASR-1.7B-GGUF/qwen3-asr-1.7b-q8_0.gguf',
     bytes: 2473010048,
     sha256: 'da4fc2ac7f24dee784d1684eb1f35836cdbf559519452ae11777670734c0a4f8',
     family: 'qwen3_asr',
@@ -121,6 +122,7 @@ const MODELS = {
   'qwen3-asr-0.6b-q8': {
     file: 'qwen3-asr-0.6b-q8_0.gguf',
     url: 'https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/e36610ac69b5262e914a52635324050bee8f1ad2/Qwen3-ASR-0.6B-GGUF/qwen3-asr-0.6b-q8_0.gguf',
+    mirror: 'https://modelscope.cn/models/audio-cpp/audio.cpp-gguf/resolve/master/Qwen3-ASR-0.6B-GGUF/qwen3-asr-0.6b-q8_0.gguf',
     bytes: 1151272416,
     sha256: '6c44ec2fb4cee513892d7863c1fcc3ea6b699ffa4d899b0ef4ab19956d9544f7',
     family: 'qwen3_asr',
@@ -136,6 +138,7 @@ const MODELS = {
   'nemotron-asr-0.6b-q8': {
     file: 'nemotron-3.5-asr-streaming-0.6b-q8_0.gguf',
     url: 'https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/e36610ac69b5262e914a52635324050bee8f1ad2/Nemotron-3.5-ASR-Streaming-0.6B-GGUF/nemotron-3.5-asr-streaming-0.6b-q8_0.gguf',
+    mirror: 'https://modelscope.cn/models/audio-cpp/audio.cpp-gguf/resolve/master/Nemotron-3.5-ASR-Streaming-0.6B-GGUF/nemotron-3.5-asr-streaming-0.6b-q8_0.gguf',
     bytes: 930625888,
     sha256: 'c58b62c1bdd6c5d7b14b08126c5bd16c1289fee6e0d6ac0761dbd3aa6d714935',
     family: 'nemotron_asr',
@@ -146,6 +149,21 @@ const MODELS = {
     languages: Object.keys(NEMOTRON_LOCALES),
   },
 };
+
+/**
+ * A model's `mirror` is the same file on ModelScope: Hugging Face is not reached from mainland China without a proxy
+ * (a user's friend there, 2026-10-10), and ModelScope is. The repositories are the publishers' own or copies of them;
+ * each file's size and SHA-256 there were compared with the ones here on that day, and a download is kept only if it
+ * hashes right wherever it came from, so a mirror that changed costs a download, not a wrong model. The runtimes
+ * (GitHub releases) and R2T2 have no such copy.
+ */
+const CHINA_ZONES = new Set(['Asia/Shanghai', 'Asia/Chongqing', 'Asia/Harbin', 'Asia/Urumqi', 'PRC']);
+/** A guess that only orders the two addresses: by the clock the computer keeps. */
+function inMainlandChina() {
+  try { return CHINA_ZONES.has(Intl.DateTimeFormat().resolvedOptions().timeZone); } catch { return false; }
+}
+/** An address that has not begun to answer in this long is left for the other. */
+const ANSWER_WITHIN_MS = 15_000;
 
 /** llama.cpp's server, for the translation models: the project's own release archives, as published. */
 const LLAMA = {
@@ -175,18 +193,21 @@ const TRANSLATORS = {
   'index-translate-2b': {
     file: 'Index-Translate-2B.Q4_K_M.gguf',
     url: 'https://huggingface.co/IndexTeam/Index-Translate-2B-GGUF/resolve/449c9e6457b3632d328c6cbb78ae8e8e0c8059a5/Index-Translate-2B.Q4_K_M.gguf',
+    mirror: 'https://modelscope.cn/models/IndexTeam/Index-Translate-2B-GGUF/resolve/master/Index-Translate-2B.Q4_K_M.gguf',
     bytes: 1312164352,
     sha256: '044b313d29342bd3b2c77cbb64023ca0d209bd9b3247763f9d162767ef2d746a',
   },
   'hy-mt2-1.8b': {
     file: 'Hy-MT2-1.8B-Q4_K_M.gguf',
     url: 'https://huggingface.co/tencent/Hy-MT2-1.8B-GGUF/resolve/a0c709d9fac510f2c807aa3af52872340dc37a4a/Hy-MT2-1.8B-Q4_K_M.gguf',
+    mirror: 'https://modelscope.cn/models/Tencent-Hunyuan/Hy-MT2-1.8B-GGUF/resolve/master/Hy-MT2-1.8B-Q4_K_M.gguf',
     bytes: 1133080448,
     sha256: 'dc5f44fcf1fa496ee7ad725982c0c8c553a4de00259b53af84c4b89fb0c06699',
   },
   'hy-mt1.5-1.8b': {
     file: 'HY-MT1.5-1.8B-Q4_K_M.gguf',
     url: 'https://huggingface.co/tencent/HY-MT1.5-1.8B-GGUF/resolve/265b2e615a7dc9b06c435dc878829ad99a512ba2/HY-MT1.5-1.8B-Q4_K_M.gguf',
+    mirror: 'https://modelscope.cn/models/Tencent-Hunyuan/HY-MT1.5-1.8B-GGUF/resolve/master/HY-MT1.5-1.8B-Q4_K_M.gguf',
     bytes: 1133080512,
     sha256: '4383ac0c3c8e476de98ff979c2a3f069f8c4fb385e7860cf2d28da896cc477c7',
   },
@@ -201,6 +222,7 @@ const COACHES = {
   'gemma-4-e2b': {
     file: 'gemma-4-E2B-it-Q4_K_M.gguf',
     url: 'https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/0314792d7f1f7e229411f620751375812bb9faf2/gemma-4-E2B-it-Q4_K_M.gguf',
+    mirror: 'https://modelscope.cn/models/unsloth/gemma-4-E2B-it-GGUF/resolve/master/gemma-4-E2B-it-Q4_K_M.gguf',
     bytes: 3106738272,
     sha256: '740185b21d22ceb83a11c3aa62ad5842ef32c70f6096d756bbee85a1e4ec34b8',
   },
@@ -737,6 +759,9 @@ function createNativeEngine(deps = {}) {
     env = process.env,
     sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
     now = () => Date.now(),
+    /** Whether a model's mirror is asked before the address it is published at. */
+    mirrorFirst = inMainlandChina,
+    answerWithinMs = ANSWER_WITHIN_MS,
     log = null,
     onChange = () => {},
     onStream = () => {},
@@ -814,8 +839,12 @@ function createNativeEngine(deps = {}) {
     tail = [...tail, ...text.split(/\r?\n/).filter((line) => line.trim())].slice(-TAIL_LINES);
   };
 
-  /** One file, from its address to its place: resumed where a stopped download left off, and kept only if it hashes right. */
-  async function fetchFile(key, { url, bytes, sha256 }, dest) {
+  /**
+   * One file, from its address to its place: resumed where a stopped download left off, and kept only if it hashes
+   * right. Where it has a mirror, the other address is asked when the first does not answer or breaks off — and goes
+   * on from what the first brought, the file being the same.
+   */
+  async function fetchFile(key, { url, mirror, bytes, sha256 }, dest) {
     const part = `${dest}.part`;
     const control = new AbortController();
     const state = { received: sizeOf(part), total: bytes, abort: () => control.abort(), verifying: false };
@@ -824,9 +853,47 @@ function createNativeEngine(deps = {}) {
     fetching.set(key, state);
     failed.delete(key);
     tell();
+    const sources = mirror ? (mirrorFirst() ? [mirror, url] : [url, mirror]) : [url];
     try {
-      if (state.received < bytes) {
-        const response = await doFetch(url, { signal: control.signal, redirect: 'follow', headers: state.received > 0 ? { Range: `bytes=${state.received}-` } : {} });
+      for (const [index, source] of sources.entries()) {
+        if (state.received >= bytes) break;
+        try {
+          await pull(source);
+        } catch (error) {
+          // Stopped by the user, or nowhere else to ask: that is the answer.
+          if (control.signal.aborted || index === sources.length - 1) throw error;
+          log?.(`[native-engine] ${new URL(source).host} did not serve ${path.basename(dest)} (${error.message}); asking ${new URL(sources[index + 1]).host}\n`);
+          state.received = sizeOf(part);
+          tell();
+        }
+      }
+      state.verifying = true;
+      tell();
+      if (sizeOf(part) !== bytes || (await hash(part)) !== sha256) {
+        files.rmSync(part, { force: true });
+        throw new Error('The downloaded file is not the one expected, and was discarded.');
+      }
+      files.renameSync(part, dest);
+    } finally {
+      fetching.delete(key);
+    }
+
+    /** What one address brings, appended to the part. */
+    async function pull(source) {
+      {
+        // An address that never answers is not waited on for as long as the system would.
+        const attempt = new AbortController();
+        const give = () => attempt.abort();
+        control.signal.addEventListener('abort', give, { once: true });
+        const waiting = setTimeout(give, answerWithinMs);
+        let response;
+        try {
+          response = await doFetch(source, { signal: attempt.signal, redirect: 'follow', headers: state.received > 0 ? { Range: `bytes=${state.received}-` } : {} });
+        } catch (error) {
+          throw control.signal.aborted || !attempt.signal.aborted ? error : new Error('The download did not answer.');
+        } finally {
+          clearTimeout(waiting);
+        }
         // The server sent the whole file where a rest was asked for: start over.
         if (response.status === 200 && state.received > 0) { files.rmSync(part, { force: true }); state.received = 0; }
         else if (response.status !== 200 && response.status !== 206) throw new Error(`The download answered HTTP ${response.status}.`);
@@ -854,15 +921,6 @@ function createNativeEngine(deps = {}) {
         // An answer that ended early without saying so: what came is kept, and the next attempt goes on from it.
         if (sizeOf(part) < bytes) throw new Error('The download stopped before the end. Start it again to go on.');
       }
-      state.verifying = true;
-      tell();
-      if (sizeOf(part) !== bytes || (await hash(part)) !== sha256) {
-        files.rmSync(part, { force: true });
-        throw new Error('The downloaded file is not the one expected, and was discarded.');
-      }
-      files.renameSync(part, dest);
-    } finally {
-      fetching.delete(key);
     }
   }
 

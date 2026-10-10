@@ -422,8 +422,8 @@ describe('a live recognition', () => {
   });
 
   it('has a small model of the same family, read and told the language the same way', () => {
-    const { file, url, bytes, sha256, ...rest } = MODELS['qwen3-asr-0.6b-q8'];
-    const { file: f, url: u, bytes: b, sha256: h, ...big } = MODELS['qwen3-asr-1.7b-q8'];
+    const { file, url, mirror, bytes, sha256, ...rest } = MODELS['qwen3-asr-0.6b-q8'];
+    const { file: f, url: u, mirror: m, bytes: b, sha256: h, ...big } = MODELS['qwen3-asr-1.7b-q8'];
     expect(rest).toEqual(big);
     expect(bytes).toBeLessThan(b / 2);
     expect(url).toMatch(/\/resolve\/[0-9a-f]{40}\/Qwen3-ASR-0\.6B-GGUF\/qwen3-asr-0\.6b-q8_0\.gguf$/);
@@ -801,6 +801,86 @@ describe('a download, once more', () => {
     const second = await engine.download('m1');
     expect(second.models.m1.state).toBe('downloaded');
     expect(requests.filter((r) => r.url.endsWith('m1.gguf')).map((r) => r.range)).toEqual([undefined, 'bytes=10-']);
+  });
+
+  describe('from a mirror', () => {
+    const MIRRORED = { ...CATALOG, models: { m1: { ...CATALOG.models.m1, mirror: 'https://mirror.test/m1.gguf' } } };
+    const serving = (requests, served) => async (url, init = {}) => {
+      requests.push({ url, range: init.headers?.Range });
+      if (url.endsWith('.zip')) return answer([ARCHIVE]);
+      const from = init.headers?.Range ? Number(/bytes=(\d+)-/.exec(init.headers.Range)[1]) : 0;
+      return served(url, from, init);
+    };
+    const extract = async (archive, into) => { fs.writeFileSync(path.join(into, 'server.exe'), 'exe'); };
+    const asked = (requests) => requests.filter((r) => r.url.endsWith('m1.gguf')).map((r) => [new URL(r.url).host, r.range]);
+
+    it('asks the mirror where the address does not answer, and keeps what hashes right', async () => {
+      const requests = [];
+      const engine = createNativeEngine({
+        dir, platform: 'win32', arch: 'x64', catalog: MIRRORED, mirrorFirst: () => false, extract,
+        fetch: serving(requests, (url, from) => { if (url.startsWith('https://example.test/')) throw new TypeError('fetch failed'); return answer([MODEL.subarray(from)], from > 0 ? 206 : 200); }),
+      });
+      const after = await engine.download('m1');
+      expect(after.models.m1.state).toBe('downloaded');
+      expect(fs.readFileSync(modelFile())).toEqual(MODEL);
+      expect(asked(requests)).toEqual([['example.test', undefined], ['mirror.test', undefined]]);
+    });
+
+    it('goes on at the mirror from what the address brought before it broke off', async () => {
+      const requests = [];
+      const engine = createNativeEngine({
+        dir, platform: 'win32', arch: 'x64', catalog: MIRRORED, mirrorFirst: () => false, extract,
+        fetch: serving(requests, (url, from) => (url.startsWith('https://example.test/') ? answer([MODEL.subarray(0, 10)]) : answer([MODEL.subarray(from)], from > 0 ? 206 : 200))),
+      });
+      const after = await engine.download('m1');
+      expect(after.models.m1.state).toBe('downloaded');
+      expect(fs.readFileSync(modelFile())).toEqual(MODEL);
+      expect(asked(requests)).toEqual([['example.test', undefined], ['mirror.test', 'bytes=10-']]);
+    });
+
+    it('asks the mirror first where the computer looks to be in mainland China, and the address only if that fails', async () => {
+      const requests = [];
+      const engine = createNativeEngine({
+        dir, platform: 'win32', arch: 'x64', catalog: MIRRORED, mirrorFirst: () => true, extract,
+        fetch: serving(requests, (url, from) => answer([MODEL.subarray(from)], from > 0 ? 206 : 200)),
+      });
+      expect((await engine.download('m1')).models.m1.state).toBe('downloaded');
+      expect(asked(requests)).toEqual([['mirror.test', undefined]]);
+    });
+
+    it('leaves an address that does not begin to answer, for the mirror', async () => {
+      const requests = [];
+      const engine = createNativeEngine({
+        dir, platform: 'win32', arch: 'x64', catalog: MIRRORED, mirrorFirst: () => false, answerWithinMs: 20, extract,
+        fetch: serving(requests, (url, from, init) => (url.startsWith('https://example.test/')
+          ? new Promise((resolve, reject) => { /* never answers: only its being given up ends it */ init.signal.addEventListener('abort', () => reject(new Error('given up'))); })
+          : answer([MODEL.subarray(from)], from > 0 ? 206 : 200))),
+      });
+      const after = await engine.download('m1');
+      expect(after.models.m1.state).toBe('downloaded');
+      expect(asked(requests).map(([host]) => host)).toEqual(['example.test', 'mirror.test']);
+    });
+
+    it('says the last reason when neither serves it', async () => {
+      const engine = createNativeEngine({
+        dir, platform: 'win32', arch: 'x64', catalog: MIRRORED, mirrorFirst: () => false, extract,
+        fetch: serving([], () => answer([], 404)),
+      });
+      const after = await engine.download('m1');
+      expect(after.models.m1).toMatchObject({ state: 'failed', error: 'The download answered HTTP 404.' });
+    });
+
+    it('gives every model ModelScope keeps its address there, on the same file', () => {
+      const every = { ...MODELS, ...TRANSLATORS, ...COACHES };
+      const mirrored = Object.values(every).filter((model) => model.mirror);
+      expect(mirrored.length).toBe(7);
+      for (const model of mirrored) {
+        expect(model.mirror).toMatch(/^https:\/\/modelscope\.cn\/models\/[^/]+\/[^/]+\/resolve\/master\//);
+        expect(model.mirror.endsWith(`/${model.url.split('/').pop()}`)).toBe(true);
+      }
+      // R2T2 is published in one place only.
+      expect(MODELS['r2t2-q8'].mirror).toBeUndefined();
+    });
   });
 
   it('stops an answer that is longer than the file', async () => {
