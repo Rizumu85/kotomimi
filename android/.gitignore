@@ -1,0 +1,12 @@
+# Gradle and Android Studio
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+.kotlin/
+
+# The engine is built by scripts/build-engine.sh, never committed: its source, its build, and what the app packs.
+.engine/
+app/src/main/jniLibs/
+app/src/main/assets/selfcheck.wav

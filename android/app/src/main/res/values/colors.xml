@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The apricot-and-mint look chosen from the mockup (2026-10-10). -->
+<resources>
+    <color name="room">#FBE3B9</color>
+    <color name="tile">#FFFDF8</color>
+    <color name="body">#BDE5CF</color>
+    <color name="body_deep">#8ECAAC</color>
+    <color name="screen">#1F3D36</color>
+    <color name="screen_ink">#EEF7E3</color>
+    <color name="screen_ink_2">#B5D0C0</color>
+    <color name="glow">#D8F2A2</color>
+    <color name="key">#F0604A</color>
+    <color name="key_deep">#C4432F</color>
+    <color name="ink">#1F2A30</color>
+    <color name="ink_2">#66727A</color>
+    <color name="good">#2F8457</color>
+</resources>
