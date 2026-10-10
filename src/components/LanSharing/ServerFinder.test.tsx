@@ -45,6 +45,40 @@ describe('the devices found on the network', () => {
     expect(rows[2]).toContain('fork.find.needsKey');
   });
 
+  describe('a phone that lends its recognition engine', () => {
+    const phone: FoundServer = { address: '192.168.4.28:8792', kind: 'phone', name: '朋友的手机', product: '', models: 1, needsKey: false, self: false, model: 'qwen3-asr-0.6b-q8' };
+
+    it('is listed where recognition can be set to it, as a phone, with the model it lends', async () => {
+      const onPick = vi.fn();
+      render(<ServerFinder auto value="" phone="" onPick={onPick} find={async () => [desk, phone]} />);
+      await waitFor(() => expect(screen.getAllByRole('listitem')).toHaveLength(2));
+      const row = screen.getAllByRole('listitem')[1];
+      expect(row.textContent).toContain('朋友的手机');
+      expect(row.textContent).toContain('fork.find.kindPhone');
+      expect(row.textContent).toContain('qwen3-asr-0.6b-q8');
+      fireEvent.click(screen.getByRole('button', { name: 'fork.find.use {"name":"朋友的手机"}' }));
+      expect(onPick).toHaveBeenCalledWith(phone);
+    });
+
+    it('is marked as the one in use by the address recognition is asked at, not the other device\'s', async () => {
+      render(<ServerFinder auto value="192.168.4.29:8790" phone="http://192.168.4.28:8792/v1" onPick={() => {}} find={async () => [desk, phone]} />);
+      await waitFor(() => expect(screen.getAllByRole('listitem')).toHaveLength(2));
+      expect(screen.getByRole('button', { name: 'fork.find.use {"name":"朋友的手机"}' }).getAttribute('aria-pressed')).toBe('true');
+      expect(screen.getByRole('button', { name: 'fork.find.use {"name":"DESK"}' }).getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('is not listed where it could not be used: the wizard asks for a device with a whole pipeline', async () => {
+      render(<ServerFinder auto value="" onPick={() => {}} find={async () => [desk, phone]} />);
+      await waitFor(() => expect(screen.getAllByRole('listitem')).toHaveLength(1));
+    });
+
+    it('is held to its shape on the way from the main process', () => {
+      expect(foundServers([phone])).toEqual([phone]);
+      // A phone that names no model is nothing recognition can be set to: it is read as any server.
+      expect(foundServers([{ ...phone, model: undefined }])[0].kind).toBe('server');
+    });
+  });
+
   it('hands over the device that is clicked, and marks the one whose address is in the field', async () => {
     const onPick = vi.fn();
     render(<ServerFinder auto value="http://192.168.4.105:8080/v1" onPick={onPick} find={async () => [desk, mac]} />);

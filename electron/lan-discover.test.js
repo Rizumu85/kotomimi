@@ -78,6 +78,15 @@ describe('what an answer says of a server', () => {
     expect(readAnswer(403, {}, '')).toEqual({ kind: 'server', name: '', models: 0, needsKey: true, includes: false });
   });
 
+  it('knows a phone that lends its recognition engine, by what it says of itself, and the model it lends', () => {
+    const list = JSON.stringify({ object: 'list', data: [{ id: 'qwen3-asr-0.6b-q8', object: 'model', owned_by: 'kotomimi-phone' }] });
+    expect(readAnswer(200, { [NAME_HEADER]: encodeURIComponent('朋友的手机'), 'x-kotomimi-node': 'engine' }, list)).toEqual({ kind: 'phone', name: '朋友的手机', models: 1, needsKey: false, includes: false, model: 'qwen3-asr-0.6b-q8' });
+    // A phone that lends nothing is nothing to choose.
+    expect(readAnswer(200, { 'x-kotomimi-node': 'engine' }, '{"object":"list","data":[]}')).toBeNull();
+    // The same list from anything that does not say it is a phone is a model server.
+    expect(readAnswer(200, {}, list)).toMatchObject({ kind: 'server', models: 1 });
+  });
+
   it('is nothing for a router\'s page, a 404, or JSON that is no list', () => {
     expect(readAnswer(200, {}, '<html>router</html>')).toBeNull();
     expect(readAnswer(404, {}, '{}')).toBeNull();

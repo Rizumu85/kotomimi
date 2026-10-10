@@ -1723,6 +1723,7 @@
       "none": "没有找到。请确认另一台设备已经开机、和这台电脑连着同一个 Wi-Fi 或路由器，并且在它的 Kotomimi 里打开了「共享这台电脑的模型」。也可以在下面手动填地址。",
       "kindKotomimi": "Kotomimi 共享",
       "kindServer": "模型服务器",
+      "kindPhone": "手机 · 语音识别",
       "models": "{{count}} 个模型",
       "needsKey": "需要访问密钥",
       "thisComputer": "这台电脑上的服务器",

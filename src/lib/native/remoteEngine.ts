@@ -29,14 +29,25 @@ const modelsUrl = (baseUrl: string) => `${baseUrl.trim().replace(/\/+$/, '')}/mo
  * as the API it was named as.
  */
 export async function isEngineNode(baseUrl: string, fetchIt: typeof fetch, key?: string, timeoutMs: number = ASK_TIMEOUT_MS): Promise<boolean> {
-  if (!electron() || !/^http:\/\//i.test(baseUrl.trim())) return false;
+  return (await engineNode(baseUrl, fetchIt, key, timeoutMs)) !== null;
+}
+
+/**
+ * The same question, with what the phone lends now: the model it has loaded, which its owner may have changed since
+ * the address was written down — blank where its list could not be read. Null: no phone's engine is there.
+ */
+export async function engineNode(baseUrl: string, fetchIt: typeof fetch, key?: string, timeoutMs: number = ASK_TIMEOUT_MS): Promise<{ model: string } | null> {
+  if (!electron() || !/^http:\/\//i.test(baseUrl.trim())) return null;
   const control = new AbortController();
   const waiting = setTimeout(() => control.abort(), timeoutMs);
   try {
     const answer = await fetchIt(modelsUrl(baseUrl), { signal: control.signal, headers: key ? { Authorization: `Bearer ${key}` } : {} });
-    return answer.ok && answer.headers.get(NODE_HEADER) === ENGINE;
+    if (!answer.ok || answer.headers.get(NODE_HEADER) !== ENGINE) return null;
+    const list = (await answer.json().catch(() => null)) as { data?: Array<{ id?: unknown }> } | null;
+    const first = list?.data?.[0]?.id;
+    return { model: typeof first === 'string' ? first.slice(0, 80) : '' };
   } catch {
-    return false;
+    return null;
   } finally {
     clearTimeout(waiting);
   }

@@ -8,7 +8,7 @@ import { ModelGroup } from '../../components/Settings/sections/ModelManagementCo
 import { ModelCard, ModelManagementSection } from '../../components/Settings/sections/ModelManagementSection';
 import ToggleSwitch from '../../components/Settings/shared/ToggleSwitch';
 import Tooltip from '../../components/Tooltip/Tooltip';
-import { canFindServers, findServers, plainAddress, type FoundServer } from '../../lib/lan/discover';
+import { canFindServers, findServers, phoneBase, plainAddress, type FoundServer } from '../../lib/lan/discover';
 import { askLocalPipelines, NO_PIPELINES, type LocalPipelines } from '../../lib/lan/localServer';
 import { modelLabel } from '../../lib/lan/modelLabel';
 import { deviceReady, getManifestEntry, getModelSizeMb } from '../../lib/local-inference/modelManifest';
@@ -759,6 +759,13 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
 
   // The same as a pick in the search above the cards.
   const useServer = (server: FoundServer) => {
+    // A phone lends its recognition engine and nothing else: recognition goes to it, and the other stages stay
+    // where they are. (It is asked as an API is, at its own address; the run finds out it is a phone and reads it
+    // live: `remoteEngine.ts`.)
+    if (server.kind === 'phone') {
+      put({ asrVia: 'api', asrApiBaseUrl: phoneBase(server), asrApiModel: server.model ?? '', asrApiNeedsKey: false } as Partial<S>);
+      return;
+    }
     if (server.needsKey !== settings.serverNeedsKey) put({ serverNeedsKey: server.needsKey });
     fill('endpoint', server.address);
   };
@@ -795,6 +802,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
         <ServerFinder
           hint={t('providers.localai.otherDeviceHint')}
           value={address}
+          phone={settings.asrVia === 'api' ? settings.asrApiBaseUrl : ''}
           auto={serverInUse && !address.trim()}
           disabled={disabled}
           onPick={useServer}

@@ -10,8 +10,8 @@
 export interface FoundServer {
   /** What goes in the address field: `host:port`. */
   address: string;
-  /** Another Kotomimi, or any other server that lists models. */
-  kind: 'kotomimi' | 'server';
+  /** Another Kotomimi, a phone that lends its recognition engine (`android/`), or any other server that lists models. */
+  kind: 'kotomimi' | 'phone' | 'server';
   /** The computer's name, where it gave one or the network knows one; else blank. */
   name: string;
   /** What the server is, where it could be told (`LocalAI`); else blank. */
@@ -21,6 +21,8 @@ export interface FoundServer {
   needsKey: boolean;
   /** It runs on this computer. */
   self: boolean;
+  /** A phone's: the model it lends. */
+  model?: string;
 }
 
 /** The main process's answer, held to its shape: what is no server is dropped. */
@@ -31,12 +33,13 @@ export function foundServers(value: unknown): FoundServer[] {
     if (!item || typeof item.address !== 'string' || !/^[\d.]+:\d{1,5}$/.test(item.address)) continue;
     out.push({
       address: item.address,
-      kind: item.kind === 'kotomimi' ? 'kotomimi' : 'server',
+      kind: item.kind === 'kotomimi' ? 'kotomimi' : item.kind === 'phone' && typeof item.model === 'string' && item.model ? 'phone' : 'server',
       name: typeof item.name === 'string' ? item.name.slice(0, 80) : '',
       product: item.product === 'LocalAI' ? 'LocalAI' : '',
       models: Number.isInteger(item.models) && (item.models as number) > 0 ? (item.models as number) : 0,
       needsKey: item.needsKey === true,
       self: item.self === true,
+      ...(item.kind === 'phone' && typeof item.model === 'string' && item.model ? { model: item.model.slice(0, 80) } : {}),
     });
   }
   return out;
@@ -58,6 +61,9 @@ export async function findServers(): Promise<FoundServer[]> {
     return [];
   }
 }
+
+/** What a phone that was found is asked at: the address the recognizer is given (`asrApiBaseUrl`). */
+export const phoneBase = (server: Pick<FoundServer, 'address'>): string => `http://${server.address}/v1`;
 
 /** An address as typed — with a scheme, a path, a trailing slash — as the `host:port` a found server is listed by. */
 export function plainAddress(value: string): string {

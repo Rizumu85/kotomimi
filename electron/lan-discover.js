@@ -22,6 +22,13 @@ const dns = require('dns');
 /** Where a sharing Kotomimi listens unless told otherwise, and where a LocalAI does. */
 const KOTOMIMI_PORT = 8790;
 const SERVER_PORT = 8080;
+/**
+ * Where a phone that lends its recognition engine listens (android/): a port of its own, because a Kotomimi that
+ * does not know such a phone would list it as a device with a whole pipeline, and fail when it was chosen.
+ */
+const PHONE_PORT = 8792;
+/** What such a phone says of itself on every answer. */
+const NODE_HEADER = 'x-kotomimi-node';
 /** A device on the same network answers in a few milliseconds: this long is for a busy one. */
 const PROBE_TIMEOUT_MS = 600;
 /** Requests in flight at once. */
@@ -59,7 +66,7 @@ function neighbours(address, netmask) {
  * too — a server may run beside the app — as the loopback, and only on the
  * ports this app does not listen on itself (`ownPorts`).
  */
-function targets(interfaces = os.networkInterfaces(), { ports = [KOTOMIMI_PORT, SERVER_PORT], ownPorts = [] } = {}) {
+function targets(interfaces = os.networkInterfaces(), { ports = [KOTOMIMI_PORT, SERVER_PORT, PHONE_PORT], ownPorts = [] } = {}) {
   const own = new Set();
   const hosts = new Set();
   for (const list of Object.values(interfaces)) {
@@ -98,6 +105,8 @@ function readAnswer(status, headers, body) {
   }
   if (!list || !Array.isArray(list.data)) return null;
   const models = list.data.filter((m) => m && typeof m.id === 'string');
+  // A phone lends one thing: the model it has loaded, to recognize speech with.
+  if (headers[NODE_HEADER] === 'engine') return models.length ? { kind: 'phone', name, models: models.length, needsKey: false, includes: false, model: String(models[0].id).slice(0, 80) } : null;
   const kotomimi = models.some((m) => m.owned_by === 'kotomimi');
   // A sharing Kotomimi lists its pipeline first, which is no model of its own to count.
   return { kind: kotomimi ? 'kotomimi' : 'server', name, models: kotomimi ? Math.max(models.length - 1, 0) : models.length, needsKey: false, includes: kotomimi && includes };
@@ -192,8 +201,8 @@ async function discoverServers({ interfaces, ports, ownPorts = [], timeoutMs = P
     s.name = name;
     s.product = product;
   }));
-  const order = (s) => `${s.kind === 'kotomimi' ? 0 : 1}${s.self ? 0 : 1}${toNumber(s.host).toString().padStart(10, '0')}${String(s.port).padStart(5, '0')}`;
-  return others.sort((a, b) => order(a).localeCompare(order(b))).map(({ address, kind, name, product, models, needsKey, self }) => ({ address, kind, name, product, models, needsKey, self }));
+  const order = (s) => `${s.kind === 'kotomimi' ? 0 : s.kind === 'phone' ? 1 : 2}${s.self ? 0 : 1}${toNumber(s.host).toString().padStart(10, '0')}${String(s.port).padStart(5, '0')}`;
+  return others.sort((a, b) => order(a).localeCompare(order(b))).map(({ address, kind, name, product, models, needsKey, self, model }) => ({ address, kind, name, product, models, needsKey, self, ...(model ? { model } : {}) }));
 }
 
-module.exports = { discoverServers, targets, neighbours, readAnswer, probe, productOf, nameOf, shown, KOTOMIMI_PORT, SERVER_PORT, NAME_HEADER, INCLUDES_HEADER };
+module.exports = { discoverServers, targets, neighbours, readAnswer, probe, productOf, nameOf, shown, KOTOMIMI_PORT, SERVER_PORT, PHONE_PORT, NAME_HEADER, INCLUDES_HEADER, NODE_HEADER };

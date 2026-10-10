@@ -34,7 +34,7 @@ import { AUTO } from '../../lib/provider/languages';
 import { BEFORE_SLOT, TEXT_SLOT } from './nativeTranslators';
 import { cutAt, letters, restFrom, SETTLE_MS } from './sentenceCut';
 import { askNativeEngine, ipcNativeBridge, NO_NATIVE_ENGINE, type NativeBridge, type NativeEngineStatus } from '../../lib/native/nativeEngine';
-import { isEngineNode, remoteBridge } from '../../lib/native/remoteEngine';
+import { engineNode, remoteBridge } from '../../lib/native/remoteEngine';
 import { createEitherAsr } from './eitherAsr';
 import { createRealtimeAdapter } from './adapter';
 import type { RealtimeConfig } from './config';
@@ -155,7 +155,7 @@ export interface PipelineDeps {
    */
   prepare(pipeline: string, transcription: string): Promise<unknown>;
   /** An engine on another device, where the API named for recognition is one (`remoteEngine.ts`): asked, and its recognitions; stand-ins in tests. */
-  remote: { isNode(baseUrl: string): Promise<boolean>; bridge(baseUrl: string): NativeBridge };
+  remote: { /** Null: what answers there is no phone's engine. `model`: the one it lends now; blank where it did not say. */ node(baseUrl: string): Promise<{ model: string } | null>; bridge(baseUrl: string): NativeBridge };
   /** The native engine, when a leg hears by it: the main process's by default, stand-ins in tests. */
   native: { bridge: NativeBridge; start(model: string): Promise<NativeEngineStatus>; /** Where a native text engine answers now, up with this model, and the key its present run asks for. Rejects when it is not up and cannot be brought up. */ base?(engine: 'translator' | 'coach', model: string): Promise<EngineAddress> };
 }
@@ -829,17 +829,20 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
     const byApi = () => createApiAsr({ baseUrl: api.baseUrl, model: api.model, ...(key ? { key } : {}), fetch: asked, clock: request.clock });
     // The address may be a Kotomimi phone lending its engine: that is read as this computer's own engine is, while
     // the voice is heard, not a sentence at a time. Asked once, as the run begins; anything else is the API named.
-    const remote = deps.remote ?? { isNode: (baseUrl: string) => isEngineNode(baseUrl, asked, key), bridge: remoteBridge };
+    const remote = deps.remote ?? { node: (baseUrl: string) => engineNode(baseUrl, asked, key), bridge: remoteBridge };
     return createLocalInferenceAdapter({
       ...engines,
       asr: () => createEitherAsr(async () => {
-        if (!(await remote.isNode(api.baseUrl))) return byApi();
-        const lent: NativeEngineStatus = { ...NO_NATIVE_ENGINE, run: { state: 'ready', model: api.model, port: 0, tail: '' }, up: [api.model] };
+        const node = await remote.node(api.baseUrl);
+        if (!node) return byApi();
+        // The model the phone lends now, whatever was written down when it was chosen: its owner may have changed it.
+        const model = node.model || api.model;
+        const lent: NativeEngineStatus = { ...NO_NATIVE_ENGINE, run: { state: 'ready', model, port: 0, tail: '' }, up: [model] };
         // Its last words are waited for as long as a reading may take there (`READ_TIMEOUT_MS` in
         // `electron/remote-engine.js`): a phone slower than the voice still writes all of it, late, where the wait
         // this computer's own engine is given would have kept only what the first reading had (seen 2026-10-10 on a
         // phone at half the speed of speech: "ゲームは、 like" for twenty seconds of talk).
-        return createNativeAsr({ bridge: remote.bridge(api.baseUrl), start: async () => lent, model: api.model, clock: request.clock, named: 'The recognition engine of the other device', limits: { ...api.limits, lastWordsMs: REMOTE_LAST_WORDS_MS } });
+        return createNativeAsr({ bridge: remote.bridge(api.baseUrl), start: async () => lent, model, clock: request.clock, named: 'The recognition engine of the other device', limits: { ...api.limits, lastWordsMs: REMOTE_LAST_WORDS_MS } });
       }),
     });
   };

@@ -233,6 +233,7 @@ module.exports = {
     ],
     kindKotomimi: ['Kotomimi', 'Kotomimi 共享', 'Kotomimi 共享'],
     kindServer: ['Model server', '模型服务器', '模型伺服器'],
+    kindPhone: ['Phone · speech recognition', '手机 · 语音识别', '手機 · 語音辨識'],
     models: ['{{count}} model(s)', '{{count}} 个模型', '{{count}} 個模型'],
     needsKey: ['asks for an access key', '需要访问密钥', '需要存取金鑰'],
     thisComputer: ['On this computer', '这台电脑上的服务器', '這台電腦上的伺服器'],

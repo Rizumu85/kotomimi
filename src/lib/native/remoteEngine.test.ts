@@ -2,7 +2,7 @@
  * Fork: a recognition engine on another device, as the page uses it (`remoteEngine.ts`).
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { isEngineNode, remoteBridge } from './remoteEngine';
+import { engineNode, isEngineNode, remoteBridge } from './remoteEngine';
 
 const answer = (status: number, headers: Record<string, string> = {}) => new Response('{"object":"list","data":[]}', { status, headers });
 
@@ -14,7 +14,7 @@ describe('telling a Kotomimi phone from any other API', () => {
   afterEach(() => { delete (window as unknown as { electron?: unknown }).electron; vi.clearAllMocks(); });
 
   it('is one where the model list says it is the engine', async () => {
-    const fetchIt = vi.fn(async () => answer(200, { 'X-Kotomimi-Node': 'engine' }));
+    const fetchIt = vi.fn(async (_url: string) => answer(200, { 'X-Kotomimi-Node': 'engine' }));
     expect(await isEngineNode('http://192.168.1.23:8792/v1/', fetchIt as unknown as typeof fetch)).toBe(true);
     expect(fetchIt.mock.calls[0][0]).toBe('http://192.168.1.23:8792/v1/models');
   });
@@ -32,8 +32,17 @@ describe('telling a Kotomimi phone from any other API', () => {
   });
 
   it('gives up on an address that does not answer in time', async () => {
-    const fetchIt = ((url: string, init: RequestInit) => new Promise((resolve, reject) => { init.signal?.addEventListener('abort', () => reject(new Error('aborted'))); })) as unknown as typeof fetch;
+    const fetchIt = ((_url: string, init: RequestInit) => new Promise((_resolve, reject) => { init.signal?.addEventListener('abort', () => reject(new Error('aborted'))); })) as unknown as typeof fetch;
     expect(await isEngineNode('http://192.168.1.23:8792/v1', fetchIt, undefined, 20)).toBe(false);
+  });
+
+  it('says which model the phone lends now', async () => {
+    const lending = (async () => new Response(JSON.stringify({ object: 'list', data: [{ id: 'qwen3-asr-1.7b-q8' }] }), { status: 200, headers: { 'X-Kotomimi-Node': 'engine' } })) as unknown as typeof fetch;
+    expect(await engineNode('http://192.168.1.23:8792/v1', lending)).toEqual({ model: 'qwen3-asr-1.7b-q8' });
+    // A list that cannot be read is still a phone: the model written down is asked for.
+    const unread = (async () => new Response('not a list', { status: 200, headers: { 'X-Kotomimi-Node': 'engine' } })) as unknown as typeof fetch;
+    expect(await engineNode('http://192.168.1.23:8792/v1', unread)).toEqual({ model: '' });
+    expect(await engineNode('http://192.168.1.23:8080/v1', (async () => answer(200)) as unknown as typeof fetch)).toBeNull();
   });
 
   it('opens its recognitions at the address it was given', async () => {
