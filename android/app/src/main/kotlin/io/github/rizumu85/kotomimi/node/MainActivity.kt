@@ -1,9 +1,12 @@
 package io.github.rizumu85.kotomimi.node
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -20,8 +23,8 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * The first build of the phone side: one screen that fetches a model and runs the self-check, so that a phone nobody
- * here can hold tells what it can do. The look of the mockup comes after the numbers.
+ * The phone side's one screen: fetch a model, lend the phone to a computer, and check what the phone can do. The look
+ * of the mockup comes after it is known to work on the phones it is for.
  */
 class MainActivity : Activity() {
     private val main = Handler(Looper.getMainLooper())
@@ -30,27 +33,43 @@ class MainActivity : Activity() {
 
     private lateinit var engine: Engine
     private lateinit var store: ModelStore
+    private lateinit var choices: Choices
 
     private lateinit var title: TextView
     private lateinit var sub: TextView
     private lateinit var progress: ProgressBar
     private lateinit var key: TextView
+    private lateinit var checkKey: TextView
     private lateinit var report: TextView
     private lateinit var share: TextView
     private val rows = HashMap<Model, Pair<TextView, TextView>>()
 
-    /** What the worker is doing: nothing, a check, or the download of one model. */
+    /** What this screen's own worker is doing: nothing, a check, or the download of one model. */
     private var busy: Any? = null
     private var lastReport: String? = null
+    private var lastVerdict: Pair<String, String>? = null
 
     override fun onCreate(saved: Bundle?) {
         super.onCreate(saved)
         engine = Engine(this)
         store = ModelStore(this)
+        choices = Choices(this)
         setContentView(build())
         refresh()
-        // For a check started from a computer: adb shell am start -n …/.MainActivity --ez selfcheck true
+        // For a computer driving the phone: adb shell am start -n …/.MainActivity --ez selfcheck true (or --ez share true)
         if (intent.getBooleanExtra("selfcheck", false)) check()
+        if (intent.getBooleanExtra("share", false)) lend()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Sharing.listener = { refresh() }
+        refresh()
+    }
+
+    override fun onStop() {
+        Sharing.listener = null
+        super.onStop()
     }
 
     override fun onDestroy() {
@@ -69,9 +88,9 @@ class MainActivity : Activity() {
         }
 
         column.addView(text("KOTOMIMI", 17f, R.color.screen, bold = true).apply { letterSpacing = 0.14f })
-        column.addView(text("手机端 · 自检版", 13f, R.color.ink_2), spaced(top = 2))
+        column.addView(text("手机端 ${BuildConfigLite.VERSION}", 13f, R.color.ink_2), spaced(top = 2))
 
-        // The recorder: a body, and a screen that says what is going on.
+        // The recorder: a body, a screen that says what is going on, and the key.
         val body = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = shape(R.color.body, 34)
@@ -96,19 +115,29 @@ class MainActivity : Activity() {
         key = text("", 17f, android.R.color.white, bold = true).apply {
             gravity = Gravity.CENTER
             background = shape(R.color.key, 28)
-            setOnClickListener { if (busy == null) check() else halt() }
+            setOnClickListener { if (Sharing.on) ShareService.stop(this@MainActivity) else if (busy == null) lend() }
         }
         body.addView(key, LinearLayout.LayoutParams(MATCH_PARENT, dp(56)).apply { topMargin = dp(12) })
+        checkKey = text("", 15f, R.color.screen, bold = true).apply {
+            gravity = Gravity.CENTER
+            background = shape(R.color.body_deep, 22)
+            setOnClickListener { if (busy == "check") halt() else if (busy == null && !Sharing.on) check() }
+        }
+        body.addView(checkKey, LinearLayout.LayoutParams(MATCH_PARENT, dp(46)).apply { topMargin = dp(10) })
         column.addView(body, spaced(top = 18))
 
-        // The models.
+        // The models: the one that is lent is marked; a touch on another that is here lends that one instead.
         val models = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = shape(R.color.tile, 26)
             setPadding(dp(18), dp(8), dp(12), dp(8))
         }
         for (model in MODELS) {
-            val row = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL; minimumHeight = dp(64) }
+            val row = LinearLayout(this).apply {
+                gravity = Gravity.CENTER_VERTICAL
+                minimumHeight = dp(64)
+                setOnClickListener { if (store.has(model) && busy == null && !Sharing.on) { choices.share(model); refresh() } }
+            }
             val words = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
             val state = text("", 13f, R.color.ink_2)
             words.addView(text(model.name, 16f, R.color.ink, bold = true))
@@ -152,32 +181,45 @@ class MainActivity : Activity() {
         }
     }
 
-    /** The screen as things stand, while nothing is running. */
+    /** The screen as things stand. A check or a download in hand writes its own lines over this as it goes. */
     private fun refresh() {
         val here = MODELS.filter { store.has(it) }
+        val lent = choices.shared(store)
+        val sharing = Sharing.state
+        val shared = Sharing.on
         for ((model, views) in rows) {
             val (state, act) = views
             val begun = store.begun(model)
-            state.text = when {
-                store.has(model) -> "已下载 · ${model.sizeInWords}"
-                begun > 0 -> "下载到 ${percent(begun, model.bytes)}，可以接着下"
-                else -> model.sizeInWords
+            if (busy !== model) {
+                state.text = when {
+                    store.has(model) -> if (model === lent && here.size > 1) "借出去的是这个 · ${model.sizeInWords}" else "已下载 · ${model.sizeInWords}"
+                    begun > 0 -> "下载到 ${percent(begun, model.bytes)}，可以接着下"
+                    else -> model.sizeInWords
+                }
+                act.text = if (begun > 0 && !store.has(model)) "继续" else "下载"
+                act.alpha = if (busy == null) 1f else 0.4f
             }
-            act.text = if (begun > 0 && !store.has(model)) "继续" else "下载"
             act.visibility = if (store.has(model)) View.GONE else View.VISIBLE
-            act.alpha = 1f
         }
-        progress.visibility = View.INVISIBLE
-        key.text = if (lastReport == null) "开始自检" else "再检查一次"
-        key.alpha = if (here.isEmpty() || !engine.present) 0.45f else 1f
-        when {
-            !engine.present -> say("引擎不在", "这个安装包里没有带上识别引擎")
-            here.isEmpty() -> say("先下载模型", "下面选一个，建议连着 Wi-Fi")
-            lastReport == null -> say("可以自检了", "读一段固定的录音，看这台手机跟不跟得上")
+
+        key.text = if (shared) "停止共享" else "开始共享"
+        key.alpha = if (shared || (busy == null && lent != null && engine.present)) 1f else 0.45f
+        checkKey.text = if (busy == "check") "停下" else if (lastReport == null) "自检：看这台手机跟不跟得上" else "再自检一次"
+        checkKey.alpha = if (busy == "check" || (busy == null && !shared && here.isNotEmpty() && engine.present)) 1f else 0.45f
+
+        if (busy != "check") {
+            progress.visibility = View.INVISIBLE
+            when {
+                !engine.present -> say("引擎不在", "这个安装包里没有带上识别引擎")
+                shared || sharing.phase == Share.Phase.FAILED -> ShareService.wordsOf(sharing).let { say(it.first, it.second) }
+                here.isEmpty() -> say("先下载模型", "下面选一个，建议连着 Wi-Fi")
+                lastVerdict != null -> say(lastVerdict!!.first, lastVerdict!!.second)
+                else -> say("没有开启", "按下面的键，把这台手机借给电脑")
+            }
         }
-        report.text = lastReport ?: "还没有报告。"
+        report.text = lastReport ?: "还没有自检报告。"
         share.visibility = if (lastReport == null) View.GONE else View.VISIBLE
-        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        if (busy == null) window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
     private fun say(big: String, small: String) {
@@ -187,12 +229,25 @@ class MainActivity : Activity() {
 
     // ── What it does ────────────────────────────────────────────────────────────────────────────────────────────
 
+    /** Lends the phone: the model that is chosen, the way the self-check found fastest. */
+    private fun lend() {
+        val model = choices.shared(store) ?: return
+        if (!engine.present || busy != null) return
+        // The notification that says the phone is lent: asked for once, and lent whatever the answer.
+        if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
+        }
+        lastVerdict = null
+        ShareService.start(this, model)
+    }
+
     private fun check() {
-        if (!engine.present || MODELS.none { store.has(it) }) return
+        if (!engine.present || MODELS.none { store.has(it) } || Sharing.on) return
         begin("check")
-        key.text = "停下"
         say("正在检查", "别切走，一会儿就好")
+        progress.visibility = View.VISIBLE
         progress.progress = 0
+        refresh()
         worker.execute {
             val result = runCatching {
                 SelfCheck(this, engine, store).run(
@@ -210,10 +265,10 @@ class MainActivity : Activity() {
                 result.onSuccess { done ->
                     if (done != null) {
                         lastReport = done.report
-                        say(done.verdict.words, done.models.mapNotNull { m -> m.best?.let { "${m.model.name} ${"%.1f".format(it.speed)} 倍速" } }.joinToString(" · ").ifBlank { "看下面的报告" })
+                        lastVerdict = done.verdict.words to done.models.mapNotNull { m -> m.best?.let { "${m.model.name} ${"%.1f".format(it.speed)} 倍速" } }.joinToString(" · ").ifBlank { "看下面的报告" }
                     }
                 }.onFailure { error ->
-                    say("没检查成", error.message ?: error.javaClass.simpleName)
+                    lastVerdict = "没检查成" to (error.message ?: error.javaClass.simpleName)
                 }
                 refresh()
             }
@@ -224,11 +279,16 @@ class MainActivity : Activity() {
         begin(model)
         val (state, act) = rows.getValue(model)
         act.text = "停止"
-        for ((other, views) in rows) if (other !== model) views.second.alpha = 0.4f
-        key.alpha = 0.45f
+        refresh()
+        act.alpha = 1f
         worker.execute {
             val result = runCatching {
-                store.fetch(model, onProgress = { had -> main.post { state.text = "下载中 ${percent(had, model.bytes)}" } }, stopped = stop::get)
+                store.fetch(
+                    model,
+                    onProgress = { had -> main.post { state.text = "下载中 ${percent(had, model.bytes)}" } },
+                    onChecking = { main.post { state.text = "下完了，核对中…"; act.alpha = 0.4f } },
+                    stopped = stop::get,
+                )
             }
             main.post {
                 busy = null
@@ -241,7 +301,6 @@ class MainActivity : Activity() {
     private fun begin(what: Any) {
         busy = what
         stop.set(false)
-        progress.visibility = if (what == "check") View.VISIBLE else View.INVISIBLE
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 

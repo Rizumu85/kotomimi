@@ -7,17 +7,19 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * The self-check: the engine reads one fixed recording with each model that is here, at several thread counts, and
- * what it took is written down. The numbers are the phone's own; nothing is judged from the name of its processor.
+ * The self-check: the engine reads one fixed recording with each model that is here — on the processor at several
+ * thread counts, then on the graphics chip — and what it took is written down. The numbers are the phone's own;
+ * nothing is judged from the name of its processor.
  */
 class SelfCheck(private val context: Context, private val engine: Engine, private val store: ModelStore) {
-    /** One reading of the recording. */
-    class Reading(val threads: Int, val speechMs: Double, val tookMs: Double, val loadMs: Double, val memoryMb: Int, val text: String) {
+    /** One reading of the recording: on the graphics chip, or on so many threads of the processor. */
+    class Reading(val graphics: Boolean, val threads: Int, val speechMs: Double, val tookMs: Double, val loadMs: Double, val memoryMb: Int, val text: String) {
         /** Seconds of speech read in a second: above 1 it keeps up with a voice read once. */
         val speed: Double get() = if (tookMs > 0) speechMs / tookMs else 0.0
+        val how: String get() = if (graphics) "显卡" else "$threads 线程"
     }
 
-    class OfModel(val model: Model, val readings: List<Reading>, val failure: String?) {
+    class OfModel(val model: Model, val readings: List<Reading>, val failure: String?, val graphicsFailure: String?) {
         val best: Reading? get() = readings.maxByOrNull { it.speed }
     }
 
@@ -35,38 +37,57 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
         }
         val models = MODELS.filter { store.has(it) }
         val threads = threadCounts(device.cores.size)
-        val steps = models.size * threads.size
+        val perModel = threads.size + if (engine.hasGraphics) 1 else 0
+        val steps = models.size * perModel
         val warmBefore = device.warmth()
         val (memory, free) = device.memory()
 
         var done = 0
         var variant: String? = null
-        val results = models.map { model ->
+        var chip: String? = null
+        val results = ArrayList<OfModel>()
+        for ((index, model) in models.withIndex()) {
             val readings = ArrayList<Reading>()
             var failure: String? = null
-            for (count in threads) {
-                if (stopped()) return null
-                onStep(done, steps, "${model.name} · $count 线程")
+            var graphicsFailure: String? = null
+            fun read(graphics: Boolean, count: Int): Engine.Outcome {
+                onStep(done, steps, "${model.name} · ${if (graphics) "显卡" else "$count 线程"}")
                 val outcome = engine.run(
                     listOf(
-                        "--task", "asr", "--family", model.family, "--model", store.fileOf(model).path, "--backend", "cpu",
-                        "--threads", count.toString(), "--audio", recording.path, "--language", "en", "--metrics",
+                        "--task", "asr", "--family", model.family, "--model", store.fileOf(model).path,
+                        "--backend", if (graphics) "vulkan" else "cpu", "--threads", count.toString(),
+                        "--audio", recording.path, "--language", "en", "--metrics",
                     ),
                     store.folder,
+                    graphics,
                 )
-                if (stopped()) return null
                 done += 1
+                return outcome
+            }
+            for (count in threads) {
+                if (stopped()) return null
+                val outcome = read(graphics = false, count)
+                if (stopped()) return null
                 // ggml says which of its CPU builds it took for this processor.
                 variant = variant ?: outcome.lines.firstOrNull { LOADED in it }?.substringAfter(VARIANT_PREFIX)?.removeSuffix(".so")
-                val reading = readingOf(count, outcome)
+                val reading = readingOf(false, count, outcome)
                 if (reading == null) {
-                    // What it said last is the reason, when it gave one.
-                    failure = outcome.lines.lastOrNull { it.isNotBlank() }?.take(200) ?: "引擎退出（${outcome.exit}）"
+                    failure = whyNot(outcome)
                     break
                 }
                 readings += reading
             }
-            OfModel(model, readings, failure)
+            // The graphics chip last: a driver that cannot take it ends that one run, and the rest is already had.
+            if (engine.hasGraphics && failure == null) {
+                if (stopped()) return null
+                val outcome = read(graphics = true, GRAPHICS_THREADS)
+                if (stopped()) return null
+                chip = chip ?: outcome.lines.firstOrNull { it.startsWith(CHIP_LINE) }?.substringAfter("= ")?.substringBefore(" |")
+                val reading = readingOf(true, GRAPHICS_THREADS, outcome)
+                if (reading == null) graphicsFailure = whyNot(outcome) else readings += reading
+            }
+            done = (index + 1) * perModel
+            results += OfModel(model, readings, failure, graphicsFailure)
         }
         onStep(steps, steps, "写报告")
 
@@ -80,23 +101,25 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
             appendLine("系统：${device.android}")
             appendLine("处理器：${device.coresInWords()}")
             appendLine("指令集：${device.featuresInWords()}")
+            if (engine.hasGraphics) appendLine("显卡：${chip ?: "引擎没认出来"}")
             appendLine("内存：共 ${"%.1f".format(memory / 1024.0)} GB，开始时空闲 ${"%.1f".format(free / 1024.0)} GB")
             val warmAfter = device.warmth()
             if (warmBefore != null && warmAfter != null) appendLine("电池温度：$warmBefore°C → $warmAfter°C")
-            appendLine("引擎：audio.cpp ${BuildConfigLite.ENGINE}，只用处理器，用的是 ${variant ?: "没说"} 这一档（共 ${engine.variants.size} 档）")
+            appendLine("引擎：audio.cpp ${BuildConfigLite.ENGINE}，处理器用的是 ${variant ?: "没说"} 这一档（共 ${engine.variants.size} 档）")
             appendLine()
             if (results.isEmpty()) appendLine("没有模型：先下载一个。")
             for (result in results) {
                 appendLine("【${result.model.name}】")
                 for (reading in result.readings) {
                     appendLine(
-                        "  ${reading.threads} 线程：${seconds(reading.speechMs)} 秒的话读了 ${seconds(reading.tookMs)} 秒" +
+                        "  ${reading.how}：${seconds(reading.speechMs)} 秒的话读了 ${seconds(reading.tookMs)} 秒" +
                             "（${"%.1f".format(reading.speed)} 倍速），装入 ${seconds(reading.loadMs)} 秒，内存 ${"%.1f".format(reading.memoryMb / 1024.0)} GB",
                     )
                 }
                 result.failure?.let { appendLine("  没读成：$it") }
+                result.graphicsFailure?.let { appendLine("  显卡：用不了（$it）") }
                 result.best?.let { best ->
-                    appendLine("  最快：${best.threads} 线程，${"%.1f".format(best.speed)} 倍速 → ${verdictOf(best.speed).words}")
+                    appendLine("  最快：${best.how}，${"%.1f".format(best.speed)} 倍速 → ${verdictOf(best.speed).words}")
                     appendLine("  读出的字：${best.text}")
                 }
                 appendLine()
@@ -106,15 +129,18 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
             appendLine("连着读手机会发热降速，排在后面的几次偏慢是正常的。")
         }
         File(context.getExternalFilesDir(null), "report.txt").writeText(report)
+        // What sharing starts the engine with: the fastest way found here.
+        for (result in results) result.best?.let { Choices(context).remember(result.model, it.graphics, it.threads) }
         return Result(report, verdict, results)
     }
 
-    private fun readingOf(threads: Int, outcome: Engine.Outcome): Reading? {
+    private fun readingOf(graphics: Boolean, threads: Int, outcome: Engine.Outcome): Reading? {
         if (outcome.exit != 0) return null
         val said = outcome.lines.associate { line -> line.substringBefore('=') to line.substringAfter('=', "") }
         val took = said["metrics.wall_ms"]?.toDoubleOrNull() ?: return null
         val speech = said["metrics.audio_duration_ms"]?.toDoubleOrNull() ?: return null
         return Reading(
+            graphics = graphics,
             threads = threads,
             speechMs = speech,
             tookMs = took,
@@ -123,6 +149,12 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
             memoryMb = said["metrics.memory.peak_rss_mb"]?.toDoubleOrNull()?.toInt() ?: 0,
             text = said["text_output"].orEmpty(),
         )
+    }
+
+    /** Why a run gave no reading: that it was killed by a fault, or what it said last. */
+    private fun whyNot(outcome: Engine.Outcome): String = when (outcome.exit) {
+        139, 134, 135, 136 -> "引擎崩了（${outcome.exit}）"
+        else -> outcome.lines.lastOrNull { it.isNotBlank() && '=' !in it }?.take(160) ?: "引擎退出（${outcome.exit}）"
     }
 
     private fun verdictOf(results: List<OfModel>): Verdict {
@@ -142,6 +174,8 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
         const val RECORDING = "selfcheck.wav"
         private const val LOADED = "loaded CPU backend from"
         private const val VARIANT_PREFIX = "libggml-cpu-"
+        private const val CHIP_LINE = "ggml_vulkan: 0 = "
+        private const val GRAPHICS_THREADS = 4
 
         /** Live captions read a growing stretch again and again: several times real time is what keeping up means. */
         const val FAST_FROM = 4.0
@@ -154,6 +188,6 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
 
 /** What the build knows of itself. */
 object BuildConfigLite {
-    const val VERSION = "0.1.0"
+    const val VERSION = "0.2.0"
     const val ENGINE = "0.9.0"
 }
