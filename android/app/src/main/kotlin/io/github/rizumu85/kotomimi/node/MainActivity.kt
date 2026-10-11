@@ -14,6 +14,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -84,7 +85,7 @@ class MainActivity : Activity() {
     private fun build(): View {
         val column = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(18), dp(22), dp(18), dp(28))
+            setPadding(dp(PAGE_SIDE), dp(PAGE_TOP), dp(PAGE_SIDE), dp(PAGE_FOOT))
         }
 
         column.addView(text("KOTOMIMI", 17f, R.color.screen, bold = true).apply { letterSpacing = 0.14f })
@@ -175,9 +176,25 @@ class MainActivity : Activity() {
         sheet.addView(share, LinearLayout.LayoutParams(MATCH_PARENT, dp(46)).apply { topMargin = dp(14) })
         column.addView(sheet, spaced(top = 14))
 
+        // The page lies under the status bar and the navigation bar — Android 15 puts every app there, and here it is
+        // asked for on the versions before, so that all of them are one case — and keeps its content clear of them:
+        // on the first phone of that kind it was shown on, the name sat against the clock (2026-10-11).
+        if (Build.VERSION.SDK_INT >= 30) window.setDecorFitsSystemWindows(false)
         return ScrollView(this).apply {
             isFillViewport = true
             addView(column)
+            // The bars' room is the scrolling view's own, so what scrolls is cut off at the bars and never runs under
+            // the clock; the page's colour shows there.
+            setOnApplyWindowInsetsListener { view, insets ->
+                val (left, top, right, bottom) = if (Build.VERSION.SDK_INT >= 30) {
+                    insets.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()).let { listOf(it.left, it.top, it.right, it.bottom) }
+                } else {
+                    @Suppress("DEPRECATION")
+                    listOf(insets.systemWindowInsetLeft, insets.systemWindowInsetTop, insets.systemWindowInsetRight, insets.systemWindowInsetBottom)
+                }
+                view.setPadding(left, top, right, bottom)
+                insets
+            }
         }
     }
 
@@ -285,7 +302,13 @@ class MainActivity : Activity() {
             val result = runCatching {
                 store.fetch(
                     model,
-                    onProgress = { had -> main.post { state.text = "下载中 ${percent(had, model.bytes)}" } },
+                    onProgress = { now ->
+                        main.post {
+                            // What comes in a second says the download is alive where the per cent stands still, and
+                            // where it comes from says which address this phone ended up with.
+                            state.text = if (now.from.isBlank()) "找最快的下载地址…" else "${percent(now.had, model.bytes)} · ${speed(now.perSecond)} · ${now.from}"
+                        }
+                    },
                     onChecking = { main.post { state.text = "下完了，核对中…"; act.alpha = 0.4f } },
                     stopped = stop::get,
                 )
@@ -331,5 +354,14 @@ class MainActivity : Activity() {
 
     private fun spaced(top: Int) = LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = dp(top) }
 
+    private companion object {
+        /** The page's own margins, in dp, inside whatever the system's bars take. */
+        const val PAGE_SIDE = 18
+        const val PAGE_TOP = 14
+        const val PAGE_FOOT = 28
+    }
+
     private fun percent(had: Long, of: Long) = "${had * 100 / of}%"
+
+    private fun speed(perSecond: Long) = if (perSecond >= 1024 * 1024) "%.1f MB/秒".format(perSecond / (1024.0 * 1024.0)) else "${perSecond / 1024} KB/秒"
 }
