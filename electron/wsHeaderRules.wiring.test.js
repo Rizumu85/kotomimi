@@ -36,7 +36,7 @@ describe('the upgrade header rules wiring', () => {
     const listener = main.slice(at(main, 'session.defaultSession.webRequest.onBeforeSendHeaders('));
     const auth = at(listener, 'authConfig.injectCookies(requestHeaders);');
     const take = at(listener, "if (details.resourceType === 'webSocket') {\n        wsHeaderRules.take(details.url, requestHeaders);\n      }");
-    const bing = at(listener, "details.url.startsWith('https://www.bing.com/translator')");
+    const bing = at(listener, "const bing = details.resourceType !== 'webSocket' && typeof details.url === 'string'");
     expect(auth).toBeLessThan(take);
     expect(take).toBeLessThan(bing);
     expect(at(listener, 'callback({ requestHeaders });')).toBeGreaterThan(bing);

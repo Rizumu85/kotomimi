@@ -71,6 +71,19 @@ const DEFAULT_UA =
 const TOKEN_TTL_MS = 3_300_000;   // 55 min (Bing advertises 1h; we refresh early)
 const DEFAULT_TIMEOUT = 12_000;
 
+const BING_ORIGIN = 'https://www.bing.com';
+
+/** The origin of an address of Bing's own — `https://cn.bing.com` — or null for anything else: a page that came from elsewhere is not where the translation is asked. */
+export function bingOriginOf(url: string | undefined): string | null {
+  if (!url) return null;
+  try {
+    const { protocol, hostname } = new URL(url);
+    return protocol === 'https:' && /^([a-z0-9-]+\.)?bing\.com$/.test(hostname) ? `https://${hostname}` : null;
+  } catch {
+    return null;
+  }
+}
+
 export class BingTranslatorClient {
   private readonly fetchFn: typeof fetch;
   private readonly now: () => number;
@@ -82,6 +95,13 @@ export class BingTranslatorClient {
   private key: string | null = null;
   private token: string | null = null;
   private tokenFetchedAt = 0;
+  /**
+   * Fork: where Bing answers this computer. From mainland China `www.bing.com` sends every request on to
+   * `cn.bing.com`; the page still came back, by way of that redirect, but the translation itself — a POST — did not
+   * survive one, and came back as something that is no translation ("unexpected response shape (not array)", a
+   * user's friend there, 2026-10-10). So the translation is asked where the page was finally served from.
+   */
+  private origin = BING_ORIGIN;
 
   constructor(options: BingTranslatorClientOptions = {}) {
     // `fetch` must run with WorkerGlobalScope (or window) as its `this` — storing
@@ -130,7 +150,7 @@ export class BingTranslatorClient {
   }
 
   private async refreshToken(): Promise<void> {
-    const url = 'https://www.bing.com/translator';
+    const url = `${BING_ORIGIN}/translator`;
     const res = await this.fetchWithTimeout(url, {
       method: 'GET',
       credentials: 'include',
@@ -149,6 +169,7 @@ export class BingTranslatorClient {
     // Parse first: on malformed HTML we throw without mutating any state.
     const parsed = parseTranslatorPage(html);
 
+    this.origin = bingOriginOf(res.url) ?? BING_ORIGIN;
     this.ig = parsed.ig;
     this.iid = parsed.iid;
     this.key = parsed.key;
@@ -166,7 +187,7 @@ export class BingTranslatorClient {
       throw new BingTokenFetchError('missing token state after refresh');
     }
 
-    const url = `https://www.bing.com/ttranslatev3?isVertical=1&IG=${this.ig}&IID=${this.iid}`;
+    const url = `${this.origin}/ttranslatev3?isVertical=1&IG=${this.ig}&IID=${this.iid}`;
     const body = new URLSearchParams({
       fromLang: mapToBingCode(from),
       text,
@@ -183,8 +204,8 @@ export class BingTranslatorClient {
         'Content-Type': 'application/x-www-form-urlencoded',
         Accept: '*/*',
         'Accept-Language': 'en-US,en;q=0.9',
-        Referer: 'https://www.bing.com/translator',
-        Origin: 'https://www.bing.com',
+        Referer: `${this.origin}/translator`,
+        Origin: this.origin,
       },
       body: body.toString(),
     });
