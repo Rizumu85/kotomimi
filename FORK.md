@@ -418,7 +418,7 @@ VRChat 里对面的人说什么语言是不一定的。"对方说什么语言"�
 
 ## 在线翻译（Bing）在国内（2026-10-11）
 
-默认的在线翻译（"这台电脑"下面没下载模型时的 Bing Translator）在国内每句都失败：`unexpected response shape (not array)`（用户的朋友，0.43.110）。
+默认的在线翻译（"这台电脑"下面没下载模型时的 Bing Translator）在国内每句都失败：`unexpected response shape (not array)`（用户的朋友，0.43.111）。
 
 - **原因**：国内访问 `www.bing.com` 会被转到 `cn.bing.com`。取令牌的那个页面跟着跳转拿到了，但翻译本身是一个 POST，经过跳转就不是原来的请求了，回来的不是译文。
 - **改法**：页面最后是从哪个域名回来的，翻译就向哪个域名要（`BingTranslatorClient.ts` 的 `origin`，从回答的 `url` 里读，只认 `*.bing.com`）；主进程给请求补浏览器身份的那条规则也跟着认 `cn.bing.com`（`main.js`）。国外没有跳转，一切照旧。
@@ -964,7 +964,7 @@ node scripts/fork-make-icons.cjs assets/logo-source.svg
 - 发布用本分支自己的流程 `.github/workflows/kotomimi-release.yml`：
 
 ```bash
-git tag -a v0.43.110 -m "Kotomimi 0.43.110" && git push origin v0.43.110
+git tag -a v0.43.111 -m "Kotomimi 0.43.111" && git push origin v0.43.111
 ```
 
   它会跑本分支的测试，构建 Windows 安装包，尽量构建 macOS（Apple 芯片）版本，然后生成一个**草稿** Release。到 GitHub 的 Releases 页面检查后点发布。只有发布了的 Release 才会被"检查更新"看到。
@@ -1071,7 +1071,7 @@ node scripts/fork-localai-locales.cjs   # 语言包冲突时：先取上游版�
   - 发布用的测试清单加了上游的横幅和字幕分享几组测试。
   - 实测（测试窗口）：会话正常，首字 1.2 秒；开启分享字幕后，观众端收到了每一句的更新，页面标题和文字是 Kotomimi。
   - 合并前就失败、与合并无关的上游测试（不在本分支的清单里）：`electron/audio-host-path.test.js`、`sandbox-recovery.test.js`、`wsHeaderRules.wiring.test.js`（Windows 上的路径和换行）、`src/services/providers/astGuard.test.ts`、`src/utils/featureGateForwarding.consistency.test.ts`。
-  - 下一次发版的版本号从上游 0.43.1 起算：`0.43.110`。
+  - 下一次发版的版本号从上游 0.43.1 起算：`0.43.111`。
 
 ## 许可
 
