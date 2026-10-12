@@ -18,6 +18,12 @@ import kotlin.math.roundToInt
  * 1.2 and 1.1 times real time for the same setting (2026-10-12). Whichever engine came second would lose by that
  * alone. So the engines take turns within each setting, and before every run the phone is given time to cool back to
  * where it began; a run it could not wait long enough for says so.
+ *
+ * Beside the engines the phone is lent with, llama.cpp's reader is measured built two other ways, each on the phones
+ * it is for (`Way`): with Arm's KleidiAI kernels on the processor, and through OpenCL on Qualcomm's graphics chips.
+ * Whether either is faster can only be found on phones nobody building this has, so one check on such a phone has
+ * to tell. They are measured and no more: the phone is not lent with them, nothing of them is remembered, and the
+ * verdict is not theirs.
  */
 class SelfCheck(private val context: Context, private val engine: Engine, private val llama: Llama, private val store: ModelStore) {
     /** What a run that read the recording took. */
@@ -46,8 +52,33 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
         val reading: Reading?, val failure: String?,
         /** The recording read: the English one the speeds are measured on, unless it says otherwise. */
         val clip: Clip = ENGLISH,
+        val way: Way = Way.AS_LENT,
     ) {
         val how: String get() = if (graphics) "显卡" else "$threads 线程"
+
+        /** What read: the engine by its name, and the way it was built where that is not the way it is lent. */
+        val label: String get() = model.reader.words + way.words
+    }
+
+    /**
+     * How a model is read. `AS_LENT` is the engine as the phone is lent with it: what the check is for. The others
+     * are llama.cpp's reader built another way (`words` is what its name is followed by), read beside it where the
+     * phone has what they are for.
+     *
+     * KleidiAI takes turns with the engines on the processor, at the same thread counts: what it brings depends on
+     * the count (a phone has fewer SME units than cores, and the threads past them get its plain kernels), so its
+     * best count need not be the plain build's, and a turn can only be taken at a count known beforehand. Where
+     * the processor has SME it is read once more without it, to tell what SME brings from what Arm's other kernels
+     * bring. OpenCL is read once, with the other graphics runs at the end; and once more with the part that hears
+     * left on the processor only where the first did not read right, so that a chip which cannot hear still says
+     * what it does for the rest.
+     */
+    enum class Way(val words: String) {
+        AS_LENT(""),
+        KLEIDIAI(" + KleidiAI"),
+        KLEIDIAI_WITHOUT_SME(" + KleidiAI（不用 SME）"),
+        OPENCL(" OpenCL"),
+        OPENCL_HEARING_ON_PROCESSOR(" OpenCL（听的部分留在处理器上）"),
     }
 
     /**
@@ -65,7 +96,9 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
         val how: String get() = if (graphics) "显卡" else "$threads 线程"
     }
 
-    class OfModel(val model: Model, val runs: List<Run>) {
+    class OfModel(val model: Model, val runs: List<Run>, val way: Way = Way.AS_LENT) {
+        val label: String get() = model.reader.words + way.words
+
         /** The speeds are of the English recording alone: the Japanese one is another length, read once. */
         val settings: List<Setting> = runs.filter { it.clip === ENGLISH }.groupBy { it.graphics to it.threads }.map { (way, its) -> Setting(way.first, way.second, its) }
         val japanese: Run? = runs.firstOrNull { it.clip === JAPANESE }
@@ -75,8 +108,11 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
         val lent: Setting? = settings.filter { it.speed != null && !(it.graphics && model.reader == Reader.LLAMA_CPP) }.maxByOrNull { it.speed!! }
     }
 
-    /** `lending` is the model the phone is lent with from now on, where it was among those checked. */
-    class Result(val report: String, val verdict: Verdict, val models: List<OfModel>, val lending: OfModel?)
+    /**
+     * `models` are the engines as the phone is lent with them, and `lending` the one it is lent with from now on,
+     * where it was among those checked; `measured` are the ways that were only measured.
+     */
+    class Result(val report: String, val verdict: Verdict, val models: List<OfModel>, val lending: OfModel?, val measured: List<OfModel> = emptyList())
 
     /** Whether the phone keeps up when it is lent: by the runs of the model it is lent with, the way it is lent. */
     enum class Verdict(val words: String) {
@@ -88,9 +124,11 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
 
     /**
      * `onStep(done, of, words)` as it goes. Returns null when it was stopped. `startWith` is for trying a build of
-     * llama.cpp the phone would not pick itself (the fall to the next one down cannot be seen otherwise).
+     * llama.cpp the phone would not pick itself (the fall to the next one down cannot be seen otherwise), and
+     * `force` for trying, on a phone they are not for, the runs only another kind of phone is given: `opencl` on a
+     * graphics chip the backend does not take, `sme` on a processor without it. Neither is anything a user can ask.
      */
-    fun run(onStep: (Int, Int, String) -> Unit, stopped: () -> Boolean, startWith: Llama.Build? = null): Result? {
+    fun run(onStep: (Int, Int, String) -> Unit, stopped: () -> Boolean, startWith: Llama.Build? = null, force: Set<String> = emptySet()): Result? {
         val device = Device(context)
         fun unpacked(asset: String): File? = runCatching {
             File(context.cacheDir, asset).also { file -> context.assets.open(asset).use { input -> file.outputStream().use { input.copyTo(it) } } }
@@ -103,7 +141,22 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
         val groups = MODELS.filter { store.has(it) && (it.reader == Reader.AUDIO_CPP || llama.present) }.groupBy { it.name }
         val threads = threadCounts(device.cores.size)
         fun onGraphics(reader: Reader) = if (reader == Reader.AUDIO_CPP) engine.hasGraphics else llama.hasGraphics
-        val steps = groups.values.flatten().sumOf { threads.size * ROUNDS + (if (japanese != null) 1 else 0) + if (onGraphics(it.reader)) 1 else 0 }
+
+        // The two ways that are only measured: whether this phone is one to try each on, or why not. What chip
+        // OpenCL would use is asked of its own build, which takes a moment and no model.
+        val withLlama = groups.values.flatten().any { it.reader == Reader.LLAMA_CPP }
+        var kleidiai = startWith?.takeIf { it in llama.kleidiai } ?: llama.kleidiaiFor(device.features)
+        val noKleidiai = whyNoKleidiai(llama.kleidiai, device.features, kleidiai)
+        if (withLlama && llama.hasOpenCl) onStep(0, 0, "看这台手机能试哪几种…")
+        val openCl = if (withLlama && Llama.takesOpenCl(device.features)) llama.openClChip() else null
+        if (stopped()) return null
+        val noOpenCl = whyNoOpenCl(llama.hasOpenCl, device.features, openCl)
+        val tryKleidiai = withLlama && noKleidiai == null
+        val trySme = tryKleidiai && ("sme" in device.features || "sme" in force)
+        val tryOpenCl = withLlama && (noOpenCl == null || ("opencl" in force && llama.hasOpenCl))
+        fun onlyMeasured(reader: Reader) = if (reader != Reader.LLAMA_CPP) 0 else (if (tryKleidiai) threads.size * ROUNDS else 0) + (if (trySme) 1 else 0) + if (tryOpenCl) 1 else 0
+
+        val steps = groups.values.flatten().sumOf { threads.size * ROUNDS + (if (japanese != null) 1 else 0) + (if (onGraphics(it.reader)) 1 else 0) + onlyMeasured(it.reader) }
 
         val began = System.currentTimeMillis()
         val warmthAtStart = device.warmth()
@@ -118,19 +171,27 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
         var chip: String? = null
         var build = startWith?.takeIf { it in llama.builds } ?: llama.buildFor(device.features)
         val steppedDown = ArrayList<String>()
+        // What KleidiAI said of itself the first time it read: the kernels it took, and whether it held the weights.
+        var kleidiaiSaid: Llama.Kleidiai? = null
 
         /** One run, the phone cooled first. Null when the check was stopped. */
-        fun measure(model: Model, graphics: Boolean, count: Int, clip: Clip = ENGLISH): Run? {
+        fun measure(model: Model, graphics: Boolean, count: Int, clip: Clip = ENGLISH, way: Way = Way.AS_LENT): Run? {
             val sound = if (clip === JAPANESE) japanese!! else recording
             val soundMs = if (clip === JAPANESE) speechMsOf(sound) else speechMs
+            val withKleidiai = way == Way.KLEIDIAI || way == Way.KLEIDIAI_WITHOUT_SME
+            val onOpenCl = way == Way.OPENCL || way == Way.OPENCL_HEARING_ON_PROCESSOR
             while (true) {
                 val (waited, cooled) = cool(device, warmthAtStart, atOnce = done == 0, stopped) { onStep(done, steps, it) } ?: return null
                 waitedMs += waited
-                onStep(done, steps, "${model.name} · ${model.reader.words} · ${if (graphics) "显卡" else "$count 线程"}${if (clip === JAPANESE) " · 日语" else ""}")
+                onStep(done, steps, "${model.name} · ${model.reader.words}${way.words} · ${if (graphics) "显卡" else "$count 线程"}${if (clip === JAPANESE) " · 日语" else ""}")
                 val warmthBefore = device.warmth()
                 val thermal = device.thermal()
                 val using = build
+                val usingKleidiai = kleidiai
                 val outcome = when {
+                    withKleidiai && usingKleidiai != null -> llama.readWithKleidiai(model, store, sound, usingKleidiai, count, sme = way == Way.KLEIDIAI, limitMs = RUN_AT_MOST_MS)
+                    withKleidiai -> return Run(model, graphics, count, waited, !cooled, warmthBefore, warmthBefore, thermal, null, "安装包里没有这台处理器能用的那一档", clip, way)
+                    onOpenCl -> llama.readOnOpenCl(model, store, sound, count, hearingOnChip = way == Way.OPENCL, limitMs = RUN_AT_MOST_MS)
                     model.reader == Reader.AUDIO_CPP -> engine.run(
                         listOf(
                             "--task", "asr", "--family", model.family, "--model", store.fileOf(model.file).path,
@@ -147,59 +208,112 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
                 if (stopped()) return null
                 // A processor without what this build of llama.cpp was compiled for ends it at the first such
                 // instruction. The next build down then, for the rest of the check, and this run again.
-                if (model.reader == Reader.LLAMA_CPP && !graphics && outcome.exit == ILLEGAL_INSTRUCTION && using != null) {
+                if (way == Way.AS_LENT && model.reader == Reader.LLAMA_CPP && !graphics && outcome.exit == ILLEGAL_INSTRUCTION && using != null) {
                     val lower = llama.below(using)
                     if (lower != null) {
-                        steppedDown += "${using.words} 这一档在这台手机上跑不了（非法指令），换成了 ${lower.words}"
+                        steppedDown += "llama.cpp 的 ${using.words} 这一档在这台手机上跑不了（非法指令），换成了 ${lower.words}"
                         build = lower
+                        continue
+                    }
+                }
+                // The same for the build with KleidiAI, which is that build and more: by itself, since what ended
+                // it may be a kernel of KleidiAI's own, which the plain build never ran into.
+                if (withKleidiai && outcome.exit == ILLEGAL_INSTRUCTION && usingKleidiai != null) {
+                    val lower = llama.kleidiaiBelow(usingKleidiai)
+                    if (lower != null) {
+                        steppedDown += "llama.cpp + KleidiAI 的 ${usingKleidiai.words} 这一档在这台手机上跑不了（非法指令），换成了 ${lower.words}"
+                        kleidiai = lower
                         continue
                     }
                 }
                 // ggml says which of audio.cpp's CPU builds it took for this processor, and what the graphics chip is.
                 if (model.reader == Reader.AUDIO_CPP) variant = variant ?: outcome.lines.firstOrNull { LOADED in it }?.substringAfter(VARIANT_PREFIX)?.removeSuffix(".so")
                 if (graphics) chip = chip ?: outcome.lines.firstNotNullOfOrNull(::chipIn)
+                if (way == Way.KLEIDIAI && outcome.exit == 0) kleidiaiSaid = kleidiaiSaid ?: Llama.kleidiaiIn(outcome.lines)
                 val reading = if (model.reader == Reader.AUDIO_CPP) audioCppReading(outcome, soundMs, clip.expected) else llamaCppReading(outcome, soundMs, clip.expected)
-                return Run(model, graphics, count, waited, !cooled, warmthBefore, device.warmth(), thermal, reading, if (reading == null) whyNot(outcome, model.reader) else null, clip)
+                // A reading by one of these builds that was not made the way the build is for is the plain build's
+                // reading under another name: it is given no speed. (llama.cpp reads on the processor without a
+                // word where the graphics chip is not one it takes; KleidiAI turns down what it has no kernel for.)
+                val notThatWay = when {
+                    reading == null -> null
+                    withKleidiai && !Llama.kleidiaiIn(outcome.lines).holdsWeights -> "读是读了，但 KleidiAI 没接手（引擎没说用了它）"
+                    onOpenCl && outcome.lines.none { Llama.OPENCL_CHIP.containsMatchIn(it) } ->
+                        "读是读了，但没用上显卡" + (outcome.lines.firstOrNull { "ggml_opencl:" in it }?.replace(Llama.LOG_PREFIX, "")?.trim()?.take(160)?.let { "：$it" } ?: "")
+                    else -> null
+                }
+                val failure = notThatWay ?: if (reading == null) whyNot(outcome, model.reader) else null
+                return Run(model, graphics, count, waited, !cooled, warmthBefore, device.warmth(), thermal, reading.takeIf { notThatWay == null }, failure, clip, way)
             }
         }
 
         val checked = ArrayList<Pair<String, List<Run>>>()
         for ((name, models) in groups) {
             val runs = ArrayList<Run>()
-            val broken = HashSet<Model>()
+            // A model an engine could not read, and a way llama.cpp's could not be read: neither is asked again.
+            val broken = HashSet<Pair<Model, Way>>()
+            fun readable(model: Model, way: Way = Way.AS_LENT) = (model to way) !in broken && (model to Way.AS_LENT) !in broken
+            fun of(model: Model, way: Way = Way.AS_LENT) = OfModel(model, runs.filter { it.model === model && it.way == way }, way)
+            val llamas = models.filter { it.reader == Reader.LLAMA_CPP }
             // The engines in turn within each setting, and every setting once before any is read again: neither
-            // engine has the cool phone to itself. The graphics chip last: a driver that cannot take it ends that
-            // one run, and the rest is already had.
-            val rounds = (1..ROUNDS).flatMap { threads.flatMap { count -> models.map { Triple(it, false, count) } } }
-            for ((model, graphics, count) in rounds) {
+            // engine has the cool phone to itself. llama.cpp with KleidiAI takes its turn after llama.cpp without.
+            // The graphics chip last: a driver that cannot take it ends that one run, and the rest is already had.
+            val turns = models.flatMap { model -> listOfNotNull(model to Way.AS_LENT, (model to Way.KLEIDIAI).takeIf { tryKleidiai && model.reader == Reader.LLAMA_CPP }) }
+            val rounds = (1..ROUNDS).flatMap { threads.flatMap { count -> turns.map { (model, way) -> Triple(model, way, count) } } }
+            for ((model, way, count) in rounds) {
                 // A model that could not be read on the processor is not asked again: on a phone it is too big for,
                 // every try is a long wait for the same end.
-                if (model !in broken) {
-                    val run = measure(model, graphics, count) ?: return null
+                if (readable(model, way)) {
+                    val run = measure(model, false, count, way = way) ?: return null
                     runs += run
-                    if (run.reading == null && !graphics) broken += model
+                    if (run.reading == null) broken += model to way
                 }
                 done += 1
             }
             // The Japanese recording, once by each engine, the way that engine was fastest just now.
             if (japanese != null) {
                 for (model in models) {
-                    if (model !in broken) {
-                        val fastest = OfModel(model, runs.filter { it.model === model }).best?.threads ?: threads.first()
+                    if (readable(model)) {
+                        val fastest = of(model).best?.threads ?: threads.first()
                         runs += measure(model, false, fastest, JAPANESE) ?: return null
                     }
                     done += 1
                 }
             }
+            // KleidiAI once more with its SME kernels left alone, at the count it was fastest with them — whether
+            // or not it read with them: a processor on which they end the program still has the others to show.
+            if (trySme) {
+                for (model in llamas) {
+                    if (readable(model)) {
+                        val fastest = of(model, Way.KLEIDIAI).best?.threads ?: of(model).best?.threads ?: threads.first()
+                        runs += measure(model, false, fastest, way = Way.KLEIDIAI_WITHOUT_SME) ?: return null
+                    }
+                    done += 1
+                }
+            }
             for (model in models.filter { onGraphics(it.reader) }) {
-                if (model !in broken) runs += measure(model, true, GRAPHICS_THREADS) ?: return null
+                if (readable(model)) runs += measure(model, true, GRAPHICS_THREADS) ?: return null
                 done += 1
+            }
+            if (tryOpenCl) {
+                for (model in llamas) {
+                    if (readable(model)) {
+                        val whole = measure(model, true, GRAPHICS_THREADS, way = Way.OPENCL) ?: return null
+                        runs += whole
+                        if (whole.reading?.right != true) runs += measure(model, true, GRAPHICS_THREADS, way = Way.OPENCL_HEARING_ON_PROCESSOR) ?: return null
+                    }
+                    done += 1
+                }
             }
             checked += name to runs
         }
         onStep(steps, steps, "写报告")
 
-        val results = checked.flatMap { (_, runs) -> runs.map { it.model }.distinct().map { model -> OfModel(model, runs.filter { it.model === model }) } }
+        // The engines as the phone is lent with them — all that the choice of what to lend, and the verdict, go by —
+        // and apart from them the ways that were only measured.
+        val results = checked.flatMap { (_, runs) -> runs.filter { it.way == Way.AS_LENT }.map { it.model }.distinct().map { model -> OfModel(model, runs.filter { it.model === model && it.way == Way.AS_LENT }) } }
+        val measured = checked.flatMap { (_, runs) ->
+            runs.filter { it.way != Way.AS_LENT }.map { it.model to it.way }.distinct().map { (model, way) -> OfModel(model, runs.filter { it.model === model && it.way == way }, way) }
+        }
         // What sharing goes by from now on: for each model the fastest way found here to lend it, and how fast that
         // was. So the model lent, where the user chose none, is the fastest of those that read the recording right.
         val choices = Choices(context)
@@ -240,13 +354,34 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
                     else -> "处理器用的是 ${build!!.words} 这一档（共 ${llama.builds.size} 档）"
                 },
             )
-            for (step in steppedDown) appendLine("  llama.cpp 的 $step")
+            for (step in steppedDown) appendLine("  $step")
+            // The two ways that are only measured: whether this phone was one to try each on, and where not, why.
+            if (llama.present) {
+                appendLine("另外只量、不拿来借的两种：")
+                appendLine(
+                    "  llama.cpp + KleidiAI：" + when {
+                        noKleidiai != null -> "没试，$noKleidiai"
+                        !withLlama -> "这台手机能试，这次没有 llama.cpp 的模型"
+                        else -> "试了，${kleidiai?.words} 这一档" + (kleidiaiSaid?.let { said ->
+                            (said.kernel?.let { "，它挑的内核是 $it" } ?: "") + (said.smeThreads?.let { "，SME 最多用 $it 个线程" } ?: "")
+                        } ?: "")
+                    },
+                )
+                appendLine(
+                    "  llama.cpp OpenCL：" + when {
+                        noOpenCl != null && tryOpenCl -> "这台手机不该试（$noOpenCl），这次硬试了"
+                        noOpenCl != null -> "没试，$noOpenCl"
+                        !withLlama -> "这次没有 llama.cpp 的模型"
+                        else -> "试了，显卡是 ${openCl?.chip}"
+                    },
+                )
+            }
             appendLine()
             if (checked.isEmpty()) appendLine("没有模型：先下载一个。")
             else appendLine("下面是倍速：${seconds(speechMs)} 秒的录音，处理器每种线程数读 $ROUNDS 遍，显卡读 1 遍，每遍之前先等手机凉下来。" + if (japanese != null) "另有一段日语录音，每个引擎读 1 遍，看读得对不对。" else "")
             appendLine()
             for ((name, runs) in checked) {
-                append(blockOf(name, runs, results.filter { it.model.name == name }, threads))
+                append(blockOf(name, runs, results.filter { it.model.name == name }, measured.filter { it.model.name == name }, threads))
                 appendLine()
             }
             appendLine("怎么看：倍速是一秒钟能读几秒的话。边听边出字要把同一段话反复读，")
@@ -266,9 +401,18 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
                     appendLine("  想借出别的，在模型列表里点那一行。")
                 }
             }
+            // What was only measured, said once more where the report is read last: nothing is lent with it.
+            val onlyMeasured = listOfNotNull(
+                "llama.cpp + KleidiAI".takeIf { measured.any { it.way == Way.KLEIDIAI } },
+                "llama.cpp OpenCL".takeIf { measured.any { it.way == Way.OPENCL } },
+            )
+            if (onlyMeasured.isNotEmpty()) {
+                appendLine()
+                appendLine("${onlyMeasured.joinToString(" 和 ")} 这次只是量一量，借给电脑时不用它${if (onlyMeasured.size > 1) "们" else ""}。")
+            }
         }
         File(context.getExternalFilesDir(null), "report.txt").writeText(report)
-        return Result(report, verdict, results, lending)
+        return Result(report, verdict, results, lending, measured)
     }
 
     /**
@@ -359,29 +503,55 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
         }
     }
 
-    /** One model's part of the report: the engines side by side, which was fastest, then every run as it was made. */
-    private fun blockOf(name: String, runs: List<Run>, models: List<OfModel>, threads: List<Int>): String = buildString {
+    /**
+     * One model's part of the report: the engines side by side, which was fastest, then every run as it was made.
+     * `models` are the engines as the phone is lent with them; `measured` the ways that were only measured, which
+     * stand beside them wherever a speed or a reading is told, and nowhere the lending is.
+     */
+    private fun blockOf(name: String, runs: List<Run>, models: List<OfModel>, measured: List<OfModel>, threads: List<Int>): String = buildString {
+        val all = models + measured
         appendLine("【$name】")
         for (count in threads) {
             appendLine("  $count 线程：" + models.joinToString("   ") { of -> "${of.model.reader.words} ${speedsOf(of.runs.filter { !it.graphics && it.threads == count && it.clip === ENGLISH })}" })
+            // What was only measured at this count, on a line of its own under those it is measured against: a
+            // phone's screen would break the line there in any case.
+            val beside = measured.mapNotNull { of -> of.runs.filter { !it.graphics && it.threads == count && it.clip === ENGLISH }.takeIf { it.isNotEmpty() }?.let { "${of.label} ${speedsOf(it)}" } }
+            if (beside.isNotEmpty()) appendLine("        " + beside.joinToString("   "))
         }
-        for (of in models) {
+        for (of in all) {
             val run = of.runs.firstOrNull { it.graphics } ?: continue
-            appendLine("  显卡：${of.model.reader.words} " + (run.reading?.let { if (it.right) "${times(it.speed)}${if (run.warm) "*" else ""} 倍速" else "读错了（错 ${it.wrong} 个字母）" } ?: "用不了（${run.failure}）"))
+            appendLine("  显卡：${of.label} " + (run.reading?.let { if (it.right) "${times(it.speed)}${if (run.warm) "*" else ""} 倍速" else "读错了（错 ${it.wrong} 个字母）" } ?: "用不了（${run.failure}）"))
         }
-        for (of in models) of.runs.firstOrNull { !it.graphics && it.reading == null && it.clip === ENGLISH }?.let { appendLine("  ${of.model.reader.words} 没读成：${it.failure}") }
+        for (of in all) of.runs.firstOrNull { !it.graphics && it.reading == null && it.clip === ENGLISH }?.let { appendLine("  ${of.label} 没读成：${it.failure}") }
 
-        val bests = models.mapNotNull { of -> of.best?.let { best -> Triple(of.model.reader, best, best.speed ?: 0.0) } }.sortedByDescending { it.third }
-        bests.firstOrNull()?.let { (reader, best, speed) ->
-            val fastest = "${reader.words} ${best.how}，${times(speed)} 倍速"
+        // The fastest of all that was read. Where that is a way that was only measured, it is named first and as
+        // such, and the line of the engines the phone is lent with — which of the two, and by how much — follows
+        // under the name of what it then is; where it is one of those engines, that line is the one there always was.
+        fun bestsOf(those: List<OfModel>) = those.mapNotNull { of -> of.best?.let { best -> Triple(of.label, best, best.speed ?: 0.0) } }.sortedByDescending { it.third }
+        val bests = bestsOf(models)
+        val outright = bestsOf(measured).firstOrNull()?.takeIf { it.third > (bests.firstOrNull()?.third ?: 0.0) }
+        outright?.let { (label, best, speed) -> appendLine("  最快：$label ${best.how}，${times(speed)} 倍速（只量不借）") }
+        bests.firstOrNull()?.let { (label, best, speed) ->
+            val told = if (outright == null) "最快" else "能借的里最快"
+            val fastest = "$label ${best.how}，${times(speed)} 倍速"
             val other = bests.getOrNull(1)
             if (other == null) {
-                appendLine("  最快：$fastest")
+                appendLine("  $told：$fastest")
             } else {
                 val ahead = ((speed / other.third - 1) * 100).roundToInt()
-                val against = "${other.first.words} 最快的（${other.second.how}，${times(other.third)} 倍速）"
-                appendLine(if (ahead >= NEAR_PER_CENT) "  最快：$fastest，比 ${against}快 $ahead%" else "  最快：$fastest，和 ${against}差不多（差 $ahead%）")
+                val against = "${other.first} 最快的（${other.second.how}，${times(other.third)} 倍速）"
+                appendLine(if (ahead >= NEAR_PER_CENT) "  $told：$fastest，比 ${against}快 $ahead%" else "  $told：$fastest，和 ${against}差不多（差 $ahead%）")
             }
+        }
+        // What the ways that were only measured are in the check for: each against llama.cpp as it is lent, the
+        // fastest of the one against the fastest of the other. Only what was measured; which ought to win is not said.
+        val plain = models.firstOrNull { it.model.reader == Reader.LLAMA_CPP }?.best
+        val against = measured.mapNotNull { of -> of.best?.let { of to it } }
+        if (plain?.speed != null && against.isNotEmpty()) {
+            appendLine("  和 llama.cpp 最快的（${plain.how}，${times(plain.speed)} 倍速）比：" + against.joinToString("，") { (of, best) ->
+                val ahead = ((best.speed!! / plain.speed - 1) * 100).roundToInt()
+                "${of.label} ${best.how} ${times(best.speed)} 倍速，" + if (ahead >= NEAR_PER_CENT) "快 $ahead%" else if (ahead <= -NEAR_PER_CENT) "慢 ${-ahead}%" else "差不多（${if (ahead > 0) "+" else ""}$ahead%）"
+            })
         }
         // How it would be to lend the phone with this model: the fastest way either engine's server runs it.
         models.filter { it.lent != null }.maxByOrNull { it.lent!!.speed!! }?.let { of ->
@@ -389,16 +559,19 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
             appendLine("  借给电脑时：${of.model.reader.words} ${way.how}，${times(way.speed!!)} 倍速 → ${verdictOf(way.speed).words}")
         }
         // Whether what was read is what the recording says: every run of each engine, the worst of them told.
-        val heard = models.mapNotNull { of -> of.runs.filter { it.clip === ENGLISH }.mapNotNull { it.reading }.takeIf { it.isNotEmpty() }?.let { of.model.reader.words to it } }
+        val heard = all.mapNotNull { of -> of.runs.filter { it.clip === ENGLISH }.mapNotNull { it.reading }.takeIf { it.isNotEmpty() }?.let { of.label to it } }
         if (heard.isNotEmpty()) {
             appendLine("  英文录音读得对不对（和原文比，共 ${lettersOf(EXPECTED).length} 个字母）：" + heard.joinToString("，") { (reader, readings) ->
                 val worst = readings.maxOf { it.wrong }
                 "$reader " + if (worst == 0) "一字不差" else "最多错 $worst 个字母" + if (readings.any { !it.right }) "（读错的那几遍不算成绩）" else ""
             })
         }
-        val texts = models.mapNotNull { of -> (of.best?.runs ?: of.runs.filter { it.clip === ENGLISH }).firstNotNullOfOrNull { it.reading }?.let { of.model.reader.words to it.text } }
+        fun textOf(of: OfModel) = (of.best?.runs ?: of.runs.filter { it.clip === ENGLISH }).firstNotNullOfOrNull { it.reading }?.text
+        val texts = models.mapNotNull { of -> textOf(of)?.let { of.model.reader.words to it } }
         if (texts.size > 1 && texts.all { it.second == texts.first().second }) appendLine("  读出的字（两个引擎一样）：${texts.first().second}")
         else for ((reader, text) in texts) appendLine("  读出的字（$reader）：${text.take(TEXT_SHOWN)}")
+        // Of what was only measured, the text where it is not one already shown: the same words need no second line.
+        for (of in measured) textOf(of)?.takeIf { text -> texts.none { it.second == text } }?.let { appendLine("  读出的字（${of.label}）：${it.take(TEXT_SHOWN)}") }
 
         // The Japanese recording: whether each engine read it right, and how fast; the text where they differ from it.
         val inJapanese = models.mapNotNull { of -> of.japanese?.let { of.model.reader.words to it } }
@@ -416,7 +589,7 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
             val took = run.reading?.let { "${seconds(it.tookMs)} 秒 · ${seconds(it.loadMs)} 秒 · ${if (it.memoryMb > 0) "%.1f GB".format(it.memoryMb / 1024.0) else "—"}" } ?: "没读成"
             val notes = (if (run.warm) "，等了 ${run.waitedMs / 1000} 秒没凉下来" else "") +
                 (run.thermal?.takeIf { it != Device.THERMAL_NONE }?.let { "，系统说手机热（${Device.thermalInWords(it)}）" } ?: "")
-            appendLine("   ${index + 1} ${run.model.reader.words} ${run.how}${if (run.clip === JAPANESE) "（日语）" else ""}：$took · ${run.warmthBefore ?: "?"}→${run.warmthAfter ?: "?"}°C$notes")
+            appendLine("   ${index + 1} ${run.label} ${run.how}${if (run.clip === JAPANESE) "（日语）" else ""}：$took · ${run.warmthBefore ?: "?"}→${run.warmthAfter ?: "?"}°C$notes")
         }
     }
 
@@ -494,6 +667,41 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
             if (CHIP_LINE in line) line.substringAfter(CHIP_LINE).substringBefore(" |") else Llama.CHIP.find(line)?.groupValues?.get(1)
         private const val GRAPHICS_THREADS = 4
 
+        private const val NOT_PACKED = "这个安装包里没有带"
+
+        /**
+         * Why a phone is not one to try llama.cpp with KleidiAI on, in the report's words; null where it is.
+         * `packed` are the builds with it in the package, and `start` the one the check would begin with.
+         */
+        fun whyNoKleidiai(packed: List<Llama.Build>, features: Set<String>, start: Llama.Build?): String? = when {
+            packed.isEmpty() -> NOT_PACKED
+            !Llama.takesKleidiai(features) -> "不是这类处理器（要有 dotprod 和 fp16）"
+            start == null -> "安装包里没有这台处理器能用的那一档"
+            else -> null
+        }
+
+        /**
+         * And llama.cpp through OpenCL, by what its own build said when asked which chips it would use (`said`;
+         * null where it was not asked). Where it names none, what it said is passed on beside the reason: the
+         * backend's word on the chip, or the linker's on a library it could not load.
+         */
+        fun whyNoOpenCl(packed: Boolean, features: Set<String>, said: Llama.OpenCl?): String? {
+            val words = said?.words?.let { "（$it）" } ?: ""
+            return when {
+                !packed || said?.absent == true -> NOT_PACKED
+                !Llama.takesOpenCl(features) -> "不是这类处理器（要有 dotprod 和 fp16）"
+                said == null || said.chip != null -> null
+                said.overtime -> "问它有哪些显卡，一直没回答"
+                said.exit in CRASHES -> "一问有哪些显卡，引擎就崩了（${said.exit}）$words"
+                // The program did not start: as a rule the linker, which found no libOpenCL.so or may not load it.
+                said.exit != 0 -> "在这台手机上起不来$words"
+                // It started, and names no chip. Either it says of one that it is not a kind it takes, or it found
+                // no OpenCL to ask: which is not the same thing, on a phone whose chip is the right kind.
+                said.words?.contains("unsupported") == true -> "不是这类显卡$words"
+                else -> "这台手机的 OpenCL 它用不了$words"
+            }
+        }
+
         /** Each setting of the processor is read this many times: one run alone may have been the lucky or the unlucky one. */
         private const val ROUNDS = 2
 
@@ -539,7 +747,7 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
 
 /** What the build knows of itself. */
 object BuildConfigLite {
-    const val VERSION = "0.4.0"
+    const val VERSION = "0.5.0"
     const val ENGINE = "0.9.0"
     const val LLAMA = "b11401"
 }

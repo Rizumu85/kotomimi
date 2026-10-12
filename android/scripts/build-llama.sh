@@ -6,7 +6,7 @@
 #                   which is faster on the phone
 #   llama-server    stays up and is asked over HTTP: what the phone is lent with when a llama.cpp model is shared
 #
-#   android/scripts/build-llama.sh            all four builds
+#   android/scripts/build-llama.sh            all seven builds
 #   android/scripts/build-llama.sh v82 vulkan  only these
 #
 #   v80     plain armv8-a (NEON): runs on every arm64 phone
@@ -14,9 +14,27 @@
 #   v86     the same for armv8.6-a with the 8-bit matrix multiply (i8mm) too
 #   vulkan  plain armv8-a with ggml's Vulkan backend linked in, for the graphics chip; needs the phone's libvulkan.so
 #
+#   kleidiai-v82  the v82 build with Arm's KleidiAI kernels beside ggml's own
+#   kleidiai-v86  the v86 build with them
+#   opencl        the v82 build with ggml's OpenCL backend linked in, for Qualcomm's Adreno graphics chips; needs the
+#                 phone's own libOpenCL.so
+#
 # The processor builds make both programs. The Vulkan build makes the reader alone: on the phones tried the graphics
 # chip is slower than the processor or ends the program, so the phone is never lent with it, and a server for it
 # would be ten megabytes of package nobody runs.
+#
+# The last three make the reader alone too: they are in the package to be measured by the self-check on phones
+# nobody here has, and nothing is lent with them yet.
+#
+# KleidiAI is not a level of processor but a second set of kernels for the language model's quantized matrix
+# products, which picks among its own at run time (dot product, i8mm, SME, SME2) whatever the build was compiled
+# for. The rest of the reading — all of the part that hears, which is about half of the time — stays ggml's own
+# code, and that is as fast as the level it was compiled for. So there is one KleidiAI build for each level a plain
+# build is measured at beside it: the two then differ by KleidiAI and by nothing else. There is none for v80: every
+# kernel KleidiAI has for these models (Q8_0) needs the dot product at least.
+#
+# The OpenCL build is v82 beneath: what the graphics chip does not take falls to the processor, and every phone with
+# an Adreno this backend accepts has dot product and half floats.
 #
 # Each is one self-contained program (libc, libm and libdl only): unlike audio.cpp's engine it cannot choose its CPU
 # code at run time, so the app chooses the program (Llama.kt). They are not built as shared libraries because
@@ -36,13 +54,16 @@ set -euo pipefail
 LLAMA_TAG=b11401
 # The Vulkan headers audio.cpp is built against (build-engine.sh).
 VULKAN_TAG=vulkan-sdk-1.4.357.0
+# Khronos's OpenCL headers, and its loader: only to link against (the phone's own libOpenCL.so is what runs).
+OPENCL_TAG=v2025.07.22
 ABI=arm64-v8a
 API=28
 
 # The programs of a build, and the name each is packed under: one Android unpacks and lets the app run (lib*.so), as
 # audio.cpp's programs are.
-targets_of() { case "$1" in vulkan) echo "llama-mtmd-cli" ;; *) echo "llama-mtmd-cli llama-server" ;; esac; }
-packed_as() { case "$1" in llama-mtmd-cli) echo "libllama_mtmd_$2.so" ;; llama-server) echo "libllama_server_$2.so" ;; esac; }
+targets_of() { case "$1" in vulkan|kleidiai-*|opencl) echo "llama-mtmd-cli" ;; *) echo "llama-mtmd-cli llama-server" ;; esac; }
+# (kleidiai-v82 is packed as libllama_mtmd_kleidiai_v82.so.)
+packed_as() { case "$1" in llama-mtmd-cli) echo "libllama_mtmd_${2//-/_}.so" ;; llama-server) echo "libllama_server_${2//-/_}.so" ;; esac; }
 for target in ${TARGETS:-}; do
   case "$target" in llama-mtmd-cli|llama-server) ;; *) echo "Unknown program: $target (llama-mtmd-cli or llama-server)." >&2; exit 1 ;; esac
 done
@@ -53,9 +74,12 @@ libs="$here/app/src/main/jniLibs/$ABI"
 mkdir -p "$work" "$libs"
 
 builds=("$@")
-[ ${#builds[@]} -gt 0 ] || builds=(v80 v82 v86 vulkan)
+[ ${#builds[@]} -gt 0 ] || builds=(v80 v82 v86 vulkan kleidiai-v82 kleidiai-v86 opencl)
 for name in "${builds[@]}"; do
-  case "$name" in v80|v82|v86|vulkan) ;; *) echo "Unknown build: $name (v80, v82, v86 or vulkan)." >&2; exit 1 ;; esac
+  case "$name" in
+    v80|v82|v86|vulkan|kleidiai-v82|kleidiai-v86|opencl) ;;
+    *) echo "Unknown build: $name (v80, v82, v86, vulkan, kleidiai-v82, kleidiai-v86 or opencl)." >&2; exit 1 ;;
+  esac
 done
 
 # Paths with forward slashes, for CMake on Windows as elsewhere.
@@ -140,6 +164,27 @@ prepare_vulkan() {
   export PATH
 }
 
+# What the OpenCL build needs besides: OpenCL's headers, which the NDK does not have, and a libOpenCL.so to link
+# against. Android has none of its own: where there is one it is the graphics chip's maker's, in the phone's vendor
+# folder, and the program finds it there when it starts. Khronos's loader is built here only for its name and its
+# symbols; it is not packed.
+prepare_opencl() {
+  cl_headers="$work/opencl-headers"
+  if [ ! -f "$cl_headers/CL/cl.h" ]; then
+    git clone --depth 1 --branch "$OPENCL_TAG" https://github.com/KhronosGroup/OpenCL-Headers.git "$cl_headers"
+  fi
+  cl_loader="$work/build-opencl-loader"
+  if [ ! -f "$cl_loader/libOpenCL.so" ]; then
+    if [ ! -f "$work/opencl-loader/CMakeLists.txt" ]; then
+      git clone --depth 1 --branch "$OPENCL_TAG" https://github.com/KhronosGroup/OpenCL-ICD-Loader.git "$work/opencl-loader"
+    fi
+    "$cmake" -S "$work/opencl-loader" -B "$cl_loader" -G Ninja -DCMAKE_MAKE_PROGRAM="$ninja" \
+      -DCMAKE_TOOLCHAIN_FILE="$ndk/build/cmake/android.toolchain.cmake" -DANDROID_ABI="$ABI" -DANDROID_PLATFORM="android-$API" \
+      -DCMAKE_BUILD_TYPE=Release -DOPENCL_ICD_LOADER_HEADERS_DIR="$cl_headers" -DBUILD_TESTING=OFF
+    "$cmake" --build "$cl_loader" --target OpenCL
+  fi
+}
+
 echo "llama.cpp: $src"
 echo "NDK:       $ndk"
 
@@ -149,6 +194,15 @@ for name in "${builds[@]}"; do
     # GGML_CPU_ARM_ARCH puts -march on ggml's CPU code only, which is where the time goes.
     v82) extra=(-DGGML_CPU_ARM_ARCH=armv8.2-a+dotprod+fp16) ;;
     v86) extra=(-DGGML_CPU_ARM_ARCH=armv8.6-a+dotprod+fp16+i8mm) ;;
+    # GGML_CPU_KLEIDIAI fetches KleidiAI's source when it is configured (a release archive from GitHub, its checksum
+    # in ggml's own build file) and compiles each of its kernels for the processor that kernel is for.
+    kleidiai-v82) extra=(-DGGML_CPU_ARM_ARCH=armv8.2-a+dotprod+fp16 -DGGML_CPU_KLEIDIAI=ON) ;;
+    kleidiai-v86) extra=(-DGGML_CPU_ARM_ARCH=armv8.6-a+dotprod+fp16+i8mm -DGGML_CPU_KLEIDIAI=ON) ;;
+    opencl)
+      prepare_opencl
+      extra=(-DGGML_CPU_ARM_ARCH=armv8.2-a+dotprod+fp16 -DGGML_OPENCL=ON
+             -DOpenCL_INCLUDE_DIR="$cl_headers" -DOpenCL_LIBRARY="$cl_loader/libOpenCL.so")
+      ;;
     vulkan)
       prepare_vulkan
       extra=(-DGGML_VULKAN=ON
@@ -161,7 +215,7 @@ for name in "${builds[@]}"; do
   # down, and on Windows its compiler gives up on a path past 260 letters ("C1083: Cannot open compiler generated
   # file" — met with `build-llama-vulkan` under a deep checkout, 2026-10-12).
   build="$work/llama-$name"
-  [ "$name" = vulkan ] && build="$work/llama-vk"
+  case "$name" in vulkan) build="$work/llama-vk" ;; kleidiai-v82) build="$work/llama-k82" ;; kleidiai-v86) build="$work/llama-k86" ;; opencl) build="$work/llama-cl" ;; esac
   # Of this build's programs, the ones asked for; all of them where none was.
   targets=()
   for target in $(targets_of "$name"); do

@@ -73,9 +73,12 @@ class MainActivity : Activity() {
      * --ez share false stops it). With --es llama v86 (or v82, v80) the self-check, or sharing, begins with that build
      * of llama.cpp, not the one it would pick. With --es model llama-qwen3-asr-0.6b-q8 (a model's own name here, not
      * the one it is lent as) the phone is lent with that model this once: what the user chose stays as it was.
+     * With --es force opencl,sme the self-check also makes the runs only another kind of phone is given.
      */
     private fun asked(intent: Intent) {
-        if (intent.getBooleanExtra("selfcheck", false)) check(Llama.Build.values().firstOrNull { it.words == intent.getStringExtra("llama") })
+        if (intent.getBooleanExtra("selfcheck", false)) {
+            check(Llama.Build.values().firstOrNull { it.words == intent.getStringExtra("llama") }, intent.getStringExtra("force")?.split(',')?.map { it.trim() }?.toSet().orEmpty())
+        }
         if (intent.getBooleanExtra("share", false)) lend(MODELS.firstOrNull { it.id == intent.getStringExtra("model") }, intent.getStringExtra("llama"))
         else if (intent.hasExtra("share") && Sharing.on) ShareService.stop(this)
     }
@@ -284,7 +287,7 @@ class MainActivity : Activity() {
         ShareService.start(this, model, llamaBuild)
     }
 
-    private fun check(startWith: Llama.Build? = null) {
+    private fun check(startWith: Llama.Build? = null, force: Set<String> = emptySet()) {
         if (busy != null || !engine.present || MODELS.none { store.has(it) } || Sharing.on) return
         begin("check")
         // Every run is waited for with the phone cooling: it takes a good while, and says at each step what it is at.
@@ -304,6 +307,7 @@ class MainActivity : Activity() {
                     },
                     stopped = stop::get,
                     startWith = startWith,
+                    force = force,
                 )
             }
             main.post {
