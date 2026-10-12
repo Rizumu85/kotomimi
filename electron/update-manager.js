@@ -1,6 +1,7 @@
 const { autoUpdater } = require('electron-updater');
 const { buildUpdatePayload, usesNativeUpdaterFlow } = require('./update-payload');
-const { app, ipcMain, shell } = require('electron');
+const { app, ipcMain, shell, net } = require('electron');
+const { downloadInstaller, checkable } = require('./update-download');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
@@ -221,6 +222,9 @@ class UpdateManager {
       return {
         fileName: exeFile.url,
         url: `https://github.com/Rizumu85/kotomimi/releases/download/v${version}/${exeFile.url}`,
+        // Fork: what the release says the installer is — what lets it be asked of others than GitHub.
+        sha512: exeFile.sha512,
+        size: exeFile.size,
       };
     }
 
@@ -238,8 +242,31 @@ class UpdateManager {
    * so we download the .exe Setup file directly from GitHub Release assets.
    */
   _downloadUpdate() {
+    const resolved = this._resolveDownloadUrl();
+    // Fork: a release that says what its installer is (ours all do, in latest.yml) is fetched the way the engines
+    // are — over the system's network stack, its proxy included, of relays where GitHub is not reached, going on by
+    // itself when it breaks off — and run only if it is that file (electron/update-download.js).
+    if (checkable(resolved)) {
+      this.downloadPath = path.join(app.getPath('temp'), resolved.fileName);
+      this._sendStatus({ status: 'downloading' });
+      let told = 0;
+      return downloadInstaller({
+        url: resolved.url,
+        sha512: resolved.sha512,
+        size: resolved.size,
+        dest: this.downloadPath,
+        fetch: (url, init) => net.fetch(url, init),
+        log: (line) => console.log(`[Sokuji] [UpdateManager] ${line}`),
+        onProgress: (transferred, total) => {
+          // A few times a second is all a progress bar shows.
+          if (Date.now() - told < 250 && transferred < total) return;
+          told = Date.now();
+          this._sendProgress({ percent: Math.round((transferred / total) * 100), bytesPerSecond: 0, transferred, total });
+        },
+      }).then(() => { this._sendStatus({ status: 'downloaded' }); });
+    }
     return new Promise((resolve, reject) => {
-      const { fileName, url: downloadUrl } = this._resolveDownloadUrl();
+      const { fileName, url: downloadUrl } = resolved;
 
       const tempDir = app.getPath('temp');
       this.downloadPath = path.join(tempDir, fileName);

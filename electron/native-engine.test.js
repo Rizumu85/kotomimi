@@ -938,6 +938,17 @@ describe('a download, once more', () => {
       expect((await hostsAsked(() => false, ['github.com'])).map((url) => new URL(url).host)).toEqual(['github.com', 'ghfast.top']);
     });
 
+    it('asks a public mirror of Hugging Face for a file published there: after its own mirror, before Hugging Face where that is not reached', async () => {
+      const onTheHub = { ...CATALOG, models: { m1: { ...CATALOG.models.m1, url: 'https://huggingface.co/someone/model/resolve/0123abc/m1.gguf', mirror: 'https://mirror.test/m1.gguf' } } };
+      const requests = [];
+      const engine = createNativeEngine({
+        dir, platform: 'win32', arch: 'x64', catalog: onTheHub, mirrorFirst: () => true, extract,
+        fetch: serving(requests, (url, from) => { if (url.startsWith('https://mirror.test/')) throw new TypeError('fetch failed'); return answer([MODEL.subarray(from)], from > 0 ? 206 : 200); }),
+      });
+      expect((await engine.download('m1')).models.m1.state).toBe('downloaded');
+      expect(requests.filter((r) => r.url.endsWith('m1.gguf')).map((r) => r.url)).toEqual(['https://mirror.test/m1.gguf', 'https://hf-mirror.com/someone/model/resolve/0123abc/m1.gguf']);
+    });
+
     it('gives every model ModelScope keeps its address there, on the same file', () => {
       const every = { ...MODELS, ...TRANSLATORS, ...COACHES };
       const mirrored = Object.values(every).filter((model) => model.mirror);

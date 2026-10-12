@@ -48,6 +48,7 @@ const net = require('net');
 const os = require('os');
 const path = require('path');
 const { spawn: nodeSpawn, execFile } = require('child_process');
+const { pullWhole, relaysOf, hfMirrorOf, inMainlandChina, ANSWER_WITHIN_MS } = require('./fetch-file');
 
 const LOOPBACK = '127.0.0.1';
 
@@ -155,32 +156,9 @@ const MODELS = {
  * (a user's friend there, 2026-10-10), and ModelScope is. The repositories are the publishers' own or copies of them;
  * each file's size and SHA-256 there were compared with the ones here on that day, and a download is kept only if it
  * hashes right wherever it came from, so a mirror that changed costs a download, not a wrong model. R2T2 has no such
- * copy; the runtimes (GitHub releases) have `GITHUB_RELAYS`, below.
+ * copy. Beyond these, every file on Hugging Face is also asked of a public mirror of it, and the runtimes (GitHub
+ * releases) of public relays: where a file is asked for, in what order and how patiently is electron/fetch-file.js.
  */
-const CHINA_ZONES = new Set(['Asia/Shanghai', 'Asia/Chongqing', 'Asia/Harbin', 'Asia/Urumqi', 'PRC']);
-/** A guess that only orders the two addresses: by the clock the computer keeps. */
-function inMainlandChina() {
-  try { return CHINA_ZONES.has(Intl.DateTimeFormat().resolvedOptions().timeZone); } catch { return false; }
-}
-/** An address that has not begun to answer in this long is left for the next. */
-const ANSWER_WITHIN_MS = 15_000;
-/** Asked again after every address has failed once, each is waited on this many times longer: a slow proxy is not a dead one. */
-const SECOND_PATIENCE = 3;
-/** Every address is asked this many times in a row with nothing to show for it before the download is called failed. */
-const FETCH_PASSES = 2;
-/** However the addresses behave, a download asks no more often than this. */
-const FETCH_ATTEMPTS_MOST = 500;
-
-/**
- * The runtimes are GitHub release files, and GitHub's downloads are often not reached from mainland China (the same
- * friend, 2026-10-11: a translation model stayed at 0 % and failed; from an exit in Beijing the next day, the runtime's
- * download either did not connect in half a minute or came at some 30 KB/s). These are public relays of GitHub downloads, run by volunteers: asked first there, last elsewhere, and trusted with nothing —
- * what they bring is kept only if it hashes as the release file does. Each answered a ranged request for the llama.cpp
- * archive on that day; one that has gone costs a quarter of a minute, not the download.
- */
-const GITHUB_RELAYS = ['https://ghfast.top/', 'https://gh-proxy.com/', 'https://ghproxy.net/'];
-const relaysOf = (url) => (String(url).startsWith('https://github.com/') ? GITHUB_RELAYS.map((relay) => `${relay}${url}`) : []);
-const hostOf = (address) => { try { return new URL(address).host; } catch { return String(address); } };
 
 /** llama.cpp's server, for the translation models: the project's own release archives, as published. */
 const LLAMA = {
@@ -870,40 +848,19 @@ function createNativeEngine(deps = {}) {
     fetching.set(key, state);
     failed.delete(key);
     tell();
-    const mirrors = [].concat(mirror ?? []);
+    // Its mirrors, then a public mirror of Hugging Face for a file published there: all the same file, by its hash.
+    const mirrors = [...[].concat(mirror ?? []), ...hfMirrorOf(url)];
     const sources = mirrorFirst() ? [...mirrors, url] : [url, ...mirrors];
     try {
-      // The addresses in turn, and round again: one that brought something is asked for the rest, one that brought
-      // nothing is left for the next. A download that breaks off — as a long one does, on a poor line — goes on by
-      // itself, and fails only when every address has been asked in vain, patiently the second time.
-      const said = new Map();
-      let at = 0;
-      let barren = 0;
-      // The most there has been of it: an address that begins the file again and stops short of this has brought nothing.
-      let most = state.received;
-      for (let attempts = 0; state.received < bytes; attempts += 1) {
-        const source = sources[at % sources.length];
-        const had = state.received;
-        try {
-          await pull(source, barren < sources.length ? answerWithinMs : answerWithinMs * SECOND_PATIENCE);
-        } catch (error) {
-          // Stopped by the user: that is the answer.
-          if (control.signal.aborted) throw error;
-          state.received = sizeOf(part);
-          // More than the whole file is none of it.
-          if (state.received > bytes) { files.rmSync(part, { force: true }); state.received = 0; most = 0; }
-          const reason = String(error?.message ?? error);
-          log?.(`[native-engine] ${hostOf(source)} did not serve ${path.basename(dest)} from ${had} (${reason})\n`);
-          said.set(hostOf(source), reason);
-          if (state.received > most) { most = state.received; barren = 0; }
-          else { barren += 1; at += 1; }
-          if (barren >= sources.length * FETCH_PASSES || attempts + 1 >= FETCH_ATTEMPTS_MOST) {
-            // Who was asked and what each said: what a person can read out when asking for help.
-            throw new Error([...said].map(([host, why]) => `${host}: ${why}`).join(' · '));
-          }
-          tell();
-        }
-      }
+      await pullWhole({
+        sources, part, bytes, files, answerWithinMs,
+        fetch: doFetch,
+        signal: control.signal,
+        name: path.basename(dest),
+        onReceived: (count) => { state.received = count; tell(false); },
+        onTurn: () => tell(),
+        log: (line) => log?.(`[native-engine] ${line}\n`),
+      });
       state.verifying = true;
       tell();
       if (sizeOf(part) !== bytes || (await hash(part)) !== sha256) {
@@ -913,73 +870,6 @@ function createNativeEngine(deps = {}) {
       files.renameSync(part, dest);
     } finally {
       fetching.delete(key);
-    }
-
-    /** What one address brings, appended to the part: waited on for `patience` to begin, and twice that when it falls silent. */
-    async function pull(source, patience) {
-      {
-        // An address that never answers is not waited on for as long as the system would.
-        const attempt = new AbortController();
-        const give = () => attempt.abort();
-        control.signal.addEventListener('abort', give, { once: true });
-        const waiting = setTimeout(give, patience);
-        let response;
-        try {
-          response = await doFetch(source, { signal: attempt.signal, redirect: 'follow', headers: state.received > 0 ? { Range: `bytes=${state.received}-` } : {} });
-        } catch (error) {
-          control.signal.removeEventListener('abort', give);
-          throw control.signal.aborted || !attempt.signal.aborted ? error : new Error('The download did not answer.');
-        } finally {
-          clearTimeout(waiting);
-        }
-        const refuse = (why) => {
-          control.signal.removeEventListener('abort', give);
-          Promise.resolve(response.body?.cancel()).catch(() => {});
-          return new Error(why);
-        };
-        if (response.status !== 200 && response.status !== 206) throw refuse(`The download answered HTTP ${response.status}.`);
-        // An answer that says it is something else — a page in place of the file, another file, another place in it — is
-        // not written down: the part is what the next address goes on from.
-        const header = (name) => response.headers?.get?.(name) ?? '';
-        if (/^text\/html/i.test(header('content-type'))) throw refuse('The download answered with a page, not the file.');
-        const range = /^bytes (\d+)-\d+\/(\d+|\*)/.exec(header('content-range'));
-        if (response.status === 206 && range && (Number(range[1]) !== state.received || (range[2] !== '*' && Number(range[2]) !== bytes))) throw refuse('The download answered with another file.');
-        if (response.status === 200 && !header('content-encoding') && /^\d+$/.test(header('content-length')) && Number(header('content-length')) !== bytes) throw refuse('The download answered with another file.');
-        if (!response.body) throw refuse('The download has no body.');
-        // The server sent the whole file where a rest was asked for: start over.
-        if (response.status === 200 && state.received > 0) { files.rmSync(part, { force: true }); state.received = 0; }
-        const out = files.createWriteStream(part, { flags: state.received > 0 ? 'a' : 'w' });
-        const failedWrite = new Promise((_, reject) => out.once('error', reject));
-        failedWrite.catch(() => {});
-        // An answer that begins and then says nothing more would be waited on for ever.
-        let silence = null;
-        let fallSilent;
-        const silent = new Promise((_, reject) => { fallSilent = reject; });
-        silent.catch(() => {});
-        const listen = () => { clearTimeout(silence); silence = setTimeout(() => { fallSilent(new Error('The download stopped coming.')); attempt.abort(); }, patience * 2); };
-        const reader = response.body.getReader();
-        let whole = false;
-        try {
-          for (;;) {
-            listen();
-            const { done, value } = await Promise.race([reader.read(), failedWrite, silent]);
-            if (done) break;
-            if (!out.write(Buffer.from(value))) await Promise.race([new Promise((resolve) => out.once('drain', resolve)), failedWrite]);
-            state.received += value.byteLength;
-            if (state.received > bytes) throw new Error('The download is larger than the file expected.');
-            tell(false);
-          }
-          whole = true;
-        } finally {
-          clearTimeout(silence);
-          control.signal.removeEventListener('abort', give);
-          // Whatever stopped it, the rest of the answer is not waited for.
-          if (!whole) Promise.resolve(reader.cancel()).catch(() => {});
-          await new Promise((resolve) => out.end(resolve));
-        }
-        // An answer that ended early without saying so: what came is kept, and the next attempt goes on from it.
-        if (sizeOf(part) < bytes) throw new Error('The download stopped before the end.');
-      }
     }
   }
 
