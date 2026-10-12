@@ -252,7 +252,7 @@ describe('a download', () => {
 
   it('says what the network said when it refuses', async () => {
     const { engine } = computer({ served: { 'https://example.test/engine.zip': ARCHIVE } });
-    expect((await engine.download('m1')).models.m1).toMatchObject({ state: 'failed', error: 'The download answered HTTP 404.' });
+    expect((await engine.download('m1')).models.m1).toMatchObject({ state: 'failed', error: 'example.test: The download answered HTTP 404.' });
   });
 
   it('can be stopped: nothing failed, and what came stays for the next time', async () => {
@@ -796,10 +796,9 @@ describe('a download, once more', () => {
       },
       extract: async (archive, into) => { fs.writeFileSync(path.join(into, 'server.exe'), 'exe'); },
     });
-    const first = await engine.download('m1');
-    expect(first.models.m1).toMatchObject({ state: 'failed', received: 10 });
-    const second = await engine.download('m1');
-    expect(second.models.m1.state).toBe('downloaded');
+    // Nobody has to start it again: it asks for the rest itself.
+    expect((await engine.download('m1')).models.m1.state).toBe('downloaded');
+    expect(fs.readFileSync(modelFile())).toEqual(MODEL);
     expect(requests.filter((r) => r.url.endsWith('m1.gguf')).map((r) => r.range)).toEqual([undefined, 'bytes=10-']);
   });
 
@@ -835,7 +834,8 @@ describe('a download, once more', () => {
       const after = await engine.download('m1');
       expect(after.models.m1.state).toBe('downloaded');
       expect(fs.readFileSync(modelFile())).toEqual(MODEL);
-      expect(asked(requests)).toEqual([['example.test', undefined], ['mirror.test', 'bytes=10-']]);
+      // The address had brought something, so it is asked for the rest; it brings the same ten bytes, and the mirror is asked.
+      expect(asked(requests)).toEqual([['example.test', undefined], ['example.test', 'bytes=10-'], ['mirror.test', 'bytes=10-']]);
     });
 
     it('asks the mirror first where the computer looks to be in mainland China, and the address only if that fails', async () => {
@@ -861,13 +861,81 @@ describe('a download, once more', () => {
       expect(asked(requests).map(([host]) => host)).toEqual(['example.test', 'mirror.test']);
     });
 
-    it('says the last reason when neither serves it', async () => {
+    it('says who was asked and what each said when none serves it', async () => {
       const engine = createNativeEngine({
         dir, platform: 'win32', arch: 'x64', catalog: MIRRORED, mirrorFirst: () => false, extract,
         fetch: serving([], () => answer([], 404)),
       });
       const after = await engine.download('m1');
-      expect(after.models.m1).toMatchObject({ state: 'failed', error: 'The download answered HTTP 404.' });
+      expect(after.models.m1).toMatchObject({ state: 'failed', error: 'example.test: The download answered HTTP 404. · mirror.test: The download answered HTTP 404.' });
+    });
+
+    it('waits longer the second time round for an address that was slow to answer, not dead', async () => {
+      const requests = [];
+      let asks = 0;
+      const engine = createNativeEngine({
+        dir, platform: 'win32', arch: 'x64', catalog: CATALOG, answerWithinMs: 40, extract,
+        fetch: serving(requests, (url, from, init) => new Promise((resolve, reject) => {
+          asks += 1;
+          // It takes longer to answer than the first wait allows, and less than the second.
+          const late = setTimeout(() => resolve(answer([MODEL.subarray(from)], from > 0 ? 206 : 200)), 70);
+          init.signal.addEventListener('abort', () => { clearTimeout(late); reject(new Error('given up')); });
+        })),
+      });
+      expect((await engine.download('m1')).models.m1.state).toBe('downloaded');
+      expect(asks).toBe(2);
+    });
+
+    it('leaves an answer that begins and then says nothing more, and goes on from what it brought', async () => {
+      const requests = [];
+      const engine = createNativeEngine({
+        dir, platform: 'win32', arch: 'x64', catalog: MIRRORED, mirrorFirst: () => false, answerWithinMs: 20, extract,
+        fetch: serving(requests, (url, from) => (url.startsWith('https://example.test/')
+          // Ten bytes, and then the line stays open with nothing on it.
+          ? new Response(new ReadableStream({ start(controller) { controller.enqueue(new Uint8Array(MODEL.subarray(from, from + 10))); } }), { status: from > 0 ? 206 : 200 })
+          : answer([MODEL.subarray(from)], from > 0 ? 206 : 200))),
+      });
+      const after = await engine.download('m1');
+      expect(after.models.m1.state).toBe('downloaded');
+      expect(fs.readFileSync(modelFile())).toEqual(MODEL);
+    });
+
+    it('writes down nothing of an answer that is a page, or another file', async () => {
+      const requests = [];
+      const page = () => new Response('<html>Not here</html>', { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' } });
+      const other = () => new Response(new Uint8Array(5), { status: 200, headers: { 'content-length': '5' } });
+      const engine = createNativeEngine({
+        dir, platform: 'win32', arch: 'x64', mirrorFirst: () => true, extract,
+        catalog: { ...CATALOG, models: { m1: { ...CATALOG.models.m1, mirror: ['https://page.test/m1.gguf', 'https://other.test/m1.gguf'] } } },
+        fetch: serving(requests, (url, from) => (url.startsWith('https://page.test/') ? page() : url.startsWith('https://other.test/') ? other() : answer([MODEL.subarray(from)], from > 0 ? 206 : 200))),
+      });
+      expect((await engine.download('m1')).models.m1.state).toBe('downloaded');
+      // The address was asked for the whole file: nothing of the other two had been kept.
+      expect(asked(requests)).toEqual([['page.test', undefined], ['other.test', undefined], ['example.test', undefined]]);
+    });
+
+    it('asks relays of GitHub for a runtime published there: first where GitHub is not reached, last elsewhere', async () => {
+      const onGitHub = { ...CATALOG, engine: { version: '1.0.0', builds: { 'win32-x64': { ...CATALOG.engine.builds['win32-x64'], url: 'https://github.com/someone/engine/releases/download/v1/engine.zip' } } } };
+      const hostsAsked = async (mirrorFirst, down) => {
+        const requests = [];
+        const engine = createNativeEngine({
+          dir: fs.mkdtempSync(path.join(dir, 'relay-')), platform: 'win32', arch: 'x64', catalog: onGitHub, mirrorFirst, extract,
+          fetch: async (url, init = {}) => {
+            requests.push(url);
+            if (down.includes(new URL(url).host)) throw new TypeError('fetch failed');
+            return answer([url.endsWith('.zip') ? ARCHIVE : MODEL]);
+          },
+        });
+        expect((await engine.download('m1')).engine).toBe('ready');
+        return requests.filter((url) => url.endsWith('.zip'));
+      };
+      // In mainland China: a relay, the release's own address after it in full.
+      expect(await hostsAsked(() => true, [])).toEqual(['https://ghfast.top/https://github.com/someone/engine/releases/download/v1/engine.zip']);
+      // A relay that has gone is passed over.
+      expect((await hostsAsked(() => true, ['ghfast.top'])).map((url) => new URL(url).host)).toEqual(['ghfast.top', 'gh-proxy.com']);
+      // Elsewhere GitHub itself, and the relays only should it fail.
+      expect((await hostsAsked(() => false, [])).map((url) => new URL(url).host)).toEqual(['github.com']);
+      expect((await hostsAsked(() => false, ['github.com'])).map((url) => new URL(url).host)).toEqual(['github.com', 'ghfast.top']);
     });
 
     it('gives every model ModelScope keeps its address there, on the same file', () => {
