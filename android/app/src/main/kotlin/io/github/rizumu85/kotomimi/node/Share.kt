@@ -57,7 +57,11 @@ class Share(private val context: Context, private val engine: Engine, private va
         File(store.folder, CONFIG).writeText(configOf(model, way))
         val process = engine.serve(listOf("--config", CONFIG, "--no-ui"), store.folder, way.graphics)
         server = process
-        Thread({ process.inputStream.bufferedReader().forEachLine { line -> synchronized(said) { said += line; if (said.size > KEPT_LINES) said.removeFirst() } } }, "engine-output").apply { isDaemon = true }.start()
+        // Ending the engine closes what this reads from under it, and Android then throws in the reading thread: an
+        // error nobody caught there closed the whole app the moment sharing was stopped (a friend's phone, 2026-10-12).
+        Thread({
+            runCatching { process.inputStream.bufferedReader().forEachLine { line -> synchronized(said) { said += line; if (said.size > KEPT_LINES) said.removeFirst() } } }
+        }, "engine-output").apply { isDaemon = true }.start()
 
         val deadline = System.currentTimeMillis() + READY_WITHIN_MS
         while (!ready()) {
@@ -79,15 +83,18 @@ class Share(private val context: Context, private val engine: Engine, private va
         Thread({
             while (!socket.isClosed) {
                 val client = try { socket.accept() } catch (error: Exception) { break }
-                workers.execute { runCatching { client.use(::answer) } }
+                // Stopped between the two: the workers take no more, and say so by throwing.
+                try { workers.execute { runCatching { client.use(::answer) } } } catch (error: Exception) { runCatching { client.close() }; break }
             }
         }, "door").apply { isDaemon = true }.start()
         // Whether it is working is told by whether anything was asked of it lately; and that the engine still lives.
         Thread({
-            while (!stopping && door === socket) {
-                if (!process.isAlive) { fail("引擎停了：${lastSaid()}"); close(); return@Thread }
-                tell(if (System.currentTimeMillis() - lastUse < WORKING_FOR_MS) Phase.WORKING else Phase.WAITING)
-                Thread.sleep(700)
+            runCatching {
+                while (!stopping && door === socket) {
+                    if (!process.isAlive) { if (!stopping) fail("引擎停了：${lastSaid()}"); close(); return@runCatching }
+                    tell(if (System.currentTimeMillis() - lastUse < WORKING_FOR_MS) Phase.WORKING else Phase.WAITING)
+                    Thread.sleep(700)
+                }
             }
         }, "watch").apply { isDaemon = true }.start()
         tell(Phase.WAITING)

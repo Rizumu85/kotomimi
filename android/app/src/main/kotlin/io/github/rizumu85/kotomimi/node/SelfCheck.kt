@@ -152,9 +152,14 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
     }
 
     /** Why a run gave no reading: that it was killed by a fault, or what it said last. */
-    private fun whyNot(outcome: Engine.Outcome): String = when (outcome.exit) {
-        139, 134, 135, 136 -> "引擎崩了（${outcome.exit}）"
-        else -> outcome.lines.lastOrNull { it.isNotBlank() && '=' !in it }?.take(160) ?: "引擎退出（${outcome.exit}）"
+    private fun whyNot(outcome: Engine.Outcome): String {
+        val last = outcome.lines.lastOrNull { it.isNotBlank() && '=' !in it }?.take(160)
+        return when (outcome.exit) {
+            // With what it said last, where it said anything: "it crashed (134)" on a friend's phone told nobody why
+            // its graphics chip could not be used (2026-10-12).
+            139, 134, 135, 136 -> "引擎崩了（${outcome.exit}）" + (last?.let { "：$it" } ?: "")
+            else -> last ?: "引擎退出（${outcome.exit}）"
+        }
     }
 
     private fun verdictOf(results: List<OfModel>): Verdict {
@@ -188,6 +193,6 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
 
 /** What the build knows of itself. */
 object BuildConfigLite {
-    const val VERSION = "0.2.2"
+    const val VERSION = "0.2.3"
     const val ENGINE = "0.9.0"
 }

@@ -133,7 +133,7 @@ class ModelStore(context: Context) {
                         try {
                             pull(source, part, piece, had, stopped)
                             if (piece.at >= piece.end || stopped()) return@thread
-                        } catch (error: IOException) {
+                        } catch (error: Exception) {
                             last = IOException("${source.name}：${error.message ?: error.javaClass.simpleName}")
                         }
                         if (piece.at > before) { barren = 0; from.set(source.name) } else { barren += 1; at += 1 }
