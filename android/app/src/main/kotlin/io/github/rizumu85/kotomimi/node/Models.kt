@@ -30,7 +30,10 @@ class Model(val id: String, val name: String, val file: String, val path: String
     fun addresses(): List<Source> {
         val published = Source("Hugging Face", "https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/$REVISION/$path")
         val mirrored = Source("魔搭", "https://modelscope.cn/models/audio-cpp/audio.cpp-gguf/resolve/master/$path")
-        return if (inMainlandChina()) listOf(mirrored, published) else listOf(published, mirrored)
+        // A public mirror of Hugging Face, a volunteer's: the same path, answered from Beijing where Hugging Face is
+        // not (2026-10-12). A second way in should ModelScope be down; what it brings is checked like the rest.
+        val relayed = Source("HF 镜像", "https://hf-mirror.com/audio-cpp/audio.cpp-gguf/resolve/$REVISION/$path")
+        return if (inMainlandChina()) listOf(mirrored, relayed, published) else listOf(published, mirrored, relayed)
     }
 
     private companion object {
@@ -117,16 +120,23 @@ class ModelStore(context: Context) {
             val workers = open.map { piece ->
                 thread(name = "piece-${piece.start}") {
                     var last: IOException? = null
-                    // The faster address, twice; then the other: a piece that fails at both is the download's failure.
-                    for (source in sources + sources) {
+                    // The addresses in turn, the faster first: one that brought something is asked for the rest, one
+                    // that brought nothing is left for the next. A piece that breaks off — as a long one does, on a
+                    // poor line — goes on by itself; it is the download's failure only once every address has been
+                    // asked twice in a row for nothing. (The desktop does the same: electron/fetch-file.js.)
+                    var at = 0
+                    var barren = 0
+                    while (barren < sources.size * ROUNDS_IN_VAIN) {
                         if (stopped() || failure.get() != null) return@thread
+                        val source = sources[at % sources.size]
+                        val before = piece.at
                         try {
                             pull(source, part, piece, had, stopped)
                             if (piece.at >= piece.end || stopped()) return@thread
                         } catch (error: IOException) {
                             last = IOException("${source.name}：${error.message ?: error.javaClass.simpleName}")
-                            if (source !== sources.first()) from.set(source.name)
                         }
+                        if (piece.at > before) { barren = 0; from.set(source.name) } else { barren += 1; at += 1 }
                     }
                     failure.compareAndSet(null, last ?: IOException("下载中断了"))
                 }
@@ -162,10 +172,14 @@ class ModelStore(context: Context) {
     }
 
     /**
-     * The addresses, the one that brings the most in a few seconds first. Both are asked for the same first megabyte
-     * at once; one that does not answer is last, and it is an error only when neither does. (From mainland China
-     * Hugging Face does not answer at all; behind a proxy it may, slowly, and ModelScope slower still: no rule about
-     * where the phone is knows which, and a megabyte from each does.)
+     * The addresses, the one that brings the most in a few seconds first. All are asked for the same first megabyte
+     * at once; one that does not answer is last. (From mainland China Hugging Face does not answer at all; behind a
+     * proxy it may, slowly, and ModelScope slower still: no rule about where the phone is knows which, and a megabyte
+     * from each does.)
+     *
+     * This only orders them. None answering in these few seconds is not yet a failure — from an exit in Beijing,
+     * 2026-10-12, ModelScope took up to three seconds to begin, and a poorer line takes longer: the pieces then ask
+     * in the order given, with the patience of a download, and say what stopped them.
      */
     private fun fastestFirst(sources: List<Source>, stopped: () -> Boolean): List<Source> {
         if (sources.size < 2) return sources
@@ -173,7 +187,6 @@ class ModelStore(context: Context) {
         sources.mapIndexed { index, source ->
             thread(name = "try-${source.name}") { speeds[index] = runCatching { speedOf(source, stopped) }.getOrDefault(0L) }
         }.forEach { it.join() }
-        if (speeds.all { it == 0L } && !stopped()) throw IOException("两个下载地址都连不上，检查一下网络")
         return sources.indices.sortedByDescending { speeds[it] }.map { sources[it] }
     }
 
@@ -196,7 +209,8 @@ class ModelStore(context: Context) {
                 }
             }
             val took = (System.currentTimeMillis() - started).coerceAtLeast(1)
-            return read * 1000 / took
+            // It answered: ahead of one that did not, however little came in the time.
+            return (read * 1000 / took).coerceAtLeast(1)
         } finally {
             connection.disconnect()
         }
@@ -280,6 +294,8 @@ class ModelStore(context: Context) {
         /** Connections at once, and the least one of them is worth opening for. */
         const val PIECES = 4
         const val PIECE_LEAST = 32L * 1024 * 1024
+        /** Every address is asked this many times in a row, with nothing to show for it, before a piece gives up. */
+        const val ROUNDS_IN_VAIN = 2
         const val TRY_BYTES = 1024L * 1024
         const val TRY_FOR_MS = 5_000L
         const val REPORT_EVERY_MS = 500L
