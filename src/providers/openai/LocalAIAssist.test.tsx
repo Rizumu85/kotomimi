@@ -14,9 +14,16 @@ import type { LocalAIModel } from './localaiModels';
 vi.mock('react-i18next', async (importOriginal) => ({ ...(await importOriginal<typeof import('react-i18next')>()), useTranslation: () => ({ t: (key: string) => key }) }));
 // The search of the network is the finder's own test: here only that it is drawn, and what a pick does.
 vi.mock('../../components/LanSharing/ServerFinder', () => ({
-  ServerFinder: ({ onPick, auto, hint }: { onPick(server: unknown): void; auto?: boolean; hint?: string }) => (
-    <button type="button" data-auto={String(Boolean(auto))} data-hint={hint} onClick={() => onPick({ address: '192.168.1.9:8790', kind: 'kotomimi', name: 'DESK', product: '', models: 2, needsKey: true, self: false })}>finder</button>
-  ),
+  ServerFinder: ({ onPick, onFound, auto, hint, phone }: { onPick(server: unknown): void; onFound?(servers: unknown[]): void; auto?: boolean; hint?: string; phone?: string }) => {
+    const aPhone = { address: '192.168.4.28:8792', kind: 'phone', name: 'Pixel', product: '', models: 1, needsKey: false, self: false, model: 'qwen3-asr-0.6b-q8' };
+    return (
+      <>
+        <button type="button" data-auto={String(Boolean(auto))} data-hint={hint} data-phone={phone} onClick={() => onPick({ address: '192.168.1.9:8790', kind: 'kotomimi', name: 'DESK', product: '', models: 2, needsKey: true, self: false })}>finder</button>
+        <button type="button" onClick={() => onFound?.([aPhone])}>a search that finds a phone</button>
+        <button type="button" onClick={() => onPick(aPhone)}>the phone, picked</button>
+      </>
+    );
+  },
 }));
 // The library is Local Inference's own, tested beside it: here only which one opens. Its card is the real one: the chat models are drawn with it.
 vi.mock('../../components/Settings/sections/ModelManagementSection', async (importOriginal) => ({
@@ -688,5 +695,46 @@ describe('the app\'s own models, where their source is far', () => {
   it('says nothing anywhere else', () => {
     render(<FarSourceNote rest far={false} />);
     expect(screen.queryByRole('note')).toBeNull();
+  });
+});
+
+describe('a phone that lends its recognition: the "another device" of the hearing stage alone', () => {
+  const PHONE = { asrVia: 'server' as const, asrOther: '192.168.4.28:8792', asrOtherModel: 'qwen3-asr-0.6b-q8' };
+
+  it('is chosen by a pick in the search: the stage is on another device, that one, and nothing is typed', () => {
+    const { update, fill } = draw({ settings: { asrVia: 'device' } });
+    fireEvent.click(screen.getByText('the phone, picked'));
+    expect(update).toHaveBeenCalledWith(expect.objectContaining(PHONE));
+    // It is not the device the other stages share.
+    expect(fill).not.toHaveBeenCalled();
+  });
+
+  it('shows as "another device" with the model it lends, and asks for no address of the shared one', () => {
+    const { card, places } = draw({ settings: { ...PHONE, translateAt: 'device' } });
+    expect(pressed(places(HEAR))).toBe('providers.localai.placeServer');
+    const device = card(HEAR).getByRole('combobox', { name: 'providers.localai.stageDevice' }) as HTMLSelectElement;
+    expect(device.value).toBe('192.168.4.28:8792');
+    expect((card(HEAR).getByRole('combobox', { name: 'providers.localai.model' }) as HTMLSelectElement).selectedOptions[0].textContent).toContain('Qwen3-ASR 0.6B');
+    expect(card(HEAR).queryByText('providers.localai.connectFirst')).toBeNull();
+    // The search marks it as the one recognition is asked of.
+    expect(screen.getByText('finder').getAttribute('data-phone')).toBe('192.168.4.28:8792');
+  });
+
+  it('is offered beside the shared device once a search has found it, and either can be chosen there', () => {
+    const { card, update } = draw({ settings: { asrVia: 'server' }, values: { endpoint: '192.168.1.9:8790' } });
+    // One device to hear on: nothing to choose among.
+    expect(card(HEAR).queryByRole('combobox', { name: 'providers.localai.stageDevice' })).toBeNull();
+    fireEvent.click(screen.getByText('a search that finds a phone'));
+    const device = card(HEAR).getByRole('combobox', { name: 'providers.localai.stageDevice' }) as HTMLSelectElement;
+    expect(options(device)).toEqual(['', '192.168.4.28:8792']);
+    expect(device.options[0].textContent).toBe('192.168.1.9:8790');
+    fireEvent.change(device, { target: { value: '192.168.4.28:8792' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrOther: '192.168.4.28:8792', asrOtherModel: 'qwen3-asr-0.6b-q8' }));
+  });
+
+  it('gives the stage back to the shared device when that is chosen', () => {
+    const { card, update } = draw({ settings: PHONE, values: { endpoint: '192.168.1.9:8790' } });
+    fireEvent.change(card(HEAR).getByRole('combobox', { name: 'providers.localai.stageDevice' }), { target: { value: '' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrOther: '', asrOtherModel: '' }));
   });
 });

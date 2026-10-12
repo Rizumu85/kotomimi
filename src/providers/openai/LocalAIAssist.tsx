@@ -8,7 +8,7 @@ import { ModelGroup } from '../../components/Settings/sections/ModelManagementCo
 import { ModelCard, ModelManagementSection } from '../../components/Settings/sections/ModelManagementSection';
 import ToggleSwitch from '../../components/Settings/shared/ToggleSwitch';
 import Tooltip from '../../components/Tooltip/Tooltip';
-import { canFindServers, findServers, phoneBase, plainAddress, type FoundServer } from '../../lib/lan/discover';
+import { canFindServers, findServers, plainAddress, type FoundServer } from '../../lib/lan/discover';
 import { askLocalPipelines, NO_PIPELINES, type LocalPipelines } from '../../lib/lan/localServer';
 import { modelLabel } from '../../lib/lan/modelLabel';
 import { deviceReady, getManifestEntry, getModelSizeMb } from '../../lib/local-inference/modelManifest';
@@ -23,7 +23,7 @@ import { API_SERVICES, preferredModel, serviceOf, servicesFor, type ApiKind, typ
 import { coachPrompt } from './coachPrompt';
 // Type only: `localai.ts` imports this view, and a value import back would close a cycle.
 import type { LocalAISettings as S } from './localai';
-import { deviceChatModels, deviceCoachModel, deviceLanguage, deviceModelsLoaded, needsServer, PLACE_FIELDS, PLACES, type DeviceNeed, type Place } from './localaiDevice';
+import { deviceChatModels, deviceCoachModel, deviceLanguage, deviceModelsLoaded, hearingPlace, needsServer, PLACE_FIELDS, PLACES, type DeviceNeed, type Place } from './localaiDevice';
 import { NATIVE_MODELS, chooseNative, isAutoLanguage, nativeDownloaded, nativeHears, nativeModel, nativePicked, type NativePick } from './localaiNative';
 import { detectsOther, heardBy } from './localaiDevice';
 import { languageLabel } from '../../lib/language/label';
@@ -736,7 +736,8 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   }, [here]);
 
   const found: readonly LocalAIModel[] = models;
-  const onServer = settings.asrVia === 'server';
+  // On the device the stages share: a device of the hearing stage's own (a phone) is none of what follows.
+  const onServer = hearingPlace(settings) === 'server';
   const serverInUse = needsServer(settings);
   const address = values.endpoint ?? '';
   // The address names this computer itself: a model server running here (a LocalAI), reached the way another device is.
@@ -770,13 +771,25 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   // The device says what its models are for, and none of them is a text model.
   const coachNone = ownModels.some((m) => m.kind !== undefined) && coachOptions.length === 0;
 
+  // What the search above the cards last found: the devices a stage can be given a device of its own from.
+  const [seen, setSeen] = useState<readonly FoundServer[]>([]);
+  // The hearing stage's own device: a phone, by its address. The ones found, and the one saved though it was not
+  // found this time (the phone asleep, or no search made yet): it stays visible, so the setting is not silently another.
+  const ownHearing = plainAddress(settings.asrOther);
+  const hearsAtOwn = settings.asrVia === 'server' && ownHearing !== '';
+  const hearingPhones = [
+    ...seen.filter((server) => server.kind === 'phone'),
+    ...(ownHearing !== '' && !seen.some((server) => server.kind === 'phone' && plainAddress(server.address) === ownHearing) ? [{ address: ownHearing, name: '', model: settings.asrOtherModel }] : []),
+  ];
+  // The shared device by the name the search knew it by, where it found it.
+  const sharedName = seen.find((server) => server.kind !== 'phone' && plainAddress(server.address) === plainAddress(address))?.name ?? '';
   // The same as a pick in the search above the cards.
   const useServer = (server: FoundServer) => {
-    // A phone lends its recognition engine and nothing else: recognition goes to it, and the other stages stay
-    // where they are. (It is asked as an API is, at its own address; the run finds out it is a phone and reads it
-    // live: `remoteEngine.ts`.)
+    // A phone lends its recognition engine and nothing else: it is the hearing stage's "another device", and the
+    // other stages stay where they are. (`settled` reads it as an API at its address; the run finds out it is a
+    // phone and reads it live: `remoteEngine.ts`.)
     if (server.kind === 'phone') {
-      put({ asrVia: 'api', asrApiBaseUrl: phoneBase(server), asrApiModel: server.model ?? '', asrApiNeedsKey: false } as Partial<S>);
+      put({ asrVia: 'server', asrOther: server.address, asrOtherModel: server.model ?? '' } as Partial<S>);
       return;
     }
     if (server.needsKey !== settings.serverNeedsKey) put({ serverNeedsKey: server.needsKey });
@@ -814,8 +827,10 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
         </h4>
         <ServerFinder
           hint={t('providers.localai.otherDeviceHint')}
-          value={address}
-          phone={settings.asrVia === 'api' ? settings.asrApiBaseUrl : ''}
+          // Marked as in use only while a stage is on it: with a phone hearing, the address may be one nothing asks.
+          value={serverInUse ? address : ''}
+          phone={settings.asrVia === 'server' ? settings.asrOther : settings.asrVia === 'api' ? settings.asrApiBaseUrl : ''}
+          onFound={setSeen}
           auto={serverInUse && !address.trim()}
           disabled={disabled}
           onPick={useServer}
@@ -847,7 +862,32 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
 
       <StageCard icon={<Mic size={14} />} title={t('providers.localai.hearStage')} tooltip={t('providers.localai.hearStageTooltip')}>
         <PlaceSwitch label={t('providers.localai.hearStage')} value={settings.asrVia} onChange={(asrVia) => put({ asrVia })} disabled={disabled} />
-        {settings.asrVia === 'server' && (
+        {/* Which device, where there is more than the shared one to choose from: the phones that lend their recognition. */}
+        {settings.asrVia === 'server' && hearingPhones.length > 0 && (
+          <Field label={t('providers.localai.stageDevice')}>
+            <select
+              className="select-dropdown"
+              aria-label={t('providers.localai.stageDevice')}
+              value={ownHearing}
+              onChange={(e) => {
+                const picked = hearingPhones.find((phone) => plainAddress(phone.address) === e.target.value);
+                put({ asrOther: picked ? picked.address : '', asrOtherModel: picked?.model ?? '' } as Partial<S>);
+              }}
+              disabled={disabled}
+            >
+              <option value="">{address.trim() ? sharedName || plainAddress(address) : t('providers.localai.sharedDeviceNone')}</option>
+              {hearingPhones.map((phone) => <option key={phone.address} value={plainAddress(phone.address)}>{t('providers.localai.phoneOption', { name: phone.name || phone.address.replace(/:d+$/, '') })}</option>)}
+            </select>
+          </Field>
+        )}
+        {hearsAtOwn && (
+          <>
+            {/* A phone lends one model at a time, the one chosen on it: named here, and asked again at every start. */}
+            <ServerModel label={t('providers.localai.model')} value="" blank={settings.asrOtherModel ? shownName(settings.asrOtherModel) : t('providers.localai.deviceDefault')} options={[]} onChange={() => {}} disabled />
+            {detectOther}
+          </>
+        )}
+        {settings.asrVia === 'server' && !hearsAtOwn && (
           <>
             {connectFirst}
             <ServerModel label={t('providers.localai.model')} value={everyLegTranscribes ? '' : recognizerChosen} blank={t('providers.localai.deviceDefault')} options={everyLegTranscribes ? [] : recognizerMenu} onChange={(asrModel) => put({ asrModel })} disabled={disabled || everyLegTranscribes} />

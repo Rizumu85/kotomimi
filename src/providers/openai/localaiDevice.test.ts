@@ -11,7 +11,7 @@ import {
   admitLocalAI, buildLocalAI, createLocalAICheck, describeLocalAI, LOCALAI_DEFAULTS, localaiCredentials, localaiProvider, migrateLocalAISettings,
   type LocalAIConfig, type LocalAICredentials, type LocalAISettings,
 } from './localai';
-import { canDetectOther, deviceChatModels, deviceChoices, deviceCoachModel, deviceNeeds, deviceRecognizer, deviceTranslator, heardBy, needsServer } from './localaiDevice';
+import { canDetectOther, cutsSentencesHere, deviceChatModels, deviceChoices, deviceCoachModel, deviceNeeds, deviceRecognizer, deviceTranslator, heardBy, hearingPlace, hearsAtOwnDevice, needsServer } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
 import { createPipelineAdapter, FIRST_REF, type DeviceStage } from './pipeline';
 import { SHARED } from './testing';
@@ -452,5 +452,32 @@ describe('a session the server hears and this computer translates', () => {
     h.translation.answer('你好');
     await vi.waitFor(() => expect(h.lastText(FIRST_REF + 1)?.text).toBe('你好'));
     expect(h.fetch).not.toHaveBeenCalled();
+  });
+});
+
+describe('a hearing stage on a device of its own', () => {
+  const shared = { asrVia: 'server' as const, translateAt: 'device' as const, coach: false, coachAt: 'device' as const };
+  const own = { ...shared, asrOther: '192.168.4.28:8792' };
+
+  it('is asked as an API is: this computer cuts the sentences, and the shared device is not needed for it', () => {
+    expect(hearingPlace(shared)).toBe('server');
+    expect(hearingPlace(own)).toBe('api');
+    expect(hearsAtOwnDevice({ ...own, asrOther: '  ' })).toBe(false);
+    expect(needsServer(shared)).toBe(true);
+    expect(needsServer(own)).toBe(false);
+    expect(cutsSentencesHere(shared)).toBe(false);
+    expect(cutsSentencesHere(own)).toBe(true);
+    // Another stage on the shared device still needs it.
+    expect(needsServer({ ...own, translateAt: 'server' })).toBe(true);
+  });
+
+  it('can be left to detect the language of the other side, as an API can', () => {
+    expect(canDetectOther(shared)).toBe(false);
+    expect(canDetectOther(own)).toBe(true);
+  });
+
+  it('counts for nothing once the stage is placed elsewhere', () => {
+    expect(hearingPlace({ ...own, asrVia: 'device' })).toBe('device');
+    expect(needsServer({ ...own, asrVia: 'device' })).toBe(false);
   });
 });

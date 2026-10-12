@@ -30,16 +30,20 @@ interface ServerFinderProps {
    * for the other stages, so only who can set recognition to it lists it.
    */
   phone?: string;
+  /** What a search found, phones among them or not as above: for whoever offers the devices elsewhere too. */
+  onFound?(servers: FoundServer[]): void;
   /** For tests: the search itself. */
   find?(): Promise<FoundServer[]>;
 }
 
-export function ServerFinder({ value, onPick, disabled = false, auto = false, hint, phone, find = findServers }: ServerFinderProps) {
+export function ServerFinder({ value, onPick, disabled = false, auto = false, hint, phone, onFound, find = findServers }: ServerFinderProps) {
   const { t } = useTranslation();
   const [searching, setSearching] = useState(false);
   /** null: not searched yet. */
   const [servers, setServers] = useState<FoundServer[] | null>(null);
   const latest = useRef(0);
+  const told = useRef(onFound);
+  told.current = onFound;
   const alive = useRef(true);
   useEffect(() => () => { alive.current = false; }, []);
 
@@ -48,7 +52,9 @@ export function ServerFinder({ value, onPick, disabled = false, auto = false, hi
     setSearching(true);
     const found = await find();
     if (!alive.current || mine !== latest.current) return;
-    setServers(phone === undefined ? found.filter((server) => server.kind !== 'phone') : found);
+    const shown = phone === undefined ? found.filter((server) => server.kind !== 'phone') : found;
+    setServers(shown);
+    told.current?.(shown);
     setSearching(false);
   }, [find, phone === undefined]);
 

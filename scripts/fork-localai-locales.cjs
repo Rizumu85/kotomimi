@@ -24,6 +24,10 @@ const PROVIDER = {
 
   // The three places.
   placeServer: ['Another device', '另一台设备', '另一台裝置'],
+  // A stage's own choice among the devices found, where there is more than one that can run it.
+  stageDevice: ['Device', '设备', '裝置'],
+  sharedDeviceNone: ['No device connected yet', '还没有连接设备', '尚未連接裝置'],
+  phoneOption: ['{{name}} (phone)', '{{name}}（手机）', '{{name}}（手機）'],
   viaModel: ['API model', 'API 模型', 'API 模型'],
   placeDevice: ['This computer', '这台电脑', '這台電腦'],
   // The wizard's one question.
