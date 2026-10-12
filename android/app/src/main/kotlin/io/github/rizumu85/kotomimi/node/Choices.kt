@@ -6,9 +6,9 @@ import android.content.Context
 class Choices(context: Context) {
     private val kept = context.getSharedPreferences("choices", Context.MODE_PRIVATE)
 
-    /** The model that is shared: the one chosen, while it is still here; else the first that is. */
+    /** The model that is shared: the one chosen, while it is still here; else the first that is. Of audio.cpp's only. */
     fun shared(store: ModelStore): Model? {
-        val here = MODELS.filter { store.has(it) }
+        val here = LENDABLE.filter { store.has(it) }
         return here.firstOrNull { it.id == kept.getString(SHARED, null) } ?: here.firstOrNull()
     }
 

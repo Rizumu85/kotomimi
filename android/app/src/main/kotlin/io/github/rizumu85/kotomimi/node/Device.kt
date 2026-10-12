@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
 import android.os.Build
+import android.os.PowerManager
 import java.io.File
 
 /** What the phone is, as far as a recognizer cares: its processor, its memory, how warm it is. */
@@ -46,14 +47,49 @@ class Device(private val context: Context) {
         return info.totalMem / MB to info.availMem / MB
     }
 
+    /** What the system last said of the battery. */
+    private fun battery(): Intent? = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+
     /** The battery's temperature in °C — the one every phone reports. */
     fun warmth(): Double? {
-        val battery = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED)) ?: return null
-        val tenths = battery.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, Int.MIN_VALUE)
+        val tenths = battery()?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, Int.MIN_VALUE) ?: return null
         return if (tenths == Int.MIN_VALUE) null else tenths / 10.0
     }
 
-    private companion object {
-        const val MB = 1024L * 1024L
+    /** How full the battery is, in per cent. */
+    fun charge(): Int? {
+        val battery = battery() ?: return null
+        val level = battery.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+        val scale = battery.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+        return if (level < 0 || scale <= 0) null else level * 100 / scale
+    }
+
+    /** Whether it is plugged in: a phone that is charging is warmer for it. */
+    fun charging(): Boolean? = battery()?.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)?.takeIf { it >= 0 }?.let { it != 0 }
+
+    /** Whether power saving is on, under which a phone holds its processor back. */
+    fun savingPower(): Boolean = power().isPowerSaveMode
+
+    /**
+     * How hot the system says the phone is — `PowerManager`'s thermal status, 0 for not at all, each step up to 6 a
+     * harder holding back; null on the Androids that do not say (before 10).
+     */
+    fun thermal(): Int? = if (Build.VERSION.SDK_INT >= 29) power().currentThermalStatus else null
+
+    private fun power() = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+
+    companion object {
+        private const val MB = 1024L * 1024L
+
+        const val THERMAL_NONE = 0
+
+        /** A thermal status in a word, as the report says it. */
+        fun thermalInWords(status: Int): String = when (status) {
+            0 -> "不热"
+            1 -> "轻度"
+            2 -> "中度"
+            3 -> "严重"
+            else -> "很严重"
+        }
     }
 }

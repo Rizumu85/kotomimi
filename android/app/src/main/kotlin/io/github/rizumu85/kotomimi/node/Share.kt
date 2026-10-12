@@ -134,7 +134,7 @@ class Share(private val context: Context, private val engine: Engine, private va
         ?.let { "${it.hostAddress}:$PORT" }
 
     private fun configOf(model: Model, way: Choices.Way): String {
-        val entry = """{"id":"${model.id}","family":"${model.family}","path":"${model.file}","task":"asr","mode":"offline","session_options":{}}"""
+        val entry = """{"id":"${model.id}","family":"${model.family}","path":"${model.file.name}","task":"asr","mode":"offline","session_options":{}}"""
         return """{"host":"$LOOPBACK","port":$ENGINE_PORT,"backend":"${if (way.graphics) "vulkan" else "cpu"}","device":0,"threads":${way.threads},"lazy_load":false,"models":[$entry]}"""
     }
 

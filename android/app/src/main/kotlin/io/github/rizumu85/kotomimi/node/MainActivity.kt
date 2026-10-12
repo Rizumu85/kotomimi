@@ -33,6 +33,7 @@ class MainActivity : Activity() {
     private val stop = AtomicBoolean(false)
 
     private lateinit var engine: Engine
+    private lateinit var llama: Llama
     private lateinit var store: ModelStore
     private lateinit var choices: Choices
 
@@ -53,12 +54,26 @@ class MainActivity : Activity() {
     override fun onCreate(saved: Bundle?) {
         super.onCreate(saved)
         engine = Engine(this)
+        llama = Llama(this)
         store = ModelStore(this)
         choices = Choices(this)
         setContentView(build())
         refresh()
-        // For a computer driving the phone: adb shell am start -n …/.MainActivity --ez selfcheck true (or --ez share true)
-        if (intent.getBooleanExtra("selfcheck", false)) check()
+        asked(intent)
+    }
+
+    /** The app is one screen kept: asked again while it is open, it is told here. */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        asked(intent)
+    }
+
+    /**
+     * For a computer driving the phone: adb shell am start -n …/.MainActivity --ez selfcheck true (or --ez share true).
+     * With --es llama v86 (or v82, v80) the self-check begins with that build of llama.cpp, not the one it would pick.
+     */
+    private fun asked(intent: Intent) {
+        if (intent.getBooleanExtra("selfcheck", false)) check(Llama.Build.values().firstOrNull { it.words == intent.getStringExtra("llama") })
         if (intent.getBooleanExtra("share", false)) lend()
     }
 
@@ -76,6 +91,7 @@ class MainActivity : Activity() {
     override fun onDestroy() {
         stop.set(true)
         engine.stop()
+        llama.stop()
         worker.shutdownNow()
         super.onDestroy()
     }
@@ -127,7 +143,8 @@ class MainActivity : Activity() {
         body.addView(checkKey, LinearLayout.LayoutParams(MATCH_PARENT, dp(46)).apply { topMargin = dp(10) })
         column.addView(body, spaced(top = 18))
 
-        // The models: the one that is lent is marked; a touch on another that is here lends that one instead.
+        // The models, each with the engine it is for: the one that is lent is marked; a touch on another of
+        // audio.cpp's that is here lends that one instead. llama.cpp's are for the self-check alone.
         val models = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = shape(R.color.tile, 26)
@@ -137,7 +154,7 @@ class MainActivity : Activity() {
             val row = LinearLayout(this).apply {
                 gravity = Gravity.CENTER_VERTICAL
                 minimumHeight = dp(64)
-                setOnClickListener { if (store.has(model) && busy == null && !Sharing.on) { choices.share(model); refresh() } }
+                setOnClickListener { if (model in LENDABLE && store.has(model) && busy == null && !Sharing.on) { choices.share(model); refresh() } }
             }
             val words = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
             val state = text("", 13f, R.color.ink_2)
@@ -201,6 +218,7 @@ class MainActivity : Activity() {
     /** The screen as things stand. A check or a download in hand writes its own lines over this as it goes. */
     private fun refresh() {
         val here = MODELS.filter { store.has(it) }
+        val lendable = LENDABLE.filter { store.has(it) }
         val lent = choices.shared(store)
         val sharing = Sharing.state
         val shared = Sharing.on
@@ -208,10 +226,12 @@ class MainActivity : Activity() {
             val (state, act) = views
             val begun = store.begun(model)
             if (busy !== model) {
+                // Which engine a row is for, in every state: two rows carry the same model's name.
+                val whose = "${model.reader.words} 用"
                 state.text = when {
-                    store.has(model) -> if (model === lent && here.size > 1) "借出去的是这个 · ${model.sizeInWords}" else "已下载 · ${model.sizeInWords}"
-                    begun > 0 -> "下载到 ${percent(begun, model.bytes)}，可以接着下"
-                    else -> model.sizeInWords
+                    store.has(model) -> if (model === lent && lendable.size > 1) "借出去的是这个 · $whose" else "已下载 · $whose · ${model.sizeInWords}"
+                    begun > 0 -> "$whose · 下载到 ${percent(begun, model.bytes)}，可以接着下"
+                    else -> "$whose · ${model.sizeInWords}"
                 }
                 act.text = if (begun > 0 && !store.has(model)) "继续" else "下载"
                 act.alpha = if (busy == null) 1f else 0.4f
@@ -231,6 +251,8 @@ class MainActivity : Activity() {
                 shared || sharing.phase == Share.Phase.FAILED -> ShareService.wordsOf(sharing).let { say(it.first, it.second) }
                 here.isEmpty() -> say("先下载模型", "下面选一个，建议连着 Wi-Fi")
                 lastVerdict != null -> say(lastVerdict!!.first, lastVerdict!!.second)
+                // Only llama.cpp's files are here: enough to check with, not to lend.
+                lent == null -> say("可以自检", "要借给电脑，还得下载 audio.cpp 用的模型")
                 else -> say("没有开启", "按下面的键，把这台手机借给电脑")
             }
         }
@@ -258,23 +280,26 @@ class MainActivity : Activity() {
         ShareService.start(this, model)
     }
 
-    private fun check() {
-        if (!engine.present || MODELS.none { store.has(it) } || Sharing.on) return
+    private fun check(startWith: Llama.Build? = null) {
+        if (busy != null || !engine.present || MODELS.none { store.has(it) } || Sharing.on) return
         begin("check")
-        say("正在检查", "别切走，一会儿就好")
+        // Every run is waited for with the phone cooling: it takes a good while, and says at each step what it is at.
+        say("正在检查", "手机放着别动，要等一阵子")
         progress.visibility = View.VISIBLE
         progress.progress = 0
         refresh()
         worker.execute {
             val result = runCatching {
-                SelfCheck(this, engine, store).run(
+                SelfCheck(this, engine, llama, store).run(
                     onStep = { done, of, words ->
                         main.post {
+                            title.text = if (done < of) "正在检查 ${done + 1}/$of" else "正在检查"
                             sub.text = words
                             progress.progress = if (of == 0) 0 else done * 1000 / of
                         }
                     },
                     stopped = stop::get,
+                    startWith = startWith,
                 )
             }
             main.post {
@@ -282,7 +307,9 @@ class MainActivity : Activity() {
                 result.onSuccess { done ->
                     if (done != null) {
                         lastReport = done.report
-                        lastVerdict = done.verdict.words to done.models.mapNotNull { m -> m.best?.let { "${m.model.name} ${"%.1f".format(it.speed)} 倍速" } }.joinToString(" · ").ifBlank { "看下面的报告" }
+                        // What the screen says is about lending the phone, which is audio.cpp's work.
+                        lastVerdict = done.verdict.words to done.models.filter { it.model.reader == Reader.AUDIO_CPP }
+                            .mapNotNull { m -> m.best?.speed?.let { "${m.model.name} ${"%.1f".format(it)} 倍速" } }.joinToString(" · ").ifBlank { "看下面的报告" }
                     }
                 }.onFailure { error ->
                     lastVerdict = "没检查成" to (error.message ?: error.javaClass.simpleName)
@@ -305,11 +332,14 @@ class MainActivity : Activity() {
                     onProgress = { now ->
                         main.post {
                             // What comes in a second says the download is alive where the per cent stands still, and
-                            // where it comes from says which address this phone ended up with.
-                            state.text = if (now.from.isBlank()) "找最快的下载地址…" else "${percent(now.had, model.bytes)} · ${speed(now.perSecond)} · ${now.from}"
+                            // where it comes from says which address this phone ended up with. A model in several
+                            // files says which it is at; the per cent is of the whole model.
+                            val which = if (now.files > 1) "${now.file}/${now.files} · " else ""
+                            state.text = if (now.from.isBlank()) "${which}找最快的下载地址…" else "$which${percent(now.had, model.bytes)} · ${speed(now.perSecond)} · ${now.from}"
+                            act.alpha = 1f
                         }
                     },
-                    onChecking = { main.post { state.text = "下完了，核对中…"; act.alpha = 0.4f } },
+                    onChecking = { main.post { state.text = "核对中…"; act.alpha = 0.4f } },
                     stopped = stop::get,
                 )
             }
@@ -330,6 +360,7 @@ class MainActivity : Activity() {
     private fun halt() {
         stop.set(true)
         engine.stop()
+        llama.stop()
     }
 
     private fun send(words: String) {

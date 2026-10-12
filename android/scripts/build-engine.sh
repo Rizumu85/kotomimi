@@ -101,8 +101,10 @@ echo "NDK:       $ndk"
 "$cmake" --build "$build" --target audiocpp_cli audiocpp_server -j "${JOBS:-8}"
 
 # Into the app: Android unpacks and lets an app run only files named lib*.so from its library folder, so the two
-# programs take that shape, beside the libraries they load.
-rm -rf "$libs"; mkdir -p "$libs" "$assets"
+# programs take that shape, beside the libraries they load. What was there from a build before goes first — but not
+# llama.cpp's reader (build-llama.sh), which lies in the same folder and is not this script's to remove.
+mkdir -p "$libs" "$assets"
+find "$libs" -maxdepth 1 -type f ! -name 'libllama_mtmd_*.so' -delete
 strip="$host/bin/llvm-strip$exe"
 "$strip" -o "$libs/libaudiocpp_cli.so" "$build/bin/audiocpp_cli"
 "$strip" -o "$libs/libaudiocpp_server.so" "$build/bin/audiocpp_server"

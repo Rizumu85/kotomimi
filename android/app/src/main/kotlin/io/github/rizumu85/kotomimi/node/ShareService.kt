@@ -52,7 +52,7 @@ class ShareService : Service() {
             return START_NOT_STICKY
         }
         val store = ModelStore(this)
-        val model = MODELS.firstOrNull { it.id == intent?.getStringExtra(MODEL) && store.has(it) } ?: Choices(this).shared(store)
+        val model = LENDABLE.firstOrNull { it.id == intent?.getStringExtra(MODEL) && store.has(it) } ?: Choices(this).shared(store)
         if (model == null || share != null) {
             if (share == null) stopSelf()
             return START_NOT_STICKY

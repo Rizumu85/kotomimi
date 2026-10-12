@@ -1,0 +1,159 @@
+#!/usr/bin/env bash
+# Builds llama.cpp's reader of speech (llama-mtmd-cli) for Android arm64 and puts it where the app's build picks it
+# up, beside audio.cpp's engine (build-engine.sh): the self-check reads the same recording with both and says which
+# is faster on the phone. Nothing it makes is committed.
+#
+#   android/scripts/build-llama.sh            all four builds
+#   android/scripts/build-llama.sh v82 vulkan  only these
+#
+#   v80     plain armv8-a (NEON): runs on every arm64 phone
+#   v82     ggml's CPU code compiled for armv8.2-a with dot product and half floats
+#   v86     the same for armv8.6-a with the 8-bit matrix multiply (i8mm) too
+#   vulkan  plain armv8-a with ggml's Vulkan backend linked in, for the graphics chip; needs the phone's libvulkan.so
+#
+# Each is one self-contained program (libc, libm and libdl only): unlike audio.cpp's engine it cannot choose its CPU
+# code at run time, so the app chooses the program (Llama.kt). They are not built as shared libraries because
+# llama.cpp's libggml*.so have the very names of audio.cpp's and are not the same ggml (0.25.3 against 0.12.0): the
+# two cannot lie in one folder.
+#
+# Needs the Android SDK with an NDK and its CMake (Android Studio installs both). Reads:
+#   ANDROID_SDK   the SDK folder; found in the usual places when unset
+#   LLAMA_SRC     a llama.cpp source tree at the tag below; cloned into android/.engine when unset
+#
+# The Vulkan build turns its shaders into code with a small program that runs here, on the computer doing the build,
+# so it needs a C++ compiler for this computer too: on Windows Visual Studio's (found and set up below when `cl` is
+# not already on the PATH), elsewhere gcc or clang.
+set -euo pipefail
+
+LLAMA_TAG=b11401
+# The Vulkan headers audio.cpp is built against (build-engine.sh).
+VULKAN_TAG=vulkan-sdk-1.4.357.0
+ABI=arm64-v8a
+API=28
+TARGET=llama-mtmd-cli
+
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+work="$here/.engine"
+libs="$here/app/src/main/jniLibs/$ABI"
+mkdir -p "$work" "$libs"
+
+builds=("$@")
+[ ${#builds[@]} -gt 0 ] || builds=(v80 v82 v86 vulkan)
+for name in "${builds[@]}"; do
+  case "$name" in v80|v82|v86|vulkan) ;; *) echo "Unknown build: $name (v80, v82, v86 or vulkan)." >&2; exit 1 ;; esac
+done
+
+# Paths with forward slashes, for CMake on Windows as elsewhere.
+norm() { if command -v cygpath >/dev/null 2>&1; then cygpath -m "$1"; else printf '%s' "$1"; fi; }
+
+sdk="${ANDROID_SDK:-${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}}"
+if [ -z "$sdk" ]; then
+  for guess in "${LOCALAPPDATA:-}/Android/Sdk" "$HOME/Library/Android/sdk" "$HOME/Android/Sdk"; do
+    if [ -d "$guess" ]; then sdk="$guess"; break; fi
+  done
+fi
+[ -d "$sdk" ] || { echo "No Android SDK found: set ANDROID_SDK." >&2; exit 1; }
+sdk="$(norm "$sdk")"
+ndk="$(ls -d "$sdk"/ndk/*/ 2>/dev/null | sort -V | tail -1)"; ndk="${ndk%/}"
+cmake_dir="$(ls -d "$sdk"/cmake/*/ 2>/dev/null | sort -V | tail -1)"; cmake_dir="${cmake_dir%/}"
+[ -d "$ndk" ] || { echo "No NDK under $sdk/ndk: install one from Android Studio's SDK Manager." >&2; exit 1; }
+[ -d "$cmake_dir" ] || { echo "No CMake under $sdk/cmake: install it from Android Studio's SDK Manager." >&2; exit 1; }
+exe=""; case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) exe=".exe";; esac
+cmake="$cmake_dir/bin/cmake$exe"
+ninja="$cmake_dir/bin/ninja$exe"
+host="$(ls -d "$ndk"/toolchains/llvm/prebuilt/*/ | head -1)"; host="${host%/}"
+strip="$host/bin/llvm-strip$exe"
+
+src="${LLAMA_SRC:-$work/llama.cpp}"
+if [ ! -f "$src/CMakeLists.txt" ]; then
+  git clone --depth 1 --branch "$LLAMA_TAG" https://github.com/ggml-org/llama.cpp.git "$src"
+fi
+src="$(norm "$src")"
+work="$(norm "$work")"
+
+# What every build shares. No web page, no HTTPS client, no tests. ggml's own thread pool instead of OpenMP, as
+# llama.cpp's Android release is built. (LLAMA_USE_PREBUILT_UI=OFF: left on, the build fetches a web page from
+# Hugging Face.)
+common=(
+  -G Ninja -DCMAKE_MAKE_PROGRAM="$ninja"
+  -DCMAKE_TOOLCHAIN_FILE="$ndk/build/cmake/android.toolchain.cmake"
+  -DANDROID_ABI="$ABI" -DANDROID_PLATFORM="android-$API" -DCMAKE_BUILD_TYPE=Release
+  -DBUILD_SHARED_LIBS=OFF -DGGML_NATIVE=OFF -DGGML_OPENMP=OFF
+  -DLLAMA_OPENSSL=OFF -DLLAMA_BUILD_UI=OFF -DLLAMA_USE_PREBUILT_UI=OFF
+  -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF
+)
+
+# What the Vulkan build needs besides: headers the NDK does not have, and a compiler for this computer.
+prepare_vulkan() {
+  # Vulkan's C++ headers: the NDK has the C headers, the library and glslc. build-engine.sh fetches the same ones.
+  vk="$work/vulkan-headers"
+  if [ ! -f "$vk/include/vulkan/vulkan.hpp" ]; then
+    git clone --depth 1 --branch "$VULKAN_TAG" https://github.com/KhronosGroup/Vulkan-Headers.git "$vk"
+  fi
+  # SPIR-V's headers: llama.cpp asks for them as a CMake package (find_package(SPIRV-Headers CONFIG REQUIRED)), not
+  # as the folder of headers audio.cpp is given. So they are installed into a folder of their own: headers and a few
+  # small CMake files, nothing compiled.
+  spv_package="$work/spirv-headers-package"
+  if [ ! -d "$spv_package/share/cmake/SPIRV-Headers" ]; then
+    spv="$work/spirv-headers"
+    if [ ! -f "$spv/CMakeLists.txt" ]; then
+      git clone --depth 1 --branch "$VULKAN_TAG" https://github.com/KhronosGroup/SPIRV-Headers.git "$spv"
+    fi
+    "$cmake" -S "$spv" -B "$work/build-spirv-headers" -G Ninja -DCMAKE_MAKE_PROGRAM="$ninja" \
+      -DCMAKE_TOOLCHAIN_FILE="$ndk/build/cmake/android.toolchain.cmake" -DANDROID_ABI="$ABI" -DANDROID_PLATFORM="android-$API" \
+      -DCMAKE_INSTALL_PREFIX="$spv_package" -DSPIRV_HEADERS_ENABLE_TESTS=OFF -DSPIRV_HEADERS_ENABLE_INSTALL=ON
+    "$cmake" --install "$work/build-spirv-headers"
+  fi
+  glslc="$(ls "$ndk"/shader-tools/*/glslc"$exe" | head -1)"
+  # The compiler for this computer. On Windows: Visual Studio's environment, taken from its own script.
+  if [ -n "$exe" ] && ! command -v cl >/dev/null 2>&1; then
+    vcvars="$(ls "/c/Program Files"*/"Microsoft Visual Studio"/*/*/VC/Auxiliary/Build/vcvars64.bat 2>/dev/null | sort | tail -1)"
+    [ -n "$vcvars" ] || { echo "No Visual Studio C++ compiler found: the Vulkan shaders need one to be built." >&2; exit 1; }
+    ask="$work/vcvars-env.bat"
+    printf '@echo off\r\ncall "%s" >nul\r\nset\r\n' "$(cygpath -w "$vcvars")" > "$ask"
+    # (`key`, not `name`: the loop over the builds below keeps its own in `name`, and a function shares it.)
+    while IFS='=' read -r key value; do
+      case "$key" in
+        PATH|Path) export PATH="$(cygpath -up "$value")" ;;
+        INCLUDE|LIB|LIBPATH) export "$key=$value" ;;
+      esac
+    done < <(cmd //c "$(cygpath -w "$ask")" | tr -d '\r')
+    command -v cl >/dev/null 2>&1 || { echo "Visual Studio's environment did not give a compiler." >&2; exit 1; }
+  fi
+  # The shader program's own build looks for Ninja on the PATH.
+  if command -v cygpath >/dev/null 2>&1; then PATH="$(cygpath -u "$cmake_dir/bin"):$PATH"; else PATH="$cmake_dir/bin:$PATH"; fi
+  export PATH
+}
+
+echo "llama.cpp: $src"
+echo "NDK:       $ndk"
+
+for name in "${builds[@]}"; do
+  case "$name" in
+    v80) extra=() ;;
+    # GGML_CPU_ARM_ARCH puts -march on ggml's CPU code only, which is where the time goes.
+    v82) extra=(-DGGML_CPU_ARM_ARCH=armv8.2-a+dotprod+fp16) ;;
+    v86) extra=(-DGGML_CPU_ARM_ARCH=armv8.6-a+dotprod+fp16+i8mm) ;;
+    vulkan)
+      prepare_vulkan
+      extra=(-DGGML_VULKAN=ON
+             -DVulkan_INCLUDE_DIR="$vk/include" -DVulkan_GLSLC_EXECUTABLE="$glslc"
+             -DVulkan_LIBRARY="$host/sysroot/usr/lib/aarch64-linux-android/$API/libvulkan.so"
+             -DSPIRV-Headers_DIR="$spv_package/share/cmake/SPIRV-Headers")
+      ;;
+  esac
+  # A short folder name, and the shortest for Vulkan: the shader program is built in a build of its own six folders
+  # down, and on Windows its compiler gives up on a path past 260 letters ("C1083: Cannot open compiler generated
+  # file" — met with `build-llama-vulkan` under a deep checkout, 2026-10-12).
+  build="$work/llama-$name"
+  [ "$name" = vulkan ] && build="$work/llama-vk"
+  echo "== $name -> $build"
+  # (An empty list, said so that an old bash with `set -u` takes it.)
+  "$cmake" -S "$src" -B "$build" "${common[@]}" ${extra[@]+"${extra[@]}"}
+  "$cmake" --build "$build" --target "$TARGET" -j "${JOBS:-8}"
+  # Into the app under a name Android unpacks and lets the app run (lib*.so), as audio.cpp's programs are.
+  "$strip" -o "$libs/libllama_mtmd_$name.so" "$build/bin/$TARGET"
+done
+
+echo "llama.cpp's reader in $libs:"
+ls -la "$libs"/libllama_mtmd_*.so
