@@ -556,6 +556,8 @@
       "notDownloaded": "还没下载模型",
       "browse": "模型库",
       "hears": "识别{{language}}",
+      "farSource": "这些模型存放在海外，下载可能很慢或失败。",
+      "farSourceRest": "这些模型存放在海外，下载可能很慢或失败。上面推荐的不受影响。",
       "chatModelsNoGpu": "这些模型需要支持 WebGPU 的显卡，这台电脑没有。语法反馈请改用另一台设备或 API 模型。",
       "hearStage": "语音识别",
       "hearStageTooltip": "负责「听」的一环：判断一句话什么时候说完，并把说的内容写成文字。",

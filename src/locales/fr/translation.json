@@ -556,6 +556,8 @@
       "notDownloaded": "No model downloaded yet",
       "browse": "Model library",
       "hears": "Recognizes {{language}}",
+      "farSource": "These models are stored overseas: a download may be very slow or fail.",
+      "farSourceRest": "These models are stored overseas: a download may be very slow or fail. The recommended ones above are not affected.",
       "chatModelsNoGpu": "These models need a graphics card with WebGPU, which this computer does not offer. Use another device or an API model for the feedback.",
       "hearStage": "Speech recognition",
       "hearStageTooltip": "What listens: it decides when a sentence ends and writes down what was said.",

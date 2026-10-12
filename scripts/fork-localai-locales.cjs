@@ -111,6 +111,13 @@ const PROVIDER = {
   notDownloaded: ['No model downloaded yet', '还没下载模型', '尚未下載模型'],
   browse: ['Model library', '模型库', '模型庫'],
   hears: ['Recognizes {{language}}', '识别{{language}}', '辨識{{language}}'],
+  // Under the app's own models, on a computer in a mainland China time zone only: what to expect, and nothing of why.
+  farSource: ['These models are stored overseas: a download may be very slow or fail.', '这些模型存放在海外，下载可能很慢或失败。', '這些模型存放在海外，下載可能很慢或失敗。'],
+  farSourceRest: [
+    'These models are stored overseas: a download may be very slow or fail. The recommended ones above are not affected.',
+    '这些模型存放在海外，下载可能很慢或失败。上面推荐的不受影响。',
+    '這些模型存放在海外，下載可能很慢或失敗。上面推薦的不受影響。',
+  ],
   chatModelsNoGpu: [
     'These models need a graphics card with WebGPU, which this computer does not offer. Use another device or an API model for the feedback.',
     '这些模型需要支持 WebGPU 的显卡，这台电脑没有。语法反馈请改用另一台设备或 API 模型。',

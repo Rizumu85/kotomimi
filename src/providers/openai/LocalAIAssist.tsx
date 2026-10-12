@@ -34,6 +34,7 @@ import { useDeviceSettings, useDeviceSlots } from './LocalAIEngine';
 import { isKotomimiServer, modelsFor, SERVER_SILENT, serverDefaultModel, type LocalAIModel } from './localaiModels';
 import { choiceOf, perLanguage, recognizerChoices } from './serverRecognizers';
 import { isRealtimeModelId } from './settings';
+import { farFromModels } from './farSource';
 import './LocalAIAssist.scss';
 
 type Props = CredentialAssistProps<S>;
@@ -537,12 +538,23 @@ function DeviceModels({ stage, settings, update, pair, legs, disabled, tour, oth
           )}
           {/* The app's own models under them, named as the rest and without the mark: a model above carries it for this direction. */}
           {fitting.length > 0 && <div className="model-management-section kt-here__rest"><div className="model-subgroup__label">{t('models.othersGroup', 'Other models')}</div></div>}
+          <FarSourceNote rest={fitting.length > 0} />
           <ModelManagementSection isSessionActive={Boolean(disabled)} stageFilter={stage} direction={open} settings={device.settings} update={device.update} pair={basePair} unmarked={fitting.length > 0} />
           {stage === 'asr' && <CustomModels disabled={Boolean(disabled)} />}
         </div>
       )}
     </div>
   );
+}
+
+/**
+ * Under the app's own models, where their one source is not reached (`farFromModels`): what to expect of a download,
+ * and that the models above it are another matter. Nothing is disabled: a person there may have a way through.
+ */
+export function FarSourceNote({ rest, far = farFromModels() }: { /** Whether the native engines' models are listed above. */ rest: boolean; far?: boolean }) {
+  const { t } = useTranslation();
+  if (!far) return null;
+  return <p className="kt-note kt-here__far" role="note">{t(rest ? 'providers.localai.farSourceRest' : 'providers.localai.farSource')}</p>;
 }
 
 /**
@@ -638,6 +650,7 @@ function DeviceChat({ value, onChange, disabled, other, native }: { value: strin
             </div>
           )}
           {native && engine.offered.length > 0 && <div className="model-management-section kt-here__rest"><div className="model-subgroup__label">{t('models.othersGroup', 'Other models')}</div></div>}
+          <FarSourceNote rest={Boolean(native && engine.offered.length > 0)} />
           {!webgpu && <p className="kt-note kt-note--todo">{t('providers.localai.chatModelsNoGpu')}</p>}
           <div className="model-management-section">
             <ModelGroup title={label} bare>

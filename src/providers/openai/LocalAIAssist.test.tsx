@@ -5,7 +5,7 @@ import { useLocalServerStore } from '../../stores/localServerStore';
 import { useModelStore } from '../../stores/modelStore';
 import { useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import { NO_LOCAL_SERVER } from '../../lib/lan/localServer';
-import { LocalAIAssist } from './LocalAIAssist';
+import { FarSourceNote, LocalAIAssist } from './LocalAIAssist';
 import { LOCALAI_DEFAULTS, type LocalAISettings } from './localai';
 import { PLACE_FIELDS } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
@@ -673,5 +673,20 @@ describe('the other side\u2019s language left to be detected', () => {
     const { card } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'qwen3-asr-1.7b-q8', asrDetectOther: true, translateAt: 'device' }, legs: ['speaker'] });
     expect(card(HEAR).queryByText('providers.localai.detectOtherNote')).toBeNull();
     expect(card(HEAR).queryByRole('combobox', { name: 'providers.localai.hearsOther' })).toBeNull();
+  });
+});
+
+describe('the app\'s own models, where their source is far', () => {
+  it('says what to expect of a download there, and that the models above are another matter', () => {
+    const { rerender } = render(<FarSourceNote rest far />);
+    expect(screen.getByRole('note').textContent).toBe('providers.localai.farSourceRest');
+    // With no native model above, nothing is said of one.
+    rerender(<FarSourceNote rest={false} far />);
+    expect(screen.getByRole('note').textContent).toBe('providers.localai.farSource');
+  });
+
+  it('says nothing anywhere else', () => {
+    render(<FarSourceNote rest far={false} />);
+    expect(screen.queryByRole('note')).toBeNull();
   });
 });
