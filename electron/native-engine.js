@@ -173,8 +173,8 @@ const FETCH_ATTEMPTS_MOST = 500;
 
 /**
  * The runtimes are GitHub release files, and GitHub's downloads are often not reached from mainland China (the same
- * friend, 2026-10-11: a translation model stayed at 0 % and failed, which is what a runtime that does not arrive looks
- * like — the reason shown was not passed on, so this is the likely cause, not a seen one). These are public relays of GitHub downloads, run by volunteers: asked first there, last elsewhere, and trusted with nothing —
+ * friend, 2026-10-11: a translation model stayed at 0 % and failed; from an exit in Beijing the next day, the runtime's
+ * download either did not connect in half a minute or came at some 30 KB/s). These are public relays of GitHub downloads, run by volunteers: asked first there, last elsewhere, and trusted with nothing —
  * what they bring is kept only if it hashes as the release file does. Each answered a ranged request for the llama.cpp
  * archive on that day; one that has gone costs a quarter of a minute, not the download.
  */
