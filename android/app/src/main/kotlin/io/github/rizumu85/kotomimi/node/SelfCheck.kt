@@ -22,9 +22,18 @@ import kotlin.math.roundToInt
  */
 class SelfCheck(private val context: Context, private val engine: Engine, private val llama: Llama, private val store: ModelStore) {
     /** What a run that read the recording took. */
-    class Reading(val speechMs: Double, val tookMs: Double, val loadMs: Double, val memoryMb: Int, val text: String) {
+    class Reading(val speechMs: Double, val tookMs: Double, val loadMs: Double, val memoryMb: Int, val text: String, private val expected: String = EXPECTED) {
         /** Seconds of speech read in a second: above 1 it keeps up with a voice read once. */
         val speed: Double get() = if (tookMs > 0) speechMs / tookMs else 0.0
+
+        /**
+         * How many letters of it are not the recording's (`EXPECTED`): fast is worth nothing where the text is
+         * wrong. Marks, spaces and capitals are not counted — the two sizes of the model already differ by two commas.
+         */
+        val wrong: Int = lettersApart(lettersOf(text), lettersOf(expected))
+
+        /** Read right: within a few letters of what the recording says. A text that ran on, or is another's, is not. */
+        val right: Boolean get() = wrong <= lettersOf(expected).length * WRONG_AT_MOST
     }
 
     /**
@@ -36,18 +45,31 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
         val model: Model, val graphics: Boolean, val threads: Int,
         val waitedMs: Long, val warm: Boolean, val warmthBefore: Double?, val warmthAfter: Double?, val thermal: Int?,
         val reading: Reading?, val failure: String?,
+        /** The recording read: the English one the speeds are measured on, unless it says otherwise. */
+        val clip: Clip = ENGLISH,
     ) {
         val how: String get() = if (graphics) "显卡" else "$threads 线程"
     }
 
+    /**
+     * A recording the check reads, the language audio.cpp is told it is in (llama.cpp tells that itself), and what
+     * it says. The English one is what every speed is measured on. The Japanese one is read once by each engine: the
+     * app is used for Japanese, and a build of an engine that reads English right on a phone has not thereby read
+     * Japanese right on it. (LibriVox's public-domain reading of Akutagawa's 杜子春, 8.6 s of its first minute.)
+     */
+    class Clip(val asset: String, val language: String, val expected: String)
+
     /** A model's runs one way, and what they come to: the mean of their speeds, so that one lucky run is not it. */
     class Setting(val graphics: Boolean, val threads: Int, val runs: List<Run>) {
-        val speed: Double? = runs.mapNotNull { it.reading?.speed }.takeIf { it.isNotEmpty() }?.average()
+        /** Of the runs that read it right: a run that was quick and wrong has no speed to speak of. */
+        val speed: Double? = runs.mapNotNull { run -> run.reading?.takeIf { it.right }?.speed }.takeIf { it.isNotEmpty() }?.average()
         val how: String get() = if (graphics) "显卡" else "$threads 线程"
     }
 
     class OfModel(val model: Model, val runs: List<Run>) {
-        val settings: List<Setting> = runs.groupBy { it.graphics to it.threads }.map { (way, its) -> Setting(way.first, way.second, its) }
+        /** The speeds are of the English recording alone: the Japanese one is another length, read once. */
+        val settings: List<Setting> = runs.filter { it.clip === ENGLISH }.groupBy { it.graphics to it.threads }.map { (way, its) -> Setting(way.first, way.second, its) }
+        val japanese: Run? = runs.firstOrNull { it.clip === JAPANESE }
         val best: Setting? = settings.filter { it.speed != null }.maxByOrNull { it.speed!! }
     }
 
@@ -67,15 +89,18 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
      */
     fun run(onStep: (Int, Int, String) -> Unit, stopped: () -> Boolean, startWith: Llama.Build? = null): Result? {
         val device = Device(context)
-        val recording = File(context.cacheDir, RECORDING).also { file ->
-            context.assets.open(RECORDING).use { input -> file.outputStream().use { input.copyTo(it) } }
-        }
+        fun unpacked(asset: String): File? = runCatching {
+            File(context.cacheDir, asset).also { file -> context.assets.open(asset).use { input -> file.outputStream().use { input.copyTo(it) } } }
+        }.getOrNull()
+        val recording = unpacked(RECORDING) ?: File(context.cacheDir, RECORDING)
         val speechMs = speechMsOf(recording)
+        // A package built without it checks the English one alone.
+        val japanese = unpacked(JAPANESE.asset)
         // Each model that is here whole and has its engine in the app; the same model for the two engines together.
         val groups = MODELS.filter { store.has(it) && (it.reader == Reader.AUDIO_CPP || llama.present) }.groupBy { it.name }
         val threads = threadCounts(device.cores.size)
         fun onGraphics(reader: Reader) = if (reader == Reader.AUDIO_CPP) engine.hasGraphics else llama.hasGraphics
-        val steps = groups.values.flatten().sumOf { threads.size * ROUNDS + if (onGraphics(it.reader)) 1 else 0 }
+        val steps = groups.values.flatten().sumOf { threads.size * ROUNDS + (if (japanese != null) 1 else 0) + if (onGraphics(it.reader)) 1 else 0 }
 
         val began = System.currentTimeMillis()
         val warmthAtStart = device.warmth()
@@ -92,11 +117,13 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
         val steppedDown = ArrayList<String>()
 
         /** One run, the phone cooled first. Null when the check was stopped. */
-        fun measure(model: Model, graphics: Boolean, count: Int): Run? {
+        fun measure(model: Model, graphics: Boolean, count: Int, clip: Clip = ENGLISH): Run? {
+            val sound = if (clip === JAPANESE) japanese!! else recording
+            val soundMs = if (clip === JAPANESE) speechMsOf(sound) else speechMs
             while (true) {
                 val (waited, cooled) = cool(device, warmthAtStart, atOnce = done == 0, stopped) { onStep(done, steps, it) } ?: return null
                 waitedMs += waited
-                onStep(done, steps, "${model.name} · ${model.reader.words} · ${if (graphics) "显卡" else "$count 线程"}")
+                onStep(done, steps, "${model.name} · ${model.reader.words} · ${if (graphics) "显卡" else "$count 线程"}${if (clip === JAPANESE) " · 日语" else ""}")
                 val warmthBefore = device.warmth()
                 val thermal = device.thermal()
                 val using = build
@@ -105,14 +132,14 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
                         listOf(
                             "--task", "asr", "--family", model.family, "--model", store.fileOf(model.file).path,
                             "--backend", if (graphics) "vulkan" else "cpu", "--threads", count.toString(),
-                            "--audio", recording.path, "--language", "en", "--metrics",
+                            "--audio", sound.path, "--language", clip.language, "--metrics",
                         ),
                         store.folder,
                         graphics,
                         RUN_AT_MOST_MS,
                     )
-                    graphics || using != null -> llama.read(model, store, recording, if (graphics) null else using, count, RUN_AT_MOST_MS)
-                    else -> return Run(model, graphics, count, waited, !cooled, warmthBefore, warmthBefore, thermal, null, "安装包里没有这台处理器能用的 llama.cpp")
+                    graphics || using != null -> llama.read(model, store, sound, if (graphics) null else using, count, RUN_AT_MOST_MS)
+                    else -> return Run(model, graphics, count, waited, !cooled, warmthBefore, warmthBefore, thermal, null, "安装包里没有这台处理器能用的 llama.cpp", clip)
                 }
                 if (stopped()) return null
                 // A processor without what this build of llama.cpp was compiled for ends it at the first such
@@ -128,8 +155,8 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
                 // ggml says which of audio.cpp's CPU builds it took for this processor, and what the graphics chip is.
                 if (model.reader == Reader.AUDIO_CPP) variant = variant ?: outcome.lines.firstOrNull { LOADED in it }?.substringAfter(VARIANT_PREFIX)?.removeSuffix(".so")
                 if (graphics) chip = chip ?: outcome.lines.firstOrNull { CHIP_LINE in it }?.substringAfter(CHIP_LINE)?.substringBefore(" |")
-                val reading = if (model.reader == Reader.AUDIO_CPP) audioCppReading(outcome, speechMs) else llamaCppReading(outcome, speechMs)
-                return Run(model, graphics, count, waited, !cooled, warmthBefore, device.warmth(), thermal, reading, if (reading == null) whyNot(outcome, model.reader) else null)
+                val reading = if (model.reader == Reader.AUDIO_CPP) audioCppReading(outcome, soundMs, clip.expected) else llamaCppReading(outcome, soundMs, clip.expected)
+                return Run(model, graphics, count, waited, !cooled, warmthBefore, device.warmth(), thermal, reading, if (reading == null) whyNot(outcome, model.reader) else null, clip)
             }
         }
 
@@ -140,9 +167,8 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
             // The engines in turn within each setting, and every setting once before any is read again: neither
             // engine has the cool phone to itself. The graphics chip last: a driver that cannot take it ends that
             // one run, and the rest is already had.
-            val turns = (1..ROUNDS).flatMap { threads.flatMap { count -> models.map { Triple(it, false, count) } } } +
-                models.filter { onGraphics(it.reader) }.map { Triple(it, true, GRAPHICS_THREADS) }
-            for ((model, graphics, count) in turns) {
+            val rounds = (1..ROUNDS).flatMap { threads.flatMap { count -> models.map { Triple(it, false, count) } } }
+            for ((model, graphics, count) in rounds) {
                 // A model that could not be read on the processor is not asked again: on a phone it is too big for,
                 // every try is a long wait for the same end.
                 if (model !in broken) {
@@ -150,6 +176,20 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
                     runs += run
                     if (run.reading == null && !graphics) broken += model
                 }
+                done += 1
+            }
+            // The Japanese recording, once by each engine, the way that engine was fastest just now.
+            if (japanese != null) {
+                for (model in models) {
+                    if (model !in broken) {
+                        val fastest = OfModel(model, runs.filter { it.model === model }).best?.threads ?: threads.first()
+                        runs += measure(model, false, fastest, JAPANESE) ?: return null
+                    }
+                    done += 1
+                }
+            }
+            for (model in models.filter { onGraphics(it.reader) }) {
+                if (model !in broken) runs += measure(model, true, GRAPHICS_THREADS) ?: return null
                 done += 1
             }
             checked += name to runs
@@ -194,7 +234,7 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
             for (step in steppedDown) appendLine("  llama.cpp 的 $step")
             appendLine()
             if (checked.isEmpty()) appendLine("没有模型：先下载一个。")
-            else appendLine("下面是倍速：${seconds(speechMs)} 秒的录音，处理器每种线程数读 $ROUNDS 遍，显卡读 1 遍，每遍之前先等手机凉下来。")
+            else appendLine("下面是倍速：${seconds(speechMs)} 秒的录音，处理器每种线程数读 $ROUNDS 遍，显卡读 1 遍，每遍之前先等手机凉下来。" + if (japanese != null) "另有一段日语录音，每个引擎读 1 遍，看读得对不对。" else "")
             appendLine()
             for ((name, runs) in checked) {
                 append(blockOf(name, runs, results.filter { it.model.name == name }, threads))
@@ -257,7 +297,7 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
     }
 
     /** audio.cpp says what it took itself, in `name=value` lines. */
-    private fun audioCppReading(outcome: Outcome, speechMs: Double): Reading? {
+    private fun audioCppReading(outcome: Outcome, speechMs: Double, expected: String): Reading? {
         if (outcome.exit != 0) return null
         val said = outcome.lines.associate { line -> line.substringBefore('=') to line.substringAfter('=', "") }
         val took = said["metrics.wall_ms"]?.toDoubleOrNull() ?: return null
@@ -268,6 +308,7 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
             loadMs = (outcome.tookMs - took).coerceAtLeast(0.0),
             memoryMb = said["metrics.memory.peak_rss_mb"]?.toDoubleOrNull()?.toInt() ?: outcome.peakMb,
             text = said["text_output"].orEmpty(),
+            expected = expected,
         )
     }
 
@@ -277,11 +318,11 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
      * `metrics.wall_ms` covers — the recording taken in, heard and written out, without the loading — so the two
      * speeds can be set side by side. (It is a little unkind to llama.cpp: the program's own ending is in it.)
      */
-    private fun llamaCppReading(outcome: Outcome, speechMs: Double): Reading? {
+    private fun llamaCppReading(outcome: Outcome, speechMs: Double, expected: String): Reading? {
         if (outcome.exit != 0) return null
         val loaded = outcome.saidAt(Llama.LOADED_LINE) ?: return null
         val text = outcome.lines.lastOrNull { Llama.TEXT_MARK in it }?.substringAfter(Llama.TEXT_MARK)?.trim() ?: return null
-        return Reading(speechMs, (outcome.tookMs - loaded).toDouble(), loaded.toDouble(), outcome.peakMb, text)
+        return Reading(speechMs, (outcome.tookMs - loaded).toDouble(), loaded.toDouble(), outcome.peakMb, text, expected)
     }
 
     /** Why a run gave no reading: that it was killed by a fault, or what it said last. */
@@ -303,13 +344,13 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
     private fun blockOf(name: String, runs: List<Run>, models: List<OfModel>, threads: List<Int>): String = buildString {
         appendLine("【$name】")
         for (count in threads) {
-            appendLine("  $count 线程：" + models.joinToString("   ") { of -> "${of.model.reader.words} ${speedsOf(of.runs.filter { !it.graphics && it.threads == count })}" })
+            appendLine("  $count 线程：" + models.joinToString("   ") { of -> "${of.model.reader.words} ${speedsOf(of.runs.filter { !it.graphics && it.threads == count && it.clip === ENGLISH })}" })
         }
         for (of in models) {
             val run = of.runs.firstOrNull { it.graphics } ?: continue
-            appendLine("  显卡：${of.model.reader.words} " + (run.reading?.let { "${times(it.speed)}${if (run.warm) "*" else ""} 倍速" } ?: "用不了（${run.failure}）"))
+            appendLine("  显卡：${of.model.reader.words} " + (run.reading?.let { if (it.right) "${times(it.speed)}${if (run.warm) "*" else ""} 倍速" else "读错了（错 ${it.wrong} 个字母）" } ?: "用不了（${run.failure}）"))
         }
-        for (of in models) of.runs.firstOrNull { !it.graphics && it.reading == null }?.let { appendLine("  ${of.model.reader.words} 没读成：${it.failure}") }
+        for (of in models) of.runs.firstOrNull { !it.graphics && it.reading == null && it.clip === ENGLISH }?.let { appendLine("  ${of.model.reader.words} 没读成：${it.failure}") }
 
         val bests = models.mapNotNull { of -> of.best?.let { best -> Triple(of.model.reader, best, best.speed ?: 0.0) } }.sortedByDescending { it.third }
         bests.firstOrNull()?.let { (reader, best, speed) ->
@@ -325,23 +366,42 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
                 bests.first { it.first == Reader.AUDIO_CPP }.let { (_, lent, its) -> appendLine("  共享用的是 audio.cpp：${lent.how}，${times(its)} 倍速 → ${verdictOf(its).words}") }
             }
         }
-        val texts = models.mapNotNull { of -> of.best?.runs?.firstNotNullOfOrNull { it.reading }?.let { of.model.reader.words to it.text } }
+        // Whether what was read is what the recording says: every run of each engine, the worst of them told.
+        val heard = models.mapNotNull { of -> of.runs.filter { it.clip === ENGLISH }.mapNotNull { it.reading }.takeIf { it.isNotEmpty() }?.let { of.model.reader.words to it } }
+        if (heard.isNotEmpty()) {
+            appendLine("  英文录音读得对不对（和原文比，共 ${lettersOf(EXPECTED).length} 个字母）：" + heard.joinToString("，") { (reader, readings) ->
+                val worst = readings.maxOf { it.wrong }
+                "$reader " + if (worst == 0) "一字不差" else "最多错 $worst 个字母" + if (readings.any { !it.right }) "（读错的那几遍不算成绩）" else ""
+            })
+        }
+        val texts = models.mapNotNull { of -> (of.best?.runs ?: of.runs.filter { it.clip === ENGLISH }).firstNotNullOfOrNull { it.reading }?.let { of.model.reader.words to it.text } }
         if (texts.size > 1 && texts.all { it.second == texts.first().second }) appendLine("  读出的字（两个引擎一样）：${texts.first().second}")
-        else for ((reader, text) in texts) appendLine("  读出的字（$reader）：$text")
+        else for ((reader, text) in texts) appendLine("  读出的字（$reader）：${text.take(TEXT_SHOWN)}")
+
+        // The Japanese recording: whether each engine read it right, and how fast; the text where they differ from it.
+        val inJapanese = models.mapNotNull { of -> of.japanese?.let { of.model.reader.words to it } }
+        if (inJapanese.isNotEmpty()) {
+            appendLine("  日语录音（各读 1 遍）：" + inJapanese.joinToString("   ") { (reader, run) ->
+                "$reader " + (run.reading?.let { "${times(it.speed)} 倍速，" + if (it.wrong == 0) "一字不差" else if (it.right) "错 ${it.wrong} 个字" else "读错了（错 ${it.wrong} 个字）" } ?: "没读成（${run.failure}）")
+            })
+            val said = inJapanese.mapNotNull { (reader, run) -> run.reading?.let { reader to it.text } }
+            if (said.size > 1 && said.all { it.second == said.first().second }) appendLine("  日语读出的字（两个引擎一样）：${said.first().second}")
+            else for ((reader, words) in said) appendLine("  日语读出的字（$reader）：${words.take(TEXT_SHOWN)}")
+        }
 
         appendLine("  每一次（读 · 装入 · 内存 · 电池温度）：")
         for ((index, run) in runs.withIndex()) {
             val took = run.reading?.let { "${seconds(it.tookMs)} 秒 · ${seconds(it.loadMs)} 秒 · ${if (it.memoryMb > 0) "%.1f GB".format(it.memoryMb / 1024.0) else "—"}" } ?: "没读成"
             val notes = (if (run.warm) "，等了 ${run.waitedMs / 1000} 秒没凉下来" else "") +
                 (run.thermal?.takeIf { it != Device.THERMAL_NONE }?.let { "，系统说手机热（${Device.thermalInWords(it)}）" } ?: "")
-            appendLine("   ${index + 1} ${run.model.reader.words} ${run.how}：$took · ${run.warmthBefore ?: "?"}→${run.warmthAfter ?: "?"}°C$notes")
+            appendLine("   ${index + 1} ${run.model.reader.words} ${run.how}${if (run.clip === JAPANESE) "（日语）" else ""}：$took · ${run.warmthBefore ?: "?"}→${run.warmthAfter ?: "?"}°C$notes")
         }
     }
 
     /** "0.52 / 0.51* 倍速": the runs of one setting in the order they were made, a warm one marked. */
     private fun speedsOf(runs: List<Run>): String {
         if (runs.isEmpty()) return "没测"
-        return runs.joinToString(" / ") { run -> run.reading?.let { times(it.speed) + if (run.warm) "*" else "" } ?: "没读成" } + if (runs.any { it.reading != null }) " 倍速" else ""
+        return runs.joinToString(" / ") { run -> run.reading?.let { if (it.right) times(it.speed) + (if (run.warm) "*" else "") else "读错了" } ?: "没读成" } + if (runs.any { it.reading?.right == true }) " 倍速" else ""
     }
 
     private fun verdictOf(speed: Double) = when {
@@ -376,6 +436,43 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
 
     companion object {
         const val RECORDING = "selfcheck.wav"
+
+        /**
+         * What the recording says: the words both engines, and both sizes of the model, write of it on a desktop's
+         * graphics card (they differ there by two commas, which are not counted).
+         */
+        const val EXPECTED = "The English forwarded to the French baskets of flowers, of which they had made a plentiful provision " +
+            "to greet the arrival of the young princess. The French, in return, invited the English to a supper, which was to be given the next day."
+
+        /** What the Japanese recording says: what both engines and both sizes of the model write of it on a desktop. */
+        const val EXPECTED_JA = "元は金持ちの息子でしたが、今は財産を使い尽くして、その日の暮らしにも困るくらい哀れな身分になっているのです。"
+
+        val ENGLISH = Clip(RECORDING, "en", EXPECTED)
+        val JAPANESE = Clip("selfcheck-ja.wav", "ja", EXPECTED_JA)
+
+        /** A run is read right with no more of its letters wrong than this share of the recording's. */
+        private const val WRONG_AT_MOST = 0.05
+
+        /** A text that is not the recording's is shown to this length: one that ran on is thousands of letters. */
+        private const val TEXT_SHOWN = 300
+
+        /** A text's letters and digits alone, small: what is compared. */
+        fun lettersOf(text: String): String = text.filter { it.isLetterOrDigit() }.lowercase()
+
+        /** How many letters must be changed, added or taken away to make one text the other; looked at no further than twice the second's length. */
+        fun lettersApart(said: String, expected: String): Int {
+            val a = said.take(expected.length * 2)
+            var previous = IntArray(expected.length + 1) { it }
+            for (i in 1..a.length) {
+                val current = IntArray(expected.length + 1)
+                current[0] = i
+                for (j in 1..expected.length) {
+                    current[j] = minOf(previous[j] + 1, current[j - 1] + 1, previous[j - 1] + if (a[i - 1] == expected[j - 1]) 0 else 1)
+                }
+                previous = current
+            }
+            return previous[expected.length]
+        }
         private const val LOADED = "loaded CPU backend from"
         private const val VARIANT_PREFIX = "libggml-cpu-"
         private const val CHIP_LINE = "ggml_vulkan: 0 = "
@@ -426,7 +523,7 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
 
 /** What the build knows of itself. */
 object BuildConfigLite {
-    const val VERSION = "0.3.0"
+    const val VERSION = "0.3.1"
     const val ENGINE = "0.9.0"
     const val LLAMA = "b11401"
 }
