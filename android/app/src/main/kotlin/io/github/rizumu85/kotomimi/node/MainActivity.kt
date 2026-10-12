@@ -69,12 +69,15 @@ class MainActivity : Activity() {
     }
 
     /**
-     * For a computer driving the phone: adb shell am start -n …/.MainActivity --ez selfcheck true (or --ez share true).
-     * With --es llama v86 (or v82, v80) the self-check begins with that build of llama.cpp, not the one it would pick.
+     * For a computer driving the phone: adb shell am start -n …/.MainActivity --ez selfcheck true (or --ez share true;
+     * --ez share false stops it). With --es llama v86 (or v82, v80) the self-check, or sharing, begins with that build
+     * of llama.cpp, not the one it would pick. With --es model llama-qwen3-asr-0.6b-q8 (a model's own name here, not
+     * the one it is lent as) the phone is lent with that model this once: what the user chose stays as it was.
      */
     private fun asked(intent: Intent) {
         if (intent.getBooleanExtra("selfcheck", false)) check(Llama.Build.values().firstOrNull { it.words == intent.getStringExtra("llama") })
-        if (intent.getBooleanExtra("share", false)) lend()
+        if (intent.getBooleanExtra("share", false)) lend(MODELS.firstOrNull { it.id == intent.getStringExtra("model") }, intent.getStringExtra("llama"))
+        else if (intent.hasExtra("share") && Sharing.on) ShareService.stop(this)
     }
 
     override fun onStart() {
@@ -143,8 +146,8 @@ class MainActivity : Activity() {
         body.addView(checkKey, LinearLayout.LayoutParams(MATCH_PARENT, dp(46)).apply { topMargin = dp(10) })
         column.addView(body, spaced(top = 18))
 
-        // The models, each with the engine it is for: the one that is lent is marked; a touch on another of
-        // audio.cpp's that is here lends that one instead. llama.cpp's are for the self-check alone.
+        // The models, each with the engine it is for: the one that is lent is marked; a touch on another that is
+        // here lends that one instead, by its own engine.
         val models = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = shape(R.color.tile, 26)
@@ -154,7 +157,7 @@ class MainActivity : Activity() {
             val row = LinearLayout(this).apply {
                 gravity = Gravity.CENTER_VERTICAL
                 minimumHeight = dp(64)
-                setOnClickListener { if (model in LENDABLE && store.has(model) && busy == null && !Sharing.on) { choices.share(model); refresh() } }
+                setOnClickListener { if (model in choices.lendable(store) && busy == null && !Sharing.on) { choices.share(model); lastVerdict = null; refresh() } }
             }
             val words = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
             val state = text("", 13f, R.color.ink_2)
@@ -218,7 +221,7 @@ class MainActivity : Activity() {
     /** The screen as things stand. A check or a download in hand writes its own lines over this as it goes. */
     private fun refresh() {
         val here = MODELS.filter { store.has(it) }
-        val lendable = LENDABLE.filter { store.has(it) }
+        val lendable = choices.lendable(store)
         val lent = choices.shared(store)
         val sharing = Sharing.state
         val shared = Sharing.on
@@ -251,9 +254,10 @@ class MainActivity : Activity() {
                 shared || sharing.phase == Share.Phase.FAILED -> ShareService.wordsOf(sharing).let { say(it.first, it.second) }
                 here.isEmpty() -> say("先下载模型", "下面选一个，建议连着 Wi-Fi")
                 lastVerdict != null -> say(lastVerdict!!.first, lastVerdict!!.second)
-                // Only llama.cpp's files are here: enough to check with, not to lend.
+                // Only llama.cpp's files are here, in a package built without its server: enough to check with, not to lend.
                 lent == null -> say("可以自检", "要借给电脑，还得下载 audio.cpp 用的模型")
-                else -> say("没有开启", "按下面的键，把这台手机借给电脑")
+                // Which engine it will be, in a word: the row below says which model.
+                else -> say("没有开启", "按下面的键借给电脑 · ${lent.reader.words}")
             }
         }
         report.text = lastReport ?: "还没有自检报告。"
@@ -268,16 +272,16 @@ class MainActivity : Activity() {
 
     // ── What it does ────────────────────────────────────────────────────────────────────────────────────────────
 
-    /** Lends the phone: the model that is chosen, the way the self-check found fastest. */
-    private fun lend() {
-        val model = choices.shared(store) ?: return
-        if (!engine.present || busy != null) return
+    /** Lends the phone: the model that is chosen (or, asked from a computer, `named`), the way the self-check found fastest. */
+    private fun lend(named: Model? = null, llamaBuild: String? = null) {
+        val model = named?.takeIf { it in choices.lendable(store) } ?: choices.shared(store) ?: return
+        if (!engine.present || busy != null || Sharing.on) return
         // The notification that says the phone is lent: asked for once, and lent whatever the answer.
         if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
         }
         lastVerdict = null
-        ShareService.start(this, model)
+        ShareService.start(this, model, llamaBuild)
     }
 
     private fun check(startWith: Llama.Build? = null) {
@@ -307,9 +311,9 @@ class MainActivity : Activity() {
                 result.onSuccess { done ->
                     if (done != null) {
                         lastReport = done.report
-                        // What the screen says is about lending the phone, which is audio.cpp's work.
-                        lastVerdict = done.verdict.words to done.models.filter { it.model.reader == Reader.AUDIO_CPP }
-                            .mapNotNull { m -> m.best?.speed?.let { "${m.model.name} ${"%.1f".format(it)} 倍速" } }.joinToString(" · ").ifBlank { "看下面的报告" }
+                        // What the screen says is about lending the phone: the model it is lent with, by its engine.
+                        // (The model by its size alone: its whole name with the rest does not fit a small screen's line.)
+                        lastVerdict = done.verdict.words to (done.lending?.let { of -> of.lent?.speed?.let { "${of.model.size} · ${of.model.reader.words} · ${"%.1f".format(it)} 倍速" } } ?: "看下面的报告")
                     }
                 }.onFailure { error ->
                     lastVerdict = "没检查成" to (error.message ?: error.javaClass.simpleName)

@@ -14,6 +14,22 @@ class Outcome(val exit: Int, val lines: List<String>, private val at: List<Long>
     fun saidAt(mark: String): Long? = lines.indexOfFirst { mark in it }.takeIf { it >= 0 }?.let { at[it] }
 }
 
+private val PID = Regex("""pid=(\d+)""")
+
+/** Android's `Process` names its number only in what it prints of itself. */
+fun pidOf(process: Process): Int? = PID.find(process.toString())?.groupValues?.get(1)?.toIntOrNull()
+
+/**
+ * Ends a program outright, whatever it is doing. `destroyForcibly` alone does not on Android: it asks (SIGTERM), and
+ * a program that answers the asking ends when it sees fit — llama.cpp's server, asked in the middle of a reading,
+ * went on reading for seven seconds with its two gigabytes (F22 Pro, 2026-10-12). The system's own way of ending a
+ * process is not to be answered, and is allowed on a process of the app's own.
+ */
+fun endOutright(process: Process) {
+    process.destroyForcibly()
+    if (process.isAlive) pidOf(process)?.let(android.os.Process::killProcess)
+}
+
 /**
  * Runs an engine's program to its end, every line it writes handed on as it comes. The program is gone before this
  * returns: a phone has memory for one at a time.
@@ -77,10 +93,6 @@ class Runner {
 
     private companion object {
         const val WATCH_EVERY_MS = 250L
-        val PID = Regex("""pid=(\d+)""")
-
-        /** Android's `Process` names its number only in what it prints of itself. */
-        fun pidOf(process: Process): Int? = PID.find(process.toString())?.groupValues?.get(1)?.toIntOrNull()
 
         /** The high-water mark of the memory it holds (`VmHWM`, in kB), in megabytes. */
         fun peakOf(status: File): Int? = runCatching {

@@ -14,8 +14,9 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlin.concurrent.thread
 
 /**
- * Which engine reads a model. audio.cpp is the one the phone is lent with; llama.cpp reads the same models from
- * files of its own, and is here for the self-check to compare the two.
+ * Which engine reads a model. audio.cpp is the engine the desktop app runs; llama.cpp reads the same models from
+ * files of its own, about twice as fast on a phone's processor (measured 2026-10-12, README). The phone is lent with
+ * either: the self-check says which is the faster here.
  */
 enum class Reader(val words: String) { AUDIO_CPP("audio.cpp"), LLAMA_CPP("llama.cpp") }
 
@@ -51,9 +52,16 @@ class ModelFile(val repository: String, val revision: String, val path: String, 
  * A model an engine reads, in one file or several. audio.cpp's are the same files as the desktop app's
  * (`electron/native-engine.js`), under the same name there (`id`). Two models of one `name` are the same model for
  * the two engines: the self-check sets them side by side.
+ *
+ * `lentAs` is the name a computer is told when the phone is lent with it: audio.cpp's name for the model, whichever
+ * engine reads. The desktop app looks that name up to know how the model is told a language and how long a stretch
+ * it may be sent, and knows no other.
  */
-class Model(val id: String, val name: String, val reader: Reader, val family: String, val files: List<ModelFile>) {
+class Model(val id: String, val name: String, val reader: Reader, val family: String, val files: List<ModelFile>, val lentAs: String = id) {
     val bytes: Long = files.sumOf { it.bytes }
+
+    /** What tells it from the other models of its family: the last word of its name, "0.6B". */
+    val size: String get() = name.substringAfterLast(' ')
 
     /** As the desktop app writes sizes: in units of 1024. */
     val sizeInWords: String get() = "%.1f GB".format(bytes / (1024.0 * 1024.0 * 1024.0))
@@ -100,6 +108,7 @@ val MODELS = listOf(
     ),
     Model(
         id = "llama-qwen3-asr-0.6b-q8",
+        lentAs = "qwen3-asr-0.6b-q8",
         name = "Qwen3-ASR 0.6B",
         reader = Reader.LLAMA_CPP,
         family = "qwen3_asr",
@@ -137,6 +146,7 @@ val MODELS = listOf(
     ),
     Model(
         id = "llama-qwen3-asr-1.7b-q8",
+        lentAs = "qwen3-asr-1.7b-q8",
         name = "Qwen3-ASR 1.7B",
         reader = Reader.LLAMA_CPP,
         family = "qwen3_asr",
@@ -158,9 +168,6 @@ val MODELS = listOf(
         ),
     ),
 )
-
-/** The models the phone can be lent with: sharing runs audio.cpp's server, which reads audio.cpp's files only. */
-val LENDABLE = MODELS.filter { it.reader == Reader.AUDIO_CPP }
 
 /**
  * Where the models are kept — the app's own folder on shared storage, which goes when the app is removed — and how

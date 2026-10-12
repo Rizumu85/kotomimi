@@ -52,21 +52,23 @@ class ShareService : Service() {
             return START_NOT_STICKY
         }
         val store = ModelStore(this)
-        val model = LENDABLE.firstOrNull { it.id == intent?.getStringExtra(MODEL) && store.has(it) } ?: Choices(this).shared(store)
+        val choices = Choices(this)
+        val model = choices.lendable(store).firstOrNull { it.id == intent?.getStringExtra(MODEL) } ?: choices.shared(store)
         if (model == null || share != null) {
             if (share == null) stopSelf()
             return START_NOT_STICKY
         }
+        val startWith = Llama.Build.values().firstOrNull { it.words == intent?.getStringExtra(LLAMA) }
         show(noticeOf(Share.State(Share.Phase.LOADING, model)))
         hold()
-        val sharing = Share(this, Engine(this), store)
+        val sharing = Share(this, Engine(this), Llama(this), store)
         share = sharing
         sharing.onState = { state ->
             Sharing.tell(state)
             if (state.phase != Share.Phase.OFF) getSystemService(NotificationManager::class.java).notify(NOTICE, noticeOf(state))
         }
         worker.execute {
-            runCatching { sharing.start(model, Choices(this).wayOf(model)) }
+            runCatching { sharing.start(model, choices.wayOf(model), startWith) }
                 .onFailure { error -> Sharing.tell(Share.State(Share.Phase.FAILED, model, message = error.message ?: error.javaClass.simpleName)) }
             // Not up: nothing to keep alive for.
             if (Sharing.state.phase == Share.Phase.FAILED) Handler(Looper.getMainLooper()).post { end(keep = Sharing.state) }
@@ -124,22 +126,27 @@ class ShareService : Service() {
         private const val NOTICE = 1
         private const val STOP = "io.github.rizumu85.kotomimi.node.STOP"
         private const val MODEL = "model"
+        private const val LLAMA = "llama"
 
-        fun start(context: Context, model: Model) {
-            context.startForegroundService(Intent(context, ShareService::class.java).putExtra(MODEL, model.id))
+        /** Lends the phone with `model`; `llamaBuild` is for trying a build of llama.cpp's server the phone would not pick itself. */
+        fun start(context: Context, model: Model, llamaBuild: String? = null) {
+            context.startForegroundService(Intent(context, ShareService::class.java).putExtra(MODEL, model.id).putExtra(LLAMA, llamaBuild))
         }
 
         fun stop(context: Context) {
             context.startService(Intent(context, ShareService::class.java).setAction(STOP))
         }
 
-        /** What a state reads as: a few words, and a line under them. */
-        fun wordsOf(state: Share.State): Pair<String, String> = when (state.phase) {
-            Share.Phase.OFF -> "没有开启" to "按下面的键，把这台手机借给电脑"
-            Share.Phase.LOADING -> "正在装入" to (state.model?.name ?: "")
-            Share.Phase.WAITING -> "等电脑连上" to (state.address?.let { "地址 $it" } ?: "这台手机没连 Wi-Fi")
-            Share.Phase.WORKING -> "正在识别" to "来自 ${state.peer ?: "一台电脑"}"
-            Share.Phase.FAILED -> "没开起来" to (state.message ?: "")
+        /** What a state reads as: a few words, and a line under them, which names the engine that is lent. */
+        fun wordsOf(state: Share.State): Pair<String, String> {
+            val by = state.model?.reader?.words?.let { " · $it" }.orEmpty()
+            return when (state.phase) {
+                Share.Phase.OFF -> "没有开启" to "按下面的键，把这台手机借给电脑"
+                Share.Phase.LOADING -> "正在装入" to (state.model?.name.orEmpty() + by)
+                Share.Phase.WAITING -> "等电脑连上" to ((state.address?.let { "地址 $it" } ?: "这台手机没连 Wi-Fi") + by)
+                Share.Phase.WORKING -> "正在识别" to "来自 ${state.peer ?: "一台电脑"}$by"
+                Share.Phase.FAILED -> "没开起来" to (state.message ?: "")
+            }
         }
     }
 }

@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
-# Builds llama.cpp's reader of speech (llama-mtmd-cli) for Android arm64 and puts it where the app's build picks it
-# up, beside audio.cpp's engine (build-engine.sh): the self-check reads the same recording with both and says which
-# is faster on the phone. Nothing it makes is committed.
+# Builds llama.cpp's two programs for Android arm64 and puts them where the app's build picks them up, beside
+# audio.cpp's engine (build-engine.sh). Nothing it makes is committed.
+#
+#   llama-mtmd-cli  reads one recording and ends: the self-check reads the same recording with both engines and says
+#                   which is faster on the phone
+#   llama-server    stays up and is asked over HTTP: what the phone is lent with when a llama.cpp model is shared
 #
 #   android/scripts/build-llama.sh            all four builds
 #   android/scripts/build-llama.sh v82 vulkan  only these
@@ -11,6 +14,10 @@
 #   v86     the same for armv8.6-a with the 8-bit matrix multiply (i8mm) too
 #   vulkan  plain armv8-a with ggml's Vulkan backend linked in, for the graphics chip; needs the phone's libvulkan.so
 #
+# The processor builds make both programs. The Vulkan build makes the reader alone: on the phones tried the graphics
+# chip is slower than the processor or ends the program, so the phone is never lent with it, and a server for it
+# would be ten megabytes of package nobody runs.
+#
 # Each is one self-contained program (libc, libm and libdl only): unlike audio.cpp's engine it cannot choose its CPU
 # code at run time, so the app chooses the program (Llama.kt). They are not built as shared libraries because
 # llama.cpp's libggml*.so have the very names of audio.cpp's and are not the same ggml (0.25.3 against 0.12.0): the
@@ -19,6 +26,7 @@
 # Needs the Android SDK with an NDK and its CMake (Android Studio installs both). Reads:
 #   ANDROID_SDK   the SDK folder; found in the usual places when unset
 #   LLAMA_SRC     a llama.cpp source tree at the tag below; cloned into android/.engine when unset
+#   TARGETS       the programs to build, where not all of a build's: "llama-server" or "llama-mtmd-cli"
 #
 # The Vulkan build turns its shaders into code with a small program that runs here, on the computer doing the build,
 # so it needs a C++ compiler for this computer too: on Windows Visual Studio's (found and set up below when `cl` is
@@ -30,7 +38,14 @@ LLAMA_TAG=b11401
 VULKAN_TAG=vulkan-sdk-1.4.357.0
 ABI=arm64-v8a
 API=28
-TARGET=llama-mtmd-cli
+
+# The programs of a build, and the name each is packed under: one Android unpacks and lets the app run (lib*.so), as
+# audio.cpp's programs are.
+targets_of() { case "$1" in vulkan) echo "llama-mtmd-cli" ;; *) echo "llama-mtmd-cli llama-server" ;; esac; }
+packed_as() { case "$1" in llama-mtmd-cli) echo "libllama_mtmd_$2.so" ;; llama-server) echo "libllama_server_$2.so" ;; esac; }
+for target in ${TARGETS:-}; do
+  case "$target" in llama-mtmd-cli|llama-server) ;; *) echo "Unknown program: $target (llama-mtmd-cli or llama-server)." >&2; exit 1 ;; esac
+done
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 work="$here/.engine"
@@ -147,13 +162,20 @@ for name in "${builds[@]}"; do
   # file" — met with `build-llama-vulkan` under a deep checkout, 2026-10-12).
   build="$work/llama-$name"
   [ "$name" = vulkan ] && build="$work/llama-vk"
-  echo "== $name -> $build"
+  # Of this build's programs, the ones asked for; all of them where none was.
+  targets=()
+  for target in $(targets_of "$name"); do
+    case " ${TARGETS:-$target} " in *" $target "*) targets+=("$target") ;; esac
+  done
+  [ ${#targets[@]} -gt 0 ] || { echo "== $name: none of its programs asked for"; continue; }
+  echo "== $name (${targets[*]}) -> $build"
   # (An empty list, said so that an old bash with `set -u` takes it.)
   "$cmake" -S "$src" -B "$build" "${common[@]}" ${extra[@]+"${extra[@]}"}
-  "$cmake" --build "$build" --target "$TARGET" -j "${JOBS:-8}"
-  # Into the app under a name Android unpacks and lets the app run (lib*.so), as audio.cpp's programs are.
-  "$strip" -o "$libs/libllama_mtmd_$name.so" "$build/bin/$TARGET"
+  "$cmake" --build "$build" --target "${targets[@]}" -j "${JOBS:-8}"
+  for target in "${targets[@]}"; do
+    "$strip" -o "$libs/$(packed_as "$target" "$name")" "$build/bin/$target"
+  done
 done
 
-echo "llama.cpp's reader in $libs:"
-ls -la "$libs"/libllama_mtmd_*.so
+echo "llama.cpp's programs in $libs:"
+ls -la "$libs"/libllama_*.so

@@ -2,8 +2,6 @@ package io.github.rizumu85.kotomimi.node
 
 import android.content.Context
 import java.io.File
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -12,8 +10,9 @@ import kotlin.math.roundToInt
 /**
  * The self-check: one fixed recording read with each model that is here, by the engine it is for — audio.cpp's files
  * by audio.cpp, llama.cpp's by llama.cpp — on the processor at two thread counts, each twice, then once on the
- * graphics chip. What every run took is written down, the two engines side by side. The numbers are the phone's own;
- * nothing is judged from the name of its processor.
+ * graphics chip. What every run took is written down, the two engines side by side, and with it which of them the
+ * phone is lent with from now on and how that will be. The numbers are the phone's own; nothing is judged from the
+ * name of its processor.
  *
  * A phone that has just read is warm, and a warm phone reads slower: three checks in a row on one phone gave 1.3,
  * 1.2 and 1.1 times real time for the same setting (2026-10-12). Whichever engine came second would lose by that
@@ -71,15 +70,19 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
         val settings: List<Setting> = runs.filter { it.clip === ENGLISH }.groupBy { it.graphics to it.threads }.map { (way, its) -> Setting(way.first, way.second, its) }
         val japanese: Run? = runs.firstOrNull { it.clip === JAPANESE }
         val best: Setting? = settings.filter { it.speed != null }.maxByOrNull { it.speed!! }
+
+        /** The fastest way the phone is lent with it: llama.cpp's server runs on the processor alone. */
+        val lent: Setting? = settings.filter { it.speed != null && !(it.graphics && model.reader == Reader.LLAMA_CPP) }.maxByOrNull { it.speed!! }
     }
 
-    class Result(val report: String, val verdict: Verdict, val models: List<OfModel>)
+    /** `lending` is the model the phone is lent with from now on, where it was among those checked. */
+    class Result(val report: String, val verdict: Verdict, val models: List<OfModel>, val lending: OfModel?)
 
-    /** Whether the phone keeps up when it is lent — which is with audio.cpp, so by audio.cpp's runs alone. */
+    /** Whether the phone keeps up when it is lent: by the runs of the model it is lent with, the way it is lent. */
     enum class Verdict(val words: String) {
         FAST("跟得上"), TIGHT("勉强跟上"), SLOW("跟不上"), NONE("没测成"),
 
-        /** None of audio.cpp's models was here to be read: the check compared what there was. */
+        /** Nothing that was checked can be lent (a package without llama.cpp's server): the check compared what there was. */
         COMPARED("测完了"),
     }
 
@@ -154,7 +157,7 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
                 }
                 // ggml says which of audio.cpp's CPU builds it took for this processor, and what the graphics chip is.
                 if (model.reader == Reader.AUDIO_CPP) variant = variant ?: outcome.lines.firstOrNull { LOADED in it }?.substringAfter(VARIANT_PREFIX)?.removeSuffix(".so")
-                if (graphics) chip = chip ?: outcome.lines.firstOrNull { CHIP_LINE in it }?.substringAfter(CHIP_LINE)?.substringBefore(" |")
+                if (graphics) chip = chip ?: outcome.lines.firstNotNullOfOrNull(::chipIn)
                 val reading = if (model.reader == Reader.AUDIO_CPP) audioCppReading(outcome, soundMs, clip.expected) else llamaCppReading(outcome, soundMs, clip.expected)
                 return Run(model, graphics, count, waited, !cooled, warmthBefore, device.warmth(), thermal, reading, if (reading == null) whyNot(outcome, model.reader) else null, clip)
             }
@@ -197,10 +200,16 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
         onStep(steps, steps, "写报告")
 
         val results = checked.flatMap { (_, runs) -> runs.map { it.model }.distinct().map { model -> OfModel(model, runs.filter { it.model === model }) } }
-        val lent = results.filter { it.model.reader == Reader.AUDIO_CPP }
+        // What sharing goes by from now on: for each model the fastest way found here to lend it, and how fast that
+        // was. So the model lent, where the user chose none, is the fastest of those that read the recording right.
+        val choices = Choices(context)
+        for (result in results) result.lent?.let { choices.remember(result.model, it.graphics, it.threads, it.speed!!) } ?: choices.forget(result.model)
+        val lendable = choices.lendable(store)
+        val shared = choices.shared(store)
+        val lending = results.firstOrNull { it.model === shared }
         val verdict = when {
-            lent.isEmpty() && results.isNotEmpty() -> Verdict.COMPARED
-            else -> lent.mapNotNull { it.best?.speed }.maxOrNull()?.let(::verdictOf) ?: Verdict.NONE
+            shared == null && results.isNotEmpty() -> Verdict.COMPARED
+            else -> lending?.lent?.speed?.let(::verdictOf) ?: Verdict.NONE
         }
         val report = buildString {
             appendLine("Kotomimi 手机端自检 ${BuildConfigLite.VERSION}")
@@ -244,12 +253,22 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
             appendLine("所以 4 倍以上算跟得上，2 到 4 倍勉强，2 倍以下跟不上。")
             appendLine("每次读之前都先等手机凉下来，两个引擎轮流读，免得排在后面的吃亏。")
             if (checked.any { (_, runs) -> runs.any { it.warm } }) appendLine("带 * 的是等了 ${COOL_AT_MOST_MS / 60_000} 分钟还没凉下来、热着测的。")
-            appendLine("现在共享用的是 audio.cpp；llama.cpp 只是拿来比一比。")
+            // Which model the phone is lent with now, by which engine, and how that will be.
+            if (shared != null) {
+                val way = lending?.lent
+                appendLine()
+                appendLine("共享用的是：${shared.name} · ${shared.reader.words}" + (way?.let { "，${it.how}，${times(it.speed!!)} 倍速 → ${verdictOf(it.speed).words}" } ?: "（这次没读成）"))
+                // The user's own choice is kept, and told where the check found a faster one.
+                val faster = results.filter { it.model !== shared && it.model in lendable && (it.lent?.speed ?: 0.0) > (way?.speed ?: 0.0) }.maxByOrNull { it.lent!!.speed!! }
+                if (choices.chosen(store) != null && faster != null) {
+                    appendLine("  这是你选的。更快的是 ${faster.model.name} · ${faster.model.reader.words}（${times(faster.lent!!.speed!!)} 倍速）：在模型列表里点它那一行就换。")
+                } else if (lendable.size > 1) {
+                    appendLine("  想借出别的，在模型列表里点那一行。")
+                }
+            }
         }
         File(context.getExternalFilesDir(null), "report.txt").writeText(report)
-        // What sharing starts the engine with: the fastest way found here for audio.cpp, the engine it runs.
-        for (result in lent) result.best?.let { Choices(context).remember(result.model, it.graphics, it.threads) }
-        return Result(report, verdict, results)
+        return Result(report, verdict, results, lending)
     }
 
     /**
@@ -357,14 +376,17 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
             val fastest = "${reader.words} ${best.how}，${times(speed)} 倍速"
             val other = bests.getOrNull(1)
             if (other == null) {
-                appendLine("  最快：$fastest" + if (reader == Reader.AUDIO_CPP) " → ${verdictOf(speed).words}" else "")
+                appendLine("  最快：$fastest")
             } else {
                 val ahead = ((speed / other.third - 1) * 100).roundToInt()
                 val against = "${other.first.words} 最快的（${other.second.how}，${times(other.third)} 倍速）"
                 appendLine(if (ahead >= NEAR_PER_CENT) "  最快：$fastest，比 ${against}快 $ahead%" else "  最快：$fastest，和 ${against}差不多（差 $ahead%）")
-                // The phone is lent with audio.cpp, whichever was the faster here.
-                bests.first { it.first == Reader.AUDIO_CPP }.let { (_, lent, its) -> appendLine("  共享用的是 audio.cpp：${lent.how}，${times(its)} 倍速 → ${verdictOf(its).words}") }
             }
+        }
+        // How it would be to lend the phone with this model: the fastest way either engine's server runs it.
+        models.filter { it.lent != null }.maxByOrNull { it.lent!!.speed!! }?.let { of ->
+            val way = of.lent!!
+            appendLine("  借给电脑时：${of.model.reader.words} ${way.how}，${times(way.speed!!)} 倍速 → ${verdictOf(way.speed).words}")
         }
         // Whether what was read is what the recording says: every run of each engine, the worst of them told.
         val heard = models.mapNotNull { of -> of.runs.filter { it.clip === ENGLISH }.mapNotNull { it.reading }.takeIf { it.isNotEmpty() }?.let { of.model.reader.words to it } }
@@ -418,21 +440,7 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
     private fun minutes(ms: Long) = if (ms < 60_000) "${ms / 1000} 秒" else "${(ms / 60_000.0).roundToInt()} 分钟"
 
     /** How long a WAV recording is, by its own header: llama.cpp does not say, as audio.cpp does. */
-    private fun speechMsOf(recording: File): Double {
-        val bytes = recording.readBytes()
-        val numbers = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
-        var at = 12
-        var bytesASecond = 0
-        while (at + 8 <= bytes.size) {
-            val chunk = String(bytes, at, 4, Charsets.US_ASCII)
-            val size = numbers.getInt(at + 4)
-            if (chunk == "fmt " && at + 20 <= bytes.size) bytesASecond = numbers.getInt(at + 16)
-            if (chunk == "data") return if (bytesASecond > 0) minOf(size, bytes.size - at - 8) * 1000.0 / bytesASecond else 0.0
-            if (size < 0) break
-            at += 8 + size + (size and 1)
-        }
-        return 0.0
-    }
+    private fun speechMsOf(recording: File): Double = runCatching { wavMsOf(recording.readBytes()) }.getOrNull() ?: 0.0
 
     companion object {
         const val RECORDING = "selfcheck.wav"
@@ -476,6 +484,14 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
         private const val LOADED = "loaded CPU backend from"
         private const val VARIANT_PREFIX = "libggml-cpu-"
         private const val CHIP_LINE = "ggml_vulkan: 0 = "
+
+        /**
+         * The graphics chip's name in a line an engine wrote, or null. audio.cpp says `ggml_vulkan: 0 = Mali-G52 MC2
+         * (…) | uma: …`. llama.cpp keeps that line to itself and names the chip in another (`Llama.CHIP`): a phone
+         * with llama.cpp's models alone was told its chip was not recognised, by a check that had just read with it.
+         */
+        fun chipIn(line: String): String? =
+            if (CHIP_LINE in line) line.substringAfter(CHIP_LINE).substringBefore(" |") else Llama.CHIP.find(line)?.groupValues?.get(1)
         private const val GRAPHICS_THREADS = 4
 
         /** Each setting of the processor is read this many times: one run alone may have been the lucky or the unlucky one. */
@@ -523,7 +539,7 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
 
 /** What the build knows of itself. */
 object BuildConfigLite {
-    const val VERSION = "0.3.1"
+    const val VERSION = "0.4.0"
     const val ENGINE = "0.9.0"
     const val LLAMA = "b11401"
 }
