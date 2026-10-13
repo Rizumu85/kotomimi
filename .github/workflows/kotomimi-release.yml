@@ -368,9 +368,11 @@ jobs:
           cat release-assets/latest.yml
 
       # The fork's own commits since the last release: upstream's are upstream's news.
+      # The last release is the nearest `v<version>` tag: the history carries other
+      # tags too (`native-v*`, `sidecar-v*`, the phone app's `phone-v*`).
       - name: Write the notes
         run: |
-          PREVIOUS=$(git describe --tags --abbrev=0 "$GITHUB_REF_NAME^" 2>/dev/null || echo "")
+          PREVIOUS=$(git describe --tags --abbrev=0 --match 'v[0-9]*' "$GITHUB_REF_NAME^" 2>/dev/null || echo "")
           {
             echo "Kotomimi ${GITHUB_REF_NAME#v} — an independent fork of [Sokuji](https://github.com/kizuna-ai-lab/sokuji)."
             echo
