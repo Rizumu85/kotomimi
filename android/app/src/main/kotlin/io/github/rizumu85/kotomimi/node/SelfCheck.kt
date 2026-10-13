@@ -54,6 +54,8 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
         /** The recording read: the English one the speeds are measured on, unless it says otherwise. */
         val clip: Clip = ENGLISH,
         val way: Way = Way.AS_LENT,
+        /** How near the phone was to being held back for heat when the run was over (`Device.headroom`). */
+        val headroom: Double? = null,
     ) {
         val how: String get() = if (graphics) "显卡" else "$threads 线程"
 
@@ -245,7 +247,7 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
                     else -> null
                 }
                 val failure = notThatWay ?: if (reading == null) whyNot(outcome, model.reader) else null
-                return Run(model, graphics, count, waited, !cooled, warmthBefore, device.warmth(), thermal, reading.takeIf { notThatWay == null }, failure, clip, way)
+                return Run(model, graphics, count, waited, !cooled, warmthBefore, device.warmth(), thermal, reading.takeIf { notThatWay == null }, failure, clip, way, device.headroom())
             }
         }
 
@@ -416,11 +418,11 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
     }
 
     /**
-     * Waits for the phone to cool before a run: a few seconds at least, then until the battery is back within a
-     * degree of where it was when the check began and the system no longer calls the phone hot — or until it has
-     * stopped getting cooler. A phone that began the check cold never comes back to within a degree of that while
-     * it is being checked: on the first phone tried, six runs in ten waited the full three minutes for a goal it
-     * had settled 0.4 °C above. Settled is as fair a start as cooled — every run then begins from the same warmth,
+     * Waits for the phone to cool before a run: a few seconds at least, then until the battery is back within a few
+     * degrees of where it was when the check began and the system no longer calls the phone hot — or until it has
+     * stopped getting cooler. A phone that began the check cold never comes back to quite that while it is being
+     * checked: on the first phone tried, six runs in ten waited the full three minutes for a goal it had settled
+     * 0.4 °C above. Settled is as fair a start as cooled — every run then begins from the same warmth,
      * whichever engine's turn it is — so it goes on from there. Only a phone still cooling when the longest wait is
      * over is run warm, and marked so.
      * Returns how long it waited and whether the phone cooled or settled; null when the check was stopped.
@@ -589,12 +591,14 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
             else for ((reader, words) in said) appendLine("  日语读出的字（$reader）：${words.take(TEXT_SHOWN)}")
         }
 
-        appendLine("  每一次（读 · 装入 · 内存 · 电池温度）：")
+        // (发热: how near the system says the phone is to holding itself back, where it says.)
+        val heated = runs.any { it.headroom != null }
+        appendLine("  每一次（读 · 装入 · 内存 · 电池温度${if (heated) " · 发热，到 100% 系统会降速" else ""}）：")
         for ((index, run) in runs.withIndex()) {
             val took = run.reading?.let { "${seconds(it.tookMs)} 秒 · ${seconds(it.loadMs)} 秒 · ${if (it.memoryMb > 0) "%.1f GB".format(it.memoryMb / 1024.0) else "—"}" } ?: "没读成"
             val notes = (if (run.warm) "，等了 ${run.waitedMs / 1000} 秒没凉下来" else "") +
                 (run.thermal?.takeIf { it != Device.THERMAL_NONE }?.let { "，系统说手机热（${Device.thermalInWords(it)}）" } ?: "")
-            appendLine("   ${index + 1} ${run.label} ${run.how}${if (run.clip === JAPANESE) "（日语）" else ""}：$took · ${run.warmthBefore ?: "?"}→${run.warmthAfter ?: "?"}°C$notes")
+            appendLine("   ${index + 1} ${run.label} ${run.how}${if (run.clip === JAPANESE) "（日语）" else ""}：$took · ${run.warmthBefore ?: "?"}→${run.warmthAfter ?: "?"}°C${run.headroom?.let { " · %.0f%%".format(it * 100) }.orEmpty()}$notes")
         }
     }
 
@@ -753,8 +757,13 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
         /** No run is waited on longer: a driver that hangs must not hold the check for ever. The slowest phone tried takes under a minute. */
         private const val RUN_AT_MOST_MS = 10 * 60_000L
 
-        /** Before a run: cooled is within this of the battery's temperature at the start, in °C. */
-        private const val COOL_WITHIN = 1.0
+        /**
+         * Before a run: cooled is within this of the battery's temperature at the start, in °C. It was 1: a phone
+         * that idles at 29 to 30 °C then waited forty seconds before each of its last four runs for having reached
+         * 30.2 °C ("30 有点太低了", OPPO PLG110, 2026-10-13) — while its second round, at the very temperature of the
+         * first, was a sixth slower. A degree of the battery says nothing of how the processor stands.
+         */
+        private const val COOL_WITHIN = 3.0
         private const val COOL_AT_LEAST_MS = 10_000L
         private const val COOL_AT_MOST_MS = 180_000L
         /** No cooler for this long is as cool as it gets; and a fall smaller than this is the sensor's own noise. */
@@ -785,7 +794,7 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
 
 /** What the build knows of itself. */
 object BuildConfigLite {
-    const val VERSION = "0.7.0"
+    const val VERSION = "0.7.1"
     const val ENGINE = "0.9.0"
     const val LLAMA = "b11401"
 }

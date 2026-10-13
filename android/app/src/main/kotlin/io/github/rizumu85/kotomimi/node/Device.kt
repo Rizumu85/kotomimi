@@ -76,6 +76,13 @@ class Device(private val context: Context) {
      */
     fun thermal(): Int? = if (Build.VERSION.SDK_INT >= 29) power().currentThermalStatus else null
 
+    /**
+     * How near the phone is to being held back for heat, by the warmth of its case as the system reckons it: 1 is
+     * where the holding back becomes severe. Null where the system does not say (before Android 11, or a phone that
+     * gives it no figures). The system answers this once a second at most: it is asked once a run.
+     */
+    fun headroom(): Double? = if (Build.VERSION.SDK_INT >= 30) power().getThermalHeadroom(0).takeUnless { it.isNaN() }?.toDouble() else null
+
     private fun power() = context.getSystemService(Context.POWER_SERVICE) as PowerManager
 
     companion object {

@@ -16,8 +16,8 @@ android {
         targetSdk {
             version = release(36)
         }
-        versionCode = 11
-        versionName = "0.7.0"
+        versionCode = 12
+        versionName = "0.7.1"
         ndk {
             // The engine is built for 64-bit ARM alone (scripts/build-engine.sh).
             abiFilters += "arm64-v8a"
