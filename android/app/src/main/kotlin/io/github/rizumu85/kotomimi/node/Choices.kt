@@ -9,8 +9,20 @@ class Choices(private val context: Context) {
     /** Whether a server of llama.cpp's that this phone's processor runs came with the app. */
     private val servesLlama: Boolean by lazy { Llama(context).serverFor(Device(context).features) != null }
 
+    /** All the phone's memory, in megabytes. */
+    private val memoryMb: Long by lazy { Device(context).memory().first }
+
     /** The models the phone can be lent with: here whole, with a server for them in the app. */
     fun lendable(store: ModelStore): List<Model> = MODELS.filter { store.has(it) && (it.reader == Reader.AUDIO_CPP || servesLlama) }
+
+    /**
+     * The text models that are lent while the phone is shared: every one that is here whole, has its server in the
+     * app, and that this phone could hold at all. None is chosen: a computer asks for the one it wants by name.
+     */
+    fun lendableText(store: ModelStore): List<Model> = TEXT_MODELS.filter { store.has(it) && servesLlama && fits(it) }
+
+    /** Whether this phone could hold a text model's engine with nothing else of the app's running (`fitsIn`). */
+    fun fits(model: Model): Boolean = fitsIn(model, memoryMb)
 
     /** The model the user chose to lend, by touching its row, while it is still here. */
     fun chosen(store: ModelStore): Model? = lendable(store).firstOrNull { it.id == kept.getString(SHARED, null) }
@@ -51,6 +63,9 @@ class Choices(private val context: Context) {
     /** The self-check could not read the recording right with it: it has no speed, and is run as before any check. */
     fun forget(model: Model) = kept.edit().remove("$GRAPHICS${model.id}").remove("$THREADS${model.id}").remove("$SPEED${model.id}").apply()
 
+    /** What the self-check found of a text model: the thread count it answered fastest with. (It runs on the processor alone.) */
+    fun rememberText(model: Model, threads: Int) = kept.edit().putInt("$THREADS${model.id}", threads).apply()
+
     /** The way the self-check found fastest; before any check, four threads of the processor. */
     fun wayOf(model: Model) = Way(kept.getBoolean("$GRAPHICS${model.id}", false), kept.getInt("$THREADS${model.id}", DEFAULT_THREADS))
 
@@ -63,6 +78,20 @@ class Choices(private val context: Context) {
         private const val THREADS = "threads:"
         private const val SPEED = "speed:"
         private const val DEFAULT_THREADS = 4
+
+        /**
+         * What a phone keeps for itself whatever is asked of it — the system, and the app's own screen — in
+         * megabytes: a guess on the low side. The F22 Pro (3.8 GB) has 2.1 GB to spare with nothing running.
+         */
+        private const val PHONE_KEEPS_MB = 1024
+
+        /**
+         * Whether a phone with `memoryMb` in all could hold a model's engine with nothing else of the app's running.
+         * A model that fails this is not lent and its row says so: a download of three gigabytes would be for
+         * nothing. One that passes may still be refused when it is asked for, by the memory there is at that
+         * moment (`Share.ensure`).
+         */
+        fun fitsIn(model: Model, memoryMb: Long): Boolean = model.holdsMb + PHONE_KEEPS_MB <= memoryMb
 
         /** `preferred`, of these models, given how fast the self-check found each (null: not read right, or not yet). */
         fun pick(here: List<Model>, speedOf: (Model) -> Double?): Model? {

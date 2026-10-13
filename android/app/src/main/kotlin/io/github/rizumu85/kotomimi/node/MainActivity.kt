@@ -32,6 +32,9 @@ import kotlin.concurrent.thread
  * The phone side's one screen: fetch a model, lend the phone to a computer, and check what the phone can do — and,
  * when a newer version of the app is published, fetch and install that. The look of the mockup comes after it is
  * known to work on the phones it is for.
+ *
+ * The models stand in three groups, by what each is lent for: to recognize speech, to translate, to give grammar
+ * feedback. One recognizer is lent, the one whose row is marked; the text models that are here are all lent.
  */
 class MainActivity : Activity() {
     private val main = Handler(Looper.getMainLooper())
@@ -267,37 +270,44 @@ class MainActivity : Activity() {
         body.addView(checkKey, LinearLayout.LayoutParams(MATCH_PARENT, dp(46)).apply { topMargin = dp(10) })
         column.addView(body, spaced(top = 18))
 
-        // The models, each with the engine it is for: the one that is lent is marked; a touch on another that is
-        // here lends that one instead, by its own engine.
+        // The models, in three short groups by what they are lent for, each under a small heading. The recognizers
+        // each with the engine they are for: the one that is lent is marked; a touch on another that is here lends
+        // that one instead, by its own engine. The text models are all lent, so a touch on one does nothing.
         val models = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = shape(R.color.tile, 26)
             setPadding(dp(18), dp(8), dp(12), dp(8))
         }
-        for (model in MODELS) {
-            val row = LinearLayout(this).apply {
-                gravity = Gravity.CENTER_VERTICAL
-                minimumHeight = dp(64)
-                setOnClickListener { if (model in choices.lendable(store) && busy == null && !Sharing.on) { choices.share(model); lastVerdict = null; refresh() } }
-            }
-            val words = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-            val state = text("", 13f, R.color.ink_2)
-            words.addView(text(model.name, 16f, R.color.ink, bold = true))
-            words.addView(state, spaced(top = 2))
-            val act = text("", 14f, R.color.screen, bold = true).apply {
-                gravity = Gravity.CENTER
-                background = shape(R.color.body, 20)
-                setPadding(dp(16), 0, dp(16), 0)
-                setOnClickListener { if (busy == null) fetch(model) else if (busy === model) halt() }
-            }
-            row.addView(words, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
-            row.addView(act, LinearLayout.LayoutParams(WRAP_CONTENT, dp(40)))
-            models.addView(row)
-            rows[model] = state to act
-        }
-        // Under the rows, how the one that is lent comes to be it: nothing else on the screen says a row can be touched.
         rule = text("", 12.5f, R.color.ink_2)
-        models.addView(rule, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = dp(4); bottomMargin = dp(8); rightMargin = dp(6) })
+        for (task in Task.values()) {
+            models.addView(
+                text(task.words, 12.5f, R.color.ink_2, bold = true).apply { letterSpacing = 0.08f },
+                LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = dp(if (task == Task.HEAR) 8 else 12) },
+            )
+            for (model in ALL_MODELS.filter { it.task == task }) {
+                val row = LinearLayout(this).apply {
+                    gravity = Gravity.CENTER_VERTICAL
+                    minimumHeight = dp(64)
+                    setOnClickListener { if (model in choices.lendable(store) && busy == null && !Sharing.on) { choices.share(model); lastVerdict = null; refresh() } }
+                }
+                val words = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+                val state = text("", 13f, R.color.ink_2)
+                words.addView(text(model.name, 16f, R.color.ink, bold = true))
+                words.addView(state, spaced(top = 2))
+                val act = text("", 14f, R.color.screen, bold = true).apply {
+                    gravity = Gravity.CENTER
+                    background = shape(R.color.body, 20)
+                    setPadding(dp(16), 0, dp(16), 0)
+                    setOnClickListener { if (busy == null) fetch(model) else if (busy === model) halt() }
+                }
+                row.addView(words, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
+                row.addView(act, LinearLayout.LayoutParams(WRAP_CONTENT, dp(40)))
+                models.addView(row)
+                rows[model] = state to act
+            }
+            // Under the recognizers, how the one that is lent comes to be it: nothing else on the screen says a row can be touched.
+            if (task == Task.HEAR) models.addView(rule, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = dp(4); bottomMargin = dp(4); rightMargin = dp(6) })
+        }
         column.addView(models, spaced(top = 14))
 
         // The report.
@@ -344,27 +354,34 @@ class MainActivity : Activity() {
 
     /** The screen as things stand. A check or a download in hand writes its own lines over this as it goes. */
     private fun refresh() {
-        val here = MODELS.filter { store.has(it) }
+        val here = ALL_MODELS.filter { store.has(it) }
         val lendable = choices.lendable(store)
         val lent = choices.shared(store)
+        val lentText = choices.lendableText(store)
         val sharing = Sharing.state
         val shared = Sharing.on
         for ((model, views) in rows) {
             val (state, act) = views
             val begun = store.begun(model)
+            val isText = model.task != Task.HEAR
+            // A text model this phone could not hold says so in its row, and is not offered for download: it is
+            // three gigabytes that would lie there for nothing.
+            val tooLarge = isText && !choices.fits(model)
             if (busy !== model) {
                 // Which engine a row is for, in every state: two rows carry the same model's name. A model with a
-                // row to itself says there what it is good for, which the engine's name tells nobody.
-                val whose = model.note ?: "${model.reader.words} 用"
+                // row to itself says there what it is good for, which the engine's name tells nobody. (All the text
+                // models are llama.cpp's: there the engine tells nothing apart.)
+                val whose = model.note ?: "${model.reader.words} 用".takeIf { !isText }
                 state.text = when {
-                    store.has(model) -> if (model === lent && lendable.size > 1) "借出去的是这个 · $whose" else "已下载 · $whose · ${model.sizeInWords}"
-                    begun > 0 -> "$whose · 下载到 ${percent(begun, model.bytes)}，可以接着下"
-                    else -> "$whose · ${model.sizeInWords}"
-                }
+                    tooLarge -> listOfNotNull("已下载".takeIf { store.has(model) }, model.sizeInWords, "这台手机内存不够")
+                    store.has(model) -> if (model === lent && lendable.size > 1) listOfNotNull("借出去的是这个", whose) else listOfNotNull("已下载", whose, model.sizeInWords)
+                    begun > 0 -> listOfNotNull(whose, "下载到 ${percent(begun, model.bytes)}，可以接着下")
+                    else -> listOfNotNull(whose, model.sizeInWords)
+                }.joinToString(" · ")
                 act.text = if (begun > 0 && !store.has(model)) "继续" else "下载"
                 act.alpha = if (busy == null) 1f else 0.4f
             }
-            act.visibility = if (store.has(model)) View.GONE else View.VISIBLE
+            act.visibility = if (store.has(model) || (tooLarge && busy !== model)) View.GONE else View.VISIBLE
         }
         // The rule the lent model is picked by (`Choices.shared`), where there is more than one to pick from.
         rule.visibility = if (lendable.size > 1) View.VISIBLE else View.GONE
@@ -375,7 +392,7 @@ class MainActivity : Activity() {
         }
 
         key.text = if (shared) "停止共享" else "开始共享"
-        key.alpha = if (shared || (busy == null && lent != null && engine.present)) 1f else 0.45f
+        key.alpha = if (shared || (busy == null && (lent != null || lentText.isNotEmpty()) && engine.present)) 1f else 0.45f
         checkKey.text = if (busy == "check") "停下" else if (lastReport == null) "自检：看这台手机跟不跟得上" else "再自检一次"
         checkKey.alpha = if (busy == "check" || (busy == null && !shared && here.isNotEmpty() && engine.present)) 1f else 0.45f
 
@@ -387,9 +404,9 @@ class MainActivity : Activity() {
                 here.isEmpty() -> say("先下载模型", "下面选一个，建议连着 Wi-Fi")
                 lastVerdict != null -> say(lastVerdict!!.first, lastVerdict!!.second)
                 // Only llama.cpp's files are here, in a package built without its server: enough to check with, not to lend.
-                lent == null -> say("可以自检", "要借给电脑，还得下载 audio.cpp 用的模型")
-                // Which engine it will be, in a word: the row below says which model.
-                else -> say("没有开启", "按下面的键借给电脑 · ${lent.reader.words}")
+                lent == null && lentText.isEmpty() -> say("可以自检", "要借给电脑，还得下载 audio.cpp 用的模型")
+                // Which engine it will be, in a word: the row below says which model. (Text models alone: nothing to tell apart.)
+                else -> say("没有开启", "按下面的键借给电脑" + lent?.let { " · ${it.reader.words}" }.orEmpty())
             }
         }
         report.text = lastReport ?: "还没有自检报告。"
@@ -431,7 +448,9 @@ class MainActivity : Activity() {
 
     /** Lends the phone: the model that is chosen (or, asked from a computer, `named`), the way the self-check found fastest. */
     private fun lend(named: Model? = null, llamaBuild: String? = null) {
-        val model = named?.takeIf { it in choices.lendable(store) } ?: choices.shared(store) ?: return
+        // No recognizer to lend: the phone is lent with its text models alone, where it has any.
+        val model = named?.takeIf { it in choices.lendable(store) } ?: choices.shared(store)
+        if (model == null && choices.lendableText(store).isEmpty()) return
         if (!engine.present || busy != null || Sharing.on) return
         // The notification that says the phone is lent: asked for once, and lent whatever the answer.
         if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
@@ -442,7 +461,7 @@ class MainActivity : Activity() {
     }
 
     private fun check(startWith: Llama.Build? = null, force: Set<String> = emptySet()) {
-        if (busy != null || !engine.present || MODELS.none { store.has(it) } || Sharing.on) return
+        if (busy != null || !engine.present || ALL_MODELS.none { store.has(it) } || Sharing.on) return
         begin("check")
         // Every run is waited for with the phone cooling: it takes a good while, and says at each step what it is at.
         say("正在检查", "手机放着别动，要等一阵子")
@@ -472,9 +491,10 @@ class MainActivity : Activity() {
                         // What the screen says is about lending the phone: the model it is lent with, by its engine.
                         // (The model by its size alone: its whole name with the rest does not fit a small screen's line.
                         // The engine only where the model has a row for each: it is what tells the two apart.)
-                        lastVerdict = done.verdict.words to (done.lending?.let { of ->
+                        // Where no recognizer was checked, the first text model speaks: what it is for, and how long it takes.
+                        lastVerdict = done.texts.takeIf { done.models.isEmpty() }?.firstNotNullOfOrNull { it.words } ?: (done.verdict.words to (done.lending?.let { of ->
                             of.lent?.speed?.let { listOfNotNull(of.model.size, of.model.reader.words.takeIf { of.model.twin }, "${"%.1f".format(it)} 倍速").joinToString(" · ") }
-                        } ?: "看下面的报告")
+                        } ?: "看下面的报告"))
                     }
                 }.onFailure { error ->
                     lastVerdict = "没检查成" to (error.message ?: error.javaClass.simpleName)

@@ -47,6 +47,13 @@ class Device(private val context: Context) {
         return info.totalMem / MB to info.availMem / MB
     }
 
+    /** Whether the system itself says memory is short: it is then ending apps to get some back. */
+    fun memoryShort(): Boolean {
+        val info = ActivityManager.MemoryInfo()
+        (context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).getMemoryInfo(info)
+        return info.lowMemory
+    }
+
     /** What the system last said of the battery. */
     private fun battery(): Intent? = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
 

@@ -31,6 +31,19 @@ fun endOutright(process: Process) {
 }
 
 /**
+ * What a program of the app's holds, in megabytes, as the kernel keeps it (`/proc/<pid>/status`): the most it has
+ * ever held (`VmHWM`), and what it holds now that is its own and no file's (`RssAnon`) — the part the system cannot
+ * take back from it. Null once the program is gone.
+ */
+class Held(val peakMb: Int, val ownMb: Int)
+
+fun heldBy(process: Process): Held? = runCatching {
+    val lines = File("/proc/${pidOf(process)!!}/status").readLines()
+    fun megabytes(name: String) = lines.firstOrNull { it.startsWith(name) }?.substringAfter(':')?.trim()?.substringBefore(' ')?.toLongOrNull()?.let { (it / 1024).toInt() }
+    Held(megabytes("VmHWM:")!!, megabytes("RssAnon:") ?: 0)
+}.getOrNull()
+
+/**
  * Runs an engine's program to its end, every line it writes handed on as it comes. The program is gone before this
  * returns: a phone has memory for one at a time.
  */

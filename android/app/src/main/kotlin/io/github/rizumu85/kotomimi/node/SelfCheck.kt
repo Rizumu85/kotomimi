@@ -25,6 +25,10 @@ import kotlin.math.roundToInt
  * Whether either is faster can only be found on phones nobody building this has, so one check on such a phone has
  * to tell. They are measured and no more: the phone is not lent with them, nothing of them is remembered, and the
  * verdict is not theirs.
+ *
+ * After the recognizers come the text models that are here — translation, grammar feedback — each asked on
+ * llama.cpp's server the way a computer will ask it (`TextCheck`), on the same thread counts, the phone cooled the
+ * same way before each start. A check finds what there is: recognizers alone, text models alone, or both.
  */
 class SelfCheck(private val context: Context, private val engine: Engine, private val llama: Llama, private val store: ModelStore) {
     /** What a run that read the recording took. */
@@ -113,9 +117,9 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
 
     /**
      * `models` are the engines as the phone is lent with them, and `lending` the one it is lent with from now on,
-     * where it was among those checked; `measured` are the ways that were only measured.
+     * where it was among those checked; `measured` are the ways that were only measured; `texts` are the text models.
      */
-    class Result(val report: String, val verdict: Verdict, val models: List<OfModel>, val lending: OfModel?, val measured: List<OfModel> = emptyList())
+    class Result(val report: String, val verdict: Verdict, val models: List<OfModel>, val lending: OfModel?, val measured: List<OfModel> = emptyList(), val texts: List<TextCheck.Of> = emptyList())
 
     /** Whether the phone keeps up when it is lent: by the runs of the model it is lent with, the way it is lent. */
     enum class Verdict(val words: String) {
@@ -159,11 +163,24 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
         val tryOpenCl = withLlama && (noOpenCl == null || ("opencl" in force && llama.hasOpenCl))
         fun onlyMeasured(reader: Reader) = if (reader != Reader.LLAMA_CPP) 0 else (if (tryKleidiai) threads.size * ROUNDS else 0) + (if (trySme) 1 else 0) + if (tryOpenCl) 1 else 0
 
-        val steps = groups.values.flatten().sumOf { threads.size * ROUNDS + (if (japanese != null) 1 else 0) + (if (onGraphics(it)) 1 else 0) + onlyMeasured(it.reader) }
-
         val began = System.currentTimeMillis()
         val warmthAtStart = device.warmth()
         val (memory, free) = device.memory()
+
+        // The text models that are here whole: each is asked on a server of llama.cpp's (`TextCheck`), after the
+        // recognizers. One this phone has no server for, or could not hold at all, is not started: its block says why.
+        var server = startWith?.takeIf { it in llama.servers } ?: llama.serverFor(device.features)
+        val texts = TEXT_MODELS.filter { store.has(it) }
+        val unasked = texts.mapNotNull { model ->
+            when {
+                server == null -> model to "安装包里没有这台处理器能用的 llama.cpp"
+                !Choices.fitsIn(model, memory) -> model to "这台手机内存不够：它的引擎自己要占 ${"%.1f".format(model.holdsMb / 1024.0)} GB，手机一共 ${"%.1f".format(memory / 1024.0)} GB"
+                else -> null
+            }
+        }.toMap()
+
+        val steps = groups.values.flatten().sumOf { threads.size * ROUNDS + (if (japanese != null) 1 else 0) + (if (onGraphics(it)) 1 else 0) + onlyMeasured(it.reader) } +
+            texts.count { it !in unasked } * threads.size * ROUNDS
         val charge = device.charge()
         val charging = device.charging()
         val savingPower = device.savingPower()
@@ -311,6 +328,53 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
             }
             checked += name to runs
         }
+
+        /**
+         * One run of a text model's server, the phone cooled first as before a recognizer's. Null when the check was
+         * stopped. Where the memory that can be had now is less than the engine keeps for its own, it is not started:
+         * the system would end it, or this app, to find the room.
+         */
+        fun ask(model: Model, count: Int): TextCheck.Run? {
+            val check = TextCheck(llama, store)
+            while (true) {
+                val (waited, cooled) = cool(device, warmthAtStart, atOnce = done == 0, stopped) { onStep(done, steps, it) } ?: return null
+                waitedMs += waited
+                onStep(done, steps, "${model.name} · $count 线程")
+                val warmthBefore = device.warmth()
+                val thermal = device.thermal()
+                val using = server!!
+                val room = device.memory().second
+                val outcome = if (room < model.holdsMb) {
+                    TextCheck.Outcome(null, null, emptyList(), 0, 0, "内存不够：现在能用的是 ${"%.1f".format(room / 1024.0)} GB，它的引擎自己要占 ${"%.1f".format(model.holdsMb / 1024.0)} GB")
+                } else {
+                    check.run(model, using, count, stopped) ?: return null
+                }
+                // The server on a processor without what this build was compiled for: the next build down, as the reader's.
+                if (outcome.exit == ILLEGAL_INSTRUCTION) {
+                    val lower = llama.serverBelow(using)
+                    if (lower != null) {
+                        steppedDown += "llama.cpp 的服务 ${using.words} 这一档在这台手机上跑不了（非法指令），换成了 ${lower.words}"
+                        server = lower
+                        continue
+                    }
+                }
+                return TextCheck.Run(model, count, waited, !cooled, warmthBefore, device.warmth(), thermal, device.headroom(), outcome)
+            }
+        }
+
+        val asked = ArrayList<TextCheck.Of>()
+        for (model in texts) {
+            unasked[model]?.let { asked += TextCheck.Of(model, emptyList(), it) }
+            if (model in unasked) continue
+            val runs = ArrayList<TextCheck.Run>()
+            // Every thread count once before any is asked again, as the recognizers are read. A model that could not
+            // be asked is not started again: every try is the same wait for the same end.
+            for (round in 1..ROUNDS) for (count in threads) {
+                if (runs.none { it.outcome.failure != null }) runs += ask(model, count) ?: return null
+                done += 1
+            }
+            asked += TextCheck.Of(model, runs)
+        }
         onStep(steps, steps, "写报告")
 
         // The engines as the phone is lent with them — all that the choice of what to lend, and the verdict, go by —
@@ -324,11 +388,15 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
         // the most accurate that keeps up, or the fastest where none does (`Choices.preferred`).
         val choices = Choices(context)
         for (result in results) result.lent?.let { choices.remember(result.model, it.graphics, it.threads, it.speed!!) } ?: choices.forget(result.model)
+        // And a text model is served from now on with the thread count it answered fastest with.
+        for (of in asked) of.best?.let { choices.rememberText(of.model, it) }
         val lendable = choices.lendable(store)
         val shared = choices.shared(store)
         val lending = results.firstOrNull { it.model === shared }
         val verdict = when {
             shared == null && results.isNotEmpty() -> Verdict.COMPARED
+            // No recognizer here at all: the check was of the text models, and the first of them speaks for it.
+            results.isEmpty() -> asked.firstNotNullOfOrNull { it.verdict } ?: Verdict.NONE
             else -> lending?.lent?.speed?.let(::verdictOf) ?: Verdict.NONE
         }
         val report = buildString {
@@ -357,7 +425,8 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
             appendLine(
                 "引擎：llama.cpp ${BuildConfigLite.LLAMA}，" + when {
                     !llama.present -> "这个安装包里没有带"
-                    Reader.LLAMA_CPP !in read -> "这次没有它的模型"
+                    // (Its server may all the same have run the text models: those have a line of their own below.)
+                    Reader.LLAMA_CPP !in read -> "这次没有它的识别模型"
                     build == null -> "没有这台处理器能用的那一档"
                     else -> "处理器用的是 ${build!!.words} 这一档（共 ${llama.builds.size} 档）"
                 },
@@ -369,7 +438,7 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
                 appendLine(
                     "  llama.cpp + KleidiAI：" + when {
                         noKleidiai != null -> "没试，$noKleidiai"
-                        !withLlama -> "这台手机能试，这次没有 llama.cpp 的模型"
+                        !withLlama -> "这台手机能试，这次没有 llama.cpp 的识别模型"
                         else -> "试了，${kleidiai?.words} 这一档" + (kleidiaiSaid?.let { said ->
                             (said.kernel?.let { "，它挑的内核是 $it" } ?: "") + (said.smeThreads?.let { "，SME 最多用 $it 个线程" } ?: "")
                         } ?: "")
@@ -379,29 +448,49 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
                     "  llama.cpp OpenCL：" + when {
                         noOpenCl != null && tryOpenCl -> "这台手机不该试（$noOpenCl），这次硬试了"
                         noOpenCl != null -> "没试，$noOpenCl"
-                        !withLlama -> "这次没有 llama.cpp 的模型"
+                        !withLlama -> "这次没有 llama.cpp 的识别模型"
                         else -> "试了，显卡是 ${openCl?.chip}"
                     },
                 )
             }
+            if (asked.any { it.skipped == null }) appendLine("文字模型（翻译、语法反馈）：llama.cpp 的服务，${server?.words} 这一档，只用处理器")
             appendLine()
-            if (checked.isEmpty()) appendLine("没有模型：先下载一个。")
-            else appendLine("下面是倍速：${seconds(speechMs)} 秒的录音，处理器每种线程数读 $ROUNDS 遍，显卡读 1 遍，每遍之前先等手机凉下来。" + if (japanese != null) "另有一段日语录音，每个引擎读 1 遍，看读得对不对。" else "")
-            appendLine()
+            if (checked.isEmpty() && asked.isEmpty()) appendLine("没有模型：先下载一个。")
+            if (checked.isNotEmpty()) {
+                appendLine("下面是倍速：${seconds(speechMs)} 秒的录音，处理器每种线程数读 $ROUNDS 遍，显卡读 1 遍，每遍之前先等手机凉下来。" + if (japanese != null) "另有一段日语录音，每个引擎读 1 遍，看读得对不对。" else "")
+                appendLine()
+            }
             for ((name, runs) in checked) {
                 append(blockOf(name, runs, results.filter { it.model.name == name }, measured.filter { it.model.name == name }, threads))
                 appendLine()
             }
-            appendLine("怎么看：倍速是一秒钟能读几秒的话。边听边出字要把同一段话反复读，")
-            appendLine("所以 4 倍以上算跟得上，2 到 4 倍勉强，2 倍以下跟不上。")
-            appendLine("每次读之前都先等手机凉下来，两个引擎轮流读，免得排在后面的吃亏。")
-            if (checked.any { (_, runs) -> runs.any { it.warm } }) appendLine("带 * 的是等了 ${COOL_AT_MOST_MS / 60_000} 分钟还没凉下来、热着测的。")
+            if (asked.isNotEmpty()) {
+                appendLine("下面是翻译和语法反馈：问法和电脑版问它自己的引擎一样（日语译成中文；中文母语的人说的日语）。每种线程数起 $ROUNDS 次服务，每次先等手机凉下来，装入、先问一句短的，再问下面两句。数字是秒，越小越好。")
+                appendLine()
+            }
+            for (of in asked) {
+                append(TextCheck.blockOf(of, threads))
+                appendLine()
+            }
+            if (checked.isNotEmpty()) {
+                appendLine("怎么看：倍速是一秒钟能读几秒的话。边听边出字要把同一段话反复读，")
+                appendLine("所以 4 倍以上算跟得上，2 到 4 倍勉强，2 倍以下跟不上。")
+                appendLine("每次读之前都先等手机凉下来，两个引擎轮流读，免得排在后面的吃亏。")
+            }
+            for (line in TextCheck.howToRead(asked.filter { it.skipped == null }.map { it.model.task }.toSet())) appendLine(line)
+            if (checked.any { (_, runs) -> runs.any { it.warm } } || asked.any { of -> of.runs.any { it.warm } }) appendLine("带 * 的是等了 ${COOL_AT_MOST_MS / 60_000} 分钟还没凉下来、热着测的。")
             // Which model the phone is lent with now, by which engine, and how that will be.
             if (shared != null) {
                 val way = lending?.lent
                 appendLine()
                 appendLine("共享用的是：${shared.name} · ${shared.reader.words}" + (way?.let { "，${it.how}，${times(it.speed!!)} 倍速 → ${verdictOf(it.speed).words}" } ?: "（这次没读成）"))
                 for (line in whyLent(shared, choices.chosen(store) != null, choices.preferred(store), lendable, choices::speedOf)) appendLine("  $line")
+            }
+            // The text models that are lent beside it, whatever the check made of them: nobody chooses among those.
+            val lentText = choices.lendableText(store)
+            if (lentText.isNotEmpty()) {
+                appendLine()
+                appendLine("共享时也借出：${lentText.joinToString("、") { it.name }}。电脑要用哪个，哪个才装入；内存不够几个一起放时，轮流装。")
             }
             // What was only measured, said once more where the report is read last: nothing is lent with it.
             val onlyMeasured = listOfNotNull(
@@ -414,7 +503,7 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
             }
         }
         File(context.getExternalFilesDir(null), "report.txt").writeText(report)
-        return Result(report, verdict, results, lending, measured)
+        return Result(report, verdict, results, lending, measured, asked)
     }
 
     /**
@@ -794,7 +883,7 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
 
 /** What the build knows of itself. */
 object BuildConfigLite {
-    const val VERSION = "0.7.1"
+    const val VERSION = "0.8.0"
     const val ENGINE = "0.9.0"
     const val LLAMA = "b11401"
 }

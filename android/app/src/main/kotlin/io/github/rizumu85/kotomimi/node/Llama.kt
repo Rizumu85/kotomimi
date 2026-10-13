@@ -7,7 +7,9 @@ import java.io.File
  * llama.cpp's two programs, packed as audio.cpp's are (`scripts/build-llama.sh`): its reader of speech
  * (`llama-mtmd-cli`), which reads one recording and ends — the self-check times it against audio.cpp — and its
  * server (`llama-server`), which stays up and is asked over HTTP: what the phone is lent with when the model lent is
- * one of llama.cpp's. Both read the same Qwen3-ASR as audio.cpp, from files of their own.
+ * one of llama.cpp's. Both read the same Qwen3-ASR as audio.cpp, from files of their own. The server also runs the
+ * text models — translation, grammar feedback (`TEXT_MODELS`) — which are the desktop app's own and need nothing
+ * but it.
  *
  * audio.cpp's engine loads the processor code that fits the phone; these are programs with their processor code
  * built in, so there is one of each for each kind of processor, and the app picks.
@@ -152,13 +154,21 @@ class Llama(context: Context) {
      * It answers only who has `key`. Without one it answers every app on the phone, and any page open in the
      * phone's browser besides: its answers to another origin carry that origin's leave. (The desktop app starts
      * its own the same way: `LLAMA_RUNTIME` in electron/native-engine.js.)
+     *
+     * A text model is served as the desktop serves it (`LLAMA_RUNTIME.launch`: the model, the room, no page, no
+     * slots, the key; thinking is turned off by each request, not here, and the model's own template is used), but
+     * for what a phone needs said: the threads, and no graphics chip (`-ngl` is left out: these builds have none).
+     * With one slot, what the server read last stays in that slot and the next request reads only what is new of
+     * it — the feedback model's instructions and examples are the same every time — which `--cache-ram 0` does not
+     * touch: that is the server's other store, of slots put aside.
      */
     fun serve(model: Model, store: ModelStore, build: Build, threads: Int, port: Int, key: String): Process {
-        val arguments = listOf(
-            "-m", store.fileOf(model.file).path, "--mmproj", store.fileOf(model.projector!!).path,
-            "-c", SERVER_CONTEXT.toString(), "-t", threads.toString(), "-np", "1", "--cache-ram", "0",
-            "--host", "127.0.0.1", "--port", port.toString(), "--no-webui", "--no-slots", "--api-key", key,
-        )
+        val arguments = listOf("-m", store.fileOf(model.file).path) +
+            (model.projector?.let { listOf("--mmproj", store.fileOf(it).path) } ?: emptyList()) +
+            listOf(
+                "-c", (if (model.task == Task.HEAR) SERVER_CONTEXT else TEXT_CONTEXT).toString(), "-t", threads.toString(), "-np", "1", "--cache-ram", "0",
+                "--host", "127.0.0.1", "--port", port.toString(), "--no-webui", "--no-slots", "--api-key", key,
+            )
         return ProcessBuilder(listOf(serverOf(build).path) + arguments).directory(store.folder).redirectErrorStream(true).start()
     }
 
@@ -193,6 +203,14 @@ class Llama(context: Context) {
          * no slower for it (2026-10-12). 2048 is still under what audio.cpp's server holds there (2.0 GB).
          */
         const val SERVER_CONTEXT = 2048
+
+        /**
+         * A text model's room: the desktop's own (`model.context ?? 4096` in electron/native-engine.js), so that
+         * whatever a computer may ask its own engine fits here too. The feedback model's instructions with their
+         * seven examples are some six hundred letters of it, a sentence to translate a few dozen tokens. The memory
+         * figures of `Model.holdsMb` were taken with it.
+         */
+        const val TEXT_CONTEXT = 4096
 
         /** The most a stretch of sound takes of that room: 13 tokens a second, and what stands around them. */
         fun tokensOfSound(seconds: Double): Int = (seconds * 13).toInt() + 40

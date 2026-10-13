@@ -21,6 +21,13 @@ import kotlin.concurrent.thread
 enum class Reader(val words: String) { AUDIO_CPP("audio.cpp"), LLAMA_CPP("llama.cpp") }
 
 /**
+ * What a model is lent for, and the heading its rows stand under. Hearing is what the phone was made to lend. The
+ * other two are text models, the desktop app's own (`TRANSLATORS` and `COACHES` in electron/native-engine.js), which
+ * llama.cpp's server runs: one puts a sentence into another language, the other says what was wrong with one.
+ */
+enum class Task(val words: String) { HEAR("识别"), TRANSLATE("翻译"), COACH("语法反馈") }
+
+/**
  * A file that is fetched (`Downloads`): the name it is kept under here, the size and SHA-256 that tell it is the
  * right one, and the places it is asked for. A model's file is one, and a new version of the app itself another
  * (`Release`).
@@ -42,11 +49,14 @@ fun inMainlandChina() = TimeZone.getDefault().id in CHINA_ZONES || Locale.getDef
 /**
  * One file of a model: the repository it is published in and its place there, the name it is kept under here, and
  * the size and SHA-256 that tell it is the right one. `onModelScope` is whether ModelScope keeps that repository
- * too: one it does not keep is not asked there, where the answer could only be that it is not found.
+ * too: one it does not keep is not asked there, where the answer could only be that it is not found. And
+ * `modelScope` is the repository's name there, where its makers publish under another name than on Hugging Face
+ * (Tencent is `tencent` there and `Tencent-Hunyuan` here).
  */
 class ModelFile(
     val repository: String, val revision: String, val path: String,
     override val name: String, override val bytes: Long, override val sha256: String, val onModelScope: Boolean = true,
+    val modelScope: String = repository,
 ) : Fetched {
     /**
      * Hugging Face is where the files are published; ModelScope keeps the same repository (the same bytes: the
@@ -55,7 +65,7 @@ class ModelFile(
      */
     override fun addresses(): List<Source> {
         val published = Source("Hugging Face", "https://huggingface.co/$repository/resolve/$revision/$path")
-        val mirrored = Source("魔搭", "https://modelscope.cn/models/$repository/resolve/master/$path").takeIf { onModelScope }
+        val mirrored = Source("魔搭", "https://modelscope.cn/models/$modelScope/resolve/master/$path").takeIf { onModelScope }
         // A public mirror of Hugging Face, a volunteer's: the same path, answered from Beijing where Hugging Face is
         // not (2026-10-12). A second way in should ModelScope be down — and the only one from there for a file
         // ModelScope does not keep; what it brings is checked like the rest.
@@ -89,11 +99,19 @@ class ModelFile(
  *   `default_request_options`).
  * - `graphics`: whether the self-check also reads it on the graphics chip.
  * - `unspaced`: whether it puts spaces into writing that has none, to be taken out again (`Share.unspaced`).
+ *
+ * `task` is what it is lent for; a text model (`TEXT_MODELS`) is one whose task is not hearing.
+ *
+ * `holdsMb` is the memory its engine keeps that the system cannot take back while it runs (megabytes of the
+ * engine's own, `RssAnon`): what the phone must have to spare before the engine is started beside another
+ * (`Share.ensure`). The file an engine maps is not in it — the system takes those pages back when it is short, and
+ * gives them again. Measured on the F22 Pro where a figure is said to be; an estimate otherwise.
  */
 class Model(
     val id: String, val name: String, val reader: Reader, val family: String, val files: List<ModelFile>, val accuracy: Int, val lentAs: String = id,
     val note: String? = null, val hears: Map<String, String>? = null, val options: Map<String, String> = emptyMap(),
     val graphics: Boolean = true, val unspaced: Boolean = false,
+    val task: Task = Task.HEAR, val holdsMb: Int = 0,
 ) {
     val bytes: Long = files.sumOf { it.bytes }
 
@@ -150,6 +168,10 @@ private const val SENSEVOICE_REVISION = "5c3fcfe748a8714216bc135476d5863084fddb7
  * llama.cpp's files are kept under names of our own: as published, `Qwen3-ASR-0.6B-Q8_0.gguf` is audio.cpp's
  * `qwen3-asr-0.6b-q8_0.gguf` in other letters, and the app's folder on shared storage does not tell capitals from
  * small letters (seen on the test phone, 2026-10-12) — one would be taken for the other.
+ *
+ * `holdsMb` of the three that are on the F22 Pro is what each server held of its own after a reading there
+ * (2026-10-13: 251, 1869 and 1295 MB). The two 1.7B were never run on it: theirs are reckoned from the 0.6B's, by
+ * the size of the files, and are no better than that.
  */
 val MODELS = listOf(
     Model(
@@ -158,6 +180,7 @@ val MODELS = listOf(
         reader = Reader.AUDIO_CPP,
         family = "sense_asr",
         accuracy = 2,
+        holdsMb = 250,
         note = "快 · 只听中粤英日韩",
         hears = mapOf("zh" to "Chinese", "yue" to "Cantonese", "en" to "English", "ja" to "Japanese", "ko" to "Korean"),
         options = mapOf("audio_chunk_mode" to "none"),
@@ -180,6 +203,7 @@ val MODELS = listOf(
         reader = Reader.AUDIO_CPP,
         family = "qwen3_asr",
         accuracy = 3,
+        holdsMb = 1870,
         files = listOf(
             ModelFile(
                 AUDIO_CPP_REPOSITORY, AUDIO_CPP_REVISION,
@@ -197,6 +221,7 @@ val MODELS = listOf(
         reader = Reader.LLAMA_CPP,
         family = "qwen3_asr",
         accuracy = 3,
+        holdsMb = 1300,
         files = listOf(
             ModelFile(
                 LLAMA_CPP_SMALL, LLAMA_CPP_SMALL_REVISION,
@@ -220,6 +245,7 @@ val MODELS = listOf(
         reader = Reader.AUDIO_CPP,
         family = "qwen3_asr",
         accuracy = 1,
+        holdsMb = 4000,
         files = listOf(
             ModelFile(
                 AUDIO_CPP_REPOSITORY, AUDIO_CPP_REVISION,
@@ -237,6 +263,7 @@ val MODELS = listOf(
         reader = Reader.LLAMA_CPP,
         family = "qwen3_asr",
         accuracy = 1,
+        holdsMb = 3200,
         files = listOf(
             ModelFile(
                 LLAMA_CPP_LARGE, LLAMA_CPP_LARGE_REVISION,
@@ -255,6 +282,95 @@ val MODELS = listOf(
         ),
     ),
 )
+
+private const val HUNYUAN = "tencent/Hy-MT2-1.8B-GGUF"
+private const val HUNYUAN_REVISION = "a0c709d9fac510f2c807aa3af52872340dc37a4a"
+private const val INDEX_TRANSLATE = "IndexTeam/Index-Translate-2B-GGUF"
+private const val INDEX_TRANSLATE_REVISION = "449c9e6457b3632d328c6cbb78ae8e8e0c8059a5"
+private const val GEMMA = "unsloth/gemma-4-E2B-it-GGUF"
+private const val GEMMA_REVISION = "0314792d7f1f7e229411f620751375812bb9faf2"
+
+/**
+ * The text models: the desktop app's own translation and feedback models — the same files, by the same checksums
+ * (`TRANSLATORS` and `COACHES` in electron/native-engine.js), under the desktop's own names for them (`id`), which
+ * is what a computer asks for them by and what it picks its words to each by (`translatorRequest`,
+ * `NATIVE_COACH_EXTRA`). llama.cpp's server runs them, on the processor.
+ *
+ * Every one that is downloaded is lent while the phone is shared; none is chosen, and none is loaded before it is
+ * asked for (`Share.ensure`). The smaller translator first, as the recognizers stand. `accuracy` is their order on
+ * the desktop's own measurement (thirty sentences of Japanese talk into Chinese, 2026-10-05: serious errors in
+ * about 3 for Index-Translate and 8 for Hunyuan MT 2), not anything a phone measured.
+ *
+ * All three are on Hugging Face, on its mirror and on ModelScope: each address was asked for the first bytes of
+ * its file and answered with the file's right length (2026-10-13, from outside mainland China).
+ *
+ * `holdsMb`: the two translators were measured on the F22 Pro with the armv8.2 server, which rewrites a model's
+ * Q4_K weights into a copy of its own at loading — that copy is the memory, and the speed (NOTES.md, 2026-10-12:
+ * 1190 and 1541 MB, against 309 and 338 MB for a server that does not rewrite them and reads half as fast; lent
+ * from the app on 2026-10-13, Hunyuan MT 2 held 1212 MB). Gemma's was never measured on any phone: it is its file
+ * and what Index-Translate holds beyond its own.
+ */
+val TEXT_MODELS = listOf(
+    Model(
+        id = "hy-mt2-1.8b",
+        name = "Hunyuan MT 2 1.8B",
+        reader = Reader.LLAMA_CPP,
+        family = "hunyuan",
+        task = Task.TRANSLATE,
+        accuracy = 2,
+        holdsMb = 1210,
+        files = listOf(
+            ModelFile(
+                HUNYUAN, HUNYUAN_REVISION,
+                path = "Hy-MT2-1.8B-Q4_K_M.gguf",
+                name = "Hy-MT2-1.8B-Q4_K_M.gguf",
+                bytes = 1_133_080_448,
+                sha256 = "dc5f44fcf1fa496ee7ad725982c0c8c553a4de00259b53af84c4b89fb0c06699",
+                modelScope = "Tencent-Hunyuan/Hy-MT2-1.8B-GGUF",
+            ),
+        ),
+    ),
+    Model(
+        id = "index-translate-2b",
+        name = "Index-Translate 2B",
+        reader = Reader.LLAMA_CPP,
+        family = "index",
+        task = Task.TRANSLATE,
+        accuracy = 1,
+        note = "更准",
+        holdsMb = 1541,
+        files = listOf(
+            ModelFile(
+                INDEX_TRANSLATE, INDEX_TRANSLATE_REVISION,
+                path = "Index-Translate-2B.Q4_K_M.gguf",
+                name = "Index-Translate-2B.Q4_K_M.gguf",
+                bytes = 1_312_164_352,
+                sha256 = "044b313d29342bd3b2c77cbb64023ca0d209bd9b3247763f9d162767ef2d746a",
+            ),
+        ),
+    ),
+    Model(
+        id = "gemma-4-e2b",
+        name = "Gemma 4 E2B",
+        reader = Reader.LLAMA_CPP,
+        family = "gemma",
+        task = Task.COACH,
+        accuracy = 1,
+        holdsMb = 3250,
+        files = listOf(
+            ModelFile(
+                GEMMA, GEMMA_REVISION,
+                path = "gemma-4-E2B-it-Q4_K_M.gguf",
+                name = "gemma-4-E2B-it-Q4_K_M.gguf",
+                bytes = 3_106_738_272,
+                sha256 = "740185b21d22ceb83a11c3aa62ad5842ef32c70f6096d756bbee85a1e4ec34b8",
+            ),
+        ),
+    ),
+)
+
+/** Every row of the screen, in the order of the screen. */
+val ALL_MODELS = MODELS + TEXT_MODELS
 
 /**
  * Where the models are kept — the app's own folder on shared storage, which goes when the app is removed — and how

@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.provider.Settings
 import android.util.Base64
+import android.util.Log
 import org.json.JSONObject
 import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
@@ -21,25 +22,40 @@ import java.net.URLEncoder
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.UUID
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 /**
- * Sharing: an engine's server on this phone alone (the loopback), and before it a small door on the network that a
- * computer finds and sends its sound to. The engine is the one the lent model is for: audio.cpp's server, or
- * llama.cpp's. Which of them reads, a computer cannot tell: the door says the same and answers the same.
+ * Sharing: engines' servers on this phone alone (the loopback), and before them a small door on the network that a
+ * computer finds and sends its sound and its sentences to. The recognition engine is the one the lent model is for:
+ * audio.cpp's server, or llama.cpp's. Which of them reads, a computer cannot tell: the door says the same and
+ * answers the same. The text models — translation, grammar feedback — each have a server of llama.cpp's of their
+ * own, started when one is first asked for.
  *
  * The door answers what a Kotomimi on a computer asks of another device:
  *
- * - `GET /v1/models` — the model that is lent, under audio.cpp's name for it (`Model.lentAs`), with the phone's name
- *   in `X-Kotomimi-Name` as a sharing computer gives its own, and `X-Kotomimi-Node: engine`: what is here is the
- *   recognition engine itself, not a computer's whole pipeline.
+ * - `GET /v1/models` — in `data`, the recognition model that is lent, under audio.cpp's name for it
+ *   (`Model.lentAs`), with the phone's name in `X-Kotomimi-Name` as a sharing computer gives its own, and
+ *   `X-Kotomimi-Node: engine`: what is here is the engine itself, not a computer's whole pipeline. The text models
+ *   stand beside it in a list of their own, `text` (`modelsJson`).
  * - `POST /v1/audio/transcriptions` — one stretch of sound read whole. It is audio.cpp's own interface and OpenAI's
  *   shape, so the computer's "API model" place reads through it too. audio.cpp's server is asked the same thing
  *   in the door's own words (`readByAudioCpp`). llama.cpp's has no such door: it is asked as a chat (`readByChat`).
  *   Either way what goes back is `{"text": …}` and nothing more.
+ * - `POST /v1/chat/completions` — one answer of a text model, whole or as it is written (`chat`).
+ *
+ * One thing is done at a time, in the order asked (`turn`): a reading, a translation, a line of feedback. Two
+ * engines at work at once have more threads between them than the phone has cores, and llama.cpp's threads wait
+ * for each other by spinning: with as many threads as cores one engine alone fell from 5 tokens a second to 0.2
+ * (NOTES.md, 2026-10-12).
+ *
+ * Which engines are up at once goes by the phone's memory (`ensure`).
  *
  * As a computer's door does, it turns away a request a web page made (one carrying an `Origin` that is not the app's
  * own) and one whose `Host` is a public name: the phone is for the devices around it.
@@ -47,46 +63,121 @@ import java.util.concurrent.locks.ReentrantLock
 class Share(private val context: Context, private val engine: Engine, private val llama: Llama, private val store: ModelStore) {
     enum class Phase { OFF, LOADING, WAITING, WORKING, FAILED }
 
-    class State(val phase: Phase, val model: Model? = null, val address: String? = null, val peer: String? = null, val message: String? = null)
+    /**
+     * `model` is the recognition model that is lent (none, where the phone lends text models alone) — or, while an
+     * engine is being loaded, the model it is loaded with. `task` is what the phone is working at.
+     */
+    class State(val phase: Phase, val model: Model? = null, val address: String? = null, val peer: String? = null, val message: String? = null, val task: Task? = null)
 
     @Volatile var onState: (State) -> Unit = {}
     @Volatile private var model: Model? = null
-    @Volatile private var server: Process? = null
     @Volatile private var door: ServerSocket? = null
     @Volatile private var pool: ExecutorService? = null
     @Volatile private var stopping = false
     @Volatile private var lastUse = 0L
     @Volatile private var lastPeer: String? = null
-    private val said = ArrayDeque<String>()
+    @Volatile private var lastTask: Task? = null
+    @Volatile private var startWith: Llama.Build? = null
+    private val choices = Choices(context)
+    private val device = Device(context)
 
-    /** What llama.cpp's server asks of whoever asks it, made anew at every start; nobody but this door has it. */
-    @Volatile private var key = ""
+    /**
+     * An engine's server: the model it holds, where on this phone it listens, the key it asks of whoever asks it
+     * (llama.cpp's; made anew at every start, and nobody but this door has it), when it was last asked, and the last
+     * of what it wrote, for when it fails.
+     */
+    private class Up(val model: Model, val process: Process, val port: Int, val key: String) {
+        @Volatile var usedAt = System.currentTimeMillis()
+        val said = ArrayDeque<String>()
+    }
 
-    /** One reading at a time by llama.cpp's server, in the order they came. */
-    private val turn = ReentrantLock(true)
+    /** The engines that are up. Which are, changes only by who has the turn — and by `close`, which ends them all. */
+    private val up = ArrayList<Up>()
+
+    /** The engine that is being brought up, and its model: told on the screen, and ended with the rest. */
+    @Volatile private var rising: Up? = null
+    @Volatile private var loading: Model? = null
+
+    /** One thing at a time by the phone's engines, in the order they were asked. */
+    private val turn = Line()
+
+    /**
+     * Who waits for the phone's engines, in the order they came: the first has the turn. (A fair lock that is asked
+     * for again and again, to look between askings whether anybody still waits, does not keep that order — whoever
+     * asks at the right moment is let in ahead of one who has waited longer: four translations asked together were
+     * answered first, second, fourth, third.)
+     */
+    private class Line {
+        private val lock = ReentrantLock()
+        private val moved = lock.newCondition()
+        private val waiting = ArrayDeque<Any>()
+
+        /** Stands in line until its turn comes; false where `gone` says, between looks, that nobody waits for it any more. */
+        fun take(gone: () -> Boolean): Boolean {
+            val mine = Any()
+            lock.withLock { waiting.addLast(mine) }
+            try {
+                while (true) {
+                    lock.withLock {
+                        if (waiting.first() === mine) return true
+                        moved.await(LOOK_EVERY_MS.toLong(), TimeUnit.MILLISECONDS)
+                        if (waiting.first() === mine) return true
+                    }
+                    if (gone()) break
+                }
+            } catch (stopped: InterruptedException) {
+                // Sharing was stopped under it: out of the line like one who has gone, so that nobody waits behind it.
+            }
+            lock.withLock { waiting.remove(mine); moved.signalAll() }
+            return false
+        }
+
+        /** The turn, where nobody has it and nobody waits; false otherwise. */
+        fun tryTake(): Boolean = lock.withLock { waiting.isEmpty().also { free -> if (free) waiting.addLast(Any()) } }
+
+        fun give() = lock.withLock { waiting.removeFirstOrNull(); moved.signalAll() }
+    }
+
+    /** The text requests in the door, the one that is being answered among them. */
+    private val asking = AtomicInteger(0)
+    private val answers = AtomicInteger(0)
+
+    /** The requests the door has in hand at once: each may hold a recording, and the app's own memory is small. */
+    private val open = Semaphore(MOST_OPEN)
 
     val name: String = Settings.Global.getString(context.contentResolver, Settings.Global.DEVICE_NAME)?.takeIf { it.isNotBlank() } ?: Build.MODEL
 
     /**
-     * Brings the engine up with `model` and opens the door. Returns when it is up, or has failed. `startWith` is for
-     * trying a build of llama.cpp's server the phone would not pick itself.
+     * Brings the recognition engine up with `model`, where there is one to lend, and opens the door. Returns when
+     * it is up, or has failed. `startWith` is for trying a build of llama.cpp's server the phone would not pick
+     * itself. The text models' engines are not started here: each waits to be asked for (`ensure`).
      */
-    fun start(model: Model, way: Choices.Way, startWith: Llama.Build? = null) {
+    fun start(model: Model?, startWith: Llama.Build? = null) {
         stopping = false
         this.model = model
+        this.startWith = startWith
         tell(Phase.LOADING)
-        // The engine before this one may still be on its way out, where sharing was stopped and started again at
-        // once: a phone has memory for one at a time, and the new one would be taken for up while the old one
+        // The engines before these may still be on their way out, where sharing was stopped and started again at
+        // once: a phone has memory for few at a time, and a new one would be taken for up while the old one
         // still answers at its port.
-        last?.let { before ->
+        for (before in started.toList()) {
+            if (before.isAlive) endOutright(before)
             if (before.isAlive && !before.waitFor(GONE_WITHIN_MS, TimeUnit.MILLISECONDS)) return fail("上一次的引擎还没退出，等几秒再开")
+            started -= before
         }
-        val process = (if (model.reader == Reader.LLAMA_CPP) llamaUp(model, way, startWith) else audioUp(model, way)) ?: return
+        if (model != null) {
+            if (!turn.take { stopping }) return
+            val raised = try { raise(model) } finally { turn.give() }
+            if (raised.up == null) {
+                if (raised.why != null) fail(raised.why)
+                return
+            }
+        }
 
         val socket = try {
             ServerSocket().apply { reuseAddress = true; bind(InetSocketAddress(PORT)) }
         } catch (error: Exception) {
-            endOutright(process)
+            close()
             return fail("端口 $PORT 被占用")
         }
         door = socket
@@ -95,16 +186,36 @@ class Share(private val context: Context, private val engine: Engine, private va
         Thread({
             while (!socket.isClosed) {
                 val client = try { socket.accept() } catch (error: Exception) { break }
+                // More at once than the door takes: this one is not read at all.
+                if (!open.tryAcquire()) { runCatching { client.close() }; continue }
                 // Stopped between the two: the workers take no more, and say so by throwing.
-                try { workers.execute { runCatching { client.use(::answer) } } } catch (error: Exception) { runCatching { client.close() }; break }
+                try {
+                    workers.execute { try { runCatching { client.use(::answer) } } finally { open.release() } }
+                } catch (error: Exception) {
+                    open.release()
+                    runCatching { client.close() }
+                    break
+                }
             }
         }, "door").apply { isDaemon = true }.start()
-        // Whether it is working is told by whether anything was asked of it lately; and that the engine still lives.
+        // Whether it is working is told by whether anything was asked of it lately.
         Thread({
             runCatching {
                 while (!stopping && door === socket) {
-                    if (!process.isAlive) { if (!stopping) fail("引擎停了：${whyEnded(process)}"); close(); return@runCatching }
-                    tell(if (System.currentTimeMillis() - lastUse < WORKING_FOR_MS) Phase.WORKING else Phase.WAITING)
+                    // An engine that is gone without having been ended here was ended by the system, as a rule for
+                    // its memory. It is forgotten: the next request for its model starts it again, in whatever
+                    // room there is then. (Before the text models, sharing ended with it. Now an engine going is
+                    // part of how the phone is lent.)
+                    for (gone in running().filter { !it.process.isAlive }) {
+                        Log.w(TAG, "${gone.model.id} is gone: ${whyEnded(gone)}")
+                        synchronized(up) { up -= gone }
+                    }
+                    // The system says memory is short: with more than one engine up, the one asked longest ago
+                    // goes, before the system picks what goes itself.
+                    if (running().size > 1 && device.memoryShort() && turn.tryTake()) {
+                        try { running().minByOrNull { it.usedAt }?.let { end(it, "the system says memory is short") } } finally { turn.give() }
+                    }
+                    tell(if (loading != null) Phase.LOADING else if (System.currentTimeMillis() - lastUse < WORKING_FOR_MS) Phase.WORKING else Phase.WAITING)
                     Thread.sleep(700)
                 }
             }
@@ -123,8 +234,9 @@ class Share(private val context: Context, private val engine: Engine, private va
         door = null
         pool?.shutdownNow()
         pool = null
-        server?.let(::endOutright)
-        server = null
+        for (running in synchronized(up) { up.toList().also { up.clear() } }) endOutright(running.process)
+        rising?.let { endOutright(it.process) }
+        rising = null
     }
 
     private fun fail(message: String) {
@@ -132,8 +244,11 @@ class Share(private val context: Context, private val engine: Engine, private va
     }
 
     private fun tell(phase: Phase) {
-        onState(State(phase, model, address = address(), peer = if (phase == Phase.WORKING) lastPeer else null))
+        val shown = if (phase == Phase.LOADING) loading ?: model else model
+        onState(State(phase, shown, address = address(), peer = if (phase == Phase.WORKING) lastPeer else null, task = if (phase == Phase.WORKING) lastTask else null))
     }
+
+    private fun running(): List<Up> = synchronized(up) { up.toList() }
 
     /** The phone's address on the network it is on, with the door's port. */
     fun address(): String? = NetworkInterface.getNetworkInterfaces()?.toList().orEmpty()
@@ -145,94 +260,185 @@ class Share(private val context: Context, private val engine: Engine, private va
 
     // ── The engines ─────────────────────────────────────────────────────────────────────────────────────────────
 
-    /** audio.cpp's server with `model`, up and answering; null where it is not, the reason already told. */
-    private fun audioUp(model: Model, way: Choices.Way): Process? {
-        File(store.folder, CONFIG).writeText(configOf(model, way))
-        val process = begun(engine.serve(listOf("--config", CONFIG, "--no-ui"), store.folder, way.graphics))
-        return when (awaited(process)) {
-            Came.UP -> process
-            Came.STOPPED -> null
-            Came.LATE -> null.also { fail("装入太久，停下了") }
-            Came.ENDED -> null.also { fail("引擎没起来：${whyEnded(process)}") }
+    /**
+     * An engine for a model, up — or why there is none: `why` in the screen's words, `told` in the words a computer
+     * is given, and `short` where the reason is the phone's memory. Neither where sharing was stopped meanwhile.
+     */
+    private class Raised(val up: Up?, val why: String? = null, val told: String? = null, val short: Boolean = false)
+
+    /**
+     * The engine for `model`, up: the one that is, or one started now. Asked by whoever has the turn.
+     *
+     * Which engines are up together goes by the phone's memory. A phone of 4 GB cannot hold a recognizer and a
+     * translator at once (1.9 GB and 2.3 GB at their most on the F22 Pro, of 2.1 GB to spare); one of 15 GB holds
+     * all three kinds. So nothing is fixed beforehand. An engine is started when its model is asked for and stays
+     * up; and before one is started, the memory the system says can be had (`Device.memory`) is held against what
+     * that engine keeps for its own (`Model.holdsMb`):
+     *
+     * - Beside other engines it is started only if `RESERVE_MB` would still be over — for the files the engines
+     *   map, and the rest of the phone. Else the engine asked longest ago is ended, and the next longest, until
+     *   there is that much or no other is left.
+     * - Alone it needs what it keeps and no more to spare: that it runs so is what was measured.
+     * - A text model that would not fit even alone is refused, and before anything is ended for it: by what the
+     *   others hold of their own, read from the system (`heldBy`), ending them all would not make the room. The
+     *   computer is told the phone has not the memory (503), and may ask again.
+     * - The recognition model is started whatever the figures say, once every other engine is ended: it is the
+     *   one the phone's owner chose to lend, and it was started so before there were text models.
+     *
+     * So on a small phone the engines take turns, each loaded again when it is asked for (some ten seconds each
+     * way on the F22 Pro), and on a large one they all stay. The system ending the app, or one of its engines, for
+     * memory is what this is to keep from happening; where it ends an engine all the same, that engine is started
+     * again at its next request (`start`'s watch).
+     */
+    private fun ensure(model: Model): Raised {
+        running().firstOrNull { it.model === model }?.let { had ->
+            if (had.process.isAlive) return Raised(had.also { it.usedAt = System.currentTimeMillis() })
+            Log.w(TAG, "${model.id} is gone: ${whyEnded(had)}")
+            synchronized(up) { up -= had }
         }
+        val text = model.task != Task.HEAR
+        fun others() = running().filter { it.process.isAlive }.sortedBy { it.usedAt }
+        fun free() = device.memory().second
+        fun tooLittle(free: Long) = Raised(
+            null, short = true,
+            told = "This phone has not the memory for ${model.name} now: it keeps ${gigabytes(model.holdsMb.toLong())} GB for itself, and ${gigabytes(free)} GB can be had.",
+        )
+        if (text) {
+            val could = free() + others().sumOf { (heldBy(it.process)?.ownMb ?: it.model.holdsMb).toLong() }
+            if (could < model.holdsMb) return tooLittle(could).also { Log.i(TAG, "${model.id} refused: ${model.holdsMb} MB needed, $could MB to be had with every engine ended") }
+        }
+        while (true) {
+            val beside = others()
+            val spare = free() - model.holdsMb
+            if (spare >= (if (beside.isEmpty()) 0 else RESERVE_MB)) break
+            end(beside.firstOrNull() ?: break, "room for ${model.id}: $spare MB would be over")
+        }
+        if (stopping) return Raised(null)
+        if (text && free() < model.holdsMb) return tooLittle(free()).also { Log.i(TAG, "${model.id} refused: ${model.holdsMb} MB needed, ${free()} MB free") }
+        return raise(model)
+    }
+
+    /** Ends an engine that is up, and waits until it is gone and its memory is the system's again. */
+    private fun end(running: Up, why: String) {
+        Log.i(TAG, "ending ${running.model.id}: $why")
+        endOutright(running.process)
+        runCatching { running.process.waitFor(GONE_WITHIN_MS, TimeUnit.MILLISECONDS) }
+        synchronized(up) { up -= running }
+        runCatching { Thread.sleep(SETTLE_MS) }
     }
 
     /**
-     * llama.cpp's server with `model`, the same. On the processor alone, with the newest build this processor runs:
-     * and where that build ends at once on an instruction the processor does not have after all, with the next one
-     * down, as the self-check does with the reader.
+     * Starts the engine for `model` and waits for it to answer. audio.cpp's server for its models, on the graphics
+     * chip where the self-check found that fastest. llama.cpp's for its own — a recognizer or a text model — on
+     * the processor alone, with the newest build this processor runs: and where that build ends at once on an
+     * instruction the processor does not have after all, with the next one down, as the self-check does with the
+     * reader.
      */
-    private fun llamaUp(model: Model, way: Choices.Way, startWith: Llama.Build?): Process? {
-        var build = startWith?.takeIf { it in llama.servers } ?: llama.serverFor(Device(context).features)
-            ?: return null.also { fail("安装包里没有这台处理器能用的 llama.cpp") }
-        key = UUID.randomUUID().toString().replace("-", "")
-        while (true) {
-            val process = begun(llama.serve(model, store, build, way.threads, ENGINE_PORT, key))
-            when (awaited(process)) {
-                Came.UP -> return process
-                Came.STOPPED -> return null
-                Came.LATE -> return null.also { fail("装入太久，停下了") }
+    private fun raise(model: Model): Raised {
+        loading = model
+        tell(Phase.LOADING)
+        val free = device.memory().second
+        val began = System.currentTimeMillis()
+        try {
+            val way = choices.wayOf(model)
+            val port = portOf(model)
+            fun came(running: Up, lower: () -> Llama.Build? = { null }): Pair<Raised?, Llama.Build?> = when (awaited(running)) {
+                Came.UP -> {
+                    synchronized(up) { up += running }
+                    Log.i(TAG, "${model.id} up in ${System.currentTimeMillis() - began} ms on ${way.threads} threads; $free MB could be had before, ${device.memory().second} MB now")
+                    Raised(running) to null
+                }
+                Came.STOPPED -> Raised(null) to null
+                Came.LATE -> Raised(null, "装入太久，停下了", "The engine took too long to load ${model.name}.") to null
                 Came.ENDED -> {
-                    val lower = if (exitOf(process) == ILLEGAL_INSTRUCTION) llama.serverBelow(build) else null
-                    if (lower == null) return null.also { fail("引擎没起来：${whyEnded(process)}") }
-                    build = lower
+                    val next = if (exitOf(running.process) == ILLEGAL_INSTRUCTION) lower() else null
+                    if (next != null) null to next
+                    else Raised(null, "引擎没起来：${whyEnded(running)}", "The engine did not start with ${model.name}: ${whyEnded(running, forComputer = true)}", short = exitOf(running.process) == KILLED) to null
                 }
             }
+            if (model.reader == Reader.AUDIO_CPP) {
+                File(store.folder, CONFIG).writeText(configOf(model, way, port))
+                return came(begun(model, engine.serve(listOf("--config", CONFIG, "--no-ui"), store.folder, way.graphics), port, "")).first!!
+            }
+            var build = startWith?.takeIf { it in llama.servers } ?: llama.serverFor(device.features)
+                ?: return Raised(null, "安装包里没有这台处理器能用的 llama.cpp", "This phone's app has no llama.cpp for its processor.")
+            while (true) {
+                val key = UUID.randomUUID().toString().replace("-", "")
+                val using = build
+                val (raised, lower) = came(begun(model, llama.serve(model, store, using, way.threads, port, key), port, key)) { llama.serverBelow(using) }
+                if (raised != null) return raised
+                build = lower!!
+            }
+        } finally {
+            rising = null
+            loading = null
         }
     }
 
     /** An engine just started: remembered, so that it can be ended, and what it writes kept for when it fails. */
-    private fun begun(process: Process): Process {
-        server = process
-        last = process
-        synchronized(said) { said.clear() }
+    private fun begun(model: Model, process: Process, port: Int, key: String): Up {
+        val running = Up(model, process, port, key)
+        rising = running
+        started.removeAll { !it.isAlive }
+        started += process
+        // Sharing was stopped while this one was on its way: nobody else would end it.
+        if (stopping) endOutright(process)
         // Ending the engine closes what this reads from under it, and Android then throws in the reading thread: an
         // error nobody caught there closed the whole app the moment sharing was stopped (a friend's phone, 2026-10-12).
         Thread({
-            runCatching { process.inputStream.bufferedReader().forEachLine { line -> synchronized(said) { said += line; if (said.size > KEPT_LINES) said.removeFirst() } } }
+            runCatching { process.inputStream.bufferedReader().forEachLine { line -> synchronized(running.said) { running.said += line; if (running.said.size > KEPT_LINES) running.said.removeFirst() } } }
         }, "engine-output").apply { isDaemon = true }.start()
-        return process
+        return running
     }
 
     private enum class Came { UP, ENDED, LATE, STOPPED }
 
     /** Waits for an engine to answer: both say they are well at `/health` once the model is in memory. */
-    private fun awaited(process: Process): Came {
+    private fun awaited(running: Up): Came {
         val deadline = System.currentTimeMillis() + READY_WITHIN_MS
-        while (!ready()) {
+        while (!Chat.well(running.port)) {
             if (stopping) return Came.STOPPED
-            if (!process.isAlive) return Came.ENDED
-            if (System.currentTimeMillis() > deadline) { endOutright(process); return Came.LATE }
+            if (!running.process.isAlive) return Came.ENDED
+            if (System.currentTimeMillis() > deadline) { endOutright(running.process); return Came.LATE }
             Thread.sleep(400)
         }
         return Came.UP
     }
 
-    private fun ready(): Boolean = runCatching {
-        Socket().use { socket ->
-            socket.connect(InetSocketAddress(LOOPBACK, ENGINE_PORT), 500)
-            socket.soTimeout = 2000
-            socket.getOutputStream().write("GET /health HTTP/1.1\r\nHost: $LOOPBACK\r\nConnection: close\r\n\r\n".toByteArray())
-            String(socket.getInputStream().readBytes()).startsWith("HTTP/1.1 200")
-        }
-    }.getOrDefault(false)
-
     private fun exitOf(process: Process): Int? = runCatching { process.exitValue() }.getOrNull()
 
     /** Why an engine is no longer there: that the system took it, or what it said last. */
-    private fun whyEnded(process: Process): String =
-        if (exitOf(process) == KILLED) "被系统停掉了，多半是内存不够"
-        else synchronized(said) { said.lastOrNull { it.isNotBlank() }?.replace(Llama.LOG_PREFIX, "")?.trim()?.take(160) ?: "没有说原因" }
+    private fun whyEnded(running: Up, forComputer: Boolean = false): String =
+        if (exitOf(running.process) == KILLED) (if (forComputer) "the system ended it, as a rule for the memory it took" else "被系统停掉了，多半是内存不够")
+        else synchronized(running.said) { running.said.lastOrNull { it.isNotBlank() }?.replace(Llama.LOG_PREFIX, "")?.trim()?.take(160) } ?: if (forComputer) "it gave no reason" else "没有说原因"
 
     /**
      * What audio.cpp's server is started with (its `server.json`): the one model, and with it what every reading
      * of that model is to be told (`default_request_options` — the server puts them under whatever a request
      * says itself, and the door's requests say none of them).
      */
-    private fun configOf(model: Model, way: Choices.Way): String {
+    private fun configOf(model: Model, way: Choices.Way, port: Int): String {
         val always = model.options.entries.joinToString(",") { "${JSONObject.quote(it.key)}:${JSONObject.quote(it.value)}" }
         val entry = """{"id":"${model.id}","family":"${model.family}","path":"${model.file.name}","task":"asr","mode":"offline","session_options":{},"default_request_options":{$always}}"""
-        return """{"host":"$LOOPBACK","port":$ENGINE_PORT,"backend":"${if (way.graphics) "vulkan" else "cpu"}","device":0,"threads":${way.threads},"lazy_load":false,"models":[$entry]}"""
+        return """{"host":"$LOOPBACK","port":$port,"backend":"${if (way.graphics) "vulkan" else "cpu"}","device":0,"threads":${way.threads},"lazy_load":false,"models":[$entry]}"""
+    }
+
+    private sealed class Turn {
+        /** The turn is held, with the engine to ask: whoever is given this gives the turn back (`turn.give`). */
+        class Mine(val up: Up) : Turn()
+        class No(val status: Int, val message: String) : Turn()
+    }
+
+    /**
+     * Waits for its turn at the phone's engines, and has the one for `model` brought up. Whoever asked may give up
+     * before its turn comes (`gone`), and is then not served at all.
+     */
+    private fun turnFor(model: Model, gone: () -> Boolean): Turn {
+        if (!turn.take { gone() || stopping }) return Turn.No(503, "Nobody waits for this any more.")
+        val raised = try { ensure(model) } catch (error: Throwable) { turn.give(); throw error }
+        raised.up?.let { return Turn.Mine(it) }
+        turn.give()
+        return Turn.No(if (raised.short || raised.told == null) 503 else 502, raised.told ?: "This phone is no longer lent.")
     }
 
     // ── The door ────────────────────────────────────────────────────────────────────────────────────────────────
@@ -260,34 +466,155 @@ class Share(private val context: Context, private val engine: Engine, private va
             method == "OPTIONS" -> reply(out, 204, "", "${allow}Access-Control-Allow-Methods: GET, POST, OPTIONS\r\nAccess-Control-Allow-Headers: authorization, content-type\r\n")
             method == "GET" && (path == "/v1/models" || path == "/models") -> reply(out, 200, modelsJson(), allow)
             method == "POST" && (path == "/v1/audio/transcriptions" || path == "/audio/transcriptions") -> {
+                val lent = model ?: return reply(out, 404, errorOf("This phone lends no speech recognition now: no model for it is downloaded there."), allow)
                 val length = headers["content-length"]?.toIntOrNull()
-                if (length == null || length < 0 || length > BODY_MOST) return reply(out, 413, errorOf("The sound is too long, or its length was not said."), allow)
-                val body = ByteArray(length)
-                var had = 0
-                while (had < length) {
-                    val read = input.read(body, had, length - had)
-                    if (read < 0) return
-                    had += read
-                }
+                if (length == null || length < 0 || length > BODY_MOST) return refuseUnread(client, input, out, "The sound is too long, or its length was not said.", allow)
+                val body = bodyOf(input, length) ?: return
                 lastPeer = client.inetAddress.hostAddress
-                lastUse = System.currentTimeMillis()
-                if (model?.reader == Reader.LLAMA_CPP) {
-                    // Whoever asked may give up before its turn comes, or while its stretch is read, and the engine
-                    // is not kept busy for a computer that has dropped the stretch. Nothing more is due from it
-                    // after the request, so the one thing its side of the line can say now is that it has gone.
-                    val gone = {
-                        try { client.soTimeout = 1; input.read() < 0 } catch (waiting: SocketTimeoutException) { false } catch (broken: IOException) { true }
-                    }
-                    val (status, json) = readByChat(headers["content-type"].orEmpty(), body, gone) { lastUse = System.currentTimeMillis() }
-                    lastUse = System.currentTimeMillis()
-                    reply(out, status, json, allow)
-                } else {
-                    val (status, json) = readByAudioCpp(headers["content-type"].orEmpty(), body)
-                    lastUse = System.currentTimeMillis()
-                    reply(out, status, json, allow)
+                // Whoever asked may give up before its turn comes, or while its stretch is read, and the engine
+                // is not kept busy for a computer that has dropped the stretch. Nothing more is due from it
+                // after the request, so the one thing its side of the line can say now is that it has gone.
+                val gone = {
+                    try { client.soTimeout = 1; input.read() < 0 } catch (waiting: SocketTimeoutException) { false } catch (broken: IOException) { true }
                 }
+                val onWork = { lastTask = Task.HEAR; lastUse = System.currentTimeMillis() }
+                val type = headers["content-type"].orEmpty()
+                val (status, json) = if (lent.reader == Reader.LLAMA_CPP) readByChat(lent, type, body, gone, onWork) else readByAudioCpp(lent, type, body, gone, onWork)
+                lastUse = System.currentTimeMillis()
+                reply(out, status, json, allow)
             }
+            method == "POST" && (path == "/v1/chat/completions" || path == "/chat/completions") -> chat(client, input, out, headers, allow)
             else -> reply(out, 404, errorOf("Not here."), allow)
+        }
+    }
+
+    /**
+     * Refuses a request whose body is not read — too long, or of no said length — and then lets what the computer
+     * is still sending run out for a moment. Closed at once, with the rest of the upload unread, the line is broken
+     * off under the refusal, and the computer may see a broken line where it should read why.
+     */
+    private fun refuseUnread(client: Socket, input: InputStream, out: OutputStream, message: String, more: String) {
+        reply(out, 413, errorOf(message), more)
+        runCatching {
+            client.shutdownOutput()
+            client.soTimeout = UNREAD_FOR_MS
+            val deadline = System.currentTimeMillis() + UNREAD_FOR_MS
+            val buffer = ByteArray(1 shl 15)
+            var passed = 0L
+            while (passed < UNREAD_MOST && System.currentTimeMillis() < deadline) {
+                val read = input.read(buffer)
+                if (read < 0) break
+                passed += read
+            }
+        }
+    }
+
+    /** A request's body, of the length it said; null where the line ended before it. */
+    private fun bodyOf(input: InputStream, length: Int): ByteArray? {
+        val body = ByteArray(length)
+        var had = 0
+        while (had < length) {
+            val read = input.read(body, had, length - had)
+            if (read < 0) return null
+            had += read
+        }
+        return body
+    }
+
+    /**
+     * One answer of a text model: a translation, or a line of grammar feedback. The request and the answer are
+     * OpenAI's chat completions, as the desktop app asks its own engine (`completeText` in
+     * src/providers/openai/textModel.ts): whole, or — with `"stream": true` — as it is written, in the same
+     * `data:` lines llama.cpp's server writes.
+     *
+     * What goes to the engine is not the request but what `Chat.requestOf` makes of it. The model is one of the
+     * text models this phone lends, by the desktop's name for it; the engine for it is brought up for the first
+     * request and kept (`ensure`), and the first answer waits for that.
+     *
+     * A request waits its turn behind what the phone is doing, as a stretch of sound does: a talk has two sides,
+     * and both may want a sentence translated at once. But no more than a few wait (`MOST_ASKING`): the next is
+     * told the phone is busy (429) at once, where it would else wait out the computer's patience for nothing.
+     */
+    private fun chat(client: Socket, input: InputStream, out: OutputStream, headers: Map<String, String>, allow: String) {
+        val length = headers["content-length"]?.toIntOrNull()
+        if (length == null || length < 0 || length > CHAT_BODY_MOST) return refuseUnread(client, input, out, "The request is too long, or its length was not said.", allow)
+        val body = bodyOf(input, length) ?: return
+        val asked = when (val request = Chat.requestOf(body, choices.lendableText(store))) {
+            is Chat.Refused -> return reply(out, request.status, errorOf(request.message), allow)
+            is Chat.Asked -> request
+        }
+        if (asking.incrementAndGet() > MOST_ASKING) {
+            asking.decrementAndGet()
+            return reply(out, 429, errorOf("This phone is busy: $MOST_ASKING requests for its text models wait already."), "${allow}Retry-After: 2\r\n")
+        }
+        try {
+            // The computer may give up while it waits or while the answer is written: its line then ends, or
+            // what is written to it no longer goes.
+            var left = false
+            val gone = {
+                left || stopping || try { client.soTimeout = 1; input.read() < 0 } catch (waiting: SocketTimeoutException) { false } catch (broken: IOException) { true }
+            }
+            val running = when (val mine = turnFor(asked.model, gone)) {
+                is Turn.No -> return reply(out, mine.status, errorOf(mine.message), if (mine.status == 503) "${allow}Retry-After: 5\r\n" else allow)
+                is Turn.Mine -> mine.up
+            }
+            try {
+                lastPeer = client.inetAddress.hostAddress
+                lastTask = asked.model.task
+                lastUse = System.currentTimeMillis()
+                val id = "chatcmpl-kotomimi-${answers.incrementAndGet()}"
+                val created = System.currentTimeMillis() / 1000
+                var begun = false
+                fun event(json: String) {
+                    out.write("data: $json\n\n".toByteArray())
+                    out.flush()
+                }
+                /** The answer's head, and its first piece: who speaks. Written once it is known that there is an answer. */
+                fun begin() {
+                    begun = true
+                    out.write("HTTP/1.1 200 OK\r\nContent-Type: text/event-stream; charset=utf-8\r\nCache-Control: no-cache\r\nConnection: close\r\n${named()}$allow\r\n".toByteArray(Charsets.ISO_8859_1))
+                    event(Chat.pieceOf(id, created, asked.model, JSONObject().put("role", "assistant").put("content", "")))
+                }
+                val written = Chat.ask(running.port, running.key, asked.body, TEXT_TIMEOUT_MS, gone) { piece ->
+                    lastUse = System.currentTimeMillis()
+                    if (asked.stream && !left) {
+                        try {
+                            if (!begun) begin()
+                            event(Chat.pieceOf(id, created, asked.model, JSONObject().put("content", piece)))
+                        } catch (broken: IOException) {
+                            left = true
+                        }
+                    }
+                }
+                running.usedAt = System.currentTimeMillis()
+                lastUse = running.usedAt
+                if (left) return
+                if (written == null) {
+                    if (gone()) return
+                    val why = if (running.process.isAlive) "The engine did not answer in time." else "The engine stopped: ${whyEnded(running, forComputer = true)}."
+                    if (begun) event(errorOf(why)) else reply(out, 502, errorOf(why), allow)
+                    return
+                }
+                val broke = written.error?.take(300)
+                when {
+                    // A request the model cannot take — as a rule one longer than its room — is the computer's to mend.
+                    written.status == 400 -> reply(out, 400, errorOf("The model did not take the request: ${broke.orEmpty()}"), allow)
+                    written.status != 200 -> reply(out, 502, errorOf("The engine answered HTTP ${written.status}: ${broke.orEmpty()}"), allow)
+                    !asked.stream && broke != null -> reply(out, 502, errorOf("The engine broke off: $broke"), allow)
+                    !asked.stream -> reply(out, 200, Chat.wholeOf(id, created, asked.model, written), allow)
+                    else -> {
+                        if (!begun) begin()
+                        if (broke != null) event(errorOf(broke))
+                        event(Chat.pieceOf(id, created, asked.model, JSONObject(), written.finish ?: "stop", written.timings))
+                        out.write("data: [DONE]\n\n".toByteArray())
+                        out.flush()
+                    }
+                }
+            } finally {
+                turn.give()
+            }
+        } finally {
+            asking.decrementAndGet()
         }
     }
 
@@ -311,9 +638,9 @@ class Share(private val context: Context, private val engine: Engine, private va
      * to the engine is then closed, which is how llama.cpp's server is told to stop reading. (It stops at the next
      * step it comes to, not at once: a reading dropped after 3 s of its 16 held it for 8 more on the F22 Pro.)
      */
-    private fun asked(head: String, pieces: List<ByteArray>, gone: () -> Boolean): ByteArray? = runCatching {
+    private fun asked(port: Int, head: String, pieces: List<ByteArray>, gone: () -> Boolean): ByteArray? = runCatching {
         Socket().use { socket ->
-            socket.connect(InetSocketAddress(LOOPBACK, ENGINE_PORT), 2000)
+            socket.connect(InetSocketAddress(LOOPBACK, port), 2000)
             socket.soTimeout = LOOK_EVERY_MS
             val out = socket.getOutputStream()
             out.write(head.toByteArray(Charsets.ISO_8859_1))
@@ -343,9 +670,30 @@ class Share(private val context: Context, private val engine: Engine, private va
 
     private fun named() = "X-Kotomimi-Name: ${URLEncoder.encode(name, "UTF-8").replace("+", "%20")}\r\nX-Kotomimi-Node: engine\r\n"
 
+    /**
+     * What the phone lends. `data` is the recognition model, and nothing else is ever put there: a Kotomimi on a
+     * computer takes every name in it for a recognizer — the published ones (0.43.114) take the first for the
+     * model the phone lends (`readAnswer` in electron/lan-discover.js, `engineNode` in src/lib/native/remoteEngine.ts)
+     * and offer all of them for the recognition model's field (`slot === 'asr'` in src/providers/openai/localai.ts).
+     * A translation model listed there would be offered to hear with. It is empty where the phone has no
+     * recognition model: such a phone is then not listed by those versions at all, which can do nothing with it.
+     *
+     * The text models stand in `text`, a field those versions do not read: each by the desktop's own name for it,
+     * with what it is for (`kind`: `translate` or `coach`), its name in words, and whether its engine is up now
+     * (`loaded`) — one that is not takes a while over its first answer.
+     *
+     * And so that a computer can tell beforehand what this phone holds at once: what each model's engine keeps for
+     * its own (`holds_mb`, on the text models and on the recognizer), and in `memory_mb` all the phone has and what
+     * can be had of it now. Engines that do not fit together take turns, and every turn is a loading (`ensure`).
+     */
     private fun modelsJson(): String {
-        val model = model ?: return """{"object":"list","data":[]}"""
-        return """{"object":"list","data":[{"id":"${model.lentAs}","object":"model","owned_by":"kotomimi-phone"}]}"""
+        fun entry(model: Model, more: String = "") = """{"id":"${model.lentAs}","object":"model","owned_by":"kotomimi-phone","holds_mb":${model.holdsMb}$more}"""
+        val up = running().filter { it.process.isAlive }.map { it.model }
+        val text = choices.lendableText(store).joinToString(",") {
+            entry(it, ""","kind":"${if (it.task == Task.TRANSLATE) "translate" else "coach"}","name":${JSONObject.quote(it.name)},"loaded":${it in up}""")
+        }
+        val (all, free) = device.memory()
+        return """{"object":"list","data":[${model?.let { entry(it) }.orEmpty()}],"text":[$text],"memory_mb":{"total":$all,"available":$free}}"""
     }
 
     private fun errorOf(message: String) = """{"error":{"message":${JSONObject.quote(message)}}}"""
@@ -372,7 +720,7 @@ class Share(private val context: Context, private val engine: Engine, private va
      * Chinese or English; two seconds, one time in six; a quarter of a minute, never (8 minutes of conversation,
      * 2026-10-12). `onWork` is called when its turn has come.
      */
-    private fun readByChat(type: String, body: ByteArray, gone: () -> Boolean, onWork: () -> Unit): Pair<Int, String> {
+    private fun readByChat(model: Model, type: String, body: ByteArray, gone: () -> Boolean, onWork: () -> Unit): Pair<Int, String> {
         val form = formOf(type, body) ?: return 400 to errorOf("The request is not a multipart form.")
         val sound = form.file ?: return 400 to errorOf("The form has no file in it.")
         val ms = wavMsOf(sound) ?: return 400 to errorOf("The file is not a WAV recording.")
@@ -388,18 +736,20 @@ class Share(private val context: Context, private val engine: Engine, private va
         val beginning = begun?.let { """,{"role":"assistant","content":${JSONObject.quote(it)}}""" }.orEmpty()
         val after = """","format":"wav"}}]}$beginning]}"""
         val pieces = listOf(before.toByteArray(), Base64.encode(sound, Base64.NO_WRAP), after.toByteArray())
-        val head = "POST /v1/chat/completions HTTP/1.1\r\nHost: $LOOPBACK\r\nAuthorization: Bearer $key\r\nContent-Type: application/json\r\nContent-Length: ${pieces.sumOf { it.size }}\r\nConnection: close\r\n\r\n"
 
-        // Its turn: the server reads one at a time, and one who has gone meanwhile is not read at all.
-        while (!turn.tryLock(LOOK_EVERY_MS.toLong(), TimeUnit.MILLISECONDS)) {
-            if (gone() || stopping) return 503 to errorOf("Nobody waits for this reading any more.")
+        // Its turn: the phone does one thing at a time, and one who has gone meanwhile is not read at all.
+        val running = when (val mine = turnFor(model, gone)) {
+            is Turn.No -> return mine.status to errorOf(mine.message)
+            is Turn.Mine -> mine.up
         }
         val answered: ByteArray?
         try {
             onWork()
-            answered = asked(head, pieces, gone)
+            val head = "POST /v1/chat/completions HTTP/1.1\r\nHost: $LOOPBACK\r\nAuthorization: Bearer ${running.key}\r\nContent-Type: application/json\r\nContent-Length: ${pieces.sumOf { it.size }}\r\nConnection: close\r\n\r\n"
+            answered = asked(running.port, head, pieces, gone)
+            running.usedAt = System.currentTimeMillis()
         } finally {
-            turn.unlock()
+            turn.give()
         }
         if (answered == null) return 502 to errorOf("The engine did not answer.")
 
@@ -433,8 +783,7 @@ class Share(private val context: Context, private val engine: Engine, private va
      * words. audio.cpp would not refuse it: SenseVoice told `fr` reads as though told nothing, and writes French
      * speech down as one of its five languages — an answer that looks like a reading and is none.
      */
-    private fun readByAudioCpp(type: String, body: ByteArray): Pair<Int, String> {
-        val model = model ?: return 502 to errorOf("The engine did not answer.")
+    private fun readByAudioCpp(model: Model, type: String, body: ByteArray, gone: () -> Boolean, onWork: () -> Unit): Pair<Int, String> {
         val form = formOf(type, body) ?: return 400 to errorOf("The request is not a multipart form.")
         val sound = form.file ?: return 400 to errorOf("The form has no file in it.")
         val ms = wavMsOf(sound) ?: return 400 to errorOf("The file is not a WAV recording.")
@@ -456,7 +805,21 @@ class Share(private val context: Context, private val engine: Engine, private va
             "--$boundary\r\nContent-Disposition: form-data; name=\"file\"; filename=\"stretch.wav\"\r\nContent-Type: audio/wav\r\n\r\n"
         val pieces = listOf(before.toByteArray(), sound, "\r\n--$boundary--\r\n".toByteArray())
         val head = "POST /v1/audio/transcriptions HTTP/1.1\r\nHost: $LOOPBACK\r\nContent-Type: multipart/form-data; boundary=$boundary\r\nContent-Length: ${pieces.sumOf { it.size }}\r\nConnection: close\r\n\r\n"
-        val answered = asked(head, pieces) { false } ?: return 502 to errorOf("The engine did not answer.")
+        // Its turn, as llama.cpp's readings take theirs. (audio.cpp's server reads to the end whoever has gone
+        // meanwhile: closing its line stops nothing there, so it is not looked whether the computer still waits.)
+        val running = when (val mine = turnFor(model, gone)) {
+            is Turn.No -> return mine.status to errorOf(mine.message)
+            is Turn.Mine -> mine.up
+        }
+        val heard: ByteArray?
+        try {
+            onWork()
+            heard = asked(running.port, head, pieces) { false }
+            running.usedAt = System.currentTimeMillis()
+        } finally {
+            turn.give()
+        }
+        val answered = heard ?: return 502 to errorOf("The engine did not answer.")
 
         val whole = String(answered, Charsets.UTF_8)
         val status = whole.substringBefore("\r\n").split(' ').getOrNull(1)?.toIntOrNull()
@@ -522,6 +885,44 @@ class Share(private val context: Context, private val engine: Engine, private va
         const val PORT = 8792
         private const val ENGINE_PORT = 8793
         private const val LOOPBACK = "127.0.0.1"
+        private const val TAG = "share"
+
+        /** Where a model's engine listens, on this phone alone: the recognizer at one port, each text model at one of its own after it. */
+        fun portOf(model: Model): Int = if (model.task == Task.HEAR) ENGINE_PORT else ENGINE_PORT + 1 + TEXT_MODELS.indexOf(model)
+
+        /**
+         * What is to be over, in megabytes, once an engine is started beside others (`ensure`): for the pages of
+         * their files the engines read from, which the system gives and takes as it has room, and for whatever
+         * else the phone is asked meanwhile. A setting more than a measurement. On the F22 Pro (2026-10-13) it lets
+         * SenseVoice-Small stay beside Hunyuan MT 2 — the two were up together there with 0.9 GB still to be had,
+         * and each answered as fast as alone — and has every other pair take turns: Qwen3-ASR 0.6B started beside
+         * Hunyuan MT 2 (1.3 GB and 1.2 GB of their own) used up the phone's swap, the translator was put out of
+         * memory whole, and a reading that takes 9 s took 42.
+         */
+        private const val RESERVE_MB = 400
+
+        /** After an engine is ended, before the memory is asked after again. */
+        private const val SETTLE_MS = 300L
+
+        /** The requests in hand at once, of every kind; and of those, the ones for a text model, waiting or being answered. */
+        private const val MOST_OPEN = 12
+        private const val MOST_ASKING = 4
+
+        /** A text request: the feedback model's, the longest the desktop sends, is under six kilobytes. */
+        private const val CHAT_BODY_MOST = 256 * 1024
+
+        /** How long, and how much, of an upload that was refused is let run out before the line is closed. */
+        private const val UNREAD_FOR_MS = 1_500
+        private const val UNREAD_MOST = 8L * 1024 * 1024
+
+        /**
+         * How long a text model may take over one answer. The desktop gives up after a minute
+         * (`TEXT_TIMEOUT_MS` in src/providers/openai/textModel.ts), and the door then stops the engine; this is for
+         * whoever else asks, and is patient.
+         */
+        private const val TEXT_TIMEOUT_MS = 180_000L
+
+        private fun gigabytes(megabytes: Long) = "%.1f".format(megabytes / 1024.0)
         private const val CONFIG = "server.json"
         private const val END = "\r\n\r\n"
         private const val HEAD_MOST = 16 * 1024
@@ -541,15 +942,15 @@ class Share(private val context: Context, private val engine: Engine, private va
         private val PART_NAME = Regex("""(?i)content-disposition:[^\r\n]*?[;\s]name="([^"]*)"""")
         private val REASONS = mapOf(
             200 to "OK", 204 to "No Content", 400 to "Bad Request", 403 to "Forbidden", 404 to "Not Found",
-            413 to "Payload Too Large", 502 to "Bad Gateway", 503 to "Service Unavailable",
+            413 to "Payload Too Large", 429 to "Too Many Requests", 502 to "Bad Gateway", 503 to "Service Unavailable",
         )
 
         /** How a program ends when the system kills it for an instruction the processor does not have, and when it kills it outright. */
         private const val ILLEGAL_INSTRUCTION = 132
         private const val KILLED = 137
 
-        /** The engine started last, by whichever sharing: the one that must be gone before another is started. */
-        @Volatile private var last: Process? = null
+        /** The engines started, by whichever sharing: all of them must be gone before another sharing starts its own. */
+        private val started = CopyOnWriteArrayList<Process>()
 
         private const val TEXT_OF_NOTHING = """{"text":""}"""
 

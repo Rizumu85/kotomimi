@@ -53,8 +53,9 @@ class ShareService : Service() {
         }
         val store = ModelStore(this)
         val choices = Choices(this)
+        // The recognition model that is lent; none on a phone that has text models alone, which are lent without it.
         val model = choices.lendable(store).firstOrNull { it.id == intent?.getStringExtra(MODEL) } ?: choices.shared(store)
-        if (model == null || share != null) {
+        if ((model == null && choices.lendableText(store).isEmpty()) || share != null) {
             if (share == null) stopSelf()
             return START_NOT_STICKY
         }
@@ -68,7 +69,7 @@ class ShareService : Service() {
             if (state.phase != Share.Phase.OFF) getSystemService(NotificationManager::class.java).notify(NOTICE, noticeOf(state))
         }
         worker.execute {
-            runCatching { sharing.start(model, choices.wayOf(model), startWith) }
+            runCatching { sharing.start(model, startWith) }
                 .onFailure { error -> Sharing.tell(Share.State(Share.Phase.FAILED, model, message = error.message ?: error.javaClass.simpleName)) }
             // Not up: nothing to keep alive for.
             if (Sharing.state.phase == Share.Phase.FAILED) Handler(Looper.getMainLooper()).post { end(keep = Sharing.state) }
@@ -128,9 +129,12 @@ class ShareService : Service() {
         private const val MODEL = "model"
         private const val LLAMA = "llama"
 
-        /** Lends the phone with `model`; `llamaBuild` is for trying a build of llama.cpp's server the phone would not pick itself. */
-        fun start(context: Context, model: Model, llamaBuild: String? = null) {
-            context.startForegroundService(Intent(context, ShareService::class.java).putExtra(MODEL, model.id).putExtra(LLAMA, llamaBuild))
+        /**
+         * Lends the phone with `model` to recognize by (none: with its text models alone); `llamaBuild` is for trying
+         * a build of llama.cpp's server the phone would not pick itself.
+         */
+        fun start(context: Context, model: Model?, llamaBuild: String? = null) {
+            context.startForegroundService(Intent(context, ShareService::class.java).putExtra(MODEL, model?.id).putExtra(LLAMA, llamaBuild))
         }
 
         fun stop(context: Context) {
@@ -144,7 +148,12 @@ class ShareService : Service() {
                 Share.Phase.OFF -> "没有开启" to "按下面的键，把这台手机借给电脑"
                 Share.Phase.LOADING -> "正在装入" to (state.model?.name.orEmpty() + by)
                 Share.Phase.WAITING -> "等电脑连上" to ((state.address?.let { "地址 $it" } ?: "这台手机没连 Wi-Fi") + by)
-                Share.Phase.WORKING -> "正在识别" to "来自 ${state.peer ?: "一台电脑"}$by"
+                // (The engine named is the recognizer's: a text model's answer is not its work, and is told without it.)
+                Share.Phase.WORKING -> when (state.task) {
+                    Task.TRANSLATE -> "正在翻译" to "来自 ${state.peer ?: "一台电脑"}"
+                    Task.COACH -> "正在写反馈" to "来自 ${state.peer ?: "一台电脑"}"
+                    else -> "正在识别" to "来自 ${state.peer ?: "一台电脑"}$by"
+                }
                 Share.Phase.FAILED -> "没开起来" to (state.message ?: "")
             }
         }
