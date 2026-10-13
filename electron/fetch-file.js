@@ -2,7 +2,8 @@
  * Fork: one file from several addresses of it, to a `.part` on disk — what the native engines' runtimes and models
  * and the app's own update are fetched with.
  *
- * The addresses are asked in turn, and round again: one that brought something is asked for the rest, one that
+ * For a large file the addresses are first tried against each other, and the quickest goes first (`quickestFirst`).
+ * Then they are asked in turn, and round again: one that brought something is asked for the rest, one that
  * brought nothing is left for the next. A download that breaks off — as a long one does, on a poor line — goes on by
  * itself, and fails only when every address has been asked in vain, patiently the second time. Nothing here decides
  * that the file is the right one: whoever asks checks its hash, wherever it came from.
@@ -44,17 +45,81 @@ const hfMirrorOf = (url) => (String(url).startsWith(HF) ? [`https://hf-mirror.co
 
 const hostOf = (address) => { try { return new URL(address).host; } catch { return String(address); } };
 
+/** A file with this much of it still to come is worth finding the quickest address for; less has arrived before that is known. */
+const TRIAL_WORTH = 16 * 1024 * 1024;
+/** Each address is asked for this much of the file, and timed. */
+const TRIAL_BYTES = 1024 * 1024;
+/** The trial is over after this long, whoever has answered; and this long after the first address has brought its share. */
+const TRIAL_MS = 6_000;
+const TRIAL_REST_MS = 2_000;
+
+/**
+ * The addresses of a file, the quickest first: all are asked at once for the same stretch of it, and ordered by how
+ * much of it each brought in the time. What they bring is thrown away — it is a megabyte.
+ *
+ * The order the addresses come in is a guess (`inMainlandChina`: by the clock). A guess sent a person in mainland
+ * China who had a proxy on to the relays, which were slow that day, past a GitHub their proxy reached well; and a
+ * relay that crawls still brings something, so it was never left (2026-10-13). Which address is quick is found out
+ * by asking; the guess only orders those that are as quick as each other, and those that did not answer.
+ */
+async function quickestFirst({ sources, from = 0, bytes, fetch: doFetch, signal, trialBytes = TRIAL_BYTES, trialMs = TRIAL_MS, restMs = TRIAL_REST_MS, log = () => {} }) {
+  const all = new AbortController();
+  const give = () => all.abort();
+  signal?.addEventListener('abort', give, { once: true });
+  const began = Date.now();
+  let over = setTimeout(give, trialMs);
+  let someoneDone = false;
+  const end = Math.min(bytes, from + trialBytes) - 1;
+  // (An answer whose body does not end with its request is not waited on past the time either.)
+  const stopped = new Promise((_, reject) => all.signal.addEventListener('abort', () => reject(new Error('The trial is over.')), { once: true }));
+  stopped.catch(() => {});
+  const rates = await Promise.all(sources.map(async (source) => {
+    let got = 0;
+    try {
+      const response = await doFetch(source, { signal: all.signal, redirect: 'follow', headers: { Range: `bytes=${from}-${end}` } });
+      const page = /^text\/html/i.test(response.headers?.get?.('content-type') ?? '');
+      if ((response.status !== 200 && response.status !== 206) || page || !response.body) {
+        Promise.resolve(response.body?.cancel()).catch(() => {});
+        return 0;
+      }
+      const reader = response.body.getReader();
+      try {
+        while (got <= end - from) {
+          const { done, value } = await Promise.race([reader.read(), stopped]);
+          if (done) break;
+          got += value.byteLength;
+        }
+      } finally {
+        Promise.resolve(reader.cancel()).catch(() => {});
+      }
+      // The others are not waited on for long once one has shown what a quick address is like.
+      if (!someoneDone) { someoneDone = true; clearTimeout(over); over = setTimeout(give, restMs); }
+    } catch {
+      // Stopped when the time was up: what it brought until then is what it is judged by.
+    }
+    return got / Math.max(1, Date.now() - began);
+  }));
+  clearTimeout(over);
+  signal?.removeEventListener('abort', give);
+  all.abort();
+  log(`quickest first: ${sources.map((source, index) => `${hostOf(source)} ${Math.round(rates[index])} KB/s`).join(' · ')}`);
+  // (A sort that keeps the order of equals: the guess stands among them.)
+  return sources.map((source, index) => ({ source, rate: rates[index] })).sort((a, b) => b.rate - a.rate).map((entry) => entry.source);
+}
+
 /**
  * The file, whole in `part`: resolves when it is `bytes` long there, going on from what `part` already holds.
  * Rejects with what stopped it (`signal` aborted: the fetch's own abort error), or with who was asked and what each
  * said. `onReceived(count)` follows the part's length; `onTurn()` is called when an address is left for another.
  */
-async function pullWhole({ sources, part, bytes, fetch: doFetch, signal, files = fs, answerWithinMs = ANSWER_WITHIN_MS, onReceived = () => {}, onTurn = () => {}, log = () => {}, name = part }) {
+async function pullWhole({ sources: given, part, bytes, fetch: doFetch, signal, files = fs, answerWithinMs = ANSWER_WITHIN_MS, onReceived = () => {}, onTurn = () => {}, log = () => {}, name = part, trial = quickestFirst, trialWorth = TRIAL_WORTH }) {
   const sizeOf = (file) => { try { return files.statSync(file).size; } catch { return 0; } };
   let received = sizeOf(part);
   // A part larger than the whole is no part of it.
   if (received > bytes) { files.rmSync(part, { force: true }); received = 0; }
   onReceived(received);
+  // A large file is begun at whichever address is the quickest just now, not at the one guessed to be.
+  const sources = trial && given.length > 1 && bytes - received >= trialWorth ? await trial({ sources: given, from: received, bytes, fetch: doFetch, signal, log }) : given;
   const said = new Map();
   let at = 0;
   let barren = 0;
@@ -151,4 +216,4 @@ async function pullWhole({ sources, part, bytes, fetch: doFetch, signal, files =
   }
 }
 
-module.exports = { pullWhole, relaysOf, hfMirrorOf, hostOf, inMainlandChina, ANSWER_WITHIN_MS, GITHUB_RELAYS };
+module.exports = { pullWhole, quickestFirst, relaysOf, hfMirrorOf, hostOf, inMainlandChina, ANSWER_WITHIN_MS, GITHUB_RELAYS, TRIAL_WORTH };
