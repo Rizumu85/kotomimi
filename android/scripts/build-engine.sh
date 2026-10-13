@@ -20,7 +20,9 @@ AUDIOCPP_TAG=v0.9.0
 # The Vulkan headers audio.cpp's own releases are built against.
 VULKAN_TAG=vulkan-sdk-1.4.357.0
 # The model families the desktop app offers: Qwen3-ASR (both sizes), Nemotron, Confucius4 R2T2.
-MODELS="qwen3_asr,nemotron_asr,confucius4_r2t2"
+# And SenseVoice-Small (sense_asr), which the desktop does not offer: on a phone it read 3.4x real time where
+# Qwen3-ASR 0.6B read 1.1x, in 0.3 GB, as right on real conversation as 0.6B (2026-10-13).
+MODELS="qwen3_asr,nemotron_asr,confucius4_r2t2,sense_asr"
 ABI=arm64-v8a
 API=28
 
@@ -102,9 +104,10 @@ echo "NDK:       $ndk"
 
 # Into the app: Android unpacks and lets an app run only files named lib*.so from its library folder, so the two
 # programs take that shape, beside the libraries they load. What was there from a build before goes first — but not
-# llama.cpp's reader (build-llama.sh), which lies in the same folder and is not this script's to remove.
+# llama.cpp's programs (build-llama.sh: its readers and its servers), which lie in the same folder and are not this
+# script's to remove. (It kept only the readers once, and a rebuild of this engine took the servers away, 2026-10-13.)
 mkdir -p "$libs" "$assets"
-find "$libs" -maxdepth 1 -type f ! -name 'libllama_mtmd_*.so' -delete
+find "$libs" -maxdepth 1 -type f ! -name 'libllama_*.so' -delete
 strip="$host/bin/llvm-strip$exe"
 "$strip" -o "$libs/libaudiocpp_cli.so" "$build/bin/audiocpp_cli"
 "$strip" -o "$libs/libaudiocpp_server.so" "$build/bin/audiocpp_server"
