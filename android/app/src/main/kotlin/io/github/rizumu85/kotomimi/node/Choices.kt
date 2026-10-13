@@ -15,17 +15,29 @@ class Choices(private val context: Context) {
     /** The model the user chose to lend, by touching its row, while it is still here. */
     fun chosen(store: ModelStore): Model? = lendable(store).firstOrNull { it.id == kept.getString(SHARED, null) }
 
+    /** The model that is shared: the one chosen, else the one the phone picks by itself. */
+    fun shared(store: ModelStore): Model? = chosen(store) ?: preferred(store)
+
     /**
-     * The model that is shared: the one chosen; else the one the self-check found fastest, of those it read right;
-     * else, before any check, the smaller model first, and of one model llama.cpp's before audio.cpp's — on the two
-     * phones both were measured on, it read about twice as fast.
+     * The model the phone lends where nobody chose one. Of those the self-check read right:
+     *
+     * - the most accurate that keeps up (`SelfCheck.FAST_FROM`), and of one model the faster engine;
+     * - where none keeps up, the fastest: a text that comes late is worth less than one a little less right.
+     *
+     * The fastest alone, which it was before, would lend SenseVoice-Small on every phone from now on — also on one
+     * that keeps up with Qwen3-ASR 1.7B, which reads better.
+     *
+     * A model fetched since the last check has no speed and is not among them: what it does on this phone is not
+     * known until the next check, or until its row is touched.
+     *
+     * Before any check, the smaller model first (`MODELS`), and of one model llama.cpp's before audio.cpp's, which
+     * read about twice as fast on the two phones both were measured on: the likeliest to keep up, and no more than
+     * that is known.
      */
-    fun shared(store: ModelStore): Model? {
-        val here = lendable(store)
-        return chosen(store)
-            ?: here.filter { speedOf(it) != null }.maxByOrNull { speedOf(it)!! }
-            ?: here.minWithOrNull(compareBy({ model -> MODELS.indexOfFirst { it.name == model.name } }, { it.reader != Reader.LLAMA_CPP }))
-    }
+    fun preferred(store: ModelStore): Model? = pick(lendable(store), ::speedOf)
+
+    /** Whether the self-check has read any of the models that can be lent: what `preferred` then goes by. */
+    fun checked(store: ModelStore): Boolean = lendable(store).any { speedOf(it) != null }
 
     fun share(model: Model) = kept.edit().putString(SHARED, model.id).apply()
 
@@ -45,11 +57,19 @@ class Choices(private val context: Context) {
     /** How fast the self-check found it; null before any check that read it right. */
     fun speedOf(model: Model): Double? = kept.getFloat("$SPEED${model.id}", 0f).takeIf { it > 0f }?.toDouble()
 
-    private companion object {
-        const val SHARED = "shared"
-        const val GRAPHICS = "graphics:"
-        const val THREADS = "threads:"
-        const val SPEED = "speed:"
-        const val DEFAULT_THREADS = 4
+    companion object {
+        private const val SHARED = "shared"
+        private const val GRAPHICS = "graphics:"
+        private const val THREADS = "threads:"
+        private const val SPEED = "speed:"
+        private const val DEFAULT_THREADS = 4
+
+        /** `preferred`, of these models, given how fast the self-check found each (null: not read right, or not yet). */
+        fun pick(here: List<Model>, speedOf: (Model) -> Double?): Model? {
+            val checked = here.filter { speedOf(it) != null }
+            return checked.filter { speedOf(it)!! >= SelfCheck.FAST_FROM }.minWithOrNull(compareBy<Model> { it.accuracy }.thenByDescending { speedOf(it)!! })
+                ?: checked.maxByOrNull { speedOf(it)!! }
+                ?: here.minWithOrNull(compareBy({ model -> MODELS.indexOfFirst { it.name == model.name } }, { it.reader != Reader.LLAMA_CPP }))
+        }
     }
 }

@@ -37,8 +37,9 @@ import java.util.concurrent.locks.ReentrantLock
  *   in `X-Kotomimi-Name` as a sharing computer gives its own, and `X-Kotomimi-Node: engine`: what is here is the
  *   recognition engine itself, not a computer's whole pipeline.
  * - `POST /v1/audio/transcriptions` — one stretch of sound read whole. It is audio.cpp's own interface and OpenAI's
- *   shape, so the computer's "API model" place reads through it too. audio.cpp's server is handed it as it came.
- *   llama.cpp's has no such door: it is asked as a chat (`readByChat`), and its answer is put into this shape.
+ *   shape, so the computer's "API model" place reads through it too. audio.cpp's server is asked the same thing
+ *   in the door's own words (`readByAudioCpp`). llama.cpp's has no such door: it is asked as a chat (`readByChat`).
+ *   Either way what goes back is `{"text": …}` and nothing more.
  *
  * As a computer's door does, it turns away a request a web page made (one carrying an `Origin` that is not the app's
  * own) and one whose `Host` is a public name: the phone is for the devices around it.
@@ -223,8 +224,14 @@ class Share(private val context: Context, private val engine: Engine, private va
         if (exitOf(process) == KILLED) "被系统停掉了，多半是内存不够"
         else synchronized(said) { said.lastOrNull { it.isNotBlank() }?.replace(Llama.LOG_PREFIX, "")?.trim()?.take(160) ?: "没有说原因" }
 
+    /**
+     * What audio.cpp's server is started with (its `server.json`): the one model, and with it what every reading
+     * of that model is to be told (`default_request_options` — the server puts them under whatever a request
+     * says itself, and the door's requests say none of them).
+     */
     private fun configOf(model: Model, way: Choices.Way): String {
-        val entry = """{"id":"${model.id}","family":"${model.family}","path":"${model.file.name}","task":"asr","mode":"offline","session_options":{}}"""
+        val always = model.options.entries.joinToString(",") { "${JSONObject.quote(it.key)}:${JSONObject.quote(it.value)}" }
+        val entry = """{"id":"${model.id}","family":"${model.family}","path":"${model.file.name}","task":"asr","mode":"offline","session_options":{},"default_request_options":{$always}}"""
         return """{"host":"$LOOPBACK","port":$ENGINE_PORT,"backend":"${if (way.graphics) "vulkan" else "cpu"}","device":0,"threads":${way.threads},"lazy_load":false,"models":[$entry]}"""
     }
 
@@ -275,19 +282,9 @@ class Share(private val context: Context, private val engine: Engine, private va
                     lastUse = System.currentTimeMillis()
                     reply(out, status, json, allow)
                 } else {
-                    // What goes to audio.cpp's server is held to what llama.cpp is given: a form with a recording
-                    // in it, no longer than this phone reads at once. Passed on as it came, a body that was no form
-                    // could name a file on the phone for the engine to open, and one long recording took memory
-                    // until the system killed this app and others to make room (both found 2026-10-12; anything on
-                    // the network could have sent either).
-                    val refused = refusalOf(headers["content-type"].orEmpty(), body)
-                    if (refused != null) {
-                        reply(out, refused.first, refused.second, allow)
-                    } else {
-                        val answered = forward(headers["content-type"].orEmpty(), body)
-                        lastUse = System.currentTimeMillis()
-                        if (answered == null) reply(out, 502, errorOf("The engine did not answer."), allow) else relay(out, answered, allow)
-                    }
+                    val (status, json) = readByAudioCpp(headers["content-type"].orEmpty(), body)
+                    lastUse = System.currentTimeMillis()
+                    reply(out, status, json, allow)
                 }
             }
             else -> reply(out, 404, errorOf("Not here."), allow)
@@ -307,10 +304,6 @@ class Share(private val context: Context, private val engine: Engine, private va
         }
         return null
     }
-
-    /** Hands the upload to audio.cpp's server as it came; what it answered, head and all, or null. */
-    private fun forward(type: String, body: ByteArray): ByteArray? =
-        asked("POST /v1/audio/transcriptions HTTP/1.1\r\nHost: $LOOPBACK\r\nContent-Type: $type\r\nContent-Length: ${body.size}\r\nConnection: close\r\n\r\n", listOf(body)) { false }
 
     /**
      * What the engine answers to a request — its `head`, then its body in `pieces` — whole, head and all. Null
@@ -339,17 +332,6 @@ class Share(private val context: Context, private val engine: Engine, private va
             answered.toByteArray()
         }
     }.getOrNull()
-
-    /** The engine's answer, with the phone's name put into its head. */
-    private fun relay(out: OutputStream, answered: ByteArray, more: String) {
-        val text = String(answered, Charsets.ISO_8859_1)
-        val firstLine = text.indexOf("\r\n")
-        if (firstLine < 0) return reply(out, 502, errorOf("The engine's answer could not be read."))
-        out.write(answered, 0, firstLine + 2)
-        out.write((named() + more).toByteArray(Charsets.ISO_8859_1))
-        out.write(answered, firstLine + 2, answered.size - firstLine - 2)
-        out.flush()
-    }
 
     private fun reply(out: OutputStream, status: Int, body: String, more: String = "") {
         val bytes = body.toByteArray()
@@ -434,13 +416,58 @@ class Share(private val context: Context, private val engine: Engine, private va
         return 200 to """{"text":${JSONObject.quote(textOf(written, begun != null))}}"""
     }
 
-    /** Why an upload is not passed on to the engine — the status and the body to answer with — or null where it may be. */
-    private fun refusalOf(type: String, body: ByteArray): Pair<Int, String>? {
+    /**
+     * One stretch of sound read by audio.cpp's server: the status and the body to answer the computer with.
+     *
+     * The interface is audio.cpp's own, but the upload is not handed on as it came. What goes to the engine is
+     * held to what llama.cpp is given — a form with a recording in it, no longer than this phone reads at once —
+     * and is written anew from that: a body that was no form could name a file on the phone for the engine to
+     * open, and one long recording took memory until the system killed this app and others to make room (both
+     * found 2026-10-12; anything on the network could have sent either). Written anew, the request also names the
+     * model by the name the engine was started with, whatever the computer called it (the engine refuses a name it
+     * does not have: `unknown model id`), carries the recording as the `.wav` the engine asks an upload to be
+     * called, and nothing else a form might hold (`stream`, which the engine answers in another shape).
+     *
+     * The language goes on as the computer said it, to a model of many languages. A model of a few (`Model.hears`)
+     * is told one of its own by its code, or none; and a language it does not read is refused here, in so many
+     * words. audio.cpp would not refuse it: SenseVoice told `fr` reads as though told nothing, and writes French
+     * speech down as one of its five languages — an answer that looks like a reading and is none.
+     */
+    private fun readByAudioCpp(type: String, body: ByteArray): Pair<Int, String> {
+        val model = model ?: return 502 to errorOf("The engine did not answer.")
         val form = formOf(type, body) ?: return 400 to errorOf("The request is not a multipart form.")
         val sound = form.file ?: return 400 to errorOf("The form has no file in it.")
         val ms = wavMsOf(sound) ?: return 400 to errorOf("The file is not a WAV recording.")
+        // Nothing to hear: audio.cpp would refuse it as an incomplete file.
+        if (ms < LEAST_MS) return 200 to TEXT_OF_NOTHING
         if (ms / 1000.0 > MOST_SECONDS_AUDIO_CPP) return 413 to errorOf("The sound is too long: this phone reads at most $MOST_SECONDS_AUDIO_CPP seconds at once.")
-        return null
+        val said = form.fields["language"]?.trim().orEmpty()
+        val language = when {
+            said.isEmpty() -> null
+            model.hears == null -> said
+            said.equals("auto", ignoreCase = true) -> null
+            else -> heardAs(said, model.hears)
+                ?: return 400 to errorOf("${model.name} reads ${inWords(model.hears.values)} only, not \"${said.take(LANGUAGE_SHOWN)}\". Lend another model from the phone for this language.")
+        }
+
+        val boundary = "----kotomimi${UUID.randomUUID().toString().replace("-", "")}"
+        fun field(name: String, value: String) = "--$boundary\r\nContent-Disposition: form-data; name=\"$name\"\r\n\r\n$value\r\n"
+        val before = field("model", model.id) + language?.let { field("language", it) }.orEmpty() +
+            "--$boundary\r\nContent-Disposition: form-data; name=\"file\"; filename=\"stretch.wav\"\r\nContent-Type: audio/wav\r\n\r\n"
+        val pieces = listOf(before.toByteArray(), sound, "\r\n--$boundary--\r\n".toByteArray())
+        val head = "POST /v1/audio/transcriptions HTTP/1.1\r\nHost: $LOOPBACK\r\nContent-Type: multipart/form-data; boundary=$boundary\r\nContent-Length: ${pieces.sumOf { it.size }}\r\nConnection: close\r\n\r\n"
+        val answered = asked(head, pieces) { false } ?: return 502 to errorOf("The engine did not answer.")
+
+        val whole = String(answered, Charsets.UTF_8)
+        val status = whole.substringBefore("\r\n").split(' ').getOrNull(1)?.toIntOrNull()
+        val json = runCatching { JSONObject(whole.substringAfter(END, "")) }.getOrNull()
+        if (status == null || json == null) return 502 to errorOf("The engine's answer could not be read.")
+        if (status != 200) {
+            val why = json.optJSONObject("error")?.optString("message").orEmpty().ifBlank { "no reason given" }
+            return 502 to errorOf("The engine answered HTTP $status: ${why.take(200)}")
+        }
+        val written = json.takeIf { it.has("text") && !it.isNull("text") }?.optString("text") ?: return 502 to errorOf("The engine's answer has no text in it.")
+        return 200 to """{"text":${JSONObject.quote(if (model.unspaced) unspaced(written) else written)}}"""
     }
 
     /** A form's fields by their names, and the file it carries. */
@@ -570,6 +597,39 @@ class Share(private val context: Context, private val engine: Engine, private va
             val word = said?.trim()?.lowercase()?.takeIf { it.isNotEmpty() } ?: return null
             return LANGUAGES[word.substringBefore('-').substringBefore('_')] ?: LANGUAGES.values.firstOrNull { it.lowercase() == word }
         }
+
+        /**
+         * The code a model of few languages (`Model.hears`: its codes, and their names) is told for what a computer
+         * said: the code itself, with or without a region after it (`zh-CN`), or the language's English name. Null
+         * for a language that is not one of the model's.
+         */
+        fun heardAs(said: String, hears: Map<String, String>): String? {
+            val word = said.trim().lowercase()
+            val code = word.substringBefore('-').substringBefore('_')
+            return hears.keys.firstOrNull { it == code } ?: hears.entries.firstOrNull { it.value.lowercase() == word }?.key
+        }
+
+        /** "Chinese, Cantonese, English, Japanese and Korean". */
+        fun inWords(names: Collection<String>): String = if (names.size < 2) names.joinToString() else names.toList().let { it.dropLast(1).joinToString(", ") + " and " + it.last() }
+
+        /** A language nobody reads is shown in a refusal to this length: it is whatever the request said. */
+        private const val LANGUAGE_SHOWN = 20
+
+        /**
+         * A text without the spaces a model put where the writing has none: between two characters of Japanese or
+         * Chinese, and between such a character and a figure (「あと 15 秒」). SenseVoice writes them now and then —
+         * in 27 of 59 stretches of real Japanese conversation, and a second or two cut out of a sentence comes back
+         * a word at a time (「元 は 金持ち の 息子 でし たが。」) — and a computer shows what it is given. Korean keeps
+         * its spaces (Hangul is not among these characters), and so do Latin words, also inside Japanese.
+         */
+        fun unspaced(text: String): String = text.replace(SPACE_INSIDE, "")
+
+        /**
+         * Kana, Chinese characters, and the marks and full-width forms written with them: left for the regular
+         * expression to read as numbers, since the first of them is a space, which nobody would see standing here.
+         */
+        private const val UNSPACED = """\u3000-\u30ff\u3400-\u9fff\uff00-\uffef"""
+        private val SPACE_INSIDE = Regex("""(?<=[$UNSPACED])\s+(?=[$UNSPACED\d])|(?<=\d)\s+(?=[$UNSPACED])""")
 
         /**
          * The text in what the model wrote: what follows its mark. The server gives the answer whole, the beginning

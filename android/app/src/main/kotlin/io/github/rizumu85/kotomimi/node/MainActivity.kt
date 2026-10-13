@@ -44,6 +44,7 @@ class MainActivity : Activity() {
     private lateinit var checkKey: TextView
     private lateinit var report: TextView
     private lateinit var share: TextView
+    private lateinit var rule: TextView
     private val rows = HashMap<Model, Pair<TextView, TextView>>()
 
     /** What this screen's own worker is doing: nothing, a check, or the download of one model. */
@@ -177,6 +178,9 @@ class MainActivity : Activity() {
             models.addView(row)
             rows[model] = state to act
         }
+        // Under the rows, how the one that is lent comes to be it: nothing else on the screen says a row can be touched.
+        rule = text("", 12.5f, R.color.ink_2)
+        models.addView(rule, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = dp(4); bottomMargin = dp(8); rightMargin = dp(6) })
         column.addView(models, spaced(top = 14))
 
         // The report.
@@ -232,8 +236,9 @@ class MainActivity : Activity() {
             val (state, act) = views
             val begun = store.begun(model)
             if (busy !== model) {
-                // Which engine a row is for, in every state: two rows carry the same model's name.
-                val whose = "${model.reader.words} 用"
+                // Which engine a row is for, in every state: two rows carry the same model's name. A model with a
+                // row to itself says there what it is good for, which the engine's name tells nobody.
+                val whose = model.note ?: "${model.reader.words} 用"
                 state.text = when {
                     store.has(model) -> if (model === lent && lendable.size > 1) "借出去的是这个 · $whose" else "已下载 · $whose · ${model.sizeInWords}"
                     begun > 0 -> "$whose · 下载到 ${percent(begun, model.bytes)}，可以接着下"
@@ -243,6 +248,13 @@ class MainActivity : Activity() {
                 act.alpha = if (busy == null) 1f else 0.4f
             }
             act.visibility = if (store.has(model)) View.GONE else View.VISIBLE
+        }
+        // The rule the lent model is picked by (`Choices.shared`), where there is more than one to pick from.
+        rule.visibility = if (lendable.size > 1) View.VISIBLE else View.GONE
+        rule.text = when {
+            choices.chosen(store) != null -> "借的是你点的那一行。点别的行就换。"
+            choices.checked(store) -> "点哪一行就借哪一行。没点过：按自检，借跟得上的里最准的，都跟不上就借最快的。"
+            else -> "点哪一行就借哪一行。没点过、也没自检过：先借最小最快的。"
         }
 
         key.text = if (shared) "停止共享" else "开始共享"
@@ -316,8 +328,11 @@ class MainActivity : Activity() {
                     if (done != null) {
                         lastReport = done.report
                         // What the screen says is about lending the phone: the model it is lent with, by its engine.
-                        // (The model by its size alone: its whole name with the rest does not fit a small screen's line.)
-                        lastVerdict = done.verdict.words to (done.lending?.let { of -> of.lent?.speed?.let { "${of.model.size} · ${of.model.reader.words} · ${"%.1f".format(it)} 倍速" } } ?: "看下面的报告")
+                        // (The model by its size alone: its whole name with the rest does not fit a small screen's line.
+                        // The engine only where the model has a row for each: it is what tells the two apart.)
+                        lastVerdict = done.verdict.words to (done.lending?.let { of ->
+                            of.lent?.speed?.let { listOfNotNull(of.model.size, of.model.reader.words.takeIf { of.model.twin }, "${"%.1f".format(it)} 倍速").joinToString(" · ") }
+                        } ?: "看下面的报告")
                     }
                 }.onFailure { error ->
                     lastVerdict = "没检查成" to (error.message ?: error.javaClass.simpleName)

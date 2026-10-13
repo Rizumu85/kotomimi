@@ -16,15 +16,16 @@ import kotlin.concurrent.thread
 /**
  * Which engine reads a model. audio.cpp is the engine the desktop app runs; llama.cpp reads the same models from
  * files of its own, about twice as fast on a phone's processor (measured 2026-10-12, README). The phone is lent with
- * either: the self-check says which is the faster here.
+ * either: the self-check says which is the faster here. (Qwen3-ASR, that is. SenseVoice-Small is audio.cpp's alone.)
  */
 enum class Reader(val words: String) { AUDIO_CPP("audio.cpp"), LLAMA_CPP("llama.cpp") }
 
 /**
  * One file of a model: the repository it is published in and its place there, the name it is kept under here, and
- * the size and SHA-256 that tell it is the right one.
+ * the size and SHA-256 that tell it is the right one. `onModelScope` is whether ModelScope keeps that repository
+ * too: one it does not keep is not asked there, where the answer could only be that it is not found.
  */
-class ModelFile(val repository: String, val revision: String, val path: String, val name: String, val bytes: Long, val sha256: String) {
+class ModelFile(val repository: String, val revision: String, val path: String, val name: String, val bytes: Long, val sha256: String, val onModelScope: Boolean = true) {
     /**
      * Where it is fetched from, the likelier first. Hugging Face is where the files are published; ModelScope keeps
      * the same repository (the same bytes: the sizes and checksums were compared, 2026-10-10) and is reached from
@@ -33,11 +34,12 @@ class ModelFile(val repository: String, val revision: String, val path: String, 
      */
     fun addresses(): List<Source> {
         val published = Source("Hugging Face", "https://huggingface.co/$repository/resolve/$revision/$path")
-        val mirrored = Source("魔搭", "https://modelscope.cn/models/$repository/resolve/master/$path")
+        val mirrored = Source("魔搭", "https://modelscope.cn/models/$repository/resolve/master/$path").takeIf { onModelScope }
         // A public mirror of Hugging Face, a volunteer's: the same path, answered from Beijing where Hugging Face is
-        // not (2026-10-12). A second way in should ModelScope be down; what it brings is checked like the rest.
+        // not (2026-10-12). A second way in should ModelScope be down — and the only one from there for a file
+        // ModelScope does not keep; what it brings is checked like the rest.
         val relayed = Source("HF 镜像", "https://hf-mirror.com/$repository/resolve/$revision/$path")
-        return if (inMainlandChina()) listOf(mirrored, relayed, published) else listOf(published, mirrored, relayed)
+        return if (inMainlandChina()) listOfNotNull(mirrored, relayed, published) else listOfNotNull(published, mirrored, relayed)
     }
 
     private companion object {
@@ -55,13 +57,37 @@ class ModelFile(val repository: String, val revision: String, val path: String, 
  *
  * `lentAs` is the name a computer is told when the phone is lent with it: audio.cpp's name for the model, whichever
  * engine reads. The desktop app looks that name up to know how the model is told a language and how long a stretch
- * it may be sent, and knows no other.
+ * it may be sent; a name it does not know (SenseVoice's) it tells the language by its bare code, which is what the
+ * door takes.
+ *
+ * `accuracy` is its place among the models by how right it reads, 1 the best — the same for either engine, which
+ * write the same text. It is what the phone goes by when it picks the model to lend (`Choices.preferred`), and it
+ * was not measured on a phone: the same engine writes the same text of the same sound anywhere. On a desktop, of
+ * the 59 stretches the app itself cut from seven clips of real Japanese conversation (2026-10-13), Qwen3-ASR 1.7B
+ * wrote 16.9 % of the kana wrong, SenseVoice-Small 20.3 % and Qwen3-ASR 0.6B 20.7 %. Seven clips do not tell the
+ * last two apart; they stand in the order they came out.
+ *
+ * What a model needs that the others do not, each left as it is for those:
+ * - `note`: what its row says of it in place of the engine it is for, where the engine tells nobody anything.
+ * - `hears`: the languages it reads, by the codes it is told them with and their names — where they are few
+ *   enough that a computer may ask for one it cannot read, and has to be told so (`Share.readByAudioCpp`).
+ * - `options`: what audio.cpp is told with every reading of it (`--request-option`, and the server's
+ *   `default_request_options`).
+ * - `graphics`: whether the self-check also reads it on the graphics chip.
+ * - `unspaced`: whether it puts spaces into writing that has none, to be taken out again (`Share.unspaced`).
  */
-class Model(val id: String, val name: String, val reader: Reader, val family: String, val files: List<ModelFile>, val lentAs: String = id) {
+class Model(
+    val id: String, val name: String, val reader: Reader, val family: String, val files: List<ModelFile>, val accuracy: Int, val lentAs: String = id,
+    val note: String? = null, val hears: Map<String, String>? = null, val options: Map<String, String> = emptyMap(),
+    val graphics: Boolean = true, val unspaced: Boolean = false,
+) {
     val bytes: Long = files.sumOf { it.bytes }
 
     /** What tells it from the other models of its family: the last word of its name, "0.6B". */
     val size: String get() = name.substringAfterLast(' ')
+
+    /** Whether another row carries its name: the same model for the other engine, which the two are then told apart by. */
+    val twin: Boolean get() = MODELS.any { it !== this && it.name == name }
 
     /** As the desktop app writes sizes: in units of 1024. */
     val sizeInWords: String get() = "%.1f GB".format(bytes / (1024.0 * 1024.0 * 1024.0))
@@ -82,9 +108,30 @@ private const val LLAMA_CPP_SMALL = "ggml-org/Qwen3-ASR-0.6B-GGUF"
 private const val LLAMA_CPP_SMALL_REVISION = "928ab958557df9aa2ef1c93e0e83c7ad0933fae2"
 private const val LLAMA_CPP_LARGE = "ggml-org/Qwen3-ASR-1.7B-GGUF"
 private const val LLAMA_CPP_LARGE_REVISION = "36a678687ba7d07a74ca70ccb0e36902e005fb80"
+private const val SENSEVOICE = "FunAudioLLM/SenseVoiceSmall-GGUF-audiocpp"
+private const val SENSEVOICE_REVISION = "5c3fcfe748a8714216bc135476d5863084fddb72"
 
 /**
- * The same model for the two engines next to each other, the smaller model first.
+ * The smaller model first, and the same model for the two engines next to each other. The order is also what the
+ * phone is lent with before any self-check (`Choices.preferred`): the smaller reads the faster, and whether a
+ * larger one keeps up on this phone is not known until it is measured.
+ *
+ * SenseVoice-Small is audio.cpp's alone (llama.cpp has no such model), a quarter of the small Qwen3-ASR in size
+ * and three times as fast on the phone both were tried on (3.4 against 1.1 times real time, F22 Pro, 2026-10-13),
+ * in 0.3 GB of memory against 1.7. It reads five languages and no other.
+ * - Its file is published on Hugging Face only: ModelScope has no repository of that name (asked 2026-10-12; it
+ *   has the makers' `FunAudioLLM/SenseVoiceSmall-GGUF`, which is another file — the same weights without
+ *   audio.cpp's description of the model in them, 2,880 bytes shorter). So from mainland China it comes by the
+ *   mirror of Hugging Face alone.
+ * - Left to itself audio.cpp cuts a recording at its pauses before it reads this model, with a second model the
+ *   app does not carry, and fails for the lack of it (`Silero VAD model path does not exist`):
+ *   `audio_chunk_mode=none` has it read the stretch whole, which is what a computer sends anyway.
+ * - It is not read on the graphics chip by the self-check. audio.cpp's graphics backend has ended the program on
+ *   both phones it was tried on, with either size of Qwen3-ASR; this model is the one that needs it least (the
+ *   slowest phone tried reads a quarter of a minute of it in five seconds on its processor); and every run is
+ *   one more wait for the phone to cool. A phone with a Qwen3-ASR for audio.cpp still tries the backend with that.
+ * - It writes Japanese and Chinese with spaces in them now and then (in 27 of the 59 stretches of the measurement
+ *   above; a second or two cut out of a sentence comes back a word at a time): `unspaced`.
  *
  * llama.cpp's files are kept under names of our own: as published, `Qwen3-ASR-0.6B-Q8_0.gguf` is audio.cpp's
  * `qwen3-asr-0.6b-q8_0.gguf` in other letters, and the app's folder on shared storage does not tell capitals from
@@ -92,10 +139,33 @@ private const val LLAMA_CPP_LARGE_REVISION = "36a678687ba7d07a74ca70ccb0e36902e0
  */
 val MODELS = listOf(
     Model(
+        id = "sensevoice-small-q8",
+        name = "SenseVoice-Small",
+        reader = Reader.AUDIO_CPP,
+        family = "sense_asr",
+        accuracy = 2,
+        note = "快 · 只听中粤英日韩",
+        hears = mapOf("zh" to "Chinese", "yue" to "Cantonese", "en" to "English", "ja" to "Japanese", "ko" to "Korean"),
+        options = mapOf("audio_chunk_mode" to "none"),
+        graphics = false,
+        unspaced = true,
+        files = listOf(
+            ModelFile(
+                SENSEVOICE, SENSEVOICE_REVISION,
+                path = "sensevoice-small-q8-audiocpp-v1.gguf",
+                name = "sensevoice-small-q8.gguf",
+                bytes = 254_211_200,
+                sha256 = "4dedf169f625437fb336f2959674f399819729a765e184128c0e25a6e16ff0ec",
+                onModelScope = false,
+            ),
+        ),
+    ),
+    Model(
         id = "qwen3-asr-0.6b-q8",
         name = "Qwen3-ASR 0.6B",
         reader = Reader.AUDIO_CPP,
         family = "qwen3_asr",
+        accuracy = 3,
         files = listOf(
             ModelFile(
                 AUDIO_CPP_REPOSITORY, AUDIO_CPP_REVISION,
@@ -112,6 +182,7 @@ val MODELS = listOf(
         name = "Qwen3-ASR 0.6B",
         reader = Reader.LLAMA_CPP,
         family = "qwen3_asr",
+        accuracy = 3,
         files = listOf(
             ModelFile(
                 LLAMA_CPP_SMALL, LLAMA_CPP_SMALL_REVISION,
@@ -134,6 +205,7 @@ val MODELS = listOf(
         name = "Qwen3-ASR 1.7B",
         reader = Reader.AUDIO_CPP,
         family = "qwen3_asr",
+        accuracy = 1,
         files = listOf(
             ModelFile(
                 AUDIO_CPP_REPOSITORY, AUDIO_CPP_REVISION,
@@ -150,6 +222,7 @@ val MODELS = listOf(
         name = "Qwen3-ASR 1.7B",
         reader = Reader.LLAMA_CPP,
         family = "qwen3_asr",
+        accuracy = 1,
         files = listOf(
             ModelFile(
                 LLAMA_CPP_LARGE, LLAMA_CPP_LARGE_REVISION,
