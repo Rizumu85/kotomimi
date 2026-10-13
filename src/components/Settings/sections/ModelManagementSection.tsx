@@ -510,12 +510,13 @@ export function ModelManagementSection({
   }, []);
 
   const compatibleAsrModels = useMemo(
-    // Fork: in the order measured for this language, where it was (`measuredRank.ts`).
+    // Fork: in the order measured for this language, where it was, and without the ones not offered for it —
+    // but for the one that hears it now, by a choice made before (`measuredRank.ts`).
     () => measuredEntries(asrModels.filter(m =>
       (m.multilingual || m.languages.includes(sourceLanguage))
       && deviceReady(m, webgpuAvailable)
-    ), sourceLanguage).map((m) => (unmarked && m.recommended ? { ...m, recommended: false } : m)),
-    [asrModels, sourceLanguage, webgpuAvailable, unmarked],
+    ), sourceLanguage, selectedAsr).map((m) => (unmarked && m.recommended ? { ...m, recommended: false } : m)),
+    [asrModels, sourceLanguage, webgpuAvailable, unmarked, selectedAsr],
   );
   const incompatibleAsrModels = useMemo(
     () => asrModels.filter(m =>

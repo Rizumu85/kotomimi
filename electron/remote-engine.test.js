@@ -33,6 +33,10 @@ describe('how a model is told the language', () => {
     expect(saidFor('qwen3-asr-0.6b-q8', 'ja')).toBe('ja');
     expect(saidFor('nemotron-asr-0.6b-q8', 'ja')).toBe('ja-JP');
     expect(saidFor('r2t2-q8', 'ja')).toBe('Japanese');
+    // SenseVoice-Small, which a phone lends under the name this computer has it by: its bare code, as before this
+    // computer knew the name.
+    expect(saidFor('sensevoice-small-q8', 'ja-JP')).toBe('ja');
+    expect(saidFor('sensevoice-small-q8', 'zh-TW')).toBe('zh');
   });
 
   it('is the code as it is for a model this computer does not know, and nothing where no language is given', () => {
@@ -60,6 +64,24 @@ describe('a recognition on another device', () => {
     expect(events).toEqual([{ id: 1, type: 'done', text: 'こんにちは' }]);
     // Over: nothing more is taken for it.
     expect(engine.writeStream(id, sound())).toBe(false);
+  });
+
+  it('takes a model’s spaces out of what the device wrote, where this computer does so with its own readings of that model', async () => {
+    const texts = (model) => new Promise((resolve) => {
+      const events = [];
+      const engine = createRemoteEngine({
+        onStream: (event) => { events.push(event); if (event.type === 'done') resolve(events.map((one) => one.text)); },
+        read: () => ({ done: Promise.resolve({ ok: true, text: '元 は 金持ち の 息子 でし たが。' }), abort() {} }),
+      });
+      const id = engine.openStream({ base: 'http://192.168.1.23:8792/v1', model, language: 'ja', sampleRate: 16000 });
+      engine.writeStream(id, sound());
+      engine.endStream(id);
+    });
+    // The phone takes them out itself; one that did not would still read the same here.
+    expect(await texts('sensevoice-small-q8')).toEqual(['元は金持ちの息子でしたが。']);
+    // Any other model's text is passed on as it came.
+    expect(await texts('qwen3-asr-0.6b-q8')).toEqual(['元 は 金持ち の 息子 でし たが。']);
+    expect(await texts('some-other-model')).toEqual(['元 は 金持ち の 息子 でし たが。']);
   });
 
   it('says so when the device does not answer', async () => {

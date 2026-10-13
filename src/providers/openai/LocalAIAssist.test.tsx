@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { Readiness } from '../../lib/provider/types';
 import { useLocalServerStore } from '../../stores/localServerStore';
 import { useModelStore } from '../../stores/modelStore';
@@ -632,6 +632,129 @@ describe('one menu for a stage of this computer, whoever runs it', () => {
     expect(menu.selectedOptions[0].textContent).toBe('Qwen3-ASR 1.7B GGUF');
     expect(groups(menu)[0]).toEqual(['providers.localai.groupNative', ['Qwen3-ASR 1.7B GGUF']]);
     expect(card(HEAR).getByRole('button', { name: 'providers.localai.browse' }).getAttribute('aria-expanded')).toBe('false');
+  });
+
+  /** The engine's cards in the library that is open, in the order drawn, and which of them carry the mark. */
+  const cards = (container: HTMLElement) => [...container.querySelectorAll<HTMLElement>('.kt-here__native [data-testid^="model-card-native:"]')]
+    .map((one) => `${one.dataset.testid!.slice('model-card-native:'.length)}${one.querySelector('.model-card__recommended-badge') ? ' ★' : ''}`);
+  const EVERY = { 'qwen3-asr-1.7b-q8': 'absent', 'r2t2-q8': 'absent', 'sensevoice-small-q8': 'absent', 'qwen3-asr-0.6b-q8': 'absent', 'nemotron-asr-0.6b-q8': 'absent' } as const;
+  const hearing = (pair: { source: string; target: string }, chosen = 'qwen3-asr-1.7b-q8') => render(
+    <LocalAIAssist settings={{ ...LOCALAI_DEFAULTS, asrVia: 'device', asrHere: 'native', asrNativeModel: chosen, translateAt: 'device' }} values={{ endpoint: '' }} set={vi.fn()} fill={vi.fn()} update={vi.fn()} pair={pair} legs={['speaker']} models={[]} readiness={{ state: 'unknown' }} check={vi.fn()} />,
+  );
+
+  it('offers SenseVoice-Small among the engine’s models for the five languages it hears: after the more accurate ones, before the small Qwen3, and never with the mark', () => {
+    // Windows: every model of the engine the app downloads, R2T2 among them. None is here yet, so the library is open.
+    useNativeEngineStore.setState({ status: engineOf(EVERY) });
+    for (const source of ['ja', 'zh-CN', 'en', 'ko']) {
+      const view = hearing({ source, target: 'ru' });
+      expect(cards(view.container), source).toEqual(['qwen3-asr-1.7b-q8 ★', 'r2t2-q8', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
+      view.unmount();
+    }
+    // Cantonese: R2T2 and Nemotron do not hear it.
+    const cantonese = hearing({ source: 'yue', target: 'en' });
+    expect(cards(cantonese.container)).toEqual(['qwen3-asr-1.7b-q8 ★', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8']);
+    cantonese.unmount();
+    // A language it does not hear has no card of it.
+    const russian = hearing({ source: 'ru', target: 'zh-CN' });
+    expect(cards(russian.container)).toEqual(['qwen3-asr-1.7b-q8 ★', 'r2t2-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
+    russian.unmount();
+    // One only the last model hears: that one alone, and so the one marked.
+    const ukrainian = hearing({ source: 'uk', target: 'zh-CN' }, 'nemotron-asr-0.6b-q8');
+    expect(cards(ukrainian.container)).toEqual(['nemotron-asr-0.6b-q8 ★']);
+  });
+
+  it('offers it on a Mac too, after the system’s own recognition and Qwen3-ASR 1.7B: the system’s is the one marked for each of its five languages', () => {
+    // A Mac: the system's recognition, a model to a language, and the engine's models but R2T2, which names Windows alone.
+    const MAC = { 'apple-speech:ja': 'absent', 'apple-speech:zh': 'absent', 'apple-speech:en': 'absent', 'apple-speech:ko': 'absent', 'apple-speech:yue': 'absent', 'qwen3-asr-1.7b-q8': 'absent', 'sensevoice-small-q8': 'absent', 'qwen3-asr-0.6b-q8': 'absent', 'nemotron-asr-0.6b-q8': 'absent' } as const;
+    useNativeEngineStore.setState({ status: engineOf(MAC) });
+    for (const [source, own] of [['ja', 'ja'], ['zh-CN', 'zh'], ['en', 'en'], ['ko', 'ko']] as const) {
+      const view = hearing({ source, target: 'ru' });
+      expect(cards(view.container), source).toEqual([`apple-speech:${own} ★`, 'qwen3-asr-1.7b-q8', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
+      view.unmount();
+    }
+    // Cantonese: Nemotron does not hear it.
+    const cantonese = hearing({ source: 'yue', target: 'en' });
+    expect(cards(cantonese.container)).toEqual(['apple-speech:yue ★', 'qwen3-asr-1.7b-q8', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8']);
+    cantonese.unmount();
+    // A language neither the system nor it hears: Qwen3-ASR's, as before.
+    const russian = hearing({ source: 'ru', target: 'zh-CN' });
+    expect(cards(russian.container)).toEqual(['qwen3-asr-1.7b-q8 ★', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
+    russian.unmount();
+    // A Mac whose system has no such recognition (before macOS 26): the engine's models alone, in their order.
+    useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'absent', 'sensevoice-small-q8': 'absent', 'qwen3-asr-0.6b-q8': 'absent', 'nemotron-asr-0.6b-q8': 'absent' }) });
+    const older = hearing({ source: 'ja', target: 'zh-CN' });
+    expect(cards(older.container)).toEqual(['qwen3-asr-1.7b-q8 ★', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
+  });
+
+  it('has no card of a model the engine of this system does not list', () => {
+    useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'absent', 'qwen3-asr-0.6b-q8': 'absent' }) });
+    const japanese = hearing({ source: 'ja', target: 'zh-CN' });
+    expect(cards(japanese.container)).toEqual(['qwen3-asr-1.7b-q8 ★', 'qwen3-asr-0.6b-q8']);
+  });
+
+  it('lists it in a row’s menu once it is downloaded, for a language it hears and for no other', () => {
+    useNativeEngineStore.setState({ status: engineOf({ ...EVERY, 'qwen3-asr-1.7b-q8': 'downloaded', 'sensevoice-small-q8': 'downloaded' }) });
+    const japanese = hearing({ source: 'ja', target: 'ru' }, 'sensevoice-small-q8');
+    const menu = within(screen.getByRole('region', { name: HEAR })).getByRole('combobox') as HTMLSelectElement;
+    expect(menu.selectedOptions[0].textContent).toBe('SenseVoice-Small GGUF');
+    expect(groups(menu)[0]).toEqual(['providers.localai.groupNative', ['Qwen3-ASR 1.7B GGUF', 'SenseVoice-Small GGUF']]);
+    japanese.unmount();
+    // Russian is not one of its five: the row has no model chosen, says so, and offers the one that hears it.
+    hearing({ source: 'ru', target: 'ja' }, 'sensevoice-small-q8');
+    const other = within(screen.getByRole('region', { name: HEAR })).getByRole('combobox') as HTMLSelectElement;
+    expect(other.selectedOptions[0].textContent).toBe('Qwen3-ASR 1.7B GGUF');
+    expect(groups(other)[0]).toEqual(['providers.localai.groupNative', ['Qwen3-ASR 1.7B GGUF']]);
+    // Taken down before the engine's state is put back: the row would then have no model, in words this test's stand-in for the catalog does not have.
+    cleanup();
+  });
+});
+
+describe('the SenseVoice that runs in the page, which writes Japanese without its kana', () => {
+  const groups = (select: HTMLSelectElement) => [...select.querySelectorAll('optgroup')].map((g) => [g.label, [...g.querySelectorAll('option')].map((o) => o.value)]);
+  const KEPT = { 'ja→zh': { asr: { modelId: 'sensevoice-int8' }, translation: { modelId: '' }, tts: { modelId: '' } } };
+  // The other side speaks Japanese: the participant's row is the one that hears it.
+  const row = (selections = {}) => {
+    const { card } = draw({ settings: { asrVia: 'device', translateAt: 'device', selections }, legs: ['participant'] });
+    return card(HEAR).getByRole('combobox') as HTMLSelectElement;
+  };
+
+  it('is not what hears Japanese by itself, nor in the row’s menu, though it is downloaded for its Chinese', () => {
+    useModelStore.setState({ modelStatuses: { 'sensevoice-int8': 'downloaded', 'sensevoice-nano-int8': 'downloaded' } });
+    const menu = row();
+    // Nothing here hears Japanese: said as that, and the library opens on it.
+    expect(menu.selectedOptions[0].textContent).toBe('providers.localai.notDownloaded');
+    expect(menu.className).toContain('kt-here__select--missing');
+    expect(groups(menu)).toEqual([]);
+    expect(screen.getByTestId('library').textContent).toBe('asr:ja→zh');
+  });
+
+  it('is still the one that hears where it was chosen before, and the menu says so: the model is never silently another', () => {
+    useModelStore.setState({ modelStatuses: { 'sensevoice-int8': 'downloaded', 'moonshine-tiny-ja-quant': 'downloaded' } });
+    const menu = row(KEPT);
+    expect(menu.value).toBe('sensevoice-int8');
+    expect(menu.selectedOptions[0].textContent).toContain('SenseVoice');
+    expect(menu.className).not.toContain('kt-here__select--missing');
+    // The automatic choice beside it is the other recognizer, never this one.
+    expect(groups(menu)).toEqual([['providers.localai.groupApp', ['', 'sensevoice-int8', 'moonshine-tiny-ja-quant']]]);
+    cleanup();
+    // Also with nothing else downloaded: it hears, and nothing is said to be missing.
+    useModelStore.setState({ modelStatuses: { 'sensevoice-int8': 'downloaded' } });
+    const alone = row(KEPT);
+    expect(alone.value).toBe('sensevoice-int8');
+    expect(alone.className).not.toContain('kt-here__select--missing');
+    expect(screen.queryByTestId('library')).toBeNull();
+    cleanup();
+    // Chosen away from, it is no longer offered for the language.
+    useModelStore.setState({ modelStatuses: { 'sensevoice-int8': 'downloaded', 'moonshine-tiny-ja-quant': 'downloaded' } });
+    expect(groups(row())).toEqual([['providers.localai.groupApp', ['']]]);
+  });
+
+  it('hears Chinese as ever', () => {
+    useModelStore.setState({ modelStatuses: { 'sensevoice-int8': 'downloaded', 'moonshine-tiny-ja-quant': 'downloaded' } });
+    const { card } = draw({ settings: { asrVia: 'device', translateAt: 'device' }, legs: ['speaker'] });
+    const menu = card(HEAR).getByRole('combobox') as HTMLSelectElement;
+    expect(menu.selectedOptions[0].textContent).toBe('providers.localai.auto');
+    expect(menu.className).not.toContain('kt-here__select--missing');
   });
 });
 

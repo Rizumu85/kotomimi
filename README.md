@@ -89,9 +89,10 @@ Sokuji 原有的功能和云服务提供商（OpenAI、Gemini、Soniox 等）都
 - 说话时显示的是"暂定"文字，最后几个字可能还会变；一句话说完（连着说时最多 15 秒）就定稿并翻译。
 - 对方连着说好几句时，不用等他说完：每说完一句就先翻译这一句（"翻译"卡片里的"一句一译"，默认开，可以关）。这要识别模型边听边写标点，Qwen3-ASR 可以。
 - 需要独立显卡，约占 3 GB 显存。显卡忙不过来时（显卡不强，或同时开着游戏）只是文字刷新得慢一些。模型只在会话中占显存：点"开始会话"时加载（开机后第一次约半分钟，之后每次几秒），结束一分钟后释放。
-- 只有一台电脑、同时还要开 VRChat？用最下面的 **Qwen3-ASR 0.6B GGUF**（约 1.1 GB）：显存从约 3 GB 降到约 2 GB，错字多一些（约 22%），其他都一样。
-- 显存连 2 GB 都腾不出来时，最下面还有 **Nemotron 3.5 ASR 0.6B GGUF**（约 0.9 GB，占约 1 GB 显存）：错字更多（约 27%），短句有时会漏掉。
-- 它下面还有一个 **Confucius4 R2T2 GGUF**（只在 Windows）：写出来的字不会再改，但显卡忙不过来时文字会越落越远；偶尔会有十几秒不出字、然后一口气补上的情况。一般用上面那个就好。
+- 只有一台电脑、同时还要开 VRChat？说的是中文、粤语、英语、日语或韩语，用 **SenseVoice-Small GGUF**（约 0.25 GB，Windows 和 Apple 芯片的 Mac 都有）：只占约 0.4 GB 显存（Mac 上约 0.5 GB 内存），是最轻最快的一个；错字比上面那个多一些，日语闲聊实测和下面的 Qwen3-ASR 0.6B 一样准；很少写标点，所以对方连着说时要等他停下来才翻译。
+- 其他语言用下面的 **Qwen3-ASR 0.6B GGUF**（约 1.1 GB）：显存从约 3 GB 降到约 2 GB，错字多一些（约 22%），其他都和 1.7B 一样，同样 30 种语言。
+- 最下面还有 **Nemotron 3.5 ASR 0.6B GGUF**（约 0.9 GB，占约 1 GB 显存）：错字更多（约 27%），短句有时会漏掉。只在上面几个放不下、或者不支持你要的语言时再用。
+- Qwen3-ASR 1.7B 下面还有一个 **Confucius4 R2T2 GGUF**（只在 Windows）：写出来的字不会再改，但显卡忙不过来时文字会越落越远；偶尔会有十几秒不出字、然后一口气补上的情况。一般用上面那个就好。
 - 想让它提前准备好，可以在设置的"启动"里打开"登录 Windows 时在后台启动"（默认关）：开机后 Kotomimi 不弹窗口地在后台待命（右下角通知区域有它的图标，点一下显示窗口，右键可以退出），并把模型预先加载一遍，这样第一次开始会话就不用等那半分钟。
 - Mac（macOS 26 及以上）在最上面显示的是 **Apple Speech**：系统自带的语音识别，实测是最准的，同样边听边出字，不占显存；语言包由系统下载，点一下"下载"就行。系统不支持的语言（比如俄语）用它下面的 Qwen3-ASR 1.7B GGUF。有了这两个，Mac 上不需要再装 LocalAI。
 
@@ -144,7 +145,7 @@ Sokuji 原有的功能和云服务提供商（OpenAI、Gemini、Soniox 等）都
 <br>
 
 - "Kotomimi 自由搭配"只出文字，不合成语音。需要语音输出时，用 Sokuji 原有的提供商。
-- 内置的 SenseVoice 模型识别日语时会漏掉假名。日语建议用 Whisper，或在"自定义模型"里添加 `onnx-community/kotoba-whisper-v2.2-ONNX`。
+- "其他模型"里内置的 SenseVoice（int8）识别日语时会漏掉假名，所以日语里不再提供它（以前选过的会保留，直到你换掉）；它听中文、粤语、英语、韩语照旧。日语用上面的原生引擎模型，或 Whisper，或在"自定义模型"里添加 `onnx-community/kotoba-whisper-v2.2-ONNX`。原生引擎的 SenseVoice-Small GGUF 没有这个问题。
 - 识别走 API 时，文字要等一句话说完才出现，没有逐字更新。
 - macOS 版只有 Apple 芯片的构建，而且不能自动更新，新版本要手动下载。
 - 这是个人分支，更新节奏和功能取舍以自用为准。
@@ -169,11 +170,11 @@ Kotomimi is a personal fork of [Sokuji](https://github.com/kizuna-ai-lab/sokuji)
 - **Subtitles you can read**: furigana over Japanese kanji, and an optional romanization line under Japanese, Korean and Russian.
 - **Stages you place yourself**: speech recognition, translation and grammar feedback each run on this computer, on another device on your network, or on any OpenAI-compatible API, in any mix.
 - **Two devices together**: one computer shares the models it has downloaded; another device finds it on the network and uses them, downloading nothing.
-- **Text while they speak**: a recognition engine the app downloads and runs itself (audio.cpp with Qwen3-ASR 1.7B, thirty languages, and its small 0.6B sibling for a computer that runs a game beside it; on Windows also Confucius4 R2T2) writes about a second behind the voice, with nothing else to install. Translation has one too (llama.cpp with Index-Translate 2B), on Windows and Apple-silicon Macs. On a Mac (macOS 26 or later) the first recognizer is the system's own speech recognition, built in, with Qwen3-ASR behind it for the languages the system does not hear — no LocalAI needed.
+- **Text while they speak**: a recognition engine the app downloads and runs itself (audio.cpp with Qwen3-ASR 1.7B, thirty languages, its small 0.6B sibling for a computer that runs a game beside it, and the very light SenseVoice-Small for Chinese, Cantonese, English, Japanese and Korean; on Windows also Confucius4 R2T2) writes about a second behind the voice, with nothing else to install. Translation has one too (llama.cpp with Index-Translate 2B), on Windows and Apple-silicon Macs. On a Mac (macOS 26 or later) the first recognizer is the system's own speech recognition, built in, with Qwen3-ASR behind it for the languages the system does not hear — no LocalAI needed.
 - **Typed lookups** (`Ctrl+K`), **grammar feedback** on your own speech, **fonts** chosen per language, and the languages you switch between **pinned** to the top of the language menus.
 
 **Install**: download from [Releases](https://github.com/Rizumu85/kotomimi/releases/latest). The Windows installer is not code-signed, so Windows warns about an unknown publisher; the macOS build (Apple silicon) is not notarized, so right-click the app and choose Open the first time. Then follow the setup wizard and pick "Kotomimi Pipeline". No account and no API key are needed.
 
-**Limits**: the Kotomimi provider is text-only; the built-in SenseVoice model drops kana in Japanese (use Whisper); recognition through an API shows text only when a sentence ends.
+**Limits**: the Kotomimi provider is text-only; the SenseVoice (int8) among the app's own models drops kana in Japanese, so it is no longer offered for Japanese (the native engine's SenseVoice-Small is another build, and does not); recognition through an API shows text only when a sentence ends.
 
 Everything else — how the stages combine, the wire contract, building and releasing — is in [FORK.md](FORK.md) (Chinese). Sokuji is the work of [Kizuna AI Lab](https://github.com/kizuna-ai-lab); this fork keeps its license, [AGPL-3.0](LICENSE). Please report this fork's problems [here](https://github.com/Rizumu85/kotomimi/issues), not upstream.

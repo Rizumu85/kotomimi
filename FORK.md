@@ -17,7 +17,7 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 | 共享给其他设备 | 把这台电脑的模型共享给局域网里的另一台 Kotomimi；这台电脑上装了 LocalAI 时，它的模型也从同一个开关、同一个地址共享出去 | `electron/lan-server.js`、`electron/lan-upstream.js`、`src/lib/lan/` |
 | 自动找到另一台设备 | 选「用另一台设备」时，应用自己搜索局域网，把找到的 Kotomimi 和模型服务器列出来，点一下就连上，不用知道地址 | `electron/lan-discover.js`、`src/components/LanSharing/ServerFinder.tsx` |
 | 这台电脑上的 LocalAI | 电脑上装了 LocalAI 时，由应用启动和停止它，显示状态和模型 | `electron/local-server.js`、`src/components/LanSharing/LocalServerCard.tsx` |
-| 原生识别引擎 | 应用自己下载一个运行库（audio.cpp）和模型，在本机用显卡边听边出字；不用装任何别的东西。三个模型：Qwen3-ASR 1.7B（Windows 和 Apple 芯片的 Mac，实测更准、出字更快，30 种语言，显卡忙不过来时也不会越落越远）、Confucius4 R2T2（只在 Windows）、Qwen3-ASR 0.6B（小模型，约占 2 GB 显存，给同一台电脑还要跑游戏的人）和 Nemotron 3.5 ASR 0.6B（最小，约占 1 GB，最后的选择） | `electron/native-engine.js`、`src/providers/openai/nativeAsr.ts`、`localaiNative.ts`、`NativeEngineCard.tsx` |
+| 原生识别引擎 | 应用自己下载一个运行库（audio.cpp）和模型，在本机用显卡边听边出字；不用装任何别的东西。五个模型：Qwen3-ASR 1.7B（Windows 和 Apple 芯片的 Mac，实测更准、出字更快，30 种语言，显卡忙不过来时也不会越落越远）、Confucius4 R2T2（只在 Windows）、SenseVoice-Small（Windows 和 Apple 芯片的 Mac，最轻最快，约占 0.4 GB 显存，只听中、粤、英、日、韩）、Qwen3-ASR 0.6B（小模型，约占 2 GB 显存，给同一台电脑还要跑游戏的人）和 Nemotron 3.5 ASR 0.6B（约占 1 GB，最后的选择） | `electron/native-engine.js`、`src/providers/openai/nativeAsr.ts`、`localaiNative.ts`、`NativeEngineCard.tsx` |
 | Mac 自带的语音识别 | Mac 上（macOS 26 及以上）排第一的原生识别引擎是系统自己的语音识别：应用带一个小程序去调用它，边听边出字，不需要 LocalAI。系统不支持的语言（比如俄语）由上一行的 Qwen3-ASR 来听，两个引擎对页面来说是一个 | `native/apple-speech/SpeechHelper.swift`、`electron/apple-speech.js`、`electron/native-engines.js` |
 | 原生翻译引擎 | 同样的做法用在翻译上：应用自己下载 llama.cpp 的服务器和翻译模型的 GGUF 文件（Index-Translate 2B、Hunyuan MT 2、Hunyuan MT 1.5），在本机运行。Windows 和 Apple 芯片的 Mac 都提供 | `electron/native-engine.js`（`LLAMA`、`TRANSLATORS`）、`src/providers/openai/nativeTranslators.ts` |
 | 原生语法反馈引擎 | 语法反馈也可以由应用自己下载的 llama.cpp 来跑：一个小的对话模型（Gemma 4 E2B），几乎即时给出反馈，不需要 API | `electron/native-engine.js`（`COACHES`）、`src/providers/openai/nativeCoaches.ts` |
@@ -112,6 +112,11 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 - 文本模型由应用的渲染进程直接请求，所以对方服务必须允许跨域（CORS）。LocalAI 和 Ollama 默认允许；LM Studio 需要在服务器设置里打开 CORS。
 - 语法反馈的质量取决于模型。实测 4B 级别的本地模型能发现时态错误，但解释经常不按要求用母语写，建议用更强的模型。这台电脑上的小型对话模型更弱，适合完全离线时凑合用。
 - **内置的 SenseVoice 识别日语会丢假名**（实测 2026-10-03："今日は天気がいいので、公園に行きましょう" 被识别成 "日天気公演行"）。识别日语请用 Whisper 系列或下面的自定义模型。中文没有这个问题。
+  - **所以日语不再提供它**（2026-10-12）。说的是模型库里在页面里跑的那两个：`sensevoice-int8` 和 `sensevoice-nano-int8`（sherpa-onnx）。原生引擎里的 SenseVoice-Small 是同一个模型的另一种实现，日语写得完整，见"原生识别引擎"里的"又轻又快的模型"。
+  - **以前会怎样**：它在模型清单里写着支持日语，所以日语的模型库里有它的卡片，下拉菜单里能选它；更糟的是，一台电脑为了中文下载了它、别的识别模型一个都没下时，对方说日语就**自动**由它来听——出来的字没法读，用户也不知道为什么。共享给别的设备时，它同样被说成"能听日语"。
+  - **现在**（都在本分支自己的 `selection/measuredRank.ts` 里，`MEASURED_ASR_ORDER.ja.unoffered`）：日语的自动选择永远不选它（没有别的模型时就是"还没下载模型"，会话开始前就说清楚）；日语的模型库、下拉菜单里没有它；共享清单里它的语言去掉日语（`appModels.ts`），别的设备的菜单里日语会话不再列它。中文、粤语、英语、韩语一切照旧。
+  - **以前选过它的人**：保存着的选择不会被悄悄换成别的模型。设置里"日语 → 某语言"这一行明确选过它的，它继续听，下拉菜单和模型库里照样显示它（卡片排在最后，ⓘ 里写着"不会输出假名"），直到用户自己换掉；一旦换掉，日语里就不再出现它。别的设备按名字点过它来听日语的，同样继续由它回答。没明确选过、只是被自动选上的人，现在日语那一行会变成别的已下载模型，或者"还没下载模型"。
+  - **上游文件这次只动了两处、各一两行**：`ModelManagementSection.tsx` 里原来就有本分支的调用（按实测排序），这次多传一个"现在在用的模型"；`useWasmEngineAdapter.ts` 的下拉候选里补上"这一行自己选过的那个"，否则保存着的选择在菜单里是空白（上游自己的"本地推理"提供商用的也是这个菜单）。自动选择那一头走的是 `candidates.wasm.ts` 里早就有的那一处调用，没有再动。做法是把它在日语里标成"不参与自动选择"（上游候选模型本来就有的 `autoEligible`），而不是从候选里删掉——删掉的话保存着的选择会被上游的规则当成"语言不兼容"、换成别的模型，而 Kotomimi 这个提供商的卡片上不显示上游那条"已改用别的模型"的提示，等于悄悄换了。
 
 ### 模型菜单怎么排（2026-10-06）
 
@@ -161,7 +166,7 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 - **R2T2 只在 Windows 提供**：Apple M2 上（Metal 版）一分钟的话要处理两分多钟，跟不上说话，所以 Mac 上不显示它（`MODELS` 里的 `platforms`）；Mac 上的原生识别是系统自带的那个，见下一节。显卡较弱的 Windows 电脑也可能跟不上，这一点应用目前不会自己判断——这种电脑用下面的 Qwen3-ASR。
 - **不指定语言不可靠**：R2T2 可以不给语言让它自己判断，但实测每段开头几个词经常认错语言（一段日语开头被写成英语，整段跟着跑偏），所以"这台电脑"识别时仍然要选好语言。常用的几种语言可以在语言菜单里置顶，切换快一些。
 - **开发**：非打包运行时，`KOTOMIMI_NATIVE_DIR` 让它用别的目录（免得测试用的配置目录里再下一遍 2.4 GB），`KOTOMIMI_NATIVE_DUMP` 把每次识别实际送给引擎的声音存成 PCM 文件，用来和引擎自带的客户端对照。
-- **以后加模型**：加一个模型是在 `electron/native-engine.js` 的 `MODELS` 里加一项（地址、大小、SHA-256、家族、参数），再在 `localaiNative.ts` 的 `NATIVE_MODELS` 里加它的名字和语言。2026-10-05 直连引擎试过的其他模型（同样 7 段日语）：Nemotron 3.5 Streaming 0.6B 是真流式、最轻（M2 上也有 8 倍实时），但错字率 20.6%；Fun-ASR Nano 51%（两段陷入复读）；Parakeet TDT v3 和 GigaAM 不支持日语，没测。
+- **以后加模型**：加一个模型是在 `electron/native-engine.js` 的 `MODELS` 里加一项（地址、大小、SHA-256、家族、参数），再在 `localaiNative.ts` 的 `NATIVE_MODELS` 里加它的名字和语言，`NativeEngineCard.tsx` 的 `NOTES` 和 `scripts/fork-localai-locales.cjs` 里加它的说明（有测试拦着：没有说明的模型过不了）。共享给别的设备、手机借出同名模型时的处理都是从这两张表里推出来的，不用另写。2026-10-05 直连引擎试过的其他模型（同样 7 段日语）：Nemotron 3.5 Streaming 0.6B 是真流式、最轻（M2 上也有 8 倍实时），但错字率 20.6%；Fun-ASR Nano 51%（两段陷入复读）；Parakeet TDT v3 和 GigaAM 不支持日语，没测。
 
 ### 第二个模型：Qwen3-ASR 1.7B（整段识别的模型怎么做到边说边出字）
 
@@ -177,7 +182,7 @@ Qwen3-ASR 不是流式模型：给它一段完整的声音，它写出整段文�
 - **语言**：30 种（中、英、粤、日、韩、俄、西、法、德、意、葡、阿、泰、越、印尼、土、印地、马来、荷、瑞典、丹麦、芬兰、波兰、捷克、菲律宾、波斯、希腊、匈牙利、马其顿、罗马尼亚），语言用代码告诉它（`languageAs: 'code'`）。不给语言时它会自己判断，这一点还没有接进界面。
 - **按语言记住选择**（`nativePicked`、`chooseNative`）：原生识别模型是一种语言一行来选的。某种语言选过模型，就一直用那个；没选过的语言沿用当前在用的模型（它能听的话）；它听不了，那一行就显示"未选择模型"并提示去选，不会自动换成别的——换语言本来就要先停下会话，一步一步来。同一次会话里两种语言选了下载引擎的两个不同模型时会提示选成同一个（它一次只能跑一个）；Mac 上系统自带的识别和下载的引擎可以同时用（主进程的状态里有 `up`：现在能用的所有模型）。
 - **下载了但没选用**：应用自带的模型一个都没有、而原生引擎的模型已经在这台电脑上时（比如切回过应用自带的模型，或者模型文件是拷进来的），下拉菜单的空项写的是「未选择模型」而不是「还没下载模型」，检查的提示也是「还没有为某语言选择语音识别模型」（`nativeWaits`）。不自动替用户选：否则从原生引擎切回应用自带模型的人会被立刻弹回去，进不了自带模型的模型库。
-- **推荐顺序**（`NATIVE_MODELS` 的顺序，模型库里第一个能听这种语言的带"推荐"）：Mac 自带识别 → Qwen3-ASR 1.7B → R2T2 → Qwen3-ASR 0.6B → Nemotron 3.5 ASR 0.6B。R2T2 的长处是写出来的字不再改动；短处是吃显卡、语言少、Mac 上跑不动。0.6B 排最后：它不是最准的，是最省的。
+- **推荐顺序**（`NATIVE_MODELS` 的顺序，模型库里第一个能听这种语言的带"推荐"）：Mac 自带识别 → Qwen3-ASR 1.7B → R2T2 → SenseVoice-Small → Qwen3-ASR 0.6B → Nemotron 3.5 ASR 0.6B。R2T2 的长处是写出来的字不再改动；短处是吃显卡、语言少、Mac 上跑不动。后三个是省资源的：不是最准的，是最省的。SenseVoice-Small 排在 0.6B 前面，因为两个一样准而它轻得多（2026-10-12，见下面"又轻又快的模型"）。同一个顺序也是"没选过模型的语言默认用哪个"（已下载的里面排最前的那个）和"别的设备没点名时给哪个"的顺序。
 
 ### 小模型：Qwen3-ASR 0.6B
 
@@ -197,6 +202,37 @@ Qwen3-ASR 不是流式模型：给它一段完整的声音，它写出整段文�
 - **省多少**：显存约 1.8 GB 对 3.0 GB（省三分之一多），每次识别快四分之一。省得不算多，是因为它的声音编码器和 1.7B 差不多大。
 - **不用来自动识别语言**：让它自己判断时，韩、俄、英、日、中都对，但一段西班牙语被写成了半句葡萄牙语。所以它没有 `detects`，"自动识别对方说的语言"仍然只用 1.7B 或 API。
 - **旁证**：微软 2026 年 4 月的论文 [Pushing the Limits of On-Device Streaming ASR](https://arxiv.org/abs/2604.14493) 比了 Whisper、Parakeet、Canary、Qwen3-ASR 等五十多种配置，结论是 Qwen3-ASR 1.7B 整段识别最准，而 Nemotron（英语版）最适合在 CPU 上连续流式识别。和这里的结果不矛盾：Nemotron 的长处是不间断的流，而应用是按句送的。
+
+### 又轻又快的模型：SenseVoice-Small（2026-10-12）
+
+给手机挑模型时量出来的（`.dev/android-spike/faster/RESULTS.md`、`.dev/android-spike/asr-llama/FINDINGS.md`）：它和 Qwen3-ASR 0.6B 一样准，却只有四分之一大、快好几倍。手机端先接了它（`feat/android-node` 分支的 `android/`，0.6.0），电脑端用同一个名字 `sensevoice-small-q8` 接进原生引擎。
+
+- **模型**：[SenseVoice-Small](https://huggingface.co/FunAudioLLM/SenseVoiceSmall)（阿里 FunAudioLLM），用的是发布者自己给 audio.cpp 做的 GGUF：[FunAudioLLM/SenseVoiceSmall-GGUF-audiocpp](https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF-audiocpp) 的 `sensevoice-small-q8-audiocpp-v1.gguf`，254,211,200 字节，SHA-256 `4dedf169f625437fb336f2959674f399819729a765e184128c0e25a6e16ff0ec`，地址带提交号 `5c3fcfe748a8714216bc135476d5863084fddb72`（本机那份拷贝的大小和哈希 2026-10-12 重新算过，对得上）。audio.cpp 里的家族名是 `sense_asr`。和 Qwen3-ASR 不是一类模型：它一遍把整段写出来（CTC），不是一个字一个字往下写，所以不会"复读"，读一次也几乎不花时间。
+- **走哪条路**：和 Qwen3-ASR 一样（`mode: 'offline'`、`openWindow`）：说话时把"到目前为止的声音"反复读，一句完了再读最后一遍；断句的参数也一样（`WINDOW_LIMITS`，满 8 秒找空隙重开）——它的错字率就是在这样切出来的句子上量的。
+- **必须告诉它"整段读"**：audio.cpp 默认先用另一个模型（Silero VAD）按停顿把录音切开再读，应用没带那个模型，一读就失败。所以 `server.json` 里这个模型多一项 `"default_request_options": {"audio_chunk_mode": "none"}`（`MODELS` 里的 `requestOptions`；audio.cpp 的"请求参数默认值"，和 `session_options` 是两回事）。别的模型的配置一个字没变。
+- **准不准**（2026-10-13 记在 FINDINGS.md；按本项目一贯的打分：假名读音的错字率，对照人工校过的参考）：把应用自己从 7 段真实日语闲聊里切出来的 59 段声音逐段交给引擎读——Qwen3-ASR 1.7B 16.9%，**SenseVoice-Small 20.3%**，Qwen3-ASR 0.6B 20.7%。59 段里它没有一段读成空的（Nemotron 的毛病是短句整句不出字，它没有）。所以：和 0.6B 分不出高下，比 1.7B 差三个多点。
+- **多轻多快**（这台电脑，RTX 5070 Ti，2026-10-12，用应用自己的代码把引擎起在另一个端口上量的，没开应用界面）：
+  - 显存：引擎进程加载完占 **约 0.27 GB**（Windows 性能计数器"GPU 进程内存·专用"，265 MB；`nvidia-smi` 在 Windows 上不报单个进程的用量），读 8～24 秒的句子时 0.28～0.31 GB，另一轮连着读了几十次长短不一的句子后到过 0.38 GB。对照：Nemotron 约 1 GB，Qwen3-ASR 0.6B 约 1.8 GB，1.7B 约 3 GB。卡片上写的是"约 0.4 GB"。进程的内存（工作集）0.14～0.23 GB。
+  - 读一次：8.6 秒的一句 48～95 毫秒；边说边读时每次 26～226 毫秒（0.7～8.2 秒的声音）；24 秒约 0.1 秒。说完到定稿 38 毫秒。
+  - 启动：加载加预热不到 2 秒（文件已在系统缓存里时）。
+  - 不用显卡也能跑（`backend: cpu`）：8 秒的一句约 1.6 秒，24 秒约 5.3 秒，也就是 4.5～5 倍实时——用的是引擎服务默认的线程数，量的时候电脑上别的程序正占着显卡（整卡用量从 9 GB 涨到了 14.7 GB），处理器忙不忙没看；RESULTS.md 里用命令行、8 线程量的是 16 倍。应用现在总是用显卡，没有给它开"只用处理器"的开关。
+- **只听五种语言**：中文、粤语、英语、日语、韩语（`languages`），语言用代码告诉它。给它别的语言它不会拒绝：当成"没说"，把法语硬写成这五种里的一种，看着像读出来了。所以别的语言的模型库和菜单里没有它；选着它、又要听俄语时，俄语那一行显示"未选择模型"，和 R2T2 遇到泰语时一样。
+- **不用来自动识别对方的语言**（没有 `detects`）。它确实能在这五种里自己判断（实测不给语言，日语那一句照样写对），但"自动检测"的意思是对方说什么语言都行：对方说俄语时它没有办法说"这不是我会的"，只会写成五种之一，而且开着自动检测时这台电脑每一路都由这同一个模型来听。要给它开放，至少得：先量它在应用切出的句子上判断语言准不准；界面和说明把"只在这五种里判断"讲清楚（现在的文字是"对方说哪种语言都能识别"）；共享清单里给它加 `auto` 之前想好别的设备会怎么理解。没把握，所以不提供。
+- **它会在日文、中文里加空格**：一句话里的一小段常常是一个词一个空格地写出来（实测「元 は 金持ち の 息子 でし たが。」；边说边读的 12 次里有 11 次带空格，同一句读完整时又没有）。显示前去掉（`native-engine.js` 的 `unspaced`，`openWindow` 的 `tidy`）：日文/中文字符之间、这类字符和数字之间的空格去掉；韩语的空格、拉丁字母单词之间的空格留着（日语里夹的英文单词也留着）。规则和手机端的 `Share.unspaced` 一字不差，所以同一段话电脑读和手机读出来一样；手机借给电脑时手机自己已经去过一遍，电脑这边（`remote-engine.js`）按模型名再去一遍，不依赖对方。
+- **很少写标点**：闲聊时几乎不写，朗读得清楚时会写。"一句一译"靠的是句子中间的句号（`sentenceCut.ts`），所以用它时和 R2T2 一样，连着说的一长段要等说完才翻译——不会出错，只是没有这个好处。有一点和别的模型不同：它每一次读，末尾都带一个句号或问号（哪怕话才说到一半：「元は金持ちの息子でしたが今は？」）。断句的规矩本来就要求句号后面再说出一截话才算数，所以这种末尾的标点不会被当成一句的结束（`sentenceCut.test.ts` 里用它实际写出来的几次读法钉住了）。没有替它补标点。两句话之间它有时只写一个空格、不写句号，去空格后两句就连在一起了：空格大多数时候是词与词之间的，没法拿来当句号用。
+- **安静的地方它可能写一个语气词**（比如「あ。」）。没有处理：应用送给它的是 VAD 判断"有人说话"的片段，太短的片段本来就不留。
+- **下载**：只在 Hugging Face 上有，魔搭上没有这个文件（魔搭上发布者的 `FunAudioLLM/SenseVoiceSmall-GGUF` 是另一个文件，少了 audio.cpp 要的那段说明，2,880 字节的差别，没试过能不能读）。所以它和 R2T2 一样没有 `mirror`，国内靠 `hf-mirror.com`（从北京出口查过，能下）。
+- **Windows 和 Apple 芯片的 Mac 都提供**（没有 `platforms`；2026-10-12 先只给了 Windows，第二天在 Mac 上跑过后放开）。先查的是 Mac 的引擎包里有没有这个家族：没有 Mac 也查得到一半——audio.cpp v0.9.0 的发布流程（`.github/workflows/release.yml`）里 macOS arm64 那一项用的是和别的平台同一组参数，没有限定模型（`AUDIOCPP_MODEL_SET` 默认 `full`），`CMakeLists.txt` 里 `sense_asr` 的登记也不分平台，所以**按构建配置它在包里**。但它在 Metal 上跑不跑得对，当时没人跑过：把它移植进 audio.cpp 的人只在处理器上验证过（它的说明 `docs/community_models/sense_asr-pr.md` 里写的是"CUDA/Metal/Vulkan 应该能用"，并把量显卡列为待办）；而同一个模型换一个显卡后端能不能跑不能想当然——手机上 audio.cpp 的 Vulkan 后端读 Qwen3-ASR 时在两台手机上都直接崩了。所以先只给了跑过的系统。
+  - **Mac 上的实测**（2026-10-13，M2，应用装好的那个引擎包里的 `audiocpp_cli`，`--family sense_asr --backend metal --request-option audio_chunk_mode=none --language ja`，同一个 GGUF，SHA-256 对过）：朗读的那一句（`selfcheck-ja.wav`，8.6 秒）一字不差，0.29 秒读完（29 倍实时），Metal 和处理器一样；应用切出来的那 59 段在 Metal 上读、去掉词间空格后按同一套打分是 **19.9%，没有一段是空的**（Windows 上 Vulkan 是 20.3%）；命令行进程的内存峰值约 0.53～0.54 GB。
+  - **Mac 上没跑过的**：验证的是模型本身（命令行），不是应用实际走的那条路——引擎的服务（`audiocpp_server`）加边说边重读。那条路用这个模型在 Windows 上跑过，在 Mac 上 Qwen3-ASR 一直在走。
+  - Mac 上系统自带识别已经覆盖这五种语言且更准，它在 Mac 上的用处是 macOS 26 以下，或想省内存的时候。
+- **许可**：原模型在 Hugging Face 上写的是 FunASR 的模型许可（`license: other`），魔搭上的原模型和这个 GGUF 仓库写的是 Apache-2.0。说法不一，记在这里。
+- **用户看到什么**："语音识别 → 这台电脑"的模型库里，"推荐"一组（`LocalAIAssist.test.tsx` 里按真实渲染钉住）：
+  - Windows：日语、中文、英语、韩语是 Qwen3-ASR 1.7B（带"推荐"）、R2T2、**SenseVoice-Small**、Qwen3-ASR 0.6B、Nemotron；粤语是 Qwen3-ASR 1.7B（带"推荐"）、SenseVoice-Small、Qwen3-ASR 0.6B。
+  - Mac（macOS 26 及以上）：日语、中文、英语、韩语是 Apple Speech（带"推荐"）、Qwen3-ASR 1.7B、**SenseVoice-Small**、Qwen3-ASR 0.6B、Nemotron；粤语是 Apple Speech（带"推荐"）、Qwen3-ASR 1.7B、SenseVoice-Small、Qwen3-ASR 0.6B。系统没有自带识别的 Mac 上，开头就是 Qwen3-ASR 1.7B（带"推荐"）。
+  - 它在哪个系统上都不会带"推荐"标记：它会的五种语言，排在它前面的模型都会，而且更准。别的语言（比如俄语）没有它的卡片。
+  - 它的说明："最轻也最快：约占 0.4 GB 显存。日语闲聊实测和 Qwen3-ASR 0.6B 一样准，很少写标点。只支持中文、粤语、英语、日语和韩语。"不写"约 20%"：20.3 和 20.7 分不出高下，而 0.6B 的卡片上写的是更早那次量的"约 22%"，两个数字摆在一起会让人以为它准两个点。"约 0.4 GB 显存"是 Windows 上量的；Mac 上是约 0.5 GB 内存。因为它成了最轻的，Nemotron 的说明从"最省显存……只在显存实在放不下上面几个时再选它"改成"占用小……只在上面几个放不下、或者不支持要听的语言时再选它"。
+- **手机借来的同一个模型**：手机借出的名字也是 `sensevoice-small-q8`。电脑现在认识这个名字了：语言照旧按代码告诉它（`saidFor`，和以前"不认识的名字"的做法结果一样），句子的长度限制从默认的 45/60/90 秒变成和这台电脑自己跑时一样的 8/8/24 秒（`localai.ts` 里按名字查 `limits`），也就是手机上的 Qwen3-ASR 一直在用的那一套。
 
 ### 审查之后（2026-10-06）
 
@@ -300,7 +336,7 @@ VRChat 里对面的人说什么语言是不一定的。"对方说什么语言"�
 - **语言这一组按用户的想法排**（2026-10-06，用户："我阅读不是我自己说的语言么，这个应该不用选自动检测，反而是对方说才需要"）：上游按"这次运行拿它做什么"给两个下拉框起名（"我说 / 对方读到"、"我阅读 / 对方说"），同一个框在不同模式下两个名字；"两者"模式还要再读一行反过来的话。Kotomimi 这个提供商下改成固定的 **我的语言 / 对方的语言**（`owners`），下面什么都不写。设置向导的语言那一步和最后的小结也这样叫（`StepLanguagePair`、`StepFinish`）。别的提供商保持上游的写法，上游的测试也因此不用动。
 - **下面不写解释**：试过在语言下面用一两行说"这次运行做什么"（对方说… → 我读到…），以及做不到自动检测时的原因，用户看了觉得更乱（"心智负担有点大"），都去掉了。能少写就少写。
 - **"我的语言"里没有自动检测**：源语言列表不再带 `auto`（`localaiLanguages.sources`）。以前识别放在另一台设备或 API 时会带，只听对方时它就出现在"我阅读"下面，读起来像是"自动检测我自己的语言"。
-- **谁能做到**：这台电脑原生引擎里的 Qwen3-ASR 1.7B（它读完整段再写，自己判断语言；`NATIVE_MODELS` 里的 `detects`）；一个 API（比如 Whisper 的接口）；或者**另一台 Kotomimi**，只要它共享着一个能识别语言的模型——它在模型清单里给这个模型的语言加上 `auto`（`nativeShare.ts`），这边据此判断（`canDetectOther` / `serverDetects`），会话里把语言说成 `auto`，那边就挑能识别语言的模型来听（选的是 Apple Speech 这种按语言分的也一样，交给那边挑）。实测：电脑选 Apple Speech、Mac 测试副本代听，俄、英、中、西都识别并翻译，日语原样显示。R2T2 也能不给语言，但每段开头几个词常认错语言，不提供。
+- **谁能做到**：这台电脑原生引擎里的 Qwen3-ASR 1.7B（它读完整段再写，自己判断语言；`NATIVE_MODELS` 里的 `detects`）；一个 API（比如 Whisper 的接口）；或者**另一台 Kotomimi**，只要它共享着一个能识别语言的模型——它在模型清单里给这个模型的语言加上 `auto`（`nativeShare.ts`），这边据此判断（`canDetectOther` / `serverDetects`），会话里把语言说成 `auto`，那边就挑能识别语言的模型来听（选的是 Apple Speech 这种按语言分的也一样，交给那边挑）。实测：电脑选 Apple Speech、Mac 测试副本代听，俄、英、中、西都识别并翻译，日语原样显示。R2T2 也能不给语言，但每段开头几个词常认错语言，不提供。SenseVoice-Small 只能在它会的五种语言里判断，别的语言会被硬写成这五种之一，也不提供（见"又轻又快的模型"）。
 - **做不到的时候**：选项还在，选了也保留，这一路就按"翻译对方主要说的语言"里选的那个来识别，不提示、不拒绝。0.43.107 及更早的 Kotomimi 不会在清单里写 `auto`，所以两边都更新后才会真的自动检测。
 - **语法反馈和模式**：语法反馈回答的是你自己说的话，所以只听对方时不起作用；这时"语法反馈"卡片里有一行提示把模式切到"我"或"两者"。
 - **模型自动跟着换**（用户的说法："类似一个不同的语言选项默认不同的模型"）：每个语言没单独选过模型、正在用的模型又听不了它时，默认用这台电脑上已下载、能听它的最好的一个（`nativePicked` 的最后一步；默认值不写进设置）。"自动检测"就是这样的一种"语言"：对方那一行自动显示 Qwen3-ASR 1.7B，只列出能自己识别语言的模型；一个都没下载时才显示"未选择模型"并说明要下载哪个。
@@ -433,13 +469,13 @@ VRChat 里对面的人说什么语言是不一定的。"对方说什么语言"�
 
 模型原来只从 Hugging Face 下载，国内不开代理连不上（用户的朋友在国内）。现在每个模型多一个备用地址：魔搭（ModelScope）上的同一个文件（`native-engine.js` 里每个模型的 `mirror`）。
 
-- **哪些有**：三个 Qwen3-ASR / Nemotron 识别模型、Index-Translate、两个混元翻译模型、Gemma 4 E2B，共七个。魔搭上的仓库是发布者自己的或对应的副本；2026-10-10 逐个对过，文件大小和 SHA-256 与这里记的完全一致。R2T2 在魔搭上没有（见下面"Hugging Face 的公开镜像"）。两个运行库见下面"运行库"。
+- **哪些有**：三个 Qwen3-ASR / Nemotron 识别模型、Index-Translate、两个混元翻译模型、Gemma 4 E2B，共七个。魔搭上的仓库是发布者自己的或对应的副本；2026-10-10 逐个对过，文件大小和 SHA-256 与这里记的完全一致。R2T2 在魔搭上没有（见下面"Hugging Face 的公开镜像"）；2026-10-12 加的 SenseVoice-Small 也没有（魔搭上发布者的那个仓库是另一个文件）。两个运行库见下面"运行库"。
 - **先问哪个**：电脑的时区是国内的（`Asia/Shanghai` 等）先问魔搭，否则先问 Hugging Face。只是先后顺序，不是限制。
 - **什么时候换**：一个地址 15 秒没有开始回答、回答了错误、回答的不是这个文件（一个网页、大小不对），或者一点没下到就断了，就换下一个，从已经下到的地方接着下（各处是同一个文件）。
 - **断了自己续（2026-10-11）**：下到一半断了、或者半分钟没有新数据，不用人再点，自己向刚才那个地址要剩下的部分。所有地址都轮过两遍（第二遍每个等 45 秒）还一点没有进展才报错，报错里写着问过哪些地址、各自说了什么（例如 `ghfast.top: The download did not answer. · github.com: …`），朋友截图过来就能看出卡在哪。
 - **运行库（2026-10-11）**：两个运行库（audio.cpp、llama.cpp）是 GitHub 发布页上的文件，国内常常下不动。用户的朋友第一次下翻译模型时卡在 0% 然后失败：模型之前要先下 llama.cpp 运行库。2026-10-12 从北京电信的出口实测（`.dev/tools/china-exit.ps1`）：GitHub 的运行库下载有时 30 秒连不上，有时连上了只有约 30 KB/s；Hugging Face 连不上；魔搭和前两个中转正常。同一个出口下，改过的应用从空文件夹下到了翻译和语法反馈各自的运行库（经中转）和模型（魔搭）。现在它们多了三个备用地址：公开的 GitHub 下载中转（`ghfast.top`、`gh-proxy.com`、`ghproxy.net`，`native-engine.js` 的 `GITHUB_RELAYS`），国内时区先问它们，别处最后才问。这些是志愿者办的服务，随时可能关：关了的代价是多等 15 秒，下一个接上。不信任它们的内容：下完同样核对 SHA-256，2026-10-11 三个中转下来的两个运行库都对得上。从北京出口看，`ghfast.top` 和 `gh-proxy.com` 快，`ghproxy.net` 慢（约 30 KB/s），所以排第三。想要一个不靠别人的国内地址，得在用户自己的魔搭账号下放一份。
 - **不会下错**：不管从哪边来，下完都要核对大小和 SHA-256，不对就丢掉。镜像上的文件以后要是变了，代价是白下一次，不会装进一个错的模型。
-- **Hugging Face 的公开镜像（2026-10-12）**：凡是 Hugging Face 上的文件，再多问一个 `hf-mirror.com`（同样的路径，志愿者办的镜像），排在魔搭之后。R2T2 在魔搭上没有，靠它才在国内下得到；从北京出口它答了 R2T2 的第一兆。同样只凭 SHA-256 收下。
+- **Hugging Face 的公开镜像（2026-10-12）**：凡是 Hugging Face 上的文件，再多问一个 `hf-mirror.com`（同样的路径，志愿者办的镜像），排在魔搭之后。R2T2 在魔搭上没有，靠它才在国内下得到；从北京出口它答了 R2T2 的第一兆。同样只凭 SHA-256 收下。SenseVoice-Small 也是只靠它（同样从国内查过有这个文件）。
 - **实现**：问谁、先后、等多久、断了怎么续，都在 `electron/fetch-file.js`（`pullWhole`）；`native-engine.js` 只管核对和改名。
 - 用户不需要选，也没有新的设置。
 
@@ -621,7 +657,7 @@ VRChat 里对面的人说什么语言是不一定的。"对方说什么语言"�
 
 ### 0.43.107 发出去之后用户看到的（2026-10-06）
 
-- **选了自动检测，会话启动失败**（"ASR engine init failed: The recognition engine of this computer could not start."）：应用下载的识别引擎一次只跑一个模型。对方那一路要识别语言，只能用 Qwen3-ASR 1.7B；用户自己的语言选的是别的模型（R2T2），两路各要一个，谁也起不来。而且开着语法反馈时两路听的是同一种语言，卡片里只有一行，没地方改。现在：选了自动检测，这台电脑上每一路都用能识别语言的那个模型（`NativePick.detecting`，`nativePicked` 的第一步），卡片里每一行也只列这样的模型；这个"顺带"的选择不写进设置，关掉自动检测就回到各自选的模型。用户问"为什么自动检测需要不同的识别模型"——因为引擎里只有 Qwen3-ASR 1.7B 能自己判断语言，其余的（R2T2、0.6B、Nemotron、Apple Speech）都要先被告知语言。
+- **选了自动检测，会话启动失败**（"ASR engine init failed: The recognition engine of this computer could not start."）：应用下载的识别引擎一次只跑一个模型。对方那一路要识别语言，只能用 Qwen3-ASR 1.7B；用户自己的语言选的是别的模型（R2T2），两路各要一个，谁也起不来。而且开着语法反馈时两路听的是同一种语言，卡片里只有一行，没地方改。现在：选了自动检测，这台电脑上每一路都用能识别语言的那个模型（`NativePick.detecting`，`nativePicked` 的第一步），卡片里每一行也只列这样的模型；这个"顺带"的选择不写进设置，关掉自动检测就回到各自选的模型。用户问"为什么自动检测需要不同的识别模型"——因为引擎里只有 Qwen3-ASR 1.7B 能自己判断语言，其余的（R2T2、0.6B、Nemotron、Apple Speech）都要先被告知语言；2026-10-12 加的 SenseVoice-Small 也一样，它只分得清自己会的五种。
 - **无底的样式下，没开始会话时的提示看不清**：只加阴影不够（浅色字压在浅色网页上）。没有会话时字幕窗口里的东西——开始按钮、提示——现在总是站在自己的深色底上，和样式无关；样式只管字幕。
 - **没人说话时"对方"标签一直挂在那里**：一栏里还没人说过话时什么都不画，也不占地方、不画分隔线。
 - **原文和标签在非深色底的样式下看不清**：原文和"我"那行的原句原来各带 0.8 的透明度，标签的底也是半透明的，底板一淡就一起没了。现在两种小字都是十足的颜色，标签是实心的深色小底配亮字。
@@ -738,7 +774,7 @@ VRChat 里对面的人说什么语言是不一定的。"对方说什么语言"�
 
 - 每种语言都是一两句一条、说完约 1～2 秒出译文。字数下限按文字类型算，所以俄语、英语、西语里"Привет.""Hello there."这样的短句和下一句合成一条，韩语、日语按 10 个字算。
 - 中文那一段没有翻译（读的人自己的语言，本来就不翻），整段一条。
-- **不同的识别模型**：断句靠的是识别器边听边写出带标点的文字。Qwen3-ASR 1.7B 是这样，上面的数字都是它的。Confucius4 R2T2 几乎不写标点（同一段录音里只有一个句号），所以基本不会断，和以前一样整段说完才翻译——不会出错，只是没有这个好处。Qwen3-ASR 0.6B、Mac 上的 Apple 语音、API 识别还没单独测过；一次性给出整段文字的识别器本来就不断。
+- **不同的识别模型**：断句靠的是识别器边听边写出带标点的文字。Qwen3-ASR 1.7B 是这样，上面的数字都是它的。Confucius4 R2T2 几乎不写标点（同一段录音里只有一个句号），所以基本不会断，和以前一样整段说完才翻译——不会出错，只是没有这个好处。SenseVoice-Small（2026-10-12 加的）闲聊时也几乎不写标点，同样基本不断；它每次读到的末尾都带一个句号或问号，但末尾的标点后面没有话，按规矩不算一句的结束（见"又轻又快的模型"）。Qwen3-ASR 0.6B、Mac 上的 Apple 语音、API 识别还没单独测过；一次性给出整段文字的识别器本来就不断。
 - **顺带发现一个从 0.43.102 起就有的错**：开着语法反馈、又开着自动检测时，对方那条腿被当成了"我"的腿——按"我"的语言去听、回的是语法反馈的 ✓，完全没有译文。原因是判断"这是不是对方的腿"用的是已经把来源改成"自动"之后的方向，和语言对的反向对不上了（`buildLocalAI` 里的 `coached`）。改成用改写之前的方向来判断。原来的测试里"是不是对方"的判断写得太松，没测出来；加了一条按应用真实判断方式写的测试。
 
 ### 工具条在字幕框的上方（2026-10-06）
@@ -1066,6 +1102,7 @@ node scripts/fork-localai-locales.cjs   # 语言包冲突时：先取上游版�
 | `src/components/SetupWizard/applySetup.ts` | Kotomimi 那一步的选择同时写入翻译和语法反馈的位置 |
 | `src/app/readiness.ts`、`src/stores/providerStore.ts` | 网络类提供商也能在模型下载完成后重新检查就绪状态 |
 | `src/lib/local-inference/modelManifest.ts` | 启动时把自定义模型并入模型库 |
+| `src/lib/local-inference/selection/candidates.wasm.ts`、`src/components/Settings/sections/ModelManagementSection.tsx`、`src/components/Settings/engine/useWasmEngineAdapter.ts` | 识别模型按实测排序、带说明气泡（各一处调用，规则本身在本分支的 `selection/measuredRank.ts`）；模型卡片导出给原生引擎的卡片用；某种语言不再提供的识别模型（日语的内置 SenseVoice）不进自动选择、模型库和下拉菜单，只有以前选过它的那一行还列着它 |
 | `src/lib/local-inference/engine/AsrEngine.ts`、`public/workers/sherpa-onnx-asr.worker.js` | 把语言传给 SenseVoice |
 | `src/components/Conversation/ConversationList.tsx`、`src/components/Subtitle/SubtitleBands.tsx` | 文本渲染处接入注音，并给文字加语言标记 |
 | `src/components/Display/DisplaySettingsPopover.tsx` | 显示设置里加两个注音开关 |
@@ -1084,7 +1121,7 @@ node scripts/fork-localai-locales.cjs   # 语言包冲突时：先取上游版�
 | `electron/update-manager.js`、`electron/update-payload.js` | 更新源和安装包文件名 |
 | `forge.config.js` | 应用身份 |
 | `assets/icon.*`、`public/favicon.ico`、`public/logo*.png` | 图标 |
-| 几个测试文件（`registry.test.ts`、`palabraai/provider.test.ts`、`gemini/provider.test.ts`、`localInference/provider.test.ts`、`ProviderPicker.test.tsx`、`AccountButton.test.tsx`、`LanguagePairSection.test.tsx`、`SimpleSettings.order.test.tsx`、`HelpSection.test.tsx`、`src/viewer/{ViewerApp,PresentApp,strings}.test.ts(x)`） | 跟着上面的改动更新的断言（观众页的三个：语言名和产品名是本分支的叫法） |
+| 几个测试文件（`registry.test.ts`、`palabraai/provider.test.ts`、`gemini/provider.test.ts`、`localInference/provider.test.ts`、`ProviderPicker.test.tsx`、`AccountButton.test.tsx`、`LanguagePairSection.test.tsx`、`SimpleSettings.order.test.tsx`、`HelpSection.test.tsx`、`src/viewer/{ViewerApp,PresentApp,strings}.test.ts(x)`、`selection/candidates.wasm.test.ts`、`engine/useWasmEngineAdapter.test.ts`） | 跟着上面的改动更新的断言（观众页的三个：语言名和产品名是本分支的叫法；最后两个：日语的识别模型排序，以及"第一个支持日语的模型"不再是内置的 SenseVoice） |
 | `src/locales/*/translation.json` | 由脚本生成的文字 |
 | `package.json`、`package-lock.json` | 三个新依赖：`@sglkc/kuromoji`、`wanakana`、`es-hangul`；`ws` 从开发依赖移到运行依赖（共享的服务端要用）。另外是本分支的版本号（见"版本号和发布"），`productName` 和 `build` 里的应用 ID、可执行文件名、macOS 签名证书名、更新源 |
 | `extension/package.json`、`extension/package-lock.json`、`extension/manifest.json` | 只有版本号，和根目录的一起改（见"版本号和发布"）。上游每次发版都会在这里冲突：保留本分支的版本号 |

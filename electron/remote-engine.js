@@ -10,7 +10,7 @@
 // open on such an engine, each under an id, for the page (`src/lib/native/remoteEngine.ts`).
 //
 // No Electron import, and the reading is handed in, so its tests need neither.
-const { openWindow, readWhole, languageCode, languageName, languageLocale, MODELS } = require('./native-engine');
+const { openWindow, readWhole, unspaced, languageCode, languageName, languageLocale, MODELS } = require('./native-engine');
 
 /** A reading over the network is given longer than one on this computer: the phone may be the slower of the two. */
 const READ_TIMEOUT_MS = 60_000;
@@ -58,6 +58,8 @@ function createRemoteEngine({ onStream = () => {}, window = openWindow, read = r
       language: saidFor(model, typeof language === 'string' ? language : ''),
       timeoutMs: READ_TIMEOUT_MS,
       read: (asked) => read({ ...asked, ...target }),
+      // The phone takes a model's spaces out itself; taken out here as well, the text is the same whoever sent it.
+      ...(MODELS[model]?.unspaced ? { tidy: unspaced } : {}),
       note,
     }, (event) => {
       if (event.type !== 'delta' && event.type !== 'partial') streams.delete(id);

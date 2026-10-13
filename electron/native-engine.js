@@ -90,6 +90,9 @@ const QWEN_LANGUAGES = ['zh', 'en', 'yue', 'ar', 'de', 'fr', 'es', 'pt', 'id', '
 /**
  * The models, by the id the page asks with. `options` are the runtime's
  * session options; R2T2's are the ones measured (FORK.md, "原生引擎").
+ * `requestOptions` are what it is told with every reading (the server's
+ * `default_request_options`), and `unspaced` says its text has spaces to be
+ * taken out before it is shown (`unspaced`).
  */
 const MODELS = {
   'r2t2-q8': {
@@ -117,6 +120,31 @@ const MODELS = {
     // It is told the language by its code, and these are the ones it hears.
     languageAs: 'code',
     languages: QWEN_LANGUAGES,
+  },
+  // SenseVoice-Small: a quarter of a gigabyte, and as right as the small Qwen3 below on the stretches the app cuts
+  // (20.3 % of the kana wrong against 20.7 %, the 1.7B 16.9 %; none of its readings empty — FORK.md, "又轻又快").
+  // Another kind of model: it writes a stretch in one pass, not a letter at a time, so it cannot lose its way, and
+  // a reading costs it next to nothing. Read a stretch at a time like the others here.
+  // For every system the runtime is published for, each run with its own archive (2026-10-12/13): on Windows (Vulkan,
+  // RTX 5070 Ti) through the server as the app starts it, 0.3-0.4 GB of video memory; on an Apple M2 (Metal) by the
+  // archive's command-line program, the same stretches 19.9 % wrong and none empty, about 0.5 GB of memory.
+  'sensevoice-small-q8': {
+    file: 'sensevoice-small-q8-audiocpp-v1.gguf',
+    // The makers' own file for this runtime. ModelScope has no copy of it (theirs there is another file), so it has
+    // no `mirror`: where Hugging Face is not reached it comes by the public mirror every such file is also asked of.
+    url: 'https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF-audiocpp/resolve/5c3fcfe748a8714216bc135476d5863084fddb72/sensevoice-small-q8-audiocpp-v1.gguf',
+    bytes: 254211200,
+    sha256: '4dedf169f625437fb336f2959674f399819729a765e184128c0e25a6e16ff0ec',
+    family: 'sense_asr',
+    mode: 'offline',
+    // Left to itself the runtime first cuts a recording at its pauses, with a second model the app does not carry,
+    // and fails for the lack of it. A stretch is read whole.
+    requestOptions: { audio_chunk_mode: 'none' },
+    // Told a language that is not one of these it does not refuse: it reads as though told none, and writes the
+    // speech down as one of its five. So it is offered for these alone, and never left to detect.
+    languageAs: 'code',
+    languages: ['zh', 'yue', 'en', 'ja', 'ko'],
+    unspaced: true,
   },
   // The small one, for a computer that runs a game beside it: about 2 GB of video memory where the 1.7B holds 3, a
   // reading a quarter shorter, and more characters wrong (FORK.md, "小模型"). The same family, read the same way.
@@ -346,7 +374,7 @@ const AUDIO_RUNTIME = {
       backend: build.backend,
       device: 0,
       lazy_load: false,
-      models: [{ id, family: model.family, path: model.file, task: 'asr', mode: model.mode, session_options: model.options ?? {} }],
+      models: [{ id, family: model.family, path: model.file, task: 'asr', mode: model.mode, session_options: model.options ?? {}, ...(model.requestOptions ? { default_request_options: model.requestOptions } : {}) }],
     }, null, 1));
     return ['--config', 'server.json', '--no-ui'];
   },
@@ -535,6 +563,18 @@ function joinHalves(first, second) {
 }
 
 /**
+ * A text without the spaces a model put where the writing has none: between two characters of Japanese or Chinese
+ * (`UNSPACED`), and between such a character and a figure (「あと 15 秒」). SenseVoice writes them now and then — a second or two
+ * cut out of a sentence comes back a word at a time (「元 は 金持ち の 息子 でし たが。」). Korean keeps its spaces
+ * (Hangul is not among these characters), and so do Latin words, also inside Japanese. The same rule as the phone's
+ * (`Share.unspaced` in android/), so that a stretch reads the same whichever of the two read it.
+ */
+const SPACE_INSIDE = new RegExp(String.raw`(?<=${UNSPACED.source})\s+(?=${UNSPACED.source}|\d)|(?<=\d)\s+(?=${UNSPACED.source})`, 'gu');
+function unspaced(text) {
+  return String(text).replace(SPACE_INSIDE, '');
+}
+
+/**
  * Where to cut a stretch in two for reading the halves apart: the quietest fifth of a second in its middle third,
  * as a count of bytes from its start.
  */
@@ -592,8 +632,14 @@ const WINDOW_MOST_SECONDS = 120;
  * goes out as `{ type: 'partial', text }`, everything heard so far, which the
  * next may write otherwise. `end` has it read once more, to `{ type: 'done',
  * text }` — unless the last reading already had all but the closing silence.
+ * `tidy`: what every reading's text goes through before anything is made of
+ * it, for a model whose writing needs it (`unspaced`).
  */
-function openWindow({ port, model, sampleRate, language, timeoutMs = WINDOW_READ_TIMEOUT_MS, read = readWhole, now = () => Date.now(), setTimer = setTimeout, clearTimer = clearTimeout, note = () => {} }, onEvent) {
+function openWindow({ port, model, sampleRate, language, timeoutMs = WINDOW_READ_TIMEOUT_MS, read: readAsIs = readWhole, tidy = null, now = () => Date.now(), setTimer = setTimeout, clearTimer = clearTimeout, note = () => {} }, onEvent) {
+  const read = tidy ? (asked) => {
+    const one = readAsIs(asked);
+    return { done: one.done.then((answer) => (answer.ok ? { ...answer, text: tidy(answer.text) } : answer)), abort: () => one.abort() };
+  } : readAsIs;
   const chunks = [];
   let bytes = 0;
   /** The loudest sample so far, and the loudest that no reading has had yet. */
@@ -1109,7 +1155,7 @@ function createNativeEngine(deps = {}) {
     const windowed = model?.mode === 'offline';
     const said = model?.languageAs === 'code' ? languageCode(language) : model?.languageAs === 'locale' ? languageLocale(language) : languageName(language);
     const target = { port: run.port, model: run.model, sampleRate: rate, language: said };
-    const stream = (windowed ? window : live)(windowed ? { ...target, note } : target, (event) => {
+    const stream = (windowed ? window : live)(windowed ? { ...target, note, ...(model?.unspaced ? { tidy: unspaced } : {}) } : target, (event) => {
       if (event.type !== 'delta' && event.type !== 'partial') streams.delete(id);
       onStream({ id, ...event });
     });
@@ -1137,4 +1183,4 @@ function createNativeEngine(deps = {}) {
   return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream };
 }
 
-module.exports = { createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };
+module.exports = { createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, unspaced, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };

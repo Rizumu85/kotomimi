@@ -417,10 +417,15 @@ const PROVIDER = {
     "省资源的小模型，适合同一台电脑还开着游戏时用：约占 2 GB 显存（1.7B 约 3 GB）。日语闲聊实测错字约 22%，比 1.7B 多一些。其他和 1.7B 一样，同样支持 30 种语言。",
     "省資源的小模型，適合同一台電腦還開著遊戲時用：約佔 2 GB 顯示記憶體（1.7B 約 3 GB）。日語閒聊實測錯字約 22%，比 1.7B 多一些。其他和 1.7B 一樣，同樣支援 30 種語言。",
   ],
+  noteNativeSenseVoice: [
+    "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
+    "最轻也最快：约占 0.4 GB 显存。日语闲聊实测和 Qwen3-ASR 0.6B 一样准，很少写标点。只支持中文、粤语、英语、日语和韩语。",
+    "最輕也最快：約佔 0.4 GB 顯示記憶體。日語閒聊實測和 Qwen3-ASR 0.6B 一樣準，很少寫標點。只支援中文、粵語、英語、日語和韓語。",
+  ],
   noteNativeNemotron: [
-    "The lightest: about 1 GB of video memory. Japanese talk, measured: about 27% of the characters wrong, and a short sentence is sometimes left out altogether. Choose it only when the computer has no room for the ones above. Over thirty languages.",
-    "最省显存：约占 1 GB。日语闲聊实测错字约 27%，短句有时会整句漏掉。只在显存实在放不下上面几个时再选它。支持三十多种语言。",
-    "最省顯示記憶體：約佔 1 GB。日語閒聊實測錯字約 27%，短句有時會整句漏掉。只在顯示記憶體實在放不下上面幾個時再選它。支援三十多種語言。",
+    "Small: about 1 GB of video memory. Japanese talk, measured: about 27% of the characters wrong, and a short sentence is sometimes left out altogether. Choose it only when the ones above do not fit or do not hear the language. Over thirty languages.",
+    "占用小：约占 1 GB 显存。日语闲聊实测错字约 27%，短句有时会整句漏掉。只在上面几个放不下、或者不支持要听的语言时再选它。支持三十多种语言。",
+    "佔用小：約佔 1 GB 顯示記憶體。日語閒聊實測錯字約 27%，短句有時會整句漏掉。只在上面幾個放不下、或者不支援要聽的語言時再選它。支援三十多種語言。",
   ],
   // The native translation engine (llama.cpp's server) and what was found of its models.
   // The native feedback engine (llama.cpp's server with a small chat model) and what was found of its model.

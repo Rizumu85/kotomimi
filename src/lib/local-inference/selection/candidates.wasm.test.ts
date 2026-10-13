@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { wasmCandidates } from './candidates.wasm';
 import { getManifestByType } from '../modelManifest';
-import { byRank } from './resolveStage';
+import { byRank, resolveStage } from './resolveStage';
+import { MEASURED_ASR_ORDER, measuredEntries, measuredNote, offeredFor, offeredLanguages } from './measuredRank';
 
 const allDownloaded = () => {
   const out: Record<string, 'downloaded'> = {};
@@ -24,12 +25,52 @@ describe('the recognizers\' order where it was measured (fork)', () => {
     expect(ranked('ja').slice(0, 3)).toEqual(['qwen3-asr-1.7b-webgpu', 'whisper-large-v3-turbo-webgpu', 'voxtral-mini-4b-webgpu']);
   });
 
-  it('keeps the ones measured unusable for Japanese to the end: picked by hand, or when nothing else is there', () => {
+  it('keeps the one measured unusable for Japanese to the end: picked by hand, or when nothing else is there', () => {
     const ja = ranked('ja');
-    expect(ja.slice(-2)).toEqual(['granite-speech-4.1-2b', 'sensevoice-int8']);
-    // Still in the pool: with only one of them downloaded, it is what hears.
-    const only = wasmCandidates({ ...ctx(), modelStatuses: { 'sensevoice-int8': 'downloaded' } }).pool('asr', 'ja', 'en').filter((c) => c.ready).map((c) => c.id);
-    expect(only).toEqual(['sensevoice-int8']);
+    expect(ja[ja.length - 1]).toBe('granite-speech-4.1-2b');
+    // Still in the pool: with only that one downloaded, it is what hears.
+    const only = wasmCandidates({ ...ctx(), modelStatuses: { 'granite-speech-4.1-2b': 'downloaded' } }).pool('asr', 'ja', 'en').filter((c) => c.ready && c.autoEligible).map((c) => c.id);
+    expect(only).toEqual(['granite-speech-4.1-2b']);
+  });
+
+  it('does not offer for Japanese the SenseVoice that runs in the page, which writes it without its kana: never the automatic choice, though a choice made before still finds it', () => {
+    const withheld = ['sensevoice-int8', 'sensevoice-nano-int8'];
+    expect(MEASURED_ASR_ORDER.ja.unoffered).toEqual(withheld);
+    for (const id of withheld) expect(ranked('ja')).not.toContain(id);
+    // With nothing else downloaded, nothing hears Japanese by itself…
+    const only = wasmCandidates({ ...ctx(), modelStatuses: { 'sensevoice-int8': 'downloaded', 'sensevoice-nano-int8': 'downloaded' } });
+    expect(resolveStage('ja→en', 'asr', {}, only)).toMatchObject({ resolved: null, note: { reason: 'no-candidate' } });
+    // …and a choice of one saved by an earlier build is still the model that hears, not another.
+    for (const id of withheld) {
+      const saved = { 'ja→en': { asr: { modelId: id }, translation: { modelId: '' }, tts: { modelId: '' } } };
+      expect(resolveStage('ja→en', 'asr', saved, only)).toEqual({ resolved: { modelId: id, variant: undefined, source: 'explicit' } });
+      expect(resolveStage('ja→en', 'asr', saved, wasmCandidates(ctx())).resolved).toMatchObject({ modelId: id, source: 'explicit' });
+    }
+    // The languages it reads well are as they were: offered, and the automatic choice where the catalog says so.
+    for (const language of ['zh', 'en', 'ko', 'yue']) {
+      for (const id of withheld) {
+        expect(offeredFor(id, language)).toBe(true);
+        expect(wasmCandidates(ctx()).pool('asr', language, 'en').find((c) => c.id === id)?.autoEligible).toBe(true);
+      }
+    }
+    expect(resolveStage('zh→en', 'asr', {}, only).resolved).toMatchObject({ source: 'auto' });
+    expect(offeredLanguages('sensevoice-int8', ['zh', 'en', 'ja', 'ko', 'yue'])).toEqual(['zh', 'en', 'ko', 'yue']);
+    expect(offeredLanguages('whisper-large-v3-turbo-webgpu', ['ja', 'en'])).toEqual(['ja', 'en']);
+  });
+
+  it('lists in the library what is offered for the language, and one that is not only while it is what hears', () => {
+    const catalog = [...getManifestByType('asr'), ...getManifestByType('asr-stream')].filter((m) => m.multilingual || m.languages.includes('ja'));
+    expect(measuredEntries(catalog, 'ja').map((m) => m.id)).not.toContain('sensevoice-int8');
+    expect(measuredEntries(catalog, 'ja').map((m) => m.id)).not.toContain('sensevoice-nano-int8');
+    // The one chosen before stays, last and unmarked, with what was found of it; the other is still not offered.
+    const kept = measuredEntries(catalog, 'ja', 'sensevoice-int8');
+    expect(kept[kept.length - 1]).toMatchObject({ id: 'sensevoice-int8', recommended: false });
+    expect(kept.map((m) => m.id)).not.toContain('sensevoice-nano-int8');
+    expect(measuredNote('sensevoice-int8', 'ja')).toBe('noteSenseVoice');
+    expect(measuredNote('sensevoice-nano-int8', 'ja')).toBe('noteSenseVoice');
+    // A language that was not measured lists everything, as given.
+    const zh = [...getManifestByType('asr')].filter((m) => m.multilingual || m.languages.includes('zh'));
+    expect(measuredEntries(zh, 'zh').map((m) => m.id)).toEqual(zh.map((m) => m.id));
   });
 
   it('leaves the catalog\'s order alone for a language that was not measured', () => {

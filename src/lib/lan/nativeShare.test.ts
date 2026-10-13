@@ -303,3 +303,38 @@ describe('a recognizer that tells languages apart, lent', () => {
     expect(nativeRecognizerFor('auto', '')).toBeNull();
   });
 });
+
+describe('SenseVoice-Small, lent as the engine’s other models are', () => {
+  it('is listed with its five languages, and not as one that tells languages apart', () => {
+    useNativeEngineStore.setState({ status: status({ 'sensevoice-small-q8': downloaded, 'qwen3-asr-0.6b-q8': absent }) });
+    expect(nativeShared()).toEqual([{ id: 'sensevoice-small-q8', kind: 'asr', languages: ['zh', 'yue', 'en', 'ja', 'ko'] }]);
+    expect(appLanModels.shared()[0]).toEqual({ id: 'sensevoice-small-q8', kind: 'asr', languages: ['zh', 'yue', 'en', 'ja', 'ko'] });
+  });
+
+  it('answers a device for a language it hears — named, or left to this computer — and for no other', () => {
+    useNativeEngineStore.setState({ status: status({ 'sensevoice-small-q8': downloaded }) });
+    for (const language of ['ja', 'zh', 'yue', 'en', 'ko']) {
+      expect(nativeRecognizerFor(language, ''), language).toEqual({ modelId: 'sensevoice-small-q8', streaming: true });
+      expect(nativeRecognizerFor(language, 'sensevoice-small-q8'), language).toEqual({ modelId: 'sensevoice-small-q8', streaming: true });
+    }
+    // Told another language it would write the speech down as one of its five: it is not asked.
+    for (const language of ['ru', 'fr', 'auto']) {
+      expect(nativeRecognizerFor(language, ''), language).toBeNull();
+      expect(nativeRecognizerFor(language, 'sensevoice-small-q8'), language).toBeNull();
+    }
+    // Read live, a stretch begun again as often as on this computer's own runs.
+    expect(nativeRecognizer({ modelId: 'sensevoice-small-q8' })).not.toBeNull();
+  });
+
+  it('is this computer’s choice after the more accurate models and before the small Qwen3 it is level with', () => {
+    useNativeEngineStore.setState({ status: status({ 'qwen3-asr-0.6b-q8': downloaded, 'nemotron-asr-0.6b-q8': downloaded, 'sensevoice-small-q8': downloaded }) });
+    expect(nativeRecognizerFor('ja', '')).toEqual({ modelId: 'sensevoice-small-q8', streaming: true });
+    // A language of the small Qwen3's alone is that one's.
+    expect(nativeRecognizerFor('ru', '')).toEqual({ modelId: 'qwen3-asr-0.6b-q8', streaming: true });
+    useNativeEngineStore.setState({ status: status({ 'r2t2-q8': downloaded, 'sensevoice-small-q8': downloaded }) });
+    expect(nativeRecognizerFor('ja', '')).toEqual({ modelId: 'r2t2-q8', streaming: true });
+    expect(nativeRecognizerFor('yue', '')).toEqual({ modelId: 'sensevoice-small-q8', streaming: true });
+    useNativeEngineStore.setState({ status: status({ 'qwen3-asr-1.7b-q8': downloaded, 'sensevoice-small-q8': downloaded }) });
+    expect(nativeRecognizerFor('ja', '')).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
+  });
+});

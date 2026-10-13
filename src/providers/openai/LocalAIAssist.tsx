@@ -479,7 +479,8 @@ function DeviceModels({ stage, settings, update, pair, legs, disabled, tour, oth
         const nothing = mine === null ? t('providers.localai.nativeNone')
           : mine !== undefined ? null
             : !looked ? t('providers.localai.checking')
-              : auto ? null
+              // A model chosen before and no longer offered for the language still hears it, with no automatic choice beside it.
+              : auto || explicit ? null
                 : natives.length > 0 ? t('providers.localai.nativeNone') : t('providers.localai.notDownloaded');
         return (
           <div className="kt-here__row" key={slot.dir}>

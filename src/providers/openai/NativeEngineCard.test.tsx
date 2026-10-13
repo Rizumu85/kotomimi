@@ -3,9 +3,13 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { NativeEngineStatus } from '../../lib/native/nativeEngine';
 import { useNativeCoachStore, useNativeEngineStore } from '../../stores/nativeEngineStore';
-import { NativeEngineCard } from './NativeEngineCard';
+import { NativeEngineCard, nativeNoteKey } from './NativeEngineCard';
 import { NATIVE_COACHES } from './nativeCoaches';
 import { NATIVE_MODELS } from './localaiNative';
+import { NATIVE_TRANSLATORS } from './nativeTranslators';
+import en from '../../locales/en/translation.json';
+import zhCN from '../../locales/zh_CN/translation.json';
+import zhTW from '../../locales/zh_TW/translation.json';
 
 // The catalog's keys stand for its strings.
 vi.mock('react-i18next', async (importOriginal) => ({ ...(await importOriginal<typeof import('react-i18next')>()), useTranslation: () => ({ t: (key: string) => key }) }));
@@ -25,6 +29,38 @@ afterEach(() => {
   cleanup();
   useNativeCoachStore.setState({ status: before.coach });
   useNativeEngineStore.setState({ status: before.hearing });
+});
+
+describe('what a native model’s card says of it', () => {
+  type Words = Record<string, string>;
+  const words = (catalog: unknown): Words => (catalog as { providers: { localai: Words } }).providers.localai;
+
+  it('is a sentence the catalogs have, for every model of every engine', () => {
+    for (const model of [...NATIVE_MODELS, ...NATIVE_TRANSLATORS, ...NATIVE_COACHES]) {
+      const key = nativeNoteKey(model.id);
+      expect(key, model.id).toBeTruthy();
+      for (const catalog of [en, zhCN, zhTW]) expect(words(catalog)[key!], `${model.id} ${key}`).toBeTruthy();
+    }
+    expect(nativeNoteKey('some-other-model')).toBeUndefined();
+  });
+
+  it('says of SenseVoice-Small what it costs and what it hears, in the three languages the fork writes, and briefly', () => {
+    expect(nativeNoteKey('sensevoice-small-q8')).toBe('noteNativeSenseVoice');
+    for (const [catalog, languages] of [[en, ['Chinese', 'Cantonese', 'English', 'Japanese', 'Korean']], [zhCN, ['中文', '粤语', '英语', '日语', '韩语']], [zhTW, ['中文', '粵語', '英語', '日語', '韓語']]] as const) {
+      const note = words(catalog).noteNativeSenseVoice;
+      // What it takes of the graphics card, how right it is — said against the small Qwen3-ASR, which it is level
+      // with (20.3 % against 20.7 %: no number of its own would say that) — and its five languages.
+      expect(note).toContain('0.4 GB');
+      expect(note).toContain('Qwen3-ASR');
+      for (const language of languages) expect(note).toContain(language);
+      // No longer than the notes of the cards beside it.
+      expect(note.length).toBeLessThanOrEqual(words(catalog).noteNativeQwenSmall.length);
+    }
+    // The card that was "the lightest" before it no longer says so: this one is.
+    expect(words(en).noteNativeNemotron).not.toMatch(/lightest/i);
+    expect(words(zhCN).noteNativeNemotron).not.toContain('最省');
+    expect(words(zhTW).noteNativeNemotron).not.toContain('最省');
+  });
 });
 
 describe('a native model’s card', () => {

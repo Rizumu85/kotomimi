@@ -27,12 +27,16 @@ const NONE: LocalAICredentials = { apiKey: '', endpoint: '' };
 const SERVER: LocalAICredentials = { apiKey: '', endpoint: 'ws://192.168.1.10:8080/v1/realtime' };
 const settings = (patch: Partial<LocalAISettings> = {}): LocalAISettings => ({ ...LOCALAI_DEFAULTS, ...patch });
 
-/** What this computer has downloaded: SenseVoice hears Chinese and Japanese; Bing, a cloud model, is always there to translate. */
+/**
+ * What this computer has downloaded: SenseVoice hears Chinese, and a Moonshine Japanese — the SenseVoice that runs in
+ * the page is not offered for Japanese (`measuredRank.ts`); Bing, a cloud model, is always there to translate.
+ */
 function downloaded(...ids: string[]) {
   useModelStore.setState({ initialized: true, webgpuAvailable: true, deviceFeatures: [], modelStatuses: Object.fromEntries(ids.map((id) => [id, 'downloaded' as const])) });
 }
+const HEARS_JA = 'moonshine-tiny-ja-quant';
 
-beforeEach(() => downloaded('sensevoice-int8'));
+beforeEach(() => downloaded('sensevoice-int8', HEARS_JA));
 
 function configFor(context: SessionContext, patch: Partial<LocalAISettings>, models: typeof shared.models = []): LocalAIConfig {
   const config = buildLocalAI(context, settings(patch), { ...shared, models });
@@ -75,12 +79,31 @@ describe('where each stage runs', () => {
 
   it('resolves a slot to the pick, else to the best model downloaded, and to nothing for a language no one hears', () => {
     expect(deviceRecognizer('zh-CN', 'ja', {})).toEqual({ modelId: 'sensevoice-int8', streaming: false });
+    expect(deviceRecognizer('ja', 'zh-CN', {})).toEqual({ modelId: HEARS_JA, streaming: false });
     expect(deviceRecognizer('auto', 'ja', {})).toBeNull();
     downloaded();
     expect(deviceRecognizer('zh-CN', 'ja', {})).toBeNull();
     // A cloud translator needs no download.
     expect(deviceTranslator('zh-CN', 'ja', {})).toBe('bing-translator');
     expect(deviceTranslator('auto', 'ja', {})).toBeNull();
+  });
+
+  it('does not hear Japanese by the SenseVoice that runs in the page, which writes it without its kana — unless that was chosen before', () => {
+    // Downloaded for its Chinese, and nothing else here hears Japanese: none does, and the run says a model is missing.
+    downloaded('sensevoice-int8', 'sensevoice-nano-int8');
+    expect(deviceRecognizer('zh-CN', 'ja', {})).toEqual({ modelId: 'sensevoice-int8', streaming: false });
+    expect(deviceRecognizer('ja', 'zh-CN', {})).toBeNull();
+    expect(buildLocalAI(PARTICIPANT, settings(HERE), shared)).toMatchObject({ code: 'no_asr', params: { source: 'ja' } });
+    // A choice of it saved by an earlier build still hears: the model is never silently another.
+    for (const id of ['sensevoice-int8', 'sensevoice-nano-int8']) {
+      const picks = { 'ja→zh': { asr: { modelId: id }, translation: { modelId: '' }, tts: { modelId: '' } } };
+      expect(deviceRecognizer('ja', 'zh-CN', picks)).toEqual({ modelId: id, streaming: false });
+    }
+    // …also beside a recognizer that would otherwise be the automatic choice.
+    downloaded('sensevoice-int8', HEARS_JA);
+    const kept = { 'ja→zh': { asr: { modelId: 'sensevoice-int8' }, translation: { modelId: '' }, tts: { modelId: '' } } };
+    expect(deviceRecognizer('ja', 'zh-CN', kept)?.modelId).toBe('sensevoice-int8');
+    expect(deviceRecognizer('ja', 'zh-CN', {})?.modelId).toBe(HEARS_JA);
   });
 });
 
@@ -130,7 +153,7 @@ describe('a leg this computer hears', () => {
 
   it('hears a coached speaker in the language they practise, and translates only what they type', () => {
     const c = configFor(SPEAKER, { ...HERE, coach: true, coachAt: 'api', coachModel: 'qwen3-4b', coachBaseUrl: 'http://192.168.1.10:8080/v1', coachNeedsKey: false });
-    expect(c.device?.modelId).toBe('sensevoice-int8');
+    expect(c.device?.modelId).toBe(HEARS_JA);
     expect(c.stages).toMatchObject({ heard: 'ja', speech: { kind: 'coach', model: 'qwen3-4b' }, typed: { via: 'device', model: 'bing-translator' } });
     // The feedback has a place of its own, and borrows no model from the translation's.
     expect(buildLocalAI(SPEAKER, settings({ ...HERE, coach: true, coachAt: 'api', translateModel: 'left-over' }), shared)).toMatchObject({ code: 'coach_unnamed' });
@@ -206,7 +229,7 @@ describe('grammar feedback on this computer', () => {
 
   it('is written by one of the catalog\'s chat models: the pick, else the largest downloaded', () => {
     expect(deviceChatModels().map((m) => m.id)).toEqual(['qwen2.5-0.5b-translation', 'qwen3-0.6b-translation', 'qwen3.5-0.8b-translation', 'qwen3.5-2b-translation']);
-    downloaded('sensevoice-int8', 'qwen3-0.6b-translation', 'qwen3.5-2b-translation', 'opus-mt-ja-en');
+    downloaded('sensevoice-int8', HEARS_JA, 'qwen3-0.6b-translation', 'qwen3.5-2b-translation', 'opus-mt-ja-en');
     expect(deviceCoachModel('')).toBe('qwen3.5-2b-translation');
     expect(deviceCoachModel('qwen3-0.6b-translation')).toBe('qwen3-0.6b-translation');
     // A pick that cannot run falls back; a translation model that is no chat model is never one.
@@ -230,7 +253,7 @@ describe('grammar feedback on this computer', () => {
   });
 
   it('counts both of the leg\'s models when the feedback\'s is not the translation\'s', () => {
-    downloaded('sensevoice-int8', 'qwen3.5-2b-translation');
+    downloaded('sensevoice-int8', HEARS_JA, 'qwen3.5-2b-translation');
     expect(admitLocalAI({ speaker: configFor(SPEAKER, COACHED) })).toBe(true);
     // A chat model runs on the graphics card: counted against its memory, when a budget for it is set.
     localStorage.setItem('debug:vram-budget', '1');
@@ -270,7 +293,7 @@ describe('readiness with stages on this computer', () => {
   it('is not ready while the feedback\'s model here is missing, and only for a run that coaches', async () => {
     expect((await check(settings({ ...HERE, coach: true, coachAt: 'device' }))).result).toMatchObject({ ok: false, code: 'local_models_missing' });
     expect((await check(settings({ ...HERE, coach: true, coachAt: 'device' }), NONE, ['participant'])).result).toMatchObject({ ok: true });
-    downloaded('sensevoice-int8', 'qwen3-0.6b-translation');
+    downloaded('sensevoice-int8', HEARS_JA, 'qwen3-0.6b-translation');
     expect((await check(settings({ ...HERE, coach: true, coachAt: 'device' }))).result).toMatchObject({ ok: true });
   });
 

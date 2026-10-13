@@ -79,8 +79,11 @@ export function useWasmEngineAdapter(isSessionActive: boolean, override: WasmEng
         // opposite of what it says. That trap is exactly what the AST guard
         // exists to contain. AST stays reachable through the Library (the
         // full card flow), not this quick picker.
+        // Fork: a recognizer no longer offered for a language (`measuredRank.ts`) is not auto-eligible either, and
+        // is listed only while it is the one chosen for this slot — the menu then shows what hears, not a blank.
+        const kept = slot.stage === 'asr' ? selections[slot.dir]?.asr?.modelId : undefined;
         return source.pool(slot.stage, src, tgt)
-          .filter((c) => c.ready && c.hardwareOk && c.autoEligible)
+          .filter((c) => c.ready && c.hardwareOk && (c.autoEligible || c.id === kept))
           .map((c) => {
             const entry = getManifestEntry(c.id);
             return {

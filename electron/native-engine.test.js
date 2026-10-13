@@ -16,7 +16,8 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { createNativeEngine, openLive, languageName, languageLocale, modelHears, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME } = require('./native-engine.js');
+const { createNativeEngine, openLive, languageName, languageLocale, modelHears, unspaced, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME } = require('./native-engine.js');
+const { hfMirrorOf } = require('./fetch-file.js');
 
 const sha = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
 const ARCHIVE = Buffer.from('an archive of the engine');
@@ -109,7 +110,7 @@ describe('what is fetched', () => {
     expect(MODELS['r2t2-q8'].platforms).toEqual(['win32-x64']);
     // A Mac is offered the model that is for every system, and not the one that names Windows alone.
     const mac = createNativeEngine({ dir, platform: 'darwin', arch: 'arm64', fetch: nothing });
-    expect(Object.keys(mac.status().models)).toEqual(['qwen3-asr-1.7b-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
+    expect(Object.keys(mac.status().models)).toEqual(['qwen3-asr-1.7b-q8', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
     const here = createNativeEngine({ dir, platform: 'win32', arch: 'x64', fetch: nothing });
     expect(here.status()).toMatchObject({ supported: true, models: { 'r2t2-q8': { state: 'absent' }, 'qwen3-asr-1.7b-q8': { state: 'absent' } } });
     // A catalog whose every model names another system leaves this one with nothing to run.
@@ -430,6 +431,77 @@ describe('a live recognition', () => {
     expect(file).toBe('qwen3-asr-0.6b-q8_0.gguf');
     expect(sha256).toMatch(/^[0-9a-f]{64}$/);
     expect([f, u, h].every(Boolean)).toBe(true);
+  });
+
+  it('has a light model of another family: its makers’ own file, read a stretch at once and whole, told one of five languages by its code', () => {
+    expect(MODELS['sensevoice-small-q8']).toEqual({
+      file: 'sensevoice-small-q8-audiocpp-v1.gguf',
+      url: 'https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF-audiocpp/resolve/5c3fcfe748a8714216bc135476d5863084fddb72/sensevoice-small-q8-audiocpp-v1.gguf',
+      bytes: 254211200,
+      sha256: '4dedf169f625437fb336f2959674f399819729a765e184128c0e25a6e16ff0ec',
+      family: 'sense_asr',
+      mode: 'offline',
+      requestOptions: { audio_chunk_mode: 'none' },
+      languageAs: 'code',
+      languages: ['zh', 'yue', 'en', 'ja', 'ko'],
+      unspaced: true,
+    });
+    for (const language of ['ja', 'zh-CN', 'zh-TW', 'yue', 'en-GB', 'ko-KR']) expect(modelHears('sensevoice-small-q8', language)).toBe(true);
+    // Told another language it would not refuse, and write the speech down as one of its five: it is not offered for it.
+    for (const language of ['fr', 'ru', 'th', 'auto', '']) expect(modelHears('sensevoice-small-q8', language)).toBe(false);
+    // It is in the order the models are recommended in, before the small Qwen3 it is level with.
+    expect(Object.keys(MODELS)).toEqual(['r2t2-q8', 'qwen3-asr-1.7b-q8', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
+    const here = createNativeEngine({ dir, platform: 'win32', arch: 'x64', fetch: async () => { throw new Error('nothing is fetched'); } });
+    expect(here.status().models['sensevoice-small-q8']).toEqual({ state: 'absent', received: 0, total: 254211200 });
+    // For every system the runtime is published for: run on Windows (Vulkan) and on an Apple M2 (Metal).
+    expect(MODELS['sensevoice-small-q8'].platforms).toBeUndefined();
+    const mac = createNativeEngine({ dir, platform: 'darwin', arch: 'arm64', fetch: async () => { throw new Error('nothing is fetched'); } });
+    expect(mac.status().models['sensevoice-small-q8']).toEqual({ state: 'absent', received: 0, total: 254211200 });
+  });
+
+  it('tells the runtime, in its config, what such a model is told with every reading — and takes out of its text the spaces it puts inside Japanese', async () => {
+    const light = { file: 's1.gguf', url: 'https://example.test/s1.gguf', bytes: MODEL.length, sha256: sha(MODEL), family: 'sense_asr', mode: 'offline', requestOptions: { audio_chunk_mode: 'none' }, languageAs: 'code', languages: ['zh', 'yue', 'en', 'ja', 'ko'], unspaced: true };
+    const catalog = { engine: CATALOG.engine, models: { s1: light, w1: { file: 'w1.gguf', url: 'https://example.test/w1.gguf', bytes: MODEL.length, sha256: sha(MODEL), family: 'fam2', mode: 'offline', languageAs: 'code' } } };
+    const { world, engine } = computer({ catalog, served: { 'https://example.test/engine.zip': ARCHIVE, 'https://example.test/s1.gguf': MODEL, 'https://example.test/w1.gguf': MODEL } });
+    await engine.download('s1');
+    await engine.start('s1');
+    // Its request options are the server's defaults for the model: every reading is of the whole stretch, with no
+    // other model to cut it by. Its session options are none.
+    expect(JSON.parse(fs.readFileSync(path.join(dir, 'models', 'server.json'), 'utf8'))).toEqual({
+      host: '127.0.0.1', port: 45123, backend: 'vulkan', device: 0, lazy_load: false,
+      models: [{ id: 's1', family: 'sense_asr', path: 's1.gguf', task: 'asr', mode: 'offline', session_options: {}, default_request_options: { audio_chunk_mode: 'none' } }],
+    });
+    // Warmed as its recognitions go, with no language told.
+    expect(world.windows).toHaveLength(1);
+    expect(world.windows[0].target).toMatchObject({ model: 's1', language: null });
+    engine.openStream({ language: 'ja-JP', sampleRate: 16000 });
+    expect(world.windows[1].target).toMatchObject({ port: 45123, model: 's1', sampleRate: 16000, language: 'ja' });
+    expect(world.windows[1].target.tidy('元 は 金持ち の 息子 でし たが。')).toBe('元は金持ちの息子でしたが。');
+    // A model that writes no such spaces is read as it writes.
+    await engine.download('w1');
+    await engine.start('w1');
+    engine.openStream({ language: 'ja', sampleRate: 16000 });
+    expect(world.windows.at(-1).target).toMatchObject({ model: 'w1', language: 'ja' });
+    expect(world.windows.at(-1).target.tidy).toBeUndefined();
+    await engine.stop();
+  });
+
+  it('takes out the spaces a model put where the writing has none, and no other', () => {
+    // Between two characters of Japanese or Chinese, their marks included, and between one and a figure.
+    expect(unspaced('元 は 金持ち の 息子 でし たが、今 は財産 を 使い 尽く して。')).toBe('元は金持ちの息子でしたが、今は財産を使い尽くして。');
+    expect(unspaced('今天 天气 很 好 ，我们 去 公园 吧。')).toBe('今天天气很好，我们去公园吧。');
+    expect(unspaced('あと 15 秒 で 3 時')).toBe('あと15秒で3時');
+    // A full-width space is one too.
+    expect(unspaced(`のです 何しろ${String.fromCodePoint(0x3000)}その頃`)).toBe('のです何しろその頃');
+    // Korean is written with spaces, and so are Latin words — also inside Japanese.
+    expect(unspaced('오늘은 날씨가 좋아요')).toBe('오늘은 날씨가 좋아요');
+    expect(unspaced('the weather is nice today')).toBe('the weather is nice today');
+    expect(unspaced('VR Chat で 遊ぶ')).toBe('VR Chat で遊ぶ');
+    expect(unspaced('Page 15 of 20')).toBe('Page 15 of 20');
+    // Nothing to take out leaves the text as it is, and so does taking them out twice.
+    expect(unspaced('そうだね。')).toBe('そうだね。');
+    expect(unspaced(unspaced('元 は 金持ち'))).toBe('元は金持ち');
+    expect(unspaced('')).toBe('');
   });
 
   it('tells a model that takes a locale the one of its own list: the app\u2019s regional one where it has it, the language\u2019s usual one otherwise', () => {
@@ -959,6 +1031,9 @@ describe('a download, once more', () => {
       }
       // R2T2 is published in one place only.
       expect(MODELS['r2t2-q8'].mirror).toBeUndefined();
+      // So is SenseVoice-Small's file for this runtime: where Hugging Face is not reached, its public mirror has it.
+      expect(MODELS['sensevoice-small-q8'].mirror).toBeUndefined();
+      expect(hfMirrorOf(MODELS['sensevoice-small-q8'].url)).toEqual(['https://hf-mirror.com/FunAudioLLM/SenseVoiceSmall-GGUF-audiocpp/resolve/5c3fcfe748a8714216bc135476d5863084fddb72/sensevoice-small-q8-audiocpp-v1.gguf']);
     });
   });
 
