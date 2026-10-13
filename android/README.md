@@ -15,7 +15,7 @@
 
 ## 给朋友测
 
-1. 装上 `app-debug.apk`（要允许"安装未知来源的应用"）。
+1. 装上 `app-debug.apk`（要允许"安装未知来源的应用"）。0.7.0 起只用这样装一次，以后的版本 App 自己更新（见"应用自己的更新"）。
 2. 下载模型（建议连 Wi-Fi；断了可以接着下）。最上面一行是 SenseVoice-Small（"快 · 只听中粤英日韩"，254 MB）：听的是这五种语言里的，先下它。下面是 Qwen3-ASR，同一个模型有两行，一行"audio.cpp 用"，一行"llama.cpp 用"（它是两个文件，一个接一个下）。只想借给电脑用，下 llama.cpp 那一行就够了：0.6B 是 0.9 GB，1.7B 是 2.3 GB。要比两个引擎，就把同一个模型的两行都下了：0.6B 两行一共 2.0 GB，1.7B 两行一共约 4.7 GB。在国内不用开代理：Qwen3-ASR 在 Hugging Face、魔搭（ModelScope）和一个 Hugging Face 的公开镜像上各有一份，SenseVoice-Small 魔搭上没有，只有另外两处；开始时各试一小段，哪边快用哪边；分四路同时下，下面会写着进度、速度和来源。中途断了会自己接着下，不用再点。下完会核对。
 3. 自检之前：拔掉充电线，关掉省电模式，电量在一半以上；刚下完模型的话先放几分钟，让手机凉下来。
 4. 点"自检"，把手机放在桌上别动：别切到别的 App，别锁屏。屏幕上会写着读到第几项、现在在等什么。读完把报告分享回来。
@@ -153,6 +153,91 @@ SenseVoice-Small 报出去的名字是 `sensevoice-small-q8`，现在发布的�
 
 手机只回答身边的设备：网页发来的请求、用公网域名指过来的请求都会被拒绝（和电脑版共享的做法一样）。现在没有访问密钥，同一个 Wi-Fi 下的设备都能让它识别。
 
+## 应用自己的更新
+
+0.7.0 起，手机端自己查有没有新版本、自己下、交给系统装。之前的版本（0.6.0 及更早）没有这个功能，要手动装一次 0.7.0 或更新的安装包，以后才不用再发安装包。
+
+**在手机上是什么样**
+
+- 打开 App 时自己查，一天最多一次；右上角的"检查更新"随时可以点。自己查的时候什么都不说，除非真有新版本；点了才会说"已是最新"或"没连上，稍后再试"。
+- 有新版本时，最上面多一行"新版本 X.Y.Z"，下面是一句说明和大小，右边是"更新"。点了就下载（和下模型一样：进度、速度、来源，能停、能接着下，下完核对），下完直接交给系统装。
+- 系统会自己弹出"要更新此应用吗？"，点"更新"才装。装完 App 会被关掉，要自己再打开一次。
+- 第一次更新前，系统要求先允许这个 App 安装应用：App 会带到系统的那一页（"安装未知应用"），打开"允许来自此来源的应用"再返回，就接着装。每台手机只要做一次。
+- 正在共享时不会自己开始装（装的时候 App 会被关掉，共享就断了）：这一行写"已下好 · 安装会停止共享"，点"安装"才装。屏幕不在前面时也一样先留着。自检或下载模型时，这一行的键是灰的，和别的行一样。
+- 装上新版本后，下载的安装包在下次打开时自己删掉。
+- 装不上时这一行写"没装成：…"和原因，括号里是系统给的名字（比如 `INSTALL_FAILED_UPDATE_INCOMPATIBLE`），截图发回来就知道是什么。
+
+**版本放在哪**：GitHub 上 `Rizumu85/kotomimi` 的发布（Releases），全都标成**预发布**。仓库的"最新发布"是电脑版的，电脑版的更新就查它，所以手机端的发布绝不能是"最新"。
+
+- 每个版本：标签 `phone-vX.Y.Z`，里面一个文件 `Kotomimi-phone-X.Y.Z.apk`。
+- 一个固定的标签 `phone-latest`，里面只有一个小文件 `phone.json`，每次发布换掉它。App 问的就是这个不变的地址：`https://github.com/Rizumu85/kotomimi/releases/download/phone-latest/phone.json`。这个发布不能删，标签也不能改名：已经装出去的 App 只认这个地址。
+
+`phone.json` 的样子：
+
+```json
+{"version":"0.7.0","code":11,"apk":"https://github.com/Rizumu85/kotomimi/releases/download/phone-v0.7.0/Kotomimi-phone-0.7.0.apk","bytes":69390606,"sha256":"…64 个十六进制字符…","sdk":28,"notes":"一句话，说这一版有什么"}
+```
+
+- `code` 比手机上装的大才算新版本（看的是它，不是 `version`）。
+- `apk` 必须在这个仓库的发布下面（`https://github.com/Rizumu85/kotomimi/releases/download/` 开头），别的地址 App 不认。
+- `sdk` 是这个安装包最低要的安卓版本（API 级别）；比手机高就不提这个版本。可以不写。
+- `notes` 可以不写；只取第一行，最多 40 个字。
+- App 不认识的字段一律不管，所以以后可以往里加东西。哪天要改得连老版本都读不了，就换个文件名，别动 `phone.json`。
+
+**从哪儿问、从哪儿下**（做法和电脑版一样，`electron/fetch-file.js`）：GitHub 本身，加三个公开的 GitHub 下载中转 `https://ghfast.top/`、`https://gh-proxy.com/`、`https://ghproxy.net/`（用法是 `<中转><完整的 GitHub 地址>`）。手机的时区或地区是国内时中转排前面，否则 GitHub 排前面。
+
+- 问 `phone.json`：四个地址同时问，地址后面带一个每小时变一次的 `?t=…`（免得中转给的是它存着的旧文件）。哪个中转先说有更新的版本，就信它，不再等（中转存着的旧文件只会说得更旧；国内 GitHub 常常等不到）。"没有新版本"要 GitHub 自己说才算；它没答，就取中转里版本最高的那个，而且不会比上次知道的更旧。GitHub 答"没有这个文件"（404）算"没有新版本"。最多等十几秒，不挡屏幕。
+- 下安装包：和模型一样，四个地址各试 1 MB，哪个快用哪个，分几路下，断了换地址接着下。
+- 2026-10-13 试过：三个中转都能按位置取文件的一段（HTTP 206，分路下载要这个），也都把 `?t=` 原样带过去。
+
+**谁在保护用户**：是安卓，不是 App。系统只在新安装包和已装的这份是**同一个签名**、版本号又不更低时才肯覆盖安装。所以中转（陌生人）没法让手机装上别的东西，最坏只是白下一次、系统拒绝。`phone.json` 里的 SHA-256 在交给系统之前照样核对：省得弹一个注定失败的提示，也能发现下坏了的文件。中转给假的 `phone.json` 时，屏幕上会出现一行假的"新版本"和它写的那句话（最多 40 个字），下完被系统拒绝后这一行的安装包和记录都会删掉。
+
+**签名**（重要）
+
+- 到现在为止所有的安装包都是 debug 版，用**这台电脑的 debug 密钥**签的：`%USERPROFILE%\.android\debug.keystore`，证书的 SHA-256 是 `0d0db733ff8d3558a71935b3d43a564ef2a6d95ecf939cc4ecff8fc65c68d19f`。朋友手机上装的都是这个签名。
+- 更新只能覆盖**同一个密钥签的**那一份。所以以后的每个版本都必须在这台电脑上、用这个密钥编。
+- 这个密钥丢了或者换了（重装系统、换电脑、删了 `.android` 文件夹、改成正式签名），所有人都得**卸载再重装一次**，下载好的模型也跟着没了。值得现在就把这个文件备份一份。
+- `scripts/publish.sh` 会核对安装包的签名，不是这个密钥签的就拒绝发布。
+
+**发布**：`scripts/publish.sh`。要不要发、什么时候发，每次自己定；脚本只是把它变成一条命令。
+
+```bash
+cd android && ./gradlew assembleDebug
+android/scripts/publish.sh --notes "一句话，说这一版有什么"         # 只说它要做什么，什么都不做
+android/scripts/publish.sh --notes "一句话，说这一版有什么" --yes   # 真的发布
+```
+
+它读 `app/build.gradle.kts` 里的版本，核对安装包确实是这个版本、确实是上面那个密钥签的，算出大小和 SHA-256，写出 `phone.json`（在 `app/build/outputs/`），然后用 `gh`（都带 `--repo Rizumu85/kotomimi`）：建 `phone-vX.Y.Z` 预发布并传上安装包，确认传完整了，再建或更新 `phone-latest` 里的 `phone.json`。下面这些情况它不做，并说明原因：这个版本已经发布过而安装包不一样；GitHub 上的 `phone.json` 已经是更高的版本；`android/` 里有没提交的改动；当前提交还没推到 GitHub（标签要打在它上面）。发到一半断了可以再跑一次，已经对的部分不会重传。它不会把任何发布标成"最新"或正式发布。
+
+发版本前改两处版本号：`app/build.gradle.kts` 的 `versionCode`（每次加一）和 `versionName`，还有 `SelfCheck.kt` 里的 `BuildConfigLite.VERSION`（屏幕和报告上显示的）。两处不一致脚本会拒绝。
+
+**不发布也能试**（只在 debug 版里有；现在所有的版本都是 debug 版，所以这条路是这样防的）：App 从自己私有文件夹里的一个文件读测试地址，这个文件只有 `adb shell run-as` 写得进去，手机上别的 App 写不了，也没法用 intent 指定；地址还只能是 `http://127.0.0.1:端口/…`（手机本机，用 `adb reverse` 接到电脑上）。设了测试地址时，"检查更新"旁边会多"· 测试"两个字，每次打开都查，不受一天一次的限制。
+
+```bash
+# 电脑上：把一个安装包当成"新版本"端出来（只听 127.0.0.1，不碰防火墙）。手机上装的版本号要比它低
+node android/scripts/update-test-server.mjs android/app/build/outputs/apk/debug/app-debug.apk
+adb reverse tcp:23456 tcp:23456
+adb shell "run-as io.github.rizumu85.kotomimi.node sh -c 'mkdir -p files && echo http://127.0.0.1:23456/good/phone.json > files/update-test'"
+
+# 试完收拾
+adb shell run-as io.github.rizumu85.kotomimi.node rm files/update-test
+adb reverse --remove tcp:23456
+```
+
+地址里 `good` 的位置换成别的，就是别的情况：`slow`（每秒约 1 MB，好试停下和接着下）、`hash`（校验值不对）、`stale`（比手机上的旧）、`future`（多了 App 不认识的字段）、`sdk`（要的安卓版本太高）、`garbage`（不是 `phone.json`）、`hang`（一直不回答）；别的词是 404。换了地址要把 App 切到后台再切回来，它才重新读。
+
+**试过的**（2026-10-13）
+
+- 多亲 F22 Pro（Android 14）：没有新版本、旧的 `phone.json`、不是 `phone.json`、连不上、不回答、404、安卓版本太高，都是不出这一行，自己查时不说话，点了才说；有新版本时出这一行；下载的进度、停下、杀掉 App 后接着下（各路从停下的位置续上）、下完的文件 SHA-256 对；校验值不对时不交给系统，文件删掉；共享时下完不自己装，共享不断；没允许安装应用时被带到系统的"安装未知应用"那一页，不允许就返回时这一行写"要先允许本应用安装应用"。**这台手机上没有往下试**：打开那个开关和系统的"更新"确认要人来点。
+- 模拟器（Android 16，带 Google Play）：把上面剩下的走完了。打开开关返回后自己接着装；系统问"Update this app?"，点取消这一行回到"已下好"，再点"安装"、确认，装成 0.7.0；再打开时安装包已删掉。一个不是安装包的文件（校验值对）：系统拒绝，这一行写"没装成：安装包不对（INSTALL_PARSE_FAILED_NOT_APK）"，文件和记录都删了。
+- 模拟器上第一次确认时，Google Play 保护机制弹出"Unsafe app blocked"（没见过这个开发者的应用），点"Got it"就是不装（系统报的是 `INSTALL_FAILED_VERIFICATION_FAILURE`）；要装得点"More details"里的"Install anyway"。第二次确认时它没再拦，直接装上了。有 Google 服务的手机上可能遇到，手动装安装包时应该也一样。被它拦下时，那次这一行只是回到"已下好"；之后才加了一句"没装成：被手机的安全检查拦下了"，这句话还没在屏幕上见过（它没再拦）。
+
+**还不知道的**
+
+- 国内各家系统（MIUI / HyperOS、ColorOS、OriginOS、HarmonyOS）对 App 自己发起的安装各有各的拦法和提示（有的要先关"纯净模式"），没有这些手机，没试过。装不上时那一行会写系统给的原因。
+- 有的安卓版本在打开"允许安装应用"的开关时会把 App 关掉（Android 11 是这样）。App 把"正在等这个开关"记了下来，十分钟内再回到 App 会接着装；但要是当时正在共享，共享会断。模拟器（Android 16）上没被关；F22 Pro（Android 14）上没试（开关没人点）。
+- 从国内真的经中转下一次安装包：要等发布了第一个版本才能试。
+
 ## 自己编
 
 要 Android Studio（带 SDK、NDK 和它的 CMake）；Windows 上还要 Visual Studio 的 C++ 编译器（显卡后端的着色器要用它编一个小工具）。
@@ -170,7 +255,7 @@ cd android && ./gradlew assembleDebug
 
 第 2 步要能连上 GitHub：除了 llama.cpp 自己的源码，KleidiAI 的源码是配置时现下的（llama.cpp 的构建文件里写着版本 v1.24.0 和校验值），OpenCL 的头文件和加载器（Khronos 的，v2025.07.22）是脚本下的；编 OpenCL 那一版还要电脑上有 Python 3（把内核的源码嵌进程序里）。
 
-安装包在 `android/app/build/outputs/apk/debug/app-debug.apk`，约 69.7 MB（0.5.0 是 69.5 MB，0.4.0 是 57.4 MB），其中 llama.cpp 占 48 MB：自检用的 `llama-mtmd-cli` 34 MB（处理器三档各 3.7 MB，带 KleidiAI 的两档各 3.8 MB，Vulkan 那个 10.6 MB，OpenCL 那个 4.5 MB），共享用的 `llama-server` 14 MB（处理器三档各 4.7 MB，装到手机上各 10.5 MB；没有显卡版）。多出来的 12 MB 就是只量不借的那三个程序。不跑第 2 步也能编出安装包，只是没有 llama.cpp：自检报告里会写"这个安装包里没有带"，它的模型也借不出去。只编了其中几个也行（`build-llama.sh v82 kleidiai-v82`），没带的那种报告里写"这个安装包里没有带"。
+安装包在 `android/app/build/outputs/apk/debug/app-debug.apk`，约 69.4 MB（0.6.0 是 69.7 MB，0.5.0 是 69.5 MB，0.4.0 是 57.4 MB），其中 llama.cpp 占 48 MB：自检用的 `llama-mtmd-cli` 34 MB（处理器三档各 3.7 MB，带 KleidiAI 的两档各 3.8 MB，Vulkan 那个 10.6 MB，OpenCL 那个 4.5 MB），共享用的 `llama-server` 14 MB（处理器三档各 4.7 MB，装到手机上各 10.5 MB；没有显卡版）。多出来的 12 MB 就是只量不借的那三个程序。不跑第 2 步也能编出安装包，只是没有 llama.cpp：自检报告里会写"这个安装包里没有带"，它的模型也借不出去。只编了其中几个也行（`build-llama.sh v82 kleidiai-v82`），没带的那种报告里写"这个安装包里没有带"。
 
 引擎带齐了 ggml 给安卓准备的七档处理器版本（armv8.0 到 armv9.2），运行时自己挑这台手机能用的最快一档，所以同一个安装包在旧手机和新手机上都不吃亏。显卡后端（Vulkan）也编进去了，但只在要用它的那一次才加载：有的手机驱动撑不住它，这样崩掉的只是那一次，处理器照常能用。
 
@@ -202,6 +287,10 @@ adb shell am start -n io.github.rizumu85.kotomimi.node/.MainActivity --ez share 
 # 自检时把这台手机本来不该试的也硬试一遍：opencl（显卡不是它收的那种）、sme（处理器没有 SME）。
 # 看报告在这些情况下写得对不对用的，量出来的数没有意义
 adb shell am start -n io.github.rizumu85.kotomimi.node/.MainActivity --ez selfcheck true --es force opencl,sme
+
+# 查一次有没有新版本，和点"检查更新"一样（往哪儿查不能这样指定，见"应用自己的更新"）
+adb shell am start -n io.github.rizumu85.kotomimi.node/.MainActivity --ez update true
+adb logcat -s update    # 查到了什么、谁没回答、系统对安装说了什么
 ```
 
 ## 手机对外提供什么

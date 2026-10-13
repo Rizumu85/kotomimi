@@ -21,18 +21,39 @@ import kotlin.concurrent.thread
 enum class Reader(val words: String) { AUDIO_CPP("audio.cpp"), LLAMA_CPP("llama.cpp") }
 
 /**
+ * A file that is fetched (`Downloads`): the name it is kept under here, the size and SHA-256 that tell it is the
+ * right one, and the places it is asked for. A model's file is one, and a new version of the app itself another
+ * (`Release`).
+ */
+interface Fetched {
+    val name: String
+    val bytes: Long
+    val sha256: String
+
+    /** Where it is fetched from, the likelier first. Which is used is settled by trying them (`Downloads.fastestFirst`); this order only breaks a tie. */
+    fun addresses(): List<Source>
+}
+
+private val CHINA_ZONES = setOf("Asia/Shanghai", "Asia/Chongqing", "Asia/Harbin", "Asia/Urumqi", "PRC")
+
+/** A guess that only orders the addresses a file is asked for: by the phone's clock, or the region it is set to. */
+fun inMainlandChina() = TimeZone.getDefault().id in CHINA_ZONES || Locale.getDefault().country == "CN"
+
+/**
  * One file of a model: the repository it is published in and its place there, the name it is kept under here, and
  * the size and SHA-256 that tell it is the right one. `onModelScope` is whether ModelScope keeps that repository
  * too: one it does not keep is not asked there, where the answer could only be that it is not found.
  */
-class ModelFile(val repository: String, val revision: String, val path: String, val name: String, val bytes: Long, val sha256: String, val onModelScope: Boolean = true) {
+class ModelFile(
+    val repository: String, val revision: String, val path: String,
+    override val name: String, override val bytes: Long, override val sha256: String, val onModelScope: Boolean = true,
+) : Fetched {
     /**
-     * Where it is fetched from, the likelier first. Hugging Face is where the files are published; ModelScope keeps
-     * the same repository (the same bytes: the sizes and checksums were compared, 2026-10-10) and is reached from
-     * mainland China without a proxy, where Hugging Face is not. Which is used is settled by trying both
-     * (`ModelStore.fastestFirst`); this order only breaks a tie.
+     * Hugging Face is where the files are published; ModelScope keeps the same repository (the same bytes: the
+     * sizes and checksums were compared, 2026-10-10) and is reached from mainland China without a proxy, where
+     * Hugging Face is not.
      */
-    fun addresses(): List<Source> {
+    override fun addresses(): List<Source> {
         val published = Source("Hugging Face", "https://huggingface.co/$repository/resolve/$revision/$path")
         val mirrored = Source("魔搭", "https://modelscope.cn/models/$repository/resolve/master/$path").takeIf { onModelScope }
         // A public mirror of Hugging Face, a volunteer's: the same path, answered from Beijing where Hugging Face is
@@ -40,13 +61,6 @@ class ModelFile(val repository: String, val revision: String, val path: String, 
         // ModelScope does not keep; what it brings is checked like the rest.
         val relayed = Source("HF 镜像", "https://hf-mirror.com/$repository/resolve/$revision/$path")
         return if (inMainlandChina()) listOfNotNull(mirrored, relayed, published) else listOfNotNull(published, mirrored, relayed)
-    }
-
-    private companion object {
-        val CHINA_ZONES = setOf("Asia/Shanghai", "Asia/Chongqing", "Asia/Harbin", "Asia/Urumqi", "PRC")
-
-        /** A guess that only orders the two addresses: by the phone's clock, or the region it is set to. */
-        fun inMainlandChina() = TimeZone.getDefault().id in CHINA_ZONES || Locale.getDefault().country == "CN"
     }
 }
 
@@ -99,7 +113,7 @@ class Model(
     val projector: ModelFile? get() = files.getOrNull(1)
 }
 
-/** A place a model is fetched from, and what it is called on the screen. */
+/** A place a file is fetched from, and what it is called on the screen. */
 class Source(val name: String, val address: String)
 
 private const val AUDIO_CPP_REPOSITORY = "audio-cpp/audio.cpp-gguf"
@@ -244,37 +258,28 @@ val MODELS = listOf(
 
 /**
  * Where the models are kept — the app's own folder on shared storage, which goes when the app is removed — and how
- * they get there.
- *
- * A download is taken in several pieces at once, from whichever of the model's addresses is the faster for this
- * phone at this moment. One connection to either was slow enough for the first person who tried it to give up
- * ("太慢了", 2026-10-11): a file server gives each connection a share, and four take four shares. What each piece has
- * is written down beside the file, so a download that was stopped goes on where every piece left off.
+ * they get there (`Downloads`).
  */
 class ModelStore(context: Context) {
-    val folder: File = File(context.getExternalFilesDir(null), "models").apply { mkdirs() }
+    private val downloads = Downloads(File(context.getExternalFilesDir(null), "models"))
+    val folder: File get() = downloads.folder
 
-    fun fileOf(file: ModelFile) = File(folder, file.name)
-    private fun partOf(file: ModelFile) = File(folder, "${file.name}.part")
-    private fun notesOf(file: ModelFile) = File(folder, "${file.name}.part.pieces")
+    fun fileOf(file: ModelFile) = downloads.fileOf(file)
 
     /** Whole and of the right size. (Its checksum was looked at when it was fetched.) */
-    fun has(file: ModelFile) = fileOf(file).length() == file.bytes
+    fun has(file: ModelFile) = downloads.has(file)
 
     /** Every file of it is here. */
     fun has(model: Model) = model.files.all { has(it) }
 
     /** Bytes here so far, of a download begun: the files that are whole, and what there is of the one in hand. */
-    fun begun(model: Model): Long = model.files.sumOf { file -> if (has(file)) file.bytes else piecesOf(file).sumOf { it.at - it.start } }
+    fun begun(model: Model): Long = model.files.sumOf { downloads.begun(it) }
 
     /**
      * How a download stands: the bytes had of the whole model, how many come in a second, where from (blank while
      * that is being found out), and which of the model's files it is at.
      */
     class Progress(val had: Long, val perSecond: Long, val from: String, val file: Int, val files: Int)
-
-    /** A stretch of the file, `start` to `end`, of which everything before `at` is here. */
-    private class Piece(val start: Long, @Volatile var at: Long, val end: Long)
 
     /**
      * Fetches a model: each of its files in turn, the ones already here passed over, each checked to be the file it
@@ -287,14 +292,45 @@ class ModelStore(context: Context) {
             if (has(file)) continue
             // Every file before this one is whole by now.
             val before = model.files.take(index).sumOf { it.bytes }
-            fetch(file, { had, perSecond, from -> onProgress(Progress(before + had, perSecond, from, index + 1, model.files.size)) }, onChecking, stopped)
+            downloads.fetch(file, { had, perSecond, from -> onProgress(Progress(before + had, perSecond, from, index + 1, model.files.size)) }, onChecking, stopped)
             // Stopped in the middle of it.
             if (!has(file)) return
         }
     }
+}
 
-    /** One file: fetched in pieces, then checked. `onProgress` is told the bytes had of this file, the speed and the source. */
-    private fun fetch(file: ModelFile, onProgress: (Long, Long, String) -> Unit, onChecking: () -> Unit, stopped: () -> Boolean) {
+/**
+ * Files fetched into one folder: the models into theirs, a new version of the app into its own.
+ *
+ * A download is taken in several pieces at once, from whichever of the file's addresses is the faster for this
+ * phone at this moment. One connection to either was slow enough for the first person who tried it to give up
+ * ("太慢了", 2026-10-11): a file server gives each connection a share, and four take four shares. What each piece has
+ * is written down beside the file, so a download that was stopped goes on where every piece left off.
+ */
+class Downloads(val folder: File) {
+    init {
+        folder.mkdirs()
+    }
+
+    fun fileOf(file: Fetched) = File(folder, file.name)
+    private fun partOf(file: Fetched) = File(folder, "${file.name}.part")
+    private fun notesOf(file: Fetched) = File(folder, "${file.name}.part.pieces")
+
+    /** Whole and of the right size. (Its checksum was looked at when it was fetched.) */
+    fun has(file: Fetched) = fileOf(file).length() == file.bytes
+
+    /** Bytes of it here so far: all of it, or what there is of a download begun. */
+    fun begun(file: Fetched): Long = if (has(file)) file.bytes else piecesOf(file).sumOf { it.at - it.start }
+
+    /** A stretch of the file, `start` to `end`, of which everything before `at` is here. */
+    private class Piece(val start: Long, @Volatile var at: Long, val end: Long)
+
+    /**
+     * One file: fetched in pieces, then checked. `onProgress` is told the bytes had of this file, the speed and the
+     * source (blank while that is being found out) twice a second, and `onChecking` when the download is over;
+     * `stopped` is asked between pieces of work, and what is had is kept when it says yes.
+     */
+    fun fetch(file: Fetched, onProgress: (Long, Long, String) -> Unit, onChecking: () -> Unit, stopped: () -> Boolean) {
         val part = partOf(file)
         val pieces = piecesOf(file)
         val had = AtomicLong(pieces.sumOf { it.at - it.start })
@@ -441,7 +477,7 @@ class ModelStore(context: Context) {
      * pieces — one run of bytes from the start — that run and the rest in pieces; or, for none begun, the whole file
      * in pieces.
      */
-    private fun piecesOf(file: ModelFile): List<Piece> {
+    private fun piecesOf(file: Fetched): List<Piece> {
         val part = partOf(file)
         val notes = notesOf(file)
         if (!part.exists()) return planned(0, file.bytes)
@@ -465,7 +501,7 @@ class ModelStore(context: Context) {
         return generateSequence(from) { it + size }.takeWhile { it < to }.map { Piece(it, it, minOf(it + size, to)) }.toList()
     }
 
-    private fun save(file: ModelFile, pieces: List<Piece>) {
+    private fun save(file: Fetched, pieces: List<Piece>) {
         runCatching { notesOf(file).writeText(pieces.joinToString("\n") { "${it.start} ${it.at} ${it.end}" }) }
     }
 
