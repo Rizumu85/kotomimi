@@ -74,8 +74,20 @@ class MainActivity : Activity() {
     private var lookAsked = false
     private var lookWords: String? = null
 
-    /** A package is on its way to the system, which has not answered yet. */
+    /**
+     * A package is with the system: on its way there, or there and being asked about or installed. Asking the
+     * system again meanwhile would give up the install under way — on a slow phone the system takes ten seconds
+     * over it after the person said yes, with this screen back in front (Duoqin F22 Pro, 2026-10-13: three
+     * installs handed over within twenty seconds, each giving up the one before it).
+     */
     private var installing = false
+
+    /** The system's own question about the install was opened; and this screen gave way to it. */
+    private var confirming = false
+    private var confirmShown = false
+
+    /** Which handing-over is the current one: a wait that was set for an earlier one ends nothing. */
+    private var handed = 0
 
     /** The person was taken to the system's screen where this app is let install apps, since this screen was made. */
     private var sentToAllow = false
@@ -143,6 +155,20 @@ class MainActivity : Activity() {
             updater.sentToAllow = false
             release?.takeIf { updater.has(it) && updater.allowed() }?.let(::install)
         }
+        // Back from the system's question. A no is told (`answered`); a yes ends the app within the time the system
+        // takes to install; a question put away with the home key is told by nobody — so after that time the row is
+        // the person's again.
+        if (confirmShown) {
+            confirming = false
+            confirmShown = false
+            val turn = handed
+            main.postDelayed({ if (installing && handed == turn) { installing = false; refresh() } }, SYSTEM_INSTALLS_MS)
+        }
+    }
+
+    override fun onPause() {
+        if (confirming) confirmShown = true
+        super.onPause()
     }
 
     override fun onStop() {
@@ -384,7 +410,7 @@ class MainActivity : Activity() {
         val here = updater.has(offered)
         val begun = updater.begun(offered)
         updateState.text = updateWords ?: when {
-            installing -> "正在交给系统…"
+            installing -> "已交给系统，稍等…"
             sentToAllow && !updater.allowed() -> "要先允许本应用安装应用"
             // Installing ends the app, and what it is lent for with it.
             here && Sharing.on -> "已下好 · 安装会停止共享"
@@ -586,6 +612,7 @@ class MainActivity : Activity() {
             return
         }
         installing = true
+        handed++
         refresh()
         thread(name = "install") {
             val result = runCatching { updater.install(offered) }
@@ -603,10 +630,15 @@ class MainActivity : Activity() {
     private fun answered() {
         val told = Installing.take() ?: return
         installing = false
+        confirming = false
+        confirmShown = false
         when (told.status) {
-            // It wants the person's word, and gives the screen of its own that asks for it.
+            // It wants the person's word, and gives the screen of its own that asks for it. The package stays with
+            // the system while it asks, and while it installs after a yes.
             PackageInstaller.STATUS_PENDING_USER_ACTION ->
-                runCatching { startActivity(told.confirm!!) }.onFailure { error -> updateWords = "没装成：${error.message ?: error.javaClass.simpleName}" }
+                runCatching { startActivity(told.confirm!!) }
+                    .onSuccess { installing = true; confirming = true }
+                    .onFailure { error -> updateWords = "没装成：${error.message ?: error.javaClass.simpleName}" }
             // The person said no: the package stays, for when they say yes. (A yes is not heard here: the app is ended
             // to be replaced.) The same word comes when the phone's own guard said no in their place — Google Play
             // Protect did, the first time, on the emulator this was tried on (2026-10-13): that much is said.
@@ -664,6 +696,9 @@ class MainActivity : Activity() {
 
         /** How long the small key says how asking for a newer version went, before it is the key again. */
         const val LOOK_WORDS_MS = 4_000L
+
+        /** How long the system is given to install after its question went away, before the row can be touched again: it took ten seconds on a slow phone. */
+        const val SYSTEM_INSTALLS_MS = 45_000L
 
         /** The system's refusals that asking again would not change. */
         val NEVER_TAKEN = setOf(PackageInstaller.STATUS_FAILURE_CONFLICT, PackageInstaller.STATUS_FAILURE_INCOMPATIBLE, PackageInstaller.STATUS_FAILURE_INVALID)
