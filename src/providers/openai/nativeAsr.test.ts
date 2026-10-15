@@ -397,5 +397,11 @@ describe('what a recognizer wrote, as it is handed on', () => {
     // Spaces that mean something stay: between words, and before Latin punctuation.
     expect(tidyHeard('I think so , yes. VRChat で 遊ぶ')).toBe('I think so , yes. VRChat で 遊ぶ');
     expect(tidyHeard('')).toBe('');
+    // Marks alone are nothing heard (SenseVoice's lone "。" for a breath); a figure or a letter is something.
+    expect(tidyHeard('。')).toBe('');
+    expect(tidyHeard(' 。 ')).toBe('');
+    expect(tidyHeard('……？')).toBe('');
+    expect(tidyHeard('5。')).toBe('5。');
+    expect(tidyHeard('え。')).toBe('え。');
   });
 });

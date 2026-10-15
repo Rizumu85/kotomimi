@@ -86,8 +86,12 @@ const TRAILING_SILENCE_SECONDS = 1;
  * Chinese or Japanese punctuation. The Mac's own recognition writes Chinese
  * with one ("今天天气很好 ，我们…", seen 2026-10-06). Only what goes out is
  * changed: what was heard so far is still counted on the text as it came.
+ *
+ * A text without a single letter or figure in it is nothing heard: SenseVoice
+ * answers a stretch of breath or noise with a lone "。", which stood as a line
+ * of its own (2026-10-15). Empty, the stretch closes without a line.
  */
-export const tidyHeard = (text: string): string => text.replace(/[ \t\u3000]+(?=[，。！？、；：])/g, '');
+export const tidyHeard = (text: string): string => (/[\p{L}\p{N}]/u.test(text) ? text.replace(/[ \t\u3000]+(?=[，。！？、；：])/g, '') : '');
 /** A recognition this long is begun again at the next gap between words… */
 export const ROLL_AFTER_SECONDS = 45;
 /** …or where the detector cuts, once it is this long, or anywhere at this: the engine's own limit is near two minutes. */
