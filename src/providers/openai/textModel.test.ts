@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createVirtualClock } from '../../lib/contract/clock';
-import { chatUrl, completeText, httpBaseOf, TEXT_TIMEOUT_MS, visibleText } from './textModel';
+import { chatUrl, completeText, httpBaseOf, retryAfterMs, TEXT_TIMEOUT_MS, visibleText } from './textModel';
 
 const REQUEST = { url: 'http://host:8080/v1/chat/completions', model: 'hy-mt2-1.8b', system: 'Translate.', user: '你好' };
 const sse = (...pieces: string[]) => new Response(
@@ -88,5 +88,82 @@ describe('one answer from a text model', () => {
     const pending = completeText(REQUEST, { fetch: hang, clock: createVirtualClock(0), signal: controller.signal });
     controller.abort(new Error('the session ended'));
     await expect(pending).rejects.toThrow('the session ended');
+  });
+});
+
+describe('a text model that is busy for now (a phone that lends its models)', () => {
+  const busy = (status: number, retryAfter?: string) => new Response(JSON.stringify({ error: { message: status === 429 ? 'busy' : 'no memory now' } }), { status, headers: { 'Content-Type': 'application/json', ...(retryAfter ? { 'Retry-After': retryAfter } : {}) } });
+  /** Lets the awaited fetch and the body's cancel settle before the clock is moved. */
+  const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  it('is asked again after the wait it names, the same request each time, when retries are allowed', async () => {
+    const clock = createVirtualClock(0);
+    const answers = [busy(429, '2'), busy(503, '5'), sse('你好')];
+    const bodies: string[] = [];
+    const fetch = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => { bodies.push(init?.body as string); return answers.shift()!; });
+    const pending = completeText({ ...REQUEST, busyRetries: 3 }, { fetch, clock, signal: new AbortController().signal });
+    await settle();
+    expect(fetch).toHaveBeenCalledTimes(1);
+    clock.advance(1999);
+    await settle();
+    expect(fetch).toHaveBeenCalledTimes(1);
+    clock.advance(1);
+    await settle();
+    expect(fetch).toHaveBeenCalledTimes(2);
+    clock.advance(5000);
+    expect((await pending).text).toBe('你好');
+    expect(fetch).toHaveBeenCalledTimes(3);
+    expect(new Set(bodies).size).toBe(1);
+  });
+
+  it('gives up after the retries allowed, with the last refusal in its own words', async () => {
+    const clock = createVirtualClock(0);
+    const fetch = vi.fn(async () => busy(429, '1'));
+    const failed = expect(completeText({ ...REQUEST, busyRetries: 2 }, { fetch, clock, signal: new AbortController().signal })).rejects.toThrow('HTTP 429: busy');
+    for (let i = 0; i < 4; i += 1) {
+      await settle();
+      clock.advance(1000);
+    }
+    await failed;
+    expect(fetch).toHaveBeenCalledTimes(3);
+  });
+
+  it('is not asked again where no retry is allowed: any other server, as before', async () => {
+    const fetch = vi.fn(async () => busy(503, '1'));
+    await expect(completeText(REQUEST, deps(fetch))).rejects.toThrow('HTTP 503: no memory now');
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('waits within its one bound, its own when it is given one', async () => {
+    const clock = createVirtualClock(0);
+    const fetch = vi.fn(async () => busy(429, '10'));
+    const failed = expect(completeText({ ...REQUEST, busyRetries: 100, timeoutMs: 15_000 }, { fetch, clock, signal: new AbortController().signal })).rejects.toThrow(/did not finish within 15 s/);
+    await settle();
+    clock.advance(10_000);
+    await settle();
+    clock.advance(5_000);
+    await failed;
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('stops waiting when the session does', async () => {
+    const controller = new AbortController();
+    const clock = createVirtualClock(0);
+    const fetch = vi.fn(async () => busy(429, '2'));
+    const pending = completeText({ ...REQUEST, busyRetries: 3 }, { fetch, clock, signal: controller.signal });
+    await settle();
+    controller.abort(new Error('the session ended'));
+    await expect(pending).rejects.toThrow('the session ended');
+    clock.advance(10_000);
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('reads the wait as seconds, held between half a second and ten, and two where it names none', () => {
+    expect(retryAfterMs('2')).toBe(2000);
+    expect(retryAfterMs('5')).toBe(5000);
+    expect(retryAfterMs('0')).toBe(500);
+    expect(retryAfterMs('600')).toBe(10_000);
+    expect(retryAfterMs(null)).toBe(2000);
+    expect(retryAfterMs('Wed, 21 Oct 2026 07:28:00 GMT')).toBe(2000);
   });
 });

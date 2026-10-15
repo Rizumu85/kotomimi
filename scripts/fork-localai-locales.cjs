@@ -278,6 +278,17 @@ const PROVIDER = {
     '连不上 API（{{address}}）。请检查对应卡片里的地址，以及这台电脑能不能上网。',
     '連不上 API（{{address}}）。請檢查對應卡片裡的位址，以及這台電腦能不能上網。',
   ],
+  // A phone a stage was given as its own device.
+  phoneUnreachable: [
+    'The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.',
+    '手机（{{address}}）连不上。请确认它开着共享，并且和这台电脑在同一个 Wi-Fi 下。',
+    '手機（{{address}}）連不上。請確認它開著共享，並且和這台電腦在同一個 Wi-Fi 下。',
+  ],
+  phoneModelGone: [
+    'The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.',
+    '手机（{{address}}）现在没有借出 {{name}}。请在卡片里换一个模型。',
+    '手機（{{address}}）現在沒有借出 {{name}}。請在卡片裡換一個模型。',
+  ],
   apiKeyNeeded: [
     'The API at {{address}} asks for a key. In its card, turn on "The API asks for a key" and enter it.',
     'API（{{address}}）需要密钥。请在对应卡片里打开「这个 API 需要密钥」并填写。',

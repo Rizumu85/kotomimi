@@ -2,7 +2,7 @@
  * Fork: "which device?" answered by looking. The app searches the local
  * network for what it can use another device's models through and lists
  * what it finds — a Kotomimi sharing its models, by its computer's name, a
- * phone lending its recognition engine, or a model server — each a row to
+ * phone lending its engines, or a model server — each a row to
  * click. The address field stays below for
  * whatever the search cannot reach; nobody has to know an address to start.
  *
@@ -25,11 +25,11 @@ interface ServerFinderProps {
   /** What stands above the search in place of its own title: the settings say what the search is for. */
   hint?: string;
   /**
-   * Present: phones that lend their recognition engine are listed too, and this is the address recognition is asked
-   * at now (blank where it is asked of none) — the phone it names is marked as the one in use. A phone is no device
-   * for the other stages, so only who can set recognition to it lists it.
+   * Present: phones that lend their engines are listed too, and these are the addresses the stages ask a phone at now
+   * (blank where they ask none) — the phones they name are marked as in use. A phone is no device with a whole
+   * pipeline, so only who can give a stage to it lists it.
    */
-  phone?: string;
+  phone?: string | readonly string[];
   /** What a search found, phones among them or not as above: for whoever offers the devices elsewhere too. */
   onFound?(servers: FoundServer[]): void;
   /** For tests: the search itself. */
@@ -68,6 +68,18 @@ export function ServerFinder({ value, onPick, disabled = false, auto = false, hi
   if (find === findServers && !canFindServers()) return null;
 
   const current = plainAddress(value);
+  const phonesInUse = (typeof phone === 'string' ? [phone] : phone ?? []).map(plainAddress).filter(Boolean);
+  // What a phone lends, by the stages it can run: its recognizer, its text models.
+  const lends = (server: FoundServer) => {
+    const what = [
+      ...(server.model ? [t('fork.find.lendsAsr')] : []),
+      ...(server.text?.some((m) => m.kind === 'translate') ? [t('fork.find.lendsTranslate')] : []),
+      ...(server.text?.some((m) => m.kind === 'coach') ? [t('fork.find.lendsCoach')] : []),
+    ];
+    // A phone of an earlier version lends its recognizer alone: said as it always was.
+    return server.text?.length ? t('fork.find.kindPhoneLends', { what: what.join(t('fork.find.lendsJoin')) }) : t('fork.find.kindPhone');
+  };
+  const phoneModels = (server: FoundServer) => [...(server.model ? [server.model] : []), ...(server.text ?? []).map((m) => m.name || m.id)].join(' · ');
   // By the name its owner knows it by; else what it is; else where it is.
   const title = (server: FoundServer) => server.name || (server.self ? (server.product ? t('fork.find.productHere', { product: server.product }) : t('fork.find.thisComputer')) : server.product || server.address.replace(/:\d+$/, ''));
 
@@ -99,7 +111,7 @@ export function ServerFinder({ value, onPick, disabled = false, auto = false, hi
       {servers !== null && servers.length > 0 && (
         <ul className="kt-find__list">
           {servers.map((server) => {
-            const chosen = plainAddress(server.address) === (server.kind === 'phone' ? plainAddress(phone ?? '') : current);
+            const chosen = server.kind === 'phone' ? phonesInUse.includes(plainAddress(server.address)) : plainAddress(server.address) === current;
             return (
               <li key={server.address}>
                 <button type="button" className={`kt-find__row${chosen ? ' is-chosen' : ''}`} aria-pressed={chosen} aria-label={t('fork.find.use', { name: title(server) })} onClick={() => onPick(server)} disabled={disabled}>
@@ -107,12 +119,12 @@ export function ServerFinder({ value, onPick, disabled = false, auto = false, hi
                   <span className="kt-find__text">
                     <span className="kt-find__name">
                       {title(server)}
-                      <em className="kt-find__kind">{server.kind === 'kotomimi' ? t('fork.find.kindKotomimi') : server.kind === 'phone' ? t('fork.find.kindPhone') : t('fork.find.kindServer')}</em>
+                      <em className="kt-find__kind">{server.kind === 'kotomimi' ? t('fork.find.kindKotomimi') : server.kind === 'phone' ? lends(server) : t('fork.find.kindServer')}</em>
                     </span>
                     <span className="kt-find__detail">
                       {server.address}
                       {' · '}
-                      {server.needsKey ? <><KeyRound size={11} />{t('fork.find.needsKey')}</> : server.kind === 'phone' ? server.model : t('fork.find.models', { count: server.models })}
+                      {server.needsKey ? <><KeyRound size={11} />{t('fork.find.needsKey')}</> : server.kind === 'phone' ? phoneModels(server) : t('fork.find.models', { count: server.models })}
                     </span>
                   </span>
                   {chosen && <Check size={15} className="kt-find__check" aria-hidden />}

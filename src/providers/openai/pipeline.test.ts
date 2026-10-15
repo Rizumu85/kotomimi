@@ -410,6 +410,43 @@ describe('a stage one of this computer\u2019s native engines answers', () => {
   });
 });
 
+describe('a stage a phone lends its model for', () => {
+  const PHONE: Partial<LocalAISettings> = { translateOther: '192.168.4.28:8792', translateOtherModel: 'hy-mt2-1.8b' };
+  const busy = (status: number, after: string) => new Response(JSON.stringify({ error: { message: 'busy' } }), { status, headers: { 'Content-Type': 'application/json', 'Retry-After': after } });
+
+  it('is asked at the phone, in the model’s own form, and again after the wait a busy phone names', async () => {
+    const h = await live(PARTICIPANT, PHONE, [busy(429, '2'), busy(503, '5'), sse('今天天气很好。')]);
+    h.receive(...heard('item_1', '今日は天気がいいですね。'));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(1));
+    expect(h.calls[0].url).toBe('http://192.168.4.28:8792/v1/chat/completions');
+    // One user message in Hunyuan MT's own words, with its sampling; no system message.
+    expect(h.calls[0].body.messages).toEqual([{ role: 'user', content: '将以下文本翻译为中文，注意只需要输出翻译后的结果，不要额外解释：\n\n今日は天気がいいですね。' }]);
+    expect(h.calls[0].body).toMatchObject({ model: 'hy-mt2-1.8b', temperature: 0.7, top_k: 20 });
+    // The wait is armed once the refusal is read: the clock is moved on until it has passed.
+    await vi.waitFor(() => { h.clock.advance(500); expect(h.calls).toHaveLength(2); });
+    await vi.waitFor(() => { h.clock.advance(500); expect(h.calls).toHaveLength(3); });
+    await h.settled();
+    expect(h.calls).toHaveLength(3);
+    expect(h.of('segmentText').map((e) => e.payload.text)).toContain('今天天气很好。');
+    expect(h.of('degraded')).toEqual([]);
+    expect(h.of('frame').find((e) => e.payload.type === 'text.request')?.payload.payload).toMatchObject({ phone: true });
+    await h.session.stop();
+  });
+
+  it('is given longer than a text model of this computer: a first answer waits for the phone to load the model', async () => {
+    const h = await live(PARTICIPANT, PHONE, ['hang']);
+    h.receive(...heard('item_1', '今日は天気がいいですね。'));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(1));
+    h.clock.advance(60_000);
+    await Promise.resolve();
+    expect(h.of('degraded')).toEqual([]);
+    h.clock.advance(60_000);
+    await vi.waitFor(() => expect(h.of('degraded')).toHaveLength(1));
+    expect(h.of('degraded')[0].payload.message).toContain('did not finish within 120 s');
+    await h.session.stop();
+  });
+});
+
 describe('a stretch of several sentences, of a leg that translates what it hears', () => {
   // The recognizer goes on hearing one stretch; the leg closes its finished sentences as they come (`sentenceCut.ts`).
   const delta = (text: string) => SERVER.inputDelta('item_1', text);

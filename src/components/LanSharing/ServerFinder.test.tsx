@@ -79,6 +79,35 @@ describe('the devices found on the network', () => {
     });
   });
 
+  describe('a phone that lends text models too (0.8.0 on)', () => {
+    const text = [{ id: 'index-translate-2b', kind: 'translate' as const, name: 'Index-Translate 2B', loaded: false }, { id: 'gemma-4-e2b', kind: 'coach' as const, name: 'Gemma 4 E2B', loaded: true }];
+    const lending: FoundServer = { address: '192.168.4.28:8792', kind: 'phone', name: '朋友的手机', product: '', models: 3, needsKey: false, self: false, model: 'qwen3-asr-0.6b-q8', text };
+    const textOnly: FoundServer = { address: '192.168.4.30:8792', kind: 'phone', name: 'F22', product: '', models: 1, needsKey: false, self: false, text: text.slice(0, 1) };
+
+    it('is kept with what it lends, and so is one that lends text models alone', () => {
+      expect(foundServers([lending, textOnly])).toEqual([lending, textOnly]);
+      // What is not a text model of a phone's is left out of it; a phone with nothing left is any server.
+      expect(foundServers([{ ...textOnly, text: [{ id: 'x', kind: 'asr' }] }])[0]).toEqual({ address: '192.168.4.30:8792', kind: 'server', name: 'F22', product: '', models: 1, needsKey: false, self: false });
+    });
+
+    it('is listed by the stages it can run, with the models it lends', async () => {
+      render(<ServerFinder auto value="" phone="" onPick={() => {}} find={async () => [lending, textOnly]} />);
+      await waitFor(() => expect(screen.getAllByRole('listitem')).toHaveLength(2));
+      const [both, alone] = screen.getAllByRole('listitem').map((row) => row.textContent ?? '');
+      expect(both).toContain('fork.find.kindPhoneLends {"what":"fork.find.lendsAsrfork.find.lendsJoinfork.find.lendsTranslatefork.find.lendsJoinfork.find.lendsCoach"}');
+      expect(both).toContain('qwen3-asr-0.6b-q8 · Index-Translate 2B · Gemma 4 E2B');
+      expect(alone).toContain('fork.find.kindPhoneLends {"what":"fork.find.lendsTranslate"}');
+      expect(alone).toContain('192.168.4.30:8792 · Index-Translate 2B');
+    });
+
+    it('is marked as in use by whichever stage asks it', async () => {
+      render(<ServerFinder auto value="" phone={['192.168.4.30:8792']} onPick={() => {}} find={async () => [lending, textOnly]} />);
+      await waitFor(() => expect(screen.getAllByRole('listitem')).toHaveLength(2));
+      expect(screen.getByRole('button', { name: 'fork.find.use {"name":"F22"}' }).getAttribute('aria-pressed')).toBe('true');
+      expect(screen.getByRole('button', { name: 'fork.find.use {"name":"朋友的手机"}' }).getAttribute('aria-pressed')).toBe('false');
+    });
+  });
+
   it('hands over the device that is clicked, and marks the one whose address is in the field', async () => {
     const onPick = vi.fn();
     render(<ServerFinder auto value="http://192.168.4.105:8080/v1" onPick={onPick} find={async () => [desk, mac]} />);

@@ -65,11 +65,11 @@ import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
 import { recognizerAsked } from './serverRecognizers';
 import { phoneBase, plainAddress } from '../../lib/lan/discover';
-import { ASR_HERES, coachIs, coachesNatively, cutsSentencesHere, hearsAtOwnDevice, detectsOther, heardBy, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
+import { ASR_HERES, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
 import { NATIVE_MODELS, preferNative, type NativePick } from './localaiNative';
 import { NATIVE_DEFAULT_MODEL, coachBaseUrl, coachGap, coachIdle, coachUp, holdNativeForRun, nativeGap, nativeUp, restNative, translatorUp, nativeWaits, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
-import { NATIVE_COACH_EXTRA, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
-import { NATIVE_DEFAULT_TRANSLATOR, nativeTranslates, nativeTranslator, translatorRequest } from './nativeTranslators';
+import { NATIVE_COACH_EXTRA, NATIVE_COACHES, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
+import { NATIVE_DEFAULT_TRANSLATOR, NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator, translatorRequest } from './nativeTranslators';
 import { setLocalPipeline } from '../../lib/lan/localServer';
 import { useLocalServerStore } from '../../stores/localServerStore';
 import { LocalAITurnDetectionControls, LocalAITurnDetectionHelp, LocalAITurnDetectionSummary } from './LocalAIEngine';
@@ -82,6 +82,7 @@ import {
   type RealtimeSettings,
 } from './settings';
 import { httpBaseOf } from './textModel';
+import { phoneTextBase, phoneTextList, warmPhones, type PhoneWarm } from './phoneText';
 import { normalizeTranscriptionLanguage, type TranscriptionHint } from './transcription';
 
 /** Where a stage runs (`localaiDevice.ts`): the same three places for what hears, what translates and what gives feedback. */
@@ -121,6 +122,13 @@ export interface LocalAISettings extends RealtimeSettings {
   translateAt: Place;
   /** On the other device: the model asked over chat. Blank: the device's own — its pipeline, inside the session it hears in; else the first model it lists that translates. */
   translateServerModel: string;
+  /**
+   * On "another device", a device of the translation's own (`host:port`) in place of the one the stages share: a
+   * phone that lends its text models (`android/`, 0.8.0 on), found by the same search. Blank: the shared device. The
+   * model is one of the desktop's native translators it lends, asked in that model's own form (`translatorRequest`).
+   */
+  translateOther: string;
+  translateOtherModel: string;
   /** The translation API's OpenAI-style base URL (`http://localhost:11434/v1`), its model, and whether it wants a key. */
   translateBaseUrl: string;
   translateModel: string;
@@ -131,6 +139,9 @@ export interface LocalAISettings extends RealtimeSettings {
   coachAt: Place;
   /** On the other device: its text model. Blank: the first it lists. */
   coachServerModel: string;
+  /** The same as `translateOther` of the feedback: a phone that lends the desktop's native feedback model, asked as this computer asks its own. */
+  coachOther: string;
+  coachOtherModel: string;
   /** The feedback API's base URL, its model, and whether it wants a key. */
   coachBaseUrl: string;
   coachModel: string;
@@ -201,12 +212,16 @@ export const LOCALAI_DEFAULTS: LocalAISettings = {
   translateBySentence: true,
   translateAt: 'server',
   translateServerModel: '',
+  translateOther: '',
+  translateOtherModel: '',
   translateBaseUrl: '',
   translateModel: '',
   translateNeedsKey: true,
   coach: false,
   coachAt: 'server',
   coachServerModel: '',
+  coachOther: '',
+  coachOtherModel: '',
   coachBaseUrl: '',
   coachModel: '',
   coachNeedsKey: true,
@@ -335,7 +350,7 @@ const byLanguage = (stored: unknown): Record<string, string> => (stored && typeo
 const quick = (baseUrl: string): { extra?: Readonly<Record<string, unknown>> } => { const extra = quickOf(baseUrl); return extra ? { extra } : {}; };
 
 export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>, inputs: MigrationInputs): LocalAISettings {
-  const text = (k: 'asrModel' | 'asrApiBaseUrl' | 'asrApiModel' | 'asrOther' | 'asrOtherModel' | 'translateBaseUrl' | 'coachDeviceModel' | 'coachPrompt' | 'asrHereModel' | 'asrNativeModel' | 'translateHereModel' | 'translateNativeModel' | 'coachHereModel' | 'coachNativeModel' | 'hereAddress' | 'herePipeline') => (typeof stored[k] === 'string' ? (stored[k] as string) : LOCALAI_DEFAULTS[k]);
+  const text = (k: 'asrModel' | 'asrApiBaseUrl' | 'asrApiModel' | 'asrOther' | 'asrOtherModel' | 'translateOther' | 'translateOtherModel' | 'coachOther' | 'coachOtherModel' | 'translateBaseUrl' | 'coachDeviceModel' | 'coachPrompt' | 'asrHereModel' | 'asrNativeModel' | 'translateHereModel' | 'translateNativeModel' | 'coachHereModel' | 'coachNativeModel' | 'hereAddress' | 'herePipeline') => (typeof stored[k] === 'string' ? (stored[k] as string) : LOCALAI_DEFAULTS[k]);
   const flag = (k: 'asrApiNeedsKey' | 'asrDetectOther' | 'coach' | 'serverNeedsKey' | 'translateBySentence') => (typeof stored[k] === 'boolean' ? (stored[k] as boolean) : LOCALAI_DEFAULTS[k]);
   const number = (k: (typeof VAD_FIELDS)[number]) => (typeof stored[k] === 'number' && Number.isFinite(stored[k]) ? (stored[k] as number) : LOCALAI_DEFAULTS[k]);
   const selections = stored.selections;
@@ -350,6 +365,10 @@ export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>
     asrOtherModel: text('asrOtherModel'),
     asrDetectOther: flag('asrDetectOther'),
     translateBySentence: flag('translateBySentence'),
+    translateOther: text('translateOther'),
+    translateOtherModel: text('translateOtherModel'),
+    coachOther: text('coachOther'),
+    coachOtherModel: text('coachOtherModel'),
     translateBaseUrl: text('translateBaseUrl'),
     coach: flag('coach'),
     coachDeviceModel: text('coachDeviceModel'),
@@ -409,7 +428,7 @@ export { kindOf, modelsFor, serverDefaultModel, type LocalAIModel, type LocalAIM
 export { detectsOther, heardBy, needsServer, PLACES, type Place } from './localaiDevice';
 
 /** A leg of this run only transcribes on the other device — its answers come from a stage of its own — so LocalAI lets no recognizer be chosen (`transcriptionFor`). */
-export const hasTranscriptionLeg = (s: Pick<LocalAISettings, 'asrVia' | 'translateAt' | 'translateServerModel' | 'coach'>) => s.asrVia === 'server' && (s.translateAt !== 'server' || s.translateServerModel.trim() !== '' || s.coach);
+export const hasTranscriptionLeg = (s: Pick<LocalAISettings, 'asrVia' | 'asrOther' | 'translateAt' | 'translateOther' | 'translateServerModel' | 'coach'>) => hearingPlace(s) === 'server' && (translatePlace(s) !== 'server' || s.translateServerModel.trim() !== '' || s.coach);
 
 /** This computer's LocalAI: where its models are asked over HTTP, and where its Realtime socket is. */
 const hereHost = (s: Pick<LocalAISettings, 'hereAddress'>) => s.hereAddress.trim() || LOCALAI_DEFAULTS.hereAddress;
@@ -494,6 +513,8 @@ function unnamedStage(s: LocalAISettings, models: readonly LocalAIModel[], coach
   if (s.asrVia === 'api' && (!s.asrApiBaseUrl.trim() || !s.asrApiModel.trim())) return { refused: 'No speech recognition API is named.', code: 'asr_unnamed' };
   if (!coached) {
     if (s.translateAt === 'api' && (!s.translateBaseUrl.trim() || !s.translateModel.trim())) return { refused: 'No translation model is named.', code: 'translate_unnamed' };
+    // A phone of the translation's own lends a model, chosen with it.
+    if (translatesAtOwnDevice(s)) return s.translateOtherModel.trim() ? null : { refused: 'No translation model is named.', code: 'translate_unnamed' };
     const kotomimi = needsServer(s) && isKotomimiServer(models);
     const serverModel = s.translateServerModel.trim();
     // A model of the other device is asked by name: none is named, and none of its own fits.
@@ -502,6 +523,7 @@ function unnamedStage(s: LocalAISettings, models: readonly LocalAIModel[], coach
     return null;
   }
   if (s.coachAt === 'api' && (!s.coachBaseUrl.trim() || !s.coachModel.trim())) return { refused: 'No feedback model is named.', code: 'coach_unnamed' };
+  if (coachesAtOwnDevice(s)) return s.coachOtherModel.trim() ? null : { refused: 'No feedback model is named.', code: 'coach_unnamed' };
   if (s.coachAt === 'server' && !(s.coachServerModel.trim() || serverDefaultModel(models, 'coach'))) return { refused: 'No feedback model is named.', code: 'coach_unnamed' };
   return null;
 }
@@ -548,19 +570,48 @@ export interface LocalAICheckDeps {
   clock?: Pick<Clock, 'setTimeout'>;
 }
 
-interface OtherServer { slot: 'translate' | 'coach' | 'asr'; name: string; base: string; key?: string }
+/** `phone`: the address of the phone that is the stage's own device, where it is one (`settled` made it an API). */
+interface OtherServer { slot: 'translate' | 'coach' | 'asr'; name: string; base: string; key?: string; phone?: string }
 
 /** The APIs the stages name: listed for their models, and required to accept the key. */
 function otherServers(k: LocalAICredentials, s: LocalAISettings): OtherServer[] {
   const out: OtherServer[] = [];
   const base = (url: string) => url.trim().replace(/\/+$/, '');
-  if (s.asrVia === 'api' && s.asrApiBaseUrl.trim()) out.push({ slot: 'asr', name: 'speech recognition', base: base(s.asrApiBaseUrl), key: k.asrKey });
+  if (s.asrVia === 'api' && s.asrApiBaseUrl.trim()) {
+    const phone = s.asrOther.trim() && base(s.asrApiBaseUrl) === phoneTextBase(s.asrOther) ? plainAddress(s.asrOther) : '';
+    out.push({ slot: 'asr', name: 'speech recognition', base: base(s.asrApiBaseUrl), key: k.asrKey, ...(phone ? { phone } : {}) });
+  }
   // This computer's LocalAI, when it hears: reached like any other, so that one that is not running is said before Start.
   if (hearsByLocalServer(s)) out.push({ slot: 'asr', name: 'speech recognition', base: hereBaseUrl(s), key: undefined });
   if (s.translateAt === 'api' && s.translateBaseUrl.trim()) out.push({ slot: 'translate', name: 'translation', base: base(s.translateBaseUrl), key: k.translateKey });
   if (coachIs(s, 'api') && s.coachBaseUrl.trim()) out.push({ slot: 'coach', name: 'feedback', base: base(s.coachBaseUrl), key: k.coachKey });
   return out;
 }
+
+/** A text stage on a phone of its own, as the check asks it: the phone, and the model chosen there. */
+interface PhoneStage { kind: 'translate' | 'coach'; address: string; model: string }
+
+/** The text stages a run of these legs asks a phone: the feedback only where the speaker is heard. */
+function phoneStages(s: LocalAISettings, legs: readonly LegName[]): PhoneStage[] {
+  return [
+    ...(translatesAtOwnDevice(s) ? [{ kind: 'translate' as const, address: plainAddress(s.translateOther), model: s.translateOtherModel.trim() }] : []),
+    ...(coachesAtOwnDevice(s) && legs.includes('speaker') ? [{ kind: 'coach' as const, address: plainAddress(s.coachOther), model: s.coachOtherModel.trim() }] : []),
+  ];
+}
+
+/**
+ * A translation on a phone whose model does not translate the leg's pair (Hunyuan MT's thirty-six languages): said
+ * as the card says it, by the model's name. A model this computer does not know is asked as an API's, and not judged.
+ */
+function phoneTranslatorUnfit(s: LocalAISettings, source: string, target: string): ProviderRefusal | null {
+  if (!translatesAtOwnDevice(s)) return null;
+  const model = NATIVE_TRANSLATORS.find((m) => m.id === s.translateOtherModel.trim());
+  if (!model || nativeTranslates(model, source, target)) return null;
+  return { refused: `${model.name} does not translate ${source} → ${target}.`, code: 'phone_translator_unfit', params: { name: model.name } };
+}
+
+/** A text model of the desktop's own, by the name it has here; its id where it has none. */
+const nativeTextName = (id: string): string => NATIVE_TRANSLATORS.find((m) => m.id === id)?.name ?? NATIVE_COACHES.find((m) => m.id === id)?.name ?? id;
 
 /** Where a Realtime endpoint is, as a person reads it: `ws://192.168.1.20:8790/v1/realtime` → `192.168.1.20:8790`. */
 function hostOf(endpoint: string): string {
@@ -618,7 +669,8 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
       if (!ctx.signal?.aborted && error instanceof Error && error.message === late) throw new CheckError(late, 'check_slow', { seconds: CHECK_TIMEOUT_MS / 1000 });
       throw error;
     };
-    const servers = needsServer(s) || otherServers(k, s).length > 0
+    const phones = phoneStages(s, ctx.legs);
+    const servers = needsServer(s) || otherServers(k, s).length > 0 || phones.length > 0
       ? await boundedFetch({ clock, ms: CHECK_TIMEOUT_MS, signal: ctx.signal, late }, async (signal): Promise<CheckResult> => {
         const models: LocalAIModel[] = [];
         if (needsServer(s)) {
@@ -669,6 +721,8 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
             if (signal.aborted) throw error;
             // This computer's own LocalAI is no address to check, and nothing the internet has to do with: it is not up (yet).
             if (other.base === hereBaseUrl(s)) throw new CheckError(`The LocalAI of this computer (${other.base}) is not running.`, 'localai_here_down');
+            // A phone the stage was given as its device is said to be one, by the address it was found at.
+            if (other.phone) throw new CheckError(`The phone (${other.phone}) could not be reached.`, 'phone_unreachable', { address: other.phone });
             throw new CheckError(`The ${other.name} model's server (${other.base}) could not be reached.`, 'api_unreachable', { address: other.base });
           }
           if (answer.status === 401 || answer.status === 403) {
@@ -708,6 +762,25 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
             models.push({ id: m.id, kind: m.kotomimi ? 'translate' : 'text', from: other.slot, ...(m.kotomimi ? { host: KOTOMIMI_HOST } : {}) });
           }
         }
+
+        // A phone a text stage was given: it answers, and lends the model chosen there now — read from its `text`, never
+        // its `data`, which lists its recognizer (a desktop that reads only `data` takes every name there for one).
+        for (const phone of phones) {
+          // One with no model chosen is refused below, as a stage with none (`unnamedStage`).
+          if (!phone.model) continue;
+          let lent: Awaited<ReturnType<typeof phoneTextList>>;
+          try {
+            lent = await phoneTextList(phone.address, doFetch, signal);
+          } catch (error) {
+            if (signal.aborted) throw error;
+            lent = null;
+          }
+          if (lent === null) throw new CheckError(`The phone (${phone.address}) could not be reached.`, 'phone_unreachable', { address: phone.address });
+          if (!lent.some((m) => m.id === phone.model && m.kind === phone.kind)) {
+            const what = phone.kind === 'translate' ? 'translation' : 'feedback';
+            return { ok: false, code: 'phone_model_gone', params: { address: phone.address, name: nativeTextName(phone.model) }, reason: `The phone (${phone.address}) lends no ${what} model ${phone.model} now.` };
+          }
+        }
         return { ok: true, models };
       }).catch(slow)
       : ({ ok: true, models: [] } as CheckResult);
@@ -719,7 +792,9 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
       const found = servers.models ?? [];
       // What the leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
       const heard = heardBy(s, ctx.pair, leg, found);
-      const gap = unnamedStage(s, found, coached) ?? undetected(s, found, leg === 'speaker' ? ctx.pair.source : heard, coached, leg === 'participant' ? ctx.pair.target : undefined) ?? unheard(s, found, heard);
+      const gap = unnamedStage(s, found, coached) ?? undetected(s, found, leg === 'speaker' ? ctx.pair.source : heard, coached, leg === 'participant' ? ctx.pair.target : undefined) ?? unheard(s, found, heard)
+        // What the leg translates: the speaker the pair, the other side its reverse (from whatever it turns out to be).
+        ?? (coached ? null : phoneTranslatorUnfit(s, leg === 'speaker' ? ctx.pair.source : heard, leg === 'speaker' ? ctx.pair.target : ctx.pair.source));
       // What the servers listed goes with the refusal: a pick from it is often what answers it.
       if (gap) return { ok: false, reason: gap.refused, ...(gap.code ? { code: gap.code } : {}), ...(gap.params ? { params: gap.params } : {}), ...(servers.models?.length ? { models: servers.models } : {}) };
     }
@@ -782,11 +857,42 @@ async function bringUp(needs: NativeNeeds, ups: NativeUps): Promise<boolean> {
 }
 
 /**
+ * The models a run will ask of a phone (a text stage's own device), with what goes before the sentence in each request:
+ * the feedback's instructions and worked examples, which the phone then reads once, here (`warmPhones`).
+ */
+export function phoneWarms(s: LocalAISettings, pair: { source: string; target: string }, legs: readonly LegName[]): PhoneWarm[] {
+  const out: PhoneWarm[] = [];
+  for (const stage of phoneStages(s, legs)) {
+    if (!stage.model || out.some((w) => w.address === stage.address && w.model === stage.model)) continue;
+    if (stage.kind === 'translate') {
+      const native = NATIVE_TRANSLATORS.find((m) => m.id === stage.model);
+      out.push({ address: stage.address, model: stage.model, messages: [], ...(native ? { extra: translatorRequest(native, pair.source, pair.target).extra } : {}) });
+    } else {
+      // The speaker practises the target language; their own is the source (as `buildLocalAI` asks it).
+      const prompt = coachPrompt(pair.target, pair.source, s.coachPrompt);
+      const messages = [
+        { role: 'system' as const, content: prompt.system },
+        ...prompt.shots.flatMap((shot) => [{ role: 'user' as const, content: shot.said }, { role: 'assistant' as const, content: shot.answer }]),
+      ];
+      out.push({ address: stage.address, model: stage.model, messages, ...(NATIVE_COACHES.some((m) => m.id === stage.model) ? { extra: NATIVE_COACH_EXTRA } : {}) });
+    }
+  }
+  return out;
+}
+
+/** `fetch` as it is when called, so a test's stubbed global is seen. */
+const fetchNow: typeof fetch = (input, init) => fetch(input, init);
+
+/**
  * A run's first step: the native engines it needs are loaded, and waited
  * for. Until now nothing held their models in memory; the translation and
  * the feedback are then built with the addresses the engines answer at.
  */
-export async function prepareLocalAI(shape: { pair: { source: string; target: string }; legs: readonly ('speaker' | 'participant')[] }, stored: LocalAISettings, ups: NativeUps = UPS, signal?: AbortSignal): Promise<Record<string, never>> {
+export async function prepareLocalAI(shape: { pair: { source: string; target: string }; legs: readonly ('speaker' | 'participant')[] }, stored: LocalAISettings, ups: NativeUps = UPS, signal?: AbortSignal, warm: (wanted: readonly PhoneWarm[], signal: AbortSignal) => Promise<void> = (wanted, until) => warmPhones(wanted, fetchNow, until)): Promise<Record<string, never>> {
+  // A phone a text stage is given is asked to load its model as the run begins, and not waited for (`warmPhones`):
+  // stopped with the run.
+  const warms = phoneWarms(stored, shape.pair, shape.legs);
+  if (warms.length > 0) void warm(warms, signal ?? new AbortController().signal).catch(() => undefined);
   const needs = nativeNeeds(settled(stored), shape.pair, shape.legs);
   // The run holds its engines from here to its end, whatever that end is: a stop, a refusal after this step, a leg
   // that never opened, the page going away — the run's signal is aborted on every one of them. Not only from the
@@ -937,7 +1043,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   const apiModel = s.translateModel.trim();
   const serverModel = s.translateServerModel.trim();
   // No session of the device's own pipeline answers this leg's text: one of its models is asked instead.
-  const asksServer = s.translateAt === 'server' && (serverModel !== '' || kotomimi || hearsHere || hearsLocal || coached);
+  const asksServer = translatePlace(s) === 'server' && (serverModel !== '' || kotomimi || hearsHere || hearsLocal || coached);
   const askedServerModel = serverModel || (kotomimi && pipeline ? pipeline : serverDefaultModel(models, 'translate'));
 
   // OpenAI Realtime's builder for the instructions and the detection, with the model pinned so it picks no other.
@@ -983,7 +1089,20 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
 
   // Null: the other device's pipeline answers, inside the session it hears in.
   let translate: AnswerStage | null = null;
-  if (translatesNatively(s)) {
+  if (translatesAtOwnDevice(s)) {
+    // A phone that lends the translation: one of this computer's native translators, asked as this computer asks its
+    // own — in the model's own form of request — at the phone's address. With no `engine`: that would ask this
+    // computer's own engine where it answers, and send the request there.
+    const id = s.translateOtherModel.trim();
+    const native = NATIVE_TRANSLATORS.find((m) => m.id === id);
+    const unfit = phoneTranslatorUnfit(s, source, target);
+    if (unfit) {
+      if (!coached) return unfit;
+    } else {
+      // A model this computer does not know (a later phone's) is asked as an API's is.
+      translate = { kind: 'translate', baseUrl: phoneTextBase(s.translateOther), model: id, phone: true, ...(native ? { system: '', ...translatorRequest(native, source, target) } : { system: base.instructions }) };
+    }
+  } else if (translatesNatively(s)) {
     // The native translation engine: asked over the chat wire on this computer, in the model's own form of request.
     const native = nativeTranslator(s.translateNativeModel);
     if (!nativeTranslates(native, source, target)) {
@@ -1008,7 +1127,12 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
     // The speaker practises the target language; their own is the source.
     const prompt = coachPrompt(target, source, s.coachPrompt);
     let coach: AnswerStage;
-    if (coachesNatively(s)) {
+    if (coachesAtOwnDevice(s)) {
+      // A phone that lends the feedback model: asked as this computer asks its own native one, at the phone's address.
+      const id = s.coachOtherModel.trim();
+      const known = NATIVE_COACHES.some((m) => m.id === id);
+      coach = { kind: 'coach', baseUrl: phoneTextBase(s.coachOther), model: id, phone: true, ...(known ? { extra: NATIVE_COACH_EXTRA } : {}), system: prompt.system, ...(prompt.shots.length ? { shots: prompt.shots } : {}), language: source };
+    } else if (coachesNatively(s)) {
       // The native feedback engine: a chat model at an address on this computer, asked as an API's is — with the worked examples.
       coach = { kind: 'coach', engine: 'coach', baseUrl: coachBaseUrl(), model: nativeCoach(s.coachNativeModel).id, extra: NATIVE_COACH_EXTRA, system: prompt.system, ...(prompt.shots.length ? { shots: prompt.shots } : {}), language: source };
     } else if (s.coachAt === 'device') {
@@ -1117,7 +1241,7 @@ export const localaiProvider: Provider<LocalAISettings, LocalAICredentials, Loca
   check: (k, s, ctx) => checkLocalAIWithNative(k, s, ctx),
   // What decides the credential fields, the endpoints the check reaches, and the models it asks this computer for.
   checkReads: [
-    'asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'asrOther', 'asrOtherModel', 'asrDetectOther', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'coachDeviceModel', 'serverNeedsKey', 'selections',
+    'asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'asrOther', 'asrOtherModel', 'translateOther', 'translateOtherModel', 'coachOther', 'coachOtherModel', 'asrDetectOther', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'coachDeviceModel', 'serverNeedsKey', 'selections',
     // The models a start needs named (`unnamedStage`).
     'model', 'translateModel', 'translateServerModel', 'coachModel', 'coachServerModel',
     // On this computer: by the app's own models, or by the LocalAI installed here, and then which of its models.

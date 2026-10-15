@@ -8,7 +8,7 @@ import http from 'node:http';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { discoverServers, targets, neighbours, readAnswer, probe, productOf, nameOf, shown, NAME_HEADER, INCLUDES_HEADER } = require('./lan-discover.js');
+const { discoverServers, targets, neighbours, readAnswer, textModels, probe, productOf, nameOf, shown, NAME_HEADER, INCLUDES_HEADER } = require('./lan-discover.js');
 
 let running = [];
 afterEach(async () => {
@@ -87,6 +87,35 @@ describe('what an answer says of a server', () => {
     expect(readAnswer(200, {}, list)).toMatchObject({ kind: 'server', models: 1 });
   });
 
+  it('knows what a phone of 0.8.0 lends besides: its text models, apart from its recognizer', () => {
+    const text = [
+      { id: 'hy-mt2-1.8b', object: 'model', owned_by: 'kotomimi-phone', holds_mb: 1210, kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: false },
+      { id: 'index-translate-2b', object: 'model', owned_by: 'kotomimi-phone', holds_mb: 1541, kind: 'translate', name: 'Index-Translate 2B', loaded: true },
+      { id: 'gemma-4-e2b', kind: 'coach', name: 'Gemma 4 E2B' },
+    ];
+    const both = JSON.stringify({ object: 'list', data: [{ id: 'sensevoice-small-q8', object: 'model', owned_by: 'kotomimi-phone' }], text, memory_mb: { total: 3843, available: 1850 } });
+    expect(readAnswer(200, { 'x-kotomimi-node': 'engine' }, both)).toEqual({
+      kind: 'phone', name: '', models: 4, needsKey: false, includes: false, model: 'sensevoice-small-q8',
+      text: [
+        { id: 'hy-mt2-1.8b', kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: false },
+        { id: 'index-translate-2b', kind: 'translate', name: 'Index-Translate 2B', loaded: true },
+        { id: 'gemma-4-e2b', kind: 'coach', name: 'Gemma 4 E2B', loaded: false },
+      ],
+    });
+    // One that lends text models alone has an empty `data`: still a phone to choose, with no recognizer.
+    const textOnly = readAnswer(200, { 'x-kotomimi-node': 'engine' }, JSON.stringify({ object: 'list', data: [], text: text.slice(0, 1) }));
+    expect(textOnly).toEqual({ kind: 'phone', name: '', models: 1, needsKey: false, includes: false, text: [{ id: 'hy-mt2-1.8b', kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: false }] });
+  });
+
+  it("keeps of a phone's text models only what is one: a name, and a translation or feedback, each once", () => {
+    expect(textModels([{ id: 'a', kind: 'translate' }, { id: 'a', kind: 'coach' }, { id: 'b', kind: 'asr' }, { kind: 'coach' }, null, 'x', { id: 'c', kind: 'coach', name: 7, loaded: 'yes' }])).toEqual([
+      { id: 'a', kind: 'translate', name: '', loaded: false },
+      { id: 'c', kind: 'coach', name: '', loaded: false },
+    ]);
+    expect(textModels('no')).toEqual([]);
+    expect(textModels(Array.from({ length: 40 }, (_, i) => ({ id: `m${i}`, kind: 'translate' })))).toHaveLength(16);
+  });
+
   it('is nothing for a router\'s page, a 404, or JSON that is no list', () => {
     expect(readAnswer(200, {}, '<html>router</html>')).toBeNull();
     expect(readAnswer(404, {}, '{}')).toBeNull();
@@ -140,6 +169,16 @@ describe('the search', () => {
     expect(await productOf({ host: '127.0.0.1', port: localai }, 400)).toBe('LocalAI');
     expect(await productOf({ host: '127.0.0.1', port: other }, 400)).toBe('');
     expect(await productOf({ host: '127.0.0.1', port: await serve(200, null, {}, {}) }, 400)).toBe('');
+  });
+
+  it('hands over what a phone lends, its text models with it, and of an earlier phone what it always did', async () => {
+    const node = { 'X-Kotomimi-Node': 'engine', 'X-Kotomimi-Name': 'F22' };
+    const lending = await serve(200, { object: 'list', data: [], text: [{ id: 'hy-mt2-1.8b', kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: false }] }, node);
+    const earlier = await serve(200, { object: 'list', data: [{ id: 'qwen3-asr-0.6b-q8' }] }, node);
+    const found = await discoverServers({ interfaces: {}, ports: [lending, earlier], timeoutMs: 400 });
+    const byPort = Object.fromEntries(found.map((s) => [s.address, s]));
+    expect(byPort[`127.0.0.1:${lending}`]).toEqual({ address: `127.0.0.1:${lending}`, kind: 'phone', name: 'F22', product: '', models: 1, needsKey: false, self: true, text: [{ id: 'hy-mt2-1.8b', kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: false }] });
+    expect(byPort[`127.0.0.1:${earlier}`]).toEqual({ address: `127.0.0.1:${earlier}`, kind: 'phone', name: 'F22', product: '', models: 1, needsKey: false, self: true, model: 'qwen3-asr-0.6b-q8' });
   });
 
   it('finds nothing on a computer with no network and no server', async () => {

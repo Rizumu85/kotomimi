@@ -14,13 +14,23 @@ import type { LocalAIModel } from './localaiModels';
 vi.mock('react-i18next', async (importOriginal) => ({ ...(await importOriginal<typeof import('react-i18next')>()), useTranslation: () => ({ t: (key: string) => key }) }));
 // The search of the network is the finder's own test: here only that it is drawn, and what a pick does.
 vi.mock('../../components/LanSharing/ServerFinder', () => ({
-  ServerFinder: ({ onPick, onFound, auto, hint, phone }: { onPick(server: unknown): void; onFound?(servers: unknown[]): void; auto?: boolean; hint?: string; phone?: string }) => {
+  ServerFinder: ({ onPick, onFound, auto, hint, phone }: { onPick(server: unknown): void; onFound?(servers: unknown[]): void; auto?: boolean; hint?: string; phone?: string | string[] }) => {
     const aPhone = { address: '192.168.4.28:8792', kind: 'phone', name: 'Pixel', product: '', models: 1, needsKey: false, self: false, model: 'qwen3-asr-0.6b-q8' };
+    // A phone of 0.8.0: its recognizer, two translators and the feedback model; and one that lends a translator alone.
+    const lending = { ...aPhone, models: 4, text: [
+      { id: 'hy-mt2-1.8b', kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: false },
+      { id: 'index-translate-2b', kind: 'translate', name: 'Index-Translate 2B', loaded: false },
+      { id: 'gemma-4-e2b', kind: 'coach', name: 'Gemma 4 E2B', loaded: false },
+    ] };
+    const textOnly = { address: '192.168.4.30:8792', kind: 'phone', name: 'F22', product: '', models: 1, needsKey: false, self: false, text: [{ id: 'hy-mt2-1.8b', kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: true }] };
     return (
       <>
-        <button type="button" data-auto={String(Boolean(auto))} data-hint={hint} data-phone={phone} onClick={() => onPick({ address: '192.168.1.9:8790', kind: 'kotomimi', name: 'DESK', product: '', models: 2, needsKey: true, self: false })}>finder</button>
+        <button type="button" data-auto={String(Boolean(auto))} data-hint={hint} data-phone={[phone ?? []].flat().join(' ')} onClick={() => onPick({ address: '192.168.1.9:8790', kind: 'kotomimi', name: 'DESK', product: '', models: 2, needsKey: true, self: false })}>finder</button>
         <button type="button" onClick={() => onFound?.([aPhone])}>a search that finds a phone</button>
         <button type="button" onClick={() => onPick(aPhone)}>the phone, picked</button>
+        <button type="button" onClick={() => onFound?.([lending, textOnly])}>a search that finds phones lending text models</button>
+        <button type="button" onClick={() => onPick(lending)}>the lending phone, picked</button>
+        <button type="button" onClick={() => onPick(textOnly)}>the text phone, picked</button>
       </>
     );
   },
@@ -859,5 +869,117 @@ describe('a phone that lends its recognition: the "another device" of the hearin
     const { card, update } = draw({ settings: PHONE, values: { endpoint: '192.168.1.9:8790' } });
     fireEvent.change(card(HEAR).getByRole('combobox', { name: 'providers.localai.stageDevice' }), { target: { value: '' } });
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrOther: '', asrOtherModel: '' }));
+  });
+});
+
+describe('a phone that lends its text models: the "another device" of the translation and the feedback', () => {
+  const SILENT: Readiness = { state: 'not-ready', reason: 'The other device could not be reached (192.168.1.10:8790): Failed to fetch' };
+  const device = (stage: string, card: (stage: string) => ReturnType<typeof within>) => card(stage).queryByRole('combobox', { name: 'providers.localai.stageDevice' }) as HTMLSelectElement | null;
+  const model = (stage: string, card: (stage: string) => ReturnType<typeof within>) => card(stage).getByRole('combobox', { name: 'providers.localai.model' }) as HTMLSelectElement;
+
+  it('is offered in the translation card once a search has found one, beside the shared device', () => {
+    const { card, update } = draw({ settings: { translateAt: 'server' }, values: { endpoint: '192.168.1.9:8790' } });
+    expect(device(TRANSLATE, card)).toBeNull();
+    fireEvent.click(screen.getByText('a search that finds phones lending text models'));
+    const select = device(TRANSLATE, card)!;
+    expect(options(select)).toEqual(['', '192.168.4.28:8792', '192.168.4.30:8792']);
+    expect(select.options[0].textContent).toBe('192.168.1.9:8790');
+    // The phone that lends two: the better of this computer's own order for the pair.
+    fireEvent.change(select, { target: { value: '192.168.4.28:8792' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ translateOther: '192.168.4.28:8792', translateOtherModel: 'index-translate-2b' }));
+    // A phone that lends text models alone is no device to hear with.
+    const hearing = device(HEAR, card);
+    expect(hearing ? options(hearing) : []).not.toContain('192.168.4.30:8792');
+  });
+
+  it('shows the model asked of the phone: a choice among the ones it lends', () => {
+    const { card, update } = draw({ settings: { translateAt: 'server', translateOther: '192.168.4.28:8792', translateOtherModel: 'index-translate-2b' }, values: { endpoint: '192.168.1.9:8790' } });
+    // Not found yet: the saved phone and model as they were.
+    expect(device(TRANSLATE, card)!.value).toBe('192.168.4.28:8792');
+    expect(model(TRANSLATE, card).selectedOptions[0].textContent).toBe('Index-Translate 2B');
+    expect(card(TRANSLATE).queryByText('providers.localai.connectFirst')).toBeNull();
+    fireEvent.click(screen.getByText('a search that finds phones lending text models'));
+    expect(options(model(TRANSLATE, card))).toEqual(['hy-mt2-1.8b', 'index-translate-2b']);
+    expect(model(TRANSLATE, card).disabled).toBe(false);
+    fireEvent.change(model(TRANSLATE, card), { target: { value: 'hy-mt2-1.8b' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ translateOtherModel: 'hy-mt2-1.8b' }));
+    // Back on the shared device.
+    fireEvent.change(device(TRANSLATE, card)!, { target: { value: '' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ translateOther: '', translateOtherModel: '' }));
+  });
+
+  it('fixes the model where the phone lends one, and says so where it no longer lends the one chosen', () => {
+    const gone = draw({ settings: { translateAt: 'server', translateOther: '192.168.4.30:8792', translateOtherModel: 'index-translate-2b' } });
+    fireEvent.click(screen.getByText('a search that finds phones lending text models'));
+    expect(model(TRANSLATE, gone.card).selectedOptions[0].textContent).toBe('providers.localai.modelGone');
+    cleanup();
+    const one = draw({ settings: { translateAt: 'server', translateOther: '192.168.4.30:8792', translateOtherModel: 'hy-mt2-1.8b' } });
+    fireEvent.click(screen.getByText('a search that finds phones lending text models'));
+    expect(model(TRANSLATE, one.card).disabled).toBe(true);
+    expect(model(TRANSLATE, one.card).selectedOptions[0].textContent).toBe('Hunyuan MT 2 1.8B');
+  });
+
+  it("says where the phone's translator does not translate the pair", () => {
+    render(<LocalAIAssist settings={{ ...LOCALAI_DEFAULTS, translateAt: 'server', translateOther: '192.168.4.30:8792', translateOtherModel: 'hy-mt2-1.8b' }} values={{ endpoint: '' }} set={vi.fn()} fill={vi.fn()} update={vi.fn()} pair={{ source: 'zh-CN', target: 'sw' }} legs={['speaker']} models={[]} readiness={{ state: 'unknown' }} check={vi.fn()} />);
+    expect(within(screen.getByRole('region', { name: TRANSLATE })).getByText('providers.localai.translatorUnfit')).toBeTruthy();
+  });
+
+  it('is offered in the feedback card the same way', () => {
+    const { card, update } = draw({ settings: { coach: true, coachAt: 'server' }, values: { endpoint: '192.168.1.9:8790' } });
+    fireEvent.click(screen.getByText('a search that finds phones lending text models'));
+    const select = device(COACH, card)!;
+    // Only the phone that lends a feedback model.
+    expect(options(select)).toEqual(['', '192.168.4.28:8792']);
+    fireEvent.change(select, { target: { value: '192.168.4.28:8792' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ coachOther: '192.168.4.28:8792', coachOtherModel: 'gemma-4-e2b' }));
+    cleanup();
+    const there = draw({ settings: { coach: true, coachAt: 'server', coachOther: '192.168.4.28:8792', coachOtherModel: 'gemma-4-e2b' } });
+    expect(model(COACH, there.card).selectedOptions[0].textContent).toBe('Gemma 4 E2B');
+    expect(there.card(COACH).queryByText('providers.localai.connectFirst')).toBeNull();
+  });
+
+  it('picked in the search, is given every stage on "another device" it can run, and none placed elsewhere', () => {
+    const onServer = draw({ settings: { asrVia: 'device', translateAt: 'server', coachAt: 'server' } });
+    fireEvent.click(screen.getByText('the lending phone, picked'));
+    expect(onServer.update).toHaveBeenLastCalledWith(expect.objectContaining({
+      asrVia: 'server', asrOther: '192.168.4.28:8792', asrOtherModel: 'qwen3-asr-0.6b-q8',
+      translateOther: '192.168.4.28:8792', translateOtherModel: 'index-translate-2b',
+      coachOther: '192.168.4.28:8792', coachOtherModel: 'gemma-4-e2b',
+    }));
+    expect(onServer.fill).not.toHaveBeenCalled();
+    cleanup();
+    const elsewhere = draw({ settings: { asrVia: 'device', translateAt: 'device', coachAt: 'api' } });
+    fireEvent.click(screen.getByText('the lending phone, picked'));
+    const patch = elsewhere.update.mock.lastCall?.[0] as Partial<LocalAISettings>;
+    expect(patch).toMatchObject({ asrVia: 'server', asrOther: '192.168.4.28:8792', translateAt: 'device' });
+    expect(patch).not.toHaveProperty('translateOther');
+    expect(patch).not.toHaveProperty('coachOther');
+  });
+
+  it('picked in the search while it can run no stage placed there, is given the translation: it lends that alone', () => {
+    const { update } = draw({ settings: { asrVia: 'device', translateAt: 'device' } });
+    fireEvent.click(screen.getByText('the text phone, picked'));
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ translateAt: 'server', translateOther: '192.168.4.30:8792', translateOtherModel: 'hy-mt2-1.8b' }));
+    expect(update.mock.lastCall?.[0]).not.toHaveProperty('asrOther');
+  });
+
+  it('is marked in the search as in use by the stages that ask it', () => {
+    draw({ settings: { asrVia: 'device', translateAt: 'server', translateOther: '192.168.4.30:8792', translateOtherModel: 'hy-mt2-1.8b', coach: true, coachAt: 'server', coachOther: '192.168.4.28:8792', coachOtherModel: 'gemma-4-e2b' } });
+    expect(screen.getByText('finder').getAttribute('data-phone')).toBe('192.168.4.30:8792 192.168.4.28:8792');
+  });
+
+  it("leaves the shared device's silence unsaid where no stage is on it", () => {
+    const everyStageOnPhones: Partial<LocalAISettings> = { asrVia: 'server', asrOther: '192.168.4.28:8792', asrOtherModel: 'qwen3-asr-0.6b-q8', translateAt: 'server', translateOther: '192.168.4.28:8792', translateOtherModel: 'index-translate-2b', coach: true, coachAt: 'server', coachOther: '192.168.4.28:8792', coachOtherModel: 'gemma-4-e2b' };
+    draw({ settings: everyStageOnPhones, values: { endpoint: '192.168.1.10:8790' }, readiness: SILENT });
+    expect(screen.queryByText('providers.localai.serverSilent')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'providers.localai.kotomimiThere' })).toBeNull();
+    cleanup();
+    // On an API and this computer, as on phones.
+    draw({ settings: { ...everyStageOnPhones, translateAt: 'device', coachAt: 'api' }, values: { endpoint: '192.168.1.10:8790' }, readiness: SILENT });
+    expect(screen.queryByText('providers.localai.serverSilent')).toBeNull();
+    cleanup();
+    // One stage left on it, and its silence is said.
+    draw({ settings: { ...everyStageOnPhones, translateOther: '' }, values: { endpoint: '192.168.1.10:8790' }, readiness: SILENT });
+    expect(screen.getByText('providers.localai.serverSilent')).toBeTruthy();
   });
 });

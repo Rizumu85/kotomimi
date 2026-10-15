@@ -84,6 +84,26 @@ function targets(interfaces = os.networkInterfaces(), { ports = [KOTOMIMI_PORT, 
   return out;
 }
 
+/** A phone lends a handful of text models: more than this in its list is not a phone's list. */
+const MOST_TEXT_MODELS = 16;
+
+/**
+ * The text models a phone lends (`text` of its model list): what each is for — a translation or grammar feedback —
+ * its name, and whether its engine is up now (the first request for one that is not waits for it to load). Anything
+ * else in the list is left out.
+ */
+function textModels(value) {
+  if (!Array.isArray(value)) return [];
+  const out = [];
+  for (const m of value) {
+    if (!m || typeof m.id !== 'string' || !m.id || (m.kind !== 'translate' && m.kind !== 'coach')) continue;
+    if (out.some((seen) => seen.id === m.id)) continue;
+    out.push({ id: m.id.slice(0, 80), kind: m.kind, name: typeof m.name === 'string' ? m.name.slice(0, 80) : '', loaded: m.loaded === true });
+    if (out.length >= MOST_TEXT_MODELS) break;
+  }
+  return out;
+}
+
 /** What an answer to `GET /v1/models` says of the server, or null when it is no such server. */
 function readAnswer(status, headers, body) {
   const named = typeof headers[NAME_HEADER] === 'string' ? headers[NAME_HEADER] : '';
@@ -105,8 +125,18 @@ function readAnswer(status, headers, body) {
   }
   if (!list || !Array.isArray(list.data)) return null;
   const models = list.data.filter((m) => m && typeof m.id === 'string');
-  // A phone lends one thing: the model it has loaded, to recognize speech with.
-  if (headers[NODE_HEADER] === 'engine') return models.length ? { kind: 'phone', name, models: models.length, needsKey: false, includes: false, model: String(models[0].id).slice(0, 80) } : null;
+  // A phone lends the model it has loaded, to recognize speech with, and (0.8.0 on) text models besides, listed
+  // apart under `text` so that a desktop that reads only `data` never takes one for a recognizer. A phone that lends
+  // text models alone has an empty `data`: it is still a device to choose, for the stages those models run.
+  if (headers[NODE_HEADER] === 'engine') {
+    const text = textModels(list.text);
+    if (!models.length && !text.length) return null;
+    return {
+      kind: 'phone', name, models: models.length + text.length, needsKey: false, includes: false,
+      ...(models.length ? { model: String(models[0].id).slice(0, 80) } : {}),
+      ...(text.length ? { text } : {}),
+    };
+  }
   const kotomimi = models.some((m) => m.owned_by === 'kotomimi');
   // A sharing Kotomimi lists its pipeline first, which is no model of its own to count.
   return { kind: kotomimi ? 'kotomimi' : 'server', name, models: kotomimi ? Math.max(models.length - 1, 0) : models.length, needsKey: false, includes: kotomimi && includes };
@@ -202,7 +232,7 @@ async function discoverServers({ interfaces, ports, ownPorts = [], timeoutMs = P
     s.product = product;
   }));
   const order = (s) => `${s.kind === 'kotomimi' ? 0 : s.kind === 'phone' ? 1 : 2}${s.self ? 0 : 1}${toNumber(s.host).toString().padStart(10, '0')}${String(s.port).padStart(5, '0')}`;
-  return others.sort((a, b) => order(a).localeCompare(order(b))).map(({ address, kind, name, product, models, needsKey, self, model }) => ({ address, kind, name, product, models, needsKey, self, ...(model ? { model } : {}) }));
+  return others.sort((a, b) => order(a).localeCompare(order(b))).map(({ address, kind, name, product, models, needsKey, self, model, text }) => ({ address, kind, name, product, models, needsKey, self, ...(model ? { model } : {}), ...(text ? { text } : {}) }));
 }
 
-module.exports = { discoverServers, targets, neighbours, readAnswer, probe, productOf, nameOf, shown, KOTOMIMI_PORT, SERVER_PORT, PHONE_PORT, NAME_HEADER, INCLUDES_HEADER, NODE_HEADER };
+module.exports = { discoverServers, targets, neighbours, readAnswer, textModels, probe, productOf, nameOf, shown, KOTOMIMI_PORT, SERVER_PORT, PHONE_PORT, NAME_HEADER, INCLUDES_HEADER, NODE_HEADER };

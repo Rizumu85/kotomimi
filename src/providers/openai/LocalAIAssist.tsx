@@ -8,7 +8,7 @@ import { ModelGroup } from '../../components/Settings/sections/ModelManagementCo
 import { ModelCard, ModelManagementSection } from '../../components/Settings/sections/ModelManagementSection';
 import ToggleSwitch from '../../components/Settings/shared/ToggleSwitch';
 import Tooltip from '../../components/Tooltip/Tooltip';
-import { canFindServers, findServers, plainAddress, type FoundServer } from '../../lib/lan/discover';
+import { canFindServers, findServers, phoneHears, phoneLends, plainAddress, type FoundServer, type PhoneTextModel } from '../../lib/lan/discover';
 import { askLocalPipelines, NO_PIPELINES, type LocalPipelines } from '../../lib/lan/localServer';
 import { modelLabel } from '../../lib/lan/modelLabel';
 import { deviceReady, getManifestEntry, getModelSizeMb } from '../../lib/local-inference/modelManifest';
@@ -23,13 +23,14 @@ import { API_SERVICES, preferredModel, serviceOf, servicesFor, type ApiKind, typ
 import { coachPrompt } from './coachPrompt';
 // Type only: `localai.ts` imports this view, and a value import back would close a cycle.
 import type { LocalAISettings as S } from './localai';
-import { deviceChatModels, deviceCoachModel, deviceLanguage, deviceModelsLoaded, hearingPlace, needsServer, PLACE_FIELDS, PLACES, type DeviceNeed, type Place } from './localaiDevice';
+import { coachesAtOwnDevice, deviceChatModels, deviceCoachModel, deviceLanguage, deviceModelsLoaded, hearingPlace, needsServer, PLACE_FIELDS, PLACES, translatePlace, translatesAtOwnDevice, type DeviceNeed, type Place } from './localaiDevice';
 import { NATIVE_MODELS, chooseNative, isAutoLanguage, nativeDownloaded, nativeHears, nativeModel, nativePicked, type NativePick } from './localaiNative';
 import { detectsOther, heardBy } from './localaiDevice';
 import { languageLabel } from '../../lib/language/label';
 import { NativeEngineCard, nativeStoreOf, type NativeCardModel, type NativeKind } from './NativeEngineCard';
 import { NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator } from './nativeTranslators';
 import { NATIVE_COACHES, nativeCoach } from './nativeCoaches';
+import { lentChoice } from './phoneText';
 import { useDeviceSettings, useDeviceSlots } from './LocalAIEngine';
 import { isKotomimiServer, modelsFor, SERVER_SILENT, serverDefaultModel, type LocalAIModel } from './localaiModels';
 import { choiceOf, perLanguage, recognizerChoices } from './serverRecognizers';
@@ -104,6 +105,50 @@ function ServerModel({ label, value, blank, options, onChange, disabled }: { lab
             the device did list its models, it is said that this one is not among them. */}
         {!listed && <option value={value}>{options.length > 0 ? t('providers.localai.modelGone', { name: shownName(value) }) : shownName(value)}</option>}
         {options.map((m) => <option key={m.id} value={m.id}>{shownName(m.id)}</option>)}
+      </select>
+    </Field>
+  );
+}
+
+/** A device a stage can be given beside the shared one: a phone, by its address, and its name where it gave one. */
+interface OwnDevice { address: string; name: string }
+
+/**
+ * A stage's device, where there is more than the shared one to run it: the device the stages share first (by the
+ * name the search knew it by, else its address), then the phones that lend what the stage runs. `value`: the phone's
+ * address, blank for the shared device.
+ */
+function StageDevice({ value, shared, phones, onChange, disabled }: { value: string; shared: string; phones: readonly OwnDevice[]; onChange(address: string): void; disabled?: boolean }) {
+  const { t } = useTranslation();
+  const label = t('providers.localai.stageDevice');
+  return (
+    <Field label={label}>
+      <select className="select-dropdown" aria-label={label} value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled}>
+        <option value="">{shared}</option>
+        {phones.map((phone) => <option key={phone.address} value={plainAddress(phone.address)}>{t('providers.localai.phoneOption', { name: phone.name || plainAddress(phone.address).replace(/:\d+$/, '') })}</option>)}
+      </select>
+    </Field>
+  );
+}
+
+/** A text model a phone lends, by the name it has here where it is one of this computer's own, else by the phone's. */
+const lentName = (m: Pick<PhoneTextModel, 'id' | 'name'>): string => (NATIVE_TRANSLATORS.some((n) => n.id === m.id) || NATIVE_COACHES.some((n) => n.id === m.id) ? shownName(m.id) : m.name || shownName(m.id));
+
+/**
+ * The model a text stage asks of a phone, among the ones of that kind it lends — chosen here, and shown alone where
+ * it lends only one. `lent`: what the search last found it lending; null where it was not found this time (asleep,
+ * or no search made yet): the saved model stays visible, so the setting is not silently another.
+ */
+function PhoneModel({ value, lent, onChange, disabled }: { value: string; lent: readonly PhoneTextModel[] | null; onChange(id: string): void; disabled?: boolean }) {
+  const { t } = useTranslation();
+  const label = t('providers.localai.model');
+  const options = lent ?? [];
+  const listed = options.some((m) => m.id === value);
+  return (
+    <Field label={label}>
+      <select className="select-dropdown" aria-label={label} value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled || (listed && options.length === 1)}>
+        {!listed && <option value={value}>{lent ? t('providers.localai.modelGone', { name: shownName(value) }) : shownName(value)}</option>}
+        {options.map((m) => <option key={m.id} value={m.id}>{lentName(m)}</option>)}
       </select>
     </Field>
   );
@@ -756,7 +801,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   // What a blank pipeline field runs (`effectiveLocalAIModel`): the first pipeline named `gpt-realtime*`, else the first.
   const fallback = pipelines.find((m) => isRealtimeModelId(m.id))?.id ?? pipelines[0]?.id ?? '';
   // A leg whose answers come from a stage of its own only transcribes, and on a LocalAI takes the device's own recognizer (`localai.ts` `transcriptionFor`).
-  const speechAsked = settings.translateAt !== 'server' || settings.translateServerModel.trim() !== '';
+  const speechAsked = translatePlace(settings) !== 'server' || settings.translateServerModel.trim() !== '';
   const everyLegTranscribes = onServer && !kotomimi && speechAsked;
   const someLegTranscribes = onServer && !kotomimi && (speechAsked || settings.coach);
 
@@ -779,18 +824,62 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   const ownHearing = plainAddress(settings.asrOther);
   const hearsAtOwn = settings.asrVia === 'server' && ownHearing !== '';
   const hearingPhones = [
-    ...seen.filter((server) => server.kind === 'phone'),
-    ...(ownHearing !== '' && !seen.some((server) => server.kind === 'phone' && plainAddress(server.address) === ownHearing) ? [{ address: ownHearing, name: '', model: settings.asrOtherModel }] : []),
+    ...seen.filter(phoneHears),
+    ...(ownHearing !== '' && !seen.some((server) => phoneHears(server) && plainAddress(server.address) === ownHearing) ? [{ address: ownHearing, name: '', model: settings.asrOtherModel }] : []),
   ];
+  // The same of the translation and the feedback: the phones that lend a model of the stage's kind, and the one saved.
+  const textPhones = (kind: PhoneTextModel['kind'], saved: string): OwnDevice[] => [
+    ...seen.filter((server) => phoneLends(server, kind).length > 0),
+    ...(saved !== '' && !seen.some((server) => phoneLends(server, kind).length > 0 && plainAddress(server.address) === saved) ? [{ address: saved, name: '' }] : []),
+  ];
+  // What a phone lends of a kind, as the search last found it; null where it did not find it this time.
+  const lentBy = (address: string, kind: PhoneTextModel['kind']): readonly PhoneTextModel[] | null => {
+    const phone = seen.find((server) => server.kind === 'phone' && plainAddress(server.address) === address);
+    return phone ? phoneLends(phone, kind) : null;
+  };
+  const ownTranslate = plainAddress(settings.translateOther);
+  const translatesAtOwn = translatesAtOwnDevice(settings);
+  const translatePhones = textPhones('translate', ownTranslate);
+  const ownCoach = plainAddress(settings.coachOther);
+  const coachesAtOwn = coachesAtOwnDevice(settings);
+  const coachPhones = textPhones('coach', ownCoach);
+  // A phone's translator that does not translate the pair: said as this computer's own is.
+  const phoneTranslator = translatesAtOwn ? NATIVE_TRANSLATORS.find((m) => m.id === settings.translateOtherModel) : undefined;
+  const phoneTranslatorUnfit = phoneTranslator !== undefined && !nativeTranslates(phoneTranslator, pair.source, pair.target);
   // The shared device by the name the search knew it by, where it found it.
   const sharedName = seen.find((server) => server.kind !== 'phone' && plainAddress(server.address) === plainAddress(address))?.name ?? '';
+  const sharedLabel = address.trim() ? sharedName || plainAddress(address) : t('providers.localai.sharedDeviceNone');
+  /** A text stage given a phone (or, with a blank address, the shared device again), with the model it lends that suits it. */
+  const textOn = (kind: PhoneTextModel['kind'], picked: string, found?: FoundServer): Partial<S> => {
+    const phone = found ?? seen.find((server) => server.kind === 'phone' && plainAddress(server.address) === picked);
+    const saved = kind === 'translate' ? ownTranslate : ownCoach;
+    const current = kind === 'translate' ? settings.translateOtherModel : settings.coachOtherModel;
+    // The phone saved, not found this time: its model as it was.
+    const model = !picked ? '' : phone ? lentChoice(phone.text ?? [], kind, pair, current) : picked === saved ? current : '';
+    const address = phone ? phone.address : picked;
+    return (kind === 'translate' ? { translateOther: address, translateOtherModel: model } : { coachOther: address, coachOtherModel: model }) as Partial<S>;
+  };
   // The same as a pick in the search above the cards.
   const useServer = (server: FoundServer) => {
-    // A phone lends its recognition engine and nothing else: it is the hearing stage's "another device", and the
-    // other stages stay where they are. (`settled` reads it as an API at its address; the run finds out it is a
-    // phone and reads it live: `remoteEngine.ts`.)
+    // A phone lends its engines: it is the "another device" of each stage it can run. Hearing is given it from
+    // wherever it is, as it always was; the translation and the feedback where they are on "another device", which
+    // a pick there names — a stage placed on an API or this computer stays there. A phone that lends text models
+    // alone, picked while neither is on "another device", is given the translation (or else the feedback): it was
+    // picked to be used. (`settled` reads a hearing phone as an API at its address, and the run reads it live:
+    // `remoteEngine.ts`; a text stage on a phone is asked as this computer's native engine is: `buildLocalAI`.)
     if (server.kind === 'phone') {
-      put({ asrVia: 'server', asrOther: server.address, asrOtherModel: server.model ?? '' } as Partial<S>);
+      const translates = phoneLends(server, 'translate').length > 0;
+      const coaches = phoneLends(server, 'coach').length > 0;
+      const address = plainAddress(server.address);
+      let patch: Partial<S> = {
+        ...(phoneHears(server) ? { asrVia: 'server' as const, asrOther: server.address, asrOtherModel: server.model ?? '' } : {}),
+        ...(translates && settings.translateAt === 'server' ? textOn('translate', address, server) : {}),
+        ...(coaches && settings.coachAt === 'server' ? textOn('coach', address, server) : {}),
+      };
+      if (Object.keys(patch).length === 0) {
+        patch = translates ? { translateAt: 'server', ...textOn('translate', address, server) } : coaches ? { coachAt: 'server', ...textOn('coach', address, server) } : {};
+      }
+      if (Object.keys(patch).length > 0) put(patch);
       return;
     }
     if (server.needsKey !== settings.serverNeedsKey) put({ serverNeedsKey: server.needsKey });
@@ -830,7 +919,8 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
           hint={t('providers.localai.otherDeviceHint')}
           // Marked as in use only while a stage is on it: with a phone hearing, the address may be one nothing asks.
           value={serverInUse ? address : ''}
-          phone={settings.asrVia === 'server' ? settings.asrOther : settings.asrVia === 'api' ? settings.asrApiBaseUrl : ''}
+          // The phones the stages ask now: each is marked as in use.
+          phone={[settings.asrVia === 'server' ? settings.asrOther : settings.asrVia === 'api' ? settings.asrApiBaseUrl : '', translatesAtOwn ? settings.translateOther : '', coachesAtOwn ? settings.coachOther : ''].filter((one) => one.trim() !== '')}
           onFound={setSeen}
           auto={serverInUse && !address.trim()}
           disabled={disabled}
@@ -865,21 +955,16 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
         <PlaceSwitch label={t('providers.localai.hearStage')} value={settings.asrVia} onChange={(asrVia) => put({ asrVia })} disabled={disabled} />
         {/* Which device, where there is more than the shared one to choose from: the phones that lend their recognition. */}
         {settings.asrVia === 'server' && hearingPhones.length > 0 && (
-          <Field label={t('providers.localai.stageDevice')}>
-            <select
-              className="select-dropdown"
-              aria-label={t('providers.localai.stageDevice')}
-              value={ownHearing}
-              onChange={(e) => {
-                const picked = hearingPhones.find((phone) => plainAddress(phone.address) === e.target.value);
-                put({ asrOther: picked ? picked.address : '', asrOtherModel: picked?.model ?? '' } as Partial<S>);
-              }}
-              disabled={disabled}
-            >
-              <option value="">{address.trim() ? sharedName || plainAddress(address) : t('providers.localai.sharedDeviceNone')}</option>
-              {hearingPhones.map((phone) => <option key={phone.address} value={plainAddress(phone.address)}>{t('providers.localai.phoneOption', { name: phone.name || phone.address.replace(/:d+$/, '') })}</option>)}
-            </select>
-          </Field>
+          <StageDevice
+            value={ownHearing}
+            shared={sharedLabel}
+            phones={hearingPhones}
+            onChange={(chosen) => {
+              const picked = hearingPhones.find((phone) => plainAddress(phone.address) === chosen);
+              put({ asrOther: picked ? picked.address : '', asrOtherModel: picked?.model ?? '' } as Partial<S>);
+            }}
+            disabled={disabled}
+          />
         )}
         {hearsAtOwn && (
           <>
@@ -951,7 +1036,17 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
 
       <StageCard icon={<Languages size={14} />} title={t('providers.localai.translateStage')} tooltip={t('providers.localai.translateStageTooltip')}>
         <PlaceSwitch label={t('providers.localai.translateStage')} value={settings.translateAt} onChange={(translateAt) => put({ translateAt })} disabled={disabled} />
-        {settings.translateAt === 'server' && (
+        {/* Which device, where there is more than the shared one to choose from: the phones that lend a translator. */}
+        {settings.translateAt === 'server' && translatePhones.length > 0 && (
+          <StageDevice value={ownTranslate} shared={sharedLabel} phones={translatePhones} onChange={(picked) => put(textOn('translate', picked))} disabled={disabled} />
+        )}
+        {translatesAtOwn && (
+          <>
+            <PhoneModel value={settings.translateOtherModel} lent={lentBy(ownTranslate, 'translate')} onChange={(translateOtherModel) => put({ translateOtherModel } as Partial<S>)} disabled={disabled} />
+            {phoneTranslatorUnfit && <p className="kt-note kt-note--todo" role="status">{t('providers.localai.translatorUnfit', { name: phoneTranslator.name })}</p>}
+          </>
+        )}
+        {settings.translateAt === 'server' && !translatesAtOwn && (
           <>
             {connectFirst}
             <ServerModel label={t('providers.localai.model')} value={settings.translateServerModel} blank={translateBlank} options={modelsFor(found, 'translate')} onChange={(translateServerModel) => put({ translateServerModel })} disabled={disabled} />
@@ -1003,7 +1098,11 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
         {settings.coach && (
           <>
             <PlaceSwitch label={t('providers.localai.coachStage')} value={settings.coachAt} onChange={(coachAt) => put({ coachAt })} disabled={disabled} />
-            {settings.coachAt === 'server' && (
+            {settings.coachAt === 'server' && coachPhones.length > 0 && (
+              <StageDevice value={ownCoach} shared={sharedLabel} phones={coachPhones} onChange={(picked) => put(textOn('coach', picked))} disabled={disabled} />
+            )}
+            {coachesAtOwn && <PhoneModel value={settings.coachOtherModel} lent={lentBy(ownCoach, 'coach')} onChange={(coachOtherModel) => put({ coachOtherModel } as Partial<S>)} disabled={disabled} />}
+            {settings.coachAt === 'server' && !coachesAtOwn && (
               <>
                 {connectFirst}
                 {coachNone

@@ -41,6 +41,7 @@ import type { RealtimeConfig } from './config';
 import type { RealtimeCredentials } from './settings';
 import type { OpenSocket } from './socket';
 import { chatUrl, completeText, httpBaseOf } from './textModel';
+import { PHONE_BUSY_RETRIES, PHONE_TEXT_TIMEOUT_MS } from './phoneText';
 import { unwrapTranslationText } from './wire';
 
 /** The credential a stage's endpoint is called with, by its field. */
@@ -59,6 +60,11 @@ export interface TextStage {
    * when the session was built, and what is used where it cannot be asked.
    */
   engine?: 'translator' | 'coach';
+  /**
+   * The model is one a phone lends (`phoneText.ts`): it may first have to load it, does one thing at a time, and says
+   * when to come back — so the answer is given longer, and a busy answer is asked again.
+   */
+  phone?: boolean;
   model: string;
   /** Absent: the endpoint takes no key. */
   key?: StageKey;
@@ -706,7 +712,7 @@ class PipelineLeg implements AdapterSession {
       shown = text;
       this.events.segmentText({ ref, text, ...(stage.language ? { language: stage.language } : {}) });
     };
-    const where = stage.via === 'device' ? { device: true } : {};
+    const where = stage.via === 'device' ? { device: true } : stage.phone ? { phone: true } : {};
     this.frame('out', 'text.request', { stage: stage.kind, model: stage.model, chars: job.text.length, ...where });
     try {
       const started = clock.now();
@@ -749,6 +755,7 @@ class PipelineLeg implements AdapterSession {
         ...(stage.shots?.length ? { shots: stage.shots } : {}),
         ...(stage.pair ? { pair: stage.pair } : {}),
         ...(stage.extra ? { extra: stage.extra } : {}),
+        ...(stage.phone ? { timeoutMs: PHONE_TEXT_TIMEOUT_MS, busyRetries: PHONE_BUSY_RETRIES } : {}),
         // A function, so that nothing in the sentence is read as a pattern.
         user: stage.wrapAfter && before
           ? stage.wrapAfter.replace(BEFORE_SLOT, () => before).replace(TEXT_SLOT, () => text)

@@ -63,6 +63,9 @@ export interface StagePlacement {
    * stages share: a phone that lends its recognition engine. Blank or absent: the shared device.
    */
   asrOther?: string;
+  /** The same of the translation and of the feedback: a phone that lends its text models. Blank or absent: the shared device. */
+  translateOther?: string;
+  coachOther?: string;
   /** On this computer: by whom. Absent: the app's own models. */
   asrHere?: AsrHere;
   translateHere?: AsrHere;
@@ -83,6 +86,20 @@ export const hearsAtOwnDevice = (s: Pick<StagePlacement, 'asrVia' | 'asrOther'>)
 
 /** Where the hearing stage runs, as everything but the switch reads it: a device of its own is an API. */
 export const hearingPlace = (s: Pick<StagePlacement, 'asrVia' | 'asrOther'>): Place => (hearsAtOwnDevice(s) ? 'api' : s.asrVia);
+
+/**
+ * The translation, or the feedback, is on a device of its own: a phone that lends its text models. It is asked by
+ * this computer the way this computer's native engine is, at the phone's address (`localai.ts` `buildLocalAI`), and
+ * the device the stages share is not asked for it.
+ */
+export const translatesAtOwnDevice = (s: Pick<StagePlacement, 'translateAt' | 'translateOther'>): boolean => s.translateAt === 'server' && (s.translateOther ?? '').trim() !== '';
+export const coachesAtOwnDevice = (s: Pick<StagePlacement, 'coach' | 'coachAt' | 'coachOther'>): boolean => s.coach && s.coachAt === 'server' && (s.coachOther ?? '').trim() !== '';
+
+/** Where the translation runs, as what asks the shared device reads it: a device of its own is no stage of the shared one. */
+export const translatePlace = (s: Pick<StagePlacement, 'translateAt' | 'translateOther'>): Place => (translatesAtOwnDevice(s) ? 'api' : s.translateAt);
+
+/** The feedback runs on the device the stages share: the speaker is coached, there, and not on a device of its own. */
+export const coachesOnShared = (s: Pick<StagePlacement, 'coach' | 'coachAt' | 'coachOther'>): boolean => coachIs(s, 'server') && !coachesAtOwnDevice(s);
 
 /** This computer's LocalAI hears: a Realtime session, as another device's is, on the loopback. */
 export const hearsByLocalServer = (s: Pick<StagePlacement, 'asrVia' | 'asrHere'>): boolean => s.asrVia === 'device' && s.asrHere === 'localai';
@@ -133,7 +150,7 @@ export const coachIs = (s: Pick<StagePlacement, 'coach' | 'coachAt'>, place: Pla
 
 /** A stage of this run is on the other device: the one the stages share, not a device of a stage's own. */
 export function needsServer(s: StagePlacement): boolean {
-  return hearingPlace(s) === 'server' || s.translateAt === 'server' || coachIs(s, 'server');
+  return hearingPlace(s) === 'server' || translatePlace(s) === 'server' || coachesOnShared(s);
 }
 
 /** The stored settings as the device stages read them: a stage this computer's LocalAI runs, or its native engine, asks nothing of the app's own models. */
