@@ -6,16 +6,20 @@ const CYRILLIC = /[Ѐ-ӿ]/;
 /** CJK ideographs, and the marks that stand for one in Japanese (々 〆 ヵ ヶ). */
 export const KANJI = /[一-鿿㐀-䶿豈-﫿々〆ヵヶ]/;
 
+/** Letters Ukrainian writes and Russian does not. (і alone is Belarusian's too, which reads closer to Russian's table.) */
+const UKRAINIAN = /[їєґЇЄҐ]/;
+
 /**
  * The language a line's script gives away, or null: kana is Japanese, Hangul
- * Korean, Cyrillic Russian (every Cyrillic language gets Russian's table).
+ * Korean, Cyrillic Russian — or Ukrainian, where it writes a letter only
+ * Ukrainian has.
  * A line of Han characters alone is not told apart here — it reads as
  * Chinese or Japanese only by what its row is known to be.
  */
 export function scriptLanguage(line: string): AnnotatedLanguage | null {
   if (KANA.test(line)) return 'ja';
   if (HANGUL.test(line)) return 'ko';
-  if (CYRILLIC.test(line)) return 'ru';
+  if (CYRILLIC.test(line)) return UKRAINIAN.test(line) ? 'uk' : 'ru';
   return null;
 }
 
@@ -45,8 +49,11 @@ export function isChinese(code: string | null | undefined): boolean {
   return base === 'zh' || base === 'yue';
 }
 
-/** An app language code as one this module annotates, or null: `ja`, `ja-JP`, `ko-KR`, `ru`. */
+/**
+ * An app language code as one this module annotates, or null: `ja`, `ja-JP`, `ko-KR`, `ru`, `uk`, `zh-CN`. Not
+ * Cantonese: pinyin spells Mandarin, and over Cantonese it would read wrong.
+ */
 export function annotatedLanguage(code: string | null | undefined): AnnotatedLanguage | null {
   const base = (code ?? '').toLowerCase().split(/[-_]/)[0];
-  return base === 'ja' || base === 'ko' || base === 'ru' ? base : null;
+  return base === 'ja' || base === 'ko' || base === 'ru' || base === 'uk' || base === 'zh' ? base : null;
 }

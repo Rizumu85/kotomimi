@@ -23,7 +23,8 @@ module.exports = {
       title: ['Reading aids', '阅读辅助', '閱讀輔助'],
       content: ['Help for reading the other language, switched here:', '帮你读懂外语的辅助显示，在这里开关：', '幫你讀懂外語的輔助顯示，在這裡開關：'],
       furigana: ['Furigana — kana above Japanese kanji.', '假名注音：日语汉字上方显示读音。', '假名注音：日語漢字上方顯示讀音。'],
-      romanization: ['Romanization — a line in Latin letters under Japanese, Korean and Russian.', '罗马音：日语、韩语、俄语下方加一行拉丁字母读音。', '羅馬拼音：日語、韓語、俄語下方加一行拉丁字母讀音。'],
+      romanization: ['Romanization — a line in Latin letters under Japanese, Korean, Russian and Ukrainian.', '罗马音：日语、韩语、俄语、乌克兰语下方加一行拉丁字母读音。', '羅馬拼音：日語、韓語、俄語、烏克蘭語下方加一行拉丁字母讀音。'],
+      pinyin: ['Pinyin — tone-marked pinyin above Chinese.', '拼音：中文上方显示带声调的拼音。', '拼音：中文上方顯示帶聲調的拼音。'],
       fonts: ['Fonts for each language are under Settings → Fonts.', '各语言的字体在「设置 → 字体」里选。', '各語言的字型在「設定 → 字型」裡選。'],
     },
     'kotomimi-tips': {
@@ -211,7 +212,7 @@ module.exports = {
     latin: ['Latin letters and digits', '拉丁字母和数字', '拉丁字母和數字'],
     latinHint: ["English letters and digits in the conversation", "对话里的英文字母和数字", "對話裡的英文字母和數字"],
     roman: ['Romanization', '罗马音', '羅馬拼音'],
-    romanHint: ["The readings under Japanese, Korean and Russian", "日语、韩语、俄语下方的读音", "日語、韓語、俄語下方的讀音"],
+    romanHint: ["The readings under Japanese, Korean, Russian and Ukrainian", "日语、韩语、俄语、乌克兰语下方的读音", "日語、韓語、俄語、烏克蘭語下方的讀音"],
     languages: ['Conversation text, by language', '对话文字，按语言设置', '對話文字，按語言設定'],
     text: ['Text', '正文', '正文'],
     reading: ['Readings above the text', '上方的注音假名', '上方的注音假名'],

@@ -68,7 +68,7 @@ export const BASICS_STEPS: readonly TourStep[] = [
   // Its own words there: which model to take is said by the library itself — the measured ones are marked, each with what was found of it.
   { id: 'models', anchor: 'engine-chips', when: (c) => c.providerPath === 'offline' || c.deviceStages === true, prepare: (_c, a) => a.openSettings('provider'), placement: 'left', copyVariant: (c) => (isKotomimi(c) ? 'kotomimi' : null) },
   // Fork: the reading aids and the fonts, then what else this fork adds — for its own provider's users.
-  { id: 'reading-aids', anchor: 'display-settings', when: isKotomimi, prepare: (_c, a) => a.closeSettings(), placement: 'bottom', bullets: ['furigana', 'romanization', 'fonts'] },
+  { id: 'reading-aids', anchor: 'display-settings', when: isKotomimi, prepare: (_c, a) => a.closeSettings(), placement: 'bottom', bullets: ['furigana', 'romanization', 'pinyin', 'fonts'] },
   { id: 'kotomimi-tips', when: isKotomimi, bullets: ['typed', 'coach', 'share'] },
   {
     id: 'start', anchor: 'main-action', prepare: (_c, a) => a.closeSettings(), placement: 'top',

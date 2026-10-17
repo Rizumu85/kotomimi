@@ -1050,8 +1050,9 @@
         "title": "Reading aids",
         "content": "Help for reading the other language, switched here:",
         "furigana": "Furigana — kana above Japanese kanji.",
-        "romanization": "Romanization — a line in Latin letters under Japanese, Korean and Russian.",
-        "fonts": "Fonts for each language are under Settings → Fonts."
+        "romanization": "Romanization — a line in Latin letters under Japanese, Korean, Russian and Ukrainian.",
+        "fonts": "Fonts for each language are under Settings → Fonts.",
+        "pinyin": "Pinyin — tone-marked pinyin above Chinese."
       },
       "kotomimi-tips": {
         "title": "Three more things",
@@ -1618,7 +1619,8 @@
   "fork": {
     "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
-    "romanization": "Romanization (Japanese, Korean, Russian)",
+    "romanization": "Romanization (Japanese, Korean, Russian, Ukrainian)",
+    "pinyin": "Pinyin over Chinese",
     "autostart": {
       "title": "Startup",
       "toggle": "Start in the background when I sign in to Windows",
@@ -1716,7 +1718,7 @@
       "latin": "Latin letters and digits",
       "latinHint": "English letters and digits in the conversation",
       "roman": "Romanization",
-      "romanHint": "The readings under Japanese, Korean and Russian",
+      "romanHint": "The readings under Japanese, Korean, Russian and Ukrainian",
       "languages": "Conversation text, by language",
       "text": "Text",
       "reading": "Readings above the text",

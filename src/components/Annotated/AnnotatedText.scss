@@ -5,10 +5,17 @@
   }
 
   // Readings are an aid, not content: smaller, a little dimmer, and left out of a text selection.
+  // A reading wider than its word (pinyin over one character, a long kana reading over one kanji) ran into the next
+  // one's, and spread the word under it: a little room on each side, and the word centred (upstream #638).
+  ruby {
+    ruby-align: center;
+  }
+
   rt {
     font-size: 0.5em;
     font-style: normal;
     opacity: 0.85;
+    padding-inline: 0.2em;
     user-select: none;
   }
 

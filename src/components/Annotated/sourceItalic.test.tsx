@@ -52,9 +52,10 @@ describe('the source text\'s slant', () => {
   it('has its switch above the reading aids\', and leaves theirs alone', () => {
     render(<ReadingAidToggles />);
     const labels = [...document.querySelectorAll('.reading-aid-toggle')].map((n) => n.textContent);
-    expect(labels).toEqual(['fork.sourceItalic', 'fork.furigana', 'fork.romanization']);
+    expect(labels).toEqual(['fork.sourceItalic', 'fork.furigana', 'fork.romanization', 'fork.pinyin']);
     fireEvent.click(screen.getByRole('switch', { name: 'fork.sourceItalic' }));
     expect(useAnnotationStore.getState().sourceItalic).toBe(false);
     expect(useAnnotationStore.getState().furigana).toBe(true);
+    expect(useAnnotationStore.getState().pinyin).toBe(false);
   });
 });

@@ -21,6 +21,7 @@ import './AnnotatedText.scss';
 export function useAnnotation(text: string, language: string | null | undefined): AnnotatedLine[] | null {
   const furigana = useAnnotationStore((s) => s.furigana);
   const roman = useAnnotationStore((s) => s.romanization);
+  const pinyin = useAnnotationStore((s) => s.pinyin);
   const hint = annotatedLanguage(language);
   const chinese = isChinese(language);
   const wantsJapanese = needsJapanese(text, { furigana, roman, language: hint, chinese });
@@ -30,10 +31,10 @@ export function useAnnotation(text: string, language: string | null | undefined)
     if (wantsJapanese) loadJapanese();
   }, [wantsJapanese]);
   return useMemo(() => {
-    if (!furigana && !roman) return null;
-    const lines = annotateText(text, { furigana, roman, language: hint, chinese, japanese });
+    if (!furigana && !roman && !pinyin) return null;
+    const lines = annotateText(text, { furigana, roman, pinyin, language: hint, chinese, japanese });
     return lines.some((line) => line.roman !== undefined || line.parts.some((part) => part.ruby !== undefined)) ? lines : null;
-  }, [text, furigana, roman, hint, chinese, japanese]);
+  }, [text, furigana, roman, pinyin, hint, chinese, japanese]);
 }
 
 export interface AnnotatedLinesProps {

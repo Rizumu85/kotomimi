@@ -566,7 +566,8 @@ const PROVIDER = {
 const FORK = {
   sourceItalic: ['Source text in italics', '原文用斜体', '原文用斜體'],
   furigana: ['Furigana over kanji (Japanese)', '汉字上方显示假名（日语）', '漢字上方顯示假名（日語）'],
-  romanization: ['Romanization (Japanese, Korean, Russian)', '显示罗马音（日语、韩语、俄语）', '顯示羅馬拼音（日語、韓語、俄語）'],
+  romanization: ['Romanization (Japanese, Korean, Russian, Ukrainian)', '显示罗马音（日语、韩语、俄语、乌克兰语）', '顯示羅馬拼音（日語、韓語、俄語、烏克蘭語）'],
+  pinyin: ['Pinyin over Chinese', '中文上方显示拼音', '中文上方顯示拼音'],
 };
 
 /** Further groups of the fork's own strings, each written under `fork.<group>` — and the tour's fork copy, written beside upstream's under `tour.steps.<id>`: filled in beside this file. */

@@ -43,7 +43,7 @@ interface Sample { parts: ReadonlyArray<string | readonly [string, string]>; rom
 /** A sentence per script, with readings and a romanization where the app would add them. */
 const SAMPLES: Readonly<Record<string, Sample>> = {
   ja: { parts: [['今日', 'きょう'], 'はいい', ['天気', 'てんき'], 'ですね。Kotomimi 2026'], roman: 'kyō wa ii tenki desu ne' },
-  zh: { parts: ['今天天气真好，我们出去走走吧。Kotomimi 2026'] },
+  zh: { parts: [['今', 'jīn'], ['天', 'tiān'], ['天', 'tiān'], ['气', 'qì'], ['真', 'zhēn'], ['好', 'hǎo'], '，我们出去走走吧。Kotomimi 2026'] },
   'zh-tw': { parts: ['今天天氣真好，我們出去走走吧。Kotomimi 2026'] },
   ko: { parts: ['오늘 날씨가 참 좋네요. Kotomimi 2026'], roman: 'oneul nalssiga cham jonneyo' },
   ru: { parts: ['Сегодня хорошая погода. Kotomimi 2026'], roman: 'Segodnya khoroshaya pogoda' },
