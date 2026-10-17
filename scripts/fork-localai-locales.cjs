@@ -568,6 +568,13 @@ const FORK = {
   furigana: ['Furigana over kanji (Japanese)', '汉字上方显示假名（日语）', '漢字上方顯示假名（日語）'],
   romanization: ['Romanization (Japanese, Korean, Russian, Ukrainian)', '显示罗马音（日语、韩语、俄语、乌克兰语）', '顯示羅馬拼音（日語、韓語、俄語、烏克蘭語）'],
   pinyin: ['Pinyin over Chinese', '中文上方显示拼音', '中文上方顯示拼音'],
+  // Upstream's echo cancellation choice names its own product; in this build it is Kotomimi.
+  echoCancellationApp: ['Kotomimi only', '仅 Kotomimi', '僅 Kotomimi'],
+  echoCancellationAppTooltip: [
+    'Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).',
+    '仅 Kotomimi — 只消掉 Kotomimi 自己播放的翻译语音。麦克风是虚拟声卡（VB-Cable、BlackHole 等）时选这一项。',
+    '僅 Kotomimi — 只消掉 Kotomimi 自己播放的翻譯語音。麥克風是虛擬音效卡（VB-Cable、BlackHole 等）時選這一項。',
+  ],
 };
 
 /** Further groups of the fork's own strings, each written under `fork.<group>` — and the tour's fork copy, written beside upstream's under `tour.steps.<id>`: filled in beside this file. */

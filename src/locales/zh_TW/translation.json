@@ -57,6 +57,17 @@
       "standard": "標準",
       "enhanced": "增強"
     },
+    "echoCancellation": "回音消除",
+    "echoCancellationTooltip": {
+      "app": "僅 Sokuji — 麥克風收進 Sokuji 播放的翻譯語音時將其消除。麥克風是 BlackHole 等虛擬音效卡時請選擇此項。",
+      "browser": "僅瀏覽器 — 麥克風收進本瀏覽器播放的聲音（包括會議分頁）時將其消除。麥克風是傳送其他應用程式聲音的 BlackHole 等虛擬音效卡時請選擇此項。",
+      "all": "所有聲音 — 連其他應用程式從喇叭播放的聲音（例如會議軟體）也一併消除。用作麥克風的虛擬音效卡傳送的正是這些聲音，因此會變成靜音。"
+    },
+    "echoCancellationMode": {
+      "app": "僅 Sokuji",
+      "browser": "僅瀏覽器",
+      "all": "所有聲音"
+    },
     "modelConfiguration": "模型設定",
     "sourceLanguage": "我的語言",
     "targetLanguage": "對方語言",
@@ -1621,6 +1632,8 @@
     "furigana": "漢字上方顯示假名（日語）",
     "romanization": "顯示羅馬拼音（日語、韓語、俄語、烏克蘭語）",
     "pinyin": "中文上方顯示拼音",
+    "echoCancellationApp": "僅 Kotomimi",
+    "echoCancellationAppTooltip": "僅 Kotomimi — 只消掉 Kotomimi 自己播放的翻譯語音。麥克風是虛擬音效卡（VB-Cable、BlackHole 等）時選這一項。",
     "autostart": {
       "title": "啟動",
       "toggle": "登入 Windows 時在背景啟動",

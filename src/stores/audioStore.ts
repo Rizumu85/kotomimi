@@ -12,6 +12,8 @@ import { pickDefaultInputDevice, chooseInput, chooseOutput } from '../lib/audio/
 export { pickDefaultInputDevice };
 
 export type NoiseSuppressionMode = 'off' | 'standard' | 'enhanced';
+/** What the microphone's echo cancellation removes: what this app plays, or every sound the system plays. */
+export type EchoCancellationMode = 'app' | 'all';
 export type AudioMode = 'speaker' | 'participant' | 'both';
 
 // Storage keys for persisting audio device preferences
@@ -25,6 +27,7 @@ const STORAGE_KEYS = {
   IS_MONITOR_DEVICE_ON: 'audio.isMonitorDeviceOn',
   IS_NOISE_SUPPRESS_ENABLED: 'audio.isNoiseSuppressEnabled',
   NOISE_SUPPRESSION_MODE: 'audio.noiseSuppressionMode',
+  ECHO_CANCELLATION_MODE: 'audio.echoCancellationMode',
   IS_REAL_VOICE_PASSTHROUGH_ENABLED: 'audio.isRealVoicePassthroughEnabled',
   REAL_VOICE_PASSTHROUGH_VOLUME: 'audio.realVoicePassthroughVolume',
   IS_SYSTEM_AUDIO_CAPTURE_ENABLED: 'audio.isSystemAudioCaptureEnabled',
@@ -104,6 +107,7 @@ interface AudioStore {
    * the microphone otherwise takes for the user's own.
    */
   micGateThreshold: number;
+  echoCancellationMode: EchoCancellationMode;
 
   // Symmetric mode + per-channel mute flags
   mode: AudioMode;
@@ -133,6 +137,7 @@ interface AudioStore {
   setNoiseSuppressionMode: (mode: NoiseSuppressionMode) => void;
   /** Fork: 0–100, rounded; 0 turns the gate off. Persisted. */
   setMicGateThreshold: (threshold: number) => void;
+  setEchoCancellationMode: (mode: EchoCancellationMode) => void;
   setIsLoading: (loading: boolean) => void;
 
   // Mode + mute setters
@@ -178,6 +183,7 @@ const useAudioStore = create<AudioStore>()(
     realVoicePassthroughVolume: 0.2,
     noiseSuppressionMode: 'enhanced' as NoiseSuppressionMode,
     micGateThreshold: 0,
+    echoCancellationMode: 'all' as EchoCancellationMode,
 
     // Mode + per-channel mute flags
     mode: 'speaker' as AudioMode,
@@ -284,6 +290,10 @@ const useAudioStore = create<AudioStore>()(
       if (next === get().micGateThreshold) return;
       set({ micGateThreshold: next });
       void persistSetting(STORAGE_KEYS.MIC_GATE_THRESHOLD, next);
+    },
+    setEchoCancellationMode: (mode) => {
+      set({ echoCancellationMode: mode });
+      void persistSetting(STORAGE_KEYS.ECHO_CANCELLATION_MODE, mode);
     },
 
     // Mode + per-channel mute setters
@@ -468,6 +478,9 @@ const useAudioStore = create<AudioStore>()(
           void persistSetting(STORAGE_KEYS.IS_SYSTEM_AUDIO_CAPTURE_ENABLED, null, { silent: true });
         }
 
+        const savedEchoCancellation = await settingsService.getSetting<string | null>(STORAGE_KEYS.ECHO_CANCELLATION_MODE, null);
+        set({ echoCancellationMode: savedEchoCancellation === 'app' ? 'app' : 'all' });
+
         const savedIsMicMuted = await settingsService.getSetting<boolean | null>(STORAGE_KEYS.IS_MIC_MUTED, null);
         if (typeof savedIsMicMuted === 'boolean') {
           set({ isMicMuted: savedIsMicMuted });
@@ -617,6 +630,8 @@ export const useSetNoiseSuppressionMode = () => useAudioStore((state) => state.s
 // Fork: the microphone's activation threshold.
 export const useMicGateThreshold = () => useAudioStore((state) => state.micGateThreshold);
 export const useSetMicGateThreshold = () => useAudioStore((state) => state.setMicGateThreshold);
+export const useEchoCancellationMode = () => useAudioStore((state) => state.echoCancellationMode);
+export const useSetEchoCancellationMode = () => useAudioStore((state) => state.setEchoCancellationMode);
 
 // Backward-compatible wrappers
 export const useIsNoiseSuppressEnabled = () => useAudioStore((state) => state.noiseSuppressionMode !== 'off');

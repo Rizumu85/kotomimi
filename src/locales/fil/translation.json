@@ -57,6 +57,17 @@
       "standard": "Karaniwan",
       "enhanced": "Pinahusay"
     },
+    "echoCancellation": "Pag-alis ng Echo",
+    "echoCancellationTooltip": {
+      "app": "Sokuji lang — Inaalis ang isinaling boses ng Sokuji kapag nasagap ito ng mikropono. Piliin ito kapag ang mikropono ay virtual cable gaya ng BlackHole.",
+      "browser": "Browser lang — Inaalis ang pinapatugtog ng browser na ito, kasama ang mga tab ng meeting, kapag nasagap ito ng mikropono. Piliin ito kapag ang mikropono ay virtual cable gaya ng BlackHole na nagdadala ng tunog ng ibang app.",
+      "all": "Lahat ng tunog — Inaalis din ang pinapatugtog ng ibang app sa speaker, gaya ng meeting app. Ang virtual cable na ginagamit bilang mikropono ay nagdadala mismo ng tunog na iyon, kaya mawawalan ito ng tunog."
+    },
+    "echoCancellationMode": {
+      "app": "Sokuji lang",
+      "browser": "Browser lang",
+      "all": "Lahat ng tunog"
+    },
     "modelConfiguration": "Pagsasaayos ng modelo",
     "sourceLanguage": "Aking wika",
     "targetLanguage": "Wika ng kausap",
@@ -1621,6 +1632,8 @@
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian, Ukrainian)",
     "pinyin": "Pinyin over Chinese",
+    "echoCancellationApp": "Kotomimi only",
+    "echoCancellationAppTooltip": "Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
     "autostart": {
       "title": "Startup",
       "toggle": "Start in the background when I sign in to Windows",

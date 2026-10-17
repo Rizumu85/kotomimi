@@ -57,6 +57,17 @@
       "standard": "Estándar",
       "enhanced": "Mejorado"
     },
+    "echoCancellation": "Cancelación de eco",
+    "echoCancellationTooltip": {
+      "app": "Solo Sokuji — Elimina la voz traducida de Sokuji si el micrófono la capta. Elija esta opción si el micrófono es un cable virtual como BlackHole.",
+      "browser": "Solo navegador — Elimina lo que reproduce este navegador, incluidas las pestañas de reuniones, si el micrófono lo capta. Elija esta opción si el micrófono es un cable virtual como BlackHole que transmite el sonido de otra aplicación.",
+      "all": "Todos los sonidos — También elimina lo que otras aplicaciones reproducen por los altavoces, como una aplicación de reuniones. Un cable virtual usado como micrófono transmite justo ese sonido, así que quedaría en silencio."
+    },
+    "echoCancellationMode": {
+      "app": "Solo Sokuji",
+      "browser": "Solo navegador",
+      "all": "Todos los sonidos"
+    },
     "modelConfiguration": "Configuración del modelo",
     "sourceLanguage": "Mi idioma",
     "targetLanguage": "Idioma del otro",
@@ -1621,6 +1632,8 @@
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization (Japanese, Korean, Russian, Ukrainian)",
     "pinyin": "Pinyin over Chinese",
+    "echoCancellationApp": "Kotomimi only",
+    "echoCancellationAppTooltip": "Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
     "autostart": {
       "title": "Startup",
       "toggle": "Start in the background when I sign in to Windows",

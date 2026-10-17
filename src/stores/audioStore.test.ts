@@ -641,3 +641,25 @@ describe('audioStore — refreshDevices and the saved device', () => {
     expect(s.devicesLoaded).toBe(true);
   });
 });
+
+describe('echo cancellation', () => {
+  const KEY = 'audio.echoCancellationMode';
+
+  it('defaults to all sounds, persists a choice, and restores it', async () => {
+    useAudioStore.setState({ echoCancellationMode: 'all' });
+    useAudioStore.getState().setEchoCancellationMode('app');
+    expect(useAudioStore.getState().echoCancellationMode).toBe('app');
+    expect(await ServiceFactory.getSettingsService().getSetting<string>(KEY, '')).toBe('app');
+
+    useAudioStore.setState({ echoCancellationMode: 'all' });
+    await useAudioStore.getState().refreshDevices();
+    expect(useAudioStore.getState().echoCancellationMode).toBe('app');
+  });
+
+  it('reads an unknown stored value as all sounds', async () => {
+    await ServiceFactory.getSettingsService().setSetting(KEY, 'off');
+    useAudioStore.setState({ echoCancellationMode: 'app' });
+    await useAudioStore.getState().refreshDevices();
+    expect(useAudioStore.getState().echoCancellationMode).toBe('all');
+  });
+});
