@@ -25,6 +25,12 @@ import { useProviderStore } from '../stores/providerStore';
 export const READINESS_DELAY_MS = 150;
 /** A judgement, not a measurement (choice 7): a pause in typing. */
 export const NETWORK_READINESS_DELAY_MS = 800;
+/**
+ * Fork: an answer that could not find out (`unsure`: a device that is off, or still starting) is asked again this
+ * often while the runner is idle, so the app is ready by itself once the device answers. Before, nothing asked again:
+ * the start stayed refused after the other computer was switched on (2026-10-19).
+ */
+export const UNSURE_RETRY_MS = 10_000;
 
 export interface ReadinessDriverDeps {
   runner: Pick<Runner, 'state'>;
@@ -58,7 +64,10 @@ export function driveReadiness({ runner, providers, auth, clock, watchSignIn, de
     const p = current();
     if (!p || !idle()) return;
     // A network provider no longer unknown was checked meanwhile (a Validate, a start); a local one re-checks whatever it knows.
-    if (p.kind !== 'local' && (useProviderStore.getState().readiness[p.id]?.state ?? 'unknown') !== 'unknown') return;
+    // Fork: one that could not find out is asked again.
+    const known = useProviderStore.getState().readiness[p.id];
+    const unsure = known?.state === 'not-ready' && known.unsure === true;
+    if (p.kind !== 'local' && (known?.state ?? 'unknown') !== 'unknown' && !unsure) return;
     void useProviderStore.getState().refreshReadiness(p, auth());
   };
   const schedule = (p: AnyProvider, atOnce: boolean) => {
@@ -95,6 +104,9 @@ export function driveReadiness({ runner, providers, auth, clock, watchSignIn, de
     if (stale || !readiness || readiness.state === 'unknown') {
       stale = false;
       schedule(p, fresh);
+    } else if (readiness.state === 'not-ready' && readiness.unsure && !cancel) {
+      // Fork: asked again in a while (`UNSURE_RETRY_MS`); an edit meanwhile reschedules as before.
+      cancel = clock.setTimeout(check, UNSURE_RETRY_MS);
     }
   };
   const signInChanged = () => {

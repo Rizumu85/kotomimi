@@ -5,7 +5,7 @@ import type { RunState } from '../lib/session/types';
 import { fakeProvider } from '../providers/fake/provider';
 import { FAKE_DEFAULTS } from '../providers/fake/settings';
 import { useProviderStore } from '../stores/providerStore';
-import { driveReadiness, NETWORK_READINESS_DELAY_MS, READINESS_DELAY_MS } from './readiness';
+import { driveReadiness, NETWORK_READINESS_DELAY_MS, READINESS_DELAY_MS, UNSURE_RETRY_MS } from './readiness';
 
 // `driveReadiness` reads `useProviderStore` (a real store) and calls its
 // `refreshReadiness`, which never reaches `ServiceFactory` for these tests
@@ -445,5 +445,57 @@ describe('driveReadiness', () => {
     clock.advance(10_000);
     await flush();
     expect(probe2.check).not.toHaveBeenCalled();
+  });
+
+  // Fork (2026-10-19): the other computer was off; once switched on, nothing asked again and the start stayed refused.
+  it('asks again, every UNSURE_RETRY_MS, about an answer that could not find out, and leaves a refusal alone', async () => {
+    const { provider } = makeProbe('probe', 'own-key');
+    setupStore(provider);
+    let answer: { state: 'not-ready'; reason: string; unsure?: true } = { state: 'not-ready', reason: 'no answer', unsure: true };
+    const refresh = vi.fn(async (p: { id: string }) => {
+      useProviderStore.setState((st) => ({ readiness: { ...st.readiness, [p.id]: answer } }));
+      return answer;
+    });
+    useProviderStore.setState({ refreshReadiness: refresh as never });
+    const runner = idleRunner();
+    const clock = createVirtualClock(0);
+    const detach = driveReadiness({ runner, providers: () => [provider], auth: () => auth, clock });
+
+    clock.advance(0);
+    await flush();
+    expect(refresh).toHaveBeenCalledTimes(1);
+    clock.advance(UNSURE_RETRY_MS - 1);
+    await flush();
+    expect(refresh).toHaveBeenCalledTimes(1);
+    clock.advance(1);
+    await flush();
+    expect(refresh).toHaveBeenCalledTimes(2);
+
+    // A refusal (the device answered no) is not asked again by itself.
+    answer = { state: 'not-ready', reason: 'refused' };
+    clock.advance(UNSURE_RETRY_MS);
+    await flush();
+    expect(refresh).toHaveBeenCalledTimes(3);
+    clock.advance(UNSURE_RETRY_MS * 3);
+    await flush();
+    expect(refresh).toHaveBeenCalledTimes(3);
+
+    detach();
+  });
+
+  it('does not ask again while a run is on', async () => {
+    const { provider } = makeProbe('probe', 'own-key');
+    setupStore(provider);
+    useProviderStore.setState({ readiness: { probe: { state: 'not-ready', reason: 'no answer', unsure: true } } });
+    const { calls } = spyRefresh();
+    const runner = { state: createStore<RunState>(() => ({ phase: 'running' } as unknown as RunState)) };
+    const clock = createVirtualClock(0);
+    const detach = driveReadiness({ runner, providers: () => [provider], auth: () => auth, clock });
+
+    clock.advance(UNSURE_RETRY_MS * 2);
+    await flush();
+    expect(calls('probe')).toBe(0);
+
+    detach();
   });
 });

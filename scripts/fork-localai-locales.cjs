@@ -244,14 +244,14 @@ const PROVIDER = {
 
   // The other device, or a stage's API, did not answer as it should: where to look. Said in the cards, the wizard, and at Start.
   serverUnreachable: [
-    'The other device ({{address}}) did not answer. Check that it is on and on the same network as this computer, and that Kotomimi there is sharing (or its model server is running); then check again.',
-    '另一台设备（{{address}}）没有回应。请确认它开着、和这台电脑连着同一个网络，那边的 Kotomimi 开着共享（或者模型服务器在运行），然后再检查一次。',
-    '另一台裝置（{{address}}）沒有回應。請確認它開著、和這台電腦連著同一個網路，那邊的 Kotomimi 開著共享（或者模型伺服器在執行），然後再檢查一次。',
+    'The other device ({{address}}) did not answer. Check that it is on and on the same network as this computer, and that Kotomimi there is sharing (or its model server is running). It is asked again by itself.',
+    '另一台设备（{{address}}）没有回应。请确认它开着、和这台电脑连着同一个网络，那边的 Kotomimi 开着共享（或者模型服务器在运行）。连上后会自动继续。',
+    '另一台裝置（{{address}}）沒有回應。請確認它開著、和這台電腦連著同一個網路，那邊的 Kotomimi 開著共享（或者模型伺服器在執行）。連上後會自動繼續。',
   ],
   checkSlow: [
-    'No answer within {{seconds}} s. The address may be wrong, or the device busy loading a model; check again in a moment.',
-    '等了 {{seconds}} 秒还没有回应。可能是地址不对，或者那台设备正忙着加载模型；稍等一下再检查一次。',
-    '等了 {{seconds}} 秒還沒有回應。可能是位址不對，或者那台裝置正忙著載入模型；稍等一下再檢查一次。',
+    'No answer within {{seconds}} s: the device may be off or loading a model, or the address wrong. It is asked again by itself.',
+    '等了 {{seconds}} 秒还没有回应：那台设备可能没开、正在加载模型，或者地址不对。会自动再试。',
+    '等了 {{seconds}} 秒還沒有回應：那台裝置可能沒開、正在載入模型，或者位址不對。會自動再試。',
   ],
   serverHttp: [
     'The other device answered with an error (HTTP {{status}}). Restarting the app or the model server there usually helps.',

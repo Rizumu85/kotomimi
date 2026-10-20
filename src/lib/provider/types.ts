@@ -150,8 +150,12 @@ export type Readiness =
   | { state: 'unknown' }
   | { state: 'checking' }
   | { state: 'ready'; models: readonly ModelOption[] }
-  /** `code` / `params` as a refusal's: the provider's own code puts `reason` into the user's words. */
-  | { state: 'not-ready'; reason: string; code?: string; params?: Record<string, string | number>; models?: readonly ModelOption[] };
+  /**
+   * `code` / `params` as a refusal's: the provider's own code puts `reason` into the user's words. Fork: `unsure` — the
+   * check could not find out (it threw: a device that did not answer in time, an address that does not answer), which
+   * is not a refusal; it is asked again by itself, and a start may ask it again (`app/readiness.ts`, `subtitle/session.ts`).
+   */
+  | { state: 'not-ready'; reason: string; code?: string; params?: Record<string, string | number>; models?: readonly ModelOption[]; unsure?: true };
 
 /** What a builder may read beyond its own settings; a builder never reaches into a store. The system instructions are each provider's own setting (`instructions.ts`; Stage 2 Gemini, ruling 4). */
 export interface SharedSettings {

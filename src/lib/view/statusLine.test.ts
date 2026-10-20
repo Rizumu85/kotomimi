@@ -16,6 +16,9 @@ describe('statusLine — cannot start (priority 1)', () => {
   it('words the gate’s refusal with its code and the fix (spec §3)', () => {
     const entry = statusLine(input({ canStart: false, idle: { kind: 'unready', message: 'No microphone is chosen for the speaker leg.', code: 'no_microphone' } }));
     expect(entry).toMatchObject({ key: 'unready:no_microphone', icon: 'mic-off', words: { kind: 'notice', code: 'no_microphone' }, action: { kind: 'settings', target: 'microphone' }, dismiss: null });
+    // Fork: a check that could not find out is said though the start stays offered; a plain unready with the start offered is not.
+    expect(statusLine(input({ canStart: true, idle: { kind: 'unready', message: 'm', code: 'check_slow', unsure: true } }))).toMatchObject({ key: 'unready:check_slow' });
+    expect(statusLine(input({ canStart: true, idle: { kind: 'unready', message: 'm', code: 'check_slow' } }))).toBeNull();
   });
   it('picks the icon by the code: credentials → key, balance → wallet, anything else → alert', () => {
     const unready = (code: string, params?: Record<string, string>) => statusLine(input({ canStart: false, idle: { kind: 'unready', message: 'm', code, params } }));
