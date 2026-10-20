@@ -6,7 +6,7 @@ import type { Exporter } from '../../lib/export/exporter';
 import type { Entry } from '../../lib/projection/types';
 import { baseLang } from '../../lib/segmentation/sentenceEnd';
 import type { SubtitleIdleModel, SubtitleSession } from '../../lib/subtitle/session';
-import { hasPanel, LOOKS } from '../../lib/subtitle/look';
+import { hasPanel } from '../../lib/subtitle/look';
 import { settingsTargetForCode } from '../../lib/view/noticeTargets';
 import { noticeText } from '../../lib/view/noticeText';
 import { useSubtitleLookStore } from '../../stores/subtitleLookStore';
@@ -152,8 +152,6 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
   // pointer; this tells it where that button is. Only during a run — a strip waiting to be started has to be
   // clicked — and never carried over: a view that opens, opens clickable.
   const wantsThrough = useSubtitleLookStore((state) => state.through);
-  // Fork: the glass look draws the box as a pane (`SubtitleStream.scss`, `is-glass`).
-  const glass = useSubtitleLookStore((state) => LOOKS[state.look]?.glass === true);
   const setThrough = useSubtitleLookStore((state) => state.setThrough);
   const through = surface === 'electron' && running && wantsThrough;
   useEffect(() => {
@@ -210,7 +208,7 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
   const rootProps = surface === 'electron'
     ? {
         ...shown,
-        className: `${shown.className} subtitle-app--framed${through ? ' is-through' : ''}${hasPanel(subtitle.bgOpacity) ? '' : ' is-clear'}${glass && hasPanel(subtitle.bgOpacity) ? ' is-glass' : ''}`,
+        className: `${shown.className} subtitle-app--framed${through ? ' is-through' : ''}${hasPanel(subtitle.bgOpacity) ? '' : ' is-clear'}`,
         style: {
           ...shown.style,
           '--kt-panel': shown.style.background as string,

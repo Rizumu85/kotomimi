@@ -186,7 +186,6 @@ module.exports = {
     // The looks of the strip (`src/lib/subtitle/look.ts`), at the head of its display popover.
     look: ['Look', '样式', '樣式'],
     lookPanel: ['Dark panel', '深色底', '深色底'],
-    lookGlass: ['Glass', '玻璃', '玻璃'],
     lookSoft: ['Faint panel', '淡底柔影', '淡底柔影'],
     lookLight: ['Light text', '亮字黑边', '亮字黑邊'],
     lookDark: ['Dark text', '暗字白边', '暗字白邊'],

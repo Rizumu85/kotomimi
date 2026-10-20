@@ -16,7 +16,6 @@ const NAMES: Readonly<Record<Look, [key: string, fallback: string]>> = {
   soft: ['fork.subtitle.lookSoft', 'Faint panel'],
   light: ['fork.subtitle.lookLight', 'Light text'],
   dark: ['fork.subtitle.lookDark', 'Dark text'],
-  glass: ['fork.subtitle.lookGlass', 'Glass'],
 };
 
 /** A range that writes when it is let go: every step in between would be a write to disk. */
@@ -61,7 +60,7 @@ export function SubtitleLook({ bgOpacity, onLook, onBgOpacity }: SubtitleLookPro
               {/* Half dark, half light: what the look does over either. */}
               <span className="kt-look__scene" aria-hidden="true">
                 <span
-                  className={`kt-look__sample${preset.glass ? ' kt-look__sample--glass' : ''}`}
+                  className="kt-look__sample"
                   style={{
                     color: preset.translationTextColor,
                     textShadow: shadowFor(preset.translationTextColor, preset.shadow, preset.edge),
