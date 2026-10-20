@@ -10,6 +10,8 @@
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- The system's own question whether the app may keep running in the background: a lent phone lies locked. -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <!-- The app's own update: with this the person can let the app hand a new version of itself to the system. -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 

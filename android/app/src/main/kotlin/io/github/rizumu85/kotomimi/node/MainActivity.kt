@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
 import android.provider.Settings
 import android.view.Gravity
 import android.view.View
@@ -53,6 +54,7 @@ class MainActivity : Activity() {
     private lateinit var checkKey: TextView
     private lateinit var report: TextView
     private lateinit var share: TextView
+    private lateinit var stay: TextView
     private lateinit var rule: TextView
     private val rows = HashMap<Model, Pair<TextView, TextView>>()
 
@@ -262,6 +264,13 @@ class MainActivity : Activity() {
             setOnClickListener { if (Sharing.on) ShareService.stop(this@MainActivity) else if (busy == null) lend() }
         }
         body.addView(key, LinearLayout.LayoutParams(MATCH_PARENT, dp(56)).apply { topMargin = dp(12) })
+        // While lent: where the phone may still be stopped in the background, the one place to let it run.
+        stay = text("", 13f, R.color.screen).apply {
+            gravity = Gravity.CENTER
+            setPadding(dp(8), dp(6), dp(8), dp(2))
+            setOnClickListener { letRun() }
+        }
+        body.addView(stay, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
         checkKey = text("", 15f, R.color.screen, bold = true).apply {
             gravity = Gravity.CENTER
             background = shape(R.color.body_deep, 22)
@@ -392,6 +401,9 @@ class MainActivity : Activity() {
         }
 
         key.text = if (shared) "停止共享" else "开始共享"
+        val runs = mayRun()
+        stay.visibility = if (shared && (!runs || FREEZING_MAKERS.any { Build.MANUFACTURER.lowercase().contains(it) })) View.VISIBLE else View.GONE
+        stay.text = if (!runs) "锁屏久了会断？点这里允许后台运行" else "还会断的话，点这里去设置里允许后台运行"
         key.alpha = if (shared || (busy == null && (lent != null || lentText.isNotEmpty()) && engine.present)) 1f else 0.45f
         checkKey.text = if (busy == "check") "停下" else if (lastReport == null) "自检：看这台手机跟不跟得上" else "再自检一次"
         checkKey.alpha = if (busy == "check" || (busy == null && !shared && here.isNotEmpty() && engine.present)) 1f else 0.45f
@@ -458,6 +470,27 @@ class MainActivity : Activity() {
         }
         lastVerdict = null
         ShareService.start(this, model, llamaBuild)
+        // Asked once, the first time the phone is lent: a phone the system may put to sleep stops answering when it
+        // has lain locked a while (2026-10-20). The answer, either way, is the system's to keep.
+        val asked = getSharedPreferences("stay", MODE_PRIVATE)
+        if (!mayRun() && !asked.getBoolean("asked", false)) {
+            asked.edit().putBoolean("asked", true).apply()
+            letRun()
+        }
+    }
+
+    /** Whether the system lets the app run on with the screen locked: not held back to save the battery. */
+    private fun mayRun(): Boolean = (getSystemService(POWER_SERVICE) as PowerManager).isIgnoringBatteryOptimizations(packageName)
+
+    /**
+     * Where the phone is let run in the background: the system's question for this app, or — asked already, or a
+     * maker whose own power saving stops apps all the same (ColorOS, MIUI, …) — the app's own page in the settings,
+     * where those makers keep the switch.
+     */
+    private fun letRun() {
+        val ask = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:$packageName"))
+        val page = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName"))
+        runCatching { startActivity(if (mayRun()) page else ask) }.recoverCatching { startActivity(page) }
     }
 
     private fun check(startWith: Llama.Build? = null, force: Set<String> = emptySet()) {
@@ -713,6 +746,12 @@ class MainActivity : Activity() {
         const val PAGE_SIDE = 18
         const val PAGE_TOP = 14
         const val PAGE_FOOT = 28
+
+        /**
+         * Phone makers whose own power saving stops an app in the background though it shows a notification and
+         * Android lets it run: their switch is on the app's own page. Matched against `Build.MANUFACTURER`.
+         */
+        val FREEZING_MAKERS = listOf("oppo", "realme", "oneplus", "xiaomi", "redmi", "vivo", "iqoo", "huawei", "honor", "meizu")
 
         /** How long the small key says how asking for a newer version went, before it is the key again. */
         const val LOOK_WORDS_MS = 4_000L
