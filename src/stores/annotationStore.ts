@@ -40,8 +40,18 @@ const DEFAULTS: Record<Field, boolean> = { furigana: true, romanization: false, 
  * property on the document, so every list and band of the window follows without each being told.
  */
 export const SOURCE_FONT_STYLE = '--kt-source-font-style';
+/**
+ * How far a reading moves right over slanted text (`AnnotatedText.scss`, in the reading's own em). The browser slants
+ * kana and kanji by skewing them, so a word leans right above its baseline while its reading stays upright and
+ * centred on the word's box: it looked to sit left of the word ("furigana 有点偏", 2026-10-19). 0.4em of a reading at
+ * half the text's size, about a fifth of a character, was the shift that read as centred.
+ */
+export const SOURCE_RUBY_LEAN = '--kt-source-ruby-lean';
+const RUBY_LEAN = '0.4em';
 function slant(on: boolean): void {
-  if (typeof document !== 'undefined') document.documentElement.style.setProperty(SOURCE_FONT_STYLE, on ? 'italic' : 'normal');
+  if (typeof document === 'undefined') return;
+  document.documentElement.style.setProperty(SOURCE_FONT_STYLE, on ? 'italic' : 'normal');
+  document.documentElement.style.setProperty(SOURCE_RUBY_LEAN, on ? RUBY_LEAN : '0');
 }
 const KEY = (field: Field) => `settings.common.annotation.${field}`;
 
