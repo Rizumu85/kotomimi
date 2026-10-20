@@ -21,7 +21,7 @@
  * ink, dark text light. Pure.
  */
 
-export type Look = 'panel' | 'soft' | 'light' | 'dark';
+export type Look = 'panel' | 'soft' | 'light' | 'dark' | 'glass';
 export type Align = 'left' | 'center';
 export type Edge = 'shadow' | 'outline';
 
@@ -36,10 +36,17 @@ export interface LookPreset {
   align: Align;
   sourceTextColor: string;
   translationTextColor: string;
+  /**
+   * The box drawn as a pane of glass (`SubtitleStream.scss`, `is-glass`): a light rim and a highlight inside it over
+   * a faint tint, the way glass panels are drawn (the user, 2026-10-20, after a Tauri app's). What is behind the
+   * window is not blurred: a window cannot see it from its own page, and Windows' own material turns grey while the
+   * window is not the one in use, which a strip over a game always is.
+   */
+  glass?: true;
 }
 
 /** In the order they are offered. `panel` is what the strip was before there were looks. */
-export const LOOK_ORDER: readonly Look[] = ['panel', 'soft', 'light', 'dark'];
+export const LOOK_ORDER: readonly Look[] = ['panel', 'soft', 'light', 'dark', 'glass'];
 
 /** A panel fainter than this is no panel: the strip is clear, and what belongs to a panel — the hairline between its lanes, the box's edges — is not drawn. */
 export const PANEL_FROM = 8;
@@ -57,6 +64,8 @@ export const LOOKS: Readonly<Record<Look, LookPreset>> = {
   light: { bgColor: '#000000', bgOpacity: 0, shadow: 65, edge: 'outline', align: 'center', sourceTextColor: '#f4f4f4', translationTextColor: '#ffffff' },
   // No panel: dark text in a light outline, for a scene that is dark throughout.
   dark: { bgColor: '#000000', bgOpacity: 0, shadow: 65, edge: 'outline', align: 'center', sourceTextColor: '#1f242c', translationTextColor: '#0f1a26' },
+  // A pane of glass: a faint cool tint, its rim and highlight, and the shadow keeping the letters off what shows through.
+  glass: { bgColor: '#0c1424', bgOpacity: 24, shadow: 80, edge: 'shadow', align: 'left', sourceTextColor: '#f4f7fb', translationTextColor: '#d6ecff', glass: true },
 };
 
 /** A colour as `#rgb` or `#rrggbb` reads light (it wants a dark shadow) or dark. Anything else is taken for light. */

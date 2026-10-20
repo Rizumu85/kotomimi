@@ -250,10 +250,10 @@ describe('DisplaySettingsPopover', () => {
 describe('the subtitle popover\u2019s looks (fork)', () => {
   const tiles = (container: HTMLElement) => [...container.querySelectorAll('.kt-look__tile')] as HTMLButtonElement[];
 
-  it('offers four to start from, the one last chosen marked, over the panel\u2019s popover none', () => {
+  it('offers five to start from, the one last chosen marked, over the panel\u2019s popover none', () => {
     const subtitle = render(<DisplaySettingsPopover source="subtitle" />);
-    expect(tiles(subtitle.container)).toHaveLength(4);
-    expect(tiles(subtitle.container).map((tile) => tile.getAttribute('aria-checked'))).toEqual(['true', 'false', 'false', 'false']);
+    expect(tiles(subtitle.container)).toHaveLength(5);
+    expect(tiles(subtitle.container).map((tile) => tile.getAttribute('aria-checked'))).toEqual(['true', 'false', 'false', 'false', 'false']);
     subtitle.unmount();
     const panel = render(<DisplaySettingsPopover source="conversation" />);
     expect(tiles(panel.container)).toHaveLength(0);
