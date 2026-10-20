@@ -180,6 +180,9 @@ module.exports = {
     // The two views of the subtitle window, by what they are: the caption lanes, and the conversation as a list.
     lanesView: ['Subtitle view', '字幕视图', '字幕檢視'],
     listView: ['List view', '列表视图', '列表檢視'],
+    // Typing what one cannot say, from the strip (`SubtitleBar`'s typing field).
+    type: ['Type to translate (Ctrl+K)', '打字翻译（Ctrl+K）', '打字翻譯（Ctrl+K）'],
+    typePlaceholder: ['What you want to say — Enter translates', '想说的话，回车翻译', '想說的話，Enter 翻譯'],
     // The looks of the strip (`src/lib/subtitle/look.ts`), at the head of its display popover.
     look: ['Look', '样式', '樣式'],
     lookPanel: ['Dark panel', '深色底', '深色底'],

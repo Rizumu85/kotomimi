@@ -1,11 +1,11 @@
 // src/components/Subtitle/SubtitleBar.tsx
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { BRAND } from '../../lib/brand';
 import { useTranslation } from 'react-i18next';
 import {
   AArrowDown, AArrowUp, ChevronsDownUp, ChevronsUpDown,
   Pin, Lock, Undo2, Settings, Trash2, Maximize, Minimize,
-  Play, Square, Loader, Pointer, PointerOff,
+  Play, Square, Loader, Pointer, PointerOff, Keyboard,
 } from 'lucide-react';
 import { useSubtitleLookStore } from '../../stores/subtitleLookStore';
 import {
@@ -77,6 +77,14 @@ interface Props {
     /** Told whenever the hold state flips, so the caller can keep the bar visible while it's held. */
     onHeldChange?: (held: boolean) => void;
   };
+  /**
+   * Fork: typing what one cannot say, as the main window's field does (the speaker leg, while a run is on and the
+   * provider takes typed text). Absent: no key. `onOpenChange` keeps the bar on show while the field is open.
+   */
+  typing?: {
+    onSend: (text: string) => void;
+    onOpenChange?: (open: boolean) => void;
+  };
 }
 
 function formatElapsed(ms: number): string {
@@ -100,8 +108,48 @@ const SubtitleBar: React.FC<Props> = ({
   holdToTalk,
   onExit,
   status,
+  typing,
 }) => {
   const { t } = useTranslation();
+  // Fork: the typing field, in place of the clock and the pair while it is open.
+  const [typingOpen, setTypingOpen] = useState(false);
+  const [typed, setTyped] = useState('');
+  const typingField = useRef<HTMLInputElement>(null);
+  const typingAvailable = typing !== undefined;
+  const onTypingOpenChange = typing?.onOpenChange;
+  const openTyping = (open: boolean) => {
+    setTypingOpen(open);
+    onTypingOpenChange?.(open);
+  };
+  // A run that ends, or a provider that stops taking text, closes it.
+  useEffect(() => {
+    if (!typingAvailable && typingOpen) openTyping(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [typingAvailable]);
+  useEffect(() => {
+    if (typingOpen) typingField.current?.focus();
+  }, [typingOpen]);
+  // Ctrl+K (Cmd+K) opens it from anywhere in the window, as it puts the cursor in the main window's field.
+  useEffect(() => {
+    if (!typingAvailable) return;
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        openTyping(true);
+        typingField.current?.focus();
+        typingField.current?.select();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [typingAvailable]);
+  const sendTyped = () => {
+    const text = typed.trim();
+    if (!text || !typing) return;
+    typing.onSend(text);
+    setTyped('');
+  };
   const subtitle = useSubtitleSettings();
   const setFontSize = useSetSubtitleFontSize();
   const setCompactMode = useSetSubtitleCompactMode();
@@ -207,7 +255,22 @@ const SubtitleBar: React.FC<Props> = ({
       </div>
 
       <div className="subtitle-bar__center">
-        {status ?? (
+        {typing && typingOpen ? (
+          <input
+            ref={typingField}
+            type="text"
+            className="subtitle-bar__typing"
+            value={typed}
+            maxLength={1000}
+            placeholder={t('fork.subtitle.typePlaceholder', 'What you want to say — Enter translates')}
+            aria-label={t('fork.subtitle.type', 'Type to translate (Ctrl+K)')}
+            onChange={(e) => setTyped(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); sendTyped(); }
+              else if (e.key === 'Escape') { e.preventDefault(); openTyping(false); }
+            }}
+          />
+        ) : status ?? (
           <>
             <span className="subtitle-bar__timer">{formatElapsed(sessionElapsedMs)}</span>
             <span className="subtitle-bar__lang">
@@ -218,6 +281,18 @@ const SubtitleBar: React.FC<Props> = ({
       </div>
 
       <div className="subtitle-bar__right">
+        {typing && (
+          <button
+            type="button"
+            className={`subtitle-bar__btn${typingOpen ? ' active' : ''}`}
+            onClick={() => openTyping(!typingOpen)}
+            aria-pressed={typingOpen}
+            title={t('fork.subtitle.type', 'Type to translate (Ctrl+K)')}
+            aria-label={t('fork.subtitle.type', 'Type to translate (Ctrl+K)')}
+          >
+            <Keyboard size={14} />
+          </button>
+        )}
         {speakerActive && (
           <DisplayModeButton scope="speaker" value={speakerMode} onChange={setSpeakerMode} />
         )}

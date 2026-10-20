@@ -1700,6 +1700,8 @@
     "subtitle": {
       "lanesView": "字幕檢視",
       "listView": "列表檢視",
+      "type": "打字翻譯（Ctrl+K）",
+      "typePlaceholder": "想說的話，Enter 翻譯",
       "look": "樣式",
       "lookPanel": "深色底",
       "lookSoft": "淡底柔影",

@@ -1700,6 +1700,8 @@
     "subtitle": {
       "lanesView": "Subtitle view",
       "listView": "List view",
+      "type": "Type to translate (Ctrl+K)",
+      "typePlaceholder": "What you want to say — Enter translates",
       "look": "Look",
       "lookPanel": "Dark panel",
       "lookSoft": "Faint panel",

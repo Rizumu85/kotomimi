@@ -121,6 +121,24 @@
     }
   }
 
+  // Fork: typing what one cannot say, in place of the clock and the pair (`SubtitleBar`'s typing field).
+  .subtitle-bar__typing {
+    width: min(420px, 46vw);
+    height: 24px;
+    padding: 0 10px;
+    border: 1px solid #3a3a3a;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #f0f0f0;
+    font: inherit;
+    font-size: 13px;
+    outline: none;
+    -webkit-app-region: no-drag;
+
+    &::placeholder { color: #8a8a8a; }
+    &:focus { border-color: tk.$color-primary; }
+  }
+
   .subtitle-bar__divider {
     width: 1px;
     height: 18px;
