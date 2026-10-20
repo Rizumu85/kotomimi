@@ -259,7 +259,12 @@ describe('SubtitleBar exit button', () => {
       expect(field.value).toBe('');
       fireEvent.keyDown(field, { key: 'Enter' });
       expect(onSend).toHaveBeenCalledTimes(1);
+      // The Escape that closes the field is the field's: it does not reach the strip's own Escape, which leaves subtitle mode.
+      const onDocumentKey = vi.fn();
+      document.addEventListener('keydown', onDocumentKey);
       fireEvent.keyDown(field, { key: 'Escape' });
+      document.removeEventListener('keydown', onDocumentKey);
+      expect(onDocumentKey).not.toHaveBeenCalled();
       expect(screen.queryByRole('textbox', { name: 'Type to translate (Ctrl+K)' })).toBeNull();
       expect(onOpenChange).toHaveBeenLastCalledWith(false);
     });

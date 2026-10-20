@@ -267,7 +267,7 @@ const SubtitleBar: React.FC<Props> = ({
             onChange={(e) => setTyped(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); sendTyped(); }
-              else if (e.key === 'Escape') { e.preventDefault(); openTyping(false); }
+              else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); openTyping(false); }
             }}
           />
         ) : status ?? (

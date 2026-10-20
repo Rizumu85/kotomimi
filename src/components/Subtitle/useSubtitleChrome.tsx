@@ -148,7 +148,8 @@ export function useSubtitleChrome({ surface, onExit, forceVisible = false }: {
   useEffect(() => {
     const target = rootRef.current?.ownerDocument ?? document;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return;
+      // Fork: an Escape a field has already used (the strip's typing field closing) leaves nothing.
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
       if (fullscreen) {
         void setFullscreen(false);
       } else {
