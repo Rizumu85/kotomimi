@@ -14,7 +14,7 @@ import { annotateJapanese } from './japanese';
 import { romanizeKorean } from './korean';
 import { transliterateRussian } from './russian';
 import { transliterateUkrainian } from './ukrainian';
-import { KANJI, quotesJapanese, scriptLanguage } from './script';
+import { explainsInChinese, KANJI, quotesJapanese, scriptLanguage } from './script';
 import type { AnnotatedLanguage, AnnotatedLine, AnnotateOptions, JapaneseTokenizer } from './types';
 
 export interface AnnotateInputs extends AnnotateOptions {
@@ -29,7 +29,7 @@ export interface AnnotateInputs extends AnnotateOptions {
 /** The language a line is read in. */
 function languageOf(line: string, o: Pick<AnnotateInputs, 'language' | 'chinese'>): AnnotatedLanguage | null {
   const script = scriptLanguage(line);
-  if (script === 'ja' && o.chinese && quotesJapanese(line)) return null;
+  if (script === 'ja' && (o.chinese ? quotesJapanese(line) || explainsInChinese(line) : explainsInChinese(line))) return null;
   // Ukrainian does not write one of its own letters in every sentence: the row says what the letters cannot.
   if (script === 'ru' && o.language === 'uk') return 'uk';
   if (script) return script;

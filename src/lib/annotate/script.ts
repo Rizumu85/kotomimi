@@ -24,7 +24,10 @@ export function scriptLanguage(line: string): AnnotatedLanguage | null {
 }
 
 /** Characters a Chinese sentence is full of and a Japanese one never writes: particles, and forms only Chinese uses. */
-const CHINESE_ONLY = /[这這吗嗎呢吧们們没沒还還对對应應该說说请請让讓给給从從发發现样樣错錯误誤读讀写寫为]/;
+const CHINESE_ONLY = /[这這吗嗎呢吧们們没沒还還对對应應该說说请請让讓给給从從发發现样樣错錯误誤读讀写寫为后动词关么个时问题过语]/;
+
+/** What a sentence quotes, in the marks Chinese and Japanese quote with. */
+const QUOTED = /“[^”]*”|「[^」]*」|『[^』]*』|"[^"]*"|‘[^’]*’/g;
 
 /**
  * A line of a Chinese row that only quotes Japanese — an explanation of a
@@ -41,6 +44,22 @@ export function quotesJapanese(line: string): boolean {
     else if (KANJI.test(ch)) han += 1;
   }
   return kana > 0 && kana * 4 < han;
+}
+
+/**
+ * A line in Chinese that quotes Japanese, in a row of any language: the grammar feedback's explanation sits in the
+ * practised language's row (「“に”后面缺少动词，句子不完整；用“について”表示“关于”。」), and read as Japanese every one
+ * of its Chinese characters got a kana reading, which spread the line apart (2026-10-21). Told by what no Japanese
+ * sentence holds, or by no kana outside its quotation marks with a sentence's worth of Han characters there. Stricter
+ * than `quotesJapanese`, which a Chinese row may afford.
+ */
+export function explainsInChinese(line: string): boolean {
+  if (CHINESE_ONLY.test(line)) return true;
+  const outside = line.replace(QUOTED, '');
+  if (KANA.test(outside)) return false;
+  let han = 0;
+  for (const ch of outside) if (KANJI.test(ch)) han += 1;
+  return han >= 4;
 }
 
 /** The row's language is Chinese: `zh`, `zh-CN`, `zh-TW`, `yue`. */

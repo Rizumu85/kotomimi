@@ -10,7 +10,7 @@ import { romanizeKorean } from './korean';
 import { transliterateRussian } from './russian';
 import { transliterateUkrainian } from './ukrainian';
 import { annotateChinese } from './chinese';
-import { annotatedLanguage, isChinese, quotesJapanese, scriptLanguage } from './script';
+import { annotatedLanguage, explainsInChinese, isChinese, quotesJapanese, scriptLanguage } from './script';
 import type { JapaneseTokenizer } from './types';
 
 const DICT = resolve(__dirname, '../../../node_modules/@sglkc/kuromoji/dict');
@@ -129,9 +129,9 @@ describe('a text, line by line', () => {
     // The corrected sentence above the explanation is Japanese, however many kanji it holds.
     expect(quotesJapanese('一度映画を見た。とても面白かったです。')).toBe(false);
     expect(quotesJapanese('東京大学卒業予定です')).toBe(false);
-    // Only a Chinese row is read this way: anywhere else kana are Japanese.
+    // Fork (2026-10-21): in a row of any language — the feedback's explanation sits in the practised language's row.
     expect(needsJapanese('“見ます”要改成“見た”。这里时态不对。', { furigana: true, roman: false, language: null, chinese: true })).toBe(false);
-    expect(needsJapanese('“見ます”要改成“見た”。这里时态不对。', { furigana: true, roman: false, language: null })).toBe(true);
+    expect(needsJapanese('“見ます”要改成“見た”。这里时态不对。', { furigana: true, roman: false, language: null })).toBe(false);
     expect(needsJapanese('一度映画を見た。\n“見ます”要改成“見た”。这里时态不对。', { furigana: true, roman: false, language: null, chinese: true })).toBe(true);
   });
 
@@ -198,5 +198,23 @@ describe('pinyin over Chinese, and Ukrainian by its own system (upstream #632)',
     expect(scriptLanguage('Россия')).toBe('ru');
     expect(annotateLine('Добрий день', { furigana: false, roman: true, language: 'uk' }).roman).toBe('Dobryi den');
     expect(annotateLine('Добрый день', { furigana: false, roman: true, language: 'ru' }).roman).toBe("Dobryy den'");
+  });
+});
+
+describe('a Chinese explanation that quotes Japanese, in a row of any language (2026-10-21)', () => {
+  const FEEDBACK = '“に”后面缺少动词，句子不完整；用“について”表示“关于”。';
+  it('is told apart from Japanese, which keeps its readings', () => {
+    expect(explainsInChinese(FEEDBACK)).toBe(true);
+    expect(explainsInChinese('还要加上“と”才对。')).toBe(true);
+    // Kana outside the quotes: Japanese, quoting.
+    expect(explainsInChinese('「行こう」と言った。')).toBe(false);
+    // A short line of kanji alone stays the row's: 大丈夫 in a Japanese row keeps its reading.
+    expect(explainsInChinese('大丈夫')).toBe(false);
+  });
+
+  it('gets no readings in the practised language row', () => {
+    const tokenizer = { tokenize: () => [] };
+    const line = annotateLine(FEEDBACK, { furigana: true, roman: true, language: 'ja', japanese: tokenizer });
+    expect(line).toEqual({ parts: [{ text: FEEDBACK }] });
   });
 });
