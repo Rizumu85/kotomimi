@@ -214,7 +214,7 @@ const SubtitleBar: React.FC<Props> = ({
 
   return (
     <div
-      className={`subtitle-bar ${subtitle.positionLocked ? 'locked' : ''} ${surface === 'electron' ? 'surface-electron' : 'surface-overlay'}${through ? ' subtitle-bar--through' : ''}${through && near ? ' is-near' : ''}`}
+      className={`subtitle-bar ${subtitle.positionLocked ? 'locked' : ''} ${surface === 'electron' ? 'surface-electron' : 'surface-overlay'}${through ? ' subtitle-bar--through' : ''}${through && near ? ' is-near' : ''}${typing && typingOpen ? ' is-typing' : ''}`}
       role="toolbar"
       {...dragHandleProps}
     >
@@ -301,7 +301,7 @@ const SubtitleBar: React.FC<Props> = ({
         )}
         <button
           type="button"
-          className="subtitle-bar__btn"
+          className="subtitle-bar__btn subtitle-bar__aside"
           onClick={() => setFontSize(subtitle.fontSize - 2)}
           disabled={subtitle.fontSize <= FONT_SIZE_MIN}
           title={t('subtitle.bar.fontDecrease', 'Decrease font size')}
@@ -311,7 +311,7 @@ const SubtitleBar: React.FC<Props> = ({
         </button>
         <button
           type="button"
-          className="subtitle-bar__btn"
+          className="subtitle-bar__btn subtitle-bar__aside"
           onClick={() => setFontSize(subtitle.fontSize + 2)}
           disabled={subtitle.fontSize >= FONT_SIZE_MAX}
           title={t('subtitle.bar.fontIncrease', 'Increase font size')}
@@ -321,7 +321,7 @@ const SubtitleBar: React.FC<Props> = ({
         </button>
         <button
           type="button"
-          className="subtitle-bar__btn"
+          className="subtitle-bar__btn subtitle-bar__aside"
           onClick={() => setCompactMode(!subtitle.compactMode)}
           // Fork: the two views by what they are — the caption lanes, and the conversation as a list.
           title={subtitle.compactMode ? t('fork.subtitle.listView', 'List view') : t('fork.subtitle.lanesView', 'Subtitle view')}
@@ -335,10 +335,10 @@ const SubtitleBar: React.FC<Props> = ({
             conversation and is the export source of truth — only offer
             export on the Electron surface, where SubtitleTakeover reads the
             live entries directly, uncapped. */}
-        {surface === 'electron' && exportMenu && <ExportMenuButton {...exportMenu} popoverHost="child-window" />}
+        {surface === 'electron' && exportMenu && <span className="subtitle-bar__aside"><ExportMenuButton {...exportMenu} popoverHost="child-window" /></span>}
         <button
           type="button"
-          className="subtitle-bar__btn"
+          className="subtitle-bar__btn subtitle-bar__aside"
           onClick={onClearConversation}
           title={t('subtitle.bar.clear', 'Clear conversation')}
           aria-label={t('subtitle.bar.clear', 'Clear conversation')}
@@ -376,7 +376,7 @@ const SubtitleBar: React.FC<Props> = ({
         {surface === 'electron' && (
           <button
             type="button"
-            className={`subtitle-bar__btn ${fullscreen ? 'active' : ''}`}
+            className={`subtitle-bar__btn subtitle-bar__aside ${fullscreen ? 'active' : ''}`}
             onClick={() => void setFullscreen(!fullscreen)}
             title={fullscreenLabel}
             aria-label={fullscreenLabel}
