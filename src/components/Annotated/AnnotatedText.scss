@@ -32,9 +32,18 @@
   }
 }
 
-// In flowing text the whole block sits in the line, its romanization under it.
-.annot--inline {
-  display: inline-block;
-  vertical-align: top;
-  max-width: 100%;
+// In flowing text a line with a romanization sits in the line as a block, its romanization under it; a line without
+// one is text like any other (`AnnotatedLines`).
+.annot.annot--inline {
+  display: inline;
+
+  .annot-line {
+    display: inline;
+  }
+
+  .annot-line--roman {
+    display: inline-block;
+    vertical-align: top;
+    max-width: 100%;
+  }
 }

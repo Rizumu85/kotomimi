@@ -69,4 +69,16 @@ describe('conversation text with reading aids', () => {
     expect(lines[1].querySelector('ruby')).toBeNull();
     expect(lines[1].textContent).toBe('动词时态与过去时间不符。');
   });
+
+  // Inline, in the strip's row, the explanation flows on after the corrected sentence: kept with it in one block it
+  // began under it, mid-strip (2026-10-22). Only a line with a romanization is a block, for the romanization under it.
+  it('lets inline lines flow, a space between them, only a romanized line kept a block', () => {
+    const { container } = render(<AnnotatedLines inline lines={[
+      { parts: [{ text: '餃子', ruby: 'ぎょうざ' }, { text: 'でいいよ。' }], roman: 'gyōza de ii yo.' },
+      { parts: [{ text: '应该用“いい”。' }] },
+    ]} />);
+    const lines = Array.from(container.querySelectorAll('.annot-line'));
+    expect(lines.map((line) => line.classList.contains('annot-line--roman'))).toEqual([true, false]);
+    expect(lines[1].textContent).toBe(' 应该用“いい”。');
+  });
 });

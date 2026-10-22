@@ -48,7 +48,12 @@ export function AnnotatedLines({ lines, inline = false, className }: AnnotatedLi
   return (
     <span className={`annot${inline ? ' annot--inline' : ''}${className ? ` ${className}` : ''}`}>
       {lines.map((line, i) => (
-        <span className="annot-line" key={i}>
+        // Inline, a line with a romanization is a block of its own, the romanization under it; one without flows on
+        // with the text around it, as an unread line would. Kept a block, the grammar feedback's corrected sentence
+        // read with furigana took its explanation with it: the explanation began under it, mid-strip, and the row,
+        // rolled to its last line, showed only that (2026-10-22).
+        <span className={`annot-line${line.roman ? ' annot-line--roman' : ''}`} key={i}>
+          {inline && i > 0 && ' '}
           <span className="annot-text">
             {line.parts.map((part, j) => (part.ruby === undefined
               ? <Fragment key={j}>{part.text}</Fragment>
