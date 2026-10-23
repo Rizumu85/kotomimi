@@ -1,48 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The look in the dark (the user, 2026-10-23): not the day's matte paint dimmed but lit, after Folia's 流光 — a deep
-     navy night, its fields glows of the colour of what the phone is doing (glow_*), the widgets dark glass with a
-     faint sheen, the status, the switch, the water and the glitter giving light. The objects keep their own colours:
-     the dial's face pale, the paper of the note white. -->
+<!-- The look in the dark (the user, 2026-10-23), after Folia as it is on the screen: neutral blacks of different clearness
+     — the night, the tiles, the panels, the objects all greys of no hue — lit by the colour of what the phone is doing
+     (the glows, as an album's colour behind Folia's veil), with white as what gives light: the switch, the main keys,
+     the status. A correction keeps its soft red. A blue night, everything tinted, was not it. -->
 <resources>
-    <color name="wall">#0A0F1C</color>
-    <color name="field_mint_pale">#142920</color>
-    <color name="field_mint">#123A33</color>
-    <color name="field_blue">#182638</color>
-    <color name="field_apricot">#3A2D1A</color>
-    <color name="field_apricot_deep">#E39A4C</color>
-    <color name="field_coral">#3D2133</color>
-    <color name="field_lilac">#2A2040</color>
-    <color name="tile">#172034</color>
-    <color name="card">#1E2842</color>
-    <color name="card_line">#2A3654</color>
-    <color name="switch_off">#38445F</color>
-    <color name="water_tile">#0C2633</color>
-    <color name="water">#4FE0B0</color>
-    <color name="water_deep">#1F8C70</color>
-    <color name="water_number">#EAF2EE</color>
-    <color name="water_sub">#8AAFBF</color>
-    <color name="glass_tile">#1C2140</color>
-    <color name="glass_number">#E8E2FF</color>
-    <color name="glass_sub">#A7A2C8</color>
-    <color name="paper_number">#F4E8F2</color>
-    <color name="paper_sub">#B4A8C4</color>
-    <color name="paper_tile">#1E1F38</color>
-    <color name="paper_rule">#353757</color>
-    <color name="lens">#0B0E10</color>
-    <color name="lens_inner">#3A464E</color>
-    <color name="dial">#E6E3DC</color>
-    <color name="dial_edge">#C9C4BA</color>
-    <color name="key">#EE7A62</color>
-    <color name="key_deep">#F59C88</color>
-    <color name="ink_red">#F07A64</color>
-    <color name="ink">#EEF1F7</color>
-    <color name="ink_2">#A9B3C6</color>
-    <color name="ink_3">#77839A</color>
-    <color name="good">#5CC08A</color>
+    <color name="wall">#070708</color>
+    <color name="field_mint_pale">#1A1A1E</color>
+    <color name="field_mint">#1C2A25</color>
+    <color name="field_blue">#1A1A1E</color>
+    <color name="field_apricot">#2B2822</color>
+    <color name="field_apricot_deep">#CFCFD6</color>
+    <color name="field_coral">#2E2E33</color>
+    <color name="field_lilac">#26262A</color>
+    <color name="tile">#26262A</color>
+    <color name="card">#303035</color>
+    <color name="card_line">#3D3D44</color>
+    <color name="switch_off">#3A3A40</color>
+    <color name="water_tile">#26262A</color>
+    <color name="water">#C4ECFF</color>
+    <color name="water_deep">#4A6878</color>
+    <color name="water_number">#F5F5F7</color>
+    <color name="water_sub">#9C9CA4</color>
+    <color name="glass_tile">#26262A</color>
+    <color name="glass_number">#F5F5F7</color>
+    <color name="glass_sub">#9C9CA4</color>
+    <color name="paper_number">#F5F5F7</color>
+    <color name="paper_sub">#9C9CA4</color>
+    <color name="paper_tile">#26262A</color>
+    <color name="paper_rule">#3A3A40</color>
+    <color name="lens">#070708</color>
+    <color name="lens_inner">#3A3A40</color>
+    <color name="dial">#2E2E33</color>
+    <color name="dial_edge">#4A4A52</color>
+    <color name="key">#F2F2F4</color>
+    <color name="key_deep">#FFFFFF</color>
+    <color name="ink_red">#FF8A80</color>
+    <color name="ink">#F5F5F7</color>
+    <color name="ink_2">#A3A3AB</color>
+    <color name="ink_3">#6F6F78</color>
+    <color name="good">#A3E8C8</color>
     <color name="room_2">#FBE3B9</color>
-    <color name="scrim">#8C000000</color>
-    <color name="knob">#F2F0EA</color>
-    <color name="dial_hand">#1F2A30</color>
-    <color name="sheet">#262844</color>
-    <color name="dot">#C9D6F0</color>
+    <color name="scrim">#A6000000</color>
+    <color name="knob">#F5F5F7</color>
+    <color name="dial_hand">#E8E8EC</color>
+    <color name="sheet">#2E2E33</color>
+    <color name="dot">#DADAE2</color>
 </resources>

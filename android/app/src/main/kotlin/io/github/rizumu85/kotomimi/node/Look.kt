@@ -266,7 +266,7 @@ class Wall(context: Context) : View(context), SensorEventListener {
         for (s in shapes) {
             val x = s.x + swayX * s.depth
             val y = s.y + swayY * s.depth - scrolled * 0.08f * s.depth
-            val base = when (s.hue) { 0 -> c[1]; 1 -> c[2]; else -> Color.WHITE } and 0x00FFFFFF
+            val base = blend(if (s.hue == 1) c[2] else c[1], dotInk, if (s.hue == 2) 0.55f else 0.25f) and 0x00FFFFFF
             val alpha = ((0.07f + 0.13f * s.depth) * (1f + flash * 1.2f) * 255).toInt().coerceIn(0, 255)
             shapePaint.color = base or (alpha shl 24)
             shapePaint.style = Paint.Style.FILL
@@ -335,12 +335,15 @@ class Wall(context: Context) : View(context), SensorEventListener {
 
     private val dark = context.night()
     private val glowPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    /** The glitter's colours: the day's four, or the night's ice blues and white. */
+    private val glints = if (dark) NIGHT_GLINTS else GLINTS
 
     private fun colours(m: Mood): IntArray = if (dark) when (m) {
-        Mood.IDLE -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_teal), context.getColor(R.color.glow_blue))
-        Mood.HEAR -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_mint), context.getColor(R.color.glow_blue))
-        Mood.TRANSLATE -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_violet), context.getColor(R.color.glow_teal))
-        Mood.COACH -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_coral), context.getColor(R.color.glow_violet))
+        // The colour of what the phone is doing, as an album's behind Folia's veil: the night itself has none.
+        Mood.IDLE -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_blue), context.getColor(R.color.glow_teal))
+        Mood.HEAR -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_teal), context.getColor(R.color.glow_blue))
+        Mood.TRANSLATE -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_violet), context.getColor(R.color.glow_rose))
+        Mood.COACH -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_coral), context.getColor(R.color.glow_plum))
     } else when (m) {
         Mood.IDLE -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.field_mint_pale), context.getColor(R.color.field_blue))
         Mood.HEAR -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.field_mint), context.getColor(R.color.field_blue))
@@ -440,11 +443,11 @@ class Wall(context: Context) : View(context), SensorEventListener {
                 if (count == 0) continue
                 val k = (level + 1f) / LIT_LEVELS
                 if (dark) {
-                    dot.color = (GLINTS[hue] and 0x00FFFFFF) or ((46 * k).toInt() shl 24)
+                    dot.color = (glints[hue] and 0x00FFFFFF) or ((46 * k).toInt() shl 24)
                     dot.strokeWidth = (8f + 4f * k) * dp
                     canvas.drawPoints(lit[hue][level], 0, count * 2, dot)
                 }
-                dot.color = (GLINTS[hue] and 0x00FFFFFF) or ((150 + 105 * k).toInt() shl 24)
+                dot.color = (glints[hue] and 0x00FFFFFF) or ((150 + 105 * k).toInt() shl 24)
                 dot.strokeWidth = (2.2f + 1.4f * k) * dp
                 canvas.drawPoints(lit[hue][level], 0, count * 2, dot)
                 // The light caught: a small bright point to one side, toward where the light comes from.
@@ -696,6 +699,7 @@ class Wall(context: Context) : View(context), SensorEventListener {
         const val PI_F = PI.toFloat()
         const val TWO_PI = (2 * PI).toFloat()
         val GLINTS = intArrayOf(0xFFE86A52.toInt(), 0xFF3FAF8F.toInt(), 0xFF4D86D9.toInt(), 0xFFE9A23B.toInt())
+        val NIGHT_GLINTS = intArrayOf(0xFFFFFFFF.toInt(), 0xFFFFE7C9.toInt(), 0xFFD3E8FF.toInt(), 0xFFF2D6FF.toInt())
     }
 }
 
@@ -704,6 +708,9 @@ class Switch(context: Context) : View(context) {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val dark = context.night()
     private var at = 0f
+    /** In the dark, the colour it is when on: the accent of what the phone is doing; 0 for the key's. */
+    var tint = 0
+        set(value) { if (field != value) { field = value; invalidate() } }
     private var slide: ValueAnimator? = null
     var on = false
         set(value) {
@@ -720,8 +727,9 @@ class Switch(context: Context) : View(context) {
     override fun onDraw(canvas: Canvas) {
         val h = height.toFloat()
         val w = width.toFloat()
-        paint.color = blend(context.getColor(R.color.switch_off), context.getColor(R.color.key), at)
-        if (dark && at > 0f) paint.setShadowLayer(context.px(10f) * at, 0f, 0f, (context.getColor(R.color.key) and 0x00FFFFFF) or ((170 * at).toInt() shl 24))
+        val on = if (dark && tint != 0) tint else context.getColor(R.color.key)
+        paint.color = blend(context.getColor(R.color.switch_off), on, at)
+        if (dark && at > 0f) paint.setShadowLayer(context.px(10f) * at, 0f, 0f, (on and 0x00FFFFFF) or ((170 * at).toInt() shl 24))
         canvas.drawRoundRect(RectF(0f, 0f, w, h), h / 2, h / 2, paint)
         paint.clearShadowLayer()
         val r = h / 2 - context.px(4f)
@@ -831,9 +839,12 @@ class Thing(context: Context, private val kind: Kind) : View(context) {
     var amount = 0f
         set(value) { if (field != value) { field = value; invalidate() } }
 
+    private val dark = context.night()
+
     override fun onDraw(canvas: Canvas) {
         val s = min(width, height).toFloat()
         val d = context.px(1f)
+        if (dark) { night(canvas, s, d); return }
         when (kind) {
             Kind.WATER -> {
                 val r = RectF(s * 0.12f, s * 0.04f, s * 0.86f, s * 0.96f)
@@ -909,6 +920,83 @@ class Thing(context: Context, private val kind: Kind) : View(context) {
                 val a = (-210f + 240f * amount.coerceIn(0f, 1f)) * PI.toFloat() / 180f
                 stroke.color = context.getColor(R.color.dial_hand); stroke.strokeWidth = s * 0.06f; stroke.strokeCap = Paint.Cap.ROUND
                 canvas.drawLine(s / 2, s / 2, s / 2 + cos(a) * s * 0.32f, s / 2 + sin(a) * s * 0.32f, stroke)
+            }
+        }
+    }
+
+    /**
+     * The object as the night has it: a surface of the page's blue a shade lighter (`face`), its rim lighter still,
+     * and the light (`glow`) only where it gives it — the water, the lit lens, the dial's mark, the switch that is on,
+     * the note's dot. In its day's colours it looked like a sticker on the night (the user, 2026-10-23).
+     */
+    private fun night(canvas: Canvas, s: Float, d: Float) {
+        val face = context.getColor(R.color.dial)
+        val rim = context.getColor(R.color.dial_edge)
+        val glow = context.getColor(R.color.key)
+        val pale = context.getColor(R.color.ink_2)
+        val c = s / 2
+        stroke.strokeWidth = d * 1.3f
+        stroke.strokeCap = Paint.Cap.ROUND
+        fun lit(color: Int, radius: Float) = paint.setShadowLayer(radius, 0f, 0f, color)
+        when (kind) {
+            Kind.WATER -> {
+                val r = RectF(s * 0.14f, s * 0.06f, s * 0.84f, s * 0.94f)
+                paint.color = face; canvas.drawRoundRect(r, s * 0.2f, s * 0.2f, paint)
+                canvas.save(); canvas.clipRect(r.left, r.top + r.height() * 0.58f, r.right, r.bottom)
+                paint.color = context.getColor(R.color.water); lit(paint.color, s * 0.12f)
+                canvas.drawRoundRect(r, s * 0.2f, s * 0.2f, paint); paint.clearShadowLayer(); canvas.restore()
+                stroke.color = rim; canvas.drawRoundRect(r, s * 0.2f, s * 0.2f, stroke)
+            }
+            Kind.PANES -> {
+                val back = RectF(s * 0.04f, s * 0.04f, s * 0.64f, s * 0.64f)
+                val front = RectF(s * 0.32f, s * 0.32f, s * 0.94f, s * 0.94f)
+                paint.color = face; canvas.drawRoundRect(back, s * 0.18f, s * 0.18f, paint)
+                stroke.color = rim; canvas.drawRoundRect(back, s * 0.18f, s * 0.18f, stroke)
+                paint.color = (glow and 0x00FFFFFF) or (0x40 shl 24); canvas.drawRoundRect(front, s * 0.18f, s * 0.18f, paint)
+                stroke.color = (glow and 0x00FFFFFF) or (0xB0 shl 24); canvas.drawRoundRect(front, s * 0.18f, s * 0.18f, stroke)
+            }
+            Kind.NOTE -> {
+                val r = RectF(s * 0.14f, s * 0.08f, s * 0.82f, s * 0.94f)
+                paint.color = face; canvas.drawRoundRect(r, s * 0.12f, s * 0.12f, paint)
+                stroke.color = rim; canvas.drawRoundRect(r, s * 0.12f, s * 0.12f, stroke)
+                var y = r.top + s * 0.28f
+                while (y < r.bottom - s * 0.1f) { canvas.drawLine(r.left + s * 0.12f, y, r.right - s * 0.12f, y, stroke); y += s * 0.18f }
+                paint.color = glow; lit(glow, s * 0.1f); canvas.drawCircle(r.right - s * 0.02f, r.top + s * 0.02f, s * 0.09f, paint); paint.clearShadowLayer()
+            }
+            Kind.LENS -> {
+                paint.color = face; canvas.drawCircle(c, c, s * 0.44f, paint)
+                stroke.color = rim; canvas.drawCircle(c, c, s * 0.44f, stroke); canvas.drawCircle(c, c, s * 0.27f, stroke)
+                paint.color = if (lit) context.getColor(R.color.water) else rim
+                if (lit) lit(paint.color, s * 0.18f)
+                canvas.drawCircle(c, c, s * 0.11f, paint); paint.clearShadowLayer()
+            }
+            Kind.DIAL -> {
+                paint.color = face; canvas.drawCircle(c, c, s * 0.44f, paint)
+                stroke.color = rim; canvas.drawCircle(c, c, s * 0.44f, stroke)
+                val mark = (-210f + 240f / 3f) * PI.toFloat() / 180f
+                paint.color = glow; lit(glow, s * 0.08f)
+                canvas.drawCircle(c + cos(mark) * s * 0.32f, c + sin(mark) * s * 0.32f, s * 0.05f, paint); paint.clearShadowLayer()
+                val a = (-210f + 240f * amount.coerceIn(0f, 1f)) * PI.toFloat() / 180f
+                stroke.color = context.getColor(R.color.dial_hand); stroke.strokeWidth = s * 0.06f
+                canvas.drawLine(c, c, c + cos(a) * s * 0.3f, c + sin(a) * s * 0.3f, stroke)
+            }
+            Kind.TOGGLES -> {
+                val tall = s * 0.3f
+                val wide = s * 0.78f
+                val left = s * 0.11f
+                for ((i, on) in listOf(true, false).withIndex()) {
+                    val y = s * (0.15f + 0.4f * i)
+                    paint.color = if (on) glow else face
+                    if (on) lit(glow, s * 0.1f)
+                    canvas.drawRoundRect(RectF(left, y, left + wide, y + tall), tall / 2, tall / 2, paint); paint.clearShadowLayer()
+                    if (!on) { stroke.color = rim; canvas.drawRoundRect(RectF(left, y, left + wide, y + tall), tall / 2, tall / 2, stroke) }
+                    paint.color = if (on) context.getColor(R.color.wall) else pale
+                    canvas.drawCircle(if (on) left + wide - tall / 2 else left + tall / 2, y + tall / 2, tall / 2 - s * 0.05f, paint)
+                }
+            }
+            Kind.DOTS -> {
+                paint.color = pale
+                for (k in 0..2) canvas.drawCircle(s * (0.24f + 0.26f * k), c, s * 0.075f, paint)
             }
         }
     }

@@ -48,11 +48,17 @@
     <!-- The icon's background, and the scrim over the page while a panel is open. -->
     <color name="room_2">#FBE3B9</color>
     <!-- The night's wallpaper is lit, not painted: these are its glows, by what the phone is doing. -->
-    <color name="glow_teal">#2FA59A</color>
-    <color name="glow_blue">#4C6FFF</color>
-    <color name="glow_mint">#34E0A1</color>
-    <color name="glow_coral">#FF6F7D</color>
-    <color name="glow_violet">#9B6BFF</color>
+    <color name="glow_blue">#3554E0</color>
+    <color name="glow_teal">#12A39E</color>
+    <color name="glow_violet">#7A4BE0</color>
+    <color name="glow_rose">#D2457E</color>
+    <color name="glow_coral">#E8604C</color>
+    <color name="glow_plum">#9440B0</color>
+    <!-- And its one accent, by what the phone is doing, as Folia takes its accent from the album: the switch when on. -->
+    <color name="accent_idle">#8EA6FF</color>
+    <color name="accent_hear">#6FE0D2</color>
+    <color name="accent_translate">#B59CFF</color>
+    <color name="accent_coach">#FF8F84</color>
     <!-- Behind the icon's pouch, the same by day and by night. -->
     <color name="icon_back">#DCEAE2</color>
     <color name="scrim">#59000000</color>

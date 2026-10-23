@@ -381,6 +381,8 @@ class MainActivity : Activity() {
         status.addView(big, spaced(top = 6))
         // In the dark the status gives light: its word in a coral glow, the large number in a soft white one.
         if (night()) {
+            // The status's word is white in the dark, not the day's red: what gives light there is white.
+            word.setTextColor(getColor(R.color.ink))
             word.setShadowLayer(px(10f), 0f, 0f, (getColor(R.color.key) and 0x00FFFFFF) or (0x99 shl 24))
             bigNumber.setShadowLayer(px(16f), 0f, 0f, android.graphics.Color.argb(0x55, 255, 255, 255))
         }
@@ -1273,6 +1275,7 @@ class MainActivity : Activity() {
 
         // The wallpaper: its colour, its pace, and an answer to each piece of work done since it was last drawn.
         wall.moodFor(if (!shared) Mood.IDLE else when (focus) { Task.HEAR -> Mood.HEAR; Task.TRANSLATE -> Mood.TRANSLATE; Task.COACH -> Mood.COACH })
+        if (night()) switch.tint = getColor(if (!shared) R.color.accent_idle else when (focus) { Task.HEAR -> R.color.accent_hear; Task.TRANSLATE -> R.color.accent_translate; Task.COACH -> R.color.accent_coach })
         wall.pace = when (phase) { Share.Phase.WORKING -> 1f; Share.Phase.WAITING, Share.Phase.LOADING -> 0.6f; else -> 0.3f }
         for ((task, w) in done) {
             val before = seen[task] ?: w.count
