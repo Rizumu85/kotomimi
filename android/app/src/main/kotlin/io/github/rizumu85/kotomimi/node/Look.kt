@@ -1,357 +1,401 @@
 package io.github.rizumu85.kotomimi.node
 
 import android.animation.ValueAnimator
-import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapShader
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.DashPathEffect
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
+import android.graphics.Shader
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.LayerDrawable
-import android.view.MotionEvent
 import android.view.View
-import android.view.animation.LinearInterpolator
+import android.view.animation.DecelerateInterpolator
 import kotlin.math.PI
-import kotlin.math.abs
+import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sin
+import kotlin.random.Random
 
 /**
- * The look the user settled on (`.dev/phone-node/DESIGN.md`, the apricot-and-mint mockup of 2026-10-10): flat
- * skeuomorphism — objects stand for what they do, with a little volume and no gradients, gloss or outline icons.
- * Volume is one thing only: a second, deeper face under the first (`faced`), for the body, the key, the card and the
- * box alike. Everything here is drawn: the app carries no images.
+ * The look: the OriginOS 1.0 desktop the user pointed to (2026-10-23) — a living wallpaper and, on it, round widgets
+ * of several sizes, each one object that stands for what it does. Hearing is a glass of water whose surface is the
+ * voice; a translation is two panes of frosted glass, the sentence behind and its translation in front; feedback is
+ * a sheet of paper written over in red. The objects have a little real volume (a shadow, a translucent pane) and
+ * nothing more. Everything is drawn: the app carries no images.
  */
 
 /** Pixels of `dp` on this screen. */
 fun Context.px(dp: Float): Float = dp * resources.displayMetrics.density
 fun Context.px(dp: Int): Int = (dp * resources.displayMetrics.density + 0.5f).toInt()
 
-/** A face of `color` with a deeper one `depth` dp under it: the one way this look gives anything volume. */
-fun Context.faced(color: Int, deep: Int, radius: Int, depth: Int): Drawable {
-    fun face(c: Int) = GradientDrawable().apply { setColor(getColor(c)); cornerRadius = px(radius).toFloat() }
-    return LayerDrawable(arrayOf(face(deep), face(color))).apply { setLayerInset(1, 0, 0, 0, px(depth)) }
-}
-
-/** A flat face: a widget's white, a screen's dark. */
-fun Context.flat(color: Int, radius: Int, alpha: Int = 255): Drawable =
-    GradientDrawable().apply { setColor(getColor(color)); cornerRadius = px(radius).toFloat(); this.alpha = alpha }
-
-/**
- * The room the phone stands in: a pale wall with the apricot rings of a sound spreading through it. While the phone
- * is at work the rings breathe a little.
- */
-class Room(context: Context) : View(context) {
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private var breath = 0f
-    private val breathing = ValueAnimator.ofFloat(0f, 1f).apply {
-        duration = 2600; repeatCount = ValueAnimator.INFINITE; repeatMode = ValueAnimator.REVERSE
-        addUpdateListener { breath = it.animatedValue as Float; invalidate() }
+/** A rounded face of one colour, with an edge where one is given. */
+fun Context.flat(color: Int, radius: Int, alpha: Int = 255, edge: Int? = null): Drawable =
+    GradientDrawable().apply {
+        setColor(getColor(color))
+        cornerRadius = px(radius).toFloat()
+        this.alpha = alpha
+        if (edge != null) setStroke(px(1), getColor(edge))
     }
 
-    var working = false
+/** `a` toward `b` by `t`, alpha and all. */
+fun blend(a: Int, b: Int, t: Float): Int {
+    fun ch(shift: Int) = (((a ushr shift) and 0xFF) * (1 - t) + ((b ushr shift) and 0xFF) * t).toInt() and 0xFF
+    return (ch(24) shl 24) or (ch(16) shl 16) or (ch(8) shl 8) or ch(0)
+}
+
+/** What the wallpaper is coloured by: what the phone is doing. */
+enum class Mood { IDLE, HEAR, TRANSLATE, COACH }
+
+/**
+ * The wallpaper, and part of the app: large soft fields of colour with a fine grain, coloured by what the phone is
+ * doing and always slowly moving — slower while nothing is lent. It answers what happens: a reading heard sets the
+ * fields' edges trembling, a sentence translated sends a light sweeping across, a correction spreads like a drop of
+ * red ink, and a touch on it rings out from the finger. The page scrolling moves the fields a little behind it.
+ */
+class Wall(context: Context) : View(context) {
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
+    private val grain = Paint().apply { shader = BitmapShader(grainTile(), Shader.TileMode.REPEAT, Shader.TileMode.REPEAT) }
+    private val path = Path()
+
+    private var mood = Mood.IDLE
+    /** The fields' colours now, and on their way to. */
+    private var from = colours(Mood.IDLE)
+    private var to = from
+    private var turned = 1f
+    private var t = 0f
+    private var last = 0L
+    /** How fast the fields drift: lent and at work, lent and waiting, not lent. */
+    var pace = 0.35f
+
+    /** Behind a scrolled page, by how much. */
+    var scrolled = 0f
+        set(value) { field = value; invalidate() }
+
+    private var tremble = 0f
+    private var sweep = -1f
+    private class Drop(val x: Float, val y: Float, val color: Int, var age: Float = 0f)
+    private val drops = ArrayList<Drop>()
+
+    /** Runs while the screen is seen: `MainActivity` stops it when it is not. */
+    var running = false
+        set(value) { field = value; last = 0L; if (value) invalidate() }
+
+    fun moodFor(next: Mood) {
+        if (next == mood) return
+        mood = next
+        from = current()
+        to = colours(next)
+        turned = 0f
+    }
+
+    /** Something was done: the wallpaper answers it in the way of that work. */
+    fun pulse(task: Task, x: Float = width * 0.5f, y: Float = height * 0.55f) {
+        when (task) {
+            Task.HEAR -> tremble = 1f
+            Task.TRANSLATE -> sweep = 0f
+            Task.COACH -> drops += Drop(x, y, context.getColor(R.color.ink_red))
+        }
+    }
+
+    /** A touch on the wallpaper rings out from the finger. */
+    fun touched(x: Float, y: Float) {
+        drops += Drop(x, y, Color.WHITE)
+    }
+
+    private fun current(): IntArray = IntArray(3) { blend(from[it], to[it], turned) }
+
+    private fun colours(m: Mood): IntArray = when (m) {
+        Mood.IDLE -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.field_mint_pale), context.getColor(R.color.field_blue))
+        Mood.HEAR -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.field_mint), context.getColor(R.color.field_blue))
+        Mood.TRANSLATE -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.field_apricot), context.getColor(R.color.field_blue))
+        Mood.COACH -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.field_coral), context.getColor(R.color.field_lilac))
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        val now = System.nanoTime()
+        val dt = if (last == 0L) 0f else min(0.05f, (now - last) / 1e9f)
+        last = now
+        t += dt * pace
+        if (turned < 1f) turned = min(1f, turned + dt / 0.9f)
+        tremble = max(0f, tremble - dt * 1.2f)
+        if (sweep >= 0f) sweep = if (sweep > 1.3f) -1f else sweep + dt / 1.1f
+        drops.forEach { it.age += dt }
+        drops.removeAll { it.age > 1.6f }
+
+        val c = current()
+        val w = width.toFloat()
+        val h = height.toFloat()
+        val shift = -scrolled * 0.12f
+        canvas.drawColor(c[0])
+        // The first field, up and to the left; the second, lower right. Each a round shape whose edge breathes.
+        field(canvas, w * 0.08f + sin(t * 0.7f) * w * 0.05f, h * 0.06f + shift + cos(t * 0.5f) * w * 0.04f, w * 0.78f, c[1], 0f)
+        field(canvas, w * 1.0f + cos(t * 0.6f) * w * 0.05f, h * 0.68f + shift * 1.5f + sin(t * 0.45f) * w * 0.05f, w * 0.72f, c[2], 2.1f)
+
+        // A sentence translated: a band of light sweeps across, left to right.
+        if (sweep in 0f..1.3f) {
+            val x = -w * 0.3f + sweep * w * 1.6f
+            paint.color = Color.argb((70 * sin(min(1f, sweep) * PI).toFloat()).toInt().coerceAtLeast(0), 255, 255, 255)
+            path.reset()
+            path.moveTo(x, 0f); path.lineTo(x + w * 0.22f, 0f); path.lineTo(x + w * 0.02f, h); path.lineTo(x - w * 0.2f, h); path.close()
+            canvas.drawPath(path, paint)
+        }
+        // Drops: a correction's red ink, or a touch, spreading out in a ring.
+        for (d in drops) {
+            val k = d.age / 1.6f
+            val fade = (1f - k).coerceIn(0f, 1f)
+            ring.color = blend(d.color and 0x00FFFFFF, d.color, fade * if (d.color == Color.WHITE) 0.8f else 0.55f)
+            ring.strokeWidth = context.px(2f) + k * context.px(10f)
+            canvas.drawCircle(d.x, d.y, context.px(12f) + k * w * 0.55f, ring)
+            if (d.color != Color.WHITE) {
+                paint.color = blend(d.color and 0x00FFFFFF, d.color, fade * 0.12f)
+                canvas.drawCircle(d.x, d.y, context.px(10f) + k * w * 0.4f, paint)
+            }
+        }
+        canvas.drawRect(0f, 0f, w, h, grain)
+        if (running) postInvalidateOnAnimation()
+    }
+
+    /** One field: a round shape whose edge rises and falls in a few slow waves, and trembles after a reading. */
+    private fun field(canvas: Canvas, cx: Float, cy: Float, r: Float, color: Int, seed: Float) {
+        path.reset()
+        val n = 48
+        for (i in 0..n) {
+            val a = i * 2 * PI.toFloat() / n
+            val wobble = sin(a * 3 + t * 1.3f + seed) * 0.035f + sin(a * 5 - t + seed * 2) * 0.02f +
+                tremble * sin(a * 11 + t * 9f) * 0.025f
+            val rr = r * (1f + wobble)
+            val x = cx + cos(a) * rr
+            val y = cy + sin(a) * rr * 1.06f
+            if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+        }
+        path.close()
+        paint.color = color
+        canvas.drawPath(path, paint)
+    }
+
+    /** A small tile of grain: a few dark specks on nothing, repeated over the whole wall. */
+    private fun grainTile(): Bitmap {
+        val size = 96
+        val tile = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val random = Random(7)
+        repeat(size * size / 9) {
+            val alpha = 10 + random.nextInt(22)
+            tile.setPixel(random.nextInt(size), random.nextInt(size), Color.argb(alpha, 50, 60, 80))
+        }
+        return tile
+    }
+}
+
+/** The share tile's switch: a track, coral while on, and its knob, which slides across. */
+class Switch(context: Context) : View(context) {
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private var at = 0f
+    private var slide: ValueAnimator? = null
+    var on = false
         set(value) {
             if (field == value) return
             field = value
-            if (value) breathing.start() else { breathing.cancel(); breath = 0f; invalidate() }
-        }
-
-    override fun onDraw(canvas: Canvas) {
-        canvas.drawColor(context.getColor(R.color.room_3))
-        val w = width.toFloat()
-        val cx = w * 0.62f
-        val cy = height * 0.72f
-        val grow = 1f + breath * 0.025f
-        paint.color = context.getColor(R.color.room_4)
-        canvas.drawCircle(cx, cy, w * 1.25f * grow, paint)
-        paint.color = context.getColor(R.color.room_2)
-        canvas.drawCircle(cx, cy, w * 0.95f * grow, paint)
-        paint.color = context.getColor(R.color.room_1)
-        canvas.drawCircle(cx, cy, w * 0.62f * grow, paint)
-    }
-
-    override fun onDetachedFromWindow() { breathing.cancel(); super.onDetachedFromWindow() }
-}
-
-/**
- * The row of dots along the foot of the screen — the sound wave at rest. Off: dim. Loading or checking: lit one by
- * one as far as it has come. Waiting for a computer: a light runs along them. At work: the same dots grow into a
- * wave.
- */
-class Dots(context: Context) : View(context) {
-    enum class Mode { OFF, PROGRESS, WAITING, WAVE }
-
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { strokeCap = Paint.Cap.ROUND }
-    private var mode = Mode.OFF
-    private var lit = 0f
-    private var phase = 0f
-    private val clock = ValueAnimator.ofFloat(0f, 1f).apply {
-        duration = 1800; repeatCount = ValueAnimator.INFINITE; interpolator = LinearInterpolator()
-        addUpdateListener { phase = it.animatedValue as Float; invalidate() }
-    }
-
-    fun show(next: Mode, fraction: Float = 0f) {
-        lit = fraction.coerceIn(0f, 1f)
-        if (next == mode) { invalidate(); return }
-        mode = next
-        if (next == Mode.WAITING || next == Mode.WAVE) clock.start() else clock.cancel()
-        invalidate()
-    }
-
-    override fun onMeasure(widthSpec: Int, heightSpec: Int) =
-        setMeasuredDimension(MeasureSpec.getSize(widthSpec), resolveSize(context.px(30), heightSpec))
-
-    override fun onDraw(canvas: Canvas) {
-        val dot = context.px(3f)
-        val gap = context.px(8.5f)
-        val count = max(8, ((width - dot) / gap).toInt() + 1)
-        val start = (width - (count - 1) * gap) / 2f
-        val mid = height / 2f
-        val on = context.getColor(R.color.glow)
-        // At rest the dots are there to be seen, only dim.
-        val off = blend(context.getColor(R.color.led_off), on, 0.3f)
-        for (i in 0 until count) {
-            val x = start + i * gap
-            val at = i / (count - 1f)
-            when (mode) {
-                Mode.OFF -> { paint.color = off; canvas.drawCircle(x, mid, dot / 2, paint) }
-                Mode.PROGRESS -> { paint.color = if (at <= lit) on else off; canvas.drawCircle(x, mid, dot / 2, paint) }
-                Mode.WAITING -> {
-                    // A soft light that runs left to right and round again.
-                    val near = 1f - min(1f, abs(at - phase) * 5f)
-                    paint.color = blend(off, on, 0.35f + 0.65f * near)
-                    canvas.drawCircle(x, mid, dot / 2, paint)
-                }
-                Mode.WAVE -> {
-                    // Higher in the middle, moving: two sines at different paces read as a voice, not a pendulum.
-                    val shape = sin(at * PI).toFloat()
-                    val swing = abs(sin((at * 7f + phase * 2f) * PI.toFloat()) * 0.6f + sin((at * 3f - phase) * 2f * PI.toFloat()) * 0.4f)
-                    val half = max(dot / 2, (height / 2f - dot) * shape * (0.25f + 0.75f * swing))
-                    paint.color = on
-                    paint.strokeWidth = dot
-                    canvas.drawLine(x, mid - half, x, mid + half, paint)
-                }
+            slide?.cancel()
+            slide = ValueAnimator.ofFloat(at, if (value) 1f else 0f).apply {
+                duration = 260; interpolator = DecelerateInterpolator()
+                addUpdateListener { at = it.animatedValue as Float; invalidate() }
+                start()
             }
         }
-    }
-
-    override fun onDetachedFromWindow() { clock.cancel(); super.onDetachedFromWindow() }
-}
-
-/** A small round light: lit while the phone is lent. */
-class Led(context: Context) : View(context) {
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    var on = false
-        set(value) { field = value; invalidate() }
 
     override fun onDraw(canvas: Canvas) {
-        val r = min(width, height) / 2f
-        paint.color = context.getColor(R.color.led_off)
-        canvas.drawCircle(width / 2f, height / 2f, r, paint)
-        paint.color = context.getColor(if (on) R.color.glow else R.color.screen_ink_3)
-        canvas.drawCircle(width / 2f, height / 2f, r * 0.55f, paint)
-    }
-}
-
-/** The model card's chip: a card with a cut corner and its contacts, in the body's deeper green. */
-class Chip(context: Context) : View(context) {
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val path = Path()
-
-    override fun onDraw(canvas: Canvas) {
-        val w = width.toFloat()
         val h = height.toFloat()
-        val r = context.px(5f)
-        val cut = w * 0.34f
-        path.reset()
-        path.moveTo(r, 0f)
-        path.lineTo(w - cut, 0f)
-        path.lineTo(w, cut)
-        path.lineTo(w, h - r)
-        path.quadTo(w, h, w - r, h)
-        path.lineTo(r, h)
-        path.quadTo(0f, h, 0f, h - r)
-        path.lineTo(0f, r)
-        path.quadTo(0f, 0f, r, 0f)
-        paint.color = context.getColor(R.color.body_deep)
-        canvas.drawPath(path, paint)
+        val w = width.toFloat()
+        paint.color = blend(context.getColor(R.color.switch_off), context.getColor(R.color.key), at)
+        canvas.drawRoundRect(RectF(0f, 0f, w, h), h / 2, h / 2, paint)
+        val r = h / 2 - context.px(4f)
+        val x = h / 2 + (w - h) * at
+        paint.color = Color.argb(40, 0, 0, 0)
+        canvas.drawCircle(x, h / 2 + context.px(1.5f), r, paint)
         paint.color = context.getColor(R.color.tile)
-        val pad = w * 0.22f
-        canvas.drawRoundRect(RectF(pad, h * 0.48f, w - pad, h * 0.8f), r * 0.6f, r * 0.6f, paint)
-        paint.color = context.getColor(R.color.body_deep)
-        val step = (w - 2 * pad) / 4f
-        for (i in 1..3) canvas.drawRect(pad + i * step - context.px(0.7f), h * 0.48f, pad + i * step + context.px(0.7f), h * 0.8f, paint)
+        canvas.drawCircle(x, h / 2, r, paint)
     }
 }
 
-/** The small mark at the card's right: it opens, the way an eject key does. */
-class Eject(context: Context) : View(context) {
+/**
+ * Hearing, large: a dark tile holding water. Its surface is the voice — still while nothing is heard, moving while
+ * the phone reads — and its level how far ahead of speech the phone keeps (half way: as fast as speech).
+ */
+class Water(context: Context) : View(context) {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val dash = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE; color = Color.argb(56, 255, 255, 255); strokeWidth = context.px(1f)
+        pathEffect = DashPathEffect(floatArrayOf(context.px(4f), context.px(4f)), 0f)
+    }
     private val path = Path()
+    private val clip = Path()
+    private var t = 0f
+    private var last = 0L
+    private var shown = 0.35f
+    /** Of the tile's height, how high the water stands. */
+    var level = 0.35f
+    /** Moving: the phone is reading now. */
+    var moving = false
+    var running = false
+        set(value) { field = value; last = 0L; invalidate() }
+    private val radius = context.px(30f)
 
     override fun onDraw(canvas: Canvas) {
+        val now = System.nanoTime()
+        val dt = if (last == 0L) 0f else min(0.05f, (now - last) / 1e9f)
+        last = now
+        t += dt * if (moving) 2.4f else 0.5f
+        shown += (level - shown) * min(1f, dt * 2f)
         val w = width.toFloat()
         val h = height.toFloat()
-        paint.color = context.getColor(R.color.body_deep)
+        paint.color = context.getColor(R.color.water_tile)
+        canvas.drawRoundRect(RectF(0f, 0f, w, h), radius, radius, paint)
+        val dashY = h * 0.47f
+        canvas.drawLine(context.px(16f), dashY, w - context.px(16f), dashY, dash)
+        val top = h * (1f - shown.coerceIn(0.12f, 0.5f))
+        val swell = context.px(if (moving) 7f else 3f)
+        canvas.save()
+        clip.reset()
+        clip.addRoundRect(RectF(0f, 0f, w, h), radius, radius, Path.Direction.CW)
+        canvas.clipPath(clip)
+        surface(canvas, w, h, top - context.px(5f), swell, 1.3f, context.getColor(R.color.water_deep))
+        surface(canvas, w, h, top, swell, 0f, context.getColor(R.color.water))
+        canvas.restore()
+        if (running) postInvalidateOnAnimation()
+    }
+
+    private fun surface(canvas: Canvas, w: Float, h: Float, y: Float, swell: Float, seed: Float, color: Int) {
         path.reset()
-        path.moveTo(w * 0.5f, h * 0.22f)
-        path.lineTo(w * 0.82f, h * 0.58f)
-        path.lineTo(w * 0.18f, h * 0.58f)
+        path.moveTo(0f, h)
+        var x = 0f
+        while (x <= w) {
+            val k = x / w
+            path.lineTo(x, y + sin(k * 7f + t * 1.6f + seed) * swell + sin(k * 3f - t + seed) * swell * 0.6f)
+            x += context.px(6f)
+        }
+        path.lineTo(w, h)
         path.close()
+        paint.color = color
         canvas.drawPath(path, paint)
-        canvas.drawRoundRect(RectF(w * 0.18f, h * 0.68f, w * 0.82f, h * 0.8f), h * 0.05f, h * 0.05f, paint)
     }
 }
 
-/** The speaker grille beside the key: rows of small holes. */
-class Grille(context: Context) : View(context) {
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-
-    override fun onDraw(canvas: Canvas) {
-        paint.color = context.getColor(R.color.body_deep)
-        val gap = context.px(7f)
-        val r = context.px(1.6f)
-        var y = r
-        while (y <= height - r) {
-            var x = r
-            while (x <= width - r) { canvas.drawCircle(x, y, r, paint); x += gap }
-            y += gap
-        }
+/** A sheet of lined paper: under the sentence it is written on, and its correction. */
+fun Context.lined(): Drawable = object : Drawable() {
+    private val paper = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE }
+    private val rule = Paint().apply { color = getColor(R.color.paper_rule); strokeWidth = px(1f) }
+    private val radius = px(14f)
+    override fun draw(canvas: Canvas) {
+        val b = bounds
+        canvas.drawRoundRect(RectF(b), radius, radius, paper)
+        var y = b.top + px(31f)
+        while (y < b.bottom - px(8f)) { canvas.drawLine(b.left + px(10f), y, b.right - px(10f), y, rule); y += px(22f) }
     }
+    override fun setAlpha(alpha: Int) {}
+    override fun setColorFilter(filter: android.graphics.ColorFilter?) {}
+    @Deprecated("Deprecated in Java")
+    override fun getOpacity() = android.graphics.PixelFormat.TRANSLUCENT
+    override fun getOutline(outline: android.graphics.Outline) { outline.setRoundRect(bounds, radius) }
 }
 
-/**
- * The power key: round, coral, standing on its deeper face, with the power mark. Pressed, it goes down onto that face,
- * as a key does; let go, it comes back up.
- */
-@SuppressLint("ClickableViewAccessibility")
-class PowerKey(context: Context) : View(context) {
+/** The small objects of the small tiles, one for each kind of work and for the computer's side and the check. */
+class Thing(context: Context, private val kind: Kind) : View(context) {
+    enum class Kind { WATER, PANES, NOTE, LENS, DIAL }
+
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val mark = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeCap = Paint.Cap.ROUND }
-    private var down = false
-    /** Lit: the phone is lent. */
+    private val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
+    /** The lens: lit while a computer is connected. */
     var lit = false
-        set(value) { field = value; invalidate() }
+        set(value) { if (field != value) { field = value; invalidate() } }
+    /** The dial: how far ahead of speech, of three times. */
+    var amount = 0f
+        set(value) { if (field != value) { field = value; invalidate() } }
 
-    init {
-        isClickable = true
-        setOnTouchListener { _, event ->
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> { down = true; invalidate() }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> { down = false; invalidate() }
+    override fun onDraw(canvas: Canvas) {
+        val s = min(width, height).toFloat()
+        val d = context.px(1f)
+        when (kind) {
+            Kind.WATER -> {
+                val r = RectF(s * 0.12f, s * 0.04f, s * 0.86f, s * 0.96f)
+                paint.color = context.getColor(R.color.water_tile)
+                canvas.drawRoundRect(r, s * 0.2f, s * 0.2f, paint)
+                canvas.save()
+                canvas.clipRect(r.left, r.top + r.height() * 0.58f, r.right, r.bottom)
+                paint.color = context.getColor(R.color.water)
+                canvas.drawRoundRect(r, s * 0.2f, s * 0.2f, paint)
+                canvas.restore()
             }
-            false
+            Kind.PANES -> {
+                paint.color = (context.getColor(R.color.field_apricot_deep) and 0x00FFFFFF) or (0x8C shl 24)
+                canvas.drawRoundRect(RectF(s * 0.02f, s * 0.02f, s * 0.64f, s * 0.64f), s * 0.18f, s * 0.18f, paint)
+                paint.setShadowLayer(d * 4, 0f, d * 2, Color.argb(50, 150, 100, 40))
+                paint.color = Color.argb(240, 255, 255, 255)
+                canvas.drawRoundRect(RectF(s * 0.32f, s * 0.32f, s * 0.94f, s * 0.94f), s * 0.18f, s * 0.18f, paint)
+                paint.clearShadowLayer()
+            }
+            Kind.NOTE -> {
+                paint.setShadowLayer(d * 4, 0f, d * 2, Color.argb(45, 120, 80, 70))
+                paint.color = Color.WHITE
+                val r = RectF(s * 0.12f, s * 0.08f, s * 0.82f, s * 0.96f)
+                canvas.drawRoundRect(r, s * 0.12f, s * 0.12f, paint)
+                paint.clearShadowLayer()
+                paint.color = context.getColor(R.color.paper_rule)
+                var y = r.top + s * 0.28f
+                while (y < r.bottom - s * 0.1f) { canvas.drawRect(r.left + s * 0.1f, y, r.right - s * 0.1f, y + d, paint); y += s * 0.18f }
+                paint.color = context.getColor(R.color.ink_red)
+                canvas.drawCircle(r.right - s * 0.02f, r.top + s * 0.02f, s * 0.11f, paint)
+            }
+            Kind.LENS -> {
+                paint.setShadowLayer(d * 4, 0f, d * 2, Color.argb(60, 0, 0, 0))
+                paint.color = context.getColor(R.color.lens)
+                canvas.drawCircle(s / 2, s / 2, s * 0.46f, paint)
+                paint.clearShadowLayer()
+                paint.color = context.getColor(R.color.lens_inner)
+                canvas.drawCircle(s / 2, s / 2, s * 0.29f, paint)
+                paint.color = context.getColor(if (lit) R.color.water else R.color.lens)
+                if (lit) paint.setShadowLayer(s * 0.16f, 0f, 0f, context.getColor(R.color.water))
+                canvas.drawCircle(s / 2, s / 2, s * 0.12f, paint)
+                paint.clearShadowLayer()
+            }
+            Kind.DIAL -> {
+                paint.color = context.getColor(R.color.dial)
+                canvas.drawCircle(s / 2, s / 2, s * 0.46f, paint)
+                stroke.color = context.getColor(R.color.dial_edge); stroke.strokeWidth = d; stroke.strokeCap = Paint.Cap.BUTT
+                canvas.drawCircle(s / 2, s / 2, s * 0.46f, stroke)
+                // The red mark where speech is: once as fast, a third of the way round.
+                val mark = (-210f + 240f / 3f) * PI.toFloat() / 180f
+                paint.color = context.getColor(R.color.ink_red)
+                canvas.drawCircle(s / 2 + cos(mark) * s * 0.33f, s / 2 + sin(mark) * s * 0.33f, s * 0.055f, paint)
+                val a = (-210f + 240f * amount.coerceIn(0f, 1f)) * PI.toFloat() / 180f
+                stroke.color = context.getColor(R.color.ink); stroke.strokeWidth = s * 0.06f; stroke.strokeCap = Paint.Cap.ROUND
+                canvas.drawLine(s / 2, s / 2, s / 2 + cos(a) * s * 0.32f, s / 2 + sin(a) * s * 0.32f, stroke)
+            }
         }
     }
-
-    override fun onDraw(canvas: Canvas) {
-        val depth = context.px(5f)
-        val r = min(width.toFloat(), height - depth) / 2f
-        val cx = width / 2f
-        val top = if (down) depth * 0.8f else 0f
-        paint.color = context.getColor(R.color.key_deep)
-        canvas.drawCircle(cx, r + depth, r, paint)
-        paint.color = context.getColor(R.color.key)
-        canvas.drawCircle(cx, r + top, r, paint)
-        mark.color = context.getColor(R.color.tile)
-        mark.strokeWidth = r * 0.12f
-        val m = r * 0.38f
-        val oval = RectF(cx - m, r + top - m, cx + m, r + top + m)
-        canvas.drawArc(oval, -60f, 300f, false, mark)
-        canvas.drawLine(cx, r + top - m * 1.25f, cx, r + top - m * 0.15f, mark)
-    }
 }
 
-/**
- * The laptop of the "connect a device" widget, drawn straight on (one drawn at an angle read as crooked), with the
- * phone lying beside it. Faint while no computer uses the phone; solid, with the phone's light green, while one does.
- */
-class Laptop(context: Context) : View(context) {
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    var linked = false
-        set(value) {
-            field = value
-            // Faint as a whole: faded colour by colour, the laptop showed through the phone lying on it.
-            alpha = if (value) 1f else 0.5f
-            invalidate()
-        }
-
-    init { alpha = 0.5f }
-
-    override fun onDraw(canvas: Canvas) {
-        val w = width.toFloat()
-        val h = height.toFloat()
-        val s = min(w / 1.6f, h)
-        val left = (w - s * 1.5f) / 2f
-        val top = (h - s) / 2f + s * 0.06f
-        fun color(id: Int) = context.getColor(id)
-        // The lid: frame and screen.
-        paint.color = color(R.color.laptop)
-        canvas.drawRoundRect(RectF(left + s * 0.1f, top, left + s * 1.05f, top + s * 0.66f), s * 0.07f, s * 0.07f, paint)
-        paint.color = color(R.color.laptop_screen)
-        canvas.drawRoundRect(RectF(left + s * 0.17f, top + s * 0.07f, left + s * 0.98f, top + s * 0.59f), s * 0.04f, s * 0.04f, paint)
-        // The base, a slab wider than the lid, on its deeper face.
-        paint.color = color(R.color.laptop_deep)
-        canvas.drawRoundRect(RectF(left, top + s * 0.68f, left + s * 1.15f, top + s * 0.8f), s * 0.05f, s * 0.05f, paint)
-        paint.color = color(R.color.laptop)
-        canvas.drawRoundRect(RectF(left, top + s * 0.66f, left + s * 1.15f, top + s * 0.76f), s * 0.05f, s * 0.05f, paint)
-        // The phone beside it, lying down, with its light.
-        paint.color = color(R.color.shell_deep)
-        canvas.drawRoundRect(RectF(left + s * 0.92f, top + s * 0.5f, left + s * 1.5f, top + s * 0.86f), s * 0.07f, s * 0.07f, paint)
-        paint.color = color(R.color.shell)
-        canvas.drawRoundRect(RectF(left + s * 0.92f, top + s * 0.46f, left + s * 1.5f, top + s * 0.81f), s * 0.07f, s * 0.07f, paint)
-        paint.color = context.getColor(if (linked) R.color.good else R.color.shell_deep)
-        canvas.drawRoundRect(RectF(left + s * 1.0f, top + s * 0.6f, left + s * 1.14f, top + s * 0.65f), s * 0.03f, s * 0.03f, paint)
-    }
-}
-
-/** The closed toolbox of the self-check widget: a lid, an orange band, and the red catch on its side. */
-class Toolbox(context: Context) : View(context) {
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-
-    override fun onDraw(canvas: Canvas) {
-        val w = width.toFloat()
-        val h = height.toFloat()
-        val bw = min(w * 0.82f, h * 1.75f)
-        val bh = bw * 0.5f
-        val left = (w - bw) / 2f
-        val top = (h - bh) / 2f
-        val r = bh * 0.22f
-        paint.color = context.getColor(R.color.shell_deep)
-        canvas.drawRoundRect(RectF(left, top + bh * 0.1f, left + bw, top + bh), r, r, paint)
-        paint.color = context.getColor(R.color.shell)
-        canvas.drawRoundRect(RectF(left, top, left + bw, top + bh * 0.9f), r, r, paint)
-        paint.color = context.getColor(R.color.box)
-        canvas.drawRect(left, top + bh * 0.36f, left + bw, top + bh * 0.54f, paint)
-        paint.color = context.getColor(R.color.key)
-        canvas.drawRoundRect(RectF(left + bw * 0.93f, top + bh * 0.27f, left + bw * 1.04f, top + bh * 0.63f), bh * 0.06f, bh * 0.06f, paint)
-    }
-}
-
-/** How far a self-check has come, in the toolbox: a groove in the box's pale, filled with its orange. */
+/** How far a self-check has come: a thin groove, filled with the coral of the key. */
 class Bar(context: Context) : View(context) {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     var done = 0f
         set(value) { field = value.coerceIn(0f, 1f); invalidate() }
 
     override fun onMeasure(widthSpec: Int, heightSpec: Int) =
-        setMeasuredDimension(MeasureSpec.getSize(widthSpec), resolveSize(context.px(8), heightSpec))
+        setMeasuredDimension(MeasureSpec.getSize(widthSpec), resolveSize(context.px(6), heightSpec))
 
     override fun onDraw(canvas: Canvas) {
         val r = height / 2f
-        paint.color = context.getColor(R.color.shell)
+        paint.color = context.getColor(R.color.switch_off)
         canvas.drawRoundRect(RectF(0f, 0f, width.toFloat(), height.toFloat()), r, r, paint)
         if (done <= 0f) return
-        paint.color = context.getColor(R.color.box)
+        paint.color = context.getColor(R.color.key)
         canvas.drawRoundRect(RectF(0f, 0f, max(height.toFloat(), width * done), height.toFloat()), r, r, paint)
     }
-}
-
-/** `a` toward `b` by `t`. */
-fun blend(a: Int, b: Int, t: Float): Int {
-    fun ch(shift: Int) = (((a shr shift) and 0xFF) * (1 - t) + ((b shr shift) and 0xFF) * t).toInt() and 0xFF
-    return (0xFF shl 24) or (ch(16) shl 16) or (ch(8) shl 8) or ch(0)
 }

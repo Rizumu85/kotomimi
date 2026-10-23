@@ -36,6 +36,25 @@ object Chat {
      * The engine is always asked for the answer as it is written, whatever the computer asked: that is how the
      * door knows the engine is alive, and can stop it for a computer that has gone.
      */
+    /**
+     * The sentence a request asks about, for the screen: the last thing the person said, without the instructions
+     * a translation prompt puts before it (`translatorRequest` in the desktop app: they end in a line break, the
+     * sentence is the last line). Null where there is none.
+     */
+    fun saidIn(body: String): String? = runCatching {
+        val messages = JSONObject(body).getJSONArray("messages")
+        (messages.length() - 1 downTo 0).map { messages.getJSONObject(it) }.firstOrNull { it.optString("role") == "user" }
+            ?.optString("content")?.trim()?.substringAfterLast('\n')?.trim()?.takeIf { it.isNotEmpty() }
+    }.getOrNull()
+
+    /** The language a translation is asked for, as its prompt names it (翻译为中文, into English); null where none is named. */
+    fun intoIn(body: String): String? {
+        val text = runCatching { JSONObject(body).getJSONArray("messages").toString() }.getOrNull() ?: return null
+        return INTO.find(text)?.groupValues?.drop(1)?.firstOrNull { it.isNotEmpty() }
+    }
+
+    private val INTO = Regex("翻译[为成]([\\p{IsHan}]{1,6}?)[，,：:\\\\]|into ([A-Z][a-z]+)")
+
     fun requestOf(body: ByteArray, lent: List<Model>): Request {
         val json = runCatching { JSONObject(String(body, Charsets.UTF_8)) }.getOrNull() ?: return Refused(400, "The request is not JSON.")
         val named = json.opt("model") as? String ?: return Refused(400, "The request names no model.")

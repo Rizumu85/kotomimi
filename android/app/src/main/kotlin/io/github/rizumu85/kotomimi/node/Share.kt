@@ -80,6 +80,8 @@ class Share(private val context: Context, private val engine: Engine, private va
     @Volatile private var stopping = false
     @Volatile private var lastUse = 0L
     @Volatile private var lastPeer: String? = null
+    /** The sound of the reading under way, once its length is known: for what the screen says of recognition. */
+    @Volatile private var soundMs = 0L
     @Volatile private var lastTask: Task? = null
     @Volatile private var startWith: Llama.Build? = null
     private val choices = Choices(context)
@@ -158,6 +160,7 @@ class Share(private val context: Context, private val engine: Engine, private va
      */
     fun start(model: Model?, startWith: Llama.Build? = null) {
         stopping = false
+        Sharing.forget()
         this.model = model
         this.startWith = startWith
         tell(Phase.LOADING)
@@ -483,8 +486,15 @@ class Share(private val context: Context, private val engine: Engine, private va
                 }
                 val onWork = { lastTask = Task.HEAR; lastUse = System.currentTimeMillis() }
                 val type = headers["content-type"].orEmpty()
+                val began = System.currentTimeMillis()
+                soundMs = 0L
                 val (status, json) = if (lent.reader == Reader.LLAMA_CPP) readByChat(lent, type, body, gone, onWork) else readByAudioCpp(lent, type, body, gone, onWork)
                 lastUse = System.currentTimeMillis()
+                // What it heard, for the screen: a reading of nothing is no work to show.
+                if (status == 200 && soundMs > 0) {
+                    val heard = runCatching { JSONObject(json).optString("text") }.getOrNull()?.trim()?.takeIf { it.isNotEmpty() }
+                    Sharing.work(Task.HEAR).done(lastUse - began, null, heard, soundMs = soundMs)
+                }
                 reply(out, status, json, allow)
             }
             method == "POST" && (path == "/v1/chat/completions" || path == "/chat/completions") -> chat(client, input, out, headers, allow)
@@ -605,13 +615,14 @@ class Share(private val context: Context, private val engine: Engine, private va
                     written.status == 400 -> reply(out, 400, errorOf("The model did not take the request: ${broke.orEmpty()}"), allow)
                     written.status != 200 -> reply(out, 502, errorOf("The engine answered HTTP ${written.status}: ${broke.orEmpty()}"), allow)
                     !asked.stream && broke != null -> reply(out, 502, errorOf("The engine broke off: $broke"), allow)
-                    !asked.stream -> reply(out, 200, Chat.wholeOf(id, created, asked.model, written), allow)
+                    !asked.stream -> reply(out, 200, Chat.wholeOf(id, created, asked.model, written), allow).also { tell(asked, written) }
                     else -> {
                         if (!begun) begin()
                         if (broke != null) event(errorOf(broke))
                         event(Chat.pieceOf(id, created, asked.model, JSONObject(), written.finish ?: "stop", written.timings))
                         out.write("data: [DONE]\n\n".toByteArray())
                         out.flush()
+                        if (broke == null) tell(asked, written)
                     }
                 }
             } finally {
@@ -620,6 +631,12 @@ class Share(private val context: Context, private val engine: Engine, private va
         } finally {
             asking.decrementAndGet()
         }
+    }
+
+    /** A text model's answer, for the screen: what it was asked, what it wrote, how long that took. */
+    private fun tell(asked: Chat.Asked, written: Chat.Reply) {
+        val answer = written.text.trim().takeIf { it.isNotEmpty() } ?: return
+        Sharing.work(asked.model.task).done(written.tookMs, Chat.saidIn(asked.body), answer, into = Chat.intoIn(asked.body))
     }
 
     /** The request's head, up to the empty line; null when it is not one. */
@@ -730,6 +747,7 @@ class Share(private val context: Context, private val engine: Engine, private va
         val ms = wavMsOf(sound) ?: return 400 to errorOf("The file is not a WAV recording.")
         // Nothing to hear: llama.cpp would refuse it as a file it cannot read.
         if (ms < LEAST_MS) return 200 to TEXT_OF_NOTHING
+        soundMs = ms.toLong()
         val seconds = ms / 1000.0
         if (seconds > MOST_SECONDS) return 413 to errorOf("The sound is too long: this phone reads at most $MOST_SECONDS seconds at once.")
         val begun = languageOf(form.fields["language"])?.let { "language $it${Llama.TEXT_MARK}" }
@@ -793,6 +811,7 @@ class Share(private val context: Context, private val engine: Engine, private va
         val ms = wavMsOf(sound) ?: return 400 to errorOf("The file is not a WAV recording.")
         // Nothing to hear: audio.cpp would refuse it as an incomplete file.
         if (ms < LEAST_MS) return 200 to TEXT_OF_NOTHING
+        soundMs = ms.toLong()
         if (ms / 1000.0 > MOST_SECONDS_AUDIO_CPP) return 413 to errorOf("The sound is too long: this phone reads at most $MOST_SECONDS_AUDIO_CPP seconds at once.")
         val said = form.fields["language"]?.trim().orEmpty()
         val language = when {

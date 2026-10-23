@@ -16,8 +16,53 @@ import android.os.Looper
 import android.os.PowerManager
 import java.util.concurrent.Executors
 
+/**
+ * What the phone has done for computers of one kind of work since it was last lent: how many, how long they took,
+ * and the last one — what it was asked and what it answered. The screen shows it; it is kept in memory only, and
+ * forgotten when sharing starts again.
+ */
+class Work {
+    @Volatile var count = 0
+    @Volatile var spentMs = 0L
+    /** For recognition: the sound read, against `spentMs`, says how far ahead of speech the phone keeps. */
+    @Volatile var soundMs = 0L
+    @Volatile var said: String? = null
+    @Volatile var answer: String? = null
+    /** For translation: the language it was asked to write in, in its own words (中文, 日语). */
+    @Volatile var into: String? = null
+    /** When the last was done, and how long it took: the first of a run also waits for its model to load. */
+    @Volatile var at = 0L
+    @Volatile var lastMs = 0L
+
+    fun done(tookMs: Long, said: String?, answer: String?, soundMs: Long = 0L, into: String? = null) {
+        count += 1
+        spentMs += tookMs
+        this.soundMs += soundMs
+        if (said != null) this.said = said
+        if (answer != null) this.answer = answer
+        if (into != null) this.into = into
+        at = System.currentTimeMillis()
+        lastMs = tookMs
+    }
+}
+
 /** What sharing is doing now, for whoever shows it: the service writes it, the screen reads it. */
 object Sharing {
+    private val works = java.util.concurrent.ConcurrentHashMap<Task, Work>().apply { for (task in Task.values()) put(task, Work()) }
+
+    /** What has been done of this kind of work since sharing began. */
+    fun work(task: Task): Work = works.getValue(task)
+
+    /** When sharing last began. */
+    @Volatile var since = 0L
+        private set
+
+    /** Sharing begins again: what was done before is not this time's. */
+    fun forget() {
+        since = System.currentTimeMillis()
+        for (task in Task.values()) works[task] = Work()
+    }
+
     private val main = Handler(Looper.getMainLooper())
 
     @Volatile var state = Share.State(Share.Phase.OFF)
@@ -146,16 +191,16 @@ class ShareService : Service() {
             // The engine is not named: to the person it is one model (the self-check, not they, picks the engine).
             val by = ""
             return when (state.phase) {
-                Share.Phase.OFF -> "没有开启" to "按下面的键，把这台手机借给电脑"
-                Share.Phase.LOADING -> "正在装入" to (state.model?.name.orEmpty() + by)
-                Share.Phase.WAITING -> "等电脑连上" to ((state.address?.let { "地址 $it" } ?: "这台手机没连 Wi-Fi") + by)
+                Share.Phase.OFF -> "共享未启用" to "启用后，电脑即可使用这台手机上的模型"
+                Share.Phase.LOADING -> "正在加载" to (state.model?.name.orEmpty() + by)
+                Share.Phase.WAITING -> "等待电脑连接" to ((state.address?.let { "本机 $it" } ?: "这台手机未连接 Wi-Fi") + by)
                 // (The engine named is the recognizer's: a text model's answer is not its work, and is told without it.)
                 Share.Phase.WORKING -> when (state.task) {
-                    Task.TRANSLATE -> "正在翻译" to "来自 ${state.peer ?: "一台电脑"}"
-                    Task.COACH -> "正在写反馈" to "来自 ${state.peer ?: "一台电脑"}"
-                    else -> "正在识别" to "来自 ${state.peer ?: "一台电脑"}$by"
+                    Task.TRANSLATE -> "正在翻译" to "来自 ${state.peer ?: "电脑"}"
+                    Task.COACH -> "正在生成语法反馈" to "来自 ${state.peer ?: "电脑"}"
+                    else -> "正在识别语音" to "来自 ${state.peer ?: "电脑"}$by"
                 }
-                Share.Phase.FAILED -> "没开起来" to (state.message ?: "")
+                Share.Phase.FAILED -> "未能启用共享" to (state.message ?: "")
             }
         }
     }

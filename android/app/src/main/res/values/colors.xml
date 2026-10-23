@@ -1,36 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The apricot-and-mint look chosen from the mockup (2026-10-10; values from `.dev/phone-node/phone.css`, `[data-look="apricot"]`). -->
+<!-- The look (Look.kt): the OriginOS 1.0 desktop the user pointed to, in the apricot-and-mint family chosen on 2026-10-10. -->
 <resources>
-    <!-- The room: a pale wall, and the rings of a sound spreading through it, palest outside. -->
-    <color name="room_3">#F3F2EA</color>
-    <color name="room_4">#FBEEDA</color>
-    <color name="room_2">#FBE3B9</color>
-    <color name="room_1">#F8CB86</color>
+    <!-- The wallpaper: a pale wall, and its two fields, coloured by what the phone is doing. -->
+    <color name="wall">#F2EFE8</color>
+    <color name="field_mint_pale">#DCEAE2</color>
+    <color name="field_mint">#CFE7DA</color>
+    <color name="field_blue">#DCE6EE</color>
+    <color name="field_apricot">#F8DDB4</color>
+    <color name="field_apricot_deep">#F0AA5A</color>
+    <color name="field_coral">#F3D5CC</color>
+    <color name="field_lilac">#E6E0F0</color>
+    <!-- The widgets. -->
     <color name="tile">#FFFDF8</color>
-    <color name="body">#BDE5CF</color>
-    <color name="body_deep">#8ECAAC</color>
-    <color name="body_slot">#A2D6BA</color>
-    <color name="card_edge">#D3E6DB</color>
-    <color name="screen">#1F3D36</color>
-    <color name="screen_rim">#17302A</color>
-    <color name="screen_ink">#EEF7E3</color>
-    <color name="screen_ink_2">#B5D0C0</color>
-    <color name="screen_ink_3">#9FC0AF</color>
-    <color name="led_off">#3F6558</color>
-    <color name="glow">#D8F2A2</color>
-    <color name="key">#F0604A</color>
+    <color name="switch_off">#D9D4CA</color>
+    <color name="water_tile">#22343F</color>
+    <color name="water">#7FD3AE</color>
+    <color name="water_deep">#3E8F74</color>
+    <color name="water_number">#EAF2EE</color>
+    <color name="water_sub">#A9BDC4</color>
+    <color name="glass_tile">#F4E3C8</color>
+    <color name="glass_number">#3A3026</color>
+    <color name="glass_sub">#8A7660</color>
+    <color name="paper_number">#3A2E2C</color>
+    <color name="paper_sub">#8E7A76</color>
+    <color name="paper_tile">#FBF7F0</color>
+    <color name="paper_rule">#F0E7E2</color>
+    <color name="lens">#2A3238</color>
+    <color name="lens_inner">#3E4A52</color>
+    <color name="dial">#F4F2EE</color>
+    <color name="dial_edge">#E3DFD7</color>
+    <color name="key">#E86A52</color>
     <color name="key_deep">#C4432F</color>
-    <color name="box">#F5AE55</color>
-    <color name="box_deep">#D98C33</color>
-    <color name="box_pale">#FFF4E0</color>
-    <color name="shell">#FCE9C8</color>
-    <color name="shell_deep">#EBCB95</color>
-    <color name="laptop">#4A74D0</color>
-    <color name="laptop_deep">#365AAB</color>
-    <color name="laptop_screen">#A9C8F8</color>
+    <color name="ink_red">#E35D45</color>
     <color name="ink">#1F2A30</color>
-    <color name="ink_2">#66727A</color>
+    <color name="ink_2">#5F6B72</color>
+    <color name="ink_3">#8A949A</color>
     <color name="good">#2F8457</color>
-    <!-- The scrim over the page while a box is open. -->
+    <!-- The icon's background, and the scrim over the page while a panel is open. -->
+    <color name="room_2">#FBE3B9</color>
     <color name="scrim">#59000000</color>
 </resources>
