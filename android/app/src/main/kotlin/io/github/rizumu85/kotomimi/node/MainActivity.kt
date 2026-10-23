@@ -482,7 +482,7 @@ class MainActivity : Activity() {
         }
         val (stageDp, cellDp, gapDp) = when (shape) {
             Shape.PHONE -> Triple(214, 128, 12)
-            Shape.SHORT -> Triple(184, 118, 10)
+            Shape.SHORT -> Triple(184, 108, 10)
             Shape.SIDE -> Triple(150, 70, 10)
             Shape.TABLET -> Triple(260, 136, 14)
             Shape.WIDE -> Triple((h - 150).coerceIn(260, 420), 128, 14)
@@ -495,11 +495,14 @@ class MainActivity : Activity() {
         modelsBlock.minimumHeight = px(cellDp)
         // On its side the tiles lie flat, and the page keeps less room above and below: all of it is to show at once.
         val flat = shape == Shape.SIDE
-        for (tile in works.values + listOf(lens, dial)) lay(tile, flat)
-        layModels(flat)
+        // A short phone's small tiles stand a little closer, so that its page, not lent, fits the screen at the same
+        // size as lent (the user, 2026-10-23: drawn smaller to fit, it jumped in size as sharing was switched on).
+        val snug = shape == Shape.SHORT
+        for (tile in works.values + listOf(lens, dial)) lay(tile, flat, snug)
+        layModels(flat, snug)
         shareBlock.minimumHeight = px(if (flat) 60 else 76)
         shareBlock.setPadding(px(20), px(if (flat) 10 else 14), px(16), px(if (flat) 10 else 14))
-        (leftColumn.parent as? View)?.setPadding(px(PAGE_SIDE), px(if (flat) 10 else PAGE_TOP), px(PAGE_SIDE), px(if (flat) 14 else PAGE_FOOT))
+        (leftColumn.parent as? View)?.setPadding(px(PAGE_SIDE), px(if (flat) 10 else PAGE_TOP), px(PAGE_SIDE), px(if (flat) 14 else if (snug) 12 else PAGE_FOOT))
         // On its side the status's first word stands level with the top of the switch beside it.
         (statusHead.layoutParams as? LinearLayout.LayoutParams)?.topMargin = px(if (flat) 0 else 12)
         // The status keeps the room of its tallest — the update's pill beside the word, a number at full size — so what
