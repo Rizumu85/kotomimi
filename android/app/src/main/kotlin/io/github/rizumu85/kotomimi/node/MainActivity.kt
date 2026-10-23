@@ -13,6 +13,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
+import android.text.TextUtils
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -82,6 +83,8 @@ class MainActivity : Activity() {
     // In the models box.
     private lateinit var rule: TextView
     private val rows = HashMap<Model, Row>()
+    /** The lent row's mark: made once, since the screen is redrawn every time sharing says how it stands. */
+    private val lentMark by lazy { flat(R.color.box_pale, 16) }
 
     // In the toolbox.
     private lateinit var checkKey: TextView
@@ -230,6 +233,9 @@ class MainActivity : Activity() {
 
     override fun onStop() {
         shown = false
+        // Nothing moves on a screen nobody sees: `refresh` sets it going again.
+        room.working = false
+        dots.show(Dots.Mode.OFF)
         Sharing.listener = null
         Installing.listener = null
         super.onStop()
@@ -341,7 +347,7 @@ class MainActivity : Activity() {
         top.addView(led, LinearLayout.LayoutParams(px(12), px(12)))
         screen.addView(top)
         title = text("", 28f, R.color.screen_ink, bold = true)
-        sub = text("", 13.5f, R.color.screen_ink_2).apply { maxLines = 2 }
+        sub = text("", 13.5f, R.color.screen_ink_2).apply { maxLines = 2; ellipsize = TextUtils.TruncateAt.END }
         dots = Dots(this)
         screen.addView(title, spaced(top = 14))
         screen.addView(sub, spaced(top = 4))
@@ -361,8 +367,8 @@ class MainActivity : Activity() {
         }
         card.addView(Chip(this), LinearLayout.LayoutParams(px(26), px(34)))
         val words = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        cardName = text("", 16f, R.color.ink, bold = true).apply { maxLines = 1 }
-        cardSub = text("", 12.5f, R.color.ink_2).apply { maxLines = 1 }
+        cardName = text("", 16f, R.color.ink, bold = true).apply { maxLines = 1; ellipsize = TextUtils.TruncateAt.END }
+        cardSub = text("", 12.5f, R.color.ink_2).apply { maxLines = 1; ellipsize = TextUtils.TruncateAt.END }
         words.addView(cardName)
         words.addView(cardSub, spaced(top = 1))
         card.addView(words, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f).apply { leftMargin = px(12); rightMargin = px(8) })
@@ -393,7 +399,7 @@ class MainActivity : Activity() {
             setOnClickListener { onTouch() }
             addView(thing, LinearLayout.LayoutParams(MATCH_PARENT, px(70)))
             addView(text(name, 16f, R.color.ink, bold = true), spaced(top = 12))
-            addView(state.apply { maxLines = 1 }, spaced(top = 2))
+            addView(state.apply { maxLines = 1; ellipsize = TextUtils.TruncateAt.END }, spaced(top = 2))
         }
 
     // ── The boxes ───────────────────────────────────────────────────────────────────────────────────────────────
@@ -434,6 +440,11 @@ class MainActivity : Activity() {
     private fun open(which: View) {
         if (opened === which) return
         close(at = false)
+        // Still on its way out, from a close a moment ago: taken off the page now, as it was before it opened.
+        which.animate().cancel()
+        (which.parent as? ViewGroup)?.removeView(which)
+        which.translationY = 0f
+        ((which as ViewGroup).getChildAt(1)).let { it.layoutParams = (it.layoutParams as LinearLayout.LayoutParams).apply { height = WRAP_CONTENT } }
         val shade = View(this).apply {
             setBackgroundColor(getColor(R.color.scrim))
             setOnClickListener { close() }
@@ -448,7 +459,9 @@ class MainActivity : Activity() {
         (which as ViewGroup).getChildAt(1).let { tray ->
             ((tray as ViewGroup).getChildAt(0) as ScrollView).layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
             tray.post {
-                val most = (room * 0.86f).toInt() - (which as ViewGroup).getChildAt(0).height
+                // Not laid out yet (a box asked for before the first layout): as high as it is.
+                if (room <= 0) return@post
+                val most = maxOf(px(160), (room * 0.86f).toInt() - (which as ViewGroup).getChildAt(0).height)
                 if (tray.height > most) tray.layoutParams = (tray.layoutParams as LinearLayout.LayoutParams).apply { height = most }
                 tray.requestLayout()
             }
@@ -649,7 +662,7 @@ class MainActivity : Activity() {
             // The second engine's row of a model that has two is offered only once it is here: to the person they
             // are one model, and the self-check, not they, decides between the two.
             row.view.visibility = if (model.twin && model.reader == Reader.LLAMA_CPP && !store.has(model) && busy !== model) View.GONE else View.VISIBLE
-            row.view.background = if (model === lent && lendable.size > 1) flat(R.color.box_pale, 16) else null
+            row.view.background = if (model === lent && lendable.size > 1) lentMark else null
             if (busy !== model) {
                 // What a row is good for, where that is known; for a model in two rows, which of the two it is.
                 val whose = model.note ?: twinWords(model)
