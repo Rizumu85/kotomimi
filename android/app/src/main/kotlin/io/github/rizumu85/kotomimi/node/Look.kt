@@ -58,8 +58,10 @@ enum class Mood { IDLE, HEAR, TRANSLATE, COACH }
  * red ink, and a touch on it rings out from the finger. The page scrolling moves the fields a little behind it, and
  * the dots less still: a grid held further back. (Dots in place of a grain the user took for them, 2026-10-23: a
  * touch of the technical against the soft fields.) The grid is not everywhere: it shows in a few soft pools of light
- * that wander slowly — and where a finger touches, and where work was just done — and fades out between them, so
- * the wall has places to look at and places that fall away (the user, the same day: "主次分明").
+ * in the places the page leaves empty (`free`, kept by `MainActivity`: beside the large number, under the tiles),
+ * wandering a little there — and where a finger touches, and where work was just done — and fades out between them,
+ * so the wall has places to look at and places that fall away, and is never busy behind writing or a tile (the user,
+ * the same day: "主次分明", and not where something stands in front).
  */
 class Wall(context: Context) : View(context) {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -67,6 +69,9 @@ class Wall(context: Context) : View(context) {
     private val grid = BitmapShader(dotTile(), Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
     private val pool = Paint(Paint.ANTI_ALIAS_FLAG)
     private val gridAt = android.graphics.Matrix()
+    /** The places the page leaves empty, in the wall's own pixels: where the grid's pools of light stand. */
+    var free: List<android.graphics.RectF> = emptyList()
+
     /** Pools of light the grid shows in for a while: where a finger touched, where work was just done. */
     private class Glow(val x: Float, val y: Float, var age: Float = 0f)
     private val glows = ArrayList<Glow>()
@@ -174,10 +179,14 @@ class Wall(context: Context) : View(context) {
         gridAt.setTranslate(t * context.px(5f), t * context.px(3f) - scrolled * 0.05f)
         grid.setLocalMatrix(gridAt)
         // Two pools wander over the wall, one high and one low; each glow swells and fades.
-        // Sized by the wall's short side: on a phone on its side two pools by its width covered all of it.
+        // A pool in each of the two largest empty places, wandering a little within it, as large as the place.
         val side = min(w, h)
-        lightPool(canvas, w * (0.3f + 0.22f * sin(t * 0.23f)), h * (0.22f + 0.1f * cos(t * 0.31f)), side * 0.6f, 1f)
-        lightPool(canvas, w * (0.72f + 0.2f * cos(t * 0.19f + 1f)), h * (0.7f + 0.12f * sin(t * 0.27f + 2f)), side * 0.48f, 0.75f)
+        free.sortedByDescending { it.width() * it.height() }.take(2).forEachIndexed { i, place ->
+            val cx = place.centerX() + place.width() * 0.18f * sin(t * 0.21f + i * 2f)
+            val cy = place.centerY() + place.height() * 0.18f * cos(t * 0.17f + i * 3f)
+            val r = (maxOf(place.width(), place.height()) * 0.7f).coerceIn(side * 0.18f, side * 0.6f)
+            lightPool(canvas, cx, cy, r, if (i == 0) 1f else 0.7f)
+        }
         for (g in glows) {
             val k = g.age / GLOW_LASTS
             lightPool(canvas, g.x, g.y, side * (0.18f + 0.3f * k), sin(k * PI.toFloat()))

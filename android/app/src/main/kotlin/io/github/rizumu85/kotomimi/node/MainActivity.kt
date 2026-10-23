@@ -97,12 +97,14 @@ class MainActivity : Activity() {
     private lateinit var sheet: View
 
     // The small tiles.
-    private class Small(val view: View, val state: TextView, val name: TextView, val sub: TextView, val thing: Thing)
+    private class Small(val view: View, val state: TextView, val name: TextView, val sub: TextView, val thing: Thing, val words: View)
     private lateinit var works: Map<Task, Small>
     private lateinit var grid: TileGrid
     private lateinit var lens: Small
     private lateinit var dial: Small
     private lateinit var modelsSub: TextView
+    private lateinit var modelsName: TextView
+    private lateinit var modelsThings: LinearLayout
 
     // The panels, made once and laid over the page when opened.
     private lateinit var modelsBox: View
@@ -410,7 +412,7 @@ class MainActivity : Activity() {
             isVerticalScrollBarEnabled = false
             overScrollMode = View.OVER_SCROLL_NEVER
             addView(columns)
-            setOnScrollChangeListener { _, _, y, _, _ -> wall.scrolled = y.toFloat() }
+            setOnScrollChangeListener { _, _, y, _, _ -> wall.scrolled = y.toFloat(); placePools() }
         }
         // A touch on the wallpaper — between the tiles — rings out from the finger.
         val ring = View.OnTouchListener { _, event ->
@@ -436,6 +438,7 @@ class MainActivity : Activity() {
                 bars = Bars(top, bottom)
                 insets
             }
+            viewTreeObserver.addOnGlobalLayoutListener { placePools() }
         }
         return page
     }
@@ -475,7 +478,7 @@ class MainActivity : Activity() {
         val (stageDp, cellDp, gapDp) = when (shape) {
             Shape.PHONE -> Triple(214, 128, 12)
             Shape.SHORT -> Triple(184, 118, 10)
-            Shape.SIDE -> Triple((h - 170).coerceIn(170, 260), 124, 10)
+            Shape.SIDE -> Triple((h - 150).coerceIn(150, 280), 70, 8)
             Shape.TABLET -> Triple(260, 136, 14)
             Shape.WIDE -> Triple((h - 150).coerceIn(260, 420), 128, 14)
         }
@@ -485,6 +488,13 @@ class MainActivity : Activity() {
         grid.gap = px(gapDp)
         grid.columns = if (shape == Shape.TABLET) 4 else 2
         modelsBlock.minimumHeight = px(cellDp)
+        // On its side the tiles lie flat, and the page keeps less room above and below: all of it is to show at once.
+        val flat = shape == Shape.SIDE
+        for (tile in works.values + listOf(lens, dial)) lay(tile, flat)
+        layModels(flat)
+        shareBlock.minimumHeight = px(if (flat) 60 else 76)
+        shareBlock.setPadding(px(20), px(if (flat) 10 else 14), px(16), px(if (flat) 10 else 14))
+        (leftColumn.parent as? View)?.setPadding(px(PAGE_SIDE), px(if (flat) 4 else PAGE_TOP), px(PAGE_SIDE), px(if (flat) 8 else PAGE_FOOT))
 
         for (view in listOf(statusBlock, shareBlock, stage, grid, modelsBlock)) (view.parent as? ViewGroup)?.removeView(view)
         for (column in listOf(leftColumn, rightColumn, thirdColumn)) column.removeAllViews()
@@ -519,6 +529,34 @@ class MainActivity : Activity() {
         // On a wide screen the columns are not even: the large tile's has the most room.
         (rightColumn.layoutParams as? LinearLayout.LayoutParams)?.weight = if (shape == Shape.WIDE) 1.3f else 1f
         bigNumber.textSize = if (bigNumber.text.any { it.isDigit() }) bigSize else bigSize * 0.7f
+    }
+
+    /**
+     * The places the page leaves empty, for the wallpaper's pools of light (`Wall.free`): beside the status's word and
+     * number, as far as the column goes; and under each column's last tile, to the foot of the screen.
+     */
+    private fun placePools() {
+        if (page.width == 0) return
+        val origin = IntArray(2).also { page.getLocationInWindow(it) }
+        fun rectOf(view: View): android.graphics.RectF {
+            val at = IntArray(2).also { view.getLocationInWindow(it) }
+            val x = (at[0] - origin[0]).toFloat()
+            val y = (at[1] - origin[1]).toFloat()
+            return android.graphics.RectF(x, y, x + view.width, y + view.height)
+        }
+        val places = ArrayList<android.graphics.RectF>()
+        val status = rectOf(statusBlock)
+        val wordEnd = rectOf(word).left + (word.layout?.getLineRight(0) ?: 0f)
+        val written = maxOf(wordEnd, rectOf(bigUnit).right)
+        val top = if (updatePill.visibility == View.VISIBLE) rectOf(bigNumber).top else status.top
+        val besideRight = rectOf(from).top
+        if (status.right - written > px(72f) && besideRight - top > px(40f)) places += android.graphics.RectF(written + px(16f), top, status.right, besideRight)
+        for (column in listOf(leftColumn, rightColumn, thirdColumn)) {
+            if (column.visibility != View.VISIBLE || column.height == 0) continue
+            val r = rectOf(column)
+            if (page.height - r.bottom > px(64f)) places += android.graphics.RectF(r.left, r.bottom + px(8f), r.right, page.height.toFloat())
+        }
+        wall.free = places
     }
 
     override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
@@ -622,19 +660,53 @@ class MainActivity : Activity() {
         words.addView(title)
         words.addView(sub, spaced(top = 1))
         tile.addView(words, FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, Gravity.BOTTOM).apply { leftMargin = px(16); rightMargin = px(12); bottomMargin = px(14) })
-        return Small(tile, state, title, sub, thing)
+        return Small(tile, state, title, sub, thing, words)
+    }
+
+    /**
+     * A small tile laid out standing — its object above what it is — or, `flat`, on its side: the object at the left,
+     * what it is beside it, half as high (a phone on its side, where the tiles are to fit the screen's height).
+     */
+    private fun lay(tile: Small, flat: Boolean) {
+        tile.thing.layoutParams = FrameLayout.LayoutParams(px(if (flat) 28 else 44), px(if (flat) 28 else 44), if (flat) Gravity.START or Gravity.CENTER_VERTICAL else Gravity.START or Gravity.TOP).apply {
+            leftMargin = px(if (flat) 12 else 16); topMargin = if (flat) 0 else px(16)
+        }
+        tile.words.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, if (flat) Gravity.CENTER_VERTICAL else Gravity.BOTTOM).apply {
+            leftMargin = px(if (flat) 48 else 16); rightMargin = px(if (flat) 6 else 12); bottomMargin = if (flat) 0 else px(14)
+        }
+        // Flat, a tile is too narrow for a word at its corner beside its name: the line under the name says enough.
+        tile.state.visibility = if (flat) View.GONE else View.VISIBLE
+        tile.state.layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT, Gravity.END or Gravity.TOP).apply {
+            rightMargin = px(if (flat) 12 else 16); topMargin = px(if (flat) 8 else 16)
+        }
+        tile.state.textSize = if (flat) 10f else 11f
+        tile.name.textSize = if (flat) 13.5f else 14f
     }
 
     /** The models tile: its three objects, and how many models are here. */
     private fun modelsTile(): View = FrameLayout(this).apply {
         background = flat(R.color.tile, 30, alpha = 215)
         setOnClickListener { open(modelsBox) }
-        addView(text("模型管理", 14f, R.color.ink, bold = true), FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { leftMargin = px(18); topMargin = px(16) })
-        val things = LinearLayout(this@MainActivity)
-        for (kind in listOf(Thing.Kind.WATER, Thing.Kind.PANES, Thing.Kind.NOTE)) things.addView(Thing(this@MainActivity, kind), LinearLayout.LayoutParams(px(34), px(34)).apply { rightMargin = px(10) })
-        addView(things, FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { leftMargin = px(18); topMargin = px(46) })
+        modelsName = text("模型管理", 14f, R.color.ink, bold = true)
+        addView(modelsName)
+        modelsThings = LinearLayout(this@MainActivity)
+        for (kind in listOf(Thing.Kind.WATER, Thing.Kind.PANES, Thing.Kind.NOTE)) modelsThings.addView(Thing(this@MainActivity, kind))
+        addView(modelsThings)
         modelsSub = text("", 11.5f, R.color.ink_2)
-        addView(modelsSub, FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT, Gravity.BOTTOM).apply { leftMargin = px(18); bottomMargin = px(14) })
+        addView(modelsSub)
+        layModels(flat = false)
+    }
+
+    /** The models tile standing — its name, its objects, its count, one under another — or flat: the objects at the right. */
+    private fun layModels(flat: Boolean) {
+        for (i in 0 until modelsThings.childCount) modelsThings.getChildAt(i).layoutParams = LinearLayout.LayoutParams(px(if (flat) 26 else 34), px(if (flat) 26 else 34)).apply { rightMargin = px(if (flat) 8 else 10) }
+        modelsName.layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { leftMargin = px(18); topMargin = px(if (flat) 14 else 16) }
+        modelsThings.layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT, if (flat) Gravity.END or Gravity.CENTER_VERTICAL else Gravity.START or Gravity.TOP).apply {
+            leftMargin = if (flat) 0 else px(18); topMargin = if (flat) 0 else px(46); rightMargin = if (flat) px(6) else 0
+        }
+        modelsSub.layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT, if (flat) Gravity.START or Gravity.TOP else Gravity.START or Gravity.BOTTOM).apply {
+            leftMargin = px(18); topMargin = if (flat) px(36) else 0; bottomMargin = if (flat) 0 else px(14)
+        }
     }
 
     // ── The panels ──────────────────────────────────────────────────────────────────────────────────────────────
