@@ -767,6 +767,43 @@ class Bar(context: Context) : View(context) {
 }
 
 /**
+ * How fast the phone hears, against speech itself: a track to 4×, filled to the speed — green where it keeps up, coral
+ * where it does not — and marked at 1×, where it keeps up exactly.
+ */
+class Meter(context: Context) : View(context) {
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val words = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = context.px(10.5f); color = context.getColor(R.color.ink_3) }
+    var speed = 0f
+        set(value) { field = value; invalidate() }
+
+    override fun onMeasure(widthSpec: Int, heightSpec: Int) =
+        setMeasuredDimension(MeasureSpec.getSize(widthSpec), resolveSize(context.px(30), heightSpec))
+
+    override fun onDraw(canvas: Canvas) {
+        val w = width.toFloat()
+        val thick = context.px(6f)
+        val top = context.px(4f)
+        val r = thick / 2
+        paint.color = context.getColor(R.color.dial_edge)
+        canvas.drawRoundRect(RectF(0f, top, w, top + thick), r, r, paint)
+        paint.color = context.getColor(if (speed >= 1f) R.color.good else R.color.key)
+        canvas.drawRoundRect(RectF(0f, top, max(thick, w * (speed / MOST).coerceIn(0f, 1f)), top + thick), r, r, paint)
+        // Real time: a mark across the track, and its word under it.
+        val at = w / MOST
+        paint.color = context.getColor(R.color.ink_2)
+        canvas.drawRoundRect(RectF(at - context.px(1f), 0f, at + context.px(1f), top * 2 + thick), context.px(1f), context.px(1f), paint)
+        val label = "实时 1×"
+        canvas.drawText(label, at - words.measureText(label) / 2, height - context.px(2f), words)
+        val end = "${MOST.toInt()}×"
+        canvas.drawText(end, w - words.measureText(end), height - context.px(2f), words)
+    }
+
+    private companion object {
+        const val MOST = 4f
+    }
+}
+
+/**
  * Small tiles in rows of `columns`, each `cell` high, `gap` apart: a hidden one takes no place, so the tiles shown
  * close up. How many to a row is the page's choice (`MainActivity.arrange`): two on a phone, four on a tablet. With
  * `stretch`, given a height, the rows share it, none lower than `cell`.

@@ -129,6 +129,7 @@ class MainActivity : Activity() {
     private lateinit var checkDial: Thing
     private lateinit var checkNumber: TextView
     private lateinit var checkVerdict: TextView
+    private lateinit var checkMeter: Meter
     private lateinit var reportCard: LinearLayout
     private lateinit var report: TextView
     private lateinit var reportKey: TextView
@@ -908,10 +909,13 @@ class MainActivity : Activity() {
         }.start()
     }
 
-    /** A key of a panel: the main one, in the coral of the switch, or a quiet one. */
-    private fun key(words: String, main: Boolean, onTouch: () -> Unit) = text(words, 14.5f, if (main) R.color.tile else R.color.ink, bold = true).apply {
+    /**
+     * A key of a panel: the main one tinted with the coral of the switch, its word in a deeper coral — a solid block of
+     * it outweighed all else in a panel (the user found the panels less finished, 2026-10-23) — or a quiet one.
+     */
+    private fun key(words: String, main: Boolean, onTouch: () -> Unit) = text(words, 14.5f, if (main) R.color.key_deep else R.color.ink, bold = true).apply {
         gravity = Gravity.CENTER
-        background = if (main) flat(R.color.key, 18) else flat(R.color.tile, 18, edge = R.color.card_line)
+        background = if (main) flat(R.color.field_coral, 18) else flat(R.color.tile, 18, edge = R.color.card_line)
         setPadding(px(16), 0, px(16), 0)
         setOnClickListener { onTouch() }
     }
@@ -955,34 +959,39 @@ class MainActivity : Activity() {
         }
         rule = text("", 11.5f, R.color.ink_3).apply { setLineSpacing(0f, 1.15f) }
         for (task in Task.values()) {
-            val group = card()
+            // The rows are cells the card's width less a little, so the one in use can be lifted as a white cell.
+            val group = card().apply { setPadding(px(8), px(14), px(8), px(8)) }
             groupSummary[task] = heading(group, Thing(this, THINGS.getValue(task)), TASK_NAMES.getValue(task))
+            group.getChildAt(0).setPadding(px(8), 0, px(8), px(4))
             var first = true
             for (model in ALL_MODELS.filter { it.task == task }) {
                 val row = LinearLayout(this).apply {
                     gravity = Gravity.CENTER_VERTICAL
-                    minimumHeight = px(60)
-                    setPadding(0, px(8), 0, px(8))
+                    minimumHeight = px(58)
+                    setPadding(px(8), px(9), px(8), px(9))
                     setOnClickListener { if (model in choices.lendable(store) && busy == null && !Sharing.on) { choices.share(model); lastVerdict = null; refresh() } }
                 }
                 val words = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
                 val state = text("", 12f, R.color.ink_2)
                 words.addView(text(model.name, 15f, R.color.ink, bold = true))
                 words.addView(state, spaced(top = 2))
-                val mark = pill("使用中", R.color.field_mint, R.color.good)
-                val act = key("下载", main = false) { if (busy == null) fetch(model) else if (busy === model) halt() }
+                val mark = text("使用中", 12f, R.color.good, bold = true)
+                val act = key("下载", main = false) { if (busy == null) fetch(model) else if (busy === model) halt() }.apply {
+                    setTextColor(getColor(R.color.key_deep)); textSize = 13.5f; setPadding(px(14), 0, px(14), 0)
+                }
                 row.addView(words, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f).apply { rightMargin = px(8) })
                 row.addView(mark, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
-                row.addView(act, LinearLayout.LayoutParams(WRAP_CONTENT, px(36)))
-                val divider = View(this).apply { setBackgroundColor(getColor(R.color.card_line)) }
-                if (!first) group.addView(divider, LinearLayout.LayoutParams(MATCH_PARENT, px(1)))
+                row.addView(act, LinearLayout.LayoutParams(WRAP_CONTENT, px(32)))
+                // Between rows, room rather than a line.
+                val divider = View(this)
+                if (!first) group.addView(divider, LinearLayout.LayoutParams(MATCH_PARENT, px(2)))
                 group.addView(row, spaced(top = if (first) 6 else 0))
                 rows[model] = Row(row, state, act, mark, divider.takeIf { !first })
                 first = false
             }
+            // At the foot of the recognizers' card, how the one that is lent comes to be it.
+            if (task == Task.HEAR) group.addView(rule, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = px(6); leftMargin = px(8); rightMargin = px(8); bottomMargin = px(6) })
             models.addView(group, spaced(top = if (task == Task.HEAR) 6 else 12))
-            // Under the recognizers, how the one that is lent comes to be it.
-            if (task == Task.HEAR) models.addView(rule, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = px(8); leftMargin = px(8); rightMargin = px(8) })
         }
         return models
     }
@@ -1010,14 +1019,16 @@ class MainActivity : Activity() {
         tools.addView(updateRow, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = px(6); bottomMargin = px(6) })
 
         // What the check found: the dial at the speed, the number, and what it means.
-        val found = card()
-        val words = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        checkNumber = text("", 36f, R.color.ink).apply { typeface = Typeface.create("sans-serif-light", Typeface.NORMAL); includeFontPadding = false }
-        checkVerdict = text("", 13f, R.color.ink_2)
-        words.addView(checkNumber)
-        words.addView(checkVerdict, spaced(top = 4))
-        found.addView(words)
-        checkState = text("", 12.5f, R.color.ink_2).apply { setLineSpacing(0f, 1.15f) }
+        val found = card().apply { setPadding(px(18), px(16), px(18), px(16)) }
+        val top = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL }
+        checkNumber = text("", 38f, R.color.ink).apply { typeface = Typeface.create("sans-serif-light", Typeface.NORMAL); includeFontPadding = false }
+        checkVerdict = pill("", R.color.card_line, R.color.ink_3)
+        top.addView(checkNumber, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
+        top.addView(checkVerdict)
+        found.addView(top)
+        checkMeter = Meter(this)
+        found.addView(checkMeter, spaced(top = 14))
+        checkState = text("", 12f, R.color.ink_3).apply { setLineSpacing(0f, 1.2f) }
         found.addView(checkState, spaced(top = 12))
         checkBar = Bar(this)
         found.addView(checkBar, spaced(top = 10))
@@ -1043,11 +1054,14 @@ class MainActivity : Activity() {
         tools.addView(reportCard, spaced(top = 12))
 
         // The app's own version, and the key that asks for a newer one.
-        val version = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL; setPadding(px(8), 0, px(2), 0) }
-        version.addView(text("Kotomimi 手机端 ${BuildConfigLite.VERSION}", 12.5f, R.color.ink_2), LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
+        val version = card().apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(px(16), px(12), px(12), px(12)) }
+        val versionWords = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        versionWords.addView(text("Kotomimi 手机端", 14f, R.color.ink, bold = true))
+        versionWords.addView(text("版本 ${BuildConfigLite.VERSION}", 12f, R.color.ink_3), spaced(top = 2))
+        version.addView(versionWords, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
         lookKey = key("", main = false) { look(asked = true) }
         version.addView(lookKey, LinearLayout.LayoutParams(WRAP_CONTENT, px(34)))
-        tools.addView(version, spaced(top = 16))
+        tools.addView(version, spaced(top = 12))
         return tools
     }
 
@@ -1256,6 +1270,7 @@ class MainActivity : Activity() {
             row.divider?.visibility = row.view.visibility
             val inUse = if (isText) model in lentText else model === lent
             row.mark.visibility = if (store.has(model) && inUse && busy !== model) View.VISIBLE else View.GONE
+            row.view.background = if (row.mark.visibility == View.VISIBLE) flat(R.color.tile, 16) else null
             if (busy !== model) {
                 // What a row is good for, where that is known; for a model in two rows, which of the two it is.
                 val whose = model.note ?: twinWords(model)
@@ -1283,9 +1298,13 @@ class MainActivity : Activity() {
         checkNumber.text = found?.let { unit("%.1f".format(it), " 倍速") } ?: "—"
         checkVerdict.text = when {
             found == null -> "尚未检测"
-            found >= 1.0 -> "快于说话速度，可实时识别"
-            else -> "慢于说话速度，识别会有延迟"
+            found >= 1.0 -> "可实时识别"
+            else -> "会有延迟"
         }
+        checkVerdict.background = flat(when { found == null -> R.color.card_line; found >= 1.0 -> R.color.field_mint; else -> R.color.field_coral }, 12)
+        checkVerdict.setTextColor(getColor(when { found == null -> R.color.ink_3; found >= 1.0 -> R.color.good; else -> R.color.key_deep }))
+        checkMeter.speed = (found ?: 0.0).toFloat()
+        checkMeter.visibility = if (found != null && busy != "check") View.VISIBLE else View.GONE
         checkKey.text = if (busy == "check") "停止检测" else if (lastReport == null) "开始检测" else "重新检测"
         checkKey.alpha = if (busy == "check" || (busy == null && !shared && here.isNotEmpty() && engine.present)) 1f else 0.45f
         if (busy != "check") {
