@@ -110,6 +110,22 @@ describe('SubtitleBody — compact: the fork\u2019s lanes', () => {
     expect(put.querySelector('.subtitle-lane__reply')?.textContent).toBe('Hello there.');
   });
 
+  // Fork: feedback in the language of the sentence it answers marks that sentence — struck what goes, written in what
+  // comes, the reason after — in place of the sentence, an arrow and the corrected one (the user, 2026-10-23).
+  it('draws grammar feedback that changes something as the sentence said, marked', () => {
+    const said = { ...row('s1', 0, 0, 'I goes to school yesterday.'), language: 'en' };
+    const answer = { ...row('t1', 0, 0, 'I went to school yesterday.\nPast tense.', 'translation'), language: 'en' };
+    for (const alone of [false, true]) {
+      const view = render(<SubtitleBody {...props({ entries: alone ? [exchange('a', [said], [answer])] : [exchange('a', [said], [answer]), theirs('b', 'はい。', 'Yes.')] })} />);
+      const mine = view.container.querySelector('[data-lane="speaker"]')!;
+      expect(mine.querySelector('.kt-fix__gone')?.textContent).toBe('goes');
+      expect(mine.querySelector('.kt-fix__added')?.textContent).toBe('went');
+      expect(mine.querySelector('.kt-fix__why')?.textContent).toBe('Past tense.');
+      expect(mine.querySelector('.subtitle-lane__arrow')).toBeNull();
+      view.unmount();
+    }
+  });
+
   it('draws the newest sentence alone, whatever was said before: a higher window is room for it, not for those', () => {
     const { container } = render(<SubtitleBody {...props({ entries: [theirs('a', 'こんにちは。', 'Hello.'), theirs('b', 'そうですね。', 'That is right.')] })} />);
     expect(texts(container.querySelector('.subtitle-lane')!)).toEqual(['そうですね。', 'That is right.']);

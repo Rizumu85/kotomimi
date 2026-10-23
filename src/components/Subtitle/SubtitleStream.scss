@@ -227,6 +227,11 @@
       color: var(--subtitle-translation-color, #e8e8e8);
     }
 
+    // A correction in the row: the sentence keeps the said line's look, the reason is written as the answer is.
+    .subtitle-lane__said--fixed .kt-fix__why {
+      color: var(--subtitle-translation-color, #e8e8e8);
+    }
+
     // A newer sentence is on its way.
     .subtitle-lane__pending {
       margin-left: 0.4em;

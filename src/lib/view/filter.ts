@@ -26,6 +26,11 @@ export type DisplayItem =
       header: boolean;
       /** The last row drawn of its segment: where that segment's replay button goes. */
       endsSegment: boolean;
+      /**
+       * Fork: of an answer's row, the sentence it answers and the whole answer, each with its language — what grammar
+       * feedback is drawn from as a marked sentence (`src/lib/feedback/correction.ts`). Absent on a source's row.
+       */
+      answers?: { said: string; saidLanguage?: string; answer: string };
     }
   | { kind: 'notice'; notice: NoticeEntry };
 
@@ -84,16 +89,21 @@ export function displayItems(entries: readonly Entry[], filters: LegFilters, pre
       ...(showsSide(filter, 'source') ? entry.source : []),
       ...(showsSide(filter, 'translation') ? entry.translation : []),
     ];
+    const said = entry.source.map((row) => row.text).join('').trim();
+    const answer = entry.translation.map((row) => row.text).join('').trim();
+    const answers = said && answer ? { said, saidLanguage: entry.source[0]?.language || entry.languages.source, answer } : undefined;
     rows.forEach((row, i) => {
       const header = lastLeg !== entry.leg;
       const endsSegment = rows[i + 1]?.segmentId !== row.segmentId;
       const old = byKey.get(row.key);
+      const mine = row.side === 'translation' ? answers : undefined;
       out.push(
         old?.kind === 'row' && sameRow(old.row, row) && old.header === header && old.endsSegment === endsSegment
           && old.t === entry.t && old.leg === entry.leg
           && old.languages.source === entry.languages.source && old.languages.target === entry.languages.target
+          && old.answers?.said === mine?.said && old.answers?.answer === mine?.answer && old.answers?.saidLanguage === mine?.saidLanguage
           ? old
-          : { kind: 'row', row, leg: entry.leg, languages: entry.languages, t: entry.t, header, endsSegment },
+          : { kind: 'row', row, leg: entry.leg, languages: entry.languages, t: entry.t, header, endsSegment, ...(mine ? { answers: mine } : {}) },
       );
       lastLeg = entry.leg;
     });

@@ -1,0 +1,39 @@
+// Fork: grammar feedback as a marked sentence (Correction.tsx). Red is the one colour a correction has: struck through
+// on what goes, written in on what comes.
+.kt-fix {
+  --kt-fix-ink: #ef6450;
+
+  .kt-fix__gone {
+    color: inherit;
+    opacity: 0.75;
+    text-decoration: line-through;
+    text-decoration-color: var(--kt-fix-ink);
+    text-decoration-thickness: 0.09em;
+  }
+
+  .kt-fix__added {
+    color: var(--kt-fix-ink);
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: 0.1em;
+  }
+
+  .kt-fix__why {
+    opacity: 0.72;
+    font-size: 0.88em;
+    font-style: normal;
+  }
+}
+
+.kt-fix--block {
+  display: block;
+
+  .kt-fix__why {
+    display: block;
+    margin-top: 0.25em;
+  }
+}
+
+.kt-fix--row .kt-fix__why {
+  margin-left: 0.8em;
+}
