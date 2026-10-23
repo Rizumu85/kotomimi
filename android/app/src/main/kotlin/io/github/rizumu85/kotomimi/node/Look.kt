@@ -624,7 +624,8 @@ class Water(context: Context) : View(context) {
         // Under the number and its line, however low the tile: a low one (a phone on its side) had it through the line.
         val dashY = maxOf(h * 0.47f, context.px(96f))
         canvas.drawLine(context.px(16f), dashY, w - context.px(16f), dashY, dash)
-        val top = h * (1f - shown.coerceIn(0.12f, 0.5f))
+        // Never over the line and what is written above it: in a low tile, half its height was.
+        val top = maxOf(h * (1f - shown.coerceIn(0.12f, 0.5f)), dashY + context.px(12f))
         val swell = context.px(if (moving) 7f else 3f)
         canvas.save()
         clip.reset()

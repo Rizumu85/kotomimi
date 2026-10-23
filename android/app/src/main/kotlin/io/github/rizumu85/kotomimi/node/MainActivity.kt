@@ -80,6 +80,7 @@ class MainActivity : Activity() {
     private lateinit var hearNumber: TextView
     private lateinit var hearSub: TextView
     private lateinit var hearModel: TextView
+    private lateinit var paperDot: View
     private lateinit var heardLast: TextView
     private lateinit var glassTile: View
     private lateinit var glassNumber: TextView
@@ -564,23 +565,30 @@ class MainActivity : Activity() {
         (modelsBlock.layoutParams as? LinearLayout.LayoutParams)?.apply { height = if (side && !on) 0 else WRAP_CONTENT; weight = if (side && !on) 1f else 0f }
         grid.stretch = side
         stage.minimumHeight = if (fill) stageHigh else 0
-        layGlass(snug = fill)
+        layStage(snug = fill)
         for (tile in listOf(hearTile, glassTile, paperTile)) tile.layoutParams = tile.layoutParams.apply { height = if (fill) MATCH_PARENT else stageHigh }
         leftColumn.requestLayout()
         rightColumn.requestLayout()
     }
 
-    /** Whether the translation's tile is the low one of a phone on its side. */
-    private var glassSnug = false
+    /** Whether the large tile is the low, narrow one of a phone on its side. */
+    private var stageSnug = false
 
     /**
-     * The translation's tile as on a phone held upright, or `snug`, as low and narrow as a phone on its side leaves it:
-     * the model's line goes (the models panel has it; in the corner it ran into the number), the sentence's pane comes
-     * up into its place and keeps to one line, and the translation's to two — so the sentence shows whole above its
-     * translation instead of half under it.
+     * The large tiles as on a phone held upright, or `snug`, as low and narrow as a phone on its side leaves them,
+     * where the corner's words ran into the number and the objects over what was written:
+     * - hearing: the corner says only how it stands, not the model too (the models panel has it);
+     * - translation: the model's line goes, the sentence's pane comes up into its place and keeps to one line, and the
+     *   translation's to two — so the sentence shows whole above its translation instead of half under it;
+     * - feedback: the reason keeps to one line, so the sheet stays clear of the number.
      */
-    private fun layGlass(snug: Boolean) {
-        glassSnug = snug
+    private fun layStage(snug: Boolean) {
+        stageSnug = snug
+        paperWhy.maxLines = if (snug) 1 else 2
+        (sheet.layoutParams as? FrameLayout.LayoutParams)?.bottomMargin = px(if (snug) 14 else 20)
+        (paperDot.layoutParams as? FrameLayout.LayoutParams)?.bottomMargin = px(if (snug) 96 else 118)
+        sheet.requestLayout()
+        paperDot.requestLayout()
         glassSub.visibility = if (snug) View.GONE else View.VISIBLE
         paneBack.maxLines = if (snug) 1 else 3
         paneFront.maxLines = if (snug) 2 else 3
@@ -708,7 +716,8 @@ class MainActivity : Activity() {
         page.addView(paperWhy, spaced(top = 4))
         sheet = page
         addView(page, FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, Gravity.BOTTOM).apply { leftMargin = px(18); rightMargin = px(22); bottomMargin = px(20) })
-        addView(View(this@MainActivity).apply { background = flat(R.color.ink_red, 5) }, FrameLayout.LayoutParams(px(9), px(9), Gravity.END or Gravity.BOTTOM).apply { rightMargin = px(30); bottomMargin = px(118) })
+        paperDot = View(this@MainActivity).apply { background = flat(R.color.ink_red, 5) }
+        addView(paperDot, FrameLayout.LayoutParams(px(9), px(9), Gravity.END or Gravity.BOTTOM).apply { rightMargin = px(30); bottomMargin = px(118) })
     }
 
     /** A large tile's number, thin, and the line under it. */
@@ -1174,7 +1183,7 @@ class MainActivity : Activity() {
             Task.HEAR -> {
                 hearNumber.text = speed?.let { unit("%.1f".format(it), " 倍速") } ?: "—"
                 hearSub.text = when { speed == null -> "等待第一段语音"; speed >= 1.0 -> "快于说话速度，可实时识别"; else -> "慢于说话速度，会有延迟" }
-                hearModel.text = listOfNotNull(stateOf(Task.HEAR), modelOf(Task.HEAR)?.name).joinToString(" · ")
+                hearModel.text = if (stageSnug) stateOf(Task.HEAR) else listOfNotNull(stateOf(Task.HEAR), modelOf(Task.HEAR)?.name).joinToString(" · ")
                 heardLast.text = work.answer.orEmpty()
                 water.level = ((speed ?: 0.6) / 2.0).coerceIn(0.25, 1.0).toFloat() * 0.5f
             }
