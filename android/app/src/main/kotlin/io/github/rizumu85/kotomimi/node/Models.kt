@@ -392,6 +392,15 @@ class ModelStore(context: Context) {
     fun begun(model: Model): Long = model.files.sumOf { downloads.begun(it) }
 
     /**
+     * Takes a model off the phone, when the person asks: its files, and what there is of a download of them. A file
+     * that another model here also reads stays.
+     */
+    fun remove(model: Model, all: List<Model>) {
+        val kept = all.filter { it !== model && has(it) }.flatMap { other -> other.files.map { fileOf(it).name } }.toSet()
+        for (file in model.files) if (fileOf(file).name !in kept) downloads.remove(file)
+    }
+
+    /**
      * How a download stands: the bytes had of the whole model, how many come in a second, where from (blank while
      * that is being found out), and which of the model's files it is at.
      */
@@ -434,6 +443,11 @@ class Downloads(val folder: File) {
 
     /** Whole and of the right size. (Its checksum was looked at when it was fetched.) */
     fun has(file: Fetched) = fileOf(file).length() == file.bytes
+
+    /** The file gone, and what there was of a download of it. */
+    fun remove(file: Fetched) {
+        for (it in listOf(fileOf(file), partOf(file), notesOf(file))) it.delete()
+    }
 
     /** Bytes of it here so far: all of it, or what there is of a download begun. */
     fun begun(file: Fetched): Long = if (has(file)) file.bytes else piecesOf(file).sumOf { it.at - it.start }

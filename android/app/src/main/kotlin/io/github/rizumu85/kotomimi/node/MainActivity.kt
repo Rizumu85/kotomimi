@@ -130,6 +130,7 @@ class MainActivity : Activity() {
     private lateinit var checkNumber: TextView
     private lateinit var checkVerdict: TextView
     private lateinit var checkMeter: Meter
+    private lateinit var addressChip: TextView
     private lateinit var reportCard: LinearLayout
     private lateinit var report: TextView
     private lateinit var reportKey: TextView
@@ -151,7 +152,7 @@ class MainActivity : Activity() {
     private lateinit var updater: Updater
 
     /** A model's row in the models panel: the whole row (to hide), what it says, its key, its mark of use, and the line above it. */
-    private class Row(val view: View, val state: TextView, val act: TextView, val mark: TextView, val divider: View?)
+    private class Row(val view: View, val state: TextView, val act: TextView, val mark: TextView, val drop: TextView, val divider: View?)
 
     /** What this screen's own worker is doing: nothing, a check, or the download of one model or of a newer version. */
     private var busy: Any? = null
@@ -980,13 +981,20 @@ class MainActivity : Activity() {
                     setTextColor(getColor(R.color.key_deep)); textSize = 13.5f; setPadding(px(14), 0, px(14), 0)
                 }
                 row.addView(words, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f).apply { rightMargin = px(8) })
+                // A model that is here can be taken off the phone again: a quiet word, and a question before it goes.
+                val drop = text("删除", 13f, R.color.ink_3).apply {
+                    gravity = Gravity.CENTER
+                    setPadding(px(12), 0, px(4), 0)
+                    setOnClickListener { if (busy == null && !Sharing.on) drop(model) }
+                }
                 row.addView(mark, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
+                row.addView(drop, LinearLayout.LayoutParams(WRAP_CONTENT, px(32)))
                 row.addView(act, LinearLayout.LayoutParams(WRAP_CONTENT, px(32)))
                 // Between rows, room rather than a line.
                 val divider = View(this)
                 if (!first) group.addView(divider, LinearLayout.LayoutParams(MATCH_PARENT, px(2)))
                 group.addView(row, spaced(top = if (first) 6 else 0))
-                rows[model] = Row(row, state, act, mark, divider.takeIf { !first })
+                rows[model] = Row(row, state, act, mark, drop, divider.takeIf { !first })
                 first = false
             }
             // At the foot of the recognizers' card, how the one that is lent comes to be it.
@@ -994,6 +1002,27 @@ class MainActivity : Activity() {
             models.addView(group, spaced(top = if (task == Task.HEAR) 6 else 12))
         }
         return models
+    }
+
+    /** Asks before a model is taken off the phone, saying what it frees; then takes it off. */
+    private fun drop(model: Model) {
+        android.app.AlertDialog.Builder(this)
+            .setTitle("删除 ${model.name}？")
+            .setMessage("将释放 ${model.sizeInWords} 存储空间。需要时可以重新下载。")
+            .setNegativeButton("取消", null)
+            .setPositiveButton("删除") { _, _ ->
+                // What the check found of it is kept: downloaded again, it is the same file on the same phone.
+                store.remove(model, ALL_MODELS)
+                lastVerdict = null
+                refresh()
+            }
+            .show()
+            .apply {
+                // In the panels' own look: a rounded sheet, the word that deletes in coral.
+                window?.setBackgroundDrawable(flat(R.color.tile, 24))
+                getButton(android.app.AlertDialog.BUTTON_POSITIVE)?.setTextColor(getColor(R.color.key_deep))
+                getButton(android.app.AlertDialog.BUTTON_NEGATIVE)?.setTextColor(getColor(R.color.ink_2))
+            }
     }
 
     /** The performance panel: what the check found, the check and its report; a newer version, and the key that asks for one. */
@@ -1071,31 +1100,36 @@ class MainActivity : Activity() {
             orientation = LinearLayout.VERTICAL
             setPadding(px(14), px(4), px(14), px(18))
         }
-        val here = card()
-        here.addView(text("本机地址", 11.5f, R.color.ink_3))
-        address = text("", 20f, R.color.ink, bold = true).apply { setTextIsSelectable(true) }
-        here.addView(address, spaced(top = 2))
-        lastComputer = text("", 12.5f, R.color.ink_2)
-        here.addView(lastComputer, spaced(top = 12))
+        // Where it is: the address large, with a chip saying how sharing stands, and who uses it under them.
+        val here = card().apply { setPadding(px(18), px(16), px(18), px(16)) }
+        val hereHead = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL }
+        hereHead.addView(text("本机地址", 12f, R.color.ink_3), LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
+        addressChip = pill("", R.color.card_line, R.color.ink_3)
+        hereHead.addView(addressChip)
+        here.addView(hereHead)
+        address = text("", 22f, R.color.ink, bold = true).apply { setTextIsSelectable(true) }
+        here.addView(address, spaced(top = 4))
+        lastComputer = text("", 12f, R.color.ink_3).apply { setLineSpacing(0f, 1.2f) }
+        here.addView(lastComputer, spaced(top = 10))
         devices.addView(here, spaced(top = 6))
 
         // How a computer finds it, step by step.
         val steps = card()
         heading(steps, null, "连接方法")
-        listOf("在电脑上打开 Kotomimi", "在设置中的「另一台设备」点击搜索", "选择这台手机。两台设备需连接同一个 Wi-Fi").forEachIndexed { i, words ->
+        listOf("在电脑上打开 Kotomimi", "在设置的「另一台设备」中搜索", "选择这台手机（需在同一 Wi-Fi 下）").forEachIndexed { i, words ->
             val row = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL }
-            row.addView(text("${i + 1}", 12f, R.color.tile, bold = true).apply { gravity = Gravity.CENTER; background = flat(R.color.key, 11) }, LinearLayout.LayoutParams(px(22), px(22)))
-            row.addView(text(words, 13f, R.color.ink), LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f).apply { leftMargin = px(12) })
-            steps.addView(row, spaced(top = 10))
+            row.addView(text("${i + 1}", 12f, R.color.key_deep, bold = true).apply { gravity = Gravity.CENTER; background = flat(R.color.field_coral, 12) }, LinearLayout.LayoutParams(px(24), px(24)))
+            row.addView(text(words, 13f, R.color.ink).apply { setLineSpacing(0f, 1.15f) }, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f).apply { leftMargin = px(12) })
+            steps.addView(row, spaced(top = if (i == 0) 12 else 10))
         }
         devices.addView(steps, spaced(top = 12))
 
         // Where the phone may still be stopped in the background: the one place to let it run.
         stayCard = card()
         heading(stayCard, null, "后台运行")
-        stayCard.addView(text("部分手机会在锁屏后暂停应用，导致电脑连接中断。允许后台运行可以避免。", 12.5f, R.color.ink_2).apply { setLineSpacing(0f, 1.15f) }, spaced(top = 6))
-        stay = key("", main = false) { letRun() }
-        stayCard.addView(stay, LinearLayout.LayoutParams(MATCH_PARENT, px(42)).apply { topMargin = px(12) })
+        stayCard.addView(text("部分手机会在锁屏后暂停应用，导致电脑连接中断。允许后台运行可以避免。", 12f, R.color.ink_3).apply { setLineSpacing(0f, 1.2f) }, spaced(top = 8))
+        stay = key("", main = true) { letRun() }
+        stayCard.addView(stay, LinearLayout.LayoutParams(MATCH_PARENT, px(44)).apply { topMargin = px(14) })
         devices.addView(stayCard, spaced(top = 12))
         return devices
     }
@@ -1271,6 +1305,8 @@ class MainActivity : Activity() {
             val inUse = if (isText) model in lentText else model === lent
             row.mark.visibility = if (store.has(model) && inUse && busy !== model) View.VISIBLE else View.GONE
             row.view.background = if (row.mark.visibility == View.VISIBLE) flat(R.color.tile, 16) else null
+            // Not while it may be in use, nor while something is being fetched or checked.
+            row.drop.visibility = if (store.has(model) && busy == null && !shared) View.VISIBLE else View.GONE
             if (busy !== model) {
                 // What a row is good for, where that is known; for a model in two rows, which of the two it is.
                 val whose = model.note ?: twinWords(model)
@@ -1324,7 +1360,12 @@ class MainActivity : Activity() {
 
         // The devices panel.
         devicesLens.lit = shared && recently
-        address.text = if (shared) sharing.address ?: "未连接 Wi-Fi" else "共享未启用"
+        // Not shared, the chip says so: the address's place holds a dash.
+        address.text = if (shared) sharing.address ?: "未连接 Wi-Fi" else "—"
+        address.setTextColor(getColor(if (shared) R.color.ink else R.color.ink_3))
+        addressChip.text = when { shared && recently -> "已连接"; shared -> "共享中"; else -> "未启用" }
+        addressChip.background = flat(if (shared) R.color.field_mint else R.color.card_line, 12)
+        addressChip.setTextColor(getColor(if (shared) R.color.good else R.color.ink_3))
         lastComputer.text = when {
             shared && recently -> "${sharing.seen} 正在使用这台手机"
             sharing.seen != null -> "最近连接的电脑：${sharing.seen} · ${ago(sharing.seenAt)}"
