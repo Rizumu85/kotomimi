@@ -59,18 +59,6 @@ fun blend(a: Int, b: Int, t: Float): Int {
 /** What the phone is doing, for the wallpaper's colours. */
 enum class Mood { IDLE, HEAR, TRANSLATE, COACH }
 
-/** How the wallpaper answers a finger: the ways shown to the user to choose from (2026-10-23). */
-enum class Tap(val words: String) {
-    /** A wave runs out through the dots from the finger, as through the oil. */
-    RIPPLE("涟漪"),
-    /** The finger parts the dots, as a finger through sand, and they flow back slowly behind it. */
-    PART("拨开"),
-    /** The glitter catches the light around the finger, as when the block is shaken. */
-    GLITTER("闪粉"),
-    /** Under the finger the dots swell, as under a dome of acrylic pressed in; let go, it springs back. */
-    LENS("按压"),
-}
-
 /**
  * The wallpaper, and part of the app: large soft fields of colour, and in front of them a layer of fine dots held as if
  * in an acrylic block of oil with glitter in it (流麻: the user, 2026-10-23, wanted the dots to be a layer that is
@@ -81,7 +69,8 @@ enum class Tap(val words: String) {
  * The dots stand in a grid, a touch of the technical against the soft fields; how much of it shows flows. The dots
  * gather where the page leaves room — never behind writing or a tile (`covered`), the edge of the room soft and
  * wandering — in drifts that slowly move, settle toward the way the phone is held, and sway when it is turned; a few
- * catch the light as the phone moves, as glitter does. A finger stirs them, in the way `tap` says.
+ * catch the light as the phone moves, as glitter does. A finger sends a wave out through them, wide and slow, as
+ * through the oil (the user chose it of four, 2026-10-23: a ripple, parting them, a glitter burst, a dome pressed in).
  */
 class Wall(context: Context) : View(context), SensorEventListener {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -90,9 +79,6 @@ class Wall(context: Context) : View(context), SensorEventListener {
 
     /** Where the page has something in front — tiles and writing — in the wall's own pixels: the dots keep clear of it. */
     var covered: List<RectF> = emptyList()
-
-    /** How a finger stirs the dots. */
-    var tap = Tap.RIPPLE
 
     private var mood = Mood.IDLE
     /** The fields' colours now, and on their way to. */
@@ -126,21 +112,12 @@ class Wall(context: Context) : View(context), SensorEventListener {
     /** How much the phone has just been moved, or the dots stirred: more of the glitter catches the light. */
     private var stir = 0f
 
-    // What a finger has done: waves running out, marks it left, and where it is.
+    // Waves running out through the dots, and the finger that sent the last: whether it is down, and where it was.
     private class Wave(val x: Float, val y: Float, val strength: Float, var age: Float = 0f)
     private val waves = ArrayList<Wave>()
-    private class Mark(val x: Float, val y: Float, val life: Float, var age: Float = 0f)
-    private val marks = ArrayList<Mark>()
     private var held = false
-    private var fingerX = 0f
-    private var fingerY = 0f
     private var markedX = 0f
     private var markedY = 0f
-    // The pressed dome: where it stands, following the finger, and how far it is pressed, on a spring.
-    private var lensX = 0f
-    private var lensY = 0f
-    private var lens = 0f
-    private var lensSpeed = 0f
 
     // The dots of each strength, drawn together: plain ones of each layer, and those catching the light, by colour.
     private val plain = Array(2) { Array(LEVELS) { FloatArray(256) } }
@@ -177,9 +154,8 @@ class Wall(context: Context) : View(context), SensorEventListener {
         }
     }
 
-    private fun calm() = !held && waves.isEmpty() && marks.isEmpty() && drops.isEmpty() && stir < 0.08f &&
-        abs(lens) < 0.01f && abs(lensSpeed) < 0.01f && sweep < 0f && tremble <= 0f && turned >= 1f &&
-        abs(quickX - slowX) + abs(quickY - slowY) < 0.02f
+    private fun calm() = !held && waves.isEmpty() && drops.isEmpty() && stir < 0.08f && sweep < 0f && tremble <= 0f &&
+        turned >= 1f && abs(quickX - slowX) + abs(quickY - slowY) < 0.02f
 
     fun moodFor(next: Mood) {
         if (next == mood) return
@@ -199,40 +175,24 @@ class Wall(context: Context) : View(context), SensorEventListener {
         waves += Wave(x, y, 0.8f)
     }
 
-    /** A finger comes down on the wallpaper, between the tiles. */
+    /** A finger comes down on the wallpaper, between the tiles: a wave runs out from it. */
     fun press(x: Float, y: Float) {
         held = true
-        fingerX = x; fingerY = y
         markedX = x; markedY = y
-        stir = min(1f, stir + 0.25f)
-        when (tap) {
-            Tap.RIPPLE -> waves += Wave(x, y, 1f)
-            Tap.PART -> marks += Mark(x, y, PART_REFILL)
-            Tap.GLITTER -> { waves += Wave(x, y, 1f); stir = min(1f, stir + 0.5f) }
-            Tap.LENS -> if (lens < 0.05f) { lensX = x; lensY = y }
-        }
+        stir = min(1f, stir + 0.2f)
+        waves += Wave(x, y, 1f)
     }
 
-    /** The finger moves: it leaves marks behind it as it goes. */
+    /** The finger moves: smaller waves follow it as it goes. */
     fun drag(x: Float, y: Float) {
-        if (!held) return
-        fingerX = x; fingerY = y
-        val far = hypot(x - markedX, y - markedY)
-        val every = context.px(if (tap == Tap.RIPPLE) 40f else 10f)
-        if (far < every) return
+        if (!held || hypot(x - markedX, y - markedY) < 56f * dp) return
         markedX = x; markedY = y
-        when (tap) {
-            Tap.RIPPLE -> waves += Wave(x, y, 0.45f)
-            Tap.PART -> marks += Mark(x, y, PART_REFILL)
-            Tap.GLITTER -> { marks += Mark(x, y, 0.9f); stir = min(1f, stir + 0.08f) }
-            Tap.LENS -> {}
-        }
-        while (marks.size > 64) marks.removeAt(0)
+        waves += Wave(x, y, 0.4f)
+        while (waves.size > 12) waves.removeAt(0)
     }
 
     /** The finger is lifted. */
     fun lift() {
-        if (held && tap == Tap.PART) marks += Mark(fingerX, fingerY, PART_REFILL)
         held = false
     }
 
@@ -314,19 +274,7 @@ class Wall(context: Context) : View(context), SensorEventListener {
         // Turning the phone stirs the glitter; it calms in a second or two.
         stir = (stir + hypot(quickX - wasX, quickY - wasY) * 1.6f - dt * 0.55f).coerceIn(0f, 1f)
         waves.forEach { it.age += dt }
-        waves.removeAll { it.age > 1.8f }
-        marks.forEach { it.age += dt }
-        marks.removeAll { it.age > it.life }
-        // The dome follows the finger a little behind it, and is pressed in, or springs back past where it rests.
-        if (tap == Tap.LENS) {
-            if (held) {
-                lensX += (fingerX - lensX) * min(1f, dt / 0.06f)
-                lensY += (fingerY - lensY) * min(1f, dt / 0.06f)
-            }
-            val goal = if (held) 1f else 0f
-            lensSpeed += ((goal - lens) * 260f - lensSpeed * 14f) * dt
-            lens += lensSpeed * dt
-        } else lens = 0f
+        waves.removeAll { it.age > WAVE_LASTS }
     }
 
     /**
@@ -391,19 +339,14 @@ class Wall(context: Context) : View(context), SensorEventListener {
         val wander = 36f * dp
         val grainy = 18f * dp
         val hidden = clear - wander / 2 - grainy / 2
-        val lensReach = 80f * dp
-        val hole = 34f * dp
-        val waveWide = 28f * dp
-        val waveSpeed = 330f * dp
+        // A wave: a broad, low swell, running out slowly and fading as it goes, past the finger's reach.
+        val waveWide = 46f * dp
+        val waveSpeed = 230f * dp
         for (counts in plainCount) counts.fill(0)
         for (counts in litCount) counts.fill(0)
         val light = quickX * 0.8f + quickY * 0.6f + t * 0.03f
         val shine = 0.3f + stir * 0.7f
-        val glitter = tap == Tap.GLITTER
-        val parting = tap == Tap.PART
-        val pressed = lens > 0.01f || lens < -0.01f
         val waveCount = waves.size
-        val markCount = marks.size
         val columns = ceil(w / every).toInt()
         val across = columns + 2
         for (layer in 0..1) {
@@ -415,8 +358,7 @@ class Wall(context: Context) : View(context), SensorEventListener {
             val back = -scrolled * (if (deep) 0.03f else 0.05f) + if (deep) every / 2 else 0f
             val aside = if (deep) every / 2 else 0f
             val tt = t + if (deep) 7.3f else 0f
-            val push = (if (deep) 2.5f else 4.5f) * dp
-            val depth = if (deep) 0.55f else 1f
+            val push = (if (deep) 1.8f else 3.2f) * dp
             val firstRow = floor((-every - back) / every).toInt()
             val rows = ceil((h + every - back) / every).toInt() - firstRow + 1
             val near = room(layer, firstRow, rows, across, every, back, aside)
@@ -449,9 +391,8 @@ class Wall(context: Context) : View(context), SensorEventListener {
                     // Toward down there is more of it; each dot has its own threshold, so a drift's edge is grains.
                     val settle = (slowX * (rx / w - 0.5f) + slowY * (ry / h - 0.5f)) * 0.5f
                     var amount = smooth(0.46f, 0.84f, flow + settle + grain * 0.32f)
-                    var size = 1f
-                    var glint = 0f
 
+                    var swell = 0f
                     for (k in 0 until waveCount) {
                         val wave = waves[k]
                         val dx = rx - wave.x
@@ -459,68 +400,29 @@ class Wall(context: Context) : View(context), SensorEventListener {
                         val r = sqrt(dx * dx + dy * dy)
                         val u = (r - wave.age * waveSpeed) / waveWide
                         if (u < -3f || u > 3f) continue
-                        val s = exp(-u * u) * fcos(u * 2.2f) * wave.strength * exp(-wave.age * 1.5f)
+                        val s = exp(-u * u) * fcos(u * 1.5f) * wave.strength * exp(-wave.age * 0.95f)
                         if (r > 1f) { x += dx / r * s * push; y += dy / r * s * push }
-                        if (glitter && wave.strength >= 1f) {
-                            if (hash(i, j, 7 + layer) < 0.5f) glint += max(0f, s) * 1.4f
-                            amount += max(0f, s) * 0.25f
-                        } else amount += max(0f, s) * 0.75f
+                        swell += max(0f, s) * 0.9f
                     }
-                    for (k in 0 until markCount) {
-                        val mark = marks[k]
-                        val dx = rx - mark.x
-                        val dy = ry - mark.y
-                        if (dx > hole * 2f || dx < -hole * 2f || dy > hole * 2f || dy < -hole * 2f) continue
-                        val r = sqrt(dx * dx + dy * dy)
-                        if (r > hole * 2f) continue
-                        val fade = 1f - smooth(0f, mark.life, mark.age)
-                        if (glitter) {
-                            if (hash(i, j, 11 + layer) < 0.45f) glint += (1f - r / (hole * 2f)) * fade * 1.2f
-                            continue
-                        }
-                        // Parted: none inside, gathered at the rim, pushed outward; the deeper dots less.
-                        val inside = 1f - smooth(hole * 0.5f, hole, r)
-                        val rimAt = (r - hole) / (hole * 0.35f)
-                        val rim = exp(-rimAt * rimAt)
-                        amount += (rim * 0.6f - inside * 1.3f) * fade * depth
-                        if (r > 1f) { val out = (rim * 5f + inside * 7f * r / hole) * fade * depth * dp; x += dx / r * out; y += dy / r * out }
-                    }
-                    if (held && parting) {
-                        val dx = rx - fingerX
-                        val dy = ry - fingerY
-                        val r = sqrt(dx * dx + dy * dy)
-                        if (r < hole) amount -= (if (deep) 0.7f else 1.3f) * (1f - smooth(hole * 0.5f, hole, r))
-                    }
-                    if (pressed) {
-                        val dx = rx - lensX
-                        val dy = ry - lensY
-                        val r2 = dx * dx + dy * dy
-                        if (r2 < lensReach * lensReach) {
-                            // The near dots swell more than the deep ones: a dome pressed into the front of the block.
-                            val m = 1f - r2 / (lensReach * lensReach)
-                            val dome = if (deep) 0.45f else 1f
-                            x += dx * lens * 0.42f * m * dome
-                            y += dy * lens * 0.42f * m * dome
-                            amount += lens * m * 0.6f
-                            size += lens * m * 0.9f * dome
-                        }
-                    }
-                    if (amount <= 0.02f && glint <= 0f) continue
+                    if (amount + swell <= 0.02f) continue
 
-                    // How far from what stands in front: none behind it, more as the room opens; the edge wanders.
+                    // How far from what stands in front: none behind it, more as the room opens; the edge wanders. A
+                    // wave passing comes nearer — up to the writing, never behind it — so that it shows where the
+                    // page leaves little room.
                     val room = smooth(clear, clear + feather, distance + (flow - 0.5f) * wander + grain * grainy)
-                    if (room <= 0.01f) continue
-                    val shown = (amount * room).coerceIn(0f, 1.2f)
+                    val near = if (swell > 0f) smooth(clear, clear + feather * 0.3f, distance + grain * grainy * 0.5f) else 0f
+                    if (room <= 0.01f && near <= 0.01f) continue
+                    val shown = (amount * room + swell * near).coerceIn(0f, 1.2f)
 
                     // A few of the dots are glitter: each catches the light at its own turn of the phone, where the
-                    // drift is (what a finger stirred up shines wherever it is).
+                    // drift is.
                     if (!deep) {
                         var caught = 0f
                         if (hash(i, j, 17) < SEQUINS) {
                             val turn = fcos((hash(i, j, 3) * 3f + light) * TWO_PI)
                             if (turn > 0.95f) caught = exp((turn - 1f) * 80f) * shine * amount
                         }
-                        val sparkle = ((glint + caught) * room).coerceIn(0f, 1f)
+                        val sparkle = (caught * room).coerceIn(0f, 1f)
                         if (sparkle > 0.1f) {
                             // Its colour turns with the light, as the colours of a sequin do.
                             val hue = ((hash(i, j, 13) * GLINTS.size + light * 2f).toInt() % GLINTS.size + GLINTS.size) % GLINTS.size
@@ -529,7 +431,7 @@ class Wall(context: Context) : View(context), SensorEventListener {
                             continue
                         }
                     }
-                    val level = min(LEVELS - 1, (shown * size * (LEVELS - 1) / 1.2f).toInt())
+                    val level = min(LEVELS - 1, (shown * (LEVELS - 1) / 1.2f).toInt())
                     if (level > 0) plainOf[level] = put(plainOf[level], countOf[level]++, x, y)
                 }
             }
@@ -646,8 +548,8 @@ class Wall(context: Context) : View(context), SensorEventListener {
         const val SEQUINS = 0.22f
         /** Every how many dots, each way, the flow is worked out; between, it is read off those. */
         const val FLOW_EVERY = 3
-        /** How long dots parted by a finger take to flow back, in seconds. */
-        const val PART_REFILL = 1.8f
+        /** How long a wave runs, in seconds. */
+        const val WAVE_LASTS = 2.8f
         /** The colours glitter catches the light in: the app's coral, a mint, a blue, an apricot. */
         const val PI_F = PI.toFloat()
         const val TWO_PI = (2 * PI).toFloat()
