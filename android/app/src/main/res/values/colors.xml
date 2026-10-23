@@ -12,6 +12,9 @@
     <color name="field_lilac">#E6E0F0</color>
     <!-- The widgets. -->
     <color name="tile">#FFFDF8</color>
+    <!-- A panel's cards, and the lines between their rows. -->
+    <color name="card">#F5F2EB</color>
+    <color name="card_line">#E7E1D6</color>
     <color name="switch_off">#D9D4CA</color>
     <color name="water_tile">#22343F</color>
     <color name="water">#7FD3AE</color>

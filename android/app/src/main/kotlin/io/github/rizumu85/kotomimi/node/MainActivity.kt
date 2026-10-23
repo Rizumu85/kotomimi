@@ -116,13 +116,17 @@ class MainActivity : Activity() {
     // In the models panel.
     private lateinit var rule: TextView
     private val rows = HashMap<Model, Row>()
-    /** The lent row's mark: made once, since the screen is redrawn every time sharing says how it stands. */
-    private val lentMark by lazy { flat(R.color.field_mint, 16) }
+    /** Each kind of work's card: how many of its models are here. */
+    private val groupSummary = HashMap<Task, TextView>()
 
     // In the performance panel.
     private lateinit var checkKey: TextView
     private lateinit var checkState: TextView
     private lateinit var checkBar: Bar
+    private lateinit var checkDial: Thing
+    private lateinit var checkNumber: TextView
+    private lateinit var checkVerdict: TextView
+    private lateinit var reportCard: LinearLayout
     private lateinit var report: TextView
     private lateinit var reportKey: TextView
     private lateinit var share: TextView
@@ -137,11 +141,13 @@ class MainActivity : Activity() {
     private lateinit var address: TextView
     private lateinit var lastComputer: TextView
     private lateinit var stay: TextView
+    private lateinit var stayCard: LinearLayout
+    private lateinit var devicesLens: Thing
 
     private lateinit var updater: Updater
 
-    /** A model's row in the models panel: the whole row (to mark the one lent, and to hide), what it says, and its key. */
-    private class Row(val view: View, val state: TextView, val act: TextView)
+    /** A model's row in the models panel: the whole row (to hide), what it says, its key, its mark of use, and the line above it. */
+    private class Row(val view: View, val state: TextView, val act: TextView, val mark: TextView, val divider: View?)
 
     /** What this screen's own worker is doing: nothing, a check, or the download of one model or of a newer version. */
     private var busy: Any? = null
@@ -303,10 +309,8 @@ class MainActivity : Activity() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun build(): View {
-        val column = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(px(PAGE_SIDE), px(PAGE_TOP), px(PAGE_SIDE), px(PAGE_FOOT))
-        }
+        // The page's blocks, in reading order; `arrange` lays them out in one column, or in two on a wide screen.
+        val status = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
 
         // The status: a word, letter-spaced, and a large thin number with its unit — and, when there is one, the
         // newer version beside the word.
@@ -320,15 +324,15 @@ class MainActivity : Activity() {
             setOnClickListener { open(toolsBox) }
         }
         top.addView(updatePill, LinearLayout.LayoutParams(WRAP_CONTENT, px(30)))
-        column.addView(top, spaced(top = 12))
+        status.addView(top, spaced(top = 12))
         val big = LinearLayout(this).apply { gravity = Gravity.BOTTOM }
         bigNumber = text("", 60f, R.color.ink).apply { typeface = Typeface.create("sans-serif-thin", Typeface.NORMAL); includeFontPadding = false }
         bigUnit = text("", 16f, R.color.ink_2, bold = true)
         big.addView(bigNumber)
         big.addView(bigUnit, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { leftMargin = px(6); bottomMargin = px(8) })
-        column.addView(big, spaced(top = 6))
+        status.addView(big, spaced(top = 6))
         from = text("", 12.5f, R.color.ink_2).apply { maxLines = 2; ellipsize = TextUtils.TruncateAt.END }
-        column.addView(from, spaced(top = 6))
+        status.addView(from, spaced(top = 6))
 
         // The share tile: what sharing is, and its switch. The whole tile is the switch.
         val shareTile = LinearLayout(this).apply {
@@ -346,7 +350,7 @@ class MainActivity : Activity() {
         shareTile.addView(shareWords, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f).apply { rightMargin = px(10) })
         switch = Switch(this)
         shareTile.addView(switch, LinearLayout.LayoutParams(px(60), px(36)))
-        column.addView(shareTile, spaced(top = 18))
+
 
         // The large tile.
         stage = FrameLayout(this)
@@ -354,7 +358,7 @@ class MainActivity : Activity() {
         glassTile = translating()
         paperTile = reviewing()
         for (tile in listOf(hearTile, glassTile, paperTile)) stage.addView(tile, FrameLayout.LayoutParams(MATCH_PARENT, px(STAGE_HEIGHT)))
-        column.addView(stage, spaced(top = 12))
+
 
         // The other two kinds of work, small.
         workRow = LinearLayout(this)
@@ -363,7 +367,7 @@ class MainActivity : Activity() {
             Task.TRANSLATE to small(Thing(this, Thing.Kind.PANES), "文本翻译") { open(modelsBox) },
             Task.COACH to small(Thing(this, Thing.Kind.NOTE), "语法反馈") { open(modelsBox) },
         )
-        column.addView(workRow, spaced(top = 12))
+
 
         // The computer's side and the check, and the models.
         val tools = LinearLayout(this)
@@ -371,12 +375,23 @@ class MainActivity : Activity() {
         dial = small(Thing(this, Thing.Kind.DIAL), "性能检测") { open(toolsBox) }
         tools.addView(lens.view, LinearLayout.LayoutParams(0, px(SMALL_HEIGHT), 1f))
         tools.addView(dial.view, LinearLayout.LayoutParams(0, px(SMALL_HEIGHT), 1f).apply { leftMargin = px(12) })
-        column.addView(tools, spaced(top = 12))
-        column.addView(modelsTile(), spaced(top = 12))
+        val modelsBlock = modelsTile()
+        blocks = listOf(status to 0, shareTile to 18, stage to 12, workRow to 12, tools to 12, modelsBlock to 12)
+        leftColumn = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        rightColumn = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val columns = LinearLayout(this).apply {
+            setPadding(px(PAGE_SIDE), px(PAGE_TOP), px(PAGE_SIDE), px(PAGE_FOOT))
+            addView(leftColumn, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
+            addView(rightColumn, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
+        }
+        arrange()
 
-        modelsBox = box("模型管理", "选择借给电脑的识别模型，下载翻译与语法反馈模型", modelsContent())
-        toolsBox = box("性能检测", "检测这台手机能否跟上说话的速度", toolsContent())
-        devicesBox = box("设备连接", "让电脑使用这台手机上的模型", devicesContent())
+        modelsBox = box("模型管理", "识别、翻译与语法反馈的模型", Thing(this, Thing.Kind.PANES), modelsContent())
+        // The two panels' objects in their heads say how things stand: the dial at the speed found, the lens lit.
+        checkDial = Thing(this, Thing.Kind.DIAL)
+        devicesLens = Thing(this, Thing.Kind.LENS)
+        toolsBox = box("性能检测", "这台手机能否跟上说话的速度", checkDial, toolsContent())
+        devicesBox = box("设备连接", "让电脑使用这台手机上的模型", devicesLens, devicesContent())
 
         // The page lies under the status bar and the navigation bar — Android 15 puts every app there, and here it is
         // asked for on the versions before, so that all of them are one case — and keeps its content clear of them:
@@ -387,14 +402,18 @@ class MainActivity : Activity() {
             isFillViewport = true
             isVerticalScrollBarEnabled = false
             overScrollMode = View.OVER_SCROLL_NEVER
-            addView(column)
+            addView(columns)
             setOnScrollChangeListener { _, _, y, _, _ -> wall.scrolled = y.toFloat() }
         }
         // A touch on the wallpaper — between the tiles — rings out from the finger.
-        column.setOnTouchListener { _, event ->
-            if (event.actionMasked == MotionEvent.ACTION_DOWN) wall.touched(event.x + scroll.paddingLeft, event.y - scroll.scrollY + scroll.paddingTop)
+        val ring = View.OnTouchListener { _, event ->
+            if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+                val at = IntArray(2).also { page.getLocationOnScreen(it) }
+                wall.touched(event.rawX - at[0], event.rawY - at[1])
+            }
             false
         }
+        for (view in listOf(columns, leftColumn, rightColumn, status)) view.setOnTouchListener(ring)
         wall = Wall(this)
         page = FrameLayout(this).apply {
             addView(wall, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
@@ -412,6 +431,35 @@ class MainActivity : Activity() {
             }
         }
         return page
+    }
+
+    /** The page's blocks with the space above each, and the two columns they are laid out in. */
+    private lateinit var blocks: List<Pair<View, Int>>
+    private lateinit var leftColumn: LinearLayout
+    private lateinit var rightColumn: LinearLayout
+
+    /**
+     * The blocks in one column — or, on a screen wide enough (a phone on its side, a tablet), in two: what the phone
+     * is doing on the left, the rest on the right.
+     */
+    private fun arrange() {
+        // Wide: a tablet, or a phone on its side — even a small one (the Duoqin F22 Pro lies 533 dp wide).
+        val config = resources.configuration
+        val wide = config.screenWidthDp >= TWO_COLUMNS_FROM || (config.screenWidthDp > config.screenHeightDp && config.screenWidthDp >= TWO_COLUMNS_ON_SIDE)
+        for ((view, _) in blocks) (view.parent as? ViewGroup)?.removeView(view)
+        blocks.forEachIndexed { i, (view, above) ->
+            val second = wide && i >= 3
+            val into = if (second) rightColumn else leftColumn
+            into.addView(view, spaced(top = if (second && into.childCount == 0) 12 else above))
+        }
+        rightColumn.visibility = if (wide) View.VISIBLE else View.GONE
+        (rightColumn.layoutParams as? LinearLayout.LayoutParams)?.leftMargin = if (wide) px(16) else 0
+    }
+
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        close(at = false)
+        arrange()
     }
 
     /** The system bars' room, for a panel that opens over the page. */
@@ -480,7 +528,7 @@ class MainActivity : Activity() {
         val number = text("", 34f, numberColor).apply { typeface = Typeface.create("sans-serif-light", Typeface.NORMAL); includeFontPadding = false }
         val sub = text("", 11.5f, subColor).apply { maxLines = 1; ellipsize = TextUtils.TruncateAt.END }
         tile.addView(number, FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { leftMargin = px(18); topMargin = px(18) })
-        tile.addView(sub, FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { leftMargin = px(18); topMargin = px(60) })
+        tile.addView(sub, FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { leftMargin = px(18); topMargin = px(66) })
         return number to sub
     }
 
@@ -490,7 +538,7 @@ class MainActivity : Activity() {
         words.addView(text(name, 14f, nameColor, bold = true).apply { gravity = Gravity.END })
         val sub = text("", 11.5f, subColor).apply { maxLines = 1; ellipsize = TextUtils.TruncateAt.END; gravity = Gravity.END }
         words.addView(sub, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = px(1) })
-        tile.addView(words, FrameLayout.LayoutParams(px(150), WRAP_CONTENT, Gravity.END).apply { rightMargin = px(18); topMargin = px(18) })
+        tile.addView(words, FrameLayout.LayoutParams(px(140), WRAP_CONTENT, Gravity.END).apply { rightMargin = px(18); topMargin = px(16) })
         return sub
     }
 
@@ -527,8 +575,13 @@ class MainActivity : Activity() {
 
     // ── The panels ──────────────────────────────────────────────────────────────────────────────────────────────
 
-    /** A panel: a large rounded sheet with a grip, what it is, and its contents. Opened, it comes up from the foot. */
-    private fun box(name: String, about: String, contents: View): View {
+    /**
+     * A panel: a large rounded sheet — a grip, its object and what it is, and its contents in cards. Opened, it comes
+     * up from the foot; pulled down by its head, or touched outside, it goes. On a wide screen it stands in the middle,
+     * no wider than a phone.
+     */
+    @SuppressLint("ClickableViewAccessibility")
+    private fun box(name: String, about: String, thing: Thing, contents: View): View {
         val box = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             isClickable = true
@@ -536,13 +589,29 @@ class MainActivity : Activity() {
             elevation = px(12f)
             setPadding(0, px(10), 0, 0)
         }
-        box.addView(View(this).apply { background = flat(R.color.switch_off, 2) }, LinearLayout.LayoutParams(px(36), px(4)).apply { gravity = Gravity.CENTER_HORIZONTAL })
-        val head = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(px(22), px(14), px(22), px(4)) }
-        head.addView(text(name, 19f, R.color.ink, bold = true))
-        head.addView(text(about, 12.5f, R.color.ink_2), spaced(top = 3))
-        box.addView(head)
+        val grip = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        grip.addView(View(this).apply { background = flat(R.color.switch_off, 2) }, LinearLayout.LayoutParams(px(36), px(4)).apply { gravity = Gravity.CENTER_HORIZONTAL })
+        val head = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL; setPadding(px(22), px(14), px(22), px(10)) }
+        head.addView(thing, LinearLayout.LayoutParams(px(46), px(46)))
+        val words = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        words.addView(text(name, 19f, R.color.ink, bold = true))
+        words.addView(text(about, 12.5f, R.color.ink_2), spaced(top = 2))
+        head.addView(words, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f).apply { leftMargin = px(14) })
+        grip.addView(head)
+        box.addView(grip)
         val inside = ScrollView(this).apply { isVerticalScrollBarEnabled = false; addView(contents) }
         box.addView(inside, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+        // Pulled down by its head: it follows the finger, and goes where it was pulled far enough.
+        var from = 0f
+        grip.setOnTouchListener { _, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> from = event.rawY
+                MotionEvent.ACTION_MOVE -> box.translationY = (event.rawY - from).coerceAtLeast(0f)
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL ->
+                    if (box.translationY > px(110f)) close() else box.animate().translationY(0f).setDuration(220).setInterpolator(OvershootInterpolator(1.2f)).start()
+            }
+            true
+        }
         return box
     }
 
@@ -553,7 +622,7 @@ class MainActivity : Activity() {
         which.animate().cancel()
         (which.parent as? ViewGroup)?.removeView(which)
         which.translationY = 0f
-        val inside = (which as ViewGroup).getChildAt(2)
+        val inside = (which as ViewGroup).getChildAt(1)
         inside.layoutParams = (inside.layoutParams as LinearLayout.LayoutParams).apply { height = WRAP_CONTENT }
         val shade = View(this).apply {
             setBackgroundColor(getColor(R.color.scrim))
@@ -562,14 +631,15 @@ class MainActivity : Activity() {
         }
         page.addView(shade, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
         val room = page.height - bars.top - bars.bottom
-        page.addView(which, FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, Gravity.BOTTOM).apply {
-            leftMargin = px(8); rightMargin = px(8); bottomMargin = bars.bottom + px(8)
+        val wide = page.width - px(16)
+        page.addView(which, FrameLayout.LayoutParams(minOf(wide, px(PANEL_MOST)).takeIf { page.width > 0 } ?: MATCH_PARENT, WRAP_CONTENT, Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL).apply {
+            bottomMargin = bars.bottom + px(8)
         })
         // A panel no higher than the room: its contents scroll inside.
         inside.post {
             // Not laid out yet (a panel asked for before the first layout): as high as it is.
             if (room <= 0) return@post
-            val most = maxOf(px(160), (room * 0.86f).toInt() - (which.height - inside.height))
+            val most = maxOf(px(160), (room * 0.88f).toInt() - (which.height - inside.height))
             if (inside.height > most) inside.layoutParams = (inside.layoutParams as LinearLayout.LayoutParams).apply { height = most }
         }
         opened = which
@@ -599,61 +669,93 @@ class MainActivity : Activity() {
     /** A key of a panel: the main one, in the coral of the switch, or a quiet one. */
     private fun key(words: String, main: Boolean, onTouch: () -> Unit) = text(words, 14.5f, if (main) R.color.tile else R.color.ink, bold = true).apply {
         gravity = Gravity.CENTER
-        background = if (main) flat(R.color.key, 18) else flat(R.color.dial, 18, edge = R.color.dial_edge)
+        background = if (main) flat(R.color.key, 18) else flat(R.color.tile, 18, edge = R.color.card_line)
         setPadding(px(16), 0, px(16), 0)
         setOnClickListener { onTouch() }
     }
 
+    /** A card of a panel: one group of what it holds. */
+    private fun card(): LinearLayout = LinearLayout(this).apply {
+        orientation = LinearLayout.VERTICAL
+        background = flat(R.color.card, 22)
+        setPadding(px(16), px(14), px(16), px(14))
+    }
+
+    /** A card's heading: a small object, a name, and a word at the right. */
+    private fun heading(card: LinearLayout, thing: Thing?, name: String): TextView {
+        val row = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL }
+        if (thing != null) row.addView(thing, LinearLayout.LayoutParams(px(26), px(26)).apply { rightMargin = px(10) })
+        row.addView(text(name, 14f, R.color.ink, bold = true), LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
+        val right = text("", 12f, R.color.ink_3)
+        row.addView(right)
+        card.addView(row)
+        return right
+    }
+
+    /** A thin line between two rows of a card. */
+    private fun line(card: LinearLayout) = card.addView(View(this).apply { setBackgroundColor(getColor(R.color.card_line)) }, LinearLayout.LayoutParams(MATCH_PARENT, px(1)).apply { topMargin = px(2); bottomMargin = px(2) })
+
+    /** A small rounded word: how a row stands. */
+    private fun pill(words: String, fill: Int, ink: Int) = text(words, 12f, ink, bold = true).apply {
+        gravity = Gravity.CENTER
+        background = flat(fill, 12)
+        setPadding(px(10), px(4), px(10), px(4))
+    }
+
     /**
-     * The models, in three short groups by what they are lent for, each under a small heading. The recognizer that is
-     * lent is marked; a touch on another that is here lends that one instead. The text models are all lent, so a
-     * touch on one does nothing.
+     * The models, a card for each kind of work. The recognizer that is lent is marked; a touch on another that is here
+     * lends that one instead. The text models are all lent, so a touch on one does nothing.
      */
     private fun modelsContent(): View {
         val models = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(px(14), px(4), px(14), px(18))
         }
-        rule = text("", 11.5f, R.color.ink_2)
+        rule = text("", 11.5f, R.color.ink_3).apply { setLineSpacing(0f, 1.15f) }
         for (task in Task.values()) {
-            models.addView(
-                text(TASK_NAMES.getValue(task), 12f, R.color.ink_3, bold = true).apply { letterSpacing = 0.06f },
-                LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = px(if (task == Task.HEAR) 10 else 18); leftMargin = px(10) },
-            )
+            val group = card()
+            groupSummary[task] = heading(group, Thing(this, THINGS.getValue(task)), TASK_NAMES.getValue(task))
+            var first = true
             for (model in ALL_MODELS.filter { it.task == task }) {
                 val row = LinearLayout(this).apply {
                     gravity = Gravity.CENTER_VERTICAL
-                    minimumHeight = px(58)
-                    setPadding(px(10), px(6), px(4), px(6))
+                    minimumHeight = px(60)
+                    setPadding(0, px(8), 0, px(8))
                     setOnClickListener { if (model in choices.lendable(store) && busy == null && !Sharing.on) { choices.share(model); lastVerdict = null; refresh() } }
                 }
                 val words = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
                 val state = text("", 12f, R.color.ink_2)
                 words.addView(text(model.name, 15f, R.color.ink, bold = true))
                 words.addView(state, spaced(top = 2))
+                val mark = pill("使用中", R.color.field_mint, R.color.good)
                 val act = key("下载", main = false) { if (busy == null) fetch(model) else if (busy === model) halt() }
                 row.addView(words, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f).apply { rightMargin = px(8) })
+                row.addView(mark, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
                 row.addView(act, LinearLayout.LayoutParams(WRAP_CONTENT, px(36)))
-                models.addView(row, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = px(2) })
-                rows[model] = Row(row, state, act)
+                val divider = View(this).apply { setBackgroundColor(getColor(R.color.card_line)) }
+                if (!first) group.addView(divider, LinearLayout.LayoutParams(MATCH_PARENT, px(1)))
+                group.addView(row, spaced(top = if (first) 6 else 0))
+                rows[model] = Row(row, state, act, mark, divider.takeIf { !first })
+                first = false
             }
+            models.addView(group, spaced(top = if (task == Task.HEAR) 6 else 12))
             // Under the recognizers, how the one that is lent comes to be it.
-            if (task == Task.HEAR) models.addView(rule, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = px(4); leftMargin = px(10); rightMargin = px(6) })
+            if (task == Task.HEAR) models.addView(rule, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = px(8); leftMargin = px(8); rightMargin = px(8) })
         }
         return models
     }
 
-    /** The performance panel: the check and its report; a newer version of the app, and the key that asks for one. */
+    /** The performance panel: what the check found, the check and its report; a newer version, and the key that asks for one. */
     private fun toolsContent(): View {
         val tools = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(px(22), px(12), px(22), px(20))
+            setPadding(px(14), px(4), px(14), px(18))
         }
         // A newer version, when there is one: first in the panel, and not there otherwise.
         updateRow = LinearLayout(this).apply {
             gravity = Gravity.CENTER_VERTICAL
-            background = flat(R.color.field_apricot, 18)
-            setPadding(px(14), px(10), px(10), px(10))
+            background = flat(R.color.field_apricot, 22)
+            setPadding(px(16), px(12), px(12), px(12))
             val words = LinearLayout(this@MainActivity).apply { orientation = LinearLayout.VERTICAL }
             updateTitle = text("", 15f, R.color.ink, bold = true)
             updateState = text("", 12f, R.color.ink_2)
@@ -663,52 +765,82 @@ class MainActivity : Activity() {
             addView(words, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f).apply { rightMargin = px(10) })
             addView(updateAct, LinearLayout.LayoutParams(WRAP_CONTENT, px(36)))
         }
-        tools.addView(updateRow, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { bottomMargin = px(14) })
+        tools.addView(updateRow, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = px(6); bottomMargin = px(6) })
 
-        checkState = text("", 13.5f, R.color.ink).apply { setLineSpacing(0f, 1.15f) }
-        tools.addView(checkState)
+        // What the check found: the dial at the speed, the number, and what it means.
+        val found = card()
+        val words = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        checkNumber = text("", 36f, R.color.ink).apply { typeface = Typeface.create("sans-serif-light", Typeface.NORMAL); includeFontPadding = false }
+        checkVerdict = text("", 13f, R.color.ink_2)
+        words.addView(checkNumber)
+        words.addView(checkVerdict, spaced(top = 4))
+        found.addView(words)
+        checkState = text("", 12.5f, R.color.ink_2).apply { setLineSpacing(0f, 1.15f) }
+        found.addView(checkState, spaced(top = 12))
         checkBar = Bar(this)
-        tools.addView(checkBar, spaced(top = 12))
+        found.addView(checkBar, spaced(top = 10))
         checkKey = key("", main = true) { if (busy == "check") halt() else if (busy == null && !Sharing.on) check() }
-        tools.addView(checkKey, LinearLayout.LayoutParams(MATCH_PARENT, px(48)).apply { topMargin = px(14) })
+        found.addView(checkKey, LinearLayout.LayoutParams(MATCH_PARENT, px(46)).apply { topMargin = px(14) })
+        tools.addView(found, spaced(top = 6))
 
         // The report: kept shut, it is long and only wanted when asked for, or to send.
-        val keys = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL }
+        reportCard = card()
+        val reportHead = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL }
+        reportHead.addView(text("检测报告", 14f, R.color.ink, bold = true), LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
+        share = key("分享", main = false) { lastReport?.let(::send) }
         reportKey = key("", main = false) { reportOpen = !reportOpen; refresh() }
-        share = key("分享报告", main = false) { lastReport?.let(::send) }
-        keys.addView(reportKey, LinearLayout.LayoutParams(0, px(40), 1f))
-        keys.addView(share, LinearLayout.LayoutParams(0, px(40), 1f).apply { leftMargin = px(10) })
-        tools.addView(keys, spaced(top = 10))
-        report = text("", 11.5f, R.color.ink).apply {
+        reportHead.addView(share, LinearLayout.LayoutParams(WRAP_CONTENT, px(32)))
+        reportHead.addView(reportKey, LinearLayout.LayoutParams(WRAP_CONTENT, px(32)).apply { leftMargin = px(8) })
+        reportCard.addView(reportHead)
+        report = text("", 11f, R.color.ink).apply {
             typeface = Typeface.MONOSPACE
             setTextIsSelectable(true)
             setLineSpacing(0f, 1.2f)
         }
-        tools.addView(report, spaced(top = 10))
+        reportCard.addView(report, spaced(top = 10))
+        tools.addView(reportCard, spaced(top = 12))
 
         // The app's own version, and the key that asks for a newer one.
-        val version = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL }
+        val version = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL; setPadding(px(8), 0, px(2), 0) }
         version.addView(text("Kotomimi 手机端 ${BuildConfigLite.VERSION}", 12.5f, R.color.ink_2), LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
         lookKey = key("", main = false) { look(asked = true) }
         version.addView(lookKey, LinearLayout.LayoutParams(WRAP_CONTENT, px(34)))
-        tools.addView(version, spaced(top = 18))
+        tools.addView(version, spaced(top = 16))
         return tools
     }
 
-    /** The computer's side: where this phone is, how a computer finds it, which one used it last, and staying awake. */
+    /** The computer's side: where this phone is and who uses it, how a computer finds it, and staying awake. */
     private fun devicesContent(): View {
         val devices = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(px(22), px(12), px(22), px(20))
+            setPadding(px(14), px(4), px(14), px(18))
         }
-        address = text("", 20f, R.color.ink, bold = true)
-        devices.addView(address)
-        devices.addView(text("在电脑端 Kotomimi 的「另一台设备」中点击搜索，即可找到这台手机。两台设备需连接同一个 Wi-Fi。", 13f, R.color.ink_2).apply { setLineSpacing(0f, 1.2f) }, spaced(top = 8))
-        lastComputer = text("", 13f, R.color.ink)
-        devices.addView(lastComputer, spaced(top = 14))
+        val here = card()
+        here.addView(text("本机地址", 11.5f, R.color.ink_3))
+        address = text("", 20f, R.color.ink, bold = true).apply { setTextIsSelectable(true) }
+        here.addView(address, spaced(top = 2))
+        lastComputer = text("", 12.5f, R.color.ink_2)
+        here.addView(lastComputer, spaced(top = 12))
+        devices.addView(here, spaced(top = 6))
+
+        // How a computer finds it, step by step.
+        val steps = card()
+        heading(steps, null, "连接方法")
+        listOf("在电脑上打开 Kotomimi", "在设置中的「另一台设备」点击搜索", "选择这台手机。两台设备需连接同一个 Wi-Fi").forEachIndexed { i, words ->
+            val row = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL }
+            row.addView(text("${i + 1}", 12f, R.color.tile, bold = true).apply { gravity = Gravity.CENTER; background = flat(R.color.key, 11) }, LinearLayout.LayoutParams(px(22), px(22)))
+            row.addView(text(words, 13f, R.color.ink), LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f).apply { leftMargin = px(12) })
+            steps.addView(row, spaced(top = 10))
+        }
+        devices.addView(steps, spaced(top = 12))
+
         // Where the phone may still be stopped in the background: the one place to let it run.
+        stayCard = card()
+        heading(stayCard, null, "后台运行")
+        stayCard.addView(text("部分手机会在锁屏后暂停应用，导致电脑连接中断。允许后台运行可以避免。", 12.5f, R.color.ink_2).apply { setLineSpacing(0f, 1.15f) }, spaced(top = 6))
         stay = key("", main = false) { letRun() }
-        devices.addView(stay, LinearLayout.LayoutParams(MATCH_PARENT, px(44)).apply { topMargin = px(16) })
+        stayCard.addView(stay, LinearLayout.LayoutParams(MATCH_PARENT, px(42)).apply { topMargin = px(12) })
+        devices.addView(stayCard, spaced(top = 12))
         return devices
     }
 
@@ -876,15 +1008,18 @@ class MainActivity : Activity() {
             val tight = isText && !tooLarge && store.has(model) && !shared && model.holdsMb > free
             // The second engine's row of a model that has two is offered only once it is here: to the person they
             // are one model, and the check, not they, decides between the two.
-            row.view.visibility = if (model.twin && model.reader == Reader.LLAMA_CPP && !store.has(model) && busy !== model) View.GONE else View.VISIBLE
-            row.view.background = if (model === lent && lendable.size > 1) lentMark else null
+            val hidden = model.twin && model.reader == Reader.LLAMA_CPP && !store.has(model) && busy !== model
+            row.view.visibility = if (hidden) View.GONE else View.VISIBLE
+            row.divider?.visibility = row.view.visibility
+            val inUse = if (isText) model in lentText else model === lent
+            row.mark.visibility = if (store.has(model) && inUse && busy !== model) View.VISIBLE else View.GONE
             if (busy !== model) {
                 // What a row is good for, where that is known; for a model in two rows, which of the two it is.
                 val whose = model.note ?: twinWords(model)
                 row.state.text = when {
-                    tooLarge -> listOfNotNull("已下载".takeIf { store.has(model) }, model.sizeInWords, "这台手机内存不足")
-                    tight -> listOfNotNull("已下载", model.sizeInWords, "当前可用内存不足，请关闭其他应用")
-                    store.has(model) -> if (model === lent && lendable.size > 1) listOfNotNull("正在使用", whose) else listOfNotNull("已下载", whose, model.sizeInWords)
+                    tooLarge -> listOfNotNull(model.sizeInWords, "这台手机内存不足")
+                    tight -> listOfNotNull(model.sizeInWords, "当前可用内存不足，请关闭其他应用")
+                    store.has(model) -> listOfNotNull(whose, model.sizeInWords, "已下载".takeIf { !inUse })
                     begun > 0 -> listOfNotNull(whose, "已下载 ${percent(begun, model.bytes)}，可继续")
                     else -> listOfNotNull(whose, model.sizeInWords)
                 }.joinToString(" · ")
@@ -893,10 +1028,21 @@ class MainActivity : Activity() {
             }
             row.act.visibility = if (store.has(model) || (tooLarge && busy !== model)) View.GONE else View.VISIBLE
         }
+        for (task in Task.values()) {
+            val count = ALL_MODELS.count { it.task == task && store.has(it) }
+            groupSummary[task]?.text = if (count == 0) "未下载" else "已下载 $count 个"
+        }
         rule.visibility = if (lendable.size > 1) View.VISIBLE else View.GONE
-        rule.text = if (choices.chosen(store) != null) "正在使用你选择的识别模型。点击其他模型即可切换。" else "未手动选择时，按性能检测的结果选用跟得上说话的模型中最准确的一个。"
+        rule.text = if (choices.chosen(store) != null) "正在使用你选择的识别模型。点击其他已下载的模型即可切换。" else "未手动选择时，按性能检测的结果选用跟得上说话的模型中最准确的一个。点击模型即可手动选择。"
 
         // The performance panel.
+        checkDial.amount = ((found ?: 0.0) / 3.0).toFloat()
+        checkNumber.text = found?.let { unit("%.1f".format(it), " 倍速") } ?: "—"
+        checkVerdict.text = when {
+            found == null -> "尚未检测"
+            found >= 1.0 -> "快于说话速度，可实时识别"
+            else -> "慢于说话速度，识别会有延迟"
+        }
         checkKey.text = if (busy == "check") "停止检测" else if (lastReport == null) "开始检测" else "重新检测"
         checkKey.alpha = if (busy == "check" || (busy == null && !shared && here.isNotEmpty() && engine.present)) 1f else 0.45f
         if (busy != "check") {
@@ -904,23 +1050,28 @@ class MainActivity : Activity() {
                 shared -> "共享期间无法检测，请先停止共享。"
                 lastVerdict != null -> "${lastVerdict!!.first} · ${lastVerdict!!.second}"
                 here.isEmpty() -> "请先下载至少一个模型。"
-                else -> "用一段固定录音测试识别速度，检测期间请勿操作手机，约需数分钟。"
+                else -> "用一段固定录音测试识别速度。检测期间请勿操作手机，约需数分钟。"
             }
         }
         checkBar.visibility = if (busy == "check") View.VISIBLE else View.GONE
         checkBar.done = checked
-        reportKey.visibility = if (lastReport == null) View.GONE else View.VISIBLE
-        share.visibility = reportKey.visibility
-        reportKey.text = if (reportOpen) "收起报告" else "查看报告"
+        reportCard.visibility = if (lastReport == null) View.GONE else View.VISIBLE
+        reportKey.text = if (reportOpen) "收起" else "展开"
         report.text = lastReport.orEmpty()
-        report.visibility = if (lastReport != null && reportOpen) View.VISIBLE else View.GONE
+        report.visibility = if (reportOpen) View.VISIBLE else View.GONE
 
         // The devices panel.
-        address.text = if (shared) sharing.address?.let { "本机 $it" } ?: "这台手机未连接 Wi-Fi" else "共享未启用"
-        lastComputer.text = sharing.seen?.let { "最近连接的电脑：$it · ${ago(sharing.seenAt)}" } ?: if (shared) "尚无电脑连接。" else "启用共享后，电脑才能找到这台手机。"
+        devicesLens.lit = shared && recently
+        address.text = if (shared) sharing.address ?: "未连接 Wi-Fi" else "共享未启用"
+        lastComputer.text = when {
+            shared && recently -> "${sharing.seen} 正在使用这台手机"
+            sharing.seen != null -> "最近连接的电脑：${sharing.seen} · ${ago(sharing.seenAt)}"
+            shared -> "尚无电脑连接。"
+            else -> "启用共享后，电脑才能找到这台手机。"
+        }
         val runs = mayRun()
-        stay.visibility = if (!runs || FREEZING_MAKERS.any { Build.MANUFACTURER.lowercase().contains(it) }) View.VISIBLE else View.GONE
-        stay.text = if (!runs) "允许在后台运行，避免锁屏后断开" else "前往系统设置，允许在后台运行"
+        stayCard.visibility = if (!runs || FREEZING_MAKERS.any { Build.MANUFACTURER.lowercase().contains(it) }) View.VISIBLE else View.GONE
+        stay.text = if (!runs) "允许在后台运行" else "前往系统设置"
 
         showUpdate()
         if (busy == null) window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -1280,6 +1431,16 @@ class MainActivity : Activity() {
         /** The large tile's height and a small tile's, in dp. */
         const val STAGE_HEIGHT = 214
         const val SMALL_HEIGHT = 128
+
+        /** A panel's widest, in dp: on a wide screen it stands in the middle, as wide as a phone. */
+        const val PANEL_MOST = 560
+
+        /** From this width, in dp, the page is laid out in two columns: and from this one on its side. */
+        const val TWO_COLUMNS_FROM = 600
+        const val TWO_COLUMNS_ON_SIDE = 480
+
+        /** Each kind of work's object. */
+        val THINGS = mapOf(Task.HEAR to Thing.Kind.WATER, Task.TRANSLATE to Thing.Kind.PANES, Task.COACH to Thing.Kind.NOTE)
 
         /** Each kind of work by its full name, as the panels and tiles say it. */
         val TASK_NAMES = mapOf(Task.HEAR to "语音识别", Task.TRANSLATE to "文本翻译", Task.COACH to "语法反馈")

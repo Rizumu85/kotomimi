@@ -20,7 +20,6 @@ import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sin
-import kotlin.random.Random
 
 /**
  * The look: the OriginOS 1.0 desktop the user pointed to (2026-10-23) — a living wallpaper and, on it, round widgets
@@ -53,15 +52,19 @@ fun blend(a: Int, b: Int, t: Float): Int {
 enum class Mood { IDLE, HEAR, TRANSLATE, COACH }
 
 /**
- * The wallpaper, and part of the app: large soft fields of colour with a fine grain, coloured by what the phone is
+ * The wallpaper, and part of the app: large soft fields of colour under a fine grid of dots, coloured by what the phone is
  * doing and always slowly moving — slower while nothing is lent. It answers what happens: a reading heard sets the
  * fields' edges trembling, a sentence translated sends a light sweeping across, a correction spreads like a drop of
- * red ink, and a touch on it rings out from the finger. The page scrolling moves the fields a little behind it.
+ * red ink, and a touch on it rings out from the finger. The page scrolling moves the fields a little behind it, and
+ * the dots less still: a grid held further back. (Dots in place of a grain the user took for them, 2026-10-23: a
+ * touch of the technical against the soft fields.)
  */
 class Wall(context: Context) : View(context) {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
-    private val grain = Paint().apply { shader = BitmapShader(grainTile(), Shader.TileMode.REPEAT, Shader.TileMode.REPEAT) }
+    private val grid = BitmapShader(dotTile(), Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
+    private val dots = Paint().apply { shader = grid }
+    private val gridAt = android.graphics.Matrix()
     private val path = Path()
 
     private var mood = Mood.IDLE
@@ -158,7 +161,9 @@ class Wall(context: Context) : View(context) {
                 canvas.drawCircle(d.x, d.y, context.px(10f) + k * w * 0.4f, paint)
             }
         }
-        canvas.drawRect(0f, 0f, w, h, grain)
+        gridAt.setTranslate(0f, -scrolled * 0.05f)
+        grid.setLocalMatrix(gridAt)
+        canvas.drawRect(0f, 0f, w, h, dots)
         if (running) postInvalidateOnAnimation()
     }
 
@@ -180,16 +185,19 @@ class Wall(context: Context) : View(context) {
         canvas.drawPath(path, paint)
     }
 
-    /** A small tile of grain: a few dark specks on nothing, repeated over the whole wall. */
-    private fun grainTile(): Bitmap {
-        val size = 96
+    /** One cell of the grid: a small soft dot in a square of nothing, repeated over the whole wall. */
+    private fun dotTile(): Bitmap {
+        val size = context.px(DOT_EVERY).coerceAtLeast(6)
         val tile = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-        val random = Random(7)
-        repeat(size * size / 9) {
-            val alpha = 10 + random.nextInt(22)
-            tile.setPixel(random.nextInt(size), random.nextInt(size), Color.argb(alpha, 50, 60, 80))
-        }
+        val canvas = Canvas(tile)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(46, 40, 52, 70) }
+        canvas.drawCircle(size / 2f, size / 2f, context.px(1.05f), paint)
         return tile
+    }
+
+    private companion object {
+        /** The grid's spacing, in dp. */
+        const val DOT_EVERY = 13
     }
 }
 
