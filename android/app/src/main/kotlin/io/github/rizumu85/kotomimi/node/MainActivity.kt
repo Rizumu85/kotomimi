@@ -564,9 +564,31 @@ class MainActivity : Activity() {
         (modelsBlock.layoutParams as? LinearLayout.LayoutParams)?.apply { height = if (side && !on) 0 else WRAP_CONTENT; weight = if (side && !on) 1f else 0f }
         grid.stretch = side
         stage.minimumHeight = if (fill) stageHigh else 0
+        layGlass(snug = fill)
         for (tile in listOf(hearTile, glassTile, paperTile)) tile.layoutParams = tile.layoutParams.apply { height = if (fill) MATCH_PARENT else stageHigh }
         leftColumn.requestLayout()
         rightColumn.requestLayout()
+    }
+
+    /** Whether the translation's tile is the low one of a phone on its side. */
+    private var glassSnug = false
+
+    /**
+     * The translation's tile as on a phone held upright, or `snug`, as low and narrow as a phone on its side leaves it:
+     * the model's line goes (the models panel has it; in the corner it ran into the number), the sentence's pane comes
+     * up into its place and keeps to one line, and the translation's to two — so the sentence shows whole above its
+     * translation instead of half under it.
+     */
+    private fun layGlass(snug: Boolean) {
+        glassSnug = snug
+        glassSub.visibility = if (snug) View.GONE else View.VISIBLE
+        paneBack.maxLines = if (snug) 1 else 3
+        paneFront.maxLines = if (snug) 2 else 3
+        (paneBack.layoutParams as? FrameLayout.LayoutParams)?.apply { topMargin = px(if (snug) 56 else 84); rightMargin = px(if (snug) 48 else 64) }
+        (paneFront.layoutParams as? FrameLayout.LayoutParams)?.apply { leftMargin = px(if (snug) 40 else 56); bottomMargin = px(if (snug) 12 else 18) }
+        paneFront.setPadding(px(12), px(if (snug) 8 else 10), px(12), px(if (snug) 8 else 10))
+        paneBack.requestLayout()
+        paneFront.requestLayout()
     }
 
     /** Where `view` stands on the page, in the page's (and the wallpaper's) pixels. */
@@ -625,6 +647,7 @@ class MainActivity : Activity() {
         super.onConfigurationChanged(newConfig)
         close(at = false)
         arrange()
+        refresh()
     }
 
     /** The system bars' room, for a panel that opens over the page. */
@@ -1122,7 +1145,8 @@ class MainActivity : Activity() {
                 else -> listOfNotNull("正在识别", sharing.peer?.let { "来自 $it" }).joinToString(" · ")
             }
             recently -> "待命 · 最近连接 ${sharing.seen}"
-            else -> "等待电脑连接" + sharing.address?.let { " · 本机 $it" }.orEmpty()
+            // The address is the share tile's to say.
+            else -> "等待电脑连接"
         }
 
         // The share tile.
