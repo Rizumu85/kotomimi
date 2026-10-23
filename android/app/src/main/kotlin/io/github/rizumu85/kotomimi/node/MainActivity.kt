@@ -379,6 +379,11 @@ class MainActivity : Activity() {
         big.addView(bigNumber)
         big.addView(bigUnit, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { leftMargin = px(6); bottomMargin = px(8) })
         status.addView(big, spaced(top = 6))
+        // In the dark the status gives light: its word in a coral glow, the large number in a soft white one.
+        if (night()) {
+            word.setShadowLayer(px(10f), 0f, 0f, (getColor(R.color.key) and 0x00FFFFFF) or (0x99 shl 24))
+            bigNumber.setShadowLayer(px(16f), 0f, 0f, android.graphics.Color.argb(0x55, 255, 255, 255))
+        }
         from = text("", 12.5f, R.color.ink_2).apply { maxLines = 2; ellipsize = TextUtils.TruncateAt.END }
         status.addView(from, spaced(top = 6))
 
@@ -388,6 +393,8 @@ class MainActivity : Activity() {
             background = flat(R.color.tile, 30, alpha = 215)
             setPadding(px(20), px(14), px(16), px(14))
             minimumHeight = px(76)
+            // The switch's glow in the dark spreads past the switch, not cut square at its edge.
+            clipChildren = false
             setOnClickListener { if (Sharing.on) ShareService.stop(this@MainActivity) else if (busy == null) lend() }
         }
         val shareWords = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -442,7 +449,7 @@ class MainActivity : Activity() {
         devicesLens = Thing(this, Thing.Kind.LENS)
         toolsBox = box("性能检测", "这台手机能否跟上说话的速度", checkDial, toolsContent())
         devicesBox = box("设备连接", "让电脑使用这台手机上的模型", devicesLens, devicesContent())
-        settingsBox = box("设置", "外观与版本", Thing(this, Thing.Kind.GEAR), settingsContent())
+        settingsBox = box("设置", "外观与版本", Thing(this, Thing.Kind.TOGGLES), settingsContent())
 
         // The page lies under the status bar and the navigation bar — Android 15 puts every app there, and here it is
         // asked for on the versions before, so that all of them are one case — and keeps its content clear of them:
@@ -1174,7 +1181,7 @@ class MainActivity : Activity() {
             pick.addView(text(which.words, 14f, if (chosen) R.color.ink else R.color.ink_3, bold = chosen), LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
             pick.addView(View(this).apply { background = flat(R.color.key, 2); visibility = if (chosen) View.VISIBLE else View.INVISIBLE },
                 LinearLayout.LayoutParams(px(18), px(3)).apply { topMargin = px(5) })
-            picks.addView(pick, LinearLayout.LayoutParams(WRAP_CONTENT, px(42)).apply { rightMargin = px(28) })
+            picks.addView(pick, LinearLayout.LayoutParams(0, px(42), 1f))
         }
         look.addView(picks, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = px(6) })
         settings.addView(look, spaced(top = 6))

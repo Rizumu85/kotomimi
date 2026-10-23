@@ -41,12 +41,20 @@ import kotlin.math.sqrt
 fun Context.px(dp: Float): Float = dp * resources.displayMetrics.density
 fun Context.px(dp: Int): Int = (dp * resources.displayMetrics.density + 0.5f).toInt()
 
-/** A rounded face of one colour, with an edge where one is given. */
+/** Whether the screen is drawn dark: by the phone's setting, or by the person's choice laid over it. */
+fun Context.night(): Boolean =
+    (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+/**
+ * A rounded face of one colour, with an edge where one is given. In the dark a page's tile is flat and lets more of the
+ * glows behind it through, tinted by them, as Folia's are: a sheen drawn on it looked neither clean nor lit (the user,
+ * 2026-10-23).
+ */
 fun Context.flat(color: Int, radius: Int, alpha: Int = 255, edge: Int? = null): Drawable =
     GradientDrawable().apply {
         setColor(getColor(color))
         cornerRadius = px(radius).toFloat()
-        this.alpha = alpha
+        this.alpha = if (color == R.color.tile && alpha < 255 && night()) alpha * 3 / 4 else alpha
         if (edge != null) setStroke(px(1), getColor(edge))
     }
 
@@ -216,7 +224,15 @@ class Wall(context: Context) : View(context), SensorEventListener {
 
     private fun current(): IntArray = IntArray(3) { blend(from[it], to[it], turned) }
 
-    private fun colours(m: Mood): IntArray = when (m) {
+    private val dark = context.night()
+    private val glowPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+    private fun colours(m: Mood): IntArray = if (dark) when (m) {
+        Mood.IDLE -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_teal), context.getColor(R.color.glow_blue))
+        Mood.HEAR -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_mint), context.getColor(R.color.glow_blue))
+        Mood.TRANSLATE -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_gold), context.getColor(R.color.glow_blue))
+        Mood.COACH -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_coral), context.getColor(R.color.glow_violet))
+    } else when (m) {
         Mood.IDLE -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.field_mint_pale), context.getColor(R.color.field_blue))
         Mood.HEAR -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.field_mint), context.getColor(R.color.field_blue))
         Mood.TRANSLATE -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.field_apricot), context.getColor(R.color.field_blue))
@@ -312,6 +328,11 @@ class Wall(context: Context) : View(context), SensorEventListener {
                 val count = litCount[hue][level]
                 if (count == 0) continue
                 val k = (level + 1f) / LIT_LEVELS
+                if (dark) {
+                    dot.color = (GLINTS[hue] and 0x00FFFFFF) or ((46 * k).toInt() shl 24)
+                    dot.strokeWidth = (8f + 4f * k) * dp
+                    canvas.drawPoints(lit[hue][level], 0, count * 2, dot)
+                }
                 dot.color = (GLINTS[hue] and 0x00FFFFFF) or ((150 + 105 * k).toInt() shl 24)
                 dot.strokeWidth = (2.2f + 1.4f * k) * dp
                 canvas.drawPoints(lit[hue][level], 0, count * 2, dot)
@@ -524,6 +545,14 @@ class Wall(context: Context) : View(context), SensorEventListener {
 
     /** One field: a round shape whose edge rises and falls in a few slow waves, and trembles after a reading. */
     private fun field(canvas: Canvas, cx: Float, cy: Float, r: Float, color: Int, seed: Float) {
+        // In the dark a field is a glow: a soft light, full at its heart and gone at its edge, that breathes.
+        if (dark) {
+            val rr = r * (1.05f + 0.05f * sin(t * 1.3f + seed) + tremble * 0.04f * sin(t * 9f))
+            val c = color and 0x00FFFFFF
+            glowPaint.shader = android.graphics.RadialGradient(cx, cy, rr, intArrayOf(c or (0x70 shl 24), c or (0x2A shl 24), c), floatArrayOf(0f, 0.5f, 1f), android.graphics.Shader.TileMode.CLAMP)
+            canvas.drawCircle(cx, cy, rr, glowPaint)
+            return
+        }
         path.reset()
         val n = 48
         for (i in 0..n) {
@@ -562,6 +591,7 @@ class Wall(context: Context) : View(context), SensorEventListener {
 /** The share tile's switch: a track, coral while on, and its knob, which slides across. */
 class Switch(context: Context) : View(context) {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val dark = context.night()
     private var at = 0f
     private var slide: ValueAnimator? = null
     var on = false
@@ -580,7 +610,9 @@ class Switch(context: Context) : View(context) {
         val h = height.toFloat()
         val w = width.toFloat()
         paint.color = blend(context.getColor(R.color.switch_off), context.getColor(R.color.key), at)
+        if (dark && at > 0f) paint.setShadowLayer(context.px(10f) * at, 0f, 0f, (context.getColor(R.color.key) and 0x00FFFFFF) or ((170 * at).toInt() shl 24))
         canvas.drawRoundRect(RectF(0f, 0f, w, h), h / 2, h / 2, paint)
+        paint.clearShadowLayer()
         val r = h / 2 - context.px(4f)
         val x = h / 2 + (w - h) * at
         paint.color = Color.argb(40, 0, 0, 0)
@@ -634,7 +666,9 @@ class Water(context: Context) : View(context) {
         clip.addRoundRect(RectF(0f, 0f, w, h), radius, radius, Path.Direction.CW)
         canvas.clipPath(clip)
         surface(canvas, w, h, top - context.px(5f), swell, 1.3f, context.getColor(R.color.water_deep))
+        if (context.night()) paint.setShadowLayer(context.px(14f), 0f, 0f, context.getColor(R.color.water))
         surface(canvas, w, h, top, swell, 0f, context.getColor(R.color.water))
+        paint.clearShadowLayer()
         canvas.restore()
         if (running) postInvalidateOnAnimation()
     }
@@ -675,7 +709,7 @@ fun Context.lined(): Drawable = object : Drawable() {
 
 /** The small objects of the small tiles, one for each kind of work and for the computer's side and the check. */
 class Thing(context: Context, private val kind: Kind) : View(context) {
-    enum class Kind { WATER, PANES, NOTE, LENS, DIAL, GEAR, TUNE, DOTS }
+    enum class Kind { WATER, PANES, NOTE, LENS, DIAL, TOGGLES, DOTS }
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
@@ -732,30 +766,20 @@ class Thing(context: Context, private val kind: Kind) : View(context) {
                 canvas.drawCircle(s / 2, s / 2, s * 0.12f, paint)
                 paint.clearShadowLayer()
             }
-            Kind.GEAR -> {
-                // The settings: a small gear, its teeth and its ring, the hole through it left empty.
-                val c = s / 2
-                val layer = canvas.saveLayer(0f, 0f, s, s, null)
-                paint.color = context.getColor(R.color.ink_2)
-                for (k in 0 until 8) {
-                    canvas.save()
-                    canvas.rotate(k * 45f, c, c)
-                    canvas.drawRoundRect(RectF(c - s * 0.085f, s * 0.05f, c + s * 0.085f, s * 0.3f), s * 0.035f, s * 0.035f, paint)
-                    canvas.restore()
-                }
-                canvas.drawCircle(c, c, s * 0.33f, paint)
-                paint.xfermode = android.graphics.PorterDuffXfermode(android.graphics.PorterDuff.Mode.CLEAR)
-                canvas.drawCircle(c, c, s * 0.14f, paint)
-                paint.xfermode = null
-                canvas.restoreToCount(layer)
-            }
-            Kind.TUNE -> {
-                // Two fine rules with a knob on each, drawn as thin as the large number's strokes.
-                stroke.color = context.getColor(R.color.ink_2); stroke.strokeWidth = d * 1.5f; stroke.strokeCap = Paint.Cap.ROUND
-                for ((y, at) in listOf(0.34f to 0.66f, 0.68f to 0.34f)) {
-                    canvas.drawLine(s * 0.1f, s * y, s * 0.9f, s * y, stroke)
-                    paint.color = context.getColor(R.color.ink_2)
-                    canvas.drawCircle(s * at, s * y, s * 0.12f, paint)
+            Kind.TOGGLES -> {
+                // The settings: two small switches, the upper one on in coral, the lower off — the share tile's switch,
+                // in small.
+                val tall = s * 0.3f
+                val wide = s * 0.78f
+                val left = s * 0.11f
+                for ((i, on) in listOf(true, false).withIndex()) {
+                    val y = s * (0.15f + 0.4f * i)
+                    paint.color = context.getColor(if (on) R.color.key else R.color.switch_off)
+                    canvas.drawRoundRect(RectF(left, y, left + wide, y + tall), tall / 2, tall / 2, paint)
+                    paint.setShadowLayer(d * 2, 0f, d, Color.argb(50, 0, 0, 0))
+                    paint.color = context.getColor(R.color.knob)
+                    canvas.drawCircle(if (on) left + wide - tall / 2 else left + tall / 2, y + tall / 2, tall / 2 - s * 0.045f, paint)
+                    paint.clearShadowLayer()
                 }
             }
             Kind.DOTS -> {
@@ -809,21 +833,24 @@ class Meter(context: Context) : View(context) {
         set(value) { field = value; invalidate() }
 
     override fun onMeasure(widthSpec: Int, heightSpec: Int) =
-        setMeasuredDimension(MeasureSpec.getSize(widthSpec), resolveSize(context.px(30), heightSpec))
+        setMeasuredDimension(MeasureSpec.getSize(widthSpec), resolveSize(context.px(36), heightSpec))
 
     override fun onDraw(canvas: Canvas) {
         val w = width.toFloat()
         val thick = context.px(6f)
-        val top = context.px(4f)
+        // Room above the track for its glow in the dark.
+        val top = context.px(9f)
         val r = thick / 2
         paint.color = context.getColor(R.color.switch_off)
         canvas.drawRoundRect(RectF(0f, top, w, top + thick), r, r, paint)
         paint.color = context.getColor(if (speed >= 1f) R.color.good else R.color.key)
+        if (context.night()) paint.setShadowLayer(context.px(6f), 0f, 0f, paint.color)
         canvas.drawRoundRect(RectF(0f, top, max(thick, w * (speed / MOST).coerceIn(0f, 1f)), top + thick), r, r, paint)
+        paint.clearShadowLayer()
         // Real time: a mark across the track, and its word under it.
         val at = w / MOST
         paint.color = context.getColor(R.color.ink_2)
-        canvas.drawRoundRect(RectF(at - context.px(1f), 0f, at + context.px(1f), top * 2 + thick), context.px(1f), context.px(1f), paint)
+        canvas.drawRoundRect(RectF(at - context.px(1f), top - context.px(4f), at + context.px(1f), top + thick + context.px(4f)), context.px(1f), context.px(1f), paint)
         val label = "实时 1×"
         canvas.drawText(label, at - words.measureText(label) / 2, height - context.px(2f), words)
         val end = "${MOST.toInt()}×"

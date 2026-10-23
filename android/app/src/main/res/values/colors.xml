@@ -47,6 +47,13 @@
     <color name="dot">#283446</color>
     <!-- The icon's background, and the scrim over the page while a panel is open. -->
     <color name="room_2">#FBE3B9</color>
+    <!-- The night's wallpaper is lit, not painted: these are its glows, by what the phone is doing. -->
+    <color name="glow_teal">#2FA59A</color>
+    <color name="glow_blue">#4C6FFF</color>
+    <color name="glow_mint">#34E0A1</color>
+    <color name="glow_gold">#FFC24D</color>
+    <color name="glow_coral">#FF6F7D</color>
+    <color name="glow_violet">#9B6BFF</color>
     <!-- Behind the icon's pouch, the same by day and by night. -->
     <color name="icon_back">#DCEAE2</color>
     <color name="scrim">#59000000</color>

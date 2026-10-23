@@ -1,32 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The look in the dark (the user, 2026-10-23): the same desktop at night — a deep wall with its fields dimmed to the
-     colour of what the phone is doing, the widgets dark glass over it, writing pale. The objects keep their own
-     colours: the dial's face pale, the paper of the note white, the glass of water deep. -->
+<!-- The look in the dark (the user, 2026-10-23): not the day's matte paint dimmed but lit, after Folia's 流光 — a deep
+     navy night, its fields glows of the colour of what the phone is doing (glow_*), the widgets dark glass with a
+     faint sheen, the status, the switch, the water and the glitter giving light. The objects keep their own colours:
+     the dial's face pale, the paper of the note white. -->
 <resources>
-    <color name="wall">#14171B</color>
+    <color name="wall">#0A0F1C</color>
     <color name="field_mint_pale">#142920</color>
-    <color name="field_mint">#153328</color>
+    <color name="field_mint">#123A33</color>
     <color name="field_blue">#182638</color>
-    <color name="field_apricot">#4C2E10</color>
+    <color name="field_apricot">#3A2D1A</color>
     <color name="field_apricot_deep">#E39A4C</color>
-    <color name="field_coral">#47211A</color>
+    <color name="field_coral">#3D2133</color>
     <color name="field_lilac">#2A2040</color>
-    <color name="tile">#22262C</color>
-    <color name="card">#2B3037</color>
-    <color name="card_line">#383E46</color>
-    <color name="switch_off">#474D56</color>
-    <color name="water_tile">#163440</color>
-    <color name="water">#5FBF98</color>
-    <color name="water_deep">#2C7860</color>
+    <color name="tile">#172034</color>
+    <color name="card">#1E2842</color>
+    <color name="card_line">#2A3654</color>
+    <color name="switch_off">#38445F</color>
+    <color name="water_tile">#0C2633</color>
+    <color name="water">#4FE0B0</color>
+    <color name="water_deep">#1F8C70</color>
     <color name="water_number">#EAF2EE</color>
-    <color name="water_sub">#8FA9B0</color>
-    <color name="glass_tile">#40291A</color>
-    <color name="glass_number">#FBE9D2</color>
-    <color name="glass_sub">#D9B48C</color>
-    <color name="paper_number">#F0E4E1</color>
-    <color name="paper_sub">#B5A19D</color>
-    <color name="paper_tile">#2C2826</color>
-    <color name="paper_rule">#433B37</color>
+    <color name="water_sub">#8AAFBF</color>
+    <color name="glass_tile">#1B2238</color>
+    <color name="glass_number">#FFD68A</color>
+    <color name="glass_sub">#B8A57E</color>
+    <color name="paper_number">#F4E8F2</color>
+    <color name="paper_sub">#B4A8C4</color>
+    <color name="paper_tile">#1E1F38</color>
+    <color name="paper_rule">#353757</color>
     <color name="lens">#0B0E10</color>
     <color name="lens_inner">#3A464E</color>
     <color name="dial">#E6E3DC</color>
@@ -34,14 +35,14 @@
     <color name="key">#EE7A62</color>
     <color name="key_deep">#F59C88</color>
     <color name="ink_red">#F07A64</color>
-    <color name="ink">#ECEFF1</color>
-    <color name="ink_2">#A8B2B9</color>
-    <color name="ink_3">#7C868D</color>
+    <color name="ink">#EEF1F7</color>
+    <color name="ink_2">#A9B3C6</color>
+    <color name="ink_3">#77839A</color>
     <color name="good">#5CC08A</color>
     <color name="room_2">#FBE3B9</color>
     <color name="scrim">#8C000000</color>
     <color name="knob">#F2F0EA</color>
     <color name="dial_hand">#1F2A30</color>
-    <color name="sheet">#34302D</color>
-    <color name="dot">#C6D0DA</color>
+    <color name="sheet">#262844</color>
+    <color name="dot">#C9D6F0</color>
 </resources>
