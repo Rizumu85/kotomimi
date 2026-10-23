@@ -499,6 +499,12 @@ class MainActivity : Activity() {
         (leftColumn.parent as? View)?.setPadding(px(PAGE_SIDE), px(if (flat) 10 else PAGE_TOP), px(PAGE_SIDE), px(if (flat) 14 else PAGE_FOOT))
         // On its side the status's first word stands level with the top of the switch beside it.
         (statusHead.layoutParams as? LinearLayout.LayoutParams)?.topMargin = px(if (flat) 0 else 12)
+        // On its side the large tile takes the height the status leaves: the status keeps the room of its tallest — the
+        // update's pill beside the word, a number at full size, two lines under it — so the tile does not change size
+        // as what it says changes (the user, 2026-10-23).
+        statusHead.minimumHeight = if (flat) px(30) else 0
+        (bigNumber.parent as? View)?.minimumHeight = if (flat) px((bigSize * 1.2f).toInt()) else 0
+        from.minLines = if (flat) 2 else 1
 
         for (view in listOf(statusBlock, shareBlock, stage, grid, modelsBlock)) (view.parent as? ViewGroup)?.removeView(view)
         for (column in listOf(leftColumn, rightColumn, thirdColumn)) column.removeAllViews()

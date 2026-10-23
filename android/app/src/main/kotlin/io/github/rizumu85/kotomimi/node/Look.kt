@@ -639,11 +639,11 @@ class Water(context: Context) : View(context) {
     private fun surface(canvas: Canvas, w: Float, h: Float, y: Float, swell: Float, seed: Float, color: Int) {
         path.reset()
         path.moveTo(0f, h)
-        var x = 0f
-        while (x <= w) {
-            val k = x / w
-            path.lineTo(x, y + sin(k * 7f + t * 1.6f + seed) * swell + sin(k * 3f - t + seed) * swell * 0.6f)
-            x += context.px(6f)
+        // Across to the very edge: the last step lands on it, or the water stopped short there in a sliver.
+        val steps = max(1, (w / context.px(6f)).toInt())
+        for (i in 0..steps) {
+            val k = i.toFloat() / steps
+            path.lineTo(w * k, y + sin(k * 7f + t * 1.6f + seed) * swell + sin(k * 3f - t + seed) * swell * 0.6f)
         }
         path.lineTo(w, h)
         path.close()
