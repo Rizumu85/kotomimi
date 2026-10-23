@@ -731,7 +731,7 @@ class MainActivity : Activity() {
             leftMargin = px(if (flat) 10 else 16); topMargin = if (flat) 0 else px(edge)
         }
         tile.words.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, if (flat) Gravity.CENTER_VERTICAL else Gravity.BOTTOM).apply {
-            leftMargin = px(if (flat) 40 else 16); rightMargin = px(if (flat) 4 else 12); bottomMargin = if (flat) 0 else px(edge - 2)
+            leftMargin = px(if (flat) 40 else 16); rightMargin = px(if (flat) 16 else 12); bottomMargin = if (flat) 0 else px(edge - 2)
         }
         // Flat, a tile is too narrow for a word at its corner beside its name: the line under the name says enough.
         tile.state.visibility = if (flat) View.GONE else View.VISIBLE
