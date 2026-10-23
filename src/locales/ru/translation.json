@@ -621,6 +621,7 @@
       "serverKeyRefused": "The other device did not accept the access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options).",
       "apiUnreachable": "The API at {{address}} could not be reached. Check the address in its card, and that this computer is online.",
       "phoneUnreachable": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+      "phoneQuiet": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
       "phoneModelGone": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
       "apiKeyNeeded": "The API at {{address}} asks for a key. In its card, turn on \"The API asks for a key\" and enter it.",
       "apiKeyRefused": "The API at {{address}} did not accept the key. Check the API key in its card.",

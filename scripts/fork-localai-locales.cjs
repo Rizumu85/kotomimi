@@ -284,6 +284,12 @@ const PROVIDER = {
     '手机（{{address}}）连不上。请确认它开着共享，并且和这台电脑在同一个 Wi-Fi 下。',
     '手機（{{address}}）連不上。請確認它開著共享，並且和這台電腦在同一個 Wi-Fi 下。',
   ],
+  // A phone in use stopped answering mid-run: most often locked, its system pausing the app.
+  phoneQuiet: [
+    'The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.',
+    '手机没有回应，可能锁屏后被系统暂停了。在手机上打开 Kotomimi 就能继续。',
+    '手機沒有回應，可能鎖屏後被系統暫停了。在手機上打開 Kotomimi 就能繼續。',
+  ],
   phoneModelGone: [
     'The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.',
     '手机（{{address}}）现在没有借出 {{name}}。请在卡片里换一个模型。',

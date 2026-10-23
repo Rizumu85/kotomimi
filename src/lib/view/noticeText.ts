@@ -111,6 +111,8 @@ export const NOTICE_ALIASES: Readonly<Record<string, string>> = {
   // Fork: a phone a stage was given does not answer, no longer lends the model chosen there, or lends one that does not translate the pair.
   phone_unreachable: 'providers.localai.phoneUnreachable',
   phone_model_gone: 'providers.localai.phoneModelGone',
+  // Fork: a phone in use stopped answering mid-run — locked or in the background, its system may have paused the app.
+  phone_quiet: 'providers.localai.phoneQuiet',
   phone_translator_unfit: 'providers.localai.translatorUnfit',
   localai_here_down: 'providers.localai.hereDown',
   // Fork: the native recognition engine of this computer — not downloaded, coming up, or failed to.

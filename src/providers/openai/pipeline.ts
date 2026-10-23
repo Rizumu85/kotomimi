@@ -42,6 +42,7 @@ import type { RealtimeCredentials } from './settings';
 import type { OpenSocket } from './socket';
 import { chatUrl, completeText, httpBaseOf } from './textModel';
 import { PHONE_BUSY_RETRIES, PHONE_TEXT_TIMEOUT_MS } from './phoneText';
+import { watchPhones, type PhoneWatch } from './phoneWatch';
 import { unwrapTranslationText } from './wire';
 
 /** The credential a stage's endpoint is called with, by its field. */
@@ -278,6 +279,8 @@ class PipelineLeg implements AdapterSession {
   /** How many of them have loaded, and the inner session's own loading count: one progress for the starting surface. */
   private loadedHere = 0;
   private innerLoading = { done: 0, total: 0 };
+  /** The phones this leg uses, asked now and then whether they are still there (`phoneWatch.ts`). */
+  private readonly phones: PhoneWatch;
 
   constructor(
     private readonly request: StartRequest<PipelineConfig, PipelineCredentials>,
@@ -288,6 +291,19 @@ class PipelineLeg implements AdapterSession {
     private readonly engineBase: (engine: 'translator' | 'coach', model: string) => Promise<EngineAddress> = engineBaseNow,
   ) {
     this.inner = eventsFrom((e) => this.onInner(e));
+    this.phones = watchPhones({
+      fetch: doFetch,
+      clock: request.clock,
+      onQuiet: () => {
+        if (!this.ended) this.events.degraded({ code: 'phone_quiet', message: 'A phone this session uses stopped answering.' });
+      },
+    });
+    for (const stage of [stages.speech, stages.typed]) if (stage && stage.via !== 'device' && stage.phone) this.watchPhone(stage.baseUrl);
+  }
+
+  /** A phone this leg uses, watched until the leg ends: one a stage answers on, or what hears (`hearing`). */
+  watchPhone(base: string): void {
+    if (!this.ended) this.phones.add(base);
   }
 
   /**
@@ -396,6 +412,7 @@ class PipelineLeg implements AdapterSession {
 
   private end(): void {
     this.ended = true;
+    this.phones.stop();
     this.cuts.clear();
     for (let i = heardLately.length - 1; i >= 0; i--) if (heardLately[i].leg === this) heardLately.splice(i, 1);
     this.queue.length = 0;
@@ -824,7 +841,7 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
   const engines = deps.engines ?? defaultEngines;
   const local = createLocalInferenceAdapter(engines);
   /** What hears on this computer: its own recognizer, or — the same adapter with that one engine changed — an API's. */
-  const hearing = (device: DeviceHearing, request: StartRequest<PipelineConfig, PipelineCredentials>) => {
+  const hearing = (device: DeviceHearing, request: StartRequest<PipelineConfig, PipelineCredentials>, onPhone: (base: string) => void) => {
     const { api, native } = device;
     if (native) {
       const start = deps.native?.start ?? ((model: string) => askNativeEngine('start', model));
@@ -842,6 +859,7 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
       asr: () => createEitherAsr(async () => {
         const node = await remote.node(api.baseUrl);
         if (!node) return byApi();
+        onPhone(api.baseUrl);
         // The model the phone lends now, whatever was written down when it was chosen: its owner may have changed it.
         const model = node.model || api.model;
         const lent: NativeEngineStatus = { ...NO_NATIVE_ENGINE, run: { state: 'ready', model, port: 0, tail: '' }, up: [model] };
@@ -872,7 +890,7 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
       opening.catch(() => {});
       let session: AdapterSession;
       try {
-        session = await (device ? hearing(device, request).start(hearingRequest(request, device, stages?.heard), leg.inner) : realtime.start(dialled(request), leg.inner));
+        session = await (device ? hearing(device, request, (base) => leg.watchPhone(base)).start(hearingRequest(request, device, stages?.heard), leg.inner) : realtime.start(dialled(request), leg.inner));
       } catch (error) {
         leg.abandon();
         throw error;

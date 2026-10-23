@@ -46,6 +46,8 @@ export const CLIENT_DIAGNOSTICS = {
   tts_segment_lost: { severity: 'warning' },
   /** Spoken translation has stopped; transcription and text translation go on. */
   tts_stopped: { severity: 'warning' },
+  /** Fork: a phone the session uses stopped answering mid-run (`phoneWatch.ts`); what was sent to it waits. */
+  phone_quiet: { severity: 'warning' },
 } satisfies Record<string, { severity: 'error' | 'warning' }>;
 
 export type ClientDiagnosticCode = keyof typeof CLIENT_DIAGNOSTICS;

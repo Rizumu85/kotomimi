@@ -34,6 +34,9 @@ const sse = (...pieces: string[]) => new Response(
 type Call = { url: string; body: { model: string; messages: Array<{ role: string; content: string }> }; headers: Record<string, string>; signal: AbortSignal | undefined };
 
 /** A leg over a `FakeSocket` and a scripted text model: started, opened, created and configured. */
+/** Whether a phone in use answers when asked if it is there; a frozen app takes the connection and says nothing. */
+let phoneAwake = true;
+
 async function live(context: SessionContext, patch: Partial<LocalAISettings>, answers: Array<Response | Error | 'hang'> = [], credentials: LocalAICredentials = K, tweak: (config: LocalAIConfig) => void = () => {}) {
   const settings = { ...LOCALAI_DEFAULTS, ...patch };
   const config = buildLocalAI(context, settings, shared);
@@ -44,6 +47,8 @@ async function live(context: SessionContext, patch: Partial<LocalAISettings>, an
   const { events, log } = recordEvents();
   const calls: Call[] = [];
   const fetch = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+    // A phone in use is asked now and then whether it is there (`phoneWatch.ts`): it is.
+    if (!init?.body && String(input).endsWith('/models')) return phoneAwake ? Promise.resolve(new Response('{"data":[]}')) : new Promise<Response>((_resolve, reject) => init?.signal?.addEventListener('abort', () => reject(init.signal?.reason)));
     calls.push({ url: String(input), body: JSON.parse(init?.body as string), headers: init?.headers as Record<string, string>, signal: init?.signal ?? undefined });
     const next = answers.shift();
     if (next === undefined) return Promise.reject(new Error('no answer scripted'));
@@ -443,6 +448,22 @@ describe('a stage a phone lends its model for', () => {
     h.clock.advance(60_000);
     await vi.waitFor(() => expect(h.of('degraded')).toHaveLength(1));
     expect(h.of('degraded')[0].payload.message).toContain('did not finish within 120 s');
+    await h.session.stop();
+  });
+
+  // Locked or in the background, some phones' systems freeze the app (2026-10-20): the user is told within seconds,
+  // not after the sentence's two minutes.
+  it('says when the phone stops answering mid-run', async () => {
+    const h = await live(PARTICIPANT, PHONE, ['hang']);
+    h.receive(...heard('item_1', '今日は天気がいいですね。'));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(1));
+    phoneAwake = false;
+    try {
+      await vi.waitFor(() => { h.clock.advance(1_000); expect(h.of('degraded').map((e) => e.payload.code)).toEqual(['phone_quiet']); });
+      expect(h.clock.now()).toBeLessThan(30_000);
+    } finally {
+      phoneAwake = true;
+    }
     await h.session.stop();
   });
 });
