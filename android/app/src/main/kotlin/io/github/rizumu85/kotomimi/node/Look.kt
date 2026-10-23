@@ -196,18 +196,20 @@ class Wall(context: Context) : View(context), SensorEventListener {
         kick(x, y, 1f)
     }
     /**
-     * The night's floating shapes, after Folia's (the user, 2026-10-23: not a colour but the light, the shapes behind
-     * and their motion working together): discs, rings, triangles, a small sun, arcs and crosses, in a few depths,
-     * drifting and turning slowly, faint enough never to stand in front of writing. The nearer sway further as the
-     * phone turns; a touch's wave pushes those near it away, and they drift back; work done lights them a moment.
+     * The night's linework, after the drawn lines over Folia's lyric scenes (the user, 2026-10-23): hairlines with
+     * small diamonds at their ends, corner brackets, plus signs, four-dot flowers, arches, small crosses and triangles —
+     * thin and faint, in the night's pale grey. Each drifts slowly, fades in, lingers and fades out, then comes back
+     * elsewhere as another, so the scene keeps changing as a lyric video's does. The nearer sway further as the phone
+     * turns; a touch's wave pushes those near it away; work done lights them a moment.
      */
     private class Shape(
-        var x: Float, var y: Float, val kind: Int, val size: Float, val depth: Float,
-        val driftX: Float, val driftY: Float, var vx: Float, var vy: Float, var angle: Float, val spin: Float, val hue: Int,
+        var x: Float, var y: Float, var kind: Int, var size: Float, val depth: Float,
+        val driftX: Float, val driftY: Float, var vx: Float, var vy: Float, var age: Float, var life: Float,
     )
     private val shapes = ArrayList<Shape>()
-    private val shapePaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val shapePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeCap = Paint.Cap.ROUND }
     private val shapePath = Path()
+    private val random = java.util.Random(7)
     /** How much the shapes were just lit by work done, and how far a touch has stirred them. */
     private var flash = 0f
     private var kicked = 0f
@@ -216,18 +218,28 @@ class Wall(context: Context) : View(context), SensorEventListener {
         super.onSizeChanged(w, h, oldw, oldh)
         if (!dark || w == 0 || h == 0) return
         shapes.clear()
-        val random = java.util.Random(7)
-        // Fewer on a small screen, more on a large one: about one to every 120 dp square.
-        val count = ((w / dp) * (h / dp) / (120f * 120f)).toInt().coerceIn(9, 26)
+        // Fewer on a small screen, more on a large one: about one to every 130 dp square.
+        val count = ((w / dp) * (h / dp) / (130f * 130f)).toInt().coerceIn(8, 22)
         for (i in 0 until count) {
-            val kind = i % 6
-            val depth = 0.35f + random.nextFloat() * 0.65f
-            val size = dp * when (kind) { 0 -> 26f + random.nextFloat() * 46f; 1 -> 28f + random.nextFloat() * 54f; 2 -> 30f + random.nextFloat() * 50f; 3 -> 14f + random.nextFloat() * 8f; 4 -> 16f + random.nextFloat() * 12f; else -> 14f + random.nextFloat() * 16f }
-            val speed = dp * (3f + random.nextFloat() * 7f) * depth
+            val depth = 0.4f + random.nextFloat() * 0.6f
+            val speed = dp * (1.5f + random.nextFloat() * 3.5f) * depth
             val heading = random.nextFloat() * TWO_PI
-            shapes += Shape(random.nextFloat() * w, random.nextFloat() * h, kind, size, depth, cos(heading) * speed, sin(heading) * speed,
-                cos(heading) * speed, sin(heading) * speed, random.nextFloat() * 360f, (random.nextFloat() - 0.5f) * 14f, i % 3)
+            val shape = Shape(0f, 0f, 0, 0f, depth, cos(heading) * speed, sin(heading) * speed, cos(heading) * speed, sin(heading) * speed, 0f, 1f)
+            renew(shape, w.toFloat(), h.toFloat())
+            // Begun at different points of their lives, so they do not all fade together.
+            shape.age = random.nextFloat() * shape.life
+            shapes += shape
         }
+    }
+
+    /** A shape comes back somewhere else, as another. */
+    private fun renew(s: Shape, w: Float, h: Float) {
+        s.x = random.nextFloat() * w
+        s.y = random.nextFloat() * h
+        s.kind = random.nextInt(7)
+        s.size = dp * when (s.kind) { 0 -> 110f + random.nextFloat() * 150f; 4 -> 46f + random.nextFloat() * 40f; 1 -> 26f + random.nextFloat() * 20f; else -> 10f + random.nextFloat() * 8f }
+        s.age = 0f
+        s.life = 12f + random.nextFloat() * 12f
     }
 
     private fun stepShapes(dt: Float, w: Float, h: Float) {
@@ -238,10 +250,8 @@ class Wall(context: Context) : View(context), SensorEventListener {
             s.vy += (s.driftY - s.vy) * min(1f, dt / 1.6f)
             s.x += s.vx * dt
             s.y += s.vy * dt
-            s.angle += s.spin * dt * (1f + kicked)
-            val m = s.size
-            if (s.x < -m) s.x += w + 2 * m else if (s.x > w + m) s.x -= w + 2 * m
-            if (s.y < -m) s.y += h + 2 * m else if (s.y > h + m) s.y -= h + 2 * m
+            s.age += dt
+            if (s.age > s.life) renew(s, w, h)
         }
     }
 
@@ -253,52 +263,123 @@ class Wall(context: Context) : View(context), SensorEventListener {
             val dy = s.y - y
             val r = sqrt(dx * dx + dy * dy)
             if (r > reach || r < 1f) continue
-            val push = 70f * dp * strength * (1f - r / reach) * s.depth
+            val push = 60f * dp * strength * (1f - r / reach) * s.depth
             s.vx += dx / r * push
             s.vy += dy / r * push
         }
         kicked = min(1f, kicked + 0.6f * strength)
     }
 
-    private fun drawShapes(canvas: Canvas, c: IntArray) {
+    private fun drawShapes(canvas: Canvas) {
         val swayX = (quickX - slowX) * 26f * dp
         val swayY = (quickY - slowY) * 26f * dp
+        val ink = dotInk and 0x00FFFFFF
         for (s in shapes) {
             val x = s.x + swayX * s.depth
             val y = s.y + swayY * s.depth - scrolled * 0.08f * s.depth
-            val base = blend(if (s.hue == 1) c[2] else c[1], dotInk, if (s.hue == 2) 0.55f else 0.25f) and 0x00FFFFFF
-            val alpha = ((0.07f + 0.13f * s.depth) * (1f + flash * 1.2f) * 255).toInt().coerceIn(0, 255)
-            shapePaint.color = base or (alpha shl 24)
-            shapePaint.style = Paint.Style.FILL
-            shapePaint.strokeWidth = 1.4f * dp
-            canvas.save()
-            canvas.rotate(s.angle, x, y)
+            // In, lingering, out: a soft rise and fall over its life.
+            val k = s.age / s.life
+            val envelope = smooth(0f, 0.2f, k) * (1f - smooth(0.75f, 1f, k))
+            val alpha = ((0.12f + 0.22f * s.depth) * envelope * (1f + flash * 1.5f) * 255).toInt().coerceIn(0, 255)
+            if (alpha < 2) continue
+            shapePaint.color = ink or (alpha shl 24)
+            shapePaint.strokeWidth = dp
             val r = s.size / 2
             when (s.kind) {
-                0 -> canvas.drawCircle(x, y, r, shapePaint)
-                1 -> { shapePaint.style = Paint.Style.STROKE; shapePaint.color = base or ((alpha * 1.6f).toInt().coerceAtMost(255) shl 24); canvas.drawCircle(x, y, r, shapePaint) }
-                2 -> {
+                0 -> {
+                    // A hairline with a small diamond at each end.
+                    canvas.drawLine(x - r, y, x + r, y, shapePaint)
+                    for (e in listOf(x - r, x + r)) diamond(canvas, e, y, 3f * dp)
+                }
+                1 -> {
+                    // A corner bracket.
+                    canvas.drawLine(x, y, x + r, y, shapePaint); canvas.drawLine(x, y, x, y + r, shapePaint)
+                }
+                2 -> { canvas.drawLine(x - r, y, x + r, y, shapePaint); canvas.drawLine(x, y - r, x, y + r, shapePaint) }
+                3 -> {
+                    // Four dots about a centre, a small flower.
+                    shapePaint.style = Paint.Style.FILL
+                    for ((ox, oy) in listOf(0f to -1f, 1f to 0f, 0f to 1f, -1f to 0f)) canvas.drawCircle(x + ox * r * 0.6f, y + oy * r * 0.6f, 1.6f * dp, shapePaint)
+                    shapePaint.style = Paint.Style.STROKE
+                }
+                4 -> {
+                    // An arch: a tall round-topped outline, open at its foot.
+                    shapePath.reset()
+                    shapePath.moveTo(x - r * 0.6f, y + r)
+                    shapePath.lineTo(x - r * 0.6f, y - r * 0.4f)
+                    shapePath.arcTo(RectF(x - r * 0.6f, y - r, x + r * 0.6f, y + r * 0.2f), 180f, 180f)
+                    shapePath.lineTo(x + r * 0.6f, y + r)
+                    canvas.drawPath(shapePath, shapePaint)
+                }
+                5 -> { canvas.drawLine(x - r, y - r, x + r, y + r, shapePaint); canvas.drawLine(x - r, y + r, x + r, y - r, shapePaint) }
+                else -> {
                     shapePath.reset()
                     shapePath.moveTo(x, y - r); shapePath.lineTo(x + r * 0.87f, y + r * 0.5f); shapePath.lineTo(x - r * 0.87f, y + r * 0.5f); shapePath.close()
                     canvas.drawPath(shapePath, shapePaint)
                 }
-                3 -> {
-                    shapePaint.style = Paint.Style.STROKE; shapePaint.color = base or ((alpha * 2f).toInt().coerceAtMost(255) shl 24)
-                    canvas.drawCircle(x, y, r * 0.42f, shapePaint)
-                    for (k in 0 until 8) {
-                        val a = k * TWO_PI / 8
-                        canvas.drawLine(x + cos(a) * r * 0.66f, y + sin(a) * r * 0.66f, x + cos(a) * r, y + sin(a) * r, shapePaint)
-                    }
-                }
-                4 -> { shapePaint.style = Paint.Style.STROKE; shapePaint.color = base or ((alpha * 2f).toInt().coerceAtMost(255) shl 24); canvas.drawArc(RectF(x - r, y - r, x + r, y + r), 0f, 230f, false, shapePaint) }
-                else -> {
-                    shapePaint.style = Paint.Style.STROKE; shapePaint.strokeWidth = 3f * dp; shapePaint.strokeCap = Paint.Cap.ROUND
-                    shapePaint.color = base or ((alpha * 1.5f).toInt().coerceAtMost(255) shl 24)
-                    canvas.drawLine(x - r, y - r, x + r, y + r, shapePaint); canvas.drawLine(x - r, y + r, x + r, y - r, shapePaint)
-                }
             }
-            canvas.restore()
         }
+    }
+
+    private fun diamond(canvas: Canvas, x: Float, y: Float, r: Float) {
+        shapePath.reset()
+        shapePath.moveTo(x, y - r); shapePath.lineTo(x + r, y); shapePath.lineTo(x, y + r); shapePath.lineTo(x - r, y); shapePath.close()
+        shapePaint.style = Paint.Style.FILL
+        canvas.drawPath(shapePath, shapePaint)
+        shapePaint.style = Paint.Style.STROKE
+    }
+
+    // The night's backdrop: a small picture of soft folds worked out each frame and drawn large, so it is blurred.
+    private var fume: android.graphics.Bitmap? = null
+    private var fumePixels = IntArray(0)
+    private val fumePaint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG)
+    private val fumeTo = RectF()
+
+    /**
+     * The night's backdrop, after the smoke and silk behind Folia's lyric scenes (the user, 2026-10-23): not two round
+     * glows but one flowing field of soft folds, low and hazy, its light the two colours of what the phone is doing,
+     * greyed and running into each other, its folds turning slowly. Worked out small and drawn large, so it is soft.
+     */
+    private fun drawFume(canvas: Canvas, w: Float, h: Float, c: IntArray) {
+        val cols = 40
+        val rows = (cols * h / w).toInt().coerceIn(24, 120)
+        if (fume?.height != rows) {
+            fume = android.graphics.Bitmap.createBitmap(cols, rows, android.graphics.Bitmap.Config.ARGB_8888)
+            fumePixels = IntArray(cols * rows)
+        }
+        val night = c[0]
+        val a = muted(c[1])
+        val b = muted(c[2])
+        val unit = min(w, h)
+        val tt = t * 0.9f
+        for (j in 0 until rows) {
+            val y = j.toFloat() / rows * h / unit * 2.2f + scrolled * 0.0006f
+            for (i in 0 until cols) {
+                val x = i.toFloat() / cols * w / unit * 2.2f
+                val warp = fsin(y * 1.3f + tt * 0.35f) * 0.9f + fsin(x * 0.8f - tt * 0.22f) * 0.6f
+                val fold = fsin((x * 1.5f + y * 0.9f) * 1.3f + warp + tt * 0.28f)
+                val fold2 = fsin(x * 0.7f - y * 1.6f + tt * 0.17f + warp * 0.5f)
+                var light = smooth(-0.3f, 1f, fold) * 0.6f + smooth(0f, 1f, fold2) * 0.3f
+                // Darker toward the foot, where the tiles stand thickest, and a little at the sides.
+                val v = j.toFloat() / rows
+                light *= 0.55f + 0.45f * (1f - v * 0.7f) * (1f - 0.35f * abs(i.toFloat() / cols - 0.5f) * 2f)
+                val hue = 0.5f + 0.5f * fsin(x * 0.6f + y * 0.45f + tt * 0.1f)
+                // Never quite black: a haze of the colour everywhere, and the folds lighter in it, as Folia's smoke.
+                fumePixels[j * cols + i] = blend(night, blend(a, b, hue), (0.16f + light * 0.78f).coerceIn(0f, 1f))
+            }
+        }
+        fume!!.setPixels(fumePixels, 0, cols, 0, 0, cols, rows)
+        fumeTo.set(0f, 0f, w, h)
+        canvas.drawBitmap(fume!!, null, fumeTo, fumePaint)
+    }
+
+    /** A colour greyed toward its own lightness, as smoke takes a colour. */
+    private fun muted(color: Int): Int {
+        val r = (color shr 16) and 0xFF
+        val g = (color shr 8) and 0xFF
+        val b = color and 0xFF
+        val grey = (r * 0.3f + g * 0.59f + b * 0.11f).toInt()
+        return blend(blend(color, Color.rgb(grey, grey, grey), 0.42f), Color.BLACK, 0.18f)
     }
 
 
@@ -367,8 +448,10 @@ class Wall(context: Context) : View(context), SensorEventListener {
         val shift = -scrolled * 0.12f + swayY
         canvas.drawColor(c[0])
         // The first field, up and to the left; the second, lower right. Each a round shape whose edge breathes.
-        field(canvas, swayX + w * 0.08f + sin(t * 0.7f) * w * 0.05f, h * 0.06f + shift + cos(t * 0.5f) * w * 0.04f, w * 0.78f, c[1], 0f)
-        field(canvas, swayX + w * 1.0f + cos(t * 0.6f) * w * 0.05f, h * 0.68f + shift * 1.5f + sin(t * 0.45f) * w * 0.05f, w * 0.72f, c[2], 2.1f)
+        if (dark) drawFume(canvas, w, h, c) else {
+            field(canvas, swayX + w * 0.08f + sin(t * 0.7f) * w * 0.05f, h * 0.06f + shift + cos(t * 0.5f) * w * 0.04f, w * 0.78f, c[1], 0f)
+            field(canvas, swayX + w * 1.0f + cos(t * 0.6f) * w * 0.05f, h * 0.68f + shift * 1.5f + sin(t * 0.45f) * w * 0.05f, w * 0.72f, c[2], 2.1f)
+        }
 
         // A sentence translated: a band of light sweeps across, left to right.
         if (sweep in 0f..1.3f) {
@@ -385,7 +468,7 @@ class Wall(context: Context) : View(context), SensorEventListener {
             paint.color = blend(d.color and 0x00FFFFFF, d.color, fade * 0.12f)
             canvas.drawCircle(d.x, d.y, context.px(10f) + k * w * 0.4f, paint)
         }
-        if (dark) drawShapes(canvas, c)
+        if (dark) drawShapes(canvas)
         dots(canvas, w, h)
     }
 
