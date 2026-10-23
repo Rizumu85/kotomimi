@@ -39,6 +39,12 @@
     <color name="ink_2">#5F6B72</color>
     <color name="ink_3">#8A949A</color>
     <color name="good">#2F8457</color>
+    <!-- What stays as it is in the dark, or turns its own way: the switch's knob and the writing on a coral key, the
+         dial's hand on its pale face, the feedback's sheet of paper, the wallpaper's dots. -->
+    <color name="knob">#FFFDF8</color>
+    <color name="dial_hand">#1F2A30</color>
+    <color name="sheet">#FFFFFF</color>
+    <color name="dot">#283446</color>
     <!-- The icon's background, and the scrim over the page while a panel is open. -->
     <color name="room_2">#FBE3B9</color>
     <color name="scrim">#59000000</color>

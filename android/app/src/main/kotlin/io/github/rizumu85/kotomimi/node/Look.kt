@@ -126,6 +126,8 @@ class Wall(context: Context) : View(context), SensorEventListener {
     private val litCount = Array(GLINTS.size) { IntArray(LIT_LEVELS) }
     /** Pixels of a dp. */
     private val dp = context.resources.displayMetrics.density
+    /** The dots' colour: dark on the day's wall, pale on the night's. */
+    private val dotInk = context.getColor(R.color.dot)
 
     /** Runs while the screen is seen: `MainActivity` stops it when it is not. */
     var running = false
@@ -300,7 +302,7 @@ class Wall(context: Context) : View(context), SensorEventListener {
                 val count = plainCount[layer][level]
                 if (count == 0) continue
                 val k = level / (LEVELS - 1f)
-                dot.color = Color.argb(((22 + 80 * k) * if (deep) 0.6f else 1f).toInt(), 40, 52, 70)
+                dot.color = (dotInk and 0x00FFFFFF) or (((22 + 80 * k) * if (deep) 0.6f else 1f).toInt() shl 24)
                 dot.strokeWidth = (1.0f + 1.8f * k) * (if (deep) 0.75f else 1f) * dp
                 canvas.drawPoints(plain[layer][level], 0, count * 2, dot)
             }
@@ -583,7 +585,7 @@ class Switch(context: Context) : View(context) {
         val x = h / 2 + (w - h) * at
         paint.color = Color.argb(40, 0, 0, 0)
         canvas.drawCircle(x, h / 2 + context.px(1.5f), r, paint)
-        paint.color = context.getColor(R.color.tile)
+        paint.color = context.getColor(R.color.knob)
         canvas.drawCircle(x, h / 2, r, paint)
     }
 }
@@ -655,7 +657,7 @@ class Water(context: Context) : View(context) {
 
 /** A sheet of lined paper: under the sentence it is written on, and its correction. */
 fun Context.lined(): Drawable = object : Drawable() {
-    private val paper = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE }
+    private val paper = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = getColor(R.color.sheet) }
     private val rule = Paint().apply { color = getColor(R.color.paper_rule); strokeWidth = px(1f) }
     private val radius = px(14f)
     override fun draw(canvas: Canvas) {
@@ -740,7 +742,7 @@ class Thing(context: Context, private val kind: Kind) : View(context) {
                 paint.color = context.getColor(R.color.ink_red)
                 canvas.drawCircle(s / 2 + cos(mark) * s * 0.33f, s / 2 + sin(mark) * s * 0.33f, s * 0.055f, paint)
                 val a = (-210f + 240f * amount.coerceIn(0f, 1f)) * PI.toFloat() / 180f
-                stroke.color = context.getColor(R.color.ink); stroke.strokeWidth = s * 0.06f; stroke.strokeCap = Paint.Cap.ROUND
+                stroke.color = context.getColor(R.color.dial_hand); stroke.strokeWidth = s * 0.06f; stroke.strokeCap = Paint.Cap.ROUND
                 canvas.drawLine(s / 2, s / 2, s / 2 + cos(a) * s * 0.32f, s / 2 + sin(a) * s * 0.32f, stroke)
             }
         }
@@ -784,7 +786,7 @@ class Meter(context: Context) : View(context) {
         val thick = context.px(6f)
         val top = context.px(4f)
         val r = thick / 2
-        paint.color = context.getColor(R.color.dial_edge)
+        paint.color = context.getColor(R.color.switch_off)
         canvas.drawRoundRect(RectF(0f, top, w, top + thick), r, r, paint)
         paint.color = context.getColor(if (speed >= 1f) R.color.good else R.color.key)
         canvas.drawRoundRect(RectF(0f, top, max(thick, w * (speed / MOST).coerceIn(0f, 1f)), top + thick), r, r, paint)

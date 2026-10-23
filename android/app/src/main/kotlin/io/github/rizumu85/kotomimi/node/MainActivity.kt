@@ -338,7 +338,7 @@ class MainActivity : Activity() {
         val top = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL; clipChildren = false }
         word = text("", 12.5f, R.color.ink_red, bold = true).apply { letterSpacing = 0.5f }
         top.addView(word, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
-        updatePill = text("", 12.5f, R.color.tile, bold = true).apply {
+        updatePill = text("", 12.5f, R.color.knob, bold = true).apply {
             gravity = Gravity.CENTER
             background = flat(R.color.key, 15)
             setPadding(px(12), 0, px(12), 0)
@@ -710,7 +710,7 @@ class MainActivity : Activity() {
         val (number, sub) = numberOf(this, R.color.water_number, R.color.water_sub)
         hearNumber = number
         hearSub = sub
-        hearModel = corner(this, "语音识别", R.color.tile, R.color.water_sub)
+        hearModel = corner(this, "语音识别", R.color.water_number, R.color.water_sub)
         heardLast = text("", 12.5f, R.color.water_tile).apply { maxLines = 2; ellipsize = TextUtils.TruncateAt.START; setLineSpacing(0f, 1.15f) }
         addView(heardLast, FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, Gravity.BOTTOM).apply { leftMargin = px(18); rightMargin = px(18); bottomMargin = px(16) })
     }
