@@ -110,6 +110,8 @@ class MainActivity : Activity() {
     // The panels, made once and laid over the page when opened.
     private lateinit var modelsBox: View
     private lateinit var toolsBox: View
+    private lateinit var settingsBox: View
+    private lateinit var gearKey: View
     private lateinit var devicesBox: View
     private var opened: View? = null
     private var scrim: View? = null
@@ -271,6 +273,7 @@ class MainActivity : Activity() {
         when (intent.getStringExtra("open")) {
             "models" -> open(modelsBox)
             "tools" -> open(toolsBox)
+            "settings" -> open(settingsBox)
             "devices" -> open(devicesBox)
             "none" -> close()
         }
@@ -358,9 +361,17 @@ class MainActivity : Activity() {
             gravity = Gravity.CENTER
             background = flat(R.color.key, 15)
             setPadding(px(12), 0, px(12), 0)
-            setOnClickListener { open(toolsBox) }
+            setOnClickListener { open(settingsBox) }
         }
         top.addView(updatePill, LinearLayout.LayoutParams(WRAP_CONTENT, px(30)))
+        // The settings — how the app looks, its version — behind a round key at the status's corner: not the
+        // performance panel's to hold (the user, 2026-10-23).
+        gearKey = FrameLayout(this).apply {
+            background = flat(R.color.tile, 18, alpha = 215)
+            addView(Thing(this@MainActivity, Thing.Kind.GEAR), FrameLayout.LayoutParams(px(22), px(22), Gravity.CENTER))
+            setOnClickListener { open(settingsBox) }
+        }
+        top.addView(gearKey, LinearLayout.LayoutParams(px(36), px(36)).apply { leftMargin = px(8) })
         statusHead = top
         status.addView(top, spaced(top = 12))
         val big = LinearLayout(this).apply { gravity = Gravity.BOTTOM; clipChildren = false }
@@ -432,6 +443,7 @@ class MainActivity : Activity() {
         devicesLens = Thing(this, Thing.Kind.LENS)
         toolsBox = box("性能检测", "这台手机能否跟上说话的速度", checkDial, toolsContent())
         devicesBox = box("设备连接", "让电脑使用这台手机上的模型", devicesLens, devicesContent())
+        settingsBox = box("设置", "外观与版本", Thing(this, Thing.Kind.GEAR), settingsContent())
 
         // The page lies under the status bar and the navigation bar — Android 15 puts every app there, and here it is
         // asked for on the versions before, so that all of them are one case — and keeps its content clear of them:
@@ -537,7 +549,7 @@ class MainActivity : Activity() {
         // The status keeps the room of its tallest — the update's pill beside the word, a number at full size — so what
         // is under it does not move as what it says changes; on its side, where the large tile takes the height the
         // status leaves, two lines under it too (the user, 2026-10-23).
-        statusHead.minimumHeight = px(30)
+        statusHead.minimumHeight = px(36)
         (bigNumber.parent as? View)?.minimumHeight = px((bigSize * 1.2f).toInt())
         from.minLines = if (flat) 2 else 1
 
@@ -672,6 +684,7 @@ class MainActivity : Activity() {
         if (stage.visibility == View.VISIBLE) add(stage)
         for (i in 0 until grid.childCount) grid.getChildAt(i).takeIf { it.visibility == View.VISIBLE }?.let(::add)
         if (updatePill.visibility == View.VISIBLE) add(updatePill)
+        add(gearKey)
     }
 
     /**
@@ -1078,28 +1091,12 @@ class MainActivity : Activity() {
             }
     }
 
-    /** The performance panel: what the check found, the check and its report; a newer version, and the key that asks for one. */
+    /** The performance panel: what the check found, the check and its report. */
     private fun toolsContent(): View {
         val tools = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(px(14), px(4), px(14), px(18))
         }
-        // A newer version, when there is one: first in the panel, and not there otherwise.
-        updateRow = LinearLayout(this).apply {
-            gravity = Gravity.CENTER_VERTICAL
-            background = flat(R.color.field_apricot, 22)
-            setPadding(px(16), px(12), px(12), px(12))
-            val words = LinearLayout(this@MainActivity).apply { orientation = LinearLayout.VERTICAL }
-            updateTitle = text("", 15f, R.color.ink, bold = true)
-            updateState = text("", 12f, R.color.ink_2)
-            words.addView(updateTitle)
-            words.addView(updateState, spaced(top = 2))
-            updateAct = key("更新", main = true) { release?.let(::touched) }
-            addView(words, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f).apply { rightMargin = px(10) })
-            addView(updateAct, LinearLayout.LayoutParams(WRAP_CONTENT, px(36)))
-        }
-        tools.addView(updateRow, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = px(6); bottomMargin = px(6) })
-
         // What the check found: the dial at the speed, the number, and what it means.
         val found = card().apply { setPadding(px(18), px(16), px(18), px(16)) }
         val top = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL }
@@ -1135,15 +1132,30 @@ class MainActivity : Activity() {
         reportCard.addView(report, spaced(top = 10))
         tools.addView(reportCard, spaced(top = 12))
 
-        // The app's own version, and the key that asks for a newer one.
-        val version = card().apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(px(16), px(12), px(12), px(12)) }
-        val versionWords = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        versionWords.addView(text("Kotomimi 手机端", 14f, R.color.ink, bold = true))
-        versionWords.addView(text("版本 ${BuildConfigLite.VERSION}", 12f, R.color.ink_3), spaced(top = 2))
-        version.addView(versionWords, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
-        lookKey = key("", main = false) { look(asked = true) }
-        version.addView(lookKey, LinearLayout.LayoutParams(WRAP_CONTENT, px(34)))
-        tools.addView(version, spaced(top = 12))
+        return tools
+    }
+
+    /** The settings panel: a newer version when there is one, how the app looks, and its own version. */
+    private fun settingsContent(): View {
+        val settings = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(px(14), px(4), px(14), px(18))
+        }
+        // A newer version, when there is one: first in the panel, and not there otherwise.
+        updateRow = LinearLayout(this).apply {
+            gravity = Gravity.CENTER_VERTICAL
+            background = flat(R.color.field_apricot, 22)
+            setPadding(px(16), px(12), px(12), px(12))
+            val words = LinearLayout(this@MainActivity).apply { orientation = LinearLayout.VERTICAL }
+            updateTitle = text("", 15f, R.color.ink, bold = true)
+            updateState = text("", 12f, R.color.ink_2)
+            words.addView(updateTitle)
+            words.addView(updateState, spaced(top = 2))
+            updateAct = key("更新", main = true) { release?.let(::touched) }
+            addView(words, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f).apply { rightMargin = px(10) })
+            addView(updateAct, LinearLayout.LayoutParams(WRAP_CONTENT, px(36)))
+        }
+        settings.addView(updateRow, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = px(6); bottomMargin = px(6) })
 
         // How the app looks: as the phone is set, or always light, or always dark.
         val look = card().apply { setPadding(px(16), px(14), px(16), px(14)) }
@@ -1162,8 +1174,18 @@ class MainActivity : Activity() {
             }, LinearLayout.LayoutParams(0, px(34), 1f))
         }
         look.addView(picks, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = px(10) })
-        tools.addView(look, spaced(top = 12))
-        return tools
+        settings.addView(look, spaced(top = 6))
+        // The app's own version, and the key that asks for a newer one.
+        val version = card().apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(px(16), px(12), px(12), px(12)) }
+        val versionWords = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        versionWords.addView(text("Kotomimi 手机端", 14f, R.color.ink, bold = true))
+        versionWords.addView(text("版本 ${BuildConfigLite.VERSION}", 12f, R.color.ink_3), spaced(top = 2))
+        version.addView(versionWords, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
+        lookKey = key("", main = false) { look(asked = true) }
+        version.addView(lookKey, LinearLayout.LayoutParams(WRAP_CONTENT, px(34)))
+        settings.addView(version, spaced(top = 12))
+
+        return settings
     }
 
     /** The computer's side: where this phone is and who uses it, how a computer finds it, and staying awake. */

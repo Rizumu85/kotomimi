@@ -675,7 +675,7 @@ fun Context.lined(): Drawable = object : Drawable() {
 
 /** The small objects of the small tiles, one for each kind of work and for the computer's side and the check. */
 class Thing(context: Context, private val kind: Kind) : View(context) {
-    enum class Kind { WATER, PANES, NOTE, LENS, DIAL }
+    enum class Kind { WATER, PANES, NOTE, LENS, DIAL, GEAR }
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
@@ -731,6 +731,23 @@ class Thing(context: Context, private val kind: Kind) : View(context) {
                 if (lit) paint.setShadowLayer(s * 0.16f, 0f, 0f, context.getColor(R.color.water))
                 canvas.drawCircle(s / 2, s / 2, s * 0.12f, paint)
                 paint.clearShadowLayer()
+            }
+            Kind.GEAR -> {
+                // The settings: a small gear, its teeth and its ring, the hole through it left empty.
+                val c = s / 2
+                val layer = canvas.saveLayer(0f, 0f, s, s, null)
+                paint.color = context.getColor(R.color.ink_2)
+                for (k in 0 until 8) {
+                    canvas.save()
+                    canvas.rotate(k * 45f, c, c)
+                    canvas.drawRoundRect(RectF(c - s * 0.085f, s * 0.05f, c + s * 0.085f, s * 0.3f), s * 0.035f, s * 0.035f, paint)
+                    canvas.restore()
+                }
+                canvas.drawCircle(c, c, s * 0.33f, paint)
+                paint.xfermode = android.graphics.PorterDuffXfermode(android.graphics.PorterDuff.Mode.CLEAR)
+                canvas.drawCircle(c, c, s * 0.14f, paint)
+                paint.xfermode = null
+                canvas.restoreToCount(layer)
             }
             Kind.DIAL -> {
                 paint.color = context.getColor(R.color.dial)
