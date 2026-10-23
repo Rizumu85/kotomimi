@@ -806,7 +806,8 @@ class Meter(context: Context) : View(context) {
 /**
  * Small tiles in rows of `columns`, each `cell` high, `gap` apart: a hidden one takes no place, so the tiles shown
  * close up. How many to a row is the page's choice (`MainActivity.arrange`): two on a phone, four on a tablet. With
- * `stretch`, given a height, the rows share it, none lower than `cell`.
+ * `stretch`, given a height, the rows share it, none lower than `cell`. Fewer tiles shown than `columns` take the
+ * row between them (two of four on a tablet, not lent, were left in its left half).
  */
 class TileGrid(context: Context) : android.view.ViewGroup(context) {
     var columns = 2
@@ -821,6 +822,7 @@ class TileGrid(context: Context) : android.view.ViewGroup(context) {
     override fun onMeasure(widthSpec: Int, heightSpec: Int) {
         val width = MeasureSpec.getSize(widthSpec)
         val tiles = shown()
+        val columns = across()
         val across = ((width - gap * (columns - 1)) / columns).coerceAtLeast(0)
         val rows = (tiles.size + columns - 1) / columns
         high = if (stretch && rows > 0 && MeasureSpec.getMode(heightSpec) == MeasureSpec.EXACTLY) {
@@ -830,7 +832,11 @@ class TileGrid(context: Context) : android.view.ViewGroup(context) {
         setMeasuredDimension(width, if (rows == 0) 0 else rows * high + (rows - 1) * gap)
     }
 
+    /** How many to a row: `columns`, or as many as there are when fewer, but never one alone. */
+    private fun across() = shown().size.coerceIn(minOf(2, columns), columns)
+
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+        val columns = across()
         val across = ((width - gap * (columns - 1)) / columns).coerceAtLeast(0)
         shown().forEachIndexed { i, tile ->
             val x = (i % columns) * (across + gap)

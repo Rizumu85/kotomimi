@@ -226,7 +226,9 @@ class MainActivity : Activity() {
      * to be told this way: `Updater.testAddress`.) With --es open models (or tools, devices) that panel is opened, and
      * with --es open none whatever is open is closed: for screenshots. With --es demo coach (or translate) a made-up
      * piece of that work is shown, as if a computer had asked it — for a screenshot of a kind of work this phone
-     * cannot run itself; nothing is lent or asked for it.
+     * cannot run itself; nothing is lent or asked for it. With --es pretend standby the page is shown as if lent and
+     * waiting, and with --es pretend off as it is again — for screenshots on an emulator, which can run no model: no
+     * server is started, and nothing is lent.
      */
     private fun asked(intent: Intent) {
         if (intent.getBooleanExtra("update", false)) look(asked = true)
@@ -244,6 +246,10 @@ class MainActivity : Activity() {
         when (intent.getStringExtra("demo")) {
             "coach" -> Sharing.work(Task.COACH).done(620, "昨日、映画を見ます。", "昨日、映画を見ました。\n动词时态应与“昨日”一致，使用过去式。")
             "translate" -> Sharing.work(Task.TRANSLATE).done(1400, "飛べないおじさんはただのおじさんだ。", "不会飞的叔叔只是个普通叔叔而已。", into = "中文")
+        }
+        when (intent.getStringExtra("pretend")) {
+            "standby" -> Sharing.tell(Share.State(Share.Phase.WAITING, model = choices.shared(store), address = "192.168.1.23:8792"))
+            "off" -> Sharing.tell(Share.State(Share.Phase.OFF))
         }
         if (intent.hasExtra("demo")) refresh()
         when (intent.getStringExtra("open")) {
@@ -474,9 +480,11 @@ class MainActivity : Activity() {
         val w = config.screenWidthDp
         val h = config.screenHeightDp
         shape = when {
+            // A phone on its side however wide: a common phone lies 873 dp wide and was given a tablet's three
+            // columns, which did not fit its 393 dp of height.
+            w > h && w >= 480 && h < 600 -> Shape.SIDE
             w >= 840 -> Shape.WIDE
             w >= 600 -> Shape.TABLET
-            w > h && w >= 480 -> Shape.SIDE
             h < 620 -> Shape.SHORT
             else -> Shape.PHONE
         }
@@ -563,6 +571,12 @@ class MainActivity : Activity() {
         if (side) {
             for (tile in works.values + listOf(lens, dial)) lay(tile, flat = on, snug = !on)
             layModels(flat = on, snug = !on)
+        }
+        // On a wide screen not lent, the large tile's column has nothing in it: the small tiles move into it.
+        if (shape == Shape.WIDE) {
+            (grid.parent as? ViewGroup)?.removeView(grid)
+            (if (on) thirdColumn else rightColumn).addView(grid, spaced(top = 0))
+            thirdColumn.visibility = if (on) View.VISIBLE else View.GONE
         }
         for (column in listOf(leftColumn, rightColumn)) (column.layoutParams as? LinearLayout.LayoutParams)?.height = if (side) MATCH_PARENT else WRAP_CONTENT
         (stage.layoutParams as? LinearLayout.LayoutParams)?.apply { height = if (fill) 0 else WRAP_CONTENT; weight = if (fill) 1f else 0f }
