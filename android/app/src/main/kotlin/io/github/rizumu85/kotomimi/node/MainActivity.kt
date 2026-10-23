@@ -351,7 +351,7 @@ class MainActivity : Activity() {
             minimumHeight = px(76)
             setOnClickListener { if (Sharing.on) ShareService.stop(this@MainActivity) else if (busy == null) lend() }
         }
-        shareWords = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val shareWords = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         shareTitle = text("", 15f, R.color.ink, bold = true)
         shareSub = text("", 11.5f, R.color.ink_2).apply { maxLines = 1; ellipsize = TextUtils.TruncateAt.END }
         shareWords.addView(shareTitle)
@@ -443,8 +443,7 @@ class MainActivity : Activity() {
 
     /** The page's blocks, and the columns they are laid out in. */
     private lateinit var statusBlock: View
-    private lateinit var shareBlock: LinearLayout
-    private lateinit var shareWords: LinearLayout
+    private lateinit var shareBlock: View
     private lateinit var modelsBlock: View
     private lateinit var leftColumn: LinearLayout
     private lateinit var rightColumn: LinearLayout
@@ -495,6 +494,8 @@ class MainActivity : Activity() {
         val flat = shape == Shape.SIDE
         for (tile in works.values + listOf(lens, dial)) lay(tile, flat)
         layModels(flat)
+        shareBlock.minimumHeight = px(if (flat) 60 else 76)
+        shareBlock.setPadding(px(20), px(if (flat) 10 else 14), px(16), px(if (flat) 10 else 14))
         (leftColumn.parent as? View)?.setPadding(px(PAGE_SIDE), px(if (flat) 10 else PAGE_TOP), px(PAGE_SIDE), px(if (flat) 14 else PAGE_FOOT))
         // On its side the status's first word stands level with the top of the switch beside it.
         (statusHead.layoutParams as? LinearLayout.LayoutParams)?.topMargin = px(if (flat) 0 else 12)
@@ -508,9 +509,9 @@ class MainActivity : Activity() {
                 put(leftColumn, grid, gapDp); put(leftColumn, modelsBlock, gapDp)
             }
             Shape.SIDE -> {
-                // Where the switch stands depends on whether the phone is lent: `fit` puts it.
+                // What the phone is doing fills the left, as high as the screen; the switch heads the right.
                 put(leftColumn, statusBlock, 0); put(leftColumn, stage, gapDp)
-                put(rightColumn, grid, 0); put(rightColumn, modelsBlock, gapDp)
+                put(rightColumn, shareBlock, 0); put(rightColumn, grid, gapDp); put(rightColumn, modelsBlock, gapDp)
             }
             Shape.TABLET -> {
                 // The status beside the switch, the switch in the middle of the status's height.
@@ -537,55 +538,29 @@ class MainActivity : Activity() {
     }
 
     /**
-     * On its side the two columns stand as high as each other, and the large tiles and the small ones take the height
-     * left, so that both columns end on one line (the user, 2026-10-23). Lent, what the phone is doing fills the left
-     * and the switch heads the right, over the small tiles lying flat; not lent, the switch is itself the large tile on
-     * the left, and the two small tiles beside it stand up as high as the column — rather than a half-empty screen (the
-     * user, the same day). Elsewhere each block has its own height.
+     * On its side the two columns stand as high as each other and the tiles take the height left, so that both columns
+     * end on one line (the user, 2026-10-23). Lent, what the phone is doing fills the left, and on the right the small
+     * tiles lie flat to make room for them all; not lent, the left keeps its room and the right has only a few tiles,
+     * so they stand at their full size — the small tiles and the models as on a phone held upright (the user, the same
+     * day). Elsewhere each block has its own height.
      */
     private fun fit() {
         val side = shape == Shape.SIDE
         val on = stage.visibility == View.VISIBLE
         val fill = side && on
-        val gap = px(10)
         if (side) {
-            (shareBlock.parent as? ViewGroup)?.removeView(shareBlock)
-            if (on) rightColumn.addView(shareBlock, 0, spaced(top = 0))
-            else leftColumn.addView(shareBlock, LinearLayout.LayoutParams(MATCH_PARENT, 0, 1f).apply { topMargin = gap })
-            (grid.layoutParams as? LinearLayout.LayoutParams)?.topMargin = if (on) gap else 0
-            for (tile in works.values + listOf(lens, dial)) lay(tile, flat = on)
+            for (tile in works.values + listOf(lens, dial)) lay(tile, flat = on, snug = !on)
+            layModels(flat = on, snug = !on)
         }
-        layShare(large = side && !on)
         for (column in listOf(leftColumn, rightColumn)) (column.layoutParams as? LinearLayout.LayoutParams)?.height = if (side) MATCH_PARENT else WRAP_CONTENT
         (stage.layoutParams as? LinearLayout.LayoutParams)?.apply { height = if (fill) 0 else WRAP_CONTENT; weight = if (fill) 1f else 0f }
         (grid.layoutParams as? LinearLayout.LayoutParams)?.apply { height = if (side) 0 else WRAP_CONTENT; weight = if (side) 1f else 0f }
+        (modelsBlock.layoutParams as? LinearLayout.LayoutParams)?.apply { height = if (side && !on) 0 else WRAP_CONTENT; weight = if (side && !on) 1f else 0f }
         grid.stretch = side
         stage.minimumHeight = if (fill) stageHigh else 0
         for (tile in listOf(hearTile, glassTile, paperTile)) tile.layoutParams = tile.layoutParams.apply { height = if (fill) MATCH_PARENT else stageHigh }
         leftColumn.requestLayout()
         rightColumn.requestLayout()
-    }
-
-    /**
-     * The share tile as it is on the page — its words beside the switch — or `large`, the large tile of a phone on its
-     * side not lent: its words at the top, larger, and the switch at its foot.
-     */
-    private fun layShare(large: Boolean) {
-        val flat = shape == Shape.SIDE
-        shareBlock.orientation = if (large) LinearLayout.VERTICAL else LinearLayout.HORIZONTAL
-        shareBlock.gravity = if (large) Gravity.TOP else Gravity.CENTER_VERTICAL
-        shareBlock.minimumHeight = px(if (flat) 60 else 76)
-        if (large) shareBlock.setPadding(px(22), px(20), px(20), px(18))
-        else shareBlock.setPadding(px(20), px(if (flat) 10 else 14), px(16), px(if (flat) 10 else 14))
-        shareWords.layoutParams = if (large) LinearLayout.LayoutParams(MATCH_PARENT, 0, 1f)
-        else LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f).apply { rightMargin = px(10) }
-        switch.layoutParams = LinearLayout.LayoutParams(px(if (large) 72 else 60), px(if (large) 42 else 36)).apply {
-            gravity = if (large) Gravity.END else Gravity.NO_GRAVITY
-        }
-        shareTitle.textSize = if (large) 20f else 15f
-        shareSub.textSize = if (large) 13f else 11.5f
-        shareSub.maxLines = if (large) 3 else 1
-        (shareSub.layoutParams as? LinearLayout.LayoutParams)?.topMargin = px(if (large) 6 else 2)
     }
 
     /** Where `view` stands on the page, in the page's (and the wallpaper's) pixels. */
@@ -746,19 +721,22 @@ class MainActivity : Activity() {
 
     /**
      * A small tile laid out standing — its object above what it is — or, `flat`, on its side: the object at the left,
-     * what it is beside it, half as high (a phone on its side, where the tiles are to fit the screen's height).
+     * what it is beside it, half as high (a phone on its side, where the tiles are to fit the screen's height). `snug`,
+     * standing a little closer, for the height a phone on its side leaves.
      */
-    private fun lay(tile: Small, flat: Boolean) {
-        tile.thing.layoutParams = FrameLayout.LayoutParams(px(if (flat) 24 else 44), px(if (flat) 24 else 44), if (flat) Gravity.START or Gravity.CENTER_VERTICAL else Gravity.START or Gravity.TOP).apply {
-            leftMargin = px(if (flat) 10 else 16); topMargin = if (flat) 0 else px(16)
+    private fun lay(tile: Small, flat: Boolean, snug: Boolean = false) {
+        val size = if (flat) 24 else if (snug) 36 else 44
+        val edge = if (snug) 12 else 16
+        tile.thing.layoutParams = FrameLayout.LayoutParams(px(size), px(size), if (flat) Gravity.START or Gravity.CENTER_VERTICAL else Gravity.START or Gravity.TOP).apply {
+            leftMargin = px(if (flat) 10 else 16); topMargin = if (flat) 0 else px(edge)
         }
         tile.words.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, if (flat) Gravity.CENTER_VERTICAL else Gravity.BOTTOM).apply {
-            leftMargin = px(if (flat) 40 else 16); rightMargin = px(if (flat) 4 else 12); bottomMargin = if (flat) 0 else px(14)
+            leftMargin = px(if (flat) 40 else 16); rightMargin = px(if (flat) 4 else 12); bottomMargin = if (flat) 0 else px(edge - 2)
         }
         // Flat, a tile is too narrow for a word at its corner beside its name: the line under the name says enough.
         tile.state.visibility = if (flat) View.GONE else View.VISIBLE
         tile.state.layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT, Gravity.END or Gravity.TOP).apply {
-            rightMargin = px(if (flat) 12 else 16); topMargin = px(if (flat) 8 else 16)
+            rightMargin = px(if (flat) 12 else 16); topMargin = px(if (flat) 8 else edge)
         }
         tile.state.textSize = if (flat) 10f else 11f
         tile.sub.textSize = if (flat) 11f else 11.5f
@@ -779,15 +757,19 @@ class MainActivity : Activity() {
         layModels(flat = false)
     }
 
-    /** The models tile standing — its name, its objects, its count, one under another — or flat: the objects at the right. */
-    private fun layModels(flat: Boolean) {
-        for (i in 0 until modelsThings.childCount) modelsThings.getChildAt(i).layoutParams = LinearLayout.LayoutParams(px(if (flat) 26 else 34), px(if (flat) 26 else 34)).apply { rightMargin = px(if (flat) 8 else 10) }
-        modelsName.layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { leftMargin = px(18); topMargin = px(if (flat) 14 else 16) }
+    /**
+     * The models tile standing — its name, its objects, its count, one under another — or flat: the objects at the right.
+     * `snug`, standing a little closer, as `lay`.
+     */
+    private fun layModels(flat: Boolean, snug: Boolean = false) {
+        val size = if (flat) 26 else if (snug) 28 else 34
+        for (i in 0 until modelsThings.childCount) modelsThings.getChildAt(i).layoutParams = LinearLayout.LayoutParams(px(size), px(size)).apply { rightMargin = px(if (flat) 8 else 10) }
+        modelsName.layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { leftMargin = px(18); topMargin = px(if (flat) 14 else if (snug) 12 else 16) }
         modelsThings.layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT, if (flat) Gravity.END or Gravity.CENTER_VERTICAL else Gravity.START or Gravity.TOP).apply {
-            leftMargin = if (flat) 0 else px(18); topMargin = if (flat) 0 else px(46); rightMargin = if (flat) px(6) else 0
+            leftMargin = if (flat) 0 else px(18); topMargin = if (flat) 0 else px(if (snug) 38 else 46); rightMargin = if (flat) px(6) else 0
         }
         modelsSub.layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT, if (flat) Gravity.START or Gravity.TOP else Gravity.START or Gravity.BOTTOM).apply {
-            leftMargin = px(18); topMargin = if (flat) px(36) else 0; bottomMargin = if (flat) 0 else px(14)
+            leftMargin = px(18); topMargin = if (flat) px(36) else 0; bottomMargin = if (flat) 0 else px(if (snug) 12 else 14)
         }
     }
 
