@@ -327,9 +327,10 @@ class MainActivity : Activity() {
     @SuppressLint("ClickableViewAccessibility")
     private fun build(): View {
         // The page's blocks, in reading order; `arrange` lays them out in one column, or in two on a wide screen.
-        // Its writing stands in by as much as the writing in the tiles under it does: level with the tiles' own edge,
-        // it looked to stick out past their rounded corners (the user, 2026-10-23). Its lines are moved left to where
-        // their writing starts (`flush`), drawn past its edge, not cut there.
+        // Its writing stands in a little from the page's edge, to where the tiles' rounded corners end and their straight
+        // edge begins: level with the tiles' own edge it looked to stick out past their corners, and level with the
+        // writing in them it looked too far in (the user, 2026-10-23, chose 9 dp of 4 to 20). Its lines are moved left
+        // to where their writing starts (`flush`), drawn past its edge, not cut there.
         val status = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; clipChildren = false; clipToPadding = false; setPadding(px(TILE_INSET), 0, 0, 0) }
 
         // The status: a word, letter-spaced, and a large thin number with its unit — and, when there is one, the
@@ -1772,8 +1773,8 @@ class MainActivity : Activity() {
 
     private companion object {
         /** The page's own margins, in dp, inside whatever the system's bars take. */
-        /** How far the writing in a tile stands in from its edge, and so the status's from the page's. */
-        const val TILE_INSET = 20
+        /** How far the status's writing stands in from the page's edge, for the tiles' rounded corners under it. */
+        const val TILE_INSET = 9
         const val PAGE_SIDE = 16
         const val PAGE_TOP = 8
         const val PAGE_FOOT = 24
