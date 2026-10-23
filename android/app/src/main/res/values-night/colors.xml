@@ -4,13 +4,13 @@
      colours: the dial's face pale, the paper of the note white, the glass of water deep. -->
 <resources>
     <color name="wall">#14171B</color>
-    <color name="field_mint_pale">#18241F</color>
-    <color name="field_mint">#1A2D26</color>
-    <color name="field_blue">#182230</color>
-    <color name="field_apricot">#30261A</color>
-    <color name="field_apricot_deep">#D9954A</color>
-    <color name="field_coral">#3D2622</color>
-    <color name="field_lilac">#231F35</color>
+    <color name="field_mint_pale">#142920</color>
+    <color name="field_mint">#153328</color>
+    <color name="field_blue">#182638</color>
+    <color name="field_apricot">#4C2E10</color>
+    <color name="field_apricot_deep">#E39A4C</color>
+    <color name="field_coral">#47211A</color>
+    <color name="field_lilac">#2A2040</color>
     <color name="tile">#22262C</color>
     <color name="card">#2B3037</color>
     <color name="card_line">#383E46</color>
@@ -20,9 +20,9 @@
     <color name="water_deep">#2C7860</color>
     <color name="water_number">#EAF2EE</color>
     <color name="water_sub">#8FA9B0</color>
-    <color name="glass_tile">#382F24</color>
-    <color name="glass_number">#F3E6D3</color>
-    <color name="glass_sub">#BBA68A</color>
+    <color name="glass_tile">#40291A</color>
+    <color name="glass_number">#FBE9D2</color>
+    <color name="glass_sub">#D9B48C</color>
     <color name="paper_number">#F0E4E1</color>
     <color name="paper_sub">#B5A19D</color>
     <color name="paper_tile">#2C2826</color>

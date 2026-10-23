@@ -193,6 +193,22 @@ class MainActivity : Activity() {
     private var shown = false
     private var testing = false
 
+    /**
+     * Light or dark as the person chose (`Look`), else as the phone is set: the choice is laid over the configuration
+     * the screen is made with, before anything of it is made.
+     */
+    override fun attachBaseContext(base: android.content.Context) {
+        super.attachBaseContext(base)
+        val night = when (Look.of(base)) {
+            Look.LIGHT -> android.content.res.Configuration.UI_MODE_NIGHT_NO
+            Look.DARK -> android.content.res.Configuration.UI_MODE_NIGHT_YES
+            Look.SYSTEM -> return
+        }
+        // Only light or dark is laid over: a copy of the whole configuration held the screen's size and turn as they
+        // were, and a phone turned upright went on being laid out on its side.
+        applyOverrideConfiguration(android.content.res.Configuration().apply { uiMode = night })
+    }
+
     override fun onCreate(saved: Bundle?) {
         super.onCreate(saved)
         engine = Engine(this)
@@ -1128,6 +1144,25 @@ class MainActivity : Activity() {
         lookKey = key("", main = false) { look(asked = true) }
         version.addView(lookKey, LinearLayout.LayoutParams(WRAP_CONTENT, px(34)))
         tools.addView(version, spaced(top = 12))
+
+        // How the app looks: as the phone is set, or always light, or always dark.
+        val look = card().apply { setPadding(px(16), px(14), px(16), px(14)) }
+        look.addView(text("外观", 14f, R.color.ink, bold = true))
+        val picks = LinearLayout(this).apply {
+            background = flat(R.color.card_line, 16)
+            setPadding(px(3), px(3), px(3), px(3))
+        }
+        val now = Look.of(this)
+        for (which in Look.values()) {
+            val chosen = which == now
+            picks.addView(text(which.words, 13.5f, if (chosen) R.color.ink else R.color.ink_2, bold = chosen).apply {
+                gravity = Gravity.CENTER
+                background = if (chosen) flat(R.color.tile, 13) else null
+                setOnClickListener { if (!chosen) { Look.choose(this@MainActivity, which); recreate() } }
+            }, LinearLayout.LayoutParams(0, px(34), 1f))
+        }
+        look.addView(picks, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = px(10) })
+        tools.addView(look, spaced(top = 12))
         return tools
     }
 
@@ -1239,7 +1274,7 @@ class MainActivity : Activity() {
         from.text = when {
             !engine.present -> "这个安装包缺少运行引擎。"
             here.isEmpty() -> "尚未下载模型。请先在「模型管理」中下载。"
-            phase == Share.Phase.OFF -> "启用共享后，电脑即可在局域网中找到这台手机。"
+            phase == Share.Phase.OFF -> "启用共享后，电脑可在局域网找到这台手机。"
             phase == Share.Phase.LOADING -> "正在加载 ${sharing.model?.name.orEmpty()}"
             phase == Share.Phase.FAILED -> sharing.message.orEmpty()
             phase == Share.Phase.WORKING -> when (sharing.task) {
