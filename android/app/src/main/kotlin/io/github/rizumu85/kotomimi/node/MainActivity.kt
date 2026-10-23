@@ -99,7 +99,7 @@ class MainActivity : Activity() {
     // The small tiles.
     private class Small(val view: View, val state: TextView, val name: TextView, val sub: TextView, val thing: Thing)
     private lateinit var works: Map<Task, Small>
-    private lateinit var workRow: LinearLayout
+    private lateinit var grid: TileGrid
     private lateinit var lens: Small
     private lateinit var dial: Small
     private lateinit var modelsSub: TextView
@@ -230,6 +230,12 @@ class MainActivity : Activity() {
         }
         if (intent.getBooleanExtra("share", false)) lend(MODELS.firstOrNull { it.id == intent.getStringExtra("model") }, intent.getStringExtra("llama"))
         else if (intent.hasExtra("share") && Sharing.on) ShareService.stop(this)
+        // A screenshot of the other way round, without turning the phone or its settings: --es orient port|land|auto.
+        when (intent.getStringExtra("orient")) {
+            "port" -> requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            "land" -> requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            "auto" -> requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        }
         when (intent.getStringExtra("demo")) {
             "coach" -> Sharing.work(Task.COACH).done(620, "昨日、映画を見ます。", "昨日、映画を見ました。\n动词时态应与“昨日”一致，使用过去式。")
             "translate" -> Sharing.work(Task.TRANSLATE).done(1400, "飛べないおじさんはただのおじさんだ。", "不会飞的叔叔只是个普通叔叔而已。", into = "中文")
@@ -360,8 +366,9 @@ class MainActivity : Activity() {
         for (tile in listOf(hearTile, glassTile, paperTile)) stage.addView(tile, FrameLayout.LayoutParams(MATCH_PARENT, px(STAGE_HEIGHT)))
 
 
-        // The other two kinds of work, small.
-        workRow = LinearLayout(this)
+        // The small tiles: the kinds of work not in the large tile, the computer's side and the check — in a grid as
+        // many to a row as the screen has room for.
+        grid = TileGrid(this)
         works = mapOf(
             Task.HEAR to small(Thing(this, Thing.Kind.WATER), "语音识别") { open(modelsBox) },
             Task.TRANSLATE to small(Thing(this, Thing.Kind.PANES), "文本翻译") { open(modelsBox) },
@@ -369,20 +376,20 @@ class MainActivity : Activity() {
         )
 
 
-        // The computer's side and the check, and the models.
-        val tools = LinearLayout(this)
         lens = small(Thing(this, Thing.Kind.LENS), "设备连接") { open(devicesBox) }
         dial = small(Thing(this, Thing.Kind.DIAL), "性能检测") { open(toolsBox) }
-        tools.addView(lens.view, LinearLayout.LayoutParams(0, px(SMALL_HEIGHT), 1f))
-        tools.addView(dial.view, LinearLayout.LayoutParams(0, px(SMALL_HEIGHT), 1f).apply { leftMargin = px(12) })
-        val modelsBlock = modelsTile()
-        blocks = listOf(status to 0, shareTile to 18, stage to 12, workRow to 12, tools to 12, modelsBlock to 12)
+        for (tile in works.values.map { it.view } + listOf(lens.view, dial.view)) grid.addView(tile)
+        statusBlock = status
+        shareBlock = shareTile
+        modelsBlock = modelsTile()
         leftColumn = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         rightColumn = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        thirdColumn = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val columns = LinearLayout(this).apply {
             setPadding(px(PAGE_SIDE), px(PAGE_TOP), px(PAGE_SIDE), px(PAGE_FOOT))
             addView(leftColumn, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
             addView(rightColumn, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
+            addView(thirdColumn, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
         }
         arrange()
 
@@ -413,7 +420,7 @@ class MainActivity : Activity() {
             }
             false
         }
-        for (view in listOf(columns, leftColumn, rightColumn, status)) view.setOnTouchListener(ring)
+        for (view in listOf(columns, leftColumn, rightColumn, thirdColumn, status)) view.setOnTouchListener(ring)
         wall = Wall(this)
         page = FrameLayout(this).apply {
             addView(wall, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
@@ -433,27 +440,85 @@ class MainActivity : Activity() {
         return page
     }
 
-    /** The page's blocks with the space above each, and the two columns they are laid out in. */
-    private lateinit var blocks: List<Pair<View, Int>>
+    /** The page's blocks, and the columns they are laid out in. */
+    private lateinit var statusBlock: View
+    private lateinit var shareBlock: View
+    private lateinit var modelsBlock: View
     private lateinit var leftColumn: LinearLayout
     private lateinit var rightColumn: LinearLayout
+    private lateinit var thirdColumn: LinearLayout
+    /** The large number's size, by the screen. */
+    private var bigSize = 60f
+
+    /** The page's shapes, by the screen's width and height. */
+    private enum class Shape { PHONE, SHORT, SIDE, TABLET, WIDE }
 
     /**
-     * The blocks in one column — or, on a screen wide enough (a phone on its side, a tablet), in two: what the phone
-     * is doing on the left, the rest on the right.
+     * The page laid out for the screen it is on, each shape its own arrangement rather than one stretched:
+     * - a phone: one column; a short one (the F22 Pro stands 533 dp high) tighter, its number and tiles smaller;
+     * - a phone on its side: what it is doing on the left — the status and the large tile, as high as the screen
+     *   leaves it — and the switch, the small tiles and the models on the right;
+     * - a tablet standing: the status beside the switch, the large tile wide, the small tiles four to a row;
+     * - a wide screen: three columns — the status, the switch and the models; the large tile, high; the small tiles.
      */
     private fun arrange() {
-        // Wide: a tablet, or a phone on its side — even a small one (the Duoqin F22 Pro lies 533 dp wide).
         val config = resources.configuration
-        val wide = config.screenWidthDp >= TWO_COLUMNS_FROM || (config.screenWidthDp > config.screenHeightDp && config.screenWidthDp >= TWO_COLUMNS_ON_SIDE)
-        for ((view, _) in blocks) (view.parent as? ViewGroup)?.removeView(view)
-        blocks.forEachIndexed { i, (view, above) ->
-            val second = wide && i >= 3
-            val into = if (second) rightColumn else leftColumn
-            into.addView(view, spaced(top = if (second && into.childCount == 0) 12 else above))
+        val w = config.screenWidthDp
+        val h = config.screenHeightDp
+        val shape = when {
+            w >= 840 -> Shape.WIDE
+            w >= 600 -> Shape.TABLET
+            w > h && w >= 480 -> Shape.SIDE
+            h < 620 -> Shape.SHORT
+            else -> Shape.PHONE
         }
-        rightColumn.visibility = if (wide) View.VISIBLE else View.GONE
-        (rightColumn.layoutParams as? LinearLayout.LayoutParams)?.leftMargin = if (wide) px(16) else 0
+        val (stageDp, cellDp, gapDp) = when (shape) {
+            Shape.PHONE -> Triple(214, 128, 12)
+            Shape.SHORT -> Triple(184, 118, 10)
+            Shape.SIDE -> Triple((h - 170).coerceIn(170, 260), 124, 10)
+            Shape.TABLET -> Triple(260, 136, 14)
+            Shape.WIDE -> Triple((h - 150).coerceIn(260, 420), 128, 14)
+        }
+        bigSize = when (shape) { Shape.PHONE, Shape.WIDE -> 60f; Shape.SHORT -> 50f; Shape.SIDE -> 44f; Shape.TABLET -> 68f }
+        for (tile in listOf(hearTile, glassTile, paperTile)) tile.layoutParams = tile.layoutParams.apply { height = px(stageDp) }
+        grid.cell = px(cellDp)
+        grid.gap = px(gapDp)
+        grid.columns = if (shape == Shape.TABLET) 4 else 2
+        modelsBlock.minimumHeight = px(cellDp)
+
+        for (view in listOf(statusBlock, shareBlock, stage, grid, modelsBlock)) (view.parent as? ViewGroup)?.removeView(view)
+        for (column in listOf(leftColumn, rightColumn, thirdColumn)) column.removeAllViews()
+        fun put(into: LinearLayout, view: View, above: Int) = into.addView(view, spaced(top = if (into.childCount == 0) 0 else above))
+        when (shape) {
+            Shape.PHONE, Shape.SHORT -> {
+                put(leftColumn, statusBlock, 0); put(leftColumn, shareBlock, gapDp + 6); put(leftColumn, stage, gapDp)
+                put(leftColumn, grid, gapDp); put(leftColumn, modelsBlock, gapDp)
+            }
+            Shape.SIDE -> {
+                // What the phone is doing fills the left, as high as the screen; the switch heads the right.
+                put(leftColumn, statusBlock, 0); put(leftColumn, stage, gapDp)
+                put(rightColumn, shareBlock, 0); put(rightColumn, grid, gapDp); put(rightColumn, modelsBlock, gapDp)
+            }
+            Shape.TABLET -> {
+                // The status beside the switch, the switch in the middle of the status's height.
+                val top = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL }
+                top.addView(statusBlock, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
+                top.addView(shareBlock, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f).apply { leftMargin = px(gapDp) })
+                put(leftColumn, top, 0); put(leftColumn, stage, gapDp + 4); put(leftColumn, grid, gapDp); put(leftColumn, modelsBlock, gapDp)
+            }
+            Shape.WIDE -> {
+                put(leftColumn, statusBlock, 0); put(leftColumn, shareBlock, gapDp); put(leftColumn, modelsBlock, gapDp)
+                put(rightColumn, stage, 0)
+                put(thirdColumn, grid, 0)
+            }
+        }
+        val columns = when (shape) { Shape.PHONE, Shape.SHORT, Shape.TABLET -> 1; Shape.SIDE -> 2; Shape.WIDE -> 3 }
+        rightColumn.visibility = if (columns >= 2) View.VISIBLE else View.GONE
+        thirdColumn.visibility = if (columns >= 3) View.VISIBLE else View.GONE
+        for (column in listOf(rightColumn, thirdColumn)) (column.layoutParams as? LinearLayout.LayoutParams)?.leftMargin = px(gapDp + 4)
+        // On a wide screen the columns are not even: the large tile's has the most room.
+        (rightColumn.layoutParams as? LinearLayout.LayoutParams)?.weight = if (shape == Shape.WIDE) 1.3f else 1f
+        bigNumber.textSize = if (bigNumber.text.any { it.isDigit() }) bigSize else bigSize * 0.7f
     }
 
     override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
@@ -570,7 +635,6 @@ class MainActivity : Activity() {
         addView(things, FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { leftMargin = px(18); topMargin = px(46) })
         modelsSub = text("", 11.5f, R.color.ink_2)
         addView(modelsSub, FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT, Gravity.BOTTOM).apply { leftMargin = px(18); bottomMargin = px(14) })
-        minimumHeight = px(SMALL_HEIGHT)
     }
 
     // ── The panels ──────────────────────────────────────────────────────────────────────────────────────────────
@@ -967,12 +1031,10 @@ class MainActivity : Activity() {
         }
 
         // The other two kinds of work, while lent.
-        workRow.removeAllViews()
-        workRow.visibility = if (shared) View.VISIBLE else View.GONE
-        if (shared) {
-            Task.values().filter { it != focus }.forEachIndexed { i, task ->
-                val tile = works.getValue(task)
-                workRow.addView(tile.view, LinearLayout.LayoutParams(0, px(SMALL_HEIGHT), 1f).apply { if (i > 0) leftMargin = px(12) })
+        for ((task, tile) in works) {
+            val show = shared && task != focus
+            if ((tile.view.visibility == View.VISIBLE) != show) tile.view.visibility = if (show) View.VISIBLE else View.GONE
+            if (show) {
                 val model = modelOf(task)
                 val downloaded = ALL_MODELS.any { it.task == task && store.has(it) }
                 tile.sub.text = model?.name ?: if (downloaded) "内存不足" else "未下载"
@@ -1086,7 +1148,7 @@ class MainActivity : Activity() {
     /** The large number and its unit; a word on its own is set smaller, as Chinese at the number's size is heavy. */
     private fun big(number: String, unit: String = "") {
         bigNumber.text = number
-        bigNumber.textSize = if (number.any { it.isDigit() }) 60f else 42f
+        bigNumber.textSize = if (number.any { it.isDigit() }) bigSize else bigSize * 0.7f
         bigUnit.text = unit
     }
 
@@ -1430,14 +1492,10 @@ class MainActivity : Activity() {
 
         /** The large tile's height and a small tile's, in dp. */
         const val STAGE_HEIGHT = 214
-        const val SMALL_HEIGHT = 128
 
         /** A panel's widest, in dp: on a wide screen it stands in the middle, as wide as a phone. */
         const val PANEL_MOST = 560
 
-        /** From this width, in dp, the page is laid out in two columns: and from this one on its side. */
-        const val TWO_COLUMNS_FROM = 600
-        const val TWO_COLUMNS_ON_SIDE = 480
 
         /** Each kind of work's object. */
         val THINGS = mapOf(Task.HEAR to Thing.Kind.WATER, Task.TRANSLATE to Thing.Kind.PANES, Task.COACH to Thing.Kind.NOTE)

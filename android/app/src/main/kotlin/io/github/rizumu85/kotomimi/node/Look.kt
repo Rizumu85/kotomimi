@@ -57,14 +57,19 @@ enum class Mood { IDLE, HEAR, TRANSLATE, COACH }
  * fields' edges trembling, a sentence translated sends a light sweeping across, a correction spreads like a drop of
  * red ink, and a touch on it rings out from the finger. The page scrolling moves the fields a little behind it, and
  * the dots less still: a grid held further back. (Dots in place of a grain the user took for them, 2026-10-23: a
- * touch of the technical against the soft fields.)
+ * touch of the technical against the soft fields.) The grid is not everywhere: it shows in a few soft pools of light
+ * that wander slowly — and where a finger touches, and where work was just done — and fades out between them, so
+ * the wall has places to look at and places that fall away (the user, the same day: "主次分明").
  */
 class Wall(context: Context) : View(context) {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
     private val grid = BitmapShader(dotTile(), Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
-    private val dots = Paint().apply { shader = grid }
+    private val pool = Paint(Paint.ANTI_ALIAS_FLAG)
     private val gridAt = android.graphics.Matrix()
+    /** Pools of light the grid shows in for a while: where a finger touched, where work was just done. */
+    private class Glow(val x: Float, val y: Float, var age: Float = 0f)
+    private val glows = ArrayList<Glow>()
     private val path = Path()
 
     private var mood = Mood.IDLE
@@ -105,11 +110,13 @@ class Wall(context: Context) : View(context) {
             Task.TRANSLATE -> sweep = 0f
             Task.COACH -> drops += Drop(x, y, context.getColor(R.color.ink_red))
         }
+        glows += Glow(x, y)
     }
 
     /** A touch on the wallpaper rings out from the finger. */
     fun touched(x: Float, y: Float) {
         drops += Drop(x, y, Color.WHITE)
+        glows += Glow(x, y)
     }
 
     private fun current(): IntArray = IntArray(3) { blend(from[it], to[it], turned) }
@@ -131,6 +138,8 @@ class Wall(context: Context) : View(context) {
         if (sweep >= 0f) sweep = if (sweep > 1.3f) -1f else sweep + dt / 1.1f
         drops.forEach { it.age += dt }
         drops.removeAll { it.age > 1.6f }
+        glows.forEach { it.age += dt }
+        glows.removeAll { it.age > GLOW_LASTS }
 
         val c = current()
         val w = width.toFloat()
@@ -161,9 +170,18 @@ class Wall(context: Context) : View(context) {
                 canvas.drawCircle(d.x, d.y, context.px(10f) + k * w * 0.4f, paint)
             }
         }
-        gridAt.setTranslate(0f, -scrolled * 0.05f)
+        // The grid drifts, slowly, and lies further back than the fields as the page scrolls.
+        gridAt.setTranslate(t * context.px(5f), t * context.px(3f) - scrolled * 0.05f)
         grid.setLocalMatrix(gridAt)
-        canvas.drawRect(0f, 0f, w, h, dots)
+        // Two pools wander over the wall, one high and one low; each glow swells and fades.
+        // Sized by the wall's short side: on a phone on its side two pools by its width covered all of it.
+        val side = min(w, h)
+        lightPool(canvas, w * (0.3f + 0.22f * sin(t * 0.23f)), h * (0.22f + 0.1f * cos(t * 0.31f)), side * 0.6f, 1f)
+        lightPool(canvas, w * (0.72f + 0.2f * cos(t * 0.19f + 1f)), h * (0.7f + 0.12f * sin(t * 0.27f + 2f)), side * 0.48f, 0.75f)
+        for (g in glows) {
+            val k = g.age / GLOW_LASTS
+            lightPool(canvas, g.x, g.y, side * (0.18f + 0.3f * k), sin(k * PI.toFloat()))
+        }
         if (running) postInvalidateOnAnimation()
     }
 
@@ -185,12 +203,21 @@ class Wall(context: Context) : View(context) {
         canvas.drawPath(path, paint)
     }
 
+    /** The grid, shown in a round pool of light: full at its centre, gone at its edge. */
+    private fun lightPool(canvas: Canvas, cx: Float, cy: Float, r: Float, strength: Float) {
+        if (r <= 0f || strength <= 0.01f) return
+        val alpha = (strength.coerceIn(0f, 1f) * 255).toInt()
+        val fade = android.graphics.RadialGradient(cx, cy, r, intArrayOf(Color.argb(alpha, 0, 0, 0), Color.argb(alpha / 3, 0, 0, 0), Color.TRANSPARENT), floatArrayOf(0f, 0.55f, 1f), Shader.TileMode.CLAMP)
+        pool.shader = android.graphics.ComposeShader(grid, fade, android.graphics.PorterDuff.Mode.DST_IN)
+        canvas.drawCircle(cx, cy, r, pool)
+    }
+
     /** One cell of the grid: a small soft dot in a square of nothing, repeated over the whole wall. */
     private fun dotTile(): Bitmap {
         val size = context.px(DOT_EVERY).coerceAtLeast(6)
         val tile = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(tile)
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(46, 40, 52, 70) }
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(60, 40, 52, 70) }
         canvas.drawCircle(size / 2f, size / 2f, context.px(1.05f), paint)
         return tile
     }
@@ -198,6 +225,8 @@ class Wall(context: Context) : View(context) {
     private companion object {
         /** The grid's spacing, in dp. */
         const val DOT_EVERY = 13
+        /** How long a glow lasts, in seconds. */
+        const val GLOW_LASTS = 2.4f
     }
 }
 
@@ -265,7 +294,8 @@ class Water(context: Context) : View(context) {
         val h = height.toFloat()
         paint.color = context.getColor(R.color.water_tile)
         canvas.drawRoundRect(RectF(0f, 0f, w, h), radius, radius, paint)
-        val dashY = h * 0.47f
+        // Under the number and its line, however low the tile: a low one (a phone on its side) had it through the line.
+        val dashY = maxOf(h * 0.47f, context.px(96f))
         canvas.drawLine(context.px(16f), dashY, w - context.px(16f), dashY, dash)
         val top = h * (1f - shown.coerceIn(0.12f, 0.5f))
         val swell = context.px(if (moving) 7f else 3f)
@@ -405,5 +435,35 @@ class Bar(context: Context) : View(context) {
         if (done <= 0f) return
         paint.color = context.getColor(R.color.key)
         canvas.drawRoundRect(RectF(0f, 0f, max(height.toFloat(), width * done), height.toFloat()), r, r, paint)
+    }
+}
+
+/**
+ * Small tiles in rows of `columns`, each `cell` high, `gap` apart: a hidden one takes no place, so the tiles shown
+ * close up. How many to a row is the page's choice (`MainActivity.arrange`): two on a phone, four on a tablet.
+ */
+class TileGrid(context: Context) : android.view.ViewGroup(context) {
+    var columns = 2
+    var cell = 0
+    var gap = 0
+
+    private fun shown() = (0 until childCount).map(::getChildAt).filter { it.visibility != View.GONE }
+
+    override fun onMeasure(widthSpec: Int, heightSpec: Int) {
+        val width = MeasureSpec.getSize(widthSpec)
+        val tiles = shown()
+        val across = ((width - gap * (columns - 1)) / columns).coerceAtLeast(0)
+        for (tile in tiles) tile.measure(MeasureSpec.makeMeasureSpec(across, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(cell, MeasureSpec.EXACTLY))
+        val rows = (tiles.size + columns - 1) / columns
+        setMeasuredDimension(width, if (rows == 0) 0 else rows * cell + (rows - 1) * gap)
+    }
+
+    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+        val across = ((width - gap * (columns - 1)) / columns).coerceAtLeast(0)
+        shown().forEachIndexed { i, tile ->
+            val x = (i % columns) * (across + gap)
+            val y = (i / columns) * (cell + gap)
+            tile.layout(x, y, x + across, y + cell)
+        }
     }
 }
