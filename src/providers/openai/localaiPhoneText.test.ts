@@ -148,6 +148,15 @@ describe('the check of a text stage on a phone', () => {
     expect(noticeText(t, { code: refused.code, params: refused.params, message: refused.reason })).toBe('手机（192.168.4.28:8792）现在没有借出 Index-Translate 2B。请在卡片里换一个模型。');
   });
 
+  it('refuses a model the phone has not the memory for now, and says where to look', async () => {
+    const small = { ...LENT, data: [{ id: 'sensevoice-small-q8', holds_mb: 250 }], text: [{ id: 'index-translate-2b', kind: 'translate', name: 'Index-Translate 2B', holds_mb: 1541, loaded: false }, { id: 'hy-mt2-1.8b', kind: 'translate', name: 'Hunyuan MT 2 1.8B', holds_mb: 1210, loaded: false }], memory_mb: { total: 3843, available: 1160 } };
+    const refused = await check(phoneOnly(small));
+    expect(refused).toMatchObject({ ok: false, code: 'phone_model_too_big', params: { address: PHONE, name: 'Index-Translate 2B' } });
+    if (refused.ok) return;
+    expect(noticeText(t, { code: refused.code, params: refused.params, message: refused.reason })).toBe('手机（192.168.4.28:8792）现在内存不够运行 Index-Translate 2B。请在卡片里换一个小一点的模型，或关掉手机上的其他应用。');
+    await expect(check(phoneOnly(small), { translateOtherModel: 'hy-mt2-1.8b' })).resolves.toMatchObject({ ok: true });
+  });
+
   it('refuses a feedback model the phone does not lend: a translator of the same name is no feedback model', async () => {
     const refused = await check(phoneOnly(LENT), { coach: true, coachOtherModel: 'hy-mt2-1.8b' });
     expect(refused).toMatchObject({ ok: false, code: 'phone_model_gone' });

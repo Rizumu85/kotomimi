@@ -48,6 +48,8 @@ export const CLIENT_DIAGNOSTICS = {
   tts_stopped: { severity: 'warning' },
   /** Fork: a phone the session uses stopped answering mid-run (`phoneWatch.ts`); what was sent to it waits. */
   phone_quiet: { severity: 'warning' },
+  /** Fork: a phone refused a sentence's model for want of memory; the session goes on. */
+  phone_no_memory: { severity: 'warning' },
 } satisfies Record<string, { severity: 'error' | 'warning' }>;
 
 export type ClientDiagnosticCode = keyof typeof CLIENT_DIAGNOSTICS;

@@ -290,6 +290,18 @@ const PROVIDER = {
     '手机没有回应，可能锁屏后被系统暂停了。在手机上打开 Kotomimi 就能继续。',
     '手機沒有回應，可能鎖屏後被系統暫停了。在手機上打開 Kotomimi 就能繼續。',
   ],
+  // The model chosen for a phone needs more memory than it can have now: before a run, during one, and in the list.
+  phoneModelTooBigCheck: [
+    'The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.',
+    '手机（{{address}}）现在内存不够运行 {{name}}。请在卡片里换一个小一点的模型，或关掉手机上的其他应用。',
+    '手機（{{address}}）現在記憶體不夠執行 {{name}}。請在卡片裡換一個小一點的模型，或關掉手機上的其他應用程式。',
+  ],
+  phoneNoMemory: [
+    'The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.',
+    '手机现在内存不够运行这个模型。请在卡片里换一个小一点的模型，或关掉手机上的其他应用。',
+    '手機現在記憶體不夠執行這個模型。請在卡片裡換一個小一點的模型，或關掉手機上的其他應用程式。',
+  ],
+  phoneModelTooBig: ['{{name}} (not enough memory on the phone)', '{{name}}（手机内存不够）', '{{name}}（手機記憶體不夠）'],
   phoneModelGone: [
     'The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.',
     '手机（{{address}}）现在没有借出 {{name}}。请在卡片里换一个模型。',

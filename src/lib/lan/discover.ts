@@ -33,16 +33,46 @@ export interface PhoneTextModel {
   kind: 'translate' | 'coach';
   name: string;
   loaded: boolean;
+  /**
+   * False: the phone has not the memory to load it now, even with its other engines ended (`phoneRoom`), and refuses
+   * it (503). Absent where the phone did not say enough to tell.
+   */
+  fits?: boolean;
 }
 
-/** A phone's `text`, held to its shape (the same reading as `electron/lan-discover.js` `textModels`). */
-export function phoneTextModels(value: unknown): PhoneTextModel[] {
+/**
+ * What a phone could give a text model now, in MB: the memory it can have (`memory_mb.available`), and what its
+ * engines up hold of their own, which it ends to make room — the recognizer (`data`'s `holds_mb`, counted as up)
+ * and the text models loaded. The phone's own reckoning (`Share.ensure`), from its list; null where it gave none
+ * (before 0.8.0). Seen 2026-10-23 on a 4 GB phone: Index-Translate 2B keeps 1.5 GB, 1.4 GB could be had, every
+ * sentence was refused, and nothing on the desktop said why.
+ */
+export function phoneRoom(list: unknown): number | null {
+  const body = list as { data?: unknown; text?: unknown; memory_mb?: { available?: unknown } } | null;
+  const available = body?.memory_mb?.available;
+  if (typeof available !== 'number' || !Number.isFinite(available)) return null;
+  const held = (m: unknown) => {
+    const mb = (m as { holds_mb?: unknown } | null)?.holds_mb;
+    return typeof mb === 'number' && Number.isFinite(mb) && mb > 0 ? mb : 0;
+  };
+  const hearing = Array.isArray(body?.data) ? body.data.reduce((sum: number, m) => sum + held(m), 0) : 0;
+  const loaded = Array.isArray(body?.text) ? body.text.reduce((sum: number, m) => sum + ((m as { loaded?: unknown } | null)?.loaded === true ? held(m) : 0), 0) : 0;
+  return available + hearing + loaded;
+}
+
+/**
+ * A phone's `text`, held to its shape (the same reading as `electron/lan-discover.js` `textModels`); with `room`
+ * (`phoneRoom`), whether each fits.
+ */
+export function phoneTextModels(value: unknown, room: number | null = null): PhoneTextModel[] {
   if (!Array.isArray(value)) return [];
   const out: PhoneTextModel[] = [];
-  for (const m of value as Array<Partial<PhoneTextModel> | null>) {
+  for (const m of value as Array<(Partial<PhoneTextModel> & { holds_mb?: unknown }) | null>) {
     if (!m || typeof m.id !== 'string' || !m.id || (m.kind !== 'translate' && m.kind !== 'coach')) continue;
     if (out.some((seen) => seen.id === m.id)) continue;
-    out.push({ id: m.id.slice(0, 80), kind: m.kind, name: typeof m.name === 'string' ? m.name.slice(0, 80) : '', loaded: m.loaded === true });
+    const loaded = m.loaded === true;
+    const holds = typeof m.holds_mb === 'number' && Number.isFinite(m.holds_mb) ? m.holds_mb : null;
+    out.push({ id: m.id.slice(0, 80), kind: m.kind, name: typeof m.name === 'string' ? m.name.slice(0, 80) : '', loaded, ...(room !== null && holds !== null ? { fits: loaded || holds <= room } : {}) });
     if (out.length >= 16) break;
   }
   return out;

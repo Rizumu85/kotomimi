@@ -49,6 +49,23 @@ describe('watchPhones', () => {
     watch.stop();
   });
 
+  it('says a phone two watches share once, and again after it answered', async () => {
+    const clock = createVirtualClock();
+    const { state, doFetch } = phone();
+    const quiet: string[] = [];
+    const legs = [watchPhones({ fetch: doFetch, clock, onQuiet: () => quiet.push('a') }), watchPhones({ fetch: doFetch, clock, onQuiet: () => quiet.push('b') })];
+    for (const leg of legs) leg.add('http://10.0.0.9:8792/v1');
+    state.awake = false;
+    await pass(clock, (PHONE_WATCH_EVERY_MS + PHONE_WATCH_WAIT_MS) * 3);
+    expect(quiet).toHaveLength(1);
+    state.awake = true;
+    await pass(clock, PHONE_WATCH_EVERY_MS * 2);
+    state.awake = false;
+    await pass(clock, (PHONE_WATCH_EVERY_MS + PHONE_WATCH_WAIT_MS) * 3);
+    expect(quiet).toHaveLength(2);
+    for (const leg of legs) leg.stop();
+  });
+
   it('asks each phone once however often it is added, and nothing after it stops', async () => {
     const clock = createVirtualClock();
     const { state, doFetch } = phone();

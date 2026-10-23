@@ -148,7 +148,7 @@ function PhoneModel({ value, lent, onChange, disabled }: { value: string; lent: 
     <Field label={label}>
       <select className="select-dropdown" aria-label={label} value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled || (listed && options.length === 1)}>
         {!listed && <option value={value}>{lent ? t('providers.localai.modelGone', { name: shownName(value) }) : shownName(value)}</option>}
-        {options.map((m) => <option key={m.id} value={m.id}>{lentName(m)}</option>)}
+        {options.map((m) => <option key={m.id} value={m.id}>{m.fits === false ? t('providers.localai.phoneModelTooBig', { name: lentName(m) }) : lentName(m)}</option>)}
       </select>
     </Field>
   );

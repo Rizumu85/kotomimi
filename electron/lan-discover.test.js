@@ -97,14 +97,28 @@ describe('what an answer says of a server', () => {
     expect(readAnswer(200, { 'x-kotomimi-node': 'engine' }, both)).toEqual({
       kind: 'phone', name: '', models: 4, needsKey: false, includes: false, model: 'sensevoice-small-q8',
       text: [
-        { id: 'hy-mt2-1.8b', kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: false },
-        { id: 'index-translate-2b', kind: 'translate', name: 'Index-Translate 2B', loaded: true },
+        { id: 'hy-mt2-1.8b', kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: false, fits: true },
+        { id: 'index-translate-2b', kind: 'translate', name: 'Index-Translate 2B', loaded: true, fits: true },
         { id: 'gemma-4-e2b', kind: 'coach', name: 'Gemma 4 E2B', loaded: false },
       ],
     });
     // One that lends text models alone has an empty `data`: still a phone to choose, with no recognizer.
     const textOnly = readAnswer(200, { 'x-kotomimi-node': 'engine' }, JSON.stringify({ object: 'list', data: [], text: text.slice(0, 1) }));
     expect(textOnly).toEqual({ kind: 'phone', name: '', models: 1, needsKey: false, includes: false, text: [{ id: 'hy-mt2-1.8b', kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: false }] });
+  });
+
+  // A 4 GB phone (2026-10-23): Index-Translate 2B keeps 1.5 GB, and 1.4 GB can be had with its recognizer ended.
+  it('says which text models the phone has not the memory for now', () => {
+    const list = JSON.stringify({
+      object: 'list',
+      data: [{ id: 'sensevoice-small-q8', holds_mb: 250 }],
+      text: [
+        { id: 'hy-mt2-1.8b', holds_mb: 1210, kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: false },
+        { id: 'index-translate-2b', holds_mb: 1541, kind: 'translate', name: 'Index-Translate 2B', loaded: false },
+      ],
+      memory_mb: { total: 3843, available: 1160 },
+    });
+    expect(readAnswer(200, { 'x-kotomimi-node': 'engine' }, list).text.map((m) => [m.id, m.fits])).toEqual([['hy-mt2-1.8b', true], ['index-translate-2b', false]]);
   });
 
   it("keeps of a phone's text models only what is one: a name, and a translation or feedback, each once", () => {

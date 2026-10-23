@@ -451,6 +451,15 @@ describe('a stage a phone lends its model for', () => {
     await h.session.stop();
   });
 
+  // A 4 GB phone refuses a model it has not the memory for (2026-10-23): said as that, not as a model that failed.
+  it('says a phone has not the memory for the model, where it refuses every try', async () => {
+    const full = () => new Response(JSON.stringify({ error: { message: 'This phone has not the memory for Index-Translate 2B now: it keeps 1.5 GB for itself, and 1.4 GB can be had.' } }), { status: 503, headers: { 'Content-Type': 'application/json', 'Retry-After': '1' } });
+    const h = await live(PARTICIPANT, PHONE, [full(), full(), full(), full()]);
+    h.receive(...heard('item_1', '今日は天気がいいですね。'));
+    await vi.waitFor(() => { h.clock.advance(500); expect(h.of('degraded').map((e) => e.payload.code)).toEqual(['phone_no_memory']); });
+    await h.session.stop();
+  });
+
   // Locked or in the background, some phones' systems freeze the app (2026-10-20): the user is told within seconds,
   // not after the sentence's two minutes.
   it('says when the phone stops answering mid-run', async () => {

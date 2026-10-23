@@ -113,6 +113,9 @@ export const NOTICE_ALIASES: Readonly<Record<string, string>> = {
   phone_model_gone: 'providers.localai.phoneModelGone',
   // Fork: a phone in use stopped answering mid-run — locked or in the background, its system may have paused the app.
   phone_quiet: 'providers.localai.phoneQuiet',
+  // Fork: the phone has not the memory for the model chosen there — before the run (the check) and during it.
+  phone_model_too_big: 'providers.localai.phoneModelTooBigCheck',
+  phone_no_memory: 'providers.localai.phoneNoMemory',
   phone_translator_unfit: 'providers.localai.translatorUnfit',
   localai_here_down: 'providers.localai.hereDown',
   // Fork: the native recognition engine of this computer — not downloaded, coming up, or failed to.

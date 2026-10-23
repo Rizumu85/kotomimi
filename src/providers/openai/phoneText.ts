@@ -10,7 +10,7 @@
  * So a request to it is given longer, is asked again after the wait it names (a few times, never forever), and a
  * run's start asks it to load what it will be asked for (`warmPhones`).
  */
-import { phoneBase, phoneTextModels, plainAddress, type PhoneTextModel } from '../../lib/lan/discover';
+import { phoneBase, phoneRoom, phoneTextModels, plainAddress, type PhoneTextModel } from '../../lib/lan/discover';
 import { NATIVE_COACHES } from './nativeCoaches';
 import { NATIVE_TRANSLATORS, nativeTranslates } from './nativeTranslators';
 import { chatUrl, NO_KEY } from './textModel';
@@ -33,7 +33,7 @@ export async function phoneTextList(address: string, fetchIt: typeof fetch, sign
   const answer = await fetchIt(`${phoneTextBase(address)}/models`, { method: 'GET', signal });
   if (!answer.ok) return null;
   const body = (await answer.json().catch(() => null)) as { text?: unknown } | null;
-  return body ? phoneTextModels(body.text) : null;
+  return body ? phoneTextModels(body.text, phoneRoom(body)) : null;
 }
 
 /** A model a run will ask of a phone, and the request that loads it: the first messages of the real ones. */
@@ -71,16 +71,17 @@ export function warmPhones(wanted: readonly PhoneWarm[], fetchIt: typeof fetch, 
 /**
  * Which of the models a phone lends a stage asks for when it is given the phone: the one already chosen where the
  * phone lends it, else the best of this computer's own order (`NATIVE_TRANSLATORS`, `NATIVE_COACHES`: best first) —
- * for a translation, one that translates the pair before one that does not — else the phone's first.
+ * for a translation, one that translates the pair before one that does not, and one the phone has the memory for
+ * now before one it has not (`fits`) — else the phone's first.
  */
 export function lentChoice(lent: readonly PhoneTextModel[], kind: PhoneTextModel['kind'], pair: { source: string; target: string }, current = ''): string {
   const mine = lent.filter((m) => m.kind === kind);
   if (mine.some((m) => m.id === current)) return current;
   const order: readonly string[] = (kind === 'translate' ? NATIVE_TRANSLATORS : NATIVE_COACHES).map((m) => m.id);
-  const rank = (id: string) => {
-    const at = order.indexOf(id);
+  const rank = (m: PhoneTextModel) => {
+    const at = order.indexOf(m.id);
     const fits = kind !== 'translate' || at < 0 || nativeTranslates(NATIVE_TRANSLATORS[at], pair.source, pair.target);
-    return (fits ? 0 : 1000) + (at < 0 ? 999 : at);
+    return (fits ? 0 : 1000) + (m.fits === false ? 500 : 0) + (at < 0 ? 999 : at);
   };
-  return [...mine].sort((a, b) => rank(a.id) - rank(b.id))[0]?.id ?? '';
+  return [...mine].sort((a, b) => rank(a) - rank(b))[0]?.id ?? '';
 }

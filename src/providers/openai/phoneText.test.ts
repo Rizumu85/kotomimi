@@ -79,6 +79,21 @@ describe('the model a stage asks of a phone it is given', () => {
     expect(lentChoice(lent, 'coach', zhJa)).toBe('gemma-4-e2b');
   });
 
+  it('takes one the phone has the memory for before a better one it has not', () => {
+    const small: PhoneTextModel[] = [{ ...lent[0], loaded: false, fits: true }, { ...lent[1], fits: false }];
+    expect(lentChoice(small, 'translate', zhJa)).toBe('hy-mt2-1.8b');
+    // None fits: the best still, for the check to say so.
+    expect(lentChoice(small.map((m) => ({ ...m, fits: false })), 'translate', zhJa)).toBe('index-translate-2b');
+  });
+
+  it('reads from its list whether each fits: the memory it can have and what its engines up hold of their own', async () => {
+    const list = { ...LIST, data: [{ id: 'sensevoice-small-q8', holds_mb: 250 }], text: [{ id: 'hy-mt2-1.8b', kind: 'translate', holds_mb: 1210, loaded: false }, { id: 'index-translate-2b', kind: 'translate', holds_mb: 1541, loaded: false }], memory_mb: { total: 3843, available: 1160 } };
+    const lentNow = await phoneTextList('192.168.4.28:8792', async () => json(list), never);
+    expect(lentNow?.map((m) => m.fits)).toEqual([true, false]);
+    // A phone that does not say its memory: nothing is told.
+    expect((await phoneTextList('x:1', async () => json(LIST), never))?.some((m) => 'fits' in m)).toBe(false);
+  });
+
   it('keeps the one chosen while the phone lends it', () => {
     expect(lentChoice(lent, 'translate', zhJa, 'hy-mt2-1.8b')).toBe('hy-mt2-1.8b');
     expect(lentChoice(lent, 'translate', zhJa, 'hy-mt1.5-1.8b')).toBe('index-translate-2b');

@@ -28,12 +28,19 @@ interface Watched {
   asking: AbortController | null;
 }
 
+/**
+ * The phones said to be quiet, by base URL, and by which watch: both legs of a run may use one phone (each side's
+ * translation), and it is said once, not once a leg (seen 2026-10-23: the notice twice in the panel).
+ */
+const saidQuiet = new Map<string, object>();
+
 export function watchPhones({ fetch: doFetch, clock, onQuiet }: {
   fetch: typeof fetch;
   clock: Clock;
-  /** The phone stopped answering: said once until it answers again. */
+  /** The phone stopped answering: said once until it answers again, whichever watches of a run see it. */
   onQuiet(base: string): void;
 }): PhoneWatch {
+  const self = {};
   const watched = new Map<string, Watched>();
   let stopped = false;
 
@@ -55,9 +62,13 @@ export function watchPhones({ fetch: doFetch, clock, onQuiet }: {
     if (answered) {
       w.misses = 0;
       w.quiet = false;
+      if (saidQuiet.get(base) === self) saidQuiet.delete(base);
     } else if (++w.misses >= PHONE_WATCH_MISSES && !w.quiet) {
       w.quiet = true;
-      onQuiet(base);
+      if (!saidQuiet.has(base)) {
+        saidQuiet.set(base, self);
+        onQuiet(base);
+      }
     }
     w.cancel = clock.setTimeout(() => void ask(base, w), PHONE_WATCH_EVERY_MS);
   };
@@ -72,7 +83,8 @@ export function watchPhones({ fetch: doFetch, clock, onQuiet }: {
     },
     stop() {
       stopped = true;
-      for (const w of watched.values()) {
+      for (const [base, w] of watched) {
+        if (saidQuiet.get(base) === self) saidQuiet.delete(base);
         w.cancel();
         w.asking?.abort(new Error('the run ended'));
       }

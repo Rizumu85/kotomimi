@@ -776,9 +776,14 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
             lent = null;
           }
           if (lent === null) throw new CheckError(`The phone (${phone.address}) could not be reached.`, 'phone_unreachable', { address: phone.address });
-          if (!lent.some((m) => m.id === phone.model && m.kind === phone.kind)) {
+          const chosen = lent.find((m) => m.id === phone.model && m.kind === phone.kind);
+          if (!chosen) {
             const what = phone.kind === 'translate' ? 'translation' : 'feedback';
             return { ok: false, code: 'phone_model_gone', params: { address: phone.address, name: nativeTextName(phone.model) }, reason: `The phone (${phone.address}) lends no ${what} model ${phone.model} now.` };
+          }
+          // It lends it, and would refuse every sentence for it: it has not the memory now (`phoneRoom`).
+          if (chosen.fits === false) {
+            return { ok: false, code: 'phone_model_too_big', params: { address: phone.address, name: nativeTextName(phone.model) }, reason: `The phone (${phone.address}) has not the memory for ${phone.model} now.` };
           }
         }
         return { ok: true, models };

@@ -793,10 +793,12 @@ class PipelineLeg implements AdapterSession {
   /** A source left without its answer: the session goes on, and says so. */
   private unanswered(job: Job, why: string, cause?: unknown): void {
     const what = job.stage.kind === 'coach' ? 'The feedback model' : 'The translation model';
+    // A phone that has not the memory for the model refuses it so (503, `Share.ensure`): said as that, where to look.
+    const noRoom = job.stage.via !== 'device' && job.stage.phone === true && /has not the memory/.test(why);
     this.events.degraded({
       // Each said as what it was: a sentence with no feedback, a typed sentence with no translation (which the
       // contract's `text-input-answered` wants said), a heard one with none.
-      code: job.stage.kind === 'coach' ? 'feedback_failed' : job.typed ? 'typed_translation_failed' : 'translation_failed',
+      code: noRoom ? 'phone_no_memory' : job.stage.kind === 'coach' ? 'feedback_failed' : job.typed ? 'typed_translation_failed' : 'translation_failed',
       message: `${what} (${job.stage.model}) did not answer: ${why}`,
       ...(cause !== undefined ? { cause } : {}),
     });

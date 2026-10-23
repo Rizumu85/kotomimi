@@ -92,16 +92,32 @@ const MOST_TEXT_MODELS = 16;
  * its name, and whether its engine is up now (the first request for one that is not waits for it to load). Anything
  * else in the list is left out.
  */
-function textModels(value) {
+function textModels(value, room = null) {
   if (!Array.isArray(value)) return [];
   const out = [];
   for (const m of value) {
     if (!m || typeof m.id !== 'string' || !m.id || (m.kind !== 'translate' && m.kind !== 'coach')) continue;
     if (out.some((seen) => seen.id === m.id)) continue;
-    out.push({ id: m.id.slice(0, 80), kind: m.kind, name: typeof m.name === 'string' ? m.name.slice(0, 80) : '', loaded: m.loaded === true });
+    const loaded = m.loaded === true;
+    const holds = typeof m.holds_mb === 'number' && Number.isFinite(m.holds_mb) ? m.holds_mb : null;
+    out.push({ id: m.id.slice(0, 80), kind: m.kind, name: typeof m.name === 'string' ? m.name.slice(0, 80) : '', loaded, ...(room !== null && holds !== null ? { fits: loaded || holds <= room } : {}) });
     if (out.length >= MOST_TEXT_MODELS) break;
   }
   return out;
+}
+
+/**
+ * What a phone could give a text model now, in MB: the memory it can have, and what its engines up hold of their
+ * own — the recognizer and the text models loaded — which it ends to make room (the phone's `Share.ensure`). Null
+ * where it gave none. The same reckoning as `src/lib/lan/discover.ts` `phoneRoom`.
+ */
+function phoneRoom(list) {
+  const available = list && list.memory_mb && list.memory_mb.available;
+  if (typeof available !== 'number' || !Number.isFinite(available)) return null;
+  const held = (m) => (m && typeof m.holds_mb === 'number' && Number.isFinite(m.holds_mb) && m.holds_mb > 0 ? m.holds_mb : 0);
+  const hearing = Array.isArray(list.data) ? list.data.reduce((sum, m) => sum + held(m), 0) : 0;
+  const loaded = Array.isArray(list.text) ? list.text.reduce((sum, m) => sum + (m && m.loaded === true ? held(m) : 0), 0) : 0;
+  return available + hearing + loaded;
 }
 
 /** What an answer to `GET /v1/models` says of the server, or null when it is no such server. */
@@ -129,7 +145,7 @@ function readAnswer(status, headers, body) {
   // apart under `text` so that a desktop that reads only `data` never takes one for a recognizer. A phone that lends
   // text models alone has an empty `data`: it is still a device to choose, for the stages those models run.
   if (headers[NODE_HEADER] === 'engine') {
-    const text = textModels(list.text);
+    const text = textModels(list.text, phoneRoom(list));
     if (!models.length && !text.length) return null;
     return {
       kind: 'phone', name, models: models.length + text.length, needsKey: false, includes: false,
