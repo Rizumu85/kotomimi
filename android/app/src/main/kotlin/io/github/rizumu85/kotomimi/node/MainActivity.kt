@@ -74,7 +74,7 @@ class MainActivity : Activity() {
     private lateinit var switch: Switch
 
     // The large tile: one of three, for the work in hand.
-    private lateinit var stage: FrameLayout
+    private lateinit var stage: LinearLayout
     private lateinit var hearTile: View
     private lateinit var water: Water
     private lateinit var hearNumber: TextView
@@ -329,7 +329,7 @@ class MainActivity : Activity() {
         // The page's blocks, in reading order; `arrange` lays them out in one column, or in two on a wide screen.
         // Its writing stands in a little from the page's edge, to where the tiles' rounded corners end and their straight
         // edge begins: level with the tiles' own edge it looked to stick out past their corners, and level with the
-        // writing in them it looked too far in (the user, 2026-10-23, chose 9 dp of 4 to 20). Its lines are moved left
+        // writing in them it looked too far in (the user, 2026-10-23, chose 8 dp of 4 to 20). Its lines are moved left
         // to where their writing starts (`flush`), drawn past its edge, not cut there.
         val status = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; clipChildren = false; clipToPadding = false; setPadding(px(TILE_INSET), 0, 0, 0) }
 
@@ -375,11 +375,12 @@ class MainActivity : Activity() {
 
 
         // The large tile.
-        stage = FrameLayout(this)
+        // One under another: a phone shows one of them, a large screen each kind of work going on.
+        stage = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         hearTile = hearing()
         glassTile = translating()
         paperTile = reviewing()
-        for (tile in listOf(hearTile, glassTile, paperTile)) stage.addView(tile, FrameLayout.LayoutParams(MATCH_PARENT, px(STAGE_HEIGHT)))
+        for (tile in listOf(hearTile, glassTile, paperTile)) stage.addView(tile, LinearLayout.LayoutParams(MATCH_PARENT, px(STAGE_HEIGHT)))
 
 
         // The small tiles: the kinds of work not in the large tile, the computer's side and the check — in a grid as
@@ -592,7 +593,7 @@ class MainActivity : Activity() {
         grid.stretch = gridFills
         stage.minimumHeight = if (fill) stageHigh else 0
         layStage(snug = side && on)
-        for (tile in listOf(hearTile, glassTile, paperTile)) tile.layoutParams = tile.layoutParams.apply { height = if (fill) MATCH_PARENT else stageHigh }
+        for (tile in listOf(hearTile, glassTile, paperTile)) (tile.layoutParams as? LinearLayout.LayoutParams)?.apply { height = if (fill) 0 else stageHigh; weight = if (fill) 1f else 0f }
         leftColumn.requestLayout()
         rightColumn.requestLayout()
     }
@@ -1201,7 +1202,6 @@ class MainActivity : Activity() {
         val focus = if (held != null && held != asked && shared && System.currentTimeMillis() - Sharing.work(held).at < HOLD_MS) held else asked
         shownFocus = if (shared) focus else null
         val work = Sharing.work(focus)
-        val atWork = phase == Share.Phase.WORKING && sharing.task == focus
 
         // The wallpaper: its colour, its pace, and an answer to each piece of work done since it was last drawn.
         wall.moodFor(if (!shared) Mood.IDLE else when (focus) { Task.HEAR -> Mood.HEAR; Task.TRANSLATE -> Mood.TRANSLATE; Task.COACH -> Mood.COACH })
@@ -1270,14 +1270,21 @@ class MainActivity : Activity() {
         val stageWas = stage.visibility
         stage.visibility = if (shared) View.VISIBLE else View.GONE
         if (stage.visibility != stageWas) fit()
-        hearTile.visibility = if (focus == Task.HEAR) View.VISIBLE else View.GONE
-        glassTile.visibility = if (focus == Task.TRANSLATE) View.VISIBLE else View.GONE
-        paperTile.visibility = if (focus == Task.COACH) View.VISIBLE else View.GONE
-        water.running = shown && shared && focus == Task.HEAR
-        water.moving = atWork
+        // On a tablet or a wide screen, every kind of work going on has its large tile, one under another, sharing the
+        // height (the user, 2026-10-23); a phone has room for one, the one `focus` says.
+        val now = System.currentTimeMillis()
+        val going = Task.values().filter { task -> (phase == Share.Phase.WORKING && sharing.task == task) || (Sharing.work(task).count > 0 && now - Sharing.work(task).at < HOLD_MS) }
+        val large = if (shape == Shape.TABLET || shape == Shape.WIDE) Task.values().filter { it == focus || it in going } else listOf(focus)
+        val tiles = mapOf(Task.HEAR to hearTile, Task.TRANSLATE to glassTile, Task.COACH to paperTile)
+        for ((task, tile) in tiles) tile.visibility = if (task in large) View.VISIBLE else View.GONE
+        for ((i, task) in large.withIndex()) (tiles.getValue(task).layoutParams as? LinearLayout.LayoutParams)?.topMargin = if (i == 0) 0 else px(12)
+        water.running = shown && shared && Task.HEAR in large
+        water.moving = phase == Share.Phase.WORKING && sharing.task == Task.HEAR
         val modelOf = { task: Task -> if (task == Task.HEAR) lent else lentText.firstOrNull { it.task == task } }
         val stateOf = { task: Task -> if (phase == Share.Phase.WORKING && sharing.task == task) "工作中" else "待命" }
-        when (focus) {
+        for (task in large) {
+            val work = Sharing.work(task)
+            when (task) {
             Task.HEAR -> {
                 hearNumber.text = speed?.let { unit("%.1f".format(it), " 倍速") } ?: "—"
                 hearSub.text = when { speed == null -> "等待第一段语音"; speed >= 1.0 -> "快于说话速度，可实时识别"; else -> "慢于说话速度，会有延迟" }
@@ -1303,11 +1310,12 @@ class MainActivity : Activity() {
                 paperFix.text = if (fine) "没有问题" else lines.firstOrNull().orEmpty()
                 paperWhy.text = lines.drop(1).joinToString(" ")
             }
+            }
         }
 
-        // The other two kinds of work, while lent.
+        // The other kinds of work, while lent.
         for ((task, tile) in works) {
-            val show = shared && task != focus
+            val show = shared && task !in large
             if ((tile.view.visibility == View.VISIBLE) != show) tile.view.visibility = if (show) View.VISIBLE else View.GONE
             if (show) {
                 val model = modelOf(task)
@@ -1774,7 +1782,7 @@ class MainActivity : Activity() {
     private companion object {
         /** The page's own margins, in dp, inside whatever the system's bars take. */
         /** How far the status's writing stands in from the page's edge, for the tiles' rounded corners under it. */
-        const val TILE_INSET = 9
+        const val TILE_INSET = 8
         const val PAGE_SIDE = 16
         const val PAGE_TOP = 8
         const val PAGE_FOOT = 24

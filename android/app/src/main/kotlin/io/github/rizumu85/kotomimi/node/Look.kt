@@ -807,7 +807,8 @@ class Meter(context: Context) : View(context) {
  * Small tiles in rows of `columns`, each `cell` high, `gap` apart: a hidden one takes no place, so the tiles shown
  * close up. How many to a row is the page's choice (`MainActivity.arrange`): two on a phone, four on a tablet. With
  * `stretch`, given a height, the rows share it, none lower than `cell`. Fewer tiles shown than `columns` take the
- * row between them (two of four on a tablet, not lent, were left in its left half).
+ * row between them (two of four on a tablet, not lent, were left in its left half), and so does a last row with
+ * fewer than the others (three tiles two to a row left an empty half).
  */
 class TileGrid(context: Context) : android.view.ViewGroup(context) {
     var columns = 2
@@ -823,25 +824,31 @@ class TileGrid(context: Context) : android.view.ViewGroup(context) {
         val width = MeasureSpec.getSize(widthSpec)
         val tiles = shown()
         val columns = across()
-        val across = ((width - gap * (columns - 1)) / columns).coerceAtLeast(0)
         val rows = (tiles.size + columns - 1) / columns
         high = if (stretch && rows > 0 && MeasureSpec.getMode(heightSpec) == MeasureSpec.EXACTLY) {
             max(cell, (MeasureSpec.getSize(heightSpec) - (rows - 1) * gap) / rows)
         } else cell
-        for (tile in tiles) tile.measure(MeasureSpec.makeMeasureSpec(across, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(high, MeasureSpec.EXACTLY))
+        tiles.forEachIndexed { i, tile -> tile.measure(MeasureSpec.makeMeasureSpec(wide(i, tiles.size, columns, width), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(high, MeasureSpec.EXACTLY)) }
         setMeasuredDimension(width, if (rows == 0) 0 else rows * high + (rows - 1) * gap)
     }
 
     /** How many to a row: `columns`, or as many as there are when fewer, but never one alone. */
     private fun across() = shown().size.coerceIn(minOf(2, columns), columns)
 
+    /** How wide the `i`th of `count` tiles is: a last row with fewer than `columns` shares the row between them. */
+    private fun wide(i: Int, count: Int, columns: Int, width: Int): Int {
+        val inRow = minOf(columns, count - i / columns * columns)
+        return ((width - gap * (inRow - 1)) / inRow).coerceAtLeast(0)
+    }
+
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+        val tiles = shown()
         val columns = across()
-        val across = ((width - gap * (columns - 1)) / columns).coerceAtLeast(0)
-        shown().forEachIndexed { i, tile ->
-            val x = (i % columns) * (across + gap)
+        tiles.forEachIndexed { i, tile ->
+            val w = wide(i, tiles.size, columns, width)
+            val x = (i % columns) * (w + gap)
             val y = (i / columns) * (high + gap)
-            tile.layout(x, y, x + across, y + high)
+            tile.layout(x, y, x + w, y + high)
         }
     }
 }
