@@ -16,6 +16,10 @@ describe('correctionOf', () => {
     expect(marked(correctionOf('明日は友達公園に行きます。', '明日は友達と公園に行きます。', 'ja')!.parts)).toBe('明日は友達[+と]公園に行きます。');
   });
 
+  it('keeps the end of the sentence where the correction left its mark off', () => {
+    expect(marked(correctionOf('この本はとても面白いでした。', 'この本はとても面白かったです\n形容词的过去式。', 'ja')!.parts)).toBe('この本はとても[-面白いでした][+面白かったです]。');
+  });
+
   it('joins two changes a single kept letter stands between', () => {
     const c = correctionOf('私はりんごが好きだです。', '私はりんごが好きです。', 'ja');
     expect(c?.parts.filter((p) => p.kind !== 'same').length).toBeLessThanOrEqual(2);

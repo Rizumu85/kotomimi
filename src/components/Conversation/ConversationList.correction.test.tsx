@@ -1,4 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
+import { useCoachingStore } from '../../stores/coachingStore';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from '@testing-library/react';
 import type { Row } from '../../lib/projection/types';
 import type { DisplayItem } from '../../lib/view/filter';
@@ -20,6 +21,7 @@ const draw = (items: DisplayItem[]) =>
 
 // Fork: grammar feedback that changes something is drawn as the sentence said, marked (the user, 2026-10-23).
 describe('ConversationList — grammar feedback', () => {
+  beforeEach(() => useCoachingStore.setState({ coached: true }));
   it('draws the answer as the sentence said with what goes struck and what comes written in, and the reason under it', () => {
     const container = draw([item(answerRow(), { said: 'I goes to school yesterday.', saidLanguage: 'en', answer: ANSWER })]);
     expect(container.querySelector('.kt-fix__gone')?.textContent).toBe('goes');
@@ -27,10 +29,10 @@ describe('ConversationList — grammar feedback', () => {
     expect(container.querySelector('.kt-fix__why')?.textContent).toBe('Past tense.');
   });
 
-  it('draws the answer as written where it is a translation, in another language than the sentence', () => {
-    const container = draw([item(answerRow({ text: '昨日学校に行きました。', language: 'ja' }), { said: 'I went to school yesterday.', saidLanguage: 'en', answer: '昨日学校に行きました。' })]);
+  it('draws the answer as written where the leg is not coached: the other side’s translation', () => {
+    const container = draw([{ ...item(answerRow({ text: 'I went to school yesterday.', language: 'en' }), { said: 'I goes to school yesterday.', saidLanguage: 'en', answer: 'I went to school yesterday.' }), leg: 'participant' } as DisplayItem]);
     expect(container.querySelector('.kt-fix')).toBeNull();
-    expect(container.querySelector('.row-text.tr')?.textContent).toBe('昨日学校に行きました。');
+    expect(container.querySelector('.row-text.tr')?.textContent).toBe('I went to school yesterday.');
   });
 
   it('draws nothing more for the answer’s later rows, which the marked sentence already holds', () => {

@@ -18,10 +18,13 @@ import './AnnotatedText.scss';
  * `language` is the row's (the leg's pair, or what the provider detected): it
  * decides only how a line of Han characters alone is read.
  */
-export function useAnnotation(text: string, language: string | null | undefined): AnnotatedLine[] | null {
-  const furigana = useAnnotationStore((s) => s.furigana);
-  const roman = useAnnotationStore((s) => s.romanization);
-  const pinyin = useAnnotationStore((s) => s.pinyin);
+export function useAnnotation(text: string, language: string | null | undefined, only?: 'readings' | 'roman'): AnnotatedLine[] | null {
+  // Fork: `only` asks for the readings above the words alone, or the romanization alone (a marked correction writes
+  // its pieces with readings, and one romanization under the whole: `Correction.tsx`).
+  const furigana = useAnnotationStore((s) => s.furigana) && only !== 'roman';
+  const roman = useAnnotationStore((s) => s.romanization) && only !== 'readings';
+  const pinyinOn = useAnnotationStore((s) => s.pinyin);
+  const pinyin = pinyinOn && only !== 'roman';
   const hint = annotatedLanguage(language);
   const chinese = isChinese(language);
   const wantsJapanese = needsJapanese(text, { furigana, roman, language: hint, chinese });

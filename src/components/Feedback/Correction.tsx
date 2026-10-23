@@ -2,10 +2,21 @@ import { AnnotatedLines, useAnnotation } from '../Annotated/AnnotatedText';
 import type { Correction as CorrectionData } from '../../lib/feedback/correction';
 import './Correction.scss';
 
-/** A piece of the sentence, with its reading aids where its language has any and they are switched on. */
+/**
+ * A piece of the sentence, with the readings above its words where its language has any and they are switched on —
+ * readings only: they sit in the line, so every piece keeps the one baseline. (With its own romanization each piece
+ * was a block of its own, and a piece of kana alone stood higher than one with readings: the user, 2026-10-23.)
+ */
 function Read({ text, language }: { text: string; language?: string }) {
-  const annotated = useAnnotation(text, language);
+  const annotated = useAnnotation(text, language, 'readings');
   return annotated ? <AnnotatedLines lines={annotated} inline /> : <>{text}</>;
+}
+
+/** The corrected sentence's romanization, whole, under the marked one: what to say, not what was said. */
+function Roman({ text, language }: { text: string; language?: string }) {
+  const annotated = useAnnotation(text, language, 'roman');
+  const roman = annotated?.map((line) => line.roman).filter(Boolean).join(' ');
+  return roman ? <span className="kt-fix__roman">{roman}</span> : null;
 }
 
 /**
@@ -23,6 +34,7 @@ export function Correction({ correction, language, layout = 'block', className }
           return <Read key={i} text={part.text} language={language} />;
         })}
       </span>
+      <Roman text={correction.parts.filter((part) => part.kind !== 'gone').map((part) => part.text).join('')} language={language} />
       {correction.why && <span className="kt-fix__why">{correction.why}</span>}
     </span>
   );

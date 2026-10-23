@@ -1,3 +1,4 @@
+import { useCoachingStore } from '../../stores/coachingStore';
 import { describe, it, expect, vi } from 'vitest';
 import { act, render } from '@testing-library/react';
 import { TRANSIENT_NOTICE_MS } from '../../lib/view/filter';
@@ -113,6 +114,7 @@ describe('SubtitleBody — compact: the fork\u2019s lanes', () => {
   // Fork: feedback in the language of the sentence it answers marks that sentence — struck what goes, written in what
   // comes, the reason after — in place of the sentence, an arrow and the corrected one (the user, 2026-10-23).
   it('draws grammar feedback that changes something as the sentence said, marked', () => {
+    useCoachingStore.setState({ coached: true });
     const said = { ...row('s1', 0, 0, 'I goes to school yesterday.'), language: 'en' };
     const answer = { ...row('t1', 0, 0, 'I went to school yesterday.\nPast tense.', 'translation'), language: 'en' };
     for (const alone of [false, true]) {
@@ -124,6 +126,15 @@ describe('SubtitleBody — compact: the fork\u2019s lanes', () => {
       expect(mine.querySelector('.subtitle-lane__arrow')).toBeNull();
       view.unmount();
     }
+  });
+
+  it('marks the sentence the feedback answers, not the line that runs on into what was said since', () => {
+    const said = { ...row('s1', 0, 0, 'I goes to school yesterday.'), language: 'en' };
+    const answer = { ...row('t1', 0, 0, 'I went to school yesterday.'+String.fromCharCode(10)+'Past tense.', 'translation'), language: 'en' };
+    const view = render(<SubtitleBody {...props({ entries: [exchange('a', [said], [answer]), exchange('b', [{ ...row('s2', 0, 0, 'It is sunny.'), language: 'en' }])] })} />);
+    const mine = view.container.querySelector('[data-lane="speaker"]')!;
+    expect(mine.querySelector('.kt-fix__gone')?.textContent).toBe('goes');
+    expect(mine.querySelector('.kt-fix__added')?.textContent).toBe('went');
   });
 
   it('draws the newest sentence alone, whatever was said before: a higher window is room for it, not for those', () => {

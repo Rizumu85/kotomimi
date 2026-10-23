@@ -20,6 +20,9 @@ export interface Correction {
   fine: boolean;
 }
 
+/** The mark a sentence ends with. */
+const ENDS = /[。．.！!？?]$/u;
+
 /** Of the two sentences' words, at least this much kept: below it the correction is another sentence, not a marked one. */
 const KEPT_LEAST = 0.4;
 /** Longer sentences are not laid over each other: the comparison grows with the square of their words. */
@@ -111,7 +114,9 @@ export function correctionOf(said: string, answer: string, language?: string): C
   if (!sentence || lines.length === 0) return null;
   const why = lines.slice(1).join(' ');
   if (lines[0] === '✓') return { parts: [{ text: sentence, kind: 'same' }], why, fine: true };
-  const corrected = lines[0];
+  // A corrected sentence that left off the mark the sentence ends with has not taken it away: it is given it back.
+  const end = sentence.match(ENDS)?.[0];
+  const corrected = end && !ENDS.test(lines[0]) ? lines[0] + end : lines[0];
   const a = wordsOf(sentence, language);
   const b = wordsOf(corrected, language);
   if (a.length > WORDS_MOST || b.length > WORDS_MOST) return null;
@@ -132,12 +137,11 @@ const made = new Map<string, Correction | null>();
 const MADE_MOST = 64;
 
 /**
- * The correction to draw where `answer` is grammar feedback on `said` and found something to change; null where it
- * is not feedback (a translation is written in another language than what was said), found nothing (a tick is drawn
- * as it is), or is not one to mark (`correctionOf`).
+ * The correction to draw where `answer`, grammar feedback on `said` (the caller knows it is: `useCoached`), found
+ * something to change; null where it found nothing (a tick is drawn as it is) or is not one to mark (`correctionOf`).
  */
-export function fixOf(said: string, saidLanguage: string | undefined, answer: string, answerLanguage: string | undefined): Correction | null {
-  if (!said.trim() || !answer.trim() || !saidLanguage || baseOf(saidLanguage) !== baseOf(answerLanguage)) return null;
+export function fixOf(said: string, saidLanguage: string | undefined, answer: string): Correction | null {
+  if (!said.trim() || !answer.trim()) return null;
   const key = `${baseOf(saidLanguage)}\u0000${said}\u0000${answer}`;
   if (!made.has(key)) {
     if (made.size >= MADE_MOST) made.delete(made.keys().next().value as string);

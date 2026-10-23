@@ -12,6 +12,7 @@ import type { LegFilters } from '../../lib/view/filter';
 import { noticeText } from '../../lib/view/noticeText';
 import { AnnotatedLines, useAnnotation } from '../Annotated/AnnotatedText';
 import { Correction } from '../Feedback/Correction';
+import { useCoached } from '../Feedback/useCoached';
 import { fixOf } from '../../lib/feedback/correction';
 import '../../styles/karaoke.scss';
 
@@ -196,6 +197,7 @@ export interface SubtitleLanesProps {
  */
 export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight }: SubtitleLanesProps) {
   const { t } = useTranslation();
+  const coached = useCoached();
   const held = useHeld(entries);
   const lanes = useMemo(() => buildLanes(entries, legs, filters, (notice) => noticeText(t, notice), held), [entries, legs, filters, t, held]);
   // The layout the window is fitted to: the size chosen and which texts there are, not what they say.
@@ -285,7 +287,7 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
   const tick = <Check className="subtitle-lane__ok" role="img" aria-label="✓" strokeWidth={3} />;
   // Grammar feedback that changes something: the sentence said, marked — what goes struck, what comes written in —
   // in place of the sentence, an arrow and the corrected one, which had to be read side by side (2026-10-23).
-  const fixFor = (lane: Lane) => (lane.source && lane.answer && !lane.answer.notice ? fixOf(lane.source.text, lane.source.language, lane.answer.text, lane.answer.language) : null);
+  const fixFor = (lane: Lane) => (coached && lane.leg === 'speaker' && lane.source && lane.answer && !lane.answer.notice ? fixOf(lane.answers ?? lane.source.text, lane.source.language, lane.answer.text) : null);
   // A newer sentence is waiting for its answer: said quietly, after what is shown.
   const pending = <span className="subtitle-lane__pending" aria-hidden="true">…</span>;
 
