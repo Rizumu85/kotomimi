@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The app's icon: the screen's recorder in small — the mint body on its deeper face, the dark screen with the
+     sound wave, the grille and the coral key. Inside the 66 dp a launcher may show of the 108. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group android:pivotX="54" android:pivotY="57" android:scaleX="1.1" android:scaleY="1.1" android:translateY="-3">
+    <!-- The body, and its deeper face under it. -->
+    <path android:fillColor="#8ECAAC" android:pathData="M40,30h28a10,10 0,0 1,10 10v38a10,10 0,0 1,-10 10h-28a10,10 0,0 1,-10 -10v-38a10,10 0,0 1,10 -10z" />
+    <path android:fillColor="#BDE5CF" android:pathData="M40,26h28a10,10 0,0 1,10 10v38a10,10 0,0 1,-10 10h-28a10,10 0,0 1,-10 -10v-38a10,10 0,0 1,10 -10z" />
+    <!-- The screen. -->
+    <path android:fillColor="#1F3D36" android:pathData="M41,31h26a6,6 0,0 1,6 6v17a6,6 0,0 1,-6 6h-26a6,6 0,0 1,-6 -6v-17a6,6 0,0 1,6 -6z" />
+    <!-- The wave: higher in the middle. -->
+    <path android:fillColor="#D8F2A2" android:pathData="M40,44.5h2v2h-2z M44,43h2v5h-2z M48,40.5h2v10h-2z M52,38h2v15h-2z M56,40h2v11h-2z M60,42h2v7h-2z M64,43.5h2v4h-2z M68,44.5h2v2h-2z" />
+    <!-- The grille. -->
+    <path android:fillColor="#8ECAAC" android:pathData="M38.5,70a1.5,1.5 0,1 0,3 0a1.5,1.5 0,1 0,-3 0z M43.5,70a1.5,1.5 0,1 0,3 0a1.5,1.5 0,1 0,-3 0z M48.5,70a1.5,1.5 0,1 0,3 0a1.5,1.5 0,1 0,-3 0z M38.5,75a1.5,1.5 0,1 0,3 0a1.5,1.5 0,1 0,-3 0z M43.5,75a1.5,1.5 0,1 0,3 0a1.5,1.5 0,1 0,-3 0z M48.5,75a1.5,1.5 0,1 0,3 0a1.5,1.5 0,1 0,-3 0z" />
+    <!-- The key, on its deeper face. -->
+    <path android:fillColor="#C4432F" android:pathData="M60,74.5a7,7 0,1 0,14 0a7,7 0,1 0,-14 0z" />
+    <path android:fillColor="#F0604A" android:pathData="M60,72.5a7,7 0,1 0,14 0a7,7 0,1 0,-14 0z" />
+    </group>
+</vector>

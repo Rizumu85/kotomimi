@@ -67,7 +67,11 @@ class Share(private val context: Context, private val engine: Engine, private va
      * `model` is the recognition model that is lent (none, where the phone lends text models alone) — or, while an
      * engine is being loaded, the model it is loaded with. `task` is what the phone is working at.
      */
-    class State(val phase: Phase, val model: Model? = null, val address: String? = null, val peer: String? = null, val message: String? = null, val task: Task? = null)
+    /**
+     * How sharing stands. `peer`: the computer at work with the phone now (while WORKING). `seen`, `seenAt`: the last
+     * computer that asked anything of it, and when — what the screen's "connect a device" widget says between requests.
+     */
+    class State(val phase: Phase, val model: Model? = null, val address: String? = null, val peer: String? = null, val message: String? = null, val task: Task? = null, val seen: String? = null, val seenAt: Long = 0L)
 
     @Volatile var onState: (State) -> Unit = {}
     @Volatile private var model: Model? = null
@@ -245,7 +249,7 @@ class Share(private val context: Context, private val engine: Engine, private va
 
     private fun tell(phase: Phase) {
         val shown = if (phase == Phase.LOADING) loading ?: model else model
-        onState(State(phase, shown, address = address(), peer = if (phase == Phase.WORKING) lastPeer else null, task = if (phase == Phase.WORKING) lastTask else null))
+        onState(State(phase, shown, address = address(), peer = if (phase == Phase.WORKING) lastPeer else null, task = if (phase == Phase.WORKING) lastTask else null, seen = lastPeer, seenAt = lastUse))
     }
 
     private fun running(): List<Up> = synchronized(up) { up.toList() }

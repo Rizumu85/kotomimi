@@ -1,17 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The apricot-and-mint look chosen from the mockup (2026-10-10). -->
+<!-- The apricot-and-mint look chosen from the mockup (2026-10-10; values from `.dev/phone-node/phone.css`, `[data-look="apricot"]`). -->
 <resources>
-    <color name="room">#FBE3B9</color>
+    <!-- The room: a pale wall, and the rings of a sound spreading through it, palest outside. -->
+    <color name="room_3">#F3F2EA</color>
+    <color name="room_4">#FBEEDA</color>
+    <color name="room_2">#FBE3B9</color>
+    <color name="room_1">#F8CB86</color>
     <color name="tile">#FFFDF8</color>
     <color name="body">#BDE5CF</color>
     <color name="body_deep">#8ECAAC</color>
+    <color name="body_slot">#A2D6BA</color>
+    <color name="card_edge">#D3E6DB</color>
     <color name="screen">#1F3D36</color>
+    <color name="screen_rim">#17302A</color>
     <color name="screen_ink">#EEF7E3</color>
     <color name="screen_ink_2">#B5D0C0</color>
+    <color name="screen_ink_3">#9FC0AF</color>
+    <color name="led_off">#3F6558</color>
     <color name="glow">#D8F2A2</color>
     <color name="key">#F0604A</color>
     <color name="key_deep">#C4432F</color>
+    <color name="box">#F5AE55</color>
+    <color name="box_deep">#D98C33</color>
+    <color name="box_pale">#FFF4E0</color>
+    <color name="shell">#FCE9C8</color>
+    <color name="shell_deep">#EBCB95</color>
+    <color name="laptop">#4A74D0</color>
+    <color name="laptop_deep">#365AAB</color>
+    <color name="laptop_screen">#A9C8F8</color>
     <color name="ink">#1F2A30</color>
     <color name="ink_2">#66727A</color>
     <color name="good">#2F8457</color>
+    <!-- The scrim over the page while a box is open. -->
+    <color name="scrim">#59000000</color>
 </resources>

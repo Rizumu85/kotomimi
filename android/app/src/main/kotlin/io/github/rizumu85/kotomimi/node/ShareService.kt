@@ -113,7 +113,7 @@ class ShareService : Service() {
         val stop = PendingIntent.getService(this, 1, Intent(this, ShareService::class.java).setAction(STOP), PendingIntent.FLAG_IMMUTABLE)
         val (big, small) = wordsOf(state)
         return Notification.Builder(this, CHANNEL)
-            .setSmallIcon(android.R.drawable.stat_sys_upload_done)
+            .setSmallIcon(R.drawable.ic_note)
             .setContentTitle(big)
             .setContentText(small)
             .setContentIntent(open)
@@ -143,7 +143,8 @@ class ShareService : Service() {
 
         /** What a state reads as: a few words, and a line under them, which names the engine that is lent. */
         fun wordsOf(state: Share.State): Pair<String, String> {
-            val by = state.model?.reader?.words?.let { " · $it" }.orEmpty()
+            // The engine is not named: to the person it is one model (the self-check, not they, picks the engine).
+            val by = ""
             return when (state.phase) {
                 Share.Phase.OFF -> "没有开启" to "按下面的键，把这台手机借给电脑"
                 Share.Phase.LOADING -> "正在装入" to (state.model?.name.orEmpty() + by)
