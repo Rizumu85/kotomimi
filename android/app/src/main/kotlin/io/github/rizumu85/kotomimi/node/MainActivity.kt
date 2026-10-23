@@ -500,11 +500,11 @@ class MainActivity : Activity() {
         (leftColumn.parent as? View)?.setPadding(px(PAGE_SIDE), px(if (flat) 10 else PAGE_TOP), px(PAGE_SIDE), px(if (flat) 14 else PAGE_FOOT))
         // On its side the status's first word stands level with the top of the switch beside it.
         (statusHead.layoutParams as? LinearLayout.LayoutParams)?.topMargin = px(if (flat) 0 else 12)
-        // On its side the large tile takes the height the status leaves: the status keeps the room of its tallest — the
-        // update's pill beside the word, a number at full size, two lines under it — so the tile does not change size
-        // as what it says changes (the user, 2026-10-23).
-        statusHead.minimumHeight = if (flat) px(30) else 0
-        (bigNumber.parent as? View)?.minimumHeight = if (flat) px((bigSize * 1.2f).toInt()) else 0
+        // The status keeps the room of its tallest — the update's pill beside the word, a number at full size — so what
+        // is under it does not move as what it says changes; on its side, where the large tile takes the height the
+        // status leaves, two lines under it too (the user, 2026-10-23).
+        statusHead.minimumHeight = px(30)
+        (bigNumber.parent as? View)?.minimumHeight = px((bigSize * 1.2f).toInt())
         from.minLines = if (flat) 2 else 1
 
         for (view in listOf(statusBlock, shareBlock, stage, grid, modelsBlock)) (view.parent as? ViewGroup)?.removeView(view)
@@ -577,9 +577,9 @@ class MainActivity : Activity() {
     /**
      * The large tiles as on a phone held upright, or `snug`, as low and narrow as a phone on its side leaves them,
      * where the corner's words ran into the number and the objects over what was written:
-     * - hearing: the corner says only how it stands, not the model too (the models panel has it);
-     * - translation: the model's line goes, the sentence's pane comes up into its place and keeps to one line, and the
-     *   translation's to two — so the sentence shows whole above its translation instead of half under it;
+     * - hearing and translation: the corner says only how it stands, not the model too (the models panel has it).
+     * Held upright, the translation's model is in its corner, as the hearing's is, and not on a line of its own: so
+     * the sentence's pane comes up under the number and its translation, in front, leaves its line to be read.
      * - feedback: the reason keeps to one line, so the sheet stays clear of the number.
      */
     private fun layStage(snug: Boolean) {
@@ -589,12 +589,14 @@ class MainActivity : Activity() {
         (paperDot.layoutParams as? FrameLayout.LayoutParams)?.bottomMargin = px(if (snug) 96 else 118)
         sheet.requestLayout()
         paperDot.requestLayout()
-        glassSub.visibility = if (snug) View.GONE else View.VISIBLE
-        paneBack.maxLines = if (snug) 1 else 3
-        paneFront.maxLines = if (snug) 2 else 3
-        (paneBack.layoutParams as? FrameLayout.LayoutParams)?.apply { topMargin = px(if (snug) 56 else 84); rightMargin = px(if (snug) 48 else 64) }
+        glassSub.visibility = View.GONE
+        // The sentence keeps to one line and its translation to two, every size: three of each, the translation's pane
+        // hid what the sentence's said.
+        paneBack.maxLines = 1
+        paneFront.maxLines = 2
+        (paneBack.layoutParams as? FrameLayout.LayoutParams)?.apply { topMargin = px(if (snug) 56 else 66); rightMargin = px(if (snug) 48 else 64) }
         (paneFront.layoutParams as? FrameLayout.LayoutParams)?.apply { leftMargin = px(if (snug) 40 else 56); bottomMargin = px(if (snug) 12 else 18) }
-        paneFront.setPadding(px(12), px(if (snug) 8 else 10), px(12), px(if (snug) 8 else 10))
+        paneFront.setPadding(px(12), px(8), px(12), px(8))
         paneBack.requestLayout()
         paneFront.requestLayout()
     }
@@ -826,6 +828,8 @@ class MainActivity : Activity() {
             background = flat(R.color.tile, 32)
             elevation = px(12f)
             setPadding(0, px(10), 0, 0)
+            // What scrolls inside is cut to the panel's rounded corners, not drawn out past them.
+            clipToOutline = true
         }
         val grip = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         grip.addView(View(this).apply { background = flat(R.color.switch_off, 2) }, LinearLayout.LayoutParams(px(36), px(4)).apply { gravity = Gravity.CENTER_HORIZONTAL })
@@ -1190,7 +1194,7 @@ class MainActivity : Activity() {
             Task.TRANSLATE -> {
                 glassNumber.text = if (work.count > 0) unit("%.1f".format(work.lastMs / 1000.0), " 秒 · 上一句") else "—"
                 glassSub.text = modelOf(Task.TRANSLATE)?.name.orEmpty()
-                glassState.text = stateOf(Task.TRANSLATE)
+                glassState.text = if (stageSnug) stateOf(Task.TRANSLATE) else listOfNotNull(stateOf(Task.TRANSLATE), modelOf(Task.TRANSLATE)?.name).joinToString(" · ")
                 paneBack.text = work.said ?: "原文将显示在这里"
                 paneFront.text = work.answer ?: "译文将显示在这里"
             }
