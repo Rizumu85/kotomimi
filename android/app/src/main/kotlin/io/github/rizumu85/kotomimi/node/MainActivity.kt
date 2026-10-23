@@ -327,11 +327,14 @@ class MainActivity : Activity() {
     @SuppressLint("ClickableViewAccessibility")
     private fun build(): View {
         // The page's blocks, in reading order; `arrange` lays them out in one column, or in two on a wide screen.
-        val status = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        // Its writing stands in by as much as the writing in the tiles under it does: level with the tiles' own edge,
+        // it looked to stick out past their rounded corners (the user, 2026-10-23). Its lines are moved left to where
+        // their writing starts (`flush`), drawn past its edge, not cut there.
+        val status = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; clipChildren = false; clipToPadding = false; setPadding(px(TILE_INSET), 0, 0, 0) }
 
         // The status: a word, letter-spaced, and a large thin number with its unit — and, when there is one, the
         // newer version beside the word.
-        val top = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL }
+        val top = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL; clipChildren = false }
         word = text("", 12.5f, R.color.ink_red, bold = true).apply { letterSpacing = 0.5f }
         top.addView(word, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
         updatePill = text("", 12.5f, R.color.tile, bold = true).apply {
@@ -343,7 +346,7 @@ class MainActivity : Activity() {
         top.addView(updatePill, LinearLayout.LayoutParams(WRAP_CONTENT, px(30)))
         statusHead = top
         status.addView(top, spaced(top = 12))
-        val big = LinearLayout(this).apply { gravity = Gravity.BOTTOM }
+        val big = LinearLayout(this).apply { gravity = Gravity.BOTTOM; clipChildren = false }
         bigNumber = text("", 60f, R.color.ink).apply { typeface = Typeface.create("sans-serif-thin", Typeface.NORMAL); includeFontPadding = false }
         bigUnit = text("", 16f, R.color.ink_2, bold = true)
         big.addView(bigNumber)
@@ -394,7 +397,7 @@ class MainActivity : Activity() {
         statusBlock = status
         shareBlock = shareTile
         modelsBlock = modelsTile()
-        leftColumn = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        leftColumn = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; clipChildren = false }
         rightColumn = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         thirdColumn = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val columns = LinearLayout(this).apply {
@@ -534,25 +537,24 @@ class MainActivity : Activity() {
                 put(rightColumn, shareBlock, 0); put(rightColumn, grid, gapDp); put(rightColumn, modelsBlock, gapDp)
             }
             Shape.TABLET -> {
-                // The status beside the switch, the switch in the middle of the status's height.
-                val top = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL }
+                // The status beside the switch, the switch's foot level with the status's last line.
+                val top = LinearLayout(this).apply { gravity = Gravity.BOTTOM; clipChildren = false }
                 top.addView(statusBlock, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
                 top.addView(shareBlock, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f).apply { leftMargin = px(gapDp) })
                 put(leftColumn, top, 0); put(leftColumn, stage, gapDp + 4); put(leftColumn, grid, gapDp); put(leftColumn, modelsBlock, gapDp)
             }
             Shape.WIDE -> {
-                put(leftColumn, statusBlock, 0); put(leftColumn, shareBlock, gapDp); put(leftColumn, modelsBlock, gapDp)
-                put(rightColumn, stage, 0)
-                put(thirdColumn, grid, 0)
+                // As a phone on its side, with room to spare: what it is doing on the left, the rest on the right.
+                put(leftColumn, statusBlock, 0); put(leftColumn, stage, gapDp)
+                put(rightColumn, shareBlock, 0); put(rightColumn, grid, gapDp); put(rightColumn, modelsBlock, gapDp)
             }
         }
-        val columns = when (shape) { Shape.PHONE, Shape.SHORT, Shape.TABLET -> 1; Shape.SIDE -> 2; Shape.WIDE -> 3 }
+        val columns = when (shape) { Shape.PHONE, Shape.SHORT, Shape.TABLET -> 1; Shape.SIDE, Shape.WIDE -> 2 }
         rightColumn.visibility = if (columns >= 2) View.VISIBLE else View.GONE
         thirdColumn.visibility = if (columns >= 3) View.VISIBLE else View.GONE
         for (column in listOf(rightColumn, thirdColumn)) (column.layoutParams as? LinearLayout.LayoutParams)?.leftMargin = px(if (flat) gapDp + 2 else gapDp + 4)
-        // On a wide screen the columns are not even: the large tile's has the most room. On its side the small tiles'
-        // column is the wider, so that what they say fits on a line.
-        (rightColumn.layoutParams as? LinearLayout.LayoutParams)?.weight = when (shape) { Shape.WIDE -> 1.3f; Shape.SIDE -> 1.25f; else -> 1f }
+        // On its side the small tiles' column is the wider, so that what they say fits on a line.
+        (rightColumn.layoutParams as? LinearLayout.LayoutParams)?.weight = if (shape == Shape.SIDE) 1.25f else 1f
         bigNumber.textSize = if (bigNumber.text.any { it.isDigit() }) bigSize else bigSize * 0.7f
         fit()
     }
@@ -566,29 +568,45 @@ class MainActivity : Activity() {
      */
     private fun fit() {
         val side = shape == Shape.SIDE
+        // A tablet or a wide screen: room to spare.
+        val big = shape == Shape.TABLET || shape == Shape.WIDE
         val on = stage.visibility == View.VISIBLE
-        val fill = side && on
+        val fill = (side || big) && on
         if (side) {
             for (tile in works.values + listOf(lens, dial)) lay(tile, flat = on, snug = !on)
             layModels(flat = on, snug = !on)
         }
-        // On a wide screen not lent, the large tile's column has nothing in it: the small tiles move into it.
-        if (shape == Shape.WIDE) {
-            (grid.parent as? ViewGroup)?.removeView(grid)
-            (if (on) thirdColumn else rightColumn).addView(grid, spaced(top = 0))
-            thirdColumn.visibility = if (on) View.VISIBLE else View.GONE
+        for (column in listOf(leftColumn, rightColumn)) {
+            (column.layoutParams as? LinearLayout.LayoutParams)?.height = if (side || big) MATCH_PARENT else WRAP_CONTENT
+            // Not lent, a large screen has little to show: it stands in the middle of the height, not at the top of
+            // an empty page (the user, 2026-10-23, of a tablet held upright).
+            column.gravity = if (big && !on) Gravity.CENTER_VERTICAL else Gravity.TOP
         }
-        for (column in listOf(leftColumn, rightColumn)) (column.layoutParams as? LinearLayout.LayoutParams)?.height = if (side) MATCH_PARENT else WRAP_CONTENT
+        // Lent, the large tile takes the height left; on a wide screen the small tiles do too, so both columns end
+        // on one line, as on its side.
+        val gridFills = side || (shape == Shape.WIDE && on)
         (stage.layoutParams as? LinearLayout.LayoutParams)?.apply { height = if (fill) 0 else WRAP_CONTENT; weight = if (fill) 1f else 0f }
-        (grid.layoutParams as? LinearLayout.LayoutParams)?.apply { height = if (side) 0 else WRAP_CONTENT; weight = if (side) 1f else 0f }
+        (grid.layoutParams as? LinearLayout.LayoutParams)?.apply { height = if (gridFills) 0 else WRAP_CONTENT; weight = if (gridFills) 1f else 0f }
         (modelsBlock.layoutParams as? LinearLayout.LayoutParams)?.apply { height = if (side && !on) 0 else WRAP_CONTENT; weight = if (side && !on) 1f else 0f }
-        grid.stretch = side
+        grid.stretch = gridFills
         stage.minimumHeight = if (fill) stageHigh else 0
-        layStage(snug = fill)
+        layStage(snug = side && on)
         for (tile in listOf(hearTile, glassTile, paperTile)) tile.layoutParams = tile.layoutParams.apply { height = if (fill) MATCH_PARENT else stageHigh }
         leftColumn.requestLayout()
         rightColumn.requestLayout()
     }
+
+    /** Moves a line of writing left by the room its first letter keeps before its stroke. */
+    private fun flush(line: TextView) {
+        val words = line.text?.toString().orEmpty()
+        if (words.isEmpty()) { line.translationX = 0f; return }
+        val box = android.graphics.Rect()
+        line.paint.getTextBounds(words, 0, Character.charCount(words.codePointAt(0)), box)
+        line.translationX = -box.left.toFloat()
+    }
+
+    /** The work the large tile shows, while lent. */
+    private var shownFocus: Task? = null
 
     /** Whether the large tile is the low, narrow one of a phone on its side. */
     private var stageSnug = false
@@ -1167,7 +1185,7 @@ class MainActivity : Activity() {
 
         // What the large tile is for: the work in hand, else the last done, else what is lent first.
         val done = Task.values().map { it to Sharing.work(it) }
-        val focus = when {
+        val asked = when {
             phase == Share.Phase.WORKING && sharing.task != null -> sharing.task
             done.any { it.second.count > 0 } -> done.maxBy { it.second.at }.first
             lent != null -> Task.HEAR
@@ -1175,6 +1193,12 @@ class MainActivity : Activity() {
             lentText.isNotEmpty() -> Task.COACH
             else -> Task.HEAR
         }
+        // Several kinds of work asked for together — hearing all the while, a translation after each sentence — the
+        // large tile keeps to the one it shows while that goes on, rather than turning at every request; the others
+        // go on in their small tiles.
+        val held = shownFocus
+        val focus = if (held != null && held != asked && shared && System.currentTimeMillis() - Sharing.work(held).at < HOLD_MS) held else asked
+        shownFocus = if (shared) focus else null
         val work = Sharing.work(focus)
         val atWork = phase == Share.Phase.WORKING && sharing.task == focus
 
@@ -1226,6 +1250,10 @@ class MainActivity : Activity() {
             // The address is the share tile's to say.
             else -> "等待电脑连接"
         }
+
+        // Each line of the status starts where its writing starts, not where its first letter's box does: the large
+        // thin number's box stands well clear of its stroke, and the three lines looked out of line (the user).
+        for (line in listOf(word, bigNumber, from)) flush(line)
 
         // The share tile.
         switch.on = shared
@@ -1744,6 +1772,8 @@ class MainActivity : Activity() {
 
     private companion object {
         /** The page's own margins, in dp, inside whatever the system's bars take. */
+        /** How far the writing in a tile stands in from its edge, and so the status's from the page's. */
+        const val TILE_INSET = 20
         const val PAGE_SIDE = 16
         const val PAGE_TOP = 8
         const val PAGE_FOOT = 24
@@ -1769,6 +1799,8 @@ class MainActivity : Activity() {
 
         /** How long after its last request a computer is still said to be using the phone. */
         const val RECENT_MS = 120_000L
+        /** How long the large tile keeps to the work it shows after that work was last done, before it turns. */
+        const val HOLD_MS = 8_000L
 
         /** How long the small key says how asking for a newer version went, before it is the key again. */
         const val LOOK_WORDS_MS = 4_000L
