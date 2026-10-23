@@ -21,9 +21,9 @@
     <color name="water_deep">#1F8C70</color>
     <color name="water_number">#EAF2EE</color>
     <color name="water_sub">#8AAFBF</color>
-    <color name="glass_tile">#1B2238</color>
-    <color name="glass_number">#FFD68A</color>
-    <color name="glass_sub">#B8A57E</color>
+    <color name="glass_tile">#1C2140</color>
+    <color name="glass_number">#E8E2FF</color>
+    <color name="glass_sub">#A7A2C8</color>
     <color name="paper_number">#F4E8F2</color>
     <color name="paper_sub">#B4A8C4</color>
     <color name="paper_tile">#1E1F38</color>

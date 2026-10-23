@@ -165,7 +165,7 @@ class Wall(context: Context) : View(context), SensorEventListener {
     }
 
     private fun calm() = !held && waves.isEmpty() && drops.isEmpty() && stir < 0.08f && sweep < 0f && tremble <= 0f &&
-        turned >= 1f && abs(quickX - slowX) + abs(quickY - slowY) < 0.02f
+        turned >= 1f && abs(quickX - slowX) + abs(quickY - slowY) < 0.02f && flash <= 0f && kicked <= 0f
 
     fun moodFor(next: Mood) {
         if (next == mood) return
@@ -183,6 +183,8 @@ class Wall(context: Context) : View(context), SensorEventListener {
             Task.COACH -> drops += Drop(x, y, context.getColor(R.color.ink_red))
         }
         waves += Wave(x, y, 0.8f)
+        flash = 1f
+        kick(x, y, 0.5f)
     }
 
     /** A finger comes down on the wallpaper, between the tiles: a wave runs out from it. */
@@ -191,7 +193,114 @@ class Wall(context: Context) : View(context), SensorEventListener {
         markedX = x; markedY = y
         stir = min(1f, stir + 0.2f)
         waves += Wave(x, y, 1f)
+        kick(x, y, 1f)
     }
+    /**
+     * The night's floating shapes, after Folia's (the user, 2026-10-23: not a colour but the light, the shapes behind
+     * and their motion working together): discs, rings, triangles, a small sun, arcs and crosses, in a few depths,
+     * drifting and turning slowly, faint enough never to stand in front of writing. The nearer sway further as the
+     * phone turns; a touch's wave pushes those near it away, and they drift back; work done lights them a moment.
+     */
+    private class Shape(
+        var x: Float, var y: Float, val kind: Int, val size: Float, val depth: Float,
+        val driftX: Float, val driftY: Float, var vx: Float, var vy: Float, var angle: Float, val spin: Float, val hue: Int,
+    )
+    private val shapes = ArrayList<Shape>()
+    private val shapePaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val shapePath = Path()
+    /** How much the shapes were just lit by work done, and how far a touch has stirred them. */
+    private var flash = 0f
+    private var kicked = 0f
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (!dark || w == 0 || h == 0) return
+        shapes.clear()
+        val random = java.util.Random(7)
+        // Fewer on a small screen, more on a large one: about one to every 120 dp square.
+        val count = ((w / dp) * (h / dp) / (120f * 120f)).toInt().coerceIn(9, 26)
+        for (i in 0 until count) {
+            val kind = i % 6
+            val depth = 0.35f + random.nextFloat() * 0.65f
+            val size = dp * when (kind) { 0 -> 26f + random.nextFloat() * 46f; 1 -> 28f + random.nextFloat() * 54f; 2 -> 30f + random.nextFloat() * 50f; 3 -> 14f + random.nextFloat() * 8f; 4 -> 16f + random.nextFloat() * 12f; else -> 14f + random.nextFloat() * 16f }
+            val speed = dp * (3f + random.nextFloat() * 7f) * depth
+            val heading = random.nextFloat() * TWO_PI
+            shapes += Shape(random.nextFloat() * w, random.nextFloat() * h, kind, size, depth, cos(heading) * speed, sin(heading) * speed,
+                cos(heading) * speed, sin(heading) * speed, random.nextFloat() * 360f, (random.nextFloat() - 0.5f) * 14f, i % 3)
+        }
+    }
+
+    private fun stepShapes(dt: Float, w: Float, h: Float) {
+        flash = max(0f, flash - dt * 0.9f)
+        kicked = max(0f, kicked - dt * 0.7f)
+        for (s in shapes) {
+            s.vx += (s.driftX - s.vx) * min(1f, dt / 1.6f)
+            s.vy += (s.driftY - s.vy) * min(1f, dt / 1.6f)
+            s.x += s.vx * dt
+            s.y += s.vy * dt
+            s.angle += s.spin * dt * (1f + kicked)
+            val m = s.size
+            if (s.x < -m) s.x += w + 2 * m else if (s.x > w + m) s.x -= w + 2 * m
+            if (s.y < -m) s.y += h + 2 * m else if (s.y > h + m) s.y -= h + 2 * m
+        }
+    }
+
+    /** A touch's wave pushes the shapes near it away. */
+    private fun kick(x: Float, y: Float, strength: Float) {
+        val reach = 240f * dp
+        for (s in shapes) {
+            val dx = s.x - x
+            val dy = s.y - y
+            val r = sqrt(dx * dx + dy * dy)
+            if (r > reach || r < 1f) continue
+            val push = 70f * dp * strength * (1f - r / reach) * s.depth
+            s.vx += dx / r * push
+            s.vy += dy / r * push
+        }
+        kicked = min(1f, kicked + 0.6f * strength)
+    }
+
+    private fun drawShapes(canvas: Canvas, c: IntArray) {
+        val swayX = (quickX - slowX) * 26f * dp
+        val swayY = (quickY - slowY) * 26f * dp
+        for (s in shapes) {
+            val x = s.x + swayX * s.depth
+            val y = s.y + swayY * s.depth - scrolled * 0.08f * s.depth
+            val base = when (s.hue) { 0 -> c[1]; 1 -> c[2]; else -> Color.WHITE } and 0x00FFFFFF
+            val alpha = ((0.07f + 0.13f * s.depth) * (1f + flash * 1.2f) * 255).toInt().coerceIn(0, 255)
+            shapePaint.color = base or (alpha shl 24)
+            shapePaint.style = Paint.Style.FILL
+            shapePaint.strokeWidth = 1.4f * dp
+            canvas.save()
+            canvas.rotate(s.angle, x, y)
+            val r = s.size / 2
+            when (s.kind) {
+                0 -> canvas.drawCircle(x, y, r, shapePaint)
+                1 -> { shapePaint.style = Paint.Style.STROKE; shapePaint.color = base or ((alpha * 1.6f).toInt().coerceAtMost(255) shl 24); canvas.drawCircle(x, y, r, shapePaint) }
+                2 -> {
+                    shapePath.reset()
+                    shapePath.moveTo(x, y - r); shapePath.lineTo(x + r * 0.87f, y + r * 0.5f); shapePath.lineTo(x - r * 0.87f, y + r * 0.5f); shapePath.close()
+                    canvas.drawPath(shapePath, shapePaint)
+                }
+                3 -> {
+                    shapePaint.style = Paint.Style.STROKE; shapePaint.color = base or ((alpha * 2f).toInt().coerceAtMost(255) shl 24)
+                    canvas.drawCircle(x, y, r * 0.42f, shapePaint)
+                    for (k in 0 until 8) {
+                        val a = k * TWO_PI / 8
+                        canvas.drawLine(x + cos(a) * r * 0.66f, y + sin(a) * r * 0.66f, x + cos(a) * r, y + sin(a) * r, shapePaint)
+                    }
+                }
+                4 -> { shapePaint.style = Paint.Style.STROKE; shapePaint.color = base or ((alpha * 2f).toInt().coerceAtMost(255) shl 24); canvas.drawArc(RectF(x - r, y - r, x + r, y + r), 0f, 230f, false, shapePaint) }
+                else -> {
+                    shapePaint.style = Paint.Style.STROKE; shapePaint.strokeWidth = 3f * dp; shapePaint.strokeCap = Paint.Cap.ROUND
+                    shapePaint.color = base or ((alpha * 1.5f).toInt().coerceAtMost(255) shl 24)
+                    canvas.drawLine(x - r, y - r, x + r, y + r, shapePaint); canvas.drawLine(x - r, y + r, x + r, y - r, shapePaint)
+                }
+            }
+            canvas.restore()
+        }
+    }
+
 
     /** The finger moves: smaller waves follow it as it goes. */
     fun drag(x: Float, y: Float) {
@@ -230,7 +339,7 @@ class Wall(context: Context) : View(context), SensorEventListener {
     private fun colours(m: Mood): IntArray = if (dark) when (m) {
         Mood.IDLE -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_teal), context.getColor(R.color.glow_blue))
         Mood.HEAR -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_mint), context.getColor(R.color.glow_blue))
-        Mood.TRANSLATE -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_gold), context.getColor(R.color.glow_blue))
+        Mood.TRANSLATE -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_violet), context.getColor(R.color.glow_teal))
         Mood.COACH -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_coral), context.getColor(R.color.glow_violet))
     } else when (m) {
         Mood.IDLE -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.field_mint_pale), context.getColor(R.color.field_blue))
@@ -272,6 +381,7 @@ class Wall(context: Context) : View(context), SensorEventListener {
             paint.color = blend(d.color and 0x00FFFFFF, d.color, fade * 0.12f)
             canvas.drawCircle(d.x, d.y, context.px(10f) + k * w * 0.4f, paint)
         }
+        if (dark) drawShapes(canvas, c)
         dots(canvas, w, h)
     }
 
@@ -293,6 +403,7 @@ class Wall(context: Context) : View(context), SensorEventListener {
         stir = (stir + hypot(quickX - wasX, quickY - wasY) * 1.6f - dt * 0.55f).coerceIn(0f, 1f)
         waves.forEach { it.age += dt }
         waves.removeAll { it.age > WAVE_LASTS }
+        if (dark) stepShapes(dt, width.toFloat(), height.toFloat())
     }
 
     /**
