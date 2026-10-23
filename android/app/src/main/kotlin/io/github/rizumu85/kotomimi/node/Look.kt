@@ -2,24 +2,32 @@ package io.github.rizumu85.kotomimi.node
 
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapShader
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.DashPathEffect
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
-import android.graphics.Shader
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.view.Surface
 import android.view.View
 import android.view.animation.DecelerateInterpolator
 import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.ceil
 import kotlin.math.cos
+import kotlin.math.exp
+import kotlin.math.floor
+import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sin
+import kotlin.math.sqrt
 
 /**
  * The look: the OriginOS 1.0 desktop the user pointed to (2026-10-23) — a living wallpaper and, on it, round widgets
@@ -48,34 +56,43 @@ fun blend(a: Int, b: Int, t: Float): Int {
     return (ch(24) shl 24) or (ch(16) shl 16) or (ch(8) shl 8) or ch(0)
 }
 
-/** What the wallpaper is coloured by: what the phone is doing. */
+/** What the phone is doing, for the wallpaper's colours. */
 enum class Mood { IDLE, HEAR, TRANSLATE, COACH }
 
-/**
- * The wallpaper, and part of the app: large soft fields of colour under a fine grid of dots, coloured by what the phone is
- * doing and always slowly moving — slower while nothing is lent. It answers what happens: a reading heard sets the
- * fields' edges trembling, a sentence translated sends a light sweeping across, a correction spreads like a drop of
- * red ink, and a touch on it rings out from the finger. The page scrolling moves the fields a little behind it, and
- * the dots less still: a grid held further back. (Dots in place of a grain the user took for them, 2026-10-23: a
- * touch of the technical against the soft fields.) The grid is not everywhere: it shows in a few soft pools of light
- * in the places the page leaves empty (`free`, kept by `MainActivity`: beside the large number, under the tiles),
- * wandering a little there — and where a finger touches, and where work was just done — and fades out between them,
- * so the wall has places to look at and places that fall away, and is never busy behind writing or a tile (the user,
- * the same day: "主次分明", and not where something stands in front).
- */
-class Wall(context: Context) : View(context) {
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
-    private val grid = BitmapShader(dotTile(), Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
-    private val pool = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val gridAt = android.graphics.Matrix()
-    /** The places the page leaves empty, in the wall's own pixels: where the grid's pools of light stand. */
-    var free: List<android.graphics.RectF> = emptyList()
+/** How the wallpaper answers a finger: the ways shown to the user to choose from (2026-10-23). */
+enum class Tap(val words: String) {
+    /** A wave runs out through the dots from the finger, as through the oil. */
+    RIPPLE("涟漪"),
+    /** The finger parts the dots, as a finger through sand, and they flow back slowly behind it. */
+    PART("拨开"),
+    /** The glitter catches the light around the finger, as when the block is shaken. */
+    GLITTER("闪粉"),
+    /** Under the finger the dots swell, as under a dome of acrylic pressed in; let go, it springs back. */
+    LENS("按压"),
+}
 
-    /** Pools of light the grid shows in for a while: where a finger touched, where work was just done. */
-    private class Glow(val x: Float, val y: Float, var age: Float = 0f)
-    private val glows = ArrayList<Glow>()
+/**
+ * The wallpaper, and part of the app: large soft fields of colour, and in front of them a layer of fine dots held as if
+ * in an acrylic block of oil with glitter in it (流麻: the user, 2026-10-23, wanted the dots to be a layer that is
+ * physically there, not light laid over the page). The fields are coloured by what the phone is doing and always slowly
+ * moving — slower while nothing is lent — and answer what happens: a reading heard sets their edges trembling, a
+ * sentence translated sends a light sweeping across, a correction spreads like a drop of red ink.
+ *
+ * The dots stand in a grid, a touch of the technical against the soft fields; how much of it shows flows. The dots
+ * gather where the page leaves room — never behind writing or a tile (`covered`), the edge of the room soft and
+ * wandering — in drifts that slowly move, settle toward the way the phone is held, and sway when it is turned; a few
+ * catch the light as the phone moves, as glitter does. A finger stirs them, in the way `tap` says.
+ */
+class Wall(context: Context) : View(context), SensorEventListener {
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val path = Path()
+    private val dot = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeCap = Paint.Cap.ROUND }
+
+    /** Where the page has something in front — tiles and writing — in the wall's own pixels: the dots keep clear of it. */
+    var covered: List<RectF> = emptyList()
+
+    /** How a finger stirs the dots. */
+    var tap = Tap.RIPPLE
 
     private var mood = Mood.IDLE
     /** The fields' colours now, and on their way to. */
@@ -96,9 +113,73 @@ class Wall(context: Context) : View(context) {
     private class Drop(val x: Float, val y: Float, val color: Int, var age: Float = 0f)
     private val drops = ArrayList<Drop>()
 
+    // Which way is down, on the screen, as a fraction of gravity: as the sensor says it, followed quickly, and slowly —
+    // the dots sway by the difference and settle by the slow one, as glitter in oil does.
+    private val sensors = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
+    private val gravity = sensors?.getDefaultSensor(Sensor.TYPE_GRAVITY) ?: sensors?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+    private var downX = 0f
+    private var downY = 0.7f
+    private var quickX = 0f
+    private var quickY = 0.7f
+    private var slowX = 0f
+    private var slowY = 0.7f
+    /** How much the phone has just been moved, or the dots stirred: more of the glitter catches the light. */
+    private var stir = 0f
+
+    // What a finger has done: waves running out, marks it left, and where it is.
+    private class Wave(val x: Float, val y: Float, val strength: Float, var age: Float = 0f)
+    private val waves = ArrayList<Wave>()
+    private class Mark(val x: Float, val y: Float, val life: Float, var age: Float = 0f)
+    private val marks = ArrayList<Mark>()
+    private var held = false
+    private var fingerX = 0f
+    private var fingerY = 0f
+    private var markedX = 0f
+    private var markedY = 0f
+    // The pressed dome: where it stands, following the finger, and how far it is pressed, on a spring.
+    private var lensX = 0f
+    private var lensY = 0f
+    private var lens = 0f
+    private var lensSpeed = 0f
+
+    // The dots of each strength, drawn together: plain ones of each layer, and those catching the light, by colour.
+    private val plain = Array(2) { Array(LEVELS) { FloatArray(256) } }
+    private val plainCount = Array(2) { IntArray(LEVELS) }
+    private val lit = Array(GLINTS.size) { Array(LIT_LEVELS) { FloatArray(32) } }
+    private val litCount = Array(GLINTS.size) { IntArray(LIT_LEVELS) }
+    /** Pixels of a dp. */
+    private val dp = context.resources.displayMetrics.density
+
     /** Runs while the screen is seen: `MainActivity` stops it when it is not. */
     var running = false
-        set(value) { field = value; last = 0L; if (value) invalidate() }
+        set(value) {
+            if (field == value) return
+            field = value
+            last = 0L
+            if (value) {
+                gravity?.let { sensors?.registerListener(this, it, SensorManager.SENSOR_DELAY_UI) }
+                android.view.Choreographer.getInstance().postFrameCallback(tick)
+            } else {
+                sensors?.unregisterListener(this)
+                android.view.Choreographer.getInstance().removeFrameCallback(tick)
+            }
+        }
+
+    // Drawn on every frame while something moves — a finger, a wave, the phone turned, the colours changing — and on
+    // every other one while all of it only drifts: the drift is slow enough, and the phone does half the work.
+    private var other = false
+    private val tick: android.view.Choreographer.FrameCallback = object : android.view.Choreographer.FrameCallback {
+        override fun doFrame(frameTimeNanos: Long) {
+            if (!running) return
+            other = !other
+            if (other || !calm()) invalidate()
+            android.view.Choreographer.getInstance().postFrameCallback(this)
+        }
+    }
+
+    private fun calm() = !held && waves.isEmpty() && marks.isEmpty() && drops.isEmpty() && stir < 0.08f &&
+        abs(lens) < 0.01f && abs(lensSpeed) < 0.01f && sweep < 0f && tremble <= 0f && turned >= 1f &&
+        abs(quickX - slowX) + abs(quickY - slowY) < 0.02f
 
     fun moodFor(next: Mood) {
         if (next == mood) return
@@ -108,21 +189,68 @@ class Wall(context: Context) : View(context) {
         turned = 0f
     }
 
-    /** Something was done: the wallpaper answers it in the way of that work. */
+    /** Something was done: the wallpaper answers it in the way of that work, and a wave runs out through the dots. */
     fun pulse(task: Task, x: Float = width * 0.5f, y: Float = height * 0.55f) {
         when (task) {
             Task.HEAR -> tremble = 1f
             Task.TRANSLATE -> sweep = 0f
             Task.COACH -> drops += Drop(x, y, context.getColor(R.color.ink_red))
         }
-        glows += Glow(x, y)
+        waves += Wave(x, y, 0.8f)
     }
 
-    /** A touch on the wallpaper rings out from the finger. */
-    fun touched(x: Float, y: Float) {
-        drops += Drop(x, y, Color.WHITE)
-        glows += Glow(x, y)
+    /** A finger comes down on the wallpaper, between the tiles. */
+    fun press(x: Float, y: Float) {
+        held = true
+        fingerX = x; fingerY = y
+        markedX = x; markedY = y
+        stir = min(1f, stir + 0.25f)
+        when (tap) {
+            Tap.RIPPLE -> waves += Wave(x, y, 1f)
+            Tap.PART -> marks += Mark(x, y, PART_REFILL)
+            Tap.GLITTER -> { waves += Wave(x, y, 1f); stir = min(1f, stir + 0.5f) }
+            Tap.LENS -> if (lens < 0.05f) { lensX = x; lensY = y }
+        }
     }
+
+    /** The finger moves: it leaves marks behind it as it goes. */
+    fun drag(x: Float, y: Float) {
+        if (!held) return
+        fingerX = x; fingerY = y
+        val far = hypot(x - markedX, y - markedY)
+        val every = context.px(if (tap == Tap.RIPPLE) 40f else 10f)
+        if (far < every) return
+        markedX = x; markedY = y
+        when (tap) {
+            Tap.RIPPLE -> waves += Wave(x, y, 0.45f)
+            Tap.PART -> marks += Mark(x, y, PART_REFILL)
+            Tap.GLITTER -> { marks += Mark(x, y, 0.9f); stir = min(1f, stir + 0.08f) }
+            Tap.LENS -> {}
+        }
+        while (marks.size > 64) marks.removeAt(0)
+    }
+
+    /** The finger is lifted. */
+    fun lift() {
+        if (held && tap == Tap.PART) marks += Mark(fingerX, fingerY, PART_REFILL)
+        held = false
+    }
+
+    override fun onSensorChanged(event: SensorEvent) {
+        val ax = event.values[0]
+        val ay = event.values[1]
+        // The sensor speaks in the phone's own frame; the screen may be turned. Down on the screen is against it.
+        val (sx, sy) = when (display?.rotation ?: Surface.ROTATION_0) {
+            Surface.ROTATION_90 -> -ay to ax
+            Surface.ROTATION_180 -> -ax to -ay
+            Surface.ROTATION_270 -> ay to -ax
+            else -> ax to ay
+        }
+        downX = (-sx / SensorManager.GRAVITY_EARTH).coerceIn(-1f, 1f)
+        downY = (sy / SensorManager.GRAVITY_EARTH).coerceIn(-1f, 1f)
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
     private fun current(): IntArray = IntArray(3) { blend(from[it], to[it], turned) }
 
@@ -137,23 +265,19 @@ class Wall(context: Context) : View(context) {
         val now = System.nanoTime()
         val dt = if (last == 0L) 0f else min(0.05f, (now - last) / 1e9f)
         last = now
-        t += dt * pace
-        if (turned < 1f) turned = min(1f, turned + dt / 0.9f)
-        tremble = max(0f, tremble - dt * 1.2f)
-        if (sweep >= 0f) sweep = if (sweep > 1.3f) -1f else sweep + dt / 1.1f
-        drops.forEach { it.age += dt }
-        drops.removeAll { it.age > 1.6f }
-        glows.forEach { it.age += dt }
-        glows.removeAll { it.age > GLOW_LASTS }
+        step(dt)
 
         val c = current()
         val w = width.toFloat()
         val h = height.toFloat()
-        val shift = -scrolled * 0.12f
+        // The fields lie furthest back: they sway a little as the phone turns, and move a little as the page scrolls.
+        val swayX = (quickX - slowX) * context.px(4f)
+        val swayY = (quickY - slowY) * context.px(4f)
+        val shift = -scrolled * 0.12f + swayY
         canvas.drawColor(c[0])
         // The first field, up and to the left; the second, lower right. Each a round shape whose edge breathes.
-        field(canvas, w * 0.08f + sin(t * 0.7f) * w * 0.05f, h * 0.06f + shift + cos(t * 0.5f) * w * 0.04f, w * 0.78f, c[1], 0f)
-        field(canvas, w * 1.0f + cos(t * 0.6f) * w * 0.05f, h * 0.68f + shift * 1.5f + sin(t * 0.45f) * w * 0.05f, w * 0.72f, c[2], 2.1f)
+        field(canvas, swayX + w * 0.08f + sin(t * 0.7f) * w * 0.05f, h * 0.06f + shift + cos(t * 0.5f) * w * 0.04f, w * 0.78f, c[1], 0f)
+        field(canvas, swayX + w * 1.0f + cos(t * 0.6f) * w * 0.05f, h * 0.68f + shift * 1.5f + sin(t * 0.45f) * w * 0.05f, w * 0.72f, c[2], 2.1f)
 
         // A sentence translated: a band of light sweeps across, left to right.
         if (sweep in 0f..1.3f) {
@@ -163,35 +287,335 @@ class Wall(context: Context) : View(context) {
             path.moveTo(x, 0f); path.lineTo(x + w * 0.22f, 0f); path.lineTo(x + w * 0.02f, h); path.lineTo(x - w * 0.2f, h); path.close()
             canvas.drawPath(path, paint)
         }
-        // Drops: a correction's red ink, or a touch, spreading out in a ring.
+        // A correction's red ink, spreading out in a ring.
         for (d in drops) {
             val k = d.age / 1.6f
             val fade = (1f - k).coerceIn(0f, 1f)
-            ring.color = blend(d.color and 0x00FFFFFF, d.color, fade * if (d.color == Color.WHITE) 0.8f else 0.55f)
-            ring.strokeWidth = context.px(2f) + k * context.px(10f)
-            canvas.drawCircle(d.x, d.y, context.px(12f) + k * w * 0.55f, ring)
-            if (d.color != Color.WHITE) {
-                paint.color = blend(d.color and 0x00FFFFFF, d.color, fade * 0.12f)
-                canvas.drawCircle(d.x, d.y, context.px(10f) + k * w * 0.4f, paint)
+            paint.color = blend(d.color and 0x00FFFFFF, d.color, fade * 0.12f)
+            canvas.drawCircle(d.x, d.y, context.px(10f) + k * w * 0.4f, paint)
+        }
+        dots(canvas, w, h)
+    }
+
+    /** Time passes: the fields drift, the sensor's down is followed, what a finger did fades. */
+    private fun step(dt: Float) {
+        t += dt * pace
+        if (turned < 1f) turned = min(1f, turned + dt / 0.9f)
+        tremble = max(0f, tremble - dt * 1.2f)
+        if (sweep >= 0f) sweep = if (sweep > 1.3f) -1f else sweep + dt / 1.1f
+        drops.forEach { it.age += dt }
+        drops.removeAll { it.age > 1.6f }
+        val wasX = quickX
+        val wasY = quickY
+        quickX += (downX - quickX) * min(1f, dt / 0.12f)
+        quickY += (downY - quickY) * min(1f, dt / 0.12f)
+        slowX += (quickX - slowX) * min(1f, dt / 1.4f)
+        slowY += (quickY - slowY) * min(1f, dt / 1.4f)
+        // Turning the phone stirs the glitter; it calms in a second or two.
+        stir = (stir + hypot(quickX - wasX, quickY - wasY) * 1.6f - dt * 0.55f).coerceIn(0f, 1f)
+        waves.forEach { it.age += dt }
+        waves.removeAll { it.age > 1.8f }
+        marks.forEach { it.age += dt }
+        marks.removeAll { it.age > it.life }
+        // The dome follows the finger a little behind it, and is pressed in, or springs back past where it rests.
+        if (tap == Tap.LENS) {
+            if (held) {
+                lensX += (fingerX - lensX) * min(1f, dt / 0.06f)
+                lensY += (fingerY - lensY) * min(1f, dt / 0.06f)
+            }
+            val goal = if (held) 1f else 0f
+            lensSpeed += ((goal - lens) * 260f - lensSpeed * 14f) * dt
+            lens += lensSpeed * dt
+        } else lens = 0f
+    }
+
+    /**
+     * The layer of dots: two grids, one deeper in the block than the other, offset by half a step — the deeper one
+     * smaller, fainter, and swaying less as the phone turns, so the block has a thickness. Each dot shows by how much
+     * drift is where it stands — the drifts a slow flow, settling toward down, their edges grainy rather than a fade —
+     * and by how far it is from what stands in front, the edge of that room wandering with the flow. A finger and work
+     * done stir them; a few, by turn as the phone moves, catch the light in a colour of their own, as glitter does.
+     *
+     * Every dot is worked out on every frame drawn, on the weakest phones too (the F22 Pro, in a debuggable build), so
+     * what can be is kept: each dot's distance from what stands in front until the page moves (`room`), the flow worked
+     * out every third dot and read between, and a dot that cannot show behind a tile left at once; and while all of
+     * it only drifts, the dots are worked out on every other frame drawn, and drawn again as they were between.
+     */
+    private fun dots(canvas: Canvas, w: Float, h: Float) {
+        anew = !anew
+        if (anew || !calm() || scrolled != workedAt || w * h != workedFor) work(w, h)
+        workedAt = scrolled
+        workedFor = w * h
+        for (layer in 0..1) {
+            val deep = layer == 0
+            for (level in 1 until LEVELS) {
+                val count = plainCount[layer][level]
+                if (count == 0) continue
+                val k = level / (LEVELS - 1f)
+                dot.color = Color.argb(((22 + 80 * k) * if (deep) 0.6f else 1f).toInt(), 40, 52, 70)
+                dot.strokeWidth = (1.0f + 1.8f * k) * (if (deep) 0.75f else 1f) * dp
+                canvas.drawPoints(plain[layer][level], 0, count * 2, dot)
             }
         }
-        // The grid drifts, slowly, and lies further back than the fields as the page scrolls.
-        gridAt.setTranslate(t * context.px(5f), t * context.px(3f) - scrolled * 0.05f)
-        grid.setLocalMatrix(gridAt)
-        // Two pools wander over the wall, one high and one low; each glow swells and fades.
-        // A pool in each of the two largest empty places, wandering a little within it, as large as the place.
-        val side = min(w, h)
-        free.sortedByDescending { it.width() * it.height() }.take(2).forEachIndexed { i, place ->
-            val cx = place.centerX() + place.width() * 0.18f * sin(t * 0.21f + i * 2f)
-            val cy = place.centerY() + place.height() * 0.18f * cos(t * 0.17f + i * 3f)
-            val r = (maxOf(place.width(), place.height()) * 0.7f).coerceIn(side * 0.18f, side * 0.6f)
-            lightPool(canvas, cx, cy, r, if (i == 0) 1f else 0.7f)
+        for (hue in GLINTS.indices) {
+            for (level in 0 until LIT_LEVELS) {
+                val count = litCount[hue][level]
+                if (count == 0) continue
+                val k = (level + 1f) / LIT_LEVELS
+                dot.color = (GLINTS[hue] and 0x00FFFFFF) or ((150 + 105 * k).toInt() shl 24)
+                dot.strokeWidth = (2.2f + 1.4f * k) * dp
+                canvas.drawPoints(lit[hue][level], 0, count * 2, dot)
+                // The light caught: a small bright point to one side, toward where the light comes from.
+                dot.color = Color.argb((235 * k).toInt(), 255, 255, 255)
+                dot.strokeWidth = (0.7f + 0.4f * k) * dp
+                canvas.save()
+                canvas.translate(-0.55f * dp, -0.6f * dp)
+                canvas.drawPoints(lit[hue][level], 0, count * 2, dot)
+                canvas.restore()
+            }
         }
-        for (g in glows) {
-            val k = g.age / GLOW_LASTS
-            lightPool(canvas, g.x, g.y, side * (0.18f + 0.3f * k), sin(k * PI.toFloat()))
+    }
+
+    // Whether this frame works the dots out anew, and the scroll and size they were last worked out for.
+    private var anew = false
+    private var workedAt = 0f
+    private var workedFor = 0f
+
+    /** Where each dot is and how strongly it shows, this frame. */
+    private fun work(w: Float, h: Float) {
+        val every = DOT_EVERY * dp
+        val scale = 150f * dp
+        val feather = 52f * dp
+        val clear = 4f * dp
+        val reach = 1.6f * dp
+        val wander = 36f * dp
+        val grainy = 18f * dp
+        val hidden = clear - wander / 2 - grainy / 2
+        val lensReach = 80f * dp
+        val hole = 34f * dp
+        val waveWide = 28f * dp
+        val waveSpeed = 330f * dp
+        for (counts in plainCount) counts.fill(0)
+        for (counts in litCount) counts.fill(0)
+        val light = quickX * 0.8f + quickY * 0.6f + t * 0.03f
+        val shine = 0.3f + stir * 0.7f
+        val glitter = tap == Tap.GLITTER
+        val parting = tap == Tap.PART
+        val pressed = lens > 0.01f || lens < -0.01f
+        val waveCount = waves.size
+        val markCount = marks.size
+        val columns = ceil(w / every).toInt()
+        val across = columns + 2
+        for (layer in 0..1) {
+            val deep = layer == 0
+            // The dots sway as the phone turns — the deeper less — and lie further back than the page as it scrolls.
+            val sway = (if (deep) 3f else 8f) * dp
+            val swayX = (quickX - slowX) * sway
+            val swayY = (quickY - slowY) * sway
+            val back = -scrolled * (if (deep) 0.03f else 0.05f) + if (deep) every / 2 else 0f
+            val aside = if (deep) every / 2 else 0f
+            val tt = t + if (deep) 7.3f else 0f
+            val push = (if (deep) 2.5f else 4.5f) * dp
+            val depth = if (deep) 0.55f else 1f
+            val firstRow = floor((-every - back) / every).toInt()
+            val rows = ceil((h + every - back) / every).toInt() - firstRow + 1
+            val near = room(layer, firstRow, rows, across, every, back, aside)
+            val flows = flow(layer, firstRow, rows, across, every, back, aside, scale, tt)
+            val flowAcross = across / FLOW_EVERY + 2
+            val plainOf = plain[layer]
+            val countOf = plainCount[layer]
+            for (row in 0 until rows) {
+                val j = firstRow + row
+                val ry = back + j * every
+                val warpX = fsin(ry / scale * 1.3f + tt * 0.37f)
+                val fb = row / FLOW_EVERY.toFloat()
+                val b = fb.toInt()
+                val vb = fb - b
+                for (column in 0 until across) {
+                    val distance = near[row * across + column]
+                    if (distance < hidden) continue
+                    val i = column - 1
+                    val rx = i * every + every / 2 + aside
+                    // The flow, read between the points it was worked out at.
+                    val fa = column / FLOW_EVERY.toFloat()
+                    val a = fa.toInt()
+                    val va = fa - a
+                    val at = b * flowAcross + a
+                    val flow = (flows[at] * (1 - va) + flows[at + 1] * va) * (1 - vb) +
+                        (flows[at + flowAcross] * (1 - va) + flows[at + flowAcross + 1] * va) * vb
+                    var x = rx + warpX * reach + swayX
+                    var y = ry + (flow - 0.5f) * 2f * reach + swayY
+                    val grain = hash(i, j, 5 + layer) - 0.5f
+                    // Toward down there is more of it; each dot has its own threshold, so a drift's edge is grains.
+                    val settle = (slowX * (rx / w - 0.5f) + slowY * (ry / h - 0.5f)) * 0.5f
+                    var amount = smooth(0.46f, 0.84f, flow + settle + grain * 0.32f)
+                    var size = 1f
+                    var glint = 0f
+
+                    for (k in 0 until waveCount) {
+                        val wave = waves[k]
+                        val dx = rx - wave.x
+                        val dy = ry - wave.y
+                        val r = sqrt(dx * dx + dy * dy)
+                        val u = (r - wave.age * waveSpeed) / waveWide
+                        if (u < -3f || u > 3f) continue
+                        val s = exp(-u * u) * fcos(u * 2.2f) * wave.strength * exp(-wave.age * 1.5f)
+                        if (r > 1f) { x += dx / r * s * push; y += dy / r * s * push }
+                        if (glitter && wave.strength >= 1f) {
+                            if (hash(i, j, 7 + layer) < 0.5f) glint += max(0f, s) * 1.4f
+                            amount += max(0f, s) * 0.25f
+                        } else amount += max(0f, s) * 0.75f
+                    }
+                    for (k in 0 until markCount) {
+                        val mark = marks[k]
+                        val dx = rx - mark.x
+                        val dy = ry - mark.y
+                        if (dx > hole * 2f || dx < -hole * 2f || dy > hole * 2f || dy < -hole * 2f) continue
+                        val r = sqrt(dx * dx + dy * dy)
+                        if (r > hole * 2f) continue
+                        val fade = 1f - smooth(0f, mark.life, mark.age)
+                        if (glitter) {
+                            if (hash(i, j, 11 + layer) < 0.45f) glint += (1f - r / (hole * 2f)) * fade * 1.2f
+                            continue
+                        }
+                        // Parted: none inside, gathered at the rim, pushed outward; the deeper dots less.
+                        val inside = 1f - smooth(hole * 0.5f, hole, r)
+                        val rimAt = (r - hole) / (hole * 0.35f)
+                        val rim = exp(-rimAt * rimAt)
+                        amount += (rim * 0.6f - inside * 1.3f) * fade * depth
+                        if (r > 1f) { val out = (rim * 5f + inside * 7f * r / hole) * fade * depth * dp; x += dx / r * out; y += dy / r * out }
+                    }
+                    if (held && parting) {
+                        val dx = rx - fingerX
+                        val dy = ry - fingerY
+                        val r = sqrt(dx * dx + dy * dy)
+                        if (r < hole) amount -= (if (deep) 0.7f else 1.3f) * (1f - smooth(hole * 0.5f, hole, r))
+                    }
+                    if (pressed) {
+                        val dx = rx - lensX
+                        val dy = ry - lensY
+                        val r2 = dx * dx + dy * dy
+                        if (r2 < lensReach * lensReach) {
+                            // The near dots swell more than the deep ones: a dome pressed into the front of the block.
+                            val m = 1f - r2 / (lensReach * lensReach)
+                            val dome = if (deep) 0.45f else 1f
+                            x += dx * lens * 0.42f * m * dome
+                            y += dy * lens * 0.42f * m * dome
+                            amount += lens * m * 0.6f
+                            size += lens * m * 0.9f * dome
+                        }
+                    }
+                    if (amount <= 0.02f && glint <= 0f) continue
+
+                    // How far from what stands in front: none behind it, more as the room opens; the edge wanders.
+                    val room = smooth(clear, clear + feather, distance + (flow - 0.5f) * wander + grain * grainy)
+                    if (room <= 0.01f) continue
+                    val shown = (amount * room).coerceIn(0f, 1.2f)
+
+                    // A few of the dots are glitter: each catches the light at its own turn of the phone, where the
+                    // drift is (what a finger stirred up shines wherever it is).
+                    if (!deep) {
+                        var caught = 0f
+                        if (hash(i, j, 17) < SEQUINS) {
+                            val turn = fcos((hash(i, j, 3) * 3f + light) * TWO_PI)
+                            if (turn > 0.95f) caught = exp((turn - 1f) * 80f) * shine * amount
+                        }
+                        val sparkle = ((glint + caught) * room).coerceIn(0f, 1f)
+                        if (sparkle > 0.1f) {
+                            // Its colour turns with the light, as the colours of a sequin do.
+                            val hue = ((hash(i, j, 13) * GLINTS.size + light * 2f).toInt() % GLINTS.size + GLINTS.size) % GLINTS.size
+                            val level = min(LIT_LEVELS - 1, (sparkle * LIT_LEVELS).toInt())
+                            lit[hue][level] = put(lit[hue][level], litCount[hue][level]++, x, y)
+                            continue
+                        }
+                    }
+                    val level = min(LEVELS - 1, (shown * size * (LEVELS - 1) / 1.2f).toInt())
+                    if (level > 0) plainOf[level] = put(plainOf[level], countOf[level]++, x, y)
+                }
+            }
         }
-        if (running) postInvalidateOnAnimation()
+    }
+
+    // Each layer's dots' distances from what stands in front, and what they were worked out for.
+    private val rooms = arrayOf(FloatArray(0), FloatArray(0))
+    private val roomsFor = arrayOfNulls<List<Any>>(2)
+
+    /** How far each dot of `layer` stands from what is in front — negative behind it — kept until the page moves. */
+    private fun room(layer: Int, firstRow: Int, rows: Int, across: Int, every: Float, back: Float, aside: Float): FloatArray {
+        val key = listOf(covered, firstRow, rows, across, back)
+        if (roomsFor[layer] == key) return rooms[layer]
+        roomsFor[layer] = key
+        if (rooms[layer].size < rows * across) rooms[layer] = FloatArray(rows * across)
+        val near = rooms[layer]
+        for (row in 0 until rows) {
+            val ry = back + (firstRow + row) * every
+            for (column in 0 until across) {
+                val rx = (column - 1) * every + every / 2 + aside
+                var least = Float.MAX_VALUE
+                for (r in covered) least = min(least, roundedDistance(rx, ry, r))
+                near[row * across + column] = least
+            }
+        }
+        return near
+    }
+
+    private var flows = FloatArray(0)
+
+    /** The flow of `layer` now, worked out at every `FLOW_EVERY`th dot each way: it changes slowly across the wall. */
+    private fun flow(layer: Int, firstRow: Int, rows: Int, across: Int, every: Float, back: Float, aside: Float, scale: Float, tt: Float): FloatArray {
+        val flowAcross = across / FLOW_EVERY + 2
+        val flowRows = rows / FLOW_EVERY + 2
+        if (flows.size < flowAcross * flowRows) flows = FloatArray(flowAcross * flowRows)
+        for (b in 0 until flowRows) {
+            val fy = (back + (firstRow + b * FLOW_EVERY) * every) / scale
+            val warpX = fsin(fy * 1.3f + tt * 0.37f)
+            for (a in 0 until flowAcross) {
+                val fx = ((a * FLOW_EVERY - 1) * every + every / 2 + aside) / scale
+                val qx = fx + 0.55f * warpX
+                val qy = fy + 0.55f * fcos(fx * 1.1f - tt * 0.29f)
+                flows[b * flowAcross + a] = 0.5f + 0.5f * (fsin(qx * 1.7f + tt * 0.21f) * fcos(qy * 1.4f - tt * 0.26f) * 0.6f +
+                    fsin((qx + qy) * 2.3f + tt * 0.33f) * 0.25f + fsin((qx - qy * 0.7f) * 3.1f - tt * 0.4f) * 0.15f)
+            }
+        }
+        return flows
+    }
+
+    /** A sine near enough for drawing, several times quicker than the exact one. */
+    private fun fsin(v: Float): Float {
+        var x = v % TWO_PI
+        if (x > PI_F) x -= TWO_PI else if (x < -PI_F) x += TWO_PI
+        val y = 1.2732395f * x - 0.40528473f * x * abs(x)
+        return 0.225f * (y * abs(y) - y) + y
+    }
+
+    private fun fcos(v: Float): Float = fsin(v + PI_F / 2)
+
+    /** `points` with (`x`, `y`) at `index`, grown when it is full. */
+    private fun put(points: FloatArray, index: Int, x: Float, y: Float): FloatArray {
+        val room = if (points.size < index * 2 + 2) points.copyOf(points.size * 2) else points
+        room[index * 2] = x
+        room[index * 2 + 1] = y
+        return room
+    }
+
+    /** How far (`x`, `y`) is outside `r`, taken as a rounded tile; negative inside. */
+    private fun roundedDistance(x: Float, y: Float, r: RectF): Float {
+        val radius = min(26f * dp, min(r.width(), r.height()) / 2)
+        val qx = abs(x - r.centerX()) - (r.width() / 2 - radius)
+        val qy = abs(y - r.centerY()) - (r.height() / 2 - radius)
+        return hypot(max(qx, 0f), max(qy, 0f)) + min(max(qx, qy), 0f) - radius
+    }
+
+    private fun smooth(a: Float, b: Float, x: Float): Float {
+        val k = ((x - a) / (b - a)).coerceIn(0f, 1f)
+        return k * k * (3 - 2 * k)
+    }
+
+    /** A number from 0 to 1 for each dot of the grid, the same every frame. */
+    private fun hash(i: Int, j: Int, salt: Int): Float {
+        var n = i * 374761393 + j * 668265263 + salt * 1442695041
+        n = (n xor (n ushr 13)) * 1274126177
+        return ((n xor (n ushr 16)) and 0xFFFFFF) / 16777216f
     }
 
     /** One field: a round shape whose edge rises and falls in a few slow waves, and trembles after a reading. */
@@ -212,30 +636,22 @@ class Wall(context: Context) : View(context) {
         canvas.drawPath(path, paint)
     }
 
-    /** The grid, shown in a round pool of light: full at its centre, gone at its edge. */
-    private fun lightPool(canvas: Canvas, cx: Float, cy: Float, r: Float, strength: Float) {
-        if (r <= 0f || strength <= 0.01f) return
-        val alpha = (strength.coerceIn(0f, 1f) * 255).toInt()
-        val fade = android.graphics.RadialGradient(cx, cy, r, intArrayOf(Color.argb(alpha, 0, 0, 0), Color.argb(alpha / 3, 0, 0, 0), Color.TRANSPARENT), floatArrayOf(0f, 0.55f, 1f), Shader.TileMode.CLAMP)
-        pool.shader = android.graphics.ComposeShader(grid, fade, android.graphics.PorterDuff.Mode.DST_IN)
-        canvas.drawCircle(cx, cy, r, pool)
-    }
-
-    /** One cell of the grid: a small soft dot in a square of nothing, repeated over the whole wall. */
-    private fun dotTile(): Bitmap {
-        val size = context.px(DOT_EVERY).coerceAtLeast(6)
-        val tile = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(tile)
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(60, 40, 52, 70) }
-        canvas.drawCircle(size / 2f, size / 2f, context.px(1.05f), paint)
-        return tile
-    }
-
     private companion object {
         /** The grid's spacing, in dp. */
-        const val DOT_EVERY = 13
-        /** How long a glow lasts, in seconds. */
-        const val GLOW_LASTS = 2.4f
+        const val DOT_EVERY = 13f
+        /** How many strengths the dots are drawn in, and the glints. */
+        const val LEVELS = 12
+        const val LIT_LEVELS = 4
+        /** The share of the near dots that are glitter. */
+        const val SEQUINS = 0.22f
+        /** Every how many dots, each way, the flow is worked out; between, it is read off those. */
+        const val FLOW_EVERY = 3
+        /** How long dots parted by a finger take to flow back, in seconds. */
+        const val PART_REFILL = 1.8f
+        /** The colours glitter catches the light in: the app's coral, a mint, a blue, an apricot. */
+        const val PI_F = PI.toFloat()
+        const val TWO_PI = (2 * PI).toFloat()
+        val GLINTS = intArrayOf(0xFFE86A52.toInt(), 0xFF3FAF8F.toInt(), 0xFF4D86D9.toInt(), 0xFFE9A23B.toInt())
     }
 }
 
@@ -449,12 +865,16 @@ class Bar(context: Context) : View(context) {
 
 /**
  * Small tiles in rows of `columns`, each `cell` high, `gap` apart: a hidden one takes no place, so the tiles shown
- * close up. How many to a row is the page's choice (`MainActivity.arrange`): two on a phone, four on a tablet.
+ * close up. How many to a row is the page's choice (`MainActivity.arrange`): two on a phone, four on a tablet. With
+ * `stretch`, given a height, the rows share it, none lower than `cell`.
  */
 class TileGrid(context: Context) : android.view.ViewGroup(context) {
     var columns = 2
     var cell = 0
     var gap = 0
+    var stretch = false
+    /** Each row's height, as last measured. */
+    private var high = 0
 
     private fun shown() = (0 until childCount).map(::getChildAt).filter { it.visibility != View.GONE }
 
@@ -462,17 +882,20 @@ class TileGrid(context: Context) : android.view.ViewGroup(context) {
         val width = MeasureSpec.getSize(widthSpec)
         val tiles = shown()
         val across = ((width - gap * (columns - 1)) / columns).coerceAtLeast(0)
-        for (tile in tiles) tile.measure(MeasureSpec.makeMeasureSpec(across, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(cell, MeasureSpec.EXACTLY))
         val rows = (tiles.size + columns - 1) / columns
-        setMeasuredDimension(width, if (rows == 0) 0 else rows * cell + (rows - 1) * gap)
+        high = if (stretch && rows > 0 && MeasureSpec.getMode(heightSpec) == MeasureSpec.EXACTLY) {
+            max(cell, (MeasureSpec.getSize(heightSpec) - (rows - 1) * gap) / rows)
+        } else cell
+        for (tile in tiles) tile.measure(MeasureSpec.makeMeasureSpec(across, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(high, MeasureSpec.EXACTLY))
+        setMeasuredDimension(width, if (rows == 0) 0 else rows * high + (rows - 1) * gap)
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         val across = ((width - gap * (columns - 1)) / columns).coerceAtLeast(0)
         shown().forEachIndexed { i, tile ->
             val x = (i % columns) * (across + gap)
-            val y = (i / columns) * (cell + gap)
-            tile.layout(x, y, x + across, y + cell)
+            val y = (i / columns) * (high + gap)
+            tile.layout(x, y, x + across, y + high)
         }
     }
 }

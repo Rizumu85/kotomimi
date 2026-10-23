@@ -223,7 +223,8 @@ class MainActivity : Activity() {
      * to be told this way: `Updater.testAddress`.) With --es open models (or tools, devices) that panel is opened, and
      * with --es open none whatever is open is closed: for screenshots. With --es demo coach (or translate) a made-up
      * piece of that work is shown, as if a computer had asked it — for a screenshot of a kind of work this phone
-     * cannot run itself; nothing is lent or asked for it.
+     * cannot run itself; nothing is lent or asked for it. With --es tap ripple (or part, glitter, lens) the wallpaper
+     * answers a finger that way from then on.
      */
     private fun asked(intent: Intent) {
         if (intent.getBooleanExtra("update", false)) look(asked = true)
@@ -243,6 +244,8 @@ class MainActivity : Activity() {
             "translate" -> Sharing.work(Task.TRANSLATE).done(1400, "飛べないおじさんはただのおじさんだ。", "不会飞的叔叔只是个普通叔叔而已。", into = "中文")
         }
         if (intent.hasExtra("demo")) refresh()
+        // How the wallpaper answers a finger: --es tap ripple|part|glitter|lens.
+        intent.getStringExtra("tap")?.let { words -> Tap.values().firstOrNull { it.name.equals(words, ignoreCase = true) }?.let(::chooseTap) }
         when (intent.getStringExtra("open")) {
             "models" -> open(modelsBox)
             "tools" -> open(toolsBox)
@@ -332,6 +335,7 @@ class MainActivity : Activity() {
             setOnClickListener { open(toolsBox) }
         }
         top.addView(updatePill, LinearLayout.LayoutParams(WRAP_CONTENT, px(30)))
+        statusHead = top
         status.addView(top, spaced(top = 12))
         val big = LinearLayout(this).apply { gravity = Gravity.BOTTOM }
         bigNumber = text("", 60f, R.color.ink).apply { typeface = Typeface.create("sans-serif-thin", Typeface.NORMAL); includeFontPadding = false }
@@ -412,19 +416,17 @@ class MainActivity : Activity() {
             isVerticalScrollBarEnabled = false
             overScrollMode = View.OVER_SCROLL_NEVER
             addView(columns)
-            setOnScrollChangeListener { _, _, y, _, _ -> wall.scrolled = y.toFloat(); placePools() }
+            setOnScrollChangeListener { _, _, y, _, _ -> wall.scrolled = y.toFloat(); placeCovered() }
         }
-        // A touch on the wallpaper — between the tiles — rings out from the finger.
-        val ring = View.OnTouchListener { _, event ->
-            if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-                val at = IntArray(2).also { page.getLocationOnScreen(it) }
-                wall.touched(event.rawX - at[0], event.rawY - at[1])
-            }
-            false
-        }
-        for (view in listOf(columns, leftColumn, rightColumn, thirdColumn, status)) view.setOnTouchListener(ring)
         wall = Wall(this)
-        page = FrameLayout(this).apply {
+        wall.tap = Tap.values().firstOrNull { it.name == getSharedPreferences("look", MODE_PRIVATE).getString("tap", null) } ?: Tap.RIPPLE
+        // Every touch on the page passes by the wallpaper first: one between the tiles stirs it (`feel`).
+        page = object : FrameLayout(this) {
+            override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+                feel(event)
+                return super.dispatchTouchEvent(event)
+            }
+        }.apply {
             addView(wall, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
             addView(scroll, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
             setOnApplyWindowInsetsListener { _, insets ->
@@ -438,7 +440,7 @@ class MainActivity : Activity() {
                 bars = Bars(top, bottom)
                 insets
             }
-            viewTreeObserver.addOnGlobalLayoutListener { placePools() }
+            viewTreeObserver.addOnGlobalLayoutListener { placeCovered() }
         }
         return page
     }
@@ -450,8 +452,12 @@ class MainActivity : Activity() {
     private lateinit var leftColumn: LinearLayout
     private lateinit var rightColumn: LinearLayout
     private lateinit var thirdColumn: LinearLayout
+    private lateinit var statusHead: View
     /** The large number's size, by the screen. */
     private var bigSize = 60f
+    /** The shape the page is laid out in, and the large tile's height in it. */
+    private var shape = Shape.PHONE
+    private var stageHigh = 0
 
     /** The page's shapes, by the screen's width and height. */
     private enum class Shape { PHONE, SHORT, SIDE, TABLET, WIDE }
@@ -468,7 +474,7 @@ class MainActivity : Activity() {
         val config = resources.configuration
         val w = config.screenWidthDp
         val h = config.screenHeightDp
-        val shape = when {
+        shape = when {
             w >= 840 -> Shape.WIDE
             w >= 600 -> Shape.TABLET
             w > h && w >= 480 -> Shape.SIDE
@@ -478,12 +484,12 @@ class MainActivity : Activity() {
         val (stageDp, cellDp, gapDp) = when (shape) {
             Shape.PHONE -> Triple(214, 128, 12)
             Shape.SHORT -> Triple(184, 118, 10)
-            Shape.SIDE -> Triple((h - 150).coerceIn(150, 280), 70, 8)
+            Shape.SIDE -> Triple(150, 70, 10)
             Shape.TABLET -> Triple(260, 136, 14)
             Shape.WIDE -> Triple((h - 150).coerceIn(260, 420), 128, 14)
         }
         bigSize = when (shape) { Shape.PHONE, Shape.WIDE -> 60f; Shape.SHORT -> 50f; Shape.SIDE -> 44f; Shape.TABLET -> 68f }
-        for (tile in listOf(hearTile, glassTile, paperTile)) tile.layoutParams = tile.layoutParams.apply { height = px(stageDp) }
+        stageHigh = px(stageDp)
         grid.cell = px(cellDp)
         grid.gap = px(gapDp)
         grid.columns = if (shape == Shape.TABLET) 4 else 2
@@ -494,7 +500,9 @@ class MainActivity : Activity() {
         layModels(flat)
         shareBlock.minimumHeight = px(if (flat) 60 else 76)
         shareBlock.setPadding(px(20), px(if (flat) 10 else 14), px(16), px(if (flat) 10 else 14))
-        (leftColumn.parent as? View)?.setPadding(px(PAGE_SIDE), px(if (flat) 4 else PAGE_TOP), px(PAGE_SIDE), px(if (flat) 8 else PAGE_FOOT))
+        (leftColumn.parent as? View)?.setPadding(px(PAGE_SIDE), px(if (flat) 10 else PAGE_TOP), px(PAGE_SIDE), px(if (flat) 14 else PAGE_FOOT))
+        // On its side the status's first word stands level with the top of the switch beside it.
+        (statusHead.layoutParams as? LinearLayout.LayoutParams)?.topMargin = px(if (flat) 0 else 12)
 
         for (view in listOf(statusBlock, shareBlock, stage, grid, modelsBlock)) (view.parent as? ViewGroup)?.removeView(view)
         for (column in listOf(leftColumn, rightColumn, thirdColumn)) column.removeAllViews()
@@ -525,38 +533,94 @@ class MainActivity : Activity() {
         val columns = when (shape) { Shape.PHONE, Shape.SHORT, Shape.TABLET -> 1; Shape.SIDE -> 2; Shape.WIDE -> 3 }
         rightColumn.visibility = if (columns >= 2) View.VISIBLE else View.GONE
         thirdColumn.visibility = if (columns >= 3) View.VISIBLE else View.GONE
-        for (column in listOf(rightColumn, thirdColumn)) (column.layoutParams as? LinearLayout.LayoutParams)?.leftMargin = px(gapDp + 4)
+        for (column in listOf(rightColumn, thirdColumn)) (column.layoutParams as? LinearLayout.LayoutParams)?.leftMargin = px(if (flat) gapDp + 2 else gapDp + 4)
         // On a wide screen the columns are not even: the large tile's has the most room.
         (rightColumn.layoutParams as? LinearLayout.LayoutParams)?.weight = if (shape == Shape.WIDE) 1.3f else 1f
         bigNumber.textSize = if (bigNumber.text.any { it.isDigit() }) bigSize else bigSize * 0.7f
+        fit()
     }
 
     /**
-     * The places the page leaves empty, for the wallpaper's pools of light (`Wall.free`): beside the status's word and
-     * number, as far as the column goes; and under each column's last tile, to the foot of the screen.
+     * On its side the two columns stand as high as each other; while the large tile shows, it and the small tiles take
+     * the height left, so that both columns end on one line (the user, 2026-10-23). Elsewhere each block its own height.
      */
-    private fun placePools() {
-        if (page.width == 0) return
+    private fun fit() {
+        val side = shape == Shape.SIDE
+        val fill = side && stage.visibility == View.VISIBLE
+        for (column in listOf(leftColumn, rightColumn)) (column.layoutParams as? LinearLayout.LayoutParams)?.height = if (side) MATCH_PARENT else WRAP_CONTENT
+        for (block in listOf(stage, grid)) (block.layoutParams as? LinearLayout.LayoutParams)?.apply { height = if (fill) 0 else WRAP_CONTENT; weight = if (fill) 1f else 0f }
+        grid.stretch = fill
+        stage.minimumHeight = if (fill) stageHigh else 0
+        for (tile in listOf(hearTile, glassTile, paperTile)) tile.layoutParams = tile.layoutParams.apply { height = if (fill) MATCH_PARENT else stageHigh }
+        leftColumn.requestLayout()
+        rightColumn.requestLayout()
+    }
+
+    /** Where `view` stands on the page, in the page's (and the wallpaper's) pixels. */
+    private fun rectIn(view: View): android.graphics.RectF {
         val origin = IntArray(2).also { page.getLocationInWindow(it) }
-        fun rectOf(view: View): android.graphics.RectF {
-            val at = IntArray(2).also { view.getLocationInWindow(it) }
-            val x = (at[0] - origin[0]).toFloat()
-            val y = (at[1] - origin[1]).toFloat()
-            return android.graphics.RectF(x, y, x + view.width, y + view.height)
+        val at = IntArray(2).also { view.getLocationInWindow(it) }
+        val x = (at[0] - origin[0]).toFloat()
+        val y = (at[1] - origin[1]).toFloat()
+        return android.graphics.RectF(x, y, x + view.width, y + view.height)
+    }
+
+    /** The tiles on the page now: a touch on one is the tile's, not the wallpaper's. */
+    private fun tilesShown(): List<View> = buildList {
+        add(shareBlock)
+        add(modelsBlock)
+        if (stage.visibility == View.VISIBLE) add(stage)
+        for (i in 0 until grid.childCount) grid.getChildAt(i).takeIf { it.visibility == View.VISIBLE }?.let(::add)
+        if (updatePill.visibility == View.VISIBLE) add(updatePill)
+    }
+
+    /**
+     * What stands in front of the wallpaper, for its dots to keep clear of (`Wall.covered`): the tiles, and the status's
+     * writing as far as each line is written — not the width of its column, so the dots may come in beside it.
+     */
+    private fun placeCovered() {
+        if (page.width == 0) return
+        val rects = tilesShown().mapTo(ArrayList()) { rectIn(it) }
+        for (line in listOf(word, from)) {
+            val layout = line.layout ?: continue
+            if (line.text.isEmpty()) continue
+            val r = rectIn(line)
+            val widest = (0 until layout.lineCount).maxOf { layout.getLineRight(it) }
+            rects += android.graphics.RectF(r.left, r.top, r.left + line.paddingLeft + widest, r.bottom)
         }
-        val places = ArrayList<android.graphics.RectF>()
-        val status = rectOf(statusBlock)
-        val wordEnd = rectOf(word).left + (word.layout?.getLineRight(0) ?: 0f)
-        val written = maxOf(wordEnd, rectOf(bigUnit).right)
-        val top = if (updatePill.visibility == View.VISIBLE) rectOf(bigNumber).top else status.top
-        val besideRight = rectOf(from).top
-        if (status.right - written > px(72f) && besideRight - top > px(40f)) places += android.graphics.RectF(written + px(16f), top, status.right, besideRight)
-        for (column in listOf(leftColumn, rightColumn, thirdColumn)) {
-            if (column.visibility != View.VISIBLE || column.height == 0) continue
-            val r = rectOf(column)
-            if (page.height - r.bottom > px(64f)) places += android.graphics.RectF(r.left, r.bottom + px(8f), r.right, page.height.toFloat())
+        rects += rectIn(bigNumber).apply { union(rectIn(bigUnit)) }
+        // The system's bars, with the clock and the icons in them.
+        if (bars.top > 0) rects += android.graphics.RectF(0f, 0f, page.width.toFloat(), bars.top.toFloat())
+        if (bars.bottom > 0) rects += android.graphics.RectF(0f, (page.height - bars.bottom).toFloat(), page.width.toFloat(), page.height.toFloat())
+        wall.covered = rects
+    }
+
+    /**
+     * A finger on the wallpaper — between the tiles, with no panel open — stirs its dots, in the way `Wall.tap` says;
+     * a second finger meanwhile changes the way, while the user chooses one (2026-10-23).
+     */
+    private var feeling = false
+    private fun feel(event: MotionEvent) {
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                feeling = opened == null && tilesShown().none { rectIn(it).contains(event.x, event.y) }
+                if (feeling) wall.press(event.x, event.y)
+            }
+            MotionEvent.ACTION_POINTER_DOWN -> if (feeling) {
+                feeling = false
+                wall.lift()
+                chooseTap(Tap.values()[(wall.tap.ordinal + 1) % Tap.values().size])
+            }
+            MotionEvent.ACTION_MOVE -> if (feeling) wall.drag(event.x, event.y)
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> if (feeling) { feeling = false; wall.lift() }
         }
-        wall.free = places
+    }
+
+    /** The wallpaper answers a finger this way from now on, and says which. */
+    private fun chooseTap(tap: Tap) {
+        wall.tap = tap
+        getSharedPreferences("look", MODE_PRIVATE).edit().putString("tap", tap.name).apply()
+        Toast.makeText(this, "点击效果 ${tap.ordinal + 1}/${Tap.values().size}：${tap.words}", Toast.LENGTH_SHORT).show()
     }
 
     override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
@@ -668,11 +732,11 @@ class MainActivity : Activity() {
      * what it is beside it, half as high (a phone on its side, where the tiles are to fit the screen's height).
      */
     private fun lay(tile: Small, flat: Boolean) {
-        tile.thing.layoutParams = FrameLayout.LayoutParams(px(if (flat) 28 else 44), px(if (flat) 28 else 44), if (flat) Gravity.START or Gravity.CENTER_VERTICAL else Gravity.START or Gravity.TOP).apply {
-            leftMargin = px(if (flat) 12 else 16); topMargin = if (flat) 0 else px(16)
+        tile.thing.layoutParams = FrameLayout.LayoutParams(px(if (flat) 24 else 44), px(if (flat) 24 else 44), if (flat) Gravity.START or Gravity.CENTER_VERTICAL else Gravity.START or Gravity.TOP).apply {
+            leftMargin = px(if (flat) 10 else 16); topMargin = if (flat) 0 else px(16)
         }
         tile.words.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT, if (flat) Gravity.CENTER_VERTICAL else Gravity.BOTTOM).apply {
-            leftMargin = px(if (flat) 48 else 16); rightMargin = px(if (flat) 6 else 12); bottomMargin = if (flat) 0 else px(14)
+            leftMargin = px(if (flat) 40 else 16); rightMargin = px(if (flat) 4 else 12); bottomMargin = if (flat) 0 else px(14)
         }
         // Flat, a tile is too narrow for a word at its corner beside its name: the line under the name says enough.
         tile.state.visibility = if (flat) View.GONE else View.VISIBLE
@@ -680,6 +744,8 @@ class MainActivity : Activity() {
             rightMargin = px(if (flat) 12 else 16); topMargin = px(if (flat) 8 else 16)
         }
         tile.state.textSize = if (flat) 10f else 11f
+        tile.sub.maxLines = if (flat) 2 else 1
+        tile.sub.textSize = if (flat) 11f else 11.5f
         tile.name.textSize = if (flat) 13.5f else 14f
     }
 
@@ -1066,7 +1132,9 @@ class MainActivity : Activity() {
         }
 
         // The large tile, while lent.
+        val stageWas = stage.visibility
         stage.visibility = if (shared) View.VISIBLE else View.GONE
+        if (stage.visibility != stageWas) fit()
         hearTile.visibility = if (focus == Task.HEAR) View.VISIBLE else View.GONE
         glassTile.visibility = if (focus == Task.TRANSLATE) View.VISIBLE else View.GONE
         paperTile.visibility = if (focus == Task.COACH) View.VISIBLE else View.GONE
