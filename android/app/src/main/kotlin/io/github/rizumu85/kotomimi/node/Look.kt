@@ -675,7 +675,7 @@ fun Context.lined(): Drawable = object : Drawable() {
 
 /** The small objects of the small tiles, one for each kind of work and for the computer's side and the check. */
 class Thing(context: Context, private val kind: Kind) : View(context) {
-    enum class Kind { WATER, PANES, NOTE, LENS, DIAL, GEAR }
+    enum class Kind { WATER, PANES, NOTE, LENS, DIAL, GEAR, TUNE, DOTS }
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
@@ -748,6 +748,19 @@ class Thing(context: Context, private val kind: Kind) : View(context) {
                 canvas.drawCircle(c, c, s * 0.14f, paint)
                 paint.xfermode = null
                 canvas.restoreToCount(layer)
+            }
+            Kind.TUNE -> {
+                // Two fine rules with a knob on each, drawn as thin as the large number's strokes.
+                stroke.color = context.getColor(R.color.ink_2); stroke.strokeWidth = d * 1.5f; stroke.strokeCap = Paint.Cap.ROUND
+                for ((y, at) in listOf(0.34f to 0.66f, 0.68f to 0.34f)) {
+                    canvas.drawLine(s * 0.1f, s * y, s * 0.9f, s * y, stroke)
+                    paint.color = context.getColor(R.color.ink_2)
+                    canvas.drawCircle(s * at, s * y, s * 0.12f, paint)
+                }
+            }
+            Kind.DOTS -> {
+                paint.color = context.getColor(R.color.ink_2)
+                for (k in 0..2) canvas.drawCircle(s * (0.24f + 0.26f * k), s / 2, s * 0.075f, paint)
             }
             Kind.DIAL -> {
                 paint.color = context.getColor(R.color.dial)

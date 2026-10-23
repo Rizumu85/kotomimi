@@ -367,8 +367,7 @@ class MainActivity : Activity() {
         // The settings — how the app looks, its version — behind a round key at the status's corner: not the
         // performance panel's to hold (the user, 2026-10-23).
         gearKey = FrameLayout(this).apply {
-            background = flat(R.color.tile, 18, alpha = 215)
-            addView(Thing(this@MainActivity, Thing.Kind.GEAR), FrameLayout.LayoutParams(px(22), px(22), Gravity.CENTER))
+            addView(Thing(this@MainActivity, Thing.Kind.DOTS), FrameLayout.LayoutParams(px(22), px(22), Gravity.CENTER))
             setOnClickListener { open(settingsBox) }
         }
         top.addView(gearKey, LinearLayout.LayoutParams(px(36), px(36)).apply { leftMargin = px(8) })
@@ -978,11 +977,12 @@ class MainActivity : Activity() {
 
     /**
      * A key of a panel: the main one tinted with the coral of the switch, its word in a deeper coral — a solid block of
-     * it outweighed all else in a panel (the user found the panels less finished, 2026-10-23) — or a quiet one.
+     * it outweighed all else in a panel (the user found the panels less finished, 2026-10-23) — or a quiet one, a pale
+     * face without a rim: a rim stood it off the card like a bezel (the user, the same day).
      */
     private fun key(words: String, main: Boolean, onTouch: () -> Unit) = text(words, 14.5f, if (main) R.color.key_deep else R.color.ink, bold = true).apply {
         gravity = Gravity.CENTER
-        background = if (main) flat(R.color.field_coral, 18) else flat(R.color.tile, 18, edge = R.color.card_line)
+        background = if (main) flat(R.color.field_coral, 18) else flat(R.color.tile, 18)
         setPadding(px(16), 0, px(16), 0)
         setOnClickListener { onTouch() }
     }
@@ -1160,20 +1160,23 @@ class MainActivity : Activity() {
         // How the app looks: as the phone is set, or always light, or always dark.
         val look = card().apply { setPadding(px(16), px(14), px(16), px(14)) }
         look.addView(text("外观", 14f, R.color.ink, bold = true))
-        val picks = LinearLayout(this).apply {
-            background = flat(R.color.card_line, 16)
-            setPadding(px(3), px(3), px(3), px(3))
-        }
+        // The three as words, side by side, the one chosen dark and underlined in coral: no sunken track with a pill
+        // in it, whose layers the user did not like (2026-10-23).
+        val picks = LinearLayout(this)
         val now = Look.of(this)
         for (which in Look.values()) {
             val chosen = which == now
-            picks.addView(text(which.words, 13.5f, if (chosen) R.color.ink else R.color.ink_2, bold = chosen).apply {
+            val pick = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
                 gravity = Gravity.CENTER
-                background = if (chosen) flat(R.color.tile, 13) else null
                 setOnClickListener { if (!chosen) { Look.choose(this@MainActivity, which); recreate() } }
-            }, LinearLayout.LayoutParams(0, px(34), 1f))
+            }
+            pick.addView(text(which.words, 14f, if (chosen) R.color.ink else R.color.ink_3, bold = chosen), LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
+            pick.addView(View(this).apply { background = flat(R.color.key, 2); visibility = if (chosen) View.VISIBLE else View.INVISIBLE },
+                LinearLayout.LayoutParams(px(18), px(3)).apply { topMargin = px(5) })
+            picks.addView(pick, LinearLayout.LayoutParams(WRAP_CONTENT, px(42)).apply { rightMargin = px(28) })
         }
-        look.addView(picks, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = px(10) })
+        look.addView(picks, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = px(6) })
         settings.addView(look, spaced(top = 6))
         // The app's own version, and the key that asks for a newer one.
         val version = card().apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(px(16), px(12), px(12), px(12)) }
@@ -1181,7 +1184,8 @@ class MainActivity : Activity() {
         versionWords.addView(text("Kotomimi 手机端", 14f, R.color.ink, bold = true))
         versionWords.addView(text("版本 ${BuildConfigLite.VERSION}", 12f, R.color.ink_3), spaced(top = 2))
         version.addView(versionWords, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
-        lookKey = key("", main = false) { look(asked = true) }
+        // A word to touch, in coral, not a key standing on the card.
+        lookKey = key("", main = false) { look(asked = true) }.apply { background = null; setTextColor(getColor(R.color.key_deep)); setPadding(px(8), 0, px(4), 0) }
         version.addView(lookKey, LinearLayout.LayoutParams(WRAP_CONTENT, px(34)))
         settings.addView(version, spaced(top = 12))
 
