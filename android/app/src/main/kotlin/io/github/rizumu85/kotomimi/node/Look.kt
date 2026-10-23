@@ -339,11 +339,12 @@ class Wall(context: Context) : View(context), SensorEventListener {
     private val glints = if (dark) NIGHT_GLINTS else GLINTS
 
     private fun colours(m: Mood): IntArray = if (dark) when (m) {
-        // The colour of what the phone is doing, as an album's behind Folia's veil: the night itself has none.
-        Mood.IDLE -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_blue), context.getColor(R.color.glow_teal))
-        Mood.HEAR -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_teal), context.getColor(R.color.glow_blue))
-        Mood.TRANSLATE -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_violet), context.getColor(R.color.glow_rose))
-        Mood.COACH -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_coral), context.getColor(R.color.glow_plum))
+        // The colour of what the phone is doing, as an album's behind Folia's veil: the day's fields deepened to glow
+        // on black — a blue and violet night looked like every other app made by a machine (the user, 2026-10-23).
+        Mood.IDLE -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_sage), context.getColor(R.color.glow_mist))
+        Mood.HEAR -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_mint), context.getColor(R.color.glow_mist))
+        Mood.TRANSLATE -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_apricot), context.getColor(R.color.glow_mist))
+        Mood.COACH -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.glow_coral), context.getColor(R.color.glow_lilac))
     } else when (m) {
         Mood.IDLE -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.field_mint_pale), context.getColor(R.color.field_blue))
         Mood.HEAR -> intArrayOf(context.getColor(R.color.wall), context.getColor(R.color.field_mint), context.getColor(R.color.field_blue))
