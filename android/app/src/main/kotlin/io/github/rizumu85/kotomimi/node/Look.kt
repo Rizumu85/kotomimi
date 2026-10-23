@@ -243,8 +243,6 @@ class Wall(context: Context) : View(context), SensorEventListener {
     }
 
     private fun stepShapes(dt: Float, w: Float, h: Float) {
-        flash = max(0f, flash - dt * 0.9f)
-        kicked = max(0f, kicked - dt * 0.7f)
         for (s in shapes) {
             s.vx += (s.driftX - s.vx) * min(1f, dt / 1.6f)
             s.vy += (s.driftY - s.vy) * min(1f, dt / 1.6f)
@@ -490,6 +488,10 @@ class Wall(context: Context) : View(context), SensorEventListener {
         stir = (stir + hypot(quickX - wasX, quickY - wasY) * 1.6f - dt * 0.55f).coerceIn(0f, 1f)
         waves.forEach { it.age += dt }
         waves.removeAll { it.age > WAVE_LASTS }
+        // Set by touches and work in either look, so let go in either: decayed only in the dark, the light wall never
+        // calmed after its first touch and drew every frame.
+        flash = max(0f, flash - dt * 0.9f)
+        kicked = max(0f, kicked - dt * 0.7f)
         if (dark) stepShapes(dt, width.toFloat(), height.toFloat())
     }
 
@@ -873,7 +875,11 @@ class Water(context: Context) : View(context) {
         surface(canvas, w, h, top, swell, 0f, context.getColor(R.color.water))
         paint.clearShadowLayer()
         canvas.restore()
-        if (running) postInvalidateOnAnimation()
+        if (running) {
+            // Still, it hardly moves: drawn every other frame, as the wall is when calm — each frame of it drew the
+            // whole screen again, and a lent phone with its screen on spent a core on it.
+            if (moving) postInvalidateOnAnimation() else postInvalidateDelayed(32)
+        }
     }
 
     private fun surface(canvas: Canvas, w: Float, h: Float, y: Float, swell: Float, seed: Float, color: Int) {

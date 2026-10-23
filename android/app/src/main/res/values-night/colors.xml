@@ -42,6 +42,7 @@
     <color name="room_2">#FBE3B9</color>
     <color name="scrim">#A6000000</color>
     <color name="knob">#F5F5F7</color>
+    <color name="on_key">#111113</color>
     <color name="dial_hand">#E8E8EC</color>
     <color name="sheet">#2E2E33</color>
     <color name="dot">#DADAE2</color>

@@ -357,7 +357,7 @@ class MainActivity : Activity() {
         val top = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL; clipChildren = false }
         word = text("", 12.5f, R.color.ink_red, bold = true).apply { letterSpacing = 0.5f }
         top.addView(word, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f))
-        updatePill = text("", 12.5f, R.color.knob, bold = true).apply {
+        updatePill = text("", 12.5f, R.color.on_key, bold = true).apply {
             gravity = Gravity.CENTER
             background = flat(R.color.key, 15)
             setPadding(px(12), 0, px(12), 0)
@@ -642,6 +642,9 @@ class MainActivity : Activity() {
         line.paint.getTextBounds(words, 0, Character.charCount(words.codePointAt(0)), box)
         line.translationX = -box.left.toFloat()
     }
+
+    /** Looks at the screen again when a held or recent piece of work stops counting as going on. */
+    private val holdEnds = Runnable { if (shown) refresh() }
 
     /** The work the large tile shows, while lent. */
     private var shownFocus: Task? = null
@@ -1086,6 +1089,8 @@ class MainActivity : Activity() {
             .setMessage("将释放 ${model.sizeInWords} 存储空间。需要时可以重新下载。")
             .setNegativeButton("取消", null)
             .setPositiveButton("删除") { _, _ ->
+                // Asked again now: sharing may have begun, or a download or check, while the question stood.
+                if (busy != null || Sharing.on) return@setPositiveButton
                 // What the check found of it is kept: downloaded again, it is the same file on the same phone.
                 store.remove(model, ALL_MODELS)
                 lastVerdict = null
@@ -1348,6 +1353,14 @@ class MainActivity : Activity() {
         val large = if (shape == Shape.TABLET || shape == Shape.WIDE) Task.values().filter { it == focus || it in going } else listOf(focus)
         val tiles = mapOf(Task.HEAR to hearTile, Task.TRANSLATE to glassTile, Task.COACH to paperTile)
         for ((task, tile) in tiles) tile.visibility = if (task in large) View.VISIBLE else View.GONE
+        // Several large tiles each keep a large tile's height, the page scrolling if it must: shared out of one
+        // tile's, their writing overlapped.
+        if (large.size > 1) stage.minimumHeight = large.size * stageHigh + (large.size - 1) * px(12)
+        else if (stage.minimumHeight > stageHigh) stage.minimumHeight = stageHigh
+        // When the work held in the large tile, or a recent one, stops counting as going on, the screen is looked at
+        // again then, not at the next event — which may be long in coming.
+        main.removeCallbacks(holdEnds)
+        if (shared) Task.values().map { Sharing.work(it).at + HOLD_MS - now }.filter { it > 0 }.minOrNull()?.let { main.postDelayed(holdEnds, it + 50) }
         for ((i, task) in large.withIndex()) (tiles.getValue(task).layoutParams as? LinearLayout.LayoutParams)?.topMargin = if (i == 0) 0 else px(12)
         water.running = shown && shared && Task.HEAR in large
         water.moving = phase == Share.Phase.WORKING && sharing.task == Task.HEAR
