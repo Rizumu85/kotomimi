@@ -64,6 +64,8 @@ class MainActivity : Activity() {
     private lateinit var wall: Wall
     private lateinit var page: FrameLayout
     private lateinit var scroll: ScrollView
+    /** How much smaller the page is drawn, to fit the screen without scrolling; 1 when it is not. */
+    private var fitScale = 1f
     private lateinit var updatePill: TextView
     private lateinit var word: TextView
     private lateinit var bigNumber: TextView
@@ -411,7 +413,41 @@ class MainActivity : Activity() {
         // on the first phone of that kind it was shown on, the name sat against the clock (2026-10-11). The
         // wallpaper runs under the bars.
         if (Build.VERSION.SDK_INT >= 30) window.setDecorFitsSystemWindows(false)
-        scroll = ScrollView(this).apply {
+        // A page a little higher than the screen of a phone held upright is drawn a little smaller, all of it in
+        // proportion, so that it fits without scrolling (the user, 2026-10-23: the F22 Pro's page scrolled a few
+        // dozen dp for nothing). It is laid out as wide as it will be once scaled, so it still fills the width. Much
+        // higher than the screen, it scrolls as before: smaller than `FIT_LEAST` would be too small to read.
+        scroll = object : ScrollView(this) {
+            override fun onMeasure(widthSpec: Int, heightSpec: Int) {
+                fitScale = 1f
+                super.onMeasure(widthSpec, heightSpec)
+                val child = getChildAt(0) ?: return
+                if (shape != Shape.PHONE && shape != Shape.SHORT) return
+                val room = measuredHeight - paddingTop - paddingBottom
+                val wide = measuredWidth - paddingLeft - paddingRight
+                if (room <= 0 || child.measuredHeight <= room || child.measuredHeight * FIT_LEAST > room) return
+                var scale = room.toFloat() / child.measuredHeight
+                // Laid out wider, the writing wraps less and the page is a little lower again: measured once more.
+                child.measure(MeasureSpec.makeMeasureSpec((wide / scale).toInt(), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED))
+                scale = (room.toFloat() / child.measuredHeight).coerceAtMost(1f)
+                child.measure(MeasureSpec.makeMeasureSpec((wide / scale).toInt(), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec((room / scale).toInt(), MeasureSpec.EXACTLY))
+                fitScale = scale
+            }
+
+            override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+                super.onLayout(changed, l, t, r, b)
+                val child = getChildAt(0) ?: return
+                child.pivotX = 0f
+                child.pivotY = 0f
+                child.scaleX = fitScale
+                child.scaleY = fitScale
+            }
+
+            // Fitted, there is nothing to scroll: the touches are all the page's.
+            override fun onInterceptTouchEvent(event: MotionEvent) = fitScale >= 1f && super.onInterceptTouchEvent(event)
+            @SuppressLint("ClickableViewAccessibility")
+            override fun onTouchEvent(event: MotionEvent) = fitScale >= 1f && super.onTouchEvent(event)
+        }.apply {
             isFillViewport = true
             isVerticalScrollBarEnabled = false
             overScrollMode = View.OVER_SCROLL_NEVER
@@ -609,7 +645,12 @@ class MainActivity : Activity() {
         val at = IntArray(2).also { view.getLocationInWindow(it) }
         val x = (at[0] - origin[0]).toFloat()
         val y = (at[1] - origin[1]).toFloat()
-        return android.graphics.RectF(x, y, x + view.width, y + view.height)
+        // Where it is comes scaled with the page; how large it is, scaled here.
+        var inPage = false
+        var up = view.parent
+        while (up is View) { if (up === scroll) { inPage = true; break }; up = up.parent }
+        val scale = if (inPage) fitScale else 1f
+        return android.graphics.RectF(x, y, x + view.width * scale, y + view.height * scale)
     }
 
     /** The tiles on the page now: a touch on one is the tile's, not the wallpaper's. */
@@ -1727,6 +1768,8 @@ class MainActivity : Activity() {
 
     private companion object {
         /** The page's own margins, in dp, inside whatever the system's bars take. */
+        /** The smallest a page is drawn to fit the screen without scrolling; a page that would need less scrolls. */
+        const val FIT_LEAST = 0.85f
         const val PAGE_SIDE = 16
         const val PAGE_TOP = 8
         const val PAGE_FOOT = 24
