@@ -367,28 +367,34 @@ jobs:
           } > release-assets/latest.yml
           cat release-assets/latest.yml
 
-      # The fork's own commits since the last release: upstream's are upstream's news.
-      # The last release is the nearest `v<version>` tag: the history carries other
-      # tags too (`native-v*`, `sidecar-v*`, the phone app's `phone-v*`).
+      # What the release says is also what the app's update dialog shows (`update-manager.js`, `fullChangelog`): the
+      # notes written for it, Chinese first, from `release-notes/<tag>.md` in the tagged commit. Without that file,
+      # the titles of this repository's own commits since the last release — first-parent and no merges, so an
+      # upstream merge brings none of upstream's — less the version commit. The last release is the nearest
+      # `v<version>` tag: the history carries other tags too (`native-v*`, `sidecar-v*`, the phone app's `phone-v*`).
       - name: Write the notes
         run: |
           PREVIOUS=$(git describe --tags --abbrev=0 --match 'v[0-9]*' "$GITHUB_REF_NAME^" 2>/dev/null || echo "")
           {
-            echo "Kotomimi ${GITHUB_REF_NAME#v} — an independent fork of [Sokuji](https://github.com/kizuna-ai-lab/sokuji)."
-            echo
-            echo "What the fork adds is described in [FORK.md](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/FORK.md)."
-            echo
-            echo "### Changes"
-            if [ -n "$PREVIOUS" ]; then
-              git log "${PREVIOUS}..${GITHUB_REF_NAME}" --pretty=format:'- %s' --grep='(fork)' || true
+            if [ -f "release-notes/${GITHUB_REF_NAME}.md" ]; then
+              cat "release-notes/${GITHUB_REF_NAME}.md"
             else
-              git log --pretty=format:'- %s' --grep='(fork)' -n 40 || true
+              echo "## 更新内容 / Changes"
+              echo
+              if [ -n "$PREVIOUS" ]; then
+                git log "${PREVIOUS}..${GITHUB_REF_NAME}" --first-parent --no-merges --pretty=format:'- %s' | grep -v -E '^- chore\([a-z]+\): version ' || true
+              else
+                git log --first-parent --no-merges --pretty=format:'- %s' -n 40 || true
+              fi
             fi
             echo
             echo
-            echo "### Installing"
-            echo "- **Windows**: run \`Kotomimi-${GITHUB_REF_NAME#v}.Setup.exe\`. Windows may warn that the publisher is unknown: the installer is not code-signed."
-            echo "- **macOS (Apple silicon)**: open the \`.dmg\` and drag Kotomimi to Applications. It is not notarized: the first time, right-click the app and choose Open."
+            echo "## 安装 / Installing"
+            echo
+            echo "- **Windows**：运行 \`Kotomimi-${GITHUB_REF_NAME#v}.Setup.exe\`。安装程序没有签名，Windows 可能提示“未知发布者”，选择“更多信息 → 仍要运行”。Run the installer; it is not code-signed, so Windows may warn that the publisher is unknown."
+            echo "- **macOS（Apple 芯片）**：打开 \`.dmg\`，把 Kotomimi 拖进“应用程序”。应用没有经过公证，第一次请右键点击它并选择“打开”。Not notarized: the first time, right-click the app and choose Open."
+            echo
+            echo "Kotomimi 是 [Sokuji](https://github.com/kizuna-ai-lab/sokuji) 的独立分支，增加的内容见 [FORK.md](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/FORK.md)。An independent fork of Sokuji."
           } > NOTES.md
           cat NOTES.md
 
