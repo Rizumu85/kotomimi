@@ -43,11 +43,11 @@ const PROVIDER = {
   endpoint: ['Address', '地址', '位址'],
   endpointPlaceholder: ['e.g. 192.168.1.10:8790', '例如 192.168.1.10:8790', '例如 192.168.1.10:8790'],
   serverNeedsKey: ['It asks for an access key', '它需要访问密钥', '它需要存取金鑰'],
-  bySentence: ['Translate sentence by sentence', '一句一译', '一句一譯'],
+  bySentence: ['Translate sentence by sentence', '逐句翻译', '逐句翻譯'],
   bySentenceTooltip: [
-    'The other side is translated as each sentence ends, not when they stop talking. Off: a whole stretch at once.',
-    '对方每说完一句就翻译，不等整段说完。关掉后整段一起翻译。',
-    '對方每說完一句就翻譯，不等整段說完。關掉後整段一起翻譯。',
+    'On: each sentence is translated as soon as it ends — sooner, but without the sentences around it. Off: the whole stretch is translated once the speaker pauses — with its context, but later.',
+    '开启：对方每说完一句即翻译，译文出现更早，但单句缺少上下文。关闭：对方停顿后整段翻译，上下文完整，但等待更久。',
+    '開啟：對方每說完一句即翻譯，譯文出現更早，但單句缺少上下文。關閉：對方停頓後整段翻譯，上下文完整，但等待更久。',
   ],
   serverNeedsKeyTooltip: [
     'Turn this on when the other device was given an access key — a Kotomimi with one set under its sharing options, for example.',
@@ -224,7 +224,7 @@ const PROVIDER = {
     '语法反馈要听到你说话：把模式切到「我」或「两者」。',
     '文法回饋要聽到你說話：把模式切到「我」或「兩者」。',
   ],
-  coach: ['I speak their language: check my grammar', '我自己说对方的语言：检查我的语法', '我自己說對方的語言：檢查我的文法'],
+  coach: ['Check my grammar when I speak their language', '我说对方的语言时检查语法', '我說對方的語言時檢查文法'],
   coachNoModel: [
     'The other device has no text model that can give feedback. Use an API model or this computer instead.',
     '另一台设备上没有能给语法反馈的文本模型，可以改用 API 模型或这台电脑。',
