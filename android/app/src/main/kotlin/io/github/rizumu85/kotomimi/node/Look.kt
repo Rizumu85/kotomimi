@@ -154,15 +154,36 @@ class Wall(context: Context) : View(context), SensorEventListener {
 
     // Drawn on every frame while something moves — a finger, a wave, the phone turned, the colours changing — and on
     // every other one while all of it only drifts: the drift is slow enough, and the phone does half the work.
-    private var other = false
+    //
+    // Left alone longer, every fourth: each frame drawn composes the whole screen again — the translucent tiles over
+    // the wall — and on the F22 Pro that cost the render thread over 40 % of a core at every other frame, the drift
+    // so slow the eye does not tell 15 frames a second from 30 (measured 2026-10-24).
+    private var frame = 0
+    /** Every how many frames the wall is drawn now: 1 while something moves, then 2, then 4. */
+    private var every = 1
+    /** When something last moved, in the frame clock's nanoseconds. */
+    private var stirredAt = 0L
     private val tick: android.view.Choreographer.FrameCallback = object : android.view.Choreographer.FrameCallback {
         override fun doFrame(frameTimeNanos: Long) {
             if (!running) return
-            other = !other
-            if (other || !calm()) invalidate()
+            if (!calm()) stirredAt = frameTimeNanos
+            every = when {
+                stirredAt == frameTimeNanos -> 1
+                frameTimeNanos - stirredAt < QUIET_AFTER_NS -> 2
+                else -> 4
+            }
+            frame += 1
+            if (frame % every == 0) {
+                invalidate()
+                // Still water is drawn with the wall, in the same frame: on its own clock it doubled the frames.
+                beside?.invalidate()
+            }
             android.view.Choreographer.getInstance().postFrameCallback(this)
         }
     }
+
+    /** A view in front drawn in the wall's frames while it is still: the water of the hearing tile. */
+    var beside: View? = null
 
     private fun calm() = !held && waves.isEmpty() && drops.isEmpty() && stir < 0.08f && sweep < 0f && tremble <= 0f &&
         turned >= 1f && abs(quickX - slowX) + abs(quickY - slowY) < 0.02f && flash <= 0f && kicked <= 0f
@@ -509,7 +530,8 @@ class Wall(context: Context) : View(context), SensorEventListener {
      */
     private fun dots(canvas: Canvas, w: Float, h: Float) {
         anew = !anew
-        if (anew || !calm() || scrolled != workedAt || w * h != workedFor) work(w, h)
+        // At its slowest, every frame drawn is worked out: half of those would be too few to drift smoothly.
+        if (anew || every >= 4 || !calm() || scrolled != workedAt || w * h != workedFor) work(w, h)
         workedAt = scrolled
         workedFor = w * h
         for (layer in 0..1) {
@@ -779,6 +801,8 @@ class Wall(context: Context) : View(context), SensorEventListener {
         const val SEQUINS = 0.22f
         /** Every how many dots, each way, the flow is worked out; between, it is read off those. */
         const val FLOW_EVERY = 3
+        /** How long the wall is drawn at half the rate once nothing moves, before a quarter. */
+        const val QUIET_AFTER_NS = 8_000_000_000L
         /** How long a wave runs, in seconds. */
         const val WAVE_LASTS = 2.8f
         /** The colours glitter catches the light in: the app's coral, a mint, a blue, an apricot. */
@@ -811,19 +835,36 @@ class Switch(context: Context) : View(context) {
         }
 
     override fun onDraw(canvas: Canvas) {
-        val h = height.toFloat()
-        val w = width.toFloat()
+        // The switch stands `GLOW` in from its edges, the room its glow spreads into: drawn to the edge, the glow was
+        // cut square there.
+        val m = context.px(GLOW.toFloat())
+        canvas.translate(m, m)
+        val h = height.toFloat() - 2 * m
+        val w = width.toFloat() - 2 * m
         val on = if (dark && tint != 0) tint else context.getColor(R.color.key)
         paint.color = blend(context.getColor(R.color.switch_off), on, at)
-        if (dark && at > 0f) paint.setShadowLayer(context.px(10f) * at, 0f, 0f, (on and 0x00FFFFFF) or ((170 * at).toInt() shl 24))
+        // In the dark it glows: rings of its colour, fainter as they spread — a shadow layer drew a dark box about it.
+        if (dark && at > 0f) {
+            val glow = paint.color
+            for (k in 4 downTo 1) {
+                val spread = context.px(2.2f) * k
+                paint.color = (on and 0x00FFFFFF) or ((22 * at * (5 - k) / 4f).toInt() shl 24)
+                canvas.drawRoundRect(RectF(-spread, -spread, w + spread, h + spread), h / 2 + spread, h / 2 + spread, paint)
+            }
+            paint.color = glow
+        }
         canvas.drawRoundRect(RectF(0f, 0f, w, h), h / 2, h / 2, paint)
-        paint.clearShadowLayer()
         val r = h / 2 - context.px(4f)
         val x = h / 2 + (w - h) * at
         paint.color = Color.argb(40, 0, 0, 0)
         canvas.drawCircle(x, h / 2 + context.px(1.5f), r, paint)
         paint.color = context.getColor(R.color.knob)
         canvas.drawCircle(x, h / 2, r, paint)
+    }
+
+    companion object {
+        /** The room left about the switch, in dp, for its glow: whoever lays it out adds it to each side. */
+        const val GLOW = 10
     }
 }
 
@@ -846,6 +887,7 @@ class Water(context: Context) : View(context) {
     var level = 0.35f
     /** Moving: the phone is reading now. */
     var moving = false
+        set(value) { if (field != value) { field = value; invalidate() } }
     var running = false
         set(value) { field = value; last = 0L; invalidate() }
     private val radius = context.px(30f)
@@ -878,7 +920,8 @@ class Water(context: Context) : View(context) {
         if (running) {
             // Still, it hardly moves: drawn every other frame, as the wall is when calm — each frame of it drew the
             // whole screen again, and a lent phone with its screen on spent a core on it.
-            if (moving) postInvalidateOnAnimation() else postInvalidateDelayed(32)
+            // Moving, every frame; still, in the wall's frames (`Wall.beside`).
+            if (moving) postInvalidateOnAnimation()
         }
     }
 

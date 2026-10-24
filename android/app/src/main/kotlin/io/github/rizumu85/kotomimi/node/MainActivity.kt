@@ -401,8 +401,9 @@ class MainActivity : Activity() {
             background = flat(R.color.tile, 30, alpha = 215)
             setPadding(px(20), px(14), px(16), px(14))
             minimumHeight = px(76)
-            // The switch's glow in the dark spreads past the switch, not cut square at its edge.
+            // The switch's glow in the dark spreads past the switch and into the tile's own margin, not cut there.
             clipChildren = false
+            clipToPadding = false
             setOnClickListener { if (Sharing.on) ShareService.stop(this@MainActivity) else if (busy == null) lend() }
         }
         val shareWords = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -412,7 +413,8 @@ class MainActivity : Activity() {
         shareWords.addView(shareSub, spaced(top = 2))
         shareTile.addView(shareWords, LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f).apply { rightMargin = px(10) })
         switch = Switch(this)
-        shareTile.addView(switch, LinearLayout.LayoutParams(px(60), px(36)))
+        // As large as the switch and the room for its glow (`Switch.GLOW`), the room taken back from the tile's edge.
+        shareTile.addView(switch, LinearLayout.LayoutParams(px(60 + 2 * Switch.GLOW), px(36 + 2 * Switch.GLOW)).apply { rightMargin = -px(Switch.GLOW); topMargin = -px(Switch.GLOW); bottomMargin = -px(Switch.GLOW) })
 
 
         // The large tile.
@@ -472,6 +474,7 @@ class MainActivity : Activity() {
             setOnScrollChangeListener { _, _, y, _, _ -> wall.scrolled = y.toFloat(); placeCovered() }
         }
         wall = Wall(this)
+        wall.beside = water
         // Every touch on the page passes by the wallpaper first: one between the tiles stirs it (`feel`).
         page = object : FrameLayout(this) {
             override fun dispatchTouchEvent(event: MotionEvent): Boolean {
