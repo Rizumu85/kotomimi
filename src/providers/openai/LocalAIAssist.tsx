@@ -37,6 +37,7 @@ import { isKotomimiServer, modelsFor, SERVER_SILENT, serverDefaultModel, type Lo
 import { choiceOf, perLanguage, recognizerChoices } from './serverRecognizers';
 import { isRealtimeModelId } from './settings';
 import { farFromModels } from './farSource';
+import { SpeedButton, SpeedLine, SpeedReportView, useSpeedTest } from './SpeedTestView';
 import './LocalAIAssist.scss';
 
 type Props = CredentialAssistProps<S>;
@@ -943,6 +944,27 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
     ? <p className="kt-note">{t('providers.localai.detectOtherNote')}</p>
     : null;
 
+  // The speed test, asked for beside the readiness check; each stage's result in its card (`SpeedTestView.tsx`).
+  const ready = readiness.state === 'ready';
+  const speed = useSpeedTest({ settings, values, pair, legs, models, ready, disabled: !!disabled });
+  // Where a stage on this computer's native engine falls behind: a smaller model of it, downloaded and fit for the
+  // languages, the largest of them. Elsewhere — another device, an API — the suggestion names none.
+  const nativeAsr = useNativeModels('asr');
+  const nativeTranslation = useNativeModels('translation');
+  const nativeCoaching = useNativeModels('coach');
+  const smaller = (offered: readonly NativeCardModel[], current: NativeCardModel | null, fits: (id: string) => boolean): NativeCardModel | null => (current
+    ? [...offered].filter((m) => m.id !== current.id && m.bytes < current.bytes && fits(m.id)).sort((a, b) => b.bytes - a.bytes)[0] ?? null
+    : null);
+  const asrNow = settings.asrVia === 'device' && settings.asrHere === 'native'
+    ? heardByLegs.map((language) => nativePicked(nativePick, language)).find((m) => m !== null) ?? null
+    : null;
+  const asrSmaller = smaller(nativeAsr.ready, asrNow, (id) => heardByLegs.every((language) => isAutoLanguage(language) || nativeHears(nativeModel(id), language)));
+  const translatedPairs = legs.filter((leg) => !(leg === 'speaker' && settings.coach)).map((leg) => (leg === 'speaker' ? [pair.source, pair.target] : [pair.target, pair.source]));
+  const translationSmaller = smaller(nativeTranslation.ready, settings.translateAt === 'device' && settings.translateHere === 'native' ? nativeTranslator(settings.translateNativeModel) : null,
+    (id) => translatedPairs.every(([from, to]) => nativeTranslates(nativeTranslator(id), from, to)));
+  const coachSmaller = smaller(nativeCoaching.ready, settings.coachAt === 'device' && settings.coachHere === 'native' ? nativeCoach(settings.coachNativeModel) : null, () => true);
+  const switchTo = (patch: () => void) => () => { patch(); speed.againAfterChange(); };
+
   return (
     <div className="kt-stages-assist">
       <section className={`kt-device${serverInUse ? ' is-used' : ''}`} aria-label={t('providers.localai.placeServer')}>
@@ -1090,6 +1112,10 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
               }}
             />
           ))}
+        <SpeedLine
+          stage="hear" result={speed.result('hear')} disabled={disabled}
+          advice={asrSmaller && { name: asrSmaller.name, onSwitch: switchTo(() => pickNative(asrSmaller.id, heardByLegs.filter((language) => nativeHears(nativeModel(asrSmaller.id), language)))) }}
+        />
       </StageCard>
 
       <StageCard icon={<Languages size={14} />} title={t('providers.localai.translateStage')} tooltip={t('providers.localai.translateStageTooltip')}>
@@ -1143,6 +1169,10 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
             />
           ))}
         <ToggleSwitch checked={settings.translateBySentence} onChange={() => put({ translateBySentence: !settings.translateBySentence })} label={t('providers.localai.bySentence')} disabled={disabled} tooltip={t('providers.localai.bySentenceTooltip')} />
+        <SpeedLine
+          stage="translate" result={speed.result('translate')} disabled={disabled}
+          advice={translationSmaller && { name: translationSmaller.name, onSwitch: switchTo(() => put({ translateHere: 'native', translateNativeModel: translationSmaller.id })) }}
+        />
       </StageCard>
 
       <StageCard
@@ -1217,6 +1247,10 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
               <p className="kt-note">{t('providers.localai.coachPromptPreview')}</p>
               <pre>{coachPrompt(pair.target, pair.source).system}</pre>
             </details>
+            <SpeedLine
+              stage="coach" result={speed.result('coach')} disabled={disabled}
+              advice={coachSmaller && { name: coachSmaller.name, onSwitch: switchTo(() => put({ coachHere: 'native', coachNativeModel: coachSmaller.id })) }}
+            />
           </>
         )}
       </StageCard>
@@ -1225,13 +1259,17 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
       <div className={`kt-ready kt-ready--${readiness.state}`} role="status">
         {readiness.state === 'ready' && <><CircleCheck size={15} /><span>{t('providers.localai.ready')}</span></>}
         {readiness.state === 'checking' && <><Loader size={15} className="kt-ready__spin" /><span>{t('providers.localai.checking')}</span></>}
-        {check && readiness.state !== 'checking' && (
-          <button type="button" className="kt-ready__again" onClick={check} disabled={disabled}>
-            <RefreshCw size={12} />
-            <span>{readiness.state === 'ready' ? t('providers.localai.recheck') : t('providers.localai.checkNow')}</span>
-          </button>
-        )}
+        <span className="kt-ready__actions">
+          <SpeedButton state={speed} ready={ready} disabled={disabled} />
+          {check && readiness.state !== 'checking' && speed.phase.name !== 'running' && (
+            <button type="button" className="kt-ready__again" onClick={check} disabled={disabled}>
+              <RefreshCw size={12} />
+              <span>{readiness.state === 'ready' ? t('providers.localai.recheck') : t('providers.localai.checkNow')}</span>
+            </button>
+          )}
+        </span>
       </div>
+      <SpeedReportView state={speed} ready={ready} disabled={disabled} />
     </div>
   );
 }

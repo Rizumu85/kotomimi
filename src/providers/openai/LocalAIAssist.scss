@@ -550,11 +550,136 @@
     }
   }
 
+  // The readiness check's buttons, at the right of its line: the speed test's beside the check's.
+  .kt-ready__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+  }
+
+  // A stage's speed, as the test found it: one quiet line under the stage, and where it falls behind, why and what
+  // would help (SpeedTestView.tsx).
+  .kt-speed {
+    margin-top: 8px;
+  }
+
+  .kt-speed__result {
+    margin: 0;
+    font-size: vars.$font-caption;
+    color: vars.$text-secondary;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .kt-speed.is-slow .kt-speed__result {
+    color: vars.$color-warning;
+  }
+
+  .kt-speed__advice {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 8px;
+    margin-top: 6px;
+    padding: 7px 10px;
+    font-size: vars.$font-caption;
+    line-height: 1.5;
+    color: vars.$text-secondary;
+    background: rgba(240, 179, 110, 0.1);
+    border-radius: vars.$radius-sm;
+  }
+
+  .kt-speed__switch {
+    padding: 0;
+    font: inherit;
+    font-weight: 600;
+    color: vars.$color-warning;
+    background: none;
+    border: 0;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: vars.$disabled-opacity;
+    }
+
+    &:focus-visible {
+      @include vars.focus-ring;
+    }
+  }
+
+  // Under the readiness check: the test's progress, then what it found, its retest a small grey word at the right.
+  .kt-speed-report {
+    margin-top: 2px;
+    font-size: vars.$font-caption;
+    color: vars.$text-secondary;
+
+    .kt-note {
+      margin-top: 4px;
+    }
+  }
+
+  .kt-speed-report__bar {
+    height: 3px;
+    overflow: hidden;
+    background: vars.$border-subtle;
+    border-radius: 2px;
+
+    i {
+      display: block;
+      height: 100%;
+      background: vars.$color-primary;
+      transition: width 0.2s linear;
+    }
+  }
+
+  .kt-speed-report__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 4px;
+    color: vars.$text-muted;
+  }
+
+  .kt-speed-report__again {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 0;
+    font: inherit;
+    color: vars.$text-muted;
+    background: none;
+    border: 0;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      color: vars.$text-secondary;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: vars.$disabled-opacity;
+    }
+
+    &:focus-visible {
+      @include vars.focus-ring;
+    }
+  }
+
+  .kt-speed-report__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 5px 0;
+    border-top: 1px solid vars.$border-subtle;
+    color: vars.$text-primary;
+    font-variant-numeric: tabular-nums;
+  }
+
   .kt-ready__again {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    margin-left: auto;
     padding: 3px 8px;
     font: inherit;
     color: vars.$text-secondary;

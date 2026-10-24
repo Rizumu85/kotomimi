@@ -108,6 +108,17 @@ Used via [@ricky0123/vad-web](https://github.com/ricky0123/vad-web).
 | Hugging Face Transformers.js | Apache 2.0 | [huggingface/transformers.js](https://github.com/huggingface/transformers.js) |
 | ONNX Runtime Web | MIT | [microsoft/onnxruntime](https://github.com/microsoft/onnxruntime) |
 
+## Speed Test Recordings
+
+The pipeline's speed test (`public/speed-test/`, built by `scripts/dev/build-speed-clips.py`) plays one short read sentence per language:
+
+| Recording | License | Source |
+|-----------|---------|--------|
+| Japanese: Akutagawa Ryūnosuke, 杜子春, read for LibriVox | Public domain | [toshisyun_um_librivox](https://archive.org/details/toshisyun_um_librivox) |
+| Every other language: one sentence from the `dev` split of FLEURS (Conneau et al., 2022) | CC BY 4.0 | [google/fleurs](https://huggingface.co/datasets/google/fleurs) |
+
+Each recording was trimmed to its speech and re-encoded as Opus; which sentence each one is, with its text, is listed in `public/speed-test/SOURCES.json`.
+
 ## License Notes
 
 - **CC-BY-NC 4.0** (MMS, Omnilingual 300M): Non-commercial use only.

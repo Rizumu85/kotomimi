@@ -111,6 +111,19 @@ Sokuji 原有的功能和云服务提供商（OpenAI、Gemini、Soniox 等）都
 </details>
 
 <details>
+<summary><b>测试速度</b></summary>
+
+<br>
+
+设置里"可以开始了"那一行有一个"测试速度"按钮，点了才会运行。它用一段约 10 秒的朗读录音（按你选的语言），以正常语速送进你选好的每个环节，不用麦克风，也不出声。这台电脑、另一台设备、手机和 API 都按会话时的实际路径计时，所以网络延迟也算在内。
+
+测完后，每个环节的卡片下面显示用时；底下写从说完一句到显示译文要多久。某个环节跟不上说话速度时，那张卡片里会提示，并在能换的时候给出一个更小的模型。换了模型或设备，那一项的结果就不再显示。
+
+测试录音：日语来自 LibriVox（公有领域），其他语言来自 Google 的 FLEURS 语料（CC BY 4.0），详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
+</details>
+
+<details>
 <summary><b>这台电脑上装了 LocalAI</b></summary>
 
 <br>
