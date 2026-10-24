@@ -974,8 +974,7 @@ fun Context.lined(): Drawable = object : Drawable() {
 
 /** The small objects of the small tiles, one for each kind of work and for the computer's side and the check. */
 class Thing(context: Context, private val kind: Kind) : View(context) {
-    enum class Kind { WATER, PANES, NOTE, LENS, DIAL, TOGGLES, DOTS, FADERS, HALVES, COG }
-    private val shapeClip = Path()
+    enum class Kind { WATER, PANES, NOTE, LENS, DIAL, FADERS, DOTS }
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
@@ -991,7 +990,7 @@ class Thing(context: Context, private val kind: Kind) : View(context) {
     override fun onDraw(canvas: Canvas) {
         val s = min(width, height).toFloat()
         val d = context.px(1f)
-        if (kind == Kind.FADERS || kind == Kind.HALVES || kind == Kind.COG) { settingsIcon(canvas, s, d); return }
+        if (kind == Kind.FADERS) { settingsIcon(canvas, s, d); return }
         if (dark) { night(canvas, s, d); return }
         when (kind) {
             Kind.WATER -> {
@@ -1036,23 +1035,7 @@ class Thing(context: Context, private val kind: Kind) : View(context) {
                 canvas.drawCircle(s / 2, s / 2, s * 0.12f, paint)
                 paint.clearShadowLayer()
             }
-            Kind.TOGGLES -> {
-                // The settings: two small switches, the upper one on in coral, the lower off — the share tile's switch,
-                // in small.
-                val tall = s * 0.3f
-                val wide = s * 0.78f
-                val left = s * 0.11f
-                for ((i, on) in listOf(true, false).withIndex()) {
-                    val y = s * (0.15f + 0.4f * i)
-                    paint.color = context.getColor(if (on) R.color.key else R.color.switch_off)
-                    canvas.drawRoundRect(RectF(left, y, left + wide, y + tall), tall / 2, tall / 2, paint)
-                    paint.setShadowLayer(d * 2, 0f, d, Color.argb(50, 0, 0, 0))
-                    paint.color = context.getColor(R.color.knob)
-                    canvas.drawCircle(if (on) left + wide - tall / 2 else left + tall / 2, y + tall / 2, tall / 2 - s * 0.045f, paint)
-                    paint.clearShadowLayer()
-                }
-            }
-            Kind.FADERS, Kind.HALVES, Kind.COG -> {}
+            Kind.FADERS -> {}
             Kind.DOTS -> {
                 paint.color = context.getColor(R.color.ink_2)
                 for (k in 0..2) canvas.drawCircle(s * (0.24f + 0.26f * k), s / 2, s * 0.075f, paint)
@@ -1129,21 +1112,7 @@ class Thing(context: Context, private val kind: Kind) : View(context) {
                 stroke.color = context.getColor(R.color.dial_hand); stroke.strokeWidth = s * 0.06f
                 canvas.drawLine(c, c, c + cos(a) * s * 0.3f, c + sin(a) * s * 0.3f, stroke)
             }
-            Kind.TOGGLES -> {
-                val tall = s * 0.3f
-                val wide = s * 0.78f
-                val left = s * 0.11f
-                for ((i, on) in listOf(true, false).withIndex()) {
-                    val y = s * (0.15f + 0.4f * i)
-                    paint.color = if (on) glow else face
-                    if (on) lit(glow, s * 0.1f)
-                    canvas.drawRoundRect(RectF(left, y, left + wide, y + tall), tall / 2, tall / 2, paint); paint.clearShadowLayer()
-                    if (!on) { stroke.color = rim; canvas.drawRoundRect(RectF(left, y, left + wide, y + tall), tall / 2, tall / 2, stroke) }
-                    paint.color = if (on) context.getColor(R.color.wall) else pale
-                    canvas.drawCircle(if (on) left + wide - tall / 2 else left + tall / 2, y + tall / 2, tall / 2 - s * 0.05f, paint)
-                }
-            }
-            Kind.FADERS, Kind.HALVES, Kind.COG -> {}
+            Kind.FADERS -> {}
             Kind.DOTS -> {
                 paint.color = pale
                 for (k in 0..2) canvas.drawCircle(s * (0.24f + 0.26f * k), c, s * 0.075f, paint)
@@ -1152,56 +1121,25 @@ class Thing(context: Context, private val kind: Kind) : View(context) {
     }
 
     /**
-     * The settings' object, of three the user is shown to choose from (2026-10-24): faders on a small desk, a disc
-     * half day and half night, or a soft gear of round lobes. Drawn alike by day and by night, in the objects' own faces.
+     * The settings' object: three faders on a small desk, the middle knob in coral — chosen by the user of three
+     * (2026-10-24; a disc half day and half night, and a soft gear, were the others). Drawn alike by day and by night,
+     * in the objects' own faces.
      */
     private fun settingsIcon(canvas: Canvas, s: Float, d: Float) {
         val face = context.getColor(R.color.dial)
         val rim = context.getColor(R.color.dial_edge)
         val key = context.getColor(R.color.key)
         val ink = context.getColor(R.color.dial_hand)
-        val c = s / 2
         stroke.strokeCap = Paint.Cap.ROUND
-        when (kind) {
-            Kind.FADERS -> {
-                val r = RectF(s * 0.06f, s * 0.1f, s * 0.94f, s * 0.9f)
-                paint.color = face; canvas.drawRoundRect(r, s * 0.18f, s * 0.18f, paint)
-                stroke.color = rim; stroke.strokeWidth = d * 1.2f; canvas.drawRoundRect(r, s * 0.18f, s * 0.18f, stroke)
-                for ((i, at) in listOf(0.38f, 0.64f, 0.46f).withIndex()) {
-                    val x = s * (0.28f + 0.22f * i)
-                    stroke.color = rim; stroke.strokeWidth = s * 0.05f
-                    canvas.drawLine(x, s * 0.24f, x, s * 0.76f, stroke)
-                    paint.color = if (i == 1) key else ink
-                    canvas.drawRoundRect(RectF(x - s * 0.08f, s * at - s * 0.045f, x + s * 0.08f, s * at + s * 0.045f), s * 0.03f, s * 0.03f, paint)
-                }
-            }
-            Kind.HALVES -> {
-                val r = s * 0.42f
-                paint.color = face; canvas.drawCircle(c, c, r, paint)
-                canvas.save()
-                shapeClip.reset(); shapeClip.addCircle(c, c, r, Path.Direction.CW)
-                canvas.clipPath(shapeClip)
-                paint.color = context.getColor(R.color.lens)
-                canvas.drawRect(c, 0f, s, s, paint)
-                canvas.restore()
-                stroke.color = rim; stroke.strokeWidth = d * 1.2f; canvas.drawCircle(c, c, r, stroke)
-                // A small sun on the day's half and a moon's sliver on the night's.
-                paint.color = key; canvas.drawCircle(c - r * 0.45f, c, s * 0.07f, paint)
-                paint.color = face; canvas.drawCircle(c + r * 0.45f, c, s * 0.075f, paint)
-                paint.color = context.getColor(R.color.lens); canvas.drawCircle(c + r * 0.52f, c - s * 0.03f, s * 0.065f, paint)
-            }
-            else -> {
-                // A soft gear: round lobes about a disc, a coral hub.
-                paint.color = face
-                for (k in 0 until 6) {
-                    val a = k * PI.toFloat() / 3f
-                    canvas.drawCircle(c + cos(a) * s * 0.3f, c + sin(a) * s * 0.3f, s * 0.13f, paint)
-                }
-                canvas.drawCircle(c, c, s * 0.32f, paint)
-                stroke.color = rim; stroke.strokeWidth = d * 1.2f; canvas.drawCircle(c, c, s * 0.32f, stroke)
-                paint.color = key; canvas.drawCircle(c, c, s * 0.12f, paint)
-                paint.color = face; canvas.drawCircle(c, c, s * 0.05f, paint)
-            }
+        val r = RectF(s * 0.06f, s * 0.1f, s * 0.94f, s * 0.9f)
+        paint.color = face; canvas.drawRoundRect(r, s * 0.18f, s * 0.18f, paint)
+        stroke.color = rim; stroke.strokeWidth = d * 1.2f; canvas.drawRoundRect(r, s * 0.18f, s * 0.18f, stroke)
+        for ((i, at) in listOf(0.38f, 0.64f, 0.46f).withIndex()) {
+            val x = s * (0.28f + 0.22f * i)
+            stroke.color = rim; stroke.strokeWidth = s * 0.05f
+            canvas.drawLine(x, s * 0.24f, x, s * 0.76f, stroke)
+            paint.color = if (i == 1) key else ink
+            canvas.drawRoundRect(RectF(x - s * 0.08f, s * at - s * 0.045f, x + s * 0.08f, s * at + s * 0.045f), s * 0.03f, s * 0.03f, paint)
         }
     }
 }
