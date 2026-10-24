@@ -133,6 +133,12 @@ class MainActivity : Activity() {
     private lateinit var checkVerdict: TextView
     private lateinit var checkMeter: Meter
     private lateinit var addressChip: TextView
+    // The access key, in the settings and under the address.
+    private lateinit var keyWords: TextView
+    private lateinit var keySub: TextView
+    private lateinit var keyMain: TextView
+    private lateinit var keyOff: TextView
+    private lateinit var keyLine: TextView
     private lateinit var reportCard: LinearLayout
     private lateinit var report: TextView
     private lateinit var reportKey: TextView
@@ -451,7 +457,7 @@ class MainActivity : Activity() {
         devicesLens = Thing(this, Thing.Kind.LENS)
         toolsBox = box("性能检测", "这台手机能否跟上说话的速度", checkDial, toolsContent())
         devicesBox = box("设备连接", "让电脑使用这台手机上的模型", devicesLens, devicesContent())
-        settingsBox = box("设置", "外观与版本", Thing(this, Thing.Kind.TOGGLES), settingsContent())
+        settingsBox = box("设置", "外观、访问密钥与版本", Thing(this, Thing.Kind.TOGGLES), settingsContent())
 
         // The page lies under the status bar and the navigation bar — Android 15 puts every app there, and here it is
         // asked for on the versions before, so that all of them are one case — and keeps its content clear of them:
@@ -1082,6 +1088,18 @@ class MainActivity : Activity() {
         return models
     }
 
+    /** The access key as it stands, in the settings and under the address. */
+    private fun showKey() {
+        val key = DoorKey.of(this)
+        keyWords.text = key.ifEmpty { "未设置" }
+        keyWords.setTextColor(getColor(if (key.isEmpty()) R.color.ink_3 else R.color.ink))
+        keySub.text = if (key.isEmpty()) "同一 Wi-Fi 下的设备都能使用这台手机。" else "电脑连接这台手机时需要输入此密钥。"
+        keyMain.text = if (key.isEmpty()) "设置密钥" else "更换"
+        keyOff.visibility = if (key.isEmpty()) View.GONE else View.VISIBLE
+        keyLine.text = if (key.isEmpty()) "" else "访问密钥  $key"
+        keyLine.visibility = if (key.isEmpty()) View.GONE else View.VISIBLE
+    }
+
     /** Asks before a model is taken off the phone, saying what it frees; then takes it off. */
     private fun drop(model: Model) {
         android.app.AlertDialog.Builder(this)
@@ -1192,6 +1210,21 @@ class MainActivity : Activity() {
         }
         look.addView(picks, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = px(6) })
         settings.addView(look, spaced(top = 6))
+
+        // The access key: none, as the phone comes; set, a computer must give it to use the phone.
+        val door = card().apply { setPadding(px(16), px(14), px(16), px(14)) }
+        door.addView(text("访问密钥", 14f, R.color.ink, bold = true))
+        keyWords = text("", 22f, R.color.ink, bold = true).apply { letterSpacing = 0.18f; setTextIsSelectable(true) }
+        door.addView(keyWords, spaced(top = 6))
+        keySub = text("", 12f, R.color.ink_3).apply { setLineSpacing(0f, 1.2f) }
+        door.addView(keySub, spaced(top = 4))
+        val doorKeys = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL }
+        keyMain = key("", main = true) { DoorKey.make(this@MainActivity); showKey() }
+        keyOff = key("关闭", main = false) { DoorKey.clear(this@MainActivity); showKey() }.apply { background = null; setTextColor(getColor(R.color.ink_2)) }
+        doorKeys.addView(keyMain, LinearLayout.LayoutParams(WRAP_CONTENT, px(36)))
+        doorKeys.addView(keyOff, LinearLayout.LayoutParams(WRAP_CONTENT, px(36)).apply { leftMargin = px(8) })
+        door.addView(doorKeys, spaced(top = 12))
+        settings.addView(door, spaced(top = 12))
         // The app's own version, and the key that asks for a newer one.
         val version = card().apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(px(16), px(12), px(12), px(12)) }
         val versionWords = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -1223,6 +1256,8 @@ class MainActivity : Activity() {
         here.addView(address, spaced(top = 4))
         lastComputer = text("", 12f, R.color.ink_3).apply { setLineSpacing(0f, 1.2f) }
         here.addView(lastComputer, spaced(top = 10))
+        keyLine = text("", 12f, R.color.ink_2)
+        here.addView(keyLine, spaced(top = 6))
         devices.addView(here, spaced(top = 6))
 
         // How a computer finds it, step by step.
@@ -1502,6 +1537,7 @@ class MainActivity : Activity() {
         address.text = if (shared) sharing.address ?: "未连接 Wi-Fi" else "—"
         address.setTextColor(getColor(if (shared) R.color.ink else R.color.ink_3))
         addressChip.text = when { shared && recently -> "已连接"; shared -> "共享中"; else -> "未启用" }
+        showKey()
         addressChip.background = flat(if (shared) R.color.field_mint else R.color.card_line, 12)
         addressChip.setTextColor(getColor(if (shared) R.color.good else R.color.ink_3))
         lastComputer.text = when {

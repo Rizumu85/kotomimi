@@ -469,6 +469,13 @@ class Share(private val context: Context, private val engine: Engine, private va
         // The app's own page, where it says where it comes from, is told it may read the answer.
         val allow = origin?.let { "Access-Control-Allow-Origin: $it\r\nVary: Origin\r\nAccess-Control-Expose-Headers: X-Kotomimi-Name, X-Kotomimi-Node\r\n" }.orEmpty()
 
+        // The owner's access key, where one is set (`DoorKey`): without it, nothing but the phone's name is answered.
+        val key = DoorKey.of(context)
+        if (key.isNotEmpty() && method != "OPTIONS" && headers["authorization"] != "Bearer $key") {
+            val asks = "This phone asks for its access key."
+            return if (method == "POST") refuseUnread(client, input, out, asks, allow, status = 401) else reply(out, 401, errorOf(asks), allow)
+        }
+
         when {
             method == "OPTIONS" -> reply(out, 204, "", "${allow}Access-Control-Allow-Methods: GET, POST, OPTIONS\r\nAccess-Control-Allow-Headers: authorization, content-type\r\n")
             method == "GET" && (path == "/v1/models" || path == "/models") -> reply(out, 200, modelsJson(), allow)
@@ -507,8 +514,8 @@ class Share(private val context: Context, private val engine: Engine, private va
      * is still sending run out for a moment. Closed at once, with the rest of the upload unread, the line is broken
      * off under the refusal, and the computer may see a broken line where it should read why.
      */
-    private fun refuseUnread(client: Socket, input: InputStream, out: OutputStream, message: String, more: String) {
-        reply(out, 413, errorOf(message), more)
+    private fun refuseUnread(client: Socket, input: InputStream, out: OutputStream, message: String, more: String, status: Int = 413) {
+        reply(out, status, errorOf(message), more)
         runCatching {
             client.shutdownOutput()
             client.soTimeout = UNREAD_FOR_MS
@@ -964,7 +971,7 @@ class Share(private val context: Context, private val engine: Engine, private va
         private val BOUNDARY = Regex("""boundary=(?:"([^"]*)"|([^;\s]*))""", RegexOption.IGNORE_CASE)
         private val PART_NAME = Regex("""(?i)content-disposition:[^\r\n]*?[;\s]name="([^"]*)"""")
         private val REASONS = mapOf(
-            200 to "OK", 204 to "No Content", 400 to "Bad Request", 403 to "Forbidden", 404 to "Not Found",
+            200 to "OK", 204 to "No Content", 400 to "Bad Request", 401 to "Unauthorized", 403 to "Forbidden", 404 to "Not Found",
             413 to "Payload Too Large", 429 to "Too Many Requests", 502 to "Bad Gateway", 503 to "Service Unavailable",
         )
 
