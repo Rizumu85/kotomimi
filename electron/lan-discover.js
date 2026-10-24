@@ -131,6 +131,8 @@ function readAnswer(status, headers, body) {
   }
   // A Kotomimi that shares the models of a model server on its own computer says so: that server is then not listed apart.
   const includes = headers[INCLUDES_HEADER] === 'model-server';
+  // A phone whose owner set an access key still says what it is (android/ 0.9.1 on): it is listed as a phone that wants one.
+  if ((status === 401 || status === 403) && headers[NODE_HEADER] === 'engine') return { kind: 'phone', name, models: 0, needsKey: true, includes: false };
   if (status === 401 || status === 403) return { kind: named ? 'kotomimi' : 'server', name, models: 0, needsKey: true, includes: false };
   if (status !== 200) return null;
   let list;
@@ -159,7 +161,7 @@ function readAnswer(status, headers, body) {
 }
 
 /** One GET. Resolves with the answer, or null when there was none in time: never rejects. */
-function get(host, port, path, timeoutMs) {
+function get(host, port, path, timeoutMs, key) {
   return new Promise((resolve) => {
     let done = false;
     const finish = (value) => {
@@ -169,7 +171,7 @@ function get(host, port, path, timeoutMs) {
       request.destroy();
       resolve(value);
     };
-    const request = http.get({ host, port, path, agent: false, headers: { Accept: 'application/json' } }, (response) => {
+    const request = http.get({ host, port, path, agent: false, headers: { Accept: 'application/json', ...(key ? { Authorization: `Bearer ${key}` } : {}) } }, (response) => {
       const chunks = [];
       let size = 0;
       response.on('data', (chunk) => {
@@ -186,8 +188,9 @@ function get(host, port, path, timeoutMs) {
 }
 
 /** Asks one address. Resolves with what is there, or null. */
-async function probe({ host, port, self }, timeoutMs = PROBE_TIMEOUT_MS) {
-  const answer = await get(host, port, '/v1/models', timeoutMs);
+async function probe({ host, port, self }, timeoutMs = PROBE_TIMEOUT_MS, keys = {}) {
+  // A phone given a key here is asked with it (`src/lib/lan/phoneKeys.ts`); every other address without one.
+  const answer = await get(host, port, '/v1/models', timeoutMs, keys[`${host}:${port}`]);
   const found = answer && readAnswer(answer.status, answer.headers, answer.body);
   return found ? { address: `${host}:${port}`, host, port, self, ...found } : null;
 }
@@ -227,12 +230,12 @@ function shown(found) {
  * Everything found, Kotomimis first, then by address. `ownPorts` are the
  * ports this app listens on now: it is not shown itself.
  */
-async function discoverServers({ interfaces, ports, ownPorts = [], timeoutMs = PROBE_TIMEOUT_MS, concurrency = CONCURRENCY, reverse } = {}) {
+async function discoverServers({ interfaces, ports, ownPorts = [], timeoutMs = PROBE_TIMEOUT_MS, concurrency = CONCURRENCY, reverse, keys = {} } = {}) {
   const queue = targets(interfaces, { ports, ownPorts });
   const found = [];
   const worker = async () => {
     for (let next = queue.shift(); next; next = queue.shift()) {
-      const answer = await probe(next, timeoutMs);
+      const answer = await probe(next, timeoutMs, keys);
       if (answer) found.push(answer);
     }
   };

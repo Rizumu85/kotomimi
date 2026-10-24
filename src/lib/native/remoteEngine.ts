@@ -6,6 +6,7 @@
  * address.
  */
 import { nativeStreamEvent, type NativeBridge } from './nativeEngine';
+import { phoneKey } from '../lan/phoneKeys';
 
 /** What a Kotomimi phone says of itself, on every answer: that what is here is the engine. */
 export const NODE_HEADER = 'X-Kotomimi-Node';
@@ -60,7 +61,9 @@ export function remoteBridge(base: string): NativeBridge {
       const api = electron();
       if (!api) return null;
       try {
-        const id = await api.invoke('remote-engine:stream-open', { ...init, base });
+        // The phone's key, where its owner set one (`phoneKeys.ts`): every reading of the stretch carries it.
+        const key = phoneKey(base);
+        const id = await api.invoke('remote-engine:stream-open', { ...init, base, ...(key ? { key } : {}) });
         return Number.isInteger(id) ? (id as number) : null;
       } catch {
         return null;

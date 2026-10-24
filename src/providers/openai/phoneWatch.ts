@@ -8,6 +8,7 @@
  * Nothing is done to the run: what was sent waits as it did, and when the phone is opened again it answers.
  */
 import type { Clock } from '../../lib/contract/clock';
+import { phoneKey } from '../../lib/lan/phoneKeys';
 
 /** How often a phone in use is asked, and how long it has to answer. */
 export const PHONE_WATCH_EVERY_MS = 5_000;
@@ -51,7 +52,8 @@ export function watchPhones({ fetch: doFetch, clock, onQuiet }: {
     let answered: boolean;
     try {
       // Any answer is the phone's: a frozen app gives none.
-      await doFetch(`${base}/models`, { signal: asking.signal });
+      const key = phoneKey(base);
+      await doFetch(`${base}/models`, { signal: asking.signal, ...(key ? { headers: { Authorization: `Bearer ${key}` } } : {}) });
       answered = true;
     } catch {
       answered = false;

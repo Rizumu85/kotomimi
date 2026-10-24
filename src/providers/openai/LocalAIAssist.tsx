@@ -10,6 +10,7 @@ import ToggleSwitch from '../../components/Settings/shared/ToggleSwitch';
 import Tooltip from '../../components/Tooltip/Tooltip';
 import { canFindServers, findServers, phoneHears, phoneLends, plainAddress, type FoundServer, type PhoneTextModel } from '../../lib/lan/discover';
 import { askLocalPipelines, NO_PIPELINES, type LocalPipelines } from '../../lib/lan/localServer';
+import { setPhoneKey } from '../../lib/lan/phoneKeys';
 import { modelLabel } from '../../lib/lan/modelLabel';
 import { deviceReady, getManifestEntry, getModelSizeMb } from '../../lib/local-inference/modelManifest';
 import { shortenModelName } from '../../lib/local-inference/modelName';
@@ -819,6 +820,13 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
 
   // What the search above the cards last found: the devices a stage can be given a device of its own from.
   const [seen, setSeen] = useState<readonly FoundServer[]>([]);
+  // A phone that asks for an access key, picked: its key is typed under the search, which then looks again with it,
+  // and the phone found answering is used as a pick of it would be (`phoneKeys.ts`).
+  const [keyFor, setKeyFor] = useState<FoundServer | null>(null);
+  const [keyDraft, setKeyDraft] = useState('');
+  const [keyWrong, setKeyWrong] = useState(false);
+  const [searchTurn, setSearchTurn] = useState(0);
+  const keyAsked = useRef<string | null>(null);
   // The hearing stage's own device: a phone, by its address. The ones found, and the one saved though it was not
   // found this time (the phone asleep, or no search made yet): it stays visible, so the setting is not silently another.
   const ownHearing = plainAddress(settings.asrOther);
@@ -867,6 +875,12 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
     // alone, picked while neither is on "another device", is given the translation (or else the feedback): it was
     // picked to be used. (`settled` reads a hearing phone as an API at its address, and the run reads it live:
     // `remoteEngine.ts`; a text stage on a phone is asked as this computer's native engine is: `buildLocalAI`.)
+    if (server.kind === 'phone' && server.needsKey) {
+      setKeyFor(server);
+      setKeyDraft('');
+      setKeyWrong(false);
+      return;
+    }
     if (server.kind === 'phone') {
       const translates = phoneLends(server, 'translate').length > 0;
       const coaches = phoneLends(server, 'coach').length > 0;
@@ -884,6 +898,27 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
     }
     if (server.needsKey !== settings.serverNeedsKey) put({ serverNeedsKey: server.needsKey });
     fill('endpoint', server.address);
+  };
+
+  /** The key typed for the phone asked about: kept, and the search made again with it. */
+  const tryPhoneKey = async () => {
+    if (!keyFor || !keyDraft.trim()) return;
+    await setPhoneKey(keyFor.address, keyDraft);
+    keyAsked.current = plainAddress(keyFor.address);
+    setKeyWrong(false);
+    setSearchTurn((turn) => turn + 1);
+  };
+  /** What the search found: and, after a key was typed, the phone it was for, used where it now answers. */
+  const searched = (servers: FoundServer[]) => {
+    setSeen(servers);
+    const asked = keyAsked.current;
+    if (!asked) return;
+    keyAsked.current = null;
+    const phone = servers.find((server) => server.kind === 'phone' && plainAddress(server.address) === asked);
+    if (phone && !phone.needsKey) {
+      setKeyFor(null);
+      useServer(phone);
+    } else setKeyWrong(true);
   };
 
   // The other device does not answer at its address (the check's `SERVER_SILENT`). The models shown are the last it listed.
@@ -916,16 +951,39 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
           <span className="kt-card__title">{t('providers.localai.placeServer')}</span>
         </h4>
         <ServerFinder
+          key={searchTurn}
           hint={t('providers.localai.otherDeviceHint')}
           // Marked as in use only while a stage is on it: with a phone hearing, the address may be one nothing asks.
           value={serverInUse ? address : ''}
           // The phones the stages ask now: each is marked as in use.
           phone={[settings.asrVia === 'server' ? settings.asrOther : settings.asrVia === 'api' ? settings.asrApiBaseUrl : '', translatesAtOwn ? settings.translateOther : '', coachesAtOwn ? settings.coachOther : ''].filter((one) => one.trim() !== '')}
-          onFound={setSeen}
-          auto={serverInUse && !address.trim()}
+          onFound={searched}
+          auto={(serverInUse && !address.trim()) || searchTurn > 0}
           disabled={disabled}
           onPick={useServer}
         />
+        {keyFor && (
+          <div className="kt-phone-key">
+            <p className="kt-note">{t('providers.localai.phoneKeyNote')}</p>
+            <Field label={t('providers.localai.phoneKey', { name: keyFor.name || plainAddress(keyFor.address) })}>
+              <input
+                type="password"
+                className="kt-input"
+                aria-label={t('providers.localai.phoneKey', { name: keyFor.name || plainAddress(keyFor.address) })}
+                value={keyDraft}
+                onChange={(e) => { setKeyDraft(e.target.value); setKeyWrong(false); }}
+                onKeyDown={(e) => { if (e.key === 'Enter') void tryPhoneKey(); }}
+                autoComplete="off"
+                spellCheck={false}
+                disabled={disabled}
+              />
+            </Field>
+            {keyWrong && <p className="kt-note kt-note--todo">{t('providers.localai.phoneKeyWrong')}</p>}
+            <button type="button" className="kt-there__switch" onClick={() => { void tryPhoneKey(); }} disabled={disabled || !keyDraft.trim()}>
+              {t('providers.localai.phoneKeyUse')}
+            </button>
+          </div>
+        )}
         {(serverInUse || address.trim() !== '') && (
           <>
             <Field label={t('providers.localai.endpoint')}>

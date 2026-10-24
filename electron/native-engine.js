@@ -494,7 +494,7 @@ function wavOf(pcm, sampleRate) {
  * One stretch of sound read whole by the runtime (POST /v1/audio/transcriptions, a form): `done` resolves with
  * `{ ok, text }` or `{ ok: false, message }`, and `abort` drops the request.
  */
-function readWhole({ host = LOOPBACK, port, pathname = '/v1/audio/transcriptions', model, sampleRate, language, pcm, timeoutMs }) {
+function readWhole({ host = LOOPBACK, port, pathname = '/v1/audio/transcriptions', model, sampleRate, language, pcm, timeoutMs, key }) {
   const boundary = `----kotomimi${crypto.randomBytes(12).toString('hex')}`;
   const field = (name, value) => Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="${name}"\r\n\r\n${value}\r\n`);
   const body = Buffer.concat([
@@ -506,7 +506,7 @@ function readWhole({ host = LOOPBACK, port, pathname = '/v1/audio/transcriptions
   ]);
   let request = null;
   const done = new Promise((resolve) => {
-    request = http.request({ host, port, method: 'POST', path: pathname, timeout: timeoutMs, headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}`, 'Content-Length': body.length } }, (response) => {
+    request = http.request({ host, port, method: 'POST', path: pathname, timeout: timeoutMs, headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}`, 'Content-Length': body.length, ...(key ? { Authorization: `Bearer ${key}` } : {}) } }, (response) => {
       let answer = '';
       response.setEncoding('utf8');
       response.on('data', (chunk) => { if (answer.length < 400_000) answer += chunk; });

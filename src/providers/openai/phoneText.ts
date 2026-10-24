@@ -14,6 +14,7 @@ import { phoneBase, phoneRoom, phoneTextModels, plainAddress, type PhoneTextMode
 import { NATIVE_COACHES } from './nativeCoaches';
 import { NATIVE_TRANSLATORS, nativeTranslates } from './nativeTranslators';
 import { chatUrl, NO_KEY } from './textModel';
+import { phoneKey } from '../../lib/lan/phoneKeys';
 
 /**
  * How long one answer from a phone may take: the load of its model (up to about 40 s), the requests ahead of it in
@@ -30,7 +31,8 @@ export const phoneTextBase = (address: string): string => phoneBase({ address: p
 
 /** A phone's model list, as far as a text stage asks: what it lends of text models. Null: it could not be read. */
 export async function phoneTextList(address: string, fetchIt: typeof fetch, signal: AbortSignal): Promise<PhoneTextModel[] | null> {
-  const answer = await fetchIt(`${phoneTextBase(address)}/models`, { method: 'GET', signal });
+  const key = phoneKey(address);
+  const answer = await fetchIt(`${phoneTextBase(address)}/models`, { method: 'GET', signal, ...(key ? { headers: { Authorization: `Bearer ${key}` } } : {}) });
   if (!answer.ok) return null;
   const body = (await answer.json().catch(() => null)) as { text?: unknown } | null;
   return body ? phoneTextModels(body.text, phoneRoom(body)) : null;
@@ -59,7 +61,7 @@ export function warmPhones(wanted: readonly PhoneWarm[], fetchIt: typeof fetch, 
     if (!model || model.loaded) return;
     const answer = await fetchIt(chatUrl(phoneTextBase(warm.address)), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${NO_KEY}` },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${phoneKey(warm.address) || NO_KEY}` },
       body: JSON.stringify({ ...(warm.extra ?? {}), model: warm.model, stream: false, max_tokens: 1, messages: [...warm.messages, { role: 'user', content: 'Hello' }] }),
       signal,
     });

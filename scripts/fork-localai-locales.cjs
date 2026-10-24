@@ -55,6 +55,14 @@ const PROVIDER = {
     '另一台裝置設了存取金鑰時開啟，例如對面那台 Kotomimi 在共享的「選項」裡設定了金鑰。',
   ],
   serverKey: ['Access key', '访问密钥', '存取金鑰'],
+  phoneKey: ['Access key of {{name}}', '{{name}} 的访问密钥', '{{name}} 的存取金鑰'],
+  phoneKeyNote: [
+    'This phone asks for an access key. It is shown on the phone, under 设备连接.',
+    '这台手机设置了访问密钥，可以在手机的「设备连接」中查看。',
+    '這台手機設定了存取金鑰，可以在手機的「設備連接」中查看。',
+  ],
+  phoneKeyUse: ['Use this phone', '使用这台手机', '使用這台手機'],
+  phoneKeyWrong: ['The phone did not take this key.', '这个密钥不对，请再核对一下。', '這個金鑰不對，請再核對一下。'],
   kotomimiServer: [
     'It is another Kotomimi sharing its models.',
     '它是另一台正在共享模型的 Kotomimi。',

@@ -1478,7 +1478,7 @@ app.on('will-quit', () => { void nativeEngine?.stop(); });
 // Fork: a recognition engine on another device — a phone lent to this computer (electron/remote-engine.js). Its live
 // recognitions, for the page; nothing of it runs here.
 const remoteEngine = createRemoteEngine({ onStream: (event) => toPage('remote-engine:stream', event) });
-ipcMain.handle('remote-engine:stream-open', (event, args) => remoteEngine.openStream({ base: args?.base, model: args?.model, language: args?.language, sampleRate: args?.sampleRate }));
+ipcMain.handle('remote-engine:stream-open', (event, args) => remoteEngine.openStream({ base: args?.base, model: args?.model, language: args?.language, sampleRate: args?.sampleRate, key: typeof args?.key === 'string' ? args.key : undefined }));
 ipcMain.handle('remote-engine:stream-audio', (event, args) => remoteEngine.writeStream(args?.id, args?.pcm));
 ipcMain.handle('remote-engine:stream-end', (event, args) => remoteEngine.endStream(args?.id));
 ipcMain.handle('remote-engine:stream-abort', (event, args) => remoteEngine.abortStream(args?.id));
@@ -1572,8 +1572,13 @@ app.on('web-contents-created', (created, contents) => {
 // Fork: the devices of the local network whose models this app can use (electron/lan-discover.js) —
 // asked for when the person is choosing one. One search at a time: a second asker waits for the first's answer.
 let lanSearch = null;
-ipcMain.handle('lan:discover', () => {
-  lanSearch ??= discoverServers({ ownPorts: lanServer ? [lanServer.port] : [] })
+ipcMain.handle('lan:discover', (event, args) => {
+  // The keys of phones that ask for one, by address: only what could be one is taken (`src/lib/lan/phoneKeys.ts`).
+  const keys = {};
+  for (const [address, key] of Object.entries(args && typeof args.keys === 'object' && args.keys ? args.keys : {})) {
+    if (/^[0-9a-z.:[\]-]{1,80}$/i.test(address) && typeof key === 'string' && /^[\x21-\x7e]{1,128}$/.test(key)) keys[address] = key;
+  }
+  lanSearch ??= discoverServers({ ownPorts: lanServer ? [lanServer.port] : [], keys })
     .catch((error) => { console.warn('[Kotomimi] [Main] The search of the local network failed:', error.message); return []; })
     .finally(() => { lanSearch = null; });
   return lanSearch;

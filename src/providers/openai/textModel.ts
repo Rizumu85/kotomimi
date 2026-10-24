@@ -6,6 +6,7 @@
  * but for the `fetch` and the clock it is handed.
  */
 import type { Clock } from '../../lib/contract/clock';
+import { phoneKey } from '../../lib/lan/phoneKeys';
 
 /** How long one answer may take, from the request to its last token. */
 /**
@@ -151,7 +152,8 @@ export async function completeText(request: TextRequest, deps: TextDeps): Promis
     for (let tries = 0; ; tries += 1) {
       response = await deps.fetch(request.url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${request.key || NO_KEY}` },
+        // A phone's own key where it asks for one (`phoneKeys.ts`): its base is the request's address.
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${request.key || phoneKey(request.url) || NO_KEY}` },
         body,
         signal: controller.signal,
       });

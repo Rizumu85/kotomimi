@@ -115,12 +115,14 @@ const electron = (): ElectronApi | undefined => (typeof window === 'undefined' ?
 /** Whether there is a main process to look: the extension and the web have none. */
 export const canFindServers = (): boolean => Boolean(electron());
 
-/** Looks. Never rejects: no answer is no server. */
+/** Looks, a phone that asks for a key asked with the one given for it (`phoneKeys.ts`). Never rejects: no answer is no server. */
 export async function findServers(): Promise<FoundServer[]> {
   const api = electron();
   if (!api) return [];
   try {
-    return foundServers(await api.invoke('lan:discover'));
+    const { loadPhoneKeys, phoneKeysNow } = await import('./phoneKeys');
+    await loadPhoneKeys();
+    return foundServers(await api.invoke('lan:discover', { keys: phoneKeysNow() }));
   } catch {
     return [];
   }

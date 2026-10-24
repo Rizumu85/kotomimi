@@ -78,6 +78,10 @@ describe('what an answer says of a server', () => {
     expect(readAnswer(403, {}, '')).toEqual({ kind: 'server', name: '', models: 0, needsKey: true, includes: false });
   });
 
+  it('lists a phone whose owner set an access key as a phone that wants one', () => {
+    expect(readAnswer(401, { [NAME_HEADER]: 'F22', 'x-kotomimi-node': 'engine' }, '{"error":{}}')).toEqual({ kind: 'phone', name: 'F22', models: 0, needsKey: true, includes: false });
+  });
+
   it('knows a phone that lends its recognition engine, by what it says of itself, and the model it lends', () => {
     const list = JSON.stringify({ object: 'list', data: [{ id: 'qwen3-asr-0.6b-q8', object: 'model', owned_by: 'kotomimi-phone' }] });
     expect(readAnswer(200, { [NAME_HEADER]: encodeURIComponent('朋友的手机'), 'x-kotomimi-node': 'engine' }, list)).toEqual({ kind: 'phone', name: '朋友的手机', models: 1, needsKey: false, includes: false, model: 'qwen3-asr-0.6b-q8' });
@@ -145,6 +149,22 @@ describe('asking an address', () => {
     const closed = await serve(200, {});
     await new Promise((done) => running.pop().close(done));
     expect(await probe({ host: '127.0.0.1', port: closed, self: true })).toBeNull();
+  });
+
+  it('asks a phone with the key given for its address, and only that one', async () => {
+    const asked = [];
+    const phone = http.createServer((request, response) => {
+      asked.push(request.headers.authorization);
+      const right = request.headers.authorization === 'Bearer K7P2QX';
+      response.writeHead(right ? 200 : 401, { 'Content-Type': 'application/json', 'X-Kotomimi-Node': 'engine', 'X-Kotomimi-Name': 'F22' });
+      response.end(right ? JSON.stringify({ object: 'list', data: [{ id: 'sensevoice-small-q8' }] }) : '{"error":{}}');
+    });
+    running.push(phone);
+    const port = await new Promise((resolve) => phone.listen(0, '127.0.0.1', () => resolve(phone.address().port)));
+    expect(await probe({ host: '127.0.0.1', port, self: false })).toMatchObject({ kind: 'phone', needsKey: true, models: 0 });
+    expect(await probe({ host: '127.0.0.1', port, self: false }, undefined, { [`127.0.0.1:${port}`]: 'K7P2QX' })).toMatchObject({ kind: 'phone', needsKey: false, model: 'sensevoice-small-q8' });
+    expect(await probe({ host: '127.0.0.1', port, self: false }, undefined, { '127.0.0.1:1': 'K7P2QX' })).toMatchObject({ needsKey: true });
+    expect(asked).toEqual([undefined, 'Bearer K7P2QX', undefined]);
   });
 
   it('gives up on one that never answers', async () => {

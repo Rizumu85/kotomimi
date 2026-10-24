@@ -47,8 +47,10 @@ function createRemoteEngine({ onStream = () => {}, window = openWindow, read = r
   let nextStream = 1;
 
   /** A live recognition on the engine at `base`: its id, or null where the address is not one, or too many are open. */
-  function openStream({ base, model, language, sampleRate } = {}) {
-    const target = targetOf(base);
+  function openStream({ base, model, language, sampleRate, key } = {}) {
+    const found = targetOf(base);
+    // The phone's access key, where its owner set one: every reading carries it (`src/lib/lan/phoneKeys.ts`).
+    const target = found && typeof key === 'string' && /^[\x21-\x7e]{1,128}$/.test(key) ? { ...found, key } : found;
     if (!target || typeof model !== 'string' || !model || streams.size >= MOST_STREAMS) return null;
     const id = nextStream++;
     const rate = Number.isInteger(sampleRate) && sampleRate >= 8000 && sampleRate <= 48000 ? sampleRate : 16000;

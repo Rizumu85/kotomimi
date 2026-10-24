@@ -43,6 +43,7 @@ import type { OpenSocket } from './socket';
 import { chatUrl, completeText, httpBaseOf } from './textModel';
 import { PHONE_BUSY_RETRIES, PHONE_TEXT_TIMEOUT_MS } from './phoneText';
 import { watchPhones, type PhoneWatch } from './phoneWatch';
+import { phoneKey } from '../../lib/lan/phoneKeys';
 import { unwrapTranslationText } from './wire';
 
 /** The credential a stage's endpoint is called with, by its field. */
@@ -855,7 +856,7 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
     const byApi = () => createApiAsr({ baseUrl: api.baseUrl, model: api.model, ...(key ? { key } : {}), fetch: asked, clock: request.clock });
     // The address may be a Kotomimi phone lending its engine: that is read as this computer's own engine is, while
     // the voice is heard, not a sentence at a time. Asked once, as the run begins; anything else is the API named.
-    const remote = deps.remote ?? { node: (baseUrl: string) => engineNode(baseUrl, asked, key), bridge: remoteBridge };
+    const remote = deps.remote ?? { node: (baseUrl: string) => engineNode(baseUrl, asked, key || phoneKey(baseUrl) || undefined), bridge: remoteBridge };
     return createLocalInferenceAdapter({
       ...engines,
       asr: () => createEitherAsr(async () => {
