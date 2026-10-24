@@ -86,8 +86,9 @@ export function foundServers(value: unknown): FoundServer[] {
     if (!item || typeof item.address !== 'string' || !/^[\d.]+:\d{1,5}$/.test(item.address)) continue;
     const model = typeof item.model === 'string' && item.model ? item.model.slice(0, 80) : '';
     const text = item.kind === 'phone' ? phoneTextModels(item.text) : [];
-    // A phone is one that lends something: a recognizer, or a text model.
-    const phone = item.kind === 'phone' && (model !== '' || text.length > 0);
+    // A phone is one that lends something: a recognizer, or a text model — or one that asks for its access key, whose
+    // models are not seen until it is given (`phoneKeys.ts`).
+    const phone = item.kind === 'phone' && (model !== '' || text.length > 0 || item.needsKey === true);
     out.push({
       address: item.address,
       kind: item.kind === 'kotomimi' ? 'kotomimi' : phone ? 'phone' : 'server',

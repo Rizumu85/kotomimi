@@ -83,6 +83,7 @@ import {
 } from './settings';
 import { httpBaseOf } from './textModel';
 import { phoneTextBase, phoneTextList, warmPhones, type PhoneWarm } from './phoneText';
+import { loadPhoneKeys, phoneKey } from '../../lib/lan/phoneKeys';
 import { normalizeTranscriptionLanguage, type TranscriptionHint } from './transcription';
 
 /** Where a stage runs (`localaiDevice.ts`): the same three places for what hears, what translates and what gives feedback. */
@@ -579,7 +580,8 @@ function otherServers(k: LocalAICredentials, s: LocalAISettings): OtherServer[] 
   const base = (url: string) => url.trim().replace(/\/+$/, '');
   if (s.asrVia === 'api' && s.asrApiBaseUrl.trim()) {
     const phone = s.asrOther.trim() && base(s.asrApiBaseUrl) === phoneTextBase(s.asrOther) ? plainAddress(s.asrOther) : '';
-    out.push({ slot: 'asr', name: 'speech recognition', base: base(s.asrApiBaseUrl), key: k.asrKey, ...(phone ? { phone } : {}) });
+    // A phone that asks for its access key is asked with the one given for it (`phoneKeys.ts`).
+    out.push({ slot: 'asr', name: 'speech recognition', base: base(s.asrApiBaseUrl), key: k.asrKey || (phone ? phoneKey(phone) || undefined : undefined), ...(phone ? { phone } : {}) });
   }
   // This computer's LocalAI, when it hears: reached like any other, so that one that is not running is said before Start.
   if (hearsByLocalServer(s)) out.push({ slot: 'asr', name: 'speech recognition', base: hereBaseUrl(s), key: undefined });
@@ -669,6 +671,8 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
       if (!ctx.signal?.aborted && error instanceof Error && error.message === late) throw new CheckError(late, 'check_slow', { seconds: CHECK_TIMEOUT_MS / 1000 });
       throw error;
     };
+    // The keys of phones that ask for one, read before any is asked (`phoneKeys.ts`).
+    await loadPhoneKeys();
     const phones = phoneStages(s, ctx.legs);
     const servers = needsServer(s) || otherServers(k, s).length > 0 || phones.length > 0
       ? await boundedFetch({ clock, ms: CHECK_TIMEOUT_MS, signal: ctx.signal, late }, async (signal): Promise<CheckResult> => {

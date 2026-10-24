@@ -21,6 +21,13 @@ describe('what the search found, held to its shape', () => {
     expect(foundServers('no')).toEqual([]);
   });
 
+  it('keeps a phone that asks for its access key a phone, though nothing it lends is seen yet', () => {
+    expect(foundServers([{ address: '192.168.4.28:8792', kind: 'phone', name: 'F22', models: 0, needsKey: true }])).toEqual([
+      { address: '192.168.4.28:8792', kind: 'phone', name: 'F22', product: '', models: 0, needsKey: true, self: false },
+    ]);
+    expect(foundServers([{ address: '192.168.4.28:8792', kind: 'phone', name: 'F22', models: 0, needsKey: false }])[0].kind).toBe('server');
+  });
+
   it('reads a typed address as the host and port it names', () => {
     expect(plainAddress(' http://192.168.4.29:8790/v1/ ')).toBe('192.168.4.29:8790');
     expect(plainAddress('192.168.4.29:8790')).toBe('192.168.4.29:8790');
