@@ -190,11 +190,19 @@ class Wall(context: Context) : View(context), SensorEventListener {
 
     fun moodFor(next: Mood) {
         if (next == mood) return
+        brightFrom = brightFrom + (brightTo - brightFrom) * ease(turned)
+        brightTo = if (next == Mood.IDLE) IDLE_BRIGHT else 1f
         mood = next
         from = current()
         to = colours(next)
         turned = 0f
     }
+
+    // How bright the night's smoke is, on its way from one to the other as the colours turn.
+    private var brightFrom = IDLE_BRIGHT
+    private var brightTo = IDLE_BRIGHT
+
+    private fun ease(k: Float): Float = k * k * (3 - 2 * k)
 
     /** Something was done: the wallpaper answers it in the way of that work, and a wave runs out through the dots. */
     fun pulse(task: Task, x: Float = width * 0.5f, y: Float = height * 0.55f) {
@@ -367,6 +375,8 @@ class Wall(context: Context) : View(context), SensorEventListener {
             fumePixels = IntArray(cols * rows)
         }
         val night = c[0]
+        // Not lent, the smoke is low, a dim room; lent, it lifts — at the pace the colours turn, never at once.
+        val bright = brightFrom + (brightTo - brightFrom) * ease(turned)
         val a = muted(c[1])
         val b = muted(c[2])
         val unit = min(w, h)
@@ -384,7 +394,7 @@ class Wall(context: Context) : View(context), SensorEventListener {
                 light *= 0.55f + 0.45f * (1f - v * 0.7f) * (1f - 0.35f * abs(i.toFloat() / cols - 0.5f) * 2f)
                 val hue = 0.5f + 0.5f * fsin(x * 0.6f + y * 0.45f + tt * 0.1f)
                 // Never quite black: a haze of the colour everywhere, and the folds lighter in it, as Folia's smoke.
-                fumePixels[j * cols + i] = blend(night, blend(a, b, hue), (0.16f + light * 0.78f).coerceIn(0f, 1f))
+                fumePixels[j * cols + i] = blend(night, blend(a, b, hue), ((0.16f + light * 0.78f) * bright).coerceIn(0f, 1f))
             }
         }
         fume!!.setPixels(fumePixels, 0, cols, 0, 0, cols, rows)
@@ -494,7 +504,8 @@ class Wall(context: Context) : View(context), SensorEventListener {
     /** Time passes: the fields drift, the sensor's down is followed, what a finger did fades. */
     private fun step(dt: Float) {
         t += dt * pace
-        if (turned < 1f) turned = min(1f, turned + dt / 0.9f)
+        // The colours turn over a second and a half: in the dark the whole room's light changes with them.
+        if (turned < 1f) turned = min(1f, turned + dt / 1.5f)
         tremble = max(0f, tremble - dt * 1.2f)
         if (sweep >= 0f) sweep = if (sweep > 1.3f) -1f else sweep + dt / 1.1f
         drops.forEach { it.age += dt }
@@ -803,6 +814,8 @@ class Wall(context: Context) : View(context), SensorEventListener {
         const val FLOW_EVERY = 3
         /** How long the wall is drawn at half the rate once nothing moves, before a quarter. */
         const val QUIET_AFTER_NS = 8_000_000_000L
+        /** How bright the night's smoke is while nothing is lent, of its full light (the user liked it dim, 2026-10-24). */
+        const val IDLE_BRIGHT = 0.22f
         /** How long a wave runs, in seconds. */
         const val WAVE_LASTS = 2.8f
         /** The colours glitter catches the light in: the app's coral, a mint, a blue, an apricot. */
@@ -961,7 +974,8 @@ fun Context.lined(): Drawable = object : Drawable() {
 
 /** The small objects of the small tiles, one for each kind of work and for the computer's side and the check. */
 class Thing(context: Context, private val kind: Kind) : View(context) {
-    enum class Kind { WATER, PANES, NOTE, LENS, DIAL, TOGGLES, DOTS }
+    enum class Kind { WATER, PANES, NOTE, LENS, DIAL, TOGGLES, DOTS, FADERS, HALVES, COG }
+    private val shapeClip = Path()
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
@@ -977,6 +991,7 @@ class Thing(context: Context, private val kind: Kind) : View(context) {
     override fun onDraw(canvas: Canvas) {
         val s = min(width, height).toFloat()
         val d = context.px(1f)
+        if (kind == Kind.FADERS || kind == Kind.HALVES || kind == Kind.COG) { settingsIcon(canvas, s, d); return }
         if (dark) { night(canvas, s, d); return }
         when (kind) {
             Kind.WATER -> {
@@ -1037,6 +1052,7 @@ class Thing(context: Context, private val kind: Kind) : View(context) {
                     paint.clearShadowLayer()
                 }
             }
+            Kind.FADERS, Kind.HALVES, Kind.COG -> {}
             Kind.DOTS -> {
                 paint.color = context.getColor(R.color.ink_2)
                 for (k in 0..2) canvas.drawCircle(s * (0.24f + 0.26f * k), s / 2, s * 0.075f, paint)
@@ -1127,9 +1143,64 @@ class Thing(context: Context, private val kind: Kind) : View(context) {
                     canvas.drawCircle(if (on) left + wide - tall / 2 else left + tall / 2, y + tall / 2, tall / 2 - s * 0.05f, paint)
                 }
             }
+            Kind.FADERS, Kind.HALVES, Kind.COG -> {}
             Kind.DOTS -> {
                 paint.color = pale
                 for (k in 0..2) canvas.drawCircle(s * (0.24f + 0.26f * k), c, s * 0.075f, paint)
+            }
+        }
+    }
+
+    /**
+     * The settings' object, of three the user is shown to choose from (2026-10-24): faders on a small desk, a disc
+     * half day and half night, or a soft gear of round lobes. Drawn alike by day and by night, in the objects' own faces.
+     */
+    private fun settingsIcon(canvas: Canvas, s: Float, d: Float) {
+        val face = context.getColor(R.color.dial)
+        val rim = context.getColor(R.color.dial_edge)
+        val key = context.getColor(R.color.key)
+        val ink = context.getColor(R.color.dial_hand)
+        val c = s / 2
+        stroke.strokeCap = Paint.Cap.ROUND
+        when (kind) {
+            Kind.FADERS -> {
+                val r = RectF(s * 0.06f, s * 0.1f, s * 0.94f, s * 0.9f)
+                paint.color = face; canvas.drawRoundRect(r, s * 0.18f, s * 0.18f, paint)
+                stroke.color = rim; stroke.strokeWidth = d * 1.2f; canvas.drawRoundRect(r, s * 0.18f, s * 0.18f, stroke)
+                for ((i, at) in listOf(0.38f, 0.64f, 0.46f).withIndex()) {
+                    val x = s * (0.28f + 0.22f * i)
+                    stroke.color = rim; stroke.strokeWidth = s * 0.05f
+                    canvas.drawLine(x, s * 0.24f, x, s * 0.76f, stroke)
+                    paint.color = if (i == 1) key else ink
+                    canvas.drawRoundRect(RectF(x - s * 0.08f, s * at - s * 0.045f, x + s * 0.08f, s * at + s * 0.045f), s * 0.03f, s * 0.03f, paint)
+                }
+            }
+            Kind.HALVES -> {
+                val r = s * 0.42f
+                paint.color = face; canvas.drawCircle(c, c, r, paint)
+                canvas.save()
+                shapeClip.reset(); shapeClip.addCircle(c, c, r, Path.Direction.CW)
+                canvas.clipPath(shapeClip)
+                paint.color = context.getColor(R.color.lens)
+                canvas.drawRect(c, 0f, s, s, paint)
+                canvas.restore()
+                stroke.color = rim; stroke.strokeWidth = d * 1.2f; canvas.drawCircle(c, c, r, stroke)
+                // A small sun on the day's half and a moon's sliver on the night's.
+                paint.color = key; canvas.drawCircle(c - r * 0.45f, c, s * 0.07f, paint)
+                paint.color = face; canvas.drawCircle(c + r * 0.45f, c, s * 0.075f, paint)
+                paint.color = context.getColor(R.color.lens); canvas.drawCircle(c + r * 0.52f, c - s * 0.03f, s * 0.065f, paint)
+            }
+            else -> {
+                // A soft gear: round lobes about a disc, a coral hub.
+                paint.color = face
+                for (k in 0 until 6) {
+                    val a = k * PI.toFloat() / 3f
+                    canvas.drawCircle(c + cos(a) * s * 0.3f, c + sin(a) * s * 0.3f, s * 0.13f, paint)
+                }
+                canvas.drawCircle(c, c, s * 0.32f, paint)
+                stroke.color = rim; stroke.strokeWidth = d * 1.2f; canvas.drawCircle(c, c, s * 0.32f, stroke)
+                paint.color = key; canvas.drawCircle(c, c, s * 0.12f, paint)
+                paint.color = face; canvas.drawCircle(c, c, s * 0.05f, paint)
             }
         }
     }

@@ -459,7 +459,8 @@ class MainActivity : Activity() {
         devicesLens = Thing(this, Thing.Kind.LENS)
         toolsBox = box("性能检测", "这台手机能否跟上说话的速度", checkDial, toolsContent())
         devicesBox = box("设备连接", "让电脑使用这台手机上的模型", devicesLens, devicesContent())
-        settingsBox = box("设置", "外观、访问密钥与版本", Thing(this, Thing.Kind.TOGGLES), settingsContent())
+        val settingsKind = Thing.Kind.values().firstOrNull { it.name.equals(intent.getStringExtra("settingsIcon"), ignoreCase = true) } ?: Thing.Kind.TOGGLES
+        settingsBox = box("设置", "外观、访问密钥与版本", Thing(this, settingsKind), settingsContent())
 
         // The page lies under the status bar and the navigation bar — Android 15 puts every app there, and here it is
         // asked for on the versions before, so that all of them are one case — and keeps its content clear of them:
