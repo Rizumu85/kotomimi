@@ -108,3 +108,24 @@ describe('measure, of what the silence after the speech brings', () => {
     expect(result).toMatchObject({ sentences: 1, hearMs: 600, answerMs: [200], totalMs: 800 });
   });
 });
+
+describe('measure, of a recognizer that writes a sentence only once it is whole', () => {
+  it('times the sentence it begins after the speech ended, and still leaves out a later one', () => {
+    const result = measure('participant', 'translate', [
+      { side: 'source', origin: 'u1', text: 'The Tibetan Buddhism is based on the teachings of Buddha.', openedAt: 9400, closedAt: 9400 },
+      { side: 'translation', origin: 'u1', text: '藏传佛教以佛陀的教导为基础。', openedAt: 9450, closedAt: 9900 },
+      { side: 'source', origin: 'u2', text: 'Thank you.', openedAt: 11000, closedAt: 11000 },
+    ], 8000, 8000);
+    expect(result).toMatchObject({ sentences: 1, hearMs: 1400, answerMs: [500], totalMs: 1900 });
+  });
+
+  it('keeps the rest of a stretch that opens as its first sentence closes, after the speech ended', () => {
+    const result = measure('participant', 'translate', [
+      { side: 'source', origin: 'p1', text: '元は金持ちの息子でした。', openedAt: 500, closedAt: 8300 },
+      { side: 'source', origin: 'p2', text: '今は財産を使い尽くして。', openedAt: 8300, closedAt: 8900 },
+      { side: 'translation', origin: 'p1', text: '他原本是富家子弟。', openedAt: 8350, closedAt: 8500 },
+      { side: 'translation', origin: 'p2', text: '如今家财散尽。', openedAt: 8950, closedAt: 9100 },
+    ], 8000, 7500);
+    expect(result).toMatchObject({ sentences: 2, hearMs: 900, answerMs: [200, 200], totalMs: 1100 });
+  });
+});

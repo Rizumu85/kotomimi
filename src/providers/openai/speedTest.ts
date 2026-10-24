@@ -75,6 +75,21 @@ export function clipLanguage(s: LocalAISettings, pair: { source: string; target:
  * session never wrote its text still returns, with nulls where nothing came.
  */
 export async function runSpeedTest(shape: RunShape, models: readonly ModelOption[], deps: SpeedTestDeps): Promise<LegTiming[]> {
+  // The test's own signal, aborted as it ends, whatever the end, as a run's is: `prepare` holds the native engines
+  // until it is (`prepareLocalAI`), and a test that finished must let them go as a run that stopped does.
+  const own = new AbortController();
+  const forward = () => own.abort(deps.signal.reason);
+  if (deps.signal.aborted) forward();
+  else deps.signal.addEventListener('abort', forward, { once: true });
+  try {
+    return await timeLegs(shape, models, { ...deps, signal: own.signal });
+  } finally {
+    deps.signal.removeEventListener('abort', forward);
+    own.abort(new Error('the speed test ended'));
+  }
+}
+
+async function timeLegs(shape: RunShape, models: readonly ModelOption[], deps: SpeedTestDeps): Promise<LegTiming[]> {
   const p = shape.provider;
   const credentials = readCredentials(p, shape.settings, shape.credentials, shape.auth);
   if (isMissing(credentials)) throw new SpeedTestError(credentials.missing, 'refused');
@@ -195,9 +210,17 @@ export function measure(
   speechEndAt: number,
   speechMs: number,
 ): LegTiming {
-  // The recording's own sentences: one begun after its speech ended is a recognizer hearing words in the silence
-  // that follows (Qwen3-ASR writes a "はい。" there), and no part of what is timed.
-  const heard = segments.filter((s) => s.side === 'source' && s.closedAt !== undefined && s.text.trim() !== '' && s.openedAt <= speechEndAt);
+  // The recording's own sentences: those begun before the recognizer, once the speech had ended, first had all it
+  // began written. One begun after that is it hearing words in the silence that follows (Qwen3-ASR writes a "はい。"
+  // there), and no part of what is timed. A recognizer that writes a sentence only once it is whole (an API, the
+  // app's own models) begins it after the speech ended: it is still the recording's, as the first it writes.
+  const sources = segments.filter((s) => s.side === 'source');
+  const settledAt = sources
+    .filter((s) => s.closedAt !== undefined && s.closedAt >= speechEndAt && s.text.trim() !== '')
+    .map((s) => s.closedAt!)
+    .sort((a, b) => a - b)
+    .find((t) => sources.every((s) => s.openedAt > t || (s.closedAt !== undefined && s.closedAt <= t)));
+  const heard = sources.filter((s) => s.closedAt !== undefined && s.text.trim() !== '' && s.openedAt <= (settledAt ?? speechEndAt));
   const origins = new Set(heard.flatMap((s) => (s.origin !== undefined ? [s.origin] : [])));
   const answers = segments
     .filter((s) => s.side === 'translation' && s.closedAt !== undefined && (s.origin === undefined || origins.has(s.origin)))

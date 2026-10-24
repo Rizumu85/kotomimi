@@ -93,14 +93,15 @@ export function useSpeedTest({ settings, values, pair, legs, models, ready, disa
   useEffect(() => { if (disabled) running.current?.abort(new Error('a run started')); }, [disabled]);
   useEffect(() => () => running.current?.abort(new Error('the settings closed')), []);
 
-  // A suggestion's switch: the test runs again once the change it made has arrived here.
-  const [again, setAgain] = useState(false);
-  const againAfterChange = useCallback(() => setAgain(true), []);
+  // A suggestion's switch: the test runs again once the change it made has arrived here and the check has found
+  // the new setting ready; the settings it was asked from are kept, so the old ones never run it.
+  const [againFrom, setAgainFrom] = useState<S | null>(null);
+  const againAfterChange = useCallback(() => setAgainFrom(latest.current.settings), []);
   useEffect(() => {
-    if (!again) return;
-    setAgain(false);
-    if (ready && !disabled) start();
-  }, [settings]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!againFrom || settings === againFrom || !ready) return;
+    setAgainFrom(null);
+    if (!disabled) start();
+  }, [againFrom, settings, ready, disabled, start]);
 
   // The stages a run would time now: hearing, and what answers each leg.
   const wanted: SpeedStage[] = ['hear', ...legs.map((leg): SpeedStage => (leg === 'speaker' && settings.coach ? 'coach' : 'translate'))];

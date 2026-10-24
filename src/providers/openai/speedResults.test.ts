@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { LOCALAI_DEFAULTS, type LocalAISettings } from './localai';
-import { clipFor, reportStands, stageResult, stageSig, summarize } from './speedResults';
+import { clipFor, reportOf, reportStands, stageResult, stageSig, summarize } from './speedResults';
 import type { LegTiming } from './speedTest';
 
 const pair = { source: 'zh-CN', target: 'ja' };
@@ -24,8 +24,12 @@ describe('summarize', () => {
   });
 
   it('falls behind when an answer takes longer than its sentence took to say', () => {
-    expect(summarize([leg({ answerMs: [4500], sentences: 2 })], sig, 1).stages.translate?.slow).toBe(true);
-    expect(summarize([leg({ answerMs: [3500], sentences: 2 })], sig, 1).stages.translate?.slow).toBe(false);
+    expect(summarize([leg({ answerMs: [4500, 4500], sentences: 2 })], sig, 1).stages.translate?.slow).toBe(true);
+    expect(summarize([leg({ answerMs: [3500, 3500], sentences: 2 })], sig, 1).stages.translate?.slow).toBe(false);
+  });
+
+  it('falls behind when a sentence is left unanswered, however quick the others were', () => {
+    expect(summarize([leg({ answerMs: [300], sentences: 2 })], sig, 1).stages.translate).toMatchObject({ ms: 300, slow: true });
   });
 
   it('reads each stage as its slowest leg found it, the feedback apart from the translation', () => {
@@ -66,5 +70,16 @@ describe('clipFor', () => {
     expect(clipFor('pt-PT')?.file).toBe('pt.ogg');
     expect(clipFor('nb')?.file).toBe('no.ogg');
     expect(clipFor('xx')).toBeNull();
+  });
+});
+
+describe('reportOf', () => {
+  it('takes a report of the shape this build writes, and nothing else', () => {
+    const report = summarize([leg({})], (stage) => stage, 1);
+    expect(reportOf(JSON.parse(JSON.stringify(report)))).toEqual(report);
+    expect(reportOf({})).toBeNull();
+    expect(reportOf(null)).toBeNull();
+    expect(reportOf({ at: 1, stages: { hear: { ms: '1', slow: false, sig: 'x' } }, legs: [] })).toBeNull();
+    expect(reportOf({ at: 1, stages: {}, legs: [{ leg: 'other', answeredBy: 'translate', ms: 1 }] })).toBeNull();
   });
 });

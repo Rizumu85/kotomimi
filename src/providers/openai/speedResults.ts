@@ -28,8 +28,12 @@ const STORAGE_KEY = 'kotomimi.speedTest';
 
 /** What decides each stage's speed. A field that only words what is asked (the instructions, a prompt) is none of it. */
 const STAGE_FIELDS: Record<SpeedStage, readonly (keyof LocalAISettings)[]> = {
-  hear: ['asrVia', 'asrModel', 'model', 'asrApiBaseUrl', 'asrApiModel', 'asrOther', 'asrOtherModel', 'asrDetectOther', 'asrHere', 'asrHereModel', 'asrNativeModel', 'asrNativeByLanguage', 'hereAddress', 'vadMinSilenceDuration'],
-  translate: ['translateAt', 'translateServerModel', 'translateOther', 'translateOtherModel', 'translateBaseUrl', 'translateModel', 'translateHere', 'translateHereModel', 'translateNativeModel', 'translateBySentence', 'hereAddress'],
+  // The speaker hears another language when coached; the turn detection decides when a sentence is over.
+  hear: [
+    'asrVia', 'asrModel', 'model', 'asrApiBaseUrl', 'asrApiModel', 'asrOther', 'asrOtherModel', 'asrDetectOther', 'asrHere', 'asrHereModel', 'asrNativeModel', 'asrNativeByLanguage',
+    'hereAddress', 'herePipeline', 'selections', 'coach', 'vadThreshold', 'vadNegativeThreshold', 'vadMinSilenceDuration', 'vadMinSpeechDuration', 'vadMaxSpeechDuration',
+  ],
+  translate: ['translateAt', 'translateServerModel', 'translateOther', 'translateOtherModel', 'translateBaseUrl', 'translateModel', 'translateHere', 'translateHereModel', 'translateNativeModel', 'translateBySentence', 'hereAddress', 'selections'],
   coach: ['coach', 'coachAt', 'coachServerModel', 'coachOther', 'coachOtherModel', 'coachBaseUrl', 'coachModel', 'coachDeviceModel', 'coachHere', 'coachHereModel', 'coachNativeModel', 'hereAddress'],
 };
 
@@ -60,7 +64,9 @@ export function summarize(timings: readonly LegTiming[], sig: (stage: SpeedStage
     const average = t.answerMs.length ? t.answerMs.reduce((a, b) => a + b, 0) / t.answerMs.length : null;
     // An answer falls behind when it takes longer than its sentence took to say: the next is waiting by then.
     const perSentence = t.speechMs / Math.max(1, t.sentences);
-    const answer: StageSpeed = { ms: average === null ? null : Math.round(average), slow: average === null || average > perSentence };
+    // A sentence left unanswered within the test fell behind, however quick the others were.
+    const unanswered = t.answerMs.length < t.sentences;
+    const answer: StageSpeed = { ms: average === null ? null : Math.round(average), slow: average === null || unanswered || average > perSentence };
     stages[t.answeredBy] = { ...worst(stages[t.answeredBy], answer), sig: sig(t.answeredBy) };
   }
   return { at, stages, legs: timings.map((t) => ({ leg: t.leg, answeredBy: t.answeredBy, ms: t.totalMs })) };
@@ -70,10 +76,21 @@ export function summarize(timings: readonly LegTiming[], sig: (stage: SpeedStage
 export function loadReport(): SpeedReport | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as SpeedReport) : null;
+    return raw ? reportOf(JSON.parse(raw)) : null;
   } catch {
     return null;
   }
+}
+
+/** A stored report, as long as it has the shape this build writes: another build's, or one edited by hand, is none. */
+export function reportOf(value: unknown): SpeedReport | null {
+  const r = value as Partial<SpeedReport> | null;
+  if (!r || typeof r !== 'object' || typeof r.at !== 'number' || !r.stages || typeof r.stages !== 'object' || !Array.isArray(r.legs)) return null;
+  const stage = (v: unknown) => !!v && typeof v === 'object' && typeof (v as StageSpeed & { sig: unknown }).sig === 'string'
+    && typeof (v as StageSpeed).slow === 'boolean' && ((v as StageSpeed).ms === null || typeof (v as StageSpeed).ms === 'number');
+  const leg = (v: unknown) => !!v && typeof v === 'object' && ((v as LegSpeed).ms === null || typeof (v as LegSpeed).ms === 'number')
+    && ((v as LegSpeed).leg === 'speaker' || (v as LegSpeed).leg === 'participant') && ((v as LegSpeed).answeredBy === 'translate' || (v as LegSpeed).answeredBy === 'coach');
+  return Object.values(r.stages).every(stage) && r.legs.every(leg) ? (r as SpeedReport) : null;
 }
 
 export function saveReport(report: SpeedReport): void {
