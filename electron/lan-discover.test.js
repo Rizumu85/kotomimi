@@ -8,7 +8,7 @@ import http from 'node:http';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { discoverServers, targets, neighbours, readAnswer, probe, productOf, nameOf, shown, NAME_HEADER, INCLUDES_HEADER } = require('./lan-discover.js');
+const { discoverServers, targets, neighbours, readAnswer, textModels, probe, productOf, nameOf, shown, NAME_HEADER, INCLUDES_HEADER } = require('./lan-discover.js');
 
 let running = [];
 afterEach(async () => {
@@ -78,6 +78,62 @@ describe('what an answer says of a server', () => {
     expect(readAnswer(403, {}, '')).toEqual({ kind: 'server', name: '', models: 0, needsKey: true, includes: false });
   });
 
+  it('lists a phone whose owner set an access key as a phone that wants one', () => {
+    expect(readAnswer(401, { [NAME_HEADER]: 'F22', 'x-kotomimi-node': 'engine' }, '{"error":{}}')).toEqual({ kind: 'phone', name: 'F22', models: 0, needsKey: true, includes: false });
+  });
+
+  it('knows a phone that lends its recognition engine, by what it says of itself, and the model it lends', () => {
+    const list = JSON.stringify({ object: 'list', data: [{ id: 'qwen3-asr-0.6b-q8', object: 'model', owned_by: 'kotomimi-phone' }] });
+    expect(readAnswer(200, { [NAME_HEADER]: encodeURIComponent('朋友的手机'), 'x-kotomimi-node': 'engine' }, list)).toEqual({ kind: 'phone', name: '朋友的手机', models: 1, needsKey: false, includes: false, model: 'qwen3-asr-0.6b-q8' });
+    // A phone that lends nothing is nothing to choose.
+    expect(readAnswer(200, { 'x-kotomimi-node': 'engine' }, '{"object":"list","data":[]}')).toBeNull();
+    // The same list from anything that does not say it is a phone is a model server.
+    expect(readAnswer(200, {}, list)).toMatchObject({ kind: 'server', models: 1 });
+  });
+
+  it('knows what a phone of 0.8.0 lends besides: its text models, apart from its recognizer', () => {
+    const text = [
+      { id: 'hy-mt2-1.8b', object: 'model', owned_by: 'kotomimi-phone', holds_mb: 1210, kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: false },
+      { id: 'index-translate-2b', object: 'model', owned_by: 'kotomimi-phone', holds_mb: 1541, kind: 'translate', name: 'Index-Translate 2B', loaded: true },
+      { id: 'gemma-4-e2b', kind: 'coach', name: 'Gemma 4 E2B' },
+    ];
+    const both = JSON.stringify({ object: 'list', data: [{ id: 'sensevoice-small-q8', object: 'model', owned_by: 'kotomimi-phone' }], text, memory_mb: { total: 3843, available: 1850 } });
+    expect(readAnswer(200, { 'x-kotomimi-node': 'engine' }, both)).toEqual({
+      kind: 'phone', name: '', models: 4, needsKey: false, includes: false, model: 'sensevoice-small-q8',
+      text: [
+        { id: 'hy-mt2-1.8b', kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: false, fits: true },
+        { id: 'index-translate-2b', kind: 'translate', name: 'Index-Translate 2B', loaded: true, fits: true },
+        { id: 'gemma-4-e2b', kind: 'coach', name: 'Gemma 4 E2B', loaded: false },
+      ],
+    });
+    // One that lends text models alone has an empty `data`: still a phone to choose, with no recognizer.
+    const textOnly = readAnswer(200, { 'x-kotomimi-node': 'engine' }, JSON.stringify({ object: 'list', data: [], text: text.slice(0, 1) }));
+    expect(textOnly).toEqual({ kind: 'phone', name: '', models: 1, needsKey: false, includes: false, text: [{ id: 'hy-mt2-1.8b', kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: false }] });
+  });
+
+  // A 4 GB phone (2026-10-23): Index-Translate 2B keeps 1.5 GB, and 1.4 GB can be had with its recognizer ended.
+  it('says which text models the phone has not the memory for now', () => {
+    const list = JSON.stringify({
+      object: 'list',
+      data: [{ id: 'sensevoice-small-q8', holds_mb: 250 }],
+      text: [
+        { id: 'hy-mt2-1.8b', holds_mb: 1210, kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: false },
+        { id: 'index-translate-2b', holds_mb: 1541, kind: 'translate', name: 'Index-Translate 2B', loaded: false },
+      ],
+      memory_mb: { total: 3843, available: 1160 },
+    });
+    expect(readAnswer(200, { 'x-kotomimi-node': 'engine' }, list).text.map((m) => [m.id, m.fits])).toEqual([['hy-mt2-1.8b', true], ['index-translate-2b', false]]);
+  });
+
+  it("keeps of a phone's text models only what is one: a name, and a translation or feedback, each once", () => {
+    expect(textModels([{ id: 'a', kind: 'translate' }, { id: 'a', kind: 'coach' }, { id: 'b', kind: 'asr' }, { kind: 'coach' }, null, 'x', { id: 'c', kind: 'coach', name: 7, loaded: 'yes' }])).toEqual([
+      { id: 'a', kind: 'translate', name: '', loaded: false },
+      { id: 'c', kind: 'coach', name: '', loaded: false },
+    ]);
+    expect(textModels('no')).toEqual([]);
+    expect(textModels(Array.from({ length: 40 }, (_, i) => ({ id: `m${i}`, kind: 'translate' })))).toHaveLength(16);
+  });
+
   it('is nothing for a router\'s page, a 404, or JSON that is no list', () => {
     expect(readAnswer(200, {}, '<html>router</html>')).toBeNull();
     expect(readAnswer(404, {}, '{}')).toBeNull();
@@ -93,6 +149,22 @@ describe('asking an address', () => {
     const closed = await serve(200, {});
     await new Promise((done) => running.pop().close(done));
     expect(await probe({ host: '127.0.0.1', port: closed, self: true })).toBeNull();
+  });
+
+  it('asks a phone with the key given for its address, and only that one', async () => {
+    const asked = [];
+    const phone = http.createServer((request, response) => {
+      asked.push(request.headers.authorization);
+      const right = request.headers.authorization === 'Bearer K7P2QX';
+      response.writeHead(right ? 200 : 401, { 'Content-Type': 'application/json', 'X-Kotomimi-Node': 'engine', 'X-Kotomimi-Name': 'F22' });
+      response.end(right ? JSON.stringify({ object: 'list', data: [{ id: 'sensevoice-small-q8' }] }) : '{"error":{}}');
+    });
+    running.push(phone);
+    const port = await new Promise((resolve) => phone.listen(0, '127.0.0.1', () => resolve(phone.address().port)));
+    expect(await probe({ host: '127.0.0.1', port, self: false })).toMatchObject({ kind: 'phone', needsKey: true, models: 0 });
+    expect(await probe({ host: '127.0.0.1', port, self: false }, undefined, { [`127.0.0.1:${port}`]: 'K7P2QX' })).toMatchObject({ kind: 'phone', needsKey: false, model: 'sensevoice-small-q8' });
+    expect(await probe({ host: '127.0.0.1', port, self: false }, undefined, { '127.0.0.1:1': 'K7P2QX' })).toMatchObject({ needsKey: true });
+    expect(asked).toEqual([undefined, 'Bearer K7P2QX', undefined]);
   });
 
   it('gives up on one that never answers', async () => {
@@ -131,6 +203,16 @@ describe('the search', () => {
     expect(await productOf({ host: '127.0.0.1', port: localai }, 400)).toBe('LocalAI');
     expect(await productOf({ host: '127.0.0.1', port: other }, 400)).toBe('');
     expect(await productOf({ host: '127.0.0.1', port: await serve(200, null, {}, {}) }, 400)).toBe('');
+  });
+
+  it('hands over what a phone lends, its text models with it, and of an earlier phone what it always did', async () => {
+    const node = { 'X-Kotomimi-Node': 'engine', 'X-Kotomimi-Name': 'F22' };
+    const lending = await serve(200, { object: 'list', data: [], text: [{ id: 'hy-mt2-1.8b', kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: false }] }, node);
+    const earlier = await serve(200, { object: 'list', data: [{ id: 'qwen3-asr-0.6b-q8' }] }, node);
+    const found = await discoverServers({ interfaces: {}, ports: [lending, earlier], timeoutMs: 400 });
+    const byPort = Object.fromEntries(found.map((s) => [s.address, s]));
+    expect(byPort[`127.0.0.1:${lending}`]).toEqual({ address: `127.0.0.1:${lending}`, kind: 'phone', name: 'F22', product: '', models: 1, needsKey: false, self: true, text: [{ id: 'hy-mt2-1.8b', kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: false }] });
+    expect(byPort[`127.0.0.1:${earlier}`]).toEqual({ address: `127.0.0.1:${earlier}`, kind: 'phone', name: 'F22', product: '', models: 1, needsKey: false, self: true, model: 'qwen3-asr-0.6b-q8' });
   });
 
   it('finds nothing on a computer with no network and no server', async () => {

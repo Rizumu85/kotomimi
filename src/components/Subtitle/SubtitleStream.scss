@@ -165,6 +165,7 @@
       color: var(--subtitle-source-color, #9aa0a6);
       // Fork: a switch of the display popover (`annotationStore.ts`); slanted where nothing says otherwise.
       font-style: var(--kt-source-font-style, italic);
+      --kt-ruby-lean: var(--kt-source-ruby-lean, 0.4em);
     }
 
     .subtitle-lane__answer {
@@ -194,6 +195,7 @@
     .subtitle-lane__said {
       color: var(--subtitle-source-color, #9aa0a6);
       font-style: var(--kt-source-font-style, italic);
+      --kt-ruby-lean: var(--kt-source-ruby-lean, 0.4em);
     }
 
     // What the sentence should have been follows an arrow; feedback that only approves is a tick. Both the app's own
@@ -222,6 +224,11 @@
     }
 
     .subtitle-lane__reply {
+      color: var(--subtitle-translation-color, #e8e8e8);
+    }
+
+    // A correction in the row: the sentence keeps the said line's look, the reason is written as the answer is.
+    .subtitle-lane__said--fixed .kt-fix__why {
       color: var(--subtitle-translation-color, #e8e8e8);
     }
 

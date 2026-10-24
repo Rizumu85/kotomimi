@@ -6,6 +6,7 @@
  * but for the `fetch` and the clock it is handed.
  */
 import type { Clock } from '../../lib/contract/clock';
+import { phoneKey } from '../../lib/lan/phoneKeys';
 
 /** How long one answer may take, from the request to its last token. */
 /**
@@ -39,6 +40,14 @@ export interface TextRequest {
   pair?: { source: string; target: string };
   /** What else the body carries: the sampling a model's makers name (`nativeTranslators.ts`). Never the model, the stream or the messages. */
   extra?: Readonly<Record<string, unknown>>;
+  /** How long the answer may take, retries and their waits included. Absent: `TEXT_TIMEOUT_MS`. */
+  timeoutMs?: number;
+  /**
+   * How many times a "busy" (429) or "no memory now" (503) is asked again, after the wait its `Retry-After` names.
+   * Absent: none — the refusal is thrown, as from any other server. Only a phone that lends its models is given any
+   * (`phoneText.ts`): it does one thing at a time and loads a model on demand, and says when to come back.
+   */
+  busyRetries?: number;
 }
 
 export interface TextDeps {
@@ -86,13 +95,33 @@ async function refusal(response: Response): Promise<string> {
   return `HTTP ${response.status}${said ? `: ${said}` : ''}`;
 }
 
+/** The wait a `Retry-After` of seconds names, held between half a second and ten; two seconds where it names none (or a date). */
+export function retryAfterMs(header: string | null): number {
+  const seconds = header !== null && /^\s*\d+(\.\d+)?\s*$/.test(header) ? Number(header) : 2;
+  return Math.min(Math.max(seconds * 1000, 500), 10_000);
+}
+
+/** Waits `ms` on the clock; rejects as soon as `signal` aborts. */
+function pause(clock: Clock, ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal.aborted) {
+      reject(signal.reason ?? new Error('aborted'));
+      return;
+    }
+    const onAbort = () => { cancel(); reject(signal.reason ?? new Error('aborted')); };
+    const cancel = clock.setTimeout(() => { signal.removeEventListener('abort', onAbort); resolve(); }, ms);
+    signal.addEventListener('abort', onAbort, { once: true });
+  });
+}
+
 export async function completeText(request: TextRequest, deps: TextDeps): Promise<TextAnswer> {
   const { clock, signal } = deps;
   if (signal.aborted) throw signal.reason ?? new Error('aborted');
   const started = clock.now();
   const controller = new AbortController();
   let timedOut = false;
-  const cancelTimer = clock.setTimeout(() => { timedOut = true; controller.abort(); }, TEXT_TIMEOUT_MS);
+  const limit = request.timeoutMs ?? TEXT_TIMEOUT_MS;
+  const cancelTimer = clock.setTimeout(() => { timedOut = true; controller.abort(); }, limit);
   const onAbort = () => controller.abort(signal.reason);
   signal.addEventListener('abort', onAbort, { once: true });
   let raw = '';
@@ -106,23 +135,33 @@ export async function completeText(request: TextRequest, deps: TextDeps): Promis
     if (firstMs === undefined && shown) firstMs = clock.now() - started;
     deps.onText?.(shown);
   };
+  const body = JSON.stringify({
+    ...(request.extra ?? {}),
+    model: request.model,
+    stream: true,
+    ...(request.pair ? { source_language: request.pair.source, target_language: request.pair.target } : {}),
+    messages: [
+      ...(request.system ? [{ role: 'system', content: request.system }] : []),
+      ...(request.shots ?? []).flatMap((shot) => [{ role: 'user', content: shot.said }, { role: 'assistant', content: shot.answer }]),
+      { role: 'user', content: request.user },
+    ],
+  });
   try {
-    const response = await deps.fetch(request.url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${request.key || NO_KEY}` },
-      body: JSON.stringify({
-        ...(request.extra ?? {}),
-        model: request.model,
-        stream: true,
-        ...(request.pair ? { source_language: request.pair.source, target_language: request.pair.target } : {}),
-        messages: [
-          ...(request.system ? [{ role: 'system', content: request.system }] : []),
-          ...(request.shots ?? []).flatMap((shot) => [{ role: 'user', content: shot.said }, { role: 'assistant', content: shot.answer }]),
-          { role: 'user', content: request.user },
-        ],
-      }),
-      signal: controller.signal,
-    });
+    let response: Response;
+    // Asked again after a busy answer, as many times as allowed, all within the one bound above.
+    for (let tries = 0; ; tries += 1) {
+      response = await deps.fetch(request.url, {
+        method: 'POST',
+        // A phone's own key where it asks for one (`phoneKeys.ts`): its base is the request's address.
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${request.key || phoneKey(request.url) || NO_KEY}` },
+        body,
+        signal: controller.signal,
+      });
+      if ((response.status !== 429 && response.status !== 503) || tries >= (request.busyRetries ?? 0)) break;
+      // The refusal's own body is not wanted: let it go before waiting.
+      await response.body?.cancel().catch(() => undefined);
+      await pause(clock, retryAfterMs(response.headers.get('retry-after')), controller.signal);
+    }
     if (!response.ok) throw new Error(await refusal(response));
     if (!(response.headers.get('content-type') ?? '').includes('text/event-stream') || !response.body) {
       // A server that does not stream: the whole answer in one body.
@@ -152,7 +191,7 @@ export async function completeText(request: TextRequest, deps: TextDeps): Promis
     }
     return { text: shown, ...(firstMs !== undefined ? { firstMs } : {}), totalMs: clock.now() - started };
   } catch (error) {
-    if (timedOut) throw new Error(`The model did not finish within ${TEXT_TIMEOUT_MS / 1000} s.`);
+    if (timedOut) throw new Error(`The model did not finish within ${limit / 1000} s.`);
     throw error;
   } finally {
     cancelTimer();

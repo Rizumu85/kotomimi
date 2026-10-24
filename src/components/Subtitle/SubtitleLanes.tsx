@@ -11,6 +11,9 @@ import { useAnnotationStore } from '../../stores/annotationStore';
 import type { LegFilters } from '../../lib/view/filter';
 import { noticeText } from '../../lib/view/noticeText';
 import { AnnotatedLines, useAnnotation } from '../Annotated/AnnotatedText';
+import { Correction } from '../Feedback/Correction';
+import { useCoached } from '../Feedback/useCoached';
+import { fixOf } from '../../lib/feedback/correction';
 import '../../styles/karaoke.scss';
 
 /**
@@ -194,6 +197,7 @@ export interface SubtitleLanesProps {
  */
 export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight }: SubtitleLanesProps) {
   const { t } = useTranslation();
+  const coached = useCoached();
   const held = useHeld(entries);
   const lanes = useMemo(() => buildLanes(entries, legs, filters, (notice) => noticeText(t, notice), held), [entries, legs, filters, t, held]);
   // The layout the window is fitted to: the size chosen and which texts there are, not what they say.
@@ -281,6 +285,9 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
   // a character it came from whatever font had one, and sat beside the sentence like something from another page.
   const approves = (answer: LaneText | undefined) => answer?.text.trim() === '✓';
   const tick = <Check className="subtitle-lane__ok" role="img" aria-label="✓" strokeWidth={3} />;
+  // Grammar feedback that changes something: the sentence said, marked — what goes struck, what comes written in —
+  // in place of the sentence, an arrow and the corrected one, which had to be read side by side (2026-10-23).
+  const fixFor = (lane: Lane) => (coached && lane.leg === 'speaker' && lane.source && lane.answer && !lane.answer.notice ? fixOf(lane.answers ?? lane.source.text, lane.source.language, lane.answer.text) : null);
   // A newer sentence is waiting for its answer: said quietly, after what is shown.
   const pending = <span className="subtitle-lane__pending" aria-hidden="true">…</span>;
 
@@ -303,10 +310,14 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
           {lane.shape === 'row' ? (
             // The user's own, under the other side's: what they said and what answers it, on one small line.
             <Slot className="subtitle-lane__row" fitKey={`${fontSize}:${squeeze}:${lines.row}:${lane.source?.text ?? ''}:${lane.answer?.text ?? ''}`}>
+              {fixFor(lane) ? (
+                <span className="subtitle-lane__said subtitle-lane__said--fixed" lang={langOf(lane.source!)}><Correction correction={fixFor(lane)!} language={lane.source!.language} layout="row" /></span>
+              ) : (<>
               {lane.source && <span className="subtitle-lane__said" lang={langOf(lane.source)}><Written text={lane.source} lit={lit} /></span>}
               {lane.source && lane.answer && lane.source.text !== '' && (lane.answer.text !== '' || lane.pending) && !approves(lane.answer) && <ArrowRight className="subtitle-lane__arrow" aria-hidden="true" strokeWidth={2.5} />}
               {lane.answer && lane.answer.text !== '' && (approves(lane.answer) ? tick : <span className="subtitle-lane__reply" lang={langOf(lane.answer)}><Written text={lane.answer} lit={lit} /></span>)}
               {lane.answer && lane.answer.text === '' && lane.pending && pending}
+              </>)}
             </Slot>
           ) : (
             <div className="subtitle-lane__texts">
@@ -321,7 +332,7 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
                   lang={langOf(lane.answer)}
                   fitKey={`${fontSize}:${squeeze}:${answerLines}:${lane.answer.text}`}
                 >
-                  {approves(lane.answer) ? tick : <Written text={lane.answer} lit={lit} />}
+                  {approves(lane.answer) ? tick : fixFor(lane) ? <Correction correction={fixFor(lane)!} language={lane.source!.language} /> : <Written text={lane.answer} lit={lit} />}
                   {!lane.source && lane.pending && pending}
                 </Slot>
               )}

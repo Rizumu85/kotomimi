@@ -128,7 +128,7 @@ describe('refreshReadiness', () => {
     const check = vi.fn(async (): Promise<CheckResult> => { throw new Error('offline'); });
     const p = probe('own-key', check);
     await loadedWithKey(p);
-    await expect(store.useProviderStore.getState().refreshReadiness(p, noAuth)).resolves.toEqual({ state: 'not-ready', reason: 'offline' });
+    await expect(store.useProviderStore.getState().refreshReadiness(p, noAuth)).resolves.toEqual({ state: 'not-ready', reason: 'offline', unsure: true });
     await store.useProviderStore.getState().refreshReadiness(p, noAuth);
     expect(check).toHaveBeenCalledTimes(2);
   });
@@ -296,9 +296,9 @@ describe('refreshReadiness — a provider that declares what its check reads (St
     const q = narrowed(thrown, []);
     await loadedWithKey(q);
     await store.useProviderStore.getState().refreshReadiness(q, noAuth);
-    expect(readiness()).toEqual({ state: 'not-ready', reason: 'offline' });
+    expect(readiness()).toEqual({ state: 'not-ready', reason: 'offline', unsure: true });
     store.useProviderStore.getState().updateSettings(q, { slider: 3 });
-    expect(readiness()).toEqual({ state: 'not-ready', reason: 'offline' });
+    expect(readiness()).toEqual({ state: 'not-ready', reason: 'offline', unsure: true });
     await store.useProviderStore.getState().refreshReadiness(q, noAuth);
     expect(thrown).toHaveBeenCalledTimes(2);
   });

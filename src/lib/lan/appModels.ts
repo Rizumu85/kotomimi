@@ -7,6 +7,7 @@
 import {
   asrEntryLanguages, deviceReady, getManifestByType, getManifestEntry, isTranslationModelCompatible, type ModelManifestEntry,
 } from '../local-inference/modelManifest';
+import { offeredLanguages } from '../local-inference/selection/measuredRank';
 import { useModelStore } from '../../stores/modelStore';
 import type { LanModels } from './host';
 import { nativeCoachFor, nativeRecognizerFor, nativeShared, nativeTranslatorFor } from './nativeShare';
@@ -31,8 +32,9 @@ const knownHere = (name: string): string => (name && appLanModels.shared().some(
 /** What the model store answers, for the sharing host. */
 export const appLanModels: LanModels = {
   shared(): SharedModel[] {
+    // A recognizer is listed with the languages it is offered for here: not one it was found unusable for (`measuredRank.ts`).
     const recognizers = [...getManifestByType('asr'), ...getManifestByType('asr-stream')].filter(usable)
-      .map((m): SharedModel => ({ id: m.id, kind: 'asr', languages: m.multilingual ? [] : [...new Set(asrEntryLanguages(m))] }));
+      .map((m): SharedModel => ({ id: m.id, kind: 'asr', languages: m.multilingual ? [] : offeredLanguages(m.id, [...new Set(asrEntryLanguages(m))]) }));
     const translators = getManifestByType('translation').filter(usable)
       .map((m): SharedModel => ({ id: m.id, kind: 'translate', languages: m.sourceLang && m.targetLang ? [m.sourceLang, m.targetLang] : m.languages }));
     // This computer's native engines' models first: the ones measured best, where it has them.

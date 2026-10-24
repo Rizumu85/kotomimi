@@ -5,11 +5,21 @@
   }
 
   // Readings are an aid, not content: smaller, a little dimmer, and left out of a text selection.
+  // A reading wider than its word (pinyin over one character, a long kana reading over one kanji) ran into the next
+  // one's, and spread the word under it: a little room on each side, and the word centred (upstream #638).
+  ruby {
+    ruby-align: center;
+  }
+
   rt {
     font-size: 0.5em;
     font-style: normal;
     opacity: 0.85;
+    padding-inline: 0.2em;
     user-select: none;
+    // Over slanted text the reading follows the lean (`--kt-ruby-lean`, set where the source is slanted).
+    position: relative;
+    left: var(--kt-ruby-lean, 0);
   }
 
   .annot-roman {
@@ -22,9 +32,18 @@
   }
 }
 
-// In flowing text the whole block sits in the line, its romanization under it.
-.annot--inline {
-  display: inline-block;
-  vertical-align: top;
-  max-width: 100%;
+// In flowing text a line with a romanization sits in the line as a block, its romanization under it; a line without
+// one is text like any other (`AnnotatedLines`).
+.annot.annot--inline {
+  display: inline;
+
+  .annot-line {
+    display: inline;
+  }
+
+  .annot-line--roman {
+    display: inline-block;
+    vertical-align: top;
+    max-width: 100%;
+  }
 }

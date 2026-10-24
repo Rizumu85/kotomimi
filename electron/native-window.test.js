@@ -10,7 +10,7 @@ import http from 'node:http';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { openWindow, wavOf, loopAt, unloop, quietMiddle, MODELS } = require('./native-engine.js');
+const { openWindow, wavOf, loopAt, unloop, unspaced, quietMiddle, MODELS } = require('./native-engine.js');
 
 const RATE = 16000;
 /** A stretch of sound, this long and this loud. */
@@ -20,8 +20,8 @@ const sound = (seconds, size = 8000) => {
   return pcm;
 };
 
-/** A recognition with the test's own readings and timers. */
-function recognition() {
+/** A recognition with the test's own readings and timers; `extra`: what else the window is told. */
+function recognition(extra = {}) {
   const world = { events: [], readings: [], timers: [], now: 0 };
   const read = ({ pcm, language, model }) => {
     const reading = { seconds: pcm.length / 2 / RATE, language, model, aborted: false };
@@ -34,7 +34,7 @@ function recognition() {
   const clearTimer = (timer) => { world.timers = world.timers.filter((one) => one !== timer); };
   /** The timer that is waiting fires. */
   world.tick = () => { const [timer] = world.timers.splice(0, 1); timer?.run(); return timer?.ms; };
-  const stream = openWindow({ port: 1, model: 'q', sampleRate: RATE, language: 'ja', read, now: () => world.now, setTimer, clearTimer }, (event) => world.events.push(event));
+  const stream = openWindow({ port: 1, model: 'q', sampleRate: RATE, language: 'ja', read, now: () => world.now, setTimer, clearTimer, ...extra }, (event) => world.events.push(event));
   return { world, stream };
 }
 
@@ -160,6 +160,45 @@ describe('a recognition by a model that reads a stretch at once', () => {
     stream.end();
     expect(world.events).toEqual([]);
     expect(world.timers).toHaveLength(0);
+  });
+
+  it('tidies every reading’s text where the model’s writing needs it: what shows meanwhile, and what it ends on', async () => {
+    // SenseVoice-Small, as it read a stretch that grew (2026-10-12): a word at a time, then whole.
+    const { world, stream } = recognition({ tidy: unspaced });
+    stream.write(sound(2));
+    world.tick();
+    await world.readings[0].answer('元 は 金持ち の 息子 でし たが。');
+    expect(world.events).toEqual([{ type: 'partial', text: '元は金持ちの息子でしたが。' }]);
+    stream.write(sound(2));
+    world.tick();
+    await world.readings[1].answer('元は金持ちの息子でし たが、今は財産を使い尽く して。');
+    stream.write(sound(1));
+    stream.end();
+    await world.readings[2].answer('元 は 金持ち の 息子 でし たが 今 は 財産 を 使い 尽く して、その 日 の。');
+    expect(world.events.slice(1)).toEqual([{ type: 'partial', text: '元は金持ちの息子でしたが、今は財産を使い尽くして。' }, { type: 'done', text: '元は金持ちの息子でしたが今は財産を使い尽くして、その日の。' }]);
+    // The reading under way is still the one that is dropped, and a reading that failed still says why.
+    const failing = recognition({ tidy: unspaced });
+    failing.stream.write(sound(1));
+    failing.stream.end();
+    await failing.world.readings[0].answer({ ok: false, message: 'The engine answered HTTP 503: busy' });
+    expect(failing.world.events).toEqual([{ type: 'error', message: 'The engine answered HTTP 503: busy' }]);
+    const dropped = recognition({ tidy: unspaced });
+    dropped.stream.write(sound(1));
+    dropped.world.tick();
+    dropped.stream.abort();
+    expect(dropped.world.readings[0].aborted).toBe(true);
+  });
+
+  it('ends on the last reading as it was tidied, when that one left out only the closing silence', async () => {
+    const { world, stream } = recognition({ tidy: unspaced });
+    stream.write(sound(2));
+    world.tick();
+    await world.readings[0].answer('そう だ ね');
+    stream.write(sound(1.4, 40));
+    stream.write(sound(1, 0));
+    stream.end();
+    expect(world.readings).toHaveLength(1);
+    expect(world.events).toEqual([{ type: 'partial', text: 'そうだね' }, { type: 'done', text: 'そうだね' }]);
   });
 });
 

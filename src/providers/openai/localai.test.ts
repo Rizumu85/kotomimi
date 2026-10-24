@@ -10,7 +10,7 @@ import { PROVIDERS } from '../registry';
 import { createRealtimeAdapter } from './adapter';
 import type { RealtimeConfig } from './config';
 import {
-  buildLocalAI, createLocalAICheck, effectiveLocalAIModel, LOCALAI_DEFAULTS, localaiCredentials, localaiEndpoint, localaiModelsUrl, localaiProvider,
+  buildLocalAI, createLocalAICheck, effectiveLocalAIModel, LOCALAI_DEFAULTS, localaiCredentials, localaiEndpoint, localaiModelsUrl, localaiProvider, settled,
   migrateLocalAISettings, type LocalAICredentials, type LocalAISettings,
 } from './localai';
 import { REALTIME_WS_URL, realtimeProtocols, realtimeUrl } from './wire';
@@ -131,7 +131,7 @@ describe("LocalAI Realtime's stage keys", () => {
   });
 
   it('declares every setting that decides a field, an endpoint the check reaches, or a model a start needs named', () => {
-    expect(localaiProvider.checkReads).toEqual(['asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'asrDetectOther', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'coachDeviceModel', 'serverNeedsKey', 'selections', 'model', 'translateModel', 'translateServerModel', 'coachModel', 'coachServerModel', 'asrHere', 'translateHere', 'translateHereModel', 'coachHere', 'coachHereModel', 'hereAddress', 'asrNativeModel', 'asrNativeByLanguage', 'translateNativeModel', 'coachNativeModel']);
+    expect(localaiProvider.checkReads).toEqual(['asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'asrOther', 'asrOtherModel', 'translateOther', 'translateOtherModel', 'coachOther', 'coachOtherModel', 'asrDetectOther', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'coachDeviceModel', 'serverNeedsKey', 'selections', 'model', 'translateModel', 'translateServerModel', 'coachModel', 'coachServerModel', 'asrHere', 'translateHere', 'translateHereModel', 'coachHere', 'coachHereModel', 'hereAddress', 'asrNativeModel', 'asrNativeByLanguage', 'translateNativeModel', 'coachNativeModel']);
   });
 });
 
@@ -436,5 +436,26 @@ describe('the LocalAI Realtime definition', () => {
     expect(isPresent(localaiProvider, env('electron'))).toBe(true);
     expect(isPresent(localaiProvider, env('extension'))).toBe(false);
     expect(isPresent(localaiProvider, env('web'))).toBe(false);
+  });
+});
+
+describe("a hearing stage on a device of its own, as everything past the cards reads it", () => {
+  const phone = { ...LOCALAI_DEFAULTS, asrVia: 'server' as const, asrOther: '192.168.4.28:8792', asrOtherModel: 'qwen3-asr-0.6b-q8', translateAt: 'device' as const };
+
+  it("is an API at the device's address, with the model it lends and no key", () => {
+    expect(settled(phone)).toMatchObject({ asrVia: 'api', asrApiBaseUrl: 'http://192.168.4.28:8792/v1', asrApiModel: 'qwen3-asr-0.6b-q8', asrApiNeedsKey: false });
+    // As typed, with a scheme or a path: the same device.
+    expect(settled({ ...phone, asrOther: 'http://192.168.4.28:8792/v1' }).asrApiBaseUrl).toBe('http://192.168.4.28:8792/v1');
+  });
+
+  it("asks for no address of the shared device, and no key", () => {
+    expect(localaiProvider.credentials.fields(phone)).toEqual([]);
+    // With another stage on the shared device, that one's address is asked for as ever.
+    expect(localaiProvider.credentials.fields({ ...phone, translateAt: 'server' }).map((f) => f.key)).toEqual(['endpoint']);
+  });
+
+  it("is left alone where the stage is on the shared device, or not on another device at all", () => {
+    expect(settled({ ...phone, asrOther: '' }).asrVia).toBe('server');
+    expect(settled({ ...phone, asrVia: 'device' }).asrVia).toBe('device');
   });
 });

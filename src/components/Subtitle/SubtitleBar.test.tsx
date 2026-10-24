@@ -233,4 +233,40 @@ describe('SubtitleBar exit button', () => {
     fireEvent.click(screen.getByLabelText('Back to the main window'));
     expect(onExit).toHaveBeenCalledTimes(1);
   });
+
+  // Fork: typing what one cannot say, from the strip (2026-10-20: "字幕模式下想要翻译一下不会说的没有地方").
+  describe('the typing field', () => {
+    it('has no key without typing, and a key that opens a field in place of the clock with it', () => {
+      const { unmount } = render(<SubtitleBar {...baseProps} surface="electron" />);
+      expect(screen.queryByLabelText('Type to translate (Ctrl+K)')).toBeNull();
+      unmount();
+      const onOpenChange = vi.fn();
+      render(<SubtitleBar {...baseProps} surface="electron" typing={{ onSend: vi.fn(), onOpenChange }} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Type to translate (Ctrl+K)' }));
+      expect(screen.getByRole('textbox', { name: 'Type to translate (Ctrl+K)' })).toBeTruthy();
+      expect(onOpenChange).toHaveBeenLastCalledWith(true);
+    });
+
+    it('sends the trimmed text on Enter, keeps the field open for the next, and closes on Escape', () => {
+      const onSend = vi.fn();
+      const onOpenChange = vi.fn();
+      render(<SubtitleBar {...baseProps} surface="electron" typing={{ onSend, onOpenChange }} />);
+      fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+      const field = screen.getByRole('textbox', { name: 'Type to translate (Ctrl+K)' }) as HTMLInputElement;
+      fireEvent.change(field, { target: { value: '  明天见  ' } });
+      fireEvent.keyDown(field, { key: 'Enter' });
+      expect(onSend).toHaveBeenCalledWith('明天见');
+      expect(field.value).toBe('');
+      fireEvent.keyDown(field, { key: 'Enter' });
+      expect(onSend).toHaveBeenCalledTimes(1);
+      // The Escape that closes the field is the field's: it does not reach the strip's own Escape, which leaves subtitle mode.
+      const onDocumentKey = vi.fn();
+      document.addEventListener('keydown', onDocumentKey);
+      fireEvent.keyDown(field, { key: 'Escape' });
+      document.removeEventListener('keydown', onDocumentKey);
+      expect(onDocumentKey).not.toHaveBeenCalled();
+      expect(screen.queryByRole('textbox', { name: 'Type to translate (Ctrl+K)' })).toBeNull();
+      expect(onOpenChange).toHaveBeenLastCalledWith(false);
+    });
+  });
 });

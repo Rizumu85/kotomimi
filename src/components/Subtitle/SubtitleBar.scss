@@ -46,6 +46,10 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    // Fork: the buttons keep their size and their words on one line; what gives way, where the bar is short of
+    // room, is the middle (the typing field, the clock).
+    flex-shrink: 0;
+    white-space: nowrap;
     // Non-interactive areas inside segments (logo, timer, lang label,
     // dividers) stay in the drag region so the user can grab almost any
     // visible part of the bar to move the window. Interactive elements
@@ -119,6 +123,53 @@
       opacity: 0.5;
       cursor: not-allowed;
     }
+  }
+
+  // Fork: while the typing field is open the middle takes what room there is, and the two display buttons say
+  // whose side they are by their icons alone — with their words they were squeezed a character to a line.
+  &.is-typing {
+    .subtitle-bar__center {
+      flex: 1 1 auto;
+      flex-shrink: 1;
+      min-width: 0;
+      justify-content: center;
+      margin: 0 10px;
+    }
+
+    .display-mode-label {
+      display: none;
+    }
+
+    // And what is not wanted mid-sentence — text size, the view, export, clear, fullscreen — to give the field its
+    // room on a narrow strip.
+    .subtitle-bar__aside {
+      display: none;
+    }
+
+    // And the name: on a narrow strip the field ran over it.
+    .subtitle-bar__logo {
+      display: none;
+    }
+  }
+
+  // Fork: typing what one cannot say, in place of the clock and the pair (`SubtitleBar`'s typing field).
+  .subtitle-bar__typing {
+    flex: 1 1 auto;
+    min-width: 120px;
+    max-width: 420px;
+    height: 24px;
+    padding: 0 10px;
+    border: 1px solid #3a3a3a;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #f0f0f0;
+    font: inherit;
+    font-size: 13px;
+    outline: none;
+    -webkit-app-region: no-drag;
+
+    &::placeholder { color: #8a8a8a; }
+    &:focus { border-color: tk.$color-primary; }
   }
 
   .subtitle-bar__divider {

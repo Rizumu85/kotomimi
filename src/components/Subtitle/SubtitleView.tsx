@@ -46,6 +46,8 @@ export interface SubtitleControls {
   stop?(): void;
   /** Leaves subtitle mode and opens a Settings section — the Electron takeover; the overlay has no Settings to open. */
   openSettings?(target: string): void;
+  /** Fork: typed text for the speaker leg, as the main window's field sends it — the Electron takeover, while it is taken. */
+  sendText?(text: string): void;
 }
 
 /** Two letters of the pair's base language (`baseLang`): Gemini's `cmn-CN` reads ZH, not CM (Stage 2 Gemini, choice 9). */
@@ -97,7 +99,9 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
   // must keep the bar visible for as long as a turn is held, even past the
   // bar's own idle auto-hide.
   const [holdHeld, setHoldHeld] = useState(false);
-  const chrome = useSubtitleChrome({ surface, onExit: controls.exit, forceVisible: holdHeld });
+  // Fork: the typing field keeps the bar on show while it is open, as a held key does.
+  const [typingOpen, setTypingOpen] = useState(false);
+  const chrome = useSubtitleChrome({ surface, onExit: controls.exit, forceVisible: holdHeld || typingOpen });
   const subtitle = useSubtitleSettings();
   const speaker = useSubtitleSpeakerDisplayMode();
   const participant = useSubtitleParticipantDisplayMode();
@@ -257,6 +261,7 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
           onStop: stop,
         } : undefined}
         holdToTalk={showHoldToTalk ? { onPress: controls.press, onRelease: controls.release, onHeldChange: setHoldHeld } : undefined}
+        typing={running && controls.sendText ? { onSend: controls.sendText, onOpenChange: setTypingOpen } : undefined}
         // Nothing to say of a strip that is simply ready to be started: the toolbar reads as it will while a run is
         // on — the clock at nought, the pair — and its start button is the invitation. ("Set the window's place and
         // size before you start" went: the user, 2026-10-06.)

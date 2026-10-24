@@ -8,7 +8,9 @@ import { annotateJapanese, furiganaParts, katakanaToHiragana, romaji } from './j
 import { buildJapaneseTokenizer } from './japaneseTokenizer';
 import { romanizeKorean } from './korean';
 import { transliterateRussian } from './russian';
-import { annotatedLanguage, isChinese, quotesJapanese, scriptLanguage } from './script';
+import { transliterateUkrainian } from './ukrainian';
+import { annotateChinese } from './chinese';
+import { annotatedLanguage, explainsInChinese, isChinese, quotesJapanese, scriptLanguage } from './script';
 import type { JapaneseTokenizer } from './types';
 
 const DICT = resolve(__dirname, '../../../node_modules/@sglkc/kuromoji/dict');
@@ -40,7 +42,9 @@ describe('the script a line is written in', () => {
     expect(annotatedLanguage('ja-JP')).toBe('ja');
     expect(annotatedLanguage('ko_KR')).toBe('ko');
     expect(annotatedLanguage('ru')).toBe('ru');
-    for (const other of ['zh-CN', 'en', 'auto', '', null, undefined]) expect(annotatedLanguage(other)).toBeNull();
+    expect(annotatedLanguage('zh-CN')).toBe('zh');
+    expect(annotatedLanguage('uk')).toBe('uk');
+    for (const other of ['yue', 'en', 'auto', '', null, undefined]) expect(annotatedLanguage(other)).toBeNull();
   });
 });
 
@@ -125,9 +129,9 @@ describe('a text, line by line', () => {
     // The corrected sentence above the explanation is Japanese, however many kanji it holds.
     expect(quotesJapanese('一度映画を見た。とても面白かったです。')).toBe(false);
     expect(quotesJapanese('東京大学卒業予定です')).toBe(false);
-    // Only a Chinese row is read this way: anywhere else kana are Japanese.
+    // Fork (2026-10-21): in a row of any language — the feedback's explanation sits in the practised language's row.
     expect(needsJapanese('“見ます”要改成“見た”。这里时态不对。', { furigana: true, roman: false, language: null, chinese: true })).toBe(false);
-    expect(needsJapanese('“見ます”要改成“見た”。这里时态不对。', { furigana: true, roman: false, language: null })).toBe(true);
+    expect(needsJapanese('“見ます”要改成“見た”。这里时态不对。', { furigana: true, roman: false, language: null })).toBe(false);
     expect(needsJapanese('一度映画を見た。\n“見ます”要改成“見た”。这里时态不对。', { furigana: true, roman: false, language: null, chinese: true })).toBe(true);
   });
 
@@ -159,5 +163,58 @@ describe('a text, line by line', () => {
     expect(needsJapanese('大丈夫', { ...BOTH, language: null })).toBe(false);
     expect(needsJapanese('감사합니다', { ...BOTH, language: 'ko' })).toBe(false);
     expect(needsJapanese('今日は', { furigana: false, roman: false, language: 'ja' })).toBe(false);
+  });
+});
+
+describe('pinyin over Chinese, and Ukrainian by its own system (upstream #632)', () => {
+  const ZH = { furigana: true, roman: false, pinyin: true };
+  it('puts tone-marked pinyin over each Han character, taking a polyphone’s reading from its words', () => {
+    expect(annotateChinese('我们去银行吧。')).toEqual([
+      { text: '我', ruby: 'wǒ' }, { text: '们', ruby: 'men' }, { text: '去', ruby: 'qù' }, { text: '银', ruby: 'yín' }, { text: '行', ruby: 'háng' }, { text: '吧', ruby: 'ba' }, { text: '。' },
+    ]);
+    // What is not Chinese stays one part.
+    expect(annotateChinese('用 VRChat 玩')).toEqual([{ text: '用', ruby: 'yòng' }, { text: ' VRChat ' }, { text: '玩', ruby: 'wán' }]);
+  });
+
+  it('gives pinyin to a line of a Chinese row only when it is asked for, and never to Japanese or Cantonese', () => {
+    expect(annotateLine('你好', { ...ZH, language: 'zh', chinese: true }).parts).toEqual([{ text: '你', ruby: 'nǐ' }, { text: '好', ruby: 'hǎo' }]);
+    expect(annotateLine('你好', { ...ZH, pinyin: false, language: 'zh', chinese: true })).toEqual({ parts: [{ text: '你好' }] });
+    // Han characters alone in a row of another language, or with no language, are not read as Chinese.
+    expect(annotateLine('大丈夫', { ...ZH, language: null })).toEqual({ parts: [{ text: '大丈夫' }] });
+    expect(annotatedLanguage('yue')).toBeNull();
+    expect(annotatedLanguage('zh-TW')).toBe('zh');
+  });
+
+  it('writes Ukrainian by the 2010 national system, word-initial letters apart', () => {
+    expect(transliterateUkrainian('Згода')).toBe('Zghoda');
+    expect(transliterateUkrainian('Київ, Україна')).toBe('Kyiv, Ukraina');
+    expect(transliterateUkrainian('Ярослав їжак')).toBe('Yaroslav yizhak');
+    expect(transliterateUkrainian("м'ясо, сім'я")).toBe('miaso, simia');
+    expect(transliterateUkrainian('Добрий день')).toBe('Dobryi den');
+  });
+
+  it('tells a Ukrainian line by its own letters, or by the row, and keeps the Russian table for Russian', () => {
+    expect(scriptLanguage('Україна')).toBe('uk');
+    expect(scriptLanguage('Россия')).toBe('ru');
+    expect(annotateLine('Добрий день', { furigana: false, roman: true, language: 'uk' }).roman).toBe('Dobryi den');
+    expect(annotateLine('Добрый день', { furigana: false, roman: true, language: 'ru' }).roman).toBe("Dobryy den'");
+  });
+});
+
+describe('a Chinese explanation that quotes Japanese, in a row of any language (2026-10-21)', () => {
+  const FEEDBACK = '“に”后面缺少动词，句子不完整；用“について”表示“关于”。';
+  it('is told apart from Japanese, which keeps its readings', () => {
+    expect(explainsInChinese(FEEDBACK)).toBe(true);
+    expect(explainsInChinese('还要加上“と”才对。')).toBe(true);
+    // Kana outside the quotes: Japanese, quoting.
+    expect(explainsInChinese('「行こう」と言った。')).toBe(false);
+    // A short line of kanji alone stays the row's: 大丈夫 in a Japanese row keeps its reading.
+    expect(explainsInChinese('大丈夫')).toBe(false);
+  });
+
+  it('gets no readings in the practised language row', () => {
+    const tokenizer = { tokenize: () => [] };
+    const line = annotateLine(FEEDBACK, { furigana: true, roman: true, language: 'ja', japanese: tokenizer });
+    expect(line).toEqual({ parts: [{ text: FEEDBACK }] });
   });
 });

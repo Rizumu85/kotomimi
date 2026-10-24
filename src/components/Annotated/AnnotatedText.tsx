@@ -18,9 +18,13 @@ import './AnnotatedText.scss';
  * `language` is the row's (the leg's pair, or what the provider detected): it
  * decides only how a line of Han characters alone is read.
  */
-export function useAnnotation(text: string, language: string | null | undefined): AnnotatedLine[] | null {
-  const furigana = useAnnotationStore((s) => s.furigana);
-  const roman = useAnnotationStore((s) => s.romanization);
+export function useAnnotation(text: string, language: string | null | undefined, only?: 'readings' | 'roman'): AnnotatedLine[] | null {
+  // Fork: `only` asks for the readings above the words alone, or the romanization alone (a marked correction writes
+  // its pieces with readings, and one romanization under the whole: `Correction.tsx`).
+  const furigana = useAnnotationStore((s) => s.furigana) && only !== 'roman';
+  const roman = useAnnotationStore((s) => s.romanization) && only !== 'readings';
+  const pinyinOn = useAnnotationStore((s) => s.pinyin);
+  const pinyin = pinyinOn && only !== 'roman';
   const hint = annotatedLanguage(language);
   const chinese = isChinese(language);
   const wantsJapanese = needsJapanese(text, { furigana, roman, language: hint, chinese });
@@ -30,10 +34,10 @@ export function useAnnotation(text: string, language: string | null | undefined)
     if (wantsJapanese) loadJapanese();
   }, [wantsJapanese]);
   return useMemo(() => {
-    if (!furigana && !roman) return null;
-    const lines = annotateText(text, { furigana, roman, language: hint, chinese, japanese });
+    if (!furigana && !roman && !pinyin) return null;
+    const lines = annotateText(text, { furigana, roman, pinyin, language: hint, chinese, japanese });
     return lines.some((line) => line.roman !== undefined || line.parts.some((part) => part.ruby !== undefined)) ? lines : null;
-  }, [text, furigana, roman, hint, chinese, japanese]);
+  }, [text, furigana, roman, pinyin, hint, chinese, japanese]);
 }
 
 export interface AnnotatedLinesProps {
@@ -47,7 +51,12 @@ export function AnnotatedLines({ lines, inline = false, className }: AnnotatedLi
   return (
     <span className={`annot${inline ? ' annot--inline' : ''}${className ? ` ${className}` : ''}`}>
       {lines.map((line, i) => (
-        <span className="annot-line" key={i}>
+        // Inline, a line with a romanization is a block of its own, the romanization under it; one without flows on
+        // with the text around it, as an unread line would. Kept a block, the grammar feedback's corrected sentence
+        // read with furigana took its explanation with it: the explanation began under it, mid-strip, and the row,
+        // rolled to its last line, showed only that (2026-10-22).
+        <span className={`annot-line${line.roman ? ' annot-line--roman' : ''}`} key={i}>
+          {inline && i > 0 && ' '}
           <span className="annot-text">
             {line.parts.map((part, j) => (part.ruby === undefined
               ? <Fragment key={j}>{part.text}</Fragment>

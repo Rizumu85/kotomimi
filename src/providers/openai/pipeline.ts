@@ -33,12 +33,17 @@ import { languageByScript, saidInOwn, sameSpeech } from '../../lib/language/scri
 import { AUTO } from '../../lib/provider/languages';
 import { BEFORE_SLOT, TEXT_SLOT } from './nativeTranslators';
 import { cutAt, letters, restFrom, SETTLE_MS } from './sentenceCut';
-import { askNativeEngine, ipcNativeBridge, type NativeBridge, type NativeEngineStatus } from '../../lib/native/nativeEngine';
+import { askNativeEngine, ipcNativeBridge, NO_NATIVE_ENGINE, type NativeBridge, type NativeEngineStatus } from '../../lib/native/nativeEngine';
+import { engineNode, remoteBridge } from '../../lib/native/remoteEngine';
+import { createEitherAsr } from './eitherAsr';
 import { createRealtimeAdapter } from './adapter';
 import type { RealtimeConfig } from './config';
 import type { RealtimeCredentials } from './settings';
 import type { OpenSocket } from './socket';
 import { chatUrl, completeText, httpBaseOf } from './textModel';
+import { PHONE_BUSY_RETRIES, PHONE_TEXT_TIMEOUT_MS } from './phoneText';
+import { watchPhones, type PhoneWatch } from './phoneWatch';
+import { phoneKey } from '../../lib/lan/phoneKeys';
 import { unwrapTranslationText } from './wire';
 
 /** The credential a stage's endpoint is called with, by its field. */
@@ -57,6 +62,11 @@ export interface TextStage {
    * when the session was built, and what is used where it cannot be asked.
    */
   engine?: 'translator' | 'coach';
+  /**
+   * The model is one a phone lends (`phoneText.ts`): it may first have to load it, does one thing at a time, and says
+   * when to come back — so the answer is given longer, and a busy answer is asked again.
+   */
+  phone?: boolean;
   model: string;
   /** Absent: the endpoint takes no key. */
   key?: StageKey;
@@ -114,7 +124,7 @@ export interface DeviceHearing {
   streaming: boolean;
   vad: LocalInferenceConfig['vad'];
   /** Present: the recognizer is an API (`apiAsr.ts`) — this computer still cuts the sentences, and uploads each one. */
-  api?: { baseUrl: string; model: string; key?: StageKey };
+  api?: { baseUrl: string; model: string; key?: StageKey; /** Where what answers there turns out to be a Kotomimi phone's engine (`remoteEngine.ts`), and the model is one this app knows: how long one recognition may run on it, as on this computer. */ limits?: Partial<NativeLimits> };
   /** Present: the recognizer is the native engine's (`nativeAsr.ts`), given the voice as it comes; `limits` where one recognition may not run as long as the default. */
   native?: { model: string; limits?: Partial<NativeLimits> };
 }
@@ -152,6 +162,8 @@ export interface PipelineDeps {
    * named when it was configured (measured 2026-10-04): so it is named first. Absent: nothing is done.
    */
   prepare(pipeline: string, transcription: string): Promise<unknown>;
+  /** An engine on another device, where the API named for recognition is one (`remoteEngine.ts`): asked, and its recognitions; stand-ins in tests. */
+  remote: { /** Null: what answers there is no phone's engine. `model`: the one it lends now; blank where it did not say. */ node(baseUrl: string): Promise<{ model: string } | null>; bridge(baseUrl: string): NativeBridge };
   /** The native engine, when a leg hears by it: the main process's by default, stand-ins in tests. */
   native: { bridge: NativeBridge; start(model: string): Promise<NativeEngineStatus>; /** Where a native text engine answers now, up with this model, and the key its present run asks for. Rejects when it is not up and cannot be brought up. */ base?(engine: 'translator' | 'coach', model: string): Promise<EngineAddress> };
 }
@@ -268,6 +280,8 @@ class PipelineLeg implements AdapterSession {
   /** How many of them have loaded, and the inner session's own loading count: one progress for the starting surface. */
   private loadedHere = 0;
   private innerLoading = { done: 0, total: 0 };
+  /** The phones this leg uses, asked now and then whether they are still there (`phoneWatch.ts`). */
+  private readonly phones: PhoneWatch;
 
   constructor(
     private readonly request: StartRequest<PipelineConfig, PipelineCredentials>,
@@ -278,6 +292,19 @@ class PipelineLeg implements AdapterSession {
     private readonly engineBase: (engine: 'translator' | 'coach', model: string) => Promise<EngineAddress> = engineBaseNow,
   ) {
     this.inner = eventsFrom((e) => this.onInner(e));
+    this.phones = watchPhones({
+      fetch: doFetch,
+      clock: request.clock,
+      onQuiet: () => {
+        if (!this.ended) this.events.degraded({ code: 'phone_quiet', message: 'A phone this session uses stopped answering.' });
+      },
+    });
+    for (const stage of [stages.speech, stages.typed]) if (stage && stage.via !== 'device' && stage.phone) this.watchPhone(stage.baseUrl);
+  }
+
+  /** A phone this leg uses, watched until the leg ends: one a stage answers on, or what hears (`hearing`). */
+  watchPhone(base: string): void {
+    if (!this.ended) this.phones.add(base);
   }
 
   /**
@@ -386,6 +413,7 @@ class PipelineLeg implements AdapterSession {
 
   private end(): void {
     this.ended = true;
+    this.phones.stop();
     this.cuts.clear();
     for (let i = heardLately.length - 1; i >= 0; i--) if (heardLately[i].leg === this) heardLately.splice(i, 1);
     this.queue.length = 0;
@@ -702,7 +730,7 @@ class PipelineLeg implements AdapterSession {
       shown = text;
       this.events.segmentText({ ref, text, ...(stage.language ? { language: stage.language } : {}) });
     };
-    const where = stage.via === 'device' ? { device: true } : {};
+    const where = stage.via === 'device' ? { device: true } : stage.phone ? { phone: true } : {};
     this.frame('out', 'text.request', { stage: stage.kind, model: stage.model, chars: job.text.length, ...where });
     try {
       const started = clock.now();
@@ -745,6 +773,7 @@ class PipelineLeg implements AdapterSession {
         ...(stage.shots?.length ? { shots: stage.shots } : {}),
         ...(stage.pair ? { pair: stage.pair } : {}),
         ...(stage.extra ? { extra: stage.extra } : {}),
+        ...(stage.phone ? { timeoutMs: PHONE_TEXT_TIMEOUT_MS, busyRetries: PHONE_BUSY_RETRIES } : {}),
         // A function, so that nothing in the sentence is read as a pattern.
         user: stage.wrapAfter && before
           ? stage.wrapAfter.replace(BEFORE_SLOT, () => before).replace(TEXT_SLOT, () => text)
@@ -765,10 +794,12 @@ class PipelineLeg implements AdapterSession {
   /** A source left without its answer: the session goes on, and says so. */
   private unanswered(job: Job, why: string, cause?: unknown): void {
     const what = job.stage.kind === 'coach' ? 'The feedback model' : 'The translation model';
+    // A phone that has not the memory for the model refuses it so (503, `Share.ensure`): said as that, where to look.
+    const noRoom = job.stage.via !== 'device' && job.stage.phone === true && /has not the memory/.test(why);
     this.events.degraded({
       // Each said as what it was: a sentence with no feedback, a typed sentence with no translation (which the
       // contract's `text-input-answered` wants said), a heard one with none.
-      code: job.stage.kind === 'coach' ? 'feedback_failed' : job.typed ? 'typed_translation_failed' : 'translation_failed',
+      code: noRoom ? 'phone_no_memory' : job.stage.kind === 'coach' ? 'feedback_failed' : job.typed ? 'typed_translation_failed' : 'translation_failed',
       message: `${what} (${job.stage.model}) did not answer: ${why}`,
       ...(cause !== undefined ? { cause } : {}),
     });
@@ -805,12 +836,15 @@ function hearingRequest(request: StartRequest<PipelineConfig, PipelineCredential
   };
 }
 
+/** How long the last words of a stretch are waited for from an engine on another device. */
+const REMOTE_LAST_WORDS_MS = 60_000;
+
 export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter<PipelineConfig, PipelineCredentials> {
   const realtime = createRealtimeAdapter(deps.openSocket ? { openSocket: deps.openSocket } : {});
   const engines = deps.engines ?? defaultEngines;
   const local = createLocalInferenceAdapter(engines);
   /** What hears on this computer: its own recognizer, or — the same adapter with that one engine changed — an API's. */
-  const hearing = (device: DeviceHearing, request: StartRequest<PipelineConfig, PipelineCredentials>) => {
+  const hearing = (device: DeviceHearing, request: StartRequest<PipelineConfig, PipelineCredentials>, onPhone: (base: string) => void) => {
     const { api, native } = device;
     if (native) {
       const start = deps.native?.start ?? ((model: string) => askNativeEngine('start', model));
@@ -818,7 +852,27 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
     }
     if (!api) return local;
     const key = api.key ? request.credentials[api.key] : undefined;
-    return createLocalInferenceAdapter({ ...engines, asr: () => createApiAsr({ baseUrl: api.baseUrl, model: api.model, ...(key ? { key } : {}), fetch: deps.fetch ?? fetchNow, clock: request.clock }) });
+    const asked = deps.fetch ?? fetchNow;
+    const byApi = () => createApiAsr({ baseUrl: api.baseUrl, model: api.model, ...(key ? { key } : {}), fetch: asked, clock: request.clock });
+    // The address may be a Kotomimi phone lending its engine: that is read as this computer's own engine is, while
+    // the voice is heard, not a sentence at a time. Asked once, as the run begins; anything else is the API named.
+    const remote = deps.remote ?? { node: (baseUrl: string) => engineNode(baseUrl, asked, key || phoneKey(baseUrl) || undefined), bridge: remoteBridge };
+    return createLocalInferenceAdapter({
+      ...engines,
+      asr: () => createEitherAsr(async () => {
+        const node = await remote.node(api.baseUrl);
+        if (!node) return byApi();
+        onPhone(api.baseUrl);
+        // The model the phone lends now, whatever was written down when it was chosen: its owner may have changed it.
+        const model = node.model || api.model;
+        const lent: NativeEngineStatus = { ...NO_NATIVE_ENGINE, run: { state: 'ready', model, port: 0, tail: '' }, up: [model] };
+        // Its last words are waited for as long as a reading may take there (`READ_TIMEOUT_MS` in
+        // `electron/remote-engine.js`): a phone slower than the voice still writes all of it, late, where the wait
+        // this computer's own engine is given would have kept only what the first reading had (seen 2026-10-10 on a
+        // phone at half the speed of speech: "ゲームは、 like" for twenty seconds of talk).
+        return createNativeAsr({ bridge: remote.bridge(api.baseUrl), start: async () => lent, model, clock: request.clock, named: 'The recognition engine of the other device', limits: { ...api.limits, lastWordsMs: REMOTE_LAST_WORDS_MS } });
+      }),
+    });
   };
   /** The Realtime session's own request: on the socket the config names, when it names one. */
   const dialled = (request: StartRequest<PipelineConfig, PipelineCredentials>): StartRequest<PipelineConfig, PipelineCredentials> => {
@@ -839,7 +893,7 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
       opening.catch(() => {});
       let session: AdapterSession;
       try {
-        session = await (device ? hearing(device, request).start(hearingRequest(request, device, stages?.heard), leg.inner) : realtime.start(dialled(request), leg.inner));
+        session = await (device ? hearing(device, request, (base) => leg.watchPhone(base)).start(hearingRequest(request, device, stages?.heard), leg.inner) : realtime.start(dialled(request), leg.inner));
       } catch (error) {
         leg.abandon();
         throw error;

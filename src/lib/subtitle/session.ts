@@ -14,7 +14,7 @@ export type SubtitleIdleModel =
   | { kind: 'ended' }
   | { kind: 'starting' }
   /** `message` is diagnostic English; `code`, when present, is what the surface words. */
-  | { kind: 'unready'; message: string; code?: string; params?: Record<string, string | number> }
+  | { kind: 'unready'; message: string; code?: string; params?: Record<string, string | number>; unsure?: true }
   | { kind: 'failed'; notice: RunNotice };
 
 export interface SubtitleSession {
@@ -62,7 +62,7 @@ export function idleOf(run: RunState, readiness: Readiness | undefined, micropho
   // device, where today's computeStartGate put its participant blocker,
   // and before the provider's readiness.
   if (refusal) return { kind: 'unready', message: refusal.message, code: refusal.code, ...(refusal.params ? { params: refusal.params } : {}) };
-  if (readiness?.state === 'not-ready') return { kind: 'unready', message: readiness.reason, ...(readiness.code ? { code: readiness.code } : {}), ...(readiness.params ? { params: readiness.params } : {}) };
+  if (readiness?.state === 'not-ready') return { kind: 'unready', message: readiness.reason, ...(readiness.code ? { code: readiness.code } : {}), ...(readiness.params ? { params: readiness.params } : {}), ...(readiness.unsure ? { unsure: true as const } : {}) };
   const end = run.lastEnd;
   if (end && (end.reason === 'refused' || end.reason === 'start-failed') && end.notice) return { kind: 'failed', notice: end.notice };
   return end ? { kind: 'ended' } : { kind: 'ready' };
@@ -78,7 +78,8 @@ export function subtitleSession({ run, readiness, pair, turnMode, legs, micropho
     // a participant-only run offers no hold — it would do nothing.
     holdToTalk: run.phase === 'running' && turnMode !== 'auto' && run.legs.speaker !== undefined,
     // Off for a run under way, no microphone, an entry not yet loaded, the gate's refusal, or a provider known unready or being checked; an unknown readiness is the runner's to check at start.
-    canStart: run.phase === 'idle' && !microphoneMissing && readiness?.state !== 'not-ready' && readiness?.state !== 'checking' && providerLoaded && !refusal,
+    // Fork: an answer that could not find out (`unsure`) does not hold the start: pressing it asks again.
+    canStart: run.phase === 'idle' && !microphoneMissing && !(readiness?.state === 'not-ready' && !readiness.unsure) && readiness?.state !== 'checking' && providerLoaded && !refusal,
     idle: idleOf(run, readiness, microphoneMissing, refusal),
   };
 }

@@ -70,7 +70,8 @@ export function statusLine(input: StatusLineInput): StatusEntry | null {
   const { run, idle, canStart, dismissedEnd, waitingForMicrophone, subtitleEntryHint, echo } = input;
   if (run.phase === 'idle') {
     // 1a. The live gate: what the stores refuse now (a stale failure never outranks it).
-    if (!canStart && idle.kind === 'unready') return blocker(`unready:${idle.code ?? 'message'}`, idle.code, idle.message, idle.params);
+    // Fork: an answer that could not find out is said though the start stays offered (it asks again).
+    if (idle.kind === 'unready' && (!canStart || idle.unsure)) return blocker(`unready:${idle.code ?? 'message'}`, idle.code, idle.message, idle.params);
     // 1b. The last start, refused or failed, until the next start or Clear. A run that
     // ended on its own already carries its notice on a leg (spec §2); this is not it.
     const end = run.lastEnd;

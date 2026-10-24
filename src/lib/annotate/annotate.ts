@@ -6,12 +6,15 @@
  * caller knows it: 大丈夫 in a Japanese row gets its reading, and the same
  * characters in a Chinese row get none. And in a Chinese row a Chinese
  * sentence that quotes a Japanese word stays Chinese: readings over an
- * explanation written in Chinese would be noise.
+ * explanation written in Chinese would be noise. A line of Han characters in
+ * a Chinese row is Chinese, and takes pinyin where that is asked for.
  */
+import { annotateChinese } from './chinese';
 import { annotateJapanese } from './japanese';
 import { romanizeKorean } from './korean';
 import { transliterateRussian } from './russian';
-import { KANJI, quotesJapanese, scriptLanguage } from './script';
+import { transliterateUkrainian } from './ukrainian';
+import { explainsInChinese, KANJI, quotesJapanese, scriptLanguage } from './script';
 import type { AnnotatedLanguage, AnnotatedLine, AnnotateOptions, JapaneseTokenizer } from './types';
 
 export interface AnnotateInputs extends AnnotateOptions {
@@ -26,19 +29,24 @@ export interface AnnotateInputs extends AnnotateOptions {
 /** The language a line is read in. */
 function languageOf(line: string, o: Pick<AnnotateInputs, 'language' | 'chinese'>): AnnotatedLanguage | null {
   const script = scriptLanguage(line);
-  if (script === 'ja' && o.chinese && quotesJapanese(line)) return null;
-  return script ?? (o.language === 'ja' && KANJI.test(line) ? 'ja' : null);
+  if (script === 'ja' && (o.chinese ? quotesJapanese(line) || explainsInChinese(line) : explainsInChinese(line))) return null;
+  // Ukrainian does not write one of its own letters in every sentence: the row says what the letters cannot.
+  if (script === 'ru' && o.language === 'uk') return 'uk';
+  if (script) return script;
+  return (o.language === 'ja' || o.language === 'zh') && KANJI.test(line) ? o.language : null;
 }
 
 const plain = (line: string): AnnotatedLine => ({ parts: [{ text: line }] });
 
 export function annotateLine(line: string, o: AnnotateInputs): AnnotatedLine {
-  if (!o.furigana && !o.roman) return plain(line);
+  if (!o.furigana && !o.roman && !o.pinyin) return plain(line);
   const language = languageOf(line, o);
-  if (language === 'ja') return o.japanese ? annotateJapanese(line, o.japanese, o) : plain(line);
+  if (language === 'zh') return o.pinyin ? { parts: annotateChinese(line) } : plain(line);
+  if (language === 'ja') return o.japanese && (o.furigana || o.roman) ? annotateJapanese(line, o.japanese, o) : plain(line);
   if (!o.roman) return plain(line);
   if (language === 'ko') return { parts: [{ text: line }], roman: romanizeKorean(line) };
   if (language === 'ru') return { parts: [{ text: line }], roman: transliterateRussian(line) };
+  if (language === 'uk') return { parts: [{ text: line }], roman: transliterateUkrainian(line) };
   return plain(line);
 }
 

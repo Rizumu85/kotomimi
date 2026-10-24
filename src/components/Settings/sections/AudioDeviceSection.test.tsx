@@ -11,9 +11,17 @@
  * their justification for screen readers rather than just going quiet.
  */
 import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import AudioDeviceSection from './AudioDeviceSection';
+
+const echo = vi.hoisted(() => ({ mode: 'all' as 'app' | 'all', set: vi.fn(), os: 'macos', electron: true }));
+
+vi.mock('../../../utils/environment', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../../utils/environment')>()),
+  isLinux: () => echo.os === 'linux',
+  isElectron: () => echo.electron,
+}));
 
 // Resolve to the inline default when the call site has one, else echo the key —
 // these tests assert on `lockedReason`, which is passed in as a plain string.
@@ -33,6 +41,8 @@ vi.mock('../../../stores/audioStore', () => ({
   useSetNoiseSuppressionMode: () => vi.fn(),
   useMicGateThreshold: () => 0,
   useSetMicGateThreshold: () => vi.fn(),
+  useEchoCancellationMode: () => echo.mode,
+  useSetEchoCancellationMode: () => echo.set,
   useAudioContext: () => ({
     audioInputDevices: [],
     audioMonitorDevices: devices,
@@ -50,6 +60,9 @@ vi.mock('../../../stores/audioStore', () => ({
 }));
 
 const REASON = 'Speaker monitoring is only available in "You" mode.';
+
+const renderMic = (props: Record<string, unknown> = {}) =>
+  render(<AudioDeviceSection isSessionActive={false} showMicrophone={true} showSpeaker={false} {...props} />);
 
 const renderSpeaker = (props: Record<string, unknown> = {}) =>
   render(
@@ -185,5 +198,58 @@ describe('AudioDeviceSection renders no participant UI', () => {
     expect(container.querySelector('#participant-section')).toBeNull();
     expect(container.querySelector('#participant-source-section')).toBeNull();
     expect(container.querySelector('.participant-source-picker')).toBeNull();
+  });
+});
+
+// 'all' cancels every sound the system plays, which silences a loopback
+// microphone such as BlackHole; the user can ask for what this app plays only.
+// Chromium on Linux has no 'all', so there is nothing to choose there.
+describe('AudioDeviceSection echo cancellation', () => {
+  beforeEach(() => {
+    echo.mode = 'all';
+    echo.set.mockReset();
+    echo.os = 'macos';
+    echo.electron = true;
+  });
+
+  const options = () => screen.getAllByRole('button').filter((b) => /^(settings\.echoCancellationMode\.|fork\.echoCancellationApp$)/.test(b.textContent ?? ''));
+
+  it('offers this app or all sounds on the desktop, below noise suppression', () => {
+    const { container } = renderMic();
+    expect(screen.getByText('settings.echoCancellation')).toBeInTheDocument();
+    expect(options().map((b) => b.textContent)).toEqual(['fork.echoCancellationApp', 'settings.echoCancellationMode.all']);
+    const labels = [...container.querySelectorAll('.noise-suppression-label')].map((l) => l.textContent);
+    expect(labels).toEqual(['settings.noiseSuppression', 'settings.echoCancellation']);
+  });
+
+  it('names the browser instead of Sokuji outside the desktop app', () => {
+    echo.electron = false;
+    echo.os = 'windows';
+    renderMic();
+    expect(options().map((b) => b.textContent)).toEqual(['settings.echoCancellationMode.browser', 'settings.echoCancellationMode.all']);
+  });
+
+  it('is not shown on Linux', () => {
+    echo.os = 'linux';
+    renderMic();
+    expect(screen.queryByText('settings.echoCancellation')).not.toBeInTheDocument();
+  });
+
+  it('marks the chosen mode, to the eye and to assistive technology, and stores a new choice', () => {
+    echo.mode = 'app';
+    renderMic();
+    const [app, all] = options();
+    expect(app).toHaveClass('active');
+    expect(all).not.toHaveClass('active');
+    expect(app).toHaveAttribute('aria-pressed', 'true');
+    expect(all).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(all);
+    expect(echo.set).toHaveBeenCalledWith('all');
+  });
+
+  it('tells assistive technology which noise suppression mode is on, as it does for echo cancellation', () => {
+    renderMic();
+    const pressed = screen.getAllByRole('button', { pressed: true }).map((b) => b.textContent);
+    expect(pressed).toEqual(['settings.noiseSuppressionMode.off', 'settings.echoCancellationMode.all']);
   });
 });

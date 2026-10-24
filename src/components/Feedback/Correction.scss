@@ -1,0 +1,65 @@
+// Fork: grammar feedback as a marked sentence (Correction.tsx). Red is the one colour a correction has: struck through
+// on what goes, written in on what comes.
+.kt-fix {
+  --kt-fix-ink: #ef6450;
+
+  // Struck through — and so is a piece of it written with readings, which sits in a block of its own that a line
+  // drawn on the piece around it does not reach (seen 2026-10-23: "ます" not struck under romanization).
+  .kt-fix__gone,
+  .kt-fix__gone .annot-text {
+    color: inherit;
+    text-decoration: line-through;
+    text-decoration-color: var(--kt-fix-ink);
+    text-decoration-thickness: 0.09em;
+  }
+
+  .kt-fix__gone {
+    opacity: 0.75;
+  }
+
+  .kt-fix__added {
+    color: var(--kt-fix-ink);
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: 0.1em;
+  }
+
+  .kt-fix__why {
+    opacity: 0.72;
+    font-size: 0.88em;
+    font-style: normal;
+  }
+}
+
+.kt-fix__roman {
+  font-size: 0.72em;
+  font-weight: 400;
+  // Latin, whatever font the text around it is set in: one chosen for Chinese may have none, and fall back to a serif.
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  font-style: normal;
+  opacity: 0.7;
+}
+
+.kt-fix--block {
+  display: block;
+
+  .kt-fix__roman {
+    display: block;
+    line-height: 1.3;
+  }
+
+  .kt-fix__why {
+    display: block;
+    margin-top: 0.25em;
+  }
+}
+
+// On the strip's one flowing line the reason follows the sentence; a romanization there would be a second line
+// the row has no place for, and is left to the main panel.
+.kt-fix--row .kt-fix__why {
+  margin-left: 0.8em;
+}
+
+.kt-fix--row .kt-fix__roman {
+  display: none;
+}

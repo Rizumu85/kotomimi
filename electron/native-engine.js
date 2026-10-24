@@ -48,6 +48,7 @@ const net = require('net');
 const os = require('os');
 const path = require('path');
 const { spawn: nodeSpawn, execFile } = require('child_process');
+const { pullWhole, relaysOf, hfMirrorOf, inMainlandChina, ANSWER_WITHIN_MS } = require('./fetch-file');
 
 const LOOPBACK = '127.0.0.1';
 
@@ -89,6 +90,9 @@ const QWEN_LANGUAGES = ['zh', 'en', 'yue', 'ar', 'de', 'fr', 'es', 'pt', 'id', '
 /**
  * The models, by the id the page asks with. `options` are the runtime's
  * session options; R2T2's are the ones measured (FORK.md, "原生引擎").
+ * `requestOptions` are what it is told with every reading (the server's
+ * `default_request_options`), and `unspaced` says its text has spaces to be
+ * taken out before it is shown (`unspaced`).
  */
 const MODELS = {
   'r2t2-q8': {
@@ -106,6 +110,7 @@ const MODELS = {
   'qwen3-asr-1.7b-q8': {
     file: 'qwen3-asr-1.7b-q8_0.gguf',
     url: 'https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/e36610ac69b5262e914a52635324050bee8f1ad2/Qwen3-ASR-1.7B-GGUF/qwen3-asr-1.7b-q8_0.gguf',
+    mirror: 'https://modelscope.cn/models/audio-cpp/audio.cpp-gguf/resolve/master/Qwen3-ASR-1.7B-GGUF/qwen3-asr-1.7b-q8_0.gguf',
     bytes: 2473010048,
     sha256: 'da4fc2ac7f24dee784d1684eb1f35836cdbf559519452ae11777670734c0a4f8',
     family: 'qwen3_asr',
@@ -116,11 +121,37 @@ const MODELS = {
     languageAs: 'code',
     languages: QWEN_LANGUAGES,
   },
+  // SenseVoice-Small: a quarter of a gigabyte, and as right as the small Qwen3 below on the stretches the app cuts
+  // (20.3 % of the kana wrong against 20.7 %, the 1.7B 16.9 %; none of its readings empty — FORK.md, "又轻又快").
+  // Another kind of model: it writes a stretch in one pass, not a letter at a time, so it cannot lose its way, and
+  // a reading costs it next to nothing. Read a stretch at a time like the others here.
+  // For every system the runtime is published for, each run with its own archive (2026-10-12/13): on Windows (Vulkan,
+  // RTX 5070 Ti) through the server as the app starts it, 0.3-0.4 GB of video memory; on an Apple M2 (Metal) by the
+  // archive's command-line program, the same stretches 19.9 % wrong and none empty, about 0.5 GB of memory.
+  'sensevoice-small-q8': {
+    file: 'sensevoice-small-q8-audiocpp-v1.gguf',
+    // The makers' own file for this runtime. ModelScope has no copy of it (theirs there is another file), so it has
+    // no `mirror`: where Hugging Face is not reached it comes by the public mirror every such file is also asked of.
+    url: 'https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF-audiocpp/resolve/5c3fcfe748a8714216bc135476d5863084fddb72/sensevoice-small-q8-audiocpp-v1.gguf',
+    bytes: 254211200,
+    sha256: '4dedf169f625437fb336f2959674f399819729a765e184128c0e25a6e16ff0ec',
+    family: 'sense_asr',
+    mode: 'offline',
+    // Left to itself the runtime first cuts a recording at its pauses, with a second model the app does not carry,
+    // and fails for the lack of it. A stretch is read whole.
+    requestOptions: { audio_chunk_mode: 'none' },
+    // Told a language that is not one of these it does not refuse: it reads as though told none, and writes the
+    // speech down as one of its five. So it is offered for these alone, and never left to detect.
+    languageAs: 'code',
+    languages: ['zh', 'yue', 'en', 'ja', 'ko'],
+    unspaced: true,
+  },
   // The small one, for a computer that runs a game beside it: about 2 GB of video memory where the 1.7B holds 3, a
   // reading a quarter shorter, and more characters wrong (FORK.md, "小模型"). The same family, read the same way.
   'qwen3-asr-0.6b-q8': {
     file: 'qwen3-asr-0.6b-q8_0.gguf',
     url: 'https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/e36610ac69b5262e914a52635324050bee8f1ad2/Qwen3-ASR-0.6B-GGUF/qwen3-asr-0.6b-q8_0.gguf',
+    mirror: 'https://modelscope.cn/models/audio-cpp/audio.cpp-gguf/resolve/master/Qwen3-ASR-0.6B-GGUF/qwen3-asr-0.6b-q8_0.gguf',
     bytes: 1151272416,
     sha256: '6c44ec2fb4cee513892d7863c1fcc3ea6b699ffa4d899b0ef4ab19956d9544f7',
     family: 'qwen3_asr',
@@ -136,6 +167,7 @@ const MODELS = {
   'nemotron-asr-0.6b-q8': {
     file: 'nemotron-3.5-asr-streaming-0.6b-q8_0.gguf',
     url: 'https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/e36610ac69b5262e914a52635324050bee8f1ad2/Nemotron-3.5-ASR-Streaming-0.6B-GGUF/nemotron-3.5-asr-streaming-0.6b-q8_0.gguf',
+    mirror: 'https://modelscope.cn/models/audio-cpp/audio.cpp-gguf/resolve/master/Nemotron-3.5-ASR-Streaming-0.6B-GGUF/nemotron-3.5-asr-streaming-0.6b-q8_0.gguf',
     bytes: 930625888,
     sha256: 'c58b62c1bdd6c5d7b14b08126c5bd16c1289fee6e0d6ac0761dbd3aa6d714935',
     family: 'nemotron_asr',
@@ -146,6 +178,15 @@ const MODELS = {
     languages: Object.keys(NEMOTRON_LOCALES),
   },
 };
+
+/**
+ * A model's `mirror` is the same file on ModelScope: Hugging Face is not reached from mainland China without a proxy
+ * (a user's friend there, 2026-10-10), and ModelScope is. The repositories are the publishers' own or copies of them;
+ * each file's size and SHA-256 there were compared with the ones here on that day, and a download is kept only if it
+ * hashes right wherever it came from, so a mirror that changed costs a download, not a wrong model. R2T2 has no such
+ * copy. Beyond these, every file on Hugging Face is also asked of a public mirror of it, and the runtimes (GitHub
+ * releases) of public relays: where a file is asked for, in what order and how patiently is electron/fetch-file.js.
+ */
 
 /** llama.cpp's server, for the translation models: the project's own release archives, as published. */
 const LLAMA = {
@@ -175,18 +216,21 @@ const TRANSLATORS = {
   'index-translate-2b': {
     file: 'Index-Translate-2B.Q4_K_M.gguf',
     url: 'https://huggingface.co/IndexTeam/Index-Translate-2B-GGUF/resolve/449c9e6457b3632d328c6cbb78ae8e8e0c8059a5/Index-Translate-2B.Q4_K_M.gguf',
+    mirror: 'https://modelscope.cn/models/IndexTeam/Index-Translate-2B-GGUF/resolve/master/Index-Translate-2B.Q4_K_M.gguf',
     bytes: 1312164352,
     sha256: '044b313d29342bd3b2c77cbb64023ca0d209bd9b3247763f9d162767ef2d746a',
   },
   'hy-mt2-1.8b': {
     file: 'Hy-MT2-1.8B-Q4_K_M.gguf',
     url: 'https://huggingface.co/tencent/Hy-MT2-1.8B-GGUF/resolve/a0c709d9fac510f2c807aa3af52872340dc37a4a/Hy-MT2-1.8B-Q4_K_M.gguf',
+    mirror: 'https://modelscope.cn/models/Tencent-Hunyuan/Hy-MT2-1.8B-GGUF/resolve/master/Hy-MT2-1.8B-Q4_K_M.gguf',
     bytes: 1133080448,
     sha256: 'dc5f44fcf1fa496ee7ad725982c0c8c553a4de00259b53af84c4b89fb0c06699',
   },
   'hy-mt1.5-1.8b': {
     file: 'HY-MT1.5-1.8B-Q4_K_M.gguf',
     url: 'https://huggingface.co/tencent/HY-MT1.5-1.8B-GGUF/resolve/265b2e615a7dc9b06c435dc878829ad99a512ba2/HY-MT1.5-1.8B-Q4_K_M.gguf',
+    mirror: 'https://modelscope.cn/models/Tencent-Hunyuan/HY-MT1.5-1.8B-GGUF/resolve/master/HY-MT1.5-1.8B-Q4_K_M.gguf',
     bytes: 1133080512,
     sha256: '4383ac0c3c8e476de98ff979c2a3f069f8c4fb385e7860cf2d28da896cc477c7',
   },
@@ -201,6 +245,7 @@ const COACHES = {
   'gemma-4-e2b': {
     file: 'gemma-4-E2B-it-Q4_K_M.gguf',
     url: 'https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/0314792d7f1f7e229411f620751375812bb9faf2/gemma-4-E2B-it-Q4_K_M.gguf',
+    mirror: 'https://modelscope.cn/models/unsloth/gemma-4-E2B-it-GGUF/resolve/master/gemma-4-E2B-it-Q4_K_M.gguf',
     bytes: 3106738272,
     sha256: '740185b21d22ceb83a11c3aa62ad5842ef32c70f6096d756bbee85a1e4ec34b8',
   },
@@ -329,7 +374,7 @@ const AUDIO_RUNTIME = {
       backend: build.backend,
       device: 0,
       lazy_load: false,
-      models: [{ id, family: model.family, path: model.file, task: 'asr', mode: model.mode, session_options: model.options ?? {} }],
+      models: [{ id, family: model.family, path: model.file, task: 'asr', mode: model.mode, session_options: model.options ?? {}, ...(model.requestOptions ? { default_request_options: model.requestOptions } : {}) }],
     }, null, 1));
     return ['--config', 'server.json', '--no-ui'];
   },
@@ -449,7 +494,7 @@ function wavOf(pcm, sampleRate) {
  * One stretch of sound read whole by the runtime (POST /v1/audio/transcriptions, a form): `done` resolves with
  * `{ ok, text }` or `{ ok: false, message }`, and `abort` drops the request.
  */
-function readWhole({ port, model, sampleRate, language, pcm, timeoutMs }) {
+function readWhole({ host = LOOPBACK, port, pathname = '/v1/audio/transcriptions', model, sampleRate, language, pcm, timeoutMs, key }) {
   const boundary = `----kotomimi${crypto.randomBytes(12).toString('hex')}`;
   const field = (name, value) => Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="${name}"\r\n\r\n${value}\r\n`);
   const body = Buffer.concat([
@@ -461,7 +506,7 @@ function readWhole({ port, model, sampleRate, language, pcm, timeoutMs }) {
   ]);
   let request = null;
   const done = new Promise((resolve) => {
-    request = http.request({ host: LOOPBACK, port, method: 'POST', path: '/v1/audio/transcriptions', timeout: timeoutMs, headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}`, 'Content-Length': body.length } }, (response) => {
+    request = http.request({ host, port, method: 'POST', path: pathname, timeout: timeoutMs, headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}`, 'Content-Length': body.length, ...(key ? { Authorization: `Bearer ${key}` } : {}) } }, (response) => {
       let answer = '';
       response.setEncoding('utf8');
       response.on('data', (chunk) => { if (answer.length < 400_000) answer += chunk; });
@@ -515,6 +560,18 @@ const UNSPACED = /[\u3000-\u30ff\u3400-\u9fff\uff00-\uffef]/u;
 function joinHalves(first, second) {
   if (!first || !second) return first || second;
   return UNSPACED.test(first.at(-1)) || UNSPACED.test(second[0]) ? first + second : `${first} ${second}`;
+}
+
+/**
+ * A text without the spaces a model put where the writing has none: between two characters of Japanese or Chinese
+ * (`UNSPACED`), and between such a character and a figure (「あと 15 秒」). SenseVoice writes them now and then — a second or two
+ * cut out of a sentence comes back a word at a time (「元 は 金持ち の 息子 でし たが。」). Korean keeps its spaces
+ * (Hangul is not among these characters), and so do Latin words, also inside Japanese. The same rule as the phone's
+ * (`Share.unspaced` in android/), so that a stretch reads the same whichever of the two read it.
+ */
+const SPACE_INSIDE = new RegExp(String.raw`(?<=${UNSPACED.source})\s+(?=${UNSPACED.source}|\d)|(?<=\d)\s+(?=${UNSPACED.source})`, 'gu');
+function unspaced(text) {
+  return String(text).replace(SPACE_INSIDE, '');
 }
 
 /**
@@ -575,8 +632,14 @@ const WINDOW_MOST_SECONDS = 120;
  * goes out as `{ type: 'partial', text }`, everything heard so far, which the
  * next may write otherwise. `end` has it read once more, to `{ type: 'done',
  * text }` — unless the last reading already had all but the closing silence.
+ * `tidy`: what every reading's text goes through before anything is made of
+ * it, for a model whose writing needs it (`unspaced`).
  */
-function openWindow({ port, model, sampleRate, language, timeoutMs = WINDOW_READ_TIMEOUT_MS, read = readWhole, now = () => Date.now(), setTimer = setTimeout, clearTimer = clearTimeout, note = () => {} }, onEvent) {
+function openWindow({ port, model, sampleRate, language, timeoutMs = WINDOW_READ_TIMEOUT_MS, read: readAsIs = readWhole, tidy = null, now = () => Date.now(), setTimer = setTimeout, clearTimer = clearTimeout, note = () => {} }, onEvent) {
+  const read = tidy ? (asked) => {
+    const one = readAsIs(asked);
+    return { done: one.done.then((answer) => (answer.ok ? { ...answer, text: tidy(answer.text) } : answer)), abort: () => one.abort() };
+  } : readAsIs;
   const chunks = [];
   let bytes = 0;
   /** The loudest sample so far, and the loudest that no reading has had yet. */
@@ -737,6 +800,9 @@ function createNativeEngine(deps = {}) {
     env = process.env,
     sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
     now = () => Date.now(),
+    /** Whether a model's mirror is asked before the address it is published at. */
+    mirrorFirst = inMainlandChina,
+    answerWithinMs = ANSWER_WITHIN_MS,
     log = null,
     onChange = () => {},
     onStream = () => {},
@@ -814,8 +880,12 @@ function createNativeEngine(deps = {}) {
     tail = [...tail, ...text.split(/\r?\n/).filter((line) => line.trim())].slice(-TAIL_LINES);
   };
 
-  /** One file, from its address to its place: resumed where a stopped download left off, and kept only if it hashes right. */
-  async function fetchFile(key, { url, bytes, sha256 }, dest) {
+  /**
+   * One file, from its address to its place: resumed where a stopped download left off, and kept only if it hashes
+   * right. Where it has a mirror, the other address is asked when the first does not answer or breaks off — and goes
+   * on from what the first brought, the file being the same.
+   */
+  async function fetchFile(key, { url, mirror, bytes, sha256 }, dest) {
     const part = `${dest}.part`;
     const control = new AbortController();
     const state = { received: sizeOf(part), total: bytes, abort: () => control.abort(), verifying: false };
@@ -824,36 +894,19 @@ function createNativeEngine(deps = {}) {
     fetching.set(key, state);
     failed.delete(key);
     tell();
+    // Its mirrors, then a public mirror of Hugging Face for a file published there: all the same file, by its hash.
+    const mirrors = [...[].concat(mirror ?? []), ...hfMirrorOf(url)];
+    const sources = mirrorFirst() ? [...mirrors, url] : [url, ...mirrors];
     try {
-      if (state.received < bytes) {
-        const response = await doFetch(url, { signal: control.signal, redirect: 'follow', headers: state.received > 0 ? { Range: `bytes=${state.received}-` } : {} });
-        // The server sent the whole file where a rest was asked for: start over.
-        if (response.status === 200 && state.received > 0) { files.rmSync(part, { force: true }); state.received = 0; }
-        else if (response.status !== 200 && response.status !== 206) throw new Error(`The download answered HTTP ${response.status}.`);
-        if (!response.body) throw new Error('The download has no body.');
-        const out = files.createWriteStream(part, { flags: state.received > 0 ? 'a' : 'w' });
-        const failedWrite = new Promise((_, reject) => out.once('error', reject));
-        failedWrite.catch(() => {});
-        const reader = response.body.getReader();
-        let whole = false;
-        try {
-          for (;;) {
-            const { done, value } = await Promise.race([reader.read(), failedWrite]);
-            if (done) break;
-            if (!out.write(Buffer.from(value))) await Promise.race([new Promise((resolve) => out.once('drain', resolve)), failedWrite]);
-            state.received += value.byteLength;
-            if (state.received > bytes) throw new Error('The download is larger than the file expected.');
-            tell(false);
-          }
-          whole = true;
-        } finally {
-          // Whatever stopped it, the rest of the answer is not waited for.
-          if (!whole) Promise.resolve(reader.cancel()).catch(() => {});
-          await new Promise((resolve) => out.end(resolve));
-        }
-        // An answer that ended early without saying so: what came is kept, and the next attempt goes on from it.
-        if (sizeOf(part) < bytes) throw new Error('The download stopped before the end. Start it again to go on.');
-      }
+      await pullWhole({
+        sources, part, bytes, files, answerWithinMs,
+        fetch: doFetch,
+        signal: control.signal,
+        name: path.basename(dest),
+        onReceived: (count) => { state.received = count; tell(false); },
+        onTurn: () => tell(),
+        log: (line) => log?.(`[native-engine] ${line}\n`),
+      });
       state.verifying = true;
       tell();
       if (sizeOf(part) !== bytes || (await hash(part)) !== sha256) {
@@ -870,7 +923,7 @@ function createNativeEngine(deps = {}) {
     if (engineReady()) return;
     files.mkdirSync(engineDir, { recursive: true });
     const archive = path.join(engineDir, build.archive);
-    await fetchFile('engine', build, archive);
+    await fetchFile('engine', { ...build, mirror: build.mirror ?? relaysOf(build.url) }, archive);
     unpacking = true;
     tell();
     let whole = false;
@@ -1102,7 +1155,7 @@ function createNativeEngine(deps = {}) {
     const windowed = model?.mode === 'offline';
     const said = model?.languageAs === 'code' ? languageCode(language) : model?.languageAs === 'locale' ? languageLocale(language) : languageName(language);
     const target = { port: run.port, model: run.model, sampleRate: rate, language: said };
-    const stream = (windowed ? window : live)(windowed ? { ...target, note } : target, (event) => {
+    const stream = (windowed ? window : live)(windowed ? { ...target, note, ...(model?.unspaced ? { tidy: unspaced } : {}) } : target, (event) => {
       if (event.type !== 'delta' && event.type !== 'partial') streams.delete(id);
       onStream({ id, ...event });
     });
@@ -1130,4 +1183,4 @@ function createNativeEngine(deps = {}) {
   return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream };
 }
 
-module.exports = { createNativeEngine, openLive, openWindow, wavOf, loopAt, unloop, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };
+module.exports = { createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, unspaced, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };

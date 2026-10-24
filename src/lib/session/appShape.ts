@@ -4,6 +4,7 @@
  * writes a `prepare` patch back without overwriting a change the user made
  * during the run.
  */
+import { useCoachingStore } from '../../stores/coachingStore';
 import type { LegName } from '../conversation/types';
 import { participantSpeechHeard } from '../modern-audio/participantSource';
 import { reversedPair } from '../provider/languages';
@@ -69,6 +70,17 @@ export function watchSpeechFromStores(): () => void {
   // Whole-store listeners: `setSpeech` ignores inputs that did not change.
   const offs = [useSettingsStore.subscribe(apply), useRoutingStore.subscribe(apply), useAudioStore.subscribe(apply)];
   return () => { for (const off of offs) off(); };
+}
+
+/** Fork: keeps the coaching store on whether the selected provider coaches the speaker (`coachingStore.ts`). Returns the unsubscribe. */
+export function watchCoachingFromStores(): () => void {
+  const apply = () => {
+    const s = useProviderStore.getState();
+    const coached = s.selected === 'localai' && (s.entries.localai?.settings as { coach?: unknown } | undefined)?.coach === true;
+    if (useCoachingStore.getState().coached !== coached) useCoachingStore.setState({ coached });
+  };
+  apply();
+  return useProviderStore.subscribe(apply);
 }
 
 export function readShapeFromStores(auth: AuthContext): RunShape | null {

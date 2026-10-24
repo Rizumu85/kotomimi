@@ -58,6 +58,14 @@ export interface StagePlacement {
   translateAt: Place;
   coach: boolean;
   coachAt: Place;
+  /**
+   * A device of the hearing stage's own (`host:port`), where it is on "another device" and that is not the one the
+   * stages share: a phone that lends its recognition engine. Blank or absent: the shared device.
+   */
+  asrOther?: string;
+  /** The same of the translation and of the feedback: a phone that lends its text models. Blank or absent: the shared device. */
+  translateOther?: string;
+  coachOther?: string;
   /** On this computer: by whom. Absent: the app's own models. */
   asrHere?: AsrHere;
   translateHere?: AsrHere;
@@ -69,11 +77,35 @@ export interface DeviceChoices extends StagePlacement {
   selections: Selections;
 }
 
+/**
+ * The hearing stage is on a device of its own. Such a device is asked the way an API is — its address, a model, each
+ * stretch uploaded, this computer cutting the sentences — though to the person choosing it is "another device", found
+ * by the same search (`localai.ts` `settled` reads it as an API from there on).
+ */
+export const hearsAtOwnDevice = (s: Pick<StagePlacement, 'asrVia' | 'asrOther'>): boolean => s.asrVia === 'server' && (s.asrOther ?? '').trim() !== '';
+
+/** Where the hearing stage runs, as everything but the switch reads it: a device of its own is an API. */
+export const hearingPlace = (s: Pick<StagePlacement, 'asrVia' | 'asrOther'>): Place => (hearsAtOwnDevice(s) ? 'api' : s.asrVia);
+
+/**
+ * The translation, or the feedback, is on a device of its own: a phone that lends its text models. It is asked by
+ * this computer the way this computer's native engine is, at the phone's address (`localai.ts` `buildLocalAI`), and
+ * the device the stages share is not asked for it.
+ */
+export const translatesAtOwnDevice = (s: Pick<StagePlacement, 'translateAt' | 'translateOther'>): boolean => s.translateAt === 'server' && (s.translateOther ?? '').trim() !== '';
+export const coachesAtOwnDevice = (s: Pick<StagePlacement, 'coach' | 'coachAt' | 'coachOther'>): boolean => s.coach && s.coachAt === 'server' && (s.coachOther ?? '').trim() !== '';
+
+/** Where the translation runs, as what asks the shared device reads it: a device of its own is no stage of the shared one. */
+export const translatePlace = (s: Pick<StagePlacement, 'translateAt' | 'translateOther'>): Place => (translatesAtOwnDevice(s) ? 'api' : s.translateAt);
+
+/** The feedback runs on the device the stages share: the speaker is coached, there, and not on a device of its own. */
+export const coachesOnShared = (s: Pick<StagePlacement, 'coach' | 'coachAt' | 'coachOther'>): boolean => coachIs(s, 'server') && !coachesAtOwnDevice(s);
+
 /** This computer's LocalAI hears: a Realtime session, as another device's is, on the loopback. */
 export const hearsByLocalServer = (s: Pick<StagePlacement, 'asrVia' | 'asrHere'>): boolean => s.asrVia === 'device' && s.asrHere === 'localai';
 
 /** The app's own recognizer hears, or an API it uploads each sentence to: this computer cuts the sentences itself. */
-export const cutsSentencesHere = (s: Pick<StagePlacement, 'asrVia' | 'asrHere'>): boolean => s.asrVia !== 'server' && !hearsByLocalServer(s);
+export const cutsSentencesHere = (s: Pick<StagePlacement, 'asrVia' | 'asrHere' | 'asrOther'>): boolean => hearingPlace(s) !== 'server' && !hearsByLocalServer(s);
 
 /** The native translation engine translates (`nativeTranslators.ts`): none of the app's own models is asked for. */
 export const translatesNatively = (s: Pick<StagePlacement, 'translateAt' | 'translateHere'>): boolean => s.translateAt === 'device' && s.translateHere === 'native';
@@ -95,19 +127,20 @@ export const serverDetects = (models: Listed): boolean => (models as ReadonlyArr
  * that. Anywhere else the choice counts for nothing: the leg is told the
  * pair's language, and the language section says so.
  */
-export const detectsOther = (s: { asrDetectOther?: boolean; asrVia: Place; asrHere?: AsrHere }, models: Listed = []): boolean => s.asrDetectOther === true && canDetectOther(s, models);
+export const detectsOther = (s: { asrDetectOther?: boolean; asrVia: Place; asrHere?: AsrHere; asrOther?: string }, models: Listed = []): boolean => s.asrDetectOther === true && canDetectOther(s, models);
 
 /**
  * What hears can tell a language by itself: a native engine's model, an API
  * the sentence is uploaded to, or another Kotomimi that lists a recognizer
  * which does. `models`: what the other device lists.
  */
-export function canDetectOther(s: { asrVia: Place; asrHere?: AsrHere }, models: Listed = []): boolean {
-  return hearsNatively(s) || s.asrVia === 'api' || (s.asrVia === 'server' && serverDetects(models));
+export function canDetectOther(s: { asrVia: Place; asrHere?: AsrHere; asrOther?: string }, models: Listed = []): boolean {
+  const place = hearingPlace(s);
+  return hearsNatively(s) || place === 'api' || (place === 'server' && serverDetects(models));
 }
 
 /** What a leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs, or whatever it turns out to be. */
-export function heardBy(s: { asrDetectOther?: boolean; asrVia: Place; asrHere?: AsrHere; coach: boolean }, pair: { source: string; target: string }, leg: 'speaker' | 'participant', models: Listed = []): string {
+export function heardBy(s: { asrDetectOther?: boolean; asrVia: Place; asrHere?: AsrHere; asrOther?: string; coach: boolean }, pair: { source: string; target: string }, leg: 'speaker' | 'participant', models: Listed = []): string {
   if (leg === 'speaker') return s.coach ? pair.target : pair.source;
   return detectsOther(s, models) ? AUTO : pair.target;
 }
@@ -115,15 +148,15 @@ export function heardBy(s: { asrDetectOther?: boolean; asrVia: Place; asrHere?: 
 /** The feedback runs at this place: the speaker is coached, and that is where. */
 export const coachIs = (s: Pick<StagePlacement, 'coach' | 'coachAt'>, place: Place): boolean => s.coach && s.coachAt === place;
 
-/** A stage of this run is on the other device. */
+/** A stage of this run is on the other device: the one the stages share, not a device of a stage's own. */
 export function needsServer(s: StagePlacement): boolean {
-  return s.asrVia === 'server' || s.translateAt === 'server' || coachIs(s, 'server');
+  return hearingPlace(s) === 'server' || translatePlace(s) === 'server' || coachesOnShared(s);
 }
 
 /** The stored settings as the device stages read them: a stage this computer's LocalAI runs, or its native engine, asks nothing of the app's own models. */
 export function deviceChoices(s: DeviceChoices): DeviceChoices {
   const own = (place: Place, here: AsrHere | undefined): Place => (place === 'device' && here !== undefined && here !== 'app' ? 'api' : place);
-  return { asrVia: own(s.asrVia, s.asrHere), translateAt: own(s.translateAt, s.translateHere), coach: s.coach, coachAt: own(s.coachAt, s.coachHere), selections: s.selections };
+  return { asrVia: own(hearingPlace(s), s.asrHere), translateAt: own(s.translateAt, s.translateHere), coach: s.coach, coachAt: own(s.coachAt, s.coachHere), selections: s.selections };
 }
 
 /**

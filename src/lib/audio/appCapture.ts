@@ -37,6 +37,7 @@ export function micSettings(): MicSettings {
     isUnusable: (id) => audio().unusableInputIds.includes(id),
     markUnusable: (id) => audio().markInputUnusable(id),
     noiseSuppression: () => audio().noiseSuppressionMode,
+    echoCancellation: () => audio().echoCancellationMode,
     muted: () => audio().isMicMuted,
     // Fork: the activation threshold, and the meter it is set by (`micGate.ts`, `micLevel.ts`).
     activation: () => audio().micGateThreshold,

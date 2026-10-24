@@ -38,6 +38,7 @@ const WORDS: Record<NativeKind, { ready: string; warming: string; failed: string
 const NOTES: Readonly<Record<string, string>> = {
   'r2t2-q8': 'noteNativeR2t2',
   'qwen3-asr-1.7b-q8': 'noteNativeQwen',
+  'sensevoice-small-q8': 'noteNativeSenseVoice',
   'qwen3-asr-0.6b-q8': 'noteNativeQwenSmall',
   'nemotron-asr-0.6b-q8': 'noteNativeNemotron',
   'apple-speech': 'noteAppleSpeech',
@@ -46,6 +47,9 @@ const NOTES: Readonly<Record<string, string>> = {
   'hy-mt1.5-1.8b': 'noteHyMt15',
   'gemma-4-e2b': 'noteGemma4',
 };
+
+/** The note of a model's card. A model of one family to a language (the Mac's recognition) shares its family's. */
+export const nativeNoteKey = (id: string): string | undefined => NOTES[id] ?? NOTES[id.split(':')[0]];
 
 /**
  * What every model of a kind shares, said once by a chip on its card rather than in each model's own note: one run
@@ -92,8 +96,7 @@ export function NativeEngineCard({ kind, model, recommended = true, selected, on
   const { run } = status;
   const ours = run.model === model.id;
   const words = WORDS[kind];
-  // A model of one family to a language (the Mac's recognition) shares its family's note.
-  const note = NOTES[model.id] ?? NOTES[model.id.split(':')[0]];
+  const note = nativeNoteKey(model.id);
   return (
     // No size is shown for a model the system fetches itself: it does not say how large it is.
     <div className={`kt-native-card${model.bytes > 0 ? '' : ' kt-native-card--unsized'}`}>

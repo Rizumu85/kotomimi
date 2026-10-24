@@ -64,6 +64,11 @@ export interface Lane {
   answer?: LaneText & { notice?: NoticeEntry };
   /** A sentence newer than the one answered is waiting for its answer (a pair), or the one shown is (a row). */
   pending: boolean;
+  /**
+   * Fork: the sentence the answer answers, alone — a pair's source line may run on into what was said since. What a
+   * correction is laid over (`src/lib/feedback/correction.ts`).
+   */
+  answers?: string;
 }
 
 /** The other side first: theirs is what a caption strip is read for. */
@@ -163,6 +168,7 @@ export function buildLanes(
         const sentences = mine.slice(from, (shape === 'pair' && waits ? newest : at) + 1).flatMap((entry) => (entry.kind === 'exchange' ? [entry.source] : []));
         lane.source = { ...streamOf(sentences), language: row?.language || said.languages.source, ...(row ? { segmentId: row.segmentId } : {}) };
       }
+      if (lane.source && lane.answer && joined(said.source)) lane.answers = joined(said.source);
       if (lane.answer && joined(said.translation)) {
         const row = said.translation[0];
         lane.answer = { text: joined(said.translation), pieces: piecesOf(said.translation), language: row?.language || said.languages.target, ...(row ? { segmentId: row.segmentId } : {}) };

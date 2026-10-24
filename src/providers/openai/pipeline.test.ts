@@ -34,6 +34,9 @@ const sse = (...pieces: string[]) => new Response(
 type Call = { url: string; body: { model: string; messages: Array<{ role: string; content: string }> }; headers: Record<string, string>; signal: AbortSignal | undefined };
 
 /** A leg over a `FakeSocket` and a scripted text model: started, opened, created and configured. */
+/** Whether a phone in use answers when asked if it is there; a frozen app takes the connection and says nothing. */
+let phoneAwake = true;
+
 async function live(context: SessionContext, patch: Partial<LocalAISettings>, answers: Array<Response | Error | 'hang'> = [], credentials: LocalAICredentials = K, tweak: (config: LocalAIConfig) => void = () => {}) {
   const settings = { ...LOCALAI_DEFAULTS, ...patch };
   const config = buildLocalAI(context, settings, shared);
@@ -44,6 +47,8 @@ async function live(context: SessionContext, patch: Partial<LocalAISettings>, an
   const { events, log } = recordEvents();
   const calls: Call[] = [];
   const fetch = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+    // A phone in use is asked now and then whether it is there (`phoneWatch.ts`): it is.
+    if (!init?.body && String(input).endsWith('/models')) return phoneAwake ? Promise.resolve(new Response('{"data":[]}')) : new Promise<Response>((_resolve, reject) => init?.signal?.addEventListener('abort', () => reject(init.signal?.reason)));
     calls.push({ url: String(input), body: JSON.parse(init?.body as string), headers: init?.headers as Record<string, string>, signal: init?.signal ?? undefined });
     const next = answers.shift();
     if (next === undefined) return Promise.reject(new Error('no answer scripted'));
@@ -407,6 +412,68 @@ describe('a stage one of this computer\u2019s native engines answers', () => {
     await vi.waitFor(() => expect(urls).toHaveLength(3));
     expect(urls[2]).toBe('http://127.0.0.1:4200/v1/chat/completions');
     await session.stop();
+  });
+});
+
+describe('a stage a phone lends its model for', () => {
+  const PHONE: Partial<LocalAISettings> = { translateOther: '192.168.4.28:8792', translateOtherModel: 'hy-mt2-1.8b' };
+  const busy = (status: number, after: string) => new Response(JSON.stringify({ error: { message: 'busy' } }), { status, headers: { 'Content-Type': 'application/json', 'Retry-After': after } });
+
+  it('is asked at the phone, in the model’s own form, and again after the wait a busy phone names', async () => {
+    const h = await live(PARTICIPANT, PHONE, [busy(429, '2'), busy(503, '5'), sse('今天天气很好。')]);
+    h.receive(...heard('item_1', '今日は天気がいいですね。'));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(1));
+    expect(h.calls[0].url).toBe('http://192.168.4.28:8792/v1/chat/completions');
+    // One user message in Hunyuan MT's own words, with its sampling; no system message.
+    expect(h.calls[0].body.messages).toEqual([{ role: 'user', content: '将以下文本翻译为中文，注意只需要输出翻译后的结果，不要额外解释：\n\n今日は天気がいいですね。' }]);
+    expect(h.calls[0].body).toMatchObject({ model: 'hy-mt2-1.8b', temperature: 0.7, top_k: 20 });
+    // The wait is armed once the refusal is read: the clock is moved on until it has passed.
+    await vi.waitFor(() => { h.clock.advance(500); expect(h.calls).toHaveLength(2); });
+    await vi.waitFor(() => { h.clock.advance(500); expect(h.calls).toHaveLength(3); });
+    await h.settled();
+    expect(h.calls).toHaveLength(3);
+    expect(h.of('segmentText').map((e) => e.payload.text)).toContain('今天天气很好。');
+    expect(h.of('degraded')).toEqual([]);
+    expect(h.of('frame').find((e) => e.payload.type === 'text.request')?.payload.payload).toMatchObject({ phone: true });
+    await h.session.stop();
+  });
+
+  it('is given longer than a text model of this computer: a first answer waits for the phone to load the model', async () => {
+    const h = await live(PARTICIPANT, PHONE, ['hang']);
+    h.receive(...heard('item_1', '今日は天気がいいですね。'));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(1));
+    h.clock.advance(60_000);
+    await Promise.resolve();
+    expect(h.of('degraded')).toEqual([]);
+    h.clock.advance(60_000);
+    await vi.waitFor(() => expect(h.of('degraded')).toHaveLength(1));
+    expect(h.of('degraded')[0].payload.message).toContain('did not finish within 120 s');
+    await h.session.stop();
+  });
+
+  // A 4 GB phone refuses a model it has not the memory for (2026-10-23): said as that, not as a model that failed.
+  it('says a phone has not the memory for the model, where it refuses every try', async () => {
+    const full = () => new Response(JSON.stringify({ error: { message: 'This phone has not the memory for Index-Translate 2B now: it keeps 1.5 GB for itself, and 1.4 GB can be had.' } }), { status: 503, headers: { 'Content-Type': 'application/json', 'Retry-After': '1' } });
+    const h = await live(PARTICIPANT, PHONE, [full(), full(), full(), full()]);
+    h.receive(...heard('item_1', '今日は天気がいいですね。'));
+    await vi.waitFor(() => { h.clock.advance(500); expect(h.of('degraded').map((e) => e.payload.code)).toEqual(['phone_no_memory']); });
+    await h.session.stop();
+  });
+
+  // Locked or in the background, some phones' systems freeze the app (2026-10-20): the user is told within seconds,
+  // not after the sentence's two minutes.
+  it('says when the phone stops answering mid-run', async () => {
+    const h = await live(PARTICIPANT, PHONE, ['hang']);
+    h.receive(...heard('item_1', '今日は天気がいいですね。'));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(1));
+    phoneAwake = false;
+    try {
+      await vi.waitFor(() => { h.clock.advance(1_000); expect(h.of('degraded').map((e) => e.payload.code)).toEqual(['phone_quiet']); });
+      expect(h.clock.now()).toBeLessThan(30_000);
+    } finally {
+      phoneAwake = true;
+    }
+    await h.session.stop();
   });
 });
 

@@ -7,8 +7,10 @@ import { getManifestByType } from '../../../lib/local-inference/modelManifest';
 import { wasmCandidates } from '../../../lib/local-inference/selection/candidates.wasm';
 import { LOCAL_INFERENCE_DEFAULTS, type LocalInferenceSettings } from '../../../providers/localInference/settings';
 import type { LanguagePair } from '../../../lib/provider/types';
+import { offeredFor } from '../../../lib/local-inference/selection/measuredRank';
 
-const jaAsr = () => getManifestByType('asr').filter(m => m.multilingual || m.languages.includes('ja'));
+// Fork: but for the recognizers this fork does not offer for Japanese (`measuredRank.ts`).
+const jaAsr = () => getManifestByType('asr').filter(m => (m.multilingual || m.languages.includes('ja')) && offeredFor(m.id, 'ja'));
 
 const JA_EN: LanguagePair = { source: 'ja', target: 'en' };
 const ZH_KO: LanguagePair = { source: 'zh', target: 'ko' };
@@ -69,6 +71,22 @@ describe('useWasmEngineAdapter', () => {
     const ids = result.current.adapter.readyCandidates({ dir: 'ja→en', stage: 'translation' }).map(c => c.id);
     expect(ids).not.toContain(astCandidate!.id);
     expect(ids).toContain(normalCandidate!.id);
+  });
+
+  // Fork: the SenseVoice that runs in the page writes Japanese without its kana, and is not offered for it.
+  it('lists a recognizer not offered for the language only while it is the slot\'s own choice, made before (fork)', async () => {
+    useModelStore.setState({ modelStatuses: { 'sensevoice-int8': 'downloaded', 'moonshine-tiny-ja-quant': 'downloaded' } });
+    const { result } = renderHook(() => useHeldAdapter());
+    const slot = { dir: 'ja→en', stage: 'asr' as const };
+    expect(result.current.adapter.readyCandidates(slot).map(c => c.id)).toEqual(['moonshine-tiny-ja-quant']);
+    expect(result.current.adapter.autoPick(slot)).toBe('moonshine-tiny-ja-quant');
+    // A choice of it saved by an earlier build: it still hears, and the menu names it.
+    await act(() => result.current.adapter.select(slot, 'sensevoice-int8'));
+    expect(result.current.adapter.resolved(slot)).toMatchObject({ modelId: 'sensevoice-int8', source: 'explicit' });
+    expect(result.current.adapter.readyCandidates(slot).map(c => c.id).sort()).toEqual(['moonshine-tiny-ja-quant', 'sensevoice-int8']);
+    expect(result.current.adapter.autoPick(slot)).toBe('moonshine-tiny-ja-quant');
+    // A language it reads well lists it as ever.
+    expect(result.current.adapter.readyCandidates({ dir: 'en→ja', stage: 'asr' }).map(c => c.id)).toContain('sensevoice-int8');
   });
 
   it('select writes an explicit pick preserving sibling stages, and "" restores auto', async () => {

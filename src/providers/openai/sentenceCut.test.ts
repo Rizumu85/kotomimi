@@ -54,6 +54,27 @@ describe('where a stretch still being heard may be cut', () => {
     const text = '「もう行くの？」と聞きました。それから一緒に駅まで歩きました';
     expect(text.slice(0, cutAt(text))).toBe('「もう行くの？」と聞きました。');
   });
+
+  it('cuts nothing of a recognizer that writes its only full stop at the end of whatever it has so far: the stretch is answered whole', () => {
+    // SenseVoice-Small, a stretch read as it grew (the native engine, 2026-10-12): every reading ends in a mark,
+    // which the next reading has no more, and none stands inside. Nothing is closed on such a mark.
+    const readings = [
+      'あとは？',
+      '元は金持ちの息子でしたが。',
+      '元は金持ちの息子でしたが今は？',
+      '元は金持ちの息子でしたが今は財産を使い。',
+      '元は金持ちの息子でしたが、今は財産を使い尽くして。',
+      '元は金持ちの息子でしたが今は財産を使い尽くして、その日の暮らしにも困ま。',
+      '元は金持ちの息子でしたが今は財産を使い尽くして、その日の暮らしにも困るくらい哀な身分になっている。',
+      '元は金持ちの息子でしたが、今は財産を使い尽くして、その日の暮らしにも困るくらい哀れな身分になっているのです。',
+    ];
+    for (const text of readings) expect(cutAt(text), text).toBe(-1);
+    // Two sentences it wrote with nothing between them are one run, and wait for their end.
+    expect(cutAt('今は財産を使い尽くして、その日の暮らしにも困るくらい哀れな身分になっているのです何しろ、その頃楽陽といえば、天下に並べぶもののない。')).toBe(-1);
+    // Where it does write a full stop inside — it does on clear speech — the sentence is closed there as any other's.
+    const marked = '今は財産を使い尽くして、その日の暮らしにも困るくらい哀れな身分になっているのです。何しろ、その頃楽陽といえば、天下に並ぶもののない';
+    expect(marked.slice(0, cutAt(marked))).toBe('今は財産を使い尽くして、その日の暮らしにも困るくらい哀れな身分になっているのです。');
+  });
 });
 
 describe('where the rest of a stretch begins once its beginning was closed', () => {

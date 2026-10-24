@@ -58,6 +58,9 @@ describe('subtitleSession', () => {
     expect(subtitleSession(input).canStart).toBe(true);
     expect(subtitleSession({ ...input, readiness: undefined }).canStart).toBe(true);
     expect(subtitleSession({ ...input, readiness: { state: 'not-ready', reason: 'x' } }).canStart).toBe(false);
+    // Fork: a check that could not find out does not hold the start (a press asks again), and is still said.
+    expect(subtitleSession({ ...input, readiness: { state: 'not-ready', reason: 'x', unsure: true } }).canStart).toBe(true);
+    expect(subtitleSession({ ...input, readiness: { state: 'not-ready', reason: 'x', unsure: true } }).idle).toEqual({ kind: 'unready', message: 'x', unsure: true });
     expect(subtitleSession({ ...input, readiness: { state: 'checking' } }).canStart).toBe(false);
     expect(subtitleSession({ ...input, run: { phase: 'starting', step: 'checking' } }).canStart).toBe(false);
   });

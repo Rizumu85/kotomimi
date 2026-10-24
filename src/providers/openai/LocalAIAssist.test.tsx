@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { Readiness } from '../../lib/provider/types';
 import { useLocalServerStore } from '../../stores/localServerStore';
 import { useModelStore } from '../../stores/modelStore';
 import { useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import { NO_LOCAL_SERVER } from '../../lib/lan/localServer';
-import { LocalAIAssist } from './LocalAIAssist';
+import { FarSourceNote, LocalAIAssist } from './LocalAIAssist';
 import { LOCALAI_DEFAULTS, type LocalAISettings } from './localai';
 import { PLACE_FIELDS } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
@@ -14,9 +14,26 @@ import type { LocalAIModel } from './localaiModels';
 vi.mock('react-i18next', async (importOriginal) => ({ ...(await importOriginal<typeof import('react-i18next')>()), useTranslation: () => ({ t: (key: string) => key }) }));
 // The search of the network is the finder's own test: here only that it is drawn, and what a pick does.
 vi.mock('../../components/LanSharing/ServerFinder', () => ({
-  ServerFinder: ({ onPick, auto, hint }: { onPick(server: unknown): void; auto?: boolean; hint?: string }) => (
-    <button type="button" data-auto={String(Boolean(auto))} data-hint={hint} onClick={() => onPick({ address: '192.168.1.9:8790', kind: 'kotomimi', name: 'DESK', product: '', models: 2, needsKey: true, self: false })}>finder</button>
-  ),
+  ServerFinder: ({ onPick, onFound, auto, hint, phone }: { onPick(server: unknown): void; onFound?(servers: unknown[]): void; auto?: boolean; hint?: string; phone?: string | string[] }) => {
+    const aPhone = { address: '192.168.4.28:8792', kind: 'phone', name: 'Pixel', product: '', models: 1, needsKey: false, self: false, model: 'qwen3-asr-0.6b-q8' };
+    // A phone of 0.8.0: its recognizer, two translators and the feedback model; and one that lends a translator alone.
+    const lending = { ...aPhone, models: 4, text: [
+      { id: 'hy-mt2-1.8b', kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: false },
+      { id: 'index-translate-2b', kind: 'translate', name: 'Index-Translate 2B', loaded: false },
+      { id: 'gemma-4-e2b', kind: 'coach', name: 'Gemma 4 E2B', loaded: false },
+    ] };
+    const textOnly = { address: '192.168.4.30:8792', kind: 'phone', name: 'F22', product: '', models: 1, needsKey: false, self: false, text: [{ id: 'hy-mt2-1.8b', kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: true }] };
+    return (
+      <>
+        <button type="button" data-auto={String(Boolean(auto))} data-hint={hint} data-phone={[phone ?? []].flat().join(' ')} onClick={() => onPick({ address: '192.168.1.9:8790', kind: 'kotomimi', name: 'DESK', product: '', models: 2, needsKey: true, self: false })}>finder</button>
+        <button type="button" onClick={() => onFound?.([aPhone])}>a search that finds a phone</button>
+        <button type="button" onClick={() => onPick(aPhone)}>the phone, picked</button>
+        <button type="button" onClick={() => onFound?.([lending, textOnly])}>a search that finds phones lending text models</button>
+        <button type="button" onClick={() => onPick(lending)}>the lending phone, picked</button>
+        <button type="button" onClick={() => onPick(textOnly)}>the text phone, picked</button>
+      </>
+    );
+  },
 }));
 // The library is Local Inference's own, tested beside it: here only which one opens. Its card is the real one: the chat models are drawn with it.
 vi.mock('../../components/Settings/sections/ModelManagementSection', async (importOriginal) => ({
@@ -626,6 +643,129 @@ describe('one menu for a stage of this computer, whoever runs it', () => {
     expect(groups(menu)[0]).toEqual(['providers.localai.groupNative', ['Qwen3-ASR 1.7B GGUF']]);
     expect(card(HEAR).getByRole('button', { name: 'providers.localai.browse' }).getAttribute('aria-expanded')).toBe('false');
   });
+
+  /** The engine's cards in the library that is open, in the order drawn, and which of them carry the mark. */
+  const cards = (container: HTMLElement) => [...container.querySelectorAll<HTMLElement>('.kt-here__native [data-testid^="model-card-native:"]')]
+    .map((one) => `${one.dataset.testid!.slice('model-card-native:'.length)}${one.querySelector('.model-card__recommended-badge') ? ' ★' : ''}`);
+  const EVERY = { 'qwen3-asr-1.7b-q8': 'absent', 'r2t2-q8': 'absent', 'sensevoice-small-q8': 'absent', 'qwen3-asr-0.6b-q8': 'absent', 'nemotron-asr-0.6b-q8': 'absent' } as const;
+  const hearing = (pair: { source: string; target: string }, chosen = 'qwen3-asr-1.7b-q8') => render(
+    <LocalAIAssist settings={{ ...LOCALAI_DEFAULTS, asrVia: 'device', asrHere: 'native', asrNativeModel: chosen, translateAt: 'device' }} values={{ endpoint: '' }} set={vi.fn()} fill={vi.fn()} update={vi.fn()} pair={pair} legs={['speaker']} models={[]} readiness={{ state: 'unknown' }} check={vi.fn()} />,
+  );
+
+  it('offers SenseVoice-Small among the engine’s models for the five languages it hears: after the more accurate ones, before the small Qwen3, and never with the mark', () => {
+    // Windows: every model of the engine the app downloads, R2T2 among them. None is here yet, so the library is open.
+    useNativeEngineStore.setState({ status: engineOf(EVERY) });
+    for (const source of ['ja', 'zh-CN', 'en', 'ko']) {
+      const view = hearing({ source, target: 'ru' });
+      expect(cards(view.container), source).toEqual(['qwen3-asr-1.7b-q8 ★', 'r2t2-q8', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
+      view.unmount();
+    }
+    // Cantonese: R2T2 and Nemotron do not hear it.
+    const cantonese = hearing({ source: 'yue', target: 'en' });
+    expect(cards(cantonese.container)).toEqual(['qwen3-asr-1.7b-q8 ★', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8']);
+    cantonese.unmount();
+    // A language it does not hear has no card of it.
+    const russian = hearing({ source: 'ru', target: 'zh-CN' });
+    expect(cards(russian.container)).toEqual(['qwen3-asr-1.7b-q8 ★', 'r2t2-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
+    russian.unmount();
+    // One only the last model hears: that one alone, and so the one marked.
+    const ukrainian = hearing({ source: 'uk', target: 'zh-CN' }, 'nemotron-asr-0.6b-q8');
+    expect(cards(ukrainian.container)).toEqual(['nemotron-asr-0.6b-q8 ★']);
+  });
+
+  it('offers it on a Mac too, after the system’s own recognition and Qwen3-ASR 1.7B: the system’s is the one marked for each of its five languages', () => {
+    // A Mac: the system's recognition, a model to a language, and the engine's models but R2T2, which names Windows alone.
+    const MAC = { 'apple-speech:ja': 'absent', 'apple-speech:zh': 'absent', 'apple-speech:en': 'absent', 'apple-speech:ko': 'absent', 'apple-speech:yue': 'absent', 'qwen3-asr-1.7b-q8': 'absent', 'sensevoice-small-q8': 'absent', 'qwen3-asr-0.6b-q8': 'absent', 'nemotron-asr-0.6b-q8': 'absent' } as const;
+    useNativeEngineStore.setState({ status: engineOf(MAC) });
+    for (const [source, own] of [['ja', 'ja'], ['zh-CN', 'zh'], ['en', 'en'], ['ko', 'ko']] as const) {
+      const view = hearing({ source, target: 'ru' });
+      expect(cards(view.container), source).toEqual([`apple-speech:${own} ★`, 'qwen3-asr-1.7b-q8', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
+      view.unmount();
+    }
+    // Cantonese: Nemotron does not hear it.
+    const cantonese = hearing({ source: 'yue', target: 'en' });
+    expect(cards(cantonese.container)).toEqual(['apple-speech:yue ★', 'qwen3-asr-1.7b-q8', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8']);
+    cantonese.unmount();
+    // A language neither the system nor it hears: Qwen3-ASR's, as before.
+    const russian = hearing({ source: 'ru', target: 'zh-CN' });
+    expect(cards(russian.container)).toEqual(['qwen3-asr-1.7b-q8 ★', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
+    russian.unmount();
+    // A Mac whose system has no such recognition (before macOS 26): the engine's models alone, in their order.
+    useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'absent', 'sensevoice-small-q8': 'absent', 'qwen3-asr-0.6b-q8': 'absent', 'nemotron-asr-0.6b-q8': 'absent' }) });
+    const older = hearing({ source: 'ja', target: 'zh-CN' });
+    expect(cards(older.container)).toEqual(['qwen3-asr-1.7b-q8 ★', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
+  });
+
+  it('has no card of a model the engine of this system does not list', () => {
+    useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'absent', 'qwen3-asr-0.6b-q8': 'absent' }) });
+    const japanese = hearing({ source: 'ja', target: 'zh-CN' });
+    expect(cards(japanese.container)).toEqual(['qwen3-asr-1.7b-q8 ★', 'qwen3-asr-0.6b-q8']);
+  });
+
+  it('lists it in a row’s menu once it is downloaded, for a language it hears and for no other', () => {
+    useNativeEngineStore.setState({ status: engineOf({ ...EVERY, 'qwen3-asr-1.7b-q8': 'downloaded', 'sensevoice-small-q8': 'downloaded' }) });
+    const japanese = hearing({ source: 'ja', target: 'ru' }, 'sensevoice-small-q8');
+    const menu = within(screen.getByRole('region', { name: HEAR })).getByRole('combobox') as HTMLSelectElement;
+    expect(menu.selectedOptions[0].textContent).toBe('SenseVoice-Small GGUF');
+    expect(groups(menu)[0]).toEqual(['providers.localai.groupNative', ['Qwen3-ASR 1.7B GGUF', 'SenseVoice-Small GGUF']]);
+    japanese.unmount();
+    // Russian is not one of its five: the row has no model chosen, says so, and offers the one that hears it.
+    hearing({ source: 'ru', target: 'ja' }, 'sensevoice-small-q8');
+    const other = within(screen.getByRole('region', { name: HEAR })).getByRole('combobox') as HTMLSelectElement;
+    expect(other.selectedOptions[0].textContent).toBe('Qwen3-ASR 1.7B GGUF');
+    expect(groups(other)[0]).toEqual(['providers.localai.groupNative', ['Qwen3-ASR 1.7B GGUF']]);
+    // Taken down before the engine's state is put back: the row would then have no model, in words this test's stand-in for the catalog does not have.
+    cleanup();
+  });
+});
+
+describe('the SenseVoice that runs in the page, which writes Japanese without its kana', () => {
+  const groups = (select: HTMLSelectElement) => [...select.querySelectorAll('optgroup')].map((g) => [g.label, [...g.querySelectorAll('option')].map((o) => o.value)]);
+  const KEPT = { 'ja→zh': { asr: { modelId: 'sensevoice-int8' }, translation: { modelId: '' }, tts: { modelId: '' } } };
+  // The other side speaks Japanese: the participant's row is the one that hears it.
+  const row = (selections = {}) => {
+    const { card } = draw({ settings: { asrVia: 'device', translateAt: 'device', selections }, legs: ['participant'] });
+    return card(HEAR).getByRole('combobox') as HTMLSelectElement;
+  };
+
+  it('is not what hears Japanese by itself, nor in the row’s menu, though it is downloaded for its Chinese', () => {
+    useModelStore.setState({ modelStatuses: { 'sensevoice-int8': 'downloaded', 'sensevoice-nano-int8': 'downloaded' } });
+    const menu = row();
+    // Nothing here hears Japanese: said as that, and the library opens on it.
+    expect(menu.selectedOptions[0].textContent).toBe('providers.localai.notDownloaded');
+    expect(menu.className).toContain('kt-here__select--missing');
+    expect(groups(menu)).toEqual([]);
+    expect(screen.getByTestId('library').textContent).toBe('asr:ja→zh');
+  });
+
+  it('is still the one that hears where it was chosen before, and the menu says so: the model is never silently another', () => {
+    useModelStore.setState({ modelStatuses: { 'sensevoice-int8': 'downloaded', 'moonshine-tiny-ja-quant': 'downloaded' } });
+    const menu = row(KEPT);
+    expect(menu.value).toBe('sensevoice-int8');
+    expect(menu.selectedOptions[0].textContent).toContain('SenseVoice');
+    expect(menu.className).not.toContain('kt-here__select--missing');
+    // The automatic choice beside it is the other recognizer, never this one.
+    expect(groups(menu)).toEqual([['providers.localai.groupApp', ['', 'sensevoice-int8', 'moonshine-tiny-ja-quant']]]);
+    cleanup();
+    // Also with nothing else downloaded: it hears, and nothing is said to be missing.
+    useModelStore.setState({ modelStatuses: { 'sensevoice-int8': 'downloaded' } });
+    const alone = row(KEPT);
+    expect(alone.value).toBe('sensevoice-int8');
+    expect(alone.className).not.toContain('kt-here__select--missing');
+    expect(screen.queryByTestId('library')).toBeNull();
+    cleanup();
+    // Chosen away from, it is no longer offered for the language.
+    useModelStore.setState({ modelStatuses: { 'sensevoice-int8': 'downloaded', 'moonshine-tiny-ja-quant': 'downloaded' } });
+    expect(groups(row())).toEqual([['providers.localai.groupApp', ['']]]);
+  });
+
+  it('hears Chinese as ever', () => {
+    useModelStore.setState({ modelStatuses: { 'sensevoice-int8': 'downloaded', 'moonshine-tiny-ja-quant': 'downloaded' } });
+    const { card } = draw({ settings: { asrVia: 'device', translateAt: 'device' }, legs: ['speaker'] });
+    const menu = card(HEAR).getByRole('combobox') as HTMLSelectElement;
+    expect(menu.selectedOptions[0].textContent).toBe('providers.localai.auto');
+    expect(menu.className).not.toContain('kt-here__select--missing');
+  });
 });
 
 describe('the other side\u2019s language left to be detected', () => {
@@ -673,5 +813,173 @@ describe('the other side\u2019s language left to be detected', () => {
     const { card } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'qwen3-asr-1.7b-q8', asrDetectOther: true, translateAt: 'device' }, legs: ['speaker'] });
     expect(card(HEAR).queryByText('providers.localai.detectOtherNote')).toBeNull();
     expect(card(HEAR).queryByRole('combobox', { name: 'providers.localai.hearsOther' })).toBeNull();
+  });
+});
+
+describe('the app\'s own models, where their source is far', () => {
+  it('says what to expect of a download there, and that the models above are another matter', () => {
+    const { rerender } = render(<FarSourceNote rest far />);
+    expect(screen.getByRole('note').textContent).toBe('providers.localai.farSourceRest');
+    // With no native model above, nothing is said of one.
+    rerender(<FarSourceNote rest={false} far />);
+    expect(screen.getByRole('note').textContent).toBe('providers.localai.farSource');
+  });
+
+  it('says nothing anywhere else', () => {
+    render(<FarSourceNote rest far={false} />);
+    expect(screen.queryByRole('note')).toBeNull();
+  });
+});
+
+describe('a phone that lends its recognition: the "another device" of the hearing stage alone', () => {
+  const PHONE = { asrVia: 'server' as const, asrOther: '192.168.4.28:8792', asrOtherModel: 'qwen3-asr-0.6b-q8' };
+
+  it('is chosen by a pick in the search: the stage is on another device, that one, and nothing is typed', () => {
+    const { update, fill } = draw({ settings: { asrVia: 'device' } });
+    fireEvent.click(screen.getByText('the phone, picked'));
+    expect(update).toHaveBeenCalledWith(expect.objectContaining(PHONE));
+    // It is not the device the other stages share.
+    expect(fill).not.toHaveBeenCalled();
+  });
+
+  it('shows as "another device" with the model it lends, and asks for no address of the shared one', () => {
+    const { card, places } = draw({ settings: { ...PHONE, translateAt: 'device' } });
+    expect(pressed(places(HEAR))).toBe('providers.localai.placeServer');
+    const device = card(HEAR).getByRole('combobox', { name: 'providers.localai.stageDevice' }) as HTMLSelectElement;
+    expect(device.value).toBe('192.168.4.28:8792');
+    expect((card(HEAR).getByRole('combobox', { name: 'providers.localai.model' }) as HTMLSelectElement).selectedOptions[0].textContent).toContain('Qwen3-ASR 0.6B');
+    expect(card(HEAR).queryByText('providers.localai.connectFirst')).toBeNull();
+    // The search marks it as the one recognition is asked of.
+    expect(screen.getByText('finder').getAttribute('data-phone')).toBe('192.168.4.28:8792');
+  });
+
+  it('is offered beside the shared device once a search has found it, and either can be chosen there', () => {
+    const { card, update } = draw({ settings: { asrVia: 'server' }, values: { endpoint: '192.168.1.9:8790' } });
+    // One device to hear on: nothing to choose among.
+    expect(card(HEAR).queryByRole('combobox', { name: 'providers.localai.stageDevice' })).toBeNull();
+    fireEvent.click(screen.getByText('a search that finds a phone'));
+    const device = card(HEAR).getByRole('combobox', { name: 'providers.localai.stageDevice' }) as HTMLSelectElement;
+    expect(options(device)).toEqual(['', '192.168.4.28:8792']);
+    expect(device.options[0].textContent).toBe('192.168.1.9:8790');
+    fireEvent.change(device, { target: { value: '192.168.4.28:8792' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrOther: '192.168.4.28:8792', asrOtherModel: 'qwen3-asr-0.6b-q8' }));
+  });
+
+  it('gives the stage back to the shared device when that is chosen', () => {
+    const { card, update } = draw({ settings: PHONE, values: { endpoint: '192.168.1.9:8790' } });
+    fireEvent.change(card(HEAR).getByRole('combobox', { name: 'providers.localai.stageDevice' }), { target: { value: '' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrOther: '', asrOtherModel: '' }));
+  });
+});
+
+describe('a phone that lends its text models: the "another device" of the translation and the feedback', () => {
+  const SILENT: Readiness = { state: 'not-ready', reason: 'The other device could not be reached (192.168.1.10:8790): Failed to fetch' };
+  const device = (stage: string, card: (stage: string) => ReturnType<typeof within>) => card(stage).queryByRole('combobox', { name: 'providers.localai.stageDevice' }) as HTMLSelectElement | null;
+  const model = (stage: string, card: (stage: string) => ReturnType<typeof within>) => card(stage).getByRole('combobox', { name: 'providers.localai.model' }) as HTMLSelectElement;
+
+  it('is offered in the translation card once a search has found one, beside the shared device', () => {
+    const { card, update } = draw({ settings: { translateAt: 'server' }, values: { endpoint: '192.168.1.9:8790' } });
+    expect(device(TRANSLATE, card)).toBeNull();
+    fireEvent.click(screen.getByText('a search that finds phones lending text models'));
+    const select = device(TRANSLATE, card)!;
+    expect(options(select)).toEqual(['', '192.168.4.28:8792', '192.168.4.30:8792']);
+    expect(select.options[0].textContent).toBe('192.168.1.9:8790');
+    // The phone that lends two: the better of this computer's own order for the pair.
+    fireEvent.change(select, { target: { value: '192.168.4.28:8792' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ translateOther: '192.168.4.28:8792', translateOtherModel: 'index-translate-2b' }));
+    // A phone that lends text models alone is no device to hear with.
+    const hearing = device(HEAR, card);
+    expect(hearing ? options(hearing) : []).not.toContain('192.168.4.30:8792');
+  });
+
+  it('shows the model asked of the phone: a choice among the ones it lends', () => {
+    const { card, update } = draw({ settings: { translateAt: 'server', translateOther: '192.168.4.28:8792', translateOtherModel: 'index-translate-2b' }, values: { endpoint: '192.168.1.9:8790' } });
+    // Not found yet: the saved phone and model as they were.
+    expect(device(TRANSLATE, card)!.value).toBe('192.168.4.28:8792');
+    expect(model(TRANSLATE, card).selectedOptions[0].textContent).toBe('Index-Translate 2B');
+    expect(card(TRANSLATE).queryByText('providers.localai.connectFirst')).toBeNull();
+    fireEvent.click(screen.getByText('a search that finds phones lending text models'));
+    expect(options(model(TRANSLATE, card))).toEqual(['hy-mt2-1.8b', 'index-translate-2b']);
+    expect(model(TRANSLATE, card).disabled).toBe(false);
+    fireEvent.change(model(TRANSLATE, card), { target: { value: 'hy-mt2-1.8b' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ translateOtherModel: 'hy-mt2-1.8b' }));
+    // Back on the shared device.
+    fireEvent.change(device(TRANSLATE, card)!, { target: { value: '' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ translateOther: '', translateOtherModel: '' }));
+  });
+
+  it('fixes the model where the phone lends one, and says so where it no longer lends the one chosen', () => {
+    const gone = draw({ settings: { translateAt: 'server', translateOther: '192.168.4.30:8792', translateOtherModel: 'index-translate-2b' } });
+    fireEvent.click(screen.getByText('a search that finds phones lending text models'));
+    expect(model(TRANSLATE, gone.card).selectedOptions[0].textContent).toBe('providers.localai.modelGone');
+    cleanup();
+    const one = draw({ settings: { translateAt: 'server', translateOther: '192.168.4.30:8792', translateOtherModel: 'hy-mt2-1.8b' } });
+    fireEvent.click(screen.getByText('a search that finds phones lending text models'));
+    expect(model(TRANSLATE, one.card).disabled).toBe(true);
+    expect(model(TRANSLATE, one.card).selectedOptions[0].textContent).toBe('Hunyuan MT 2 1.8B');
+  });
+
+  it("says where the phone's translator does not translate the pair", () => {
+    render(<LocalAIAssist settings={{ ...LOCALAI_DEFAULTS, translateAt: 'server', translateOther: '192.168.4.30:8792', translateOtherModel: 'hy-mt2-1.8b' }} values={{ endpoint: '' }} set={vi.fn()} fill={vi.fn()} update={vi.fn()} pair={{ source: 'zh-CN', target: 'sw' }} legs={['speaker']} models={[]} readiness={{ state: 'unknown' }} check={vi.fn()} />);
+    expect(within(screen.getByRole('region', { name: TRANSLATE })).getByText('providers.localai.translatorUnfit')).toBeTruthy();
+  });
+
+  it('is offered in the feedback card the same way', () => {
+    const { card, update } = draw({ settings: { coach: true, coachAt: 'server' }, values: { endpoint: '192.168.1.9:8790' } });
+    fireEvent.click(screen.getByText('a search that finds phones lending text models'));
+    const select = device(COACH, card)!;
+    // Only the phone that lends a feedback model.
+    expect(options(select)).toEqual(['', '192.168.4.28:8792']);
+    fireEvent.change(select, { target: { value: '192.168.4.28:8792' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ coachOther: '192.168.4.28:8792', coachOtherModel: 'gemma-4-e2b' }));
+    cleanup();
+    const there = draw({ settings: { coach: true, coachAt: 'server', coachOther: '192.168.4.28:8792', coachOtherModel: 'gemma-4-e2b' } });
+    expect(model(COACH, there.card).selectedOptions[0].textContent).toBe('Gemma 4 E2B');
+    expect(there.card(COACH).queryByText('providers.localai.connectFirst')).toBeNull();
+  });
+
+  it('picked in the search, is given every stage on "another device" it can run, and none placed elsewhere', () => {
+    const onServer = draw({ settings: { asrVia: 'device', translateAt: 'server', coachAt: 'server' } });
+    fireEvent.click(screen.getByText('the lending phone, picked'));
+    expect(onServer.update).toHaveBeenLastCalledWith(expect.objectContaining({
+      asrVia: 'server', asrOther: '192.168.4.28:8792', asrOtherModel: 'qwen3-asr-0.6b-q8',
+      translateOther: '192.168.4.28:8792', translateOtherModel: 'index-translate-2b',
+      coachOther: '192.168.4.28:8792', coachOtherModel: 'gemma-4-e2b',
+    }));
+    expect(onServer.fill).not.toHaveBeenCalled();
+    cleanup();
+    const elsewhere = draw({ settings: { asrVia: 'device', translateAt: 'device', coachAt: 'api' } });
+    fireEvent.click(screen.getByText('the lending phone, picked'));
+    const patch = elsewhere.update.mock.lastCall?.[0] as Partial<LocalAISettings>;
+    expect(patch).toMatchObject({ asrVia: 'server', asrOther: '192.168.4.28:8792', translateAt: 'device' });
+    expect(patch).not.toHaveProperty('translateOther');
+    expect(patch).not.toHaveProperty('coachOther');
+  });
+
+  it('picked in the search while it can run no stage placed there, is given the translation: it lends that alone', () => {
+    const { update } = draw({ settings: { asrVia: 'device', translateAt: 'device' } });
+    fireEvent.click(screen.getByText('the text phone, picked'));
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ translateAt: 'server', translateOther: '192.168.4.30:8792', translateOtherModel: 'hy-mt2-1.8b' }));
+    expect(update.mock.lastCall?.[0]).not.toHaveProperty('asrOther');
+  });
+
+  it('is marked in the search as in use by the stages that ask it', () => {
+    draw({ settings: { asrVia: 'device', translateAt: 'server', translateOther: '192.168.4.30:8792', translateOtherModel: 'hy-mt2-1.8b', coach: true, coachAt: 'server', coachOther: '192.168.4.28:8792', coachOtherModel: 'gemma-4-e2b' } });
+    expect(screen.getByText('finder').getAttribute('data-phone')).toBe('192.168.4.30:8792 192.168.4.28:8792');
+  });
+
+  it("leaves the shared device's silence unsaid where no stage is on it", () => {
+    const everyStageOnPhones: Partial<LocalAISettings> = { asrVia: 'server', asrOther: '192.168.4.28:8792', asrOtherModel: 'qwen3-asr-0.6b-q8', translateAt: 'server', translateOther: '192.168.4.28:8792', translateOtherModel: 'index-translate-2b', coach: true, coachAt: 'server', coachOther: '192.168.4.28:8792', coachOtherModel: 'gemma-4-e2b' };
+    draw({ settings: everyStageOnPhones, values: { endpoint: '192.168.1.10:8790' }, readiness: SILENT });
+    expect(screen.queryByText('providers.localai.serverSilent')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'providers.localai.kotomimiThere' })).toBeNull();
+    cleanup();
+    // On an API and this computer, as on phones.
+    draw({ settings: { ...everyStageOnPhones, translateAt: 'device', coachAt: 'api' }, values: { endpoint: '192.168.1.10:8790' }, readiness: SILENT });
+    expect(screen.queryByText('providers.localai.serverSilent')).toBeNull();
+    cleanup();
+    // One stage left on it, and its silence is said.
+    draw({ settings: { ...everyStageOnPhones, translateOther: '' }, values: { endpoint: '192.168.1.10:8790' }, readiness: SILENT });
+    expect(screen.getByText('providers.localai.serverSilent')).toBeTruthy();
   });
 });

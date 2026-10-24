@@ -116,6 +116,8 @@
     color: var(--conversation-source-color, #9aa0a6);
     // Fork: a switch of the display popover (`annotationStore.ts`); slanted where nothing says otherwise.
     font-style: var(--kt-source-font-style, italic);
+    // Fork: the readings over it lean with it (annotationStore.ts).
+    --kt-ruby-lean: var(--kt-source-ruby-lean, 0.4em);
   }
 
   &.tr {

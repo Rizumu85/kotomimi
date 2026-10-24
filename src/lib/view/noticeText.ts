@@ -108,6 +108,15 @@ export const NOTICE_ALIASES: Readonly<Record<string, string>> = {
   server_key_needed: 'providers.localai.serverKeyNeeded',
   server_key_refused: 'providers.localai.serverKeyRefused',
   api_unreachable: 'providers.localai.apiUnreachable',
+  // Fork: a phone a stage was given does not answer, no longer lends the model chosen there, or lends one that does not translate the pair.
+  phone_unreachable: 'providers.localai.phoneUnreachable',
+  phone_model_gone: 'providers.localai.phoneModelGone',
+  // Fork: a phone in use stopped answering mid-run — locked or in the background, its system may have paused the app.
+  phone_quiet: 'providers.localai.phoneQuiet',
+  // Fork: the phone has not the memory for the model chosen there — before the run (the check) and during it.
+  phone_model_too_big: 'providers.localai.phoneModelTooBigCheck',
+  phone_no_memory: 'providers.localai.phoneNoMemory',
+  phone_translator_unfit: 'providers.localai.translatorUnfit',
   localai_here_down: 'providers.localai.hereDown',
   // Fork: the native recognition engine of this computer — not downloaded, coming up, or failed to.
   native_unsupported: 'providers.localai.nativeUnsupported',

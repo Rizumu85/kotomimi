@@ -1,6 +1,9 @@
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getAppSession } from '../../app/session';
+import { useRunState } from '../../app/useRun';
+import { getProvider } from '../../providers/registry';
+import { useProviderStore } from '../../stores/providerStore';
 import type { NoticeEntry } from '../../lib/view/filter';
 import { actionLabel } from '../../lib/view/noticeActions';
 import { noticeActionSpec, panelNoteEntries } from '../../lib/view/panelNotes';
@@ -30,6 +33,12 @@ export function SubtitleTakeover() {
   const notes = usePanelNotes();
   const exitSubtitleMode = useExitSubtitleMode();
   const navigateToSettings = useNavigateToSettings();
+  // Fork: the main window's rule for typed text (`MainPanel`'s `canSendText`): the speaker leg live, and a provider
+  // that takes text under the run's settings — then the strip offers the same field.
+  const run = useRunState();
+  const provider = useProviderStore((s) => (s.selected ? getProvider(s.selected) : undefined));
+  const providerSettings = useProviderStore((s) => (s.selected ? s.entries[s.selected]?.settings : undefined));
+  const canSendText = run.phase === 'running' && run.legs.speaker === 'live' && !!provider && providerSettings !== undefined && provider.textInput(providerSettings);
   // Leave subtitle mode first, so the main window is back before Settings scrolls (today's `handleFix`).
   const openSettings = useCallback((target: string) => {
     void exitSubtitleMode();
@@ -47,7 +56,8 @@ export function SubtitleTakeover() {
     clear: () => session.runner.clear(),
     exit: () => void exitSubtitleMode(),
     openSettings,
-  }), [session, exitSubtitleMode, openSettings]);
+    ...(canSendText ? { sendText: (text: string) => session.runner.sendText(text) } : {}),
+  }), [session, exitSubtitleMode, openSettings, canSendText]);
   // The expanded list's actions (Ruling 8): what this window can honour — Settings, leaving
   // subtitle mode first, and a note's Show in folder. The others belong to the title bar,
   // which the takeover hides (as `TakeoverStatusLine`). Rebuilt whenever the notes change,

@@ -22,6 +22,13 @@ const dns = require('dns');
 /** Where a sharing Kotomimi listens unless told otherwise, and where a LocalAI does. */
 const KOTOMIMI_PORT = 8790;
 const SERVER_PORT = 8080;
+/**
+ * Where a phone that lends its recognition engine listens (android/): a port of its own, because a Kotomimi that
+ * does not know such a phone would list it as a device with a whole pipeline, and fail when it was chosen.
+ */
+const PHONE_PORT = 8792;
+/** What such a phone says of itself on every answer. */
+const NODE_HEADER = 'x-kotomimi-node';
 /** A device on the same network answers in a few milliseconds: this long is for a busy one. */
 const PROBE_TIMEOUT_MS = 600;
 /** Requests in flight at once. */
@@ -59,7 +66,7 @@ function neighbours(address, netmask) {
  * too — a server may run beside the app — as the loopback, and only on the
  * ports this app does not listen on itself (`ownPorts`).
  */
-function targets(interfaces = os.networkInterfaces(), { ports = [KOTOMIMI_PORT, SERVER_PORT], ownPorts = [] } = {}) {
+function targets(interfaces = os.networkInterfaces(), { ports = [KOTOMIMI_PORT, SERVER_PORT, PHONE_PORT], ownPorts = [] } = {}) {
   const own = new Set();
   const hosts = new Set();
   for (const list of Object.values(interfaces)) {
@@ -77,6 +84,42 @@ function targets(interfaces = os.networkInterfaces(), { ports = [KOTOMIMI_PORT, 
   return out;
 }
 
+/** A phone lends a handful of text models: more than this in its list is not a phone's list. */
+const MOST_TEXT_MODELS = 16;
+
+/**
+ * The text models a phone lends (`text` of its model list): what each is for — a translation or grammar feedback —
+ * its name, and whether its engine is up now (the first request for one that is not waits for it to load). Anything
+ * else in the list is left out.
+ */
+function textModels(value, room = null) {
+  if (!Array.isArray(value)) return [];
+  const out = [];
+  for (const m of value) {
+    if (!m || typeof m.id !== 'string' || !m.id || (m.kind !== 'translate' && m.kind !== 'coach')) continue;
+    if (out.some((seen) => seen.id === m.id)) continue;
+    const loaded = m.loaded === true;
+    const holds = typeof m.holds_mb === 'number' && Number.isFinite(m.holds_mb) ? m.holds_mb : null;
+    out.push({ id: m.id.slice(0, 80), kind: m.kind, name: typeof m.name === 'string' ? m.name.slice(0, 80) : '', loaded, ...(room !== null && holds !== null ? { fits: loaded || holds <= room } : {}) });
+    if (out.length >= MOST_TEXT_MODELS) break;
+  }
+  return out;
+}
+
+/**
+ * What a phone could give a text model now, in MB: the memory it can have, and what its engines up hold of their
+ * own — the recognizer and the text models loaded — which it ends to make room (the phone's `Share.ensure`). Null
+ * where it gave none. The same reckoning as `src/lib/lan/discover.ts` `phoneRoom`.
+ */
+function phoneRoom(list) {
+  const available = list && list.memory_mb && list.memory_mb.available;
+  if (typeof available !== 'number' || !Number.isFinite(available)) return null;
+  const held = (m) => (m && typeof m.holds_mb === 'number' && Number.isFinite(m.holds_mb) && m.holds_mb > 0 ? m.holds_mb : 0);
+  const hearing = Array.isArray(list.data) ? list.data.reduce((sum, m) => sum + held(m), 0) : 0;
+  const loaded = Array.isArray(list.text) ? list.text.reduce((sum, m) => sum + (m && m.loaded === true ? held(m) : 0), 0) : 0;
+  return available + hearing + loaded;
+}
+
 /** What an answer to `GET /v1/models` says of the server, or null when it is no such server. */
 function readAnswer(status, headers, body) {
   const named = typeof headers[NAME_HEADER] === 'string' ? headers[NAME_HEADER] : '';
@@ -88,6 +131,8 @@ function readAnswer(status, headers, body) {
   }
   // A Kotomimi that shares the models of a model server on its own computer says so: that server is then not listed apart.
   const includes = headers[INCLUDES_HEADER] === 'model-server';
+  // A phone whose owner set an access key still says what it is (android/ 0.9.1 on): it is listed as a phone that wants one.
+  if ((status === 401 || status === 403) && headers[NODE_HEADER] === 'engine') return { kind: 'phone', name, models: 0, needsKey: true, includes: false };
   if (status === 401 || status === 403) return { kind: named ? 'kotomimi' : 'server', name, models: 0, needsKey: true, includes: false };
   if (status !== 200) return null;
   let list;
@@ -98,13 +143,25 @@ function readAnswer(status, headers, body) {
   }
   if (!list || !Array.isArray(list.data)) return null;
   const models = list.data.filter((m) => m && typeof m.id === 'string');
+  // A phone lends the model it has loaded, to recognize speech with, and (0.8.0 on) text models besides, listed
+  // apart under `text` so that a desktop that reads only `data` never takes one for a recognizer. A phone that lends
+  // text models alone has an empty `data`: it is still a device to choose, for the stages those models run.
+  if (headers[NODE_HEADER] === 'engine') {
+    const text = textModels(list.text, phoneRoom(list));
+    if (!models.length && !text.length) return null;
+    return {
+      kind: 'phone', name, models: models.length + text.length, needsKey: false, includes: false,
+      ...(models.length ? { model: String(models[0].id).slice(0, 80) } : {}),
+      ...(text.length ? { text } : {}),
+    };
+  }
   const kotomimi = models.some((m) => m.owned_by === 'kotomimi');
   // A sharing Kotomimi lists its pipeline first, which is no model of its own to count.
   return { kind: kotomimi ? 'kotomimi' : 'server', name, models: kotomimi ? Math.max(models.length - 1, 0) : models.length, needsKey: false, includes: kotomimi && includes };
 }
 
 /** One GET. Resolves with the answer, or null when there was none in time: never rejects. */
-function get(host, port, path, timeoutMs) {
+function get(host, port, path, timeoutMs, key) {
   return new Promise((resolve) => {
     let done = false;
     const finish = (value) => {
@@ -114,7 +171,7 @@ function get(host, port, path, timeoutMs) {
       request.destroy();
       resolve(value);
     };
-    const request = http.get({ host, port, path, agent: false, headers: { Accept: 'application/json' } }, (response) => {
+    const request = http.get({ host, port, path, agent: false, headers: { Accept: 'application/json', ...(key ? { Authorization: `Bearer ${key}` } : {}) } }, (response) => {
       const chunks = [];
       let size = 0;
       response.on('data', (chunk) => {
@@ -131,8 +188,9 @@ function get(host, port, path, timeoutMs) {
 }
 
 /** Asks one address. Resolves with what is there, or null. */
-async function probe({ host, port, self }, timeoutMs = PROBE_TIMEOUT_MS) {
-  const answer = await get(host, port, '/v1/models', timeoutMs);
+async function probe({ host, port, self }, timeoutMs = PROBE_TIMEOUT_MS, keys = {}) {
+  // A phone given a key here is asked with it (`src/lib/lan/phoneKeys.ts`); every other address without one.
+  const answer = await get(host, port, '/v1/models', timeoutMs, keys[`${host}:${port}`]);
   const found = answer && readAnswer(answer.status, answer.headers, answer.body);
   return found ? { address: `${host}:${port}`, host, port, self, ...found } : null;
 }
@@ -172,12 +230,12 @@ function shown(found) {
  * Everything found, Kotomimis first, then by address. `ownPorts` are the
  * ports this app listens on now: it is not shown itself.
  */
-async function discoverServers({ interfaces, ports, ownPorts = [], timeoutMs = PROBE_TIMEOUT_MS, concurrency = CONCURRENCY, reverse } = {}) {
+async function discoverServers({ interfaces, ports, ownPorts = [], timeoutMs = PROBE_TIMEOUT_MS, concurrency = CONCURRENCY, reverse, keys = {} } = {}) {
   const queue = targets(interfaces, { ports, ownPorts });
   const found = [];
   const worker = async () => {
     for (let next = queue.shift(); next; next = queue.shift()) {
-      const answer = await probe(next, timeoutMs);
+      const answer = await probe(next, timeoutMs, keys);
       if (answer) found.push(answer);
     }
   };
@@ -192,8 +250,8 @@ async function discoverServers({ interfaces, ports, ownPorts = [], timeoutMs = P
     s.name = name;
     s.product = product;
   }));
-  const order = (s) => `${s.kind === 'kotomimi' ? 0 : 1}${s.self ? 0 : 1}${toNumber(s.host).toString().padStart(10, '0')}${String(s.port).padStart(5, '0')}`;
-  return others.sort((a, b) => order(a).localeCompare(order(b))).map(({ address, kind, name, product, models, needsKey, self }) => ({ address, kind, name, product, models, needsKey, self }));
+  const order = (s) => `${s.kind === 'kotomimi' ? 0 : s.kind === 'phone' ? 1 : 2}${s.self ? 0 : 1}${toNumber(s.host).toString().padStart(10, '0')}${String(s.port).padStart(5, '0')}`;
+  return others.sort((a, b) => order(a).localeCompare(order(b))).map(({ address, kind, name, product, models, needsKey, self, model, text }) => ({ address, kind, name, product, models, needsKey, self, ...(model ? { model } : {}), ...(text ? { text } : {}) }));
 }
 
-module.exports = { discoverServers, targets, neighbours, readAnswer, probe, productOf, nameOf, shown, KOTOMIMI_PORT, SERVER_PORT, NAME_HEADER, INCLUDES_HEADER };
+module.exports = { discoverServers, targets, neighbours, readAnswer, textModels, probe, productOf, nameOf, shown, KOTOMIMI_PORT, SERVER_PORT, PHONE_PORT, NAME_HEADER, INCLUDES_HEADER, NODE_HEADER };

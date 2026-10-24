@@ -16,13 +16,16 @@ export function ReadingAidToggles() {
   const romanization = useAnnotationStore((s) => s.romanization);
   const setFurigana = useAnnotationStore((s) => s.setFurigana);
   const setRomanization = useAnnotationStore((s) => s.setRomanization);
+  const pinyin = useAnnotationStore((s) => s.pinyin);
+  const setPinyin = useAnnotationStore((s) => s.setPinyin);
   const sourceItalic = useAnnotationStore((s) => s.sourceItalic);
   const setSourceItalic = useAnnotationStore((s) => s.setSourceItalic);
   return (
     <div className="field reading-aid-toggles">
       <ToggleSwitch className="reading-aid-toggle" checked={sourceItalic} onChange={() => void setSourceItalic(!sourceItalic)} label={t('fork.sourceItalic', 'Source text in italics')} />
       <ToggleSwitch className="reading-aid-toggle" checked={furigana} onChange={() => void setFurigana(!furigana)} label={t('fork.furigana', 'Furigana over kanji (Japanese)')} />
-      <ToggleSwitch className="reading-aid-toggle" checked={romanization} onChange={() => void setRomanization(!romanization)} label={t('fork.romanization', 'Romanization (Japanese, Korean, Russian)')} />
+      <ToggleSwitch className="reading-aid-toggle" checked={romanization} onChange={() => void setRomanization(!romanization)} label={t('fork.romanization', 'Romanization (Japanese, Korean, Russian, Ukrainian)')} />
+      <ToggleSwitch className="reading-aid-toggle" checked={pinyin} onChange={() => void setPinyin(!pinyin)} label={t('fork.pinyin', 'Pinyin over Chinese')} />
     </div>
   );
 }

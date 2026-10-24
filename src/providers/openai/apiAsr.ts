@@ -14,6 +14,7 @@
 import { realClock, type Clock } from '../../lib/contract/clock';
 import type { AsrInit, AsrLike } from '../localInference/engines';
 import { NO_KEY } from './textModel';
+import { phoneKey } from '../../lib/lan/phoneKeys';
 
 /** The detector's worker, as far as it is used here (`native-vad.worker.ts`: it posts the edges of speech and nothing else). */
 export interface VadWorker {
@@ -210,8 +211,9 @@ export function createApiAsr(options: ApiAsrOptions): AsrLike {
       try {
         const response = await options.fetch(transcriptionsUrl(options.baseUrl), {
           method: 'POST',
-          // With no key, the placeholder: a LocalAI refuses a page's upload that carries no Authorization header (`NO_KEY`).
-          headers: { Authorization: `Bearer ${options.key || NO_KEY}` },
+          // With no key, a phone's where its owner set one (`phoneKeys.ts`), else the placeholder: a LocalAI refuses a
+          // page's upload that carries no Authorization header (`NO_KEY`).
+          headers: { Authorization: `Bearer ${options.key || phoneKey(options.baseUrl) || NO_KEY}` },
           body: form,
           signal: attempt.signal,
         });

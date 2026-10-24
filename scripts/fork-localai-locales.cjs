@@ -24,6 +24,10 @@ const PROVIDER = {
 
   // The three places.
   placeServer: ['Another device', '另一台设备', '另一台裝置'],
+  // A stage's own choice among the devices found, where there is more than one that can run it.
+  stageDevice: ['Device', '设备', '裝置'],
+  sharedDeviceNone: ['No device connected yet', '还没有连接设备', '尚未連接裝置'],
+  phoneOption: ['{{name}} (phone)', '{{name}}（手机）', '{{name}}（手機）'],
   viaModel: ['API model', 'API 模型', 'API 模型'],
   placeDevice: ['This computer', '这台电脑', '這台電腦'],
   // The wizard's one question.
@@ -51,6 +55,14 @@ const PROVIDER = {
     '另一台裝置設了存取金鑰時開啟，例如對面那台 Kotomimi 在共享的「選項」裡設定了金鑰。',
   ],
   serverKey: ['Access key', '访问密钥', '存取金鑰'],
+  phoneKey: ['Access key of {{name}}', '{{name}} 的访问密钥', '{{name}} 的存取金鑰'],
+  phoneKeyNote: [
+    'This phone asks for an access key. It is shown on the phone, under 设备连接.',
+    '这台手机设置了访问密钥，可以在手机的「设备连接」中查看。',
+    '這台手機設定了存取金鑰，可以在手機的「設備連接」中查看。',
+  ],
+  phoneKeyUse: ['Use this phone', '使用这台手机', '使用這台手機'],
+  phoneKeyWrong: ['The phone did not take this key.', '这个密钥不对，请再核对一下。', '這個金鑰不對，請再核對一下。'],
   kotomimiServer: [
     'It is another Kotomimi sharing its models.',
     '它是另一台正在共享模型的 Kotomimi。',
@@ -111,6 +123,13 @@ const PROVIDER = {
   notDownloaded: ['No model downloaded yet', '还没下载模型', '尚未下載模型'],
   browse: ['Model library', '模型库', '模型庫'],
   hears: ['Recognizes {{language}}', '识别{{language}}', '辨識{{language}}'],
+  // Under the app's own models, on a computer in a mainland China time zone only: what to expect, and nothing of why.
+  farSource: ['These models are stored overseas: a download may be very slow or fail.', '这些模型存放在海外，下载可能很慢或失败。', '這些模型存放在海外，下載可能很慢或失敗。'],
+  farSourceRest: [
+    'These models are stored overseas: a download may be very slow or fail. The recommended ones above are not affected.',
+    '这些模型存放在海外，下载可能很慢或失败。上面推荐的不受影响。',
+    '這些模型存放在海外，下載可能很慢或失敗。上面推薦的不受影響。',
+  ],
   chatModelsNoGpu: [
     'These models need a graphics card with WebGPU, which this computer does not offer. Use another device or an API model for the feedback.',
     '这些模型需要支持 WebGPU 的显卡，这台电脑没有。语法反馈请改用另一台设备或 API 模型。',
@@ -233,14 +252,14 @@ const PROVIDER = {
 
   // The other device, or a stage's API, did not answer as it should: where to look. Said in the cards, the wizard, and at Start.
   serverUnreachable: [
-    'The other device ({{address}}) did not answer. Check that it is on and on the same network as this computer, and that Kotomimi there is sharing (or its model server is running); then check again.',
-    '另一台设备（{{address}}）没有回应。请确认它开着、和这台电脑连着同一个网络，那边的 Kotomimi 开着共享（或者模型服务器在运行），然后再检查一次。',
-    '另一台裝置（{{address}}）沒有回應。請確認它開著、和這台電腦連著同一個網路，那邊的 Kotomimi 開著共享（或者模型伺服器在執行），然後再檢查一次。',
+    'The other device ({{address}}) did not answer. Check that it is on and on the same network as this computer, and that Kotomimi there is sharing (or its model server is running). It is asked again by itself.',
+    '另一台设备（{{address}}）没有回应。请确认它开着、和这台电脑连着同一个网络，那边的 Kotomimi 开着共享（或者模型服务器在运行）。连上后会自动继续。',
+    '另一台裝置（{{address}}）沒有回應。請確認它開著、和這台電腦連著同一個網路，那邊的 Kotomimi 開著共享（或者模型伺服器在執行）。連上後會自動繼續。',
   ],
   checkSlow: [
-    'No answer within {{seconds}} s. The address may be wrong, or the device busy loading a model; check again in a moment.',
-    '等了 {{seconds}} 秒还没有回应。可能是地址不对，或者那台设备正忙着加载模型；稍等一下再检查一次。',
-    '等了 {{seconds}} 秒還沒有回應。可能是位址不對，或者那台裝置正忙著載入模型；稍等一下再檢查一次。',
+    'No answer within {{seconds}} s: the device may be off or loading a model, or the address wrong. It is asked again by itself.',
+    '等了 {{seconds}} 秒还没有回应：那台设备可能没开、正在加载模型，或者地址不对。会自动再试。',
+    '等了 {{seconds}} 秒還沒有回應：那台裝置可能沒開、正在載入模型，或者位址不對。會自動再試。',
   ],
   serverHttp: [
     'The other device answered with an error (HTTP {{status}}). Restarting the app or the model server there usually helps.',
@@ -266,6 +285,35 @@ const PROVIDER = {
     'The API at {{address}} could not be reached. Check the address in its card, and that this computer is online.',
     '连不上 API（{{address}}）。请检查对应卡片里的地址，以及这台电脑能不能上网。',
     '連不上 API（{{address}}）。請檢查對應卡片裡的位址，以及這台電腦能不能上網。',
+  ],
+  // A phone a stage was given as its own device.
+  phoneUnreachable: [
+    'The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.',
+    '手机（{{address}}）连不上。请确认它开着共享，并且和这台电脑在同一个 Wi-Fi 下。',
+    '手機（{{address}}）連不上。請確認它開著共享，並且和這台電腦在同一個 Wi-Fi 下。',
+  ],
+  // A phone in use stopped answering mid-run: most often locked, its system pausing the app.
+  phoneQuiet: [
+    'The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.',
+    '手机没有回应，可能锁屏后被系统暂停了。在手机上打开 Kotomimi 就能继续。',
+    '手機沒有回應，可能鎖屏後被系統暫停了。在手機上打開 Kotomimi 就能繼續。',
+  ],
+  // The model chosen for a phone needs more memory than it can have now: before a run, during one, and in the list.
+  phoneModelTooBigCheck: [
+    'The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.',
+    '手机（{{address}}）现在内存不够运行 {{name}}。请在卡片里换一个小一点的模型，或关掉手机上的其他应用。',
+    '手機（{{address}}）現在記憶體不夠執行 {{name}}。請在卡片裡換一個小一點的模型，或關掉手機上的其他應用程式。',
+  ],
+  phoneNoMemory: [
+    'The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.',
+    '手机现在内存不够运行这个模型。请在卡片里换一个小一点的模型，或关掉手机上的其他应用。',
+    '手機現在記憶體不夠執行這個模型。請在卡片裡換一個小一點的模型，或關掉手機上的其他應用程式。',
+  ],
+  phoneModelTooBig: ['{{name}} (not enough memory on the phone)', '{{name}}（手机内存不够）', '{{name}}（手機記憶體不夠）'],
+  phoneModelGone: [
+    'The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.',
+    '手机（{{address}}）现在没有借出 {{name}}。请在卡片里换一个模型。',
+    '手機（{{address}}）現在沒有借出 {{name}}。請在卡片裡換一個模型。',
   ],
   apiKeyNeeded: [
     'The API at {{address}} asks for a key. In its card, turn on "The API asks for a key" and enter it.',
@@ -406,10 +454,15 @@ const PROVIDER = {
     "省资源的小模型，适合同一台电脑还开着游戏时用：约占 2 GB 显存（1.7B 约 3 GB）。日语闲聊实测错字约 22%，比 1.7B 多一些。其他和 1.7B 一样，同样支持 30 种语言。",
     "省資源的小模型，適合同一台電腦還開著遊戲時用：約佔 2 GB 顯示記憶體（1.7B 約 3 GB）。日語閒聊實測錯字約 22%，比 1.7B 多一些。其他和 1.7B 一樣，同樣支援 30 種語言。",
   ],
+  noteNativeSenseVoice: [
+    "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
+    "最轻也最快：约占 0.4 GB 显存。日语闲聊实测和 Qwen3-ASR 0.6B 一样准，很少写标点。只支持中文、粤语、英语、日语和韩语。",
+    "最輕也最快：約佔 0.4 GB 顯示記憶體。日語閒聊實測和 Qwen3-ASR 0.6B 一樣準，很少寫標點。只支援中文、粵語、英語、日語和韓語。",
+  ],
   noteNativeNemotron: [
-    "The lightest: about 1 GB of video memory. Japanese talk, measured: about 27% of the characters wrong, and a short sentence is sometimes left out altogether. Choose it only when the computer has no room for the ones above. Over thirty languages.",
-    "最省显存：约占 1 GB。日语闲聊实测错字约 27%，短句有时会整句漏掉。只在显存实在放不下上面几个时再选它。支持三十多种语言。",
-    "最省顯示記憶體：約佔 1 GB。日語閒聊實測錯字約 27%，短句有時會整句漏掉。只在顯示記憶體實在放不下上面幾個時再選它。支援三十多種語言。",
+    "Small: about 1 GB of video memory. Japanese talk, measured: about 27% of the characters wrong, and a short sentence is sometimes left out altogether. Choose it only when the ones above do not fit or do not hear the language. Over thirty languages.",
+    "占用小：约占 1 GB 显存。日语闲聊实测错字约 27%，短句有时会整句漏掉。只在上面几个放不下、或者不支持要听的语言时再选它。支持三十多种语言。",
+    "佔用小：約佔 1 GB 顯示記憶體。日語閒聊實測錯字約 27%，短句有時會整句漏掉。只在上面幾個放不下、或者不支援要聽的語言時再選它。支援三十多種語言。",
   ],
   // The native translation engine (llama.cpp's server) and what was found of its models.
   // The native feedback engine (llama.cpp's server with a small chat model) and what was found of its model.
@@ -539,7 +592,15 @@ const PROVIDER = {
 const FORK = {
   sourceItalic: ['Source text in italics', '原文用斜体', '原文用斜體'],
   furigana: ['Furigana over kanji (Japanese)', '汉字上方显示假名（日语）', '漢字上方顯示假名（日語）'],
-  romanization: ['Romanization (Japanese, Korean, Russian)', '显示罗马音（日语、韩语、俄语）', '顯示羅馬拼音（日語、韓語、俄語）'],
+  romanization: ['Romanization (Japanese, Korean, Russian, Ukrainian)', '显示罗马音（日语、韩语、俄语、乌克兰语）', '顯示羅馬拼音（日語、韓語、俄語、烏克蘭語）'],
+  pinyin: ['Pinyin over Chinese', '中文上方显示拼音', '中文上方顯示拼音'],
+  // Upstream's echo cancellation choice names its own product; in this build it is Kotomimi.
+  echoCancellationApp: ['Kotomimi only', '仅 Kotomimi', '僅 Kotomimi'],
+  echoCancellationAppTooltip: [
+    'Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).',
+    '仅 Kotomimi — 只消掉 Kotomimi 自己播放的翻译语音。麦克风是虚拟声卡（VB-Cable、BlackHole 等）时选这一项。',
+    '僅 Kotomimi — 只消掉 Kotomimi 自己播放的翻譯語音。麥克風是虛擬音效卡（VB-Cable、BlackHole 等）時選這一項。',
+  ],
 };
 
 /** Further groups of the fork's own strings, each written under `fork.<group>` — and the tour's fork copy, written beside upstream's under `tour.steps.<id>`: filled in beside this file. */

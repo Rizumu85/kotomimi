@@ -1,5 +1,8 @@
 import { memo, useCallback, useRef, type CSSProperties, type ReactNode } from 'react';
 import { AnnotatedLines, useAnnotation } from '../Annotated/AnnotatedText';
+import { Correction } from '../Feedback/Correction';
+import { useCoached } from '../Feedback/useCoached';
+import { fixOf } from '../../lib/feedback/correction';
 import { fontLanguage } from '../../lib/fonts/fontCss';
 import { useTranslation } from 'react-i18next';
 import { ArrowDown, Play, User, Users } from 'lucide-react';
@@ -143,6 +146,11 @@ const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, r
   const played = upTo === undefined ? 0 : Math.min(text.length, Math.max(0, upTo - row.start - lead));
   // Fork: furigana and romanization, when the row's language has them and they are switched on.
   const annotated = useAnnotation(text, lang);
+  // Fork: grammar feedback that changes something, drawn as the sentence said, marked — on its answer's first row;
+  // the answer's other rows (where sentences are cut into rows) are then part of it.
+  const coached = useCoached();
+  const fix = isTranslation && leg === 'speaker' && coached && item.answers ? fixOf(item.answers.said, item.answers.saidLanguage, item.answers.answer) : null;
+  if (fix && row.start > 0) return null;
   const segmentId = row.segmentId;
   // The tint marks only the row that holds the karaoke boundary — not every
   // row of a segment lit is on, or a row karaoke has already passed.
@@ -170,7 +178,9 @@ const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, r
         )}
         {/* Fork: marked with its language, so a font chosen for that language reaches it (`src/lib/fonts`). */}
         <span className={`row-text ${isTranslation ? 'tr' : 'src'}`} data-kt-text="" lang={fontLanguage(lang) || undefined}>
-          {annotated ? (
+          {fix ? (
+            <Correction correction={fix} language={item.answers?.saidLanguage} />
+          ) : annotated ? (
             // Fork: reading aids replace the karaoke split; a row is lit whole once it has been spoken through.
             <AnnotatedLines lines={annotated} className={played > 0 && played >= text.length ? 'karaoke-played' : undefined} />
           ) : played <= 0 ? (

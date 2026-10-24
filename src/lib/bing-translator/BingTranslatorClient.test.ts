@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { parseTranslatorPage, BingTranslatorClient } from './BingTranslatorClient';
+import { parseTranslatorPage, BingTranslatorClient, bingOriginOf } from './BingTranslatorClient';
 import {
   VALID_TRANSLATOR_HTML,
   HTML_MISSING_IG,
@@ -79,6 +79,46 @@ function jsonResponse(data: unknown): Response {
     headers: { 'content-type': 'application/json' },
   });
 }
+
+describe('where Bing is asked (fork)', () => {
+  /** The page as it comes back after `www.bing.com` sent the request on: `url` says where it was served from. */
+  const servedFrom = (url: string): Response => {
+    const page = htmlResponse(VALID_TRANSLATOR_HTML);
+    Object.defineProperty(page, 'url', { value: url });
+    return page;
+  };
+  const answer = () => jsonResponse([{ translations: [{ text: '你好', to: 'zh-Hans' }] }]);
+
+  it('asks the translation of the host the page was served from: cn.bing.com, from mainland China', async () => {
+    const mock = makeMockFetch();
+    mock.queueResponse(servedFrom('https://cn.bing.com/translator'));
+    mock.queueResponse(answer());
+    const client = new BingTranslatorClient({ fetchFn: mock.fetch });
+    expect((await client.translate('こんにちは', 'ja', 'zh')).translatedText).toBe('你好');
+    expect(mock.calls[0].url).toBe('https://www.bing.com/translator');
+    expect(mock.calls[1].url).toMatch(/^https:\/\/cn\.bing\.com\/ttranslatev3\?/);
+    expect(mock.calls[1].headers['Origin']).toBe('https://cn.bing.com');
+    expect(mock.calls[1].headers['Referer']).toBe('https://cn.bing.com/translator');
+  });
+
+  it('stays with www.bing.com where the page says nothing of where it came from, or came from elsewhere', async () => {
+    for (const url of ['', 'https://example.com/translator', 'http://cn.bing.com/translator', 'https://bing.com.example.org/translator']) {
+      const mock = makeMockFetch();
+      mock.queueResponse(servedFrom(url));
+      mock.queueResponse(answer());
+      await new BingTranslatorClient({ fetchFn: mock.fetch }).translate('こんにちは', 'ja', 'zh');
+      expect(mock.calls[1].url).toMatch(/^https:\/\/www\.bing\.com\/ttranslatev3\?/);
+    }
+  });
+
+  it('knows an address of Bing by its host', () => {
+    expect(bingOriginOf('https://cn.bing.com/translator?x=1')).toBe('https://cn.bing.com');
+    expect(bingOriginOf('https://www.bing.com/translator')).toBe('https://www.bing.com');
+    expect(bingOriginOf('https://bing.com/translator')).toBe('https://bing.com');
+    expect(bingOriginOf('https://notbing.com/translator')).toBeNull();
+    expect(bingOriginOf(undefined)).toBeNull();
+  });
+});
 
 describe('BingTranslatorClient', () => {
   it('fetches translator page, parses token, then translates', async () => {

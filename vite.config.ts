@@ -164,6 +164,8 @@ export default defineConfig(({ command, mode }) => {
             'close-handshake': 'electron/close-handshake.js',
             'update-manager': 'electron/update-manager.js',
             'update-payload': 'electron/update-payload.js',
+            // Fork: the update's installer, fetched of relays too and checked before it is run
+            'update-download': 'electron/update-download.js',
             'window-caption-dblclick': 'electron/window-caption-dblclick.js',
             'window-maximize': 'electron/window-maximize.js',
             'window-caption-menu': 'electron/window-caption-menu.js',
@@ -177,8 +179,12 @@ export default defineConfig(({ command, mode }) => {
             'local-server': 'electron/local-server.js',
             // Fork: the native recognition engine the app downloads and runs
             'native-engine': 'electron/native-engine.js',
+            // Fork: one file from several addresses of it — the engines' downloads and the app's own update
+            'fetch-file': 'electron/fetch-file.js',
             // Fork: a Mac's two native recognizers, joined
             'native-engines': 'electron/native-engines.js',
+            // Fork: a recognition engine on another device — a phone lent to this computer
+            'remote-engine': 'electron/remote-engine.js',
             // Fork: starting with the computer, in the background
             'autostart': 'electron/autostart.js',
             // Fork: the icon in the notification area

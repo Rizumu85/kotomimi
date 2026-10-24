@@ -16,7 +16,8 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { createNativeEngine, openLive, languageName, languageLocale, modelHears, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME } = require('./native-engine.js');
+const { createNativeEngine, openLive, languageName, languageLocale, modelHears, unspaced, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME } = require('./native-engine.js');
+const { hfMirrorOf } = require('./fetch-file.js');
 
 const sha = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
 const ARCHIVE = Buffer.from('an archive of the engine');
@@ -109,7 +110,7 @@ describe('what is fetched', () => {
     expect(MODELS['r2t2-q8'].platforms).toEqual(['win32-x64']);
     // A Mac is offered the model that is for every system, and not the one that names Windows alone.
     const mac = createNativeEngine({ dir, platform: 'darwin', arch: 'arm64', fetch: nothing });
-    expect(Object.keys(mac.status().models)).toEqual(['qwen3-asr-1.7b-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
+    expect(Object.keys(mac.status().models)).toEqual(['qwen3-asr-1.7b-q8', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
     const here = createNativeEngine({ dir, platform: 'win32', arch: 'x64', fetch: nothing });
     expect(here.status()).toMatchObject({ supported: true, models: { 'r2t2-q8': { state: 'absent' }, 'qwen3-asr-1.7b-q8': { state: 'absent' } } });
     // A catalog whose every model names another system leaves this one with nothing to run.
@@ -252,7 +253,7 @@ describe('a download', () => {
 
   it('says what the network said when it refuses', async () => {
     const { engine } = computer({ served: { 'https://example.test/engine.zip': ARCHIVE } });
-    expect((await engine.download('m1')).models.m1).toMatchObject({ state: 'failed', error: 'The download answered HTTP 404.' });
+    expect((await engine.download('m1')).models.m1).toMatchObject({ state: 'failed', error: 'example.test: The download answered HTTP 404.' });
   });
 
   it('can be stopped: nothing failed, and what came stays for the next time', async () => {
@@ -422,14 +423,85 @@ describe('a live recognition', () => {
   });
 
   it('has a small model of the same family, read and told the language the same way', () => {
-    const { file, url, bytes, sha256, ...rest } = MODELS['qwen3-asr-0.6b-q8'];
-    const { file: f, url: u, bytes: b, sha256: h, ...big } = MODELS['qwen3-asr-1.7b-q8'];
+    const { file, url, mirror, bytes, sha256, ...rest } = MODELS['qwen3-asr-0.6b-q8'];
+    const { file: f, url: u, mirror: m, bytes: b, sha256: h, ...big } = MODELS['qwen3-asr-1.7b-q8'];
     expect(rest).toEqual(big);
     expect(bytes).toBeLessThan(b / 2);
     expect(url).toMatch(/\/resolve\/[0-9a-f]{40}\/Qwen3-ASR-0\.6B-GGUF\/qwen3-asr-0\.6b-q8_0\.gguf$/);
     expect(file).toBe('qwen3-asr-0.6b-q8_0.gguf');
     expect(sha256).toMatch(/^[0-9a-f]{64}$/);
     expect([f, u, h].every(Boolean)).toBe(true);
+  });
+
+  it('has a light model of another family: its makers’ own file, read a stretch at once and whole, told one of five languages by its code', () => {
+    expect(MODELS['sensevoice-small-q8']).toEqual({
+      file: 'sensevoice-small-q8-audiocpp-v1.gguf',
+      url: 'https://huggingface.co/FunAudioLLM/SenseVoiceSmall-GGUF-audiocpp/resolve/5c3fcfe748a8714216bc135476d5863084fddb72/sensevoice-small-q8-audiocpp-v1.gguf',
+      bytes: 254211200,
+      sha256: '4dedf169f625437fb336f2959674f399819729a765e184128c0e25a6e16ff0ec',
+      family: 'sense_asr',
+      mode: 'offline',
+      requestOptions: { audio_chunk_mode: 'none' },
+      languageAs: 'code',
+      languages: ['zh', 'yue', 'en', 'ja', 'ko'],
+      unspaced: true,
+    });
+    for (const language of ['ja', 'zh-CN', 'zh-TW', 'yue', 'en-GB', 'ko-KR']) expect(modelHears('sensevoice-small-q8', language)).toBe(true);
+    // Told another language it would not refuse, and write the speech down as one of its five: it is not offered for it.
+    for (const language of ['fr', 'ru', 'th', 'auto', '']) expect(modelHears('sensevoice-small-q8', language)).toBe(false);
+    // It is in the order the models are recommended in, before the small Qwen3 it is level with.
+    expect(Object.keys(MODELS)).toEqual(['r2t2-q8', 'qwen3-asr-1.7b-q8', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
+    const here = createNativeEngine({ dir, platform: 'win32', arch: 'x64', fetch: async () => { throw new Error('nothing is fetched'); } });
+    expect(here.status().models['sensevoice-small-q8']).toEqual({ state: 'absent', received: 0, total: 254211200 });
+    // For every system the runtime is published for: run on Windows (Vulkan) and on an Apple M2 (Metal).
+    expect(MODELS['sensevoice-small-q8'].platforms).toBeUndefined();
+    const mac = createNativeEngine({ dir, platform: 'darwin', arch: 'arm64', fetch: async () => { throw new Error('nothing is fetched'); } });
+    expect(mac.status().models['sensevoice-small-q8']).toEqual({ state: 'absent', received: 0, total: 254211200 });
+  });
+
+  it('tells the runtime, in its config, what such a model is told with every reading — and takes out of its text the spaces it puts inside Japanese', async () => {
+    const light = { file: 's1.gguf', url: 'https://example.test/s1.gguf', bytes: MODEL.length, sha256: sha(MODEL), family: 'sense_asr', mode: 'offline', requestOptions: { audio_chunk_mode: 'none' }, languageAs: 'code', languages: ['zh', 'yue', 'en', 'ja', 'ko'], unspaced: true };
+    const catalog = { engine: CATALOG.engine, models: { s1: light, w1: { file: 'w1.gguf', url: 'https://example.test/w1.gguf', bytes: MODEL.length, sha256: sha(MODEL), family: 'fam2', mode: 'offline', languageAs: 'code' } } };
+    const { world, engine } = computer({ catalog, served: { 'https://example.test/engine.zip': ARCHIVE, 'https://example.test/s1.gguf': MODEL, 'https://example.test/w1.gguf': MODEL } });
+    await engine.download('s1');
+    await engine.start('s1');
+    // Its request options are the server's defaults for the model: every reading is of the whole stretch, with no
+    // other model to cut it by. Its session options are none.
+    expect(JSON.parse(fs.readFileSync(path.join(dir, 'models', 'server.json'), 'utf8'))).toEqual({
+      host: '127.0.0.1', port: 45123, backend: 'vulkan', device: 0, lazy_load: false,
+      models: [{ id: 's1', family: 'sense_asr', path: 's1.gguf', task: 'asr', mode: 'offline', session_options: {}, default_request_options: { audio_chunk_mode: 'none' } }],
+    });
+    // Warmed as its recognitions go, with no language told.
+    expect(world.windows).toHaveLength(1);
+    expect(world.windows[0].target).toMatchObject({ model: 's1', language: null });
+    engine.openStream({ language: 'ja-JP', sampleRate: 16000 });
+    expect(world.windows[1].target).toMatchObject({ port: 45123, model: 's1', sampleRate: 16000, language: 'ja' });
+    expect(world.windows[1].target.tidy('元 は 金持ち の 息子 でし たが。')).toBe('元は金持ちの息子でしたが。');
+    // A model that writes no such spaces is read as it writes.
+    await engine.download('w1');
+    await engine.start('w1');
+    engine.openStream({ language: 'ja', sampleRate: 16000 });
+    expect(world.windows.at(-1).target).toMatchObject({ model: 'w1', language: 'ja' });
+    expect(world.windows.at(-1).target.tidy).toBeUndefined();
+    await engine.stop();
+  });
+
+  it('takes out the spaces a model put where the writing has none, and no other', () => {
+    // Between two characters of Japanese or Chinese, their marks included, and between one and a figure.
+    expect(unspaced('元 は 金持ち の 息子 でし たが、今 は財産 を 使い 尽く して。')).toBe('元は金持ちの息子でしたが、今は財産を使い尽くして。');
+    expect(unspaced('今天 天气 很 好 ，我们 去 公园 吧。')).toBe('今天天气很好，我们去公园吧。');
+    expect(unspaced('あと 15 秒 で 3 時')).toBe('あと15秒で3時');
+    // A full-width space is one too.
+    expect(unspaced(`のです 何しろ${String.fromCodePoint(0x3000)}その頃`)).toBe('のです何しろその頃');
+    // Korean is written with spaces, and so are Latin words — also inside Japanese.
+    expect(unspaced('오늘은 날씨가 좋아요')).toBe('오늘은 날씨가 좋아요');
+    expect(unspaced('the weather is nice today')).toBe('the weather is nice today');
+    expect(unspaced('VR Chat で 遊ぶ')).toBe('VR Chat で遊ぶ');
+    expect(unspaced('Page 15 of 20')).toBe('Page 15 of 20');
+    // Nothing to take out leaves the text as it is, and so does taking them out twice.
+    expect(unspaced('そうだね。')).toBe('そうだね。');
+    expect(unspaced(unspaced('元 は 金持ち'))).toBe('元は金持ち');
+    expect(unspaced('')).toBe('');
   });
 
   it('tells a model that takes a locale the one of its own list: the app\u2019s regional one where it has it, the language\u2019s usual one otherwise', () => {
@@ -796,11 +868,173 @@ describe('a download, once more', () => {
       },
       extract: async (archive, into) => { fs.writeFileSync(path.join(into, 'server.exe'), 'exe'); },
     });
-    const first = await engine.download('m1');
-    expect(first.models.m1).toMatchObject({ state: 'failed', received: 10 });
-    const second = await engine.download('m1');
-    expect(second.models.m1.state).toBe('downloaded');
+    // Nobody has to start it again: it asks for the rest itself.
+    expect((await engine.download('m1')).models.m1.state).toBe('downloaded');
+    expect(fs.readFileSync(modelFile())).toEqual(MODEL);
     expect(requests.filter((r) => r.url.endsWith('m1.gguf')).map((r) => r.range)).toEqual([undefined, 'bytes=10-']);
+  });
+
+  describe('from a mirror', () => {
+    const MIRRORED = { ...CATALOG, models: { m1: { ...CATALOG.models.m1, mirror: 'https://mirror.test/m1.gguf' } } };
+    const serving = (requests, served) => async (url, init = {}) => {
+      requests.push({ url, range: init.headers?.Range });
+      if (url.endsWith('.zip')) return answer([ARCHIVE]);
+      const from = init.headers?.Range ? Number(/bytes=(\d+)-/.exec(init.headers.Range)[1]) : 0;
+      return served(url, from, init);
+    };
+    const extract = async (archive, into) => { fs.writeFileSync(path.join(into, 'server.exe'), 'exe'); };
+    const asked = (requests) => requests.filter((r) => r.url.endsWith('m1.gguf')).map((r) => [new URL(r.url).host, r.range]);
+
+    it('asks the mirror where the address does not answer, and keeps what hashes right', async () => {
+      const requests = [];
+      const engine = createNativeEngine({
+        dir, platform: 'win32', arch: 'x64', catalog: MIRRORED, mirrorFirst: () => false, extract,
+        fetch: serving(requests, (url, from) => { if (url.startsWith('https://example.test/')) throw new TypeError('fetch failed'); return answer([MODEL.subarray(from)], from > 0 ? 206 : 200); }),
+      });
+      const after = await engine.download('m1');
+      expect(after.models.m1.state).toBe('downloaded');
+      expect(fs.readFileSync(modelFile())).toEqual(MODEL);
+      expect(asked(requests)).toEqual([['example.test', undefined], ['mirror.test', undefined]]);
+    });
+
+    it('goes on at the mirror from what the address brought before it broke off', async () => {
+      const requests = [];
+      const engine = createNativeEngine({
+        dir, platform: 'win32', arch: 'x64', catalog: MIRRORED, mirrorFirst: () => false, extract,
+        fetch: serving(requests, (url, from) => (url.startsWith('https://example.test/') ? answer([MODEL.subarray(0, 10)]) : answer([MODEL.subarray(from)], from > 0 ? 206 : 200))),
+      });
+      const after = await engine.download('m1');
+      expect(after.models.m1.state).toBe('downloaded');
+      expect(fs.readFileSync(modelFile())).toEqual(MODEL);
+      // The address had brought something, so it is asked for the rest; it brings the same ten bytes, and the mirror is asked.
+      expect(asked(requests)).toEqual([['example.test', undefined], ['example.test', 'bytes=10-'], ['mirror.test', 'bytes=10-']]);
+    });
+
+    it('asks the mirror first where the computer looks to be in mainland China, and the address only if that fails', async () => {
+      const requests = [];
+      const engine = createNativeEngine({
+        dir, platform: 'win32', arch: 'x64', catalog: MIRRORED, mirrorFirst: () => true, extract,
+        fetch: serving(requests, (url, from) => answer([MODEL.subarray(from)], from > 0 ? 206 : 200)),
+      });
+      expect((await engine.download('m1')).models.m1.state).toBe('downloaded');
+      expect(asked(requests)).toEqual([['mirror.test', undefined]]);
+    });
+
+    it('leaves an address that does not begin to answer, for the mirror', async () => {
+      const requests = [];
+      const engine = createNativeEngine({
+        dir, platform: 'win32', arch: 'x64', catalog: MIRRORED, mirrorFirst: () => false, answerWithinMs: 20, extract,
+        fetch: serving(requests, (url, from, init) => (url.startsWith('https://example.test/')
+          ? new Promise((resolve, reject) => { /* never answers: only its being given up ends it */ init.signal.addEventListener('abort', () => reject(new Error('given up'))); })
+          : answer([MODEL.subarray(from)], from > 0 ? 206 : 200))),
+      });
+      const after = await engine.download('m1');
+      expect(after.models.m1.state).toBe('downloaded');
+      expect(asked(requests).map(([host]) => host)).toEqual(['example.test', 'mirror.test']);
+    });
+
+    it('says who was asked and what each said when none serves it', async () => {
+      const engine = createNativeEngine({
+        dir, platform: 'win32', arch: 'x64', catalog: MIRRORED, mirrorFirst: () => false, extract,
+        fetch: serving([], () => answer([], 404)),
+      });
+      const after = await engine.download('m1');
+      expect(after.models.m1).toMatchObject({ state: 'failed', error: 'example.test: The download answered HTTP 404. · mirror.test: The download answered HTTP 404.' });
+    });
+
+    it('waits longer the second time round for an address that was slow to answer, not dead', async () => {
+      const requests = [];
+      let asks = 0;
+      const engine = createNativeEngine({
+        dir, platform: 'win32', arch: 'x64', catalog: CATALOG, answerWithinMs: 40, extract,
+        fetch: serving(requests, (url, from, init) => new Promise((resolve, reject) => {
+          asks += 1;
+          // It takes longer to answer than the first wait allows, and less than the second.
+          const late = setTimeout(() => resolve(answer([MODEL.subarray(from)], from > 0 ? 206 : 200)), 70);
+          init.signal.addEventListener('abort', () => { clearTimeout(late); reject(new Error('given up')); });
+        })),
+      });
+      expect((await engine.download('m1')).models.m1.state).toBe('downloaded');
+      expect(asks).toBe(2);
+    });
+
+    it('leaves an answer that begins and then says nothing more, and goes on from what it brought', async () => {
+      const requests = [];
+      const engine = createNativeEngine({
+        dir, platform: 'win32', arch: 'x64', catalog: MIRRORED, mirrorFirst: () => false, answerWithinMs: 20, extract,
+        fetch: serving(requests, (url, from) => (url.startsWith('https://example.test/')
+          // Ten bytes, and then the line stays open with nothing on it.
+          ? new Response(new ReadableStream({ start(controller) { controller.enqueue(new Uint8Array(MODEL.subarray(from, from + 10))); } }), { status: from > 0 ? 206 : 200 })
+          : answer([MODEL.subarray(from)], from > 0 ? 206 : 200))),
+      });
+      const after = await engine.download('m1');
+      expect(after.models.m1.state).toBe('downloaded');
+      expect(fs.readFileSync(modelFile())).toEqual(MODEL);
+    });
+
+    it('writes down nothing of an answer that is a page, or another file', async () => {
+      const requests = [];
+      const page = () => new Response('<html>Not here</html>', { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' } });
+      const other = () => new Response(new Uint8Array(5), { status: 200, headers: { 'content-length': '5' } });
+      const engine = createNativeEngine({
+        dir, platform: 'win32', arch: 'x64', mirrorFirst: () => true, extract,
+        catalog: { ...CATALOG, models: { m1: { ...CATALOG.models.m1, mirror: ['https://page.test/m1.gguf', 'https://other.test/m1.gguf'] } } },
+        fetch: serving(requests, (url, from) => (url.startsWith('https://page.test/') ? page() : url.startsWith('https://other.test/') ? other() : answer([MODEL.subarray(from)], from > 0 ? 206 : 200))),
+      });
+      expect((await engine.download('m1')).models.m1.state).toBe('downloaded');
+      // The address was asked for the whole file: nothing of the other two had been kept.
+      expect(asked(requests)).toEqual([['page.test', undefined], ['other.test', undefined], ['example.test', undefined]]);
+    });
+
+    it('asks relays of GitHub for a runtime published there: first where GitHub is not reached, last elsewhere', async () => {
+      const onGitHub = { ...CATALOG, engine: { version: '1.0.0', builds: { 'win32-x64': { ...CATALOG.engine.builds['win32-x64'], url: 'https://github.com/someone/engine/releases/download/v1/engine.zip' } } } };
+      const hostsAsked = async (mirrorFirst, down) => {
+        const requests = [];
+        const engine = createNativeEngine({
+          dir: fs.mkdtempSync(path.join(dir, 'relay-')), platform: 'win32', arch: 'x64', catalog: onGitHub, mirrorFirst, extract,
+          fetch: async (url, init = {}) => {
+            requests.push(url);
+            if (down.includes(new URL(url).host)) throw new TypeError('fetch failed');
+            return answer([url.endsWith('.zip') ? ARCHIVE : MODEL]);
+          },
+        });
+        expect((await engine.download('m1')).engine).toBe('ready');
+        return requests.filter((url) => url.endsWith('.zip'));
+      };
+      // In mainland China: a relay, the release's own address after it in full.
+      expect(await hostsAsked(() => true, [])).toEqual(['https://ghfast.top/https://github.com/someone/engine/releases/download/v1/engine.zip']);
+      // A relay that has gone is passed over.
+      expect((await hostsAsked(() => true, ['ghfast.top'])).map((url) => new URL(url).host)).toEqual(['ghfast.top', 'gh-proxy.com']);
+      // Elsewhere GitHub itself, and the relays only should it fail.
+      expect((await hostsAsked(() => false, [])).map((url) => new URL(url).host)).toEqual(['github.com']);
+      expect((await hostsAsked(() => false, ['github.com'])).map((url) => new URL(url).host)).toEqual(['github.com', 'ghfast.top']);
+    });
+
+    it('asks a public mirror of Hugging Face for a file published there: after its own mirror, before Hugging Face where that is not reached', async () => {
+      const onTheHub = { ...CATALOG, models: { m1: { ...CATALOG.models.m1, url: 'https://huggingface.co/someone/model/resolve/0123abc/m1.gguf', mirror: 'https://mirror.test/m1.gguf' } } };
+      const requests = [];
+      const engine = createNativeEngine({
+        dir, platform: 'win32', arch: 'x64', catalog: onTheHub, mirrorFirst: () => true, extract,
+        fetch: serving(requests, (url, from) => { if (url.startsWith('https://mirror.test/')) throw new TypeError('fetch failed'); return answer([MODEL.subarray(from)], from > 0 ? 206 : 200); }),
+      });
+      expect((await engine.download('m1')).models.m1.state).toBe('downloaded');
+      expect(requests.filter((r) => r.url.endsWith('m1.gguf')).map((r) => r.url)).toEqual(['https://mirror.test/m1.gguf', 'https://hf-mirror.com/someone/model/resolve/0123abc/m1.gguf']);
+    });
+
+    it('gives every model ModelScope keeps its address there, on the same file', () => {
+      const every = { ...MODELS, ...TRANSLATORS, ...COACHES };
+      const mirrored = Object.values(every).filter((model) => model.mirror);
+      expect(mirrored.length).toBe(7);
+      for (const model of mirrored) {
+        expect(model.mirror).toMatch(/^https:\/\/modelscope\.cn\/models\/[^/]+\/[^/]+\/resolve\/master\//);
+        expect(model.mirror.endsWith(`/${model.url.split('/').pop()}`)).toBe(true);
+      }
+      // R2T2 is published in one place only.
+      expect(MODELS['r2t2-q8'].mirror).toBeUndefined();
+      // So is SenseVoice-Small's file for this runtime: where Hugging Face is not reached, its public mirror has it.
+      expect(MODELS['sensevoice-small-q8'].mirror).toBeUndefined();
+      expect(hfMirrorOf(MODELS['sensevoice-small-q8'].url)).toEqual(['https://hf-mirror.com/FunAudioLLM/SenseVoiceSmall-GGUF-audiocpp/resolve/5c3fcfe748a8714216bc135476d5863084fddb72/sensevoice-small-q8-audiocpp-v1.gguf']);
+    });
   });
 
   it('stops an answer that is longer than the file', async () => {

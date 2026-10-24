@@ -63,13 +63,19 @@ const QWEN_LANGUAGES = ['zh', 'en', 'yue', 'ar', 'de', 'fr', 'es', 'pt', 'id', '
 const WINDOW_LIMITS: Partial<NativeLimits> = { rollAfter: 8, rollAt: 8, rollHard: 24, lastWordsMs: 15_000 };
 /** Nemotron's languages (`NEMOTRON_LOCALES` in `electron/native-engine.js`). */
 const NEMOTRON_LANGUAGES = ['ar', 'bg', 'cs', 'da', 'de', 'el', 'en', 'es', 'et', 'fi', 'fr', 'he', 'hi', 'hr', 'hu', 'it', 'ja', 'ko', 'lt', 'lv', 'mt', 'nb', 'nl', 'nn', 'no', 'pl', 'pt', 'ro', 'ru', 'sk', 'sl', 'sv', 'th', 'tr', 'uk', 'vi', 'zh'] as const;
+/** SenseVoice-Small's: the five it is told by their codes, and no other (`MODELS` in `electron/native-engine.js`). */
+const SENSEVOICE_LANGUAGES = ['zh', 'yue', 'en', 'ja', 'ko'] as const;
 
 /**
  * In the order they are offered, the one measured best for a language first
  * (Japanese VRChat talk, in the app, 2026-10-05): the Mac's own recognition
  * 12.5 % of the characters wrong; Qwen3-ASR 16.4 %, its text a second behind
  * the voice; R2T2 18.2 %, two and a half seconds behind — and R2T2 has to keep
- * up with the voice, where Qwen3-ASR only refreshes less often on a busy card. A system is offered the ones it can run.
+ * up with the voice, where Qwen3-ASR only refreshes less often on a busy card.
+ * Then the light ones, measured 2026-10-13 on the 59 stretches the app cut
+ * from those clips: SenseVoice-Small 20.3 %, the small Qwen3-ASR 20.7 % (the
+ * large one 16.9 % that way) — level, so the far lighter of the two is first.
+ * A system is offered the ones it can run.
  */
 export const NATIVE_MODELS: readonly NativeModel[] = [
   ...APPLE_LANGUAGES.map((language) => ({ id: `${APPLE_PREFIX}${language}`, name: 'Apple Speech', bytes: 0, languages: [language], limits: APPLE_LIMITS })),
@@ -78,12 +84,19 @@ export const NATIVE_MODELS: readonly NativeModel[] = [
   // detect too, but writes the first words of a stretch in the wrong language: it is not offered for that.)
   { id: 'qwen3-asr-1.7b-q8', name: 'Qwen3-ASR 1.7B GGUF', bytes: 2473010048, languages: QWEN_LANGUAGES, limits: WINDOW_LIMITS, detects: true },
   { id: 'r2t2-q8', name: 'Confucius4 R2T2 GGUF', bytes: 2477512064, languages: ['ja', 'zh', 'en', 'ko', 'fr', 'de', 'it', 'pt', 'ru', 'es', 'ar'] },
-  // The small one, last: for a computer that runs a game beside it. Two thirds of the video memory of the two above,
-  // and about 22 % of the characters wrong where the 1.7B has 16 (measured 2026-10-06 on the stretches the app
-  // cuts). Left to detect the language it mixed Spanish with Portuguese: it is not offered for that.
+  // The lightest and the quickest: 0.3-0.4 GB of video memory, a stretch read in a twentieth of a second, and as
+  // right as the small Qwen3 below. Read a stretch at a time, as that one is, and begun again as often: its
+  // measurement is of stretches cut that way. Five languages; told another it writes the speech down as one of its
+  // five, and it has no way to say that what it hears is none of them — so it is not left to detect the other
+  // side's language, which may be any.
+  { id: 'sensevoice-small-q8', name: 'SenseVoice-Small GGUF', bytes: 254211200, languages: SENSEVOICE_LANGUAGES, limits: WINDOW_LIMITS },
+  // The small one of thirty languages: for a computer that runs a game beside it. Two thirds of the video memory of
+  // the two at the top, and about 22 % of the characters wrong where the 1.7B has 16 (measured 2026-10-06 on the
+  // stretches the app cuts). Left to detect the language it mixed Spanish with Portuguese: it is not offered for that.
   { id: 'qwen3-asr-0.6b-q8', name: 'Qwen3-ASR 0.6B GGUF', bytes: 1151272416, languages: QWEN_LANGUAGES, limits: WINDOW_LIMITS },
-  // The smallest, and the last choice: half the video memory of the small Qwen3 again, and about 27 % of the
-  // characters wrong in the app — of the sentences the app cuts, it writes nothing for one short one in five.
+  // The last choice: half the video memory of the small Qwen3 again, and about 27 % of the characters wrong in the
+  // app — of the sentences the app cuts, it writes nothing for one short one in five. What it has over
+  // SenseVoice-Small, which is lighter and more right, is its languages.
   { id: 'nemotron-asr-0.6b-q8', name: 'Nemotron 3.5 ASR 0.6B GGUF', bytes: 930625888, languages: NEMOTRON_LANGUAGES, limits: WINDOW_LIMITS },
 ];
 

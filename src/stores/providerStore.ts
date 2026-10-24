@@ -345,7 +345,10 @@ export const useProviderStore = create<ProviderStore>()((set, get) => {
       const kept = p.kind === 'local' ? undefined : lastAnswer.get(p.id);
       if (kept && kept.inputs === key) return answered(kept.readiness);
 
-      setReadiness(p, { state: 'checking' });
+      // Fork: asked again about an answer that could not find out, the app keeps showing it until the new one comes —
+      // a start stays offered meanwhile, as it was (`app/readiness.ts` asks again every few seconds).
+      const shown = get().readiness[p.id];
+      if (!(shown?.state === 'not-ready' && shown.unsure)) setReadiness(p, { state: 'checking' });
       // Cancelled (a Stop while checking): it found nothing out, whichever
       // way it settled — no report, nothing kept, and unknown again.
       const cancelled = (): Readiness => (newest() ? setReadiness(p, UNKNOWN) : UNKNOWN);
@@ -368,7 +371,7 @@ export const useProviderStore = create<ProviderStore>()((set, get) => {
           dedupeKey: `readiness:${p.id}`,
         });
         // Fork: one that says what went wrong in a code of its own (`CheckError`) is worded by it, as a refusal is.
-        answer = { state: 'not-ready', reason: describeCause(error), ...(checkErrorWords(error) ?? {}) };
+        answer = { state: 'not-ready', reason: describeCause(error), ...(checkErrorWords(error) ?? {}), unsure: true };
       }
       if (!newest()) return from ? answer : get().readiness[p.id] ?? UNKNOWN;
       return answered(answer, !threw);
