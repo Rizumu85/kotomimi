@@ -1,0 +1,4 @@
+# Scripts a Unix shell runs keep their line ends on every checkout.
+*.sh text eol=lf
+gradlew text eol=lf
+*.jar binary

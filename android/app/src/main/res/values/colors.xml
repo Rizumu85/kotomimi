@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The look (Look.kt): the OriginOS 1.0 desktop the user pointed to, in the apricot-and-mint family chosen on 2026-10-10. -->
+<resources>
+    <!-- The wallpaper: a pale wall, and its two fields, coloured by what the phone is doing. -->
+    <color name="wall">#F2EFE8</color>
+    <color name="field_mint_pale">#DCEAE2</color>
+    <color name="field_mint">#CFE7DA</color>
+    <color name="field_blue">#DCE6EE</color>
+    <color name="field_apricot">#F8DDB4</color>
+    <color name="field_apricot_deep">#F0AA5A</color>
+    <color name="field_coral">#F3D5CC</color>
+    <color name="field_lilac">#E6E0F0</color>
+    <!-- The widgets. -->
+    <color name="tile">#FFFDF8</color>
+    <!-- A panel's cards, and the lines between their rows. -->
+    <color name="card">#F5F2EB</color>
+    <color name="card_line">#E7E1D6</color>
+    <color name="switch_off">#D9D4CA</color>
+    <color name="water_tile">#22343F</color>
+    <color name="water">#7FD3AE</color>
+    <color name="water_deep">#3E8F74</color>
+    <color name="water_number">#EAF2EE</color>
+    <color name="water_sub">#A9BDC4</color>
+    <color name="glass_tile">#F4E3C8</color>
+    <color name="glass_number">#3A3026</color>
+    <color name="glass_sub">#8A7660</color>
+    <color name="paper_number">#3A2E2C</color>
+    <color name="paper_sub">#8E7A76</color>
+    <color name="paper_tile">#FBF7F0</color>
+    <color name="paper_rule">#F0E7E2</color>
+    <color name="lens">#2A3238</color>
+    <color name="lens_inner">#3E4A52</color>
+    <color name="dial">#F4F2EE</color>
+    <color name="dial_edge">#E3DFD7</color>
+    <color name="key">#E86A52</color>
+    <color name="key_deep">#C4432F</color>
+    <color name="ink_red">#E35D45</color>
+    <color name="ink">#1F2A30</color>
+    <color name="ink_2">#5F6B72</color>
+    <color name="ink_3">#8A949A</color>
+    <color name="good">#2F8457</color>
+    <!-- What stays as it is in the dark, or turns its own way: the switch's knob and the writing on a coral key, the
+         dial's hand on its pale face, the feedback's sheet of paper, the wallpaper's dots. -->
+    <color name="knob">#FFFDF8</color>
+    <!-- Writing on a key-coloured face: pale on the day's coral, dark on the night's white. -->
+    <color name="on_key">#FFFDF8</color>
+    <color name="dial_hand">#1F2A30</color>
+    <color name="sheet">#FFFFFF</color>
+    <color name="dot">#283446</color>
+    <!-- The icon's background, and the scrim over the page while a panel is open. -->
+    <color name="room_2">#FBE3B9</color>
+    <!-- The night's wallpaper is lit, not painted: these are its glows, by what the phone is doing. -->
+    <!-- The day's fields, deepened to glow on black: sage, mint, a misty blue, apricot, coral, a dusty lilac. -->
+    <color name="glow_sage">#4E9A7E</color>
+    <color name="glow_mint">#3FB088</color>
+    <color name="glow_mist">#4F7A94</color>
+    <color name="glow_apricot">#D9853F</color>
+    <color name="glow_coral">#D9644E</color>
+    <color name="glow_lilac">#8A7BA8</color>
+    <!-- And its one accent, by what the phone is doing, as Folia takes its accent from the album: the switch when on. -->
+    <color name="accent_idle">#A8DCC4</color>
+    <color name="accent_hear">#8FE3BE</color>
+    <color name="accent_translate">#FFB877</color>
+    <color name="accent_coach">#FF907C</color>
+    <!-- Behind the icon's pouch, the same by day and by night. -->
+    <color name="icon_back">#DCEAE2</color>
+    <color name="scrim">#59000000</color>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Only in a build that can be debugged: what trying an update without publishing one needs (Updater.testAddress). -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:networkSecurityConfig="@xml/update_test" />
+</manifest>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  A test's server is asked over plain HTTP, which Android refuses an app by default. It is let through to the phone
+  itself alone (127.0.0.1, where `adb reverse` leads to a computer), which is the only place a test's address may be.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">127.0.0.1</domain>
+    </domain-config>
+</network-security-config>

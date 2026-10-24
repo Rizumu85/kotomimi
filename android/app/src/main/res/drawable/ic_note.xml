@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The notification's small icon while the phone is lent: the screen's sound wave, in the one colour the system gives it. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path android:fillColor="#FFFFFFFF" android:pathData="M2,11h2v2h-2z M6,9h2v6h-2z M10,5h2v14h-2z M14,7h2v10h-2z M18,10h2v4h-2z" />
+</vector>
