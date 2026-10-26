@@ -211,6 +211,9 @@ val MODELS = listOf(
                 name = "qwen3-asr-0.6b-q8_0.gguf",
                 bytes = 1_151_272_416,
                 sha256 = "6c44ec2fb4cee513892d7863c1fcc3ea6b699ffa4d899b0ef4ab19956d9544f7",
+                // ModelScope keeps only a later version of this file (larger by 7,552 bytes, another checksum: seen
+                // 2026-10-25), and has no history to ask for this one: from there it never checks out.
+                onModelScope = false,
             ),
         ),
     ),
@@ -253,6 +256,9 @@ val MODELS = listOf(
                 name = "qwen3-asr-1.7b-q8_0.gguf",
                 bytes = 2_473_010_048,
                 sha256 = "da4fc2ac7f24dee784d1684eb1f35836cdbf559519452ae11777670734c0a4f8",
+                // ModelScope keeps only a later version of this file (larger by 7,552 bytes, another checksum: seen
+                // 2026-10-25), and has no history to ask for this one: from there it never checks out.
+                onModelScope = false,
             ),
         ),
     ),
@@ -471,7 +477,7 @@ class Downloads(val folder: File) {
         val open = pieces.filter { it.at < it.end }
         if (open.isNotEmpty()) {
             onProgress(had.get(), 0, "")
-            val sources = fastestFirst(file.addresses(), stopped)
+            val sources = fastestFirst(file.addresses(), file.bytes, stopped)
             if (stopped()) return
             val failure = AtomicReference<IOException?>(null)
             val from = AtomicReference(sources.first().name)
@@ -489,7 +495,7 @@ class Downloads(val folder: File) {
                         val source = sources[at % sources.size]
                         val before = piece.at
                         try {
-                            pull(source, part, piece, had, stopped)
+                            pull(source, part, piece, file.bytes, had, stopped)
                             if (piece.at >= piece.end || stopped()) return@thread
                         } catch (error: Exception) {
                             last = IOException("${source.name}：${error.message ?: error.javaClass.simpleName}")
@@ -539,17 +545,17 @@ class Downloads(val folder: File) {
      * 2026-10-12, ModelScope took up to three seconds to begin, and a poorer line takes longer: the pieces then ask
      * in the order given, with the patience of a download, and say what stopped them.
      */
-    private fun fastestFirst(sources: List<Source>, stopped: () -> Boolean): List<Source> {
+    private fun fastestFirst(sources: List<Source>, expected: Long, stopped: () -> Boolean): List<Source> {
         if (sources.size < 2) return sources
         val speeds = LongArray(sources.size)
         sources.mapIndexed { index, source ->
-            thread(name = "try-${source.name}") { speeds[index] = runCatching { speedOf(source, stopped) }.getOrDefault(0L) }
+            thread(name = "try-${source.name}") { speeds[index] = runCatching { speedOf(source, expected, stopped) }.getOrDefault(0L) }
         }.forEach { it.join() }
         return sources.indices.sortedByDescending { speeds[it] }.map { sources[it] }
     }
 
     /** Bytes a second, over the first megabyte of the file or a few seconds, whichever ends first. */
-    private fun speedOf(source: Source, stopped: () -> Boolean): Long {
+    private fun speedOf(source: Source, expected: Long, stopped: () -> Boolean): Long {
         val connection = URL(source.address).openConnection() as HttpURLConnection
         connection.connectTimeout = TRY_FOR_MS.toInt()
         connection.readTimeout = TRY_FOR_MS.toInt()
@@ -557,6 +563,8 @@ class Downloads(val folder: File) {
         val started = System.currentTimeMillis()
         try {
             if (connection.responseCode != HttpURLConnection.HTTP_PARTIAL) return 0
+            // Another length is another file: what it brought would not check out, however quickly it came.
+            if (!sameLength(connection, expected)) return 0
             var read = 0L
             connection.inputStream.use { input ->
                 val buffer = ByteArray(1 shl 15)
@@ -574,8 +582,14 @@ class Downloads(val folder: File) {
         }
     }
 
+    /** Whether an answer to a range says the whole file is `expected` bytes long; one that does not say is taken at its word. */
+    private fun sameLength(connection: HttpURLConnection, expected: Long): Boolean {
+        val total = connection.getHeaderField("Content-Range")?.substringAfterLast('/')?.trim()?.toLongOrNull() ?: return true
+        return total == expected
+    }
+
     /** What one address brings of one piece, written at the piece's place in the file. */
-    private fun pull(source: Source, part: File, piece: Piece, had: AtomicLong, stopped: () -> Boolean) {
+    private fun pull(source: Source, part: File, piece: Piece, expected: Long, had: AtomicLong, stopped: () -> Boolean) {
         val connection = URL(source.address).openConnection() as HttpURLConnection
         connection.connectTimeout = 10_000
         connection.readTimeout = 20_000
@@ -583,6 +597,9 @@ class Downloads(val folder: File) {
         try {
             // Anything but the stretch asked for would be written in the wrong place.
             if (connection.responseCode != HttpURLConnection.HTTP_PARTIAL) throw IOException("回答 ${connection.responseCode}")
+            // Another version of the file, at the same address: its bytes in this one's places would never check out,
+            // and every try again would end the same way (ModelScope, 2026-10-25). The next address is asked instead.
+            if (!sameLength(connection, expected)) throw IOException("这里的文件是另一个版本")
             RandomAccessFile(part, "rw").use { out ->
                 out.seek(piece.at)
                 connection.inputStream.use { input ->
