@@ -7,8 +7,10 @@
  *   while the settings card is open: the user's leg hears silence while they
  *   are muted in VRChat (`vrchatHolds`, read by the microphone source).
  * - **The chatbox.** Each of the user's sentences, once it and its
- *   translation are final, goes above their avatar — spoken or typed. Not
- *   while coached: what answers the user's speech then is feedback for them.
+ *   translation are final, goes above their avatar — spoken or typed. While
+ *   coached the user speaks the other side's language and gets feedback, not
+ *   a translation: their spoken sentence goes up as they said it, the
+ *   feedback is for them alone; typed text is translated as ever.
  * - **A video.** When a world's video player begins one during a run that
  *   hears the other side, the other side's leg is heard in shorter stretches,
  *   or not at all, as the setting says — or the user is asked, where they can
@@ -36,7 +38,8 @@ export interface VRChatIpc {
 export interface VRChatDeps {
   ipc: VRChatIpc;
   runner: Pick<Runner, 'setLegPace'> & { state: { getState(): { phase: string }; subscribe(listener: () => void): () => void } };
-  view: Readable<{ entries: readonly Entry[] }>;
+  /** The conversation as drawn, and its segments: a typed sentence is told by its origin (`pipeline.ts`). */
+  view: Readable<{ entries: readonly Entry[]; legs?: readonly { segments: readonly { id: string; origin?: string }[] }[] }>;
   /** The legs a run opens now (the audio mode's). */
   legs(): readonly LegName[];
   /** Whether the user can be asked now: false while the subtitle strip lets the mouse pass through. */
@@ -59,9 +62,20 @@ export function linkOf(value: unknown): VRChatLink {
 /** The text of rows, as drawn: one after another. */
 const textOf = (rows: readonly { text: string }[]) => rows.map((row) => row.text).join('').trim();
 
-/** A sentence of the user's that is done: its own words and its translation final. Null while it is not, or for anything else. */
-export function finishedLine(entry: Entry, shows: ChatboxShows): string | null {
+/** The origin the pipeline gives a typed sentence (`appendText` in `pipeline.ts`). */
+const TYPED = /^sokuji_typed_/;
+
+/**
+ * A sentence of the user's that is done, as it goes above their avatar: its own words and its translation final.
+ * Coached and spoken, it is the sentence as they said it, once that is final — what answers it is feedback for them,
+ * never shown to others. Null while it is not done, or for anything else.
+ */
+export function finishedLine(entry: Entry, shows: ChatboxShows, said = false): string | null {
   if (shows === 'off' || entry.kind !== 'exchange' || entry.leg !== 'speaker') return null;
+  if (said) {
+    const words = textOf(entry.source);
+    return entry.source.length > 0 && entry.source.every((row) => row.final) && words ? words : null;
+  }
   if (entry.source.length === 0 || entry.translation.length === 0) return null;
   if (!entry.source.every((row) => row.final) || !entry.translation.every((row) => row.final)) return null;
   const translation = textOf(entry.translation);
@@ -130,8 +144,8 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
   const sent = new Set<string>();
   const queue: string[] = [];
   let sending = false;
-  /** Whether a line may go up now: asked again at the moment it is sent, as the settings may have changed while it waited. */
-  const allowed = () => !stopped && store.getState().chatbox !== 'off' && !deps.coached();
+  /** Whether a line may go up now: asked again at the moment it is sent, as the setting may have changed while it waited. */
+  const allowed = () => !stopped && store.getState().chatbox !== 'off';
   const pump = () => {
     if (sending) return;
     if (!allowed()) { queue.length = 0; return; }
@@ -143,12 +157,17 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
   };
   const look = () => {
     const shows = store.getState().chatbox;
-    for (const entry of deps.view.get().entries) {
+    const state = deps.view.get();
+    const coached = deps.coached();
+    // The segments typed text opened: everything else of the user's leg was spoken.
+    const typed = new Set((state.legs ?? []).flatMap((leg) => leg.segments.filter((s) => TYPED.test(s.origin ?? '')).map((s) => s.id)));
+    for (const entry of state.entries) {
       if (entry.kind !== 'exchange' || sent.has(entry.id)) continue;
-      const line = finishedLine(entry, shows);
+      const said = coached && !entry.source.some((row) => typed.has(row.segmentId));
+      const line = finishedLine(entry, shows, said);
       if (line === null) continue;
       sent.add(entry.id);
-      if (!deps.coached()) queue.push(line);
+      queue.push(line);
     }
     pump();
   };

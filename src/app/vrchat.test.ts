@@ -28,8 +28,9 @@ function setup(over: Partial<VRChatDeps> = {}, initial: Entry[] = []) {
     state: { getState: () => ({ phase }), subscribe: (l: () => void) => { runListeners.add(l); return () => runListeners.delete(l); } },
   };
   let entries: Entry[] = initial;
+  let legs: Array<{ segments: Array<{ id: string; origin?: string }> }> = [];
   const viewListeners = new Set<() => void>();
-  const view = { get: () => ({ entries }), subscribe: (l: () => void) => { viewListeners.add(l); return () => viewListeners.delete(l); } };
+  const view = { get: () => ({ entries, legs }), subscribe: (l: () => void) => { viewListeners.add(l); return () => viewListeners.delete(l); } };
   const timers: Array<() => void> = [];
   const controller = startVRChat({
     ipc, runner: runner as VRChatDeps['runner'], view, legs: () => ['speaker', 'participant'], canAsk: () => true, coached: () => false,
@@ -38,7 +39,7 @@ function setup(over: Partial<VRChatDeps> = {}, initial: Entry[] = []) {
   return {
     controller, invoked, paces, handlers, timers,
     run(next: string) { phase = next; for (const l of runListeners) l(); },
-    show(next: Entry[]) { entries = next; for (const l of viewListeners) l(); },
+    show(next: Entry[], nextLegs: typeof legs = []) { entries = next; legs = nextLegs; for (const l of viewListeners) l(); },
     chatboxLines: () => invoked.filter(([channel]) => channel === 'vrchat:chatbox').map(([, data]) => (data as { text: string }).text),
   };
 }
@@ -142,11 +143,22 @@ describe('the chatbox', () => {
     expect(t.chatboxLines()).toEqual(['こんにちは', 'ありがとう']);
   });
 
-  it('sends nothing while the user is coached: what answers them is feedback for them alone', () => {
+  it('sends what the user said while they are coached, never the feedback; typed text is translated as ever', () => {
+    useVRChatStore.setState({ chatbox: 'both' });
+    const t = setup({ coached: () => true });
+    const typed = exchange('t', '谢谢', 'ありがとう');
+    t.show([exchange('a', '今日は行きます', '✓ 正确')], [{ segments: [{ id: '谢谢', origin: 'sokuji_typed_1' }, { id: '今日は行きます', origin: 'u1' }] }]);
+    expect(t.chatboxLines()).toEqual(['今日は行きます']);
+    t.show([exchange('a', '今日は行きます', '✓ 正确'), typed], [{ segments: [{ id: '谢谢', origin: 'sokuji_typed_1' }, { id: '今日は行きます', origin: 'u1' }] }]);
+    t.timers.shift()!();
+    expect(t.chatboxLines()).toEqual(['今日は行きます', '谢谢\nありがとう']);
+  });
+
+  it('sends a coached sentence once it is final, without waiting for its feedback', () => {
     useVRChatStore.setState({ chatbox: 'translation' });
     const t = setup({ coached: () => true });
-    t.show([exchange('a', '今日は', '✓')]);
-    expect(t.chatboxLines()).toEqual([]);
+    t.show([exchange('a', '今日は行きます', '')]);
+    expect(t.chatboxLines()).toEqual(['今日は行きます']);
   });
 });
 

@@ -914,7 +914,7 @@ VRChat 里对面的人说什么语言是不一定的。"对方说什么语言"�
 - **调研结论**：VRChat 不告诉别的程序"谁在说话"。OSC 只给本人的静音和音量（`/avatar/parameters/MuteSelf`、`Voice`），Udon 也读不到别人说话（官方反馈区的请求还没做）。VRCT 等工具都是把扬声器的声音整个拿去识别，同样分不开视频和人声：两者在 VRChat 里已经混在一起。按声音方向分人（左右声道的差别）先放着，以后录两声道的样本再测。
 - **从哪里知道**（`electron/vrchat.js`，只在 Windows）：VRChat 的运行记录 `AppData\LocalLow\VRChat\VRChat\output_log_*.txt`。它启动时写自己的接口端口（`Advertising Service VRChat-Client-… of type OSCQuery on 13945`、`… of type OSC on 9000`），放视频时写 `[Video Playback] Attempting to resolve URL '…'`，进别的世界写 `[Behaviour] Entering Room`。静音状态向那个 OSCQuery 端口问 `GET /avatar/parameters/MuteSelf`（本机 HTTP，每 0.25 秒一次，只在需要时问）；头顶文字用 UDP 发 `/chatbox/input` 到 OSC 端口。这样应用自己不监听任何端口，不用 mDNS：不会弹防火墙，也不和 VRCT 抢 9001。VRChat 不记录视频什么时候停。
 - **静音**：设置「VRChat 静音时不识别我」（默认开）。VRChat 里静音时，麦克风送给"我"那一路的是同样长度的静音（`MicSettings.held`，`mic.ts`），一句话会像停顿一样结束；底栏的"我"划一道。不出声、只想把说的话翻译到头顶的人把它关掉。
-- **头顶显示我的翻译**：关 / 译文 / 原文 + 译文（默认关）。"我"那一路的一句话和译文都定稿后发一次，打字的也发；两条之间至少 1.5 秒（VRChat 会丢太快的），超过 144 个字截断。开着语法反馈时不发：那时回答"我"的是给自己看的反馈。
+- **头顶显示我的翻译**：关 / 译文 / 原文 + 译文（默认关）。"我"那一路的一句话和译文都定稿后发一次，打字的也发；两条之间至少 1.5 秒（VRChat 会丢太快的），超过 144 个字截断。开着语法反馈时（用户的要求，2026-10-26）：说的话本来就是对方的语言，发识别出来的原句，原句定稿就发，不等反馈；反馈只给自己看，不发；打的字照常翻译，发译文（打字的句子靠 `pipeline.ts` 给它的 `sokuji_typed_` origin 认出来）。
 - **播放视频时**：询问 / 照常 / 加快 / 暂停对方（默认询问）。只在会话进行、开着"对方"那一路时起作用。
   - **加快**：对方那一路的一段话切得更短（`AdapterSession.pace('quick')`，契约里可选的方法）。本机原生识别从 8 秒一翻、24 秒硬切改成 4 秒、8 秒（`nativeAsr.ts` 的 `QUICK_ROLL_*`），API 识别一段话超过 6 秒就先送一段（`apiAsr.ts`）。另一台设备的 Realtime 会话由对方切，没有这个方法，照常。
   - **暂停对方**：运行器给对方那一路送等长的静音（`Runner.setLegPace`，`run.ts`），视频和别人的话都不翻译。
