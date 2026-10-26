@@ -1,3 +1,4 @@
+import { VRChatSection } from '../../VRChat/VRChatSection';
 import React, { useCallback, useEffect, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -92,6 +93,9 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({ toggleSettings, act
 
             {/* Fork: the fonts of the app and of conversation text */}
             <FontSection />
+
+            {/* Fork: VRChat on the same computer (Windows) */}
+            <VRChatSection />
 
             {/* Fork: starting with the computer, in the background */}
             <AutostartSection />

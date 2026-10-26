@@ -102,6 +102,13 @@ export const ROLL_HARD_SECONDS = 90;
  * this (of 32768), for a voice that is very quiet itself.
  */
 const GAP_SECONDS = 0.2;
+/**
+ * Fork: a recognition's length at the quick pace (`AdapterSession.pace`): begun again at a gap past `QUICK_ROLL_AFTER`
+ * seconds, and anywhere at `QUICK_ROLL_HARD`. For sound that never pauses — a video in VRChat — where the usual
+ * lengths leave the other side's words waiting under it.
+ */
+export const QUICK_ROLL_AFTER = 4;
+export const QUICK_ROLL_HARD = 8;
 const GAP_PEAK = 600;
 const GAP_OF_LEVEL = 0.1;
 /** How loud the voice has lately been: the loudest sample, let down by this much with every piece of sound. */
@@ -140,7 +147,9 @@ interface Stream {
 
 export function createNativeAsr(options: NativeAsrOptions): AsrLike {
   const { bridge } = options;
-  const limits: NativeLimits = { rollAfter: ROLL_AFTER_SECONDS, rollAt: ROLL_AT_SECONDS, rollHard: ROLL_HARD_SECONDS, lastWordsMs: LAST_WORDS_TIMEOUT_MS, ...options.limits };
+  const usual: NativeLimits = { rollAfter: ROLL_AFTER_SECONDS, rollAt: ROLL_AT_SECONDS, rollHard: ROLL_HARD_SECONDS, lastWordsMs: LAST_WORDS_TIMEOUT_MS, ...options.limits };
+  // What the recognitions are cut by now: the usual, or the quick pace's shorter lengths.
+  const limits: NativeLimits = { ...usual };
   const now = options.now ?? (() => Date.now());
   const clock = options.clock ?? realClock;
   let worker: VadWorker | null = null;
@@ -411,6 +420,14 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
       worker?.postMessage({ type: 'flush' });
       // The turn is over whatever the detector thinks of it: after its own cut it would say nothing.
       if (live) close(live);
+    },
+
+    pace(pace) {
+      const quick = pace === 'quick';
+      limits.rollAfter = quick ? Math.min(usual.rollAfter, QUICK_ROLL_AFTER) : usual.rollAfter;
+      // A detector's cut rolls the recognition at the same length (0, at every cut, stays as it is).
+      limits.rollAt = quick && usual.rollAt > 0 ? Math.min(usual.rollAt, QUICK_ROLL_AFTER) : usual.rollAt;
+      limits.rollHard = quick ? Math.min(usual.rollHard, QUICK_ROLL_HARD) : usual.rollHard;
     },
 
     dispose() {

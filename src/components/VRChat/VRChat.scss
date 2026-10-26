@@ -1,0 +1,197 @@
+// Fork: VRChat on the same computer — the settings card (`VRChatSection.tsx`) and a video's question and mark
+// (`VideoPrompt.tsx`). No outlines: grey words, a light wash under the pointer, the green tint for what is on or
+// suggested — the subtitle strip's own buttons.
+@use '../Settings/shared/variables' as vars;
+@use '../../styles/tokens' as tk;
+
+.kt-vrchat {
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  // The app's segmented-control archetype (ModePicker.scss, and the credential choice in Settings.scss — each
+  // section keeps its own copy, as they scope their rules to themselves). Active = fill.
+  .segmented-control {
+    display: inline-flex;
+    align-items: stretch;
+    height: 28px;
+    margin-top: 6px;
+    border: 1px solid vars.$border-default;
+    border-radius: vars.$radius-md;
+    overflow: hidden;
+
+    .segmented-option {
+      display: inline-flex;
+      align-items: center;
+      padding: 0 12px;
+      font-size: vars.$font-caption;
+      line-height: 1;
+      border: none;
+      background: vars.$bg-control;
+      color: #aaa;
+      cursor: pointer;
+      transition: all 0.15s ease;
+
+      &:not(:last-child) {
+        border-right: 1px solid vars.$border-default;
+      }
+
+      &:hover:not(.active) {
+        background: vars.$bg-hover;
+      }
+
+      &.active {
+        background: vars.$color-primary-fill;
+        color: vars.$color-on-primary;
+      }
+    }
+  }
+}
+
+.kt-vrchat__pill {
+  margin-left: auto;
+  padding: 1px 9px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: vars.$text-muted;
+  background: rgba(255, 255, 255, 0.06);
+
+  &.is-on {
+    color: tk.$color-primary;
+    background: rgba(tk.$color-primary, 0.15);
+  }
+}
+
+.kt-vrchat__todo {
+  margin: -4px 0 10px;
+  font-size: 12px;
+  color: vars.$color-warning;
+}
+
+.kt-vrchat__label {
+  margin: 14px 0 0;
+  font-size: 13px;
+  color: vars.$text-secondary;
+}
+
+// The triangle before "video": the app's green, drawn, so it sits on the text's line in any font.
+.kt-video__play {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-right: 6px;
+  border-left: 7px solid tk.$color-primary;
+  border-top: 4.5px solid transparent;
+  border-bottom: 4.5px solid transparent;
+  vertical-align: 1px;
+}
+
+// Under the conversation, above the typed text and the footer.
+.kt-video {
+  margin: 0 12px 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.kt-video__title {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #e8e8e8;
+}
+
+.kt-video__acts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.kt-video__btn {
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 12.5px;
+  color: #c8c8c8;
+  background: transparent;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  &.is-go {
+    color: tk.$color-primary;
+    background: rgba(tk.$color-primary, 0.15);
+  }
+
+  &:focus-visible {
+    outline: 2px solid tk.$color-primary;
+    outline-offset: 1px;
+  }
+}
+
+span.kt-video__btn {
+  cursor: default;
+}
+
+.kt-video__remember {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  font-size: 12px;
+  color: vars.$text-muted;
+  cursor: pointer;
+}
+
+.kt-video-on {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0 12px 10px;
+}
+
+// In the subtitle strip, after its time.
+.kt-video-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12.5px;
+  -webkit-app-region: no-drag;
+}
+
+.kt-video-pill__label {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 6px 0 2px;
+  color: #9aa0a6;
+}
+
+.kt-video-pill__btn {
+  padding: 3px 9px;
+  font-size: 12.5px;
+}
+
+span.kt-video-pill__btn {
+  cursor: default;
+}
+
+// Over the captions while the strip passes the mouse through: faint, and nothing to press.
+.kt-video-mark {
+  position: absolute;
+  left: 14px;
+  top: 12px;
+  font-size: 12.5px;
+  color: tk.$color-primary;
+  opacity: 0.8;
+  text-shadow: 0 0 3px #000, 0 0 6px #000;
+  pointer-events: none;
+  z-index: 2;
+}

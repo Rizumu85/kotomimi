@@ -66,6 +66,11 @@ export interface MicSettings {
   activation?(): number;
   /** Fork: told every chunk's level, 0–100, before the gate — for the meter the threshold is set by. */
   level?(level: number): void;
+  /**
+   * Fork: read on every chunk — true while the microphone is to be heard as silence: the user muted in VRChat
+   * (`vrchatHolds`). Silence of the chunk's length, as the gate's, so that a sentence under way ends as at a pause.
+   */
+  held?(): boolean;
   /** Called when any of them may have changed. */
   subscribe(listener: () => void): () => void;
 }
@@ -115,7 +120,7 @@ export async function openMic(
   // `deliver`, so that a mute still drops the chunk whole.
   const gate = createMicGate({
     threshold: () => settings.activation?.() ?? 0,
-    deliver: (pcm) => core.deliver(pcm),
+    deliver: (pcm) => core.deliver(settings.held?.() ? new Int16Array(pcm.length) : pcm),
     onLevel: (level) => settings.level?.(level),
   });
 

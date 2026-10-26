@@ -152,6 +152,9 @@ export const INVOKE_CHANNELS = [
   'app:close-ready',
   // Window-close handshake: whether a session is running or tearing down.
   'app:session-busy',
+  // Fork: VRChat on the same computer (electron/vrchat.js)
+  'vrchat:watch',
+  'vrchat:chatbox',
   // LAN caption sharing (electron/caption-share.js)
   'caption-share:start',
   'caption-share:stop',

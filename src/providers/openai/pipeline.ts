@@ -365,6 +365,11 @@ class PipelineLeg implements AdapterSession {
     this.session?.appendAudio(pcm);
   }
 
+  /** Fork: told on to the session that hears: another device's has none, and goes on as it is. */
+  pace(pace: 'normal' | 'quick'): void {
+    this.session?.pace?.(pace);
+  }
+
   /**
    * Typed text: the Realtime session's when no stage takes it; else shown at
    * once as its own source, and answered by the stage. A leg this computer

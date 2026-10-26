@@ -1,4 +1,5 @@
 // src/components/Subtitle/SubtitleBar.tsx
+import { VideoPill } from '../VRChat/VideoPrompt';
 import React, { useEffect, useRef, useState } from 'react';
 import { BRAND } from '../../lib/brand';
 import { useTranslation } from 'react-i18next';
@@ -276,6 +277,8 @@ const SubtitleBar: React.FC<Props> = ({
             <span className="subtitle-bar__lang">
               {sourceLanguageCode} → {targetLanguageCode}
             </span>
+            {/* Fork: a video begun in VRChat — asked here, in the strip's own buttons (`VideoPrompt.tsx`). */}
+            {surface === 'electron' && <VideoPill />}
           </>
         )}
       </div>

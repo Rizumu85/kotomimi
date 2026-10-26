@@ -907,6 +907,21 @@ VRChat 里对面的人说什么语言是不一定的。"对方说什么语言"�
 - **录音**：`public/speed-test/<语言>.ogg`，50 种语言，共约 1.9 MB，`scripts/dev/build-speed-clips.py` 生成（同时写 `src/providers/openai/speedClips.generated.ts`，记每段长度和说话在哪里结束）。日语是手机自检那段（LibriVox 公有领域，两边的结果能对照）；其他语言取 FLEURS `dev` 里第一段说话 7～11 秒的朗读（CC BY 4.0，只流式读取压缩包开头，不下载整包）。说话的起止按 20 毫秒能量算：比最响的低 35 dB 以内、并且比这段录音最安静的一成高 15 dB；后一条是因为有的录音底噪大，只用前一条会把整段都算成说话。地区和书写体按基本语言归一（`zh-TW` 用普通话那段，`pt-PT` 用巴西葡语那段）。
 - **实测**（2026-10-24，这台 PC，Qwen3-ASR 1.7B + Index-Translate 2B + Gemma 4 E2B 反馈，两者模式）：说完后 0.6～0.7 秒出原文，每句翻译 0.2 秒，反馈 0.2～0.5 秒，说完到出译文 0.6～0.9 秒；连测三次稳定。另一台设备、手机和 API 还没实测。
 
+## VRChat 联动（2026-10-26）
+
+用户的问题：能不能通过 VRChat 的接口知道谁在说话，省性能；世界里用播放器放视频时，别人说话的翻译会变慢。设计稿 `.dev/design/vrchat.html`、`.dev/design/vrchat-subtitle.html`。
+
+- **调研结论**：VRChat 不告诉别的程序"谁在说话"。OSC 只给本人的静音和音量（`/avatar/parameters/MuteSelf`、`Voice`），Udon 也读不到别人说话（官方反馈区的请求还没做）。VRCT 等工具都是把扬声器的声音整个拿去识别，同样分不开视频和人声：两者在 VRChat 里已经混在一起。按声音方向分人（左右声道的差别）先放着，以后录两声道的样本再测。
+- **从哪里知道**（`electron/vrchat.js`，只在 Windows）：VRChat 的运行记录 `AppData\LocalLow\VRChat\VRChat\output_log_*.txt`。它启动时写自己的接口端口（`Advertising Service VRChat-Client-… of type OSCQuery on 13945`、`… of type OSC on 9000`），放视频时写 `[Video Playback] Attempting to resolve URL '…'`，进别的世界写 `[Behaviour] Entering Room`。静音状态向那个 OSCQuery 端口问 `GET /avatar/parameters/MuteSelf`（本机 HTTP，每 0.25 秒一次，只在需要时问）；头顶文字用 UDP 发 `/chatbox/input` 到 OSC 端口。这样应用自己不监听任何端口，不用 mDNS：不会弹防火墙，也不和 VRCT 抢 9001。VRChat 不记录视频什么时候停。
+- **静音**：设置「VRChat 静音时不识别我」（默认开）。VRChat 里静音时，麦克风送给"我"那一路的是同样长度的静音（`MicSettings.held`，`mic.ts`），一句话会像停顿一样结束；底栏的"我"划一道。不出声、只想把说的话翻译到头顶的人把它关掉。
+- **头顶显示我的翻译**：关 / 译文 / 原文 + 译文（默认关）。"我"那一路的一句话和译文都定稿后发一次，打字的也发；两条之间至少 1.5 秒（VRChat 会丢太快的），超过 144 个字截断。开着语法反馈时不发：那时回答"我"的是给自己看的反馈。
+- **播放视频时**：询问 / 照常 / 加快 / 暂停对方（默认询问）。只在会话进行、开着"对方"那一路时起作用。
+  - **加快**：对方那一路的一段话切得更短（`AdapterSession.pace('quick')`，契约里可选的方法）。本机原生识别从 8 秒一翻、24 秒硬切改成 4 秒、8 秒（`nativeAsr.ts` 的 `QUICK_ROLL_*`），API 识别一段话超过 6 秒就先送一段（`apiAsr.ts`）。另一台设备的 Realtime 会话由对方切，没有这个方法，照常。
+  - **暂停对方**：运行器给对方那一路送等长的静音（`Runner.setLegPace`，`run.ts`），视频和别人的话都不翻译。
+  - **询问**：主窗口在对话下方出提示条；字幕模式放在字幕条里时间后面，询问期间字幕条一直显示。点击穿透打开时（以及人在 VR 里）点不到，就不问，直接按"加快"处理，字幕区左上角标一下。
+  - **结束**：进别的世界、会话结束，或点"结束"。
+- **测试**：未打包运行时，`KOTOMIMI_VRCHAT_LOG_DIR` 让应用读一个别的文件夹当 VRChat 的记录；`.dev/tools/scratch/fake-vrchat.mjs` 起一个假的 VRChat（写记录、回答静音、打印收到的头顶文字）。2026-10-26 用它在测试窗口走通了：已连接、静音划线、视频询问、加快、换世界结束、字幕条询问、点击穿透下自动加快、打字发到头顶。**还没有接真的 VRChat 试过**：VRChat 关着 OSC 时 OSCQuery 端口是否还回答静音、`MuteSelf` 是否一定在 OSCQuery 里，都要用户开着 VRChat 确认。
+
 ## 字体
 
 "设置 → 字体"里从这台电脑已安装的字体中选：

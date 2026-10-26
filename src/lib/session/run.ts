@@ -63,6 +63,9 @@ export interface RunHost {
   end(result: RunEnd): void;
 }
 
+/** Fork: how a leg is heard: as usual, with shorter stretches, or not at all (`Run.setPace`). */
+export type LegPace = 'normal' | 'quick' | 'paused';
+
 export class Run {
   readonly id: string;
   /** When the run was created — Start — on the run's clock: what each leg's `session.stopped` counts from. */
@@ -81,6 +84,12 @@ export class Run {
   private readonly stack: ResourceStack;
   private readonly conversations = new Map<LegName, Conversation>();
   private readonly sessions = new Map<LegName, AdapterSession>();
+  /**
+   * Fork: a leg's pace, as the runner was last told (`Runner.setLegPace`): `quick` is told to its session, and a
+   * `paused` leg is given silence in place of its sound — of the same length, so that what it was hearing ends as
+   * at a pause, and its clock goes on.
+   */
+  private readonly paces = new Map<LegName, LegPace>();
   /** Ending: events still fold into L1, but decide nothing. */
   private ending = false;
   /** Ended: events are discarded. */
@@ -466,8 +475,25 @@ export class Run {
     return source;
   }
 
+  /** Fork: a leg's pace, now and for a session it opens later. */
+  setPace(leg: LegName, pace: LegPace): void {
+    this.paces.set(leg, pace);
+    this.tellPace(leg);
+  }
+
+  private tellPace(leg: LegName): void {
+    const session = this.sessions.get(leg);
+    if (!session?.pace) return;
+    try {
+      session.pace(this.paces.get(leg) === 'quick' ? 'quick' : 'normal');
+    } catch (error) {
+      reportError('SessionRunner', `The ${leg} adapter did not take its pace: ${describeCause(error)}`, { cause: error, dedupeKey: `pace:${leg}` });
+    }
+  }
+
   private connect(leg: LegName, source: Source, session: AdapterSession): void {
     this.sessions.set(leg, session);
+    if (this.paces.has(leg)) this.tellPace(leg);
     if (leg === 'speaker' || this.transport === undefined) this.transport = session.info.transport;
     this.stack.defer(`${leg} capture`, source.onPcm((pcm) => this.send(leg, session, pcm)));
     // A leg that said `reconnecting` before its start settled (split Both: its
@@ -487,7 +513,7 @@ export class Run {
     // Per chunk: an adapter that throws is reported when it starts failing,
     // and the throw never reaches the source's delivery.
     try {
-      session.appendAudio(pcm);
+      session.appendAudio(this.paces.get(leg) === 'paused' ? new Int16Array(pcm.length) : pcm);
       this.appendFailing.delete(leg);
     } catch (error) {
       if (!this.appendFailing.has(leg)) {

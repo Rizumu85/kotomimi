@@ -1568,3 +1568,60 @@ describe('runner — one clip per speech entry', () => {
     expect([...clips.keys()].sort()).toEqual(spoken.map((s) => `speaker:${s.ref}`).sort());
   });
 });
+
+describe('runner — a leg\'s pace (fork: a video playing in VRChat)', () => {
+  /** The fake, recording what each session was given: the loudest sample of every chunk, and every pace it was told. */
+  function recording() {
+    const heard: number[] = [];
+    const paces: string[] = [];
+    const provider = {
+      ...fakeProvider,
+      start: async (request: unknown, events: unknown) => {
+        const session = await fakeProvider.start(request as never, events as never);
+        return {
+          info: session.info,
+          appendAudio: (pcm: Int16Array) => { heard.push(pcm.reduce((most, s) => Math.max(most, Math.abs(s)), 0)); session.appendAudio(pcm); },
+          appendText: (text: string) => session.appendText(text),
+          beginTurn: () => session.beginTurn(),
+          endTurn: () => session.endTurn(),
+          cancelTurn: () => session.cancelTurn(),
+          stop: () => session.stop(),
+          pace: (pace: string) => { paces.push(pace); },
+        };
+      },
+    } as unknown as AnyProvider;
+    return { provider, heard, paces };
+  }
+
+  it('gives a paused leg silence of the same length, and its sound again once it goes on', async () => {
+    const rec = recording();
+    const clock = createVirtualClock(0);
+    const t = setup({ shape: { provider: rec.provider }, openSource: async () => createFakeSource(clock, { voiced: true }) });
+    void t.runner.start();
+    await flush();
+    await flush();
+    clock.advance(300);
+    expect(Math.max(...rec.heard)).toBeGreaterThan(0);
+    t.runner.setLegPace('speaker', 'paused');
+    rec.heard.length = 0;
+    clock.advance(300);
+    expect(rec.heard.length).toBeGreaterThan(0);
+    expect(Math.max(...rec.heard)).toBe(0);
+    t.runner.setLegPace('speaker', 'normal');
+    rec.heard.length = 0;
+    clock.advance(300);
+    expect(Math.max(...rec.heard)).toBeGreaterThan(0);
+  });
+
+  it('tells the session a quick pace, now and in the next run, until it is set again', async () => {
+    const rec = recording();
+    const t = setup({ shape: { provider: rec.provider } });
+    t.runner.setLegPace('speaker', 'quick');
+    void t.runner.start();
+    await flush();
+    await flush();
+    expect(rec.paces).toEqual(['quick']);
+    t.runner.setLegPace('speaker', 'normal');
+    expect(rec.paces).toEqual(['quick', 'normal']);
+  });
+});

@@ -71,3 +71,16 @@ describe('a recognizer that is one of two', () => {
     expect(chosen.inits).toEqual([]);
   });
 });
+
+describe('the pace (fork: a video playing in VRChat)', () => {
+  it('is passed on to the chosen recognizer, and one asked for before it was chosen is given once it is', async () => {
+    const paces: string[] = [];
+    const one = { ...stand(), pace: (pace: 'normal' | 'quick') => { paces.push(pace); } } as AsrLike;
+    const either = createEitherAsr(async () => one);
+    either.pace?.('quick');
+    await either.init('m', INIT);
+    expect(paces).toEqual(['quick']);
+    either.pace?.('normal');
+    expect(paces).toEqual(['quick', 'normal']);
+  });
+});

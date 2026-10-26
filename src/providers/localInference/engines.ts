@@ -36,6 +36,8 @@ export interface AsrLike {
   onError: ((error: string) => void) | null;
   /** The ready worker died: nothing more will be transcribed. */
   onFatal: ((error: string) => void) | null;
+  /** Fork: a shorter stretch, or the usual (`AdapterSession.pace`). Absent: the recognizer cuts as it does. */
+  pace?(pace: 'normal' | 'quick'): void;
 }
 
 /** `TranslationEngine`, as it is: its `onError` carries only fatal failures. */

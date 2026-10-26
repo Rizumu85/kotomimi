@@ -231,3 +231,40 @@ describe('a recognizer that is an API', () => {
     expect(clock.pending()).toBe(0);
   });
 });
+
+describe('the quick pace (a video playing in VRChat)', () => {
+  it('sends a stretch that goes on in pieces as it grows past its length, and as usual again at the usual pace', async () => {
+    const api = fakeApi({ body: { text: 'いち' } }, { body: { text: 'に' } }, { body: { text: 'さん' } });
+    const { asr, vad } = await started(api);
+    asr.pace?.('quick');
+    vad.worker.say('speech_start');
+    for (let i = 0; i < 13; i++) asr.feedAudio(seconds(1, 5), RATE);
+    await settled();
+    await settled();
+    // Two pieces of six seconds, the speaker still talking.
+    expect(api.calls).toHaveLength(2);
+    asr.pace?.('normal');
+    for (let i = 0; i < 8; i++) asr.feedAudio(seconds(1, 5), RATE);
+    await settled();
+    expect(api.calls).toHaveLength(2);
+    vad.worker.say('speech_end');
+    await settled();
+    await settled();
+    expect(api.calls).toHaveLength(3);
+  });
+});
+
+describe('the quick pace, of what is sent', () => {
+  it('sends a piece cut while the speaker talks on whole: no pause at its end to trim', async () => {
+    const api = fakeApi({ body: { text: 'いち' } });
+    const { asr, vad } = await started(api);
+    asr.pace?.('quick');
+    vad.worker.say('speech_start');
+    for (let i = 0; i < 6; i++) asr.feedAudio(seconds(1, 5), RATE);
+    await settled();
+    await settled();
+    expect(api.calls).toHaveLength(1);
+    const file = api.calls[0].form.get('file') as File;
+    expect(file.size).toBe(44 + 6 * RATE * 2);
+  });
+});

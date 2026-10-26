@@ -375,6 +375,22 @@ describe('this computer\'s native recognizer', () => {
     expect(engine.streams).toHaveLength(2);
   });
 
+  it('begins a recognition again sooner at the quick pace (a video playing in VRChat)', async () => {
+    const usual = await started(fakeEngine(), { limits: { rollAfter: 20, rollAt: 20, rollHard: 40 } });
+    usual.vad.worker.say('speech_start');
+    await settled();
+    talk(usual.asr, usual.engine, 1, 10);
+    expect(usual.engine.streams[0].ended).toBe(false);
+
+    const quick = await started(fakeEngine(), { limits: { rollAfter: 20, rollAt: 20, rollHard: 40 } });
+    quick.asr.pace?.('quick');
+    quick.vad.worker.say('speech_start');
+    await settled();
+    talk(quick.asr, quick.engine, 1, 10);
+    // Closed at eight seconds, the speaker still talking: the next recognition follows it.
+    expect(quick.engine.streams[0].ended).toBe(true);
+  });
+
   it('lets go of everything when it is disposed of', async () => {
     const { asr, vad, engine, seen } = await started();
     vad.worker.say('speech_start');

@@ -10,7 +10,7 @@ import type { LegName } from '../conversation/types';
 import type { RunNoticeCode } from './codes';
 import { ConversationSet, type ConversationInfo } from './conversationSet';
 import { guardPorts, type ControlMethod, type RunnerDeps } from './ports';
-import { apiErrorType, LegOpenError, RefusedError, retentionFor, Run, type RunHost } from './run';
+import { apiErrorType, LegOpenError, RefusedError, retentionFor, Run, type LegPace, type RunHost } from './run';
 import type { LegState, RunEnd, RunState } from './types';
 
 const DEFAULT_TIMEOUT_MS = 5_000;
@@ -32,6 +32,11 @@ export interface Runner {
   /** Whether the speaker's voice is fed into processing now — what the mic strip shows: while running, except under push-to-talk only while a turn is held. False when idle, starting or stopping. */
   speakerAudioInUse(): boolean;
   sendText(text: string): void;
+  /**
+   * Fork: a leg's pace (`LegPace`) — for this run and every later one, until it is set again: a video playing in
+   * VRChat has the other side heard in shorter stretches, or not at all.
+   */
+  setLegPace(leg: LegName, pace: LegPace): void;
   /** Empties the conversation, and the queued audio with it. */
   clear(): void;
 }
@@ -64,6 +69,8 @@ export function createRunner(rawDeps: RunnerDeps): Runner {
     for (const leg of ['speaker', 'participant'] as const) conversation.get(leg)?.setRetention(retention);
   });
   let current: Run | null = null;
+  /** Fork: each leg's pace as last set, for the runs that open from now on (`setLegPace`). */
+  const paces = new Map<LegName, LegPace>();
   let ending: Promise<void> | null = null;
   // A run `abandon()` has already forced idle: an `end()` for it already in
   // flight (a stop, a leg's end, a failed start) must not run its
@@ -205,6 +212,7 @@ export function createRunner(rawDeps: RunnerDeps): Runner {
       return;
     }
     const run = new Run(deps, hostFor, shape);
+    for (const [leg, pace] of paces) run.setPace(leg, pace);
     current = run;
     set({ phase: 'starting', step: 'checking' });
     try {
@@ -308,6 +316,10 @@ export function createRunner(rawDeps: RunnerDeps): Runner {
     // The phase too: `end()` says stopping before the run itself starts ending.
     speakerAudioInUse: () => state.getState().phase === 'running' && (current?.speakerAudioInUse() ?? false),
     sendText: (text) => current?.sendText(text),
+    setLegPace: (leg, pace) => {
+      paces.set(leg, pace);
+      current?.setPace(leg, pace);
+    },
     clear: () => {
       conversation.clear();
       deps.playback.clear();

@@ -64,6 +64,12 @@ export interface AdapterSession {
   stop(): Promise<void>;
   /** What the started session actually used, for telemetry. */
   readonly info: { transport?: string };
+  /**
+   * Fork: how long a stretch of speech may run before its words are written. `quick` cuts it shorter, for sound that
+   * never pauses (a video playing in VRChat) — the words come sooner, a sentence may be cut. Optional: a session whose
+   * stretches are cut elsewhere (another device's) has none, and goes on as it is.
+   */
+  pace?(pace: 'normal' | 'quick'): void;
 }
 
 /** One protocol frame an adapter reported (spec D8): what the Logs panel lists. Never audio, never a credential. */

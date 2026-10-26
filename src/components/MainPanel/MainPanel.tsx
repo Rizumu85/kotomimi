@@ -4,6 +4,7 @@
  * controls, the toolbar with the export menu, the footers over the run's
  * state.
  */
+import { VideoPrompt } from '../VRChat/VideoPrompt';
 import { useNativeEnginesComing } from '../../stores/nativeEngineStore';
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -340,6 +341,8 @@ export default function MainPanel() {
               : <><MessageSquare size={32} /><p>{t('simplePanel.startToBegin', 'Click Start to begin real-time translation')}</p></>}
           />
         )}
+        {/* Fork: a video begun in VRChat — asked here, or what was chosen with its end (`VideoPrompt.tsx`). */}
+        {!takeover && <VideoPrompt />}
         {canSendText && <TypedText onSend={(text) => runner.sendText(text)} />}
         {status && <StatusLine entry={status} onAction={runNoticeAction} onDismiss={onDismissStatus} />}
         {footer(uiMode === 'advanced' ? 'advanced' : 'basic')}

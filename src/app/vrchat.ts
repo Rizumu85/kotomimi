@@ -1,0 +1,221 @@
+// src/app/vrchat.ts
+/**
+ * Fork: VRChat on the same computer, as the page uses it (`electron/vrchat.js`
+ * is the main process's side; the settings are `vrchatStore`).
+ *
+ * - **The mute.** Asked while a run hears the user and the gate is on, or
+ *   while the settings card is open: the user's leg hears silence while they
+ *   are muted in VRChat (`vrchatHolds`, read by the microphone source).
+ * - **The chatbox.** Each of the user's sentences, once it and its
+ *   translation are final, goes above their avatar — spoken or typed. Not
+ *   while coached: what answers the user's speech then is feedback for them.
+ * - **A video.** When a world's video player begins one during a run that
+ *   hears the other side, the other side's leg is heard in shorter stretches,
+ *   or not at all, as the setting says — or the user is asked, where they can
+ *   be: with the subtitle strip passing the mouse through, they cannot, and
+ *   shorter stretches are chosen for them. It ends with another world, the
+ *   run's end, or the user's "end"; VRChat writes nothing when a video stops.
+ */
+import type { Entry } from '../lib/projection/types';
+import type { LegName } from '../lib/conversation/types';
+import type { LegPace } from '../lib/session/run';
+import type { Runner } from '../lib/session/runner';
+import type { Readable } from '../lib/view/conversationView';
+import { useCoachingStore } from '../stores/coachingStore';
+import useAudioStore from '../stores/audioStore';
+import useSettingsStore from '../stores/settingsStore';
+import { useSubtitleLookStore } from '../stores/subtitleLookStore';
+import { useVRChatStore, type ChatboxShows, type VRChatLink } from '../stores/vrchatStore';
+import { setVRChatController, vrchatOffered } from './vrchatHandle';
+
+export interface VRChatIpc {
+  invoke(channel: string, data?: unknown): Promise<unknown>;
+  receive?(channel: string, fn: (...args: unknown[]) => void): void;
+}
+
+export interface VRChatDeps {
+  ipc: VRChatIpc;
+  runner: Pick<Runner, 'setLegPace'> & { state: { getState(): { phase: string }; subscribe(listener: () => void): () => void } };
+  view: Readable<{ entries: readonly Entry[] }>;
+  /** The legs a run opens now (the audio mode's). */
+  legs(): readonly LegName[];
+  /** Whether the user can be asked now: false while the subtitle strip lets the mouse pass through. */
+  canAsk(): boolean;
+  coached(): boolean;
+  /** The conversation emptied (a clear, a new run): what waits to be sent was said there, and is not sent. */
+  onReset?(listener: () => void): () => void;
+  store: typeof useVRChatStore;
+  /** The least time between two chatbox lines: VRChat drops lines sent faster. */
+  chatboxGapMs?: number;
+  setTimeout?(fn: () => void, ms: number): unknown;
+}
+
+/** The main process's word for VRChat's side, held to its shape. */
+export function linkOf(value: unknown): VRChatLink {
+  const v = (value ?? {}) as Partial<VRChatLink>;
+  return { found: v.found === true, connected: v.connected === true, muted: typeof v.muted === 'boolean' ? v.muted : null };
+}
+
+/** The text of rows, as drawn: one after another. */
+const textOf = (rows: readonly { text: string }[]) => rows.map((row) => row.text).join('').trim();
+
+/** A sentence of the user's that is done: its own words and its translation final. Null while it is not, or for anything else. */
+export function finishedLine(entry: Entry, shows: ChatboxShows): string | null {
+  if (shows === 'off' || entry.kind !== 'exchange' || entry.leg !== 'speaker') return null;
+  if (entry.source.length === 0 || entry.translation.length === 0) return null;
+  if (!entry.source.every((row) => row.final) || !entry.translation.every((row) => row.final)) return null;
+  const translation = textOf(entry.translation);
+  if (!translation) return null;
+  return shows === 'both' ? `${textOf(entry.source)}\n${translation}` : translation;
+}
+
+export interface VRChatController {
+  /** The user's answer to a video: a pace, or carry on as usual; `remember` makes it the setting. */
+  answer(choice: 'quick' | 'pause' | 'normal', remember: boolean): void;
+  /** The user's "end": the video is over. */
+  endVideo(): void;
+  stop(): void;
+}
+
+const PACE_OF: Record<'quick' | 'pause', Exclude<LegPace, 'normal'>> = { quick: 'quick', pause: 'paused' };
+
+export function startVRChat(deps: VRChatDeps): VRChatController {
+  const { ipc, runner, store } = deps;
+  const later = deps.setTimeout ?? ((fn: () => void, ms: number) => setTimeout(fn, ms));
+  const gap = deps.chatboxGapMs ?? 1500;
+  const offs: Array<() => void> = [];
+  const running = () => runner.state.getState().phase === 'running';
+  /** Stopped: nothing it was told after, and nothing it scheduled, does anything. */
+  let stopped = false;
+
+  // ── The mute ──────────────────────────────────────────────────────────────
+  // Null until first said: a page loaded again says so at once, ending what the last page had asked for.
+  let watching: boolean | null = null;
+  const watch = () => {
+    if (stopped) return;
+    const s = store.getState();
+    const want = s.viewers > 0 || (running() && s.muteGate && deps.legs().includes('speaker'));
+    if (want === watching) return;
+    watching = want;
+    // Not asked any longer, the last answer is not the mute now: a microphone opened outside a run (the settings'
+    // test) must not be heard as silence on its word.
+    if (!want) store.getState().setLink({ ...s.link, muted: null });
+    void ipc.invoke('vrchat:watch', { on: want }).then((state) => { if (state && watching) store.getState().setLink(linkOf(state)); }, () => {});
+  };
+  ipc.receive?.('vrchat:state', (state) => { if (!stopped) store.getState().setLink(linkOf(state)); });
+
+  // ── A video ───────────────────────────────────────────────────────────────
+  const setPace = (pace: LegPace) => runner.setLegPace('participant', pace);
+  const endVideo = () => {
+    if (store.getState().video.kind === 'none') return;
+    setPace('normal');
+    store.getState().setVideo({ kind: 'none' });
+  };
+  const apply = (choice: 'quick' | 'pause', auto: boolean) => {
+    setPace(PACE_OF[choice]);
+    store.getState().setVideo({ kind: 'on', pace: PACE_OF[choice] === 'paused' ? 'paused' : 'quick', auto });
+  };
+  ipc.receive?.('vrchat:video', () => {
+    if (stopped || !running() || !deps.legs().includes('participant')) return;
+    const on = store.getState().onVideo;
+    if (on === 'normal') return;
+    if (on === 'quick' || on === 'pause') return apply(on, false);
+    // Asked, where the user can answer; chosen for them where they cannot — shorter stretches lose no one's words.
+    if (deps.canAsk()) store.getState().setVideo({ kind: 'asking' });
+    else apply('quick', true);
+  });
+  ipc.receive?.('vrchat:world', () => { if (!stopped) endVideo(); });
+
+  // ── The chatbox ───────────────────────────────────────────────────────────
+  const sent = new Set<string>();
+  const queue: string[] = [];
+  let sending = false;
+  /** Whether a line may go up now: asked again at the moment it is sent, as the settings may have changed while it waited. */
+  const allowed = () => !stopped && store.getState().chatbox !== 'off' && !deps.coached();
+  const pump = () => {
+    if (sending) return;
+    if (!allowed()) { queue.length = 0; return; }
+    const line = queue.shift();
+    if (line === undefined) return;
+    sending = true;
+    void ipc.invoke('vrchat:chatbox', { text: line }).catch(() => {});
+    later(() => { sending = false; pump(); }, gap);
+  };
+  const look = () => {
+    const shows = store.getState().chatbox;
+    for (const entry of deps.view.get().entries) {
+      if (entry.kind !== 'exchange' || sent.has(entry.id)) continue;
+      const line = finishedLine(entry, shows);
+      if (line === null) continue;
+      sent.add(entry.id);
+      if (!deps.coached()) queue.push(line);
+    }
+    pump();
+  };
+  // What is finished on screen when this begins was said before: it is not sent now. A sentence still under way is.
+  for (const entry of deps.view.get().entries) if (finishedLine(entry, 'translation') !== null) sent.add(entry.id);
+  offs.push(deps.view.subscribe(look));
+  if (deps.onReset) offs.push(deps.onReset(() => { queue.length = 0; }));
+
+  // ── Following the run, the settings and the views ─────────────────────────
+  let wasRunning = running();
+  offs.push(runner.state.subscribe(() => {
+    const now = running();
+    // The run is over: a video it heard is forgotten, the pace is the usual for the next.
+    if (wasRunning && !now) endVideo();
+    wasRunning = now;
+    watch();
+  }));
+  offs.push(store.subscribe(watch));
+  watch();
+
+  return {
+    answer(choice, remember) {
+      if (remember) store.getState().setOnVideo(choice);
+      if (choice === 'normal') {
+        setPace('normal');
+        store.getState().setVideo({ kind: 'none' });
+      } else {
+        apply(choice, false);
+      }
+    },
+    endVideo,
+    stop() {
+      if (stopped) return;
+      // The pace back to the usual first: a paused leg must not stay paused for the runs after.
+      endVideo();
+      stopped = true;
+      for (const off of offs.splice(0)) off();
+      queue.length = 0;
+      if (watching) void ipc.invoke('vrchat:watch', { on: false }).catch(() => {});
+      watching = false;
+    },
+  };
+}
+
+let building: Promise<VRChatController> | null = null;
+
+/** The page's one controller (desktop on Windows): over the app session and window.electron. Null elsewhere. */
+export function getVRChatController(): Promise<VRChatController | null> {
+  if (!vrchatOffered()) return Promise.resolve(null);
+  // One build, however many ask while it is under way (React's strict mode runs the boot effect twice).
+  building ??= build();
+  return building;
+}
+
+async function build(): Promise<VRChatController> {
+  const { getAppSession } = await import('./session');
+  const session = getAppSession();
+  const controller = startVRChat({
+    ipc: (window as unknown as { electron: VRChatIpc }).electron,
+    runner: session.runner,
+    view: { get: () => session.view.get(), subscribe: (listener) => session.view.subscribe(listener) },
+    legs: () => { const mode = useAudioStore.getState().mode; return mode === 'both' ? ['speaker', 'participant'] : [mode]; },
+    canAsk: () => !(useSettingsStore.getState().subtitleModeActive && useSubtitleLookStore.getState().through),
+    coached: () => useCoachingStore.getState().coached,
+    onReset: (listener) => session.runner.conversation.onReset(() => listener()),
+    store: useVRChatStore,
+  });
+  setVRChatController(controller);
+  return controller;
+}

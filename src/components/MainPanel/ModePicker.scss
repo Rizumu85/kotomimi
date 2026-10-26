@@ -53,6 +53,24 @@
     &:first-child { border-radius: 5px 0 0 5px; }
     &:last-child  { border-radius: 0 5px 5px 0; }
 
+    // Fork: muted in VRChat — the user's own leg is not heard: "Me" dimmed and struck through.
+    &--muted {
+      position: relative;
+      color: var(--text-tertiary, #777);
+
+      &::after {
+        content: '';
+        position: absolute;
+        left: 8px;
+        right: 8px;
+        top: 50%;
+        height: 1.5px;
+        background: #e57b6a;
+        transform: rotate(-24deg);
+        pointer-events: none;
+      }
+    }
+
     &:hover:not(.mode-picker__segment--active):not(:disabled) {
       background: var(--bg-hover, #3a3a3a);
     }

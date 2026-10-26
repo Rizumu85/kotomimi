@@ -1,3 +1,5 @@
+import { useVRChatStore } from '../stores/vrchatStore';
+import { getVRChatController } from '../app/vrchat';
 import React, { useEffect } from 'react';
 import MainLayout from '../components/MainLayout/MainLayout';
 import { UserProfileProvider } from '../contexts/UserProfileContext';
@@ -63,6 +65,8 @@ export function Home() {
     void startedInBackground().then((hidden) => { if (hidden) primeNativeOnce(); });
     // Fork: the languages pinned to the top of the language menus.
     void useLanguagePinStore.getState().hydrate();
+    // Fork: VRChat on the same computer — its settings, then the mute, the chatbox and its videos followed (Windows).
+    void useVRChatStore.getState().hydrate().then(() => getVRChatController());
     // Follow the OS's devices from here on (spec 2026-10-04): plugging,
     // unplugging, a Bluetooth reconnect, a repaired virtual device.
     const unwatchDevices = watchDevices({

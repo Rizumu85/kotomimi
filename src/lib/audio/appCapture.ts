@@ -7,6 +7,7 @@
 import type { LegName } from '../conversation/types';
 import type { Platform } from '../provider/types';
 import type { OpenSource, Source } from '../session/source';
+import { vrchatHolds } from '../../stores/vrchatStore';
 import useAudioStore from '../../stores/audioStore';
 import { getEnvironment } from '../../utils/environment';
 import { createEchoWatch, type EchoWatch } from './capture/echoWatch';
@@ -42,6 +43,8 @@ export function micSettings(): MicSettings {
     // Fork: the activation threshold, and the meter it is set by (`micGate.ts`, `micLevel.ts`).
     activation: () => audio().micGateThreshold,
     level: (level) => micLevel.set(level),
+    // Fork: muted in VRChat, the user's own leg hears silence (`src/app/vrchat.ts`).
+    held: () => vrchatHolds(),
     subscribe: onAudioChange,
   };
 }

@@ -94,6 +94,9 @@ const joined = (chunks: readonly Int16Array[]): Int16Array => {
   return out;
 };
 
+/** Fork: at the quick pace (`AdapterSession.pace`), a stretch is sent once it is this long, the speaker still talking. */
+export const QUICK_STRETCH_SECONDS = 6;
+
 export function createApiAsr(options: ApiAsrOptions): AsrLike {
   const now = options.now ?? (() => Date.now());
   const clock = options.clock ?? realClock;
@@ -107,6 +110,8 @@ export function createApiAsr(options: ApiAsrOptions): AsrLike {
   let beforeLength = 0;
   /** The stretch being spoken; null while nobody speaks. */
   let speech: Int16Array[] | null = null;
+  /** Fork: at the quick pace, how long the stretch being spoken may grow before it is sent, in samples; 0, as long as the detector lets it. */
+  let quickAt = 0;
   /** One request at a time, in the order spoken. */
   let queue: Promise<void> = Promise.resolve();
 
@@ -165,6 +170,14 @@ export function createApiAsr(options: ApiAsrOptions): AsrLike {
       const kept = samples.slice();
       if (speech) {
         speech.push(kept);
+        // At the quick pace a stretch that goes on and on is sent in pieces: the speaker is still talking, so the
+        // next piece begins at once.
+        if (quickAt > 0 && speech.reduce((n, chunk) => n + chunk.length, 0) >= quickAt) {
+          const said = speech;
+          speech = [];
+          // Cut while they talk on: there is no pause at its end to trim.
+          send(joined(said), false);
+        }
       } else {
         before.push(kept);
         beforeLength += kept.length;
@@ -180,6 +193,10 @@ export function createApiAsr(options: ApiAsrOptions): AsrLike {
       worker?.postMessage({ type: 'flush' });
     },
 
+    pace(pace) {
+      quickAt = pace === 'quick' ? Math.round(QUICK_STRETCH_SECONDS * rate) : 0;
+    },
+
     dispose() {
       stop.abort();
       worker?.postMessage({ type: 'dispose' });
@@ -191,8 +208,8 @@ export function createApiAsr(options: ApiAsrOptions): AsrLike {
   };
 
   /** One stretch of speech, up to the API and back as its text. */
-  function send(said: Int16Array) {
-    const trimmed = said.subarray(0, Math.max(Math.ceil(0.2 * rate), said.length - Math.round(tailTrimSeconds * rate)));
+  function send(said: Int16Array, endsInPause = true) {
+    const trimmed = endsInPause ? said.subarray(0, Math.max(Math.ceil(0.2 * rate), said.length - Math.round(tailTrimSeconds * rate))) : said;
     const sampleRate = rate;
     queue = queue.then(async () => {
       if (stop.signal.aborted) return;

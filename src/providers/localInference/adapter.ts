@@ -317,6 +317,11 @@ class LocalSession implements AdapterSession {
     this.asr.feedAudio(pcm.slice(), SAMPLE_RATE);
   }
 
+  /** Fork: told on to the recognizer, which alone knows how it cuts a stretch. */
+  pace(pace: 'normal' | 'quick'): void {
+    if (!this.ended) this.asr.pace?.(pace);
+  }
+
   /**
    * A source segment with exactly the typed text (ruling 5: today trims it,
    * this contract does not), then a job as for an ASR final — whose text is

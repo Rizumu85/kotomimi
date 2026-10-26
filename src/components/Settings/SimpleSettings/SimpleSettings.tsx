@@ -1,3 +1,4 @@
+import { VRChatSection } from '../../VRChat/VRChatSection';
 import React, { useEffect, useState } from 'react';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -193,6 +194,9 @@ const SimpleSettings: React.FC<SimpleSettingsProps> = ({ highlightSection }) => 
 
         {/* Fork: the fonts of the app and of conversation text */}
         <FontSection />
+
+        {/* Fork: VRChat on the same computer (Windows) */}
+        <VRChatSection />
 
         {/* Fork: starting with the computer, in the background */}
         <AutostartSection />

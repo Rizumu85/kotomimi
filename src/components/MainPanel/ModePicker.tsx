@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SideMeIcon, SideOtherIcon, SideBothIcon } from '../Icons/SideIcons';
+import { useVRChatStore, vrchatHolds } from '../../stores/vrchatStore';
 import './ModePicker.scss';
 
 export type FooterMode = 'speaker' | 'participant' | 'both';
@@ -26,6 +27,8 @@ const SEGMENT_ICONS: Record<'speaker' | 'participant' | 'both', React.ComponentT
 const ModePicker: React.FC<ModePickerProps> = ({ mode, locked, missingDeviceForMode, onSegmentClick }) => {
   const { t } = useTranslation();
   const refs = useRef<Record<string, HTMLButtonElement | null>>({});
+  // Fork: muted in VRChat during a session, the user's own leg hears silence (`src/app/vrchat.ts`): "Me" is struck through.
+  const vrchatMuted = useVRChatStore((state) => vrchatHolds(state)) && locked;
 
   const labelFor = (seg: 'speaker' | 'participant' | 'both') => {
     if (seg === 'speaker') return t('modePicker.modeYou', 'Me');
@@ -72,6 +75,7 @@ const ModePicker: React.FC<ModePickerProps> = ({ mode, locked, missingDeviceForM
         const classes = [
           'mode-picker__segment',
           isActive ? 'mode-picker__segment--active' : '',
+          vrchatMuted && seg === 'speaker' ? 'mode-picker__segment--muted' : '',
           isWarn ? 'mode-picker__segment--warn' : '',
         ].filter(Boolean).join(' ');
         const Icon = SEGMENT_ICONS[seg];
@@ -89,7 +93,7 @@ const ModePicker: React.FC<ModePickerProps> = ({ mode, locked, missingDeviceForM
             aria-pressed={isActive}
             aria-label={label}
             disabled={isDisabled}
-            title={titleFor(seg)}
+            title={vrchatMuted && seg === 'speaker' ? t('fork.vrchat.mutedThere') : titleFor(seg)}
             onClick={() => {
               if (isDisabled) return;
               const el = refs.current[seg];

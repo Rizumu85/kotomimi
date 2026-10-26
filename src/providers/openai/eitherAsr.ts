@@ -13,6 +13,8 @@ type Heard = Pick<AsrLike, 'onPartialResult' | 'onResult' | 'onSpeechStart' | 'o
 export function createEitherAsr(choose: () => Promise<AsrLike>): AsrLike {
   let chosen: AsrLike | null = null;
   let disposed = false;
+  /** Fork: the pace last asked for, given to the recognizer once it is chosen (`AdapterSession.pace`). */
+  let paced: 'normal' | 'quick' = 'normal';
   const outer: AsrLike = {
     async init(modelId: string, options: AsrInit) {
       const made = await choose();
@@ -28,9 +30,14 @@ export function createEitherAsr(choose: () => Promise<AsrLike>): AsrLike {
       };
       Object.assign(made, heard);
       await made.init(modelId, options);
+      if (paced !== 'normal') made.pace?.(paced);
     },
     feedAudio(samples, sampleRate) { chosen?.feedAudio(samples, sampleRate); },
     flush() { chosen?.flush(); },
+    pace(pace) {
+      paced = pace;
+      chosen?.pace?.(pace);
+    },
     dispose() {
       disposed = true;
       chosen?.dispose();

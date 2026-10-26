@@ -140,6 +140,8 @@ export default defineConfig(({ command, mode }) => {
             'caption-share-core': 'electron/caption-share-core.js',
             'caption-share-net': 'electron/caption-share-net.js',
             'caption-share-server': 'electron/caption-share-server.js',
+            // Fork: VRChat on the same computer — its mute, its videos, its chatbox.
+            'vrchat': 'electron/vrchat.js',
             'macos-audio-utils': 'electron/macos-audio-utils.js',
             'main': 'electron/main.js',
             'native-host-manager': 'electron/native-host-manager.js',

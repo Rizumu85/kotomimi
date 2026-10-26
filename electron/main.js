@@ -7,6 +7,7 @@ const { setupCaptionContextMenu } = require('./window-caption-menu.js');
 const { setupPopoverWindowHandlers } = require('./popover-windows.js');
 const { setupTranscriptSaveHandler } = require('./transcript-save.js');
 const { setupCaptionShare } = require('./caption-share.js');
+const { setupVRChat } = require('./vrchat.js');
 const { createCloseHandshake } = require('./close-handshake.js');
 const { createWsHeaderRules } = require('./ws-header-rules.js');
 const { startLanServer } = require('./lan-server');
@@ -57,6 +58,16 @@ const captionShare = setupCaptionShare({
   // the built viewer page too: there is no dev server to pass it on from.
   isDev: (import.meta.env.MODE === 'development' || !app.isPackaged) && !(process.env.KOTOMIMI_LOAD_BUILD === '1' && !app.isPackaged),
 });
+
+// Fork: VRChat on the same computer — its mute, its videos, its chatbox (electron/vrchat.js). Windows only.
+// `KOTOMIMI_VRCHAT_LOG_DIR` (unpackaged only): a folder of logs to read in place of VRChat's, for a test with no VRChat.
+const vrchat = setupVRChat({
+  ipcMain,
+  isTrustedSender: (sender) => sender === mainWindow?.webContents,
+  getMainWindow: () => mainWindow,
+  dir: !app.isPackaged ? process.env.KOTOMIMI_VRCHAT_LOG_DIR : undefined,
+});
+app.on('will-quit', () => vrchat.stop());
 
 // Config utility no longer needed - using localStorage in renderer process
 

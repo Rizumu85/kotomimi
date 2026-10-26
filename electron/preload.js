@@ -98,6 +98,10 @@ const validReceiveChannels = [
   'native-coach:status',
   // LAN caption sharing status (main → renderer)
   'caption-share:status',
+  // Fork: VRChat's mute, a video begun, another world (electron/vrchat.js)
+  'vrchat:state',
+  'vrchat:video',
+  'vrchat:world',
 ];
 
 // Expose protected methods that allow the renderer process to use

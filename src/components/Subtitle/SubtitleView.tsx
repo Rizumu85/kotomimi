@@ -1,3 +1,5 @@
+import { useVRChatStore } from '../../stores/vrchatStore';
+import { VideoMark } from '../VRChat/VideoPrompt';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
@@ -154,6 +156,7 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
   const wantsThrough = useSubtitleLookStore((state) => state.through);
   const setThrough = useSubtitleLookStore((state) => state.setThrough);
   const through = surface === 'electron' && running && wantsThrough;
+  const videoAsked = useVRChatStore((state) => state.video.kind === 'asking');
   useEffect(() => {
     if (surface !== 'electron') return undefined;
     const invoke = (payload: unknown) => void window.electron?.invoke?.('subtitle:set-click-through', payload)?.catch?.(() => {});
@@ -205,6 +208,8 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
   // in the colour the hook gave the window.
   // With no run on, the toolbar stays out: it is where the strip says what state it is in, and how it is started.
   const idleInBar = !running && surface === 'electron';
+  // Fork: a video begun in VRChat is asked about in the toolbar: it stays in view until it is answered.
+  const askingInBar = surface === 'electron' && !through && videoAsked;
   const rootProps = surface === 'electron'
     ? {
         ...shown,
@@ -213,7 +218,7 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
           ...shown.style,
           '--kt-panel': shown.style.background as string,
           background: 'transparent',
-          ...(idleInBar ? { '--bar-opacity': 1, '--bar-pointer-events': 'auto' } : {}),
+          ...(idleInBar || askingInBar ? { '--bar-opacity': 1, '--bar-pointer-events': 'auto' } : {}),
         },
       }
     : shown;
@@ -267,6 +272,8 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
         // size before you start" went: the user, 2026-10-06.)
         status={idleInBar && idleNow.kind !== 'ready' ? idle : undefined}
       />
+      {/* Fork: with the strip passing the mouse through, a video's pace is marked, not asked (`VideoPrompt.tsx`). */}
+      {surface === 'electron' && through && <VideoMark />}
       {running ? (
         surface === 'electron' && session.holdToTalk && entries.length === 0 ? (
           // The takeover is the same window, and the panel's Space key works in it; on the overlay Space is the meeting's.
