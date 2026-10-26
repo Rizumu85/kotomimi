@@ -31,6 +31,8 @@ export type DisplayItem =
        * feedback is drawn from as a marked sentence (`src/lib/feedback/correction.ts`). Absent on a source's row.
        */
       answers?: { said: string; saidLanguage?: string; answer: string };
+      /** Fork: a video's words (`Entry.lane`), drawn smaller and fainter under a header of their own. */
+      video?: true;
     }
   | { kind: 'notice'; notice: NoticeEntry };
 
@@ -78,6 +80,7 @@ export function displayItems(entries: readonly Entry[], filters: LegFilters, pre
   }
   const out: DisplayItem[] = [];
   let lastLeg: LegName | null = null;
+  let lastVideo = false;
   for (const entry of entries) {
     if (entry.kind === 'notice') {
       const old = byKey.get(`n:${entry.id}`);
@@ -92,8 +95,9 @@ export function displayItems(entries: readonly Entry[], filters: LegFilters, pre
     const said = entry.source.map((row) => row.text).join('').trim();
     const answer = entry.translation.map((row) => row.text).join('').trim();
     const answers = said && answer ? { said, saidLanguage: entry.source[0]?.language || entry.languages.source, answer } : undefined;
+    const video = entry.lane === 'video';
     rows.forEach((row, i) => {
-      const header = lastLeg !== entry.leg;
+      const header = lastLeg !== entry.leg || lastVideo !== video;
       const endsSegment = rows[i + 1]?.segmentId !== row.segmentId;
       const old = byKey.get(row.key);
       const mine = row.side === 'translation' ? answers : undefined;
@@ -102,10 +106,12 @@ export function displayItems(entries: readonly Entry[], filters: LegFilters, pre
           && old.t === entry.t && old.leg === entry.leg
           && old.languages.source === entry.languages.source && old.languages.target === entry.languages.target
           && old.answers?.said === mine?.said && old.answers?.answer === mine?.answer && old.answers?.saidLanguage === mine?.saidLanguage
+          && (old.video === true) === video
           ? old
-          : { kind: 'row', row, leg: entry.leg, languages: entry.languages, t: entry.t, header, endsSegment, ...(mine ? { answers: mine } : {}) },
+          : { kind: 'row', row, leg: entry.leg, languages: entry.languages, t: entry.t, header, endsSegment, ...(mine ? { answers: mine } : {}), ...(video ? { video: true as const } : {}) },
       );
       lastLeg = entry.leg;
+      lastVideo = video;
     });
   }
   return out;

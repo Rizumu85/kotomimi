@@ -2,16 +2,26 @@
  * Fork: a video begun in VRChat (`src/app/vrchat.ts`) — the question, where the user is asked, and what was chosen,
  * with its end. Two looks: under the conversation in the main window (`VideoPrompt`), and in the subtitle strip
  * (`VideoPill`), the strip's own buttons; with the strip passing the mouse through, a mark that cannot be pressed
- * (`VideoMark`).
+ * (`VideoMark`). With its words heard apart, the strip shows the last of them above the captions (`VideoLine`).
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { vrchatController } from '../../app/vrchatHandle';
-import { useVRChatStore } from '../../stores/vrchatStore';
+import type { Entry } from '../../lib/projection/types';
+import { useVRChatStore, type VideoState } from '../../stores/vrchatStore';
 import './VRChat.scss';
 
 type Choice = 'quick' | 'pause' | 'normal';
 const CHOICES: Array<[Choice, string]> = [['quick', 'videoQuick'], ['pause', 'videoPause'], ['normal', 'videoNormal']];
+
+/** What is on, in a word or two: paused, faster — and, faster, the video's sound taken out, or heard apart. */
+function onWords(video: Extract<VideoState, { kind: 'on' }>, t: TFunction): string {
+  if (video.pace === 'paused') return t('fork.vrchat.pausedOn');
+  if (video.apart === 'separated') return t('fork.vrchat.separatedOn');
+  if (video.apart === 'removed') return t('fork.vrchat.removedOn');
+  return t('fork.vrchat.quickOn');
+}
 
 /** Under the conversation: the question with its three answers and "remember", or what is on with its end. */
 export function VideoPrompt() {
@@ -39,7 +49,7 @@ export function VideoPrompt() {
   }
   return (
     <div className="kt-video-on" role="status">
-      <span className="kt-video__btn is-go"><span className="kt-video__play" />{video.pace === 'quick' ? t('fork.vrchat.quickOn') : t('fork.vrchat.pausedOn')}</span>
+      <span className="kt-video__btn is-go"><span className="kt-video__play" />{onWords(video, t)}</span>
       <button type="button" className="kt-video__btn" onClick={() => vrchatController()?.endVideo()}>{t('fork.vrchat.end')}</button>
     </div>
   );
@@ -64,7 +74,7 @@ export function VideoPill() {
         </>
       ) : (
         <>
-          <span className="subtitle-bar__btn kt-video-pill__btn active">{video.pace === 'quick' ? t('fork.vrchat.quickOn') : t('fork.vrchat.pausedOn')}</span>
+          <span className="subtitle-bar__btn kt-video-pill__btn active">{onWords(video, t)}</span>
           <button type="button" className="subtitle-bar__btn kt-video-pill__btn" onClick={() => vrchatController()?.endVideo()}>{t('fork.vrchat.end')}</button>
         </>
       )}
@@ -79,7 +89,23 @@ export function VideoMark() {
   if (video.kind !== 'on') return null;
   return (
     <div className="kt-video-mark" aria-hidden="true">
-      <span className="kt-video__play" />{video.pace === 'quick' ? t('fork.vrchat.quickOn') : t('fork.vrchat.pausedOn')}
+      <span className="kt-video__play" />{onWords(video, t)}
+    </div>
+  );
+}
+
+/** Above the captions, while the video's words are heard apart: the last of them — this video's — small and faint. */
+export function VideoLine({ entries }: { entries: readonly Entry[] }) {
+  const origin = useVRChatStore((state) => (state.video.kind === 'on' && state.video.apart === 'separated' ? state.video.laneOrigin : undefined));
+  // An exchange's id names its stated origin (`project.ts`): an earlier video's words are not this one's.
+  const last = origin ? entries.filter((entry) => entry.id.includes(`:o:${origin}`)).pop() : undefined;
+  if (last?.kind !== 'exchange') return null;
+  const rows = last.translation.length > 0 ? last.translation : last.source;
+  const text = rows.map((row) => row.text).join('').trim();
+  if (!text) return null;
+  return (
+    <div className="kt-video-line" aria-hidden="true">
+      <span className="kt-video__play kt-video__play--dim" />{text}
     </div>
   );
 }

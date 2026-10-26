@@ -1625,3 +1625,109 @@ describe('runner — a leg\'s pace (fork: a video playing in VRChat)', () => {
     expect(rec.paces).toEqual(['quick', 'normal']);
   });
 });
+
+describe('runner — a second session on a leg (fork: a video\'s words in VRChat)', () => {
+  /** A provider whose every start is kept: what it was told, what it was given, whether it stopped. */
+  function keeping() {
+    const starts: Array<{ events: AdapterEvents; heard: Int16Array[]; paces: string[]; stopped: boolean }> = [];
+    const provider = {
+      ...fakeProvider,
+      start: async (_request: unknown, events: AdapterEvents) => {
+        const kept = { events, heard: [] as Int16Array[], paces: [] as string[], stopped: false };
+        starts.push(kept);
+        return {
+          info: {},
+          appendAudio: (pcm: Int16Array) => { kept.heard.push(pcm); },
+          appendText: () => {},
+          beginTurn: () => {},
+          endTurn: () => {},
+          cancelTurn: () => {},
+          stop: async () => { kept.stopped = true; },
+          pace: (pace: string) => { kept.paces.push(pace); },
+        };
+      },
+    } as unknown as AnyProvider;
+    return { provider, starts };
+  }
+  const lane = () => {
+    let deliver: ((pcm: Int16Array) => void) | null = null;
+    return { prefix: 'kotomimi_video:', feed: (d: (pcm: Int16Array) => void) => { deliver = d; return () => { deliver = null; }; }, send: (pcm: Int16Array) => deliver?.(pcm), fed: () => deliver !== null };
+  };
+
+  it('opens on a live leg: its own sound, in shorter stretches, its words in the leg under its own origins', async () => {
+    const k = keeping();
+    const t = setup({ shape: { provider: k.provider, legs: ['speaker', 'participant'] } });
+    await t.runner.start();
+    expect(t.runner.sideOffered('participant')).toBe(true);
+    const side = lane();
+    const handle = await t.runner.openSide('participant', side);
+    expect(handle?.origin).toBe('kotomimi_video:1:');
+    const own = k.starts[2];
+    expect(own.paces).toEqual(['quick']);
+    side.send(new Int16Array([1, 2, 3]));
+    expect(own.heard).toHaveLength(1);
+    // The leg's own session states no origin; the side's words never pair with its.
+    k.starts[1].events.segmentOpened({ ref: 1, side: 'source' });
+    k.starts[1].events.segmentText({ ref: 1, text: 'hello' });
+    own.events.segmentOpened({ ref: 1, side: 'source' });
+    own.events.segmentText({ ref: 1, text: 'from the video' });
+    own.events.segmentClosed({ ref: 1, origin: 'o1' });
+    own.events.segmentOpened({ ref: 2, side: 'translation', origin: 'o1' });
+    own.events.segmentText({ ref: 2, text: 'translated' });
+    own.events.audio({ ref: 2, pcm: new Int16Array(10) });
+    const leg = t.runner.conversation.snapshot().find((l) => l.leg === 'participant')!;
+    expect(leg.segments.map((s) => [s.ref, s.origin, s.text])).toEqual([
+      [1, undefined, 'hello'],
+      [1_000_000_001, 'kotomimi_video:1:o1', 'from the video'],
+      [1_000_000_002, 'kotomimi_video:1:o1', 'translated'],
+    ]);
+    expect(t.playback.audio).not.toHaveBeenCalled();
+    // Closed with a segment still open: it is closed with it.
+    own.events.segmentOpened({ ref: 3, side: 'source' });
+    await handle!.close();
+    expect(own.stopped).toBe(true);
+    expect(side.fed()).toBe(false);
+    const after = t.runner.conversation.snapshot().find((l) => l.leg === 'participant')!;
+    expect(after.segments.find((s) => s.ref === 1_000_000_003)?.final).toBe(true);
+
+    // A second lane in the same run takes refs and origins of its own.
+    const again = await t.runner.openSide('participant', lane());
+    expect(again?.origin).toBe('kotomimi_video:2:');
+    k.starts[3].events.segmentOpened({ ref: 1, side: 'source', origin: 'o1' });
+    const both = t.runner.conversation.snapshot().find((l) => l.leg === 'participant')!;
+    expect(both.segments.filter((s) => s.origin?.startsWith('kotomimi_video:')).map((s) => [s.ref, s.origin])).toEqual([
+      [1_000_000_001, 'kotomimi_video:1:o1'], [1_000_000_002, 'kotomimi_video:1:o1'], [1_000_000_003, 'kotomimi_video:1:r3'],
+      [2_000_000_001, 'kotomimi_video:2:o1'],
+    ]);
+  });
+
+  it('ends alone when its session fails, and with the run otherwise', async () => {
+    const k = keeping();
+    const t = setup({ shape: { provider: k.provider, legs: ['speaker', 'participant'] } });
+    await t.runner.start();
+    const failing = lane();
+    const ended = vi.fn();
+    await t.runner.openSide('participant', { ...failing, onEnded: ended });
+    k.starts[2].events.failed({ message: 'gone' });
+    await flush();
+    expect(k.starts[2].stopped).toBe(true);
+    expect(failing.fed()).toBe(false);
+    expect(ended).toHaveBeenCalledTimes(1);
+    expect(t.runner.state.getState().phase).toBe('running');
+
+    const second = lane();
+    await t.runner.openSide('participant', second);
+    await t.runner.stop();
+    expect(k.starts[3].stopped).toBe(true);
+    expect(second.fed()).toBe(false);
+    expect(t.runner.sideOffered('participant')).toBe(false);
+    expect(await t.runner.openSide('participant', lane())).toBeNull();
+  });
+
+  it('is not offered where the legs start together', async () => {
+    const both = { ...fakeProvider, session: { ...fakeProvider.session, startBoth: fakeProvider.session?.startBoth ?? (async () => { throw new Error('unused'); }) } } as unknown as AnyProvider;
+    const t = setup({ shape: { provider: { ...both, start: fakeProvider.start } as AnyProvider, legs: ['speaker'] } });
+    await t.runner.start();
+    expect(t.runner.sideOffered('speaker')).toBe(false);
+  });
+});

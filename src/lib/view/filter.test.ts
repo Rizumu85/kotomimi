@@ -10,6 +10,16 @@ const both: LegFilters = { speaker: 'both', participant: 'both' };
 const shape = (items: ReturnType<typeof displayItems>) =>
   items.map((i) => (i.kind === 'notice' ? 'notice' : `${i.row.key}${i.header ? '+h' : ''}${i.endsSegment ? '+e' : ''}`));
 
+describe("displayItems — a video's words (fork)", () => {
+  it("marks a video's rows, under a header of their own between the other side's", () => {
+    const video = { ...exchange('v', 'participant', [row('v1', 'source')], []), lane: 'video' as const };
+    const entries = [exchange('a', 'participant', [row('p1', 'source')], []), video, exchange('b', 'participant', [row('p2', 'source')], [])];
+    const items = displayItems(entries, both);
+    expect(shape(items)).toEqual(['p1:0+h+e', 'v1:0+h+e', 'p2:0+h+e']);
+    expect(items.map((i) => i.kind === 'row' && i.video === true)).toEqual([false, true, false]);
+  });
+});
+
 describe('displayItems', () => {
   it("draws an exchange's source rows before its translation rows, and opens a header where the leg changes", () => {
     const entries = [

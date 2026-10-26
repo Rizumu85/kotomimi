@@ -12,22 +12,29 @@
  *   a translation: their spoken sentence goes up as they said it, the
  *   feedback is for them alone; typed text is translated as ever.
  * - **A video.** When a world's video player begins one during a run that
- *   hears the other side, the other side's leg is heard in shorter stretches,
- *   or not at all, as the setting says — or the user is asked, where they can
- *   be: with the subtitle strip passing the mouse through, they cannot, and
- *   shorter stretches are chosen for them. It ends with another world, the
- *   run's end, or the user's "end"; VRChat writes nothing when a video stops.
+ *   hears the other side, the other side's leg is heard faster, or not at
+ *   all, as the setting says — or the user is asked, where they can be: with
+ *   the subtitle strip passing the mouse through, they cannot, and faster is
+ *   chosen for them. Faster begins with shorter stretches, and listens
+ *   (`stereoSplit.ts`): a video whose sound is the same in both channels has
+ *   no place in the world, and is taken out of the other side's sound — the
+ *   stretches as usual again, and, where the user asked and the provider can,
+ *   the video's own words heard and translated apart (`Run.openSide`). It
+ *   ends with another world, the run's end, the user's "end", or, once taken
+ *   out, when the video's sound has stopped; VRChat writes nothing then.
  */
-import type { Entry } from '../lib/projection/types';
+import { createVideoJudge, participantSplit, type ParticipantSplit } from '../lib/audio/capture/stereoSplit';
+import { VIDEO_ORIGIN, type Entry } from '../lib/projection/types';
 import type { LegName } from '../lib/conversation/types';
-import type { LegPace } from '../lib/session/run';
+import type { LegPace, SideHandle } from '../lib/session/run';
 import type { Runner } from '../lib/session/runner';
 import type { Readable } from '../lib/view/conversationView';
 import { useCoachingStore } from '../stores/coachingStore';
 import useAudioStore from '../stores/audioStore';
+import { useProviderStore } from '../stores/providerStore';
 import useSettingsStore from '../stores/settingsStore';
 import { useSubtitleLookStore } from '../stores/subtitleLookStore';
-import { useVRChatStore, type ChatboxShows, type VRChatLink } from '../stores/vrchatStore';
+import { useVRChatStore, type ChatboxShows, type VideoApart, type VRChatLink } from '../stores/vrchatStore';
 import { setVRChatController, vrchatOffered } from './vrchatHandle';
 
 export interface VRChatIpc {
@@ -37,7 +44,7 @@ export interface VRChatIpc {
 
 export interface VRChatDeps {
   ipc: VRChatIpc;
-  runner: Pick<Runner, 'setLegPace'> & { state: { getState(): { phase: string }; subscribe(listener: () => void): () => void } };
+  runner: Pick<Runner, 'setLegPace'> & Partial<Pick<Runner, 'openSide' | 'sideOffered'>> & { state: { getState(): { phase: string }; subscribe(listener: () => void): () => void } };
   /** The conversation as drawn, and its segments: a typed sentence is told by its origin (`pipeline.ts`). */
   view: Readable<{ entries: readonly Entry[]; legs?: readonly { segments: readonly { id: string; origin?: string }[] }[] }>;
   /** The legs a run opens now (the audio mode's). */
@@ -48,6 +55,10 @@ export interface VRChatDeps {
   /** The conversation emptied (a clear, a new run): what waits to be sent was said there, and is not sent. */
   onReset?(listener: () => void): () => void;
   store: typeof useVRChatStore;
+  /** The other side's sound by channel (`participantSplit`): absent, a video is only ever heard faster. */
+  split?: Pick<ParticipantSplit, 'onHearing' | 'onShared' | 'setMode' | 'spatialSeen'>;
+  /** Whether the run's provider can hear a video's words apart: one whose segments state their origins (Kotomimi's own). */
+  laneOffered?(): boolean;
   /** The least time between two chatbox lines: VRChat drops lines sent faster. */
   chatboxGapMs?: number;
   setTimeout?(fn: () => void, ms: number): unknown;
@@ -120,17 +131,81 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
 
   // ── A video ───────────────────────────────────────────────────────────────
   const setPace = (pace: LegPace) => runner.setLegPace('participant', pace);
+  const { split } = deps;
+  /** Listening for whether the video can be taken out, and then for its end. */
+  let hearing: (() => void) | null = null;
+  /** The video's own lane, opening or open: what closes it, once it has. */
+  let lane: Promise<SideHandle | null> | null = null;
+  /** What the video state says of its sound: taken out, or heard apart as well — under these origins, once open. */
+  const mark = (apart: VideoApart, laneOrigin?: string) => {
+    const video = store.getState().video;
+    if (video.kind !== 'on' || (video.apart === apart && video.laneOrigin === laneOrigin)) return;
+    const { laneOrigin: _gone, ...rest } = video;
+    store.getState().setVideo({ ...rest, apart, ...(laneOrigin ? { laneOrigin } : {}) });
+  };
+  const closeLane = () => {
+    const opening = lane;
+    lane = null;
+    void opening?.then((handle) => handle?.close());
+  };
+  /** Opens the video's lane where the user asked and the run can: false where it does not. */
+  const openLane = (): boolean => {
+    if (lane || !split || !store.getState().translateVideo || !deps.laneOffered?.() || !runner.openSide || !runner.sideOffered?.('participant')) return false;
+    // Ended on its own (its session failed): the video's sound stays out, its words are no longer heard.
+    const ended = () => { if (lane === opening) { lane = null; mark('removed'); } };
+    const opening: Promise<SideHandle | null> = runner.openSide('participant', { prefix: VIDEO_ORIGIN, feed: (deliver) => split.onShared(deliver), onEnded: ended });
+    lane = opening;
+    void opening.then((handle) => {
+      // Closed while it opened: it goes at once. Not opened: the video's sound is only taken out.
+      if (lane !== opening) void handle?.close();
+      else if (!handle) ended();
+      else mark('separated', handle.origin);
+    }, ended);
+    return true;
+  };
+  const takeOut = () => {
+    split?.setMode('people');
+    setPace('normal');
+    mark(openLane() ? 'separated' : 'removed');
+  };
+  const listen = () => {
+    if (!split || hearing) return;
+    const judge = createVideoJudge();
+    hearing = split.onHearing((heard) => {
+      const said = judge.hear(heard, split.spatialSeen());
+      if (said === 'apart') takeOut();
+      else if (said === 'over') endVideo();
+    });
+  };
+  /** The other side's sound whole again: nothing listened for, no lane. */
+  const whole = () => {
+    hearing?.();
+    hearing = null;
+    closeLane();
+    split?.setMode('mix');
+  };
   const endVideo = () => {
+    whole();
     if (store.getState().video.kind === 'none') return;
     setPace('normal');
     store.getState().setVideo({ kind: 'none' });
   };
   const apply = (choice: 'quick' | 'pause', auto: boolean) => {
+    whole();
     setPace(PACE_OF[choice]);
     store.getState().setVideo({ kind: 'on', pace: PACE_OF[choice] === 'paused' ? 'paused' : 'quick', auto });
+    if (choice === 'quick') listen();
   };
+  // The lane follows its setting while the video's sound is out.
+  offs.push(store.subscribe((s) => s.translateVideo, (on) => {
+    const video = store.getState().video;
+    if (stopped || video.kind !== 'on' || !video.apart) return;
+    if (!on) { closeLane(); mark('removed'); } else if (openLane()) mark('separated');
+  }));
   ipc.receive?.('vrchat:video', () => {
     if (stopped || !running() || !deps.legs().includes('participant')) return;
+    // A video already heard to (the next of a playlist): what is on stays on.
+    if (store.getState().video.kind !== 'none') return;
     const on = store.getState().onVideo;
     if (on === 'normal') return;
     if (on === 'quick' || on === 'pause') return apply(on, false);
@@ -192,6 +267,7 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     answer(choice, remember) {
       if (remember) store.getState().setOnVideo(choice);
       if (choice === 'normal') {
+        whole();
         setPace('normal');
         store.getState().setVideo({ kind: 'none' });
       } else {
@@ -234,6 +310,8 @@ async function build(): Promise<VRChatController> {
     coached: () => useCoachingStore.getState().coached,
     onReset: (listener) => session.runner.conversation.onReset(() => listener()),
     store: useVRChatStore,
+    split: participantSplit,
+    laneOffered: () => useProviderStore.getState().selected === 'localai',
   });
   setVRChatController(controller);
   return controller;

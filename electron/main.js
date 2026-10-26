@@ -1147,13 +1147,16 @@ ipcMain.handle('start-app-audio-capture', async (event, deviceId) => {
   try {
     const { startCapture } = require(helperModule);
     const wc = event.sender;
+    // Kotomimi: both channels on Windows (`stereoSplit.ts`); the renderer is told, and splits them.
+    const stereo = process.platform === 'win32';
     const ok = startCapture(
       deviceId,
       // A Buffer does not survive the context-bridge as-is; a Uint8Array view does.
       (pcm) => { if (!wc.isDestroyed()) wc.send('app-audio:pcm', new Uint8Array(pcm)); },
-      (evt) => { if (!wc.isDestroyed()) wc.send('app-audio:event', evt); }
+      (evt) => { if (!wc.isDestroyed()) wc.send('app-audio:event', evt); },
+      { stereo }
     );
-    return ok ? { ok: true } : { ok: false, error: 'Capture helper unavailable' };
+    return ok ? { ok: true, channels: stereo ? 2 : 1 } : { ok: false, error: 'Capture helper unavailable' };
   } catch (error) {
     console.error('[Sokuji] [Main] Failed to start application audio capture:', error);
     return { ok: false, error: error.message };

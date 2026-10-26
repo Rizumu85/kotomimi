@@ -1674,7 +1674,7 @@
     },
     "vrchat": {
       "title": "VRChat",
-      "help": "与这台电脑上的 VRChat 联动：在 VRChat 中静音时不识别你的语音；你的翻译可以显示在头顶，其他玩家可以看到；世界里播放视频时，可以把对方的语音切成较短的片段，避免译文被拖慢。",
+      "help": "与这台电脑上的 VRChat 联动：在 VRChat 中静音时不识别你的语音；你的翻译可以显示在头顶，其他玩家可以看到。加快：世界里的视频声音没有方向时，自动把它去掉，只留下玩家的声音；有方向时，把对方的语音切成较短的片段。",
       "connected": "已连接",
       "notConnected": "未连接",
       "turnOnOsc": "在 VRChat 快捷菜单中打开 OSC",
@@ -1692,6 +1692,9 @@
       "videoShort": "视频",
       "remember": "记住",
       "quickOn": "加快中",
+      "removedOn": "已去掉视频声",
+      "separatedOn": "已分开视频声",
+      "translateVideo": "也翻译视频",
       "pausedOn": "已暂停对方",
       "end": "结束",
       "mutedThere": "VRChat 静音中"

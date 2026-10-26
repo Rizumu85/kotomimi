@@ -66,6 +66,28 @@ export interface RunHost {
 /** Fork: how a leg is heard: as usual, with shorter stretches, or not at all (`Run.setPace`). */
 export type LegPace = 'normal' | 'quick' | 'paused';
 
+/**
+ * Fork: a second session on one leg, fed a sound of its own (`Run.openSide`): its words join the leg's conversation
+ * under origins of its own — `prefix`, the lane's number, then the session's origin — so that they are drawn apart (a
+ * video's words, `VIDEO_ORIGIN`). Its refs are moved past any the leg's own session, or an earlier lane, gives; its
+ * audio is not played; its failure ends it alone, and what it left open is closed with it.
+ */
+export interface SideLane {
+  prefix: string;
+  /** Starts the sound the lane hears; returns what stops it. */
+  feed(deliver: (pcm: Int16Array) => void): () => void;
+  /** It ended on its own: its session failed or closed. */
+  onEnded?(): void;
+}
+/** An open lane: what closes it, and the start of every origin it gives (`prefix` and its number). */
+export interface SideHandle {
+  close(): Promise<void>;
+  origin: string;
+}
+const SIDE_REFS = 1_000_000_000;
+/** A side session as the run keeps it: where its origins and refs start, which of its segments are open, and whether it is over. */
+interface Side { origin: string; refs: number; open: Set<number>; done: boolean }
+
 export class Run {
   readonly id: string;
   /** When the run was created — Start — on the run's clock: what each leg's `session.stopped` counts from. */
@@ -96,6 +118,10 @@ export class Run {
   private finished = false;
   private turn: Turn | null = null;
   private readonly appendFailing = new Set<LegName>();
+  /** Fork: each leg's start request, kept for a second session on it (`openSide`). */
+  private requests: Partial<Record<LegName, StartRequest<unknown, unknown>>> = {};
+  /** Fork: how many side sessions this run has opened: each takes refs and origins of its own. */
+  private sides = 0;
   /** The promise of `open()`'s own body; `close()` waits for it (bounded) before it unwinds (F3). */
   private opening: Promise<void> | null = null;
   /** Every leg's open still in flight — a source, an adapter's start: `close()` waits for all of them, not just the first to fail. */
@@ -286,6 +312,7 @@ export class Run {
       signal: this.signal,
       punctuate,
     }])) as Record<LegName, StartRequest<unknown, unknown>>;
+    this.requests = requests;
 
     if (together) {
       const events = { speaker: this.eventsFor('speaker'), participant: this.eventsFor('participant') };
@@ -473,6 +500,123 @@ export class Run {
     this.stack.defer(`${leg} degradation watch`, source.onDegraded(({ code, message, params, severity, lifetime }) =>
       conversation.degraded(code, message, { params, severity, lifetime })));
     return source;
+  }
+
+  /**
+   * Fork: whether a leg can be heard by a second session now: live, and a provider whose legs start one by one with
+   * the run's own credentials — not both at once, not under a lease, which buys one stream per leg.
+   */
+  sideOffered(leg: LegName): boolean {
+    const session = this.shape.provider.session;
+    return !this.ending && this.liveSince !== null && this.requests[leg] !== undefined && !session?.acquire && !session?.startBoth;
+  }
+
+  /**
+   * Fork: opens a second session on `leg` (`SideLane`), in shorter stretches, as its sound never pauses. Resolves to
+   * what closes it, or null where it cannot open; the run's end closes it as well.
+   */
+  async openSide(leg: LegName, lane: SideLane): Promise<SideHandle | null> {
+    const request = this.requests[leg];
+    if (!request || !this.sideOffered(leg)) return null;
+    const n = ++this.sides;
+    const side: Side = { origin: `${lane.prefix}${n}:`, refs: SIDE_REFS * n, open: new Set(), done: false };
+    const controller = new AbortController();
+    const abort = () => controller.abort(this.signal.reason);
+    this.signal.addEventListener('abort', abort, { once: true });
+    let session: AdapterSession | null = null;
+    let closed = false;
+    let unfeed = () => {};
+    const close = async () => {
+      if (closed) return;
+      closed = true;
+      this.signal.removeEventListener('abort', abort);
+      unfeed();
+      controller.abort(new Error('the side session ended'));
+      try {
+        await session?.stop();
+      } catch (error) {
+        reportWarning('SessionRunner', `Stopping the ${leg} side session failed: ${describeCause(error)}`, { cause: error, dedupeKey: `side:${leg}:stop` });
+      }
+      // What it left open is over with it: nothing else would ever close it.
+      side.done = true;
+      const conversation = this.conversations.get(leg);
+      if (!this.finished) for (const ref of side.open) conversation?.apply({ kind: 'segmentClosed', payload: { ref } });
+      side.open.clear();
+    };
+    const events = eventsFrom((event) => this.onSideEvent(leg, side, event, () => {
+      void close();
+      lane.onEnded?.();
+    }));
+    try {
+      session = await this.opened(this.shape.provider.start({ ...request, signal: controller.signal }, events));
+    } catch (error) {
+      this.signal.removeEventListener('abort', abort);
+      closed = true;
+      if (!this.signal.aborted) reportWarning('SessionRunner', `The ${leg} side session did not start: ${describeCause(error)}`, { cause: error, dedupeKey: `side:${leg}:start` });
+      return null;
+    }
+    if (closed || this.ending) {
+      closed = false;
+      await close();
+      return null;
+    }
+    this.stack.defer(`${leg} side session`, close);
+    try {
+      session.pace?.('quick');
+    } catch (error) {
+      reportError('SessionRunner', `The ${leg} side session did not take its pace: ${describeCause(error)}`, { cause: error, dedupeKey: `side:${leg}:pace` });
+    }
+    const opened = session;
+    let failing = false;
+    unfeed = lane.feed((pcm) => {
+      if (closed || this.ending) return;
+      try {
+        opened.appendAudio(pcm);
+        failing = false;
+      } catch (error) {
+        if (!failing) reportError('SessionRunner', `The ${leg} side session did not take audio: ${describeCause(error)}`, { cause: error, dedupeKey: `side:${leg}:append` });
+        failing = true;
+      }
+    });
+    return { close, origin: side.origin };
+  }
+
+  /** A side session's event: its words into the leg's conversation, moved apart; its end ends it alone. */
+  private onSideEvent(leg: LegName, side: Side, event: AdapterEvent, end: () => void): void {
+    if (this.finished || side.done) return;
+    if (event.kind === 'frame') {
+      this.deps.frames?.frame(leg, event.payload);
+      return;
+    }
+    const conversation = this.conversations.get(leg);
+    const ref = (r: number) => side.refs + r;
+    switch (event.kind) {
+      case 'segmentOpened': {
+        const p = event.payload;
+        side.open.add(ref(p.ref));
+        // A segment that states no origin yet has one of its own, never to be paired with the leg's own by time.
+        conversation?.apply({ kind: 'segmentOpened', payload: { ref: ref(p.ref), side: p.side, origin: `${side.origin}${p.origin ?? `r${p.ref}`}` } });
+        return;
+      }
+      case 'segmentText':
+        conversation?.apply({ kind: 'segmentText', payload: { ...event.payload, ref: ref(event.payload.ref) } });
+        return;
+      case 'segmentClosed': {
+        const p = event.payload;
+        side.open.delete(ref(p.ref));
+        conversation?.apply({ kind: 'segmentClosed', payload: { ref: ref(p.ref), ...(p.origin !== undefined ? { origin: `${side.origin}${p.origin}` } : {}) } });
+        return;
+      }
+      case 'failed':
+      case 'closed':
+        if (this.ending) return;
+        reportWarning('SessionRunner', `The ${leg} side session ended: ${event.kind === 'failed' ? event.payload.message : event.payload.reason}`, { dedupeKey: `side:${leg}:end` });
+        end();
+        return;
+      default:
+        // Its audio, its ranges, its loading and its state are its own: none is the leg's.
+        return;
+    }
   }
 
   /** Fork: a leg's pace, now and for a session it opens later. */

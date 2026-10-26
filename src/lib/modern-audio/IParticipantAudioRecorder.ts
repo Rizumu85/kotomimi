@@ -14,7 +14,8 @@ export interface ParticipantAudioOptions {
 }
 
 export interface AudioDataCallback {
-  (data: { mono: Int16Array; raw: Int16Array }): void;
+  /** Fork: `left` and `right` as well where the source has two channels (`ParticipantRecorder.wantsStereo`). */
+  (data: { mono: Int16Array; raw: Int16Array; left?: Int16Array; right?: Int16Array }): void;
 }
 
 export interface IParticipantAudioRecorder {

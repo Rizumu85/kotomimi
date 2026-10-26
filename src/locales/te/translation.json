@@ -1674,7 +1674,7 @@
     },
     "vrchat": {
       "title": "VRChat",
-      "help": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read; and when a world plays a video, the other side can be heard in shorter stretches so their words are not held up.",
+      "help": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. Faster, when a world plays a video: if the video has no direction in the world, its sound is removed and only the players are heard; if it has, the other side is heard in shorter stretches.",
       "connected": "Connected",
       "notConnected": "Not connected",
       "turnOnOsc": "Turn on OSC in the VRChat quick menu",
@@ -1692,6 +1692,9 @@
       "videoShort": "Video",
       "remember": "Remember",
       "quickOn": "Faster",
+      "removedOn": "Video sound removed",
+      "separatedOn": "Video sound separated",
+      "translateVideo": "Also translate the video",
       "pausedOn": "Other side paused",
       "end": "End",
       "mutedThere": "Muted in VRChat"

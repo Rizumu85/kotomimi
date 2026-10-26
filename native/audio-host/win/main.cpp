@@ -10,11 +10,13 @@
 //       because one process can own several windows and Windows cannot capture
 //       them separately.
 //
-//   sokuji-audio-host.exe --target pid:1234
+//   sokuji-audio-host.exe --target pid:1234 [--stereo]
 //       Writes raw PCM to stdout until killed. Format is fixed at
-//       24000 Hz, 1 channel, signed 16-bit little-endian.
+//       24000 Hz, 1 channel, signed 16-bit little-endian; with --stereo
+//       (Kotomimi), 2 channels interleaved, left first.
 //       Writes one JSON object per line to stderr:
 //         {"event":"format","sampleRate":24000,"channels":1,"encoding":"s16le"}
+//       ("channels":2 with --stereo)
 //         {"event":"error","code":"..."}
 //
 // Exit codes: 0 clean, 1 runtime failure, 2 bad usage.
@@ -42,8 +44,10 @@
 // The pipeline consumes 24 kHz mono s16 and nothing else, so the format is not
 // configurable. WASAPI converts from whatever the app renders via
 // AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM.
+// Kotomimi: --stereo keeps both channels. What sounds the same in both has no
+// place in a game's world (a video player's sound), which the app can take out.
 static const DWORD kSampleRate = 24000;
-static const WORD  kChannels   = 1;
+static WORD        g_channels  = 1;
 static const WORD  kBits       = 16;
 
 // ---------------------------------------------------------------- utilities
@@ -465,7 +469,7 @@ static int Capture(DWORD pid) {
 
     WAVEFORMATEX fmt{};
     fmt.wFormatTag = WAVE_FORMAT_PCM;
-    fmt.nChannels = kChannels;
+    fmt.nChannels = g_channels;
     fmt.nSamplesPerSec = kSampleRate;
     fmt.wBitsPerSample = kBits;
     fmt.nBlockAlign = fmt.nChannels * fmt.wBitsPerSample / 8;
@@ -488,7 +492,9 @@ static int Capture(DWORD pid) {
 
     if (FAILED(handler.client->Start())) { EmitError("initialize_failed"); return 1; }
 
-    EmitEvent("{\"event\":\"format\",\"sampleRate\":24000,\"channels\":1,\"encoding\":\"s16le\"}");
+    EmitEvent(g_channels == 2
+        ? "{\"event\":\"format\",\"sampleRate\":24000,\"channels\":2,\"encoding\":\"s16le\"}"
+        : "{\"event\":\"format\",\"sampleRate\":24000,\"channels\":1,\"encoding\":\"s16le\"}");
 
     static const char kZeros[8192] = {};
     const UINT32 blockAlign = fmt.nBlockAlign;
@@ -547,7 +553,7 @@ static void Usage() {
     fprintf(stderr,
         "usage:\n"
         "  sokuji-audio-host.exe --list\n"
-        "  sokuji-audio-host.exe --target pid:<processId>\n");
+        "  sokuji-audio-host.exe --target pid:<processId> [--stereo]\n");
 }
 
 int wmain(int argc, wchar_t** argv) {
@@ -568,6 +574,7 @@ int wmain(int argc, wchar_t** argv) {
             DWORD pid = static_cast<DWORD>(_wtoi(argv[2] + 4));
             if (pid == 0) { EmitError("bad_target"); rc = 2; }
             else {
+                if (argc >= 4 && wcscmp(argv[3], L"--stereo") == 0) g_channels = 2;
                 SetConsoleCtrlHandler(OnConsoleCtrl, TRUE);
                 rc = Capture(pid);
             }

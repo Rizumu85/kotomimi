@@ -45,7 +45,7 @@ function setup(over: Partial<VRChatDeps> = {}, initial: Entry[] = []) {
 }
 
 beforeEach(() => {
-  useVRChatStore.setState({ muteGate: true, chatbox: 'off', onVideo: 'ask', link: { found: false, connected: false, muted: null }, video: { kind: 'none' }, viewers: 0 });
+  useVRChatStore.setState({ muteGate: true, chatbox: 'off', onVideo: 'ask', translateVideo: false, link: { found: false, connected: false, muted: null }, video: { kind: 'none' }, viewers: 0 });
 });
 
 describe('linkOf', () => {
@@ -210,5 +210,109 @@ describe('the controller, at the edges the review found', () => {
     expect(last(t.paces)).toEqual(['participant', 'normal']);
     t.handlers.get('vrchat:video')!({ url: 'y' });
     expect(useVRChatStore.getState().video.kind).toBe('none');
+  });
+});
+
+describe('a video taken out (stereoSplit)', () => {
+  const alone = { mid: -40, side: -120, shared: -40 };
+  const silence = { mid: -120, side: -120, shared: -120 };
+  function fakeSplit() {
+    const hearing = new Set<(h: typeof alone) => void>();
+    const shared = new Set<(pcm: Int16Array) => void>();
+    let mode = 'mix';
+    return {
+      onHearing: (l: (h: typeof alone) => void) => { hearing.add(l); return () => { hearing.delete(l); }; },
+      onShared: (l: (pcm: Int16Array) => void) => { shared.add(l); return () => { shared.delete(l); }; },
+      setMode: (m: string) => { mode = m; },
+      spatialSeen: () => true,
+      hear(h: typeof alone, times = 1) { for (let i = 0; i < times; i++) for (const l of [...hearing]) l(h); },
+      mode: () => mode,
+      listening: () => hearing.size > 0,
+    };
+  }
+  /** A runner that opens a side lane, and says when it is closed. */
+  function withLanes() {
+    const opened: Array<{ prefix: string; closed: boolean; end?: () => void }> = [];
+    return {
+      opened,
+      openSide: async (_leg: string, lane: { prefix: string; feed(deliver: (pcm: Int16Array) => void): () => void; onEnded?(): void }) => {
+        const kept = { prefix: lane.prefix, closed: false, end: lane.onEnded };
+        opened.push(kept);
+        const stop = lane.feed(() => {});
+        return { origin: `${lane.prefix}${opened.length}:`, close: async () => { kept.closed = true; stop(); } };
+      },
+      sideOffered: () => true,
+    };
+  }
+
+  it('listens once faster, takes the video out once it is heard alone, and ends once its sound has stopped', () => {
+    const split = fakeSplit();
+    useVRChatStore.setState({ onVideo: 'quick' });
+    const t = setup({ split: split as never });
+    t.run('running');
+    t.handlers.get('vrchat:video')!({ url: 'x' });
+    expect(split.listening()).toBe(true);
+    expect(last(t.paces)).toEqual(['participant', 'quick']);
+    split.hear(alone, 6);
+    expect(split.mode()).toBe('people');
+    expect(last(t.paces)).toEqual(['participant', 'normal']);
+    expect(useVRChatStore.getState().video).toEqual({ kind: 'on', pace: 'quick', auto: false, apart: 'removed' });
+    // The next of a playlist changes nothing.
+    t.handlers.get('vrchat:video')!({ url: 'y' });
+    expect(useVRChatStore.getState().video).toMatchObject({ apart: 'removed' });
+    split.hear(silence, 20);
+    expect(useVRChatStore.getState().video).toEqual({ kind: 'none' });
+    expect(split.mode()).toBe('mix');
+    expect(split.listening()).toBe(false);
+  });
+
+  it('does not listen with the other side paused', () => {
+    const split = fakeSplit();
+    useVRChatStore.setState({ onVideo: 'pause' });
+    const t = setup({ split: split as never });
+    t.run('running');
+    t.handlers.get('vrchat:video')!({ url: 'x' });
+    expect(split.listening()).toBe(false);
+  });
+
+  it('hears the video apart where asked and offered, and follows the setting', async () => {
+    const split = fakeSplit();
+    const lanes = withLanes();
+    useVRChatStore.setState({ onVideo: 'quick', translateVideo: true });
+    const runner = { setLegPace: () => {}, state: { getState: () => ({ phase: 'running' }), subscribe: () => () => {} }, ...lanes };
+    const t = setup({ split: split as never, laneOffered: () => true, runner: runner as never });
+    t.handlers.get('vrchat:video')!({ url: 'x' });
+    split.hear(alone, 6);
+    await Promise.resolve();
+    expect(lanes.opened).toMatchObject([{ prefix: 'kotomimi_video:', closed: false }]);
+    expect(useVRChatStore.getState().video).toMatchObject({ apart: 'separated', laneOrigin: 'kotomimi_video:1:' });
+    useVRChatStore.getState().setTranslateVideo(false);
+    await Promise.resolve(); await Promise.resolve();
+    expect(lanes.opened[0].closed).toBe(true);
+    expect(useVRChatStore.getState().video).toMatchObject({ apart: 'removed' });
+    useVRChatStore.getState().setTranslateVideo(true);
+    await Promise.resolve();
+    expect(lanes.opened).toHaveLength(2);
+    await Promise.resolve();
+    expect(useVRChatStore.getState().video).toMatchObject({ apart: 'separated', laneOrigin: 'kotomimi_video:2:' });
+    // Its session fails: the video's sound stays out, and the state says its words are no longer heard.
+    lanes.opened[1].end?.();
+    expect(useVRChatStore.getState().video).toMatchObject({ apart: 'removed' });
+    expect(useVRChatStore.getState().video).not.toHaveProperty('laneOrigin');
+    t.controller.endVideo();
+    await Promise.resolve(); await Promise.resolve();
+    expect(split.mode()).toBe('mix');
+    expect(useVRChatStore.getState().video).toEqual({ kind: 'none' });
+  });
+
+  it('only takes the video out where the provider cannot hear it apart', () => {
+    const split = fakeSplit();
+    const lanes = withLanes();
+    useVRChatStore.setState({ onVideo: 'quick', translateVideo: true });
+    const runner = { setLegPace: () => {}, state: { getState: () => ({ phase: 'running' }), subscribe: () => () => {} }, ...lanes };
+    setup({ split: split as never, laneOffered: () => false, runner: runner as never }).handlers.get('vrchat:video')!({ url: 'x' });
+    split.hear(alone, 6);
+    expect(lanes.opened).toHaveLength(0);
+    expect(useVRChatStore.getState().video).toMatchObject({ apart: 'removed' });
   });
 });

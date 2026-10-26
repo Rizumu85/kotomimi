@@ -17,7 +17,7 @@ const ON_VIDEO: Array<[OnVideo, string]> = [['ask', 'videoAsk'], ['normal', 'vid
 
 export function VRChatSection() {
   const { t } = useTranslation();
-  const { muteGate, chatbox, onVideo, link, setMuteGate, setChatbox, setOnVideo, view } = useVRChatStore();
+  const { muteGate, chatbox, onVideo, translateVideo, link, setMuteGate, setChatbox, setOnVideo, setTranslateVideo, view } = useVRChatStore();
   // While the card is open the mute is asked, so that whether VRChat answers is shown as it is.
   useEffect(() => {
     if (!vrchatOffered()) return undefined;
@@ -53,6 +53,12 @@ export function VRChatSection() {
           </button>
         ))}
       </div>
+      {/* Faster takes a video's sound out where it can: its words can then be translated as well. */}
+      {onVideo === 'quick' && (
+        <div className="kt-vrchat__more">
+          <ToggleSwitch checked={translateVideo} onChange={() => setTranslateVideo(!translateVideo)} label={t('fork.vrchat.translateVideo')} />
+        </div>
+      )}
     </div>
   );
 }

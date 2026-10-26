@@ -22,9 +22,15 @@ export class AppAudioRecorder implements IParticipantAudioRecorder {
   private callback: AudioDataCallback | null = null;
   private status: 'ended' | 'paused' | 'recording' = 'ended';
   private pcmHandler: ((payload: Uint8Array) => void) | null = null;
-  private eventHandler: ((payload: { event?: string; code?: string }) => void) | null = null;
-  /** A chunk can split a 16-bit sample; the odd byte waits here for its partner. */
+  private eventHandler: ((payload: { event?: string; code?: string; channels?: number }) => void) | null = null;
+  /** A chunk can split a 16-bit sample (or a stereo frame); the odd bytes wait here for their partners. */
   private leftover: Uint8Array = new Uint8Array(0);
+  /**
+   * Fork: 2 where the helper sends both channels, interleaved (Windows): they are split here (`stereoSplit.ts`). Asked
+   * for at the start; the helper's own `format` event has the last word (one built before `--stereo` sends one).
+   */
+  private channels = 1;
+  private formatSeen = false;
 
   // Rolling level, logged periodically. Silence and a denied permission look
   // identical from the outside, so the console must state which one it is
@@ -120,7 +126,7 @@ export class AppAudioRecorder implements IParticipantAudioRecorder {
     electron.receive('app-audio:pcm', this.pcmHandler);
     electron.receive('app-audio:event', this.eventHandler);
 
-    let result: { ok?: boolean; error?: string } | undefined;
+    let result: { ok?: boolean; error?: string; channels?: number } | undefined;
     try {
       result = await electron.invoke('start-app-audio-capture', deviceId);
     } catch (error) {
@@ -136,6 +142,7 @@ export class AppAudioRecorder implements IParticipantAudioRecorder {
       return false;
     }
 
+    if (!this.formatSeen) this.channels = result.channels === 2 ? 2 : 1;
     this.status = 'paused';
     this.silenceWatchdog = setInterval(() => {
       if (this.chunksSeen === 0) {
@@ -213,7 +220,8 @@ export class AppAudioRecorder implements IParticipantAudioRecorder {
       this.leftover = new Uint8Array(0);
     }
 
-    const usable = bytes.length - (bytes.length % 2);
+    const frame = 2 * this.channels;
+    const usable = bytes.length - (bytes.length % frame);
     if (usable < bytes.length) {
       this.leftover = bytes.slice(usable);
     }
@@ -224,7 +232,22 @@ export class AppAudioRecorder implements IParticipantAudioRecorder {
     // posting it to a worker.
     const aligned = new Uint8Array(usable);
     aligned.set(bytes.subarray(0, usable));
-    const mono = new Int16Array(aligned.buffer);
+    const samples = new Int16Array(aligned.buffer);
+    // Fork: two channels are heard as their average, and passed on as they are.
+    let mono = samples;
+    let stereo: { left: Int16Array; right: Int16Array } | null = null;
+    if (this.channels === 2) {
+      const frames = samples.length / 2;
+      const left = new Int16Array(frames);
+      const right = new Int16Array(frames);
+      mono = new Int16Array(frames);
+      for (let i = 0; i < frames; i++) {
+        left[i] = samples[2 * i];
+        right[i] = samples[2 * i + 1];
+        mono[i] = (left[i] + right[i]) >> 1;
+      }
+      stereo = { left, right };
+    }
 
     // Observe BEFORE dispatching. The callback transfers this ArrayBuffer to a
     // worker, which detaches it and leaves mono.length at 0 - which silently
@@ -232,7 +255,7 @@ export class AppAudioRecorder implements IParticipantAudioRecorder {
     // on every single chunk.
     this.observeLevel(mono);
     this.feedAnalyser(mono);
-    this.callback({ mono, raw: mono });
+    this.callback({ mono, raw: mono, ...(stereo ?? {}) });
   }
 
   /** Log the captured level periodically so silence is visible as a fact. */
@@ -309,9 +332,15 @@ export class AppAudioRecorder implements IParticipantAudioRecorder {
     }
   }
 
-  private onHelperEvent(payload: { event?: string; code?: string }): void {
+  private onHelperEvent(payload: { event?: string; code?: string; channels?: number }): void {
     if (payload?.event === 'format') {
       console.info('[Sokuji] [AppAudioRecorder] Helper format:', payload);
+      this.formatSeen = true;
+      const channels = payload.channels === 2 ? 2 : 1;
+      if (channels !== this.channels) {
+        this.channels = channels;
+        this.leftover = new Uint8Array(0);
+      }
       return;
     }
     if (payload?.event === 'warning') {

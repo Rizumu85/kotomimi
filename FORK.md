@@ -911,16 +911,29 @@ VRChat 里对面的人说什么语言是不一定的。"对方说什么语言"�
 
 用户的问题：能不能通过 VRChat 的接口知道谁在说话，省性能；世界里用播放器放视频时，别人说话的翻译会变慢。设计稿 `.dev/design/vrchat.html`、`.dev/design/vrchat-subtitle.html`。
 
-- **调研结论**：VRChat 不告诉别的程序"谁在说话"。OSC 只给本人的静音和音量（`/avatar/parameters/MuteSelf`、`Voice`），Udon 也读不到别人说话（官方反馈区的请求还没做）。VRCT 等工具都是把扬声器的声音整个拿去识别，同样分不开视频和人声：两者在 VRChat 里已经混在一起。按声音方向分人（左右声道的差别）先放着，以后录两声道的样本再测。
+- **调研结论**：VRChat 不告诉别的程序"谁在说话"。OSC 只给本人的静音和音量（`/avatar/parameters/MuteSelf`、`Voice`），Udon 也读不到别人说话（官方反馈区的请求还没做）。VRCT 等工具都是把扬声器的声音整个拿去识别，同样分不开视频和人声：两者在 VRChat 里已经混在一起。后来按声音方向把视频去掉了，见下面「按声音方向去掉视频声」。
 - **从哪里知道**（`electron/vrchat.js`，只在 Windows）：VRChat 的运行记录 `AppData\LocalLow\VRChat\VRChat\output_log_*.txt`。它启动时写自己的接口端口（`Advertising Service VRChat-Client-… of type OSCQuery on 13945`、`… of type OSC on 9000`），放视频时写 `[Video Playback] Attempting to resolve URL '…'`，进别的世界写 `[Behaviour] Entering Room`。静音状态向那个 OSCQuery 端口问 `GET /avatar/parameters/MuteSelf`（本机 HTTP，每 0.25 秒一次，只在需要时问）；头顶文字用 UDP 发 `/chatbox/input` 到 OSC 端口。这样应用自己不监听任何端口，不用 mDNS：不会弹防火墙，也不和 VRCT 抢 9001。VRChat 不记录视频什么时候停。
 - **静音**：设置「VRChat 静音时不识别我」（默认开）。VRChat 里静音时，麦克风送给"我"那一路的是同样长度的静音（`MicSettings.held`，`mic.ts`），一句话会像停顿一样结束；底栏的"我"划一道。不出声、只想把说的话翻译到头顶的人把它关掉。
 - **头顶显示我的翻译**：关 / 译文 / 原文 + 译文（默认关）。"我"那一路的一句话和译文都定稿后发一次，打字的也发；两条之间至少 1.5 秒（VRChat 会丢太快的），超过 144 个字截断。开着语法反馈时（用户的要求，2026-10-26）：说的话本来就是对方的语言，发识别出来的原句，原句定稿就发，不等反馈；反馈只给自己看，不发；打的字照常翻译，发译文（打字的句子靠 `pipeline.ts` 给它的 `sokuji_typed_` origin 认出来）。
 - **播放视频时**：询问 / 照常 / 加快 / 暂停对方（默认询问）。只在会话进行、开着"对方"那一路时起作用。
-  - **加快**：对方那一路的一段话切得更短（`AdapterSession.pace('quick')`，契约里可选的方法）。本机原生识别从 8 秒一翻、24 秒硬切改成 4 秒、8 秒（`nativeAsr.ts` 的 `QUICK_ROLL_*`），API 识别一段话超过 6 秒就先送一段（`apiAsr.ts`）。另一台设备的 Realtime 会话由对方切，没有这个方法，照常。
+  - **加快**：先把对方那一路的一段话切得更短（`AdapterSession.pace('quick')`，契约里可选的方法）。本机原生识别从 8 秒一翻、24 秒硬切改成 4 秒、8 秒（`nativeAsr.ts` 的 `QUICK_ROLL_*`），API 识别一段话超过 6 秒就先送一段（`apiAsr.ts`）。另一台设备的 Realtime 会话由对方切，没有这个方法，照常。同时开始听：视频的声音左右完全一样时，把它从对方那一路里去掉，切段恢复正常（见下一节）。
+  - **也翻译视频**（「加快」下面的开关，默认关，`settings.vrchat.translateVideo`）：去掉视频声的同时，把视频那部分单独识别、翻译，显示成淡一些、小一些的「视频」行；字幕模式里是最上面一小行。不发到头顶，不做语法反馈，不放进局域网共享。只在 Kotomimi 自己的提供商（`localai`）下开：它的每句话都带 origin，视频的句子才能和人说的分开配对。
   - **暂停对方**：运行器给对方那一路送等长的静音（`Runner.setLegPace`，`run.ts`），视频和别人的话都不翻译。
   - **询问**：主窗口在对话下方出提示条；字幕模式放在字幕条里时间后面，询问期间字幕条一直显示。点击穿透打开时（以及人在 VR 里）点不到，就不问，直接按"加快"处理，字幕区左上角标一下。
-  - **结束**：进别的世界、会话结束，或点"结束"。
-- **测试**：未打包运行时，`KOTOMIMI_VRCHAT_LOG_DIR` 让应用读一个别的文件夹当 VRChat 的记录；`.dev/tools/scratch/fake-vrchat.mjs` 起一个假的 VRChat（写记录、回答静音、打印收到的头顶文字）。2026-10-26 用它在测试窗口走通了：已连接、静音划线、视频询问、加快、换世界结束、字幕条询问、点击穿透下自动加快、打字发到头顶。**还没有接真的 VRChat 试过**：VRChat 关着 OSC 时 OSCQuery 端口是否还回答静音、`MuteSelf` 是否一定在 OSCQuery 里，都要用户开着 VRChat 确认。
+  - **结束**：进别的世界、会话结束，或点"结束"；去掉视频声之后，视频的声音停了也自动结束。
+- **测试**：未打包运行时，`KOTOMIMI_VRCHAT_LOG_DIR` 让应用读一个别的文件夹当 VRChat 的记录；`.dev/tools/scratch/fake-vrchat.mjs` 起一个假的 VRChat（写记录、回答静音、打印收到的头顶文字）。2026-10-26 用它在测试窗口走通了：已连接、静音划线、视频询问、加快、换世界结束、字幕条询问、点击穿透下自动加快、打字发到头顶。之后接真的 VRChat 确认过：OSC 关着时 OSCQuery 端口也回答 `MuteSelf`。头顶文字还没在真的 VRChat 里试过。
+
+### 按声音方向去掉视频声（2026-10-26）
+
+用户问：VRChat 是 Unity 做的，每个人的声音有位置，能不能按左右声道分开人和视频。设计稿 `.dev/design/vrchat-video-remove.html`、`.dev/design/vrchat-video-lane.html`。
+
+- **录音实测**（`.dev/tools/record-stereo.py` 录扬声器的两个声道，两段，录音只留在本机）：世界里的视频播放器不放在空间里，左右两个声道逐位相同；左减右后视频降 43–86 dB，侧面的人声几乎不变。用 Qwen3-ASR 1.7B 识别：原声只认出视频解说，人说的全丢了；左减右只认出人说的；分出来的"两边共有的部分"认出完整的视频解说，视频开始前只有人说话时它什么都认不出来。
+- **正对面的人**：VRChat 把正前方的声音也做得几乎左右一样（左减右后低 40–55 dB，约 −75 dB，最低 −94 dB），所以判断"是不是视频"不能只看左右像不像，要看是否**逐位**相同。Windows 把声音写成 16 位时给两个声道各加一点噪声，视频的左减右在那里约 −99 dB；门槛定在 −97 dB（约一个最小量化单位）。正对面的人在去掉视频声期间会被一起削弱，所以只在放视频时这样做，视频停了就换回原声。
+- **录两个声道**：对方那一路以前只取左声道。现在 AudioWorklet 收到两个声道时送它们的平均给识别，左右也一起带出来（`audio-recorder-worklet-processor.js` 的 `stereo`，`ParticipantRecorder.wantsStereo`）；只录某个程序时，Windows 的辅助程序 `sokuji-audio-host.exe` 加了 `--stereo`，输出交错的两个声道（`AppAudioRecorder` 拆开）。macOS 的辅助程序还是单声道，那边只能"加快"。
+- **分离**（`src/lib/audio/capture/stereoSplit.ts`，全页一个 `participantSplit`，系统声音经过它）：平时送平均；去掉视频声时送左减右；需要时用 512 点、半帧重叠的频谱，每个频率按左右的差有多大保留平均值，得到"两边共有的部分"给视频那一路。每半秒算一次平均、差、共有部分的响度。
+- **判断**（`createVideoJudge`）：放视频后，最近 30 秒里有 6 个半秒是"视频单独在响"（平均高于 −60 dB、差低于 −97 dB），并且这台电脑的声音出现过有方向的声音（排除单声道输出），就去掉视频声。之后 10 秒没有"视频单独在响"、共有部分也低于 −55 dB，或者 30 秒都没有"视频单独在响"，就算视频停了。
+- **视频那一路**（`Run.openSide`）：在对方那一路上再开一个同样配置的会话，只喂共有部分，按"加快"切段；每开一次占一段自己的句子编号（第 n 次从 n×10 亿开始），origin 前面加 `kotomimi_video:n:`，放进对方那一路的对话里；它的语音不播放；它出错只关它自己，界面改回"已去掉视频声"；关掉时它还开着的句子一并结束。投影按 origin 给这些对话标 `lane: 'video'`（`project.ts`），界面据此画成视频行。要整段买流量的提供商（Kizuna AI）和两路一起开的提供商不开。
+- **测试**：离线 `.dev/tools/scratch/split-offline.ts`（模拟 Windows 的噪声：`DITHER=1`）；两段录音里，视频开始后约 6 秒判定，正对面说话的那段没有误判。端到端：`.dev/tools/scratch/play-to-cable.py` 把录音放进 VB-Cable（扬声器不出声），测试窗口只录这个播放器，`video-e2e.mjs` 让假 VRChat 报"开始放视频"；视频开始约 1 秒后出现"已分开视频声"，对方那一路只剩玩家的话，视频解说进了视频行，字幕模式里在最上面一行。还没在真的 VRChat 里试；三路同时跑时显卡的负担也还没测。
 
 ## 字体
 

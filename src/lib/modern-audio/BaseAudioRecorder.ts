@@ -17,7 +17,7 @@ export abstract class BaseAudioRecorder {
   protected dummyGain: GainNode | null = null;
   protected useAudioWorklet: boolean = false;
   protected recording: boolean = false;
-  protected onAudioData: ((data: { mono: Int16Array; raw: Int16Array }) => void) | null = null;
+  protected onAudioData: ((data: { mono: Int16Array; raw: Int16Array; left?: Int16Array; right?: Int16Array }) => void) | null = null;
   protected _audioChunkCount: number = 0;
 
   constructor(sampleRate: number = 24000) {
@@ -120,6 +120,14 @@ export abstract class BaseAudioRecorder {
   /**
    * Setup real-time audio processing with AudioWorklet or ScriptProcessor fallback
    */
+  /**
+   * Fork: whether this recorder keeps both channels of a two-channel source, the participant's (`stereoSplit.ts`):
+   * the worklet then hears their average, and sends each as well. Off by default: the first channel alone, as before.
+   */
+  protected wantsStereo(): boolean {
+    return false;
+  }
+
   protected async setupRealtimeAudioProcessing(): Promise<void> {
     if (!this.audioContext || !this.stream) {
       throw new Error('AudioContext and stream required for real-time processing');
@@ -149,11 +157,13 @@ export abstract class BaseAudioRecorder {
 
         // Create AudioWorkletNode
         this.audioWorkletNode = new AudioWorkletNode(this.audioContext, 'audio-recorder-processor');
+        // Fork: a recorder that keeps both channels says so before any audio comes (`wantsStereo`).
+        if (this.wantsStereo()) this.audioWorkletNode.port.postMessage({ type: 'config', config: { stereo: true } });
 
         // Handle messages from the worklet
         this.audioWorkletNode.port.onmessage = (event) => {
           if (event.data.type === 'audioData') {
-            const { pcmData } = event.data;
+            const { pcmData, left, right } = event.data;
 
             // Log periodically to verify data flow
             if (DEBUG_CONFIG.ENABLE_AUDIO_CHUNK_LOGGING) {
@@ -164,7 +174,7 @@ export abstract class BaseAudioRecorder {
             }
 
             // Send audio data through callback
-            this._processAudioData(pcmData);
+            this._processAudioData(pcmData, left ?? undefined, right ?? undefined);
           }
         };
 
@@ -256,12 +266,13 @@ export abstract class BaseAudioRecorder {
   /**
    * Process audio data through callback
    */
-  protected _processAudioData(pcmData: Int16Array): void {
+  protected _processAudioData(pcmData: Int16Array, left?: Int16Array, right?: Int16Array): void {
     if (this.onAudioData && typeof this.onAudioData === 'function' && pcmData.length > 0 && this.recording) {
       try {
         this.onAudioData({
           mono: pcmData,
           raw: pcmData,
+          ...(left && right ? { left, right } : {}),
         });
       } catch (error) {
         console.error(`${this.getLogPrefix()} Error in onAudioData callback:`, error);

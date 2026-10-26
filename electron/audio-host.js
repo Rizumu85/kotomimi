@@ -142,9 +142,11 @@ async function listAppSources({
  * @param {string} deviceId  `app:pid:<n>` as produced by listAppSources
  * @param {(pcm: Buffer) => void} onPcm
  * @param {(event: object) => void} onEvent
+ * @param {{stereo?: boolean}} options - `stereo` (Kotomimi, Windows): both channels, interleaved
  * @returns {boolean} false when the helper is unavailable
  */
 function startCapture(deviceId, onPcm, onEvent, {
+  stereo = false,
   spawn = nodeSpawn,
   resolvePath = resolveAudioHostPath,
   selfIdentity = currentSelfIdentity(),
@@ -163,6 +165,8 @@ function startCapture(deviceId, onPcm, onEvent, {
   const raw = String(deviceId);
   const target = raw === 'desktop-audio-loopback' ? 'system' : raw.replace(/^app:/, '');
   const args = ['--target', target];
+  // Kotomimi: only the Windows helper takes it (its third argument).
+  if (stereo && platform === 'win32') args.push('--stereo');
   // The macOS helper decides "the target is rendering yet every sample is
   // zero" (its silent_no_permission warning) by asking Core Audio which
   // processes hold an active output stream. Sokuji's own audio service holds

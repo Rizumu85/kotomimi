@@ -7,7 +7,7 @@
 import type { Leg, Segment, SegmentId } from '../conversation/types';
 import { cutSegment } from './cut';
 import { createPairCache, DEFAULT_PAIRING } from './pair';
-import type { CutSettings, Entry, ProjectionSettings, Row } from './types';
+import { VIDEO_ORIGIN, type CutSettings, type Entry, type ProjectionSettings, type Row } from './types';
 
 export const DEFAULT_PROJECTION: ProjectionSettings = { mode: 'off', sentencesPerRow: 0, sourcePauseMs: 0, translationPauseMs: 0, pairing: DEFAULT_PAIRING };
 
@@ -17,7 +17,7 @@ export interface Projector {
 
 type Exchange = Extract<Entry, { kind: 'exchange' }>;
 
-interface Group { id: string; pairing: Exchange['pairing']; source: Segment[]; translation: Segment[]; t: number }
+interface Group { id: string; pairing: Exchange['pairing']; source: Segment[]; translation: Segment[]; t: number; video?: boolean }
 
 export function createProjector(): Projector {
   const rows = new WeakMap<Segment, { cut: CutSettings; rows: Row[] }>();
@@ -50,6 +50,7 @@ export function createProjector(): Projector {
             source: group.source.flatMap((s) => rowsOf(s, cut)),
             translation: group.translation.flatMap((s) => rowsOf(s, cut)),
             t: group.t,
+            ...(group.video ? { lane: 'video' as const } : {}),
           };
           if (candidate.source.length === 0 && candidate.translation.length === 0) continue;
           next.push(reuse(entries, kept, candidate));
@@ -82,7 +83,10 @@ function groupsOf(leg: Leg, inferred: Map<SegmentId, SegmentId>): Group[] {
   const pairedSources = new Set(inferred.values());
   for (const seg of leg.segments) {
     let g: Group;
-    if (seg.origin !== undefined) g = get(`${leg.session}:${leg.leg}:o:${seg.origin}`, 'stated');
+    if (seg.origin !== undefined) {
+      g = get(`${leg.session}:${leg.leg}:o:${seg.origin}`, 'stated');
+      if (seg.origin.startsWith(VIDEO_ORIGIN)) g.video = true;
+    }
     else if (seg.side === 'translation' && inferred.has(seg.id)) g = get(`${leg.leg}:s:${inferred.get(seg.id)}`, 'inferred');
     else if (seg.side === 'source' && pairedSources.has(seg.id)) g = get(`${leg.leg}:s:${seg.id}`, 'inferred');
     else g = get(`${leg.leg}:s:${seg.id}`, 'none');
@@ -129,7 +133,7 @@ function sameEntry(a: Entry, b: Entry): boolean {
   if (a.kind === 'exchange' && b.kind === 'exchange') {
     // Languages by value: a Leg snapshot may be rebuilt around the same segments.
     return a.leg === b.leg && a.languages.source === b.languages.source && a.languages.target === b.languages.target
-      && a.pairing === b.pairing && a.t === b.t
+      && a.pairing === b.pairing && a.t === b.t && a.lane === b.lane
       && sameRows(a.source, b.source) && sameRows(a.translation, b.translation);
   }
   return false;

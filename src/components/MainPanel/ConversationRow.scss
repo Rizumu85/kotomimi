@@ -41,6 +41,29 @@
     background: tk.$color-participant;
     color: #1a1a1a;
   }
+
+  // Fork: a video's words (VRChat): a play mark in place of a person.
+  &.avatar-video {
+    background: #2f3034;
+  }
+}
+
+.kt-video-row__play {
+  width: 0;
+  height: 0;
+  margin-left: 2px;
+  border-left: 6px solid tk.$color-primary;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+}
+
+// Fork: a video's words sit back from the people's: fainter, a step smaller.
+.conversation-row.kt-video-row {
+  opacity: 0.62;
+
+  .row-body {
+    font-size: calc(var(--conversation-font-size, 14px) * 0.92);
+  }
 }
 
 .row-name {

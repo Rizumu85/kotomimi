@@ -23,6 +23,9 @@ export interface Row {
 
 export type Pairing = 'stated' | 'inferred' | 'none';
 
+/** Fork: the origins of a video's words, heard by a lane of their own beside the other side's (`Run.openSide`). */
+export const VIDEO_ORIGIN = 'kotomimi_video:';
+
 export type Entry =
   | {
       kind: 'exchange';
@@ -34,6 +37,8 @@ export type Entry =
       translation: Row[];
       /** Earliest `openedAt` in the group. */
       t: number;
+      /** Fork: a video's words, not a person's (`VIDEO_ORIGIN`): drawn smaller and apart. */
+      lane?: 'video';
     }
   | {
       kind: 'notice';

@@ -10,7 +10,7 @@ import type { LegName } from '../conversation/types';
 import type { RunNoticeCode } from './codes';
 import { ConversationSet, type ConversationInfo } from './conversationSet';
 import { guardPorts, type ControlMethod, type RunnerDeps } from './ports';
-import { apiErrorType, LegOpenError, RefusedError, retentionFor, Run, type LegPace, type RunHost } from './run';
+import { apiErrorType, LegOpenError, RefusedError, retentionFor, Run, type LegPace, type RunHost, type SideHandle, type SideLane } from './run';
 import type { LegState, RunEnd, RunState } from './types';
 
 const DEFAULT_TIMEOUT_MS = 5_000;
@@ -37,6 +37,10 @@ export interface Runner {
    * VRChat has the other side heard in shorter stretches, or not at all.
    */
   setLegPace(leg: LegName, pace: LegPace): void;
+  /** Fork: a second session on a leg of the running run (`Run.openSide`): what closes it, or null where none opens. */
+  openSide(leg: LegName, lane: SideLane): Promise<SideHandle | null>;
+  /** Fork: whether the running run can open one on `leg` now. */
+  sideOffered(leg: LegName): boolean;
   /** Empties the conversation, and the queued audio with it. */
   clear(): void;
 }
@@ -316,6 +320,8 @@ export function createRunner(rawDeps: RunnerDeps): Runner {
     // The phase too: `end()` says stopping before the run itself starts ending.
     speakerAudioInUse: () => state.getState().phase === 'running' && (current?.speakerAudioInUse() ?? false),
     sendText: (text) => current?.sendText(text),
+    openSide: (leg, lane) => (current && state.getState().phase === 'running' ? current.openSide(leg, lane) : Promise.resolve(null)),
+    sideOffered: (leg) => state.getState().phase === 'running' && (current?.sideOffered(leg) ?? false),
     setLegPace: (leg, pace) => {
       paces.set(leg, pace);
       current?.setPace(leg, pace);

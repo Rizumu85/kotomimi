@@ -62,9 +62,9 @@ module.exports = {
   vrchat: {
     title: ['VRChat', 'VRChat', 'VRChat'],
     help: [
-      'Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read; and when a world plays a video, the other side can be heard in shorter stretches so their words are not held up.',
-      '与这台电脑上的 VRChat 联动：在 VRChat 中静音时不识别你的语音；你的翻译可以显示在头顶，其他玩家可以看到；世界里播放视频时，可以把对方的语音切成较短的片段，避免译文被拖慢。',
-      '與這台電腦上的 VRChat 連動：在 VRChat 中靜音時不辨識你的語音；你的翻譯可以顯示在頭頂，其他玩家可以看到；世界裡播放影片時，可以把對方的語音切成較短的片段，避免譯文被拖慢。',
+      'Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. Faster, when a world plays a video: if the video has no direction in the world, its sound is removed and only the players are heard; if it has, the other side is heard in shorter stretches.',
+      '与这台电脑上的 VRChat 联动：在 VRChat 中静音时不识别你的语音；你的翻译可以显示在头顶，其他玩家可以看到。加快：世界里的视频声音没有方向时，自动把它去掉，只留下玩家的声音；有方向时，把对方的语音切成较短的片段。',
+      '與這台電腦上的 VRChat 連動：在 VRChat 中靜音時不辨識你的語音；你的翻譯可以顯示在頭頂，其他玩家可以看到。加快：世界裡的影片聲音沒有方向時，自動把它去除，只留下玩家的聲音；有方向時，把對方的語音切成較短的片段。',
     ],
     connected: ['Connected', '已连接', '已連線'],
     notConnected: ['Not connected', '未连接', '未連線'],
@@ -83,6 +83,9 @@ module.exports = {
     videoShort: ['Video', '视频', '影片'],
     remember: ['Remember', '记住', '記住'],
     quickOn: ['Faster', '加快中', '加快中'],
+    removedOn: ['Video sound removed', '已去掉视频声', '已去除影片聲'],
+    separatedOn: ['Video sound separated', '已分开视频声', '已分開影片聲'],
+    translateVideo: ['Also translate the video', '也翻译视频', '也翻譯影片'],
     pausedOn: ['Other side paused', '已暂停对方', '已暫停對方'],
     end: ['End', '结束', '結束'],
     mutedThere: ['Muted in VRChat', 'VRChat 静音中', 'VRChat 靜音中'],

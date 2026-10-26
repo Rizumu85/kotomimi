@@ -136,7 +136,9 @@ const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, r
   const isTranslation = row.side === 'translation';
   // A detected language wins; otherwise the leg's pair, frozen at start (spec: "The language pair belongs to the leg").
   const lang = row.language || (isTranslation ? languages.target : languages.source);
-  const scopeName = t(
+  // Fork: a video's words (VRChat) are the video's, not the other side's.
+  const video = item.video === true;
+  const scopeName = video ? t('fork.vrchat.videoShort') : t(
     leg === 'speaker' ? 'mainPanel.displayMode.speaker' : 'mainPanel.displayMode.participant',
     leg === 'speaker' ? 'Me' : 'Other',
   );
@@ -157,11 +159,11 @@ const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, r
   const isPlayingRow = upTo !== undefined && ((upTo >= row.start && upTo < row.end) || (item.endsSegment && upTo >= row.end));
 
   return (
-    <div className={`conversation-row source-${leg} ${item.header ? 'with-header' : 'grouped'} ${compact ? 'compact' : 'expanded'}`}>
+    <div className={`conversation-row source-${leg} ${item.header ? 'with-header' : 'grouped'} ${compact ? 'compact' : 'expanded'}${video ? ' kt-video-row' : ''}`}>
       {!compact && item.header && (
         <div className="row-header">
-          <div className={`row-avatar avatar-${leg}`}>
-            {leg === 'speaker' ? <User size={12} /> : <Users size={12} />}
+          <div className={`row-avatar ${video ? 'avatar-video' : `avatar-${leg}`}`}>
+            {video ? <span className="kt-video-row__play" /> : leg === 'speaker' ? <User size={12} /> : <Users size={12} />}
           </div>
           <div className="row-name">
             <span className="row-name-text">{scopeName}</span>

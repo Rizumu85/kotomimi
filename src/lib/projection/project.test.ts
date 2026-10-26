@@ -12,6 +12,16 @@ const legOf = (leg: 'speaker' | 'participant', segments: Segment[], notices: Not
 });
 const exchanges = (entries: readonly Entry[]) => entries.filter((e): e is Extract<Entry, { kind: 'exchange' }> => e.kind === 'exchange');
 
+describe("createProjector — a video's words (fork)", () => {
+  it("marks the exchanges whose stated origin is a video's", () => {
+    const src = seg('participant', { side: 'source', origin: 'kotomimi_video:o1' });
+    const tr = seg('participant', { side: 'translation', origin: 'kotomimi_video:o1' });
+    const person = seg('participant', { side: 'source', origin: 'o2' });
+    const es = exchanges(createProjector().project([legOf('participant', [src, tr, person])], DEFAULT_PROJECTION));
+    expect(es.map((e) => e.lane)).toEqual(['video', undefined]);
+  });
+});
+
 describe('createProjector', () => {
   it('groups by stated origin, keys the entry by it, and marks the pairing stated', () => {
     const src = seg('speaker', { side: 'source', origin: 'u1', openedAt: 10 });

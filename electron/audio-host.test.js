@@ -177,6 +177,14 @@ describe('startCapture', () => {
     expect(spawn.mock.calls[0][1]).toEqual(['--target', 'pid:42']);
   });
 
+  it('asks the Windows helper alone for both channels (Kotomimi)', () => {
+    const spawn = vi.fn(() => fakeChild());
+    startCapture('app:pid:42', vi.fn(), vi.fn(), { stereo: true, spawn, resolvePath, platform: 'win32' });
+    expect(spawn.mock.calls[0][1]).toEqual(['--target', 'pid:42', '--stereo']);
+    startCapture('app:pid:42', vi.fn(), vi.fn(), { stereo: true, spawn, resolvePath, platform: 'darwin', selfIdentity: makeSelfIdentity({ execPath: '/a', pids: [], appName: 'Sokuji' }) });
+    expect(spawn.mock.calls[1][1]).toEqual(['--target', 'pid:42']);
+  });
+
   it('parses stderr JSON lines, tolerating split chunks', () => {
     const child = fakeChild();
     const onEvent = vi.fn();

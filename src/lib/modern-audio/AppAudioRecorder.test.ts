@@ -25,6 +25,23 @@ async function started() {
   return rec;
 }
 
+describe('AppAudioRecorder — both channels (Kotomimi)', () => {
+  it('splits what the helper sends interleaved: their average heard, each passed on, a frame never cut', async () => {
+    invoke.mockResolvedValue({ ok: true, channels: 2 });
+    const rec = await started();
+    const got: Array<{ mono: number[]; left?: number[]; right?: number[] }> = [];
+    await rec.record((d) => got.push({ mono: [...d.mono], left: d.left && [...d.left], right: d.right && [...d.right] }));
+    // Frames (L, R): (100, 300), (-200, 0); then a frame cut after its left sample.
+    const pcm = new Int16Array([100, 300, -200, 0, 50]);
+    pushPcm([...new Uint8Array(pcm.buffer)]);
+    pushPcm([...new Uint8Array(new Int16Array([70]).buffer)]);
+    expect(got).toEqual([
+      { mono: [200, -100], left: [100, -200], right: [300, 0] },
+      { mono: [60], left: [50], right: [70] },
+    ]);
+  });
+});
+
 describe('AppAudioRecorder.begin', () => {
   it('starts the helper for the selected source', async () => {
     const rec = await started();

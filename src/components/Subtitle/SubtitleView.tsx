@@ -1,5 +1,5 @@
 import { useVRChatStore } from '../../stores/vrchatStore';
-import { VideoMark } from '../VRChat/VideoPrompt';
+import { VideoLine, VideoMark } from '../VRChat/VideoPrompt';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
@@ -27,6 +27,9 @@ import SubtitleIdle from './SubtitleIdle';
 import type { SubtitleIdleState } from './subtitleIdleState';
 import { useSubtitleChrome, type SubtitleSurfaceKind } from './useSubtitleChrome';
 import './SubtitleApp.scss';
+
+/** Fork: a video's words (VRChat), heard apart from the other side's. */
+const isVideo = (e: Entry) => e.kind === 'exchange' && e.lane === 'video';
 
 /** What a subtitle surface draws: the conversation's entries (the overlay gets their tail), karaoke, and the run. */
 export interface SubtitleModel {
@@ -109,7 +112,10 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
   const participant = useSubtitleParticipantDisplayMode();
   const newItemHighlightEnabled = useSubtitleNewItemHighlightEnabled();
   const filters = useMemo(() => ({ speaker, participant }), [speaker, participant]);
-  const { entries, lit, session, notes } = model;
+  const { entries: all, lit, session, notes } = model;
+  // Fork: a video's words (VRChat) are not the other side's caption: a faint line of their own (`VideoLine`).
+  const entries = useMemo(() => (all.some(isVideo) ? all.filter((e) => !isVideo(e)) : all), [all]);
+  const videoEntries = useMemo(() => all.filter(isVideo), [all]);
   const running = session?.phase === 'running';
 
   const [now, setNow] = useState(Date.now());
@@ -274,6 +280,7 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
       />
       {/* Fork: with the strip passing the mouse through, a video's pace is marked, not asked (`VideoPrompt.tsx`). */}
       {surface === 'electron' && through && <VideoMark />}
+      {running && surface === 'electron' && <VideoLine entries={videoEntries} />}
       {running ? (
         surface === 'electron' && session.holdToTalk && entries.length === 0 ? (
           // The takeover is the same window, and the panel's Space key works in it; on the overlay Space is the meeting's.

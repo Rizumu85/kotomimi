@@ -13,6 +13,7 @@ import { DeviceCaptureRecorder } from '../../modern-audio/DeviceCaptureRecorder'
 import { LoopbackRecorder } from '../../modern-audio/LoopbackRecorder';
 import { SourceOpenError, type Source } from '../../session/source';
 import { createSourceCore } from './core';
+import { participantSplit, type ParticipantSplit, type StereoChunk } from './stereoSplit';
 
 export const APP_CAPTURE_LOST = 'app_capture_lost_using_system_audio';
 export const APP_MONITOR_MISSING = 'app_capture_monitor_missing';
@@ -33,7 +34,8 @@ export interface SystemAudioSettings {
 export interface ParticipantCapture {
   /** False when it cannot capture (it logs why and cleans up after itself). */
   begin(options?: { deviceId?: string }): Promise<boolean>;
-  record(callback: (data: { mono: Int16Array }) => void): Promise<boolean>;
+  /** `left` and `right` as well where the capture keeps both channels. */
+  record(callback: (data: StereoChunk) => void): Promise<boolean>;
   end(): Promise<void>;
   getStream?(): MediaStream | null;
   onLost?: (() => void) | null;
@@ -50,6 +52,8 @@ export interface SystemAudioDeps {
   loopback(): ParticipantCapture;
   /** The OS's Screen Recording permission as the main process reports it (`granted`, `denied`, `not-determined`, `unknown`); outside macOS always `granted`. */
   screenRecording(): Promise<string>;
+  /** Fork: what the leg hears of the two channels (`stereoSplit.ts`); absent, the capture's own mono. */
+  split?: ParticipantSplit;
 }
 
 export const electronSystemAudio = (): SystemAudioDeps => ({
@@ -59,6 +63,7 @@ export const electronSystemAudio = (): SystemAudioDeps => ({
   app: () => new AppAudioRecorder(SAMPLE_RATE),
   device: () => new DeviceCaptureRecorder(SAMPLE_RATE),
   loopback: () => new LoopbackRecorder(SAMPLE_RATE),
+  split: participantSplit,
   screenRecording: async () => {
     try {
       const answer = (await window.electron.invoke('check-screen-recording-permission')) as { status?: unknown } | undefined;
@@ -181,7 +186,8 @@ export async function openSystemAudio(
       throw new Error('The system audio capture did not start.');
     }
     unwatch = core.watch(next.getStream?.() ?? null);
-    await next.record((data) => core.deliver(data.mono));
+    const split = deps.split;
+    await next.record((data) => core.deliver(split ? split.take(data) : data.mono));
   };
 
   /**

@@ -71,6 +71,10 @@
   color: vars.$color-warning;
 }
 
+.kt-vrchat__more {
+  margin-top: 10px;
+}
+
 .kt-vrchat__label {
   margin: 14px 0 0;
   font-size: 13px;
@@ -181,6 +185,29 @@ span.kt-video__btn {
 
 span.kt-video-pill__btn {
   cursor: default;
+}
+
+.kt-video__play--dim {
+  border-left-color: #9aa0a6;
+}
+
+// The video's words, above the captions: one faint line, never in the people's way.
+.kt-video-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 42px;
+  padding: 0 16px;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  color: #cfd2d6;
+  opacity: 0.75;
+  text-shadow: 0 0 3px #000, 0 0 6px #000, 0 1px 2px #000;
+  pointer-events: none;
+  z-index: 2;
 }
 
 // Over the captions while the strip passes the mouse through: faint, and nothing to press.

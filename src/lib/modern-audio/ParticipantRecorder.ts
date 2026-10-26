@@ -26,6 +26,11 @@ export abstract class ParticipantRecorder extends BaseAudioRecorder implements I
     };
   }
 
+  /** Fork: both channels of the system's sound are kept: what has a direction in it is a person (`stereoSplit.ts`). */
+  protected wantsStereo(): boolean {
+    return true;
+  }
+
   /**
    * Acquire the media stream - subclasses must implement
    */
