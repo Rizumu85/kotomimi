@@ -1473,10 +1473,10 @@ class MainActivity : Activity() {
             // three gigabytes that would lie there for nothing. One it holds, but not now, beside what is open.
             val tooLarge = isText && !choices.fits(model)
             val tight = isText && !tooLarge && store.has(model) && !shared && model.holdsMb > free
-            // The second engine's row of a model that has two is offered only once it is here: to the person they
-            // are one model, and the check, not they, decides between the two.
-            val hidden = model.twin && model.reader == Reader.LLAMA_CPP && !store.has(model) && busy !== model
-            row.view.visibility = if (hidden) View.GONE else View.VISIBLE
+            // Both engines' rows of a model that has two are offered: nothing else fetches the second, and llama.cpp's
+            // is the faster on a phone's processor — hidden until it was here (0.9.0 to 0.9.2), a phone that began
+            // with none of it could never be lent with it (a friend's Snapdragon 8 Elite, 2026-10-25).
+            row.view.visibility = View.VISIBLE
             row.divider?.visibility = row.view.visibility
             val inUse = if (isText) model in lentText else model === lent
             row.mark.visibility = if (store.has(model) && inUse && busy !== model) View.VISIBLE else View.GONE
