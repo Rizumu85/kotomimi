@@ -76,12 +76,31 @@ const textOf = (rows: readonly { text: string }[]) => rows.map((row) => row.text
 /** The origin the pipeline gives a typed sentence (`appendText` in `pipeline.ts`). */
 const TYPED = /^sokuji_typed_/;
 
+/** The chatbox's length, as the main process cuts to (`CHATBOX_MOST` in `electron/vrchat.js`). */
+const CHATBOX_MOST = 144;
+
+/**
+ * Two lines within the chatbox's length: each whole where they fit; else the shorter whole where it takes no more
+ * than half, and the other cut to the rest — so that neither is lost to the cut of the whole.
+ */
+function twoLines(first: string, second: string): string {
+  const a = [...first];
+  const b = [...second];
+  const room = CHATBOX_MOST - 1;
+  if (a.length + b.length <= room) return `${first}\n${second}`;
+  const half = Math.floor(room / 2);
+  const cut = (chars: string[], most: number) => (chars.length <= most ? chars.join('') : `${chars.slice(0, most - 1).join('')}…`);
+  const keepA = a.length <= half ? a.length : b.length <= half ? room - b.length : half;
+  return `${cut(a, keepA)}\n${cut(b, room - Math.min(a.length, keepA))}`;
+}
+
 /**
  * A sentence of the user's that is done, as it goes above their avatar: its own words and its translation final.
  * Coached and spoken, it is the sentence as they said it, once that is final — what answers it is feedback for them,
- * never shown to others. Null while it is not done, or for anything else.
+ * never shown to others. With both shown, each has a line of its own: the original first, or — `translationFirst` —
+ * the translation. Null while it is not done, or for anything else.
  */
-export function finishedLine(entry: Entry, shows: ChatboxShows, said = false): string | null {
+export function finishedLine(entry: Entry, shows: ChatboxShows, said = false, translationFirst = false): string | null {
   if (shows === 'off' || entry.kind !== 'exchange' || entry.leg !== 'speaker') return null;
   if (said) {
     const words = textOf(entry.source);
@@ -91,7 +110,9 @@ export function finishedLine(entry: Entry, shows: ChatboxShows, said = false): s
   if (!entry.source.every((row) => row.final) || !entry.translation.every((row) => row.final)) return null;
   const translation = textOf(entry.translation);
   if (!translation) return null;
-  return shows === 'both' ? `${textOf(entry.source)}\n${translation}` : translation;
+  if (shows !== 'both') return translation;
+  const original = textOf(entry.source);
+  return translationFirst ? twoLines(translation, original) : twoLines(original, translation);
 }
 
 export interface VRChatController {
@@ -239,7 +260,7 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     for (const entry of state.entries) {
       if (entry.kind !== 'exchange' || sent.has(entry.id)) continue;
       const said = coached && !entry.source.some((row) => typed.has(row.segmentId));
-      const line = finishedLine(entry, shows, said);
+      const line = finishedLine(entry, shows, said, store.getState().chatboxTranslationFirst);
       if (line === null) continue;
       sent.add(entry.id);
       queue.push(line);

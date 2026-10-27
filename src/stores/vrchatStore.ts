@@ -1,12 +1,14 @@
 /**
  * Fork: VRChat on the same computer (`electron/vrchat.js`, `src/app/vrchat.ts`) —
- * four settings, and what the app knows of VRChat now.
+ * five settings, and what the app knows of VRChat now.
  *
  * - `muteGate`: muted in VRChat, the user's own leg is not heard (on by
  *   default). Off for a player who keeps silent in VRChat and still wants
  *   what they say translated into the chatbox.
  * - `chatbox`: the user's translations above their avatar — off, the
- *   translation, or the original with it. Typed text goes the same way.
+ *   translation, or the original with it, on lines of their own, the
+ *   original first or — `chatboxTranslationFirst` — the translation.
+ *   Typed text goes the same way.
  * - `onVideo`: when a world's video player begins a video — ask, carry on,
  *   hear the other side faster, or not hear it at all. Faster takes the
  *   video's sound out where it has no direction in the world, and hears the
@@ -35,13 +37,20 @@ export type VideoState =
 /** What VRChat's side says: a log of a running VRChat was found, its OSCQuery answers the mute, and the mute. */
 export interface VRChatLink { found: boolean; connected: boolean; muted: boolean | null }
 
-const KEYS = { muteGate: 'settings.vrchat.muteGate', chatbox: 'settings.vrchat.chatbox', onVideo: 'settings.vrchat.onVideo', translateVideo: 'settings.vrchat.translateVideo' } as const;
+const KEYS = {
+  muteGate: 'settings.vrchat.muteGate',
+  chatbox: 'settings.vrchat.chatbox',
+  chatboxTranslationFirst: 'settings.vrchat.chatboxTranslationFirst',
+  onVideo: 'settings.vrchat.onVideo',
+  translateVideo: 'settings.vrchat.translateVideo',
+} as const;
 const CHATBOX: readonly ChatboxShows[] = ['off', 'translation', 'both'];
 const ON_VIDEO: readonly OnVideo[] = ['ask', 'normal', 'quick', 'pause'];
 
 interface VRChatStore {
   muteGate: boolean;
   chatbox: ChatboxShows;
+  chatboxTranslationFirst: boolean;
   onVideo: OnVideo;
   translateVideo: boolean;
   link: VRChatLink;
@@ -50,6 +59,7 @@ interface VRChatStore {
   viewers: number;
   setMuteGate(on: boolean): void;
   setChatbox(shows: ChatboxShows): void;
+  setChatboxTranslationFirst(on: boolean): void;
   setOnVideo(on: OnVideo): void;
   setTranslateVideo(on: boolean): void;
   setLink(link: VRChatLink): void;
@@ -67,6 +77,7 @@ export const useVRChatStore = create<VRChatStore>()(
   subscribeWithSelector((set) => ({
     muteGate: true,
     chatbox: 'off',
+    chatboxTranslationFirst: false,
     onVideo: 'ask',
     translateVideo: false,
     link: { found: false, connected: false, muted: null },
@@ -74,6 +85,7 @@ export const useVRChatStore = create<VRChatStore>()(
     viewers: 0,
     setMuteGate: (muteGate) => { set({ muteGate }); persist(KEYS.muteGate, muteGate); },
     setChatbox: (chatbox) => { set({ chatbox }); persist(KEYS.chatbox, chatbox); },
+    setChatboxTranslationFirst: (chatboxTranslationFirst) => { set({ chatboxTranslationFirst }); persist(KEYS.chatboxTranslationFirst, chatboxTranslationFirst); },
     setOnVideo: (onVideo) => { set({ onVideo }); persist(KEYS.onVideo, onVideo); },
     setTranslateVideo: (translateVideo) => { set({ translateVideo }); persist(KEYS.translateVideo, translateVideo); },
     setLink: (link) => set({ link }),
@@ -82,15 +94,17 @@ export const useVRChatStore = create<VRChatStore>()(
     hydrate: async () => {
       const { ServiceFactory } = await import('../services/ServiceFactory');
       const service = ServiceFactory.getSettingsService();
-      const [muteGate, chatbox, onVideo, translateVideo] = await Promise.all([
+      const [muteGate, chatbox, chatboxTranslationFirst, onVideo, translateVideo] = await Promise.all([
         service.getSetting<unknown>(KEYS.muteGate, true),
         service.getSetting<unknown>(KEYS.chatbox, 'off'),
+        service.getSetting<unknown>(KEYS.chatboxTranslationFirst, false),
         service.getSetting<unknown>(KEYS.onVideo, 'ask'),
         service.getSetting<unknown>(KEYS.translateVideo, false),
       ]);
       set({
         muteGate: muteGate !== false,
         chatbox: CHATBOX.includes(chatbox as ChatboxShows) ? (chatbox as ChatboxShows) : 'off',
+        chatboxTranslationFirst: chatboxTranslationFirst === true,
         onVideo: ON_VIDEO.includes(onVideo as OnVideo) ? (onVideo as OnVideo) : 'ask',
         translateVideo: translateVideo === true,
       });

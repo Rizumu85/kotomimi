@@ -74,6 +74,7 @@ module.exports = {
     chatboxOff: ['Off', '关', '關'],
     chatboxTranslation: ['Translation', '译文', '譯文'],
     chatboxBoth: ['Original + translation', '原文 + 译文', '原文 + 譯文'],
+    chatboxTranslationFirst: ['Translation on top', '译文在上', '譯文在上'],
     onVideo: ['When a video plays', '播放视频时', '播放影片時'],
     videoAsk: ['Ask', '询问', '詢問'],
     videoNormal: ['As usual', '照常', '照常'],

@@ -17,7 +17,7 @@ const ON_VIDEO: Array<[OnVideo, string]> = [['ask', 'videoAsk'], ['normal', 'vid
 
 export function VRChatSection() {
   const { t } = useTranslation();
-  const { muteGate, chatbox, onVideo, translateVideo, link, setMuteGate, setChatbox, setOnVideo, setTranslateVideo, view } = useVRChatStore();
+  const { muteGate, chatbox, chatboxTranslationFirst, onVideo, translateVideo, link, setMuteGate, setChatbox, setChatboxTranslationFirst, setOnVideo, setTranslateVideo, view } = useVRChatStore();
   // While the card is open the mute is asked, so that whether VRChat answers is shown as it is.
   useEffect(() => {
     if (!vrchatOffered()) return undefined;
@@ -45,6 +45,12 @@ export function VRChatSection() {
           </button>
         ))}
       </div>
+      {/* Both shown: which goes on top. */}
+      {chatbox === 'both' && (
+        <div className="kt-vrchat__more">
+          <ToggleSwitch checked={chatboxTranslationFirst} onChange={() => setChatboxTranslationFirst(!chatboxTranslationFirst)} label={t('fork.vrchat.chatboxTranslationFirst')} />
+        </div>
+      )}
       <div className="kt-vrchat__label">{t('fork.vrchat.onVideo')}</div>
       <div className="segmented-control">
         {ON_VIDEO.map(([value, words]) => (

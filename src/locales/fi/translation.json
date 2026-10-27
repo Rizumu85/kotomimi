@@ -1685,6 +1685,7 @@
       "chatboxOff": "Off",
       "chatboxTranslation": "Translation",
       "chatboxBoth": "Original + translation",
+      "chatboxTranslationFirst": "Translation on top",
       "onVideo": "When a video plays",
       "videoAsk": "Ask",
       "videoNormal": "As usual",

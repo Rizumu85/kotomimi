@@ -45,7 +45,7 @@ function setup(over: Partial<VRChatDeps> = {}, initial: Entry[] = []) {
 }
 
 beforeEach(() => {
-  useVRChatStore.setState({ muteGate: true, chatbox: 'off', onVideo: 'ask', translateVideo: false, link: { found: false, connected: false, muted: null }, video: { kind: 'none' }, viewers: 0 });
+  useVRChatStore.setState({ muteGate: true, chatbox: 'off', chatboxTranslationFirst: false, onVideo: 'ask', translateVideo: false, link: { found: false, connected: false, muted: null }, video: { kind: 'none' }, viewers: 0 });
 });
 
 describe('linkOf', () => {
@@ -69,6 +69,18 @@ describe('finishedLine', () => {
   it('is the translation of a final sentence of the user\'s, or the original with it', () => {
     expect(finishedLine(exchange('a', '今天天气真好', '今日はいい天気ですね'), 'translation')).toBe('今日はいい天気ですね');
     expect(finishedLine(exchange('a', '今天天气真好', '今日はいい天気ですね'), 'both')).toBe('今天天气真好\n今日はいい天気ですね');
+  });
+
+  it('puts the translation on top where asked, and keeps both lines within the chatbox\'s length', () => {
+    expect(finishedLine(exchange('a', '今天天气真好', '今日はいい天気ですね'), 'both', false, true)).toBe('今日はいい天気ですね\n今天天气真好');
+    const long = '长'.repeat(200);
+    const line = finishedLine(exchange('a', long, '短い訳'), 'both')!;
+    const [first, second] = line.split('\n');
+    expect(second).toBe('短い訳');
+    expect([...line].length).toBe(144);
+    expect(first.endsWith('…')).toBe(true);
+    const both = finishedLine(exchange('a', long, '訳'.repeat(200)), 'both')!.split('\n');
+    expect(both.map((l) => [...l].length)).toEqual([71, 72]);
   });
 
   it('is nothing while off, unfinished, untranslated, or the other side\'s', () => {

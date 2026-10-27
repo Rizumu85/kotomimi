@@ -1685,6 +1685,7 @@
       "chatboxOff": "關",
       "chatboxTranslation": "譯文",
       "chatboxBoth": "原文 + 譯文",
+      "chatboxTranslationFirst": "譯文在上",
       "onVideo": "播放影片時",
       "videoAsk": "詢問",
       "videoNormal": "照常",

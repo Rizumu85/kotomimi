@@ -50,8 +50,8 @@ describe('the chatbox', () => {
     expect(message.toString('latin1')).toBe('/chatbox/input\0\0,sTF\0\0\0\0hi\0\0');
   });
 
-  it('takes one line within its length, cut at a whole character', () => {
-    expect(forChatbox('  a\nb  ')).toBe('a b');
+  it('takes its lines within its length, each on one line, cut at a whole character', () => {
+    expect(forChatbox('  a \t b\n\n c  ')).toBe('a b\nc');
     const long = '漢'.repeat(CHATBOX_MOST + 10);
     expect([...forChatbox(long)].length).toBe(CHATBOX_MOST);
     expect(forChatbox(long).endsWith('…')).toBe(true);

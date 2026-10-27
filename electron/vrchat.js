@@ -66,9 +66,13 @@ function chatboxMessage(text) {
   return Buffer.concat([oscString('/chatbox/input'), oscString(',sTF'), oscString(text)]);
 }
 
-/** A line the chatbox takes: on one line, and within its length, cut at the last whole character. */
+/**
+ * What the chatbox takes: its lines kept (the original over its translation, as VRChat draws a line break), each on
+ * one line, and within its length, cut at the last whole character.
+ */
 function forChatbox(text) {
-  const chars = [...String(text).replace(/\s+/g, ' ').trim()];
+  const lines = String(text).split('\n').map((line) => line.replace(/\s+/g, ' ').trim()).filter(Boolean);
+  const chars = [...lines.join('\n')];
   return chars.length <= CHATBOX_MOST ? chars.join('') : `${chars.slice(0, CHATBOX_MOST - 1).join('')}…`;
 }
 
