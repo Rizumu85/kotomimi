@@ -145,6 +145,16 @@ export function heardBy(s: { asrDetectOther?: boolean; asrVia: Place; asrHere?: 
   return detectsOther(s, models) ? AUTO : pair.target;
 }
 
+/**
+ * Fork: a leg heard in the language it is shown in (Chinese to Chinese — to hear someone more clearly): what is heard
+ * is shown as said, and nothing translates it. Not a coached speaker, who is answered with feedback, nor the other
+ * side left to be detected, who may speak anything.
+ */
+export function shownAsSaid(s: { asrDetectOther?: boolean; asrVia: Place; asrHere?: AsrHere; asrOther?: string; coach: boolean }, pair: { source: string; target: string }, leg: 'speaker' | 'participant', models: Listed = []): boolean {
+  if (leg === 'speaker' ? s.coach : detectsOther(s, models)) return false;
+  return pair.source.toLowerCase() === pair.target.toLowerCase();
+}
+
 /** The feedback runs at this place: the speaker is coached, and that is where. */
 export const coachIs = (s: Pick<StagePlacement, 'coach' | 'coachAt'>, place: Place): boolean => s.coach && s.coachAt === place;
 
@@ -258,7 +268,8 @@ export function deviceNeeds(s: DeviceChoices, pair: LanguagePair, legs: readonly
       const other = coached ? source : target;
       out.push({ leg, dir: slot(heard, other), stage: 'asr', source: heard, target: other, required: true });
     }
-    if (s.translateAt === 'device') out.push({ leg, dir: slot(source, target), stage: 'translation', source, target, required: !coached });
+    // A leg shown as said (`shownAsSaid`) translates nothing.
+    if (s.translateAt === 'device') out.push({ leg, dir: slot(source, target), stage: 'translation', source, target, required: !coached && source.toLowerCase() !== target.toLowerCase() });
   }
   return out;
 }

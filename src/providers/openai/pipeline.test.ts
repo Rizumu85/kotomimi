@@ -67,6 +67,31 @@ async function live(context: SessionContext, patch: Partial<LocalAISettings>, an
   return { config, socket, session, calls, log, of, lastText, settled, clock, sent: () => socket.sentJson<Record<string, unknown>>(), receive: (...m: string[]) => { for (const x of m) socket.receive(x); } };
 }
 
+describe('a leg heard in the language it is shown in (fork)', () => {
+  const SAME: SessionContext = { direction: { source: 'zh-CN', target: 'zh-CN' }, speech: false, turns: 'auto' };
+
+  it('is shown as said: the session only transcribes, and nothing is translated, spoken or typed', async () => {
+    const h = await live(SAME, VIA_MODEL);
+    expect(h.config).toMatchObject({ transcribeOnly: true, stages: { speech: null, typed: null, asIs: true } });
+    h.receive(...heard('item_1', '今天天气很好。'));
+    h.session.appendText('你好');
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(h.calls).toHaveLength(0);
+    expect(h.of('segmentOpened').map((e) => e.payload.side)).toEqual(['source', 'source']);
+    expect(h.lastText(1)?.text).toBe('今天天气很好。');
+    expect(h.of('degraded')).toHaveLength(0);
+    expect(h.sent().map((m) => m.type)).toEqual(['session.update']);
+  });
+
+  it('is still translated between two scripts of one language, and coached as ever', () => {
+    const settings = { ...LOCALAI_DEFAULTS, ...VIA_MODEL };
+    const traditional = buildLocalAI({ ...SAME, direction: { source: 'zh-CN', target: 'zh-TW' } }, settings, shared);
+    expect(traditional).toMatchObject({ stages: { speech: { kind: 'translate' } } });
+    const coached = buildLocalAI(SAME, { ...settings, coach: true, coachServerModel: 'qwen3-4b' }, shared);
+    expect(coached).toMatchObject({ stages: { speech: { kind: 'coach' } } });
+  });
+});
+
 describe('a leg whose translation runs on a text model', () => {
   it('opens a transcription session: the input\'s settings alone, no answering switches, no conversation model', async () => {
     const h = await live(PARTICIPANT, VIA_MODEL);

@@ -65,7 +65,7 @@ import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
 import { recognizerAsked } from './serverRecognizers';
 import { phoneBase, plainAddress } from '../../lib/lan/discover';
-import { ASR_HERES, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
+import { ASR_HERES, shownAsSaid, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
 import { NATIVE_MODELS, preferNative, type NativePick } from './localaiNative';
 import { NATIVE_DEFAULT_MODEL, coachBaseUrl, coachGap, coachIdle, coachUp, holdNativeForRun, nativeGap, nativeUp, restNative, translatorUp, nativeWaits, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_COACH_EXTRA, NATIVE_COACHES, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
@@ -507,11 +507,13 @@ export const localaiCredentials: Provider<LocalAISettings, LocalAICredentials, n
  * start would refuse. `coached`: the speaker's own leg, whose speech the
  * feedback answers and whose translation only what is typed needs.
  */
-function unnamedStage(s: LocalAISettings, models: readonly LocalAIModel[], coached: boolean): ProviderRefusal | null {
+function unnamedStage(s: LocalAISettings, models: readonly LocalAIModel[], coached: boolean, asIs = false): ProviderRefusal | null {
   const hearsHere = s.asrVia !== 'server';
   const pipeline = needsServer(s) ? effectiveLocalAIModel(s, models) : '';
   if (!hearsHere && !pipeline) return { refused: 'No model is named, and the server lists none.', code: 'asr_unnamed' };
   if (s.asrVia === 'api' && (!s.asrApiBaseUrl.trim() || !s.asrApiModel.trim())) return { refused: 'No speech recognition API is named.', code: 'asr_unnamed' };
+  // Fork: a leg shown as said (`shownAsSaid`) has nothing that answers it.
+  if (asIs) return null;
   if (!coached) {
     if (s.translateAt === 'api' && (!s.translateBaseUrl.trim() || !s.translateModel.trim())) return { refused: 'No translation model is named.', code: 'translate_unnamed' };
     // A phone of the translation's own lends a model, chosen with it.
@@ -801,9 +803,11 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
       const found = servers.models ?? [];
       // What the leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
       const heard = heardBy(s, ctx.pair, leg, found);
-      const gap = unnamedStage(s, found, coached) ?? undetected(s, found, leg === 'speaker' ? ctx.pair.source : heard, coached, leg === 'participant' ? ctx.pair.target : undefined) ?? unheard(s, found, heard)
+      // Fork: a leg shown as said needs no translation stage at all.
+      const plain = shownAsSaid(s, ctx.pair, leg, found);
+      const gap = unnamedStage(s, found, coached, plain) ?? undetected(s, found, leg === 'speaker' ? ctx.pair.source : heard, coached, leg === 'participant' ? ctx.pair.target : undefined) ?? unheard(s, found, heard)
         // What the leg translates: the speaker the pair, the other side its reverse (from whatever it turns out to be).
-        ?? (coached ? null : phoneTranslatorUnfit(s, leg === 'speaker' ? ctx.pair.source : heard, leg === 'speaker' ? ctx.pair.target : ctx.pair.source));
+        ?? (coached || plain ? null : phoneTranslatorUnfit(s, leg === 'speaker' ? ctx.pair.source : heard, leg === 'speaker' ? ctx.pair.target : ctx.pair.source));
       // What the servers listed goes with the refusal: a pick from it is often what answers it.
       if (gap) return { ok: false, reason: gap.refused, ...(gap.code ? { code: gap.code } : {}), ...(gap.params ? { params: gap.params } : {}), ...(servers.models?.length ? { models: servers.models } : {}) };
     }
@@ -837,7 +841,8 @@ interface NativeNeeds {
 function nativeNeeds(s: LocalAISettings, pair: { source: string; target: string }, legs: readonly ('speaker' | 'participant')[]): NativeNeeds {
   return {
     ...(hearsNatively(s) ? { hears: { pick: { model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage, ...(detectsOther(s) ? { detecting: true } : {}) }, heard: legs.map((leg) => heardBy(s, pair, leg)) } } : {}),
-    ...(translatesNatively(s) ? { translates: s.translateNativeModel } : {}),
+    // Not where every leg is shown as said: nothing would ask it.
+    ...(translatesNatively(s) && legs.some((leg) => !shownAsSaid(s, pair, leg)) ? { translates: s.translateNativeModel } : {}),
     ...(coachesNatively(s) && legs.includes('speaker') ? { coaches: s.coachNativeModel } : {}),
   };
 }
@@ -1043,10 +1048,12 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   // the other side's leg was taken for the speaker's — heard in the user's language and answered with feedback, no
   // translation at all (feedback on, detection on; found 2026-10-06, in every build since detection was a choice).
   const coached = s.coach && !shared.reversed(asked.direction);
+  // Fork: heard in the language it is shown in (Chinese to Chinese): shown as said, nothing translates it.
+  const plain = !coached && !detected && source.toLowerCase() === target.toLowerCase();
 
   // Every stage named, before anything is built: a run with none has nothing to say. A coached speaker's translation
-  // is for what they type only: the run starts without it.
-  const gap = unnamedStage(s, models, coached) ?? undetected(s, models, source, coached, detected ? told : undefined);
+  // is for what they type only: the run starts without it. A leg shown as said has none.
+  const gap = unnamedStage(s, models, coached, plain) ?? undetected(s, models, source, coached, detected ? told : undefined);
   if (gap) return gap;
   const apiBase = s.translateBaseUrl.trim();
   const apiModel = s.translateModel.trim();
@@ -1098,7 +1105,9 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
 
   // Null: the other device's pipeline answers, inside the session it hears in.
   let translate: AnswerStage | null = null;
-  if (translatesAtOwnDevice(s)) {
+  if (plain) {
+    // Nothing translates it.
+  } else if (translatesAtOwnDevice(s)) {
     // A phone that lends the translation: one of this computer's native translators, asked as this computer asks its
     // own — in the model's own form of request — at the phone's address. With no `engine`: that would ask this
     // computer's own engine where it answers, and send the request there.
@@ -1132,7 +1141,9 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   }
 
   let stages: Stages | undefined;
-  if (coached) {
+  if (plain) {
+    stages = { speech: null, typed: null, asIs: true };
+  } else if (coached) {
     // The speaker practises the target language; their own is the source.
     const prompt = coachPrompt(target, source, s.coachPrompt);
     let coach: AnswerStage;
@@ -1177,10 +1188,10 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
     model,
     modalities: ['text'],
     // This computer's LocalAI is told its recognizer through its pipeline, before the socket opens: the session names none.
-    transcription: transcriptionFor(s, heard, Boolean(stages?.speech) || hearsLocal, kotomimi && !hearsLocal, models),
+    transcription: transcriptionFor(s, heard, Boolean(stages?.speech) || plain || hearsLocal, kotomimi && !hearsLocal, models),
     anchor: false,
     commitAnswers: true,
-    ...(stages?.speech && !device ? { transcribeOnly: true as const } : {}),
+    ...((stages?.speech || plain) && !device ? { transcribeOnly: true as const } : {}),
     ...(stages ? { stages } : {}),
     ...(device ? { device } : {}),
     ...(hearsLocal ? { socket: { endpoint: hereSocket(s) } } : {}),

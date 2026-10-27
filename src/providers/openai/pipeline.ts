@@ -107,6 +107,11 @@ export interface Stages {
   /** What answers typed text. Null: the Realtime session does. */
   typed: AnswerStage | null;
   /**
+   * Fork: the leg is heard in the language it is shown in: nothing answers — not the stages, which are null, nor the
+   * Realtime session, which only transcribes — and what is said or typed is shown as it is.
+   */
+  asIs?: true;
+  /**
    * The language heard, when it is not the leg's source: a speaker practising
    * the target language — or `auto`, the other side's language left to be
    * detected: the recognizer is told none, each sentence is given the
@@ -378,7 +383,7 @@ class PipelineLeg implements AdapterSession {
    */
   appendText(text: string): void {
     const stage = this.stages.typed;
-    if (!stage && !this.request.config.device) {
+    if (!stage && !this.request.config.device && !this.stages.asIs) {
       this.session?.appendText(text);
       return;
     }
@@ -390,7 +395,7 @@ class PipelineLeg implements AdapterSession {
     this.events.segmentText({ ref, text: trimmed });
     this.events.segmentClosed({ ref });
     if (stage) this.push({ stage, text: trimmed, origin, typed: true });
-    else this.events.degraded({ code: 'translation_unavailable', message: 'Typed text has no translation stage in this session — shown as typed.' });
+    else if (!this.stages.asIs) this.events.degraded({ code: 'translation_unavailable', message: 'Typed text has no translation stage in this session — shown as typed.' });
   }
 
   beginTurn(): void {
@@ -891,7 +896,7 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
       // told keeps the recognizer it has, and the session still hears. (Nothing is waited for where nothing is asked:
       // a start opens its socket in the same turn.)
       if (prepare && deps.prepare && !device) await deps.prepare(prepare.pipeline, prepare.transcription).catch(() => undefined);
-      if (!device && (!stages || (!stages.speech && !stages.typed))) return realtime.start(dialled(request), events);
+      if (!device && (!stages || (!stages.speech && !stages.typed && !stages.asIs))) return realtime.start(dialled(request), events);
       const leg = new PipelineLeg(request, stages ?? { speech: null, typed: null }, events, deps.fetch ?? fetchNow, engines, deps.native?.base ?? engineBaseNow);
       // What hears and what answers load together; either failing lets the other go.
       const opening = leg.open();
