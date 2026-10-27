@@ -45,7 +45,7 @@ function setup(over: Partial<VRChatDeps> = {}, initial: Entry[] = []) {
 }
 
 beforeEach(() => {
-  useVRChatStore.setState({ muteGate: true, chatbox: 'off', chatboxTranslationFirst: false, onVideo: 'ask', translateVideo: false, link: { found: false, connected: false, muted: null }, video: { kind: 'none' }, viewers: 0 });
+  useVRChatStore.setState({ muteGate: true, chatbox: 'off', chatboxTranslationFirst: false, recent: null, onVideo: 'ask', translateVideo: false, link: { found: false, connected: false, muted: null }, video: { kind: 'none' }, viewers: 0 });
 });
 
 describe('linkOf', () => {
@@ -326,5 +326,13 @@ describe('a video taken out (stereoSplit)', () => {
     split.hear(alone, 6);
     expect(lanes.opened).toHaveLength(0);
     expect(useVRChatStore.getState().video).toMatchObject({ apart: 'removed' });
+  });
+});
+
+describe('the chatbox\'s sample (fork)', () => {
+  it('notes the user\'s last translated sentence for the settings, whether the chatbox is on or not, and never the other side\'s', () => {
+    const t = setup();
+    t.show([exchange('a', '你好', 'こんにちは'), exchange('b', 'おはよう', '早上好', { leg: 'participant' })]);
+    expect(useVRChatStore.getState().recent).toEqual({ said: '你好', translation: 'こんにちは' });
   });
 });

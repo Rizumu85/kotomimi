@@ -257,6 +257,16 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     const coached = deps.coached();
     // The segments typed text opened: everything else of the user's leg was spoken.
     const typed = new Set((state.legs ?? []).flatMap((leg) => leg.segments.filter((s) => TYPED.test(s.origin ?? '')).map((s) => s.id)));
+    // The last sentence of the user's translated as it would go up, for the settings to show the chatbox with: not
+    // one answered with feedback, which is theirs alone.
+    for (let i = state.entries.length - 1; i >= 0; i--) {
+      const entry = state.entries[i];
+      if (entry.kind !== 'exchange' || entry.leg !== 'speaker') continue;
+      if (coached && !entry.source.some((row) => typed.has(row.segmentId))) continue;
+      if (finishedLine(entry, 'translation') === null) continue;
+      store.getState().setRecent({ said: textOf(entry.source), translation: textOf(entry.translation) });
+      break;
+    }
     for (const entry of state.entries) {
       if (entry.kind !== 'exchange' || sent.has(entry.id)) continue;
       const said = coached && !entry.source.some((row) => typed.has(row.segmentId));

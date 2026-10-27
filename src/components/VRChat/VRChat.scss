@@ -77,6 +77,101 @@
   color: vars.$color-warning;
 }
 
+// The chatbox's looks, as pictures of it: grey the original, green the translation.
+.kt-chatbox-looks {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.kt-chatbox-look {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: vars.$text-muted;
+  font: inherit;
+  cursor: pointer;
+
+  &:focus-visible .kt-chatbox-look__pic {
+    outline: 2px solid tk.$color-primary;
+    outline-offset: 2px;
+  }
+
+  &:hover:not(.is-on) .kt-chatbox-look__pic {
+    background: vars.$bg-hover;
+  }
+
+  &.is-on {
+    color: tk.$color-primary;
+
+    .kt-chatbox-look__pic {
+      border-color: tk.$color-primary;
+      box-shadow: inset 0 0 0 1px tk.$color-primary;
+      background: rgba(tk.$color-primary, 0.1);
+    }
+  }
+}
+
+.kt-chatbox-look__pic {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 54px;
+  border: 1px solid vars.$border-default;
+  border-radius: 9px;
+  background: vars.$bg-control;
+  color: #77777d;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.kt-chatbox-look__bubble {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 46px;
+  padding: 6px;
+  border-radius: 6px;
+  background: #e9e9ea;
+}
+
+.kt-chatbox-look__bar {
+  height: 4px;
+  border-radius: 2px;
+  background: #9a9aa0;
+
+  &.is-translation {
+    background: tk.$color-primary;
+  }
+}
+
+.kt-chatbox-look__name {
+  font-size: 12px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+// The chatbox as it will look above the avatar.
+.kt-chatbox-preview {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #ececed;
+  color: #151515;
+  font-size: 13.5px;
+  line-height: 1.45;
+
+  .is-translation {
+    color: #0b6b52;
+  }
+}
+
 .kt-vrchat__more {
   margin-top: 10px;
 }

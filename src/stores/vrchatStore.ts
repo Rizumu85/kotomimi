@@ -34,6 +34,8 @@ export type VideoState =
   | { kind: 'none' }
   | { kind: 'asking' }
   | { kind: 'on'; pace: 'quick' | 'paused'; auto: boolean; apart?: VideoApart; laneOrigin?: string };
+/** The user's last finished sentence and its translation: what the settings show the chatbox with (`VRChatSection`). */
+export interface ChatboxSample { said: string; translation: string }
 /** What VRChat's side says: a log of a running VRChat was found, its OSCQuery answers the mute, and the mute. */
 export interface VRChatLink { found: boolean; connected: boolean; muted: boolean | null }
 
@@ -55,6 +57,7 @@ interface VRChatStore {
   translateVideo: boolean;
   link: VRChatLink;
   video: VideoState;
+  recent: ChatboxSample | null;
   /** How many views want the link kept fresh now (the settings card): the mute is asked while one does. */
   viewers: number;
   setMuteGate(on: boolean): void;
@@ -64,6 +67,7 @@ interface VRChatStore {
   setTranslateVideo(on: boolean): void;
   setLink(link: VRChatLink): void;
   setVideo(video: VideoState): void;
+  setRecent(recent: ChatboxSample): void;
   view(on: boolean): void;
   /** Called once at app boot (`src/routes/Home.tsx`). */
   hydrate(): Promise<void>;
@@ -82,6 +86,7 @@ export const useVRChatStore = create<VRChatStore>()(
     translateVideo: false,
     link: { found: false, connected: false, muted: null },
     video: { kind: 'none' },
+    recent: null,
     viewers: 0,
     setMuteGate: (muteGate) => { set({ muteGate }); persist(KEYS.muteGate, muteGate); },
     setChatbox: (chatbox) => { set({ chatbox }); persist(KEYS.chatbox, chatbox); },
@@ -90,6 +95,7 @@ export const useVRChatStore = create<VRChatStore>()(
     setTranslateVideo: (translateVideo) => { set({ translateVideo }); persist(KEYS.translateVideo, translateVideo); },
     setLink: (link) => set({ link }),
     setVideo: (video) => set({ video }),
+    setRecent: (recent) => set((state) => (state.recent?.said === recent.said && state.recent.translation === recent.translation ? state : { recent })),
     view: (on) => set((state) => ({ viewers: Math.max(0, state.viewers + (on ? 1 : -1)) })),
     hydrate: async () => {
       const { ServiceFactory } = await import('../services/ServiceFactory');
