@@ -1,6 +1,6 @@
 // Fork: the language a sentence is in, as far as its writing says.
 import { describe, expect, it } from 'vitest';
-import { languageByScript } from './script';
+import { languageByScript, oneOfTwo } from './script';
 
 describe('the language a sentence\u2019s writing shows', () => {
   it('is Japanese wherever there is kana, whatever is written around it', () => {
@@ -75,5 +75,22 @@ describe('one stretch of speech, heard twice', () => {
     expect(sameSpeech('はい', 'うん、そうだね。')).toBe(false);
     expect(sameSpeech('', 'うん')).toBe(false);
     expect(sameSpeech('うん', '')).toBe(false);
+  });
+});
+
+describe('oneOfTwo (fork: a speaker who speaks both)', () => {
+  it('names the one a sentence is written in, by its script, or by Latin letters against a script of its own', () => {
+    expect(oneOfTwo('有人想跟我一起去吗？', 'zh-CN', 'es')).toBe('zh');
+    expect(oneOfTwo('¿Alguien quiere venir?', 'zh-CN', 'es')).toBe('es');
+    expect(oneOfTwo('Vale', 'zh-CN', 'es')).toBe('es');
+    expect(oneOfTwo('こんにちは', 'ja', 'en')).toBe('ja');
+    expect(oneOfTwo('see you tomorrow', 'ja', 'en')).toBe('en');
+  });
+
+  it('leaves a doubt unnamed: two Latin-letter languages it cannot tell apart, a few Han characters between Chinese and Japanese, one language twice', () => {
+    expect(oneOfTwo('Vale', 'es', 'pt')).toBeUndefined();
+    expect(oneOfTwo('了解', 'zh-CN', 'ja')).toBeUndefined();
+    expect(oneOfTwo('你好', 'zh-CN', 'zh-TW')).toBeUndefined();
+    expect(oneOfTwo('hola que tal muy bien gracias', 'es', 'en')).toBe('es');
   });
 });

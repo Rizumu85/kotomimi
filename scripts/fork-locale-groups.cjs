@@ -92,6 +92,12 @@ module.exports = {
   },
   // The language menus' own list (`LanguageMenu.tsx`).
   languageMenu: {
+    speakBoth: ['I speak {{language}} too', '我也说{{language}}', '我也說{{language}}'],
+    speakBothHelp: [
+      'When you speak {{mine}}, it is translated into {{language}}; when you speak {{language}}, into {{mine}}. Recognition tells the two apart.',
+      '你说{{mine}}时翻成{{language}}，说{{language}}时翻成{{mine}}。识别会自动分辨这两种语言。',
+      '你說{{mine}}時翻成{{language}}，說{{language}}時翻成{{mine}}。辨識會自動分辨這兩種語言。',
+    ],
     search: ['Type to find a language', '输入筛选语言', '輸入篩選語言'],
     none: ['No language by that name', '没有这个名字的语言', '沒有這個名稱的語言'],
     pin: ['Pin {{name}} to the top', '把{{name}}置顶', '把{{name}}置頂'],

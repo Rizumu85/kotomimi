@@ -73,6 +73,11 @@
   color: vars.$text-secondary;
 }
 
+// Fork: "I speak their language too", under the pair.
+.language-both {
+  margin-top: 12px;
+}
+
 .language-select-group--mostly {
   grid-column: 3;
   margin-top: -6px;

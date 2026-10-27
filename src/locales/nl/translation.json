@@ -1700,6 +1700,8 @@
       "mutedThere": "Muted in VRChat"
     },
     "languageMenu": {
+      "speakBoth": "I speak {{language}} too",
+      "speakBothHelp": "When you speak {{mine}}, it is translated into {{language}}; when you speak {{language}}, into {{mine}}. Recognition tells the two apart.",
       "search": "Type to find a language",
       "none": "No language by that name",
       "pin": "Pin {{name}} to the top",

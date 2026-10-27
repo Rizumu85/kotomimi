@@ -237,3 +237,27 @@ describe('LanguagePairSection — my language and theirs (fork)', () => {
     expect(quiet).not.toHaveBeenCalled();
   });
 });
+
+describe('LanguagePairSection — "I speak their language too" (fork)', () => {
+  const show = (both: { on: boolean; set(on: boolean): void } | undefined, pair = { source: 'en', target: 'ja' }) =>
+    render(<LanguagePairSection provider={fakeProvider} settings={FAKE_DEFAULTS} pair={pair} onChange={vi.fn()} both={both} owners />);
+
+  it('is a switch under the pair, turned as asked', () => {
+    const set = vi.fn();
+    show({ on: false, set });
+    const toggle = screen.getByRole('switch');
+    expect(toggle.getAttribute('aria-checked')).toBe('false');
+    fireEvent.click(toggle);
+    expect(set).toHaveBeenCalledWith(true);
+    cleanup();
+  });
+
+  it('is not offered where not handed in, nor for one language on both sides', () => {
+    show(undefined);
+    expect(screen.queryByRole('switch')).toBeNull();
+    cleanup();
+    show({ on: false, set: vi.fn() }, { source: 'ja', target: 'ja' });
+    expect(screen.queryByRole('switch')).toBeNull();
+    cleanup();
+  });
+});

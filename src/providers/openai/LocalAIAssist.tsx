@@ -1179,7 +1179,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
         icon={<GraduationCap size={14} />}
         title={t('providers.localai.coachStage')}
         tooltip={t('providers.localai.coachStageTooltip')}
-        lead={<ToggleSwitch checked={settings.coach} onChange={() => put({ coach: !settings.coach })} label={t('providers.localai.coach')} disabled={disabled} />}
+        lead={<ToggleSwitch checked={settings.coach} onChange={() => put(settings.coach ? { coach: false } : { coach: true, speakBoth: false })} label={t('providers.localai.coach')} disabled={disabled} />}
       >
         {/* Feedback answers what the user says: with the other side alone heard there is nothing for it to answer. */}
         {settings.coach && !legs.includes('speaker') && <p className="kt-note kt-note--todo" role="status">{t('providers.localai.coachNeedsSpeaker')}</p>}

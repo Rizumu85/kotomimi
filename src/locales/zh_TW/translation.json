@@ -1700,6 +1700,8 @@
       "mutedThere": "VRChat 靜音中"
     },
     "languageMenu": {
+      "speakBoth": "我也說{{language}}",
+      "speakBothHelp": "你說{{mine}}時翻成{{language}}，說{{language}}時翻成{{mine}}。辨識會自動分辨這兩種語言。",
       "search": "輸入篩選語言",
       "none": "沒有這個名稱的語言",
       "pin": "把{{name}}置頂",

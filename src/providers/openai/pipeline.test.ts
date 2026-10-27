@@ -5,7 +5,7 @@ import { fakeSockets } from '../../lib/contract/testing/fakeSocket';
 import { trackedClock } from '../../lib/contract/testing/trackedClock';
 import { coachPrompt } from './coachPrompt';
 import { buildLocalAI, LOCALAI_DEFAULTS, localaiProvider, type LocalAIConfig, type LocalAICredentials, type LocalAISettings } from './localai';
-import { createPipelineAdapter, FIRST_REF, tidyAnswer } from './pipeline';
+import { createPipelineAdapter, FIRST_REF, tidyAnswer, type AnswerStage } from './pipeline';
 import { SHARED } from './testing';
 
 const K: LocalAICredentials = { apiKey: '', endpoint: 'ws://192.168.1.10:8080/v1/realtime' };
@@ -200,6 +200,42 @@ describe('a leg whose translation runs on a text model', () => {
     // The fake delivers a close as a browser does: after the current task.
     await vi.waitFor(() => expect(h.of('failed')).toHaveLength(1));
     expect(h.calls[0].signal?.aborted).toBe(true);
+  });
+});
+
+describe('a speaker who speaks the other side\'s language too (fork)', () => {
+  const ES: SessionContext = { direction: { source: 'zh-CN', target: 'es' }, speech: false, turns: 'auto' };
+  /** What `speakBoth` builds, put on a leg the fake socket hears: either language heard, Spanish answered the other way. */
+  const both = (config: LocalAIConfig) => {
+    if (!config.stages?.speech) return;
+    config.stages.heard = 'auto';
+    config.stages.back = { stage: { ...config.stages.speech, model: 'back-model', language: 'zh-CN' } as AnswerStage, language: 'es', own: 'zh-CN' };
+  };
+
+  it('translates their own language as ever, and the other side\'s back into their own, spoken or typed', async () => {
+    const h = await live(ES, VIA_MODEL, [sse('Vamos.'), sse('有人想去吗？'), sse('你好')], K, both);
+    h.receive(...heard('item_1', '我们去下一个世界吧。'));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(1));
+    h.receive(...heard('item_2', '¿Alguien quiere venir conmigo?'));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(2));
+    h.session.appendText('hola amigos');
+    await h.settled();
+    expect(h.calls.map((c) => c.body.model)).toEqual(['hy-mt2-1.8b', 'back-model', 'back-model']);
+    expect(h.lastText(1)).toMatchObject({ language: 'zh' });
+    expect(h.lastText(2)).toMatchObject({ language: 'es' });
+    // The answer to the Spanish one is said to be Chinese.
+    const answers = h.of('segmentText').filter((e) => e.payload.ref > FIRST_REF && e.payload.text === '有人想去吗？');
+    expect(answers.pop()?.payload.language).toBe('zh-CN');
+  });
+
+  it('is built where what hears tells languages apart, and never while coached, nor on the other side\'s leg', () => {
+    const api = { ...VIA_MODEL, speakBoth: true, asrVia: 'api' as const, asrApiBaseUrl: 'http://127.0.0.1:9000/v1', asrApiModel: 'whisper' };
+    const built = buildLocalAI(ES, { ...LOCALAI_DEFAULTS, ...api }, shared);
+    expect(built).toMatchObject({ stages: { heard: 'auto', back: { language: 'es', own: 'zh-CN', stage: { kind: 'translate', language: 'zh-CN' } } } });
+    const coached = buildLocalAI(ES, { ...LOCALAI_DEFAULTS, ...api, coach: true, coachServerModel: 'qwen3-4b' }, shared) as LocalAIConfig;
+    expect(coached.stages?.back).toBeUndefined();
+    const theirs = buildLocalAI({ ...ES, direction: { source: 'ja', target: 'zh-CN' } }, { ...LOCALAI_DEFAULTS, ...api }, shared) as LocalAIConfig;
+    expect(theirs.stages?.back).toBeUndefined();
   });
 });
 

@@ -139,9 +139,17 @@ export function canDetectOther(s: { asrVia: Place; asrHere?: AsrHere; asrOther?:
   return hearsNatively(s) || place === 'api' || (place === 'server' && serverDetects(models));
 }
 
-/** What a leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs, or whatever it turns out to be. */
-export function heardBy(s: { asrDetectOther?: boolean; asrVia: Place; asrHere?: AsrHere; asrOther?: string; coach: boolean }, pair: { source: string; target: string }, leg: 'speaker' | 'participant', models: Listed = []): string {
-  if (leg === 'speaker') return s.coach ? pair.target : pair.source;
+/**
+ * Fork: the speaker speaks the other side's language too (`speakBoth`), and what hears can tell the two apart: their
+ * sentences in either are heard, and each translated into the other. Not while coached: that answers a sentence in the
+ * other side's language with feedback instead.
+ */
+export const speaksBoth = (s: { speakBoth?: boolean; coach: boolean; asrVia: Place; asrHere?: AsrHere; asrOther?: string }, models: Listed = []): boolean =>
+  s.speakBoth === true && !s.coach && canDetectOther(s, models);
+
+/** What a leg hears: the speaker their own language, or — coached — the one they practise, or either (`speaksBoth`); the other side theirs, or whatever it turns out to be. */
+export function heardBy(s: { asrDetectOther?: boolean; speakBoth?: boolean; asrVia: Place; asrHere?: AsrHere; asrOther?: string; coach: boolean }, pair: { source: string; target: string }, leg: 'speaker' | 'participant', models: Listed = []): string {
+  if (leg === 'speaker') return s.coach ? pair.target : speaksBoth(s, models) && pair.source.toLowerCase() !== pair.target.toLowerCase() ? AUTO : pair.source;
   return detectsOther(s, models) ? AUTO : pair.target;
 }
 

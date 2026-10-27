@@ -77,6 +77,33 @@ export function saidInOwn(text: string, own: string, practised: string): boolean
   return true;
 }
 
+/** The languages written in a script of their own: any other is taken to be written in Latin letters. */
+const OWN_SCRIPT = new Set([...SCRIPTS.map(([language]) => language), 'zh', 'ja']);
+
+/**
+ * Fork: which of two languages a sentence is in, as far as its writing says — for a speaker who speaks both
+ * (`speakBoth`). The one its script or its little words name; else, of a pair where one language has a script of its
+ * own and the other is written in Latin letters, the Latin one for a sentence in Latin letters. Undefined where the
+ * writing leaves a doubt (two Latin-letter languages it cannot tell apart; a few Han characters between Chinese and
+ * Japanese). Base codes.
+ */
+export function oneOfTwo(text: string, a: string, b: string): string | undefined {
+  const base = (code: string) => code.toLowerCase().split(/[-_]/)[0];
+  const first = base(a);
+  const second = base(b);
+  if (first === second) return undefined;
+  const found = languageByScript(text);
+  if (found === first || found === second) {
+    // Chinese and Japanese share their characters: a few of them alone say nothing.
+    if (found === 'zh' && (first === 'ja' || second === 'ja') && (text.match(HAN)?.length ?? 0) < HAN_SENTENCE) return undefined;
+    return found;
+  }
+  if (OWN_SCRIPT.has(first) === OWN_SCRIPT.has(second)) return undefined;
+  const latin = OWN_SCRIPT.has(first) ? second : first;
+  const inLatin = (found === undefined || !OWN_SCRIPT.has(found)) && (text.match(/[a-z\u00c0-\u024f]/gi)?.length ?? 0) >= 2;
+  return inLatin ? latin : undefined;
+}
+
 /** Letters and digits only, lower case: what two recognizers' writing of one stretch of speech has in common. */
 const bare = (text: string): string => text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
 

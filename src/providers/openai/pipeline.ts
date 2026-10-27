@@ -29,7 +29,7 @@ import type { LocalInferenceConfig } from '../localInference/config';
 import { defaultEngines, type LocalEngines, type TranslationLike } from '../localInference/engines';
 import { createApiAsr } from './apiAsr';
 import { createNativeAsr, type NativeLimits } from './nativeAsr';
-import { languageByScript, saidInOwn, sameSpeech } from '../../lib/language/script';
+import { languageByScript, oneOfTwo, saidInOwn, sameSpeech } from '../../lib/language/script';
 import { AUTO } from '../../lib/provider/languages';
 import { BEFORE_SLOT, TEXT_SLOT } from './nativeTranslators';
 import { cutAt, letters, restFrom, SETTLE_MS } from './sentenceCut';
@@ -97,6 +97,8 @@ export interface DeviceStage {
   system: string;
   wrapTranscript: boolean;
   language?: string;
+  /** Fork: the direction its engine is loaded for, where it is not the leg's (`Stages.back`). */
+  direction?: { source: string; target: string };
 }
 
 export type AnswerStage = TextStage | DeviceStage;
@@ -121,6 +123,11 @@ export interface Stages {
   heard?: string;
   /** A stretch is answered whole, when the recognizer closes it: its sentences are not closed as they come (`sentenceCut.ts`). The user's choice. */
   whole?: boolean;
+  /**
+   * Fork: the speaker speaks the other side's language too (`speakBoth`; `heard` is then `auto`): a sentence in it —
+   * `language` — is answered by `stage`, into their own (`own`); one in their own by `speech`, as ever.
+   */
+  back?: { stage: AnswerStage; language: string; own: string };
 }
 
 /** This computer hears: its own recognizer and turn detection, and no socket. */
@@ -213,11 +220,14 @@ export function tidyAnswer(kind: AnswerStage['kind'], text: string): string {
 /** The device stages of a leg, one per model: speech and typed text usually share theirs. */
 function deviceStages(stages: Stages): DeviceStage[] {
   const out: DeviceStage[] = [];
-  for (const stage of [stages.speech, stages.typed]) {
-    if (stage?.via === 'device' && !out.some((s) => s.model === stage.model)) out.push(stage);
+  for (const stage of [stages.speech, stages.typed, stages.back?.stage]) {
+    if (stage?.via === 'device' && !out.some((s) => engineKey(s) === engineKey(stage))) out.push(stage);
   }
   return out;
 }
+
+/** A device stage's engine: one per model, and per direction where a stage names its own (`DeviceStage.direction`). */
+const engineKey = (stage: DeviceStage): string => (stage.direction ? `${stage.model}:${stage.direction.source}>${stage.direction.target}` : stage.model);
 
 /**
  * What the legs of the runs now open have lately heard, each stretch with
@@ -336,7 +346,7 @@ class PipelineLeg implements AdapterSession {
         Promise.all(loading.map(async ({ stage, engine }) => {
           this.frame('out', 'device.translation.start', { model: stage.model });
           const started = clock.now();
-          await engine.init(baseOf(source), baseOf(target), stage.model);
+          await engine.init(baseOf(stage.direction?.source ?? source), baseOf(stage.direction?.target ?? target), stage.model);
           this.frame('out', 'device.translation.ready', { model: stage.model, initDurationMs: clock.now() - started });
           this.loadedHere += 1;
           this.sayLoading('translation');
@@ -356,7 +366,7 @@ class PipelineLeg implements AdapterSession {
     for (const { stage, engine } of loading) {
       // A failure no request carries — the worker died: no translation would ever settle.
       engine.onError = (error) => this.fail(`Translation stopped: ${error}`);
-      this.translators.set(stage.model, engine);
+      this.translators.set(engineKey(stage), engine);
     }
   }
 
@@ -394,7 +404,7 @@ class PipelineLeg implements AdapterSession {
     this.events.segmentOpened({ ref, side: 'source', origin });
     this.events.segmentText({ ref, text: trimmed });
     this.events.segmentClosed({ ref });
-    if (stage) this.push({ stage, text: trimmed, origin, typed: true });
+    if (stage) this.push({ stage: this.backFor(trimmed) ?? stage, text: trimmed, origin, typed: true });
     else if (!this.stages.asIs) this.events.degraded({ code: 'translation_unavailable', message: 'Typed text has no translation stage in this session — shown as typed.' });
   }
 
@@ -463,7 +473,7 @@ class PipelineLeg implements AdapterSession {
         const told = open ? this.stages.heard : undefined;
         // Left to be detected: the language its writing shows, or none — which also keeps the leg's own from being assumed.
         // Told one, and written in the leg's other language: said to be in that one.
-        const heard = told === AUTO ? languageByScript(e.payload.text) ?? AUTO : (open ? this.otherThanHeard(e.payload.text) : undefined) ?? told;
+        const heard = told === AUTO ? this.byWriting(e.payload.text) ?? AUTO : (open ? this.otherThanHeard(e.payload.text) : undefined) ?? told;
         if (source && this.cutsSentences()) {
           this.heardSoFar(e.payload.ref, source, heard);
           return;
@@ -636,11 +646,13 @@ class PipelineLeg implements AdapterSession {
     const coached = this.stages.speech?.kind === 'coach';
     this.events.segmentClosed(payload);
     const other = text !== undefined ? this.otherThanHeard(text) : undefined;
+    // Fork: a speaker who speaks both said this one in the other side's language: it is translated into their own.
+    const backward = text !== undefined ? this.backFor(text) : undefined;
     // What was said in the reader's own language needs no translating: detected, or told another and written in theirs.
-    const already = !coached && text !== undefined && (other !== undefined || (this.stages.heard === AUTO && languageByScript(text) === baseOf(this.request.context.direction.target)));
+    const already = !backward && !coached && text !== undefined && (other !== undefined || (this.stages.heard === AUTO && languageByScript(text) === baseOf(this.request.context.direction.target)));
     // A coached speaker who says a sentence in their own language is not practising with it: it is translated, as what
     // they type is, and not sent for feedback. No translation in this run: it is shown as said.
-    const stage = coached && other !== undefined ? this.stages.typed : this.stages.speech;
+    const stage = backward ?? (coached && other !== undefined ? this.stages.typed : this.stages.speech);
     if (source && text && stage && !already) {
       // A translation is told the sentence before, where its model takes one: what this side said last, not long ago.
       const now = this.request.clock.now();
@@ -682,6 +694,18 @@ class PipelineLeg implements AdapterSession {
    * the language told, or the writing does not say; and always of a leg with
    * no stage of its own, whose session answers what it hears itself.
    */
+  /** Fork: the stage that answers a sentence in the other side's language, of a speaker who speaks both; else undefined. */
+  private backFor(text: string): AnswerStage | undefined {
+    const back = this.stages.back;
+    return back && oneOfTwo(text, back.own, back.language) === baseOf(back.language) ? back.stage : undefined;
+  }
+
+  /** The language a sentence of a leg left to detect it is written in: of a speaker who speaks both, one of the two. */
+  private byWriting(text: string): string | undefined {
+    const back = this.stages.back;
+    return back ? oneOfTwo(text, back.own, back.language) : languageByScript(text);
+  }
+
   private otherThanHeard(text: string): string | undefined {
     const speech = this.stages.speech;
     if (!speech || this.stages.heard === AUTO) return undefined;
@@ -795,7 +819,7 @@ class PipelineLeg implements AdapterSession {
 
   /** This computer's own answer: whole when it comes, since its engines write nothing before the end. */
   private async translateHere(stage: DeviceStage, text: string, started: number): Promise<{ text: string; totalMs: number }> {
-    const engine = this.translators.get(stage.model);
+    const engine = this.translators.get(engineKey(stage));
     if (!engine) throw new Error('the model is not loaded');
     const result = await engine.translate(text, stage.system, stage.wrapTranscript);
     return { text: result.translatedText ?? '', totalMs: this.request.clock.now() - started };

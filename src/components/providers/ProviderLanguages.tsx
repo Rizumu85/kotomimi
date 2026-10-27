@@ -35,6 +35,12 @@ export function ProviderLanguages({ providers, disabled, sentence }: ProviderLan
   const detect = kotomimi && legs.includes('participant')
     ? { on: (entry.settings as { asrDetectOther?: boolean }).asrDetectOther === true, set: (on: boolean) => updateSettings(provider, { asrDetectOther: on }) }
     : undefined;
+  // Fork: the user speaks the other side's language too, while they are heard. It and the grammar feedback answer one
+  // question — what is done with a sentence of theirs in the other side's language — so turning it on turns that off.
+  const kept = entry.settings as { speakBoth?: boolean; coach?: boolean };
+  const both = kotomimi && legs.includes('speaker')
+    ? { on: kept.speakBoth === true && kept.coach !== true, set: (on: boolean) => updateSettings(provider, on ? { speakBoth: true, coach: false } : { speakBoth: false }) }
+    : undefined;
 
   return (
     <LanguagePairSection
@@ -45,6 +51,7 @@ export function ProviderLanguages({ providers, disabled, sentence }: ProviderLan
       sentence={sentence}
       context={languageContext(provider, legs, speech)}
       detect={detect}
+      both={both}
       owners={kotomimi}
       onChange={(pair) => {
         if (pair.source !== entry.pair.source) trackEvent('language_changed', { to_language: pair.source, language_type: 'source' });

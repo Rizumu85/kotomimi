@@ -2,6 +2,7 @@ import { ArrowLeftRight, Languages } from 'lucide-react';
 import { useId, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Tooltip from '../Tooltip/Tooltip';
+import ToggleSwitch from '../Settings/shared/ToggleSwitch';
 import { pairSentence } from '../SetupWizard/languageSentence';
 import { normalizePair, swapped } from '../../lib/provider/languages';
 import type { AnyProvider, LanguageContext, LanguageOption, LanguagePair } from '../../lib/provider/types';
@@ -37,6 +38,11 @@ interface LanguagePairSectionProps {
    */
   detect?: { on: boolean; set(on: boolean): void };
   /**
+   * Fork: the speaker speaks the other side's language too — a switch under the pair, named with that language:
+   * what they say in it is translated into their own. What it does is in its help. Absent: not offered.
+   */
+  both?: { on: boolean; set(on: boolean): void };
+  /**
    * Fork: the two selects are named for whose language they hold — "my
    * language", "their language" — whatever the mode, and nothing is written
    * under them. Named for what the run does with them ("I read / they
@@ -56,7 +62,7 @@ const DETECT = '\u0000detect';
  * allowed whenever the provider supports the reversed pair. Markup is
  * LanguageSection's translation-languages block.
  */
-export function LanguagePairSection({ provider, settings, pair, onChange, disabled, sentence, context, detect, owners }: LanguagePairSectionProps) {
+export function LanguagePairSection({ provider, settings, pair, onChange, disabled, sentence, context, detect, both, owners }: LanguagePairSectionProps) {
   const { t, i18n } = useTranslation();
   const id = useId();
   const label = useLanguageLabel();
@@ -204,6 +210,17 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
           </>
         )}
       </div>
+      {both && pair.source.toLowerCase() !== pair.target.toLowerCase() && (
+        <div className="language-both">
+          <ToggleSwitch
+            checked={both.on}
+            onChange={() => both.set(!both.on)}
+            label={t('fork.languageMenu.speakBoth', { language: label(pair.target) })}
+            tooltip={t('fork.languageMenu.speakBothHelp', { language: label(pair.target), mine: label(pair.source) })}
+            disabled={disabled}
+          />
+        </div>
+      )}
       {resolved?.showMirror && !owners && (
         <div className="language-mirror-line" data-testid="language-mirror-line">
           {t('settings.langSentence.mirror', 'They speak {{their}} → I read {{mine}}', {

@@ -65,7 +65,7 @@ import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
 import { recognizerAsked } from './serverRecognizers';
 import { phoneBase, plainAddress } from '../../lib/lan/discover';
-import { ASR_HERES, shownAsSaid, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
+import { ASR_HERES, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
 import { NATIVE_MODELS, preferNative, type NativePick } from './localaiNative';
 import { NATIVE_DEFAULT_MODEL, coachBaseUrl, coachGap, coachIdle, coachUp, holdNativeForRun, nativeGap, nativeUp, restNative, translatorUp, nativeWaits, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_COACH_EXTRA, NATIVE_COACHES, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
@@ -113,6 +113,13 @@ export interface LocalAISettings extends RealtimeSettings {
    * detects the language (`detectsOther`).
    */
   asrDetectOther: boolean;
+  /**
+   * Fork: the speaker speaks the other side's language too: a sentence of theirs in it is translated into their own,
+   * one in their own into the other side's, as ever — so that both sides read it (VRChat's chatbox). Takes a
+   * recognizer that detects the language, and gives way to the grammar feedback, which the settings keep apart
+   * (`speaksBoth`).
+   */
+  speakBoth: boolean;
   /**
    * What is heard is translated a sentence at a time, as it is said, where the recognizer writes as it hears
    * (`sentenceCut.ts`). Off: a stretch is translated when the recognizer closes it, as upstream does — later, and by
@@ -210,6 +217,7 @@ export const LOCALAI_DEFAULTS: LocalAISettings = {
   asrOther: '',
   asrOtherModel: '',
   asrDetectOther: false,
+  speakBoth: false,
   translateBySentence: true,
   translateAt: 'server',
   translateServerModel: '',
@@ -352,7 +360,7 @@ const quick = (baseUrl: string): { extra?: Readonly<Record<string, unknown>> } =
 
 export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>, inputs: MigrationInputs): LocalAISettings {
   const text = (k: 'asrModel' | 'asrApiBaseUrl' | 'asrApiModel' | 'asrOther' | 'asrOtherModel' | 'translateOther' | 'translateOtherModel' | 'coachOther' | 'coachOtherModel' | 'translateBaseUrl' | 'coachDeviceModel' | 'coachPrompt' | 'asrHereModel' | 'asrNativeModel' | 'translateHereModel' | 'translateNativeModel' | 'coachHereModel' | 'coachNativeModel' | 'hereAddress' | 'herePipeline') => (typeof stored[k] === 'string' ? (stored[k] as string) : LOCALAI_DEFAULTS[k]);
-  const flag = (k: 'asrApiNeedsKey' | 'asrDetectOther' | 'coach' | 'serverNeedsKey' | 'translateBySentence') => (typeof stored[k] === 'boolean' ? (stored[k] as boolean) : LOCALAI_DEFAULTS[k]);
+  const flag = (k: 'asrApiNeedsKey' | 'asrDetectOther' | 'speakBoth' | 'coach' | 'serverNeedsKey' | 'translateBySentence') => (typeof stored[k] === 'boolean' ? (stored[k] as boolean) : LOCALAI_DEFAULTS[k]);
   const number = (k: (typeof VAD_FIELDS)[number]) => (typeof stored[k] === 'number' && Number.isFinite(stored[k]) ? (stored[k] as number) : LOCALAI_DEFAULTS[k]);
   const selections = stored.selections;
   return {
@@ -365,6 +373,7 @@ export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>
     asrOther: text('asrOther'),
     asrOtherModel: text('asrOtherModel'),
     asrDetectOther: flag('asrDetectOther'),
+    speakBoth: flag('speakBoth'),
     translateBySentence: flag('translateBySentence'),
     translateOther: text('translateOther'),
     translateOtherModel: text('translateOtherModel'),
@@ -1050,6 +1059,8 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   const coached = s.coach && !shared.reversed(asked.direction);
   // Fork: heard in the language it is shown in (Chinese to Chinese): shown as said, nothing translates it.
   const plain = !coached && !detected && source.toLowerCase() === target.toLowerCase();
+  // Fork: the speaker heard in either language, each sentence translated into the other (`speakBoth`).
+  const both = !coached && !plain && !shared.reversed(asked.direction) && speaksBoth(s, models);
 
   // Every stage named, before anything is built: a run with none has nothing to say. A coached speaker's translation
   // is for what they type only: the run starts without it. A leg shown as said has none.
@@ -1069,12 +1080,12 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   const { voice: _voice, reasoningEffort: _reasoning, ...config } = base;
 
   // What hears is asked first: a run with no recognizer has nothing to translate.
-  const heard = coached ? target : source;
+  const heard = coached ? target : both ? AUTO : source;
   let device: DeviceHearing | undefined;
   if (hearsHere) {
     let recognizer: Pick<DeviceHearing, 'modelId' | 'streaming' | 'api' | 'native'> | null;
     if (hearsNatively(s)) {
-      const native = nativePicked({ model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage, ...(detectsOther(s, models) ? { detecting: true } : {}) }, heard);
+      const native = nativePicked({ model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage, ...(detectsOther(s, models) || both ? { detecting: true } : {}) }, heard);
       // The language has no native model chosen: said as that, since downloading one would not help.
       if (!native) return { refused: `No native recognition model is chosen for ${heard}.`, code: 'native_unchosen', params: { source: heard } };
       recognizer = { modelId: native.id, streaming: true, native: { model: native.id, ...(native.limits ? { limits: native.limits } : {}) } };
@@ -1100,44 +1111,62 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
     };
   }
 
-  /** A model another Kotomimi shares is told the pair: it runs a translation model, not a chat model. */
-  const pairFor = (id: string, from: 'translate' | undefined) => (models.some((m) => m.id === id && m.host === KOTOMIMI_HOST && m.from === from) ? { pair: { source: told, target } } : {});
-
-  // Null: the other device's pipeline answers, inside the session it hears in.
-  let translate: AnswerStage | null = null;
-  if (plain) {
-    // Nothing translates it.
-  } else if (translatesAtOwnDevice(s)) {
-    // A phone that lends the translation: one of this computer's native translators, asked as this computer asks its
-    // own — in the model's own form of request — at the phone's address. With no `engine`: that would ask this
-    // computer's own engine where it answers, and send the request there.
-    const id = s.translateOtherModel.trim();
-    const native = NATIVE_TRANSLATORS.find((m) => m.id === id);
-    const unfit = phoneTranslatorUnfit(s, source, target);
-    if (unfit) {
-      if (!coached) return unfit;
-    } else {
+  /**
+   * What translates `from` → `to` (`said`: the pair's language for a translation that must be told one; `instructions`
+   * for a chat model): null where the other device's pipeline answers, inside the session it hears in, or where a
+   * coached speaker has none (what they type then goes untranslated). Fork: asked twice for a speaker who speaks both.
+   */
+  const translatorFor = (from: string, said: string, to: string, instructions: string): AnswerStage | null | ProviderRefusal => {
+    /** A model another Kotomimi shares is told the pair: it runs a translation model, not a chat model. */
+    const pairFor = (id: string, kind: 'translate' | undefined) => (models.some((m) => m.id === id && m.host === KOTOMIMI_HOST && m.from === kind) ? { pair: { source: said, target: to } } : {});
+    if (translatesAtOwnDevice(s)) {
+      // A phone that lends the translation: one of this computer's native translators, asked as this computer asks its
+      // own — in the model's own form of request — at the phone's address. With no `engine`: that would ask this
+      // computer's own engine where it answers, and send the request there.
+      const id = s.translateOtherModel.trim();
+      const native = NATIVE_TRANSLATORS.find((m) => m.id === id);
+      const unfit = phoneTranslatorUnfit(s, from, to);
+      if (unfit) return coached ? null : unfit;
       // A model this computer does not know (a later phone's) is asked as an API's is.
-      translate = { kind: 'translate', baseUrl: phoneTextBase(s.translateOther), model: id, phone: true, ...(native ? { system: '', ...translatorRequest(native, source, target) } : { system: base.instructions }) };
+      return { kind: 'translate', baseUrl: phoneTextBase(s.translateOther), model: id, phone: true, ...(native ? { system: '', ...translatorRequest(native, from, to) } : { system: instructions }) };
     }
-  } else if (translatesNatively(s)) {
-    // The native translation engine: asked over the chat wire on this computer, in the model's own form of request.
-    const native = nativeTranslator(s.translateNativeModel);
-    if (!nativeTranslates(native, source, target)) {
-      if (!coached) return { refused: `No translation model is downloaded for ${source} → ${target}.`, code: 'local_models_missing' };
-    } else {
-      translate = { kind: 'translate', engine: 'translator', baseUrl: translatorBaseUrl(), model: native.id, system: '', ...translatorRequest(native, source, target) };
+    if (translatesNatively(s)) {
+      // The native translation engine: asked over the chat wire on this computer, in the model's own form of request.
+      const native = nativeTranslator(s.translateNativeModel);
+      if (!nativeTranslates(native, from, to)) return coached ? null : { refused: `No translation model is downloaded for ${from} → ${to}.`, code: 'local_models_missing' };
+      return { kind: 'translate', engine: 'translator', baseUrl: translatorBaseUrl(), model: native.id, system: '', ...translatorRequest(native, from, to) };
     }
-  } else if (s.translateAt === 'device') {
-    const id = deviceTranslator(told, target, s.selections);
-    if (!id && !coached) return { refused: `No translation model is downloaded for ${told} → ${target}.`, code: 'local_models_missing' };
-    if (id) translate = { via: 'device', kind: 'translate', model: id, system: buildDefaultLocalPrompt(deviceLanguage(told), deviceLanguage(target)), wrapTranscript: true };
-  } else if (s.translateAt === 'api') {
-    if (apiBase && apiModel) translate = { kind: 'translate', baseUrl: apiBase, model: apiModel, ...(s.translateNeedsKey ? { key: 'translateKey' as const } : {}), system: base.instructions, ...pairFor(apiModel, 'translate'), ...quick(apiBase) };
-  } else if (asksServer && askedServerModel) {
-    // Another Kotomimi answers nothing inside its socket: its pipeline's name, asked over chat, runs its own best translation model for the pair.
-    const itsOwn = !serverModel && kotomimi && askedServerModel === pipeline;
-    translate = { kind: 'translate', baseUrl: '', model: askedServerModel, ...serverKeyOf(s), system: base.instructions, ...(itsOwn ? { pair: { source: told, target } } : pairFor(askedServerModel, undefined)) };
+    if (s.translateAt === 'device') {
+      const id = deviceTranslator(said, to, s.selections);
+      if (!id) return coached ? null : { refused: `No translation model is downloaded for ${said} → ${to}.`, code: 'local_models_missing' };
+      return { via: 'device', kind: 'translate', model: id, system: buildDefaultLocalPrompt(deviceLanguage(said), deviceLanguage(to)), wrapTranscript: true };
+    }
+    if (s.translateAt === 'api') {
+      return apiBase && apiModel ? { kind: 'translate', baseUrl: apiBase, model: apiModel, ...(s.translateNeedsKey ? { key: 'translateKey' as const } : {}), system: instructions, ...pairFor(apiModel, 'translate'), ...quick(apiBase) } : null;
+    }
+    if (asksServer && askedServerModel) {
+      // Another Kotomimi answers nothing inside its socket: its pipeline's name, asked over chat, runs its own best translation model for the pair.
+      const itsOwn = !serverModel && kotomimi && askedServerModel === pipeline;
+      return { kind: 'translate', baseUrl: '', model: askedServerModel, ...serverKeyOf(s), system: instructions, ...(itsOwn ? { pair: { source: said, target: to } } : pairFor(askedServerModel, undefined)) };
+    }
+    return null;
+  };
+
+  // Null: the other device's pipeline answers, inside the session it hears in. A leg shown as said has nothing.
+  let translate: AnswerStage | null = null;
+  if (!plain) {
+    const chosen = translatorFor(source, told, target, base.instructions);
+    if (chosen && 'refused' in chosen) return chosen;
+    translate = chosen;
+  }
+  // Fork: a speaker who speaks both is answered in their own language when they speak the other side's.
+  let back: AnswerStage | undefined;
+  if (both && translate) {
+    const reversed = buildRealtime({ ...context, direction: { source: target, target: told } }, { ...s, model: pinned }, { ...shared, models: [{ id: pinned }] });
+    const chosen = translatorFor(target, target, told, 'refused' in reversed ? base.instructions : reversed.instructions);
+    if (chosen && 'refused' in chosen) return chosen;
+    // Its answers are in the speaker's own language; this computer's engine is loaded for that direction.
+    if (chosen) back = { ...chosen, language: told, ...(chosen.via === 'device' ? { direction: { source: target, target: told } } : {}) };
   }
 
   let stages: Stages | undefined;
@@ -1180,7 +1209,14 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
     stages = { speech: coach, typed: translate, heard: target };
   } else if (translate) {
     // A detected leg says so to what runs it: the recognizer is told no language, and each sentence is given its own.
-    stages = { speech: translate, typed: translate, ...(detected ? { heard: AUTO } : {}), ...(s.translateBySentence ? {} : { whole: true }) };
+    stages = {
+      speech: translate,
+      typed: translate,
+      ...(detected || both ? { heard: AUTO } : {}),
+      // The pair's two languages, each answered by the stage that translates out of it.
+      ...(back ? { back: { stage: back, language: target, own: told } } : {}),
+      ...(s.translateBySentence ? {} : { whole: true }),
+    };
   }
 
   return {
@@ -1261,7 +1297,7 @@ export const localaiProvider: Provider<LocalAISettings, LocalAICredentials, Loca
   check: (k, s, ctx) => checkLocalAIWithNative(k, s, ctx),
   // What decides the credential fields, the endpoints the check reaches, and the models it asks this computer for.
   checkReads: [
-    'asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'asrOther', 'asrOtherModel', 'translateOther', 'translateOtherModel', 'coachOther', 'coachOtherModel', 'asrDetectOther', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'coachDeviceModel', 'serverNeedsKey', 'selections',
+    'asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'asrOther', 'asrOtherModel', 'translateOther', 'translateOtherModel', 'coachOther', 'coachOtherModel', 'asrDetectOther', 'speakBoth', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'coachDeviceModel', 'serverNeedsKey', 'selections',
     // The models a start needs named (`unnamedStage`).
     'model', 'translateModel', 'translateServerModel', 'coachModel', 'coachServerModel',
     // On this computer: by the app's own models, or by the LocalAI installed here, and then which of its models.
