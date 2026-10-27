@@ -12,9 +12,11 @@
   }
 
   // The app's segmented-control archetype (ModePicker.scss, and the credential choice in Settings.scss — each
-  // section keeps its own copy, as they scope their rules to themselves). Active = fill.
+  // section keeps its own copy, as they scope their rules to themselves). Active = fill. Across the card, as the stage
+  // cards' place switch is: the room shared out over the options, so that a long one (English) still fits.
   .segmented-control {
-    display: inline-flex;
+    display: flex;
+    width: 100%;
     align-items: stretch;
     height: 28px;
     margin-top: 6px;
@@ -24,8 +26,12 @@
 
     .segmented-option {
       display: inline-flex;
+      flex: 1 1 auto;
+      min-width: 0;
       align-items: center;
-      padding: 0 12px;
+      justify-content: center;
+      white-space: nowrap;
+      padding: 0 8px;
       font-size: vars.$font-caption;
       line-height: 1;
       border: none;
