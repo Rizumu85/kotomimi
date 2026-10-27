@@ -113,8 +113,23 @@ struct SpeechHelper {
                   "maximumReserved": AssetInventory.maximumReservedLocales])
     }
 
-    static func install(_ identifier: String) async throws {
+    /// Kotomimi: the system lets an app keep only so many languages reserved (`maximumReservedLocales`, 5 on macOS
+    /// 27), and refuses one more. Where they are all taken, one is let go first: one not downloaded, else the one used
+    /// longest ago (`order`, oldest first, as the app saw them used), never one in `keep` (heard by a recognition now).
+    /// Let go is not deleted: the system keeps a language's assets until it wants the room.
+    static func makeRoom(for locale: Locale, keep: Set<String>, order: [String]) async {
+        let reserved = await AssetInventory.reservedLocales.map(\.identifier)
+        guard !reserved.contains(locale.identifier), reserved.count >= AssetInventory.maximumReservedLocales else { return }
+        let installed = Set(await SpeechTranscriber.installedLocales.map(\.identifier))
+        let free = reserved.filter { !keep.contains($0) && $0 != locale.identifier }
+        guard let gone = free.first(where: { !installed.contains($0) }) ?? order.first(where: { free.contains($0) }) ?? free.first else { return }
+        await AssetInventory.release(reservedLocale: Locale(identifier: gone))
+        try? emit(["type": "released", "locale": gone])
+    }
+
+    static func install(_ identifier: String, keep: Set<String> = [], order: [String] = []) async throws {
         let locale = try await locale(identifier)
+        await makeRoom(for: locale, keep: keep, order: order)
         try await AssetInventory.reserve(locale: locale)
         let transcriber = SpeechTranscriber(locale: locale, preset: .transcription)
         if let request = try await AssetInventory.assetInstallationRequest(supporting: [transcriber]) {
@@ -136,11 +151,12 @@ struct SpeechHelper {
         try emit(["type": "released", "locale": locale.identifier])
     }
 
-    static func stream(_ identifier: String) async throws {
+    static func stream(_ identifier: String, keep: Set<String> = [], order: [String] = []) async throws {
         let locale = try await locale(identifier)
         guard await SpeechTranscriber.installedLocales.contains(where: { $0.identifier == locale.identifier }) else {
             throw HelperError("The speech assets for \(locale.identifier) are not installed")
         }
+        await makeRoom(for: locale, keep: keep, order: order)
         try await AssetInventory.reserve(locale: locale)
         let considered = try await Listener(locale: locale, fast: false)
         let quick = try await Listener(locale: locale, fast: true)
@@ -221,12 +237,22 @@ struct SpeechHelper {
                 throw HelperError("The system's speech recognition is not available to this program")
             }
             let arguments = Array(CommandLine.arguments.dropFirst())
-            switch (arguments.first, arguments.count) {
-            case ("inventory", 1): try await inventory()
-            case ("install", 2): try await install(arguments[1])
-            case ("release", 2): try await release(arguments[1])
-            case ("stream", 2): try await stream(arguments[1])
-            default: throw HelperError("Usage: speech-helper inventory | install LOCALE | release LOCALE | stream LOCALE")
+            // Kotomimi: `--keep A,B` and `--order A,B` after the locale, for `makeRoom`.
+            var options: [String: [String]] = [:]
+            var at = 2
+            while at + 1 < arguments.count, arguments[at].hasPrefix("--") {
+                options[String(arguments[at].dropFirst(2))] = arguments[at + 1].split(separator: ",").map(String.init)
+                at += 2
+            }
+            let plain = at >= arguments.count
+            let keep = Set(options["keep"] ?? [])
+            let order = options["order"] ?? []
+            switch (arguments.first, min(arguments.count, 2), plain) {
+            case ("inventory", 1, _): try await inventory()
+            case ("install", 2, true): try await install(arguments[1], keep: keep, order: order)
+            case ("release", 2, true): try await release(arguments[1])
+            case ("stream", 2, true): try await stream(arguments[1], keep: keep, order: order)
+            default: throw HelperError("Usage: speech-helper inventory | install LOCALE [--keep L,...] [--order L,...] | release LOCALE | stream LOCALE [--keep L,...] [--order L,...]")
             }
         } catch {
             try? emit(["type": "error", "message": String(describing: error)])

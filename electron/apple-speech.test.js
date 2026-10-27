@@ -9,7 +9,7 @@ const HELPER = '/Applications/Kotomimi.app/Contents/Resources/resources/bin/darw
 const settled = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 /** A Mac: which locales the system offers and has, every helper started, and what each was given. */
-function mac({ platform = 'darwin', release = '26.0.0', offered = ['ja_JP', 'en_US', 'ko_KR', 'zh_CN'], installed = ['ja_JP'], helper = HELPER, helperThere = true } = {}) {
+function mac({ platform = 'darwin', release = '26.0.0', offered = ['ja_JP', 'en_US', 'ko_KR', 'zh_CN'], installed = ['ja_JP'], helper = HELPER, helperThere = true, files = null } = {}) {
   const world = { started: [], changes: [], events: [], installed: new Set(installed) };
   const spawn = (bin, args) => {
     const child = new EventEmitter();
@@ -34,7 +34,7 @@ function mac({ platform = 'darwin', release = '26.0.0', offered = ['ja_JP', 'en_
     });
     return child;
   };
-  const speech = createAppleSpeech({ helper, platform, release, spawn, exists: () => helperThere, onChange: (status) => world.changes.push(status), onStream: (event) => world.events.push(event) });
+  const speech = createAppleSpeech({ helper, platform, release, spawn, exists: () => helperThere, onChange: (status) => world.changes.push(status), onStream: (event) => world.events.push(event), ...(files ? { usedFile: 'used.json', readFile: (f) => { if (!(f in files)) throw new Error('none'); return files[f]; }, writeFile: (f, text) => { files[f] = text; } } : {}) });
   return { world, speech };
 }
 
@@ -209,5 +209,29 @@ describe('review: what the code should do and does not yet', () => {
     child.emit('close', 0);
     await settled();
     expect(world.events).toEqual([{ id, type: 'done', text: 'こんにちは' }]);
+  });
+});
+
+describe('the few languages the system keeps reserved (fork)', () => {
+  it('tells each helper that reserves a language what it must not let go, and what was used longest ago', async () => {
+    const { world, speech } = mac({ installed: ['ja_JP', 'zh_CN', 'en_US'] });
+    await speech.start(`${PREFIX}ja`);
+    speech.openStream({ language: 'zh', sampleRate: 16000 });
+    expect(world.started.at(-1).args).toEqual(['stream', 'zh_CN']);
+    // Chinese is heard now: it is kept; it was the last used.
+    speech.openStream({ language: 'en', sampleRate: 16000 });
+    expect(world.started.at(-1).args).toEqual(['stream', 'en_US', '--keep', 'zh_CN', '--order', 'zh_CN']);
+    void speech.download(`${PREFIX}ko`);
+    await settled();
+    expect(world.started.find((s) => s.args[0] === 'install').args).toEqual(['install', 'ko_KR', '--keep', 'zh_CN,en_US', '--order', 'zh_CN,en_US']);
+  });
+
+  it('remembers the order across launches, in the file it is given', async () => {
+    const files = { 'used.json': JSON.stringify(['en_US', 'zh_CN']) };
+    const { world, speech } = mac({ installed: ['ja_JP'], files });
+    await speech.start(`${PREFIX}ja`);
+    speech.openStream({ language: 'ja', sampleRate: 16000 });
+    expect(world.started.at(-1).args).toEqual(['stream', 'ja_JP', '--order', 'en_US,zh_CN']);
+    expect(JSON.parse(files['used.json'])).toEqual(['en_US', 'zh_CN', 'ja_JP']);
   });
 });

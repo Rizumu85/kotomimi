@@ -1468,7 +1468,7 @@ const getNativeEngine = () => {
       .find((candidate) => candidate && require('fs').existsSync(candidate)) ?? null;
     // `idleMs: Infinity`: the page holds the engines while a run or a sharing device uses them and stops them a minute
     // after (`restNative`); the joined engines' own idle stop would take one from under a leg that had been silent.
-    nativeEngine = joinEngines([(tell) => createAppleSpeech({ helper, log, ...tell }), downloaded], { onChange: toStatus, onStream: toStream, idleMs: Infinity });
+    nativeEngine = joinEngines([(tell) => createAppleSpeech({ helper, log, usedFile: path.join(app.getPath('userData'), 'apple-speech-used.json'), ...tell }), downloaded], { onChange: toStatus, onStream: toStream, idleMs: Infinity });
     return nativeEngine;
   }
   nativeEngine = downloaded({ onChange: toStatus, onStream: toStream });

@@ -71,6 +71,14 @@ function createAppleSpeech(deps = {}) {
     log = null,
     onChange = () => {},
     onStream = () => {},
+    /**
+     * Fork: where the languages are remembered in the order they were last used, oldest first — the helper lets the
+     * oldest go when the system's few reserved languages are all taken (`makeRoom` in `SpeechHelper.swift`). Null:
+     * remembered while the app runs.
+     */
+    usedFile = null,
+    readFile = (file) => fs.readFileSync(file, 'utf8'),
+    writeFile = (file, text) => fs.writeFileSync(file, text),
   } = deps;
 
   const supported = Boolean(helper) && systemHasIt(platform, release) && exists(helper);
@@ -100,6 +108,23 @@ function createAppleSpeech(deps = {}) {
     up: supported && run.state === 'ready' ? Object.keys(LOCALES).filter((language) => installed?.has(LOCALES[language])).map(idOf) : [],
   });
   const tell = () => onChange(snapshot());
+
+  // ── The languages in the order they were used ────────────────────────────
+  let used = [];
+  if (usedFile) {
+    try {
+      const kept = JSON.parse(readFile(usedFile));
+      if (Array.isArray(kept)) used = kept.filter((l) => typeof l === 'string');
+    } catch { /* none yet */ }
+  }
+  /** A language used now: last in the order, and remembered. */
+  const touch = (locale) => {
+    used = [...used.filter((l) => l !== locale), locale];
+    if (!usedFile) return;
+    try { writeFile(usedFile, JSON.stringify(used)); } catch { /* remembered while the app runs */ }
+  };
+  /** What a helper that reserves a language is told: what it must not let go, and what was used longest ago. */
+  const roomArgs = (keep) => [...(keep.length ? ['--keep', keep.join(',')] : []), ...(used.length ? ['--order', used.join(',')] : [])];
 
   /** Runs the helper to its end: its events, and how it exited. */
   function runHelper(args, onEvent = () => {}) {
@@ -150,7 +175,9 @@ function createAppleSpeech(deps = {}) {
     const state = { fraction: 0, kill: () => {}, cancelled: false };
     fetching.set(language, state);
     tell();
-    const job = runHelper(['install', LOCALES[language]], (event) => {
+    const args = ['install', LOCALES[language], ...roomArgs(hearing())];
+    touch(LOCALES[language]);
+    const job = runHelper(args, (event) => {
       if (event?.type === 'progress' && Number.isFinite(event.fraction)) { state.fraction = Math.max(0, Math.min(1, event.fraction)); tell(); }
     });
     state.kill = job.kill;
@@ -193,6 +220,8 @@ function createAppleSpeech(deps = {}) {
 
   const streams = new Map();
   let nextStream = 1;
+  /** The languages recognitions hear now: never let go to make room. */
+  const hearing = () => [...new Set([...streams.values()].map((stream) => stream.locale))];
 
   async function stop() {
     // Each open recognition is told, as the downloaded engine tells its own: the page otherwise waits for last words that never come.
@@ -207,9 +236,11 @@ function createAppleSpeech(deps = {}) {
     const locale = localeFor(language);
     if (!supported || run.state !== 'ready' || !locale || sampleRate !== 16000) return null;
     const id = nextStream++;
+    const args = ['stream', locale, ...roomArgs(hearing())];
+    touch(locale);
     let child;
     try {
-      child = spawn(helper, ['stream', locale], { stdio: ['pipe', 'pipe', 'pipe'] });
+      child = spawn(helper, args, { stdio: ['pipe', 'pipe', 'pipe'] });
     } catch {
       return null;
     }
@@ -233,6 +264,7 @@ function createAppleSpeech(deps = {}) {
     child.on('error', (error) => finish({ type: 'error', message: error.message }));
     child.on('close', () => finish({ type: 'error', message: 'The speech recognizer closed before it finished.' }));
     streams.set(id, {
+      locale,
       write: (line) => { if (!over && child.stdin?.writable) child.stdin.write(line); },
       kill: () => { over = true; try { child.kill(); } catch { /* gone already */ } },
     });
