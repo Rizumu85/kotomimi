@@ -21,6 +21,7 @@ import { appSubtitleSession } from '../lib/subtitle/appSession';
 import type { SubtitleSession } from '../lib/subtitle/session';
 import type { AutoSaveNotifier } from '../lib/transcript/autoSave';
 import { panelNoteWriter, usePanelNotesStore } from '../stores/panelNotesStore';
+import { heardByFrames, useHeardByStore } from '../stores/heardByStore';
 import { appProjectionSettings } from '../lib/view/appViewSettings';
 import { createConversationView, type ConversationViewState, type Readable } from '../lib/view/conversationView';
 import { createKaraoke, type KaraokeState } from '../lib/view/karaoke';
@@ -137,7 +138,8 @@ export function createAppSession(options: AppSessionOptions = {}): AppSession {
       live: (on) => playback?.live(on),
     },
     analytics: decorateSessionAnalytics(() => bridges.track, { frames, startInputs: () => appStartInputs(punctuation.lastReady) }),
-    frames: teeFrames(frames.port, options.observeFrames),
+    // Fork: what another device says it hears each leg with, for the settings to show (`heardByStore.ts`).
+    frames: teeFrames(teeFrames(frames.port, heardByFrames()), options.observeFrames),
     punctuate: punctuation.punctuate,
     punctuationReady: () => punctuation.ready(),
     newSessionId: options.newSessionId ?? (() => crypto.randomUUID()),
@@ -154,6 +156,14 @@ export function createAppSession(options: AppSessionOptions = {}): AppSession {
         refetchQuota();
       }
     },
+  });
+
+  // Fork: what another device heard a run with is forgotten as the next one begins, and once it is over.
+  let phase = runner.state.getState().phase;
+  runner.state.subscribe(() => {
+    const now = runner.state.getState().phase;
+    if (now !== phase && (now === 'starting' || now === 'idle')) useHeardByStore.getState().clear();
+    phase = now;
   });
 
   const view = createConversationView(runner.conversation, appProjectionSettings(), clock);

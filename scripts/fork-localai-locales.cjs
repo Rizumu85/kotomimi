@@ -255,6 +255,8 @@ const PROVIDER = {
     '文法回饋要聽到你說話：把模式切到「我」或「兩者」。',
   ],
   coach: ['Check my grammar when I speak their language', '我说对方的语言时检查语法', '我說對方的語言時檢查文法'],
+  inUse: ['In use: {{name}}', '正在用 {{name}}', '正在用 {{name}}'],
+  inUseLegs: ['In use: {{theirs}} (them), {{mine}} (me)', '正在用 对方 {{theirs}} · 我 {{mine}}', '正在用 對方 {{theirs}} · 我 {{mine}}'],
   coachNoModel: [
     'The other device has no text model that can give feedback. Use an API model or this computer instead.',
     '另一台设备上没有能给语法反馈的文本模型，可以改用 API 模型或这台电脑。',

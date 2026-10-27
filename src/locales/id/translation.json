@@ -636,6 +636,8 @@
       "coachStageTooltip": "For when you speak the other side's language yourself. Your speech is not translated: a model checks it and answers ✓, or the corrected sentence and why. What you type is still translated.",
       "coachNeedsSpeaker": "Feedback answers what you say. Switch the mode to \"Me\" or \"Both\".",
       "coach": "Check my grammar when I speak their language",
+      "inUse": "In use: {{name}}",
+      "inUseLegs": "In use: {{theirs}} (them), {{mine}} (me)",
       "coachNoModel": "The other device has no text model that can give feedback. Use an API model or this computer instead.",
       "coachPrompt": "Feedback instructions",
       "coachPromptPlaceholder": "Blank: written automatically for your two languages. Your own text may use {{spoken}} and {{native}}.",

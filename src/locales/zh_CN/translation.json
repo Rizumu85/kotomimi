@@ -636,6 +636,8 @@
       "coachStageTooltip": "适合自己直接说对方语言的场合。你说的话不再翻译，而是交给模型检查：没问题回 ✓，有问题给出改正后的句子和原因。打字输入的内容仍然会翻译。",
       "coachNeedsSpeaker": "语法反馈要听到你说话：把模式切到「我」或「两者」。",
       "coach": "我说对方的语言时检查语法",
+      "inUse": "正在用 {{name}}",
+      "inUseLegs": "正在用 对方 {{theirs}} · 我 {{mine}}",
       "coachNoModel": "另一台设备上没有能给语法反馈的文本模型，可以改用 API 模型或这台电脑。",
       "coachPrompt": "语法反馈提示词",
       "coachPromptPlaceholder": "留空：按你的母语和所练的语言自动生成。自己写时可以用 {{spoken}} 和 {{native}} 代表这两种语言。",

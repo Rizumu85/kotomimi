@@ -16,6 +16,7 @@ import { deviceReady, getManifestEntry, getModelSizeMb } from '../../lib/local-i
 import { shortenModelName } from '../../lib/local-inference/modelName';
 import type { CredentialAssistProps } from '../../lib/provider/types';
 import { useLocalServerStore } from '../../stores/localServerStore';
+import { useHeardByStore } from '../../stores/heardByStore';
 
 import { useDeviceFeatures, useDownloadErrors, useModelDownloads, useModelInitialized, useModelStatuses, useModelStore, useWebGPUAvailable } from '../../stores/modelStore';
 import { ApiModelPicker } from './ApiModelPicker';
@@ -56,10 +57,10 @@ function shownName(id: string): string {
 }
 
 /** A labelled control. */
-function Field({ label, children }: { label: string; children: ReactNode }) {
+function Field({ label, aside, children }: { label: string; aside?: string; children: ReactNode }) {
   return (
     <label className="kt-field">
-      <span className="kt-field__label">{label}</span>
+      <span className="kt-field__label">{label}{aside && <span className="kt-field__aside">{aside}</span>}</span>
       {children}
     </label>
   );
@@ -96,11 +97,11 @@ function StageCard({ icon, title, tooltip, lead, children }: { icon: ReactNode; 
 }
 
 /** A model of the other device's, chosen from what it lists; the first option is what a blank choice runs. */
-function ServerModel({ label, value, blank, options, onChange, disabled }: { label: string; value: string; blank: string; options: ReadonlyArray<Pick<LocalAIModel, 'id'>>; onChange(id: string): void; disabled?: boolean }) {
+function ServerModel({ label, value, blank, options, onChange, disabled, aside }: { label: string; value: string; blank: string; options: ReadonlyArray<Pick<LocalAIModel, 'id'>>; onChange(id: string): void; disabled?: boolean; aside?: string }) {
   const { t } = useTranslation();
   const listed = value === '' || options.some((m) => m.id === value);
   return (
-    <Field label={label}>
+    <Field label={label} aside={aside}>
       <select className="select-dropdown" aria-label={label} value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled}>
         <option value="">{blank}</option>
         {/* A saved model the device no longer lists stays visible, so the setting is not silently another — and where
@@ -799,6 +800,16 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   // As a person chooses among them (`serverRecognizers.ts`): one to a language is one choice, and only what hears a
   // language of this run is listed. A choice saved as one member of a family shows as the family.
   const recognizerMenu = recognizerChoices(recognizers, legs.map((leg) => heardBy(settings, pair, leg, models))).map((id) => ({ id }));
+  // Fork: what the other device says it hears each leg with in the run under way — said beside the choice where it is
+  // not simply the model chosen: left to the device, or another of its own taken in its place (`heardByStore.ts`).
+  const inUse = useHeardByStore((state) => state.byLeg);
+  const inUseText = (chosen: string): string | undefined => {
+    const shown = (['participant', 'speaker'] as const).filter((leg) => inUse[leg] && (chosen === '' || choiceOf(inUse[leg]!) !== choiceOf(chosen)));
+    if (shown.length === 0) return undefined;
+    const names = shown.map((leg) => shownName(inUse[leg]!));
+    if (shown.length === 1 || names[0] === names[1]) return t('providers.localai.inUse', { name: names[0] });
+    return t('providers.localai.inUseLegs', { theirs: names[0], mine: names[1] });
+  };
   const recognizerChosen = recognizers.some((m) => choiceOf(m.id) === choiceOf(settings.asrModel) && perLanguage(m.id)) ? choiceOf(settings.asrModel) : settings.asrModel;
   // What a blank pipeline field runs (`effectiveLocalAIModel`): the first pipeline named `gpt-realtime*`, else the first.
   const fallback = pipelines.find((m) => isRealtimeModelId(m.id))?.id ?? pipelines[0]?.id ?? '';
@@ -1056,7 +1067,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
         {settings.asrVia === 'server' && !hearsAtOwn && (
           <>
             {connectFirst}
-            <ServerModel label={t('providers.localai.model')} value={everyLegTranscribes ? '' : recognizerChosen} blank={t('providers.localai.deviceDefault')} options={everyLegTranscribes ? [] : recognizerMenu} onChange={(asrModel) => put({ asrModel })} disabled={disabled || everyLegTranscribes} />
+            <ServerModel label={t('providers.localai.model')} value={everyLegTranscribes ? '' : recognizerChosen} blank={t('providers.localai.deviceDefault')} options={everyLegTranscribes ? [] : recognizerMenu} onChange={(asrModel) => put({ asrModel })} disabled={disabled || everyLegTranscribes} aside={inUseText(everyLegTranscribes ? '' : recognizerChosen)} />
             {someLegTranscribes && recognizers.length > 0 && (
               <>
                 <p className="kt-note">{t('providers.localai.asrFixedNote')}</p>

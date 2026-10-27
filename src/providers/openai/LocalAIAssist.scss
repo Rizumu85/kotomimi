@@ -132,8 +132,21 @@
   }
 
   .kt-field__label {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
     font-size: vars.$font-caption;
     color: vars.$text-secondary;
+  }
+
+  // Fork: what another device is using now, beside the choice (`heardByStore.ts`).
+  .kt-field__aside {
+    margin-left: auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: vars.$text-muted;
   }
 
   .kt-input {

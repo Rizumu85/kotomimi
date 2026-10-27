@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { Readiness } from '../../lib/provider/types';
 import { useLocalServerStore } from '../../stores/localServerStore';
+import { useHeardByStore } from '../../stores/heardByStore';
 import { useModelStore } from '../../stores/modelStore';
 import { useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import { NO_LOCAL_SERVER } from '../../lib/lan/localServer';
@@ -135,6 +136,18 @@ describe('the stage cards: where each stage runs', () => {
 });
 
 describe('the stage cards: on the other device', () => {
+  it('says beside the model what the device hears with now, where it is not simply the one chosen', () => {
+    useHeardByStore.setState({ byLeg: { speaker: 'qwen3-asr-1.7b-q8' } });
+    const left = draw({ values: { endpoint: '192.168.1.10:8080' }, models: LISTED });
+    expect(left.card(HEAR).getByText('providers.localai.inUse')).toBeTruthy();
+    left.unmount();
+    useHeardByStore.setState({ byLeg: { speaker: 'whisper-large-turbo' } });
+    const chosen = draw({ settings: { asrModel: 'whisper-large-turbo' }, values: { endpoint: '192.168.1.10:8080' }, models: LISTED });
+    expect(chosen.card(HEAR).queryByText('providers.localai.inUse')).toBeNull();
+    chosen.unmount();
+    useHeardByStore.setState({ byLeg: {} });
+  });
+
   it('chooses each stage\'s model from what the device lists for it, in the card itself', () => {
     const { card, update } = draw({ settings: { coach: true }, values: { endpoint: '192.168.1.10:8080' }, models: LISTED });
     const hear = card(HEAR).getByRole('combobox', { name: 'providers.localai.model' });
