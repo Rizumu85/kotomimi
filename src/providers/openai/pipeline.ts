@@ -517,7 +517,7 @@ class PipelineLeg implements AdapterSession {
         }
         // A coached speaker's sentence may be the other side's voice, come back through the microphone.
         if (coached && source && text && heard) {
-          this.settleOwn(heard, e.payload, source.origin, text, HEARD_ASK_TIMES);
+          this.settleOwn(heard, e.payload, source.origin, text, HEARD_ASK_TIMES, source.language);
           return;
         }
         this.closed(e.payload, source, text, source?.language);
@@ -557,7 +557,7 @@ class PipelineLeg implements AdapterSession {
    * leg was hearing something as it began, its writing is waited for
    * (`HEARD_ASK_EVERY_MS`), the sentence staying open on the screen meanwhile.
    */
-  private settleOwn(heard: Heard, closed: { ref: Ref; origin?: string }, origin: string | undefined, text: string, asksLeft: number): void {
+  private settleOwn(heard: Heard, closed: { ref: Ref; origin?: string }, origin: string | undefined, text: string, asksLeft: number, language?: string): void {
     if (this.ended) return;
     const there = this.heardElsewhere(heard);
     if (there === 'same') {
@@ -568,10 +568,10 @@ class PipelineLeg implements AdapterSession {
     }
     if (there !== 'none' && asksLeft > 0) {
       const left = there === 'open' ? asksLeft - 1 : Math.min(asksLeft - 1, HEARD_ASK_TIMES_CLOSED - 1);
-      this.request.clock.setTimeout(() => this.settleOwn(heard, closed, origin, text, left), HEARD_ASK_EVERY_MS);
+      this.request.clock.setTimeout(() => this.settleOwn(heard, closed, origin, text, left, language), HEARD_ASK_EVERY_MS);
       return;
     }
-    this.closed(closed, { origin, text }, text);
+    this.closed(closed, { origin, text }, text, language);
   }
 
   /**
@@ -649,7 +649,7 @@ class PipelineLeg implements AdapterSession {
   private closed(payload: { ref: Ref; origin?: string }, source: { origin?: string; text: string } | undefined, text: string | undefined, language?: string): void {
     const coached = this.stages.speech?.kind === 'coach';
     this.events.segmentClosed(payload);
-    const other = text !== undefined ? this.otherThanHeard(text) : undefined;
+    const other = text !== undefined ? this.otherThanHeard(text, language) : undefined;
     // Fork: a speaker who speaks both said this one in the other side's language: it is translated into their own.
     const backward = text !== undefined ? this.backFor(text, language) : undefined;
     // What was said in the reader's own language needs no translating: detected, or told another and written in theirs.
@@ -715,10 +715,13 @@ class PipelineLeg implements AdapterSession {
     return back ? oneOfTwo(text, back.own, back.language) : languageByScript(text);
   }
 
-  private otherThanHeard(text: string): string | undefined {
+  private otherThanHeard(text: string, language?: string): string | undefined {
     const speech = this.stages.speech;
     if (!speech || this.stages.heard === AUTO) return undefined;
     const { source, target } = this.request.context.direction;
+    const other = speech.kind === 'coach' ? source : target;
+    // Fork: the language the recognizer says it heard (the Mac's, hearing both of the pair's): that, not the writing.
+    if (language) return baseOf(language) === baseOf(other) ? other : undefined;
     if (speech.kind === 'coach') return saidInOwn(text, source, target) ? source : undefined;
     return saidInOwn(text, target, source) ? target : undefined;
   }

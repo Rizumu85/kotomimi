@@ -43,7 +43,8 @@ describe('VRChatSection — a chatbox that would stay empty (fork)', () => {
     useVRChatStore.setState({ chatbox: 'translation' });
     render(<VRChatSection />);
     expect(screen.getByText('fork.vrchat.chatboxUnheard')).toBeTruthy();
-    expect(document.querySelector('.kt-chatbox-preview')?.classList.contains('is-unheard')).toBe(true);
+    // No picture of a chatbox that stays empty.
+    expect(document.querySelector('.kt-chatbox-preview')).toBeNull();
     fireEvent.click(screen.getByText('fork.vrchat.chatboxHearBoth'));
     expect(useAudioStore.getState().mode).toBe('both');
     expect(screen.queryByText('fork.vrchat.chatboxUnheard')).toBeNull();

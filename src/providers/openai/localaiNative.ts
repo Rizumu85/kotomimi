@@ -158,9 +158,19 @@ const hereNow = (id: string): boolean => nativeDownloaded(useNativeEngineStore.g
 export function nativeEither(pick: NativePick, has: (id: string) => boolean = hereNow): { model: NativeModel; also: string } | null {
   if (!pick.either) return null;
   const mine = nativePicked({ model: pick.model, byLanguage: pick.byLanguage }, pick.either.own, has);
-  if (!mine || !isApple(mine.id) || !has(mine.id)) return null;
-  const theirs = nativeModelFor(mine.id, pick.either.other);
-  return theirs && has(theirs.id) ? { model: mine, also: baseOf(pick.either.other) } : null;
+  const also = mine && has(mine.id) ? appleAlso(mine, pick.either.other, has) : null;
+  return mine && also ? { model: mine, also } : null;
+}
+
+/**
+ * Fork: the other of a pair's languages, which the Mac's recognition hears beside a leg's own where it has both — so
+ * that a sentence in it is known for what it is (the other side speaking the reader's language; a coached speaker
+ * saying one in their own): its base code. Null for any other model, the same language, or one not downloaded.
+ */
+export function appleAlso(model: NativeModel, other: string, has: (id: string) => boolean = hereNow): string | null {
+  if (!isApple(model.id) || isAutoLanguage(other)) return null;
+  const theirs = nativeModelFor(model.id, other);
+  return theirs && theirs.id !== model.id && has(theirs.id) ? baseOf(other) : null;
 }
 
 /**

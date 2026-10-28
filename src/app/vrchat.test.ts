@@ -66,6 +66,21 @@ describe('vrchatHolds', () => {
 });
 
 describe('finishedLine', () => {
+  it('is, for a sentence the user said in the other side\'s language, what they said: alone, or over its answer back where both show (fork)', () => {
+    const inJapanese = (translation: string): Entry => {
+      const e = exchange('a', '次のワールドに行こう', translation);
+      return e.kind === 'exchange' ? { ...e, source: e.source.map((r) => ({ ...r, language: 'ja' })) } : e;
+    };
+    const back = { language: 'ja', back: true };
+    expect(finishedLine(inJapanese('我们去下一个世界吧'), 'translation', false, false, back)).toBe('次のワールドに行こう');
+    expect(finishedLine(inJapanese('我们去下一个世界吧'), 'both', false, false, back)).toBe('次のワールドに行こう\n我们去下一个世界吧');
+    // Not answered back: shown as said, with no translation to wait for.
+    expect(finishedLine(inJapanese(''), 'both', false, false, { language: 'ja', back: false })).toBe('次のワールドに行こう');
+    // Their own language: the translation, as ever.
+    const inChinese = exchange('b', '今天天气真好', '今日はいい天気ですね');
+    expect(finishedLine(inChinese.kind === 'exchange' ? { ...inChinese, source: inChinese.source.map((r) => ({ ...r, language: 'zh' })) } : inChinese, 'translation', false, false, back)).toBe('今日はいい天気ですね');
+  });
+
   it('is the translation of a final sentence of the user\'s, or the original with it', () => {
     expect(finishedLine(exchange('a', '今天天气真好', '今日はいい天気ですね'), 'translation')).toBe('今日はいい天気ですね');
     expect(finishedLine(exchange('a', '今天天气真好', '今日はいい天気ですね'), 'both')).toBe('今天天气真好\n今日はいい天気ですね');

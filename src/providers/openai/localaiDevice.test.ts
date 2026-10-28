@@ -364,6 +364,28 @@ describe('a speaker heard in either language, by a recognizer that says which (f
     h.asr.final('天气预报', 'zh');
     await vi.waitFor(() => expect(h.lastText(2)).toMatchObject({ text: '天气预报', language: 'zh' }));
   });
+
+  it('shows as said, untranslated, a sentence the recognizer heard in the language it would be translated into', async () => {
+    const h = await live(SPEAKER, HERE);
+    await h.starting;
+    h.asr.final('天気予報明日雨', 'ja');
+    await vi.waitFor(() => expect(h.of('segmentClosed').map((e) => e.payload.ref)).toContain(1));
+    await Promise.resolve();
+    expect(h.translation.calls).toEqual([]);
+    expect(h.lastText(1)).toMatchObject({ text: '天気予報明日雨', language: 'ja' });
+    h.asr.final('天气预报', 'zh');
+    await vi.waitFor(() => expect(h.translation.calls).toHaveLength(1));
+  });
+
+  it('translates a coached speaker\'s sentence heard in their own language, and sends it for no feedback', async () => {
+    const h = await live(SPEAKER, { ...HERE, coach: true, coachAt: 'api', coachModel: 'c', coachBaseUrl: 'https://api.example.com/v1', coachNeedsKey: false });
+    await h.starting;
+    // Han characters alone: by the writing, it could be the Japanese they practise.
+    h.asr.final('天气预报', 'zh');
+    await vi.waitFor(() => expect(h.translation.calls).toHaveLength(1));
+    expect(h.translation.calls[0]).toMatchObject({ text: '天气预报' });
+    expect(h.fetch).not.toHaveBeenCalled();
+  });
 });
 
 describe('a session this computer hears and translates', () => {

@@ -83,7 +83,7 @@
   flex-wrap: wrap;
   align-items: baseline;
   gap: 4px 8px;
-  margin: 8px 0 0;
+  margin: 10px 0 0;
   padding: 7px 10px;
   font-size: vars.$font-caption;
   line-height: 1.5;
@@ -194,10 +194,6 @@
 }
 
 // The chatbox as it will look above the avatar.
-.kt-chatbox-preview.is-unheard {
-  opacity: 0.45;
-}
-
 .kt-chatbox-preview {
   display: flex;
   flex-direction: column;

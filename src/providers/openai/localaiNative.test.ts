@@ -385,7 +385,7 @@ describe('the Mac\'s recognizer hearing a speaker who speaks both (fork)', () =>
     expect(hearingPick(MINE, PAIR_JA, { detecting: false, both: false }, has(MAC(true)))).toEqual({ model: `${APPLE_PREFIX}ja`, byLanguage: {} });
   });
 
-  it('builds the speaker\'s leg told their own language and the other, and the other side\'s by its own model', () => {
+  it('builds the speaker\'s leg told their own language and the other, and the other side\'s told its own, hearing both too', () => {
     useNativeEngineStore.setState({ status: MAC(true) });
     const s = settings({ ...NATIVE, asrNativeModel: `${APPLE_PREFIX}ja`, speakBoth: true });
     const speaker = buildLocalAI(SPEAKER, s, shared);
@@ -394,8 +394,13 @@ describe('the Mac\'s recognizer hearing a speaker who speaks both (fork)', () =>
     expect(speaker.stages).toMatchObject({ heard: 'auto', back: { language: 'zh-CN', own: 'ja' } });
     const participant = buildLocalAI({ ...SPEAKER, direction: { source: 'zh-CN', target: 'ja' } }, s, shared);
     if ('refused' in participant) throw new Error(participant.refused);
-    expect(participant.device).toMatchObject({ native: { model: `${APPLE_PREFIX}zh` } });
-    expect(participant.device?.native).not.toHaveProperty('either');
+    // The other side's leg hears both too, told its own: someone speaking the reader's language is known for it.
+    expect(participant.device).toMatchObject({ native: { model: `${APPLE_PREFIX}zh`, either: { first: 'zh-CN', also: 'ja' } } });
+    // Without the other language downloaded: one language, as ever.
+    useNativeEngineStore.setState({ status: MAC(true, false) });
+    const alone = buildLocalAI({ ...SPEAKER, direction: { source: 'zh-CN', target: 'ja' } }, settings({ ...NATIVE, asrNativeModel: `${APPLE_PREFIX}zh` }), shared);
+    if ('refused' in alone) throw new Error(alone.refused);
+    expect(alone.device?.native).not.toHaveProperty('either');
     useNativeEngineStore.setState({ status: NO_NATIVE_ENGINE });
   });
 });

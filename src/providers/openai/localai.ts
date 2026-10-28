@@ -67,7 +67,7 @@ import { recognizerAsked } from './serverRecognizers';
 import { phoneBase, plainAddress } from '../../lib/lan/discover';
 import { ASR_HERES, canDetectOther, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
 import { NATIVE_MODELS, preferNative, type NativePick } from './localaiNative';
-import { NATIVE_DEFAULT_MODEL, coachBaseUrl, coachGap, coachIdle, coachUp, hearingPick, holdNativeForRun, nativeEither, nativeGap, nativeUp, restNative, translatorUp, nativeWaits, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
+import { NATIVE_DEFAULT_MODEL, appleAlso, coachBaseUrl, coachGap, coachIdle, coachUp, hearingPick, holdNativeForRun, nativeEither, nativeGap, nativeUp, restNative, translatorUp, nativeWaits, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_COACH_EXTRA, NATIVE_COACHES, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
 import { NATIVE_DEFAULT_TRANSLATOR, NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator, translatorRequest } from './nativeTranslators';
 import { setLocalPipeline } from '../../lib/lan/localServer';
@@ -1090,13 +1090,18 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
     let recognizer: Pick<DeviceHearing, 'modelId' | 'streaming' | 'api' | 'native'> | null;
     if (hearsNatively(s)) {
       // Of the run, not of this leg: the engine runs one model for both.
-      const pick = runHearing(s, shared.reversed(asked.direction) ? { source: asked.direction.target, target: asked.direction.source } : asked.direction, models);
+      const runPair = shared.reversed(asked.direction) ? { source: asked.direction.target, target: asked.direction.source } : asked.direction;
+      const pick = runHearing(s, runPair, models);
       const native = nativePicked(pick, heard);
       // The language has no native model chosen: said as that, since downloading one would not help.
       if (!native) return { refused: `No native recognition model is chosen for ${heard}.`, code: 'native_unchosen', params: { source: heard } };
-      // Fork: the speaker in either language, heard by the Mac's recognition in both: told their own, and the other.
+      // Fork: the Mac's recognition hears the pair's other language beside the leg's own, where it has both: the
+      // speaker in either (`speakBoth`), told their own; else any leg, told its own — a sentence in the other is then
+      // known for what it is, not guessed from its writing.
       const either = both ? nativeEither(pick) : null;
-      recognizer = { modelId: native.id, streaming: true, native: { model: native.id, ...(native.limits ? { limits: native.limits } : {}), ...(either ? { either: { first: source, also: either.also } } : {}) } };
+      const alsoHeard = either ? either.also : appleAlso(native, heard.toLowerCase().split(/[-_]/)[0] === runPair.source.toLowerCase().split(/[-_]/)[0] ? runPair.target : runPair.source);
+      const first = either ? source : heard;
+      recognizer = { modelId: native.id, streaming: true, native: { model: native.id, ...(native.limits ? { limits: native.limits } : {}), ...(alsoHeard ? { either: { first, also: alsoHeard } } : {}) } };
     } else if (s.asrVia === 'api') {
       const baseUrl = s.asrApiBaseUrl.trim();
       const named = s.asrApiModel.trim();

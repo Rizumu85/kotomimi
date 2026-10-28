@@ -92,9 +92,10 @@ export function VRChatSection() {
           );
         })}
       </div>
-      {chatbox !== 'off' && (
+      {/* Nothing goes up while only the other side is heard: no picture of a chatbox, the note in its place. */}
+      {chatbox !== 'off' && !unheard && (
         // As it will look above the avatar: the last sentence, or one in the pair's languages.
-        <div className={`kt-chatbox-preview${unheard ? ' is-unheard' : ''}`} aria-hidden="true">
+        <div className="kt-chatbox-preview" aria-hidden="true">
           {(LOOKS.find((look) => look.shows === chatbox && (chatbox !== 'both' || look.translationFirst === chatboxTranslationFirst))?.lines ?? []).map((line) => (
             <span key={line} className={`kt-chatbox-preview__line is-${line}`}>
               {line === 'said' ? recent?.said ?? sampleIn(pair?.source) : recent?.translation ?? sampleIn(pair?.target)}

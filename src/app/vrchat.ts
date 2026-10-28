@@ -31,6 +31,7 @@ import type { Runner } from '../lib/session/runner';
 import type { Readable } from '../lib/view/conversationView';
 import { useCoachingStore } from '../stores/coachingStore';
 import useAudioStore from '../stores/audioStore';
+import { getProvider } from '../providers/registry';
 import { useProviderStore } from '../stores/providerStore';
 import useSettingsStore from '../stores/settingsStore';
 import { useSubtitleLookStore } from '../stores/subtitleLookStore';
@@ -52,6 +53,11 @@ export interface VRChatDeps {
   /** Whether the user can be asked now: false while the subtitle strip lets the mouse pass through. */
   canAsk(): boolean;
   coached(): boolean;
+  /**
+   * Fork: the other side's language, and whether the user's sentences in it are translated back into their own
+   * (`speakBoth`): what a sentence the user said in that language goes up as (`finishedLine`). Absent: none known.
+   */
+  theirs?(): { language: string; back: boolean } | undefined;
   /** The conversation emptied (a clear, a new run): what waits to be sent was said there, and is not sent. */
   onReset?(listener: () => void): () => void;
   store: typeof useVRChatStore;
@@ -100,9 +106,13 @@ function twoLines(first: string, second: string): string {
  * never shown to others. With both shown, each has a line of its own: the original first, or — `translationFirst` —
  * the translation. Null while it is not done, or for anything else.
  */
-export function finishedLine(entry: Entry, shows: ChatboxShows, said = false, translationFirst = false): string | null {
+export function finishedLine(entry: Entry, shows: ChatboxShows, said = false, translationFirst = false, theirs?: { language: string; back: boolean }): string | null {
   if (shows === 'off' || entry.kind !== 'exchange' || entry.leg !== 'speaker') return null;
-  if (said) {
+  // Fork: said in the other side's language, as the recognizer heard it: that is what they read, as it was said —
+  // alone, unless the chatbox shows both and it is answered back into the user's own, for those near who read that.
+  const base = (code: string) => code.toLowerCase().split(/[-_]/)[0];
+  const inTheirs = theirs !== undefined && entry.source.length > 0 && entry.source.every((row) => row.language !== undefined && base(row.language) === base(theirs.language));
+  if (said || (inTheirs && (shows === 'translation' || !theirs.back))) {
     const words = textOf(entry.source);
     return entry.source.length > 0 && entry.source.every((row) => row.final) && words ? words : null;
   }
@@ -255,6 +265,7 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     const shows = store.getState().chatbox;
     const state = deps.view.get();
     const coached = deps.coached();
+    const theirs = deps.theirs?.();
     // The segments typed text opened: everything else of the user's leg was spoken.
     const typed = new Set((state.legs ?? []).flatMap((leg) => leg.segments.filter((s) => TYPED.test(s.origin ?? '')).map((s) => s.id)));
     // The last sentence of the user's translated as it would go up, for the settings to show the chatbox with: not
@@ -270,7 +281,7 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     for (const entry of state.entries) {
       if (entry.kind !== 'exchange' || sent.has(entry.id)) continue;
       const said = coached && !entry.source.some((row) => typed.has(row.segmentId));
-      const line = finishedLine(entry, shows, said, store.getState().chatboxTranslationFirst);
+      const line = finishedLine(entry, shows, said, store.getState().chatboxTranslationFirst, theirs);
       if (line === null) continue;
       sent.add(entry.id);
       queue.push(line);
@@ -339,6 +350,13 @@ async function build(): Promise<VRChatController> {
     legs: () => { const mode = useAudioStore.getState().mode; return mode === 'both' ? ['speaker', 'participant'] : [mode]; },
     canAsk: () => !(useSettingsStore.getState().subtitleModeActive && useSubtitleLookStore.getState().through),
     coached: () => useCoachingStore.getState().coached,
+    theirs: () => {
+      const { selected, entries, models } = useProviderStore.getState();
+      const entry = selected ? entries[selected] : undefined;
+      const provider = selected ? getProvider(selected) : undefined;
+      if (!entry || !provider) return undefined;
+      return { language: entry.pair.target, back: provider.languages.detection?.(entry.settings, models[selected!] ?? [], entry.pair).both.on === true };
+    },
     onReset: (listener) => session.runner.conversation.onReset(() => listener()),
     store: useVRChatStore,
     split: participantSplit,
