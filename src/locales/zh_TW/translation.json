@@ -1729,7 +1729,8 @@
       "translateVideo": "也翻譯影片",
       "pausedOn": "已暫停對方",
       "end": "結束",
-      "mutedThere": "VRChat 靜音中"
+      "mutedThere": "VRChat 靜音中",
+      "mutedNotHeard": "VRChat 靜音中，不會辨識你說的話。"
     },
     "languageMenu": {
       "speakBoth": "我也說{{language}}",

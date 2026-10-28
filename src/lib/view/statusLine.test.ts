@@ -75,6 +75,11 @@ describe('statusLine — while running (priorities 2–5)', () => {
   it('the microphone wait outranks the subtitle layer’s hint', () => {
     expect(statusLine(input({ run: running(), waitingForMicrophone: true, subtitleEntryHint: true }))).toMatchObject({ key: 'mic-waiting', icon: 'mic-off', dismiss: null });
   });
+  it('says that nothing said is heard while muted in VRChat, under the microphone wait and over the rest (fork)', () => {
+    expect(statusLine(input({ run: running(), mutedInVRChat: true, subtitleEntryHint: true, echo }))).toMatchObject({ key: 'vrchat-muted', icon: 'mic-off', words: { kind: 'key', key: 'fork.vrchat.mutedNotHeard' }, action: null, dismiss: null });
+    expect(statusLine(input({ run: running(), mutedInVRChat: true, waitingForMicrophone: true }))?.key).toBe('mic-waiting');
+    expect(statusLine(input({ mutedInVRChat: true }))).toBeNull();
+  });
   // Ruling 11: the overlay opens only while a run is live, so the hint is a running line.
   it('the subtitle layer’s hint only while running', () => {
     expect(statusLine(input({ subtitleEntryHint: true }))).toBeNull();

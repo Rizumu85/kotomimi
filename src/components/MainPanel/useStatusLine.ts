@@ -5,6 +5,7 @@ import type { SubtitleIdleModel } from '../../lib/subtitle/session';
 import { statusLine, type StatusEntry } from '../../lib/view/statusLine';
 import { useSelectedInputDevice } from '../../stores/audioStore';
 import { useSubtitleEntryHint } from '../../stores/subtitleStore';
+import { useVRChatStore, vrchatHolds } from '../../stores/vrchatStore';
 
 export interface UseStatusLineArgs {
   run: RunState;
@@ -26,8 +27,11 @@ export function useStatusLine({ run, idle, canStart, dismissedEnd, echo }: UseSt
   const entryHint = useSubtitleEntryHint();
   // No usable input is selected: `audioStore` clears the selection when none is left (#596).
   const waitingForMicrophone = run.phase === 'running' && run.legs.speaker !== undefined && selectedInput === null;
+  // Fork: muted in VRChat, the microphone source gives silence (`src/app/vrchat.ts`).
+  const held = useVRChatStore((state) => vrchatHolds(state));
+  const mutedInVRChat = held && run.phase === 'running' && run.legs.speaker !== undefined;
   return useMemo(
-    () => statusLine({ run, idle, canStart, dismissedEnd, waitingForMicrophone, subtitleEntryHint: entryHint === 'refresh', echo }),
-    [run, idle, canStart, dismissedEnd, waitingForMicrophone, entryHint, echo],
+    () => statusLine({ run, idle, canStart, dismissedEnd, waitingForMicrophone, mutedInVRChat, subtitleEntryHint: entryHint === 'refresh', echo }),
+    [run, idle, canStart, dismissedEnd, waitingForMicrophone, mutedInVRChat, entryHint, echo],
   );
 }

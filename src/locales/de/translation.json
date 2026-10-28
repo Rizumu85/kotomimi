@@ -1729,7 +1729,8 @@
       "translateVideo": "Also translate the video",
       "pausedOn": "Other side paused",
       "end": "End",
-      "mutedThere": "Muted in VRChat"
+      "mutedThere": "Muted in VRChat",
+      "mutedNotHeard": "Muted in VRChat: what you say is not recognized."
     },
     "languageMenu": {
       "speakBoth": "I speak {{language}} too",

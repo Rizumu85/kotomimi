@@ -92,6 +92,7 @@ module.exports = {
     pausedOn: ['Other side paused', '已暂停对方', '已暫停對方'],
     end: ['End', '结束', '結束'],
     mutedThere: ['Muted in VRChat', 'VRChat 静音中', 'VRChat 靜音中'],
+    mutedNotHeard: ['Muted in VRChat: what you say is not recognized.', 'VRChat 静音中，不会识别你说的话。', 'VRChat 靜音中，不會辨識你說的話。'],
   },
   // The language menus' own list (`LanguageMenu.tsx`).
   languageMenu: {

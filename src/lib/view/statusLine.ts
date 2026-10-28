@@ -2,7 +2,7 @@
  * The status line (spec 2026-10-05 §3): why the user cannot start, or what is
  * wrong right now. Not a record — the condition's presence is the line's. One
  * line at a time, the highest of: cannot start › reconnecting › waiting for a
- * microphone › the subtitle layer unavailable › echo. Pure: the inputs come
+ * microphone › muted in VRChat (fork) › the subtitle layer unavailable › echo. Pure: the inputs come
  * from `useStatusLine`, so this is testable without React.
  */
 import type { EchoCause, EchoNoticeState } from '../modern-audio/EchoMonitor';
@@ -40,6 +40,8 @@ export interface StatusLineInput {
   dismissedEnd: RunEnd | null;
   /** Running with a speaker leg and no usable input selected (`audioStore.selectedInputDevice === null`). */
   waitingForMicrophone: boolean;
+  /** Fork: running with a speaker leg while muted in VRChat holds the microphone (`vrchatHolds`): nothing said is heard. */
+  mutedInVRChat?: boolean;
   /** The extension's content script was missing on the last attempt to enter subtitle mode (`subtitleStore.entryHint`). */
   subtitleEntryHint: boolean;
   /** `useEchoNotice`'s visible notice: already null while its cause is dismissed. */
@@ -67,7 +69,7 @@ function blocker(key: string, code: string | undefined, message: string, params?
 }
 
 export function statusLine(input: StatusLineInput): StatusEntry | null {
-  const { run, idle, canStart, dismissedEnd, waitingForMicrophone, subtitleEntryHint, echo } = input;
+  const { run, idle, canStart, dismissedEnd, waitingForMicrophone, mutedInVRChat, subtitleEntryHint, echo } = input;
   if (run.phase === 'idle') {
     // 1a. The live gate: what the stores refuse now (a stale failure never outranks it).
     // Fork: an answer that could not find out is said though the start stays offered (it asks again).
@@ -87,6 +89,10 @@ export function statusLine(input: StatusLineInput): StatusEntry | null {
     // 3. Waiting for a microphone (#596): the moment it went away was an event row; this is the wait.
     if (waitingForMicrophone) {
       return { key: 'mic-waiting', icon: 'mic-off', words: { kind: 'notice', code: 'mic_lost_waiting', message: 'The microphone went away; waiting for one to be connected.' }, action: null, dismiss: null };
+    }
+    // 3b. Fork: muted in VRChat, the user's own leg hears silence; unmuting there is the fix.
+    if (mutedInVRChat) {
+      return { key: 'vrchat-muted', icon: 'mic-off', words: { kind: 'key', key: 'fork.vrchat.mutedNotHeard', fallback: 'Muted in VRChat: what you say is not recognized.' }, action: null, dismiss: null };
     }
   }
   // 4. The subtitle layer could not be entered (the extension): the user just pressed the button, so this outranks the ambient echo.
