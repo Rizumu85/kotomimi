@@ -1553,7 +1553,10 @@
     "loopback_denied": "Den andras ljud kräver behörighet för skärminspelning för att fånga systemljud.",
     "mic_lost_using_other": "Mikrofonen ”{{lost}}” kopplades från, så ”{{device}}” används i stället.",
     "mic_lost_waiting": "Mikrofonen kopplades från. Översättningen av ditt tal fortsätter när en mikrofon ansluts.",
-    "mic_now_using": "Nu används mikrofonen ”{{device}}”."
+    "mic_now_using": "Nu används mikrofonen ”{{device}}”.",
+    "mic_in_use": "Mikrofonen ”{{device}}” används av {{apps}}. Stäng {{apps}} och starta igen, eller välj en annan mikrofon.",
+    "mic_unreadable": "Windows kunde inte öppna mikrofonen ”{{device}}”. En annan app kanske använder den, eller så svarar inte dess drivrutin. Stäng appar som använder den eller anslut den igen och starta sedan igen.",
+    "mic_blocked": "Windows låter inte Sokuji använda mikrofonen. Aktivera mikrofonåtkomst för skrivbordsappar under Inställningar › Sekretess och säkerhet › Mikrofon och starta sedan igen."
   },
   "viewer": {
     "title": "Sokuji-undertexter",

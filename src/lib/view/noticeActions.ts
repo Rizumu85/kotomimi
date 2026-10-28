@@ -3,6 +3,7 @@
  * 2026-10-05 §6). A code resolves to an action here; MainPanel owns the
  * handlers; rows and the status line only draw the label.
  */
+import { MIC_BLOCKED } from '../audio/capture/micFailure';
 import { LOOPBACK_DENIED } from '../audio/capture/systemAudio';
 import { BALANCE_BELOW_FLOOR } from '../session/shape';
 import { settingsTargetForCode } from './noticeTargets';
@@ -12,7 +13,9 @@ export type NoticeActionSpec =
   | { kind: 'top-up' }
   | { kind: 'sign-in' }
   | { kind: 'system-settings'; pane: 'screen-recording' | 'audio-capture' }
-  | { kind: 'show-in-folder'; dir: string };
+  | { kind: 'show-in-folder'; dir: string }
+  // Windows' own settings, opened directly (spec 2026-10-13 §3).
+  | { kind: 'windows-settings'; page: 'microphone-privacy' };
 
 /** The managed provider's lease refused a start, or the gate did, on the balance: both are fixed by topping up. */
 const TOP_UP_CODES: ReadonlySet<string> = new Set([BALANCE_BELOW_FLOOR, 'insufficient_balance']);
@@ -20,6 +23,7 @@ const TOP_UP_CODES: ReadonlySet<string> = new Set([BALANCE_BELOW_FLOOR, 'insuffi
 export function actionForCode(code: string | undefined): NoticeActionSpec | null {
   if (code === undefined) return null;
   if (code === LOOPBACK_DENIED) return { kind: 'system-settings', pane: 'screen-recording' };
+  if (code === MIC_BLOCKED) return { kind: 'windows-settings', page: 'microphone-privacy' };
   if (TOP_UP_CODES.has(code)) return { kind: 'top-up' };
   if (code === 'sign_in_required') return { kind: 'sign-in' };
   const target = settingsTargetForCode(code);
@@ -34,5 +38,6 @@ export function actionLabel(action: NoticeActionSpec): { key: string; fallback: 
     case 'sign-in': return { key: 'common.signIn', fallback: 'Sign In' };
     case 'system-settings': return { key: 'audioPanel.openSystemSettings', fallback: 'Open System Settings' };
     case 'show-in-folder': return { key: 'mainPanel.export.autoSave.showInFolder', fallback: 'Show in folder' };
+    case 'windows-settings': return { key: 'audioPanel.openSystemSettings', fallback: 'Open System Settings' };
   }
 }

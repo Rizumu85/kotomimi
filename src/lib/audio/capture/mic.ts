@@ -14,6 +14,7 @@ import { MicrophoneCaptureError } from '../../modern-audio/microphoneCaptureErro
 import type { Source } from '../../session/source';
 import { createSourceCore } from './core';
 import { createMicGate } from './micGate';
+import { explainMicFailure, type AppsUsing } from './micFailure';
 
 /** The notices the microphone raises when its device changes under it (#593; spec 2026-10-04 §3). */
 export const MIC_LOST_USING_OTHER = 'mic_lost_using_other';
@@ -73,6 +74,12 @@ export interface MicSettings {
   held?(): boolean;
   /** Called when any of them may have changed. */
   subscribe(listener: () => void): () => void;
+  /**
+   * Windows desktop only: the applications using the device with this label,
+   * or null when that cannot be told. Present, a device that will not open at
+   * Start says why (spec 2026-10-13 §2).
+   */
+  appsUsing?: AppsUsing;
 }
 
 /** The part of `ModernAudioRecorder` a microphone drives. */
@@ -293,7 +300,8 @@ export async function openMic(
     await begin(label);
   } catch (error) {
     await core.stop();
-    throw error;
+    // Asked once the recorder has let go, so our own capture is not among those using the device.
+    throw settings.appsUsing ? await explainMicFailure(error, label, settings.appsUsing) : error;
   }
   if (signal.aborted) {
     await core.stop();

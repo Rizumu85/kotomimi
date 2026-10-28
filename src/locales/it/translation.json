@@ -1553,7 +1553,10 @@
     "loopback_denied": "L'Audio dell'altro richiede l'autorizzazione alla Registrazione Schermo per acquisire l'audio di sistema.",
     "mic_lost_using_other": "Il microfono «{{lost}}» è stato scollegato, quindi ora viene usato «{{device}}».",
     "mic_lost_waiting": "Il microfono è stato scollegato. La traduzione della tua voce riprenderà quando verrà collegato un microfono.",
-    "mic_now_using": "Ora viene usato il microfono «{{device}}»."
+    "mic_now_using": "Ora viene usato il microfono «{{device}}».",
+    "mic_in_use": "Il microfono «{{device}}» è in uso da parte di {{apps}}. Chiudi {{apps}} e avvia di nuovo, oppure scegli un altro microfono.",
+    "mic_unreadable": "Windows non è riuscito ad aprire il microfono «{{device}}». Potrebbe usarlo un’altra app, oppure il suo driver ha smesso di rispondere. Chiudi le app che lo usano o ricollegalo, poi avvia di nuovo.",
+    "mic_blocked": "Windows non consente a Sokuji di usare il microfono. Attiva l’accesso al microfono per le app desktop in Impostazioni › Privacy e sicurezza › Microfono, poi avvia di nuovo."
   },
   "viewer": {
     "title": "Sottotitoli Sokuji",

@@ -1553,7 +1553,10 @@
     "loopback_denied": "O Áudio do outro requer permissão de Gravação de Ecrã para capturar o áudio do sistema.",
     "mic_lost_using_other": "O microfone “{{lost}}” foi desligado, pelo que está agora a ser utilizado “{{device}}”.",
     "mic_lost_waiting": "O microfone foi desligado. A tradução da sua fala será retomada quando for ligado um microfone.",
-    "mic_now_using": "A utilizar agora o microfone “{{device}}”."
+    "mic_now_using": "A utilizar agora o microfone “{{device}}”.",
+    "mic_in_use": "O microfone “{{device}}” está a ser utilizado por {{apps}}. Feche {{apps}} e inicie novamente, ou escolha outro microfone.",
+    "mic_unreadable": "O Windows não conseguiu abrir o microfone “{{device}}”. Outra aplicação pode estar a utilizá-lo, ou o respetivo controlador deixou de responder. Feche as aplicações que o utilizam ou volte a ligá-lo e inicie novamente.",
+    "mic_blocked": "O Windows não está a permitir que o Sokuji utilize o microfone. Ative o acesso ao microfone para aplicações de ambiente de trabalho em Definições › Privacidade e segurança › Microfone e inicie novamente."
   },
   "viewer": {
     "title": "Legendas do Sokuji",
