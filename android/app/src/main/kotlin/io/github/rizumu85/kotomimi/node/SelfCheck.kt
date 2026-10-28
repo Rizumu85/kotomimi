@@ -628,8 +628,12 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
         private const val COOL_WITHIN = 3.0
         private const val COOL_AT_LEAST_MS = 10_000L
         private const val COOL_AT_MOST_MS = 180_000L
-        /** No cooler for this long is as cool as it gets; and a fall smaller than this is the sensor's own noise. */
-        private const val COOL_SETTLED_MS = 40_000L
+        /**
+         * No cooler for this long is as cool as it gets; and a fall smaller than this is the sensor's own noise. It was
+         * 40 s: on a Snapdragon 8 Elite whose battery went from 24 to 31 °C over the check, 29 of its 36 minutes were
+         * waiting (2026-10-28), most runs past the 3 °C and so waiting out this. The engines take turns either way.
+         */
+        private const val COOL_SETTLED_MS = 20_000L
         private const val COOL_STEP = 0.05
         private const val COOL_LOOK_EVERY_MS = 1_000L
 
