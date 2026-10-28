@@ -131,7 +131,11 @@ export function buildLanes(
     const showsAnswer = showsSide(filters[leg], 'translation');
     // Under the other side's lane, the user's own is a row.
     const shape = leg === 'speaker' && shown.length > 1 ? 'row' : 'pair';
-    const mine = entries.filter((entry) => entry.leg === leg);
+    // Fork: of the notices, the strip says an error, and one that goes by itself (a new microphone, #481). A warning
+    // that stays took the place of the last sentence's translation until the side spoke again, for something already
+    // taken care of (the app's capture falling back to the whole system's sound; the user, 2026-10-28). The
+    // conversation still lists every notice.
+    const mine = entries.filter((entry) => entry.leg === leg && (entry.kind !== 'notice' || entry.severity === 'error' || entry.lifetime === 'transient'));
     const lane: Lane = { leg, shape, pending: false };
     if (showsSource) lane.source = { text: '', pieces: [] };
     if (showsAnswer) lane.answer = { text: '', pieces: [] };
@@ -210,17 +214,19 @@ export interface LaneSpacing {
   answerLine: number;
   sourceLine: number;
   rowLine: number;
-  /** What a small line has under it for its romanization, in ems of the small text: none, or `ROMAN_LINE`. */
+  /** What a pair's small line has under it for its romanization, in ems of the small text: none, or `ROMAN_LINE`. */
   roman: number;
+  /** Fork: and the user's own row, apart: room kept under a line that has none showed half of the line before (2026-10-28). */
+  rowRoman: number;
 }
 
 /** A line of romanization: its size (0.72 of the small text) by its line height (1.3), and a hair. */
 export const ROMAN_LINE = 0.95;
-/** A spacing whose small lines each have a line of romanization under them. */
-export const withRoman = (spacing: LaneSpacing): LaneSpacing => ({ ...spacing, roman: ROMAN_LINE });
+/** A spacing whose small lines each have a line of romanization under them: a pair's, and the row's where `row`. */
+export const withRoman = (spacing: LaneSpacing, pair = true, row = pair): LaneSpacing => ({ ...spacing, roman: pair ? ROMAN_LINE : 0, rowRoman: row ? ROMAN_LINE : 0 });
 
-export const ROOMY: LaneSpacing = { padTop: 10, padBottom: 12, gap: 17, inner: 2, answerLines: 2, answerLine: 1.4, sourceLine: 2.15, rowLine: 2.15, roman: 0 };
-export const TIGHT: LaneSpacing = { padTop: 4, padBottom: 5, gap: 7, inner: 0, answerLines: 1, answerLine: 1.22, sourceLine: 1.9, rowLine: 1.9, roman: 0 };
+export const ROOMY: LaneSpacing = { padTop: 10, padBottom: 12, gap: 17, inner: 2, answerLines: 2, answerLine: 1.4, sourceLine: 2.15, rowLine: 2.15, roman: 0, rowRoman: 0 };
+export const TIGHT: LaneSpacing = { padTop: 4, padBottom: 5, gap: 7, inner: 0, answerLines: 1, answerLine: 1.22, sourceLine: 1.9, rowLine: 1.9, roman: 0, rowRoman: 0 };
 
 /** The spacing a share of the way from roomy (0) to tight (1). */
 export function spacingAt(squeeze: number, roomy: LaneSpacing = ROOMY, tight: LaneSpacing = TIGHT): LaneSpacing {
@@ -228,13 +234,13 @@ export function spacingAt(squeeze: number, roomy: LaneSpacing = ROOMY, tight: La
   const mix = (key: keyof LaneSpacing) => roomy[key] + (tight[key] - roomy[key]) * t;
   return {
     padTop: mix('padTop'), padBottom: mix('padBottom'), gap: mix('gap'), inner: mix('inner'),
-    answerLines: mix('answerLines'), answerLine: mix('answerLine'), sourceLine: mix('sourceLine'), rowLine: mix('rowLine'), roman: mix('roman'),
+    answerLines: mix('answerLines'), answerLine: mix('answerLine'), sourceLine: mix('sourceLine'), rowLine: mix('rowLine'), roman: mix('roman'), rowRoman: mix('rowRoman'),
   };
 }
 
 /** The height one lane takes at a font size, spaced so: in ems of that size, for its share of the strip. */
 export function laneEms(lane: Lane, spacing: LaneSpacing): number {
-  if (lane.shape === 'row') return ROW_SCALE * (spacing.rowLine + spacing.roman);
+  if (lane.shape === 'row') return ROW_SCALE * (spacing.rowLine + spacing.rowRoman);
   return (lane.source ? SOURCE_SCALE * (spacing.sourceLine + spacing.roman) : 0) + (lane.answer ? spacing.answerLine * spacing.answerLines : 0);
 }
 
@@ -278,7 +284,7 @@ export function linesFor(lanes: readonly Lane[], fontSize: number, spare: number
   const cost: LaneLines = {
     source: pair?.source ? fontSize * SOURCE_SCALE * (roomy.sourceLine + roomy.roman) : Infinity,
     answer: pair?.answer ? fontSize * roomy.answerLine : Infinity,
-    row: lanes.some((lane) => lane.shape === 'row') ? fontSize * ROW_SCALE * (roomy.rowLine + roomy.roman) : Infinity,
+    row: lanes.some((lane) => lane.shape === 'row') ? fontSize * ROW_SCALE * (roomy.rowLine + roomy.rowRoman) : Infinity,
   };
   let left = spare;
   for (let turn = 0, passed = 0; passed < LINES_ORDER.length; turn++) {

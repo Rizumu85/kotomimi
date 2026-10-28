@@ -116,6 +116,9 @@ describe('the subtitle view’s lanes', () => {
     expect(built[0].pending).toBe(false);
     // A sentence after it takes the lane back.
     expect(lanes([notice, said('b', 'participant', 'はい。', '好的。')], ['participant'])[0].answer).toMatchObject({ text: '好的。' });
+    // A warning is not: the last sentence's translation stays (fork).
+    const warning: Entry = { kind: 'notice', id: 'w', leg: 'participant', severity: 'warning', code: 'app_capture_lost_using_system_audio', message: 'The app capture stopped.', at: 1 };
+    expect(lanes([said('a', 'participant', 'そうそう。', '对对。'), warning], ['participant'])[0].answer).toMatchObject({ text: '对对。' });
   });
 });
 
@@ -203,6 +206,14 @@ describe('a strip whose small lines have a romanization under them', () => {
     expect(linesFor(two, 24, row).row).toBe(2);
     expect(linesFor(two, 24, row, withRoman(ROOMY)).row).toBe(1);
     expect(linesFor(two, 24, row + 24 * ROW_SCALE * ROMAN_LINE, withRoman(ROOMY)).row).toBe(2);
+  });
+
+  it('keeps room under the row apart from the pair’s: a row with no romanization has none (fork)', () => {
+    const plain = lanesHeight(two, 24);
+    expect(Math.abs(lanesHeight(two, 24, withRoman(ROOMY, true, false)) - (plain + 24 * SOURCE_SCALE * ROMAN_LINE))).toBeLessThan(1);
+    expect(spacingAt(0.5, withRoman(ROOMY, true, false), withRoman(TIGHT, true, false)).rowRoman).toBe(0);
+    const row = 24 * ROW_SCALE * ROOMY.rowLine;
+    expect(linesFor(two, 24, row, withRoman(ROOMY, true, false)).row).toBe(2);
   });
 });
 
