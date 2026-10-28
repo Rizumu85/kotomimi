@@ -36,6 +36,8 @@ describe('the days and months of a date (fork)', () => {
     expect(read('1日')).toBe('1にち');
     expect(read('一日中')).toBe('いちにちじゅう');
     expect(read('1ヶ月1日')).toBe('1かげつ1にち');
+    // A day a month.
+    expect(read('月1日しか休まない')).not.toContain('ついたち');
   });
 
   it('reads a month in digits with its number, as its name says it', () => {

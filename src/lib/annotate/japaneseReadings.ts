@@ -315,14 +315,23 @@ function days(tokens: readonly JapaneseToken[], i: number): Change[] | undefined
   const { value } = count;
   const inDigits = DIGITS.test(number.surface_form);
   // The first of a month is ついたち: 4月1日, 四月一日, 毎月1日. Alone, 1日 is as often a day's length (いちにち), and
-  // after ヶ月 it is one (1ヶ月1日).
-  if (value === 1 && tail === 'カ' && count.start === i && /月$/.test(surface(tokens[i - 1])) && !/[ヶヵかカケ箇]月$/.test(surface(tokens[i - 1])) && !/^[ヶヵかカケ箇]$/.test(surface(tokens[i - 2]))) {
+  // after ヶ月 it is one (1ヶ月1日), and after 月 alone too: 月1日しか休まない, a day a month.
+  if (value === 1 && tail === 'カ' && count.start === i && dateMonthBefore(tokens, i)) {
     return [[i, 'ツイ'], [i + 1, 'タチ']];
   }
   if (value >= 2 && value <= 10) return count.start === i ? [[i, DAYS[value]], [i + 1, tail]] : undefined;
   if (value === 14 || value === 24) return [[i, inDigits ? `${value === 14 ? 'ジュウ' : 'ニジュウ'}ヨッ` : 'ヨッ'], [i + 1, tail]];
   if (value === 20) return inDigits ? [[i, 'ハツ'], [i + 1, tail]] : [[i - 1, 'ハ'], [i, 'ツ'], [i + 1, tail]];
   return undefined;
+}
+
+/** Whether the token before `i` names the month of a date: 4月, 四月, 何月, 毎月, 今月 — not 月 alone, nor months counted (1ヶ月). */
+function dateMonthBefore(tokens: readonly JapaneseToken[], i: number): boolean {
+  const before = surface(tokens[i - 1]);
+  if (!before.endsWith('月')) return false;
+  if (/^(?:毎|今|来|先|再来|同|翌|前|当)月$/.test(before)) return true;
+  const named = before === '月' ? surface(tokens[i - 2]) : before.slice(0, -1);
+  return /(?:[0-9０-９〇一二三四五六七八九十]|何)$/u.test(named);
 }
 
 /** 二十歳 is はたち, in kanji or in digits. */
