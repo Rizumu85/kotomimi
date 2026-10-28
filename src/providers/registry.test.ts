@@ -144,6 +144,7 @@ describe('the invariants every provider meets (F17)', () => {
     expect(Object.fromEntries(ownKey.map((p) => [p.id, p.checkReads]))).toEqual({
       gemini: [],
       volcengine_ast2: ['authMode'],
+      qwen_livetranslate: [],
       openai: [],
       openai_translate: [],
       openai_live: [],
@@ -155,12 +156,15 @@ describe('the invariants every provider meets (F17)', () => {
     });
   });
 
-  it("every released id is the old Provider enum's spelling (controller ruling 2)", () => {
-    for (const p of released) expect(Object.keys(LEGACY_SLICE_KEYS), p.id).toContain(storedProviderValue(p.id));
+  // A provider new upstream since the old path (Qwen LiveTranslate) has no old spelling and no stored slice.
+  const ported = released.filter((p) => p.id !== 'qwen_livetranslate');
+
+  it("every ported id is the old Provider enum's spelling (controller ruling 2)", () => {
+    for (const p of ported) expect(Object.keys(LEGACY_SLICE_KEYS), p.id).toContain(storedProviderValue(p.id));
   });
 
   it('a provider that existed before keeps its storage prefix', () => {
-    for (const p of released) expect(p.settings.key, p.id).toBe(LEGACY_SLICE_KEYS[storedProviderValue(p.id)]);
+    for (const p of ported) expect(p.settings.key, p.id).toBe(LEGACY_SLICE_KEYS[storedProviderValue(p.id)]);
   });
 
   it('every released provider has a name and a description in en, under its locale key', () => {
@@ -347,7 +351,7 @@ describe('the invariants every provider meets (F17)', () => {
     // Kizuna Soniox first, unflagged (Stage 2 Kizuna Soniox, ruling 6): the owner's 2026-09-12
     // product order put the managed provider first; then LocalInference, Gemini (Stage 2 Gemini, ruling 6), Doubao AST 2.0 (Stage 2 Volcengine AST2, ruling 5), OpenAI Realtime (Stage 2 OpenAI Realtime, ruling 18), OpenAI Translate (Stage 2 OpenAI Translate, ruling 11), OpenAI Live (Stage 2 OpenAI Live, ruling 9), Soniox with your own key, and Palabra AI last (Stage 2 Palabra, ruling 14).
     // Fork: the fork's own provider leads, and is the one the picker recommends.
-    expect(releaseBuild.PROVIDERS.map((p) => p.id)).toEqual(['localai', 'kizunaai_soniox', 'localInference', 'gemini', 'volcengine_ast2', 'openai', 'openai_translate', 'openai_live', 'soniox', 'palabraai']);
+    expect(releaseBuild.PROVIDERS.map((p) => p.id)).toEqual(['localai', 'kizunaai_soniox', 'localInference', 'gemini', 'volcengine_ast2', 'qwen_livetranslate', 'openai', 'openai_translate', 'openai_live', 'soniox', 'palabraai']);
     expect(releaseBuild.PROVIDERS.filter((p) => p.recommended).map((p) => p.id)).toEqual(['localai']);
   });
 
