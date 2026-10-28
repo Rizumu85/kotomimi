@@ -48,13 +48,13 @@ function fakeEngine(options: { down?: boolean } = {}) {
   return { bridge, streams, state, say: (event: NativeStreamEvent) => listener?.(event) };
 }
 
-async function started(engine = fakeEngine(), options: { status?: NativeEngineStatus; vad?: typeof VAD; limits?: { rollAfter?: number; rollAt?: number; rollHard?: number; lastWordsMs?: number }; model?: string } = {}) {
+async function started(engine = fakeEngine(), options: { status?: NativeEngineStatus; vad?: typeof VAD; limits?: { rollAfter?: number; rollAt?: number; rollHard?: number; lastWordsMs?: number }; model?: string; also?: string } = {}) {
   const vad = fakeVad();
   const clock = createVirtualClock();
-  const asr = createNativeAsr({ bridge: engine.bridge, start: async () => options.status ?? READY, vad: () => vad.worker, now: () => clock.now(), clock, ...(options.limits ? { limits: options.limits } : {}), ...(options.model ? { model: options.model } : {}) });
-  const seen = { partials: [] as string[], results: [] as string[], starts: 0, errors: [] as string[], fatal: [] as string[] };
+  const asr = createNativeAsr({ bridge: engine.bridge, start: async () => options.status ?? READY, vad: () => vad.worker, now: () => clock.now(), clock, ...(options.limits ? { limits: options.limits } : {}), ...(options.model ? { model: options.model } : {}), ...(options.also ? { also: options.also } : {}) });
+  const seen = { partials: [] as string[], results: [] as string[], languages: [] as Array<string | undefined>, starts: 0, errors: [] as string[], fatal: [] as string[] };
   asr.onPartialResult = (text) => seen.partials.push(text);
-  asr.onResult = (result) => seen.results.push(result.text);
+  asr.onResult = (result) => { seen.results.push(result.text); seen.languages.push(result.language); };
   asr.onSpeechStart = () => { seen.starts += 1; };
   asr.onError = (error) => seen.errors.push(error);
   asr.onFatal = (error) => seen.fatal.push(error);
@@ -121,6 +121,19 @@ describe('this computer\'s native recognizer', () => {
     // Sound after it is nobody's until the next voice.
     asr.feedAudio(seconds(1), RATE);
     expect(engine.streams[0].samples).toBe(3.4 * HEARD);
+  });
+
+  it('asks for a second language where told one, and gives the language the engine heard with the result (fork)', async () => {
+    const { asr, vad, engine, seen } = await started(fakeEngine(), { also: 'zh' });
+    vad.worker.say('speech_start');
+    await settled();
+    asr.feedAudio(seconds(2), RATE);
+    expect(engine.streams[0]).toMatchObject({ language: 'ja', also: 'zh' });
+    asr.feedAudio(seconds(1.4, 0), RATE);
+    vad.worker.say('speech_end');
+    engine.say({ id: 1, type: 'done', text: '天气预报', language: 'zh' });
+    expect(seen.results).toEqual(['天气预报']);
+    expect(seen.languages).toEqual(['zh']);
   });
 
   it('adds the silence the engine needs when the detector waits for less', async () => {

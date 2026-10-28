@@ -13,7 +13,7 @@ import {
 } from './localai';
 import { canDetectOther, cutsSentencesHere, deviceChatModels, deviceChoices, deviceCoachModel, deviceNeeds, deviceRecognizer, deviceTranslator, heardBy, hearingPlace, hearsAtOwnDevice, needsServer } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
-import { createPipelineAdapter, FIRST_REF, type DeviceStage } from './pipeline';
+import { createPipelineAdapter, FIRST_REF, type AnswerStage, type DeviceStage } from './pipeline';
 import { SHARED } from './testing';
 
 // "I read Chinese, the other side speaks Japanese": the speaker leg is zh → ja, the participant leg its reverse.
@@ -317,8 +317,9 @@ describe('readiness with stages on this computer', () => {
 });
 
 /** A leg with this computer's fake engines, started once they are told to be ready. */
-async function live(context: SessionContext, patch: Partial<LocalAISettings>, o: { models?: typeof shared.models; ready?: boolean } = {}) {
+async function live(context: SessionContext, patch: Partial<LocalAISettings>, o: { models?: typeof shared.models; ready?: boolean; alter?: (config: LocalAIConfig) => void } = {}) {
   const config = configFor(context, patch, o.models ?? []);
+  o.alter?.(config);
   const fakes = createFakeEngines();
   const sockets = fakeSockets();
   const { clock } = trackedClock();
@@ -343,6 +344,27 @@ async function live(context: SessionContext, patch: Partial<LocalAISettings>, o:
   }
   return h;
 }
+
+describe('a speaker heard in either language, by a recognizer that says which (fork)', () => {
+  /** What `speakBoth` builds where the Mac's recognition hears both: the speaker's stretch either language, Japanese answered the other way. */
+  const both = (config: LocalAIConfig) => {
+    const speech = config.stages!.speech as DeviceStage;
+    config.stages!.heard = 'auto';
+    config.stages!.back = { stage: { ...speech, language: 'zh-CN', direction: { source: 'ja', target: 'zh' } } as AnswerStage, language: 'ja', own: 'zh-CN' };
+  };
+
+  it('answers a sentence the other way where the recognizer heard it in the other side\'s language, whatever its writing says', async () => {
+    const h = await live(SPEAKER, HERE, { alter: both });
+    await h.starting;
+    // Han characters alone: by their writing, Chinese as well as Japanese.
+    h.asr.final('天気予報明日雨', 'ja');
+    await vi.waitFor(() => expect(h.translation.inits.some((i) => i.sourceLang === 'ja' && i.targetLang === 'zh')).toBe(true));
+    expect(h.lastText(1)).toMatchObject({ text: '天気予報明日雨', language: 'ja' });
+    // Its own language, said so: translated as ever.
+    h.asr.final('天气预报', 'zh');
+    await vi.waitFor(() => expect(h.lastText(2)).toMatchObject({ text: '天气预报', language: 'zh' }));
+  });
+});
 
 describe('a session this computer hears and translates', () => {
   it('opens no socket, loads the recognizer for the language heard and the translator for the direction, and counts both as it loads', async () => {

@@ -113,13 +113,14 @@ export function onNativeEngineStatus(listener: (status: NativeEngineStatus) => v
 export type NativeStreamEvent =
   | { id: number; type: 'delta'; text: string }
   | { id: number; type: 'partial'; text: string }
-  | { id: number; type: 'done'; text: string }
+  | { id: number; type: 'done'; text: string; language?: string }
   | { id: number; type: 'error'; message: string };
 
 /** The live recognitions of the engine, as the recognizer uses them (`src/providers/openai/nativeAsr.ts`). */
 export interface NativeBridge {
   /** Opens one: its id, or null while the engine is not ready. `model` says whose it is, where a computer has more than one engine (a Mac). */
-  open(init: { language: string; sampleRate: number; model?: string }): Promise<number | null>;
+  /** Fork: `also`, a second language the speech may be in, for a recognizer that hears either of two (the Mac's). */
+  open(init: { language: string; also?: string; sampleRate: number; model?: string }): Promise<number | null>;
   write(id: number, pcm: Int16Array): void;
   /** The sound is over: the rest of the text follows, then `done`. */
   end(id: number): void;
@@ -129,12 +130,12 @@ export interface NativeBridge {
 
 /** A stream event from the main process, held to its shape; null for anything else. */
 export function nativeStreamEvent(value: unknown): NativeStreamEvent | null {
-  const event = value as { id?: unknown; type?: unknown; text?: unknown; message?: unknown } | null;
+  const event = value as { id?: unknown; type?: unknown; text?: unknown; message?: unknown; language?: unknown } | null;
   if (!event || typeof event !== 'object' || !Number.isInteger(event.id)) return null;
   const id = event.id as number;
   if (event.type === 'delta' && typeof event.text === 'string') return { id, type: 'delta', text: event.text };
   if (event.type === 'partial' && typeof event.text === 'string') return { id, type: 'partial', text: event.text };
-  if (event.type === 'done') return { id, type: 'done', text: typeof event.text === 'string' ? event.text : '' };
+  if (event.type === 'done') return { id, type: 'done', text: typeof event.text === 'string' ? event.text : '', ...(typeof event.language === 'string' && event.language ? { language: event.language } : {}) };
   if (event.type === 'error') return { id, type: 'error', message: typeof event.message === 'string' ? event.message.slice(0, 300) : 'The engine failed.' };
   return null;
 }

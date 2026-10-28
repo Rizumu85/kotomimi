@@ -26,8 +26,8 @@ import { coachPrompt } from './coachPrompt';
 // Type only: `localai.ts` imports this view, and a value import back would close a cycle.
 import type { LocalAISettings as S } from './localai';
 import { coachesAtOwnDevice, deviceChatModels, deviceCoachModel, deviceLanguage, deviceModelsLoaded, hearingPlace, needsServer, PLACE_FIELDS, PLACES, translatePlace, translatesAtOwnDevice, type DeviceNeed, type Place } from './localaiDevice';
-import { NATIVE_MODELS, chooseNative, isAutoLanguage, nativeDownloaded, nativeHears, nativeModel, nativePicked, type NativePick } from './localaiNative';
-import { canDetectOther, detectsOther, heardBy } from './localaiDevice';
+import { NATIVE_MODELS, chooseNative, hearingPick, isApple, isAutoLanguage, nativeDownloaded, nativeEither, nativeHears, nativeModel, nativeModelFor, nativePicked } from './localaiNative';
+import { canDetectOther, detectsOther, heardBy, speaksBoth } from './localaiDevice';
 import { languageLabel } from '../../lib/language/label';
 import { NativeEngineCard, nativeStoreOf, type NativeCardModel, type NativeKind } from './NativeEngineCard';
 import { NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator } from './nativeTranslators';
@@ -468,7 +468,13 @@ function DeviceModels({ stage, settings, update, pair, legs, disabled, tour, oth
   const heardIn = (slot: DeviceNeed): string => (nativeRuns && stage === 'asr' ? heardBy(settings, pair, slot.leg) : slot.source);
   /** The engine's model that serves a row; null: the engine runs the stage and none is chosen for the row; undefined: the app's own models run it. */
   const using = (slot: DeviceNeed): NativeCardModel | null | undefined => (native?.inUse ? native.inUse(slot) : undefined);
-  const fits = (id: string, slot: DeviceNeed): boolean => nativeFits(stage, id, heardIn(slot), slot.target);
+  /**
+   * Fork: the speaker heard in either of the pair's languages: the Mac's recognition hears that too, where it has both
+   * (`nativeEither`) — offered for them as their own language's model.
+   */
+  const hearsEither = (id: string, slot: DeviceNeed): boolean => stage === 'asr' && slot.leg === 'speaker' && isAutoLanguage(heardIn(slot)) && isApple(id)
+    && nativeModelFor(id, slot.source)?.id === id && nativeEither({ model: id, either: { own: pair.source, other: pair.target } }, (one) => nativeDownloaded(status, one)) !== null;
+  const fits = (id: string, slot: DeviceNeed): boolean => nativeFits(stage, id, heardIn(slot), slot.target) || hearsEither(id, slot);
   /** A model a row offers: one that fits it — or, where its language is left to be detected, one that hears the pair's language, which chosen ends the detection (`onPick`). */
   const offers = (id: string, slot: DeviceNeed): boolean => fits(id, slot) || (stage === 'asr' && nativeFits('asr', id, slot.source, slot.target));
   /** A row with nothing to run, or whose model needs the person: not on this computer yet, or the engine failed with it. */
@@ -957,7 +963,8 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   // What each leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
   const heardByLegs = legs.map((leg) => heardBy(settings, pair, leg, models));
   // The native recognizer, language by language: a choice is the model in use from then on, and that language's by name.
-  const nativePick: NativePick = { model: settings.asrNativeModel, byLanguage: settings.asrNativeByLanguage, ...(detectsOther(settings, models) ? { detecting: true } : {}) };
+  const bothOn = speaksBoth(settings, models) && pair.source.toLowerCase() !== pair.target.toLowerCase();
+  const nativePick = hearingPick(settings, pair, { detecting: detectsOther(settings, models), both: bothOn });
   const pickNative = (id: string, languages: readonly string[]) => {
     const next = chooseNative(nativePick, id, languages, heardByLegs);
     put({ asrHere: 'native', asrNativeModel: next.model, asrNativeByLanguage: next.byLanguage });
@@ -969,6 +976,16 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   const pickNativeFor = (id: string, slot?: DeviceNeed) => {
     const detectOff = settings.asrDetectOther === true && legs.includes('participant');
     const bothOff = settings.speakBoth === true && !settings.coach && legs.includes('speaker') && pair.source.toLowerCase() !== pair.target.toLowerCase();
+    // Fork: the Mac's recognition, chosen for a speaker who speaks both, where it has both languages: it hears them in
+    // either, as their own language's model, and they go on speaking both. The other side's language is no longer
+    // detected: that takes the model that tells languages apart, for every leg.
+    if (bothOff && (!slot || slot.leg === 'speaker') && isApple(id) && nativeEither({ model: id, either: { own: pair.source, other: pair.target } })) {
+      const ended = detectOff ? { asrDetectOther: false } : {};
+      const heard = legs.map((leg) => heardBy({ ...settings, ...ended }, pair, leg, models));
+      const next = chooseNative({ model: settings.asrNativeModel, byLanguage: settings.asrNativeByLanguage }, id, [pair.source], heard);
+      put({ asrHere: 'native', asrNativeModel: next.model, asrNativeByLanguage: next.byLanguage, ...ended });
+      return;
+    }
     if (nativeModel(id).detects || !(detectOff || bothOff)) {
       pickNative(id, slot ? [heardBy(settings, pair, slot.leg)] : heardByLegs.filter((language) => nativeHears(nativeModel(id), language)));
       return;

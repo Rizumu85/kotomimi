@@ -1483,7 +1483,7 @@ ipcMain.handle('native-engine:start', async (event, args) => {
   return getNativeEngine().start(String(args?.id ?? ''));
 });
 ipcMain.handle('native-engine:stop', () => getNativeEngine().stop());
-ipcMain.handle('native-engine:stream-open', (event, args) => getNativeEngine().openStream({ language: args?.language, sampleRate: args?.sampleRate, model: typeof args?.model === 'string' ? args.model : undefined }));
+ipcMain.handle('native-engine:stream-open', (event, args) => getNativeEngine().openStream({ language: args?.language, ...(typeof args?.also === 'string' ? { also: args.also } : {}), sampleRate: args?.sampleRate, model: typeof args?.model === 'string' ? args.model : undefined }));
 ipcMain.handle('native-engine:stream-audio', (event, args) => getNativeEngine().writeStream(args?.id, args?.pcm));
 ipcMain.handle('native-engine:stream-end', (event, args) => getNativeEngine().endStream(args?.id));
 ipcMain.handle('native-engine:stream-abort', (event, args) => getNativeEngine().abortStream(args?.id));

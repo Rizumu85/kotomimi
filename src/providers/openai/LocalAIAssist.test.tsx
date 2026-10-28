@@ -815,6 +815,28 @@ describe('the other side\u2019s language left to be detected', () => {
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native', asrNativeModel: 'r2t2-q8', asrDetectOther: false, asrNativeByLanguage: expect.objectContaining({ ja: 'r2t2-q8' }) }));
   });
 
+  it('offers the Mac\'s recognition for the user speaking either language where it has both, and keeps them speaking both when it is chosen (fork)', () => {
+    useNativeEngineStore.setState({ status: engineOf({ 'apple-speech:zh': 'downloaded', 'apple-speech:ja': 'downloaded', 'qwen3-asr-1.7b-q8': 'downloaded' }) });
+    const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'qwen3-asr-1.7b-q8', speakBoth: true, translateAt: 'device' }, legs: BOTH });
+    const mine = (card(HEAR).getAllByRole('combobox') as HTMLSelectElement[]).find((m) => m.getAttribute('aria-label') === 'providers.localai.hearsEither')!;
+    expect(mine.selectedOptions[0].textContent).toBe('Qwen3-ASR 1.7B GGUF');
+    expect([...mine.querySelectorAll('optgroup')[0].querySelectorAll('option')].map((o) => o.textContent).sort()).toEqual(['Apple Speech', 'Qwen3-ASR 1.7B GGUF']);
+    fireEvent.change(mine, { target: { value: '\u0000native:apple-speech:zh' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native', asrNativeModel: 'apple-speech:zh', asrNativeByLanguage: expect.objectContaining({ zh: 'apple-speech:zh' }) }));
+    expect(update.mock.calls[update.mock.calls.length - 1][0]).not.toHaveProperty('speakBoth');
+  });
+
+  it('shows the Mac\'s recognition hearing the user in either language once it is theirs, and not where it lacks the other one', () => {
+    const settings = { asrVia: 'device' as const, asrHere: 'native' as const, asrNativeModel: 'apple-speech:zh', asrNativeByLanguage: { zh: 'apple-speech:zh' }, speakBoth: true, translateAt: 'device' as const };
+    useNativeEngineStore.setState({ status: engineOf({ 'apple-speech:zh': 'downloaded', 'apple-speech:ja': 'downloaded', 'qwen3-asr-1.7b-q8': 'downloaded' }) });
+    const shown = draw({ settings, legs: BOTH }).card(HEAR);
+    expect((shown.getAllByRole('combobox')[0] as HTMLSelectElement).selectedOptions[0].textContent).toBe('Apple Speech');
+    expect(shown.queryByText('providers.localai.nativeUnheard')).toBeNull();
+    cleanup();
+    useNativeEngineStore.setState({ status: engineOf({ 'apple-speech:zh': 'downloaded', 'apple-speech:ja': 'absent', 'qwen3-asr-1.7b-q8': 'downloaded' }) });
+    expect((draw({ settings, legs: BOTH }).card(HEAR).getAllByRole('combobox')[0] as HTMLSelectElement).selectedOptions[0].textContent).toBe('Qwen3-ASR 1.7B GGUF');
+  });
+
   it('ends the user\'s own detection — speaking either language — when a model that cannot detect is chosen for them', () => {
     useNativeEngineStore.setState({ status: engineOf({ 'r2t2-q8': 'downloaded', 'qwen3-asr-1.7b-q8': 'downloaded' }) });
     const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'qwen3-asr-1.7b-q8', speakBoth: true, translateAt: 'device' }, legs: BOTH });

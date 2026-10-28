@@ -30,7 +30,8 @@ export interface AsrLike {
   dispose(): void;
   /** The cumulative hypothesis for the utterance so far, never a delta. */
   onPartialResult: ((text: string) => void) | null;
-  onResult: ((result: { text: string; durationMs: number; recognitionTimeMs: number }) => void) | null;
+  /** Fork: `language`, where the recognizer hears in either of two languages and says which (the Mac's, `nativeAsr.ts`). */
+  onResult: ((result: { text: string; durationMs: number; recognitionTimeMs: number; language?: string }) => void) | null;
   onSpeechStart: (() => void) | null;
   /** An error message from the ready worker: one utterance failed, the engine goes on. */
   onError: ((error: string) => void) | null;

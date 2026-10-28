@@ -37,6 +37,8 @@ const PROGRESS_SCALE = 1000;
 const baseOf = (code) => String(code ?? '').trim().toLowerCase().split(/[-_]/)[0];
 /** The system's locale for a language as the app names it; null for one it is not offered in. */
 const localeFor = (code) => LOCALES[baseOf(code)] ?? null;
+/** The app's language for one of the system's locales. */
+const languageAt = (locale) => Object.keys(LOCALES).find((language) => LOCALES[language] === locale) ?? null;
 const idOf = (language) => `${PREFIX}${language}`;
 const languageOf = (id) => (typeof id === 'string' && id.startsWith(PREFIX) ? id.slice(PREFIX.length) : null);
 
@@ -221,7 +223,9 @@ function createAppleSpeech(deps = {}) {
   const streams = new Map();
   let nextStream = 1;
   /** The languages recognitions hear now: never let go to make room. */
-  const hearing = () => [...new Set([...streams.values()].map((stream) => stream.locale))];
+  const hearing = () => [...new Set([...streams.values()].flatMap((stream) => [stream.locale, ...(stream.also ? [stream.also] : [])]))];
+  /** Kotomimi: the language each pair of languages was last heard in: what a recognition of both prefers on a tie. */
+  const lastOfPair = new Map();
 
   async function stop() {
     // Each open recognition is told, as the downloaded engine tells its own: the page otherwise waits for last words that never come.
@@ -231,13 +235,22 @@ function createAppleSpeech(deps = {}) {
     return snapshot();
   }
 
-  /** A live recognition opened for the page: its id, or null where it cannot be — no such language, or sound at another rate than the recognizer's. */
-  function openStream({ language, sampleRate } = {}) {
+  /**
+   * A live recognition opened for the page: its id, or null where it cannot be — no such language, or sound at
+   * another rate than the recognizer's. Kotomimi: `also`, a second language the speech may be in (a speaker who speaks
+   * both): heard in both, the text of the one surer of itself kept, and said with its language (`done`'s `language`);
+   * on a tie, the one the two were last heard in.
+   */
+  function openStream({ language, also, sampleRate } = {}) {
     const locale = localeFor(language);
-    if (!supported || run.state !== 'ready' || !locale || sampleRate !== 16000) return null;
+    const second = also ? localeFor(also) : null;
+    if (!supported || run.state !== 'ready' || !locale || (also && !second) || sampleRate !== 16000) return null;
+    const pair = second && second !== locale ? [locale, second].sort().join('+') : null;
+    const prefer = pair ? lastOfPair.get(pair) : undefined;
     const id = nextStream++;
-    const args = ['stream', locale, ...roomArgs(hearing())];
+    const args = ['stream', locale, ...(pair ? ['--also', second, ...(prefer ? ['--prefer', prefer] : [])] : []), ...roomArgs(hearing())];
     touch(locale);
+    if (pair) touch(second);
     let child;
     try {
       child = spawn(helper, args, { stdio: ['pipe', 'pipe', 'pipe'] });
@@ -255,7 +268,11 @@ function createAppleSpeech(deps = {}) {
       if (over) return;
       if (event?.type === 'partial' && typeof event.text === 'string') onStream({ id, type: 'partial', text: event.text });
       else if (event?.type === 'delta' && typeof event.text === 'string' && event.text) onStream({ id, type: 'delta', text: event.text });
-      else if (event?.type === 'final') finish({ type: 'done', text: typeof event.text === 'string' ? event.text : '' });
+      else if (event?.type === 'final') {
+        const heardIn = pair && typeof event.locale === 'string' && (event.locale === locale || event.locale === second) ? event.locale : null;
+        if (heardIn) lastOfPair.set(pair, heardIn);
+        finish({ type: 'done', text: typeof event.text === 'string' ? event.text : '', ...(heardIn ? { language: languageAt(heardIn) } : {}) });
+      }
       else if (event?.type === 'error') finish({ type: 'error', message: String(event.message ?? 'The speech recognizer reported an error.').slice(0, 300) });
     });
     child.stderr?.on('data', (chunk) => log?.(String(chunk)));
@@ -265,6 +282,7 @@ function createAppleSpeech(deps = {}) {
     child.on('close', () => finish({ type: 'error', message: 'The speech recognizer closed before it finished.' }));
     streams.set(id, {
       locale,
+      also: pair ? second : null,
       write: (line) => { if (!over && child.stdin?.writable) child.stdin.write(line); },
       kill: () => { over = true; try { child.kill(); } catch { /* gone already */ } },
     });

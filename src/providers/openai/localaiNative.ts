@@ -139,10 +139,44 @@ export interface NativePick {
    * this computer could not start").
    */
   detecting?: boolean;
+  /**
+   * Fork: the speaker is heard in either of two languages (`speakBoth`): their own, and the other side's. Their
+   * stretch is heard by the Mac's recognition where it is the one chosen for their own language and the other's is
+   * downloaded too: in both at once, the surer kept (`nativeEither`); else by the model that tells languages apart.
+   */
+  either?: { own: string; other: string };
 }
 
 /** A model is on this computer now, as the engine's store has it. */
 const hereNow = (id: string): boolean => nativeDownloaded(useNativeEngineStore.getState().status, id);
+
+/**
+ * Fork: the Mac's recognition hearing a speaker in either of two languages (`NativePick.either`): the model of their
+ * own language, and the other one it hears beside it. Null where the model chosen for their own language is not the
+ * Mac's, or the other language's is not downloaded.
+ */
+export function nativeEither(pick: NativePick, has: (id: string) => boolean = hereNow): { model: NativeModel; also: string } | null {
+  if (!pick.either) return null;
+  const mine = nativePicked({ model: pick.model, byLanguage: pick.byLanguage }, pick.either.own, has);
+  if (!mine || !isApple(mine.id) || !has(mine.id)) return null;
+  const theirs = nativeModelFor(mine.id, pick.either.other);
+  return theirs && has(theirs.id) ? { model: mine, also: baseOf(pick.either.other) } : null;
+}
+
+/**
+ * Fork: what hears a run's languages, from the settings: the models chosen, the speaker in either of two languages
+ * where they speak both (`both`, for the pair `pair`), and — the engine running one model for every leg — the model
+ * that tells languages apart for every language where one is left to be detected: the other side's (`detecting`), or
+ * the speaker's own where the Mac's recognition does not hear both. With the other side's detected, that model hears
+ * the speaker too: "either of two" and "whatever it is" are one language to a pick (`AUTO`).
+ */
+export function hearingPick(s: { asrNativeModel: string; asrNativeByLanguage?: Readonly<Record<string, string>> }, pair: { source: string; target: string }, kinds: { detecting: boolean; both: boolean }, has: (id: string) => boolean = hereNow): NativePick {
+  const pick: NativePick = { model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage };
+  if (kinds.detecting) return { ...pick, detecting: true };
+  if (!kinds.both) return pick;
+  const either: NativePick = { ...pick, either: { own: pair.source, other: pair.target } };
+  return nativeEither(either, has) ? either : { ...pick, detecting: true };
+}
 
 /**
  * The model a language is heard by: the one chosen for that language; else
@@ -155,6 +189,10 @@ const hereNow = (id: string): boolean => nativeDownloaded(useNativeEngineStore.g
  * store's answer by default).
  */
 export function nativePicked(pick: NativePick, language: string, has: (id: string) => boolean = hereNow): NativeModel | null {
+  // Fork: the speaker in either of two languages, heard by the Mac's recognition in both (`nativeEither`).
+  // Never where a language is left to be detected: that is the model that tells languages apart, for every leg.
+  const either = isAutoLanguage(language) && !pick.detecting ? nativeEither(pick, has) : null;
+  if (either) return either.model;
   if (pick.detecting && !isAutoLanguage(language)) {
     const detects = nativePicked({ ...pick, detecting: false }, 'auto', has);
     if (detects && !isApple(detects.id) && nativeHears(detects, language)) return detects;

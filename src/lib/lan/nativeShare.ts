@@ -89,8 +89,9 @@ export function nativeRecognizerFor(language: string, wanted: string): { modelId
   }
   // Nothing named: this computer's own choice for the language first, so that its owner's next run finds the engine
   // on the model it would start anyway.
+  // Its own speaker heard in either of two languages is its own run's: "auto" from a device is a language to detect.
   const own = nativePreference().asr;
-  const chosen = own ? nativePicked(own, language) : null;
+  const chosen = own ? nativePicked({ model: own.model, byLanguage: own.byLanguage, ...(own.detecting ? { detecting: true } : {}) }, language) : null;
   if (chosen && free(chosen.id)) return { modelId: chosen.id, streaming: true };
   const best = NATIVE_MODELS.find((m) => free(m.id) && nativeModelFor(m.id, language)?.id === m.id);
   return best ? { modelId: best.id, streaming: true } : null;

@@ -57,6 +57,8 @@ export interface NativeAsrOptions {
   limits?: Partial<NativeLimits>;
   /** What the engine is called when it cannot start, where it is not this computer's own. */
   named?: string;
+  /** Fork: a second language the speech may be in, for a recognizer that hears either of two and says which (the Mac's). */
+  also?: string;
 }
 
 /**
@@ -205,7 +207,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     const head = queue[0];
     if (!head || head.id !== null || head.opening || disposed) return;
     head.opening = true;
-    void bridge.open({ language, sampleRate: head.resampler ? TARGET_RATE : rate, ...(options.model ? { model: options.model } : {}) }).then((id) => {
+    void bridge.open({ language, ...(options.also ? { also: options.also } : {}), sampleRate: head.resampler ? TARGET_RATE : rate, ...(options.model ? { model: options.model } : {}) }).then((id) => {
       head.opening = false;
       if (head.over || disposed) {
         if (id !== null) bridge.abort(id);
@@ -257,8 +259,8 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     s.pieceSamples = 0;
   }
 
-  /** A recognition is over: the rest of its text is its last result, and the engine takes the next. */
-  function finish(s: Stream, whole: string) {
+  /** A recognition is over: the rest of its text is its last result, and the engine takes the next. `heardIn`: the language the engine says it was in. */
+  function finish(s: Stream, whole: string, heardIn?: string) {
     if (s.over) return;
     s.over = true;
     s.cancelWait?.();
@@ -269,7 +271,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     // what was written on the way — a character here and there — it is still read from where the results left off.
     const text = whole.length >= s.text.length ? whole : s.text;
     // An empty result too: it closes what the partials opened.
-    asr.onResult?.({ text: s.misfire ? '' : tidyHeard(text.slice(s.emitted).trim()), durationMs: Math.round(secondsOf(s.pieceSamples) * 1000), recognitionTimeMs: s.closed ? Math.max(0, now() - s.closedAt) : 0 });
+    asr.onResult?.({ text: s.misfire ? '' : tidyHeard(text.slice(s.emitted).trim()), durationMs: Math.round(secondsOf(s.pieceSamples) * 1000), recognitionTimeMs: s.closed ? Math.max(0, now() - s.closedAt) : 0, ...(heardIn ? { language: heardIn } : {}) });
     advance();
   }
 
@@ -291,7 +293,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
       s.text += event.text;
       if (!s.misfire && !s.tentative) asr.onPartialResult?.(tidyHeard(pending(s)));
     } else if (event.type === 'done') {
-      finish(s, event.text || s.text);
+      finish(s, event.text || s.text, event.language);
     } else {
       s.over = true;
       s.cancelWait?.();

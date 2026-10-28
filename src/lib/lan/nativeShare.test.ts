@@ -73,6 +73,15 @@ describe('the recognizer a device gets', () => {
     expect(nativeRecognizerFor('zh', '')).toBeNull();
   });
 
+  it('is, for a language to detect, never the Mac\'s recognition its own run hears its speaker in either language by (fork)', () => {
+    const both = { 'apple-speech:zh': downloaded, 'apple-speech:ja': downloaded, 'qwen3-asr-1.7b-q8': downloaded };
+    useNativeEngineStore.setState({ status: status(both) });
+    preferNative({ asr: { model: 'apple-speech:zh', byLanguage: { zh: 'apple-speech:zh' }, either: { own: 'zh', other: 'ja' } } });
+    expect(nativeRecognizerFor('auto', '')).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
+    expect(nativeRecognizerFor('zh', '')).toEqual({ modelId: 'apple-speech:zh', streaming: true });
+    preferNative({ asr: null });
+  });
+
   it('is the app\'s own model when that is the one named, though a native one is there', () => {
     useNativeEngineStore.setState({ status: PC });
     useModelStore.setState({ modelStatuses: { 'whisper-large-v3-turbo-webgpu': 'downloaded' } });

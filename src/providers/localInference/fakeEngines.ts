@@ -55,7 +55,8 @@ export class FakeAsr implements AsrLike {
   dispose(): void { this.disposes++; }
 
   partial(text: string): void { this.onPartialResult?.(text); }
-  final(text: string): void { this.onResult?.({ text, durationMs: 1000, recognitionTimeMs: 100 }); }
+  /** `language`: what a recognizer hearing either of two says it heard (fork). */
+  final(text: string, language?: string): void { this.onResult?.({ text, durationMs: 1000, recognitionTimeMs: 100, ...(language ? { language } : {}) }); }
   speechStart(): void { this.onSpeechStart?.(); }
   /** An error message from the ready worker (one utterance). */
   fail(message: string): void { this.onError?.(message); }

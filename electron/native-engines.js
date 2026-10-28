@@ -149,11 +149,11 @@ function joinEngines(makers, deps = {}) {
   }
 
   /** A recognition, on the engine of the model it names — or, naming none, on the one started last. */
-  function openStream({ language, sampleRate, model } = {}) {
+  function openStream({ language, also, sampleRate, model } = {}) {
     const named = typeof model === 'string' && model ? last.findIndex((one) => one?.supported && Object.prototype.hasOwnProperty.call(one.models, model)) : -1;
     const at = named >= 0 ? named : active;
     if (at === null || at < 0) return null;
-    const inner = engines[at].openStream({ language, sampleRate, model });
+    const inner = engines[at].openStream({ language, ...(also ? { also } : {}), sampleRate, model });
     if (inner === null || inner === undefined) return null;
     const id = nextStream++;
     streams.set(id, { at, inner });

@@ -454,7 +454,7 @@ class LocalSession implements AdapterSession {
    * closing a segment its partials opened with its last text. AST: the final
    * already is the translation — no source segment.
    */
-  private final(result: { text: string; durationMs: number; recognitionTimeMs: number }): void {
+  private final(result: { text: string; durationMs: number; recognitionTimeMs: number; language?: string }): void {
     if (this.ended) return;
     const text = result.text.trim();
     if (!text) {
@@ -488,7 +488,8 @@ class LocalSession implements AdapterSession {
     }
     const segment = current ?? { ref: this.nextRef++, origin: this.nextOrigin(), text: '' };
     if (!current) this.emit('segmentOpened', { ref: segment.ref, side: 'source', origin: segment.origin });
-    if (text !== segment.text) this.emit('segmentText', { ref: segment.ref, text });
+    // Fork: the language the recognizer heard it in, where it says: with its last text, changed or not.
+    if (text !== segment.text || result.language) this.emit('segmentText', { ref: segment.ref, text, ...(result.language ? { language: result.language } : {}) });
     this.emit('segmentClosed', { ref: segment.ref, origin: segment.origin });
     if (kind === 'engine') this.enqueue({ text, origin: segment.origin, fill });
   }

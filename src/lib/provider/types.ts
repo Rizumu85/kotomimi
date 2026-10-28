@@ -399,9 +399,10 @@ export interface Provider<S, K extends { missing?: never } & object, C extends {
     wire: WireTable;
     /**
      * Fork: a language left to be detected, as the language section offers it — the other side's (`other`), or the
-     * user's own in either of the pair's (`both`). `models`: what the provider's readiness found. Absent: not offered.
+     * user's own in either of the pair's (`both`). `models`: what the provider's readiness found; `pair`, the pair
+     * shown. Absent: not offered.
      */
-    detection?(s: S, models: readonly ModelOption[]): { other: Detection<S>; both: Detection<S> };
+    detection?(s: S, models: readonly ModelOption[], pair: LanguagePair): { other: Detection<S>; both: Detection<S> };
   };
 
   // the only capabilities generic code reads

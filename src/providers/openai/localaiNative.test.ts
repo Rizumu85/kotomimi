@@ -10,7 +10,7 @@ import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } f
 import { buildLocalAI, admitLocalAI, checkLocalAIWithNative, describeLocalAI, localaiProvider, prepareLocalAI, primeNativeOnce, type NativeUps, LOCALAI_DEFAULTS, migrateLocalAISettings, type LocalAICredentials, type LocalAISettings } from './localai';
 import { cutsSentencesHere, deviceChoices, deviceNeeds, hearsByLocalServer, hearsNatively } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
-import { APPLE_PREFIX, NATIVE_DEFAULT_MODEL, NATIVE_MODELS, chooseNative, coachIdle, nativePicked, nativeDownloaded, holdNative, holdNativeForRun, nativeGap, nativeHears, nativeIdle, nativeModel, nativeModelFor, nativeReady, nativeUp, nativeWaits, restNative, translatorUp } from './localaiNative';
+import { APPLE_PREFIX, NATIVE_DEFAULT_MODEL, NATIVE_MODELS, chooseNative, coachIdle, hearingPick, nativeEither, nativePicked, nativeDownloaded, holdNative, holdNativeForRun, nativeGap, nativeHears, nativeIdle, nativeModel, nativeModelFor, nativeReady, nativeUp, nativeWaits, restNative, translatorUp } from './localaiNative';
 import { SHARED } from './testing';
 
 const SPEAKER: SessionContext = { direction: { source: 'ja', target: 'zh-CN' }, speech: false, turns: 'auto' };
@@ -52,6 +52,8 @@ describe('what the main process says of the engine, held to its shape', () => {
   it('reads a recognition\'s events, and nothing that is not one', () => {
     expect(nativeStreamEvent({ id: 3, type: 'delta', text: 'あ' })).toEqual({ id: 3, type: 'delta', text: 'あ' });
     expect(nativeStreamEvent({ id: 3, type: 'done' })).toEqual({ id: 3, type: 'done', text: '' });
+    // Fork: the language a recognizer hearing either of two says it heard.
+    expect(nativeStreamEvent({ id: 3, type: 'done', text: 'はい', language: 'ja' })).toEqual({ id: 3, type: 'done', text: 'はい', language: 'ja' });
     expect(nativeStreamEvent({ id: 3, type: 'error' })).toEqual({ id: 3, type: 'error', message: 'The engine failed.' });
     expect(nativeStreamEvent({ id: 'x', type: 'delta', text: 'あ' })).toBeNull();
     expect(nativeStreamEvent({ id: 3, type: 'other' })).toBeNull();
@@ -343,6 +345,58 @@ describe('the system recognizer of a Mac, one model to a language', () => {
     expect(start.mock.calls).toEqual([[`${APPLE_PREFIX}ja`]]);
     expect(nativeReady(both, `${APPLE_PREFIX}zh`)).toBe(true);
     expect(nativeReady(both, 'r2t2-q8')).toBe(false);
+  });
+});
+
+describe('the Mac\'s recognizer hearing a speaker who speaks both (fork)', () => {
+  const MAC = (zh: boolean, ja = true): NativeEngineStatus => ({
+    supported: true, engine: 'ready', engineBytes: 0, up: [],
+    models: {
+      [`${APPLE_PREFIX}ja`]: { state: ja ? 'downloaded' : 'absent', received: 0, total: 0 },
+      [`${APPLE_PREFIX}zh`]: { state: zh ? 'downloaded' : 'absent', received: 0, total: 0 },
+      'qwen3-asr-1.7b-q8': { state: 'downloaded', received: 1, total: 1 },
+    },
+    run: { state: 'stopped', model: null, port: 0, tail: '' },
+  });
+  const has = (status: NativeEngineStatus) => (id: string) => nativeDownloaded(status, id);
+  const MINE = { asrNativeModel: `${APPLE_PREFIX}ja`, asrNativeByLanguage: {} };
+  const PAIR_JA = { source: 'ja', target: 'zh-CN' };
+
+  it('hears them in both at once where their own language\'s model is the Mac\'s and the other one is downloaded too', () => {
+    const pick = hearingPick(MINE, PAIR_JA, { detecting: false, both: true }, has(MAC(true)));
+    expect(pick).toEqual({ model: `${APPLE_PREFIX}ja`, byLanguage: {}, either: { own: 'ja', other: 'zh-CN' } });
+    expect(nativeEither(pick, has(MAC(true)))).toMatchObject({ model: { id: `${APPLE_PREFIX}ja` }, also: 'zh' });
+    // Their stretch — either language — by the Mac's; the other side's leg by its own language's model.
+    expect(nativePicked(pick, 'auto', has(MAC(true)))?.id).toBe(`${APPLE_PREFIX}ja`);
+    expect(nativePicked(pick, 'zh-CN', has(MAC(true)))?.id).toBe(`${APPLE_PREFIX}zh`);
+  });
+
+  it('is the model that tells languages apart, for every leg, where the Mac\'s does not have both, is not theirs, or the other side is detected', () => {
+    // The other language not downloaded.
+    expect(hearingPick(MINE, PAIR_JA, { detecting: false, both: true }, has(MAC(false)))).toMatchObject({ detecting: true });
+    expect(nativePicked(hearingPick(MINE, PAIR_JA, { detecting: false, both: true }, has(MAC(false))), 'auto', has(MAC(false)))?.id).toBe('qwen3-asr-1.7b-q8');
+    // Their own language is heard by another model.
+    expect(hearingPick({ asrNativeModel: 'qwen3-asr-1.7b-q8', asrNativeByLanguage: {} }, PAIR_JA, { detecting: false, both: true }, has(MAC(true)))).toMatchObject({ detecting: true });
+    // The other side's language left to be detected: one model hears every leg.
+    const detected = hearingPick(MINE, PAIR_JA, { detecting: true, both: true }, has(MAC(true)));
+    expect(detected).toEqual({ model: `${APPLE_PREFIX}ja`, byLanguage: {}, detecting: true });
+    expect(nativePicked(detected, 'auto', has(MAC(true)))?.id).toBe('qwen3-asr-1.7b-q8');
+    // Nothing spoken both ways: as ever.
+    expect(hearingPick(MINE, PAIR_JA, { detecting: false, both: false }, has(MAC(true)))).toEqual({ model: `${APPLE_PREFIX}ja`, byLanguage: {} });
+  });
+
+  it('builds the speaker\'s leg told their own language and the other, and the other side\'s by its own model', () => {
+    useNativeEngineStore.setState({ status: MAC(true) });
+    const s = settings({ ...NATIVE, asrNativeModel: `${APPLE_PREFIX}ja`, speakBoth: true });
+    const speaker = buildLocalAI(SPEAKER, s, shared);
+    if ('refused' in speaker) throw new Error(speaker.refused);
+    expect(speaker.device).toMatchObject({ modelId: `${APPLE_PREFIX}ja`, native: { model: `${APPLE_PREFIX}ja`, either: { first: 'ja', also: 'zh' } } });
+    expect(speaker.stages).toMatchObject({ heard: 'auto', back: { language: 'zh-CN', own: 'ja' } });
+    const participant = buildLocalAI({ ...SPEAKER, direction: { source: 'zh-CN', target: 'ja' } }, s, shared);
+    if ('refused' in participant) throw new Error(participant.refused);
+    expect(participant.device).toMatchObject({ native: { model: `${APPLE_PREFIX}zh` } });
+    expect(participant.device?.native).not.toHaveProperty('either');
+    useNativeEngineStore.setState({ status: NO_NATIVE_ENGINE });
   });
 });
 

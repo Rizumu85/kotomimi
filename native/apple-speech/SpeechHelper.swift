@@ -11,12 +11,13 @@
 //   speech-helper install LOCALE     fetch a language's assets, with progress
 //   speech-helper release LOCALE     let a language's assets go
 //   speech-helper stream LOCALE      recognize what is given on standard input
+//     [--also LOCALE2 [--prefer L]]  Kotomimi: in either of two languages (see `stream`)
 //
 // A stream takes  {"type":"audio","pcm":"<base64 of 16-bit little-endian mono at 16 kHz>"}
 // and at the end  {"type":"end"};  it writes  {"type":"ready"},  then
 // {"type":"partial","text":…}  — everything heard so far, as it stands now —
 // {"type":"delta","text":…}  for text that will not change any more, and
-// {"type":"final","text":…}  with the whole.
+// {"type":"final","text":…,"locale":…}  with the whole, and the language it was heard in.
 //
 // Two recognizers listen to the same sound. The system's recognizer writes
 // its considered text only every ten seconds or so, or when the sound ends;
@@ -54,12 +55,13 @@ private final class Listener {
     private let continuation: AsyncStream<AnalyzerInput>.Continuation
     private let input: AsyncStream<AnalyzerInput>
 
-    init(locale: Locale, fast: Bool) async throws {
+    /// `confidence`: each piece of text says how sure the recognizer is of it (Kotomimi: to choose between two languages).
+    init(locale: Locale, fast: Bool, confidence: Bool = false) async throws {
         transcriber = SpeechTranscriber(
             locale: locale,
             transcriptionOptions: [],
             reportingOptions: fast ? [.volatileResults, .fastResults] : [],
-            attributeOptions: fast ? [] : [.audioTimeRange]
+            attributeOptions: (fast ? [] : [.audioTimeRange] as Set<SpeechTranscriber.ResultAttributeOption>).union(confidence ? [.transcriptionConfidence] : [])
         )
         // The recognizer takes 16-bit samples as they are; it traps on floating point rather than converting it.
         let formats = await transcriber.availableCompatibleAudioFormats
@@ -84,6 +86,28 @@ private final class Listener {
     }
 
     func finish() { continuation.finish() }
+}
+
+/// Kotomimi: what shows while someone speaks, of a stream that hears one language or two: the quick text so far of
+/// the preferred language, unless the other's is surer of itself by more than a tie — as the kept text is chosen, so
+/// that what shows does not go back and forth between the two while each has a word or two.
+@MainActor
+private final class Shown {
+    private var now: [SpeechHelper.Settled?]
+    private let preferred: Int
+    init(count: Int, preferred: Int) { now = Array(repeating: nil, count: count); self.preferred = preferred }
+    /// One language's quick text so far: what shows now, or nil where that is unchanged.
+    func update(_ at: Int, _ settled: SpeechHelper.Settled) -> String? {
+        let before = shown()
+        now[at] = settled
+        let after = shown()
+        return after == before ? nil : after
+    }
+    private func shown() -> String? {
+        guard now.count > 1, let first = now[preferred] else { return now.compactMap { $0 }.first?.text }
+        guard let second = now[1 - preferred] else { return first.text }
+        return second.confidence > first.confidence + SpeechHelper.tie ? second.text : first.text
+    }
 }
 
 @main
@@ -151,42 +175,82 @@ struct SpeechHelper {
         try emit(["type": "released", "locale": locale.identifier])
     }
 
-    static func stream(_ identifier: String, keep: Set<String> = [], order: [String] = []) async throws {
-        let locale = try await locale(identifier)
-        guard await SpeechTranscriber.installedLocales.contains(where: { $0.identifier == locale.identifier }) else {
-            throw HelperError("The speech assets for \(locale.identifier) are not installed")
-        }
-        await makeRoom(for: locale, keep: keep, order: order)
-        try await AssetInventory.reserve(locale: locale)
-        let considered = try await Listener(locale: locale, fast: false)
-        let quick = try await Listener(locale: locale, fast: true)
+    /// Kotomimi: within this much of each other, two languages' confidences say nothing: the one preferred is taken.
+    static let tie = 0.05
 
-        // What is kept: the considered recognizer's text, in the order it was spoken.
-        let kept = Task {
-            var text = ""
-            var lastEnd = CMTime.zero
-            for try await result in considered.transcriber.results {
-                guard result.isFinal else { continue }
-                guard CMTimeCompare(result.range.start, lastEnd) >= 0 else { throw HelperError("Overlapping stretches of settled speech") }
-                lastEnd = CMTimeRangeGetEnd(result.range)
-                let delta = String(result.text.characters)
-                text += delta
-                if !delta.isEmpty { try emit(["type": "delta", "text": delta]) }
-            }
-            return text
-        }
-        // What shows meanwhile: the quick recognizer's text so far, settled and not.
-        let shown = Task {
-            var settled = ""
-            for try await result in quick.transcriber.results {
-                let piece = String(result.text.characters)
-                if result.isFinal { settled += piece } else { try? emit(["type": "partial", "text": settled + piece]) }
+    /// The text a recognizer settled on, and how sure it was of it (its characters' mean confidence; -1 for none).
+    struct Settled { var text = ""; var weighted = 0.0; var chars = 0
+        var confidence: Double { chars > 0 ? weighted / Double(chars) : -1 }
+        mutating func add(_ text: AttributedString) {
+            for run in text.runs {
+                let n = String(text[run.range].characters).trimmingCharacters(in: .whitespaces).count
+                if let c = run.transcriptionConfidence { weighted += c * Double(n); chars += n }
             }
         }
-        defer { considered.finish(); quick.finish(); kept.cancel(); shown.cancel() }
+    }
+
+    /// Kotomimi: `also`, a second language the same speech may be in (a speaker who speaks both): each language has
+    /// its two recognizers, and what is kept is the text of the one surer of itself — within `tie`, `prefer`'s (the
+    /// language of the speaker's sentence before), else the first — given with its language (`final`'s `locale`).
+    /// What shows meanwhile is the quick text of the one surer so far. Nothing settles before the end then (no
+    /// `delta`): which language a sentence was in is known only once it is all heard.
+    static func stream(_ identifier: String, also: String? = nil, prefer: String? = nil, keep: Set<String> = [], order: [String] = []) async throws {
+        var locales = [try await locale(identifier)]
+        if let also { let second = try await locale(also); if second.identifier != locales[0].identifier { locales.append(second) } }
+        let both = locales.count > 1
+        let preferred = locales.firstIndex { $0.identifier == prefer } ?? 0
+        for locale in locales {
+            guard await SpeechTranscriber.installedLocales.contains(where: { $0.identifier == locale.identifier }) else {
+                throw HelperError("The speech assets for \(locale.identifier) are not installed")
+            }
+        }
+        let held = keep.union(locales.map(\.identifier))
+        for locale in locales {
+            await makeRoom(for: locale, keep: held, order: order)
+            try await AssetInventory.reserve(locale: locale)
+        }
+        var considered: [Listener] = []
+        var quick: [Listener] = []
+        for locale in locales {
+            considered.append(try await Listener(locale: locale, fast: false, confidence: both))
+            quick.append(try await Listener(locale: locale, fast: true, confidence: both))
+        }
+
+        // What is kept: each considered recognizer's text, in the order it was spoken.
+        let kept = considered.map { listener in
+            Task { () -> Settled in
+                var settled = Settled()
+                var lastEnd = CMTime.zero
+                for try await result in listener.transcriber.results {
+                    guard result.isFinal else { continue }
+                    guard CMTimeCompare(result.range.start, lastEnd) >= 0 else { throw HelperError("Overlapping stretches of settled speech") }
+                    lastEnd = CMTimeRangeGetEnd(result.range)
+                    let delta = String(result.text.characters)
+                    settled.text += delta
+                    settled.add(result.text)
+                    if !both, !delta.isEmpty { try emit(["type": "delta", "text": delta]) }
+                }
+                return settled
+            }
+        }
+        // What shows meanwhile: the quick recognizer's text so far, settled and not — of the language surer so far.
+        let shownNow = Shown(count: locales.count, preferred: preferred)
+        let shown = quick.enumerated().map { (at, listener) in
+            Task {
+                var settled = Settled()
+                for try await result in listener.transcriber.results {
+                    var now = settled
+                    now.text += String(result.text.characters)
+                    now.add(result.text)
+                    if result.isFinal { settled = now }
+                    if !result.isFinal || both, let text = shownNow.update(at, now) { try? emit(["type": "partial", "text": text]) }
+                }
+            }
+        }
+        let listeners = considered + quick
+        defer { for listener in listeners { listener.finish() }; for task in kept { task.cancel() }; for task in shown { task.cancel() } }
         do {
-            try await considered.start()
-            try await quick.start()
+            for listener in listeners { try await listener.start() }
             try emit(["type": "ready"])
             var sampleCount = 0
             var ended = false
@@ -198,25 +262,31 @@ struct SpeechHelper {
                       data.count % 2 == 0, !data.isEmpty else { throw HelperError("Not a 16-bit sound message") }
                 sampleCount += data.count / 2
                 guard sampleCount <= maxSamples else { throw HelperError("The sound is longer than one stream takes") }
-                try considered.hear(data)
-                try quick.hear(data)
+                for listener in listeners { try listener.hear(data) }
             }
             guard ended else { throw HelperError("The sound ended without its last message") }
-            considered.finish()
-            quick.finish()
+            for listener in listeners { listener.finish() }
             if sampleCount == 0 {
-                await considered.analyzer.cancelAndFinishNow()
-                await quick.analyzer.cancelAndFinishNow()
-                try emit(["type": "final", "text": ""])
+                for listener in listeners { await listener.analyzer.cancelAndFinishNow() }
+                try emit(["type": "final", "text": "", "locale": locales[0].identifier])
                 return
             }
-            // The quick one has done its part: only the considered text is waited for.
-            await quick.analyzer.cancelAndFinishNow()
-            try await considered.analyzer.finalizeAndFinishThroughEndOfInput()
-            try emit(["type": "final", "text": try await kept.value])
+            // The quick ones have done their part: only the considered text is waited for, every language's at once.
+            for listener in quick { await listener.analyzer.cancelAndFinishNow() }
+            try await withThrowingTaskGroup(of: Void.self) { group in
+                for listener in considered { group.addTask { @MainActor in try await listener.analyzer.finalizeAndFinishThroughEndOfInput() } }
+                try await group.waitForAll()
+            }
+            var heard: [Settled] = []
+            for task in kept { heard.append(try await task.value) }
+            var chosen = 0
+            if both {
+                let other = 1 - preferred
+                chosen = heard[other].confidence > heard[preferred].confidence + tie ? other : preferred
+            }
+            try emit(["type": "final", "text": heard[chosen].text, "locale": locales[chosen].identifier])
         } catch {
-            await considered.analyzer.cancelAndFinishNow()
-            await quick.analyzer.cancelAndFinishNow()
+            for listener in listeners { await listener.analyzer.cancelAndFinishNow() }
             throw error
         }
     }
@@ -237,7 +307,8 @@ struct SpeechHelper {
                 throw HelperError("The system's speech recognition is not available to this program")
             }
             let arguments = Array(CommandLine.arguments.dropFirst())
-            // Kotomimi: `--keep A,B` and `--order A,B` after the locale, for `makeRoom`.
+            // Kotomimi: `--keep A,B` and `--order A,B` after the locale, for `makeRoom`; `--also L` and `--prefer L`, for a
+            // stream that hears two languages.
             var options: [String: [String]] = [:]
             var at = 2
             while at + 1 < arguments.count, arguments[at].hasPrefix("--") {
@@ -251,8 +322,8 @@ struct SpeechHelper {
             case ("inventory", 1, _): try await inventory()
             case ("install", 2, true): try await install(arguments[1], keep: keep, order: order)
             case ("release", 2, true): try await release(arguments[1])
-            case ("stream", 2, true): try await stream(arguments[1], keep: keep, order: order)
-            default: throw HelperError("Usage: speech-helper inventory | install LOCALE [--keep L,...] [--order L,...] | release LOCALE | stream LOCALE [--keep L,...] [--order L,...]")
+            case ("stream", 2, true): try await stream(arguments[1], also: options["also"]?.first, prefer: options["prefer"]?.first, keep: keep, order: order)
+            default: throw HelperError("Usage: speech-helper inventory | install LOCALE [--keep L,...] [--order L,...] | release LOCALE | stream LOCALE [--also L] [--prefer L] [--keep L,...] [--order L,...]")
             }
         } catch {
             try? emit(["type": "error", "message": String(describing: error)])
