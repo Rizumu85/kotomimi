@@ -1,4 +1,5 @@
 @use '../../styles/tokens' as tk;
+@use '../Settings/shared/variables' as vars;
 
 // Segmented control. Color palette and structure mirror the
 // .segmented-control.noise-suppression-modes in Settings.scss so the two
@@ -18,7 +19,7 @@
   align-items: stretch;
   height: 28px;
   box-sizing: border-box;
-  border: 1px solid var(--border-color, #444);
+  border: 1px solid var(--border-color, vars.$border-default);
   border-radius: 6px;
   overflow: hidden;
   flex-shrink: 0;
@@ -30,8 +31,8 @@
     gap: 5px;
     padding: 0 12px;
     font-size: 12px;
-    color: var(--text-secondary, #aaa);
-    background: var(--bg-secondary, #333);
+    color: var(--text-secondary, vars.$text-tertiary);
+    background: var(--bg-secondary, vars.$bg-control);
     border: 0;
     line-height: 1;
     cursor: pointer;
@@ -41,7 +42,7 @@
     svg { flex-shrink: 0; }
 
     &:not(:last-child) {
-      border-right: 1px solid var(--border-color, #444);
+      border-right: 1px solid var(--border-color, vars.$border-default);
     }
 
     // The picker rounds its own frame and clips the segments to the padding
@@ -72,7 +73,7 @@
     }
 
     &:hover:not(.mode-picker__segment--active):not(:disabled) {
-      background: var(--bg-hover, #3a3a3a);
+      background: var(--bg-hover, vars.$bg-hover);
     }
 
     &--active {
@@ -84,7 +85,7 @@
     // costs no layout width; it lands on the segment's own border-radius
     // (set above), so it wraps the end segments' arcs.
     &--warn {
-      box-shadow: inset 0 0 0 1px #f59e0b;
+      box-shadow: inset 0 0 0 1px tk.$color-recommended;
     }
   }
 
@@ -98,8 +99,8 @@
     // so override the locked-cursor to signal it's interactive.
     .mode-picker__segment--active {
       opacity: 1;
-      background: #555;
-      color: #fff;
+      background: vars.$bg-elevated-hover;
+      color: vars.$text-primary;
       cursor: pointer;
     }
   }

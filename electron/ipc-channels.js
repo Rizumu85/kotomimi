@@ -137,6 +137,8 @@ export const INVOKE_CHANNELS = [
   'window:shift-place',
   'window:shift-ready',
   'window:close',
+  // Appearance: the renderer's setting, so nativeTheme (menus, dialogs) agrees with the window
+  'theme:set',
   // Subtitle mode
   'subtitle:enter',
   'subtitle:exit',

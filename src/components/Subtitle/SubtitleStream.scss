@@ -1,4 +1,5 @@
 @use '../../styles/tokens' as tk;
+@use '../Settings/shared/variables' as vars;
 
 .subtitle-stream {
   flex: 1;
@@ -352,12 +353,12 @@
       margin: 8px -12px -10px;
       font-size: 13px;
       background: transparent;
-      border-top: 1px solid rgba(255, 255, 255, 0.14);
-      color: rgba(255, 255, 255, 0.62);
+      border-top: 1px solid color-mix(in srgb, vars.$overlay-fg 14%, transparent);
+      color: color-mix(in srgb, vars.$overlay-fg 62%, transparent);
 
       &:hover {
-        background: rgba(255, 255, 255, 0.08);
-        color: rgba(255, 255, 255, 0.9);
+        background: color-mix(in srgb, vars.$overlay-fg 8%, transparent);
+        color: color-mix(in srgb, vars.$overlay-fg 90%, transparent);
       }
     }
   }

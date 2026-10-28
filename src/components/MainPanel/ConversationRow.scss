@@ -1,4 +1,5 @@
 @use '../../styles/tokens' as tk;
+@use '../Settings/shared/variables' as vars;
 
 .conversation-row {
   display: flex;
@@ -34,12 +35,12 @@
 
   &.avatar-speaker {
     background: tk.$color-speaker-fill;
-    color: #fff;
+    color: tk.$color-on-primary;
   }
 
   &.avatar-participant {
     background: tk.$color-participant;
-    color: #1a1a1a;
+    color: vars.$bg-base;
   }
 
   // Fork: a video's words (VRChat): a play mark in place of a person.
@@ -71,7 +72,7 @@
   align-items: baseline;
   gap: 8px;
   font-size: 0.7rem;
-  color: #9aa0a6;
+  color: vars.$text-source;
 }
 
 .row-name-text {
@@ -112,22 +113,22 @@
   text-transform: uppercase;
 
   &.src {
-    background: #2a2a2a;
-    color: #9aa0a6;
-    border: 1px solid #3a3a3a;
+    background: vars.$bg-bar;
+    color: vars.$text-source;
+    border: 1px solid vars.$border-subtle;
   }
 
   &.tr {
     &.source-speaker {
-      background: rgba(tk.$color-speaker, 0.2);
+      background: color-mix(in srgb, tk.$color-speaker 20%, transparent);
       color: tk.$color-speaker;
-      border: 1px solid rgba(tk.$color-speaker, 0.4);
+      border: 1px solid color-mix(in srgb, tk.$color-speaker 40%, transparent);
     }
 
     &.source-participant {
-      background: rgba(tk.$color-participant, 0.2);
+      background: color-mix(in srgb, tk.$color-participant 20%, transparent);
       color: tk.$color-participant;
-      border: 1px solid rgba(tk.$color-participant, 0.4);
+      border: 1px solid color-mix(in srgb, tk.$color-participant 40%, transparent);
     }
   }
 }
@@ -157,21 +158,21 @@
   height: 18px;
   padding: 0;
   margin-left: 4px;
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, vars.$overlay-fg 8%, transparent);
   border: none;
   border-radius: 3px;
-  color: #c8c8c8;
+  color: vars.$text-tertiary;
   cursor: pointer;
   transition: background-color 0.15s, color 0.15s;
 
   &:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.18);
-    color: #fff;
+    background: color-mix(in srgb, vars.$overlay-fg 18%, transparent);
+    color: vars.$text-primary;
   }
 
   &.playing {
-    background: rgba(tk.$color-speaker, 0.45);
-    color: #fff;
+    background: color-mix(in srgb, tk.$color-speaker 45%, transparent);
+    color: vars.$text-primary;
   }
 
   &:disabled {

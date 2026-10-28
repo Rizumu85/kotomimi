@@ -31,7 +31,7 @@ import {
   type AudioMode,
 } from '../../stores/audioStore';
 import { useCleanupAudioSystemListeners, useInitAudioSystemListeners } from '../../stores/audioSystemStore';
-import { useConversationDisplayStore } from '../../stores/conversationDisplayStore';
+import { useConversationColours, useConversationDisplayStore } from '../../stores/conversationDisplayStore';
 import { usePanelNotes, usePanelNotesStore } from '../../stores/panelNotesStore';
 import { useProviderStore } from '../../stores/providerStore';
 import { useRoutingStore } from '../../stores/routingStore';
@@ -68,6 +68,7 @@ import { usePushToTalk } from './panel/usePushToTalk';
 import { InputWaveforms, OutputWaveform } from './panel/Waveforms';
 import { StatusLine } from './StatusLine';
 import { useStatusLine } from './useStatusLine';
+import { toneOf } from '../../lib/view/tone';
 import './MainPanel.scss';
 
 /**
@@ -174,6 +175,8 @@ export default function MainPanel() {
   const provider = useProviderStore((s) => (s.selected ? getProvider(s.selected) : undefined));
   const providerSettings = useProviderStore((s) => (s.selected ? s.entries[s.selected]?.settings : undefined));
   const display = useConversationDisplayStore();
+  // The user's colours where set, the scheme's otherwise (spec 2026-10-22 §3).
+  const colours = useConversationColours();
 
   // The conversation, then the panel notes after it (spec 2026-10-05 §5), through the display filter,
   // reusing unchanged lines (ruling 14).
@@ -299,7 +302,7 @@ export default function MainPanel() {
   );
 
   return (
-    <div className="main-panel-wrapper" style={{ '--conversation-bg-color': display.bgColor, '--conversation-source-color': display.sourceTextColor, '--conversation-translation-color': display.translationTextColor } as CSSProperties}>
+    <div className="main-panel-wrapper" style={{ '--conversation-bg-color': colours.bgColor, '--conversation-source-color': colours.sourceTextColor, '--conversation-translation-color': colours.translationTextColor } as CSSProperties}>
       {/* Fork: nothing about a missing virtual microphone to a provider that never speaks. */}
       <Banners speaks={provider?.speech !== 'never'} />
       <UpdateDialog />
@@ -312,7 +315,7 @@ export default function MainPanel() {
           <p className="kt-warming__banner" role="status"><Loader size={14} className="kt-warming__spin" /><span>{t('providers.localai.nativeLoading')}</span></p>
         )}
         {takeover ? (
-          <div className="conversation-display">
+          <div className="conversation-display" data-tone={toneOf(colours.bgColor)}>
             <div className="empty-state">
               <Captions size={32} /><p>{t('mainPanel.subtitleTakeover', 'Translations are showing in the subtitle overlay')}</p>
               {overlayNotes.length > 0 && (
@@ -324,6 +327,8 @@ export default function MainPanel() {
           </div>
         ) : (
           <ConversationList
+            // The conversation keeps the user's colours in both app themes, and a colour never set follows the scheme; its palette follows them (spec §3).
+            tone={toneOf(colours.bgColor)}
             items={drawn} lit={lit} replaying={replaying} replayLegs={replayLegs}
             canReplay={(id) => { const s = segments.get(id); return !!s?.final && s.speech.some((e) => e.pcm.length > 0); }}
             onReplay={(leg, id) => {
