@@ -21,7 +21,7 @@ import { isElectron, isExtension, isLinux, isMacOS, isWindows } from '../../util
 import { initialDraft, draftFromRecord, setupReducer, canAdvance, LAST_STEP, shownSteps } from './setupDraft';
 import type { SetupDraft } from './setupDraft';
 import { useApplySetup } from './useApplySetup';
-import { offersRecord } from './providerPaths';
+import { offersRecord, wizardProvider } from './providerPaths';
 import StepLanguage from './steps/StepLanguage';
 import StepScenario from './steps/StepScenario';
 import StepProviderPath from './steps/StepProviderPath';
@@ -98,7 +98,8 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ variant, onClose }) => {
         startTour(buildTourCtx({
           record: { scenario: draft.scenario },
           provider: draft.provider!,
-          mode: preset.mode, textOnly: preset.textOnly, isSignedIn,
+          // A provider that never speaks is read as text only, whatever the use said (Kotomimi's).
+          mode: preset.mode, textOnly: preset.textOnly || wizardProvider(draft.provider)?.speech === 'never', isSignedIn,
           apiKeyValid: draft.providerPath === 'own-key' ? !draft.credentialsPending : null,
           // Fork: the Kotomimi provider set to run on this computer has models to download.
           deviceStages: (draft.provider as string | null) === 'localai' && ['device', 'share'].includes(draft.credentialChoice?.value ?? ''),

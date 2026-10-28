@@ -1,8 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { SCENARIOS } from '../../../lib/setup/scenarios';
-import { providerFits } from '../providerPaths';
-import type { SetupAction, SetupDraft } from '../setupDraft';
+import { providerFits, wizardProvider } from '../providerPaths';
+import type { ProviderType } from '../../../types/Provider';
+import { providerKept, type SetupAction, type SetupDraft } from '../setupDraft';
 
 interface Props { draft: SetupDraft; dispatch: React.Dispatch<SetupAction> }
 
@@ -40,7 +41,11 @@ const StepScenario: React.FC<Props> = ({ draft, dispatch }) => {
       <h2>{t('setup.steps.scenario.title', 'What do you want to do?')}</h2>
       <p>{t('setup.steps.scenario.desc', 'Pick the closest match. You can change any of this later.')}</p>
       <div className="setup-cards" role="radiogroup" aria-label={t('setup.steps.scenario.title', 'What do you want to do?')}>
-        {SCENARIOS.map((s) => (
+        {/* Fork: where the provider is not chosen here, only the uses it serves: Kotomimi's, which speaks none. */}
+        {SCENARIOS.filter((s) => {
+          const kept = draft.provider ?? ('localai' as ProviderType);
+          return !providerKept() || wizardProvider(kept) === undefined || providerFits(kept, s.id);
+        }).map((s) => (
           <label key={s.id} className={`setup-card${draft.scenario === s.id ? ' is-selected' : ''}`}>
             <input
               type="radio" name="scenario" value={s.id} checked={draft.scenario === s.id}

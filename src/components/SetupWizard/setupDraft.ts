@@ -26,6 +26,8 @@ let hidden: readonly SetupStep[] = KOTOMIMI_HIDDEN_STEPS;
 export function setHiddenSetupSteps(steps: readonly SetupStep[]): void {
   hidden = steps;
 }
+/** Fork: the provider is not chosen in the wizard (its steps are hidden): the one the draft has stays, whatever the use. */
+export const providerKept = (): boolean => hidden.includes(2);
 /** The steps the wizard walks, in order. */
 export const shownSteps = (): SetupStep[] => ([0, 1, 2, 3, 4, 5] as SetupStep[]).filter((step) => !hidden.includes(step));
 
@@ -138,7 +140,9 @@ export function canAdvance(d: SetupDraft, env: AdvanceEnv): boolean {
 export function setupReducer(d: SetupDraft, a: SetupAction): SetupDraft {
   switch (a.type) {
     case 'setScenario':
-      if (a.keepProvider) return { ...d, scenario: a.scenario };
+      // Fork: with no step to choose another, a provider the draft has is kept — the saved one, on a re-run, and with
+      // it every place its stages run (FORK.md: "重新运行向导时，已保存的提供商和各环节的去处保持不变").
+      if (a.keepProvider || providerKept()) return { ...d, scenario: a.scenario };
       return { ...d, scenario: a.scenario, providerPath: null, provider: null, ...cleared };
     case 'setPath':
       return { ...d, providerPath: a.path, provider: a.provider, ...cleared };

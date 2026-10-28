@@ -175,6 +175,14 @@ describe('the steps the fork hides: which service, and which device', () => {
     expect(canAdvance({ ...d, step: 3 }, { isSignedIn: false })).toBe(true);
   });
 
+  it('keeps the saved provider, and with it its places, when another use is chosen on a re-run (fork)', () => {
+    const kotomimi = { ...draftFromRecord({ scenario: 'subtitle-myself', providerPath: 'own-key', provider: 'localai' }, { credentialsAlreadyValid: false }), step: 1 as const };
+    // A use the provider is not fit for would clear it where the provider is chosen in the wizard; here it is not.
+    const changed = setupReducer(kotomimi, { type: 'setScenario', scenario: 'two-way-text', keepProvider: false });
+    expect(changed).toMatchObject({ scenario: 'two-way-text', provider: 'localai' });
+    expect(setupReducer(changed, { type: 'next' })).toMatchObject({ step: 4, provider: 'localai', credentialChoice: null });
+  });
+
   it('keeps the provider a draft already names, and writes no choice over its saved places', () => {
     const rerun = { ...draftFromRecord({ scenario: 'subtitle-myself', providerPath: 'own-key', provider: Provider.SONIOX }, { credentialsAlreadyValid: true }), step: 1 as const };
     const d = setupReducer(rerun, { type: 'next' });

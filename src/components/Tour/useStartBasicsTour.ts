@@ -33,7 +33,8 @@ export function useStartBasicsTour(): () => void {
       // which is wizard-time history (tourContext.ts).
       provider: storedProviderValue(useProviderStore.getState().selected ?? '') as ProviderType,
       mode: useAudioStore.getState().mode,
-      textOnly: s.textOnly,
+      // Kotomimi's never speaks: read as text only, whatever the toggle says.
+      textOnly: s.textOnly || selected === 'localai',
       isSignedIn,
       apiKeyValid: s.isApiKeyValid,
       deviceStages: kotomimi?.asrVia === 'device' || kotomimi?.translateAt === 'device',
