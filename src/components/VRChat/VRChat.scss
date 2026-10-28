@@ -77,31 +77,41 @@
   color: vars.$color-warning;
 }
 
-// The chatbox would stay empty: said under its picture, with the way out beside it.
+// The chatbox would stay empty: said under its picture, with the way out at the end — as the speed test's advice.
 .kt-vrchat__unheard {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 10px;
+  align-items: baseline;
+  gap: 4px 8px;
   margin: 8px 0 0;
+  padding: 7px 10px;
+  font-size: vars.$font-caption;
+  line-height: 1.5;
+  color: vars.$text-secondary;
+  background: rgba(240, 179, 110, 0.1);
+  border-radius: vars.$radius-sm;
 }
 
 .kt-vrchat__fix {
-  padding: 2px 10px;
-  border: 1px solid currentColor;
-  border-radius: 6px;
-  background: none;
-  color: inherit;
+  padding: 0;
   font: inherit;
+  font-weight: 600;
+  color: vars.$color-warning;
+  background: none;
+  border: 0;
   cursor: pointer;
 
   &:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.06);
+    text-decoration: underline;
   }
 
   &:disabled {
-    opacity: 0.5;
-    cursor: default;
+    cursor: not-allowed;
+    opacity: vars.$disabled-opacity;
+  }
+
+  &:focus-visible {
+    @include vars.focus-ring;
   }
 }
 

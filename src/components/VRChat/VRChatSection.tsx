@@ -103,7 +103,7 @@ export function VRChatSection() {
         </div>
       )}
       {unheard && (
-        <p className="kt-vrchat__todo kt-vrchat__unheard" role="status">
+        <p className="kt-vrchat__unheard" role="status">
           <span>{t('fork.vrchat.chatboxUnheard')}</span>
           <button type="button" className="kt-vrchat__fix" onClick={() => setMode('both')} disabled={locked}>{t('fork.vrchat.chatboxHearBoth')}</button>
         </p>
