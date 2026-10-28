@@ -25,6 +25,30 @@ const roman = (line: string) => annotateJapanese(line, ja, { furigana: false, ro
 /** As the dictionary alone reads it. */
 const plain = (line: string) => ja.tokenize(line).map((t) => katakanaToHiragana(t.reading && t.reading !== '*' ? t.reading : t.surface_form)).join('');
 
+describe('the days and months of a date (fork)', () => {
+  it('reads the first of a month ついたち, and 1日 alone as the dictionary does', () => {
+    expect(read('4月1日')).toBe('しがつついたち');
+    expect(read('四月一日')).toBe('しがつついたち');
+    expect(read('12月1日に')).toBe('じゅうにがつついたちに');
+    expect(read('毎月1日')).toBe('まいつきついたち');
+    expect(read('今月一日から')).toBe('こんげつついたちから');
+    // A day's length, not a date.
+    expect(read('1日')).toBe('1にち');
+    expect(read('一日中')).toBe('いちにちじゅう');
+    expect(read('1ヶ月1日')).toBe('1かげつ1にち');
+  });
+
+  it('reads a month in digits with its number, as its name says it', () => {
+    expect(read('4月')).toBe('しがつ');
+    expect(read('7月7日')).toBe('しちがつなのか');
+    expect(read('9月')).toBe('くがつ');
+    expect(read('1月')).toBe('いちがつ');
+    // No month by that number: the digits stay bare.
+    expect(read('13月')).toBe('13がつ');
+    expect(read('3か月')).toBe('3かげつ');
+  });
+});
+
 describe('a number and its counter', () => {
   it('doubles the counter’s first sound after 一, 六, 八, 十 and 百', () => {
     expect(plain('一回だけ')).toBe('いちかいだけ');
@@ -162,8 +186,8 @@ describe('a word with two readings', () => {
     expect(read('この後プラベ行くよ')).toBe('このあとぷらべいくよ');
     expect(read('後は任せた')).toBe('あとはまかせた');
     expect(read('三日後')).toBe('みっかご');
-    // A number in digits is given its reading where it is one nobody could guess: とおか.
-    expect(read('8月10日なの')).toBe('8がつとおかなの');
+    // A number in digits is given its reading where it is one nobody could guess: とおか. The month too (fork).
+    expect(read('8月10日なの')).toBe('はちがつとおかなの');
     expect(read('月が綺麗')).toBe('つきがきれい');
     expect(read('そういう風に聞こえた')).toBe('そういうふうにきこえた');
     expect(read('風が強い')).toBe('かぜがつよい');

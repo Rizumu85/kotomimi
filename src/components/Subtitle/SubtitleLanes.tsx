@@ -61,7 +61,7 @@ function Slot({ className, lang, children, fitKey }: { className: string; lang?:
  * (a provider that speaks; the aids' text is lit whole, once it has all been spoken).
  */
 function Stretch({ piece, language, upTo }: { piece: LanePiece; language?: string; upTo: number | undefined }) {
-  const annotated = useAnnotation(piece.text, language);
+  const annotated = useAnnotation(piece.text, language, undefined, piece.growing === true);
   const played = upTo === undefined ? 0 : Math.min(piece.text.length, Math.max(0, upTo - piece.start));
   if (annotated) return <AnnotatedLines lines={annotated} inline className={played > 0 && played >= piece.text.length ? 'karaoke-played' : undefined} />;
   if (played <= 0) return <span>{piece.text}</span>;

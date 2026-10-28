@@ -53,6 +53,8 @@ const NATIVE_TWO = new Set(['通り', '切れ', '粒', '握り', '箱', '皿', '
 const UNITS = new Set(['百', '千', '兆']);
 /** The days counted the native way: 二日 is ふつか, 十日 とおか. Above ten only 十四日, 二十日 and 二十四日 are. */
 const DAYS: Readonly<Record<number, string>> = { 2: 'フツ', 3: 'ミッ', 4: 'ヨッ', 5: 'イツ', 6: 'ムイ', 7: 'ナノ', 8: 'ヨウ', 9: 'ココノ', 10: 'トオ' };
+/** The months by their number, as their names say it: 四月 is しがつ, 七月 しちがつ, 九月 くがつ. */
+const MONTHS: Readonly<Record<number, string>> = { 1: 'イチ', 2: 'ニ', 3: 'サン', 4: 'シ', 5: 'ゴ', 6: 'ロク', 7: 'シチ', 8: 'ハチ', 9: 'ク', 10: 'ジュウ', 11: 'ジュウイチ', 12: 'ジュウニ' };
 const KANJI_DIGIT: Readonly<Record<string, number>> = { 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
 /** A full-width digit is a word the dictionary knows, and reads as it does the kanji: ８ is はち. */
 const WIDE_DIGIT: Readonly<Record<string, string>> = { '１': '一', '２': '二', '３': '三', '４': '四', '５': '五', '６': '六', '７': '七', '８': '八', '９': '九' };
@@ -312,6 +314,11 @@ function days(tokens: readonly JapaneseToken[], i: number): Change[] | undefined
   if (!count || surface(tokens[count.start - 1]) === '第') return undefined;
   const { value } = count;
   const inDigits = DIGITS.test(number.surface_form);
+  // The first of a month is ついたち: 4月1日, 四月一日, 毎月1日. Alone, 1日 is as often a day's length (いちにち), and
+  // after ヶ月 it is one (1ヶ月1日).
+  if (value === 1 && tail === 'カ' && count.start === i && /月$/.test(surface(tokens[i - 1])) && !/[ヶヵかカケ箇]月$/.test(surface(tokens[i - 1])) && !/^[ヶヵかカケ箇]$/.test(surface(tokens[i - 2]))) {
+    return [[i, 'ツイ'], [i + 1, 'タチ']];
+  }
   if (value >= 2 && value <= 10) return count.start === i ? [[i, DAYS[value]], [i + 1, tail]] : undefined;
   if (value === 14 || value === 24) return [[i, inDigits ? `${value === 14 ? 'ジュウ' : 'ニジュウ'}ヨッ` : 'ヨッ'], [i + 1, tail]];
   if (value === 20) return inDigits ? [[i, 'ハツ'], [i + 1, tail]] : [[i - 1, 'ハ'], [i, 'ツ'], [i + 1, tail]];
@@ -366,6 +373,12 @@ function counted(tokens: readonly JapaneseToken[], i: number): Change[] | undefi
   if (NATIVE_NOUNS.has(counter.surface_form) && counter.pos === '名詞' && number.reading && !isNumeral(tokens[i - 1])) {
     if (digit === '一') return [[i, 'ヒト']];
     if (digit === '二' && NATIVE_TWO.has(counter.surface_form)) return [[i, 'フタ']];
+  }
+  // A month in digits is read with its number, as its name says it — 4月 しがつ, 7月 しちがつ, 9月 くがつ — where the
+  // digits alone have no reading.
+  if (counter.surface_form === '月' && counter.reading === 'ツキ' && DIGITS.test(digit)) {
+    const month = numberAt(tokens, i);
+    if (month && month.start === i && MONTHS[month.value]) return [[i, MONTHS[month.value]], [i + 1, 'ガツ']];
   }
   if (!isCounter(counter) || !counter.reading) return undefined;
   const day = days(tokens, i) ?? twenty(tokens, i);

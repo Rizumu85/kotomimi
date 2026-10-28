@@ -37,6 +37,8 @@ export interface LanePiece {
   text: string;
   segmentId: SegmentId;
   start: number;
+  /** Fork: its sentence is still being heard (the row is not final): its last word's reading waits (`useAnnotation`). */
+  growing?: boolean;
 }
 
 export interface LaneText {
@@ -84,7 +86,7 @@ function piecesOf(rows: readonly Row[]): LanePiece[] {
   for (const row of rows) {
     const start = Math.max(from, at);
     const end = Math.min(to, at + row.text.length);
-    if (end > start) pieces.push({ key: row.key, text: row.text.slice(start - at, end - at), segmentId: row.segmentId, start: row.start + (start - at) });
+    if (end > start) pieces.push({ key: row.key, text: row.text.slice(start - at, end - at), segmentId: row.segmentId, start: row.start + (start - at), ...(row.final ? {} : { growing: true }) });
     at += row.text.length;
   }
   return pieces;

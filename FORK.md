@@ -28,7 +28,7 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 | 打字查词 | 会话中按 Ctrl+K，输入母语，得到对方语言的译文 | `src/components/MainPanel/panel/TypedText.tsx` |
 | 麦克风激活阈值 | 像 VRChat 那样：比设定音量小的声音当作静音，扬声器里对方的声音进不了识别和语法反馈。设置里的麦克风下面有滑块和实时音量条，没开会话时可以按麦克风图标测试 | `src/lib/audio/capture/micGate.ts`、`src/components/Settings/sections/MicGateControl.tsx` |
 | 假名注音、罗马音、拼音、原文斜体 | 日语汉字上方显示平假名；日语、韩语、俄语、乌克兰语下方显示拉丁字母注音（乌克兰语按乌克兰 2010 年的国家标准，不套俄语的表）；中文每个字上方显示带声调的拼音（默认关，粤语不加）；原文要不要用斜体（默认斜体，和上游一样；汉字和假名的斜体是浏览器硬倾斜出来的，可以关掉）。四个开关都在显示设置弹窗底部。拼音和乌克兰语转写、注音两侧留空居中，是 2026-10-17 照上游 #632/#638 补的（拼音用同一个 `pinyin-pro` 3.29.5） | `src/lib/annotate/`、`src/components/Annotated/` |
-| 注音读音修正 | 词典在口语里常读错的词（行った、今、方、何、数词加量词……）按上下文改成说话时的读音 | `src/lib/annotate/japaneseReadings.ts` |
+| 注音读音修正 | 词典在口语里常读错的词（行った、今、方、何、数词加量词……）按上下文改成说话时的读音；日期里「月」后面的 1日 读ついたち，数字写的月份连数字一起标（4月 しがつ、7月 しちがつ、9月 くがつ）。一句还在识别时，最后一个词先不标读音，说完再标，读音不会跳（这两点参考上游 2026-10-15 的注音，2026-10-28） | `src/lib/annotate/japaneseReadings.ts`、`annotate.ts` 的 `holdLastReading` |
 | 字体 | 界面、拉丁字母、罗马音、各语言的正文和注音，分别选字体 | `src/lib/fonts/`、`src/components/Fonts/` |
 | 语言置顶 | 语言下拉换成应用自己的列表：每个语言右边有置顶按钮，置顶的排最前；还可以输入几个字筛选 | `src/components/providers/LanguageMenu.tsx`、`src/stores/languagePinStore.ts` |
 | 开机时在后台启动 | 一个开关，默认关。打开后登录 Windows 时不弹窗口地启动，并把原生引擎预先加载一遍（之后放掉显存）。只在安装版的 Windows 上显示 | `electron/autostart.js`、`src/components/Autostart/AutostartSection.tsx` |

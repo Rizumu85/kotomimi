@@ -6,7 +6,7 @@
  * it always did.
  */
 import { Fragment, useEffect, useMemo, useSyncExternalStore } from 'react';
-import { annotateText, needsJapanese } from '../../lib/annotate/annotate';
+import { annotateText, holdLastReading, needsJapanese } from '../../lib/annotate/annotate';
 import { japaneseTokenizer, loadJapanese, subscribeJapanese } from '../../lib/annotate/japaneseStore';
 import { annotatedLanguage, isChinese } from '../../lib/annotate/script';
 import type { AnnotatedLine } from '../../lib/annotate/types';
@@ -16,9 +16,10 @@ import './AnnotatedText.scss';
 /**
  * `text` as annotated lines, or null when it would be drawn no differently.
  * `language` is the row's (the leg's pair, or what the provider detected): it
- * decides only how a line of Han characters alone is read.
+ * decides only how a line of Han characters alone is read. Fork: `growing`, the
+ * sentence is still being heard: its last word's reading waits for its end.
  */
-export function useAnnotation(text: string, language: string | null | undefined, only?: 'readings' | 'roman'): AnnotatedLine[] | null {
+export function useAnnotation(text: string, language: string | null | undefined, only?: 'readings' | 'roman', growing = false): readonly AnnotatedLine[] | null {
   // Fork: `only` asks for the readings above the words alone, or the romanization alone (a marked correction writes
   // its pieces with readings, and one romanization under the whole: `Correction.tsx`).
   const furigana = useAnnotationStore((s) => s.furigana) && only !== 'roman';
@@ -35,9 +36,10 @@ export function useAnnotation(text: string, language: string | null | undefined,
   }, [wantsJapanese]);
   return useMemo(() => {
     if (!furigana && !roman && !pinyin) return null;
-    const lines = annotateText(text, { furigana, roman, pinyin, language: hint, chinese, japanese });
+    const annotated = annotateText(text, { furigana, roman, pinyin, language: hint, chinese, japanese });
+    const lines = growing ? holdLastReading(annotated) : annotated;
     return lines.some((line) => line.roman !== undefined || line.parts.some((part) => part.ruby !== undefined)) ? lines : null;
-  }, [text, furigana, roman, pinyin, hint, chinese, japanese]);
+  }, [text, furigana, roman, pinyin, hint, chinese, japanese, growing]);
 }
 
 export interface AnnotatedLinesProps {

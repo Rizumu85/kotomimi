@@ -60,3 +60,20 @@ export function needsJapanese(text: string, o: Pick<AnnotateInputs, 'furigana' |
   if (!o.furigana && !o.roman) return false;
   return text.split('\n').some((line) => languageOf(line, o) === 'ja');
 }
+
+/**
+ * Lines with their last reading held back: of a sentence still being heard, the last word may change yet - a
+ * dictionary reads it from what follows (行っ: いっ or おこなっ), and recognition rewrites it - so its reading
+ * would come and go. It shows once the sentence is final (as upstream's `holdLastReading`, kizuna-ai-lab/sokuji).
+ */
+export function holdLastReading(lines: readonly AnnotatedLine[]): readonly AnnotatedLine[] {
+  for (let l = lines.length - 1; l >= 0; l--) {
+    const parts = lines[l].parts;
+    for (let p = parts.length - 1; p >= 0; p--) {
+      if (parts[p].ruby === undefined) continue;
+      const held = parts.map((part, i) => (i === p ? { text: part.text } : part));
+      return lines.map((line, i) => (i === l ? { ...line, parts: held } : line));
+    }
+  }
+  return lines;
+}

@@ -155,7 +155,7 @@ const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, r
   const lead = row.text.length - row.text.trimStart().length;
   const played = upTo === undefined ? 0 : Math.min(text.length, Math.max(0, upTo - row.start - lead));
   // Fork: furigana and romanization, when the row's language has them and they are switched on.
-  const annotated = useAnnotation(text, lang);
+  const annotated = useAnnotation(text, lang, undefined, !row.final);
   // Fork: grammar feedback that changes something, drawn as the sentence said, marked — on its answer's first row;
   // the answer's other rows (where sentences are cut into rows) are then part of it.
   const coached = useCoached();

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { annotateLine, annotateText, needsJapanese } from './annotate';
+import { annotateLine, annotateText, holdLastReading, needsJapanese } from './annotate';
 import { annotateJapanese, furiganaParts, katakanaToHiragana, romaji } from './japanese';
 import { buildJapaneseTokenizer } from './japaneseTokenizer';
 import { romanizeKorean } from './korean';
@@ -216,5 +216,21 @@ describe('a Chinese explanation that quotes Japanese, in a row of any language (
     const tokenizer = { tokenize: () => [] };
     const line = annotateLine(FEEDBACK, { furigana: true, roman: true, language: 'ja', japanese: tokenizer });
     expect(line).toEqual({ parts: [{ text: FEEDBACK }] });
+  });
+});
+
+describe('holdLastReading (fork)', () => {
+  it('holds back the last reading of a sentence still being heard, and leaves the rest and the romanization', () => {
+    const lines = [
+      { parts: [{ text: '今日', ruby: 'きょう' }, { text: 'は' }], roman: 'kyou wa' },
+      { parts: [{ text: '東京', ruby: 'とうきょう' }, { text: 'に' }, { text: '行', ruby: 'い' }, { text: 'って' }], roman: 'toukyou ni itte' },
+    ];
+    expect(holdLastReading(lines)).toEqual([
+      lines[0],
+      { parts: [{ text: '東京', ruby: 'とうきょう' }, { text: 'に' }, { text: '行' }, { text: 'って' }], roman: 'toukyou ni itte' },
+    ]);
+    // Nothing read: as it is.
+    const bare = [{ parts: [{ text: 'hello' }] }];
+    expect(holdLastReading(bare)).toBe(bare);
   });
 });
