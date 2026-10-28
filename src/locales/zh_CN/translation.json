@@ -1686,6 +1686,8 @@
       "chatboxOff": "关",
       "chatboxTranslation": "译文",
       "chatboxSourceFirst": "原文在上",
+      "chatboxUnheard": "现在只翻译对方，你说的话不会显示在头顶。",
+      "chatboxHearBoth": "改成「两者」",
       "chatboxTranslationFirst": "译文在上",
       "onVideo": "播放视频时",
       "videoAsk": "询问",

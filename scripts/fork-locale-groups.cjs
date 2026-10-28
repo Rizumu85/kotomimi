@@ -74,6 +74,8 @@ module.exports = {
     chatboxOff: ['Off', '关', '關'],
     chatboxTranslation: ['Translation', '译文', '譯文'],
     chatboxSourceFirst: ['Original on top', '原文在上', '原文在上'],
+    chatboxUnheard: ['Only the other side is translated now: what you say won\'t show above your avatar.', '现在只翻译对方，你说的话不会显示在头顶。', '現在只翻譯對方，你說的話不會顯示在頭頂。'],
+    chatboxHearBoth: ['Switch to Both', '改成「两者」', '改成「兩者」'],
     chatboxTranslationFirst: ['Translation on top', '译文在上', '譯文在上'],
     onVideo: ['When a video plays', '播放视频时', '播放影片時'],
     videoAsk: ['Ask', '询问', '詢問'],

@@ -1686,6 +1686,8 @@
       "chatboxOff": "Off",
       "chatboxTranslation": "Translation",
       "chatboxSourceFirst": "Original on top",
+      "chatboxUnheard": "Only the other side is translated now: what you say won't show above your avatar.",
+      "chatboxHearBoth": "Switch to Both",
       "chatboxTranslationFirst": "Translation on top",
       "onVideo": "When a video plays",
       "videoAsk": "Ask",

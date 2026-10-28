@@ -8,7 +8,9 @@
 import { useEffect } from 'react';
 import { Ban, Gamepad2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useSessionLocked } from '../../app/useRun';
 import { vrchatOffered } from '../../app/vrchatHandle';
+import useAudioStore from '../../stores/audioStore';
 import { useProviderStore } from '../../stores/providerStore';
 import { useVRChatStore, type ChatboxShows, type OnVideo } from '../../stores/vrchatStore';
 import ToggleSwitch from '../Settings/shared/ToggleSwitch';
@@ -40,6 +42,12 @@ const ON_VIDEO: Array<[OnVideo, string]> = [['ask', 'videoAsk'], ['normal', 'vid
 export function VRChatSection() {
   const { t } = useTranslation();
   const { muteGate, chatbox, chatboxTranslationFirst, onVideo, translateVideo, link, recent, setMuteGate, setChatbox, setChatboxTranslationFirst, setOnVideo, setTranslateVideo, view } = useVRChatStore();
+  // The chatbox carries what the user says: with only the other side heard, it stays empty. Said under it, with the
+  // way out — the mode, changed while no session runs, as the main panel changes it.
+  const mode = useAudioStore((state) => state.mode);
+  const setMode = useAudioStore((state) => state.setMode);
+  const locked = useSessionLocked();
+  const unheard = chatbox !== 'off' && mode === 'participant';
   const pair = useProviderStore((state) => (state.selected ? state.entries[state.selected]?.pair : undefined));
   // While the card is open the mute is asked, so that whether VRChat answers is shown as it is.
   useEffect(() => {
@@ -86,13 +94,19 @@ export function VRChatSection() {
       </div>
       {chatbox !== 'off' && (
         // As it will look above the avatar: the last sentence, or one in the pair's languages.
-        <div className="kt-chatbox-preview" aria-hidden="true">
+        <div className={`kt-chatbox-preview${unheard ? ' is-unheard' : ''}`} aria-hidden="true">
           {(LOOKS.find((look) => look.shows === chatbox && (chatbox !== 'both' || look.translationFirst === chatboxTranslationFirst))?.lines ?? []).map((line) => (
             <span key={line} className={`kt-chatbox-preview__line is-${line}`}>
               {line === 'said' ? recent?.said ?? sampleIn(pair?.source) : recent?.translation ?? sampleIn(pair?.target)}
             </span>
           ))}
         </div>
+      )}
+      {unheard && (
+        <p className="kt-vrchat__todo kt-vrchat__unheard" role="status">
+          <span>{t('fork.vrchat.chatboxUnheard')}</span>
+          <button type="button" className="kt-vrchat__fix" onClick={() => setMode('both')} disabled={locked}>{t('fork.vrchat.chatboxHearBoth')}</button>
+        </p>
       )}
       <div className="kt-vrchat__label">{t('fork.vrchat.onVideo')}</div>
       <div className="segmented-control">

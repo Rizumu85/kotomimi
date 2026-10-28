@@ -77,6 +77,34 @@
   color: vars.$color-warning;
 }
 
+// The chatbox would stay empty: said under its picture, with the way out beside it.
+.kt-vrchat__unheard {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 8px 0 0;
+}
+
+.kt-vrchat__fix {
+  padding: 2px 10px;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
 // The chatbox's looks, as pictures of it: grey the original, green the translation.
 .kt-chatbox-looks {
   display: grid;
@@ -156,6 +184,10 @@
 }
 
 // The chatbox as it will look above the avatar.
+.kt-chatbox-preview.is-unheard {
+  opacity: 0.45;
+}
+
 .kt-chatbox-preview {
   display: flex;
   flex-direction: column;

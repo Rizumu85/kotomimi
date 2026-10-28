@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 
 vi.mock('../../app/vrchatHandle', () => ({ vrchatOffered: () => true }));
 vi.mock('../../services/persistSetting', () => ({ persistSetting: async () => {} }));
 vi.mock('react-i18next', async (importOriginal) => ({ ...(await importOriginal<typeof import('react-i18next')>()), useTranslation: () => ({ t: (key: string) => key }) }));
 
+import useAudioStore from '../../stores/audioStore';
 import { useVRChatStore } from '../../stores/vrchatStore';
 import { useProviderStore } from '../../stores/providerStore';
 import { VRChatSection } from './VRChatSection';
@@ -33,5 +34,21 @@ describe('VRChatSection — the chatbox chosen from pictures of it (fork)', () =
     useVRChatStore.setState({ chatbox: 'both', recent: { said: '你好', translation: 'こんにちは' } });
     render(<VRChatSection />);
     expect([...document.querySelectorAll('.kt-chatbox-preview__line')].map((l) => l.textContent)).toEqual(['你好', 'こんにちは']);
+  });
+});
+
+describe('VRChatSection — a chatbox that would stay empty (fork)', () => {
+  it('says so while only the other side is heard, with the way to hear both, and is quiet otherwise', () => {
+    useAudioStore.setState({ mode: 'participant' });
+    useVRChatStore.setState({ chatbox: 'translation' });
+    render(<VRChatSection />);
+    expect(screen.getByText('fork.vrchat.chatboxUnheard')).toBeTruthy();
+    expect(document.querySelector('.kt-chatbox-preview')?.classList.contains('is-unheard')).toBe(true);
+    fireEvent.click(screen.getByText('fork.vrchat.chatboxHearBoth'));
+    expect(useAudioStore.getState().mode).toBe('both');
+    expect(screen.queryByText('fork.vrchat.chatboxUnheard')).toBeNull();
+    // The chatbox off: nothing to say.
+    act(() => { useAudioStore.setState({ mode: 'participant' }); useVRChatStore.setState({ chatbox: 'off' }); });
+    expect(screen.queryByText('fork.vrchat.chatboxUnheard')).toBeNull();
   });
 });
