@@ -42,13 +42,13 @@ export function useDeviceSettings(settings: S, update: (patch: Partial<S>) => vo
 
 /** The slots a run would load on this computer, each once: both legs' recognizers may be the same slot. */
 export function useDeviceSlots(settings: S, pair: LanguagePair, legs: readonly LegName[]): DeviceNeed[] {
-  const { asrVia, translateAt, coach, coachAt, selections, asrHere, translateHere, coachHere } = settings;
+  const { asrVia, translateAt, coach, coachAt, selections, asrHere, translateHere, coachHere, speakBoth } = settings;
   const { source, target } = pair;
   return useMemo(() => {
     const seen = new Set<string>();
-    return deviceNeeds(deviceChoices({ asrVia, translateAt, coach, coachAt, selections, asrHere, translateHere, coachHere }), { source, target }, legs)
+    return deviceNeeds(deviceChoices({ asrVia, translateAt, coach, coachAt, selections, asrHere, translateHere, coachHere, speakBoth }), { source, target }, legs)
       .filter((need) => !seen.has(`${need.dir}|${need.stage}`) && Boolean(seen.add(`${need.dir}|${need.stage}`)));
-  }, [asrVia, translateAt, coach, coachAt, selections, asrHere, translateHere, coachHere, source, target, legs]);
+  }, [asrVia, translateAt, coach, coachAt, selections, asrHere, translateHere, coachHere, speakBoth, source, target, legs]);
 }
 
 /** Local Inference's turn-detection views over this provider's settings: the knobs of the recognizer the speaker's leg loads. */

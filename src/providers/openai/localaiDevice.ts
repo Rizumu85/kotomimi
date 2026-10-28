@@ -75,6 +75,8 @@ export interface StagePlacement {
 /** The settings a device stage reads: where each stage runs, and the picks. */
 export interface DeviceChoices extends StagePlacement {
   selections: Selections;
+  /** Fork: the speaker speaks the other side's language too (`speakBoth`): their sentences in it are translated back. */
+  speakBoth?: boolean;
 }
 
 /**
@@ -174,7 +176,7 @@ export function needsServer(s: StagePlacement): boolean {
 /** The stored settings as the device stages read them: a stage this computer's LocalAI runs, or its native engine, asks nothing of the app's own models. */
 export function deviceChoices(s: DeviceChoices): DeviceChoices {
   const own = (place: Place, here: AsrHere | undefined): Place => (place === 'device' && here !== undefined && here !== 'app' ? 'api' : place);
-  return { asrVia: own(hearingPlace(s), s.asrHere), translateAt: own(s.translateAt, s.translateHere), coach: s.coach, coachAt: own(s.coachAt, s.coachHere), selections: s.selections };
+  return { asrVia: own(hearingPlace(s), s.asrHere), translateAt: own(s.translateAt, s.translateHere), coach: s.coach, coachAt: own(s.coachAt, s.coachHere), selections: s.selections, ...(s.speakBoth ? { speakBoth: true } : {}) };
 }
 
 /**
@@ -278,6 +280,10 @@ export function deviceNeeds(s: DeviceChoices, pair: LanguagePair, legs: readonly
     }
     // A leg shown as said (`shownAsSaid`) translates nothing.
     if (s.translateAt === 'device') out.push({ leg, dir: slot(source, target), stage: 'translation', source, target, required: !coached && source.toLowerCase() !== target.toLowerCase() });
+    // Fork: a speaker who speaks both has their sentences in the other side's language translated back: that
+    // direction too, the other side's leg's (`Stages.back`), where what hears can tell the two apart.
+    const both = leg === 'speaker' && s.speakBoth === true && !s.coach && canDetectOther(s) && source.toLowerCase() !== target.toLowerCase();
+    if (s.translateAt === 'device' && both) out.push({ leg, dir: slot(target, source), stage: 'translation', source: target, target: source, required: true });
   }
   return out;
 }

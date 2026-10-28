@@ -75,6 +75,10 @@ describe('where each stage runs', () => {
     expect(needs({ asrVia: 'device' }, ['speaker'])).toEqual(['speaker:asr:zh→ja']);
     // A coached speaker speaks Japanese: their recognizer is the Japanese one, and only what they type is translated.
     expect(needs({ ...HERE, coach: true }, ['speaker'])).toEqual(['speaker:asr:ja→zh', 'speaker:translation:zh→ja?']);
+    // Fork: a speaker who speaks both, heard by what tells the two apart: their Japanese is translated back too.
+    expect(needs({ ...HERE, asrHere: 'native', speakBoth: true }, ['speaker'])).toEqual(['speaker:translation:zh→ja', 'speaker:translation:ja→zh']);
+    // Heard by the app's own models, which cannot: no sentence is taken for Japanese, nothing is translated back.
+    expect(needs({ ...HERE, speakBoth: true }, ['speaker'])).toEqual(['speaker:asr:zh→ja', 'speaker:translation:zh→ja']);
   });
 
   it('resolves a slot to the pick, else to the best model downloaded, and to nothing for a language no one hears', () => {
