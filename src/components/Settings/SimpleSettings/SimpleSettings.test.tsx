@@ -36,6 +36,8 @@ vi.mock('../../../app/useRun', () => ({ useSessionLocked: () => false }));
 
 vi.mock('../../../stores/audioStore', () => ({
   useMode: () => 'speaker',
+  // VRChatSection (mounted unmocked) selects `mode`/`setMode` off the default export.
+  default: (select: (s: { mode: string; setMode: () => void }) => unknown) => select({ mode: 'speaker', setMode: () => {} }),
 }));
 
 let settingsNavigationTarget: string | null = null;
