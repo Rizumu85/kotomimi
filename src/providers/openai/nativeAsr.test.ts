@@ -3,6 +3,7 @@ import { createVirtualClock } from '../../lib/contract/clock';
 import { NO_NATIVE_ENGINE, type NativeBridge, type NativeEngineStatus, type NativeStreamEvent } from '../../lib/native/nativeEngine';
 import type { VadWorker } from './apiAsr';
 import { createNativeAsr, LAST_WORDS_TIMEOUT_MS, ROLL_AFTER_SECONDS, ROLL_AT_SECONDS } from './nativeAsr';
+import { endsTurn } from './turnEnd';
 
 const RATE = 24000;
 /** The rate the engine is given: the app brings its sound down to it. */
@@ -220,6 +221,21 @@ describe('this computer\'s native recognizer', () => {
     expect(engine.streams[1].samples).toBe(3 * HEARD);
   });
 
+  it('opens nothing for the silence after a gap where the speaker has stopped (fork)', async () => {
+    const { asr, vad, engine } = await started();
+    vad.worker.say('speech_start');
+    await settled();
+    talk(asr, engine, 1, ROLL_AFTER_SECONDS);
+    asr.feedAudio(seconds(0.1, 20), RATE);
+    asr.feedAudio(seconds(0.1, 20), RATE);
+    expect(engine.streams[0].ended).toBe(true);
+    engine.say({ id: 1, type: 'done', text: '一つ目' });
+    asr.feedAudio(seconds(1.2, 20), RATE);
+    vad.worker.say('speech_end');
+    await settled();
+    expect(engine.streams).toHaveLength(1);
+  });
+
   it('begins again where the detector cuts, once a recognition has run a minute with no gap', async () => {
     const { asr, vad, engine, seen } = await started();
     vad.worker.say('speech_start');
@@ -432,5 +448,92 @@ describe('what a recognizer wrote, as it is handed on', () => {
     expect(tidyHeard('……？')).toBe('');
     expect(tidyHeard('5。')).toBe('5。');
     expect(tidyHeard('え。')).toBe('え。');
+  });
+});
+
+describe('the early end of a turn (fork)', () => {
+  it('ends the stretch at a short pause when what is written closes a sentence, with the silence the engine needs', async () => {
+    const { asr, vad, engine, seen } = await started();
+    vad.worker.say('speech_start');
+    await settled();
+    asr.feedAudio(seconds(2), RATE);
+    asr.feedAudio(seconds(0.5, 0), RATE);
+    vad.sent.length = 0;
+    vad.worker.say('pause');
+    engine.say({ id: 1, type: 'partial', text: '今日はいい天気ですね。' });
+    expect(engine.streams[0].ended).toBe(true);
+    // 0.5 s of the pause given, and the half second more the engine needs added at once; the detector left as it is.
+    expect(engine.streams[0].samples).toBe(3 * HEARD);
+    expect(vad.sent).toEqual([]);
+    engine.say({ id: 1, type: 'done', text: '今日はいい天気ですね。' });
+    expect(seen.results).toEqual(['今日はいい天気ですね。']);
+    // The speaker goes on within the detector's stretch: a recognition of its own, with the moments before it.
+    asr.feedAudio(seconds(1, 0), RATE);
+    vad.worker.say('resume');
+    await settled();
+    expect(engine.streams).toHaveLength(2);
+    expect(seen.starts).toBe(2);
+    expect(engine.streams[1].samples).toBe(1 * HEARD);
+    vad.worker.say('speech_end');
+    expect(engine.streams[1].ended).toBe(true);
+  });
+
+  it('opens nothing at the end the detector makes of a stretch ended early, where no voice came back', async () => {
+    const { asr, vad, engine } = await started();
+    vad.worker.say('speech_start');
+    await settled();
+    asr.feedAudio(seconds(2), RATE);
+    vad.worker.say('pause');
+    engine.say({ id: 1, type: 'partial', text: '分かりました。' });
+    asr.feedAudio(seconds(1, 0), RATE);
+    vad.worker.say('speech_end');
+    vad.worker.say('resume');
+    await settled();
+    expect(engine.streams).toHaveLength(1);
+  });
+
+  it('waits out the whole pause where the words heard do not close a sentence, or the voice comes back', async () => {
+    const { asr, vad, engine } = await started();
+    vad.worker.say('speech_start');
+    await settled();
+    asr.feedAudio(seconds(2), RATE);
+    engine.say({ id: 1, type: 'partial', text: '昨日友達と。' });
+    vad.worker.say('pause');
+    expect(engine.streams[0].ended).toBe(false);
+    vad.worker.say('resume');
+    engine.say({ id: 1, type: 'partial', text: '昨日友達と映画を見ました。' });
+    expect(engine.streams[0].ended).toBe(false);
+  });
+
+  it('does not end on what was written before the pause: its last word may not be in it yet', async () => {
+    const { asr, vad, engine } = await started();
+    vad.worker.say('speech_start');
+    await settled();
+    asr.feedAudio(seconds(2), RATE);
+    engine.say({ id: 1, type: 'partial', text: '元は金持ちの息子でした。' });
+    vad.worker.say('pause');
+    expect(engine.streams[0].ended).toBe(false);
+    engine.say({ id: 1, type: 'partial', text: '元は金持ちの息子でしたが。' });
+    expect(engine.streams[0].ended).toBe(false);
+  });
+
+  it('ends at a partial that comes during the pause and closes the sentence', async () => {
+    const { asr, vad, engine } = await started();
+    vad.worker.say('speech_start');
+    await settled();
+    asr.feedAudio(seconds(2), RATE);
+    engine.say({ id: 1, type: 'partial', text: '昨日友達と映画を。' });
+    vad.worker.say('pause');
+    asr.feedAudio(seconds(0.3, 0), RATE);
+    engine.say({ id: 1, type: 'partial', text: '昨日友達と映画を見ました。' });
+    expect(engine.streams[0].ended).toBe(true);
+    expect(engine.streams[0].samples).toBe(2.5 * HEARD);
+  });
+});
+
+describe('whether what is written closes a sentence (fork)', () => {
+  it('reads the words a sentence closes on, not the marks a recognizer writes wherever the speaker breathes', () => {
+    for (const text of ['今日はいい天気ですね。', '行きましょう', '本当にそうかな…', '알겠습니다.', '맛있어요', '你去吗？', '好吧。', 'Are you coming?', '「本当ですか」']) expect(endsTurn(text), text).toBe(true);
+    for (const text of ['撞倒摄影师的汽车司机，未必。', '昨日友達と。', 'I think that.', '然后呢', '그리고', '。', '']) expect(endsTurn(text), text).toBe(false);
   });
 });

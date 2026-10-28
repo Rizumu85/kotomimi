@@ -16,7 +16,10 @@
  * translated, but the recognition is not closed — the engine keeps its
  * context, and no word is lost at a seam. Only a recognition that has run
  * for most of a minute is closed and begun again, at a gap between words
- * when there is one: the engine takes about two minutes at most.
+ * when there is one: the engine takes about two minutes at most. The next
+ * one begins with the next voice, not at the gap: a gap is also where the
+ * speaker has stopped, and a recognition of the silence after came out as
+ * 「はい。」 (2026-10-28).
  *
  * The engine runs one recognition at a time, so they queue: a stretch that
  * begins while the last one is still being finished keeps its sound until
@@ -34,12 +37,22 @@
  *
  * The engine is given its sound at the 16 kHz it reads, brought down here
  * (`resample.ts`): it would do that itself, less carefully.
+ *
+ * Fork: a stretch also ends at a short pause (the detector's `pause`, half a
+ * second) when what is written during it closes a sentence (`endsTurn`): its
+ * translation then need not wait out the whole pause. What was written before
+ * the pause may not have its last word yet (「でした。」 of 「でしたが、」).
+ * Should the speaker go on (`resume`), what follows is a recognition of its
+ * own. The detector is left as it is: begun again, its model took the
+ * silence after for a voice, and the engine wrote 「はい。」 for it
+ * (2026-10-28).
  */
 import { realClock, type Clock } from '../../lib/contract/clock';
 import type { NativeBridge, NativeEngineStatus, NativeStreamEvent } from '../../lib/native/nativeEngine';
 import { createResampler, TARGET_RATE, type Resampler } from '../../lib/native/resample';
 import type { AsrInit, AsrLike } from '../localInference/engines';
 import { apiLanguage, appVad, type VadWorker } from './apiAsr';
+import { endsTurn } from './turnEnd';
 
 export interface NativeAsrOptions {
   /** The engine's live recognitions. */
@@ -115,6 +128,8 @@ const GAP_PEAK = 600;
 const GAP_OF_LEVEL = 0.1;
 /** How loud the voice has lately been: the loudest sample, let down by this much with every piece of sound. */
 const LEVEL_DECAY = 0.995;
+/** The short pause the detector says (`native-vad.worker.ts`), in seconds: the silence a recognition ended at it has had. */
+const SHORT_PAUSE_SECONDS = 0.5;
 /** How long a closed recognition's last words are waited for. Its sound is already heard: they come at once, or the engine is stuck. */
 export const LAST_WORDS_TIMEOUT_MS = 4000;
 
@@ -176,6 +191,14 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
   let idle = 0;
   /** The pause that ends a stretch, as the detector was told it. */
   let pauseSeconds = 1.4;
+  /** Fork: the detector hears a short pause in the live stretch; the samples given since it said so. */
+  let paused = false;
+  let pausedFor = 0;
+  /**
+   * Fork: no recognition is open in a stretch the detector still hears, which one was closed in: the next voice begins
+   * one — said by the detector (`resume`) after a short pause, or by its loudness after a gap between words.
+   */
+  let awaiting: 'resume' | 'voice' | null = null;
 
   const secondsOf = (samples: number) => samples / rate;
   const pending = (s: Stream) => s.text.slice(s.emitted);
@@ -275,10 +298,33 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     advance();
   }
 
+  /** Fork: the live recognition ends at a short pause where what is written so far closes a sentence. */
+  function endEarly() {
+    const s = live;
+    if (!paused || !s || s.misfire || !endsTurn(s.tentative ? s.heard : s.text)) return;
+    paused = false;
+    awaiting = 'resume';
+    close(s, Math.max(0, TRAILING_SILENCE_SECONDS - SHORT_PAUSE_SECONDS - secondsOf(pausedFor)));
+  }
+
+  /** A recognition for a voice just heard, with the moments before it. */
+  function beginHeard() {
+    const s = begin();
+    for (const pcm of before) give(s, pcm);
+    before = [];
+    beforeLength = 0;
+  }
+
   /** The live recognition is closed and another begun at once: the speaker has not stopped, so the silence is added. */
   function roll(s: Stream) {
     close(s, TRAILING_SILENCE_SECONDS);
     begin();
+  }
+
+  /** At a gap between words: the next begins with the next voice. */
+  function rollAtGap(s: Stream) {
+    close(s, TRAILING_SILENCE_SECONDS);
+    awaiting = 'voice';
   }
 
   function onEvent(event: NativeStreamEvent) {
@@ -289,9 +335,11 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
       s.heard = event.text;
       // Everything heard so far, as it stands: what follows the results already given, by their length.
       if (!s.misfire) asr.onPartialResult?.(tidyHeard(event.text.slice(s.emitted)));
+      if (s === live) endEarly();
     } else if (event.type === 'delta') {
       s.text += event.text;
       if (!s.misfire && !s.tentative) asr.onPartialResult?.(tidyHeard(pending(s)));
+      if (s === live) endEarly();
     } else if (event.type === 'done') {
       finish(s, event.text || s.text, event.language);
     } else {
@@ -324,19 +372,29 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
           if (data.type === 'ready') {
             ready = true;
             resolve();
+          } else if (data.type === 'pause') {
+            paused = true;
+            pausedFor = 0;
+          } else if (data.type === 'resume') {
+            paused = false;
+            if (!awaiting || live) return;
+            awaiting = null;
+            asr.onSpeechStart?.();
+            beginHeard();
           } else if (data.type === 'speech_start') {
             voice = true;
             idle = 0;
+            paused = false;
+            awaiting = null;
             asr.onSpeechStart?.();
             // After a cut the detector made, the recognition is still open: the voice simply goes on.
             if (live) return;
-            const s = begin();
-            for (const pcm of before) give(s, pcm);
-            before = [];
-            beforeLength = 0;
+            beginHeard();
           } else if (data.type === 'speech_end') {
             voice = false;
             idle = 0;
+            paused = false;
+            awaiting = null;
             if (!live) return;
             if (data.forced) {
               // Closed here, the engine writes all it heard at once: no result is cut from what is settled so far.
@@ -351,6 +409,8 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
           } else if (data.type === 'speech_cancel') {
             voice = false;
             idle = 0;
+            paused = false;
+            awaiting = null;
             if (!live) return;
             // Too short to be speech — unless it is the tail of a stretch already heard.
             if (live.emitted === 0 && secondsOf(live.samples) < PRE_ROLL_SECONDS + 2) live.misfire = true;
@@ -387,19 +447,25 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
       if (!worker) return;
       rate = sampleRate;
       const kept = samples.slice();
+      let peak = 0;
+      for (let i = 0; i < kept.length; i += 1) {
+        const size = kept[i] < 0 ? -kept[i] : kept[i];
+        if (size > peak) peak = size;
+      }
+      const loud = peak > Math.max(GAP_PEAK, level * GAP_OF_LEVEL);
+      if (live || awaiting === 'voice') level = Math.max(peak, level * LEVEL_DECAY);
+      if (!live && awaiting === 'voice' && loud) {
+        awaiting = null;
+        beginHeard();
+      }
       if (live) {
         give(live, kept);
+        if (paused) pausedFor += kept.length;
         const age = secondsOf(live.samples);
-        let peak = 0;
-        for (let i = 0; i < kept.length; i += 1) {
-          const size = kept[i] < 0 ? -kept[i] : kept[i];
-          if (size > peak) peak = size;
-        }
-        const loud = peak > Math.max(GAP_PEAK, level * GAP_OF_LEVEL);
-        level = Math.max(peak, level * LEVEL_DECAY);
         if (age >= limits.rollAfter) {
           quiet = loud ? 0 : quiet + kept.length;
-          if (secondsOf(quiet) >= GAP_SECONDS || age >= limits.rollHard) roll(live);
+          if (secondsOf(quiet) >= GAP_SECONDS) rollAtGap(live);
+          else if (age >= limits.rollHard) roll(live);
         }
         // Open after a cut of the detector's own, and no voice since: the speaker had just stopped. The pause has passed
         // in what the recognition was given, so it is closed as the detector would have closed it.

@@ -25,6 +25,17 @@ let frameProcessor: FrameProcessor | null = null;
 let audioBuffer = new Float32Array(0);
 let maxSpeechFrames = Math.ceil(20000 / VAD_FRAME_MS);
 let speechFramesSinceStart = 0;
+/**
+ * Fork: a short pause inside a stretch, said as it begins (`pause`) and when the voice comes back (`resume`), for a
+ * recognizer that ends a turn on it when the words heard close a sentence (`nativeAsr.ts`). Only where the detector's
+ * own pause is longer.
+ */
+const SHORT_PAUSE_MS = 500;
+let shortPauseFrames = Infinity;
+let quietFrames = 0;
+let paused = false;
+let positiveThreshold = 0.3;
+let negativeThreshold = 0.15;
 
 // The longest speech one segment runs. Not the client's to raise on this
 // path: the sidecar never receives the cap and keeps backstops of its own —
@@ -56,6 +67,8 @@ type WorkerOutbound =
   // Fork: `forced` marks an end the cap made, with the speaker still talking (`nativeAsr.ts` keeps its stream open over it).
   | { type: 'speech_end'; forced?: true }
   | { type: 'speech_cancel' }
+  | { type: 'pause' }
+  | { type: 'resume' }
   | { type: 'error'; message: string };
 
 const post = (msg: WorkerOutbound, transfer?: Transferable[]) =>
@@ -110,6 +123,9 @@ async function initVad(vadConfig?: VadWebConfig, vadModelUrl?: string): Promise<
     resolveVadThresholds(vadConfig);
   const redemptionMs = (vadConfig?.minSilenceDuration ?? 1.4) * 1000;
   const minSpeechMs = (vadConfig?.minSpeechDuration ?? 0.4) * 1000;
+  positiveThreshold = positiveSpeechThreshold;
+  negativeThreshold = negativeSpeechThreshold;
+  shortPauseFrames = redemptionMs > SHORT_PAUSE_MS ? Math.ceil(SHORT_PAUSE_MS / VAD_FRAME_MS) : Infinity;
   const preSpeechPadMs = (vadConfig?.preSpeechPadDuration ?? 0.8) * 1000;
   maxSpeechFrames = resolveMaxSpeechFrames(vadConfig?.maxSpeechDuration, preSpeechPadMs, {
     maxSpeechSeconds: NATIVE_MAX_SPEECH_SECONDS,
@@ -148,6 +164,9 @@ async function feedAudio(samples: Int16Array, sampleRate: number): Promise<void>
     await frameProcessor.process(frame, (ev) => events.push(ev));
     for (const ev of events) {
       switch (ev.msg) {
+        case Message.FrameProcessed:
+          heardFrame(ev.probs.isSpeech);
+          break;
         case Message.SpeechStart:
           speechFramesSinceStart = 0;
           post({ type: 'speech_start' });
@@ -176,6 +195,22 @@ async function feedAudio(samples: Int16Array, sampleRate: number): Promise<void>
     } else {
       speechFramesSinceStart = 0;
     }
+  }
+}
+
+function heardFrame(probability: number): void {
+  if (!frameProcessor?.speaking) {
+    quietFrames = 0;
+    paused = false;
+  } else if (probability >= positiveThreshold) {
+    quietFrames = 0;
+    if (paused) {
+      paused = false;
+      post({ type: 'resume' });
+    }
+  } else if (probability < negativeThreshold && !paused && ++quietFrames >= shortPauseFrames) {
+    paused = true;
+    post({ type: 'pause' });
   }
 }
 
