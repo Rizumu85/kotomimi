@@ -67,7 +67,7 @@
     height: 8px;
     border-radius: 50%;
     background: vars.$color-primary;
-    box-shadow: 0 0 0 3px rgba(vars.$color-primary, 0.2);
+    box-shadow: 0 0 0 3px color-mix(in srgb, vars.$color-primary 20%, transparent);
   }
 
   .kt-lan__spin {
@@ -235,7 +235,7 @@
     padding: 3px 8px;
     font-size: vars.$font-caption;
     color: vars.$text-secondary;
-    background: rgba(255, 255, 255, 0.04);
+    background: color-mix(in srgb, vars.$text-primary 4%, transparent);
     border: 1px solid vars.$border-subtle;
     border-radius: 999px;
 

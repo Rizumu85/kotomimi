@@ -168,7 +168,7 @@
     font-style: normal;
     font-weight: 400;
     color: vars.$color-primary;
-    background: rgba(vars.$color-primary, 0.15);
+    background: color-mix(in srgb, vars.$color-primary 15%, transparent);
     border-radius: 10px;
   }
 

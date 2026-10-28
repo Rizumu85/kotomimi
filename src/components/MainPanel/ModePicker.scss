@@ -19,7 +19,7 @@
   align-items: stretch;
   height: 28px;
   box-sizing: border-box;
-  border: 1px solid var(--border-color, vars.$border-default);
+  border: 1px solid vars.$border-default;
   border-radius: 6px;
   overflow: hidden;
   flex-shrink: 0;
@@ -31,8 +31,8 @@
     gap: 5px;
     padding: 0 12px;
     font-size: 12px;
-    color: var(--text-secondary, vars.$text-tertiary);
-    background: var(--bg-secondary, vars.$bg-control);
+    color: vars.$text-secondary;
+    background: vars.$bg-control;
     border: 0;
     line-height: 1;
     cursor: pointer;
@@ -42,7 +42,7 @@
     svg { flex-shrink: 0; }
 
     &:not(:last-child) {
-      border-right: 1px solid var(--border-color, vars.$border-default);
+      border-right: 1px solid vars.$border-default;
     }
 
     // The picker rounds its own frame and clips the segments to the padding
@@ -57,7 +57,7 @@
     // Fork: muted in VRChat — the user's own leg is not heard: "Me" dimmed and struck through.
     &--muted {
       position: relative;
-      color: var(--text-tertiary, #777);
+      color: vars.$text-tertiary;
 
       &::after {
         content: '';
@@ -73,7 +73,7 @@
     }
 
     &:hover:not(.mode-picker__segment--active):not(:disabled) {
-      background: var(--bg-hover, vars.$bg-hover);
+      background: vars.$bg-hover;
     }
 
     &--active {

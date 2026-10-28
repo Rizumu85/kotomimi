@@ -36,7 +36,7 @@
       line-height: 1;
       border: none;
       background: vars.$bg-control;
-      color: #aaa;
+      color: vars.$text-tertiary;
       cursor: pointer;
       transition: all 0.15s ease;
 
@@ -63,11 +63,11 @@
   font-size: 11.5px;
   font-weight: 500;
   color: vars.$text-muted;
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, vars.$text-primary 6%, transparent);
 
   &.is-on {
     color: tk.$color-primary;
-    background: rgba(tk.$color-primary, 0.15);
+    background: color-mix(in srgb, tk.$color-primary 15%, transparent);
   }
 }
 
@@ -88,7 +88,7 @@
   font-size: vars.$font-caption;
   line-height: 1.5;
   color: vars.$text-secondary;
-  background: rgba(240, 179, 110, 0.1);
+  background: color-mix(in srgb, tk.$color-warning 10%, transparent);
   border-radius: vars.$radius-sm;
 }
 
@@ -150,7 +150,7 @@
     .kt-chatbox-look__pic {
       border-color: tk.$color-primary;
       box-shadow: inset 0 0 0 1px tk.$color-primary;
-      background: rgba(tk.$color-primary, 0.1);
+      background: color-mix(in srgb, tk.$color-primary 10%, transparent);
     }
   }
 }
@@ -163,7 +163,7 @@
   border: 1px solid vars.$border-default;
   border-radius: 9px;
   background: vars.$bg-control;
-  color: #77777d;
+  color: vars.$text-muted;
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
@@ -237,7 +237,7 @@
   margin: 0 12px 10px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, vars.$text-primary 5%, transparent);
 }
 
 .kt-video__title {
@@ -245,7 +245,7 @@
   margin-bottom: 8px;
   font-size: 13.5px;
   font-weight: 600;
-  color: #e8e8e8;
+  color: vars.$text-primary;
 }
 
 .kt-video__acts {
@@ -261,17 +261,17 @@
   border-radius: 6px;
   font: inherit;
   font-size: 12.5px;
-  color: #c8c8c8;
+  color: vars.$text-secondary;
   background: transparent;
   cursor: pointer;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: color-mix(in srgb, vars.$text-primary 8%, transparent);
   }
 
   &.is-go {
     color: tk.$color-primary;
-    background: rgba(tk.$color-primary, 0.15);
+    background: color-mix(in srgb, tk.$color-primary 15%, transparent);
   }
 
   &:focus-visible {

@@ -48,7 +48,7 @@
   &:hover {
     opacity: 1;
     color: vars.$text-primary;
-    background: rgba(255, 255, 255, 0.08);
+    background: color-mix(in srgb, vars.$text-primary 8%, transparent);
   }
 
   &[aria-pressed='true'] {

@@ -1,3 +1,4 @@
+@use '../../styles/tokens' as tk;
 // Fork: "this computer is serving other devices", in the title bar (ServingBadge.tsx).
 // The title bar's own sizes; green, the app's colour for what is on.
 
@@ -10,16 +11,16 @@
   padding: 0 8px;
   font-size: 11px;
   line-height: 1;
-  color: #10a37f;
-  background: rgba(16, 163, 127, 0.12);
-  border: 1px solid rgba(16, 163, 127, 0.35);
+  color: tk.$color-primary;
+  background: color-mix(in srgb, tk.$color-primary 12%, transparent);
+  border: 1px solid color-mix(in srgb, tk.$color-primary 35%, transparent);
   border-radius: 999px;
   white-space: nowrap;
   cursor: default;
 
   &.is-busy {
-    color: #fff;
-    background: rgba(16, 163, 127, 0.55);
+    color: tk.$color-on-primary;
+    background: tk.$color-primary-fill;
     border-color: transparent;
   }
 }

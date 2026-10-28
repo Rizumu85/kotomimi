@@ -143,12 +143,15 @@ export const useConversationDisplayStore = create<ConversationDisplayState>()(
           svc.getSetting(KEY('sourceTextColor'), DEFAULTS.sourceTextColor),
           svc.getSetting(KEY('translationTextColor'), DEFAULTS.translationTextColor),
         ]);
+      // Fork: a colour stored as the dark default it was before the light theme came is read as never set: the
+      // default's own chip used to store it, so it was the default that was chosen, which now follows the scheme.
+      const chosen = (stored: string | null, olderDefault: string) => (stored !== null && stored.toLowerCase() === olderDefault.toLowerCase() ? null : stored);
       set({
         fontSize: clamp(Math.round(fontSize), CONVERSATION_FONT_SIZE_MIN, CONVERSATION_FONT_SIZE_MAX),
         compactMode,
-        bgColor,
-        sourceTextColor,
-        translationTextColor,
+        bgColor: chosen(bgColor, CONVERSATION_DISPLAY_DEFAULT_BG_COLOR),
+        sourceTextColor: chosen(sourceTextColor, CONVERSATION_DISPLAY_DEFAULT_SOURCE_TEXT_COLOR),
+        translationTextColor: chosen(translationTextColor, CONVERSATION_DISPLAY_DEFAULT_TRANSLATION_TEXT_COLOR),
       });
     },
   })),

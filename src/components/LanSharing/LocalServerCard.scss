@@ -35,7 +35,7 @@
 
       .kt-ls__dot {
         background: vars.$color-primary;
-        box-shadow: 0 0 0 3px rgba(vars.$color-primary, 0.2);
+        box-shadow: 0 0 0 3px color-mix(in srgb, vars.$color-primary 20%, transparent);
       }
     }
 

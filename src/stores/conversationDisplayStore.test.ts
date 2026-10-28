@@ -94,6 +94,16 @@ describe('conversationDisplayStore', () => {
     expect(s.translationTextColor).toBeNull();
   });
 
+  it('hydrate reads a colour stored as the old dark default as never set: it follows the theme (fork)', async () => {
+    const stored: Record<string, string> = { bgColor: '#1F1F1F', sourceTextColor: '#9aa0a6', translationTextColor: '#123456' };
+    mockGetSetting.mockImplementation(async (key: string, def: unknown) => stored[key.split('.').pop()!] ?? def);
+    await useConversationDisplayStore.getState().hydrate();
+    const s = useConversationDisplayStore.getState();
+    expect(s.bgColor).toBeNull();
+    expect(s.sourceTextColor).toBeNull();
+    expect(s.translationTextColor).toBe('#123456');
+  });
+
   it('clamps setFontSize to [12, 64]', async () => {
     await useConversationDisplayStore.getState().setFontSize(8);
     expect(useConversationDisplayStore.getState().fontSize).toBe(12);

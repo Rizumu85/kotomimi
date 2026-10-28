@@ -179,7 +179,7 @@
   flex-direction: column;
   overflow: hidden;
   color: vars.$text-primary;
-  background: #2a2a2a;
+  background: vars.$bg-popover;
   border: 1px solid vars.$border-default;
   border-radius: vars.$radius-lg;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);

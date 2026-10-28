@@ -794,8 +794,8 @@
     + .understand-button {
       margin-top: 8px;
       background-color: transparent;
-      border: 1px solid var(--border-color, vars.$border-default);
-      color: var(--text-secondary, vars.$text-tertiary);
+      border: 1px solid vars.$border-default;
+      color: vars.$text-secondary;
 
       &:hover {
         background-color: color-mix(in srgb, vars.$overlay-fg 6%, transparent);
@@ -1745,7 +1745,7 @@
       line-height: 1;
       border: none;
       background: vars.$bg-control;
-      color: #aaa;
+      color: vars.$text-tertiary;
       cursor: pointer;
       transition: all 0.15s ease;
 
@@ -2309,7 +2309,7 @@
     gap: 6px;
     margin-bottom: 6px;
     font-size: 13px;
-    color: var(--text-secondary, #aaa);
+    color: vars.$text-secondary;
   }
 
   .noise-suppression-label {
@@ -2320,24 +2320,24 @@
     display: flex;
     border-radius: 6px;
     overflow: hidden;
-    border: 1px solid var(--border-color, vars.$border-default);
+    border: 1px solid vars.$border-default;
 
     .segmented-option {
       flex: 1;
       padding: 6px 12px;
       font-size: 12px;
       border: none;
-      background: var(--bg-secondary, #333);
-      color: var(--text-secondary, #aaa);
+      background: vars.$bg-control;
+      color: vars.$text-secondary;
       cursor: pointer;
       transition: all 0.15s ease;
 
       &:not(:last-child) {
-        border-right: 1px solid var(--border-color, #444);
+        border-right: 1px solid vars.$border-default;
       }
 
       &:hover:not(.active) {
-        background: var(--bg-hover, #3a3a3a);
+        background: vars.$bg-hover;
       }
 
       &.active {

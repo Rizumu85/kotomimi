@@ -85,7 +85,7 @@
       gap: vars.$space-2;
       padding: 5px 4px 5px 8px;
       margin-bottom: 4px;
-      background: rgba(255, 255, 255, 0.03);
+      background: color-mix(in srgb, vars.$text-primary 3%, transparent);
       border: 1px solid vars.$border-subtle;
       border-radius: vars.$radius-sm;
     }
