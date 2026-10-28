@@ -102,6 +102,16 @@ export interface CredentialsMissing { missing: string; code?: string; params?: R
 export interface ModelOption { id: string }
 
 /**
+ * Fork: one kind of language detection (`languages.detection`): whether a run does it, whether it can be had, and the
+ * settings that turn it on — moving what hears to what can detect, where that takes it — or off.
+ */
+export interface Detection<S> {
+  on: boolean;
+  available: boolean;
+  turn(on: boolean): Partial<S>;
+}
+
+/**
  * What a provider's `Settings` may reach besides its settings (F3): the
  * saved credential values — every key in `credentials.keys` — and the
  * sign-in, for pieces that call the provider's API from Settings (Soniox's
@@ -387,6 +397,11 @@ export interface Provider<S, K extends { missing?: never } & object, C extends {
     reverse?(pair: LanguagePair, s: S): LanguagePair | null;
     /** App codes ⇄ the vendor's: `toWire` for every code a build sends, `fromWire` for every language the vendor reports (spec "Unified language codes" §3). */
     wire: WireTable;
+    /**
+     * Fork: a language left to be detected, as the language section offers it — the other side's (`other`), or the
+     * user's own in either of the pair's (`both`). `models`: what the provider's readiness found. Absent: not offered.
+     */
+    detection?(s: S, models: readonly ModelOption[]): { other: Detection<S>; both: Detection<S> };
   };
 
   // the only capabilities generic code reads

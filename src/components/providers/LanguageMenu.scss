@@ -13,6 +13,11 @@
   }
 }
 
+.kt-lang-option.is-unavailable {
+  opacity: 0.45;
+  cursor: default;
+}
+
 .kt-lang-popover .kt-font-list {
   overflow-x: hidden;
 }

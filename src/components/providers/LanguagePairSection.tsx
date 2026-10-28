@@ -36,12 +36,12 @@ interface LanguagePairSectionProps {
    * translated into, and what a translation that must be told a language is
    * told. Absent: not offered.
    */
-  detect?: { on: boolean; set(on: boolean): void };
+  detect?: { on: boolean; available: boolean; set(on: boolean): void };
   /**
    * Fork: the speaker speaks the other side's language too — a switch under the pair, named with that language:
    * what they say in it is translated into their own. What it does is in its help. Absent: not offered.
    */
-  both?: { on: boolean; set(on: boolean): void };
+  both?: { on: boolean; available: boolean; set(on: boolean): void };
   /**
    * Fork: the two selects are named for whose language they hold — "my
    * language", "their language" — whatever the mode, and nothing is written
@@ -126,7 +126,8 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
     onPick: pickTheirs,
     label,
     disabled,
-    ...(detect ? { first: { code: DETECT, name: t('fork.languageMenu.detect') } } : {}),
+    // What hears cannot detect, and nothing here that could is downloaded: there, and greyed, with why on it.
+    ...(detect ? { first: { code: DETECT, name: t('fork.languageMenu.detect'), ...(detect.available || detecting ? {} : { unavailable: t('fork.languageMenu.detectUnavailable') }) } } : {}),
   });
   // While their language is detected: the one they mostly speak, which the pair still names.
   const mostlyMenu = useLanguageMenu({
@@ -185,7 +186,7 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
             disabled={disabled}
             {...targetMenu.selectProps}
           >
-            {detect && <option value={DETECT}>{t('fork.languageMenu.detect')}</option>}
+            {detect && <option value={DETECT} disabled={!detect.available && !detecting}>{t('fork.languageMenu.detect')}</option>}
             {options(targetOptions)}
           </select>
           {targetMenu.list}
@@ -216,8 +217,8 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
             checked={both.on}
             onChange={() => both.set(!both.on)}
             label={t('fork.languageMenu.speakBoth', { language: label(pair.target) })}
-            tooltip={t('fork.languageMenu.speakBothHelp', { language: label(pair.target), mine: label(pair.source) })}
-            disabled={disabled}
+            tooltip={t(both.available || both.on ? 'fork.languageMenu.speakBothHelp' : 'fork.languageMenu.speakBothUnavailable', { language: label(pair.target), mine: label(pair.source) })}
+            disabled={disabled || (!both.available && !both.on)}
           />
         </div>
       )}

@@ -171,7 +171,8 @@ describe('LanguagePairSection — a language context (Stage 2 Volcengine AST2, c
 describe('LanguagePairSection — my language and theirs (fork)', () => {
   const DETECT = '\u0000detect';
   type Mode = 'speaker' | 'participant' | 'both';
-  const show = (mode: Mode, detect: { on: boolean; set(on: boolean): void } | undefined, onChange = vi.fn()) => {
+  const show = (mode: Mode, given: { on: boolean; available?: boolean; set(on: boolean): void } | undefined, onChange = vi.fn()) => {
+    const detect = given && { available: true, ...given };
     cleanup();
     render(<LanguagePairSection provider={fakeProvider} settings={FAKE_DEFAULTS} pair={{ source: 'en', target: 'ja' }} onChange={onChange} sentence={{ mode, textOnly: true }} detect={detect} owners />);
     return onChange;
@@ -236,11 +237,20 @@ describe('LanguagePairSection — my language and theirs (fork)', () => {
     expect(again).toHaveBeenCalledWith(false);
     expect(quiet).not.toHaveBeenCalled();
   });
+
+  it('is greyed where what hears cannot detect and nothing here that could is downloaded — unless a run does it already', () => {
+    const set = vi.fn();
+    show('participant', { on: false, available: false, set });
+    expect(theirs().options[0].disabled).toBe(true);
+    expect(theirs().value).toBe('ja');
+    show('participant', { on: true, available: false, set });
+    expect(theirs().options[0].disabled).toBe(false);
+  });
 });
 
 describe('LanguagePairSection — "I speak their language too" (fork)', () => {
-  const show = (both: { on: boolean; set(on: boolean): void } | undefined, pair = { source: 'en', target: 'ja' }) =>
-    render(<LanguagePairSection provider={fakeProvider} settings={FAKE_DEFAULTS} pair={pair} onChange={vi.fn()} both={both} owners />);
+  const show = (given: { on: boolean; available?: boolean; set(on: boolean): void } | undefined, pair = { source: 'en', target: 'ja' }) =>
+    render(<LanguagePairSection provider={fakeProvider} settings={FAKE_DEFAULTS} pair={pair} onChange={vi.fn()} both={given && { available: true, ...given }} owners />);
 
   it('is a switch under the pair, turned as asked', () => {
     const set = vi.fn();
@@ -249,6 +259,15 @@ describe('LanguagePairSection — "I speak their language too" (fork)', () => {
     expect(toggle.getAttribute('aria-checked')).toBe('false');
     fireEvent.click(toggle);
     expect(set).toHaveBeenCalledWith(true);
+    cleanup();
+  });
+
+  it('is greyed where what hears cannot tell the two apart, unless it is on', () => {
+    show({ on: false, available: false, set: vi.fn() });
+    expect(screen.getByRole('switch').getAttribute('aria-disabled')).toBe('true');
+    cleanup();
+    show({ on: true, available: false, set: vi.fn() });
+    expect(screen.getByRole('switch').getAttribute('aria-disabled')).toBe('false');
     cleanup();
   });
 

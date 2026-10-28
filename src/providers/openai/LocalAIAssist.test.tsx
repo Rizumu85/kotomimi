@@ -807,9 +807,9 @@ describe('the other side\u2019s language left to be detected', () => {
     // a time): its row shows that model.
     const named = menus.find((m) => m !== other)!;
     expect(named.selectedOptions[0].textContent).toBe('Qwen3-ASR 1.7B GGUF');
-    // No switch in the card: the choice is made among the languages. What it takes is said here.
+    // No switch in the card: the choice is made among the languages. The row's title says what it hears; nothing under it.
     expect(card(HEAR).queryByText('providers.localai.detectOther')).toBeNull();
-    expect(card(HEAR).getByText('providers.localai.detectOtherNote')).toBeTruthy();
+    expect(card(HEAR).queryByText('providers.localai.detectOtherNote')).toBeNull();
     // R2T2 chosen for the other side: it is heard in the pair's language, by R2T2, and no longer detected.
     fireEvent.change(other, { target: { value: '\u0000native:r2t2-q8' } });
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native', asrNativeModel: 'r2t2-q8', asrDetectOther: false, asrNativeByLanguage: expect.objectContaining({ ja: 'r2t2-q8' }) }));
@@ -823,6 +823,14 @@ describe('the other side\u2019s language left to be detected', () => {
     fireEvent.change(menus[0], { target: { value: '\u0000native:r2t2-q8' } });
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native', speakBoth: false, asrNativeByLanguage: expect.objectContaining({ zh: 'r2t2-q8' }) }));
     expect(update.mock.calls[update.mock.calls.length - 1][0]).not.toHaveProperty('asrDetectOther');
+  });
+
+  it('drops a detection kept from before when what hears changes, even to a model that detects: it does not come back on unseen', () => {
+    useNativeEngineStore.setState({ status: engineOf({ 'r2t2-q8': 'downloaded', 'qwen3-asr-1.7b-q8': 'downloaded' }) });
+    const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'app', asrDetectOther: true, speakBoth: true, translateAt: 'device' }, legs: BOTH });
+    const menus = card(HEAR).getAllByRole('combobox') as HTMLSelectElement[];
+    fireEvent.change(menus[1], { target: { value: '\u0000native:qwen3-asr-1.7b-q8' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native', asrDetectOther: false, speakBoth: false }));
   });
 
   it('ends the detection, kept from before, when a model that cannot detect is what makes the engine hear', () => {

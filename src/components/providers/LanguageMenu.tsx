@@ -28,11 +28,11 @@ export interface LanguageMenuOptions {
   /** A code's name, in the UI's language. */
   label(code: string): string;
   disabled?: boolean;
-  /** A choice that is no language, listed first and never pinned ("detect the language"). */
-  first?: { code: string; name: string };
+  /** A choice that is no language, listed first and never pinned ("detect the language"); `unavailable`: greyed, and why. */
+  first?: { code: string; name: string; unavailable?: string };
 }
 
-interface Row { code: string; name: string; pinned: boolean; group: 'first' | 'pinned' | 'suggested' | 'all' }
+interface Row { code: string; name: string; pinned: boolean; group: 'first' | 'pinned' | 'suggested' | 'all'; unavailable?: string }
 
 /** The rows as listed: the person's pins, then what the app suggests, then every other language — each once. */
 export function languageRows(ordered: readonly LanguageOption[], suggested: readonly LanguageOption[], pins: readonly string[], label: (code: string) => string, query = ''): Row[] {
@@ -84,13 +84,14 @@ export function useLanguageMenu({ ordered, suggested, value, onPick, label, disa
 
   const firstCode = first?.code;
   const firstName = first?.name;
+  const firstUnavailable = first?.unavailable;
   const rows = useMemo(() => {
     const languages = languageRows(ordered, suggested, pins, label, query);
     if (firstCode === undefined || firstName === undefined) return languages;
     // Found by its own name too, when letters are typed.
     const wanted = query.trim().toLowerCase();
-    return !wanted || firstName.toLowerCase().includes(wanted) ? [{ code: firstCode, name: firstName, pinned: false, group: 'first' as const }, ...languages] : languages;
-  }, [ordered, suggested, pins, label, query, firstCode, firstName]);
+    return !wanted || firstName.toLowerCase().includes(wanted) ? [{ code: firstCode, name: firstName, pinned: false, group: 'first' as const, unavailable: firstUnavailable }, ...languages] : languages;
+  }, [ordered, suggested, pins, label, query, firstCode, firstName, firstUnavailable]);
 
   // Opening starts from an empty search, on the current choice.
   useEffect(() => {
@@ -106,7 +107,7 @@ export function useLanguageMenu({ ordered, suggested, value, onPick, label, disa
   }, [open, active, rows.length]);
 
   const choose = (row: Row | undefined) => {
-    if (!row) return;
+    if (!row || row.unavailable) return;
     setOpen(false);
     if (row.code !== value) onPick(row.code);
   };
@@ -154,8 +155,10 @@ export function useLanguageMenu({ ordered, suggested, value, onPick, label, disa
                 <div
                   role="option"
                   aria-selected={row.code === value}
+                  aria-disabled={row.unavailable ? true : undefined}
+                  title={row.unavailable}
                   data-row={i}
-                  className={`kt-font-option kt-lang-option${active === i ? ' is-active' : ''}${row.pinned ? ' is-pinned' : ''}`}
+                  className={`kt-font-option kt-lang-option${active === i ? ' is-active' : ''}${row.pinned ? ' is-pinned' : ''}${row.unavailable ? ' is-unavailable' : ''}`}
                   onMouseEnter={() => setActive(i)}
                   onClick={() => choose(row)}
                 >

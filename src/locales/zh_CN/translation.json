@@ -1715,7 +1715,9 @@
       "mine": "我的语言",
       "theirs": "对方的语言",
       "mostly": "翻译对方主要说的语言",
-      "detect": "自动检测"
+      "detect": "自动检测",
+      "detectUnavailable": "当前的语音识别不能自动检测语言，需要 Qwen3-ASR 1.7B GGUF 或 API 模型。",
+      "speakBothUnavailable": "当前的语音识别分不出{{mine}}和{{language}}，需要 Qwen3-ASR 1.7B GGUF 或 API 模型。"
     },
     "wizard": {
       "pathTitle": "Kotomimi 自由搭配",

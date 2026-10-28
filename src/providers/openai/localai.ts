@@ -65,7 +65,7 @@ import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
 import { recognizerAsked } from './serverRecognizers';
 import { phoneBase, plainAddress } from '../../lib/lan/discover';
-import { ASR_HERES, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
+import { ASR_HERES, canDetectOther, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
 import { NATIVE_MODELS, preferNative, type NativePick } from './localaiNative';
 import { NATIVE_DEFAULT_MODEL, coachBaseUrl, coachGap, coachIdle, coachUp, holdNativeForRun, nativeGap, nativeUp, restNative, translatorUp, nativeWaits, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_COACH_EXTRA, NATIVE_COACHES, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
@@ -1275,6 +1275,23 @@ export function admitLocalAI(configs: Partial<Record<LegName, LocalAIConfig>>): 
 export const localaiLanguages: Provider<LocalAISettings, never, never>['languages'] = {
   ...realtimeLanguages,
   sources: () => REALTIME_LANGUAGES,
+  detection: (stored, models) => {
+    // On is what a run does, not what is stored: a choice kept from when what hears could detect is shown off while it
+    // cannot (`LocalAIAssist`'s `put` drops it with the next change of what hears). Where this computer's own models
+    // hear, which cannot, its engine can once a model of it that detects is downloaded: turned on, the hearing moves
+    // to the engine, which hears with that model.
+    const s = settled(stored);
+    const detector = nativeWaits(AUTO);
+    const can = hearsNatively(s) ? detector : canDetectOther(s, models);
+    const moves = !can && s.asrVia === 'device' && detector;
+    const to: Partial<LocalAISettings> = moves ? { asrHere: 'native' } : {};
+    const available = can || moves;
+    return {
+      other: { on: detectsOther(s, models), available, turn: (on) => (on ? { ...to, asrDetectOther: true } : { asrDetectOther: false }) },
+      // Grammar feedback answers a sentence in the other side's language the other way: one turns the other off.
+      both: { on: speaksBoth(s, models), available, turn: (on) => (on ? { ...to, speakBoth: true, coach: false } : { speakBoth: false }) },
+    };
+  },
 };
 
 const adapter = createPipelineAdapter({ prepare: (pipeline, transcription) => setLocalPipeline(pipeline, { transcription }) });

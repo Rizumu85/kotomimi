@@ -2,6 +2,7 @@ import { useAnalytics } from '../../lib/analytics';
 import type { AnyProvider } from '../../lib/provider/types';
 import { languageContext } from '../../lib/session/shape';
 import type { AudioMode } from '../../stores/audioStore';
+import { useNativeEngineStore } from '../../stores/nativeEngineStore';
 import { useProviderStore } from '../../stores/providerStore';
 import { LanguagePairSection } from './LanguagePairSection';
 import { useSelectedProvider } from './useSelectedProvider';
@@ -25,22 +26,20 @@ export function ProviderLanguages({ providers, disabled, sentence }: ProviderLan
   const selection = useSelectedProvider(providers);
   const legs = useProviderStore((st) => st.legs);
   const speech = useProviderStore((st) => st.speech);
+  // Read only to draw again when a recognizer downloads: whether a language can be detected may depend on it.
+  useNativeEngineStore((st) => st.status);
   if (!selection?.entry) return null;
   const { provider, entry } = selection;
   const { setPair, updateSettings } = useProviderStore.getState();
-  // Fork: the Kotomimi provider's pair is the user's language and the other side's, named so; and the other side's
-  // can be left to be detected — a choice of their language, made while they are heard at all. Where what hears
-  // cannot tell languages apart the choice stays and the pair's language is the one heard (`detectsOther`).
+  // Fork: the Kotomimi provider's pair is the user's language and the other side's, named so; and a language can be
+  // left to be detected where the provider says (`languages.detection`): the other side's — a choice of their
+  // language, made while they are heard at all — or the user's own in either of the pair's, while they are. Each is
+  // shown as a run does it.
   const kotomimi = (provider.id as string) === 'localai';
-  const detect = kotomimi && legs.includes('participant')
-    ? { on: (entry.settings as { asrDetectOther?: boolean }).asrDetectOther === true, set: (on: boolean) => updateSettings(provider, { asrDetectOther: on }) }
-    : undefined;
-  // Fork: the user speaks the other side's language too, while they are heard. It and the grammar feedback answer one
-  // question — what is done with a sentence of theirs in the other side's language — so turning it on turns that off.
-  const kept = entry.settings as { speakBoth?: boolean; coach?: boolean };
-  const both = kotomimi && legs.includes('speaker')
-    ? { on: kept.speakBoth === true && kept.coach !== true, set: (on: boolean) => updateSettings(provider, on ? { speakBoth: true, coach: false } : { speakBoth: false }) }
-    : undefined;
+  const detection = provider.languages.detection?.(entry.settings, selection.models);
+  const offer = (kind: 'other' | 'both') => detection && { on: detection[kind].on, available: detection[kind].available, set: (on: boolean) => updateSettings(provider, detection[kind].turn(on)) };
+  const detect = legs.includes('participant') ? offer('other') : undefined;
+  const both = legs.includes('speaker') ? offer('both') : undefined;
 
   return (
     <LanguagePairSection

@@ -1715,7 +1715,9 @@
       "mine": "My language",
       "theirs": "Their language",
       "mostly": "Translate into what they mostly speak",
-      "detect": "Auto-detect"
+      "detect": "Auto-detect",
+      "detectUnavailable": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
+      "speakBothUnavailable": "The speech recognition in use can't tell {{mine}} from {{language}}. It needs Qwen3-ASR 1.7B GGUF or an API model."
     },
     "wizard": {
       "pathTitle": "Kotomimi Pipeline",

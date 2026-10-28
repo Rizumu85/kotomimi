@@ -109,6 +109,16 @@ module.exports = {
     theirs: ['Their language', '对方的语言', '對方的語言'],
     mostly: ['Translate into what they mostly speak', '翻译对方主要说的语言', '翻譯對方主要說的語言'],
     detect: ['Auto-detect', '自动检测', '自動偵測'],
+    detectUnavailable: [
+      "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
+      '当前的语音识别不能自动检测语言，需要 Qwen3-ASR 1.7B GGUF 或 API 模型。',
+      '目前的語音辨識不能自動偵測語言，需要 Qwen3-ASR 1.7B GGUF 或 API 模型。',
+    ],
+    speakBothUnavailable: [
+      "The speech recognition in use can't tell {{mine}} from {{language}}. It needs Qwen3-ASR 1.7B GGUF or an API model.",
+      '当前的语音识别分不出{{mine}}和{{language}}，需要 Qwen3-ASR 1.7B GGUF 或 API 模型。',
+      '目前的語音辨識分不出{{mine}}和{{language}}，需要 Qwen3-ASR 1.7B GGUF 或 API 模型。',
+    ],
   },
   wizard: {
     pathTitle: ['Kotomimi Pipeline', 'Kotomimi 自由搭配', 'Kotomimi 自由搭配'],

@@ -27,7 +27,7 @@ import { coachPrompt } from './coachPrompt';
 import type { LocalAISettings as S } from './localai';
 import { coachesAtOwnDevice, deviceChatModels, deviceCoachModel, deviceLanguage, deviceModelsLoaded, hearingPlace, needsServer, PLACE_FIELDS, PLACES, translatePlace, translatesAtOwnDevice, type DeviceNeed, type Place } from './localaiDevice';
 import { NATIVE_MODELS, chooseNative, isAutoLanguage, nativeDownloaded, nativeHears, nativeModel, nativePicked, type NativePick } from './localaiNative';
-import { detectsOther, heardBy } from './localaiDevice';
+import { canDetectOther, detectsOther, heardBy } from './localaiDevice';
 import { languageLabel } from '../../lib/language/label';
 import { NativeEngineCard, nativeStoreOf, type NativeCardModel, type NativeKind } from './NativeEngineCard';
 import { NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator } from './nativeTranslators';
@@ -762,13 +762,23 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   const pinned = useRef(false);
   const latest = useRef(settings);
   latest.current = settings;
-  const put = useCallback((patch: Partial<S>) => {
+  const listed = useRef(models);
+  listed.current = models;
+  const put = useCallback((asked: Partial<S>) => {
+    const now = latest.current;
+    // A detection kept from when what hears could detect is shown off while it cannot (`localaiLanguages.detection`):
+    // a change of what hears drops it, so that it never comes back on unseen.
+    const hearing = 'asrVia' in asked || 'asrHere' in asked || 'asrOther' in asked;
+    const patch: Partial<S> = {
+      ...(hearing && now.asrDetectOther && !detectsOther(now, listed.current) ? { asrDetectOther: false } : {}),
+      ...(hearing && now.speakBoth && !canDetectOther(now, listed.current) ? { speakBoth: false } : {}),
+      ...asked,
+    };
     if (pinned.current) {
       update(patch);
       return;
     }
     pinned.current = true;
-    const now = latest.current;
     update({ ...Object.fromEntries(PLACE_FIELDS.map((field) => [field, now[field]])), ...patch } as Partial<S>);
   }, [update]);
 
@@ -970,8 +980,8 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
     put({ asrHere: 'native', asrNativeModel: next.model, asrNativeByLanguage: next.byLanguage, ...ended });
   };
   const translateToLocalAI = toLocalAI({ translateHere: 'localai', translateHereModel: settings.translateHereModel || firstText });
-  // Offered where what hears can detect a language: the native engine, or an API.
-  // While the other side's language is left to be detected (chosen among the languages, `LanguagePairSection`): what that takes.
+  // While the other side's language is left to be detected (chosen among the languages, `LanguagePairSection`): what
+  // that takes, where no row of this computer's says it (`hearsOther`).
   const detectOther = legs.includes('participant') && detectsOther(settings, models)
     ? <p className="kt-note">{t('providers.localai.detectOtherNote')}</p>
     : null;
@@ -1138,7 +1148,6 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
           : (
             <DeviceModels
               stage="asr" settings={settings} update={put} pair={pair} legs={legs} disabled={disabled} tour={tourAt === 'asr'} other={asrToLocalAI}
-              below={settings.asrHere === 'native' ? detectOther : undefined}
               native={{
                 onPick: pickNativeFor,
                 ...(settings.asrHere === 'native' ? { inUse: (slot: DeviceNeed) => nativePicked(nativePick, heardBy(settings, pair, slot.leg)) ?? null, onBack: () => put({ asrHere: 'app' }) } : {}),
