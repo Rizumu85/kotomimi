@@ -88,6 +88,8 @@ function clamp(n: number, min: number, max: number): number {
 }
 
 const KEY = (suffix: string) => `settings.common.conversationDisplay.${suffix}`;
+/** Fork: the old dark defaults have been read as never set, once (`hydrate`). */
+const SCHEME_MIGRATED = 'followsScheme';
 
 // The former local body caught a rejection but never read `result.success`, so
 // the failure the service actually reports was dropped. `persistSetting` owns
@@ -135,24 +137,33 @@ export const useConversationDisplayStore = create<ConversationDisplayState>()(
 
     hydrate: async () => {
       const svc = ServiceFactory.getSettingsService();
-      const [fontSize, compactMode, bgColor, sourceTextColor, translationTextColor] =
+      const [fontSize, compactMode, bgColor, sourceTextColor, translationTextColor, followsScheme] =
         await Promise.all([
           svc.getSetting(KEY('fontSize'), DEFAULTS.fontSize),
           svc.getSetting(KEY('compactMode'), DEFAULTS.compactMode),
           svc.getSetting(KEY('bgColor'), DEFAULTS.bgColor),
           svc.getSetting(KEY('sourceTextColor'), DEFAULTS.sourceTextColor),
           svc.getSetting(KEY('translationTextColor'), DEFAULTS.translationTextColor),
+          svc.getSetting(KEY(SCHEME_MIGRATED), false),
         ]);
-      // Fork: a colour stored as the dark default it was before the light theme came is read as never set: the
-      // default's own chip used to store it, so it was the default that was chosen, which now follows the scheme.
-      const chosen = (stored: string | null, olderDefault: string) => (stored !== null && stored.toLowerCase() === olderDefault.toLowerCase() ? null : stored);
-      set({
-        fontSize: clamp(Math.round(fontSize), CONVERSATION_FONT_SIZE_MIN, CONVERSATION_FONT_SIZE_MAX),
-        compactMode,
+      // Fork: a colour stored as the dark default it was before the light theme came is read as never set, once: the
+      // default's own chip used to store it, so it was the default that was chosen, which now follows the scheme. After
+      // that once, the same colour picked again is the user's (mapped every time, a dark background picked in the
+      // light app came back following the scheme under the white text picked with it).
+      const chosen = (stored: string | null, olderDefault: string) => (!followsScheme && stored !== null && stored.toLowerCase() === olderDefault.toLowerCase() ? null : stored);
+      const colours = {
         bgColor: chosen(bgColor, CONVERSATION_DISPLAY_DEFAULT_BG_COLOR),
         sourceTextColor: chosen(sourceTextColor, CONVERSATION_DISPLAY_DEFAULT_SOURCE_TEXT_COLOR),
         translationTextColor: chosen(translationTextColor, CONVERSATION_DISPLAY_DEFAULT_TRANSLATION_TEXT_COLOR),
-      });
+      };
+      set({ fontSize: clamp(Math.round(fontSize), CONVERSATION_FONT_SIZE_MIN, CONVERSATION_FONT_SIZE_MAX), compactMode, ...colours });
+      if (!followsScheme) {
+        const read = { bgColor, sourceTextColor, translationTextColor };
+        const changed = (Object.keys(colours) as Array<keyof typeof colours>).filter((key) => colours[key] !== read[key]);
+        const written = await Promise.all(changed.map((key) => persist(key, colours[key])));
+        // Not marked done where a colour could not be written: the next start maps it again.
+        if (written.every((w) => w.ok)) await persist(SCHEME_MIGRATED, true);
+      }
     },
   })),
 );

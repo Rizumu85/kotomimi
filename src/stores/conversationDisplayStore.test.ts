@@ -102,6 +102,17 @@ describe('conversationDisplayStore', () => {
     expect(s.bgColor).toBeNull();
     expect(s.sourceTextColor).toBeNull();
     expect(s.translationTextColor).toBe('#123456');
+    // Written so, once: the same colour picked after this is the user's.
+    expect(mockSetSetting).toHaveBeenCalledWith('settings.common.conversationDisplay.bgColor', null);
+    expect(mockSetSetting).toHaveBeenCalledWith('settings.common.conversationDisplay.followsScheme', true);
+  });
+
+  it('hydrate keeps the old dark default where it was picked after the once (fork)', async () => {
+    const stored: Record<string, unknown> = { bgColor: '#1f1f1f', sourceTextColor: '#ffffff', followsScheme: true };
+    mockGetSetting.mockImplementation(async (key: string, def: unknown) => stored[key.split('.').pop()!] ?? def);
+    await useConversationDisplayStore.getState().hydrate();
+    expect(useConversationDisplayStore.getState().bgColor).toBe('#1f1f1f');
+    expect(mockSetSetting).not.toHaveBeenCalled();
   });
 
   it('clamps setFontSize to [12, 64]', async () => {
