@@ -43,7 +43,7 @@ export interface NativeModel {
 export const APPLE_PREFIX = 'apple-speech:';
 const APPLE_LANGUAGES = ['ja', 'en', 'ko', 'zh', 'es', 'fr', 'de', 'it', 'pt', 'hi', 'yue'] as const;
 const APPLE_LIMITS: Partial<NativeLimits> = { rollAfter: 10, rollAt: 20, rollHard: 28 };
-const isApple = (id: string | null | undefined): boolean => typeof id === 'string' && id.startsWith(APPLE_PREFIX);
+export const isApple = (id: string | null | undefined): boolean => typeof id === 'string' && id.startsWith(APPLE_PREFIX);
 
 /**
  * Qwen3-ASR in the native engine reads a stretch at a time, and the engine

@@ -17,7 +17,7 @@ import { AUTO } from '../provider/languages';
 import { createNativeAsr } from '../../providers/openai/nativeAsr';
 import { NATIVE_COACHES } from '../../providers/openai/nativeCoaches';
 import { coachBaseUrl, coachKey } from '../../providers/openai/localaiNative';
-import { NATIVE_MODELS, holdNative, nativeDownloaded, nativeModel, nativeModelFor, nativePicked, nativePreference, nativeTaken, translatorBaseUrl, translatorKey } from '../../providers/openai/localaiNative';
+import { NATIVE_MODELS, holdNative, isApple, nativeDownloaded, nativeModel, nativeModelFor, nativePicked, nativePreference, nativeTaken, translatorBaseUrl, translatorKey } from '../../providers/openai/localaiNative';
 import { NATIVE_TRANSLATORS, TEXT_SLOT, nativeTranslates, translatorRequest } from '../../providers/openai/nativeTranslators';
 import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import type { SharedModel } from './protocol';
@@ -73,10 +73,12 @@ export function nativeRecognizerFor(language: string, wanted: string): { modelId
   const usable = (id: string) => nativeDownloaded(status, id);
   if (wanted && !isNativeRecognizer(wanted)) return null;
   // The engine the app downloads runs one model at a time. The one running — this computer's own choice, or what
-  // another device is listening through — answers for whichever of the native models was named, where it hears the
-  // language: starting another would stop it under whoever is using it.
+  // another device is listening through — answers for whichever of that engine's models was named, where it hears the
+  // language: starting another would stop it under whoever is using it. The Mac's own recognition is an engine of its
+  // own, beside it: named, it is what runs, whichever of the two was started last.
   const running = status.run.state !== 'stopped' && status.run.state !== 'failed' && status.run.model ? nativeModelFor(status.run.model, language) : null;
-  if (running && isNativeRecognizer(running.id) && usable(running.id)) return { modelId: running.id, streaming: true };
+  const sameEngine = (id: string) => !wanted || isApple(wanted) === isApple(id);
+  if (running && isNativeRecognizer(running.id) && usable(running.id) && sameEngine(running.id)) return { modelId: running.id, streaming: true };
   // The engine is someone's with a model that does not hear this language: it is not switched under them. The
   // system's own recognition (a Mac) runs beside it, and is still offered.
   const taken = nativeTaken('asr');

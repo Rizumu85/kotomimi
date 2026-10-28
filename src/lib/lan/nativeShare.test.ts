@@ -94,6 +94,15 @@ describe('the recognizer a device gets', () => {
     expect(nativeRecognizerFor('ja', 'whisper-large-v3-turbo-webgpu')).toBeNull();
   });
 
+  it('is the Mac\'s own recognition when that is named, though the downloaded engine is running a model that hears the language — and the other way round', () => {
+    const both = { 'apple-speech:zh': downloaded, 'qwen3-asr-1.7b-q8': downloaded };
+    useNativeEngineStore.setState({ status: status(both, { state: 'ready', model: 'qwen3-asr-1.7b-q8', port: 5000 }) });
+    expect(nativeRecognizerFor('zh', 'apple-speech:zh')).toEqual({ modelId: 'apple-speech:zh', streaming: true });
+    expect(nativeRecognizerFor('zh', '')).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
+    useNativeEngineStore.setState({ status: status(both, { state: 'ready', model: 'apple-speech:zh', port: 5000 }) });
+    expect(nativeRecognizerFor('zh', 'qwen3-asr-1.7b-q8')).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
+  });
+
   it('is run by the native engine, which is held while a device listens through it', async () => {
     useNativeEngineStore.setState({ status: status({ 'r2t2-q8': downloaded }, { state: 'ready', model: 'r2t2-q8', port: 5000 }) });
     const stop = vi.fn();
