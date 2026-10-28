@@ -599,6 +599,7 @@
       "notDownloaded": "尚未下載模型",
       "browse": "模型庫",
       "hears": "辨識{{language}}",
+      "hearsEither": "辨識{{first}}或{{second}}",
       "farSource": "這些模型存放在海外，下載可能很慢或失敗。",
       "farSourceRest": "這些模型存放在海外，下載可能很慢或失敗。上面推薦的不受影響。",
       "chatModelsNoGpu": "這些模型需要支援 WebGPU 的顯示卡，這台電腦沒有。文法回饋請改用另一台裝置或 API 模型。",

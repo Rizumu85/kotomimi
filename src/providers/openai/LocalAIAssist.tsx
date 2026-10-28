@@ -469,6 +469,8 @@ function DeviceModels({ stage, settings, update, pair, legs, disabled, tour, oth
   /** The engine's model that serves a row; null: the engine runs the stage and none is chosen for the row; undefined: the app's own models run it. */
   const using = (slot: DeviceNeed): NativeCardModel | null | undefined => (native?.inUse ? native.inUse(slot) : undefined);
   const fits = (id: string, slot: DeviceNeed): boolean => nativeFits(stage, id, heardIn(slot), slot.target);
+  /** A model a row offers: one that fits it — or, where its language is left to be detected, one that hears the pair's language, which chosen ends the detection (`onPick`). */
+  const offers = (id: string, slot: DeviceNeed): boolean => fits(id, slot) || (stage === 'asr' && nativeFits('asr', id, slot.source, slot.target));
   /** A row with nothing to run, or whose model needs the person: not on this computer yet, or the engine failed with it. */
   const wanting = (slot: DeviceNeed): boolean => {
     const model = using(slot);
@@ -482,7 +484,7 @@ function DeviceModels({ stage, settings, update, pair, legs, disabled, tour, oth
   /** The engine's models a row can be given: the downloaded ones that serve it, and the one in use whatever its state. */
   const nativeFor = (slot: DeviceNeed): readonly NativeCardModel[] => {
     if (!native) return [];
-    const ready = engine.ready.filter((m) => fits(m.id, slot));
+    const ready = engine.ready.filter((m) => offers(m.id, slot));
     const mine = using(slot);
     return mine && !ready.some((m) => m.id === mine.id) ? [mine, ...ready] : ready;
   };
@@ -499,14 +501,16 @@ function DeviceModels({ stage, settings, update, pair, legs, disabled, tour, oth
   if (slots.length === 0) return null;
   // The native models that serve the direction whose library is open, best first.
   const openSlot = slots.find((slot) => slot.dir === open);
-  const fitting = native && openSlot ? engine.offered.filter((m) => fits(m.id, openSlot)) : [];
+  const fitting = native && openSlot ? engine.offered.filter((m) => offers(m.id, openSlot)) : [];
   const usedThere = openSlot ? using(openSlot) : undefined;
 
   const title = (slot: DeviceNeed) => {
     if (stage !== 'asr') return `${adapter.languageName(deviceLanguage(slot.source))} → ${adapter.languageName(deviceLanguage(slot.target))}`;
-    // A leg whose language is left to be detected is the other side's, and is said so.
+    // A leg whose language is left to be detected: the other side's, in any language, or the user's own in either of the pair's (`speakBoth`).
     const heard = heardIn(slot);
-    return isAutoLanguage(heard) ? t('providers.localai.hearsOther') : t('providers.localai.hears', { language: adapter.languageName(deviceLanguage(heard)) });
+    const named = (code: string) => adapter.languageName(deviceLanguage(code));
+    if (!isAutoLanguage(heard)) return t('providers.localai.hears', { language: named(heard) });
+    return slot.leg === 'speaker' ? t('providers.localai.hearsEither', { first: named(pair.source), second: named(pair.target) }) : t('providers.localai.hearsOther');
   };
 
   return (
@@ -516,7 +520,7 @@ function DeviceModels({ stage, settings, update, pair, legs, disabled, tour, oth
         const auto = adapter.autoPick(slot);
         const label = title(slot);
         const mine = using(slot);
-        const natives = stage === 'asr' && nativeRuns && detectsOther(settings) ? nativeFor(slot).filter((m) => nativeFits('asr', m.id, 'auto', slot.target)) : nativeFor(slot);
+        const natives = nativeFor(slot);
         const candidates = adapter.readyCandidates(slot);
         // A language left to be detected is heard by a model that can tell languages apart: the app's own cannot, nor
         // can it be known of a LocalAI's. And while the other side's is, that model hears this computer's every
@@ -948,6 +952,23 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
     const next = chooseNative(nativePick, id, languages, heardByLegs);
     put({ asrHere: 'native', asrNativeModel: next.model, asrNativeByLanguage: next.byLanguage });
   };
+  // A model that cannot tell languages apart, chosen while a language is left to be detected — the other side's, or the
+  // user's own in either of the pair's (`speakBoth`) — or is to be once the engine hears, as it does from this choice
+  // on: the engine runs one model for every leg, so the detection ends, and each leg is heard in the pair's language.
+  // Kept on, the engine would hear with the model that detects.
+  const pickNativeFor = (id: string, slot?: DeviceNeed) => {
+    const detectOff = settings.asrDetectOther === true && legs.includes('participant');
+    const bothOff = settings.speakBoth === true && !settings.coach && legs.includes('speaker') && pair.source.toLowerCase() !== pair.target.toLowerCase();
+    if (nativeModel(id).detects || !(detectOff || bothOff)) {
+      pickNative(id, slot ? [heardBy(settings, pair, slot.leg)] : heardByLegs.filter((language) => nativeHears(nativeModel(id), language)));
+      return;
+    }
+    const ended = { ...(detectOff ? { asrDetectOther: false } : {}), ...(bothOff ? { speakBoth: false } : {}) };
+    const told = { ...settings, ...ended };
+    const heard = legs.map((leg) => heardBy(told, pair, leg, models));
+    const next = chooseNative({ model: settings.asrNativeModel, byLanguage: settings.asrNativeByLanguage }, id, slot ? [heardBy(told, pair, slot.leg)] : heard.filter((language) => nativeHears(nativeModel(id), language)), heard);
+    put({ asrHere: 'native', asrNativeModel: next.model, asrNativeByLanguage: next.byLanguage, ...ended });
+  };
   const translateToLocalAI = toLocalAI({ translateHere: 'localai', translateHereModel: settings.translateHereModel || firstText });
   // Offered where what hears can detect a language: the native engine, or an API.
   // While the other side's language is left to be detected (chosen among the languages, `LanguagePairSection`): what that takes.
@@ -969,7 +990,8 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   const asrNow = settings.asrVia === 'device' && settings.asrHere === 'native'
     ? heardByLegs.map((language) => nativePicked(nativePick, language)).find((m) => m !== null) ?? null
     : null;
-  const asrSmaller = smaller(nativeAsr.ready, asrNow, (id) => heardByLegs.every((language) => isAutoLanguage(language) || nativeHears(nativeModel(id), language)));
+  // A leg left to be detected keeps being so: only a model that detects is suggested for it.
+  const asrSmaller = smaller(nativeAsr.ready, asrNow, (id) => heardByLegs.every((language) => (isAutoLanguage(language) ? nativeModel(id).detects === true : nativeHears(nativeModel(id), language))));
   const translatedPairs = legs.filter((leg) => !(leg === 'speaker' && settings.coach)).map((leg) => (leg === 'speaker' ? [pair.source, pair.target] : [pair.target, pair.source]));
   const translationSmaller = smaller(nativeTranslation.ready, settings.translateAt === 'device' && settings.translateHere === 'native' ? nativeTranslator(settings.translateNativeModel) : null,
     (id) => translatedPairs.every(([from, to]) => nativeTranslates(nativeTranslator(id), from, to)));
@@ -1118,7 +1140,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
               stage="asr" settings={settings} update={put} pair={pair} legs={legs} disabled={disabled} tour={tourAt === 'asr'} other={asrToLocalAI}
               below={settings.asrHere === 'native' ? detectOther : undefined}
               native={{
-                onPick: (id, slot) => pickNative(id, slot ? [heardBy(settings, pair, slot.leg)] : heardByLegs.filter((language) => nativeHears(nativeModel(id), language))),
+                onPick: pickNativeFor,
                 ...(settings.asrHere === 'native' ? { inUse: (slot: DeviceNeed) => nativePicked(nativePick, heardBy(settings, pair, slot.leg)) ?? null, onBack: () => put({ asrHere: 'app' }) } : {}),
               }}
             />

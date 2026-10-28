@@ -153,6 +153,7 @@ const PROVIDER = {
   notDownloaded: ['No model downloaded yet', '还没下载模型', '尚未下載模型'],
   browse: ['Model library', '模型库', '模型庫'],
   hears: ['Recognizes {{language}}', '识别{{language}}', '辨識{{language}}'],
+  hearsEither: ['Recognizes {{first}} or {{second}}', '识别{{first}}或{{second}}', '辨識{{first}}或{{second}}'],
   // Under the app's own models, on a computer in a mainland China time zone only: what to expect, and nothing of why.
   farSource: ['These models are stored overseas: a download may be very slow or fail.', '这些模型存放在海外，下载可能很慢或失败。', '這些模型存放在海外，下載可能很慢或失敗。'],
   farSourceRest: [
