@@ -17,15 +17,21 @@ export interface SharePort {
   state(state: ShareState): Promise<unknown>;
 }
 
+/** The origin the pipeline gives a typed sentence (`appendText` in `pipeline.ts`): answered with a translation, coached or not. */
+const TYPED = /^sokuji_typed_/;
+
 export interface PublisherSources {
-  view: Readable<{ entries: readonly Entry[] }>;
+  /** The conversation as drawn, and its segments: a typed sentence is told by its origin. */
+  view: Readable<{ entries: readonly Entry[]; legs?: readonly { segments: readonly { id: string; origin?: string }[] }[] }>;
+  /** Fork: the user is coached: what they say is answered with feedback, which is not shared (`toViewerEntry`). */
+  coached?(): boolean;
   state: Readable<ShareState>;
   onReset(listener: (reason: ResetReason) => void): () => void;
 }
 
 export function startSharePublisher(sources: PublisherSources, port: SharePort): () => void {
   const acked = new Map<string, string>();
-  const cache = new WeakMap<Entry, ShareItem | null>();
+  const cache = new WeakMap<Entry, { feedback: boolean; item: ShareItem | null }>();
   let failing = false;
   let stopped = false;
   // Bumped by every reset: a patch acknowledged after one belongs to the page
@@ -41,14 +47,18 @@ export function startSharePublisher(sources: PublisherSources, port: SharePort):
 
   const items = (): ShareItem[] => {
     const out: ShareItem[] = [];
-    for (const entry of sources.view.get().entries) {
-      let item = cache.get(entry);
-      if (item === undefined) {
-        const viewer = toViewerEntry(entry);
-        item = viewer ? { entry: viewer, json: JSON.stringify(viewer) } : null;
-        cache.set(entry, item);
+    const view = sources.view.get();
+    const coached = sources.coached?.() ?? false;
+    const typed = coached ? new Set((view.legs ?? []).flatMap((leg) => leg.segments.filter((s) => TYPED.test(s.origin ?? '')).map((s) => s.id))) : null;
+    for (const entry of view.entries) {
+      const feedback = typed !== null && entry.kind === 'exchange' && entry.leg === 'speaker' && !entry.source.some((r) => typed.has(r.segmentId));
+      let kept = cache.get(entry);
+      if (kept === undefined || kept.feedback !== feedback) {
+        const viewer = toViewerEntry(entry, feedback);
+        kept = { feedback, item: viewer ? { entry: viewer, json: JSON.stringify(viewer) } : null };
+        cache.set(entry, kept);
       }
-      if (item) out.push(item);
+      if (kept.item) out.push(kept.item);
     }
     return out;
   };

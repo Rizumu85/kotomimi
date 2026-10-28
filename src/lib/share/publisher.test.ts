@@ -120,3 +120,21 @@ describe('startSharePublisher', () => {
     h.stop();
   });
 });
+
+describe('startSharePublisher — a coached user (fork)', () => {
+  it('shares what they said and not its feedback; a typed sentence keeps its translation', async () => {
+    const answered = (id: string, said: string, answer: string): Entry => {
+      const e = exchange(id, said);
+      return e.kind === 'exchange' ? { ...e, translation: [{ key: `${id}t:0`, segmentId: `${id}t`, side: 'translation', start: 0, end: answer.length, text: answer, final: true }] } : e;
+    };
+    const view = readable({ entries: [answered('spoken', '今日は', '✓'), answered('typed', '你好', 'こんにちは')], legs: [{ segments: [{ id: 'typed', origin: 'sokuji_typed_1' }, { id: 'spoken', origin: 'u1' }] }] });
+    const state = readable<ShareState>({ phase: 'live', pair: { source: 'ja', target: 'en' }, allowSave: false });
+    const port = { patch: vi.fn<SharePort['patch']>(async () => undefined), clear: vi.fn<SharePort['clear']>(async () => undefined), state: vi.fn<SharePort['state']>(async () => undefined) };
+    const stop = startSharePublisher({ view, state, onReset: () => () => {}, coached: () => true }, port);
+    await flush();
+    const sent = port.patch.mock.calls[0][0].upsert as ViewerEntry[];
+    expect(sent.find((e) => e.id === 'spoken')?.translation).toEqual([]);
+    expect(sent.find((e) => e.id === 'typed')?.translation.map((r) => r.text)).toEqual(['こんにちは']);
+    stop();
+  });
+});

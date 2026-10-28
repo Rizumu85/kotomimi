@@ -13,6 +13,7 @@ import { describeCause, reportError } from '../lib/diagnostics/report';
 import { startSharePublisher, type SharePort } from '../lib/share/publisher';
 import type { ShareState, ShareStatus } from '../lib/share/types';
 import { useCaptionShareStore, type ShareError, type WifiHintState } from '../stores/captionShareStore';
+import { useCoachingStore } from '../stores/coachingStore';
 import { useProviderStore } from '../stores/providerStore';
 import useSettingsStore from '../stores/settingsStore';
 import { getAppSession } from './session';
@@ -24,7 +25,9 @@ export interface CaptionShareIpc {
 
 export interface CaptionShareDeps {
   ipc: CaptionShareIpc;
-  view: Readable<{ entries: readonly Entry[] }>;
+  view: Readable<{ entries: readonly Entry[]; legs?: readonly { segments: readonly { id: string; origin?: string }[] }[] }>;
+  /** Fork: the user is coached: their spoken sentences' feedback is not shared. */
+  coached?(): boolean;
   onReset(listener: (reason: ConversationResetReason) => void): () => void;
   runState: { getState(): RunState; subscribe(listener: () => void): () => void };
   pair: { get(): { source: string; target: string } | null; subscribe(listener: () => void): () => void };
@@ -68,7 +71,7 @@ export function createCaptionShareController(deps: CaptionShareDeps): CaptionSha
   };
 
   const beginPublisher = () => {
-    stopPublisher = startSharePublisher({ view: deps.view, state: stateSource, onReset: deps.onReset }, port);
+    stopPublisher = startSharePublisher({ view: deps.view, state: stateSource, onReset: deps.onReset, ...(deps.coached ? { coached: deps.coached } : {}) }, port);
   };
   const endPublisher = () => {
     stopPublisher?.();
@@ -189,6 +192,7 @@ export function getCaptionShareController(): CaptionShareController {
     controller = createCaptionShareController({
       ipc: window.electron,
       view: session.view,
+      coached: () => useCoachingStore.getState().coached,
       onReset: (listener) => session.runner.conversation.onReset(listener),
       runState: { getState: () => session.runner.state.getState(), subscribe: (listener) => session.runner.state.subscribe(() => listener()) },
       pair: sharedPair,
