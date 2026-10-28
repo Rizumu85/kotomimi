@@ -220,6 +220,9 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     queue.push(s);
     live = s;
     quiet = 0;
+    // A pause the detector said of sound before this one is not this one's.
+    paused = false;
+    pausedFor = 0;
     idle = 0;
     advance();
     return s;
@@ -339,7 +342,8 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     } else if (event.type === 'delta') {
       s.text += event.text;
       if (!s.misfire && !s.tentative) asr.onPartialResult?.(tidyHeard(pending(s)));
-      if (s === live) endEarly();
+      // Where the engine also says what it has heard so far, that is what is shown: a delta does not renew it.
+      if (s === live && !s.tentative) endEarly();
     } else if (event.type === 'done') {
       finish(s, event.text || s.text, event.language);
     } else {
@@ -461,6 +465,8 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
       if (live) {
         give(live, kept);
         if (paused) pausedFor += kept.length;
+        // The voice may be back before the detector says so: what is written next may lack it, and is not to end on.
+        if (paused && loud) paused = false;
         const age = secondsOf(live.samples);
         if (age >= limits.rollAfter) {
           quiet = loud ? 0 : quiet + kept.length;

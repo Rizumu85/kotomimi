@@ -28,12 +28,14 @@ let speechFramesSinceStart = 0;
 /**
  * Fork: a short pause inside a stretch, said as it begins (`pause`) and when the voice comes back (`resume`), for a
  * recognizer that ends a turn on it when the words heard close a sentence (`nativeAsr.ts`). Only where the detector's
- * own pause is longer.
+ * own pause is longer, and only once the stretch has had speech enough not to be a misfire (`SpeechRealStart`): a
+ * stretch ended early can no longer be called one.
  */
 const SHORT_PAUSE_MS = 500;
 let shortPauseFrames = Infinity;
 let quietFrames = 0;
 let paused = false;
+let realSpeech = false;
 let positiveThreshold = 0.3;
 let negativeThreshold = 0.15;
 
@@ -167,16 +169,22 @@ async function feedAudio(samples: Int16Array, sampleRate: number): Promise<void>
         case Message.FrameProcessed:
           heardFrame(ev.probs.isSpeech);
           break;
+        case Message.SpeechRealStart:
+          realSpeech = true;
+          break;
         case Message.SpeechStart:
           speechFramesSinceStart = 0;
+          realSpeech = false;
           post({ type: 'speech_start' });
           break;
         case Message.SpeechEnd:
           speechFramesSinceStart = 0;
+          realSpeech = false;
           post({ type: 'speech_end' });
           break;
         case Message.VADMisfire:
           speechFramesSinceStart = 0;
+          realSpeech = false;
           post({ type: 'speech_cancel' });
           break;
       }
@@ -191,6 +199,7 @@ async function feedAudio(samples: Int16Array, sampleRate: number): Promise<void>
           else if (ev.msg === Message.VADMisfire) post({ type: 'speech_cancel' });
         }
         speechFramesSinceStart = 0;
+        realSpeech = false;
       }
     } else {
       speechFramesSinceStart = 0;
@@ -208,7 +217,7 @@ function heardFrame(probability: number): void {
       paused = false;
       post({ type: 'resume' });
     }
-  } else if (probability < negativeThreshold && !paused && ++quietFrames >= shortPauseFrames) {
+  } else if (probability < negativeThreshold && !paused && ++quietFrames >= shortPauseFrames && realSpeech) {
     paused = true;
     post({ type: 'pause' });
   }

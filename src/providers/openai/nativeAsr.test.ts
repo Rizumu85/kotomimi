@@ -529,11 +529,52 @@ describe('the early end of a turn (fork)', () => {
     expect(engine.streams[0].ended).toBe(true);
     expect(engine.streams[0].samples).toBe(2.5 * HEARD);
   });
+
+  it('does not end where the voice is back before the detector says so', async () => {
+    const { asr, vad, engine } = await started();
+    vad.worker.say('speech_start');
+    await settled();
+    asr.feedAudio(seconds(2), RATE);
+    vad.worker.say('pause');
+    asr.feedAudio(seconds(0.2), RATE);
+    engine.say({ id: 1, type: 'partial', text: '昨日友達と映画を見ました。' });
+    expect(engine.streams[0].ended).toBe(false);
+  });
+
+  it('does not end on a delta where the engine also says what it has heard so far: that is what is shown', async () => {
+    const { asr, vad, engine } = await started();
+    vad.worker.say('speech_start');
+    await settled();
+    asr.feedAudio(seconds(2), RATE);
+    engine.say({ id: 1, type: 'partial', text: '元は金持ちの息子でした。' });
+    vad.worker.say('pause');
+    engine.say({ id: 1, type: 'delta', text: '元は金持ちの息子でしたが、' });
+    expect(engine.streams[0].ended).toBe(false);
+  });
+
+  it('takes a pause said of the sound before a recognition begun at the next voice as none of its own', async () => {
+    const { asr, vad, engine } = await started();
+    vad.worker.say('speech_start');
+    await settled();
+    talk(asr, engine, 1, ROLL_AFTER_SECONDS);
+    asr.feedAudio(seconds(0.1, 20), RATE);
+    asr.feedAudio(seconds(0.1, 20), RATE);
+    expect(engine.streams[0].ended).toBe(true);
+    engine.say({ id: 1, type: 'done', text: '一つ目' });
+    vad.worker.say('pause');
+    asr.feedAudio(seconds(0.5), RATE);
+    await settled();
+    expect(engine.streams).toHaveLength(2);
+    engine.say({ id: 2, type: 'partial', text: 'そうです。' });
+    expect(engine.streams[1].ended).toBe(false);
+  });
 });
 
 describe('whether what is written closes a sentence (fork)', () => {
   it('reads the words a sentence closes on, not the marks a recognizer writes wherever the speaker breathes', () => {
-    for (const text of ['今日はいい天気ですね。', '行きましょう', '本当にそうかな…', '알겠습니다.', '맛있어요', '你去吗？', '好吧。', 'Are you coming?', '「本当ですか」']) expect(endsTurn(text), text).toBe(true);
+    for (const text of ['今日はいい天気ですね。', '行きましょう', '本当にそうかな。', '알겠습니다.', '맛있어요', '그래요', '어제 먹었다.', '你去吗？', '好吧。', 'Are you coming?', '「本当ですか」']) expect(endsTurn(text), text).toBe(true);
     for (const text of ['撞倒摄影师的汽车司机，未必。', '昨日友達と。', 'I think that.', '然后呢', '그리고', '。', '']) expect(endsTurn(text), text).toBe(false);
+    // Words that only look like an ending (아까, 나보다, 필요, 酒吧), and a mark that holds the sentence open.
+    for (const text of ['아까，', '나보다…', '필요', '我们去酒吧', '今日はいい天気ですね、', 'そうですけど…']) expect(endsTurn(text), text).toBe(false);
   });
 });
