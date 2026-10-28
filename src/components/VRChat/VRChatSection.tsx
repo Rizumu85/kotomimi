@@ -49,6 +49,7 @@ export function VRChatSection() {
   const locked = useSessionLocked();
   const unheard = chatbox !== 'off' && mode === 'participant';
   const pair = useProviderStore((state) => (state.selected ? state.entries[state.selected]?.pair : undefined));
+  const kotomimi = useProviderStore((state) => state.selected === 'localai');
   // While the card is open the mute is asked, so that whether VRChat answers is shown as it is.
   useEffect(() => {
     if (!vrchatOffered()) return undefined;
@@ -118,7 +119,8 @@ export function VRChatSection() {
         ))}
       </div>
       {/* Faster takes a video's sound out where it can: its words can then be translated as well. */}
-      {onVideo === 'quick' && (
+      {/* Its words heard apart only by Kotomimi's own pipeline (`laneOffered`): no switch where nothing would do it. */}
+      {onVideo === 'quick' && kotomimi && (
         <div className="kt-vrchat__more">
           <ToggleSwitch checked={translateVideo} onChange={() => setTranslateVideo(!translateVideo)} label={t('fork.vrchat.translateVideo')} />
         </div>

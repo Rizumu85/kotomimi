@@ -53,3 +53,15 @@ describe('VRChatSection — a chatbox that would stay empty (fork)', () => {
     expect(screen.queryByText('fork.vrchat.chatboxUnheard')).toBeNull();
   });
 });
+
+describe('VRChatSection — a video\'s words (fork)', () => {
+  it('offers to translate them, under faster, only where Kotomimi\'s own pipeline hears: nothing else would', () => {
+    useVRChatStore.setState({ onVideo: 'quick' });
+    const { unmount } = render(<VRChatSection />);
+    expect(screen.getByText('fork.vrchat.translateVideo')).toBeTruthy();
+    unmount();
+    useProviderStore.setState({ selected: 'openai' as never });
+    render(<VRChatSection />);
+    expect(screen.queryByText('fork.vrchat.translateVideo')).toBeNull();
+  });
+});

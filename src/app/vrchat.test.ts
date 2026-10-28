@@ -120,6 +120,22 @@ describe('a video', () => {
     expect(useVRChatStore.getState().video).toEqual({ kind: 'none' });
   });
 
+  it('chooses faster for them when the question stays unanswered — the user in VR — and leaves an answer that came alone (fork)', () => {
+    const t = setup();
+    t.run('running');
+    t.handlers.get('vrchat:video')!({ url: 'x' });
+    expect(useVRChatStore.getState().video).toEqual({ kind: 'asking' });
+    for (const fire of t.timers.splice(0)) fire();
+    expect(useVRChatStore.getState().video).toEqual({ kind: 'on', pace: 'quick', auto: true });
+    expect(last(t.paces)).toEqual(['participant', 'quick']);
+    // Answered in time: the wait ends with nothing to do.
+    t.controller.endVideo();
+    t.handlers.get('vrchat:video')!({ url: 'y' });
+    t.controller.answer('normal', false);
+    for (const fire of t.timers.splice(0)) fire();
+    expect(useVRChatStore.getState().video).not.toMatchObject({ pace: 'quick' });
+  });
+
   it('is not asked about where the user cannot answer: shorter stretches are chosen for them', () => {
     const t = setup({ canAsk: () => false });
     t.run('running');

@@ -67,6 +67,8 @@ export interface VRChatDeps {
   laneOffered?(): boolean;
   /** The least time between two chatbox lines: VRChat drops lines sent faster. */
   chatboxGapMs?: number;
+  /** How long a question about a video waits for its answer before faster is chosen (`ASK_WAIT_MS`). */
+  askWaitMs?: number;
   setTimeout?(fn: () => void, ms: number): unknown;
 }
 
@@ -134,6 +136,12 @@ export interface VRChatController {
 }
 
 const PACE_OF: Record<'quick' | 'pause', Exclude<LegPace, 'normal'>> = { quick: 'quick', pause: 'paused' };
+
+/**
+ * Fork: a question about a video unanswered this long — the user in VR, the main window out of sight — is answered
+ * for them with faster, as where they cannot be asked: the other side's words are not left to wait under the video.
+ */
+const ASK_WAIT_MS = 12_000;
 
 export function startVRChat(deps: VRChatDeps): VRChatController {
   const { ipc, runner, store } = deps;
@@ -241,8 +249,9 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     if (on === 'normal') return;
     if (on === 'quick' || on === 'pause') return apply(on, false);
     // Asked, where the user can answer; chosen for them where they cannot — shorter stretches lose no one's words.
-    if (deps.canAsk()) store.getState().setVideo({ kind: 'asking' });
-    else apply('quick', true);
+    if (!deps.canAsk()) return apply('quick', true);
+    store.getState().setVideo({ kind: 'asking' });
+    later(() => { if (!stopped && store.getState().video.kind === 'asking') apply('quick', true); }, deps.askWaitMs ?? ASK_WAIT_MS);
   });
   ipc.receive?.('vrchat:world', () => { if (!stopped) endVideo(); });
 
