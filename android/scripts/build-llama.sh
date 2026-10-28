@@ -6,7 +6,7 @@
 #                   which is faster on the phone
 #   llama-server    stays up and is asked over HTTP: what the phone is lent with when a llama.cpp model is shared
 #
-#   android/scripts/build-llama.sh            all seven builds
+#   android/scripts/build-llama.sh            the three the app is packed with: v80, v82, v86
 #   android/scripts/build-llama.sh v82 vulkan  only these
 #
 #   v80     plain armv8-a (NEON): runs on every arm64 phone
@@ -23,8 +23,10 @@
 # chip is slower than the processor or ends the program, so the phone is never lent with it, and a server for it
 # would be ten megabytes of package nobody runs.
 #
-# The last three make the reader alone too: they are in the package to be measured by the self-check on phones
-# nobody here has, and nothing is lent with them yet.
+# The last three make the reader alone too. They were packed up to phone 0.9.3 for the self-check to measure on
+# phones nobody here has; three phones answered (2026-10-12 to 10-28) and none was a way to lend (`Llama.kt`), so
+# they are built only when named, and not packed by the app's self-check any more: to measure one again, build it
+# and run it by hand over adb.
 #
 # KleidiAI is not a level of processor but a second set of kernels for the language model's quantized matrix
 # products, which picks among its own at run time (dot product, i8mm, SME, SME2) whatever the build was compiled
@@ -74,7 +76,7 @@ libs="$here/app/src/main/jniLibs/$ABI"
 mkdir -p "$work" "$libs"
 
 builds=("$@")
-[ ${#builds[@]} -gt 0 ] || builds=(v80 v82 v86 vulkan kleidiai-v82 kleidiai-v86 opencl)
+[ ${#builds[@]} -gt 0 ] || builds=(v80 v82 v86)
 for name in "${builds[@]}"; do
   case "$name" in
     v80|v82|v86|vulkan|kleidiai-v82|kleidiai-v86|opencl) ;;

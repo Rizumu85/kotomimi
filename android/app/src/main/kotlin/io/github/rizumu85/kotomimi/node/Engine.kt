@@ -122,41 +122,34 @@ class Engine(context: Context) {
     private val home = File(context.applicationInfo.nativeLibraryDir)
     private val reader = File(home, "libaudiocpp_cli.so")
     private val server = File(home, "libaudiocpp_server.so")
-    private val vulkan = File(home, "libkotomimi-vulkan.so")
     private val runner = Runner()
 
     val present: Boolean get() = reader.canExecute()
-
-    /** Whether the build for the graphics chip came with it. Whether the phone's driver takes it is found by trying. */
-    val hasGraphics: Boolean get() = vulkan.exists()
 
     /** The CPU builds packed with it; it loads the best one this processor has. */
     val variants: List<String>
         get() = home.list().orEmpty().filter { it.startsWith(VARIANT_PREFIX) }.map { it.removePrefix(VARIANT_PREFIX).removeSuffix(".so") }.sorted()
 
     /** Reads one recording to the end in `folder`, every line it writes handed on as it comes. */
-    fun run(arguments: List<String>, folder: File, graphics: Boolean = false, limitMs: Long = Long.MAX_VALUE, onLine: (String) -> Unit = {}): Outcome =
-        runner.run(listOf(reader.path) + arguments, folder, environment(graphics), limitMs, onLine)
+    fun run(arguments: List<String>, folder: File, limitMs: Long = Long.MAX_VALUE, onLine: (String) -> Unit = {}): Outcome =
+        runner.run(listOf(reader.path) + arguments, folder, environment, limitMs, onLine)
 
     /** Starts the server in `folder`; whoever starts it reads what it writes and ends it. */
-    fun serve(arguments: List<String>, folder: File, graphics: Boolean): Process {
+    fun serve(arguments: List<String>, folder: File): Process {
         val builder = ProcessBuilder(listOf(server.path) + arguments).directory(folder).redirectErrorStream(true)
-        builder.environment().putAll(environment(graphics))
+        builder.environment().putAll(environment)
         return builder.start()
     }
 
     /** Ends the reading that is running, if one is. */
     fun stop() = runner.stop()
 
-    private fun environment(graphics: Boolean): Map<String, String> {
-        // Its own libraries lie beside it.
-        val all = HashMap<String, String>()
-        all["LD_LIBRARY_PATH"] = home.path
-        // The graphics backend is loaded only where it is asked for: a driver that cannot take it then costs that
-        // one run, not the processor's as well.
-        if (graphics) all["GGML_BACKEND_PATH"] = vulkan.path
-        return all
-    }
+    /**
+     * Its own libraries lie beside it. There is no graphics backend among them: on every phone tried (Mali-G52,
+     * Mali on the Dimensity 9500, Adreno 830) audio.cpp's Vulkan ended the program, and llama.cpp's was slower than
+     * the processor or ended too (2026-10-12 to 10-28), so it is not packed.
+     */
+    private val environment: Map<String, String> get() = mapOf("LD_LIBRARY_PATH" to home.path)
 
     private companion object {
         const val VARIANT_PREFIX = "libggml-cpu-"

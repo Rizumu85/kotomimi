@@ -13,7 +13,9 @@
 #
 # The Vulkan backend is built too, for the phone's graphics chip. Its shaders are turned into code by a small program
 # that runs here, on the computer doing the build, so a C++ compiler for this computer is needed as well: on Windows
-# Visual Studio's (found and set up below when `cl` is not already on the PATH), elsewhere gcc or clang.
+# Visual Studio's (found and set up below when `cl` is not already on the PATH), elsewhere gcc or clang. It is not
+# packed: on every phone tried it ended the program (2026-10-12 to 10-28). It is left in the build folder
+# (`.engine/build-<abi>/`), to be pushed to a phone by hand and tried with GGML_BACKEND_PATH.
 set -euo pipefail
 
 AUDIOCPP_TAG=v0.9.0
@@ -114,9 +116,7 @@ strip="$host/bin/llvm-strip$exe"
 found=0
 while IFS= read -r lib; do
   name="$(basename "$lib")"
-  # Under its own name ggml would load the Vulkan backend for every run, and a phone whose driver cannot take it
-  # would lose the processor too. Under another, it is loaded only where the app asks (GGML_BACKEND_PATH).
-  [ "$name" = libggml-vulkan.so ] && name=libkotomimi-vulkan.so
+  [ "$name" = libggml-vulkan.so ] && continue
   "$strip" -o "$libs/$name" "$lib"; found=$((found + 1))
 done < <(find "$build" -name 'lib*.so' -not -path '*/CMakeFiles/*')
 omp="$(find "$host/lib/clang" -path '*aarch64/libomp.so' | head -1)"

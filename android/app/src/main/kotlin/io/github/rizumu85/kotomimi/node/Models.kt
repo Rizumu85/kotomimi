@@ -97,7 +97,6 @@ class ModelFile(
  *   enough that a computer may ask for one it cannot read, and has to be told so (`Share.readByAudioCpp`).
  * - `options`: what audio.cpp is told with every reading of it (`--request-option`, and the server's
  *   `default_request_options`).
- * - `graphics`: whether the self-check also reads it on the graphics chip.
  * - `unspaced`: whether it puts spaces into writing that has none, to be taken out again (`Share.unspaced`).
  *
  * `task` is what it is lent for; a text model (`TEXT_MODELS`) is one whose task is not hearing.
@@ -110,7 +109,7 @@ class ModelFile(
 class Model(
     val id: String, val name: String, val reader: Reader, val family: String, val files: List<ModelFile>, val accuracy: Int, val lentAs: String = id,
     val note: String? = null, val hears: Map<String, String>? = null, val options: Map<String, String> = emptyMap(),
-    val graphics: Boolean = true, val unspaced: Boolean = false,
+    val unspaced: Boolean = false,
     val task: Task = Task.HEAR, val holdsMb: Int = 0,
 ) {
     val bytes: Long = files.sumOf { it.bytes }
@@ -158,10 +157,6 @@ private const val SENSEVOICE_REVISION = "5c3fcfe748a8714216bc135476d5863084fddb7
  * - Left to itself audio.cpp cuts a recording at its pauses before it reads this model, with a second model the
  *   app does not carry, and fails for the lack of it (`Silero VAD model path does not exist`):
  *   `audio_chunk_mode=none` has it read the stretch whole, which is what a computer sends anyway.
- * - It is not read on the graphics chip by the self-check. audio.cpp's graphics backend has ended the program on
- *   both phones it was tried on, with either size of Qwen3-ASR; this model is the one that needs it least (the
- *   slowest phone tried reads a quarter of a minute of it in five seconds on its processor); and every run is
- *   one more wait for the phone to cool. A phone with a Qwen3-ASR for audio.cpp still tries the backend with that.
  * - It writes Japanese and Chinese with spaces in them now and then (in 27 of the 59 stretches of the measurement
  *   above; a second or two cut out of a sentence comes back a word at a time): `unspaced`.
  *
@@ -184,7 +179,6 @@ val MODELS = listOf(
         note = "快 · 只听中粤英日韩",
         hears = mapOf("zh" to "Chinese", "yue" to "Cantonese", "en" to "English", "ja" to "Japanese", "ko" to "Korean"),
         options = mapOf("audio_chunk_mode" to "none"),
-        graphics = false,
         unspaced = true,
         files = listOf(
             ModelFile(

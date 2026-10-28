@@ -335,9 +335,8 @@ class Share(private val context: Context, private val engine: Engine, private va
     }
 
     /**
-     * Starts the engine for `model` and waits for it to answer. audio.cpp's server for its models, on the graphics
-     * chip where the self-check found that fastest. llama.cpp's for its own — a recognizer or a text model — on
-     * the processor alone, with the newest build this processor runs: and where that build ends at once on an
+     * Starts the engine for `model` and waits for it to answer, on the processor: audio.cpp's server for its
+     * models, llama.cpp's for its own — a recognizer or a text model — with the newest build this processor runs: and where that build ends at once on an
      * instruction the processor does not have after all, with the next one down, as the self-check does with the
      * reader.
      */
@@ -365,7 +364,7 @@ class Share(private val context: Context, private val engine: Engine, private va
             }
             if (model.reader == Reader.AUDIO_CPP) {
                 File(store.folder, CONFIG).writeText(configOf(model, way, port))
-                return came(begun(model, engine.serve(listOf("--config", CONFIG, "--no-ui"), store.folder, way.graphics), port, "")).first!!
+                return came(begun(model, engine.serve(listOf("--config", CONFIG, "--no-ui"), store.folder), port, "")).first!!
             }
             var build = startWith?.takeIf { it in llama.servers } ?: llama.serverFor(device.features)
                 ?: return Raised(null, "安装包里没有这台处理器能用的 llama.cpp", "This phone's app has no llama.cpp for its processor.")
@@ -427,7 +426,7 @@ class Share(private val context: Context, private val engine: Engine, private va
     private fun configOf(model: Model, way: Choices.Way, port: Int): String {
         val always = model.options.entries.joinToString(",") { "${JSONObject.quote(it.key)}:${JSONObject.quote(it.value)}" }
         val entry = """{"id":"${model.id}","family":"${model.family}","path":"${model.file.name}","task":"asr","mode":"offline","session_options":{},"default_request_options":{$always}}"""
-        return """{"host":"$LOOPBACK","port":$port,"backend":"${if (way.graphics) "vulkan" else "cpu"}","device":0,"threads":${way.threads},"lazy_load":false,"models":[$entry]}"""
+        return """{"host":"$LOOPBACK","port":$port,"backend":"cpu","device":0,"threads":${way.threads},"lazy_load":false,"models":[$entry]}"""
     }
 
     private sealed class Turn {
