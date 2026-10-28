@@ -53,12 +53,12 @@ class Choices(private val context: Context) {
 
     fun share(model: Model) = kept.edit().putString(SHARED, model.id).apply()
 
-    /** How a model is run: on the graphics chip or not, and on how many threads. */
-    class Way(val graphics: Boolean, val threads: Int)
+    /** How a model is run: on so many threads of the processor. */
+    class Way(val threads: Int)
 
-    /** What the self-check found of a model: the way it is lent fastest, and how fast that is, in seconds of speech a second. */
-    fun remember(model: Model, graphics: Boolean, threads: Int, speed: Double) =
-        kept.edit().putBoolean("$GRAPHICS${model.id}", graphics).putInt("$THREADS${model.id}", threads).putFloat("$SPEED${model.id}", speed.toFloat()).apply()
+    /** What the self-check found of a model: the thread count it is lent fastest with, and how fast that is, in seconds of speech a second. */
+    fun remember(model: Model, threads: Int, speed: Double) =
+        kept.edit().remove("$GRAPHICS${model.id}").putInt("$THREADS${model.id}", threads).putFloat("$SPEED${model.id}", speed.toFloat()).apply()
 
     /** The self-check could not read the recording right with it: it has no speed, and is run as before any check. */
     fun forget(model: Model) = kept.edit().remove("$GRAPHICS${model.id}").remove("$THREADS${model.id}").remove("$SPEED${model.id}").apply()
@@ -66,14 +66,15 @@ class Choices(private val context: Context) {
     /** What the self-check found of a text model: the thread count it answered fastest with. (It runs on the processor alone.) */
     fun rememberText(model: Model, threads: Int) = kept.edit().putInt("$THREADS${model.id}", threads).apply()
 
-    /** The way the self-check found fastest; before any check, four threads of the processor. */
-    fun wayOf(model: Model) = Way(kept.getBoolean("$GRAPHICS${model.id}", false), kept.getInt("$THREADS${model.id}", DEFAULT_THREADS))
+    /** The way the self-check found fastest; before any check, four threads. */
+    fun wayOf(model: Model) = Way(kept.getInt("$THREADS${model.id}", DEFAULT_THREADS))
 
     /** How fast the self-check found it; null before any check that read it right. */
     fun speedOf(model: Model): Double? = kept.getFloat("$SPEED${model.id}", 0f).takeIf { it > 0f }?.toDouble()
 
     companion object {
         private const val SHARED = "shared"
+        /** Where versions before 0.9.4 kept whether a model was lent on the graphics chip: no phone ever was, and it is let go. */
         private const val GRAPHICS = "graphics:"
         private const val THREADS = "threads:"
         private const val SPEED = "speed:"
