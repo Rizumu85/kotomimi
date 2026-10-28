@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { LegName, SegmentId } from '../../lib/conversation/types';
 import type { Entry } from '../../lib/projection/types';
 import { fontLanguage } from '../../lib/fonts/fontCss';
-import { annotatedLanguage } from '../../lib/annotate/script';
+import { romanizedLanguage } from '../../lib/annotate/script';
 import { answeredOf, holdMs, nextShown } from '../../lib/subtitle/dwell';
 import { buildLanes, lanesHeight, linesFor, ROOMY, ROW_SCALE, spacingAt, squeezeOf, TIGHT, withRoman, type Lane, type LanePiece, type LaneText } from '../../lib/subtitle/lanes';
 import { useAnnotationStore } from '../../stores/annotationStore';
@@ -60,8 +60,8 @@ function Slot({ className, lang, children, fitKey }: { className: string; lang?:
  * A row of a lane's text: with its reading aids, where its language has any, and lit as far as its clip has played
  * (a provider that speaks; the aids' text is lit whole, once it has all been spoken).
  */
-function Stretch({ piece, language, upTo }: { piece: LanePiece; language?: string; upTo: number | undefined }) {
-  const annotated = useAnnotation(piece.text, language, undefined, piece.growing === true);
+function Stretch({ piece, language, upTo, readingsOnly = false }: { piece: LanePiece; language?: string; upTo: number | undefined; readingsOnly?: boolean }) {
+  const annotated = useAnnotation(piece.text, language, readingsOnly ? 'readings' : undefined, piece.growing === true);
   const played = upTo === undefined ? 0 : Math.min(piece.text.length, Math.max(0, upTo - piece.start));
   if (annotated) return <AnnotatedLines lines={annotated} inline className={played > 0 && played >= piece.text.length ? 'karaoke-played' : undefined} />;
   if (played <= 0) return <span>{piece.text}</span>;
@@ -87,13 +87,15 @@ function clausesOf(piece: LanePiece): LanePiece[] {
 /**
  * A lane's text, row by row; a notice's words as they are. Where a romanization is written under the text, clause by
  * clause: under a whole sentence it is one block, which wraps as text first and romanization after — and a strip
- * that shows one line of it showed the romanization alone (seen 2026-10-06).
+ * that shows one line of it showed the romanization alone (seen 2026-10-06). `readingsOnly`: none under it, whatever
+ * the switch (the user's own row under grammar feedback: `rowRoman`).
  */
-function Written({ text, lit }: { text: LaneText; lit: ReadonlyMap<SegmentId, number> }) {
-  const roman = useAnnotationStore((s) => s.romanization) && annotatedLanguage(text.language) !== null;
+function Written({ text, lit, readingsOnly = false }: { text: LaneText; lit: ReadonlyMap<SegmentId, number>; readingsOnly?: boolean }) {
+  const romanization = useAnnotationStore((s) => s.romanization);
+  const roman = !readingsOnly && romanization && romanizedLanguage(text.language);
   if (text.pieces.length === 0) return <>{text.text}</>;
   const pieces = roman ? text.pieces.flatMap(clausesOf) : text.pieces;
-  return <>{pieces.map((piece) => <Stretch key={piece.key} piece={piece} language={text.language} upTo={lit.get(piece.segmentId)} />)}</>;
+  return <>{pieces.map((piece) => <Stretch key={piece.key} piece={piece} language={text.language} upTo={lit.get(piece.segmentId)} readingsOnly={readingsOnly} />)}</>;
 }
 
 const langOf = (text: LaneText): string | undefined => fontLanguage(text.language) || undefined;
@@ -205,9 +207,19 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
   // A romanization under the small lines has a line of its own there: while the switch is on and what is said is
   // in a language that has one — or nothing is said yet, so that the window is not made higher at the first word.
   const romanization = useAnnotationStore((s) => s.romanization);
-  const small = lanes.flatMap((lane) => [lane.source?.language, lane.shape === 'row' ? lane.answer?.language : undefined]).filter((language): language is string => !!language);
-  const roman = romanization && (small.length === 0 || small.some((language) => annotatedLanguage(language) !== null));
-  const [roomySpacing, tightSpacing] = roman ? [withRoman(ROOMY), withRoman(TIGHT)] : [ROOMY, TIGHT];
+  // Fork: under grammar feedback the user's own row has none: the correction drawn there has no room for one, and a
+  // row that had one only while no correction stood in it would change the window's height from sentence to sentence.
+  const rowRoman = !coached;
+  // Each kind of line for itself: a pair's small line, and the user's own row. (Not for Chinese: its pinyin is above
+  // the line, and room kept under it showed half of the line before, 2026-10-28.)
+  const needs = (languages: Array<string | undefined>) => {
+    const said = languages.filter((language): language is string => !!language);
+    return romanization && (said.length === 0 || said.some(romanizedLanguage));
+  };
+  const pairRoman = needs(lanes.filter((lane) => lane.shape === 'pair').map((lane) => lane.source?.language));
+  const rowNeeds = rowRoman && needs(lanes.filter((lane) => lane.shape === 'row').flatMap((lane) => [lane.source?.language, lane.answer?.language]));
+  const roman = `${pairRoman}:${rowNeeds}`;
+  const [roomySpacing, tightSpacing] = pairRoman || rowNeeds ? [withRoman(ROOMY, pairRoman, rowNeeds), withRoman(TIGHT, pairRoman, rowNeeds)] : [ROOMY, TIGHT];
   const [roomy, least] = useMemo(() => [lanesHeight(lanes, fontSize, roomySpacing), lanesHeight(lanes, fontSize, tightSpacing)], [shape, fontSize, roman]); // eslint-disable-line react-hooks/exhaustive-deps
   const strip = useRef<HTMLDivElement>(null);
   // The window is fitted to the lanes. A window the user made higher than that keeps what they added — the room a
@@ -269,7 +281,7 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
     '--lane-roman': String(spacing.roman),
     // The user's own row is as high as its lines; everything else is the pair's.
     '--lane-row-lines': String(lines.row),
-    '--lane-row-height': `${fontSize * ROW_SCALE * (spacing.rowLine + spacing.roman) * lines.row}px`,
+    '--lane-row-height': `${fontSize * ROW_SCALE * (spacing.rowLine + spacing.rowRoman) * lines.row}px`,
     '--lane-source-lines': String(lines.source),
     // A pair's two texts share its height by what each is laid out for.
     // A pair's answer has this many lines, written in or not.
@@ -313,9 +325,9 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
               {fixFor(lane) ? (
                 <span className="subtitle-lane__said subtitle-lane__said--fixed" lang={langOf(lane.source!)}><Correction correction={fixFor(lane)!} language={lane.source!.language} layout="row" /></span>
               ) : (<>
-              {lane.source && <span className="subtitle-lane__said" lang={langOf(lane.source)}><Written text={lane.source} lit={lit} /></span>}
+              {lane.source && <span className="subtitle-lane__said" lang={langOf(lane.source)}><Written text={lane.source} lit={lit} readingsOnly={!rowRoman} /></span>}
               {lane.source && lane.answer && lane.source.text !== '' && (lane.answer.text !== '' || lane.pending) && !approves(lane.answer) && <ArrowRight className="subtitle-lane__arrow" aria-hidden="true" strokeWidth={2.5} />}
-              {lane.answer && lane.answer.text !== '' && (approves(lane.answer) ? tick : <span className="subtitle-lane__reply" lang={langOf(lane.answer)}><Written text={lane.answer} lit={lit} /></span>)}
+              {lane.answer && lane.answer.text !== '' && (approves(lane.answer) ? tick : <span className="subtitle-lane__reply" lang={langOf(lane.answer)}><Written text={lane.answer} lit={lit} readingsOnly={!rowRoman} /></span>)}
               {lane.answer && lane.answer.text === '' && lane.pending && pending}
               </>)}
             </Slot>

@@ -72,6 +72,12 @@ export function isChinese(code: string | null | undefined): boolean {
  * An app language code as one this module annotates, or null: `ja`, `ja-JP`, `ko-KR`, `ru`, `uk`, `zh-CN`. Not
  * Cantonese: pinyin spells Mandarin, and over Cantonese it would read wrong.
  */
+/** Fork: whether a language is written with a romanization under it: Japanese, Korean, Russian, Ukrainian — not Chinese, whose pinyin is written above. */
+export function romanizedLanguage(code: string | null | undefined): boolean {
+  const language = annotatedLanguage(code);
+  return language !== null && language !== 'zh';
+}
+
 export function annotatedLanguage(code: string | null | undefined): AnnotatedLanguage | null {
   const base = (code ?? '').toLowerCase().split(/[-_]/)[0];
   return base === 'ja' || base === 'ko' || base === 'ru' || base === 'uk' || base === 'zh' ? base : null;

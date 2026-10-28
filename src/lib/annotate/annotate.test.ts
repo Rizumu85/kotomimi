@@ -10,7 +10,7 @@ import { romanizeKorean } from './korean';
 import { transliterateRussian } from './russian';
 import { transliterateUkrainian } from './ukrainian';
 import { annotateChinese } from './chinese';
-import { annotatedLanguage, explainsInChinese, isChinese, quotesJapanese, scriptLanguage } from './script';
+import { annotatedLanguage, explainsInChinese, isChinese, quotesJapanese, romanizedLanguage, scriptLanguage } from './script';
 import type { JapaneseTokenizer } from './types';
 
 const DICT = resolve(__dirname, '../../../node_modules/@sglkc/kuromoji/dict');
@@ -45,6 +45,11 @@ describe('the script a line is written in', () => {
     expect(annotatedLanguage('zh-CN')).toBe('zh');
     expect(annotatedLanguage('uk')).toBe('uk');
     for (const other of ['yue', 'en', 'auto', '', null, undefined]) expect(annotatedLanguage(other)).toBeNull();
+  });
+
+  it('has a romanization written under it in Japanese, Korean, Russian and Ukrainian, not in Chinese (fork)', () => {
+    for (const code of ['ja-JP', 'ko', 'ru', 'uk']) expect(romanizedLanguage(code), code).toBe(true);
+    for (const code of ['zh-CN', 'zh_TW', 'es', 'en', null]) expect(romanizedLanguage(code), String(code)).toBe(false);
   });
 });
 
