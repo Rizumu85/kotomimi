@@ -51,6 +51,12 @@ export interface Candidate {
   sizeBytes: number;
   /** Downloaded, or cloud with a valid key. */
   ready: boolean;
+  /**
+   * Runs somewhere else (online): ready without a download. Automatic choice
+   * takes it only when no local candidate can run — a downloaded local model
+   * always wins, whatever the ranking says.
+   */
+  cloud: boolean;
   /** WASM `deviceReady()`; native `!hardwareGated()`. */
   hardwareOk: boolean;
   /** Reserved: false for every local implementation today. */

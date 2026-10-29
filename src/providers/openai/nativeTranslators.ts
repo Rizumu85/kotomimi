@@ -32,6 +32,12 @@ const HUNYUAN = ['zh', 'en', 'fr', 'pt', 'es', 'ja', 'tr', 'ru', 'ar', 'ko', 'th
  * 1.5 does nothing its successor does not — the same languages, the same
  * size, as many errors, and words of its own added besides — so it is no
  * longer offered: a computer that has it keeps it.
+ *
+ * The retired model's id (`hy-mt1.5-1.8b`) keeps its dot, where the sidecar's
+ * catalog and the app's own catalog name the same weights `hy-mt15-1.8b`: each
+ * runtime finds a downloaded model by its id, so renaming this one would orphan
+ * what a computer already has (the engine would report it absent). They are
+ * never listed together, and the languages both name are the same (`HUNYUAN`).
  */
 export const NATIVE_TRANSLATORS: readonly NativeTranslator[] = [
   { id: 'index-translate-2b', name: 'Index-Translate 2B', bytes: 1312164352, prompt: 'index', languages: 'any' },

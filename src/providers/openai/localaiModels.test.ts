@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { kindOf, modelsFor, type LocalAIModel } from './localaiModels';
+import { fitsPair, kindOf, modelsFor, translationDefault, type LocalAIModel } from './localaiModels';
 
 /** The Realtime server's models, sorted by its capability list, and what the translation stage's other server lists. */
 const SORTED: LocalAIModel[] = [
@@ -61,5 +61,39 @@ describe('another Kotomimi\u2019s feedback model', () => {
     expect(modelsFor(there, 'coach').map((m) => m.id)).toEqual(['gemma-4-e2b']);
     expect(modelsFor(there, 'translate').map((m) => m.id)).toEqual(['index-translate-2b']);
     expect(modelsFor(there, 'asr').map((m) => m.id)).toEqual(['qwen3-asr-1.7b-q8']);
+  });
+});
+
+describe('whether a model the other device lists translates a pair (fork)', () => {
+  it('reads a directional model by its pair, not by the two languages it lists', () => {
+    const opus = { id: 'opus-mt-ja-en', languages: ['ja', 'en'], pair: ['ja', 'en'] };
+    expect(fitsPair(opus, 'ja', 'en')).toBe(true);
+    expect(fitsPair(opus, 'zh-TW', 'ja')).toBe(false);
+    expect(fitsPair(opus, 'en', 'ja')).toBe(false);
+  });
+
+  it('reads a multilingual model by its languages, region and case aside', () => {
+    const hy = { id: 'hy-mt2-1.8b', languages: ['ja', 'zh', 'en'] };
+    expect(fitsPair(hy, 'ja', 'zh-CN')).toBe(true);
+    expect(fitsPair(hy, 'ja', 'el')).toBe(false);
+  });
+
+  it('hides nothing of a model that says nothing, or takes any language', () => {
+    expect(fitsPair({ languages: [] }, 'ja', 'sw')).toBe(true);
+    expect(fitsPair({}, 'ja', 'sw')).toBe(true);
+    // The catalog's marker for every language, from a device older than this page.
+    expect(fitsPair({ languages: ['multilingual'] }, 'ja', 'sw')).toBe(true);
+  });
+});
+
+describe('what a blank translation runs on another device (fork)', () => {
+  it('is the one model it lists that translates, and nothing when there are several', () => {
+    expect(translationDefault([{ id: 'one', kind: 'text' }])).toBe('one');
+    // The list order is no reason to translate with one of several: the card asks for one.
+    expect(translationDefault([{ id: 'a', kind: 'text' }, { id: 'b', kind: 'text' }])).toBe('');
+    // A server that says nothing of its models is never guessed at.
+    expect(translationDefault([{ id: 'a' }, { id: 'b' }])).toBe('');
+    // Only a model that can translate counts.
+    expect(translationDefault([{ id: 'asr', kind: 'asr' }, { id: 'mt', kind: 'translate' }])).toBe('mt');
   });
 });

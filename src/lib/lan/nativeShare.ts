@@ -131,17 +131,23 @@ export function nativeTranslatorFor(source: string, target: string, wanted: stri
   const status = useNativeTranslatorStore.getState().status;
   const fits = (id: string) => nativeDownloaded(status, id) && nativeTranslates(NATIVE_TRANSLATORS.find((m) => m.id === id)!, source, target);
   if (wanted && !isNativeTranslator(wanted)) return null;
-  // The engine runs one model at a time. The one running — this computer's own choice, or what another device is
-  // being served with — answers for any of the engine's models, where it translates the pair: starting another would
-  // stop it under whoever is using it.
-  const running = status.run.state !== 'stopped' && status.run.state !== 'failed' ? status.run.model : null;
-  if (running && isNativeTranslator(running) && fits(running)) return running;
-  // In use with a model that does not translate this pair: not switched under whoever is using it.
+  // The engine runs one model at a time. While someone is using it, its model answers for any of the engine's models
+  // that translates the pair: starting another would stop it under them.
   const taken = nativeTaken('translation');
+  if (wanted) {
+    // A model named is never answered by one that cannot translate the pair: `appModels` says why instead (`refusal`).
+    if (!fits(wanted)) return null;
+    if (taken && taken !== wanted) return fits(taken) ? taken : null;
+    return wanted;
+  }
+  // In use with a model that does not translate this pair: not switched under whoever is using it.
   const free = (id: string) => fits(id) && (taken === null || id === taken);
-  if (wanted) return free(wanted) ? wanted : null;
+  // Nothing named: this computer's own choice first, so that its owner's next run finds the engine on the model it
+  // would start anyway — then the one already up (a load saved), then the best that is nobody else's.
   const own = nativePreference().translation;
   if (own && free(own)) return own;
+  const running = status.run.state !== 'stopped' && status.run.state !== 'failed' ? status.run.model : null;
+  if (running && isNativeTranslator(running) && free(running)) return running;
   return NATIVE_TRANSLATORS.find((m) => free(m.id))?.id ?? null;
 }
 

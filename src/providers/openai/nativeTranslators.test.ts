@@ -1,5 +1,9 @@
 // Fork: on this computer, translation can be the native translation engine's — llama.cpp's server, downloaded and run by the app.
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { createRequire } from 'node:module';
+import { getManifestEntry } from '../../lib/local-inference/modelManifest';
 import type { SessionContext } from '../../lib/contract/adapter';
 import { createVirtualClock } from '../../lib/contract/clock';
 import { NO_NATIVE_ENGINE, type NativeEngineStatus } from '../../lib/native/nativeEngine';
@@ -188,5 +192,48 @@ describe('a request with the sentence said before', () => {
   it('is not made for Index-Translate: given one, it translated that sentence instead of its own', () => {
     // Measured 2026-10-06, three forms, twelve pairs of sentences: one to three of twelve each.
     expect(translatorRequest(nativeTranslator('index-translate-2b'), 'ja', 'zh-CN').wrapAfter).toBeUndefined();
+  });
+});
+
+describe('the main process\u2019s list of translators (fork)', () => {
+  const main = createRequire(import.meta.url)('../../../electron/native-engine.js') as {
+    TRANSLATORS: Record<string, { languages: 'any' | readonly string[] }>;
+  };
+
+  it('names the same models as this page does, with the same languages', () => {
+    expect(Object.keys(main.TRANSLATORS).sort()).toEqual(NATIVE_TRANSLATORS.map((m) => m.id).sort());
+    for (const model of NATIVE_TRANSLATORS) {
+      const theirs = main.TRANSLATORS[model.id].languages;
+      if (model.languages === 'any') expect(theirs, model.id).toBe('any');
+      else expect([...theirs].sort(), model.id).toEqual([...model.languages].sort());
+    }
+  });
+
+  it('answers the same pair for every model, both ways', () => {
+    const fits = createRequire(import.meta.url)('../../../electron/native-engine.js').translatorFits as (id: string, s: string, t: string) => boolean;
+    for (const model of NATIVE_TRANSLATORS) {
+      for (const [from, to] of [['ja', 'zh-CN'], ['zh-TW', 'ja'], ['auto', 'en'], ['ja', 'el'], ['el', 'ja']]) {
+        expect(fits(model.id, from, to), `${model.id} ${from} → ${to}`).toBe(nativeTranslates(model, from, to));
+      }
+    }
+  });
+});
+
+describe('the languages the sidecar catalog names (fork)', () => {
+  const py = readFileSync(resolve(process.cwd(), 'sidecar/sokuji_sidecar/catalog.py'), 'utf8');
+  /** The codes of one `_X_LANGUAGES = (...)` tuple in the sidecar's catalog. */
+  const tuple = (name: string): string[] => {
+    const block = new RegExp(`${name} = \\(([\\s\\S]*?)\\)`).exec(py)?.[1] ?? '';
+    return [...block.matchAll(/"([a-z]+)"/g)].map((m) => m[1]!);
+  };
+
+  it('are the ones this page and the app catalog name for the same model', () => {
+    const hy = nativeTranslator('hy-mt2-1.8b').languages;
+    expect(Array.isArray(hy)).toBe(true);
+    expect(tuple('_HUNYUAN_LANGUAGES').sort()).toEqual([...(hy as readonly string[])].sort());
+    expect(tuple('_QWEN25_LANGUAGES').sort())
+      .toEqual([...(getManifestEntry('qwen2.5-0.5b-translation')?.languages ?? [])].sort());
+    expect(tuple('_TRANSLATEGEMMA_LANGUAGES').sort())
+      .toEqual([...(getManifestEntry('translategemma-4b-translation')?.languages ?? [])].sort());
   });
 });

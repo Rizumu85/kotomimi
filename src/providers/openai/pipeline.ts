@@ -805,11 +805,12 @@ class PipelineLeg implements AdapterSession {
     this.frame('out', 'text.request', { stage: stage.kind, model: stage.model, chars: job.text.length, ...where });
     try {
       const started = clock.now();
-      const answer: { text: string; firstMs?: number; totalMs: number } = stage.via === 'device' ? await this.translateHere(stage, job.text, started) : await this.complete(stage, job.text, signal, show, job.before);
+      const answer: { text: string; firstMs?: number; totalMs: number; model?: string } = stage.via === 'device' ? await this.translateHere(stage, job.text, started) : await this.complete(stage, job.text, signal, show, job.before);
       if (this.ended) return;
       const final = tidyAnswer(stage.kind, answer.text);
       show(final);
-      this.frame('in', 'text.done', { stage: stage.kind, model: stage.model, firstMs: answer.firstMs ?? null, totalMs: answer.totalMs, chars: final.length, ...where });
+      // `served`: the model that answered, where the server says (another Kotomimi chooses a blank one itself).
+      this.frame('in', 'text.done', { stage: stage.kind, model: stage.model, served: answer.model ?? stage.model, firstMs: answer.firstMs ?? null, totalMs: answer.totalMs, chars: final.length, ...where });
       if (opened) this.events.segmentClosed({ ref });
       // A model that said nothing: feedback with nothing to say is no fault; a translation with none is.
       else if (stage.kind === 'translate') this.unanswered(job, 'the model answered with no text');
@@ -822,7 +823,7 @@ class PipelineLeg implements AdapterSession {
   }
 
   /** A text model's answer, shown as it is written. */
-  private async complete(stage: TextStage, text: string, signal: AbortSignal, show: (text: string) => void, before?: string): Promise<{ text: string; firstMs?: number; totalMs: number }> {
+  private async complete(stage: TextStage, text: string, signal: AbortSignal, show: (text: string) => void, before?: string): Promise<{ text: string; firstMs?: number; totalMs: number; model?: string }> {
     const { credentials, clock } = this.request;
     let key = stage.key ? credentials[stage.key] : undefined;
     let base = stage.baseUrl || httpBaseOf(credentials.endpoint);

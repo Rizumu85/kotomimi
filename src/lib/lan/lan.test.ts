@@ -319,13 +319,17 @@ function fakeTranslator(answer: (text: string) => string | Error = (text) => `[$
   return fake;
 }
 
-function translator(resolve: (source: string, target: string, wanted: string) => string | null = () => 'bing-translator') {
+function translator(
+  resolve: (source: string, target: string, wanted: string) => string | null = () => 'bing-translator',
+  refusal?: (wanted: string, source: string, target: string) => 'unfit' | 'busy' | null,
+) {
   const made: Array<ReturnType<typeof fakeTranslator>> = [];
   const clock = createVirtualClock(1_700_000_000_000);
   const next: { fail?: Error } = {};
   const t = new LanTranslator({
     translator: () => { const f = fakeTranslator(); if (next.fail) f.failInit = next.fail; made.push(f); return f; },
     resolve,
+    ...(refusal ? { refusal } : {}),
     clock,
   });
   const ask = (patch: Record<string, unknown> = {}) => t.complete({ model: LAN_PIPELINE, source_language: 'zh-CN', target_language: 'ja', messages: [{ role: 'system', content: 'ignored' }, { role: 'user', content: ' 你好 ' }], ...patch });
@@ -402,6 +406,15 @@ describe('a sharing Kotomimi\'s translations', () => {
     expect(await x.ask({ source_language: undefined })).toMatchObject({ status: 400, body: { error: { code: 'languages_required' } } });
     expect(await x.ask({ messages: [{ role: 'system', content: 'x' }] })).toMatchObject({ status: 400, body: { error: { code: 'no_text' } } });
     expect(await x.ask()).toMatchObject({ status: 404, body: { error: { code: 'model_not_found' } } });
+  });
+
+  it('says a model it shares cannot take the pair, rather than answering with another', async () => {
+    const unfit = translator(() => null, () => 'unfit');
+    expect(await unfit.ask({ model: 'opus-mt-ja-en' })).toMatchObject({ status: 422, body: { error: { code: 'model_unfit', message: expect.stringContaining('opus-mt-ja-en') } } });
+    const busy = translator(() => null, () => 'busy');
+    expect(await busy.ask({ model: 'hy-mt2-1.8b' })).toMatchObject({ status: 503, body: { error: { code: 'translator_busy' } } });
+    // The pipeline's own name leaves the choice here: it is never a model that was "named".
+    expect(await unfit.ask()).toMatchObject({ status: 404, body: { error: { code: 'model_not_found' } } });
   });
 
   it('answers a failure as a server error, and loads afresh after a model that could not load', async () => {

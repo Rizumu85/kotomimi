@@ -8,10 +8,16 @@ import {
   asrEntryLanguages, deviceReady, getManifestByType, getManifestEntry, isTranslationModelCompatible, type ModelManifestEntry,
 } from '../local-inference/modelManifest';
 import { offeredLanguages } from '../local-inference/selection/measuredRank';
+import type { Selections } from '../local-inference/selection/types';
 import { useModelStore } from '../../stores/modelStore';
+import { useProviderStore } from '../../stores/providerStore';
+import { NATIVE_TRANSLATORS, nativeTranslates } from '../../providers/openai/nativeTranslators';
+import { nativeTaken } from '../../providers/openai/localaiNative';
 import type { LanModels } from './host';
 import { nativeCoachFor, nativeRecognizerFor, nativeShared, nativeTranslatorFor } from './nativeShare';
 import type { SharedModel } from './protocol';
+
+const isNativeTranslator = (id: string): boolean => NATIVE_TRANSLATORS.some((m) => m.id === id);
 
 const isRecognizer = (entry: ModelManifestEntry | undefined): entry is ModelManifestEntry => entry?.type === 'asr' || entry?.type === 'asr-stream';
 
@@ -29,6 +35,16 @@ function usable(entry: ModelManifestEntry | undefined): entry is ModelManifestEn
 /** A model's name as another device gave it, where this computer shares one by it; empty where it shares none. */
 const knownHere = (name: string): string => (name && appLanModels.shared().some((m) => m.id === name) ? name : '');
 
+/**
+ * The translation models this computer's own settings chose for a direction, where they are known: what its owner
+ * picked for a pair is what a device left to this computer gets, as it would get it for itself. Empty where no
+ * choice was made (or the provider was never loaded): every direction is automatic then.
+ */
+function hostSelections(): Selections {
+  const settings = useProviderStore.getState().entries.localai?.settings as { selections?: Selections } | undefined;
+  return settings?.selections ?? {};
+}
+
 /** What the model store answers, for the sharing host. */
 export const appLanModels: LanModels = {
   shared(): SharedModel[] {
@@ -36,7 +52,17 @@ export const appLanModels: LanModels = {
     const recognizers = [...getManifestByType('asr'), ...getManifestByType('asr-stream')].filter(usable)
       .map((m): SharedModel => ({ id: m.id, kind: 'asr', languages: m.multilingual ? [] : offeredLanguages(m.id, [...new Set(asrEntryLanguages(m))]) }));
     const translators = getManifestByType('translation').filter(usable)
-      .map((m): SharedModel => ({ id: m.id, kind: 'translate', languages: m.sourceLang && m.targetLang ? [m.sourceLang, m.targetLang] : m.languages }));
+      .map((m): SharedModel => {
+        // A model of every language lists none: the list is what a device reads to rule a model out.
+        const any = m.languages.includes('multilingual');
+        return {
+          id: m.id,
+          kind: 'translate',
+          languages: m.sourceLang && m.targetLang ? [m.sourceLang, m.targetLang] : any ? [] : m.languages,
+          // A pair model is directional: the languages alone would claim the other way round too.
+          ...(m.sourceLang && m.targetLang ? { pair: [m.sourceLang, m.targetLang] as const } : {}),
+        };
+      });
     // This computer's native engines' models first: the ones measured best, where it has them.
     const native = nativeShared();
     return [...native.filter((m) => m.kind === 'asr'), ...recognizers, ...native.filter((m) => m.kind !== 'asr'), ...translators];
@@ -60,14 +86,45 @@ export const appLanModels: LanModels = {
   },
   translator(source, target, named_) {
     const wanted = knownHere(named_);
-    const native = nativeTranslatorFor(source, target, wanted);
-    if (native) return native;
-    const named = getManifestEntry(wanted);
-    if (named?.type === 'translation' && usable(named) && isTranslationModelCompatible(named, source, target)) return named.id;
-    // What the app would pick for itself — unless that is the online service it falls back to with nothing downloaded.
-    const picked = useModelStore.getState().resolve(source, target, {}).translation;
+    // A native model this computer shares is answered by that engine and by nothing else: when it cannot take the
+    // pair, no app's own model stands in for it (`refusal` says why).
+    if (wanted && isNativeTranslator(wanted)) return nativeTranslatorFor(source, target, wanted);
+    if (wanted) {
+      const named = getManifestEntry(wanted);
+      if (named?.type === 'translation' && usable(named)) {
+        return isTranslationModelCompatible(named, source, target) ? named.id : null;
+      }
+    }
+    // Left to this computer: its native engine's models first (they are the ones measured best), then its own.
+    if (!wanted) {
+      const native = nativeTranslatorFor(source, target, '');
+      if (native) return native;
+    }
+    // What the app would pick for itself — its own choice for the direction where one was made, else the best it
+    // has — unless that is the online service it falls back to with nothing downloaded.
+    const picked = useModelStore.getState().resolve(source, target, hostSelections()).translation;
     const entry = picked ? getManifestEntry(picked.modelId) : undefined;
     return entry?.type === 'translation' && usable(entry) ? entry.id : null;
+  },
+  /**
+   * Why a model this computer shares cannot answer for a pair: it does not translate the pair, or the native
+   * engine is someone's with another model that does not (`translator` answered null). Null: another model may.
+   */
+  refusal(source, target, named_) {
+    const wanted = knownHere(named_);
+    if (!wanted) return null;
+    if (isNativeTranslator(wanted)) {
+      const model = NATIVE_TRANSLATORS.find((m) => m.id === wanted)!;
+      if (!nativeTranslates(model, source, target)) return 'unfit';
+      const taken = nativeTaken('translation');
+      if (taken && taken !== wanted) {
+        const other = NATIVE_TRANSLATORS.find((m) => m.id === taken);
+        return other && nativeTranslates(other, source, target) ? null : 'busy';
+      }
+      return null;
+    }
+    const entry = getManifestEntry(wanted);
+    return entry?.type === 'translation' && !isTranslationModelCompatible(entry, source, target) ? 'unfit' : null;
   },
   coach: (wanted) => nativeCoachFor(wanted),
 };

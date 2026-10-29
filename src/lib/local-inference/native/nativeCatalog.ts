@@ -8,12 +8,16 @@ import type { ResolutionNote, Selections } from '../selection/types';
 
 /**
  * `jap` is an old catalog spelling of Japanese; app codes (`yue`, `fil`) need no
- * alias. The picker emits app codes, which is what catalog rows use.
+ * alias. A regional code is the base language a catalog row names (`zh-CN` →
+ * `zh`), as the rest of the app reads it (`deviceLanguage`).
  */
 const LANG_ALIASES: Record<string, string> = {
   jap: 'ja',
 };
-const canonLang = (l: string): string => LANG_ALIASES[l] ?? l;
+const canonLang = (l: string): string => {
+  const base = l.trim().toLowerCase().split(/[-_]/)[0];
+  return LANG_ALIASES[base] ?? base;
+};
 
 /** `['multi']` matches any language; otherwise the language must be listed (alias-aware). */
 export function supportsLanguage(opt: { languages?: string[] }, lang: string): boolean {
@@ -521,12 +525,23 @@ export function nativeTranslationCards(src: string, tgt: string, catalog: Record
   const wantSrc = canonLang(src);
   const wantTgt = canonLang(tgt);
   const all = catalogModels(catalog, 'translate');
-  const multilingual = all.filter((m) => m.languages.includes('multi'));
+  /** The direction of a card that names exactly two languages (a pair model); null for any other card. */
+  const pairOf = (m: NativeModelInfo): [string, string] | null => {
+    if (m.languages.includes('multi') || m.languages.length !== 2) return null;
+    const [from, into] = m.languages.map(canonLang);
+    return [from!, into!];
+  };
+  // A card that names no language takes any (Qwen 3 / 3.5, EuroLLM here).
+  const any = all.filter((m) => m.languages.includes('multi'));
+  // A card that lists more than a pair takes the pairs both of its languages are in — the model's own list,
+  // so a pair it does not take is out of the pool before the run, not a sentence failing after it.
+  const listed = all.filter((m) => pairOf(m) === null && !m.languages.includes('multi')
+    && supportsLanguage(m, wantSrc) && supportsLanguage(m, wantTgt));
   const pair = all.filter((m) => {
-    const ls = m.languages.map(canonLang);
-    return !m.languages.includes('multi') && ls[0] === wantSrc && ls[1] === wantTgt;
+    const one = pairOf(m);
+    return one !== null && one[0] === wantSrc && one[1] === wantTgt;
   });
-  return [...multilingual, ...pair].map(infoToCard);
+  return [...any, ...listed, ...pair].map(infoToCard);
 }
 
 export function nativeTtsCards(tgt: string, catalog: Record<string, NativeModelInfo>): NativeModelCardSpec[] {

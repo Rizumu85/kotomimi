@@ -16,7 +16,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { createNativeEngine, openLive, languageName, languageLocale, modelHears, unspaced, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME } = require('./native-engine.js');
+const { createNativeEngine, openLive, languageName, languageLocale, modelHears, translatorFits, unspaced, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME } = require('./native-engine.js');
 const { hfMirrorOf } = require('./fetch-file.js');
 
 const sha = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -1071,5 +1071,26 @@ describe('a download, once more', () => {
     expect(engine.status().engine).toBe('ready');
     await engine.download('m1');
     expect(world.requests.map((r) => r.url)).toEqual(['https://example.test/m1.gguf']);
+  });
+});
+
+describe('whether a native translator takes a pair (fork)', () => {
+  it('is any pair for the model that reads what it is given', () => {
+    expect(translatorFits('index-translate-2b', 'ja', 'zh')).toBe(true);
+    expect(translatorFits('index-translate-2b', 'sw', 'en')).toBe(true);
+    expect(translatorFits('index-translate-2b', 'auto', 'ko')).toBe(true);
+  });
+
+  it('is the pair both ways for a model that lists its languages, and no other', () => {
+    expect(translatorFits('hy-mt2-1.8b', 'ja', 'zh-CN')).toBe(true);
+    expect(translatorFits('hy-mt2-1.8b', 'zh-TW', 'ja')).toBe(true);
+    expect(translatorFits('hy-mt2-1.8b', 'auto', 'ja')).toBe(true);
+    // Greek is not among the thirty-six.
+    expect(translatorFits('hy-mt2-1.8b', 'ja', 'el')).toBe(false);
+    expect(translatorFits('hy-mt2-1.8b', 'el', 'ja')).toBe(false);
+  });
+
+  it('knows no model by another name', () => {
+    expect(translatorFits('a-model-that-is-gone', 'ja', 'zh')).toBe(false);
   });
 });

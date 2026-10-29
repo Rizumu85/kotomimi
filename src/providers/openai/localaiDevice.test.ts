@@ -308,7 +308,8 @@ describe('grammar feedback on this computer', () => {
       heard: 'ja',
       // The feedback's own instructions, the sentence as it was said, and answers in the speaker's own language.
       speech: { via: 'device', kind: 'coach', model: 'qwen3.5-2b-translation', wrapTranscript: false, language: 'zh-CN' },
-      typed: { via: 'device', kind: 'translate', model: 'bing-translator' },
+      // A downloaded local model is used before the online one, which is only for a computer with none.
+      typed: { via: 'device', kind: 'translate', model: 'qwen3-0.6b-translation' },
     });
     expect((c.stages?.speech as DeviceStage).system).toContain('日语');
     // The participant's leg is never coached: it translates.
@@ -326,11 +327,12 @@ describe('grammar feedback on this computer', () => {
     // A chat model runs on the graphics card: counted against its memory, when a budget for it is set.
     localStorage.setItem('debug:vram-budget', '1');
     try {
-      // Beside the online translator, which takes none.
+      // The chat model is also this leg's translator (the only local model downloaded): counted once.
       expect(admitLocalAI({ speaker: configFor(SPEAKER, COACHED) })).toMatchObject({ code: 'memory_exceeded' });
       // The other device hears and translates; this computer only gives the feedback: its model alone is still counted.
       expect(admitLocalAI({ speaker: configFor(SPEAKER, { coach: true, coachAt: 'device', translateServerModel: 'hy-mt2-1.8b' }, [{ id: 'gpt-realtime' }]) })).toMatchObject({ code: 'memory_exceeded' });
-      // With the feedback elsewhere nothing of the graphics card's is.
+      // With nothing of this computer's translating (the online translator takes no memory), nothing is counted.
+      downloaded('sensevoice-int8', HEARS_JA);
       expect(admitLocalAI({ speaker: configFor(SPEAKER, HERE) })).toBe(true);
     } finally {
       localStorage.removeItem('debug:vram-budget');

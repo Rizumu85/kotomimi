@@ -16,7 +16,7 @@ const { keepMaximizeHonest, pageShift } = require('./window-maximize');
 const { firewallStatus, allowThroughFirewall } = require('./lan-firewall');
 const { discoverServers } = require('./lan-discover');
 const { createLocalServer } = require('./local-server');
-const { createNativeEngine, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME, modelHears: nativeModelHears } = require('./native-engine');
+const { createNativeEngine, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME, modelHears: nativeModelHears, translatorFits } = require('./native-engine');
 const { joinEngines } = require('./native-engines');
 const { createRemoteEngine } = require('./remote-engine');
 const { createAutostart } = require('./autostart');
@@ -1347,7 +1347,9 @@ ipcMain.handle('lan:start', async (event, args) => {
       const base = String(ask?.language ?? '').trim().toLowerCase().split(/[-_]/)[0];
       const has = (status, fits) => status.engine === 'ready' && Object.entries(status.models).some(([id, model]) => model.state === 'downloaded' && fits(id));
       if (ask?.kind === 'asr') return has(await getNativeEngine().status(), (id) => (id.includes(':') ? id.endsWith(`:${base}`) : nativeModelHears(id, base)));
-      return has(await getNativeTranslator().status(), () => true);
+      // A translation is this computer's own where a downloaded translator takes the pair; one that does not is no
+      // reason to keep it from the LocalAI, which may translate what this computer's models cannot.
+      return has(await getNativeTranslator().status(), (id) => translatorFits(id, ask?.source, ask?.target));
     };
     const upstream = createUpstream({ port: local.port, pipelines: () => local.pipelines(), setPipeline: (name, change, options) => local.setPipeline(name, change, options), ownFirst });
     lanServer = await startLanServer({ port: Number.isInteger(port) && port >= 1024 && port < 65536 ? port : 8790, key: String(args?.key ?? ''), upstream }, {

@@ -4,7 +4,7 @@ import type { Candidate, CandidateSource, Selections, Stage } from './types';
 
 const C = (id: string, over: Partial<Candidate> = {}): Candidate => ({
   id, recommended: false, sortOrder: 0, sizeBytes: 0, ready: true, hardwareOk: true,
-  needsKey: false, autoEligible: true, supportsVariant: () => true, ...over,
+  cloud: false, needsKey: false, autoEligible: true, supportsVariant: () => true, ...over,
 });
 
 /** Per-stage, per-direction pools — the shape the real adapters have. */

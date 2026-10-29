@@ -60,7 +60,8 @@ import type { CheckContext, CheckResult, CredentialField, CredentialsMissing, Mi
 import { admitLocalInference, type LocalInferenceConfig } from '../localInference/config';
 import { LOCAL_INFERENCE_DEFAULTS } from '../localInference/settings';
 import { CHECK_TIMEOUT_MS } from './check';
-import { SERVER_SILENT, isKotomimiServer, kindOf, KOTOMIMI_HOST, modelsFor, serverDefaultModel, type LocalAIModel, type LocalAIModelKind } from './localaiModels';
+import { SERVER_SILENT, isKotomimiServer, kindOf, KOTOMIMI_HOST, fitsPair, modelsFor, serverDefaultModel, translationDefault, type LocalAIModel, type LocalAIModelKind } from './localaiModels';
+import { getManifestEntry } from '../../lib/local-inference/modelManifest';
 import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
 import { choiceOf, recognizerAsked, serverBilingual } from './serverRecognizers';
@@ -433,7 +434,7 @@ export function localaiModelsUrl(endpoint: string): string {
   return `${httpBaseOf(endpoint)}/models`;
 }
 
-export { kindOf, modelsFor, serverDefaultModel, type LocalAIModel, type LocalAIModelKind, type LocalAIModelSlot } from './localaiModels';
+export { kindOf, modelsFor, serverDefaultModel, translationDefault, type LocalAIModel, type LocalAIModelKind, type LocalAIModelSlot } from './localaiModels';
 export { detectsOther, heardBy, needsServer, PLACES, type Place } from './localaiDevice';
 
 /** A leg of this run only transcribes on the other device — its answers come from a stage of its own — so LocalAI lets no recognizer be chosen (`transcriptionFor`). */
@@ -530,12 +531,41 @@ function unnamedStage(s: LocalAISettings, models: readonly LocalAIModel[], coach
     const serverModel = s.translateServerModel.trim();
     // A model of the other device is asked by name: none is named, and none of its own fits.
     const asksServer = translatePlace(s) === 'server' && (serverModel !== '' || kotomimi || hearsHere || both);
-    if (asksServer && !(serverModel || (kotomimi && pipeline ? pipeline : serverDefaultModel(models, 'translate')))) return { refused: 'No translation model is named.', code: 'translate_unnamed' };
+    if (asksServer && !(serverModel || (kotomimi && pipeline ? pipeline : translationDefault(models)))) return { refused: 'No translation model is named.', code: 'translate_unnamed' };
   }
   if (!coached) return null;
   if (s.coachAt === 'api' && (!s.coachBaseUrl.trim() || !s.coachModel.trim())) return { refused: 'No feedback model is named.', code: 'coach_unnamed' };
   if (coachesAtOwnDevice(s)) return s.coachOtherModel.trim() ? null : { refused: 'No feedback model is named.', code: 'coach_unnamed' };
-  if (s.coachAt === 'server' && !(s.coachServerModel.trim() || serverDefaultModel(models, 'coach'))) return { refused: 'No feedback model is named.', code: 'coach_unnamed' };
+  if (s.coachAt === 'server' && !(s.coachServerModel.trim() || serverDefaultModel(models))) return { refused: 'No feedback model is named.', code: 'coach_unnamed' };
+  return null;
+}
+
+/**
+ * A translation model named for the other device that cannot take a leg's direction. Only what the device says of
+ * its models can answer this (a Kotomimi lists a model's languages, and a directional model's pair); a server that
+ * says nothing of them is left alone. A model named is never answered by another in its place (`src/lib/lan/`), so
+ * the card refuses before the run rather than a sentence failing — or being translated by a model nobody chose.
+ */
+function serverTranslatorUnfit(
+  s: LocalAISettings, models: readonly LocalAIModel[], pair: { source: string; target: string }, leg: LegName, heard: string, both = false,
+): ProviderRefusal | null {
+  const named = s.translateServerModel.trim();
+  if (!named || translatePlace(s) !== 'server' || translatesAtOwnDevice(s)) return null;
+  const model = models.find((m) => m.id === named);
+  if (!model) return null;
+  // A speaker who speaks both translates its reverse too (`Stages.back`); a named model must take every direction.
+  const directions: Array<[string, string]> = leg === 'speaker'
+    ? [[pair.source, pair.target], ...(both ? [[pair.target, pair.source] as [string, string]] : [])]
+    : [[heard, pair.source]];
+  for (const [source, target] of directions) {
+    // A leg whose language is left to be detected has no source the model could be measured against.
+    if (!source || source === AUTO || fitsPair(model, source, target)) continue;
+    return {
+      refused: `${named} does not translate ${source} → ${target}.`,
+      code: 'server_translator_unfit',
+      params: { name: getManifestEntry(named)?.name ?? nativeTextName(named) },
+    };
+  }
   return null;
 }
 
@@ -581,10 +611,9 @@ function unpaired(s: LocalAISettings, models: readonly LocalAIModel[], pair: { s
   const first = normalizeTranscriptionLanguage(pair.source);
   const second = normalizeTranscriptionLanguage(pair.target);
   if (hearingPlace(s) !== 'server' || !isKotomimiServer(models) || !first || !second || first === second) return null;
-  if (!speaker && detectsOther(s, models)) return null;
-  const apple = choiceOf(s.asrModel.trim()) === 'apple-speech';
-  const both = speaker && s.speakBoth && !canDetectOther(s, models);
-  if ((!apple && !both) || serverBilingual(s.asrModel, pair, models)) return null;
+  // Only the speaker's "I speak both" asks the device for a pair; the other side's detection is a different choice.
+  if (!speaker || !s.speakBoth) return null;
+  if (canDetectOther(s, models) || serverBilingual(s.asrModel, pair, models)) return null;
   return {
     refused: `The other device cannot recognize both ${first} and ${second} with the selected model. Update Kotomimi on both computers and install both Apple Speech languages on the Mac, or choose a recognizer that supports both.`,
     code: 'server_no_bilingual', params: { source: first, target: second },
@@ -722,17 +751,19 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
 
           // What each model is for. LocalAI's own endpoint; any other server answers 404, or nothing, and the models stay unsorted.
           const kinds = new Map<string, LocalAIModelKind>();
-          // Another Kotomimi says which languages each of its models takes, too.
+          // Another Kotomimi says which languages each of its models takes, too — and which direction a pair model translates.
           const languages = new Map<string, readonly string[]>();
           const bilingual = new Set<string>();
+          const pairs = new Map<string, readonly string[]>();
           try {
             const answer = await doFetch(`${localaiModelsUrl(k.endpoint)}/capabilities`, listing(k.apiKey, signal));
             if (answer.ok) {
-              for (const m of ((await answer.json()) as { data?: Array<{ id?: unknown; capabilities?: unknown; languages?: unknown }> }).data ?? []) {
+              for (const m of ((await answer.json()) as { data?: Array<{ id?: unknown; capabilities?: unknown; languages?: unknown; pair?: unknown }> }).data ?? []) {
                 if (typeof m.id !== 'string') continue;
                 kinds.set(m.id, kindOf(m.capabilities));
                 if (Array.isArray(m.capabilities) && m.capabilities.includes('bilingual')) bilingual.add(m.id);
                 if (Array.isArray(m.languages)) languages.set(m.id, m.languages.filter((l): l is string => typeof l === 'string'));
+                if (Array.isArray(m.pair) && m.pair.length === 2 && m.pair.every((one) => typeof one === 'string')) pairs.set(m.id, m.pair as string[]);
               }
             }
           } catch (error) {
@@ -740,7 +771,15 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
           }
           for (const m of own) {
             const taken = m.kotomimi ? languages.get(m.id) : undefined;
-            models.push({ id: m.id, ...(kinds.has(m.id) ? { kind: kinds.get(m.id) } : {}), ...(m.kotomimi ? { host: KOTOMIMI_HOST } : {}), ...(taken?.length ? { languages: taken } : {}), ...(m.kotomimi && bilingual.has(m.id) ? { bilingual: true } : {}) });
+            const pair = m.kotomimi ? pairs.get(m.id) : undefined;
+            models.push({
+              id: m.id,
+              ...(kinds.has(m.id) ? { kind: kinds.get(m.id) } : {}),
+              ...(m.kotomimi ? { host: KOTOMIMI_HOST } : {}),
+              ...(taken?.length ? { languages: taken } : {}),
+              ...(m.kotomimi && bilingual.has(m.id) ? { bilingual: true } : {}),
+              ...(pair ? { pair } : {}),
+            });
           }
         }
 
@@ -831,8 +870,9 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
       // Fork: a leg shown as said needs no translation stage at all.
       const plain = shownAsSaid(s, ctx.pair, leg, found);
       const both = leg === 'speaker' && speaksBoth(s, found, ctx.pair) && ctx.pair.source.toLowerCase() !== ctx.pair.target.toLowerCase();
-      const gap = unpaired(s, found, ctx.pair, leg === 'speaker') ?? unnamedStage(s, found, coached, plain, both) ?? undetected(s, found, leg === 'speaker' ? ctx.pair.source : heard, coached, leg === 'participant' ? ctx.pair.target : undefined) ?? unheard(s, found, heard)
-        // What the leg translates: the speaker the pair, the other side its reverse (from whatever it turns out to be).
+      // What the leg translates: the speaker the pair and — when it speaks both — its reverse; the other side its reverse.
+      const unfitServer = serverTranslatorUnfit(s, found, ctx.pair, leg, heard, both);
+      const gap = unfitServer ?? unpaired(s, found, ctx.pair, leg === 'speaker') ?? unnamedStage(s, found, coached, plain, both) ?? undetected(s, found, leg === 'speaker' ? ctx.pair.source : heard, coached, leg === 'participant' ? ctx.pair.target : undefined) ?? unheard(s, found, heard)
         ?? ((coached && !both) || plain ? null : phoneTranslatorUnfit(s, leg === 'speaker' ? ctx.pair.source : heard, leg === 'speaker' ? ctx.pair.target : ctx.pair.source))
         ?? (both ? phoneTranslatorUnfit(s, ctx.pair.target, ctx.pair.source) : null);
       // What the servers listed goes with the refusal: a pick from it is often what answers it.
@@ -1096,7 +1136,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   const serverModel = s.translateServerModel.trim();
   // No session of the device's own pipeline answers this leg's text: one of its models is asked instead.
   const asksServer = translatePlace(s) === 'server' && (serverModel !== '' || kotomimi || hearsHere || hearsLocal || coached || both);
-  const askedServerModel = serverModel || (kotomimi && pipeline ? pipeline : serverDefaultModel(models, 'translate'));
+  const askedServerModel = serverModel || (kotomimi && pipeline ? pipeline : translationDefault(models));
 
   // OpenAI Realtime's builder for the instructions and the detection, with the model pinned so it picks no other.
   const pinned = model || LOCALAI_DEFAULT_MODEL;
@@ -1229,7 +1269,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
     } else {
       const api = s.coachAt === 'api';
       const baseUrl = api ? s.coachBaseUrl.trim() : '';
-      const named = api ? s.coachModel.trim() : s.coachServerModel.trim() || serverDefaultModel(models, 'coach');
+      const named = api ? s.coachModel.trim() : s.coachServerModel.trim() || serverDefaultModel(models);
       coach = {
         kind: 'coach',
         baseUrl,

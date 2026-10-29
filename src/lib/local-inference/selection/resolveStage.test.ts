@@ -11,6 +11,7 @@ export const C = (id: string, over: Partial<Candidate> = {}): Candidate => ({
   sizeBytes: 0,
   ready: true,
   hardwareOk: true,
+  cloud: false,
   needsKey: false,
   autoEligible: true,
   supportsVariant: () => true,
@@ -118,6 +119,37 @@ describe('resolveStage — auto', () => {
     const r = resolveStage('ja→en', 'translation', auto,
       src([C('ast-model', { autoEligible: false, recommended: true }), C('mt')]));
     expect(r.resolved?.modelId).toBe('mt');
+  });
+
+  it('prefers a downloaded local model to a cloud one, however the cloud one ranks', () => {
+    const r = resolveStage('ja→en', 'translation', auto,
+      src([C('online', { cloud: true, ready: true, recommended: true, sortOrder: 1 }), C('local', { sortOrder: 9 })]));
+    expect(r.resolved?.modelId).toBe('local');
+  });
+
+  it('takes the cloud model when no local one can run', () => {
+    const r = resolveStage('ja→en', 'translation', auto,
+      src([C('online', { cloud: true, recommended: true }), C('local', { ready: false })]));
+    expect(r.resolved?.modelId).toBe('online');
+    // Hardware-gated counts as not runnable here too: the online one still answers.
+    expect(resolveStage('ja→en', 'translation', auto,
+      src([C('online', { cloud: true }), C('local', { hardwareOk: false })])).resolved?.modelId).toBe('online');
+  });
+
+  it('leaves another stage\'s cloud model where its own ranking puts it', () => {
+    // The translation rule only: a downloaded local voice does not displace the online one by itself.
+    const r = resolveStage('ja→en', 'tts', auto,
+      src([C('edge', { cloud: true, recommended: true, sortOrder: 0 }), C('local-voice', { sortOrder: 5 })]));
+    expect(r.resolved?.modelId).toBe('edge');
+  });
+
+  it('still honours an explicit pick of a cloud model beside a local one', () => {
+    const selections: Selections = {
+      'ja→en': { asr: { modelId: '' }, translation: { modelId: 'online' }, tts: { modelId: '' } },
+    };
+    const r = resolveStage('ja→en', 'translation', selections,
+      src([C('online', { cloud: true }), C('local')]));
+    expect(r.resolved).toEqual({ modelId: 'online', variant: undefined, source: 'explicit' });
   });
 
   it('still lets an explicit selection reach an explicit-only candidate', () => {

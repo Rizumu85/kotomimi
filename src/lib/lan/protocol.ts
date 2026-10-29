@@ -52,6 +52,11 @@ export interface SharedModel {
   languages: readonly string[];
   /** Can arbitrate between two installed languages of this recognizer's family. */
   bilingual?: boolean;
+  /**
+   * A translation model that translates one way only, as `[source, target]`: `languages` alone
+   * would claim the other direction too. Absent: it takes both (a multilingual model).
+   */
+  pair?: readonly [string, string];
 }
 
 /** `GET /v1/models`: the pipeline first, then every model shared. */
@@ -60,12 +65,20 @@ export function modelList(models: readonly SharedModel[]): { object: 'list'; dat
 }
 
 /** `GET /v1/models/capabilities`: what each is for. The pipeline has no capability of its own, as LocalAI's has none. */
-export function capabilityList(models: readonly SharedModel[]): { object: 'list'; data: Array<{ id: string; capabilities: string[] | null; languages?: readonly string[] }> } {
+export function capabilityList(models: readonly SharedModel[]): { object: 'list'; data: Array<{ id: string; capabilities: string[] | null; languages?: readonly string[]; pair?: readonly [string, string] }> } {
   return {
     object: 'list',
     data: [
       { id: LAN_PIPELINE, capabilities: null },
-      ...models.map((m) => ({ id: m.id, capabilities: [m.kind === 'asr' ? 'transcript' : m.kind, ...(m.kind === 'asr' && m.bilingual ? ['bilingual'] : [])], languages: m.languages })),
+      ...models.map((m) => ({
+        id: m.id,
+        capabilities: [
+          m.kind === 'asr' ? 'transcript' : m.kind,
+          ...(m.kind === 'asr' && m.bilingual ? ['bilingual'] : []),
+        ],
+        languages: m.languages,
+        ...(m.pair ? { pair: m.pair } : {}),
+      })),
     ],
   };
 }

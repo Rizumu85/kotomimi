@@ -5,6 +5,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { getManifestByType } from '../local-inference/modelManifest';
 import { useModelStore } from '../../stores/modelStore';
+import { useProviderStore } from '../../stores/providerStore';
 import { appLanModels } from './appModels';
 
 const cloud = getManifestByType('translation').filter((m) => m.isCloudModel);
@@ -13,6 +14,7 @@ const local = getManifestByType('translation').find((m) => !m.isCloudModel && m.
 
 beforeEach(() => {
   useModelStore.setState({ modelStatuses: {}, webgpuAvailable: true, initialized: true } as never);
+  useProviderStore.setState({ entries: {} } as never);
 });
 
 describe('what this computer shares of the app\'s own models', () => {
@@ -50,5 +52,38 @@ describe('what this computer shares of the app\'s own models', () => {
     // Nothing downloaded: the app itself would use the online one; a device is told there is no model.
     expect(appLanModels.translator('ja', 'zh', '')).toBeNull();
     expect(appLanModels.translator('ja', 'zh', cloud[0].id)).toBeNull();
+  });
+
+  it('takes a downloaded local model for a pair before the online one it would otherwise fall back to', () => {
+    // Opus-MT ja→en is not marked recommended, and the online one always is: ranking alone would choose online.
+    useModelStore.setState({ modelStatuses: { 'opus-mt-ja-en': 'downloaded' } } as never);
+    expect(appLanModels.translator('ja', 'en', '')).toBe('opus-mt-ja-en');
+  });
+
+  it('lists a model of every language as taking any, and translates any pair with it', () => {
+    useModelStore.setState({ modelStatuses: { 'qwen3-0.6b-translation': 'downloaded' } } as never);
+    // The catalog's `multilingual` marker is the wire's "none listed".
+    expect(appLanModels.shared().find((m) => m.id === 'qwen3-0.6b-translation')?.languages).toEqual([]);
+    expect(appLanModels.translator('ja', 'el', 'qwen3-0.6b-translation')).toBe('qwen3-0.6b-translation');
+    expect(appLanModels.refusal!('ja', 'el', 'qwen3-0.6b-translation')).toBeNull();
+  });
+
+  it('follows this computer\u2019s own choice for the direction, where one was made', () => {
+    useModelStore.setState({ modelStatuses: { 'opus-mt-ja-en': 'downloaded', 'translategemma-4b-translation': 'downloaded' } } as never);
+    // Left to the ranking: the recommended model.
+    expect(appLanModels.translator('ja', 'en', '')).toBe('translategemma-4b-translation');
+    useProviderStore.setState({
+      entries: {
+        localai: {
+          settings: { selections: { 'ja→en': { asr: { modelId: '' }, translation: { modelId: 'opus-mt-ja-en' }, tts: { modelId: '' } } } },
+          credentials: {},
+          pair: { source: 'ja', target: 'en' },
+        },
+      },
+    } as never);
+    // The owner's pick for the direction, as its own run would use it.
+    expect(appLanModels.translator('ja', 'en', '')).toBe('opus-mt-ja-en');
+    // A device that names one is still answered by what it named.
+    expect(appLanModels.translator('ja', 'en', 'translategemma-4b-translation')).toBe('translategemma-4b-translation');
   });
 });
