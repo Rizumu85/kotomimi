@@ -140,6 +140,13 @@ export interface DeviceHearing {
   modelId: string;
   streaming: boolean;
   vad: LocalInferenceConfig['vad'];
+  /**
+   * Fork: the language the recognizer itself is told, when the leg is left to
+   * be detected and this model cannot name a language. The phrasing is the
+   * leg's own source; the pipeline then reads each finished sentence's
+   * language from its writing and a small text detector (`identify.ts`).
+   */
+  language?: string;
   /** Present: the recognizer is an API (`apiAsr.ts`) — this computer still cuts the sentences, and uploads each one. */
   api?: { baseUrl: string; model: string; key?: StageKey; /** Where what answers there turns out to be a Kotomimi phone's engine (`remoteEngine.ts`), and the model is one this app knows: how long one recognition may run on it, as on this computer. */ limits?: Partial<NativeLimits> };
   /** Present: the recognizer is the native engine's (`nativeAsr.ts`), given the voice as it comes; `limits` where one recognition may not run as long as the default. */
@@ -901,9 +908,11 @@ const fetchNow: typeof fetch = (input, init) => fetch(input, init);
 /** The request this computer's recognizer is started with: its own config, hearing the language the speaker speaks, translating nothing itself and never speaking. */
 function hearingRequest(request: StartRequest<PipelineConfig, PipelineCredentials>, device: DeviceHearing, heard: string | undefined): StartRequest<LocalInferenceConfig, Record<string, never>> {
   const { source, target } = request.context.direction;
+  // A model that cannot name a language is told the leg's own source; the sentence's writing names the rest.
+  const told = device.language ?? heard;
   return {
     // A recognizer hearing either of two is told the first: "detect it" is no language to it.
-    context: { ...request.context, direction: { source: baseOf(device.native?.either?.first ?? heard ?? source), target: baseOf(heard ? source : target) }, speech: false },
+    context: { ...request.context, direction: { source: baseOf(device.native?.either?.first ?? told ?? source), target: baseOf(told ? source : target) }, speech: false },
     config: { asr: { modelId: device.modelId, streaming: device.streaming }, vad: device.vad, translation: { kind: 'none' } },
     credentials: {},
     clock: request.clock,

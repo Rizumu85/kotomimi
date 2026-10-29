@@ -88,8 +88,8 @@ describe('where each stage runs', () => {
     expect(needs({ ...HERE, coach: true }, ['speaker'])).toEqual(['speaker:asr:ja→zh', 'speaker:translation:zh→ja?']);
     // Fork: a speaker who speaks both, heard by what tells the two apart: their Japanese is translated back too.
     expect(needs({ ...HERE, asrHere: 'native', speakBoth: true }, ['speaker'])).toEqual(['speaker:translation:zh→ja', 'speaker:translation:ja→zh']);
-    // Heard by the app's own models, which cannot: no sentence is taken for Japanese, nothing is translated back.
-    expect(needs({ ...HERE, speakBoth: true }, ['speaker'])).toEqual(['speaker:asr:zh→ja', 'speaker:translation:zh→ja']);
+    // Heard by the app's own models: the writing and the text detector guess, so the reverse is a best effort too.
+    expect(needs({ ...HERE, speakBoth: true }, ['speaker'])).toEqual(['speaker:asr:zh→ja', 'speaker:translation:zh→ja', 'speaker:translation:ja→zh']);
   });
 
   it('resolves a slot to the pick, else to the best model downloaded, and to nothing for a language no one hears', () => {
@@ -184,7 +184,8 @@ describe('a leg this computer hears', () => {
     const lists = (languages: string[]) => [{ id: 'qwen3-asr-1.7b-q8', kind: 'asr', languages }];
     expect(canDetectOther({ asrVia: 'device', asrHere: 'native' })).toBe(true);
     expect(canDetectOther({ asrVia: 'api' })).toBe(true);
-    expect(canDetectOther({ asrVia: 'device', asrHere: 'app' })).toBe(false);
+    // A model that does not name the language is a best effort here: the writing and `identify.ts` try.
+    expect(canDetectOther({ asrVia: 'device', asrHere: 'app' })).toBe(true);
     // Another device: only where it says so, by "auto" among what a recognizer takes.
     expect(canDetectOther({ asrVia: 'server' }, lists(['ja', 'zh']))).toBe(false);
     expect(canDetectOther({ asrVia: 'server' }, lists(['ja', 'zh', 'auto']))).toBe(true);

@@ -834,7 +834,7 @@ describe('the other side\u2019s language left to be detected', () => {
   beforeEach(() => { before = useNativeEngineStore.getState().status; });
   afterEach(() => { useNativeEngineStore.setState({ status: before as never }); });
 
-  it('gives the other side\u2019s row a model that can tell languages apart, by itself, and still lists the ones that cannot: chosen, the detection ends', () => {
+  it('gives the other side\u2019s row a model that can tell languages apart, by itself, and still lists the ones that cannot: chosen, it is a best effort', () => {
     useNativeEngineStore.setState({ status: engineOf({ 'r2t2-q8': 'downloaded', 'qwen3-asr-1.7b-q8': 'downloaded' }) });
     // Japanese is heard by R2T2, which tells no language; the other side is whatever it turns out to be.
     const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'r2t2-q8', asrDetectOther: true, translateAt: 'device' }, legs: BOTH });
@@ -852,9 +852,10 @@ describe('the other side\u2019s language left to be detected', () => {
     // No switch in the card: the choice is made among the languages. The row's title says what it hears; nothing under it.
     expect(card(HEAR).queryByText('providers.localai.detectOther')).toBeNull();
     expect(card(HEAR).queryByText('providers.localai.detectOtherNote')).toBeNull();
-    // R2T2 chosen for the other side: it is heard in the pair's language, by R2T2, and no longer detected.
+    // R2T2 chosen for the other side: it is heard in the pair's language, by R2T2, and the detection stays, best effort.
     fireEvent.change(other, { target: { value: '\u0000native:r2t2-q8' } });
-    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native', asrNativeModel: 'r2t2-q8', asrDetectOther: false, asrNativeByLanguage: expect.objectContaining({ ja: 'r2t2-q8' }) }));
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native', asrNativeModel: 'r2t2-q8', asrNativeByLanguage: expect.objectContaining({ ja: 'r2t2-q8' }) }));
+    expect(update.mock.calls[update.mock.calls.length - 1][0]).not.toMatchObject({ asrDetectOther: false });
   });
 
   it.each([false, true])('offers paired Apple recognition without ending bilingual speech (feedback: %s)', async (coach) => {
@@ -879,33 +880,37 @@ describe('the other side\u2019s language left to be detected', () => {
     expect((draw({ settings, legs: BOTH }).card(HEAR).getAllByRole('combobox')[0] as HTMLSelectElement).selectedOptions[0].textContent).toBe('Qwen3-ASR 1.7B GGUF');
   });
 
-  it.each([false, true])('ends bilingual speech when a recognizer cannot detect either language (feedback: %s)', async (coach) => {
+  it.each([false, true])('keeps bilingual speech as a best effort when a recognizer cannot detect either language (feedback: %s)', async (coach) => {
     useNativeEngineStore.setState({ status: engineOf({ 'r2t2-q8': 'downloaded', 'qwen3-asr-1.7b-q8': 'downloaded' }) });
     const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'qwen3-asr-1.7b-q8', speakBoth: true, coach, translateAt: 'device' }, legs: BOTH });
     const menus = card(HEAR).getAllByRole('combobox') as HTMLSelectElement[];
     expect(menus.map((m) => m.getAttribute('aria-label'))).toEqual(['providers.localai.hearsEither', 'providers.localai.hears']);
     await act(async () => { fireEvent.change(menus[0], { target: { value: '\u0000native:r2t2-q8' } }); });
-    // Feedback remains enabled: without bilingual detection, the speaker practises the target language.
-    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native', speakBoth: false, asrNativeByLanguage: expect.objectContaining({ [coach ? 'ja' : 'zh']: 'r2t2-q8' }) }));
+    // Feedback remains enabled: the writing and the detector route what was said, best effort.
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native', asrNativeModel: 'r2t2-q8' }));
+    expect(update.mock.calls[update.mock.calls.length - 1][0]).not.toHaveProperty('speakBoth');
     expect(update.mock.calls[update.mock.calls.length - 1][0]).not.toHaveProperty('asrDetectOther');
     expect(update.mock.calls[update.mock.calls.length - 1][0]).not.toHaveProperty('coach');
   });
 
-  it('drops a detection kept from before when what hears changes, even to a model that detects: it does not come back on unseen', () => {
+  it('keeps a detection kept from before when what hears changes: every model here is a best effort', () => {
     useNativeEngineStore.setState({ status: engineOf({ 'r2t2-q8': 'downloaded', 'qwen3-asr-1.7b-q8': 'downloaded' }) });
     const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'app', asrDetectOther: true, speakBoth: true, translateAt: 'device' }, legs: BOTH });
     const menus = card(HEAR).getAllByRole('combobox') as HTMLSelectElement[];
     fireEvent.change(menus[1], { target: { value: '\u0000native:qwen3-asr-1.7b-q8' } });
-    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native', asrDetectOther: false, speakBoth: false }));
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native' }));
+    expect(update.mock.calls[update.mock.calls.length - 1][0]).not.toHaveProperty('asrDetectOther');
+    expect(update.mock.calls[update.mock.calls.length - 1][0]).not.toHaveProperty('speakBoth');
   });
 
-  it('ends the detection, kept from before, when a model that cannot detect is what makes the engine hear', () => {
+  it('keeps the detection when a model that cannot name the language makes the engine hear: the writing and detector try', () => {
     useNativeEngineStore.setState({ status: engineOf({ 'r2t2-q8': 'downloaded', 'qwen3-asr-1.7b-q8': 'downloaded' }) });
     const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'app', asrDetectOther: true, translateAt: 'device' }, legs: BOTH });
     const menus = card(HEAR).getAllByRole('combobox') as HTMLSelectElement[];
     // The app's models hear: the other side is heard in Japanese, its row the second.
     fireEvent.change(menus[1], { target: { value: '\u0000native:r2t2-q8' } });
-    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native', asrDetectOther: false }));
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native' }));
+    expect(update.mock.calls[update.mock.calls.length - 1][0]).not.toHaveProperty('asrDetectOther');
   });
 
   it('says a model has to be downloaded only where none here can tell languages apart', () => {

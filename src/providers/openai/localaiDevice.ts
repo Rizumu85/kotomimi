@@ -138,10 +138,17 @@ export const detectsOther = (s: { asrDetectOther?: boolean; asrVia: Place; asrHe
  * What hears can tell a language by itself: a native engine's model, an API
  * the sentence is uploaded to, or another Kotomimi that lists a recognizer
  * which does. `models`: what the other device lists.
+ *
+ * Fork: here this computer hears, a model that does not name the language is
+ * no refusal: the sentence's writing, and behind it a small text detector,
+ * try (`src/lib/language/identify.ts`). That is a best effort, and the
+ * settings say so; only the other device's list still has to state `auto`.
  */
 export function canDetectOther(s: { asrVia: Place; asrHere?: AsrHere; asrOther?: string }, models: Listed = []): boolean {
   const place = hearingPlace(s);
-  return hearsNatively(s) || place === 'api' || (place === 'server' && serverDetects(models));
+  if (place === 'server') return serverDetects(models);
+  // This computer, or an API: the recognizer's language, else the writing, else the detector.
+  return true;
 }
 
 /**

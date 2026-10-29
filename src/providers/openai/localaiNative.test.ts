@@ -214,11 +214,12 @@ describe('the other side\u2019s language left to be detected', () => {
   const PARTICIPANT: SessionContext = { direction: { source: 'zh-CN', target: 'ja' }, speech: false, turns: 'auto' };
   const DETECT: Partial<LocalAISettings> = { ...NATIVE, asrNativeModel: 'qwen3-asr-1.7b-q8', asrDetectOther: true, translateAt: 'device', translateHere: 'native', translateNativeModel: 'index-translate-2b' };
 
-  it('counts only where what hears can detect a language: the native engine, or an API', () => {
+  it('counts where this computer can try: a detector, a model that does not name one, or an API', () => {
     expect(LOCALAI_DEFAULTS.asrDetectOther).toBe(false);
     expect(detectsOther(settings(DETECT))).toBe(true);
     expect(detectsOther(settings({ ...DETECT, asrVia: 'api' }))).toBe(true);
-    expect(detectsOther(settings({ ...DETECT, asrHere: 'app' }))).toBe(false);
+    // Fork: a model that does not name the language is a best effort here: the writing and `identify.ts` try.
+    expect(detectsOther(settings({ ...DETECT, asrHere: 'app' }))).toBe(true);
     expect(detectsOther(settings({ ...DETECT, asrVia: 'server' }))).toBe(false);
     expect(detectsOther(settings({ ...DETECT, asrDetectOther: false }))).toBe(false);
     expect(migrateLocalAISettings({ asrDetectOther: true }, { legacy: {}, credentials: {} }).asrDetectOther).toBe(true);
@@ -275,10 +276,35 @@ describe('the other side\u2019s language left to be detected', () => {
     expect((mine.stages?.speech as { wrap?: string }).wrap).toContain('请将以下中文文本翻译为日语');
   });
 
-  it('is refused in words of its own where the model in use does not detect', () => {
+  it('is a best effort, told the leg\u2019s source, where the model in use does not detect', () => {
     const other = { ...PARTICIPANT, direction: { source: 'ja', target: 'zh-CN' } };
     const reversed = { ...shared, reversed: (d: SessionContext['direction']) => d.target === 'zh-CN' };
-    expect(buildLocalAI(other, settings({ ...DETECT, asrNativeModel: 'r2t2-q8' }), reversed)).toMatchObject({ code: 'native_unchosen', params: { source: 'auto' } });
+    const built = buildLocalAI(other, settings({ ...DETECT, asrNativeModel: 'r2t2-q8' }), reversed);
+    if ('refused' in built) throw new Error(built.refused);
+    expect(built.device).toMatchObject({ modelId: 'r2t2-q8', language: 'ja' });
+    expect(built.stages).toMatchObject({ heard: 'auto' });
+  });
+
+  it('lets a model that names no language hear a speaker who speaks both, and keeps the feedback beside it', () => {
+    useNativeEngineStore.setState({ status: engine() });
+    try {
+      const s = settings({
+        ...NATIVE,
+        asrNativeModel: 'r2t2-q8',
+        speakBoth: true,
+        coach: true,
+        coachAt: 'api',
+        coachBaseUrl: 'https://feedback.example.com/v1',
+        coachModel: 'feedback-model',
+      });
+      const built = buildLocalAI(SPEAKER, s, shared);
+      if ('refused' in built) throw new Error(built.refused);
+      // The engine runs one model and is told the speaker's own source; `identify.ts` routes each sentence.
+      expect(built.device).toMatchObject({ modelId: 'r2t2-q8', language: 'ja' });
+      expect(built.stages).toMatchObject({ heard: 'auto', feedback: { language: 'zh-CN' } });
+    } finally {
+      useNativeEngineStore.setState({ status: NO_NATIVE_ENGINE });
+    }
   });
 
   it('is not refused for a translation that has to be told the pair: that is told the pair\u2019s own language', () => {
@@ -718,7 +744,7 @@ describe('the provider\'s check, with the engine', () => {
     const s = settings({ ...NATIVE, speakBoth: true, coach: true, translateAt: 'device', translateHere: 'native', translateNativeModel: 'index-translate-2b', coachAt: 'device', coachHere: 'native', coachNativeModel: 'gemma-4-e2b' });
     const native = { gap, idle: () => undefined, translatorGap, coachGap };
     expect(await checkLocalAIWithNative(NONE, s, CTX, async () => OK, native)).toBe(OK);
-    expect(gap).toHaveBeenCalledWith({ model: 'r2t2-q8', byLanguage: {}, detecting: true }, ['auto']);
+    expect(gap).toHaveBeenCalledWith({ model: 'r2t2-q8', byLanguage: {}, detecting: true }, ['ja']);
     expect(translatorGap).toHaveBeenCalledWith('index-translate-2b', [PAIR, { source: PAIR.target, target: PAIR.source }]);
     expect(coachGap).toHaveBeenCalledWith('gemma-4-e2b');
     const missing = { ok: false as const, code: 'native_translator_missing', reason: 'The translation model is not downloaded.' };

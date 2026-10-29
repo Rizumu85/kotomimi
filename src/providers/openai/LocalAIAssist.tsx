@@ -1065,8 +1065,8 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   // The native recognizer, language by language: a choice is the model in use from then on, and that language's by name.
   const bothOn = speaksBoth(settings, models, pair) && pair.source.toLowerCase() !== pair.target.toLowerCase();
   const nativePick = hearingPick(settings, pair, { detecting: detectsOther(settings, models), both: bothOn });
-  const pickNative = (id: string, languages: readonly string[]) => {
-    const next = chooseNative(nativePick, id, languages, heardByLegs);
+  const pickNative = (id: string, languages: readonly string[], heard: readonly string[] = heardByLegs) => {
+    const next = chooseNative(nativePick, id, languages, heard);
     put({ asrHere: 'native', asrNativeModel: next.model, asrNativeByLanguage: next.byLanguage });
   };
   // A model that cannot tell languages apart, chosen while a language is left to be detected — the other side's, or the
@@ -1074,8 +1074,9 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   // on: the engine runs one model for every leg, so the detection ends, and each leg is heard in the pair's language.
   // Kept on, the engine would hear with the model that detects.
   const pickNativeFor = (id: string, slot?: DeviceNeed) => {
-    const detectOff = settings.asrDetectOther === true && legs.includes('participant');
-    const bothOff = settings.speakBoth === true && legs.includes('speaker') && pair.source.toLowerCase() !== pair.target.toLowerCase();
+    // A model that cannot name the language still gets a best-effort guess here; only a place that cannot try at all ends the choice.
+    const detectOff = settings.asrDetectOther === true && !detectsOther(settings, models) && legs.includes('participant');
+    const bothOff = settings.speakBoth === true && !speaksBoth(settings, models, pair) && legs.includes('speaker') && pair.source.toLowerCase() !== pair.target.toLowerCase();
     // Fork: the Mac's recognition, chosen for a speaker who speaks both, where it has both languages: it hears them in
     // either, as their own language's model, and they go on speaking both. The other side's language is no longer
     // detected: that takes the model that tells languages apart, for every leg.
@@ -1087,7 +1088,17 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
       return;
     }
     if (nativeModel(id).detects || !(detectOff || bothOff)) {
-      pickNative(id, slot ? [heardBy(settings, pair, slot.leg)] : heardByLegs.filter((language) => nativeHears(nativeModel(id), language)));
+      // A row a best-effort detection keeps is named by the language it hears, not by "auto" (which no model runs).
+      const languageOf = (leg: 'speaker' | 'participant') => (
+        (leg === 'speaker' && settings.speakBoth) || (leg === 'participant' && settings.asrDetectOther)
+          ? (leg === 'speaker' ? pair.source : pair.target)
+          : heardBy(settings, pair, leg)
+      );
+      pickNative(
+        id,
+        slot ? [languageOf(slot.leg)] : heardByLegs.filter((language) => nativeHears(nativeModel(id), language)),
+        legs.map(languageOf),
+      );
       return;
     }
     const ended = { ...(detectOff ? { asrDetectOther: false } : {}), ...(bothOff ? { speakBoth: false } : {}) };
