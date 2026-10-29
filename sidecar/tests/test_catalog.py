@@ -598,6 +598,29 @@ def test_translate_row_count_and_no_opus():
     assert catalog.translate_model("opus-mt-ja-en") is None
 
 
+def test_translate_cards_name_the_languages_their_cards_list():
+    # A model whose card lists its languages carries them, so the renderer can
+    # refuse a pair it does not take before the run (`nativeTranslationCards`).
+    # Qwen 3 / 3.5 and EuroLLM keep ("multi",): their coverage is any language
+    # beyond the list this catalog would write.
+    qwen25 = catalog.translate_model("qwen2.5-0.5b")
+    assert len(qwen25.languages) == 28
+    assert {"ja", "zh", "en", "ko", "af"} <= set(qwen25.languages)
+    gemma = catalog.translate_model("translategemma-4b")
+    assert len(gemma.languages) == 51
+    assert {"ja", "zh", "en", "el", "zu"} <= set(gemma.languages)
+    for mid in ("hy-mt2-1.8b", "hy-mt2-7b", "hy-mt15-1.8b", "hy-mt15-7b"):
+        m = catalog.translate_model(mid)
+        assert len(m.languages) == 36, mid
+        assert {"ja", "zh", "en", "km", "ug"} <= set(m.languages), mid
+    for mid in ("qwen3-0.6b", "qwen3.5-0.8b", "qwen3.5-2b", "qwen3.5-4b", "eurollm-1.7b"):
+        assert catalog.translate_model(mid).languages == ("multi",), mid
+    # Every code is the app's base form, which is what the renderer compares.
+    for m in catalog.translate_models():
+        assert all(code and code == code.lower() and "-" not in code for code in m.languages), m.id
+
+
+
 def test_tts_pocket_cards_have_load_language_and_only_english_has_presets():
     # R9: model_specs/pocket_tts.json's OWN package list only wires the
     # "alba" preset into the english package — german/italian/portuguese/

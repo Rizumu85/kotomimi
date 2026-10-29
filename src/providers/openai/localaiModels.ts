@@ -25,6 +25,8 @@ export interface LocalAIModel extends ModelOption {
   host?: typeof KOTOMIMI_HOST;
   /** The languages it takes, as another Kotomimi lists them (`src/lib/lan/protocol.ts`); empty or absent: any. */
   languages?: readonly string[];
+  /** A translation model that translates one way only, `[source, target]` (`src/lib/lan/protocol.ts`); absent: both ways. */
+  pair?: readonly string[];
 }
 
 /**
@@ -69,14 +71,43 @@ export function modelsFor(models: readonly LocalAIModel[], slot: LocalAIModelSlo
 }
 
 /**
- * What the other device runs for a slot left blank: the first model it lists
- * that can do the work. Only a device that says what its models are for is
- * asked this way (a LocalAI, another Kotomimi): on any other, nothing is run
- * on a guess, and the model has to be named.
+ * Whether a model another Kotomimi lists translates a pair. Its `pair` (a directional model) decides when it has
+ * one; otherwise its languages: none means any, or a server that says nothing of them — nothing is hidden on a
+ * guess. This is the page's side of `nativeTranslates` and `isTranslationModelCompatible`, for what the device
+ * itself chose.
  */
-export function serverDefaultModel(models: readonly LocalAIModel[], slot: 'translate' | 'coach'): string {
+export function fitsPair(model: Pick<LocalAIModel, 'languages' | 'pair'>, source: string, target: string): boolean {
+  const base = (code: string): string => code.trim().toLowerCase().split(/[-_]/)[0];
+  if (model.pair && model.pair.length === 2) return base(model.pair[0]!) === base(source) && base(model.pair[1]!) === base(target);
+  const languages = (model.languages ?? []).map(base);
+  if (languages.length === 0) return true;
+  // The catalog's marker for a model of every language (`modelManifest.ts`): a device older than this page may send it.
+  if (languages.includes('multilingual')) return true;
+  return languages.includes(base(source)) && languages.includes(base(target));
+}
+
+/**
+ * What the other device runs for the feedback slot left blank: the first text model it lists that can do the
+ * work. Only a device that says what its models are for is asked this way (a LocalAI, another Kotomimi): on any
+ * other, nothing is run on a guess, and the model has to be named. The translation has `translationDefault`,
+ * which does not pick among several.
+ */
+export function serverDefaultModel(models: readonly LocalAIModel[]): string {
   if (!models.some((m) => m.from === undefined && m.kind !== undefined)) return '';
-  return modelsFor(models, slot)[0]?.id ?? '';
+  return modelsFor(models, 'coach')[0]?.id ?? '';
+}
+
+/**
+ * The translation model another device runs when none is named: the one it lists, where it lists exactly one
+ * that translates. Several are not a choice — the server's list order is no reason to translate with one of
+ * them (it changes as models are installed or removed), and nothing of the device says which takes this pair —
+ * so the card asks for a model instead (`translate_unnamed`). A server that says nothing of its models is
+ * never guessed at. The device's own pipeline is another matter (`translateInSession`): that is its choice.
+ */
+export function translationDefault(models: readonly LocalAIModel[]): string {
+  if (!models.some((m) => m.from === undefined && m.kind !== undefined)) return '';
+  const candidates = modelsFor(models, 'translate');
+  return candidates.length === 1 ? candidates[0]!.id : '';
 }
 
 /** The Realtime server is another Kotomimi: every model it lists says so. */

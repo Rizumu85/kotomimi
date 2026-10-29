@@ -573,7 +573,8 @@ def _gguf_artifact(mid: str, quant: str) -> str:
 
 def _llm_translate_row(mid, name, family, sort_order, default_quant, default_bytes,
                        alt_quant, alt_bytes, recommended=False,
-                       disable_thinking=False, append_no_think=False, arch=""):
+                       disable_thinking=False, append_no_think=False, arch="",
+                       languages=("multi",)):
     """A GGUF LLM translate card: the native_translate backend (sokuji_native's
     in-process llama.cpp runtime, spec §4.3), two GGUF quant variants, three
     tiers each (gpu-metal / gpu-vulkan / cpu — no gpu-cuda: post-A1 no probe
@@ -583,18 +584,42 @@ def _llm_translate_row(mid, name, family, sort_order, default_quant, default_byt
     cpu 1.0), not by the order of this tuple. `family` selects the prompt
     strategy (translate_backend.STRATEGIES) via PlanConfig.prompt_family. `arch`
     is llama.cpp's `general.architecture` string for this GGUF (graph_family) —
-    unrelated to `family`, which is a prompt strategy, not a graph."""
+    unrelated to `family`, which is a prompt strategy, not a graph.
+
+    `languages` is what the model's card names, as the renderer's catalogs name
+    it too (`nativeTranslators.ts`'s HUNYUAN, the manifest's lists): ("multi",)
+    is the card's "any language", and a model whose list is known carries it, so
+    a pair the model does not take is refused before the run instead of after a
+    sentence."""
     deps = []
     for quant, nbytes, rank in ((default_quant, default_bytes, 2.0),
                                 (alt_quant, alt_bytes, 1.0)):
         artifact = _gguf_artifact(mid, quant)
         deps += [Deployment("native_translate", tier, quant, artifact, rank, est_bytes=nbytes)
                  for tier in ("gpu-metal", "gpu-vulkan", "cpu")]
-    return TranslateModel(mid, name, ("multi",), tuple(deps),
+    return TranslateModel(mid, name, tuple(languages), tuple(deps),
                           recommended=recommended, sort_order=sort_order,
                           size_bytes=default_bytes, disable_thinking=disable_thinking,
                           append_no_think=append_no_think, prompt_family=family,
                           graph_family=arch)
+
+
+# The languages each translation card names, as its own card lists them. A card
+# whose coverage is "any language" (Qwen 3 / 3.5, EuroLLM's EU set) keeps
+# ("multi",): its list is not enumerated here, and the renderer treats it as any.
+_HUNYUAN_LANGUAGES = (
+    "zh", "en", "fr", "pt", "es", "ja", "tr", "ru", "ar", "ko", "th", "it", "de", "vi", "ms", "id", "fil", "hi",
+    "pl", "cs", "nl", "km", "my", "fa", "gu", "ur", "te", "mr", "he", "bn", "ta", "uk", "bo", "kk", "mn", "ug",
+)
+_QWEN25_LANGUAGES = (
+    "ja", "zh", "en", "ko", "de", "fr", "es", "ru", "ar", "pt", "th", "vi", "id", "tr", "nl", "pl",
+    "it", "hi", "sv", "da", "fi", "hu", "ro", "no", "uk", "cs", "et", "af",
+)
+_TRANSLATEGEMMA_LANGUAGES = (
+    "ar", "bg", "bn", "ca", "cs", "da", "de", "el", "en", "es", "et", "fa", "fi", "fr", "gu", "he", "hi", "hr",
+    "hu", "id", "is", "it", "ja", "kn", "ko", "lt", "lv", "ml", "mr", "nl", "no", "pa", "pl", "pt", "ro", "ru",
+    "sk", "sl", "sr", "sv", "sw", "ta", "te", "th", "fil", "tr", "uk", "ur", "vi", "zh", "zu",
+)
 
 
 # Sizes are the exact upstream GGUF file byte counts (HF API size fetch,
@@ -604,7 +629,8 @@ def _llm_translate_row(mid, name, family, sort_order, default_quant, default_byt
 # through native_translate (sokuji_native's in-process llama.cpp runtime).
 TRANSLATE_MODELS: list[TranslateModel] = [
     _llm_translate_row("qwen2.5-0.5b", "Qwen 2.5 0.5B", "qwen", 1,
-                       "q8_0", 675710816, "q4_k_m", 491400032, recommended=True, arch="qwen2"),
+                       "q8_0", 675710816, "q4_k_m", 491400032, recommended=True, arch="qwen2",
+                       languages=_QWEN25_LANGUAGES),
     _llm_translate_row("qwen3-0.6b", "Qwen 3 0.6B", "qwen", 2,
                        "q8_0", 639446688, "q4_k_m", 396705472, recommended=True,
                        disable_thinking=True, append_no_think=True, arch="qwen3"),
@@ -621,7 +647,8 @@ TRANSLATE_MODELS: list[TranslateModel] = [
                        "q4_k_m", 2740937888, "q8_0", 4482403488,
                        disable_thinking=True, arch="qwen35"),
     _llm_translate_row("translategemma-4b", "TranslateGemma 4B", "gemma", 6,
-                       "q4_k_m", 2489909760, "q8_0", 4130417920, arch="gemma3"),
+                       "q4_k_m", 2489909760, "q8_0", 4130417920, arch="gemma3",
+                       languages=_TRANSLATEGEMMA_LANGUAGES),
     # EuroLLM-1.7B-Instruct (utter-project, Apache-2.0): a translation-tuned
     # Llama-architecture model covering 35 languages (the EU set plus zh, ja,
     # ko, ru, uk, ar, hi). Its chat template is ChatML, which is what the
@@ -630,13 +657,17 @@ TRANSLATE_MODELS: list[TranslateModel] = [
     _llm_translate_row("eurollm-1.7b", "EuroLLM 1.7B", "qwen", 7,
                        "q4_k_m", 1045157088, "q8_0", 1763775712, arch="llama"),
     _llm_translate_row("hy-mt2-1.8b", "Hunyuan-MT2 1.8B", "hunyuan", 8,
-                       "q4_k_m", 1133080448, "q8_0", 1908528192, arch="hunyuan-dense"),
+                       "q4_k_m", 1133080448, "q8_0", 1908528192, arch="hunyuan-dense",
+                       languages=_HUNYUAN_LANGUAGES),
     _llm_translate_row("hy-mt2-7b", "Hunyuan-MT2 7B", "hunyuan", 9,
-                       "q4_k_m", 4624648896, "q8_0", 7981928896, arch="hunyuan-dense"),
+                       "q4_k_m", 4624648896, "q8_0", 7981928896, arch="hunyuan-dense",
+                       languages=_HUNYUAN_LANGUAGES),
     _llm_translate_row("hy-mt15-1.8b", "Hunyuan-MT1.5 1.8B", "hunyuan", 10,
-                       "q4_k_m", 1133080512, "q8_0", 1908528288, arch="hunyuan-dense"),
+                       "q4_k_m", 1133080512, "q8_0", 1908528288, arch="hunyuan-dense",
+                       languages=_HUNYUAN_LANGUAGES),
     _llm_translate_row("hy-mt15-7b", "Hunyuan-MT1.5 7B", "hunyuan", 11,
-                       "q4_k_m", 4624649312, "q8_0", 7981929344, arch="hunyuan-dense"),
+                       "q4_k_m", 4624649312, "q8_0", 7981929344, arch="hunyuan-dense",
+                       languages=_HUNYUAN_LANGUAGES),
 ]
 
 

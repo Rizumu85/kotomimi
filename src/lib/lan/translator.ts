@@ -30,6 +30,8 @@ export interface TranslatorDeps {
   translator(): Translator;
   /** The model for a pair: the one named when it is shared and translates that pair, else the best shared. Null: none. */
   resolve(source: string, target: string, wanted: string): string | null;
+  /** Why the named model could not answer, where `resolve` answered null: it does not translate the pair, or the engine is in use with one that does not. */
+  refusal?(source: string, target: string, wanted: string): 'unfit' | 'busy' | null;
   clock: Clock;
 }
 
@@ -74,7 +76,13 @@ export class LanTranslator {
     if (!text) return refusal(400, 'no_text', 'There is no user message to translate.');
     const named = typeof request.model === 'string' && request.model !== LAN_PIPELINE ? request.model : '';
     const model = this.deps.resolve(source, target, named);
-    if (!model) return refusal(404, 'model_not_found', `This Kotomimi shares no translation model for ${source} → ${target}.`);
+    if (!model) {
+      // A model this computer shares that cannot take the pair is said as that: a lesser model is not put in its place.
+      const why = named ? this.deps.refusal?.(source, target, named) ?? null : null;
+      if (why === 'unfit') return refusal(422, 'model_unfit', `${named} does not translate ${source} → ${target}, and no other model answers in its place.`);
+      if (why === 'busy') return refusal(503, 'translator_busy', `This Kotomimi's translation engine is in use with another model, and it does not translate ${source} → ${target}.`);
+      return refusal(404, 'model_not_found', `This Kotomimi shares no translation model for ${source} → ${target}.`);
+    }
 
     let translated: string;
     // Held while it loads and answers: room is made for another model only among those answering nobody.

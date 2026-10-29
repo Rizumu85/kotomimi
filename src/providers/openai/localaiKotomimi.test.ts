@@ -131,7 +131,8 @@ describe('a leg another Kotomimi hears', () => {
     const calls: Array<{ url: string; body: Record<string, unknown>; headers: Record<string, string> }> = [];
     const fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       calls.push({ url: String(input), body: JSON.parse(init?.body as string), headers: init?.headers as Record<string, string> });
-      return json({ choices: [{ message: { role: 'assistant', content: 'こんにちは' } }] });
+      // The device leaves the model to itself here, and names the one it ran in its answer.
+      return json({ model: 'index-translate-2b', choices: [{ message: { role: 'assistant', content: 'こんにちは' } }] });
     });
     const starting = createPipelineAdapter({ openSocket: sockets.create, fetch: fetch as unknown as typeof globalThis.fetch })
       .start({ context: SPEAKER, config, credentials: { ...K, apiKey: 's3cret' }, clock, signal: new AbortController().signal }, events);
@@ -156,6 +157,9 @@ describe('a leg another Kotomimi hears', () => {
     expect(calls[0].headers.Authorization).toBe('Bearer s3cret');
     expect(of('segmentText').map((e) => [e.payload.ref, e.payload.text])).toEqual([[1, '你好'], [FIRST_REF + 1, 'こんにちは']]);
     expect(of('segmentOpened').map((e) => e.payload.origin)).toEqual(['item_1', 'item_1']);
+    // The one that ran, as its answer named it — not the pipeline's name that was asked.
+    expect(of('frame').filter((e) => e.payload.type === 'text.done').map((e) => e.payload.payload))
+      .toMatchObject([{ model: LAN_PIPELINE, served: 'index-translate-2b' }]);
     // The key is never framed.
     expect(JSON.stringify(of('frame'))).not.toContain('s3cret');
   });
@@ -190,5 +194,35 @@ describe('another Kotomimi that hears none of a leg\'s language', () => {
     expect(await ask(serving(JA_ONLY, ['apple-speech-transcriber']), ['speaker'])).toMatchObject({ ok: true });
     // Heard elsewhere: what that Kotomimi hears does not matter.
     expect(await ask(serving(JA_ONLY), ['speaker'], { asrVia: 'api', asrApiBaseUrl: 'http://x/v1', asrApiModel: 'm', asrApiNeedsKey: false })).toMatchObject({ ok: true });
+  });
+});
+
+describe('a translation model that cannot take a direction of the run (fork)', () => {
+  const serving = (models: SharedModel[]) => vi.fn(async (input: RequestInfo | URL) =>
+    (String(input).endsWith('/capabilities') ? json(capabilityList(models)) : json(modelList(models))));
+  const ask = (
+    fetch: ReturnType<typeof serving>, patch: Partial<LocalAISettings>, pair: { source: string; target: string },
+    legs: Array<'speaker' | 'participant'> = ['speaker'],
+  ) => createLocalAICheck({ fetch: fetch as unknown as typeof globalThis.fetch, clock: createVirtualClock(0) })(K, settings(patch), { pair, legs, signal: new AbortController().signal });
+
+  it('is refused before the run, where another model would otherwise answer in its place', async () => {
+    const fetch = serving([
+      { id: 'whisper-large', kind: 'asr', languages: [] },
+      { id: 'hy-mt2-1.8b', kind: 'translate', languages: ['ja', 'zh', 'en'] },
+    ]);
+    expect(await ask(fetch, { translateServerModel: 'hy-mt2-1.8b' }, { source: 'zh-CN', target: 'el' }))
+      .toMatchObject({ ok: false, code: 'server_translator_unfit', params: { name: 'Hunyuan MT 2 1.8B' } });
+    // The pair it does take is ready.
+    expect(await ask(fetch, { translateServerModel: 'hy-mt2-1.8b' }, { source: 'zh-CN', target: 'ja' })).toMatchObject({ ok: true });
+  });
+
+  it('is refused for the other side of a directional model, which names one way only', async () => {
+    const fetch = serving([
+      { id: 'whisper-large', kind: 'asr', languages: [] },
+      { id: 'opus-mt-ja-en', kind: 'translate', languages: ['ja', 'en'], pair: ['ja', 'en'] },
+    ]);
+    expect(await ask(fetch, { translateServerModel: 'opus-mt-ja-en' }, { source: 'ja', target: 'en' })).toMatchObject({ ok: true });
+    expect(await ask(fetch, { translateServerModel: 'opus-mt-ja-en' }, { source: 'ja', target: 'en' }, ['speaker', 'participant']))
+      .toMatchObject({ ok: false, code: 'server_translator_unfit' });
   });
 });

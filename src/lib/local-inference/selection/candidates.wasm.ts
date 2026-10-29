@@ -30,6 +30,7 @@ export function wasmCandidates(ctx: WasmCandidateCtx): CandidateSource {
     sortOrder: m.sortOrder ?? 0,
     sizeBytes: m.isCloudModel ? 0 : getModelSizeMb(m, ctx.deviceFeatures) * 1_048_576,
     ready: Boolean(m.isCloudModel) || ctx.modelStatuses[m.id] === 'downloaded',
+    cloud: Boolean(m.isCloudModel),
     hardwareOk: deviceReady(m, ctx.webgpuAvailable),
     needsKey: false,
     autoEligible,

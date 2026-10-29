@@ -67,15 +67,15 @@ const LISTED: LocalAIModel[] = [
   { id: 'qwen3-4b', kind: 'text' },
 ];
 
-interface Drawn { settings?: Partial<LocalAISettings>; values?: Record<string, string>; models?: LocalAIModel[]; readiness?: Readiness; legs?: Array<'speaker' | 'participant'> }
+interface Drawn { settings?: Partial<LocalAISettings>; values?: Record<string, string>; models?: LocalAIModel[]; readiness?: Readiness; legs?: Array<'speaker' | 'participant'>; pair?: { source: string; target: string } }
 
-function draw({ settings = {}, values = { endpoint: '' }, models = [], readiness = { state: 'unknown' }, legs = ['speaker'] }: Drawn = {}) {
+function draw({ settings = {}, values = { endpoint: '' }, models = [], readiness = { state: 'unknown' }, legs = ['speaker'], pair = { source: 'zh-CN', target: 'ja' } }: Drawn = {}) {
   const update = vi.fn();
   const fill = vi.fn();
   const set = vi.fn();
   const check = vi.fn();
   const view = render(
-    <LocalAIAssist settings={{ ...LOCALAI_DEFAULTS, ...settings }} values={values} set={set} fill={fill} update={update} pair={{ source: 'zh-CN', target: 'ja' }} legs={legs} models={models} readiness={readiness} check={check} />,
+    <LocalAIAssist settings={{ ...LOCALAI_DEFAULTS, ...settings }} values={values} set={set} fill={fill} update={update} pair={pair} legs={legs} models={models} readiness={readiness} check={check} />,
   );
   const card = (stage: string) => within(screen.getByRole('region', { name: stage }));
   const places = (stage: string) => [...screen.getByRole('group', { name: stage }).querySelectorAll('button')];
@@ -161,11 +161,22 @@ describe('the stage cards: on the other device', () => {
     expect(options(card(COACH).getByRole('combobox', { name: 'providers.localai.model' }))).toEqual(['', 'hy-mt2-1.8b', 'qwen3-4b']);
   });
 
-  it('offers the translation there to a leg this computer hears, too: the device\'s first model that translates when none is named', () => {
+  it('offers the translation there to a leg this computer hears, too: several models are a choice, not the first listed', () => {
     const { card } = draw({ settings: { asrVia: 'device' }, values: { endpoint: '192.168.1.10:8080' }, models: LISTED });
     const translate = card(TRANSLATE).getByRole('combobox', { name: 'providers.localai.model' }) as HTMLSelectElement;
-    expect(translate.options[0].textContent).toBe('providers.localai.auto');
+    // Two of them translate and the device says nothing of the pair: the card asks which.
+    expect(translate.options[0].textContent).toBe('providers.localai.hereModelPick');
     expect(options(translate)).toEqual(['', 'hy-mt2-1.8b', 'qwen3-4b']);
+  });
+
+  it('names the one model a device lists as what a blank choice runs', () => {
+    const { card } = draw({
+      settings: { asrVia: 'device' },
+      values: { endpoint: '192.168.1.10:8080' },
+      models: [{ id: 'gpt-realtime', kind: 'pipeline' }, { id: 'whisper-large-turbo', kind: 'asr' }, { id: 'hy-mt2-1.8b', kind: 'text' }],
+    });
+    const translate = card(TRANSLATE).getByRole('combobox', { name: 'providers.localai.model' }) as HTMLSelectElement;
+    expect(translate.options[0].textContent).toBe('providers.localai.auto');
   });
 
   it('keeps a saved model the device no longer lists visible, and shows no recognizer a LocalAI would refuse', () => {
@@ -622,28 +633,36 @@ describe('one menu for a stage of this computer, whoever runs it', () => {
     useNativeTranslatorStore.setState({ status: before.translation as never });
   });
 
-  it('lists the same choices while a native engine translates as while the app’s own model does', () => {
-    const app = draw({ settings: { translateAt: 'device', translateHere: 'app' } });
-    const whileApp = groups(app.card(TRANSLATE).getByRole('combobox') as HTMLSelectElement);
-    app.unmount();
+  it('draws the engine’s one model in one row, with the way back to the app’s own', () => {
     const native = draw({ settings: { translateAt: 'device', translateHere: 'native', translateNativeModel: 'index-translate-2b' } });
     const menu = native.card(TRANSLATE).getByRole('combobox') as HTMLSelectElement;
-    // The engine's models under their own heading, by their own names; the app's own under theirs; nothing else.
-    expect(groups(menu)).toEqual(whileApp);
+    // The engine runs one model for both directions: its models under their own heading, and one entry back to the
+    // app's own models (which are chosen a direction at a time).
     expect(groups(menu)[0]).toEqual(['providers.localai.groupNative', ['Index-Translate 2B', 'Hunyuan MT 2 1.8B']]);
-    expect(groups(menu)[1][0]).toBe('providers.localai.groupApp');
-    // What is in use is what the menu shows.
+    expect(groups(menu)[1]).toEqual(['providers.localai.groupApp', ['providers.localai.groupApp']]);
     expect(menu.selectedOptions[0].textContent).toBe('Index-Translate 2B');
+    // One row, not one a direction, and its label names both.
+    expect(native.card(TRANSLATE).getAllByRole('combobox')).toHaveLength(1);
   });
 
-  it('hands the stage back to the app’s own models when one of them is chosen, and to another of the engine’s when that is', () => {
+  it('hands the stage back to the app’s own models when that is chosen, and to another of the engine’s when that is', () => {
     const { card, update } = draw({ settings: { translateAt: 'device', translateHere: 'native', translateNativeModel: 'index-translate-2b' } });
     const menu = card(TRANSLATE).getByRole('combobox') as HTMLSelectElement;
-    fireEvent.change(menu, { target: { value: '' } });
+    const back = [...menu.options].find((o) => o.textContent === 'providers.localai.groupApp')!;
+    fireEvent.change(menu, { target: { value: back.value } });
     expect(update).toHaveBeenCalledWith(expect.objectContaining({ translateHere: 'app' }));
     const other = [...menu.options].find((o) => o.textContent === 'Hunyuan MT 2 1.8B')!;
     fireEvent.change(menu, { target: { value: other.value } });
     expect(update).toHaveBeenCalledWith(expect.objectContaining({ translateHere: 'native', translateNativeModel: 'hy-mt2-1.8b' }));
+  });
+
+  it('offers only the engine’s models that take every direction, and says when the chosen one does not', () => {
+    // Hunyuan MT has no Greek: it cannot serve this pair, and the engine runs one model for both directions.
+    const { card } = draw({ pair: { source: 'zh-CN', target: 'el' }, settings: { translateAt: 'device', translateHere: 'native', translateNativeModel: 'hy-mt2-1.8b' } });
+    const menu = card(TRANSLATE).getByRole('combobox') as HTMLSelectElement;
+    // The saved choice stays visible — it is not silently another — with only Index-Translate to move it to.
+    expect(groups(menu)[0]).toEqual(['providers.localai.groupNative', ['Hunyuan MT 2 1.8B', 'Index-Translate 2B']]);
+    expect(card(TRANSLATE).getByText('providers.localai.translatorUnfit')).toBeTruthy();
   });
 
   it('keeps the library shut for a model that is chosen and here, and opens it for one that is not', () => {

@@ -211,6 +211,12 @@ const LLAMA = {
   },
 };
 
+/** The languages the Hunyuan MT models take, as their card lists them: the page's `HUNYUAN` names the same ones. */
+const HUNYUAN_LANGUAGES = [
+  'zh', 'en', 'fr', 'pt', 'es', 'ja', 'tr', 'ru', 'ar', 'ko', 'th', 'it', 'de', 'vi', 'ms', 'id', 'fil', 'hi',
+  'pl', 'cs', 'nl', 'km', 'my', 'fa', 'gu', 'ur', 'te', 'mr', 'he', 'bn', 'ta', 'uk', 'bo', 'kk', 'mn', 'ug',
+];
+
 /** The translation models, by the id the page asks with: each a Q4_K_M file from its makers' own repository, at a fixed revision. */
 const TRANSLATORS = {
   'index-translate-2b': {
@@ -219,6 +225,8 @@ const TRANSLATORS = {
     mirror: 'https://modelscope.cn/models/IndexTeam/Index-Translate-2B-GGUF/resolve/master/Index-Translate-2B.Q4_K_M.gguf',
     bytes: 1312164352,
     sha256: '044b313d29342bd3b2c77cbb64023ca0d209bd9b3247763f9d162767ef2d746a',
+    // Every language: it is asked what to translate from and into.
+    languages: 'any',
   },
   'hy-mt2-1.8b': {
     file: 'Hy-MT2-1.8B-Q4_K_M.gguf',
@@ -226,6 +234,7 @@ const TRANSLATORS = {
     mirror: 'https://modelscope.cn/models/Tencent-Hunyuan/Hy-MT2-1.8B-GGUF/resolve/master/Hy-MT2-1.8B-Q4_K_M.gguf',
     bytes: 1133080448,
     sha256: 'dc5f44fcf1fa496ee7ad725982c0c8c553a4de00259b53af84c4b89fb0c06699',
+    languages: HUNYUAN_LANGUAGES,
   },
   'hy-mt1.5-1.8b': {
     file: 'HY-MT1.5-1.8B-Q4_K_M.gguf',
@@ -233,7 +242,25 @@ const TRANSLATORS = {
     mirror: 'https://modelscope.cn/models/Tencent-Hunyuan/HY-MT1.5-1.8B-GGUF/resolve/master/HY-MT1.5-1.8B-Q4_K_M.gguf',
     bytes: 1133080512,
     sha256: '4383ac0c3c8e476de98ff979c2a3f069f8c4fb385e7860cf2d28da896cc477c7',
+    languages: HUNYUAN_LANGUAGES,
   },
+};
+
+/**
+ * Whether a translator of the list above translates a pair: one that takes any language, or one whose list holds
+ * both. A source left to be detected is no obstacle — the model reads what it is given. The page's
+ * `nativeTranslates` (`src/providers/openai/nativeTranslators.ts`) is the same rule; a test holds the two lists
+ * together.
+ */
+const translatorFits = (id, source, target) => {
+  const model = TRANSLATORS[id];
+  if (!model) return false;
+  if (model.languages === 'any') return true;
+  const base = (code) => languageCode(code) ?? (/^auto$/i.test(String(code ?? '').trim()) ? 'auto' : null);
+  const from = base(source);
+  const into = base(target);
+  if (!into) return false;
+  return (from === null || from === 'auto' || model.languages.includes(from)) && model.languages.includes(into);
 };
 
 /**
@@ -1183,4 +1210,4 @@ function createNativeEngine(deps = {}) {
   return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream };
 }
 
-module.exports = { createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, unspaced, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };
+module.exports = { createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, unspaced, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, translatorFits, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };

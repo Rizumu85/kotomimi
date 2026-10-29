@@ -64,6 +64,12 @@ export interface TextAnswer {
   /** From the request to the first visible text; absent when none came before the end. */
   firstMs?: number;
   totalMs: number;
+  /**
+   * The model the server says answered, where it says: another Kotomimi leaves a blank model to itself
+   * (`src/lib/lan/translator.ts`), so the one that ran is only known from its answer. Absent: the server
+   * named none (the request's own model is what it ran).
+   */
+  model?: string;
 }
 
 /** An OpenAI-style base URL as its chat-completions URL: `http://host:11434/v1` → `http://host:11434/v1/chat/completions`. A URL that already names the path is kept. */
@@ -86,7 +92,7 @@ export function visibleText(raw: string): string {
   return raw.replace(/<think>[\s\S]*?<\/think>/g, '').replace(/<think>[\s\S]*$/, '').trim();
 }
 
-interface Chunk { choices?: Array<{ delta?: { content?: unknown }; message?: { content?: unknown } }>; error?: { message?: unknown } }
+interface Chunk { model?: unknown; choices?: Array<{ delta?: { content?: unknown }; message?: { content?: unknown } }>; error?: { message?: unknown } }
 
 /** The server's own words for a refusal, when it sent any. */
 async function refusal(response: Response): Promise<string> {
@@ -163,9 +169,15 @@ export async function completeText(request: TextRequest, deps: TextDeps): Promis
       await pause(clock, retryAfterMs(response.headers.get('retry-after')), controller.signal);
     }
     if (!response.ok) throw new Error(await refusal(response));
+    // The model the server says it ran, where it says (another Kotomimi chooses a blank request's model itself).
+    let served: string | undefined;
+    const named = (chunk: Chunk): void => {
+      if (typeof chunk.model === 'string' && chunk.model.trim()) served = chunk.model.trim();
+    };
     if (!(response.headers.get('content-type') ?? '').includes('text/event-stream') || !response.body) {
       // A server that does not stream: the whole answer in one body.
       const body = (await response.json()) as Chunk;
+      named(body);
       const content = body.choices?.[0]?.message?.content;
       if (typeof content === 'string') grow(content);
     } else {
@@ -184,12 +196,13 @@ export async function completeText(request: TextRequest, deps: TextDeps): Promis
           let chunk: Chunk;
           try { chunk = JSON.parse(data) as Chunk; } catch { continue; }
           if (typeof chunk.error?.message === 'string') throw new Error(chunk.error.message);
+          named(chunk);
           const piece = chunk.choices?.[0]?.delta?.content;
           if (typeof piece === 'string' && piece) grow(piece);
         }
       }
     }
-    return { text: shown, ...(firstMs !== undefined ? { firstMs } : {}), totalMs: clock.now() - started };
+    return { text: shown, ...(firstMs !== undefined ? { firstMs } : {}), totalMs: clock.now() - started, ...(served ? { model: served } : {}) };
   } catch (error) {
     if (timedOut) throw new Error(`The model did not finish within ${limit / 1000} s.`);
     throw error;

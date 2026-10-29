@@ -40,6 +40,8 @@ const FIXTURE_ASR: Record<string, NativeModelInfo> = {
 const TR_CAT: Record<string, NativeModelInfo> = {
   'qwen2.5-0.5b': M('qwen2.5-0.5b', 'translate', ['multi'], 1, true),
   'qwen3-0.6b': M('qwen3-0.6b', 'translate', ['multi'], 2, true),
+  // A card that names its languages (more than a pair): only the pairs both are in.
+  'hy-mt2-1.8b': M('hy-mt2-1.8b', 'translate', ['ja', 'zh', 'en'], 8),
   'opus-mt-zh-en': M('opus-mt-zh-en', 'translate', ['zh', 'en'], 21),
   'opus-mt-en-zh': M('opus-mt-en-zh', 'translate', ['en', 'zh'], 22),
 };
@@ -59,9 +61,13 @@ const TTS_CAT: Record<string, NativeModelInfo> = {
 describe('nativeCatalog', () => {
   it('nativeTranslationCards: multilingual always, opus only for the matching pair', () => {
     const zhEn = nativeTranslationCards('zh', 'en', TR_CAT).map((c) => c.selectId);
-    expect(zhEn).toEqual(['qwen2.5-0.5b', 'qwen3-0.6b', 'opus-mt-zh-en']);
+    expect(zhEn).toEqual(['qwen2.5-0.5b', 'qwen3-0.6b', 'hy-mt2-1.8b', 'opus-mt-zh-en']);
     const enZh = nativeTranslationCards('en', 'zh', TR_CAT).map((c) => c.selectId);
-    expect(enZh).toEqual(['qwen2.5-0.5b', 'qwen3-0.6b', 'opus-mt-en-zh']);
+    expect(enZh).toEqual(['qwen2.5-0.5b', 'qwen3-0.6b', 'hy-mt2-1.8b', 'opus-mt-en-zh']);
+    // A pair the listed model does not take is out of the pool; the card that names no language stays.
+    expect(nativeTranslationCards('ja', 'ko', TR_CAT).map((c) => c.selectId)).toEqual(['qwen2.5-0.5b', 'qwen3-0.6b']);
+    // A regional code is the base language the card names.
+    expect(nativeTranslationCards('zh-TW', 'en-GB', TR_CAT).map((c) => c.selectId)).toEqual(['qwen2.5-0.5b', 'qwen3-0.6b', 'hy-mt2-1.8b', 'opus-mt-zh-en']);
   });
 
   it('resolves translation choices', () => {

@@ -121,6 +121,8 @@ export const NOTICE_ALIASES: Readonly<Record<string, string>> = {
   phone_model_too_big: 'providers.localai.phoneModelTooBigCheck',
   phone_no_memory: 'providers.localai.phoneNoMemory',
   phone_translator_unfit: 'providers.localai.translatorUnfit',
+  // Fork: a translation model named for the other device that does not translate one of this run's directions.
+  server_translator_unfit: 'providers.localai.translatorUnfit',
   localai_here_down: 'providers.localai.hereDown',
   // Fork: the native recognition engine of this computer — not downloaded, coming up, or failed to.
   native_unsupported: 'providers.localai.nativeUnsupported',

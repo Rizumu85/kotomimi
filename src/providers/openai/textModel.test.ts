@@ -50,6 +50,21 @@ describe('one answer from a text model', () => {
     expect((fetch.mock.calls[0][1]?.headers as Record<string, string>).Authorization).toBe('Bearer sk-test');
   });
 
+  it('says which model answered, where the server names one', async () => {
+    const chunk = (model: string, content: string) => new Response(
+      `data: ${JSON.stringify({ model, choices: [{ delta: { content } }] })}\n\ndata: [DONE]\n\n`,
+      { headers: { 'Content-Type': 'text/event-stream' } },
+    );
+    const served = await completeText({ ...REQUEST, model: 'kotomimi' }, deps(async () => chunk('index-translate-2b', '你好')));
+    expect(served).toMatchObject({ text: '你好', model: 'index-translate-2b' });
+    const wholeBody = await completeText({ ...REQUEST, model: 'kotomimi' }, deps(async () => new Response(
+      JSON.stringify({ model: 'hy-mt2-1.8b', choices: [{ message: { role: 'assistant', content: '你好' } }] }), { headers: { 'Content-Type': 'application/json' } },
+    )));
+    expect(wholeBody).toMatchObject({ text: '你好', model: 'hy-mt2-1.8b' });
+    // A server that names none (a plain API) leaves it out: the request's own model is what ran.
+    expect(await completeText(REQUEST, deps(async () => sse('你好')))).not.toHaveProperty('model');
+  });
+
   it('says the answer each time it grows, thinking left out', async () => {
     const said: string[] = [];
     await completeText(REQUEST, deps(async () => sse('<think>hm', '</think>', 'こん', 'にちは'), { onText: (t) => said.push(t) }));

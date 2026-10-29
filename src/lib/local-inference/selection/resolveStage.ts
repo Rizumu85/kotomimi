@@ -51,7 +51,12 @@ export function resolveStage(
   }
 
   const usable = pool.filter((c) => c.ready && c.hardwareOk && c.autoEligible).sort(byRank);
-  const best = usable[0];
+  // A translation that runs somewhere else (the online Bing) answers only when nothing here can: a
+  // downloaded local model is the user's — and their words stay here — whatever the ranking says. Bing
+  // is recommended and always ready, so ranking alone would put it above every local model that is not
+  // marked recommended (every pair-specific Opus-MT, Qwen 3.5). Other stages keep their own ranking.
+  const local = stage === 'translation' ? usable.filter((c) => !c.cloud) : usable;
+  const best = (local.length > 0 ? local : usable)[0];
   const resolved = best ? { modelId: best.id, variant: undefined, source: 'auto' as const } : null;
 
   let note: ResolutionNote | undefined;

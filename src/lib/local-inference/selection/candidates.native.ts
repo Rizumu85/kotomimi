@@ -20,6 +20,8 @@ export function nativeCandidates(ctx: NativeCandidateCtx): CandidateSource {
     sortOrder: info.order,
     sizeBytes: info.sizeBytes ?? 0,
     ready: ctx.statuses[info.id] === 'ready',
+    // Every native model runs on this computer: nothing of its is an online service.
+    cloud: false,
     hardwareOk: !hardwareGated(info),
     needsKey: false,
     // AST is a WASM manifest concept; the sidecar has no equivalent, so every

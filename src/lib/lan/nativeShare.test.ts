@@ -141,8 +141,8 @@ describe('the translator a device gets', () => {
     expect(nativeTranslatorFor('ja', 'sw', 'hy-mt2-1.8b')).toBeNull();
     useNativeTranslatorStore.setState({ status: { ...TRANSLATORS, run: { state: 'ready', model: 'hy-mt2-1.8b', port: 6000, tail: '' } } });
     expect(nativeTranslatorFor('ja', 'zh', '')).toBe('hy-mt2-1.8b');
-    // The engine runs one model at a time: the one running answers for another of its models that was named.
-    expect(nativeTranslatorFor('ja', 'zh', 'index-translate-2b')).toBe('hy-mt2-1.8b');
+    // Nobody is using it: a model named starts, though another is still up from a run before.
+    expect(nativeTranslatorFor('ja', 'zh', 'index-translate-2b')).toBe('index-translate-2b');
     // The running one does not translate this pair: the one that does.
     expect(nativeTranslatorFor('ja', 'sw', '')).toBe('index-translate-2b');
   });
@@ -225,6 +225,8 @@ describe('an engine that is someone\u2019s is not switched to another model', ()
 
   it('does the same for the translation engine, held by a device or by a run', () => {
     useNativeTranslatorStore.setState({ status: { ...TRANSLATORS, run: { state: 'ready', model: 'hy-mt2-1.8b', port: 4200, tail: '' }, up: ['hy-mt2-1.8b'] } });
+    // Nobody is using it: a model named starts, rather than the one still up from an earlier run.
+    expect(nativeTranslatorFor('ja', 'zh', 'index-translate-2b')).toBe('index-translate-2b');
     const device = holdNative('translation', QUIET);
     try {
       expect(nativeTranslatorFor('ja', 'zh', '')).toBe('hy-mt2-1.8b');
@@ -387,5 +389,27 @@ describe('sharing waits for the engines to say what they have (fork)', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+});
+
+describe('a model named that cannot take the pair (fork)', () => {
+  it('is refused as that, not answered by one of this computer\u2019s other models', () => {
+    useNativeTranslatorStore.setState({ status: TRANSLATORS });
+    useModelStore.setState({ modelStatuses: { 'translategemma-4b-translation': 'downloaded' } });
+    // Greek is not Hunyuan MT 2's: the app has a model that takes it, and it is not put in the named model's place.
+    expect(appLanModels.translator('ja', 'el', 'hy-mt2-1.8b')).toBeNull();
+    expect(appLanModels.refusal!('ja', 'el', 'hy-mt2-1.8b')).toBe('unfit');
+    // Left to this computer, the model that takes the pair answers.
+    expect(appLanModels.translator('ja', 'el', '')).toBe('index-translate-2b');
+    // The other way round, and a pair it does take: the named model stands.
+    expect(appLanModels.translator('ja', 'zh', 'hy-mt2-1.8b')).toBe('hy-mt2-1.8b');
+  });
+
+  it('is a pair model of the app\u2019s, named for the direction it does not translate', () => {
+    useModelStore.setState({ modelStatuses: { 'opus-mt-ja-en': 'downloaded' } });
+    expect(appLanModels.shared().find((m) => m.id === 'opus-mt-ja-en')?.pair).toEqual(['ja', 'en']);
+    expect(appLanModels.translator('ja', 'en', 'opus-mt-ja-en')).toBe('opus-mt-ja-en');
+    expect(appLanModels.translator('en', 'ja', 'opus-mt-ja-en')).toBeNull();
+    expect(appLanModels.refusal!('en', 'ja', 'opus-mt-ja-en')).toBe('unfit');
   });
 });

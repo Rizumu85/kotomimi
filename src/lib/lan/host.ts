@@ -32,6 +32,12 @@ export interface LanModels {
   shared(): SharedModel[];
   recognizer(language: string, wanted: string): { modelId: string; streaming: boolean } | null;
   translator(source: string, target: string, wanted: string): string | null;
+  /**
+   * Why a model this computer shares cannot answer for a pair, when `translator` answered null for it
+   * anyway: it does not translate the pair ('unfit'), or the engine is in use with another model that
+   * does not ('busy'). Absent, or null: nothing to say — the request is refused as having no model.
+   */
+  refusal?(source: string, target: string, wanted: string): 'unfit' | 'busy' | null;
   /** The feedback model a device named, where this computer lends one by that name; null for any other name. */
   coach?(wanted: string): string | null;
 }
@@ -109,7 +115,7 @@ export function createLanHost(deps: LanHostDeps): LanHost {
       await deps.ready?.();
       const started = (await bridge.invoke('lan:start', { port, key })) as LanStart;
       if (!started.ok) return started;
-      translator = new LanTranslator({ translator: deps.engines.translator, resolve: models.translator, clock });
+      translator = new LanTranslator({ translator: deps.engines.translator, resolve: models.translator, refusal: models.refusal, clock });
       coach = deps.engines.coach ? new LanCoach({ ...deps.engines.coach, clock }) : null;
       unsubscribe = [
         bridge.on('lan:request', (request: WireRequest) => { void answer(request); }),

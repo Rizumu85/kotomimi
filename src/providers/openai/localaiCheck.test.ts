@@ -92,6 +92,37 @@ describe('the check says ready only to what a start can build', () => {
     expect(checked).toMatchObject({ ok: false, models: [{ id: 'some-model' }] });
   });
 
+  it('asks which model to translate with when a LocalAI lists several, and runs the only one when it lists one', async () => {
+    // Its list order is no reason to translate with one of several (`translationDefault`): the card asks, and what
+    // it asks for is what a start runs.
+    const many = {
+      models: { data: [{ id: 'gpt-realtime' }, { id: 'whisper' }, { id: 'qwen3' }, { id: 'llama3' }] },
+      capabilities: {
+        data: [
+          { id: 'gpt-realtime', capabilities: [] }, { id: 'whisper', capabilities: ['transcript'] },
+          { id: 'qwen3', capabilities: ['chat'] }, { id: 'llama3', capabilities: ['chat'] },
+        ],
+      },
+    };
+    const fetchMany = (async (url: RequestInfo | URL) => {
+      const text = String(url);
+      if (text.startsWith('http://192.168.1.10:8790/v1/models')) {
+        return new Response(JSON.stringify(text.endsWith('/capabilities') ? many.capabilities : many.models), { status: 200 });
+      }
+      return new Response(JSON.stringify({ data: [{ id: 'gpt-4o' }] }), { status: 200 });
+    }) as typeof globalThis.fetch;
+    // Heard here and translated there: that device's pipeline does not translate it, so one of its models must be named.
+    const s = settings({ asrVia: 'api', asrApiBaseUrl: 'https://api.example.com/v1', asrApiModel: 'whisper-1', asrApiNeedsKey: false, translateAt: 'server' });
+    const credentials = { apiKey: '', endpoint: 'ws://192.168.1.10:8790/v1/realtime' };
+    const ctx: CheckContext = { pair: PAIR, legs: ['speaker'], signal: new AbortController().signal };
+    const checked = await createLocalAICheck({ fetch: fetchMany })(credentials, s, ctx);
+    expect(checked).toMatchObject({ ok: false, code: 'translate_unnamed' });
+    const models = checked.ok ? [] : checked.models ?? [];
+    expect(buildLocalAI({ direction: PAIR, speech: false, turns: 'auto' }, s, { ...shared, models })).toMatchObject({ code: 'translate_unnamed' });
+    // Naming one is the way.
+    expect(await createLocalAICheck({ fetch: fetchMany })(credentials, settings({ ...s, translateServerModel: 'qwen3' }), ctx)).toMatchObject({ ok: true });
+  });
+
   it('is asked again when a model or an address a start needs is edited', () => {
     for (const field of ['model', 'asrApiBaseUrl', 'asrApiModel', 'translateBaseUrl', 'translateModel', 'translateServerModel', 'coachBaseUrl', 'coachModel', 'coachServerModel'] as const) {
       expect(localaiProvider.checkReads).toContain(field);
