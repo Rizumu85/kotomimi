@@ -9,7 +9,7 @@ import { defaultEngines } from '../../providers/localInference/engines';
 import { createLanHost, type LanBridge, type LanHost } from './host';
 import { FIREWALL_UNKNOWN, firewallAnswer, type LanFirewall } from './protocol';
 import { appLanModels } from './appModels';
-import { nativeCoachAnswer, nativeOrOwnTranslator, nativeRecognizer } from './nativeShare';
+import { nativeCoachAnswer, nativeKnown, nativeOrOwnTranslator, nativeRecognizer } from './nativeShare';
 import { holdNative } from '../../providers/openai/localaiNative';
 import { NATIVE_COACH_EXTRA } from '../../providers/openai/nativeCoaches';
 
@@ -63,6 +63,7 @@ export function createAppLanHost(onClients: (count: number) => void): LanHost | 
     },
     clock: realClock,
     onClients,
+    ready: () => nativeKnown(),
   });
 }
 

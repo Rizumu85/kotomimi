@@ -5,7 +5,7 @@ import { holdNative, holdNativeForRun, nativeIdle, preferNative, translatorIdle 
 import { useModelStore } from '../../stores/modelStore';
 import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import { appLanModels } from './appModels';
-import { nativeCoachAnswer, nativeCoachFor, nativeOrOwnTranslator, nativeRecognizer, nativeRecognizerFor, nativeShared, nativeTranslatorFor } from './nativeShare';
+import { NATIVE_KNOWN_WITHIN_MS, nativeCoachAnswer, nativeCoachFor, nativeKnown, nativeOrOwnTranslator, nativeRecognizer, nativeRecognizerFor, nativeShared, nativeTranslatorFor } from './nativeShare';
 import type { Translator } from './translator';
 
 const downloaded = { state: 'downloaded' as const, received: 1, total: 1 };
@@ -354,5 +354,38 @@ describe('SenseVoice-Small, lent as the engine’s other models are', () => {
     expect(nativeRecognizerFor('yue', '')).toEqual({ modelId: 'sensevoice-small-q8', streaming: true });
     useNativeEngineStore.setState({ status: status({ 'qwen3-asr-1.7b-q8': downloaded, 'sensevoice-small-q8': downloaded }) });
     expect(nativeRecognizerFor('ja', '')).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
+  });
+});
+
+describe('sharing waits for the engines to say what they have (fork)', () => {
+  it('opens once every engine has answered, and not before', async () => {
+    useNativeEngineStore.setState({ asked: false });
+    useNativeCoachStore.setState({ asked: false });
+    let open = false;
+    const known = nativeKnown().then(() => { open = true; });
+    await Promise.resolve();
+    expect(open).toBe(false);
+    useNativeEngineStore.setState({ asked: true });
+    await Promise.resolve();
+    expect(open).toBe(false);
+    useNativeCoachStore.setState({ asked: true });
+    await known;
+    expect(open).toBe(true);
+  });
+
+  it('opens all the same after a few seconds of no answer', async () => {
+    vi.useFakeTimers();
+    try {
+      useNativeEngineStore.setState({ asked: false });
+      let open = false;
+      const known = nativeKnown().then(() => { open = true; });
+      await vi.advanceTimersByTimeAsync(NATIVE_KNOWN_WITHIN_MS - 1);
+      expect(open).toBe(false);
+      await vi.advanceTimersByTimeAsync(1);
+      await known;
+      expect(open).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

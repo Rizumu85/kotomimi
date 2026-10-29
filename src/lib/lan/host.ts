@@ -43,6 +43,12 @@ export interface LanHostDeps {
   clock: Clock;
   /** How many sockets are open changed: the settings show it. */
   onClients?(count: number): void;
+  /**
+   * Fork: what is to be known before the door opens — the app's engines, what each has downloaded. Opened before,
+   * the door told a device asking at once that it shared no such model (a Mac whose app had just restarted,
+   * 2026-10-29), where a moment later it did.
+   */
+  ready?(): Promise<void>;
 }
 
 export type LanStart = { ok: true; port: number; addresses: string[]; /** This computer's name, as a searching device lists it. */ name?: string } | { ok: false; code: string | null; message: string };
@@ -100,6 +106,7 @@ export function createLanHost(deps: LanHostDeps): LanHost {
   return {
     async start({ port, key }) {
       drop();
+      await deps.ready?.();
       const started = (await bridge.invoke('lan:start', { port, key })) as LanStart;
       if (!started.ok) return started;
       translator = new LanTranslator({ translator: deps.engines.translator, resolve: models.translator, clock });

@@ -27,6 +27,28 @@ import type { Translator } from './translator';
 const isNativeRecognizer = (id: string): boolean => NATIVE_MODELS.some((m) => m.id === id);
 const isNativeTranslator = (id: string): boolean => NATIVE_TRANSLATORS.some((m) => m.id === id);
 
+/** How long sharing waits for this computer's engines to say what they have before it opens all the same (`nativeKnown`). */
+export const NATIVE_KNOWN_WITHIN_MS = 5000;
+
+/**
+ * Fork: resolves once each of this computer's engines has said what it has downloaded (`asked`), or after `within`
+ * ms whatever they said: until then they look as if they had nothing, and sharing would tell a device so.
+ */
+export function nativeKnown(within = NATIVE_KNOWN_WITHIN_MS): Promise<void> {
+  const stores = [useNativeEngineStore, useNativeTranslatorStore, useNativeCoachStore];
+  const known = () => stores.every((store) => store.getState().asked);
+  if (known()) return Promise.resolve();
+  return new Promise((resolve) => {
+    const done = () => {
+      clearTimeout(timer);
+      for (const off of offs) off();
+      resolve();
+    };
+    const offs = stores.map((store) => store.subscribe(() => { if (known()) done(); }));
+    const timer = setTimeout(done, within);
+  });
+}
+
 /** The native models this computer can run now: downloaded, each with what it is for. */
 export function nativeShared(): SharedModel[] {
   const hearing = useNativeEngineStore.getState().status;
