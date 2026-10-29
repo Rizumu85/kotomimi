@@ -706,6 +706,8 @@
       "nativeFailedShort": "引擎没能启动。",
       "nativeRetry": "重试",
       "nativeUnsupportedShort": "这个系统暂不支持",
+      "familyUnheard": "那台设备的 {{name}} 没有{{languages}}，这部分由那台设备自己选模型。要用 {{name}}，先在那台设备上下载{{languages}}。",
+      "listJoin": "、",
       "nativeUnheard": "{{name}} 听不了你选的其中一种语言，请换一个模型。",
       "nativeUnsupported": "这个系统暂不支持原生识别引擎。请在「语音识别」卡片里换一个模型。",
       "nativeMissing": "{{name}} 还没有下载。请在「语音识别」卡片里下载，或者换一个模型。",

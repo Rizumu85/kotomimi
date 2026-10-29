@@ -706,6 +706,8 @@
       "nativeFailedShort": "The engine could not start.",
       "nativeRetry": "Try again",
       "nativeUnsupportedShort": "Not available for this system",
+      "familyUnheard": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
+      "listJoin": ", ",
       "nativeUnheard": "{{name}} does not hear one of your two languages. Choose another model for it.",
       "nativeUnsupported": "The native recognition engine is not available for this system. Choose another model in the Speech recognition card.",
       "nativeMissing": "{{name}} is not downloaded yet. Download it in the Speech recognition card, or choose another model.",

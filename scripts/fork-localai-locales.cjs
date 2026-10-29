@@ -441,6 +441,12 @@ const PROVIDER = {
   nativeFailedShort: ["The engine could not start.", "引擎没能启动。", "引擎沒能啟動。"],
   nativeRetry: ["Try again", "重试", "重試"],
   nativeUnsupportedShort: ["Not available for this system", "这个系统暂不支持", "這個系統暫不支援"],
+  familyUnheard: [
+    "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
+    "那台设备的 {{name}} 没有{{languages}}，这部分由那台设备自己选模型。要用 {{name}}，先在那台设备上下载{{languages}}。",
+    "那台裝置的 {{name}} 沒有{{languages}}，這部分由那台裝置自己選模型。要用 {{name}}，先在那台裝置上下載{{languages}}。",
+  ],
+  listJoin: [', ', '、', '、'],
   nativeUnheard: [
     "{{name}} does not hear one of your two languages. Choose another model for it.",
     "{{name}} 听不了你选的其中一种语言，请换一个模型。",

@@ -97,16 +97,17 @@ function StageCard({ icon, title, tooltip, lead, children }: { icon: ReactNode; 
 }
 
 /** A model of the other device's, chosen from what it lists; the first option is what a blank choice runs. */
-function ServerModel({ label, value, blank, options, onChange, disabled, aside }: { label: string; value: string; blank: string; options: ReadonlyArray<Pick<LocalAIModel, 'id'>>; onChange(id: string): void; disabled?: boolean; aside?: string }) {
+function ServerModel({ label, value, blank, options, onChange, disabled, aside, present = false }: { label: string; value: string; blank: string; options: ReadonlyArray<Pick<LocalAIModel, 'id'>>; onChange(id: string): void; disabled?: boolean; aside?: string; present?: boolean }) {
   const { t } = useTranslation();
   const listed = value === '' || options.some((m) => m.id === value);
+  // Fork: `present`: the device has it, only not for a language of this run (said under the menu) — it is not gone.
   return (
     <Field label={label} aside={aside}>
       <select className="select-dropdown" aria-label={label} value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled}>
         <option value="">{blank}</option>
         {/* A saved model the device no longer lists stays visible, so the setting is not silently another — and where
             the device did list its models, it is said that this one is not among them. */}
-        {!listed && <option value={value}>{options.length > 0 ? t('providers.localai.modelGone', { name: shownName(value) }) : shownName(value)}</option>}
+        {!listed && <option value={value}>{options.length > 0 && !present ? t('providers.localai.modelGone', { name: shownName(value) }) : shownName(value)}</option>}
         {options.map((m) => <option key={m.id} value={m.id}>{shownName(m.id)}</option>)}
       </select>
     </Field>
@@ -763,7 +764,7 @@ function DeviceChat({ value, onChange, disabled, other, native }: { value: strin
  * panel opened for something else asks the network nothing.
  */
 export function LocalAIAssist({ settings, values, set, fill, update, disabled, pair, legs, models, readiness, check }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   // The places an earlier build's settings were read into are written together by the first edit made here (`PLACE_FIELDS`).
   const pinned = useRef(false);
   const latest = useRef(settings);
@@ -831,6 +832,11 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
     return t('providers.localai.inUseLegs', { theirs: names[0], mine: names[1] });
   };
   const recognizerChosen = recognizers.some((m) => choiceOf(m.id) === choiceOf(settings.asrModel) && perLanguage(m.id)) ? choiceOf(settings.asrModel) : settings.asrModel;
+  // Fork: the languages of this run the chosen family has no member for (the Mac's Apple Speech without Korean): those
+  // legs are left to the device, which said so only in the small "in use" beside the menu (the user, 2026-10-28).
+  const familyMembers = recognizers.map((m) => perLanguage(m.id)).filter((one) => one !== null && one.family === choiceOf(settings.asrModel));
+  const familyMissing = familyMembers.length === 0 ? [] : [...new Set(legs.map((leg) => heardBy(settings, pair, leg, models)))]
+    .filter((language) => language && !isAutoLanguage(language) && !familyMembers.some((one) => one!.language.split('-')[0] === language.split('-')[0]));
   // What a blank pipeline field runs (`effectiveLocalAIModel`): the first pipeline named `gpt-realtime*`, else the first.
   const fallback = pipelines.find((m) => isRealtimeModelId(m.id))?.id ?? pipelines[0]?.id ?? '';
   // A leg whose answers come from a stage of its own only transcribes, and on a LocalAI takes the device's own recognizer (`localai.ts` `transcriptionFor`).
@@ -1116,7 +1122,10 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
         {settings.asrVia === 'server' && !hearsAtOwn && (
           <>
             {connectFirst}
-            <ServerModel label={t('providers.localai.model')} value={everyLegTranscribes ? '' : recognizerChosen} blank={t('providers.localai.deviceDefault')} options={everyLegTranscribes ? [] : recognizerMenu} onChange={(asrModel) => put({ asrModel })} disabled={disabled || everyLegTranscribes} aside={inUseText(everyLegTranscribes ? '' : recognizerChosen)} />
+            <ServerModel label={t('providers.localai.model')} value={everyLegTranscribes ? '' : recognizerChosen} blank={t('providers.localai.deviceDefault')} options={everyLegTranscribes ? [] : recognizerMenu} onChange={(asrModel) => put({ asrModel })} disabled={disabled || everyLegTranscribes} aside={inUseText(everyLegTranscribes ? '' : recognizerChosen)} present={familyMembers.length > 0} />
+            {!everyLegTranscribes && familyMissing.length > 0 && (
+              <p className="kt-note kt-note--todo" role="status">{t('providers.localai.familyUnheard', { name: shownName(recognizerChosen), languages: familyMissing.map((language) => languageLabel(language, i18n.language)).join(t('providers.localai.listJoin')) })}</p>
+            )}
             {someLegTranscribes && recognizers.length > 0 && (
               <>
                 <p className="kt-note">{t('providers.localai.asrFixedNote')}</p>

@@ -12,7 +12,7 @@ import { PLACE_FIELDS } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
 
 // The catalog's keys stand for its strings.
-vi.mock('react-i18next', async (importOriginal) => ({ ...(await importOriginal<typeof import('react-i18next')>()), useTranslation: () => ({ t: (key: string) => key }) }));
+vi.mock('react-i18next', async (importOriginal) => ({ ...(await importOriginal<typeof import('react-i18next')>()), useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }) }));
 // The search of the network is the finder's own test: here only that it is drawn, and what a pick does.
 vi.mock('../../components/LanSharing/ServerFinder', () => ({
   ServerFinder: ({ onPick, onFound, auto, hint, phone }: { onPick(server: unknown): void; onFound?(servers: unknown[]): void; auto?: boolean; hint?: string; phone?: string | string[] }) => {
@@ -589,6 +589,18 @@ describe('the other device’s recognizers in the menu', () => {
     const { card } = draw({ settings: { asrVia: 'server', asrModel: 'apple-speech-transcriber' }, values: { endpoint: '192.168.1.10:8790' }, models: MAC_MODELS });
     expect(menu(card).value).toBe('apple-speech-transcriber');
     expect(menu(card).selectedOptions[0].textContent).toBe('providers.localai.modelGone');
+  });
+
+  it('says under the menu where the family chosen has no member for a language of this run (fork)', () => {
+    // This run hears Chinese; the Mac's Apple Speech here has Japanese and Korean only.
+    const withoutChinese = (MAC_MODELS as unknown as Array<{ id: string }>).filter((m) => m.id !== 'apple-speech:zh') as never;
+    const { card, unmount } = draw({ settings: { asrVia: 'server', asrModel: 'apple-speech' }, values: { endpoint: '192.168.1.10:8790' }, models: withoutChinese });
+    expect(card(HEAR).getByText('providers.localai.familyUnheard')).toBeTruthy();
+    // The device has it, for other languages: not said to be gone.
+    expect(menu(card).selectedOptions[0].textContent).toBe('Apple Speech');
+    unmount();
+    const whole = draw({ settings: { asrVia: 'server', asrModel: 'apple-speech' }, values: { endpoint: '192.168.1.11:8790' }, models: MAC_MODELS });
+    expect(whole.card(HEAR).queryAllByText('providers.localai.familyUnheard')).toHaveLength(0);
   });
 });
 
