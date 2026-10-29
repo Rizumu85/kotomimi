@@ -102,13 +102,14 @@ export class RealtimeItems {
     this.sink.segmentText({ ref: input.ref, text: input.text });
   }
 
-  /** The input's transcript, completed: it settles the text and closes the source. An empty completion is no answer — the same rule `outputDone` keeps — so streamed text survives it; with none streamed, the source closes with none. */
-  inputDone(itemId: string, transcript: string): void {
+  /** The input's transcript, completed: it settles the text and closes the source. An empty completion keeps streamed text. A detected language still gets its snapshot when the text has not changed. */
+  inputDone(itemId: string, transcript: string, language?: string): void {
     const input = this.input(itemId);
     if (!input) return;
-    if (transcript && transcript !== input.text) {
-      input.text = transcript;
-      this.sink.segmentText({ ref: input.ref, text: transcript });
+    const text = transcript || input.text;
+    if (text !== input.text || language !== undefined) {
+      input.text = text;
+      this.sink.segmentText({ ref: input.ref, text, ...(language !== undefined ? { language } : {}) });
     }
     this.closeInput(input);
   }

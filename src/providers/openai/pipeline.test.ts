@@ -3,6 +3,7 @@ import type { SessionContext } from '../../lib/contract/adapter';
 import { recordEvents, type AdapterEvent } from '../../lib/contract/events';
 import { fakeSockets } from '../../lib/contract/testing/fakeSocket';
 import { trackedClock } from '../../lib/contract/testing/trackedClock';
+import { createFakeEngines } from '../localInference/fakeEngines';
 import { coachPrompt } from './coachPrompt';
 import { buildLocalAI, LOCALAI_DEFAULTS, localaiProvider, type LocalAIConfig, type LocalAICredentials, type LocalAISettings } from './localai';
 import { createPipelineAdapter, FIRST_REF, tidyAnswer, type AnswerStage } from './pipeline';
@@ -37,7 +38,7 @@ type Call = { url: string; body: { model: string; messages: Array<{ role: string
 /** Whether a phone in use answers when asked if it is there; a frozen app takes the connection and says nothing. */
 let phoneAwake = true;
 
-async function live(context: SessionContext, patch: Partial<LocalAISettings>, answers: Array<Response | Error | 'hang'> = [], credentials: LocalAICredentials = K, tweak: (config: LocalAIConfig) => void = () => {}) {
+async function live(context: SessionContext, patch: Partial<LocalAISettings>, answers: Array<Response | Error | 'hang'> = [], credentials: LocalAICredentials = K, tweak: (config: LocalAIConfig) => void = () => {}, engines?: ReturnType<typeof createFakeEngines>['engines']) {
   const settings = { ...LOCALAI_DEFAULTS, ...patch };
   const config = buildLocalAI(context, settings, shared);
   if ('refused' in config) throw new Error(config.refused);
@@ -55,7 +56,7 @@ async function live(context: SessionContext, patch: Partial<LocalAISettings>, an
     if (next === 'hang') return new Promise<Response>((_resolve, reject) => init?.signal?.addEventListener('abort', () => reject(init.signal?.reason)));
     return next instanceof Error ? Promise.reject(next) : Promise.resolve(next);
   });
-  const starting = createPipelineAdapter({ openSocket: sockets.create, fetch }).start({ context, config, credentials, clock, signal: new AbortController().signal }, events);
+  const starting = createPipelineAdapter({ openSocket: sockets.create, fetch, ...(engines ? { engines } : {}) }).start({ context, config, credentials, clock, signal: new AbortController().signal }, events);
   const socket = sockets.last();
   socket.open('');
   socket.receive(SERVER.created());
@@ -118,7 +119,7 @@ describe('a leg whose translation runs on a text model', () => {
     expect(h.calls[0].headers.Authorization).toBe('Bearer no-key');
     expect(h.of('segmentOpened').map((e) => e.payload)).toEqual([
       { ref: 1, side: 'source', origin: 'item_1' },
-      { ref: FIRST_REF + 1, side: 'translation', origin: 'item_1' },
+      { ref: FIRST_REF + 1, side: 'translation', purpose: 'translation', origin: 'item_1' },
     ]);
     // Streamed: each snapshot is the whole text so far.
     expect(h.of('segmentText').filter((e) => e.payload.ref === FIRST_REF + 1).map((e) => e.payload.text)).toEqual(['今天', '今天天气很好。']);
@@ -156,7 +157,7 @@ describe('a leg whose translation runs on a text model', () => {
     expect(h.sent().map((m) => m.type)).toEqual(['session.update']);
     expect(h.of('segmentOpened').map((e) => e.payload)).toEqual([
       { ref: FIRST_REF + 1, side: 'source', origin: 'sokuji_typed_1' },
-      { ref: FIRST_REF + 2, side: 'translation', origin: 'sokuji_typed_1' },
+      { ref: FIRST_REF + 2, side: 'translation', purpose: 'translation', origin: 'sokuji_typed_1' },
     ]);
     expect(h.lastText(FIRST_REF + 1)?.text).toBe('报销');
     expect(h.lastText(FIRST_REF + 2)?.text).toBe('経費精算');
@@ -228,14 +229,102 @@ describe('a speaker who speaks the other side\'s language too (fork)', () => {
     expect(answers.pop()?.payload.language).toBe('zh-CN');
   });
 
-  it('is built where what hears tells languages apart, and never while coached, nor on the other side\'s leg', () => {
+  it('is built where what hears tells languages apart, alongside feedback, but not on the other side\'s leg', () => {
     const api = { ...VIA_MODEL, speakBoth: true, asrVia: 'api' as const, asrApiBaseUrl: 'http://127.0.0.1:9000/v1', asrApiModel: 'whisper' };
     const built = buildLocalAI(ES, { ...LOCALAI_DEFAULTS, ...api }, shared);
     expect(built).toMatchObject({ stages: { heard: 'auto', back: { language: 'es', own: 'zh-CN', stage: { kind: 'translate', language: 'zh-CN' } } } });
     const coached = buildLocalAI(ES, { ...LOCALAI_DEFAULTS, ...api, coach: true, coachServerModel: 'qwen3-4b' }, shared) as LocalAIConfig;
-    expect(coached.stages?.back).toBeUndefined();
+    expect(coached.stages).toMatchObject({ heard: 'auto', back: { language: 'es' }, feedback: { language: 'es', stage: { kind: 'coach' } } });
     const theirs = buildLocalAI({ ...ES, direction: { source: 'ja', target: 'zh-CN' } }, { ...LOCALAI_DEFAULTS, ...api }, shared) as LocalAIConfig;
     expect(theirs.stages?.back).toBeUndefined();
+  });
+});
+
+describe('translation and feedback for the same utterance', () => {
+  const combined = (config: LocalAIConfig) => {
+    config.stages = {
+      ...config.stages!, heard: 'auto',
+      back: { own: 'zh-CN', language: 'ja', stage: { kind: 'translate', model: 'reverse', baseUrl: '', system: 'Translate into Chinese', language: 'zh-CN' } },
+      feedback: { language: 'ja', stage: { kind: 'coach', model: 'feedback', baseUrl: '', system: 'Give grammar feedback', language: 'zh-CN' } },
+    };
+  };
+
+  it('keeps translations moving while feedback is pending and cancels both queues on stop', async () => {
+    const h = await live(SPEAKER, VIA_MODEL, [sse('昨天看了电影。'), 'hang', sse('明天再去。')], K, combined);
+    h.receive(...heard('first', '昨日映画を見ます。'));
+    await vi.waitFor(() => expect(h.of('segmentClosed').map((e) => e.payload.ref)).toContain(FIRST_REF + 1));
+    h.receive(...heard('second', '明日も行きます。'));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(3));
+    await vi.waitFor(() => expect(h.lastText(FIRST_REF + 3)?.text).toBe('明天再去。'));
+    expect(h.calls.map((call) => call.body.model)).toEqual(['reverse', 'feedback', 'reverse']);
+    expect(h.of('segmentOpened').filter((e) => e.payload.side === 'translation').map((e) => e.payload)).toEqual([
+      { ref: FIRST_REF + 1, side: 'translation', purpose: 'translation', origin: 'first' },
+      { ref: FIRST_REF + 3, side: 'translation', purpose: 'translation', origin: 'second' },
+    ]);
+    expect(h.of('busy').slice(-1)[0]?.payload).toBe(true);
+    await h.session.stop();
+    expect(h.calls[1].signal?.aborted).toBe(true);
+    expect(h.calls).toHaveLength(3);
+    expect(h.of('degraded')).toEqual([]);
+  });
+
+  it.each(['translate', 'coach'] as const)('keeps the other result when %s fails', async (failed) => {
+    const h = await live(SPEAKER, VIA_MODEL, failed === 'translate'
+      ? [new Error('translator offline'), sse('✓')]
+      : [sse('昨天看了电影。'), new Error('feedback offline')], K, combined);
+    h.receive(...heard('first', '昨日映画を見ます。'));
+    await h.settled();
+    expect(h.calls).toHaveLength(2);
+    expect(h.of('degraded').map((e) => e.payload.code)).toEqual([failed === 'translate' ? 'translation_failed' : 'feedback_failed']);
+    expect(h.of('failed')).toEqual([]);
+    expect(h.of('segmentOpened').filter((e) => e.payload.side === 'translation').map((e) => e.payload)).toEqual([
+      { ref: FIRST_REF + (failed === 'translate' ? 2 : 1), side: 'translation', purpose: failed === 'translate' ? 'feedback' : 'translation', ...(failed === 'translate' ? { accompaniesTranslation: true } : {}), origin: 'first' },
+    ]);
+    await h.session.stop();
+  });
+
+  it('aborts both active requests without reporting errors after the session stops', async () => {
+    const h = await live(SPEAKER, VIA_MODEL, ['hang', 'hang'], K, combined);
+    h.receive(...heard('first', '昨日映画を見ます。'));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(2));
+    await h.session.stop();
+    expect(h.calls.every((call) => call.signal?.aborted)).toBe(true);
+    expect(h.of('segmentOpened').map((e) => e.payload.side)).toEqual(['source']);
+    expect(h.of('degraded')).toEqual([]);
+  });
+
+  it('translates native speech and typed foreign text without asking for feedback', async () => {
+    const h = await live(SPEAKER, VIA_MODEL, [sse('明日会いましょう。'), sse('明天见。')], K, combined);
+    h.receive(...heard('first', '我们明天见。'));
+    await h.settled();
+    h.session.appendText('明日会いましょう。');
+    await h.settled();
+    expect(h.calls.map((call) => call.body.model)).toEqual(['hy-mt2-1.8b', 'reverse']);
+    expect(h.of('segmentOpened').filter((e) => e.payload.side === 'translation').every((e) => e.payload.purpose === 'translation')).toBe(true);
+    await h.session.stop();
+  });
+
+  it('serializes translation and feedback when they use the same local worker', async () => {
+    const fakes = createFakeEngines();
+    fakes.translation.ready();
+    const h = await live(SPEAKER, VIA_MODEL, [], K, (config) => {
+      combined(config);
+      const local: AnswerStage = { via: 'device', kind: 'translate', model: 'shared-model', system: 'Translate', wrapTranscript: false };
+      config.stages!.speech = local;
+      config.stages!.typed = local;
+      config.stages!.back!.stage = local;
+      config.stages!.feedback!.stage = { ...local, kind: 'coach', system: 'Give feedback' };
+    }, fakes.engines);
+    h.receive(...heard('first', '昨日映画を見ます。'));
+    expect(fakes.created.filter((kind) => kind === 'translation')).toHaveLength(1);
+    expect(fakes.translation.calls.map((call) => call.systemPrompt)).toEqual(['Translate']);
+    fakes.translation.answer('昨天看了电影。');
+    await vi.waitFor(() => expect(fakes.translation.calls.map((call) => call.systemPrompt)).toEqual(['Translate', 'Give feedback']));
+    fakes.translation.answer('✓');
+    await h.settled();
+    expect(h.of('segmentOpened').filter((e) => e.payload.side === 'translation').map((e) => e.payload.purpose)).toEqual(['translation', 'feedback']);
+    await h.session.stop();
+    expect(fakes.translation.disposes).toBe(1);
   });
 });
 
@@ -529,12 +618,17 @@ describe('a stage a phone lends its model for', () => {
     await vi.waitFor(() => expect(h.calls).toHaveLength(1));
     phoneAwake = false;
     try {
-      await vi.waitFor(() => { h.clock.advance(1_000); expect(h.of('degraded').map((e) => e.payload.code)).toEqual(['phone_quiet']); });
+      // Advance the virtual clock independently of how often a wall-clock assertion happens to run under load.
+      for (let step = 0; step < 20; step++) {
+        h.clock.advance(1_000);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      }
+      expect(h.of('degraded').map((e) => e.payload.code)).toEqual(['phone_quiet']);
       expect(h.clock.now()).toBeLessThan(30_000);
     } finally {
       phoneAwake = true;
+      await h.session.stop();
     }
-    await h.session.stop();
   });
 });
 
@@ -644,7 +738,7 @@ describe('a stretch of several sentences, of a leg that translates what it hears
     expect(h.calls.map((c) => c.body.messages[1].content)).toEqual(['今日は本当に寒いですね。明日も寒いそうです。']);
     expect(h.of('segmentOpened').map((e) => e.payload)).toEqual([
       { ref: 1, side: 'source', origin: 'item_1' },
-      { ref: FIRST_REF + 1, side: 'translation', origin: 'item_1' },
+      { ref: FIRST_REF + 1, side: 'translation', purpose: 'translation', origin: 'item_1' },
     ]);
   });
 });

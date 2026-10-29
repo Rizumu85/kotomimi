@@ -656,7 +656,7 @@
       "translateInSession": "The device's own choice (translated in the same session it hears in)",
       "translateKotomimiOwn": "The device's own choice (its best model for your languages)",
       "coachStage": "Grammar feedback",
-      "coachStageTooltip": "For when you speak the other side's language yourself. Your speech is not translated: a model checks it and answers ✓, or the corrected sentence and why. What you type is still translated.",
+      "coachStageTooltip": "When you speak the other language, a model checks your grammar and answers with a check mark, or a corrected sentence and an explanation. Enable \"I speak the other language too\" as well to get both a translation and private feedback. Your own language and typed text are translated without feedback.",
       "coachNeedsSpeaker": "Feedback answers what you say. Switch the mode to \"Me\" or \"Both\".",
       "coach": "Check my grammar when I speak their language",
       "inUse": "In use: {{name}}",
@@ -1130,7 +1130,7 @@
         "title": "Three more things",
         "content": "Worth knowing before you start:",
         "typed": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
-        "coach": "Speaking their language yourself? Turn on the Grammar feedback card in Settings: your speech is checked instead of translated.",
+        "coach": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
         "share": "Another device can use this computer's models: Advanced → Provider → Share with other devices."
       }
     }
@@ -1752,7 +1752,7 @@
       "mostly": "Translate into what they mostly speak",
       "detect": "Auto-detect",
       "detectUnavailable": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
-      "speakBothUnavailable": "The speech recognition in use can't tell {{mine}} from {{language}}. It needs Qwen3-ASR 1.7B GGUF or an API model."
+      "speakBothUnavailable": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages."
     },
     "wizard": {
       "pathTitle": "Kotomimi Pipeline",

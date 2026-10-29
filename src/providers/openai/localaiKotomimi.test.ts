@@ -11,7 +11,7 @@ import { recordEvents, type AdapterEvent } from '../../lib/contract/events';
 import { fakeSockets } from '../../lib/contract/testing/fakeSocket';
 import { trackedClock } from '../../lib/contract/testing/trackedClock';
 import { capabilityList, LAN_PIPELINE, modelList, type SharedModel } from '../../lib/lan/protocol';
-import { buildLocalAI, createLocalAICheck, LOCALAI_DEFAULTS, type LocalAIConfig, type LocalAICredentials, type LocalAISettings } from './localai';
+import { buildLocalAI, createLocalAICheck, localaiLanguages, LOCALAI_DEFAULTS, type LocalAIConfig, type LocalAICredentials, type LocalAISettings } from './localai';
 import { isKotomimiServer, kindOf, modelsFor, type LocalAIModel } from './localaiModels';
 import { createPipelineAdapter, FIRST_REF, type TextStage } from './pipeline';
 import { SHARED } from './testing';
@@ -64,6 +64,19 @@ describe('another Kotomimi\'s model lists', () => {
     expect(modelsFor(FOUND, 'pipeline').map((m) => m.id)).toEqual([LAN_PIPELINE]);
   });
 
+  it('carries an explicit bilingual capability from the host into the language controls', async () => {
+    const offered: SharedModel[] = [
+      ...THEIRS,
+      ...['en', 'fr'].map((language) => ({ id: `apple-speech:${language}`, kind: 'asr' as const, languages: [language], bilingual: true })),
+    ];
+    const fetch = vi.fn(async (input: RequestInfo | URL) => json(String(input).endsWith('/capabilities') ? capabilityList(offered) : modelList(offered)));
+    const result = await check(fetch);
+    expect(result).toMatchObject({ ok: true, models: expect.arrayContaining([
+      { id: 'apple-speech:en', kind: 'asr', host: 'kotomimi', languages: ['en'], bilingual: true },
+      { id: 'apple-speech:fr', kind: 'asr', host: 'kotomimi', languages: ['fr'], bilingual: true },
+    ]) });
+  });
+
   it('are asked with the access key when that Kotomimi has one, and a wrong key is the key\'s refusal', async () => {
     const fetch = serve('s3cret');
     expect(await check(fetch, settings({ serverNeedsKey: true }), { ...K, apiKey: 's3cret' })).toMatchObject({ ok: true });
@@ -89,6 +102,50 @@ describe('another Kotomimi\'s model lists', () => {
 });
 
 describe('a leg another Kotomimi hears', () => {
+  it('refuses an explicitly selected Apple pair when the host is old or lacks either language', async () => {
+    const pair = { source: 'en', target: 'fr' };
+    const offered: SharedModel[] = ['en', 'fr'].map((language) => ({ id: `apple-speech:${language}`, kind: 'asr', languages: [language], bilingual: true }));
+    for (const asr of [offered.map(({ bilingual: _, ...m }) => m), offered.slice(0, 1)]) {
+      const all = [...asr, { id: 'bing-translator', kind: 'translate' as const, languages: [] }];
+      const fetch = vi.fn(async (input: RequestInfo | URL) => json(String(input).endsWith('/capabilities') ? capabilityList(all) : modelList(all)));
+      const s = settings({ asrModel: 'apple-speech', speakBoth: true });
+      const result = await createLocalAICheck({ fetch })(K, s, { pair, legs: ['speaker'] });
+      expect(result).toMatchObject({ ok: false, code: 'server_no_bilingual' });
+      const models = result.models ?? [];
+      expect(buildLocalAI({ ...SPEAKER, direction: pair }, s, { ...shared, models, reversed: () => false })).toMatchObject({ code: 'server_no_bilingual' });
+      expect(localaiLanguages.detection?.(s, models, pair).both).toMatchObject({ on: false, available: false });
+    }
+  });
+
+  it('exposes the bilingual toggle for a paired host without advertising open-ended detection', () => {
+    const pair = { source: 'en', target: 'fr' };
+    const models: LocalAIModel[] = ['en', 'fr'].map((language) => ({ id: `apple-speech:${language}`, host: 'kotomimi', kind: 'asr', languages: [language], bilingual: true }));
+    const controls = localaiLanguages.detection?.(settings({ asrModel: 'apple-speech', speakBoth: true }), models, pair);
+    expect(controls?.both).toMatchObject({ on: true, available: true });
+    expect(controls?.other).toMatchObject({ on: false, available: false });
+    expect(controls?.both.turn(true)).toEqual({ speakBoth: true });
+  });
+
+  it('keeps both paired recognition candidates when translation and feedback are enabled together', () => {
+    const models: LocalAIModel[] = [
+      ...['zh', 'ja'].map((language) => ({ id: `apple-speech:${language}`, host: 'kotomimi' as const, kind: 'asr' as const, languages: [language], bilingual: true })),
+      { id: LAN_PIPELINE, host: 'kotomimi', kind: 'pipeline' },
+      { id: 'bing-translator', host: 'kotomimi', kind: 'translate' },
+    ];
+    const s = settings({ asrModel: 'apple-speech', speakBoth: true, coach: true, coachAt: 'api', coachBaseUrl: 'https://feedback.example.com/v1', coachModel: 'feedback-model' });
+    const config = buildLocalAI(SPEAKER, s, { ...shared, models });
+    if ('refused' in config) throw new Error(config.refused);
+    expect(config.transcription).toMatchObject({ languages: ['zh', 'ja'] });
+    expect(config.stages).toMatchObject({
+      requiresLanguage: true,
+      heard: 'auto',
+      speech: { kind: 'translate' },
+      back: { language: 'ja', own: 'zh-CN', stage: { kind: 'translate' } },
+      feedback: { language: 'ja', stage: { kind: 'coach' } },
+    });
+    expect(localaiLanguages.detection?.(s, models, SPEAKER.direction).both).toMatchObject({ on: true, available: true });
+  });
+
   it('opens a transcription session and asks the pipeline, over chat, for the translation — with the pair', () => {
     const c = configFor();
     expect(c).toMatchObject({ model: LAN_PIPELINE, transcribeOnly: true });

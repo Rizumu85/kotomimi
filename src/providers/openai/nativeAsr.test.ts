@@ -27,8 +27,8 @@ function fakeVad() {
 
 /** The engine as a recorder: each recognition it opened, with the samples it was given and how it was left. */
 function fakeEngine(options: { down?: boolean } = {}) {
-  const streams: Array<{ id: number; language: string; sampleRate: number; model?: string; samples: number; ended: boolean; aborted: boolean }> = [];
-  let listener: ((event: NativeStreamEvent) => void) | null = null;
+  const streams: Array<{ id: number; language: string; also?: string; prefer?: string; sampleRate: number; model?: string; samples: number; ended: boolean; aborted: boolean }> = [];
+  const listeners = new Set<(event: NativeStreamEvent) => void>();
   const state = { down: options.down ?? false, listening: 0 };
   const bridge: NativeBridge = {
     async open(init) {
@@ -41,12 +41,12 @@ function fakeEngine(options: { down?: boolean } = {}) {
     end: (id) => { streams[id - 1].ended = true; },
     abort: (id) => { streams[id - 1].aborted = true; },
     listen: (mine) => {
-      listener = mine;
+      listeners.add(mine);
       state.listening += 1;
-      return () => { listener = null; state.listening -= 1; };
+      return () => { listeners.delete(mine); state.listening -= 1; };
     },
   };
-  return { bridge, streams, state, say: (event: NativeStreamEvent) => listener?.(event) };
+  return { bridge, streams, state, say: (event: NativeStreamEvent) => { for (const listener of listeners) listener(event); } };
 }
 
 async function started(engine = fakeEngine(), options: { status?: NativeEngineStatus; vad?: typeof VAD; limits?: { rollAfter?: number; rollAt?: number; rollHard?: number; lastWordsMs?: number }; model?: string; also?: string } = {}) {
@@ -135,6 +135,155 @@ describe('this computer\'s native recognizer', () => {
     engine.say({ id: 1, type: 'done', text: '天气预报', language: 'zh' });
     expect(seen.results).toEqual(['天气预报']);
     expect(seen.languages).toEqual(['zh']);
+  });
+
+  it('uses a shorter paired final from the chosen language instead of a longer earlier candidate', async () => {
+    const { asr, vad, engine, seen } = await started(fakeEngine(), { also: 'zh' });
+    vad.worker.say('speech_start');
+    await settled();
+    asr.feedAudio(seconds(2), RATE);
+    engine.say({ id: 1, type: 'partial', text: '今日はとてもいい天気ですね。' });
+    engine.say({ id: 1, type: 'delta', text: '今日はとてもいい天気ですね。' });
+    vad.worker.say('speech_end');
+    engine.say({ id: 1, type: 'done', text: '好天气。', language: 'zh' });
+    expect(seen.results).toEqual(['好天气。']);
+    expect(seen.languages).toEqual(['zh']);
+    vad.worker.say('speech_start');
+    await settled();
+    expect(engine.streams[1].prefer).toBe('zh');
+    asr.dispose();
+  });
+
+  it('keeps an empty paired final empty despite earlier text, without remembering its language', async () => {
+    const { asr, vad, engine, seen } = await started(fakeEngine(), { also: 'zh' });
+    vad.worker.say('speech_start');
+    await settled();
+    asr.feedAudio(seconds(2), RATE);
+    engine.say({ id: 1, type: 'partial', text: '今日はとてもいい天気ですね。' });
+    engine.say({ id: 1, type: 'delta', text: '今日はとてもいい天気ですね。' });
+    vad.worker.say('speech_end');
+    engine.say({ id: 1, type: 'done', text: '', language: 'zh' });
+    expect(seen.results).toEqual(['']);
+    expect(seen.languages).toEqual(['zh']);
+    vad.worker.say('speech_start');
+    await settled();
+    expect(engine.streams[1].prefer).toBeUndefined();
+    asr.dispose();
+  });
+
+  it('waits for the paired final language at a detector cut without consuming any candidate text', async () => {
+    const { asr, vad, engine, seen } = await started(fakeEngine(), { also: 'zh' });
+    vad.worker.say('speech_start');
+    await settled();
+    talk(asr, engine, 1, 15);
+    engine.say({ id: 1, type: 'partial', text: '今日はとてもいい天気ですね。' });
+    engine.say({ id: 1, type: 'delta', text: '今日はとてもいい天気ですね。' });
+    vad.worker.say('speech_end', { forced: true });
+    expect(engine.streams[0].ended).toBe(false);
+    expect(seen.results).toEqual([]);
+    expect(seen.languages).toEqual([]);
+    vad.worker.say('speech_start');
+    engine.say({ id: 1, type: 'partial', text: '今日はとてもいい天気ですね。散歩しよう。' });
+    expect(seen.partials[seen.partials.length - 1]).toBe('今日はとてもいい天気ですね。散歩しよう。');
+    vad.worker.say('speech_end');
+    engine.say({ id: 1, type: 'done', text: '天气很好，去散步吧。', language: 'zh' });
+    expect(seen.results).toEqual(['天气很好，去散步吧。']);
+    expect(seen.languages).toEqual(['zh']);
+    asr.dispose();
+  });
+
+  it('preserves settled single-language text when its final is shorter or empty', async () => {
+    for (const text of ['短い', '']) {
+      const { asr, vad, engine, seen } = await started();
+      vad.worker.say('speech_start');
+      await settled();
+      engine.say({ id: 1, type: 'delta', text: '今日はとてもいい天気ですね。' });
+      vad.worker.say('speech_end');
+      engine.say({ id: 1, type: 'done', text });
+      expect(seen.results).toEqual(['今日はとてもいい天気ですね。']);
+      expect(seen.languages).toEqual([undefined]);
+      asr.dispose();
+    }
+  });
+
+  it('remembers successful languages only within each recognizer sharing the same engine', async () => {
+    const engine = fakeEngine();
+    const speaker = await started(engine, { also: 'zh' });
+    const participant = await started(engine, { also: 'zh' });
+    speaker.vad.worker.say('speech_start');
+    await settled();
+    expect(engine.streams[0].prefer).toBeUndefined();
+    speaker.vad.worker.say('speech_end');
+    engine.say({ id: 1, type: 'done', text: '你好。', language: 'zh' });
+
+    participant.vad.worker.say('speech_start');
+    await settled();
+    expect(engine.streams[1].prefer).toBeUndefined();
+    participant.vad.worker.say('speech_end');
+    engine.say({ id: 2, type: 'done', text: 'こんにちは。', language: 'ja' });
+
+    speaker.vad.worker.say('speech_start');
+    participant.vad.worker.say('speech_start');
+    await settled();
+    expect(engine.streams[2].prefer).toBe('zh');
+    expect(engine.streams[3].prefer).toBe('ja');
+    expect(speaker.seen.languages).toEqual(['zh']);
+    expect(participant.seen.languages).toEqual(['ja']);
+    speaker.asr.dispose();
+    participant.asr.dispose();
+    expect(engine.state.listening).toBe(0);
+  });
+
+  it('keeps its last successful candidate across empty results and invalid final languages', async () => {
+    const { vad, engine, seen, asr } = await started(fakeEngine(), { also: 'zh' });
+    vad.worker.say('speech_start');
+    await settled();
+    vad.worker.say('speech_end');
+    engine.say({ id: 1, type: 'done', text: '你好。', language: 'zh' });
+    for (const event of [
+      { type: 'done' as const, text: '', language: 'ja' },
+      { type: 'done' as const, text: 'unrelated', language: 'en' },
+      { type: 'done' as const, text: 'unidentified' },
+    ]) {
+      vad.worker.say('speech_start');
+      await settled();
+      const stream = engine.streams[engine.streams.length - 1];
+      expect(stream.prefer).toBe('zh');
+      vad.worker.say('speech_end');
+      engine.say({ id: stream.id, ...event });
+    }
+    vad.worker.say('speech_start');
+    await settled();
+    expect(engine.streams[engine.streams.length - 1].prefer).toBe('zh');
+    expect(seen.results).toEqual(['你好。', '']);
+    expect(seen.languages).toEqual(['zh', 'ja']);
+    expect(seen.errors).toEqual([
+      expect.stringContaining('requested languages'),
+      expect.stringContaining('requested languages'),
+    ]);
+    expect(seen.fatal).toEqual([]);
+    asr.dispose();
+  });
+
+  it('resets its remembered candidate when initialized again, including after disposal', async () => {
+    const { asr, vad, engine } = await started(fakeEngine(), { also: 'zh' });
+    for (const dispose of [false, true]) {
+      vad.worker.say('speech_start');
+      await settled();
+      const stream = engine.streams[engine.streams.length - 1];
+      expect(stream.prefer).toBeUndefined();
+      vad.worker.say('speech_end');
+      engine.say({ id: stream.id, type: 'done', text: '你好。', language: 'zh' });
+      if (dispose) asr.dispose();
+      const ready = asr.init('r2t2-q8', { vadConfig: VAD, language: 'ja-JP' });
+      vad.worker.say('ready');
+      await ready;
+      expect(engine.state.listening).toBe(1);
+    }
+    vad.worker.say('speech_start');
+    await settled();
+    expect(engine.streams[engine.streams.length - 1].prefer).toBeUndefined();
+    asr.dispose();
   });
 
   it('adds the silence the engine needs when the detector waits for less', async () => {
@@ -301,6 +450,34 @@ describe('this computer\'s native recognizer', () => {
     clock.advance(15_000 - LAST_WORDS_TIMEOUT_MS);
     expect(engine.streams[0].aborted).toBe(true);
     expect(seen.results).toEqual(['こんにちは']);
+  });
+
+  it('fails a paired utterance whose final language never arrives, without promoting partial text', async () => {
+    const { asr, vad, engine, seen, clock } = await started(fakeEngine(), { also: 'zh', limits: { lastWordsMs: 15_000 } });
+    vad.worker.say('speech_start');
+    await settled();
+    engine.say({ id: 1, type: 'partial', text: '你好。' });
+    vad.worker.say('speech_end');
+    vad.worker.say('speech_start');
+    asr.feedAudio(seconds(1), RATE);
+    clock.advance(14_999);
+    expect(seen.errors).toEqual([]);
+    clock.advance(1);
+    await settled();
+    expect(engine.streams[0].aborted).toBe(true);
+    expect(seen.results).toEqual([]);
+    expect(seen.errors).toEqual([expect.stringContaining('spoken language in time')]);
+    expect(seen.fatal).toEqual([]);
+    expect(engine.streams[1]).toMatchObject({ samples: HEARD });
+    expect(engine.streams[1].prefer).toBeUndefined();
+    // A late final from the timed-out recognition cannot become the next one's preference.
+    engine.say({ id: 1, type: 'done', text: '你好。', language: 'zh' });
+    vad.worker.say('speech_end');
+    engine.say({ id: 2, type: 'done', text: 'こんにちは。', language: 'ja' });
+    expect(seen.results).toEqual(['こんにちは。']);
+    expect(seen.languages).toEqual(['ja']);
+    asr.dispose();
+    expect(clock.pending()).toBe(0);
   });
 
   it('names its model with every recognition, for a computer whose native recognizers are more than one engine', async () => {

@@ -15,6 +15,76 @@ const LEGS: LegName[] = ['speaker', 'participant'];
 const words = (notice: { message: string }) => notice.message;
 const lanes = (entries: Entry[], legs = LEGS, filters = BOTH) => buildLanes(entries, legs, filters, words);
 
+describe('independent feedback beside translated subtitle lanes', () => {
+  const exchange = (id: string, text: string, translation: string, feedback?: string): Extract<Entry, { kind: 'exchange' }> => ({
+    kind: 'exchange', id, leg: 'speaker', languages: { source: 'fr', target: 'en' }, pairing: 'stated', t: 0,
+    source: [row(`s-${id}`, text, 'source', 'en')],
+    translation: translation ? [{ ...row(`t-${id}`, translation, 'translation', 'fr'), purpose: 'translation' }] : [],
+    ...(feedback ? { feedback: [{ ...row(`f-${id}`, feedback, 'translation', 'fr'), purpose: 'feedback', ...(translation ? { accompaniesTranslation: true as const } : {}) }] } : {}),
+  });
+
+  it('keeps feedback and its original sentence separate from the translated answer', () => {
+    const entry = exchange('first', 'I goes.', 'Je vais.', 'I go.\nPresent tense.');
+    const lane = lanes([entry], ['speaker'])[0];
+    expect(lane.answer).toMatchObject({ text: 'Je vais.', purpose: 'translation' });
+    expect(lane.feedback).toMatchObject({ text: 'I go.\nPresent tense.', origin: 'first', said: { text: 'I goes.', language: 'en' } });
+    const without = lanes([{ ...entry, feedback: undefined }], ['speaker'])[0];
+    expect(lane.answer).toEqual(without.answer);
+    expect(lane.pending).toBe(without.pending);
+    expect(lanesHeight([lane], 24)).toBeGreaterThan(lanesHeight([without], 24));
+  });
+
+  it('does not put late feedback on the newer sentence in a speaker row', () => {
+    const first = exchange('first', 'I goes.', 'Je vais.');
+    const second = exchange('second', 'We arrive tomorrow.', 'Nous arrivons demain.');
+    const before = lanes([first, second]);
+    const after = lanes([{ ...first, feedback: exchange('first', 'I goes.', '', 'I go.').feedback }, second]);
+    expect(after[1]).toEqual(before[1]);
+    expect(after[1].source?.text).toBe('We arrive tomorrow.');
+    expect(after[1].feedback).toBeUndefined();
+  });
+
+  it('binds feedback to the held translated exchange while the source line runs into newer speech', () => {
+    const first = exchange('first', 'I goes.', 'Je vais.', 'I go.');
+    const second = exchange('second', 'We arrive tomorrow.', 'Nous arrivons demain.', '✓');
+    const [lane] = buildLanes([first, second], ['speaker'], BOTH, words, { speaker: 'first' });
+    expect(lane.answer?.text).toBe('Je vais.');
+    expect(lane.source?.text).toBe('I goes. We arrive tomorrow.');
+    expect(lane.feedback).toMatchObject({ origin: 'first', text: 'I go.', said: { text: 'I goes.' } });
+  });
+
+  it('shows feedback without a translation and keeps it out of source-only and hidden lanes', () => {
+    const entry = exchange('first', 'I goes.', '', 'I go.');
+    expect(lanes([entry], ['speaker'])[0]).toMatchObject({ feedback: { text: 'I go.' }, answer: { text: '' } });
+    expect(lanes([entry], ['speaker'], { ...BOTH, speaker: 'source' })[0].feedback).toBeUndefined();
+    expect(lanes([entry], ['speaker'], { ...BOTH, speaker: 'none' })).toEqual([]);
+  });
+
+  it('advances from a native translation to standalone practice feedback, then back to a translation', () => {
+    const first = exchange('native', 'Nous arrivons.', 'We arrive.');
+    const practice = exchange('practice', 'I goes.', '', 'I go.');
+    const nextNative = exchange('next-native', 'Nous partons.', 'We leave.');
+    const [practiced] = buildLanes([first, practice], ['speaker'], BOTH, words);
+    expect(practiced).toMatchObject({ source: { text: 'I goes.' }, answer: { text: '' }, feedback: { origin: 'practice', said: { text: 'I goes.' } }, pending: false });
+    const [held] = buildLanes([first, practice, nextNative], ['speaker'], BOTH, words, { speaker: 'practice' });
+    expect(held.feedback?.origin).toBe('practice');
+    expect(held.answer?.text).toBe('');
+    const [translated] = buildLanes([first, practice, nextNative], ['speaker'], BOTH, words);
+    expect(translated).toMatchObject({ source: { text: 'Nous partons.' }, answer: { text: 'We leave.' }, pending: false });
+    expect(translated.feedback).toBeUndefined();
+  });
+
+  it('does not advance a translated pair when combined feedback arrives before its translation', () => {
+    const first = exchange('first', 'Nous arrivons.', 'We arrive.');
+    const waiting = exchange('waiting', 'I goes.', '');
+    const feedback = exchange('waiting', 'I goes.', '', 'I go.').feedback!.map((part) => ({ ...part, accompaniesTranslation: true as const }));
+    const before = lanes([first, waiting], ['speaker'])[0];
+    expect(lanes([first, { ...waiting, feedback }], ['speaker'])[0]).toEqual(before);
+    const translated = exchange('waiting', 'I goes.', 'Je vais.');
+    expect(lanes([first, { ...translated, feedback }], ['speaker'])[0]).toMatchObject({ answer: { text: 'Je vais.' }, feedback: { origin: 'waiting', said: { text: 'I goes.' } }, pending: false });
+  });
+});
+
 describe('the subtitle view’s lanes', () => {
   it('has a lane for each side heard, the other side first, there from the start', () => {
     expect(lanes([])).toEqual([

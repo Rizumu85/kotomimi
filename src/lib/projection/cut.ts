@@ -71,6 +71,8 @@ export function cutSegment(seg: Segment, settings: CutSettings): Row[] {
     key: `${seg.id}:${k}`,
     segmentId: seg.id,
     side: seg.side,
+    ...(seg.purpose ? { purpose: seg.purpose } : {}),
+    ...(seg.accompaniesTranslation ? { accompaniesTranslation: seg.accompaniesTranslation } : {}),
     start,
     end,
     text: seg.text.slice(start, end),

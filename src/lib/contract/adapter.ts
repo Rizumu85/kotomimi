@@ -15,6 +15,8 @@ export const SAMPLE_RATE = 24000;
 
 export type Lang = string;
 export type Side = 'source' | 'translation';
+/** An answer's role, independent of which language it is written in. Absent on older providers and history. */
+export type SegmentPurpose = 'translation' | 'feedback';
 /** An adapter-local counter naming a segment; never reused within one session. */
 export type Ref = number;
 /** UTF-16 code-unit offsets into a segment's text: [start, end). */
@@ -80,7 +82,7 @@ export interface AdapterFrame {
 }
 
 export interface AdapterEvents {
-  segmentOpened(e: { ref: Ref; side: Side; origin?: string }): void;
+  segmentOpened(e: { ref: Ref; side: Side; origin?: string; purpose?: SegmentPurpose; accompaniesTranslation?: true }): void;
   /** Always the whole text; a snapshot, never a delta. */
   segmentText(e: { ref: Ref; text: string; timing?: SegmentTiming; language?: string }): void;
   segmentClosed(e: { ref: Ref; origin?: string }): void;

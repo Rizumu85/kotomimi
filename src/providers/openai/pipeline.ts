@@ -123,11 +123,15 @@ export interface Stages {
   heard?: string;
   /** A stretch is answered whole, when the recognizer closes it: its sentences are not closed as they come (`sentenceCut.ts`). The user's choice. */
   whole?: boolean;
+  /** Paired recognition: only final language metadata may choose translation or feedback. */
+  requiresLanguage?: boolean;
   /**
    * Fork: the speaker speaks the other side's language too (`speakBoth`; `heard` is then `auto`): a sentence in it —
    * `language` — is answered by `stage`, into their own (`own`); one in their own by `speech`, as ever.
    */
   back?: { stage: AnswerStage; language: string; own: string };
+  /** Feedback alongside translation, only for speech in the language being practised. */
+  feedback?: { stage: AnswerStage; language: string };
 }
 
 /** This computer hears: its own recognizer and turn detection, and no socket. */
@@ -221,7 +225,7 @@ export function tidyAnswer(kind: AnswerStage['kind'], text: string): string {
 /** The device stages of a leg, one per model: speech and typed text usually share theirs. */
 function deviceStages(stages: Stages): DeviceStage[] {
   const out: DeviceStage[] = [];
-  for (const stage of [stages.speech, stages.typed, stages.back?.stage]) {
+  for (const stage of [stages.speech, stages.typed, stages.back?.stage, stages.feedback?.stage]) {
     if (stage?.via === 'device' && !out.some((s) => engineKey(s) === engineKey(stage))) out.push(stage);
   }
   return out;
@@ -289,7 +293,7 @@ class PipelineLeg implements AdapterSession {
   /** The last sentence heard that was sent to be translated, and when. */
   private said: { text: string; at: number } | null = null;
   private readonly queue: Job[] = [];
-  private running: AbortController | null = null;
+  private readonly running = new Map<AnswerStage['kind'], { controller: AbortController; stage: AnswerStage }>();
   private innerBusy = false;
   private saidBusy = false;
   /** This computer's translation models, by id, once loaded. */
@@ -316,7 +320,7 @@ class PipelineLeg implements AdapterSession {
         if (!this.ended) this.events.degraded({ code: 'phone_quiet', message: 'A phone this session uses stopped answering.' });
       },
     });
-    for (const stage of [stages.speech, stages.typed]) if (stage && stage.via !== 'device' && stage.phone) this.watchPhone(stage.baseUrl);
+    for (const stage of [stages.speech, stages.typed, stages.back?.stage, stages.feedback?.stage]) if (stage && stage.via !== 'device' && stage.phone) this.watchPhone(stage.baseUrl);
   }
 
   /** A phone this leg uses, watched until the leg ends: one a stage answers on, or what hears (`hearing`). */
@@ -439,8 +443,8 @@ class PipelineLeg implements AdapterSession {
     this.cuts.clear();
     for (let i = heardLately.length - 1; i >= 0; i--) if (heardLately[i].leg === this) heardLately.splice(i, 1);
     this.queue.length = 0;
-    this.running?.abort(new Error('the session ended'));
-    this.running = null;
+    for (const { controller } of this.running.values()) controller.abort(new Error('the session ended'));
+    this.running.clear();
     for (const engine of this.translators.values()) engine.dispose();
     this.translators.clear();
   }
@@ -477,7 +481,7 @@ class PipelineLeg implements AdapterSession {
         // Left to be detected: the language its writing shows, or none — which also keeps the leg's own from being assumed.
         // Told one, and written in the leg's other language: said to be in that one.
         // Said by the recognizer: that, which also goes with the sentences closed from it.
-        const heard = e.payload.language ?? (told === AUTO ? this.byWriting(e.payload.text) ?? AUTO : (open ? this.otherThanHeard(e.payload.text) : undefined) ?? told);
+        const heard = e.payload.language ?? (this.stages.requiresLanguage ? undefined : (told === AUTO ? this.byWriting(e.payload.text) ?? AUTO : (open ? this.otherThanHeard(e.payload.text) : undefined) ?? told));
         if (source && this.cutsSentences()) {
           this.heardSoFar(e.payload.ref, source, heard);
           return;
@@ -489,7 +493,7 @@ class PipelineLeg implements AdapterSession {
         const source = this.sources.get(e.payload.ref);
         this.sources.delete(e.payload.ref);
         const text = source?.text.trim();
-        const coached = this.stages.speech?.kind === 'coach';
+        const coached = this.stages.speech?.kind === 'coach' || !!this.stages.feedback;
         const heard = this.heardOf(e.payload.ref);
         if (heard) heard.until = this.request.clock.now();
         // Its finished sentences were closed as they came: what is left is the last of them.
@@ -581,7 +585,7 @@ class PipelineLeg implements AdapterSession {
    */
   private cutsSentences(): boolean {
     const speech = this.stages.speech;
-    return !!speech && speech.kind !== 'coach' && this.stages.whole !== true;
+    return !!speech && speech.kind !== 'coach' && !this.stages.feedback && this.stages.whole !== true && !this.stages.requiresLanguage;
   }
 
   /** The segment that shows what is left of a stretch: opened when there first is something left. */
@@ -648,12 +652,18 @@ class PipelineLeg implements AdapterSession {
   /** A source sentence, closed: said so, and handed to what answers it. `language`: what the recognizer said it heard it in. */
   private closed(payload: { ref: Ref; origin?: string }, source: { origin?: string; text: string } | undefined, text: string | undefined, language?: string): void {
     const coached = this.stages.speech?.kind === 'coach';
+    // Failed paired recognition must not seal a provisional guess as final text that the chatbox could send.
+    if (this.stages.requiresLanguage && !language) {
+      this.events.segmentText({ ref: payload.ref, text: '' });
+      this.events.segmentClosed(payload);
+      return;
+    }
     this.events.segmentClosed(payload);
     const other = text !== undefined ? this.otherThanHeard(text, language) : undefined;
     // Fork: a speaker who speaks both said this one in the other side's language: it is translated into their own.
     const backward = text !== undefined ? this.backFor(text, language) : undefined;
     // What was said in the reader's own language needs no translating: detected, or told another and written in theirs.
-    const already = !backward && !coached && text !== undefined && (other !== undefined || (this.stages.heard === AUTO && languageByScript(text) === baseOf(this.request.context.direction.target)));
+    const already = !backward && !coached && text !== undefined && (other !== undefined || (this.stages.heard === AUTO && (language ? baseOf(language) : languageByScript(text)) === baseOf(this.request.context.direction.target)));
     // A coached speaker who says a sentence in their own language is not practising with it: it is translated, as what
     // they type is, and not sent for feedback. No translation in this run: it is shown as said.
     const stage = backward ?? (coached && other !== undefined ? this.stages.typed : this.stages.speech);
@@ -663,6 +673,11 @@ class PipelineLeg implements AdapterSession {
       const before = stage.kind === 'translate' && this.said && now - this.said.at <= BEFORE_WITHIN_MS ? this.said.text.slice(-BEFORE_MOST) : undefined;
       if (stage.kind === 'translate') this.said = { text, at: now };
       this.push({ stage, text, origin: payload.origin ?? source.origin, typed: false, ...(before ? { before } : {}) });
+    }
+    const feedback = this.stages.feedback;
+    if (source && text && feedback) {
+      const spoken = language ? baseOf(language) : oneOfTwo(text, this.request.context.direction.source, feedback.language);
+      if (spoken === baseOf(feedback.language)) this.push({ stage: feedback.stage, text, origin: payload.origin ?? source.origin, typed: false });
     }
   }
 
@@ -741,24 +756,30 @@ class PipelineLeg implements AdapterSession {
   private push(job: Job): void {
     this.queue.push(job);
     this.sayBusy();
-    void this.pump();
+    this.pump();
   }
 
-  /** One answer at a time, in the order the sources finished: the rows read in the order they were said. */
-  private async pump(): Promise<void> {
-    if (this.running || this.ended) return;
-    const job = this.queue.shift();
-    if (!job) return;
-    const controller = new AbortController();
-    this.running = controller;
-    try {
-      await this.answer(job, controller.signal);
-    } finally {
-      if (this.running === controller) this.running = null;
-    }
+  /** Each kind answers in source order; slow feedback does not hold up translations. A shared local worker stays serial. */
+  private pump(): void {
     if (this.ended) return;
-    this.sayBusy();
-    void this.pump();
+    for (const kind of ['translate', 'coach'] as const) {
+      if (this.running.has(kind)) continue;
+      const index = this.queue.findIndex((job) => job.stage.kind === kind);
+      if (index < 0) continue;
+      const job = this.queue[index];
+      const stage = job.stage;
+      const occupied = stage.via === 'device' && [...this.running.values()].some((active) => active.stage.via === 'device' && engineKey(active.stage) === engineKey(stage));
+      if (occupied) continue;
+      this.queue.splice(index, 1);
+      const controller = new AbortController();
+      this.running.set(kind, { controller, stage });
+      void this.answer(job, controller.signal).finally(() => {
+        if (this.running.get(kind)?.controller === controller) this.running.delete(kind);
+        if (this.ended) return;
+        this.sayBusy();
+        this.pump();
+      });
+    }
   }
 
   private async answer(job: Job, signal: AbortSignal): Promise<void> {
@@ -770,7 +791,11 @@ class PipelineLeg implements AdapterSession {
     const show = (text: string) => {
       if (this.ended || !text || text === shown) return;
       if (!opened) {
-        this.events.segmentOpened({ ref, side: 'translation', ...(job.origin !== undefined ? { origin: job.origin } : {}) });
+        this.events.segmentOpened({
+          ref, side: 'translation', purpose: stage.kind === 'coach' ? 'feedback' : 'translation',
+          ...(stage.kind === 'coach' && this.stages.feedback ? { accompaniesTranslation: true as const } : {}),
+          ...(job.origin !== undefined ? { origin: job.origin } : {}),
+        });
         opened = true;
       }
       shown = text;
@@ -852,7 +877,7 @@ class PipelineLeg implements AdapterSession {
   }
 
   private sayBusy(): void {
-    const busy = this.innerBusy || this.running !== null || this.queue.length > 0;
+    const busy = this.innerBusy || this.running.size > 0 || this.queue.length > 0;
     if (busy === this.saidBusy || this.ended) return;
     this.saidBusy = busy;
     this.events.busy(busy);

@@ -25,6 +25,8 @@ export interface LocalAIModel extends ModelOption {
   host?: typeof KOTOMIMI_HOST;
   /** The languages it takes, as another Kotomimi lists them (`src/lib/lan/protocol.ts`); empty or absent: any. */
   languages?: readonly string[];
+  /** Can arbitrate between two installed language models of this family. */
+  bilingual?: boolean;
 }
 
 /**

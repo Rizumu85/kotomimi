@@ -173,6 +173,10 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
   let unlisten: (() => void) | null = null;
   let disposed = false;
   let language = '';
+  const also = options.also ? apiLanguage(options.also) : undefined;
+  /** Only this recognizer's last successful language: another audio source must not influence its ties. */
+  let preferred: string | undefined;
+  const paired = () => Boolean(also && also !== language);
   let rate = 24000;
   let padSeconds = 0;
   /** The last moments heard while nobody speaks. */
@@ -233,7 +237,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     const head = queue[0];
     if (!head || head.id !== null || head.opening || disposed) return;
     head.opening = true;
-    void bridge.open({ language, ...(options.also ? { also: options.also } : {}), sampleRate: head.resampler ? TARGET_RATE : rate, ...(options.model ? { model: options.model } : {}) }).then((id) => {
+    void bridge.open({ language, ...(options.also ? { also: options.also } : {}), ...(paired() && preferred ? { prefer: preferred } : {}), sampleRate: head.resampler ? TARGET_RATE : rate, ...(options.model ? { model: options.model } : {}) }).then((id) => {
       head.opening = false;
       if (head.over || disposed) {
         if (id !== null) bridge.abort(id);
@@ -261,6 +265,10 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     s.cancelWait = clock.setTimeout(() => {
       if (s.over) return;
       if (s.id !== null) bridge.abort(s.id);
+      if (paired()) {
+        fail(s, 'The speech recognizer did not finish identifying the spoken language in time.');
+        return;
+      }
       // What was last heard of it, where nothing was settled: better than nothing.
       finish(s, s.text || s.heard);
     }, limits.lastWordsMs);
@@ -278,6 +286,8 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
 
   /** What is written and not yet a result becomes one; the recognition goes on. */
   function piece(s: Stream) {
+    // A paired recognition's text has no settled language until its final candidate is chosen.
+    if (paired()) return;
     const text = pending(s).trim();
     if (!text) return;
     asr.onResult?.({ text: tidyHeard(text), durationMs: Math.round(secondsOf(s.pieceSamples) * 1000), recognitionTimeMs: 0 });
@@ -295,9 +305,23 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     if (live === s) live = null;
     // The engine's own account of the whole: it ends with words no partial carried. Where it differs a little from
     // what was written on the way — a character here and there — it is still read from where the results left off.
-    const text = whole.length >= s.text.length ? whole : s.text;
+    // A paired final instead replaces the earlier candidate entirely, even when it is shorter or empty.
+    const text = paired() || whole.length >= s.text.length ? whole : s.text;
+    if (paired() && heardIn && !s.misfire && tidyHeard(text)) preferred = heardIn;
     // An empty result too: it closes what the partials opened.
     asr.onResult?.({ text: s.misfire ? '' : tidyHeard(text.slice(s.emitted).trim()), durationMs: Math.round(secondsOf(s.pieceSamples) * 1000), recognitionTimeMs: s.closed ? Math.max(0, now() - s.closedAt) : 0, ...(heardIn ? { language: heardIn } : {}) });
+    advance();
+  }
+
+  /** One utterance failed; later speech can still be recognized. */
+  function fail(s: Stream, message: string) {
+    if (s.over) return;
+    s.over = true;
+    s.cancelWait?.();
+    const at = queue.indexOf(s);
+    if (at >= 0) queue.splice(at, 1);
+    if (live === s) live = null;
+    asr.onError?.(message);
     advance();
   }
 
@@ -345,14 +369,15 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
       // Where the engine also says what it has heard so far, that is what is shown: a delta does not renew it.
       if (s === live && !s.tentative) endEarly();
     } else if (event.type === 'done') {
-      finish(s, event.text || s.text, event.language);
+      const heardIn = event.language ? apiLanguage(event.language) : undefined;
+      const both = paired();
+      if (both && heardIn !== language && heardIn !== also) {
+        fail(s, 'The speech recognizer did not identify one of the requested languages.');
+        return;
+      }
+      finish(s, both ? event.text : event.text || s.text, both ? heardIn : event.language);
     } else {
-      s.over = true;
-      s.cancelWait?.();
-      queue.splice(queue.indexOf(s), 1);
-      if (live === s) live = null;
-      asr.onError?.(event.message);
-      advance();
+      fail(s, event.message);
     }
   }
 
@@ -364,6 +389,9 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     onFatal: null,
 
     async init(_modelId: string, init: AsrInit) {
+      if (worker || unlisten) asr.dispose();
+      disposed = false;
+      preferred = undefined;
       language = apiLanguage(init.language) ?? '';
       pauseSeconds = init.vadConfig.minSilenceDuration ?? pauseSeconds;
       padSeconds = Math.max(0, TRAILING_SILENCE_SECONDS - (init.vadConfig.minSilenceDuration ?? 0));
@@ -506,6 +534,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
 
     dispose() {
       disposed = true;
+      preferred = undefined;
       unlisten?.();
       unlisten = null;
       for (const s of queue) {
@@ -519,6 +548,14 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
       worker?.terminate();
       worker = null;
       before = [];
+      beforeLength = 0;
+      quiet = 0;
+      level = 0;
+      voice = false;
+      idle = 0;
+      paused = false;
+      pausedFor = 0;
+      awaiting = null;
     },
   };
 

@@ -6,12 +6,13 @@ import { fakeSockets } from '../../lib/contract/testing/fakeSocket';
 import { trackedClock } from '../../lib/contract/testing/trackedClock';
 import type { CheckContext } from '../../lib/provider/types';
 import { useModelStore } from '../../stores/modelStore';
+import { estimateModelMemoryByDevice } from '../../lib/local-inference/modelManifest';
 import { createFakeEngines } from '../localInference/fakeEngines';
 import {
-  admitLocalAI, buildLocalAI, createLocalAICheck, describeLocalAI, LOCALAI_DEFAULTS, localaiCredentials, localaiProvider, migrateLocalAISettings,
+  admitLocalAI, buildLocalAI, createLocalAICheck, describeLocalAI, LOCALAI_DEFAULTS, localaiCredentials, localaiLanguages, localaiProvider, migrateLocalAISettings,
   type LocalAIConfig, type LocalAICredentials, type LocalAISettings,
 } from './localai';
-import { canDetectOther, cutsSentencesHere, deviceChatModels, deviceChoices, deviceCoachModel, deviceNeeds, deviceRecognizer, deviceTranslator, heardBy, hearingPlace, hearsAtOwnDevice, needsServer } from './localaiDevice';
+import { canDetectOther, cutsSentencesHere, deviceChatModels, deviceChoices, deviceCoachModel, deviceNeeds, deviceRecognizer, deviceTranslator, heardBy, hearingPlace, hearsAtOwnDevice, needsServer, speaksBoth } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
 import { createPipelineAdapter, FIRST_REF, type AnswerStage, type DeviceStage } from './pipeline';
 import { SHARED } from './testing';
@@ -45,6 +46,16 @@ function configFor(context: SessionContext, patch: Partial<LocalAISettings>, mod
 }
 
 describe('where each stage runs', () => {
+  it.each([false, true])('requires both local translation directions for a LAN pair (feedback: %s)', (coach) => {
+    const models: LocalAIModel[] = ['en', 'fr'].map((language) => ({ id: `apple-speech:${language}`, kind: 'asr', host: 'kotomimi', languages: [language], bilingual: true }));
+    const s = settings({ asrVia: 'server', asrModel: 'apple-speech', translateAt: 'device', speakBoth: true, coach });
+    const needs = deviceNeeds(deviceChoices(s), { source: 'en', target: 'fr' }, ['speaker'], models);
+    expect(needs.map((n) => ({ source: n.source, target: n.target, required: n.required }))).toEqual([
+      { source: 'en', target: 'fr', required: true },
+      { source: 'fr', target: 'en', required: true },
+    ]);
+  });
+
   it('places each stage by itself: what hears decides nothing about what translates', () => {
     expect(deviceChoices(settings({ asrVia: 'device' })).translateAt).toBe('server');
     expect(deviceChoices(settings({ asrVia: 'device', translateAt: 'api' })).translateAt).toBe('api');
@@ -194,6 +205,17 @@ describe('a leg this computer hears', () => {
     expect(localaiProvider.textInput(settings({ coach: true, translateAt: 'api', translateBaseUrl: 'https://api.example.com/v1', translateModel: 'm' }))).toBe(true);
   });
 
+  it('keeps bilingual speech and feedback independently enabled', () => {
+    const s = settings({ asrVia: 'api', speakBoth: true, coach: true });
+    expect(speaksBoth(s, [], PAIR)).toBe(true);
+    expect(heardBy(s, PAIR, 'speaker')).toBe('auto');
+    expect(heardBy(s, PAIR, 'participant')).toBe('ja');
+    const controls = localaiLanguages.detection?.(s, [], PAIR);
+    expect(controls?.both).toMatchObject({ on: true, available: true });
+    expect(controls?.both.turn(true)).toEqual({ speakBoth: true });
+    expect(controls?.both.turn(false)).toEqual({ speakBoth: false });
+  });
+
   it('keeps stored picks and knobs, and defaults what is missing or of the wrong type', () => {
     const inputs = { legacy: {}, credentials: {} };
     const picks = { 'zh→ja': { asr: { modelId: 'sensevoice-int8' }, translation: { modelId: '' }, tts: { modelId: '' } } };
@@ -214,6 +236,48 @@ describe('a leg the server hears and this computer translates', () => {
 });
 
 describe('the memory this computer\'s models take', () => {
+  it('counts feedback beside two different local translation engines', () => {
+    const config = configFor(SPEAKER, { translateAt: 'device' }, [{ id: 'gpt-realtime' }]);
+    const forward: DeviceStage = { via: 'device', kind: 'translate', model: 'qwen3-0.6b-translation', system: '', wrapTranscript: true };
+    const reverse: DeviceStage = { ...forward, model: 'qwen3.5-0.8b-translation', direction: { source: 'ja', target: 'zh-CN' } };
+    config.stages = { speech: forward, typed: forward, back: { stage: reverse, language: 'ja', own: 'zh-CN' } };
+    const budget = estimateModelMemoryByDevice([forward.model, reverse.model]).vramMb;
+    localStorage.setItem('debug:vram-budget', String(budget));
+    try {
+      expect(admitLocalAI({ speaker: config })).toBe(true);
+      config.stages.feedback = { language: 'ja', stage: { ...forward, kind: 'coach', model: 'qwen3.5-2b-translation', wrapTranscript: false } };
+      expect(admitLocalAI({ speaker: config })).toMatchObject({ code: 'memory_exceeded' });
+    } finally {
+      localStorage.removeItem('debug:vram-budget');
+    }
+  });
+
+  it('counts a separate reverse worker even when its model matches the forward translator', () => {
+    const config = configFor(SPEAKER, { translateAt: 'device' }, [{ id: 'gpt-realtime' }]);
+    const forward: DeviceStage = { via: 'device', kind: 'translate', model: 'qwen3-0.6b-translation', system: '', wrapTranscript: true };
+    config.stages = { speech: forward, typed: forward };
+    localStorage.setItem('debug:vram-budget', String(estimateModelMemoryByDevice([forward.model]).vramMb));
+    try {
+      expect(admitLocalAI({ speaker: config })).toBe(true);
+      config.stages.back = { language: 'ja', own: 'zh-CN', stage: { ...forward, direction: { source: 'ja', target: 'zh-CN' } } };
+      expect(admitLocalAI({ speaker: config })).toMatchObject({ code: 'memory_exceeded' });
+    } finally {
+      localStorage.removeItem('debug:vram-budget');
+    }
+  });
+
+  it('counts a different local model needed only for the reverse translation', () => {
+    const config = configFor(SPEAKER, { translateAt: 'device' }, [{ id: 'gpt-realtime' }]);
+    localStorage.setItem('debug:vram-budget', '1');
+    try {
+      expect(admitLocalAI({ speaker: config })).toBe(true);
+      config.stages!.back = { own: 'zh', language: 'ja', stage: { via: 'device', kind: 'translate', model: 'qwen3.5-2b-translation', system: '', wrapTranscript: true } };
+      expect(admitLocalAI({ speaker: config })).toMatchObject({ code: 'memory_exceeded' });
+    } finally {
+      localStorage.removeItem('debug:vram-budget');
+    }
+  });
+
   it('counts nothing for a run with every stage elsewhere, and the device models otherwise', () => {
     expect(admitLocalAI({ speaker: configFor(SPEAKER, {}, [{ id: 'gpt-realtime' }]) })).toBe(true);
     expect(admitLocalAI({ speaker: configFor(SPEAKER, HERE), participant: configFor(PARTICIPANT, HERE) })).toBe(true);
@@ -417,7 +481,7 @@ describe('a session this computer hears and translates', () => {
     await vi.waitFor(() => expect(h.of('busy').map((e) => e.payload).pop()).toBe(false));
     expect(h.of('segmentOpened').map((e) => e.payload)).toEqual([
       { ref: 1, side: 'source', origin: 'u1' },
-      { ref: FIRST_REF + 1, side: 'translation', origin: 'u1' },
+      { ref: FIRST_REF + 1, side: 'translation', purpose: 'translation', origin: 'u1' },
     ]);
     expect(h.lastText(1)?.text).toBe('今天天气很好');
     expect(h.lastText(FIRST_REF + 1)?.text).toBe('今日は天気がいいです');
@@ -435,7 +499,7 @@ describe('a session this computer hears and translates', () => {
     await vi.waitFor(() => expect(h.lastText(FIRST_REF + 2)?.text).toBe('経費精算'));
     expect(h.of('segmentOpened').map((e) => e.payload)).toEqual([
       { ref: FIRST_REF + 1, side: 'source', origin: 'sokuji_typed_1' },
-      { ref: FIRST_REF + 2, side: 'translation', origin: 'sokuji_typed_1' },
+      { ref: FIRST_REF + 2, side: 'translation', purpose: 'translation', origin: 'sokuji_typed_1' },
     ]);
   });
 

@@ -17,6 +17,8 @@ import type { LegName } from '../../lib/conversation/types';
 import type { EngineSlot, LanguagePair } from '../../lib/provider/types';
 import { AUTO } from '../../lib/provider/languages';
 import { useModelStore } from '../../stores/modelStore';
+import { serverBilingual } from './serverRecognizers';
+import type { LocalAIModel } from './localaiModels';
 
 /** What the model manifest calls a language: its base (`zh-CN` → `zh`). */
 export const deviceLanguage = (code: string): string => code.split('-')[0];
@@ -77,6 +79,7 @@ export interface DeviceChoices extends StagePlacement {
   selections: Selections;
   /** Fork: the speaker speaks the other side's language too (`speakBoth`): their sentences in it are translated back. */
   speakBoth?: boolean;
+  asrModel?: string;
 }
 
 /**
@@ -143,15 +146,14 @@ export function canDetectOther(s: { asrVia: Place; asrHere?: AsrHere; asrOther?:
 
 /**
  * Fork: the speaker speaks the other side's language too (`speakBoth`), and what hears can tell the two apart: their
- * sentences in either are heard, and each translated into the other. Not while coached: that answers a sentence in the
- * other side's language with feedback instead.
+ * sentences in either are heard, and each translated into the other. Feedback can also answer their foreign speech.
  */
-export const speaksBoth = (s: { speakBoth?: boolean; coach: boolean; asrVia: Place; asrHere?: AsrHere; asrOther?: string }, models: Listed = []): boolean =>
-  s.speakBoth === true && !s.coach && canDetectOther(s, models);
+export const speaksBoth = (s: { speakBoth?: boolean; coach: boolean; asrVia: Place; asrHere?: AsrHere; asrOther?: string; asrModel?: string }, models: Listed = [], pair?: LanguagePair): boolean =>
+  s.speakBoth === true && (canDetectOther(s, models) || (hearingPlace(s) === 'server' && !!pair && serverBilingual(s.asrModel ?? '', pair, models as readonly LocalAIModel[]) !== null));
 
 /** What a leg hears: the speaker their own language, or — coached — the one they practise, or either (`speaksBoth`); the other side theirs, or whatever it turns out to be. */
-export function heardBy(s: { asrDetectOther?: boolean; speakBoth?: boolean; asrVia: Place; asrHere?: AsrHere; asrOther?: string; coach: boolean }, pair: { source: string; target: string }, leg: 'speaker' | 'participant', models: Listed = []): string {
-  if (leg === 'speaker') return s.coach ? pair.target : speaksBoth(s, models) && pair.source.toLowerCase() !== pair.target.toLowerCase() ? AUTO : pair.source;
+export function heardBy(s: { asrDetectOther?: boolean; speakBoth?: boolean; asrVia: Place; asrHere?: AsrHere; asrOther?: string; asrModel?: string; coach: boolean }, pair: { source: string; target: string }, leg: 'speaker' | 'participant', models: Listed = []): string {
+  if (leg === 'speaker') return speaksBoth(s, models, pair) && pair.source.toLowerCase() !== pair.target.toLowerCase() ? AUTO : s.coach ? pair.target : pair.source;
   return detectsOther(s, models) ? AUTO : pair.target;
 }
 
@@ -176,7 +178,7 @@ export function needsServer(s: StagePlacement): boolean {
 /** The stored settings as the device stages read them: a stage this computer's LocalAI runs, or its native engine, asks nothing of the app's own models. */
 export function deviceChoices(s: DeviceChoices): DeviceChoices {
   const own = (place: Place, here: AsrHere | undefined): Place => (place === 'device' && here !== undefined && here !== 'app' ? 'api' : place);
-  return { asrVia: own(hearingPlace(s), s.asrHere), translateAt: own(s.translateAt, s.translateHere), coach: s.coach, coachAt: own(s.coachAt, s.coachHere), selections: s.selections, ...(s.speakBoth ? { speakBoth: true } : {}) };
+  return { asrVia: own(hearingPlace(s), s.asrHere), translateAt: own(s.translateAt, s.translateHere), coach: s.coach, coachAt: own(s.coachAt, s.coachHere), selections: s.selections, ...(s.speakBoth ? { speakBoth: true } : {}), ...(s.asrModel ? { asrModel: s.asrModel } : {}) };
 }
 
 /**
@@ -261,28 +263,28 @@ export interface DeviceNeed extends EngineSlot {
 }
 
 /**
- * The device stages a run opens, speaker's first. A coached speaker speaks
- * the target language, so their recognizer is the one for `target→source`
- * — the same slot the participant's leg uses — and only what they type is
- * translated.
+ * The device stages a run opens, speaker's first. Without bilingual speech,
+ * a coached speaker hears through `target→source`, the participant's slot,
+ * and only their typed text needs a translator. Bilingual speech requires
+ * translation in both directions alongside the feedback.
  */
-export function deviceNeeds(s: DeviceChoices, pair: LanguagePair, legs: readonly LegName[]): DeviceNeed[] {
+export function deviceNeeds(s: DeviceChoices, pair: LanguagePair, legs: readonly LegName[], models: Listed = []): DeviceNeed[] {
   const out: DeviceNeed[] = [];
   const slot = (src: string, tgt: string) => directionKey(deviceLanguage(src), deviceLanguage(tgt));
   for (const leg of legs) {
     const source = leg === 'participant' ? pair.target : pair.source;
     const target = leg === 'participant' ? pair.source : pair.target;
     const coached = s.coach && leg === 'speaker';
+    const both = leg === 'speaker' && speaksBoth(s, models, pair) && source.toLowerCase() !== target.toLowerCase();
     if (s.asrVia === 'device') {
-      const heard = coached ? target : source;
-      const other = coached ? source : target;
+      const heard = coached && !both ? target : source;
+      const other = coached && !both ? source : target;
       out.push({ leg, dir: slot(heard, other), stage: 'asr', source: heard, target: other, required: true });
     }
     // A leg shown as said (`shownAsSaid`) translates nothing.
-    if (s.translateAt === 'device') out.push({ leg, dir: slot(source, target), stage: 'translation', source, target, required: !coached && source.toLowerCase() !== target.toLowerCase() });
+    if (s.translateAt === 'device') out.push({ leg, dir: slot(source, target), stage: 'translation', source, target, required: (!coached || both) && source.toLowerCase() !== target.toLowerCase() });
     // Fork: a speaker who speaks both has their sentences in the other side's language translated back: that
     // direction too, the other side's leg's (`Stages.back`), where what hears can tell the two apart.
-    const both = leg === 'speaker' && s.speakBoth === true && !s.coach && canDetectOther(s) && source.toLowerCase() !== target.toLowerCase();
     if (s.translateAt === 'device' && both) out.push({ leg, dir: slot(target, source), stage: 'translation', source: target, target: source, required: true });
   }
   return out;

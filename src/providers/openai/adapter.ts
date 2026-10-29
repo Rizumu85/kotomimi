@@ -109,6 +109,11 @@ function itemOf(item: unknown): { id: string | undefined; role: string | undefin
   return { id: typeof i.id === 'string' ? i.id : undefined, role: typeof i.role === 'string' ? i.role : undefined };
 }
 
+/** A LAN recognizer reports base codes; accept the same code with a locale suffix. */
+function languageOf(value: unknown): string | undefined {
+  return typeof value === 'string' ? value.trim().toLowerCase().split(/[-_]/)[0] || undefined : undefined;
+}
+
 class RealtimeLeg implements AdapterSession {
   readonly info: { transport: string };
   readonly opening: Promise<AdapterSession>;
@@ -118,6 +123,10 @@ class RealtimeLeg implements AdapterSession {
   private readonly socket: WebSocket;
   private readonly items: RealtimeItems;
   private readonly queue: ResponseQueue;
+  /** Fork (Kotomimi): a requested pair needs an explicit acknowledgement and a language on every final. */
+  private readonly languagePair: readonly [string, string] | undefined;
+  /** Fork: a late paired final or failure must not diagnose an input that has already ended. */
+  private readonly finishedPairedInputs = new Set<string>();
   /** The client's own ids, one counter: request event ids (`sokuji_<n>`) and typed items' (`sokuji_text_<n>`, under the API's 32 characters). */
   private ids = 0;
   /** Typed items already sent: a request asked again sends its `response.create` alone (choice 10). */
@@ -144,6 +153,8 @@ class RealtimeLeg implements AdapterSession {
     const { config, clock, signal } = request;
     // Always `websocket` (ruling 12; choice 18): the owner abandoned WebRTC for this provider (2026-09-29). Analytics reports it.
     this.info = { transport: config.transport };
+    const candidates = config.transcription.languages;
+    this.languagePair = config.transcribeOnly && candidates?.length === 2 ? [candidates[0], candidates[1]] : undefined;
     this.items = new RealtimeItems(events);
     this.queue = new ResponseQueue({
       clock,
@@ -306,6 +317,20 @@ class RealtimeLeg implements AdapterSession {
     // What the server confirmed, for the live test's reading of the hints (survey §2.16 item 3); never the instructions, which the out frame carries.
     this.frame('in', 'session.updated', { outputModalities: s.output_modalities ?? null, audio: s.audio ?? null, reasoning: s.reasoning ?? null, maxOutputTokens: s.max_output_tokens ?? null });
     if (this.phase !== 'configuring') return;
+    const pair = this.languagePair;
+    if (pair) {
+      const transcription = (s.audio as { input?: { transcription?: { language?: unknown; languages?: unknown } } } | null)?.input?.transcription;
+      const confirmed = transcription?.languages;
+      if (languageOf(transcription?.language) !== this.request.config.transcription.language
+        || !Array.isArray(confirmed) || confirmed.length !== pair.length
+        || !confirmed.every((language, i) => languageOf(language) === pair[i])) {
+        this.refuse(new AdapterStartError(
+          'The server did not confirm the requested pair of speech languages. Update Kotomimi on both devices and install both Apple Speech languages on the Mac.',
+          'server_no_bilingual', { source: pair[0], target: pair[1] },
+        ));
+        return;
+      }
+    }
     this.phase = 'live';
     const settle = this.settle;
     this.settle = null;
@@ -327,6 +352,10 @@ class RealtimeLeg implements AdapterSession {
     // Fork: so does a sharing Kotomimi's end of a session left silent (`session_idle`).
     if (refusal.code === 'segment_ended' || refusal.code === 'session_idle') {
       this.end({ failed: refusal });
+      return;
+    }
+    if (this.languagePair && error.code === 'transcription_failed') {
+      this.events.degraded({ code: 'transcription_failed', message: refusal.message, reason: 'bilingual_transcription_failed' });
       return;
     }
     // A request refused because a response was active is asked again (choice 10): routine, never the words of a close that follows (ruling 13).
@@ -354,15 +383,45 @@ class RealtimeLeg implements AdapterSession {
     if (this.phase === 'live' && typeof e.item_id === 'string' && typeof e.delta === 'string') this.items.inputDelta(e.item_id, e.delta);
   }
 
-  private inputDone(e: ConversationItemInputAudioTranscriptionCompletedEvent): void {
-    this.frame('in', e.type, { itemId: e.item_id ?? null, transcript: e.transcript ?? null });
-    if (this.phase === 'live' && typeof e.item_id === 'string') this.items.inputDone(e.item_id, typeof e.transcript === 'string' ? e.transcript : '');
+  private inputDone(e: ConversationItemInputAudioTranscriptionCompletedEvent & { language?: unknown }): void {
+    // A sharing Kotomimi can report its detected language; ordinary OpenAI events omit it.
+    const language = typeof e.language === 'string' ? e.language.trim() || undefined : undefined;
+    this.frame('in', e.type, { itemId: e.item_id ?? null, transcript: e.transcript ?? null, ...(language !== undefined ? { language } : {}) });
+    if (this.phase !== 'live' || typeof e.item_id !== 'string') return;
+    if (this.languagePair) {
+      if (this.finishedPairedInputs.has(e.item_id)) return;
+      this.finishedPairedInputs.add(e.item_id);
+    }
+    const transcript = typeof e.transcript === 'string' ? e.transcript : '';
+    const detected = languageOf(language);
+    if (this.languagePair && (!detected || !this.languagePair.includes(detected) || !transcript.trim())) {
+      this.events.degraded({
+        code: 'transcription_failed',
+        message: !transcript.trim()
+          ? 'The server did not finalize any words for this paired-language utterance.'
+          : 'The server did not identify a language from the requested pair for this utterance.',
+        reason: 'bilingual_final_invalid',
+      });
+      this.items.inputFailed(e.item_id);
+      return;
+    }
+    this.items.inputDone(e.item_id, transcript, this.languagePair ? detected : language);
   }
 
   private inputFailed(e: ConversationItemInputAudioTranscriptionFailedEvent): void {
     const error = e.error ?? {};
     this.frame('in', e.type, { itemId: e.item_id ?? null, error: { type: error.type ?? null, code: error.code ?? null, message: error.message ?? null } });
-    if (this.phase === 'live' && typeof e.item_id === 'string') this.items.inputFailed(e.item_id);
+    if (this.phase !== 'live' || typeof e.item_id !== 'string') return;
+    if (this.languagePair) {
+      if (this.finishedPairedInputs.has(e.item_id)) return;
+      this.finishedPairedInputs.add(e.item_id);
+      this.events.degraded({
+        code: 'transcription_failed',
+        message: typeof error.message === 'string' && error.message.trim() ? error.message : 'The server could not transcribe this paired-language utterance.',
+        reason: 'bilingual_transcription_failed',
+      });
+    }
+    this.items.inputFailed(e.item_id);
   }
 
   /** A response began: in band it is `busy`, and the queue's; out of band — the anchor's — neither (ruling 2). */

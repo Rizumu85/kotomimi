@@ -12,6 +12,7 @@ import { LocalInferenceTurnDetectionControls, LocalInferenceTurnDetectionHelp, L
 import { LOCAL_INFERENCE_DEFAULTS, type LocalInferenceSettings } from '../localInference/settings';
 // Type only: `localai.ts` imports these views, and a value import back would close a cycle.
 import type { LocalAISettings as S } from './localai';
+import type { LocalAIModel } from './localaiModels';
 import { cutsSentencesHere, deviceChoices, deviceLanguage, deviceNeeds, type DeviceNeed } from './localaiDevice';
 import { RealtimeTurnDetectionControls, RealtimeTurnDetectionHelp, RealtimeTurnDetectionSummary } from './RealtimeTurnDetection';
 
@@ -41,14 +42,14 @@ export function useDeviceSettings(settings: S, update: (patch: Partial<S>) => vo
 }
 
 /** The slots a run would load on this computer, each once: both legs' recognizers may be the same slot. */
-export function useDeviceSlots(settings: S, pair: LanguagePair, legs: readonly LegName[]): DeviceNeed[] {
-  const { asrVia, translateAt, coach, coachAt, selections, asrHere, translateHere, coachHere, speakBoth } = settings;
+export function useDeviceSlots(settings: S, pair: LanguagePair, legs: readonly LegName[], models: readonly LocalAIModel[]): DeviceNeed[] {
+  const { asrVia, asrModel, translateAt, coach, coachAt, selections, asrHere, translateHere, coachHere, speakBoth } = settings;
   const { source, target } = pair;
   return useMemo(() => {
     const seen = new Set<string>();
-    return deviceNeeds(deviceChoices({ asrVia, translateAt, coach, coachAt, selections, asrHere, translateHere, coachHere, speakBoth }), { source, target }, legs)
+    return deviceNeeds(deviceChoices({ asrVia, asrModel, translateAt, coach, coachAt, selections, asrHere, translateHere, coachHere, speakBoth }), { source, target }, legs, models)
       .filter((need) => !seen.has(`${need.dir}|${need.stage}`) && Boolean(seen.add(`${need.dir}|${need.stage}`)));
-  }, [asrVia, translateAt, coach, coachAt, selections, asrHere, translateHere, coachHere, speakBoth, source, target, legs]);
+  }, [asrVia, asrModel, translateAt, coach, coachAt, selections, asrHere, translateHere, coachHere, speakBoth, source, target, legs, models]);
 }
 
 /** Local Inference's turn-detection views over this provider's settings: the knobs of the recognizer the speaker's leg loads. */

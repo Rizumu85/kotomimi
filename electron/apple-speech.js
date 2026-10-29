@@ -224,9 +224,6 @@ function createAppleSpeech(deps = {}) {
   let nextStream = 1;
   /** The languages recognitions hear now: never let go to make room. */
   const hearing = () => [...new Set([...streams.values()].flatMap((stream) => [stream.locale, ...(stream.also ? [stream.also] : [])]))];
-  /** Kotomimi: the language each pair of languages was last heard in: what a recognition of both prefers on a tie. */
-  const lastOfPair = new Map();
-
   async function stop() {
     // Each open recognition is told, as the downloaded engine tells its own: the page otherwise waits for last words that never come.
     for (const [id, stream] of [...streams]) { stream.kill(); onStream({ id, type: 'error', message: 'The speech recognizer was stopped.' }); }
@@ -239,16 +236,17 @@ function createAppleSpeech(deps = {}) {
    * A live recognition opened for the page: its id, or null where it cannot be — no such language, or sound at
    * another rate than the recognizer's. Kotomimi: `also`, a second language the speech may be in (a speaker who speaks
    * both): heard in both, the text of the one surer of itself kept, and said with its language (`done`'s `language`);
-   * on a tie, the one the two were last heard in.
+   * on a tie, `prefer`, when it is one of the two languages.
    */
-  function openStream({ language, also, sampleRate } = {}) {
+  function openStream({ language, also, prefer, sampleRate } = {}) {
     const locale = localeFor(language);
     const second = also ? localeFor(also) : null;
     if (!supported || run.state !== 'ready' || !locale || (also && !second) || sampleRate !== 16000) return null;
-    const pair = second && second !== locale ? [locale, second].sort().join('+') : null;
-    const prefer = pair ? lastOfPair.get(pair) : undefined;
+    const pair = second && second !== locale;
+    const preferred = pair ? localeFor(prefer) : null;
+    const preference = preferred === locale || preferred === second ? preferred : null;
     const id = nextStream++;
-    const args = ['stream', locale, ...(pair ? ['--also', second, ...(prefer ? ['--prefer', prefer] : [])] : []), ...roomArgs(hearing())];
+    const args = ['stream', locale, ...(pair ? ['--also', second, ...(preference ? ['--prefer', preference] : [])] : []), ...roomArgs(hearing())];
     touch(locale);
     if (pair) touch(second);
     let child;
@@ -270,7 +268,10 @@ function createAppleSpeech(deps = {}) {
       else if (event?.type === 'delta' && typeof event.text === 'string' && event.text) onStream({ id, type: 'delta', text: event.text });
       else if (event?.type === 'final') {
         const heardIn = pair && typeof event.locale === 'string' && (event.locale === locale || event.locale === second) ? event.locale : null;
-        if (heardIn) lastOfPair.set(pair, heardIn);
+        if (pair && !heardIn) {
+          finish({ type: 'error', message: 'The speech recognizer did not identify one of the requested languages.' });
+          return;
+        }
         finish({ type: 'done', text: typeof event.text === 'string' ? event.text : '', ...(heardIn ? { language: languageAt(heardIn) } : {}) });
       }
       else if (event?.type === 'error') finish({ type: 'error', message: String(event.message ?? 'The speech recognizer reported an error.').slice(0, 300) });

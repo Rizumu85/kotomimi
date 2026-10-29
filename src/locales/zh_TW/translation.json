@@ -656,7 +656,7 @@
       "translateInSession": "由那台裝置決定（和辨識在同一個工作階段完成）",
       "translateKotomimiOwn": "由那台裝置決定（依語言對自動選最合適的）",
       "coachStage": "文法回饋",
-      "coachStageTooltip": "適合自己直接說對方語言的場合。你說的話不再翻譯，而是交給模型檢查：沒問題回 ✓，有問題給出改正後的句子和原因。打字輸入的內容仍然會翻譯。",
+      "coachStageTooltip": "When you speak the other language, a model checks your grammar and answers with a check mark, or a corrected sentence and an explanation. Enable \"I speak the other language too\" as well to get both a translation and private feedback. Your own language and typed text are translated without feedback.",
       "coachNeedsSpeaker": "文法回饋要聽到你說話：把模式切到「我」或「兩者」。",
       "coach": "我說對方的語言時檢查文法",
       "inUse": "正在用 {{name}}",
@@ -1536,7 +1536,7 @@
         "title": "還有三件事",
         "content": "開始之前值得知道：",
         "typed": "工作階段開始後，底部會出現輸入框：打一句話就能翻譯。按 Ctrl+K 可以直接跳到輸入框。",
-        "coach": "想自己直接說對方的語言？在設定裡開啟「文法回饋」那張卡片：你說的話不再翻譯，而是幫你檢查文法。",
+        "coach": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
         "share": "另一台裝置也能用這台電腦的模型：「進階 → 提供商 → 共享給其他裝置」。"
       }
     }
@@ -1752,7 +1752,7 @@
       "mostly": "翻譯對方主要說的語言",
       "detect": "自動偵測",
       "detectUnavailable": "目前的語音辨識不能自動偵測語言，需要 Qwen3-ASR 1.7B GGUF 或 API 模型。",
-      "speakBothUnavailable": "目前的語音辨識分不出{{mine}}和{{language}}，需要 Qwen3-ASR 1.7B GGUF 或 API 模型。"
+      "speakBothUnavailable": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages."
     },
     "wizard": {
       "pathTitle": "Kotomimi 自由搭配",

@@ -24,7 +24,7 @@
  * Pure: the component keeps the clock (`SubtitleLanes`).
  */
 import type { LegName } from '../conversation/types';
-import type { Entry } from '../projection/types';
+import type { Entry, Row } from '../projection/types';
 
 export const HOLD_LEAST_MS = 1200;
 export const HOLD_MOST_MS = 2500;
@@ -52,13 +52,20 @@ export function nextShown(at: number, last: number): number {
 
 export interface Answered { id: string; text: string; language: string }
 
-/** A leg's answered sentences, oldest first: what has a translation written. */
+/** A translated caption, or standalone coaching feedback. Combined feedback never takes a translation's turn. */
+export function captionRows(entry: Extract<Entry, { kind: 'exchange' }>): readonly Row[] {
+  if (entry.translation.some((row) => row.text.trim())) return entry.translation;
+  return entry.feedback?.filter((row) => !row.accompaniesTranslation) ?? [];
+}
+
+/** A leg's answered sentences, oldest first: translated captions and standalone coaching feedback. */
 export function answeredOf(entries: readonly Entry[], leg: LegName): Answered[] {
   const out: Answered[] = [];
   for (const entry of entries) {
     if (entry.kind !== 'exchange' || entry.leg !== leg) continue;
-    const text = entry.translation.map((row) => row.text).join('').trim();
-    if (text) out.push({ id: entry.id, text, language: entry.translation[0]?.language || entry.languages.target });
+    const rows = captionRows(entry);
+    const text = rows.map((row) => row.text).join('').trim();
+    if (text) out.push({ id: entry.id, text, language: rows[0]?.language || (rows[0]?.purpose === 'feedback' ? entry.languages.source : entry.languages.target) });
   }
   return out;
 }

@@ -38,7 +38,7 @@ function fakeRecognizer() {
   return fake;
 }
 
-function socket(dialled = LAN_PIPELINE, resolve: (language: string, wanted: string) => { modelId: string; streaming: boolean } | null = () => ({ modelId: 'sensevoice-int8', streaming: false })) {
+function socket(dialled = LAN_PIPELINE, resolve: (language: string, wanted: string, also?: string) => { modelId: string; streaming: boolean; also?: string } | null = () => ({ modelId: 'sensevoice-int8', streaming: false })) {
   const sent: Array<Record<string, unknown>> = [];
   const closed: Array<{ code: number; reason: string }> = [];
   const engines: Array<ReturnType<typeof fakeRecognizer>> = [];
@@ -46,7 +46,7 @@ function socket(dialled = LAN_PIPELINE, resolve: (language: string, wanted: stri
   const asked: Array<[string, string]> = [];
   const t = new LanTranscriber({
     recognizer: () => { const e = fakeRecognizer(); engines.push(e); return e; },
-    resolve: (language, wanted) => { asked.push([language, wanted]); return resolve(language, wanted); },
+    resolve: (language, wanted, also) => { asked.push([language, wanted]); return resolve(language, wanted, also); },
     send: (event) => sent.push(event),
     close: (code, reason) => closed.push({ code, reason }),
     clock,
@@ -96,6 +96,34 @@ describe('what the main process says of the firewall', () => {
 });
 
 describe('a Realtime socket of a sharing Kotomimi', () => {
+  it('negotiates two languages and returns the actual language with each final transcript', async () => {
+    const resolve = vi.fn((language: string, _wanted: string, also?: string) => ({ modelId: `apple-speech:${language}`, streaming: true, also }));
+    const s = socket(LAN_PIPELINE, resolve);
+    s.update('en-US', { model: 'apple-speech:en', languages: ['en-US', 'fr-FR'] });
+    expect(resolve).toHaveBeenCalledWith('en', 'apple-speech:en', 'fr');
+    expect(s.sent[0]).toMatchObject({ session: { audio: { input: { transcription: { language: 'en', languages: ['en', 'fr'] } } } } });
+    await s.engine().loaded();
+    s.engine().onResult?.({ text: 'Bonjour', language: 'fr', durationMs: 100, recognitionTimeMs: 1 });
+    expect(s.sent[s.sent.length - 1]).toMatchObject({ type: 'conversation.item.input_audio_transcription.completed', transcript: 'Bonjour', language: 'fr' });
+    s.engine().onResult?.({ text: 'Hello', language: 'en', durationMs: 100, recognitionTimeMs: 1 });
+    expect(s.sent[s.sent.length - 1]).toMatchObject({ transcript: 'Hello', language: 'en' });
+    s.engine().onResult?.({ text: 'Uncertain', durationMs: 100, recognitionTimeMs: 1 });
+    expect(s.sent[s.sent.length - 1]).toMatchObject({ type: 'error', error: { code: 'transcription_failed' } });
+  });
+
+  it('refuses malformed or unsupported pairs without starting a single-language substitute', () => {
+    for (const languages of [[], ['en'], ['en', 'fr', 'de'], ['en', 'en-US'], ['en', 'auto'], ['fr', 'en'], ['en', 7], 'en,fr']) {
+      const s = socket();
+      s.update('en', { languages });
+      expect(s.sent[0]).toMatchObject({ type: 'error', error: { code: 'invalid_languages' } });
+      expect(s.engines).toHaveLength(0);
+    }
+    const single = socket();
+    single.update('en', { languages: ['en', 'fr'] });
+    expect(single.sent[0]).toMatchObject({ type: 'error', error: { code: 'bilingual_unavailable' } });
+    expect(single.engines).toHaveLength(0);
+  });
+
   it('announces its session, and confirms a configuration at once while the model loads', () => {
     const s = socket();
     s.t.open();

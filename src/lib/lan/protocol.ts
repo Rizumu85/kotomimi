@@ -50,6 +50,8 @@ export interface SharedModel {
   kind: 'asr' | 'translate' | 'feedback';
   /** The languages it takes, as the catalog codes them; empty: any. */
   languages: readonly string[];
+  /** Can arbitrate between two installed languages of this recognizer's family. */
+  bilingual?: boolean;
 }
 
 /** `GET /v1/models`: the pipeline first, then every model shared. */
@@ -63,7 +65,7 @@ export function capabilityList(models: readonly SharedModel[]): { object: 'list'
     object: 'list',
     data: [
       { id: LAN_PIPELINE, capabilities: null },
-      ...models.map((m) => ({ id: m.id, capabilities: [m.kind === 'asr' ? 'transcript' : m.kind], languages: m.languages })),
+      ...models.map((m) => ({ id: m.id, capabilities: [m.kind === 'asr' ? 'transcript' : m.kind, ...(m.kind === 'asr' && m.bilingual ? ['bilingual'] : [])], languages: m.languages })),
     ],
   };
 }

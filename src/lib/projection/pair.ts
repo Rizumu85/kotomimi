@@ -6,8 +6,8 @@ export const DEFAULT_PAIRING: PairingThresholds = { minOverlap: 0.5, proximityMs
 /**
  * `origin` inference for a leg's segments that state none: by maximum media-
  * time overlap where both sides carry `timing`, otherwise by how soon after a
- * source the translation opened. Each source pairs at most once; translations
- * are matched in order of opening, a tie going to the earlier-opened source.
+ * source the translation opened. Each source pairs at most once per answer
+ * purpose; answers are matched in opening order, a tie going to the earlier source.
  * Unpaired is the normal case, not an error.
  *
  * Windowed (F16, Stage 2 Gemini): `segments` is in the order L1 opened them
@@ -25,9 +25,12 @@ export function inferPairs(segments: readonly Segment[], t: PairingThresholds): 
   const sources = segments.filter((s) => s.side === 'source' && s.origin === undefined);
   const translations = segments.filter((s) => s.side === 'translation' && s.origin === undefined);
   const timed = sources.flatMap((s, i) => (s.timing ? [i] : []));
-  const taken = new Set<SegmentId>();
+  const takenTranslation = new Set<SegmentId>();
+  const takenFeedback = new Set<SegmentId>();
   const out = new Map<SegmentId, SegmentId>();
   for (const tr of translations) {
+    // Feedback may answer the same source, but cannot consume a translation's match.
+    const taken = tr.purpose === 'feedback' ? takenFeedback : takenTranslation;
     const near = windowOf(sources, tr.openedAt - t.proximityMs, tr.openedAt);
     let best: Segment | undefined;
     let bestScore = -Infinity;
@@ -89,12 +92,12 @@ function pairScore(src: Segment, tr: Segment, t: PairingThresholds): number | nu
 }
 
 /** What `inferPairs` reads of a segment: a partial's text changes none of it. */
-interface PairInput { id: SegmentId; side: Segment['side']; origin: string | undefined; openedAt: number; startMs: number | undefined; endMs: number | undefined }
+interface PairInput { id: SegmentId; side: Segment['side']; purpose: Segment['purpose']; origin: string | undefined; openedAt: number; startMs: number | undefined; endMs: number | undefined }
 
-const pairInput = (s: Segment): PairInput => ({ id: s.id, side: s.side, origin: s.origin, openedAt: s.openedAt, startMs: s.timing?.startMs, endMs: s.timing?.endMs });
+const pairInput = (s: Segment): PairInput => ({ id: s.id, side: s.side, purpose: s.purpose, origin: s.origin, openedAt: s.openedAt, startMs: s.timing?.startMs, endMs: s.timing?.endMs });
 
 const sameInput = (a: PairInput, s: Segment): boolean =>
-  a.id === s.id && a.side === s.side && a.origin === s.origin && a.openedAt === s.openedAt && a.startMs === s.timing?.startMs && a.endMs === s.timing?.endMs;
+  a.id === s.id && a.side === s.side && a.purpose === s.purpose && a.origin === s.origin && a.openedAt === s.openedAt && a.startMs === s.timing?.startMs && a.endMs === s.timing?.endMs;
 
 interface Cached { session: string; t: PairingThresholds; inputs: PairInput[]; map: Map<SegmentId, SegmentId> }
 

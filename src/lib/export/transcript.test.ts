@@ -7,7 +7,10 @@ let n = 0;
 const seg = (leg: 'speaker' | 'participant', over: Partial<Segment>): Segment => ({
   id: `s:${leg}:${++n}`, ref: n, side: 'source', text: '', final: true, openedAt: 0, marks: [], speech: [], ...over,
 });
-const rows = (s: Segment) => [{ key: `${s.id}:0`, segmentId: s.id, side: s.side, start: 0, end: s.text.length, text: s.text, final: s.final }];
+const rows = (s: Segment) => [{
+  key: `${s.id}:0`, segmentId: s.id, side: s.side, start: 0, end: s.text.length, text: s.text, final: s.final,
+  ...(s.purpose ? { purpose: s.purpose } : {}), ...(s.accompaniesTranslation ? { accompaniesTranslation: s.accompaniesTranslation } : {}),
+}];
 
 const src = seg('speaker', { text: '今天天气很好。我们去公园吧。', openedAt: 1_000 });
 const tr = seg('speaker', { side: 'translation', text: 'The weather is nice. Let us go to the park.', openedAt: 1_500 });
@@ -119,6 +122,27 @@ describe('scope, header and metadata', () => {
 });
 
 describe('renderTranscriptJson', () => {
+  it('keeps feedback and its purpose separate from translated text in JSON and text exports', () => {
+    const source = seg('speaker', { text: 'I goes.' });
+    const translation = seg('speaker', { side: 'translation', purpose: 'translation', text: 'Je vais.' });
+    const feedback = seg('speaker', { side: 'translation', purpose: 'feedback', accompaniesTranslation: true, text: 'I go.\nPresent tense.' });
+    const leg: Leg = { leg: 'speaker', session: 's', languages: { source: 'en', target: 'fr' }, segments: [source, translation, feedback], notices: [] };
+    const entry: Entry = { kind: 'exchange', id: 'combined', leg: 'speaker', languages: leg.languages, pairing: 'stated', source: rows(source), translation: rows(translation), feedback: rows(feedback), t: 0 };
+    const [group] = renderTranscriptJson([entry], [leg]).groups;
+    expect(group.translation).toMatchObject({ text: 'Je vais.', purpose: 'translation' });
+    expect(group.feedback).toMatchObject({ text: feedback.text, purpose: 'feedback', accompaniesTranslation: true });
+    const text = renderTranscriptTxt([entry], [leg], { ...options, labels: { ...options.labels, feedback: 'Grammar' } });
+    expect(text).toContain('  → Je vais.\n  Grammar: I go.\nPresent tense.');
+    const sourceOnly = renderTranscriptJson([entry], [leg], { scope: { speaker: 'source', participant: 'none' } }).groups[0];
+    expect(sourceOnly).not.toHaveProperty('translation');
+    expect(sourceOnly).not.toHaveProperty('feedback');
+    const feedbackOnly = { ...entry, source: [], translation: [] };
+    const onlyAnswers = renderTranscriptJson([feedbackOnly], [leg], { scope: { speaker: 'translation', participant: 'none' } }).groups;
+    expect(onlyAnswers).toHaveLength(1);
+    expect(onlyAnswers[0].translation).toBeNull();
+    expect(onlyAnswers[0].feedback?.purpose).toBe('feedback');
+  });
+
   it('keeps pairing and ids on every group and lists notices separately', () => {
     const json = renderTranscriptJson(entries, legs);
     expect(json.groups.map((g) => [g.id, g.pairing, g.source?.text, g.translation?.text])).toEqual([

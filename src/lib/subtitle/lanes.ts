@@ -27,9 +27,11 @@
  * A row is the user's own sentence: it shows the newest at once, so that
  * they see they were heard, and its answer when it comes. Pure.
  */
+import type { SegmentPurpose } from '../contract/adapter';
 import type { LegName, SegmentId } from '../conversation/types';
 import type { Entry, Row } from '../projection/types';
 import { showsSide, type LegFilters, type NoticeEntry } from '../view/filter';
+import { captionRows } from './dwell';
 
 /** A stretch of a lane's text: a row of the conversation, with where it begins in its segment — what karaoke lights it by. */
 export interface LanePiece {
@@ -49,6 +51,7 @@ export interface LaneText {
   language?: string;
   /** The first segment it is cut from, for a key that changes with the sentence. */
   segmentId?: SegmentId;
+  purpose?: SegmentPurpose;
 }
 
 export interface Lane {
@@ -64,6 +67,8 @@ export interface Lane {
   source?: LaneText;
   /** What answers it. Absent: not shown. Empty text: nothing has answered yet. */
   answer?: LaneText & { notice?: NoticeEntry };
+  /** Feedback on this exact exchange, with its own source even when the caption line runs on. */
+  feedback?: LaneText & { said: LaneText; origin: string };
   /** A sentence newer than the one answered is waiting for its answer (a pair), or the one shown is (a row). */
   pending: boolean;
   /**
@@ -141,20 +146,20 @@ export function buildLanes(
     if (showsAnswer) lane.answer = { text: '', pieces: [] };
 
     // The newest sentence of this side with anything written, and the newest that has been answered.
-    const written = (i: number, side: 'source' | 'translation'): string => {
+    const written = (i: number, side: 'source' | 'answer'): string => {
       const entry = mine[i];
-      return entry?.kind === 'exchange' ? joined(entry[side]) : '';
+      return entry?.kind === 'exchange' ? joined(side === 'source' ? entry.source : captionRows(entry)) : '';
     };
     let newest = -1;
     let answered = -1;
     for (let i = mine.length - 1; i >= 0 && (newest < 0 || answered < 0); i--) {
-      if (newest < 0 && (written(i, 'source') || written(i, 'translation'))) newest = i;
-      if (answered < 0 && written(i, 'translation')) answered = i;
+      if (newest < 0 && (written(i, 'source') || written(i, 'answer'))) newest = i;
+      if (answered < 0 && written(i, 'answer')) answered = i;
     }
     // A pair holds the answer it shows until that has been read: a newer one waits its turn.
     if (shape === 'pair' && held[leg] !== undefined) {
       const at = mine.findIndex((entry) => entry.id === held[leg]);
-      if (at >= 0 && at < answered && written(at, 'translation')) answered = at;
+      if (at >= 0 && at < answered && written(at, 'answer')) answered = at;
     }
     // A notice after the newest sentence is what the side has to say now, where its answers are shown.
     const last = mine[mine.length - 1];
@@ -177,7 +182,15 @@ export function buildLanes(
       if (lane.source && lane.answer && joined(said.source)) lane.answers = joined(said.source);
       if (lane.answer && joined(said.translation)) {
         const row = said.translation[0];
-        lane.answer = { text: joined(said.translation), pieces: piecesOf(said.translation), language: row?.language || said.languages.target, ...(row ? { segmentId: row.segmentId } : {}) };
+        lane.answer = { text: joined(said.translation), pieces: piecesOf(said.translation), language: row?.language || said.languages.target, ...(row ? { segmentId: row.segmentId } : {}), ...(row?.purpose ? { purpose: row.purpose } : {}) };
+      }
+      if (showsAnswer && said.feedback?.length && joined(said.feedback)) {
+        const row = said.feedback[0];
+        lane.feedback = {
+          text: joined(said.feedback), pieces: piecesOf(said.feedback), language: row.language || said.languages.source,
+          segmentId: row.segmentId, purpose: 'feedback', origin: said.id,
+          said: { text: joined(said.source), pieces: piecesOf(said.source), language: said.source[0]?.language || said.languages.source },
+        };
       }
     }
     if (lane.answer && notice) lane.answer = { text: words(notice), pieces: [], notice };
@@ -240,8 +253,9 @@ export function spacingAt(squeeze: number, roomy: LaneSpacing = ROOMY, tight: La
 
 /** The height one lane takes at a font size, spaced so: in ems of that size, for its share of the strip. */
 export function laneEms(lane: Lane, spacing: LaneSpacing): number {
-  if (lane.shape === 'row') return ROW_SCALE * (spacing.rowLine + spacing.rowRoman);
-  return (lane.source ? SOURCE_SCALE * (spacing.sourceLine + spacing.roman) : 0) + (lane.answer ? spacing.answerLine * spacing.answerLines : 0);
+  const feedback = lane.feedback ? ROW_SCALE * spacing.rowLine : 0;
+  if (lane.shape === 'row') return ROW_SCALE * (spacing.rowLine + spacing.rowRoman) + feedback;
+  return (lane.source ? SOURCE_SCALE * (spacing.sourceLine + spacing.roman) : 0) + (lane.answer ? spacing.answerLine * spacing.answerLines : 0) + feedback;
 }
 
 /** The height a strip of these lanes takes at a font size, spaced so. */
@@ -250,7 +264,8 @@ export function lanesHeight(lanes: readonly Lane[], fontSize: number, spacing: L
   let height = spacing.padTop + spacing.padBottom + spacing.gap * (lanes.length - 1);
   for (const lane of lanes) {
     height += fontSize * laneEms(lane, spacing);
-    if (lane.shape === 'pair' && lane.source && lane.answer) height += spacing.inner;
+    const texts = (lane.shape === 'row' ? 1 : Number(!!lane.source) + Number(!!lane.answer)) + Number(!!lane.feedback);
+    height += Math.max(0, texts - 1) * spacing.inner;
   }
   return Math.ceil(height);
 }

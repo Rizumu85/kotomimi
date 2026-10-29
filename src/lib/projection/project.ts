@@ -17,7 +17,7 @@ export interface Projector {
 
 type Exchange = Extract<Entry, { kind: 'exchange' }>;
 
-interface Group { id: string; pairing: Exchange['pairing']; source: Segment[]; translation: Segment[]; t: number; video?: boolean }
+interface Group { id: string; pairing: Exchange['pairing']; source: Segment[]; translation: Segment[]; feedback: Segment[]; t: number; video?: boolean }
 
 export function createProjector(): Projector {
   const rows = new WeakMap<Segment, { cut: CutSettings; rows: Row[] }>();
@@ -45,14 +45,16 @@ export function createProjector(): Projector {
       const next: Entry[] = [];
       for (const leg of legs) {
         for (const group of groupsOf(leg, pairsOf(leg, settings.pairing))) {
+          const feedback = group.feedback.flatMap((s) => rowsOf(s, cut));
           const candidate: Exchange = {
             kind: 'exchange', id: group.id, leg: leg.leg, languages: leg.languages, pairing: group.pairing,
             source: group.source.flatMap((s) => rowsOf(s, cut)),
             translation: group.translation.flatMap((s) => rowsOf(s, cut)),
+            ...(feedback.length ? { feedback } : {}),
             t: group.t,
             ...(group.video ? { lane: 'video' as const } : {}),
           };
-          if (candidate.source.length === 0 && candidate.translation.length === 0) continue;
+          if (candidate.source.length === 0 && candidate.translation.length === 0 && feedback.length === 0) continue;
           next.push(reuse(entries, kept, candidate));
         }
         for (const notice of leg.notices) {
@@ -74,7 +76,7 @@ function groupsOf(leg: Leg, inferred: Map<SegmentId, SegmentId>): Group[] {
   const get = (id: string, pairing: Exchange['pairing']): Group => {
     let g = byId.get(id);
     if (!g) {
-      g = { id, pairing, source: [], translation: [], t: Infinity };
+      g = { id, pairing, source: [], translation: [], feedback: [], t: Infinity };
       byId.set(id, g);
       order.push(g);
     }
@@ -90,7 +92,7 @@ function groupsOf(leg: Leg, inferred: Map<SegmentId, SegmentId>): Group[] {
     else if (seg.side === 'translation' && inferred.has(seg.id)) g = get(`${leg.leg}:s:${inferred.get(seg.id)}`, 'inferred');
     else if (seg.side === 'source' && pairedSources.has(seg.id)) g = get(`${leg.leg}:s:${seg.id}`, 'inferred');
     else g = get(`${leg.leg}:s:${seg.id}`, 'none');
-    (seg.side === 'source' ? g.source : g.translation).push(seg);
+    (seg.side === 'source' ? g.source : seg.purpose === 'feedback' ? g.feedback : g.translation).push(seg);
     g.t = Math.min(g.t, seg.openedAt);
   }
   return order;
@@ -134,7 +136,7 @@ function sameEntry(a: Entry, b: Entry): boolean {
     // Languages by value: a Leg snapshot may be rebuilt around the same segments.
     return a.leg === b.leg && a.languages.source === b.languages.source && a.languages.target === b.languages.target
       && a.pairing === b.pairing && a.t === b.t && a.lane === b.lane
-      && sameRows(a.source, b.source) && sameRows(a.translation, b.translation);
+      && sameRows(a.source, b.source) && sameRows(a.translation, b.translation) && sameRows(a.feedback ?? [], b.feedback ?? []);
   }
   return false;
 }
@@ -152,6 +154,6 @@ function sameRows(a: readonly Row[], b: readonly Row[]): boolean {
 export function sameRow(a: Row, b: Row): boolean {
   if (a === b) return true;
   if (a.key !== b.key || a.segmentId !== b.segmentId || a.side !== b.side || a.start !== b.start || a.end !== b.end) return false;
-  if (a.text !== b.text || a.final !== b.final || a.language !== b.language) return false;
+  if (a.text !== b.text || a.final !== b.final || a.language !== b.language || a.purpose !== b.purpose || a.accompaniesTranslation !== b.accompaniesTranslation) return false;
   return true;
 }

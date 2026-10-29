@@ -41,7 +41,9 @@ export const appLanModels: LanModels = {
     const native = nativeShared();
     return [...native.filter((m) => m.kind === 'asr'), ...recognizers, ...native.filter((m) => m.kind !== 'asr'), ...translators];
   },
-  recognizer(language, named_) {
+  recognizer(language, named_, also) {
+    // Paired recognition is an explicit capability, never a reason to substitute another engine.
+    if (also) return nativeRecognizerFor(language, named_, also);
     // A name this computer shares nothing under — a model it had once, which a device still has chosen — is no name:
     // the choice is this computer's, as when none is given, and not a refusal or a lesser model.
     const wanted = knownHere(named_);

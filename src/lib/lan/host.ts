@@ -30,7 +30,7 @@ export interface LanBridge {
 export interface LanModels {
   /** Every recognizer and translation model ready to run. */
   shared(): SharedModel[];
-  recognizer(language: string, wanted: string): { modelId: string; streaming: boolean } | null;
+  recognizer(language: string, wanted: string, also?: string): { modelId: string; streaming: boolean; also?: string } | null;
   translator(source: string, target: string, wanted: string): string | null;
   /** The feedback model a device named, where this computer lends one by that name; null for any other name. */
   coach?(wanted: string): string | null;
@@ -39,7 +39,7 @@ export interface LanModels {
 export interface LanHostDeps {
   bridge: LanBridge;
   models: LanModels;
-  engines: { recognizer(model: { modelId: string; streaming: boolean }): Recognizer; translator(): Translator; /** The feedback engine: its answer to a chat, and the hold that keeps it up. Absent: no feedback model is lent. */ coach?: Pick<CoachDeps, 'answer' | 'hold'> };
+  engines: { recognizer(model: { modelId: string; streaming: boolean; also?: string }): Recognizer; translator(): Translator; /** The feedback engine: its answer to a chat, and the hold that keeps it up. Absent: no feedback model is lent. */ coach?: Pick<CoachDeps, 'answer' | 'hold'> };
   clock: Clock;
   /** How many sockets are open changed: the settings show it. */
   onClients?(count: number): void;

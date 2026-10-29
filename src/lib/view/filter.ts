@@ -91,6 +91,7 @@ export function displayItems(entries: readonly Entry[], filters: LegFilters, pre
     const rows = [
       ...(showsSide(filter, 'source') ? entry.source : []),
       ...(showsSide(filter, 'translation') ? entry.translation : []),
+      ...(showsSide(filter, 'translation') ? entry.feedback ?? [] : []),
     ];
     const said = entry.source.map((row) => row.text).join('').trim();
     const answer = entry.translation.map((row) => row.text).join('').trim();
@@ -100,7 +101,10 @@ export function displayItems(entries: readonly Entry[], filters: LegFilters, pre
       const header = lastLeg !== entry.leg || lastVideo !== video;
       const endsSegment = rows[i + 1]?.segmentId !== row.segmentId;
       const old = byKey.get(row.key);
-      const mine = row.side === 'translation' ? answers : undefined;
+      const feedback = row.purpose === 'feedback'
+        ? entry.feedback?.filter((part) => part.segmentId === row.segmentId).map((part) => part.text).join('').trim()
+        : undefined;
+      const mine = row.side === 'translation' ? (feedback && said ? { said, saidLanguage: entry.source[0]?.language || entry.languages.source, answer: feedback } : answers) : undefined;
       out.push(
         old?.kind === 'row' && sameRow(old.row, row) && old.header === header && old.endsSegment === endsSegment
           && old.t === entry.t && old.leg === entry.leg

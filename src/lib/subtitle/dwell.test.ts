@@ -41,7 +41,7 @@ describe('how long a caption stays before the next takes its place', () => {
 describe('a leg’s answered sentences', () => {
   const row = (id: string, text: string, side: 'source' | 'translation', language?: string): Row =>
     ({ key: `${id}:0`, segmentId: id, side, start: 0, end: text.length, text, final: true, ...(language ? { language } : {}) });
-  const said = (id: string, leg: 'speaker' | 'participant', source: string, answer = '', language?: string): Entry => ({
+  const said = (id: string, leg: 'speaker' | 'participant', source: string, answer = '', language?: string): Extract<Entry, { kind: 'exchange' }> => ({
     kind: 'exchange', id, leg, languages: { source: 'ja', target: 'zh-CN' }, pairing: 'stated',
     source: [row(`s-${id}`, source, 'source')], translation: answer ? [row(`t-${id}`, answer, 'translation', language)] : [], t: 0,
   });
@@ -59,5 +59,22 @@ describe('a leg’s answered sentences', () => {
       { id: 'd', text: 'Hello.', language: 'en' },
     ]);
     expect(answeredOf(entries, 'speaker')).toEqual([{ id: 'b', text: 'こんにちは。', language: 'zh-CN' }]);
+  });
+
+  it('includes standalone coaching feedback between translations, while combined feedback keeps the translation turn', () => {
+    const feedback = (id: string, combined = false): Extract<Entry, { kind: 'exchange' }> => ({
+      ...said(id, 'speaker', 'I goes.'),
+      kind: 'exchange', source: [row(`s-${id}`, 'I goes.', 'source', 'en')], translation: [],
+      feedback: [{ ...row(`f-${id}`, 'I go.', 'translation', 'en'), purpose: 'feedback', ...(combined ? { accompaniesTranslation: true as const } : {}) }],
+    });
+    const native = said('native', 'speaker', 'Nous arrivons.', 'We arrive.', 'en');
+    const practice = feedback('practice');
+    const combined = feedback('combined', true);
+    expect(answeredOf([native, practice, combined], 'speaker')).toEqual([
+      { id: 'native', text: 'We arrive.', language: 'en' },
+      { id: 'practice', text: 'I go.', language: 'en' },
+    ]);
+    const translated = { ...combined, translation: [row('translation', 'Je vais.', 'translation', 'fr')] };
+    expect(answeredOf([translated], 'speaker')).toEqual([{ id: 'combined', text: 'Je vais.', language: 'fr' }]);
   });
 });

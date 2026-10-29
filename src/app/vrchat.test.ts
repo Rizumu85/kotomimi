@@ -66,13 +66,13 @@ describe('vrchatHolds', () => {
 });
 
 describe('finishedLine', () => {
-  it('is, for a sentence the user said in the other side\'s language, what they said: alone, or over its answer back where both show (fork)', () => {
+  it('shows the reverse translation when enabled, or the original with it where both show', () => {
     const inJapanese = (translation: string): Entry => {
       const e = exchange('a', '次のワールドに行こう', translation);
       return e.kind === 'exchange' ? { ...e, source: e.source.map((r) => ({ ...r, language: 'ja' })) } : e;
     };
     const back = { language: 'ja', back: true };
-    expect(finishedLine(inJapanese('我们去下一个世界吧'), 'translation', false, false, back)).toBe('次のワールドに行こう');
+    expect(finishedLine(inJapanese('我们去下一个世界吧'), 'translation', false, false, back)).toBe('我们去下一个世界吧');
     expect(finishedLine(inJapanese('我们去下一个世界吧'), 'both', false, false, back)).toBe('次のワールドに行こう\n我们去下一个世界吧');
     // Not answered back: shown as said, with no translation to wait for.
     expect(finishedLine(inJapanese(''), 'both', false, false, { language: 'ja', back: false })).toBe('次のワールドに行こう');
@@ -202,6 +202,44 @@ describe('the chatbox', () => {
     const t = setup({ coached: () => true });
     t.show([exchange('a', '今日は行きます', '')]);
     expect(t.chatboxLines()).toEqual(['今日は行きます']);
+  });
+
+  it('translates a coached speaker switching to their own language without publishing feedback', () => {
+    useVRChatStore.setState({ chatbox: 'translation' });
+    const t = setup({ coached: () => true, theirs: () => ({ language: 'fr', back: false }) });
+    const sentence = (id: string, source: string, answer: string, language: string): Entry => {
+      const e = exchange(id, source, answer);
+      return e.kind === 'exchange' ? { ...e, source: e.source.map((r) => ({ ...r, language })) } : e;
+    };
+    const own = sentence('own', 'Good morning', 'Bonjour', 'en');
+    t.show([own]);
+    expect(t.chatboxLines()).toEqual(['Bonjour']);
+    t.show([own, sentence('practice', 'Je suis ici', 'Your grammar is correct.', 'fr')]);
+    t.timers.shift()?.();
+    expect(t.chatboxLines()).toEqual(['Bonjour', 'Je suis ici']);
+  });
+
+  it.each(['before', 'after'] as const)('publishes only the translation when combined feedback arrives %s it', (order) => {
+    useVRChatStore.setState({ chatbox: 'translation' });
+    const t = setup({ coached: () => true, theirs: () => ({ language: 'fr', back: true }) });
+    const sentence = (translated: boolean, feedback: boolean): Entry => {
+      const entry = exchange('both', 'Je suis ici', translated ? 'I am here' : '');
+      if (entry.kind !== 'exchange') throw new Error('expected exchange');
+      return {
+        ...entry,
+        source: entry.source.map((r) => ({ ...r, language: 'fr' })),
+        translation: entry.translation.map((r) => ({ ...r, purpose: 'translation' })),
+        feedback: feedback ? [{ ...row('Private grammar explanation'), side: 'translation', purpose: 'feedback' }] : [],
+      };
+    };
+    t.show([sentence(false, false)]);
+    expect(t.chatboxLines()).toEqual([]);
+    t.show([sentence(order === 'after', order === 'before')]);
+    expect(t.chatboxLines()).toEqual(order === 'after' ? ['I am here'] : []);
+    t.show([sentence(true, true)]);
+    t.timers.shift()?.();
+    expect(t.chatboxLines()).toEqual(['I am here']);
+    expect(useVRChatStore.getState().recent).toEqual({ said: 'Je suis ici', translation: 'I am here' });
   });
 });
 

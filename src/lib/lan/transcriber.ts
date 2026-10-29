@@ -23,17 +23,19 @@ export interface Recognizer {
   flush(): void;
   dispose(): void;
   onPartialResult: ((text: string) => void) | null;
-  onResult: ((result: { text: string; durationMs: number; recognitionTimeMs: number }) => void) | null;
+  onResult: ((result: { text: string; durationMs: number; recognitionTimeMs: number; language?: string }) => void) | null;
   onSpeechStart: (() => void) | null;
   onError: ((error: string) => void) | null;
   onFatal: ((error: string) => void) | null;
 }
 
+export interface RecognitionModel { modelId: string; streaming: boolean; also?: string }
+
 export interface TranscriberDeps {
   /** A recognizer for this model: the app's own engine, a fake in tests. */
-  recognizer(model: { modelId: string; streaming: boolean }): Recognizer;
+  recognizer(model: RecognitionModel): Recognizer;
   /** The model for a language: the one named when it is shared and hears that language, else the best shared. Null: none. */
-  resolve(language: string, wanted: string): { modelId: string; streaming: boolean } | null;
+  resolve(language: string, wanted: string, also?: string): RecognitionModel | null;
   send(event: Record<string, unknown>): void;
   close(code: number, reason: string): void;
   clock: Clock;
@@ -143,25 +145,36 @@ export class LanTranscriber {
   }
 
   private configure(session: unknown): void {
-    const input = ((session ?? {}) as { audio?: { input?: { transcription?: { language?: unknown; model?: unknown }; turn_detection?: unknown } } }).audio?.input ?? {};
+    const input = ((session ?? {}) as { audio?: { input?: { transcription?: { language?: unknown; languages?: unknown; model?: unknown }; turn_detection?: unknown } } }).audio?.input ?? {};
     const language = baseLanguage(input.transcription?.language);
     // "auto" is a language here: answered by a recognizer that tells languages apart, where one is shared (`nativeShare.ts`).
     if (!language) return this.error('language_required', 'Say which language is spoken, or "auto" to have it detected (audio.input.transcription.language).');
+    const candidates = input.transcription?.languages;
+    let also: string | undefined;
+    if (candidates !== undefined) {
+      if (!Array.isArray(candidates) || candidates.length !== 2) return this.error('invalid_languages', 'Name exactly two distinct candidate languages.');
+      const pair = candidates.map(baseLanguage);
+      if (pair.some((l) => !/^[a-z]{2,3}$/.test(l) || l === 'auto') || pair[0] === pair[1] || pair[0] !== language) {
+        return this.error('invalid_languages', 'Name two distinct languages, with the primary language first.');
+      }
+      also = pair[1];
+    }
     const named = typeof input.transcription?.model === 'string' ? input.transcription.model : '';
     const wanted = named || (this.dialled !== LAN_PIPELINE ? this.dialled : '');
-    const model = this.deps.resolve(language, wanted);
+    const model = also ? this.deps.resolve(language, wanted, also) : this.deps.resolve(language, wanted);
     if (!model) return this.error('model_not_found', `This Kotomimi shares no speech recognition model for "${language}".`);
+    if (also && model.also !== also) return this.error('bilingual_unavailable', 'This recognizer cannot hear the requested pair of languages.');
     const vad = vadFrom(input.turn_detection);
-    const asked = JSON.stringify([model.modelId, language, vad]);
+    const asked = JSON.stringify([model.modelId, language, vad, model.also]);
     if (asked !== this.running) this.start(model, language, vad, asked);
     this.deps.send({
       type: 'session.updated',
-      session: { id: this.sessionId, object: 'realtime.session', type: 'transcription', audio: { input: { transcription: { model: model.modelId, language }, turn_detection: input.turn_detection ?? null } } },
+      session: { id: this.sessionId, object: 'realtime.session', type: 'transcription', audio: { input: { transcription: { model: model.modelId, language, ...(also ? { languages: [language, also] } : {}) }, turn_detection: input.turn_detection ?? null } } },
     });
   }
 
   /** Loads the model. The session is confirmed at once and the audio held meanwhile: a large model can take longer to load than a client waits for its confirmation. */
-  private start(model: { modelId: string; streaming: boolean }, language: string, vad: VadWebConfig, asked: string): void {
+  private start(model: RecognitionModel, language: string, vad: VadWebConfig, asked: string): void {
     this.engine?.dispose();
     this.ready = false;
     this.commitWhenReady = false;
@@ -172,7 +185,21 @@ export class LanTranscriber {
     const mine = () => this.engine === engine && !this.ended;
     engine.onSpeechStart = () => { if (mine()) this.speechStarted(); };
     engine.onPartialResult = (text) => { if (mine()) this.partial(text); };
-    engine.onResult = (result) => { if (mine()) this.final(result.text); };
+    engine.onResult = (result) => {
+      if (!mine()) return;
+      const heard = baseLanguage(result.language);
+      if (model.also && heard !== language && heard !== model.also) {
+        this.failed('The recognizer did not identify which candidate language was spoken.');
+        return;
+      }
+      // Empty paired finals reject tentative words. An empty completion would otherwise preserve the old deltas.
+      if (model.also && !result.text.trim()) {
+        if (this.item?.sent) this.failed('The recognizer did not finalize any words for this utterance.');
+        else this.item = null;
+        return;
+      }
+      this.final(result.text, heard || undefined);
+    };
     engine.onError = (message) => { if (mine()) this.failed(message); };
     engine.onFatal = (message) => {
       if (!mine()) return;
@@ -269,7 +296,7 @@ export class LanTranscriber {
     item.sent = settled;
   }
 
-  private final(raw: string): void {
+  private final(raw: string, language?: string): void {
     const text = raw.trim();
     const item = this.item;
     this.item = null;
@@ -281,7 +308,7 @@ export class LanTranscriber {
     this.deps.send({ type: 'input_audio_buffer.speech_stopped', item_id: id });
     this.deps.send({ type: 'input_audio_buffer.committed', item_id: id, previous_item_id: null });
     // An empty completion closes what the deltas showed as it stands.
-    this.deps.send({ type: 'conversation.item.input_audio_transcription.completed', item_id: id, content_index: 0, transcript: cleared ? '' : text });
+    this.deps.send({ type: 'conversation.item.input_audio_transcription.completed', item_id: id, content_index: 0, transcript: cleared ? '' : text, ...(!cleared && language ? { language } : {}) });
   }
 
   /** One utterance could not be recognized: its item fails, and the session goes on. */

@@ -54,7 +54,7 @@ export function nativeShared(): SharedModel[] {
   const hearing = useNativeEngineStore.getState().status;
   const translating = useNativeTranslatorStore.getState().status;
   return [
-    ...NATIVE_MODELS.filter((m) => nativeDownloaded(hearing, m.id)).map((m): SharedModel => ({ id: m.id, kind: 'asr', languages: [...m.languages, ...(m.detects ? [AUTO] : [])] })),
+    ...NATIVE_MODELS.filter((m) => nativeDownloaded(hearing, m.id)).map((m): SharedModel => ({ id: m.id, kind: 'asr', languages: [...m.languages, ...(m.detects ? [AUTO] : [])], ...(isApple(m.id) ? { bilingual: true } : {}) })),
     // A model of every language lists none: the list is what a device reads to rule a model out.
     ...NATIVE_TRANSLATORS.filter((m) => nativeDownloaded(translating, m.id)).map((m): SharedModel => ({ id: m.id, kind: 'translate', languages: m.languages === 'any' ? [] : [...m.languages] })),
     // The feedback engine's models: chat models, lent for grammar feedback in whatever languages they are asked.
@@ -90,10 +90,17 @@ export async function nativeCoachAnswer(model: string, messages: unknown, extra:
 }
 
 /** The native recognizer for a language: the one named when it is downloaded and hears it, else — nothing named — the first downloaded that does. Null: none, and the app's own models answer. */
-export function nativeRecognizerFor(language: string, wanted: string): { modelId: string; streaming: boolean } | null {
+export function nativeRecognizerFor(language: string, wanted: string, also?: string): { modelId: string; streaming: boolean; also?: string } | null {
   const status = useNativeEngineStore.getState().status;
   const usable = (id: string) => nativeDownloaded(status, id);
   if (wanted && !isNativeRecognizer(wanted)) return null;
+  if (also) {
+    const named = wanted ? nativeModelFor(wanted, language) : NATIVE_MODELS.find((m) => isApple(m.id) && m.languages.includes(language));
+    const second = named && isApple(named.id) ? nativeModelFor(named.id, also) : null;
+    return named && second && named.id !== second.id && usable(named.id) && usable(second.id)
+      ? { modelId: named.id, streaming: true, also }
+      : null;
+  }
   // The engine the app downloads runs one model at a time. The one running — this computer's own choice, or what
   // another device is listening through — answers for whichever of that engine's models was named, where it hears the
   // language: starting another would stop it under whoever is using it. The Mac's own recognition is an engine of its
@@ -139,13 +146,14 @@ export function nativeTranslatorFor(source: string, target: string, wanted: stri
 }
 
 /** A recognizer for a native model, as the sharing host drives one; null for any other model. The engine is held while it listens: the app's own check does not stop it under a device that is using it. */
-export function nativeRecognizer(model: { modelId: string }): Recognizer | null {
+export function nativeRecognizer(model: { modelId: string; also?: string }): Recognizer | null {
   if (!isNativeRecognizer(model.modelId)) return null;
   const native = nativeModel(model.modelId);
   const asr = createNativeAsr({
     bridge: ipcNativeBridge,
     start: () => useNativeEngineStore.getState().start(native.id),
     model: native.id,
+    ...(model.also ? { also: model.also } : {}),
     ...(native.limits ? { limits: native.limits } : {}),
   });
   let release: (() => void) | null = null;

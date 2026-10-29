@@ -13,8 +13,8 @@ const ANSWER = 'I went to school yesterday.\nPast tense.';
 const answerRow = (over: Partial<Row> = {}): Row => ({
   key: 'a:0', segmentId: 'a', side: 'translation', start: 0, end: ANSWER.length, text: ANSWER, final: true, language: 'en', ...over,
 });
-const item = (row: Row, answers?: { said: string; saidLanguage?: string; answer: string }): DisplayItem => ({
-  kind: 'row', row, leg: 'speaker', languages: { source: 'en', target: 'ja' }, t: 0, header: false, endsSegment: true, ...(answers ? { answers } : {}),
+const item = (row: Row, answers?: { said: string; saidLanguage?: string; answer: string }): Extract<DisplayItem, { kind: 'row' }> => ({
+  kind: 'row', row, leg: 'speaker', languages: { source: 'ja', target: 'en' }, t: 0, header: false, endsSegment: true, ...(answers ? { answers } : {}),
 });
 const draw = (items: DisplayItem[]) =>
   render(<ConversationList items={items} lit={new Map()} replaying={null} replayLegs={new Set()} canReplay={() => false} onReplay={() => {}} compact={false} fontSize={14} empty="" />).container;
@@ -42,5 +42,38 @@ describe('ConversationList — grammar feedback', () => {
       item(answerRow({ key: 'a:1', start: 28, text: 'Past tense.' }), answers),
     ]);
     expect(container.querySelectorAll('.conversation-row')).toHaveLength(1);
+  });
+
+  it('shows a native-language sentence as a translation while coaching is enabled', () => {
+    const answer = 'Le restaurant est excellent.';
+    const container = draw([{ ...item(answerRow({ text: answer, language: 'fr' }), {
+      said: 'The restaurant is excellent.', saidLanguage: 'en', answer,
+    }), languages: { source: 'en', target: 'fr' } }]);
+    expect(container.querySelector('.kt-fix')).toBeNull();
+    expect(container.querySelector('.row-text.tr')?.textContent).toBe(answer);
+  });
+
+  it('keeps a practice correction when the answer is labelled with the explanation language', () => {
+    const container = draw([{ ...item(answerRow({ language: 'fr' }), { said: 'I goes to school yesterday.', saidLanguage: 'en', answer: ANSWER }), languages: { source: 'fr', target: 'en' } }]);
+    expect(container.querySelector('.kt-fix__gone')?.textContent).toBe('goes');
+  });
+
+  it('draws explicit feedback separately and never marks an explicit translation as a correction', () => {
+    const answers = { said: 'I goes to school yesterday.', saidLanguage: 'en', answer: ANSWER };
+    const container = draw([
+      item(answerRow({ key: 'translation:0', segmentId: 'translation', purpose: 'translation' }), answers),
+      item(answerRow({ key: 'feedback:0', segmentId: 'feedback', purpose: 'feedback', language: 'ja' }), answers),
+    ]);
+    expect(container.querySelector('[data-purpose="translation"] .kt-fix')).toBeNull();
+    expect(container.querySelector('[data-purpose="translation"] .row-text')?.textContent).toBe(ANSWER);
+    expect(container.querySelector('[data-purpose="feedback"] .kt-fix__gone')?.textContent).toBe('goes');
+    expect(container.querySelector('[data-purpose="feedback"] .kt-fix__added')?.textContent).toBe('went');
+    expect(container.querySelectorAll('.conversation-row')).toHaveLength(2);
+  });
+
+  it('keeps saved explicit feedback recognizable when coaching is currently disabled', () => {
+    useCoachingStore.setState({ coached: false });
+    const container = draw([item(answerRow({ purpose: 'feedback', language: 'ja' }), { said: 'I goes to school yesterday.', saidLanguage: 'en', answer: ANSWER })]);
+    expect(container.querySelector('.kt-fix__gone')?.textContent).toBe('goes');
   });
 });

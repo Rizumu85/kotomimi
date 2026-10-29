@@ -140,8 +140,11 @@ const MADE_MOST = 64;
  * The correction to draw where `answer`, grammar feedback on `said` (the caller knows it is: `useCoached`), found
  * something to change; null where it found nothing (a tick is drawn as it is) or is not one to mark (`correctionOf`).
  */
-export function fixOf(said: string, saidLanguage: string | undefined, answer: string): Correction | null {
+export function fixOf(said: string, saidLanguage: string | undefined, answer: string, practiceLanguage?: string): Correction | null {
   if (!said.trim() || !answer.trim()) return null;
+  // A coached speaker can switch to their own language: that answer is a translation, even if many words overlap.
+  // Feedback itself may be labelled with the explanation's language, so compare with the configured practice language.
+  if (saidLanguage && practiceLanguage && baseOf(saidLanguage) !== baseOf(practiceLanguage)) return null;
   const key = `${baseOf(saidLanguage)}\u0000${said}\u0000${answer}`;
   if (!made.has(key)) {
     if (made.size >= MADE_MOST) made.delete(made.keys().next().value as string);

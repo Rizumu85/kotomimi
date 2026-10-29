@@ -4,7 +4,7 @@ import { displayItems, nextNoticeExpiry, TRANSIENT_NOTICE_MS, visibleEntries, ty
 
 const row = (segmentId: string, side: 'source' | 'translation', k = 0, text = 'x'): Row =>
   ({ key: `${segmentId}:${k}`, segmentId, side, start: 0, end: text.length, text, final: true });
-const exchange = (id: string, leg: 'speaker' | 'participant', source: Row[], translation: Row[], t = 0): Entry =>
+const exchange = (id: string, leg: 'speaker' | 'participant', source: Row[], translation: Row[], t = 0): Extract<Entry, { kind: 'exchange' }> =>
   ({ kind: 'exchange', id, leg, languages: { source: 'en', target: 'ja' }, pairing: 'stated', source, translation, t });
 const both: LegFilters = { speaker: 'both', participant: 'both' };
 const shape = (items: ReturnType<typeof displayItems>) =>
@@ -21,6 +21,34 @@ describe("displayItems — a video's words (fork)", () => {
 });
 
 describe('displayItems', () => {
+  it('draws feedback separately with its own answer and the source it answers, while obeying side filters', () => {
+    const source = row('source', 'source', 0, 'I goes.');
+    source.language = 'en';
+    const translation = { ...row('translation', 'translation', 0, 'Je vais.'), purpose: 'translation' as const };
+    const feedback = { ...row('feedback', 'translation', 0, 'I go.\nUse the present tense.'), purpose: 'feedback' as const };
+    const entry = { ...exchange('utterance', 'speaker', [source], [translation]), feedback: [feedback] };
+    const items = displayItems([entry], both).filter((item) => item.kind === 'row');
+    expect(items.map((item) => item.row.segmentId)).toEqual(['source', 'translation', 'feedback']);
+    expect(items[2].answers).toEqual({ said: 'I goes.', saidLanguage: 'en', answer: feedback.text });
+    expect(items[1].answers?.answer).toBe(translation.text);
+    expect(shape(displayItems([entry], { ...both, speaker: 'source' }))).toEqual(['source:0+h+e']);
+    expect(displayItems([entry], { ...both, speaker: 'none' })).toEqual([]);
+    const onlyAnswers = displayItems([entry], { ...both, speaker: 'translation' }).filter((item) => item.kind === 'row');
+    expect(onlyAnswers.map((item) => item.row.purpose)).toEqual(['translation', 'feedback']);
+    expect(onlyAnswers[1].answers?.said).toBe('I goes.');
+  });
+
+  it('updates a feedback row without rebuilding an unchanged translation row', () => {
+    const source = row('source', 'source', 0, 'I goes.');
+    const translation = { ...row('translation', 'translation', 0, 'Je vais.'), purpose: 'translation' as const };
+    const feedback = { ...row('feedback', 'translation', 0, 'I go.'), purpose: 'feedback' as const };
+    const entry = { ...exchange('utterance', 'speaker', [source], [translation]), feedback: [feedback] };
+    const first = displayItems([entry], both);
+    const second = displayItems([{ ...entry, feedback: [{ ...feedback, text: 'I go.\nPresent tense.' }] }], both, first);
+    expect(second[1]).toBe(first[1]);
+    expect(second[2]).not.toBe(first[2]);
+  });
+
   it("draws an exchange's source rows before its translation rows, and opens a header where the leg changes", () => {
     const entries = [
       exchange('a', 'speaker', [row('s1', 'source')], [row('s2', 'translation')]),

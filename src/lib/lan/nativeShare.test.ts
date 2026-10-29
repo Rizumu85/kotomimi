@@ -36,8 +36,8 @@ describe('what of the native engines is shared', () => {
     useNativeEngineStore.setState({ status: MAC });
     useNativeTranslatorStore.setState({ status: TRANSLATORS });
     expect(nativeShared()).toEqual([
-      { id: 'apple-speech:ja', kind: 'asr', languages: ['ja'] },
-      { id: 'apple-speech:en', kind: 'asr', languages: ['en'] },
+      { id: 'apple-speech:ja', kind: 'asr', languages: ['ja'], bilingual: true },
+      { id: 'apple-speech:en', kind: 'asr', languages: ['en'], bilingual: true },
       // Every language: none listed.
       { id: 'index-translate-2b', kind: 'translate', languages: [] },
       { id: 'hy-mt2-1.8b', kind: 'translate', languages: expect.arrayContaining(['ja', 'zh', 'en']) },
@@ -57,6 +57,15 @@ describe('what of the native engines is shared', () => {
 });
 
 describe('the recognizer a device gets', () => {
+  it('opens any installed Apple pair and refuses missing languages or a different engine', () => {
+    useNativeEngineStore.setState({ status: status({ 'apple-speech:en': downloaded, 'apple-speech:fr': downloaded, 'apple-speech:ko': absent }) });
+    expect(appLanModels.recognizer('en', 'apple-speech:en', 'fr')).toEqual({ modelId: 'apple-speech:en', streaming: true, also: 'fr' });
+    expect(appLanModels.recognizer('fr', 'apple-speech:en', 'en')).toEqual({ modelId: 'apple-speech:fr', streaming: true, also: 'en' });
+    for (const [first, wanted, second] of [['en', 'apple-speech:en', 'ko'], ['en', 'apple-speech:en', 'ru'], ['en', 'qwen3-asr-1.7b-q8', 'fr'], ['en', 'missing-model', 'fr']]) {
+      expect(appLanModels.recognizer(first, wanted, second)).toBeNull();
+    }
+  });
+
   it('is the native one for a language it hears, when the choice is left to this computer', () => {
     useNativeEngineStore.setState({ status: PC });
     expect(appLanModels.recognizer('ja', '')).toEqual({ modelId: 'r2t2-q8', streaming: true });

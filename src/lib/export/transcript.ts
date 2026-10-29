@@ -5,6 +5,7 @@
  * form keeps `pairing` so a consumer can tell them apart.
  */
 import type { Languages, Leg, LegName, Segment, SegmentId } from '../conversation/types';
+import type { SegmentPurpose } from '../contract/adapter';
 import type { Entry, Pairing, Row } from '../projection/types';
 import { joinSegmentTexts } from '../projection/join';
 import { showsSide, type LegFilters } from '../view/filter';
@@ -14,6 +15,7 @@ export interface TranscriptLabels {
   other: string;
   noTranslation: string;
   noSource: string;
+  feedback?: string;
 }
 
 /** Which sides of each leg an export writes: the display modes' union, per leg (today's four checkboxes). */
@@ -55,7 +57,7 @@ export interface TranscriptOptions {
   header?: { labels: TranscriptHeaderLabels; meta: TranscriptMeta; formatDateTime: (ms: number) => string };
 }
 
-export interface TranscriptSide { segmentIds: SegmentId[]; text: string }
+export interface TranscriptSide { segmentIds: SegmentId[]; text: string; purpose?: SegmentPurpose; accompaniesTranslation?: true }
 
 export interface TranscriptGroup {
   id: string;
@@ -66,6 +68,7 @@ export interface TranscriptGroup {
   source?: TranscriptSide | null;
   /** absent: not in the export's scope; null: none was produced */
   translation?: TranscriptSide | null;
+  feedback?: TranscriptSide;
 }
 
 /** A notice as the export writes it: the entry without its `kind`. */
@@ -94,7 +97,12 @@ function sideOf(rows: Row[], index: Map<SegmentId, Segment>): TranscriptSide | n
   const ids = [...new Set(rows.map((row) => row.segmentId))];
   if (ids.length === 0) return null;
   const text = joinSegmentTexts(ids.map((id) => index.get(id)?.text ?? ''));
-  return { segmentIds: ids, text };
+  const purpose = rows[0]?.purpose;
+  return {
+    segmentIds: ids, text,
+    ...(purpose && rows.every((row) => row.purpose === purpose) ? { purpose } : {}),
+    ...(rows.every((row) => row.accompaniesTranslation) ? { accompaniesTranslation: true as const } : {}),
+  };
 }
 
 const ARROW = '→';
@@ -147,7 +155,8 @@ export function renderTranscriptJson(
     const group: TranscriptGroup = { id: e.id, leg: e.leg, t: e.t, pairing: e.pairing };
     if (showsSide(filter, 'source')) group.source = sideOf(e.source, index);
     if (showsSide(filter, 'translation')) group.translation = sideOf(e.translation, index);
-    if (group.source == null && group.translation == null) continue;
+    if (showsSide(filter, 'translation') && e.feedback?.length) group.feedback = sideOf(e.feedback, index) ?? undefined;
+    if (group.source == null && group.translation == null && group.feedback == null) continue;
     groups.push(group);
   }
   // A downloaded file must say what it is before thousands of groups: key
@@ -173,6 +182,7 @@ export function renderTranscriptTxt(entries: readonly Entry[], legs: readonly Le
     lines.push(`${o.formatTime(g.t)} ${g.leg === 'speaker' ? o.labels.me : o.labels.other}`);
     if ('source' in g) lines.push(`  ${g.source ? g.source.text : o.labels.noSource}`);
     if ('translation' in g) lines.push(`  ${g.translation ? `${ARROW} ${g.translation.text}` : o.labels.noTranslation}`);
+    if (g.feedback) lines.push(`  ${o.labels.feedback ?? 'Feedback'}: ${g.feedback.text}`);
     lines.push('');
   }
   return lines.join('\n');

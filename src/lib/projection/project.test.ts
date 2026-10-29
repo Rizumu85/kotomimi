@@ -23,6 +23,48 @@ describe("createProjector — a video's words (fork)", () => {
 });
 
 describe('createProjector', () => {
+  it('keeps translation and feedback apart under their shared source origin, including cut rows', () => {
+    const src = seg('speaker', { origin: 'utterance', text: 'I goes.' });
+    const tr = seg('speaker', { side: 'translation', origin: 'utterance', purpose: 'translation', text: 'Je vais.' });
+    const feedback = seg('speaker', { side: 'translation', origin: 'utterance', purpose: 'feedback', accompaniesTranslation: true, text: 'I go. Use the present tense.' });
+    const [entry] = exchanges(createProjector().project([legOf('speaker', [src, feedback, tr])], { ...DEFAULT_PROJECTION, mode: 'sentences', sentencesPerRow: 1 }));
+    expect(entry.source.map((r) => r.segmentId)).toEqual([src.id]);
+    expect(entry.translation.map((r) => [r.segmentId, r.purpose, r.text])).toEqual([[tr.id, 'translation', 'Je vais.']]);
+    expect(entry.feedback?.map((r) => [r.segmentId, r.purpose])).toEqual([[feedback.id, 'feedback'], [feedback.id, 'feedback']]);
+    expect(entry.feedback?.map((r) => r.text).join('')).toBe(feedback.text);
+    expect(entry.feedback?.every((r) => r.accompaniesTranslation)).toBe(true);
+  });
+
+  it('pairs feedback without taking a translation match and invalidates caches when purpose changes', () => {
+    const projector = createProjector();
+    const src = seg('speaker', { openedAt: 0 });
+    const answer = seg('speaker', { side: 'translation', openedAt: 10, text: 'Answer.' });
+    const other = seg('speaker', { side: 'translation', openedAt: 20, purpose: 'feedback', text: 'Feedback.' });
+    const first = exchanges(projector.project([legOf('speaker', [src, answer, other])], DEFAULT_PROJECTION));
+    expect(first).toHaveLength(1);
+    expect(first[0].translation.map((r) => r.segmentId)).toEqual([answer.id]);
+    expect(first[0].feedback?.map((r) => r.segmentId)).toEqual([other.id]);
+    const second = exchanges(projector.project([legOf('speaker', [src, { ...answer, purpose: 'feedback' }, { ...other, purpose: 'translation' }])], DEFAULT_PROJECTION));
+    expect(second[0]).not.toBe(first[0]);
+    expect(second[0].translation.map((r) => r.segmentId)).toEqual([other.id]);
+    expect(second[0].feedback?.map((r) => r.segmentId)).toEqual([answer.id]);
+  });
+
+  it('retains a feedback-only exchange and refreshes it when only its feedback changes', () => {
+    const projector = createProjector();
+    const feedback = seg('speaker', { side: 'translation', purpose: 'feedback', origin: 'utterance', text: 'Feedback.' });
+    const first = exchanges(projector.project([legOf('speaker', [feedback])], DEFAULT_PROJECTION));
+    expect(first).toHaveLength(1);
+    expect(first[0].translation).toEqual([]);
+    const second = exchanges(projector.project([legOf('speaker', [{ ...feedback, text: 'Updated feedback.' }])], DEFAULT_PROJECTION));
+    expect(second[0]).not.toBe(first[0]);
+    expect(second[0].feedback?.[0].text).toBe('Updated feedback.');
+    expect(projector.project([legOf('speaker', [{ ...feedback, text: 'Updated feedback.' }])], DEFAULT_PROJECTION)[0]).toBe(second[0]);
+    const combined = exchanges(projector.project([legOf('speaker', [{ ...feedback, text: 'Updated feedback.', accompaniesTranslation: true }])], DEFAULT_PROJECTION));
+    expect(combined[0]).not.toBe(second[0]);
+    expect(combined[0].feedback?.[0].accompaniesTranslation).toBe(true);
+  });
+
   it('groups by stated origin, keys the entry by it, and marks the pairing stated', () => {
     const src = seg('speaker', { side: 'source', origin: 'u1', openedAt: 10 });
     const tr = seg('speaker', { side: 'translation', origin: 'u1', openedAt: 40 });

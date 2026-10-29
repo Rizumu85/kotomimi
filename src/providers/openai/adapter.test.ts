@@ -8,7 +8,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { AdapterStartError } from '../../lib/contract/adapter';
 import { createVirtualClock } from '../../lib/contract/clock';
-import { recordEvents } from '../../lib/contract/events';
+import { recordEvents, type AdapterEvent } from '../../lib/contract/events';
 import { flush, type ScenarioStep } from '../../lib/contract/testing/drive';
 import { fakeSockets } from '../../lib/contract/testing/fakeSocket';
 import { runScenario, scenarioNames, type AdapterHarness } from '../../lib/contract/testing/scenarios';
@@ -39,6 +39,34 @@ function answer(n: number, eventId: string, previous: string | null, translation
     SERVER.responseDone(resp),
   ];
 }
+
+/** A sharing Kotomimi extends the completed transcription with its detected language. */
+function inputDoneWithLanguage(itemId: string, transcript: string, language: unknown): string {
+  return JSON.stringify({ ...JSON.parse(SERVER.inputDone(itemId, transcript)), language });
+}
+
+function startPairedRealtime(patch: Partial<RealtimeConfig> = {}) {
+  const context = { ...AUTO_CTX, direction: { source: 'en', target: 'fr' } };
+  const config: RealtimeConfig = {
+    ...configFor(context), transcribeOnly: true, anchor: false,
+    transcription: { model: 'apple-speech:en', language: 'en', languages: ['en', 'fr'] },
+    ...patch,
+  };
+  const sockets = fakeSockets();
+  const { events, log } = recordEvents();
+  const starting = createRealtimeAdapter({ openSocket: sockets.create }).start({
+    context, config, credentials: { apiKey: '', endpoint: 'ws://mac.local:8792/v1/realtime' },
+    clock: createVirtualClock(0), signal: new AbortController().signal,
+  }, events);
+  const socket = sockets.last();
+  const of = <K extends AdapterEvent['kind']>(kind: K) => log.filter((e): e is Extract<AdapterEvent, { kind: K }> => e.kind === kind);
+  const receive = (...frames: string[]) => { for (const frame of frames) socket.receive(frame); };
+  return { starting, socket, of, receive };
+}
+
+const pairedUpdated = (transcription: unknown = { language: 'en', languages: ['en', 'fr'] }) => JSON.stringify({
+  type: 'session.updated', session: { type: 'transcription', audio: { input: { transcription } } },
+});
 
 function harness(): AdapterHarness<RealtimeConfig, RealtimeCredentials> {
   let sockets = fakeSockets();
@@ -223,6 +251,132 @@ describe('the OpenAI Realtime adapter: opening', () => {
     expect(error).not.toBeInstanceOf(AdapterStartError);
     expect(sockets.all).toEqual([]);
     expect(log).toEqual([]);
+  });
+});
+
+describe('the OpenAI Realtime adapter: paired LAN transcription', () => {
+  it.each([
+    { language: 'en', languages: ['en', 'fr'] },
+    { language: 'en-US', languages: ['en-US', 'fr-FR'] },
+  ])('starts only after the server confirms the requested primary and both candidates (%j)', async (confirmed) => {
+    const h = startPairedRealtime();
+    let live = false;
+    void h.starting.then(() => { live = true; });
+    h.socket.open();
+    h.receive(SERVER.created());
+    await flush();
+    expect(live).toBe(false);
+    h.receive(pairedUpdated(confirmed));
+    const session = await h.starting;
+    expect(live).toBe(true);
+    expect(h.of('failed')).toEqual([]);
+    expect(h.of('degraded')).toEqual([]);
+    await session.stop();
+  });
+
+  it.each([
+    ['no transcription', null],
+    ['no primary', { languages: ['en', 'fr'] }],
+    ['no candidates', { language: 'en' }],
+    ['another primary', { language: 'fr', languages: ['en', 'fr'] }],
+    ['reversed candidates', { language: 'en', languages: ['fr', 'en'] }],
+    ['another candidate', { language: 'en', languages: ['en', 'de'] }],
+    ['one candidate', { language: 'en', languages: ['en'] }],
+    ['three candidates', { language: 'en', languages: ['en', 'fr', 'de'] }],
+    ['a string of candidates', { language: 'en', languages: 'en,fr' }],
+    ['a non-string candidate', { language: 'en', languages: ['en', 42] }],
+  ])('refuses an unconfirmed pair (%s) instead of starting in one language', async (_name, confirmed) => {
+    const h = startPairedRealtime();
+    h.socket.open();
+    h.receive(SERVER.created(), pairedUpdated(confirmed));
+    await expect(h.starting).rejects.toMatchObject({
+      code: 'server_no_bilingual', params: { source: 'en', target: 'fr' },
+      message: expect.stringContaining('did not confirm the requested pair'),
+    });
+    expect(h.socket.closedByClient).not.toBeNull();
+    expect(h.of('segmentOpened')).toEqual([]);
+    expect(h.of('failed')).toEqual([]);
+    expect(h.of('degraded')).toEqual([]);
+  });
+
+  it('keeps ordinary OpenAI languages hints compatible with confirmations and finals that omit language', async () => {
+    const h = startPairedRealtime({ transcribeOnly: undefined, transcription: { model: 'gpt-transcribe', languages: ['en', 'fr'] } });
+    h.socket.open();
+    h.receive(SERVER.created(), SERVER.updated());
+    const session = await h.starting;
+    h.receive(SERVER.committed('ordinary'), SERVER.inputDone('ordinary', 'Hello'));
+    expect(h.of('segmentText').map((e) => e.payload)).toEqual([{ ref: 1, text: 'Hello' }]);
+    expect(h.of('segmentClosed').map((e) => e.payload)).toEqual([{ ref: 1 }]);
+    expect(h.of('degraded')).toEqual([]);
+    await session.stop();
+  });
+
+  it.each([undefined, null, 42, {}, '', '  ', 'de'])('reports an invalid paired final language (%j), closes that input, and accepts the next utterance', async (language) => {
+    const h = startPairedRealtime();
+    h.socket.open();
+    h.receive(SERVER.created(), pairedUpdated());
+    const session = await h.starting;
+    h.receive(SERVER.committed('bad'), SERVER.inputDelta('bad', 'Bonjour'), inputDoneWithLanguage('bad', 'Bonjour', language));
+    expect(h.of('degraded').map((e) => e.payload)).toEqual([{
+      code: 'transcription_failed', reason: 'bilingual_final_invalid',
+      message: expect.stringContaining('did not identify a language from the requested pair'),
+    }]);
+    expect(h.of('segmentText').map((e) => e.payload)).toEqual([{ ref: 1, text: 'Bonjour' }]);
+    expect(h.of('segmentClosed').map((e) => e.payload)).toEqual([{ ref: 1 }]);
+    expect(h.of('failed')).toEqual([]);
+    expect(h.socket.closedByClient).toBeNull();
+    h.receive(SERVER.committed('good'), inputDoneWithLanguage('good', 'Bonjour encore', 'fr-FR'));
+    expect(h.of('segmentText').map((e) => e.payload).pop()).toEqual({ ref: 2, text: 'Bonjour encore', language: 'fr' });
+    expect(h.of('segmentClosed').map((e) => e.payload)).toEqual([{ ref: 1 }, { ref: 2 }]);
+    await session.stop();
+  });
+
+  it('does not promote tentative text when a paired final is empty', async () => {
+    const h = startPairedRealtime();
+    h.socket.open();
+    h.receive(SERVER.created(), pairedUpdated());
+    const session = await h.starting;
+    h.receive(SERVER.committed('empty'), SERVER.inputDelta('empty', 'Tentative words'), inputDoneWithLanguage('empty', '', 'en'));
+    expect(h.of('segmentText').map((e) => e.payload)).toEqual([{ ref: 1, text: 'Tentative words' }]);
+    expect(h.of('segmentClosed').map((e) => e.payload)).toEqual([{ ref: 1 }]);
+    expect(h.of('degraded').map((e) => e.payload)).toEqual([{
+      code: 'transcription_failed', reason: 'bilingual_final_invalid',
+      message: expect.stringContaining('did not finalize any words'),
+    }]);
+    expect(h.of('failed')).toEqual([]);
+    await session.stop();
+  });
+
+  it('reports paired transcription failures with and without an item while leaving the session live', async () => {
+    const h = startPairedRealtime();
+    h.socket.open();
+    h.receive(SERVER.created(), pairedUpdated());
+    const session = await h.starting;
+    h.receive(SERVER.committed('failed'), SERVER.inputDelta('failed', 'Tentative words'), SERVER.inputFailed('failed'));
+    h.receive(SERVER.error({ code: 'transcription_failed', message: 'The recognizer did not identify a language.' }));
+    expect(h.of('degraded').map((e) => e.payload)).toEqual([
+      { code: 'transcription_failed', reason: 'bilingual_transcription_failed', message: 'Audio was unintelligible.' },
+      { code: 'transcription_failed', reason: 'bilingual_transcription_failed', message: '[OpenAI transcription_failed] The recognizer did not identify a language.' },
+    ]);
+    expect(h.of('segmentClosed').map((e) => e.payload)).toEqual([{ ref: 1 }]);
+    expect(h.of('failed')).toEqual([]);
+    expect(h.socket.closedByClient).toBeNull();
+    h.receive(SERVER.committed('good'), inputDoneWithLanguage('good', 'Bonjour', 'fr'));
+    expect(h.of('segmentText').map((e) => e.payload).pop()).toEqual({ ref: 2, text: 'Bonjour', language: 'fr' });
+    await session.stop();
+  });
+
+  it('ignores late paired completions and failures after the input has closed', async () => {
+    const h = startPairedRealtime();
+    h.socket.open();
+    h.receive(SERVER.created(), pairedUpdated());
+    const session = await h.starting;
+    h.receive(SERVER.committed('done'), inputDoneWithLanguage('done', 'Bonjour', 'fr'));
+    h.receive(SERVER.inputDone('done', 'Hello'), SERVER.inputFailed('done'));
+    expect(h.of('segmentText').map((e) => e.payload)).toEqual([{ ref: 1, text: 'Bonjour', language: 'fr' }]);
+    expect(h.of('segmentClosed').map((e) => e.payload)).toEqual([{ ref: 1 }]);
+    expect(h.of('degraded')).toEqual([]);
+    await session.stop();
   });
 });
 
@@ -420,6 +574,37 @@ describe('the OpenAI Realtime adapter: audio, turns and typed text going up', ()
 });
 
 describe('the OpenAI Realtime adapter: what comes down', () => {
+  it.each([
+    ['en', 'Hello there'],
+    ['fr', 'Bonjour tout le monde'],
+  ])('passes detected %s through a completed transcription with unchanged text on the original source segment', async (language, text) => {
+    const h = await liveRealtime({ context: { ...AUTO_CTX, direction: { source: 'en', target: 'fr' } } });
+    h.receive(SERVER.committed('item_in_1'), SERVER.inputDelta('item_in_1', text), inputDoneWithLanguage('item_in_1', text, language));
+    expect(h.of('segmentOpened').map((e) => e.payload)).toEqual([{ ref: 1, side: 'source', origin: 'item_in_1' }]);
+    expect(h.of('segmentText').map((e) => e.payload)).toEqual([{ ref: 1, text }, { ref: 1, text, language }]);
+    expect(h.of('segmentClosed').map((e) => e.payload)).toEqual([{ ref: 1 }]);
+    expect(h.frames('conversation.item.input_audio_transcription.completed')).toEqual([{ itemId: 'item_in_1', transcript: text, language }]);
+  });
+
+  it.each([undefined, null, 42, false, {}, ['fr'], '', '  '])('omits an absent or invalid detected language (%j) and keeps ordinary OpenAI final-text behavior', async (language) => {
+    const h = await liveRealtime();
+    h.receive(SERVER.committed('item_in_1'), SERVER.inputDelta('item_in_1', 'Hello'), inputDoneWithLanguage('item_in_1', 'Hello', language));
+    expect(h.of('segmentText').map((e) => e.payload)).toEqual([{ ref: 1, text: 'Hello' }]);
+    expect(h.of('segmentClosed').map((e) => e.payload)).toEqual([{ ref: 1 }]);
+    expect(h.frames('conversation.item.input_audio_transcription.completed')).toEqual([{ itemId: 'item_in_1', transcript: 'Hello' }]);
+    expect(h.of('degraded')).toEqual([]);
+    expect(h.of('failed')).toEqual([]);
+  });
+
+  it('does not change a closed input when a later completion carries a language', async () => {
+    const h = await liveRealtime();
+    h.receive(SERVER.committed('item_in_1'), SERVER.inputDone('item_in_1', 'Hello'));
+    h.receive(inputDoneWithLanguage('item_in_1', 'Bonjour', 'fr'));
+    expect(h.of('segmentOpened').map((e) => e.payload)).toEqual([{ ref: 1, side: 'source', origin: 'item_in_1' }]);
+    expect(h.of('segmentText').map((e) => e.payload)).toEqual([{ ref: 1, text: 'Hello' }]);
+    expect(h.of('segmentClosed').map((e) => e.payload)).toEqual([{ ref: 1 }]);
+  });
+
   it('makes each input a source under its item id, streaming its transcript, and each translation a segment paired with the input it follows (rulings 11; choice 8)', async () => {
     const h = await liveRealtime();
     h.receive(SERVER.committed('item_in_1'), SERVER.itemAdded('item_in_1', 'user'), SERVER.inputDelta('item_in_1', 'こんにち'), SERVER.inputDelta('item_in_1', 'は'));

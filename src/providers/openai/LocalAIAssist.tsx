@@ -27,7 +27,7 @@ import { coachPrompt } from './coachPrompt';
 import type { LocalAISettings as S } from './localai';
 import { coachesAtOwnDevice, deviceChatModels, deviceCoachModel, deviceLanguage, deviceModelsLoaded, hearingPlace, needsServer, PLACE_FIELDS, PLACES, translatePlace, translatesAtOwnDevice, type DeviceNeed, type Place } from './localaiDevice';
 import { NATIVE_MODELS, chooseNative, hearingPick, isApple, isAutoLanguage, nativeDownloaded, nativeEither, nativeHears, nativeModel, nativeModelFor, nativePicked } from './localaiNative';
-import { canDetectOther, detectsOther, heardBy, speaksBoth } from './localaiDevice';
+import { detectsOther, heardBy, speaksBoth } from './localaiDevice';
 import { languageLabel } from '../../lib/language/label';
 import { NativeEngineCard, nativeStoreOf, type NativeCardModel, type NativeKind } from './NativeEngineCard';
 import { NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator } from './nativeTranslators';
@@ -448,7 +448,7 @@ function LocalAIHere({ kind, model, onModel, onBack, local, disabled }: { kind: 
  * serves. It opens by itself while a direction has no model to run: what is
  * missing is then the first thing seen.
  */
-function DeviceModels({ stage, settings, update, pair, legs, disabled, tour, other, native, below }: Pick<Props, 'settings' | 'update' | 'pair' | 'legs' | 'disabled'> & { stage: 'asr' | 'translation'; tour?: boolean; other?: OtherRunner; native?: NativeRunner; /** Drawn under the rows. */ below?: ReactNode }) {
+function DeviceModels({ stage, settings, update, pair, legs, models, disabled, tour, other, native, below }: Pick<Props, 'settings' | 'update' | 'pair' | 'legs' | 'models' | 'disabled'> & { stage: 'asr' | 'translation'; tour?: boolean; other?: OtherRunner; native?: NativeRunner; /** Drawn under the rows. */ below?: ReactNode }) {
   const { t, i18n } = useTranslation();
   const engine = useNativeModels(stage);
   const status = nativeStoreOf(stage)((one) => one.status);
@@ -461,8 +461,11 @@ function DeviceModels({ stage, settings, update, pair, legs, disabled, tour, oth
   const adapter = useWasmEngineAdapter(Boolean(disabled), override);
   // The stage is a native engine's now. Its rows are the same ones: read as if the app's own models ran it.
   const nativeRuns = Boolean(native?.inUse);
-  const asApp = useMemo(() => (stage === 'asr' ? { ...settings, asrHere: 'app' as const } : { ...settings, translateHere: 'app' as const }), [settings, stage]);
-  const slots = useDeviceSlots(asApp, pair, legs).filter((slot) => slot.stage === stage);
+  const asApp = useMemo(() => (stage === 'asr'
+    // The app cannot detect both languages. Keep the native speaker's source-language slot when projecting its rows.
+    ? { ...settings, asrHere: 'app' as const, ...(speaksBoth(settings, models, pair) ? { coach: false } : {}) }
+    : { ...settings, translateHere: 'app' as const }), [settings, stage, models, pair]);
+  const slots = useDeviceSlots(asApp, pair, legs, models).filter((slot) => slot.stage === stage);
   // What is downloaded is known only once the model store has looked: until then a blank is its blank, not an answer.
   const looked = useModelInitialized();
   /** The language a row hears: where the engine hears, the other side's may be left to be detected. */
@@ -778,7 +781,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
     const hearing = 'asrVia' in asked || 'asrHere' in asked || 'asrOther' in asked;
     const patch: Partial<S> = {
       ...(hearing && now.asrDetectOther && !detectsOther(now, listed.current) ? { asrDetectOther: false } : {}),
-      ...(hearing && now.speakBoth && !canDetectOther(now, listed.current) ? { speakBoth: false } : {}),
+      ...(hearing && now.speakBoth && !speaksBoth(now, listed.current, pair) ? { speakBoth: false } : {}),
       ...asked,
     };
     if (pinned.current) {
@@ -787,7 +790,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
     }
     pinned.current = true;
     update({ ...Object.fromEntries(PLACE_FIELDS.map((field) => [field, now[field]])), ...patch } as Partial<S>);
-  }, [update]);
+  }, [update, pair]);
 
   // A stage on this computer needs the model store loaded — what is downloaded, and what the graphics card can run.
   // The readiness check loads it too, but only after the other device has answered: with that device away, the
@@ -969,7 +972,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   // What each leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
   const heardByLegs = legs.map((leg) => heardBy(settings, pair, leg, models));
   // The native recognizer, language by language: a choice is the model in use from then on, and that language's by name.
-  const bothOn = speaksBoth(settings, models) && pair.source.toLowerCase() !== pair.target.toLowerCase();
+  const bothOn = speaksBoth(settings, models, pair) && pair.source.toLowerCase() !== pair.target.toLowerCase();
   const nativePick = hearingPick(settings, pair, { detecting: detectsOther(settings, models), both: bothOn });
   const pickNative = (id: string, languages: readonly string[]) => {
     const next = chooseNative(nativePick, id, languages, heardByLegs);
@@ -981,7 +984,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   // Kept on, the engine would hear with the model that detects.
   const pickNativeFor = (id: string, slot?: DeviceNeed) => {
     const detectOff = settings.asrDetectOther === true && legs.includes('participant');
-    const bothOff = settings.speakBoth === true && !settings.coach && legs.includes('speaker') && pair.source.toLowerCase() !== pair.target.toLowerCase();
+    const bothOff = settings.speakBoth === true && legs.includes('speaker') && pair.source.toLowerCase() !== pair.target.toLowerCase();
     // Fork: the Mac's recognition, chosen for a speaker who speaks both, where it has both languages: it hears them in
     // either, as their own language's model, and they go on speaking both. The other side's language is no longer
     // detected: that takes the model that tells languages apart, for every leg.
@@ -1025,7 +1028,9 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
     : null;
   // A leg left to be detected keeps being so: only a model that detects is suggested for it.
   const asrSmaller = smaller(nativeAsr.ready, asrNow, (id) => heardByLegs.every((language) => (isAutoLanguage(language) ? nativeModel(id).detects === true : nativeHears(nativeModel(id), language))));
-  const translatedPairs = legs.filter((leg) => !(leg === 'speaker' && settings.coach)).map((leg) => (leg === 'speaker' ? [pair.source, pair.target] : [pair.target, pair.source]));
+  const translatedPairs = legs.flatMap((leg) => (leg === 'speaker'
+    ? settings.coach && !bothOn ? [] : [[pair.source, pair.target], ...(bothOn ? [[pair.target, pair.source]] : [])]
+    : [[pair.target, pair.source]]));
   const translationSmaller = smaller(nativeTranslation.ready, settings.translateAt === 'device' && settings.translateHere === 'native' ? nativeTranslator(settings.translateNativeModel) : null,
     (id) => translatedPairs.every(([from, to]) => nativeTranslates(nativeTranslator(id), from, to)));
   const coachSmaller = smaller(nativeCoaching.ready, settings.coachAt === 'device' && settings.coachHere === 'native' ? nativeCoach(settings.coachNativeModel) : null, () => true);
@@ -1173,7 +1178,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
           ? <LocalAIHere kind="asr" model={settings.asrHereModel} onModel={(asrHereModel) => put({ asrHereModel })} onBack={() => put({ asrHere: 'app' })} local={local} disabled={disabled} />
           : (
             <DeviceModels
-              stage="asr" settings={settings} update={put} pair={pair} legs={legs} disabled={disabled} tour={tourAt === 'asr'} other={asrToLocalAI}
+              stage="asr" settings={settings} update={put} pair={pair} legs={legs} models={models} disabled={disabled} tour={tourAt === 'asr'} other={asrToLocalAI}
               native={{
                 onPick: pickNativeFor,
                 ...(settings.asrHere === 'native' ? { inUse: (slot: DeviceNeed) => nativePicked(nativePick, heardBy(settings, pair, slot.leg)) ?? null, onBack: () => put({ asrHere: 'app' }) } : {}),
@@ -1229,7 +1234,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
           ? <LocalAIHere kind="text" model={settings.translateHereModel} onModel={(translateHereModel) => put({ translateHereModel })} onBack={() => put({ translateHere: 'app' })} local={local} disabled={disabled} />
           : (
             <DeviceModels
-              stage="translation" settings={settings} update={put} pair={pair} legs={legs} disabled={disabled} tour={tourAt === 'translation'} other={translateToLocalAI}
+              stage="translation" settings={settings} update={put} pair={pair} legs={legs} models={models} disabled={disabled} tour={tourAt === 'translation'} other={translateToLocalAI}
               native={{
                 onPick: (translateNativeModel) => put({ translateHere: 'native', translateNativeModel }),
                 ...(settings.translateHere === 'native' ? { inUse: () => nativeTranslator(settings.translateNativeModel), onBack: () => put({ translateHere: 'app' }) } : {}),
@@ -1247,7 +1252,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
         icon={<GraduationCap size={14} />}
         title={t('providers.localai.coachStage')}
         tooltip={t('providers.localai.coachStageTooltip')}
-        lead={<ToggleSwitch checked={settings.coach} onChange={() => put(settings.coach ? { coach: false } : { coach: true, speakBoth: false })} label={t('providers.localai.coach')} disabled={disabled} />}
+        lead={<ToggleSwitch checked={settings.coach} onChange={() => put({ coach: !settings.coach })} label={t('providers.localai.coach')} disabled={disabled} />}
       >
         {/* Feedback answers what the user says: with the other side alone heard there is nothing for it to answer. */}
         {settings.coach && !legs.includes('speaker') && <p className="kt-note kt-note--todo" role="status">{t('providers.localai.coachNeedsSpeaker')}</p>}

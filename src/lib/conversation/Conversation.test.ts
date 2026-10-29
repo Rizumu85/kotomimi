@@ -29,6 +29,17 @@ function make(extra: Partial<ConstructorParameters<typeof Conversation>[0]> = {}
 }
 
 describe('Conversation — identity and text', () => {
+  it('preserves an answer purpose through text, close and later revisions', () => {
+    const { conv, apply } = make();
+    apply(
+      { kind: 'segmentOpened', payload: { ref: 1, side: 'translation', origin: 'utterance', purpose: 'feedback', accompaniesTranslation: true } },
+      { kind: 'segmentText', payload: { ref: 1, text: 'A correction.', language: 'en' } },
+      { kind: 'segmentClosed', payload: { ref: 1 } },
+      { kind: 'segmentText', payload: { ref: 1, text: 'A better correction.' } },
+    );
+    expect(conv.snapshot().segments[0]).toMatchObject({ purpose: 'feedback', accompaniesTranslation: true, origin: 'utterance', text: 'A better correction.', final: true });
+  });
+
   it('names segments by session, leg and a counter, in order of opening', () => {
     const { conv, apply } = make();
     apply({ kind: 'segmentOpened', payload: { ref: 5, side: 'source' } }, { kind: 'segmentOpened', payload: { ref: 9, side: 'translation' } });

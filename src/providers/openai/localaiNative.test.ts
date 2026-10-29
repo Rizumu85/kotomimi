@@ -403,6 +403,30 @@ describe('the Mac\'s recognizer hearing a speaker who speaks both (fork)', () =>
     expect(alone.device?.native).not.toHaveProperty('either');
     useNativeEngineStore.setState({ status: NO_NATIVE_ENGINE });
   });
+
+  it('keeps native Apple recognition paired while translating both ways and giving foreign speech feedback', () => {
+    useNativeEngineStore.setState({ status: MAC(true) });
+    try {
+      const s = settings({ ...NATIVE, asrNativeModel: `${APPLE_PREFIX}ja`, speakBoth: true, coach: true, coachAt: 'api', coachBaseUrl: 'https://feedback.example.com/v1', coachModel: 'feedback-model' });
+      const speaker = buildLocalAI(SPEAKER, s, shared);
+      if ('refused' in speaker) throw new Error(speaker.refused);
+      expect(speaker.device?.native).toMatchObject({ model: `${APPLE_PREFIX}ja`, either: { first: 'ja', also: 'zh' } });
+      expect(speaker.stages).toMatchObject({
+        requiresLanguage: true,
+        heard: 'auto',
+        speech: { kind: 'translate', model: NATIVE.translateModel },
+        back: { language: 'zh-CN', own: 'ja', stage: { kind: 'translate', language: 'ja' } },
+        feedback: { language: 'zh-CN', stage: { kind: 'coach', model: 'feedback-model', language: 'ja' } },
+      });
+      expect(speaker.stages?.typed).toBe(speaker.stages?.speech);
+      const participant = buildLocalAI({ ...SPEAKER, direction: { source: 'zh-CN', target: 'ja' } }, s, shared);
+      if ('refused' in participant) throw new Error(participant.refused);
+      expect(participant.stages?.speech?.kind).toBe('translate');
+      expect(participant.stages).not.toHaveProperty('feedback');
+    } finally {
+      useNativeEngineStore.setState({ status: NO_NATIVE_ENGINE });
+    }
+  });
 });
 
 describe('whether a run that hears by the engine can start', () => {
@@ -614,6 +638,14 @@ describe('a run\u2019s first step', () => {
     expect(other.hears).toHaveBeenCalledWith({ model: 'r2t2-q8', byLanguage: {} }, ['zh-CN']);
   });
 
+  it('prepares recognition, translation and feedback together for bilingual speech', async () => {
+    const u = ups();
+    await prepareLocalAI(BOTH, settings({ ...ALL, speakBoth: true, asrNativeModel: 'qwen3-asr-1.7b-q8' }), u);
+    expect(u.hears).toHaveBeenCalledWith({ model: 'qwen3-asr-1.7b-q8', byLanguage: {}, detecting: true }, ['auto', 'zh-CN']);
+    expect(u.translates).toHaveBeenCalledWith('index-translate-2b');
+    expect(u.coaches).toHaveBeenCalledWith('gemma-4-e2b');
+  });
+
   it('ends the start with the engine\u2019s own notice when one does not come up, and still lets the others go', async () => {
     const u = ups();
     u.translates.mockRejectedValue(new AdapterStartError('The engine could not start: out of memory', 'native_translator_failed'));
@@ -677,6 +709,20 @@ describe('the provider\'s check, with the engine', () => {
     // A coached speaker speaks the target language.
     await checkLocalAIWithNative(NONE, settings({ ...NATIVE, coach: true }), CTX, check, { gap, idle });
     expect(gap).toHaveBeenLastCalledWith({ model: 'r2t2-q8', byLanguage: {} }, ['zh-CN']);
+  });
+
+  it('checks both native translation directions and the feedback model for a bilingual speaker', async () => {
+    const gap = vi.fn(async () => null);
+    const translatorGap = vi.fn(async () => null);
+    const coachGap = vi.fn(async () => null);
+    const s = settings({ ...NATIVE, speakBoth: true, coach: true, translateAt: 'device', translateHere: 'native', translateNativeModel: 'index-translate-2b', coachAt: 'device', coachHere: 'native', coachNativeModel: 'gemma-4-e2b' });
+    const native = { gap, idle: () => undefined, translatorGap, coachGap };
+    expect(await checkLocalAIWithNative(NONE, s, CTX, async () => OK, native)).toBe(OK);
+    expect(gap).toHaveBeenCalledWith({ model: 'r2t2-q8', byLanguage: {}, detecting: true }, ['auto']);
+    expect(translatorGap).toHaveBeenCalledWith('index-translate-2b', [PAIR, { source: PAIR.target, target: PAIR.source }]);
+    expect(coachGap).toHaveBeenCalledWith('gemma-4-e2b');
+    const missing = { ok: false as const, code: 'native_translator_missing', reason: 'The translation model is not downloaded.' };
+    expect(await checkLocalAIWithNative(NONE, s, CTX, async () => OK, { ...native, translatorGap: async () => missing })).toMatchObject(missing);
   });
 
   it('refuses in the engine\'s words, with what the servers listed', async () => {

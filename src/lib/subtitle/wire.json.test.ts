@@ -33,7 +33,8 @@ const exchange: Entry = {
     { key: 'r:speaker:1:0', segmentId: 'r:speaker:1', side: 'source', start: 0, end: 6, text: '今日は天気が', final: true, language: 'ja' },
     { key: 'r:speaker:1:1', segmentId: 'r:speaker:1', side: 'source', start: 6, end: 12, text: 'いいですね。', final: false },
   ],
-  translation: [{ key: 'r:speaker:2:0', segmentId: 'r:speaker:2', side: 'translation', start: 0, end: 26, text: 'The weather is nice today.', final: true }],
+  translation: [{ key: 'r:speaker:2:0', segmentId: 'r:speaker:2', side: 'translation', purpose: 'translation', start: 0, end: 26, text: 'The weather is nice today.', final: true }],
+  feedback: [{ key: 'r:speaker:3:0', segmentId: 'r:speaker:3', side: 'translation', purpose: 'feedback', accompaniesTranslation: true, start: 0, end: 1, text: '✓', final: true }],
 };
 const notice: Entry = { kind: 'notice', id: 'n1', leg: 'participant', severity: 'error', message: 'No speech model for en.', code: 'no_asr', params: { source: 'en', count: 2 }, at: 2_000 };
 const sessions: SubtitleSession[] = [

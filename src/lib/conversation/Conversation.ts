@@ -82,7 +82,7 @@ export class Conversation {
 
   private dispatch(event: AdapterEvent): void {
     switch (event.kind) {
-      case 'segmentOpened': return this.open(event.payload.ref, event.payload.side, event.payload.origin);
+      case 'segmentOpened': return this.open(event.payload.ref, event.payload.side, event.payload.origin, event.payload.purpose, event.payload.accompaniesTranslation);
       case 'segmentText': return this.text(event.payload.ref, event.payload.text, event.payload.timing, event.payload.language);
       case 'segmentClosed': return this.close(event.payload.ref, event.payload.origin);
       case 'audio': return this.audio(event.payload.ref, event.payload.range, event.payload.pcm);
@@ -198,7 +198,7 @@ export class Conversation {
 
   // ---- events ----
 
-  private open(ref: number, side: Segment['side'], origin?: string): void {
+  private open(ref: number, side: Segment['side'], origin?: string, purpose?: Segment['purpose'], accompaniesTranslation?: true): void {
     if (this.indexByRef.has(ref)) return this.violation(`ref ${ref} opened twice`);
     const n = ++this.counter;
     const speech = this.pending.get(ref) ?? [];
@@ -206,7 +206,8 @@ export class Conversation {
     const seg: Segment = {
       id: `${this.opts.session}:${this.opts.leg}:${n}`,
       ref, side, text: '', final: false,
-      openedAt: this.opts.clock.now(), marks: [], origin, speech,
+      openedAt: this.opts.clock.now(), marks: [], origin, speech, ...(purpose ? { purpose } : {}),
+      ...(accompaniesTranslation ? { accompaniesTranslation } : {}),
     };
     this.indexByRef.set(ref, this.segments.length);
     this.segments.push(seg);

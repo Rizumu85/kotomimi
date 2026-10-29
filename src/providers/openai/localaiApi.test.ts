@@ -58,6 +58,41 @@ describe('recognition by an API: the run it builds', () => {
     expect(c.device?.api?.model).toBe('whisper-large-v3');
   });
 
+  it('translates either spoken language and adds feedback only to the target language', () => {
+    const patch = { ...API, speakBoth: true, coach: true, coachAt: 'api' as const, coachBaseUrl: 'https://feedback.example.com/v1', coachModel: 'feedback-model' };
+    const config = configFor(SPEAKER, patch);
+    expect(config.device?.api?.model).toBe('whisper-large-v3');
+    expect(config.stages).toMatchObject({
+      heard: 'auto',
+      speech: { kind: 'translate', model: 'gpt-x' },
+      typed: { kind: 'translate', model: 'gpt-x' },
+      back: { language: 'ja', own: 'zh-CN', stage: { kind: 'translate', language: 'zh-CN' } },
+      feedback: { language: 'ja', stage: { kind: 'coach', model: 'feedback-model', language: 'zh-CN' } },
+    });
+    expect(config.stages?.typed).toBe(config.stages?.speech);
+    expect(config.stages).not.toHaveProperty('requiresLanguage');
+    const participant = configFor({ ...SPEAKER, direction: { source: 'ja', target: 'zh-CN' } }, patch);
+    expect(participant.stages?.speech?.kind).toBe('translate');
+    expect(participant.stages).not.toHaveProperty('feedback');
+  });
+
+  it('requires both the translator and feedback model when bilingual speech is enabled', async () => {
+    const patch = { ...API, speakBoth: true, coach: true, coachAt: 'api' as const, coachBaseUrl: 'https://feedback.example.com/v1', coachModel: 'feedback-model' };
+    const check = createLocalAICheck({ fetch: async () => new Response('{}', { status: 404 }) });
+    const context: CheckContext = { pair: SPEAKER.direction, legs: ['speaker'] };
+    for (const [missing, code] of [
+      [{ translateModel: '' }, 'translate_unnamed'],
+      [{ coachModel: '' }, 'coach_unnamed'],
+    ] as const) {
+      const s = settings({ ...patch, ...missing });
+      expect(buildLocalAI(SPEAKER, s, shared)).toMatchObject({ code });
+      expect(await check({ apiKey: '', endpoint: '' }, s, context)).toMatchObject({ ok: false, code });
+    }
+    expect(await check({ apiKey: '', endpoint: '' }, settings(patch), context)).toMatchObject({ ok: true });
+    // With bilingual speech off, coaching still accepts a missing translator for typed text.
+    expect(configFor(SPEAKER, { ...patch, speakBoth: false, translateModel: '' }).stages).toMatchObject({ speech: { kind: 'coach' }, typed: null, heard: 'ja' });
+  });
+
   it('is refused while the API or its model is not named', () => {
     expect(buildLocalAI(SPEAKER, settings({ ...API, asrApiModel: ' ' }), shared)).toMatchObject({ code: 'asr_unnamed' });
     expect(buildLocalAI(SPEAKER, settings({ ...API, asrApiBaseUrl: '' }), shared)).toMatchObject({ code: 'asr_unnamed' });

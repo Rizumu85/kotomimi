@@ -115,7 +115,7 @@ describe('two native recognizers as one', () => {
     // Each engine counts its own from one: the page never sees two alike.
     expect([apple.streams[0].id, runtime.streams[0].id]).toEqual([1, 1]);
     expect(mine).not.toBe(theirs);
-    expect(runtime.streams[0].init).toMatchObject({ language: 'ru', model: 'qwen3-asr-1.7b-q8' });
+    expect(runtime.streams[0].init).toEqual({ language: 'ru', sampleRate: 16000, model: 'qwen3-asr-1.7b-q8' });
     engine.writeStream(theirs, 'sound');
     engine.endStream(theirs);
     expect(runtime.streams[0]).toMatchObject({ written: ['sound'], ended: true });
@@ -131,6 +131,13 @@ describe('two native recognizers as one', () => {
     expect(engine.writeStream(theirs, 'more')).toBe(false);
     engine.abortStream(mine);
     expect(apple.streams[0].aborted).toBe(true);
+  });
+
+  it('passes a recognition\'s second language and tie preference to its own engine', async () => {
+    const { engine, apple } = mac();
+    await engine.start('apple-speech:ja');
+    engine.openStream({ language: 'ja', also: 'zh', prefer: 'zh', sampleRate: 16000, model: 'apple-speech:ja' });
+    expect(apple.streams[0].init).toEqual({ language: 'ja', also: 'zh', prefer: 'zh', sampleRate: 16000, model: 'apple-speech:ja' });
   });
 
   it('opens one that names no model on the engine started last, and none while nothing runs', async () => {

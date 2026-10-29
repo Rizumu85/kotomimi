@@ -203,7 +203,7 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
   const held = useHeld(entries);
   const lanes = useMemo(() => buildLanes(entries, legs, filters, (notice) => noticeText(t, notice), held), [entries, legs, filters, t, held]);
   // The layout the window is fitted to: the size chosen and which texts there are, not what they say.
-  const shape = lanes.map((lane) => `${lane.leg}:${lane.source ? 's' : ''}${lane.answer ? 'a' : ''}`).join(',');
+  const shape = lanes.map((lane) => `${lane.leg}:${lane.source ? 's' : ''}${lane.answer ? 'a' : ''}${lane.feedback ? 'f' : ''}`).join(',');
   // A romanization under the small lines has a line of its own there: while the switch is on and what is said is
   // in a language that has one — or nothing is said yet, so that the window is not made higher at the first word.
   const romanization = useAnnotationStore((s) => s.romanization);
@@ -282,6 +282,7 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
     // The user's own row is as high as its lines; everything else is the pair's.
     '--lane-row-lines': String(lines.row),
     '--lane-row-height': `${fontSize * ROW_SCALE * (spacing.rowLine + spacing.rowRoman) * lines.row}px`,
+    '--lane-feedback-height': `${fontSize * ROW_SCALE * spacing.rowLine}px`,
     '--lane-source-lines': String(lines.source),
     // A pair's two texts share its height by what each is laid out for.
     // A pair's answer has this many lines, written in or not.
@@ -290,16 +291,37 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
   const who = (leg: LegName) => (leg === 'speaker' ? t('modePicker.modeYou', 'Me') : t('modePicker.modeParticipants', 'Other'));
   // A lane nobody has spoken in yet says nothing — not even whose it is: a tag alone on the screen, waiting, is noise.
   // It keeps its room, so that nothing moves when somebody does speak.
-  const silent = (lane: Lane) => !lane.source?.text && !lane.answer?.text;
+  const silent = (lane: Lane) => !lane.source?.text && !lane.answer?.text && !lane.feedback?.text;
   // Whose lane it is, is a bar of the lane's colour down its left edge; the word is there for a screen reader.
   const tag = (lane: Lane) => (silent(lane) ? null : <span className={`subtitle-lane__tag subtitle-lane__tag--${lane.leg}`}><span className="subtitle-lane__who">{who(lane.leg)}</span></span>);
   // Feedback that only approves is a bare tick (`tidyAnswer`): drawn as the app's own icon, in the user's colour. As
   // a character it came from whatever font had one, and sat beside the sentence like something from another page.
-  const approves = (answer: LaneText | undefined) => answer?.text.trim() === '✓';
+  const approves = (answer: LaneText | undefined) => answer?.purpose !== 'translation' && answer?.text.trim() === '✓';
   const tick = <Check className="subtitle-lane__ok" role="img" aria-label="✓" strokeWidth={3} />;
   // Grammar feedback that changes something: the sentence said, marked — what goes struck, what comes written in —
   // in place of the sentence, an arrow and the corrected one, which had to be read side by side (2026-10-23).
-  const fixFor = (lane: Lane) => (coached && lane.leg === 'speaker' && lane.source && lane.answer && !lane.answer.notice ? fixOf(lane.answers ?? lane.source.text, lane.source.language, lane.answer.text) : null);
+  const fixFor = (lane: Lane) => {
+    if (!coached || lane.leg !== 'speaker' || !lane.source || !lane.answer || lane.answer.notice || lane.answer.purpose !== undefined) return null;
+    // The held answer may belong to an older entry: use its configured pair, not the newest sentence's language.
+    const entry = entries.find((e) => e.kind === 'exchange' && e.source.some((row) => row.segmentId === lane.source?.segmentId));
+    return fixOf(lane.answers ?? lane.source.text, lane.source.language, lane.answer.text, entry?.kind === 'exchange' ? entry.languages.target : undefined);
+  };
+  const feedbackFor = (lane: Lane) => {
+    const feedback = lane.feedback;
+    if (!feedback) return null;
+    const fix = fixOf(feedback.said.text, feedback.said.language, feedback.text);
+    return (
+      <Slot className="subtitle-lane__feedback" lang={langOf(feedback.said)} fitKey={`${fontSize}:${squeeze}:${feedback.origin}:${feedback.said.text}:${feedback.text}`}>
+        {fix ? <Correction correction={fix} language={feedback.said.language} layout="row" /> : (<>
+          <Written text={feedback.said} lit={lit} readingsOnly />
+          {approves(feedback) ? tick : (<>
+            {feedback.said.text && <ArrowRight className="subtitle-lane__arrow" aria-hidden="true" strokeWidth={2.5} />}
+            <Written text={feedback} lit={lit} readingsOnly />
+          </>)}
+        </>)}
+      </Slot>
+    );
+  };
   // A newer sentence is waiting for its answer: said quietly, after what is shown.
   const pending = <span className="subtitle-lane__pending" aria-hidden="true">…</span>;
 
@@ -317,7 +339,7 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
       {lanes.map((lane) => (
         // Whose lane it is, in a column of its own at the left: in its place whatever the text beside it says, and
         // wherever that text sits. Written into the text, it moved with every sentence of a centred strip.
-        <div key={lane.leg} className={`subtitle-lane subtitle-lane--${lane.shape} subtitle-lane--${lane.leg}${silent(lane) ? ' is-silent' : ''}${large(lane) ? ' subtitle-lane--large' : ''}`} data-lane={lane.leg}>
+        <div key={lane.leg} className={`subtitle-lane subtitle-lane--${lane.shape} subtitle-lane--${lane.leg}${silent(lane) ? ' is-silent' : ''}${large(lane) ? ' subtitle-lane--large' : ''}${lane.feedback ? ' has-feedback' : ''}`} data-lane={lane.leg}>
           {tag(lane)}
           {lane.shape === 'row' ? (
             // The user's own, under the other side's: what they said and what answers it, on one small line.
@@ -350,6 +372,7 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
               )}
             </div>
           )}
+          {feedbackFor(lane)}
         </div>
       ))}
     </div>

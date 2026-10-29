@@ -1,4 +1,4 @@
-import type { Side, SegmentTiming, TextRange } from '../contract/adapter';
+import type { Side, SegmentPurpose, SegmentTiming, TextRange } from '../contract/adapter';
 
 export type LegName = 'speaker' | 'participant';
 /** `${session}:${leg}:${n}` */
@@ -17,6 +17,9 @@ export interface Segment {
   id: SegmentId;
   ref: number;
   side: Side;
+  purpose?: SegmentPurpose;
+  /** This feedback accompanies a separate translation; it must not advance that caption's turn. */
+  accompaniesTranslation?: true;
   /** Display text, replaced wholesale. */
   text: string;
   /** The adapter closed it. */

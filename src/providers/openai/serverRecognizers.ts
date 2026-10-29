@@ -10,9 +10,24 @@
  * Pure.
  */
 import { AUTO } from '../../lib/provider/languages';
-import type { LocalAIModel } from './localaiModels';
+import { KOTOMIMI_HOST, modelsFor, type LocalAIModel } from './localaiModels';
 
-const base = (code: string): string => code.split('-')[0];
+const base = (code: string): string => code.trim().toLowerCase().split(/[-_]/)[0];
+
+/** Two explicitly supported languages of a sharing host's recognizer, in the requested order. */
+export function serverBilingual(chosen: string, pair: { source: string; target: string }, models: readonly LocalAIModel[]): { model: string; languages: [string, string] } | null {
+  const first = base(pair.source);
+  const second = base(pair.target);
+  if (!first || !second || first === second || first === AUTO || second === AUTO) return null;
+  const eligible = modelsFor(models, 'asr').filter((m) => m.host === KOTOMIMI_HOST && m.bilingual && perLanguage(m.id));
+  const families = chosen.trim() ? [choiceOf(chosen.trim())] : [...new Set(eligible.map((m) => choiceOf(m.id)))];
+  for (const family of families) {
+    const member = (language: string) => eligible.find((m) => choiceOf(m.id) === family && base(perLanguage(m.id)!.language) === language && m.languages?.some((l) => base(l) === language));
+    const one = member(first);
+    if (one && member(second)) return { model: one.id, languages: [first, second] };
+  }
+  return null;
+}
 
 /** A recognizer the device has one of for each language: its family and that language; null for any other. */
 export function perLanguage(id: string): { family: string; language: string } | null {

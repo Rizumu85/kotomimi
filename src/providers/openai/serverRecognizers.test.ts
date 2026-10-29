@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { AUTO } from '../../lib/provider/languages';
 import type { LocalAIModel } from './localaiModels';
-import { choiceOf, perLanguage, recognizerAsked, recognizerChoices } from './serverRecognizers';
+import { choiceOf, perLanguage, recognizerAsked, recognizerChoices, serverBilingual } from './serverRecognizers';
 
 /** A Mac sharing its models: the system's recognition for four languages, and a downloaded recognizer that hears many. */
 const MAC: LocalAIModel[] = [
@@ -14,6 +14,29 @@ const MAC: LocalAIModel[] = [
   { id: 'kotoba-whisper', name: 'kotoba-whisper', kind: 'asr', languages: ['ja'] },
   { id: 'whisper-large', name: 'whisper-large', kind: 'asr' },
 ] as unknown as LocalAIModel[];
+
+describe('a sharing host that can hear either of two languages', () => {
+  const models: LocalAIModel[] = ['en', 'fr', 'ko'].map((language) => ({
+    id: `apple-speech:${language}`, kind: 'asr', host: 'kotomimi', languages: [language], bilingual: true,
+  }));
+  const pair = { source: 'en-US', target: 'fr-FR' };
+
+  it('selects both installed members in the requested order, including a saved member or default selection', () => {
+    for (const choice of ['apple-speech', 'apple-speech:ko', '']) {
+      expect(serverBilingual(choice, pair, models)).toEqual({ model: 'apple-speech:en', languages: ['en', 'fr'] });
+    }
+    expect(serverBilingual('apple-speech', { source: 'fr', target: 'en' }, models)).toEqual({ model: 'apple-speech:fr', languages: ['fr', 'en'] });
+  });
+
+  it('requires explicit capability, both languages, and the chosen model family', () => {
+    expect(serverBilingual('apple-speech', pair, models.map(({ bilingual: _, ...m }) => m))).toBeNull();
+    expect(serverBilingual('apple-speech', pair, models.map(({ host: _, ...m }) => m))).toBeNull();
+    expect(serverBilingual('apple-speech', pair, models.filter((m) => m.id !== 'apple-speech:fr'))).toBeNull();
+    expect(serverBilingual('whisper', pair, models)).toBeNull();
+    expect(serverBilingual('apple-speech', { source: 'en', target: 'en-GB' }, models)).toBeNull();
+    expect(serverBilingual('apple-speech', { source: 'auto', target: 'fr' }, models)).toBeNull();
+  });
+});
 
 describe('the other device\u2019s recognizers, as a person chooses among them', () => {
   it('knows a recognizer that is one to a language by its name', () => {

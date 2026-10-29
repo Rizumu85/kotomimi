@@ -1,4 +1,4 @@
-import type { Side } from '../contract/adapter';
+import type { SegmentPurpose, Side } from '../contract/adapter';
 import type { Languages, LegName, SegmentId } from '../conversation/types';
 
 /** A drawn line: a stretch of one segment's text, carrying what a surface draws. */
@@ -7,6 +7,9 @@ export interface Row {
   key: string;
   segmentId: SegmentId;
   side: Side;
+  purpose?: SegmentPurpose;
+  /** Feedback accompanies a separate translation, whose caption keeps its own turn. */
+  accompaniesTranslation?: true;
   start: number;
   end: number;
   /**
@@ -35,6 +38,8 @@ export type Entry =
       pairing: Pairing;
       source: Row[];
       translation: Row[];
+      /** Private grammar feedback, kept apart from translated captions and their timing. */
+      feedback?: Row[];
       /** Earliest `openedAt` in the group. */
       t: number;
       /** Fork: a video's words, not a person's (`VIDEO_ORIGIN`): drawn smaller and apart. */

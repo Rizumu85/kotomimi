@@ -14,7 +14,7 @@ vi.mock('react-i18next', () => ({
 
 const row = (segmentId: string, k: number, start: number, text: string, side: 'source' | 'translation' = 'source'): Row =>
   ({ key: `${segmentId}:${k}`, segmentId, side, start, end: start + text.length, text, final: true });
-const exchange = (id: string, source: Row[], translation: Row[] = []): Entry =>
+const exchange = (id: string, source: Row[], translation: Row[] = []): Extract<Entry, { kind: 'exchange' }> =>
   ({ kind: 'exchange', id, leg: 'speaker', languages: { source: 'en', target: 'ja' }, pairing: 'stated', source, translation, t: 0 });
 const props = (over: Partial<SubtitleBodyProps> = {}): SubtitleBodyProps => ({
   entries: [exchange('a', [row('s1', 0, 0, 'Hello.')], [row('t1', 0, 0, 'こんにちは。', 'translation')])],
@@ -117,8 +117,9 @@ describe('SubtitleBody — compact: the fork\u2019s lanes', () => {
     useCoachingStore.setState({ coached: true });
     const said = { ...row('s1', 0, 0, 'I goes to school yesterday.'), language: 'en' };
     const answer = { ...row('t1', 0, 0, 'I went to school yesterday.\nPast tense.', 'translation'), language: 'en' };
+    const practiced = { ...exchange('a', [said], [answer]), languages: { source: 'ja', target: 'en' } };
     for (const alone of [false, true]) {
-      const view = render(<SubtitleBody {...props({ entries: alone ? [exchange('a', [said], [answer])] : [exchange('a', [said], [answer]), theirs('b', 'はい。', 'Yes.')] })} />);
+      const view = render(<SubtitleBody {...props({ entries: alone ? [practiced] : [practiced, theirs('b', 'はい。', 'Yes.')] })} />);
       const mine = view.container.querySelector('[data-lane="speaker"]')!;
       expect(mine.querySelector('.kt-fix__gone')?.textContent).toBe('goes');
       expect(mine.querySelector('.kt-fix__added')?.textContent).toBe('went');
@@ -131,10 +132,60 @@ describe('SubtitleBody — compact: the fork\u2019s lanes', () => {
   it('marks the sentence the feedback answers, not the line that runs on into what was said since', () => {
     const said = { ...row('s1', 0, 0, 'I goes to school yesterday.'), language: 'en' };
     const answer = { ...row('t1', 0, 0, 'I went to school yesterday.'+String.fromCharCode(10)+'Past tense.', 'translation'), language: 'en' };
-    const view = render(<SubtitleBody {...props({ entries: [exchange('a', [said], [answer]), exchange('b', [{ ...row('s2', 0, 0, 'It is sunny.'), language: 'en' }])] })} />);
+    const view = render(<SubtitleBody {...props({ entries: [{ ...exchange('a', [said], [answer]), languages: { source: 'ja', target: 'en' } }, exchange('b', [{ ...row('s2', 0, 0, 'It is sunny.'), language: 'en' }])] })} />);
     const mine = view.container.querySelector('[data-lane="speaker"]')!;
     expect(mine.querySelector('.kt-fix__gone')?.textContent).toBe('goes');
     expect(mine.querySelector('.kt-fix__added')?.textContent).toBe('went');
+  });
+
+  it('shows a native-language translation without correction markup while coaching is enabled', () => {
+    useCoachingStore.setState({ coached: true });
+    const said = { ...row('s1', 0, 0, 'The restaurant is excellent.'), language: 'en' };
+    const answer = { ...row('t1', 0, 0, 'Le restaurant est excellent.', 'translation'), language: 'fr' };
+    const entry = { ...exchange('a', [said], [answer]), languages: { source: 'en', target: 'fr' } };
+    const view = render(<SubtitleBody {...props({ entries: [entry] })} />);
+    expect(view.container.querySelector('.kt-fix')).toBeNull();
+    expect(view.container.textContent).toContain(answer.text);
+  });
+
+  it('shows explicit feedback on its own line beside the unchanged translation, even with coaching disabled', () => {
+    useCoachingStore.setState({ coached: false });
+    const source = { ...row('source', 0, 0, 'I goes to school yesterday.'), language: 'en' };
+    const translated = { ...row('translation', 0, 0, 'I went to school yesterday.', 'translation'), language: 'fr', purpose: 'translation' as const };
+    const feedback = { ...row('feedback', 0, 0, 'I went to school yesterday.\nPast tense.', 'translation'), language: 'fr', purpose: 'feedback' as const, accompaniesTranslation: true as const };
+    const entry = { ...exchange('first', [source], [translated]), languages: { source: 'fr', target: 'en' }, feedback: [feedback] };
+    for (const compact of [true, false]) {
+      const view = render(<SubtitleBody {...props({ compact, entries: [entry] })} />);
+      const translation = view.container.querySelector(compact ? '.subtitle-lane__answer' : '[data-purpose="translation"] .row-text');
+      const correction = view.container.querySelector(compact ? '.subtitle-lane__feedback' : '[data-purpose="feedback"]');
+      expect(translation?.querySelector('.kt-fix')).toBeNull();
+      expect(translation?.textContent).toBe(translated.text);
+      expect(correction?.querySelector('.kt-fix__gone')?.textContent).toBe('goes');
+      expect(correction?.querySelector('.kt-fix__added')?.textContent).toBe('went');
+      expect(correction?.querySelector('.kt-fix__why')?.textContent).toBe('Past tense.');
+      view.unmount();
+    }
+  });
+
+  it('does not turn an explicit translated answer into correction markup when coaching is enabled', () => {
+    useCoachingStore.setState({ coached: true });
+    const source = { ...row('source', 0, 0, 'I goes to school yesterday.'), language: 'en' };
+    const translated = { ...row('translation', 0, 0, 'I went to school yesterday.', 'translation'), language: 'fr', purpose: 'translation' as const };
+    const entry = { ...exchange('first', [source], [translated]), languages: { source: 'fr', target: 'en' } };
+    const view = render(<SubtitleBody {...props({ entries: [entry] })} />);
+    expect(view.container.querySelector('.kt-fix')).toBeNull();
+    expect(view.container.querySelector('.subtitle-lane__answer')?.textContent).toBe(translated.text);
+  });
+
+  it('leaves the newest row and its translation intact when an older sentence receives feedback', () => {
+    const first = { ...exchange('first', [{ ...row('s-first', 0, 0, 'I goes.'), language: 'en' }], [{ ...row('t-first', 0, 0, 'Je vais.', 'translation'), purpose: 'translation' as const }]), languages: { source: 'fr', target: 'en' } };
+    const second = { ...exchange('second', [{ ...row('s-second', 0, 0, 'We arrive tomorrow.'), language: 'en' }], [{ ...row('t-second', 0, 0, 'Nous arrivons demain.', 'translation'), purpose: 'translation' as const }]), languages: first.languages };
+    const other = theirs('other', 'はい。', 'Yes.');
+    const view = render(<SubtitleBody {...props({ entries: [first, second, other] })} />);
+    const before = view.container.querySelector('[data-lane="speaker"]')?.textContent;
+    view.rerender(<SubtitleBody {...props({ entries: [{ ...first, feedback: [{ ...row('f-first', 0, 0, 'I go.', 'translation'), purpose: 'feedback' as const }] }, second, other] })} />);
+    expect(view.container.querySelector('[data-lane="speaker"]')?.textContent).toBe(before);
+    expect(view.container.querySelector('[data-lane="speaker"] .subtitle-lane__feedback')).toBeNull();
   });
 
   it('draws the newest sentence alone, whatever was said before: a higher window is room for it, not for those', () => {
@@ -269,6 +320,93 @@ describe('SubtitleBody — an answer stays long enough to be read (fork)', () =>
       rerender(<SubtitleBody {...props({ entries: [...first, theirs('b', 'はい。', '好的。')], legs: ['participant'] })} />);
       act(() => { vi.advanceTimersByTime(20); });
       expect(answer(container)).toBe('好的。');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
+describe('SubtitleBody — independent coaching feedback turns', () => {
+  const native = (id: string, source = 'Nous arrivons.', translation = 'We arrive.'): Extract<Entry, { kind: 'exchange' }> => ({
+    ...exchange(id, [{ ...row(`s-${id}`, 0, 0, source), language: 'fr' }], [{ ...row(`t-${id}`, 0, 0, translation, 'translation'), language: 'en', purpose: 'translation' }]),
+    languages: { source: 'fr', target: 'en' },
+  });
+  const practiced = (id: string, combined = false): Extract<Entry, { kind: 'exchange' }> => ({
+    ...exchange(id, [{ ...row(`s-${id}`, 0, 0, 'I goes to school.'), language: 'en' }]),
+    languages: { source: 'fr', target: 'en' },
+    feedback: [{ ...row(`f-${id}`, 0, 0, 'I go to school.\nPresent tense.', 'translation'), language: 'fr', purpose: 'feedback', ...(combined ? { accompaniesTranslation: true as const } : {}) }],
+  });
+  const answer = (container: HTMLElement) => container.querySelector('[data-lane="speaker"] .subtitle-lane__answer')?.textContent;
+
+  it.each([true, false])('shows standalone feedback with its own original sentence (compact: %s)', (compact) => {
+    const { container } = render(<SubtitleBody {...props({ entries: [practiced('practice')], legs: ['speaker'], compact })} />);
+    const feedback = container.querySelector(compact ? '.subtitle-lane__feedback' : '[data-purpose="feedback"]');
+    expect(feedback?.querySelector('.kt-fix__gone')?.textContent).toBe('goes');
+    expect(feedback?.querySelector('.kt-fix__added')?.textContent).toBe('go');
+    expect(feedback?.querySelector('.kt-fix__why')?.textContent).toBe('Present tense.');
+  });
+
+  it('gives standalone feedback its own dwell turn between native-language translations', () => {
+    vi.useFakeTimers();
+    try {
+      const first = native('first');
+      const practice = practiced('practice');
+      const last = native('last', 'Nous partons.', 'We leave.');
+      const view = render(<SubtitleBody {...props({ entries: [first], legs: ['speaker'] })} />);
+      act(() => { vi.advanceTimersByTime(300); });
+      view.rerender(<SubtitleBody {...props({ entries: [first, practice], legs: ['speaker'] })} />);
+      expect(answer(view.container)).toBe('We arrive.');
+      expect(view.container.querySelector('.subtitle-lane__feedback')).toBeNull();
+      act(() => { vi.advanceTimersByTime(1000); });
+      expect(answer(view.container)).toBe('');
+      expect(view.container.querySelector('.subtitle-lane__source')?.textContent).toBe('I goes to school.');
+      expect(view.container.querySelector('.subtitle-lane__feedback .kt-fix__gone')?.textContent).toBe('goes');
+      view.rerender(<SubtitleBody {...props({ entries: [first, practice, last], legs: ['speaker'] })} />);
+      expect(answer(view.container)).toBe('');
+      expect(view.container.querySelector('.subtitle-lane__feedback')).not.toBeNull();
+      act(() => { vi.advanceTimersByTime(2600); });
+      expect(answer(view.container)).toBe('We leave.');
+      expect(view.container.querySelector('.subtitle-lane__feedback')).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('lets combined feedback arrive first without taking the previous translation turn', () => {
+    vi.useFakeTimers();
+    try {
+      const first = native('first');
+      const waiting = practiced('waiting', true);
+      const view = render(<SubtitleBody {...props({ entries: [first], legs: ['speaker'] })} />);
+      act(() => { vi.advanceTimersByTime(300); });
+      view.rerender(<SubtitleBody {...props({ entries: [first, waiting], legs: ['speaker'] })} />);
+      act(() => { vi.advanceTimersByTime(2000); });
+      expect(answer(view.container)).toBe('We arrive.');
+      expect(view.container.querySelector('.subtitle-lane__feedback')).toBeNull();
+      const translated = { ...waiting, translation: native('waiting', '', 'Je vais.').translation };
+      view.rerender(<SubtitleBody {...props({ entries: [first, translated], legs: ['speaker'] })} />);
+      expect(answer(view.container)).toBe('Je vais.');
+      expect(view.container.querySelector('.subtitle-lane__feedback .kt-fix__gone')?.textContent).toBe('goes');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('does not restart a translation dwell when its feedback arrives late, or carry that feedback onto the next sentence', () => {
+    vi.useFakeTimers();
+    try {
+      const first = native('first', 'I goes.', 'Je vais.');
+      const next = native('next', 'Nous partons.', 'We leave.');
+      const view = render(<SubtitleBody {...props({ entries: [first], legs: ['speaker'] })} />);
+      act(() => { vi.advanceTimersByTime(300); });
+      view.rerender(<SubtitleBody {...props({ entries: [first, next], legs: ['speaker'] })} />);
+      act(() => { vi.advanceTimersByTime(800); });
+      const withFeedback = { ...first, source: practiced('first').source, feedback: practiced('first', true).feedback };
+      view.rerender(<SubtitleBody {...props({ entries: [withFeedback, next], legs: ['speaker'] })} />);
+      expect(answer(view.container)).toBe('Je vais.');
+      act(() => { vi.advanceTimersByTime(120); });
+      expect(answer(view.container)).toBe('We leave.');
+      expect(view.container.querySelector('.subtitle-lane__feedback')).toBeNull();
     } finally {
       vi.useRealTimers();
     }

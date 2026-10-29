@@ -133,6 +133,17 @@ describe('the stage cards: where each stage runs', () => {
     draw({ settings: { coach: true } });
     expect(screen.getByRole('group', { name: COACH })).toBeTruthy();
   });
+
+  it('toggles feedback without changing the speaker\'s bilingual choice', () => {
+    for (const coach of [false, true]) {
+      const view = draw({ settings: { asrVia: 'api', speakBoth: true, coach } });
+      fireEvent.click(view.card(COACH).getByText('providers.localai.coach'));
+      expect(view.update).toHaveBeenLastCalledWith(expect.objectContaining({ coach: !coach }));
+      const patch = view.update.mock.calls[view.update.mock.calls.length - 1][0];
+      expect(patch).not.toHaveProperty('speakBoth');
+      view.unmount();
+    }
+  });
 });
 
 describe('the stage cards: on the other device', () => {
@@ -827,13 +838,13 @@ describe('the other side\u2019s language left to be detected', () => {
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native', asrNativeModel: 'r2t2-q8', asrDetectOther: false, asrNativeByLanguage: expect.objectContaining({ ja: 'r2t2-q8' }) }));
   });
 
-  it('offers the Mac\'s recognition for the user speaking either language where it has both, and keeps them speaking both when it is chosen (fork)', () => {
+  it.each([false, true])('offers paired Apple recognition without ending bilingual speech (feedback: %s)', async (coach) => {
     useNativeEngineStore.setState({ status: engineOf({ 'apple-speech:zh': 'downloaded', 'apple-speech:ja': 'downloaded', 'qwen3-asr-1.7b-q8': 'downloaded' }) });
-    const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'qwen3-asr-1.7b-q8', speakBoth: true, translateAt: 'device' }, legs: BOTH });
+    const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'qwen3-asr-1.7b-q8', speakBoth: true, coach, translateAt: 'device' }, legs: BOTH });
     const mine = (card(HEAR).getAllByRole('combobox') as HTMLSelectElement[]).find((m) => m.getAttribute('aria-label') === 'providers.localai.hearsEither')!;
     expect(mine.selectedOptions[0].textContent).toBe('Qwen3-ASR 1.7B GGUF');
     expect([...mine.querySelectorAll('optgroup')[0].querySelectorAll('option')].map((o) => o.textContent).sort()).toEqual(['Apple Speech', 'Qwen3-ASR 1.7B GGUF']);
-    fireEvent.change(mine, { target: { value: '\u0000native:apple-speech:zh' } });
+    await act(async () => { fireEvent.change(mine, { target: { value: '\u0000native:apple-speech:zh' } }); });
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native', asrNativeModel: 'apple-speech:zh', asrNativeByLanguage: expect.objectContaining({ zh: 'apple-speech:zh' }) }));
     expect(update.mock.calls[update.mock.calls.length - 1][0]).not.toHaveProperty('speakBoth');
   });
@@ -849,14 +860,16 @@ describe('the other side\u2019s language left to be detected', () => {
     expect((draw({ settings, legs: BOTH }).card(HEAR).getAllByRole('combobox')[0] as HTMLSelectElement).selectedOptions[0].textContent).toBe('Qwen3-ASR 1.7B GGUF');
   });
 
-  it('ends the user\'s own detection — speaking either language — when a model that cannot detect is chosen for them', () => {
+  it.each([false, true])('ends bilingual speech when a recognizer cannot detect either language (feedback: %s)', async (coach) => {
     useNativeEngineStore.setState({ status: engineOf({ 'r2t2-q8': 'downloaded', 'qwen3-asr-1.7b-q8': 'downloaded' }) });
-    const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'qwen3-asr-1.7b-q8', speakBoth: true, translateAt: 'device' }, legs: BOTH });
+    const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'qwen3-asr-1.7b-q8', speakBoth: true, coach, translateAt: 'device' }, legs: BOTH });
     const menus = card(HEAR).getAllByRole('combobox') as HTMLSelectElement[];
     expect(menus.map((m) => m.getAttribute('aria-label'))).toEqual(['providers.localai.hearsEither', 'providers.localai.hears']);
-    fireEvent.change(menus[0], { target: { value: '\u0000native:r2t2-q8' } });
-    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native', speakBoth: false, asrNativeByLanguage: expect.objectContaining({ zh: 'r2t2-q8' }) }));
+    await act(async () => { fireEvent.change(menus[0], { target: { value: '\u0000native:r2t2-q8' } }); });
+    // Feedback remains enabled: without bilingual detection, the speaker practises the target language.
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native', speakBoth: false, asrNativeByLanguage: expect.objectContaining({ [coach ? 'ja' : 'zh']: 'r2t2-q8' }) }));
     expect(update.mock.calls[update.mock.calls.length - 1][0]).not.toHaveProperty('asrDetectOther');
+    expect(update.mock.calls[update.mock.calls.length - 1][0]).not.toHaveProperty('coach');
   });
 
   it('drops a detection kept from before when what hears changes, even to a model that detects: it does not come back on unseen', () => {

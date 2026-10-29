@@ -116,6 +116,33 @@
       grid-template-rows: minmax(0, 1fr);
     }
 
+    .subtitle-lane.has-feedback {
+      row-gap: var(--lane-inner-gap, 2px);
+
+      .subtitle-lane__tag {
+        grid-row: 1 / span 2;
+      }
+    }
+
+    .subtitle-lane--row.has-feedback {
+      flex-basis: calc(var(--lane-row-height, 1.18em) + var(--lane-feedback-height, 1.33em) + var(--lane-inner-gap, 2px));
+      grid-template-rows: minmax(0, 1fr) auto;
+    }
+
+    // Feedback has its own line and source; it never takes the translated caption's place.
+    .subtitle-lane__feedback {
+      grid-column: 2;
+      min-height: 0;
+      height: var(--lane-feedback-height, 1.33em);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      font-size: 0.62em;
+      line-height: var(--lane-row-line, 2.15);
+      color: var(--subtitle-translation-color, #e8e8e8);
+    }
+
     .subtitle-lane__source,
     .subtitle-lane__answer,
     .subtitle-lane__row {

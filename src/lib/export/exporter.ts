@@ -41,6 +41,7 @@ export function exportWords(t: (key: string, defaultValue: string) => string): E
       other: t('mainPanel.export.speakerOther', 'Other'),
       noTranslation: t('mainPanel.export.noTranslation', '(no translation)'),
       noSource: t('mainPanel.export.noSource', '(no source)'),
+      feedback: t('mainPanel.export.feedback', 'Feedback'),
     },
     header: {
       title: t('mainPanel.export.headerTitle', 'Sokuji conversation export'),
@@ -87,7 +88,7 @@ export function conversationExporter({ entries, legs, info, words, appVersion, n
     hasScopedContent: (scope) => entries.some((e) =>
       e.kind === 'exchange'
       && ((showsSide(scope[e.leg], 'source') && e.source.length > 0)
-        || (showsSide(scope[e.leg], 'translation') && e.translation.length > 0))),
+        || (showsSide(scope[e.leg], 'translation') && (e.translation.length > 0 || (e.feedback?.length ?? 0) > 0)))),
     text: (scope, withHeader) => renderTranscriptTxt(entries, legs, {
       labels: words.labels,
       formatTime,

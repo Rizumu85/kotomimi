@@ -157,7 +157,7 @@ describe('a live recognition', () => {
     expect(speech.writeStream(id, new Uint8Array(2))).toBe(false);
   });
 
-  it('hears a speaker who speaks both in either language: the one heard comes with the text, and is preferred next time (fork)', async () => {
+  it('hears either language and uses only the preference supplied with each recognition (fork)', async () => {
     const { world, speech } = mac({ installed: ['ja_JP', 'zh_CN'] });
     await speech.start(`${PREFIX}zh`);
     const first = speech.openStream({ language: 'zh-CN', also: 'ja', sampleRate: 16000 });
@@ -165,13 +165,46 @@ describe('a live recognition', () => {
     world.started.at(-1).child.say({ type: 'final', text: '次のワールドに行こう。', locale: 'ja_JP' });
     world.started.at(-1).child.finish();
     expect(world.events.at(-1)).toEqual({ id: first, type: 'done', text: '次のワールドに行こう。', language: 'ja' });
-    // The next prefers Japanese on a tie; both languages are kept from being let go while it hears.
+    // Another recognition inherits no preference from the one that just finished.
     speech.openStream({ language: 'zh', also: 'ja', sampleRate: 16000 });
+    expect(world.started.at(-1).args).toEqual(['stream', 'zh_CN', '--also', 'ja_JP', '--order', 'zh_CN,ja_JP']);
+    world.started.at(-1).child.say({ type: 'final', text: '天气很好。', locale: 'zh_CN' });
+    // The caller can prefer Japanese on a tie; both languages are kept while it hears.
+    speech.openStream({ language: 'zh', also: 'ja', prefer: 'ja-JP', sampleRate: 16000 });
     expect(world.started.at(-1).args).toEqual(['stream', 'zh_CN', '--also', 'ja_JP', '--prefer', 'ja_JP', '--order', 'zh_CN,ja_JP']);
     speech.openStream({ language: 'en', sampleRate: 16000 });
     expect(world.started.at(-1).args.slice(0, 4)).toEqual(['stream', 'en_US', '--keep', 'zh_CN,ja_JP']);
     // A second language the system does not offer: not opened at all.
     expect(speech.openStream({ language: 'zh', also: 'ru', sampleRate: 16000 })).toBeNull();
+  });
+
+  it('ignores a preference outside the requested pair, and every preference for a single language', async () => {
+    for (const prefer of ['en', 'ru', '', undefined]) {
+      const { world, speech } = mac({ installed: ['ja_JP', 'zh_CN'] });
+      await speech.start(`${PREFIX}ja`);
+      speech.openStream({ language: 'ja', also: 'zh', prefer, sampleRate: 16000 });
+      expect(world.started.at(-1).args).toEqual(['stream', 'ja_JP', '--also', 'zh_CN']);
+    }
+    for (const also of [undefined, 'ja-JP']) {
+      const { world, speech } = mac();
+      await speech.start(`${PREFIX}ja`);
+      speech.openStream({ language: 'ja', also, prefer: 'ja', sampleRate: 16000 });
+      expect(world.started.at(-1).args).toEqual(['stream', 'ja_JP']);
+    }
+  });
+
+  it('rejects a paired final that does not identify one of its candidates', async () => {
+    for (const locale of [undefined, 'en_US', 'ja']) {
+      const { world, speech } = mac({ installed: ['ja_JP', 'zh_CN'] });
+      await speech.start(`${PREFIX}ja`);
+      const id = speech.openStream({ language: 'ja', also: 'zh', sampleRate: 16000 });
+      world.started.at(-1).child.say({ type: 'partial', text: '你好。' });
+      world.started.at(-1).child.say({ type: 'final', text: '你好。', ...(locale ? { locale } : {}) });
+      expect(world.events).toEqual([
+        { id, type: 'partial', text: '你好。' },
+        { id, type: 'error', message: expect.stringContaining('requested languages') },
+      ]);
+    }
   });
 
   it('is not opened for a language the system has no recognizer for, for sound at another rate, or before a run', async () => {

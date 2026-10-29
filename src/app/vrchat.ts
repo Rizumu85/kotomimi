@@ -108,13 +108,13 @@ function twoLines(first: string, second: string): string {
  * never shown to others. With both shown, each has a line of its own: the original first, or — `translationFirst` —
  * the translation. Null while it is not done, or for anything else.
  */
+const base = (code: string) => code.toLowerCase().split(/[-_]/)[0];
+
 export function finishedLine(entry: Entry, shows: ChatboxShows, said = false, translationFirst = false, theirs?: { language: string; back: boolean }): string | null {
   if (shows === 'off' || entry.kind !== 'exchange' || entry.leg !== 'speaker') return null;
-  // Fork: said in the other side's language, as the recognizer heard it: that is what they read, as it was said —
-  // alone, unless the chatbox shows both and it is answered back into the user's own, for those near who read that.
-  const base = (code: string) => code.toLowerCase().split(/[-_]/)[0];
+  // Speech already in the other language is shown as said unless the user enabled translation back into their own.
   const inTheirs = theirs !== undefined && entry.source.length > 0 && entry.source.every((row) => row.language !== undefined && base(row.language) === base(theirs.language));
-  if (said || (inTheirs && (shows === 'translation' || !theirs.back))) {
+  if (said || (inTheirs && !theirs.back)) {
     const words = textOf(entry.source);
     return entry.source.length > 0 && entry.source.every((row) => row.final) && words ? words : null;
   }
@@ -277,19 +277,26 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     const theirs = deps.theirs?.();
     // The segments typed text opened: everything else of the user's leg was spoken.
     const typed = new Set((state.legs ?? []).flatMap((leg) => leg.segments.filter((s) => TYPED.test(s.origin ?? '')).map((s) => s.id)));
+    // Feedback is private; a coached speaker's own-language sentence is a translation instead.
+    // An undecided partial must not reach the chatbox before the final language arrives.
+    const feedback = (entry: Extract<Entry, { kind: 'exchange' }>) => coached
+      && !theirs?.back
+      && !entry.translation.some((row) => row.purpose === 'translation')
+      && !entry.source.some((row) => typed.has(row.segmentId))
+      && !(theirs && entry.source.length > 0 && entry.source.every((row) => row.language && base(row.language) !== base(theirs.language)));
     // The last sentence of the user's translated as it would go up, for the settings to show the chatbox with: not
     // one answered with feedback, which is theirs alone.
     for (let i = state.entries.length - 1; i >= 0; i--) {
       const entry = state.entries[i];
       if (entry.kind !== 'exchange' || entry.leg !== 'speaker') continue;
-      if (coached && !entry.source.some((row) => typed.has(row.segmentId))) continue;
+      if (feedback(entry)) continue;
       if (finishedLine(entry, 'translation') === null) continue;
       store.getState().setRecent({ said: textOf(entry.source), translation: textOf(entry.translation) });
       break;
     }
     for (const entry of state.entries) {
       if (entry.kind !== 'exchange' || sent.has(entry.id)) continue;
-      const said = coached && !entry.source.some((row) => typed.has(row.segmentId));
+      const said = feedback(entry);
       const line = finishedLine(entry, shows, said, store.getState().chatboxTranslationFirst, theirs);
       if (line === null) continue;
       sent.add(entry.id);

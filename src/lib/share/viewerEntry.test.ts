@@ -26,4 +26,16 @@ describe('toViewerEntry', () => {
     const notice: Entry = { kind: 'notice', id: 'speaker:n:1', leg: 'speaker', severity: 'error', message: 'x', at: 1 };
     expect(toViewerEntry(notice)).toBeNull();
   });
+
+  it('keeps a combined translation visible while withholding explicit and legacy feedback', () => {
+    const entry: Entry = {
+      kind: 'exchange', id: 'both', leg: 'speaker', languages: { source: 'en', target: 'fr' }, pairing: 'stated', t: 0,
+      source: [row('source:0', 'Je suis ici', true)],
+      translation: [{ ...row('translation:0', 'I am here', true), side: 'translation', purpose: 'translation' }],
+      feedback: [{ ...row('feedback:0', 'Private grammar explanation', true), side: 'translation', purpose: 'feedback' }],
+    };
+    expect(toViewerEntry(entry, true)?.translation).toEqual([{ key: 'translation:0', text: 'I am here', final: true }]);
+    expect(JSON.stringify(toViewerEntry(entry, true))).not.toContain('Private grammar explanation');
+    expect(toViewerEntry({ ...entry, translation: [{ ...row('legacy:0', 'Legacy feedback', true), side: 'translation' }] }, true)?.translation).toEqual([]);
+  });
 });

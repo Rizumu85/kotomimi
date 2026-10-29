@@ -47,6 +47,47 @@ describe("OpenAI Realtime's items: the sources", () => {
     expect(m.of('segmentClosed')).toEqual([{ ref: 1 }, { ref: 2 }]);
   });
 
+  it.each([
+    ['en', 'Hello there'],
+    ['fr', 'Bonjour tout le monde'],
+  ])('writes the final detected language %s even when its transcript equals the streamed text', (language, text) => {
+    const m = machine();
+    m.items.committed('item_a');
+    m.items.inputDelta('item_a', text);
+    m.items.inputDone('item_a', text, language);
+    expect(m.of('segmentOpened')).toEqual([{ ref: 1, side: 'source', origin: 'item_a' }]);
+    expect(m.of('segmentText')).toEqual([{ ref: 1, text }, { ref: 1, text, language }]);
+    expect(m.of('segmentClosed')).toEqual([{ ref: 1 }]);
+  });
+
+  it('keeps streamed text in a language-only completion, and carries the language even when no text was streamed', () => {
+    const m = machine();
+    m.items.inputDelta('item_a', 'Bonjour');
+    m.items.inputDone('item_a', '', 'fr');
+    m.items.committed('item_b');
+    m.items.inputDone('item_b', '', 'en');
+    expect(m.of('segmentText')).toEqual([
+      { ref: 1, text: 'Bonjour' },
+      { ref: 1, text: 'Bonjour', language: 'fr' },
+      { ref: 2, text: '', language: 'en' },
+    ]);
+    expect(m.of('segmentClosed')).toEqual([{ ref: 1 }, { ref: 2 }]);
+  });
+
+  it('ignores a detected language after its input closed or the machine stopped', () => {
+    const m = machine();
+    m.items.inputDone('item_a', 'Hello');
+    const n = m.log.length;
+    m.items.inputDone('item_a', 'Bonjour', 'fr');
+    expect(m.log).toHaveLength(n);
+    m.items.committed('item_b');
+    const beforeStop = m.log.length;
+    m.items.stop();
+    m.items.inputDone('item_b', 'Bonjour', 'fr');
+    m.items.inputDone('item_c', 'Hello', 'en');
+    expect(m.log).toHaveLength(beforeStop);
+  });
+
   it('keeps the streamed text when the completed transcript arrives empty, as `outputDone` treats an empty final text as none; with no deltas, the source closes with no text at all', () => {
     const m = machine();
     m.items.committed('item_a');

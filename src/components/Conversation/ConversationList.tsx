@@ -88,7 +88,7 @@ export function ConversationList({
               }
               // The slot is decided here, session-wide, so a row without one never
               // re-renders for a replay-state change (plan 1e-3b-1 ruling 14).
-              const slot = !compact && item.row.side === 'translation' && item.endsSegment && replayLegs.has(item.leg);
+              const slot = !compact && item.row.side === 'translation' && item.row.purpose !== 'feedback' && item.endsSegment && replayLegs.has(item.leg);
               const id = item.row.segmentId;
               return (
                 <RowBubble
@@ -159,7 +159,8 @@ const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, r
   // Fork: grammar feedback that changes something, drawn as the sentence said, marked — on its answer's first row;
   // the answer's other rows (where sentences are cut into rows) are then part of it.
   const coached = useCoached();
-  const fix = isTranslation && leg === 'speaker' && coached && item.answers ? fixOf(item.answers.said, item.answers.saidLanguage, item.answers.answer) : null;
+  const isFeedback = row.purpose === 'feedback' || (row.purpose === undefined && isTranslation && leg === 'speaker' && coached);
+  const fix = isFeedback && item.answers ? fixOf(item.answers.said, item.answers.saidLanguage, item.answers.answer, row.purpose === 'feedback' ? undefined : languages.target) : null;
   if (fix && row.start > 0) return null;
   const segmentId = row.segmentId;
   // The tint marks only the row that holds the karaoke boundary — not every
@@ -167,7 +168,7 @@ const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, r
   const isPlayingRow = upTo !== undefined && ((upTo >= row.start && upTo < row.end) || (item.endsSegment && upTo >= row.end));
 
   return (
-    <div className={`conversation-row source-${leg} ${item.header ? 'with-header' : 'grouped'} ${compact ? 'compact' : 'expanded'}${video ? ' kt-video-row' : ''}`}>
+    <div className={`conversation-row source-${leg} ${item.header ? 'with-header' : 'grouped'} ${compact ? 'compact' : 'expanded'}${video ? ' kt-video-row' : ''}`} data-purpose={row.purpose}>
       {!compact && item.header && (
         <div className="row-header">
           <div className={`row-avatar ${video ? 'avatar-video' : `avatar-${leg}`}`}>
@@ -187,7 +188,7 @@ const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, r
           <span className={`lang-badge ${isTranslation ? 'tr' : 'src'} source-${leg}`}>{lang.toUpperCase()}</span>
         )}
         {/* Fork: marked with its language, so a font chosen for that language reaches it (`src/lib/fonts`). */}
-        <span className={`row-text ${isTranslation ? 'tr' : 'src'}`} data-kt-text="" lang={fontLanguage(lang) || undefined}>
+        <span className={`row-text ${isTranslation ? 'tr' : 'src'}`} data-kt-text="" lang={fontLanguage(fix ? item.answers?.saidLanguage : lang) || undefined}>
           {fix ? (
             <Correction correction={fix} language={item.answers?.saidLanguage} />
           ) : annotated ? (

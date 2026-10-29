@@ -52,6 +52,20 @@ describe('conversationExporter', () => {
     expect(exporter({ entries: noTranslation }).hasScopedContent({ speaker: 'translation', participant: 'none' })).toBe(false);
   });
 
+  it('allows exporting standalone feedback in the answer scope without a translation', () => {
+    const feedback = seg({ id: 'r:speaker:3', side: 'translation', purpose: 'feedback', text: 'Use the past tense.' });
+    const feedbackOnly: Entry = {
+      kind: 'exchange', id: 'feedback', leg: 'speaker', languages: legs[0].languages, pairing: 'stated',
+      source: [], translation: [], feedback: [{ ...row(feedback), purpose: 'feedback' }], t: said,
+    };
+    const writer = exporter({ entries: [feedbackOnly], legs: [{ ...legs[0], segments: [feedback] }] });
+    const scope = { speaker: 'translation', participant: 'none' } as const;
+    expect(writer.hasScopedContent(scope)).toBe(true);
+    expect(writer.hasScopedContent({ ...scope, speaker: 'source' })).toBe(false);
+    expect(writer.text(scope, false)).toContain('Feedback: Use the past tense.');
+    expect(JSON.parse(writer.json(scope)).groups[0].feedback).toMatchObject({ text: feedback.text, purpose: 'feedback' });
+  });
+
   it('writes the JSON with the metadata of the export and the run', () => {
     const written = exporter().json(FULL_SCOPE);
     expect(written.endsWith('\n')).toBe(true);
@@ -83,6 +97,7 @@ describe('exportWords', () => {
       other: 'mainPanel.export.speakerOther|Other',
       noTranslation: 'mainPanel.export.noTranslation|(no translation)',
       noSource: 'mainPanel.export.noSource|(no source)',
+      feedback: 'mainPanel.export.feedback|Feedback',
     });
     expect(keyed.header.narrowed).toBe('mainPanel.export.headerNarrowed|Note: this export was narrowed at export time — some lines were left out.');
   });
