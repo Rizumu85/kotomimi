@@ -64,7 +64,7 @@ import { SERVER_SILENT, isKotomimiServer, kindOf, KOTOMIMI_HOST, fitsPair, model
 import { getManifestEntry } from '../../lib/local-inference/modelManifest';
 import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
-import { choiceOf, recognizerAsked, serverBilingual } from './serverRecognizers';
+import { recognizerAsked, serverBilingual } from './serverRecognizers';
 import { phoneBase, plainAddress } from '../../lib/lan/discover';
 import { ASR_HERES, canDetectOther, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
 import { NATIVE_MODELS, preferNative, type NativePick } from './localaiNative';
