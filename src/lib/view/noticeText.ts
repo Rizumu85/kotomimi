@@ -147,6 +147,7 @@ export const NOTICE_ALIASES: Readonly<Record<string, string>> = {
   api_key_refused: 'providers.localai.apiKeyRefused',
   // Fork: another Kotomimi hears a leg's language with none of its recognizers.
   server_no_asr: 'providers.localai.serverNoAsr',
+  server_no_detect: 'providers.localai.serverNoDetect',
   connection_lost: 'mainPanel.sonioxConnectionLost',
   // Kizuna Soniox's lease refused a start (Stage 2 Kizuna Soniox, ruling 11): the sentences name Soniox, so the codes keep it.
   soniox_service_unavailable: 'mainPanel.sonioxServiceUnavailable',

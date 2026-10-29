@@ -48,6 +48,7 @@ import { base64ToPcm } from '../../lib/contract/pcm64';
 import { describeCause } from '../../lib/diagnostics/describeCause';
 import type { RealtimeConfig } from './config';
 import { RealtimeItems } from './items';
+import { kotomimiRefusal } from './kotomimiRefusal';
 import { ACTIVE_RESPONSE, ResponseQueue, type Request } from './queue';
 import type { RealtimeCredentials } from './settings';
 import { nativeSocket, WS_OPEN, type OpenSocket } from './socket';
@@ -317,7 +318,9 @@ class RealtimeLeg implements AdapterSession {
     this.frame('in', 'session.error', { type: error.type ?? null, code: error.code ?? null, message: error.message ?? null, param: error.param ?? null, eventId: error.event_id ?? null });
     const refusal = { code: errorCode(error), message: errorWords(error) };
     if (this.phase !== 'live') {
-      this.refuse(new AdapterStartError(refusal.message, refusal.code));
+      // Fork: a sharing Kotomimi's refusal, worded by the app (`kotomimiRefusal.ts`); its English kept for the Logs.
+      const kotomimi = kotomimiRefusal(error);
+      this.refuse(kotomimi ? new AdapterStartError(refusal.message, kotomimi.code, kotomimi.params) : new AdapterStartError(refusal.message, refusal.code));
       return;
     }
     // The 60-minute cap ends the run at once, in its words, whether or not the server closes the socket after it (ruling 14; choice 14).

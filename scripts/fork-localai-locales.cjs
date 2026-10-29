@@ -365,6 +365,12 @@ const PROVIDER = {
     '另一台裝置上沒有能辨識{{source}}的語音辨識模型。請先在那台裝置上下載一個（在它共享卡片的模型庫裡），或者改由這台電腦辨識。',
   ],
 
+  serverNoDetect: [
+    "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
+    '另一台设备上没有能自动分辨语言的识别模型，「我也说××」和自动识别对方语言都要用到它。请先在那台设备上下载一个（比如 Qwen3-ASR），或者关掉这两个开关。',
+    '另一台裝置上沒有能自動分辨語言的辨識模型，「我也說××」和自動辨識對方語言都要用到它。請先在那台裝置上下載一個（比如 Qwen3-ASR），或者關掉這兩個開關。',
+  ],
+
   // Auto Detect where nothing detects the language: said when it is checked, and when Start is pressed.
   sourceAuto: [
     'The language cannot be detected with this setup. Choose the language you speak.',
