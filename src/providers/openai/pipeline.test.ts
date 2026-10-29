@@ -359,7 +359,7 @@ describe('a leg whose language is left to be detected', () => {
     const h = await live(PARTICIPANT, VIA_MODEL, [sse('你好。')], K, detected);
     h.receive(...heard('item_1', 'Hello there.'));
     await h.settled();
-    expect(h.lastText(1)).toMatchObject({ text: 'Hello there.', language: 'auto' });
+    expect(h.lastText(1)).toMatchObject({ text: 'Hello there.', language: 'en' });
     expect(h.calls).toHaveLength(1);
   });
 

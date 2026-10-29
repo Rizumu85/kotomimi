@@ -29,7 +29,8 @@ import type { LocalInferenceConfig } from '../localInference/config';
 import { defaultEngines, type LocalEngines, type TranslationLike } from '../localInference/engines';
 import { createApiAsr } from './apiAsr';
 import { createNativeAsr, type NativeLimits } from './nativeAsr';
-import { languageByScript, oneOfTwo, saidInOwn, sameSpeech } from '../../lib/language/script';
+import { oneOfTwo, saidInOwn, sameSpeech } from '../../lib/language/script';
+import { identifyLanguage } from '../../lib/language/identify';
 import { AUTO } from '../../lib/provider/languages';
 import { BEFORE_SLOT, TEXT_SLOT } from './nativeTranslators';
 import { cutAt, letters, restFrom, SETTLE_MS } from './sentenceCut';
@@ -663,7 +664,7 @@ class PipelineLeg implements AdapterSession {
     // Fork: a speaker who speaks both said this one in the other side's language: it is translated into their own.
     const backward = text !== undefined ? this.backFor(text, language) : undefined;
     // What was said in the reader's own language needs no translating: detected, or told another and written in theirs.
-    const already = !backward && !coached && text !== undefined && (other !== undefined || (this.stages.heard === AUTO && (language ? baseOf(language) : languageByScript(text)) === baseOf(this.request.context.direction.target)));
+    const already = !backward && !coached && text !== undefined && (other !== undefined || (this.stages.heard === AUTO && (language ? baseOf(language) : this.byWriting(text)) === baseOf(this.request.context.direction.target)));
     // A coached speaker who says a sentence in their own language is not practising with it: it is translated, as what
     // they type is, and not sent for feedback. No translation in this run: it is shown as said.
     const stage = backward ?? (coached && other !== undefined ? this.stages.typed : this.stages.speech);
@@ -727,7 +728,8 @@ class PipelineLeg implements AdapterSession {
   /** The language a sentence of a leg left to detect it is written in: of a speaker who speaks both, one of the two. */
   private byWriting(text: string): string | undefined {
     const back = this.stages.back;
-    return back ? oneOfTwo(text, back.own, back.language) : languageByScript(text);
+    // The writing first; a small text detector for the pairs it cannot tell apart (English/French, Spanish/Portuguese).
+    return identifyLanguage(text, back ? [back.own, back.language] : [])?.language;
   }
 
   private otherThanHeard(text: string, language?: string): string | undefined {
