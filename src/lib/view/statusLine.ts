@@ -1,7 +1,7 @@
 /**
  * The status line (spec 2026-10-05 §3): why the user cannot start, or what is
  * wrong right now. Not a record — the condition's presence is the line's. One
- * line at a time, the highest of: cannot start › reconnecting › waiting for a
+ * line at a time, the highest of: cannot start › still getting ready (fork) › reconnecting › waiting for a
  * microphone › muted in VRChat (fork) › the subtitle layer unavailable › echo. Pure: the inputs come
  * from `useStatusLine`, so this is testable without React.
  */
@@ -40,6 +40,12 @@ export interface StatusLineInput {
   dismissedEnd: RunEnd | null;
   /** Running with a speaker leg and no usable input selected (`audioStore.selectedInputDevice === null`). */
   waitingForMicrophone: boolean;
+  /**
+   * Fork: idle, nothing refuses the start, and the start is still off — the stages are being checked, or the
+   * provider's entry is loading — for long enough to be noticed (`useStatusLine`). The start button was grey with
+   * nothing said, and read as broken (the user, 2026-10-29).
+   */
+  gettingReady?: boolean;
   /** Fork: running with a speaker leg while muted in VRChat holds the microphone (`vrchatHolds`): nothing said is heard. */
   mutedInVRChat?: boolean;
   /** The extension's content script was missing on the last attempt to enter subtitle mode (`subtitleStore.entryHint`). */
@@ -69,7 +75,7 @@ function blocker(key: string, code: string | undefined, message: string, params?
 }
 
 export function statusLine(input: StatusLineInput): StatusEntry | null {
-  const { run, idle, canStart, dismissedEnd, waitingForMicrophone, mutedInVRChat, subtitleEntryHint, echo } = input;
+  const { run, idle, canStart, dismissedEnd, waitingForMicrophone, mutedInVRChat, gettingReady, subtitleEntryHint, echo } = input;
   if (run.phase === 'idle') {
     // 1a. The live gate: what the stores refuse now (a stale failure never outranks it).
     // Fork: an answer that could not find out is said though the start stays offered (it asks again).
@@ -79,6 +85,10 @@ export function statusLine(input: StatusLineInput): StatusEntry | null {
     const end = run.lastEnd;
     if (end && (end.reason === 'refused' || end.reason === 'start-failed') && end.notice && end !== dismissedEnd) {
       return blocker(`last-end:${end.notice.code}`, end.notice.code, end.notice.message, end.notice.params);
+    }
+    // 1c. Fork: nothing refuses it, and it is not on yet.
+    if (gettingReady && !canStart && (idle.kind === 'ready' || idle.kind === 'ended')) {
+      return { key: 'getting-ready', icon: 'refresh-cw', words: { kind: 'key', key: 'fork.statusLine.checking', fallback: 'Getting ready. You can start in a moment.' }, action: null, dismiss: null };
     }
   }
   if (run.phase === 'running') {

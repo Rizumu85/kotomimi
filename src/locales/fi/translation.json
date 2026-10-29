@@ -1703,6 +1703,9 @@
       "toggle": "Start in the background when I sign in to Windows",
       "note": "Kotomimi waits in the background after you sign in, with an icon in the notification area, and loads the models once ahead of time so the first session does not wait for it."
     },
+    "statusLine": {
+      "checking": "Getting ready. You can start in a moment."
+    },
     "vrchat": {
       "title": "VRChat",
       "help": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. Faster, when a world plays a video: if the video has no direction in the world, its sound is removed and only the players are heard; if it has, the other side is heard in shorter stretches.",

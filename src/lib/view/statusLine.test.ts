@@ -75,6 +75,15 @@ describe('statusLine — while running (priorities 2–5)', () => {
   it('the microphone wait outranks the subtitle layer’s hint', () => {
     expect(statusLine(input({ run: running(), waitingForMicrophone: true, subtitleEntryHint: true }))).toMatchObject({ key: 'mic-waiting', icon: 'mic-off', dismiss: null });
   });
+  it('says the start is still getting ready where nothing refuses it and it is not on yet (fork)', () => {
+    expect(statusLine(input({ canStart: false, gettingReady: true }))).toMatchObject({ key: 'getting-ready', icon: 'refresh-cw', words: { kind: 'key', key: 'fork.statusLine.checking' }, action: null, dismiss: null });
+    // Not before it has lasted a moment, not once it can start, and not over a reason it cannot.
+    expect(statusLine(input({ canStart: false }))).toBeNull();
+    expect(statusLine(input({ canStart: true, gettingReady: true }))).toBeNull();
+    const unready = { kind: 'unready', message: 'Enter an API key.', code: 'credentials_missing' } as const;
+    expect(statusLine(input({ canStart: false, gettingReady: true, idle: unready }))?.key).toBe('unready:credentials_missing');
+  });
+
   it('says that nothing said is heard while muted in VRChat, under the microphone wait and over the rest (fork)', () => {
     expect(statusLine(input({ run: running(), mutedInVRChat: true, subtitleEntryHint: true, echo }))).toMatchObject({ key: 'vrchat-muted', icon: 'mic-off', words: { kind: 'key', key: 'fork.vrchat.mutedNotHeard' }, action: null, dismiss: null });
     expect(statusLine(input({ run: running(), mutedInVRChat: true, waitingForMicrophone: true }))?.key).toBe('mic-waiting');

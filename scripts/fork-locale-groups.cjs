@@ -58,6 +58,10 @@ module.exports = {
       "登入後 Kotomimi 在背景待命（右下角有圖示），並預先載入一次模型，第一次開始工作階段就不用多等。",
     ],
   },
+  // The status line above the footer (`src/lib/view/statusLine.ts`).
+  statusLine: {
+    checking: ['Getting ready. You can start in a moment.', '正在准备，稍等就能开始。', '正在準備，稍等就能開始。'],
+  },
   // VRChat on the same computer (`src/components/VRChat/`, `src/app/vrchat.ts`).
   vrchat: {
     title: ['VRChat', 'VRChat', 'VRChat'],
