@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
-import { buildLocalAI, checkLocalAIWithNative, LOCALAI_DEFAULTS, localaiLanguages, migrateLocalAISettings } from './localai';
+import { buildLocalAI, checkLocalAIWithNative, createLocalAICheck, LOCALAI_DEFAULTS, localaiLanguages, migrateLocalAISettings } from './localai';
 import { canDetectOther, cutsSentencesHere, deviceNeeds, heardBy, hearingPlace, hearsAtOwnDevice, needsServer, speaksBoth } from './localaiDevice';
-import { nativeGap } from './localaiNative';
-import { NO_NATIVE_ENGINE } from '../../lib/native/nativeEngine';
+import { nativeGap, translatorGap } from './localaiNative';
+import { NO_NATIVE_ENGINE, type NativeEngineStatus } from '../../lib/native/nativeEngine';
 import { SHARED } from './testing';
 import { useModelStore } from '../../stores/modelStore';
 
@@ -50,6 +50,32 @@ describe('native-only local stages', () => {
       idle: vi.fn(), translatorIdle: vi.fn(), coachIdle: vi.fn(),
     });
     expect(result).toMatchObject({ ok: false, code: 'native_missing' });
+  });
+
+  it.each([
+    { supported: false, anotherDownloaded: false, code: 'native_translator_unsupported' },
+    { supported: true, anotherDownloaded: false, code: 'native_translator_missing' },
+    { supported: true, anotherDownloaded: true, code: 'native_translator_missing' },
+  ])('refuses unavailable native translation without a Bing request: $code, another model=$anotherDownloaded', async ({ supported, anotherDownloaded, code }) => {
+    const s = migrateLocalAISettings({
+      ...LOCALAI_DEFAULTS, asrVia: 'device', translateAt: 'device', translateHere: 'app',
+      translateNativeModel: 'hy-mt2-1.8b',
+      selections: { 'zh→ja': { translation: { modelId: 'bing-translator' } } },
+    }, { legacy: { translateAt: 'device' }, credentials: {} });
+    const fetch = vi.fn<typeof globalThis.fetch>();
+    const resolve = vi.spyOn(useModelStore.getState(), 'resolve');
+    const status: NativeEngineStatus = { ...NO_NATIVE_ENGINE, supported, engine: 'ready', models: {} };
+    if (anotherDownloaded) status.models['index-translate-2b'] = { state: 'downloaded', received: 1, total: 1 };
+    try {
+      const result = await checkLocalAIWithNative({ apiKey: '', endpoint: '' }, s, { pair: PAIR, legs: ['speaker', 'participant'] }, createLocalAICheck({ fetch }), {
+        gap: async () => null, idle: vi.fn(), translatorIdle: vi.fn(), coachIdle: vi.fn(),
+        translatorGap: (id, pairs) => translatorGap(id, pairs, { status: async () => status }),
+      });
+      expect(result).toMatchObject({ ok: false, code });
+      expect(buildLocalAI(context, s, shared)).toMatchObject({ stages: { speech: { engine: 'translator', model: 'hy-mt2-1.8b' } } });
+      expect(fetch).not.toHaveBeenCalled();
+      expect(resolve).not.toHaveBeenCalled();
+    } finally { resolve.mockRestore(); }
   });
 
   it('keeps bilingual speech and feedback independent', () => {
