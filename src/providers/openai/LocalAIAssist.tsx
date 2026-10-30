@@ -404,7 +404,12 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
    */
   const hearsEither = (id: string, slot: DeviceNeed): boolean => stage === 'asr' && slot.leg === 'speaker' && isAutoLanguage(heardIn(slot)) && isApple(id)
     && nativeModelFor(id, slot.source)?.id === id && nativeEither({ model: id, either: { own: pair.source, other: pair.target } }, (one) => nativeDownloaded(status, one)) !== null;
-  const fits = (id: string, slot: DeviceNeed): boolean => nativeFits(stage, id, heardIn(slot), slot.target) || hearsEither(id, slot);
+  // A model that cannot name the language still fits a best-effort row, where it hears one of the pair's languages.
+  const bestEffortFits = (id: string): boolean => stage === 'asr'
+    && (settings.speakBoth === true || settings.asrDetectOther === true)
+    && !nativeModel(id).detects && !isApple(id)
+    && (nativeHears(nativeModel(id), pair.source) || nativeHears(nativeModel(id), pair.target));
+  const fits = (id: string, slot: DeviceNeed): boolean => nativeFits(stage, id, heardIn(slot), slot.target) || hearsEither(id, slot) || bestEffortFits(id);
   /** A model a row offers: one that fits it — or, where its language is left to be detected, one that hears the pair's language, which chosen ends the detection (`onPick`). */
   const offers = (id: string, slot: DeviceNeed): boolean => fits(id, slot) || (stage === 'asr' && nativeFits('asr', id, slot.source, slot.target));
   /** A row with nothing to run, or whose model needs the person: not on this computer yet, or the engine failed with it. */
