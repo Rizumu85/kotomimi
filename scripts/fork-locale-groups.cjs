@@ -1,6 +1,6 @@
 /**
  * Fork: the groups of strings written under `fork.<group>` by
- * `fork-localai-locales.cjs`, each string as [English, 简体, 繁體].
+ * `fork-localai-locales.cjs`, each string as [English, Simplified Chinese, Traditional Chinese] or a locale-keyed record.
  */
 module.exports = {
   // The tour's fork steps and copy (`src/components/Tour/steps.ts`): written under `tour.steps.<id>`, beside upstream's own, not under `fork`.
@@ -36,9 +36,9 @@ module.exports = {
         '工作階段開始後，底部會出現輸入框：打一句話就能翻譯。按 Ctrl+K 可以直接跳到輸入框。',
       ],
       coach: [
-        'Speaking their language yourself? Turn on the Grammar feedback card in Settings: your speech is checked instead of translated.',
-        '想自己直接说对方的语言？在设置里打开「语法反馈」那张卡片：你说的话不再翻译，而是帮你检查语法。',
-        '想自己直接說對方的語言？在設定裡開啟「文法回饋」那張卡片：你說的話不再翻譯，而是幫你檢查文法。',
+        "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
+        "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
+        "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
       ],
       share: [
         'Another device can use this computer\'s models: Advanced → Provider → Share with other devices.',
@@ -122,17 +122,12 @@ module.exports = {
       '目前的語音辨識不能自動偵測語言，需要 Qwen3-ASR 1.7B GGUF 或 API 模型。',
     ],
     speakBothUnavailable: [
-      "The speech recognition in use can't tell {{mine}} from {{language}}. It needs Qwen3-ASR 1.7B GGUF or an API model.",
-      '当前的语音识别分不出{{mine}}和{{language}}，需要 Qwen3-ASR 1.7B GGUF 或 API 模型。',
-      '目前的語音辨識分不出{{mine}}和{{language}}，需要 Qwen3-ASR 1.7B GGUF 或 API 模型。',
+      "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
+      "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
+      "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
     ],
     // A model that does not name the language: the pipeline guesses it from the writing and a small detector.
-    bestEffort: ['Best effort', '尽力而为', '盡力而為'],
-    bestEffortHelp: [
-      'The speech recognition model in use cannot identify the language of a transcript by itself. Kotomimi will try to guess it in code, so the language may be slightly less accurate.',
-      '目前使用的语音识别模型无法自主判断转写的语言类型，Kotomimi会尽量用程序来猜，所以语言的判断会略差一些。',
-      '目前使用的語音辨識模型無法自主判斷轉寫的語言類型，Kotomimi 會盡量用程式來猜，所以語言的判斷會略差一些。',
-    ],
+    ...require('./fork-best-effort-locales.cjs'),
   },
   wizard: {
     pathTitle: ['Kotomimi Pipeline', 'Kotomimi 自由搭配', 'Kotomimi 自由搭配'],

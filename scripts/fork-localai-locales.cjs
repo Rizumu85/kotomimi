@@ -7,9 +7,9 @@
  *
  *   node scripts/fork-localai-locales.cjs
  *
- * Each string is written once here, as [English, 简体, 繁體]. English goes
- * everywhere but the two Chinese catalogs, so the catalogs stay in lockstep
- * with `en` (`src/locales/locales.consistency.test.ts`).
+ * Copy uses [English, Simplified Chinese, Traditional Chinese] columns or
+ * locale-keyed records for fully translated entries. Missing translations
+ * fall back to English; all catalogs retain the same keys and placeholders.
  */
 const fs = require('node:fs');
 const path = require('node:path');
@@ -246,9 +246,9 @@ const PROVIDER = {
   // Grammar feedback.
   coachStage: ['Grammar feedback', '语法反馈', '文法回饋'],
   coachStageTooltip: [
-    'For when you speak the other side\'s language yourself. Your speech is not translated: a model checks it and answers ✓, or the corrected sentence and why. What you type is still translated.',
-    '适合自己直接说对方语言的场合。你说的话不再翻译，而是交给模型检查：没问题回 ✓，有问题给出改正后的句子和原因。打字输入的内容仍然会翻译。',
-    '適合自己直接說對方語言的場合。你說的話不再翻譯，而是交給模型檢查：沒問題回 ✓，有問題給出改正後的句子和原因。打字輸入的內容仍然會翻譯。',
+      "When you speak the other language, a model checks your grammar and answers with a check mark, or a corrected sentence and an explanation. Enable \"I speak the other language too\" as well to get both a translation and private feedback. Your own language and typed text are translated without feedback.",
+      "When you speak the other language, a model checks your grammar and answers with a check mark, or a corrected sentence and an explanation. Enable \"I speak the other language too\" as well to get both a translation and private feedback. Your own language and typed text are translated without feedback.",
+      "When you speak the other language, a model checks your grammar and answers with a check mark, or a corrected sentence and an explanation. Enable \"I speak the other language too\" as well to get both a translation and private feedback. Your own language and typed text are translated without feedback."
   ],
   coachNeedsSpeaker: [
     'Feedback answers what you say. Switch the mode to "Me" or "Both".',
@@ -459,14 +459,14 @@ const PROVIDER = {
     "{{name}} 聽不了你選的其中一種語言，請換一個模型。",
   ],
   nativeUnsupported: [
-    "The native recognition engine is not available for this system. Choose another model in the Speech recognition card.",
-    "这个系统暂不支持原生识别引擎。请在「语音识别」卡片里换一个模型。",
-    "這個系統暫不支援原生辨識引擎。請在「語音辨識」卡片裡換一個模型。",
+      "The native recognition engine is not available for this system. In the Speech recognition card, switch to \"API model\" or \"Another device\".",
+      "这个系统暂不支持原生语音识别引擎。请在「语音识别」卡片里切换到「API 模型」或「另一台设备」。",
+      "這個系統暫不支援原生語音辨識引擎。請在「語音辨識」卡片裡切換到「API 模型」或「另一台裝置」。"
   ],
   nativeMissing: [
-    "{{name}} is not downloaded yet. Download it in the Speech recognition card, or choose another model.",
-    "{{name}} 还没有下载。请在「语音识别」卡片里下载，或者换一个模型。",
-    "{{name}} 還沒有下載。請在「語音辨識」卡片裡下載，或者換一個模型。",
+      "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
+      "{{name}} 还没有下载。请在「语音识别」卡片里下载原生模型，或切换到「API 模型」／「另一台设备」。",
+      "{{name}} 還沒有下載。請在「語音辨識」卡片裡下載原生模型，或切換到「API 模型」／「另一台裝置」。"
   ],
   nativeWarming: [
     "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
@@ -515,14 +515,14 @@ const PROVIDER = {
   nativeCoachWarmingShort: ['Starting the feedback engine…', '正在启动语法反馈引擎…', '正在啟動語法回饋引擎…'],
   nativeCoachFailedShort: ['The feedback engine could not start.', '语法反馈引擎没能启动。', '語法回饋引擎沒能啟動。'],
   nativeCoachUnsupported: [
-    'The native feedback engine is not available for this system. Choose another model in the Grammar feedback card.',
-    '这个系统暂不支持原生语法反馈引擎。请在「语法反馈」卡片里换一个模型。',
-    '這個系統暫不支援原生語法回饋引擎。請在「語法回饋」卡片裡換一個模型。',
+      "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
+      "这个系统暂不支持原生语法反馈引擎。请在「语法反馈」卡片里切换到「API 模型」或「另一台设备」。",
+      "這個系統暫不支援原生語法回饋引擎。請在「語法回饋」卡片裡切換到「API 模型」或「另一台裝置」。"
   ],
   nativeCoachMissing: [
-    '{{name}} is not downloaded yet. Download it in the Grammar feedback card, or choose another model.',
-    '{{name}} 还没有下载。请在「语法反馈」卡片里下载，或者换一个模型。',
-    '{{name}} 還沒有下載。請在「語法回饋」卡片裡下載，或者換一個模型。',
+      "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
+      "{{name}} 还没有下载。请在「语法反馈」卡片里下载原生模型，或切换到「API 模型」／「另一台设备」。",
+      "{{name}} 還沒有下載。請在「語法回饋」卡片裡下載原生模型，或切換到「API 模型」／「另一台裝置」。"
   ],
   nativeCoachWarming: [
     'The feedback engine is still starting — a few seconds. You can start as soon as it is ready.',
@@ -548,14 +548,14 @@ const PROVIDER = {
     '{{name}} 不支援你選的這兩種語言，請換一個模型。',
   ],
   translatorUnsupported: [
-    'The native translation engine is not available for this system. Choose another model in the Translation card.',
-    '这个系统暂不支持原生翻译引擎。请在「翻译」卡片里换一个模型。',
-    '這個系統暫不支援原生翻譯引擎。請在「翻譯」卡片裡換一個模型。',
+      "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
+      "这个系统暂不支持原生翻译引擎。请在「翻译」卡片里切换到「API 模型」或「另一台设备」。",
+      "這個系統暫不支援原生翻譯引擎。請在「翻譯」卡片裡切換到「API 模型」或「另一台裝置」。"
   ],
   translatorMissing: [
-    '{{name}} is not downloaded yet. Download it in the Translation card, or choose another model.',
-    '{{name}} 还没有下载。请在「翻译」卡片里下载，或者换一个模型。',
-    '{{name}} 還沒有下載。請在「翻譯」卡片裡下載，或者換一個模型。',
+      "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
+      "{{name}} 还没有下载。请在「翻译」卡片里下载原生模型，或切换到「API 模型」／「另一台设备」。",
+      "{{name}} 還沒有下載。請在「翻譯」卡片裡下載原生模型，或切換到「API 模型」／「另一台裝置」。"
   ],
   translatorWarming: [
     'The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.',
@@ -652,7 +652,9 @@ const FORK = {
 const { tour: TOUR, ...GROUPS } = require('./fork-locale-groups.cjs');
 
 const COLUMN = { zh_CN: 1, zh_TW: 2 };
-const pick = (table, column) => Object.fromEntries(Object.entries(table).map(([key, value]) => [key, value[column] ?? value[0]]));
+// Existing copy uses three columns; fully localized copy uses locale keys with English fallback.
+const pick = (table, column, lang) => Object.fromEntries(Object.entries(table).map(([key, value]) =>
+  [key, Array.isArray(value) ? value[column] ?? value[0] : value[lang] ?? value.en]));
 
 const root = path.resolve(__dirname, '../src/locales');
 let changed = 0;
@@ -665,10 +667,10 @@ for (const lang of fs.readdirSync(root)) {
   const catalog = JSON.parse(text);
   if (!catalog.providers || typeof catalog.providers !== 'object') throw new Error(`${lang}: no "providers" block`);
   const column = COLUMN[lang] ?? 0;
-  catalog.providers.localai = pick(PROVIDER, column);
-  catalog.fork = { ...pick(FORK, column), ...Object.fromEntries(Object.entries(GROUPS).map(([group, table]) => [group, pick(table, column)])) };
+  catalog.providers.localai = pick(PROVIDER, column, lang);
+  catalog.fork = { ...pick(FORK, column, lang), ...Object.fromEntries(Object.entries(GROUPS).map(([group, table]) => [group, pick(table, column, lang)])) };
   if (!catalog.tour || !catalog.tour.steps) throw new Error(`${lang}: no "tour.steps" block`);
-  for (const [step, table] of Object.entries(TOUR)) catalog.tour.steps[step] = { ...(catalog.tour.steps[step] ?? {}), ...pick(table, column) };
+  for (const [step, table] of Object.entries(TOUR)) catalog.tour.steps[step] = { ...(catalog.tour.steps[step] ?? {}), ...pick(table, column, lang) };
   const next = JSON.stringify(catalog, null, 2).replace(/\n/g, eol) + (text.endsWith('\n') ? eol : '');
   if (next !== text) {
     fs.writeFileSync(file, next);

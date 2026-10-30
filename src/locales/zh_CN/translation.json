@@ -1754,7 +1754,7 @@
       "detectUnavailable": "当前的语音识别不能自动检测语言，需要 Qwen3-ASR 1.7B GGUF 或 API 模型。",
       "speakBothUnavailable": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
       "bestEffort": "尽力而为",
-      "bestEffortHelp": "目前使用的语音识别模型无法自主判断转写的语言类型，Kotomimi会尽量用程序来猜，所以语言的判断会略差一些。"
+      "bestEffortHelp": "当前选择的语音识别模型不会返回转写文本的语言。Kotomimi 会根据文本推测，因此语言判断可能不够准确。"
     },
     "wizard": {
       "pathTitle": "Kotomimi 自由搭配",

@@ -8,7 +8,7 @@ The Windows app captures the microphone and VRChat audio as separate sources. A 
 2. In the Mac's sharing card, open the model library and install Apple Speech assets for both languages. Enable model sharing and keep Kotomimi running.
 3. In Windows Kotomimi, select your language and the other language. Choose the Mac as the device for speech recognition and select Apple Speech. Refresh the connection after downloading another language on the Mac. The default sharing port is 8790.
 4. Select the Windows microphone for your voice and VRChat audio for the other side. Enable both listening sources when both should have subtitles.
-5. Configure translation and, if needed, grammar feedback. These stages can run on the Mac, Windows, or an API, independently of where speech recognition runs.
+5. Configure translation and, if needed, grammar feedback. These stages can run on the Mac, Windows, or an API, independently of where speech recognition runs. Download the required native models on the computer serving each local stage. A missing selected translator blocks readiness; it does not fall back to Bing.
 6. Enable **I speak the other language too** for automatic translation in both directions on your microphone. Enable **grammar feedback** alongside it to receive a separate correction or explanation when you speak the other language. Either option can also be used alone.
 
 ## What each mode does
@@ -27,7 +27,13 @@ Here, A is your language and B is the other language. A and B can be any two dis
 
 Grammar feedback remains private. With both options enabled, VRChat's chatbox follows its selected translation display setting in either direction; corrections and explanations never go into the chatbox. With grammar feedback alone, the chatbox sends the practiced original sentence. Typed input is translated without grammar feedback.
 
-Translation and feedback have separate results attached to the same utterance in conversation history and subtitles. An answer arriving later cannot replace the other answer. Translation and feedback requests run independently, so a slow or failed feedback request does not block subsequent translations. If both stages share one local inference worker, requests to that worker remain serial. Local models for separate stages can require additional memory.
+Translation and feedback have separate results attached to the same utterance in conversation history and subtitles. An answer arriving later cannot replace the other answer. Translation and feedback requests run independently, so a slow or failed feedback request does not block subsequent translations. Native translation and feedback use separate engines; local models for separate stages can require additional memory. An external service may apply its own request scheduling.
+
+## Shared models and saved choices
+
+Kotomimi shares installed native models, including Apple Speech language assets, native translators, and native feedback models. The sharing library does not expose browser/WASM/WebGPU models or forward a locally managed LocalAI server. Downloads started in the sharing library leave the host's own session selections unchanged. External compatible services remain available through the API/another-device choices.
+
+A selected recognizer that does not report transcript language can remain selected. Kotomimi uses best-effort text-based language identification and shows a badge explaining the limitation. It does not silently replace that selection with a language-detecting model. This fallback is distinct from Apple Speech's negotiated pair: the paired protocol must confirm both languages before the session proceeds.
 
 ## Recognition and compatibility
 

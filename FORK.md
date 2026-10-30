@@ -1,6 +1,6 @@
 # Kotomimi（ことみみ）
 
-> **Runtime update — 2026-10-29:** Kotomimi's "this computer" stages and LAN sharing now use native engines only. The embedded LocalAI runner and the browser/WASM/WebGPU app-model runner have been removed from this provider. Old local runner settings normalize to native; native model choices and remote stage locations are preserved. Missing native models block readiness instead of falling back to browser models or Bing. External LocalAI servers, APIs, and phones remain supported. The upstream `src/providers/localInference/` implementation is retained; it is hidden on desktop and remains available on web and extension, with its Bing integration isolated in that retained upstream provider. Historical app-model descriptions below no longer describe the Kotomimi provider.
+> **Runtime update — 2026-10-29:** Kotomimi's "this computer" stages and LAN sharing now use native engines only. The embedded LocalAI runner and the browser/WASM/WebGPU app-model runner have been removed from this provider. Old local runner settings normalize to native; native model choices and remote stage locations are preserved. Missing native models block readiness instead of falling back to browser models or Bing. External LocalAI servers, APIs, and phones remain supported. The upstream `src/providers/localInference/` implementation is retained; it is hidden on desktop and remains available on web and extension, with its Bing integration isolated in that retained upstream provider. The current stage and sharing sections below describe the native-only implementation.
 
 > **Fallback verification — 2026-10-30:** Kotomimi refuses a missing or unsupported selected native translator even if an old settings record names Bing or a different native translator is installed. Its readiness check neither resolves browser models nor makes a translation network request. English, Simplified Chinese, and Traditional Chinese notices now direct users to download native models or choose an API/another device; unsupported systems are directed to the remote options. Upstream Bing translation and Edge speech services remain outside this cleanup.
 
@@ -12,7 +12,7 @@ Kotomimi 是 Sokuji 的一个分支：在实时翻译之外，加上了自建模
 
 仓库：<https://github.com/Rizumu85/kotomimi>。Kotomimi 的工作在 `main` 分支上（默认分支）；`upstream` 分支是上游 Sokuji 的一份镜像。2026-10-06 之前它们分别叫 `localai` 和 `main`：`localai` 是这个 fork 只加了一个 LocalAI 提供商时起的名字，后来所有功能都长在它上面，名字就不对了。GitHub 会把旧名字转到新名字上。
 
-2026-10-29：应用内置的 LocalAI runner 已停用；旧设置里的 `localai` 会读成 `native`。相关死代码和模块会在下一个清理里删除。
+The embedded LocalAI runner and its management modules have been removed. Legacy local runner values normalize to native; remote API and external LocalAI services remain supported.
 
 Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录，可以和官方 Sokuji 同时安装、同时运行。第一次启动时会把已有的 Sokuji 设置和登录状态复制过来；下载过的模型不复制，需要时重新下载。
 
@@ -22,7 +22,7 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 |---|---|---|
 | Kotomimi 自由搭配（提供商） | 识别、翻译、语法反馈三个环节，各自选在哪里运行：局域网里的另一台设备、任意 API 模型、或这台电脑。排在提供商列表第一个，带"推荐" | `src/providers/openai/localai.ts`、`pipeline.ts`、`LocalAIAssist.tsx` |
 | 这台电脑的内置模型 | 识别、翻译和语法反馈都可以用应用自己下载的模型，全部在本机完成，不需要服务器 | `localaiDevice.ts`、`LocalAIEngine.tsx` |
-| 共享给其他设备 | 把这台电脑的模型共享给局域网里的另一台 Kotomimi。LocalAI 已停用，不再从同一个开关共享 | `electron/lan-server.js`、`electron/lan-upstream.js`、`src/lib/lan/` |
+| Native model sharing | Share installed native recognizers, translators, and feedback models with another LAN device. | `electron/lan-server.js`, `src/lib/lan/` |
 | 自动找到另一台设备 | 选「用另一台设备」时，应用自己搜索局域网，把找到的 Kotomimi 和模型服务器列出来，点一下就连上，不用知道地址 | `electron/lan-discover.js`、`src/components/LanSharing/ServerFinder.tsx` |
 | 原生识别引擎 | 应用自己下载一个运行库（audio.cpp）和模型，在本机用显卡边听边出字；不用装任何别的东西。五个模型：Qwen3-ASR 1.7B（Windows 和 Apple 芯片的 Mac，实测更准、出字更快，30 种语言，显卡忙不过来时也不会越落越远）、Confucius4 R2T2（只在 Windows）、SenseVoice-Small（Windows 和 Apple 芯片的 Mac，最轻最快，约占 0.4 GB 显存，只听中、粤、英、日、韩）、Qwen3-ASR 0.6B（小模型，约占 2 GB 显存，给同一台电脑还要跑游戏的人）和 Nemotron 3.5 ASR 0.6B（约占 1 GB，最后的选择） | `electron/native-engine.js`、`src/providers/openai/nativeAsr.ts`、`localaiNative.ts`、`NativeEngineCard.tsx` |
 | Mac 自带的语音识别 | Mac 上（macOS 26 及以上）排第一的原生识别引擎是系统自己的语音识别：应用带一个小程序去调用它，边听边出字，不需要 LocalAI。系统不支持的语言（比如俄语）由上一行的 Qwen3-ASR 来听，两个引擎对页面来说是一个 | `native/apple-speech/SpeechHelper.swift`、`electron/apple-speech.js`、`electron/native-engines.js` |
@@ -43,106 +43,43 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 
 注音在本机用词典和规则算出来，不调用任何模型，也不联网。
 
-## 环节怎么搭配
+## Stage configuration
 
-一条翻译链路有三个环节，每个环节都可以放在三个地方之一，互不牵连：
+Kotomimi has three independent stages: speech recognition, translation, and optional grammar feedback. Each stage can use **This computer**, **API model**, or **Another device**. The simple and advanced settings layouts use the same stage cards (`LocalAIAssist.tsx`).
 
-```
-麦克风 / 系统声音
-      │
-      ▼
- ① 语音识别（断句 + 语音转文字）：另一台设备 │ API 模型 │ 这台电脑
-      │  原文
-      ▼
- ② 翻译：另一台设备 │ API 模型 │ 这台电脑     ── 或 ──     ③ 语法反馈：另一台设备 │ API 模型 │ 这台电脑
-      │
-      ▼
-   字幕（按语言加注音、按语言选字体）
-```
+| Stage | This computer | API model | Another device |
+| --- | --- | --- | --- |
+| Speech recognition | Downloaded native recognizer or installed Apple Speech language assets | An OpenAI-compatible transcription endpoint | A sharing Kotomimi, compatible phone node, or external LocalAI Realtime server |
+| Translation | Downloaded native translation model | An OpenAI-compatible chat endpoint | A compatible shared translation/text model |
+| Grammar feedback | Downloaded native feedback model | An OpenAI-compatible chat endpoint | A shared feedback/chat model |
 
-提供商下面，每个环节一张卡片（`LocalAIAssist.tsx`）。卡片里先是三个位置的切换，紧接着就是这个位置需要的东西：模型，API 的地址和密钥，或这台电脑的模型库。一个环节的所有设置都在它自己的卡片里，简单布局和高级布局画的是同一组卡片。卡片下面有一行字说明现在能不能开始，旁边可以手动重新检查。
+The embedded LocalAI runner and browser/WASM/WebGPU model runner have been removed from Kotomimi. Old local runner settings normalize to native. External LocalAI services remain usable through the remote/API choices; Kotomimi does not install, start, stop, or proxy an external LocalAI process.
 
-卡片上方是"另一台设备"：应用搜索局域网（见下文"怎么找到另一台设备"），点一下就填好地址；也可以手填地址和访问密钥。它对三个环节是同一台设备，所以只问一次。没有任何环节放在另一台设备上时，这一块只留一句说明和搜索按钮。
+### Choosing and downloading models
 
-- **① 语音识别**
-  - **另一台设备**：一台支持 GA Realtime 协议的服务器（另一台开启了共享的 Kotomimi，或 LocalAI）。模型默认由那台设备决定，也可以从它列出的识别模型里选。"高级"里有实时管线的名字，一般不用改：留空时自动用那台设备的管线，只有它是 LocalAI 并且配了不止一条管线时才需要选。那台设备是 Kotomimi 时，它的识别模型不检测语言，源语言不能是「自动检测」；它没有能识别某一路语言的模型时，开始之前检查就会指出来。直接连 LocalAI 时，翻译或语法反馈另选了模型，识别模型就只能用它默认的（LocalAI 的限制），下拉菜单会变灰；卡片上有一个按钮"改连那台设备的 Kotomimi"，在局域网里找同一台设备上开着共享的 Kotomimi 并把地址换过去，之后就能选。地址连不上时（比如那台设备的 Kotomimi 已经把 LocalAI 收回本机），"另一台设备"区域里也给同一个按钮。
-  - **API 模型**：任何提供 OpenAI 转写接口（`POST /v1/audio/transcriptions`）的服务，比如 OpenAI、Groq、LocalAI（`apiAsr.ts`）。断句仍在这台电脑上做，用的是和"这台电脑"同一套 VAD 设置；每句话说完后作为一个 WAV 文件上传，文字在句子结束时才出现，没有逐字更新。源语言可以选"自动检测"。
-  - **这台电脑**：用应用下载的识别模型，断句也在本机做。每个要听的语言一行，选用哪个已下载的模型；旁边的"模型库"就在卡片里展开，缺模型时自动展开。断句灵敏度在"VAD 设置"里调。这时不能选"自动检测"作为源语言，因为本机的识别模型不检测语言。本机的识别模型要等一句话结束才出字，两个人不停地说时，一句话只会在"最大语音时长"到了才结束，所以这个值默认是 15 秒（`LOCALAI_MAX_SPEECH_SECONDS`，上游的本机推理是 30 秒）：2026-10-04 用一段真实的双人快速对话实测，30 秒时第一行字要等 30–37 秒，15 秒时约每 15 秒出一行，10 秒时约每 10 秒一行但更容易切在词中间。用户自己调过的值不受影响。模型库里最上面是原生识别引擎的模型（见"原生识别引擎"一节），选了它就由它来听。应用自己的模型里，「自动」选哪个识别模型，日语按实测来排（`selection/measuredRank.ts`，模型库里的顺序、"推荐"标记和每个模型的说明气泡也来自这里）：Qwen3-ASR 1.7B、Whisper Large V3 Turbo、Voxtral Mini 4B Realtime 依次优先，Granite Speech 4.1 和 SenseVoice int8 排到最后（日语实测不可用，但仍可手选，也仍是没有别的模型时的兜底）。上游目录对所有语言用同一个顺序，日语会先选 Cohere Transcribe，而它在真实对话里漏掉约四分之一的内容。其他语言没测过，顺序不变。
-- **② 翻译**
-  - **另一台设备**：模型留空时由那台设备决定。识别也在那台设备上时，就是它的管线在同一个 Realtime 会话里完成；对方是 Kotomimi 时，由它按语言对挑最合适的翻译模型；识别不在那台设备上（这台电脑或 API 在听）时，用它列出的第一个能翻译的模型。也可以指定它的某个文本模型或翻译模型，这时那台设备只做转写，译文通过聊天接口另外请求。
-  - **API 模型**：任何支持 OpenAI 聊天接口（`/v1/chat/completions`）的服务：云端 API，或这台电脑上的 Ollama / LM Studio。
-  - **这台电脑**：用应用下载的翻译模型，每个方向一行。没下载任何翻译模型时会用在线的 Bing 翻译，装好就能用。翻译模型要知道源语言，所以源语言是「自动检测」时检查不通过，会请用户选好语言。
-- **③ 语法反馈**：打开"我自己说对方的语言"后，"我"这一路的语音不再翻译，而是交给一个文本模型检查。"对方"那一路不受影响，照常翻译；打字输入的内容仍然由翻译环节翻译。
-  - **另一台设备**：它的某个文本模型，留空用它列出的第一个。另一台 Kotomimi 共享的翻译模型不是聊天模型，做不了语法反馈，卡片会直接说明。
-  - **API 模型**：自己的地址、模型和密钥。
+- Recognition has a row for each required language; translation has a row for each required direction. An explicit model choice is preserved, including a recognizer that needs best-effort language identification.
+- Open **Model library** in a stage to download native models. A download started there selects the model for the original stage/row when it finishes, even if the library closes or another row is opened. Downloads from the sharing library do not change local session selections.
+- Readiness checks whether required native models are available. It does not start an engine. Starting a session prepares the engines that session needs.
+- A missing selected native translator prevents the session from starting. There is no automatic Bing fallback or substitution with a different installed translator.
+- Models advertising translation directions are checked for every required direction, including reverse translation when speaking both languages. During a remote session the UI can show the model actually serving the request.
 
-"API 模型"的三个卡片都先选**服务**（`apiServices.ts`）：OpenAI、Google Gemini、豆包（火山方舟）、DeepSeek、Groq、硅基流动、OpenRouter、这台电脑的 Ollama，或"自定义地址"。语音识别只列出有转写接口的那几个（OpenAI、Groq、硅基流动）。
+### API and remote services
 
-- 选了服务，地址和"要不要密钥"就定了，这两项不再显示；"自定义地址"就是原来的三个输入框。
-- 用的是哪个服务不单独保存，而是从地址读回来（`serviceOf`），所以以前手填过 `https://api.openai.com/v1` 的设置，现在也显示为 OpenAI。
-- 模型名不写死在代码里（模型名几个月就过时）。密钥填好、检查通过后，服务会列出它的模型，模型栏空着时自动填一个合适的（`preferredModel`）：文本环节取小而快的那一类里最新的（比如 `gpt-*-mini`、`gemini-*-flash`），语音识别取转写模型。列表里没有合适的（比如豆包要填自己的接入点 ID）就留给用户填。正在输入时不会替用户填。
-- 密钥能省则省：另一个环节已经在用同一个服务，就直接用它的密钥；OpenAI 和 Gemini 还会读内置提供商里保存过的密钥（`apiServiceKey.ts`，只读），并在密钥栏下面说明来源。换服务时会清掉原来的密钥，不会把一个服务的密钥发给另一个服务。
-- Google 对无效密钥回的是 400 而不是 401，检查时按"密钥被拒绝"处理。
-  - **这台电脑**：模型库里的小型对话模型（Qwen 系列，需要 WebGPU），留空用已下载的里最大的那个。它们也是翻译模型，所以翻译和语法反馈选同一个时只加载一次。这类模型只有几百 MB 到 1 GB 多，反馈不如大模型准确，例句也不随提示词发送（本机引擎只接收提示词和一句话）。
+The API service selector supplies known endpoint defaults; custom endpoints remain available. Choose a model from the service's list or enter its name. Recognition uses `/v1/audio/transcriptions`; translation and feedback use `/v1/chat/completions`. Text requests originate in the renderer, so the service must permit CORS.
 
-每个下拉菜单只列出能做这件事的模型：识别只列识别模型，翻译列文本模型和翻译模型，语法只列文本模型。分类来自那台设备的 `/v1/models/capabilities`。没有这个接口的服务器不做过滤，留空的模型也不会替你猜一个，需要自己选。
+Remote recognition uses the Realtime protocol. A sharing Kotomimi supports selecting a recognizer in the transcription session; an external LocalAI server may restrict that session to its pipeline's default recognizer. A phone can provide the stages it advertises. Recognition, translation, and feedback may run on different devices.
 
-高级布局里提供商这一块只画在"提供商"页（引导和各处跳转本来就指向那里），"常规"页不再出现提供商。上游原来两页各画一遍，容易让人问以哪边为准。简单布局只有一页，照旧画在那里。标题栏的"登录"是 Kizuna AI 的账号，只在选了 Kizuna AI 提供商（或已经登录）时显示。
+### Translation and private feedback
 
-旧版本的设置会自动读成新的样子（`localai.ts` 的 `migratePlaces`）：以前"文本模型、地址留空"就是现在的"另一台设备 + 指定模型"；以前识别在这台电脑时翻译自动落到这台电脑，现在照样读成"这台电脑"；以前语法反馈留空复用翻译的文本模型，现在读成那个模型本身。第一次在卡片里改任何东西时，这些读出来的值会一起存下来。
+**I speak the other language too** translates either of your two languages into the other. **Grammar feedback** can be enabled at the same time: a practice sentence then receives both a translation and a separate private correction/explanation. A sentence in your own language and typed input are translated without feedback. With feedback alone, practice speech receives feedback; it does not acquire a second translation merely because feedback is enabled.
 
-几种搭配示例（地址仅为示意）：
+Translation and feedback stay attached to the same utterance as separate results. Feedback never replaces its translation or goes to the VRChat chatbox. See [Apple Speech over LAN](docs/apple-speech-lan.md) for the two-source behavior and device checks.
 
-| 目标 | 识别 | 翻译 | 语法反馈 |
-|---|---|---|---|
-| 全部交给 Mac | 另一台设备 `mac:8790` | 另一台设备，模型留空 | 关 |
-| Mac 识别，Mac 上换一个翻译模型 | 另一台设备 | 另一台设备，模型 `hy-mt2-1.8b` | 关 |
-| Mac 识别，本机翻译 | 另一台设备 | 这台电脑 | 关 |
-| 本机识别，Mac 翻译 | 这台电脑 | 另一台设备，模型 `hy-mt2-1.8b` | 关 |
-| 全部在这台电脑 | 这台电脑 | 这台电脑 | 关 |
-| 另一台 Kotomimi 全包 | 另一台设备 `192.168.1.20:8790` | 另一台设备，模型留空 | 关 |
-| Mac 识别和翻译，云端查语法 | 另一台设备 | 另一台设备 | 开，API 模型 `https://api.openai.com/v1` + 密钥 |
-| 完全离线，还要语法反馈 | 这台电脑 | 这台电脑 | 开，这台电脑（下载一个 Qwen 模型） |
+Feedback prompts use the native and practiced languages. A custom prompt can use `{{SPOKEN}}` and `{{NATIVE}}`; the built-in prompts can include examples. Model quality and memory use depend on the chosen model. Kotomimi's pipeline produces text rather than synthesized speech; upstream speech providers remain separate.
 
-**语法反馈的提示词**按两种语言自动生成：
+## Native speech recognition
 
-- 你的母语决定提示词本身用什么语言写。目前有中文和英文两套，其他母语用英文那套，但仍会要求模型用你的母语解释。
-- 你在练的语言决定检查重点和例句。日语、韩语、英语、俄语、法语、德语、西班牙语有各自的检查重点；日语、英语、韩语带例句。
-- 例句作为对话的前几轮发给模型，而不是写在提示词正文里。小模型看到正文里的例句会接着往下编。
-- 想自己写就填"语法反馈提示词"。里面的 `{{SPOKEN}}` 和 `{{NATIVE}}` 会被替换成两种语言的名字。自己写的提示词不附带例句。
-
-日志面板里每次调用文本模型或本机翻译模型都会记一行 `text.done`，带 `firstMs`（首字耗时）和 `totalMs`（总耗时），可以用来对比不同搭配的速度。
-
-限制：
-
-- 只输出文本，不合成语音。
-- 文本模型由应用的渲染进程直接请求，所以对方服务必须允许跨域（CORS）。LocalAI 和 Ollama 默认允许；LM Studio 需要在服务器设置里打开 CORS。
-- 语法反馈的质量取决于模型。实测 4B 级别的本地模型能发现时态错误，但解释经常不按要求用母语写，建议用更强的模型。这台电脑上的小型对话模型更弱，适合完全离线时凑合用。
-- **内置的 SenseVoice 识别日语会丢假名**（实测 2026-10-03："今日は天気がいいので、公園に行きましょう" 被识别成 "日天気公演行"）。识别日语请用 Whisper 系列或下面的自定义模型。中文没有这个问题。
-  - **所以日语不再提供它**（2026-10-12）。说的是模型库里在页面里跑的那两个：`sensevoice-int8` 和 `sensevoice-nano-int8`（sherpa-onnx）。原生引擎里的 SenseVoice-Small 是同一个模型的另一种实现，日语写得完整，见"原生识别引擎"里的"又轻又快的模型"。
-  - **以前会怎样**：它在模型清单里写着支持日语，所以日语的模型库里有它的卡片，下拉菜单里能选它；更糟的是，一台电脑为了中文下载了它、别的识别模型一个都没下时，对方说日语就**自动**由它来听——出来的字没法读，用户也不知道为什么。共享给别的设备时，它同样被说成"能听日语"。
-  - **现在**（都在本分支自己的 `selection/measuredRank.ts` 里，`MEASURED_ASR_ORDER.ja.unoffered`）：日语的自动选择永远不选它（没有别的模型时就是"还没下载模型"，会话开始前就说清楚）；日语的模型库、下拉菜单里没有它；共享清单里它的语言去掉日语（`appModels.ts`），别的设备的菜单里日语会话不再列它。中文、粤语、英语、韩语一切照旧。
-  - **以前选过它的人**：保存着的选择不会被悄悄换成别的模型。设置里"日语 → 某语言"这一行明确选过它的，它继续听，下拉菜单和模型库里照样显示它（卡片排在最后，ⓘ 里写着"不会输出假名"），直到用户自己换掉；一旦换掉，日语里就不再出现它。别的设备按名字点过它来听日语的，同样继续由它回答。没明确选过、只是被自动选上的人，现在日语那一行会变成别的已下载模型，或者"还没下载模型"。
-  - **上游文件这次只动了两处、各一两行**：`ModelManagementSection.tsx` 里原来就有本分支的调用（按实测排序），这次多传一个"现在在用的模型"；`useWasmEngineAdapter.ts` 的下拉候选里补上"这一行自己选过的那个"，否则保存着的选择在菜单里是空白（上游自己的"本地推理"提供商用的也是这个菜单）。自动选择那一头走的是 `candidates.wasm.ts` 里早就有的那一处调用，没有再动。做法是把它在日语里标成"不参与自动选择"（上游候选模型本来就有的 `autoEligible`），而不是从候选里删掉——删掉的话保存着的选择会被上游的规则当成"语言不兼容"、换成别的模型，而 Kotomimi 这个提供商的卡片上不显示上游那条"已改用别的模型"的提示，等于悄悄换了。
-
-### 模型菜单怎么排（2026-10-06）
-
-用户反馈：同一个下拉菜单在两种状态下内容不一样——选着"Kotomimi 下载的模型"时列一批，选着原生引擎的模型时列另一批，还混着"切换方式""状态""模型"三种东西；「模型库」按钮有时有、有时没有。原因是原生引擎和应用自带模型各有一套界面。现在"这台电脑"的三个环节各只有一套（`LocalAIAssist.tsx` 的 `DeviceModels`、`DeviceChat`）：
-
-- **行是一样的**：语音识别一种语言一行，翻译一个方向一行，谁在跑都一样。
-- **菜单是一样的**：每一行都列出全部能选的，分两组——「原生引擎」「应用自带的模型」。模型只写名字，不再带"（原生引擎）"。选哪个就切到哪个；在原生引擎的状态下选了应用自带的模型，环节随之交回应用自带的模型。LocalAI 这一组已停用。
-- **状态不是选项**："未选择模型""还没下载模型""正在检查…"只在确实如此时出现在最上面，不和模型混在组里。应用自带的模型只有一个时，「自动 · 某某」已经指的是它，不再单列一遍。
-- **「模型库」按钮每一行都有**，点了才展开，展开的内容也是同一套（原生引擎的模型在上，应用自带的在下）。只有在用的模型需要人处理时才自己展开：没选、没下载（或正在下）、引擎用它启动失败。选好且已下载的模型不再占着一屏卡片。
-
-"另一台设备"的识别模型菜单（`serverRecognizers.ts`）：
-
-- 对方每种语言各有一个的识别模型（Mac 的系统识别列成 `apple-speech:ja`、`apple-speech:en`……）在菜单里只是一项「Apple Speech」，每一路按它听的语言去要对应的那个；对方没有这种语言的，就交给对方自己决定。
-- 只列听得懂这次会话语言的模型：日语会话里不出现韩语、西班牙语的系统识别。语言交给自动识别时全部列出。
-- 保存着、但对方已经没有的模型（比如以前选过对方 LocalAI 里的模型，后来删了）标成「某某（那台设备上已经没有）」。共享的一方收到这种已经不存在的名字时，按"没点名"处理，自己挑最好的，不再报没有模型或退到别的模型（`appModels.ts` 的 `knownHere`）。
-
-## 原生识别引擎
-
-应用自己的识别模型都跑在浏览器内核里（WebGPU / WASM），要等一句话说完才出字。原生识别引擎是另一条路：应用下载一个独立的运行库和一个模型，在本机启动它，把声音实时送过去，文字边听边回来。用户不需要装 llama、LocalAI 之类的任何东西，在"语音识别 → 这台电脑"的模型库里点下载就行；下载完自动启用。
+Kotomimi downloads a native runtime and model, starts the engine locally, and streams audio to it for live transcripts. Users do not need to install LocalAI. Choose a model in **Speech recognition → This computer → Model library**. Apple Speech uses the macOS helper and installed system language assets.
 
 - **运行库**：[audio.cpp](https://github.com/0xShug0/audio.cpp) v0.9.0 的官方发行包（Windows x64 是 Vulkan 版，约 60 MB；Apple 芯片的 Mac 是 Metal 版，约 29 MB）。**第一个接进来的模型**（下面各条讲的是它；现在排第一的 Qwen3-ASR 见本节末尾）：[Confucius4 R2T2](https://huggingface.co/netease-youdao/Confucius4-R2T2)（网易有道，Qwen3-ASR 的流式微调）的 q8 GGUF，约 2.4 GB。两者的地址、大小和 SHA-256 都写死在 `electron/native-engine.js` 里（模型地址带提交号，不是分支），下载完校验不对就丢弃。下载可以取消，再点会从断点续传。
 - **放在哪**：`<用户数据>/native-engine/`（`engine-<版本>/` 和 `models/`）。在模型卡片上点删除只删模型。
@@ -188,7 +125,7 @@ Qwen3-ASR 不是流式模型：给它一段完整的声音，它写出整段文�
 - **实测**（同样 7 段、在应用里）：Windows（RTX 5070 Ti）错字率 16.4%，文字平均落后约 1 秒；M2 的 Mac 16.6%，落后约 2.3 秒。对照同一套打分：R2T2 18.2%、落后 2.5 秒；Mac 自带识别 12.5%、落后 1.7 秒。引擎进程约占 3 GB 显存（Mac 上约 3 GB 内存）。
 - **语言**：30 种（中、英、粤、日、韩、俄、西、法、德、意、葡、阿、泰、越、印尼、土、印地、马来、荷、瑞典、丹麦、芬兰、波兰、捷克、菲律宾、波斯、希腊、匈牙利、马其顿、罗马尼亚），语言用代码告诉它（`languageAs: 'code'`）。不给语言时它会自己判断，这一点还没有接进界面。
 - **按语言记住选择**（`nativePicked`、`chooseNative`）：原生识别模型是一种语言一行来选的。某种语言选过模型，就一直用那个；没选过的语言沿用当前在用的模型（它能听的话）；它听不了，那一行就显示"未选择模型"并提示去选，不会自动换成别的——换语言本来就要先停下会话，一步一步来。同一次会话里两种语言选了下载引擎的两个不同模型时会提示选成同一个（它一次只能跑一个）；Mac 上系统自带的识别和下载的引擎可以同时用（主进程的状态里有 `up`：现在能用的所有模型）。
-- **下载了但没选用**：应用自带的模型一个都没有、而原生引擎的模型已经在这台电脑上时（比如切回过应用自带的模型，或者模型文件是拷进来的），下拉菜单的空项写的是「未选择模型」而不是「还没下载模型」，检查的提示也是「还没有为某语言选择语音识别模型」（`nativeWaits`）。不自动替用户选：否则从原生引擎切回应用自带模型的人会被立刻弹回去，进不了自带模型的模型库。
+- An installed model and a selected model are different states. Explicit native choices are retained; readiness reports an unavailable required choice rather than substituting a browser model.
 - **推荐顺序**（`NATIVE_MODELS` 的顺序，模型库里第一个能听这种语言的带"推荐"）：Mac 自带识别 → Qwen3-ASR 1.7B → R2T2 → SenseVoice-Small → Qwen3-ASR 0.6B → Nemotron 3.5 ASR 0.6B。R2T2 的长处是写出来的字不再改动；短处是吃显卡、语言少、Mac 上跑不动。后三个是省资源的：不是最准的，是最省的。SenseVoice-Small 排在 0.6B 前面，因为两个一样准而它轻得多（2026-10-12，见下面"又轻又快的模型"）。同一个顺序也是"没选过模型的语言默认用哪个"（已下载的里面排最前的那个）和"别的设备没点名时给哪个"的顺序。
 
 ### 小模型：Qwen3-ASR 0.6B
@@ -297,7 +234,7 @@ macOS 26 起系统里有一个在本机运行的语音识别（`SpeechAnalyzer` 
 
 这次补的：
 
-- **共享不再把别人的句子转给在线翻译**（#2 中-4）：没下载翻译模型时应用自己会用 Bing，但那不算"这台电脑的模型"，不借出；对方会被告知这台电脑没有这个方向的翻译模型。
+- Shared requests are served by native models. If no suitable native translator is available, the request is refused; neither local Kotomimi sessions nor LAN sharing fall back to online Bing translation.
 - **正在回答的翻译模型不会被第四个挤掉**（#2 低-8）：只在没人用的模型里腾位置。
 - **读不到 LocalAI 的帮助时仍然告诉它监听地址**（#2 低-5），否则它会监听所有网卡。
 - **共享端口只能是 1024 以上**（#2 中-3），主进程自己也检查。
@@ -317,86 +254,27 @@ macOS 26 起系统里有一个在本机运行的语音识别（`SpeechAnalyzer` 
 - **另一台设备中途消失要等连接超时才发现**（#4 待确认项）：连接没有心跳。要做得在共享的一方定时发消息、客户端计时，是一个单独的功能，没做。
 - "VAD 设置"、自定义模型的几句提示、英文名里的 Pipeline：没有改。
 
-## 共享原生引擎的模型
+## Native models and language identification
 
-开着共享时，这台电脑的原生引擎的模型和别的模型一样共享给局域网里的其他 Kotomimi（`src/lib/lan/nativeShare.ts`）：列在模型列表最前面；对方指名要就用它；对方没指名（交给这台电脑决定）时，只要这台电脑有能听那种语言的原生识别模型、或有下载好的原生翻译模型，就优先用它们——包括这台电脑同时装着 LocalAI 的情况（`lan-upstream.js` 的 `ownFirst`），因为它们是实测最好的。
+LAN sharing advertises downloaded native recognizers, native translators, and native feedback models (`nativeShare.ts`). Apple Speech is listed by installed language and advertises paired-language recognition. A recognizer that reports language detection advertises `auto`. The shared inventory does not scan browser model downloads or include a local LocalAI process.
 
-- 识别走的是和本机会话同一个识别器；翻译用模型自己的句式去问本机的翻译引擎。
-- 原生翻译引擎一次只跑一个模型：已经在跑的那个（这台电脑自己在用的，或正在给别的设备用的）会替引擎里的其他模型回答，只要它能翻那个语言对——否则换模型会把正在用的人打断。下载的识别引擎也一样（Qwen3-ASR 和 R2T2 是同一个引擎的两个模型）：正在跑的那个能听这种语言，就由它回答。
-- 说话时的暂定文字怎么给对方：协议里的增量只能往后加字，不能改已经发出去的。所以发出去的是"连续两次暂定结果从头数一致的那一段"（去掉末尾的标点，`transcriber.ts` 的 `agreed`）。只会往后加字的识别器因此晚一拍；会改写句尾的识别器（Mac 自带的、原生引擎里的 Qwen3-ASR）以前一改写对方就只能等整句定稿，现在能一直看到实时文字。已经发出去的部分后来被改写了，就等定稿（定稿带整句文字）。
-- 别的设备正在用的时候，这台电脑自己的就绪检查不会因为"我自己没选它"而把引擎停掉（`holdNative`）。
-- 实测（PC 通过局域网用 Mac 的共享，Mac 上同时装着 LocalAI）：不指名时识别由 Apple 语音识别回答、实时出字，翻译由 Index-Translate 回答、约 0.3 秒一句。
+### Best-effort language identification
 
-### 语法反馈模型也共享（2026-10-06）
+The selected recognizer remains selected even when it cannot report the language. Kotomimi can infer the language from the transcript using script evidence and a text detector (`src/lib/language/script.ts`, `identify.ts`). The **Best effort** badge explains this limitation. It does not promise that a recognizer can transcribe languages outside its capabilities, and a more capable installed recognizer does not silently replace the user's selection.
 
-以前共享只借出识别模型和翻译模型：对方把语法反馈放在"另一台设备"时，即使这台电脑下载了 Gemma，也只会看到"另一台设备上没有能给语法反馈的文本模型"。现在原生语法反馈引擎的模型也借出去：
+Shared scripts do not uniquely identify a language: Cyrillic is not always Russian, Arabic script is not always Arabic, and Devanagari is not always Hindi. Short or uncertain text can remain unlabelled while translation continues. A selected two-language pair can provide additional evidence. A transcript identified as the user's own language on the participant source is shown without redundant translation.
 
-- 模型列表里它的用途写的是 `feedback`（`protocol.ts`）。对方只在语法反馈那一栏看到它，翻译和识别的菜单里没有（`localaiModels.ts` 的 `kindOf`、`KINDS`）。旧版本的 Kotomimi 不认识这个用途，会忽略它。
-- `POST /v1/chat/completions` 里点名这个模型的请求交给反馈引擎（`src/lib/lan/coach.ts`），其他的照旧当作要翻译的句子。提示词是对方自己的（它的两种语言、它自己写的要求），原样转给引擎；一次回答最多 1024 个词元。
-- 引擎按需启动（第一句要等模型加载，实测 3.6 秒，之后 0.1 秒），有设备在用时不会被这台电脑自己的就绪检查停掉，最后一次请求十分钟后释放。
-- 应用自带的聊天模型（WebGPU 的那几个）不借出，只借原生引擎的。
+### Apple Speech with two languages
 
-## 翻译模型怎么选（2026-10-29）
+Apple Speech can compare two installed language candidates for each audio source. This is a selected pair, not unrestricted detection. Each source has its own recognition sessions and language preference. Final transcript language drives translation and feedback routing; provisional text does not settle the language.
 
-以前"自动"有好几套走法，同一对语言换个位置就换个模型，另一台设备上点了名也可能被悄悄换掉。现在收成三条：
+The same paired behavior is available over LAN when both sides support the protocol and the Mac has both languages installed. An unconfirmed or unsupported paired request fails rather than silently switching to one language. See [setup, mode table, and hardware validation](docs/apple-speech-lan.md).
 
-- **下载好的本地模型排在在线 Bing 前面**（`selection/resolveStage.ts`）：只有这台电脑一个可用的本地翻译模型都没有时才走在线。以前 Bing 是 `recommended`、又永远"就绪"，排序上压过所有没标推荐的本地方向模型（Opus-MT、Qwen 3.5），只下载了它们时其实一直在联网；共享的一方还会因为"在线模型不借出"回一句"没有这个方向的翻译模型"。
-- **点名的模型不会被换成别的**（`src/lib/lan/`）：那台设备共享着这个模型、但它不翻这对语言时，检查阶段就说清楚（`server_translator_unfit`，卡片上换一个模型），会话里回 422；引擎正被别人用着、那个模型也翻不了时回 503。方向专用模型在 `capabilities` 里带上 `pair`，菜单只列这次运行每个方向都翻得了的模型（`localaiModels.ts` 的 `fitsPair`）。
-- **交给那台设备决定时，用它的设置，不用它碰巧正在跑的那个**（`appModels.ts`、`nativeShare.ts`）：应用模型按主机自己为这个方向选的模型来（`hostSelections`），原生引擎的顺序改成"点名的 → 主机选的 → 正在跑的 → 最好的"；真正用的是哪个，回答里带回来（`model`），卡片上写成"实际在用"（`translatedByStore.ts`），不用再猜。共享判定里的 `ownFirst` 也按语言对看了（`native-engine.js` 的 `translatorFits`），原生模型翻不了的语言交给 LocalAI，而不是先抢过来再报没有。
-- **LocalAI 留空不再"用它列出的第一个"**（`localaiModels.ts` 的 `translationDefault`）：那种服务器不说模型的语言，列表顺序又会随安装/删除变，所以只有它恰好列出一个能翻译的模型时，留空才用那个；有几个就要在卡片里选一个（`translate_unnamed`，菜单第一项写"选择一个模型"）。它自己听、自己在同一个会话里翻的时候（`translateInSession`）仍是它决定，那一项没变。
-- **模型卡片上的语言表跟模型的卡一致**（sidecar 的 `_llm_translate_row(languages=)`）：以前 sidecar 里每张翻译卡都写 `("multi",)`，等于说 Qwen 2.5 的 28 种语言和 Hunyuan 的 36 种都能翻任何语言；现在按卡写（Qwen 3 / 3.5、EuroLLM 仍是"任何语言"），Local Native 的候选池按 `nativeTranslationCards` 里新的"两种语言都在表里"规则过滤。三处的表（sidecar / 原生引擎 / 应用的目录）由测试互相钉住（`nativeTranslators.test.ts` 读 `catalog.py`，主进程的表也对照这一份）。
-- **原生翻译引擎画成一个模型，不是每方向一个**（`LocalAIAssist.tsx` 的 `DeviceModels`）：它一次只跑一个模型，以前却按方向画两个选择器、选哪个都改同一个设置。现在整个阶段只有一行（`中文 ⇄ 日语`），菜单和模型库只列**这次运行每个方向都翻得了**的模型；选着的那一个不适合某个方向时，下面直接说（`translatorUnfit`）。应用自带模型仍是一方向一份，菜单里的"应用自带的模型"退回去。
+### Translation direction and remote model reporting
 
-## 自动识别对方说的语言
+A translator's advertised language pair must match every direction needed by the session. The reverse direction matters when **I speak the other language too** is enabled. Generic chat models and native translators retain their own capability rules.
 
-VRChat 里对面的人说什么语言是不一定的。"对方说什么语言"里可以选"自动检测语言"（设置项 `asrDetectOther`）：选了之后，"对方"那一路不告诉识别器语言，对方说哪种语言都识别出来、翻译成你的语言；你自己那一路不变，仍按语言菜单里选的来翻译，所以和"两者"模式不冲突。
-
-- **在哪里选**（2026-10-06 几次改，都是用户提的）：它是"对方的语言"的第一个选项（`LanguagePairSection` 的 `detect`），只要这次运行听对方就有，"对方""两者"两种模式一样。选了之后下面多出一行"翻译对方主要说的语言"——语言对里原来那个语言还留着：你说的话翻译成它，要知道语言对的翻译模型也按它来。
-- **语言这一组按用户的想法排**（2026-10-06，用户："我阅读不是我自己说的语言么，这个应该不用选自动检测，反而是对方说才需要"）：上游按"这次运行拿它做什么"给两个下拉框起名（"我说 / 对方读到"、"我阅读 / 对方说"），同一个框在不同模式下两个名字；"两者"模式还要再读一行反过来的话。Kotomimi 这个提供商下改成固定的 **我的语言 / 对方的语言**（`owners`），下面什么都不写。设置向导的语言那一步和最后的小结也这样叫（`StepLanguagePair`、`StepFinish`）。别的提供商保持上游的写法，上游的测试也因此不用动。
-- **下面不写解释**：试过在语言下面用一两行说"这次运行做什么"（对方说… → 我读到…），以及做不到自动检测时的原因，用户看了觉得更乱（"心智负担有点大"），都去掉了。能少写就少写。
-- **"我的语言"里没有自动检测**：源语言列表不再带 `auto`（`localaiLanguages.sources`）。以前识别放在另一台设备或 API 时会带，只听对方时它就出现在"我阅读"下面，读起来像是"自动检测我自己的语言"。
-- **谁能做到**：这台电脑原生引擎里的 Qwen3-ASR 1.7B（它读完整段再写，自己判断语言；`NATIVE_MODELS` 里的 `detects`）；一个 API（比如 Whisper 的接口）；或者**另一台 Kotomimi**，只要它共享着一个能识别语言的模型——它在模型清单里给这个模型的语言加上 `auto`（`nativeShare.ts`），这边据此判断（`canDetectOther` / `serverDetects`），会话里把语言说成 `auto`，那边就挑能识别语言的模型来听（选的是 Apple Speech 这种按语言分的也一样，交给那边挑）。实测：电脑选 Apple Speech、Mac 测试副本代听，俄、英、中、西都识别并翻译，日语原样显示。R2T2 也能不给语言，但每段开头几个词常认错语言，不提供。SenseVoice-Small 只能在它会的五种语言里判断，别的语言会被硬写成这五种之一，也不提供（见"又轻又快的模型"）。
-- **做不到的时候**：选项还在，选了也保留，这一路就按"翻译对方主要说的语言"里选的那个来识别，不提示、不拒绝。0.43.107 及更早的 Kotomimi 不会在清单里写 `auto`，所以两边都更新后才会真的自动检测。
-- **语法反馈和模式**：语法反馈回答的是你自己说的话，所以只听对方时不起作用；这时"语法反馈"卡片里有一行提示把模式切到"我"或"两者"。
-- **模型自动跟着换**（用户的说法："类似一个不同的语言选项默认不同的模型"）：每个语言没单独选过模型、正在用的模型又听不了它时，默认用这台电脑上已下载、能听它的最好的一个（`nativePicked` 的最后一步；默认值不写进设置）。"自动检测"就是这样的一种"语言"：对方那一行自动显示 Qwen3-ASR 1.7B，只列出能自己识别语言的模型；一个都没下载时才显示"未选择模型"并说明要下载哪个。
-- **翻译**：原生翻译引擎（Index-Translate 的请求里不写源语言，实测译文几乎一样）和 API 模型读到什么翻什么。应用自带的翻译模型、另一台 Kotomimi 借出的翻译模型要知道语言对，就告诉它语言菜单里选的那一对（`buildLocalAI` 的 `told`）：对方说你的语言时原样显示，其余的句子按所选的语言翻译。以前这种搭配会在检查时报一条红字"这样搭配时不能自动识别语言……"，而实际上正是用户想要的用法（朋友的截图，2026-10-06），所以不再拒绝。那条提示只剩"你自己说的语言选了自动检测、而翻译或识别必须知道语言"这一种情况，文字也缩短了。
-- **每句话是什么语言**：引擎的回答里不带它判断出的语言，所以按文字来认（`src/lib/language/script.ts`）：有假名是日语，谚文是韩语，西里尔字母按俄语，只有汉字按中文……拉丁字母的句子按最常用的小词在英、西、法、德、意、葡里认，认不准就不标（照常翻译，只是没有注音这些辅助）。这样每一行有自己的语言标签，日语行照样有假名注音。
-- **对方说的就是你的语言**时，这一句原样显示，不翻译。
-- **没选自动检测时也一样**（2026-10-06，朋友的截图：对方设成日语却说了中文，每句显示两遍，第一遍还标着 JA）：一句话明明是用"要翻译成的那种语言"写的，就原样显示、标成那种语言，不再翻译（`pipeline.ts` 的 `otherThanHeard`，判断在 `script.ts` 的 `saidInOwn`）。中文和日文共用汉字：没有假名、汉字不到 5 个的短句（"大丈夫""了解"）不下结论，照常处理。
-- **开着语法反馈时说了自己的语言**（用户问："我说自己的语言也被发进去了？"）：这一句不是练习，不送去做语法反馈，而是和打字一样翻译成对方的语言；这次运行没有翻译时就只原样显示。标签也标成自己的语言。
-- **扬声器的声音漏进麦克风**（2026-10-06，用户："扬声器声音大一点都会传回去语法反馈"）：语法反馈模式下麦克风的处理和平时一样，区别是这时"我"这一路被告知听的是对方的语言，所以漏进来的对方声音会被清楚地写出来，再当成你说的话送去反馈。两边都在听时现在会比对（`pipeline.ts` 的 `heardLately` / `settleOwn`，判断在 `script.ts` 的 `sameSpeech`）："我"这句开始的时候对方那一路正好也在听，而且两边写出来的字对得上（短的要整句包含，长的要六成相邻字对相同），就把这句从屏幕上拿掉，不问反馈。对方那一路的字可能晚一两秒才出来，所以对方那一路还在听的时候最多等 5 秒、它听完后再等 1 秒才定；没人同时说话时不等。对方说完之后你跟着重复一遍不算漏音（按开始时间区分）。只听"我"一路时没有可比的东西，这个办法帮不上。2026-10-07 起另有一道按音量的门，不分模式都管用，见下面「麦克风激活阈值」。
-- **实测**（韩、俄、日、英、中、西六种语言连着说，喂给"对方"一路）：六句都识别成各自的语言并翻成中文，中文那句原样显示。
-- 怎么做的：`buildLocalAI` 把这一路当作"源语言待识别"的一路来搭（`heardBy`），`stages.heard` 记为 `auto`，包装层（`pipeline.ts`）据此不给识别器语言、给每句标上语言、跳过不需要翻译的句子。
-
-## 我也说对方的语言（2026-10-27）
-
-用户的话："我设置我的语言是中文，要翻译的是西班牙语……如果我说的是西班牙语（因为我会），附近会说中文的人看不懂。"设计稿 `.dev/design/speak-both.html`，用户选了方案 A。
-
-- **在哪里**：翻译语言的语言对下面一个开关「我也说西班牙语」（语言名跟着"对方的语言"变；设置项 `speakBoth`，`LanguagePairSection` 的 `both`）。只在听"我"那一路时出现，两边同一种语言时不出现。说明只在 ⓘ 里。
-- **做什么**："我"那一路不告诉识别器语言（`heardBy` 里说话人这一路成了 `auto`），每句按文字判断是哪一种（`script.ts` 的 `oneOfTwo`：按文字或常用小词认；一种有自己的文字、一种用拉丁字母时，拉丁字母的句子就是后者；两种拉丁字母语言分不出来时不下结论）。自己的语言照常翻成对方的；对方的语言用反方向的翻译（`Stages.back`，`buildLocalAI` 的 `translatorFor` 两个方向各问一次），译文标成自己的语言。打的字一样。头顶的聊天框照常发译文。
-- **和语法反馈二选一**：两者回答的是同一个问题——我说对方的语言时怎么办。打开一个，另一个自动关掉（`ProviderLanguages`、`LocalAIAssist`）；构建时语法反馈优先（`speaksBoth` 要求没开反馈）。
-- **要识别器能自己判断语言**（`canDetectOther`：原生引擎、API、或共享着能判断语言的模型的另一台 Kotomimi）。做不到时开关保留，这一路照常按自己的语言识别。
-- **这台电脑应用自带的翻译模型**按方向加载：反方向的那个单独加载一份（`DeviceStage.direction`，`engineKey`）。
-- **实测**（测试窗口，麦克风换成测速用的西班牙语、中文、西班牙语三段录音，原生 Qwen3-ASR 1.7B + Index-Translate 2B）：两段西班牙语都翻成了中文，中文那段（"据警方称……"）翻成了西班牙语。
-
-### Mac 的 Apple 语音识别同时听两种语言（2026-10-28）
-
-用户问"我说中文和日语这种，能不能让 Apple Speech 听多个"。Apple 语音识别一路只听一种语言、不会自己判断，所以同时开两路，各听一种，每句话说完后取对自己更有把握的那一路。
-
-- **先测过**：Mac 自带朗读声音的中日 40 句、两种声音共 80 段，按置信度挑全对（最小差 0.13）；B 站两个 VRChat 视频（中国人讲日语经历、学中文的日本人对话）切出的 123 句，和 Qwen3-ASR 1.7B 的语言判断对上 119 句，没对上的是「哇哦」「哦」这样的语气词和一句两边都只有 0.62 的含糊中文。说完后多等 0.1～0.3 秒。素材测完就删了。
-- **什么时候用**：开着「我也说××语」、这台电脑原生引擎识别、"我"的语言选的是 Apple 语音识别、对方语言的 Apple 语音识别也下载了（`localaiNative.ts` 的 `nativeEither`，经 `hearingPick` 进 `NativePick.either`）。对方的语言设成自动检测时不用：那时每一路都要能判断语言的模型（引擎一次只跑一个）。不满足时照旧用能判断语言的模型。
-- **每一路都听两种**（用户的要求，2026-10-28："开了两者模式都有可能需要识别两个语言"）：任何一路用 Apple 语音识别、语言对另一种语言的也下载了，就告诉它自己这一路的语言，同时也听另一种（`appleAlso`，`buildLocalAI` 里 `either.first` 是这一路的语言）。识别器说听到的是另一种时，按语言而不是按文字处理（`otherThanHeard(text, language)`）：说话人说对方的语言、没开「我也说××语」和语法反馈时原样显示、不翻译；开着语法反馈时说自己的语言照常翻译、不送去反馈；对方说"我"的语言时原样显示。
-- **助手**（`SpeechHelper.swift`）：`stream 自己的 --also 对方的 [--prefer 上一句的]`，两种语言各一对识别器（考虑周全的和快的），都带置信度。最后取平均置信度高的；相差不到 0.05 时取 `--prefer`（主进程记着这一对上一句是哪种，`apple-speech.js` 的 `lastOfPair`），没有就取自己的语言。`final` 带 `locale`。说话中途显示的是偏好那种语言的快结果，另一种明显更有把握才换（快结果多半没有置信度，所以换语言后的第一句中途会先显示成上一种语言的乱字，说完才对）。两种语言都不会被腾出位置时放掉（`--keep`）。
-- **一路传下去**：`done` 带 `language` → `nativeAsr` 的结果带 `language` → 本地适配器的 `segmentText` 带上 → 翻译流程以识别器说的为准（`pipeline.ts` 的 `backFor(text, language)`），不再按文字猜，全是汉字的日语也不会当成中文。
-- **设置里**：识别卡片"识别中文或日语"一行（说话人那一路检测语言时的标题，`hearsEither`；原来误写成"听对方"）能选 Apple 语音识别，选了记成自己语言的模型，「我也说××语」保持开着；对方语言的自动检测会关掉。语言设置里「我也说××语」在只有 Apple 语音识别（两种都下载了）时也能开（`localaiLanguages.detection` 现在也拿语言对）。
-
-## 另一台设备实际用哪个模型识别（2026-10-27）
-
-用户的问题：Mac 上 Apple 语音识别没下载西班牙语，也没人提醒，不知道当时是什么在识别。查下来是这台电脑指定了 Qwen3-ASR 1.7B，Mac 就用它听；但"由那台设备决定"时，或者指定的模型那边用不了（Apple 语音识别缺这种语言、引擎正被别的模型占着），那边会自己换一个，这边原来看不到。
-
-- 共享模型的 Kotomimi 回复会话配置时写着它选的识别模型（`transcriber.ts` 的 `session.updated`）。运行里的帧经 `heardByFrames` 记进 `heardByStore`（每一路一个），新的运行开始和运行结束时清空。
-- 识别卡片"模型"一行的右边显示「正在用 ×××」（`LocalAIAssist` 的 `Field` 的 `aside`），只在和所选的不一样时显示：选了"由那台设备决定"，或那边换了别的。两路用的不一样时写成「正在用 对方 ××× · 我 ×××」。
-- 实测：测试窗口识别放在 Mac（选"由那台设备决定"），对方说日语，显示「正在用 SenseVoice-Small GGUF」；结束会话后消失。
+The remote session reports the recognizer that actually serves each source. The UI displays it when it differs from the requested/default choice and clears it when the run ends. A stale remote name may be treated as automatic by the host; paired Apple Speech negotiation is checked explicitly. This remote host behavior is distinct from preserving an explicit local native selection.
 
 ## 麦克风激活阈值（2026-10-07）
 
@@ -413,9 +291,9 @@ VRChat 里对面的人说什么语言是不一定的。"对方说什么语言"�
 
 没做的：没有真机实测这两个时间常数；没有按音量自动建议一个阈值；门关着时音量条上没有另外画"门关了"的标记（看灰绿就知道）。
 
-## 模型库里怎么摆
+## Native model library
 
-"这台电脑"的模型库分两组：上面"推荐"是原生引擎的模型（Mac 上包括系统自带的语音识别），下面"其他模型"是应用自带的。有原生推荐时，下面那组不再带"推荐"标记。原生引擎的模型卡片上有一个"原生引擎"标签（系统自带的是"系统自带"），鼠标移上去是这一类模型共同的说明——比如开机后第一次启动要半分钟——所以每个模型自己的简介只写它自己的特点，以后加模型不用重复写。给用户看的说明只写用户需要知道的：做什么、要付出什么；怎么测的、为什么这样设计写在这份文档里。
+The stage and sharing libraries list native models, including installed system speech assets on Mac. Browser model groups and custom ONNX import are no longer part of Kotomimi's stage UI. Recommendations and model descriptions belong to each native model. Stage downloads select their original target row; sharing downloads only make models available to other devices.
 
 ## 原生翻译引擎
 
@@ -427,10 +305,10 @@ VRChat 里对面的人说什么语言是不一定的。"对方说什么语言"�
 | Hunyuan MT 2 1.8B（腾讯，Apache-2.0） | 1.08 GB | 约 8 句 | 36 种 |
 | Hunyuan MT 1.5 1.8B（腾讯） | 1.08 GB | 约 8 句，还喜欢自己加词 | 36 种 |
 
-- 放在 `<用户数据>/native-translator/`。在"翻译 → 这台电脑"的模型库里排在最前面，下载完自动启用；启动只要几秒，一句话约 0.1 秒（应用自带的 WebGPU 版 Hunyuan MT 1.5 是 0.4～0.9 秒）。
+- Models are stored under `<userData>/native-translator/`. Download and select them in the translation stage library. Historical latency measurements depend on the model and hardware.
 - **怎么问它**：它们是翻译模型，不是聊天模型，各有训练时用的固定句式，所以请求按模型写在 `nativeTranslators.ts` 里：只有一条用户消息，没有系统提示词。Index-Translate 用它模型卡上的中文句式（"请将以下日语文本翻译为中文，直接输出翻译结果，不要进行任何解释。"），语言用中文名，源语言是"自动检测"时省略；贪心解码，关闭思考。Hunyuan MT 一边是中文时用中文句式，否则用英文句式，采样参数用官方建议的。
 - 请求走的就是"API 模型"那条聊天接口的路，只是地址是本机引擎的端口（每次启动随机选一个空闲端口，只监听 127.0.0.1）。所以翻译会像 API 模型一样边写边显示。
-- 就绪检查和识别引擎一样：选了它、已下载但还没起来时自动启动，起来之前"开始"旁边有说明；不用了就停掉。
+- Readiness checks downloaded model availability without starting an engine. Session preparation starts the selected native engine; its lifetime follows active use.
 - 开着共享时，它的模型也共享给其他设备（见上一节）。
 - **Hunyuan MT 1.5 不再提供下载**（`retired`）：它和 Hunyuan MT 2 支持的语言一样、大小一样，实测严重错误一样多，还会自己加词，没有哪一点比后者好。已经下载过的电脑上它的卡片还在，可以继续用，也可以删掉。
 - **Index 团队的其他模型**（2026-10-05 看过）：Index-Translate 9B（Q4_K_M 5.8 GB）同样 30 句实测，译文更自然，但严重错误和 2B 一样多（各 3–4 句，错的地方不同），慢一倍、多占约 4 GB 显存，没有接。官方的带约束写法（`【源文】…【约束要求】`，加"口语闲聊"或前两句上下文）也试了，错误没有减少。不写源语言时译文几乎一样。Index-Echo（语音直接出译文）官方只支持中文作源语言；Homura（控制音节数）和 Nailong（长文档）用不上。
@@ -447,7 +325,7 @@ VRChat 里对面的人说什么语言是不一定的。"对方说什么语言"�
 
 ## 原生语法反馈引擎
 
-语法反馈（自己说对方的语言时，检查说得对不对）原来有三种跑法：另一台设备、API 模型、应用自带的对话模型（WebGPU，很小，质量一般）。现在"这台电脑"多了第四种：原生语法反馈引擎，和原生翻译引擎是同一套代码（`createNativeEngine` + llama.cpp 的 `llama-server`），自己一个进程——翻译引擎一次只跑一个模型，而一次会话里翻译和反馈都要用。
+Grammar feedback can run on another device, through an API, or in this computer's native feedback engine. The native feedback engine uses its own llama.cpp process, separate from translation, so both stages can serve the same session.
 
 - **模型**：[Gemma 4 E2B](https://huggingface.co/google/gemma-4-E2B-it)（Google，Apache-2.0）的 Q4_K_M GGUF（[unsloth 的仓库](https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF)，固定提交号），约 3 GB，占显存约 1.5 GB。
 - **怎么选出来的**（2026-10-05，`%TEMP%\ktasr\coach-bench.mjs`）：中文母语者说的日语 28 句，14 句有错（助词、时态、活用、自他动词、あげる/くれる……），14 句是正确的口语（省略助词、俗语、不带标点）。都跑在 llama.cpp 上（RTX 5070 Ti），提示词用下面说的新版：
@@ -462,7 +340,7 @@ VRChat 里对面的人说什么语言是不一定的。"对方说什么语言"�
 
 - **提示词也改了**（`coachPrompt.ts`）：原来的提示词下，小模型会把正确的口语当成错误来"改"（Gemma 14 句正确的只放过 5 句，Qwen3.5-4B 只放过 1 句）。加了一段"这是朋友之间的口头闲聊，省略、俗语、不完整的句子都是对的，拿不准就回 ✓"，并在示例里加了几句口语。这对所有跑法都生效，包括 API 模型。
 - **DeepSeek 不先思考**（`apiServices.ts` 的 `quick`）：deepseek-flash 默认每次回答前先想七百多字，一句要 1.7–2 秒，偶尔 5–7 秒；请求里带上 `thinking: { type: 'disabled' }` 后约 0.9 秒，28 句的结果完全一样。翻译和语法反馈用 DeepSeek 时都自动带上。
-- **接法**：和 API 模型一样走 OpenAI 的聊天接口，带上示例（应用自带的 WebGPU 模型不带示例）；地址是引擎在本机的端口。没下载、正在启动、启动失败，各有一句提示。不用语法反馈时引擎停掉。
+- Native feedback uses the OpenAI-compatible chat endpoint on its local engine port and includes the configured prompt examples. Missing models and preparation failures are reported; native holds keep the engine available while in use.
 
 ### 不先思考（2026-10-06）
 
@@ -528,13 +406,9 @@ VRChat 里对面的人说什么语言是不一定的。"对方说什么语言"�
 - **还没验证的**：真手机上的翻译（多亲 F22 Pro 这次没接上）；语法反馈在任何手机上都没跑过（Gemma 在 4 GB 的手机上不借）。
 - **已知限制**：检查对同样的设置会沿用上一次"可以开始了"的回答（`providerStore` 的做法，对所有设备和 API 都一样），所以手机中途关掉共享后，要等设置有变化才重新问；会话里那几句会各自报翻译失败。
 
-## 在线翻译（Bing）在国内（2026-10-11）
+## Retained upstream Bing translation
 
-默认的在线翻译（"这台电脑"下面没下载模型时的 Bing Translator）在国内每句都失败：`unexpected response shape (not array)`（用户的朋友，0.43.110；0.43.111 里修的）。
-
-- **原因**：国内访问 `www.bing.com` 会被转到 `cn.bing.com`。取令牌的那个页面跟着跳转拿到了，但翻译本身是一个 POST，经过跳转就不是原来的请求了，回来的不是译文。
-- **改法**：页面最后是从哪个域名回来的，翻译就向哪个域名要（`BingTranslatorClient.ts` 的 `origin`，从回答的 `url` 里读，只认 `*.bing.com`）；主进程给请求补浏览器身份的那条规则也跟着认 `cn.bing.com`（`main.js`）。国外没有跳转，一切照旧。
-- **验证（2026-10-12）**：测试窗口的全部流量走北京电信的出口（`.dev/tools/china-exit.ps1`），照应用自己的步骤问一句（`.dev/tools/bing-china.js`）：页面由 `cn.bing.com` 送回；向它要，得到译文；照旧向 `www.bing.com` 要，回来是空的——就是朋友看到的那个错。
+Bing translation remains in the upstream LocalInference implementation, including its `cn.bing.com` redirect handling. Kotomimi's native stages and LAN sharing do not use it as a fallback. LocalInference is hidden on desktop and remains available on web and extension. Edge speech services are retained separately.
 
 ## 模型的下载源（2026-10-10）
 
@@ -562,113 +436,35 @@ VRChat 里对面的人说什么语言是不一定的。"对方说什么语言"�
 
 ### 国内仍然到不了的（2026-10-12 查过一遍）
 
-- **"其他模型"**（在页面里跑的 Whisper WebGPU、sherpa-onnx、Opus-MT 等，`modelManifest.ts`）和**自定义 Whisper 模型**：只从 Hugging Face 下。`hf-mirror.com` 上有同样的文件，但这条下载只核对大小、不核对哈希，接一个陌生的镜像前要先想好信任问题，所以没接。
+- The retained upstream browser model library has its own Hugging Face download path. It is not part of Kotomimi's native stage or sharing library; the native mirrors described above apply to native models.
   - **提示**：电脑的时区是国内的时候（`farSource.ts`，和主进程排下载顺序用的是同一个判断），模型库里"其他模型"的标题下多一行：「这些模型存放在海外，下载可能很慢或失败。上面推荐的不受影响。」上面没有推荐模型时只有第一句。别处不显示。
   - **措辞（用户要求注意）**：只说会遇到什么，不说为什么，不提任何绕过的办法；不禁用任何按钮，有办法的人照样可以下。改这句话时保持这三条。
 - **VB-CABLE**（虚拟麦克风的驱动，`download.vb-audio.com`）：能连上，但北京出口只有每秒十几 KB，约 1 MB 的包要一分多钟。
 - OpenAI、Gemini 等国外的云服务：本来就要代理，不是应用能解决的。
 
-## 自定义模型
+## Models outside the native catalog
 
-"语音识别"选"这台电脑"时，下面有"添加 Hugging Face 上的 Whisper 模型"。填仓库名（例如 `onnx-community/kotoba-whisper-v2.2-ONNX`，一个专门为日语微调的 Whisper），选它识别的语言，添加后它会出现在模型库里，像内置模型一样下载、选择和共享。
+To use a model outside Kotomimi's native catalog, run it in an external compatible service and choose **API model** or **Another device** for the relevant stage. Kotomimi's stage UI no longer imports Transformers.js/ONNX Whisper models. The retained upstream browser inference implementation is separate from the desktop Kotomimi provider.
 
-- 仓库要是 Transformers.js 用的 ONNX 格式：有 `config.json`、`tokenizer.json` 等配置文件，以及 `onnx/encoder_model*.onnx` 和 `onnx/decoder_model_merged*.onnx`。`onnx-community/…` 和 `Xenova/…` 的 Whisper 仓库大多符合。
-- 量化版本按 q4、8 位、全精度的顺序取第一个有的。
-- 需要显卡（WebGPU）。
-- 实测 `onnx-community/kotoba-whisper-v2.2-ONNX`（698 MB）识别上面那句日语完全正确。
-- 翻译和语法想用别的模型，走"API 模型"更合适：用 Ollama 或 LM Studio 加载任意模型，把地址填进去。
+## Using another device and sharing with other devices
 
-## 两个方向：用另一台设备，和共享给其他设备
+**Another device** delegates a stage to a remote host. **Share with other devices**, under the advanced Provider settings, makes this computer's installed native models available on the LAN. These are independent choices: local session stage locations do not control which models are shared.
 
-界面上这是两件相反的事，名字也按方向起：
+### Sharing setup and ownership
 
-- **用另一台设备**：这台电脑不出力，环节交给局域网里的另一台。在提供商下面那个环节的卡片里选「另一台设备」。
-- **共享给其他设备**：这台电脑出力，别的设备来用它下载好的模型。在"提供商"页最下面打开「共享这台电脑的模型」。
+- Download the desired native models in the sharing library and enable sharing. Keep Kotomimi running. The default port is 8790; clients use the host's address and access key.
+- The client chooses the requested language, model, and segmentation settings. The host controls installed model availability and the access key.
+- Apple Speech language assets, native recognizers, translators, and feedback models can be advertised. No browser models or managed LocalAI models are advertised or proxied.
+- The title bar indicates when sharing is enabled and when clients are using it. Native engines are prepared when requested and managed by native engine lifetime/hold rules; listing a model does not load it.
+- Sharing-library downloads do not change the host's own session model choices.
 
-一台开共享，另一台选「用另一台设备」，两边就接上了。
+The server retains its access-key checks, LAN restrictions, connection limits, and idle-session handling. The existing security section describes these separately. Sharing models is also separate from the upstream browser-based caption-sharing feature.
 
-### 自动找到另一台设备
+### Protocol
 
-选了「用另一台设备」而还没有地址时（设置向导里总是），应用会搜索局域网（`electron/lan-discover.js`），把找到的设备列出来，点一下就填好地址并立即连接。地址框还在，留给搜索够不到的情况。
+The model list and capabilities identify shared Kotomimi models and their supported stages/languages. Realtime transcription can name a recognizer; translation and feedback use chat requests with their respective model capabilities. Paired Apple Speech sessions negotiate both languages and report the final transcript language. Translation models may declare directional capabilities. The host reports the model actually used when resolving a request.
 
-- 搜索的做法：向本机所在网段的每个地址，在 8790（Kotomimi 共享的默认端口）和 8080（LocalAI 的默认端口）上发一次 `GET /v1/models`，像模型列表的回答就算找到。只发这一个请求；网段大于 256 个地址时只搜本机地址所在的那 256 个；VPN 和隧道的网段不搜。整个过程大约两秒。
-- 开共享的 Kotomimi 在每个回答里带一个 `X-Kotomimi-Name` 头，值是那台电脑的名字（URL 编码），列表里就显示这个名字。它把同一台电脑上 LocalAI 的模型也一起共享时，模型列表的回答还带 `X-Kotomimi-Includes: model-server`，搜索结果里那台电脑就只列一行（它的 Kotomimi），不再单独列出它的 LocalAI。要密钥的设备回 401，仍然会被列出来，标为"需要访问密钥"，选中后密钥框自动出现。
-- 别的服务器没有名字时，能认出是 LocalAI（它的 `GET /version` 会回版本号）就显示 LocalAI，否则显示地址。
-- 本机上和应用并排运行的服务器（比如同一台 Mac 上的 LocalAI）也会被找到，地址是 `127.0.0.1`。本机自己的共享不会列出来。
-- 改过端口的设备搜不到，要手动填地址。
-
-### 共享这台电脑的模型
-
-打开后，这台电脑会在局域网上提供它已下载的识别和翻译模型，另一台设备自己不需要下载任何东西。卡片上会写明这台电脑在对方列表里叫什么名字，以及搜不到时手动填的地址。
-
-- 默认端口 8790。可以设访问密钥；对方在"另一台设备需要访问密钥"里填同一个。
-- 应用开着的时候才能共享。开关的状态会记住，下次启动自动恢复。
-- Windows 上，每次开始共享都会读一次防火墙（`electron/lan-firewall.js`）：这台电脑所在的网络里只要有一个挡住这个端口，设置里就显示出来，并给一个「允许」按钮。点了以后由 Windows 向用户确认，然后为这个端口加一条规则：专用网络和域网络对任何地址开放；Windows 把当前网络当作「公用网络」时（新连的家用 Wi‑Fi 默认就是），再加一条只对同一网络里的设备开放的规则。读规则不需要权限，也不改任何东西。
-- 其他系统不处理：macOS 会自己询问，要允许。
-- 共享的是应用自己下载的模型（包括自定义模型），要共享哪个，就在共享区域的模型库里下载哪个；以及这台电脑上 LocalAI 的模型（见下面"LocalAI 的模型一起共享"）。
-- 每个连接占用一个识别模型的内存。最多同时 6 个连接。
-- **模型只在用的时候占内存**：
-  - 没有设备来用时什么都不加载；连接关闭时，那个连接的识别模型立即释放。
-  - 对方忘了结束会话：一台设备的所有连接 30 分钟都没有语音时，门会结束这些连接（先发一个 `session_idle` 错误，对方界面上显示"另一台设备结束了这次会话"），模型随之释放。按设备算而不是按连接算，所以"我"在说话时，一直安静的"对方"那一路不会被掐掉。
-  - 应用自己的翻译模型 10 分钟没人请求就卸载，下次请求再加载（`translator.ts`）。
-  - LocalAI 的模型由它自己的空闲看门狗卸载，也是 10 分钟（见下面"这台电脑上的 LocalAI"）。
-
-### 哪边的设置算数
-
-出力的那台电脑和使用的那台电脑各有一套设置，容易分不清以哪边为准。规则只有两条，共享卡片上也写着：
-
-- **使用的那台设备决定**：语言、用哪个模型、断句的灵敏度。这些随每次请求发过来。
-- **出力的这台电脑只决定**：有哪些模型可选（它下载了哪些、它的 LocalAI 里装了哪些），和访问密钥。它自己各环节选在哪里，只管它自己开会话时用，不影响共享。
-
-出力的电脑在共享期间，标题栏会显示"共享中"，有设备在用时显示路数（`ServingBadge.tsx`）。
-
-### 这台电脑上的 LocalAI
-
-有些模型不归应用自己跑：Apple 的语音识别、MLX 模型、GGUF 翻译模型。它们由同一台电脑上的 LocalAI 运行。电脑上装了 LocalAI 时（`~/.localai/bin/local-ai`，或 Homebrew 装的），提供商设置里、共享区域上面会多一节"这台电脑上的 LocalAI"（`electron/local-server.js`、`LocalServerCard.tsx`）。这一节只有一行状态（运行中、几个模型）加启动 / 停止按钮、"打开 Kotomimi 时自动启动"的开关、打开 LocalAI 页面的链接；它是什么、怎么用，收在标题旁的问号里；"别的设备没指定模型时用哪个"折叠着。它不再列出自己的模型：模型在环节卡片里选，共享出去的在共享区域里看。
-
-- **启动和停止**由应用来做，可以设成随应用启动。应用退出时，它启动的 LocalAI 一起停。输出记在应用日志目录的 `localai.log`。
-- 启动参数取自 `~/.localai` 下存在的目录（models、backends、data 等）和 `launcher.json` 里的端口（默认 8080）。监听地址固定是 `127.0.0.1`，不用 `launcher.json` 里的主机：LocalAI 不要密钥，开在局域网上等于把模型交给网里任何人，还多出一个和应用共享并列的地址。别的设备只通过应用的共享（一个端口、一把密钥）用到它的模型。每个参数只在这个版本的 LocalAI 自己的帮助里出现时才给，避免旧版本因为不认识的参数起不来。Apple 芯片上会带 `LOCALAI_FORCE_META_BACKEND_CAPABILITY=metal`。
-- **空闲的模型自动卸载**：应用启动 LocalAI 时会打开它自带的空闲看门狗（`--enable-watchdog-idle --watchdog-idle-timeout=10m`，同样只在这个版本认识时才给）。一个模型 10 分钟没有请求点到它，就从内存里卸载，下次用到再加载。不开的话，LocalAI 会把每个用过的模型一直留在内存里。
-- **别的程序启动的 LocalAI 不碰**：端口上已经有回应时，卡片显示"运行中 · 由其他程序启动"，没有停止按钮。想让应用来管，先退出那个程序。
-- **对方没指定模型时用哪个**：LocalAI 的 Realtime 管线把一个识别模型和一个文本模型串在一起。卡片上列出每条管线现在用的这两个，各是一个下拉菜单，选项是这台 LocalAI 里能做这件事的模型。改动通过 LocalAI 自己的接口写回（`PATCH /api/models/config-json/<管线名>`，整段 `pipeline` 一起发），被换下的模型会从内存里卸载，下一次会话生效。应用不认识任何具体的模型：菜单里的名字是从模型 id 生成的（`modelLabel.ts`），所以换一台装了别的模型的 LocalAI 也一样能用。
-- 安装和删除模型仍然在 LocalAI 自己的网页里做，卡片上有链接。
-- 没装 LocalAI 的电脑看不到这张卡片。
-
-#### 这台电脑自己用它：就在"这台电脑"下面选
-
-整页设置按一个概念组织：**这台电脑的模型 = 应用下载的 + 这台电脑的 LocalAI 里装的**。各环节从里面选，共享就是把同一批借给别的设备。所以这台电脑自己要用 LocalAI 的模型时，不用绕到"另一台设备"：
-
-- 每个环节选"这台电脑"时，模型下拉的最后多一项"LocalAI（这台电脑上的）"。只有这台电脑装了 LocalAI 才有这一项。
-- 选了它，这个下拉变成两项（"Kotomimi 下载的模型" / "LocalAI"），正下方多一个下拉，列出 LocalAI 里能做这个环节的模型。语音识别可以留给 LocalAI 的管线决定；翻译和语法反馈必须选一个。
-- LocalAI 没在运行时，卡片里提示并给一个"启动 LocalAI"按钮。
-- 设置里是每个环节一个字段（`asrHere` / `translateHere` / `coachHere`，值为 `app` 或 `localai`）加选中的模型（`…HereModel`），以及当时的地址和管线名（`hereAddress`、`herePipeline`）。
-- **翻译和语法反馈**交给 LocalAI 时，后面的代码把它读成"一个地址上的文本模型、不要密钥"（`localai.ts` 的 `settled`），检查、构建、运行都走 API 模型那条路。
-- **语音识别**交给 LocalAI 时，走的是它的 Realtime 套接字（`ws://127.0.0.1:<端口>/v1/realtime`），不是上传接口：实测（2026-10-04）LocalAI 的 `/v1/audio/transcriptions` 只有 Whisper 和 Parakeet 能用，Apple Speech、SenseVoice、Qwen3 都回 `Unimplemented`。转写会话里不能点名识别模型，所以会话开始前先把选中的识别模型写进管线（`PipelineConfig.prepare`，经 `local-server:set-pipeline`），再开套接字（`PipelineConfig.socket`，不带密钥）。断句由 LocalAI 做，"VAD 设置"显示的是 Realtime 那一套。
-- 别的环节照样可以放在别处：比如识别用这台电脑的 LocalAI，翻译用另一台设备。文本环节仍然向凭据里的那个地址请求。
-
-"另一台设备"里搜到的"这台电脑上的 LocalAI"（地址 `127.0.0.1`）仍然可以用，效果和以前一样。
-
-#### LocalAI 的模型一起共享
-
-对别的设备来说，一台电脑就是一台电脑：一个开关、一个地址、一个访问密钥。所以共享打开、这台电脑的 LocalAI 又在运行时，共享的门（8790）会把属于 LocalAI 的请求经回环地址转给它（`electron/lan-upstream.js`）：
-
-- **模型列表**：LocalAI 的识别模型和文本模型接在应用自己的模型后面（`owned_by: "localai"`，能力分别是 `transcript` 和 `chat`）。它的管线不列出来，对外只有 `kotomimi` 这一个管线名。
-- **聊天请求**：模型名是 LocalAI 的文本模型时，原样转给它（去掉只有 Kotomimi 才读的 `source_language` / `target_language`），回答按原样流式传回。
-- **Realtime 套接字**：会话照旧先由应用宣布；对方的第一条 `session.update` 里指定的识别模型如果是 LocalAI 的，这条连接从此接到 LocalAI 自己的会话上。LocalAI 的转写会话不接受指定识别模型，所以先把它写进管线（就是卡片上那个下拉菜单做的事，被换下的模型从内存卸载），再开会话，发过去的 `session.update` 里不带模型名。
-- **加载哪个由对方决定**：LocalAI 只在请求点到名时才加载模型，列出来不等于加载。对方在自己的环节卡片里选了哪个，这边才加载哪个；换识别模型时，换下来的那个如果没有别的会话在用，立即卸载；其余用过的模型空闲 10 分钟后卸载（见上）。
-- **对方把模型留给这台电脑决定时**：LocalAI 在运行就用它的管线（卡片上"对方没指定模型时用哪个"的那两个）；没有 LocalAI 时才用应用自己下载的模型里最合适的。
-- 管线是全局的：两台设备同时指定不同的识别模型时，后来的那个会把管线改掉，但要等先来的会话在 LocalAI 那边配置好（LocalAI 回了 `session.updated`，最多等 30 秒）才改，所以先来的会话用上的是它自己选的模型。被换下的模型只在没有会话还在用它时才立即卸载：会话配置好以后一直用它当时的识别模型，管线再改也不变（2026-10-04 在 Mac 上实测：A 用 Whisper 开着，管线改成 SenseVoice 后 A 仍是 Whisper，新开的 B 是 SenseVoice，两个同时在内存里；这时强行卸载 Whisper，A 不报错，只是下一句多等几秒把它重新加载）。所以共享的门记着每个开着的会话用的是哪个识别模型（`lan-upstream.js` 的 `using`），改管线时把它们交给 `setPipeline` 的 `keep`，不卸载；没人用了以后由 LocalAI 自己的空闲看门狗卸载。代价是两台设备同时用不同识别模型时，两个模型都在内存里。一台设备的两路（我 / 对方）用的是同一个，不受影响，也不用互相等。
-- **LocalAI 中途停了**：接到 LocalAI 的会话里，LocalAI 关掉连接（停止、崩溃）时，对方先收到一个 `upstream_failed` 错误说明原因，再收到关闭；LocalAI 给了关闭码就原样带过去，连接是断掉的就用 1011。对方自己关闭时，它的关闭码也带给 LocalAI。聊天请求的回答流到一半断掉时，对方的连接跟着断开，不会补上结尾、当成完整的回答。
-
-### 协议上的差别
-
-对另一台设备来说，这就是一台说同一套协议的服务器，所以下一节的约定对它同样适用。它和 LocalAI 有三处不同，客户端从模型列表里的 `owned_by: "kotomimi"` 认出它并自动处理：
-
-- **Realtime 套接字里只做识别，不生成回答。** 客户端把翻译留给这台设备决定时，会改用聊天接口向管线名 `kotomimi` 要翻译，由共享的那台电脑按语言对自己挑最合适的翻译模型。
-- **翻译模型不是聊天模型**，在 `capabilities` 里标为 `translate`。请求聊天接口时客户端会多带两个字段 `source_language` 和 `target_language`；系统提示词不被采用，每个翻译模型用自己的提示词。
-- **转写会话里可以指定任何一个识别模型**，不像 LocalAI 只接受默认的那个。
-
-握手带密钥时用 GA 的方式：子协议 `realtime` 加 `openai-insecure-api-key.<密钥>`，服务器回 `realtime`。HTTP 请求用 `Authorization: Bearer <密钥>`。
+External LocalAI-compatible servers remain supported directly as remote/API services. Kotomimi no longer provides a LocalAI management card, rewrites a locally managed LocalAI pipeline, or forwards its models through the sharing port.
 
 ## 假名注音的读音修正
 
@@ -1073,7 +869,7 @@ VRChat 里对面的人说什么语言是不一定的。"对方说什么语言"�
 
 ## 实机测试
 
-共享的整条链路（共享端口、它到 LocalAI 的那一半、管线改写）在一台机器上有端到端测试 `electron/lan-door.e2e.test.js`：一个假的 LocalAI 只听回环地址，不需要环境变量，随 fork 的测试一起跑。真的 LocalAI 何时读管线、模型真的加载和卸载，仍然只有下面的实机测试能确认。
+Automated coverage for native sharing lives in `src/lib/lan/` and the Electron LAN tests. The removed LocalAI proxy test `electron/lan-door.e2e.test.js` is no longer an acceptance command. Live tests below cover external services and another sharing Kotomimi; they require actual devices and models.
 
 不设环境变量时这些测试会跳过，普通测试不会连任何服务器。WAV 要求 24 kHz、单声道、PCM16，几秒钟的语音即可。各变量的含义写在测试文件开头。
 
@@ -1133,7 +929,7 @@ npx electron-forge make --arch=x64
 
 - 名字集中在几处：`forge.config.js`（安装目录、可执行文件名、应用 ID）、`package.json` 的 `productName`、`electron/main.js` 的 `app.setName`（设置目录）。
 - 界面文字不改语言包。上游的语言包里写的是 Sokuji，由 `src/lib/brand.ts` 在显示时替换成 Kotomimi。虚拟音频设备的名字保持 Sokuji 不变，因为设备确实还叫那个名字。
-- 本分支自己的文字写在 `scripts/fork-localai-locales.cjs` 和 `scripts/fork-locale-groups.cjs` 里，每条是 [英文, 简体, 繁体]，由脚本写进全部 30 个语言包。
+- Fork copy is generated by `scripts/fork-localai-locales.cjs` from its tables and `scripts/fork-locale-groups.cjs`. Most entries use English/Simplified Chinese/Traditional Chinese columns; the best-effort badge and help use all 30 locale keys in `scripts/fork-best-effort-locales.cjs`. Edit these sources before regenerating catalogs.
 - 图标由一张图生成全套：
 
 ```bash

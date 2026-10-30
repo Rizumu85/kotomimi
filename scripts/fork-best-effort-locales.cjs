@@ -1,0 +1,38 @@
+/** Language-detection copy, keyed by catalog locale so regeneration preserves translations. */
+const translations = {
+  en: ['Best effort', "The selected speech recognition model does not report the transcript's language. Kotomimi estimates it from the text, so language detection may be less reliable."],
+  zh_CN: ['尽力而为', '当前选择的语音识别模型不会返回转写文本的语言。Kotomimi 会根据文本推测，因此语言判断可能不够准确。'],
+  zh_TW: ['盡力而為', '目前選擇的語音辨識模型不會回傳轉寫文字的語言。Kotomimi 會根據文字推測，因此語言判斷可能不夠準確。'],
+  ar: ['قدر الإمكان', 'لا يحدد نموذج التعرف على الكلام المحدد لغة النص المنسوخ. يحاول Kotomimi استنتاجها من النص، لذا قد يكون اكتشاف اللغة أقل موثوقية.'],
+  bn: ['সাধ্যমতো চেষ্টা', 'নির্বাচিত কথন শনাক্তকরণ মডেল প্রতিলিপির ভাষা জানায় না। Kotomimi লেখা থেকে ভাষা অনুমান করে, তাই ভাষা শনাক্তকরণ কম নির্ভরযোগ্য হতে পারে।'],
+  de: ['Bestmögliche Erkennung', 'Das ausgewählte Spracherkennungsmodell gibt die Sprache des Transkripts nicht an. Kotomimi schätzt sie anhand des Textes, weshalb die Erkennung der Sprache weniger zuverlässig sein kann.'],
+  es: ['Mejor esfuerzo', 'El modelo de reconocimiento de voz seleccionado no indica el idioma de la transcripción. Kotomimi lo estima a partir del texto, por lo que la detección del idioma puede ser menos fiable.'],
+  fa: ['حداکثر تلاش', 'مدل تشخیص گفتار انتخاب‌شده زبان متن پیاده‌شده را اعلام نمی‌کند. Kotomimi زبان را از روی متن حدس می‌زند، بنابراین تشخیص زبان ممکن است قابل‌اعتماد نباشد.'],
+  fi: ['Parhaan arvion mukaan', 'Valittu puheentunnistusmalli ei ilmoita litteroinnin kieltä. Kotomimi arvioi sen tekstin perusteella, joten kielen tunnistus voi olla epävarmempaa.'],
+  fil: ['Sa abot ng makakaya', 'Hindi ibinibigay ng napiling modelo ng pagkilala sa pagsasalita ang wika ng transkripsiyon. Tinatantiya ito ng Kotomimi mula sa teksto, kaya maaaring hindi gaanong maaasahan ang pagtukoy sa wika.'],
+  fr: ['Au mieux', 'Le modèle de reconnaissance vocale sélectionné ne précise pas la langue de la transcription. Kotomimi l’estime à partir du texte ; la détection de la langue peut donc être moins fiable.'],
+  he: ['כמיטב היכולת', 'מודל זיהוי הדיבור שנבחר אינו מדווח על שפת התמלול. Kotomimi מנסה להסיק אותה מהטקסט, ולכן זיהוי השפה עשוי להיות פחות אמין.'],
+  hi: ['यथासंभव प्रयास', 'चुना गया वाक् पहचान मॉडल लिप्यंतरण की भाषा नहीं बताता। Kotomimi पाठ से भाषा का अनुमान लगाता है, इसलिए भाषा की पहचान कम विश्वसनीय हो सकती है।'],
+  id: ['Upaya terbaik', 'Model pengenalan ucapan yang dipilih tidak melaporkan bahasa transkrip. Kotomimi memperkirakannya dari teks, sehingga deteksi bahasa mungkin kurang andal.'],
+  it: ['Al meglio possibile', 'Il modello di riconoscimento vocale selezionato non indica la lingua della trascrizione. Kotomimi la stima dal testo, quindi il rilevamento della lingua potrebbe essere meno affidabile.'],
+  ja: ['できる限り判定', '選択した音声認識モデルは、文字起こしの言語を返しません。Kotomimi がテキストから推測するため、言語判定の精度が下がる場合があります。'],
+  ko: ['최대한 판별', '선택한 음성 인식 모델은 받아쓴 텍스트의 언어를 알려 주지 않습니다. Kotomimi가 텍스트를 바탕으로 추정하므로 언어 감지의 정확도가 낮아질 수 있습니다.'],
+  ms: ['Usaha terbaik', 'Model pengecaman pertuturan yang dipilih tidak menyatakan bahasa transkrip. Kotomimi menganggarkannya berdasarkan teks, jadi pengesanan bahasa mungkin kurang tepat.'],
+  nl: ['Zo goed mogelijk', 'Het geselecteerde spraakherkenningsmodel geeft de taal van de transcriptie niet aan. Kotomimi schat die in op basis van de tekst, waardoor de taaldetectie minder betrouwbaar kan zijn.'],
+  pl: ['Najlepsza możliwa próba', 'Wybrany model rozpoznawania mowy nie podaje języka transkrypcji. Kotomimi szacuje go na podstawie tekstu, więc wykrywanie języka może być mniej wiarygodne.'],
+  pt_BR: ['Melhor esforço', 'O modelo de reconhecimento de fala selecionado não informa o idioma da transcrição. O Kotomimi o estima a partir do texto, por isso a detecção do idioma pode ser menos confiável.'],
+  pt_PT: ['Melhor esforço', 'O modelo de reconhecimento de fala selecionado não indica o idioma da transcrição. O Kotomimi estima-o a partir do texto, pelo que a deteção do idioma pode ser menos fiável.'],
+  ru: ['По мере возможности', 'Выбранная модель распознавания речи не сообщает язык расшифровки. Kotomimi определяет его по тексту, поэтому определение языка может быть менее надёжным.'],
+  sv: ['Så gott det går', 'Den valda taligenkänningsmodellen anger inte transkriptionens språk. Kotomimi uppskattar det utifrån texten, så språkidentifieringen kan vara mindre tillförlitlig.'],
+  ta: ['முடிந்தவரை கண்டறிதல்', 'தேர்ந்தெடுக்கப்பட்ட பேச்சு அறிதல் மாதிரி, எழுத்தாக்கத்தின் மொழியைத் தெரிவிக்காது. Kotomimi உரையிலிருந்து மொழியை ஊகிக்கிறது. எனவே மொழியைக் கண்டறிவதில் துல்லியம் குறையலாம்.'],
+  te: ['సాధ్యమైనంత వరకు', 'ఎంచుకున్న మాటల గుర్తింపు మోడల్ లిప్యంతరీకరణ భాషను తెలియజేయదు. Kotomimi పాఠ్యం ఆధారంగా భాషను అంచనా వేస్తుంది, కాబట్టి భాష గుర్తింపు తక్కువ నమ్మదగినదిగా ఉండవచ్చు.'],
+  th: ['พยายามให้ดีที่สุด', 'โมเดลรู้จำเสียงพูดที่เลือกไม่ได้ระบุภาษาของข้อความที่ถอดเสียง Kotomimi จะคาดเดาจากข้อความ จึงอาจตรวจจับภาษาได้แม่นยำน้อยลง'],
+  tr: ['Mümkün olduğunca', 'Seçilen konuşma tanıma modeli, dökümün dilini bildirmez. Kotomimi dili metinden tahmin eder; bu nedenle dil algılama daha az güvenilir olabilir.'],
+  uk: ['У міру можливостей', 'Вибрана модель розпізнавання мовлення не повідомляє мову розшифровки. Kotomimi визначає її за текстом, тому визначення мови може бути менш надійним.'],
+  vi: ['Cố gắng hết sức', 'Mô hình nhận dạng giọng nói đã chọn không cho biết ngôn ngữ của bản chép lời. Kotomimi suy đoán từ văn bản, nên việc phát hiện ngôn ngữ có thể kém tin cậy hơn.'],
+};
+
+module.exports = {
+  bestEffort: Object.fromEntries(Object.entries(translations).map(([locale, copy]) => [locale, copy[0]])),
+  bestEffortHelp: Object.fromEntries(Object.entries(translations).map(([locale, copy]) => [locale, copy[1]])),
+};
