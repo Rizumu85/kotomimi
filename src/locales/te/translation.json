@@ -1752,7 +1752,9 @@
       "mostly": "Translate into what they mostly speak",
       "detect": "Auto-detect",
       "detectUnavailable": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
-      "speakBothUnavailable": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages."
+      "speakBothUnavailable": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
+      "bestEffort": "Best effort",
+      "bestEffortHelp": "The speech recognition model in use cannot identify the language of a transcript by itself. Kotomimi will try to guess it in code, so the language may be slightly less accurate."
     },
     "wizard": {
       "pathTitle": "Kotomimi Pipeline",

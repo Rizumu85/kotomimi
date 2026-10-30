@@ -126,6 +126,13 @@ module.exports = {
       '当前的语音识别分不出{{mine}}和{{language}}，需要 Qwen3-ASR 1.7B GGUF 或 API 模型。',
       '目前的語音辨識分不出{{mine}}和{{language}}，需要 Qwen3-ASR 1.7B GGUF 或 API 模型。',
     ],
+    // A model that does not name the language: the pipeline guesses it from the writing and a small detector.
+    bestEffort: ['Best effort', '尽力而为', '盡力而為'],
+    bestEffortHelp: [
+      'The speech recognition model in use cannot identify the language of a transcript by itself. Kotomimi will try to guess it in code, so the language may be slightly less accurate.',
+      '目前使用的语音识别模型无法自主判断转写的语言类型，Kotomimi会尽量用程序来猜，所以语言的判断会略差一些。',
+      '目前使用的語音辨識模型無法自主判斷轉寫的語言類型，Kotomimi 會盡量用程式來猜，所以語言的判斷會略差一些。',
+    ],
   },
   wizard: {
     pathTitle: ['Kotomimi Pipeline', 'Kotomimi 自由搭配', 'Kotomimi 自由搭配'],

@@ -37,7 +37,7 @@ export function ProviderLanguages({ providers, disabled, sentence }: ProviderLan
   // shown as a run does it.
   const kotomimi = (provider.id as string) === 'localai';
   const detection = provider.languages.detection?.(entry.settings, selection.models, entry.pair);
-  const offer = (kind: 'other' | 'both') => detection && { on: detection[kind].on, available: detection[kind].available, set: (on: boolean) => updateSettings(provider, detection[kind].turn(on)) };
+  const offer = (kind: 'other' | 'both') => detection && { on: detection[kind].on, available: detection[kind].available, bestEffort: detection[kind].bestEffort, set: (on: boolean) => updateSettings(provider, detection[kind].turn(on)) };
   const detect = legs.includes('participant') ? offer('other') : undefined;
   const both = legs.includes('speaker') ? offer('both') : undefined;
 

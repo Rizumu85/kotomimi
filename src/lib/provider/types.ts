@@ -108,6 +108,8 @@ export interface ModelOption { id: string }
 export interface Detection<S> {
   on: boolean;
   available: boolean;
+  /** Fork: on, but the language is guessed from the writing/a small detector rather than named by the model. */
+  bestEffort?: boolean;
   turn(on: boolean): Partial<S>;
 }
 

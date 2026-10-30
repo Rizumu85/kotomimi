@@ -81,6 +81,31 @@
 // Fork: "I speak their language too", under the pair.
 .language-both {
   margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+// Fork: the model guesses the language instead of naming it.
+.language-best-effort {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 8px;
+  vertical-align: middle;
+
+  &__badge {
+    font-size: 10px;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+    padding: 1px 7px;
+    border-radius: 99px;
+    color: vars.$color-warning;
+    background: vars.$color-warning-bg;
+    border: 1px solid vars.$color-warning-border;
+    white-space: nowrap;
+  }
 }
 
 .language-select-group--mostly {

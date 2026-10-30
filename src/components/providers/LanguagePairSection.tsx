@@ -36,12 +36,12 @@ interface LanguagePairSectionProps {
    * translated into, and what a translation that must be told a language is
    * told. Absent: not offered.
    */
-  detect?: { on: boolean; available: boolean; set(on: boolean): void };
+  detect?: { on: boolean; available: boolean; bestEffort?: boolean; set(on: boolean): void };
   /**
    * Fork: the speaker speaks the other side's language too — a switch under the pair, named with that language:
    * what they say in it is translated into their own. What it does is in its help. Absent: not offered.
    */
-  both?: { on: boolean; available: boolean; set(on: boolean): void };
+  both?: { on: boolean; available: boolean; bestEffort?: boolean; set(on: boolean): void };
   /**
    * Fork: the two selects are named for whose language they hold — "my
    * language", "their language" — whatever the mode, and nothing is written
@@ -64,6 +64,13 @@ const DETECT = '\u0000detect';
  */
 export function LanguagePairSection({ provider, settings, pair, onChange, disabled, sentence, context, detect, both, owners }: LanguagePairSectionProps) {
   const { t, i18n } = useTranslation();
+  // A model that cannot name the language still runs it, as a guess: the badge says so beside the choice.
+  const bestEffortBadge = (bestEffort?: boolean, on?: boolean) => (bestEffort && on ? (
+    <span className="language-best-effort">
+      <span className="language-best-effort__badge">{t('fork.languageMenu.bestEffort')}</span>
+      <Tooltip content={t('fork.languageMenu.bestEffortHelp')} position="top" icon="help" maxWidth={320} />
+    </span>
+  ) : null);
   const id = useId();
   const label = useLanguageLabel();
   const sources = provider.languages.sources(settings, context);
@@ -194,7 +201,7 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
         {detecting && (
           // In the pair's own grid, a row of its own: what it is for at the left, the choice under their language.
           <>
-            <label className="language-mostly-label" htmlFor={`${id}-mostly`}>{t('fork.languageMenu.mostly')}</label>
+            <label className="language-mostly-label" htmlFor={`${id}-mostly`}>{t('fork.languageMenu.mostly')}{bestEffortBadge(detect?.bestEffort, true)}</label>
             <div className="language-select-group language-select-group--mostly">
               <select
                 id={`${id}-mostly`}
@@ -220,6 +227,7 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
             tooltip={t(both.available || both.on ? 'fork.languageMenu.speakBothHelp' : 'fork.languageMenu.speakBothUnavailable', { language: label(pair.target), mine: label(pair.source) })}
             disabled={disabled || (!both.available && !both.on)}
           />
+          {bestEffortBadge(both.bestEffort, both.on)}
         </div>
       )}
       {resolved?.showMirror && !owners && (

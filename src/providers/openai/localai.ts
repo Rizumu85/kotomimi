@@ -1414,9 +1414,12 @@ export const localaiLanguages: Provider<LocalAISettings, never, never>['language
     // The speaker in either of the pair's languages: also the Mac's recognition, where it hears theirs and has both.
     const either = (hearsNatively(s) && nativeEither({ model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage, either: { own: pair.source, other: pair.target } }) !== null)
       || (hearingPlace(s) === 'server' && serverBilingual(s.asrModel, pair, models as readonly LocalAIModel[]) !== null);
+    // A model that names the language, or a paired Apple one, is exact; everything else here is a best effort.
+    const reliable = (hearsNatively(s) && detector) || either || (hearingPlace(s) === 'server' && serverDetects(models));
+    const bestEffort = available && !reliable;
     return {
-      other: { on: detectsOther(s, models), available, turn: (on) => (on ? { ...to, asrDetectOther: true } : { asrDetectOther: false }) },
-      both: { on: speaksBoth(s, models, pair), available: available || either, turn: (on) => (on ? { ...(either ? {} : to), speakBoth: true } : { speakBoth: false }) },
+      other: { on: detectsOther(s, models), available, ...(bestEffort ? { bestEffort: true } : {}), turn: (on) => (on ? { ...to, asrDetectOther: true } : { asrDetectOther: false }) },
+      both: { on: speaksBoth(s, models, pair), available: available || either, ...(bestEffort ? { bestEffort: true } : {}), turn: (on) => (on ? { ...(either ? {} : to), speakBoth: true } : { speakBoth: false }) },
     };
   },
 };
