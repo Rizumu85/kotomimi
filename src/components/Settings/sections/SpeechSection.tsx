@@ -137,6 +137,11 @@ export function OutputToggles({ locked }: { locked: boolean }) {
   const setTextOnly = useSetTextOnly();
   const keepReplayAudio = useKeepReplayAudio();
   const setKeepReplayAudio = useSetKeepReplayAudio();
+  const isKotomimi = useProviderStore((state) => state.selected === 'localai');
+
+  // Restore these controls when Kotomimi supports translated speech output.
+  // Hide the entire section, preserving saved preferences for other providers.
+  if (isKotomimi) return null;
 
   const speech = selection?.provider.speech ?? 'optional';
   const speakerLegRuns = mode !== 'participant';

@@ -51,6 +51,8 @@ General places VRChat controls before font settings. Audio starts with Speech mo
 
 For Kotomimi (`localai`), Audio hides the echo-cancellation picker and Original Audio Passthrough until translated speech output is supported. This only hides controls: saved preferences and audio processing remain intact. Speaker monitoring is last, after Other's audio. To restore the two controls after implementing and validating voice output, update `showVoiceOutputControls` in `AdvancedSettings.tsx`; the existing components, settings, and handlers are retained.
 
+General also hides the entire Text Only / Keep audio for replay section for Kotomimi. Restore it by updating the Kotomimi visibility guard in `OutputToggles` (`SpeechSection.tsx`) when translated speech output is supported. Existing preferences and other providers' controls are preserved.
+
 | Stage | This computer | API model | Another device |
 | --- | --- | --- | --- |
 | Speech recognition | Downloaded native recognizer or installed Apple Speech language assets | An OpenAI-compatible transcription endpoint | A sharing Kotomimi, compatible phone node, or external LocalAI Realtime server |
