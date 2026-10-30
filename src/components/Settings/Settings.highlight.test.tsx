@@ -102,17 +102,16 @@ describe("Settings — the 'provider' navigation target switches tabs without fl
     expect(navigateToSettings).toHaveBeenCalledWith(null);
   });
 
-  // The global turn mode's section sits under the language pair on the
-  // General tab (plan 1e-3b-2), no longer among the provider's own settings.
-  it("target='turn-detection' switches to the General tab", () => {
+  // Speech mode belongs to the Audio category.
+  it("target='turn-detection' switches to the Audio tab", () => {
     sessionStorage.setItem('panelState.settingsActiveTab', 'provider');
     mockTarget = 'turn-detection';
     const { getByTestId } = render(<Settings />);
 
-    expect(getByTestId('advanced-body')).toHaveAttribute('data-active-tab', 'general');
+    expect(getByTestId('advanced-body')).toHaveAttribute('data-active-tab', 'audio');
   });
 
-  // The Speech section's summary link (General tab) lands on the provider's
+  // The Speech section's summary link (Audio tab) lands on the provider's
   // VAD block, which the Provider tab draws after the provider's own settings.
   it("target='turn-detection-tuning' switches to the Provider tab and highlights the VAD block", () => {
     mockTarget = 'turn-detection-tuning';

@@ -47,6 +47,8 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 
 Kotomimi has three independent stages: speech recognition, translation, and optional grammar feedback. Each stage can use **This computer**, **API model**, or **Another device**. Settings use one categorized layout: General, Audio, and Provider. Stage cards (`LocalAIAssist.tsx`) live in Provider.
 
+General places VRChat controls before font settings. Audio starts with Speech mode (Auto, Push-to-Talk, and Push-to-Translate), followed by audio devices. The speech-detection summary links to its provider-specific tuning in Provider.
+
 | Stage | This computer | API model | Another device |
 | --- | --- | --- | --- |
 | Speech recognition | Downloaded native recognizer or installed Apple Speech language assets | An OpenAI-compatible transcription endpoint | A sharing Kotomimi, compatible phone node, or external LocalAI Realtime server |

@@ -20,6 +20,9 @@ const run = vi.hoisted(() => ({ locked: false }));
 vi.mock('../../../app/useRun', () => ({ useSessionLocked: () => run.locked }));
 
 vi.mock('../shared/WarningModal', () => ({ default: () => null }));
+vi.mock('../sections/SpeechSection', () => ({
+  SpeechSection: () => <div data-testid="speech-section" />,
+}));
 
 const blocks = vi.hoisted(() => ({
   general: [] as Array<{ locked: boolean }>,

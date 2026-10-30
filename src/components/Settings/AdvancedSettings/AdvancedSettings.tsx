@@ -14,6 +14,7 @@ import {
   HelpSection
 } from '../sections';
 import { SessionSettingsGeneral, SessionSettingsProvider } from '../ProviderArea';
+import { SpeechSection } from '../sections/SpeechSection';
 import { FontSection } from '../../Fonts/FontSection';
 import { AutostartSection } from '../../Autostart/AutostartSection';
 import './AdvancedSettings.scss';
@@ -77,14 +78,14 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({ toggleSettings, act
       >
         {activeTab === 'general' && (
           <>
-            {/* Language pair, output preferences, and speech mode. */}
+            {/* Language pair and output preferences. */}
             <SessionSettingsGeneral locked={locked} />
-
-            {/* Fork: the fonts of the app and of conversation text */}
-            <FontSection />
 
             {/* Fork: VRChat on the same computer (Windows) */}
             <VRChatSection />
+
+            {/* Fork: the fonts of the app and of conversation text */}
+            <FontSection />
 
             {/* Fork: starting with the computer, in the background */}
             <AutostartSection />
@@ -95,34 +96,37 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({ toggleSettings, act
         )}
 
         {activeTab === 'audio' && (
-          <div className="settings-section audio-section">
-            <h2>{t('audioPanel.title', 'Audio Settings')}</h2>
+          <>
+            <SpeechSection locked={locked} />
+            <div className="settings-section audio-section">
+              <h2>{t('audioPanel.title', 'Audio Settings')}</h2>
 
-            <AudioDeviceSection
-              isSessionActive={locked}
-              isLocked={lockMic}
-              showMicrophone={true}
-              showSpeaker={false}
-            />
+              <AudioDeviceSection
+                isSessionActive={locked}
+                isLocked={lockMic}
+                showMicrophone={true}
+                showSpeaker={false}
+              />
 
-            <AudioDeviceSection
-              isSessionActive={locked}
-              isLocked={lockMonitor}
-              lockedReason={lockMonitor ? monitorLockedReason : undefined}
-              showMicrophone={false}
-              showSpeaker={true}
-            />
+              <AudioDeviceSection
+                isSessionActive={locked}
+                isLocked={lockMonitor}
+                lockedReason={lockMonitor ? monitorLockedReason : undefined}
+                showMicrophone={false}
+                showSpeaker={true}
+              />
 
-            <SystemAudioSection
-              isSessionActive={locked}
-              isLocked={lockParticipant}
-            />
+              <SystemAudioSection
+                isSessionActive={locked}
+                isLocked={lockParticipant}
+              />
 
-            <VoicePassthroughSection
-              disabled={turnMode === 'push-to-translate'}
-              disabledReason={t('audioPanel.passthroughManagedByPushToTranslate')}
-            />
-          </div>
+              <VoicePassthroughSection
+                disabled={turnMode === 'push-to-translate'}
+                disabledReason={t('audioPanel.passthroughManagedByPushToTranslate')}
+              />
+            </div>
+          </>
         )}
 
         {activeTab === 'provider' && (

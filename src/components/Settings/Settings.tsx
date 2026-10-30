@@ -45,8 +45,8 @@ const NAVIGATION_TAB_MAP: Record<string, string> = {
   'provider': 'provider',
   'system-instructions': 'provider',
   'voice-settings': 'provider',
-  // The global turn mode lives on the General tab (plan 1e-3b-2).
-  'turn-detection': 'general',
+  // Speech mode lives at the top of the Audio category.
+  'turn-detection': 'audio',
   // The Speech section's summary link: `${target}-section` is the provider's speech-detection block (ProviderTurnDetectionControls).
   'turn-detection-tuning': 'provider',
   'model-management': 'provider',

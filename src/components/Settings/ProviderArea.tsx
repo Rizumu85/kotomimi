@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { OutputToggles, SpeechSection } from './sections/SpeechSection';
+import { OutputToggles } from './sections/SpeechSection';
 import SentenceSegmentationSection from './sections/SentenceSegmentationSection';
 import { ProviderEngine, ProviderOwnSettings, ProviderTurnDetectionControls } from '../providers/ProviderOwnSettings';
 import { ProviderLanguages } from '../providers/ProviderLanguages';
@@ -16,10 +16,9 @@ export function SessionSettingsGeneral({ locked }: { locked: boolean }) {
   const textOnly = useTextOnly();
   return (
     <>
-      {/* Language pair, output preferences, then speech mode. */}
+      {/* Language pair and output preferences. */}
       <ProviderLanguages providers={providers} disabled={locked} sentence={{ mode, textOnly }} />
       <OutputToggles locked={locked} />
-      <SpeechSection locked={locked} />
       {SENTENCE_SEGMENTATION_SHOWN && <SentenceSegmentationSection isSessionActive={locked} />}
     </>
   );

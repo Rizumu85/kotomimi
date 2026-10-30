@@ -35,12 +35,12 @@ import { useProviderStore } from '../../stores/providerStore';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useTurnModeStore } from '../../stores/turnModeStore';
 import { SessionSettingsGeneral, SessionSettingsProvider } from './ProviderArea';
+import { SpeechSection } from './sections/SpeechSection';
 
 const entry = () => ({ settings: { ...LOCAL_INFERENCE_DEFAULTS }, credentials: {}, pair: { source: 'ja', target: 'en' } });
 
-// The owner's order of 2026-10-01: the pair, the provider, Text only and
-// Keep audio, then the speech mode.
-const SECTION_IDS = ['languages-section', 'output-section', 'turn-detection-section'];
+// General keeps language and output preferences together.
+const SECTION_IDS = ['languages-section', 'output-section'];
 
 beforeEach(() => {
   stored.clear();
@@ -74,18 +74,15 @@ describe('SessionSettingsGeneral', () => {
   });
 
 
-  it('locked disables the pair and turn mode', () => {
+  it('locked disables the language pair', () => {
     render(<SessionSettingsGeneral locked={true} />);
     for (const select of screen.getAllByRole('combobox')) expect(select).toBeDisabled();
-    for (const button of [...screen.getAllByRole('button')].filter((b) => b.className.includes('option-button'))) {
-      expect(button).toBeDisabled();
-    }
   });
 
-  it("General: the Speech section shows the tuning as a link to the Provider tab, with no sliders of its own", () => {
+  it("Audio: the Speech section shows the tuning as a link to the Provider tab, with no sliders of its own", () => {
     useTurnModeStore.setState({ turnMode: 'auto' });
     useSettingsStore.setState({ settingsNavigationTarget: null });
-    const { container } = render(<SessionSettingsGeneral locked={false} />);
+    const { container } = render(<SpeechSection locked={false} />);
     const speech = container.querySelector('#turn-detection-section')!;
     const button = speech.querySelector('button.turn-detection-link')!;
     expect(button.textContent).toBe('VAD Settings · Min Silence Duration: 1.40s');
@@ -103,7 +100,7 @@ describe('General category boundaries', () => {
     expect(container.querySelector('.provider-select')).toBeNull();
     expect(container.querySelector('.kt-provider-pointer')).toBeNull();
     // The rest of the page is as before.
-    for (const id of ['languages-section', 'output-section', 'turn-detection-section']) expect(container.querySelector(`#${id}`), id).toBeTruthy();
+    for (const id of ['languages-section', 'output-section']) expect(container.querySelector(`#${id}`), id).toBeTruthy();
   });
 
 });
