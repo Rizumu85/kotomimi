@@ -50,58 +50,6 @@
     &:focus-visible { @include vars.focus-ring; }
   }
 
-  // Segmented mode toggle. Applied to a `.mode-toggle` element a consumer
-  // passes via the `actions` slot (see Settings.tsx for the markup shape).
-  // Relocated from Settings.scss, with the track intentionally deepened to
-  // $bg-base (vs the old $bg-surface) so it reads as a recessed segmented
-  // track against the $bg-surface panel rather than two loose buttons.
-  .mode-toggle {
-    display: flex;
-    background: vars.$bg-base;
-    border-radius: vars.$radius-md;
-    padding: 2px;
-    gap: 2px;
-
-    .mode-button {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      background: transparent;
-      border: none;
-      border-radius: vars.$radius-sm;
-      color: vars.$text-muted;
-      font-size: vars.$font-caption;
-      font-weight: 500;
-      white-space: nowrap;
-      cursor: pointer;
-      transition: all vars.$transition-fast;
-
-      svg { width: 14px; height: 14px; }
-
-      &:hover:not(:disabled):not(.active) {
-        color: vars.$text-secondary;
-        background: color-mix(in srgb, vars.$overlay-fg 5%, transparent);
-      }
-
-      &.active { @include vars.state-selected-fill; }
-      &:disabled { @include vars.disabled-state; }
-      &:focus-visible { @include vars.focus-ring; }
-    }
-  }
-
-  // When the bar carries tabs (Settings Advanced, all of Logs) the tabs eat
-  // the horizontal room, so the right-cluster controls collapse to icon-only
-  // (their `title`/`aria-label` carry the meaning). With no tabs (Settings
-  // Quick) there is room, so the labels stay visible.
-  &--has-tabs {
-    .panel-bar__actions .mode-button {
-      padding: 6px 8px;
-    }
-    .panel-bar__actions span {
-      display: none;
-    }
-  }
 }
 
 // Tab labels are the last thing to go — only on a genuinely tiny panel. Use an

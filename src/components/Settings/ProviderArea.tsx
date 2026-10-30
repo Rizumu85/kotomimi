@@ -5,34 +5,21 @@ import { ProviderEngine, ProviderOwnSettings, ProviderTurnDetectionControls } fr
 import { ProviderLanguages } from '../providers/ProviderLanguages';
 import { ProviderPicker } from '../providers/ProviderPicker';
 import { useAuthContext } from '../providers/useAuthContext';
-import type { EngineSlot } from '../../lib/provider/types';
 import { presentProviders } from '../../providers/registry';
 import { useMode } from '../../stores/audioStore';
 import { SENTENCE_SEGMENTATION_SHOWN, useEngineSlotTarget, useSetEngineSlotTarget, useTextOnly } from '../../stores/settingsStore';
 
-/**
- * The provider-related blocks the two Settings layouts show (plan 1e-3b-2):
- * the General tab and Simple mode's list share `SessionSettingsGeneral`;
- * Advanced's Provider tab is `SessionSettingsProvider`; Simple mode pushes
- * `SessionEnginePage` in place of its list when a chip is clicked (1e-3
- * ruling 10). Every block reads `providerStore` and the run's lock.
- * `layout` is the host's: the Speech section draws the provider's tuning of
- * Auto as a summary line linking to that tuning's Controls on Advanced's
- * Provider tab, and from Simple mode the link switches to Advanced first.
- */
-export function SessionSettingsGeneral({ locked, layout, onOpenSlot }: { locked: boolean; layout: 'simple' | 'advanced'; onOpenSlot(slot: EngineSlot): void }) {
+/** General and Provider categories read the same provider entry and session lock. */
+export function SessionSettingsGeneral({ locked }: { locked: boolean }) {
   const providers = useMemo(() => presentProviders(), []);
-  const auth = useAuthContext();
   const mode = useMode();
   const textOnly = useTextOnly();
   return (
     <>
-      {/* The owner's order of 2026-10-01: the pair, the provider, Text only and Keep audio, then the speech mode. */}
+      {/* Language pair, output preferences, then speech mode. */}
       <ProviderLanguages providers={providers} disabled={locked} sentence={{ mode, textOnly }} />
-      {/* Fork: the Advanced layout draws the provider on its Provider page alone, and says nothing of it here. */}
-      {layout !== 'advanced' && <ProviderPicker providers={providers} auth={auth} disabled={locked} openSlot={onOpenSlot} />}
       <OutputToggles locked={locked} />
-      <SpeechSection locked={locked} layout={layout} />
+      <SpeechSection locked={locked} />
       {SENTENCE_SEGMENTATION_SHOWN && <SentenceSegmentationSection isSessionActive={locked} />}
     </>
   );
@@ -52,9 +39,4 @@ export function SessionSettingsProvider({ locked }: { locked: boolean }) {
       <ProviderTurnDetectionControls providers={providers} disabled={locked} />
     </>
   );
-}
-
-export function SessionEnginePage({ locked, slot }: { locked: boolean; slot: EngineSlot }) {
-  const providers = useMemo(() => presentProviders(), []);
-  return <ProviderEngine providers={providers} disabled={locked} initialSlot={slot} />;
 }

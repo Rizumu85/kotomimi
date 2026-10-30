@@ -1492,7 +1492,7 @@
         "title": "Tarjoajan asetukset",
         "content": "Vaihda avaimesi tai tarjoajasi täältä.",
         "content_pending": "Liitä API-avaimesi tähän. Aloita vapautuu, kun avain vahvistuu.",
-        "content_kotomimi": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Advanced → Provider this computer's models can also be shared with another device."
+        "content_kotomimi": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device."
       },
       "models": {
         "title": "Mallit",
@@ -1508,7 +1508,7 @@
       },
       "done": {
         "title": "Siinä kaikki",
-        "content": "Lisäasetukset — puheen käsittely, promptit, äänet, lokit — löytyvät Edistynyt-kytkimen takaa Asetusten oikeasta yläkulmasta. Voit toistaa tämän oppaan milloin tahansa Ohje-valikosta."
+        "content": "Löydät tarvitsemasi asetusten välilehdiltä. Voit avata tämän oppaan uudelleen ohjeesta."
       },
       "reading-aids": {
         "title": "Reading aids",
@@ -1523,7 +1523,7 @@
         "content": "Worth knowing before you start:",
         "typed": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
         "coach": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-        "share": "Another device can use this computer's models: Advanced → Provider → Share with other devices."
+        "share": "Another device can use this computer's models: Settings → Provider → Share with other devices."
       }
     }
   },

@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutGrid, Sliders, Settings as SettingsIcon, Headphones, Cpu } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import { useUIMode, useSetUIMode, useNavigateToSettings, useSettingsNavigationTarget } from '../../stores/settingsStore';
-import { useSessionLocked } from '../../app/useRun';
-import { useAnalytics } from '../../lib/analytics';
-import SimpleSettings from './SimpleSettings/SimpleSettings';
+import { Settings as SettingsIcon, Headphones, Cpu } from 'lucide-react';
+import { useNavigateToSettings, useSettingsNavigationTarget } from '../../stores/settingsStore';
 import AdvancedSettings from './AdvancedSettings/AdvancedSettings';
 import PanelBar from './shared/PanelBar';
 import type { Tab } from './shared/TabBar';
@@ -41,7 +37,7 @@ const NAVIGATION_TAB_MAP: Record<string, string> = {
   'system-audio': 'audio',
   'participant': 'audio',
   // Engine chips (Task 10) deep-link here to switch to the provider tab
-  // without forcing Advanced mode — see AdvancedSettings' openSlot handler.
+  // using the same route as other settings links.
   // The target IS 'provider' (not a separate 'provider-section' key): the
   // scroll/highlight lookup below builds `${target}-section` as the DOM id,
   // and ProviderPicker's root carries id="provider-section" — so 'provider'
@@ -60,17 +56,8 @@ const NAVIGATION_TAB_MAP: Record<string, string> = {
 };
 
 const Settings: React.FC<SettingsProps> = ({ toggleSettings, highlightSection }) => {
-  const { t } = useTranslation();
-  const { trackEvent } = useAnalytics();
-  const locked = useSessionLocked();
-
-  const uiMode = useUIMode();
-  const setUIMode = useSetUIMode();
   const settingsNavigationTarget = useSettingsNavigationTarget();
   const navigateToSettings = useNavigateToSettings();
-
-  // 'basic' maps to Simple/Quick, 'advanced' maps to Advanced.
-  const isSimpleMode = uiMode === 'basic';
 
   const [activeTab, setActiveTab] = useState(readStoredTab);
 
@@ -78,34 +65,34 @@ const Settings: React.FC<SettingsProps> = ({ toggleSettings, highlightSection })
     sessionStorage.setItem(TAB_STORAGE_KEY, activeTab);
   }, [activeTab]);
 
-  // Advanced-only: switch to the target tab and scroll/highlight its section.
-  // Quick mode highlights via SimpleSettings' highlightSection instead.
+  const target = highlightSection || settingsNavigationTarget;
+
+  // Switch to the target category and highlight its section.
   useEffect(() => {
-    if (isSimpleMode) return;
-    if (!settingsNavigationTarget) return;
-    const targetTab = NAVIGATION_TAB_MAP[settingsNavigationTarget];
+    if (!target) return;
+    const targetTab = NAVIGATION_TAB_MAP[target];
     if (targetTab && targetTab !== activeTab) {
       setActiveTab(targetTab);
     }
     // 'provider' is special (Finding 4): it's the engine chips' deep-link
-    // target (see AdvancedSettings' openSlot), and the section this would
+    // target, and the section this would
     // scroll/highlight is id="provider-section" — the WHOLE ProviderPicker,
     // not the slot the chip actually opened. That flash now belongs to
     // EngineSurface's own expanded SlotRow (its one-shot `flashSlot` prop)
     // instead. Switch tabs only, and clear the one-shot target immediately
     // so it can't linger and hijack a later navigation that DOES want the
     // scroll/highlight.
-    if (settingsNavigationTarget === 'provider') {
+    if (target === 'provider') {
       navigateToSettings(null);
       return;
     }
     // Wait for the tab switch + DOM update before scrolling. Cancel the
-    // pending scroll on cleanup so flipping modes mid-navigation doesn't
+    // pending scroll on cleanup so changing targets mid-navigation doesn't
     // fire into an unmounted/stale DOM.
     let highlightTimer: ReturnType<typeof setTimeout> | undefined;
     let highlightedEl: HTMLElement | null = null;
     const scrollTimer = setTimeout(() => {
-      const element = document.getElementById(`${settingsNavigationTarget}-section`);
+      const element = document.getElementById(`${target}-section`);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
         element.classList.add('highlight');
@@ -129,57 +116,19 @@ const Settings: React.FC<SettingsProps> = ({ toggleSettings, highlightSection })
       highlightedEl?.classList.remove('highlight');
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settingsNavigationTarget, navigateToSettings, isSimpleMode]);
-
-  const handleModeToggle = () => {
-    const newMode = isSimpleMode ? 'advanced' : 'basic';
-    setUIMode(newMode);
-    trackEvent('settings_mode_switched', {
-      from_mode: uiMode,
-      to_mode: newMode,
-      during_session: locked,
-    });
-  };
-
-  const modeToggle = (
-    <div className="mode-toggle">
-      <button
-        className={`mode-button ${isSimpleMode ? 'active' : ''}`}
-        onClick={() => !isSimpleMode && handleModeToggle()}
-        title={t('settings.simpleMode', 'Quick')}
-        aria-label={t('settings.simple', 'Quick')}
-      >
-        <LayoutGrid size={14} />
-        <span>{t('settings.simple', 'Quick')}</span>
-      </button>
-      <button
-        className={`mode-button ${!isSimpleMode ? 'active' : ''}`}
-        onClick={() => isSimpleMode && handleModeToggle()}
-        title={t('settings.advancedMode', 'Advanced')}
-        aria-label={t('settings.advanced', 'Advanced')}
-      >
-        <Sliders size={14} />
-        <span>{t('settings.advanced', 'Advanced')}</span>
-      </button>
-    </div>
-  );
+  }, [target, navigateToSettings]);
 
   return (
     <div className="settings-container">
       <PanelBar
-        tabs={isSimpleMode ? undefined : TABS}
-        activeTab={isSimpleMode ? undefined : activeTab}
-        onTabChange={isSimpleMode ? undefined : setActiveTab}
-        actions={modeToggle}
+        tabs={TABS}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
         onClose={toggleSettings ?? (() => {})}
       />
 
       <div className="settings-body">
-        {isSimpleMode ? (
-          <SimpleSettings highlightSection={highlightSection || settingsNavigationTarget} />
-        ) : (
-          <AdvancedSettings toggleSettings={toggleSettings} activeTab={activeTab} />
-        )}
+        <AdvancedSettings toggleSettings={toggleSettings} activeTab={activeTab} />
       </div>
     </div>
   );

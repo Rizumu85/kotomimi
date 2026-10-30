@@ -1492,7 +1492,7 @@
         "title": "Pengaturan Penyedia",
         "content": "Ubah kunci Anda atau ganti penyedia di sini.",
         "content_pending": "Tempel kunci API Anda di sini. Tombol Mulai aktif setelah kunci divalidasi.",
-        "content_kotomimi": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Advanced → Provider this computer's models can also be shared with another device."
+        "content_kotomimi": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device."
       },
       "models": {
         "title": "Model",
@@ -1508,7 +1508,7 @@
       },
       "done": {
         "title": "Sekian",
-        "content": "Pengaturan lanjutan — deteksi ucapan, prompt, suara, log — ada di balik sakelar Lanjutan di pojok kanan atas Pengaturan. Putar ulang panduan ini kapan saja dari Bantuan."
+        "content": "Gunakan tab di Pengaturan untuk menemukan yang Anda butuhkan. Panduan ini dapat dibuka kembali dari Bantuan."
       },
       "reading-aids": {
         "title": "Reading aids",
@@ -1523,7 +1523,7 @@
         "content": "Worth knowing before you start:",
         "typed": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
         "coach": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-        "share": "Another device can use this computer's models: Advanced → Provider → Share with other devices."
+        "share": "Another device can use this computer's models: Settings → Provider → Share with other devices."
       }
     }
   },

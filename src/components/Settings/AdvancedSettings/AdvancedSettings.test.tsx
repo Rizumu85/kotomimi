@@ -1,13 +1,6 @@
-/**
- * AdvancedSettings' General-tab engine chip (review Minor 5): a chip's
- * `onOpenSlot` (`AdvancedSettings.tsx:36-39`, today's `ProviderSection.tsx`'s
- * `openSlot`) sets the one-shot `engineSlotTarget` and switches Settings to
- * the Provider tab via `navigateToSettings('provider')`. Real settingsStore;
- * the provider/section blocks stubbed to markers, since this is about the
- * chip's wiring, not any block's content.
- */
+/** Categorized settings show only the selected category and preserve session locks. */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>();
@@ -29,16 +22,12 @@ vi.mock('../../../app/useRun', () => ({ useSessionLocked: () => run.locked }));
 vi.mock('../shared/WarningModal', () => ({ default: () => null }));
 
 const blocks = vi.hoisted(() => ({
-  general: [] as Array<{ locked: boolean; layout: string; onOpenSlot(slot: { dir: string; stage: string }): void }>,
+  general: [] as Array<{ locked: boolean }>,
 }));
 vi.mock('../ProviderArea', () => ({
-  SessionSettingsGeneral: (props: { locked: boolean; layout: string; onOpenSlot(slot: { dir: string; stage: string }): void }) => {
+  SessionSettingsGeneral: (props: { locked: boolean }) => {
     blocks.general.push(props);
-    return (
-      <button type="button" onClick={() => props.onOpenSlot({ dir: 'ja→en', stage: 'asr' })}>
-        open chip
-      </button>
-    );
+    return <div data-testid="session-settings-general" />;
   },
   SessionSettingsProvider: () => <div data-testid="session-settings-provider" />,
 }));
@@ -59,15 +48,7 @@ beforeEach(() => {
   useSettingsStore.setState({ engineSlotTarget: null, settingsNavigationTarget: null });
 });
 
-describe("AdvancedSettings — the General tab's chip deep-links to the Provider tab", () => {
-  it("a chip's onOpenSlot sets engineSlotTarget and navigates to 'provider'", () => {
-    render(<AdvancedSettings activeTab="general" />);
-
-    fireEvent.click(screen.getByText('open chip'));
-
-    expect(useSettingsStore.getState().engineSlotTarget).toEqual({ dir: 'ja→en', stage: 'asr' });
-    expect(useSettingsStore.getState().settingsNavigationTarget).toBe('provider');
-  });
+describe("Categorized settings", () => {
 
   it("hands SessionSettingsGeneral the run's lock", () => {
     run.locked = true;
@@ -75,9 +56,12 @@ describe("AdvancedSettings — the General tab's chip deep-links to the Provider
     expect(blocks.general[blocks.general.length - 1].locked).toBe(true);
   });
 
-  // The Speech section's provider tuning links to its full controls here.
-  it('hands SessionSettingsGeneral the Advanced layout', () => {
-    render(<AdvancedSettings activeTab="general" />);
-    expect(blocks.general[blocks.general.length - 1].layout).toBe('advanced');
+  it('keeps provider controls in their own category', () => {
+    const { rerender } = render(<AdvancedSettings activeTab="general" />);
+    expect(screen.getByTestId('session-settings-general')).toBeInTheDocument();
+    expect(screen.queryByTestId('session-settings-provider')).toBeNull();
+    rerender(<AdvancedSettings activeTab="provider" />);
+    expect(screen.queryByTestId('session-settings-general')).toBeNull();
+    expect(screen.getByTestId('session-settings-provider')).toBeInTheDocument();
   });
 });

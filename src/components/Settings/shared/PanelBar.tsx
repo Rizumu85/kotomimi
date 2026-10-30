@@ -5,7 +5,7 @@ import TabBar, { Tab } from './TabBar';
 import './PanelBar.scss';
 
 interface PanelBarProps {
-  /** Tab strip. Omit for tab-less panels (e.g. Settings Quick mode). */
+  /** Tab strip. Omit for tab-less panels (when a panel has no categories). */
   tabs?: Tab[];
   activeTab?: string;
   onTabChange?: (id: string) => void;

@@ -8,7 +8,6 @@ import {
   useLocalNativeSettings,
   useUpdateLocalNative,
   useNavigateToSettings,
-  useUIMode,
   useSetEngineSlotTarget,
   useValidateApiKey,
   useTextOnly,
@@ -58,7 +57,6 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
   const lockedMode = useLockedMode();
   const speakerChannelInScopeForUi = speakerChannelInScope(lockedMode ?? mode);
   const navigateToSettings = useNavigateToSettings();
-  const uiMode = useUIMode();
   const setEngineSlotTarget = useSetEngineSlotTarget();
   const validateApiKey = useValidateApiKey();
 
@@ -274,7 +272,7 @@ const LanguageSection: React.FC<LanguageSectionProps> = ({
   // reacts to the signal itself, advanced mode also switches to the tab.
   const openEngineSlot = (dir: string, stage: Stage) => {
     setEngineSlotTarget({ dir, stage });
-    if (uiMode !== 'basic') navigateToSettings('provider');
+    navigateToSettings('provider');
   };
 
   if (!providerConfig) return null;

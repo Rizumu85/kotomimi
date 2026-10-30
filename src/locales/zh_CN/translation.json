@@ -1492,7 +1492,7 @@
         "title": "服务设置",
         "content": "在这里换密钥或换服务。",
         "content_pending": "把 API 密钥粘贴在这里。校验通过后才能开始。",
-        "content_kotomimi": "这里每个环节一张卡片：语音识别、翻译、语法反馈。在卡片里选它在哪里运行（局域网里的另一台设备、API 模型、这台电脑），模型也在同一处选。到「高级 → 提供商」里，还可以把这台电脑的模型共享给另一台设备。"
+        "content_kotomimi": "这里每个环节一张卡片：语音识别、翻译、语法反馈。在卡片里选它在哪里运行（局域网里的另一台设备、API 模型、这台电脑），模型也在同一处选。到「设置 → 提供商」里，还可以把这台电脑的模型共享给另一台设备。"
       },
       "models": {
         "title": "模型",
@@ -1508,7 +1508,7 @@
       },
       "done": {
         "title": "就这些",
-        "content": "高级设置——说话检测、提示词、语音、日志——在「设置」右上角的高级模式开关后面。随时可以在「帮助」里重看本引导。"
+        "content": "设置已按常规、音频和提供商分类，可以通过顶部标签查找。随时可以在「帮助」里重看本引导。"
       },
       "reading-aids": {
         "title": "阅读辅助",
@@ -1523,7 +1523,7 @@
         "content": "开始之前值得知道：",
         "typed": "会话开始后，底部会出现输入框：打一句话就能翻译。按 Ctrl+K 可以直接跳到输入框。",
         "coach": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-        "share": "另一台设备也能用这台电脑的模型：「高级 → 提供商 → 共享给其他设备」。"
+        "share": "另一台设备也能用这台电脑的模型：「设置 → 提供商 → 共享给其他设备」。"
       }
     }
   },

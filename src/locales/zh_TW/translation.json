@@ -1492,7 +1492,7 @@
         "title": "提供商設定",
         "content": "在這裡更換金鑰或切換提供商。",
         "content_pending": "在這裡貼上您的 API 金鑰。通過驗證後即可解鎖「開始」。",
-        "content_kotomimi": "這裡每個環節一張卡片：語音辨識、翻譯、文法回饋。在卡片裡選它在哪裡執行（區域網路裡的另一台裝置、API 模型、這台電腦），模型也在同一處選。到「進階 → 提供商」裡，還可以把這台電腦的模型共享給另一台裝置。"
+        "content_kotomimi": "這裡每個環節一張卡片：語音辨識、翻譯、文法回饋。在卡片裡選它在哪裡執行（區域網路裡的另一台裝置、API 模型、這台電腦），模型也在同一處選。到「設定 → 提供商」裡，還可以把這台電腦的模型共享給另一台裝置。"
       },
       "models": {
         "title": "模型",
@@ -1508,7 +1508,7 @@
       },
       "done": {
         "title": "就是這樣",
-        "content": "進階設定 — 語音偵測、提示詞、語音、日誌 — 都在「設定」右上角的「進階」開關後面。隨時可以在「說明」中重看本導覽。"
+        "content": "設定已按一般、音訊和提供商分類，可以透過頂部分頁尋找。隨時可以在「說明」裡重看本導覽。"
       },
       "reading-aids": {
         "title": "閱讀輔助",
@@ -1523,7 +1523,7 @@
         "content": "開始之前值得知道：",
         "typed": "工作階段開始後，底部會出現輸入框：打一句話就能翻譯。按 Ctrl+K 可以直接跳到輸入框。",
         "coach": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-        "share": "另一台裝置也能用這台電腦的模型：「進階 → 提供商 → 共享給其他裝置」。"
+        "share": "另一台裝置也能用這台電腦的模型：「設定 → 提供商 → 共享給其他裝置」。"
       }
     }
   },

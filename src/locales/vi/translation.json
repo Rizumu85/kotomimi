@@ -1492,7 +1492,7 @@
         "title": "Cài đặt nhà cung cấp",
         "content": "Thay đổi khóa hoặc chuyển nhà cung cấp ở đây.",
         "content_pending": "Dán khóa API của bạn vào đây. Bắt đầu sẽ mở khóa khi khóa được xác thực.",
-        "content_kotomimi": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Advanced → Provider this computer's models can also be shared with another device."
+        "content_kotomimi": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device."
       },
       "models": {
         "title": "Mô hình",
@@ -1508,7 +1508,7 @@
       },
       "done": {
         "title": "Vậy là xong",
-        "content": "Cài đặt nâng cao — phát hiện giọng nói, prompt, giọng nói, nhật ký — nằm sau công tắc Nâng cao ở góc trên bên phải của Cài đặt. Xem lại hướng dẫn này bất cứ lúc nào từ Trợ giúp."
+        "content": "Dùng các thẻ trong Cài đặt để tìm mục bạn cần. Bạn có thể xem lại hướng dẫn này từ Trợ giúp."
       },
       "reading-aids": {
         "title": "Reading aids",
@@ -1523,7 +1523,7 @@
         "content": "Worth knowing before you start:",
         "typed": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
         "coach": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-        "share": "Another device can use this computer's models: Advanced → Provider → Share with other devices."
+        "share": "Another device can use this computer's models: Settings → Provider → Share with other devices."
       }
     }
   },

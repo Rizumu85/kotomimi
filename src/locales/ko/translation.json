@@ -1492,7 +1492,7 @@
         "title": "제공자 설정",
         "content": "여기서 키를 변경하거나 제공자를 전환할 수 있습니다.",
         "content_pending": "여기에 API 키를 붙여넣으세요. 검증되면 시작이 활성화됩니다.",
-        "content_kotomimi": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Advanced → Provider this computer's models can also be shared with another device."
+        "content_kotomimi": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device."
       },
       "models": {
         "title": "모델",
@@ -1508,7 +1508,7 @@
       },
       "done": {
         "title": "여기까지입니다",
-        "content": "음성 감지, 프롬프트, 음성, 로그 등 고급 설정은 설정 화면 오른쪽 위의 고급 토글 뒤에 있습니다. 이 가이드는 도움말에서 언제든 다시 볼 수 있습니다."
+        "content": "설정의 탭에서 필요한 항목을 찾으세요. 도움말에서 언제든지 이 안내를 다시 볼 수 있습니다."
       },
       "reading-aids": {
         "title": "Reading aids",
@@ -1523,7 +1523,7 @@
         "content": "Worth knowing before you start:",
         "typed": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
         "coach": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-        "share": "Another device can use this computer's models: Advanced → Provider → Share with other devices."
+        "share": "Another device can use this computer's models: Settings → Provider → Share with other devices."
       }
     }
   },

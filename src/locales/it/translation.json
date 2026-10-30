@@ -1492,7 +1492,7 @@
         "title": "Impostazioni fornitore",
         "content": "Cambia la tua chiave o il fornitore qui.",
         "content_pending": "Incolla qui la tua chiave API. Avvia si sblocca una volta convalidata.",
-        "content_kotomimi": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Advanced → Provider this computer's models can also be shared with another device."
+        "content_kotomimi": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device."
       },
       "models": {
         "title": "Modelli",
@@ -1508,7 +1508,7 @@
       },
       "done": {
         "title": "È tutto",
-        "content": "Le impostazioni avanzate — rilevamento vocale, prompt, voci, log — si trovano dietro l'interruttore Avanzato in alto a destra in Impostazioni. Rivedi questa guida in qualsiasi momento da Aiuto."
+        "content": "Usa le schede delle impostazioni per trovare ciò che ti serve. Puoi rivedere questa guida dalla Guida."
       },
       "reading-aids": {
         "title": "Reading aids",
@@ -1523,7 +1523,7 @@
         "content": "Worth knowing before you start:",
         "typed": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
         "coach": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-        "share": "Another device can use this computer's models: Advanced → Provider → Share with other devices."
+        "share": "Another device can use this computer's models: Settings → Provider → Share with other devices."
       }
     }
   },

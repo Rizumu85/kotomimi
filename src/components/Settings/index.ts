@@ -1,5 +1,4 @@
 export { default as Settings } from './Settings';
-export { default as SimpleSettings } from './SimpleSettings/SimpleSettings';
 export { default as AdvancedSettings } from './AdvancedSettings/AdvancedSettings';
 
 // Sections

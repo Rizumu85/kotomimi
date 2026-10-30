@@ -8,7 +8,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 vi.mock('../../stores/settingsStore', () => ({
-  useUIMode: () => 'advanced',
+  useUIMode: () => 'basic',
   useSetUIMode: () => vi.fn(),
   useNavigateToSettings: () => vi.fn(),
   useSettingsNavigationTarget: () => null,
@@ -20,8 +20,7 @@ vi.mock('../../lib/analytics', () => ({
   useAnalytics: () => ({ trackEvent: vi.fn() }),
 }));
 
-// Stub the mode bodies: the tab bar (PanelBar/TabBar) is what's under test.
-vi.mock('./SimpleSettings/SimpleSettings', () => ({ default: () => null }));
+// Stub category content: the tab bar (PanelBar/TabBar) is what's under test.
 vi.mock('./AdvancedSettings/AdvancedSettings', () => ({
   default: ({ activeTab }: { activeTab: string }) => (
     <div data-testid="advanced-body" data-active-tab={activeTab} />
@@ -36,6 +35,8 @@ describe('Settings tab persistence', () => {
   it('defaults to the general tab', () => {
     render(<Settings />);
     expect(screen.getByRole('tab', { name: /general/i })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getAllByRole('tab')).toHaveLength(3);
+    expect(screen.queryByRole('button', { name: /quick|advanced/i })).toBeNull();
   });
 
   it('keeps the selected tab across unmount/remount (settings → logs → settings)', () => {

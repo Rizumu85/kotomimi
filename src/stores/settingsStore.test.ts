@@ -46,6 +46,14 @@ describe('settingsStore', () => {
     vi.clearAllTimers();
   });
 
+  it('restores the categorized layout even when a legacy profile saved Quick', async () => {
+    useSettingsStore.setState({ uiMode: 'basic' });
+    mockGetSetting.mockImplementation(async (key: string, fallback: unknown) => key === 'settings.common.uiMode' ? 'basic' : fallback);
+    await useSettingsStore.getState().loadSettings();
+    expect(useSettingsStore.getState().uiMode).toBe('advanced');
+    expect(mockSetSetting).not.toHaveBeenCalledWith('settings.common.uiMode', expect.anything());
+  });
+
   describe('Provider Switching', () => {
     it('should set provider and clear cache without calling validateApiKey', async () => {
       // setProvider does not call validateApiKey, and nothing validates on a

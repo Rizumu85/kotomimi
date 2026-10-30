@@ -84,16 +84,15 @@ describe('ProviderSection — model chips deep-link to their slot (Task 10)', ()
     expect(useSettingsStore.getState().uiMode).toBe('advanced');
   });
 
-  it('simple mode: clicking a chip sets the target and calls neither navigateToSettings nor setUIMode', () => {
+  it('a legacy basic state still navigates a chip to its category', () => {
     useSettingsStore.setState({ uiMode: 'basic' } as never);
     const { container } = render(<ProviderSection isSessionActive={false} />);
 
     fireEvent.click(chips(container)[0]); // ASR
 
     expect(useSettingsStore.getState().engineSlotTarget).toEqual({ dir: 'ja→en', stage: 'asr' });
-    // Neither side effect fires in Simple mode: SimpleSettings' own host
-    // reacts to engineSlotTarget directly, no tab and no mode switch needed.
-    expect(useSettingsStore.getState().settingsNavigationTarget).toBeNull();
+    // Legacy in-memory state cannot redirect model navigation to a retired layout.
+    expect(useSettingsStore.getState().settingsNavigationTarget).toBe('provider');
     expect(useSettingsStore.getState().uiMode).toBe('basic');
   });
 

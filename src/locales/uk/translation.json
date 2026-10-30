@@ -1492,7 +1492,7 @@
         "title": "Налаштування постачальника",
         "content": "Тут можна змінити ключ або постачальника.",
         "content_pending": "Вставте свій API-ключ тут. Кнопка «Почати» розблокується, щойно його буде перевірено.",
-        "content_kotomimi": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Advanced → Provider this computer's models can also be shared with another device."
+        "content_kotomimi": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device."
       },
       "models": {
         "title": "Моделі",
@@ -1508,7 +1508,7 @@
       },
       "done": {
         "title": "Це все",
-        "content": "Розширені налаштування — виявлення мовлення, промпти, голоси, логи — доступні за перемикачем «Розширений» у верхньому правому куті Налаштувань. Повторити цей гід можна будь-коли в розділі «Допомога»."
+        "content": "Потрібні параметри розміщено на вкладках налаштувань. Цей посібник можна повторити в розділі довідки."
       },
       "reading-aids": {
         "title": "Reading aids",
@@ -1523,7 +1523,7 @@
         "content": "Worth knowing before you start:",
         "typed": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
         "coach": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-        "share": "Another device can use this computer's models: Advanced → Provider → Share with other devices."
+        "share": "Another device can use this computer's models: Settings → Provider → Share with other devices."
       }
     }
   },

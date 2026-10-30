@@ -1492,7 +1492,7 @@
         "title": "Mga setting ng provider",
         "content": "Palitan ang inyong key o lumipat ng provider dito.",
         "content_pending": "I-paste ang inyong API key dito. Mabubuksan ang Start kapag na-validate na ito.",
-        "content_kotomimi": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Advanced → Provider this computer's models can also be shared with another device."
+        "content_kotomimi": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device."
       },
       "models": {
         "title": "Mga Modelo",
@@ -1508,7 +1508,7 @@
       },
       "done": {
         "title": "Tapos na",
-        "content": "Ang mga advanced na setting — pagtukoy ng pagsasalita, prompt, boses, log — ay nasa likod ng Advanced toggle sa kanang itaas ng Mga Setting. I-replay ang gabay na ito anumang oras mula sa Tulong."
+        "content": "Gamitin ang mga tab sa Mga Setting para mahanap ang kailangan mo. Maaari mong ulitin ang gabay na ito mula sa Tulong."
       },
       "reading-aids": {
         "title": "Reading aids",
@@ -1523,7 +1523,7 @@
         "content": "Worth knowing before you start:",
         "typed": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
         "coach": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-        "share": "Another device can use this computer's models: Advanced → Provider → Share with other devices."
+        "share": "Another device can use this computer's models: Settings → Provider → Share with other devices."
       }
     }
   },

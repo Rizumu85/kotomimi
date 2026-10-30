@@ -11,7 +11,6 @@ import {
   useIsApiKeyValid,
   useSetProvider,
   useValidationMessage,
-  useUIMode,
   useNavigateToSettings,
   useSetEngineSlotTarget,
   useLocalNativeSettings,
@@ -65,8 +64,6 @@ const ProviderSection: React.FC<ProviderSectionProps> = ({
 
   const setProvider = useSetProvider();
   const validationMessage = useValidationMessage();
-  const uiMode = useUIMode();
-  const isSimpleMode = uiMode === 'basic';
   const navigateToSettings = useNavigateToSettings();
   const setEngineSlotTarget = useSetEngineSlotTarget();
 
@@ -191,13 +188,10 @@ const ProviderSection: React.FC<ProviderSectionProps> = ({
   // src/tgt — a participant-group chip targets the reverse direction, a
   // speaker-group chip the forward one, and each chip owns its own slot
   // (Finding 1: clicks target the CHIP'S OWN direction, never a hardcoded
-  // one). Simple mode needs only the target — SimpleSettings' host reacts to
-  // it directly. Advanced mode also has to switch to the provider tab; no
-  // mode switch happens here (that's the whole point — the chip no longer
-  // forces the user into Advanced).
+  // one). Every chip opens its slot in the Provider category.
   const openSlot = (dir: string, stage: Stage) => {
     setEngineSlotTarget({ dir, stage });
-    if (!isSimpleMode) navigateToSettings('provider');
+    navigateToSettings('provider');
   };
 
   // ── Chip groups: mode-aware ──────────────────────────────────────────────

@@ -45,7 +45,7 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 
 ## Stage configuration
 
-Kotomimi has three independent stages: speech recognition, translation, and optional grammar feedback. Each stage can use **This computer**, **API model**, or **Another device**. The simple and advanced settings layouts use the same stage cards (`LocalAIAssist.tsx`).
+Kotomimi has three independent stages: speech recognition, translation, and optional grammar feedback. Each stage can use **This computer**, **API model**, or **Another device**. Settings use one categorized layout: General, Audio, and Provider. Stage cards (`LocalAIAssist.tsx`) live in Provider.
 
 | Stage | This computer | API model | Another device |
 | --- | --- | --- | --- |

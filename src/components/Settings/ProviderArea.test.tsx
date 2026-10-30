@@ -34,13 +34,13 @@ import useAudioStore from '../../stores/audioStore';
 import { useProviderStore } from '../../stores/providerStore';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useTurnModeStore } from '../../stores/turnModeStore';
-import { SessionEnginePage, SessionSettingsGeneral, SessionSettingsProvider } from './ProviderArea';
+import { SessionSettingsGeneral, SessionSettingsProvider } from './ProviderArea';
 
 const entry = () => ({ settings: { ...LOCAL_INFERENCE_DEFAULTS }, credentials: {}, pair: { source: 'ja', target: 'en' } });
 
 // The owner's order of 2026-10-01: the pair, the provider, Text only and
 // Keep audio, then the speech mode.
-const SECTION_IDS = ['languages-section', 'provider-section', 'output-section', 'turn-detection-section'];
+const SECTION_IDS = ['languages-section', 'output-section', 'turn-detection-section'];
 
 beforeEach(() => {
   stored.clear();
@@ -52,8 +52,8 @@ beforeEach(() => {
 });
 
 describe('SessionSettingsGeneral', () => {
-  it('renders the blocks in order, with the engine chips inside the provider section, and the sentence labels', () => {
-    const { container } = render(<SessionSettingsGeneral locked={false} layout="simple" onOpenSlot={vi.fn()} />);
+  it('renders the general controls in order without duplicating the Provider category', () => {
+    const { container } = render(<SessionSettingsGeneral locked={false} />);
 
     const elements = SECTION_IDS.map((id) => container.querySelector(`#${id}`));
     elements.forEach((el, i) => expect(el, `#${SECTION_IDS[i]} is present`).toBeTruthy());
@@ -61,8 +61,7 @@ describe('SessionSettingsGeneral', () => {
       // eslint-disable-next-line no-bitwise
       expect(elements[i]!.compareDocumentPosition(elements[i + 1]!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     }
-    const providerSection = container.querySelector('#provider-section')!;
-    expect(providerSection.querySelector('[data-tour="engine-chips"]')).toBeTruthy();
+    expect(container.querySelector('#provider-section')).toBeNull();
 
     const labels = [...container.querySelectorAll('#languages-section .language-select-group label')].map((el) => el.textContent);
     expect(labels).toEqual(['I speak', 'they hear']);
@@ -70,53 +69,23 @@ describe('SessionSettingsGeneral', () => {
 
   // The owner, 2026-10-01: hidden, with segmentation kept Off.
   it('does not render the sentence segmentation section', () => {
-    const { container } = render(<SessionSettingsGeneral locked={false} layout="advanced" onOpenSlot={vi.fn()} />);
+    const { container } = render(<SessionSettingsGeneral locked={false} />);
     expect(container.querySelector('#sentence-segmentation-section')).toBeNull();
   });
 
-  it('a chip calls onOpenSlot with its slot', () => {
-    const onOpenSlot = vi.fn();
-    render(<SessionSettingsGeneral locked={false} layout="simple" onOpenSlot={onOpenSlot} />);
-    const chip = screen.getByText('ASR');
-    fireEvent.click(chip.closest('button')!);
-    expect(onOpenSlot).toHaveBeenCalledWith({ dir: 'ja→en', stage: 'asr' });
-  });
 
-  it('locked disables the picker, the pair and the turn mode', () => {
-    render(<SessionSettingsGeneral locked={true} layout="simple" onOpenSlot={vi.fn()} />);
-    expect(screen.getByLabelText('simpleSettings.provider')).toBeDisabled();
+  it('locked disables the pair and turn mode', () => {
+    render(<SessionSettingsGeneral locked={true} />);
     for (const select of screen.getAllByRole('combobox')) expect(select).toBeDisabled();
     for (const button of [...screen.getAllByRole('button')].filter((b) => b.className.includes('option-button'))) {
       expect(button).toBeDisabled();
     }
   });
 
-  // The layout reaches the Speech section: LocalInference's speech-detection
-  // tuning, under Auto, is a summary line linking to the Provider tab's VAD
-  // block — from Simple mode the link switches to Advanced first.
-  it("layout 'simple': the Speech section's tuning link switches to Advanced, then navigates", () => {
-    useTurnModeStore.setState({ turnMode: 'auto' });
-    const setUIMode = vi.fn();
-    const { setUIMode: originalSetUIMode } = useSettingsStore.getState();
-    useSettingsStore.setState({ settingsNavigationTarget: null, setUIMode } as Partial<ReturnType<typeof useSettingsStore.getState>>);
-    try {
-      const { container } = render(<SessionSettingsGeneral locked={false} layout="simple" onOpenSlot={vi.fn()} />);
-      const speech = container.querySelector('#turn-detection-section')!;
-      const button = speech.querySelector('button.turn-detection-link')!;
-      expect(button.textContent).toBe('VAD Settings · Min Silence Duration: 1.40s');
-      fireEvent.click(button);
-      expect(setUIMode).toHaveBeenCalledWith('advanced');
-      expect(useSettingsStore.getState().settingsNavigationTarget).toBe('turn-detection-tuning');
-      expect(speech.querySelectorAll('input[type="range"]')).toHaveLength(0);
-    } finally {
-      useSettingsStore.setState({ setUIMode: originalSetUIMode });
-    }
-  });
-
-  it("layout 'advanced': the Speech section shows the tuning as a link to the Provider tab, with no sliders of its own", () => {
+  it("General: the Speech section shows the tuning as a link to the Provider tab, with no sliders of its own", () => {
     useTurnModeStore.setState({ turnMode: 'auto' });
     useSettingsStore.setState({ settingsNavigationTarget: null });
-    const { container } = render(<SessionSettingsGeneral locked={false} layout="advanced" onOpenSlot={vi.fn()} />);
+    const { container } = render(<SessionSettingsGeneral locked={false} />);
     const speech = container.querySelector('#turn-detection-section')!;
     const button = speech.querySelector('button.turn-detection-link')!;
     expect(button.textContent).toBe('VAD Settings · Min Silence Duration: 1.40s');
@@ -127,9 +96,9 @@ describe('SessionSettingsGeneral', () => {
 });
 
 // Fork: on the Advanced layout the provider is drawn on its own page alone.
-describe('SessionSettingsGeneral, on the Advanced layout (fork)', () => {
+describe('General category boundaries', () => {
   it('draws no provider block at all: the Provider page is where it is chosen and set up', () => {
-    const { container } = render(<SessionSettingsGeneral locked={false} layout="advanced" onOpenSlot={vi.fn()} />);
+    const { container } = render(<SessionSettingsGeneral locked={false} />);
     expect(container.querySelector('#provider-section')).toBeNull();
     expect(container.querySelector('.provider-select')).toBeNull();
     expect(container.querySelector('.kt-provider-pointer')).toBeNull();
@@ -137,11 +106,6 @@ describe('SessionSettingsGeneral, on the Advanced layout (fork)', () => {
     for (const id of ['languages-section', 'output-section', 'turn-detection-section']) expect(container.querySelector(`#${id}`), id).toBeTruthy();
   });
 
-  it('still draws the block itself on the Simple layout, which has no Provider page', () => {
-    const { container } = render(<SessionSettingsGeneral locked={false} layout="simple" onOpenSlot={vi.fn()} />);
-    expect(container.querySelector('#provider-section .provider-select')).toBeTruthy();
-    expect(container.querySelector('.kt-provider-pointer__row')).toBeNull();
-  });
 });
 
 describe('SessionSettingsProvider', () => {
@@ -201,12 +165,5 @@ describe('SessionSettingsProvider', () => {
     // The engine's own flash proves the slot reached it as `initialSlot`.
     expect(container.querySelector('[data-slot="ja→en:asr"].highlight')).toBeTruthy();
     expect(useSettingsStore.getState().engineSlotTarget).toBeNull();
-  });
-});
-
-describe('SessionEnginePage', () => {
-  it('renders the engine with initialSlot equal to its slot', () => {
-    const { container } = render(<SessionEnginePage locked={false} slot={{ dir: 'ja→en', stage: 'tts' }} />);
-    expect(container.querySelector('[data-slot="ja→en:tts"].highlight')).toBeTruthy();
   });
 });

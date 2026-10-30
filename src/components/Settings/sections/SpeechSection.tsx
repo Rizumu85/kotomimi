@@ -10,7 +10,7 @@ import type { TurnMode } from '../../../lib/session/types';
 import { presentProviders } from '../../../providers/registry';
 import { useMode } from '../../../stores/audioStore';
 import { useProviderStore } from '../../../stores/providerStore';
-import { useKeepReplayAudio, useNavigateToSettings, useSetKeepReplayAudio, useSetTextOnly, useSetUIMode, useTextOnly } from '../../../stores/settingsStore';
+import { useKeepReplayAudio, useNavigateToSettings, useSetKeepReplayAudio, useSetTextOnly, useTextOnly } from '../../../stores/settingsStore';
 import { useTurnModeStore } from '../../../stores/turnModeStore';
 import { effectiveTextOnly } from '../../../utils/effectiveTextOnly';
 
@@ -51,40 +51,11 @@ export function TurnModeControl({ locked }: { locked: boolean }) {
   );
 }
 
-/**
- * The selected provider's own tuning of automatic turn detection (its
- * `TurnDetection`, D18: settings belong to the provider), under Auto only —
- * push-to-talk and push-to-translate detect nothing. Both layouts show the
- * Summary, one line, as a link; the Controls are a block of their own on
- * Advanced's Provider tab (`ProviderTurnDetectionControls`), never drawn
- * here. The link is the existing settings deep link (`navigateToSettings`),
- * whose `'turn-detection-tuning'` target Settings.tsx maps to the Provider
- * tab, then scrolls to and highlights the block. The Provider tab is
- * Advanced's, so from Simple the link first switches the UI mode, as the
- * Settings panel's own mode toggle does (its `settings_mode_switched` event
- * included); Settings.tsx follows the target once the mode reads Advanced.
- * The link stays usable during a run — it only navigates; the lock disables
- * the Controls it leads to.
- *
- * `Help`, when the provider defines one, renders right after — a sibling of
- * the link button, never a descendant: `Tooltip`'s trigger is its own
- * hover/focus target, and a click on it must not also fire the button's
- * `onClick` and navigate.
- *
- * A Summary that renders nothing (nothing to tune now — LocalInference on a
- * streaming ASR, where endpoint detection replaces VAD) leaves its
- * `.turn-detection-summary` empty, and Settings.scss hides the row then:
- * the section cannot see what a provider's component rendered, and a row
- * left standing would be an empty link in Advanced. `Help` follows the same
- * rule on its own (renders nothing then too), so no stray icon is left
- * behind for `:has(.turn-detection-summary:empty)` to have missed.
- */
-function ProviderTurnDetection({ locked, layout }: { locked: boolean; layout: 'simple' | 'advanced' }) {
-  const { trackEvent } = useAnalytics();
+/** The automatic-detection summary links to its controls in the Provider category. */
+function ProviderTurnDetection({ locked }: { locked: boolean }) {
   const turnMode = useTurnModeStore((s) => s.turnMode);
   const providers = useMemo(() => presentProviders(), []);
   const selection = useSelectedProvider(providers);
-  const setUIMode = useSetUIMode();
   const navigateToSettings = useNavigateToSettings();
 
   if (turnMode !== 'auto' || !selection?.entry) return null;
@@ -94,11 +65,6 @@ function ProviderTurnDetection({ locked, layout }: { locked: boolean; layout: 's
   const props = ownProps(selection, selection.entry, locked);
 
   const openControls = () => {
-    if (layout === 'simple') {
-      // The Settings panel's own mode toggle, analytics event included.
-      setUIMode('advanced');
-      trackEvent('settings_mode_switched', { from_mode: 'basic', to_mode: 'advanced', during_session: locked });
-    }
     navigateToSettings('turn-detection-tuning');
   };
 
@@ -118,9 +84,9 @@ function ProviderTurnDetection({ locked, layout }: { locked: boolean; layout: 's
  * The global turn mode's own section (1e-3b-2 ruling 6). Its tooltip is
  * provider-neutral (Stage 2 Soniox, ruling 8): what ends an utterance under
  * Auto is each provider's own detection. The turn modes come first, then
- * that detection's tuning — the provider's own, drawn for `layout`.
+ * that detection's tuning — linked to the Provider category.
  */
-export function SpeechSection({ locked, layout }: { locked: boolean; layout: 'simple' | 'advanced' }) {
+export function SpeechSection({ locked }: { locked: boolean }) {
   const { t } = useTranslation();
   const tooltip = `${t('settings.speechModeTooltip', 'Auto: the provider detects when you have finished speaking. \nPush-to-Talk: hold Space or the mic button to send audio manually. \nPush-to-Translate: like Push-to-Talk, but routes your raw mic to the virtual mic when idle so you can speak directly without translation.')}\n\n${t('settings.speechModeAppliesToAuto', "Applies to your voice. Other's audio always uses the provider's automatic detection.")}`;
   return (
@@ -131,7 +97,7 @@ export function SpeechSection({ locked, layout }: { locked: boolean; layout: 'si
         <Tooltip content={tooltip} position="top" icon="help" />
       </h3>
       <TurnModeControl locked={locked} />
-      <ProviderTurnDetection locked={locked} layout={layout} />
+      <ProviderTurnDetection locked={locked} />
     </div>
   );
 }

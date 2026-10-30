@@ -44,12 +44,11 @@ afterEach(() => {
 });
 
 describe("SpeechSection — the provider tuning row's help tooltip trigger", () => {
-  // Both layouts draw the summary as the same link (Simple's also switches
-  // the UI mode to Advanced first — `setUIMode` stubbed here).
-  it.each(['simple', 'advanced'] as const)('%s: sits beside the link button, not inside it, and hovering or clicking it navigates nowhere', (layout) => {
+  // Help is a separate action from category navigation.
+  it.each(['simple', 'advanced'] as const)('%s: sits beside the link button, not inside it, and hovering or clicking it navigates nowhere', (_layout) => {
     const setUIMode = vi.fn();
     useSettingsStore.setState({ setUIMode } as Partial<ReturnType<typeof useSettingsStore.getState>>);
-    const { container } = render(<SpeechSection locked={false} layout={layout} />);
+    const { container } = render(<SpeechSection locked={false} />);
     const row = container.querySelector('.turn-detection-tuning')!;
     const button = row.querySelector('button.turn-detection-link') as HTMLElement;
     const trigger = row.querySelector('.tooltip-trigger') as HTMLElement;

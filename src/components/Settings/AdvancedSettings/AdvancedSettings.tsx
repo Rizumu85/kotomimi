@@ -1,11 +1,9 @@
 import { VRChatSection } from '../../VRChat/VRChatSection';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useSessionLocked } from '../../../app/useRun';
-import type { EngineSlot } from '../../../lib/provider/types';
 import { useMode } from '../../../stores/audioStore';
-import { useNavigateToSettings, useSetEngineSlotTarget } from '../../../stores/settingsStore';
 import { useTurnModeStore } from '../../../stores/turnModeStore';
 import WarningModal from '../shared/WarningModal';
 import { WarningType } from '../shared/hooks';
@@ -32,15 +30,6 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({ toggleSettings, act
   // The global turn mode — used to disable VoicePassthroughSection when
   // Push-to-Translate is in effect (mutual exclusion, 1e-3 ruling 4).
   const turnMode = useTurnModeStore((s) => s.turnMode);
-  const setEngineSlotTarget = useSetEngineSlotTarget();
-  const navigateToSettings = useNavigateToSettings();
-
-  // A chip on the General tab opens its slot on the Provider tab (today's `openSlot`, ProviderSection.tsx:298-301).
-  const openSlot = useCallback((slot: EngineSlot) => {
-    setEngineSlotTarget(slot);
-    navigateToSettings('provider');
-  }, [setEngineSlotTarget, navigateToSettings]);
-
   // Per-channel lock derivation: a section out of the mode's scope is visible
   // but disabled (greyed), so the mode picker is the master control. The mode
   // picker is locked while a run is not idle, so the audio mode is the run's
@@ -88,8 +77,8 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({ toggleSettings, act
       >
         {activeTab === 'general' && (
           <>
-            {/* The pair, the provider with its chips, the output toggles, the speech mode — same as Simple mode */}
-            <SessionSettingsGeneral locked={locked} layout="advanced" onOpenSlot={openSlot} />
+            {/* Language pair, output preferences, and speech mode. */}
+            <SessionSettingsGeneral locked={locked} />
 
             {/* Fork: the fonts of the app and of conversation text */}
             <FontSection />

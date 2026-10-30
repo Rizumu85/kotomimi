@@ -11,7 +11,7 @@
  * scrolling/highlighting the section, and must still clear the one-shot
  * target so it can't linger.
  *
- * Follows Settings.test.tsx's mount idiom (AdvancedSettings/SimpleSettings
+ * Follows Settings.test.tsx's mount idiom (category content
  * stubbed, i18n stubbed to its default string) but keeps
  * settingsNavigationTarget/navigateToSettings mutable via a shared mock
  * variable, since this suite needs to drive the effect through more than one
@@ -42,7 +42,6 @@ vi.mock('../../lib/analytics', () => ({
   useAnalytics: () => ({ trackEvent: vi.fn() }),
 }));
 
-vi.mock('./SimpleSettings/SimpleSettings', () => ({ default: () => null }));
 vi.mock('./AdvancedSettings/AdvancedSettings', () => ({
   default: ({ activeTab }: { activeTab: string }) => (
     <div data-testid="advanced-body" data-active-tab={activeTab}>
@@ -119,25 +118,6 @@ describe("Settings — the 'provider' navigation target switches tabs without fl
     mockTarget = 'turn-detection-tuning';
     const { getByTestId } = render(<Settings />);
 
-    expect(getByTestId('advanced-body')).toHaveAttribute('data-active-tab', 'provider');
-    vi.advanceTimersByTime(200);
-    expect(getByTestId('turn-detection-tuning-el').classList.contains('highlight')).toBe(true);
-  });
-
-  // From Simple mode the same link switches the UI mode and sets the target
-  // in one click: the target is already set while Settings is still Simple
-  // (whose own effect never lands on a Provider-tab block), and must be
-  // followed the moment the mode reads Advanced.
-  it("a 'turn-detection-tuning' target set while still in Simple is followed once the mode is Advanced", () => {
-    mockUIMode = 'basic';
-    mockTarget = 'turn-detection-tuning';
-    const { getByTestId, queryByTestId, rerender } = render(<Settings />);
-    expect(queryByTestId('advanced-body')).toBeNull();
-    vi.advanceTimersByTime(200);
-    expect(navigateToSettings).not.toHaveBeenCalled();
-
-    mockUIMode = 'advanced';
-    rerender(<Settings />);
     expect(getByTestId('advanced-body')).toHaveAttribute('data-active-tab', 'provider');
     vi.advanceTimersByTime(200);
     expect(getByTestId('turn-detection-tuning-el').classList.contains('highlight')).toBe(true);

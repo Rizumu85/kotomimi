@@ -1492,7 +1492,7 @@
         "title": "प्रदाता सेटिंग्स",
         "content": "यहां अपनी कुंजी बदलें या प्रदाता बदलें।",
         "content_pending": "अपनी API कुंजी यहां पेस्ट करें। सत्यापित होते ही \"शुरू करें\" अनलॉक हो जाएगा।",
-        "content_kotomimi": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Advanced → Provider this computer's models can also be shared with another device."
+        "content_kotomimi": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device."
       },
       "models": {
         "title": "मॉडल",
@@ -1508,7 +1508,7 @@
       },
       "done": {
         "title": "बस इतना ही",
-        "content": "उन्नत सेटिंग्स — भाषण पहचान, प्रॉम्प्ट, आवाज़ें, लॉग्स — सेटिंग्स के ऊपर-दाईं ओर मौजूद \"उन्नत\" टॉगल के पीछे मिलती हैं। इस गाइड को सहायता से कभी भी दोबारा देखें।"
+        "content": "ज़रूरी विकल्प खोजने के लिए सेटिंग्स के टैब इस्तेमाल करें। सहायता से यह गाइड दोबारा देख सकते हैं।"
       },
       "reading-aids": {
         "title": "Reading aids",
@@ -1523,7 +1523,7 @@
         "content": "Worth knowing before you start:",
         "typed": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
         "coach": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-        "share": "Another device can use this computer's models: Advanced → Provider → Share with other devices."
+        "share": "Another device can use this computer's models: Settings → Provider → Share with other devices."
       }
     }
   },

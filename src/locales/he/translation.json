@@ -1492,7 +1492,7 @@
         "title": "הגדרות הספק",
         "content": "שנה את המפתח שלך או החלף ספק כאן.",
         "content_pending": "הדבק כאן את מפתח ה-API שלך. \"התחל\" נפתח ברגע שהמפתח מאומת.",
-        "content_kotomimi": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Advanced → Provider this computer's models can also be shared with another device."
+        "content_kotomimi": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device."
       },
       "models": {
         "title": "מודלים",
@@ -1508,7 +1508,7 @@
       },
       "done": {
         "title": "זה הכל",
-        "content": "הגדרות מתקדמות — זיהוי פעילות קולית, פרומפטים, קולות, יומנים — נמצאות מאחורי מתג \"מתקדם\" בפינה הימנית העליונה של ההגדרות. אפשר לצפות במדריך הזה שוב בכל עת מתוך עזרה."
+        "content": "אפשר למצוא את האפשרויות בלשוניות ההגדרות. ניתן להציג שוב את המדריך דרך העזרה."
       },
       "reading-aids": {
         "title": "Reading aids",
@@ -1523,7 +1523,7 @@
         "content": "Worth knowing before you start:",
         "typed": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
         "coach": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-        "share": "Another device can use this computer's models: Advanced → Provider → Share with other devices."
+        "share": "Another device can use this computer's models: Settings → Provider → Share with other devices."
       }
     }
   },

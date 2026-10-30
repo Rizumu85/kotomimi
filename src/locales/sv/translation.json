@@ -1492,7 +1492,7 @@
         "title": "Leverantörsinställningar",
         "content": "Ändra din nyckel eller byt leverantör här.",
         "content_pending": "Klistra in din API-nyckel här. Starta-knappen låses upp så snart den valideras.",
-        "content_kotomimi": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Advanced → Provider this computer's models can also be shared with another device."
+        "content_kotomimi": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device."
       },
       "models": {
         "title": "Modeller",
@@ -1508,7 +1508,7 @@
       },
       "done": {
         "title": "Det var allt",
-        "content": "Avancerade inställningar — taldetektering, promptar, röster, loggar — finns bakom reglaget Avancerat uppe till höger i Inställningar. Spela upp den här guiden igen när som helst från Hjälp."
+        "content": "Hitta det du behöver via flikarna i Inställningar. Du kan öppna den här guiden igen via Hjälp."
       },
       "reading-aids": {
         "title": "Reading aids",
@@ -1523,7 +1523,7 @@
         "content": "Worth knowing before you start:",
         "typed": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
         "coach": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-        "share": "Another device can use this computer's models: Advanced → Provider → Share with other devices."
+        "share": "Another device can use this computer's models: Settings → Provider → Share with other devices."
       }
     }
   },

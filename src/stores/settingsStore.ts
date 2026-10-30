@@ -161,7 +161,7 @@ const defaultCommonSettings: CommonSettings = {
   // that registers it (Stage 2 deletion, choice 4).
   provider: Provider.OPENAI,
   uiLanguage: 'en',
-  uiMode: 'basic',
+  uiMode: 'advanced',
   // Dark is a default, not a migration: a user who never picks keeps today's look (R1).
   theme: 'dark',
   textOnly: false,
@@ -437,11 +437,8 @@ const useSettingsStore = create<SettingsStore>()(
       await service.setSetting('settings.common.uiLanguage', uiLanguage);
     },
 
-    setUIMode: async (uiMode) => {
-      set({uiMode});
-      const service = ServiceFactory.getSettingsService();
-      await service.setSetting('settings.common.uiMode', uiMode);
-    },
+    // Compatibility action for old callers; settings now have one categorized layout.
+    setUIMode: async (_uiMode) => { set({ uiMode: 'advanced' }); },
 
     setTextOnly: async (textOnly) => {
       const previous = get().textOnly;
@@ -685,7 +682,8 @@ const useSettingsStore = create<SettingsStore>()(
         // Load common settings
         const provider = await service.getSetting('settings.common.provider', defaultCommonSettings.provider);
         const uiLanguage = await service.getSetting('settings.common.uiLanguage', defaultCommonSettings.uiLanguage);
-        const uiMode = await service.getSetting('settings.common.uiMode', defaultCommonSettings.uiMode);
+        // Keep the old persisted key intact for setupMigration, but never restore the retired layout.
+        const uiMode = 'advanced' as const;
         // A value outside the three (a hand edit, a downgrade) falls to the default.
         const storedTheme = await service.getSetting<unknown>('settings.common.theme', defaultCommonSettings.theme);
         const theme = isThemeSetting(storedTheme) ? storedTheme : defaultCommonSettings.theme;

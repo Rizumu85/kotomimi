@@ -18,10 +18,7 @@ export function useStartBasicsTour(): () => void {
   const { isSignedIn } = useAuth();
   const { start } = useTour();
   return useCallback(() => {
-    // Every caller, not just the one that happens to hold a toggle: Help lives
-    // in the settings panel, and SimpleSettings renders HelpSection without a
-    // `toggleSettings` prop, so the panel would sit open under the tour it just
-    // restarted. Steps that need the panel reopen it in their own `prepare`.
+    // Close the panel before restarting; each step opens its required category.
     useLayoutStore.getState().setShowSettings(false);
     const s = useSettingsStore.getState();
     // Fork: whether the Kotomimi provider runs a stage on this computer, from its own settings.
