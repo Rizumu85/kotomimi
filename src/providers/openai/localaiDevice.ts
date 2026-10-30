@@ -18,7 +18,7 @@ import type { EngineSlot, LanguagePair } from '../../lib/provider/types';
 import { AUTO } from '../../lib/provider/languages';
 import { useModelStore } from '../../stores/modelStore';
 import { serverBilingual } from './serverRecognizers';
-import type { LocalAIModel } from './localaiModels';
+import { KOTOMIMI_HOST, type LocalAIModel } from './localaiModels';
 
 /** What the model manifest calls a language: its base (`zh-CN` → `zh`). */
 export const deviceLanguage = (code: string): string => code.split('-')[0];
@@ -128,6 +128,13 @@ type Listed = ReadonlyArray<object>;
 export const serverDetects = (models: Listed): boolean => (models as ReadonlyArray<{ kind?: string; languages?: readonly string[] }>).some((m) => m.kind === 'asr' && m.languages?.includes(AUTO) === true);
 
 /**
+ * Another Kotomimi lists a recognizer that does not name the language. It is
+ * told this leg's own source, transcribes, and the client's writing/text
+ * detector names each finished sentence — the same best effort as here.
+ */
+export const serverSoft = (models: Listed): boolean => (models as ReadonlyArray<{ kind?: string; host?: string }>).some((m) => m.kind === 'asr' && m.host === KOTOMIMI_HOST);
+
+/**
  * The other side's language is left to be detected, and what hears can do
  * that. Anywhere else the choice counts for nothing: the leg is told the
  * pair's language, and the language section says so.
@@ -146,7 +153,7 @@ export const detectsOther = (s: { asrDetectOther?: boolean; asrVia: Place; asrHe
  */
 export function canDetectOther(s: { asrVia: Place; asrHere?: AsrHere; asrOther?: string }, models: Listed = []): boolean {
   const place = hearingPlace(s);
-  if (place === 'server') return serverDetects(models);
+  if (place === 'server') return serverDetects(models) || serverSoft(models);
   // This computer, or an API: the recognizer's language, else the writing, else the detector.
   return true;
 }

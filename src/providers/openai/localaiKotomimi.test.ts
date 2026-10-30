@@ -102,7 +102,7 @@ describe('another Kotomimi\'s model lists', () => {
 });
 
 describe('a leg another Kotomimi hears', () => {
-  it('refuses an explicitly selected Apple pair when the host is old or lacks either language', async () => {
+  it('hears an explicitly selected Apple pair as a best effort when the host is old or lacks either language', async () => {
     const pair = { source: 'en', target: 'fr' };
     const offered: SharedModel[] = ['en', 'fr'].map((language) => ({ id: `apple-speech:${language}`, kind: 'asr', languages: [language], bilingual: true }));
     for (const asr of [offered.map(({ bilingual: _, ...m }) => m), offered.slice(0, 1)]) {
@@ -110,19 +110,19 @@ describe('a leg another Kotomimi hears', () => {
       const fetch = vi.fn(async (input: RequestInfo | URL) => json(String(input).endsWith('/capabilities') ? capabilityList(all) : modelList(all)));
       const s = settings({ asrModel: 'apple-speech', speakBoth: true });
       const result = await createLocalAICheck({ fetch })(K, s, { pair, legs: ['speaker'] });
-      expect(result).toMatchObject({ ok: false, code: 'server_no_bilingual' });
+      expect(result).toMatchObject({ ok: true });
       const models = result.models ?? [];
-      expect(buildLocalAI({ ...SPEAKER, direction: pair }, s, { ...shared, models, reversed: () => false })).toMatchObject({ code: 'server_no_bilingual' });
-      expect(localaiLanguages.detection?.(s, models, pair).both).toMatchObject({ on: false, available: false });
+      expect(buildLocalAI({ ...SPEAKER, direction: pair }, s, { ...shared, models, reversed: () => false })).toMatchObject({ stages: { heard: 'auto' } });
+      expect(localaiLanguages.detection?.(s, models, pair).both).toMatchObject({ on: true, available: true });
     }
   });
 
-  it('exposes the bilingual toggle for a paired host without advertising open-ended detection', () => {
+  it('exposes both toggles for a paired host: bilingual is exact, open-ended detection is a best effort', () => {
     const pair = { source: 'en', target: 'fr' };
     const models: LocalAIModel[] = ['en', 'fr'].map((language) => ({ id: `apple-speech:${language}`, host: 'kotomimi', kind: 'asr', languages: [language], bilingual: true }));
     const controls = localaiLanguages.detection?.(settings({ asrModel: 'apple-speech', speakBoth: true }), models, pair);
     expect(controls?.both).toMatchObject({ on: true, available: true });
-    expect(controls?.other).toMatchObject({ on: false, available: false });
+    expect(controls?.other).toMatchObject({ on: false, available: true });
     expect(controls?.both.turn(true)).toEqual({ speakBoth: true });
   });
 

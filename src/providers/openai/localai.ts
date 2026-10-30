@@ -66,7 +66,7 @@ import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
 import { recognizerAsked, serverBilingual } from './serverRecognizers';
 import { phoneBase, plainAddress } from '../../lib/lan/discover';
-import { ASR_HERES, canDetectOther, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
+import { ASR_HERES, canDetectOther, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsByLocalServer, hearsNatively, needsServer, serverDetects, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
 import { NATIVE_MODELS, preferNative, type NativePick } from './localaiNative';
 import { NATIVE_DEFAULT_MODEL, appleAlso, coachBaseUrl, coachGap, coachIdle, coachUp, hearingPick, holdNativeForRun, nativeEither, nativeGap, nativeUp, restNative, translatorUp, nativeWaits, nativeIdle, nativeModelFor, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_COACH_EXTRA, NATIVE_COACHES, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
@@ -1331,12 +1331,17 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   // translate or classify them by their script before that decision (English and French share one, for example).
   if (stages && (remotePair || device?.native?.either)) stages = { ...stages, requiresLanguage: true };
 
+  // Another Kotomimi whose recognizer does not name the language is told this leg's own source; `identify.ts` names the rest.
+  const serverHeard = heard === AUTO && hearingPlace(s) === 'server' && !serverDetects(models)
+    ? asked.direction.source
+    : heard;
+
   return {
     ...config,
     model,
     modalities: ['text'],
     // This computer's LocalAI is told its recognizer through its pipeline, before the socket opens: the session names none.
-    transcription: remotePair ? { ...remotePair, language: remotePair.languages[0] } : transcriptionFor(s, heard, Boolean(stages?.speech) || plain || hearsLocal, kotomimi && !hearsLocal, models),
+    transcription: remotePair ? { ...remotePair, language: remotePair.languages[0] } : transcriptionFor(s, serverHeard, Boolean(stages?.speech) || plain || hearsLocal, kotomimi && !hearsLocal, models),
     anchor: false,
     commitAnswers: true,
     ...((stages?.speech || plain) && !device ? { transcribeOnly: true as const } : {}),

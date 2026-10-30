@@ -218,6 +218,7 @@ describe('the other side\u2019s language left to be detected, heard by another K
     const built = buildLocalAI(THEIRS, s, { ...SHARED, reversed, models: listing(['ja', 'zh']) });
     if ('refused' in built) throw new Error(built.refused);
     expect(built.transcription).toEqual({ model: 'apple-speech:ja', language: 'ja' });
-    expect(built.stages?.heard).toBeUndefined();
+    // Another Kotomimi that lists no "auto" is still a best effort: the client names each sentence.
+    expect(built.stages?.heard).toBe('auto');
   });
 });
