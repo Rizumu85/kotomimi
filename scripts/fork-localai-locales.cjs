@@ -154,18 +154,6 @@ const PROVIDER = {
   browse: ['Model library', '模型库', '模型庫'],
   hears: ['Recognizes {{language}}', '识别{{language}}', '辨識{{language}}'],
   hearsEither: ['Recognizes {{first}} or {{second}}', '识别{{first}}或{{second}}', '辨識{{first}}或{{second}}'],
-  // Under the app's own models, on a computer in a mainland China time zone only: what to expect, and nothing of why.
-  farSource: ['These models are stored overseas: a download may be very slow or fail.', '这些模型存放在海外，下载可能很慢或失败。', '這些模型存放在海外，下載可能很慢或失敗。'],
-  farSourceRest: [
-    'These models are stored overseas: a download may be very slow or fail. The recommended ones above are not affected.',
-    '这些模型存放在海外，下载可能很慢或失败。上面推荐的不受影响。',
-    '這些模型存放在海外，下載可能很慢或失敗。上面推薦的不受影響。',
-  ],
-  chatModelsNoGpu: [
-    'These models need a graphics card with WebGPU, which this computer does not offer. Use another device or an API model for the feedback.',
-    '这些模型需要支持 WebGPU 的显卡，这台电脑没有。语法反馈请改用另一台设备或 API 模型。',
-    '這些模型需要支援 WebGPU 的顯示卡，這台電腦沒有。文法回饋請改用另一台裝置或 API 模型。',
-  ],
 
   // Speech recognition.
   hearStage: ['Speech recognition', '语音识别', '語音辨識'],
@@ -180,25 +168,13 @@ const PROVIDER = {
     '現在連的是那台裝置上的 LocalAI 本身：翻譯或文法回饋另選了模型時，它只用自己預設的辨識模型。改連那台裝置上的 Kotomimi，就能在這裡選辨識模型。',
   ],
   serverSilent: [
-    'This address does not answer. A Kotomimi on that device lends its models, and its LocalAI\'s, through its own sharing.',
-    '这个地址连不上。那台设备上的 Kotomimi 会通过自己的共享提供模型（包括它的 LocalAI 里的）。',
-    '這個位址連不上。那台裝置上的 Kotomimi 會透過自己的共享提供模型（包括它的 LocalAI 裡的）。',
+    "This address does not answer. If Kotomimi is running on that device, enable its sharing to use its installed native models.",
+    "这个地址连不上。如果那台设备正在运行 Kotomimi，请开启共享，以使用它已安装的原生模型。",
+    "這個位址連不上。如果那台裝置正在執行 Kotomimi，請開啟共享，以使用它已安裝的原生模型。",
   ],
-  // Under "this computer": the LocalAI installed here, as one more choice in the model's own menu (`LocalAIHere`).
-  hereLocalAI: ['LocalAI (on this computer)', 'LocalAI（这台电脑上的）', 'LocalAI（這台電腦上的）'],
-  hereApp: ['Models Kotomimi downloaded', 'Kotomimi 下载的模型', 'Kotomimi 下載的模型'],
-  // The model menus' groups: every menu of "this computer" has the same three.
+  // Native model menus.
   groupNative: ['Native engine', '原生引擎', '原生引擎'],
-  groupApp: ['The app\'s own models', '应用自带的模型', '應用程式內建的模型'],
-  groupOther: ['Other', '其他', '其他'],
-  appAuto: ['Chosen automatically', '自动选择', '自動選擇'],
-  hereModel: ['LocalAI\'s model', 'LocalAI 的模型', 'LocalAI 的模型'],
-  hereModelOwn: ['LocalAI\'s own choice', '由 LocalAI 决定', '由 LocalAI 決定'],
   hereModelPick: ['Choose a model', '请选择模型', '請選擇模型'],
-  hereStopped: ['LocalAI is not running.', 'LocalAI 没有在运行。', 'LocalAI 沒有在執行。'],
-  hereStarting: ['Starting LocalAI…', '正在启动 LocalAI…', '正在啟動 LocalAI…'],
-  hereAbsent: ['No LocalAI was found on this computer.', '这台电脑上没有找到 LocalAI。', '這台電腦上沒有找到 LocalAI。'],
-  hereStart: ['Start LocalAI', '启动 LocalAI', '啟動 LocalAI'],
   hereDown: [
     'The LocalAI on this computer is not running yet. Start it in the stage\'s card — or, if Kotomimi has only just opened, give it a moment.',
     '这台电脑的 LocalAI 还没有运行。在环节卡片里点「启动 LocalAI」；如果刚打开 Kotomimi，稍等一会儿它就会起来。',
@@ -426,9 +402,9 @@ const PROVIDER = {
   ],
   tag_native: ['Native engine', '原生引擎', '原生引擎'],
   tagHint_native: [
-    "Runs on the graphics card in an engine the app downloads with it: quicker than the app's own way. Loaded when a session starts (about half a minute the first time after the computer boots) and freed a minute after it ends.",
-    "由应用一并下载的独立引擎用显卡运行，比应用自带的方式快。开始会话时加载（开机后第一次约半分钟），结束一分钟后释放显存。",
-    "由應用程式一併下載的獨立引擎用顯示卡執行，比應用程式內建的方式快。開始工作階段時載入（開機後第一次約半分鐘），結束一分鐘後釋放顯示記憶體。",
+    "Runs on the graphics card using a native engine downloaded with the model. Loads when a session starts; the first start after boot may take about half a minute. Memory is released after the engine is no longer in use.",
+    "通过与模型一起下载的原生引擎使用显卡运行。开始会话时加载，开机后首次启动可能需要约半分钟。引擎不再被使用后会释放内存。",
+    "透過與模型一起下載的原生引擎使用顯示卡執行。開始工作階段時載入，開機後首次啟動可能需要約半分鐘。引擎不再被使用後會釋放記憶體。",
   ],
   nativeLoading: ['Loading the models… About half a minute the first time after the computer boots.', '正在加载模型…开机后第一次大约要半分钟。', '正在載入模型…開機後第一次大約要半分鐘。'],
   tag_system: ['Built into macOS', '系统自带', '系統內建'],

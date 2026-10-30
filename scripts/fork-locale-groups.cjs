@@ -156,9 +156,9 @@ module.exports = {
     ],
     device: ['This computer', '这台电脑', '這台電腦'],
     deviceDesc: [
-      'Speech recognition runs right here, on models the app downloads; translation uses the online translator until you download a model for it. Nothing else is needed; a GPU helps.',
-      '语音识别用应用下载的模型在本机运行；翻译先用在线翻译，下载翻译模型后也能在本机完成。不需要别的设备；有独立显卡会更快。',
-      '語音辨識用應用程式下載的模型在本機執行；翻譯先用線上翻譯，下載翻譯模型後也能在本機完成。不需要別的裝置；有獨立顯示卡會更快。',
+      "Recognition and translation run on this computer using native models. Download a model for each stage before starting.",
+      "识别和翻译使用原生模型在这台电脑上运行。开始前，需要为两个环节分别下载模型。",
+      "辨識與翻譯使用原生模型在這台電腦上執行。開始前，需要為兩個環節分別下載模型。",
     ],
     share: ['This computer, for my other devices', '这台电脑给其他设备用', '這台電腦給其他裝置用'],
     shareDesc: [
@@ -192,9 +192,9 @@ module.exports = {
     serverUnreachable: ['Could not connect: {{message}}', '连接不上：{{message}}', '連線不上：{{message}}'],
     pendingAddress: ['No device chosen yet — choose one in Settings before you start.', '还没有选另一台设备。开始之前请到设置里选好。', '還沒有選另一台裝置。開始之前請到設定裡選好。'],
     deviceNotice: [
-      'Nothing to enter. After setup, download a speech recognition model in the Speech recognition card in Settings — the tour shows where. Translation works at once with the online translator, and offline models can be downloaded too.',
-      '这里不用填任何东西。向导结束后，在设置的「语音识别」卡片里下载一个模型，引导会指给你看。翻译默认用在线翻译，马上可用，也可以再下载离线模型。',
-      '這裡不用填任何東西。精靈結束後，在設定的「語音辨識」卡片裡下載一個模型，導覽會指給你看。翻譯預設用線上翻譯，馬上可用，也可以再下載離線模型。',
+      "After setup, open Model library in the Speech recognition and Translation cards and download a native model for each. Translation requires a downloaded model, or you can switch that stage to an API model or another device.",
+      "设置完成后，在「语音识别」和「翻译」卡片中打开「模型库」，分别下载原生模型。翻译需要已下载的模型，也可以把翻译环节改用 API 模型或另一台设备。",
+      "設定完成後，在「語音辨識」和「翻譯」卡片中開啟「模型庫」，分別下載原生模型。翻譯需要已下載的模型，也可以將翻譯環節改用 API 模型或另一台裝置。",
     ],
   },
   // Adding a model from Hugging Face (`src/components/CustomModels`).
@@ -341,42 +341,6 @@ module.exports = {
       '使用耳機即可切斷回路；或者在「設定 → 麥克風」裡調高麥克風啟用閾值。',
     ],
   },
-  // The LocalAI installed on this computer, run by the app (`src/components/LanSharing/LocalServerCard.tsx`).
-  server: {
-    title: ['LocalAI on this computer', '这台电脑上的 LocalAI', '這台電腦上的 LocalAI'],
-    tooltip: [
-      "A LocalAI is installed on this computer. Kotomimi starts and stops it; choose its models in the cards above, under \"This computer\". With sharing on, they are lent to other devices too.",
-      "这台电脑装了 LocalAI，由 Kotomimi 负责启动和停止。上面各环节选「这台电脑」时可以选它的模型；打开共享后，它的模型也一起借给别的设备。",
-      "這台電腦裝了 LocalAI，由 Kotomimi 負責啟動和停止。上面各環節選「這台電腦」時可以選它的模型；開啟共享後，它的模型也一起借給別的裝置。",
-    ],
-    stopped: ['Not running', '未启动', '未啟動'],
-    starting: ['Starting…', '正在启动…', '正在啟動…'],
-    running: ['Running · {{count}} model(s)', '运行中 · {{count}} 个模型', '執行中 · {{count}} 個模型'],
-    external: ['Running · {{count}} model(s) · started by another program', '运行中 · {{count}} 个模型 · 由其他程序启动', '執行中 · {{count}} 個模型 · 由其他程式啟動'],
-    failed: ['It would not start', '启动失败', '啟動失敗'],
-    start: ['Start', '启动', '啟動'],
-    stop: ['Stop', '停止', '停止'],
-    autoStart: ['Start it when Kotomimi opens', '打开 Kotomimi 时自动启动', '開啟 Kotomimi 時自動啟動'],
-    externalNote: [
-      'Kotomimi did not start it — another program did — so it cannot be stopped from here, and its models are not unloaded when idle. To let Kotomimi run it, quit that program, then come back and press Start.',
-      '它不是 Kotomimi 启动的，而是别的程序启动的，所以这里不能停止它，空闲的模型也不会自动卸载。想让 Kotomimi 来管，先退出那个程序，再回到这里点「启动」。',
-      '它不是 Kotomimi 啟動的，而是別的程式啟動的，所以這裡不能停止它，閒置的模型也不會自動卸載。想讓 Kotomimi 來管，先結束那個程式，再回到這裡按「啟動」。',
-    ],
-    openPage: ['Open LocalAI\'s page to install or remove models', '打开 LocalAI 的页面，安装或删除模型', '開啟 LocalAI 的頁面，安裝或刪除模型'],
-    lastWords: ['What LocalAI said last', 'LocalAI 最后的输出', 'LocalAI 最後的輸出'],
-    pipelineTitle: [
-      'What another device gets when it does not choose',
-      '别的设备没指定模型时用哪个',
-      '別的裝置沒指定模型時用哪個',
-    ],
-    pipelineSwitching: ['Switching…', '正在切换…', '正在切換…'],
-    pipelineFailed: ['Could not switch: {{message}}', '切换失败：{{message}}', '切換失敗：{{message}}'],
-    pipelineNote: [
-      'A device that leaves the model to this computer gets these two. One that names a recognizer changes the first by itself. A change takes effect from the next session.',
-      '别的设备把模型留给这台电脑决定时，用的就是这两个。对方指定了识别模型时，第一个会自动跟着换。改动从下一次会话开始生效。',
-      '別的裝置把模型留給這台電腦決定時，用的就是這兩個。對方指定了辨識模型時，第一個會自動跟著換。改動從下一次工作階段開始生效。',
-    ],
-  },
   lan: {
     title: ['Share with other devices', '共享给其他设备', '共享給其他裝置'],
     tooltip: [
@@ -402,7 +366,6 @@ module.exports = {
       '共享的模型 · {{count}} 个',
       '共享的模型 · {{count}} 個',
     ],
-    fromLocalAI: ['From this computer\'s LocalAI ({{id}})', '来自这台电脑的 LocalAI（{{id}}）', '來自這台電腦的 LocalAI（{{id}}）'],
     sessionIdle: [
       'The other device ended the session: nobody had spoken for a long while, and it let its models go. Start again to continue.',
       '另一台设备结束了这次会话：太久没有人说话，它把模型从内存里释放了。重新点「开始」就能继续。',

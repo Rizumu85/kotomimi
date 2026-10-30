@@ -52,11 +52,14 @@ describe("the fork's instructions name what the screen shows", () => {
 });
 
 describe("the wizard's card for this computer", () => {
-  it('says the translation starts online, as the step under it does: the card is chosen to keep things here', () => {
-    // Chosen, the translation runs on this computer, and with no model downloaded yet that is the online translator (`bing-translator`).
-    for (const [lang, online] of [['en', 'online translator'], ['zh_CN', '在线翻译'], ['zh_TW', '線上翻譯']] as const) {
-      expect(at(CATALOGS[lang], 'fork.wizard.deviceNotice'), lang).toContain(online);
-      expect(at(CATALOGS[lang], 'fork.wizard.deviceDesc'), lang).toContain(online);
+  it('requires native downloads instead of promising an automatic online translator', () => {
+    for (const [lang, native, download, online] of [['en', 'native model', 'download', 'online translator'], ['zh_CN', '原生模型', '下载', '在线翻译'], ['zh_TW', '原生模型', '下載', '線上翻譯']] as const) {
+      for (const key of ['fork.wizard.deviceNotice', 'fork.wizard.deviceDesc']) {
+        const copy = at(CATALOGS[lang], key);
+        expect(copy, `${lang} ${key}`).toContain(native);
+        expect(copy.toLowerCase(), `${lang} ${key}`).toContain(download);
+        expect(copy, `${lang} ${key}`).not.toContain(online);
+      }
     }
   });
 });
