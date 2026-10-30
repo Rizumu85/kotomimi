@@ -37,16 +37,54 @@ A selected recognizer that does not report transcript language can remain select
 
 ## Recognition and compatibility
 
-The native helper uses `SpeechAnalyzer` and `SpeechTranscriber`. It already analyzes each utterance with two locale-specific candidates and selects one using transcription confidence, with a small tie margin and the same audio source's previous successful language as a tie preference. The two sources do not share this preference.
+The native helper uses `SpeechAnalyzer` and `SpeechTranscriber`. It analyzes each utterance with two locale-specific candidates. A locale-specific recognizer can also transcribe the other language, so its requested locale alone does not prove the spoken language. When both sufficiently long candidate texts independently agree on a language with high confidence, macOS Natural Language selects the matching candidate. Otherwise, transcription confidence selects the candidate, with a small tie margin and the same audio source's previous successful language as a tie preference. The two sources do not share this preference. The text check runs locally using the system framework and requires no additional model download.
 
 The LAN protocol advertises `bilingual` with the installed Apple Speech models. A session requests `languages: [A, B]`, confirms the pair in `session.updated`, and returns the actual language with each final transcript. The Windows pipeline displays provisional words but waits for the final language before translating or choosing feedback. An unsupported pair or unconfirmed negotiation is an error rather than a silent switch to single-language recognition.
 
 The integration currently maps Chinese, Japanese, English, Korean, Spanish, French, German, Italian, Portuguese, Hindi, and Cantonese. The Mac's runtime inventory determines which of these are actually available. Regional variants use the integration's existing locale mapping. This is a selected pair, not unrestricted automatic detection of every language.
 
-Switching languages between utterances is supported. Mixed-language speech inside one uninterrupted utterance still yields one winning candidate and one language. Similar-sounding short phrases and names may remain ambiguous; confidence comparison across models is a heuristic, not an accuracy guarantee. The helper creates fast and final listeners for each candidate, so simultaneous sources increase its workload.
+Switching languages between utterances is supported. Mixed-language speech inside one uninterrupted utterance still yields one winning candidate and one language. Similar-sounding short phrases and names may remain ambiguous; text identification and confidence comparison across models are heuristics, not accuracy guarantees. The helper creates fast and final listeners for each candidate, so simultaneous sources increase its workload.
 
 ## Validation on the actual devices
 
 Automated tests exercise configuration, LAN negotiation, transcript language transport, routing, source-isolated preferences, failure recovery, and VRChat output with simulated recognition. They do not measure Apple Speech accuracy or latency on a Mac.
+
+On a Mac, `bash native/apple-speech/verify.sh` runs the candidate-selection regression cases against the real Natural Language framework, including the measured English-as-Chinese failure, same-script French text, ambiguous short text, and conflicting candidates. Build the complete helper with `bash native/apple-speech/build.sh`.
+
+### Repeatable two-device acceptance
+
+`src/providers/openai/kotomimi.bilingual.live.test.ts` runs the real client provider, readiness check, pipeline, and network transport against a Mac sharing actual models. It is skipped unless the host and both audio files are explicitly supplied. It does not capture a live microphone or operate the UI.
+
+The Mac must run the current bilingual-capable host, have Apple Speech assets for both languages, and share the translation and feedback models named below. An older host may pass ordinary recognition tests but omit `bilingual` from `/v1/models/capabilities`; that does not verify paired recognition.
+
+Prepare one clear utterance in your own language and one in the practiced language as 24 kHz, mono, PCM16 WAV files. For the defaults below, use Chinese and English respectively. The practiced utterance can contain a simple grammar error. On Windows, run from the repository root:
+
+```powershell
+$env:KOTOMIMI_BILINGUAL_LIVE = '192.168.1.20:8790' # Replace with the Mac's sharing address.
+$env:KOTOMIMI_NATIVE_LANGUAGE = 'zh-CN'
+$env:KOTOMIMI_PRACTICE_LANGUAGE = 'en'
+$env:KOTOMIMI_NATIVE_WAV = 'C:\test-audio\native.wav'
+$env:KOTOMIMI_PRACTICE_WAV = 'C:\test-audio\practice.wav'
+$env:KOTOMIMI_TRANSLATOR = 'index-translate-2b'
+$env:KOTOMIMI_COACH = 'gemma-4-e2b'
+npx vitest run src/providers/openai/kotomimi.bilingual.live.test.ts --disable-console-intercept
+```
+
+If sharing requires a key, supply it through `KOTOMIMI_LIVE_KEY`. `KOTOMIMI_TYPED_TEXT` overrides the default English typed sentence when testing another practiced language. Changing the language pair also requires matching installed Apple Speech assets and WAV contents.
+
+The two cases verify:
+
+- Practice speech produces separate, completed translation and feedback results attached to the same source utterance. Subsequent native speech and typed text translate without adding feedback.
+- Simultaneous speaker and participant streams keep their language results separate. The participant's native-language speech is shown without redundant translation; switching that source to the practiced language produces a translation without feedback.
+
+Sessions stop in `finally`, including when an assertion fails. Review the printed transcripts and answers as well as the pass/fail result: the assertions check routing and result ownership, not translation quality. For ordinary typed, automatic-turn, and manual-turn checks, use the separate `kotomimi.live.test.ts` with its documented `KOTOMIMI_LIVE*` variables.
+
+### Recorded acceptance: 2026-10-30
+
+A Windows client passed both bilingual cases and all three ordinary live cases against an isolated current-source Electron host on macOS 27.0.1, using Apple Speech (Chinese/English), Index-Translate 2B, and Gemma 4 E2B. Inputs were synthesized WAV fixtures streamed in real time. The English practice sentence produced a Chinese translation and a separate past-tense correction; Chinese speech produced only an English translation. Simultaneous source routing and participant language switching also passed.
+
+The first bilingual run failed because both locale-specific recognizers returned English, but the confidence tie selected the Chinese locale. The final-candidate text check fixes that reproduced case. These results cover real network and native inference, not microphone capture, UI rendering, VRChat capture/chatbox output, broader language-pair accuracy, or a packaged release. The installed Mac application was not replaced, and the isolated test host was stopped after verification.
+
+### Manual application walkthrough
 
 For a hardware check, use a pair such as English/French as well as the intended everyday pair. On both audio sources, alternate languages between sentences; then overlap the two sources briefly. Verify that your microphone's language choice does not change the other source's preference. With both options enabled, a practice sentence should produce a translation and private feedback, while a sentence in your own language should produce only a translation. Check the conversation, subtitle, and chatbox separately, including when feedback arrives slowly. Finally test silence, a short ambiguous phrase, and a sentence containing words from both languages to assess the recognizer's practical limits.

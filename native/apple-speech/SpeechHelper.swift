@@ -89,8 +89,8 @@ private final class Listener {
 }
 
 /// Kotomimi: what shows while someone speaks, of a stream that hears one language or two: the quick text so far of
-/// the preferred language, unless the other's is surer of itself by more than a tie — as the kept text is chosen, so
-/// that what shows does not go back and forth between the two while each has a word or two.
+/// the preferred language, unless the other's is surer of itself by more than a tie, so that what shows does not
+/// go back and forth between the two while each has a word or two. Text-language agreement is checked at finalization.
 @MainActor
 private final class Shown {
     private var now: [SpeechHelper.Settled?]
@@ -176,7 +176,7 @@ struct SpeechHelper {
     }
 
     /// Kotomimi: within this much of each other, two languages' confidences say nothing: the one preferred is taken.
-    static let tie = 0.05
+    static let tie = SpeechPairSelection.tie
 
     /// The text a recognizer settled on, and how sure it was of it (its characters' mean confidence; -1 for none).
     struct Settled { var text = ""; var weighted = 0.0; var chars = 0
@@ -190,8 +190,8 @@ struct SpeechHelper {
     }
 
     /// Kotomimi: `also`, a second language the same speech may be in (a speaker who speaks both): each language has
-    /// its two recognizers, and what is kept is the text of the one surer of itself — within `tie`, `prefer`'s (the
-    /// language of the speaker's sentence before), else the first — given with its language (`final`'s `locale`).
+    /// its two recognizers. Clear text-language agreement selects the matching candidate; otherwise speech
+    /// confidence wins, with `prefer` breaking ties. See `SpeechPairSelection` for the conservative text check.
     /// What shows meanwhile is the quick text of the one surer so far. Nothing settles before the end then (no
     /// `delta`): which language a sentence was in is known only once it is all heard.
     static func stream(_ identifier: String, also: String? = nil, prefer: String? = nil, keep: Set<String> = [], order: [String] = []) async throws {
@@ -279,11 +279,9 @@ struct SpeechHelper {
             }
             var heard: [Settled] = []
             for task in kept { heard.append(try await task.value) }
-            var chosen = 0
-            if both {
-                let other = 1 - preferred
-                chosen = heard[other].confidence > heard[preferred].confidence + tie ? other : preferred
-            }
+            let chosen = SpeechPairSelection.choose(heard.enumerated().map { at, candidate in
+                SpeechCandidate(text: candidate.text, confidence: candidate.confidence, locale: locales[at])
+            }, preferred: preferred)
             try emit(["type": "final", "text": heard[chosen].text, "locale": locales[chosen].identifier])
         } catch {
             for listener in listeners { await listener.analyzer.cancelAndFinishNow() }

@@ -235,8 +235,8 @@ function createAppleSpeech(deps = {}) {
   /**
    * A live recognition opened for the page: its id, or null where it cannot be — no such language, or sound at
    * another rate than the recognizer's. Kotomimi: `also`, a second language the speech may be in (a speaker who speaks
-   * both): heard in both, the text of the one surer of itself kept, and said with its language (`done`'s `language`);
-   * on a tie, `prefer`, when it is one of the two languages.
+   * both): heard in both, then the helper selects a candidate using text-language agreement and speech confidence.
+   * It reports that candidate's language; on an unresolved tie, `prefer` is used when it is one of the two languages.
    */
   function openStream({ language, also, prefer, sampleRate } = {}) {
     const locale = localeFor(language);

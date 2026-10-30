@@ -17,7 +17,7 @@ DEST="../../resources/bin/darwin-arm64/Kotomimi Speech Helper.app"
 rm -rf out "$DEST"
 mkdir -p "out/Kotomimi Speech Helper.app/Contents/MacOS"
 cp Info.plist "out/Kotomimi Speech Helper.app/Contents/Info.plist"
-if ! swiftc -O -parse-as-library -target arm64-apple-macosx26.0 SpeechHelper.swift -o "out/Kotomimi Speech Helper.app/Contents/MacOS/speech-helper"; then
+if ! swiftc -O -parse-as-library -target arm64-apple-macosx26.0 SpeechHelper.swift SpeechPairSelection.swift -o "out/Kotomimi Speech Helper.app/Contents/MacOS/speech-helper"; then
   echo "BUILD SKIPPED: the speech helper needs the macOS 26 SDK; the app will not offer the system's recognizer."
   exit 0
 fi
