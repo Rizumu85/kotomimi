@@ -79,6 +79,14 @@ describe('the registry', () => {
     expect(released.PROVIDERS.map((p) => p.id)).not.toContain('fake_leased');
   });
 
+  it.each(['electron', 'web', 'extension'] as const)('retains LocalInference in the registry but offers it only outside desktop (%s)', (platform) => {
+    expect(getProvider('localInference')).toBeDefined();
+    for (const dev of [false, true]) {
+      const offered = presentProviders({ platform, dev, enabled: new Set(['localInference']), kizuna: true, switchOn: () => true });
+      expect(offered.some((p) => p.id === 'localInference')).toBe(platform !== 'electron');
+    }
+  });
+
   it("a release build offers no flagged provider and, without the umbrella, no managed one (D24 release check, F6)", () => {
     for (const platform of ['electron', 'extension', 'web'] as const) {
       for (const p of presentProviders({ platform, dev: false, enabled: new Set(), kizuna: false, switchOn: () => false })) {
@@ -152,7 +160,7 @@ describe('the invariants every provider meets (F17)', () => {
       soniox: ['region'],
       palabraai: ['authMode'],
       // Fork: LocalAI Realtime — what decides its key fields, the other servers its check reaches, and the models a start needs named.
-      localai: ['asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'asrOther', 'asrOtherModel', 'translateOther', 'translateOtherModel', 'coachOther', 'coachOtherModel', 'asrDetectOther', 'speakBoth', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'coachDeviceModel', 'serverNeedsKey', 'selections', 'model', 'translateModel', 'translateServerModel', 'coachModel', 'coachServerModel', 'asrHere', 'translateHere', 'coachHere', 'asrNativeModel', 'asrNativeByLanguage', 'translateNativeModel', 'coachNativeModel'],
+      localai: ['asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'asrOther', 'asrOtherModel', 'translateOther', 'translateOtherModel', 'coachOther', 'coachOtherModel', 'asrDetectOther', 'speakBoth', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'serverNeedsKey', 'model', 'translateModel', 'translateServerModel', 'coachModel', 'coachServerModel', 'asrHere', 'translateHere', 'coachHere', 'asrNativeModel', 'asrNativeByLanguage', 'translateNativeModel', 'coachNativeModel'],
     });
   });
 

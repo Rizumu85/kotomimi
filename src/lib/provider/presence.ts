@@ -23,6 +23,8 @@ export function isPresent(
   env: PresenceEnv,
 ): boolean {
   if (!p.platforms.includes(env.platform)) return false;
+  // Kotomimi desktop uses its native stages; retain upstream LocalInference for web and extension.
+  if (env.platform === 'electron' && p.id === 'localInference') return false;
   if (p.kind === 'managed' && !env.kizuna) return false;
   if (!p.flagged || env.dev || env.enabled.has(p.id)) return true;
   return p.testerSwitch !== undefined && env.switchOn(p.testerSwitch);

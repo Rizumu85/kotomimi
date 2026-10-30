@@ -22,6 +22,7 @@ vi.mock('../services/ServiceFactory', () => ({
 }));
 
 import { settleReports } from '../lib/diagnostics/report';
+import { selectedFromStores } from '../lib/session/appShape';
 import { localInferenceProvider } from '../providers/localInference/provider';
 import { kizunaSonioxProvider } from '../providers/soniox/kizuna';
 import { sonioxProvider } from '../providers/soniox/provider';
@@ -31,6 +32,7 @@ import { useProviderStore } from '../stores/providerStore';
 import { useRoutingStore } from '../stores/routingStore';
 import { useSegmentationStore } from '../stores/segmentationStore';
 import { useTurnModeStore } from '../stores/turnModeStore';
+import * as environment from '../utils/environment';
 import { loadSelectedProvider, loadSessionStores } from './loadStores';
 
 const providersBefore = useProviderStore.getState();
@@ -53,6 +55,47 @@ afterEach(() => {
 });
 
 describe('loadSessionStores', () => {
+  it.each([
+    ['local_inference', null],
+    ['localInference', null],
+    ['local_inference', 'localInference'],
+    ['localInference', 'localInference'],
+  ])('restores desktop selection from %s (in memory: %s) to Kotomimi without rewriting saved settings', async (saved, selected) => {
+    vi.spyOn(environment, 'getEnvironment').mockReturnValue('electron');
+    stored.set('settings.common.provider', saved);
+    stored.set('settings.common.turnMode', 'push-to-talk');
+    stored.set('settings.common.sourceLanguage', 'ja');
+    stored.set('settings.common.targetLanguage', 'en');
+    stored.set(`settings.${localInferenceProvider.settings.key}.ttsSpeed`, 1.25);
+    const settingsBefore = new Map(stored);
+    useSegmentationStore.setState({ refresh: vi.fn(async () => {}) });
+    // Even a previously loaded upstream entry must not become a desktop run.
+    await useProviderStore.getState().load(localInferenceProvider);
+    useProviderStore.setState({ selected });
+    expect(selectedFromStores()).toBeNull();
+
+    await loadSessionStores();
+
+    expect(useProviderStore.getState().selected).toBe('localai');
+    expect(useProviderStore.getState().entries.localai).toBeDefined();
+    expect(selectedFromStores()?.provider.id).toBe('localai');
+    expect(stored).toEqual(settingsBefore);
+    expect(setSetting).not.toHaveBeenCalled();
+  });
+
+  it.each(['web', 'extension'] as const)('still restores LocalInference on %s', async (platform) => {
+    vi.spyOn(environment, 'getEnvironment').mockReturnValue(platform);
+    stored.set('settings.common.provider', 'local_inference');
+    stored.set('settings.common.turnMode', 'push-to-talk');
+    useSegmentationStore.setState({ refresh: vi.fn(async () => {}) });
+
+    await loadSessionStores();
+
+    expect(useProviderStore.getState().selected).toBe('localInference');
+    expect(selectedFromStores()?.provider).toBe(localInferenceProvider);
+    expect(setSetting).not.toHaveBeenCalled();
+  });
+
   it('loads the turn mode, the routing switches, the punctuation pack, and selects the first offered provider in memory — writing nothing', async () => {
     stored.set('settings.common.turnMode', 'push-to-talk');
     stored.set('settings.routing.meeting', false);
