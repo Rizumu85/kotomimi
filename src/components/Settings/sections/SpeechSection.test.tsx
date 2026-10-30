@@ -1,7 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent, within } from '@testing-library/react';
-import { resolve } from 'node:path';
-import { compile } from 'sass';
 
 const { trackEvent } = vi.hoisted(() => ({ trackEvent: vi.fn() }));
 vi.mock('../../../lib/analytics', () => ({ useAnalytics: () => ({ trackEvent }) }));
@@ -45,13 +43,11 @@ vi.mock('../../../lib/local-inference/modelManifest', async (importOriginal) => 
 
 import { FAKE_DEFAULTS } from '../../../providers/fake/settings';
 import { LOCAL_INFERENCE_DEFAULTS } from '../../../providers/localInference/settings';
-import { presentProviders } from '../../../providers/registry';
 import useAudioStore from '../../../stores/audioStore';
 import { useModelStore } from '../../../stores/modelStore';
 import { useProviderStore } from '../../../stores/providerStore';
 import { useSettingsStore } from '../../../stores/settingsStore';
 import { useTurnModeStore } from '../../../stores/turnModeStore';
-import { ProviderTurnDetectionControls } from '../../providers/ProviderOwnSettings';
 import { OutputToggles, SpeechSection } from './SpeechSection';
 
 const entry = () => ({ settings: FAKE_DEFAULTS, credentials: {}, pair: { source: 'auto', target: 'en' } });
@@ -120,7 +116,7 @@ describe('SpeechSection', () => {
 
   it('clicking the active mode does nothing', () => {
     render(<SpeechSection locked={false} />);
-    fireEvent.click(screen.getByText('Auto'));
+    fireEvent.click(screen.getByRole('button', { name: 'Auto', exact: true }));
     expect(trackEvent).not.toHaveBeenCalled();
     expect(useTurnModeStore.getState().turnMode).toBe('auto');
   });
@@ -141,133 +137,69 @@ describe('SpeechSection', () => {
   });
 });
 
-describe("SpeechSection — the provider's turn-detection tuning", () => {
-  const SUMMARY = 'VAD Settings · Min Silence Duration: 1.40s';
-  const section = (container: HTMLElement) => container.querySelector('#turn-detection-section')!;
-  const sliders = (container: HTMLElement) => section(container).querySelectorAll('input[type="range"]');
-  const link = (container: HTMLElement) => section(container).querySelector<HTMLButtonElement>('button.turn-detection-link');
-  const target = () => useSettingsStore.getState().settingsNavigationTarget;
+describe("SpeechSection — automatic speech detection", () => {
+  const disclosure = () => screen.getByRole('button', { name: /Speech detection/ });
 
-  // The Controls live on Advanced's Provider tab: in both layouts the row
-  // links there instead of opening them in place.
-  it.each(['simple', 'advanced'] as const)("%s, Auto: the summary below the turn modes is a link to the Provider tab's block — no disclosure, no controls here", (_layout) => {
+  it('starts collapsed and expands controls in place without navigating', () => {
     const { container } = render(<SpeechSection locked={false} />);
-    const button = link(container)!;
-    expect(button).toBeTruthy();
-    expect(button.textContent).toBe(SUMMARY);
-    // Below the three turn-mode buttons.
-    const turnModes = section(container).querySelector('.turn-detection-options')!;
-    // eslint-disable-next-line no-bitwise
-    expect(turnModes.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(section(container).querySelector('[aria-expanded]')).toBeNull();
-    expect(sliders(container)).toHaveLength(0);
+    const button = disclosure();
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+    const panel = document.getElementById(button.getAttribute('aria-controls')!)!;
+    expect(panel).not.toBeVisible();
+    fireEvent.click(button);
+    expect(button).toHaveAttribute('aria-expanded', 'true');
+    expect(panel).toBeVisible();
+    expect(panel.querySelectorAll('input[type="range"]').length).toBeGreaterThanOrEqual(3);
+    expect(container.querySelector('#turn-detection-section')!.contains(panel)).toBe(true);
+    expect(useSettingsStore.getState().settingsNavigationTarget).toBeNull();
+    fireEvent.click(button);
+    expect(panel).not.toBeVisible();
   });
 
-  it('Advanced: the link navigates and leaves the compatibility state alone', () => {
-    const setUIMode = vi.fn();
-    useSettingsStore.setState({ uiMode: 'advanced', setUIMode } as Partial<ReturnType<typeof useSettingsStore.getState>>);
+  it('edits the current provider and updates the collapsed summary', () => {
     const { container } = render(<SpeechSection locked={false} />);
-    fireEvent.click(link(container)!);
-    expect(target()).toBe('turn-detection-tuning');
-    expect(setUIMode).not.toHaveBeenCalled();
-    expect(trackEvent).not.toHaveBeenCalled();
-    expect(sliders(container)).toHaveLength(0);
-  });
-
-  // The heading's tooltip sits on the row itself, in both layouts.
-  it.each(['simple', 'advanced'] as const)('the row carries the VAD settings tooltip (%s)', (_layout) => {
-    render(<SpeechSection locked={false} />);
-    expect(tooltipContents).toContain(
-      'Voice Activity Detection parameters. Controls how speech segments are detected and split. Changes take effect on next session start.',
-    );
-  });
-
-  // The Provider tab's block and this row read the same entry.
-  it("a change on the Provider tab's block goes to the provider's settings, and the summary follows", () => {
-    const { container } = render(
-      <>
-        <SpeechSection locked={false} />
-        <ProviderTurnDetectionControls providers={presentProviders()} />
-      </>,
-    );
+    fireEvent.click(disclosure());
     const block = container.querySelector<HTMLElement>('#turn-detection-tuning-section')!;
-    const minSilence = within(block).getByText('Min Silence Duration').closest('.setting-item')!.querySelector('input[type="range"]')!;
-    fireEvent.change(minSilence, { target: { value: '0.5' } });
+    const slider = within(block).getByText('Min Silence Duration').closest('.setting-item')!.querySelector('input[type="range"]')!;
+    fireEvent.change(slider, { target: { value: '0.5' } });
     expect((useProviderStore.getState().entries.localInference.settings as typeof LOCAL_INFERENCE_DEFAULTS).vadMinSilenceDuration).toBe(0.5);
-    expect(link(container)!.textContent).toBe('VAD Settings · Min Silence Duration: 0.50s');
+    fireEvent.click(disclosure());
+    expect(disclosure()).toHaveTextContent('0.50s');
   });
 
-  it.each([
-    ['push-to-talk', 'simple'],
-    ['push-to-talk', 'advanced'],
-    ['push-to-translate', 'simple'],
-    ['push-to-translate', 'advanced'],
-  ] as const)('%s (%s): no summary and no link', (turnMode, _layout) => {
-    useTurnModeStore.setState({ turnMode });
-    const { container } = render(<SpeechSection locked={false} />);
-    expect(screen.queryByText(SUMMARY)).toBeNull();
-    expect(link(container)).toBeNull();
-    expect(sliders(container)).toHaveLength(0);
+  it.each(['push-to-talk', 'push-to-translate'] as const)('%s hides the tuning and returning to Auto collapses it', (mode) => {
+    render(<SpeechSection locked={false} />);
+    fireEvent.click(disclosure());
+    fireEvent.click(screen.getByText(mode === 'push-to-talk' ? 'Push-to-Talk' : 'Push-to-Translate'));
+    expect(screen.queryByRole('button', { name: /Speech detection/ })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Auto', exact: true }));
+    expect(disclosure()).toHaveAttribute('aria-expanded', 'false');
   });
 
-  it.each(['simple', 'advanced'] as const)('a provider without TurnDetection shows neither (%s)', (_layout) => {
+  it('a provider without tuning shows no disclosure', () => {
     useProviderStore.setState({ selected: 'fake', entries: { fake: entry() } });
-    const { container } = render(<SpeechSection locked={false} />);
-    expect(screen.queryByText(/VAD Settings/)).toBeNull();
-    expect(link(container)).toBeNull();
-    expect(sliders(container)).toHaveLength(0);
+    render(<SpeechSection locked={false} />);
+    expect(screen.queryByRole('button', { name: /Speech detection/ })).toBeNull();
   });
 
-  // The link only navigates; it changes nothing, so a run leaves it working —
-  // the Controls it leads to are what the lock disables.
-  it('locked leaves the link enabled, and it still navigates', () => {
+  it('a session permits inspection while preventing parameter changes', () => {
     const { container } = render(<SpeechSection locked={true} />);
-    const button = link(container)!;
-    expect(button).not.toBeDisabled();
-    fireEvent.click(button);
-    expect(target()).toBe('turn-detection-tuning');
+    expect(disclosure()).not.toBeDisabled();
+    fireEvent.click(disclosure());
+    const sliders = container.querySelectorAll('#turn-detection-tuning-section input[type="range"]');
+    expect(sliders.length).toBeGreaterThanOrEqual(3);
+    for (const slider of sliders) expect(slider).toBeDisabled();
   });
 
-  it('locked, legacy: the link still switches to Advanced and navigates, tracked as during the session', () => {
-    const setUIMode = vi.fn();
-    useSettingsStore.setState({ uiMode: 'basic', setUIMode } as Partial<ReturnType<typeof useSettingsStore.getState>>);
-    const { container } = render(<SpeechSection locked={true} />);
-    const button = link(container)!;
-    expect(button).not.toBeDisabled();
-    fireEvent.click(button);
-    expect(setUIMode).not.toHaveBeenCalled();
-    expect(target()).toBe('turn-detection-tuning');
-    expect(trackEvent).not.toHaveBeenCalled();
+  it('a direct tuning target expands the controls', () => {
+    useSettingsStore.setState({ settingsNavigationTarget: 'turn-detection-tuning' });
+    render(<SpeechSection locked={false} />);
+    expect(disclosure()).toHaveAttribute('aria-expanded', 'true');
   });
 
-  // Endpoint detection replaces VAD on a streaming ASR with no worker type:
-  // the provider's Summary renders nothing, and the row it would sit in must
-  // go with it — else Advanced shows an empty link.
-  // The row is the section's; hiding it is the stylesheet's job, so this is
-  // asserted in two halves: the summary element is empty in the real DOM,
-  // and the compiled Settings.scss hides a row whose summary is empty.
-  it.each(['simple', 'advanced'] as const)('nothing to tune (a streaming ASR with no worker type, %s): the row is hidden', (_layout) => {
-    asr.entry = { type: 'asr-stream', asrWorkerType: undefined };
-    const { container } = render(<SpeechSection locked={false} />);
-    expect(screen.queryByText(/VAD Settings/)).toBeNull();
-    const summary = section(container).querySelector('.turn-detection-summary')!;
-    expect(summary).toBeTruthy();
-    expect(summary.childNodes).toHaveLength(0);
-    const row = summary.closest('.turn-detection-tuning')!;
-    expect(row).toBeTruthy();
-    expect(row.closest('.config-section')).toBe(section(container));
-
-    const { css } = compile(resolve(__dirname, '../Settings.scss'));
-    expect(css).toMatch(/\.config-section \.turn-detection-tuning:has\(\.turn-detection-summary:empty\)[^{]*\{\s*display:\s*none;/);
-  });
-
-  // The row is the section's last child and has no control under its label,
-  // so neither it nor the label keeps a bottom margin: the space above the
-  // next divider is the section's own padding-bottom, as everywhere else.
-  it('the row keeps no bottom margin of its own (compiled Settings.scss)', () => {
-    const { css } = compile(resolve(__dirname, '../Settings.scss'));
-    expect(css).toMatch(/\.config-section \.setting-item\.turn-detection-tuning,\s*\.settings-section \.setting-item\.turn-detection-tuning\s*\{[^}]*margin-bottom:\s*0;/);
-    expect(css).toMatch(/\.config-section \.setting-item\.turn-detection-tuning \.setting-label,\s*\.settings-section \.setting-item\.turn-detection-tuning \.setting-label\s*\{[^}]*margin-bottom:\s*0;/);
+  it('keeps the provider help beside the disclosure', () => {
+    render(<SpeechSection locked={false} />);
+    expect(tooltipContents).toContain('Voice Activity Detection parameters. Controls how speech segments are detected and split. Changes take effect on next session start.');
   });
 });
 

@@ -1,16 +1,17 @@
-import { Mic } from 'lucide-react';
-import { useMemo } from 'react';
+import { ChevronRight, Mic } from 'lucide-react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Tooltip from '../../Tooltip/Tooltip';
 import ToggleSwitch from '../shared/ToggleSwitch';
 import { ownProps, useSelectedProvider } from '../../providers/useSelectedProvider';
+import { ProviderTurnDetectionControls } from '../../providers/ProviderOwnSettings';
 import { useAnalytics } from '../../../lib/analytics';
 import { storedProviderValue } from '../../../lib/session/storedSettings';
 import type { TurnMode } from '../../../lib/session/types';
 import { presentProviders } from '../../../providers/registry';
 import { useMode } from '../../../stores/audioStore';
 import { useProviderStore } from '../../../stores/providerStore';
-import { useKeepReplayAudio, useNavigateToSettings, useSetKeepReplayAudio, useSetTextOnly, useTextOnly } from '../../../stores/settingsStore';
+import { useKeepReplayAudio, useSettingsNavigationTarget, useSetKeepReplayAudio, useSetTextOnly, useTextOnly } from '../../../stores/settingsStore';
 import { useTurnModeStore } from '../../../stores/turnModeStore';
 import { effectiveTextOnly } from '../../../utils/effectiveTextOnly';
 
@@ -51,30 +52,38 @@ export function TurnModeControl({ locked }: { locked: boolean }) {
   );
 }
 
-/** The automatic-detection summary links to its controls in the Provider category. */
+/** Provider-owned tuning, disclosed in place under automatic speech mode. */
 function ProviderTurnDetection({ locked }: { locked: boolean }) {
-  const turnMode = useTurnModeStore((s) => s.turnMode);
+  const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
+  const controlsId = useId();
   const providers = useMemo(() => presentProviders(), []);
   const selection = useSelectedProvider(providers);
-  const navigateToSettings = useNavigateToSettings();
+  const target = useSettingsNavigationTarget();
+  useEffect(() => {
+    if (target === 'turn-detection-tuning') setExpanded(true);
+  }, [target]);
 
-  if (turnMode !== 'auto' || !selection?.entry) return null;
+  if (!selection?.entry) return null;
   const tuning = selection.provider.TurnDetection;
   if (!tuning) return null;
   const { Summary, Help } = tuning;
   const props = ownProps(selection, selection.entry, locked);
 
-  const openControls = () => {
-    navigateToSettings('turn-detection-tuning');
-  };
-
   return (
     <div className="setting-item turn-detection-tuning">
       <div className="setting-label">
-        <button type="button" className="turn-detection-summary turn-detection-link" onClick={openControls}>
-          <Summary {...props} />
+        <button type="button" className="turn-detection-disclosure" aria-expanded={expanded} aria-controls={controlsId} onClick={() => setExpanded(!expanded)}>
+          <ChevronRight size={16} aria-hidden="true" />
+          <span className="turn-detection-labels">
+            <span>{t('fork.speechDetection.title', 'Speech detection')}</span>
+            <span className="turn-detection-summary"><Summary {...props} /></span>
+          </span>
         </button>
         {Help && <Help {...props} />}
+      </div>
+      <div id={controlsId} hidden={!expanded} className="turn-detection-controls">
+        <ProviderTurnDetectionControls providers={providers} disabled={locked} />
       </div>
     </div>
   );
@@ -84,10 +93,12 @@ function ProviderTurnDetection({ locked }: { locked: boolean }) {
  * The global turn mode's own section (1e-3b-2 ruling 6). Its tooltip is
  * provider-neutral (Stage 2 Soniox, ruling 8): what ends an utterance under
  * Auto is each provider's own detection. The turn modes come first, then
- * that detection's tuning — linked to the Provider category.
+ * that detection's tuning — collapsed by default in the Audio category.
  */
 export function SpeechSection({ locked }: { locked: boolean }) {
   const { t } = useTranslation();
+  const turnMode = useTurnModeStore((s) => s.turnMode);
+  const selected = useProviderStore((s) => s.selected);
   const tooltip = `${t('settings.speechModeTooltip', 'Auto: the provider detects when you have finished speaking. \nPush-to-Talk: hold Space or the mic button to send audio manually. \nPush-to-Translate: like Push-to-Talk, but routes your raw mic to the virtual mic when idle so you can speak directly without translation.')}\n\n${t('settings.speechModeAppliesToAuto', "Applies to your voice. Other's audio always uses the provider's automatic detection.")}`;
   return (
     <div className="config-section turn-detection-section" id="turn-detection-section">
@@ -97,7 +108,7 @@ export function SpeechSection({ locked }: { locked: boolean }) {
         <Tooltip content={tooltip} position="top" icon="help" />
       </h3>
       <TurnModeControl locked={locked} />
-      <ProviderTurnDetection locked={locked} />
+      {turnMode === 'auto' && <ProviderTurnDetection key={selected} locked={locked} />}
     </div>
   );
 }

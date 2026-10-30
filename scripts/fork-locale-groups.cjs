@@ -3,6 +3,9 @@
  * `fork-localai-locales.cjs`, each string as [English, Simplified Chinese, Traditional Chinese] or a locale-keyed record.
  */
 module.exports = {
+  speechDetection: {
+    title: ['Speech detection', '语音检测', '語音偵測'],
+  },
   // The tour's fork steps and copy (`src/components/Tour/steps.ts`): written under `tour.steps.<id>`, beside upstream's own, not under `fork`.
   tour: {
     done: {

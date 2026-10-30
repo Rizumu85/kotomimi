@@ -165,20 +165,14 @@ describe('ProviderTurnDetectionControls', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  // Controls with nothing to tune (LocalInference on a streaming ASR with no
-  // worker type) leave the host's wrapper empty. It is the tab's last child
-  // then, so the section before it is no longer `:last-child` and would keep
-  // its divider at the bottom of the tab: the stylesheet hides the empty
-  // wrapper and gives that section the `:last-child` resets. Asserted in two
-  // halves, as the Speech section's own empty row is.
-  it("Controls that render nothing leave the wrapper empty, and the stylesheet hides it and resets the section before it", () => {
+  // Providers without adjustable parameters leave an empty hidden wrapper.
+  it("Controls that render nothing leave an empty hidden wrapper", () => {
     loaded();
     const { container } = render(<ProviderTurnDetectionControls providers={[withTurnDetection(() => null)]} />);
     expect(container.querySelector('#turn-detection-tuning-section')!.childNodes).toHaveLength(0);
 
     const { css } = compile(resolve(__dirname, '../Settings/Settings.scss'));
     expect(css).toMatch(/\.turn-detection-tuning-block:empty\s*\{\s*display:\s*none;/);
-    expect(css).toMatch(/\.config-section:has\(\+ \.turn-detection-tuning-block:empty\),\s*\.settings-section:has\(\+ \.turn-detection-tuning-block:empty\)\s*\{[^}]*border-bottom:\s*none;[^}]*margin-bottom:\s*0;[^}]*padding-bottom:\s*0;/);
   });
 
   // A plain wrapper, not a section: `.settings-section.highlight` does not

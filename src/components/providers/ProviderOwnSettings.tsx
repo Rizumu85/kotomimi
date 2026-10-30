@@ -38,13 +38,7 @@ export function ProviderOwnSettings({ providers, auth, disabled }: ProviderOwnSe
   return <Settings {...ownProps(selection, selection.entry, disabled)} account={account} legs={legs} preview={appVoicePreview} />;
 }
 
-/**
- * The selected provider's `TurnDetection` Controls, as their own block on
- * Advanced's Provider tab in every turn mode. The Speech section's summary
- * links here: `#turn-detection-tuning-section` is what Settings.tsx scrolls
- * to and highlights for the `'turn-detection-tuning'` target. Nothing when
- * the provider has no `TurnDetection`, or before its entry loads.
- */
+/** Provider-owned controls inside the Audio disclosure, with a stable deep-link target. */
 export function ProviderTurnDetectionControls({ providers, disabled }: ProviderOwnSettingsProps) {
   const selection = useSelectedProvider(providers);
   if (!selection?.entry) return null;

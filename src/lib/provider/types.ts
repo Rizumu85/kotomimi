@@ -297,10 +297,8 @@ export interface Provider<S, K extends { missing?: never } & object, C extends {
   EngineSummary?: ComponentType<EngineSummaryProps<S>>;
   /**
    * The provider's own tuning of automatic turn detection. The Summary is
-   * shown in the Speech section while the turn mode is Auto, in both layouts
-   * as a link to the Controls (from Simple it switches to Advanced first).
-   * The Controls live on Advanced's
-   * Provider tab, drawn by the host as their own block in every turn mode.
+   * shown in the Audio category while the turn mode is Auto, in a disclosure
+   * that starts collapsed. The Controls expand beneath it in the same section.
    * Each renders nothing while there is nothing to tune: the section then
    * shows no row at all, and the host's empty block is hidden.
    */
@@ -310,7 +308,7 @@ export interface Provider<S, K extends { missing?: never } & object, C extends {
     Controls: ComponentType<SettingsProps<S>>;
     /**
      * An explanatory tooltip trigger for the row, rendered by the section as
-     * a sibling right after the Summary/link — never nested inside the link
+     * a sibling right after the disclosure — never nested inside its
      * `<button>`, whose own click must not fire the trigger's.
      * Optional: a provider with nothing to explain omits it. Follows
      * `Summary`'s own rule — render nothing while there is nothing to tune.

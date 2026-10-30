@@ -45,30 +45,31 @@ afterEach(() => {
 
 describe("SpeechSection — the provider tuning row's help tooltip trigger", () => {
   // Help is a separate action from category navigation.
-  it.each(['simple', 'advanced'] as const)('%s: sits beside the link button, not inside it, and hovering or clicking it navigates nowhere', (_layout) => {
+  it('help sits outside the disclosure button and does not expand it', () => {
     const setUIMode = vi.fn();
     useSettingsStore.setState({ setUIMode } as Partial<ReturnType<typeof useSettingsStore.getState>>);
     const { container } = render(<SpeechSection locked={false} />);
     const row = container.querySelector('.turn-detection-tuning')!;
-    const button = row.querySelector('button.turn-detection-link') as HTMLElement;
+    const button = row.querySelector('button.turn-detection-disclosure') as HTMLElement;
     const trigger = row.querySelector('.tooltip-trigger') as HTMLElement;
     expect(button).toBeTruthy();
     expect(trigger).toBeTruthy();
 
-    // Not nested inside the link button.
+    // Not nested inside the disclosure button.
     expect(button.contains(trigger)).toBe(false);
     // A sibling positioned after it.
     // eslint-disable-next-line no-bitwise
     expect(button.compareDocumentPosition(trigger) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 
-    // The trigger is its own hover/click target: it must not also fire the
-    // link's navigation (nor, in Simple, its mode switch).
+    // The help trigger must not toggle the disclosure or navigate.
     fireEvent.mouseEnter(trigger);
     fireEvent.click(trigger);
     expect(useSettingsStore.getState().settingsNavigationTarget).toBeNull();
     expect(setUIMode).not.toHaveBeenCalled();
 
+    expect(button).toHaveAttribute('aria-expanded', 'false');
     fireEvent.click(button);
-    expect(useSettingsStore.getState().settingsNavigationTarget).toBe('turn-detection-tuning');
+    expect(button).toHaveAttribute('aria-expanded', 'true');
+    expect(useSettingsStore.getState().settingsNavigationTarget).toBeNull();
   });
 });

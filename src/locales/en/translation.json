@@ -1687,6 +1687,9 @@
     "pinyin": "Pinyin over Chinese",
     "echoCancellationApp": "Kotomimi only",
     "echoCancellationAppTooltip": "Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "speechDetection": {
+      "title": "Speech detection"
+    },
     "autostart": {
       "title": "Startup",
       "toggle": "Start in the background when I sign in to Windows",

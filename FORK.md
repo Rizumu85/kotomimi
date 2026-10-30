@@ -47,7 +47,7 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 
 Kotomimi has three independent stages: speech recognition, translation, and optional grammar feedback. Each stage can use **This computer**, **API model**, or **Another device**. Settings use one categorized layout: General, Audio, and Provider. Stage cards (`LocalAIAssist.tsx`) live in Provider.
 
-General places VRChat controls before font settings. Audio starts with Speech mode (Auto, Push-to-Talk, and Push-to-Translate), followed by audio devices. The speech-detection summary links to its provider-specific tuning in Provider.
+General places VRChat controls before font settings. Audio starts with Speech mode (Auto, Push-to-Talk, and Push-to-Translate), followed by audio devices. In Auto, Speech detection starts collapsed beneath the mode buttons and expands its provider-specific tuning in place. Manual modes hide this disclosure; returning to Auto collapses it again. Provider contains no duplicate tuning block. Active sessions allow inspection but keep parameters locked.
 
 For Kotomimi (`localai`), Audio hides the echo-cancellation picker and Original Audio Passthrough until translated speech output is supported. This only hides controls: saved preferences and audio processing remain intact. Speaker monitoring is last, after Other's audio. To restore the two controls after implementing and validating voice output, update `showVoiceOutputControls` in `AdvancedSettings.tsx`; the existing components, settings, and handlers are retained.
 

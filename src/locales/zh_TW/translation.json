@@ -1685,6 +1685,9 @@
     "pinyin": "中文上方顯示拼音",
     "echoCancellationApp": "僅 Kotomimi",
     "echoCancellationAppTooltip": "僅 Kotomimi — 只消掉 Kotomimi 自己播放的翻譯語音。麥克風是虛擬音效卡（VB-Cable、BlackHole 等）時選這一項。",
+    "speechDetection": {
+      "title": "語音偵測"
+    },
     "autostart": {
       "title": "啟動",
       "toggle": "登入 Windows 時在背景啟動",

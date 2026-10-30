@@ -47,8 +47,8 @@ const NAVIGATION_TAB_MAP: Record<string, string> = {
   'voice-settings': 'provider',
   // Speech mode lives at the top of the Audio category.
   'turn-detection': 'audio',
-  // The Speech section's summary link: `${target}-section` is the provider's speech-detection block (ProviderTurnDetectionControls).
-  'turn-detection-tuning': 'provider',
+  // A direct link also expands the speech-detection controls in Audio.
+  'turn-detection-tuning': 'audio',
   'model-management': 'provider',
   'model-asr': 'provider',
   'model-translation': 'provider',

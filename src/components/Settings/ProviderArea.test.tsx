@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 const { stored, setSetting } = vi.hoisted(() => {
   const stored = new Map<string, unknown>();
@@ -35,7 +35,6 @@ import { useProviderStore } from '../../stores/providerStore';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useTurnModeStore } from '../../stores/turnModeStore';
 import { SessionSettingsGeneral, SessionSettingsProvider } from './ProviderArea';
-import { SpeechSection } from './sections/SpeechSection';
 
 const entry = () => ({ settings: { ...LOCAL_INFERENCE_DEFAULTS }, credentials: {}, pair: { source: 'ja', target: 'en' } });
 
@@ -79,17 +78,7 @@ describe('SessionSettingsGeneral', () => {
     for (const select of screen.getAllByRole('combobox')) expect(select).toBeDisabled();
   });
 
-  it("Audio: the Speech section shows the tuning as a link to the Provider tab, with no sliders of its own", () => {
-    useTurnModeStore.setState({ turnMode: 'auto' });
-    useSettingsStore.setState({ settingsNavigationTarget: null });
-    const { container } = render(<SpeechSection locked={false} />);
-    const speech = container.querySelector('#turn-detection-section')!;
-    const button = speech.querySelector('button.turn-detection-link')!;
-    expect(button.textContent).toBe('VAD Settings · Min Silence Duration: 1.40s');
-    fireEvent.click(button);
-    expect(useSettingsStore.getState().settingsNavigationTarget).toBe('turn-detection-tuning');
-    expect(speech.querySelectorAll('input[type="range"]')).toHaveLength(0);
-  });
+
 });
 
 // Fork: on the Advanced layout the provider is drawn on its own page alone.
@@ -119,33 +108,9 @@ describe('SessionSettingsProvider', () => {
     expect(surface!.compareDocumentPosition(speed) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  // The provider's speech-detection Controls (its `TurnDetection`) are a block
-  // of their own after its own settings — where LocalInference's VAD sat
-  // before the Speech section summarized it — and the Speech section's link
-  // lands on `#turn-detection-tuning-section`.
-  it("renders LocalInference's VAD block, heading and sliders, after its own settings", () => {
+  it('keeps speech-detection controls out of the Provider category', () => {
     const { container } = render(<SessionSettingsProvider locked={false} />);
-    const block = container.querySelector<HTMLElement>('#turn-detection-tuning-section')!;
-    expect(block).toBeTruthy();
-    expect(block.querySelector('h2')?.textContent).toBe('VAD Settings');
-    expect(block.querySelectorAll('input[type="range"]').length).toBeGreaterThanOrEqual(3);
-    // eslint-disable-next-line no-bitwise
-    expect(screen.getByText('Speech Speed').compareDocumentPosition(block) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-  });
-
-  // Unlike the Speech section's summary, the block does not follow the turn
-  // mode: the knobs keep their values whatever mode is on.
-  it('renders the VAD block under push-to-talk too', () => {
-    useTurnModeStore.setState({ turnMode: 'push-to-talk' });
-    const { container } = render(<SessionSettingsProvider locked={false} />);
-    expect(container.querySelector('#turn-detection-tuning-section input[type="range"]')).toBeTruthy();
-  });
-
-  it('locked disables the VAD sliders', () => {
-    const { container } = render(<SessionSettingsProvider locked={true} />);
-    const sliders = container.querySelectorAll('#turn-detection-tuning-section input[type="range"]');
-    expect(sliders.length).toBeGreaterThanOrEqual(3);
-    for (const slider of sliders) expect(slider).toBeDisabled();
+    expect(container.querySelector('#turn-detection-tuning-section')).toBeNull();
   });
 
   it('a provider without TurnDetection renders no block', () => {

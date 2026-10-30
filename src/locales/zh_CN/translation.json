@@ -1685,6 +1685,9 @@
     "pinyin": "中文上方显示拼音",
     "echoCancellationApp": "仅 Kotomimi",
     "echoCancellationAppTooltip": "仅 Kotomimi — 只消掉 Kotomimi 自己播放的翻译语音。麦克风是虚拟声卡（VB-Cable、BlackHole 等）时选这一项。",
+    "speechDetection": {
+      "title": "语音检测"
+    },
     "autostart": {
       "title": "启动",
       "toggle": "登录 Windows 时在后台启动",

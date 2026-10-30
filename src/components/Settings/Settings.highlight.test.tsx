@@ -111,13 +111,12 @@ describe("Settings — the 'provider' navigation target switches tabs without fl
     expect(getByTestId('advanced-body')).toHaveAttribute('data-active-tab', 'audio');
   });
 
-  // The Speech section's summary link (Audio tab) lands on the provider's
-  // VAD block, which the Provider tab draws after the provider's own settings.
-  it("target='turn-detection-tuning' switches to the Provider tab and highlights the VAD block", () => {
+  // Direct tuning links land on the provider-owned controls in Audio.
+  it("target='turn-detection-tuning' switches to the Audio tab and highlights the VAD block", () => {
     mockTarget = 'turn-detection-tuning';
     const { getByTestId } = render(<Settings />);
 
-    expect(getByTestId('advanced-body')).toHaveAttribute('data-active-tab', 'provider');
+    expect(getByTestId('advanced-body')).toHaveAttribute('data-active-tab', 'audio');
     vi.advanceTimersByTime(200);
     expect(getByTestId('turn-detection-tuning-el').classList.contains('highlight')).toBe(true);
   });
