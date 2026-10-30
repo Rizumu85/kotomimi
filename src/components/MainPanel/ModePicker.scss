@@ -8,7 +8,7 @@
 //   - Each option fills with var --bg-secondary (#1a1a1a)
 //   - Options separated by border-right (not a gap)
 //   - Hover var --bg-hover (#252525)
-//   - Active tk.$color-primary-fill / tk.$color-on-primary
+//   - Active shared selection background / text
 //
 // Deviation from noise-suppression: NO font-weight change on active.
 // Active state is differentiated by bg + text color only — keeps segment
@@ -77,8 +77,7 @@
     }
 
     &--active {
-      background: tk.$color-primary-fill;
-      color: tk.$color-on-primary;
+      @include vars.state-selected-fill;
     }
 
     // Devices for this mode aren't configured yet. The ring is inset so it

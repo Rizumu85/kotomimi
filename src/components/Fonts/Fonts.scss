@@ -108,7 +108,8 @@
     font-size: 17px;
     line-height: 1.9;
     color: vars.$text-primary;
-    background: rgba(0, 0, 0, 0.25);
+    background: vars.$bg-font-preview;
+    box-shadow: inset 0 0 0 1px vars.$border-font-preview;
     border-radius: vars.$radius-md;
 
     // Its reading aids are always shown here, whatever the switches say: they are what the fonts are chosen for.

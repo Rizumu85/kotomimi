@@ -1,5 +1,16 @@
 # Light theme and the Appearance setting
 
+## Approved refinement — 2026-10-30
+
+The owner approved integrating the revised preview. This section supersedes the original light-palette values below; the original dark values and custom conversation/subtitle colors remain preserved.
+
+- **User confirmed:** neutral near-white surfaces, soft mint selected backgrounds with dark green labels, and brighter green for non-text indicators. Selected-tab underlines, sliders, and enabled switches use `control-accent`; links and small labels use the darker `primary` role.
+- **User confirmed:** font previews use a light reading surface and subtle outline instead of a fixed black overlay in light mode. Their font and reading-aid behavior is unchanged.
+- **User confirmed:** light scrollbars use transparent tracks and neutral gray thumbs, darkening on hover. Custom Chromium scrollbars suppress arrow buttons; the standards path uses thin scrollbars. Dark application scrollbars retain their previous styling.
+- **Implementation:** palette values live in `src/styles/theme.scss`; aliases live in `src/styles/_tokens.scss` and `src/components/Settings/shared/_variables.scss`. Selection backgrounds/text are separate from solid action colors, so primary actions, destructive actions, and status messages keep appropriate label contrast. Speech mode retains its original bright fill in dark mode through `speech-mode-bg`.
+- **Validation refinement:** the text accent is slightly deeper than the preview to pass the existing 4.5:1 checks on tinted surfaces. The approved bright non-text accent is preserved. New role checks cover selected text, the font sample, switch-thumb contrast, and scrollbar visibility.
+- **Representative surfaces:** General (font sample), Audio (speech mode, noise suppression, switches, scrollbars), and Provider/model compute-device selectors share these roles. The selected Soft graphite tooltip proportions remain intact.
+
 Status: implemented on branch `worktree-light-theme-design` (2026-10-22; plan `docs/superpowers/plans/2026-10-22-light-theme.md`), awaiting the owner's live test. Rulings R1 to R7 below.
 Rendered candidates: https://claude.ai/artifact/KBcQpzX5Xy9teefPcwCNDH (real compiled stylesheets on the components' real DOM; the harness that built it is described in §10 and was not kept).
 

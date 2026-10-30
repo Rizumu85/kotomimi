@@ -64,7 +64,7 @@
     box-sizing: border-box;
     padding: 5px 10px; cursor: pointer;
     &--ghost { background: transparent; border-color: transparent; color: vars.$text-muted; }
-    &--primary { @include vars.state-selected-fill; border-color: vars.$color-primary; }
+    &--primary { background: vars.$color-primary-fill; color: vars.$color-on-primary; border-color: vars.$color-primary; }
     &:focus-visible { @include vars.focus-ring; }
   }
 }

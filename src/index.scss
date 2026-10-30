@@ -1,4 +1,5 @@
 @use './styles/theme';
+@use './styles/scrollbar';
 
 // The UI font. The Latin stack ends at `sans-serif`; the CJK fonts after it
 // are reached only for glyphs nothing before them has. Without them a glyph

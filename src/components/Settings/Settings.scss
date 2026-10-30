@@ -465,7 +465,7 @@
         width: 14px;
         height: 14px;
         border-radius: 50%;
-        background: vars.$color-primary;
+        background: vars.$color-control-accent;
         cursor: pointer;
       }
 
@@ -473,7 +473,7 @@
         width: 14px;
         height: 14px;
         border-radius: 50%;
-        background: vars.$color-primary;
+        background: vars.$color-control-accent;
         cursor: pointer;
         border: none;
       }
@@ -517,7 +517,8 @@
         }
 
         &.active {
-          background-color: vars.$color-primary;
+          background-color: vars.$color-speech-mode-bg;
+          color: vars.$color-selection-text;
         }
 
         &:hover:not(.active):not(:disabled) {
@@ -1174,7 +1175,7 @@
       appearance: none;
       width: 16px;
       height: 16px;
-      background: vars.$color-primary;
+      background: vars.$color-control-accent;
       border-radius: 50%;
       cursor: pointer;
     }
@@ -1182,7 +1183,7 @@
     &::-moz-range-thumb {
       width: 16px;
       height: 16px;
-      background: vars.$color-primary;
+      background: vars.$color-control-accent;
       border-radius: 50%;
       cursor: pointer;
       border: none;
@@ -1528,7 +1529,7 @@
     background: vars.$text-muted;
     border: 1px solid transparent;
 
-    &--ready { background: vars.$color-primary; }
+    &--ready { background: vars.$color-control-accent; }
     // Hollow = "not actively wrong, just not there yet" (starting / not
     // installed) — an outline reads as pending, not filled colour states.
     &--hollow { background: transparent; border-color: vars.$text-muted; }
@@ -1743,8 +1744,7 @@
       }
 
       &.active {
-        background: vars.$color-primary-fill;
-        color: vars.$color-on-primary;
+        @include vars.state-selected-fill;
       }
 
       &:disabled {
@@ -2117,7 +2117,7 @@
 
   &::before {
     transform: translateX(9px);
-    background: vars.$text-primary;
+    background: vars.$white;
   }
 }
 
@@ -2326,8 +2326,7 @@
       }
 
       &.active {
-        background: tk.$color-primary-fill;
-        color: tk.$color-on-primary;
+        @include vars.state-selected-fill;
         font-weight: 500;
       }
     }

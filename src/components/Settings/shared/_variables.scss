@@ -18,6 +18,15 @@ $color-primary-hover: tk.$color-primary-hover;
 $color-primary-fill:  tk.$color-primary-fill;
 $color-primary-fill-hover: tk.$color-primary-fill-hover;
 $color-on-primary:    tk.$color-on-primary;
+$color-control-accent: tk.$color-control-accent;
+$color-selection-bg: tk.$color-selection-bg;
+$color-selection-text: tk.$color-selection-text;
+$color-speech-mode-bg: var(--sk-speech-mode-bg);
+$color-switch-label: var(--sk-switch-label);
+$bg-font-preview: var(--sk-font-preview-bg);
+$border-font-preview: var(--sk-font-preview-line);
+$scrollbar-thumb: var(--sk-scrollbar-thumb);
+$scrollbar-thumb-hover: var(--sk-scrollbar-thumb-hover);
 
 // Status
 $color-success: tk.$color-success;
@@ -137,7 +146,7 @@ $slider-track-height: 4px;
 $slider-track-bg:     $bg-elevated;
 $slider-track-radius: 2px;
 $slider-thumb-size:   16px;
-$slider-thumb-bg:     $color-primary;
+$slider-thumb-bg:     $color-control-accent;
 
 // --- Toggle --------------------------------------------------
 
@@ -145,7 +154,7 @@ $toggle-width:    40px;
 $toggle-height:   20px;
 $toggle-thumb:    16px;
 $toggle-bg-off:   $bg-elevated-hover;
-$toggle-bg-on:    $color-primary;
+$toggle-bg-on:    $color-control-accent;
 
 // --- Convenience Mixins --------------------------------------
 
@@ -188,15 +197,13 @@ $toggle-bg-on:    $color-primary;
 //   focus       → outline (focus-ring above; :focus-visible only)
 @mixin state-selected-underline {
   color: $color-primary;
-  border-bottom: 2px solid $color-primary;
+  border-bottom: 2px solid $color-control-accent;
 }
 
 @mixin state-selected-fill {
-  // The app's segmented → fill selection form. It is the accent *behind a
-  // label*, so it takes the fill value rather than the bright accent: a
-  // brighter accent cannot carry legible white text.
-  background: $color-primary-fill;
-  color: $color-on-primary;
+  // Selection is independent of solid actions and non-text indicators.
+  background: $color-selection-bg;
+  color: $color-selection-text;
 }
 
 // --- Selectable option row --------------------------------------

@@ -22,6 +22,9 @@ $color-primary-fill:       var(--sk-primary-fill);        // the accent when it 
 $color-primary-fill-hover: var(--sk-primary-fill-hover);
 $color-on-primary:         var(--sk-on-accent);           // that label
 $color-primary-hover:      var(--sk-primary-hover);
+$color-control-accent:     var(--sk-control-accent); // non-text indicators only
+$color-selection-bg:       var(--sk-selection-bg);
+$color-selection-text:     var(--sk-selection-text);
 
 // ── Who is speaking ──
 // A pair, and it only works as a pair: these two must stay clearly

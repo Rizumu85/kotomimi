@@ -75,6 +75,15 @@ const DARK_PINNED: Record<string, string> = {
   'line': '#444444', 'line-subtle': '#333333', 'line-strong': '#555555',
   'overlay-fg': '#ffffff', 'overlay-bg': '#000000', 'scrim': 'rgba(0,0,0,0.6)', 'shadow': 'rgba(0,0,0,0.3)', 'shadow-strong': 'rgba(0,0,0,0.5)',
   'primary': '#0fbb8f', 'primary-hover': '#0da77f', 'primary-fill': '#008261', 'primary-fill-hover': '#006e52',
+  'control-accent': '#0fbb8f',
+  'selection-bg': '#008261',
+  'selection-text': '#ffffff',
+  'speech-mode-bg': '#0fbb8f',
+  'switch-label': '#0fbb8f',
+  'font-preview-bg': 'rgba(0,0,0,0.25)',
+  'font-preview-line': 'transparent',
+  'scrollbar-thumb': '#777777',
+  'scrollbar-thumb-hover': '#999999',
   'speaker': 'var(--sk-primary)', 'speaker-fill': 'var(--sk-primary-fill)', 'speaker-person-3': '#005c45',
   'participant': '#f39c12', 'participant-person-2': '#f8c471', 'participant-person-3': '#ca6f1e',
   'success': '#10a37f', 'error': '#e74c3c', 'error-deep': '#c0392b', 'warning': '#ffc107', 'recommended': '#f59e0b',
@@ -86,6 +95,12 @@ const DARK_PINNED: Record<string, string> = {
 // Spec §7: the light block's floors, each role against the background it sits on.
 const SURFACES = ['bg-page', 'bg-surface', 'bg-control'];
 const LIGHT_FLOORS: [string, string, number][] = [
+  ['selection-text', 'selection-bg', 4.5],
+  ['selection-text', 'speech-mode-bg', 4.5],
+  ['text-primary', 'font-preview-bg', 4.5],
+  ['control-accent', 'bg-surface', 3],
+  ['white', 'control-accent', 3],
+  ['scrollbar-thumb', 'bg-surface', 3],
   ...['text-primary', 'text-secondary', 'text-tertiary', 'text-muted', 'text-source'].flatMap((fg) => SURFACES.map((bg): [string, string, number] => [fg, bg, 4.5])),
   ...['text-dim', 'toolbar-icon'].flatMap((fg) => SURFACES.map((bg): [string, string, number] => [fg, bg, 3])),
   ...['primary-fill', 'error', 'usage'].map((bg): [string, string, number] => ['on-accent', bg, 4.5]),
@@ -124,7 +139,7 @@ describe('theme.scss', () => {
     expect(names(LIGHT)).toEqual(names(DARK));
     expect(names(TONE_DARK)).toEqual(names(DARK));
     expect(names(TONE_LIGHT)).toEqual(names(DARK));
-    expect(names(DARK)).toHaveLength(51);
+    expect(names(DARK)).toHaveLength(Object.keys(DARK_PINNED).length);
   });
 
   it('sets color-scheme on the two root blocks only', () => {

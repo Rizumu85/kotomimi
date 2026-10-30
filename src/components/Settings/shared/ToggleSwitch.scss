@@ -28,7 +28,7 @@
       transition: color 0.2s;
 
       &.active {
-        color: vars.$color-primary;
+        color: vars.$color-switch-label;
         font-weight: vars.$weight-medium;
       }
     }
@@ -46,7 +46,7 @@
         height: 0;
 
         &:checked + .toggle-track {
-          background-color: vars.$color-primary;
+          background-color: vars.$color-control-accent;
 
           &:before {
             transform: translateX(20px);
