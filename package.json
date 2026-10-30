@@ -195,6 +195,7 @@
     "zustand": "^5.0.8"
   },
   "scripts": {
+    "make:beta": "node scripts/package-beta.js",
     "dev": "vite",
     "build": "vite build",
     "build:audio-host": "node scripts/build-audio-host.js",

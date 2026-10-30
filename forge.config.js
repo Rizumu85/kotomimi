@@ -244,3 +244,7 @@ module.exports = {
     }
   }
 };
+
+if (process.env.KOTOMIMI_BETA_VERSION) {
+  module.exports = require('./forge.beta.config')(module.exports);
+}

@@ -20,6 +20,8 @@ class UpdateManager {
     this.downloadPath = null;
     this._updateInfo = null;
     this._downloadPromise = null;
+    // Private beta installations must never install a stable-channel artifact.
+    this.isPrivateBeta = /-beta\./.test(app.getVersion?.() ?? '');
 
     // Disable auto-download — user must confirm
     autoUpdater.autoDownload = false;
@@ -98,6 +100,7 @@ class UpdateManager {
 
   _setupIpcHandlers() {
     ipcMain.handle('update-check', async () => {
+      if (this.isPrivateBeta) return this._betaUpdateUnavailable();
       try {
         await autoUpdater.checkForUpdates();
         return { success: true };
@@ -109,6 +112,7 @@ class UpdateManager {
     });
 
     ipcMain.handle('update-download', async () => {
+      if (this.isPrivateBeta) return this._betaUpdateUnavailable();
       if (!this._updateInfo) {
         this._sendStatus({ status: 'error', message: 'No update available to download' });
         return { success: false, error: 'No update available' };
@@ -175,6 +179,7 @@ class UpdateManager {
     });
 
     ipcMain.handle('update-install', async () => {
+      if (this.isPrivateBeta) return this._betaUpdateUnavailable();
       if (!this.downloadPath) {
         this._sendStatus({ status: 'error', message: 'No downloaded update to install' });
         return { success: false, error: 'No downloaded update' };
@@ -357,6 +362,7 @@ class UpdateManager {
    * Public method to check for updates (used by Help menu).
    */
   checkForUpdates() {
+    if (this.isPrivateBeta) return Promise.resolve(this._betaUpdateUnavailable());
     return autoUpdater.checkForUpdates().catch((err) => {
       console.error('Update check failed:', err);
       this._sendStatus({ status: 'error', message: err.message || String(err) });
@@ -368,12 +374,19 @@ class UpdateManager {
    * #10: Send error status to renderer on failure (consistent with manual check).
    */
   checkAfterDelay(delayMs = 5000) {
+    if (this.isPrivateBeta) return;
     setTimeout(() => {
       autoUpdater.checkForUpdates().catch((err) => {
         console.error('Startup update check failed:', err);
         this._sendStatus({ status: 'error', message: err.message || String(err) });
       });
     }, delayMs);
+  }
+
+  _betaUpdateUnavailable() {
+    const message = 'This private beta is updated by installing a new beta package.';
+    this._sendStatus({ status: 'error', message });
+    return { success: false, error: message };
   }
 }
 

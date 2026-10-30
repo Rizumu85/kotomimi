@@ -324,7 +324,7 @@ export default defineConfig(({ command, mode }) => {
       global: 'globalThis',
       // Define build target for Electron
       'import.meta.env.BUILD_TARGET': JSON.stringify('electron'),
-      __APP_VERSION__: JSON.stringify(pkg.version)
+      __APP_VERSION__: JSON.stringify(process.env.KOTOMIMI_BETA_VERSION || pkg.version)
     },
     css: {
       preprocessorOptions: {

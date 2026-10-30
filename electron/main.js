@@ -1,5 +1,12 @@
 const { app, BrowserWindow, ipcMain, Menu, dialog, shell, session, systemPreferences, nativeTheme } = require('electron');
 const path = require('path');
+// Set the beta profile before importing modules that construct persistent stores.
+const isBeta = /-beta\./.test(app.getVersion());
+const applicationName = isBeta ? 'kotomimi-beta' : 'kotomimi';
+if (isBeta) {
+  app.setName(applicationName);
+  app.setPath('userData', path.join(app.getPath('appData'), applicationName));
+}
 const { betterAuthAdapter, PACKAGED_ORIGIN } = require('./better-auth-adapter');
 const { setupSubtitleHandlers } = require('./subtitle-window.js');
 const { setupCaptionDoubleClick } = require('./window-caption-dblclick.js');
@@ -117,9 +124,10 @@ const {
 // Set application name for PulseAudio
 // Fork: Kotomimi is its own application — its own name, and so its own profile directory and
 // single-instance lock. It can be installed beside upstream Sokuji, and run while it runs.
-app.setName('kotomimi');
-app.commandLine.appendSwitch('application-name', 'kotomimi');
-app.commandLine.appendSwitch('jack-name', 'kotomimi');
+app.setName(applicationName);
+app.commandLine.appendSwitch('application-name', applicationName);
+app.commandLine.appendSwitch('jack-name', applicationName);
+if (process.platform === 'win32') app.setAppUserModelId(isBeta ? 'com.squirrel.KotomimiBeta.kotomimi-beta' : 'com.squirrel.Kotomimi.kotomimi');
 // Fork: on a Mac the app asks the system keychain for nothing. Chromium keeps a key there to encrypt its cookies with
 // ("kotomimi Safe Storage"), and macOS lets an app with no Apple team read it only after asking the person — again
 // after every update, since such an app is known by the hash of its program, which every build changes. Kotomimi
@@ -147,7 +155,7 @@ if (!app.isPackaged) {
  */
 (function adoptUpstreamProfile() {
   try {
-    if (app.commandLine.hasSwitch('user-data-dir') || (!app.isPackaged && process.env.KOTOMIMI_PROFILE)) return;
+    if (isBeta || app.commandLine.hasSwitch('user-data-dir') || (!app.isPackaged && process.env.KOTOMIMI_PROFILE)) return;
     const fs = require('fs');
     const mine = app.getPath('userData');
     const theirs = path.join(app.getPath('appData'), 'sokuji');
@@ -476,9 +484,7 @@ function createApplicationMenu() {
 
 function createWindow() {
   // Determine the correct icon path based on platform
-  const iconPath = process.platform === 'win32'
-    ? path.join(__dirname, '../assets/icon.ico')
-    : path.join(__dirname, '../assets/icon.png');
+  const iconPath = iconFile({ beta: isBeta, exists: (file) => require('fs').existsSync(file) });
 
   // Create the browser window
   const isDev = loadsDevServer();
@@ -493,7 +499,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    title: 'Kotomimi',
+    title: isBeta ? 'Kotomimi Beta' : 'Kotomimi',
     icon: iconPath,
     frame: false,
     transparent: true,
@@ -1381,7 +1387,8 @@ app.whenReady().then(() => {
     Tray: require('electron').Tray,
     Menu,
     locale: app.getLocale(),
-    icon: iconFile({ exists: (file) => require('fs').existsSync(file) }),
+    icon: iconFile({ beta: isBeta, exists: (file) => require('fs').existsSync(file) }),
+    name: isBeta ? 'Kotomimi Beta' : 'Kotomimi',
     show: () => focusWindow(mainWindow),
     quit: () => {
       if (mainWindow && !mainWindow.isDestroyed()) mainWindow.close();

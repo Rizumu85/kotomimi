@@ -28,9 +28,10 @@ function wordsFor(locale) {
 }
 
 /** Where the icon's file is: beside the packaged app's resources, or in the repository. */
-function iconFile({ platform = process.platform, resourcesPath = process.resourcesPath, here = __dirname, exists }) {
+function iconFile({ platform = process.platform, resourcesPath = process.resourcesPath, here = __dirname, exists, beta = false }) {
   const name = platform === 'win32' ? 'icon.ico' : 'icon.png';
-  const places = [resourcesPath ? path.join(resourcesPath, 'assets', name) : null, path.join(here, '..', 'assets', name)].filter(Boolean);
+  const directory = beta ? 'assets/beta' : 'assets';
+  const places = [resourcesPath ? path.join(resourcesPath, directory, name) : null, path.join(here, '..', directory, name)].filter(Boolean);
   return places.find((file) => exists(file)) ?? null;
 }
 
@@ -39,7 +40,7 @@ function iconFile({ platform = process.platform, resourcesPath = process.resourc
  * Mac, a missing file, a system with no notification area. `show` brings the
  * window up; `quit` ends the app the way closing its window does.
  */
-function createTray({ Tray, Menu, platform = process.platform, locale, icon, show, quit }) {
+function createTray({ Tray, Menu, platform = process.platform, locale, icon, show, quit, name = NAME }) {
   if (platform === 'darwin' || !icon) return null;
   let tray;
   try {
@@ -48,9 +49,9 @@ function createTray({ Tray, Menu, platform = process.platform, locale, icon, sho
     return null;
   }
   const words = wordsFor(locale);
-  tray.setToolTip(NAME);
+  tray.setToolTip(name);
   tray.setContextMenu(Menu.buildFromTemplate([
-    { label: words.show, click: () => show() },
+    { label: words.show.replace(NAME, name), click: () => show() },
     { type: 'separator' },
     { label: words.quit, click: () => quit() },
   ]));
