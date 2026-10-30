@@ -20,14 +20,11 @@ import ToggleSwitch from '../Settings/shared/ToggleSwitch';
 import { ModelManagementSection } from '../Settings/sections/ModelManagementSection';
 import Tooltip from '../Tooltip/Tooltip';
 import { appLanModels } from '../../lib/lan/appModels';
-import { askLocalPipelines, NO_PIPELINES, type LocalPipelines } from '../../lib/lan/localServer';
-import { modelLabel } from '../../lib/lan/modelLabel';
 import { getManifestEntry } from '../../lib/local-inference/modelManifest';
 import { shortenModelName } from '../../lib/local-inference/modelName';
 import type { LanguagePair } from '../../lib/provider/types';
 import { LOCAL_INFERENCE_DEFAULTS } from '../../providers/localInference/settings';
 import { useLanStore, validLanPort, lanKeyOf } from '../../stores/lanStore';
-import { useLocalServerStore } from '../../stores/localServerStore';
 import { useModelStatuses, useModelStore } from '../../stores/modelStore';
 import './LanSharingSection.scss';
 
@@ -84,22 +81,9 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
   const recognizers = shared.filter((m) => m.kind === 'asr');
   const translators = shared.filter((m) => m.kind === 'translate');
   const coaches = shared.filter((m) => m.kind === 'feedback');
-  // The LocalAI of this computer, while it is up: its models go out through the same door.
-  const localUp = useLocalServerStore((s) => s.status.state === 'running' || s.status.state === 'external');
-  const localModels = useLocalServerStore((s) => s.status.models.length);
-  const [theirs, setTheirs] = useState<LocalPipelines>(NO_PIPELINES);
-  useEffect(() => {
-    if (!enabled || !localUp) {
-      setTheirs(NO_PIPELINES);
-      return undefined;
-    }
-    let live = true;
-    void askLocalPipelines().then((found) => { if (live) setTheirs(found); });
-    return () => { live = false; };
-  }, [enabled, localUp, localModels]);
-  const lentCount = recognizers.length + translators.length + coaches.length + theirs.recognizers.length + theirs.translators.length;
+  const lentCount = recognizers.length + translators.length + coaches.length;
   // Looked, and nothing here hears: another device would find nothing to listen with.
-  const deaf = initialized && recognizers.length === 0 && theirs.recognizers.length === 0;
+  const deaf = initialized && recognizers.length === 0;
   // The library's own pair: the catalog's base codes, in the direction chosen.
   const libraryPair = useMemo(() => {
     const source = pair.source.split('-')[0];
@@ -176,8 +160,6 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
               {recognizers.map((m) => <span key={m.id} className="kt-lan__model"><Mic size={12} />{nameOf(m.id)}</span>)}
               {translators.map((m) => <span key={m.id} className="kt-lan__model"><Languages size={12} />{nameOf(m.id)}</span>)}
               {coaches.map((m) => <span key={m.id} className="kt-lan__model"><GraduationCap size={12} />{nameOf(m.id)}</span>)}
-              {theirs.recognizers.map((id) => <span key={`localai:${id}`} className="kt-lan__model kt-lan__model--theirs" title={t('fork.lan.fromLocalAI', { id })}><Mic size={12} />{modelLabel(id)}</span>)}
-              {theirs.translators.map((id) => <span key={`localai:${id}`} className="kt-lan__model kt-lan__model--theirs" title={t('fork.lan.fromLocalAI', { id })}><Languages size={12} />{modelLabel(id)}</span>)}
             </div>
             <button type="button" className="kt-lan__link" aria-expanded={managing} onClick={() => setManaging(!managing)}>
               {managing ? t('fork.lan.hideLibrary') : t('fork.lan.showLibrary')}

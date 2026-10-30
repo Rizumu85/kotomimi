@@ -9,7 +9,7 @@ import { ModelCard, ModelManagementSection } from '../../components/Settings/sec
 import ToggleSwitch from '../../components/Settings/shared/ToggleSwitch';
 import Tooltip from '../../components/Tooltip/Tooltip';
 import { canFindServers, findServers, phoneHears, phoneLends, plainAddress, type FoundServer, type PhoneTextModel } from '../../lib/lan/discover';
-import { askLocalPipelines, NO_PIPELINES, type LocalPipelines } from '../../lib/lan/localServer';
+import { NO_PIPELINES, type LocalPipelines } from '../../lib/lan/localServer';
 import { setPhoneKey } from '../../lib/lan/phoneKeys';
 import { modelLabel } from '../../lib/lan/modelLabel';
 import { deviceReady, getManifestEntry, getModelSizeMb } from '../../lib/local-inference/modelManifest';
@@ -370,21 +370,12 @@ interface LocalAIHereState {
   pipes: LocalPipelines;
 }
 
-/** Whether this computer has a LocalAI, whether it is up, and what it offers each stage — asked again each time it comes up. */
+/**
+ * Whether this computer has a LocalAI. Retired: the runner is no longer
+ * offered, and the code below is kept only until its own removal.
+ */
 function useLocalAIHere(): LocalAIHereState {
-  const status = useLocalServerStore((s) => s.status);
-  const up = status.state === 'running' || status.state === 'external';
-  const [pipes, setPipes] = useState<LocalPipelines>(NO_PIPELINES);
-  useEffect(() => {
-    if (!up) {
-      setPipes(NO_PIPELINES);
-      return undefined;
-    }
-    let live = true;
-    void askLocalPipelines().then((found) => { if (live) setPipes(found); });
-    return () => { live = false; };
-  }, [up, status.models.length]);
-  return { present: status.installed || status.state === 'external', up, starting: status.state === 'starting', port: status.port, pipes };
+  return { present: false, up: false, starting: false, port: 8080, pipes: NO_PIPELINES };
 }
 
 /** What a model's own menu offers besides the app's models: this computer's LocalAI. Absent where there is none. */

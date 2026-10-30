@@ -1339,8 +1339,12 @@ ipcMain.handle('lan:start', async (event, args) => {
   await stopLanServer();
   const port = Number(args?.port);
   try {
-    // A LocalAI on this computer is shared through the same door (electron/lan-upstream.js): asked each time, so one started later joins by itself.
-    const local = getLocalServer();
+    // LocalAI is retired: nothing of it is shared, even if another program has one running here.
+    const local = {
+      port: 0,
+      pipelines: async () => ({ pipelines: [], recognizers: [], translators: [] }),
+      setPipeline: async () => ({ ok: false, error: 'LocalAI is retired.' }),
+    };
     // A request that names no model is the app's own to answer, though the LocalAI could, where the app has a native
     // engine's model for it: the Mac's recognition for the language, the downloaded recognizer, a native translator.
     const ownFirst = async (ask) => {

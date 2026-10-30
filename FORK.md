@@ -6,6 +6,8 @@ Kotomimi 是 Sokuji 的一个分支：在实时翻译之外，加上了自建模
 
 仓库：<https://github.com/Rizumu85/kotomimi>。Kotomimi 的工作在 `main` 分支上（默认分支）；`upstream` 分支是上游 Sokuji 的一份镜像。2026-10-06 之前它们分别叫 `localai` 和 `main`：`localai` 是这个 fork 只加了一个 LocalAI 提供商时起的名字，后来所有功能都长在它上面，名字就不对了。GitHub 会把旧名字转到新名字上。
 
+2026-10-29：应用内置的 LocalAI runner 已停用；旧设置里的 `localai` 会读成 `native`。相关死代码和模块会在下一个清理里删除。
+
 Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录，可以和官方 Sokuji 同时安装、同时运行。第一次启动时会把已有的 Sokuji 设置和登录状态复制过来；下载过的模型不复制，需要时重新下载。
 
 ## 这个分支加了什么
@@ -14,9 +16,8 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 |---|---|---|
 | Kotomimi 自由搭配（提供商） | 识别、翻译、语法反馈三个环节，各自选在哪里运行：局域网里的另一台设备、任意 API 模型、或这台电脑。排在提供商列表第一个，带"推荐" | `src/providers/openai/localai.ts`、`pipeline.ts`、`LocalAIAssist.tsx` |
 | 这台电脑的内置模型 | 识别、翻译和语法反馈都可以用应用自己下载的模型，全部在本机完成，不需要服务器 | `localaiDevice.ts`、`LocalAIEngine.tsx` |
-| 共享给其他设备 | 把这台电脑的模型共享给局域网里的另一台 Kotomimi；这台电脑上装了 LocalAI 时，它的模型也从同一个开关、同一个地址共享出去 | `electron/lan-server.js`、`electron/lan-upstream.js`、`src/lib/lan/` |
+| 共享给其他设备 | 把这台电脑的模型共享给局域网里的另一台 Kotomimi。LocalAI 已停用，不再从同一个开关共享 | `electron/lan-server.js`、`electron/lan-upstream.js`、`src/lib/lan/` |
 | 自动找到另一台设备 | 选「用另一台设备」时，应用自己搜索局域网，把找到的 Kotomimi 和模型服务器列出来，点一下就连上，不用知道地址 | `electron/lan-discover.js`、`src/components/LanSharing/ServerFinder.tsx` |
-| 这台电脑上的 LocalAI | 电脑上装了 LocalAI 时，由应用启动和停止它，显示状态和模型 | `electron/local-server.js`、`src/components/LanSharing/LocalServerCard.tsx` |
 | 原生识别引擎 | 应用自己下载一个运行库（audio.cpp）和模型，在本机用显卡边听边出字；不用装任何别的东西。五个模型：Qwen3-ASR 1.7B（Windows 和 Apple 芯片的 Mac，实测更准、出字更快，30 种语言，显卡忙不过来时也不会越落越远）、Confucius4 R2T2（只在 Windows）、SenseVoice-Small（Windows 和 Apple 芯片的 Mac，最轻最快，约占 0.4 GB 显存，只听中、粤、英、日、韩）、Qwen3-ASR 0.6B（小模型，约占 2 GB 显存，给同一台电脑还要跑游戏的人）和 Nemotron 3.5 ASR 0.6B（约占 1 GB，最后的选择） | `electron/native-engine.js`、`src/providers/openai/nativeAsr.ts`、`localaiNative.ts`、`NativeEngineCard.tsx` |
 | Mac 自带的语音识别 | Mac 上（macOS 26 及以上）排第一的原生识别引擎是系统自己的语音识别：应用带一个小程序去调用它，边听边出字，不需要 LocalAI。系统不支持的语言（比如俄语）由上一行的 Qwen3-ASR 来听，两个引擎对页面来说是一个 | `native/apple-speech/SpeechHelper.swift`、`electron/apple-speech.js`、`electron/native-engines.js` |
 | 原生翻译引擎 | 同样的做法用在翻译上：应用自己下载 llama.cpp 的服务器和翻译模型的 GGUF 文件（Index-Translate 2B、Hunyuan MT 2、Hunyuan MT 1.5），在本机运行。Windows 和 Apple 芯片的 Mac 都提供 | `electron/native-engine.js`（`LLAMA`、`TRANSLATORS`）、`src/providers/openai/nativeTranslators.ts` |
@@ -123,7 +124,7 @@ Kotomimi 是独立的应用：有自己的名字、安装目录和设置目录�
 用户反馈：同一个下拉菜单在两种状态下内容不一样——选着"Kotomimi 下载的模型"时列一批，选着原生引擎的模型时列另一批，还混着"切换方式""状态""模型"三种东西；「模型库」按钮有时有、有时没有。原因是原生引擎和应用自带模型各有一套界面。现在"这台电脑"的三个环节各只有一套（`LocalAIAssist.tsx` 的 `DeviceModels`、`DeviceChat`）：
 
 - **行是一样的**：语音识别一种语言一行，翻译一个方向一行，谁在跑都一样。
-- **菜单是一样的**：每一行都列出全部能选的，分三组——「原生引擎」「应用自带的模型」「其他」（这台电脑上的 LocalAI）。模型只写名字，不再带"（原生引擎）"。选哪个就切到哪个；在原生引擎的状态下选了应用自带的模型，环节随之交回应用自带的模型。
+- **菜单是一样的**：每一行都列出全部能选的，分两组——「原生引擎」「应用自带的模型」。模型只写名字，不再带"（原生引擎）"。选哪个就切到哪个；在原生引擎的状态下选了应用自带的模型，环节随之交回应用自带的模型。LocalAI 这一组已停用。
 - **状态不是选项**："未选择模型""还没下载模型""正在检查…"只在确实如此时出现在最上面，不和模型混在组里。应用自带的模型只有一个时，「自动 · 某某」已经指的是它，不再单列一遍。
 - **「模型库」按钮每一行都有**，点了才展开，展开的内容也是同一套（原生引擎的模型在上，应用自带的在下）。只有在用的模型需要人处理时才自己展开：没选、没下载（或正在下）、引擎用它启动失败。选好且已下载的模型不再占着一屏卡片。
 

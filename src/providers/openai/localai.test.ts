@@ -290,6 +290,9 @@ describe("LocalAI Realtime's model and config", () => {
     expect(migrateLocalAISettings({ ...LOCALAI_DEFAULTS, translateModel: 'm', translateNeedsKey: true, coach: true, coachBaseUrl: 'http://x/v1' }, { legacy: { translateAt: 'api', coachAt: 'device' }, credentials: {} }))
       .toMatchObject({ translateAt: 'api', translateModel: 'm', translateNeedsKey: true, coach: true, coachAt: 'device', coachBaseUrl: 'http://x/v1' });
     expect(migrateLocalAISettings({ ...LOCALAI_DEFAULTS, translateModel: 3, coach: 'yes' }, { legacy: { translateAt: 'cloud' }, credentials: {} })).toMatchObject({ translateAt: 'server', translateModel: '', coach: false });
+    // LocalAI is retired: a stage it used to run falls to the native engine of this computer.
+    expect(migrateLocalAISettings({ ...LOCALAI_DEFAULTS, asrHere: 'localai', translateHere: 'localai', coachHere: 'localai' }, inputs))
+      .toMatchObject({ asrHere: 'native', translateHere: 'native', coachHere: 'native' });
   });
 });
 

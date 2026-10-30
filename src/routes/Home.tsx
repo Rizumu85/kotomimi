@@ -1,6 +1,6 @@
 import { useVRChatStore } from '../stores/vrchatStore';
 import { getVRChatController } from '../app/vrchat';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import MainLayout from '../components/MainLayout/MainLayout';
 import { UserProfileProvider } from '../contexts/UserProfileContext';
 import { TourProvider } from '../components/Tour/TourProvider';
@@ -12,7 +12,6 @@ import { useSubtitleLookStore } from '../stores/subtitleLookStore';
 import { useLanStore } from '../stores/lanStore';
 import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../stores/nativeEngineStore';
 import { useLanguagePinStore } from '../stores/languagePinStore';
-import { useLocalServerStore } from '../stores/localServerStore';
 import { useFontStore } from '../stores/fontStore';
 import { useConversationDisplayStore } from '../stores/conversationDisplayStore';
 import { useSetupStore } from '../stores/setupStore';
@@ -54,8 +53,6 @@ export function Home() {
 
     // Fork: sharing this computer's models, left on, starts again with the app. On its own: it waits for the model scan, which nothing else here should.
     void useLanStore.getState().hydrate();
-    // Fork: a LocalAI installed on this computer — whether it is up, and started with the app when that was asked for.
-    void useLocalServerStore.getState().hydrate();
     // Fork: the native recognition engine — whether its model is downloaded, and whether it is up.
     void useNativeEngineStore.getState().hydrate();
     void useNativeTranslatorStore.getState().hydrate();
