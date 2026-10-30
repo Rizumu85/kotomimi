@@ -27,6 +27,7 @@ import type { LocalAISettings as S } from './localai';
 import { coachesAtOwnDevice, deviceChatModels, deviceCoachModel, deviceLanguage, deviceModelsLoaded, hearingPlace, needsServer, PLACE_FIELDS, PLACES, translatePlace, translatesAtOwnDevice, type DeviceNeed, type Place } from './localaiDevice';
 import { NATIVE_MODELS, chooseNative, hearingPick, isApple, isAutoLanguage, nativeDownloaded, nativeEither, nativeHears, nativeModel, nativeModelFor, nativePicked } from './localaiNative';
 import { detectsOther, heardBy, speaksBoth } from './localaiDevice';
+import { AUTO } from '../../lib/provider/languages';
 import { languageLabel } from '../../lib/language/label';
 import { NativeEngineCard, nativeStoreOf, type NativeCardModel, type NativeKind } from './NativeEngineCard';
 import { NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator } from './nativeTranslators';
@@ -961,9 +962,18 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   const heardByLegs = legs.map((leg) => heardBy(settings, pair, leg, models));
   // The native recognizer, language by language: a choice is the model in use from then on, and that language's by name.
   const bothOn = speaksBoth(settings, models, pair) && pair.source.toLowerCase() !== pair.target.toLowerCase();
-  const nativePick = hearingPick(settings, pair, { detecting: detectsOther(settings, models), both: bothOn });
+  const nativePick = hearingPick(settings, pair, {
+    detecting: detectsOther(settings, models),
+    both: bothOn,
+    // A model that cannot name the language is a best effort, not a reason to keep another one in its place.
+    bestEffort: settings.speakBoth === true || settings.asrDetectOther === true,
+  });
   const pickNative = (id: string, languages: readonly string[], heard: readonly string[] = heardByLegs) => {
-    const next = chooseNative(nativePick, id, languages, heard);
+    // The row's chosen model may be a non-detecting one even while the default still is a detector.
+    const pick = nativePick.bestEffort || !nativeModel(id).detects && !isApple(id)
+      ? { ...nativePick, bestEffort: true }
+      : nativePick;
+    const next = chooseNative(pick, id, languages, heard);
     put({ asrHere: 'native', asrNativeModel: next.model, asrNativeByLanguage: next.byLanguage });
   };
   // A model that cannot tell languages apart, chosen while a language is left to be detected — the other side's, or the
@@ -987,9 +997,10 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
     if (nativeModel(id).detects || !(detectOff || bothOff)) {
       // A row a best-effort detection keeps is named by the language it hears, not by "auto" (which no model runs).
       const languageOf = (leg: 'speaker' | 'participant') => (
-        (leg === 'speaker' && settings.speakBoth) || (leg === 'participant' && settings.asrDetectOther)
-          ? (leg === 'speaker' ? pair.source : pair.target)
-          : heardBy(settings, pair, leg)
+        leg === 'speaker' && settings.speakBoth
+          // The Mac's pair is one member per language; a model that only hears a language is named "auto".
+          ? (isApple(id) ? pair.source : AUTO)
+          : (leg === 'participant' && settings.asrDetectOther) ? AUTO : heardBy(settings, pair, leg)
       );
       pickNative(
         id,

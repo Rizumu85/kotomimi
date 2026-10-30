@@ -145,6 +145,8 @@ export interface NativePick {
    * downloaded too: in both at once, the surer kept (`nativeEither`); else by the model that tells languages apart.
    */
   either?: { own: string; other: string };
+  /** Fork: an auto leg may use a model that does not name the language; the pipeline guesses each sentence. */
+  bestEffort?: boolean;
 }
 
 /** A model is on this computer now, as the engine's store has it. */
@@ -180,8 +182,10 @@ export function appleAlso(model: NativeModel, other: string, has: (id: string) =
  * the speaker's own where the Mac's recognition does not hear both. With the other side's detected, that model hears
  * the speaker too: "either of two" and "whatever it is" are one language to a pick (`AUTO`).
  */
-export function hearingPick(s: { asrNativeModel: string; asrNativeByLanguage?: Readonly<Record<string, string>> }, pair: { source: string; target: string }, kinds: { detecting: boolean; both: boolean }, has: (id: string) => boolean = hereNow): NativePick {
-  const pick: NativePick = { model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage };
+export function hearingPick(s: { asrNativeModel: string; asrNativeByLanguage?: Readonly<Record<string, string>> }, pair: { source: string; target: string }, kinds: { detecting: boolean; both: boolean; bestEffort?: boolean }, has: (id: string) => boolean = hereNow): NativePick {
+  // Best effort is for a model that cannot name the language; a detector keeps naming it, and the Mac's pair stays a pair.
+  const bestEffort = kinds.bestEffort === true && !nativeModel(s.asrNativeModel).detects && !isApple(s.asrNativeModel);
+  const pick: NativePick = { model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage, ...(bestEffort ? { bestEffort: true } : {}) };
   if (kinds.detecting) return { ...pick, detecting: true };
   if (!kinds.both) return pick;
   const either: NativePick = { ...pick, either: { own: pair.source, other: pair.target } };
@@ -210,6 +214,11 @@ export function nativePicked(pick: NativePick, language: string, has: (id: strin
   const chosen = pick.byLanguage?.[baseOf(language)];
   // A name the app no longer has is no choice.
   const known = chosen !== undefined && NATIVE_MODELS.some((m) => m.id === chosen);
+  // Fork: best effort — the named model stays, though it cannot name the language; the pipeline guesses.
+  if (pick.bestEffort && isAutoLanguage(language)) {
+    const named = NATIVE_MODELS.find((m) => m.id === (known ? chosen : pick.model));
+    if (named && !named.detects && !isApple(named.id)) return named;
+  }
   return (known ? nativeModelFor(chosen, language) : null)
     ?? nativeModelFor(pick.model, language)
     ?? NATIVE_MODELS.find((m) => nativeHears(m, language) && has(m.id))
@@ -233,7 +242,9 @@ export function chooseNative(pick: NativePick, id: string, languages: readonly s
     if (now) byLanguage[base] = now.id;
   }
   for (const language of languages) {
-    const model = nativeModelFor(id, language);
+    // Fork: best effort — an auto leg may name a model that cannot name the language.
+    const model = nativeModelFor(id, language)
+      ?? (pick.bestEffort && isAutoLanguage(language) ? nativeModel(id) : null);
     if (model) byLanguage[baseOf(language)] = model.id;
   }
   return { model: id, byLanguage };

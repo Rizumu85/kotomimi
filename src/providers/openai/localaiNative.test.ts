@@ -743,7 +743,7 @@ describe('the provider\'s check, with the engine', () => {
     const s = settings({ ...NATIVE, speakBoth: true, coach: true, translateAt: 'device', translateHere: 'native', translateNativeModel: 'index-translate-2b', coachAt: 'device', coachHere: 'native', coachNativeModel: 'gemma-4-e2b' });
     const native = { gap, idle: () => undefined, translatorGap, coachGap };
     expect(await checkLocalAIWithNative(NONE, s, CTX, async () => OK, native)).toBe(OK);
-    expect(gap).toHaveBeenCalledWith({ model: 'r2t2-q8', byLanguage: {}, detecting: true }, ['ja']);
+    expect(gap).toHaveBeenCalledWith({ model: 'r2t2-q8', byLanguage: {}, detecting: true, bestEffort: true }, ['ja']);
     expect(translatorGap).toHaveBeenCalledWith('index-translate-2b', [PAIR, { source: PAIR.target, target: PAIR.source }]);
     expect(coachGap).toHaveBeenCalledWith('gemma-4-e2b');
     const missing = { ok: false as const, code: 'native_translator_missing', reason: 'The translation model is not downloaded.' };
@@ -895,6 +895,11 @@ describe('a language\u2019s model by default', () => {
     expect(nativePicked({ model: `${APPLE_PREFIX}ja` }, 'auto', HERE(`${APPLE_PREFIX}ja`, `${APPLE_PREFIX}en`, 'qwen3-asr-1.7b-q8'))?.id).toBe('qwen3-asr-1.7b-q8');
     // The small models and the Mac's own tell no language: with only those here there is none.
     expect(nativePicked({ model: 'r2t2-q8' }, 'auto', HERE('r2t2-q8', 'qwen3-asr-0.6b-q8', `${APPLE_PREFIX}ja`))).toBeNull();
+    // Fork: best effort — the named model stays even though it cannot tell languages apart.
+    const bestEffort = hearingPick({ asrNativeModel: 'r2t2-q8' }, PAIR, { detecting: true, both: true, bestEffort: true }, HERE('r2t2-q8'));
+    expect(bestEffort).toMatchObject({ model: 'r2t2-q8', detecting: true, bestEffort: true });
+    expect(nativePicked(bestEffort, 'auto', HERE('r2t2-q8'))?.id).toBe('r2t2-q8');
+    expect(chooseNative(bestEffort, 'r2t2-q8', ['auto'], ['auto']).byLanguage).toEqual({ auto: 'r2t2-q8' });
   });
 
   it('gives way to a choice, and to the one in use where it hears the language', () => {

@@ -68,7 +68,7 @@ import { recognizerAsked, serverBilingual } from './serverRecognizers';
 import { phoneBase, plainAddress } from '../../lib/lan/discover';
 import { ASR_HERES, canDetectOther, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, deviceChoices, deviceCoachModel, deviceLanguage, deviceModelFor, deviceModelsLoaded, deviceNeeds, deviceRecognizer, deviceTranslator, hearsNatively, needsServer, serverDetects, PLACE_FIELDS, PLACES, translatesNatively, watchDeviceModels, type AsrHere, type Place } from './localaiDevice';
 import { NATIVE_MODELS, preferNative, type NativePick } from './localaiNative';
-import { NATIVE_DEFAULT_MODEL, appleAlso, coachBaseUrl, coachGap, coachIdle, coachUp, hearingPick, holdNativeForRun, nativeEither, nativeGap, nativeUp, restNative, translatorUp, nativeWaits, nativeIdle, nativeModelFor, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
+import { NATIVE_DEFAULT_MODEL, appleAlso, coachBaseUrl, coachGap, coachIdle, coachUp, hearingPick, holdNativeForRun, nativeEither, nativeGap, nativeModel, nativeUp, restNative, translatorUp, nativeWaits, nativeIdle, nativeModelFor, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_COACH_EXTRA, NATIVE_COACHES, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
 import { NATIVE_DEFAULT_TRANSLATOR, NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator, translatorRequest } from './nativeTranslators';
 import { LocalAITurnDetectionControls, LocalAITurnDetectionHelp, LocalAITurnDetectionSummary } from './LocalAIEngine';
@@ -879,7 +879,11 @@ interface NativeNeeds {
 
 /** Fork: what this computer's recognizer hears a run's languages with (`hearingPick`), for the run's pair. */
 export const runHearing = (s: LocalAISettings, pair: { source: string; target: string }, models: readonly LocalAIModel[] = []): NativePick =>
-  hearingPick(s, pair, { detecting: detectsOther(s, models), both: speaksBoth(s, models, pair) && pair.source.toLowerCase() !== pair.target.toLowerCase() });
+  hearingPick(s, pair, {
+    detecting: detectsOther(s, models),
+    both: speaksBoth(s, models, pair) && pair.source.toLowerCase() !== pair.target.toLowerCase(),
+    bestEffort: s.speakBoth === true || s.asrDetectOther === true,
+  });
 
 /**
  * The language a native model is told for a leg. A leg left to be detected
@@ -891,7 +895,9 @@ export const runHearing = (s: LocalAISettings, pair: { source: string; target: s
 const heardForModel = (s: LocalAISettings, pair: { source: string; target: string }, leg: LegName): string => {
   const heard = heardBy(s, pair, leg);
   if (heard !== AUTO) return heard;
-  return nativePicked(runHearing(s, pair), AUTO) ? AUTO : (leg === 'speaker' ? pair.source : pair.target);
+  // Only a model that names the language is asked for `auto`; a best-effort one is told the leg's source.
+  const pick = runHearing(s, pair);
+  return nativePicked({ ...pick, bestEffort: false }, AUTO) ? AUTO : (leg === 'speaker' ? pair.source : pair.target);
 };
 
 function nativeNeeds(s: LocalAISettings, pair: { source: string; target: string }, legs: readonly ('speaker' | 'participant')[]): NativeNeeds {
@@ -1148,7 +1154,8 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
       const runPair = shared.reversed(asked.direction) ? { source: asked.direction.target, target: asked.direction.source } : asked.direction;
       const pick = runHearing(s, runPair, models);
       // A model that names the language is asked for "auto"; without one, the chosen model hears and the sentence is guessed.
-      detector = nativePicked(pick, AUTO);
+      // Only a model that names the language is a detector; a best-effort model is told the leg's source.
+      detector = nativePicked({ ...pick, bestEffort: false }, AUTO);
       // A family of one model per language (the Mac's) answers the leg's source with that language's member.
       const picked = detector ?? nativePicked(pick, modelHeard);
       const native = picked ? nativeModelFor(picked.id, modelHeard) ?? picked : null;
@@ -1384,8 +1391,8 @@ export const localaiLanguages: Provider<LocalAISettings, never, never>['language
     // The speaker in either of the pair's languages: also the Mac's recognition, where it hears theirs and has both.
     const either = (hearsNatively(s) && nativeEither({ model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage, either: { own: pair.source, other: pair.target } }) !== null)
       || (hearingPlace(s) === 'server' && serverBilingual(s.asrModel, pair, models as readonly LocalAIModel[]) !== null);
-    // A model that names the language, or a paired Apple one, is exact; everything else here is a best effort.
-    const reliable = (hearsNatively(s) && detector) || either || (hearingPlace(s) === 'server' && serverDetects(models));
+    // A model chosen here that names the language, or a paired Apple one, is exact; everything else is a best effort.
+    const reliable = (hearsNatively(s) && nativeModel(s.asrNativeModel).detects) || either || (hearingPlace(s) === 'server' && serverDetects(models));
     const bestEffort = available && !reliable;
     return {
       other: { on: detectsOther(s, models), available, ...(bestEffort ? { bestEffort: true } : {}), turn: (on) => (on ? { ...to, asrDetectOther: true } : { asrDetectOther: false }) },
