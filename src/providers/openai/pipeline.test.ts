@@ -3,7 +3,6 @@ import type { SessionContext } from '../../lib/contract/adapter';
 import { recordEvents, type AdapterEvent } from '../../lib/contract/events';
 import { fakeSockets } from '../../lib/contract/testing/fakeSocket';
 import { trackedClock } from '../../lib/contract/testing/trackedClock';
-import { createFakeEngines } from '../localInference/fakeEngines';
 import { coachPrompt } from './coachPrompt';
 import { buildLocalAI, LOCALAI_DEFAULTS, localaiProvider, type LocalAIConfig, type LocalAICredentials, type LocalAISettings } from './localai';
 import { createPipelineAdapter, FIRST_REF, tidyAnswer, type AnswerStage } from './pipeline';
@@ -38,7 +37,7 @@ type Call = { url: string; body: { model: string; messages: Array<{ role: string
 /** Whether a phone in use answers when asked if it is there; a frozen app takes the connection and says nothing. */
 let phoneAwake = true;
 
-async function live(context: SessionContext, patch: Partial<LocalAISettings>, answers: Array<Response | Error | 'hang'> = [], credentials: LocalAICredentials = K, tweak: (config: LocalAIConfig) => void = () => {}, engines?: ReturnType<typeof createFakeEngines>['engines']) {
+async function live(context: SessionContext, patch: Partial<LocalAISettings>, answers: Array<Response | Error | 'hang'> = [], credentials: LocalAICredentials = K, tweak: (config: LocalAIConfig) => void = () => {}) {
   const settings = { ...LOCALAI_DEFAULTS, ...patch };
   const config = buildLocalAI(context, settings, shared);
   if ('refused' in config) throw new Error(config.refused);
@@ -56,7 +55,7 @@ async function live(context: SessionContext, patch: Partial<LocalAISettings>, an
     if (next === 'hang') return new Promise<Response>((_resolve, reject) => init?.signal?.addEventListener('abort', () => reject(init.signal?.reason)));
     return next instanceof Error ? Promise.reject(next) : Promise.resolve(next);
   });
-  const starting = createPipelineAdapter({ openSocket: sockets.create, fetch, ...(engines ? { engines } : {}) }).start({ context, config, credentials, clock, signal: new AbortController().signal }, events);
+  const starting = createPipelineAdapter({ openSocket: sockets.create, fetch }).start({ context, config, credentials, clock, signal: new AbortController().signal }, events);
   const socket = sockets.last();
   socket.open('');
   socket.receive(SERVER.created());
@@ -304,28 +303,7 @@ describe('translation and feedback for the same utterance', () => {
     await h.session.stop();
   });
 
-  it('serializes translation and feedback when they use the same local worker', async () => {
-    const fakes = createFakeEngines();
-    fakes.translation.ready();
-    const h = await live(SPEAKER, VIA_MODEL, [], K, (config) => {
-      combined(config);
-      const local: AnswerStage = { via: 'device', kind: 'translate', model: 'shared-model', system: 'Translate', wrapTranscript: false };
-      config.stages!.speech = local;
-      config.stages!.typed = local;
-      config.stages!.back!.stage = local;
-      config.stages!.feedback!.stage = { ...local, kind: 'coach', system: 'Give feedback' };
-    }, fakes.engines);
-    h.receive(...heard('first', '昨日映画を見ます。'));
-    expect(fakes.created.filter((kind) => kind === 'translation')).toHaveLength(1);
-    expect(fakes.translation.calls.map((call) => call.systemPrompt)).toEqual(['Translate']);
-    fakes.translation.answer('昨天看了电影。');
-    await vi.waitFor(() => expect(fakes.translation.calls.map((call) => call.systemPrompt)).toEqual(['Translate', 'Give feedback']));
-    fakes.translation.answer('✓');
-    await h.settled();
-    expect(h.of('segmentOpened').filter((e) => e.payload.side === 'translation').map((e) => e.payload.purpose)).toEqual(['translation', 'feedback']);
-    await h.session.stop();
-    expect(fakes.translation.disposes).toBe(1);
-  });
+
 });
 
 describe('a leg on the server\'s own pipeline', () => {
@@ -825,5 +803,21 @@ describe('a leg told to answer a stretch whole', () => {
     expect(LOCALAI_DEFAULTS.translateBySentence).toBe(true);
     expect(on.stages?.whole).toBeUndefined();
     expect(off.stages?.whole).toBe(true);
+  });
+});
+
+
+describe('retired app-model recognition', () => {
+  it('rejects a local hearing config with no native engine or API', async () => {
+    const { events, log } = recordEvents();
+    const { clock } = trackedClock();
+    const config = buildLocalAI(SPEAKER, { ...LOCALAI_DEFAULTS, ...VIA_MODEL }, shared);
+    if ('refused' in config) throw new Error(config.refused);
+    config.device = { modelId: 'sensevoice-int8', streaming: false, vad: { threshold: 0.5, minSilenceDuration: 0.5, minSpeechDuration: 0.1, maxSpeechDuration: 10 } };
+    const fetch = vi.fn();
+    await expect(createPipelineAdapter({ fetch }).start({ context: SPEAKER, config, credentials: K, clock, signal: new AbortController().signal }, events))
+      .rejects.toThrow('Recognition requires a native engine or an API');
+    expect(fetch).not.toHaveBeenCalled();
+    expect(log.some((e) => e.kind === 'segmentOpened')).toBe(false);
   });
 });

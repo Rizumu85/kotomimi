@@ -57,7 +57,7 @@ async function live(context: SessionContext, patch: Partial<LocalAISettings>, wi
     const content = body.model === 'feedback-model' ? 'Your sentence is clear.' : `Translation into ${body.target_language}`;
     return new Response(JSON.stringify({ choices: [{ message: { content } }] }), { headers: { 'Content-Type': 'application/json' } });
   });
-  const starting = createPipelineAdapter({ openSocket: sockets.create, fetch, engines: fakes.engines }).start({
+  const starting = createPipelineAdapter({ openSocket: sockets.create, fetch }).start({
     context, config, credentials: { apiKey: '', endpoint: 'ws://mac.local:8792/v1/realtime' }, clock, signal: new AbortController().signal,
   }, events);
   const socket = sockets.last();

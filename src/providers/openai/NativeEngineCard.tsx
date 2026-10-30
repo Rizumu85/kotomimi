@@ -80,7 +80,7 @@ function entryOf(kind: NativeKind, model: NativeCardModel, recommended: boolean)
   };
 }
 
-export function NativeEngineCard({ kind, model, recommended = true, selected, onSelect, disabled }: { kind: NativeKind; model: NativeCardModel; /** The one measured best of its engine's: the others are there to be chosen, without the mark. */ recommended?: boolean; selected: boolean; onSelect(): void; disabled?: boolean }) {
+export function NativeEngineCard({ kind, model, recommended = true, selected, onSelect, onDownloadStarted, disabled }: { kind: NativeKind; model: NativeCardModel; /** The one measured best of its engine's: the others are there to be chosen, without the mark. */ recommended?: boolean; selected: boolean; onSelect?(): void; onDownloadStarted?(): void; disabled?: boolean }) {
   const { t } = useTranslation();
   const useStore = nativeStoreOf(kind);
   const status = useStore((s) => s.status);
@@ -113,7 +113,7 @@ export function NativeEngineCard({ kind, model, recommended = true, selected, on
       note={note ? t(`providers.localai.${note}`) : undefined}
       tag={{ label: t(`providers.localai.tag_${tagOf(model.id)}`), hint: t(`providers.localai.tagHint_${tagOf(model.id)}`) }}
       onSelect={onSelect}
-      onDownload={() => { void store().download(model.id); }}
+      onDownload={() => { onDownloadStarted?.(); void store().download(model.id); }}
       onCancel={() => { void store().cancel(model.id); }}
       onDelete={() => { void store().remove(model.id); }}
     >

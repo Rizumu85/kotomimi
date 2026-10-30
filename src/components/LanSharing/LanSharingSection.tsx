@@ -1,36 +1,31 @@
-/**
- * Fork: the settings of "share this computer's models on the local network".
- *
- * One idea holds the page together: this computer has models — the ones the
- * app downloaded, and the ones of a LocalAI installed here — its own stages
- * choose among them in their cards, and sharing lends the same models to the
- * other devices. So this section is one switch and, while it is on, what is
- * to be seen at a glance: that it is sharing and how many use it, the name
- * and address another device finds it by, and whatever stands in the way (a
- * firewall, a port that is taken, no recognizer to lend). What is lent, the
- * port and the access key are each one disclosure away; how sharing works is
- * behind the question mark, for whoever asks.
- */
+/** Settings for lending this computer's native models over the local network. */
 import { useEffect, useMemo, useState } from 'react';
 import { Check, CircleHelp, Copy, GraduationCap, Languages, Loader, Mic, Share2, ShieldAlert, TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { CustomModels } from '../CustomModels/CustomModels';
-import { languageNameFor } from '../Settings/engine/languageName';
 import ToggleSwitch from '../Settings/shared/ToggleSwitch';
-import { ModelManagementSection } from '../Settings/sections/ModelManagementSection';
 import Tooltip from '../Tooltip/Tooltip';
 import { appLanModels } from '../../lib/lan/appModels';
-import { getManifestEntry } from '../../lib/local-inference/modelManifest';
-import { shortenModelName } from '../../lib/local-inference/modelName';
-import type { LanguagePair } from '../../lib/provider/types';
-import { LOCAL_INFERENCE_DEFAULTS } from '../../providers/localInference/settings';
 import { useLanStore, validLanPort, lanKeyOf } from '../../stores/lanStore';
-import { useModelStatuses, useModelStore } from '../../stores/modelStore';
+import { NativeEngineCard, nativeStoreOf, type NativeCardModel, type NativeKind } from '../../providers/openai/NativeEngineCard';
+import { NATIVE_MODELS } from '../../providers/openai/localaiNative';
+import { NATIVE_TRANSLATORS } from '../../providers/openai/nativeTranslators';
+import { NATIVE_COACHES } from '../../providers/openai/nativeCoaches';
 import './LanSharingSection.scss';
 
+const LIBRARY: Record<NativeKind, readonly NativeCardModel[]> = { asr: NATIVE_MODELS, translation: NATIVE_TRANSLATORS, coach: NATIVE_COACHES };
+
+/** Sharing lends every downloaded model; it does not change the local session's selection. */
+function SharedLibrary({ kind, disabled }: { kind: NativeKind; disabled: boolean }) {
+  const { t } = useTranslation();
+  const status = nativeStoreOf(kind)((s) => s.status);
+  const models = LIBRARY[kind].filter((m) => status.supported && status.models[m.id] && (!m.retired || status.models[m.id].state !== 'absent'));
+  if (!models.length) return null;
+  const label = kind === 'asr' ? 'hearStage' : kind === 'translation' ? 'translateStage' : 'coachStage';
+  return <section><h3>{t(`providers.localai.${label}`)}</h3>{models.map((model) => <NativeEngineCard key={model.id} kind={kind} model={model} selected={false} disabled={disabled} />)}</section>;
+}
+
+
 const helpIcon = <CircleHelp className="tooltip-trigger" size={14} style={{ marginLeft: '8px' }} />;
-const FALLBACK_PAIR: LanguagePair = { source: 'ja', target: 'en' };
-const noUpdate = () => {};
 
 /** An address, and a button that copies it and says so for a moment. */
 function Address({ value }: { value: string }) {
@@ -52,7 +47,7 @@ function Address({ value }: { value: string }) {
   );
 }
 
-export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { disabled?: boolean; pair?: LanguagePair }) {
+export function LanSharingSection({ disabled = false }: { disabled?: boolean }) {
   const { t } = useTranslation();
   const enabled = useLanStore((s) => s.enabled);
   const status = useLanStore((s) => s.status);
@@ -65,32 +60,21 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
   const [portText, setPortText] = useState(String(port));
   const [keyText, setKeyText] = useState(key);
   const [managing, setManaging] = useState(false);
-  // The library lists the models of one direction: the other device may ask for either of the pair's.
-  const [reversed, setReversed] = useState(false);
   useEffect(() => setPortText(String(port)), [port]);
   useEffect(() => setKeyText(key), [key]);
 
-  // What is downloaded decides what is shared: read again when a download finishes.
-  const statuses = useModelStatuses();
-  const initialized = useModelStore((s) => s.initialized);
-  const shared = useMemo(() => (enabled ? appLanModels.shared() : []), [enabled, statuses, initialized]); // eslint-disable-line react-hooks/exhaustive-deps
-  const nameOf = (id: string) => {
-    const entry = getManifestEntry(id);
-    return entry ? shortenModelName(entry.name, entry.shortName) : id;
-  };
+  const asr = nativeStoreOf('asr')((s) => s.status);
+  const translation = nativeStoreOf('translation')((s) => s.status);
+  const coach = nativeStoreOf('coach')((s) => s.status);
+  const asked = nativeStoreOf('asr')((s) => s.asked);
+  const shared = useMemo(() => (enabled ? appLanModels.shared() : []), [enabled, asr, translation, coach]); // eslint-disable-line react-hooks/exhaustive-deps
+  const nameOf = (id: string) => Object.values(LIBRARY).flat().find((m) => m.id === id)?.name ?? id;
   const recognizers = shared.filter((m) => m.kind === 'asr');
   const translators = shared.filter((m) => m.kind === 'translate');
   const coaches = shared.filter((m) => m.kind === 'feedback');
   const lentCount = recognizers.length + translators.length + coaches.length;
   // Looked, and nothing here hears: another device would find nothing to listen with.
-  const deaf = initialized && recognizers.length === 0;
-  // The library's own pair: the catalog's base codes, in the direction chosen.
-  const libraryPair = useMemo(() => {
-    const source = pair.source.split('-')[0];
-    const target = pair.target.split('-')[0];
-    return reversed ? { source: target, target: source } : { source, target };
-  }, [pair.source, pair.target, reversed]);
-  const directions = [false, true].map((back) => ({ back, label: back ? `${languageNameFor(pair.target)} → ${languageNameFor(pair.source)}` : `${languageNameFor(pair.source)} → ${languageNameFor(pair.target)}` }));
+  const deaf = asked && recognizers.length === 0;
 
   const commitPort = () => {
     const next = Number(portText);
@@ -166,16 +150,7 @@ export function LanSharingSection({ disabled = false, pair = FALLBACK_PAIR }: { 
             </button>
             {managing && (
               <div className="kt-lan__library">
-                <div className="setting-item">
-                  <div className="turn-detection-options" role="group" aria-label={t('fork.lan.direction')}>
-                    {directions.map(({ back, label }) => (
-                      <button key={String(back)} type="button" className={`option-button ${back === reversed ? 'active' : ''}`} aria-pressed={back === reversed} onClick={() => setReversed(back)}>{label}</button>
-                    ))}
-                  </div>
-                </div>
-                <CustomModels disabled={disabled} />
-                <ModelManagementSection isSessionActive={disabled} stageFilter="asr" direction={`${libraryPair.source}→${libraryPair.target}`} settings={LOCAL_INFERENCE_DEFAULTS} update={noUpdate} pair={libraryPair} />
-                <ModelManagementSection isSessionActive={disabled} stageFilter="translation" direction={`${libraryPair.source}→${libraryPair.target}`} settings={LOCAL_INFERENCE_DEFAULTS} update={noUpdate} pair={libraryPair} />
+                {(['asr', 'translation', 'coach'] as const).map((kind) => <SharedLibrary key={kind} kind={kind} disabled={disabled} />)}
               </div>
             )}
           </details>

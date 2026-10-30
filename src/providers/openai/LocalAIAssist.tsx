@@ -1,30 +1,25 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { CircleCheck, CircleHelp, GraduationCap, Languages, LibraryBig, Loader, Mic, MonitorSmartphone, RefreshCw, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { CustomModels } from '../../components/CustomModels/CustomModels';
 import { ServerFinder } from '../../components/LanSharing/ServerFinder';
-import { useWasmEngineAdapter } from '../../components/Settings/engine/useWasmEngineAdapter';
-import { ModelGroup } from '../../components/Settings/sections/ModelManagementControls';
-import { ModelCard, ModelManagementSection } from '../../components/Settings/sections/ModelManagementSection';
 import ToggleSwitch from '../../components/Settings/shared/ToggleSwitch';
 import Tooltip from '../../components/Tooltip/Tooltip';
 import { canFindServers, findServers, phoneHears, phoneLends, plainAddress, type FoundServer, type PhoneTextModel } from '../../lib/lan/discover';
 import { setPhoneKey } from '../../lib/lan/phoneKeys';
 import { modelLabel } from '../../lib/lan/modelLabel';
-import { deviceReady, getManifestEntry, getModelSizeMb } from '../../lib/local-inference/modelManifest';
+import { getManifestEntry } from '../../lib/local-inference/modelManifest';
 import { shortenModelName } from '../../lib/local-inference/modelName';
 import type { CredentialAssistProps } from '../../lib/provider/types';
 import { useHeardByStore } from '../../stores/heardByStore';
 import { useTranslatedByStore } from '../../stores/translatedByStore';
 
-import { useDeviceFeatures, useDownloadErrors, useModelDownloads, useModelInitialized, useModelStatuses, useModelStore, useWebGPUAvailable } from '../../stores/modelStore';
 import { ApiModelPicker } from './ApiModelPicker';
 import { savedKeyOf } from './apiServiceKey';
 import { API_SERVICES, preferredModel, serviceOf, servicesFor, type ApiKind, type ApiService } from './apiServices';
 import { coachPrompt } from './coachPrompt';
 // Type only: `localai.ts` imports this view, and a value import back would close a cycle.
 import type { LocalAISettings as S } from './localai';
-import { coachesAtOwnDevice, deviceChatModels, deviceCoachModel, deviceLanguage, deviceModelsLoaded, hearingPlace, needsServer, PLACE_FIELDS, PLACES, translatePlace, translatesAtOwnDevice, type DeviceNeed, type Place } from './localaiDevice';
+import { coachesAtOwnDevice, deviceLanguage, hearingPlace, needsServer, PLACE_FIELDS, PLACES, translatePlace, translatesAtOwnDevice, type DeviceNeed, type Place } from './localaiDevice';
 import { NATIVE_MODELS, chooseNative, hearingPick, isApple, isAutoLanguage, nativeDownloaded, nativeEither, nativeHears, nativeModel, nativeModelFor, nativePicked } from './localaiNative';
 import { detectsOther, heardBy, speaksBoth } from './localaiDevice';
 import { AUTO } from '../../lib/provider/languages';
@@ -33,11 +28,10 @@ import { NativeEngineCard, nativeStoreOf, type NativeCardModel, type NativeKind 
 import { NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator } from './nativeTranslators';
 import { NATIVE_COACHES, nativeCoach } from './nativeCoaches';
 import { lentChoice } from './phoneText';
-import { useDeviceSettings, useDeviceSlots } from './LocalAIEngine';
+import { useNativeStageSlots } from './LocalAIEngine';
 import { fitsPair, isKotomimiServer, modelsFor, SERVER_SILENT, serverDefaultModel, translationDefault, type LocalAIModel } from './localaiModels';
 import { choiceOf, perLanguage, recognizerChoices } from './serverRecognizers';
 import { isRealtimeModelId } from './settings';
-import { farFromModels } from './farSource';
 import { SpeedButton, SpeedLine, SpeedReportView, useSpeedTest } from './SpeedTestView';
 import './LocalAIAssist.scss';
 
@@ -306,13 +300,10 @@ function ApiFields({ id, kind, others, baseUrl, model, needsKey, apiKey, urlPlac
   );
 }
 
-/** The value of the menu's entry that hands the stage to this computer's LocalAI. No model's id. */
 /** And of the entries that hand hearing to the native engine, one for each of its models. */
 const NATIVE_ENTRY = '\u0000native:';
 /** The native translation engine's single row: it runs one model for every direction, not one a direction. */
 const ENGINE_ROW = '\u0000engine';
-/** And the way back to the app's own models, which are chosen a direction at a time. */
-const APP_ENTRY = '\u0000app';
 
 /** A stage's native models, as their cards and menus read them. */
 const NATIVE_OF: Record<NativeKind, readonly NativeCardModel[]> = { asr: NATIVE_MODELS, translation: NATIVE_TRANSLATORS, coach: NATIVE_COACHES };
@@ -323,15 +314,31 @@ const nativeFits = (kind: NativeKind, id: string, source: string, target: string
   : kind === 'translation' ? nativeTranslates(nativeTranslator(id), source, target) : true);
 
 /** A stage's native models this computer can run, and which of them are downloaded or on their way. */
-function useNativeModels(kind: NativeKind): { offered: readonly NativeCardModel[]; ready: readonly NativeCardModel[]; fetching: readonly string[] } {
+function useNativeModels(kind: NativeKind): { offered: readonly NativeCardModel[]; ready: readonly NativeCardModel[] } {
   const status = nativeStoreOf(kind)((s) => s.status);
   return useMemo(() => {
     // The main process lists the models this system is offered: one it leaves out has no card here.
     // One no longer offered (`retired`) keeps its card only where it is already on this computer: to be used, or removed.
     const offered = status.supported ? NATIVE_OF[kind].filter((m) => status.models[m.id] !== undefined && (!m.retired || status.models[m.id].state !== 'absent')) : [];
-    const fetching = offered.filter((m) => status.models[m.id]?.state === 'downloading' || status.models[m.id]?.state === 'verifying').map((m) => m.id);
-    return { offered, ready: offered.filter((m) => nativeDownloaded(status, m.id)), fetching };
+    return { offered, ready: offered.filter((m) => nativeDownloaded(status, m.id)) };
   }, [status, kind]);
+}
+
+/** Download intent belongs to the stage, so closing its library cannot lose the target row. */
+function useNativeDownloads(kind: NativeKind, disabled: boolean | undefined, select: (id: string, slot?: DeviceNeed) => void) {
+  const status = nativeStoreOf(kind)((s) => s.status);
+  const pending = useRef(new Map<string, { slot?: DeviceNeed; fetching: boolean }>());
+  useEffect(() => {
+    for (const [id, intent] of pending.current) {
+      const state = status.models[id]?.state;
+      if (nativeDownloaded(status, id)) {
+        pending.current.delete(id);
+        if (!disabled) select(id, intent.slot);
+      } else if (status.engine === 'downloading' || state === 'downloading' || state === 'verifying') intent.fetching = true;
+      else if (state === 'failed' || intent.fetching) pending.current.delete(id);
+    }
+  }, [status, disabled, select]);
+  return (id: string, slot?: DeviceNeed) => { pending.current.set(id, { slot, fetching: false }); };
 }
 
 /** The button that opens a stage's model library, the same in every menu of "this computer". */
@@ -350,9 +357,7 @@ interface NativeRunner {
   /** A model of the engine is to run the stage: for one row where a row was chosen in, for every row it serves otherwise. */
   onPick(id: string, slot?: DeviceNeed): void;
   /** Present while the engine runs the stage: the model that serves a row, or null where none is chosen for it. */
-  inUse?(slot?: DeviceNeed): NativeCardModel | null;
-  /** Back to the app's own models. */
-  onBack?(): void;
+  inUse(slot?: DeviceNeed): NativeCardModel | null;
 }
 
 /** The value of a language's menu while no native model hears it. No model's id. */
@@ -366,38 +371,28 @@ const NONE_ENTRY = '\u0000none';
  * serves. It opens by itself while a direction has no model to run: what is
  * missing is then the first thing seen.
  */
-function DeviceModels({ stage, settings, update, pair, legs, models, disabled, tour, native, below }: Pick<Props, 'settings' | 'update' | 'pair' | 'legs' | 'models' | 'disabled'> & { stage: 'asr' | 'translation'; tour?: boolean; native?: NativeRunner; /** Drawn under the rows. */ below?: ReactNode }) {
+function DeviceModels({ stage, settings, pair, legs, models, disabled, tour, native, below }: Pick<Props, 'settings' | 'update' | 'pair' | 'legs' | 'models' | 'disabled'> & { stage: 'asr' | 'translation'; tour?: boolean; native: NativeRunner; /** Drawn under the rows. */ below?: ReactNode }) {
   const { t, i18n } = useTranslation();
   const engine = useNativeModels(stage);
   const status = nativeStoreOf(stage)((one) => one.status);
-  const device = useDeviceSettings(settings, update);
-  // The catalog's own codes: the pair as Local Inference would hold it.
   const source = deviceLanguage(pair.source);
   const target = deviceLanguage(pair.target);
-  const basePair = useMemo(() => ({ source, target }), [source, target]);
-  const override = useMemo(() => ({ settings: device.settings, update: device.update, pair: basePair }), [device.settings, device.update, basePair]);
-  const adapter = useWasmEngineAdapter(Boolean(disabled), override);
-  // The stage is a native engine's now. Its rows are the same ones: read as if the app's own models ran it.
-  const nativeRuns = Boolean(native?.inUse);
-  const asApp = useMemo(() => (stage === 'asr'
-    // The app cannot detect both languages. Keep the native speaker's source-language slot when projecting its rows.
-    ? { ...settings, asrHere: 'app' as const, ...(speaksBoth(settings, models, pair) ? { coach: false } : {}) }
-    : { ...settings, translateHere: 'app' as const }), [settings, stage, models, pair]);
-  const slots = useDeviceSlots(asApp, pair, legs, models).filter((slot) => slot.stage === stage);
+  const nameOf = (code: string) => languageLabel(deviceLanguage(code), i18n.language);
+  const slots = useNativeStageSlots(settings, pair, legs, models).filter((slot) => slot.stage === stage);
   /**
    * Fork: the native translation engine runs one model for the whole stage, not a copy for each direction (unlike
    * the app's own models). Its rows are drawn as the one choice it is, and the menu lists only models that take
    * every direction this run translates: a model offered for one direction would be the wrong one for the other
    * (`translatorUnfit`). The recognizer's engine keeps its rows, one a language (`byLanguage`).
    */
-  const engineOne = stage === 'translation' && nativeRuns;
+  const engineOne = stage === 'translation';
   const engineFits = (id: string): boolean => slots.every((slot) => nativeFits('translation', id, slot.source, slot.target));
-  // What is downloaded is known only once the model store has looked: until then a blank is its blank, not an answer.
-  const looked = useModelInitialized();
+  // What is downloaded is known only once the native engine has looked: until then a blank is its blank, not an answer.
+  const looked = nativeStoreOf(stage)((one) => one.asked);
   /** The language a row hears: where the engine hears, the other side's may be left to be detected. */
-  const heardIn = (slot: DeviceNeed): string => (nativeRuns && stage === 'asr' ? heardBy(settings, pair, slot.leg) : slot.source);
+  const heardIn = (slot: DeviceNeed): string => (stage === 'asr' ? heardBy(settings, pair, slot.leg) : slot.source);
   /** The engine's model that serves a row; null: the engine runs the stage and none is chosen for the row; undefined: the app's own models run it. */
-  const using = (slot: DeviceNeed): NativeCardModel | null | undefined => (native?.inUse ? native.inUse(slot) : undefined);
+  const using = (slot: DeviceNeed): NativeCardModel | null => native.inUse(slot);
   /**
    * Fork: the speaker heard in either of the pair's languages: the Mac's recognition hears that too, where it has both
    * (`nativeEither`) — offered for them as their own language's model.
@@ -415,7 +410,6 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
   /** A row with nothing to run, or whose model needs the person: not on this computer yet, or the engine failed with it. */
   const wanting = (slot: DeviceNeed): boolean => {
     const model = using(slot);
-    if (model === undefined) return looked && !adapter.resolved(slot);
     return model === null || !nativeDownloaded(status, model.id) || (status.run.state === 'failed' && status.run.model === model.id);
   };
   const missing = slots.find(wanting);
@@ -429,21 +423,15 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
     const mine = using(slot);
     return mine && !ready.some((m) => m.id === mine.id) ? [mine, ...ready] : ready;
   };
-  // An engine's model whose download ends while this is shown is the one wanted: it hears from then on, without being asked twice.
-  const sawFetching = useRef(new Set<string>());
-  useEffect(() => {
-    for (const id of engine.fetching) sawFetching.current.add(id);
-    const done = engine.ready.find((m) => sawFetching.current.has(m.id));
-    if (!done) return;
-    sawFetching.current.delete(done.id);
-    if (native && !disabled && (engineOne ? engineFits(done.id) : slots.some((slot) => fits(done.id, slot)))) native.onPick(done.id);
-  }, [engine]); // eslint-disable-line react-hooks/exhaustive-deps
-
+  const downloading = useNativeDownloads(stage, disabled, (id, slot) => {
+    if (engineOne ? engineFits(id) : slot && slots.some((current) => current.dir === slot.dir && current.leg === slot.leg) && fits(id, slot)) native.onPick(id, slot);
+  });
   if (slots.length === 0) return null;
+  if (looked && !status.supported) return <p className="kt-note">{t('providers.localai.nativeUnsupportedShort')}</p>;
 
   // The native translation engine, as the one model it runs: a model that takes every direction this run translates.
   if (engineOne) {
-    const mine = native!.inUse!();
+    const mine = native.inUse();
     const ready = engine.ready.filter((m) => engineFits(m.id));
     // A model chosen before and no longer offered still stands, so the setting is not silently another.
     const shown = mine && !ready.some((m) => m.id === mine.id) ? [mine, ...ready] : ready;
@@ -453,8 +441,8 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
     const libraryOpen = picked === undefined ? (looked && missingModel) : picked === ENGINE_ROW;
     const fittingAll = engine.offered.filter((m) => engineFits(m.id));
     const label = slots.length > 1
-      ? `${adapter.languageName(source)} ⇄ ${adapter.languageName(target)}`
-      : `${adapter.languageName(deviceLanguage(slots[0]!.source))} → ${adapter.languageName(deviceLanguage(slots[0]!.target))}`;
+      ? `${nameOf(source)} ⇄ ${nameOf(target)}`
+      : `${nameOf(deviceLanguage(slots[0]!.source))} → ${nameOf(deviceLanguage(slots[0]!.target))}`;
     return (
       <div className="kt-here" {...(tour ? { 'data-tour': 'engine-chips' } : {})}>
         <div className="kt-here__row">
@@ -469,8 +457,7 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
             onChange={(e) => {
               const value = e.target.value;
               if (value === NONE_ENTRY) return;
-              if (value === APP_ENTRY) native?.onBack?.();
-              else if (value.startsWith(NATIVE_ENTRY)) native?.onPick(value.slice(NATIVE_ENTRY.length));
+              if (value.startsWith(NATIVE_ENTRY)) native.onPick(value.slice(NATIVE_ENTRY.length));
             }}
             disabled={disabled}
           >
@@ -480,9 +467,6 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
                 {shown.map((m) => <option key={m.id} value={`${NATIVE_ENTRY}${m.id}`}>{m.name}</option>)}
               </optgroup>
             )}
-            <optgroup label={t('providers.localai.groupApp')}>
-              <option value={APP_ENTRY}>{t('providers.localai.groupApp')}</option>
-            </optgroup>
           </select>
           {mine && !engineFits(mine.id) && <p className="kt-note kt-note--todo" role="status">{t('providers.localai.translatorUnfit', { name: mine.name })}</p>}
         </div>
@@ -495,7 +479,7 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
               <div className="model-management-section kt-here__native">
                 <div className="model-subgroup">
                   <div className="model-subgroup__label"><Star size={11} />{t('models.recommendedGroup', 'Recommended')}</div>
-                  {fittingAll.map((m) => <NativeEngineCard key={m.id} kind="translation" model={m} recommended={m.name === fittingAll[0].name} selected={mine?.id === m.id} onSelect={() => { if (mine?.id !== m.id) native?.onPick(m.id); }} disabled={disabled} />)}
+                  {fittingAll.map((m) => <NativeEngineCard key={m.id} kind="translation" model={m} onDownloadStarted={() => downloading(m.id)} recommended={m.name === fittingAll[0].name} selected={mine?.id === m.id} onSelect={() => { if (mine?.id !== m.id) native.onPick(m.id); }} disabled={disabled} />)}
                 </div>
               </div>
             )}
@@ -511,10 +495,10 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
   const usedThere = openSlot ? using(openSlot) : undefined;
 
   const title = (slot: DeviceNeed) => {
-    if (stage !== 'asr') return `${adapter.languageName(deviceLanguage(slot.source))} → ${adapter.languageName(deviceLanguage(slot.target))}`;
+    if (stage !== 'asr') return `${nameOf(deviceLanguage(slot.source))} → ${nameOf(deviceLanguage(slot.target))}`;
     // A leg whose language is left to be detected: the other side's, in any language, or the user's own in either of the pair's (`speakBoth`).
     const heard = heardIn(slot);
-    const named = (code: string) => adapter.languageName(deviceLanguage(code));
+    const named = (code: string) => nameOf(deviceLanguage(code));
     if (!isAutoLanguage(heard)) return t('providers.localai.hears', { language: named(heard) });
     return slot.leg === 'speaker' ? t('providers.localai.hearsEither', { first: named(pair.source), second: named(pair.target) }) : t('providers.localai.hearsOther');
   };
@@ -522,24 +506,10 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
   return (
     <div className="kt-here" {...(tour ? { 'data-tour': 'engine-chips' } : {})}>
       {slots.map((slot) => {
-        const resolved = adapter.resolved(slot);
-        const auto = adapter.autoPick(slot);
         const label = title(slot);
         const mine = using(slot);
         const natives = nativeFor(slot);
-        const candidates = adapter.readyCandidates(slot);
-        // A language left to be detected is heard by a model that can tell languages apart: the app's own cannot, nor
-        // can it be known of a LocalAI's. And while the other side's is, that model hears this computer's every
-        // language (the engine runs one at a time): each row offers only such models.
-        const detecting = stage === 'asr' && nativeRuns && detectsOther(settings);
-        const explicit = mine === undefined && resolved?.source === 'explicit' ? resolved.modelId : '';
-        // Nothing to run is a state, said above the groups: of the engine's choice, or of the app's own models.
-        const nothing = mine === null ? t('providers.localai.nativeNone')
-          : mine !== undefined ? null
-            : !looked ? t('providers.localai.checking')
-              // A model chosen before and no longer offered for the language still hears it, with no automatic choice beside it.
-              : auto || explicit ? null
-                : natives.length > 0 ? t('providers.localai.nativeNone') : t('providers.localai.notDownloaded');
+        const nothing = mine ? null : t('providers.localai.nativeNone');
         return (
           <div className="kt-here__row" key={slot.dir}>
             <div className="kt-here__head">
@@ -547,18 +517,14 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
               <BrowseButton open={open === slot.dir} onToggle={() => setPicked(open === slot.dir ? null : slot.dir)} />
             </div>
             <select
-              className={`select-dropdown${(mine === undefined ? resolved || !looked : mine !== null) ? '' : ' kt-here__select--missing'}`}
+              className={`select-dropdown${(mine !== null) ? '' : ' kt-here__select--missing'}`}
               aria-label={label}
-              value={mine ? `${NATIVE_ENTRY}${mine.id}` : nothing !== null ? NONE_ENTRY : explicit}
+              value={mine ? `${NATIVE_ENTRY}${mine.id}` : NONE_ENTRY}
               onChange={(e) => {
                 const value = e.target.value;
                 if (value === NONE_ENTRY) return;
-                if (value.startsWith(NATIVE_ENTRY)) native?.onPick(value.slice(NATIVE_ENTRY.length), slot);
-                else {
-                  // One of the app's own, chosen while the engine runs the stage: the stage is the app's again, with it.
-                  if (mine !== undefined) native?.onBack?.();
-                  void adapter.select(slot, value);
-                }
+                if (value.startsWith(NATIVE_ENTRY)) native.onPick(value.slice(NATIVE_ENTRY.length), slot);
+
               }}
               disabled={disabled}
             >
@@ -568,13 +534,7 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
                   {natives.map((m) => <option key={m.id} value={`${NATIVE_ENTRY}${m.id}`}>{m.name}</option>)}
                 </optgroup>
               )}
-              {!detecting && looked && (auto || candidates.length > 0 || mine !== undefined) && (
-                <optgroup label={t('providers.localai.groupApp')}>
-                  <option value="">{auto ? t('providers.localai.auto', { name: adapter.displayName(auto) }) : t('providers.localai.appAuto')}</option>
-                  {/* The only one there is, is what "automatic" already names: it is listed by itself only once chosen so. */}
-                  {candidates.filter((c) => candidates.length > 1 || !auto || explicit === c.id).map((c) => <option key={c.id} value={c.id}>{c.sizeLabel ? `${c.name} · ${c.sizeLabel}` : c.name}</option>)}
-                </optgroup>
-              )}
+
             </select>
             {mine === null && <p className="kt-note kt-note--todo" role="status">{isAutoLanguage(heardIn(slot)) ? t('providers.localai.detectOtherNeeds') : t('providers.localai.nativeUnchosen', { source: languageLabel(heardIn(slot), i18n.language) })}</p>}
             {mine && !fits(mine.id, slot) && <p className="kt-note kt-note--todo" role="status">{t(stage === 'asr' ? 'providers.localai.nativeUnheard' : 'providers.localai.translatorUnfit', { name: mine.name })}</p>}
@@ -589,73 +549,31 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
             <div className="model-management-section kt-here__native">
               <div className="model-subgroup">
                 <div className="model-subgroup__label"><Star size={11} />{t('models.recommendedGroup', 'Recommended')}</div>
-                {fitting.map((m) => <NativeEngineCard key={m.id} kind={stage} model={m} recommended={m.name === fitting[0].name} selected={usedThere?.id === m.id} onSelect={() => { if (usedThere?.id !== m.id) native?.onPick(m.id, openSlot); }} disabled={disabled} />)}
+                {fitting.map((m) => <NativeEngineCard key={m.id} kind={stage} model={m} onDownloadStarted={() => downloading(m.id, openSlot)} recommended={m.name === fitting[0].name} selected={usedThere?.id === m.id} onSelect={() => { if (usedThere?.id !== m.id) native.onPick(m.id, openSlot); }} disabled={disabled} />)}
               </div>
             </div>
           )}
-          {/* The app's own models under them, named as the rest and without the mark: a model above carries it for this direction. */}
-          {fitting.length > 0 && <div className="model-management-section kt-here__rest"><div className="model-subgroup__label">{t('models.othersGroup', 'Other models')}</div></div>}
-          <FarSourceNote rest={fitting.length > 0} />
-          <ModelManagementSection isSessionActive={Boolean(disabled)} stageFilter={stage} direction={open} settings={device.settings} update={device.update} pair={basePair} unmarked={fitting.length > 0} />
-          {stage === 'asr' && <CustomModels disabled={Boolean(disabled)} />}
+
         </div>
       )}
     </div>
   );
 }
 
-/**
- * Under the app's own models, where their one source is not reached (`farFromModels`): what to expect of a download,
- * and that the models above it are another matter. Nothing is disabled: a person there may have a way through.
- */
-export function FarSourceNote({ rest, far = farFromModels() }: { /** Whether the native engines' models are listed above. */ rest: boolean; far?: boolean }) {
-  const { t } = useTranslation();
-  if (!far) return null;
-  return <p className="kt-note kt-here__far" role="note">{t(rest ? 'providers.localai.farSourceRest' : 'providers.localai.farSource')}</p>;
-}
-
-/**
- * This computer's feedback model: one of the catalog's chat models. The same
- * shape as the other stages' — the model in use, and the library under it,
- * in the library's own cards — but a list of its own: only a chat model can
- * be told what feedback is.
- */
-function DeviceChat({ value, onChange, disabled, native }: { value: string; onChange(id: string): void; disabled?: boolean; native?: NativeRunner }) {
+function DeviceChat({ disabled, native }: { disabled?: boolean; native: NativeRunner }) {
   const { t } = useTranslation();
   const engine = useNativeModels('coach');
   // The native feedback engine's model whose download ends while this is shown is the one wanted: it is used from then on.
-  const sawFetching = useRef(new Set<string>());
-  useEffect(() => {
-    for (const id of engine.fetching) sawFetching.current.add(id);
-    const done = engine.ready.find((m) => sawFetching.current.has(m.id));
-    if (!done) return;
-    sawFetching.current.delete(done.id);
-    if (native && !disabled) native.onPick(done.id);
-  }, [engine]); // eslint-disable-line react-hooks/exhaustive-deps
-  const statuses = useModelStatuses();
-  const downloads = useModelDownloads();
-  const errors = useDownloadErrors();
-  // Whether this computer has a graphics card for them is only known once the model store has looked: until then
-  // "no" is the store's blank, not an answer, and nothing is said of it.
-  const looked = useModelInitialized();
-  const webgpu = useWebGPUAvailable() || !looked;
-  const features = useDeviceFeatures();
-  const all = deviceChatModels();
-  const ready = all.filter((m) => statuses[m.id] === 'downloaded' && deviceReady(m, webgpu));
-  const auto = deviceCoachModel('');
+  const downloading = useNativeDownloads('coach', disabled, (id) => native.onPick(id));
   const status = nativeStoreOf('coach')((one) => one.status);
-  // The native engine's model, while it gives the feedback; undefined: one of the app's own does.
-  const mine = native?.inUse ? native.inUse() ?? undefined : undefined;
-  const natives = !native ? [] : mine && !engine.ready.some((m) => m.id === mine.id) ? [mine, ...engine.ready] : engine.ready;
+  const looked = nativeStoreOf('coach')((one) => one.asked);
+  const mine = native.inUse();
+  const natives = mine && !engine.ready.some((m) => m.id === mine.id) ? [mine, ...engine.ready] : engine.ready;
   const [picked, setPicked] = useState<boolean | undefined>(undefined);
-  // Opened by itself on a gap the store has found, not on its blank before it has looked — or on an engine's model
-  // that needs the person: not on this computer yet, or the engine failed with it.
-  const open = picked ?? (mine ? !nativeDownloaded(status, mine.id) || (status.run.state === 'failed' && status.run.model === mine.id) : looked && ready.length === 0);
-  const explicit = !mine && ready.some((m) => m.id === value) ? value : '';
-  // Nothing to run is a state, said above the groups.
-  const nothing = mine ? null : !looked ? t('providers.localai.checking') : auto ? null : natives.length > 0 ? t('providers.localai.nativeNone') : t('providers.localai.notDownloaded');
-  const name = (id: string) => { const entry = getManifestEntry(id); return entry ? shortenModelName(entry.name, entry.shortName) : id; };
+  const open = picked ?? (!mine || !nativeDownloaded(status, mine.id) || (status.run.state === 'failed' && status.run.model === mine.id));
+  const nothing = mine ? null : t('providers.localai.nativeNone');
   const label = t('providers.localai.model');
+  if (looked && !status.supported) return <p className="kt-note">{t('providers.localai.nativeUnsupportedShort')}</p>;
   return (
     <div className="kt-here">
       <div className="kt-here__row">
@@ -664,18 +582,14 @@ function DeviceChat({ value, onChange, disabled, native }: { value: string; onCh
           <BrowseButton open={open} onToggle={() => setPicked(!open)} />
         </div>
         <select
-          className={`select-dropdown${mine || auto || !looked ? '' : ' kt-here__select--missing'}`}
+          className={`select-dropdown${mine ? '' : ' kt-here__select--missing'}`}
           aria-label={label}
-          value={mine ? `${NATIVE_ENTRY}${mine.id}` : nothing !== null ? NONE_ENTRY : explicit}
+          value={mine ? `${NATIVE_ENTRY}${mine.id}` : NONE_ENTRY}
           onChange={(e) => {
             const picked = e.target.value;
             if (picked === NONE_ENTRY) return;
-            if (picked.startsWith(NATIVE_ENTRY)) native?.onPick(picked.slice(NATIVE_ENTRY.length));
-            else {
-              // One of the app's own, chosen while the engine gives the feedback: the app's again, with it.
-              if (mine) native?.onBack?.();
-              onChange(picked);
-            }
+            if (picked.startsWith(NATIVE_ENTRY)) native.onPick(picked.slice(NATIVE_ENTRY.length));
+
           }}
           disabled={disabled}
         >
@@ -685,12 +599,7 @@ function DeviceChat({ value, onChange, disabled, native }: { value: string; onCh
               {natives.map((m) => <option key={m.id} value={`${NATIVE_ENTRY}${m.id}`}>{m.name}</option>)}
             </optgroup>
           )}
-          {looked && (auto || ready.length > 0 || mine) && (
-            <optgroup label={t('providers.localai.groupApp')}>
-              <option value="">{auto ? t('providers.localai.auto', { name: name(auto) }) : t('providers.localai.appAuto')}</option>
-              {ready.filter((m) => ready.length > 1 || !auto || m.id === explicit).map((m) => <option key={m.id} value={m.id}>{`${name(m.id)} · ${getModelSizeMb(m, features)} MB`}</option>)}
-            </optgroup>
-          )}
+
         </select>
       </div>
       {open && (
@@ -700,41 +609,11 @@ function DeviceChat({ value, onChange, disabled, native }: { value: string; onCh
             <div className="model-management-section kt-here__native">
               <div className="model-subgroup">
                 <div className="model-subgroup__label"><Star size={11} />{t('models.recommendedGroup', 'Recommended')}</div>
-                {engine.offered.map((m, at) => <NativeEngineCard key={m.id} kind="coach" model={m} recommended={at === 0} selected={mine?.id === m.id} onSelect={() => { if (mine?.id !== m.id) native.onPick(m.id); }} disabled={disabled} />)}
+                {engine.offered.map((m, at) => <NativeEngineCard key={m.id} kind="coach" model={m} onDownloadStarted={() => downloading(m.id)} recommended={at === 0} selected={mine?.id === m.id} onSelect={() => { if (mine?.id !== m.id) native.onPick(m.id); }} disabled={disabled} />)}
               </div>
             </div>
           )}
-          {native && engine.offered.length > 0 && <div className="model-management-section kt-here__rest"><div className="model-subgroup__label">{t('models.othersGroup', 'Other models')}</div></div>}
-          <FarSourceNote rest={Boolean(native && engine.offered.length > 0)} />
-          {!webgpu && <p className="kt-note kt-note--todo">{t('providers.localai.chatModelsNoGpu')}</p>}
-          <div className="model-management-section">
-            <ModelGroup title={label} bare>
-              {all.map((m) => {
-                const runs = deviceReady(m, webgpu);
-                return (
-                  <ModelCard
-                    key={m.id}
-                    // A native model above carries the mark: the app's own are then listed without it.
-                    entry={native && engine.offered.length > 0 && m.recommended ? { ...m, recommended: false } : m}
-                    status={statuses[m.id] || 'not_downloaded'}
-                    download={downloads[m.id]}
-                    errorMessage={errors[m.id]}
-                    isSessionActive={Boolean(disabled)}
-                    // The one a run would load: the pick while it can run, else what a blank choice falls to.
-                    isSelected={!mine && deviceCoachModel(value) === m.id}
-                    isAutoSelected={!mine && !ready.some((r) => r.id === value) && auto === m.id}
-                    isCompatible={runs}
-                    compatibilityHint={runs ? undefined : t('settings.webgpuNotSupported', 'Not available in current environment')}
-                    deviceFeatures={features}
-                    onSelect={() => onChange(m.id)}
-                    onDownload={() => { useModelStore.getState().downloadModel(m.id).catch(() => { /* The store keeps the reason, and the card shows it. */ }); }}
-                    onCancel={() => useModelStore.getState().cancelDownload(m.id)}
-                    onDelete={() => { void useModelStore.getState().deleteModel(m.id); }}
-                  />
-                );
-              })}
-            </ModelGroup>
-          </div>
+
         </div>
       )}
     </div>
@@ -783,14 +662,6 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
     pinned.current = true;
     update({ ...Object.fromEntries(PLACE_FIELDS.map((field) => [field, now[field]])), ...patch } as Partial<S>);
   }, [update, pair]);
-
-  // A stage on this computer needs the model store loaded — what is downloaded, and what the graphics card can run.
-  // The readiness check loads it too, but only after the other device has answered: with that device away, the
-  // cards here would show an empty library and a computer without a graphics card.
-  const here = settings.asrVia === 'device' || settings.translateAt === 'device' || (settings.coach && settings.coachAt === 'device');
-  useEffect(() => {
-    if (here) deviceModelsLoaded().catch(() => { /* The library's own card says why, with a retry. */ });
-  }, [here]);
 
   const found: readonly LocalAIModel[] = models;
   // On the device the stages share: a device of the hearing stage's own (a phone) is none of what follows.
@@ -962,7 +833,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
 
   const connectFirst = !address.trim() && <p className="kt-note kt-note--todo">{t('providers.localai.connectFirst')}</p>;
   // The first card with a stage on this computer carries the tour's anchor.
-  const tourAt = settings.asrVia === 'device' && settings.asrHere === 'app' ? 'asr' : settings.translateAt === 'device' && settings.translateHere === 'app' ? 'translation' : null;
+  const tourAt = settings.asrVia === 'device' ? 'asr' : settings.translateAt === 'device' ? 'translation' : null;
   // What each leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
   const heardByLegs = legs.map((leg) => heardBy(settings, pair, leg, models));
   // The native recognizer, language by language: a choice is the model in use from then on, and that language's by name.
@@ -1201,7 +1072,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
             stage="asr" settings={settings} update={put} pair={pair} legs={legs} models={models} disabled={disabled} tour={tourAt === 'asr'}
             native={{
               onPick: pickNativeFor,
-              ...(settings.asrHere === 'native' ? { inUse: (slot: DeviceNeed) => nativePicked(nativePick, heardBy(settings, pair, slot.leg)) ?? null, onBack: () => put({ asrHere: 'app' }) } : {}),
+              inUse: (slot) => slot ? nativePicked(nativePick, heardBy(settings, pair, slot.leg)) : null,
             }}
           />
         )}
@@ -1256,7 +1127,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
             stage="translation" settings={settings} update={put} pair={pair} legs={legs} models={models} disabled={disabled} tour={tourAt === 'translation'}
             native={{
               onPick: (translateNativeModel) => put({ translateHere: 'native', translateNativeModel }),
-              ...(settings.translateHere === 'native' ? { inUse: () => nativeTranslator(settings.translateNativeModel), onBack: () => put({ translateHere: 'app' }) } : {}),
+              inUse: () => nativeTranslator(settings.translateNativeModel),
             }}
           />
         )}
@@ -1313,10 +1184,10 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
             )}
             {settings.coachAt === 'device' && (
               <DeviceChat
-                value={settings.coachDeviceModel} onChange={(coachDeviceModel) => put({ coachDeviceModel })} disabled={disabled}
+                disabled={disabled}
                 native={{
                   onPick: (coachNativeModel) => put({ coachHere: 'native', coachNativeModel }),
-                  ...(settings.coachHere === 'native' ? { inUse: () => nativeCoach(settings.coachNativeModel), onBack: () => put({ coachHere: 'app' }) } : {}),
+                  inUse: () => nativeCoach(settings.coachNativeModel),
                 }}
               />
             )}

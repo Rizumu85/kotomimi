@@ -66,7 +66,6 @@ describe('the words for a stage with nothing to run', () => {
 
 describe('the words for another device not chosen yet', () => {
   const noAuth = { signedIn: false, getToken: async () => null };
-  const localai = (catalog: unknown) => (catalog as { providers: { localai: Record<string, string> } }).providers.localai;
   /** What a missing credential reads as: its own code, else the runner's `credentials_missing` (`providerStore.refreshReadiness`, `run.ts`). */
   const said = (catalog: unknown, values: Record<string, string>) => {
     const read = localaiCredentials.read(values, noAuth);
@@ -93,7 +92,6 @@ describe('the words for Auto Detect where nothing detects the language', () => {
   const AUTO_PAIR = { source: 'auto', target: 'en' };
   const autoCtx = { ...ctx, pair: AUTO_PAIR };
   const AUTO_SPEAKER: SessionContext = { ...SPEAKER, direction: AUTO_PAIR };
-  const localai = (catalog: unknown) => (catalog as { providers: { localai: Record<string, string> } }).providers.localai;
   /** A LocalAI hears: whether its recognizer detects the language is its own business. */
   const localaiServer = createLocalAICheck({ fetch: (async (url: RequestInfo | URL) => new Response(JSON.stringify(String(url).endsWith('/capabilities')
     ? { data: [{ id: 'gpt-realtime', capabilities: [] }, { id: 'whisper', capabilities: ['transcript'] }] }
@@ -104,16 +102,10 @@ describe('the words for Auto Detect where nothing detects the language', () => {
     : { data: [{ id: 'kotomimi', owned_by: 'kotomimi' }, { id: 'sensevoice-int8', owned_by: 'kotomimi' }] }), { status: 200 })) as unknown as typeof fetch });
   const SERVER = { apiKey: '', endpoint: 'ws://192.168.1.10:8790/v1/realtime' };
 
-  it('this computer translating asks for the language, not for a download no model can answer', async () => {
+  it('lets the native translator accept an automatically detected source', async () => {
     const s = settings({ translateAt: 'device' });
-    const checked = await localaiServer(SERVER, s, autoCtx);
-    const built = buildLocalAI(AUTO_SPEAKER, s, { ...SHARED, models: [{ id: 'gpt-realtime', kind: 'pipeline' as const }] as LocalAIModel[] });
-    expect(checked).toMatchObject({ ok: false, code: 'source_auto' });
-    expect(built).toMatchObject({ code: 'source_auto' });
-    for (const catalog of [zhCN, zhTW]) {
-      expect(localai(catalog).sourceAuto).toBeTruthy();
-      if (!checked.ok) expect(noticeText(tIn(catalog as Catalog), { code: checked.code, message: checked.reason })).toBe(localai(catalog).sourceAuto);
-    }
+    expect(await localaiServer(SERVER, s, autoCtx)).toMatchObject({ ok: true });
+    expect(buildLocalAI(AUTO_SPEAKER, s, { ...SHARED, models: [{ id: 'gpt-realtime' }] })).toMatchObject({ stages: { speech: { engine: 'translator' } } });
   });
 
   it('another Kotomimi listening is refused before Start, not at it in its English', async () => {
@@ -132,7 +124,6 @@ describe('the words for Auto Detect where nothing detects the language', () => {
 
 describe('the words for another device or an API that does not answer as it should', () => {
   const DEVICE = { apiKey: '', endpoint: 'ws://192.168.1.20:8790/v1/realtime' };
-  const localai = (catalog: unknown) => (catalog as { providers: { localai: Record<string, string> } }).providers.localai;
   /** The catalog's sentence, its `{{name}}`s filled in: what the person reads. */
   const filled = (text: string, params: Record<string, string | number> = {}) => text.replace(/\{\{(\w+)\}\}/g, (_, name: string) => String(params[name]));
   type Answer = Response | Error | 'never';
@@ -222,3 +213,5 @@ describe('the other side\u2019s language left to be detected, heard by another K
     expect(built.stages?.heard).toBe('auto');
   });
 });
+
+const localai = (catalog: unknown) => (catalog as { providers: { localai: Record<string, string> } }).providers.localai;

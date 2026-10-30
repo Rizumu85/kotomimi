@@ -5,7 +5,6 @@ import type { CheckResult } from '../../lib/provider/types';
 import type { NativeEngineStatus } from '../../lib/native/nativeEngine';
 import { buildLocalAI, checkLocalAIWithNative, LOCALAI_DEFAULTS, localaiProvider, migrateLocalAISettings, type LocalAISettings } from './localai';
 import { coachGap, coachIdle, coachUp } from './localaiNative';
-import { deviceChoices } from './localaiDevice';
 import { NATIVE_COACHES, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
 import { SHARED } from './testing';
 import { useNativeCoachStore } from '../../stores/nativeEngineStore';
@@ -37,12 +36,11 @@ describe('the models of the native feedback engine', () => {
 
 describe('the native feedback engine as what gives the feedback on this computer', () => {
   it('is a third runner of the stage here, kept as stored with its model', () => {
-    expect(LOCALAI_DEFAULTS).toMatchObject({ coachHere: 'app', coachNativeModel: NATIVE_DEFAULT_COACH });
+    expect(LOCALAI_DEFAULTS).toMatchObject({ coachHere: 'native', coachNativeModel: NATIVE_DEFAULT_COACH });
     const kept = migrateLocalAISettings({ coachHere: 'native', coachNativeModel: 'gemma-4-e2b' }, { legacy: {}, credentials: {} });
     expect(kept).toMatchObject({ coachHere: 'native', coachNativeModel: 'gemma-4-e2b' });
     expect(localaiProvider.checkReads).toContain('coachNativeModel');
     // None of the app's own models is asked for the feedback then.
-    expect(deviceChoices({ ...settings(), selections: {} }).coachAt).toBe('api');
   });
 
   it('is asked as an API model is, at its address on this computer, with the prompt and its worked examples', () => {
@@ -110,7 +108,7 @@ describe('the check of the provider, with the feedback engine', () => {
     expect(native.coachGap).toHaveBeenCalledWith('gemma-4-e2b');
     expect(native.coachIdle).not.toHaveBeenCalled();
     // Not coached, or coached by another runner, or only the other side runs: it rests.
-    for (const other of [settings({ coach: false }), settings({ coachHere: 'app' }), settings({ coachAt: 'api' })]) {
+    for (const other of [settings({ coach: false }), settings({ coachAt: 'server' }), settings({ coachAt: 'api' })]) {
       const rest = deps();
       await checkLocalAIWithNative({ apiKey: '', endpoint: '' }, other, CTX, check, rest);
       expect(rest.coachGap).not.toHaveBeenCalled();

@@ -85,13 +85,12 @@ export const useLanStore = create<LanState>()(
             return;
           }
           set({ status: { state: 'starting' }, ...NO_FIREWALL });
-          const [{ createAppLanHost }, { lanModelsLoaded }] = await Promise.all([import('../lib/lan/appHost'), import('../lib/lan/appModels')]);
+          const { createAppLanHost } = await import('../lib/lan/appHost');
           host ??= createAppLanHost((clients) => set({ clients }));
           if (!host) {
             set({ status: { state: 'error', code: 'unsupported', message: 'Sharing needs the desktop app.' } });
             return;
           }
-          await lanModelsLoaded();
           const started = await host.start({ port, key });
           set({ status: started.ok ? { state: 'on', port: started.port, addresses: started.addresses, name: typeof started.name === 'string' ? started.name : '' } : { state: 'error', code: started.code, message: started.message } });
           // Not awaited: sharing is on whatever the firewall says, and the answer takes a moment.

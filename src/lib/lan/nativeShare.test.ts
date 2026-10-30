@@ -5,8 +5,7 @@ import { holdNative, holdNativeForRun, nativeIdle, preferNative, translatorIdle 
 import { useModelStore } from '../../stores/modelStore';
 import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import { appLanModels } from './appModels';
-import { NATIVE_KNOWN_WITHIN_MS, nativeCoachAnswer, nativeCoachFor, nativeKnown, nativeOrOwnTranslator, nativeRecognizer, nativeRecognizerFor, nativeShared, nativeTranslatorFor } from './nativeShare';
-import type { Translator } from './translator';
+import { NATIVE_KNOWN_WITHIN_MS, nativeCoachAnswer, nativeCoachFor, nativeKnown, nativeTranslator, nativeRecognizer, nativeRecognizerFor, nativeShared, nativeTranslatorFor } from './nativeShare';
 
 const downloaded = { state: 'downloaded' as const, received: 1, total: 1 };
 const absent = { state: 'absent' as const, received: 0, total: 1 };
@@ -44,16 +43,13 @@ describe('what of the native engines is shared', () => {
     ]);
   });
 
-  it('is listed before the app\'s own models, each kind with its own', () => {
+  it('shares native models even when old app models are still downloaded', () => {
     useNativeEngineStore.setState({ status: PC });
     useNativeTranslatorStore.setState({ status: TRANSLATORS });
     useModelStore.setState({ modelStatuses: { 'whisper-large-v3-turbo-webgpu': 'downloaded', 'hy-mt15-1.8b-translation': 'downloaded' } });
-    const shared = appLanModels.shared().map((m) => `${m.kind}:${m.id}`);
-    expect(shared.indexOf('asr:r2t2-q8')).toBe(0);
-    expect(shared.indexOf('asr:r2t2-q8')).toBeLessThan(shared.indexOf('asr:whisper-large-v3-turbo-webgpu'));
-    expect(shared.indexOf('translate:index-translate-2b')).toBeLessThan(shared.indexOf('translate:hy-mt15-1.8b-translation'));
-    expect(shared.indexOf('asr:whisper-large-v3-turbo-webgpu')).toBeLessThan(shared.indexOf('translate:index-translate-2b'));
+    expect(appLanModels.shared().map((m) => m.id)).toEqual(['r2t2-q8', 'index-translate-2b', 'hy-mt2-1.8b']);
   });
+
 });
 
 describe('the recognizer a device gets', () => {
@@ -69,7 +65,7 @@ describe('the recognizer a device gets', () => {
   it('is the native one for a language it hears, when the choice is left to this computer', () => {
     useNativeEngineStore.setState({ status: PC });
     expect(appLanModels.recognizer('ja', '')).toEqual({ modelId: 'r2t2-q8', streaming: true });
-    // A language it does not hear is the app's own models' to answer: none downloaded here.
+    // A language no native model hears is unavailable.
     expect(appLanModels.recognizer('th', '')).toBeNull();
   });
 
@@ -91,10 +87,9 @@ describe('the recognizer a device gets', () => {
     preferNative({ asr: null });
   });
 
-  it('is the app\'s own model when that is the one named, though a native one is there', () => {
+  it('treats a retired app recognizer as a stale remote selection', () => {
     useNativeEngineStore.setState({ status: PC });
-    useModelStore.setState({ modelStatuses: { 'whisper-large-v3-turbo-webgpu': 'downloaded' } });
-    expect(appLanModels.recognizer('ja', 'whisper-large-v3-turbo-webgpu')).toEqual({ modelId: 'whisper-large-v3-turbo-webgpu', streaming: false });
+    expect(appLanModels.recognizer('ja', 'whisper-large-v3-turbo-webgpu')).toEqual({ modelId: 'r2t2-q8', streaming: true });
   });
 
   it('is, of two downloaded for the engine, the one measured better — unless the other is running: starting another would stop it under whoever listens', () => {
@@ -164,10 +159,8 @@ describe('the translator a device gets', () => {
       sent.push({ url: String(url), body: JSON.parse(String(init?.body)) });
       return new Response(JSON.stringify({ choices: [{ message: { content: ' 你好。 ' } }] }), { status: 200 });
     });
-    const own = vi.fn();
-    const translator = nativeOrOwnTranslator(own as unknown as () => Translator, fetch as unknown as typeof globalThis.fetch);
+    const translator = nativeTranslator(fetch as unknown as typeof globalThis.fetch);
     await translator.init('ja', 'zh', 'index-translate-2b');
-    expect(own).not.toHaveBeenCalled();
     const stop = vi.fn();
     translatorIdle({ stop });
     expect(stop).not.toHaveBeenCalled();
@@ -180,21 +173,16 @@ describe('the translator a device gets', () => {
     expect(stop).toHaveBeenCalledTimes(1);
   });
 
-  it('is the app\'s own engine for any other model, used as it always was', async () => {
-    const engine: Translator = { onError: null, init: vi.fn(async () => undefined), translate: vi.fn(async () => ({ translatedText: '译文' })), dispose: vi.fn() };
-    const translator = nativeOrOwnTranslator(() => engine);
-    await translator.init('ja', 'zh', 'hy-mt15-1.8b-translation');
-    expect(engine.init).toHaveBeenCalledWith('ja', 'zh', 'hy-mt15-1.8b-translation');
-    expect(await translator.translate('text', 'prompt', true)).toEqual({ translatedText: '译文' });
-    expect(engine.translate).toHaveBeenCalledWith('text', 'prompt', true);
+  it('rejects an app translator instead of starting a local worker', async () => {
+    const translator = nativeTranslator();
+    await expect(translator.init('ja', 'zh', 'hy-mt15-1.8b-translation')).rejects.toThrow('not a native model');
     translator.dispose();
-    expect(engine.dispose).toHaveBeenCalledTimes(1);
   });
 
   it('says so when the engine does not come up', async () => {
     const down: NativeEngineStatus = { ...TRANSLATORS, run: { state: 'failed', model: 'index-translate-2b', port: 0, tail: 'no device' } };
     useNativeTranslatorStore.setState({ status: down, start: async () => down });
-    const translator = nativeOrOwnTranslator(vi.fn() as unknown as () => Translator);
+    const translator = nativeTranslator();
     await expect(translator.init('ja', 'zh', 'index-translate-2b')).rejects.toThrow('could not start');
     translator.dispose();
   });
@@ -414,11 +402,5 @@ describe('a model named that cannot take the pair (fork)', () => {
     expect(appLanModels.translator('ja', 'zh', 'hy-mt2-1.8b')).toBe('hy-mt2-1.8b');
   });
 
-  it('is a pair model of the app\u2019s, named for the direction it does not translate', () => {
-    useModelStore.setState({ modelStatuses: { 'opus-mt-ja-en': 'downloaded' } });
-    expect(appLanModels.shared().find((m) => m.id === 'opus-mt-ja-en')?.pair).toEqual(['ja', 'en']);
-    expect(appLanModels.translator('ja', 'en', 'opus-mt-ja-en')).toBe('opus-mt-ja-en');
-    expect(appLanModels.translator('en', 'ja', 'opus-mt-ja-en')).toBeNull();
-    expect(appLanModels.refusal!('en', 'ja', 'opus-mt-ja-en')).toBe('unfit');
-  });
+
 });

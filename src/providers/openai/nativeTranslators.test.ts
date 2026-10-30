@@ -10,8 +10,8 @@ import { NO_NATIVE_ENGINE, type NativeEngineStatus } from '../../lib/native/nati
 import type { CheckContext, CheckResult } from '../../lib/provider/types';
 import { useModelStore } from '../../stores/modelStore';
 import { useNativeTranslatorStore } from '../../stores/nativeEngineStore';
-import { admitLocalAI, buildLocalAI, checkLocalAIWithNative, localaiProvider, LOCALAI_DEFAULTS, migrateLocalAISettings, type LocalAICredentials, type LocalAISettings } from './localai';
-import { deviceChoices, deviceNeeds, translatesNatively } from './localaiDevice';
+import { buildLocalAI, checkLocalAIWithNative, localaiProvider, LOCALAI_DEFAULTS, migrateLocalAISettings, type LocalAICredentials, type LocalAISettings } from './localai';
+import { translatesNatively } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
 import { translatorBaseUrl, translatorGap } from './localaiNative';
 import { BEFORE_SLOT, NATIVE_DEFAULT_TRANSLATOR, NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator, TEXT_SLOT, translatorRequest } from './nativeTranslators';
@@ -95,15 +95,14 @@ describe('a request in a model\'s own form, on the chat wire', () => {
 
 describe('the native translation engine as what translates on this computer', () => {
   it('is kept as stored, with its model', () => {
-    expect(LOCALAI_DEFAULTS).toMatchObject({ translateHere: 'app', translateNativeModel: NATIVE_DEFAULT_TRANSLATOR });
+    expect(LOCALAI_DEFAULTS).toMatchObject({ translateHere: 'native', translateNativeModel: NATIVE_DEFAULT_TRANSLATOR });
     const kept = migrateLocalAISettings({ translateHere: 'native', translateNativeModel: 'hy-mt2-1.8b' }, { legacy: {}, credentials: {} });
-    expect(kept).toMatchObject({ translateHere: 'native', translateNativeModel: 'hy-mt2-1.8b', coachHere: 'app' });
+    expect(kept).toMatchObject({ translateHere: 'native', translateNativeModel: 'hy-mt2-1.8b', coachHere: 'native' });
   });
 
   it('asks nothing of the app\'s own translation models', () => {
     const s = settings(NATIVE);
     expect(translatesNatively(s)).toBe(true);
-    expect(deviceNeeds(deviceChoices(s), PAIR, ['speaker', 'participant'])).toEqual([]);
   });
 
   it('builds a leg whose translation is asked of the engine on this computer, in the model\'s own form', () => {
@@ -115,7 +114,6 @@ describe('the native translation engine as what translates on this computer', ()
     expect(config.stages?.speech).not.toHaveProperty('key');
     expect(config.stages?.typed).toBe(config.stages?.speech);
     // Its memory is not the app's own models' to count.
-    expect(admitLocalAI({ speaker: config })).toBe(true);
   });
 
   it('refuses a pair its model does not translate', () => {
@@ -163,7 +161,7 @@ describe('the provider\'s check, with the translation engine', () => {
   it('lets the engine rest when it does not translate', async () => {
     const gap = vi.fn(async () => null);
     const native = deps(gap as unknown as typeof translatorGap);
-    await checkLocalAIWithNative(NONE, settings({ ...NATIVE, translateHere: 'app' }), CTX, async () => OK, native);
+    await checkLocalAIWithNative(NONE, settings({ ...NATIVE, translateAt: 'api' }), CTX, async () => OK, native);
     expect(gap).not.toHaveBeenCalled();
     expect(native.translatorIdle).toHaveBeenCalledTimes(1);
   });

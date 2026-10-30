@@ -1,85 +1,55 @@
-/**
- * Fork: what the stages this computer runs itself share with Local
- * Inference (`src/providers/localInference`) — this provider's settings
- * under the names Local Inference's views read, the slots a run would
- * actually load, and its turn detection. The models themselves are chosen
- * and downloaded in the stage's own card (`LocalAIAssist`).
- */
-import { useCallback, useMemo } from 'react';
+// Fork: native stage rows and turn detection, independent of the browser model catalog.
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { CircleHelp } from 'lucide-react';
+import { VadControl } from '../../components/Settings/sections/LocalSettingsControls';
+import Tooltip from '../../components/Tooltip/Tooltip';
 import type { LegName } from '../../lib/conversation/types';
 import type { LanguagePair, SettingsProps } from '../../lib/provider/types';
-import { LocalInferenceTurnDetectionControls, LocalInferenceTurnDetectionHelp, LocalInferenceTurnDetectionSummary } from '../localInference/LocalInferenceTurnDetection';
-import { LOCAL_INFERENCE_DEFAULTS, type LocalInferenceSettings } from '../localInference/settings';
-// Type only: `localai.ts` imports these views, and a value import back would close a cycle.
 import type { LocalAISettings as S } from './localai';
 import type { LocalAIModel } from './localaiModels';
-import { cutsSentencesHere, deviceChoices, deviceLanguage, deviceNeeds, type DeviceNeed } from './localaiDevice';
+import { cutsSentencesHere, deviceNeeds, type DeviceNeed } from './localaiDevice';
 import { RealtimeTurnDetectionControls, RealtimeTurnDetectionHelp, RealtimeTurnDetectionSummary } from './RealtimeTurnDetection';
 
-const FALLBACK_PAIR: LanguagePair = { source: 'ja', target: 'en' };
-
-/** The fields of this provider's settings that are Local Inference's own, under the same names. */
-const OWN_FIELDS = ['selections', 'vadThreshold', 'vadNegativeThreshold', 'vadMinSilenceDuration', 'vadMinSpeechDuration', 'vadMaxSpeechDuration'] as const;
-
-/**
- * This provider's settings as Local Inference's views read them, and a
- * writer that takes back only the fields that are this provider's too. The
- * settings object keeps its identity while those fields do: the engine
- * adapter underneath is memoized on it.
- */
-export function useDeviceSettings(settings: S, update: (patch: Partial<S>) => void): { settings: LocalInferenceSettings; update(patch: Partial<LocalInferenceSettings>): void } {
-  const { selections, vadThreshold, vadNegativeThreshold, vadMinSilenceDuration, vadMinSpeechDuration, vadMaxSpeechDuration } = settings;
-  const projected = useMemo<LocalInferenceSettings>(
-    () => ({ ...LOCAL_INFERENCE_DEFAULTS, selections, vadThreshold, vadNegativeThreshold, vadMinSilenceDuration, vadMinSpeechDuration, vadMaxSpeechDuration }),
-    [selections, vadThreshold, vadNegativeThreshold, vadMinSilenceDuration, vadMinSpeechDuration, vadMaxSpeechDuration],
-  );
-  const write = useCallback((patch: Partial<LocalInferenceSettings>) => {
-    const own: Partial<S> = {};
-    for (const field of OWN_FIELDS) if (patch[field] !== undefined) (own as Record<string, unknown>)[field] = patch[field];
-    if (Object.keys(own).length > 0) update(own);
-  }, [update]);
-  return { settings: projected, update: write };
-}
-
-/** The slots a run would load on this computer, each once: both legs' recognizers may be the same slot. */
-export function useDeviceSlots(settings: S, pair: LanguagePair, legs: readonly LegName[], models: readonly LocalAIModel[]): DeviceNeed[] {
-  const { asrVia, asrModel, translateAt, coach, coachAt, selections, asrHere, translateHere, coachHere, speakBoth } = settings;
-  const { source, target } = pair;
+/** One row per stage and language direction, regardless of the installed models. */
+export function useNativeStageSlots(settings: S, pair: LanguagePair, legs: readonly LegName[], models: readonly LocalAIModel[]): DeviceNeed[] {
   return useMemo(() => {
     const seen = new Set<string>();
-    return deviceNeeds(deviceChoices({ asrVia, asrModel, translateAt, coach, coachAt, selections, asrHere, translateHere, coachHere, speakBoth }), { source, target }, legs, models)
+    return deviceNeeds(settings, pair, legs, models)
       .filter((need) => !seen.has(`${need.dir}|${need.stage}`) && Boolean(seen.add(`${need.dir}|${need.stage}`)));
-  }, [asrVia, asrModel, translateAt, coach, coachAt, selections, asrHere, translateHere, coachHere, speakBoth, source, target, legs, models]);
+  }, [settings, pair, legs, models]);
 }
 
-/** Local Inference's turn-detection views over this provider's settings: the knobs of the recognizer the speaker's leg loads. */
-function useDeviceTurnProps(props: SettingsProps<S>): SettingsProps<LocalInferenceSettings> {
-  const device = useDeviceSettings(props.settings, props.update);
-  const pair = props.pair ?? FALLBACK_PAIR;
-  // A coached speaker speaks the target language: their recognizer is that direction's.
-  const heard = deviceLanguage(props.settings.coach ? pair.target : pair.source);
-  const other = deviceLanguage(props.settings.coach ? pair.source : pair.target);
-  const devicePair = useMemo(() => ({ source: heard, target: other }), [heard, other]);
-  return { settings: device.settings, update: device.update, disabled: props.disabled, pair: devicePair };
+function NativeTurnSummary({ settings }: SettingsProps<S>) {
+  const { t } = useTranslation();
+  return <>{`${t('settings.vadSettings', 'VAD Settings')} · ${t('settings.vadMinSilenceDuration', 'Min Silence Duration')}: ${settings.vadMinSilenceDuration.toFixed(2)}s`}</>;
 }
 
-function DeviceTurnSummary(props: SettingsProps<S>) {
-  return <LocalInferenceTurnDetectionSummary {...useDeviceTurnProps(props)} />;
-}
-function DeviceTurnControls(props: SettingsProps<S>) {
-  return <LocalInferenceTurnDetectionControls {...useDeviceTurnProps(props)} />;
-}
-function DeviceTurnHelp(props: SettingsProps<S>) {
-  return <LocalInferenceTurnDetectionHelp {...useDeviceTurnProps(props)} />;
+function NativeTurnHelp() {
+  const { t } = useTranslation();
+  return (
+    <Tooltip content={t('settings.vadSettingsTooltip')} position="top">
+      <CircleHelp className="tooltip-trigger" size={14} />
+    </Tooltip>
+  );
 }
 
-/** Turn detection is whoever hears: this computer's own knobs, or a Realtime server's — the other device's, or this computer's LocalAI. */
+function NativeTurnControls({ settings, update, disabled = false }: SettingsProps<S>) {
+  return <VadControl values={{
+    vadThreshold: settings.vadThreshold,
+    vadNegativeThreshold: settings.vadNegativeThreshold,
+    vadMinSilenceDuration: settings.vadMinSilenceDuration,
+    vadMinSpeechDuration: settings.vadMinSpeechDuration,
+    vadMaxSpeechDuration: settings.vadMaxSpeechDuration,
+  }} onChange={update} disabled={disabled} />;
+}
+
 export function LocalAITurnDetectionSummary(props: SettingsProps<S>) {
-  return cutsSentencesHere(props.settings) ? <DeviceTurnSummary {...props} /> : <RealtimeTurnDetectionSummary {...props} />;
+  return cutsSentencesHere(props.settings) ? <NativeTurnSummary {...props} /> : <RealtimeTurnDetectionSummary {...props} />;
 }
 export function LocalAITurnDetectionControls(props: SettingsProps<S>) {
-  return cutsSentencesHere(props.settings) ? <DeviceTurnControls {...props} /> : <RealtimeTurnDetectionControls {...props} />;
+  return cutsSentencesHere(props.settings) ? <NativeTurnControls {...props} /> : <RealtimeTurnDetectionControls {...props} />;
 }
 export function LocalAITurnDetectionHelp(props: SettingsProps<S>) {
-  return cutsSentencesHere(props.settings) ? <DeviceTurnHelp {...props} /> : <RealtimeTurnDetectionHelp {...props} />;
+  return cutsSentencesHere(props.settings) ? <NativeTurnHelp /> : <RealtimeTurnDetectionHelp {...props} />;
 }

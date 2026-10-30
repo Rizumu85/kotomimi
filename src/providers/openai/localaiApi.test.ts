@@ -6,7 +6,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { SessionContext } from '../../lib/contract/adapter';
 import type { CheckContext } from '../../lib/provider/types';
-import { admitLocalAI, buildLocalAI, createLocalAICheck, LOCALAI_DEFAULTS, localaiCredentials, type LocalAIConfig, type LocalAISettings } from './localai';
+import { buildLocalAI, createLocalAICheck, LOCALAI_DEFAULTS, localaiCredentials, type LocalAIConfig, type LocalAISettings } from './localai';
 import { needsServer } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
 import { SHARED } from './testing';
@@ -96,10 +96,6 @@ describe('recognition by an API: the run it builds', () => {
   it('is refused while the API or its model is not named', () => {
     expect(buildLocalAI(SPEAKER, settings({ ...API, asrApiModel: ' ' }), shared)).toMatchObject({ code: 'asr_unnamed' });
     expect(buildLocalAI(SPEAKER, settings({ ...API, asrApiBaseUrl: '' }), shared)).toMatchObject({ code: 'asr_unnamed' });
-  });
-
-  it('counts none of this computer\'s memory for the recognizer', () => {
-    expect(admitLocalAI({ speaker: configFor(SPEAKER, API) })).toBe(true);
   });
 });
 

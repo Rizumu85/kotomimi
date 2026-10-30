@@ -89,7 +89,7 @@ export async function nativeCoachAnswer(model: string, messages: unknown, extra:
   return typeof content === 'string' ? content.replace(/<think>[\s\S]*?<\/think>/g, '').trim() : '';
 }
 
-/** The native recognizer for a language: the one named when it is downloaded and hears it, else — nothing named — the first downloaded that does. Null: none, and the app's own models answer. */
+/** The native recognizer for a language: the one named when it is downloaded and hears it, else — nothing named — the first downloaded that does. Null: no native recognizer is available. */
 export function nativeRecognizerFor(language: string, wanted: string, also?: string): { modelId: string; streaming: boolean; also?: string } | null {
   const status = useNativeEngineStore.getState().status;
   const usable = (id: string) => nativeDownloaded(status, id);
@@ -177,32 +177,21 @@ export function nativeRecognizer(model: { modelId: string; also?: string }): Rec
   return asr;
 }
 
-/**
- * A translator that is the native translation engine when it is asked for one
- * of that engine's models, and `other` — the app's own — for any other. The
- * choice is made when it is told its model, which is when it is told
- * anything.
- */
-export function nativeOrOwnTranslator(other: () => Translator, doFetch: typeof fetch = (input, init) => fetch(input, init)): Translator {
-  let own: Translator | null = null;
+/** A native translation engine held for the lifetime of a shared translator. */
+export function nativeTranslator(doFetch: typeof fetch = (input, init) => fetch(input, init)): Translator {
   let native: { id: string; source: string; target: string } | null = null;
   let release: (() => void) | null = null;
   const translator: Translator = {
     onError: null,
     async init(sourceLang, targetLang, modelId) {
-      if (!modelId || !isNativeTranslator(modelId)) {
-        own = other();
-        own.onError = (error) => translator.onError?.(error);
-        return own.init(sourceLang, targetLang, modelId);
-      }
+      if (!modelId || !isNativeTranslator(modelId)) throw new Error('The shared translator is not a native model.');
       release ??= holdNative('translation');
       const status = await useNativeTranslatorStore.getState().start(modelId);
       if (status.run.state !== 'ready' || status.run.model !== modelId) throw new Error('The translation engine of this computer could not start.');
       native = { id: modelId, source: sourceLang, target: targetLang };
       return undefined;
     },
-    async translate(text, systemPrompt, wrapTranscript) {
-      if (own) return own.translate(text, systemPrompt, wrapTranscript);
+    async translate(text) {
       if (!native) throw new Error('The translator was not told its model.');
       const request = translatorRequest(NATIVE_TRANSLATORS.find((m) => m.id === native!.id)!, native.source, native.target);
       const response = await doFetch(`${translatorBaseUrl()}/chat/completions`, {
@@ -217,8 +206,6 @@ export function nativeOrOwnTranslator(other: () => Translator, doFetch: typeof f
       return { translatedText: typeof content === 'string' ? content.replace(/<think>[\s\S]*?<\/think>/g, '').trim() : '' };
     },
     dispose() {
-      own?.dispose();
-      own = null;
       native = null;
       release?.();
       release = null;

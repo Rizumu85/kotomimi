@@ -1,5 +1,7 @@
 # Kotomimi（ことみみ）
 
+> **Runtime update — 2026-10-29:** Kotomimi's "this computer" stages and LAN sharing now use native engines only. The embedded LocalAI runner and the browser/WASM/WebGPU app-model runner have been removed from this provider. Old local runner settings normalize to native; native model choices and remote stage locations are preserved. Missing native models block readiness instead of falling back to browser models or Bing. External LocalAI servers, APIs, and phones remain supported. The upstream `src/providers/localInference/` implementation is retained; its desktop visibility and the remaining upstream Bing integration are separate follow-ups. Historical app-model descriptions below no longer describe the Kotomimi provider.
+
 Kotomimi 是 Sokuji 的一个分支：在实时翻译之外，加上了自建模型的自由搭配和学语言用的辅助功能。名字取自"言葉"（话语）和"耳"（耳朵）。
 
 基于上游 [kizuna-ai-lab/sokuji](https://github.com/kizuna-ai-lab/sokuji) v0.42.3（`d2f8001`）。上游的说明见 [README.md](README.md)，这份文件只讲本分支多出来的东西。

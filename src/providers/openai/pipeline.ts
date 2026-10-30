@@ -4,8 +4,7 @@
  * detects turns and writes the source text, and makes no answer — or this
  * computer's own recognizer, the Local Inference adapter run without a
  * translation of its own. Each finished source is then handed to what
- * answers: a text model over chat completions (`textModel.ts`), or a
- * translation model this computer runs itself. The answer is this leg's
+ * answers: a native engine or remote text model over chat completions (`textModel.ts`). The answer is this leg's
  * translation segment, paired with the source by the same origin.
  *
  * What a stage answers with is its own business: a translation, or — for a
@@ -26,7 +25,7 @@ import { framePayload } from '../../lib/contract/framePayload';
 import { describeCause } from '../../lib/diagnostics/describeCause';
 import { createLocalInferenceAdapter } from '../localInference/adapter';
 import type { LocalInferenceConfig } from '../localInference/config';
-import { defaultEngines, type LocalEngines, type TranslationLike } from '../localInference/engines';
+import type { LocalEngines } from '../localInference/engines';
 import { createApiAsr } from './apiAsr';
 import { createNativeAsr, type NativeLimits } from './nativeAsr';
 import { oneOfTwo, saidInOwn, sameSpeech } from '../../lib/language/script';
@@ -88,21 +87,7 @@ export interface TextStage {
   extra?: Readonly<Record<string, unknown>>;
 }
 
-/** A stage this computer runs itself (`localaiDevice.ts`): a translation, or — by one of the catalog's chat models — feedback. */
-export interface DeviceStage {
-  via: 'device';
-  kind: 'translate' | 'coach';
-  /** The model's id in the app's own catalog. */
-  model: string;
-  /** The instructions: the model's own translation prompt for this direction, or the feedback's; and whether the source goes up wrapped in the tags a translation prompt names. */
-  system: string;
-  wrapTranscript: boolean;
-  language?: string;
-  /** Fork: the direction its engine is loaded for, where it is not the leg's (`Stages.back`). */
-  direction?: { source: string; target: string };
-}
-
-export type AnswerStage = TextStage | DeviceStage;
+export type AnswerStage = TextStage;
 
 export interface Stages {
   /** What answers a finished source. Null: the server's own pipeline does, inside the Realtime session. */
@@ -179,8 +164,6 @@ export interface PipelineCredentials extends RealtimeCredentials {
 export interface PipelineDeps {
   openSocket: OpenSocket;
   fetch: typeof fetch;
-  /** This computer's own engines: the app's by default, fakes in tests. */
-  engines: LocalEngines;
   /**
    * Names the recognizer in a pipeline of this computer's LocalAI (`PipelineConfig.prepare`). A LocalAI takes no
    * recognizer but its pipeline's own in a session that only transcribes, and a session keeps the one the pipeline
@@ -229,18 +212,6 @@ export function tidyAnswer(kind: AnswerStage['kind'], text: string): string {
   if (/^[✓✔☑]/.test(lines[0]) || /^(ok|correct)[.!]?$/i.test(lines[0])) return '✓';
   return lines.join('\n');
 }
-
-/** The device stages of a leg, one per model: speech and typed text usually share theirs. */
-function deviceStages(stages: Stages): DeviceStage[] {
-  const out: DeviceStage[] = [];
-  for (const stage of [stages.speech, stages.typed, stages.back?.stage, stages.feedback?.stage]) {
-    if (stage?.via === 'device' && !out.some((s) => engineKey(s) === engineKey(stage))) out.push(stage);
-  }
-  return out;
-}
-
-/** A device stage's engine: one per model, and per direction where a stage names its own (`DeviceStage.direction`). */
-const engineKey = (stage: DeviceStage): string => (stage.direction ? `${stage.model}:${stage.direction.source}>${stage.direction.target}` : stage.model);
 
 /**
  * What the legs of the runs now open have lately heard, each stretch with
@@ -304,11 +275,6 @@ class PipelineLeg implements AdapterSession {
   private readonly running = new Map<AnswerStage['kind'], { controller: AbortController; stage: AnswerStage }>();
   private innerBusy = false;
   private saidBusy = false;
-  /** This computer's translation models, by id, once loaded. */
-  private readonly translators = new Map<string, TranslationLike>();
-  /** How many of them have loaded, and the inner session's own loading count: one progress for the starting surface. */
-  private loadedHere = 0;
-  private innerLoading = { done: 0, total: 0 };
   /** The phones this leg uses, asked now and then whether they are still there (`phoneWatch.ts`). */
   private readonly phones: PhoneWatch;
 
@@ -317,7 +283,6 @@ class PipelineLeg implements AdapterSession {
     private readonly stages: Stages,
     private readonly events: AdapterEvents,
     private readonly doFetch: typeof fetch,
-    private readonly engines: LocalEngines,
     private readonly engineBase: (engine: 'translator' | 'coach', model: string) => Promise<EngineAddress> = engineBaseNow,
   ) {
     this.inner = eventsFrom((e) => this.onInner(e));
@@ -328,60 +293,12 @@ class PipelineLeg implements AdapterSession {
         if (!this.ended) this.events.degraded({ code: 'phone_quiet', message: 'A phone this session uses stopped answering.' });
       },
     });
-    for (const stage of [stages.speech, stages.typed, stages.back?.stage, stages.feedback?.stage]) if (stage && stage.via !== 'device' && stage.phone) this.watchPhone(stage.baseUrl);
+    for (const stage of [stages.speech, stages.typed, stages.back?.stage, stages.feedback?.stage]) if (stage?.phone) this.watchPhone(stage.baseUrl);
   }
 
   /** A phone this leg uses, watched until the leg ends: one a stage answers on, or what hears (`hearing`). */
   watchPhone(base: string): void {
     if (!this.ended) this.phones.add(base);
-  }
-
-  /**
-   * Loads this computer's translation models, each for the leg's direction.
-   * One that cannot load rejects the start, the others disposed; so does
-   * the start's signal.
-   */
-  async open(): Promise<void> {
-    const wanted = deviceStages(this.stages);
-    if (wanted.length === 0) return;
-    const { signal, clock } = this.request;
-    if (signal.aborted) throw signal.reason ?? new Error('aborted');
-    const { source, target } = this.request.context.direction;
-    const loading = wanted.map((stage) => ({ stage, engine: this.engines.translation() }));
-    const disposeAll = () => { for (const { engine } of loading) engine.dispose(); };
-    let onAbort: () => void = () => {};
-    const aborted = new Promise<never>((_, reject) => {
-      onAbort = () => reject(signal.reason ?? new Error('aborted'));
-      signal.addEventListener('abort', onAbort, { once: true });
-    });
-    try {
-      await Promise.race([
-        aborted,
-        Promise.all(loading.map(async ({ stage, engine }) => {
-          this.frame('out', 'device.translation.start', { model: stage.model });
-          const started = clock.now();
-          await engine.init(baseOf(stage.direction?.source ?? source), baseOf(stage.direction?.target ?? target), stage.model);
-          this.frame('out', 'device.translation.ready', { model: stage.model, initDurationMs: clock.now() - started });
-          this.loadedHere += 1;
-          this.sayLoading('translation');
-        })),
-      ]);
-    } catch (error) {
-      disposeAll();
-      throw error instanceof Error && !signal.aborted ? new Error(`Translation engine init failed: ${error.message}`) : error;
-    } finally {
-      signal.removeEventListener('abort', onAbort);
-    }
-    // What hears failed to start meanwhile: nothing here is wanted.
-    if (this.ended) {
-      disposeAll();
-      throw new Error('the session ended');
-    }
-    for (const { stage, engine } of loading) {
-      // A failure no request carries — the worker died: no translation would ever settle.
-      engine.onError = (error) => this.fail(`Translation stopped: ${error}`);
-      this.translators.set(engineKey(stage), engine);
-    }
   }
 
   attach(session: AdapterSession): this {
@@ -453,17 +370,6 @@ class PipelineLeg implements AdapterSession {
     this.queue.length = 0;
     for (const { controller } of this.running.values()) controller.abort(new Error('the session ended'));
     this.running.clear();
-    for (const engine of this.translators.values()) engine.dispose();
-    this.translators.clear();
-  }
-
-  /** This leg can no longer answer: said once, and the inner session stopped. */
-  private fail(message: string): void {
-    if (this.ended) return;
-    const session = this.session;
-    this.end();
-    this.events.failed({ message });
-    void session?.stop();
   }
 
   private onInner(e: AdapterEvent): void {
@@ -540,8 +446,7 @@ class PipelineLeg implements AdapterSession {
         this.sayBusy();
         return;
       case 'loading':
-        this.innerLoading = { done: e.payload.done, total: e.payload.total };
-        this.sayLoading(e.payload.stage);
+        this.events.loading(e.payload);
         return;
       case 'degraded':
         // This computer's recognizer says it only transcribes: here a stage answers what it hears.
@@ -750,25 +655,13 @@ class PipelineLeg implements AdapterSession {
     return saidInOwn(text, target, source) ? target : undefined;
   }
 
-  /** The inner session's models and this leg's own, as one count. */
-  private sayLoading(stage: string): void {
-    const here = deviceStages(this.stages).length;
-    if (here === 0) {
-      this.events.loading({ stage, ...this.innerLoading });
-      return;
-    }
-    // Before the inner session has counted its own, a recognizer on this computer is known to be one more.
-    const innerTotal = this.innerLoading.total || (this.request.config.device ? 1 : 0);
-    this.events.loading({ stage, done: this.innerLoading.done + this.loadedHere, total: innerTotal + here });
-  }
-
   private push(job: Job): void {
     this.queue.push(job);
     this.sayBusy();
     this.pump();
   }
 
-  /** Each kind answers in source order; slow feedback does not hold up translations. A shared local worker stays serial. */
+  /** Each kind answers in source order; slow feedback does not hold up translations. */
   private pump(): void {
     if (this.ended) return;
     for (const kind of ['translate', 'coach'] as const) {
@@ -777,8 +670,6 @@ class PipelineLeg implements AdapterSession {
       if (index < 0) continue;
       const job = this.queue[index];
       const stage = job.stage;
-      const occupied = stage.via === 'device' && [...this.running.values()].some((active) => active.stage.via === 'device' && engineKey(active.stage) === engineKey(stage));
-      if (occupied) continue;
       this.queue.splice(index, 1);
       const controller = new AbortController();
       this.running.set(kind, { controller, stage });
@@ -793,7 +684,6 @@ class PipelineLeg implements AdapterSession {
 
   private async answer(job: Job, signal: AbortSignal): Promise<void> {
     const { stage } = job;
-    const { clock } = this.request;
     const ref = ++this.refs;
     let opened = false;
     let shown = '';
@@ -810,11 +700,10 @@ class PipelineLeg implements AdapterSession {
       shown = text;
       this.events.segmentText({ ref, text, ...(stage.language ? { language: stage.language } : {}) });
     };
-    const where = stage.via === 'device' ? { device: true } : stage.phone ? { phone: true } : {};
+    const where = stage.phone ? { phone: true } : {};
     this.frame('out', 'text.request', { stage: stage.kind, model: stage.model, chars: job.text.length, ...where });
     try {
-      const started = clock.now();
-      const answer: { text: string; firstMs?: number; totalMs: number; model?: string } = stage.via === 'device' ? await this.translateHere(stage, job.text, started) : await this.complete(stage, job.text, signal, show, job.before);
+      const answer: { text: string; firstMs?: number; totalMs: number; model?: string } = await this.complete(stage, job.text, signal, show, job.before);
       if (this.ended) return;
       const final = tidyAnswer(stage.kind, answer.text);
       show(final);
@@ -864,19 +753,11 @@ class PipelineLeg implements AdapterSession {
     );
   }
 
-  /** This computer's own answer: whole when it comes, since its engines write nothing before the end. */
-  private async translateHere(stage: DeviceStage, text: string, started: number): Promise<{ text: string; totalMs: number }> {
-    const engine = this.translators.get(engineKey(stage));
-    if (!engine) throw new Error('the model is not loaded');
-    const result = await engine.translate(text, stage.system, stage.wrapTranscript);
-    return { text: result.translatedText ?? '', totalMs: this.request.clock.now() - started };
-  }
-
   /** A source left without its answer: the session goes on, and says so. */
   private unanswered(job: Job, why: string, cause?: unknown): void {
     const what = job.stage.kind === 'coach' ? 'The feedback model' : 'The translation model';
     // A phone that has not the memory for the model refuses it so (503, `Share.ensure`): said as that, where to look.
-    const noRoom = job.stage.via !== 'device' && job.stage.phone === true && /has not the memory/.test(why);
+    const noRoom = job.stage.phone === true && /has not the memory/.test(why);
     this.events.degraded({
       // Each said as what it was: a sentence with no feedback, a typed sentence with no translation (which the
       // contract's `text-input-answered` wants said), a heard one with none.
@@ -925,8 +806,11 @@ const REMOTE_LAST_WORDS_MS = 60_000;
 
 export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter<PipelineConfig, PipelineCredentials> {
   const realtime = createRealtimeAdapter(deps.openSocket ? { openSocket: deps.openSocket } : {});
-  const engines = deps.engines ?? defaultEngines;
-  const local = createLocalInferenceAdapter(engines);
+  // The reused audio adapter only transcribes; text and speech synthesis have no local worker.
+  const engines: Omit<LocalEngines, 'asr'> = {
+    translation: () => { throw new Error('The pipeline has no app-model translator.'); },
+    tts: () => { throw new Error('The pipeline has no app-model speech synthesizer.'); },
+  };
   /** What hears on this computer: its own recognizer, or — the same adapter with that one engine changed — an API's. */
   const hearing = (device: DeviceHearing, request: StartRequest<PipelineConfig, PipelineCredentials>, onPhone: (base: string) => void) => {
     const { api, native } = device;
@@ -934,7 +818,7 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
       const start = deps.native?.start ?? ((model: string) => askNativeEngine('start', model));
       return createLocalInferenceAdapter({ ...engines, asr: () => createNativeAsr({ bridge: deps.native?.bridge ?? ipcNativeBridge, start: () => start(native.model), model: native.model, clock: request.clock, ...(native.limits ? { limits: native.limits } : {}), ...(native.either ? { also: native.either.also } : {}) }) });
     }
-    if (!api) return local;
+    if (!api) throw new Error('Recognition requires a native engine or an API.');
     const key = api.key ? request.credentials[api.key] : undefined;
     const asked = deps.fetch ?? fetchNow;
     const byApi = () => createApiAsr({ baseUrl: api.baseUrl, model: api.model, ...(key ? { key } : {}), fetch: asked, clock: request.clock });
@@ -971,22 +855,12 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
       // a start opens its socket in the same turn.)
       if (prepare && deps.prepare && !device) await deps.prepare(prepare.pipeline, prepare.transcription).catch(() => undefined);
       if (!device && (!stages || (!stages.speech && !stages.typed && !stages.asIs))) return realtime.start(dialled(request), events);
-      const leg = new PipelineLeg(request, stages ?? { speech: null, typed: null }, events, deps.fetch ?? fetchNow, engines, deps.native?.base ?? engineBaseNow);
-      // What hears and what answers load together; either failing lets the other go.
-      const opening = leg.open();
-      opening.catch(() => {});
+      const leg = new PipelineLeg(request, stages ?? { speech: null, typed: null }, events, deps.fetch ?? fetchNow, deps.native?.base ?? engineBaseNow);
       let session: AdapterSession;
       try {
         session = await (device ? hearing(device, request, (base) => leg.watchPhone(base)).start(hearingRequest(request, device, stages?.heard), leg.inner) : realtime.start(dialled(request), leg.inner));
       } catch (error) {
         leg.abandon();
-        throw error;
-      }
-      try {
-        await opening;
-      } catch (error) {
-        leg.abandon();
-        await session.stop();
         throw error;
       }
       return leg.attach(session);

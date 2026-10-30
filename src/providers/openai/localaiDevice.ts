@@ -1,22 +1,8 @@
-/**
- * Fork: the stages this computer runs itself — the models the app downloads
- * and runs in its own workers (`src/lib/local-inference`), the ones the
- * built-in Local Inference provider uses. Here they are one more place each
- * stage can run: speech recognition, with its own turn detection, in place
- * of the Realtime server; translation, in place of the server's pipeline or
- * a text model; and grammar feedback, by one of the catalog's chat models.
- *
- * Which model a stage runs is chosen as Local Inference chooses it: one
- * selection per stage of a direction (`src→tgt`), blank meaning the best
- * one downloaded. The model store answers; this module only asks it, for the
- * builder, the readiness check and the settings' own views.
- */
-import { deviceReady, getManifestByType, getManifestEntry, type ModelManifestEntry } from '../../lib/local-inference/modelManifest';
-import { directionKey, emptyDirection, type Selections } from '../../lib/local-inference/selection/types';
+// Fork: stage placement, language behavior, and native model rows.
+import { directionKey } from '../../lib/local-inference/selection/types';
 import type { LegName } from '../../lib/conversation/types';
 import type { EngineSlot, LanguagePair } from '../../lib/provider/types';
 import { AUTO } from '../../lib/provider/languages';
-import { useModelStore } from '../../stores/modelStore';
 import { choiceOf, serverBilingual } from './serverRecognizers';
 import { KOTOMIMI_HOST, type LocalAIModel } from './localaiModels';
 
@@ -36,21 +22,7 @@ export type Place = (typeof PLACES)[number];
  */
 export const PLACE_FIELDS = ['translateAt', 'translateServerModel', 'translateModel', 'translateNeedsKey', 'coachAt', 'coachServerModel', 'coachBaseUrl', 'coachModel', 'coachNeedsKey'] as const;
 
-/**
- * Who runs a stage placed on this computer: the app's own models, or the
- * native engine. A LocalAI choice from an older build is read as the native
- * engine (`localai.ts` `hereOf`).
- */
-export const HERES = ['app'] as const;
-export type Here = (typeof HERES)[number];
-
-/**
- * The hearing stage has a second runner here: the native engine
- * (`localaiNative.ts`) — a runtime the app downloads and runs beside
- * itself, cutting the sentences as the app's own recognizers do.
- */
-export const ASR_HERES = [...HERES, 'native'] as const;
-export type AsrHere = (typeof ASR_HERES)[number];
+export type AsrHere = 'native';
 
 /** Where each stage runs. The feedback's place counts only while the speaker is coached. */
 export interface StagePlacement {
@@ -66,7 +38,7 @@ export interface StagePlacement {
   /** The same of the translation and of the feedback: a phone that lends its text models. Blank or absent: the shared device. */
   translateOther?: string;
   coachOther?: string;
-  /** On this computer: by whom. Absent: the app's own models. */
+  /** On this computer: by whom. Legacy field; native is the only local runtime. */
   asrHere?: AsrHere;
   translateHere?: AsrHere;
   coachHere?: AsrHere;
@@ -74,7 +46,6 @@ export interface StagePlacement {
 
 /** The settings a device stage reads: where each stage runs, and the picks. */
 export interface DeviceChoices extends StagePlacement {
-  selections: Selections;
   /** Fork: the speaker speaks the other side's language too (`speakBoth`): their sentences in it are translated back. */
   speakBoth?: boolean;
   asrModel?: string;
@@ -104,20 +75,17 @@ export const translatePlace = (s: Pick<StagePlacement, 'translateAt' | 'translat
 /** The feedback runs on the device the stages share: the speaker is coached, there, and not on a device of its own. */
 export const coachesOnShared = (s: Pick<StagePlacement, 'coach' | 'coachAt' | 'coachOther'>): boolean => coachIs(s, 'server') && !coachesAtOwnDevice(s);
 
-/** This computer's LocalAI hears: a Realtime session, as another device's is, on the loopback. */
-
-
-/** The app's own recognizer hears, or an API it uploads each sentence to: this computer cuts the sentences itself. */
+/** The native recognizer hears, or an API it uploads each sentence to: this computer cuts the sentences itself. */
 export const cutsSentencesHere = (s: Pick<StagePlacement, 'asrVia' | 'asrHere' | 'asrOther'>): boolean => hearingPlace(s) !== 'server';
 
 /** The native translation engine translates (`nativeTranslators.ts`): none of the app's own models is asked for. */
-export const translatesNatively = (s: Pick<StagePlacement, 'translateAt' | 'translateHere'>): boolean => s.translateAt === 'device' && s.translateHere === 'native';
+export const translatesNatively = (s: Pick<StagePlacement, 'translateAt' | 'translateHere'>): boolean => s.translateAt === 'device';
 
 /** The native feedback engine gives the feedback (`nativeCoaches.ts`): none of the app's own models is asked for. */
-export const coachesNatively = (s: Pick<StagePlacement, 'coach' | 'coachAt' | 'coachHere'>): boolean => s.coach && s.coachAt === 'device' && s.coachHere === 'native';
+export const coachesNatively = (s: Pick<StagePlacement, 'coach' | 'coachAt' | 'coachHere'>): boolean => s.coach && s.coachAt === 'device';
 
 /** The native engine hears: none of the app's own models is asked for. */
-export const hearsNatively = (s: Pick<StagePlacement, 'asrVia' | 'asrHere'>): boolean => s.asrVia === 'device' && s.asrHere === 'native';
+export const hearsNatively = (s: Pick<StagePlacement, 'asrVia' | 'asrHere'>): boolean => s.asrVia === 'device';
 
 /** What the other device lists, as far as detection asks: its recognizers and the languages each takes. */
 type Listed = ReadonlyArray<object>;
@@ -189,83 +157,6 @@ export function needsServer(s: StagePlacement): boolean {
   return hearingPlace(s) === 'server' || translatePlace(s) === 'server' || coachesOnShared(s);
 }
 
-/** The stored settings as the device stages read them: a stage this computer's LocalAI runs, or its native engine, asks nothing of the app's own models. */
-export function deviceChoices(s: DeviceChoices): DeviceChoices {
-  const own = (place: Place, here: AsrHere | undefined): Place => (place === 'device' && here !== undefined && here !== 'app' ? 'api' : place);
-  return { asrVia: own(hearingPlace(s), s.asrHere), translateAt: own(s.translateAt, s.translateHere), coach: s.coach, coachAt: own(s.coachAt, s.coachHere), selections: s.selections, ...(s.speakBoth ? { speakBoth: true } : {}), ...(s.asrModel ? { asrModel: s.asrModel } : {}) };
-}
-
-/**
- * The catalog's chat models: the translation models that are a chat model
- * underneath and take any instructions (the Qwen family), so they can give
- * grammar feedback as well as translate. Smallest first, as the catalog
- * lists them.
- */
-export function deviceChatModels(): ModelManifestEntry[] {
-  return getManifestByType('translation').filter((m) => m.translationWorkerType === 'qwen' || m.translationWorkerType === 'qwen35');
-}
-
-/** The chat models this computer can run now: downloaded, and on hardware that runs them. */
-export function deviceChatModelsReady(): ModelManifestEntry[] {
-  const { modelStatuses, webgpuAvailable } = useModelStore.getState();
-  return deviceChatModels().filter((m) => modelStatuses[m.id] === 'downloaded' && deviceReady(m, webgpuAvailable));
-}
-
-/** The feedback model on this computer: the pick while it can run, else the largest that can; null when none can. */
-export function deviceCoachModel(picked: string): string | null {
-  const ready = deviceChatModelsReady();
-  if (picked && ready.some((m) => m.id === picked)) return picked;
-  return ready.length > 0 ? ready[ready.length - 1].id : null;
-}
-
-/** The model store, loaded: its first scan of what is downloaded may still be running. */
-export async function deviceModelsLoaded(signal?: AbortSignal): Promise<void> {
-  const store = useModelStore.getState();
-  if (store.initialized) return;
-  const init = store.initialize();
-  if (!signal) return init;
-  if (signal.aborted) {
-    init.catch(() => {});
-    throw signal.reason ?? new Error('aborted');
-  }
-  await new Promise<void>((resolve, reject) => {
-    const onAbort = () => reject(signal.reason ?? new Error('aborted'));
-    signal.addEventListener('abort', onAbort, { once: true });
-    init.then(
-      () => { signal.removeEventListener('abort', onAbort); resolve(); },
-      (error) => { signal.removeEventListener('abort', onAbort); reject(error); },
-    );
-  });
-}
-
-/** The recognizer for speech in `heard`, on the leg whose other language is `other`: the pick for `heard→other`, else the best downloaded. */
-export function deviceRecognizer(heard: string, other: string, selections: Selections): { modelId: string; streaming: boolean } | null {
-  if (heard === AUTO) return null;
-  const resolved = useModelStore.getState().resolve(deviceLanguage(heard), deviceLanguage(other), selections).asr;
-  if (!resolved) return null;
-  return { modelId: resolved.modelId, streaming: getManifestEntry(resolved.modelId)?.type === 'asr-stream' };
-}
-
-/**
- * The translation model for `source→target`. A speech-translation model
- * picked here (an ASR model that translates what it hears) is no text
- * translator: the pick is then read as blank, and the best downloaded
- * translation model answers.
- */
-export function deviceTranslator(source: string, target: string, selections: Selections): string | null {
-  if (source === AUTO) return null;
-  const src = deviceLanguage(source);
-  const tgt = deviceLanguage(target);
-  const { resolve } = useModelStore.getState();
-  const picked = resolve(src, tgt, selections).translation;
-  if (!picked) return null;
-  if (getManifestEntry(picked.modelId)?.type === 'translation') return picked.modelId;
-  const dir = directionKey(src, tgt);
-  const masked = { ...selections, [dir]: { ...(selections[dir] ?? emptyDirection()), translation: { modelId: '' } } };
-  const again = resolve(src, tgt, masked).translation;
-  return again && getManifestEntry(again.modelId)?.type === 'translation' ? again.modelId : null;
-}
-
 /** One model a run would load on this computer, and whether the run cannot start without it. */
 export interface DeviceNeed extends EngineSlot {
   leg: LegName;
@@ -302,14 +193,4 @@ export function deviceNeeds(s: DeviceChoices, pair: LanguagePair, legs: readonly
     if (s.translateAt === 'device' && both) out.push({ leg, dir: slot(target, source), stage: 'translation', source: target, target: source, required: true });
   }
   return out;
-}
-
-/** The model a need resolves to now; null when none is downloaded for it. */
-export function deviceModelFor(need: DeviceNeed, selections: Selections): string | null {
-  return need.stage === 'asr' ? deviceRecognizer(need.source, need.target, selections)?.modelId ?? null : deviceTranslator(need.source, need.target, selections);
-}
-
-/** Calls back when a model finishes downloading or is deleted: a readiness answer about the old set is stale. */
-export function watchDeviceModels(onChange: () => void): () => void {
-  return useModelStore.subscribe((s) => s.modelStatuses, () => onChange());
 }

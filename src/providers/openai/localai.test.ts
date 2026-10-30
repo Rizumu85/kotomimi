@@ -131,7 +131,7 @@ describe("LocalAI Realtime's stage keys", () => {
   });
 
   it('declares every setting that decides a field, an endpoint the check reaches, or a model a start needs named', () => {
-    expect(localaiProvider.checkReads).toEqual(['asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'asrOther', 'asrOtherModel', 'translateOther', 'translateOtherModel', 'coachOther', 'coachOtherModel', 'asrDetectOther', 'speakBoth', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'coachDeviceModel', 'serverNeedsKey', 'selections', 'model', 'translateModel', 'translateServerModel', 'coachModel', 'coachServerModel', 'asrHere', 'translateHere', 'coachHere', 'asrNativeModel', 'asrNativeByLanguage', 'translateNativeModel', 'coachNativeModel']);
+    expect(localaiProvider.checkReads).toEqual(['asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'asrOther', 'asrOtherModel', 'translateOther', 'translateOtherModel', 'coachOther', 'coachOtherModel', 'asrDetectOther', 'speakBoth', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'serverNeedsKey', 'model', 'translateModel', 'translateServerModel', 'coachModel', 'coachServerModel', 'asrHere', 'translateHere', 'coachHere', 'asrNativeModel', 'asrNativeByLanguage', 'translateNativeModel', 'coachNativeModel']);
   });
 });
 

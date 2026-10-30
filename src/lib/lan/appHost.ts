@@ -1,15 +1,9 @@
-/**
- * Fork: the sharing host as the app runs it — the bridge to the main
- * process, the app's own engines, and what the model store says is
- * downloaded (`appModels.ts`). The one module of `src/lib/lan` that knows the app; the rest
- * is handed what it needs.
- */
+/** The desktop sharing host, backed exclusively by native engines. */
 import { realClock } from '../contract/clock';
-import { defaultEngines } from '../../providers/localInference/engines';
 import { createLanHost, type LanBridge, type LanHost } from './host';
 import { FIREWALL_UNKNOWN, firewallAnswer, type LanFirewall } from './protocol';
 import { appLanModels } from './appModels';
-import { nativeCoachAnswer, nativeKnown, nativeOrOwnTranslator, nativeRecognizer } from './nativeShare';
+import { nativeCoachAnswer, nativeKnown, nativeTranslator, nativeRecognizer } from './nativeShare';
 import { holdNative } from '../../providers/openai/localaiNative';
 import { NATIVE_COACH_EXTRA } from '../../providers/openai/nativeCoaches';
 
@@ -54,9 +48,12 @@ export function createAppLanHost(onClients: (count: number) => void): LanHost | 
     bridge,
     models: appLanModels,
     engines: {
-      // A native engine's model is run by that engine (`nativeShare.ts`); any other by the app's own.
-      recognizer: (model) => nativeRecognizer(model) ?? defaultEngines.asr(model),
-      translator: () => nativeOrOwnTranslator(() => defaultEngines.translation()),
+      recognizer: (model) => {
+        const recognizer = nativeRecognizer(model);
+        if (!recognizer) throw new Error('The shared recognizer is not a native model.');
+        return recognizer;
+      },
+      translator: () => nativeTranslator(),
       // The feedback model is the native engine's alone: the app's own chat models are not lent.
       // Asked as this computer asks it for itself, unless the device says otherwise.
       coach: { answer: (model, messages, extra) => nativeCoachAnswer(model, messages, { ...NATIVE_COACH_EXTRA, ...extra }), hold: () => holdNative('coach') },

@@ -4,7 +4,7 @@ import type { Readiness } from '../../lib/provider/types';
 import { useHeardByStore } from '../../stores/heardByStore';
 import { useModelStore } from '../../stores/modelStore';
 import { useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
-import { FarSourceNote, LocalAIAssist } from './LocalAIAssist';
+import { LocalAIAssist } from './LocalAIAssist';
 import { LOCALAI_DEFAULTS, type LocalAISettings } from './localai';
 import { PLACE_FIELDS } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
@@ -34,12 +34,6 @@ vi.mock('../../components/LanSharing/ServerFinder', () => ({
     );
   },
 }));
-// The library is Local Inference's own, tested beside it: here only which one opens. Its card is the real one: the chat models are drawn with it.
-vi.mock('../../components/Settings/sections/ModelManagementSection', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('../../components/Settings/sections/ModelManagementSection')>()),
-  ModelManagementSection: ({ stageFilter, direction }: { stageFilter?: string; direction?: string }) => <div data-testid="library">{`${stageFilter}:${direction}`}</div>,
-}));
-vi.mock('../../components/CustomModels/CustomModels', () => ({ CustomModels: () => null }));
 // The keys the built-in providers keep, by their settings prefix.
 const saved = vi.hoisted(() => ({ keys: {} as Record<string, string> }));
 vi.mock('./apiServiceKey', () => ({ savedKeyOf: async (prefix: string) => saved.keys[prefix] ?? '' }));
@@ -373,101 +367,6 @@ describe('the stage cards: an API chosen by its service', () => {
 });
 
 describe('the stage cards: on this computer', () => {
-  it('says "not chosen" where a model of the engine is downloaded and nothing hears yet, and "not downloaded" only where nothing is', () => {
-    const before = useNativeEngineStore.getState().status;
-    try {
-      useNativeEngineStore.setState({ status: { supported: true, engine: 'ready', engineBytes: 1, models: { 'qwen3-asr-1.7b-q8': { state: 'downloaded', received: 1, total: 1 } }, run: { state: 'stopped', model: null, port: 0, tail: '' }, up: [] } });
-      const { card } = draw({ settings: { asrVia: 'device', translateAt: 'device' } });
-      const menu = card(HEAR).getByRole('combobox') as HTMLSelectElement;
-      expect(menu.options[0].textContent).toBe('providers.localai.nativeNone');
-      // The engine's model, under the engine's own group and by its own name.
-      // No model of the app's own is downloaded, so its group has nothing to offer and is not drawn.
-      expect([...menu.querySelectorAll('optgroup')].map((g) => g.label)).toEqual(['providers.localai.groupNative']);
-      expect([...menu.querySelectorAll('optgroup')[0].querySelectorAll('option')].map((o) => o.textContent)).toEqual(['Qwen3-ASR 1.7B GGUF']);
-    } finally {
-      useNativeEngineStore.setState({ status: before });
-    }
-  });
-
-
-  it('chooses the model in the card, and opens the library under it by itself while a model is missing', () => {
-    const { card } = draw({ settings: { asrVia: 'device', translateAt: 'device' } });
-    // No recognizer is downloaded: the library is the first thing seen, for the language heard; the tour points here.
-    expect(card(HEAR).getByTestId('library').textContent).toBe('asr:zh→ja');
-    expect(card(HEAR).getByRole('combobox').closest('[data-tour="engine-chips"]')).toBeTruthy();
-    expect((card(HEAR).getByRole('combobox') as HTMLSelectElement).options[0].textContent).toBe('providers.localai.notDownloaded');
-    // The online translator is always there: the translation has its model, and its library waits to be opened.
-    expect(card(TRANSLATE).queryByTestId('library')).toBeNull();
-    expect((card(TRANSLATE).getByRole('combobox') as HTMLSelectElement).options[0].textContent).toBe('providers.localai.auto');
-    fireEvent.click(card(TRANSLATE).getByRole('button', { name: 'providers.localai.browse' }));
-    expect(card(TRANSLATE).getByTestId('library').textContent).toBe('translation:zh→ja');
-    fireEvent.click(card(TRANSLATE).getByRole('button', { name: 'providers.localai.browse' }));
-    expect(card(TRANSLATE).queryByTestId('library')).toBeNull();
-  });
-
-  it('gives feedback with one of the catalog\'s chat models, downloaded from the card — in the library\'s own cards', () => {
-    const downloadModel = vi.fn(async () => {});
-    useModelStore.setState({ downloadModel });
-    const { card, update } = draw({ settings: { coach: true, coachAt: 'device' } });
-    const coach = card(COACH);
-    // None downloaded: the list of them is open, a card each, as the other stages' libraries draw theirs.
-    const ids = ['qwen2.5-0.5b-translation', 'qwen3-0.6b-translation', 'qwen3.5-0.8b-translation', 'qwen3.5-2b-translation'];
-    for (const id of ids) expect(coach.getByTestId(`model-card-${id}`).className).toContain('model-card');
-    const downloads = coach.getAllByTitle('models.download');
-    expect(downloads).toHaveLength(4);
-    fireEvent.click(downloads[0]);
-    expect(downloadModel).toHaveBeenCalledWith('qwen2.5-0.5b-translation');
-    // Downloaded ones can be picked: from the menu, or by their card. Left alone, the largest is the one in use.
-    act(() => useModelStore.setState({ modelStatuses: { 'qwen3-0.6b-translation': 'downloaded', 'qwen3.5-2b-translation': 'downloaded' } }));
-    fireEvent.click(coach.getByRole('button', { name: 'providers.localai.browse' }));
-    expect(coach.getByTestId('model-card-qwen3.5-2b-translation').className).toContain('model-card--selected');
-    const select = coach.getByRole('combobox', { name: 'providers.localai.model' });
-    expect(options(select)).toEqual(['', 'qwen3-0.6b-translation', 'qwen3.5-2b-translation']);
-    fireEvent.change(select, { target: { value: 'qwen3-0.6b-translation' } });
-    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ coachDeviceModel: 'qwen3-0.6b-translation' }));
-    fireEvent.click(coach.getByTestId('model-card-qwen3.5-2b-translation'));
-    expect(update).toHaveBeenLastCalledWith({ coachDeviceModel: 'qwen3.5-2b-translation' });
-  });
-
-  it('loads the model store itself, and says nothing of the graphics card before it has looked', async () => {
-    // The other device is away: the readiness check never gets as far as this computer's models.
-    const initialize = vi.fn(async () => { useModelStore.setState({ initialized: true, webgpuAvailable: true }); });
-    useModelStore.setState({ initialized: false, webgpuAvailable: false, initialize });
-    const { card } = draw({ settings: { coach: true, coachAt: 'device' }, values: { endpoint: '192.168.1.10:8080' }, readiness: { state: 'not-ready', reason: 'The other device could not be reached (192.168.1.10:8080): Failed to fetch' } });
-    expect(initialize).toHaveBeenCalledTimes(1);
-    await waitFor(() => expect(useModelStore.getState().initialized).toBe(true));
-    expect(card(COACH).queryByText('providers.localai.chatModelsNoGpu')).toBeNull();
-    expect(card(COACH).queryByText('settings.webgpuNotSupported')).toBeNull();
-  });
-
-  it('says nothing is downloaded only once the store has looked: while it scans, every choice is still being checked', async () => {
-    // A model is downloaded; the store has not finished its first look at what is.
-    let finish: () => void = () => {};
-    const initialize = vi.fn(() => new Promise<void>((resolve) => { finish = () => { useModelStore.setState({ initialized: true, modelStatuses: { 'sensevoice-int8': 'downloaded', 'qwen3-0.6b-translation': 'downloaded' } }); resolve(); }; }));
-    useModelStore.setState({ initialized: false, webgpuAvailable: false, modelStatuses: {}, initialize });
-    const { card } = draw({ settings: { asrVia: 'device', translateAt: 'device', coach: true, coachAt: 'device' } });
-    for (const stage of [HEAR, TRANSLATE, COACH]) {
-      expect(card(stage).queryByText('providers.localai.notDownloaded'), stage).toBeNull();
-      expect(card(stage).getAllByText('providers.localai.checking').length, stage).toBeGreaterThan(0);
-      expect(card(stage).queryAllByRole('combobox').filter((select) => select.className.includes('kt-here__select--missing')), stage).toEqual([]);
-    }
-    // Nothing opens by itself on a gap that is not known to be one.
-    expect(screen.queryByTestId('library')).toBeNull();
-    for (const button of screen.getAllByRole('button', { name: 'providers.localai.browse' })) expect(button.getAttribute('aria-expanded')).toBe('false');
-    await act(async () => { finish(); });
-    expect(card(HEAR).queryByText('providers.localai.checking')).toBeNull();
-  });
-
-  it('says so once the store has looked and found no graphics card for them, and loads nothing while no stage is here', () => {
-    const initialize = vi.fn(async () => {});
-    useModelStore.setState({ initialized: true, webgpuAvailable: false, initialize });
-    const { card, unmount } = draw({ settings: { coach: true, coachAt: 'device' } });
-    expect(card(COACH).getByText('providers.localai.chatModelsNoGpu')).toBeTruthy();
-    unmount();
-    useModelStore.setState({ initialized: false });
-    draw({ settings: { asrVia: 'server', translateAt: 'server', coach: false }, values: { endpoint: '192.168.1.10:8790' } });
-    expect(initialize).not.toHaveBeenCalled();
-  });
 
   it('says that an address on this computer is this computer\'s own model server', () => {
     draw({ values: { endpoint: '127.0.0.1:8080' } });
@@ -544,41 +443,84 @@ describe('the other device’s recognizers in the menu', () => {
 });
 
 describe('one menu for a stage of this computer, whoever runs it', () => {
-  const engineOf = (models: Record<string, 'downloaded' | 'absent'>, run: { state: string; model: string | null } = { state: 'stopped', model: null }) => ({
+  const engineOf = (models: Record<string, 'downloaded' | 'absent' | 'downloading'>, run: { state: string; model: string | null } = { state: 'stopped', model: null }) => ({
     supported: true, engine: 'ready', engineBytes: 1,
     models: Object.fromEntries(Object.entries(models).map(([id, state]) => [id, { state, received: state === 'downloaded' ? 1 : 0, total: 1 }])),
     run: { ...run, port: 0, tail: '' }, up: [],
   }) as never;
   const groups = (select: HTMLSelectElement) => [...select.querySelectorAll('optgroup')].map((g) => [g.label, [...g.querySelectorAll('option')].map((o) => o.textContent)]);
-  let before: { asr: unknown; translation: unknown };
+  let before: { asr: unknown; translation: unknown; asked: boolean };
   beforeEach(() => {
-    before = { asr: useNativeEngineStore.getState().status, translation: useNativeTranslatorStore.getState().status };
+    before = { asr: useNativeEngineStore.getState().status, translation: useNativeTranslatorStore.getState().status, asked: useNativeTranslatorStore.getState().asked };
     useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'downloaded' }) });
-    useNativeTranslatorStore.setState({ status: engineOf({ 'index-translate-2b': 'downloaded', 'hy-mt2-1.8b': 'downloaded' }) });
+    useNativeTranslatorStore.setState({ asked: true, status: engineOf({ 'index-translate-2b': 'downloaded', 'hy-mt2-1.8b': 'downloaded' }) });
   });
   afterEach(() => {
     useNativeEngineStore.setState({ status: before.asr as never });
-    useNativeTranslatorStore.setState({ status: before.translation as never });
+    useNativeTranslatorStore.setState({ status: before.translation as never, asked: before.asked });
   });
 
-  it('draws the engine’s one model in one row, with the way back to the app’s own', () => {
+  it('lists only native models in the single translation row', () => {
     const native = draw({ settings: { translateAt: 'device', translateHere: 'native', translateNativeModel: 'index-translate-2b' } });
     const menu = native.card(TRANSLATE).getByRole('combobox') as HTMLSelectElement;
-    // The engine runs one model for both directions: its models under their own heading, and one entry back to the
-    // app's own models (which are chosen a direction at a time).
+    // The engine runs one model for both directions, with only native choices.
     expect(groups(menu)[0]).toEqual(['providers.localai.groupNative', ['Index-Translate 2B', 'Hunyuan MT 2 1.8B']]);
-    expect(groups(menu)[1]).toEqual(['providers.localai.groupApp', ['providers.localai.groupApp']]);
+    expect(groups(menu)).toHaveLength(1);
     expect(menu.selectedOptions[0].textContent).toBe('Index-Translate 2B');
     // One row, not one a direction, and its label names both.
     expect(native.card(TRANSLATE).getAllByRole('combobox')).toHaveLength(1);
   });
 
-  it('hands the stage back to the app’s own models when that is chosen, and to another of the engine’s when that is', () => {
+  it('does not select a model downloaded from the sharing library', () => {
+    useNativeTranslatorStore.setState({ status: engineOf({ 'index-translate-2b': 'downloaded', 'hy-mt2-1.8b': 'absent' }) });
+    const { card, update } = draw({ settings: { translateAt: 'device', translateNativeModel: 'index-translate-2b' } });
+    fireEvent.click(card(TRANSLATE).getByRole('button', { name: 'providers.localai.browse' }));
+    act(() => useNativeTranslatorStore.setState({ status: engineOf({ 'index-translate-2b': 'downloaded', 'hy-mt2-1.8b': 'downloading' }) }));
+    act(() => useNativeTranslatorStore.setState({ status: engineOf({ 'index-translate-2b': 'downloaded', 'hy-mt2-1.8b': 'downloaded' }) }));
+    expect(update.mock.calls.some(([patch]) => 'translateNativeModel' in patch)).toBe(false);
+    expect((card(TRANSLATE).getByRole('combobox') as HTMLSelectElement).selectedOptions[0].textContent).toBe('Index-Translate 2B');
+  });
+
+  it('selects a stage download after its library has been closed', () => {
+    const previous = useNativeTranslatorStore.getState().download;
+    useNativeTranslatorStore.setState({ status: engineOf({ 'index-translate-2b': 'downloaded', 'hy-mt2-1.8b': 'absent' }), download: vi.fn(async () => {}) });
+    const { card, update, unmount } = draw({ settings: { translateAt: 'device', translateNativeModel: 'index-translate-2b' } });
+    try {
+      fireEvent.click(card(TRANSLATE).getByRole('button', { name: 'providers.localai.browse' }));
+      fireEvent.click(within(screen.getByTestId('model-card-native:hy-mt2-1.8b')).getByRole('button', { name: 'models.download' }));
+      act(() => useNativeTranslatorStore.setState({ status: engineOf({ 'index-translate-2b': 'downloaded', 'hy-mt2-1.8b': 'downloading' }) }));
+      fireEvent.click(card(TRANSLATE).getByRole('button', { name: 'providers.localai.browse' }));
+      act(() => useNativeTranslatorStore.setState({ status: engineOf({ 'index-translate-2b': 'downloaded', 'hy-mt2-1.8b': 'downloaded' }) }));
+      expect(update).toHaveBeenCalledWith(expect.objectContaining({ translateNativeModel: 'hy-mt2-1.8b' }));
+    } finally {
+      unmount();
+      useNativeTranslatorStore.setState({ download: previous });
+    }
+  });
+
+  it('keeps a recognition download assigned to the row that requested it', () => {
+    const previous = useNativeEngineStore.getState().download;
+    useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'downloaded', 'sensevoice-small-q8': 'absent' }), download: vi.fn(async () => {}) });
+    const { card, update, unmount } = draw({ legs: ['speaker', 'participant'], pair: { source: 'zh-CN', target: 'en' }, settings: { asrVia: 'device', asrNativeModel: 'qwen3-asr-1.7b-q8', asrNativeByLanguage: {} } });
+    try {
+      fireEvent.click(card(HEAR).getAllByRole('button', { name: 'providers.localai.browse' })[0]);
+      fireEvent.click(within(screen.getByTestId('model-card-native:sensevoice-small-q8')).getByRole('button', { name: 'models.download' }));
+      act(() => useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'downloaded', 'sensevoice-small-q8': 'downloading' }) }));
+      fireEvent.click(card(HEAR).getAllByRole('button', { name: 'providers.localai.browse' })[1]);
+      act(() => useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'downloaded', 'sensevoice-small-q8': 'downloaded' }) }));
+      const picked = update.mock.calls.find(([patch]) => patch.asrNativeByLanguage?.zh === 'sensevoice-small-q8')?.[0];
+      expect(picked).toBeDefined();
+      expect(picked!.asrNativeByLanguage?.en).not.toBe('sensevoice-small-q8');
+    } finally {
+      unmount();
+      useNativeEngineStore.setState({ download: previous });
+    }
+  });
+
+  it('switches between native models without a legacy runner option', () => {
     const { card, update } = draw({ settings: { translateAt: 'device', translateHere: 'native', translateNativeModel: 'index-translate-2b' } });
     const menu = card(TRANSLATE).getByRole('combobox') as HTMLSelectElement;
-    const back = [...menu.options].find((o) => o.textContent === 'providers.localai.groupApp')!;
-    fireEvent.change(menu, { target: { value: back.value } });
-    expect(update).toHaveBeenCalledWith(expect.objectContaining({ translateHere: 'app' }));
+    expect([...menu.options].some((o) => o.textContent === 'providers.localai.groupApp')).toBe(false);
     const other = [...menu.options].find((o) => o.textContent === 'Hunyuan MT 2 1.8B')!;
     fireEvent.change(menu, { target: { value: other.value } });
     expect(update).toHaveBeenCalledWith(expect.objectContaining({ translateHere: 'native', translateNativeModel: 'hy-mt2-1.8b' }));
@@ -601,7 +543,7 @@ describe('one menu for a stage of this computer, whoever runs it', () => {
     fireEvent.click(here.card(TRANSLATE).getByRole('button', { name: 'providers.localai.browse' }));
     expect(here.container.querySelector('.kt-here__library')).not.toBeNull();
     here.unmount();
-    useNativeTranslatorStore.setState({ status: engineOf({ 'index-translate-2b': 'absent', 'hy-mt2-1.8b': 'downloaded' }) });
+    useNativeTranslatorStore.setState({ asked: true, status: engineOf({ 'index-translate-2b': 'absent', 'hy-mt2-1.8b': 'downloaded' }) });
     const gone = draw({ settings: { translateAt: 'device', translateHere: 'native', translateNativeModel: 'index-translate-2b' } });
     expect(gone.card(TRANSLATE).getByRole('button', { name: 'providers.localai.browse' }).getAttribute('aria-expanded')).toBe('true');
     // Still what the menu shows: the choice is not silently another.
@@ -691,57 +633,8 @@ describe('one menu for a stage of this computer, whoever runs it', () => {
   });
 });
 
-describe('the SenseVoice that runs in the page, which writes Japanese without its kana', () => {
-  const groups = (select: HTMLSelectElement) => [...select.querySelectorAll('optgroup')].map((g) => [g.label, [...g.querySelectorAll('option')].map((o) => o.value)]);
-  const KEPT = { 'ja→zh': { asr: { modelId: 'sensevoice-int8' }, translation: { modelId: '' }, tts: { modelId: '' } } };
-  // The other side speaks Japanese: the participant's row is the one that hears it.
-  const row = (selections = {}) => {
-    const { card } = draw({ settings: { asrVia: 'device', translateAt: 'device', selections }, legs: ['participant'] });
-    return card(HEAR).getByRole('combobox') as HTMLSelectElement;
-  };
-
-  it('is not what hears Japanese by itself, nor in the row’s menu, though it is downloaded for its Chinese', () => {
-    useModelStore.setState({ modelStatuses: { 'sensevoice-int8': 'downloaded', 'sensevoice-nano-int8': 'downloaded' } });
-    const menu = row();
-    // Nothing here hears Japanese: said as that, and the library opens on it.
-    expect(menu.selectedOptions[0].textContent).toBe('providers.localai.notDownloaded');
-    expect(menu.className).toContain('kt-here__select--missing');
-    expect(groups(menu)).toEqual([]);
-    expect(screen.getByTestId('library').textContent).toBe('asr:ja→zh');
-  });
-
-  it('is still the one that hears where it was chosen before, and the menu says so: the model is never silently another', () => {
-    useModelStore.setState({ modelStatuses: { 'sensevoice-int8': 'downloaded', 'moonshine-tiny-ja-quant': 'downloaded' } });
-    const menu = row(KEPT);
-    expect(menu.value).toBe('sensevoice-int8');
-    expect(menu.selectedOptions[0].textContent).toContain('SenseVoice');
-    expect(menu.className).not.toContain('kt-here__select--missing');
-    // The automatic choice beside it is the other recognizer, never this one.
-    expect(groups(menu)).toEqual([['providers.localai.groupApp', ['', 'sensevoice-int8', 'moonshine-tiny-ja-quant']]]);
-    cleanup();
-    // Also with nothing else downloaded: it hears, and nothing is said to be missing.
-    useModelStore.setState({ modelStatuses: { 'sensevoice-int8': 'downloaded' } });
-    const alone = row(KEPT);
-    expect(alone.value).toBe('sensevoice-int8');
-    expect(alone.className).not.toContain('kt-here__select--missing');
-    expect(screen.queryByTestId('library')).toBeNull();
-    cleanup();
-    // Chosen away from, it is no longer offered for the language.
-    useModelStore.setState({ modelStatuses: { 'sensevoice-int8': 'downloaded', 'moonshine-tiny-ja-quant': 'downloaded' } });
-    expect(groups(row())).toEqual([['providers.localai.groupApp', ['']]]);
-  });
-
-  it('hears Chinese as ever', () => {
-    useModelStore.setState({ modelStatuses: { 'sensevoice-int8': 'downloaded', 'moonshine-tiny-ja-quant': 'downloaded' } });
-    const { card } = draw({ settings: { asrVia: 'device', translateAt: 'device' }, legs: ['speaker'] });
-    const menu = card(HEAR).getByRole('combobox') as HTMLSelectElement;
-    expect(menu.selectedOptions[0].textContent).toBe('providers.localai.auto');
-    expect(menu.className).not.toContain('kt-here__select--missing');
-  });
-});
-
 describe('the other side\u2019s language left to be detected', () => {
-  const engineOf = (models: Record<string, 'downloaded' | 'absent'>) => ({
+  const engineOf = (models: Record<string, 'downloaded' | 'absent' | 'downloading'>) => ({
     supported: true, engine: 'ready', engineBytes: 1,
     models: Object.fromEntries(Object.entries(models).map(([id, state]) => [id, { state, received: state === 'downloaded' ? 1 : 0, total: 1 }])),
     run: { state: 'stopped', model: null, port: 0, tail: '' }, up: [],
@@ -812,7 +705,7 @@ describe('the other side\u2019s language left to be detected', () => {
 
   it('keeps a detection kept from before when what hears changes: every model here is a best effort', () => {
     useNativeEngineStore.setState({ status: engineOf({ 'r2t2-q8': 'downloaded', 'qwen3-asr-1.7b-q8': 'downloaded' }) });
-    const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'app', asrDetectOther: true, speakBoth: true, translateAt: 'device' }, legs: BOTH });
+    const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrDetectOther: true, speakBoth: true, translateAt: 'device' }, legs: BOTH });
     const menus = card(HEAR).getAllByRole('combobox') as HTMLSelectElement[];
     fireEvent.change(menus[1], { target: { value: '\u0000native:qwen3-asr-1.7b-q8' } });
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native' }));
@@ -822,7 +715,7 @@ describe('the other side\u2019s language left to be detected', () => {
 
   it('keeps the detection when a model that cannot name the language makes the engine hear: the writing and detector try', () => {
     useNativeEngineStore.setState({ status: engineOf({ 'r2t2-q8': 'downloaded', 'qwen3-asr-1.7b-q8': 'downloaded' }) });
-    const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'app', asrDetectOther: true, translateAt: 'device' }, legs: BOTH });
+    const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrDetectOther: true, translateAt: 'device' }, legs: BOTH });
     const menus = card(HEAR).getAllByRole('combobox') as HTMLSelectElement[];
     // The app's models hear: the other side is heard in Japanese, its row the second.
     fireEvent.change(menus[1], { target: { value: '\u0000native:r2t2-q8' } });
@@ -843,21 +736,6 @@ describe('the other side\u2019s language left to be detected', () => {
     const { card } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'qwen3-asr-1.7b-q8', asrDetectOther: true, translateAt: 'device' }, legs: ['speaker'] });
     expect(card(HEAR).queryByText('providers.localai.detectOtherNote')).toBeNull();
     expect(card(HEAR).queryByRole('combobox', { name: 'providers.localai.hearsOther' })).toBeNull();
-  });
-});
-
-describe('the app\'s own models, where their source is far', () => {
-  it('says what to expect of a download there, and that the models above are another matter', () => {
-    const { rerender } = render(<FarSourceNote rest far />);
-    expect(screen.getByRole('note').textContent).toBe('providers.localai.farSourceRest');
-    // With no native model above, nothing is said of one.
-    rerender(<FarSourceNote rest={false} far />);
-    expect(screen.getByRole('note').textContent).toBe('providers.localai.farSource');
-  });
-
-  it('says nothing anywhere else', () => {
-    render(<FarSourceNote rest far={false} />);
-    expect(screen.queryByRole('note')).toBeNull();
   });
 });
 

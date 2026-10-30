@@ -31,10 +31,10 @@ const STAGE_FIELDS: Record<SpeedStage, readonly (keyof LocalAISettings)[]> = {
   // The speaker hears another language when coached; the turn detection decides when a sentence is over.
   hear: [
     'asrVia', 'asrModel', 'model', 'asrApiBaseUrl', 'asrApiModel', 'asrOther', 'asrOtherModel', 'asrDetectOther', 'speakBoth', 'asrHere', 'asrNativeModel', 'asrNativeByLanguage',
-    'selections', 'coach', 'vadThreshold', 'vadNegativeThreshold', 'vadMinSilenceDuration', 'vadMinSpeechDuration', 'vadMaxSpeechDuration',
+    'coach', 'vadThreshold', 'vadNegativeThreshold', 'vadMinSilenceDuration', 'vadMinSpeechDuration', 'vadMaxSpeechDuration',
   ],
-  translate: ['translateAt', 'translateServerModel', 'translateOther', 'translateOtherModel', 'translateBaseUrl', 'translateModel', 'translateHere', 'translateNativeModel', 'translateBySentence', 'selections'],
-  coach: ['coach', 'coachAt', 'coachServerModel', 'coachOther', 'coachOtherModel', 'coachBaseUrl', 'coachModel', 'coachDeviceModel', 'coachHere', 'coachNativeModel'],
+  translate: ['translateAt', 'translateServerModel', 'translateOther', 'translateOtherModel', 'translateBaseUrl', 'translateModel', 'translateHere', 'translateNativeModel', 'translateBySentence'],
+  coach: ['coach', 'coachAt', 'coachServerModel', 'coachOther', 'coachOtherModel', 'coachBaseUrl', 'coachModel', 'coachHere', 'coachNativeModel'],
 };
 
 /** A stage as it is set now: its fields, the device the stages share, the languages, and the legs that run. */

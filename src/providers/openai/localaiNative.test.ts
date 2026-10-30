@@ -7,10 +7,10 @@ import { useModelStore } from '../../stores/modelStore';
 import { detectsOther, heardBy } from './localaiDevice';
 import { AdapterStartError } from '../../lib/contract/adapter';
 import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
-import { buildLocalAI, admitLocalAI, checkLocalAIWithNative, describeLocalAI, localaiProvider, prepareLocalAI, primeNativeOnce, type NativeUps, LOCALAI_DEFAULTS, migrateLocalAISettings, type LocalAICredentials, type LocalAISettings } from './localai';
-import { cutsSentencesHere, deviceChoices, deviceNeeds, hearsNatively } from './localaiDevice';
+import { buildLocalAI, checkLocalAIWithNative, describeLocalAI, localaiProvider, prepareLocalAI, primeNativeOnce, type NativeUps, LOCALAI_DEFAULTS, migrateLocalAISettings, type LocalAICredentials, type LocalAISettings } from './localai';
+import { cutsSentencesHere, hearsNatively } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
-import { APPLE_PREFIX, NATIVE_DEFAULT_MODEL, NATIVE_MODELS, chooseNative, coachIdle, hearingPick, nativeEither, nativePicked, nativeDownloaded, holdNative, holdNativeForRun, nativeGap, nativeHears, nativeIdle, nativeModel, nativeModelFor, nativeReady, nativeUp, nativeWaits, restNative, translatorUp } from './localaiNative';
+import { APPLE_PREFIX, NATIVE_DEFAULT_MODEL, NATIVE_MODELS, chooseNative, coachIdle, hearingPick, nativeEither, nativePicked, nativeDownloaded, holdNative, holdNativeForRun, nativeGap, nativeHears, nativeIdle, nativeModel, nativeModelFor, nativeReady, nativeUp, restNative, translatorUp } from './localaiNative';
 import { SHARED } from './testing';
 
 const SPEAKER: SessionContext = { direction: { source: 'ja', target: 'zh-CN' }, speech: false, turns: 'auto' };
@@ -62,16 +62,15 @@ describe('what the main process says of the engine, held to its shape', () => {
 
 describe('the native engine as what hears on this computer', () => {
   it('is kept as stored, with its model', () => {
-    expect(LOCALAI_DEFAULTS).toMatchObject({ asrHere: 'app', asrNativeModel: NATIVE_DEFAULT_MODEL });
+    expect(LOCALAI_DEFAULTS).toMatchObject({ asrHere: 'native', asrNativeModel: NATIVE_DEFAULT_MODEL });
     const kept = migrateLocalAISettings({ asrHere: 'native', asrNativeModel: 'r2t2-q8', coachHere: 'nonsense' }, { legacy: {}, credentials: {} });
-    expect(kept).toMatchObject({ asrHere: 'native', asrNativeModel: 'r2t2-q8', coachHere: 'app' });
+    expect(kept).toMatchObject({ asrHere: 'native', asrNativeModel: 'r2t2-q8', coachHere: 'native' });
   });
 
   it('cuts the sentences here, with no Realtime session, and asks nothing of the app\'s own models', () => {
     const s = settings(NATIVE);
     expect(hearsNatively(s)).toBe(true);
     expect(cutsSentencesHere(s)).toBe(true);
-    expect(deviceNeeds(deviceChoices(s), PAIR, ['speaker', 'participant'])).toEqual([]);
   });
 
   it('builds a leg that hears by the engine, with this computer\'s own turn detection', () => {
@@ -82,7 +81,6 @@ describe('the native engine as what hears on this computer', () => {
     expect(config.model).toBe('');
     expect(describeLocalAI(config).asrModel).toBe('r2t2-q8');
     // Its memory is not the app's own models' to count.
-    expect(admitLocalAI({ speaker: config })).toBe(true);
   });
 
   it('has no model for a language the one in use does not hear, and says so: none is taken in its place', () => {
@@ -256,7 +254,7 @@ describe('the other side\u2019s language left to be detected', () => {
     expect(detectsOther(settings(DETECT))).toBe(true);
     expect(detectsOther(settings({ ...DETECT, asrVia: 'api' }))).toBe(true);
     // Fork: a model that does not name the language is a best effort here: the writing and `identify.ts` try.
-    expect(detectsOther(settings({ ...DETECT, asrHere: 'app' }))).toBe(true);
+    expect(detectsOther(settings({ ...DETECT, asrHere: 'native' }))).toBe(true);
     expect(detectsOther(settings({ ...DETECT, asrVia: 'server' }))).toBe(false);
     expect(detectsOther(settings({ ...DETECT, asrDetectOther: false }))).toBe(false);
     expect(migrateLocalAISettings({ asrDetectOther: true }, { legacy: {}, credentials: {} }).asrDetectOther).toBe(true);
@@ -349,7 +347,7 @@ describe('the other side\u2019s language left to be detected', () => {
     // this setup") while the run itself was what the user wanted.
     const other = { ...PARTICIPANT, direction: { source: 'ja', target: 'zh-CN' } };
     const reversed = { ...shared, reversed: (d: SessionContext['direction']) => d.target === 'zh-CN' };
-    const built = buildLocalAI(other, settings({ ...DETECT, translateHere: 'app' }), reversed);
+    const built = buildLocalAI(other, settings({ ...DETECT, translateHere: 'native' }), reversed);
     // Whatever it says, it is not that the language cannot be detected: at most that no model for ja → zh is here.
     expect(built).not.toMatchObject({ code: 'source_auto' });
     if ('refused' in built) expect(built).toMatchObject({ code: 'local_models_missing', refused: expect.stringContaining('ja') });
@@ -745,21 +743,6 @@ describe('the provider\'s check, with the engine', () => {
     expect(await checkLocalAIWithNative(NONE, settings({ asrVia: 'api' }), CTX, check, { gap, idle })).toBe(OK);
     expect(idle).toHaveBeenCalledTimes(1);
     expect(gap).not.toHaveBeenCalled();
-  });
-
-  it('says "not chosen", not "not downloaded", where the app\u2019s own models hear nothing and one of the engine\u2019s is on the computer', async () => {
-    const none: CheckResult = { ok: false, reason: 'No speech recognition model is downloaded for ja.', code: 'no_asr', params: { source: 'ja' } };
-    const deps = { gap: vi.fn(async () => null), idle: vi.fn() };
-    const here = { asrVia: 'device' as const, asrHere: 'app' as const };
-    expect(await checkLocalAIWithNative(NONE, settings(here), CTX, vi.fn(async () => none), { ...deps, waits: (language: string) => language === 'ja' })).toMatchObject({ ok: false, code: 'native_unchosen', params: { source: 'ja' } });
-    // Nothing of the engine's either: it is as it was.
-    expect(await checkLocalAIWithNative(NONE, settings(here), CTX, vi.fn(async () => none), { ...deps, waits: () => false })).toBe(none);
-    // And the question itself: a downloaded model that hears the language, with the runtime that runs it.
-    expect(nativeWaits('ja', READY)).toBe(true);
-    expect(nativeWaits('zh-CN', READY)).toBe(true);
-    expect(nativeWaits('th', READY)).toBe(false);
-    expect(nativeWaits('ja', engine({ engine: 'absent' }))).toBe(false);
-    expect(nativeWaits('ja', engine({ models: { 'r2t2-q8': { state: 'absent', received: 0, total: 1 } } }))).toBe(false);
   });
 
   it('asks the engine for the language each leg hears, and passes when both it and the servers do', async () => {

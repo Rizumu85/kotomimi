@@ -23,7 +23,7 @@ export function LocalAISettingsView({ settings, update, disabled = false, pair }
     <div className="kt-stages">
       {/* The instructions are the other device's pipeline's and a text model's: this computer's translation models carry their own. */}
       {settings.translateAt !== 'device' && <InstructionsField value={settings} onChange={update} preview={preview} disabled={disabled} />}
-      <LanSharingSection disabled={disabled} pair={pair} />
+      <LanSharingSection disabled={disabled} />
     </div>
   );
 }
