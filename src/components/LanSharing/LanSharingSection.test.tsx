@@ -2,15 +2,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { LanSharingSection } from './LanSharingSection';
 import { useLanStore } from '../../stores/lanStore';
-import { useLocalServerStore } from '../../stores/localServerStore';
 import { useModelStore } from '../../stores/modelStore';
-import { NO_LOCAL_SERVER } from '../../lib/lan/localServer';
 
 // The catalog's keys stand for its strings.
 vi.mock('react-i18next', async (importOriginal) => ({ ...(await importOriginal<typeof import('react-i18next')>()), useTranslation: () => ({ t: (key: string) => key }) }));
 
 beforeEach(() => {
-  useLocalServerStore.setState({ status: NO_LOCAL_SERVER, refresh: vi.fn(async () => {}) });
   useLanStore.setState({ enabled: true, status: { state: 'starting' }, clients: 0 });
 });
 

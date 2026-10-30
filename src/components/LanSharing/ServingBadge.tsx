@@ -1,11 +1,9 @@
 /**
  * Fork: in the title bar, while this computer is lending its models to other
- * devices — while sharing is on, which lends a LocalAI's models too. A LocalAI
- * alone lends nothing: the one the app starts listens on this computer only
- * (`electron/local-server.js`), and its own card says whether it is up. On the
- * computer that does the work the main screen is otherwise idle, and its own
- * session controls say nothing of the devices it is serving: this says it,
- * and in its tooltip, whose settings decide what those devices get.
+ * devices. On the computer that does the work the main screen is otherwise
+ * idle, and its own session controls say nothing of the devices it is serving:
+ * this says it, and in its tooltip, whose settings decide what those devices
+ * get.
  */
 import { Share2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';

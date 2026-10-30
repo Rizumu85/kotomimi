@@ -38,16 +38,14 @@ export const PLACE_FIELDS = ['translateAt', 'translateServerModel', 'translateMo
 
 /**
  * Who runs a stage placed on this computer: the app's own models, or the
- * LocalAI installed here (`electron/local-server.js`) — a model server on
- * the same computer, with models the app cannot run itself. To the stage
- * cards both are "this computer"; to everything that loads the app's own
- * models, a stage the LocalAI runs is somewhere else.
+ * native engine. A LocalAI choice from an older build is read as the native
+ * engine (`localai.ts` `hereOf`).
  */
-export const HERES = ['app', 'localai'] as const;
+export const HERES = ['app'] as const;
 export type Here = (typeof HERES)[number];
 
 /**
- * The hearing stage has a third runner here: the native engine
+ * The hearing stage has a second runner here: the native engine
  * (`localaiNative.ts`) — a runtime the app downloads and runs beside
  * itself, cutting the sentences as the app's own recognizers do.
  */
@@ -107,10 +105,10 @@ export const translatePlace = (s: Pick<StagePlacement, 'translateAt' | 'translat
 export const coachesOnShared = (s: Pick<StagePlacement, 'coach' | 'coachAt' | 'coachOther'>): boolean => coachIs(s, 'server') && !coachesAtOwnDevice(s);
 
 /** This computer's LocalAI hears: a Realtime session, as another device's is, on the loopback. */
-export const hearsByLocalServer = (s: Pick<StagePlacement, 'asrVia' | 'asrHere'>): boolean => s.asrVia === 'device' && s.asrHere === 'localai';
+
 
 /** The app's own recognizer hears, or an API it uploads each sentence to: this computer cuts the sentences itself. */
-export const cutsSentencesHere = (s: Pick<StagePlacement, 'asrVia' | 'asrHere' | 'asrOther'>): boolean => hearingPlace(s) !== 'server' && !hearsByLocalServer(s);
+export const cutsSentencesHere = (s: Pick<StagePlacement, 'asrVia' | 'asrHere' | 'asrOther'>): boolean => hearingPlace(s) !== 'server';
 
 /** The native translation engine translates (`nativeTranslators.ts`): none of the app's own models is asked for. */
 export const translatesNatively = (s: Pick<StagePlacement, 'translateAt' | 'translateHere'>): boolean => s.translateAt === 'device' && s.translateHere === 'native';

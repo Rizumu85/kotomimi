@@ -83,8 +83,6 @@ const validReceiveChannels = [
   'lan:socket-message',
   'lan:socket-close',
   'lan:socket-proxied',
-  // Fork: the state of the LocalAI installed on this computer, as it changes (electron/local-server.js)
-  'local-server:status',
   // Fork: the window is about to be maximized or restored, for the page to play (electron/window-maximize.js)
   'window:shift',
   // Fork: the native recognition engine — its state as it changes, and the text of a live recognition (electron/native-engine.js)

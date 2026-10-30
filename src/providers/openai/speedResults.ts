@@ -30,11 +30,11 @@ const STORAGE_KEY = 'kotomimi.speedTest';
 const STAGE_FIELDS: Record<SpeedStage, readonly (keyof LocalAISettings)[]> = {
   // The speaker hears another language when coached; the turn detection decides when a sentence is over.
   hear: [
-    'asrVia', 'asrModel', 'model', 'asrApiBaseUrl', 'asrApiModel', 'asrOther', 'asrOtherModel', 'asrDetectOther', 'speakBoth', 'asrHere', 'asrHereModel', 'asrNativeModel', 'asrNativeByLanguage',
-    'hereAddress', 'herePipeline', 'selections', 'coach', 'vadThreshold', 'vadNegativeThreshold', 'vadMinSilenceDuration', 'vadMinSpeechDuration', 'vadMaxSpeechDuration',
+    'asrVia', 'asrModel', 'model', 'asrApiBaseUrl', 'asrApiModel', 'asrOther', 'asrOtherModel', 'asrDetectOther', 'speakBoth', 'asrHere', 'asrNativeModel', 'asrNativeByLanguage',
+    'selections', 'coach', 'vadThreshold', 'vadNegativeThreshold', 'vadMinSilenceDuration', 'vadMinSpeechDuration', 'vadMaxSpeechDuration',
   ],
-  translate: ['translateAt', 'translateServerModel', 'translateOther', 'translateOtherModel', 'translateBaseUrl', 'translateModel', 'translateHere', 'translateHereModel', 'translateNativeModel', 'translateBySentence', 'hereAddress', 'selections'],
-  coach: ['coach', 'coachAt', 'coachServerModel', 'coachOther', 'coachOtherModel', 'coachBaseUrl', 'coachModel', 'coachDeviceModel', 'coachHere', 'coachHereModel', 'coachNativeModel', 'hereAddress'],
+  translate: ['translateAt', 'translateServerModel', 'translateOther', 'translateOtherModel', 'translateBaseUrl', 'translateModel', 'translateHere', 'translateNativeModel', 'translateBySentence', 'selections'],
+  coach: ['coach', 'coachAt', 'coachServerModel', 'coachOther', 'coachOtherModel', 'coachBaseUrl', 'coachModel', 'coachDeviceModel', 'coachHere', 'coachNativeModel'],
 };
 
 /** A stage as it is set now: its fields, the device the stages share, the languages, and the legs that run. */

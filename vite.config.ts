@@ -177,9 +177,6 @@ export default defineConfig(({ command, mode }) => {
             'lan-server': 'electron/lan-server.js',
             'lan-firewall': 'electron/lan-firewall.js',
             'lan-discover': 'electron/lan-discover.js',
-            'lan-upstream': 'electron/lan-upstream.js',
-            // Fork: a LocalAI installed on this computer, run by the app
-            'local-server': 'electron/local-server.js',
             // Fork: the native recognition engine the app downloads and runs
             'native-engine': 'electron/native-engine.js',
             // Fork: one file from several addresses of it — the engines' downloads and the app's own update

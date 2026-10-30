@@ -156,27 +156,18 @@ export interface LocalAISettings extends RealtimeSettings {
   coachDeviceModel: string;
   /** The user's own feedback instructions; blank: chosen by the two languages (`coachPrompt.ts`). `{{SPOKEN}}` and `{{NATIVE}}` are filled in. */
   coachPrompt: string;
-  /**
-   * On this computer, who runs each stage: the app's own models, or the LocalAI installed here — and then which of
-   * its models. The recognizer may be blank: the one its pipeline names.
-   */
+  /** On this computer, who runs each stage: the app's own models, or the native engine. */
   asrHere: AsrHere;
-  asrHereModel: string;
   /** The native engine's model, when it hears. */
   asrNativeModel: string;
   /** The native model chosen for a language, by the language's base code: it is heard by that one whatever is in use (`nativePicked`). */
   asrNativeByLanguage: Record<string, string>;
   translateHere: AsrHere;
-  translateHereModel: string;
   /** The native translation engine's model, when it translates. */
   translateNativeModel: string;
   coachHere: AsrHere;
-  coachHereModel: string;
   /** The native feedback engine's model, when it gives the feedback. */
   coachNativeModel: string;
-  /** That LocalAI's address (`127.0.0.1:8080`) and its Realtime pipeline, as they were when it was chosen. */
-  hereAddress: string;
-  herePipeline: string;
   /** The other device wants an access key: a credential field appears. */
   serverNeedsKey: boolean;
   /** This computer's own models, picked per stage of a direction as Local Inference picks them; a blank pick is the best one downloaded. */
@@ -235,17 +226,12 @@ export const LOCALAI_DEFAULTS: LocalAISettings = {
   coachDeviceModel: '',
   coachPrompt: '',
   asrHere: 'app',
-  asrHereModel: '',
   asrNativeModel: NATIVE_DEFAULT_MODEL,
   asrNativeByLanguage: {},
   translateHere: 'app',
-  translateHereModel: '',
   translateNativeModel: NATIVE_DEFAULT_TRANSLATOR,
   coachHere: 'app',
-  coachHereModel: '',
   coachNativeModel: NATIVE_DEFAULT_COACH,
-  hereAddress: '127.0.0.1:8080',
-  herePipeline: '',
   serverNeedsKey: false,
   selections: {},
   vadThreshold: LOCAL_INFERENCE_DEFAULTS.vadThreshold,
@@ -357,7 +343,7 @@ const byLanguage = (stored: unknown): Record<string, string> => (stored && typeo
 const quick = (baseUrl: string): { extra?: Readonly<Record<string, unknown>> } => { const extra = quickOf(baseUrl); return extra ? { extra } : {}; };
 
 export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>, inputs: MigrationInputs): LocalAISettings {
-  const text = (k: 'asrModel' | 'asrApiBaseUrl' | 'asrApiModel' | 'asrOther' | 'asrOtherModel' | 'translateOther' | 'translateOtherModel' | 'coachOther' | 'coachOtherModel' | 'translateBaseUrl' | 'coachDeviceModel' | 'coachPrompt' | 'asrHereModel' | 'asrNativeModel' | 'translateHereModel' | 'translateNativeModel' | 'coachHereModel' | 'coachNativeModel' | 'hereAddress' | 'herePipeline') => (typeof stored[k] === 'string' ? (stored[k] as string) : LOCALAI_DEFAULTS[k]);
+  const text = (k: 'asrModel' | 'asrApiBaseUrl' | 'asrApiModel' | 'asrOther' | 'asrOtherModel' | 'translateOther' | 'translateOtherModel' | 'coachOther' | 'coachOtherModel' | 'translateBaseUrl' | 'coachDeviceModel' | 'coachPrompt' | 'asrNativeModel' | 'translateNativeModel' | 'coachNativeModel') => (typeof stored[k] === 'string' ? (stored[k] as string) : LOCALAI_DEFAULTS[k]);
   const flag = (k: 'asrApiNeedsKey' | 'asrDetectOther' | 'speakBoth' | 'coach' | 'serverNeedsKey' | 'translateBySentence') => (typeof stored[k] === 'boolean' ? (stored[k] as boolean) : LOCALAI_DEFAULTS[k]);
   const number = (k: (typeof VAD_FIELDS)[number]) => (typeof stored[k] === 'number' && Number.isFinite(stored[k]) ? (stored[k] as number) : LOCALAI_DEFAULTS[k]);
   const selections = stored.selections;
@@ -386,17 +372,12 @@ export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>
     coachDeviceModel: text('coachDeviceModel'),
     coachPrompt: text('coachPrompt'),
     asrHere: hereOf(stored.asrHere, LOCALAI_DEFAULTS.asrHere),
-    asrHereModel: text('asrHereModel'),
     asrNativeModel: text('asrNativeModel'),
     asrNativeByLanguage: byLanguage(stored.asrNativeByLanguage),
     translateHere: hereOf(stored.translateHere, LOCALAI_DEFAULTS.translateHere),
-    translateHereModel: text('translateHereModel'),
     translateNativeModel: text('translateNativeModel'),
     coachHere: hereOf(stored.coachHere, LOCALAI_DEFAULTS.coachHere),
-    coachHereModel: text('coachHereModel'),
     coachNativeModel: text('coachNativeModel'),
-    hereAddress: text('hereAddress'),
-    herePipeline: text('herePipeline'),
     ...migratePlaces(stored, inputs.legacy ?? {}),
     serverNeedsKey: flag('serverNeedsKey'),
     selections: selections && typeof selections === 'object' && !Array.isArray(selections) ? (selections as Selections) : {},
@@ -457,9 +438,9 @@ export function settled(stored: LocalAISettings): LocalAISettings {
   // LocalAI is retired: a setting kept from it falls to the native engine of this computer.
   return {
     ...s,
-    ...(s.asrHere === 'localai' ? { asrHere: 'native' as const } : {}),
-    ...(s.translateHere === 'localai' ? { translateHere: 'native' as const } : {}),
-    ...(s.coachHere === 'localai' ? { coachHere: 'native' as const } : {}),
+    ...((s.asrHere as string) === 'localai' ? { asrHere: 'native' as const } : {}),
+    ...((s.translateHere as string) === 'localai' ? { translateHere: 'native' as const } : {}),
+    ...((s.coachHere as string) === 'localai' ? { coachHere: 'native' as const } : {}),
   };
 }
 
@@ -1436,9 +1417,9 @@ export const localaiProvider: Provider<LocalAISettings, LocalAICredentials, Loca
     'asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'asrOther', 'asrOtherModel', 'translateOther', 'translateOtherModel', 'coachOther', 'coachOtherModel', 'asrDetectOther', 'speakBoth', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'coachDeviceModel', 'serverNeedsKey', 'selections',
     // The models a start needs named (`unnamedStage`).
     'model', 'translateModel', 'translateServerModel', 'coachModel', 'coachServerModel',
-    // On this computer: by the app's own models, or by the LocalAI installed here, and then which of its models.
-    'asrHere', 'translateHere', 'translateHereModel', 'coachHere', 'coachHereModel', 'hereAddress',
-    // Or by the native engine, and then with which of its models.
+    // On this computer: by the app's own models, or by the native engine.
+    'asrHere', 'translateHere', 'coachHere',
+    // The native engine's own model choices.
     'asrNativeModel', 'asrNativeByLanguage', 'translateNativeModel', 'coachNativeModel',
   ],
   // This computer's models are per direction, and each leg needs its own.

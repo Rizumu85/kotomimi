@@ -11,11 +11,9 @@ const { setupVRChat } = require('./vrchat.js');
 const { createCloseHandshake } = require('./close-handshake.js');
 const { createWsHeaderRules } = require('./ws-header-rules.js');
 const { startLanServer } = require('./lan-server');
-const { createUpstream } = require('./lan-upstream');
 const { keepMaximizeHonest, pageShift } = require('./window-maximize');
 const { firewallStatus, allowThroughFirewall } = require('./lan-firewall');
 const { discoverServers } = require('./lan-discover');
-const { createLocalServer } = require('./local-server');
 const { createNativeEngine, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME, modelHears: nativeModelHears, translatorFits } = require('./native-engine');
 const { joinEngines } = require('./native-engines');
 const { createRemoteEngine } = require('./remote-engine');
@@ -1339,24 +1337,7 @@ ipcMain.handle('lan:start', async (event, args) => {
   await stopLanServer();
   const port = Number(args?.port);
   try {
-    // LocalAI is retired: nothing of it is shared, even if another program has one running here.
-    const local = {
-      port: 0,
-      pipelines: async () => ({ pipelines: [], recognizers: [], translators: [] }),
-      setPipeline: async () => ({ ok: false, error: 'LocalAI is retired.' }),
-    };
-    // A request that names no model is the app's own to answer, though the LocalAI could, where the app has a native
-    // engine's model for it: the Mac's recognition for the language, the downloaded recognizer, a native translator.
-    const ownFirst = async (ask) => {
-      const base = String(ask?.language ?? '').trim().toLowerCase().split(/[-_]/)[0];
-      const has = (status, fits) => status.engine === 'ready' && Object.entries(status.models).some(([id, model]) => model.state === 'downloaded' && fits(id));
-      if (ask?.kind === 'asr') return has(await getNativeEngine().status(), (id) => (id.includes(':') ? id.endsWith(`:${base}`) : nativeModelHears(id, base)));
-      // A translation is this computer's own where a downloaded translator takes the pair; one that does not is no
-      // reason to keep it from the LocalAI, which may translate what this computer's models cannot.
-      return has(await getNativeTranslator().status(), (id) => translatorFits(id, ask?.source, ask?.target));
-    };
-    const upstream = createUpstream({ port: local.port, pipelines: () => local.pipelines(), setPipeline: (name, change, options) => local.setPipeline(name, change, options), ownFirst });
-    lanServer = await startLanServer({ port: Number.isInteger(port) && port >= 1024 && port < 65536 ? port : 8790, key: String(args?.key ?? ''), upstream }, {
+    lanServer = await startLanServer({ port: Number.isInteger(port) && port >= 1024 && port < 65536 ? port : 8790, key: String(args?.key ?? '') }, {
       request: (request) => toPage('lan:request', request),
       socketOpen: (socket) => toPage('lan:socket-open', socket),
       socketMessage: (message) => toPage('lan:socket-message', message),
@@ -1379,33 +1360,6 @@ ipcMain.handle('lan:stop', async () => {
 ipcMain.handle('lan:reply', (event, args) => lanServer?.reply(args?.id, args ?? {}) ?? false);
 ipcMain.handle('lan:send', (event, args) => lanServer?.send(args?.id, args?.data ?? '') ?? false);
 ipcMain.handle('lan:close-socket', (event, args) => { lanServer?.closeSocket(args?.id, args?.code, args?.reason); return true; });
-
-// Fork: a LocalAI installed on this computer, run by the app (electron/local-server.js): started and stopped from the
-// settings, its output kept in the app's log folder, and stopped with the app. One something else started is left alone.
-let localServer = null;
-const getLocalServer = () => {
-  if (localServer) return localServer;
-  let out = null;
-  const log = (text) => {
-    try {
-      out ??= require('fs').createWriteStream(path.join(app.getPath('logs'), 'localai.log'), { flags: 'a' });
-      out.write(text);
-    } catch { /* its output is a convenience: never a reason to fail */ }
-  };
-  // An unpackaged run can be pointed at another home (`KOTOMIMI_LOCALAI_HOME`): a stand-in installation to try this against.
-  const home = !app.isPackaged && process.env.KOTOMIMI_LOCALAI_HOME ? { home: process.env.KOTOMIMI_LOCALAI_HOME } : {};
-  localServer = createLocalServer({ ...home, log, onChange: (status) => toPage('local-server:status', status) });
-  return localServer;
-};
-ipcMain.handle('local-server:get', () => getLocalServer().refresh());
-ipcMain.handle('local-server:start', () => getLocalServer().start());
-ipcMain.handle('local-server:stop', () => getLocalServer().stop());
-ipcMain.handle('local-server:pipelines', () => getLocalServer().pipelines());
-ipcMain.handle('local-server:set-pipeline', (event, args) => getLocalServer().setPipeline(String(args?.name ?? ''), { transcription: args?.transcription, llm: args?.llm }));
-// The one this app started goes with it: asked to stop, not waited for.
-app.on('will-quit', () => { void localServer?.stop(); });
-// …and on the ways out that `will-quit` never hears of (a signal, an error nothing caught: `process.exit`).
-process.on('exit', () => { void localServer?.stop(); });
 
 // Fork: the native recognition engine (electron/native-engine.js): a runtime and its models, fetched into the app's
 // own folder and run on this computer alone. Fetched over the system's own network stack (`net.fetch`: its proxy

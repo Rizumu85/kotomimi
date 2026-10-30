@@ -8,7 +8,7 @@ import { detectsOther, heardBy } from './localaiDevice';
 import { AdapterStartError } from '../../lib/contract/adapter';
 import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import { buildLocalAI, admitLocalAI, checkLocalAIWithNative, describeLocalAI, localaiProvider, prepareLocalAI, primeNativeOnce, type NativeUps, LOCALAI_DEFAULTS, migrateLocalAISettings, type LocalAICredentials, type LocalAISettings } from './localai';
-import { cutsSentencesHere, deviceChoices, deviceNeeds, hearsByLocalServer, hearsNatively } from './localaiDevice';
+import { cutsSentencesHere, deviceChoices, deviceNeeds, hearsNatively } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
 import { APPLE_PREFIX, NATIVE_DEFAULT_MODEL, NATIVE_MODELS, chooseNative, coachIdle, hearingPick, nativeEither, nativePicked, nativeDownloaded, holdNative, holdNativeForRun, nativeGap, nativeHears, nativeIdle, nativeModel, nativeModelFor, nativeReady, nativeUp, nativeWaits, restNative, translatorUp } from './localaiNative';
 import { SHARED } from './testing';
@@ -70,7 +70,6 @@ describe('the native engine as what hears on this computer', () => {
   it('cuts the sentences here, with no Realtime session, and asks nothing of the app\'s own models', () => {
     const s = settings(NATIVE);
     expect(hearsNatively(s)).toBe(true);
-    expect(hearsByLocalServer(s)).toBe(false);
     expect(cutsSentencesHere(s)).toBe(true);
     expect(deviceNeeds(deviceChoices(s), PAIR, ['speaker', 'participant'])).toEqual([]);
   });
