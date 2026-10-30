@@ -351,7 +351,8 @@ describe('a leg whose language is left to be detected', () => {
     expect(h.lastText(1)).toMatchObject({ text: '안녕하세요.', language: 'ko' });
     h.receive(...heard('item_2', 'Привет!'));
     await h.settled();
-    expect(h.lastText(2)).toMatchObject({ text: 'Привет!', language: 'ru' });
+    // A short sentence in a shared script remains unnamed, but is still translated.
+    expect(h.lastText(2)).toMatchObject({ text: 'Привет!', language: 'auto' });
     expect(h.calls).toHaveLength(2);
   });
 

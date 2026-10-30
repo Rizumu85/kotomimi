@@ -102,6 +102,20 @@ describe('another Kotomimi\'s model lists', () => {
 });
 
 describe('a leg another Kotomimi hears', () => {
+  it('keeps a selected non-detecting recognizer when the host also advertises a detector', () => {
+    const models: LocalAIModel[] = [...FOUND, { id: 'qwen3-asr-1.7b-q8', host: 'kotomimi', kind: 'asr', languages: ['auto', 'zh', 'ja'] }];
+    const s = settings({ asrModel: 'sensevoice-int8', speakBoth: true, asrDetectOther: true });
+    const controls = localaiLanguages.detection?.(s, models, SPEAKER.direction);
+    expect(controls?.both).toMatchObject({ on: true, available: true, bestEffort: true });
+    expect(controls?.other).toMatchObject({ on: true, available: true, bestEffort: true });
+    for (const direction of [SPEAKER.direction, { source: 'ja', target: 'zh-CN' }]) {
+      expect(buildLocalAI({ ...SPEAKER, direction }, s, { ...shared, models })).toMatchObject({
+        transcription: { model: 'sensevoice-int8', language: direction.source === 'zh-CN' ? 'zh' : 'ja' },
+        stages: { heard: 'auto' },
+      });
+    }
+  });
+
   it('hears an explicitly selected Apple pair as a best effort when the host is old or lacks either language', async () => {
     const pair = { source: 'en', target: 'fr' };
     const offered: SharedModel[] = ['en', 'fr'].map((language) => ({ id: `apple-speech:${language}`, kind: 'asr', languages: [language], bilingual: true }));

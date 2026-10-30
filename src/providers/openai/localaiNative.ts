@@ -184,7 +184,9 @@ export function appleAlso(model: NativeModel, other: string, has: (id: string) =
  */
 export function hearingPick(s: { asrNativeModel: string; asrNativeByLanguage?: Readonly<Record<string, string>> }, pair: { source: string; target: string }, kinds: { detecting: boolean; both: boolean; bestEffort?: boolean }, has: (id: string) => boolean = hereNow): NativePick {
   // Best effort is for a model that cannot name the language; a detector keeps naming it, and the Mac's pair stays a pair.
-  const bestEffort = kinds.bestEffort === true && !nativeModel(s.asrNativeModel).detects && !isApple(s.asrNativeModel);
+  const autoChoice = s.asrNativeByLanguage?.auto;
+  const detectionModel = autoChoice && NATIVE_MODELS.some((model) => model.id === autoChoice) ? autoChoice : s.asrNativeModel;
+  const bestEffort = kinds.bestEffort === true && !nativeModel(detectionModel).detects && !isApple(detectionModel);
   const pick: NativePick = { model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage, ...(bestEffort ? { bestEffort: true } : {}) };
   if (kinds.detecting) return { ...pick, detecting: true };
   if (!kinds.both) return pick;

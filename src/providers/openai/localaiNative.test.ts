@@ -213,6 +213,44 @@ describe('the other side\u2019s language left to be detected', () => {
   const PARTICIPANT: SessionContext = { direction: { source: 'zh-CN', target: 'ja' }, speech: false, turns: 'auto' };
   const DETECT: Partial<LocalAISettings> = { ...NATIVE, asrNativeModel: 'qwen3-asr-1.7b-q8', asrDetectOther: true, translateAt: 'device', translateHere: 'native', translateNativeModel: 'index-translate-2b' };
 
+  it('offers best-effort controls with only the selected non-detecting model installed', () => {
+    const previous = useNativeEngineStore.getState().status;
+    useNativeEngineStore.setState({ status: engine() });
+    try {
+      const controls = localaiProvider.languages.detection?.(settings(NATIVE), [], PAIR);
+      expect(controls?.both).toMatchObject({ available: true, bestEffort: true });
+      expect(controls?.other).toMatchObject({ available: true, bestEffort: true });
+      expect(controls?.both.turn(true)).toEqual({ speakBoth: true });
+    } finally {
+      useNativeEngineStore.setState({ status: previous });
+    }
+  });
+
+  it('keeps the selected best-effort model even when a detector is also installed', () => {
+    const previous = useNativeEngineStore.getState().status;
+    useNativeEngineStore.setState({ status: engine({ models: {
+      ...engine().models,
+      'qwen3-asr-1.7b-q8': { state: 'downloaded', received: 1, total: 1 },
+    } }) });
+    try {
+      const s = settings({ ...NATIVE, speakBoth: true, asrDetectOther: true });
+      const built = buildLocalAI(SPEAKER, s, shared);
+      expect(built).toMatchObject({ device: { modelId: 'r2t2-q8', language: 'ja' }, stages: { heard: 'auto' } });
+      expect(localaiProvider.languages.detection?.(s, [], PAIR).both).toMatchObject({ bestEffort: true });
+      // The fixed-language path must also respect the selected model.
+      expect(buildLocalAI(SPEAKER, settings(NATIVE), shared)).toMatchObject({ device: { modelId: 'r2t2-q8' } });
+      // An explicit choice for the auto row remains authoritative, including its capability badge.
+      const explicit = { ...s, asrNativeByLanguage: { auto: 'qwen3-asr-1.7b-q8' } };
+      expect(buildLocalAI(SPEAKER, explicit, shared)).toMatchObject({ device: { modelId: 'qwen3-asr-1.7b-q8' } });
+      expect(localaiProvider.languages.detection?.(explicit, [], PAIR).both.bestEffort).not.toBe(true);
+      const explicitSoft = { ...s, asrNativeModel: 'qwen3-asr-1.7b-q8', asrNativeByLanguage: { auto: 'r2t2-q8' } };
+      expect(buildLocalAI(SPEAKER, explicitSoft, shared)).toMatchObject({ device: { modelId: 'r2t2-q8', language: 'ja' } });
+      expect(localaiProvider.languages.detection?.(explicitSoft, [], PAIR).both.bestEffort).toBe(true);
+    } finally {
+      useNativeEngineStore.setState({ status: previous });
+    }
+  });
+
   it('counts where this computer can try: a detector, a model that does not name one, or an API', () => {
     expect(LOCALAI_DEFAULTS.asrDetectOther).toBe(false);
     expect(detectsOther(settings(DETECT))).toBe(true);
@@ -965,12 +1003,12 @@ describe('one model for a run that detects the other side\u2019s language', () =
       const mine = buildLocalAI(PARTICIPANT, settings(DETECTING), reversed);
       if ('refused' in theirs) throw new Error(theirs.refused);
       if ('refused' in mine) throw new Error(mine.refused);
-      expect(theirs.device?.modelId).toBe('qwen3-asr-1.7b-q8');
-      expect(mine.device?.modelId).toBe('qwen3-asr-1.7b-q8');
-      // The engine's own check, with the real rule: one model for both languages, so nothing to refuse.
-      expect(await nativeGap({ model: 'r2t2-q8', byLanguage: { ja: 'r2t2-q8' }, detecting: true }, ['zh-CN', 'auto'], { status: async () => useNativeEngineStore.getState().status })).toBeNull();
-      // Without the rule this is the run that could not start.
-      expect(await nativeGap({ model: 'r2t2-q8', byLanguage: { ja: 'r2t2-q8', zh: 'r2t2-q8' } }, ['zh-CN', 'auto'], { status: async () => useNativeEngineStore.getState().status })).toMatchObject({ code: 'native_two_models' });
+      expect(theirs.device?.modelId).toBe('r2t2-q8');
+      expect(mine.device?.modelId).toBe('r2t2-q8');
+      expect(theirs.device?.language).toBe('ja');
+      // Both legs use the selected model; installing a detector does not replace it.
+      const pick = hearingPick(settings(DETECTING), { source: 'zh-CN', target: 'ja' }, { detecting: true, both: false, bestEffort: true });
+      expect(await nativeGap(pick, ['zh-CN', 'ja'], { status: async () => useNativeEngineStore.getState().status })).toBeNull();
     } finally {
       useNativeEngineStore.setState({ status: NO_NATIVE_ENGINE });
     }

@@ -33,6 +33,16 @@ describe('identifyLanguage (fork: the language of a sentence the recognizer did 
   });
 
   it('accepts a language outside a pair when no candidates are given, for the other side', () => {
-    expect(identifyLanguage('Привет, как дела?')?.language).toBe('ru');
+    expect(identifyLanguage('Сегодня хорошая погода и мы собираемся гулять по городу.')?.language).toBe('ru');
+  });
+
+  it('uses text detection when a script cannot distinguish the candidate languages', () => {
+    const ukrainian = 'Сьогодні гарна погода, і я хочу прогулятися містом.';
+    expect(scriptLanguage(ukrainian)).toBeNull();
+    expect(scriptLanguage(ukrainian, ['ru', 'uk'])).toBeNull();
+    expect(identifyLanguage(ukrainian)).toMatchObject({ language: 'uk', source: 'text' });
+    expect(identifyLanguage(ukrainian, ['ru', 'uk'])).toMatchObject({ language: 'uk', source: 'text' });
+    expect(identifyLanguage('امروز هوا بسیار خوب است و من میخواهم در شهر قدم بزنم.')).toMatchObject({ language: 'fa', source: 'text' });
+    expect(identifyLanguage('Привет')).toBeNull();
   });
 });

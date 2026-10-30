@@ -206,11 +206,11 @@ describe('the other side\u2019s language left to be detected, heard by another K
   ] as unknown as LocalAIModel[];
   const s = settings({ asrDetectOther: true, asrModel: 'apple-speech', translateAt: 'server' });
 
-  it('is asked of it as "auto", and of a recognizer of its own choice, where it lists one that detects', () => {
+  it('keeps the chosen Apple recognizer when an unrelated detector is also available', () => {
     const built = buildLocalAI(THEIRS, s, { ...SHARED, reversed, models: listing(['ja', 'zh', 'auto']) });
     if ('refused' in built) throw new Error(built.refused);
-    // No member of the family chosen hears "auto": the device picks.
-    expect(built.transcription).toEqual({ language: 'auto' });
+    // The selected family remains selected; the client handles language identification as a best effort.
+    expect(built.transcription).toEqual({ model: 'apple-speech:ja', language: 'ja' });
     expect(built.stages).toMatchObject({ heard: 'auto' });
   });
 

@@ -17,7 +17,7 @@ import type { LegName } from '../../lib/conversation/types';
 import type { EngineSlot, LanguagePair } from '../../lib/provider/types';
 import { AUTO } from '../../lib/provider/languages';
 import { useModelStore } from '../../stores/modelStore';
-import { serverBilingual } from './serverRecognizers';
+import { choiceOf, serverBilingual } from './serverRecognizers';
 import { KOTOMIMI_HOST, type LocalAIModel } from './localaiModels';
 
 /** What the model manifest calls a language: its base (`zh-CN` → `zh`). */
@@ -122,8 +122,9 @@ export const hearsNatively = (s: Pick<StagePlacement, 'asrVia' | 'asrHere'>): bo
 /** What the other device lists, as far as detection asks: its recognizers and the languages each takes. */
 type Listed = ReadonlyArray<object>;
 
-/** Another Kotomimi lists a recognizer that tells languages apart: "auto" is among the languages it takes (`src/lib/lan/nativeShare.ts`). */
-export const serverDetects = (models: Listed): boolean => (models as ReadonlyArray<{ kind?: string; languages?: readonly string[] }>).some((m) => m.kind === 'asr' && m.languages?.includes(AUTO) === true);
+/** Whether the selected recognizer advertises "auto"; without a choice, the server may use any detector it lists. */
+export const serverDetects = (models: Listed, chosen = ''): boolean => (models as ReadonlyArray<{ id?: string; kind?: string; languages?: readonly string[] }>).some((m) =>
+  m.kind === 'asr' && (!chosen.trim() || choiceOf(m.id ?? '') === choiceOf(chosen.trim())) && m.languages?.includes(AUTO) === true);
 
 /**
  * Another Kotomimi lists a recognizer that does not name the language. It is
@@ -137,7 +138,7 @@ export const serverSoft = (models: Listed): boolean => (models as ReadonlyArray<
  * that. Anywhere else the choice counts for nothing: the leg is told the
  * pair's language, and the language section says so.
  */
-export const detectsOther = (s: { asrDetectOther?: boolean; asrVia: Place; asrHere?: AsrHere; asrOther?: string }, models: Listed = []): boolean => s.asrDetectOther === true && canDetectOther(s, models);
+export const detectsOther = (s: { asrDetectOther?: boolean; asrVia: Place; asrHere?: AsrHere; asrOther?: string; asrModel?: string }, models: Listed = []): boolean => s.asrDetectOther === true && canDetectOther(s, models);
 
 /**
  * What hears can tell a language by itself: a native engine's model, an API
@@ -147,11 +148,12 @@ export const detectsOther = (s: { asrDetectOther?: boolean; asrVia: Place; asrHe
  * Fork: here this computer hears, a model that does not name the language is
  * no refusal: the sentence's writing, and behind it a small text detector,
  * try (`src/lib/language/identify.ts`). That is a best effort, and the
- * settings say so; only the other device's list still has to state `auto`.
+ * settings say so. Another Kotomimi can also use the client's text detector;
+ * other Realtime servers must advertise detection for the selected model.
  */
-export function canDetectOther(s: { asrVia: Place; asrHere?: AsrHere; asrOther?: string }, models: Listed = []): boolean {
+export function canDetectOther(s: { asrVia: Place; asrHere?: AsrHere; asrOther?: string; asrModel?: string }, models: Listed = []): boolean {
   const place = hearingPlace(s);
-  if (place === 'server') return serverDetects(models) || serverSoft(models);
+  if (place === 'server') return serverDetects(models, s.asrModel) || serverSoft(models);
   // This computer, or an API: the recognizer's language, else the writing, else the detector.
   return true;
 }

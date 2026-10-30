@@ -37,6 +37,13 @@ const TEXT_MIN_CHARS = 12;
 const TEXT_MIN_SCORE = 0.45;
 const TEXT_MIN_MARGIN = 0.25;
 
+/** These scripts are shared by several languages; they identify a language only within an unambiguous pair. */
+const SHARED_SCRIPTS: Readonly<Record<string, readonly string[]>> = {
+  ru: ['ru', 'uk', 'be', 'bg', 'mk', 'sr', 'kk', 'ky', 'mn', 'tg'],
+  ar: ['ar', 'fa', 'ur', 'ps', 'sd', 'ug'],
+  hi: ['hi', 'mr', 'ne', 'sa', 'bho', 'mai'],
+};
+
 /** The language the writing itself names, when that is one of the candidates. */
 export function scriptLanguage(text: string, candidates: readonly string[] = []): string | null {
   const trimmed = text.trim();
@@ -44,6 +51,8 @@ export function scriptLanguage(text: string, candidates: readonly string[] = [])
   const bases = candidates.map(baseOf).filter(Boolean);
   // Two candidates: `oneOfTwo` knows the Latin-letter pair and the Han/Kana doubt.
   const found = bases.length === 2 ? oneOfTwo(trimmed, bases[0]!, bases[1]!) : languageByScript(trimmed);
+  const shared = found ? SHARED_SCRIPTS[found] : undefined;
+  if (shared && (bases.length === 0 || bases.filter((language) => shared.includes(language)).length !== 1)) return null;
   return found && inCandidates(found, bases) ? found : null;
 }
 
