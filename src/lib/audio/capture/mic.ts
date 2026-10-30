@@ -11,6 +11,7 @@ import { SAMPLE_RATE } from '../../contract/adapter';
 import { describeCause, reportWarning } from '../../diagnostics/report';
 import { ModernAudioRecorder } from '../../modern-audio/ModernAudioRecorder';
 import { MicrophoneCaptureError } from '../../modern-audio/microphoneCaptureError';
+import type { NoiseSuppressionMode, NoiseSuppressionState } from '../../modern-audio/noiseSuppression';
 import type { Source } from '../../session/source';
 import { createSourceCore } from './core';
 import { createMicGate } from './micGate';
@@ -20,6 +21,7 @@ import { explainMicFailure, type AppsUsing } from './micFailure';
 export const MIC_LOST_USING_OTHER = 'mic_lost_using_other';
 export const MIC_LOST_WAITING = 'mic_lost_waiting';
 export const MIC_NOW_USING = 'mic_now_using';
+export const NOISE_SUPPRESSION_FALLBACK = 'noise_suppression_fallback';
 
 /**
  * A reopened device whose track ends again sooner than this is not a blip but a
@@ -41,7 +43,7 @@ function refused(error: unknown): boolean {
   return name === 'NotAllowedError' || name === 'PermissionDeniedError' || name === 'SecurityError';
 }
 
-export type NoiseSuppression = 'off' | 'standard' | 'enhanced';
+export type NoiseSuppression = NoiseSuppressionMode;
 /** What echo cancellation removes: what this app plays, or every sound the system plays. */
 export type EchoCancellation = 'app' | 'all';
 
@@ -58,6 +60,8 @@ export interface MicSettings {
   /** The device would not open: the store leaves it out and chooses again (spec 2026-10-04 §2). */
   markUnusable(deviceId: string): void;
   noiseSuppression(): NoiseSuppression;
+  /** Runtime status for the settings surface; null when the capture is closed or reconfiguring. */
+  noiseSuppressionState?(state: NoiseSuppressionState | null): void;
   echoCancellation(): EchoCancellation;
   muted(): boolean;
   /**
@@ -92,6 +96,7 @@ export interface MicRecorder {
   /** Ends the recording if it is open, then disposes the recorder for good — the GTCRN worker included. */
   quit(): Promise<unknown>;
   setNoiseSuppressionMode(mode: NoiseSuppression): Promise<void>;
+  onNoiseSuppressionChange?: ((state: NoiseSuppressionState | null) => void) | null;
   /** Applied at the next `begin()`. */
   setEchoCancellation(mode: EchoCancellation): void;
   getStream(): MediaStream | null;
@@ -149,6 +154,8 @@ export async function openMic(
       // the microphone open while it settles. `quit()` below still ends the recorder.
       for (const track of recorder.getStream()?.getTracks() ?? []) track.stop();
       unsubscribe();
+      recorder.onNoiseSuppressionChange = null;
+      settings.noiseSuppressionState?.(null);
       // A switch in flight finishes (or fails) before the recorder is disposed.
       await chain;
       unwatch();
@@ -164,6 +171,25 @@ export async function openMic(
       }
     },
   });
+
+  let lastNoiseFallback: string | null = null;
+  recorder.onNoiseSuppressionChange = (state) => {
+    if (core.stopped || core.ended || (state && state.requested !== settings.noiseSuppression())) return;
+    settings.noiseSuppressionState?.(state);
+    if (!state) return;
+    if (state.effective === state.requested) {
+      lastNoiseFallback = null;
+      return;
+    }
+    const key = `${state.requested}:${state.effective}`;
+    if (lastNoiseFallback === key) return;
+    lastNoiseFallback = key;
+    core.degrade({
+      code: NOISE_SUPPRESSION_FALLBACK,
+      message: 'The selected noise suppression is unavailable. A lower level is in use; check the microphone settings.',
+      lifetime: 'transient',
+    });
+  };
 
   /** Steps run one at a time, in order: a switch, a lost track, a noise-mode or echo-cancellation change. A failure not about a device ends the source. */
   const queue = (step: () => Promise<void>) => {
@@ -309,5 +335,7 @@ export async function openMic(
   }
 
   unsubscribe = settings.subscribe(() => queue(follow));
+  // Opening can await a denoiser for seconds. Follow choices made before the subscription existed.
+  queue(follow);
   return core;
 }

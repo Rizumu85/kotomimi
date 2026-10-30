@@ -10,12 +10,14 @@
  * the device list via aria-describedby, so the `aria-disabled` options carry
  * their justification for screen readers rather than just going quiet.
  */
-import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import AudioDeviceSection from './AudioDeviceSection';
+import type { NoiseSuppressionState } from '../../../lib/modern-audio/noiseSuppression';
 
 const echo = vi.hoisted(() => ({ mode: 'all' as 'app' | 'all', set: vi.fn(), os: 'macos', electron: true }));
+const noise = vi.hoisted(() => ({ mode: 'off', state: null as NoiseSuppressionState | null }));
+beforeEach(() => { noise.mode = 'off'; noise.state = null; });
 
 vi.mock('../../../utils/environment', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../../utils/environment')>()),
@@ -26,7 +28,8 @@ vi.mock('../../../utils/environment', async (importOriginal) => ({
 // Resolve to the inline default when the call site has one, else echo the key —
 // these tests assert on `lockedReason`, which is passed in as a plain string.
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string, def?: string) => def ?? key }),
+  useTranslation: () => ({ t: (key: string, def?: string | { defaultValue: string; mode: string }) =>
+    typeof def === 'object' ? def.defaultValue.replace('{{mode}}', def.mode) : def ?? key }),
 }));
 
 vi.mock('../../../lib/analytics', () => ({
@@ -37,7 +40,8 @@ const devices = [{ deviceId: 'spk-1', label: 'Headphones' }];
 
 vi.mock('../../../stores/audioStore', () => ({
   useIsMonitorChannelInScope: () => false,
-  useNoiseSuppressionMode: () => 'off',
+  useNoiseSuppressionMode: () => noise.mode,
+  useNoiseSuppressionState: () => noise.state,
   useSetNoiseSuppressionMode: () => vi.fn(),
   useMicGateThreshold: () => 0,
   useSetMicGateThreshold: () => vi.fn(),
@@ -73,6 +77,23 @@ const renderSpeaker = (props: Record<string, unknown> = {}) =>
       {...props}
     />
   );
+
+describe('AudioDeviceSection noise suppression status', () => {
+  it.each(['standard', 'off'] as const)('shows the effective %s fallback while keeping the enhanced preference selected', (effective) => {
+    noise.mode = 'enhanced';
+    noise.state = { requested: 'enhanced', effective, reason: 'unavailable' };
+    renderMic();
+    expect(screen.getByRole('status')).toHaveTextContent(`Currently using settings.noiseSuppressionMode.${effective}`);
+    expect(screen.getByRole('button', { name: 'settings.noiseSuppressionMode.enhanced' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('hides a fallback from an earlier selection', () => {
+    noise.mode = 'off';
+    noise.state = { requested: 'enhanced', effective: 'standard' };
+    renderMic();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+});
 
 describe('AudioDeviceSection — the mic activation threshold (fork)', () => {
   it('draws the threshold under the noise suppression in the microphone section, with its test while no run is on', () => {

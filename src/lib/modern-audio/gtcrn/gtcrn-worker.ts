@@ -26,6 +26,8 @@ let interCache: Tensor;
 
 // Ring buffer for accumulating input samples at 16kHz
 let inputBuffer: Float32Array = new Float32Array(0);
+// Reset changes this immediately, so queued work from an earlier capture is skipped.
+let generation = 0;
 
 // Previous frame for overlap-add
 let prevFrame: Float32Array = new Float32Array(GTCRN_N_FFT);
@@ -100,8 +102,8 @@ async function processFrame(frameRe: Float32Array, frameIm: Float32Array): Promi
   return [enhRe, enhIm];
 }
 
-async function processAudio(audio: Int16Array): Promise<void> {
-  if (!session) return;
+async function processAudio(audio: Int16Array, expectedGeneration: number): Promise<void> {
+  if (!session || expectedGeneration !== generation) return;
 
   // Convert Int16 48kHz → Float32 16kHz
   const float32 = int16ToFloat32(audio);
@@ -131,6 +133,7 @@ async function processAudio(audio: Int16Array): Promise<void> {
 
     // Run GTCRN inference
     const [enhRe, enhIm] = await processFrame(re, im);
+    if (expectedGeneration !== generation) return;
 
     // ISTFT: inverse FFT
     const timeDomain = irfft(enhRe, enhIm, GTCRN_N_FFT);
@@ -165,7 +168,7 @@ async function processAudio(audio: Int16Array): Promise<void> {
   // Convert to Int16 and send back
   const outputInt16 = float32ToInt16(upsampled);
   self.postMessage(
-    { type: 'audio', audio: outputInt16 },
+    { type: 'audio', audio: outputInt16, generation: expectedGeneration },
     { transfer: [outputInt16.buffer] }
   );
 }
@@ -173,12 +176,13 @@ async function processAudio(audio: Int16Array): Promise<void> {
 // Serialize all message handling to prevent concurrent access to shared state
 let commandQueue: Promise<void> = Promise.resolve();
 
-function enqueueCommand(task: () => Promise<void> | void): void {
+function enqueueCommand(task: () => Promise<void> | void, expectedGeneration?: number): void {
   commandQueue = commandQueue
     .then(() => task())
     .catch((error) => {
+      if (expectedGeneration !== undefined && expectedGeneration !== generation) return;
       const message = error instanceof Error ? error.message : String(error);
-      self.postMessage({ type: 'error', message: `GTCRN worker error: ${message}` });
+      self.postMessage({ type: 'error', message: `GTCRN worker error: ${message}`, generation: expectedGeneration });
     });
 }
 
@@ -190,14 +194,15 @@ self.onmessage = (event: MessageEvent) => {
       enqueueCommand(() => init(event.data.ortWasmBaseUrl, event.data.modelUrl));
       break;
     case 'process':
-      enqueueCommand(() => processAudio(event.data.audio));
+      enqueueCommand(() => processAudio(event.data.audio, event.data.generation), event.data.generation);
       break;
     case 'reset':
+      generation = event.data.generation;
       enqueueCommand(() => {
         initStates();
         inputBuffer = new Float32Array(0);
         prevFrame = new Float32Array(GTCRN_N_FFT);
-      });
+      }, event.data.generation);
       break;
     case 'dispose':
       enqueueCommand(() => {

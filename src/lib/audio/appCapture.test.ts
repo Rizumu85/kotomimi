@@ -203,6 +203,19 @@ describe('the settings the sources follow', () => {
     expect([settings.muted(), settings.echoCancellation()]).toEqual([true, 'all']);
   });
 
+  it('publishes runtime noise suppression without overwriting the saved preference', () => {
+    localStorage.setItem('audio.noiseSuppressionMode', 'enhanced');
+    useAudioStore.setState({ noiseSuppressionMode: 'enhanced', noiseSuppressionState: null });
+    const state = { requested: 'enhanced', effective: 'standard', reason: 'unavailable' } as const;
+    micSettings().noiseSuppressionState!(state);
+    expect(useAudioStore.getState().noiseSuppressionState).toEqual(state);
+    expect(useAudioStore.getState().noiseSuppressionMode).toBe('enhanced');
+    expect(localStorage.getItem('audio.noiseSuppressionMode')).toBe('enhanced');
+    micSettings().noiseSuppressionState!(null);
+    expect(useAudioStore.getState().noiseSuppressionState).toBeNull();
+    localStorage.removeItem('audio.noiseSuppressionMode');
+  });
+
   it('reads the participant source, whole-system when none is chosen, and remembers audible audio', () => {
     const settings = systemAudioSettings();
     useAudioStore.setState({ selectedParticipantSource: null, participantTapAudioSeen: false });

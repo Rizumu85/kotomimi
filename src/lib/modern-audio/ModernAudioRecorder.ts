@@ -1,5 +1,6 @@
 import { BaseAudioRecorder } from './BaseAudioRecorder';
 import { MicrophoneCaptureError } from './microphoneCaptureError';
+import type { NoiseSuppressionMode, NoiseSuppressionState } from './noiseSuppression';
 import { DEBUG_CONFIG, AUDIO_CONSTRAINT_PROFILES } from '../config/performance.js';
 
 // Vite ?url imports for AudioWorklet and WASM assets
@@ -77,19 +78,19 @@ export class ModernAudioRecorder extends BaseAudioRecorder {
   private rnnoiseNode: (AudioWorkletNode & { destroy(): void }) | null = null;
   private rnnoiseWasmBinary: ArrayBuffer | null = null;
   private rnnoiseModuleLoaded: boolean = false;
-  private _noiseSuppressEnabled: boolean = false;
   private _noiseSuppressOpId: number = 0;
+  /** Null while closed or reconfiguring; never changes the user's preference. */
+  public onNoiseSuppressionChange: ((state: NoiseSuppressionState | null) => void) | null = null;
 
   // GTCRN worker-based noise suppression
   private gtcrnWorker: Worker | null = null;
   private gtcrnReady: boolean = false;
-  // GTCRN (enhanced) needs onnxruntime-web loaded inside an ES module worker. That
-  // import fails in `vite dev` (the packaged/release build bundles it via Rollup and
-  // works fine), so once the worker fails to load we remember it and quietly stick
-  // to RNNoise instead of re-attempting — and re-logging — on every start / mode change.
-  private gtcrnUnavailable: boolean = false;
-  private _noiseSuppressionMode: 'off' | 'standard' | 'enhanced' = 'off';
-  private _originalOnMessage: ((event: MessageEvent) => void) | null = null;
+  private gtcrnFailure: Error | null = null;
+  private gtcrnInitialization: Promise<void> | null = null;
+  private cancelGtcrnInitialization: (() => void) | null = null;
+  private gtcrnConnected = false;
+  private gtcrnGeneration = 0;
+  private _noiseSuppressionMode: NoiseSuppressionMode = 'off';
 
   // Internal sample rate for AudioContext (48kHz for RNNoise compatibility)
   private internalSampleRate: number;
@@ -286,6 +287,8 @@ export class ModernAudioRecorder extends BaseAudioRecorder {
    * us here is the one worth surfacing, not a hiccup while cleaning up.
    */
   private async abortBegin(): Promise<void> {
+    ++this._noiseSuppressOpId;
+    this.onNoiseSuppressionChange?.(null);
     try {
       this.mediaRecorder = null;
       if (this.rnnoiseNode) {
@@ -359,9 +362,7 @@ export class ModernAudioRecorder extends BaseAudioRecorder {
               this._lastValidAudioChunk = pcmData;
             }
 
-            // Downsample 48kHz → 24kHz for client compatibility
-            const outputPcm = this.downsample48to24(processedPcm);
-            this._processAudioData(outputPcm);
+            this._processAudioData(processedPcm);
           }
         };
 
@@ -371,22 +372,40 @@ export class ModernAudioRecorder extends BaseAudioRecorder {
         this.audioWorkletNode.connect(this.dummyGain);
         this.dummyGain.connect(this.audioContext.destination);
 
-        // Insert noise suppression based on current mode
-        if (this._noiseSuppressionMode === 'standard') {
-          await this._insertRnnoiseNode();
-        } else if (this._noiseSuppressionMode === 'enhanced') {
-          await this._connectGtcrnWorker();
-        }
-
       } catch (error) {
         console.warn(`${this.getLogPrefix()} AudioWorklet failed, using ScriptProcessor:`, error);
         this.useAudioWorklet = false;
+        // A failed graph must not keep emitting beside the fallback.
+        this.mediaStreamSource.disconnect();
+        this.audioWorkletNode?.disconnect();
+        this.audioWorkletNode?.port.close();
+        this.audioWorkletNode = null;
+        this.dummyGain?.disconnect();
+        this.dummyGain = null;
         await this.setupScriptProcessorFallback();
       }
     } else {
       console.info(`${this.getLogPrefix()} Using ScriptProcessor fallback`);
       await this.setupScriptProcessorFallback();
     }
+    await this.applyNoiseSuppression(++this._noiseSuppressOpId);
+  }
+
+  /** Both capture backends enter here at 48 kHz. Only the delivery boundary resamples. */
+  protected _processAudioData(pcm: Int16Array): void {
+    if (!this.recording) return;
+    if (this.gtcrnConnected && this.gtcrnReady && this.gtcrnWorker) {
+      this.gtcrnWorker.postMessage(
+        { type: 'process', audio: pcm, generation: this.gtcrnGeneration },
+        [pcm.buffer],
+      );
+    } else {
+      this.deliverCapturedPcm(pcm);
+    }
+  }
+
+  private deliverCapturedPcm(pcm: Int16Array): void {
+    super._processAudioData(this.downsample48to24(pcm));
   }
 
   /**
@@ -437,6 +456,7 @@ export class ModernAudioRecorder extends BaseAudioRecorder {
     }
 
     console.info(`${this.getLogPrefix()} Pausing recording`);
+    this.resetGtcrnStream();
     this.audioWorkletNode?.port.postMessage({ type: 'stop' });
 
     if (this.mediaRecorder.state === 'recording') {
@@ -461,6 +481,8 @@ export class ModernAudioRecorder extends BaseAudioRecorder {
     }
 
     console.info(`${this.getLogPrefix()} Stopping recording session`);
+    ++this._noiseSuppressOpId;
+    this.onNoiseSuppressionChange?.(null);
 
     if (this.recording) {
       await this.pause();
@@ -497,6 +519,8 @@ export class ModernAudioRecorder extends BaseAudioRecorder {
    * Perform cleanup
    */
   async quit(): Promise<boolean> {
+    ++this._noiseSuppressOpId;
+    this.onNoiseSuppressionChange?.(null);
     this.listenForDeviceChange(null);
     this._disposeGtcrnWorker();
     if (this.mediaRecorder) {
@@ -639,34 +663,61 @@ export class ModernAudioRecorder extends BaseAudioRecorder {
     await this.setNoiseSuppressionMode(enabled ? 'standard' : 'off');
   }
 
-  /**
-   * Set noise suppression mode: 'off', 'standard' (RNNoise), or 'enhanced' (GTCRN).
-   */
-  async setNoiseSuppressionMode(mode: 'off' | 'standard' | 'enhanced'): Promise<void> {
-    const prevMode = this._noiseSuppressionMode;
-    if (prevMode === mode) return;
-
+  /** Select a preference; a fallback changes only the reported effective mode. */
+  async setNoiseSuppressionMode(mode: NoiseSuppressionMode): Promise<void> {
+    if (this._noiseSuppressionMode === mode) return;
     this._noiseSuppressionMode = mode;
-    this._noiseSuppressEnabled = mode === 'standard';
     const opId = ++this._noiseSuppressOpId;
+    if (!this.audioContext || !this.mediaStreamSource) return;
+    await this.applyNoiseSuppression(opId);
+  }
 
-    if (!this.audioContext || !this.mediaStreamSource || !this.audioWorkletNode) {
+  private isCurrentNoiseOperation(opId: number): boolean {
+    return opId === this._noiseSuppressOpId && this.audioContext !== null && this.mediaStreamSource !== null;
+  }
+
+  private reportNoiseSuppression(effective: NoiseSuppressionMode, reason?: string): void {
+    this.onNoiseSuppressionChange?.({ requested: this._noiseSuppressionMode, effective, ...(reason ? { reason } : {}) });
+  }
+
+  /** Every path settles on one working level, and keeps raw capture available while loading. */
+  private async applyNoiseSuppression(opId: number): Promise<void> {
+    this._disconnectGtcrnWorker();
+    this._removeRnnoiseNode();
+    this.onNoiseSuppressionChange?.(null);
+    const requested = this._noiseSuppressionMode;
+    if (requested === 'off') {
+      this.reportNoiseSuppression('off');
+      return;
+    }
+    if (!this.audioWorkletNode) {
+      this.reportNoiseSuppression('off', 'AudioWorklet is unavailable.');
       return;
     }
 
-    // Tear down previous mode
-    if (prevMode === 'standard' && mode !== 'standard') {
-      this._removeRnnoiseNode();
-    }
-    if (prevMode === 'enhanced' && mode !== 'enhanced') {
-      this._disconnectGtcrnWorker();
+    let reason: string | undefined;
+    if (requested === 'enhanced') {
+      try {
+        await this._connectGtcrnWorker(opId);
+        if (this.isCurrentNoiseOperation(opId)) this.reportNoiseSuppression('enhanced');
+        return;
+      } catch (error) {
+        if (!this.isCurrentNoiseOperation(opId)) return;
+        this.gtcrnFailure = error instanceof Error ? error : new Error(String(error));
+        reason = this.gtcrnFailure.message;
+        this._disposeGtcrnWorker();
+        console.warn(`${this.getLogPrefix()} GTCRN unavailable; trying RNNoise:`, reason);
+      }
     }
 
-    // Set up new mode
-    if (mode === 'standard') {
+    try {
       await this._insertRnnoiseNode(opId);
-    } else if (mode === 'enhanced') {
-      await this._connectGtcrnWorker(opId);
+      if (this.isCurrentNoiseOperation(opId)) this.reportNoiseSuppression('standard', reason);
+    } catch (error) {
+      if (!this.isCurrentNoiseOperation(opId)) return;
+      const failure = error instanceof Error ? error.message : String(error);
+      console.warn(`${this.getLogPrefix()} RNNoise unavailable; using raw capture:`, failure);
+      this.reportNoiseSuppression('off', reason ? `${reason}; ${failure}` : failure);
     }
   }
 
@@ -689,62 +740,39 @@ export class ModernAudioRecorder extends BaseAudioRecorder {
    */
   private async _ensureRnnoiseModule(): Promise<void> {
     if (this.rnnoiseModuleLoaded) return;
-    if (!this.audioContext) throw new Error('AudioContext required');
-
-    await this.audioContext.audioWorklet.addModule(rnnoiseWorkletPath);
-    this.rnnoiseModuleLoaded = true;
+    const context = this.audioContext;
+    if (!context) throw new Error('AudioContext required');
+    await context.audioWorklet.addModule(rnnoiseWorkletPath);
+    if (context === this.audioContext) this.rnnoiseModuleLoaded = true;
   }
 
-  /**
-   * Insert RnnoiseWorkletNode between mediaStreamSource and audioWorkletNode.
-   * Also reconnects the analyser to tap post-suppression audio.
-   */
-  private async _insertRnnoiseNode(opId?: number): Promise<void> {
-    if (this.rnnoiseNode) return; // Already inserted
-    if (!this.audioContext || !this.mediaStreamSource || !this.audioWorkletNode) return;
+  /** Load before touching the graph; stale operations cannot rewire a newer capture. */
+  private async _insertRnnoiseNode(opId: number): Promise<void> {
+    const context = this.audioContext;
+    const source = this.mediaStreamSource;
+    const capture = this.audioWorkletNode;
+    if (!context || !source || !capture) throw new Error('AudioWorklet required');
+    const [wasmBinary, , { RnnoiseWorkletNode }] = await Promise.all([
+      this._loadRnnoiseResources(),
+      this._ensureRnnoiseModule(),
+      import('@sapphi-red/web-noise-suppressor'),
+    ]);
+    if (!this.isCurrentNoiseOperation(opId) || this.audioContext !== context || this.audioWorkletNode !== capture) return;
 
+    const node = new RnnoiseWorkletNode(context, { wasmBinary, maxChannels: 1 });
     try {
-      const [wasmBinary] = await Promise.all([
-        this._loadRnnoiseResources(),
-        this._ensureRnnoiseModule(),
-      ]);
-
-      // Abort if a newer toggle happened during async loading
-      if (opId !== undefined && opId !== this._noiseSuppressOpId) {
-        console.debug(`${this.getLogPrefix()} RNNoise insert aborted (stale opId ${opId} vs ${this._noiseSuppressOpId})`);
-        return;
-      }
-
-      const { RnnoiseWorkletNode } = await import('@sapphi-red/web-noise-suppressor');
-      this.rnnoiseNode = new RnnoiseWorkletNode(this.audioContext, {
-        wasmBinary,
-        maxChannels: 1,
-      });
-
-      // Rewire: mediaStreamSource → rnnoiseNode → audioWorkletNode
-      this.mediaStreamSource.disconnect();
-      this.mediaStreamSource.connect(this.rnnoiseNode);
-      this.rnnoiseNode.connect(this.audioWorkletNode);
-
-      // Reconnect analyser to post-suppression audio if it exists
-      if (this.analyser) {
-        try { this.analyser.disconnect(); } catch { /* ignore */ }
-        this.rnnoiseNode.connect(this.analyser);
-      }
-
-      console.info(`${this.getLogPrefix()} RNNoise worklet node inserted`);
+      source.disconnect();
+      source.connect(node);
+      node.connect(capture);
+      if (this.analyser) node.connect(this.analyser);
+      this.rnnoiseNode = node;
     } catch (error) {
-      console.error(`${this.getLogPrefix()} Failed to insert RNNoise node:`, error);
-      this.rnnoiseNode = null;
-      // Restore direct connection so mic audio is not lost
-      try {
-        if (this.mediaStreamSource && this.audioWorkletNode) {
-          this.mediaStreamSource.connect(this.audioWorkletNode);
-          if (this.analyser) {
-            this.mediaStreamSource.connect(this.analyser);
-          }
-        }
-      } catch { /* best effort */ }
+      node.disconnect();
+      node.destroy();
+      source.disconnect();
+      source.connect(capture);
+      if (this.analyser) source.connect(this.analyser);
+      throw error;
     }
   }
 
@@ -784,138 +812,108 @@ export class ModernAudioRecorder extends BaseAudioRecorder {
     }
   }
 
-  /**
-   * Initialize and connect GTCRN worker for audio processing.
-   */
-  private async _connectGtcrnWorker(opId?: number): Promise<void> {
-    if (!this.audioWorkletNode) return;
+  /** Initializes once per worker, even if the selected mode changes while it loads. */
+  private async ensureGtcrnWorker(): Promise<void> {
+    if (this.gtcrnFailure) throw this.gtcrnFailure;
+    if (this.gtcrnReady) return;
+    if (this.gtcrnInitialization) return this.gtcrnInitialization;
 
-    // Known unavailable (e.g. vite dev) — go straight to RNNoise, no re-attempt/log.
-    if (this.gtcrnUnavailable) {
-      if (opId !== undefined && opId !== this._noiseSuppressOpId) return;
-      this._noiseSuppressionMode = 'standard';
-      this._noiseSuppressEnabled = true;
-      try { await this._insertRnnoiseNode(); } catch { /* RNNoise best effort */ }
-      return;
-    }
-
-    try {
-      if (!this.gtcrnWorker) {
-        this.gtcrnWorker = new Worker(
-          new URL('./gtcrn/gtcrn-worker.ts', import.meta.url),
-          { type: 'module' }
-        );
-
-        await new Promise<void>((resolve, reject) => {
-          const timeout = setTimeout(() => reject(new Error('GTCRN worker init timeout')), 10000);
-          this.gtcrnWorker!.onmessage = (event) => {
-            if (event.data.type === 'ready') {
-              clearTimeout(timeout);
-              this.gtcrnWorker!.onerror = null; // init done — let runtime errors log normally
-              this.gtcrnReady = true;
-              resolve();
-            } else if (event.data.type === 'error') {
-              clearTimeout(timeout);
-              reject(new Error(event.data.message));
-            }
-          };
-          // A worker *load* failure fires `error`, not `message`, and the in-worker
-          // try/catch can't see it — without this it would wait out the full 10s
-          // timeout. Module-worker load errors are opaque (all ErrorEvent fields are
-          // undefined), so there's nothing useful to log; mark unavailable and fail
-          // fast. This is the expected path in `vite dev` (ORT ESM import can't load
-          // in an ES module worker); the packaged/release build bundles it and works.
-          this.gtcrnWorker!.onerror = () => {
-            clearTimeout(timeout);
-            reject(new Error('GTCRN worker failed to load'));
-          };
-          this.gtcrnWorker!.postMessage({
-            type: 'init',
-            ortWasmBaseUrl: new URL('./wasm/ort/', window.location.href).href,
-            modelUrl: new URL('./wasm/gtcrn/gtcrn_simple.onnx', window.location.href).href,
-          });
-        });
-      }
-
-      if (opId !== undefined && opId !== this._noiseSuppressOpId) return;
-
-      const originalHandler = this.audioWorkletNode.port.onmessage;
-      this._originalOnMessage = originalHandler as ((event: MessageEvent) => void) | null;
-
-      this.gtcrnWorker.onmessage = (event: MessageEvent) => {
-        if (event.data.type === 'audio') {
-          const denoisedPcm: Int16Array = event.data.audio;
-          const outputPcm = this.downsample48to24(denoisedPcm);
-          this._processAudioData(outputPcm);
+    const worker = new Worker(new URL('./gtcrn/gtcrn-worker.ts', import.meta.url), { type: 'module' });
+    this.gtcrnWorker = worker;
+    const initialization = new Promise<void>((resolve, reject) => {
+      let settled = false;
+      const finish = (error?: Error) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeout);
+        if (this.gtcrnWorker === worker) this.cancelGtcrnInitialization = null;
+        if (error) reject(error);
+        else resolve();
+      };
+      const timeout = setTimeout(() => finish(new Error('GTCRN worker init timeout')), 10000);
+      this.cancelGtcrnInitialization = () => finish(new Error('GTCRN worker disposed'));
+      worker.onmessage = (event) => {
+        if (settled || this.gtcrnWorker !== worker) return;
+        if (event.data.type === 'ready') {
+          this.gtcrnReady = true;
+          finish();
         } else if (event.data.type === 'error') {
-          console.error(`${this.getLogPrefix()} GTCRN worker error:`, event.data.message);
-          this.setNoiseSuppressionMode('standard');
+          finish(new Error(event.data.message));
         }
       };
-
-      this.audioWorkletNode.port.onmessage = (event: MessageEvent) => {
-        if (event.data.type === 'audioData' && this.gtcrnReady && this.gtcrnWorker) {
-          const { pcmData } = event.data;
-          this.gtcrnWorker.postMessage(
-            { type: 'process', audio: pcmData },
-            [pcmData.buffer]
-          );
-        }
+      worker.onerror = () => {
+        if (!settled) finish(new Error('GTCRN worker failed to load'));
+        else this.failGtcrnWorker(worker, 'GTCRN worker stopped unexpectedly.');
       };
-
-      console.info(`${this.getLogPrefix()} GTCRN worker connected`);
+      worker.postMessage({
+        type: 'init',
+        ortWasmBaseUrl: new URL('./wasm/ort/', window.location.href).href,
+        modelUrl: new URL('./wasm/gtcrn/gtcrn_simple.onnx', window.location.href).href,
+      });
+    });
+    this.gtcrnInitialization = initialization;
+    try {
+      await initialization;
     } catch (error) {
-      // Mark unavailable so we don't re-attempt (and re-log) on every start/mode
-      // change — the load failure is environmental (vite dev), not transient.
-      this.gtcrnUnavailable = true;
-      console.warn(`${this.getLogPrefix()} GTCRN (enhanced) unavailable — using RNNoise. This is expected in 'vite dev'; the packaged build supports enhanced noise suppression.`);
-      this.gtcrnReady = false;
-      this._disposeGtcrnWorker();
-
-      // Ignore stale failures — user may have already switched away
-      if (opId !== undefined && opId !== this._noiseSuppressOpId) return;
-
-      // Fallback chain: enhanced → standard → off
-      try {
-        this._noiseSuppressionMode = 'standard';
-        this._noiseSuppressEnabled = true;
-        await this._insertRnnoiseNode();
-      } catch (rnnoiseError) {
-        console.error(`${this.getLogPrefix()} RNNoise fallback also failed:`, rnnoiseError);
-        this._noiseSuppressionMode = 'off';
-        this._noiseSuppressEnabled = false;
+      // The request may have changed while loading. Retire this failed worker
+      // regardless, without disposing a replacement installed by another operation.
+      if (this.gtcrnWorker === worker) {
+        this.gtcrnFailure = error instanceof Error ? error : new Error(String(error));
+        this._disposeGtcrnWorker();
       }
+      throw error;
+    } finally {
+      if (this.gtcrnInitialization === initialization) this.gtcrnInitialization = null;
     }
   }
 
-  /**
-   * Disconnect GTCRN worker from the audio pipeline (keep worker alive).
-   */
+  private async _connectGtcrnWorker(opId: number): Promise<void> {
+    await this.ensureGtcrnWorker();
+    if (!this.isCurrentNoiseOperation(opId) || !this.audioWorkletNode) return;
+    const worker = this.gtcrnWorker!;
+    const current = () => this.gtcrnWorker === worker && this.gtcrnConnected && this.isCurrentNoiseOperation(opId);
+    worker.onmessage = (event: MessageEvent) => {
+      if (!current() || event.data.generation !== this.gtcrnGeneration) return;
+      if (event.data.type === 'audio') this.deliverCapturedPcm(event.data.audio);
+      else if (event.data.type === 'error') this.failGtcrnWorker(worker, event.data.message);
+    };
+    worker.onerror = () => this.failGtcrnWorker(worker, 'GTCRN worker stopped unexpectedly.');
+    this.resetGtcrnStream();
+    this.gtcrnConnected = true;
+  }
+
+  private failGtcrnWorker(worker: Worker, message: string): void {
+    if (worker !== this.gtcrnWorker) return;
+    const connected = this.gtcrnConnected;
+    this.gtcrnFailure = new Error(message);
+    this._disposeGtcrnWorker();
+    // A dormant worker also has to be retired, but only an active failure changes the graph.
+    if (connected) void this.applyNoiseSuppression(++this._noiseSuppressOpId);
+  }
+
+  /** Invalidates queued output, including output from before a pause or a device reopen. */
+  private resetGtcrnStream(): void {
+    ++this.gtcrnGeneration;
+    this.gtcrnWorker?.postMessage({ type: 'reset', generation: this.gtcrnGeneration });
+  }
+
   private _disconnectGtcrnWorker(): void {
-    if (!this.audioWorkletNode) return;
-
-    if (this._originalOnMessage) {
-      this.audioWorkletNode.port.onmessage = this._originalOnMessage;
-      this._originalOnMessage = null;
-    }
-
-    if (this.gtcrnWorker) {
-      this.gtcrnWorker.postMessage({ type: 'reset' });
-    }
-
-    console.info(`${this.getLogPrefix()} GTCRN worker disconnected`);
+    this.gtcrnConnected = false;
+    this.resetGtcrnStream();
   }
 
-  /**
-   * Fully dispose the GTCRN worker.
-   */
   private _disposeGtcrnWorker(): void {
     this._disconnectGtcrnWorker();
-    if (this.gtcrnWorker) {
-      this.gtcrnWorker.postMessage({ type: 'dispose' });
-      this.gtcrnWorker.terminate();
-      this.gtcrnWorker = null;
-      this.gtcrnReady = false;
+    const worker = this.gtcrnWorker;
+    this.cancelGtcrnInitialization?.();
+    this.cancelGtcrnInitialization = null;
+    this.gtcrnInitialization = null;
+    this.gtcrnWorker = null;
+    this.gtcrnReady = false;
+    if (worker) {
+      worker.onmessage = null;
+      worker.onerror = null;
+      worker.terminate();
     }
   }
 

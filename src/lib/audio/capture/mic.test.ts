@@ -1,5 +1,5 @@
 import { afterEach, describe, it, expect, vi } from 'vitest';
-import { MIC_LOST_USING_OTHER, MIC_LOST_WAITING, MIC_NOW_USING, openMic, type EchoCancellation, type MicRecorder, type MicSettings, type NoiseSuppression } from './mic';
+import { MIC_LOST_USING_OTHER, MIC_LOST_WAITING, MIC_NOW_USING, NOISE_SUPPRESSION_FALLBACK, openMic, type EchoCancellation, type MicRecorder, type MicSettings, type NoiseSuppression } from './mic';
 import { MicrophoneCaptureError } from '../../modern-audio/microphoneCaptureError';
 import { GATE_LOOKAHEAD_MS } from './micGate';
 import { SourceOpenError } from '../../session/source';
@@ -132,6 +132,63 @@ const settle = async () => {
 };
 
 const live = () => new AbortController().signal;
+
+describe('microphone noise suppression status', () => {
+  it('follows a preference changed while the microphone was opening', async () => {
+    const fake = fakeRecorder();
+    const finishBegin = fake.hangNextBegin();
+    const { settings, set } = settingsFixture({ noiseSuppression: 'enhanced' });
+    const opening = openMic(settings, live(), () => fake.recorder);
+    await settle();
+    set({ noiseSuppression: 'standard' });
+    finishBegin();
+    const source = await opening;
+    await settle();
+    expect(fake.calls).toContain('ns:standard');
+    await source.stop();
+  });
+
+  it('reports a startup fallback to the first listener and clears runtime state on stop', async () => {
+    const fake = fakeRecorder();
+    const { settings } = settingsFixture({ noiseSuppression: 'enhanced' });
+    settings.noiseSuppressionState = vi.fn();
+    const state = { requested: 'enhanced', effective: 'standard', reason: 'worker unavailable' } as const;
+    const begin = fake.recorder.begin;
+    fake.recorder.begin = async (id) => {
+      const result = await begin(id);
+      fake.recorder.onNoiseSuppressionChange?.(state);
+      return result;
+    };
+    const source = await openMic(settings, live(), () => fake.recorder);
+    const degraded = vi.fn();
+    source.onDegraded(degraded);
+    expect(degraded).toHaveBeenCalledWith(expect.objectContaining({ code: NOISE_SUPPRESSION_FALLBACK }));
+    expect(settings.noiseSuppressionState).toHaveBeenLastCalledWith(state);
+    expect(settings.noiseSuppression()).toBe('enhanced');
+    fake.recorder.onNoiseSuppressionChange?.(state);
+    expect(degraded).toHaveBeenCalledTimes(1);
+    const late = fake.recorder.onNoiseSuppressionChange;
+    await source.stop();
+    expect(settings.noiseSuppressionState).toHaveBeenLastCalledWith(null);
+    late?.(state);
+    expect(settings.noiseSuppressionState).toHaveBeenLastCalledWith(null);
+    expect(fake.recorder.onNoiseSuppressionChange).toBeNull();
+  });
+
+  it('ignores a fallback reported for a preference the user already changed', async () => {
+    const fake = fakeRecorder();
+    const { settings, set } = settingsFixture({ noiseSuppression: 'enhanced' });
+    settings.noiseSuppressionState = vi.fn();
+    const source = await openMic(settings, live(), () => fake.recorder);
+    const degraded = vi.fn();
+    source.onDegraded(degraded);
+    set({ noiseSuppression: 'off' });
+    fake.recorder.onNoiseSuppressionChange?.({ requested: 'enhanced', effective: 'standard' });
+    expect(settings.noiseSuppressionState).not.toHaveBeenCalled();
+    expect(degraded).not.toHaveBeenCalled();
+    await source.stop();
+  });
+});
 
 describe('openMic', () => {
   it('opens the selected device with its noise suppression, and delivers its chunks', async () => {

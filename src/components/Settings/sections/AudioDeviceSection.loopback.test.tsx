@@ -32,6 +32,7 @@ const { inputDevices, selectInputDevice } = vi.hoisted(() => ({
 vi.mock('../../../stores/audioStore', () => ({
   useIsMonitorChannelInScope: () => true,
   useNoiseSuppressionMode: () => 'off',
+  useNoiseSuppressionState: () => null,
   useSetNoiseSuppressionMode: () => vi.fn(),
   useMicGateThreshold: () => 0,
   useSetMicGateThreshold: () => vi.fn(),

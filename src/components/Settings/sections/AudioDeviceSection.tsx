@@ -5,7 +5,7 @@ import Tooltip from '../../Tooltip/Tooltip';
 import DeviceList from '../shared/DeviceList';
 import WarningModal from '../shared/WarningModal';
 import { useFilteredDevices, WarningType, AudioDevice, isVirtualMic } from '../shared/hooks';
-import { useAudioContext, useNoiseSuppressionMode, useSetNoiseSuppressionMode, useIsMonitorChannelInScope, NoiseSuppressionMode, useEchoCancellationMode, useSetEchoCancellationMode, EchoCancellationMode } from '../../../stores/audioStore';
+import { useAudioContext, useNoiseSuppressionMode, useNoiseSuppressionState, useSetNoiseSuppressionMode, useIsMonitorChannelInScope, NoiseSuppressionMode, useEchoCancellationMode, useSetEchoCancellationMode, EchoCancellationMode } from '../../../stores/audioStore';
 import { useAnalytics } from '../../../lib/analytics';
 import { isElectron, isLinux } from '../../../utils/environment';
 import MicGateControl from './MicGateControl';
@@ -72,6 +72,9 @@ const AudioDeviceSection: React.FC<AudioDeviceSectionProps> = ({
   const { t } = useTranslation();
   const { trackEvent } = useAnalytics();
   const noiseSuppressionMode = useNoiseSuppressionMode();
+  const noiseSuppressionState = useNoiseSuppressionState();
+  const noiseFallback = noiseSuppressionState?.requested === noiseSuppressionMode &&
+    noiseSuppressionState.effective !== noiseSuppressionMode ? noiseSuppressionState : null;
   const setNoiseSuppressionMode = useSetNoiseSuppressionMode();
   const echoCancellationMode = useEchoCancellationMode();
   const setEchoCancellationMode = useSetEchoCancellationMode();
@@ -244,6 +247,14 @@ const AudioDeviceSection: React.FC<AudioDeviceSectionProps> = ({
                 </button>
               ))}
             </div>
+            {noiseFallback && (
+              <span className="setting-description" role="status">
+                {t('settings.noiseSuppressionFallback', {
+                  defaultValue: 'Currently using {{mode}}. The selected noise suppression is unavailable.',
+                  mode: t(`settings.noiseSuppressionMode.${noiseFallback.effective}`),
+                })}
+              </span>
+            )}
           </div>
 
           {/* Echo Cancellation: Chromium on Linux has no 'all', so nothing to choose there */}

@@ -8,10 +8,11 @@ import { listAudioDevices, listSystemAudioSources } from '../lib/audio/devices';
 import { isVirtualDevice } from '../components/Settings/shared/hooks';
 import { isLoopbackInput } from '../utils/audioDevices';
 import { pickDefaultInputDevice, chooseInput, chooseOutput } from '../lib/audio/deviceChoice';
+import type { NoiseSuppressionMode, NoiseSuppressionState } from '../lib/modern-audio/noiseSuppression';
 
 export { pickDefaultInputDevice };
 
-export type NoiseSuppressionMode = 'off' | 'standard' | 'enhanced';
+export type { NoiseSuppressionMode } from '../lib/modern-audio/noiseSuppression';
 /** What the microphone's echo cancellation removes: what this app plays, or every sound the system plays. */
 export type EchoCancellationMode = 'app' | 'all';
 export type AudioMode = 'speaker' | 'participant' | 'both';
@@ -100,6 +101,8 @@ interface AudioStore {
   isRealVoicePassthroughEnabled: boolean;
   realVoicePassthroughVolume: number;
   noiseSuppressionMode: NoiseSuppressionMode;
+  /** Current capture only; never persisted or used as the user's selection. */
+  noiseSuppressionState: NoiseSuppressionState | null;
   /**
    * Fork: the microphone's activation threshold, 0–100 on the level scale of
    * `levelOf` (`src/lib/audio/capture/micGate.ts`); 0 is off. Sound under it
@@ -135,6 +138,7 @@ interface AudioStore {
   toggleRealVoicePassthrough: () => void;
   setRealVoicePassthroughVolume: (volume: number) => void;
   setNoiseSuppressionMode: (mode: NoiseSuppressionMode) => void;
+  setNoiseSuppressionState: (state: NoiseSuppressionState | null) => void;
   /** Fork: 0–100, rounded; 0 turns the gate off. Persisted. */
   setMicGateThreshold: (threshold: number) => void;
   setEchoCancellationMode: (mode: EchoCancellationMode) => void;
@@ -181,7 +185,8 @@ const useAudioStore = create<AudioStore>()(
     isLoading: true,
     isRealVoicePassthroughEnabled: false,
     realVoicePassthroughVolume: 0.2,
-    noiseSuppressionMode: 'enhanced' as NoiseSuppressionMode,
+    noiseSuppressionMode: 'standard' as NoiseSuppressionMode,
+    noiseSuppressionState: null,
     micGateThreshold: 0,
     echoCancellationMode: 'all' as EchoCancellationMode,
 
@@ -284,6 +289,7 @@ const useAudioStore = create<AudioStore>()(
       set({ noiseSuppressionMode: mode });
       void persistSetting(STORAGE_KEYS.NOISE_SUPPRESSION_MODE, mode);
     },
+    setNoiseSuppressionState: (state) => set({ noiseSuppressionState: state }),
 
     setMicGateThreshold: (threshold) => {
       const next = micGateThresholdOf(threshold);
@@ -626,6 +632,7 @@ export const useIsAudioLoading = () => useAudioStore((state) => state.isLoading)
 export const useIsRealVoicePassthroughEnabled = () => useAudioStore((state) => state.isRealVoicePassthroughEnabled);
 export const useRealVoicePassthroughVolume = () => useAudioStore((state) => state.realVoicePassthroughVolume);
 export const useNoiseSuppressionMode = () => useAudioStore((state) => state.noiseSuppressionMode);
+export const useNoiseSuppressionState = () => useAudioStore((state) => state.noiseSuppressionState);
 export const useSetNoiseSuppressionMode = () => useAudioStore((state) => state.setNoiseSuppressionMode);
 // Fork: the microphone's activation threshold.
 export const useMicGateThreshold = () => useAudioStore((state) => state.micGateThreshold);
