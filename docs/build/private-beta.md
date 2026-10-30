@@ -1,5 +1,20 @@
 # Private desktop beta
 
+## Beta 2 UI follow-up
+
+`0.43.133-beta.2` retains the existing beta profile. It supplies explicit Windows
+taskbar relaunch/icon metadata and keeps the native window title as Kotomimi Beta.
+Light-theme selected rows and VRChat options use the shared selection palette;
+the session-lock notice uses neutral status colors. Switch endpoints derive from
+track geometry. Chromium's custom scrollbars no longer switch to native scrollbars
+on hover, and the conversation area reserves scrollbar space.
+
+Validation: 105 focused tests passed, including three save/reload tests for the
+bilingual speaker preference. A fixture compiled from production SCSS verified
+selection colors, scrollbar geometry on hover, and switch endpoints at 100%,
+125%, and 150% zoom. Reduced-motion checks confirmed zero-duration switch
+transitions. The fixture does not replace live conversation testing.
+
 `npm run make:beta` builds a local `X.Y.Z-beta.1` package from the stable version
 in `package.json`. Set `KOTOMIMI_BETA_VERSION=X.Y.Z-beta.N` for subsequent builds.
 Build on the target OS. Windows requires the Visual Studio C++ build tools;

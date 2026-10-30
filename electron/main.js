@@ -520,6 +520,25 @@ function createWindow() {
     }
   });
 
+  if (process.platform === 'win32' && isBeta) {
+    // Pinning/relaunching uses shell metadata, independently of the window icon.
+    // Point at the embedded icon so the taskbar does not depend on a cached lookup.
+    const launcher = path.resolve(path.dirname(process.execPath), '..', 'kotomimi-beta.exe');
+    mainWindow.setAppDetails({
+      appId: 'com.squirrel.KotomimiBeta.kotomimi-beta',
+      appIconPath: process.execPath,
+      appIconIndex: 0,
+      relaunchCommand: `"${require('fs').existsSync(launcher) ? launcher : process.execPath}"`,
+      relaunchDisplayName: 'Kotomimi Beta',
+    });
+  }
+  if (isBeta) {
+    mainWindow.on('page-title-updated', (event) => {
+      event.preventDefault();
+      mainWindow.setTitle('Kotomimi Beta');
+    });
+  }
+
   // A second launch during the ~half second between claiming the lock and
   // getting here left its focus request waiting; honour it now.
   focusRelay.windowCreated();

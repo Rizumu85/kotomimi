@@ -1,11 +1,6 @@
 @use '../components/Settings/shared/variables' as vars;
 // Light chrome uses a quiet track; existing dark scrollbars retain their style.
 :root[data-theme='light'] * {
-  scrollbar-width: thin;
-  scrollbar-color: vars.$scrollbar-thumb transparent;
-
-  &:hover { scrollbar-color: vars.$scrollbar-thumb-hover transparent; }
-
   &::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -30,10 +25,19 @@
   }
 }
 
-// In Chromium, non-auto standard properties override the custom pseudo-elements.
+// Never switch scrollbar engines on hover: non-auto standard properties suppress
+// Chromium's pseudo-elements and change the scrollbar's width and arrow buttons.
 @supports selector(::-webkit-scrollbar) {
   :root[data-theme='light'] * {
     scrollbar-width: auto;
     scrollbar-color: auto;
+  }
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  :root[data-theme='light'] * {
+    scrollbar-width: thin;
+    scrollbar-color: vars.$scrollbar-thumb transparent;
+    &:hover { scrollbar-color: vars.$scrollbar-thumb-hover transparent; }
   }
 }

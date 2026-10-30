@@ -49,7 +49,7 @@
           background-color: vars.$color-control-accent;
 
           &:before {
-            transform: translateX(20px);
+            left: calc(100% - #{vars.$toggle-thumb} - 2px);
           }
         }
       }
@@ -62,7 +62,7 @@
         right: 0;
         bottom: 0;
         background-color: vars.$toggle-bg-off;
-        transition: vars.$transition-fast;
+        transition: background-color vars.$transition-fast;
         border-radius: 20px;
 
         &:before {
@@ -73,8 +73,12 @@
           left: 2px;
           bottom: 2px;
           background-color: vars.$white;
-          transition: vars.$transition-fast;
+          transition: left vars.$transition-fast;
           border-radius: 50%;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          &, &::before { transition: none; }
         }
       }
     }

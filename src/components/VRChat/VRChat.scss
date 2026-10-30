@@ -49,8 +49,8 @@
       }
 
       &.active {
-        background: vars.$color-primary-fill;
-        color: vars.$color-on-primary;
+        @include vars.state-selected-fill;
+        font-weight: vars.$weight-medium;
       }
     }
   }
@@ -151,6 +151,9 @@
       border-color: tk.$color-primary;
       box-shadow: inset 0 0 0 1px tk.$color-primary;
       background: color-mix(in srgb, tk.$color-primary 10%, transparent);
+      [data-theme='light'] & {
+        @include vars.state-selected-fill;
+      }
     }
   }
 }

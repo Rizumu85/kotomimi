@@ -229,6 +229,10 @@ $toggle-bg-on:    $color-control-accent;
   color: $color-primary;
   background: color-mix(in srgb, $color-primary 8%, transparent);
   border-color: color-mix(in srgb, $color-primary 45%, transparent);
+
+  [data-theme='light'] & {
+    @include state-selected-fill;
+  }
 }
 
 @mixin control-base {

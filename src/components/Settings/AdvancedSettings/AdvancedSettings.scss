@@ -23,6 +23,13 @@
     line-height: 1.4;
     flex-shrink: 0;
 
+    // This is a session status, not an error requiring attention.
+    [data-theme='light'] & {
+      background-color: vars.$bg-control;
+      border-color: vars.$border-default;
+      color: vars.$text-secondary;
+    }
+
     svg {
       flex-shrink: 0;
       margin-top: 1px;
