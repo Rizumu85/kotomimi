@@ -32,6 +32,8 @@ interface AudioDeviceSectionProps {
   showMicrophone?: boolean;
   /** Show speaker section */
   showSpeaker?: boolean;
+  /** Hide the echo-cancellation picker without changing its saved capture behavior. */
+  showEchoCancellation?: boolean;
   /** If system audio is enabled (for mutual exclusivity check) */
   isSystemAudioEnabled?: boolean;
   /** Callback when speaker is clicked while system audio is on */
@@ -46,6 +48,7 @@ const AudioDeviceSection: React.FC<AudioDeviceSectionProps> = ({
   lockedReason,
   showMicrophone = true,
   showSpeaker = true,
+  showEchoCancellation = true,
   isSystemAudioEnabled = false,
   onSpeakerMutualExclusivity,
   className = ''
@@ -258,7 +261,7 @@ const AudioDeviceSection: React.FC<AudioDeviceSectionProps> = ({
           </div>
 
           {/* Echo Cancellation: Chromium on Linux has no 'all', so nothing to choose there */}
-          {!isLinux() && (
+          {showEchoCancellation && !isLinux() && (
             <div className="noise-suppression-control">
               <div className="noise-suppression-header">
                 <span className="noise-suppression-label">{t('settings.echoCancellation')}</span>

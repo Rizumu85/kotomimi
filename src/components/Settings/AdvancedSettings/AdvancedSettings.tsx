@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useSessionLocked } from '../../../app/useRun';
 import { useMode } from '../../../stores/audioStore';
 import { useTurnModeStore } from '../../../stores/turnModeStore';
+import { useProviderStore } from '../../../stores/providerStore';
 import WarningModal from '../shared/WarningModal';
 import { WarningType } from '../shared/hooks';
 import {
@@ -28,6 +29,9 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({ toggleSettings, act
   const { t } = useTranslation();
   const locked = useSessionLocked();
   const mode = useMode();
+  // Restore these controls when Kotomimi supports translated speech output.
+  // This presentation gate preserves capture behavior and saved preferences.
+  const showVoiceOutputControls = useProviderStore((state) => state.selected !== 'localai');
   // The global turn mode — used to disable VoicePassthroughSection when
   // Push-to-Translate is in effect (mutual exclusion, 1e-3 ruling 4).
   const turnMode = useTurnModeStore((s) => s.turnMode);
@@ -106,14 +110,7 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({ toggleSettings, act
                 isLocked={lockMic}
                 showMicrophone={true}
                 showSpeaker={false}
-              />
-
-              <AudioDeviceSection
-                isSessionActive={locked}
-                isLocked={lockMonitor}
-                lockedReason={lockMonitor ? monitorLockedReason : undefined}
-                showMicrophone={false}
-                showSpeaker={true}
+                showEchoCancellation={showVoiceOutputControls}
               />
 
               <SystemAudioSection
@@ -121,9 +118,19 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({ toggleSettings, act
                 isLocked={lockParticipant}
               />
 
-              <VoicePassthroughSection
-                disabled={turnMode === 'push-to-translate'}
-                disabledReason={t('audioPanel.passthroughManagedByPushToTranslate')}
+              {showVoiceOutputControls && (
+                <VoicePassthroughSection
+                  disabled={turnMode === 'push-to-translate'}
+                  disabledReason={t('audioPanel.passthroughManagedByPushToTranslate')}
+                />
+              )}
+
+              <AudioDeviceSection
+                isSessionActive={locked}
+                isLocked={lockMonitor}
+                lockedReason={lockMonitor ? monitorLockedReason : undefined}
+                showMicrophone={false}
+                showSpeaker={true}
               />
             </div>
           </>
