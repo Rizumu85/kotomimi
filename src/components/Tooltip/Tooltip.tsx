@@ -43,7 +43,7 @@ const Tooltip: React.FC<TooltipProps> = ({
   position = 'top',
   trigger = 'hover',
   icon = 'help',
-  maxWidth = 250,
+  maxWidth = 320,
   openDelay = 100,
   suppressed = false
 }) => {
@@ -116,23 +116,14 @@ const Tooltip: React.FC<TooltipProps> = ({
     : undefined;
   const triggerRef = useMergeRefs([refs.setReference, childRef]);
 
-  // Function to render content with line break support
+  const detailed = typeof content !== 'string' || content.includes('\n');
+
+  // Preserve paragraphs while letting the shared stylesheet own their spacing.
   const renderContent = () => {
     if (typeof content === 'string' && content.includes('\n')) {
-      return content.split('\n').map((line, index) => {
-        const trimmedLine = line.trim();
-        if (!trimmedLine) return null; // Skip empty lines
-        return (
-          <div 
-            key={index} 
-            style={{ 
-              marginBottom: index < content.split('\n').length - 1 ? '4px' : 0 
-            }}
-          >
-            {trimmedLine}
-          </div>
-        );
-      }).filter(Boolean); // Remove null entries
+      return content.split('\n').map(line => line.trim()).filter(Boolean).map((line, index) => (
+        <p key={index}>{line}</p>
+      ));
     }
     return content;
   };
@@ -163,10 +154,10 @@ const Tooltip: React.FC<TooltipProps> = ({
             ref={refs.setFloating}
             style={{
               ...floatingStyles,
-              maxWidth,
+              maxWidth: `min(${maxWidth}px, calc(100vw - 16px))`,
               zIndex: 9999,
             }}
-            className={`tooltip-content ${placement}`}
+            className={`tooltip-content${detailed ? ' tooltip-content--detailed' : ''} ${placement}`}
             {...getFloatingProps()}
           >
             <FloatingArrow 

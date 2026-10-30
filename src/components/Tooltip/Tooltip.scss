@@ -12,25 +12,33 @@
 }
 
 .tooltip-content {
+  // Current theme colors with the selected Soft graphite proportions.
   background: vars.$bg-popover;
   border: 1px solid vars.$border-default;
-  border-radius: 6px;
-  padding: 10px 12px;
-  font-size: 13px;
-  line-height: 1.5;
+  border-radius: 10px;
+  padding: vars.$space-2 vars.$space-3;
+  box-sizing: border-box;
+  width: max-content;
+  font-size: 14px;
+  font-weight: vars.$weight-normal;
+  line-height: 1.65;
   color: vars.$text-primary;
-  box-shadow: 0 4px 12px vars.$shadow;
+  box-shadow: 0 8px 22px vars.$shadow, 0 1px 3px vars.$shadow;
   white-space: normal;
-  min-width: 200px;
+  overflow-wrap: anywhere;
   opacity: 0;
-  animation: tooltipFadeIn 0.2s ease forwards;
+  animation: tooltipFadeIn 0.12s ease-out forwards;
+
+  &--detailed {
+    padding: 14px vars.$space-4;
+  }
 
   .tooltip-body {
     position: relative;
     z-index: 1;
     
     p {
-      margin: 0 0 8px 0;
+      margin: 0 0 10px 0;
       
       &:last-child {
         margin-bottom: 0;
@@ -41,8 +49,15 @@
       background: color-mix(in srgb, vars.$overlay-fg 10%, transparent);
       padding: 2px 4px;
       border-radius: 3px;
-      font-size: 12px;
+      font-size: vars.$font-body;
     }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tooltip-content {
+    animation: none;
+    opacity: 1;
   }
 }
 
