@@ -117,13 +117,23 @@ export function glossaryTranslationPairs({ entries }: GlossarySnapshot): Array<{
   return entries.map(({ source, target }) => ({ source, target }));
 }
 
-/** The pairs a sentence needs, either way: the sentence may be on its way back from the target's language. */
-export function termsIn(text: string, { entries }: GlossarySnapshot): Array<[from: string, to: string]> {
+/**
+ * The pairs a sentence needs on its way into a language, either way round: the sentence may be coming back from the
+ * target's language. An entry says no language, so its writing does: `インスタンス → 房间` is for a translation into
+ * Chinese, not into English. A rendering in Latin letters goes anywhere, as a name does.
+ */
+export function termsIn(text: string, { entries }: GlossarySnapshot, into: string): Array<[from: string, to: string]> {
+  const language = into.trim().toLowerCase().split(/[-_]/)[0];
+  const wanted = language === 'ja' ? 'zh' : language;
+  const fits = (rendering: string) => {
+    const writing = writingOf(rendering);
+    return writing === undefined || writing === wanted;
+  };
   const found = new Map<string, string>();
   const has = (term: string) => termPattern(term).test(text);
   for (const { source, target, aliases } of entries) {
-    for (const term of [source, ...aliases]) if (has(term)) found.set(term, target);
-    if (target !== source && has(target)) found.set(target, source);
+    if (fits(target)) for (const term of [source, ...aliases]) if (has(term)) found.set(term, target);
+    if (target !== source && fits(source) && has(target)) found.set(target, source);
   }
   return [...found].slice(0, MAX_TERMS_PER_SENTENCE);
 }

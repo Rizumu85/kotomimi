@@ -741,7 +741,7 @@ class PipelineLeg implements AdapterSession {
     // A model asked in its own form reads no instructions: it is told the terms this sentence needs. Another Kotomimi writes
     // the request itself, so it is told them beside the sentence.
     const glossary = stage.kind === 'translate' ? this.request.config.glossary : undefined;
-    const terms = glossary && (stage.wrap || stage.pair) ? termsIn(text, glossary) : [];
+    const terms = glossary && (stage.wrap || stage.pair) ? termsIn(text, glossary, stage.language ?? this.request.context.direction.target) : [];
     const extra = terms.length > 0 && !stage.wrap ? { ...stage.extra, terms } : stage.extra;
     return completeText(
       {

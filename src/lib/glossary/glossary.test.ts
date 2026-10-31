@@ -28,9 +28,11 @@ describe('glossary', () => {
       { id: '1', source: 'Rizum', target: 'Rizum', aliases: ['リズム'] },
       { id: '2', source: 'インスタンス', target: '房间', aliases: [] },
     ] } as const;
-    expect(termsIn('リズムさんがインスタンスを開けた', snapshot)).toEqual([['リズム', 'Rizum'], ['インスタンス', '房间']]);
-    expect(termsIn('把房间开好了', snapshot)).toEqual([['房间', 'インスタンス']]);
-    expect(termsIn('こんにちは', snapshot)).toEqual([]);
+    expect(termsIn('リズムさんがインスタンスを開けた', snapshot, 'zh-CN')).toEqual([['リズム', 'Rizum'], ['インスタンス', '房间']]);
+    expect(termsIn('把房间开好了', snapshot, 'ja')).toEqual([['房间', 'インスタンス']]);
+    expect(termsIn('こんにちは', snapshot, 'zh-CN')).toEqual([]);
+    // The rendering is Chinese: it has no place in English. A name in Latin letters does.
+    expect(termsIn('リズムさんがインスタンスを開けた', snapshot, 'en')).toEqual([['リズム', 'Rizum']]);
     expect(withTerms('翻译：{{TEXT}}', [['リズム', 'Rizum']])).toBe('参考下面的翻译：\nリズム 翻译成 Rizum\n\n翻译：{{TEXT}}');
     expect(withTerms('翻译：{{TEXT}}', [])).toBe('翻译：{{TEXT}}');
   });
