@@ -422,7 +422,7 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
                   lang={langOf(lane.answer)}
                   fitKey={`${fontSize}:${squeeze}:${answerLines}:${lane.answer.text}`}
                 >
-                  {approves(lane.answer) ? tick : fixFor(lane) ? <Correction correction={fixFor(lane)!} language={lane.source!.language} /> : <Written text={lane.answer} lit={lit} readingsOnly={lane.said && !!reads(lane.answer)} />}
+                  {approves(lane.answer) ? tick : fixFor(lane) ? <Correction correction={fixFor(lane)!} language={lane.source!.language} layout={answerLines < 2 ? 'row' : 'block'} /> : <Written text={lane.answer} lit={lit} readingsOnly={lane.said && !!reads(lane.answer)} />}
                   {!lane.source && lane.pending && pending}
                 </Slot>
               )}
