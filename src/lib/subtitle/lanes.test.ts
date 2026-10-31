@@ -23,6 +23,26 @@ describe('independent feedback beside translated subtitle lanes', () => {
     expect(lane.pending).toBe(false);
   });
 
+  it('shows it whichever sides are shown, and leaves the user\u2019s own row a row', () => {
+    const entry = { ...said('a', 'participant', 'こんにちは'), languages: { source: 'ja', target: 'ja' } } as Entry;
+    expect(lanes([entry], ['participant'], { ...BOTH, participant: 'translation' })[0]).toMatchObject({ answer: { text: 'こんにちは' }, said: true });
+    const row = lanes([said('p', 'participant', 'はい。', '好的。'), { ...entry, leg: 'speaker' } as Entry])[1];
+    expect(row).toMatchObject({ shape: 'row', source: { text: 'こんにちは' } });
+    expect(row.said).toBeUndefined();
+  });
+
+  it('takes a sentence in the language of the answers for its own answer, keeping the frame (fork)', () => {
+    // Seen 2026-10-31: left to be detected, a side's Chinese stayed in the small line under the Korean before it, for good.
+    const sentence = (id: string, text: string, language: string, final = true): Entry => ({ ...said(id, 'participant', ''), languages: { source: 'auto', target: 'zh-CN' }, source: [{ ...row(`s-${id}`, text, 'source', language), final }] } as Entry);
+    const answered = { ...sentence('a', '네.', 'ko'), translation: [row('t-a', '好的。', 'translation')] } as Entry;
+    const own = lanes([answered, sentence('b', '都睁开睡了。', 'zh')], ['participant'])[0];
+    expect(own).toMatchObject({ answer: { text: '都睁开睡了。', language: 'zh' }, source: { text: '' }, said: true, pending: false });
+    // While it is being heard it may yet be something else.
+    expect(lanes([answered, sentence('b', '都睁开', 'zh', false)], ['participant'])[0]).toMatchObject({ answer: { text: '好的。' }, source: { text: '네. 都睁开' } });
+    // What is said after it runs on over it, until that is answered.
+    expect(lanes([answered, sentence('b', '都睁开睡了。', 'zh'), sentence('c', '오늘', 'ko', false)], ['participant'])[0]).toMatchObject({ answer: { text: '都睁开睡了。' }, source: { text: '오늘' }, pending: true });
+  });
+
   const exchange = (id: string, text: string, translation: string, feedback?: string): Extract<Entry, { kind: 'exchange' }> => ({
     kind: 'exchange', id, leg: 'speaker', languages: { source: 'fr', target: 'en' }, pairing: 'stated', t: 0,
     source: [row(`s-${id}`, text, 'source', 'en')],

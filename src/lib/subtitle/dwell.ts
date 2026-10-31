@@ -29,14 +29,15 @@ import type { Entry, Row } from '../projection/types';
 export const HOLD_LEAST_MS = 1200;
 export const HOLD_MOST_MS = 2500;
 
+const baseOf = (language: string | undefined): string => (language ?? '').toLowerCase().split(/[-_]/)[0];
+
 /** Characters read in a second, by the language's base code; any other: `READ_CPS`. */
 const READ_CPS_OF: Readonly<Record<string, number>> = { zh: 9, yue: 9, ja: 5, ko: 10 };
 export const READ_CPS = 17;
 
 /** How long a text takes to read in its language, within the least and the most a caption is held. */
 export function readMs(text: string, language: string | undefined): number {
-  const base = (language ?? '').toLowerCase().split(/[-_]/)[0];
-  const ms = (text.trim().length / (READ_CPS_OF[base] ?? READ_CPS)) * 1000;
+  const ms = (text.trim().length / (READ_CPS_OF[baseOf(language)] ?? READ_CPS)) * 1000;
   return Math.min(HOLD_MOST_MS, Math.max(HOLD_LEAST_MS, Math.round(ms)));
 }
 
@@ -52,9 +53,25 @@ export function nextShown(at: number, last: number): number {
 
 export interface Answered { id: string; text: string; language: string }
 
-/** A translated caption, or standalone coaching feedback. Combined feedback never takes a translation's turn. */
-export function captionRows(entry: Extract<Entry, { kind: 'exchange' }>): readonly Row[] {
+type Exchange = Extract<Entry, { kind: 'exchange' }>;
+
+/**
+ * Fork: the other side said this, whole, in the language the answers are in: their language left to be detected, or
+ * told one and written in the reader's. Nothing translates it (`pipeline.ts`), so it is its own answer. Waiting for one
+ * that never came it stayed in the small line, under the sentence before's translation, and every sentence after it
+ * too (2026-10-31). Not the speaker's: theirs, in that language, is what grammar feedback answers.
+ */
+export function answersItself(entry: Exchange): boolean {
+  const target = baseOf(entry.languages.target);
+  return entry.leg === 'participant' && baseOf(entry.languages.source) !== target
+    && entry.source.length > 0 && entry.source.every((row) => row.final && baseOf(row.language) === target)
+    && !entry.translation.some((row) => row.text.trim());
+}
+
+/** A translated caption, or standalone coaching feedback, or a sentence that is its own answer. Combined feedback never takes a translation's turn. */
+export function captionRows(entry: Exchange): readonly Row[] {
   if (entry.translation.some((row) => row.text.trim())) return entry.translation;
+  if (answersItself(entry)) return entry.source;
   return entry.feedback?.filter((row) => !row.accompaniesTranslation) ?? [];
 }
 

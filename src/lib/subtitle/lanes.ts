@@ -31,7 +31,7 @@ import type { SegmentPurpose } from '../contract/adapter';
 import type { LegName, SegmentId } from '../conversation/types';
 import type { Entry, Row } from '../projection/types';
 import { showsSide, type LegFilters, type NoticeEntry } from '../view/filter';
-import { captionRows } from './dwell';
+import { answersItself, captionRows } from './dwell';
 
 /** A stretch of a lane's text: a row of the conversation, with where it begins in its segment — what karaoke lights it by. */
 export interface LanePiece {
@@ -73,7 +73,11 @@ export interface Lane {
   feedback?: LaneText & { said: LaneText; origin: string };
   /** A sentence newer than the one answered is waiting for its answer (a pair), or the one shown is (a row). */
   pending: boolean;
-  /** Fork: `answer` is what was said, a run in one language having nothing to translate. */
+  /**
+   * Fork: `answer` is what was said, there being nothing to translate: a run in one language — `source` is then gone,
+   * and the lane has the one text — or a sentence in the language of the answers (`answersItself`), where `source` is
+   * what was said since.
+   */
   said?: true;
   /**
    * Fork: the sentence the answer answers, alone — a pair's source line may run on into what was said since. What a
@@ -177,18 +181,28 @@ export function buildLanes(
     lane.pending = waits && answered >= 0 && written(newest, 'source') !== '';
     const said = at >= 0 ? mine[at] : undefined;
     if (said?.kind === 'exchange') {
-      if (lane.source) {
-        const row = said.source[0];
-        // A pair whose newest has no answer yet: the sentence shown, then all said since — or, before anything was
-        // answered, the last few said. Its end is what is being heard now.
-        const from = shape === 'pair' && waits ? Math.max(answered >= 0 ? answered : 0, newest - STREAM_MOST + 1) : at;
-        const sentences = mine.slice(from, (shape === 'pair' && waits ? newest : at) + 1).flatMap((entry) => (entry.kind === 'exchange' ? [entry] : []));
-        lane.source = { ...streamOf(sentences), language: row?.language || said.languages.source, ...(row ? { segmentId: row.segmentId } : {}) };
-      }
+      // Fork: a sentence in the language of the answers is its own, and what was said since runs on over it.
+      const own = showsAnswer && !notice && answersItself(said);
+      // Fork: a run in one language translates nothing: what is said is what the strip is read for, whichever sides
+      // are shown, at an answer's size.
+      const oneLanguage = shape === 'pair' && !notice && !joined(said.translation) && said.languages.source.toLowerCase() === said.languages.target.toLowerCase();
+      const runsOn = shape === 'pair' && waits;
+      // A pair whose newest has no answer yet: the sentence shown, then all said since — or, before anything was
+      // answered, the last few said. Its end is what is being heard now.
+      const from = own ? at + 1 : runsOn ? Math.max(answered >= 0 ? answered : 0, newest - STREAM_MOST + 1) : at;
+      const sentences = mine.slice(from, (runsOn ? newest : at) + 1).flatMap((entry) => (entry.kind === 'exchange' ? [entry] : []));
+      const row = sentences[0]?.source[0];
+      const heard: LaneText = { ...streamOf(sentences), language: row?.language || said.languages.source, ...(row ? { segmentId: row.segmentId } : {}) };
+      if (lane.source) lane.source = heard;
       if (lane.source && lane.answer && joined(said.source)) lane.answers = joined(said.source);
       if (lane.answer && joined(said.translation)) {
         const row = said.translation[0];
         lane.answer = { text: joined(said.translation), pieces: piecesOf(said.translation), language: row?.language || said.languages.target, ...(row ? { segmentId: row.segmentId } : {}), ...(row?.purpose ? { purpose: row.purpose } : {}) };
+      }
+      if (own) {
+        const first = said.source[0];
+        lane.answer = { text: joined(said.source), pieces: piecesOf(said.source), language: first.language, segmentId: first.segmentId };
+        lane.said = true;
       }
       if (showsAnswer && said.feedback?.length && joined(said.feedback)) {
         const row = said.feedback[0];
@@ -198,14 +212,12 @@ export function buildLanes(
           said: { text: joined(said.source), pieces: piecesOf(said.source), language: said.source[0]?.language || said.languages.source },
         };
       }
-    }
-    // Fork: a run in one language translates nothing: what is said is what the strip is read for, at an answer's size.
-    if (said?.kind === 'exchange' && lane.source?.text && !joined(said.translation) && !notice
-      && said.languages.source.toLowerCase() === said.languages.target.toLowerCase()) {
-      lane.answer = lane.source;
-      lane.said = true;
-      lane.pending = false;
-      delete lane.source;
+      if (oneLanguage && heard.text) {
+        lane.answer = heard;
+        lane.said = true;
+        lane.pending = false;
+        delete lane.source;
+      }
     }
     if (lane.answer && notice) lane.answer = { text: words(notice), pieces: [], notice };
     return lane;
