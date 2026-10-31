@@ -511,7 +511,7 @@ External LocalAI-compatible servers remain supported directly as remote/API serv
 术语表（`src/lib/glossary/`）是一张手写的小表，最多 50 条，每行：写成、听成、译成；开始会话时取快照。不导入 VRChat 好友：导入的是拼写，大家说的是叫法，几百个名字只会拖慢识别（用户 2026-10-31 定的）。
 
 - **识别**：Qwen3-ASR 拿到整张表的「写成」（audio.cpp 的 `text` 字段，`takesContext`），10 句稀有名字从 1 句写对到 5～7 句，40 个词不变慢，300 个词约慢 0.6 秒。Apple Speech 的 `contextualStrings` 实测没有任何效果，所以不传；其他模型同样不传。识别不出来的靠「听成」事后替换（`Run.glossaryEvent`）。
-- **翻译**：只把本句出现的词写进请求（`termsIn`、`withTerms`，混元模型卡的形式），Index-Translate 11 个词里从 0 个对到 10 个对。请求由本机写的走 `wrap`，另一台 Kotomimi 自己写请求，就随句子带 `terms`。云端服务商拿提示词或自己的词表。
+- **翻译**：只把本句出现的词写进请求（`termsIn`、`withTerms`，混元模型卡的形式），11 个句子里 Index-Translate 从 0 句对到 10 句对，混元 MT 2 从 1 句对到 11 句对（换成普通的“术语：A=B”只有 7 句）。请求由本机写的走 `wrap`，另一台 Kotomimi 自己写请求，就随句子带 `terms`。云端服务商拿提示词或自己的词表。
 - 条目不分方向，两条腿都过这里，所以输出后的替换要先看文字的书写：`Alice → 爱丽丝` 只进中文译文。
 
 ## 字幕模式的字幕视图（2026-10-06）

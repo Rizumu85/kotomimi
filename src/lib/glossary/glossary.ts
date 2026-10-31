@@ -129,8 +129,9 @@ export function termsIn(text: string, { entries }: GlossarySnapshot): Array<[fro
 }
 
 /**
- * A translation model's request with the pairs ahead of it, in Hunyuan MT's own form (its card's). Index-Translate
- * follows the same words: ten of eleven terms against none without them (measured 2026-10-31).
+ * A translation model's request with the pairs ahead of it, in Hunyuan MT's own form (its card's): of eleven sentences,
+ * Hunyuan MT 2 got eleven right in it, seven in a plain list and one without; Index-Translate ten, against none
+ * without (measured 2026-10-31).
  */
 export function withTerms(request: string, terms: ReadonlyArray<readonly [string, string]>): string {
   if (terms.length === 0) return request;
