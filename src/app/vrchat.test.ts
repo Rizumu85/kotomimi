@@ -45,7 +45,7 @@ function setup(over: Partial<VRChatDeps> = {}, initial: Entry[] = []) {
 }
 
 beforeEach(() => {
-  useVRChatStore.setState({ muteGate: true, chatbox: 'off', chatboxTranslationFirst: false, recent: null, onVideo: 'ask', translateVideo: false, link: { found: false, connected: false, muted: null }, video: { kind: 'none' }, viewers: 0 });
+  useVRChatStore.setState({ muteGate: true, chatbox: 'off', chatboxTranslationFirst: false, recent: null, onVideo: 'ask', link: { found: false, connected: false, muted: null }, video: { kind: 'none' }, viewers: 0 });
 });
 
 describe('linkOf', () => {
@@ -131,9 +131,9 @@ describe('a video', () => {
     // Answered in time: the wait ends with nothing to do.
     t.controller.endVideo();
     t.handlers.get('vrchat:video')!({ url: 'y' });
-    t.controller.answer('normal', false);
+    t.controller.answer('pause', false);
     for (const fire of t.timers.splice(0)) fire();
-    expect(useVRChatStore.getState().video).not.toMatchObject({ pace: 'quick' });
+    expect(useVRChatStore.getState().video).toMatchObject({ pace: 'paused', auto: false });
   });
 
   it('is not asked about where the user cannot answer: shorter stretches are chosen for them', () => {
@@ -160,12 +160,8 @@ describe('a video', () => {
     expect(last(t.paces)).toEqual(['participant', 'normal']);
   });
 
-  it('is nothing outside a run, or with the setting at "as usual"', () => {
+  it('is nothing outside a run', () => {
     const t = setup();
-    t.handlers.get('vrchat:video')!({ url: 'x' });
-    expect(useVRChatStore.getState().video.kind).toBe('none');
-    t.run('running');
-    useVRChatStore.setState({ onVideo: 'normal' });
     t.handlers.get('vrchat:video')!({ url: 'x' });
     expect(useVRChatStore.getState().video.kind).toBe('none');
     expect(t.paces).toEqual([]);
@@ -404,10 +400,10 @@ describe('a video taken out (stereoSplit)', () => {
     expect(split.listening()).toBe(false);
   });
 
-  it('hears the video apart where asked and offered, and follows the setting', async () => {
+  it('hears the video apart where chosen and offered, and follows the setting', async () => {
     const split = fakeSplit();
     const lanes = withLanes();
-    useVRChatStore.setState({ onVideo: 'quick', translateVideo: true });
+    useVRChatStore.setState({ onVideo: 'both' });
     const runner = { setLegPace: () => {}, state: { getState: () => ({ phase: 'running' }), subscribe: () => () => {} }, ...lanes };
     const t = setup({ split: split as never, laneOffered: () => true, runner: runner as never });
     t.handlers.get('vrchat:video')!({ url: 'x' });
@@ -415,11 +411,11 @@ describe('a video taken out (stereoSplit)', () => {
     await Promise.resolve();
     expect(lanes.opened).toMatchObject([{ prefix: 'kotomimi_video:', closed: false }]);
     expect(useVRChatStore.getState().video).toMatchObject({ apart: 'separated', laneOrigin: 'kotomimi_video:1:' });
-    useVRChatStore.getState().setTranslateVideo(false);
+    useVRChatStore.getState().setOnVideo('quick');
     await Promise.resolve(); await Promise.resolve();
     expect(lanes.opened[0].closed).toBe(true);
     expect(useVRChatStore.getState().video).toMatchObject({ apart: 'removed' });
-    useVRChatStore.getState().setTranslateVideo(true);
+    useVRChatStore.getState().setOnVideo('both');
     await Promise.resolve();
     expect(lanes.opened).toHaveLength(2);
     await Promise.resolve();
@@ -434,10 +430,29 @@ describe('a video taken out (stereoSplit)', () => {
     expect(useVRChatStore.getState().video).toEqual({ kind: 'none' });
   });
 
+  it('hears the video apart for one answer, with the setting left as it was', async () => {
+    const split = fakeSplit();
+    const lanes = withLanes();
+    const runner = { setLegPace: () => {}, state: { getState: () => ({ phase: 'running' }), subscribe: () => () => {} }, ...lanes };
+    const t = setup({ split: split as never, laneOffered: () => true, runner: runner as never });
+    t.handlers.get('vrchat:video')!({ url: 'x' });
+    t.controller.answer('both', false);
+    split.hear(alone, 6);
+    await Promise.resolve();
+    expect(lanes.opened).toHaveLength(1);
+    expect(useVRChatStore.getState().onVideo).toBe('ask');
+    // The next video asks again, and "only the people" opens nothing.
+    t.controller.endVideo();
+    t.handlers.get('vrchat:video')!({ url: 'y' });
+    t.controller.answer('quick', false);
+    split.hear(alone, 6);
+    expect(lanes.opened).toHaveLength(1);
+  });
+
   it('only takes the video out where the provider cannot hear it apart', () => {
     const split = fakeSplit();
     const lanes = withLanes();
-    useVRChatStore.setState({ onVideo: 'quick', translateVideo: true });
+    useVRChatStore.setState({ onVideo: 'both' });
     const runner = { setLegPace: () => {}, state: { getState: () => ({ phase: 'running' }), subscribe: () => () => {} }, ...lanes };
     setup({ split: split as never, laneOffered: () => false, runner: runner as never }).handlers.get('vrchat:video')!({ url: 'x' });
     split.hear(alone, 6);

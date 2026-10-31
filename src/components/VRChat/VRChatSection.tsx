@@ -37,11 +37,11 @@ const sampleIn = (code: string | undefined): string => {
   const traditional = /^zh-(tw|hk|hant)/.test(lower);
   return (traditional ? SAMPLE['zh-tw'] : SAMPLE[lower.split(/[-_]/)[0]]) ?? SAMPLE.en;
 };
-const ON_VIDEO: Array<[OnVideo, string]> = [['ask', 'videoAsk'], ['normal', 'videoNormal'], ['quick', 'videoQuick'], ['pause', 'videoPause']];
+const ON_VIDEO: Array<[OnVideo, string]> = [['ask', 'videoAsk'], ['quick', 'videoQuick'], ['both', 'videoBoth'], ['pause', 'videoPause']];
 
 export function VRChatSection() {
   const { t } = useTranslation();
-  const { muteGate, chatbox, chatboxTranslationFirst, onVideo, translateVideo, link, recent, setMuteGate, setChatbox, setChatboxTranslationFirst, setOnVideo, setTranslateVideo, view } = useVRChatStore();
+  const { muteGate, chatbox, chatboxTranslationFirst, onVideo, link, recent, setMuteGate, setChatbox, setChatboxTranslationFirst, setOnVideo, view } = useVRChatStore();
   // The chatbox carries what the user says: with only the other side heard, it stays empty. Said under it, with the
   // way out — the mode, changed while no session runs, as the main panel changes it.
   const mode = useAudioStore((state) => state.mode);
@@ -49,7 +49,9 @@ export function VRChatSection() {
   const locked = useSessionLocked();
   const unheard = chatbox !== 'off' && mode === 'participant';
   const pair = useProviderStore((state) => (state.selected ? state.entries[state.selected]?.pair : undefined));
+  // A video's words are heard apart only by Kotomimi's own pipeline (`laneOffered`): elsewhere `both` hears the people.
   const kotomimi = useProviderStore((state) => state.selected === 'localai');
+  const videoChoice = onVideo === 'both' && !kotomimi ? 'quick' : onVideo;
   // While the card is open the mute is asked, so that whether VRChat answers is shown as it is.
   useEffect(() => {
     if (!vrchatOffered()) return undefined;
@@ -112,20 +114,13 @@ export function VRChatSection() {
       )}
       <div className="kt-vrchat__label">{t('fork.vrchat.onVideo')}</div>
       <div className="segmented-control">
-        {ON_VIDEO.map(([value, words]) => (
-          <button key={value} type="button" className={`segmented-option ${onVideo === value ? 'active' : ''}`} aria-pressed={onVideo === value} onClick={() => setOnVideo(value)}>
+        {ON_VIDEO.filter(([value]) => kotomimi || value !== 'both').map(([value, words]) => (
+          <button key={value} type="button" className={`segmented-option ${videoChoice === value ? 'active' : ''}`} aria-pressed={videoChoice === value} onClick={() => setOnVideo(value)}>
             {t(`fork.vrchat.${words}`)}
           </button>
         ))}
       </div>
-      <p className="kt-vrchat__result" role="status">{t(`fork.vrchat.${ON_VIDEO.find(([value]) => value === onVideo)?.[1]}Result`)}</p>
-      {/* Favoring people takes a video's sound out where it can: its words can then be translated as well. */}
-      {/* Its words heard apart only by Kotomimi's own pipeline (`laneOffered`): no switch where nothing would do it. */}
-      {onVideo === 'quick' && kotomimi && (
-        <div className="kt-vrchat__more">
-          <ToggleSwitch checked={translateVideo} onChange={() => setTranslateVideo(!translateVideo)} label={t('fork.vrchat.translateVideo')} />
-        </div>
-      )}
+      <p className="kt-vrchat__result" role="status">{t(`fork.vrchat.${ON_VIDEO.find(([value]) => value === videoChoice)?.[1]}Result`)}</p>
     </div>
   );
 }

@@ -35,7 +35,7 @@ import { getProvider } from '../providers/registry';
 import { useProviderStore } from '../stores/providerStore';
 import useSettingsStore from '../stores/settingsStore';
 import { useSubtitleLookStore } from '../stores/subtitleLookStore';
-import { useVRChatStore, type ChatboxShows, type VideoApart, type VRChatLink } from '../stores/vrchatStore';
+import { useVRChatStore, type ChatboxShows, type OnVideo, type VideoApart, type VRChatLink } from '../stores/vrchatStore';
 import { setVRChatController, vrchatOffered } from './vrchatHandle';
 
 export interface VRChatIpc {
@@ -153,14 +153,14 @@ export function finishedLine(entry: Entry, shows: ChatboxShows, said = false, tr
 }
 
 export interface VRChatController {
-  /** The user's answer to a video: a pace, or carry on as usual; `remember` makes it the setting. */
-  answer(choice: 'quick' | 'pause' | 'normal', remember: boolean): void;
+  /** The user's answer to a video; `remember` makes it the setting. */
+  answer(choice: Exclude<OnVideo, 'ask'>, remember: boolean): void;
+  /** Whether a video's words can be heard apart: `both` is offered only then. */
+  laneOffered(): boolean;
   /** The user's "end": the video is over. */
   endVideo(): void;
   stop(): void;
 }
-
-const PACE_OF: Record<'quick' | 'pause', Exclude<LegPace, 'normal'>> = { quick: 'quick', pause: 'paused' };
 
 /**
  * Fork: a question about a video unanswered this long — the user in VR, the main window out of sight — is answered
@@ -200,6 +200,8 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
   let hearing: (() => void) | null = null;
   /** The video's own lane, opening or open: what closes it, once it has. */
   let lane: Promise<SideHandle | null> | null = null;
+  /** Whether this video's words are to be heard apart as well. */
+  let laneWanted = false;
   /** What the video state says of its sound: taken out, or heard apart as well — under these origins, once open. */
   const mark = (apart: VideoApart, laneOrigin?: string) => {
     const video = store.getState().video;
@@ -214,7 +216,7 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
   };
   /** Opens the video's lane where the user asked and the run can: false where it does not. */
   const openLane = (): boolean => {
-    if (lane || !split || !store.getState().translateVideo || !deps.laneOffered?.() || !runner.openSide || !runner.sideOffered?.('participant')) return false;
+    if (lane || !split || !laneWanted || !deps.laneOffered?.() || !runner.openSide || !runner.sideOffered?.('participant')) return false;
     // Ended on its own (its session failed): the video's sound stays out, its words are no longer heard.
     const ended = () => { if (lane === opening) { lane = null; mark('removed'); } };
     const opening: Promise<SideHandle | null> = runner.openSide('participant', { prefix: VIDEO_ORIGIN, feed: (deliver) => split.onShared(deliver), onEnded: ended });
@@ -254,25 +256,28 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     setPace('normal');
     store.getState().setVideo({ kind: 'none' });
   };
-  const apply = (choice: 'quick' | 'pause', auto: boolean) => {
+  const apply = (choice: Exclude<OnVideo, 'ask'>, auto: boolean) => {
     whole();
-    setPace(PACE_OF[choice]);
-    store.getState().setVideo({ kind: 'on', pace: PACE_OF[choice] === 'paused' ? 'paused' : 'quick', auto });
-    if (choice === 'quick') listen();
+    const pace = choice === 'pause' ? 'paused' : 'quick';
+    laneWanted = choice === 'both';
+    setPace(pace);
+    store.getState().setVideo({ kind: 'on', pace, auto });
+    if (pace === 'quick') listen();
   };
-  // The lane follows its setting while the video's sound is out.
-  offs.push(store.subscribe((s) => s.translateVideo, (on) => {
+  // A video under way follows a change between hearing the people and hearing both.
+  offs.push(store.subscribe((s) => s.onVideo, (on) => {
     const video = store.getState().video;
-    if (stopped || video.kind !== 'on' || !video.apart) return;
-    if (!on) { closeLane(); mark('removed'); } else if (openLane()) mark('separated');
+    if (stopped || video.kind !== 'on' || (on !== 'quick' && on !== 'both')) return;
+    laneWanted = on === 'both';
+    if (!video.apart) return;
+    if (!laneWanted) { closeLane(); mark('removed'); } else if (openLane()) mark('separated');
   }));
   ipc.receive?.('vrchat:video', () => {
     if (stopped || !running() || !deps.legs().includes('participant')) return;
     // A video already heard to (the next of a playlist): what is on stays on.
     if (store.getState().video.kind !== 'none') return;
     const on = store.getState().onVideo;
-    if (on === 'normal') return;
-    if (on === 'quick' || on === 'pause') return apply(on, false);
+    if (on !== 'ask') return apply(on, false);
     // Asked, where the user can answer; chosen for them where they cannot — shorter stretches lose no one's words.
     if (!deps.canAsk()) return apply('quick', true);
     store.getState().setVideo({ kind: 'asking' });
@@ -353,14 +358,9 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
   return {
     answer(choice, remember) {
       if (remember) store.getState().setOnVideo(choice);
-      if (choice === 'normal') {
-        whole();
-        setPace('normal');
-        store.getState().setVideo({ kind: 'none' });
-      } else {
-        apply(choice, false);
-      }
+      apply(choice, false);
     },
+    laneOffered: () => deps.laneOffered?.() === true,
     endVideo,
     stop() {
       if (stopped) return;

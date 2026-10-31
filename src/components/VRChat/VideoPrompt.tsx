@@ -9,13 +9,15 @@ import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { vrchatController } from '../../app/vrchatHandle';
 import type { Entry } from '../../lib/projection/types';
-import { useVRChatStore, type VideoState } from '../../stores/vrchatStore';
+import { useVRChatStore, type OnVideo, type VideoState } from '../../stores/vrchatStore';
 import './VRChat.scss';
 
-type Choice = 'quick' | 'pause' | 'normal';
-const CHOICES: Array<[Choice, string]> = [['quick', 'videoQuick'], ['pause', 'videoPause'], ['normal', 'videoNormal']];
+const CHOICES: Array<[Exclude<OnVideo, 'ask'>, string]> = [['quick', 'videoQuick'], ['both', 'videoBoth'], ['pause', 'videoPause']];
 
-/** What is on, in a word or two: paused, faster — and, faster, the video's sound taken out, or heard apart. */
+/** The answers to offer: `both` only where the run can hear a video's words apart. */
+const offered = () => (vrchatController()?.laneOffered() ? CHOICES : CHOICES.filter(([choice]) => choice !== 'both'));
+
+/** What is on, in a word or two: paused, shorter stretches — or the video's sound taken out, or heard apart. */
 function onWords(video: Extract<VideoState, { kind: 'on' }>, t: TFunction): string {
   if (video.pace === 'paused') return t('fork.vrchat.pausedOn');
   if (video.apart === 'separated') return t('fork.vrchat.separatedOn');
@@ -34,7 +36,7 @@ export function VideoPrompt() {
       <div className="kt-video" role="status">
         <b className="kt-video__title"><span className="kt-video__play" />{t('fork.vrchat.videoStarted')}</b>
         <div className="kt-video__acts">
-          {CHOICES.map(([choice, words]) => (
+          {offered().map(([choice, words]) => (
             <button key={choice} type="button" className={`kt-video__btn${choice === 'quick' ? ' is-go' : ''}`} onClick={() => vrchatController()?.answer(choice, remember)}>
               {t(`fork.vrchat.${words}`)}
             </button>
@@ -66,7 +68,7 @@ export function VideoPill() {
       {video.kind === 'asking' ? (
         <>
           <span className="kt-video-pill__label"><span className="kt-video__play" />{t('fork.vrchat.videoShort')}</span>
-          {CHOICES.map(([choice, words]) => (
+          {offered().map(([choice, words]) => (
             <button key={choice} type="button" className={`subtitle-bar__btn kt-video-pill__btn${choice === 'quick' ? ' active' : ''}`} onClick={() => vrchatController()?.answer(choice, false)}>
               {t(`fork.vrchat.${words}`)}
             </button>
