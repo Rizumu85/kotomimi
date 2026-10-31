@@ -107,8 +107,6 @@ describe('a Realtime socket of a sharing Kotomimi', () => {
     expect(s.sent[s.sent.length - 1]).toMatchObject({ type: 'conversation.item.input_audio_transcription.completed', transcript: 'Bonjour', language: 'fr' });
     s.engine().onResult?.({ text: 'Hello', language: 'en', durationMs: 100, recognitionTimeMs: 1 });
     expect(s.sent[s.sent.length - 1]).toMatchObject({ transcript: 'Hello', language: 'en' });
-    s.engine().onResult?.({ text: 'Uncertain', durationMs: 100, recognitionTimeMs: 1 });
-    expect(s.sent[s.sent.length - 1]).toMatchObject({ type: 'error', error: { code: 'transcription_failed' } });
   });
 
   it('refuses malformed or unsupported pairs without starting a single-language substitute', () => {

@@ -233,31 +233,6 @@ describe('paired Apple recognition across the LAN wire and client pipeline', () 
     expect(userText(h.calls[0])).toBe(ENGLISH);
   });
 
-  it.each([undefined, 'de'])('reports an ASR result outside the pair (%j) through the real server failure event and recovers', async (language) => {
-    const h = await live(SPEAKER, { speakBoth: true });
-    await tentative(h, 1, FRENCH);
-    h.asr.final(FRENCH, language);
-    await flush();
-    expect(h.calls).toEqual([]);
-    expect(h.lastText(1)).toEqual({ ref: 1, text: '' });
-    expect(h.of('segmentClosed').map((event) => event.payload.ref)).toContain(1);
-    expect(h.serverEvents).toContainEqual({
-      type: 'conversation.item.input_audio_transcription.failed', item_id: 'item_mac_session_1', content_index: 0,
-      error: expect.objectContaining({ code: 'transcription_failed' }),
-    });
-    expect(h.of('degraded').map((event) => event.payload)).toEqual([{
-      code: 'transcription_failed', reason: 'bilingual_transcription_failed', message: expect.stringContaining('candidate language'),
-    }]);
-    expect(h.of('failed')).toEqual([]);
-    expect(h.socket.closedByClient).toBeNull();
-
-    await tentative(h, 2, ENGLISH);
-    h.asr.final(ENGLISH, 'en');
-    await h.settled(1);
-    expectHeard(h, 2, ENGLISH, 'en');
-    expect(h.calls[0].body).toMatchObject({ model: 'translation-model', source_language: 'en', target_language: 'fr' });
-  });
-
   it('translates either language into the other on a speaker with speakBoth enabled', async () => {
     const h = await live(SPEAKER, { speakBoth: true });
     expectPair(h, 'en', 'fr');

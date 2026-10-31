@@ -125,8 +125,6 @@ class RealtimeLeg implements AdapterSession {
   private readonly queue: ResponseQueue;
   /** Fork (Kotomimi): a requested pair needs an explicit acknowledgement and a language on every final. */
   private readonly languagePair: readonly [string, string] | undefined;
-  /** Fork: a late paired final or failure must not diagnose an input that has already ended. */
-  private readonly finishedPairedInputs = new Set<string>();
   /** The client's own ids, one counter: request event ids (`sokuji_<n>`) and typed items' (`sokuji_text_<n>`, under the API's 32 characters). */
   private ids = 0;
   /** Typed items already sent: a request asked again sends its `response.create` alone (choice 10). */
@@ -388,10 +386,6 @@ class RealtimeLeg implements AdapterSession {
     const language = typeof e.language === 'string' ? e.language.trim() || undefined : undefined;
     this.frame('in', e.type, { itemId: e.item_id ?? null, transcript: e.transcript ?? null, ...(language !== undefined ? { language } : {}) });
     if (this.phase !== 'live' || typeof e.item_id !== 'string') return;
-    if (this.languagePair) {
-      if (this.finishedPairedInputs.has(e.item_id)) return;
-      this.finishedPairedInputs.add(e.item_id);
-    }
     const transcript = typeof e.transcript === 'string' ? e.transcript : '';
     const detected = languageOf(language);
     if (this.languagePair && (!detected || !this.languagePair.includes(detected) || !transcript.trim())) {
@@ -413,8 +407,6 @@ class RealtimeLeg implements AdapterSession {
     this.frame('in', e.type, { itemId: e.item_id ?? null, error: { type: error.type ?? null, code: error.code ?? null, message: error.message ?? null } });
     if (this.phase !== 'live' || typeof e.item_id !== 'string') return;
     if (this.languagePair) {
-      if (this.finishedPairedInputs.has(e.item_id)) return;
-      this.finishedPairedInputs.add(e.item_id);
       this.events.degraded({
         code: 'transcription_failed',
         message: typeof error.message === 'string' && error.message.trim() ? error.message : 'The server could not transcribe this paired-language utterance.',

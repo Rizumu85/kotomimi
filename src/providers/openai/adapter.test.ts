@@ -366,18 +366,6 @@ describe('the OpenAI Realtime adapter: paired LAN transcription', () => {
     await session.stop();
   });
 
-  it('ignores late paired completions and failures after the input has closed', async () => {
-    const h = startPairedRealtime();
-    h.socket.open();
-    h.receive(SERVER.created(), pairedUpdated());
-    const session = await h.starting;
-    h.receive(SERVER.committed('done'), inputDoneWithLanguage('done', 'Bonjour', 'fr'));
-    h.receive(SERVER.inputDone('done', 'Hello'), SERVER.inputFailed('done'));
-    expect(h.of('segmentText').map((e) => e.payload)).toEqual([{ ref: 1, text: 'Bonjour', language: 'fr' }]);
-    expect(h.of('segmentClosed').map((e) => e.payload)).toEqual([{ ref: 1 }]);
-    expect(h.of('degraded')).toEqual([]);
-    await session.stop();
-  });
 });
 
 describe('the OpenAI Realtime adapter: audio, turns and typed text going up', () => {

@@ -193,20 +193,6 @@ describe('a live recognition', () => {
     }
   });
 
-  it('rejects a paired final that does not identify one of its candidates', async () => {
-    for (const locale of [undefined, 'en_US', 'ja']) {
-      const { world, speech } = mac({ installed: ['ja_JP', 'zh_CN'] });
-      await speech.start(`${PREFIX}ja`);
-      const id = speech.openStream({ language: 'ja', also: 'zh', sampleRate: 16000 });
-      world.started.at(-1).child.say({ type: 'partial', text: '你好。' });
-      world.started.at(-1).child.say({ type: 'final', text: '你好。', ...(locale ? { locale } : {}) });
-      expect(world.events).toEqual([
-        { id, type: 'partial', text: '你好。' },
-        { id, type: 'error', message: expect.stringContaining('requested languages') },
-      ]);
-    }
-  });
-
   it('is not opened for a language the system has no recognizer for, for sound at another rate, or before a run', async () => {
     const { speech } = mac();
     expect(speech.openStream({ language: 'ja', sampleRate: 16000 })).toBeNull();

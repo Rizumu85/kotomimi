@@ -87,6 +87,9 @@ const TYPED = /^sokuji_typed_/;
 /** The chatbox's length, as the main process cuts to (`CHATBOX_MOST` in `electron/vrchat.js`). */
 const CHATBOX_MOST = 144;
 
+/** The most a line holds the chatbox from what comes after it: past this, the talk outruns what can be read. */
+const CHATBOX_HOLD_MOST_S = 6;
+
 /** Reading time for the visible chatbox text, independent of recognition/subtitle pacing. */
 export function chatboxReadingMs(text: string): number {
   const visible = [...text.split('\n').map((line) => line.replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n')].slice(0, CHATBOX_MOST);
@@ -95,7 +98,18 @@ export function chatboxReadingMs(text: string): number {
     if (/\s/u.test(character)) continue;
     seconds += /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(character) ? 1 / 6 : 1 / 22;
   }
-  return Math.round(Math.max(3, Math.min(15, seconds)) * 1000);
+  return Math.round(Math.max(3, Math.min(CHATBOX_HOLD_MOST_S, seconds)) * 1000);
+}
+
+/** What goes up after a wait: every line waiting that fits together, oldest first. The talk has moved on: what does not fit is dropped. */
+export function chatboxWaiting(waiting: readonly string[]): string {
+  let lines = waiting[waiting.length - 1];
+  for (let i = waiting.length - 2; i >= 0; i--) {
+    const more = `${waiting[i]}\n${lines}`;
+    if ([...more].length > CHATBOX_MOST) break;
+    lines = more;
+  }
+  return lines;
 }
 
 /**
@@ -275,8 +289,9 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
   const pump = () => {
     if (sending) return;
     if (!allowed()) { queue.length = 0; return; }
-    const line = queue.shift();
-    if (line === undefined) return;
+    if (queue.length === 0) return;
+    const line = chatboxWaiting(queue);
+    queue.length = 0;
     sending = true;
     void ipc.invoke('vrchat:chatbox', { text: line }).catch(() => {});
     later(() => { sending = false; pump(); }, Math.max(gap, chatboxReadingMs(line)));

@@ -268,10 +268,6 @@ function createAppleSpeech(deps = {}) {
       else if (event?.type === 'delta' && typeof event.text === 'string' && event.text) onStream({ id, type: 'delta', text: event.text });
       else if (event?.type === 'final') {
         const heardIn = pair && typeof event.locale === 'string' && (event.locale === locale || event.locale === second) ? event.locale : null;
-        if (pair && !heardIn) {
-          finish({ type: 'error', message: 'The speech recognizer did not identify one of the requested languages.' });
-          return;
-        }
         finish({ type: 'done', text: typeof event.text === 'string' ? event.text : '', ...(heardIn ? { language: languageAt(heardIn) } : {}) });
       }
       else if (event?.type === 'error') finish({ type: 'error', message: String(event.message ?? 'The speech recognizer reported an error.').slice(0, 300) });

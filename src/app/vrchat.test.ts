@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Entry } from '../lib/projection/types';
 import { useVRChatStore, vrchatHolds } from '../stores/vrchatStore';
-import { chatboxReadingMs, finishedLine, linkOf, startVRChat, type VRChatDeps } from './vrchat';
+import { chatboxReadingMs, chatboxWaiting, finishedLine, linkOf, startVRChat, type VRChatDeps } from './vrchat';
 
 vi.mock('../services/persistSetting', () => ({ persistSetting: async () => {} }));
 
@@ -178,6 +178,7 @@ describe('the chatbox', () => {
     const waits: Array<{ fn: () => void; ms: number }> = [];
     const t = setup({ setTimeout: (fn, ms) => { waits.push({ fn, ms }); } });
     const long = '这是一个需要留出足够时间让朋友读完的比较长的句子。';
+    t.show([exchange('a', 'first', long)]);
     t.show([exchange('a', 'first', long), exchange('b', 'second', 'Next')]);
     expect(t.chatboxLines()).toEqual([long]);
     expect(waits[0].ms).toBe(chatboxReadingMs(long));
@@ -192,12 +193,25 @@ describe('the chatbox', () => {
     expect(chatboxReadingMs('Hi')).toBe(3000);
     expect(chatboxReadingMs('中'.repeat(60))).toBeGreaterThan(chatboxReadingMs('a'.repeat(60)));
     expect(chatboxReadingMs('a'.repeat(1000))).toBe(chatboxReadingMs('a'.repeat(144)));
-    expect(chatboxReadingMs('中'.repeat(144))).toBe(15000);
+    expect(chatboxReadingMs('中'.repeat(144))).toBe(6000);
+  });
+
+  it('sends the lines that piled up together, and lets the oldest go when they do not fit', () => {
+    useVRChatStore.setState({ chatbox: 'translation' });
+    const t = setup();
+    t.show([exchange('a', '一', 'First')]);
+    t.show([exchange('a', '一', 'First'), exchange('b', '二', 'Second'), exchange('c', '三', 'Third')]);
+    expect(t.chatboxLines()).toEqual(['First']);
+    t.timers.shift()!();
+    expect(t.chatboxLines()).toEqual(['First', 'Second\nThird']);
+    t.controller.stop();
+    expect(chatboxWaiting(['a'.repeat(100), 'b'.repeat(100), 'c'.repeat(30)])).toBe(`${'b'.repeat(100)}\n${'c'.repeat(30)}`);
   });
 
   it('discards queued messages immediately when disabled, even if re-enabled before the timer fires', () => {
     useVRChatStore.setState({ chatbox: 'translation' });
     const t = setup();
+    t.show([exchange('a', 'one', 'First')]);
     t.show([exchange('a', 'one', 'First'), exchange('b', 'two', 'Second')]);
     useVRChatStore.setState({ chatbox: 'off' });
     useVRChatStore.setState({ chatbox: 'translation' });
@@ -209,6 +223,7 @@ describe('the chatbox', () => {
     useVRChatStore.setState({ chatbox: 'translation' });
     const t = setup({}, [exchange('old', '旧的', '古い')]);
     expect(t.chatboxLines()).toEqual([]);
+    t.show([exchange('old', '旧的', '古い'), exchange('a', '你好', 'こんにちは')]);
     t.show([exchange('old', '旧的', '古い'), exchange('a', '你好', 'こんにちは'), exchange('b', '谢谢', 'ありがとう')]);
     expect(t.chatboxLines()).toEqual(['こんにちは']);
     t.timers.shift()!();
@@ -294,6 +309,7 @@ describe('the controller, at the edges the review found', () => {
   it('does not send a waiting line once the chatbox is turned off', () => {
     useVRChatStore.setState({ chatbox: 'translation' });
     const t = setup();
+    t.show([exchange('a', '你好', 'こんにちは')]);
     t.show([exchange('a', '你好', 'こんにちは'), exchange('b', '谢谢', 'ありがとう')]);
     expect(t.chatboxLines()).toEqual(['こんにちは']);
     useVRChatStore.setState({ chatbox: 'off' });

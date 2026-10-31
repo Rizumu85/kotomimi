@@ -188,10 +188,6 @@ export class LanTranscriber {
     engine.onResult = (result) => {
       if (!mine()) return;
       const heard = baseLanguage(result.language);
-      if (model.also && heard !== language && heard !== model.also) {
-        this.failed('The recognizer did not identify which candidate language was spoken.');
-        return;
-      }
       // Empty paired finals reject tentative words. An empty completion would otherwise preserve the old deltas.
       if (model.also && !result.text.trim()) {
         if (this.item?.sent) this.failed('No usable final transcript was produced for this utterance.');
