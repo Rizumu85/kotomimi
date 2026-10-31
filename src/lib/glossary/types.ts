@@ -1,15 +1,12 @@
-/** A local term pair used by recognition and translation hints. */
+/** A term the user keeps: how it is written, how it comes out wrong, and how it is translated. */
 export interface GlossaryEntry {
   id: string;
-  /** An optional stable identifier from an external source such as VRCX. */
-  externalId?: string;
-  /** The canonical term as it should appear in the source transcript. */
+  /** How it should appear in the source transcript. */
   source: string;
-  /** The preferred rendering in the translated text. Use the source for names that should stay unchanged. */
+  /** How it is translated. The source for a name that stays as it is. */
   target: string;
-  /** Recognition variants that should be folded into `source`. */
+  /** What recognition writes instead: folded into `source`. */
   aliases: readonly string[];
-  enabled: boolean;
 }
 
 export interface GlossarySnapshot {
@@ -20,13 +17,4 @@ export interface GlossaryEntryInput {
   source: string;
   target?: string;
   aliases?: readonly string[];
-  enabled?: boolean;
-  externalId?: string;
 }
-
-export interface GlossaryImportResult {
-  added: number;
-  updated: number;
-  skipped: number;
-}
-

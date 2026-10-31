@@ -72,6 +72,8 @@ export interface NativeAsrOptions {
   named?: string;
   /** Fork: a second language the speech may be in, for a recognizer that hears either of two and says which (the Mac's). */
   also?: string;
+  /** Fork: words to expect (the glossary's), for an engine that takes them. */
+  hints?: readonly string[];
 }
 
 /**
@@ -237,7 +239,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     const head = queue[0];
     if (!head || head.id !== null || head.opening || disposed) return;
     head.opening = true;
-    void bridge.open({ language, ...(options.also ? { also: options.also } : {}), ...(paired() && preferred ? { prefer: preferred } : {}), sampleRate: head.resampler ? TARGET_RATE : rate, ...(options.model ? { model: options.model } : {}) }).then((id) => {
+    void bridge.open({ language, ...(options.also ? { also: options.also } : {}), ...(paired() && preferred ? { prefer: preferred } : {}), ...(options.hints?.length ? { hints: options.hints } : {}), sampleRate: head.resampler ? TARGET_RATE : rate, ...(options.model ? { model: options.model } : {}) }).then((id) => {
       head.opening = false;
       if (head.over || disposed) {
         if (id !== null) bridge.abort(id);

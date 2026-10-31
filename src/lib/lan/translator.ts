@@ -21,7 +21,8 @@ import { baseLanguage, LAN_PIPELINE, wireError } from './protocol';
 /** The translation engine as the sharing host drives it: `engines.ts`'s `TranslationLike`, named here so `lib` imports no provider. */
 export interface Translator {
   init(sourceLang: string, targetLang: string, modelId?: string): Promise<unknown>;
-  translate(text: string, systemPrompt: string, wrapTranscript: boolean): Promise<{ translatedText: string }>;
+  /** `terms`: pairs the sentence needs, written `[from, to]`, for a model that follows them. */
+  translate(text: string, systemPrompt: string, wrapTranscript: boolean, terms?: ReadonlyArray<readonly [string, string]>): Promise<{ translatedText: string }>;
   dispose(): void;
   onError: ((error: string) => void) | null;
 }
@@ -47,6 +48,12 @@ interface Loaded { engine: Translator; ready: Promise<unknown>; usedAt: number; 
 
 const refusal = (status: number, code: string, message: string): HttpAnswer => ({ status, body: { error: wireError(code, message) } });
 
+/** The pairs a client sent with a sentence; anything else is left out. */
+function termsOf(terms: unknown): Array<[string, string]> {
+  if (!Array.isArray(terms)) return [];
+  return terms.filter((pair): pair is [string, string] => Array.isArray(pair) && pair.length === 2 && pair.every((term) => typeof term === 'string'));
+}
+
 /** The text to translate: the last user message, whether its content is a string or OpenAI's list of parts. */
 function userText(messages: unknown): string {
   if (!Array.isArray(messages)) return '';
@@ -68,7 +75,7 @@ export class LanTranslator {
   constructor(private readonly deps: TranslatorDeps) {}
 
   async complete(body: unknown): Promise<HttpAnswer> {
-    const request = (body ?? {}) as { model?: unknown; messages?: unknown; stream?: unknown; source_language?: unknown; target_language?: unknown };
+    const request = (body ?? {}) as { model?: unknown; messages?: unknown; stream?: unknown; source_language?: unknown; target_language?: unknown; terms?: unknown };
     const source = baseLanguage(request.source_language);
     const target = baseLanguage(request.target_language);
     if (!source || !target) return refusal(400, 'languages_required', 'Name the pair: this Kotomimi runs translation models, and they are told what to translate from and into (source_language, target_language).');
@@ -90,7 +97,7 @@ export class LanTranslator {
     entry.busy += 1;
     try {
       await entry.ready;
-      translated = (await entry.engine.translate(text, buildDefaultLocalPrompt(source, target), true)).translatedText ?? '';
+      translated = (await entry.engine.translate(text, buildDefaultLocalPrompt(source, target), true, termsOf(request.terms))).translatedText ?? '';
     } catch (cause) {
       return refusal(500, 'server_error', `The translation failed: ${cause instanceof Error ? cause.message : String(cause)}`);
     } finally {

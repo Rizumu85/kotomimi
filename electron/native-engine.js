@@ -108,6 +108,7 @@ const MODELS = {
     options: { 'confucius4_r2t2.chunk_size_ms': '160', 'confucius4_r2t2.unfixed_chunk_num': '0', 'confucius4_r2t2.unfixed_token_num': '3' },
   },
   'qwen3-asr-1.7b-q8': {
+    takesContext: true,
     file: 'qwen3-asr-1.7b-q8_0.gguf',
     url: 'https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/e36610ac69b5262e914a52635324050bee8f1ad2/Qwen3-ASR-1.7B-GGUF/qwen3-asr-1.7b-q8_0.gguf',
     mirror: 'https://modelscope.cn/models/audio-cpp/audio.cpp-gguf/resolve/master/Qwen3-ASR-1.7B-GGUF/qwen3-asr-1.7b-q8_0.gguf',
@@ -149,6 +150,7 @@ const MODELS = {
   // The small one, for a computer that runs a game beside it: about 2 GB of video memory where the 1.7B holds 3, a
   // reading a quarter shorter, and more characters wrong (FORK.md, "小模型"). The same family, read the same way.
   'qwen3-asr-0.6b-q8': {
+    takesContext: true,
     file: 'qwen3-asr-0.6b-q8_0.gguf',
     url: 'https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/e36610ac69b5262e914a52635324050bee8f1ad2/Qwen3-ASR-0.6B-GGUF/qwen3-asr-0.6b-q8_0.gguf',
     mirror: 'https://modelscope.cn/models/audio-cpp/audio.cpp-gguf/resolve/master/Qwen3-ASR-0.6B-GGUF/qwen3-asr-0.6b-q8_0.gguf',
@@ -521,12 +523,13 @@ function wavOf(pcm, sampleRate) {
  * One stretch of sound read whole by the runtime (POST /v1/audio/transcriptions, a form): `done` resolves with
  * `{ ok, text }` or `{ ok: false, message }`, and `abort` drops the request.
  */
-function readWhole({ host = LOOPBACK, port, pathname = '/v1/audio/transcriptions', model, sampleRate, language, pcm, timeoutMs, key }) {
+function readWhole({ host = LOOPBACK, port, pathname = '/v1/audio/transcriptions', model, sampleRate, language, context, pcm, timeoutMs, key }) {
   const boundary = `----kotomimi${crypto.randomBytes(12).toString('hex')}`;
   const field = (name, value) => Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="${name}"\r\n\r\n${value}\r\n`);
   const body = Buffer.concat([
     field('model', model),
     ...(language ? [field('language', language)] : []),
+    ...(context ? [field('text', context)] : []),
     Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="stretch.wav"\r\nContent-Type: audio/wav\r\n\r\n`),
     wavOf(pcm, sampleRate),
     Buffer.from(`\r\n--${boundary}--\r\n`),
@@ -662,7 +665,7 @@ const WINDOW_MOST_SECONDS = 120;
  * `tidy`: what every reading's text goes through before anything is made of
  * it, for a model whose writing needs it (`unspaced`).
  */
-function openWindow({ port, model, sampleRate, language, timeoutMs = WINDOW_READ_TIMEOUT_MS, read: readAsIs = readWhole, tidy = null, now = () => Date.now(), setTimer = setTimeout, clearTimer = clearTimeout, note = () => {} }, onEvent) {
+function openWindow({ port, model, sampleRate, language, context, timeoutMs = WINDOW_READ_TIMEOUT_MS, read: readAsIs = readWhole, tidy = null, now = () => Date.now(), setTimer = setTimeout, clearTimer = clearTimeout, note = () => {} }, onEvent) {
   const read = tidy ? (asked) => {
     const one = readAsIs(asked);
     return { done: one.done.then((answer) => (answer.ok ? { ...answer, text: tidy(answer.text) } : answer)), abort: () => one.abort() };
@@ -694,7 +697,7 @@ function openWindow({ port, model, sampleRate, language, timeoutMs = WINDOW_READ
 
   /** One more reading, of this sound; `then` is given its answer unless the recognition was dropped meanwhile. */
   function ask(pcm, then) {
-    const mine = read({ port, model, sampleRate, language, pcm, timeoutMs });
+    const mine = read({ port, model, sampleRate, language, context, pcm, timeoutMs });
     reading = mine;
     mine.done.then((answer) => {
       if (reading === mine) reading = null;
@@ -728,7 +731,7 @@ function openWindow({ port, model, sampleRate, language, timeoutMs = WINDOW_READ
     readBytes = bytes;
     unreadPeak = 0;
     const sound = Buffer.concat(chunks, bytes);
-    const mine = read({ port, model, sampleRate, language, pcm: sound, timeoutMs });
+    const mine = read({ port, model, sampleRate, language, context, pcm: sound, timeoutMs });
     reading = mine;
     mine.done.then((answer) => {
       if (reading === mine) reading = null;
@@ -1171,7 +1174,7 @@ function createNativeEngine(deps = {}) {
 
   /** A live recognition opened for the page: its id, or null while the runtime is not ready — or is up with another model than the one asked for. */
   const dumps = new Map();
-  function openStream({ language, sampleRate, model: asked } = {}) {
+  function openStream({ language, sampleRate, model: asked, hints = [] } = {}) {
     if (run.state !== 'ready' || !run.model) return null;
     if (typeof asked === 'string' && asked && asked !== run.model) return null;
     const id = nextStream++;
@@ -1181,7 +1184,10 @@ function createNativeEngine(deps = {}) {
     // locale, is told that.
     const windowed = model?.mode === 'offline';
     const said = model?.languageAs === 'code' ? languageCode(language) : model?.languageAs === 'locale' ? languageLocale(language) : languageName(language);
-    const target = { port: run.port, model: run.model, sampleRate: rate, language: said };
+    // Fork: Qwen3-ASR takes words to expect as its context, and writes them: 1 of 10 rare names right without, 7 with
+    // three hundred words told, and nothing invented with forty (measured 2026-10-31).
+    const context = model?.takesContext && hints.length > 0 ? `可能出现的人名和词语：${hints.join('、')}` : undefined;
+    const target = { port: run.port, model: run.model, sampleRate: rate, language: said, ...(context ? { context } : {}) };
     const stream = (windowed ? window : live)(windowed ? { ...target, note, ...(model?.unspaced ? { tidy: unspaced } : {}) } : target, (event) => {
       if (event.type !== 'delta' && event.type !== 'partial') streams.delete(id);
       onStream({ id, ...event });

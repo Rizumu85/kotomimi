@@ -140,6 +140,13 @@ describe('two native recognizers as one', () => {
     expect(apple.streams[0].init).toEqual({ language: 'ja', also: 'zh', prefer: 'zh', sampleRate: 16000, model: 'apple-speech:ja' });
   });
 
+  it('passes the words to expect to the engine that hears', async () => {
+    const { engine, runtime } = mac();
+    await engine.start('qwen3-asr-1.7b-q8');
+    engine.openStream({ language: 'ja', hints: ['Rizum'], sampleRate: 16000, model: 'qwen3-asr-1.7b-q8' });
+    expect(runtime.streams[0].init).toMatchObject({ hints: ['Rizum'] });
+  });
+
   it('opens one that names no model on the engine started last, and none while nothing runs', async () => {
     const { engine, apple } = mac();
     expect(engine.openStream({ language: 'ja', sampleRate: 16000 })).toBeNull();

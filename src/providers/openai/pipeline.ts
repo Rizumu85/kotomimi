@@ -32,6 +32,8 @@ import { oneOfTwo, saidInOwn, sameSpeech } from '../../lib/language/script';
 import { identifyLanguage } from '../../lib/language/identify';
 import { AUTO } from '../../lib/provider/languages';
 import { BEFORE_SLOT, TEXT_SLOT } from './nativeTranslators';
+import { termsIn, withTerms } from '../../lib/glossary/glossary';
+import type { GlossarySnapshot } from '../../lib/glossary/types';
 import { cutAt, letters, restFrom, SETTLE_MS } from './sentenceCut';
 import { askNativeEngine, ipcNativeBridge, NO_NATIVE_ENGINE, type NativeBridge, type NativeEngineStatus } from '../../lib/native/nativeEngine';
 import { engineNode, remoteBridge } from '../../lib/native/remoteEngine';
@@ -136,7 +138,7 @@ export interface DeviceHearing {
   api?: { baseUrl: string; model: string; key?: StageKey; /** Where what answers there turns out to be a Kotomimi phone's engine (`remoteEngine.ts`), and the model is one this app knows: how long one recognition may run on it, as on this computer. */ limits?: Partial<NativeLimits> };
   /** Present: the recognizer is the native engine's (`nativeAsr.ts`), given the voice as it comes; `limits` where one recognition may not run as long as the default. */
   /** Fork: `either`, a recognizer hearing the speaker in either of two languages (the Mac's): told the first, and the other. */
-  native?: { model: string; limits?: Partial<NativeLimits>; either?: { first: string; also: string } };
+  native?: { model: string; limits?: Partial<NativeLimits>; either?: { first: string; also: string }; hints?: readonly string[] };
 }
 
 export interface PipelineConfig extends RealtimeConfig {
@@ -151,6 +153,8 @@ export interface PipelineConfig extends RealtimeConfig {
   socket?: { endpoint: string };
   /** Present: before the socket opens, that server's pipeline is told its recognizer (`PipelineDeps.prepare`). */
   prepare?: { pipeline: string; transcription: string };
+  /** The user's terms, for a translation model that is not told them in instructions. */
+  glossary?: GlossarySnapshot;
 }
 
 export interface PipelineCredentials extends RealtimeCredentials {
@@ -734,6 +738,11 @@ class PipelineLeg implements AdapterSession {
         // Not to be asked (a test, a build with no main process), or not up: the address it was built with.
       }
     }
+    // A model asked in its own form reads no instructions: it is told the terms this sentence needs. Another Kotomimi writes
+    // the request itself, so it is told them beside the sentence.
+    const glossary = stage.kind === 'translate' ? this.request.config.glossary : undefined;
+    const terms = glossary && (stage.wrap || stage.pair) ? termsIn(text, glossary) : [];
+    const extra = terms.length > 0 && !stage.wrap ? { ...stage.extra, terms } : stage.extra;
     return completeText(
       {
         url: chatUrl(base),
@@ -742,12 +751,12 @@ class PipelineLeg implements AdapterSession {
         system: stage.wrap ? '' : stage.system,
         ...(stage.shots?.length ? { shots: stage.shots } : {}),
         ...(stage.pair ? { pair: stage.pair } : {}),
-        ...(stage.extra ? { extra: stage.extra } : {}),
+        ...(extra ? { extra } : {}),
         ...(stage.phone ? { timeoutMs: PHONE_TEXT_TIMEOUT_MS, busyRetries: PHONE_BUSY_RETRIES } : {}),
         // A function, so that nothing in the sentence is read as a pattern.
         user: stage.wrapAfter && before
-          ? stage.wrapAfter.replace(BEFORE_SLOT, () => before).replace(TEXT_SLOT, () => text)
-          : stage.wrap ? stage.wrap.replace(TEXT_SLOT, () => text) : text,
+          ? withTerms(stage.wrapAfter, terms).replace(BEFORE_SLOT, () => before).replace(TEXT_SLOT, () => text)
+          : stage.wrap ? withTerms(stage.wrap, terms).replace(TEXT_SLOT, () => text) : text,
       },
       { fetch: this.doFetch, clock, signal, onText: (shown) => show(tidyAnswer(stage.kind, shown)) },
     );
@@ -816,7 +825,7 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
     const { api, native } = device;
     if (native) {
       const start = deps.native?.start ?? ((model: string) => askNativeEngine('start', model));
-      return createLocalInferenceAdapter({ ...engines, asr: () => createNativeAsr({ bridge: deps.native?.bridge ?? ipcNativeBridge, start: () => start(native.model), model: native.model, clock: request.clock, ...(native.limits ? { limits: native.limits } : {}), ...(native.either ? { also: native.either.also } : {}) }) });
+      return createLocalInferenceAdapter({ ...engines, asr: () => createNativeAsr({ bridge: deps.native?.bridge ?? ipcNativeBridge, start: () => start(native.model), model: native.model, clock: request.clock, ...(native.hints?.length ? { hints: native.hints } : {}), ...(native.limits ? { limits: native.limits } : {}), ...(native.either ? { also: native.either.also } : {}) }) });
     }
     if (!api) throw new Error('Recognition requires a native engine or an API.');
     const key = api.key ? request.credentials[api.key] : undefined;

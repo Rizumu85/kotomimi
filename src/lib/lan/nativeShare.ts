@@ -22,6 +22,7 @@ import { NATIVE_TRANSLATORS, TEXT_SLOT, nativeTranslates, translatorRequest } fr
 import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import type { SharedModel } from './protocol';
 import type { Recognizer } from './transcriber';
+import { withTerms } from '../glossary/glossary';
 import type { Translator } from './translator';
 
 const isNativeRecognizer = (id: string): boolean => NATIVE_MODELS.some((m) => m.id === id);
@@ -152,7 +153,7 @@ export function nativeTranslatorFor(source: string, target: string, wanted: stri
 }
 
 /** A recognizer for a native model, as the sharing host drives one; null for any other model. The engine is held while it listens: the app's own check does not stop it under a device that is using it. */
-export function nativeRecognizer(model: { modelId: string; also?: string }): Recognizer | null {
+export function nativeRecognizer(model: { modelId: string; also?: string; hints?: readonly string[] }): Recognizer | null {
   if (!isNativeRecognizer(model.modelId)) return null;
   const native = nativeModel(model.modelId);
   const asr = createNativeAsr({
@@ -160,6 +161,7 @@ export function nativeRecognizer(model: { modelId: string; also?: string }): Rec
     start: () => useNativeEngineStore.getState().start(native.id),
     model: native.id,
     ...(model.also ? { also: model.also } : {}),
+    ...(model.hints?.length ? { hints: model.hints } : {}),
     ...(native.limits ? { limits: native.limits } : {}),
   });
   let release: (() => void) | null = null;
@@ -191,13 +193,13 @@ export function nativeTranslator(doFetch: typeof fetch = (input, init) => fetch(
       native = { id: modelId, source: sourceLang, target: targetLang };
       return undefined;
     },
-    async translate(text) {
+    async translate(text, _prompt, _wrap, terms = []) {
       if (!native) throw new Error('The translator was not told its model.');
       const request = translatorRequest(NATIVE_TRANSLATORS.find((m) => m.id === native!.id)!, native.source, native.target);
       const response = await doFetch(`${translatorBaseUrl()}/chat/completions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${translatorKey() || 'no-key'}` },
-        body: JSON.stringify({ ...request.extra, model: native.id, stream: false, messages: [{ role: 'user', content: request.wrap.replace(TEXT_SLOT, () => text) }] }),
+        body: JSON.stringify({ ...request.extra, model: native.id, stream: false, messages: [{ role: 'user', content: withTerms(request.wrap, terms).replace(TEXT_SLOT, () => text) }] }),
       });
       if (!response.ok) throw new Error(`The translation engine answered HTTP ${response.status}.`);
       const body = (await response.json()) as { choices?: Array<{ message?: { content?: unknown } }> } | null;

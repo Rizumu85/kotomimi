@@ -29,7 +29,7 @@ export interface Recognizer {
   onFatal: ((error: string) => void) | null;
 }
 
-export interface RecognitionModel { modelId: string; streaming: boolean; also?: string }
+export interface RecognitionModel { modelId: string; streaming: boolean; also?: string; hints?: readonly string[] }
 
 export interface TranscriberDeps {
   /** A recognizer for this model: the app's own engine, a fake in tests. */
@@ -145,7 +145,7 @@ export class LanTranscriber {
   }
 
   private configure(session: unknown): void {
-    const input = ((session ?? {}) as { audio?: { input?: { transcription?: { language?: unknown; languages?: unknown; model?: unknown }; turn_detection?: unknown } } }).audio?.input ?? {};
+    const input = ((session ?? {}) as { audio?: { input?: { transcription?: { language?: unknown; languages?: unknown; model?: unknown; keywords?: unknown }; turn_detection?: unknown } } }).audio?.input ?? {};
     const language = baseLanguage(input.transcription?.language);
     // "auto" is a language here: answered by a recognizer that tells languages apart, where one is shared (`nativeShare.ts`).
     if (!language) return this.error('language_required', 'Say which language is spoken, or "auto" to have it detected (audio.input.transcription.language).');
@@ -165,8 +165,10 @@ export class LanTranscriber {
     if (!model) return this.error('model_not_found', `This Kotomimi shares no speech recognition model for "${language}".`);
     if (also && model.also !== also) return this.error('bilingual_unavailable', 'This recognizer cannot hear the requested pair of languages.');
     const vad = vadFrom(input.turn_detection);
-    const asked = JSON.stringify([model.modelId, language, vad, model.also]);
-    if (asked !== this.running) this.start(model, language, vad, asked);
+    const said = input.transcription?.keywords;
+    const hints = Array.isArray(said) ? said.filter((word): word is string => typeof word === 'string') : [];
+    const asked = JSON.stringify([model.modelId, language, vad, model.also, hints]);
+    if (asked !== this.running) this.start({ ...model, ...(hints.length ? { hints } : {}) }, language, vad, asked);
     this.deps.send({
       type: 'session.updated',
       session: { id: this.sessionId, object: 'realtime.session', type: 'transcription', audio: { input: { transcription: { model: model.modelId, language, ...(also ? { languages: [language, also] } : {}) }, turn_detection: input.turn_detection ?? null } } },

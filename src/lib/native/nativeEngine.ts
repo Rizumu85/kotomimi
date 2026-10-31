@@ -119,8 +119,8 @@ export type NativeStreamEvent =
 /** The live recognitions of the engine, as the recognizer uses them (`src/providers/openai/nativeAsr.ts`). */
 export interface NativeBridge {
   /** Opens one: its id, or null while the engine is not ready. `model` says whose it is, where a computer has more than one engine (a Mac). */
-  /** Fork: `also`, a second language the speech may be in; `prefer`, which of those two to choose on a tie (the Mac's). */
-  open(init: { language: string; also?: string; prefer?: string; sampleRate: number; model?: string }): Promise<number | null>;
+  /** Fork: `also`, a second language the speech may be in; `prefer`, which of those two to choose on a tie (the Mac's); `hints`, words to expect, for an engine that takes them (Qwen3-ASR; `contextualStrings` changed nothing in Apple Speech, 8 sentences, 2026-10-31). */
+  open(init: { language: string; also?: string; prefer?: string; hints?: readonly string[]; sampleRate: number; model?: string }): Promise<number | null>;
   write(id: number, pcm: Int16Array): void;
   /** The sound is over: the rest of the text follows, then `done`. */
   end(id: number): void;

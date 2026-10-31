@@ -61,6 +61,7 @@ import { CHECK_TIMEOUT_MS } from './check';
 import { SERVER_SILENT, isKotomimiServer, kindOf, KOTOMIMI_HOST, fitsPair, modelsFor, serverDefaultModel, translationDefault, type LocalAIModel, type LocalAIModelKind } from './localaiModels';
 import { coachPrompt } from './coachPrompt';
 import { buildRealtime } from './config';
+import { glossaryRecognitionTerms } from '../../lib/glossary/glossary';
 import { recognizerAsked, serverBilingual } from './serverRecognizers';
 import { phoneBase, plainAddress } from '../../lib/lan/discover';
 import { deviceLanguage, canDetectOther, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, hearsNatively, needsServer, serverDetects, PLACE_FIELDS, PLACES, translatesNatively, type AsrHere, type Place } from './localaiDevice';
@@ -1100,6 +1101,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   if ('refused' in base) return base;
   const { voice: _voice, reasoningEffort: _reasoning, ...config } = base;
 
+  const hints = shared.glossary ? glossaryRecognitionTerms(shared.glossary) : [];
   // What hears is asked first: a run with no recognizer has nothing to translate.
   const heard = both ? AUTO : coached ? target : source;
   // A model that cannot name a language is still told the leg's own source; `identify.ts` names each sentence.
@@ -1131,7 +1133,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
       const either = both ? nativeEither(pick) : null;
       const alsoHeard = either ? either.also : appleAlso(native, modelHeard.toLowerCase().split(/[-_]/)[0] === runPair.source.toLowerCase().split(/[-_]/)[0] ? runPair.target : runPair.source);
       const first = either ? source : modelHeard;
-      recognizer = { modelId: native.id, streaming: true, native: { model: native.id, ...(native.limits ? { limits: native.limits } : {}), ...(alsoHeard ? { either: { first, also: alsoHeard } } : {}) } };
+      recognizer = { modelId: native.id, streaming: true, native: { model: native.id, ...(native.limits ? { limits: native.limits } : {}), ...(alsoHeard ? { either: { first, also: alsoHeard } } : {}), ...(hints.length ? { hints } : {}) } };
     } else if (s.asrVia === 'api') {
       const baseUrl = s.asrApiBaseUrl.trim();
       const named = s.asrApiModel.trim();
@@ -1274,12 +1276,13 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
     model,
     modalities: ['text'],
     // This computer's LocalAI is told its recognizer through its pipeline, before the socket opens: the session names none.
-    transcription: remotePair ? { ...remotePair, language: remotePair.languages[0] } : transcriptionFor(s, serverHeard, Boolean(stages?.speech) || plain || hearsLocal, kotomimi && !hearsLocal, models),
+    transcription: { ...(remotePair ? { ...remotePair, language: remotePair.languages[0] } : transcriptionFor(s, serverHeard, Boolean(stages?.speech) || plain || hearsLocal, kotomimi && !hearsLocal, models)), ...(kotomimi && hints.length ? { keywords: [...hints] } : {}) },
     anchor: false,
     commitAnswers: true,
     ...((stages?.speech || plain) && !device ? { transcribeOnly: true as const } : {}),
     ...(stages ? { stages } : {}),
     ...(device ? { device } : {}),
+    ...(shared.glossary ? { glossary: shared.glossary } : {}),
   };
 }
 

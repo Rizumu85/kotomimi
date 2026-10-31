@@ -45,7 +45,7 @@ export interface LanModels {
 export interface LanHostDeps {
   bridge: LanBridge;
   models: LanModels;
-  engines: { recognizer(model: { modelId: string; streaming: boolean; also?: string }): Recognizer; translator(): Translator; /** The feedback engine: its answer to a chat, and the hold that keeps it up. Absent: no feedback model is lent. */ coach?: Pick<CoachDeps, 'answer' | 'hold'> };
+  engines: { recognizer(model: { modelId: string; streaming: boolean; also?: string; hints?: readonly string[] }): Recognizer; translator(): Translator; /** The feedback engine: its answer to a chat, and the hold that keeps it up. Absent: no feedback model is lent. */ coach?: Pick<CoachDeps, 'answer' | 'hold'> };
   clock: Clock;
   /** How many sockets are open changed: the settings show it. */
   onClients?(count: number): void;

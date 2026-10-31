@@ -19,7 +19,7 @@ export function SessionSettingsGeneral({ locked }: { locked: boolean }) {
     <>
       {/* Language pair and output preferences. */}
       <ProviderLanguages providers={providers} disabled={locked} sentence={{ mode, textOnly }} />
-      <GlossarySection disabled={locked} />
+      <GlossarySection />
       <OutputToggles locked={locked} />
       {SENTENCE_SEGMENTATION_SHOWN && <SentenceSegmentationSection isSessionActive={locked} />}
     </>
