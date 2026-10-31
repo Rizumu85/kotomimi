@@ -67,7 +67,7 @@
     background: transparent;
     color: vars.$text-primary;
     font: inherit;
-    font-size: 13px;
+    font-size: vars.$font-body;
     text-overflow: ellipsis;
 
     &::placeholder { color: vars.$text-muted; }

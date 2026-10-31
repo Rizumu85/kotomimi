@@ -13,7 +13,8 @@ with the release workflow's `VITE_*` values.
 
 The Windows build uses Forge and Squirrel and lands in `out/make/squirrel.windows/x64`. The
 Mac build uses electron-builder, produces an Apple Silicon ZIP in `out/beta-mac`, and defaults
-to a local ad-hoc signature; set `CSC_NAME` when a signing certificate is available.
+to a local ad-hoc signature. `CSC_NAME` needs the login keychain, which an SSH session cannot
+reach, so a build over SSH stays ad-hoc. macOS may ask for permissions again after each ad-hoc build.
 
 ## Installation identity
 
@@ -35,10 +36,11 @@ sharing port.
 
 ## Install
 
-- **Windows:** run `Kotomimi Beta-<version> Setup.exe --silent`. Squirrel strips the dot, so
-  the folder is `app-X.Y.Z-betaN`. Run it from an ordinary process: an installer started
-  from an MSIX-packaged app such as Codex lands in that package's `LocalCache`, and so does
-  the desktop shortcut.
+- **Windows:** start `Kotomimi Beta-<version> Setup.exe --silent` through `Win32_Process.Create`
+  (`Invoke-CimMethod`), so that it runs outside any package. Squirrel strips the dot, so the
+  folder is `app-X.Y.Z-betaN`. An installer started by an MSIX-packaged app, Codex or the
+  Store's PowerShell among them, can land in that package's `LocalCache`, and the desktop
+  shortcut with it. Check the shortcut's target afterwards.
 - **Mac:** build on the Mac, check the app with `codesign --verify --deep --strict`, quit the
   running beta, keep the previous app in a backup rather than deleting it, move the new one
   to `/Applications`, and open it.
