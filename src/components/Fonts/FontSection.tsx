@@ -22,8 +22,11 @@ import './Fonts.scss';
 /** The languages offered for a font of their own, most likely first. */
 const OFFERED = ['ja', 'zh', 'zh-tw', 'ko', 'en', 'ru', 'fr', 'de', 'es', 'pt', 'it', 'vi', 'th', 'ar', 'hi', 'id', 'tr', 'uk', 'pl', 'nl', 'el', 'he'];
 
-/** Languages whose text gets readings above it: the ones a reading font means something for. */
-const WITH_READINGS = new Set(['ja']);
+/** Languages whose text gets readings above it: what they are called, and what a font must write for them. */
+const READINGS: Readonly<Record<string, { words: string; sample?: string }>> = {
+  ja: { words: 'reading' },
+  zh: { words: 'pinyin', sample: 'ǎǐǒǔ' },
+};
 
 /** A language of the pair as the fonts key it: its base, but Traditional Chinese, which is drawn in its own fonts. */
 function keyOf(code: string | undefined): string {
@@ -44,7 +47,7 @@ interface Sample { parts: ReadonlyArray<string | readonly [string, string]>; rom
 const SAMPLES: Readonly<Record<string, Sample>> = {
   ja: { parts: [['今日', 'きょう'], 'はいい', ['天気', 'てんき'], 'ですね。Kotomimi 2026'], roman: 'kyō wa ii tenki desu ne' },
   zh: { parts: [['今', 'jīn'], ['天', 'tiān'], ['天', 'tiān'], ['气', 'qì'], ['真', 'zhēn'], ['好', 'hǎo'], '，我们出去走走吧。Kotomimi 2026'] },
-  'zh-tw': { parts: ['今天天氣真好，我們出去走走吧。Kotomimi 2026'] },
+  'zh-tw': { parts: [['今', 'jīn'], ['天', 'tiān'], ['天', 'tiān'], ['氣', 'qì'], ['真', 'zhēn'], ['好', 'hǎo'], '，我們出去走走吧。Kotomimi 2026'] },
   ko: { parts: ['오늘 날씨가 참 좋네요. Kotomimi 2026'], roman: 'o-neul nal-ssi-ga cham jon-ne-yo' },
   ru: { parts: ['Сегодня хорошая погода. Kotomimi 2026'], roman: 'Segodnya khoroshaya pogoda' },
   uk: { parts: ['Сьогодні гарна погода. Kotomimi 2026'] },
@@ -133,6 +136,7 @@ export function FontSection() {
       {languages.map((language) => {
         const name = nameOf(language);
         const hasChoice = Boolean(text[language] || ruby[language]);
+        const readings = READINGS[language.split('-')[0]];
         return (
           <div className="kt-fonts__language" key={language}>
             <div className="kt-fonts__language-head">
@@ -148,10 +152,10 @@ export function FontSection() {
                 <span>{t('fork.fonts.text')}</span>
                 <FontPicker value={text[language] ?? ''} onChange={(family) => setText(language, family)} label={`${name} · ${t('fork.fonts.text')}`} sample={scriptSample(language)} />
               </label>
-              {WITH_READINGS.has(language.split('-')[0]) && (
+              {readings && (
                 <label className="kt-fonts__picker">
-                  <span>{t('fork.fonts.reading')}</span>
-                  <FontPicker value={ruby[language] ?? ''} onChange={(family) => setRuby(language, family)} label={`${name} · ${t('fork.fonts.reading')}`} sample={scriptSample(language)} />
+                  <span>{t(`fork.fonts.${readings.words}`)}</span>
+                  <FontPicker value={ruby[language] ?? ''} onChange={(family) => setRuby(language, family)} label={`${name} · ${t(`fork.fonts.${readings.words}`)}`} sample={readings.sample ?? scriptSample(language)} />
                 </label>
               )}
             </div>

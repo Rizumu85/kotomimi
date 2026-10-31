@@ -1846,6 +1846,7 @@
       "languages": "Conversation text, by language",
       "text": "Text",
       "reading": "Readings above the text",
+      "pinyin": "Pinyin above the text",
       "add": "Add a language…",
       "remove": "Reset {{language}}"
     },

@@ -1846,6 +1846,7 @@
       "languages": "對話文字，按語言設定",
       "text": "正文",
       "reading": "上方的注音假名",
+      "pinyin": "上方的拼音",
       "add": "新增語言…",
       "remove": "恢復 {{language}} 的預設字型"
     },

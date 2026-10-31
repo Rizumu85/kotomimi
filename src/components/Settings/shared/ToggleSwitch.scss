@@ -71,6 +71,9 @@
       }
 
       .toggle-track {
+        // A layer of its own: on a scaled screen the track and its thumb were each rounded to the pixel by where the
+        // row fell, and the thumb sat a pixel high in one switch and a pixel low in the next (seen at 135%, 2026-10-31).
+        will-change: transform;
         position: absolute;
         cursor: pointer;
         top: 0;

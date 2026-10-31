@@ -109,8 +109,7 @@
     }
 
     &.is-active {
-      color: vars.$color-on-primary;
-      background: vars.$color-primary-fill;
+      @include vars.state-selected-fill;
     }
 
     &:disabled {

@@ -21,7 +21,7 @@ export interface FontPickerProps {
   onChange(family: string): void;
   /** What the picker chooses a font for: its accessible name. */
   label: string;
-  /** A few characters of the script this font must write (`scriptSample`); Latin letters ask nothing of a font. */
+  /** A few characters this font must write (`scriptSample`); plain Latin letters ask nothing of a font. */
   sample: string;
   disabled?: boolean;
 }
@@ -37,7 +37,8 @@ export function FontPicker({ value, onChange, label, sample, disabled = false }:
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
   const list = useRef<HTMLDivElement | null>(null);
-  const latin = /^[\u0000-ɏ]*$/.test(sample);
+  // Plain letters ask nothing of a font; a tone mark does (pinyin), as a script does.
+  const latin = /^[\u0000-\u007f]*$/.test(sample);
 
   const { refs, floatingStyles, context } = useFloating({
     open,

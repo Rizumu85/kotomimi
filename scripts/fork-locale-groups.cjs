@@ -317,6 +317,7 @@ module.exports = {
     languages: ['Conversation text, by language', '对话文字，按语言设置', '對話文字，按語言設定'],
     text: ['Text', '正文', '正文'],
     reading: ['Readings above the text', '上方的注音假名', '上方的注音假名'],
+    pinyin: ['Pinyin above the text', '上方的拼音', '上方的拼音'],
     add: ['Add a language…', '添加语言…', '新增語言…'],
     remove: ['Reset {{language}}', '恢复 {{language}} 的默认字体', '恢復 {{language}} 的預設字型'],
   },

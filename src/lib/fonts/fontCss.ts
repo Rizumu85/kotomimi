@@ -7,7 +7,8 @@
  *   its sounds, and often wanted in another face than the letters of a name
  *   in the middle of a sentence. Blank: it follows `latin`.
  * - `text[lang]`: conversation and subtitle text in one language.
- * - `ruby[lang]`: the readings drawn above that language's text (furigana).
+ * - `ruby[lang]`: the readings drawn above that language's text: furigana,
+ *   and pinyin.
  *
  * Conversation text is marked by its row (`data-kt-text`, with the row's
  * `lang`), so a rule here reaches every surface that draws it. A font is put
@@ -125,7 +126,7 @@ export function fontCss(settings: FontSettings): string {
     const ruby = f.ruby[lang] ?? '';
     const latinFirst = OTHER_SCRIPTS.has(lang.split('-')[0]);
     if (text) rules.push(`[${TEXT_MARK}]:lang(${lang}) { font-family: ${latinFirst ? stack(latin, text) : stack(text, latin)}; }`);
-    // A reading is the language's own script: its font first, then the text's.
+    // A reading has its font first, then the text's.
     if (ruby) rules.push(`[${TEXT_MARK}]:lang(${lang}) rt { font-family: ${stack(ruby, text)}; }`);
   }
   return rules.join('\n');
