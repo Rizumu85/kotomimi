@@ -98,7 +98,7 @@
     "glossaryOptional": "Optional",
     "glossaryAsIs": "As is",
     "glossarySearch": "Search",
-    "glossaryTooltip": "Written is how it shows in subtitles, heard as is what recognition gets wrong, and translated is its fixed translation. Changes apply from the next session.",
+    "glossaryTooltip": "Heard as is what recognition gets wrong, written is how it shows in subtitles, and translated is its fixed translation. Changes apply from the next session.",
     "glossaryTooltipLabel": "About personal glossary",
     "glossaryDelete": "Delete entry",
     "glossaryAdd": "Add",

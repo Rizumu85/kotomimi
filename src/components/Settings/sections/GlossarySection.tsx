@@ -33,14 +33,14 @@ function Cell({ value, commit, ...input }: Omit<InputHTMLAttributes<HTMLInputEle
   );
 }
 
-/** The row under the last: an entry is made as the row is left with something in its first cell, or on Enter. */
+/** The row under the last: an entry is made as the row is left with something in its written cell, or on Enter. */
 function NewRow({ onAdd }: { onAdd(): void }) {
   const { t } = useTranslation();
   const add = useGlossaryStore((state) => state.add);
   const [source, setSource] = useState('');
   const [aliases, setAliases] = useState('');
   const [target, setTarget] = useState('');
-  const first = useRef<HTMLInputElement>(null);
+  const written = useRef<HTMLInputElement>(null);
   const save = () => {
     if (!source.trim()) return false;
     add({ source, target, aliases: parseAliases(aliases) });
@@ -51,15 +51,15 @@ function NewRow({ onAdd }: { onAdd(): void }) {
     return true;
   };
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter' && save()) first.current?.focus();
+    if (event.key === 'Enter' && save()) written.current?.focus();
   };
   return (
     <tr
       className="glossary-new"
       onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) save(); }}
     >
-      <td><input ref={first} aria-label={t('settings.glossaryWritten')} placeholder={t('settings.glossaryAdd')} value={source} onChange={(event) => setSource(event.target.value)} onKeyDown={onKeyDown} /></td>
       <td><input aria-label={t('settings.glossaryHeard')} placeholder={t('settings.glossaryOptional')} value={aliases} onChange={(event) => setAliases(event.target.value)} onKeyDown={onKeyDown} /></td>
+      <td><input ref={written} aria-label={t('settings.glossaryWritten')} placeholder={t('settings.glossaryAdd')} value={source} onChange={(event) => setSource(event.target.value)} onKeyDown={onKeyDown} /></td>
       <td><input aria-label={t('settings.glossaryTranslated')} placeholder={t('settings.glossaryAsIs')} value={target} onChange={(event) => setTarget(event.target.value)} onKeyDown={onKeyDown} /></td>
       <td />
     </tr>
@@ -121,8 +121,8 @@ export function GlossarySection() {
         <table className="glossary-table">
           <thead>
             <tr>
-              <th scope="col">{t('settings.glossaryWritten')}</th>
               <th scope="col">{t('settings.glossaryHeard')}</th>
+              <th scope="col">{t('settings.glossaryWritten')}</th>
               <th scope="col">{t('settings.glossaryTranslated')}</th>
               <th aria-hidden="true" />
             </tr>
@@ -131,14 +131,14 @@ export function GlossarySection() {
             {shown.map((entry) => (
               <tr key={entry.id}>
                 <Cell
-                  aria-label={t('settings.glossaryWritten')}
-                  value={entry.source}
-                  commit={(text) => { if (text.trim()) update(entry.id, { source: text, target: entry.target === entry.source ? '' : entry.target }); }}
-                />
-                <Cell
                   aria-label={t('settings.glossaryHeard')}
                   value={entry.aliases.join(', ')}
                   commit={(text) => update(entry.id, { aliases: parseAliases(text) })}
+                />
+                <Cell
+                  aria-label={t('settings.glossaryWritten')}
+                  value={entry.source}
+                  commit={(text) => { if (text.trim()) update(entry.id, { source: text, target: entry.target === entry.source ? '' : entry.target }); }}
                 />
                 <Cell
                   aria-label={t('settings.glossaryTranslated')}

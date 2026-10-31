@@ -97,7 +97,7 @@
     "glossaryOptional": "选填",
     "glossaryAsIs": "原样",
     "glossarySearch": "搜索",
-    "glossaryTooltip": "写成是字幕里的写法，听成是常被听错的样子，译成是翻译时固定的说法。修改从下次开始会话时生效。",
+    "glossaryTooltip": "听成是常被听错的样子，写成是字幕里的写法，译成是翻译时固定的说法。修改从下次开始会话时生效。",
     "glossaryTooltipLabel": "关于个性化词典",
     "glossaryDelete": "删除条目",
     "glossaryAdd": "添加",
