@@ -39,7 +39,7 @@
       position: sticky;
       top: 0;
       z-index: 1;
-      padding: 6px 8px;
+      padding: 6px;
       background: vars.$bg-surface;
       color: vars.$text-tertiary;
       font-size: vars.$font-caption;
@@ -48,7 +48,7 @@
     }
 
     th:last-child,
-    td:last-child { width: 28px; padding: 0; }
+    td:last-child { width: 24px; padding: 0; }
 
     td { padding: 0; border-top: 1px solid vars.$border-subtle; }
     td + td { border-left: 1px solid vars.$border-subtle; }
@@ -61,12 +61,13 @@
     min-width: 0;
     box-sizing: border-box;
     height: 34px;
-    padding: 0 8px;
+    padding: 0 6px;
     border: 0;
     border-radius: 0;
     background: transparent;
     color: vars.$text-primary;
     font: inherit;
+    font-size: 13px;
     text-overflow: ellipsis;
 
     &::placeholder { color: vars.$text-muted; }
@@ -80,8 +81,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
+    width: 24px;
     height: 34px;
+    padding: 0;
     border: 0;
     background: transparent;
     color: vars.$text-muted;
