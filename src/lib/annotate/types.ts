@@ -21,11 +21,17 @@ export interface AnnotatedLine {
 /** The languages that have a reading aid here. */
 export type AnnotatedLanguage = 'ja' | 'ko' | 'ru' | 'uk' | 'zh';
 
+/** The ones with a romanization under them. */
+export const ROMANIZED_LANGUAGES = ['ja', 'ko', 'ru', 'uk'] as const;
+export type RomanizedLanguage = (typeof ROMANIZED_LANGUAGES)[number];
+
 export interface AnnotateOptions {
   /** Hiragana over kanji (Japanese only). */
   furigana: boolean;
   /** A romanization line under the text. */
   roman: boolean;
+  /** The languages that go without one all the same. */
+  romanOff?: readonly RomanizedLanguage[];
   /** Pinyin over each Han character of Chinese text. */
   pinyin?: boolean;
 }

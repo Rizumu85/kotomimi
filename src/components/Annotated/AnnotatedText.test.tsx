@@ -56,7 +56,7 @@ describe('conversation text with reading aids', () => {
     expect(off.container.querySelector('.plain')).not.toBeNull();
     set(true, true);
     const korean = render(<Row text="감사합니다" language="ko" />);
-    expect(korean.container.querySelector('.annot-roman')?.textContent).toBe('gamsahamnida');
+    expect(korean.container.querySelector('.annot-roman')?.textContent).toBe('gam-sa-ham-ni-da');
     const russian = render(<Row text="Спасибо" language="ru" />);
     expect(russian.container.querySelector('.annot-roman')?.textContent).toBe('Spasibo');
   });

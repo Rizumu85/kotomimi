@@ -1692,7 +1692,7 @@
   "fork": {
     "sourceItalic": "Source text in italics",
     "furigana": "Furigana over kanji (Japanese)",
-    "romanization": "Romanization (Japanese, Korean, Russian, Ukrainian)",
+    "romanization": "Romanization",
     "pinyin": "Pinyin over Chinese",
     "echoCancellationApp": "Kotomimi only",
     "echoCancellationAppTooltip": "Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",

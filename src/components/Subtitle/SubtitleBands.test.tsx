@@ -233,6 +233,14 @@ describe('SubtitleBody — compact: the fork\u2019s lanes', () => {
     expect(onHeight).toHaveBeenCalledTimes(2);
     expect((onHeight.mock.calls[1] as [number, number])[0]).toBeGreaterThan(height);
   });
+
+  it('keeps the room for the answer\'s readings from the start: the window is not made higher at the first one (fork)', () => {
+    const onHeight = vi.fn();
+    const heard = { onHeight, pair: { source: 'en', target: 'ja' }, legs: ['speaker'] } as const;
+    const { rerender } = render(<SubtitleBody {...props({ ...heard, entries: [] })} />);
+    rerender(<SubtitleBody {...props(heard)} />);
+    expect(onHeight).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('SubtitleBody — expanded', () => {

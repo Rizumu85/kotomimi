@@ -24,11 +24,12 @@ export function useAnnotation(text: string, language: string | null | undefined,
   // its pieces with readings, and one romanization under the whole: `Correction.tsx`).
   const furigana = useAnnotationStore((s) => s.furigana) && only !== 'roman';
   const roman = useAnnotationStore((s) => s.romanization) && only !== 'readings';
+  const romanOff = useAnnotationStore((s) => s.romanizationOff);
   const pinyinOn = useAnnotationStore((s) => s.pinyin);
   const pinyin = pinyinOn && only !== 'roman';
   const hint = annotatedLanguage(language);
   const chinese = isChinese(language);
-  const wantsJapanese = needsJapanese(text, { furigana, roman, language: hint, chinese });
+  const wantsJapanese = needsJapanese(text, { furigana, roman, romanOff, language: hint, chinese });
   // The snapshot is the tokenizer alone: a load that fails changes nothing a row draws, so it re-renders none.
   const japanese = useSyncExternalStore(subscribeJapanese, japaneseTokenizer, japaneseTokenizer);
   useEffect(() => {
@@ -36,10 +37,10 @@ export function useAnnotation(text: string, language: string | null | undefined,
   }, [wantsJapanese]);
   return useMemo(() => {
     if (!furigana && !roman && !pinyin) return null;
-    const annotated = annotateText(text, { furigana, roman, pinyin, language: hint, chinese, japanese });
+    const annotated = annotateText(text, { furigana, roman, romanOff, pinyin, language: hint, chinese, japanese });
     const lines = growing ? holdLastReading(annotated) : annotated;
     return lines.some((line) => line.roman !== undefined || line.parts.some((part) => part.ruby !== undefined)) ? lines : null;
-  }, [text, furigana, roman, pinyin, hint, chinese, japanese, growing]);
+  }, [text, furigana, roman, romanOff, pinyin, hint, chinese, japanese, growing]);
 }
 
 export interface AnnotatedLinesProps {

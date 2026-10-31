@@ -30,6 +30,8 @@ export interface SubtitleBodyProps {
   legs?: readonly LegName[];
   /** Fork: told the height the compact view is laid out for and the least it can be squeezed into, whenever either changes: the window is fitted to the one and held above the other. */
   onHeight?(height: number, least: number): void;
+  /** The run's languages, for the room the lanes keep for reading aids. */
+  pair?: { source: string; target: string };
 }
 
 const NO_REPLAY: ReadonlySet<LegName> = new Set();
@@ -45,7 +47,7 @@ const noReplay = () => {};
  * for both (`--subtitle-*` for the lanes, `--conversation-*` for the list).
  */
 export function SubtitleBody(props: SubtitleBodyProps) {
-  const { lit, compact, fontSize, filters, sourceTextColor, translationTextColor, bgOpacity, notes, noticeAction, onHeight } = props;
+  const { lit, compact, fontSize, filters, sourceTextColor, translationTextColor, bgOpacity, notes, noticeAction, onHeight, pair } = props;
   // The panel notes join the expanded list only (the same merge MainPanel does).
   const listed = useMemo(
     () => (compact || !notes || notes.length === 0 ? props.entries : [...props.entries, ...notes]),
@@ -86,7 +88,7 @@ export function SubtitleBody(props: SubtitleBodyProps) {
   return (
     <div className={`subtitle-stream ${compact ? 'compact' : 'expanded'}`} data-align={align} data-edge={edged} data-panel={panel} style={style}>
       {compact ? (
-        <SubtitleLanes entries={entries} lit={lit} legs={legs} filters={filters} fontSize={fontSize} onHeight={onHeight} />
+        <SubtitleLanes entries={entries} lit={lit} legs={legs} filters={filters} fontSize={fontSize} onHeight={onHeight} pair={pair} />
       ) : (
         <ConversationList
           items={items}

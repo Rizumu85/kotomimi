@@ -82,9 +82,14 @@ export function romanizedLanguage(code: string | null | undefined): boolean {
  * Fork: whether a text has a romanization written under it. By its language where that is known, and by its writing
  * where not — a recognizer that names none, or names it only with the final: reading aids go by the writing, and
  * asked of the language alone a Korean sentence had its romanization and nothing laid out for it (2026-10-31).
+ * `off`: the languages the user has none under.
  */
-export function romanizedText(text: string, code: string | null | undefined): boolean {
-  return romanizedLanguage(code) || scriptLanguage(text) !== null;
+export function romanizedText(text: string, code: string | null | undefined, off: readonly string[] = []): boolean {
+  const language = annotatedLanguage(code);
+  const script = scriptLanguage(text);
+  // Cyrillic is Russian by its letters and Ukrainian by its row, as `languageOf` reads it.
+  const read = script === 'ru' && language === 'uk' ? 'uk' : script ?? language;
+  return read !== null && read !== 'zh' && !off.includes(read);
 }
 
 export function annotatedLanguage(code: string | null | undefined): AnnotatedLanguage | null {

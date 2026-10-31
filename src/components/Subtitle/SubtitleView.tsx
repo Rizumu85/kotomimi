@@ -251,12 +251,16 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
   // height again.
   const lanesShown = running && subtitle.compactMode;
   const romanization = useAnnotationStore((state) => state.romanization);
+  const romanOff = useAnnotationStore((state) => state.romanizationOff);
+  const furigana = useAnnotationStore((state) => state.furigana);
+  const pinyin = useAnnotationStore((state) => state.pinyin);
+  const pair = session?.pair ?? undefined;
   useEffect(() => {
     if (surface !== 'electron' || lanesShown) return;
-    const resting = !running && subtitle.compactMode && fitsWindow ? restingHeights(laneLegs, filters, subtitle.fontSize, romanization) : null;
+    const resting = !running && subtitle.compactMode && fitsWindow ? restingHeights(laneLegs, filters, subtitle.fontSize, { romanization, romanOff, furigana, pinyin }, pair) : null;
     if (resting) fitWindow(resting.height, resting.least);
     else void window.electron?.invoke?.('subtitle:fit-height', { least: 0 })?.catch?.(() => {});
-  }, [surface, lanesShown, running, subtitle.compactMode, subtitle.fontSize, fitsWindow, fitWindow, laneLegs, filters, romanization]);
+  }, [surface, lanesShown, running, subtitle.compactMode, subtitle.fontSize, fitsWindow, fitWindow, laneLegs, filters, romanization, romanOff, furigana, pinyin, pair]);
 
   return (
     <div ref={chrome.rootRef} {...rootProps}>
@@ -308,6 +312,7 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
             noticeAction={noticeAction}
             legs={laneLegs}
             onHeight={fitWindow}
+            pair={pair}
           />
         )
       ) : (

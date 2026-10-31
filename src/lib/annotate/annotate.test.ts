@@ -51,6 +51,10 @@ describe('the script a line is written in', () => {
     for (const code of ['auto', undefined]) expect(romanizedText('안녕하세요', code), String(code)).toBe(true);
     expect(romanizedText('今天天气真好', 'auto')).toBe(false);
     expect(romanizedText('今日', 'ja')).toBe(true);
+    expect(romanizedText('今日', 'ja', ['ja'])).toBe(false);
+    expect(romanizedText('안녕하세요', 'ja', ['ja'])).toBe(true);
+    expect(romanizedText('Привет', 'uk', ['uk'])).toBe(false);
+    expect(romanizedText('Привет', 'uk', ['ru'])).toBe(true);
   });
 
   it('has a romanization written under it in Japanese, Korean, Russian and Ukrainian, not in Chinese (fork)', () => {
@@ -110,8 +114,17 @@ describe('a Japanese sentence', () => {
 
 describe('Korean and Russian', () => {
   it('romanizes Korean by pronunciation and keeps what is not Hangul', () => {
-    expect(romanizeKorean('안녕하세요, 만나서 반갑습니다.')).toBe('annyeonghaseyo, mannaseo bangapseumnida.');
-    expect(romanizeKorean('백마')).toBe('baengma');
+    expect(romanizeKorean('안녕하세요, 만나서 반갑습니다.')).toBe('an-nyeong-ha-se-yo, man-na-seo ban-gap-seum-ni-da.');
+    expect(romanizeKorean('백마')).toBe('baeng-ma');
+    expect(romanizeKorean('K팝 스타')).toBe('Kpap seu-ta');
+  });
+
+  it('writes Korean syllable by syllable as said: ng stays where it is, and a final goes over to the vowel after it (fork)', () => {
+    expect(romanizeKorean('강아지')).toBe('gang-a-ji');
+    expect(romanizeKorean('한국어')).toBe('han-gu-geo');
+    expect(romanizeKorean('먹었어요')).toBe('meo-geo-sseo-yo');
+    expect(romanizeKorean('신라')).toBe('sil-la');
+    expect(romanizeKorean('별로')).toBe('byeol-lo');
   });
 
   it('transliterates Russian letter by letter, keeping case and punctuation', () => {
@@ -159,9 +172,18 @@ describe('a text, line by line', () => {
   });
 
   it('gives Korean and Russian a romanization line, and only when it is asked for', () => {
-    expect(annotateLine('감사합니다', o(null))).toEqual({ parts: [{ text: '감사합니다' }], roman: 'gamsahamnida' });
+    expect(annotateLine('감사합니다', o(null))).toEqual({ parts: [{ text: '감사합니다' }], roman: 'gam-sa-ham-ni-da' });
     expect(annotateLine('Спасибо', o('ru'))).toEqual({ parts: [{ text: 'Спасибо' }], roman: 'Spasibo' });
     expect(annotateLine('감사합니다', o(null, { furigana: true, roman: false }))).toEqual({ parts: [{ text: '감사합니다' }] });
+  });
+
+  it('leaves out the languages the user has none under, and the others keep theirs (fork)', () => {
+    const off = { ...o(null), romanOff: ['ja'] as const };
+    expect(annotateLine('감사합니다', off).roman).toBe('gam-sa-ham-ni-da');
+    expect(annotateLine('감사합니다', { ...o(null), romanOff: ['ko'] })).toEqual({ parts: [{ text: '감사합니다' }] });
+    expect(annotateLine('Спасибо', { ...o('ru'), romanOff: ['ru'] })).toEqual({ parts: [{ text: 'Спасибо' }] });
+    expect(needsJapanese('今日は', { furigana: false, roman: true, romanOff: ['ja'], language: null })).toBe(false);
+    expect(needsJapanese('今日は', { furigana: true, roman: true, romanOff: ['ja'], language: null })).toBe(true);
   });
 
   it('draws Japanese plain until the dictionary has loaded', () => {

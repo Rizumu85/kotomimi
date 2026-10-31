@@ -15,7 +15,7 @@ import { romanizeKorean } from './korean';
 import { transliterateRussian } from './russian';
 import { transliterateUkrainian } from './ukrainian';
 import { explainsInChinese, KANJI, quotesJapanese, scriptLanguage } from './script';
-import type { AnnotatedLanguage, AnnotatedLine, AnnotateOptions, JapaneseTokenizer } from './types';
+import type { AnnotatedLanguage, AnnotatedLine, AnnotateOptions, JapaneseTokenizer, RomanizedLanguage } from './types';
 
 export interface AnnotateInputs extends AnnotateOptions {
   /** The row's language when it is one of the annotated ones; null when it is another, or mixed. */
@@ -38,12 +38,16 @@ function languageOf(line: string, o: Pick<AnnotateInputs, 'language' | 'chinese'
 
 const plain = (line: string): AnnotatedLine => ({ parts: [{ text: line }] });
 
+const romanFor = (language: AnnotatedLanguage | null, o: Pick<AnnotateOptions, 'roman' | 'romanOff'>): boolean =>
+  o.roman && !(language && o.romanOff?.includes(language as RomanizedLanguage));
+
 export function annotateLine(line: string, o: AnnotateInputs): AnnotatedLine {
   if (!o.furigana && !o.roman && !o.pinyin) return plain(line);
   const language = languageOf(line, o);
   if (language === 'zh') return o.pinyin ? { parts: annotateChinese(line) } : plain(line);
-  if (language === 'ja') return o.japanese && (o.furigana || o.roman) ? annotateJapanese(line, o.japanese, o) : plain(line);
-  if (!o.roman) return plain(line);
+  const roman = romanFor(language, o);
+  if (language === 'ja') return o.japanese && (o.furigana || roman) ? annotateJapanese(line, o.japanese, { ...o, roman }) : plain(line);
+  if (!roman) return plain(line);
   if (language === 'ko') return { parts: [{ text: line }], roman: romanizeKorean(line) };
   if (language === 'ru') return { parts: [{ text: line }], roman: transliterateRussian(line) };
   if (language === 'uk') return { parts: [{ text: line }], roman: transliterateUkrainian(line) };
@@ -66,8 +70,8 @@ export function romanStretches(text: string, o: Pick<AnnotateInputs, 'language' 
 }
 
 /** Whether annotating this text needs the Japanese dictionary: it is asked for, and a line of it would be read as Japanese. */
-export function needsJapanese(text: string, o: Pick<AnnotateInputs, 'furigana' | 'roman' | 'language' | 'chinese'>): boolean {
-  if (!o.furigana && !o.roman) return false;
+export function needsJapanese(text: string, o: Pick<AnnotateInputs, 'furigana' | 'roman' | 'romanOff' | 'language' | 'chinese'>): boolean {
+  if (!o.furigana && !romanFor('ja', o)) return false;
   return text.split('\n').some((line) => languageOf(line, o) === 'ja');
 }
 

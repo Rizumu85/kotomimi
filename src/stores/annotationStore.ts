@@ -10,12 +10,15 @@
  */
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
+import { ROMANIZED_LANGUAGES, type RomanizedLanguage } from '../lib/annotate/types';
 
 interface AnnotationState {
   /** Hiragana over kanji in Japanese text. On by default: it changes nothing but Japanese. */
   furigana: boolean;
   /** A line in Latin letters under Japanese, Korean, Russian and Ukrainian text. */
   romanization: boolean;
+  /** The languages with `romanization` on and none under them all the same: a reader of kana who still spells out Korean. */
+  romanizationOff: readonly RomanizedLanguage[];
   /** Pinyin over Chinese text. Off by default: most who read this app's Chinese need no help with it. */
   pinyin: boolean;
   /**
@@ -26,6 +29,7 @@ interface AnnotationState {
   sourceItalic: boolean;
   setFurigana: (on: boolean) => Promise<void>;
   setRomanization: (on: boolean) => Promise<void>;
+  setRomanized: (language: RomanizedLanguage, on: boolean) => Promise<void>;
   setPinyin: (on: boolean) => Promise<void>;
   setSourceItalic: (on: boolean) => Promise<void>;
   /** Called once at app boot (`src/routes/Home.tsx`). */
@@ -53,7 +57,7 @@ function slant(on: boolean): void {
   document.documentElement.style.setProperty(SOURCE_FONT_STYLE, on ? 'italic' : 'normal');
   document.documentElement.style.setProperty(SOURCE_RUBY_LEAN, on ? RUBY_LEAN : '0');
 }
-const KEY = (field: Field) => `settings.common.annotation.${field}`;
+const KEY = (field: Field | 'romanizationOff') => `settings.common.annotation.${field}`;
 
 export const useAnnotationStore = create<AnnotationState>()(
   subscribeWithSelector((set, get) => {
@@ -65,21 +69,31 @@ export const useAnnotationStore = create<AnnotationState>()(
     };
     return {
       ...DEFAULTS,
+      romanizationOff: [],
       setFurigana: write('furigana'),
       setRomanization: write('romanization'),
+      setRomanized: async (language, on) => {
+        const previous = get().romanizationOff;
+        const romanizationOff = on ? previous.filter((other) => other !== language) : [...previous, language];
+        set({ romanizationOff });
+        const { persistSetting } = await import('../services/persistSetting');
+        if (!(await persistSetting(KEY('romanizationOff'), romanizationOff))) set({ romanizationOff: previous });
+      },
       setPinyin: write('pinyin'),
       setSourceItalic: write('sourceItalic'),
       hydrate: async () => {
         const { ServiceFactory } = await import('../services/ServiceFactory');
         const service = ServiceFactory.getSettingsService();
-        const [furigana, romanization, pinyin, sourceItalic] = await Promise.all([
+        const [furigana, romanization, romanizationOff, pinyin, sourceItalic] = await Promise.all([
           service.getSetting(KEY('furigana'), DEFAULTS.furigana),
           service.getSetting(KEY('romanization'), DEFAULTS.romanization),
+          service.getSetting<unknown>(KEY('romanizationOff'), []),
           service.getSetting(KEY('pinyin'), DEFAULTS.pinyin),
           service.getSetting(KEY('sourceItalic'), DEFAULTS.sourceItalic),
         ]);
         // Only a stored "off" turns the slant off: anything else is the default.
-        set({ furigana: furigana === true, romanization: romanization === true, pinyin: pinyin === true, sourceItalic: sourceItalic !== false });
+        const off = Array.isArray(romanizationOff) ? ROMANIZED_LANGUAGES.filter((language) => romanizationOff.includes(language)) : [];
+        set({ furigana: furigana === true, romanization: romanization === true, romanizationOff: off, pinyin: pinyin === true, sourceItalic: sourceItalic !== false });
       },
     };
   }),

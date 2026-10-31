@@ -1692,7 +1692,7 @@
   "fork": {
     "sourceItalic": "原文用斜体",
     "furigana": "汉字上方显示假名（日语）",
-    "romanization": "显示罗马音（日语、韩语、俄语、乌克兰语）",
+    "romanization": "显示罗马音",
     "pinyin": "中文上方显示拼音",
     "echoCancellationApp": "仅 Kotomimi",
     "echoCancellationAppTooltip": "仅 Kotomimi — 只消掉 Kotomimi 自己播放的翻译语音。麦克风是虚拟声卡（VB-Cable、BlackHole 等）时选这一项。",

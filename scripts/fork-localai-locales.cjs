@@ -613,7 +613,7 @@ const PROVIDER = {
 const FORK = {
   sourceItalic: ['Source text in italics', '原文用斜体', '原文用斜體'],
   furigana: ['Furigana over kanji (Japanese)', '汉字上方显示假名（日语）', '漢字上方顯示假名（日語）'],
-  romanization: ['Romanization (Japanese, Korean, Russian, Ukrainian)', '显示罗马音（日语、韩语、俄语、乌克兰语）', '顯示羅馬拼音（日語、韓語、俄語、烏克蘭語）'],
+  romanization: ['Romanization', '显示罗马音', '顯示羅馬拼音'],
   pinyin: ['Pinyin over Chinese', '中文上方显示拼音', '中文上方顯示拼音'],
   // Upstream's echo cancellation choice names its own product; in this build it is Kotomimi.
   echoCancellationApp: ['Kotomimi only', '仅 Kotomimi', '僅 Kotomimi'],

@@ -1,3 +1,6 @@
+@use '../../styles/tokens' as tk;
+@use '../Settings/shared/variables' as vars;
+
 // Fork: the reading aids at the foot of the display popover (ReadingAidToggles.tsx). The popover spaces its rows by
 // a margin under each; a switch brings a margin of its own above it. Here the two are set so the gaps read as the
 // rows above them do, and the last row ends where the popover's own padding does.
@@ -10,6 +13,36 @@
 
   .toggle-switch-component {
     margin-top: 0;
+  }
+}
+
+// The romanization's languages, under its switch.
+.reading-aid-languages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: -4px;
+}
+
+.reading-aid-language {
+  padding: 4px 9px;
+  border: 1px solid vars.$border-subtle;
+  border-radius: 999px;
+  font: inherit;
+  font-size: vars.$font-caption;
+  line-height: 1;
+  color: vars.$text-tertiary;
+  background: transparent;
+  cursor: pointer;
+
+  &:hover {
+    color: vars.$text-secondary;
+  }
+
+  &.is-on {
+    border-color: transparent;
+    color: tk.$color-primary;
+    background: color-mix(in srgb, tk.$color-primary 15%, transparent);
   }
 }
 

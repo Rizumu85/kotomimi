@@ -266,8 +266,11 @@ export const ROMAN_LINE = 0.95;
 /** A spacing whose small lines each have a line of romanization under them: a pair's, and the row's where `row`. */
 export const withRoman = (spacing: LaneSpacing, pair = true, row = pair): LaneSpacing => ({ ...spacing, roman: pair ? ROMAN_LINE : 0, rowRoman: row ? ROMAN_LINE : 0 });
 
-/** A line of the answer with readings written above it: what they take in the app's fonts. */
-export const READ_LINE = 2;
+/**
+ * A line of the answer with readings written above it: what they take in the app's fonts. Less, and the line comes out
+ * higher than it is laid out for, and a rolled line lost the top of its pinyin, tone marks and all (seen 2026-10-31).
+ */
+export const READ_LINE = 2.12;
 /**
  * Fork: a spacing whose answer's lines have readings above them, or a romanization under them. Laid out for a bare
  * line, a second line of Chinese lost the pinyin of its first, and a squeezed strip showed a Korean answer's
