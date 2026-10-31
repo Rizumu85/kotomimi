@@ -96,6 +96,7 @@
     "glossaryTranslated": "ترجمه",
     "glossaryOptional": "اختیاری",
     "glossaryAsIs": "بدون تغییر",
+    "glossarySearch": "جستجو",
     "glossaryTooltip": "نوشتار شکل آن در زیرنویس است، شنیده می‌شود همان چیزی است که تشخیص اشتباه می‌گیرد و ترجمه معادل ثابت آن است. تغییرات از جلسه بعد اعمال می‌شود.",
     "glossaryTooltipLabel": "About personal glossary",
     "glossaryDelete": "Delete entry",

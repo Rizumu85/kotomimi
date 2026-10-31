@@ -96,6 +96,7 @@
     "glossaryTranslated": "Перевод",
     "glossaryOptional": "Необязательно",
     "glossaryAsIs": "Как есть",
+    "glossarySearch": "Поиск",
     "glossaryTooltip": "Написание — форма в субтитрах, «слышится как» — то, что распознавание путает, перевод — постоянный перевод. Изменения применятся со следующего сеанса.",
     "glossaryTooltipLabel": "About personal glossary",
     "glossaryDelete": "Delete entry",

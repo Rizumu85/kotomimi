@@ -96,6 +96,7 @@
     "glossaryTranslated": "Traduction",
     "glossaryOptional": "Facultatif",
     "glossaryAsIs": "Tel quel",
+    "glossarySearch": "Rechercher",
     "glossaryTooltip": "Écriture : la forme dans les sous-titres. Entendu : ce que la reconnaissance comprend mal. Traduction : la traduction fixe. Les modifications s’appliquent à la prochaine session.",
     "glossaryTooltipLabel": "About personal glossary",
     "glossaryDelete": "Delete entry",

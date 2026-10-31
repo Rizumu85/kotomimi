@@ -96,6 +96,7 @@
     "glossaryTranslated": "Översättning",
     "glossaryOptional": "Valfritt",
     "glossaryAsIs": "Oförändrat",
+    "glossarySearch": "Sök",
     "glossaryTooltip": "Skrivs är formen i undertexten, hörs som är det igenkänningen uppfattar fel och översättning är den fasta översättningen. Ändringar gäller från nästa session.",
     "glossaryTooltipLabel": "About personal glossary",
     "glossaryDelete": "Delete entry",

@@ -96,6 +96,7 @@
     "glossaryTranslated": "Bản dịch",
     "glossaryOptional": "Tùy chọn",
     "glossaryAsIs": "Giữ nguyên",
+    "glossarySearch": "Tìm kiếm",
     "glossaryTooltip": "Cách viết là dạng trong phụ đề, nghe thành là từ thường bị nhận sai, bản dịch là cách dịch cố định. Thay đổi có hiệu lực từ phiên tiếp theo.",
     "glossaryTooltipLabel": "About personal glossary",
     "glossaryDelete": "Delete entry",

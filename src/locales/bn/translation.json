@@ -96,6 +96,7 @@
     "glossaryTranslated": "অনুবাদ",
     "glossaryOptional": "ঐচ্ছিক",
     "glossaryAsIs": "যেমন আছে",
+    "glossarySearch": "খুঁজুন",
     "glossaryTooltip": "লেখা হলো সাবটাইটেলে যেভাবে দেখায়, শোনা যায় হলো যেভাবে ভুল শনাক্ত হয়, আর অনুবাদ হলো নির্দিষ্ট অনুবাদ। পরিবর্তন পরের সেশন থেকে কার্যকর হবে।",
     "glossaryTooltipLabel": "About personal glossary",
     "glossaryDelete": "Delete entry",

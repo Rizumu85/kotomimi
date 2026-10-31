@@ -96,6 +96,7 @@
     "glossaryTranslated": "번역",
     "glossaryOptional": "선택",
     "glossaryAsIs": "그대로",
+    "glossarySearch": "검색",
     "glossaryTooltip": "표기는 자막에 쓰이는 형태, 잘못 들림은 자주 틀리게 인식되는 형태, 번역은 고정된 번역입니다. 변경 사항은 다음 세션부터 적용됩니다.",
     "glossaryTooltipLabel": "About personal glossary",
     "glossaryDelete": "Delete entry",

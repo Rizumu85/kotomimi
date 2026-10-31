@@ -96,6 +96,7 @@
     "glossaryTranslated": "Käännös",
     "glossaryOptional": "Valinnainen",
     "glossaryAsIs": "Ennallaan",
+    "glossarySearch": "Hae",
     "glossaryTooltip": "Kirjoitusasu näkyy tekstityksessä, kuullaan on se, minkä tunnistus ymmärtää väärin, ja käännös on kiinteä käännös. Muutokset tulevat voimaan seuraavasta istunnosta.",
     "glossaryTooltipLabel": "About personal glossary",
     "glossaryDelete": "Delete entry",

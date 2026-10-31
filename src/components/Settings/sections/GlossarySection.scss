@@ -22,6 +22,27 @@
     font-weight: 400;
   }
 
+  .glossary-search {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    margin-top: vars.$space-2;
+    padding: 0 8px;
+    border: 1px solid vars.$border-default;
+    border-radius: vars.$radius-sm;
+    background: vars.$bg-control;
+    color: vars.$text-muted;
+
+    &:focus-within { border-color: vars.$color-primary; }
+
+    input {
+      height: 28px;
+      padding: 0;
+      &:hover, &:focus { outline: none; background: transparent; }
+    }
+  }
+
   .glossary-scroll {
     max-height: 340px;
     overflow-y: auto;
@@ -53,6 +74,15 @@
     td { padding: 0; border-top: 1px solid vars.$border-subtle; }
     td + td { border-left: 1px solid vars.$border-subtle; }
     td:last-child { border-left: 0; }
+
+    // The way in stays in view however long the list is.
+    tfoot td {
+      position: sticky;
+      bottom: 0;
+      z-index: 1;
+      background: vars.$bg-page;
+      box-shadow: inset 0 1px 0 vars.$border-subtle;
+    }
   }
 
   input {

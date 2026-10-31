@@ -96,6 +96,7 @@
     "glossaryTranslated": "Tradução",
     "glossaryOptional": "Opcional",
     "glossaryAsIs": "Como está",
+    "glossarySearch": "Buscar",
     "glossaryTooltip": "Escrita é a forma nas legendas, ouvido como é o que o reconhecimento erra e tradução é a tradução fixa. As alterações valem a partir da próxima sessão.",
     "glossaryTooltipLabel": "About personal glossary",
     "glossaryDelete": "Delete entry",

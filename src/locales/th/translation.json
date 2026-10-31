@@ -96,6 +96,7 @@
     "glossaryTranslated": "คำแปล",
     "glossaryOptional": "ไม่บังคับ",
     "glossaryAsIs": "ตามเดิม",
+    "glossarySearch": "ค้นหา",
     "glossaryTooltip": "คำเขียนคือรูปในคำบรรยาย ได้ยินเป็นคือคำที่ระบบรู้จำผิด และคำแปลคือคำแปลที่กำหนดไว้ การเปลี่ยนแปลงมีผลตั้งแต่เซสชันถัดไป",
     "glossaryTooltipLabel": "About personal glossary",
     "glossaryDelete": "Delete entry",

@@ -96,6 +96,7 @@
     "glossaryTranslated": "訳語",
     "glossaryOptional": "任意",
     "glossaryAsIs": "そのまま",
+    "glossarySearch": "検索",
     "glossaryTooltip": "表記は字幕での書き方、聞き間違いはよく誤認識される形、訳語は固定の訳です。変更は次のセッションから反映されます。",
     "glossaryTooltipLabel": "About personal glossary",
     "glossaryDelete": "Delete entry",

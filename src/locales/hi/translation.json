@@ -96,6 +96,7 @@
     "glossaryTranslated": "अनुवाद",
     "glossaryOptional": "वैकल्पिक",
     "glossaryAsIs": "जैसा है",
+    "glossarySearch": "खोजें",
     "glossaryTooltip": "लिखावट उपशीर्षक का रूप है, सुनाई देता है वह जो पहचान में गलत आता है, और अनुवाद तय अनुवाद है। बदलाव अगले सत्र से लागू होंगे।",
     "glossaryTooltipLabel": "About personal glossary",
     "glossaryDelete": "Delete entry",

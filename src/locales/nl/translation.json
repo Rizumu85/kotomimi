@@ -96,6 +96,7 @@
     "glossaryTranslated": "Vertaling",
     "glossaryOptional": "Optioneel",
     "glossaryAsIs": "Ongewijzigd",
+    "glossarySearch": "Zoeken",
     "glossaryTooltip": "Schrijfwijze is de vorm in de ondertiteling, gehoord als is wat de herkenning verkeerd verstaat, vertaling is de vaste vertaling. Wijzigingen gelden vanaf de volgende sessie.",
     "glossaryTooltipLabel": "About personal glossary",
     "glossaryDelete": "Delete entry",

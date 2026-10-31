@@ -96,6 +96,7 @@
     "glossaryTranslated": "Çeviri",
     "glossaryOptional": "İsteğe bağlı",
     "glossaryAsIs": "Olduğu gibi",
+    "glossarySearch": "Ara",
     "glossaryTooltip": "Yazılış altyazıdaki biçim, duyulan tanımanın yanlış anladığı şey, çeviri ise sabit çeviridir. Değişiklikler sonraki oturumdan itibaren geçerli olur.",
     "glossaryTooltipLabel": "About personal glossary",
     "glossaryDelete": "Delete entry",

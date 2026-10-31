@@ -96,6 +96,7 @@
     "glossaryTranslated": "Переклад",
     "glossaryOptional": "Необов’язково",
     "glossaryAsIs": "Як є",
+    "glossarySearch": "Пошук",
     "glossaryTooltip": "Написання — форма в субтитрах, «чується як» — те, що розпізнавання плутає, переклад — сталий переклад. Зміни застосуються з наступного сеансу.",
     "glossaryTooltipLabel": "About personal glossary",
     "glossaryDelete": "Delete entry",

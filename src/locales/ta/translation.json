@@ -96,6 +96,7 @@
     "glossaryTranslated": "மொழிபெயர்ப்பு",
     "glossaryOptional": "விருப்பம்",
     "glossaryAsIs": "அப்படியே",
+    "glossarySearch": "தேடு",
     "glossaryTooltip": "எழுத்து என்பது வசனத்தில் தெரியும் வடிவம், கேட்பது என்பது தவறாக அறியப்படுவது, மொழிபெயர்ப்பு என்பது நிலையான மொழிபெயர்ப்பு. மாற்றங்கள் அடுத்த அமர்விலிருந்து பொருந்தும்.",
     "glossaryTooltipLabel": "About personal glossary",
     "glossaryDelete": "Delete entry",

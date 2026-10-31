@@ -1,10 +1,13 @@
-import { BookOpen, CircleHelp, X } from 'lucide-react';
-import { useRef, useState, type InputHTMLAttributes, type KeyboardEvent } from 'react';
+import { BookOpen, CircleHelp, Search, X } from 'lucide-react';
+import { useEffect, useRef, useState, type InputHTMLAttributes, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import Tooltip from '../../Tooltip/Tooltip';
 import { MAX_GLOSSARY_ENTRIES, parseAliases } from '../../../lib/glossary/glossary';
 import { useGlossaryStore } from '../../../stores/glossaryStore';
 import './GlossarySection.scss';
+
+/** Past this the list scrolls, and a term is quicker found than looked for. */
+const SEARCH_FROM = 9;
 
 const blurOnEnter = (event: KeyboardEvent<HTMLInputElement>) => {
   if (event.key === 'Enter') event.currentTarget.blur();
@@ -31,7 +34,7 @@ function Cell({ value, commit, ...input }: Omit<InputHTMLAttributes<HTMLInputEle
 }
 
 /** The row under the last: an entry is made as the row is left with something in its first cell, or on Enter. */
-function NewRow() {
+function NewRow({ onAdd }: { onAdd(): void }) {
   const { t } = useTranslation();
   const add = useGlossaryStore((state) => state.add);
   const [source, setSource] = useState('');
@@ -41,6 +44,7 @@ function NewRow() {
   const save = () => {
     if (!source.trim()) return false;
     add({ source, target, aliases: parseAliases(aliases) });
+    onAdd();
     setSource('');
     setAliases('');
     setTarget('');
@@ -68,6 +72,18 @@ export function GlossarySection() {
   const entries = useGlossaryStore((state) => state.entries);
   const update = useGlossaryStore((state) => state.update);
   const remove = useGlossaryStore((state) => state.remove);
+  const [query, setQuery] = useState('');
+  const scroller = useRef<HTMLDivElement>(null);
+  const added = useRef(false);
+  const needle = entries.length >= SEARCH_FROM ? query.trim().toLocaleLowerCase() : '';
+  const shown = needle
+    ? entries.filter((entry) => [entry.source, entry.target, ...entry.aliases].some((term) => term.toLocaleLowerCase().includes(needle)))
+    : entries;
+  // What was just added shows: the new row stays put under a list that may be longer than the box.
+  useEffect(() => {
+    if (added.current && scroller.current) scroller.current.scrollTop = scroller.current.scrollHeight;
+    added.current = false;
+  }, [entries]);
 
   return (
     <div className="config-section glossary-section" id="glossary-section">
@@ -82,7 +98,26 @@ export function GlossarySection() {
         <span className="glossary-count">{entries.length} / {MAX_GLOSSARY_ENTRIES}</span>
       </h3>
 
-      <div className="glossary-scroll">
+      {entries.length >= SEARCH_FROM && (
+        <label className="glossary-search">
+          <Search size={14} aria-hidden="true" />
+          <input
+            type="search"
+            aria-label={t('settings.glossarySearch')}
+            placeholder={t('settings.glossarySearch')}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key !== 'Escape' || !query) return;
+              // Esc clears the search first; only an empty search lets it close the panel.
+              event.stopPropagation();
+              setQuery('');
+            }}
+          />
+        </label>
+      )}
+
+      <div className="glossary-scroll" ref={scroller}>
         <table className="glossary-table">
           <thead>
             <tr>
@@ -93,7 +128,7 @@ export function GlossarySection() {
             </tr>
           </thead>
           <tbody>
-            {entries.map((entry) => (
+            {shown.map((entry) => (
               <tr key={entry.id}>
                 <Cell
                   aria-label={t('settings.glossaryWritten')}
@@ -118,8 +153,12 @@ export function GlossarySection() {
                 </td>
               </tr>
             ))}
-            {entries.length < MAX_GLOSSARY_ENTRIES && <NewRow />}
           </tbody>
+          {entries.length < MAX_GLOSSARY_ENTRIES && (
+            <tfoot>
+              <NewRow onAdd={() => { added.current = true; setQuery(''); }} />
+            </tfoot>
+          )}
         </table>
       </div>
     </div>
