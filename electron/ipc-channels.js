@@ -136,6 +136,7 @@ export const INVOKE_CHANNELS = [
   // Subtitle mode
   'subtitle:enter',
   'subtitle:exit',
+  'subtitle:show-main',
   'subtitle:set-always-on-top',
   'subtitle:set-locked',
   'subtitle:set-fullscreen',

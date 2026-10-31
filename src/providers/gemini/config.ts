@@ -8,6 +8,7 @@
  */
 import type { SessionContext } from '../../lib/contract/adapter';
 import { resolveInstructions } from '../../lib/provider/instructions';
+import { buildGlossaryPrompt } from '../../lib/glossary/glossary';
 import type { ProviderRefusal, SharedSettings } from '../../lib/provider/types';
 import { clampSegmentPauseMs, segmentPauseMs } from '../../lib/segmentation/segmentationMode';
 import {
@@ -58,7 +59,9 @@ export function buildGemini(context: SessionContext, s: GeminiSettings, shared: 
     return { refused: `Live Translate does not translate into ${geminiLanguageName(target)}: choose another language, or a dialogue model.` };
   }
   // The participant's direction reads Other's prompt, as LocalInference's builder does (`localInference/config.ts:47-56`).
-  const instructions = resolveInstructions(s, { participant: shared.reversed(context.direction), source: geminiLanguageName(source), target: geminiLanguageName(target) });
+  const baseInstructions = resolveInstructions(s, { participant: shared.reversed(context.direction), source: geminiLanguageName(source), target: geminiLanguageName(target) });
+  const glossaryPrompt = shared.glossary ? buildGlossaryPrompt(shared.glossary) : '';
+  const instructions = glossaryPrompt ? `${baseInstructions.trim()}\n\n${glossaryPrompt}`.trim() : baseInstructions;
   const activity: GeminiConfig['activity'] = context.turns === 'manual'
     ? { manual: true }
     : {

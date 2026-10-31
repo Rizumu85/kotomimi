@@ -20,6 +20,7 @@ import {
 } from '../../stores/subtitleStore';
 import type { ConversationListProps } from '../Conversation/ConversationList';
 import SubtitleBar from './SubtitleBar';
+import { usePushToTalk } from '../MainPanel/panel/usePushToTalk';
 import { SubtitleBody } from './SubtitleBands';
 import { restingHeights } from './SubtitleLanes';
 import { useAnnotationStore } from '../../stores/annotationStore';
@@ -117,6 +118,11 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
   const entries = useMemo(() => (all.some(isVideo) ? all.filter((e) => !isVideo(e)) : all), [all]);
   const videoEntries = useMemo(() => all.filter(isVideo), [all]);
   const running = session?.phase === 'running';
+  const keyboardHold = usePushToTalk({ enabled: surface === 'electron' && running && session?.holdToTalk === true,
+    press: controls.press, release: controls.release, target: chrome.rootRef });
+  useEffect(() => {
+    if (surface === 'electron') setHoldHeld(keyboardHold.held);
+  }, [surface, keyboardHold.held]);
 
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
@@ -283,7 +289,7 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
       {running && surface === 'electron' && <VideoLine entries={videoEntries} />}
       {running ? (
         surface === 'electron' && session.holdToTalk && entries.length === 0 ? (
-          // The takeover is the same window, and the panel's Space key works in it; on the overlay Space is the meeting's.
+          // The subtitle window handles Space locally; the main panel has its own keyboard target.
           <div className="subtitle-ptt-hint">
             <p>{t('subtitle.pttHint', 'Press Space to speak')}</p>
           </div>

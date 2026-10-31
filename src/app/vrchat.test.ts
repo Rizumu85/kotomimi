@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Entry } from '../lib/projection/types';
 import { useVRChatStore, vrchatHolds } from '../stores/vrchatStore';
-import { finishedLine, linkOf, startVRChat, type VRChatDeps } from './vrchat';
+import { chatboxReadingMs, finishedLine, linkOf, startVRChat, type VRChatDeps } from './vrchat';
 
 vi.mock('../services/persistSetting', () => ({ persistSetting: async () => {} }));
 
@@ -173,6 +173,38 @@ describe('a video', () => {
 });
 
 describe('the chatbox', () => {
+  it('holds visible words for reading while new translations continue to arrive', () => {
+    useVRChatStore.setState({ chatbox: 'translation' });
+    const waits: Array<{ fn: () => void; ms: number }> = [];
+    const t = setup({ setTimeout: (fn, ms) => { waits.push({ fn, ms }); } });
+    const long = '这是一个需要留出足够时间让朋友读完的比较长的句子。';
+    t.show([exchange('a', 'first', long), exchange('b', 'second', 'Next')]);
+    expect(t.chatboxLines()).toEqual([long]);
+    expect(waits[0].ms).toBe(chatboxReadingMs(long));
+    expect(waits[0].ms).toBeGreaterThan(4000);
+    expect(t.paces).toEqual([]);
+    waits[0].fn();
+    expect(t.chatboxLines()).toEqual([long, 'Next']);
+    t.controller.stop();
+  });
+
+  it('times only visible characters and gives CJK text more time than the same Latin character count', () => {
+    expect(chatboxReadingMs('Hi')).toBe(3000);
+    expect(chatboxReadingMs('中'.repeat(60))).toBeGreaterThan(chatboxReadingMs('a'.repeat(60)));
+    expect(chatboxReadingMs('a'.repeat(1000))).toBe(chatboxReadingMs('a'.repeat(144)));
+    expect(chatboxReadingMs('中'.repeat(144))).toBe(15000);
+  });
+
+  it('discards queued messages immediately when disabled, even if re-enabled before the timer fires', () => {
+    useVRChatStore.setState({ chatbox: 'translation' });
+    const t = setup();
+    t.show([exchange('a', 'one', 'First'), exchange('b', 'two', 'Second')]);
+    useVRChatStore.setState({ chatbox: 'off' });
+    useVRChatStore.setState({ chatbox: 'translation' });
+    t.timers[0]();
+    expect(t.chatboxLines()).toEqual(['First']);
+    t.controller.stop();
+  });
   it('sends each finished sentence of the user\'s once, a gap apart, and nothing that was on screen before', () => {
     useVRChatStore.setState({ chatbox: 'translation' });
     const t = setup({}, [exchange('old', '旧的', '古い')]);

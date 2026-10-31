@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { SessionContext } from '../../lib/contract/adapter';
 import { createVirtualClock } from '../../lib/contract/clock';
+import { Conversation } from '../../lib/conversation/Conversation';
 import { recordEvents, type AdapterEvent } from '../../lib/contract/events';
 import { flush } from '../../lib/contract/testing/drive';
 import { fakeSockets } from '../../lib/contract/testing/fakeSocket';
@@ -94,7 +95,7 @@ async function live(context: SessionContext, patch: Partial<LocalAISettings>, wi
     expect(calls).toHaveLength(count);
     expect(of('busy').map((event) => event.payload).pop()).toBe(false);
   });
-  return { config, socket, serverEvents, resolve, recognizer, asr: fakes.asr, clock, calls, of, lastText, settled };
+  return { config, socket, serverEvents, resolve, recognizer, asr: fakes.asr, clock, calls, of, lastText, settled, log };
 }
 
 type Live = Awaited<ReturnType<typeof live>>;
@@ -216,6 +217,11 @@ describe('paired Apple recognition across the LAN wire and client pipeline', () 
     });
     expect(h.serverEvents.filter((event) => event.type === 'conversation.item.input_audio_transcription.completed')).toEqual([]);
     expect(h.of('degraded').map((event) => event.payload.code)).toEqual(['transcription_failed']);
+    expect(h.of('frame').some((event) => event.payload.type === 'conversation.item.input_audio_transcription.failed')).toBe(true);
+    const conversation = new Conversation({ leg: 'speaker', session: 'test', languages: { source: 'en', target: 'fr' }, clock: h.clock });
+    h.log.forEach((event) => conversation.apply(event));
+    expect(conversation.snapshot().notices).toEqual([]);
+    expect(conversation.snapshot().segments).toMatchObject([{ text: '', final: true }]);
     expect(h.of('failed')).toEqual([]);
     expect(h.socket.closedByClient).toBeNull();
 

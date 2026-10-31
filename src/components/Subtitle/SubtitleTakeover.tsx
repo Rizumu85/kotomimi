@@ -17,11 +17,8 @@ import { SubtitleView, type SubtitleControls } from './SubtitleView';
 import { TakeoverStatusLine } from './TakeoverStatusLine';
 
 /**
- * The Electron subtitle takeover over the app's session (roadmap 1d-2 → 1e):
- * the root's view, karaoke and subtitle session, the runner's controls, and
- * the conversation's export. `MainLayout` mounts it in place of the main
- * layout while subtitle mode is on (plan 1e-3b-2); MainPanel stays mounted
- * behind it, so the Space key keeps working.
+ * The desktop subtitle view shares the main app's session and runner.
+ * SubtitleWindow portals this tree into a separate native window.
  */
 export function SubtitleTakeover() {
   const { t } = useTranslation();
@@ -39,11 +36,11 @@ export function SubtitleTakeover() {
   const provider = useProviderStore((s) => (s.selected ? getProvider(s.selected) : undefined));
   const providerSettings = useProviderStore((s) => (s.selected ? s.entries[s.selected]?.settings : undefined));
   const canSendText = run.phase === 'running' && run.legs.speaker === 'live' && !!provider && providerSettings !== undefined && provider.textInput(providerSettings);
-  // Leave subtitle mode first, so the main window is back before Settings scrolls (today's `handleFix`).
+  // Settings belongs to the main window; leave the subtitle window open alongside it.
   const openSettings = useCallback((target: string) => {
-    void exitSubtitleMode();
+    void window.electron?.invoke('subtitle:show-main');
     navigateToSettings(target);
-  }, [exitSubtitleMode, navigateToSettings]);
+  }, [navigateToSettings]);
   const controls = useMemo<SubtitleControls>(() => ({
     // `SubtitleIdle`'s ready/ended button carries no `disabled` of its own:
     // `session.start` is the one start every surface calls (ruling 11) — a

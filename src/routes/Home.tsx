@@ -12,6 +12,7 @@ import { useSubtitleLookStore } from '../stores/subtitleLookStore';
 import { useLanStore } from '../stores/lanStore';
 import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../stores/nativeEngineStore';
 import { useLanguagePinStore } from '../stores/languagePinStore';
+import { useGlossaryStore } from '../stores/glossaryStore';
 import { useFontStore } from '../stores/fontStore';
 import { useConversationDisplayStore } from '../stores/conversationDisplayStore';
 import { useSetupStore } from '../stores/setupStore';
@@ -42,6 +43,7 @@ export function Home() {
       useSubtitleLookStore.getState().hydrate(),
       useFontStore.getState().hydrate(),
       useSetupStore.getState().hydrate(),
+      useGlossaryStore.getState().hydrate(),
     ]).catch((err) => {
       console.warn('[Home] Settings/subtitle/conversationDisplay/setup hydration error:', err);
     });

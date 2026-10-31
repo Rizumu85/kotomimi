@@ -2,6 +2,7 @@ import type { AnyProvider, AuthContext } from '../../lib/provider/types';
 import { ProviderEngine, ProviderOwnSettings } from './ProviderOwnSettings';
 import { ProviderLanguages } from './ProviderLanguages';
 import { ProviderPicker } from './ProviderPicker';
+import { GlossarySection } from '../Settings/sections/GlossarySection';
 
 interface ProviderPanelProps {
   providers: readonly AnyProvider[];
@@ -21,6 +22,7 @@ export function ProviderPanel({ providers, auth, disabled }: ProviderPanelProps)
     <>
       <ProviderPicker providers={providers} auth={auth} disabled={disabled} />
       <ProviderLanguages providers={providers} disabled={disabled} />
+      <GlossarySection disabled={disabled} />
       <ProviderOwnSettings providers={providers} auth={auth} disabled={disabled} />
       <ProviderEngine providers={providers} disabled={disabled} />
     </>

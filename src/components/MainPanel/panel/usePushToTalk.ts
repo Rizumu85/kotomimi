@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 
 /**
  * The footer's push-to-talk hold: today's Space handler (`MainPanel.tsx:4094-4149`),
@@ -8,7 +8,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  * key-up, the window losing focus mid-hold, or `enabled` turning false
  * (the mode changed, or the run ended) while held.
  */
-export function usePushToTalk({ enabled, press, release }: { enabled: boolean; press(): void; release(): void }) {
+export function usePushToTalk({ enabled, press, release, target }: { enabled: boolean; press(): void; release(): void; target?: RefObject<HTMLElement | null> }) {
   const [held, setHeld] = useState(false);
   const heldRef = useRef(false);
   const doPress = useCallback(() => {
@@ -27,8 +27,10 @@ export function usePushToTalk({ enabled, press, release }: { enabled: boolean; p
   useEffect(() => { if (!enabled) doRelease(); }, [enabled, doRelease]);
   useEffect(() => {
     if (!enabled) return;
+    const owner = target?.current?.ownerDocument ?? document;
+    const eventWindow = owner.defaultView ?? window;
     const typing = () => {
-      const el = document.activeElement;
+      const el = owner.activeElement;
       return el?.tagName === 'INPUT' || el?.tagName === 'TEXTAREA' || el?.getAttribute('contenteditable') === 'true';
     };
     const down = (e: KeyboardEvent) => {
@@ -37,18 +39,19 @@ export function usePushToTalk({ enabled, press, release }: { enabled: boolean; p
       doPress();
     };
     const up = (e: KeyboardEvent) => {
-      if (typing() || e.code !== 'Space') return;
+      if (e.code !== 'Space' || (!heldRef.current && typing())) return;
       e.preventDefault();
       doRelease();
     };
-    window.addEventListener('keydown', down);
-    window.addEventListener('keyup', up);
-    window.addEventListener('blur', doRelease);
+    eventWindow.addEventListener('keydown', down);
+    eventWindow.addEventListener('keyup', up);
+    eventWindow.addEventListener('blur', doRelease);
     return () => {
-      window.removeEventListener('keydown', down);
-      window.removeEventListener('keyup', up);
-      window.removeEventListener('blur', doRelease);
+      eventWindow.removeEventListener('keydown', down);
+      eventWindow.removeEventListener('keyup', up);
+      eventWindow.removeEventListener('blur', doRelease);
+      doRelease();
     };
-  }, [enabled, doPress, doRelease]);
+  }, [enabled, doPress, doRelease, target]);
   return { held, press: doPress, release: doRelease };
 }

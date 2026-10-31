@@ -16,6 +16,7 @@ import { useProviderStore, type ProviderEntry } from '../../stores/providerStore
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useTurnModeStore } from '../../stores/turnModeStore';
 import { useRoutingStore } from '../../stores/routingStore';
+import { useGlossaryStore } from '../../stores/glossaryStore';
 import { getEnvironment } from '../../utils/environment';
 import { buildSharedSettings } from './shared';
 import { gate, type Refusal, type SpeechInputs } from './shape';
@@ -102,6 +103,7 @@ export function readShapeFromStores(auth: AuthContext): RunShape | null {
       reversedPair(provider, entry.settings, entry.pair),
       { sourceSeconds: st.segmentationSourcePause, translationSeconds: st.segmentationTranslationPause },
       { mode: st.segmentationMode, sentencesPerRow: st.sentenceSegmentationChunkSentences },
+      useGlossaryStore.getState().snapshot(),
     ),
     auth,
     account: useAccountStore.getState().account,

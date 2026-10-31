@@ -547,7 +547,7 @@ function createWindow() {
   // could not be restored (electron/window-maximize.js). Before anything below asks the window whether it is.
   // The change itself is played by the page (`windowShift` below), the system's animation being lost with the frame.
   keepMaximizeHonest(mainWindow, (bounds) => require('electron').screen.getDisplayMatching(bounds).workArea, process.platform, windowShift.shift);
-  setupSubtitleHandlers(mainWindow);
+  // Subtitle chrome lives in a separate window; the main renderer owns both views.
   // Windows only: frame:false + transparent:true above costs the window its
   // WS_CAPTION style, and with it the native double-click-to-maximize on the
   // custom title bar. Linux and macOS keep it for free — see the module.
@@ -557,7 +557,7 @@ function createWindow() {
   // and freezes the whole session — see the module for the measured details.
   // An Electron-drawn Minimize/Maximize/Close menu takes its place.
   setupCaptionContextMenu(mainWindow);
-  setupPopoverWindowHandlers(mainWindow);
+  setupPopoverWindowHandlers(mainWindow, (child) => setupSubtitleHandlers(child, mainWindow));
   // Fork: the person is here — what a start in the background left for later begins now.
   mainWindow.on('show', () => autostart.wake());
   captionShare.attachWindow(mainWindow);

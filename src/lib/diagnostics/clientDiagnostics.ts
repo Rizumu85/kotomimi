@@ -32,7 +32,7 @@ export const CLIENT_DIAGNOSTICS = {
   resume_attempt_failed: { severity: 'warning' },
   /** The requested voice was unavailable and a substitute was used. */
   voice_fallback: { severity: 'warning' },
-  /** One utterance could not be transcribed; the session continues. */
+  /** One utterance could not be transcribed; log-only in Conversation, as the session continues. */
   transcription_failed: { severity: 'warning' },
   /** One translation failed; the session continues. */
   translation_failed: { severity: 'warning' },

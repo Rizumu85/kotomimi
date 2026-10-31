@@ -116,6 +116,7 @@ const SubtitleBar: React.FC<Props> = ({
   const [typingOpen, setTypingOpen] = useState(false);
   const [typed, setTyped] = useState('');
   const typingField = useRef<HTMLInputElement>(null);
+  const barElement = useRef<HTMLDivElement>(null);
   const typingAvailable = typing !== undefined;
   const onTypingOpenChange = typing?.onOpenChange;
   const openTyping = (open: boolean) => {
@@ -141,8 +142,9 @@ const SubtitleBar: React.FC<Props> = ({
         typingField.current?.select();
       }
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    const eventWindow = barElement.current?.ownerDocument.defaultView ?? window;
+    eventWindow.addEventListener('keydown', onKey);
+    return () => eventWindow.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [typingAvailable]);
   const sendTyped = () => {
@@ -215,6 +217,7 @@ const SubtitleBar: React.FC<Props> = ({
 
   return (
     <div
+      ref={barElement}
       className={`subtitle-bar ${subtitle.positionLocked ? 'locked' : ''} ${surface === 'electron' ? 'surface-electron' : 'surface-overlay'}${through ? ' subtitle-bar--through' : ''}${through && near ? ' is-near' : ''}${typing && typingOpen ? ' is-typing' : ''}`}
       role="toolbar"
       {...dragHandleProps}

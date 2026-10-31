@@ -1,0 +1,139 @@
+@use '../shared/variables' as vars;
+
+.glossary-section {
+  .glossary-help {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    border: 0;
+    background: transparent;
+    color: vars.$text-muted;
+    cursor: help;
+
+    &:hover { color: vars.$text-primary; }
+    &:focus-visible { @include vars.focus-ring; }
+  }
+
+  .glossary-list {
+    display: flex;
+    flex-direction: column;
+    gap: vars.$space-2;
+    margin: vars.$space-3 0;
+  }
+
+  .glossary-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: vars.$space-2;
+    align-items: center;
+    padding: vars.$space-2;
+    border: 1px solid vars.$border-subtle;
+    border-radius: vars.$radius-sm;
+    background: vars.$bg-surface;
+
+    &.is-disabled { opacity: .6; }
+  }
+
+  .glossary-row-fields,
+  .glossary-add-row {
+    display: flex;
+    align-items: center;
+    gap: vars.$space-2;
+    min-width: 0;
+  }
+
+  .glossary-row-fields { grid-column: 1 / span 2; }
+
+  input {
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 7px 9px;
+    border: 1px solid vars.$border-default;
+    border-radius: vars.$radius-sm;
+    background: vars.$bg-control;
+    color: vars.$text-primary;
+    font: inherit;
+
+    &:focus { outline: none; border-color: vars.$color-primary; }
+    &:disabled { color: vars.$text-disabled; @include vars.disabled-state; }
+  }
+
+  .glossary-arrow {
+    flex: none;
+    color: vars.$text-muted;
+  }
+
+  .glossary-aliases { grid-column: 1 / span 2; }
+
+  .glossary-row-actions {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    display: flex;
+    align-items: center;
+    gap: vars.$space-2;
+
+    .toggle-switch-component { margin: 0; }
+    .toggle-label-text { font-size: vars.$font-caption; }
+  }
+
+  .glossary-delete,
+  .glossary-add,
+  .glossary-import {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 1px solid vars.$border-default;
+    border-radius: vars.$radius-sm;
+    background: vars.$bg-control;
+    color: vars.$text-secondary;
+    padding: 7px 9px;
+    font: inherit;
+    cursor: pointer;
+
+    &:hover:not(:disabled) { color: vars.$text-primary; background: vars.$bg-elevated; }
+    &:focus-visible { @include vars.focus-ring; }
+    &:disabled { @include vars.disabled-state; }
+  }
+
+  .glossary-delete { padding: 7px; color: vars.$text-muted; }
+  .glossary-add { flex: none; color: vars.$color-on-primary; background: vars.$color-primary-fill; border-color: vars.$color-primary-fill; }
+
+  .glossary-add-row {
+    flex-wrap: wrap;
+    margin-top: vars.$space-3;
+    align-items: stretch;
+
+    > input { flex: 1 1 130px; }
+    .glossary-add { align-self: center; }
+  }
+
+  .glossary-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: vars.$space-2;
+    margin-top: vars.$space-3;
+  }
+
+  .glossary-import-hint,
+  .glossary-message {
+    color: vars.$text-muted;
+    font-size: vars.$font-caption;
+  }
+
+  .glossary-message { margin: vars.$space-2 0 0; }
+  .glossary-file-input { display: none; }
+}
+
+@media (max-width: 520px) {
+  .glossary-section .glossary-row {
+    grid-template-columns: 1fr auto;
+    .glossary-row-fields,
+    .glossary-aliases { grid-column: 1 / span 2; }
+    .glossary-row-actions { grid-column: 2; grid-row: 3; }
+  }
+}
+

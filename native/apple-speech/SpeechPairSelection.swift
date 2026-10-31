@@ -13,6 +13,12 @@ enum SpeechPairSelection {
 
     static func choose(_ candidates: [SpeechCandidate], preferred: Int) -> Int {
         guard candidates.count == 2 else { return 0 }
+        // Confidence may be absent even on final words. Empty or punctuation-only
+        // candidates must not win a tie against usable final text.
+        let usable = candidates.indices.filter { index in
+            candidates[index].text.unicodeScalars.contains { CharacterSet.alphanumerics.contains($0) }
+        }
+        if usable.count == 1 { return usable[0] }
         // Some locale-specific Apple models also transcribe other languages. Comparing their
         // speech confidence alone can label identical English text as Chinese. Override only
         // when both sufficiently long transcripts independently agree with high confidence.

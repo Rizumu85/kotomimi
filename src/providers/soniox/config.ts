@@ -8,6 +8,7 @@
 import type { SessionContext } from '../../lib/contract/adapter';
 import { reportWarning } from '../../lib/diagnostics/report';
 import type { SharedSettings } from '../../lib/provider/types';
+import { glossaryRecognitionTerms, glossaryTranslationPairs } from '../../lib/glossary/glossary';
 import { asSonioxRegion } from '../../lib/soniox/regions';
 import { SONIOX_DEFAULT_VOICE, SONIOX_TTS_MODEL } from '../../lib/soniox/ttsCatalog';
 import { sonioxVoiceField, type SonioxSettings } from './settings';
@@ -131,10 +132,17 @@ function fitContextToBudget(
   return { terms, translationTerms, text };
 }
 
-export function buildSoniox(context: SessionContext, s: SonioxSettings, _shared: SharedSettings): SonioxConfig {
+export function buildSoniox(context: SessionContext, s: SonioxSettings, shared: SharedSettings): SonioxConfig {
+  const glossaryTerms = shared.glossary ? glossaryRecognitionTerms(shared.glossary) : [];
+  const glossaryTranslations = shared.glossary ? glossaryTranslationPairs(shared.glossary) : [];
+  const termsInput = [...new Set([...parseVocabularyTerms(s.vocabularyTerms ?? ''), ...glossaryTerms])];
+  const translationInput = new Map<string, string>();
+  for (const pair of [...parseVocabularyTranslations(s.vocabularyTranslations ?? ''), ...glossaryTranslations]) {
+    translationInput.set(pair.source, pair.target);
+  }
   const { terms, translationTerms, text } = fitContextToBudget(
-    parseVocabularyTerms(s.vocabularyTerms ?? ''),
-    parseVocabularyTranslations(s.vocabularyTranslations ?? ''),
+    termsInput,
+    [...translationInput].map(([source, target]) => ({ source, target })),
     (s.contextText ?? '').trim(),
   );
   const wire: SonioxWireContext = {

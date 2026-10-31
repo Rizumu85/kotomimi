@@ -22,7 +22,8 @@ const TRANSITION_BLACKOUT_MS = 600;
 // module load and have them resolve the *current* mainWindow at call time
 // via the activeWindow reference that setupSubtitleHandlers() updates.
 let activeWindow = null;
-let normalBoundsSnapshot = null;
+let entered = false;
+let ownerWindow = null;
 let transitionUntil = 0;
 
 const beginTransition = () => {
@@ -141,7 +142,7 @@ ipcMain.handle('subtitle:enter', (_event, payload) => {
   const requested = payload?.bounds ?? defaultSubtitleBounds(work);
   const clamped = clampToScreen(requested, work);
 
-  normalBoundsSnapshot = win.getBounds();
+  entered = true;
   beginTransition();
   win.setBounds(clamped);
   win.setAlwaysOnTop(Boolean(payload?.alwaysOnTop), pinLevel());
@@ -154,53 +155,33 @@ ipcMain.handle('subtitle:enter', (_event, payload) => {
   if (process.platform === 'darwin') {
     win.setWindowButtonVisibility(false);
   }
+  win.show();
   return { ok: true, bounds: clamped };
 });
 
-ipcMain.handle('subtitle:exit', (_event, payload) => {
+ipcMain.handle('subtitle:exit', () => {
   const win = getLiveWindow();
   if (!win) return { ok: false };
-  // Fork: the least height the lanes asked for is the subtitle window's, not the main window's — and the main window
-  // takes its own clicks. What the last fit gave the strip is nothing to the window it becomes.
-  restoreLeastSize(win);
   stopThrough(win);
-  fitGave = null;
-  // If the user exits subtitle mode while fullscreen, drop fullscreen first;
-  // otherwise setBounds() fights the fullscreen state and the window can be
-  // left stuck. Guarded to avoid a needless transition on the common path.
-  //
-  // KNOWN, ACCEPTED limitation (macOS): setFullScreen(false) animates
-  // asynchronously, so the synchronous setBounds() below can land before the
-  // Space transition finishes, leaving the window slightly mis-sized when
-  // exiting subtitle mode DIRECTLY from fullscreen via the ✕ button. The
-  // layered-ESC path (fullscreen → windowed → exit) is unaffected. We keep
-  // native setFullScreen (not setSimpleFullScreen) because it emits
-  // enter/leave-full-screen, which the subtitle:fullscreen-changed sync relies
-  // on. If revisited, defer setBounds to the leave-full-screen event rather
-  // than switching fullscreen modes.
-  if (win.isFullScreen()) win.setFullScreen(false);
-  const restore = payload?.restoreBounds ?? normalBoundsSnapshot ?? { width: 1200, height: 800 };
-  beginTransition();
-  if (restore.x !== undefined && restore.y !== undefined) {
-    win.setBounds(restore);
-  } else {
-    const display = screen.getPrimaryDisplay().workArea;
-    win.setBounds({
-      x: display.x + Math.round((display.width - 1200) / 2),
-      y: display.y + Math.round((display.height - 800) / 2),
-      width: 1200,
-      height: 800,
-    });
-  }
   stopPinEnforcement();
-  win.setAlwaysOnTop(false);
-  win.setResizable(true);
-  if (process.platform === 'darwin') {
-    win.setWindowButtonVisibility(true);
-  }
-  normalBoundsSnapshot = null;
+  fitGave = null;
+  restoreLeastSize(win);
+  entered = false;
+  win.close();
   return { ok: true };
 });
+
+ipcMain.handle('subtitle:show-main', () => {
+  if (!ownerWindow || ownerWindow.isDestroyed()) return { ok: false };
+  if (ownerWindow.isMinimized()) ownerWindow.restore();
+  ownerWindow.show();
+  ownerWindow.focus();
+  return { ok: true };
+});
+
+function tellOwner(channel, value) {
+  if (ownerWindow && !ownerWindow.isDestroyed()) ownerWindow.webContents.send(channel, value);
+}
 
 ipcMain.handle('subtitle:set-always-on-top', (_event, flag) => {
   const win = getLiveWindow();
@@ -240,7 +221,7 @@ const FIT_READS_WITHIN = 2;
 const stillAs = (read, gave) => gave !== null && Math.abs(read - gave) <= FIT_READS_WITHIN;
 ipcMain.handle('subtitle:fit-height', (_event, payload) => {
   const win = getLiveWindow();
-  if (!win || normalBoundsSnapshot === null) return { ok: false };
+  if (!win || !entered) return { ok: false };
   const least = Math.round(Number(payload?.least));
   if (Number.isFinite(least)) {
     if (least >= FIT_HEIGHT_MIN) {
@@ -303,7 +284,7 @@ function watchPointer(win) {
     if (over) win.setIgnoreMouseEvents(false);
     else win.setIgnoreMouseEvents(true, { forward: true });
   }
-  if (inside !== through.inside || over !== through.over) win.webContents.send('subtitle:pointer', { inside, over });
+  if (inside !== through.inside || over !== through.over) tellOwner('subtitle:pointer', { inside, over });
   through.inside = inside;
   through.over = over;
 }
@@ -312,7 +293,7 @@ const holeOf = (hole) => (hole && [hole.x, hole.y, hole.width, hole.height].ever
   : null);
 ipcMain.handle('subtitle:set-click-through', (_event, payload) => {
   const win = getLiveWindow();
-  if (!win || normalBoundsSnapshot === null) return { ok: false };
+  if (!win || !entered) return { ok: false };
   if (!(payload === true || payload?.on === true)) {
     stopThrough(win);
     return { ok: true };
@@ -346,14 +327,15 @@ ipcMain.handle('subtitle:set-fullscreen', (_event, flag) => {
   return { ok: true };
 });
 
-function setupSubtitleHandlers(mainWindow) {
+function setupSubtitleHandlers(mainWindow, owner = mainWindow) {
+  ownerWindow = owner;
   // Rebind the active window. Resize/move listeners are per-window and need
   // to be attached on every createWindow() call.
   activeWindow = mainWindow;
   // Reset snapshot/transition for the fresh window so a stale snapshot
   // from a previous window can't leak in. A fresh window starts unpinned,
   // so any enforcement left over from a previous window must stop too.
-  normalBoundsSnapshot = null;
+  entered = false;
   transitionUntil = 0;
   stopPinEnforcement();
 
@@ -376,16 +358,16 @@ function setupSubtitleHandlers(mainWindow) {
     if (debounceTimer) clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       if (!mainWindow.isDestroyed() && Date.now() >= transitionUntil) {
-        mainWindow.webContents.send('subtitle:window-bounds-changed', mainWindow.getBounds());
+        tellOwner('subtitle:window-bounds-changed', mainWindow.getBounds());
       }
     }, 200);
   };
   mainWindow.on('resize', onChange);
   mainWindow.on('move', onChange);
   const onEnterFullScreen = () =>
-    mainWindow.webContents.send('subtitle:fullscreen-changed', true);
+    tellOwner('subtitle:fullscreen-changed', true);
   const onLeaveFullScreen = () =>
-    mainWindow.webContents.send('subtitle:fullscreen-changed', false);
+    tellOwner('subtitle:fullscreen-changed', false);
   mainWindow.on('enter-full-screen', onEnterFullScreen);
   mainWindow.on('leave-full-screen', onLeaveFullScreen);
   // Activation transitions are the moments PowerPoint re-raises itself
@@ -404,8 +386,11 @@ function setupSubtitleHandlers(mainWindow) {
     // replaced by a rebind must not stop the new window's enforcement.
     if (activeWindow === mainWindow) {
       stopPinEnforcement();
+      stopThrough(mainWindow);
+      leastBefore = null;
+      fitGave = null;
       activeWindow = null;
-      normalBoundsSnapshot = null;
+      entered = false;
     }
   });
 }

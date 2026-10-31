@@ -1,4 +1,4 @@
-import { ArrowLeftRight, Languages } from 'lucide-react';
+import { ArrowLeftRight, Info, Languages } from 'lucide-react';
 import { useId, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Tooltip from '../Tooltip/Tooltip';
@@ -64,13 +64,6 @@ const DETECT = '\u0000detect';
  */
 export function LanguagePairSection({ provider, settings, pair, onChange, disabled, sentence, context, detect, both, owners }: LanguagePairSectionProps) {
   const { t, i18n } = useTranslation();
-  // A model that cannot name the language still runs it, as a guess: the badge says so beside the choice.
-  const bestEffortBadge = (bestEffort?: boolean, on?: boolean) => (bestEffort && on ? (
-    <span className="language-best-effort">
-      <span className="language-best-effort__badge">{t('fork.languageMenu.bestEffort')}</span>
-      <Tooltip content={t('fork.languageMenu.bestEffortHelp')} position="top" icon="help" maxWidth={320} />
-    </span>
-  ) : null);
   const id = useId();
   const label = useLanguageLabel();
   const sources = provider.languages.sources(settings, context);
@@ -120,6 +113,18 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
     disabled,
   });
   const detecting = detect?.on === true;
+  const showBoth = !!both && pair.source.toLowerCase() !== pair.target.toLowerCase();
+  const bothBestEffort = showBoth && both?.on && both.bestEffort;
+  const detectionBestEffort = detecting && detect?.bestEffort;
+  const bothUnavailable = showBoth && !both?.available && !both?.on;
+  const bothHelp = t(bothUnavailable ? 'fork.languageMenu.speakBothUnavailable' : 'fork.languageMenu.speakBothHelp', {
+    language: label(pair.target), mine: label(pair.source),
+  });
+  const sectionHelp = [
+    t(owners ? 'fork.languageMenu.pairHelp' : 'simpleConfig.translationLanguagesDesc'),
+    ...(showBoth ? [bothHelp] : []),
+    ...(bothBestEffort || detectionBestEffort ? [t('fork.languageMenu.bestEffortHelp')] : []),
+  ].join('\n\n');
   /** Their language was chosen: a language, which is the pair's, or its detection. */
   const pickTheirs = (target: string) => {
     if (target === DETECT) { detect?.set(true); return; }
@@ -152,10 +157,13 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
         <Languages size={18} />
         <span>{t('simpleConfig.translationLanguages')}</span>
         <Tooltip
-          content={t('simpleConfig.translationLanguagesDesc')}
+          content={sectionHelp}
           position="top"
-          icon="help"
-        />
+        >
+          <button type="button" className="language-section-help" aria-label={t('simpleConfig.translationLanguages')}>
+            <Info size={16} />
+          </button>
+        </Tooltip>
       </h3>
       <div className="language-pair-row">
         <div className="language-select-group">
@@ -201,7 +209,7 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
         {detecting && (
           // In the pair's own grid, a row of its own: what it is for at the left, the choice under their language.
           <>
-            <label className="language-mostly-label" htmlFor={`${id}-mostly`}>{t('fork.languageMenu.mostly')}{bestEffortBadge(detect?.bestEffort, true)}</label>
+            <label className="language-mostly-label" htmlFor={`${id}-mostly`}>{t('fork.languageMenu.mostly')}</label>
             <div className="language-select-group language-select-group--mostly">
               <select
                 id={`${id}-mostly`}
@@ -218,17 +226,17 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
           </>
         )}
       </div>
-      {both && pair.source.toLowerCase() !== pair.target.toLowerCase() && (
-        <div className="language-both">
-          <ToggleSwitch
-            checked={both.on}
-            onChange={() => both.set(!both.on)}
-            label={t('fork.languageMenu.speakBoth', { language: label(pair.target) })}
-            tooltip={t(both.available || both.on ? 'fork.languageMenu.speakBothHelp' : 'fork.languageMenu.speakBothUnavailable', { language: label(pair.target), mine: label(pair.source) })}
-            disabled={disabled || (!both.available && !both.on)}
-          />
-          {bestEffortBadge(both.bestEffort, both.on)}
-        </div>
+      {detectionBestEffort && !bothBestEffort && (
+        <p className="language-detection-note">{t('fork.languageMenu.bestEffortSummary')}</p>
+      )}
+      {both && showBoth && (
+        <ToggleSwitch
+          checked={both.on}
+          onChange={() => both.set(!both.on)}
+          label={t('fork.languageMenu.speakBoth', { language: label(pair.target) })}
+          description={bothUnavailable ? bothHelp : bothBestEffort ? t('fork.languageMenu.bestEffortSummary') : undefined}
+          disabled={disabled || (!both.available && !both.on)}
+        />
       )}
       {resolved?.showMirror && !owners && (
         <div className="language-mirror-line" data-testid="language-mirror-line">

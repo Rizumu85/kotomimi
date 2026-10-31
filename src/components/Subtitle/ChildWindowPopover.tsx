@@ -254,8 +254,9 @@ export const ChildWindowPopover: React.FC<ChildWindowPopoverProps> = ({
     const w = Math.ceil(rect.width) || width;
     const natural = Math.ceil(rect.height) || height;
 
-    const screenTop = (window.screen as { availTop?: number }).availTop ?? 0;
-    const screenLeft = (window.screen as { availLeft?: number }).availLeft ?? 0;
+    const owner = anchorEl.ownerDocument.defaultView ?? window;
+    const screenTop = (owner.screen as { availTop?: number }).availTop ?? 0;
+    const screenLeft = (owner.screen as { availLeft?: number }).availLeft ?? 0;
 
     // Never ask for more than the screen can show. Handing the same number to
     // the popover as a max-height is what makes the overflow scrollable
@@ -263,7 +264,7 @@ export const ChildWindowPopover: React.FC<ChildWindowPopoverProps> = ({
     //
     // A non-positive availHeight means "unknown", not "no room" — capping to
     // it would collapse the window to nothing.
-    const availH = window.screen.availHeight;
+    const availH = owner.screen.availHeight;
     const h = availH > 0
       ? Math.min(natural, Math.max(1, availH - 2 * EDGE_PAD))
       : natural;
@@ -274,8 +275,8 @@ export const ChildWindowPopover: React.FC<ChildWindowPopoverProps> = ({
     const scrollbar = Math.max(0, container.offsetWidth - container.clientWidth);
 
     const anchor = anchorEl.getBoundingClientRect();
-    const anchorTop = window.screenY + anchor.top;
-    const anchorBottom = window.screenY + anchor.bottom;
+    const anchorTop = owner.screenY + anchor.top;
+    const anchorBottom = owner.screenY + anchor.bottom;
     // Above the anchor, right edges aligned; below when the screen has no
     // room above. Clamped on ALL edges — a partially off-screen request gets
     // re-placed by mutter to an arbitrary position, which is worse than a
@@ -306,14 +307,14 @@ export const ChildWindowPopover: React.FC<ChildWindowPopoverProps> = ({
     // height above — never "the screen is 0px tall". Reading it literally
     // collapses the upper bound onto the screen origin, which wins every
     // min() and drags the window into the corner with the anchor ignored.
-    const availW = window.screen.availWidth;
+    const availW = owner.screen.availWidth;
     const clamp = (raw: number, origin: number, avail: number, size: number) =>
       avail > 0
         ? Math.min(Math.max(origin, raw), origin + Math.max(0, avail - size))
         : Math.max(origin, raw);
 
     const left = clamp(
-      Math.round(window.screenX + anchor.right - (w + scrollbar)),
+      Math.round(owner.screenX + anchor.right - (w + scrollbar)),
       screenLeft, availW, w + scrollbar,
     );
     const rawTop = above
@@ -355,10 +356,11 @@ export const ChildWindowPopover: React.FC<ChildWindowPopoverProps> = ({
     // The bar window can move under the popover (its whole surface is a drag
     // region). There is no DOM event for a window move; poll and close —
     // repositioning live would fight the WM mid-drag.
-    const startX = window.screenX;
-    const startY = window.screenY;
+    const ownerWindow = anchorEl.ownerDocument.defaultView ?? window;
+    const startX = ownerWindow.screenX;
+    const startY = ownerWindow.screenY;
     const movePoll = setInterval(() => {
-      if (window.screenX !== startX || window.screenY !== startY) {
+      if (ownerWindow.screenX !== startX || ownerWindow.screenY !== startY) {
         onCloseRef.current('moved');
       }
     }, 300);

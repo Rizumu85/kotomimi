@@ -192,10 +192,10 @@ describe('SubtitleTakeover', () => {
   // The old `handleFix`'s rule, now `SubtitleTakeover.tsx`'s `openSettings`:
   // subtitle mode is left first so the main window is back before Settings
   // scrolls to the section.
-  it('leaves subtitle mode before opening Settings, through controls.openSettings()', () => {
+  it('keeps subtitles open while opening main-window Settings', () => {
     render(<SubtitleTakeover />);
     act(() => { lastControls().openSettings!('provider'); });
-    expect(order).toEqual(['exit', 'navigate:provider']);
+    expect(order).toEqual(['navigate:provider']);
   });
 
   // Spec 2026-10-05 §7: the takeover hands SubtitleView the same status line
@@ -263,7 +263,7 @@ describe('SubtitleTakeover', () => {
       const voice = noticeAction(l1('voice_fallback'));
       expect(voice?.label).toBe('settings.title');
       act(() => { voice!.run(); });
-      expect(order).toEqual(['exit', 'navigate:provider']);
+      expect(order).toEqual(['navigate:provider']);
       expect(noticeAction(l1('insufficient_balance'))).toBeNull();
     } finally {
       delete electron.electron;

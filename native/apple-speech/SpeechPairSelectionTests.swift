@@ -32,6 +32,16 @@ struct SpeechPairSelectionTests {
             candidate("Je voudrais apprendre une nouvelle langue.", 0.95, "fr_FR"),
         ], preferred: 0, expected: 1)
         check("An empty candidate cannot establish consensus", [candidate("", -1, "zh_CN"), english[1]], preferred: 0, expected: 1)
+        check("Final words without confidence beat an empty preferred candidate", [
+            candidate("", -1, "zh_CN"), candidate("Hello", -1, "en_US"),
+        ], preferred: 0, expected: 1)
+        check("Punctuation alone cannot beat final words", [
+            candidate("...", 0.99, "zh_CN"), candidate("Hello", 0.80, "en_US"),
+        ], preferred: 0, expected: 1)
+        check("Final numbers count as words with the opposite candidate order", [
+            candidate("123", -1, "en_US"), candidate(" \n ", -1, "zh_CN"),
+        ], preferred: 1, expected: 0)
+        check("Two empty candidates retain preference", [candidate("", -1, "zh_CN"), candidate("", -1, "en_US")], preferred: 1, expected: 1)
         check("An unrelated text language cannot escape the pair", [
             candidate("Je voudrais apprendre une nouvelle langue avec mes amis.", 0.94, "en_US"),
             candidate("Je voudrais apprendre une nouvelle langue avec mes amis.", 0.92, "zh_CN"),

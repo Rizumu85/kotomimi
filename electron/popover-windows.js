@@ -78,8 +78,16 @@ ipcMain.handle('popover-window:set-visible', (_event, payload) => {
   return { ok: true };
 });
 
-function setupPopoverWindowHandlers(mainWindow) {
+function setupPopoverWindowHandlers(mainWindow, onSubtitleWindow = () => {}) {
   mainWindow.webContents.setWindowOpenHandler((details) => {
+    if (details.frameName === 'kotomimi-subtitle') {
+      if (!isBlankUrl(details.url)) return { action: 'deny' };
+      return { action: 'allow', overrideBrowserWindowOptions: {
+        show: false, frame: false, transparent: true, skipTaskbar: true,
+        resizable: true, minimizable: false, maximizable: false, hasShadow: false,
+        webPreferences: { backgroundThrottling: false },
+      } };
+    }
     if (details.frameName?.startsWith(POPOVER_PREFIX)) {
       if (!isBlankUrl(details.url)) return { action: 'deny' };
       return {
@@ -99,8 +107,10 @@ function setupPopoverWindowHandlers(mainWindow) {
 
   mainWindow.webContents.on('did-create-window', (childWindow, details) => {
     const name = details.frameName;
-    if (!name?.startsWith(POPOVER_PREFIX)) return;
-    popoverWindows.set(name, childWindow);
+    const subtitle = name === 'kotomimi-subtitle';
+    if (!subtitle && !name?.startsWith(POPOVER_PREFIX)) return;
+    if (subtitle) onSubtitleWindow(childWindow);
+    else popoverWindows.set(name, childWindow);
 
     // setWindowOpenHandler governs creation only. Re-opening an existing
     // window NAME navigates the live window instead of making a new one, and

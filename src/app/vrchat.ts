@@ -87,6 +87,17 @@ const TYPED = /^sokuji_typed_/;
 /** The chatbox's length, as the main process cuts to (`CHATBOX_MOST` in `electron/vrchat.js`). */
 const CHATBOX_MOST = 144;
 
+/** Reading time for the visible chatbox text, independent of recognition/subtitle pacing. */
+export function chatboxReadingMs(text: string): number {
+  const visible = [...text.split('\n').map((line) => line.replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n')].slice(0, CHATBOX_MOST);
+  let seconds = 1;
+  for (const character of visible) {
+    if (/\s/u.test(character)) continue;
+    seconds += /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(character) ? 1 / 6 : 1 / 22;
+  }
+  return Math.round(Math.max(3, Math.min(15, seconds)) * 1000);
+}
+
 /**
  * Two lines within the chatbox's length: each whole where they fit; else the shorter whole where it takes no more
  * than half, and the other cut to the rest — so that neither is lost to the cut of the whole.
@@ -268,7 +279,7 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     if (line === undefined) return;
     sending = true;
     void ipc.invoke('vrchat:chatbox', { text: line }).catch(() => {});
-    later(() => { sending = false; pump(); }, gap);
+    later(() => { sending = false; pump(); }, Math.max(gap, chatboxReadingMs(line)));
   };
   const look = () => {
     const shows = store.getState().chatbox;
@@ -314,11 +325,14 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
   offs.push(runner.state.subscribe(() => {
     const now = running();
     // The run is over: a video it heard is forgotten, the pace is the usual for the next.
-    if (wasRunning && !now) endVideo();
+    if (wasRunning && !now) { endVideo(); queue.length = 0; }
     wasRunning = now;
     watch();
   }));
-  offs.push(store.subscribe(watch));
+  offs.push(store.subscribe(() => {
+    if (store.getState().chatbox === 'off') queue.length = 0;
+    watch();
+  }));
   watch();
 
   return {

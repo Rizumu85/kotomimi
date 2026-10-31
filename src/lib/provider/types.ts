@@ -8,6 +8,7 @@ import type { Adapter, SessionContext } from '../contract/adapter';
 import type { LegName } from '../conversation/types';
 import type { SessionHooks } from '../session/types';
 import type { WireTable } from '../language/wire';
+import type { GlossarySnapshot } from '../glossary/types';
 
 export type Platform = 'electron' | 'extension' | 'web';
 export type ProviderKind = 'own-key' | 'managed' | 'local';
@@ -179,6 +180,8 @@ export interface SharedSettings {
   segmentation: { mode: 'off' | 'pause' | 'sentences'; sentencesPerRow: number };
   /** The models this run's own readiness check found (F2): the list its settings component was shown, for the same effective-model function. */
   models: readonly ModelOption[];
+  /** The local vocabulary snapshot captured when the run starts. Providers may use it as native context. */
+  glossary?: GlossarySnapshot;
 }
 
 /** The voice-preview route (spec, "Playback — Routing": voice preview, the real device, a fixed route): one clip at its own rate; `play` resolves when it ends or is stopped. */

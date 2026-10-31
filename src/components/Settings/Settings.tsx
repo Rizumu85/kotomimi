@@ -31,6 +31,7 @@ function readStoredTab(): string {
 const NAVIGATION_TAB_MAP: Record<string, string> = {
   'user-account': 'general',
   'languages': 'general',
+  'glossary': 'general',
   'sentence-segmentation': 'general',
   'microphone': 'audio',
   'speaker': 'audio',

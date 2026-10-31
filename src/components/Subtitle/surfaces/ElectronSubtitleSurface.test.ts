@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ElectronSubtitleSurface } from './ElectronSubtitleSurface';
+import { getSubtitleWindowHost } from './subtitleWindowHost';
 
 // Kept from before the old audio service was deleted: subtitleStore
 // statically imports ServiceFactory, which used to reach
@@ -19,6 +20,8 @@ vi.mock('../../../services/ServiceFactory', () => ({
 
 describe('ElectronSubtitleSurface', () => {
   const invoke = vi.fn(async () => ({ ok: true }));
+  let frame: HTMLIFrameElement;
+  let surface: ElectronSubtitleSurface;
 
   beforeEach(() => {
     invoke.mockClear();
@@ -26,7 +29,13 @@ describe('ElectronSubtitleSurface', () => {
     globalThis.window = globalThis.window || {};
     // @ts-ignore
     (globalThis.window as any).electron = { invoke };
+    frame = document.createElement('iframe');
+    document.body.appendChild(frame);
+    vi.spyOn(window, 'open').mockReturnValue(frame.contentWindow);
+    vi.spyOn(frame.contentWindow!, 'close').mockImplementation(() => {});
+    surface = new ElectronSubtitleSurface();
   });
+  afterEach(async () => { await surface.exit(); frame.remove(); vi.restoreAllMocks(); });
 
   it('enter() sends subtitle:enter with bounds + alwaysOnTop + locked from subtitleStore', async () => {
     // Arrange — seed the subtitle store
@@ -37,14 +46,31 @@ describe('ElectronSubtitleSurface', () => {
       positionLocked: false,
     });
 
-    const surface = new ElectronSubtitleSurface();
     await surface.enter();
+    expect(getSubtitleWindowHost()?.ownerDocument).toBe(frame.contentDocument);
+    expect(window.open).toHaveBeenCalledWith('', 'kotomimi-subtitle', expect.any(String));
 
     expect(invoke).toHaveBeenCalledWith('subtitle:enter', {
       bounds: { x: 10, y: 20, width: 800, height: 200 },
       alwaysOnTop: true,
       locked: false,
     });
+  });
+
+  it('reuses one child and removes its host on close without stopping the main session', async () => {
+    await surface.enter();
+    await surface.enter();
+    expect(window.open).toHaveBeenCalledTimes(1);
+    frame.contentWindow!.dispatchEvent(new Event('pagehide'));
+    expect(getSubtitleWindowHost()).toBeNull();
+    expect(invoke).not.toHaveBeenCalledWith('app:close-ready');
+  });
+
+  it('cleans up when native initialization fails', async () => {
+    invoke.mockResolvedValueOnce({ ok: false });
+    await expect(surface.enter()).rejects.toThrow('did not initialize');
+    expect(getSubtitleWindowHost()).toBeNull();
+    expect(frame.contentWindow!.close).toHaveBeenCalled();
   });
 
   it('exit() sends subtitle:exit with an empty payload, regardless of stored windowBounds', async () => {

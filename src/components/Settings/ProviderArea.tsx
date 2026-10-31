@@ -8,6 +8,7 @@ import { useAuthContext } from '../providers/useAuthContext';
 import { presentProviders } from '../../providers/registry';
 import { useMode } from '../../stores/audioStore';
 import { SENTENCE_SEGMENTATION_SHOWN, useEngineSlotTarget, useSetEngineSlotTarget, useTextOnly } from '../../stores/settingsStore';
+import { GlossarySection } from './sections/GlossarySection';
 
 /** General and Provider categories read the same provider entry and session lock. */
 export function SessionSettingsGeneral({ locked }: { locked: boolean }) {
@@ -18,6 +19,7 @@ export function SessionSettingsGeneral({ locked }: { locked: boolean }) {
     <>
       {/* Language pair and output preferences. */}
       <ProviderLanguages providers={providers} disabled={locked} sentence={{ mode, textOnly }} />
+      <GlossarySection disabled={locked} />
       <OutputToggles locked={locked} />
       {SENTENCE_SEGMENTATION_SHOWN && <SentenceSegmentationSection isSessionActive={locked} />}
     </>

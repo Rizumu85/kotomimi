@@ -37,6 +37,26 @@ describe('usePushToTalk', () => {
     document.body.removeChild(input);
   });
 
+  it('releases a held Space even when focus moves into an input before keyup', () => {
+    const press = vi.fn();
+    const release = vi.fn();
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    const { result } = renderHook(() => usePushToTalk({ enabled: true, press, release }));
+
+    act(() => { fireEvent.keyDown(window, { code: 'Space' }); });
+    expect(result.current.held).toBe(true);
+
+    act(() => {
+      input.focus();
+      fireEvent.keyUp(window, { code: 'Space' });
+    });
+    expect(release).toHaveBeenCalledTimes(1);
+    expect(result.current.held).toBe(false);
+
+    document.body.removeChild(input);
+  });
+
   it('ignores any other key', () => {
     const press = vi.fn();
     const release = vi.fn();

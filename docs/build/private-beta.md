@@ -1,5 +1,31 @@
 # Private desktop beta
 
+## Beta 4
+
+`0.43.133-beta.4` adds VRCX friend-list CSV import to the personal glossary.
+The importer accepts `UserID,DisplayName,Memo` files, including quoted commas
+and line breaks. UserID values are retained as stable external identifiers, so
+re-importing a list updates renamed friends without creating duplicate entries.
+The settings panel also accepts the same CSV through a file picker or the
+clipboard import action.
+
+## Beta 3 follow-up
+
+`0.43.133-beta.3` includes the muted gray-green selected-state palette, simplified
+bilingual language controls, and log-only per-utterance transcription failures.
+The Mac helper also fixes empty/punctuation-only bilingual candidates winning
+against usable final text. See `docs/apple-speech-lan.md` for the audit scope and
+remaining short-word language-attribution limitation.
+
+Both packages were rebuilt from the current working tree on their target OS.
+Existing beta profiles are retained; settings/authentication/browser-storage
+snapshots are backed up before installation, and native model files are reused.
+The Mac installation keeps the previous Beta 2 application in a separate backup.
+Windows installation uses an external WMI-launched PowerShell 7 process, preserving
+the normal installation directory and taskbar shortcut identity. Legacy Windows
+PowerShell exited before executing the update script on this machine; do not
+mistake a successful process-creation result for a completed installation.
+
 ## Beta 2 UI follow-up
 
 `0.43.133-beta.2` retains the existing beta profile. It supplies explicit Windows
@@ -14,6 +40,44 @@ bilingual speaker preference. A fixture compiled from production SCSS verified
 selection colors, scrollbar geometry on hover, and switch endpoints at 100%,
 125%, and 150% zoom. Reduced-motion checks confirmed zero-duration switch
 transitions. The fixture does not replace live conversation testing.
+
+### Windows installation repair after Beta 2
+
+Independent diagnosis on 2026-10-30 confirmed that installation launched from
+the Codex MSIX environment was redirected into its `LocalCache/Local/KotomimiBeta`
+directory. The desktop shortcut and window icon metadata refer to the ordinary
+`LocalAppData/KotomimiBeta` path. `CIM_DataFile`, queried through the external WMI
+provider, finds the physical launcher and versioned executable but neither
+logical path. The embedded icon is valid and the shortcut's AppUserModelID
+matches the application. Supplying explicit icon metadata in Beta 2 did not
+resolve the user's blank taskbar icon.
+
+Node's `fs.realpathSync.native` resolves the physical path in this environment;
+plain `fs.realpathSync` retains the redirected logical path. However, changing
+only the launch target is insufficient: the current beta profile also resides
+in `LocalCache/Roaming/kotomimi-beta`, and an Explorer launch can read a different
+profile. A durable repair must install outside package virtualization and
+preserve the current beta profile before switching launch context. Do not seed
+from stable again or overwrite an existing destination profile. Verify the
+taskbar icon and retained settings after launching from the desktop shortcut.
+
+The PC installation was repaired on 2026-10-30 using a hidden PowerShell process
+created through `Win32_Process.Create`, outside the Codex package context. A
+read-only probe first confirmed the normal installation and profile directories
+were absent. With Beta closed, the entire current profile was backed up under
+`.dev/beta/windows-repair-20261030/profile-backup` and copied to normal Roaming
+storage, excluding disposable caches and lock files. SHA-256 checks matched all
+22 settings/authentication/IndexedDB files against both the backup and the
+migrated profile. The existing Beta 2 installer then completed with exit code 0.
+
+The old virtualized installation and profile were renamed with the suffix
+`.before-normal-install-20261030` so they cannot shadow the repaired directories.
+WMI now finds the normal launcher and profile. The regenerated desktop shortcut
+points to that launcher for both its target and icon; launching this shortcut
+produced a window whose executable path is outside `LocalCache`. The light
+theme and language pair are present. The user confirmed that the BETA taskbar
+icon is visible after this repair. Future installations must also run outside the
+Codex package context; do not blindly launch the installer as a child of Codex.
 
 `npm run make:beta` builds a local `X.Y.Z-beta.1` package from the stable version
 in `package.json`. Set `KOTOMIMI_BETA_VERSION=X.Y.Z-beta.N` for subsequent builds.

@@ -85,6 +85,18 @@ A Windows client passed both bilingual cases and all three ordinary live cases a
 
 The first bilingual run failed because both locale-specific recognizers returned English, but the confidence tie selected the Chinese locale. The final-candidate text check fixes that reproduced case. These results cover real network and native inference, not microphone capture, UI rendering, VRChat capture/chatbox output, broader language-pair accuracy, or a packaged release. The installed Mac application was not replaced, and the isolated test host was stopped after verification.
 
+### Empty-final audit: 2026-10-30
+
+Per-utterance `transcription_failed` degradations no longer insert notices into the conversation. The adapter still records the original failure frame and emits diagnostics; fatal session failures remain visible. The LAN integration regression verifies that rejected tentative text is cleared, never translated, and the next utterance recovers without a notice.
+
+An empty adapter result does not necessarily mean Apple returned no final words. The native adapter also discards VAD misfires (sounds below the configured minimum speech duration), even if recognition produced text. Apple additionally uses separate fast and considered recognizers: tentative text from the fast recognizer is not a final result from the considered one. The LAN diagnostic therefore describes an absent usable transcript without claiming which stage discarded it.
+
+The paired selector had a reproducible boundary defect: an empty preferred candidate could defeat nonempty final text when confidence metadata was absent; punctuation-only candidates could also win. It now selects the only candidate containing letters or numbers before comparing confidence. Both-empty cases remain empty, and tentative text is never promoted as a fallback. Four additional Swift cases cover these boundaries; all twelve pass on macOS.
+
+An isolated helper on the user's Mac ran 22 synthetic-input probes: short English words and a sentence, single/paired modes, silence, reduced volume, and clipped 50–400 ms fragments. Complete short utterances produced final text; extremely short fragments could produce empty final results. This did not reproduce the user's full intermittent failure sequence or establish its frequency. The probes bypassed app VAD and did not capture the user's microphone or VRChat audio. Existing VAD/early-close regression tests passed, without changing VAD settings.
+
+Short-word language attribution remains a known limitation: a Chinese/English pair can label `Hello` or `OK` as Chinese because both models recognize Latin text and the long-text consensus rule intentionally does not decide ambiguous short words. The previous two-device acceptance covered full sentences, not this case. Do not describe that acceptance or the empty-candidate fix as comprehensive bilingual accuracy validation.
+
 ### Manual application walkthrough
 
 For a hardware check, use a pair such as English/French as well as the intended everyday pair. On both audio sources, alternate languages between sentences; then overlap the two sources briefly. Verify that your microphone's language choice does not change the other source's preference. With both options enabled, a practice sentence should produce a translation and private feedback, while a sentence in your own language should produce only a translation. Check the conversation, subtitle, and chatbox separately, including when feedback arrives slowly. Finally test silence, a short ambiguous phrase, and a sentence containing words from both languages to assess the recognizer's practical limits.

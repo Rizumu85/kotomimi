@@ -22,6 +22,7 @@ import type { Source } from './source';
 import { ResourceStack } from './stack';
 import { Turn } from './turn';
 import type { Budget, LegState, LoadingProgress, Prepared, Resources, RunEnd, RunNotice, RunShape } from './types';
+import { normalizeRecognitionText, normalizeTranslationText } from '../glossary/glossary';
 
 const DEFAULT_TIMEOUT_MS = 5_000;
 const API_ERROR_TYPES = ['auth', 'rate_limit', 'network', 'server', 'client'] as const;
@@ -106,6 +107,8 @@ export class Run {
   private readonly stack: ResourceStack;
   private readonly conversations = new Map<LegName, Conversation>();
   private readonly sessions = new Map<LegName, AdapterSession>();
+  /** Segment sides are carried by the open event; text events only carry a ref. */
+  private readonly segmentSides = new Map<LegName, Map<number, 'source' | 'translation'>>();
   /**
    * Fork: a leg's pace, as the runner was last told (`Runner.setLegPace`): `quick` is told to its session, and a
    * `paused` leg is given silence in place of its sound — of the same length, so that what it was hearing ends as
@@ -596,12 +599,13 @@ export class Run {
       case 'segmentOpened': {
         const p = event.payload;
         side.open.add(ref(p.ref));
+        this.sideMap(leg).set(ref(p.ref), p.side);
         // A segment that states no origin yet has one of its own, never to be paired with the leg's own by time.
         conversation?.apply({ kind: 'segmentOpened', payload: { ref: ref(p.ref), side: p.side, origin: `${side.origin}${p.origin ?? `r${p.ref}`}` } });
         return;
       }
       case 'segmentText':
-        conversation?.apply({ kind: 'segmentText', payload: { ...event.payload, ref: ref(event.payload.ref) } });
+        conversation?.apply(this.glossaryEvent(leg, { ...event, payload: { ...event.payload, ref: ref(event.payload.ref) } }));
         return;
       case 'segmentClosed': {
         const p = event.payload;
@@ -673,13 +677,35 @@ export class Run {
     return eventsFrom((event) => this.onEvent(leg, event));
   }
 
+  private sideMap(leg: LegName): Map<number, 'source' | 'translation'> {
+    let map = this.segmentSides.get(leg);
+    if (!map) {
+      map = new Map();
+      this.segmentSides.set(leg, map);
+    }
+    return map;
+  }
+
+  /** Apply the local glossary at the contract boundary for providers without native context support. */
+  private glossaryEvent(leg: LegName, event: AdapterEvent): AdapterEvent {
+    const glossary = this.shape.shared.glossary;
+    if (!glossary || event.kind !== 'segmentText') return event;
+    const side = this.sideMap(leg).get(event.payload.ref);
+    if (!side) return event;
+    const text = side === 'source'
+      ? normalizeRecognitionText(event.payload.text, glossary)
+      : normalizeTranslationText(event.payload.text, glossary);
+    return text === event.payload.text ? event : { ...event, payload: { ...event.payload, text } };
+  }
+
   private onEvent(leg: LegName, event: AdapterEvent): void {
     if (this.finished) return;
     if (event.kind === 'frame') {
       this.deps.frames?.frame(leg, event.payload);
       return;
     }
-    this.conversations.get(leg)?.apply(event);
+    if (event.kind === 'segmentOpened') this.sideMap(leg).set(event.payload.ref, event.payload.side);
+    this.conversations.get(leg)?.apply(this.glossaryEvent(leg, event));
     if (this.ending) return;
     const { playback, analytics } = this.deps;
     const provider = this.shape.provider.id;

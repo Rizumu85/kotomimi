@@ -15,6 +15,7 @@ import {
   REALTIME_SILENCE_RANGE, REALTIME_THRESHOLD_RANGE, takesReasoning, type NoiseReduction, type ReasoningEffort, type RealtimeSettings,
 } from './settings';
 import { buildTranscriptionHint, type TranscriptionHint } from './transcription';
+import { buildGlossaryPrompt, glossaryRecognitionTerms } from '../../lib/glossary/glossary';
 
 /** Automatic detection as the wire takes it (`openAIRealtimeSession.ts:13-41`); the adapter adds `create_response: true, interrupt_response: false`. */
 export type TurnDetection =
@@ -63,7 +64,9 @@ export function buildRealtime(context: SessionContext, s: RealtimeSettings, shar
   if (!model) return { refused: 'No OpenAI Realtime model is available to this key.', code: 'models_required' };
   const { source, target } = context.direction;
   // The participant's direction reads Other's prompt, as Gemini's and LocalInference's builders do.
-  const instructions = resolveInstructions(s, { participant: shared.reversed(context.direction), source: realtimeLanguageName(source), target: realtimeLanguageName(target) });
+  const baseInstructions = resolveInstructions(s, { participant: shared.reversed(context.direction), source: realtimeLanguageName(source), target: realtimeLanguageName(target) });
+  const glossaryPrompt = shared.glossary ? buildGlossaryPrompt(shared.glossary) : '';
+  const instructions = glossaryPrompt ? `${baseInstructions.trim()}\n\n${glossaryPrompt}`.trim() : baseInstructions;
   const turnDetection: TurnDetection | null = context.turns === 'manual'
     ? null
     : s.turnDetectionMode === 'Semantic'
@@ -83,7 +86,11 @@ export function buildRealtime(context: SessionContext, s: RealtimeSettings, shar
     // Every knob falls back to its default on a value that is not a finite number; maxTokens' default is 'inf' (unlimited).
     maxTokens: s.maxTokens === 'inf' || !Number.isFinite(s.maxTokens) ? 'inf' : Math.round(clamp(s.maxTokens, REALTIME_MAX_TOKENS_RANGE, REALTIME_MAX_TOKENS_RANGE.max)),
     turnDetection,
-    transcription: buildTranscriptionHint(s.transcriptModel, source, s.transcriptKeywords),
+    transcription: buildTranscriptionHint(
+      s.transcriptModel,
+      source,
+      [s.transcriptKeywords, ...(shared.glossary ? glossaryRecognitionTerms(shared.glossary) : [])].filter(Boolean).join(', '),
+    ),
     noiseReduction: NOISE[s.noiseReduction],
     ...(takesReasoning(model) ? { reasoningEffort: s.reasoningEffort } : {}),
     // Every session runs over WebSocket (ruling 12): a stored `transportType`, `webrtc` included, is not read into `S`.

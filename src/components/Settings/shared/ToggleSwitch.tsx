@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import Tooltip from '../../Tooltip/Tooltip';
 import './ToggleSwitch.scss';
 
@@ -9,6 +9,7 @@ interface ToggleSwitchProps {
   disabled?: boolean;
   tooltip?: string;
   tooltipMaxWidth?: number;
+  description?: string;
   className?: string;
 }
 
@@ -19,8 +20,10 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   disabled = false,
   tooltip,
   tooltipMaxWidth = 300,
+  description,
   className = ''
 }) => {
+  const descriptionId = useId();
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
@@ -29,7 +32,7 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   };
 
   return (
-    <div className={`toggle-switch-component ${className}`}>
+    <div className={`toggle-switch-component ${description ? 'has-description' : ''} ${className}`}>
       <div
         className={`toggle-switch-label ${disabled ? 'disabled' : ''}`}
         onClick={disabled ? undefined : onChange}
@@ -37,6 +40,7 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
         role="switch"
         aria-checked={checked}
         aria-disabled={disabled}
+        aria-describedby={description ? descriptionId : undefined}
         tabIndex={disabled ? -1 : 0}
       >
         <div className="toggle-track-container">
@@ -59,6 +63,7 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
           maxWidth={tooltipMaxWidth}
         />
       )}
+      {description && <p className="toggle-switch-description" id={descriptionId}>{description}</p>}
     </div>
   );
 };

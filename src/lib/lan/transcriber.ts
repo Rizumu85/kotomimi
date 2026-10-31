@@ -194,7 +194,7 @@ export class LanTranscriber {
       }
       // Empty paired finals reject tentative words. An empty completion would otherwise preserve the old deltas.
       if (model.also && !result.text.trim()) {
-        if (this.item?.sent) this.failed('The recognizer did not finalize any words for this utterance.');
+        if (this.item?.sent) this.failed('No usable final transcript was produced for this utterance.');
         else this.item = null;
         return;
       }

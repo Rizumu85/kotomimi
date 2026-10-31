@@ -184,6 +184,17 @@ describe('Conversation — audio', () => {
 });
 
 describe('Conversation — notices and closing', () => {
+  it('keeps repeated utterance transcription failures out of the conversation without hiding fatal failures', () => {
+    const { conv, apply, clock } = make();
+    for (let i = 0; i < 3; i++) {
+      apply({ kind: 'degraded', payload: { code: 'transcription_failed', message: 'No final words.' } });
+      clock.advance(DEGRADED_DEDUPE_MS + 1);
+    }
+    expect(conv.snapshot().notices).toEqual([]);
+    apply({ kind: 'failed', payload: { code: 'transcription_failed', message: 'Recognizer stopped.' } });
+    expect(conv.snapshot().notices).toMatchObject([{ severity: 'error', message: 'Recognizer stopped.' }]);
+  });
+
   it('turns failed into an error notice and degraded into a notice with the table\'s severity', () => {
     const { conv, apply } = make();
     apply({ kind: 'failed', payload: { message: 'socket died', code: 'E1' } });
