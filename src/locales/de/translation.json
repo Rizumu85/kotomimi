@@ -333,7 +333,8 @@
       "theyRead": "sie lesen",
       "theySpeak": "sie sprechen",
       "mirror": "Sie sprechen {{their}} → ich lese {{mine}}"
-    }
+    },
+    "noiseSuppressionFallback": "Derzeit wird {{mode}} verwendet. Die gewählte Rauschunterdrückung ist nicht verfügbar."
   },
   "simpleSettings": {
     "autoAuthenticated": "Automatisch über Ihr Konto authentifiziert",
@@ -1593,7 +1594,8 @@
     "mic_now_using": "Jetzt wird das Mikrofon „{{device}}“ verwendet.",
     "mic_in_use": "Das Mikrofon „{{device}}“ wird von {{apps}} verwendet. Schließen Sie {{apps}} und starten Sie erneut, oder wählen Sie ein anderes Mikrofon.",
     "mic_unreadable": "Windows konnte das Mikrofon „{{device}}“ nicht öffnen. Möglicherweise belegt es eine andere App, oder sein Treiber reagiert nicht mehr. Schließen Sie Apps, die es verwenden, oder schließen Sie es neu an, und starten Sie dann erneut.",
-    "mic_blocked": "Windows erlaubt Sokuji nicht, das Mikrofon zu verwenden. Aktivieren Sie den Mikrofonzugriff für Desktop-Apps unter Einstellungen › Datenschutz und Sicherheit › Mikrofon, und starten Sie dann erneut."
+    "mic_blocked": "Windows erlaubt Sokuji nicht, das Mikrofon zu verwenden. Aktivieren Sie den Mikrofonzugriff für Desktop-Apps unter Einstellungen › Datenschutz und Sicherheit › Mikrofon, und starten Sie dann erneut.",
+    "noise_suppression_fallback": "Die gewählte Rauschunterdrückung ist nicht verfügbar. Eine niedrigere Stufe wird verwendet; prüfe die Mikrofoneinstellungen."
   },
   "viewer": {
     "title": "Sokuji-Untertitel",
@@ -1767,8 +1769,9 @@
       "detect": "Auto-detect",
       "detectUnavailable": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
       "speakBothUnavailable": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
-      "bestEffort": "Bestmögliche Erkennung",
-      "bestEffortHelp": "Das ausgewählte Spracherkennungsmodell gibt die Sprache des Transkripts nicht an. Kotomimi schätzt sie anhand des Textes, weshalb die Erkennung der Sprache weniger zuverlässig sein kann."
+      "bestEffortSummary": "Die Sprache wird aus dem Text abgeleitet und kann falsch erkannt werden.",
+      "bestEffortHelp": "Das ausgewählte Spracherkennungsmodell gibt die Sprache des Transkripts nicht an. Kotomimi schätzt sie anhand des Textes, weshalb die Erkennung der Sprache weniger zuverlässig sein kann.",
+      "pairHelp": "Wähle die Sprachen, die du und dein Gegenüber hauptsächlich verwenden. Deine Sprache wird in ihre übersetzt, ihre in deine."
     },
     "wizard": {
       "pathTitle": "Kotomimi Pipeline",

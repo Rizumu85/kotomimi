@@ -8,7 +8,7 @@
  */
 import type { SessionContext } from '../../lib/contract/adapter';
 import { resolveInstructions } from '../../lib/provider/instructions';
-import { buildGlossaryPrompt } from '../../lib/glossary/glossary';
+import { withGlossary } from '../../lib/glossary/glossary';
 import type { ProviderRefusal, SharedSettings } from '../../lib/provider/types';
 import { clampSegmentPauseMs, segmentPauseMs } from '../../lib/segmentation/segmentationMode';
 import { LIVE_DEFAULT_VOICE, LIVE_LANGUAGES, LIVE_MODEL, LIVE_VOICES, liveLanguageName, type LiveSettings } from './settings';
@@ -36,12 +36,10 @@ export function buildLive(context: SessionContext, s: LiveSettings, shared: Shar
   // A guard: the languages offer the 55 targets only, so the runner never builds another.
   if (!LIVE_LANGUAGES.some((o) => o.value === target)) return { refused: `OpenAI Live does not translate into ${target}.` };
   const sentences = shared.segmentation.mode === 'sentences';
-  const baseInstructions = resolveInstructions(s, { participant: shared.reversed(context.direction), source: liveLanguageName(source), target: liveLanguageName(target) });
-  const glossaryPrompt = shared.glossary ? buildGlossaryPrompt(shared.glossary) : '';
   return {
     model: LIVE_MODEL,
     // The participant's direction reads Other's prompt, as the other builders do.
-    instructions: glossaryPrompt ? `${baseInstructions.trim()}\n\n${glossaryPrompt}`.trim() : baseInstructions,
+    instructions: withGlossary(resolveInstructions(s, { participant: shared.reversed(context.direction), source: liveLanguageName(source), target: liveLanguageName(target) }), shared.glossary),
     voice: LIVE_VOICES.some((v) => v.value === s.voice) ? s.voice : LIVE_DEFAULT_VOICE,
     silence: {
       sourceMs: clampSegmentPauseMs(segmentPauseMs(shared.pauses.sourceSeconds)),

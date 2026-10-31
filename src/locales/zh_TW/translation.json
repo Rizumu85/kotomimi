@@ -333,7 +333,8 @@
       "theyRead": "對方讀到",
       "theySpeak": "對方說",
       "mirror": "對方說 {{their}} → 我閱讀 {{mine}}"
-    }
+    },
+    "noiseSuppressionFallback": "目前使用{{mode}}。所選降噪無法使用。"
   },
   "simpleSettings": {
     "autoAuthenticated": "已通過您的帳戶自動認證",
@@ -1593,7 +1594,8 @@
     "mic_now_using": "現在使用麥克風「{{device}}」。",
     "mic_in_use": "麥克風「{{device}}」正被 {{apps}} 佔用。請關閉 {{apps}} 後重新開始，或選擇其他麥克風。",
     "mic_unreadable": "Windows 無法開啟麥克風「{{device}}」。可能有其他應用程式佔用了它，或者它的驅動程式沒有回應。請關閉正在使用它的應用程式或重新連接麥克風，然後重新開始。",
-    "mic_blocked": "Windows 不允許 Sokuji 使用麥克風。請在 設定 › 隱私權與安全性 › 麥克風 中開啟傳統型應用程式的麥克風存取權，然後重新開始。"
+    "mic_blocked": "Windows 不允許 Sokuji 使用麥克風。請在 設定 › 隱私權與安全性 › 麥克風 中開啟傳統型應用程式的麥克風存取權，然後重新開始。",
+    "noise_suppression_fallback": "所選降噪無法使用，已改用較低等級，請檢查麥克風設定。"
   },
   "viewer": {
     "title": "Sokuji 字幕",
@@ -1753,7 +1755,6 @@
       "mutedNotHeard": "VRChat 靜音中，不會辨識你說的話。"
     },
     "languageMenu": {
-      "pairHelp": "選擇你和對方主要使用的語言。你說的話預設翻成對方的語言，對方的話翻成你的語言。",
       "speakBoth": "我也說{{language}}",
       "speakBothHelp": "你說{{mine}}時翻成{{language}}，說{{language}}時翻成{{mine}}。辨識會自動分辨這兩種語言。",
       "search": "輸入篩選語言",
@@ -1767,9 +1768,10 @@
       "mostly": "翻譯對方主要說的語言",
       "detect": "自動偵測",
       "detectUnavailable": "目前的語音辨識不能自動偵測語言，需要 Qwen3-ASR 1.7B GGUF 或 API 模型。",
-      "speakBothUnavailable": "目前的語音模型無法區分{{mine}}和{{language}}。請選擇能自動辨識這兩種語言的模型。",
+      "speakBothUnavailable": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
       "bestEffortSummary": "根據文字推測語言，可能判斷不準",
-      "bestEffortHelp": "目前選擇的語音辨識模型不會回傳轉寫文字的語言。Kotomimi 會根據文字推測，因此語言判斷可能不夠準確。"
+      "bestEffortHelp": "目前選擇的語音辨識模型不會回傳轉寫文字的語言。Kotomimi 會根據文字推測，因此語言判斷可能不夠準確。",
+      "pairHelp": "選擇你和對方主要使用的語言。你說的話預設翻成對方的語言，對方的話翻成你的語言。"
     },
     "wizard": {
       "pathTitle": "Kotomimi 自由搭配",

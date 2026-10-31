@@ -1,5 +1,18 @@
 import { registerThemeDocument } from '../../../lib/theme/theme';
 
+/**
+ * Size changes of an element that may live in the subtitle window. An observer runs with the frames of the window
+ * that made it, not the element's: one made by the app's window never hears the subtitle window being resized.
+ */
+export function observeSize(element: Element, onResize: () => void): () => void {
+  const own = element.ownerDocument.defaultView as (Window & typeof globalThis) | null;
+  const Observer = own?.ResizeObserver ?? (typeof ResizeObserver === 'undefined' ? undefined : ResizeObserver);
+  if (!Observer) return () => {};
+  const observer = new Observer(onResize);
+  observer.observe(element);
+  return () => observer.disconnect();
+}
+
 /** Keep a portal document's styles, fonts and root variables in sync with its owning app. */
 export function mirrorChildDocument(from: Document, to: Document): () => void {
   const base = to.createElement('base');

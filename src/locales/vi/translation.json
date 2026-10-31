@@ -333,7 +333,8 @@
       "theyRead": "họ đọc",
       "theySpeak": "họ nói",
       "mirror": "Họ nói {{their}} → tôi đọc {{mine}}"
-    }
+    },
+    "noiseSuppressionFallback": "Hiện đang dùng {{mode}}. Chế độ giảm ồn đã chọn không khả dụng."
   },
   "simpleSettings": {
     "autoAuthenticated": "Tự động xác thực qua tài khoản của bạn",
@@ -1593,7 +1594,8 @@
     "mic_now_using": "Đang dùng micrô “{{device}}”.",
     "mic_in_use": "Micrô “{{device}}” đang được {{apps}} sử dụng. Hãy đóng {{apps}} rồi bắt đầu lại, hoặc chọn micrô khác.",
     "mic_unreadable": "Windows không mở được micrô “{{device}}”. Có thể một ứng dụng khác đang dùng nó, hoặc trình điều khiển của nó không phản hồi. Hãy đóng các ứng dụng đang dùng nó hoặc kết nối lại, rồi bắt đầu lại.",
-    "mic_blocked": "Windows không cho phép Sokuji dùng micrô. Hãy bật quyền truy cập micrô cho ứng dụng máy tính trong Cài đặt › Quyền riêng tư & bảo mật › Micrô, rồi bắt đầu lại."
+    "mic_blocked": "Windows không cho phép Sokuji dùng micrô. Hãy bật quyền truy cập micrô cho ứng dụng máy tính trong Cài đặt › Quyền riêng tư & bảo mật › Micrô, rồi bắt đầu lại.",
+    "noise_suppression_fallback": "Chế độ giảm ồn đã chọn không khả dụng. Đang dùng mức thấp hơn; hãy kiểm tra cài đặt micrô."
   },
   "viewer": {
     "title": "Phụ đề Sokuji",
@@ -1767,8 +1769,9 @@
       "detect": "Auto-detect",
       "detectUnavailable": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
       "speakBothUnavailable": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
-      "bestEffort": "Cố gắng hết sức",
-      "bestEffortHelp": "Mô hình nhận dạng giọng nói đã chọn không cho biết ngôn ngữ của bản chép lời. Kotomimi suy đoán từ văn bản, nên việc phát hiện ngôn ngữ có thể kém tin cậy hơn."
+      "bestEffortSummary": "Ngôn ngữ được suy đoán từ văn bản và có thể bị nhận sai.",
+      "bestEffortHelp": "Mô hình nhận dạng giọng nói đã chọn không cho biết ngôn ngữ của bản chép lời. Kotomimi suy đoán từ văn bản, nên việc phát hiện ngôn ngữ có thể kém tin cậy hơn.",
+      "pairHelp": "Chọn các ngôn ngữ mà bạn và người kia chủ yếu sử dụng. Lời của bạn được dịch sang ngôn ngữ của họ, và lời của họ sang ngôn ngữ của bạn."
     },
     "wizard": {
       "pathTitle": "Kotomimi Pipeline",

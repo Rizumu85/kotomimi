@@ -296,24 +296,8 @@ describe('SpinePreview', () => {
     }
   });
 
-  // Task 3, plan 1e-3b-2: `&settings=simple` draws the new Settings blocks in
-  // place of ProviderPanel (its fake `Script` select), including the global
-  // turn mode's own section.
-  it('with &settings=simple, draws the new blocks in place of ProviderPanel', async () => {
-    const before = window.location.href;
-    window.history.replaceState(null, '', '/?preview=spine&settings=simple');
-    try {
-      const { container } = render(<SpinePreview />);
-      await waitFor(() => expect(container.querySelector('#turn-detection-section')).not.toBeNull());
-      expect(screen.queryByLabelText('Script')).not.toBeInTheDocument();
-    } finally {
-      window.history.replaceState(null, '', before);
-    }
-  });
-
-  // `&settings=advanced` draws Advanced's Provider tab alone: the General
-  // tab's blocks (its own #provider-section) are &settings=simple's, so this
-  // page never doubles the id.
+  // `&settings=advanced` draws the Provider category alone, so this page never
+  // doubles #provider-section.
   it('with &settings=advanced&provider=localInference, draws only the Advanced Provider tab', async () => {
     const before = window.location.href;
     window.history.replaceState(null, '', '/?preview=spine&settings=advanced&provider=localInference');

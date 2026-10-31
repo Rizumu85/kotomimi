@@ -333,7 +333,8 @@
       "theyRead": "相手が読む言語",
       "theySpeak": "相手が話す言語",
       "mirror": "相手は{{their}}を話す → 自分は{{mine}}で読む"
-    }
+    },
+    "noiseSuppressionFallback": "現在は{{mode}}を使用しています。選択したノイズ抑制は利用できません。"
   },
   "simpleSettings": {
     "autoAuthenticated": "アカウントで自動的に認証されました",
@@ -1593,7 +1594,8 @@
     "mic_now_using": "マイク「{{device}}」を使用しています。",
     "mic_in_use": "マイク「{{device}}」は{{apps}}が使用中です。{{apps}}を終了してからもう一度開始するか、別のマイクを選んでください。",
     "mic_unreadable": "Windows がマイク「{{device}}」を開けませんでした。ほかのアプリが使用中か、ドライバーが応答していない可能性があります。マイクを使っているアプリを終了するか、マイクを接続し直してから、もう一度開始してください。",
-    "mic_blocked": "Windows の設定により、Sokuji がマイクを使用できません。設定 › プライバシーとセキュリティ › マイク で、デスクトップ アプリのマイクへのアクセスをオンにしてから、もう一度開始してください。"
+    "mic_blocked": "Windows の設定により、Sokuji がマイクを使用できません。設定 › プライバシーとセキュリティ › マイク で、デスクトップ アプリのマイクへのアクセスをオンにしてから、もう一度開始してください。",
+    "noise_suppression_fallback": "選択したノイズ抑制は利用できません。低いレベルを使用しています。マイク設定を確認してください。"
   },
   "viewer": {
     "title": "Sokuji 字幕",
@@ -1753,7 +1755,6 @@
       "mutedNotHeard": "Muted in VRChat: what you say is not recognized."
     },
     "languageMenu": {
-      "pairHelp": "自分と相手が主に使う言語を選びます。自分の発言は相手の言語に、相手の発言は自分の言語に翻訳されます。",
       "speakBoth": "I speak {{language}} too",
       "speakBothHelp": "When you speak {{mine}}, it is translated into {{language}}; when you speak {{language}}, into {{mine}}. Recognition tells the two apart.",
       "search": "Type to find a language",
@@ -1767,9 +1768,10 @@
       "mostly": "Translate into what they mostly speak",
       "detect": "Auto-detect",
       "detectUnavailable": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
-      "speakBothUnavailable": "現在の音声認識モデルでは{{mine}}と{{language}}を区別できません。両方の言語を自動判別できるモデルを選んでください。",
-      "bestEffortSummary": "テキストから言語を推測するため、誤判定する場合があります。",
-      "bestEffortHelp": "選択した音声認識モデルは、文字起こしの言語を返しません。Kotomimi がテキストから推測するため、言語判定の精度が下がる場合があります。"
+      "speakBothUnavailable": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
+      "bestEffortSummary": "言語は文字から推測するため、誤判定することがあります。",
+      "bestEffortHelp": "選択した音声認識モデルは、文字起こしの言語を返しません。Kotomimi がテキストから推測するため、言語判定の精度が下がる場合があります。",
+      "pairHelp": "自分と相手が主に使う言語を選びます。自分の発言は相手の言語に、相手の発言は自分の言語に翻訳されます。"
     },
     "wizard": {
       "pathTitle": "Kotomimi Pipeline",

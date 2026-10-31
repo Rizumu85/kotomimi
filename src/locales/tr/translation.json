@@ -333,7 +333,8 @@
       "theyRead": "onlar okuyor",
       "theySpeak": "onlar konuşuyor",
       "mirror": "Onlar {{their}} konuşuyor → ben {{mine}} okuyorum"
-    }
+    },
+    "noiseSuppressionFallback": "Şu anda {{mode}} kullanılıyor. Seçilen gürültü azaltma kullanılamıyor."
   },
   "simpleSettings": {
     "autoAuthenticated": "Hesabınız üzerinden otomatik olarak doğrulandı",
@@ -1593,7 +1594,8 @@
     "mic_now_using": "Artık “{{device}}” mikrofonu kullanılıyor.",
     "mic_in_use": "“{{device}}” mikrofonu şu anda kullanımda ({{apps}}). Yeniden başlatmadan önce kapatın: {{apps}}. Ya da başka bir mikrofon seçin.",
     "mic_unreadable": "Windows “{{device}}” mikrofonunu açamadı. Başka bir uygulama kullanıyor olabilir veya sürücüsü yanıt vermiyor olabilir. Mikrofonu kullanan uygulamaları kapatın veya mikrofonu yeniden bağlayın, ardından yeniden başlatın.",
-    "mic_blocked": "Windows, Sokuji'nin mikrofonu kullanmasına izin vermiyor. Ayarlar › Gizlilik ve güvenlik › Mikrofon bölümünden masaüstü uygulamalarının mikrofon erişimini açın, ardından yeniden başlatın."
+    "mic_blocked": "Windows, Sokuji'nin mikrofonu kullanmasına izin vermiyor. Ayarlar › Gizlilik ve güvenlik › Mikrofon bölümünden masaüstü uygulamalarının mikrofon erişimini açın, ardından yeniden başlatın.",
+    "noise_suppression_fallback": "Seçilen gürültü azaltma kullanılamıyor. Daha düşük bir düzey kullanılıyor; mikrofon ayarlarını kontrol edin."
   },
   "viewer": {
     "title": "Sokuji altyazıları",
@@ -1767,8 +1769,9 @@
       "detect": "Auto-detect",
       "detectUnavailable": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
       "speakBothUnavailable": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
-      "bestEffort": "Mümkün olduğunca",
-      "bestEffortHelp": "Seçilen konuşma tanıma modeli, dökümün dilini bildirmez. Kotomimi dili metinden tahmin eder; bu nedenle dil algılama daha az güvenilir olabilir."
+      "bestEffortSummary": "Dil metinden çıkarılır ve yanlış belirlenebilir.",
+      "bestEffortHelp": "Seçilen konuşma tanıma modeli, dökümün dilini bildirmez. Kotomimi dili metinden tahmin eder; bu nedenle dil algılama daha az güvenilir olabilir.",
+      "pairHelp": "Sizin ve karşınızdakinin en çok kullandığı dilleri seçin. Söyledikleriniz onun diline, onun söyledikleri sizin dilinize çevrilir."
     },
     "wizard": {
       "pathTitle": "Kotomimi Pipeline",

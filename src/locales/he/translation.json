@@ -333,7 +333,8 @@
       "theyRead": "הם קוראים",
       "theySpeak": "הם מדברים",
       "mirror": "הם מדברים {{their}} → אני קורא {{mine}}"
-    }
+    },
+    "noiseSuppressionFallback": "כעת בשימוש: {{mode}}. סינון הרעשים שנבחר אינו זמין."
   },
   "simpleSettings": {
     "autoAuthenticated": "אומת אוטומטית דרך החשבון שלך",
@@ -1593,7 +1594,8 @@
     "mic_now_using": "כעת נעשה שימוש במיקרופון “{{device}}”.",
     "mic_in_use": "המיקרופון “{{device}}” נמצא בשימוש של {{apps}}. סגור את {{apps}} והתחל מחדש, או בחר מיקרופון אחר.",
     "mic_unreadable": "Windows לא הצליח לפתוח את המיקרופון “{{device}}”. ייתכן שאפליקציה אחרת משתמשת בו, או שמנהל ההתקן שלו הפסיק להגיב. סגור אפליקציות שמשתמשות בו או חבר אותו מחדש, ואז התחל מחדש.",
-    "mic_blocked": "Windows לא מאפשר ל-Sokuji להשתמש במיקרופון. הפעל גישה למיקרופון עבור אפליקציות שולחן עבודה בהגדרות › פרטיות ואבטחה › מיקרופון, ואז התחל מחדש."
+    "mic_blocked": "Windows לא מאפשר ל-Sokuji להשתמש במיקרופון. הפעל גישה למיקרופון עבור אפליקציות שולחן עבודה בהגדרות › פרטיות ואבטחה › מיקרופון, ואז התחל מחדש.",
+    "noise_suppression_fallback": "סינון הרעשים שנבחר אינו זמין. נעשה שימוש ברמה נמוכה יותר; בדקו את הגדרות המיקרופון."
   },
   "viewer": {
     "title": "כתוביות Sokuji",
@@ -1767,8 +1769,9 @@
       "detect": "Auto-detect",
       "detectUnavailable": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
       "speakBothUnavailable": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
-      "bestEffort": "כמיטב היכולת",
-      "bestEffortHelp": "מודל זיהוי הדיבור שנבחר אינו מדווח על שפת התמלול. Kotomimi מנסה להסיק אותה מהטקסט, ולכן זיהוי השפה עשוי להיות פחות אמין."
+      "bestEffortSummary": "השפה מוסקת מהטקסט ועלולה להיות מזוהה בטעות.",
+      "bestEffortHelp": "מודל זיהוי הדיבור שנבחר אינו מדווח על שפת התמלול. Kotomimi מנסה להסיק אותה מהטקסט, ולכן זיהוי השפה עשוי להיות פחות אמין.",
+      "pairHelp": "בחרו את השפות שבהן אתם והצד השני משתמשים בעיקר. הדיבור שלכם יתורגם לשפתו, והדיבור שלו לשפתכם."
     },
     "wizard": {
       "pathTitle": "Kotomimi Pipeline",

@@ -15,7 +15,7 @@ import {
   REALTIME_SILENCE_RANGE, REALTIME_THRESHOLD_RANGE, takesReasoning, type NoiseReduction, type ReasoningEffort, type RealtimeSettings,
 } from './settings';
 import { buildTranscriptionHint, type TranscriptionHint } from './transcription';
-import { buildGlossaryPrompt, glossaryRecognitionTerms } from '../../lib/glossary/glossary';
+import { glossaryRecognitionTerms, withGlossary } from '../../lib/glossary/glossary';
 
 /** Automatic detection as the wire takes it (`openAIRealtimeSession.ts:13-41`); the adapter adds `create_response: true, interrupt_response: false`. */
 export type TurnDetection =
@@ -64,9 +64,7 @@ export function buildRealtime(context: SessionContext, s: RealtimeSettings, shar
   if (!model) return { refused: 'No OpenAI Realtime model is available to this key.', code: 'models_required' };
   const { source, target } = context.direction;
   // The participant's direction reads Other's prompt, as Gemini's and LocalInference's builders do.
-  const baseInstructions = resolveInstructions(s, { participant: shared.reversed(context.direction), source: realtimeLanguageName(source), target: realtimeLanguageName(target) });
-  const glossaryPrompt = shared.glossary ? buildGlossaryPrompt(shared.glossary) : '';
-  const instructions = glossaryPrompt ? `${baseInstructions.trim()}\n\n${glossaryPrompt}`.trim() : baseInstructions;
+  const instructions = withGlossary(resolveInstructions(s, { participant: shared.reversed(context.direction), source: realtimeLanguageName(source), target: realtimeLanguageName(target) }), shared.glossary);
   const turnDetection: TurnDetection | null = context.turns === 'manual'
     ? null
     : s.turnDetectionMode === 'Semantic'

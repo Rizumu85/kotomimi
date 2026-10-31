@@ -5,7 +5,7 @@ import { useModelStore } from '../../stores/modelStore';
 import { guardAstCrossStage } from '../../services/providers/astGuard';
 import { getManifestEntry, estimateModelMemoryByDevice } from '../../lib/local-inference/modelManifest';
 import { buildDefaultLocalPrompt } from '../../lib/local-inference/prompts';
-import { buildGlossaryPrompt } from '../../lib/glossary/glossary';
+import { withGlossary } from '../../lib/glossary/glossary';
 import type { LocalInferenceSettings } from './settings';
 
 /**
@@ -101,12 +101,11 @@ export function buildLocalInference(
   } else if (!resolved.translation) {
     translation = { kind: 'none' };
   } else {
-    const baseInstructions = localInstructions(context, s, shared);
-    const glossaryPrompt = shared.glossary ? buildGlossaryPrompt(shared.glossary) : '';
-    const instructions = glossaryPrompt ? `${baseInstructions.trim()}\n\n${glossaryPrompt}`.trim() : baseInstructions;
+    const stated = localInstructions(context, s, shared);
+    const instructions = withGlossary(stated, shared.glossary);
     const defaultForward = buildDefaultLocalPrompt(source, target);
     const defaultReverse = buildDefaultLocalPrompt(target, source);
-    const wrapTranscript = instructions === defaultForward || instructions === defaultReverse;
+    const wrapTranscript = stated === defaultForward || stated === defaultReverse;
     translation = { kind: 'engine', modelId: resolved.translation.modelId, instructions, wrapTranscript };
   }
 

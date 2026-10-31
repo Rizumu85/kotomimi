@@ -333,7 +333,8 @@
       "theyRead": "lezen zij",
       "theySpeak": "spreken zij",
       "mirror": "Zij spreken {{their}} → ik lees {{mine}}"
-    }
+    },
+    "noiseSuppressionFallback": "Momenteel wordt {{mode}} gebruikt. De gekozen ruisonderdrukking is niet beschikbaar."
   },
   "simpleSettings": {
     "autoAuthenticated": "Automatisch geauthenticeerd via uw account",
@@ -1593,7 +1594,8 @@
     "mic_now_using": "Nu wordt de microfoon “{{device}}” gebruikt.",
     "mic_in_use": "De microfoon “{{device}}” wordt gebruikt door {{apps}}. Sluit {{apps}} en start opnieuw, of kies een andere microfoon.",
     "mic_unreadable": "Windows kon de microfoon “{{device}}” niet openen. Mogelijk gebruikt een andere app hem, of reageert het stuurprogramma niet meer. Sluit apps die hem gebruiken of sluit hem opnieuw aan, en start dan opnieuw.",
-    "mic_blocked": "Windows staat niet toe dat Sokuji de microfoon gebruikt. Zet microfoontoegang voor bureaublad-apps aan via Instellingen › Privacy en beveiliging › Microfoon, en start dan opnieuw."
+    "mic_blocked": "Windows staat niet toe dat Sokuji de microfoon gebruikt. Zet microfoontoegang voor bureaublad-apps aan via Instellingen › Privacy en beveiliging › Microfoon, en start dan opnieuw.",
+    "noise_suppression_fallback": "De gekozen ruisonderdrukking is niet beschikbaar. Er wordt een lager niveau gebruikt; controleer de microfooninstellingen."
   },
   "viewer": {
     "title": "Sokuji-ondertiteling",
@@ -1767,8 +1769,9 @@
       "detect": "Auto-detect",
       "detectUnavailable": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
       "speakBothUnavailable": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
-      "bestEffort": "Zo goed mogelijk",
-      "bestEffortHelp": "Het geselecteerde spraakherkenningsmodel geeft de taal van de transcriptie niet aan. Kotomimi schat die in op basis van de tekst, waardoor de taaldetectie minder betrouwbaar kan zijn."
+      "bestEffortSummary": "De taal wordt uit de tekst afgeleid en kan verkeerd worden herkend.",
+      "bestEffortHelp": "Het geselecteerde spraakherkenningsmodel geeft de taal van de transcriptie niet aan. Kotomimi schat die in op basis van de tekst, waardoor de taaldetectie minder betrouwbaar kan zijn.",
+      "pairHelp": "Kies de talen die jij en de ander het meest gebruiken. Wat jij zegt wordt vertaald naar hun taal, en wat zij zeggen naar die van jou."
     },
     "wizard": {
       "pathTitle": "Kotomimi Pipeline",

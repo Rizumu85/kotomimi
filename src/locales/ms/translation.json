@@ -333,7 +333,8 @@
       "theyRead": "mereka baca",
       "theySpeak": "mereka bertutur",
       "mirror": "Mereka bertutur {{their}} → Saya baca {{mine}}"
-    }
+    },
+    "noiseSuppressionFallback": "Kini menggunakan {{mode}}. Penindasan hingar yang dipilih tidak tersedia."
   },
   "simpleSettings": {
     "autoAuthenticated": "Disahkan secara automatik melalui akaun anda",
@@ -1593,7 +1594,8 @@
     "mic_now_using": "Kini menggunakan mikrofon “{{device}}”.",
     "mic_in_use": "Mikrofon “{{device}}” sedang digunakan oleh {{apps}}. Tutup {{apps}} dan mula semula, atau pilih mikrofon lain.",
     "mic_unreadable": "Windows tidak dapat membuka mikrofon “{{device}}”. Mungkin apl lain sedang menggunakannya, atau pemacunya berhenti bertindak balas. Tutup apl yang menggunakannya atau sambungkan semula, kemudian mula semula.",
-    "mic_blocked": "Windows tidak membenarkan Sokuji menggunakan mikrofon. Hidupkan akses mikrofon untuk apl desktop dalam Tetapan › Privasi & keselamatan › Mikrofon, kemudian mula semula."
+    "mic_blocked": "Windows tidak membenarkan Sokuji menggunakan mikrofon. Hidupkan akses mikrofon untuk apl desktop dalam Tetapan › Privasi & keselamatan › Mikrofon, kemudian mula semula.",
+    "noise_suppression_fallback": "Penindasan hingar yang dipilih tidak tersedia. Tahap lebih rendah digunakan; semak tetapan mikrofon."
   },
   "viewer": {
     "title": "Sari kata Sokuji",
@@ -1767,8 +1769,9 @@
       "detect": "Auto-detect",
       "detectUnavailable": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
       "speakBothUnavailable": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
-      "bestEffort": "Usaha terbaik",
-      "bestEffortHelp": "Model pengecaman pertuturan yang dipilih tidak menyatakan bahasa transkrip. Kotomimi menganggarkannya berdasarkan teks, jadi pengesanan bahasa mungkin kurang tepat."
+      "bestEffortSummary": "Bahasa dianggarkan daripada teks dan mungkin salah dikenal pasti.",
+      "bestEffortHelp": "Model pengecaman pertuturan yang dipilih tidak menyatakan bahasa transkrip. Kotomimi menganggarkannya berdasarkan teks, jadi pengesanan bahasa mungkin kurang tepat.",
+      "pairHelp": "Pilih bahasa yang paling kerap digunakan oleh anda dan orang lain itu. Percakapan anda diterjemahkan ke bahasanya, dan percakapannya ke bahasa anda."
     },
     "wizard": {
       "pathTitle": "Kotomimi Pipeline",

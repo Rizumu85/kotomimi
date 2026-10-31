@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { reportError, describeCause } from '../../lib/diagnostics/report';
 import { registerThemeDocument } from '../../lib/theme/theme';
+import { observeSize } from './surfaces/childDocument';
 
 /**
  * Hosts a popover in its own frameless, transparent OS window instead of
@@ -375,12 +376,9 @@ export const ChildWindowPopover: React.FC<ChildWindowPopoverProps> = ({
   // Visibility and focus stay OUT of this path — refocusing on every resize
   // would fight the user mid-drag.
   useEffect(() => {
-    if (!open || !container || typeof ResizeObserver === 'undefined') return;
     const content = contentRef.current;
-    if (!content) return;
-    const ro = new ResizeObserver(() => sizeAndPlace());
-    ro.observe(content);
-    return () => ro.disconnect();
+    if (!open || !container || !content) return;
+    return observeSize(content, () => sizeAndPlace());
   }, [open, container, sizeAndPlace]);
 
   if (!container) return null;

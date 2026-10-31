@@ -1,8 +1,11 @@
+import { languageByScript } from '../language/script';
 import type { GlossaryEntry, GlossaryEntryInput, GlossaryImportResult, GlossarySnapshot } from './types';
 
 export const MAX_GLOSSARY_ENTRIES = 500;
 export const MAX_GLOSSARY_TERM_LENGTH = 120;
 const MAX_GLOSSARY_ALIASES = 12;
+/** How many pairs a provider is told, where it takes a prompt or a small list. */
+const MAX_GLOSSARY_PAIRS = 80;
 
 const cleanTerm = (value: unknown): string => typeof value === 'string'
   ? value.trim().slice(0, MAX_GLOSSARY_TERM_LENGTH)
@@ -26,11 +29,11 @@ function uniqueTerms(values: unknown): string[] {
   return result;
 }
 
-function idFor(index: number): string {
-  return `glossary-${Date.now().toString(36)}-${index.toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-}
+const newId = () => `glossary-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 
-export function normalizeGlossaryEntry(value: unknown, index = 0): GlossaryEntry | null {
+export const parseAliases = (text: string): string[] => text.split(/[,，、]/).map((alias) => alias.trim()).filter(Boolean);
+
+export function normalizeGlossaryEntry(value: unknown): GlossaryEntry | null {
   if (!value || typeof value !== 'object') return null;
   const raw = value as Partial<GlossaryEntry>;
   const source = cleanTerm(raw.source);
@@ -39,7 +42,7 @@ export function normalizeGlossaryEntry(value: unknown, index = 0): GlossaryEntry
   const aliases = uniqueTerms(raw.aliases).filter((alias) => alias !== source);
   const externalId = cleanExternalId(raw.externalId);
   return {
-    id: cleanTerm(raw.id) || idFor(index),
+    id: cleanTerm(raw.id) || newId(),
     ...(externalId ? { externalId } : {}),
     source,
     target,
@@ -53,25 +56,21 @@ export function normalizeGlossaryEntries(value: unknown): GlossaryEntry[] {
   const seenExternalIds = new Set<string>();
   const seenSources = new Set<string>();
   const result: GlossaryEntry[] = [];
-  value.forEach((item, index) => {
-    const entry = normalizeGlossaryEntry(item, index);
-    if (!entry) return;
+  for (const item of value) {
+    const entry = normalizeGlossaryEntry(item);
+    if (!entry) continue;
     const sourceKey = entry.source.toLocaleLowerCase();
     if (entry.externalId) {
       const externalKey = entry.externalId.toLocaleLowerCase();
-      if (seenExternalIds.has(externalKey)) return;
+      if (seenExternalIds.has(externalKey)) continue;
       seenExternalIds.add(externalKey);
     } else {
-      if (seenSources.has(sourceKey)) return;
+      if (seenSources.has(sourceKey)) continue;
       seenSources.add(sourceKey);
     }
     result.push(entry);
-  });
+  }
   return result.slice(0, MAX_GLOSSARY_ENTRIES);
-}
-
-export function createGlossaryEntry(input: GlossaryEntryInput, index = 0): GlossaryEntry | null {
-  return normalizeGlossaryEntry({ ...input, id: idFor(index) }, index);
 }
 
 function parseCsvRows(raw: string): string[][] {
@@ -172,30 +171,36 @@ export function parseGlossaryClipboard(raw: string): GlossaryEntryInput[] {
     entries.push({
       source,
       target: target || source,
-      aliases: aliases ? aliases.split(/[,，]/) : [],
+      aliases: parseAliases(aliases),
     });
   }
   return entries;
 }
 
-function sameTerms(left: readonly string[], right: readonly string[]): boolean {
-  return left.length === right.length && left.every((value, index) => value === right[index]);
-}
+const sameEntry = (a: GlossaryEntry, b: GlossaryEntry): boolean => a.source === b.source
+  && a.target === b.target
+  && a.externalId === b.externalId
+  && a.aliases.join('\n') === b.aliases.join('\n');
 
-/** Merge imported entries by external ID first, then canonical source. */
-export function mergeGlossaryEntriesDetailed(current: readonly GlossaryEntry[], imported: readonly GlossaryEntryInput[]): { entries: GlossaryEntry[]; result: GlossaryImportResult } {
+/**
+ * Merge imported entries by external ID first, then canonical source. A row from
+ * a friends list carries a name only: what the user wrote on it stays, the target
+ * unless it was just the old name.
+ */
+export function mergeGlossaryEntries(current: readonly GlossaryEntry[], imported: readonly GlossaryEntryInput[]): { entries: GlossaryEntry[]; result: GlossaryImportResult } {
   const result = normalizeGlossaryEntries(current);
   const byExternalId = new Map<string, GlossaryEntry>();
   const bySource = new Map<string, GlossaryEntry>();
-  result.forEach((entry) => {
+  const remember = (entry: GlossaryEntry) => {
     if (entry.externalId) byExternalId.set(entry.externalId.toLocaleLowerCase(), entry);
     bySource.set(entry.source.toLocaleLowerCase(), entry);
-  });
+  };
+  result.forEach(remember);
   let added = 0;
   let updated = 0;
   let skipped = 0;
   for (const input of imported) {
-    const entry = createGlossaryEntry(input, result.length);
+    const entry = normalizeGlossaryEntry({ ...input, id: newId() });
     if (!entry) {
       skipped += 1;
       continue;
@@ -204,35 +209,23 @@ export function mergeGlossaryEntriesDetailed(current: readonly GlossaryEntry[], 
     const existing = (entry.externalId && byExternalId.get(entry.externalId.toLocaleLowerCase()))
       ?? (entry.externalId && sourceMatch?.externalId ? undefined : sourceMatch);
     if (existing) {
-      const index = result.indexOf(existing);
-      const importedFromExternal = Boolean(entry.externalId);
-      const preserveCustomTarget = importedFromExternal && existing.target !== existing.source;
-      const nextValues = {
+      const named = Boolean(entry.externalId);
+      const next = normalizeGlossaryEntry({
         ...existing,
         externalId: entry.externalId ?? existing.externalId,
         source: entry.source,
-        target: preserveCustomTarget ? existing.target : entry.target,
-        aliases: preserveCustomTarget ? existing.aliases : entry.aliases,
-        id: existing.id,
-      };
-      const next = normalizeGlossaryEntry({
-        ...nextValues,
-      }, index);
+        target: named && existing.target !== existing.source ? existing.target : entry.target,
+        aliases: named ? existing.aliases : entry.aliases,
+      });
       if (next) {
-        const changed = next.source !== existing.source
-          || next.target !== existing.target
-          || next.externalId !== existing.externalId
-          || !sameTerms(next.aliases, existing.aliases);
-        result[index] = next;
+        if (!sameEntry(next, existing)) updated += 1;
+        result[result.indexOf(existing)] = next;
         bySource.delete(existing.source.toLocaleLowerCase());
-        bySource.set(next.source.toLocaleLowerCase(), next);
-        if (next.externalId) byExternalId.set(next.externalId.toLocaleLowerCase(), next);
-        if (changed) updated += 1;
+        remember(next);
       }
     } else if (result.length < MAX_GLOSSARY_ENTRIES) {
       result.push(entry);
-      bySource.set(entry.source.toLocaleLowerCase(), entry);
-      if (entry.externalId) byExternalId.set(entry.externalId.toLocaleLowerCase(), entry);
+      remember(entry);
       added += 1;
     } else {
       skipped += 1;
@@ -241,32 +234,33 @@ export function mergeGlossaryEntriesDetailed(current: readonly GlossaryEntry[], 
   return { entries: result, result: { added, updated, skipped } };
 }
 
-/** Merge imported entries by external ID first, then canonical source. */
-export function mergeGlossaryEntries(current: readonly GlossaryEntry[], imported: readonly GlossaryEntryInput[]): GlossaryEntry[] {
-  return mergeGlossaryEntriesDetailed(current, imported).entries;
-}
-
-function enabledEntries(snapshot: GlossarySnapshot | readonly GlossaryEntry[]): GlossaryEntry[] {
-  const entries: readonly GlossaryEntry[] = Array.isArray(snapshot)
-    ? snapshot
-    : (snapshot as GlossarySnapshot).entries;
-  return entries.filter((entry) => entry.enabled && entry.source && entry.target);
+/** What the user wrote by hand first, so that a friends list imported before it does not push it past a provider's limit. */
+function enabledEntries({ entries }: GlossarySnapshot): GlossaryEntry[] {
+  const written = (entry: GlossaryEntry) => (entry.target !== entry.source || entry.aliases.length > 0 ? 0 : 1);
+  return entries.filter((entry) => entry.enabled).sort((a, b) => written(a) - written(b));
 }
 
 function escapeRegExp(term: string): string {
   return term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+const WORD_EDGE = /[\p{Script=Latin}\p{N}]/u;
+
+/** A term in Latin letters is matched as a whole word: "art" is not in "start". Scripts written without spaces have no such edge. */
+function termPattern(term: string): RegExp {
+  const before = WORD_EDGE.test(term[0]) ? '(?<![\\p{Script=Latin}\\p{N}])' : '';
+  const after = WORD_EDGE.test(term[term.length - 1]) ? '(?![\\p{Script=Latin}\\p{N}])' : '';
+  return new RegExp(`${before}${escapeRegExp(term)}${after}`, 'giu');
+}
+
 function replaceTerms(text: string, replacements: readonly { from: string; to: string }[]): string {
   let result = text;
-  const ordered = [...replacements].sort((a, b) => b.from.length - a.from.length);
-  const targetForms = ordered.filter((item) => item.from !== item.to).map((item) => item.to.toLocaleLowerCase());
+  const ordered = replacements.filter((item) => item.from !== item.to).sort((a, b) => b.from.length - a.from.length);
+  const targetForms = ordered.map((item) => item.to.toLocaleLowerCase());
   for (const { from, to } of ordered) {
-    if (!from || from === to) continue;
     // Do not expand a target that already contains the source term (for
     // example `AI` → `AI assistant`) every time a streaming revision arrives.
-    const pattern = new RegExp(escapeRegExp(from), 'giu');
-    result = result.replace(pattern, (match, offset: number, whole: string) => {
+    result = result.replace(termPattern(from), (match, offset: number, whole: string) => {
       const lower = whole.toLocaleLowerCase();
       if (targetForms.some((target) => target.length > match.length && lower.startsWith(target, offset))) return match;
       return to;
@@ -276,20 +270,31 @@ function replaceTerms(text: string, replacements: readonly { from: string; to: s
 }
 
 /** Fold ASR variants into the canonical source term. */
-export function normalizeRecognitionText(text: string, snapshot: GlossarySnapshot | readonly GlossaryEntry[]): string {
-  const replacements = enabledEntries(snapshot).flatMap((entry) => [
-    { from: entry.source, to: entry.source },
-    ...entry.aliases.map((alias) => ({ from: alias, to: entry.source })),
-  ]);
-  return replaceTerms(text, replacements);
+export function normalizeRecognitionText(text: string, snapshot: GlossarySnapshot): string {
+  return replaceTerms(text, enabledEntries(snapshot).flatMap((entry) => entry.aliases.map((alias) => ({ from: alias, to: entry.source }))));
 }
 
-/** Apply preferred source→target renderings to translated text. */
-export function normalizeTranslationText(text: string, snapshot: GlossarySnapshot | readonly GlossaryEntry[]): string {
-  return replaceTerms(text, enabledEntries(snapshot).map((entry) => ({ from: entry.source, to: entry.target })));
+/** Chinese and Japanese share the characters a rendering is often written in. */
+const writingOf = (text: string): string | undefined => {
+  const language = languageByScript(text);
+  return language === 'ja' ? 'zh' : language;
+};
+
+/**
+ * Apply preferred source→target renderings to translated text. An entry has no
+ * direction and both legs pass through here, so the writing decides: `Alice → 爱丽丝`
+ * belongs in a Chinese translation, not in the English one going the other way.
+ */
+export function normalizeTranslationText(text: string, snapshot: GlossarySnapshot): string {
+  const written = writingOf(text);
+  const fits = ({ source, target }: GlossaryEntry) => {
+    const into = writingOf(target);
+    return into ? into === written : written === undefined || written !== writingOf(source);
+  };
+  return replaceTerms(text, enabledEntries(snapshot).filter(fits).map((entry) => ({ from: entry.source, to: entry.target })));
 }
 
-export function glossaryRecognitionTerms(snapshot: GlossarySnapshot | readonly GlossaryEntry[], limit = 100): string[] {
+export function glossaryRecognitionTerms(snapshot: GlossarySnapshot, limit = 100): string[] {
   const seen = new Set<string>();
   return enabledEntries(snapshot).flatMap((entry) => [entry.source, ...entry.aliases]).filter((term) => {
     const key = term.toLocaleLowerCase();
@@ -299,19 +304,18 @@ export function glossaryRecognitionTerms(snapshot: GlossarySnapshot | readonly G
   }).slice(0, limit);
 }
 
-export function glossaryTranslationPairs(snapshot: GlossarySnapshot | readonly GlossaryEntry[]): Array<{ source: string; target: string }> {
-  return enabledEntries(snapshot).map(({ source, target }) => ({ source, target }));
+export function glossaryTranslationPairs(snapshot: GlossarySnapshot): Array<{ source: string; target: string }> {
+  return enabledEntries(snapshot).slice(0, MAX_GLOSSARY_PAIRS).map(({ source, target }) => ({ source, target }));
 }
 
-/** A short, provider-neutral instruction block for models without a glossary API. */
-export function buildGlossaryPrompt(snapshot: GlossarySnapshot | readonly GlossaryEntry[]): string {
-  // Keep provider prompts bounded when a user pastes a large friends list.
-  const pairs = glossaryTranslationPairs(snapshot).slice(0, 80);
-  if (pairs.length === 0) return '';
-  const lines = pairs.map(({ source, target }) => `- ${source} → ${target}`);
+/** A provider's instructions with the glossary after them, for models without a glossary API. */
+export function withGlossary(instructions: string, snapshot: GlossarySnapshot | undefined): string {
+  const pairs = snapshot ? glossaryTranslationPairs(snapshot) : [];
+  if (pairs.length === 0) return instructions;
   return [
+    instructions.trim(),
+    '',
     'Terminology preferences (use these spellings when the corresponding term is spoken):',
-    ...lines,
-  ].join('\n');
+    ...pairs.map(({ source, target }) => `- ${source} → ${target}`),
+  ].join('\n').trim();
 }
-

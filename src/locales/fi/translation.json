@@ -333,7 +333,8 @@
       "theyRead": "he lukevat",
       "theySpeak": "he puhuvat",
       "mirror": "He puhuvat {{their}} → luen {{mine}}"
-    }
+    },
+    "noiseSuppressionFallback": "Käytössä on nyt {{mode}}. Valittu kohinanvaimennus ei ole käytettävissä."
   },
   "simpleSettings": {
     "autoAuthenticated": "Automaattisesti todennettu tilisi kautta",
@@ -1593,7 +1594,8 @@
     "mic_now_using": "Nyt käytetään mikrofonia ”{{device}}”.",
     "mic_in_use": "Mikrofoni ”{{device}}” on käytössä ({{apps}}). Sulje {{apps}} ja aloita uudelleen, tai valitse toinen mikrofoni.",
     "mic_unreadable": "Windows ei voinut avata mikrofonia ”{{device}}”. Toinen sovellus saattaa käyttää sitä, tai sen ohjain on lakannut vastaamasta. Sulje sitä käyttävät sovellukset tai liitä se uudelleen ja aloita sitten uudelleen.",
-    "mic_blocked": "Windows ei anna Sokujin käyttää mikrofonia. Salli työpöytäsovellusten mikrofonin käyttö kohdassa Asetukset › Tietosuoja ja suojaus › Mikrofoni ja aloita sitten uudelleen."
+    "mic_blocked": "Windows ei anna Sokujin käyttää mikrofonia. Salli työpöytäsovellusten mikrofonin käyttö kohdassa Asetukset › Tietosuoja ja suojaus › Mikrofoni ja aloita sitten uudelleen.",
+    "noise_suppression_fallback": "Valittu kohinanvaimennus ei ole käytettävissä. Käytössä on alempi taso; tarkista mikrofonin asetukset."
   },
   "viewer": {
     "title": "Sokuji-tekstitys",
@@ -1767,8 +1769,9 @@
       "detect": "Auto-detect",
       "detectUnavailable": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
       "speakBothUnavailable": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
-      "bestEffort": "Parhaan arvion mukaan",
-      "bestEffortHelp": "Valittu puheentunnistusmalli ei ilmoita litteroinnin kieltä. Kotomimi arvioi sen tekstin perusteella, joten kielen tunnistus voi olla epävarmempaa."
+      "bestEffortSummary": "Kieli päätellään tekstistä, ja se voi tunnistua väärin.",
+      "bestEffortHelp": "Valittu puheentunnistusmalli ei ilmoita litteroinnin kieltä. Kotomimi arvioi sen tekstin perusteella, joten kielen tunnistus voi olla epävarmempaa.",
+      "pairHelp": "Valitse kielet, joita sinä ja toinen henkilö pääasiassa käytätte. Puheesi käännetään hänen kielelleen ja hänen puheensa sinun kielellesi."
     },
     "wizard": {
       "pathTitle": "Kotomimi Pipeline",

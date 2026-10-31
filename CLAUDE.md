@@ -34,6 +34,8 @@ npm run test -- path/to/test
 ```
 
 ### Building and Packaging
+A private beta for testing before a stable release: `npm run make:beta`, see `docs/build/private-beta.md`.
+
 ```bash
 # Build React app
 npm run build
@@ -656,8 +658,8 @@ corrected on 2026-09-05.
 
 ## UI Components
 
-### Simple Mode Components
-- **SimpleSettings** (`src/components/Settings/SimpleSettings/SimpleSettings.tsx`): the simple layout's settings — the session settings (`SessionSettingsGeneral` in `ProviderArea.tsx`, shared with Advanced's General tab: languages, the provider picker, output switches, speech; sentence segmentation is hidden and held at Off while `SENTENCE_SEGMENTATION_SHOWN` in `settingsStore.ts` is false), the microphone and speaker, system audio (its participant-speech switch hidden and held off while `PARTICIPANT_SPEECH_SHOWN` in `routingStore.ts` is false), help
+### Main Components
+- **Settings** (`src/components/Settings/Settings.tsx`): one panel with three categories, General, Audio and Provider (`AdvancedSettings.tsx`); `NAVIGATION_TAB_MAP` says which category a deep link opens
 - **MainPanel**: Unified conversation panel with `uiMode`-driven layout (basic: bubble messages + status footer, advanced: bubble messages + waveform footer with controls)
 - **Tooltip**: @floating-ui/react powered tooltips with hover/click/focus triggers
 - **ConnectionStatus**: Real-time connection state indicator
@@ -687,7 +689,7 @@ corrected on 2026-09-05.
   `src/styles/colourLedger.consistency.test.ts` (an exact count of colour literals per file; the
   allow-list is brand marks, the user colour presets and defaults, the viewer and the dev
   previews). Light accent `#007255` as a fill and `#006d51` as text; dark accent `#0fbb8f`; error `#e74c3c` / `#ad3327`. Light status text also clears 4.5:1 on its own 10–15% tint.
-- Component styles defined in colocated SCSS files (e.g., `SimpleSettings.scss`)
+- Component styles defined in colocated SCSS files (e.g., `Settings.scss`)
 - Lucide React icons with consistent sizing (14-16px)
 
 ## Platform Requirements

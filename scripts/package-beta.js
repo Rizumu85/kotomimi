@@ -4,6 +4,13 @@ const pkg = require('../package.json');
 const version = process.env.KOTOMIMI_BETA_VERSION || `${pkg.version}-beta.1`;
 if (!/^\d+\.\d+\.\d+-beta\.\d+$/.test(version)) throw new Error('Expected X.Y.Z-beta.N');
 process.env.KOTOMIMI_BETA_VERSION = version;
+// What the release workflow builds with (`kotomimi-release.yml`), so that what is tested is what ships.
+Object.assign(process.env, {
+  VITE_BACKEND_URL: 'https://sokuji-api.kizuna.ai',
+  VITE_ENVIRONMENT: 'production',
+  VITE_ENABLE_KIZUNA_AI: 'true',
+  VITE_ENABLE_DEBUG: 'false',
+});
 const run = (command, args) => {
   const result = spawnSync(command, args, { stdio: 'inherit', shell: process.platform === 'win32', env: process.env });
   if (result.error || result.status !== 0) process.exit(result.status || 1);

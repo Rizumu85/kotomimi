@@ -14,6 +14,7 @@ import { AnnotatedLines, useAnnotation } from '../Annotated/AnnotatedText';
 import { Correction } from '../Feedback/Correction';
 import { useCoached } from '../Feedback/useCoached';
 import { fixOf } from '../../lib/feedback/correction';
+import { observeSize } from './surfaces/childDocument';
 import '../../styles/karaoke.scss';
 
 /**
@@ -43,11 +44,7 @@ function Slot({ className, lang, children, fitKey }: { className: string; lang?:
   useLayoutEffect(measure, [fitKey]); // eslint-disable-line react-hooks/exhaustive-deps
   // The window was resized.
   useEffect(() => {
-    const outer = box.current;
-    if (!outer || typeof ResizeObserver === 'undefined') return undefined;
-    const observer = new ResizeObserver(measure);
-    observer.observe(outer);
-    return () => observer.disconnect();
+    return box.current ? observeSize(box.current, measure) : undefined;
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div ref={box} className={className}>
@@ -261,10 +258,8 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
     };
     let keeping: ReturnType<typeof setTimeout> | undefined;
     measure();
-    if (typeof ResizeObserver === 'undefined') return () => clearTimeout(keeping);
-    const observer = new ResizeObserver(measure);
-    observer.observe(element);
-    return () => { observer.disconnect(); clearTimeout(keeping); };
+    const stop = observeSize(element, measure);
+    return () => { stop(); clearTimeout(keeping); };
   }, [roomy, least]);
   const spacing = spacingAt(squeeze, roomySpacing, tightSpacing);
   const lines = useMemo(() => linesFor(lanes, fontSize, spare, roomySpacing), [shape, fontSize, spare, roman]); // eslint-disable-line react-hooks/exhaustive-deps

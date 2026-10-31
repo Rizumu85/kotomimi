@@ -551,9 +551,7 @@ const useSettingsStore = create<SettingsStore>()(
       }
       // Claim the slot synchronously so a concurrent call (double-click,
       // duplicate dispatch) short-circuits at the guard above instead of
-      // racing into a second surface.enter(). On the Electron path the
-      // second IPC would otherwise overwrite normalBoundsSnapshot with
-      // the already-shrunk subtitle bounds — same bug class as 8f9aea85.
+      // racing into a second surface.enter().
       set({ subtitleModeActive: true, subtitleFullscreen: false });
       try {
         await getSubtitleSurface().enter();

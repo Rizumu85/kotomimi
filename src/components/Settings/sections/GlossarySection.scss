@@ -20,6 +20,8 @@
     flex-direction: column;
     gap: vars.$space-2;
     margin: vars.$space-3 0;
+    max-height: 340px;
+    overflow-y: auto;
   }
 
   .glossary-row {
@@ -118,13 +120,12 @@
     margin-top: vars.$space-3;
   }
 
-  .glossary-import-hint,
   .glossary-message {
+    margin: vars.$space-2 0 0;
     color: vars.$text-muted;
     font-size: vars.$font-caption;
   }
 
-  .glossary-message { margin: vars.$space-2 0 0; }
   .glossary-file-input { display: none; }
 }
 

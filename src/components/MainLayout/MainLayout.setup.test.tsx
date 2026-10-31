@@ -83,16 +83,11 @@ describe('MainLayout first-run gating (spec §1.1)', () => {
     expect(screen.getByTestId('tour-overlay')).toBeInTheDocument();
   });
 
-  it('drops the tour overlay during an Electron subtitle takeover', () => {
-    // The window is reshaped into a tiny bar and every anchor the tour points
-    // at is gone; TourOverlay portals to document.body, so the takeover's
-    // display:none would not have hidden it.
+  it('keeps the main window whole while the subtitles are in their own window', () => {
     flags.electron = true; flags.subtitleActive = true;
     render(<MainLayout />);
-    expect(screen.queryByTestId('tour-overlay')).toBeNull();
-    expect(screen.queryByTestId('title-bar')).toBeNull();
-    // The app session's takeover in the layout's place.
-    expect(screen.getByTestId('subtitle-takeover')).toBeInTheDocument();
+    expect(screen.getByTestId('tour-overlay')).toBeInTheDocument();
+    expect(screen.getByTestId('title-bar')).toBeInTheDocument();
   });
 });
 

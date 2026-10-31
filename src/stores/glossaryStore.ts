@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import { mergeGlossaryEntries, mergeGlossaryEntriesDetailed, normalizeGlossaryEntries, parseGlossaryClipboard } from '../lib/glossary/glossary';
+import { mergeGlossaryEntries, normalizeGlossaryEntries, parseGlossaryClipboard } from '../lib/glossary/glossary';
 import type { GlossaryEntry, GlossaryEntryInput, GlossaryImportResult, GlossarySnapshot } from '../lib/glossary/types';
 
 const KEY = 'settings.common.glossary';
@@ -26,7 +26,7 @@ export const useGlossaryStore = create<GlossaryStoreState>()(
     entries: [],
     hydrated: false,
     add: (input) => {
-      const entries = mergeGlossaryEntries(get().entries, [input]);
+      const { entries } = mergeGlossaryEntries(get().entries, [input]);
       set({ entries });
       write(entries);
     },
@@ -46,12 +46,10 @@ export const useGlossaryStore = create<GlossaryStoreState>()(
       write(entries);
     },
     importClipboard: (raw) => {
-      const imported = parseGlossaryClipboard(raw);
-      const merged = mergeGlossaryEntriesDetailed(get().entries, imported);
-      const entries = merged.entries;
+      const { entries, result } = mergeGlossaryEntries(get().entries, parseGlossaryClipboard(raw));
       set({ entries });
       write(entries);
-      return merged.result;
+      return result;
     },
     snapshot: () => ({ entries: get().entries.map((entry) => ({ ...entry, aliases: [...entry.aliases] })) }),
     hydrate: async () => {

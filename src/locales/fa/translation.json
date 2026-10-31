@@ -333,7 +333,8 @@
       "theyRead": "آن‌ها می‌خوانند",
       "theySpeak": "آن‌ها صحبت می‌کنند",
       "mirror": "آن‌ها به {{their}} صحبت می‌کنند → من به {{mine}} می‌خوانم"
-    }
+    },
+    "noiseSuppressionFallback": "اکنون از {{mode}} استفاده می‌شود. کاهش نویز انتخاب‌شده در دسترس نیست."
   },
   "simpleSettings": {
     "autoAuthenticated": "به طور خودکار از طریق حساب کاربری شما احراز هویت شده",
@@ -1593,7 +1594,8 @@
     "mic_now_using": "اکنون از میکروفون «{{device}}» استفاده می‌شود.",
     "mic_in_use": "میکروفون «{{device}}» در حال استفاده توسط {{apps}} است. {{apps}} را ببندید و دوباره شروع کنید، یا میکروفون دیگری انتخاب کنید.",
     "mic_unreadable": "Windows نتوانست میکروفون «{{device}}» را باز کند. ممکن است برنامه دیگری از آن استفاده کند یا درایور آن پاسخ ندهد. برنامه‌هایی را که از آن استفاده می‌کنند ببندید یا آن را دوباره وصل کنید، سپس دوباره شروع کنید.",
-    "mic_blocked": "Windows اجازه نمی‌دهد Sokuji از میکروفون استفاده کند. دسترسی برنامه‌های دسکتاپ به میکروفون را در تنظیمات › حریم خصوصی و امنیت › میکروفون روشن کنید، سپس دوباره شروع کنید."
+    "mic_blocked": "Windows اجازه نمی‌دهد Sokuji از میکروفون استفاده کند. دسترسی برنامه‌های دسکتاپ به میکروفون را در تنظیمات › حریم خصوصی و امنیت › میکروفون روشن کنید، سپس دوباره شروع کنید.",
+    "noise_suppression_fallback": "کاهش نویز انتخاب‌شده در دسترس نیست. از سطح پایین‌تری استفاده می‌شود؛ تنظیمات میکروفون را بررسی کنید."
   },
   "viewer": {
     "title": "زیرنویس Sokuji",
@@ -1767,8 +1769,9 @@
       "detect": "Auto-detect",
       "detectUnavailable": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
       "speakBothUnavailable": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
-      "bestEffort": "حداکثر تلاش",
-      "bestEffortHelp": "مدل تشخیص گفتار انتخاب‌شده زبان متن پیاده‌شده را اعلام نمی‌کند. Kotomimi زبان را از روی متن حدس می‌زند، بنابراین تشخیص زبان ممکن است قابل‌اعتماد نباشد."
+      "bestEffortSummary": "زبان از روی متن حدس زده می‌شود و ممکن است اشتباه باشد.",
+      "bestEffortHelp": "مدل تشخیص گفتار انتخاب‌شده زبان متن پیاده‌شده را اعلام نمی‌کند. Kotomimi زبان را از روی متن حدس می‌زند، بنابراین تشخیص زبان ممکن است قابل‌اعتماد نباشد.",
+      "pairHelp": "زبان‌هایی را که شما و طرف مقابل بیشتر استفاده می‌کنید انتخاب کنید. گفتار شما به زبان او و گفتار او به زبان شما ترجمه می‌شود."
     },
     "wizard": {
       "pathTitle": "Kotomimi Pipeline",

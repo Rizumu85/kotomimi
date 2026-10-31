@@ -333,7 +333,8 @@
       "theyRead": "তারা পড়ে",
       "theySpeak": "তারা বলে",
       "mirror": "তারা {{their}} বলে → আমি {{mine}} পড়ি"
-    }
+    },
+    "noiseSuppressionFallback": "এখন {{mode}} ব্যবহার হচ্ছে। নির্বাচিত নয়েজ সাপ্রেশন উপলব্ধ নয়।"
   },
   "simpleSettings": {
     "autoAuthenticated": "আপনার অ্যাকাউন্টের মাধ্যমে স্বয়ংক্রিয়ভাবে প্রমাণীকৃত",
@@ -1593,7 +1594,8 @@
     "mic_now_using": "এখন মাইক্রোফোন “{{device}}” ব্যবহার করা হচ্ছে।",
     "mic_in_use": "মাইক্রোফোন “{{device}}” {{apps}} ব্যবহার করছে। {{apps}} বন্ধ করে আবার শুরু করুন, অথবা অন্য একটি মাইক্রোফোন বেছে নিন।",
     "mic_unreadable": "Windows মাইক্রোফোন “{{device}}” খুলতে পারেনি। হয়তো অন্য কোনো অ্যাপ এটি ব্যবহার করছে, অথবা এর ড্রাইভার সাড়া দিচ্ছে না। যে অ্যাপগুলো এটি ব্যবহার করছে সেগুলো বন্ধ করুন বা এটি আবার সংযুক্ত করুন, তারপর আবার শুরু করুন।",
-    "mic_blocked": "Windows, Sokuji-কে মাইক্রোফোন ব্যবহার করতে দিচ্ছে না। সেটিংস › গোপনীয়তা ও নিরাপত্তা › মাইক্রোফোন থেকে ডেস্কটপ অ্যাপের জন্য মাইক্রোফোন অ্যাক্সেস চালু করুন, তারপর আবার শুরু করুন।"
+    "mic_blocked": "Windows, Sokuji-কে মাইক্রোফোন ব্যবহার করতে দিচ্ছে না। সেটিংস › গোপনীয়তা ও নিরাপত্তা › মাইক্রোফোন থেকে ডেস্কটপ অ্যাপের জন্য মাইক্রোফোন অ্যাক্সেস চালু করুন, তারপর আবার শুরু করুন।",
+    "noise_suppression_fallback": "নির্বাচিত নয়েজ সাপ্রেশন উপলব্ধ নয়। নিম্নতর স্তর ব্যবহার হচ্ছে; মাইক্রোফোন সেটিংস দেখুন।"
   },
   "viewer": {
     "title": "Sokuji সাবটাইটেল",
@@ -1767,8 +1769,9 @@
       "detect": "Auto-detect",
       "detectUnavailable": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
       "speakBothUnavailable": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
-      "bestEffort": "সাধ্যমতো চেষ্টা",
-      "bestEffortHelp": "নির্বাচিত কথন শনাক্তকরণ মডেল প্রতিলিপির ভাষা জানায় না। Kotomimi লেখা থেকে ভাষা অনুমান করে, তাই ভাষা শনাক্তকরণ কম নির্ভরযোগ্য হতে পারে।"
+      "bestEffortSummary": "ভাষা লেখা থেকে অনুমান করা হয় এবং ভুল হতে পারে।",
+      "bestEffortHelp": "নির্বাচিত কথন শনাক্তকরণ মডেল প্রতিলিপির ভাষা জানায় না। Kotomimi লেখা থেকে ভাষা অনুমান করে, তাই ভাষা শনাক্তকরণ কম নির্ভরযোগ্য হতে পারে।",
+      "pairHelp": "আপনি ও অপর ব্যক্তি প্রধানত যে ভাষা ব্যবহার করেন তা বেছে নিন। আপনার কথা তাদের ভাষায় এবং তাদের কথা আপনার ভাষায় অনুবাদ হবে।"
     },
     "wizard": {
       "pathTitle": "Kotomimi Pipeline",

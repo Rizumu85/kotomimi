@@ -251,6 +251,7 @@ describe('a provider session side', () => {
     expect(realtime).toEqual([
       'src/providers/openai/adapter.ts',
       'src/providers/openai/items.ts',
+      'src/providers/openai/kotomimiRefusal.ts',
       'src/providers/openai/queue.ts',
       'src/providers/openai/socket.ts',
       'src/providers/openai/wire.ts',

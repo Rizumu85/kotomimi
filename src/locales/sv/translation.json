@@ -333,7 +333,8 @@
       "theyRead": "de läser",
       "theySpeak": "de talar",
       "mirror": "De talar {{their}} → jag läser {{mine}}"
-    }
+    },
+    "noiseSuppressionFallback": "Använder just nu {{mode}}. Den valda brusreduceringen är inte tillgänglig."
   },
   "simpleSettings": {
     "autoAuthenticated": "Automatiskt autentiserad via ditt konto",
@@ -1593,7 +1594,8 @@
     "mic_now_using": "Nu används mikrofonen ”{{device}}”.",
     "mic_in_use": "Mikrofonen ”{{device}}” används av {{apps}}. Stäng {{apps}} och starta igen, eller välj en annan mikrofon.",
     "mic_unreadable": "Windows kunde inte öppna mikrofonen ”{{device}}”. En annan app kanske använder den, eller så svarar inte dess drivrutin. Stäng appar som använder den eller anslut den igen och starta sedan igen.",
-    "mic_blocked": "Windows låter inte Sokuji använda mikrofonen. Aktivera mikrofonåtkomst för skrivbordsappar under Inställningar › Sekretess och säkerhet › Mikrofon och starta sedan igen."
+    "mic_blocked": "Windows låter inte Sokuji använda mikrofonen. Aktivera mikrofonåtkomst för skrivbordsappar under Inställningar › Sekretess och säkerhet › Mikrofon och starta sedan igen.",
+    "noise_suppression_fallback": "Den valda brusreduceringen är inte tillgänglig. En lägre nivå används; kontrollera mikrofoninställningarna."
   },
   "viewer": {
     "title": "Sokuji-undertexter",
@@ -1767,8 +1769,9 @@
       "detect": "Auto-detect",
       "detectUnavailable": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
       "speakBothUnavailable": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
-      "bestEffort": "Så gott det går",
-      "bestEffortHelp": "Den valda taligenkänningsmodellen anger inte transkriptionens språk. Kotomimi uppskattar det utifrån texten, så språkidentifieringen kan vara mindre tillförlitlig."
+      "bestEffortSummary": "Språket härleds från texten och kan identifieras fel.",
+      "bestEffortHelp": "Den valda taligenkänningsmodellen anger inte transkriptionens språk. Kotomimi uppskattar det utifrån texten, så språkidentifieringen kan vara mindre tillförlitlig.",
+      "pairHelp": "Välj de språk som du och den andra personen främst använder. Det du säger översätts till deras språk och det de säger till ditt."
     },
     "wizard": {
       "pathTitle": "Kotomimi Pipeline",

@@ -20,6 +20,7 @@ import {
 } from '../../stores/subtitleStore';
 import type { ConversationListProps } from '../Conversation/ConversationList';
 import SubtitleBar from './SubtitleBar';
+import { observeSize } from './surfaces/childDocument';
 import { usePushToTalk } from '../MainPanel/panel/usePushToTalk';
 import { SubtitleBody } from './SubtitleBands';
 import { restingHeights } from './SubtitleLanes';
@@ -186,10 +187,9 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
     const onPointer = (state: { inside?: boolean }) => useSubtitleLookStore.getState().setNear(state?.inside === true);
     window.electron?.receive?.('subtitle:pointer', onPointer);
     // The button moves with the window's width.
-    const observer = typeof ResizeObserver !== 'undefined' && root ? new ResizeObserver(tell) : null;
-    if (root) observer?.observe(root);
+    const stop = root ? observeSize(root, tell) : undefined;
     return () => {
-      observer?.disconnect();
+      stop?.();
       window.electron?.removeListener?.('subtitle:pointer', onPointer);
     };
   }, [surface, through]); // eslint-disable-line react-hooks/exhaustive-deps

@@ -43,11 +43,16 @@ beforeEach(() => {
 
 // Import after mocking
 const { default: useSettingsStore } = await import('./settingsStore');
+const { __resetSubtitleSurfaceForTests } = await import('../components/Subtitle/surfaces');
 
 describe('settingsStore subtitle actions', () => {
   beforeEach(() => {
     useSettingsStore.setState({ subtitleModeActive: false, subtitleFullscreen: false });
     isElectronFlag = true;
+    __resetSubtitleSurfaceForTests();
+    // The subtitle window is a child of this one: an empty frame stands in for it.
+    const frame = document.body.appendChild(document.createElement('iframe'));
+    vi.spyOn(window, 'open').mockReturnValue(frame.contentWindow);
   });
 
   // Issue #324: the Electron subtitle window carries its own Start control
@@ -89,11 +94,7 @@ describe('settingsStore subtitle actions', () => {
   it('enterSubtitleMode is concurrency-safe (TOCTOU)', async () => {
     // Regression: two concurrent enter() calls (e.g. double-click) both
     // pass the subtitleModeActive guard, then both await the surface and
-    // both fire the subtitle:enter IPC. On the Electron path the main
-    // process snapshots normalBoundsSnapshot on every call, and the
-    // second invocation captures the *already-shrunk* subtitle bounds —
-    // exit would then restore the window to subtitle size. Same bug
-    // class as the one fixed in 8f9aea85.
+    // both fire the subtitle:enter IPC.
     const invokeMock = (window as any).electron.invoke;
     invokeMock.mockClear();
     const enter = useSettingsStore.getState().enterSubtitleMode;

@@ -333,7 +333,8 @@
       "theyRead": "oni czytają",
       "theySpeak": "oni mówią",
       "mirror": "Oni mówią {{their}} → ja czytam {{mine}}"
-    }
+    },
+    "noiseSuppressionFallback": "Obecnie używany jest tryb {{mode}}. Wybrane tłumienie szumów jest niedostępne."
   },
   "simpleSettings": {
     "autoAuthenticated": "Automatycznie uwierzytelniono za pomocą konta",
@@ -1593,7 +1594,8 @@
     "mic_now_using": "Teraz używany jest mikrofon „{{device}}”.",
     "mic_in_use": "Mikrofon „{{device}}” jest używany przez {{apps}}. Zamknij {{apps}} i rozpocznij ponownie albo wybierz inny mikrofon.",
     "mic_unreadable": "System Windows nie mógł otworzyć mikrofonu „{{device}}”. Może go używać inna aplikacja albo jego sterownik przestał odpowiadać. Zamknij aplikacje, które go używają, lub podłącz go ponownie, a następnie rozpocznij ponownie.",
-    "mic_blocked": "System Windows nie pozwala aplikacji Sokuji używać mikrofonu. Włącz dostęp do mikrofonu dla aplikacji klasycznych w obszarze Ustawienia › Prywatność i zabezpieczenia › Mikrofon, a następnie rozpocznij ponownie."
+    "mic_blocked": "System Windows nie pozwala aplikacji Sokuji używać mikrofonu. Włącz dostęp do mikrofonu dla aplikacji klasycznych w obszarze Ustawienia › Prywatność i zabezpieczenia › Mikrofon, a następnie rozpocznij ponownie.",
+    "noise_suppression_fallback": "Wybrane tłumienie szumów jest niedostępne. Używany jest niższy poziom; sprawdź ustawienia mikrofonu."
   },
   "viewer": {
     "title": "Napisy Sokuji",
@@ -1767,8 +1769,9 @@
       "detect": "Auto-detect",
       "detectUnavailable": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
       "speakBothUnavailable": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
-      "bestEffort": "Najlepsza możliwa próba",
-      "bestEffortHelp": "Wybrany model rozpoznawania mowy nie podaje języka transkrypcji. Kotomimi szacuje go na podstawie tekstu, więc wykrywanie języka może być mniej wiarygodne."
+      "bestEffortSummary": "Język jest ustalany na podstawie tekstu i może zostać rozpoznany błędnie.",
+      "bestEffortHelp": "Wybrany model rozpoznawania mowy nie podaje języka transkrypcji. Kotomimi szacuje go na podstawie tekstu, więc wykrywanie języka może być mniej wiarygodne.",
+      "pairHelp": "Wybierz języki, których ty i druga osoba głównie używacie. Twoje słowa są tłumaczone na jej język, a jej na twój."
     },
     "wizard": {
       "pathTitle": "Kotomimi Pipeline",

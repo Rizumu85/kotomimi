@@ -333,7 +333,8 @@
       "theyRead": "loro leggono",
       "theySpeak": "loro parlano",
       "mirror": "Loro parlano {{their}} → io leggo {{mine}}"
-    }
+    },
+    "noiseSuppressionFallback": "Attualmente è in uso {{mode}}. La soppressione del rumore selezionata non è disponibile."
   },
   "simpleSettings": {
     "autoAuthenticated": "Autenticato automaticamente tramite il tuo account",
@@ -1593,7 +1594,8 @@
     "mic_now_using": "Ora viene usato il microfono «{{device}}».",
     "mic_in_use": "Il microfono «{{device}}» è in uso da parte di {{apps}}. Chiudi {{apps}} e avvia di nuovo, oppure scegli un altro microfono.",
     "mic_unreadable": "Windows non è riuscito ad aprire il microfono «{{device}}». Potrebbe usarlo un’altra app, oppure il suo driver ha smesso di rispondere. Chiudi le app che lo usano o ricollegalo, poi avvia di nuovo.",
-    "mic_blocked": "Windows non consente a Sokuji di usare il microfono. Attiva l’accesso al microfono per le app desktop in Impostazioni › Privacy e sicurezza › Microfono, poi avvia di nuovo."
+    "mic_blocked": "Windows non consente a Sokuji di usare il microfono. Attiva l’accesso al microfono per le app desktop in Impostazioni › Privacy e sicurezza › Microfono, poi avvia di nuovo.",
+    "noise_suppression_fallback": "La soppressione del rumore selezionata non è disponibile. È in uso un livello inferiore; controlla le impostazioni del microfono."
   },
   "viewer": {
     "title": "Sottotitoli Sokuji",
@@ -1767,8 +1769,9 @@
       "detect": "Auto-detect",
       "detectUnavailable": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
       "speakBothUnavailable": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
-      "bestEffort": "Al meglio possibile",
-      "bestEffortHelp": "Il modello di riconoscimento vocale selezionato non indica la lingua della trascrizione. Kotomimi la stima dal testo, quindi il rilevamento della lingua potrebbe essere meno affidabile."
+      "bestEffortSummary": "La lingua viene dedotta dal testo e può essere identificata male.",
+      "bestEffortHelp": "Il modello di riconoscimento vocale selezionato non indica la lingua della trascrizione. Kotomimi la stima dal testo, quindi il rilevamento della lingua potrebbe essere meno affidabile.",
+      "pairHelp": "Scegli le lingue che tu e l’altra persona usate di più. Le tue parole vengono tradotte nella sua lingua e le sue nella tua."
     },
     "wizard": {
       "pathTitle": "Kotomimi Pipeline",
