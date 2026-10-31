@@ -1,15 +1,5 @@
 # Kotomimi（ことみみ）
 
-> **Light palette — 2026-10-30:** Light settings now use neutral surfaces, soft mint selections, and brighter non-text accents. Font samples have a light reading surface; light scrollbars have transparent tracks and neutral thumbs. Shared semantic roles keep readable text separate from bright indicators and solid actions. The approved direction is recorded in the light-theme design specification.
-
-> **Tooltip appearance — 2026-10-30:** Shared tooltips retain the existing theme colors and use the selected Soft graphite proportions: 14px text, 1.65 line height, 10px corners, content-sized short hints, and a 320px default maximum width. Multi-paragraph help uses more padding and paragraph spacing. Explicit width limits, viewport-edge positioning, and reduced-motion preferences remain supported.
-
-> **Runtime update — 2026-10-29:** Kotomimi's "this computer" stages and LAN sharing now use native engines only. The embedded LocalAI runner and the browser/WASM/WebGPU app-model runner have been removed from this provider. Old local runner settings normalize to native; native model choices and remote stage locations are preserved. Missing native models block readiness instead of falling back to browser models or Bing. External LocalAI servers, APIs, and phones remain supported. The upstream `src/providers/localInference/` implementation is retained; it is hidden on desktop and remains available on web and extension, with its Bing integration isolated in that retained upstream provider. The current stage and sharing sections below describe the native-only implementation.
-
-> **Fallback verification — 2026-10-30:** Kotomimi refuses a missing or unsupported selected native translator even if an old settings record names Bing or a different native translator is installed. Its readiness check neither resolves browser models nor makes a translation network request. English, Simplified Chinese, and Traditional Chinese notices now direct users to download native models or choose an API/another device; unsupported systems are directed to the remote options. Upstream Bing translation and Edge speech services remain outside this cleanup.
-
-> **Desktop provider visibility — 2026-10-30:** LocalInference is omitted from the desktop provider list in both development and release builds. A saved or in-memory LocalInference selection resolves to Kotomimi during desktop startup; the original saved selection and provider settings remain intact. Session starts use the same filtered list. Web and extension availability, upstream implementation files, external LocalAI servers, and Edge speech services are preserved.
-
 Kotomimi 是 Sokuji 的一个分支：在实时翻译之外，加上了自建模型的自由搭配和学语言用的辅助功能。名字取自"言葉"（话语）和"耳"（耳朵）。
 
 基于上游 [kizuna-ai-lab/sokuji](https://github.com/kizuna-ai-lab/sokuji) v0.42.3（`d2f8001`）。上游的说明见 [README.md](README.md)，这份文件只讲本分支多出来的东西。
@@ -1028,6 +1018,8 @@ git checkout -b sync/upstream-<日期> main
 git merge upstream/main                 # merge，不 rebase：main 的历史不改写。这里的 upstream 是上游的远端，不是本仓库的 upstream 分支
 node scripts/fork-localai-locales.cjs   # 语言包冲突时：先取上游版本，再跑这一行
 ```
+
+上游带来的 `docs/superpowers/plans` 是已经执行完的开发计划，合并后删掉，只留代码还在引用的那几份；要查看时都在 Git 历史里。
 
 测试跑 `.github/workflows/kotomimi-release.yml` 里"Run the fork's tests"那一步的完整命令（清单以那里为准），再跑 `npx tsc --noEmit -p .`。然后开 PR 到 `main`。本仓库的 `upstream` 分支只是一份放在 GitHub 上的镜像（现在停在 v0.42.2），合并不依赖它；想让它跟上，`git push origin upstream/main:upstream`。
 

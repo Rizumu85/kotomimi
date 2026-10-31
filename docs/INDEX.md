@@ -117,9 +117,7 @@ npm run electron:build
 
 ### 3. **Feature Documentation**
 - **Authentication & Authorization**
-  - [Authentication Integration](./TODO-AUTH-INTEGRATION.md)
   - [Kizuna AI Integration](./KIZUNA_AI_INTEGRATION.md)
-  - [Profile Optimization](./PROFILE-OPTIMIZATION.md)
 
 - **AI Provider Integration**
   - [Kizuna AI Provider](./KIZUNA_AI_INTEGRATION.md)
@@ -174,8 +172,6 @@ npm run electron:build
   - [Extension Packaging](./extension/extension-packaging.md)
 
 ### 7. **Migration Guides**
-- [Clerk to Better Auth Migration](./TODO-AUTH-INTEGRATION.md) (Historical)
-- [Profile Data Optimization](./PROFILE-OPTIMIZATION.md)
 
 ---
 

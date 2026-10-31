@@ -30,7 +30,6 @@ This directory contains comprehensive documentation for the Sokuji project, orga
 
 ### Technical Analysis Documentation
 - **[audio-analysis/](./audio-analysis/)** - Comprehensive audio flow analysis and echo feedback documentation
-- **[github-issues/](./github-issues/)** - Technical analysis for specific GitHub issues
 
 ### Project Documentation
 - **[../README.md](../README.md)** - Main project README
@@ -97,11 +96,6 @@ Technical documentation and analysis:
 - Browser AEC limitations
 - Solution recommendations
 
-### 🐛 GitHub Issues (github-issues/)
-Issue-specific technical analysis:
-- Problem investigation reports
-- Solution implementation details
-- Technical explanations for community
 
 ## Contributing to Documentation
 

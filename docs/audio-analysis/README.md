@@ -45,5 +45,3 @@ Interactive HTML visualization (needs updating) with:
    - Better browser compatibility
 
 ## Related Documentation
-
-- [GitHub Issue #55](../github-issues/issue-55-comment.md) - Original audio echo problem (now resolved)
