@@ -1,10 +1,13 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from 'react';
 import { ArrowRight, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { LegName, SegmentId } from '../../lib/conversation/types';
 import type { Entry } from '../../lib/projection/types';
 import { fontLanguage } from '../../lib/fonts/fontCss';
-import { romanizedLanguage } from '../../lib/annotate/script';
+import { romanStretches } from '../../lib/annotate/annotate';
+import { japaneseTokenizer, subscribeJapanese } from '../../lib/annotate/japaneseStore';
+import { annotatedLanguage, isChinese, romanizedText } from '../../lib/annotate/script';
+import type { JapaneseTokenizer } from '../../lib/annotate/types';
 import { answeredOf, holdMs, nextShown } from '../../lib/subtitle/dwell';
 import { buildLanes, lanesHeight, linesFor, ROOMY, ROW_SCALE, spacingAt, squeezeOf, TIGHT, withRoman, type Lane, type LanePiece, type LaneText } from '../../lib/subtitle/lanes';
 import { useAnnotationStore } from '../../stores/annotationStore';
@@ -18,6 +21,30 @@ import { observeSize } from './surfaces/childDocument';
 import '../../styles/karaoke.scss';
 
 /**
+ * Where the lines of a rolled text begin to show whole: pixels down from its top. Its lines are not of one height —
+ * one with a romanization under it is half as high again — so the box's edge falls through a line, not between two:
+ * over a line without one it left the romanization of the line before, alone (seen 2026-10-31). The lowest line stays,
+ * whatever it takes.
+ */
+function wholeLinesFrom(box: HTMLElement, text: HTMLElement, line: number): number {
+  const range = text.ownerDocument.createRange();
+  range.selectNodeContents(text);
+  const runs = Array.from(range.getClientRects()).sort((a, b) => a.top - b.top);
+  // A stretch and its romanization go together, as the block they are.
+  const blocks = Array.from(text.querySelectorAll('.annot-line--roman')).map((block) => block.getBoundingClientRect());
+  const { top, bottom } = box.getBoundingClientRect();
+  let edge = top;
+  for (const rect of [...runs, ...blocks].sort((a, b) => a.top - b.top)) {
+    // A reading over the top line reaches past the box by a pixel or two, and stays.
+    const cut = edge - rect.top > Math.min(rect.height / 2, line / 4);
+    if (cut && rect.bottom > edge && rect.bottom < bottom - line / 2) edge = rect.bottom;
+  }
+  // Down to the first run that shows: the feet of the line before reach a little past its box.
+  const first = runs.find((rect) => (rect.top + rect.bottom) / 2 > edge);
+  return Math.max(0, Math.max(edge, (first?.top ?? edge) - 1) - text.getBoundingClientRect().top);
+}
+
+/**
  * Text in a box of fixed height, at the size chosen — always. A caption is
  * read while it changes, out of the corner of an eye: the frame has to hold
  * still, and only the words move. So nothing here is ever drawn smaller to
@@ -26,7 +53,8 @@ import '../../styles/karaoke.scss';
  * and the lanes moved nine — the user, 2026-10-06: "the size goes up and
  * down and the structure keeps changing".) What is too long for its box
  * loses its oldest line, a whole line at a time: the stylesheet holds the
- * text's end in sight where this says it is over (`data-over`).
+ * text's end in sight where this says it is over (`data-over`), and what the
+ * box's edge would cut is not drawn (`wholeLinesFrom`).
  */
 function Slot({ className, lang, children, fitKey }: { className: string; lang?: string; children: ReactNode; fitKey: string }) {
   const box = useRef<HTMLDivElement>(null);
@@ -37,14 +65,19 @@ function Slot({ className, lang, children, fitKey }: { className: string; lang?:
     if (!outer || !inner) return;
     // Over by a line, not by the pixels a reading above a word can add to one. No layout (a test's document): as written.
     const line = parseFloat(getComputedStyle(inner).lineHeight) || 0;
-    if (outer.clientHeight > 0 && inner.scrollHeight > outer.clientHeight + Math.max(1, line / 2)) outer.dataset.over = '';
+    const over = outer.clientHeight > 0 && inner.scrollHeight > outer.clientHeight + Math.max(1, line / 2);
+    if (over) outer.dataset.over = '';
     else delete outer.dataset.over;
+    inner.style.clipPath = over ? `inset(${wholeLinesFrom(outer, inner, line)}px -1em -1em)` : '';
   };
   // What is written changed, or the lines it has.
   useLayoutEffect(measure, [fitKey]); // eslint-disable-line react-hooks/exhaustive-deps
-  // The window was resized.
+  // The window was resized, or the text changed height with nothing new to read: its readings have come (the dictionary), or its font.
   useEffect(() => {
-    return box.current ? observeSize(box.current, measure) : undefined;
+    if (!box.current || !text.current) return undefined;
+    const stopBox = observeSize(box.current, measure);
+    const stopText = observeSize(text.current, measure);
+    return () => { stopBox(); stopText(); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div ref={box} className={className}>
@@ -71,28 +104,34 @@ function Stretch({ piece, language, upTo, readingsOnly = false }: { piece: LaneP
   );
 }
 
-/** A clause with the marks that close it: a romanization is written under each, so that it stays under its own words where the text wraps. */
-const CLAUSE = /[^。．！？!?、，,;；:：]+[。．！？!?、，,;；:：」』）)\s]*|[。．！？!?、，,;；:：」』）)\s]+/g;
-
-/** A piece as its clauses, each lit from where it begins. */
-function clausesOf(piece: LanePiece): LanePiece[] {
-  const out: LanePiece[] = [];
-  for (const match of piece.text.matchAll(CLAUSE)) out.push({ key: `${piece.key}:${match.index}`, text: match[0], segmentId: piece.segmentId, start: piece.start + (match.index ?? 0) });
-  return out.length > 1 ? out : [piece];
+/** A piece as the stretches a romanization is written under, each lit from where it begins; the last is what is still being heard. */
+function stretchesOf(piece: LanePiece, language: string | undefined, japanese: JapaneseTokenizer | undefined): LanePiece[] {
+  const stretches = romanStretches(piece.text, { language: annotatedLanguage(language), chinese: isChinese(language), japanese });
+  let at = 0;
+  return stretches.map((text, i) => {
+    const stretch: LanePiece = { key: `${piece.key}:${at}`, text, segmentId: piece.segmentId, start: piece.start + at, ...(piece.growing && i === stretches.length - 1 ? { growing: true } : {}) };
+    at += text.length;
+    return stretch;
+  });
 }
 
 /**
- * A lane's text, row by row; a notice's words as they are. Where a romanization is written under the text, clause by
- * clause: under a whole sentence it is one block, which wraps as text first and romanization after — and a strip
- * that shows one line of it showed the romanization alone (seen 2026-10-06). `readingsOnly`: none under it, whatever
- * the switch (the user's own row under grammar feedback: `rowRoman`).
+ * A lane's text, row by row; a notice's words as they are. Each piece is read in its own language: a pair's small
+ * line runs on from one sentence to the next, and a side left to be detected may change language between them. Where
+ * a romanization is written under the text, stretch by stretch (`romanStretches`). `readingsOnly`: none under it,
+ * whatever the switch (the user's own row under grammar feedback: `rowRoman`).
  */
 function Written({ text, lit, readingsOnly = false }: { text: LaneText; lit: ReadonlyMap<SegmentId, number>; readingsOnly?: boolean }) {
   const romanization = useAnnotationStore((s) => s.romanization);
-  const roman = !readingsOnly && romanization && romanizedLanguage(text.language);
+  const japanese = useSyncExternalStore(subscribeJapanese, japaneseTokenizer, japaneseTokenizer);
   if (text.pieces.length === 0) return <>{text.text}</>;
-  const pieces = roman ? text.pieces.flatMap(clausesOf) : text.pieces;
-  return <>{pieces.map((piece) => <Stretch key={piece.key} piece={piece} language={text.language} upTo={lit.get(piece.segmentId)} readingsOnly={readingsOnly} />)}</>;
+  return <>{text.pieces.map((piece) => {
+    const language = piece.language ?? text.language;
+    const stretches = !readingsOnly && romanization && romanizedText(piece.text, language) ? stretchesOf(piece, language, japanese) : [piece];
+    const drawn = stretches.map((stretch) => <Stretch key={stretch.key} piece={stretch} language={language} upTo={lit.get(stretch.segmentId)} readingsOnly={readingsOnly} />);
+    // The font and the glyphs of a language are the box's (`Slot`): a sentence in another marks its own.
+    return language === text.language ? drawn : <span key={piece.key} lang={fontLanguage(language) || undefined} data-kt-text="">{drawn}</span>;
+  })}</>;
 }
 
 const langOf = (text: LaneText): string | undefined => fontLanguage(text.language) || undefined;
@@ -209,12 +248,12 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
   const rowRoman = !coached;
   // Each kind of line for itself: a pair's small line, and the user's own row. (Not for Chinese: its pinyin is above
   // the line, and room kept under it showed half of the line before, 2026-10-28.)
-  const needs = (languages: Array<string | undefined>) => {
-    const said = languages.filter((language): language is string => !!language);
-    return romanization && (said.length === 0 || said.some(romanizedLanguage));
+  const needs = (texts: Array<LaneText | undefined>) => {
+    const said = texts.filter((text): text is LaneText => !!text?.text);
+    return romanization && (said.length === 0 || said.some((text) => text.pieces.some((piece) => romanizedText(piece.text, piece.language ?? text.language))));
   };
-  const pairRoman = needs(lanes.filter((lane) => lane.shape === 'pair').map((lane) => lane.source?.language));
-  const rowNeeds = rowRoman && needs(lanes.filter((lane) => lane.shape === 'row').flatMap((lane) => [lane.source?.language, lane.answer?.language]));
+  const pairRoman = needs(lanes.filter((lane) => lane.shape === 'pair').map((lane) => lane.source));
+  const rowNeeds = rowRoman && needs(lanes.filter((lane) => lane.shape === 'row').flatMap((lane) => [lane.source, lane.answer]));
   const roman = `${pairRoman}:${rowNeeds}`;
   const [roomySpacing, tightSpacing] = pairRoman || rowNeeds ? [withRoman(ROOMY, pairRoman, rowNeeds), withRoman(TIGHT, pairRoman, rowNeeds)] : [ROOMY, TIGHT];
   const [roomy, least] = useMemo(() => [lanesHeight(lanes, fontSize, roomySpacing), lanesHeight(lanes, fontSize, tightSpacing)], [shape, fontSize, roman]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -340,11 +379,11 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
             // The user's own, under the other side's: what they said and what answers it, on one small line.
             <Slot className="subtitle-lane__row" fitKey={`${fontSize}:${squeeze}:${lines.row}:${lane.source?.text ?? ''}:${lane.answer?.text ?? ''}`}>
               {fixFor(lane) ? (
-                <span className="subtitle-lane__said subtitle-lane__said--fixed" lang={langOf(lane.source!)}><Correction correction={fixFor(lane)!} language={lane.source!.language} layout="row" /></span>
+                <span className="subtitle-lane__said subtitle-lane__said--fixed" lang={langOf(lane.source!)} data-kt-text=""><Correction correction={fixFor(lane)!} language={lane.source!.language} layout="row" /></span>
               ) : (<>
-              {lane.source && <span className="subtitle-lane__said" lang={langOf(lane.source)}><Written text={lane.source} lit={lit} readingsOnly={!rowRoman} /></span>}
+              {lane.source && <span className="subtitle-lane__said" lang={langOf(lane.source)} data-kt-text=""><Written text={lane.source} lit={lit} readingsOnly={!rowRoman} /></span>}
               {lane.source && lane.answer && lane.source.text !== '' && (lane.answer.text !== '' || lane.pending) && !approves(lane.answer) && <ArrowRight className="subtitle-lane__arrow" aria-hidden="true" strokeWidth={2.5} />}
-              {lane.answer && lane.answer.text !== '' && (approves(lane.answer) ? tick : <span className="subtitle-lane__reply" lang={langOf(lane.answer)}><Written text={lane.answer} lit={lit} readingsOnly={!rowRoman} /></span>)}
+              {lane.answer && lane.answer.text !== '' && (approves(lane.answer) ? tick : <span className="subtitle-lane__reply" lang={langOf(lane.answer)} data-kt-text=""><Written text={lane.answer} lit={lit} readingsOnly={!rowRoman} /></span>)}
               {lane.answer && lane.answer.text === '' && lane.pending && pending}
               </>)}
             </Slot>

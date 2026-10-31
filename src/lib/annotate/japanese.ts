@@ -115,6 +115,25 @@ export function romaji(tokens: readonly JapaneseToken[]): string {
   return words.join(' ');
 }
 
+/** About how many characters of Japanese go over one romanization: fewer, and the romanization sets their width, not they. */
+const STRETCH = 8;
+
+/** A line of Japanese in stretches of about `STRETCH` characters, each ending where a word does: never before what is written onto a word, a particle or a mark. */
+export function japaneseStretches(line: string, tokenizer: JapaneseTokenizer): string[] {
+  const out: string[] = [];
+  let stretch = '';
+  for (const token of tokenizer.tokenize(line)) {
+    const onto = joins(token) || token.pos === '助詞' || PUNCTUATION.test(token.surface_form);
+    if (stretch.length >= STRETCH && !onto) {
+      out.push(stretch);
+      stretch = '';
+    }
+    stretch += token.surface_form;
+  }
+  if (stretch) out.push(stretch);
+  return out;
+}
+
 /** One line of Japanese, annotated as asked. */
 export function annotateJapanese(line: string, tokenizer: JapaneseTokenizer, options: AnnotateOptions): AnnotatedLine {
   // The dictionary's readings, with the ones everyday speech gives differently put right (`japaneseReadings.ts`).

@@ -10,7 +10,7 @@
  * a Chinese row is Chinese, and takes pinyin where that is asked for.
  */
 import { annotateChinese } from './chinese';
-import { annotateJapanese } from './japanese';
+import { annotateJapanese, japaneseStretches } from './japanese';
 import { romanizeKorean } from './korean';
 import { transliterateRussian } from './russian';
 import { transliterateUkrainian } from './ukrainian';
@@ -53,6 +53,16 @@ export function annotateLine(line: string, o: AnnotateInputs): AnnotatedLine {
 /** Every line of a text, in order; an empty line stays an empty line. */
 export function annotateText(text: string, o: AnnotateInputs): AnnotatedLine[] {
   return text.split('\n').map((line) => annotateLine(line, o));
+}
+
+/**
+ * A text with a romanization under it, in the stretches it is drawn in where it flows (a strip's line): at its spaces,
+ * which stay stretches of their own, and Japanese, which has none, between its words. A stretch and its romanization
+ * are a block, which wraps as text first and romanization after: of a sentence that wraps, a strip showing one line
+ * showed the romanization alone, or its text under the romanization of all of it (2026-10-06, 2026-10-31).
+ */
+export function romanStretches(text: string, o: Pick<AnnotateInputs, 'language' | 'chinese' | 'japanese'>): string[] {
+  return text.split(/(\s+)/).filter(Boolean).flatMap((word) => (o.japanese && languageOf(word, o) === 'ja' ? japaneseStretches(word, o.japanese) : [word]));
 }
 
 /** Whether annotating this text needs the Japanese dictionary: it is asked for, and a line of it would be read as Japanese. */

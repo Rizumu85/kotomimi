@@ -172,6 +172,13 @@ describe('the subtitle view’s lanes', () => {
     expect(answer.pieces.map((piece) => piece.text).join('')).toBe(answer.text);
   });
 
+  it('keeps each sentence’s language in a line that runs on, and puts a space after Hangul (fork)', () => {
+    const entry = (id: string, text: string, language?: string): Entry => ({ ...said(id, 'participant', text), source: [row(`s-${id}`, text, 'source', language)], languages: { source: 'auto', target: 'zh-CN' } } as Entry);
+    const lane = lanes([{ ...said('a', 'participant', '', '好的。'), source: [row('s-a', '네 좋아요', 'source', 'ko')], languages: { source: 'auto', target: 'zh-CN' } } as Entry, entry('b', '정말요', 'ko'), entry('c', '今天不行'), entry('d', 'こんにちは', 'ja')], ['participant'])[0];
+    expect(lane.source?.text).toBe('네 좋아요 정말요 今天不行こんにちは');
+    expect(lane.source?.pieces.map((piece) => piece.language)).toEqual(['ko', 'ko', 'auto', 'ja']);
+  });
+
   it('takes a row’s own language where the provider detected one', () => {
     const entry = said('a', 'participant', '', '');
     if (entry.kind !== 'exchange') throw new Error('unreachable');

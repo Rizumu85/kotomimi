@@ -3,14 +3,14 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { annotateLine, annotateText, holdLastReading, needsJapanese } from './annotate';
+import { annotateLine, annotateText, holdLastReading, needsJapanese, romanStretches } from './annotate';
 import { annotateJapanese, furiganaParts, katakanaToHiragana, romaji } from './japanese';
 import { buildJapaneseTokenizer } from './japaneseTokenizer';
 import { romanizeKorean } from './korean';
 import { transliterateRussian } from './russian';
 import { transliterateUkrainian } from './ukrainian';
 import { annotateChinese } from './chinese';
-import { annotatedLanguage, explainsInChinese, isChinese, quotesJapanese, romanizedLanguage, scriptLanguage } from './script';
+import { annotatedLanguage, explainsInChinese, isChinese, quotesJapanese, romanizedLanguage, romanizedText, scriptLanguage } from './script';
 import type { JapaneseTokenizer } from './types';
 
 const DICT = resolve(__dirname, '../../../node_modules/@sglkc/kuromoji/dict');
@@ -45,6 +45,12 @@ describe('the script a line is written in', () => {
     expect(annotatedLanguage('zh-CN')).toBe('zh');
     expect(annotatedLanguage('uk')).toBe('uk');
     for (const other of ['yue', 'en', 'auto', '', null, undefined]) expect(annotatedLanguage(other)).toBeNull();
+  });
+
+  it('tells a romanized text by its writing where its language is not known (fork)', () => {
+    for (const code of ['auto', undefined]) expect(romanizedText('안녕하세요', code), String(code)).toBe(true);
+    expect(romanizedText('今天天气真好', 'auto')).toBe(false);
+    expect(romanizedText('今日', 'ja')).toBe(true);
   });
 
   it('has a romanization written under it in Japanese, Korean, Russian and Ukrainian, not in Chinese (fork)', () => {
@@ -221,6 +227,21 @@ describe('a Chinese explanation that quotes Japanese, in a row of any language (
     const tokenizer = { tokenize: () => [] };
     const line = annotateLine(FEEDBACK, { furigana: true, roman: true, language: 'ja', japanese: tokenizer });
     expect(line).toEqual({ parts: [{ text: FEEDBACK }] });
+  });
+});
+
+describe('a romanized text in the stretches it flows in (fork)', () => {
+  const stretches = (text: string, language: 'ja' | 'ko' | 'ru' | null) => romanStretches(text, { language, japanese: ja });
+
+  it('cuts at the spaces, which stay stretches of their own, and Japanese between its words', () => {
+    // Under a sentence with no marks (recognizers that write none) the romanization was one block with it: 2026-10-31.
+    expect(stretches('오늘은 날씨가 좋아서', 'ko')).toEqual(['오늘은', ' ', '날씨가', ' ', '좋아서']);
+    const long = '昨日は友達と一緒に新宿の映画館へ行ってとても面白い映画を見ました';
+    const cut = stretches(long, 'ja');
+    expect(cut.join('')).toBe(long);
+    expect(Math.max(...cut.map((stretch) => stretch.length))).toBeLessThan(14);
+    // Never before what is written onto a word: the particle stays.
+    expect(cut[0]).toBe('昨日は友達と一緒に');
   });
 });
 

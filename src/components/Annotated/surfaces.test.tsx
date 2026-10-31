@@ -54,7 +54,7 @@ describe('reading aids on the subtitle', () => {
   it('adds the romanization under the band\'s text when it is switched on, and drops both aids when they are off', () => {
     act(() => { useAnnotationStore.setState({ romanization: true }); });
     const on = render(<SubtitleBody {...props()} />);
-    expect(on.container.querySelector('.subtitle-lane__source .annot-roman')?.textContent).toBe('kyou wa tenki ga ii desu ne.');
+    expect(Array.from(on.container.querySelectorAll('.subtitle-lane__source .annot-roman')).map((roman) => roman.textContent).join(' ')).toBe('kyou wa tenki ga ii desu ne.');
     on.unmount();
     act(() => { useAnnotationStore.setState({ furigana: false, romanization: false }); });
     const off = render(<SubtitleBody {...props()} />);

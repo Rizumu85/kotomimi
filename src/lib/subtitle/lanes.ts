@@ -41,6 +41,8 @@ export interface LanePiece {
   start: number;
   /** Fork: its sentence is still being heard (the row is not final): its last word's reading waits (`useAnnotation`). */
   growing?: boolean;
+  /** Fork: its sentence's language, in a text that runs on from one sentence to the next. Absent: the text's. */
+  language?: string;
 }
 
 export interface LaneText {
@@ -80,11 +82,13 @@ export interface Lane {
   answers?: string;
 }
 
+type Exchange = Extract<Entry, { kind: 'exchange' }>;
+
 /** The other side first: theirs is what a caption strip is read for. */
 const ORDER: readonly LegName[] = ['participant', 'speaker'];
 
 /** Rows as the pieces of one text: joined as written, the whole's outer whitespace gone, rows left blank by that gone with it. */
-function piecesOf(rows: readonly Row[]): LanePiece[] {
+function piecesOf(rows: readonly Row[], language?: string): LanePiece[] {
   const whole = rows.map((row) => row.text).join('');
   const from = whole.length - whole.trimStart().length;
   const to = whole.trimEnd().length;
@@ -93,7 +97,7 @@ function piecesOf(rows: readonly Row[]): LanePiece[] {
   for (const row of rows) {
     const start = Math.max(from, at);
     const end = Math.min(to, at + row.text.length);
-    if (end > start) pieces.push({ key: row.key, text: row.text.slice(start - at, end - at), segmentId: row.segmentId, start: row.start + (start - at), ...(row.final ? {} : { growing: true }) });
+    if (end > start) pieces.push({ key: row.key, text: row.text.slice(start - at, end - at), segmentId: row.segmentId, start: row.start + (start - at), ...(row.final ? {} : { growing: true }), ...(row.language || language ? { language: row.language || language } : {}) });
     at += row.text.length;
   }
   return pieces;
@@ -103,14 +107,14 @@ const joined = (rows: readonly Row[]): string => rows.map((row) => row.text).joi
 
 /** A pair's small line holds no more sentences than this: the one answered, and the newest said since. */
 export const STREAM_MOST = 5;
-/** Written without spaces between sentences (Han, kana, Hangul, full-width marks): nothing is put between two of them. */
-const DENSE_END = /[\u2e80-\u9fff\uac00-\ud7af\uff00-\uffef]$/;
+/** Written without spaces between sentences (Han, kana, full-width marks): nothing is put between two of them. Hangul is written with them. */
+const DENSE_END = /[\u2e80-\u9fff\uff00-\uffef]$/;
 
 /** Sentences as one text, each after the other: a space between two where the first does not end in a script written without. */
-function streamOf(sentences: ReadonlyArray<readonly Row[]>): { text: string; pieces: LanePiece[] } {
+function streamOf(sentences: readonly Exchange[]): { text: string; pieces: LanePiece[] } {
   const pieces: LanePiece[] = [];
-  for (const rows of sentences) {
-    const next = piecesOf(rows);
+  for (const sentence of sentences) {
+    const next = piecesOf(sentence.source, sentence.languages.source);
     if (next.length === 0) continue;
     const before = pieces[pieces.length - 1];
     if (before && !DENSE_END.test(before.text)) pieces[pieces.length - 1] = { ...before, text: `${before.text} ` };
@@ -178,7 +182,7 @@ export function buildLanes(
         // A pair whose newest has no answer yet: the sentence shown, then all said since — or, before anything was
         // answered, the last few said. Its end is what is being heard now.
         const from = shape === 'pair' && waits ? Math.max(answered >= 0 ? answered : 0, newest - STREAM_MOST + 1) : at;
-        const sentences = mine.slice(from, (shape === 'pair' && waits ? newest : at) + 1).flatMap((entry) => (entry.kind === 'exchange' ? [entry.source] : []));
+        const sentences = mine.slice(from, (shape === 'pair' && waits ? newest : at) + 1).flatMap((entry) => (entry.kind === 'exchange' ? [entry] : []));
         lane.source = { ...streamOf(sentences), language: row?.language || said.languages.source, ...(row ? { segmentId: row.segmentId } : {}) };
       }
       if (lane.source && lane.answer && joined(said.source)) lane.answers = joined(said.source);
