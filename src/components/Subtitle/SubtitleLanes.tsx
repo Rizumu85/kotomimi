@@ -64,9 +64,13 @@ function Slot({ className, lang, children, fitKey }: { className: string; lang?:
     const outer = box.current;
     const inner = text.current;
     if (!outer || !inner) return;
-    // Over by a line, not by the pixels a reading above a word can add to one. No layout (a test's document): as written.
+    // Over by a line, not by the pixels a reading above a word can add to one: by half a line it was left to the box's
+    // edge, and two plain lines in the room of one and its romanization showed half of the first. No layout (a test's
+    // document): as written.
     const line = parseFloat(getComputedStyle(inner).lineHeight) || 0;
-    const over = outer.clientHeight > 0 && inner.scrollHeight > outer.clientHeight + Math.max(1, line / 2);
+    const { paddingTop, paddingBottom } = getComputedStyle(outer);
+    const room = outer.clientHeight - (parseFloat(paddingTop) || 0) - (parseFloat(paddingBottom) || 0);
+    const over = outer.clientHeight > 0 && inner.scrollHeight > room + Math.max(1, line / 4);
     if (over) outer.dataset.over = '';
     else delete outer.dataset.over;
     inner.style.clipPath = over ? `inset(${wholeLinesFrom(outer, inner, line)}px -1em -1em)` : '';
