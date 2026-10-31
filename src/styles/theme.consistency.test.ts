@@ -78,12 +78,12 @@ const DARK_PINNED: Record<string, string> = {
   'control-accent': '#0fbb8f',
   'selection-bg': '#008261',
   'selection-text': '#ffffff',
-  'speech-mode-bg': '#0fbb8f',
   'switch-label': '#0fbb8f',
   'font-preview-bg': 'rgba(0,0,0,0.25)',
   'font-preview-line': 'transparent',
-  'scrollbar-thumb': '#777777',
-  'scrollbar-thumb-hover': '#999999',
+  'scrollbar-track': 'rgba(0,0,0,0.2)',
+  'scrollbar-thumb': 'rgba(255,255,255,0.2)',
+  'scrollbar-thumb-hover': 'rgba(255,255,255,0.3)',
   'speaker': 'var(--sk-primary)', 'speaker-fill': 'var(--sk-primary-fill)', 'speaker-person-3': '#005c45',
   'participant': '#f39c12', 'participant-person-2': '#f8c471', 'participant-person-3': '#ca6f1e',
   'success': '#10a37f', 'error': '#e74c3c', 'error-deep': '#c0392b', 'warning': '#ffc107', 'recommended': '#f59e0b',
@@ -96,7 +96,6 @@ const DARK_PINNED: Record<string, string> = {
 const SURFACES = ['bg-page', 'bg-surface', 'bg-control'];
 const LIGHT_FLOORS: [string, string, number][] = [
   ['selection-text', 'selection-bg', 4.5],
-  ['selection-text', 'speech-mode-bg', 4.5],
   ['text-primary', 'font-preview-bg', 4.5],
   ['control-accent', 'bg-surface', 3],
   ['white', 'control-accent', 3],

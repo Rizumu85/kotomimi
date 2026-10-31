@@ -203,6 +203,13 @@
       color: var(--subtitle-translation-color, #e8e8e8);
     }
 
+    // What was said, in a run in one language: the answer's size, on lines with room for a reading (`SAID_LINE`).
+    .subtitle-lane__answer.subtitle-lane__answer--said {
+      height: calc(var(--lane-answer-lines, 2) * 1.8em);
+      line-height: 1.8;
+      --kt-ruby-lean: var(--kt-source-ruby-lean, 0.4em);
+    }
+
     // The user's own, as a row: said, then what answers it. It rolls as the other lanes do — the newest words on the
     // lowest line, the oldest line gone — so a long piece of feedback is read to its end as it comes in. (It was cut
     // at the end with an ellipsis first, on the thought that its beginning mattered most; a long answer then showed

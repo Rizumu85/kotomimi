@@ -11,6 +11,12 @@
     gap: 8px;
   }
 
+  .kt-vrchat__result {
+    margin: 6px 0 0;
+    color: vars.$text-tertiary;
+    font-size: vars.$font-caption;
+  }
+
   // The app's segmented-control archetype (ModePicker.scss, and the credential choice in Settings.scss — each
   // section keeps its own copy, as they scope their rules to themselves). Active = fill. Across the card, as the stage
   // cards' place switch is: the room shared out over the options, so that a long one (English) still fits.
@@ -18,7 +24,7 @@
     display: flex;
     width: 100%;
     align-items: stretch;
-    height: 28px;
+    height: vars.$control-height-compact;
     margin-top: 6px;
     border: 1px solid vars.$border-default;
     border-radius: vars.$radius-md;

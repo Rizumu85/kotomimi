@@ -16,6 +16,13 @@ const words = (notice: { message: string }) => notice.message;
 const lanes = (entries: Entry[], legs = LEGS, filters = BOTH) => buildLanes(entries, legs, filters, words);
 
 describe('independent feedback beside translated subtitle lanes', () => {
+  it("shows what is said at an answer's size in a run in one language", () => {
+    const [lane] = lanes([{ ...said('a', 'participant', 'こんにちは'), languages: { source: 'ja', target: 'ja' } } as Entry], ['participant']);
+    expect(lane.source).toBeUndefined();
+    expect(lane.answer?.text).toBe('こんにちは');
+    expect(lane.pending).toBe(false);
+  });
+
   const exchange = (id: string, text: string, translation: string, feedback?: string): Extract<Entry, { kind: 'exchange' }> => ({
     kind: 'exchange', id, leg: 'speaker', languages: { source: 'fr', target: 'en' }, pairing: 'stated', t: 0,
     source: [row(`s-${id}`, text, 'source', 'en')],

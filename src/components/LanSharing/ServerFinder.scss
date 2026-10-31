@@ -54,7 +54,8 @@
     justify-content: center;
     gap: 6px;
     width: 100%;
-    padding: 9px 12px;
+    height: vars.$control-height;
+    padding: 0 12px;
     box-sizing: border-box;
     font: inherit;
     font-size: vars.$font-body;

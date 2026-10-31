@@ -357,11 +357,11 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
               )}
               {lane.answer && (
                 <Slot
-                  className={`subtitle-lane__answer${lane.answer.notice ? ' subtitle-lane__answer--notice' : ''}`}
+                  className={`subtitle-lane__answer${lane.answer.notice ? ' subtitle-lane__answer--notice' : ''}${lane.said ? ' subtitle-lane__answer--said' : ''}`}
                   lang={langOf(lane.answer)}
                   fitKey={`${fontSize}:${squeeze}:${answerLines}:${lane.answer.text}`}
                 >
-                  {approves(lane.answer) ? tick : fixFor(lane) ? <Correction correction={fixFor(lane)!} language={lane.source!.language} /> : <Written text={lane.answer} lit={lit} />}
+                  {approves(lane.answer) ? tick : fixFor(lane) ? <Correction correction={fixFor(lane)!} language={lane.source!.language} /> : <Written text={lane.answer} lit={lit} readingsOnly={lane.said} />}
                   {!lane.source && lane.pending && pending}
                 </Slot>
               )}

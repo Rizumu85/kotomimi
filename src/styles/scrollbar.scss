@@ -1,43 +1,38 @@
 @use '../components/Settings/shared/variables' as vars;
-// Light chrome uses a quiet track; existing dark scrollbars retain their style.
-:root[data-theme='light'] * {
-  &::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
 
-  &::-webkit-scrollbar-track,
-  &::-webkit-scrollbar-corner { background: transparent; }
-
-  &::-webkit-scrollbar-thumb {
-    background: vars.$scrollbar-thumb;
-    border: 2px solid transparent;
-    background-clip: padding-box;
-    border-radius: 8px;
-  }
-
-  &::-webkit-scrollbar-thumb:hover { background-color: vars.$scrollbar-thumb-hover; }
-
-  &::-webkit-scrollbar-button {
-    display: none;
-    width: 0;
-    height: 0;
-  }
+// One look in both schemes, by the pseudo-elements alone: a non-auto `scrollbar-width` or `scrollbar-color` makes
+// Chromium ignore them for its standard bar, wider and with arrow buttons.
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-// Never switch scrollbar engines on hover: non-auto standard properties suppress
-// Chromium's pseudo-elements and change the scrollbar's width and arrow buttons.
-@supports selector(::-webkit-scrollbar) {
-  :root[data-theme='light'] * {
-    scrollbar-width: auto;
-    scrollbar-color: auto;
-  }
+::-webkit-scrollbar-track { background: vars.$scrollbar-track; }
+::-webkit-scrollbar-corner { background: transparent; }
+
+::-webkit-scrollbar-thumb {
+  background: vars.$scrollbar-thumb;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover { background: vars.$scrollbar-thumb-hover; }
+::-webkit-scrollbar-button { display: none; }
+
+// Light chrome keeps a slimmer thumb in a quiet track.
+:root[data-theme='light'] ::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+// Only one scrollbar in nested scrolling areas: the panel's own, not its container's.
+.settings-panel-container,
+.logs-panel {
+  scrollbar-width: none;
 }
 
 @supports not selector(::-webkit-scrollbar) {
-  :root[data-theme='light'] * {
+  * {
     scrollbar-width: thin;
-    scrollbar-color: vars.$scrollbar-thumb transparent;
-    &:hover { scrollbar-color: vars.$scrollbar-thumb-hover transparent; }
+    scrollbar-color: vars.$scrollbar-thumb vars.$scrollbar-track;
   }
 }

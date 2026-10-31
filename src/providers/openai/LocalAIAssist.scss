@@ -77,7 +77,7 @@
   .kt-seg {
     display: flex;
     align-items: stretch;
-    height: 30px;
+    height: vars.$control-height-compact;
     overflow: hidden;
     border: 1px solid vars.$border-default;
     border-radius: vars.$radius-md;
@@ -152,6 +152,7 @@
 
   .kt-input {
     width: 100%;
+    min-height: vars.$control-height;
     padding: 8px 10px;
     box-sizing: border-box;
     font: inherit;
@@ -410,14 +411,15 @@
     flex-shrink: 0;
     align-items: center;
     gap: 5px;
-    padding: 3px 9px;
+    height: vars.$control-height-compact;
+    padding: 0 9px;
     font: inherit;
     font-size: vars.$font-caption;
     white-space: nowrap;
     color: vars.$text-secondary;
     background: vars.$bg-control;
     border: 1px solid vars.$border-default;
-    border-radius: 999px;
+    border-radius: vars.$radius-sm;
     cursor: pointer;
     transition: background-color vars.$transition-fast, color vars.$transition-fast, border-color vars.$transition-fast;
 
@@ -694,7 +696,8 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 3px 8px;
+    height: vars.$control-height-compact;
+    padding: 0 8px;
     font: inherit;
     color: vars.$text-secondary;
     background: transparent;

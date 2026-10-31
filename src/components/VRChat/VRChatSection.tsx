@@ -118,7 +118,8 @@ export function VRChatSection() {
           </button>
         ))}
       </div>
-      {/* Faster takes a video's sound out where it can: its words can then be translated as well. */}
+      <p className="kt-vrchat__result" role="status">{t(`fork.vrchat.${ON_VIDEO.find(([value]) => value === onVideo)?.[1]}Result`)}</p>
+      {/* Favoring people takes a video's sound out where it can: its words can then be translated as well. */}
       {/* Its words heard apart only by Kotomimi's own pipeline (`laneOffered`): no switch where nothing would do it. */}
       {onVideo === 'quick' && kotomimi && (
         <div className="kt-vrchat__more">

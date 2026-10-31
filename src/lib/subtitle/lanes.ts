@@ -71,6 +71,8 @@ export interface Lane {
   feedback?: LaneText & { said: LaneText; origin: string };
   /** A sentence newer than the one answered is waiting for its answer (a pair), or the one shown is (a row). */
   pending: boolean;
+  /** Fork: `answer` is what was said, a run in one language having nothing to translate. */
+  said?: true;
   /**
    * Fork: the sentence the answer answers, alone — a pair's source line may run on into what was said since. What a
    * correction is laid over (`src/lib/feedback/correction.ts`).
@@ -193,6 +195,14 @@ export function buildLanes(
         };
       }
     }
+    // Fork: a run in one language translates nothing: what is said is what the strip is read for, at an answer's size.
+    if (said?.kind === 'exchange' && lane.source?.text && !joined(said.translation) && !notice
+      && said.languages.source.toLowerCase() === said.languages.target.toLowerCase()) {
+      lane.answer = lane.source;
+      lane.said = true;
+      lane.pending = false;
+      delete lane.source;
+    }
     if (lane.answer && notice) lane.answer = { text: words(notice), pieces: [], notice };
     return lane;
   });
@@ -255,8 +265,13 @@ export function spacingAt(squeeze: number, roomy: LaneSpacing = ROOMY, tight: La
 export function laneEms(lane: Lane, spacing: LaneSpacing): number {
   const feedback = lane.feedback ? ROW_SCALE * spacing.rowLine : 0;
   if (lane.shape === 'row') return ROW_SCALE * (spacing.rowLine + spacing.rowRoman) + feedback;
-  return (lane.source ? SOURCE_SCALE * (spacing.sourceLine + spacing.roman) : 0) + (lane.answer ? spacing.answerLine * spacing.answerLines : 0) + feedback;
+  return (lane.source ? SOURCE_SCALE * (spacing.sourceLine + spacing.roman) : 0) + (lane.answer ? answerLineOf(lane, spacing) * spacing.answerLines : 0) + feedback;
 }
+
+/** A line of what was said, at an answer's size: with the leading a reading above a word stands in. */
+export const SAID_LINE = 1.8;
+
+const answerLineOf = (lane: Lane, spacing: LaneSpacing): number => (lane.said ? SAID_LINE : spacing.answerLine);
 
 /** The height a strip of these lanes takes at a font size, spaced so. */
 export function lanesHeight(lanes: readonly Lane[], fontSize: number, spacing: LaneSpacing = ROOMY): number {
@@ -298,7 +313,7 @@ export function linesFor(lanes: readonly Lane[], fontSize: number, spare: number
   const pair = lanes.find((lane) => lane.shape === 'pair');
   const cost: LaneLines = {
     source: pair?.source ? fontSize * SOURCE_SCALE * (roomy.sourceLine + roomy.roman) : Infinity,
-    answer: pair?.answer ? fontSize * roomy.answerLine : Infinity,
+    answer: pair?.answer ? fontSize * answerLineOf(pair, roomy) : Infinity,
     row: lanes.some((lane) => lane.shape === 'row') ? fontSize * ROW_SCALE * (roomy.rowLine + roomy.rowRoman) : Infinity,
   };
   let left = spare;

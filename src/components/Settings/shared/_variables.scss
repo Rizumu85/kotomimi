@@ -21,10 +21,10 @@ $color-on-primary:    tk.$color-on-primary;
 $color-control-accent: tk.$color-control-accent;
 $color-selection-bg: tk.$color-selection-bg;
 $color-selection-text: tk.$color-selection-text;
-$color-speech-mode-bg: var(--sk-speech-mode-bg);
 $color-switch-label: var(--sk-switch-label);
 $bg-font-preview: var(--sk-font-preview-bg);
 $border-font-preview: var(--sk-font-preview-line);
+$scrollbar-track: var(--sk-scrollbar-track);
 $scrollbar-thumb: var(--sk-scrollbar-thumb);
 $scrollbar-thumb-hover: var(--sk-scrollbar-thumb-hover);
 
@@ -91,6 +91,10 @@ $shadow-strong: var(--sk-shadow-strong);
 $font-title:   14px;
 $font-body:    13px;
 $font-caption: 12px;
+
+// A control is one of two heights: a field, or a choice and a small button beside it.
+$control-height: 36px;
+$control-height-compact: 30px;
 
 // The model cards' chips (language, tier, Recommended / Auto badges) share one
 // fixed line box: with `normal`, the 12px and 10px chips came out 15px and

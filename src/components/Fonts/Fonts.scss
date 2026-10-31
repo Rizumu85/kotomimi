@@ -133,6 +133,7 @@
   gap: vars.$space-2;
   width: 100%;
   min-width: 0;
+  min-height: vars.$control-height;
   padding: 7px 10px;
   font: inherit;
   font-size: vars.$font-body;

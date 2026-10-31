@@ -504,11 +504,12 @@
 
       .option-button {
         flex: 1;
+        height: vars.$control-height-compact;
         background-color: vars.$bg-control;
-        color: vars.$text-primary;
+        color: vars.$text-tertiary;
         border: none;
-        padding: 8px 0;
-        font-size: vars.$font-body;
+        padding: 0;
+        font-size: vars.$font-caption;
         cursor: pointer;
         transition: background-color vars.$transition-fast;
 
@@ -517,7 +518,7 @@
         }
 
         &.active {
-          background-color: vars.$color-speech-mode-bg;
+          background-color: vars.$color-selection-bg;
           color: vars.$color-selection-text;
         }
 
@@ -1256,8 +1257,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  // Match the select input height (8px top/bottom padding + font line height)
-  padding: 8px 6px;
+  height: vars.$control-height;
+  padding: 0 6px;
   transition: color 0.15s, border-color 0.15s;
 
   &:hover:not(:disabled) {
@@ -1299,12 +1300,13 @@
 .language-select,
 .select-dropdown {
   width: 100%;
+  min-height: vars.$control-height;
   background: vars.$bg-control;
   border: 1px solid vars.$border-default;
   color: vars.$text-primary;
   padding: 8px 10px;
   border-radius: vars.$radius-sm;
-  font-size: vars.$font-title;
+  font-size: vars.$font-body;
   cursor: pointer;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -1346,8 +1348,13 @@
     // from the classic styling would double it.
     background-image: none;
 
+    // The same chevron as the font pickers' (`.kt-font-trigger__chevron`).
     &::picker-icon {
-      color: vars.$text-muted;
+      content: '';
+      width: 12px;
+      height: 12px;
+      background: vars.$text-muted;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat;
     }
 
     &:open {
@@ -1718,7 +1725,7 @@
     display: inline-flex;
     align-items: stretch;
     align-self: flex-start;
-    height: 28px;
+    height: vars.$control-height-compact;
     border: 1px solid vars.$border-default;
     border-radius: vars.$radius-md;
     overflow: hidden;
@@ -2303,13 +2310,14 @@
 
   .segmented-control {
     display: flex;
+    height: vars.$control-height-compact;
     border-radius: 6px;
     overflow: hidden;
     border: 1px solid vars.$border-default;
 
     .segmented-option {
       flex: 1;
-      padding: 6px 12px;
+      padding: 0 12px;
       font-size: 12px;
       border: none;
       background: vars.$bg-control;
