@@ -9,7 +9,7 @@ import { japaneseTokenizer, subscribeJapanese } from '../../lib/annotate/japanes
 import { annotatedLanguage, isChinese, romanizedText } from '../../lib/annotate/script';
 import type { JapaneseTokenizer } from '../../lib/annotate/types';
 import { answeredOf, holdMs, nextShown } from '../../lib/subtitle/dwell';
-import { buildLanes, lanesHeight, linesFor, ROOMY, ROW_SCALE, spacingAt, squeezeOf, TIGHT, withRoman, type Lane, type LanePiece, type LaneText } from '../../lib/subtitle/lanes';
+import { buildLanes, lanesHeight, linesFor, ROOMY, ROW_SCALE, spacingAt, squeezeOf, TIGHT, withAnswerAids, withRoman, type Lane, type LanePiece, type LaneSpacing, type LaneText } from '../../lib/subtitle/lanes';
 import { useAnnotationStore } from '../../stores/annotationStore';
 import type { LegFilters } from '../../lib/view/filter';
 import { noticeText } from '../../lib/view/noticeText';
@@ -39,9 +39,10 @@ function wholeLinesFrom(box: HTMLElement, text: HTMLElement, line: number): numb
     const cut = edge - rect.top > Math.min(rect.height / 2, line / 4);
     if (cut && rect.bottom > edge && rect.bottom < bottom - line / 2) edge = rect.bottom;
   }
-  // Down to the first run that shows: the feet of the line before reach a little past its box.
+  // Down to the first run that shows, or a little past the edge where that begins over it (a font's box is taller than
+  // a tight line): the feet of the line before reach a little past their own box.
   const first = runs.find((rect) => (rect.top + rect.bottom) / 2 > edge);
-  return Math.max(0, Math.max(edge, (first?.top ?? edge) - 1) - text.getBoundingClientRect().top);
+  return Math.max(0, (first && first.top - 1 >= edge ? first.top - 1 : edge + 2) - text.getBoundingClientRect().top);
 }
 
 /**
@@ -137,6 +138,17 @@ function Written({ text, lit, readingsOnly = false }: { text: LaneText; lit: Rea
 const langOf = (text: LaneText): string | undefined => fontLanguage(text.language) || undefined;
 
 const LEGS: readonly LegName[] = ['participant', 'speaker'];
+
+/**
+ * Whether a kind of line has room for a reading aid: `on` is the switch; `asked`, what is on screen has the aid. Kept
+ * once asked for: a side left to be detected changes language from sentence to sentence, and the window with it.
+ * `unsaid`: nothing is said yet, and the room is kept so that the window is not made higher at the first word.
+ */
+function useRoom(on: boolean, asked: boolean, unsaid = false): boolean {
+  const kept = useRef(false);
+  kept.current = on && (kept.current || asked);
+  return kept.current || (on && unsaid);
+}
 
 /**
  * The height the lanes of these legs take before anything is said, and the least they can be squeezed into: what a
@@ -243,19 +255,28 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
   // A romanization under the small lines has a line of its own there: while the switch is on and what is said is
   // in a language that has one — or nothing is said yet, so that the window is not made higher at the first word.
   const romanization = useAnnotationStore((s) => s.romanization);
+  const furigana = useAnnotationStore((s) => s.furigana);
+  const pinyin = useAnnotationStore((s) => s.pinyin);
   // Fork: under grammar feedback the user's own row has none: the correction drawn there has no room for one, and a
   // row that had one only while no correction stood in it would change the window's height from sentence to sentence.
   const rowRoman = !coached;
   // Each kind of line for itself: a pair's small line, and the user's own row. (Not for Chinese: its pinyin is above
   // the line, and room kept under it showed half of the line before, 2026-10-28.)
-  const needs = (texts: Array<LaneText | undefined>) => {
-    const said = texts.filter((text): text is LaneText => !!text?.text);
-    return romanization && (said.length === 0 || said.some((text) => text.pieces.some((piece) => romanizedText(piece.text, piece.language ?? text.language))));
-  };
-  const pairRoman = needs(lanes.filter((lane) => lane.shape === 'pair').map((lane) => lane.source));
-  const rowNeeds = rowRoman && needs(lanes.filter((lane) => lane.shape === 'row').flatMap((lane) => [lane.source, lane.answer]));
-  const roman = `${pairRoman}:${rowNeeds}`;
-  const [roomySpacing, tightSpacing] = pairRoman || rowNeeds ? [withRoman(ROOMY, pairRoman, rowNeeds), withRoman(TIGHT, pairRoman, rowNeeds)] : [ROOMY, TIGHT];
+  const romanized = (text: LaneText | undefined) => !!text?.pieces.some((piece) => romanizedText(piece.text, piece.language ?? text.language));
+  const unsaid = (texts: Array<LaneText | undefined>) => !texts.some((text) => text?.text);
+  const pairTexts = lanes.filter((lane) => lane.shape === 'pair').map((lane) => lane.source);
+  const rowTexts = lanes.filter((lane) => lane.shape === 'row').flatMap((lane) => [lane.source, lane.answer]);
+  const pairRoman = useRoom(romanization, pairTexts.some(romanized), unsaid(pairTexts));
+  const rowNeeds = useRoom(romanization && rowRoman, rowTexts.some(romanized), unsaid(rowTexts));
+  // And the answer's own: its readings go above it, on taller lines, and its romanization under it. What was said gives
+  // the romanization up to the readings, where it has any: at its size, both are more than a line can carry.
+  const reads = (text: LaneText | undefined) => { const language = annotatedLanguage(text?.language); return language === 'zh' ? pinyin : language === 'ja' && furigana; };
+  const answering = lanes.filter((lane) => lane.shape === 'pair');
+  const answerReads = useRoom(furigana || pinyin, answering.some((lane) => reads(lane.answer)));
+  const answerRoman = useRoom(romanization, answering.some((lane) => romanized(lane.answer) && !(lane.said && reads(lane.answer))));
+  const roman = `${pairRoman}:${rowNeeds}:${answerReads}:${answerRoman}`;
+  const aided = (spacing: LaneSpacing) => withAnswerAids(withRoman(spacing, pairRoman, rowNeeds), answerReads, answerRoman);
+  const [roomySpacing, tightSpacing] = [aided(ROOMY), aided(TIGHT)];
   const [roomy, least] = useMemo(() => [lanesHeight(lanes, fontSize, roomySpacing), lanesHeight(lanes, fontSize, tightSpacing)], [shape, fontSize, roman]); // eslint-disable-line react-hooks/exhaustive-deps
   const strip = useRef<HTMLDivElement>(null);
   // The window is fitted to the lanes. A window the user made higher than that keeps what they added — the room a
@@ -311,6 +332,7 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
     '--lane-inner-gap': `${spacing.inner}px`,
     '--lane-source-line': String(spacing.sourceLine),
     '--lane-answer-line': String(spacing.answerLine),
+    '--lane-answer-roman': String(spacing.answerRoman),
     '--lane-row-line': String(spacing.rowLine),
     '--lane-roman': String(spacing.roman),
     // The user's own row is as high as its lines; everything else is the pair's.
@@ -396,11 +418,11 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight 
               )}
               {lane.answer && (
                 <Slot
-                  className={`subtitle-lane__answer${lane.answer.notice ? ' subtitle-lane__answer--notice' : ''}${lane.said ? ' subtitle-lane__answer--said' : ''}`}
+                  className={`subtitle-lane__answer${lane.answer.notice ? ' subtitle-lane__answer--notice' : ''}`}
                   lang={langOf(lane.answer)}
                   fitKey={`${fontSize}:${squeeze}:${answerLines}:${lane.answer.text}`}
                 >
-                  {approves(lane.answer) ? tick : fixFor(lane) ? <Correction correction={fixFor(lane)!} language={lane.source!.language} /> : <Written text={lane.answer} lit={lit} readingsOnly={lane.said} />}
+                  {approves(lane.answer) ? tick : fixFor(lane) ? <Correction correction={fixFor(lane)!} language={lane.source!.language} /> : <Written text={lane.answer} lit={lit} readingsOnly={lane.said && !!reads(lane.answer)} />}
                   {!lane.source && lane.pending && pending}
                 </Slot>
               )}

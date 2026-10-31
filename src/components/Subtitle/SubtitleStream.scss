@@ -165,16 +165,9 @@
     .subtitle-lane__row {
       justify-content: flex-end;
       box-sizing: content-box;
-      // Just the two pixels a reading reaches up by: with more, a line that has rolled away showed its feet above
-      // the one that took its place (the romanization's, cut in half; seen 2026-10-06).
+      // Just the two pixels a reading reaches up by.
       padding-top: 0.12em;
       margin-top: -0.12em;
-
-      // Rolled, not even that: the line above ends where this one begins.
-      &[data-over] {
-        padding-top: 0;
-        margin-top: 0;
-      }
       // …and a little under it: a line with a reading above comes out two pixels lower than its box says, which cut
       // the feet off the romanization under it (g, j, y; the user, 2026-10-06).
       padding-bottom: 0.2em;
@@ -198,16 +191,10 @@
 
     .subtitle-lane__answer {
       flex: 0 0 auto;
-      height: calc(var(--lane-answer-lines, 2) * var(--lane-answer-line, 1.4) * 1em);
+      // A line, and under it the line of its romanization where one is written.
+      height: calc(var(--lane-answer-lines, 2) * (var(--lane-answer-line, 1.4) + var(--lane-answer-roman, 0)) * 1em);
       line-height: var(--lane-answer-line, 1.4);
       color: var(--subtitle-translation-color, #e8e8e8);
-    }
-
-    // What was said, in a run in one language: the answer's size, on lines with room for a reading (`SAID_LINE`).
-    .subtitle-lane__answer.subtitle-lane__answer--said {
-      height: calc(var(--lane-answer-lines, 2) * 1.8em);
-      line-height: 1.8;
-      --kt-ruby-lean: var(--kt-source-ruby-lean, 0.4em);
     }
 
     // The user's own, as a row: said, then what answers it. It rolls as the other lanes do — the newest words on the

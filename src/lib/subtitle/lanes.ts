@@ -236,7 +236,7 @@ export interface LaneSpacing {
   padBottom: number;
   gap: number;
   inner: number;
-  /** The lines a pair's answer has room for, and a line's height in ems: the answer's, the source's (taller: readings are written above it), and a row's. */
+  /** The lines a pair's answer has room for, and a line's height in ems: the answer's (`READ_LINE` where readings are written above it), the source's (taller: they may be), and a row's. */
   answerLines: number;
   answerLine: number;
   sourceLine: number;
@@ -245,6 +245,8 @@ export interface LaneSpacing {
   roman: number;
   /** Fork: and the user's own row, apart: room kept under a line that has none showed half of the line before (2026-10-28). */
   rowRoman: number;
+  /** Fork: what a line of the answer has under it for its romanization, in ems of the answer. */
+  answerRoman: number;
 }
 
 /** A line of romanization: its size (0.72 of the small text) by its line height (1.3), and a hair. */
@@ -252,8 +254,17 @@ export const ROMAN_LINE = 0.95;
 /** A spacing whose small lines each have a line of romanization under them: a pair's, and the row's where `row`. */
 export const withRoman = (spacing: LaneSpacing, pair = true, row = pair): LaneSpacing => ({ ...spacing, roman: pair ? ROMAN_LINE : 0, rowRoman: row ? ROMAN_LINE : 0 });
 
-export const ROOMY: LaneSpacing = { padTop: 10, padBottom: 12, gap: 17, inner: 2, answerLines: 2, answerLine: 1.4, sourceLine: 2.15, rowLine: 2.15, roman: 0, rowRoman: 0 };
-export const TIGHT: LaneSpacing = { padTop: 4, padBottom: 5, gap: 7, inner: 0, answerLines: 1, answerLine: 1.22, sourceLine: 1.9, rowLine: 1.9, roman: 0, rowRoman: 0 };
+/** A line of the answer with readings written above it: what they take in the app's fonts. */
+export const READ_LINE = 2;
+/**
+ * Fork: a spacing whose answer's lines have readings above them, or a romanization under them. Laid out for a bare
+ * line, a second line of Chinese lost the pinyin of its first, and a squeezed strip showed a Korean answer's
+ * romanization and not the answer (2026-10-31).
+ */
+export const withAnswerAids = (spacing: LaneSpacing, reads: boolean, roman: boolean): LaneSpacing => ({ ...spacing, answerLine: reads ? READ_LINE : spacing.answerLine, answerRoman: roman ? ROMAN_LINE : 0 });
+
+export const ROOMY: LaneSpacing = { padTop: 10, padBottom: 12, gap: 17, inner: 2, answerLines: 2, answerLine: 1.4, sourceLine: 2.15, rowLine: 2.15, roman: 0, rowRoman: 0, answerRoman: 0 };
+export const TIGHT: LaneSpacing = { padTop: 4, padBottom: 5, gap: 7, inner: 0, answerLines: 1, answerLine: 1.22, sourceLine: 1.9, rowLine: 1.9, roman: 0, rowRoman: 0, answerRoman: 0 };
 
 /** The spacing a share of the way from roomy (0) to tight (1). */
 export function spacingAt(squeeze: number, roomy: LaneSpacing = ROOMY, tight: LaneSpacing = TIGHT): LaneSpacing {
@@ -261,7 +272,7 @@ export function spacingAt(squeeze: number, roomy: LaneSpacing = ROOMY, tight: La
   const mix = (key: keyof LaneSpacing) => roomy[key] + (tight[key] - roomy[key]) * t;
   return {
     padTop: mix('padTop'), padBottom: mix('padBottom'), gap: mix('gap'), inner: mix('inner'),
-    answerLines: mix('answerLines'), answerLine: mix('answerLine'), sourceLine: mix('sourceLine'), rowLine: mix('rowLine'), roman: mix('roman'), rowRoman: mix('rowRoman'),
+    answerLines: mix('answerLines'), answerLine: mix('answerLine'), sourceLine: mix('sourceLine'), rowLine: mix('rowLine'), roman: mix('roman'), rowRoman: mix('rowRoman'), answerRoman: mix('answerRoman'),
   };
 }
 
@@ -269,13 +280,8 @@ export function spacingAt(squeeze: number, roomy: LaneSpacing = ROOMY, tight: La
 export function laneEms(lane: Lane, spacing: LaneSpacing): number {
   const feedback = lane.feedback ? ROW_SCALE * spacing.rowLine : 0;
   if (lane.shape === 'row') return ROW_SCALE * (spacing.rowLine + spacing.rowRoman) + feedback;
-  return (lane.source ? SOURCE_SCALE * (spacing.sourceLine + spacing.roman) : 0) + (lane.answer ? answerLineOf(lane, spacing) * spacing.answerLines : 0) + feedback;
+  return (lane.source ? SOURCE_SCALE * (spacing.sourceLine + spacing.roman) : 0) + (lane.answer ? (spacing.answerLine + spacing.answerRoman) * spacing.answerLines : 0) + feedback;
 }
-
-/** A line of what was said, at an answer's size: with the leading a reading above a word stands in. */
-export const SAID_LINE = 1.8;
-
-const answerLineOf = (lane: Lane, spacing: LaneSpacing): number => (lane.said ? SAID_LINE : spacing.answerLine);
 
 /** The height a strip of these lanes takes at a font size, spaced so. */
 export function lanesHeight(lanes: readonly Lane[], fontSize: number, spacing: LaneSpacing = ROOMY): number {
@@ -317,7 +323,7 @@ export function linesFor(lanes: readonly Lane[], fontSize: number, spare: number
   const pair = lanes.find((lane) => lane.shape === 'pair');
   const cost: LaneLines = {
     source: pair?.source ? fontSize * SOURCE_SCALE * (roomy.sourceLine + roomy.roman) : Infinity,
-    answer: pair?.answer ? fontSize * answerLineOf(pair, roomy) : Infinity,
+    answer: pair?.answer ? fontSize * (roomy.answerLine + roomy.answerRoman) : Infinity,
     row: lanes.some((lane) => lane.shape === 'row') ? fontSize * ROW_SCALE * (roomy.rowLine + roomy.rowRoman) : Infinity,
   };
   let left = spare;

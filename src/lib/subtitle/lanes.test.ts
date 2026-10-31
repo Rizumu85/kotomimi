@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { LegName } from '../conversation/types';
 import type { Entry, Row } from '../projection/types';
 import type { LegFilters } from '../view/filter';
-import { buildLanes, lanesHeight, linesFor, ROMAN_LINE, ROOMY, ROW_SCALE, SOURCE_SCALE, spacingAt, squeezeOf, TIGHT, withRoman } from './lanes';
+import { buildLanes, lanesHeight, linesFor, READ_LINE, ROMAN_LINE, ROOMY, ROW_SCALE, SOURCE_SCALE, spacingAt, squeezeOf, TIGHT, withAnswerAids, withRoman } from './lanes';
 
 const row = (segmentId: string, text: string, side: 'source' | 'translation' = 'source', language?: string): Row =>
   ({ key: `${segmentId}:0`, segmentId, side, start: 0, end: text.length, text, final: true, ...(language ? { language } : {}) });
@@ -290,6 +290,17 @@ describe('a strip whose small lines have a romanization under them', () => {
     expect(linesFor(two, 24, row).row).toBe(2);
     expect(linesFor(two, 24, row, withRoman(ROOMY)).row).toBe(1);
     expect(linesFor(two, 24, row + 24 * ROW_SCALE * ROMAN_LINE, withRoman(ROOMY)).row).toBe(2);
+  });
+
+  it('gives the answer its readings and its romanization, on each of its lines (fork)', () => {
+    const plain = lanesHeight(two, 24);
+    expect(Math.abs(lanesHeight(two, 24, withAnswerAids(ROOMY, false, true)) - (plain + 2 * 24 * ROMAN_LINE))).toBeLessThan(1);
+    expect(Math.abs(lanesHeight(two, 24, withAnswerAids(ROOMY, true, false)) - (plain + 2 * 24 * (READ_LINE - ROOMY.answerLine)))).toBeLessThan(1);
+    // Squeezed to one line it is still the line and its romanization, whose room is not air to be given up.
+    expect(spacingAt(1, withAnswerAids(ROOMY, false, true), withAnswerAids(TIGHT, false, true)).answerRoman).toBe(ROMAN_LINE);
+    const answer = 24 * (ROOMY.answerLine + ROMAN_LINE);
+    expect(linesFor(two, 24, answer, withAnswerAids(ROOMY, false, true)).answer).toBe(2);
+    expect(linesFor(two, 24, answer + 24 * ROW_SCALE * ROOMY.rowLine, withAnswerAids(ROOMY, false, true)).answer).toBe(3);
   });
 
   it('keeps room under the row apart from the pair’s: a row with no romanization has none (fork)', () => {
