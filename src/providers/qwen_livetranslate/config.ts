@@ -8,7 +8,7 @@
  */
 import type { SessionContext } from '../../lib/contract/adapter';
 import type { ProviderRefusal, SharedSettings } from '../../lib/provider/types';
-import { glossaryTranslationPairs } from '../../lib/glossary/glossary';
+import { glossaryRecognitionTerms } from '../../lib/glossary/glossary';
 import { isEndpointId, type EndpointId } from './endpoints';
 import {
   QWEN_LANGUAGES, QWEN_MODEL, QWEN_PAUSE, QWEN_SPOKEN, qwenParticipantVoice, qwenSpeakerVoice, SPEAKER_CLONE, SPEAKER_CLONE_ONCE, type QwenSettings,
@@ -62,9 +62,7 @@ export function buildQwen(context: SessionContext, s: QwenSettings, shared: Shar
   // The pause field is not in 3.8's documented update: it goes on the wire only when it changes something.
   const pause = Number.isFinite(s.pauseMs) ? Math.min(QWEN_PAUSE.max, Math.max(QWEN_PAUSE.min, Math.round(s.pauseMs))) : QWEN_PAUSE.default;
   const phrases = phrasesOf(s.hotwords);
-  for (const { source, target: preferred } of shared.glossary ? glossaryTranslationPairs(shared.glossary) : []) {
-    phrases[source] = preferred;
-  }
+  for (const term of shared.glossary ? glossaryRecognitionTerms(shared.glossary) : []) phrases[term] ??= term;
   return {
     model: QWEN_MODEL,
     endpoint: isEndpointId(storefront) ? storefront : null,

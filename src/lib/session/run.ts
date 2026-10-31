@@ -22,7 +22,7 @@ import type { Source } from './source';
 import { ResourceStack } from './stack';
 import { Turn } from './turn';
 import type { Budget, LegState, LoadingProgress, Prepared, Resources, RunEnd, RunNotice, RunShape } from './types';
-import { normalizeRecognitionText, normalizeTranslationText } from '../glossary/glossary';
+import { normalizeRecognitionText } from '../glossary/glossary';
 
 const DEFAULT_TIMEOUT_MS = 5_000;
 const API_ERROR_TYPES = ['auth', 'rate_limit', 'network', 'server', 'client'] as const;
@@ -690,11 +690,8 @@ export class Run {
   private glossaryEvent(leg: LegName, event: AdapterEvent): AdapterEvent {
     const glossary = this.shape.shared.glossary;
     if (!glossary || event.kind !== 'segmentText') return event;
-    const side = this.sideMap(leg).get(event.payload.ref);
-    if (!side) return event;
-    const text = side === 'source'
-      ? normalizeRecognitionText(event.payload.text, glossary)
-      : normalizeTranslationText(event.payload.text, glossary);
+    if (this.sideMap(leg).get(event.payload.ref) !== 'source') return event;
+    const text = normalizeRecognitionText(event.payload.text, glossary);
     return text === event.payload.text ? event : { ...event, payload: { ...event.payload, text } };
   }
 

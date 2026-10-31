@@ -39,15 +39,13 @@ function NewRow({ onAdd }: { onAdd(): void }) {
   const add = useGlossaryStore((state) => state.add);
   const [source, setSource] = useState('');
   const [aliases, setAliases] = useState('');
-  const [target, setTarget] = useState('');
   const written = useRef<HTMLInputElement>(null);
   const save = () => {
     if (!source.trim()) return false;
-    add({ source, target, aliases: parseAliases(aliases) });
+    add({ source, aliases: parseAliases(aliases) });
     onAdd();
     setSource('');
     setAliases('');
-    setTarget('');
     return true;
   };
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -60,7 +58,6 @@ function NewRow({ onAdd }: { onAdd(): void }) {
     >
       <td><input aria-label={t('settings.glossaryHeard')} placeholder={t('settings.glossaryOptional')} value={aliases} onChange={(event) => setAliases(event.target.value)} onKeyDown={onKeyDown} /></td>
       <td><input ref={written} aria-label={t('settings.glossaryWritten')} placeholder={t('settings.glossaryAdd')} value={source} onChange={(event) => setSource(event.target.value)} onKeyDown={onKeyDown} /></td>
-      <td><input aria-label={t('settings.glossaryTranslated')} placeholder={t('settings.glossaryAsIs')} value={target} onChange={(event) => setTarget(event.target.value)} onKeyDown={onKeyDown} /></td>
       <td />
     </tr>
   );
@@ -77,7 +74,7 @@ export function GlossarySection() {
   const added = useRef(false);
   const needle = entries.length >= SEARCH_FROM ? query.trim().toLocaleLowerCase() : '';
   const shown = needle
-    ? entries.filter((entry) => [entry.source, entry.target, ...entry.aliases].some((term) => term.toLocaleLowerCase().includes(needle)))
+    ? entries.filter((entry) => [entry.source, ...entry.aliases].some((term) => term.toLocaleLowerCase().includes(needle)))
     : entries;
   // What was just added shows: the new row stays put under a list that may be longer than the box.
   useEffect(() => {
@@ -123,7 +120,6 @@ export function GlossarySection() {
             <tr>
               <th scope="col">{t('settings.glossaryHeard')}</th>
               <th scope="col">{t('settings.glossaryWritten')}</th>
-              <th scope="col">{t('settings.glossaryTranslated')}</th>
               <th aria-hidden="true" />
             </tr>
           </thead>
@@ -138,13 +134,7 @@ export function GlossarySection() {
                 <Cell
                   aria-label={t('settings.glossaryWritten')}
                   value={entry.source}
-                  commit={(text) => { if (text.trim()) update(entry.id, { source: text, target: entry.target === entry.source ? '' : entry.target }); }}
-                />
-                <Cell
-                  aria-label={t('settings.glossaryTranslated')}
-                  placeholder={t('settings.glossaryAsIs')}
-                  value={entry.target === entry.source ? '' : entry.target}
-                  commit={(text) => update(entry.id, { target: text })}
+                  commit={(text) => { if (text.trim()) update(entry.id, { source: text }); }}
                 />
                 <td>
                   <button type="button" className="glossary-delete" onClick={() => remove(entry.id)} aria-label={t('settings.glossaryDelete')}>

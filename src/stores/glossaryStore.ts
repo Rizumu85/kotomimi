@@ -10,7 +10,7 @@ interface GlossaryStoreState {
   hydrated: boolean;
   add(input: GlossaryEntryInput): void;
   /** A source another row already has is refused: the two would be one entry. */
-  update(id: string, patch: Partial<Pick<GlossaryEntry, 'source' | 'target' | 'aliases'>>): void;
+  update(id: string, patch: Partial<Pick<GlossaryEntry, 'source' | 'aliases'>>): void;
   remove(id: string): void;
   snapshot(): GlossarySnapshot;
   hydrate(): Promise<void>;

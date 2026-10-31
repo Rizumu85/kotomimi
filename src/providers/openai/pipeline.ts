@@ -32,7 +32,7 @@ import { oneOfTwo, saidInOwn, sameSpeech } from '../../lib/language/script';
 import { identifyLanguage } from '../../lib/language/identify';
 import { AUTO } from '../../lib/provider/languages';
 import { BEFORE_SLOT, TEXT_SLOT } from './nativeTranslators';
-import { termsIn, withTerms } from '../../lib/glossary/glossary';
+import { normalizeRecognitionText } from '../../lib/glossary/glossary';
 import type { GlossarySnapshot } from '../../lib/glossary/types';
 import { cutAt, letters, restFrom, SETTLE_MS } from './sentenceCut';
 import { askNativeEngine, ipcNativeBridge, NO_NATIVE_ENGINE, type NativeBridge, type NativeEngineStatus } from '../../lib/native/nativeEngine';
@@ -153,7 +153,7 @@ export interface PipelineConfig extends RealtimeConfig {
   socket?: { endpoint: string };
   /** Present: before the socket opens, that server's pipeline is told its recognizer (`PipelineDeps.prepare`). */
   prepare?: { pipeline: string; transcription: string };
-  /** The user's terms, for a translation model that is not told them in instructions. */
+  /** The user's terms: a sentence is put right by them before it is translated. */
   glossary?: GlossarySnapshot;
 }
 
@@ -725,7 +725,7 @@ class PipelineLeg implements AdapterSession {
   }
 
   /** A text model's answer, shown as it is written. */
-  private async complete(stage: TextStage, text: string, signal: AbortSignal, show: (text: string) => void, before?: string): Promise<{ text: string; firstMs?: number; totalMs: number; model?: string }> {
+  private async complete(stage: TextStage, heard: string, signal: AbortSignal, show: (text: string) => void, before?: string): Promise<{ text: string; firstMs?: number; totalMs: number; model?: string }> {
     const { credentials, clock } = this.request;
     let key = stage.key ? credentials[stage.key] : undefined;
     let base = stage.baseUrl || httpBaseOf(credentials.endpoint);
@@ -738,11 +738,9 @@ class PipelineLeg implements AdapterSession {
         // Not to be asked (a test, a build with no main process), or not up: the address it was built with.
       }
     }
-    // A model asked in its own form reads no instructions: it is told the terms this sentence needs. Another Kotomimi writes
-    // the request itself, so it is told them beside the sentence.
-    const glossary = stage.kind === 'translate' ? this.request.config.glossary : undefined;
-    const terms = glossary && (stage.wrap || stage.pair) ? termsIn(text, glossary, stage.language ?? this.request.context.direction.target) : [];
-    const extra = terms.length > 0 && !stage.wrap ? { ...stage.extra, terms } : stage.extra;
+    // A term written right is kept by the model unprompted; written wrong, it is translated as what it sounds like.
+    const { glossary } = this.request.config;
+    const text = glossary && stage.kind === 'translate' ? normalizeRecognitionText(heard, glossary) : heard;
     return completeText(
       {
         url: chatUrl(base),
@@ -751,12 +749,12 @@ class PipelineLeg implements AdapterSession {
         system: stage.wrap ? '' : stage.system,
         ...(stage.shots?.length ? { shots: stage.shots } : {}),
         ...(stage.pair ? { pair: stage.pair } : {}),
-        ...(extra ? { extra } : {}),
+        ...(stage.extra ? { extra: stage.extra } : {}),
         ...(stage.phone ? { timeoutMs: PHONE_TEXT_TIMEOUT_MS, busyRetries: PHONE_BUSY_RETRIES } : {}),
         // A function, so that nothing in the sentence is read as a pattern.
         user: stage.wrapAfter && before
-          ? withTerms(stage.wrapAfter, terms).replace(BEFORE_SLOT, () => before).replace(TEXT_SLOT, () => text)
-          : stage.wrap ? withTerms(stage.wrap, terms).replace(TEXT_SLOT, () => text) : text,
+          ? stage.wrapAfter.replace(BEFORE_SLOT, () => before).replace(TEXT_SLOT, () => text)
+          : stage.wrap ? stage.wrap.replace(TEXT_SLOT, () => text) : text,
       },
       { fetch: this.doFetch, clock, signal, onText: (shown) => show(tidyAnswer(stage.kind, shown)) },
     );

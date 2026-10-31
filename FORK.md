@@ -498,11 +498,10 @@ External LocalAI-compatible servers remain supported directly as remote/API serv
 
 字幕不再把主窗口缩成一条，而是开一个独立窗口（`window.open`，`electron/subtitle-window.js` 管它的位置和置顶）；主窗口留着，设置也在主窗口里打开。React 树仍在主窗口的页面里，`SubtitleWindow.tsx` 用 portal 把它画进子窗口，所以子窗口里的东西要找自己的 `window`：键盘、屏幕尺寸，还有 `ResizeObserver`。主窗口建的观察者听不到子窗口的尺寸变化，一律走 `observeSize`（`surfaces/childDocument.ts`）。
 
-术语表（`src/lib/glossary/`）是一张手写的小表，最多 50 条，每行：听成、写成、译成；开始会话时取快照。不导入 VRChat 好友：导入的是拼写，大家说的是叫法，几百个名字只会拖慢识别（用户 2026-10-31 定的）。
+术语表（`src/lib/glossary/`）是一张手写的小表，最多 50 条，每行：听成、写成；开始会话时取快照。不导入 VRChat 好友：导入的是拼写，大家说的是叫法，几百个名字只会拖慢识别（用户 2026-10-31 定的）。也不存译法：同一个词在不同语言里要不同译法，管理麻烦，而翻译模型自己就能处理（用户 2026-10-31）。
 
-- **识别**：Qwen3-ASR 拿到整张表的「写成」（audio.cpp 的 `text` 字段，`takesContext`），10 句稀有名字从 1 句写对到 5～7 句，40 个词不变慢，300 个词约慢 0.6 秒。Apple Speech 的 `contextualStrings` 实测没有任何效果，所以不传；其他模型同样不传。识别不出来的靠「听成」事后替换（`Run.glossaryEvent`）。
-- **翻译**：只把本句出现的词写进请求（`termsIn`、`withTerms`，混元模型卡的形式），11 个句子里 Index-Translate 从 0 句对到 10 句对，混元 MT 2 从 1 句对到 11 句对（换成普通的“术语：A=B”只有 7 句）。请求由本机写的走 `wrap`，另一台 Kotomimi 自己写请求，就随句子带 `terms`。云端服务商拿提示词或自己的词表。
-- 条目不分方向，两条腿都过这里，所以输出后的替换要先看文字的书写：`Alice → 爱丽丝` 只进中文译文。
+- **识别**：Qwen3-ASR 拿到整张表的「写成」（audio.cpp 的 `text` 字段，`takesContext`），10 句稀有名字从 1 句写对到 5～7 句，40 个词不变慢，300 个词约慢 0.6 秒。Apple Speech 的 `contextualStrings` 实测没有任何效果，所以不传；其他模型同样不传。识别不出来的靠「听成」替换。
+- **翻译**：「听成」的替换在翻译之前做（`PipelineLeg.complete`，显示上由 `Run.glossaryEvent` 做），模型拿到写对的词。Index-Translate 不加任何提示就保留了 11 个句子里的全部名字。做不到的是固定译法：`インスタンス` 仍由模型自己译。云端服务商拿到词表或提示词。
 
 ## 字幕模式的字幕视图（2026-10-06）
 
