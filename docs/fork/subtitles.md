@@ -1,298 +1,104 @@
 # Subtitles
 
-## 字幕是独立窗口，术语表（2026-10-30）
+The strip is read at a glance over a game or a meeting, so its frame holds still and only the words move. Measured results: [`docs/fork/measurements.md`](measurements.md).
 
-字幕不再把主窗口缩成一条，而是开一个独立窗口（`window.open`，`electron/subtitle-window.js` 管它的位置和置顶）；主窗口留着，设置也在主窗口里打开。React 树仍在主窗口的页面里，`SubtitleWindow.tsx` 用 portal 把它画进子窗口，所以子窗口里的东西要找自己的 `window`：键盘、屏幕尺寸，还有 `ResizeObserver`。主窗口建的观察者听不到子窗口的尺寸变化，一律走 `observeSize`（`surfaces/childDocument.ts`）。
+## Window
 
-术语表（`src/lib/glossary/`）是一张手写的小表，最多 50 条，每行：词语、听错成（可空）。2026-10-31 用户觉得「听成 / 写成」两列让人迷惑：填名字不知道要不要重复，填专有词不知道要不要填各种语言。所以词语放第一列、是唯一要填的，「听错成」只记真的听错过的样子。词语本身也参与匹配（不分大小写），`vrc` 自动改成 `VRC`，不用重复填。一行是一种写法，用说话时的语言写。在新行里再写一次已有的词时，这一行原来的「听错成」保留。
+`ElectronSubtitleSurface` opens a second native window with `window.open`; `electron/subtitle-window.js` owns its place, size and pinning. The React tree stays in the main page and `SubtitleWindow` portals it across, so there is one session. Sizes go through `observeSize` (`src/components/Subtitle/surfaces/childDocument.ts`): an observer of the main page never hears the child resize.
 
-**从对话里改**（`WordFix.tsx`）：在对话里选中说的话里听错的词，旁边出现一个「改词」小按钮，点了才展开输入框，填上正确写法就记进词典。选中文字本身不打扰：只是阅读或复制时，小按钮不抢焦点，选区还在。只在主窗口的对话列表里有，译文不算，超过 40 个字不算。词典是活的（`snapshot` 给的是表本身，不是副本）：改完从下一句起生效，翻译也用改对的词，屏幕上已有的原文跟着变，已经翻好的译文不变；告诉识别模型和云端服务的词表只在开始会话时读一次。不导入 VRChat 好友：导入的是拼写，大家说的是叫法，几百个名字只会拖慢识别（用户 2026-10-31 定的）。也不存译法：同一个词在不同语言里要不同译法，管理麻烦，而翻译模型自己就能处理（用户 2026-10-31）。
+A first open is at most 880 px wide; the minimum, 340 px (`electron/popover-windows.js`), is what the narrowest toolbar needs. The toolbar frame, fitting and click-through are desktop only.
 
-- **识别**：Qwen3-ASR 拿到整张表的「写成」（audio.cpp 的 `text` 字段，`takesContext`），10 句稀有名字从 1 句写对到 5～7 句，40 个词不变慢，300 个词约慢 0.6 秒。Apple Speech 的 `contextualStrings` 实测没有任何效果，所以不传；其他模型同样不传。识别不出来的靠「听成」替换。
-- **翻译**：「听成」的替换在翻译之前做（`PipelineLeg.complete`，显示上由 `Run.glossaryEvent` 做），模型拿到写对的词。Index-Translate 不加任何提示就保留了 11 个句子里的全部名字。做不到的是固定译法：`インスタンス` 仍由模型自己译。云端服务商拿到词表或提示词。
+## Lanes
 
-## 字幕模式的字幕视图（2026-10-06）
+Subtitle view is the default (`compactMode`); list view is the conversation list. Upstream's bands (`src/lib/subtitle/bands.ts`) stay undrawn.
 
-用户的话："字幕模式看不到语法反馈，目前的字幕模式也只像是把普通的界面的 ui 复制过来，好像没有根据字幕模式的特点设计过……文字大小调的不一样还会导致能看见的行数也不一样。"实际看了一遍：展开视图就是对话列表，200 像素高的窗口里只放得下四行，你那句的语法反馈晚到一秒，就被对方后面的话挤到看不见的地方；上游的紧凑视图把每一侧的文字连成一行流动，反馈成了一串"✓ ✓ ✓"，不知道对应哪句。
+`buildLanes` gives each side heard one lane, the other side's first. A lane changes only when its own side says the next sentence, so talk never pushes feedback away.
 
-现在字幕模式默认是**字幕视图**（`src/lib/subtitle/lanes.ts`、`SubtitleLanes.tsx`）。排版做了两轮，都是用户从草图里选的：第一轮选了"对方 / 我各一栏"；做出来后用户觉得"间隔好诡异"，第二轮在三张草图里选了 A。
+- Pair: the sentence small over its answer large. The other side's lane, or the user's when alone.
+- Row: the user's lane under the other side's. Sentence, arrow, answer on one small line; approval is a tick, a correction is the sentence marked in place. Feedback beside a translation has its own line.
+- A pair's small line is the answered sentence plus all said since, at most `STREAM_MOST` sentences, ending at the word being heard. When a newer sentence is answered the line restarts at it.
+- A row shows its newest sentence at once; "…" means an answer is coming, only on a side answered before.
+- A sentence in the reader's language is its own answer (`answersItself`). In a same-language run, speech takes the answer's place.
 
-- **对方是主角**：一组两行，上面原文（小字、带注音，行首一个"对方"小标签），下面译文（大字）。**我只占一行**：细线下面一行小字，"我"标签、原句、箭头、回答它的东西（译文或语法反馈）。大部分时间是在读对方的话，自己那句的反馈多半是一个 ✓ 或一句短改正，扫一眼就够。只听一侧时，那一侧就是一组两行。
-- **只有两种距离**：一组里的两行紧贴；两栏之间一个间隔，细线在正中。第一轮看着怪，是因为每行各占一个固定的格子，译文预留的第二行空着时，原文和译文、译文和下一栏之间都空出一截。现在一组字贴着细线（或窗口底边）往上长，像字幕那样，空出来的那一行在最上面，读起来就是窗口的边距。
-- **一组始终是成对的**：新的一句还没有译文时，不换——继续显示上一句和它自己的译文，原文后面加一个淡淡的"…"表示后面还有；译文一开始出来，两行一起换（`pending`）。第一轮是"新原文 + 上一句的译文（变淡）"，对方连着说话时两行永远对不上。我那一行相反，新的一句立刻显示（让你知道听到了），反馈没来时箭头后面是"…"。这个"…"只在这一侧以前有过回答时才出现：只转写、不翻译的运行里没有东西在路上。
-- **不会被挤走**：一栏只在它自己那一侧说了下一句时才换，所以你的反馈不会被对方的话挤走。
-- **窗口高度跟字号走**：按"原文一行 + 译文两行（+ 我的一行）"排，字调大窗口就变高（底边不动，往上长），看到的行数不变（`lanesHeight`，主进程的 `subtitle:fit-height`）。
-- **窗口可以自己拉小**（用户："有时候想窗口小，字大……窗口拉小可以把句子的间距调小之类的？但是在一个极限的程度内，要不然也不好看"）：拉小时先让出空白——边距、两栏之间的距离、行距，译文从两行的位置收到一行（`spacingAt`，从 `ROOMY` 到 `TIGHT`）；收到 `TIGHT` 就是下限，窗口不能再拉小（主进程给窗口设了最小高度，离开字幕视图或字幕模式时还原）。在这之间，一句话放不进它的位置就把字缩小来放（`FitText`，最小到一半，再放不下只留句尾；我那一行最小到八成，再放不下截掉句尾）。之后再改字号，窗口重新贴合。
-- **窗口拉高了就用上**（用户："默认一行 ok，但是如果用户高度设置得高一些，这些位置不会利用上么"）：窗口比贴合的高度高出来的部分，给**正在显示的这一句**更多行——"我"那一行先得第二行，然后译文第三行、原文第二行、译文第四行……轮着给，够一行的高度才给一行（`linesFor`；上限原文 3 行、译文 6 行、我 3 行）。长句在贴合的窗口里要缩字，拉高了就按选的字号多写几行。多拉出来的高度记在这台电脑上（`kotomimi.subtitle.addedHeight`），下次进字幕模式、或者改字号时都保留。第一版把多出来的地方用来显示前面几句，用户说不是这个意思（"不是前面的句子，而是如果翻译和语音识别的句子放不下的话可以利用这空间"），已经去掉。
-- 全屏、或者"锁定位置和尺寸"时，窗口不会被自动改高度。
-- 切换按钮叫"字幕视图 / 列表视图"（原来是"紧凑 / 展开"）；每一侧显示原文、译文、两者或关闭，仍用工具条上原来的按钮。
-- 上游的四条流动文字带（`src/lib/subtitle/bands.ts` 和它的测试）留着没删，只是不再画：以后合并上游时少一处冲突。会说话的提供商的卡拉 OK 高亮在字幕视图里照旧（文字按行画，播到哪亮到哪）；"新内容高亮"只在那个视图里有，不再用。
-- 实测（测试窗口，24 号字，对方放一段日语、麦克风放一段带错的日语）：两侧都听时窗口 167 像素高，只听对方 118；36 号字只听对方时 167，往小拉停在 90。
+## What stays fixed
 
-### 字幕的样式：底、阴影、对齐（2026-10-06）
+Layout computed from live text jumped every second, so nothing is sized by content.
 
-用户的话："字幕目前不是半透的嘛，为了字能看清是个黑色背景，但是可以加黑色模糊阴影看得更清楚，也可以背景是透明的、字有黑色模糊阴影，或者暗一点的字有白色模糊阴影。"先出了两版草图，用户确认后做的（`src/lib/subtitle/look.ts`、`subtitleLookStore.ts`、`SubtitleLook.tsx`）。
+- Text is always the chosen size. Too long, it loses its oldest whole line (`Slot`, `wholeLinesFrom`).
+- Each text has a fixed slot, written in or not. A silent lane keeps its room.
+- Lanes are centred in the box. Small lines stand on the foot of their slot, so a reading grows into kept room and the words stay put.
 
-- **四个样式，是起点不是模式**：深色底（原来的样子）、淡底柔影、亮字黑影（无底）、暗字白影（无底）。点一个，就把底色、底色深浅、两种字色、阴影强度、对齐一起写好；之后再动哪一项都只是在它基础上改，样式仍然显示为选中的那个。
-- **阴影照用户自己给 Folia 写的歌词模组**（`bilingual-ruby-lyrics`）：两层，一层贴身（`0 1px 3px`，55%），一层很散（`0 0 14px`，35%），是"字贴着一点暗"，不是描边。强度 50 就是它；过了 50 再加一层更贴身的，给又亮又花的背景用。**颜色不用选**：亮字配黑影，暗字配白影（按字色的明暗算，`isLight`），原文和译文各算各的。白影在每一档都画得重一些，暗背景上的光晕不重看不出来。
-- **对齐**：有底的两种靠左，无底的两种居中，可以再改。无底时短句贴在很宽的窗口最左边离视线太远，所以居中；有底的保持靠左，是因为译文一个词一个词出来，居中的话整行会随着变长不停往左挪（Folia 的歌词是整行一次出现，没有这个问题）。
-- **设置面板**：字幕的显示设置最上面是四个样式的小预览（背景一半暗一半亮，看得出各自在两种背景上的效果），下面"底色深浅""阴影强度"两个滑块（拉到 0 显示"关"）和"对齐"；译文颜色最常改，留在外面；原文颜色和底色收进"更多颜色"。主界面的显示设置没有样式，保持上游的排法。上游原来的"背景不透明度"滑块就是现在的"底色深浅"。
-- **无底时别的东西也要看得见**：没开始会话时字幕窗口里的提示文字自带一层黑影；"对方 / 我"小标签改成自己的深色小底，不靠后面的底板。
-- 样式多出来的三项（选了哪个、阴影强度、对齐）存在自己的 store 里（`settings.common.subtitleLook.*`），上游的字幕 store 没动。
+## Window height
 
-### 0.43.107 发出去之后用户看到的（2026-10-06）
+- `lanesHeight` fits the window to font size and lanes, plus the toolbar's room (`BAR_ROOM`). A larger font gives a taller window, same lines.
+- `subtitle:fit-height` keeps the bottom edge in place: the strip sits low and grows upward.
+- Dragged smaller, spacing gives way (`spacingAt`) down to `TIGHT`, the window's minimum height.
+- Dragged taller, the sentence on screen gets more lines (`linesFor`), never earlier sentences. The added height is kept (`kotomimi.subtitle.addedHeight`).
+- With no run the window keeps the height the strip will have (`restingHeights`).
+- No fitting while fullscreen or locked, or in list view.
+- A fractional display scale reads back a size a pixel or two off. `fitGave` counts a read within `FIT_READS_WITHIN` as the size given, so starts and stops do not walk the window.
 
-- **选了自动检测，会话启动失败**（"ASR engine init failed: The recognition engine of this computer could not start."）：应用下载的识别引擎一次只跑一个模型。对方那一路要识别语言，只能用 Qwen3-ASR 1.7B；用户自己的语言选的是别的模型（R2T2），两路各要一个，谁也起不来。而且开着语法反馈时两路听的是同一种语言，卡片里只有一行，没地方改。现在：选了自动检测，这台电脑上每一路都用能识别语言的那个模型（`NativePick.detecting`，`nativePicked` 的第一步），卡片里每一行也只列这样的模型；这个"顺带"的选择不写进设置，关掉自动检测就回到各自选的模型。用户问"为什么自动检测需要不同的识别模型"——因为引擎里只有 Qwen3-ASR 1.7B 能自己判断语言，其余的（R2T2、0.6B、Nemotron、Apple Speech）都要先被告知语言；2026-10-12 加的 SenseVoice-Small 也一样，它只分得清自己会的五种。
-- **无底的样式下，没开始会话时的提示看不清**：只加阴影不够（浅色字压在浅色网页上）。没有会话时字幕窗口里的东西——开始按钮、提示——现在总是站在自己的深色底上，和样式无关；样式只管字幕。
-- **没人说话时"对方"标签一直挂在那里**：一栏里还没人说过话时什么都不画，也不占地方、不画分隔线。
-- **原文和标签在非深色底的样式下看不清**：原文和"我"那行的原句原来各带 0.8 的透明度，标签的底也是半透明的，底板一淡就一起没了。现在两种小字都是十足的颜色，标签是实心的深色小底配亮字。
-- **窗口上方空着**：字幕块原来贴着窗口底边往上长，窗口一高上面就空一截，看着像是给工具条留的。现在字幕块在窗口高度的正中，多出来的空间上下各一半。
-- **"拉多高语法反馈都不出现"**：用户字幕工具条上"我"那一侧被切成了"关闭"。两个按钮原来只写"两者""关闭"，看不出哪个是哪一侧；现在写成"我 · 两者""对方 · 关闭"（`DisplayModeButton`，主界面的那两个也一样）。
-- 顺带修了一个自己删坏的：去掉"显示前面几句"那一版时把两栏之间的分隔线的样式一起删了，0.43.107 里没有那条线；已补回。
+## Toolbar
 
-### 字幕的穿透模式（2026-10-06）
+The toolbar is the head of the caption box, in its own room above it (`subtitle-app--framed`), so it covers no caption. With no run it stays out and says the state where the clock goes. `barFit` folds it as the window narrows.
 
-用户要的："字幕模式可以加个穿透模式，那个模式下字幕模式的菜单栏是不会唤出来，也无法点击到字上面，除了 explicit action unlock 这个穿透模式（类似于音乐软件的桌面字幕功能）。"
+## Click-through
 
-- 字幕工具条上多一个按钮（鼠标带斜杠的图标），会话进行中才有。点了之后窗口把所有点击都让给它下面的东西（主进程 `subtitle:set-click-through`，`setIgnoreMouseEvents(true, { forward: true })`），鼠标移上来工具条也不出来。
-- **唯一的出口**：鼠标移到字幕窗口上时，右上角出现一个小的"解除穿透"；鼠标到了这个按钮上，窗口才重新接收点击，点它就解除。鼠标移动仍然会转给页面（`forward`），所以页面知道指针在不在窗口上。
-- 只在会话进行中有效：没开始的字幕窗口要点"开始"，不能穿透。会话结束、离开字幕模式都会自动解除，而且这个状态不保存——下次打开发现窗口点不动就成了陷阱。
-- 万一按钮没出来：Alt+Tab 切到 Kotomimi 按 Esc 会退出字幕模式，也就解除了。
-- 页面这一半的逻辑在测试窗口里验证过（工具条收起、按钮只在指针进来时出现）；"点击真的落到下面的窗口上"只能真人用鼠标试，自动化的点击不经过系统这一层。
+During a run only, the window gives every click to what is under it and the toolbar is not drawn. The way out is the toolbar's own button, shown while the pointer is over the strip.
 
-### 用户试了测试版之后（2026-10-06）
+The main process polls the cursor every 50 ms (`watchPointer`) and takes clicks only over that button. Page enter and leave events flickered, because switching mouse capture fires them.
 
-用户实机试了上面这些，说了五件事，都按它改了：
+It is never kept: opening or closing the view and the end of a run clear it, since a window found unclickable is a trap. Escape in the subtitle window leaves subtitle mode too.
 
-- **无底的样式用描边，有底的仍然用阴影**。"淡阴影好像不太适合界面 UI 作为背景，Folia 是特意做的好看的背景做对比，所以可以参考桌面歌词的外描边。"`shadowFor` 现在画的是一圈贴身的描边（八个方向、不带模糊）再加一点散开的晕，单位是 em，所以小字的边细、大字的边粗。亮字黑边、暗字白边仍然按字色自动定。第一次改成了全部描边，用户马上说"淡底应该是用阴影而不是描边"：有底板时底板才是背景，字只需要稍微离开它一点，描边太硬。所以每个样式自己带一项 `edge`：深色底、淡底柔影是 `shadow`（就是上面讲的 Folia 两层阴影，强度 50 是它原样；淡底柔影默认用 100，是用户试过之后定的），亮字黑边、暗字白边是 `outline`。滑块的名字跟着当前样式叫"阴影强度"或"描边强度"。
-- **"对方 / 我"是每栏左边的一条色条**。原来标签写在文字开头，居中时每句话长短不同，标签就跟着左右跑。现在每一栏是"标签列 | 文字"的两列，标签永远在左边同一个位置；居中时右边留出和标签列一样宽的空，所以文字仍然在窗口正中。标签的大小原来跟着字号走（字幕字号的一半），用户说"大小应该要固定，不能老变化"，而且深色小药丸"很丑"：现在是固定 12 像素的彩色小字（对方橙、我绿；暗字的样式下换成深色的同两种颜色），带着和字幕文字一样的阴影或描边，像字幕里的说话人名字，不是盖在上面的徽章。标签这一格和这一栏第一行一样高，字在格子里垂直居中，所以总是和第一行对齐。然后出了四种草图（彩色小字、只有色条、色点加灰字、图标），**用户选了"只有色条"**：每栏最左边一条 3 像素的竖条，橙色是对方、绿色是我，和这一栏一样高，位置永远不变。一开始外面加了一圈很细的描边，用户说"不需要描边，颜色本身就很清晰了"，去掉了。"对方 / 我"两个字还在页面里，只给读屏用，不画出来。上面说的"彩色小字"是选之前的过渡版本。
-- **没人说话时的占位**。无底的样式下没人说话，窗口就是屏幕上什么都没有的一块，找不到在哪。现在所有栏都还没人说话时，中间有一个很淡的"· · ·"；有人开口就没了。
-- **穿透的出口就是工具条上那个按钮本身**，在它原来的位置，不再另外出一个"解除穿透"。穿透时工具条不画，只有这一个图标在鼠标移到字幕窗口上时出现。
-- **按钮一闪一闪、点的时候穿过去**：第一版靠页面的鼠标进出事件来切换窗口收不收点击，而切换这件事本身又会让窗口收到"鼠标离开/进入"，于是来回抖。现在由主进程每 50 毫秒问一次系统鼠标在哪（`watchPointer`）：在按钮上（外扩 6 像素）窗口才收点击，其余地方一律让过去；页面只负责告诉主进程按钮在哪、并在指针进出窗口时显示或藏起按钮。
-- **回到字幕模式不会还在穿透里**：字幕视图每次打开和关闭都把穿透清掉，会话结束也清。
+## Looks
 
-### 字幕条"不稳"的实测（2026-10-06）
+`src/lib/subtitle/look.ts` has four presets. A preset writes panel, text colours, edge strength and alignment; each can then be changed.
 
-用户："刚开始识别的时候语音识别的字体忽大忽小，字幕结构老是变。"用两段录音在测试窗口里跑了 56 秒，每 0.1 秒记一次字幕条（`.dev/tools/sample-strip.js`、`report-strip.js`）：
+- Edge: with a panel, a soft shadow; without, an outline as in desktop lyrics, which holds letters apart from a desktop. Ink follows the text colour (`isLight`).
+- Alignment: panels left, because a growing translation would slide when centred; no panel centred, because a short line at the far left is far from the eyes.
+- `hasPanel` goes by actual opacity, not the look. Without a panel there is no hairline between lanes.
 
-- 对方那一栏的原文字号变了 **11 次**，在 17.4 和 11 像素之间；第一句 112 个字，4.5 秒里连缩 5 次。
-- 同一种字号下，带注音假名的一行比不带的小（16.1 对 17.4）：注音让这一行比格子高了一点，`FitText` 就把它缩了。
-- 对方那一栏的位置动了 9 次、高度变了 8 次；我这一栏自己高度只变 1 次，却被带着动了 8 次（两栏在窗口里垂直居中，一栏变高另一栏就跟着挪）。
-- 窗口高度没变过。
+Each side shows source, translation, both or off.
 
-也就是：窗口是稳的，里面不稳。原因是版面跟着内容算——放不下就缩字号（`FitText`）、译文出来这一栏才长高、长高了就重新居中——而实时字幕的内容每秒都在变。一段话又没有长度上限（停顿 1.4 秒或说满 15 秒才断），所以"放不下"是常态。要改的方向：字号固定、每栏的行位固定并且预留、放不下时让旧的字走掉而不是缩小；另外在句号处就把一句交给翻译，让每个单位本来就短。用户确认后做了，见下面两节。
+## Reading aids
 
-### 不动的字幕条（2026-10-06）
+- Slots keep room for aids. `plannedRoom` plans it from the language pair, so the first answer does not raise the window; `useRoom` keeps it while the switch is on.
+- Each sentence uses its own language. Romanization sits under stretches split at spaces and between Japanese words (`romanStretches`).
+- `romanization` is the master switch; `romanizationOff` turns off ja, ko, ru or uk.
 
-原则一句话：**框不动，只有字在流动。**（`SubtitleLanes.tsx` 的 `Slot`、`SubtitleStream.scss`、`lanes.ts`）
+## Sentence by sentence
 
-- **字号永远是选的那个**，不再为了放得下而缩小（原来的 `FitText` 去掉了）。
-- **每栏的行位固定并且预留**：对方那一栏永远是"原文 1 行 + 译文 2 行"那么高，译文还没来时那两行空着；还没人说话的那一栏不画东西但占着位置。所以译文出现、另一个人开口，别的东西都不会被挤走。窗口拉高后多出来的行数规则没变（`linesFor`）。
-- **放不下时旧的一行走掉**：原文和"我"那一行贴着格子底部写，像滚动字幕一样，新字永远在最下面一行，超出时最旧的一行整行消失。译文同理，超出两行时看到的是最后两行。"我"那一行一开始是例外——按"开头最要紧"截掉句尾、补省略号，结果语法反馈一长就只剩"…"（用户，2026-10-07）；现在和别的栏一样滚动，反馈边出边看到末尾。
-- **注音假名不再让行变高**：带注音的一行比不带的高 2～4 像素，原来会把下面的字顶下去。现在小字行高从 1.9 改成 2.15，并且贴底对齐、上方留出一点余量给注音，有没有注音基线都在同一处。字幕窗口因此比原来高 8 像素。
-- "还没人说话"的"· · ·"改成盖在栏的上面，不占位置。
-- 同样两段录音、同样的采样：原文字号变化 **11 次 → 0**，栏的位置移动 **9 次 → 0**，栏的高度变化 **8 次 → 0**。原文那一行的滚动（整行换行）还有几次，这是设计内的。
-- 没做的：居中对齐时，正在变长的那一行仍然会左右移动（居中的本性）；想完全不动就用靠左。译文是日语并且开了注音时，译文行（行高 1.4）仍然会被注音顶高一点。
+A recognizer closes a stretch at a pause (1.4 s) or its longest turn (15 s). With `translateBySentence` on (the default), a leg that translates what it hears closes finished sentences as they come. Sound is not cut, only text; off, a stretch is translated whole.
 
-### 一句一译（2026-10-06，测试中）
+A closed caption cannot be taken back, so right beats early. `cutAt` (`src/providers/openai/sentenceCut.ts`) cuts only:
 
-识别器按停顿（1.4 秒）或最长 15 秒把话切成一段。一个人连着说，一段里就有好几句：原文一行放不下，而且要等整段说完才开始翻译。现在翻译"听到的话"的那条腿（`pipeline.ts`，规则在 `sentenceCut.ts`）在一段还没结束时，就把里面已经说完的句子一句一句合上、马上送去翻译；**录音不切**，识别器继续听同一段，所以识别本身不受影响。
+- at a sentence end (`src/lib/segmentation/sentenceEnd.ts`), never at a comma or a mere pause: half a Japanese sentence has no verb yet;
+- with about two seconds said after it (`PIECE_LEAST_DENSE`, `PIECE_LEAST`), because recognizers rewrite their newest words and end any partial on a full stop;
+- with as much before it, so short sentences join the next;
+- once the text has stood unchanged for `SETTLE_MS`.
 
-- **什么时候算说完**：句末标点后面已经又说了一句的量（日中韩文 10 个字、其他语言 28 个字母，约两秒），并且这一句的文字 0.4 秒没变过。一开始只要求后面有两个字，见下面"断句改得保守"。句子切分用上游的规则（`sentenceEnd.ts`，认缩写、小数点）。
-- **一句的长度是给读的人定的**（用户："可能不用死死的一个断句，稍微长一点但又不要太长"）。字幕每换一次，眼睛都要重新找一次；太长又超出两行和一眼能看完的量。字幕行业的习惯是一条大约 1.5～7 秒。所以：**至少约 2 秒的话**才成一句（日中韩泰文 10 个字、其他语言 28 个字母），更短的句子（"はい。""これもかな？"）和下一句合成一条；~~一口气说了约 8 秒还没到句末就在最后一个逗号处先断开~~（当天撤掉了，没有发布过：半句日语还没有动词，译文只能猜）。一开始的下限是 6 个字 / 14 个字母，短句一条一条闪过去。
-- **只切"翻译听到的话"的腿**。带语法反馈的"我"这条腿不切：反馈是针对整句话的，判断"是不是扬声器漏进来的"也是按整段问的。识别器一次性给出整段文字的（没有逐字输出），也不切，和以前一样。
-- 每一句是自己的一行，有自己的配对标记（`kotomimi_piece_N`），译文和它一一对应。一段的最后一句在这段结束时照常合上；如果最后什么都没剩，那个空的行不会出现。
-- **试过又撤掉的："停顿 0.9 秒就切"**。这台电脑的识别器会给"目前听到的"末尾总是加一个句号，句子中间换口气就被当成了句末：实测把"そうだね、やっぱりお正月の。/ イメージあるよね。"切成两句，各自翻错。所以说话人只是停在一句上时不切，交给识别器自己的停顿去断。
-- **实测**（同一段 60 秒的日语对话录音，对方模式，各跑一次；识别文本每次略有不同，样本很小）：
+Each piece is its own segment with a `kotomimi_piece_N` origin, so answers pair one to one. What is closed stands; `restFrom` finds the rest in the final text by the closed text's last letters. A rest with no letters makes no caption.
 
-  | | 整段翻译 | 一句一译 |
-  |---|---|---|
-  | 第一段（4 句、连着说了 14 秒）第一句译文出现 | 20.9 秒 | 8.9 秒 |
-  | 这一段里 4 句的译文分别出现 | 全部在 20.9 秒 | 8.5 / 14.3 / 20.0 / 20.7 秒 |
-  | 全程的行数 | 8 | 12～14 |
+`cutsSentences` excludes a coached leg, feedback beside translation, paired recognition and a leg with no stage. A recognizer that writes little punctuation (R2T2) stays whole.
 
-  质量上各有一处毛病：整段翻译有一次把开头的"二つ。"原样留在译文里；一句一译有一次把一段最后剩下的三个字"柄的に。"单独送去、原样返回，还有一次漏掉了一个动词。没有看出哪边明显更好。
-- **已知的代价**：一段最后可能剩一个很短的尾巴单独成句；跨句的指代没有上文。可以做的下一步是把上一句作为上下文一起给翻译模型（每种模型的提示词格式不同，还没做）。
-- 默认开着。"翻译"那张卡片最下面有一个开关"一句一译"（`translateBySentence`；2026-10-24 起界面上叫"逐句翻译"），关掉就回到整段说完再翻译，万一实际用的时候出问题可以退回去。
+## Ending a turn early
 
-### 说完了就不等整个停顿（2026-10-28，测试中）
+`src/providers/openai/nativeAsr.ts` ends a stretch at a 500 ms pause when text written during it closes a sentence (`endsTurn` in `src/providers/openai/turnEnd.ts`). Partials end on a full stop anywhere, so words decide: Japanese polite forms, Korean final endings, Chinese question and mood particles, any question mark. Others wait out the whole pause. If the speaker goes on (`resume`), a new recognition begins; the detector is not reset, since recognizing the silence after wrote phantom sentences.
 
-本机原生识别（`nativeAsr.ts`）一段话要等 1.4 秒的停顿才结束，这段的最后一句也就要等到那时才开始翻译（实测中文：声音停后约 1.7 秒原文定稿、1.8 秒译文出完，翻译本身只要 0.1 秒）。"一句一译"帮不了最后一句：它要求句号后面又说了一截才切，而 Qwen3 的中途结果每次末尾都带句号，话说到一半也是（「撞倒摄影师的汽车司机，未必。」）。
+## Translation context
 
-- **看最后几个字，不看标点**：停了半秒（检测器的 `pause`，`native-vad.worker.ts`），并且停顿开始之后写出来的文字以"句子结束的词"结尾（`turnEnd.ts`），就当说完，马上结束这一段，补上引擎需要的那一秒安静。日语是 です・ます・ました・でしょう・よね・かな 这一类，韩语是 요・다・까・죠，中文只有 吗・吧・嘛・啦・呀（不算 呢、啊：「然后呢……」是在想下一句），任何语言的问号也算。中文陈述句、英语的大部分句子没有这种词，照旧等满 1.4 秒。
-- **停顿之前写的不算**：那时的结果可能还缺最后一个字。实测「元は金持ちの息子でした。」在停顿开始时还没写出后面的「が」，被当成说完切成了两句。
-- **接着说**：检测器还在同一段里，听到声音回来（`resume`）就另起一句。检测器本身不重置：试过重置，它的模型把之后的安静当成了声音，引擎给安静写了一句「はい。」。
-- **顺带修的**：一段超过 8 秒后（Qwen3 的 `rollAfter`），原来在词与词之间 0.2 秒的空隙处立刻重开一次识别。那个空隙也可能是说完了，重开的识别只听到安静，写出「はい。」这样凭空的一行。现在空隙处只结束，等下一次真的有声音才开新的。
-- **实测**：8 秒的日语录音放 4 遍，修好后没有多出的行，也没有切错。这段录音超过 8 秒，结束靠的是上面那个空隙，所以译文在声音停后约 1.1～1.3 秒出完（以前同样情况会多出一行「はい。」）。
-  短句（测速录音的最后 3.5～5 秒，各放 4 遍，开关轮流）：日语从声音停到译文出完 1.3 秒，关掉是 2.0 秒；韩语 1.5 秒对 1.8 秒（韩语的中途结果出得慢，停顿里等到新结果的时间长）。
-- **复查后补的**（独立审查找到、逐条复现过的）：停顿后又有响亮的声音就不提前结束（声音可能比检测器先回来）；检测器要等这一段确实有足够长的语音才说停顿，免得误触的杂音被提前定稿；引擎同时给中途结果时，只按中途结果判断；新开的一段不继承上一段的停顿；句子结尾是「、，…」时不算说完；韩语只认真正的句尾（「필요」「아까」「나보다」不算），「酒吧」的「吧」不算。
+A request carries only its sentence, except Hunyuan MT's Chinese form (`wrapAfter` in `src/providers/openai/nativeTranslators.ts`), which adds this side's sentence before: within 15 s, its last 120 characters (`src/providers/openai/pipeline.ts`). Index-Translate is asked alone: given context it sometimes translated the earlier sentence.
 
-### 原文行是"正在听到的"（2026-10-06）
+## How long a translation stays
 
-一句一译之后用户问："断句会不会影响字幕模式的显示速度，导致以为语音识别很慢？"会——但不是断句慢，是字幕条原来的规则把识别藏起来了：对方那一栏的小字行只显示"已经有译文的那一句"，下一句正在说的时候屏幕上什么都不动，要等它的译文出来才整对换掉。
+`src/lib/subtitle/dwell.ts`, clock in `useHeld`. A pair's answer stays until read, by its length and language, within 1.2 to 2.5 s. A hold only delays the next caption, so it is bounded: with more than one waiting each gets 1.2 s, and three or more behind jumps to the one before the newest. The small line and the row are not held.
 
-现在（`lanes.ts` 的 `streamOf`）：小字行 = 译文对应的那一句，后面直接接着之后说的所有话，一直写到正在听的那个字；一行放不下就滚动，看到的总是最新的一行。新的一句有了译文，小字行从那一句重新开始，正好在它自己的译文上面。原来句尾那个表示"还有新的"的"…"不要了，正在出来的字本身就是这个意思。最多接 5 句（译文一直不来时不会无限变长）。"我"那一行没变。
+## Glossary
 
-实测：小字行大约每 0.9 秒更新一次（识别器出字的节奏），译文按句更新，栏的位置和字号仍然是 0 次变化。
+Up to 50 hand-kept rows (`src/lib/glossary/glossary.ts`): a word, and what it was misheard as. Qwen3-ASR gets the words (`takesContext`), cloud providers a list or prompt; Apple Speech gets none. Misheard forms are folded in before translation (`PipelineLeg.complete`) and for display (`Run.glossaryEvent`). `WordFix.tsx` adds a word from a selection in the main list; it holds from the next sentence.
 
-### 字幕条里的罗马音（2026-10-06）
+## Limits
 
-用户问开了罗马音有没有问题。有，而且之前没测过：罗马音是写在一句话下面的一整行，小字行的格子只有一行高，结果原文被挤出去、只剩罗马音。改了两处：
-
-- 开着罗马音、并且说的是有罗马音的语言（日语、韩语、俄语）时，每个小字行下面多留一行罗马音的位置（`withRoman`），字幕窗口因此高 30 像素左右；关掉就回到原来的高度。还没人说话时按"会有"来留，免得第一句话出来时窗口变高。
-- 罗马音按分句（逗号、句号处断开）写在各自的字下面。原来整句是一块，一行放不下时会先排完所有原文、再排所有罗马音，而字幕条只看得到最后一行。
-
-没做的：译文是日语并且开了罗马音时（读日语译文的人），大字的译文行没有留罗马音的位置。
-
-### 看了回放之后的四处（2026-10-06）
-
-用户看完测试窗口里的回放（`node .dev/tools/demo.mjs`，用录音播一遍字幕条）说的：
-
-- **居中时不要色条**。色条在很宽的窗口最左边，字在正中，色条不属于任何东西。居中对齐时不画色条，栏也不再留它的那一列。
-- **最下面的罗马音被截掉了脚**（g、j、y）。带注音的一行实际比格子说的低 2 像素，"我"那一行的文字又被压进了格子里。小字行的格子下面多留了一点（和上面给注音留的一样），那一行文字不再被压缩。
-- **罗马音的描边发虚**。描边是按 em 算的，在 12 像素的小字上只有零点几像素，屏幕画出来就是一层雾；罗马音自己还是七成不透明。描边样式下，注音和罗马音改用整 1 像素的描边（八个方向、不带晕）、不再半透明（`shadowFor(…, small)`，`--subtitle-shadow-small`）。阴影样式不变。
-- **"✓"和旁边的句子不是一个画风**。它原来是一个字符，哪个字体有就用哪个；箭头"→"也是。现在都换成应用自己的图标（lucide 的 `Check`、`ArrowRight`），和旁边的字一样大；对勾用"我"这一栏的绿色，只表示认可时前面不再有箭头。描边样式下图标也有同样的一圈边。
-
-### 译文停留到读完（2026-10-06）
-
-译文不是匀速来的：两句短话的译文前后脚到，或者一段结束时最后一句紧跟着上一句，前一条在屏幕上只待了零点几秒。现在一条译文至少停留到"读得完"才让位给下一条（`src/lib/subtitle/dwell.ts`，时钟在 `SubtitleLanes` 的 `useHeld`）：
-
-- 停留时间 = 译文长度 ÷ 这种语言的阅读速度：中文每秒 9 个字，日文 5 个，韩文 10 个，用空格书写的语言每秒 17 个字符（字幕行业的算法）。最短 1.2 秒，**最长 2.5 秒**。
-- 停留只会推迟下一条，所以必须有上限，否则说得快时字幕会越拖越晚（用户问的正是这个）：后面排着不止一条时每条只停最短的 1.2 秒；落后三条以上直接跳到倒数第二条。这样译文最多比"本来该出现的时候"晚两秒半左右，对方一停顿就追平。第一版是最长 5 秒、排队时每条 2.5 秒，每两秒来一条的话会漂。
-- 只管对方那一栏的"原文 + 译文"。小字的原文行不受影响，仍然实时往外出字；"我"那一行也不受影响。
-
-### 字幕条没在运行时的样子（2026-10-06）
-
-没开始、已结束、正在启动、需要先修什么：原来是整窗一块暗底，中间竖着排按钮、一行灰色小字、一个下划线链接，用户说"排版比较丑，'本次会话已结束'和'返回主窗口'看不清"。出了三种草稿，用户选了"居中的一行胶囊"：状态（前面一个小圆点）、主要动作、返回主窗口排成一行，放在窗口正中一个自带深色底的小胶囊上，窗口其余部分保持样式本来的样子。只改了样式（`SubtitleStream.scss`），上游的 `SubtitleIdle.tsx` 没动。胶囊是工具条的一部分：鼠标在窗口上时两者同时出现，所以用工具条的同一种底（同样的黑、同样的透明度、没有边框）、同样的高度和字号、同样的绿色，返回按钮和工具条上的按钮一样平时没有底。第一版是另一种黑加一圈细边，用户说和菜单栏不匹配。
-
-### 其他语言下的一句一译，和一个顺带发现的错（2026-10-06）
-
-用户问其他语言是什么效果。把对方的语言设成自动检测，播了一段韩、俄、日、英、中、西六种语言各说三句的录音：
-
-- 每种语言都是一两句一条、说完约 1～2 秒出译文。字数下限按文字类型算，所以俄语、英语、西语里"Привет.""Hello there."这样的短句和下一句合成一条，韩语、日语按 10 个字算。
-- 中文那一段没有翻译（读的人自己的语言，本来就不翻），整段一条。
-- **不同的识别模型**：断句靠的是识别器边听边写出带标点的文字。Qwen3-ASR 1.7B 是这样，上面的数字都是它的。Confucius4 R2T2 几乎不写标点（同一段录音里只有一个句号），所以基本不会断，和以前一样整段说完才翻译——不会出错，只是没有这个好处。SenseVoice-Small（2026-10-12 加的）闲聊时也几乎不写标点，同样基本不断；它每次读到的末尾都带一个句号或问号，但末尾的标点后面没有话，按规矩不算一句的结束（见"又轻又快的模型"）。Qwen3-ASR 0.6B、Mac 上的 Apple 语音、API 识别还没单独测过；一次性给出整段文字的识别器本来就不断。
-- **顺带发现一个从 0.43.102 起就有的错**：开着语法反馈、又开着自动检测时，对方那条腿被当成了"我"的腿——按"我"的语言去听、回的是语法反馈的 ✓，完全没有译文。原因是判断"这是不是对方的腿"用的是已经把来源改成"自动"之后的方向，和语言对的反向对不上了（`buildLocalAI` 里的 `coached`）。改成用改写之前的方向来判断。原来的测试里"是不是对方"的判断写得太松，没测出来；加了一条按应用真实判断方式写的测试。
-
-### 工具条在字幕框的上方（2026-10-06）
-
-上游把工具条叠在字幕框的顶上：一条从左到右、和窗口同角的横条，鼠标一靠近就盖住第一行字幕，也盖在框里别的东西上面。没开始时框中间还有那个圆角的小胶囊。用户说两者"外轮廓不一样而且分开，hover 都显示的时候怪怪的"。原因是它们是两种东西：一个贴着窗口边、方的、通栏；一个浮在中间、圆的、很短；功能还重复（开始、返回两边都有）。眼睛分不出哪个才是"这个窗口的控制条"。
-
-现在（只在桌面上，`SubtitleStream.scss` 的 `subtitle-app--framed`，`SubtitleView` 加的类）：
-
-- 窗口本身是透明的，分上下两块：上面 42 像素是工具条的位置（36 像素的条加 6 像素的缝），下面是字幕框。工具条是自己的一块圆角条，字幕框（样式的底板）从它下面开始画。**没有什么盖在字幕上，框里也没有一处是留给工具条的**——不是退回到"工具条下面留一条空白"。
-- 工具条不在时，它的位置就是透明的。窗口高度因此比字幕多 42 像素（`fit-height` 时加上）。
-- **鼠标在窗口上时，字幕框显出边线**（一条浅线，里面一条深线，什么背景上都看得见）：无底的样式下原来没有任何东西告诉你窗口多大、从哪里拖。穿透模式下不显示，鼠标不在窗口上也不显示——没人指着它的时候只有字。
-- 没开始时的小胶囊在框的正中，和工具条是同一种材质，现在两者是"上面一条工具条、下面一个框、框里一句状态"。
-
-### 断句改得保守，和 8 分钟录音的实测（2026-10-06）
-
-用户："断句的那部分你再全面地分析怎么才是最完善的方案，我不想通过后发现实战有什么问题误导了我朋友。"一条字幕合上并翻译之后收不回来，所以这里"对"比"早"重要。逐条过了一遍可能出错的地方：
-
-| 可能的问题 | 现在怎么处理 |
-|---|---|
-| 识别器边听边写的是"目前的猜测"，最新的几个字会被改写，末尾总带一个句号 | 一句话要等**后面又说了约两秒**（10 个字 / 28 个字母）、且 0.4 秒没变过，才合上。两秒之后它已经不是"最新的几个字"了。原来只要求后面有两个字 |
-| 一段结束时剩下一个很短的尾巴单独成句（"柄的に。"原样返回） | 同上一条：切的时候后面至少还有 10 个字，所以剩下的不会是碎片 |
-| 在句子中间断开，半句话翻错 | 只在句末标点处断。"停顿 0.9 秒就断"和"长句在逗号处断"都试过、都撤掉了 |
-| 识别器对整段的最终文字和中途显示的不一样，剩余部分对不上 | 按"合上的那句最后几个字"在最终文字里找位置（`restFrom`），找不到再按字数。原来只按字数，前面多一个字后面就错开一个字（实测里出现过"の。"开头的一条） |
-| 最终文字把句号挪了位置，剩下的只有一个"。" | 没有字母的剩余不算内容，不出字幕（实测里出现过一条"。"译成"。"） |
-| 短句一条条闪过 | 少于 10 个字 / 28 个字母的句子和下一句合成一条；译文至少停 1.2 秒 |
-| 说得快，译文越拖越晚 | 停留有上限（2.5 秒，排队时 1.2 秒，落后三条跳过） |
-| 不写标点的识别器 | 不断，和以前一样整段翻译 |
-| 语法反馈的"我"这一侧 | 不断，反馈针对整句 |
-
-**实测**（真实的 VRChat 日语对话录音，对方模式，新规则）：
-
-| 识别器 | 录音 | 字幕条数 | 其中提前合上的 | 来自几段 | 这几段里最终文字与合上时：完全一致 / 只差标点 / 差了几个字 |
-|---|---|---|---|---|---|
-| Qwen3-ASR 1.7B | 5 段共 5 分钟 | 58 | 20 | 13 | 8 / 1 / 4 |
-| Qwen3-ASR 0.6B | 2 段共 2 分钟 | 21 | 6 | 3 | 1 / 0 / 2 |
-| Mac 上的 Apple 语音（经另一台 Kotomimi） | 2 段共 2 分钟 | 19 | 1 | 1 | 0 / 0 / 1 |
-
-"差了几个字"的 7 处逐条看过：都是同一句话的两种听法，例如"飲んどいた方がいいか"对"飲んだ方がいいかあ"、"そうそうそうそうそう"对"そうそうそうそう"、"酔ったら"对"よっよったら"（这一处是最终文字更差）。没有一处意思相反或换了话题。也就是说：提前合上的字幕用的是识别器"当时的听法"而不是"最后的听法"，大约三分之一的段落里两者差几个字，质量相当。Apple 语音自己断得就短，提前合上的机会很少。
-
-（本来要跑 8 段，后 3 段时测试窗口被切到了字幕模式，没有跑成。）
-
-**还没解决、要知道的**：
-
-- 一句一句翻，跨句的指代没有上文（日语常省主语）。下一步是把上一句作为上下文一起给翻译模型，每种模型的提示词格式不同，还没做。
-- 识别器自己说满 15 秒会硬切，不挑位置。这是原来就有的。
-- 以上都是日语的数字；其他语言只做过一段六种语言的功能测试，没有做这种统计。
-
-### 给翻译带上一句（2026-10-06）
-
-一句一句翻，跨句的指代没有上文。做法是把这一侧刚说的上一句（15 秒以内的，最多取末尾 120 个字）一起交给翻译模型——但只给"受过这种训练"的模型，因为实测结果两种模型完全相反（12 组日语句子，各带上一句，`.dev/tools/context-trial.mjs`）：
-
-| 模型 | 怎么给上文 | 结果 |
-|---|---|---|
-| Hunyuan MT 2 | 它官方说明里的"带上文翻译"格式（`{上文}\n参考上面的信息，把下面的文本翻译成…，注意不需要翻译上文…`） | 12 组里没有一次把上文翻出来；3 组变好（"飛ばすやつ"从"可以删除的那部分"变成"那种可以带朋友一起飞的东西"，"去年から働いています"补上了"她"），1 组变差 |
-| Index-Translate 2B | 官方说明里没有这种格式，试了三种写法 | 每种写法都有 1～3 组**翻成了上一句的内容而不是这一句**（例如把"飛ばすやつ。"翻成上一句"就是那个带朋友一起浮起来的东西"） |
-
-所以：**Hunyuan MT 带上文，Index-Translate 不带**（`translatorRequest` 的 `wrapAfter`，只有 Hunyuan 的中文请求有）。Index-Translate 不带上文时这 12 组里 10 组本来就是对的，它仍然是默认的、总体更好的那个；给它硬加上文会换来一种更糟的错——字幕显示的是上一句的意思。API 模型和另一台设备上的模型还没有做。
-
-### 没开始时窗口的高度（2026-10-06）
-
-没开始时窗口原来可以拖成任意高度，外框跟着被压扁；而且一开始翻译窗口又自己变回字幕的高度，所以提示里说的"开始前请调整窗口的位置和大小"其实不成立。现在没有会话时窗口也保持"字幕会有的高度"（`restingHeights`），压不到比字幕最小高度更矮，外框就是开始后字幕条的大小。
-
-### 没开始时的状态写在工具条里（2026-10-06）
-
-框中间的小胶囊去掉了。它和工具条一起出现时不配：形状不同，而且"开始""返回"两边各有一份。用户从三种草稿里选了"状态并入菜单栏"，并要求开始按钮保持原来那个不带字的小按钮。
-
-- 没有会话时工具条一直显示（不用鼠标移上去），中间原来放计时和语言对的地方写状态：一个小圆点加一句话（没开始 / 已结束 / 正在加载 / 启动失败的原因）。
-- 开始用工具条最左边原来的小按钮，返回用最右边原来的箭头。上游的 `SubtitleIdle` 仍然渲染（放进工具条里，`SubtitleBar` 多了一个 `status`），它自己的"开始翻译"和"返回主窗口"不再画出来；唯一保留成按钮的是"需要先修什么"的那一个（例如还没下载模型），点了打开对应的设置。
-- 框里是空的，大小就是字幕将有的大小，边线一直显示，好找到窗口、好调位置。
-- 浏览器扩展的悬浮字幕不变。
-
-0.43.107 发出去之后用户又说了三点，都改了（还没发布）：
-
-- **"开始前请调整窗口的位置和大小"去掉了**。只是"可以开始"的时候工具条什么都不多说，和运行时一样显示计时（00:00:00）和语言对，开始按钮本身就是提示。"已结束""正在连接""需要先修什么""启动失败"仍然写在中间。
-- **穿透按钮一直在**。它原来只在会话开始后才出现，一出现就把左边所有按钮挤开。现在没有会话时也在原位，是灰的、点不了。
-- **连接时只有一个转圈**。开始按钮在转，中间"连接中…"前面也在转，重复了：中间只留文字。
-
-### 工具条和字幕框连体，线框换成淡底（2026-10-06）
-
-上面"工具条在字幕框的上方"那一节里的两点改了，用户看过之后说的：
-
-- **连体**。工具条和字幕框之间原来有 6 像素的缝，读成两样东西。现在工具条直接坐在框上：工具条是头（上面两个圆角），框在下面（下面两个圆角），是一个形状。工具条不在时，框自己的上角变回圆的。窗口比字幕高 36 像素（原来 42）。工具条外面没有任何描边。
-- **不要线框**。鼠标在窗口上时那圈线"丑"，而且有底板的样式（深色底、淡底柔影）根本不需要——底板自己就是面。现在只有无底的样式（底色深浅低于 8%）在鼠标移上来时浮出一层很淡的底（16% 的黑，边缘一点柔光，亮背景暗背景上都读得出），移开就消失；没有线。穿透模式下不显示。这是三种草稿里我先做的那一种，另外两种是"只有柔影"和"上下夹住"。
-- 顺带：原文行滚动之后，上一行的罗马音下半截会从上边露出来一点。给注音留的那点余量从 0.3em 收到了刚好够用的 0.12em，滚动之后不留。
-
-### 开始和停止时窗口会挪一点（2026-10-06，0.43.107 之后）
-
-用户："开始播放后和停止播放，字幕模式的窗口还是会有点位移。"测出来是累积的：每次开始或停止，窗口往下 2 像素、变宽 1～2 像素，来回几次就看得出来。
-
-原因在显示缩放不是整数的屏幕上（这台是 135%）：把窗口设成 264 高，读回来是 265 或 266，宽度也多一两个像素。开始和停止都会要一次"264 高"（要的数字每次都一样），而程序拿读回来的 266 去比，觉得不对，就按读到的尺寸重新摆一次——每摆一次就错开一点。
-
-现在主进程记住上一次给窗口的宽和高（`fitGave`）：读回来的值在 2 像素以内就当作还是那个尺寸，同样的高度不再重设；真的要换高度时，也从"给过的尺寸"算，而不是从读回来的算。用户自己拖过大小（差得多于 2 像素）才按读到的来。同一个流程连着开始、停止两轮，窗口的位置和大小一个像素都没动。
-
-### 无底的样式没有分隔线（2026-10-07）
-
-用户："字幕样式亮字黑边和暗字白边时，不应该有一个分割线分离语法反馈和翻译。"两栏之间那条 1 像素的淡线是画在底板上的；没有底板，它就是飘在游戏画面上的一条线，两边什么也没隔开。现在"有没有底板"这件事由 `look.ts` 的 `hasPanel`（底色深浅低于 8 就算没有，和字幕窗口判断"是不是透明窗口"用的是同一个数）来定，`SubtitleBody` 把它写在流的 `data-panel` 上，无底时不画那条线。按的是实际的底色深浅而不是选了哪个样式：选了"亮字黑边"又把底色拉上去，线会回来；选了"深色底"又把底色拉到 0，线也会消失。
-
-### 不同语言和模型下的字幕（2026-10-31）
-
-字幕要同时撑住：有振假名或拼音的语言、只有罗马音的语言、没有辅助的语言；句子带或不带语言；有无标点；对齐、字号和窗口大小。几条规矩：
-
-- 滚动只丢整行。一行高矮不一时硬切盒子，会露出上一行的罗马音。
-- 一句一个语言：连写的几句各按自己的语言加辅助，不沿用第一句的。语言未知时按文字判断要不要留罗马音的位置。
-- 没有标点的长句按词切，罗马音跟着自己的词走。
-- 一句话本来就是读者的语言时不用等翻译，它自己就是译文。同语言运行是这种情况的全程版本：原文占译文的位置。
-- 译文的振假名、拼音和罗马音都留位置，每一行都算。
-- 还没人说话时，按语言对预留注音和罗马音的位置，第一句译文出来时窗口不变高。声音另一边是自动判断语言时，只能到第一句才知道。
-
-### 字幕条的大小和窄窗口（2026-10-31）
-
-朋友第一次打开字幕觉得窗口太大，拉窄后右边的按钮看不到。第一次打开的宽度原来是屏幕的 80%，现在最多 880；窗口最窄 340。工具栏完整时要约 790 像素，按钮又不能收缩，所以窄了就被窗口切掉。现在按宽度分级收起（`barFit`）：800 以下去掉文字标签和名字，620 以下把字号、视图、清除、全屏移到设置弹窗最上面（导出留在主窗口），440 以下再去掉时钟和语言。设置、置顶、点击穿透、锁定和返回一直都在。
-
-### 系统的 title 提示（2026-10-31）
-
-应用里一百多处按钮用 `title` 说明自己，Windows 画出来是白边黑框，用户觉得太丑。`installTitleTips`（`src/components/Tooltip/titleTips.ts`）在主窗口、字幕窗口和弹窗里接管：鼠标停在上面时把 `title` 收起来，系统就没东西可画，改用应用样式的小提示，离开时放回去。写代码时照常写 `title`。
-
-### 韩语罗马音和按语言开关（2026-10-31）
-
-用户的问题：日语不想看罗马音、其他语言想看怎么弄；韩语罗马音连在一起，看不出 g 是上一个字的收尾还是下一个字的开头。
-
-- **韩语分音节**（`korean.ts`）：先用 es-hangul 换成实际读音，再一个音节一段，用连字符连接，一段对应上面一个韩文方块字。连字符是韩语罗马字标记法自己用来消除歧义的符号，所有字体都有；中点 `·` 在中日韩字体里可能画成全角，所以不用。ㄹㄹ 要写 ll（신라 → sil-la）。应用里 1224 条韩语文案逐条比过，去掉连字符后和原来整句的结果一个字母不差。
-- **按语言关**：`romanization` 还是总开关，`settings.common.annotation.romanizationOff` 记下关掉的语言。显示设置里总开关打开时，下面出现日语、韩语、俄语、乌克兰语四个按钮。假名注音和拼音是各自的开关，不受影响。
-- **压缩时拼音被切**：带拼音或假名的一行实际比布局算的高，滚动时被顶到框外，再加上裁剪多留的 2 像素，声调符号都看不见。`READ_LINE` 从 2 改成 2.12，读音正好在裁剪线上时不再多切。
-
+- Most translators see no earlier context, and Japanese omits subjects.
+- The 15 s turn cuts anywhere.
+- A centred line still growing moves sideways.

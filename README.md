@@ -164,7 +164,7 @@ VRChat 和 Kotomimi 在同一台 Windows 电脑上时，设置的「常规」里
 
 ## 想了解细节
 
-- [FORK.md](FORK.md)：这个分支加了什么、各环节怎么搭配、和服务器之间的约定、怎么构建和发布。
+- [FORK.md](FORK.md)：这个分支加了什么、各环节怎么搭配；设备之间的约定、构建和发布在 [docs/fork/](docs/fork/)。
 - 遇到问题：[提交 issue](https://github.com/Rizumu85/kotomimi/issues)。请不要去打扰 Sokuji 官方，这个分支的问题不是他们的。
 
 ## 致谢与许可
@@ -187,4 +187,4 @@ Kotomimi is a personal fork of [Sokuji](https://github.com/kizuna-ai-lab/sokuji)
 
 **Limits**: the Kotomimi provider is text-only; the SenseVoice (int8) among the app's own models drops kana in Japanese, so it is no longer offered for Japanese (the native engine's SenseVoice-Small is another build, and does not); recognition through an API shows text only when a sentence ends.
 
-Everything else — how the stages combine, the wire contract, building and releasing — is in [FORK.md](FORK.md). Sokuji is the work of [Kizuna AI Lab](https://github.com/kizuna-ai-lab); this fork keeps its license, [AGPL-3.0](LICENSE). Please report this fork's problems [here](https://github.com/Rizumu85/kotomimi/issues), not upstream.
+Everything else — how the stages combine, the wire contract, building and releasing — is in [FORK.md](FORK.md) and [docs/fork/](docs/fork/). Sokuji is the work of [Kizuna AI Lab](https://github.com/kizuna-ai-lab); this fork keeps its license, [AGPL-3.0](LICENSE). Please report this fork's problems [here](https://github.com/Rizumu85/kotomimi/issues), not upstream.
