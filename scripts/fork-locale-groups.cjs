@@ -100,6 +100,16 @@ module.exports = {
     checking: ['Getting ready. You can start in a moment.', '正在准备，稍等就能开始。', '正在準備，稍等就能開始。'],
   },
   // VRChat on the same computer (`src/components/VRChat/`, `src/app/vrchat.ts`).
+  // How the text is read, at the foot of the display popover (`ReadingAidToggles.tsx`).
+  aids: {
+    readings: ['Readings', '读音', '讀音'],
+    text: ['Text', '文字', '文字'],
+    furigana: ['Furigana', '假名', '假名'],
+    pinyin: ['Pinyin', '拼音', '拼音'],
+    roman: ['Romanization', '罗马音', '羅馬拼音'],
+    italic: ['Italic source', '原文斜体', '原文斜體'],
+    highlight: ['Highlight new', '高亮新文字', '醒目新文字'],
+  },
   vrchat: {
     title: ['VRChat', 'VRChat', 'VRChat'],
     help: [

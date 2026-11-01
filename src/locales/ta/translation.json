@@ -100,6 +100,7 @@
     "glossaryDelete": "Delete entry",
     "glossaryAdd": "Add",
     "glossaryFixTo": "Change to",
+    "glossaryFixOpen": "Fix word",
     "glossaryFixSave": "Save to glossary",
     "glossaryFull": "Glossary is full",
     "realtimeModelNotAvailable": "நிகழ்நேர மாதிரி கிடைக்கவில்லை",
@@ -1710,6 +1711,15 @@
     },
     "statusLine": {
       "checking": "Getting ready. You can start in a moment."
+    },
+    "aids": {
+      "readings": "Readings",
+      "text": "Text",
+      "furigana": "Furigana",
+      "pinyin": "Pinyin",
+      "roman": "Romanization",
+      "italic": "Italic source",
+      "highlight": "Highlight new"
     },
     "vrchat": {
       "title": "VRChat",

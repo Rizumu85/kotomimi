@@ -1,42 +1,52 @@
 @use '../../styles/tokens' as tk;
 @use '../Settings/shared/variables' as vars;
 
-// Fork: the reading aids at the foot of the display popover (ReadingAidToggles.tsx). The popover spaces its rows by
-// a margin under each; a switch brings a margin of its own above it. Here the two are set so the gaps read as the
-// rows above them do, and the last row ends where the popover's own padding does.
-
-.display-settings-popover .field.reading-aid-toggles {
+// Fork: how the text is read, at the foot of the display popover (ReadingAidToggles.tsx): groups of buttons, under the
+// same small label as the popover's other rows, the last ending where the popover's own padding does.
+.display-settings-popover .field.reading-aids {
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-bottom: 0;
-
-  .toggle-switch-component {
-    margin-top: 0;
-  }
 }
 
-// The romanization's languages, under its switch.
-.reading-aid-languages {
+.reading-aids__group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.reading-aids__label {
+  font-size: 12px;
+  color: vars.$text-tertiary;
+}
+
+.reading-aids__row {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  margin-top: -4px;
 }
 
+.reading-aid-toggle,
 .reading-aid-language {
-  padding: 4px 9px;
-  border: 1px solid vars.$border-subtle;
+  padding: 4px 10px;
+  border: 1px solid vars.$border-default;
   border-radius: 999px;
   font: inherit;
   font-size: vars.$font-caption;
-  line-height: 1;
-  color: vars.$text-tertiary;
+  line-height: 1.2;
+  color: vars.$text-secondary;
   background: transparent;
   cursor: pointer;
+  transition: background-color vars.$transition-fast, color vars.$transition-fast;
 
   &:hover {
-    color: vars.$text-secondary;
+    color: vars.$text-primary;
+    background: vars.$bg-hover;
+  }
+
+  &:focus-visible {
+    @include vars.focus-ring;
   }
 
   &.is-on {
@@ -46,7 +56,8 @@
   }
 }
 
-// The popover's own switch (the subtitle's "highlight new text") is a row like the others, and is spaced as they are.
-.display-settings-popover .field > .toggle-switch-component {
-  margin-top: 0;
+// The romanization's languages belong to its button: smaller, under it.
+.reading-aid-language {
+  padding: 2px 8px;
+  font-size: 11px;
 }

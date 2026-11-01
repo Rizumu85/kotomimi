@@ -100,6 +100,7 @@
     "glossaryDelete": "删除条目",
     "glossaryAdd": "新增詞語…",
     "glossaryFixTo": "改成",
+    "glossaryFixOpen": "改詞",
     "glossaryFixSave": "記進詞典",
     "glossaryFull": "詞典已滿",
     "realtimeModelNotAvailable": "即時模型不可用",
@@ -1710,6 +1711,15 @@
     },
     "statusLine": {
       "checking": "正在準備，稍等就能開始。"
+    },
+    "aids": {
+      "readings": "讀音",
+      "text": "文字",
+      "furigana": "假名",
+      "pinyin": "拼音",
+      "roman": "羅馬拼音",
+      "italic": "原文斜體",
+      "highlight": "醒目新文字"
     },
     "vrchat": {
       "title": "VRChat",

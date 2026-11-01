@@ -71,12 +71,32 @@ describe('WordFix — a word put right (fork)', () => {
     );
   }
 
-  const pick = () => {
+  const select3 = () => {
     const display = screen.getByTestId('display');
     const text = display.querySelector('.row-text')!.firstChild!;
     select(display, text, 0, text, 3);
     act(() => { fireEvent.mouseUp(display); });
   };
+  const pick = () => {
+    select3();
+    fireEvent.click(screen.getByText('settings.glossaryFixOpen'));
+  };
+
+  it('asks nothing of a selection: a small button beside it, which leaves it to be copied', () => {
+    render(<Conversation />);
+    select3();
+    expect(screen.queryByLabelText('settings.glossaryFixTo')).toBeNull();
+    const button = screen.getByText('settings.glossaryFixOpen').closest('button')!;
+    // Pressing it does not move the focus, so what is selected stays selected.
+    expect(fireEvent.mouseDown(button)).toBe(false);
+    expect(document.getSelection()?.toString()).toBe('リズム');
+    // And it goes with the selection.
+    act(() => {
+      document.getSelection()?.removeAllRanges();
+      document.dispatchEvent(new Event('selectionchange'));
+    });
+    expect(screen.queryByText('settings.glossaryFixOpen')).toBeNull();
+  });
 
   it('writes the word and what it was heard as into the glossary', async () => {
     render(<Conversation />);

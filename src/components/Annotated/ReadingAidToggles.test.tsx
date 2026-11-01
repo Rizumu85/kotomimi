@@ -14,6 +14,18 @@ import { ReadingAidToggles } from './ReadingAidToggles';
 
 afterEach(() => useAnnotationStore.setState({ romanization: false, romanizationOff: [] }));
 
+describe('ReadingAidToggles — the groups (fork)', () => {
+  it('says in full what a button does, and has the highlight only where it is given', () => {
+    const toggle = vi.fn();
+    const { rerender } = render(<ReadingAidToggles />);
+    expect(screen.getByRole('button', { name: 'fork.aids.furigana' }).getAttribute('title')).toBe('fork.furigana');
+    expect(screen.queryByRole('button', { name: 'fork.aids.highlight' })).toBeNull();
+    rerender(<ReadingAidToggles highlight={{ on: true, toggle }} />);
+    fireEvent.click(screen.getByRole('button', { name: 'fork.aids.highlight' }));
+    expect(toggle).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('ReadingAidToggles — the romanization by language (fork)', () => {
   it('shows its languages only with the romanization on', () => {
     render(<ReadingAidToggles />);

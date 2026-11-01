@@ -196,27 +196,23 @@ describe('DisplaySettingsPopover', () => {
   });
 
   it('renders the new-item-highlight toggle in subtitle mode only', () => {
+    const highlight = 'button[title="subtitle.settings.newItemHighlight"]';
     const subtitleRender = render(<DisplaySettingsPopover source="subtitle" />);
-    expect(
-      subtitleRender.container.querySelector('.toggle-switch-component'),
-    ).not.toBeNull();
+    expect(subtitleRender.container.querySelector(highlight)).not.toBeNull();
     subtitleRender.unmount();
 
+    // Fork: the reading aids are drawn on every surface; the highlight only on the subtitle's.
     const conversationRender = render(<DisplaySettingsPopover source="conversation" />);
-    // Fork: the reading aids' two switches are drawn on every surface; none of the popover's own is.
-    expect(
-      conversationRender.container.querySelector('.toggle-switch-component:not(.reading-aid-toggle)'),
-    ).toBeNull();
+    expect(conversationRender.container.querySelector('.reading-aid-toggle')).not.toBeNull();
+    expect(conversationRender.container.querySelector(highlight)).toBeNull();
   });
 
   it('clicking the new-item-highlight toggle flips subtitleStore.newItemHighlightEnabled', async () => {
     useSubtitleStore.setState({ newItemHighlightEnabled: true } as never);
     const { container } = render(<DisplaySettingsPopover source="subtitle" />);
-    const trigger = container.querySelector(
-      '.toggle-switch-component [role="switch"]',
-    ) as HTMLElement;
+    const trigger = container.querySelector('button[title="subtitle.settings.newItemHighlight"]') as HTMLElement;
     expect(trigger).not.toBeNull();
-    expect(trigger.getAttribute('aria-checked')).toBe('true');
+    expect(trigger.getAttribute('aria-pressed')).toBe('true');
 
     await act(async () => { fireEvent.click(trigger); });
     expect(useSubtitleStore.getState().newItemHighlightEnabled).toBe(false);

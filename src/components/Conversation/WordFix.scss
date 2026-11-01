@@ -15,6 +15,29 @@
   box-shadow: 0 4px 16px vars.$shadow;
 }
 
+// What comes beside a selection: small, and gone with it.
+.word-fix-button {
+  z-index: 10000;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  font: inherit;
+  font-size: vars.$font-caption;
+  line-height: 1.2;
+  color: vars.$text-secondary;
+  background: vars.$bg-popover;
+  border: 1px solid vars.$border-default;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px vars.$shadow;
+  cursor: pointer;
+
+  &:hover {
+    color: vars.$text-primary;
+    background: vars.$bg-hover;
+  }
+}
+
 .word-fix__row {
   display: flex;
   align-items: center;

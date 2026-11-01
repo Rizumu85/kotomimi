@@ -16,7 +16,6 @@ import {
   SUBTITLE_DEFAULT_SOURCE_TEXT_COLOR,
   SUBTITLE_DEFAULT_TRANSLATION_TEXT_COLOR,
 } from '../../stores/subtitleStore';
-import ToggleSwitch from '../Settings/shared/ToggleSwitch';
 import ColorPicker from './ColorPicker';
 import {
   useConversationDisplayBgColor,
@@ -267,24 +266,10 @@ const DisplaySettingsPopoverInner: React.FC<{ bindings: InnerBindings; actions?:
           {translationRow}
         </>
       )}
-      {includeHighlightToggle && (
-        <div className="field">
-          <ToggleSwitch
-            checked={bindings.newItemHighlightEnabled!}
-            onChange={() =>
-              void bindings.setNewItemHighlightEnabled!(
-                !bindings.newItemHighlightEnabled,
-              )
-            }
-            label={t(
-              'subtitle.settings.newItemHighlight',
-              'Highlight newly-arrived text',
-            )}
-          />
-        </div>
-      )}
-      {/* Fork: furigana and romanization, the same pair on every surface. */}
-      <ReadingAidToggles />
+      {/* Fork: how the text is read, on every surface; the subtitle's highlight is one of its buttons. */}
+      <ReadingAidToggles
+        highlight={includeHighlightToggle ? { on: bindings.newItemHighlightEnabled!, toggle: () => void bindings.setNewItemHighlightEnabled!(!bindings.newItemHighlightEnabled) } : undefined}
+      />
     </div>
   );
 };
