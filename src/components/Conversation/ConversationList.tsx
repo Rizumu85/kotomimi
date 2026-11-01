@@ -4,12 +4,15 @@ import { Correction } from '../Feedback/Correction';
 import { useCoached } from '../Feedback/useCoached';
 import { fixOf } from '../../lib/feedback/correction';
 import { fontLanguage } from '../../lib/fonts/fontCss';
+import { normalizeRecognitionText } from '../../lib/glossary/glossary';
+import { useGlossaryStore } from '../../stores/glossaryStore';
 import { useTranslation } from 'react-i18next';
 import { ArrowDown, Play, User, Users } from 'lucide-react';
 import type { LegName, SegmentId } from '../../lib/conversation/types';
 import type { DisplayItem, NoticeEntry } from '../../lib/view/filter';
 import { SystemRow, type NoticeAction } from './SystemRow';
 import { useFollowLatest } from './useFollowLatest';
+import { WordFix } from './WordFix';
 import '../MainPanel/MainPanel.scss';
 import '../MainPanel/ConversationRow.scss';
 import '../../styles/karaoke.scss';
@@ -111,6 +114,7 @@ export function ConversationList({
       {/* Docked below the list, not floating over it (spec 2026-10-05 goal 4): it takes its
           own height from the bottom, so the line being read does not move. */}
       {docked && <FollowDock onClick={resume} />}
+      <WordFix display={display} />
     </>
   );
 }
@@ -142,6 +146,7 @@ const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, r
   const { t } = useTranslation();
   const { row, leg, languages } = item;
   const isTranslation = row.side === 'translation';
+  const glossary = useGlossaryStore((state) => state.entries);
   // A detected language wins; otherwise the leg's pair, frozen at start (spec: "The language pair belongs to the leg").
   const lang = row.language || (isTranslation ? languages.target : languages.source);
   // Fork: a video's words (VRChat) are the video's, not the other side's.
@@ -151,7 +156,8 @@ const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, r
     leg === 'speaker' ? 'Me' : 'Other',
   );
   // Rows tile the segment's text untrimmed; a bubble shows it trimmed, and karaoke counts from the trimmed start.
-  const text = row.text.trim();
+  // Fork: what was said, as the glossary has it now: a word put right shows in the rows already there.
+  const text = isTranslation ? row.text.trim() : normalizeRecognitionText(row.text.trim(), { entries: glossary });
   const lead = row.text.length - row.text.trimStart().length;
   const played = upTo === undefined ? 0 : Math.min(text.length, Math.max(0, upTo - row.start - lead));
   // Fork: furigana and romanization, when the row's language has them and they are switched on.

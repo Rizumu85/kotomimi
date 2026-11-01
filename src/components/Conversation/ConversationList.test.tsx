@@ -1,7 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
-import { fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
 import type { Row } from '../../lib/projection/types';
 import type { DisplayItem } from '../../lib/view/filter';
+import { useGlossaryStore } from '../../stores/glossaryStore';
 import { ConversationList, type ConversationListProps } from './ConversationList';
 
 vi.mock('react-i18next', () => ({
@@ -29,6 +30,19 @@ const props = (over: Partial<ConversationListProps> = {}): ConversationListProps
   fontSize: 14,
   empty: 'Nothing yet',
   ...over,
+});
+
+describe('ConversationList — a word put right (fork)', () => {
+  it('shows in what was said, on the rows already there, and leaves the translation', () => {
+    const said = rowItem({ row: row({ side: 'source', text: 'リズムさん', end: 5 }) });
+    const translated = rowItem({ row: row({ key: 't', text: 'リズムさん', end: 5 }) });
+    const { container } = render(<ConversationList {...props({ items: [said, translated] })} />);
+    expect(container.querySelector('.row-text.src')?.textContent).toBe('リズムさん');
+    act(() => useGlossaryStore.setState({ entries: [{ id: 'one', source: 'Rizum', aliases: ['リズム'] }] }));
+    expect(container.querySelector('.row-text.src')?.textContent).toBe('Rizumさん');
+    expect(container.querySelector('.row-text.tr')?.textContent).toBe('リズムさん');
+    act(() => useGlossaryStore.setState({ entries: [] }));
+  });
 });
 
 describe('ConversationList — rows', () => {

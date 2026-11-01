@@ -1,0 +1,56 @@
+@use '../Settings/shared/variables' as vars;
+
+// Fork: a word put right from the conversation (WordFix.tsx): drawn in a portal, so its rules stand on their own.
+.word-fix {
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: vars.$space-2;
+  padding: vars.$space-2;
+  font-size: vars.$font-caption;
+  color: vars.$text-secondary;
+  background: vars.$bg-popover;
+  border: 1px solid vars.$border-default;
+  border-radius: vars.$radius-md;
+  box-shadow: 0 4px 16px vars.$shadow;
+}
+
+.word-fix__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  input {
+    width: 150px;
+    height: vars.$control-height-compact;
+    padding: 0 8px;
+    font: inherit;
+    font-size: vars.$font-body;
+    color: vars.$text-primary;
+    background: vars.$bg-control;
+    border: 1px solid vars.$border-default;
+    border-radius: vars.$radius-sm;
+
+    &:focus {
+      outline: none;
+      border-color: vars.$color-primary;
+    }
+  }
+}
+
+.word-fix__save {
+  height: vars.$control-height-compact;
+  padding: 0 10px;
+  font: inherit;
+  white-space: nowrap;
+  color: vars.$color-on-primary;
+  background: vars.$color-primary-fill;
+  border: none;
+  border-radius: vars.$radius-sm;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: vars.$disabled-opacity;
+  }
+}

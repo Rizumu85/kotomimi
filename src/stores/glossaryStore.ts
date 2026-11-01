@@ -47,7 +47,8 @@ export const useGlossaryStore = create<GlossaryStoreState>()(
       set({ entries });
       write(entries);
     },
-    snapshot: () => ({ entries: get().entries.map((entry) => ({ ...entry, aliases: [...entry.aliases] })) }),
+    // The table as it stands, not a copy: a word put right during a run holds from its next sentence.
+    snapshot: () => ({ get entries() { return get().entries; } }),
     hydrate: async () => {
       const { ServiceFactory } = await import('../services/ServiceFactory');
       const stored = await ServiceFactory.getSettingsService().getSetting<unknown>(KEY, []);

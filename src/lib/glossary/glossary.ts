@@ -61,22 +61,26 @@ function escapeRegExp(term: string): string {
 const WORD_EDGE = /[\p{Script=Latin}\p{N}]/u;
 
 /** A term in Latin letters is matched as a whole word: "art" is not in "start". Scripts written without spaces have no such edge. */
-function termPattern(term: string): RegExp {
+function termPattern(term: string): string {
   const before = WORD_EDGE.test(term[0]) ? '(?<![\\p{Script=Latin}\\p{N}])' : '';
   const after = WORD_EDGE.test(term[term.length - 1]) ? '(?![\\p{Script=Latin}\\p{N}])' : '';
-  return new RegExp(`${before}${escapeRegExp(term)}${after}`, 'giu');
+  return `${before}${escapeRegExp(term)}${after}`;
 }
 
 /**
  * Fold what recognition writes wrongly into the term as written. This runs before translation: given a name written
  * right, a translation model keeps it unprompted (11 of 11 sentences, Index-Translate, 2026-10-31).
+ *
+ * One pass, the longest first, over the words as well as what they are misheard as: the word's own case is put right
+ * with nothing to fill in, and text that has been through this before comes out the same: 糖豆豆 misheard as 糖豆 does not
+ * grow, sentence after sentence, as a row is drawn again (2026-10-31).
  */
 export function normalizeRecognitionText(text: string, { entries }: GlossarySnapshot): string {
-  const replacements = entries.flatMap((entry) => entry.aliases.map((alias) => ({ from: alias, to: entry.source })))
-    .sort((a, b) => b.from.length - a.from.length);
-  let result = text;
-  for (const { from, to } of replacements) result = result.replace(termPattern(from), () => to);
-  return result;
+  const written = new Map<string, string>();
+  for (const entry of entries) for (const term of [entry.source, ...entry.aliases]) written.set(term.toLocaleLowerCase(), entry.source);
+  if (written.size === 0) return text;
+  const terms = entries.flatMap((entry) => [entry.source, ...entry.aliases]).sort((a, b) => b.length - a.length);
+  return text.replace(new RegExp(terms.map(termPattern).join('|'), 'giu'), (found) => written.get(found.toLocaleLowerCase()) ?? found);
 }
 
 /** What a recognizer is told to expect. The aliases are what it writes by mistake: those are put right afterwards. */

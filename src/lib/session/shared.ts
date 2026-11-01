@@ -8,8 +8,9 @@ import type { GlossarySnapshot } from '../glossary/types';
  * reverse as the provider states it (`reversedPair`; Stage 2 Palabra,
  * ruling 9), null when the pair has none. The system instructions are each
  * provider's own setting (Stage 2 Gemini, ruling 4;
- * `src/lib/provider/instructions.ts`). A glossary is also captured here so
- * every leg sees the same terminology for the lifetime of a run.
+ * `src/lib/provider/instructions.ts`). The glossary is the table itself, every
+ * leg's: what a model is told comes from it at the start, and what recognition
+ * wrote is put right from it as it stands (`WordFix`, during a run).
  */
 export function buildSharedSettings(
   participant: LanguagePair | null,
@@ -21,6 +22,6 @@ export function buildSharedSettings(
     pauses,
     segmentation,
     reversed: (direction) => participant !== null && direction.source === participant.source && direction.target === participant.target,
-    ...(glossary && glossary.entries.length > 0 ? { glossary } : {}),
+    ...(glossary ? { glossary } : {}),
   };
 }

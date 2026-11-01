@@ -33,7 +33,7 @@ function Cell({ value, commit, ...input }: Omit<InputHTMLAttributes<HTMLInputEle
   );
 }
 
-/** The row under the last: an entry is made as the row is left with something in its written cell, or on Enter. */
+/** The row under the last: an entry is made as the row is left with a word in it, or on Enter. */
 function NewRow({ onAdd }: { onAdd(): void }) {
   const { t } = useTranslation();
   const add = useGlossaryStore((state) => state.add);
@@ -56,14 +56,14 @@ function NewRow({ onAdd }: { onAdd(): void }) {
       className="glossary-new"
       onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) save(); }}
     >
-      <td><input aria-label={t('settings.glossaryHeard')} placeholder={t('settings.glossaryOptional')} value={aliases} onChange={(event) => setAliases(event.target.value)} onKeyDown={onKeyDown} /></td>
       <td><input ref={written} aria-label={t('settings.glossaryWritten')} placeholder={t('settings.glossaryAdd')} value={source} onChange={(event) => setSource(event.target.value)} onKeyDown={onKeyDown} /></td>
+      <td><input aria-label={t('settings.glossaryHeard')} placeholder={t('settings.glossaryOptional')} value={aliases} onChange={(event) => setAliases(event.target.value)} onKeyDown={onKeyDown} /></td>
       <td />
     </tr>
   );
 }
 
-/** A small table of terms, written in place. A change takes effect at the next start, so it stays open during a session. */
+/** A small table of terms, written in place: a word, and what it is misheard as where it is. What is misheard is put right at once; what models are told, at the next start. */
 export function GlossarySection() {
   const { t } = useTranslation();
   const entries = useGlossaryStore((state) => state.entries);
@@ -118,8 +118,8 @@ export function GlossarySection() {
         <table className="glossary-table">
           <thead>
             <tr>
-              <th scope="col">{t('settings.glossaryHeard')}</th>
               <th scope="col">{t('settings.glossaryWritten')}</th>
+              <th scope="col">{t('settings.glossaryHeard')}</th>
               <th aria-hidden="true" />
             </tr>
           </thead>
@@ -127,14 +127,14 @@ export function GlossarySection() {
             {shown.map((entry) => (
               <tr key={entry.id}>
                 <Cell
-                  aria-label={t('settings.glossaryHeard')}
-                  value={entry.aliases.join(', ')}
-                  commit={(text) => update(entry.id, { aliases: parseAliases(text) })}
-                />
-                <Cell
                   aria-label={t('settings.glossaryWritten')}
                   value={entry.source}
                   commit={(text) => { if (text.trim()) update(entry.id, { source: text }); }}
+                />
+                <Cell
+                  aria-label={t('settings.glossaryHeard')}
+                  value={entry.aliases.join(', ')}
+                  commit={(text) => update(entry.id, { aliases: parseAliases(text) })}
                 />
                 <td>
                   <button type="button" className="glossary-delete" onClick={() => remove(entry.id)} aria-label={t('settings.glossaryDelete')}>

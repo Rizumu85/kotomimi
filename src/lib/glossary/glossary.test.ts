@@ -28,6 +28,14 @@ describe('glossary', () => {
     expect(normalizeRecognitionText('vrc に行こう、VRC だよ', { entries })).toBe('VRC に行こう、VRC だよ');
   });
 
+  it('puts a word\'s own case right with nothing to fill in, and text that has been through it comes out the same (fork)', () => {
+    const entries = normalizeGlossaryEntries([{ id: '1', source: 'VRC', aliases: [] }, { id: '2', source: '糖豆豆', aliases: ['糖豆'] }]);
+    expect(normalizeRecognitionText('vrc に行く', { entries })).toBe('VRC に行く');
+    const once = normalizeRecognitionText('糖豆来了', { entries });
+    expect(once).toBe('糖豆豆来了');
+    expect(normalizeRecognitionText(once, { entries })).toBe(once);
+  });
+
   it('holds the table to its size', () => {
     const rows = Array.from({ length: MAX_GLOSSARY_ENTRIES + 5 }, (_, i) => ({ source: `Term${i}` }));
     expect(normalizeGlossaryEntries(rows)).toHaveLength(MAX_GLOSSARY_ENTRIES);
