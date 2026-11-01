@@ -628,6 +628,8 @@ const FORK = {
 /** Further groups of the fork's own strings, each written under `fork.<group>` — and the tour's fork copy, written beside upstream's under `tour.steps.<id>`: filled in beside this file. */
 const { tour: TOUR, ...GROUPS } = require('./fork-locale-groups.cjs');
 
+const { applyRecords, locales } = require('./locale-records.cjs');
+
 const COLUMN = { zh_CN: 1, zh_TW: 2 };
 // Existing copy uses three columns; fully localized copy uses locale keys with English fallback.
 const pick = (table, column, lang) => Object.fromEntries(Object.entries(table).map(([key, value]) =>
@@ -654,4 +656,6 @@ for (const lang of fs.readdirSync(root)) {
     changed += 1;
   }
 }
+// The translations come back over the English just written: this table has columns for English and Chinese alone.
+for (const lang of locales()) applyRecords(lang);
 console.log(`fork strings written; ${changed} catalog(s) changed.`);

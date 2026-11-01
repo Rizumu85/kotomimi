@@ -1,0 +1,2170 @@
+{
+  "audioSystem.installCommand": {
+    "en": "sudo apt install pulseaudio-utils",
+    "text": "sudo apt install pulseaudio-utils"
+  },
+  "auth.emailPlaceholder": {
+    "en": "your@email.com",
+    "text": "your@email.com"
+  },
+  "captionShare.kinds.wifi": {
+    "en": "Wi‑Fi",
+    "text": "Wi‑Fi"
+  },
+  "engine.status.devVenv": {
+    "en": "dev venv",
+    "text": "סביבה וירטואלית לפיתוח"
+  },
+  "engine.status.native": {
+    "en": "native {{version}}",
+    "text": "מקומי {{version}}"
+  },
+  "fork.aids.furigana": {
+    "en": "Furigana",
+    "text": "פוריגנה"
+  },
+  "fork.aids.highlight": {
+    "en": "Highlight new",
+    "text": "הדגשת טקסט חדש"
+  },
+  "fork.aids.italic": {
+    "en": "Italic source",
+    "text": "מקור בכתב נטוי"
+  },
+  "fork.aids.pinyin": {
+    "en": "Pinyin",
+    "text": "פין-יין"
+  },
+  "fork.aids.readings": {
+    "en": "Readings",
+    "text": "הגייה"
+  },
+  "fork.aids.roman": {
+    "en": "Romanization",
+    "text": "תעתיק לטיני"
+  },
+  "fork.aids.text": {
+    "en": "Text",
+    "text": "טקסט"
+  },
+  "fork.audio.echoAction": {
+    "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
+    "text": "שימוש באוזניות יפסיק את הלולאה. אפשר גם להעלות את סף הפעלת המיקרופון בהגדרות → מיקרופון."
+  },
+  "fork.audio.gate": {
+    "en": "Mic activation threshold",
+    "text": "סף הפעלת המיקרופון"
+  },
+  "fork.audio.gateHint": {
+    "en": "Press the microphone, speak, and set the mark under where the bar reaches — and above where it sits while only your speakers are heard.",
+    "text": "יש ללחוץ על סמל המיקרופון ולומר כמה משפטים. יש למקם את הסמן מתחת לרמה שאליה המד מגיע בזמן דיבור, ומעל לרמה שלו כשרק הרמקולים משמיעים קול."
+  },
+  "fork.audio.gateOff": {
+    "en": "Off",
+    "text": "כבוי"
+  },
+  "fork.audio.gateQuiet": {
+    "en": "Nothing from the microphone yet.",
+    "text": "עדיין לא נקלט קול מהמיקרופון."
+  },
+  "fork.audio.gateTest": {
+    "en": "Test the microphone: the bar shows its level",
+    "text": "בדיקת מיקרופון: המד מציג את עוצמת הקול הנוכחית"
+  },
+  "fork.audio.gateTestStop": {
+    "en": "Stop the test",
+    "text": "עצירת הבדיקה"
+  },
+  "fork.audio.gateTooltip": {
+    "en": "Sound quieter than this is heard as silence — the other side's voice from your speakers, the keyboard, the room — so it is neither translated nor checked. The microphone is heard about 0.2 s later while this is on. Off: everything is heard.",
+    "text": "צלילים חלשים מהסף הזה נחשבים לשקט, למשל קול הצד השני מהרמקולים, הקלדות ורעשי רקע. הם לא מתורגמים ולא נשלחים למשוב על דקדוק. כשהאפשרות מופעלת, קול המיקרופון מתעכב בכ-0.2 שניות. כשהיא כבויה, כל הצלילים מועברים."
+  },
+  "fork.audio.vbcableInstall": {
+    "en": "Install VB-CABLE",
+    "text": "התקנת VB-CABLE"
+  },
+  "fork.audio.vbcableInstalling": {
+    "en": "Downloading… this can take a minute",
+    "text": "מוריד, זה עשוי לקחת קצת זמן…"
+  },
+  "fork.audio.vbcableMissing": {
+    "en": "The VB-CABLE virtual audio driver is not installed, so a spoken translation cannot be sent into a meeting. Subtitles do not need it.",
+    "text": "מנהל ההתקן לכרטיס הקול הווירטואלי VB-CABLE אינו מותקן, ולכן אי אפשר להעביר את התרגום הקולי לתוכנת הפגישות. הוא לא נחוץ להצגת כתוביות בלבד."
+  },
+  "fork.autostart.note": {
+    "en": "Kotomimi waits in the background after you sign in, with an icon in the notification area, and loads the models once ahead of time so the first session does not wait for it.",
+    "text": "לאחר הכניסה, Kotomimi ממתינה ברקע עם סמל באזור ההודעות וטוענת מראש את המודלים, כדי שלא יהיה צורך לחכות להם בשיחה הראשונה."
+  },
+  "fork.autostart.title": {
+    "en": "Startup",
+    "text": "הפעלה"
+  },
+  "fork.autostart.toggle": {
+    "en": "Start in the background when I sign in to Windows",
+    "text": "הפעלה ברקע בכניסה ל-Windows"
+  },
+  "fork.custom.add": {
+    "en": "Add",
+    "text": "הוספה"
+  },
+  "fork.custom.added": {
+    "en": "Added {{name}} ({{size}} MB). Download it in the model library.",
+    "text": "{{name}} נוסף ({{size}} MB). אפשר להוריד אותו בספריית המודלים."
+  },
+  "fork.custom.adding": {
+    "en": "Looking…",
+    "text": "מחפש…"
+  },
+  "fork.custom.anyLanguage": {
+    "en": "Every language",
+    "text": "רב-לשוני"
+  },
+  "fork.custom.downloaded": {
+    "en": "downloaded",
+    "text": "הורד"
+  },
+  "fork.custom.error_bad_repo": {
+    "en": "That is not a repository id. It looks like owner/name.",
+    "text": "זה לא שם מאגר תקין. הפורמט הוא בעלים/שם."
+  },
+  "fork.custom.error_exists": {
+    "en": "This model is already added.",
+    "text": "המודל הזה כבר נוסף."
+  },
+  "fork.custom.error_not_found": {
+    "en": "No public repository by that name.",
+    "text": "לא נמצא מאגר ציבורי בשם הזה."
+  },
+  "fork.custom.error_not_whisper": {
+    "en": "This repository is not a Whisper model in the ONNX layout. {{detail}}",
+    "text": "המאגר הזה אינו מודל Whisper בפורמט ONNX. {{detail}}"
+  },
+  "fork.custom.error_unreachable": {
+    "en": "Could not reach Hugging Face: {{detail}}",
+    "text": "לא ניתן להתחבר ל-Hugging Face: {{detail}}"
+  },
+  "fork.custom.intro": {
+    "en": "For a Whisper model the library does not list, such as one fine-tuned for your language. Give its Hugging Face repository id (most onnx-community/… and Xenova/… Whisper repositories work); it needs a graphics card.",
+    "text": "למודל Whisper שלא מופיע בספרייה, למשל מודל שהותאם לשפה מסוימת. יש להזין את שם המאגר ב-Hugging Face. רוב מאגרי Whisper של onnx-community/… ושל Xenova/… נתמכים. נדרש כרטיס מסך."
+  },
+  "fork.custom.language": {
+    "en": "The language it hears",
+    "text": "השפה שהמודל מזהה"
+  },
+  "fork.custom.notDownloaded": {
+    "en": "not downloaded",
+    "text": "לא הורד"
+  },
+  "fork.custom.remove": {
+    "en": "Remove {{name}}",
+    "text": "הסרת {{name}}"
+  },
+  "fork.custom.repo": {
+    "en": "Repository id",
+    "text": "שם המאגר"
+  },
+  "fork.custom.title": {
+    "en": "Add a Whisper model from Hugging Face",
+    "text": "הוספת מודל Whisper מ-Hugging Face"
+  },
+  "fork.echoCancellationApp": {
+    "en": "Kotomimi only",
+    "text": "רק Kotomimi"
+  },
+  "fork.echoCancellationAppTooltip": {
+    "en": "Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "רק Kotomimi: מסיר רק את הדיבור המתורגם ש-Kotomimi עצמה משמיעה. יש לבחור באפשרות זו כשהמיקרופון הוא כרטיס קול וירטואלי (VB-Cable, BlackHole)."
+  },
+  "fork.find.again": {
+    "en": "Search again",
+    "text": "חיפוש מחדש"
+  },
+  "fork.find.kindKotomimi": {
+    "en": "Kotomimi",
+    "text": "שיתוף Kotomimi"
+  },
+  "fork.find.kindPhone": {
+    "en": "Phone · speech recognition",
+    "text": "טלפון · זיהוי דיבור"
+  },
+  "fork.find.kindPhoneLends": {
+    "en": "Phone · {{what}}",
+    "text": "טלפון · {{what}}"
+  },
+  "fork.find.kindServer": {
+    "en": "Model server",
+    "text": "שרת מודלים"
+  },
+  "fork.find.lendsAsr": {
+    "en": "speech recognition",
+    "text": "זיהוי דיבור"
+  },
+  "fork.find.lendsCoach": {
+    "en": "grammar feedback",
+    "text": "משוב על דקדוק"
+  },
+  "fork.find.lendsTranslate": {
+    "en": "translation",
+    "text": "תרגום"
+  },
+  "fork.find.manual": {
+    "en": "Or type its address",
+    "text": "או הזנת כתובת ידנית"
+  },
+  "fork.find.models": {
+    "en": "{{count}} model(s)",
+    "text": "{{count}} מודלים"
+  },
+  "fork.find.needsKey": {
+    "en": "asks for an access key",
+    "text": "נדרש מפתח גישה"
+  },
+  "fork.find.none": {
+    "en": "Nothing found. Check that the other device is on, is on the same Wi-Fi or router as this one, and has \"Share this computer's models\" turned on in its Kotomimi. You can also type its address below.",
+    "text": "לא נמצאו מכשירים. יש לוודא שהמכשיר השני פועל, מחובר לאותה רשת Wi-Fi או לאותו נתב כמו המחשב הזה, ושהאפשרות \"שיתוף המודלים של המחשב הזה\" מופעלת ב-Kotomimi שלו. אפשר גם להזין את הכתובת שלו למטה."
+  },
+  "fork.find.productHere": {
+    "en": "{{product}} on this computer",
+    "text": "{{product}} במחשב הזה"
+  },
+  "fork.find.search": {
+    "en": "Search my network for devices",
+    "text": "חיפוש מכשירים ברשת המקומית"
+  },
+  "fork.find.searching": {
+    "en": "Looking for devices on your network…",
+    "text": "מחפש מכשירים ברשת המקומית…"
+  },
+  "fork.find.thisComputer": {
+    "en": "On this computer",
+    "text": "שרתים במחשב הזה"
+  },
+  "fork.find.title": {
+    "en": "Found on your network",
+    "text": "מכשירים שנמצאו ברשת המקומית"
+  },
+  "fork.find.use": {
+    "en": "Use {{name}}",
+    "text": "שימוש ב-{{name}}"
+  },
+  "fork.fonts.add": {
+    "en": "Add a language…",
+    "text": "הוספת שפה…"
+  },
+  "fork.fonts.default": {
+    "en": "App default",
+    "text": "ברירת המחדל של האפליקציה"
+  },
+  "fork.fonts.languages": {
+    "en": "Conversation text, by language",
+    "text": "טקסט השיחה, לפי שפה"
+  },
+  "fork.fonts.latin": {
+    "en": "Latin letters and digits",
+    "text": "אותיות לטיניות וספרות"
+  },
+  "fork.fonts.latinHint": {
+    "en": "English letters and digits in the conversation",
+    "text": "אותיות באנגלית וספרות בשיחה"
+  },
+  "fork.fonts.loading": {
+    "en": "Reading the installed fonts…",
+    "text": "קורא את הגופנים המותקנים…"
+  },
+  "fork.fonts.none": {
+    "en": "No font matches",
+    "text": "לא נמצאו גופנים תואמים"
+  },
+  "fork.fonts.others": {
+    "en": "Other fonts (may lack this script)",
+    "text": "גופנים אחרים (ייתכן שלא תומכים בכתב הזה)"
+  },
+  "fork.fonts.pinyin": {
+    "en": "Pinyin above the text",
+    "text": "פיניין מעל הטקסט"
+  },
+  "fork.fonts.reading": {
+    "en": "Readings above the text",
+    "text": "פוריגנה מעל הטקסט"
+  },
+  "fork.fonts.remove": {
+    "en": "Reset {{language}}",
+    "text": "שחזור גופן ברירת המחדל עבור {{language}}"
+  },
+  "fork.fonts.roman": {
+    "en": "Romanization",
+    "text": "תעתיק לטיני"
+  },
+  "fork.fonts.romanHint": {
+    "en": "The readings under Japanese, Korean, Russian and Ukrainian",
+    "text": "תעתיק ההגייה מתחת ליפנית, קוריאנית, רוסית ואוקראינית"
+  },
+  "fork.fonts.search": {
+    "en": "Search fonts",
+    "text": "חיפוש גופנים"
+  },
+  "fork.fonts.text": {
+    "en": "Text",
+    "text": "טקסט"
+  },
+  "fork.fonts.title": {
+    "en": "Fonts",
+    "text": "גופנים"
+  },
+  "fork.fonts.tooltip": {
+    "en": "Fonts installed on this computer. Characters a font lacks are shown in the app's own.",
+    "text": "גופנים המותקנים במחשב הזה. תווים שחסרים בגופן יוצגו בגופן ברירת המחדל של האפליקציה."
+  },
+  "fork.fonts.ui": {
+    "en": "Interface",
+    "text": "ממשק"
+  },
+  "fork.fonts.uiHint": {
+    "en": "Menus, settings and buttons",
+    "text": "תפריטים, הגדרות וכפתורים"
+  },
+  "fork.furigana": {
+    "en": "Furigana over kanji (Japanese)",
+    "text": "פוריגנה מעל קאנג'י (יפנית)"
+  },
+  "fork.help.issues": {
+    "en": "Report a problem",
+    "text": "דיווח על בעיה"
+  },
+  "fork.help.issuesTooltip": {
+    "en": "Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page.",
+    "text": "Kotomimi הוא פיצול עצמאי של Sokuji. על בעיות באפליקציה הזו יש לדווח בעמוד GitHub שלה."
+  },
+  "fork.lan.copied": {
+    "en": "Copied",
+    "text": "הועתק"
+  },
+  "fork.lan.copy": {
+    "en": "Copy",
+    "text": "העתקה"
+  },
+  "fork.lan.direction": {
+    "en": "Which direction to show models for",
+    "text": "הכיוון שעבורו יוצגו מודלים"
+  },
+  "fork.lan.enable": {
+    "en": "Share this computer's models",
+    "text": "שיתוף המודלים של המחשב הזה"
+  },
+  "fork.lan.failed": {
+    "en": "Sharing could not start: {{message}}",
+    "text": "לא ניתן להפעיל את השיתוף: {{message}}"
+  },
+  "fork.lan.firewall": {
+    "en": "The first time, your system's firewall may ask whether to allow Kotomimi on the network: allow it for private networks.",
+    "text": "בהפעלה הראשונה, חומת האש של המערכת עשויה לבקש אישור לגישה של Kotomimi לרשת. יש לאפשר תקשורת ברשתות פרטיות."
+  },
+  "fork.lan.firewallAllow": {
+    "en": "Allow",
+    "text": "אפשר"
+  },
+  "fork.lan.firewallBlocked": {
+    "en": "Windows Firewall is keeping other devices out",
+    "text": "חומת האש של Windows חוסמת מכשירים אחרים"
+  },
+  "fork.lan.firewallDeclined": {
+    "en": "Still blocked: Windows was not told yes.",
+    "text": "עדיין חסום: לא ניתן אישור ב-Windows."
+  },
+  "fork.lan.firewallPrivate": {
+    "en": "Allow opens this port to devices on your network. Windows will ask you to confirm.",
+    "text": "לחיצה על \"אפשר\" תפתח את היציאה הזו למכשירים ברשת המקומית. Windows יבקש אישור תחילה."
+  },
+  "fork.lan.firewallPublic": {
+    "en": "Windows treats this network as public. Allow opens this port to devices on this same network only. Windows will ask you to confirm.",
+    "text": "Windows מגדיר את הרשת הזו כציבורית. לחיצה על \"אפשר\" תפתח את היציאה הזו רק למכשירים באותה רשת. Windows יבקש אישור תחילה."
+  },
+  "fork.lan.firewallWaiting": {
+    "en": "Waiting for Windows…",
+    "text": "ממתין ל-Windows…"
+  },
+  "fork.lan.hideLibrary": {
+    "en": "Hide the model library",
+    "text": "הסתרת ספריית המודלים"
+  },
+  "fork.lan.key": {
+    "en": "Access key",
+    "text": "מפתח גישה"
+  },
+  "fork.lan.keyPlaceholder": {
+    "en": "Blank: anyone on the network may connect",
+    "text": "ריק: כל מכשיר ברשת המקומית יוכל להתחבר"
+  },
+  "fork.lan.models": {
+    "en": "Models shared · {{count}}",
+    "text": "מודלים משותפים · {{count}}"
+  },
+  "fork.lan.noNetwork": {
+    "en": "This computer is on no network.",
+    "text": "המחשב הזה אינו מחובר כרגע לרשת."
+  },
+  "fork.lan.noRecognizer": {
+    "en": "No speech recognition model downloaded yet",
+    "text": "עדיין לא הורד מודל לזיהוי דיבור"
+  },
+  "fork.lan.on": {
+    "en": "Sharing — no device connected yet",
+    "text": "השיתוף פעיל, עדיין אין מכשירים מחוברים"
+  },
+  "fork.lan.onWithClients": {
+    "en": "Sharing — {{count}} connection(s) in use",
+    "text": "השיתוף פעיל, {{count}} חיבורים בשימוש"
+  },
+  "fork.lan.options": {
+    "en": "Options",
+    "text": "אפשרויות"
+  },
+  "fork.lan.otherAddresses": {
+    "en": "This computer's other addresses",
+    "text": "כתובות נוספות של המחשב הזה"
+  },
+  "fork.lan.port": {
+    "en": "Port",
+    "text": "יציאה"
+  },
+  "fork.lan.portInUse": {
+    "en": "Port {{port}} is taken by another program. Choose another under Options.",
+    "text": "יציאה {{port}} תפוסה על ידי תוכנה אחרת. יש לבחור יציאה אחרת תחת \"אפשרויות\"."
+  },
+  "fork.lan.serving": {
+    "en": "Sharing",
+    "text": "השיתוף פעיל"
+  },
+  "fork.lan.servingClients": {
+    "en": "Sharing · {{count}} in use",
+    "text": "השיתוף פעיל · {{count}} חיבורים בשימוש"
+  },
+  "fork.lan.servingTip": {
+    "en": "This computer is lending its models to other devices. The languages and the choice of model are set on those devices, not here.",
+    "text": "המחשב הזה מאפשר למכשירים אחרים להשתמש במודלים שלו. בחירת המודל והשפות נעשית במכשירים האלה, ולא כאן."
+  },
+  "fork.lan.sessionIdle": {
+    "en": "The other device ended the session: nobody had spoken for a long while, and it let its models go. Start again to continue.",
+    "text": "המכשיר השני סיים את השיחה: איש לא דיבר זמן רב, והוא שחרר את המודלים מהזיכרון. להמשך, יש ללחוץ שוב על \"התחלה\"."
+  },
+  "fork.lan.showLibrary": {
+    "en": "Download or manage models",
+    "text": "הורדה או ניהול של מודלים"
+  },
+  "fork.lan.starting": {
+    "en": "Starting…",
+    "text": "מפעיל…"
+  },
+  "fork.lan.title": {
+    "en": "Share with other devices",
+    "text": "שיתוף עם מכשירים אחרים"
+  },
+  "fork.lan.tooltip": {
+    "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
+    "text": "מאפשר למכשירים אחרים ברשת המקומית להשתמש במודלים של המחשב הזה. במכשיר השני אפשר למצוא את המחשב בחיפוש תחת \"מכשיר אחר\" ב-Kotomimi, ולבחור שם את המודל והשפה. השיתוף פועל רק כש-Kotomimi פתוח."
+  },
+  "fork.languageMenu.detect": {
+    "en": "Auto-detect",
+    "text": "זיהוי אוטומטי"
+  },
+  "fork.languageMenu.detectUnavailable": {
+    "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
+    "text": "זיהוי הדיבור הנוכחי לא תומך בזיהוי שפות אוטומטי. נדרש Qwen3-ASR 1.7B GGUF או מודל API."
+  },
+  "fork.languageMenu.mine": {
+    "en": "My language",
+    "text": "השפה שלי"
+  },
+  "fork.languageMenu.mostly": {
+    "en": "Translate into what they mostly speak",
+    "text": "לתרגם לשפה העיקרית של הצד השני"
+  },
+  "fork.languageMenu.none": {
+    "en": "No language by that name",
+    "text": "אין שפה בשם הזה"
+  },
+  "fork.languageMenu.pin": {
+    "en": "Pin {{name}} to the top",
+    "text": "הצמדת {{name}} לראש הרשימה"
+  },
+  "fork.languageMenu.pinShort": {
+    "en": "Pin to the top",
+    "text": "הצמדה לראש הרשימה"
+  },
+  "fork.languageMenu.search": {
+    "en": "Type to find a language",
+    "text": "הקלדה לסינון שפות"
+  },
+  "fork.languageMenu.speakBoth": {
+    "en": "I speak {{language}} too",
+    "text": "אני מדבר/ת גם {{language}}"
+  },
+  "fork.languageMenu.speakBothHelp": {
+    "en": "When you speak {{mine}}, it is translated into {{language}}; when you speak {{language}}, into {{mine}}. Recognition tells the two apart.",
+    "text": "דיבור שלך ב{{mine}} מתורגם ל{{language}}, ודיבור ב{{language}} מתורגם ל{{mine}}. זיהוי הדיבור מבחין אוטומטית בין שתי השפות."
+  },
+  "fork.languageMenu.speakBothUnavailable": {
+    "en": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
+    "text": "מזהה הדיבור שנבחר לא יכול להבחין בין {{mine}} לבין {{language}}. יש לבחור במצב המשולב של Apple Speech עם שתי השפות מותקנות, או במזהה דיבור שמזהה את שתי השפות."
+  },
+  "fork.languageMenu.theirs": {
+    "en": "Their language",
+    "text": "השפה של הצד השני"
+  },
+  "fork.languageMenu.unpin": {
+    "en": "Unpin {{name}}",
+    "text": "ביטול הצמדת {{name}}"
+  },
+  "fork.languageMenu.unpinShort": {
+    "en": "Unpin",
+    "text": "ביטול הצמדה"
+  },
+  "fork.pinyin": {
+    "en": "Pinyin over Chinese",
+    "text": "פין-יין מעל הטקסט בסינית"
+  },
+  "fork.romanization": {
+    "en": "Romanization",
+    "text": "הצגת תעתיק לטיני"
+  },
+  "fork.sourceItalic": {
+    "en": "Source text in italics",
+    "text": "טקסט המקור בכתב נטוי"
+  },
+  "fork.speechDetection.title": {
+    "en": "Speech detection",
+    "text": "זיהוי דיבור"
+  },
+  "fork.statusLine.checking": {
+    "en": "Getting ready. You can start in a moment.",
+    "text": "ההכנות בעיצומן. עוד רגע אפשר להתחיל."
+  },
+  "fork.subtitle.align": {
+    "en": "Alignment",
+    "text": "יישור"
+  },
+  "fork.subtitle.alignCenter": {
+    "en": "Centre",
+    "text": "למרכז"
+  },
+  "fork.subtitle.alignLeft": {
+    "en": "Left",
+    "text": "לשמאל"
+  },
+  "fork.subtitle.back": {
+    "en": "Back to the main window",
+    "text": "חזרה לחלון הראשי"
+  },
+  "fork.subtitle.backdrop": {
+    "en": "Panel",
+    "text": "עוצמת הרקע"
+  },
+  "fork.subtitle.lanesView": {
+    "en": "Subtitle view",
+    "text": "תצוגת כתוביות"
+  },
+  "fork.subtitle.listView": {
+    "en": "List view",
+    "text": "תצוגת רשימה"
+  },
+  "fork.subtitle.look": {
+    "en": "Look",
+    "text": "סגנון"
+  },
+  "fork.subtitle.lookDark": {
+    "en": "Dark text",
+    "text": "טקסט כהה עם קו מתאר לבן"
+  },
+  "fork.subtitle.lookLight": {
+    "en": "Light text",
+    "text": "טקסט בהיר עם קו מתאר שחור"
+  },
+  "fork.subtitle.lookPanel": {
+    "en": "Dark panel",
+    "text": "רקע כהה"
+  },
+  "fork.subtitle.lookSample": {
+    "en": "Aa",
+    "text": "כתוביות"
+  },
+  "fork.subtitle.lookSoft": {
+    "en": "Faint panel",
+    "text": "רקע עדין וצל רך"
+  },
+  "fork.subtitle.moreColors": {
+    "en": "More colours (source text, panel)",
+    "text": "צבעים נוספים (טקסט המקור, רקע)"
+  },
+  "fork.subtitle.off": {
+    "en": "Off",
+    "text": "כבוי"
+  },
+  "fork.subtitle.outline": {
+    "en": "Outline",
+    "text": "עוצמת קו המתאר"
+  },
+  "fork.subtitle.shadow": {
+    "en": "Shadow",
+    "text": "עוצמת הצל"
+  },
+  "fork.subtitle.through": {
+    "en": "Click-through: the mouse passes through the captions",
+    "text": "העברת לחיצות: לחיצות העכבר עוברות דרך הכתוביות לחלון שמתחת"
+  },
+  "fork.subtitle.throughOff": {
+    "en": "Stop click-through",
+    "text": "ביטול העברת לחיצות"
+  },
+  "fork.subtitle.type": {
+    "en": "Type to translate (Ctrl+K)",
+    "text": "תרגום בהקלדה (Ctrl+K)"
+  },
+  "fork.subtitle.typePlaceholder": {
+    "en": "What you want to say — Enter translates",
+    "text": "מה רצית לומר? Enter לתרגום"
+  },
+  "fork.vrchat.chatbox": {
+    "en": "Above my avatar",
+    "text": "מעל הראש שלי"
+  },
+  "fork.vrchat.chatboxHearBoth": {
+    "en": "Switch to Both",
+    "text": "מעבר לשניהם"
+  },
+  "fork.vrchat.chatboxOff": {
+    "en": "Off",
+    "text": "כבוי"
+  },
+  "fork.vrchat.chatboxSourceFirst": {
+    "en": "Original on top",
+    "text": "מקור למעלה"
+  },
+  "fork.vrchat.chatboxTranslation": {
+    "en": "Translation",
+    "text": "תרגום"
+  },
+  "fork.vrchat.chatboxTranslationFirst": {
+    "en": "Translation on top",
+    "text": "תרגום למעלה"
+  },
+  "fork.vrchat.chatboxUnheard": {
+    "en": "Only the other side is translated now: what you say won't show above your avatar.",
+    "text": "כרגע מתורגם רק הצד השני. הדברים שלך לא יוצגו מעל הראש שלך."
+  },
+  "fork.vrchat.connected": {
+    "en": "Connected",
+    "text": "מחובר"
+  },
+  "fork.vrchat.end": {
+    "en": "End",
+    "text": "סיום"
+  },
+  "fork.vrchat.help": {
+    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
+    "text": "פועל בשילוב עם VRChat במחשב הזה: כשהמיקרופון מושתק ב-VRChat, Kotomimi לא מזהה את הדיבור שלכם. התרגומים שלכם יכולים להופיע מעל הראש של הדמות, כך ששחקנים אחרים יוכלו לקרוא אותם. כשמופעל סרטון בעולם: אם הצליל שלו אינו מגיע מכיוון מסוים, הוא מופרד מקולות השחקנים. אם הוא מגיע מכיוון מסוים, הדיבור של הצד השני מחולק לקטעים קצרים יותר."
+  },
+  "fork.vrchat.mutedNotHeard": {
+    "en": "Muted in VRChat: what you say is not recognized.",
+    "text": "יש השתקה ב-VRChat. הדיבור שלך לא יזוהה."
+  },
+  "fork.vrchat.mutedThere": {
+    "en": "Muted in VRChat",
+    "text": "בהשתקה ב-VRChat"
+  },
+  "fork.vrchat.muteGate": {
+    "en": "Don't hear me while muted in VRChat",
+    "text": "לא לזהות את הדיבור שלי בזמן השתקה ב-VRChat"
+  },
+  "fork.vrchat.notConnected": {
+    "en": "Not connected",
+    "text": "לא מחובר"
+  },
+  "fork.vrchat.onVideo": {
+    "en": "When a world plays a video",
+    "text": "כשמופעל סרטון בעולם"
+  },
+  "fork.vrchat.pausedOn": {
+    "en": "Not translating",
+    "text": "התרגום מושהה"
+  },
+  "fork.vrchat.quickOn": {
+    "en": "Shorter sentences",
+    "text": "המשפטים קוצרו"
+  },
+  "fork.vrchat.remember": {
+    "en": "Remember",
+    "text": "לזכור"
+  },
+  "fork.vrchat.removedOn": {
+    "en": "Video sound removed",
+    "text": "צליל הסרטון הוסר"
+  },
+  "fork.vrchat.separatedOn": {
+    "en": "Video sound separated",
+    "text": "צליל הסרטון הופרד"
+  },
+  "fork.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
+  },
+  "fork.vrchat.turnOnOsc": {
+    "en": "Turn on OSC in the VRChat quick menu",
+    "text": "יש להפעיל OSC בתפריט המהיר של VRChat"
+  },
+  "fork.vrchat.videoAsk": {
+    "en": "Ask me",
+    "text": "לשאול בכל פעם"
+  },
+  "fork.vrchat.videoAskResult": {
+    "en": "Asks you when a video starts.",
+    "text": "כשהסרטון מתחיל, תופיע שאלה איך להמשיך."
+  },
+  "fork.vrchat.videoBoth": {
+    "en": "People + video",
+    "text": "לתרגם אנשים וסרטון"
+  },
+  "fork.vrchat.videoBothResult": {
+    "en": "The video gets its own line and uses more power; if it can't be separated, sentences are cut shorter.",
+    "text": "הסרטון מוצג בשורה נפרדת וצורך יותר משאבים. אם אי אפשר להפריד, המשפטים מתקצרים."
+  },
+  "fork.vrchat.videoPause": {
+    "en": "Pause",
+    "text": "לא לתרגם בינתיים"
+  },
+  "fork.vrchat.videoPauseResult": {
+    "en": "The other side is not translated while it plays.",
+    "text": "הצד השני לא יתורגם בזמן שהסרטון מתנגן."
+  },
+  "fork.vrchat.videoQuick": {
+    "en": "People only",
+    "text": "לתרגם רק אנשים"
+  },
+  "fork.vrchat.videoQuickResult": {
+    "en": "Takes out video sound; if it can't, sentences are cut shorter.",
+    "text": "מנסה להסיר את צליל הסרטון. אם אי אפשר להפריד, המשפטים מתקצרים."
+  },
+  "fork.vrchat.videoShort": {
+    "en": "Video",
+    "text": "סרטון"
+  },
+  "fork.vrchat.videoStarted": {
+    "en": "Video started",
+    "text": "הסרטון התחיל"
+  },
+  "fork.wizard.addressMissing": {
+    "en": "Choose a device from the list above, or type its address, for example 192.168.1.10:8790.",
+    "text": "יש לבחור מכשיר מהרשימה למעלה או להזין את הכתובת שלו, למשל 192.168.1.10:8790."
+  },
+  "fork.wizard.device": {
+    "en": "This computer",
+    "text": "המחשב הזה"
+  },
+  "fork.wizard.deviceDesc": {
+    "en": "Recognition and translation run on this computer using native models. Download a model for each stage before starting.",
+    "text": "זיהוי הדיבור והתרגום רצים במחשב הזה באמצעות מודלים מקומיים. לפני שמתחילים, צריך להוריד מודל לכל אחד משני השלבים."
+  },
+  "fork.wizard.deviceNotice": {
+    "en": "After setup, open Model library in the Speech recognition and Translation cards and download a native model for each. Translation requires a downloaded model, or you can switch that stage to an API model or another device.",
+    "text": "לאחר ההגדרה, יש לפתוח את ״ספריית המודלים״ בכרטיסיות ״זיהוי דיבור״ ו״תרגום״ ולהוריד מודל מקומי לכל שלב. לתרגום נדרש מודל שהורד, ואפשר גם להעביר את שלב התרגום למודל API או למכשיר אחר."
+  },
+  "fork.wizard.intro": {
+    "en": "Pick a starting point. Later, in Settings, recognition and translation can each run in a different place.",
+    "text": "בוחרים נקודת התחלה. בהמשך אפשר לבחור בהגדרות היכן ירוצו זיהוי הדיבור והתרגום, כל אחד בנפרד."
+  },
+  "fork.wizard.keyNeeded": {
+    "en": "This device asks for an access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options), then press Connect.",
+    "text": "המכשיר הזה דורש מפתח גישה. יש להזין את המפתח שהוגדר בו ואז ללחוץ על ״התחברות״. במכשיר Kotomimi אחר, המפתח נמצא ב״אפשרויות״ של השיתוף."
+  },
+  "fork.wizard.pathBadge": {
+    "en": "Recommended",
+    "text": "מומלץ"
+  },
+  "fork.wizard.pathCost": {
+    "en": "No account and no API key. Text only: subtitles with furigana, typed translation and grammar feedback. Another device means a Kotomimi sharing its models, or a model server such as LocalAI; this computer downloads models onto your disk.",
+    "text": "אין צורך בחשבון או במפתח API. טקסט בלבד: כתוביות עם פוריגנה, תרגום בהקלדה ומשוב דקדוקי. המכשיר האחר יכול להריץ Kotomimi עם שיתוף מופעל, או שרת מודלים כמו LocalAI. שימוש במחשב הזה דורש הורדת מודלים לכונן."
+  },
+  "fork.wizard.pathDesc": {
+    "en": "Use the models of another device on your network, or this computer's own — and any mix of the two.",
+    "text": "אפשר להשתמש במודלים ממכשיר אחר ברשת המקומית, במודלים שבמחשב הזה, או לשלב ביניהם."
+  },
+  "fork.wizard.pathTitle": {
+    "en": "Kotomimi Pipeline",
+    "text": "Kotomimi בהתאמה אישית"
+  },
+  "fork.wizard.pendingAddress": {
+    "en": "No device chosen yet — choose one in Settings before you start.",
+    "text": "עדיין לא נבחר מכשיר אחר. יש לבחור מכשיר בהגדרות לפני שמתחילים."
+  },
+  "fork.wizard.server": {
+    "en": "Another device on my network",
+    "text": "מכשיר אחר ברשת המקומית"
+  },
+  "fork.wizard.serverDesc": {
+    "en": "The models run on another computer: a Kotomimi with sharing turned on, or a model server such as LocalAI. This computer stays light.",
+    "text": "המודלים רצים במחשב אחר: Kotomimi עם שיתוף מופעל, או שרת מודלים כמו LocalAI. המחשב הזה כמעט לא צורך משאבים."
+  },
+  "fork.wizard.serverFound": {
+    "en": "Connected — it offers {{count}} model(s).",
+    "text": "החיבור הצליח. זמינים {{count}} מודלים."
+  },
+  "fork.wizard.serverUnreachable": {
+    "en": "Could not connect: {{message}}",
+    "text": "לא ניתן להתחבר: {{message}}"
+  },
+  "fork.wizard.share": {
+    "en": "This computer, for my other devices",
+    "text": "המחשב הזה, לשימוש המכשירים האחרים שלי"
+  },
+  "fork.wizard.shareDesc": {
+    "en": "Computing power to spare here? Let the models run on this computer for the other devices on your network — and for this computer itself.",
+    "text": "יש למחשב הזה כוח עיבוד פנוי? אפשר להריץ כאן את המודלים עבור מכשירים אחרים ברשת המקומית, וגם עבור המחשב הזה."
+  },
+  "fork.wizard.shareNotice": {
+    "en": "Nothing to enter. Finishing turns on sharing, so other Kotomimi devices on your network can find this computer. After setup, download models in the Speech recognition card: those are what the others can use.",
+    "text": "אין צורך למלא דבר. בסיום יופעל השיתוף, ומכשירי Kotomimi אחרים ברשת המקומית יוכלו למצוא את המחשב הזה. לאחר ההגדרה, יש להוריד מודלים בכרטיסיית ״זיהוי דיבור״ שבהגדרות. אלה המודלים שיהיו זמינים למכשירים האחרים."
+  },
+  "fork.wizard.shareSummary": {
+    "en": "Sharing",
+    "text": "שיתוף"
+  },
+  "fork.wizard.shareSummaryOn": {
+    "en": "Turned on when you finish: other devices on your network can use this computer's models",
+    "text": "יופעל בסיום: מכשירים אחרים ברשת המקומית יוכלו להשתמש במודלים שבמחשב הזה"
+  },
+  "fork.wizard.title": {
+    "en": "Which device does the work?",
+    "text": "באיזה מכשיר להריץ?"
+  },
+  "fork.wizard.tryServer": {
+    "en": "Connect",
+    "text": "התחברות"
+  },
+  "models.deviceCpu": {
+    "en": "CPU",
+    "text": "מעבד"
+  },
+  "models.deviceGpu": {
+    "en": "GPU",
+    "text": "מעבד גרפי"
+  },
+  "providers.gemini.name": {
+    "en": "Google Gemini",
+    "text": "Google Gemini"
+  },
+  "providers.kizunaai_soniox.name": {
+    "en": "KizunaAI",
+    "text": "KizunaAI"
+  },
+  "providers.local_inference.modelAsr": {
+    "en": "ASR",
+    "text": "זיהוי דיבור"
+  },
+  "providers.local_inference.modelTranslation": {
+    "en": "MT",
+    "text": "תרגום"
+  },
+  "providers.local_inference.modelTts": {
+    "en": "TTS",
+    "text": "הקראה"
+  },
+  "providers.localai.addressMissing": {
+    "en": "No other device is chosen yet. In Settings, under \"Another device\", search for it or type its address.",
+    "text": "עדיין לא נבחר מכשיר אחר. בהגדרות, תחת \"מכשיר אחר\", אפשר לחפש אותו או להזין את הכתובת שלו."
+  },
+  "providers.localai.advanced": {
+    "en": "Advanced",
+    "text": "מתקדם"
+  },
+  "providers.localai.apiKey": {
+    "en": "API key",
+    "text": "מפתח API"
+  },
+  "providers.localai.apiKeyNeeded": {
+    "en": "The API at {{address}} asks for a key. In its card, turn on \"The API asks for a key\" and enter it.",
+    "text": "ה-API בכתובת {{address}} דורש מפתח. בכרטיס המתאים, יש להפעיל את \"ה-API הזה דורש מפתח\" ולהזין אותו."
+  },
+  "providers.localai.apiKeyRefused": {
+    "en": "The API at {{address}} did not accept the key. Check the API key in its card.",
+    "text": "ה-API בכתובת {{address}} לא קיבל את המפתח. יש לבדוק את מפתח ה-API בכרטיס המתאים."
+  },
+  "providers.localai.apiKeyReused": {
+    "en": "Filled in with the key saved under \"{{name}}\".",
+    "text": "הוזן המפתח שנשמר תחת ״{{name}}״."
+  },
+  "providers.localai.apiService": {
+    "en": "Service",
+    "text": "שירות"
+  },
+  "providers.localai.apiServiceArk": {
+    "en": "Doubao (Volcengine Ark)",
+    "text": "Doubao (Volcengine Ark)"
+  },
+  "providers.localai.apiServiceArkModel": {
+    "en": "A model's name, or your endpoint id (ep-…)",
+    "text": "שם המודל או מזהה נקודת הקצה שלך (ep-…)"
+  },
+  "providers.localai.apiServiceCustom": {
+    "en": "Custom address",
+    "text": "כתובת מותאמת אישית"
+  },
+  "providers.localai.apiServiceModel": {
+    "en": "Choose from the list on the right, or type a name",
+    "text": "אפשר לבחור מהרשימה מימין או להזין שם"
+  },
+  "providers.localai.apiServiceOllama": {
+    "en": "Ollama on this computer",
+    "text": "Ollama במחשב הזה"
+  },
+  "providers.localai.apiServiceSiliconFlow": {
+    "en": "SiliconFlow",
+    "text": "SiliconFlow"
+  },
+  "providers.localai.apiUnreachable": {
+    "en": "The API at {{address}} could not be reached. Check the address in its card, and that this computer is online.",
+    "text": "לא ניתן להתחבר ל-API בכתובת {{address}}. יש לבדוק את הכתובת בכרטיס המתאים ואת החיבור של המחשב הזה לאינטרנט."
+  },
+  "providers.localai.asrApiBaseUrl": {
+    "en": "API address",
+    "text": "כתובת API"
+  },
+  "providers.localai.asrApiBaseUrlPlaceholder": {
+    "en": "e.g. https://api.openai.com/v1",
+    "text": "למשל https://api.openai.com/v1"
+  },
+  "providers.localai.asrApiModelPlaceholder": {
+    "en": "e.g. whisper-1, whisper-large-v3",
+    "text": "למשל whisper-1, whisper-large-v3"
+  },
+  "providers.localai.asrApiNeedsKey": {
+    "en": "The API asks for a key",
+    "text": "ה־API הזה דורש מפתח"
+  },
+  "providers.localai.asrFixedNote": {
+    "en": "That device is reached as a plain LocalAI, which always hears with its own default recognizer when the translation or the feedback uses a model chosen here. Through the Kotomimi on that device, the recognizer can be chosen here.",
+    "text": "החיבור כרגע הוא ישירות ל-LocalAI במכשיר ההוא. כשבוחרים כאן מודל אחר לתרגום או למשוב דקדוקי, הוא משתמש רק במודל זיהוי הדיבור שמוגדר אצלו כברירת מחדל. חיבור ל-Kotomimi במכשיר ההוא יאפשר לבחור כאן גם מודל לזיהוי דיבור."
+  },
+  "providers.localai.asrKey": {
+    "en": "API key of the speech recognition API",
+    "text": "מפתח ה־API לזיהוי דיבור"
+  },
+  "providers.localai.asrUnnamed": {
+    "en": "Speech recognition has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "עדיין אין מודל זמין לזיהוי דיבור. יש לבחור מודל בכרטיס \"זיהוי דיבור\" שמתחת לספק (במודל API יש להזין כתובת ושם מודל), או לבחור מיקום אחר."
+  },
+  "providers.localai.auto": {
+    "en": "Automatic · {{name}}",
+    "text": "אוטומטי · {{name}}"
+  },
+  "providers.localai.browse": {
+    "en": "Model library",
+    "text": "ספריית מודלים"
+  },
+  "providers.localai.bySentence": {
+    "en": "Translate sentence by sentence",
+    "text": "תרגום משפט אחר משפט"
+  },
+  "providers.localai.bySentenceTooltip": {
+    "en": "On: each sentence is translated as soon as it ends — sooner, but without the sentences around it. Off: the whole stretch is translated once the speaker pauses — with its context, but later.",
+    "text": "כשמופעל: כל משפט מתורגם מיד בסיומו. התרגום מופיע מוקדם יותר, אבל ללא ההקשר של המשפטים שסביבו. כשכבוי: הקטע כולו מתורגם כשהדיבור נעצר, עם ההקשר המלא, אבל לאחר המתנה ארוכה יותר."
+  },
+  "providers.localai.checking": {
+    "en": "Checking…",
+    "text": "בבדיקה…"
+  },
+  "providers.localai.checkNow": {
+    "en": "Check",
+    "text": "בדיקה"
+  },
+  "providers.localai.checkSlow": {
+    "en": "No answer within {{seconds}} s: the device may be off or loading a model, or the address wrong. It is asked again by itself.",
+    "text": "לא התקבלה תגובה אחרי {{seconds}} שניות: ייתכן שהמכשיר כבוי, טוען מודל, או שהכתובת שגויה. יתבצע ניסיון נוסף אוטומטית."
+  },
+  "providers.localai.choiceDevice": {
+    "en": "Use this computer",
+    "text": "שימוש במחשב הזה"
+  },
+  "providers.localai.choiceServer": {
+    "en": "Use another device",
+    "text": "שימוש במכשיר אחר"
+  },
+  "providers.localai.coach": {
+    "en": "Check my grammar when I speak their language",
+    "text": "בדיקת דקדוק כשאני מדבר בשפה שלהם"
+  },
+  "providers.localai.coachKey": {
+    "en": "API key of the feedback model",
+    "text": "מפתח API של מודל המשוב הדקדוקי"
+  },
+  "providers.localai.coachNeedsSpeaker": {
+    "en": "Feedback answers what you say. Switch the mode to \"Me\" or \"Both\".",
+    "text": "משוב דקדוקי דורש לשמוע אותך. יש להעביר את המצב ל\"אני\" או ל\"שניהם\"."
+  },
+  "providers.localai.coachNoModel": {
+    "en": "The other device has no text model that can give feedback. Use an API model or this computer instead.",
+    "text": "במכשיר האחר אין מודל טקסט שיכול לתת משוב דקדוקי. אפשר להשתמש במודל API או במחשב הזה."
+  },
+  "providers.localai.coachPrompt": {
+    "en": "Feedback instructions",
+    "text": "הנחיות למשוב דקדוקי"
+  },
+  "providers.localai.coachPromptPlaceholder": {
+    "en": "Blank: written automatically for your two languages. Your own text may use {{spoken}} and {{native}}.",
+    "text": "אם משאירים ריק, ההנחיות נוצרות אוטומטית לפי שפת האם והשפה שמתורגלת. בהנחיות משלך אפשר להשתמש ב-{{spoken}} וב-{{native}} לציון שתי השפות."
+  },
+  "providers.localai.coachPromptPreview": {
+    "en": "Used while the box is blank, for this language pair:",
+    "text": "כשהשדה ריק, אלה ההנחיות לזוג השפות הנוכחי:"
+  },
+  "providers.localai.coachStage": {
+    "en": "Grammar feedback",
+    "text": "משוב דקדוקי"
+  },
+  "providers.localai.coachStageTooltip": {
+    "en": "When you speak the other language, a model checks your grammar and answers with a check mark, or a corrected sentence and an explanation. Enable \"I speak the other language too\" as well to get both a translation and private feedback. Your own language and typed text are translated without feedback.",
+    "text": "כשמדברים בשפה האחרת, המודל בודק את הדקדוק ומחזיר סימן אישור, או משפט מתוקן והסבר. כדי לקבל גם תרגום וגם משוב פרטי, יש להפעיל גם את \"אני מדבר גם בשפה האחרת\". דיבור בשפה שלך וטקסט מוקלד מתורגמים ללא משוב."
+  },
+  "providers.localai.coachUnnamed": {
+    "en": "Grammar feedback has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "עדיין אין מודל זמין למשוב דקדוקי. יש לבחור מודל בכרטיס \"משוב דקדוקי\" שמתחת לספק (במודל API יש להזין כתובת ושם מודל), או לבחור מיקום אחר."
+  },
+  "providers.localai.connectFirst": {
+    "en": "No other device is connected yet: search for one above, or type its address.",
+    "text": "עדיין לא חובר מכשיר אחר. אפשר לחפש מכשיר למעלה או להזין את הכתובת שלו."
+  },
+  "providers.localai.description": {
+    "en": "Recognition, translation and grammar feedback — and you mix where each model runs: this computer, another device on your network, or any API model.",
+    "text": "זיהוי דיבור, תרגום ומשוב דקדוקי, עם אפשרות לשלב מודלים שרצים במחשב הזה, במכשיר אחר ברשת המקומית או דרך כל API."
+  },
+  "providers.localai.detectOther": {
+    "en": "Detect the other side's language",
+    "text": "זיהוי אוטומטי של שפת הצד השני"
+  },
+  "providers.localai.detectOtherNeeds": {
+    "en": "Only Qwen3-ASR 1.7B GGUF can tell the language by itself. Choose it here.",
+    "text": "רק Qwen3-ASR 1.7B GGUF יכול לזהות את השפה בעצמו. יש לבחור בו כאן."
+  },
+  "providers.localai.detectOtherNote": {
+    "en": "The other side's language is detected, so a model that can tell languages apart hears them.",
+    "text": "שפת הצד השני מזוהה אוטומטית, לכן נעשה כאן שימוש במודל שמסוגל לזהות שפות."
+  },
+  "providers.localai.detectOtherTooltip": {
+    "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
+    "text": "הדיבור של הצד השני מזוהה ומתורגם לשפה שלך, בלי להחליף שפה ידנית. הדיבור שלך עדיין מתורגם לשפה שנבחרה למעלה. לזיהוי נדרש Qwen3-ASR 1.7B GGUF או API; לתרגום נדרש המנוע המובנה או API."
+  },
+  "providers.localai.deviceDefault": {
+    "en": "The device's own choice",
+    "text": "לפי בחירת המכשיר"
+  },
+  "providers.localai.endpoint": {
+    "en": "Address",
+    "text": "כתובת"
+  },
+  "providers.localai.familyUnheard": {
+    "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
+    "text": "ב-{{name}} שבמכשיר ההוא חסרה תמיכה ב-{{languages}}, לכן המכשיר בוחר בעצמו מודל לחלק הזה. כדי להשתמש ב-{{name}}, יש להוריד תחילה את {{languages}} במכשיר ההוא."
+  },
+  "providers.localai.feedbackFailed": {
+    "en": "One sentence got no grammar feedback: the feedback model did not answer.",
+    "text": "לא התקבל משוב דקדוקי למשפט אחד: מודל המשוב לא הגיב."
+  },
+  "providers.localai.groupNative": {
+    "en": "Native engine",
+    "text": "מנוע מובנה"
+  },
+  "providers.localai.hearApiNote": {
+    "en": "Any service with OpenAI's transcription API works (OpenAI, Groq, a LocalAI). This computer cuts the sentences and uploads each one, so the text appears when a sentence is finished.",
+    "text": "אפשר להשתמש בכל שירות שתומך ב-API התמלול של OpenAI, כמו OpenAI, Groq או LocalAI. המחשב הזה מחלק את הדיבור למשפטים ושולח כל משפט לזיהוי לאחר סיומו, לכן הטקסט מופיע רק בסוף המשפט."
+  },
+  "providers.localai.hears": {
+    "en": "Recognizes {{language}}",
+    "text": "מזהה {{language}}"
+  },
+  "providers.localai.hearsEither": {
+    "en": "Recognizes {{first}} or {{second}}",
+    "text": "מזהה {{first}} או {{second}}"
+  },
+  "providers.localai.hearsOther": {
+    "en": "Hears the other side (any language)",
+    "text": "האזנה לצד השני (זיהוי שפה אוטומטי)"
+  },
+  "providers.localai.hearStage": {
+    "en": "Speech recognition",
+    "text": "זיהוי דיבור"
+  },
+  "providers.localai.hearStageTooltip": {
+    "en": "What listens: it decides when a sentence ends and writes down what was said.",
+    "text": "השלב שמקשיב: מזהה מתי משפט מסתיים ומתמלל את מה שנאמר."
+  },
+  "providers.localai.hereDown": {
+    "en": "The LocalAI on this computer is not running yet. Start it in the stage's card — or, if Kotomimi has only just opened, give it a moment.",
+    "text": "LocalAI עדיין לא פועל במחשב הזה. יש ללחוץ על \"הפעלת LocalAI\" בכרטיס השלב. אם Kotomimi נפתח זה עתה, הוא יתחיל לפעול בעוד רגע."
+  },
+  "providers.localai.hereModelPick": {
+    "en": "Choose a model",
+    "text": "בחירת מודל"
+  },
+  "providers.localai.inUse": {
+    "en": "In use: {{name}}",
+    "text": "בשימוש: {{name}}"
+  },
+  "providers.localai.inUseLegs": {
+    "en": "In use: {{theirs}} (them), {{mine}} (me)",
+    "text": "בשימוש: {{theirs}} (הצד השני), {{mine}} (אני)"
+  },
+  "providers.localai.kotomimiServer": {
+    "en": "It is another Kotomimi sharing its models.",
+    "text": "זהו מכשיר אחר עם Kotomimi שמשתף את המודלים שלו."
+  },
+  "providers.localai.kotomimiThere": {
+    "en": "Use the Kotomimi on that device",
+    "text": "חיבור ל-Kotomimi במכשיר ההוא"
+  },
+  "providers.localai.kotomimiThereLooking": {
+    "en": "Looking for it…",
+    "text": "מחפש…"
+  },
+  "providers.localai.kotomimiThereNone": {
+    "en": "No Kotomimi is sharing on that device. Open Kotomimi there, turn on \"Share with other devices\", then try again.",
+    "text": "אין Kotomimi שמשתף במכשיר ההוא. יש לפתוח בו את Kotomimi, להפעיל \"שיתוף עם מכשירים אחרים\" ולנסות שוב."
+  },
+  "providers.localai.localServerNote": {
+    "en": "This address is this computer itself: a model server running here, such as LocalAI. Choose \"Another device\" in a stage to use its models.",
+    "text": "הכתובת הזו מפנה למחשב הזה: לשרת מודלים שפועל בו, כמו LocalAI. כדי להשתמש במודלים שלו, יש לבחור ״מכשיר אחר״ בשלב הרצוי."
+  },
+  "providers.localai.model": {
+    "en": "Model",
+    "text": "מודל"
+  },
+  "providers.localai.modelGone": {
+    "en": "{{name}} (no longer on that device)",
+    "text": "{{name}} (כבר לא נמצא במכשיר ההוא)"
+  },
+  "providers.localai.modelList": {
+    "en": "Choose from the models this service lists",
+    "text": "בחירה מרשימת המודלים של השירות"
+  },
+  "providers.localai.modelListAsking": {
+    "en": "Getting the list…",
+    "text": "טוענים את רשימת המודלים…"
+  },
+  "providers.localai.modelListKeyMissing": {
+    "en": "Fill in the API key first.",
+    "text": "יש להזין מפתח API קודם."
+  },
+  "providers.localai.modelListKeyRefused": {
+    "en": "The service refused this key.",
+    "text": "השירות לא מקבל את המפתח הזה."
+  },
+  "providers.localai.modelListNoAddress": {
+    "en": "Fill in the address first.",
+    "text": "יש להזין כתובת קודם."
+  },
+  "providers.localai.modelListNoMatch": {
+    "en": "No model found. Try fewer letters.",
+    "text": "לא נמצא מודל. כדאי לנסות פחות תווים."
+  },
+  "providers.localai.modelListNone": {
+    "en": "This service lists no models. Type the name instead.",
+    "text": "השירות לא מספק רשימת מודלים. יש להזין את השם ישירות."
+  },
+  "providers.localai.modelListUnreachable": {
+    "en": "The service could not be reached.",
+    "text": "לא ניתן להתחבר לשירות."
+  },
+  "providers.localai.modelSearch": {
+    "en": "Search models",
+    "text": "חיפוש מודלים"
+  },
+  "providers.localai.modelSuggested": {
+    "en": "Suits this step",
+    "text": "מתאים לשלב הזה"
+  },
+  "providers.localai.name": {
+    "en": "Kotomimi Pipeline",
+    "text": "Kotomimi בשילוב אישי"
+  },
+  "providers.localai.nativeBusy": {
+    "en": "A device you share with is using this engine with {{name}}. Wait for it to finish, or choose {{name}} here too.",
+    "text": "מכשיר שמשותף איתך משתמש במנוע הזה להפעלת {{name}}. אפשר להמתין שיסיים, או לבחור גם כאן ב-{{name}}."
+  },
+  "providers.localai.nativeCoachFailed": {
+    "en": "The feedback engine could not start. In the Grammar feedback card, press \"Try again\" — or choose another model.",
+    "text": "לא ניתן להפעיל את מנוע המשוב הדקדוקי. בכרטיס \"משוב דקדוקי\", יש ללחוץ על \"ניסיון חוזר\" או לבחור מודל אחר."
+  },
+  "providers.localai.nativeCoachFailedShort": {
+    "en": "The feedback engine could not start.",
+    "text": "לא ניתן להפעיל את מנוע המשוב הדקדוקי."
+  },
+  "providers.localai.nativeCoachMissing": {
+    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} עדיין לא הורד. בכרטיס \"משוב דקדוקי\", יש להוריד מודל מובנה או לעבור ל\"מודל API\" או ל\"מכשיר אחר\"."
+  },
+  "providers.localai.nativeCoachReady": {
+    "en": "The feedback engine is ready.",
+    "text": "מנוע המשוב הדקדוקי מוכן."
+  },
+  "providers.localai.nativeCoachUnsupported": {
+    "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
+    "text": "מנוע המשוב הדקדוקי המובנה עדיין לא נתמך במערכת הזו. בכרטיס \"משוב דקדוקי\", יש לעבור ל\"מודל API\" או ל\"מכשיר אחר\"."
+  },
+  "providers.localai.nativeCoachWarming": {
+    "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
+    "text": "מנוע המשוב הדקדוקי עדיין עולה. זה לוקח כמה שניות. אפשר להתחיל ברגע שיהיה מוכן."
+  },
+  "providers.localai.nativeCoachWarmingShort": {
+    "en": "Starting the feedback engine…",
+    "text": "מפעיל את מנוע המשוב הדקדוקי…"
+  },
+  "providers.localai.nativeEntry": {
+    "en": "{{name}} (native engine)",
+    "text": "{{name}} (מנוע מובנה)"
+  },
+  "providers.localai.nativeFailed": {
+    "en": "The recognition engine of this computer could not start. In the Speech recognition card, press \"Try again\" — or choose another model.",
+    "text": "לא ניתן להפעיל את מנוע זיהוי הדיבור במחשב הזה. בכרטיס \"זיהוי דיבור\", יש ללחוץ על \"ניסיון חוזר\" או לבחור מודל אחר."
+  },
+  "providers.localai.nativeFailedShort": {
+    "en": "The engine could not start.",
+    "text": "לא ניתן להפעיל את המנוע."
+  },
+  "providers.localai.nativeInterrupted": {
+    "en": "The engine stopped while it was starting. Press Start again.",
+    "text": "המנוע נעצר במהלך ההפעלה. יש ללחוץ שוב על \"התחלה\"."
+  },
+  "providers.localai.nativeLoading": {
+    "en": "Loading the models… About half a minute the first time after the computer boots.",
+    "text": "טוען מודלים… בפעם הראשונה אחרי הדלקת המחשב זה לוקח כחצי דקה."
+  },
+  "providers.localai.nativeMissing": {
+    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} עדיין לא הורד. בכרטיס \"זיהוי דיבור\", יש להוריד מודל מובנה או לעבור ל\"מודל API\" או ל\"מכשיר אחר\"."
+  },
+  "providers.localai.nativeNone": {
+    "en": "No model chosen",
+    "text": "לא נבחר מודל"
+  },
+  "providers.localai.nativeReady": {
+    "en": "The engine is ready.",
+    "text": "המנוע מוכן."
+  },
+  "providers.localai.nativeRetry": {
+    "en": "Try again",
+    "text": "ניסיון חוזר"
+  },
+  "providers.localai.nativeRuntime": {
+    "en": "Downloading the runtime first. This happens only once.",
+    "text": "מוריד תחילה את סביבת ההרצה. ההורדה נדרשת רק פעם אחת."
+  },
+  "providers.localai.nativeTwoModels": {
+    "en": "{{name}} and {{other}} cannot run at the same time. Choose the same model for both languages.",
+    "text": "אי אפשר להפעיל את {{name}} ואת {{other}} בו-זמנית. יש לבחור אותו מודל לשתי השפות."
+  },
+  "providers.localai.nativeUnchosen": {
+    "en": "No speech recognition model is chosen for {{source}} yet. Choose one in the Speech recognition card.",
+    "text": "עדיין לא נבחר מודל לזיהוי דיבור עבור {{source}}. יש לבחור מודל בכרטיס \"זיהוי דיבור\"."
+  },
+  "providers.localai.nativeUnheard": {
+    "en": "{{name}} does not hear one of your two languages. Choose another model for it.",
+    "text": "{{name}} לא תומך בזיהוי אחת משתי השפות שנבחרו. יש לבחור מודל אחר."
+  },
+  "providers.localai.nativeUnsupported": {
+    "en": "The native recognition engine is not available for this system. In the Speech recognition card, switch to \"API model\" or \"Another device\".",
+    "text": "מנוע זיהוי הדיבור המובנה עדיין לא נתמך במערכת הזו. בכרטיס \"זיהוי דיבור\", יש לעבור ל\"מודל API\" או ל\"מכשיר אחר\"."
+  },
+  "providers.localai.nativeUnsupportedShort": {
+    "en": "Not available for this system",
+    "text": "עדיין לא נתמך במערכת הזו"
+  },
+  "providers.localai.nativeWarming": {
+    "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
+    "text": "מנוע זיהוי הדיבור עדיין עולה. בפעם הראשונה אחרי הדלקת המחשב זה לוקח כחצי דקה. אפשר להתחיל ברגע שיהיה מוכן."
+  },
+  "providers.localai.nativeWarmingShort": {
+    "en": "Starting the engine… About half a minute the first time after the computer boots.",
+    "text": "מפעיל את המנוע… בפעם הראשונה אחרי הדלקת המחשב זה לוקח כחצי דקה."
+  },
+  "providers.localai.notDownloaded": {
+    "en": "No model downloaded yet",
+    "text": "עדיין לא הורד מודל"
+  },
+  "providers.localai.noteAppleSpeech": {
+    "en": "Japanese talk, measured: about 13% of the characters wrong, the most accurate of all. It writes as it listens (about 2 s behind).",
+    "text": "בבדיקת שיחה ביפנית: כ-13% שגיאות בתווים, המדויק ביותר מבין כל המודלים. הטקסט מופיע תוך כדי ההאזנה (בעיכוב של כ-2 שניות)."
+  },
+  "providers.localai.noteCohere": {
+    "en": "Measured on Japanese VRChat talk: about 33% of the characters wrong, and about a quarter of what was said left out. Not a good choice for Japanese conversation.",
+    "text": "בבדיקת שיחה ביפנית ב-VRChat: כ-33% שגיאות בתווים, וכרבע מהדיבור נשמט. לא מומלץ לשיחות ביפנית."
+  },
+  "providers.localai.noteGemma4": {
+    "en": "Japanese grammar, measured: it caught 11 of 14 mistakes and left right casual speech alone; about 0.1 s an answer. About 1.5 GB of video memory.",
+    "text": "בבדיקת דקדוק ביפנית: זיהה 11 מתוך 14 משפטים שגויים, ולא שינה דיבור תקין בשפה יומיומית. כ-0.1 שנייה לתשובה. צורך כ-1.5 GB מזיכרון כרטיס המסך."
+  },
+  "providers.localai.noteGranite41": {
+    "en": "Measured on Japanese VRChat talk: it keeps repeating the same sentence. Not usable for Japanese conversation.",
+    "text": "בבדיקת שיחה ביפנית ב-VRChat: חוזר שוב ושוב על אותו משפט. כמעט לא שמיש לשיחות ביפנית."
+  },
+  "providers.localai.noteHyMt15": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences, and it tends to add words of its own.",
+    "text": "בבדיקת תרגום מיפנית לסינית: טעויות משמעותיות בכ-8 מתוך 30 משפטים, וגם נוטה להוסיף מילים משלו."
+  },
+  "providers.localai.noteHyMt2": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences; about 0.1 s a sentence.",
+    "text": "בבדיקת תרגום מיפנית לסינית: טעויות משמעותיות בכ-8 מתוך 30 משפטים. כ-0.1 שנייה למשפט."
+  },
+  "providers.localai.noteIndexTranslate": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
+    "text": "בבדיקת תרגום מיפנית לסינית: טעויות משמעותיות בכ-3 מתוך 30 משפטים, התוצאה הטובה ביותר מבין המודלים שנבדקו. כ-0.1 שנייה למשפט. צורך כ-2 GB מזיכרון כרטיס המסך ותומך ביותר ממאה שפות."
+  },
+  "providers.localai.noteMoonshineJa": {
+    "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
+    "text": "בבדיקת שיחה ביפנית ב-VRChat: כ-70% שגיאות בתווים. מתאים רק כפתרון זמני כשאי אפשר להשתמש בכרטיס המסך כלל."
+  },
+  "providers.localai.noteNativeNemotron": {
+    "en": "Small: about 1 GB of video memory. Japanese talk, measured: about 27% of the characters wrong, and a short sentence is sometimes left out altogether. Choose it only when the ones above do not fit or do not hear the language. Over thirty languages.",
+    "text": "צריכת זיכרון נמוכה: כ-1 GB מזיכרון כרטיס המסך. בבדיקת שיחה ביפנית: כ-27% שגיאות בתווים, ולפעמים משפטים קצרים נשמטים לגמרי. כדאי לבחור בו רק אם אין מספיק זיכרון למודלים שלמעלה, או אם הם לא תומכים בשפה הרצויה. תומך ביותר משלושים שפות."
+  },
+  "providers.localai.noteNativeQwen": {
+    "en": "Japanese talk, measured: about 16% of the characters wrong. It writes as you speak (about 1 s behind); the last few words settle when the sentence ends. When the graphics card is busy it only refreshes less often. About 3 GB of video memory, thirty languages.",
+    "text": "בבדיקת שיחה ביפנית: כ-16% שגיאות בתווים. הטקסט מופיע תוך כדי הדיבור (בעיכוב של כ-1 שנייה); המילים האחרונות נקבעות סופית בסוף המשפט. כשכרטיס המסך עמוס, רק תדירות העדכון יורדת. צורך כ-3 GB מזיכרון כרטיס המסך ותומך ב-30 שפות."
+  },
+  "providers.localai.noteNativeQwenSmall": {
+    "en": "The light one, for a computer that runs a game at the same time: about 2 GB of video memory instead of 3. Japanese talk, measured: about 22% of the characters wrong, more than the 1.7B. Otherwise it works the same way, with the same thirty languages.",
+    "text": "מודל קטן וחסכוני, שמתאים למחשב שמריץ גם משחק: צורך כ-2 GB מזיכרון כרטיס המסך (לעומת כ-3 GB ב-1.7B). בבדיקת שיחה ביפנית: כ-22% שגיאות בתווים, מעט יותר מ-1.7B. בשאר ההיבטים פועל כמו 1.7B ותומך באותן 30 שפות."
+  },
+  "providers.localai.noteNativeR2t2": {
+    "en": "Japanese talk, measured: about 18% of the characters wrong. It writes as it listens (about 2.5 s behind) and never changes what it wrote. When the graphics card cannot keep up (a weaker card, or a game running), the text falls further and further behind. About 3 GB of video memory.",
+    "text": "בבדיקת שיחה ביפנית: כ-18% שגיאות בתווים. הטקסט מופיע תוך כדי ההאזנה (בעיכוב של כ-2.5 שניות) ולא משתנה לאחר שנכתב. כשכרטיס המסך לא עומד בעומס (כרטיס חלש או משחק שפועל במקביל), הטקסט מפגר יותר ויותר אחרי הדיבור. צורך כ-3 GB מזיכרון כרטיס המסך."
+  },
+  "providers.localai.noteNativeSenseVoice": {
+    "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
+    "text": "הקל והמהיר ביותר: צורך כ-0.4 GB מזיכרון כרטיס המסך. בבדיקת שיחה ביפנית: מדויק כמו Qwen3-ASR 0.6B, אך כמעט ללא סימני פיסוק. תומך רק בסינית, קנטונזית, אנגלית, יפנית וקוריאנית."
+  },
+  "providers.localai.noteQwen06": {
+    "en": "Measured on Japanese VRChat talk: about 35% of the characters wrong. Small: for when the graphics card has little memory to spare.",
+    "text": "בבדיקת שיחה ביפנית ב-VRChat: כ-35% שגיאות בתווים. מודל קטן, מתאים כשנותר מעט זיכרון פנוי בכרטיס המסך."
+  },
+  "providers.localai.noteQwen17": {
+    "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
+    "text": "בבדיקת שיחה ביפנית: כ-19% שגיאות בתווים. הטקסט מופיע רק בסוף המשפט (בעיכוב של כ-10 שניות); גרסת GGUF שלמעלה מציגה טקסט תוך כדי הדיבור."
+  },
+  "providers.localai.noteSenseVoice": {
+    "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
+    "text": "בבדיקת שיחה ביפנית ב-VRChat: לא מפיק תווי קאנה, ולכן היפנית כמעט בלתי קריאה."
+  },
+  "providers.localai.noteVoxtral4b": {
+    "en": "Measured on Japanese VRChat talk: quick — the text is about 2.6 s behind the voice — but about 27% of the characters wrong. For when speed matters more than accuracy.",
+    "text": "בבדיקת שיחה ביפנית ב-VRChat: הטקסט מופיע מהר (בעיכוב של כ-2.6 שניות אחרי הדיבור), אך עם לא מעט שגיאות בתווים (כ-27%). מתאים כשהמהירות חשובה יותר מהדיוק."
+  },
+  "providers.localai.noteWhisperMedium": {
+    "en": "Measured on Japanese VRChat talk: about 34% of the characters wrong.",
+    "text": "בבדיקת שיחה ביפנית ב-VRChat: כ-34% שגיאות בתווים."
+  },
+  "providers.localai.noteWhisperTurbo": {
+    "en": "Measured on Japanese VRChat talk: about 21% of the characters wrong, and steady. It writes only once a sentence has ended.",
+    "text": "בבדיקת שיחה ביפנית ב-VRChat: כ-21% שגיאות בתווים וביצועים יציבים. גם כאן הטקסט מופיע רק בסוף המשפט."
+  },
+  "providers.localai.otherDeviceHint": {
+    "en": "To use the models of another device on your local network, search the network for it.",
+    "text": "כדי להשתמש במודלים ממכשיר אחר ברשת המקומית, אפשר לחפש אותו ברשת."
+  },
+  "providers.localai.phoneKey": {
+    "en": "Access key of {{name}}",
+    "text": "מפתח הגישה של {{name}}"
+  },
+  "providers.localai.phoneKeyNote": {
+    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
+    "text": "בטלפון הזה הוגדר מפתח גישה. אפשר למצוא אותו בטלפון תחת ״חיבור מכשירים״."
+  },
+  "providers.localai.phoneKeyUse": {
+    "en": "Use this phone",
+    "text": "שימוש בטלפון הזה"
+  },
+  "providers.localai.phoneKeyWrong": {
+    "en": "The phone did not take this key.",
+    "text": "המפתח שגוי. כדאי לבדוק אותו שוב."
+  },
+  "providers.localai.phoneModelGone": {
+    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
+    "text": "הטלפון ({{address}}) לא משתף כרגע את {{name}}. יש לבחור מודל אחר בכרטיס שלו."
+  },
+  "providers.localai.phoneModelTooBig": {
+    "en": "{{name}} (not enough memory on the phone)",
+    "text": "{{name}} (אין מספיק זיכרון בטלפון)"
+  },
+  "providers.localai.phoneModelTooBigCheck": {
+    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
+    "text": "לטלפון ({{address}}) אין כרגע מספיק זיכרון להפעלת {{name}}. יש לבחור מודל קטן יותר בכרטיס שלו, או לסגור אפליקציות אחרות בטלפון."
+  },
+  "providers.localai.phoneNoMemory": {
+    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
+    "text": "לטלפון אין כרגע מספיק זיכרון להפעלת המודל הזה. יש לבחור מודל קטן יותר בכרטיס שלו, או לסגור אפליקציות אחרות בטלפון."
+  },
+  "providers.localai.phoneOption": {
+    "en": "{{name}} (phone)",
+    "text": "{{name}} (טלפון)"
+  },
+  "providers.localai.phoneQuiet": {
+    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
+    "text": "הטלפון לא מגיב. ייתכן שהמערכת השהתה אותו אחרי נעילת המסך. פתיחת Kotomimi בטלפון תאפשר להמשיך."
+  },
+  "providers.localai.phoneUnreachable": {
+    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "הטלפון ({{address}}) לא מגיב. יש לוודא שהשיתוף בו מופעל ושהוא מחובר לאותה רשת Wi-Fi כמו המחשב הזה."
+  },
+  "providers.localai.pipelineModel": {
+    "en": "Setup name on that device",
+    "text": "שם התצורה במכשיר ההוא"
+  },
+  "providers.localai.pipelineNote": {
+    "en": "Normally left alone. Change it only when that device is a LocalAI set up with more than one combination of recognition and translation.",
+    "text": "בדרך כלל אין צורך לשנות. נדרש שינוי רק אם המכשיר ההוא מפעיל LocalAI עם יותר משילוב אחד של זיהוי דיבור ותרגום."
+  },
+  "providers.localai.placeDevice": {
+    "en": "This computer",
+    "text": "המחשב הזה"
+  },
+  "providers.localai.placeServer": {
+    "en": "Another device",
+    "text": "מכשיר אחר"
+  },
+  "providers.localai.ready": {
+    "en": "Ready to start",
+    "text": "אפשר להתחיל"
+  },
+  "providers.localai.recheck": {
+    "en": "Check again",
+    "text": "בדיקה חוזרת"
+  },
+  "providers.localai.serverHttp": {
+    "en": "The other device answered with an error (HTTP {{status}}). Restarting the app or the model server there usually helps.",
+    "text": "המכשיר האחר החזיר שגיאה (HTTP {{status}}). בדרך כלל הפעלה מחדש של האפליקציה או שרת המודלים במכשיר ההוא פותרת את הבעיה."
+  },
+  "providers.localai.serverKey": {
+    "en": "Access key",
+    "text": "מפתח גישה"
+  },
+  "providers.localai.serverKeyMissing": {
+    "en": "The other device asks for an access key. Enter it in Settings, under \"Another device\".",
+    "text": "המכשיר האחר דורש מפתח גישה. יש להזין אותו בהגדרות, תחת \"מכשיר אחר\"."
+  },
+  "providers.localai.serverKeyNeeded": {
+    "en": "The other device asks for an access key. Under \"Another device\", turn on \"It asks for an access key\" and enter the key set on that device.",
+    "text": "המכשיר האחר דורש מפתח גישה. תחת \"מכשיר אחר\", יש להפעיל את \"נדרש מפתח גישה\" ולהזין את המפתח שהוגדר במכשיר ההוא."
+  },
+  "providers.localai.serverKeyRefused": {
+    "en": "The other device did not accept the access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options).",
+    "text": "המכשיר האחר לא קיבל את מפתח הגישה. יש להזין את המפתח שהוגדר בו (ב-Kotomimi אחר, המפתח נמצא ב\"אפשרויות\" השיתוף)."
+  },
+  "providers.localai.serverNeedsKey": {
+    "en": "It asks for an access key",
+    "text": "נדרש מפתח גישה"
+  },
+  "providers.localai.serverNeedsKeyTooltip": {
+    "en": "Turn this on when the other device was given an access key — a Kotomimi with one set under its sharing options, for example.",
+    "text": "יש להפעיל אם הוגדר מפתח גישה במכשיר האחר, למשל ב״אפשרויות״ השיתוף של Kotomimi במכשיר ההוא."
+  },
+  "providers.localai.serverNoAsr": {
+    "en": "The other device has no speech recognition model for {{source}}. Download one there first (in the model library of its sharing card), or let this computer listen.",
+    "text": "במכשיר האחר אין מודל לזיהוי דיבור שתומך ב-{{source}}. יש להוריד בו מודל מתאים (בספריית המודלים שבכרטיס השיתוף), או להעביר את הזיהוי למחשב הזה."
+  },
+  "providers.localai.serverNoDetect": {
+    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
+    "text": "במכשיר האחר אין מודל לזיהוי דיבור שמזהה שפות אוטומטית. הוא נדרש גם ל\"אני מדבר גם…\" וגם לזיהוי אוטומטי של שפת הצד השני. יש להוריד בו מודל מתאים, כמו Qwen3-ASR, או לכבות את שתי האפשרויות."
+  },
+  "providers.localai.serverNoModels": {
+    "en": "The other device has no model yet: install or download one there first.",
+    "text": "עדיין אין מודלים במכשיר האחר. יש להתקין או להוריד בו מודל תחילה."
+  },
+  "providers.localai.serverSilent": {
+    "en": "This address does not answer. If Kotomimi is running on that device, enable its sharing to use its installed native models.",
+    "text": "לא ניתן להתחבר לכתובת הזו. אם Kotomimi פועל במכשיר ההוא, יש להפעיל בו שיתוף כדי להשתמש במודלים המקומיים שכבר מותקנים בו."
+  },
+  "providers.localai.serverUnreachable": {
+    "en": "The other device ({{address}}) did not answer. Check that it is on and on the same network as this computer, and that Kotomimi there is sharing (or its model server is running). It is asked again by itself.",
+    "text": "המכשיר האחר ({{address}}) לא הגיב. יש לוודא שהוא מופעל, מחובר לאותה רשת כמו המחשב הזה, ושמופעל בו שיתוף ב-Kotomimi (או ששרת המודלים שלו פועל). הפעולה תימשך אוטומטית כשהחיבור יחזור."
+  },
+  "providers.localai.sharedDeviceNone": {
+    "en": "No device connected yet",
+    "text": "עדיין לא חובר מכשיר"
+  },
+  "providers.localai.sourceAuto": {
+    "en": "The language cannot be detected with this setup. Choose the language you speak.",
+    "text": "אי אפשר לזהות את השפה אוטומטית בשילוב הזה. יש לבחור את השפה שבה מדברים."
+  },
+  "providers.localai.speedAbout": {
+    "en": "About {{seconds}} s",
+    "text": "כ־{{seconds}} שניות"
+  },
+  "providers.localai.speedAdviceGeneral": {
+    "en": "A smaller model or a faster device is suggested.",
+    "text": "מומלץ לעבור למודל קטן יותר או למכשיר מהיר יותר."
+  },
+  "providers.localai.speedAdviceModel": {
+    "en": "A smaller model, such as {{name}}, is suggested.",
+    "text": "מומלץ לעבור למודל קטן יותר, כמו {{name}}."
+  },
+  "providers.localai.speedAdviceSwitch": {
+    "en": "Switch and test again",
+    "text": "החלפה ובדיקה חוזרת"
+  },
+  "providers.localai.speedBehind": {
+    "en": "Falls behind",
+    "text": "העיכוב מצטבר"
+  },
+  "providers.localai.speedCoach": {
+    "en": "{{seconds}} s per sentence for feedback, on average",
+    "text": "{{seconds}} שניות בממוצע למשוב על כל משפט"
+  },
+  "providers.localai.speedCoachSlow": {
+    "en": "Feedback is slower than speech, so it will fall further behind. ",
+    "text": "המשוב איטי מקצב הדיבור, ולכן הוא יצבור עיכוב. "
+  },
+  "providers.localai.speedFailed": {
+    "en": "The test could not finish: {{reason}}",
+    "text": "לא ניתן להשלים את הבדיקה: {{reason}}"
+  },
+  "providers.localai.speedHead": {
+    "en": "Speed test · {{when}}",
+    "text": "בדיקת מהירות · {{when}}"
+  },
+  "providers.localai.speedHear": {
+    "en": "Text appears {{seconds}} s after the speech ends",
+    "text": "הטקסט המקורי מופיע {{seconds}} שניות אחרי סיום הדיבור"
+  },
+  "providers.localai.speedHearSlow": {
+    "en": "Recognition is slower than speech, so the captions will fall further behind. ",
+    "text": "הזיהוי איטי מקצב הדיבור, ולכן הכתוביות יצברו עיכוב. "
+  },
+  "providers.localai.speedJustNow": {
+    "en": "just now",
+    "text": "הרגע"
+  },
+  "providers.localai.speedLegCoach": {
+    "en": "From you finishing to the feedback",
+    "text": "מסיום הדיבור שלך עד להצגת המשוב"
+  },
+  "providers.localai.speedLegParticipant": {
+    "en": "From the other side finishing to the translation",
+    "text": "מסיום הדיבור של הצד השני עד להצגת התרגום"
+  },
+  "providers.localai.speedLegSpeaker": {
+    "en": "From you finishing to the translation",
+    "text": "מסיום הדיבור שלך עד להצגת התרגום"
+  },
+  "providers.localai.speedNoClip": {
+    "en": "There is no test recording for this language yet.",
+    "text": "עדיין אין הקלטת בדיקה בשפה הזו."
+  },
+  "providers.localai.speedNone": {
+    "en": "No result arrived during the test.",
+    "text": "לא התקבלו תוצאות במהלך הבדיקה."
+  },
+  "providers.localai.speedRetest": {
+    "en": "Test again",
+    "text": "בדיקה חוזרת"
+  },
+  "providers.localai.speedStop": {
+    "en": "Stop",
+    "text": "עצירה"
+  },
+  "providers.localai.speedTest": {
+    "en": "Test speed",
+    "text": "בדיקת מהירות"
+  },
+  "providers.localai.speedTesting": {
+    "en": "Testing speed: a recording of about ten seconds is sent through each step at speaking pace. Nothing is recorded or played.",
+    "text": "בודקים מהירות: הקלטה של כ־10 שניות מועברת בכל השלבים בקצב דיבור רגיל. המיקרופון לא בשימוש ולא מושמע צליל."
+  },
+  "providers.localai.speedTranslate": {
+    "en": "{{seconds}} s per sentence to translate, on average",
+    "text": "{{seconds}} שניות בממוצע לתרגום כל משפט"
+  },
+  "providers.localai.speedTranslateSlow": {
+    "en": "Translation is slower than speech, so the translations will fall further behind. ",
+    "text": "התרגום איטי מקצב הדיבור, ולכן התרגומים יצברו עיכוב. "
+  },
+  "providers.localai.speedVerdictOk": {
+    "en": "This setup keeps up with live speech.",
+    "text": "השילוב הנוכחי מתאים לשימוש בזמן אמת."
+  },
+  "providers.localai.speedVerdictSlow": {
+    "en": "Some steps cannot keep up with speech; see the notes above.",
+    "text": "חלק מהשלבים לא עומדים בקצב הדיבור. פרטים בהערות למעלה."
+  },
+  "providers.localai.stageDevice": {
+    "en": "Device",
+    "text": "מכשיר"
+  },
+  "providers.localai.tag_native": {
+    "en": "Native engine",
+    "text": "מנוע מובנה"
+  },
+  "providers.localai.tag_system": {
+    "en": "Built into macOS",
+    "text": "מובנה במערכת"
+  },
+  "providers.localai.tagHint_native": {
+    "en": "Runs on the graphics card using a native engine downloaded with the model. Loads when a session starts; the first start after boot may take about half a minute. Memory is released after the engine is no longer in use.",
+    "text": "פועל על כרטיס המסך באמצעות מנוע מובנה שיורד יחד עם המודל. נטען בתחילת השיחה; ההפעלה הראשונה אחרי הדלקת המחשב עשויה להימשך כחצי דקה. הזיכרון משתחרר כשהמנוע כבר לא בשימוש."
+  },
+  "providers.localai.tagHint_system": {
+    "en": "The speech recognition of macOS itself: no video memory taken, nothing to warm up. The system downloads each language.",
+    "text": "זיהוי הדיבור המובנה ב-Mac: לא תופס זיכרון בכרטיס המסך ולא דורש הכנה. המערכת מורידה חבילת שפה לכל שפה."
+  },
+  "providers.localai.textBaseUrlPlaceholder": {
+    "en": "e.g. https://api.openai.com/v1 or http://localhost:11434/v1",
+    "text": "למשל https://api.openai.com/v1 או http://localhost:11434/v1"
+  },
+  "providers.localai.textModelPlaceholder": {
+    "en": "The model's name, e.g. gpt-4o-mini",
+    "text": "שם המודל, למשל gpt-4o-mini"
+  },
+  "providers.localai.translateInSession": {
+    "en": "The device's own choice (translated in the same session it hears in)",
+    "text": "לפי בחירת המכשיר ההוא (באותו חיבור שבו מתבצע הזיהוי)"
+  },
+  "providers.localai.translateKey": {
+    "en": "API key of the translation model",
+    "text": "מפתח API של מודל התרגום"
+  },
+  "providers.localai.translateKotomimiOwn": {
+    "en": "The device's own choice (its best model for your languages)",
+    "text": "לפי בחירת המכשיר ההוא (המודל המתאים ביותר לזוג השפות)"
+  },
+  "providers.localai.translateStage": {
+    "en": "Translation",
+    "text": "תרגום"
+  },
+  "providers.localai.translateStageTooltip": {
+    "en": "What turns the recognized text into the other language. An API model is any service that speaks the OpenAI chat API: a hosted one, or Ollama or LM Studio on this computer.",
+    "text": "השלב שמתרגם את הטקסט שזוהה לשפה האחרת. מודל API יכול להיות כל שירות שתומך ב-API הצ'אט של OpenAI: שירות בענן, או Ollama או LM Studio במחשב הזה."
+  },
+  "providers.localai.translateUnnamed": {
+    "en": "Translation has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "עדיין אין מודל זמין לתרגום. יש לבחור מודל בכרטיס \"תרגום\" שמתחת לספק (במודל API יש להזין כתובת ושם מודל), או לבחור מיקום אחר."
+  },
+  "providers.localai.translatorFailed": {
+    "en": "The translation engine of this computer could not start. In the Translation card, press \"Try again\" — or choose another model.",
+    "text": "לא ניתן להפעיל את מנוע התרגום במחשב הזה. בכרטיס \"תרגום\", יש ללחוץ על \"ניסיון חוזר\" או לבחור מודל אחר."
+  },
+  "providers.localai.translatorFailedShort": {
+    "en": "The translation engine could not start.",
+    "text": "לא ניתן להפעיל את מנוע התרגום."
+  },
+  "providers.localai.translatorMissing": {
+    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} עדיין לא הורד. בכרטיס \"תרגום\", יש להוריד מודל מובנה או לעבור ל\"מודל API\" או ל\"מכשיר אחר\"."
+  },
+  "providers.localai.translatorReady": {
+    "en": "The translation engine is ready.",
+    "text": "מנוע התרגום מוכן."
+  },
+  "providers.localai.translatorUnfit": {
+    "en": "{{name}} does not translate between your two languages. Choose another model for it.",
+    "text": "{{name}} לא תומך בתרגום בין שתי השפות שנבחרו. יש לבחור מודל אחר."
+  },
+  "providers.localai.translatorUnsupported": {
+    "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
+    "text": "מנוע התרגום המובנה עדיין לא נתמך במערכת הזו. בכרטיס \"תרגום\", יש לעבור ל\"מודל API\" או ל\"מכשיר אחר\"."
+  },
+  "providers.localai.translatorWarming": {
+    "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",
+    "text": "מנוע התרגום במחשב הזה עדיין עולה. זה לוקח כמה שניות. אפשר להתחיל ברגע שיהיה מוכן."
+  },
+  "providers.localai.translatorWarmingShort": {
+    "en": "Starting the translation engine…",
+    "text": "מפעיל את מנוע התרגום…"
+  },
+  "providers.localai.typedFailed": {
+    "en": "A sentence you typed was not translated: the translation model did not answer.",
+    "text": "משפט שהוקלד לא תורגם: מודל התרגום לא הגיב."
+  },
+  "providers.localai.viaModel": {
+    "en": "API model",
+    "text": "מודל דרך API"
+  },
+  "providers.openai_live.name": {
+    "en": "OpenAI Live",
+    "text": "OpenAI Live"
+  },
+  "providers.openai_translate.name": {
+    "en": "OpenAI Translate",
+    "text": "OpenAI Translate"
+  },
+  "providers.openai.name": {
+    "en": "OpenAI Realtime",
+    "text": "OpenAI Realtime"
+  },
+  "providers.palabraai.authModeApp": {
+    "en": "App Client ID/Secret",
+    "text": "מזהה וסוד לקוח של האפליקציה"
+  },
+  "providers.palabraai.clientIdPlaceholder": {
+    "en": "Client ID",
+    "text": "מזהה לקוח"
+  },
+  "providers.palabraai.clientSecretPlaceholder": {
+    "en": "Client Secret",
+    "text": "סוד לקוח"
+  },
+  "providers.palabraai.name": {
+    "en": "Palabra AI",
+    "text": "Palabra AI"
+  },
+  "providers.qwen_livetranslate.name": {
+    "en": "Qwen LiveTranslate",
+    "text": "Qwen LiveTranslate"
+  },
+  "providers.soniox.name": {
+    "en": "Soniox",
+    "text": "Soniox"
+  },
+  "providers.volcengine_ast2.accessTokenPlaceholder": {
+    "en": "Access Token",
+    "text": "אסימון גישה"
+  },
+  "providers.volcengine_ast2.appIdPlaceholder": {
+    "en": "APP ID",
+    "text": "מזהה אפליקציה"
+  },
+  "providers.volcengine_ast2.authModeApp": {
+    "en": "App ID + Access Token",
+    "text": "מזהה אפליקציה + אסימון גישה"
+  },
+  "providers.volcengine_ast2.name": {
+    "en": "Doubao AST 2.0",
+    "text": "Doubao תרגום סימולטני 2.0"
+  },
+  "settings.glossaryAdd": {
+    "en": "Add a word…",
+    "text": "הוספת מילה…"
+  },
+  "settings.glossaryDelete": {
+    "en": "Delete entry",
+    "text": "מחיקת ערך"
+  },
+  "settings.glossaryFixOpen": {
+    "en": "Fix word",
+    "text": "תיקון מילה"
+  },
+  "settings.glossaryFixSave": {
+    "en": "Save to glossary",
+    "text": "שמירה במילון"
+  },
+  "settings.glossaryFixTo": {
+    "en": "Change to",
+    "text": "שינוי ל־"
+  },
+  "settings.glossaryFull": {
+    "en": "Glossary is full",
+    "text": "המילון מלא"
+  },
+  "settings.glossaryHeard": {
+    "en": "Misheard as",
+    "text": "זוהתה בטעות בתור"
+  },
+  "settings.glossaryOptional": {
+    "en": "Only if misheard",
+    "text": "רק אם זוהתה בטעות"
+  },
+  "settings.glossaryTitle": {
+    "en": "Personal glossary",
+    "text": "מילון אישי"
+  },
+  "settings.glossaryTooltip": {
+    "en": "Names and special words. Write each in the language it is spoken in. Where one has been misheard, add how on the right and it is put right from then on; some recognition models only follow that column. You can also select a misheard word in the conversation and correct it there.",
+    "text": "כאן מוסיפים שמות ומונחים מיוחדים, בשפה שבה אומרים אותם. אם מילה זוהתה לא נכון, מוסיפים מימין את הזיהוי השגוי, ומעתה היא תתוקן אוטומטית. חלק ממודלי הזיהוי נעזרים רק בעמודה הימנית. אפשר גם לסמן מילה שזוהתה לא נכון בשיחה ולתקן אותה שם."
+  },
+  "settings.glossaryTooltipLabel": {
+    "en": "About personal glossary",
+    "text": "על המילון האישי"
+  },
+  "settings.glossaryWritten": {
+    "en": "Word",
+    "text": "מילה"
+  },
+  "settings.transcriptKeywordsPlaceholder": {
+    "en": "Sokuji, Kizuna AI, PulseAudio",
+    "text": "Sokuji, Kizuna AI, PulseAudio"
+  },
+  "setup.credentials.accessKeyId": {
+    "en": "Access Key ID",
+    "text": "מזהה מפתח גישה"
+  },
+  "setup.credentials.accessToken": {
+    "en": "Access Token",
+    "text": "אסימון גישה"
+  },
+  "setup.credentials.apiSecret": {
+    "en": "API Secret",
+    "text": "מפתח סודי ל-API"
+  },
+  "setup.credentials.appId": {
+    "en": "App ID",
+    "text": "מזהה אפליקציה"
+  },
+  "setup.credentials.secretAccessKey": {
+    "en": "Secret Access Key",
+    "text": "מפתח גישה סודי"
+  },
+  "tour.steps.kotomimi-tips.coach": {
+    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
+    "text": "מדברים בעצמכם בשפה השנייה? הפעילו משוב דקדוקי בהגדרות. אפשר להפעיל גם את \"אני מדבר גם בשפה השנייה\" כדי לקבל תרגום לצד משוב דקדוקי פרטי."
+  },
+  "tour.steps.kotomimi-tips.content": {
+    "en": "Worth knowing before you start:",
+    "text": "כדאי לדעת לפני שמתחילים:"
+  },
+  "tour.steps.kotomimi-tips.share": {
+    "en": "Another device can use this computer's models: Settings → Provider → Share with other devices.",
+    "text": "גם מכשיר אחר יכול להשתמש במודלים של המחשב הזה: הגדרות → ספק → שיתוף עם מכשירים אחרים."
+  },
+  "tour.steps.kotomimi-tips.title": {
+    "en": "Three more things",
+    "text": "עוד שלושה דברים"
+  },
+  "tour.steps.kotomimi-tips.typed": {
+    "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
+    "text": "בתחילת השיחה מופיעה תיבת טקסט בתחתית: מקלידים משפט והוא מתורגם. Ctrl+K מעביר את הסמן ישר לתיבה."
+  },
+  "tour.steps.models.content_kotomimi": {
+    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
+    "text": "כאן מורידים מודלים: פותחים את \"ספריית המודלים\" בכרטיס של השלב. המודלים שמסומנים כ\"מומלץ\" הם אלה שהצליחו הכי טוב בבדיקות עם שיחות אמיתיות. הסמל שליד שם המודל מציג את תוצאות הבדיקה. בסיום ההורדה המודל מופעל אוטומטית."
+  },
+  "tour.steps.provider-settings.content_kotomimi": {
+    "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",
+    "text": "לכל שלב יש כאן כרטיס: זיהוי דיבור, תרגום ומשוב דקדוקי. בכל כרטיס בוחרים היכן השלב יפעל: במכשיר אחר ברשת המקומית, במודל דרך API או במחשב הזה. גם את המודל בוחרים באותו מקום. בהגדרות → ספק אפשר גם לשתף את המודלים של המחשב הזה עם מכשיר אחר."
+  },
+  "tour.steps.reading-aids.content": {
+    "en": "Help for reading the other language, switched here:",
+    "text": "כאן מפעילים ומכבים עזרים לקריאת השפה הזרה:"
+  },
+  "tour.steps.reading-aids.fonts": {
+    "en": "Fonts for each language are under Settings → Fonts.",
+    "text": "את הגופנים לכל שפה בוחרים בהגדרות → גופנים."
+  },
+  "tour.steps.reading-aids.furigana": {
+    "en": "Furigana — kana above Japanese kanji.",
+    "text": "פוריגנה: סימני קאנה מעל הקאנג'י ביפנית לציון ההגייה."
+  },
+  "tour.steps.reading-aids.pinyin": {
+    "en": "Pinyin — tone-marked pinyin above Chinese.",
+    "text": "פין-יין: תעתיק עם סימני טונים מעל הטקסט בסינית."
+  },
+  "tour.steps.reading-aids.romanization": {
+    "en": "Romanization — a line in Latin letters under Japanese, Korean, Russian and Ukrainian.",
+    "text": "תעתיק לטיני: שורת הגייה באותיות לטיניות מתחת ליפנית, קוריאנית, רוסית ואוקראינית."
+  },
+  "tour.steps.reading-aids.title": {
+    "en": "Reading aids",
+    "text": "עזרי קריאה"
+  },
+  "voiceLibrary.cloneVoiceRequired": {
+    "en": "This voice needs a clip before it can speak — open the voice list and add one.",
+    "text": "הקול הזה עדיין לא יכול לדבר. יש לפתוח את רשימת הקולות ולהוסיף קטע קול."
+  },
+  "voiceLibrary.filter.accent.african": {
+    "en": "African",
+    "text": "אפריקאי"
+  },
+  "voiceLibrary.filter.accent.american": {
+    "en": "American",
+    "text": "אמריקאי"
+  },
+  "voiceLibrary.filter.accent.arabic": {
+    "en": "Arabic",
+    "text": "ערבי"
+  },
+  "voiceLibrary.filter.accent.australian": {
+    "en": "Australian",
+    "text": "אוסטרלי"
+  },
+  "voiceLibrary.filter.accent.brazilian": {
+    "en": "Brazilian",
+    "text": "ברזילאי"
+  },
+  "voiceLibrary.filter.accent.british": {
+    "en": "British",
+    "text": "בריטי"
+  },
+  "voiceLibrary.filter.accent.chinese": {
+    "en": "Chinese",
+    "text": "סיני"
+  },
+  "voiceLibrary.filter.accent.french": {
+    "en": "French",
+    "text": "צרפתי"
+  },
+  "voiceLibrary.filter.accent.german": {
+    "en": "German",
+    "text": "גרמני"
+  },
+  "voiceLibrary.filter.accent.indian": {
+    "en": "Indian",
+    "text": "הודי"
+  },
+  "voiceLibrary.filter.accent.italian": {
+    "en": "Italian",
+    "text": "איטלקי"
+  },
+  "voiceLibrary.filter.accent.japanese": {
+    "en": "Japanese",
+    "text": "יפני"
+  },
+  "voiceLibrary.filter.accent.korean": {
+    "en": "Korean",
+    "text": "קוריאני"
+  },
+  "voiceLibrary.filter.accent.latin_american": {
+    "en": "Latin American",
+    "text": "לטינו-אמריקאי"
+  },
+  "voiceLibrary.filter.accent.portuguese": {
+    "en": "Portuguese",
+    "text": "פורטוגלי"
+  },
+  "voiceLibrary.filter.accent.slavic": {
+    "en": "Slavic",
+    "text": "סלאבי"
+  },
+  "voiceLibrary.filter.accent.southeast_asian": {
+    "en": "Southeast Asian",
+    "text": "דרום-מזרח אסייתי"
+  },
+  "voiceLibrary.filter.accent.spanish": {
+    "en": "Spanish",
+    "text": "ספרדי"
+  },
+  "voiceLibrary.filter.accentLabel": {
+    "en": "Accent",
+    "text": "מבטא"
+  },
+  "voiceLibrary.filter.age.child": {
+    "en": "Child",
+    "text": "ילדים"
+  },
+  "voiceLibrary.filter.age.middle_aged": {
+    "en": "Middle-aged",
+    "text": "גיל העמידה"
+  },
+  "voiceLibrary.filter.age.old": {
+    "en": "Mature",
+    "text": "מבוגרים"
+  },
+  "voiceLibrary.filter.age.teen": {
+    "en": "Teen",
+    "text": "נוער"
+  },
+  "voiceLibrary.filter.age.young": {
+    "en": "Young",
+    "text": "צעירים"
+  },
+  "voiceLibrary.filter.ageLabel": {
+    "en": "Age",
+    "text": "גיל"
+  },
+  "voiceLibrary.filter.anyAccent": {
+    "en": "Any accent",
+    "text": "כל המבטאים"
+  },
+  "voiceLibrary.filter.anyAge": {
+    "en": "Any age",
+    "text": "כל הגילים"
+  },
+  "voiceLibrary.filter.anyGender": {
+    "en": "Any gender",
+    "text": "כל המגדרים"
+  },
+  "voiceLibrary.filter.anyStyle": {
+    "en": "Any style",
+    "text": "כל הסגנונות"
+  },
+  "voiceLibrary.filter.anyUseCase": {
+    "en": "Any use case",
+    "text": "כל השימושים"
+  },
+  "voiceLibrary.filter.clear": {
+    "en": "Clear filters",
+    "text": "ניקוי הסינון"
+  },
+  "voiceLibrary.filter.count": {
+    "en": "{shown} of {total} voices",
+    "text": "{shown} מתוך {total} קולות"
+  },
+  "voiceLibrary.filter.empty": {
+    "en": "No voices match these filters.",
+    "text": "אין קולות שתואמים לסינון."
+  },
+  "voiceLibrary.filter.gender.female": {
+    "en": "Female",
+    "text": "קול נשי"
+  },
+  "voiceLibrary.filter.gender.male": {
+    "en": "Male",
+    "text": "קול גברי"
+  },
+  "voiceLibrary.filter.gender.neutral": {
+    "en": "Neutral",
+    "text": "ניטרלי"
+  },
+  "voiceLibrary.filter.genderLabel": {
+    "en": "Gender",
+    "text": "מגדר"
+  },
+  "voiceLibrary.filter.style.breathy": {
+    "en": "Breathy",
+    "text": "נשיפתי"
+  },
+  "voiceLibrary.filter.style.breezy": {
+    "en": "Breezy",
+    "text": "קליל"
+  },
+  "voiceLibrary.filter.style.bright": {
+    "en": "Bright",
+    "text": "צלול"
+  },
+  "voiceLibrary.filter.style.calm": {
+    "en": "Calm",
+    "text": "רגוע"
+  },
+  "voiceLibrary.filter.style.casual": {
+    "en": "Casual",
+    "text": "נינוח"
+  },
+  "voiceLibrary.filter.style.clear": {
+    "en": "Clear",
+    "text": "ברור"
+  },
+  "voiceLibrary.filter.style.confident": {
+    "en": "Confident",
+    "text": "בטוח בעצמו"
+  },
+  "voiceLibrary.filter.style.deep": {
+    "en": "Deep",
+    "text": "עמוק"
+  },
+  "voiceLibrary.filter.style.dramatic": {
+    "en": "Dramatic",
+    "text": "דרמטי"
+  },
+  "voiceLibrary.filter.style.easy_going": {
+    "en": "Easy-going",
+    "text": "זורם"
+  },
+  "voiceLibrary.filter.style.energetic": {
+    "en": "Energetic",
+    "text": "נמרץ"
+  },
+  "voiceLibrary.filter.style.even": {
+    "en": "Even",
+    "text": "יציב"
+  },
+  "voiceLibrary.filter.style.excitable": {
+    "en": "Excitable",
+    "text": "נלהב"
+  },
+  "voiceLibrary.filter.style.expressive": {
+    "en": "Expressive",
+    "text": "מלא הבעה"
+  },
+  "voiceLibrary.filter.style.firm": {
+    "en": "Firm",
+    "text": "נחוש"
+  },
+  "voiceLibrary.filter.style.formal": {
+    "en": "Formal",
+    "text": "רשמי"
+  },
+  "voiceLibrary.filter.style.forward": {
+    "en": "Forward",
+    "text": "ישיר"
+  },
+  "voiceLibrary.filter.style.friendly": {
+    "en": "Friendly",
+    "text": "ידידותי"
+  },
+  "voiceLibrary.filter.style.gentle": {
+    "en": "Gentle",
+    "text": "עדין"
+  },
+  "voiceLibrary.filter.style.gravelly": {
+    "en": "Gravelly",
+    "text": "מחוספס"
+  },
+  "voiceLibrary.filter.style.informative": {
+    "en": "Informative",
+    "text": "הסברי"
+  },
+  "voiceLibrary.filter.style.knowledgeable": {
+    "en": "Knowledgeable",
+    "text": "ידעני"
+  },
+  "voiceLibrary.filter.style.lively": {
+    "en": "Lively",
+    "text": "תוסס"
+  },
+  "voiceLibrary.filter.style.mature": {
+    "en": "Mature",
+    "text": "בוגר"
+  },
+  "voiceLibrary.filter.style.neutral": {
+    "en": "Neutral",
+    "text": "ניטרלי"
+  },
+  "voiceLibrary.filter.style.playful": {
+    "en": "Playful",
+    "text": "שובב"
+  },
+  "voiceLibrary.filter.style.raspy": {
+    "en": "Raspy",
+    "text": "צרוד"
+  },
+  "voiceLibrary.filter.style.smooth": {
+    "en": "Smooth",
+    "text": "שוטף"
+  },
+  "voiceLibrary.filter.style.soft": {
+    "en": "Soft",
+    "text": "רך"
+  },
+  "voiceLibrary.filter.style.upbeat": {
+    "en": "Upbeat",
+    "text": "עליז"
+  },
+  "voiceLibrary.filter.style.warm": {
+    "en": "Warm",
+    "text": "חם"
+  },
+  "voiceLibrary.filter.style.youthful": {
+    "en": "Youthful",
+    "text": "צעיר"
+  },
+  "voiceLibrary.filter.styleLabel": {
+    "en": "Style",
+    "text": "סגנון"
+  },
+  "voiceLibrary.filter.useCase.conversational": {
+    "en": "Conversation",
+    "text": "שיחה"
+  },
+  "voiceLibrary.filter.useCase.educational": {
+    "en": "Teaching",
+    "text": "הסברים"
+  },
+  "voiceLibrary.filter.useCase.entertainment": {
+    "en": "Entertainment",
+    "text": "בידור"
+  },
+  "voiceLibrary.filter.useCase.narration": {
+    "en": "Narration",
+    "text": "קריינות"
+  },
+  "voiceLibrary.filter.useCase.social_media": {
+    "en": "Social media",
+    "text": "רשתות חברתיות"
+  },
+  "voiceLibrary.filter.useCaseLabel": {
+    "en": "Use case",
+    "text": "שימוש"
+  }
+}

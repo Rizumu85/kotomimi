@@ -1,0 +1,2146 @@
+{
+  "audioSystem.installCommand": {
+    "en": "sudo apt install pulseaudio-utils",
+    "text": "sudo apt install pulseaudio-utils"
+  },
+  "auth.emailPlaceholder": {
+    "en": "your@email.com",
+    "text": "your@email.com"
+  },
+  "captionShare.kinds.wifi": {
+    "en": "Wi‑Fi",
+    "text": "Wi‑Fi"
+  },
+  "engine.status.devVenv": {
+    "en": "dev venv",
+    "text": "डेवलपमेंट वर्चुअल एनवायरनमेंट"
+  },
+  "engine.status.native": {
+    "en": "native {{version}}",
+    "text": "नेटिव {{version}}"
+  },
+  "fork.aids.furigana": {
+    "en": "Furigana",
+    "text": "फ़ुरिगाना"
+  },
+  "fork.aids.highlight": {
+    "en": "Highlight new",
+    "text": "नया पाठ हाइलाइट करें"
+  },
+  "fork.aids.italic": {
+    "en": "Italic source",
+    "text": "मूल पाठ तिरछा"
+  },
+  "fork.aids.pinyin": {
+    "en": "Pinyin",
+    "text": "पिनयिन"
+  },
+  "fork.aids.readings": {
+    "en": "Readings",
+    "text": "उच्चारण"
+  },
+  "fork.aids.roman": {
+    "en": "Romanization",
+    "text": "रोमन लिप्यंतरण"
+  },
+  "fork.aids.text": {
+    "en": "Text",
+    "text": "पाठ"
+  },
+  "fork.audio.echoAction": {
+    "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
+    "text": "हेडफ़ोन लगाने से आवाज़ का यह चक्र रुक जाएगा। या सेटिंग्स → माइक्रोफ़ोन में माइक चालू होने का आवाज़ स्तर बढ़ाएँ।"
+  },
+  "fork.audio.gate": {
+    "en": "Mic activation threshold",
+    "text": "माइक चालू होने का आवाज़ स्तर"
+  },
+  "fork.audio.gateHint": {
+    "en": "Press the microphone, speak, and set the mark under where the bar reaches — and above where it sits while only your speakers are heard.",
+    "text": "माइक के आइकन पर क्लिक करके कुछ बोलें। निशान को बोलते समय पट्टी जहाँ तक पहुँचती है उससे नीचे, और सिर्फ़ स्पीकर की आवाज़ आने पर जहाँ रहती है उससे ऊपर रखें।"
+  },
+  "fork.audio.gateOff": {
+    "en": "Off",
+    "text": "बंद"
+  },
+  "fork.audio.gateQuiet": {
+    "en": "Nothing from the microphone yet.",
+    "text": "अभी माइक से कोई आवाज़ नहीं आ रही है।"
+  },
+  "fork.audio.gateTest": {
+    "en": "Test the microphone: the bar shows its level",
+    "text": "माइक जाँचें: पट्टी मौजूदा आवाज़ स्तर दिखाती है"
+  },
+  "fork.audio.gateTestStop": {
+    "en": "Stop the test",
+    "text": "जाँच रोकें"
+  },
+  "fork.audio.gateTooltip": {
+    "en": "Sound quieter than this is heard as silence — the other side's voice from your speakers, the keyboard, the room — so it is neither translated nor checked. The microphone is heard about 0.2 s later while this is on. Off: everything is heard.",
+    "text": "इस स्तर से धीमी आवाज़ को ख़ामोशी माना जाता है, जैसे स्पीकर से आती सामने वाले की आवाज़, कीबोर्ड की आवाज़ या कमरे का शोर। इसे न अनुवाद के लिए भेजा जाता है, न व्याकरण पर सुझाव के लिए। इसे चालू रखने पर माइक की आवाज़ में लगभग 0.2 सेकंड की देरी होती है। बंद होने पर सारी आवाज़ भेजी जाती है।"
+  },
+  "fork.audio.vbcableInstall": {
+    "en": "Install VB-CABLE",
+    "text": "VB-CABLE इंस्टॉल करें"
+  },
+  "fork.audio.vbcableInstalling": {
+    "en": "Downloading… this can take a minute",
+    "text": "डाउनलोड हो रहा है, थोड़ा समय लग सकता है…"
+  },
+  "fork.audio.vbcableMissing": {
+    "en": "The VB-CABLE virtual audio driver is not installed, so a spoken translation cannot be sent into a meeting. Subtitles do not need it.",
+    "text": "VB-CABLE वर्चुअल ऑडियो ड्राइवर इंस्टॉल नहीं है, इसलिए अनुवाद की आवाज़ मीटिंग ऐप में नहीं भेजी जा सकती। सिर्फ़ सबटाइटल देखने के लिए इसकी ज़रूरत नहीं है।"
+  },
+  "fork.autostart.note": {
+    "en": "Kotomimi waits in the background after you sign in, with an icon in the notification area, and loads the models once ahead of time so the first session does not wait for it.",
+    "text": "साइन इन करने के बाद Kotomimi बैकग्राउंड में तैयार रहता है और सूचना क्षेत्र में उसका आइकन दिखता है। मॉडल पहले ही एक बार लोड हो जाते हैं, ताकि पहला सत्र शुरू करते समय इंतज़ार न करना पड़े।"
+  },
+  "fork.autostart.title": {
+    "en": "Startup",
+    "text": "स्टार्टअप"
+  },
+  "fork.autostart.toggle": {
+    "en": "Start in the background when I sign in to Windows",
+    "text": "Windows में साइन इन करते ही बैकग्राउंड में शुरू करें"
+  },
+  "fork.custom.add": {
+    "en": "Add",
+    "text": "जोड़ें"
+  },
+  "fork.custom.added": {
+    "en": "Added {{name}} ({{size}} MB). Download it in the model library.",
+    "text": "{{name}} ({{size}} MB) जोड़ दिया गया। इसे मॉडल लाइब्रेरी से डाउनलोड करें।"
+  },
+  "fork.custom.adding": {
+    "en": "Looking…",
+    "text": "खोज रहे हैं…"
+  },
+  "fork.custom.anyLanguage": {
+    "en": "Every language",
+    "text": "कई भाषाएँ"
+  },
+  "fork.custom.downloaded": {
+    "en": "downloaded",
+    "text": "डाउनलोड हो गया"
+  },
+  "fork.custom.error_bad_repo": {
+    "en": "That is not a repository id. It looks like owner/name.",
+    "text": "यह रिपॉज़िटरी का नाम नहीं है। इसका रूप लेखक/नाम होना चाहिए।"
+  },
+  "fork.custom.error_exists": {
+    "en": "This model is already added.",
+    "text": "यह मॉडल पहले से जुड़ा हुआ है।"
+  },
+  "fork.custom.error_not_found": {
+    "en": "No public repository by that name.",
+    "text": "इस नाम की कोई सार्वजनिक रिपॉज़िटरी नहीं मिली।"
+  },
+  "fork.custom.error_not_whisper": {
+    "en": "This repository is not a Whisper model in the ONNX layout. {{detail}}",
+    "text": "इस रिपॉज़िटरी में ONNX फ़ॉर्मैट का Whisper मॉडल नहीं है। {{detail}}"
+  },
+  "fork.custom.error_unreachable": {
+    "en": "Could not reach Hugging Face: {{detail}}",
+    "text": "Hugging Face से कनेक्ट नहीं हो सका: {{detail}}"
+  },
+  "fork.custom.intro": {
+    "en": "For a Whisper model the library does not list, such as one fine-tuned for your language. Give its Hugging Face repository id (most onnx-community/… and Xenova/… Whisper repositories work); it needs a graphics card.",
+    "text": "लाइब्रेरी में न मिले Whisper मॉडल के लिए, जैसे आपकी भाषा के लिए खास तौर पर ढाला गया मॉडल। उसकी Hugging Face रिपॉज़िटरी का नाम भरें। onnx-community/… और Xenova/… की ज़्यादातर Whisper रिपॉज़िटरी काम करती हैं। ग्राफ़िक्स कार्ड ज़रूरी है।"
+  },
+  "fork.custom.language": {
+    "en": "The language it hears",
+    "text": "पहचानी जाने वाली भाषा"
+  },
+  "fork.custom.notDownloaded": {
+    "en": "not downloaded",
+    "text": "डाउनलोड नहीं हुआ"
+  },
+  "fork.custom.remove": {
+    "en": "Remove {{name}}",
+    "text": "{{name}} हटाएँ"
+  },
+  "fork.custom.repo": {
+    "en": "Repository id",
+    "text": "रिपॉज़िटरी का नाम"
+  },
+  "fork.custom.title": {
+    "en": "Add a Whisper model from Hugging Face",
+    "text": "Hugging Face से Whisper मॉडल जोड़ें"
+  },
+  "fork.echoCancellationApp": {
+    "en": "Kotomimi only",
+    "text": "सिर्फ़ Kotomimi"
+  },
+  "fork.echoCancellationAppTooltip": {
+    "en": "Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "सिर्फ़ Kotomimi: केवल Kotomimi की अपनी अनुवादित आवाज़ हटाता है। माइक्रोफ़ोन के तौर पर वर्चुअल साउंड कार्ड (VB-Cable, BlackHole आदि) इस्तेमाल करते समय यह विकल्प चुनें।"
+  },
+  "fork.find.again": {
+    "en": "Search again",
+    "text": "फिर से खोजें"
+  },
+  "fork.find.kindKotomimi": {
+    "en": "Kotomimi",
+    "text": "Kotomimi साझाकरण"
+  },
+  "fork.find.kindPhone": {
+    "en": "Phone · speech recognition",
+    "text": "फ़ोन · आवाज़ की पहचान"
+  },
+  "fork.find.kindPhoneLends": {
+    "en": "Phone · {{what}}",
+    "text": "फ़ोन · {{what}}"
+  },
+  "fork.find.kindServer": {
+    "en": "Model server",
+    "text": "मॉडल सर्वर"
+  },
+  "fork.find.lendsAsr": {
+    "en": "speech recognition",
+    "text": "आवाज़ की पहचान"
+  },
+  "fork.find.lendsCoach": {
+    "en": "grammar feedback",
+    "text": "व्याकरण पर सुझाव"
+  },
+  "fork.find.lendsTranslate": {
+    "en": "translation",
+    "text": "अनुवाद"
+  },
+  "fork.find.manual": {
+    "en": "Or type its address",
+    "text": "या पता खुद भरें"
+  },
+  "fork.find.models": {
+    "en": "{{count}} model(s)",
+    "text": "{{count}} मॉडल"
+  },
+  "fork.find.needsKey": {
+    "en": "asks for an access key",
+    "text": "ऐक्सेस कुंजी चाहिए"
+  },
+  "fork.find.none": {
+    "en": "Nothing found. Check that the other device is on, is on the same Wi-Fi or router as this one, and has \"Share this computer's models\" turned on in its Kotomimi. You can also type its address below.",
+    "text": "कोई डिवाइस नहीं मिला। देखें कि दूसरा डिवाइस चालू है, इसी Wi-Fi या राउटर से जुड़ा है और उसके Kotomimi में “इस कंप्यूटर के मॉडल साझा करें” चालू है। आप नीचे उसका पता भी लिख सकते हैं।"
+  },
+  "fork.find.productHere": {
+    "en": "{{product}} on this computer",
+    "text": "इस कंप्यूटर पर {{product}}"
+  },
+  "fork.find.search": {
+    "en": "Search my network for devices",
+    "text": "स्थानीय नेटवर्क पर डिवाइस खोजें"
+  },
+  "fork.find.searching": {
+    "en": "Looking for devices on your network…",
+    "text": "स्थानीय नेटवर्क पर डिवाइस खोज रहे हैं…"
+  },
+  "fork.find.thisComputer": {
+    "en": "On this computer",
+    "text": "इस कंप्यूटर का सर्वर"
+  },
+  "fork.find.title": {
+    "en": "Found on your network",
+    "text": "स्थानीय नेटवर्क पर मिले डिवाइस"
+  },
+  "fork.find.use": {
+    "en": "Use {{name}}",
+    "text": "{{name}} इस्तेमाल करें"
+  },
+  "fork.fonts.add": {
+    "en": "Add a language…",
+    "text": "भाषा जोड़ें…"
+  },
+  "fork.fonts.default": {
+    "en": "App default",
+    "text": "ऐप का डिफ़ॉल्ट"
+  },
+  "fork.fonts.languages": {
+    "en": "Conversation text, by language",
+    "text": "बातचीत का टेक्स्ट, भाषा के अनुसार"
+  },
+  "fork.fonts.latin": {
+    "en": "Latin letters and digits",
+    "text": "लैटिन अक्षर और अंक"
+  },
+  "fork.fonts.latinHint": {
+    "en": "English letters and digits in the conversation",
+    "text": "बातचीत में अंग्रेज़ी अक्षर और अंक"
+  },
+  "fork.fonts.loading": {
+    "en": "Reading the installed fonts…",
+    "text": "इंस्टॉल किए गए फ़ॉन्ट पढ़ रहे हैं…"
+  },
+  "fork.fonts.none": {
+    "en": "No font matches",
+    "text": "कोई मेल खाता फ़ॉन्ट नहीं मिला"
+  },
+  "fork.fonts.others": {
+    "en": "Other fonts (may lack this script)",
+    "text": "अन्य फ़ॉन्ट (यह लिपि शायद न हो)"
+  },
+  "fork.fonts.pinyin": {
+    "en": "Pinyin above the text",
+    "text": "टेक्स्ट के ऊपर पिनयिन"
+  },
+  "fork.fonts.reading": {
+    "en": "Readings above the text",
+    "text": "टेक्स्ट के ऊपर फ़ुरिगाना"
+  },
+  "fork.fonts.remove": {
+    "en": "Reset {{language}}",
+    "text": "{{language}} का डिफ़ॉल्ट फ़ॉन्ट बहाल करें"
+  },
+  "fork.fonts.roman": {
+    "en": "Romanization",
+    "text": "रोमन लिप्यंतरण"
+  },
+  "fork.fonts.romanHint": {
+    "en": "The readings under Japanese, Korean, Russian and Ukrainian",
+    "text": "जापानी, कोरियाई, रूसी और यूक्रेनी के नीचे दिया उच्चारण"
+  },
+  "fork.fonts.search": {
+    "en": "Search fonts",
+    "text": "फ़ॉन्ट खोजें"
+  },
+  "fork.fonts.text": {
+    "en": "Text",
+    "text": "मुख्य टेक्स्ट"
+  },
+  "fork.fonts.title": {
+    "en": "Fonts",
+    "text": "फ़ॉन्ट"
+  },
+  "fork.fonts.tooltip": {
+    "en": "Fonts installed on this computer. Characters a font lacks are shown in the app's own.",
+    "text": "इस कंप्यूटर पर इंस्टॉल किए गए फ़ॉन्ट इस्तेमाल करें। फ़ॉन्ट में न मौजूद अक्षर ऐप के डिफ़ॉल्ट फ़ॉन्ट में दिखेंगे।"
+  },
+  "fork.fonts.ui": {
+    "en": "Interface",
+    "text": "इंटरफ़ेस"
+  },
+  "fork.fonts.uiHint": {
+    "en": "Menus, settings and buttons",
+    "text": "मेन्यू, सेटिंग और बटन"
+  },
+  "fork.furigana": {
+    "en": "Furigana over kanji (Japanese)",
+    "text": "कांजी के ऊपर फ़ुरिगाना दिखाएँ (जापानी)"
+  },
+  "fork.help.issues": {
+    "en": "Report a problem",
+    "text": "समस्या बताएँ"
+  },
+  "fork.help.issuesTooltip": {
+    "en": "Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page.",
+    "text": "Kotomimi, Sokuji का स्वतंत्र फ़ोर्क है। इस ऐप की समस्याएँ इसके अपने GitHub पेज पर बताएँ।"
+  },
+  "fork.lan.copied": {
+    "en": "Copied",
+    "text": "कॉपी हो गया"
+  },
+  "fork.lan.copy": {
+    "en": "Copy",
+    "text": "कॉपी करें"
+  },
+  "fork.lan.direction": {
+    "en": "Which direction to show models for",
+    "text": "किस दिशा के मॉडल दिखाएँ"
+  },
+  "fork.lan.enable": {
+    "en": "Share this computer's models",
+    "text": "इस कंप्यूटर के मॉडल साझा करें"
+  },
+  "fork.lan.failed": {
+    "en": "Sharing could not start: {{message}}",
+    "text": "साझा करना शुरू नहीं हो सका: {{message}}"
+  },
+  "fork.lan.firewall": {
+    "en": "The first time, your system's firewall may ask whether to allow Kotomimi on the network: allow it for private networks.",
+    "text": "पहली बार चालू करने पर सिस्टम का फ़ायरवॉल पूछ सकता है कि Kotomimi को नेटवर्क इस्तेमाल करने की अनुमति दें या नहीं। इसे निजी नेटवर्क पर अनुमति दें।"
+  },
+  "fork.lan.firewallAllow": {
+    "en": "Allow",
+    "text": "अनुमति दें"
+  },
+  "fork.lan.firewallBlocked": {
+    "en": "Windows Firewall is keeping other devices out",
+    "text": "Windows फ़ायरवॉल अन्य डिवाइस को जुड़ने से रोक रहा है"
+  },
+  "fork.lan.firewallDeclined": {
+    "en": "Still blocked: Windows was not told yes.",
+    "text": "अभी भी रोक लगी है: Windows में अनुमति की पुष्टि नहीं हुई।"
+  },
+  "fork.lan.firewallPrivate": {
+    "en": "Allow opens this port to devices on your network. Windows will ask you to confirm.",
+    "text": "\"अनुमति दें\" पर क्लिक करने से लोकल नेटवर्क के डिवाइस इस पोर्ट से जुड़ सकेंगे। Windows पहले आपकी पुष्टि माँगेगा।"
+  },
+  "fork.lan.firewallPublic": {
+    "en": "Windows treats this network as public. Allow opens this port to devices on this same network only. Windows will ask you to confirm.",
+    "text": "Windows इस नेटवर्क को सार्वजनिक मानता है। \"अनुमति दें\" पर क्लिक करने से यह पोर्ट सिर्फ़ इसी नेटवर्क के डिवाइस के लिए खुलेगा। Windows पहले आपकी पुष्टि माँगेगा।"
+  },
+  "fork.lan.firewallWaiting": {
+    "en": "Waiting for Windows…",
+    "text": "Windows का इंतज़ार है…"
+  },
+  "fork.lan.hideLibrary": {
+    "en": "Hide the model library",
+    "text": "मॉडल लाइब्रेरी छिपाएँ"
+  },
+  "fork.lan.key": {
+    "en": "Access key",
+    "text": "ऐक्सेस कुंजी"
+  },
+  "fork.lan.keyPlaceholder": {
+    "en": "Blank: anyone on the network may connect",
+    "text": "खाली छोड़ें: लोकल नेटवर्क का कोई भी डिवाइस जुड़ सकता है"
+  },
+  "fork.lan.models": {
+    "en": "Models shared · {{count}}",
+    "text": "साझा मॉडल · {{count}}"
+  },
+  "fork.lan.noNetwork": {
+    "en": "This computer is on no network.",
+    "text": "यह कंप्यूटर अभी किसी नेटवर्क से जुड़ा नहीं है।"
+  },
+  "fork.lan.noRecognizer": {
+    "en": "No speech recognition model downloaded yet",
+    "text": "अभी आवाज़ की पहचान का कोई मॉडल डाउनलोड नहीं हुआ है"
+  },
+  "fork.lan.on": {
+    "en": "Sharing — no device connected yet",
+    "text": "साझा किया जा रहा है, अभी कोई डिवाइस जुड़ा नहीं है"
+  },
+  "fork.lan.onWithClients": {
+    "en": "Sharing — {{count}} connection(s) in use",
+    "text": "साझा किया जा रहा है, {{count}} कनेक्शन इस्तेमाल में हैं"
+  },
+  "fork.lan.options": {
+    "en": "Options",
+    "text": "विकल्प"
+  },
+  "fork.lan.otherAddresses": {
+    "en": "This computer's other addresses",
+    "text": "इस कंप्यूटर के अन्य पते"
+  },
+  "fork.lan.port": {
+    "en": "Port",
+    "text": "पोर्ट"
+  },
+  "fork.lan.portInUse": {
+    "en": "Port {{port}} is taken by another program. Choose another under Options.",
+    "text": "पोर्ट {{port}} किसी दूसरे प्रोग्राम के इस्तेमाल में है। \"विकल्प\" में दूसरा पोर्ट चुनें।"
+  },
+  "fork.lan.serving": {
+    "en": "Sharing",
+    "text": "साझा किया जा रहा है"
+  },
+  "fork.lan.servingClients": {
+    "en": "Sharing · {{count}} in use",
+    "text": "साझा किया जा रहा है · {{count}} कनेक्शन इस्तेमाल में"
+  },
+  "fork.lan.servingTip": {
+    "en": "This computer is lending its models to other devices. The languages and the choice of model are set on those devices, not here.",
+    "text": "यह कंप्यूटर अपने मॉडल अन्य डिवाइस को इस्तेमाल करने दे रहा है। भाषा और मॉडल उन डिवाइस पर चुने जाते हैं, यहाँ नहीं।"
+  },
+  "fork.lan.sessionIdle": {
+    "en": "The other device ended the session: nobody had spoken for a long while, and it let its models go. Start again to continue.",
+    "text": "दूसरे डिवाइस ने यह सत्र समाप्त कर दिया: काफ़ी देर तक किसी के न बोलने से उसने मॉडल मेमोरी से हटा दिए। जारी रखने के लिए फिर से \"शुरू करें\" पर क्लिक करें।"
+  },
+  "fork.lan.showLibrary": {
+    "en": "Download or manage models",
+    "text": "मॉडल डाउनलोड या प्रबंधित करें"
+  },
+  "fork.lan.starting": {
+    "en": "Starting…",
+    "text": "शुरू हो रहा है…"
+  },
+  "fork.lan.title": {
+    "en": "Share with other devices",
+    "text": "अन्य डिवाइस से साझा करें"
+  },
+  "fork.lan.tooltip": {
+    "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
+    "text": "इस कंप्यूटर के मॉडल लोकल नेटवर्क के अन्य डिवाइस को इस्तेमाल करने दें। दूसरे डिवाइस पर Kotomimi में \"दूसरा डिवाइस\" के तहत खोजने पर यह कंप्यूटर मिल जाएगा। मॉडल और भाषा वहीं चुने जाते हैं। साझा करने के लिए Kotomimi खुला रहना चाहिए।"
+  },
+  "fork.languageMenu.detect": {
+    "en": "Auto-detect",
+    "text": "अपने आप पहचानें"
+  },
+  "fork.languageMenu.detectUnavailable": {
+    "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
+    "text": "मौजूदा आवाज़ पहचान भाषाओं को अपने आप नहीं पहचान सकती। इसके लिए Qwen3-ASR 1.7B GGUF या API मॉडल चाहिए।"
+  },
+  "fork.languageMenu.mine": {
+    "en": "My language",
+    "text": "मेरी भाषा"
+  },
+  "fork.languageMenu.mostly": {
+    "en": "Translate into what they mostly speak",
+    "text": "सामने वाले की मुख्य भाषा में अनुवाद करें"
+  },
+  "fork.languageMenu.none": {
+    "en": "No language by that name",
+    "text": "इस नाम की कोई भाषा नहीं मिली"
+  },
+  "fork.languageMenu.pin": {
+    "en": "Pin {{name}} to the top",
+    "text": "{{name}} को सबसे ऊपर रखें"
+  },
+  "fork.languageMenu.pinShort": {
+    "en": "Pin to the top",
+    "text": "सबसे ऊपर रखें"
+  },
+  "fork.languageMenu.search": {
+    "en": "Type to find a language",
+    "text": "भाषा खोजने के लिए लिखें"
+  },
+  "fork.languageMenu.speakBoth": {
+    "en": "I speak {{language}} too",
+    "text": "मुझे {{language}} भी आती है"
+  },
+  "fork.languageMenu.speakBothHelp": {
+    "en": "When you speak {{mine}}, it is translated into {{language}}; when you speak {{language}}, into {{mine}}. Recognition tells the two apart.",
+    "text": "आपकी {{mine}} में कही बात का अनुवाद {{language}} में होगा और {{language}} में कही बात का {{mine}} में। आवाज़ पहचान अपने आप दोनों भाषाओं में फ़र्क कर लेगी।"
+  },
+  "fork.languageMenu.speakBothUnavailable": {
+    "en": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
+    "text": "चुनी गई आवाज़ पहचान {{mine}} और {{language}} में फ़र्क नहीं कर सकती। दोनों भाषाएँ इंस्टॉल करके Apple Speech की जोड़ी चुनें, या ऐसी आवाज़ पहचान चुनें जो दोनों भाषाएँ पहचान सके।"
+  },
+  "fork.languageMenu.theirs": {
+    "en": "Their language",
+    "text": "सामने वाले की भाषा"
+  },
+  "fork.languageMenu.unpin": {
+    "en": "Unpin {{name}}",
+    "text": "{{name}} को सबसे ऊपर से हटाएँ"
+  },
+  "fork.languageMenu.unpinShort": {
+    "en": "Unpin",
+    "text": "ऊपर से हटाएँ"
+  },
+  "fork.pinyin": {
+    "en": "Pinyin over Chinese",
+    "text": "चीनी के ऊपर पिनयिन दिखाएँ"
+  },
+  "fork.romanization": {
+    "en": "Romanization",
+    "text": "रोमन लिप्यंतरण दिखाएँ"
+  },
+  "fork.sourceItalic": {
+    "en": "Source text in italics",
+    "text": "मूल पाठ तिरछे अक्षरों में"
+  },
+  "fork.speechDetection.title": {
+    "en": "Speech detection",
+    "text": "बोली की पहचान"
+  },
+  "fork.statusLine.checking": {
+    "en": "Getting ready. You can start in a moment.",
+    "text": "तैयारी हो रही है। थोड़ी देर में शुरू कर सकेंगे।"
+  },
+  "fork.subtitle.align": {
+    "en": "Alignment",
+    "text": "संरेखण"
+  },
+  "fork.subtitle.alignCenter": {
+    "en": "Centre",
+    "text": "बीच में"
+  },
+  "fork.subtitle.alignLeft": {
+    "en": "Left",
+    "text": "बाएँ"
+  },
+  "fork.subtitle.back": {
+    "en": "Back to the main window",
+    "text": "मुख्य विंडो पर लौटें"
+  },
+  "fork.subtitle.backdrop": {
+    "en": "Panel",
+    "text": "पृष्ठभूमि का गहरापन"
+  },
+  "fork.subtitle.lanesView": {
+    "en": "Subtitle view",
+    "text": "सबटाइटल व्यू"
+  },
+  "fork.subtitle.listView": {
+    "en": "List view",
+    "text": "सूची व्यू"
+  },
+  "fork.subtitle.look": {
+    "en": "Look",
+    "text": "शैली"
+  },
+  "fork.subtitle.lookDark": {
+    "en": "Dark text",
+    "text": "गहरे अक्षर, सफ़ेद रूपरेखा"
+  },
+  "fork.subtitle.lookLight": {
+    "en": "Light text",
+    "text": "हल्के अक्षर, काली रूपरेखा"
+  },
+  "fork.subtitle.lookPanel": {
+    "en": "Dark panel",
+    "text": "गहरी पृष्ठभूमि"
+  },
+  "fork.subtitle.lookSample": {
+    "en": "Aa",
+    "text": "सबटाइटल"
+  },
+  "fork.subtitle.lookSoft": {
+    "en": "Faint panel",
+    "text": "हल्की पृष्ठभूमि, मुलायम छाया"
+  },
+  "fork.subtitle.moreColors": {
+    "en": "More colours (source text, panel)",
+    "text": "और रंग (मूल टेक्स्ट, पृष्ठभूमि)"
+  },
+  "fork.subtitle.off": {
+    "en": "Off",
+    "text": "बंद"
+  },
+  "fork.subtitle.outline": {
+    "en": "Outline",
+    "text": "रूपरेखा की मोटाई"
+  },
+  "fork.subtitle.shadow": {
+    "en": "Shadow",
+    "text": "छाया की तीव्रता"
+  },
+  "fork.subtitle.through": {
+    "en": "Click-through: the mouse passes through the captions",
+    "text": "क्लिक आर-पार: सबटाइटल पर क्लिक नहीं होगा, माउस की सभी क्रियाएँ नीचे की विंडो पर लागू होंगी"
+  },
+  "fork.subtitle.throughOff": {
+    "en": "Stop click-through",
+    "text": "क्लिक आर-पार बंद करें"
+  },
+  "fork.subtitle.type": {
+    "en": "Type to translate (Ctrl+K)",
+    "text": "लिखकर अनुवाद करें (Ctrl+K)"
+  },
+  "fork.subtitle.typePlaceholder": {
+    "en": "What you want to say — Enter translates",
+    "text": "अपनी बात लिखें, अनुवाद के लिए Enter दबाएँ"
+  },
+  "fork.vrchat.chatbox": {
+    "en": "Above my avatar",
+    "text": "अवतार के सिर के ऊपर"
+  },
+  "fork.vrchat.chatboxHearBoth": {
+    "en": "Switch to Both",
+    "text": "दोनों पर बदलें"
+  },
+  "fork.vrchat.chatboxOff": {
+    "en": "Off",
+    "text": "बंद"
+  },
+  "fork.vrchat.chatboxSourceFirst": {
+    "en": "Original on top",
+    "text": "मूल पाठ ऊपर"
+  },
+  "fork.vrchat.chatboxTranslation": {
+    "en": "Translation",
+    "text": "अनुवाद"
+  },
+  "fork.vrchat.chatboxTranslationFirst": {
+    "en": "Translation on top",
+    "text": "अनुवाद ऊपर"
+  },
+  "fork.vrchat.chatboxUnheard": {
+    "en": "Only the other side is translated now: what you say won't show above your avatar.",
+    "text": "अभी सिर्फ़ सामने वाले की बात का अनुवाद हो रहा है। आपकी बात अवतार के सिर के ऊपर नहीं दिखेगी।"
+  },
+  "fork.vrchat.connected": {
+    "en": "Connected",
+    "text": "जुड़ा है"
+  },
+  "fork.vrchat.end": {
+    "en": "End",
+    "text": "समाप्त करें"
+  },
+  "fork.vrchat.help": {
+    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
+    "text": "इस कंप्यूटर पर VRChat के साथ काम करता है। VRChat में म्यूट होने पर Kotomimi आपकी बोली नहीं पहचानता। आपका अनुवाद अवतार के सिर के ऊपर दिख सकता है, जिसे दूसरे खिलाड़ी पढ़ सकते हैं। दुनिया में वीडियो चलने पर: अगर उसकी आवाज़ किसी दिशा से नहीं आती, तो उसे खिलाड़ियों की आवाज़ों से अलग किया जाता है। अगर किसी दिशा से आती है, तो सामने वाले की बोली छोटे हिस्सों में ली जाती है।"
+  },
+  "fork.vrchat.mutedNotHeard": {
+    "en": "Muted in VRChat: what you say is not recognized.",
+    "text": "VRChat में म्यूट है। आपकी कही बातें पहचानी नहीं जाएँगी।"
+  },
+  "fork.vrchat.mutedThere": {
+    "en": "Muted in VRChat",
+    "text": "VRChat में म्यूट है"
+  },
+  "fork.vrchat.muteGate": {
+    "en": "Don't hear me while muted in VRChat",
+    "text": "VRChat में म्यूट होने पर मेरी बोली न पहचानें"
+  },
+  "fork.vrchat.notConnected": {
+    "en": "Not connected",
+    "text": "जुड़ा नहीं है"
+  },
+  "fork.vrchat.onVideo": {
+    "en": "When a world plays a video",
+    "text": "जब वर्ल्ड में वीडियो चले"
+  },
+  "fork.vrchat.pausedOn": {
+    "en": "Not translating",
+    "text": "अभी अनुवाद बंद है"
+  },
+  "fork.vrchat.quickOn": {
+    "en": "Shorter sentences",
+    "text": "वाक्य छोटे कर दिए गए"
+  },
+  "fork.vrchat.remember": {
+    "en": "Remember",
+    "text": "याद रखें"
+  },
+  "fork.vrchat.removedOn": {
+    "en": "Video sound removed",
+    "text": "वीडियो की आवाज़ हटा दी गई"
+  },
+  "fork.vrchat.separatedOn": {
+    "en": "Video sound separated",
+    "text": "वीडियो की आवाज़ अलग कर दी गई"
+  },
+  "fork.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
+  },
+  "fork.vrchat.turnOnOsc": {
+    "en": "Turn on OSC in the VRChat quick menu",
+    "text": "VRChat के क्विक मेन्यू में OSC चालू करें"
+  },
+  "fork.vrchat.videoAsk": {
+    "en": "Ask me",
+    "text": "हर बार पूछें"
+  },
+  "fork.vrchat.videoAskResult": {
+    "en": "Asks you when a video starts.",
+    "text": "वीडियो शुरू होने पर आपसे पूछेगा कि क्या करना है।"
+  },
+  "fork.vrchat.videoBoth": {
+    "en": "People + video",
+    "text": "लोगों और वीडियो की बातें"
+  },
+  "fork.vrchat.videoBothResult": {
+    "en": "The video gets its own line and uses more power; if it can't be separated, sentences are cut shorter.",
+    "text": "वीडियो का अनुवाद अलग पंक्ति में दिखेगा और कंप्यूटर के ज़्यादा संसाधन लगेंगे। आवाज़ अलग न कर पाने पर वाक्य छोटे हिस्सों में बाँटेगा।"
+  },
+  "fork.vrchat.videoPause": {
+    "en": "Pause",
+    "text": "अभी अनुवाद न करें"
+  },
+  "fork.vrchat.videoPauseResult": {
+    "en": "The other side is not translated while it plays.",
+    "text": "वीडियो चलने के दौरान सामने वाले की बातों का अनुवाद नहीं होगा।"
+  },
+  "fork.vrchat.videoQuick": {
+    "en": "People only",
+    "text": "सिर्फ लोगों की बातें"
+  },
+  "fork.vrchat.videoQuickResult": {
+    "en": "Takes out video sound; if it can't, sentences are cut shorter.",
+    "text": "वीडियो की आवाज़ हटाने की कोशिश करेगा। अलग न कर पाने पर वाक्य छोटे हिस्सों में बाँटेगा।"
+  },
+  "fork.vrchat.videoShort": {
+    "en": "Video",
+    "text": "वीडियो"
+  },
+  "fork.vrchat.videoStarted": {
+    "en": "Video started",
+    "text": "वीडियो शुरू हो गया"
+  },
+  "fork.wizard.addressMissing": {
+    "en": "Choose a device from the list above, or type its address, for example 192.168.1.10:8790.",
+    "text": "ऊपर की सूची से कोई डिवाइस चुनें या उसका पता लिखें, जैसे 192.168.1.10:8790।"
+  },
+  "fork.wizard.device": {
+    "en": "This computer",
+    "text": "यह कंप्यूटर"
+  },
+  "fork.wizard.deviceDesc": {
+    "en": "Recognition and translation run on this computer using native models. Download a model for each stage before starting.",
+    "text": "आवाज़ पहचान और अनुवाद इस कंप्यूटर पर इसके लिए बने मॉडल से चलेंगे। शुरू करने से पहले दोनों चरणों के लिए अलग-अलग मॉडल डाउनलोड करें।"
+  },
+  "fork.wizard.deviceNotice": {
+    "en": "After setup, open Model library in the Speech recognition and Translation cards and download a native model for each. Translation requires a downloaded model, or you can switch that stage to an API model or another device.",
+    "text": "सेटअप के बाद “आवाज़ पहचान” और “अनुवाद” भागों में “मॉडल लाइब्रेरी” खोलकर इस कंप्यूटर के लिए एक-एक मॉडल डाउनलोड करें। अनुवाद के लिए डाउनलोड किया हुआ मॉडल चाहिए। आप इस चरण के लिए API मॉडल या दूसरा डिवाइस भी चुन सकते हैं।"
+  },
+  "fork.wizard.intro": {
+    "en": "Pick a starting point. Later, in Settings, recognition and translation can each run in a different place.",
+    "text": "शुरुआत के लिए एक विकल्प चुनें। बाद में सेटिंग में आवाज़ पहचान और अनुवाद के लिए अलग-अलग जगह चुन सकते हैं।"
+  },
+  "fork.wizard.keyNeeded": {
+    "en": "This device asks for an access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options), then press Connect.",
+    "text": "इस डिवाइस के लिए पहुँच कुंजी चाहिए। उस डिवाइस पर सेट की गई कुंजी भरें। दूसरे Kotomimi में यह साझा करने के “विकल्प” में मिलेगी। फिर “कनेक्ट करें” दबाएँ।"
+  },
+  "fork.wizard.pathBadge": {
+    "en": "Recommended",
+    "text": "सुझाया गया"
+  },
+  "fork.wizard.pathCost": {
+    "en": "No account and no API key. Text only: subtitles with furigana, typed translation and grammar feedback. Another device means a Kotomimi sharing its models, or a model server such as LocalAI; this computer downloads models onto your disk.",
+    "text": "खाते या API कुंजी की ज़रूरत नहीं। सिर्फ टेक्स्ट: फ़ुरिगाना वाले सबटाइटल, लिखकर अनुवाद और व्याकरण पर सुझाव। दूसरा डिवाइस मॉडल साझा करने वाला Kotomimi या LocalAI जैसा मॉडल सर्वर हो सकता है। इस कंप्यूटर को चुनने पर मॉडल इसकी डिस्क पर डाउनलोड होंगे।"
+  },
+  "fork.wizard.pathDesc": {
+    "en": "Use the models of another device on your network, or this computer's own — and any mix of the two.",
+    "text": "अपने स्थानीय नेटवर्क के किसी दूसरे डिवाइस के मॉडल इस्तेमाल करें या इस कंप्यूटर के अपने मॉडल। दोनों को मिलाकर भी इस्तेमाल कर सकते हैं।"
+  },
+  "fork.wizard.pathTitle": {
+    "en": "Kotomimi Pipeline",
+    "text": "Kotomimi अपनी पसंद से"
+  },
+  "fork.wizard.pendingAddress": {
+    "en": "No device chosen yet — choose one in Settings before you start.",
+    "text": "अभी दूसरा डिवाइस नहीं चुना है। शुरू करने से पहले सेटिंग में चुनें।"
+  },
+  "fork.wizard.server": {
+    "en": "Another device on my network",
+    "text": "मेरे स्थानीय नेटवर्क का दूसरा डिवाइस"
+  },
+  "fork.wizard.serverDesc": {
+    "en": "The models run on another computer: a Kotomimi with sharing turned on, or a model server such as LocalAI. This computer stays light.",
+    "text": "मॉडल दूसरे कंप्यूटर पर चलेंगे: साझा करना चालू किया हुआ Kotomimi या LocalAI जैसा मॉडल सर्वर। इस कंप्यूटर पर बहुत कम भार पड़ेगा।"
+  },
+  "fork.wizard.serverFound": {
+    "en": "Connected — it offers {{count}} model(s).",
+    "text": "कनेक्ट हो गया। {{count}} मॉडल उपलब्ध हैं।"
+  },
+  "fork.wizard.serverUnreachable": {
+    "en": "Could not connect: {{message}}",
+    "text": "कनेक्ट नहीं हो सका: {{message}}"
+  },
+  "fork.wizard.share": {
+    "en": "This computer, for my other devices",
+    "text": "यह कंप्यूटर, मेरे दूसरे डिवाइस के लिए"
+  },
+  "fork.wizard.shareDesc": {
+    "en": "Computing power to spare here? Let the models run on this computer for the other devices on your network — and for this computer itself.",
+    "text": "इस कंप्यूटर में अतिरिक्त क्षमता है? मॉडल यहीं चलाएँ और स्थानीय नेटवर्क के दूसरे डिवाइस पर इस्तेमाल करें। यह कंप्यूटर भी इन्हें इस्तेमाल कर सकेगा।"
+  },
+  "fork.wizard.shareNotice": {
+    "en": "Nothing to enter. Finishing turns on sharing, so other Kotomimi devices on your network can find this computer. After setup, download models in the Speech recognition card: those are what the others can use.",
+    "text": "यहाँ कुछ भरना नहीं है। सेटअप पूरा होने पर साझा करना चालू हो जाएगा और स्थानीय नेटवर्क के दूसरे Kotomimi डिवाइस इस कंप्यूटर को ढूँढ सकेंगे। फिर सेटिंग के “आवाज़ पहचान” भाग में मॉडल डाउनलोड करें। दूसरे डिवाइस इन्हीं का इस्तेमाल करेंगे।"
+  },
+  "fork.wizard.shareSummary": {
+    "en": "Sharing",
+    "text": "साझा करना"
+  },
+  "fork.wizard.shareSummaryOn": {
+    "en": "Turned on when you finish: other devices on your network can use this computer's models",
+    "text": "पूरा होने पर चालू होगा: स्थानीय नेटवर्क के दूसरे डिवाइस इस कंप्यूटर के मॉडल इस्तेमाल कर सकेंगे"
+  },
+  "fork.wizard.title": {
+    "en": "Which device does the work?",
+    "text": "काम किस डिवाइस पर चलेगा?"
+  },
+  "fork.wizard.tryServer": {
+    "en": "Connect",
+    "text": "कनेक्ट करें"
+  },
+  "models.deviceCpu": {
+    "en": "CPU",
+    "text": "CPU"
+  },
+  "models.deviceGpu": {
+    "en": "GPU",
+    "text": "GPU"
+  },
+  "providers.gemini.name": {
+    "en": "Google Gemini",
+    "text": "Google Gemini"
+  },
+  "providers.kizunaai_soniox.name": {
+    "en": "KizunaAI",
+    "text": "KizunaAI"
+  },
+  "providers.local_inference.modelAsr": {
+    "en": "ASR",
+    "text": "वाक् पहचान"
+  },
+  "providers.local_inference.modelTranslation": {
+    "en": "MT",
+    "text": "मशीनी अनुवाद"
+  },
+  "providers.local_inference.modelTts": {
+    "en": "TTS",
+    "text": "पाठ से आवाज़"
+  },
+  "providers.localai.addressMissing": {
+    "en": "No other device is chosen yet. In Settings, under \"Another device\", search for it or type its address.",
+    "text": "अभी कोई दूसरा डिवाइस नहीं चुना है। सेटिंग्स में \"दूसरा डिवाइस\" के तहत उसे खोजें या उसका पता भरें।"
+  },
+  "providers.localai.advanced": {
+    "en": "Advanced",
+    "text": "उन्नत"
+  },
+  "providers.localai.apiKey": {
+    "en": "API key",
+    "text": "API कुंजी"
+  },
+  "providers.localai.apiKeyNeeded": {
+    "en": "The API at {{address}} asks for a key. In its card, turn on \"The API asks for a key\" and enter it.",
+    "text": "{{address}} पर API को कुंजी चाहिए। उसके कार्ड में \"इस API को कुंजी चाहिए\" चालू करें और कुंजी भरें।"
+  },
+  "providers.localai.apiKeyRefused": {
+    "en": "The API at {{address}} did not accept the key. Check the API key in its card.",
+    "text": "{{address}} पर API ने कुंजी स्वीकार नहीं की। उसके कार्ड में API कुंजी जाँचें।"
+  },
+  "providers.localai.apiKeyReused": {
+    "en": "Filled in with the key saved under \"{{name}}\".",
+    "text": "“{{name}}” में सहेजी गई कुंजी भर दी गई है।"
+  },
+  "providers.localai.apiService": {
+    "en": "Service",
+    "text": "सेवा"
+  },
+  "providers.localai.apiServiceArk": {
+    "en": "Doubao (Volcengine Ark)",
+    "text": "Doubao (Volcengine Ark)"
+  },
+  "providers.localai.apiServiceArkModel": {
+    "en": "A model's name, or your endpoint id (ep-…)",
+    "text": "मॉडल का नाम या अपना एंडपॉइंट आईडी (ep-…)"
+  },
+  "providers.localai.apiServiceCustom": {
+    "en": "Custom address",
+    "text": "अपना पता"
+  },
+  "providers.localai.apiServiceModel": {
+    "en": "Choose from the list on the right, or type a name",
+    "text": "दाईं ओर की सूची से चुनें या नाम लिखें"
+  },
+  "providers.localai.apiServiceOllama": {
+    "en": "Ollama on this computer",
+    "text": "इस कंप्यूटर पर Ollama"
+  },
+  "providers.localai.apiServiceSiliconFlow": {
+    "en": "SiliconFlow",
+    "text": "SiliconFlow"
+  },
+  "providers.localai.apiUnreachable": {
+    "en": "The API at {{address}} could not be reached. Check the address in its card, and that this computer is online.",
+    "text": "{{address}} पर API से कनेक्ट नहीं हो सका। उसके कार्ड में पता जाँचें और देखें कि इस कंप्यूटर पर इंटरनेट चल रहा है।"
+  },
+  "providers.localai.asrApiBaseUrl": {
+    "en": "API address",
+    "text": "API पता"
+  },
+  "providers.localai.asrApiBaseUrlPlaceholder": {
+    "en": "e.g. https://api.openai.com/v1",
+    "text": "जैसे https://api.openai.com/v1"
+  },
+  "providers.localai.asrApiModelPlaceholder": {
+    "en": "e.g. whisper-1, whisper-large-v3",
+    "text": "जैसे whisper-1, whisper-large-v3"
+  },
+  "providers.localai.asrApiNeedsKey": {
+    "en": "The API asks for a key",
+    "text": "इस API के लिए कुंजी चाहिए"
+  },
+  "providers.localai.asrFixedNote": {
+    "en": "That device is reached as a plain LocalAI, which always hears with its own default recognizer when the translation or the feedback uses a model chosen here. Through the Kotomimi on that device, the recognizer can be chosen here.",
+    "text": "अभी उस डिवाइस के LocalAI से सीधे जुड़े हैं: अनुवाद या व्याकरण की सलाह के लिए अलग मॉडल चुनने पर यह आवाज़ पहचानने के लिए अपना डिफ़ॉल्ट मॉडल ही इस्तेमाल करता है। उस डिवाइस के Kotomimi से जुड़ें, तो पहचान का मॉडल यहाँ चुन सकेंगे।"
+  },
+  "providers.localai.asrKey": {
+    "en": "API key of the speech recognition API",
+    "text": "वाक् पहचान API की कुंजी"
+  },
+  "providers.localai.asrUnnamed": {
+    "en": "Speech recognition has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "आवाज़ पहचानने के लिए अभी कोई मॉडल उपलब्ध नहीं है। सेवा प्रदाता के नीचे \"आवाज़ की पहचान\" कार्ड में मॉडल चुनें (API मॉडल के लिए पता और मॉडल का नाम भरें) या चलाने की जगह बदलें।"
+  },
+  "providers.localai.auto": {
+    "en": "Automatic · {{name}}",
+    "text": "अपने आप · {{name}}"
+  },
+  "providers.localai.browse": {
+    "en": "Model library",
+    "text": "मॉडल संग्रह"
+  },
+  "providers.localai.bySentence": {
+    "en": "Translate sentence by sentence",
+    "text": "एक-एक वाक्य का अनुवाद"
+  },
+  "providers.localai.bySentenceTooltip": {
+    "en": "On: each sentence is translated as soon as it ends — sooner, but without the sentences around it. Off: the whole stretch is translated once the speaker pauses — with its context, but later.",
+    "text": "चालू: सामने वाले का हर वाक्य पूरा होते ही अनुवाद होगा। अनुवाद जल्दी दिखेगा, लेकिन आसपास के वाक्यों का संदर्भ नहीं मिलेगा। बंद: सामने वाले के रुकने पर पूरे हिस्से का अनुवाद होगा। पूरा संदर्भ मिलेगा, लेकिन इंतज़ार ज़्यादा होगा।"
+  },
+  "providers.localai.checking": {
+    "en": "Checking…",
+    "text": "जाँच हो रही है…"
+  },
+  "providers.localai.checkNow": {
+    "en": "Check",
+    "text": "जाँचें"
+  },
+  "providers.localai.checkSlow": {
+    "en": "No answer within {{seconds}} s: the device may be off or loading a model, or the address wrong. It is asked again by itself.",
+    "text": "{{seconds}} सेकंड बाद भी जवाब नहीं मिला: डिवाइस बंद हो सकता है, मॉडल लोड हो रहा हो सकता है या पता गलत हो सकता है। फिर से अपने आप कोशिश होगी।"
+  },
+  "providers.localai.choiceDevice": {
+    "en": "Use this computer",
+    "text": "यह कंप्यूटर इस्तेमाल करें"
+  },
+  "providers.localai.choiceServer": {
+    "en": "Use another device",
+    "text": "दूसरा डिवाइस इस्तेमाल करें"
+  },
+  "providers.localai.coach": {
+    "en": "Check my grammar when I speak their language",
+    "text": "दूसरे व्यक्ति की भाषा बोलने पर मेरा व्याकरण जाँचें"
+  },
+  "providers.localai.coachKey": {
+    "en": "API key of the feedback model",
+    "text": "व्याकरण सुझाव मॉडल की API कुंजी"
+  },
+  "providers.localai.coachNeedsSpeaker": {
+    "en": "Feedback answers what you say. Switch the mode to \"Me\" or \"Both\".",
+    "text": "व्याकरण की सलाह के लिए आपकी आवाज़ सुनना ज़रूरी है। मोड को \"मैं\" या \"दोनों\" पर बदलें।"
+  },
+  "providers.localai.coachNoModel": {
+    "en": "The other device has no text model that can give feedback. Use an API model or this computer instead.",
+    "text": "दूसरे डिवाइस पर व्याकरण की सलाह देने वाला कोई टेक्स्ट मॉडल नहीं है। API मॉडल या इस कंप्यूटर का इस्तेमाल करें।"
+  },
+  "providers.localai.coachPrompt": {
+    "en": "Feedback instructions",
+    "text": "व्याकरण की सलाह के निर्देश"
+  },
+  "providers.localai.coachPromptPlaceholder": {
+    "en": "Blank: written automatically for your two languages. Your own text may use {{spoken}} and {{native}}.",
+    "text": "खाली छोड़ें: आपकी मातृभाषा और अभ्यास की भाषा के अनुसार निर्देश अपने आप बनेंगे। खुद लिखते समय इन भाषाओं के लिए {{spoken}} और {{native}} इस्तेमाल कर सकते हैं।"
+  },
+  "providers.localai.coachPromptPreview": {
+    "en": "Used while the box is blank, for this language pair:",
+    "text": "खाली छोड़ने पर इन दोनों भाषाओं के लिए ये निर्देश इस्तेमाल होंगे:"
+  },
+  "providers.localai.coachStage": {
+    "en": "Grammar feedback",
+    "text": "व्याकरण की सलाह"
+  },
+  "providers.localai.coachStageTooltip": {
+    "en": "When you speak the other language, a model checks your grammar and answers with a check mark, or a corrected sentence and an explanation. Enable \"I speak the other language too\" as well to get both a translation and private feedback. Your own language and typed text are translated without feedback.",
+    "text": "जब आप दूसरी भाषा बोलते हैं, तो मॉडल आपका व्याकरण जाँचता है और सही होने का निशान या सुधारा हुआ वाक्य और उसका कारण दिखाता है। अनुवाद और सिर्फ़ आपको दिखने वाली सलाह, दोनों पाने के लिए \"मैं दूसरी भाषा भी बोलता हूँ\" भी चालू करें। आपकी अपनी भाषा और टाइप किए हुए टेक्स्ट का केवल अनुवाद होता है, सलाह नहीं मिलती।"
+  },
+  "providers.localai.coachUnnamed": {
+    "en": "Grammar feedback has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "व्याकरण की सलाह के लिए अभी कोई मॉडल उपलब्ध नहीं है। सेवा प्रदाता के नीचे \"व्याकरण की सलाह\" कार्ड में मॉडल चुनें (API मॉडल के लिए पता और मॉडल का नाम भरें) या चलाने की जगह बदलें।"
+  },
+  "providers.localai.connectFirst": {
+    "en": "No other device is connected yet: search for one above, or type its address.",
+    "text": "अभी कोई दूसरा डिवाइस कनेक्ट नहीं है। पहले ऊपर खोजें या उसका पता भरें।"
+  },
+  "providers.localai.description": {
+    "en": "Recognition, translation and grammar feedback — and you mix where each model runs: this computer, another device on your network, or any API model.",
+    "text": "वाक् पहचान, अनुवाद और व्याकरण पर सुझाव के लिए मॉडल मिलाकर चुनें: इस कंप्यूटर पर, स्थानीय नेटवर्क के किसी दूसरे डिवाइस पर, या किसी भी API के ज़रिए।"
+  },
+  "providers.localai.detectOther": {
+    "en": "Detect the other side's language",
+    "text": "दूसरे व्यक्ति की भाषा अपने आप पहचानें"
+  },
+  "providers.localai.detectOtherNeeds": {
+    "en": "Only Qwen3-ASR 1.7B GGUF can tell the language by itself. Choose it here.",
+    "text": "केवल Qwen3-ASR 1.7B GGUF खुद भाषा पहचान सकता है। यहाँ उसे चुनें।"
+  },
+  "providers.localai.detectOtherNote": {
+    "en": "The other side's language is detected, so a model that can tell languages apart hears them.",
+    "text": "दूसरे व्यक्ति की भाषा अपने आप पहचानी जाती है, इसलिए यहाँ भाषा पहचान सकने वाला मॉडल इस्तेमाल होता है।"
+  },
+  "providers.localai.detectOtherTooltip": {
+    "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
+    "text": "दूसरा व्यक्ति जो भी भाषा बोले, उसे पहचानकर आपकी भाषा में अनुवाद किया जाएगा। आपको भाषा बदलने की ज़रूरत नहीं है। आपकी बात का अनुवाद ऊपर चुनी गई भाषा में ही होगा। पहचान के लिए Qwen3-ASR 1.7B GGUF या API और अनुवाद के लिए नेटिव इंजन या API चाहिए।"
+  },
+  "providers.localai.deviceDefault": {
+    "en": "The device's own choice",
+    "text": "उस डिवाइस को चुनने दें"
+  },
+  "providers.localai.endpoint": {
+    "en": "Address",
+    "text": "पता"
+  },
+  "providers.localai.familyUnheard": {
+    "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
+    "text": "उस डिवाइस के {{name}} में {{languages}} उपलब्ध नहीं है, इसलिए इस हिस्से के लिए डिवाइस खुद मॉडल चुनेगा। {{name}} इस्तेमाल करने के लिए पहले उस डिवाइस पर {{languages}} डाउनलोड करें।"
+  },
+  "providers.localai.feedbackFailed": {
+    "en": "One sentence got no grammar feedback: the feedback model did not answer.",
+    "text": "एक वाक्य पर व्याकरण की सलाह नहीं मिली: सलाह देने वाले मॉडल से जवाब नहीं मिला।"
+  },
+  "providers.localai.groupNative": {
+    "en": "Native engine",
+    "text": "नेटिव इंजन"
+  },
+  "providers.localai.hearApiNote": {
+    "en": "Any service with OpenAI's transcription API works (OpenAI, Groq, a LocalAI). This computer cuts the sentences and uploads each one, so the text appears when a sentence is finished.",
+    "text": "OpenAI का ट्रांसक्रिप्शन API देने वाली कोई भी सेवा चलेगी (OpenAI, Groq, LocalAI आदि)। यह कंप्यूटर वाक्यों को अलग करता है और हर वाक्य पूरा होने पर पहचान के लिए भेजता है, इसलिए टेक्स्ट वाक्य पूरा होने के बाद ही दिखता है।"
+  },
+  "providers.localai.hears": {
+    "en": "Recognizes {{language}}",
+    "text": "{{language}} की वाक् पहचान"
+  },
+  "providers.localai.hearsEither": {
+    "en": "Recognizes {{first}} or {{second}}",
+    "text": "{{first}} या {{second}} की वाक् पहचान"
+  },
+  "providers.localai.hearsOther": {
+    "en": "Hears the other side (any language)",
+    "text": "दूसरे व्यक्ति को सुनें (भाषा अपने आप पहचानें)"
+  },
+  "providers.localai.hearStage": {
+    "en": "Speech recognition",
+    "text": "वाक् पहचान"
+  },
+  "providers.localai.hearStageTooltip": {
+    "en": "What listens: it decides when a sentence ends and writes down what was said.",
+    "text": "सुनने वाला चरण: यह तय करता है कि वाक्य कब पूरा हुआ और कही गई बात को लिखता है।"
+  },
+  "providers.localai.hereDown": {
+    "en": "The LocalAI on this computer is not running yet. Start it in the stage's card — or, if Kotomimi has only just opened, give it a moment.",
+    "text": "इस कंप्यूटर का LocalAI अभी नहीं चल रहा। चरण के कार्ड में \"LocalAI शुरू करें\" दबाएँ। अगर Kotomimi अभी खोला है, तो थोड़ा इंतज़ार करें।"
+  },
+  "providers.localai.hereModelPick": {
+    "en": "Choose a model",
+    "text": "मॉडल चुनें"
+  },
+  "providers.localai.inUse": {
+    "en": "In use: {{name}}",
+    "text": "इस्तेमाल में: {{name}}"
+  },
+  "providers.localai.inUseLegs": {
+    "en": "In use: {{theirs}} (them), {{mine}} (me)",
+    "text": "इस्तेमाल में: दूसरा व्यक्ति {{theirs}} · मैं {{mine}}"
+  },
+  "providers.localai.kotomimiServer": {
+    "en": "It is another Kotomimi sharing its models.",
+    "text": "यह दूसरे डिवाइस पर चल रहा Kotomimi है, जो अपने मॉडल शेयर कर रहा है।"
+  },
+  "providers.localai.kotomimiThere": {
+    "en": "Use the Kotomimi on that device",
+    "text": "उस डिवाइस के Kotomimi से जुड़ें"
+  },
+  "providers.localai.kotomimiThereLooking": {
+    "en": "Looking for it…",
+    "text": "खोज रहे हैं…"
+  },
+  "providers.localai.kotomimiThereNone": {
+    "en": "No Kotomimi is sharing on that device. Open Kotomimi there, turn on \"Share with other devices\", then try again.",
+    "text": "उस डिवाइस पर कोई Kotomimi शेयर नहीं कर रहा। वहाँ Kotomimi खोलें, \"दूसरे डिवाइसों के साथ शेयर करें\" चालू करें और फिर कोशिश करें।"
+  },
+  "providers.localai.localServerNote": {
+    "en": "This address is this computer itself: a model server running here, such as LocalAI. Choose \"Another device\" in a stage to use its models.",
+    "text": "यह पता इसी कंप्यूटर का है, जहाँ LocalAI जैसा मॉडल सर्वर चल रहा है। उसके मॉडल इस्तेमाल करने के लिए किसी चरण में “दूसरा डिवाइस” चुनें।"
+  },
+  "providers.localai.model": {
+    "en": "Model",
+    "text": "मॉडल"
+  },
+  "providers.localai.modelGone": {
+    "en": "{{name}} (no longer on that device)",
+    "text": "{{name}} (अब उस डिवाइस पर नहीं है)"
+  },
+  "providers.localai.modelList": {
+    "en": "Choose from the models this service lists",
+    "text": "इस सेवा की मॉडल सूची से चुनें"
+  },
+  "providers.localai.modelListAsking": {
+    "en": "Getting the list…",
+    "text": "मॉडल सूची मिल रही है…"
+  },
+  "providers.localai.modelListKeyMissing": {
+    "en": "Fill in the API key first.",
+    "text": "पहले API कुंजी भरें।"
+  },
+  "providers.localai.modelListKeyRefused": {
+    "en": "The service refused this key.",
+    "text": "इस सेवा ने यह कुंजी स्वीकार नहीं की।"
+  },
+  "providers.localai.modelListNoAddress": {
+    "en": "Fill in the address first.",
+    "text": "पहले पता भरें।"
+  },
+  "providers.localai.modelListNoMatch": {
+    "en": "No model found. Try fewer letters.",
+    "text": "कोई मॉडल नहीं मिला। कम अक्षर लिखकर देखें।"
+  },
+  "providers.localai.modelListNone": {
+    "en": "This service lists no models. Type the name instead.",
+    "text": "इस सेवा ने मॉडल सूची नहीं दी है। सीधे नाम लिखें।"
+  },
+  "providers.localai.modelListUnreachable": {
+    "en": "The service could not be reached.",
+    "text": "इस सेवा से कनेक्ट नहीं हो सका।"
+  },
+  "providers.localai.modelSearch": {
+    "en": "Search models",
+    "text": "मॉडल खोजें"
+  },
+  "providers.localai.modelSuggested": {
+    "en": "Suits this step",
+    "text": "इस चरण के लिए उपयुक्त"
+  },
+  "providers.localai.name": {
+    "en": "Kotomimi Pipeline",
+    "text": "Kotomimi मनचाहा संयोजन"
+  },
+  "providers.localai.nativeBusy": {
+    "en": "A device you share with is using this engine with {{name}}. Wait for it to finish, or choose {{name}} here too.",
+    "text": "आपसे शेयरिंग के ज़रिए जुड़ा एक डिवाइस इस इंजन पर {{name}} चला रहा है। उसके पूरा होने का इंतज़ार करें या यहाँ भी {{name}} चुनें।"
+  },
+  "providers.localai.nativeCoachFailed": {
+    "en": "The feedback engine could not start. In the Grammar feedback card, press \"Try again\" — or choose another model.",
+    "text": "व्याकरण की सलाह का इंजन शुरू नहीं हो सका। \"व्याकरण की सलाह\" कार्ड में \"फिर कोशिश करें\" दबाएँ या दूसरा मॉडल चुनें।"
+  },
+  "providers.localai.nativeCoachFailedShort": {
+    "en": "The feedback engine could not start.",
+    "text": "व्याकरण की सलाह का इंजन शुरू नहीं हो सका।"
+  },
+  "providers.localai.nativeCoachMissing": {
+    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} अभी डाउनलोड नहीं हुआ है। \"व्याकरण की सलाह\" कार्ड में नेटिव मॉडल डाउनलोड करें या \"API मॉडल\" या \"दूसरा डिवाइस\" चुनें।"
+  },
+  "providers.localai.nativeCoachReady": {
+    "en": "The feedback engine is ready.",
+    "text": "व्याकरण की सलाह का इंजन तैयार है।"
+  },
+  "providers.localai.nativeCoachUnsupported": {
+    "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
+    "text": "यह सिस्टम अभी व्याकरण की सलाह के नेटिव इंजन का समर्थन नहीं करता। \"व्याकरण की सलाह\" कार्ड में \"API मॉडल\" या \"दूसरा डिवाइस\" चुनें।"
+  },
+  "providers.localai.nativeCoachWarming": {
+    "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
+    "text": "व्याकरण की सलाह का इंजन अभी शुरू हो रहा है। बस कुछ सेकंड लगेंगे। तैयार होते ही आप शुरू कर सकते हैं।"
+  },
+  "providers.localai.nativeCoachWarmingShort": {
+    "en": "Starting the feedback engine…",
+    "text": "व्याकरण की सलाह का इंजन शुरू हो रहा है…"
+  },
+  "providers.localai.nativeEntry": {
+    "en": "{{name}} (native engine)",
+    "text": "{{name}} (नेटिव इंजन)"
+  },
+  "providers.localai.nativeFailed": {
+    "en": "The recognition engine of this computer could not start. In the Speech recognition card, press \"Try again\" — or choose another model.",
+    "text": "इस कंप्यूटर का आवाज़ पहचान इंजन शुरू नहीं हो सका। \"आवाज़ की पहचान\" कार्ड में \"फिर कोशिश करें\" दबाएँ या दूसरा मॉडल चुनें।"
+  },
+  "providers.localai.nativeFailedShort": {
+    "en": "The engine could not start.",
+    "text": "इंजन शुरू नहीं हो सका।"
+  },
+  "providers.localai.nativeInterrupted": {
+    "en": "The engine stopped while it was starting. Press Start again.",
+    "text": "शुरू होते समय इंजन रोक दिया गया। \"शुरू करें\" फिर दबाएँ।"
+  },
+  "providers.localai.nativeLoading": {
+    "en": "Loading the models… About half a minute the first time after the computer boots.",
+    "text": "मॉडल लोड हो रहे हैं… कंप्यूटर चालू करने के बाद पहली बार करीब आधा मिनट लगता है।"
+  },
+  "providers.localai.nativeMissing": {
+    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} अभी डाउनलोड नहीं हुआ है। \"आवाज़ की पहचान\" कार्ड में नेटिव मॉडल डाउनलोड करें या \"API मॉडल\" या \"दूसरा डिवाइस\" चुनें।"
+  },
+  "providers.localai.nativeNone": {
+    "en": "No model chosen",
+    "text": "कोई मॉडल नहीं चुना"
+  },
+  "providers.localai.nativeReady": {
+    "en": "The engine is ready.",
+    "text": "इंजन तैयार है।"
+  },
+  "providers.localai.nativeRetry": {
+    "en": "Try again",
+    "text": "फिर कोशिश करें"
+  },
+  "providers.localai.nativeRuntime": {
+    "en": "Downloading the runtime first. This happens only once.",
+    "text": "पहले रनटाइम डाउनलोड हो रहा है। यह सिर्फ़ एक बार करना होगा।"
+  },
+  "providers.localai.nativeTwoModels": {
+    "en": "{{name}} and {{other}} cannot run at the same time. Choose the same model for both languages.",
+    "text": "{{name}} और {{other}} एक साथ नहीं चल सकते। दोनों भाषाओं के लिए एक ही मॉडल चुनें।"
+  },
+  "providers.localai.nativeUnchosen": {
+    "en": "No speech recognition model is chosen for {{source}} yet. Choose one in the Speech recognition card.",
+    "text": "{{source}} के लिए अभी आवाज़ पहचान मॉडल नहीं चुना है। \"आवाज़ की पहचान\" कार्ड में एक चुनें।"
+  },
+  "providers.localai.nativeUnheard": {
+    "en": "{{name}} does not hear one of your two languages. Choose another model for it.",
+    "text": "{{name}} आपकी चुनी हुई दो भाषाओं में से एक को नहीं पहचान सकता। उसके लिए दूसरा मॉडल चुनें।"
+  },
+  "providers.localai.nativeUnsupported": {
+    "en": "The native recognition engine is not available for this system. In the Speech recognition card, switch to \"API model\" or \"Another device\".",
+    "text": "यह सिस्टम अभी नेटिव आवाज़ पहचान इंजन का समर्थन नहीं करता। \"आवाज़ की पहचान\" कार्ड में \"API मॉडल\" या \"दूसरा डिवाइस\" चुनें।"
+  },
+  "providers.localai.nativeUnsupportedShort": {
+    "en": "Not available for this system",
+    "text": "यह सिस्टम अभी समर्थित नहीं है"
+  },
+  "providers.localai.nativeWarming": {
+    "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
+    "text": "आवाज़ पहचान इंजन अभी शुरू हो रहा है। कंप्यूटर चालू करने के बाद पहली बार करीब आधा मिनट लगता है। तैयार होते ही आप शुरू कर सकते हैं।"
+  },
+  "providers.localai.nativeWarmingShort": {
+    "en": "Starting the engine… About half a minute the first time after the computer boots.",
+    "text": "इंजन शुरू हो रहा है… कंप्यूटर चालू करने के बाद पहली बार करीब आधा मिनट लगता है।"
+  },
+  "providers.localai.notDownloaded": {
+    "en": "No model downloaded yet",
+    "text": "अभी कोई मॉडल डाउनलोड नहीं किया गया"
+  },
+  "providers.localai.noteAppleSpeech": {
+    "en": "Japanese talk, measured: about 13% of the characters wrong, the most accurate of all. It writes as it listens (about 2 s behind).",
+    "text": "जापानी बातचीत के परीक्षण में करीब 13% अक्षर गलत मिले, जो सभी में सबसे सटीक है। सुनते हुए टेक्स्ट लिखता है (करीब 2 सेकंड पीछे)।"
+  },
+  "providers.localai.noteCohere": {
+    "en": "Measured on Japanese VRChat talk: about 33% of the characters wrong, and about a quarter of what was said left out. Not a good choice for Japanese conversation.",
+    "text": "जापानी VRChat बातचीत के परीक्षण में करीब 33% अक्षर गलत मिले और लगभग एक चौथाई बात छूट गई। जापानी बातचीत के लिए इसे चुनने की सलाह नहीं है।"
+  },
+  "providers.localai.noteGemma4": {
+    "en": "Japanese grammar, measured: it caught 11 of 14 mistakes and left right casual speech alone; about 0.1 s an answer. About 1.5 GB of video memory.",
+    "text": "जापानी व्याकरण के परीक्षण में 14 गलत वाक्यों में से 11 पकड़े और सही बोलचाल के वाक्यों को बेवजह नहीं बदला। हर वाक्य में करीब 0.1 सेकंड लगता है। करीब 1.5 GB ग्राफ़िक्स मेमोरी लेता है।"
+  },
+  "providers.localai.noteGranite41": {
+    "en": "Measured on Japanese VRChat talk: it keeps repeating the same sentence. Not usable for Japanese conversation.",
+    "text": "जापानी VRChat बातचीत के परीक्षण में एक ही वाक्य लगातार दोहराता रहा। जापानी बातचीत के लिए लगभग बेकार है।"
+  },
+  "providers.localai.noteHyMt15": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences, and it tends to add words of its own.",
+    "text": "जापानी से चीनी अनुवाद के परीक्षण में 30 वाक्यों में करीब 8 गंभीर गलतियाँ मिलीं। अपनी ओर से शब्द भी जोड़ देता है।"
+  },
+  "providers.localai.noteHyMt2": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences; about 0.1 s a sentence.",
+    "text": "जापानी से चीनी अनुवाद के परीक्षण में 30 वाक्यों में करीब 8 गंभीर गलतियाँ मिलीं। हर वाक्य में करीब 0.1 सेकंड लगता है।"
+  },
+  "providers.localai.noteIndexTranslate": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
+    "text": "जापानी से चीनी अनुवाद के परीक्षण में 30 वाक्यों में करीब 3 गंभीर गलतियाँ मिलीं, जो जाँचे गए मॉडलों में सबसे अच्छा नतीजा है। हर वाक्य में करीब 0.1 सेकंड लगता है। करीब 2 GB ग्राफ़िक्स मेमोरी लेता है और सौ से ज़्यादा भाषाओं का समर्थन करता है।"
+  },
+  "providers.localai.noteMoonshineJa": {
+    "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
+    "text": "जापानी VRChat बातचीत के परीक्षण में करीब 70% अक्षर गलत मिले। इसे केवल मजबूरी में चुनें, जब ग्राफ़िक्स कार्ड बिल्कुल इस्तेमाल न हो सके।"
+  },
+  "providers.localai.noteNativeNemotron": {
+    "en": "Small: about 1 GB of video memory. Japanese talk, measured: about 27% of the characters wrong, and a short sentence is sometimes left out altogether. Choose it only when the ones above do not fit or do not hear the language. Over thirty languages.",
+    "text": "कम जगह लेता है: करीब 1 GB ग्राफ़िक्स मेमोरी। जापानी बातचीत के परीक्षण में करीब 27% अक्षर गलत मिले और कभी-कभी पूरा छोटा वाक्य छूट जाता है। इसे तभी चुनें जब ऊपर के मॉडल मेमोरी में न समाएँ या आपकी भाषा का समर्थन न करें। तीस से ज़्यादा भाषाओं का समर्थन करता है।"
+  },
+  "providers.localai.noteNativeQwen": {
+    "en": "Japanese talk, measured: about 16% of the characters wrong. It writes as you speak (about 1 s behind); the last few words settle when the sentence ends. When the graphics card is busy it only refreshes less often. About 3 GB of video memory, thirty languages.",
+    "text": "जापानी बातचीत के परीक्षण में करीब 16% अक्षर गलत मिले। बोलते समय टेक्स्ट लिखता है (करीब 1 सेकंड पीछे); आखिरी कुछ अक्षर वाक्य पूरा होने पर तय होते हैं। ग्राफ़िक्स कार्ड व्यस्त होने पर बस टेक्स्ट कम बार अपडेट होता है। करीब 3 GB ग्राफ़िक्स मेमोरी लेता है और 30 भाषाओं का समर्थन करता है।"
+  },
+  "providers.localai.noteNativeQwenSmall": {
+    "en": "The light one, for a computer that runs a game at the same time: about 2 GB of video memory instead of 3. Japanese talk, measured: about 22% of the characters wrong, more than the 1.7B. Otherwise it works the same way, with the same thirty languages.",
+    "text": "कम संसाधन लेने वाला छोटा मॉडल, उसी कंप्यूटर पर गेम भी चलाने के लिए अच्छा: करीब 2 GB ग्राफ़िक्स मेमोरी लेता है (1.7B करीब 3 GB)। जापानी बातचीत के परीक्षण में करीब 22% अक्षर गलत मिले, जो 1.7B से कुछ ज़्यादा हैं। बाकी काम करने का तरीका और 30 भाषाओं का समर्थन 1.7B जैसा ही है।"
+  },
+  "providers.localai.noteNativeR2t2": {
+    "en": "Japanese talk, measured: about 18% of the characters wrong. It writes as it listens (about 2.5 s behind) and never changes what it wrote. When the graphics card cannot keep up (a weaker card, or a game running), the text falls further and further behind. About 3 GB of video memory.",
+    "text": "जापानी बातचीत के परीक्षण में करीब 18% अक्षर गलत मिले। सुनते हुए टेक्स्ट लिखता है (करीब 2.5 सेकंड पीछे) और लिखे हुए को फिर नहीं बदलता। ग्राफ़िक्स कार्ड धीमा हो या साथ में गेम चल रहा हो, तो टेक्स्ट लगातार और पीछे छूटता जाता है। करीब 3 GB ग्राफ़िक्स मेमोरी लेता है।"
+  },
+  "providers.localai.noteNativeSenseVoice": {
+    "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
+    "text": "सबसे हल्का और तेज़: करीब 0.4 GB ग्राफ़िक्स मेमोरी। जापानी बातचीत के परीक्षण में Qwen3-ASR 0.6B जितना सटीक मिला, लेकिन विराम चिह्न बहुत कम लगाता है। केवल चीनी, कैंटोनीज़, अंग्रेज़ी, जापानी और कोरियाई का समर्थन करता है।"
+  },
+  "providers.localai.noteQwen06": {
+    "en": "Measured on Japanese VRChat talk: about 35% of the characters wrong. Small: for when the graphics card has little memory to spare.",
+    "text": "जापानी VRChat बातचीत के परीक्षण में करीब 35% अक्षर गलत मिले। छोटा मॉडल है, ग्राफ़िक्स मेमोरी कम होने पर इस्तेमाल कर सकते हैं।"
+  },
+  "providers.localai.noteQwen17": {
+    "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
+    "text": "जापानी बातचीत के परीक्षण में करीब 19% अक्षर गलत मिले। वाक्य पूरा होने के बाद ही टेक्स्ट लिखता है (करीब 10 सेकंड पीछे); ऊपर वाला GGUF संस्करण बोलते समय ही लिखता है।"
+  },
+  "providers.localai.noteSenseVoice": {
+    "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
+    "text": "जापानी VRChat बातचीत के परीक्षण में काना अक्षर नहीं लिखता, इसलिए जापानी टेक्स्ट पढ़कर समझना मुश्किल है।"
+  },
+  "providers.localai.noteVoxtral4b": {
+    "en": "Measured on Japanese VRChat talk: quick — the text is about 2.6 s behind the voice — but about 27% of the characters wrong. For when speed matters more than accuracy.",
+    "text": "जापानी VRChat बातचीत के परीक्षण में टेक्स्ट जल्दी आया (आवाज़ से करीब 2.6 सेकंड पीछे), लेकिन करीब 27% अक्षर गलत मिले। इसे तब चुनें जब गति ज़्यादा ज़रूरी हो और कुछ गलतियाँ स्वीकार हों।"
+  },
+  "providers.localai.noteWhisperMedium": {
+    "en": "Measured on Japanese VRChat talk: about 34% of the characters wrong.",
+    "text": "जापानी VRChat बातचीत के परीक्षण में करीब 34% अक्षर गलत मिले।"
+  },
+  "providers.localai.noteWhisperTurbo": {
+    "en": "Measured on Japanese VRChat talk: about 21% of the characters wrong, and steady. It writes only once a sentence has ended.",
+    "text": "जापानी VRChat बातचीत के परीक्षण में करीब 21% अक्षर गलत मिले। प्रदर्शन स्थिर है। टेक्स्ट के लिए वाक्य पूरा होने का इंतज़ार करना पड़ता है।"
+  },
+  "providers.localai.otherDeviceHint": {
+    "en": "To use the models of another device on your local network, search the network for it.",
+    "text": "स्थानीय नेटवर्क के किसी दूसरे डिवाइस के मॉडल इस्तेमाल करने के लिए नेटवर्क पर डिवाइस खोजें।"
+  },
+  "providers.localai.phoneKey": {
+    "en": "Access key of {{name}}",
+    "text": "{{name}} की एक्सेस कुंजी"
+  },
+  "providers.localai.phoneKeyNote": {
+    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
+    "text": "इस फ़ोन पर एक्सेस कुंजी सेट है। उसे फ़ोन के “डिवाइस कनेक्शन” में देख सकते हैं।"
+  },
+  "providers.localai.phoneKeyUse": {
+    "en": "Use this phone",
+    "text": "यह फ़ोन इस्तेमाल करें"
+  },
+  "providers.localai.phoneKeyWrong": {
+    "en": "The phone did not take this key.",
+    "text": "यह कुंजी सही नहीं है। कृपया दोबारा जाँचें।"
+  },
+  "providers.localai.phoneModelGone": {
+    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
+    "text": "फ़ोन ({{address}}) अभी {{name}} शेयर नहीं कर रहा। उसके कार्ड में दूसरा मॉडल चुनें।"
+  },
+  "providers.localai.phoneModelTooBig": {
+    "en": "{{name}} (not enough memory on the phone)",
+    "text": "{{name}} (फ़ोन में मेमोरी कम है)"
+  },
+  "providers.localai.phoneModelTooBigCheck": {
+    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
+    "text": "फ़ोन ({{address}}) में अभी {{name}} चलाने के लिए पर्याप्त मेमोरी नहीं है। उसके कार्ड में छोटा मॉडल चुनें या फ़ोन पर दूसरे ऐप बंद करें।"
+  },
+  "providers.localai.phoneNoMemory": {
+    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
+    "text": "फ़ोन में अभी यह मॉडल चलाने के लिए पर्याप्त मेमोरी नहीं है। उसके कार्ड में छोटा मॉडल चुनें या फ़ोन पर दूसरे ऐप बंद करें।"
+  },
+  "providers.localai.phoneOption": {
+    "en": "{{name}} (phone)",
+    "text": "{{name}} (फ़ोन)"
+  },
+  "providers.localai.phoneQuiet": {
+    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
+    "text": "फ़ोन से जवाब नहीं मिल रहा। लॉक होने के बाद सिस्टम ने शायद उसे रोक दिया है। जारी रखने के लिए फ़ोन पर Kotomimi खोलें।"
+  },
+  "providers.localai.phoneUnreachable": {
+    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "फ़ोन ({{address}}) से कनेक्ट नहीं हो रहा। जाँचें कि उसकी शेयरिंग चालू है और वह इस कंप्यूटर वाले Wi-Fi से जुड़ा है।"
+  },
+  "providers.localai.pipelineModel": {
+    "en": "Setup name on that device",
+    "text": "उस डिवाइस पर कॉन्फ़िगरेशन का नाम"
+  },
+  "providers.localai.pipelineNote": {
+    "en": "Normally left alone. Change it only when that device is a LocalAI set up with more than one combination of recognition and translation.",
+    "text": "आम तौर पर इसे बदलने की ज़रूरत नहीं है। केवल तभी बदलें जब उस डिवाइस पर LocalAI हो और उसमें आवाज़ पहचानने और अनुवाद करने के एक से ज़्यादा संयोजन सेट हों।"
+  },
+  "providers.localai.placeDevice": {
+    "en": "This computer",
+    "text": "यह कंप्यूटर"
+  },
+  "providers.localai.placeServer": {
+    "en": "Another device",
+    "text": "दूसरा डिवाइस"
+  },
+  "providers.localai.ready": {
+    "en": "Ready to start",
+    "text": "शुरू करने के लिए तैयार"
+  },
+  "providers.localai.recheck": {
+    "en": "Check again",
+    "text": "फिर जाँचें"
+  },
+  "providers.localai.serverHttp": {
+    "en": "The other device answered with an error (HTTP {{status}}). Restarting the app or the model server there usually helps.",
+    "text": "दूसरे डिवाइस ने त्रुटि भेजी (HTTP {{status}})। आम तौर पर वहाँ ऐप या मॉडल सर्वर फिर से शुरू करने से ठीक हो जाता है।"
+  },
+  "providers.localai.serverKey": {
+    "en": "Access key",
+    "text": "एक्सेस कुंजी"
+  },
+  "providers.localai.serverKeyMissing": {
+    "en": "The other device asks for an access key. Enter it in Settings, under \"Another device\".",
+    "text": "दूसरे डिवाइस को ऐक्सेस कुंजी चाहिए। सेटिंग्स में \"दूसरा डिवाइस\" के तहत उसे भरें।"
+  },
+  "providers.localai.serverKeyNeeded": {
+    "en": "The other device asks for an access key. Under \"Another device\", turn on \"It asks for an access key\" and enter the key set on that device.",
+    "text": "दूसरे डिवाइस को ऐक्सेस कुंजी चाहिए। \"दूसरा डिवाइस\" के तहत \"इसे ऐक्सेस कुंजी चाहिए\" चालू करें और उस डिवाइस पर सेट की गई कुंजी भरें।"
+  },
+  "providers.localai.serverKeyRefused": {
+    "en": "The other device did not accept the access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options).",
+    "text": "दूसरे डिवाइस ने ऐक्सेस कुंजी स्वीकार नहीं की। उस डिवाइस पर सेट की गई कुंजी भरें (दूसरे Kotomimi में यह शेयरिंग के \"विकल्प\" में मिलती है)।"
+  },
+  "providers.localai.serverNeedsKey": {
+    "en": "It asks for an access key",
+    "text": "इसके लिए एक्सेस कुंजी चाहिए"
+  },
+  "providers.localai.serverNeedsKeyTooltip": {
+    "en": "Turn this on when the other device was given an access key — a Kotomimi with one set under its sharing options, for example.",
+    "text": "दूसरे डिवाइस पर एक्सेस कुंजी सेट हो तो इसे चालू करें। जैसे, उस डिवाइस के Kotomimi में शेयर करने के विकल्पों में कुंजी सेट की गई हो।"
+  },
+  "providers.localai.serverNoAsr": {
+    "en": "The other device has no speech recognition model for {{source}}. Download one there first (in the model library of its sharing card), or let this computer listen.",
+    "text": "दूसरे डिवाइस पर {{source}} पहचानने वाला आवाज़ पहचान मॉडल नहीं है। पहले वहाँ शेयरिंग कार्ड की मॉडल लाइब्रेरी से एक डाउनलोड करें या इस कंप्यूटर को पहचानने दें।"
+  },
+  "providers.localai.serverNoDetect": {
+    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
+    "text": "दूसरे डिवाइस पर भाषा अपने आप पहचानने वाला आवाज़ पहचान मॉडल नहीं है। \"मैं … भी बोलता हूँ\" और दूसरे व्यक्ति की भाषा अपने आप पहचानने के लिए इसकी ज़रूरत है। पहले वहाँ Qwen3-ASR जैसा मॉडल डाउनलोड करें या ये दोनों विकल्प बंद करें।"
+  },
+  "providers.localai.serverNoModels": {
+    "en": "The other device has no model yet: install or download one there first.",
+    "text": "दूसरे डिवाइस पर अभी कोई मॉडल नहीं है। पहले वहाँ कोई मॉडल इंस्टॉल या डाउनलोड करें।"
+  },
+  "providers.localai.serverSilent": {
+    "en": "This address does not answer. If Kotomimi is running on that device, enable its sharing to use its installed native models.",
+    "text": "इस पते से कनेक्ट नहीं हो रहा। अगर उस डिवाइस पर Kotomimi चल रहा है, तो उसके इंस्टॉल किए हुए नेटिव मॉडल इस्तेमाल करने के लिए शेयरिंग चालू करें।"
+  },
+  "providers.localai.serverUnreachable": {
+    "en": "The other device ({{address}}) did not answer. Check that it is on and on the same network as this computer, and that Kotomimi there is sharing (or its model server is running). It is asked again by itself.",
+    "text": "दूसरे डिवाइस ({{address}}) से जवाब नहीं मिला। जाँचें कि वह चालू है, इस कंप्यूटर के नेटवर्क से जुड़ा है और वहाँ Kotomimi की शेयरिंग चालू है (या उसका मॉडल सर्वर चल रहा है)। कनेक्ट होने पर काम अपने आप जारी रहेगा।"
+  },
+  "providers.localai.sharedDeviceNone": {
+    "en": "No device connected yet",
+    "text": "अभी कोई डिवाइस कनेक्ट नहीं है"
+  },
+  "providers.localai.sourceAuto": {
+    "en": "The language cannot be detected with this setup. Choose the language you speak.",
+    "text": "इस सेटअप में भाषा अपने आप नहीं पहचानी जा सकती। अपनी बोलने की भाषा चुनें।"
+  },
+  "providers.localai.speedAbout": {
+    "en": "About {{seconds}} s",
+    "text": "लगभग {{seconds}} सेकंड"
+  },
+  "providers.localai.speedAdviceGeneral": {
+    "en": "A smaller model or a faster device is suggested.",
+    "text": "छोटा मॉडल या ज़्यादा तेज़ डिवाइस इस्तेमाल करने की सलाह है।"
+  },
+  "providers.localai.speedAdviceModel": {
+    "en": "A smaller model, such as {{name}}, is suggested.",
+    "text": "{{name}} जैसा छोटा मॉडल इस्तेमाल करने की सलाह है।"
+  },
+  "providers.localai.speedAdviceSwitch": {
+    "en": "Switch and test again",
+    "text": "बदलें और फिर गति जाँचें"
+  },
+  "providers.localai.speedBehind": {
+    "en": "Falls behind",
+    "text": "लगातार पीछे हो रहा है"
+  },
+  "providers.localai.speedCoach": {
+    "en": "{{seconds}} s per sentence for feedback, on average",
+    "text": "सुझाव मिलने में औसतन {{seconds}} सेकंड प्रति वाक्य"
+  },
+  "providers.localai.speedCoachSlow": {
+    "en": "Feedback is slower than speech, so it will fall further behind. ",
+    "text": "सुझाव मिलने की गति बोलने से धीमी है, इसलिए सुझाव लगातार पीछे होते जाएँगे। "
+  },
+  "providers.localai.speedFailed": {
+    "en": "The test could not finish: {{reason}}",
+    "text": "जाँच पूरी नहीं हो सकी: {{reason}}"
+  },
+  "providers.localai.speedHead": {
+    "en": "Speed test · {{when}}",
+    "text": "गति जाँच · {{when}}"
+  },
+  "providers.localai.speedHear": {
+    "en": "Text appears {{seconds}} s after the speech ends",
+    "text": "बोलना खत्म होने के {{seconds}} सेकंड बाद मूल पाठ दिखता है"
+  },
+  "providers.localai.speedHearSlow": {
+    "en": "Recognition is slower than speech, so the captions will fall further behind. ",
+    "text": "वाक् पहचान बोलने की गति से धीमी है, इसलिए उपशीर्षक लगातार पीछे होते जाएँगे। "
+  },
+  "providers.localai.speedJustNow": {
+    "en": "just now",
+    "text": "अभी-अभी"
+  },
+  "providers.localai.speedLegCoach": {
+    "en": "From you finishing to the feedback",
+    "text": "आपका बोलना खत्म होने से सुझाव दिखने तक"
+  },
+  "providers.localai.speedLegParticipant": {
+    "en": "From the other side finishing to the translation",
+    "text": "सामने वाले का बोलना खत्म होने से अनुवाद दिखने तक"
+  },
+  "providers.localai.speedLegSpeaker": {
+    "en": "From you finishing to the translation",
+    "text": "आपका बोलना खत्म होने से अनुवाद दिखने तक"
+  },
+  "providers.localai.speedNoClip": {
+    "en": "There is no test recording for this language yet.",
+    "text": "इस भाषा के लिए अभी जाँच की रिकॉर्डिंग उपलब्ध नहीं है।"
+  },
+  "providers.localai.speedNone": {
+    "en": "No result arrived during the test.",
+    "text": "जाँच के दौरान कोई नतीजा नहीं मिला।"
+  },
+  "providers.localai.speedRetest": {
+    "en": "Test again",
+    "text": "फिर गति जाँचें"
+  },
+  "providers.localai.speedStop": {
+    "en": "Stop",
+    "text": "रोकें"
+  },
+  "providers.localai.speedTest": {
+    "en": "Test speed",
+    "text": "गति जाँचें"
+  },
+  "providers.localai.speedTesting": {
+    "en": "Testing speed: a recording of about ten seconds is sent through each step at speaking pace. Nothing is recorded or played.",
+    "text": "गति जाँची जा रही है: लगभग 10 सेकंड की रिकॉर्डिंग सामान्य बोलने की गति से हर चरण में भेजी जा रही है। माइक्रोफ़ोन इस्तेमाल नहीं होगा और कोई आवाज़ नहीं बजेगी।"
+  },
+  "providers.localai.speedTranslate": {
+    "en": "{{seconds}} s per sentence to translate, on average",
+    "text": "अनुवाद में औसतन {{seconds}} सेकंड प्रति वाक्य"
+  },
+  "providers.localai.speedTranslateSlow": {
+    "en": "Translation is slower than speech, so the translations will fall further behind. ",
+    "text": "अनुवाद बोलने की गति से धीमा है, इसलिए अनुवाद लगातार पीछे होते जाएँगे। "
+  },
+  "providers.localai.speedVerdictOk": {
+    "en": "This setup keeps up with live speech.",
+    "text": "यह संयोजन लाइव बातचीत की गति के साथ चल सकता है।"
+  },
+  "providers.localai.speedVerdictSlow": {
+    "en": "Some steps cannot keep up with speech; see the notes above.",
+    "text": "कुछ चरण बोलने की गति के साथ नहीं चल पा रहे हैं। ऊपर दी गई जानकारी देखें।"
+  },
+  "providers.localai.stageDevice": {
+    "en": "Device",
+    "text": "डिवाइस"
+  },
+  "providers.localai.tag_native": {
+    "en": "Native engine",
+    "text": "नेटिव इंजन"
+  },
+  "providers.localai.tag_system": {
+    "en": "Built into macOS",
+    "text": "सिस्टम में शामिल"
+  },
+  "providers.localai.tagHint_native": {
+    "en": "Runs on the graphics card using a native engine downloaded with the model. Loads when a session starts; the first start after boot may take about half a minute. Memory is released after the engine is no longer in use.",
+    "text": "मॉडल के साथ डाउनलोड हुए नेटिव इंजन से ग्राफ़िक्स कार्ड पर चलता है। सत्र शुरू होने पर लोड होता है। कंप्यूटर चालू करने के बाद पहली बार शुरू होने में करीब आधा मिनट लग सकता है। इंजन का इस्तेमाल बंद होने पर मेमोरी खाली हो जाती है।"
+  },
+  "providers.localai.tagHint_system": {
+    "en": "The speech recognition of macOS itself: no video memory taken, nothing to warm up. The system downloads each language.",
+    "text": "Mac सिस्टम में शामिल आवाज़ की पहचान: ग्राफ़िक्स मेमोरी नहीं लेती और तैयार होने के लिए इंतज़ार नहीं करना पड़ता। हर भाषा का पैक सिस्टम डाउनलोड करता है।"
+  },
+  "providers.localai.textBaseUrlPlaceholder": {
+    "en": "e.g. https://api.openai.com/v1 or http://localhost:11434/v1",
+    "text": "जैसे https://api.openai.com/v1 या http://localhost:11434/v1"
+  },
+  "providers.localai.textModelPlaceholder": {
+    "en": "The model's name, e.g. gpt-4o-mini",
+    "text": "मॉडल का नाम, जैसे gpt-4o-mini"
+  },
+  "providers.localai.translateInSession": {
+    "en": "The device's own choice (translated in the same session it hears in)",
+    "text": "उस डिवाइस को चुनने दें (पहचान और अनुवाद एक ही सत्र में)"
+  },
+  "providers.localai.translateKey": {
+    "en": "API key of the translation model",
+    "text": "अनुवाद मॉडल की API कुंजी"
+  },
+  "providers.localai.translateKotomimiOwn": {
+    "en": "The device's own choice (its best model for your languages)",
+    "text": "उस डिवाइस को चुनने दें (आपकी दोनों भाषाओं के लिए सबसे सही मॉडल)"
+  },
+  "providers.localai.translateStage": {
+    "en": "Translation",
+    "text": "अनुवाद"
+  },
+  "providers.localai.translateStageTooltip": {
+    "en": "What turns the recognized text into the other language. An API model is any service that speaks the OpenAI chat API: a hosted one, or Ollama or LM Studio on this computer.",
+    "text": "पहचाने गए टेक्स्ट को दूसरी भाषा में अनुवाद करने वाला चरण। API मॉडल के लिए OpenAI चैट API का समर्थन करने वाली कोई भी सेवा चलेगी: क्लाउड सेवा या इस कंप्यूटर पर चल रहा Ollama या LM Studio।"
+  },
+  "providers.localai.translateUnnamed": {
+    "en": "Translation has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "अनुवाद के लिए अभी कोई मॉडल उपलब्ध नहीं है। सेवा प्रदाता के नीचे \"अनुवाद\" कार्ड में मॉडल चुनें (API मॉडल के लिए पता और मॉडल का नाम भरें) या चलाने की जगह बदलें।"
+  },
+  "providers.localai.translatorFailed": {
+    "en": "The translation engine of this computer could not start. In the Translation card, press \"Try again\" — or choose another model.",
+    "text": "इस कंप्यूटर का अनुवाद इंजन शुरू नहीं हो सका। \"अनुवाद\" कार्ड में \"फिर कोशिश करें\" दबाएँ या दूसरा मॉडल चुनें।"
+  },
+  "providers.localai.translatorFailedShort": {
+    "en": "The translation engine could not start.",
+    "text": "अनुवाद इंजन शुरू नहीं हो सका।"
+  },
+  "providers.localai.translatorMissing": {
+    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} अभी डाउनलोड नहीं हुआ है। \"अनुवाद\" कार्ड में नेटिव मॉडल डाउनलोड करें या \"API मॉडल\" या \"दूसरा डिवाइस\" चुनें।"
+  },
+  "providers.localai.translatorReady": {
+    "en": "The translation engine is ready.",
+    "text": "अनुवाद इंजन तैयार है।"
+  },
+  "providers.localai.translatorUnfit": {
+    "en": "{{name}} does not translate between your two languages. Choose another model for it.",
+    "text": "{{name}} आपकी चुनी हुई दोनों भाषाओं के बीच अनुवाद का समर्थन नहीं करता। दूसरा मॉडल चुनें।"
+  },
+  "providers.localai.translatorUnsupported": {
+    "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
+    "text": "यह सिस्टम अभी नेटिव अनुवाद इंजन का समर्थन नहीं करता। \"अनुवाद\" कार्ड में \"API मॉडल\" या \"दूसरा डिवाइस\" चुनें।"
+  },
+  "providers.localai.translatorWarming": {
+    "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",
+    "text": "इस कंप्यूटर का अनुवाद इंजन अभी शुरू हो रहा है। बस कुछ सेकंड लगेंगे। तैयार होते ही आप शुरू कर सकते हैं।"
+  },
+  "providers.localai.translatorWarmingShort": {
+    "en": "Starting the translation engine…",
+    "text": "अनुवाद इंजन शुरू हो रहा है…"
+  },
+  "providers.localai.typedFailed": {
+    "en": "A sentence you typed was not translated: the translation model did not answer.",
+    "text": "टाइप किए गए एक वाक्य का अनुवाद नहीं हुआ: अनुवाद मॉडल से जवाब नहीं मिला।"
+  },
+  "providers.localai.viaModel": {
+    "en": "API model",
+    "text": "API मॉडल"
+  },
+  "providers.openai_live.name": {
+    "en": "OpenAI Live",
+    "text": "OpenAI Live"
+  },
+  "providers.openai_translate.name": {
+    "en": "OpenAI Translate",
+    "text": "OpenAI Translate"
+  },
+  "providers.openai.name": {
+    "en": "OpenAI Realtime",
+    "text": "OpenAI Realtime"
+  },
+  "providers.palabraai.authModeApp": {
+    "en": "App Client ID/Secret",
+    "text": "ऐप क्लाइंट आईडी/सीक्रेट"
+  },
+  "providers.palabraai.clientIdPlaceholder": {
+    "en": "Client ID",
+    "text": "क्लाइंट आईडी"
+  },
+  "providers.palabraai.clientSecretPlaceholder": {
+    "en": "Client Secret",
+    "text": "क्लाइंट सीक्रेट"
+  },
+  "providers.palabraai.name": {
+    "en": "Palabra AI",
+    "text": "Palabra AI"
+  },
+  "providers.qwen_livetranslate.name": {
+    "en": "Qwen LiveTranslate",
+    "text": "Qwen LiveTranslate"
+  },
+  "providers.soniox.name": {
+    "en": "Soniox",
+    "text": "Soniox"
+  },
+  "providers.volcengine_ast2.accessTokenPlaceholder": {
+    "en": "Access Token",
+    "text": "एक्सेस टोकन"
+  },
+  "providers.volcengine_ast2.appIdPlaceholder": {
+    "en": "APP ID",
+    "text": "ऐप आईडी"
+  },
+  "providers.volcengine_ast2.name": {
+    "en": "Doubao AST 2.0",
+    "text": "Doubao साथ-साथ अनुवाद 2.0"
+  },
+  "settings.glossaryAdd": {
+    "en": "Add a word…",
+    "text": "शब्द जोड़ें…"
+  },
+  "settings.glossaryDelete": {
+    "en": "Delete entry",
+    "text": "प्रविष्टि हटाएँ"
+  },
+  "settings.glossaryFixOpen": {
+    "en": "Fix word",
+    "text": "शब्द सुधारें"
+  },
+  "settings.glossaryFixSave": {
+    "en": "Save to glossary",
+    "text": "शब्दकोश में सहेजें"
+  },
+  "settings.glossaryFixTo": {
+    "en": "Change to",
+    "text": "बदलकर यह करें"
+  },
+  "settings.glossaryFull": {
+    "en": "Glossary is full",
+    "text": "शब्दकोश भर गया है"
+  },
+  "settings.glossaryHeard": {
+    "en": "Misheard as",
+    "text": "गलती से यह सुना"
+  },
+  "settings.glossaryOptional": {
+    "en": "Only if misheard",
+    "text": "गलत सुना हो तभी भरें"
+  },
+  "settings.glossaryTitle": {
+    "en": "Personal glossary",
+    "text": "निजी शब्दकोश"
+  },
+  "settings.glossaryTooltip": {
+    "en": "Names and special words. Write each in the language it is spoken in. Where one has been misheard, add how on the right and it is put right from then on; some recognition models only follow that column. You can also select a misheard word in the conversation and correct it there.",
+    "text": "नाम और खास शब्द उसी भाषा में लिखें जिसमें वे बोले जाते हैं। कोई शब्द गलत सुना गया हो, तो दाईं ओर उसका गलत रूप लिखें। आगे से वह अपने आप सही हो जाएगा। कुछ वाक् पहचान मॉडल केवल दाईं ओर वाले कॉलम का इस्तेमाल करते हैं। बातचीत में गलत सुने गए शब्द को चुनकर भी सीधे सुधार सकते हैं।"
+  },
+  "settings.glossaryTooltipLabel": {
+    "en": "About personal glossary",
+    "text": "निजी शब्दकोश के बारे में"
+  },
+  "settings.glossaryWritten": {
+    "en": "Word",
+    "text": "शब्द"
+  },
+  "settings.transcriptKeywordsPlaceholder": {
+    "en": "Sokuji, Kizuna AI, PulseAudio",
+    "text": "Sokuji, Kizuna AI, PulseAudio"
+  },
+  "tour.steps.kotomimi-tips.coach": {
+    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
+    "text": "खुद उनकी भाषा बोल रहे हैं? सेटिंग्स में व्याकरण संबंधी सुझाव चालू करें। अनुवाद और सिर्फ़ आपको दिखने वाले व्याकरण के सुझाव साथ पाने के लिए \"मैं दूसरी भाषा भी बोलता हूँ\" भी चालू कर सकते हैं।"
+  },
+  "tour.steps.kotomimi-tips.content": {
+    "en": "Worth knowing before you start:",
+    "text": "शुरू करने से पहले जान लें:"
+  },
+  "tour.steps.kotomimi-tips.share": {
+    "en": "Another device can use this computer's models: Settings → Provider → Share with other devices.",
+    "text": "दूसरा डिवाइस भी इस कंप्यूटर के मॉडल इस्तेमाल कर सकता है: सेटिंग्स → प्रदाता → दूसरे डिवाइसों के साथ साझा करें।"
+  },
+  "tour.steps.kotomimi-tips.title": {
+    "en": "Three more things",
+    "text": "तीन और बातें"
+  },
+  "tour.steps.kotomimi-tips.typed": {
+    "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
+    "text": "सत्र शुरू होने पर नीचे एक टेक्स्ट बॉक्स दिखेगा: कोई वाक्य लिखें और उसका अनुवाद पाएँ। सीधे उस बॉक्स पर जाने के लिए Ctrl+K दबाएँ।"
+  },
+  "tour.steps.models.content_kotomimi": {
+    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
+    "text": "मॉडल यहाँ डाउनलोड करें: चरण के कार्ड में \"मॉडल लाइब्रेरी\" खोलें। \"सुझाया गया\" निशान वाले मॉडल असली बातचीत के परीक्षण में सबसे अच्छे रहे हैं। हर मॉडल के नाम के पास छोटे आइकन में परीक्षण के नतीजे हैं। डाउनलोड होते ही मॉडल अपने आप इस्तेमाल होने लगता है।"
+  },
+  "tour.steps.provider-settings.content_kotomimi": {
+    "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",
+    "text": "यहाँ हर चरण का अपना कार्ड है: आवाज़ की पहचान, अनुवाद और व्याकरण की सलाह। कार्ड में चुनें कि वह कहाँ चलेगा (आपके नेटवर्क का दूसरा डिवाइस, API मॉडल या यह कंप्यूटर)। मॉडल भी वहीं चुनें। \"सेटिंग्स → सेवा प्रदाता\" में इस कंप्यूटर के मॉडल दूसरे डिवाइस के साथ शेयर भी कर सकते हैं।"
+  },
+  "tour.steps.reading-aids.content": {
+    "en": "Help for reading the other language, switched here:",
+    "text": "विदेशी भाषा पढ़ने में मदद करने वाले विकल्प यहाँ चालू या बंद करें:"
+  },
+  "tour.steps.reading-aids.fonts": {
+    "en": "Fonts for each language are under Settings → Fonts.",
+    "text": "हर भाषा का फ़ॉन्ट सेटिंग्स → फ़ॉन्ट में चुनें।"
+  },
+  "tour.steps.reading-aids.furigana": {
+    "en": "Furigana — kana above Japanese kanji.",
+    "text": "फ़ुरिगाना — जापानी कांजी के ऊपर काना में उच्चारण।"
+  },
+  "tour.steps.reading-aids.pinyin": {
+    "en": "Pinyin — tone-marked pinyin above Chinese.",
+    "text": "पिनयिन: चीनी के ऊपर स्वर-चिह्नों वाला पिनयिन दिखाएँ।"
+  },
+  "tour.steps.reading-aids.romanization": {
+    "en": "Romanization — a line in Latin letters under Japanese, Korean, Russian and Ukrainian.",
+    "text": "रोमन लिप्यंतरण: जापानी, कोरियाई, रूसी और यूक्रेनी के नीचे लैटिन अक्षरों में उच्चारण की एक पंक्ति।"
+  },
+  "tour.steps.reading-aids.title": {
+    "en": "Reading aids",
+    "text": "पढ़ने में मदद"
+  },
+  "voiceLibrary.cloneVoiceRequired": {
+    "en": "This voice needs a clip before it can speak — open the voice list and add one.",
+    "text": "यह आवाज़ अभी बोल नहीं सकती। आवाज़ों की सूची खोलकर एक वॉइस क्लिप जोड़ें।"
+  },
+  "voiceLibrary.filter.accent.african": {
+    "en": "African",
+    "text": "अफ़्रीकी"
+  },
+  "voiceLibrary.filter.accent.american": {
+    "en": "American",
+    "text": "अमेरिकी"
+  },
+  "voiceLibrary.filter.accent.arabic": {
+    "en": "Arabic",
+    "text": "अरबी"
+  },
+  "voiceLibrary.filter.accent.australian": {
+    "en": "Australian",
+    "text": "ऑस्ट्रेलियाई"
+  },
+  "voiceLibrary.filter.accent.brazilian": {
+    "en": "Brazilian",
+    "text": "ब्राज़ीली"
+  },
+  "voiceLibrary.filter.accent.british": {
+    "en": "British",
+    "text": "ब्रिटिश"
+  },
+  "voiceLibrary.filter.accent.chinese": {
+    "en": "Chinese",
+    "text": "चीनी"
+  },
+  "voiceLibrary.filter.accent.french": {
+    "en": "French",
+    "text": "फ़्रेंच"
+  },
+  "voiceLibrary.filter.accent.german": {
+    "en": "German",
+    "text": "जर्मन"
+  },
+  "voiceLibrary.filter.accent.indian": {
+    "en": "Indian",
+    "text": "भारतीय"
+  },
+  "voiceLibrary.filter.accent.italian": {
+    "en": "Italian",
+    "text": "इतालवी"
+  },
+  "voiceLibrary.filter.accent.japanese": {
+    "en": "Japanese",
+    "text": "जापानी"
+  },
+  "voiceLibrary.filter.accent.korean": {
+    "en": "Korean",
+    "text": "कोरियाई"
+  },
+  "voiceLibrary.filter.accent.latin_american": {
+    "en": "Latin American",
+    "text": "लातिन अमेरिकी"
+  },
+  "voiceLibrary.filter.accent.portuguese": {
+    "en": "Portuguese",
+    "text": "पुर्तगाली"
+  },
+  "voiceLibrary.filter.accent.slavic": {
+    "en": "Slavic",
+    "text": "स्लाव"
+  },
+  "voiceLibrary.filter.accent.southeast_asian": {
+    "en": "Southeast Asian",
+    "text": "दक्षिण-पूर्व एशियाई"
+  },
+  "voiceLibrary.filter.accent.spanish": {
+    "en": "Spanish",
+    "text": "स्पेनिश"
+  },
+  "voiceLibrary.filter.accentLabel": {
+    "en": "Accent",
+    "text": "लहजा"
+  },
+  "voiceLibrary.filter.age.child": {
+    "en": "Child",
+    "text": "बच्चा"
+  },
+  "voiceLibrary.filter.age.middle_aged": {
+    "en": "Middle-aged",
+    "text": "अधेड़"
+  },
+  "voiceLibrary.filter.age.old": {
+    "en": "Mature",
+    "text": "बुज़ुर्ग"
+  },
+  "voiceLibrary.filter.age.teen": {
+    "en": "Teen",
+    "text": "किशोर"
+  },
+  "voiceLibrary.filter.age.young": {
+    "en": "Young",
+    "text": "युवा"
+  },
+  "voiceLibrary.filter.ageLabel": {
+    "en": "Age",
+    "text": "उम्र"
+  },
+  "voiceLibrary.filter.anyAccent": {
+    "en": "Any accent",
+    "text": "कोई भी लहजा"
+  },
+  "voiceLibrary.filter.anyAge": {
+    "en": "Any age",
+    "text": "कोई भी उम्र"
+  },
+  "voiceLibrary.filter.anyGender": {
+    "en": "Any gender",
+    "text": "कोई भी लिंग"
+  },
+  "voiceLibrary.filter.anyStyle": {
+    "en": "Any style",
+    "text": "कोई भी अंदाज़"
+  },
+  "voiceLibrary.filter.anyUseCase": {
+    "en": "Any use case",
+    "text": "कोई भी उपयोग"
+  },
+  "voiceLibrary.filter.clear": {
+    "en": "Clear filters",
+    "text": "फ़िल्टर हटाएँ"
+  },
+  "voiceLibrary.filter.count": {
+    "en": "{shown} of {total} voices",
+    "text": "{total} में से {shown} आवाज़ें"
+  },
+  "voiceLibrary.filter.empty": {
+    "en": "No voices match these filters.",
+    "text": "इन फ़िल्टर से मेल खाती कोई आवाज़ नहीं मिली।"
+  },
+  "voiceLibrary.filter.gender.female": {
+    "en": "Female",
+    "text": "महिला"
+  },
+  "voiceLibrary.filter.gender.male": {
+    "en": "Male",
+    "text": "पुरुष"
+  },
+  "voiceLibrary.filter.gender.neutral": {
+    "en": "Neutral",
+    "text": "तटस्थ"
+  },
+  "voiceLibrary.filter.genderLabel": {
+    "en": "Gender",
+    "text": "लिंग"
+  },
+  "voiceLibrary.filter.style.breathy": {
+    "en": "Breathy",
+    "text": "साँस भरी"
+  },
+  "voiceLibrary.filter.style.breezy": {
+    "en": "Breezy",
+    "text": "हल्का-फुल्का"
+  },
+  "voiceLibrary.filter.style.bright": {
+    "en": "Bright",
+    "text": "खिली हुई"
+  },
+  "voiceLibrary.filter.style.calm": {
+    "en": "Calm",
+    "text": "शांत"
+  },
+  "voiceLibrary.filter.style.casual": {
+    "en": "Casual",
+    "text": "बेतकल्लुफ़"
+  },
+  "voiceLibrary.filter.style.clear": {
+    "en": "Clear",
+    "text": "साफ़"
+  },
+  "voiceLibrary.filter.style.confident": {
+    "en": "Confident",
+    "text": "आत्मविश्वासी"
+  },
+  "voiceLibrary.filter.style.deep": {
+    "en": "Deep",
+    "text": "गहरी"
+  },
+  "voiceLibrary.filter.style.dramatic": {
+    "en": "Dramatic",
+    "text": "नाटकीय"
+  },
+  "voiceLibrary.filter.style.easy_going": {
+    "en": "Easy-going",
+    "text": "मिलनसार"
+  },
+  "voiceLibrary.filter.style.energetic": {
+    "en": "Energetic",
+    "text": "जोशीला"
+  },
+  "voiceLibrary.filter.style.even": {
+    "en": "Even",
+    "text": "स्थिर"
+  },
+  "voiceLibrary.filter.style.excitable": {
+    "en": "Excitable",
+    "text": "उत्साहपूर्ण"
+  },
+  "voiceLibrary.filter.style.expressive": {
+    "en": "Expressive",
+    "text": "भावपूर्ण"
+  },
+  "voiceLibrary.filter.style.firm": {
+    "en": "Firm",
+    "text": "दृढ़"
+  },
+  "voiceLibrary.filter.style.formal": {
+    "en": "Formal",
+    "text": "औपचारिक"
+  },
+  "voiceLibrary.filter.style.forward": {
+    "en": "Forward",
+    "text": "बेबाक"
+  },
+  "voiceLibrary.filter.style.friendly": {
+    "en": "Friendly",
+    "text": "दोस्ताना"
+  },
+  "voiceLibrary.filter.style.gentle": {
+    "en": "Gentle",
+    "text": "सौम्य"
+  },
+  "voiceLibrary.filter.style.gravelly": {
+    "en": "Gravelly",
+    "text": "खुरदरी"
+  },
+  "voiceLibrary.filter.style.informative": {
+    "en": "Informative",
+    "text": "समझाने वाला"
+  },
+  "voiceLibrary.filter.style.knowledgeable": {
+    "en": "Knowledgeable",
+    "text": "जानकार"
+  },
+  "voiceLibrary.filter.style.lively": {
+    "en": "Lively",
+    "text": "जीवंत"
+  },
+  "voiceLibrary.filter.style.mature": {
+    "en": "Mature",
+    "text": "परिपक्व"
+  },
+  "voiceLibrary.filter.style.neutral": {
+    "en": "Neutral",
+    "text": "तटस्थ"
+  },
+  "voiceLibrary.filter.style.playful": {
+    "en": "Playful",
+    "text": "चुलबुला"
+  },
+  "voiceLibrary.filter.style.raspy": {
+    "en": "Raspy",
+    "text": "कर्कश"
+  },
+  "voiceLibrary.filter.style.smooth": {
+    "en": "Smooth",
+    "text": "प्रवाहपूर्ण"
+  },
+  "voiceLibrary.filter.style.soft": {
+    "en": "Soft",
+    "text": "मुलायम"
+  },
+  "voiceLibrary.filter.style.upbeat": {
+    "en": "Upbeat",
+    "text": "खुशनुमा"
+  },
+  "voiceLibrary.filter.style.warm": {
+    "en": "Warm",
+    "text": "अपनापन भरा"
+  },
+  "voiceLibrary.filter.style.youthful": {
+    "en": "Youthful",
+    "text": "युवा"
+  },
+  "voiceLibrary.filter.styleLabel": {
+    "en": "Style",
+    "text": "अंदाज़"
+  },
+  "voiceLibrary.filter.useCase.conversational": {
+    "en": "Conversation",
+    "text": "बातचीत"
+  },
+  "voiceLibrary.filter.useCase.educational": {
+    "en": "Teaching",
+    "text": "समझाना"
+  },
+  "voiceLibrary.filter.useCase.entertainment": {
+    "en": "Entertainment",
+    "text": "मनोरंजन"
+  },
+  "voiceLibrary.filter.useCase.narration": {
+    "en": "Narration",
+    "text": "कथावाचन"
+  },
+  "voiceLibrary.filter.useCase.social_media": {
+    "en": "Social media",
+    "text": "सोशल मीडिया"
+  },
+  "voiceLibrary.filter.useCaseLabel": {
+    "en": "Use case",
+    "text": "उपयोग"
+  }
+}

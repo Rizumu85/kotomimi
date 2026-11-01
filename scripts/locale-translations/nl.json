@@ -1,0 +1,2274 @@
+{
+  "audioSystem.installCommand": {
+    "en": "sudo apt install pulseaudio-utils",
+    "text": "sudo apt install pulseaudio-utils"
+  },
+  "captionShare.kinds.wifi": {
+    "en": "Wi‑Fi",
+    "text": "Wifi"
+  },
+  "common.logs": {
+    "en": "Logs",
+    "text": "Logboeken"
+  },
+  "engine.ready": {
+    "en": "Engine {{version}}",
+    "text": "Engine {{version}}"
+  },
+  "engine.status.devVenv": {
+    "en": "dev venv",
+    "text": "virtuele ontwikkelomgeving"
+  },
+  "engine.status.native": {
+    "en": "native {{version}}",
+    "text": "native {{version}}"
+  },
+  "fork.aids.furigana": {
+    "en": "Furigana",
+    "text": "Furigana"
+  },
+  "fork.aids.highlight": {
+    "en": "Highlight new",
+    "text": "Nieuwe tekst markeren"
+  },
+  "fork.aids.italic": {
+    "en": "Italic source",
+    "text": "Origineel cursief"
+  },
+  "fork.aids.pinyin": {
+    "en": "Pinyin",
+    "text": "Pinyin"
+  },
+  "fork.aids.readings": {
+    "en": "Readings",
+    "text": "Uitspraak"
+  },
+  "fork.aids.roman": {
+    "en": "Romanization",
+    "text": "Romanisatie"
+  },
+  "fork.aids.text": {
+    "en": "Text",
+    "text": "Tekst"
+  },
+  "fork.audio.echoAction": {
+    "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
+    "text": "Gebruik een hoofdtelefoon om de geluidslus te doorbreken, of verhoog de activeringsdrempel bij Instellingen → Microfoon."
+  },
+  "fork.audio.gate": {
+    "en": "Mic activation threshold",
+    "text": "Activeringsdrempel microfoon"
+  },
+  "fork.audio.gateHint": {
+    "en": "Press the microphone, speak, and set the mark under where the bar reaches — and above where it sits while only your speakers are heard.",
+    "text": "Klik op het microfoonpictogram en zeg een paar zinnen. Zet de markering onder het niveau dat de balk bereikt als je praat, maar boven het niveau wanneer alleen je luidsprekers geluid geven."
+  },
+  "fork.audio.gateOff": {
+    "en": "Off",
+    "text": "Uit"
+  },
+  "fork.audio.gateQuiet": {
+    "en": "Nothing from the microphone yet.",
+    "text": "Nog geen geluid van de microfoon."
+  },
+  "fork.audio.gateTest": {
+    "en": "Test the microphone: the bar shows its level",
+    "text": "Microfoon testen: de balk toont het huidige volume"
+  },
+  "fork.audio.gateTestStop": {
+    "en": "Stop the test",
+    "text": "Test stoppen"
+  },
+  "fork.audio.gateTooltip": {
+    "en": "Sound quieter than this is heard as silence — the other side's voice from your speakers, the keyboard, the room — so it is neither translated nor checked. The microphone is heard about 0.2 s later while this is on. Off: everything is heard.",
+    "text": "Geluid onder dit volume telt als stilte, zoals de stem van de ander uit je luidsprekers, toetsenbordgeluid en omgevingsgeluid. Het wordt niet vertaald of op grammatica gecontroleerd. Met deze optie aan is het microfoongeluid ongeveer 0.2 s vertraagd. Uit: al het geluid wordt doorgestuurd."
+  },
+  "fork.audio.vbcableInstall": {
+    "en": "Install VB-CABLE",
+    "text": "VB-CABLE installeren"
+  },
+  "fork.audio.vbcableInstalling": {
+    "en": "Downloading… this can take a minute",
+    "text": "Downloaden, dit kan even duren…"
+  },
+  "fork.audio.vbcableMissing": {
+    "en": "The VB-CABLE virtual audio driver is not installed, so a spoken translation cannot be sent into a meeting. Subtitles do not need it.",
+    "text": "Het virtuele audiostuurprogramma VB-CABLE is niet geïnstalleerd. Daardoor kan de vertaalde spraak niet naar je vergaderapp worden gestuurd. Voor alleen ondertiteling is het niet nodig."
+  },
+  "fork.autostart.note": {
+    "en": "Kotomimi waits in the background after you sign in, with an icon in the notification area, and loads the models once ahead of time so the first session does not wait for it.",
+    "text": "Na het aanmelden staat Kotomimi op de achtergrond klaar, met een pictogram in het systeemvak. De modellen worden alvast geladen, zodat je bij je eerste sessie niet extra hoeft te wachten."
+  },
+  "fork.autostart.title": {
+    "en": "Startup",
+    "text": "Opstarten"
+  },
+  "fork.autostart.toggle": {
+    "en": "Start in the background when I sign in to Windows",
+    "text": "Op de achtergrond starten bij aanmelden bij Windows"
+  },
+  "fork.custom.add": {
+    "en": "Add",
+    "text": "Toevoegen"
+  },
+  "fork.custom.added": {
+    "en": "Added {{name}} ({{size}} MB). Download it in the model library.",
+    "text": "{{name}} toegevoegd ({{size}} MB). Download het in de modelbibliotheek."
+  },
+  "fork.custom.adding": {
+    "en": "Looking…",
+    "text": "Zoeken…"
+  },
+  "fork.custom.anyLanguage": {
+    "en": "Every language",
+    "text": "Meertalig"
+  },
+  "fork.custom.downloaded": {
+    "en": "downloaded",
+    "text": "gedownload"
+  },
+  "fork.custom.error_bad_repo": {
+    "en": "That is not a repository id. It looks like owner/name.",
+    "text": "Dit is geen repositorynaam. Gebruik de vorm eigenaar/naam."
+  },
+  "fork.custom.error_exists": {
+    "en": "This model is already added.",
+    "text": "Dit model is al toegevoegd."
+  },
+  "fork.custom.error_not_found": {
+    "en": "No public repository by that name.",
+    "text": "Geen openbare repository met die naam gevonden."
+  },
+  "fork.custom.error_not_whisper": {
+    "en": "This repository is not a Whisper model in the ONNX layout. {{detail}}",
+    "text": "Deze repository bevat geen Whisper-model in ONNX-formaat. {{detail}}"
+  },
+  "fork.custom.error_unreachable": {
+    "en": "Could not reach Hugging Face: {{detail}}",
+    "text": "Kan Hugging Face niet bereiken: {{detail}}"
+  },
+  "fork.custom.intro": {
+    "en": "For a Whisper model the library does not list, such as one fine-tuned for your language. Give its Hugging Face repository id (most onnx-community/… and Xenova/… Whisper repositories work); it needs a graphics card.",
+    "text": "Voor een Whisper-model dat niet in de bibliotheek staat, bijvoorbeeld een model dat voor jouw taal is aangepast. Vul de repositorynaam op Hugging Face in. De meeste Whisper-repository's van onnx-community/… en Xenova/… werken. Een grafische kaart is vereist."
+  },
+  "fork.custom.language": {
+    "en": "The language it hears",
+    "text": "Taal die het herkent"
+  },
+  "fork.custom.notDownloaded": {
+    "en": "not downloaded",
+    "text": "niet gedownload"
+  },
+  "fork.custom.remove": {
+    "en": "Remove {{name}}",
+    "text": "{{name}} verwijderen"
+  },
+  "fork.custom.repo": {
+    "en": "Repository id",
+    "text": "Repositorynaam"
+  },
+  "fork.custom.title": {
+    "en": "Add a Whisper model from Hugging Face",
+    "text": "Whisper-model van Hugging Face toevoegen"
+  },
+  "fork.echoCancellationApp": {
+    "en": "Kotomimi only",
+    "text": "Alleen Kotomimi"
+  },
+  "fork.echoCancellationAppTooltip": {
+    "en": "Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "Alleen Kotomimi: verwijdert alleen de vertaalde spraak die Kotomimi zelf afspeelt. Kies dit als je microfoon een virtuele geluidskaart is (VB-Cable, BlackHole)."
+  },
+  "fork.find.again": {
+    "en": "Search again",
+    "text": "Opnieuw zoeken"
+  },
+  "fork.find.kindKotomimi": {
+    "en": "Kotomimi",
+    "text": "Kotomimi-deling"
+  },
+  "fork.find.kindPhone": {
+    "en": "Phone · speech recognition",
+    "text": "Telefoon · spraakherkenning"
+  },
+  "fork.find.kindPhoneLends": {
+    "en": "Phone · {{what}}",
+    "text": "Telefoon · {{what}}"
+  },
+  "fork.find.kindServer": {
+    "en": "Model server",
+    "text": "Modelserver"
+  },
+  "fork.find.lendsAsr": {
+    "en": "speech recognition",
+    "text": "spraakherkenning"
+  },
+  "fork.find.lendsCoach": {
+    "en": "grammar feedback",
+    "text": "grammaticafeedback"
+  },
+  "fork.find.lendsTranslate": {
+    "en": "translation",
+    "text": "vertaling"
+  },
+  "fork.find.manual": {
+    "en": "Or type its address",
+    "text": "Of vul zelf het adres in"
+  },
+  "fork.find.models": {
+    "en": "{{count}} model(s)",
+    "text": "{{count}} model(len)"
+  },
+  "fork.find.needsKey": {
+    "en": "asks for an access key",
+    "text": "toegangssleutel nodig"
+  },
+  "fork.find.none": {
+    "en": "Nothing found. Check that the other device is on, is on the same Wi-Fi or router as this one, and has \"Share this computer's models\" turned on in its Kotomimi. You can also type its address below.",
+    "text": "Niets gevonden. Controleer of het andere apparaat aanstaat, met hetzelfde wifi-netwerk of dezelfde router is verbonden en in Kotomimi 'Modellen van deze computer delen' heeft ingeschakeld. Je kunt hieronder ook zelf het adres invullen."
+  },
+  "fork.find.productHere": {
+    "en": "{{product}} on this computer",
+    "text": "{{product}} op deze computer"
+  },
+  "fork.find.search": {
+    "en": "Search my network for devices",
+    "text": "Apparaten op mijn lokale netwerk zoeken"
+  },
+  "fork.find.searching": {
+    "en": "Looking for devices on your network…",
+    "text": "Apparaten op je lokale netwerk zoeken…"
+  },
+  "fork.find.thisComputer": {
+    "en": "On this computer",
+    "text": "Server op deze computer"
+  },
+  "fork.find.title": {
+    "en": "Found on your network",
+    "text": "Apparaten op je lokale netwerk"
+  },
+  "fork.find.use": {
+    "en": "Use {{name}}",
+    "text": "{{name}} gebruiken"
+  },
+  "fork.fonts.add": {
+    "en": "Add a language…",
+    "text": "Taal toevoegen…"
+  },
+  "fork.fonts.default": {
+    "en": "App default",
+    "text": "Standaard van de app"
+  },
+  "fork.fonts.languages": {
+    "en": "Conversation text, by language",
+    "text": "Gesprekstekst per taal"
+  },
+  "fork.fonts.latin": {
+    "en": "Latin letters and digits",
+    "text": "Latijnse letters en cijfers"
+  },
+  "fork.fonts.latinHint": {
+    "en": "English letters and digits in the conversation",
+    "text": "Engelse letters en cijfers in het gesprek"
+  },
+  "fork.fonts.loading": {
+    "en": "Reading the installed fonts…",
+    "text": "Geïnstalleerde lettertypen lezen…"
+  },
+  "fork.fonts.none": {
+    "en": "No font matches",
+    "text": "Geen passende lettertypen"
+  },
+  "fork.fonts.others": {
+    "en": "Other fonts (may lack this script)",
+    "text": "Andere lettertypen (ondersteunen dit schrift mogelijk niet)"
+  },
+  "fork.fonts.pinyin": {
+    "en": "Pinyin above the text",
+    "text": "Pinyin boven de tekst"
+  },
+  "fork.fonts.reading": {
+    "en": "Readings above the text",
+    "text": "Furigana boven de tekst"
+  },
+  "fork.fonts.remove": {
+    "en": "Reset {{language}}",
+    "text": "Standaardlettertype voor {{language}} herstellen"
+  },
+  "fork.fonts.roman": {
+    "en": "Romanization",
+    "text": "Romanisatie"
+  },
+  "fork.fonts.romanHint": {
+    "en": "The readings under Japanese, Korean, Russian and Ukrainian",
+    "text": "Uitspraak onder Japans, Koreaans, Russisch en Oekraïens"
+  },
+  "fork.fonts.search": {
+    "en": "Search fonts",
+    "text": "Lettertypen zoeken"
+  },
+  "fork.fonts.text": {
+    "en": "Text",
+    "text": "Tekst"
+  },
+  "fork.fonts.title": {
+    "en": "Fonts",
+    "text": "Lettertypen"
+  },
+  "fork.fonts.tooltip": {
+    "en": "Fonts installed on this computer. Characters a font lacks are shown in the app's own.",
+    "text": "Gebruik lettertypen die op deze computer zijn geïnstalleerd. Ontbrekende tekens worden in het standaardlettertype van de app weergegeven."
+  },
+  "fork.fonts.ui": {
+    "en": "Interface",
+    "text": "Interface"
+  },
+  "fork.fonts.uiHint": {
+    "en": "Menus, settings and buttons",
+    "text": "Menu's, instellingen en knoppen"
+  },
+  "fork.furigana": {
+    "en": "Furigana over kanji (Japanese)",
+    "text": "Furigana boven kanji (Japans)"
+  },
+  "fork.help.issues": {
+    "en": "Report a problem",
+    "text": "Probleem melden"
+  },
+  "fork.help.issuesTooltip": {
+    "en": "Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page.",
+    "text": "Kotomimi is een onafhankelijke afsplitsing van Sokuji. Meld problemen met deze app op de eigen GitHub-pagina van Kotomimi."
+  },
+  "fork.lan.copied": {
+    "en": "Copied",
+    "text": "Gekopieerd"
+  },
+  "fork.lan.copy": {
+    "en": "Copy",
+    "text": "Kopiëren"
+  },
+  "fork.lan.direction": {
+    "en": "Which direction to show models for",
+    "text": "Voor welke richting modellen tonen"
+  },
+  "fork.lan.enable": {
+    "en": "Share this computer's models",
+    "text": "Modellen van deze computer delen"
+  },
+  "fork.lan.failed": {
+    "en": "Sharing could not start: {{message}}",
+    "text": "Delen kon niet worden gestart: {{message}}"
+  },
+  "fork.lan.firewall": {
+    "en": "The first time, your system's firewall may ask whether to allow Kotomimi on the network: allow it for private networks.",
+    "text": "De eerste keer kan de firewall vragen of Kotomimi toegang tot het netwerk mag krijgen. Sta dit toe voor privénetwerken."
+  },
+  "fork.lan.firewallAllow": {
+    "en": "Allow",
+    "text": "Toestaan"
+  },
+  "fork.lan.firewallBlocked": {
+    "en": "Windows Firewall is keeping other devices out",
+    "text": "Windows Firewall blokkeert andere apparaten"
+  },
+  "fork.lan.firewallDeclined": {
+    "en": "Still blocked: Windows was not told yes.",
+    "text": "Nog steeds geblokkeerd: er is geen toestemming gegeven in Windows."
+  },
+  "fork.lan.firewallPrivate": {
+    "en": "Allow opens this port to devices on your network. Windows will ask you to confirm.",
+    "text": "Klik op 'Toestaan' om deze poort open te stellen voor apparaten op je lokale netwerk. Windows vraagt je eerst om bevestiging."
+  },
+  "fork.lan.firewallPublic": {
+    "en": "Windows treats this network as public. Allow opens this port to devices on this same network only. Windows will ask you to confirm.",
+    "text": "Windows beschouwt dit als een openbaar netwerk. Klik op 'Toestaan' om deze poort alleen open te stellen voor apparaten op hetzelfde netwerk. Windows vraagt je eerst om bevestiging."
+  },
+  "fork.lan.firewallWaiting": {
+    "en": "Waiting for Windows…",
+    "text": "Wachten op Windows…"
+  },
+  "fork.lan.hideLibrary": {
+    "en": "Hide the model library",
+    "text": "Modelbibliotheek verbergen"
+  },
+  "fork.lan.key": {
+    "en": "Access key",
+    "text": "Toegangssleutel"
+  },
+  "fork.lan.keyPlaceholder": {
+    "en": "Blank: anyone on the network may connect",
+    "text": "Leeg: elk apparaat op het lokale netwerk mag verbinden"
+  },
+  "fork.lan.models": {
+    "en": "Models shared · {{count}}",
+    "text": "Gedeelde modellen · {{count}}"
+  },
+  "fork.lan.noNetwork": {
+    "en": "This computer is on no network.",
+    "text": "Deze computer is niet verbonden met een netwerk."
+  },
+  "fork.lan.noRecognizer": {
+    "en": "No speech recognition model downloaded yet",
+    "text": "Nog geen spraakherkenningsmodel gedownload"
+  },
+  "fork.lan.on": {
+    "en": "Sharing — no device connected yet",
+    "text": "Delen actief, nog geen apparaten verbonden"
+  },
+  "fork.lan.onWithClients": {
+    "en": "Sharing — {{count}} connection(s) in use",
+    "text": "Delen actief, {{count}} verbinding(en) in gebruik"
+  },
+  "fork.lan.options": {
+    "en": "Options",
+    "text": "Opties"
+  },
+  "fork.lan.otherAddresses": {
+    "en": "This computer's other addresses",
+    "text": "Andere adressen van deze computer"
+  },
+  "fork.lan.port": {
+    "en": "Port",
+    "text": "Poort"
+  },
+  "fork.lan.portInUse": {
+    "en": "Port {{port}} is taken by another program. Choose another under Options.",
+    "text": "Poort {{port}} is al in gebruik door een ander programma. Kies een andere poort bij 'Opties'."
+  },
+  "fork.lan.serving": {
+    "en": "Sharing",
+    "text": "Delen actief"
+  },
+  "fork.lan.servingClients": {
+    "en": "Sharing · {{count}} in use",
+    "text": "Delen actief · {{count}} verbinding(en) in gebruik"
+  },
+  "fork.lan.servingTip": {
+    "en": "This computer is lending its models to other devices. The languages and the choice of model are set on those devices, not here.",
+    "text": "Deze computer deelt zijn modellen met andere apparaten. De taal en het model stel je op die apparaten in, niet hier."
+  },
+  "fork.lan.sessionIdle": {
+    "en": "The other device ended the session: nobody had spoken for a long while, and it let its models go. Start again to continue.",
+    "text": "Het andere apparaat heeft de sessie beëindigd: er werd lange tijd niet gesproken en de modellen zijn uit het geheugen vrijgegeven. Klik opnieuw op 'Starten' om verder te gaan."
+  },
+  "fork.lan.showLibrary": {
+    "en": "Download or manage models",
+    "text": "Modellen downloaden of beheren"
+  },
+  "fork.lan.starting": {
+    "en": "Starting…",
+    "text": "Starten…"
+  },
+  "fork.lan.title": {
+    "en": "Share with other devices",
+    "text": "Delen met andere apparaten"
+  },
+  "fork.lan.tooltip": {
+    "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
+    "text": "Deel de modellen van deze computer met andere apparaten op je lokale netwerk. Zoek op het andere apparaat in Kotomimi onder 'Ander apparaat' naar deze computer. Het model en de taal kies je daar. Delen werkt zolang Kotomimi open is."
+  },
+  "fork.languageMenu.detect": {
+    "en": "Auto-detect",
+    "text": "Automatisch detecteren"
+  },
+  "fork.languageMenu.detectUnavailable": {
+    "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
+    "text": "De huidige spraakherkenning kan talen niet automatisch detecteren. Daarvoor is Qwen3-ASR 1.7B GGUF of een API-model nodig."
+  },
+  "fork.languageMenu.mine": {
+    "en": "My language",
+    "text": "Mijn taal"
+  },
+  "fork.languageMenu.mostly": {
+    "en": "Translate into what they mostly speak",
+    "text": "Vertalen naar de taal die de ander meestal spreekt"
+  },
+  "fork.languageMenu.none": {
+    "en": "No language by that name",
+    "text": "Geen taal met die naam"
+  },
+  "fork.languageMenu.pin": {
+    "en": "Pin {{name}} to the top",
+    "text": "{{name}} bovenaan vastzetten"
+  },
+  "fork.languageMenu.pinShort": {
+    "en": "Pin to the top",
+    "text": "Bovenaan vastzetten"
+  },
+  "fork.languageMenu.search": {
+    "en": "Type to find a language",
+    "text": "Typ om een taal te zoeken"
+  },
+  "fork.languageMenu.speakBoth": {
+    "en": "I speak {{language}} too",
+    "text": "Ik spreek ook {{language}}"
+  },
+  "fork.languageMenu.speakBothHelp": {
+    "en": "When you speak {{mine}}, it is translated into {{language}}; when you speak {{language}}, into {{mine}}. Recognition tells the two apart.",
+    "text": "Als je {{mine}} spreekt, wordt dat vertaald naar {{language}}. Spreek je {{language}}, dan wordt dat vertaald naar {{mine}}. De spraakherkenning onderscheidt de twee talen automatisch."
+  },
+  "fork.languageMenu.speakBothUnavailable": {
+    "en": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
+    "text": "De gekozen spraakherkenning kan {{mine}} en {{language}} niet onderscheiden. Kies gekoppelde Apple Speech met beide talen geïnstalleerd, of spraakherkenning die beide talen herkent."
+  },
+  "fork.languageMenu.theirs": {
+    "en": "Their language",
+    "text": "Taal van de ander"
+  },
+  "fork.languageMenu.unpin": {
+    "en": "Unpin {{name}}",
+    "text": "{{name}} losmaken"
+  },
+  "fork.languageMenu.unpinShort": {
+    "en": "Unpin",
+    "text": "Losmaken"
+  },
+  "fork.pinyin": {
+    "en": "Pinyin over Chinese",
+    "text": "Pinyin boven Chinese tekst"
+  },
+  "fork.romanization": {
+    "en": "Romanization",
+    "text": "Romanisatie tonen"
+  },
+  "fork.sourceItalic": {
+    "en": "Source text in italics",
+    "text": "Originele tekst cursief"
+  },
+  "fork.speechDetection.title": {
+    "en": "Speech detection",
+    "text": "Spraakdetectie"
+  },
+  "fork.statusLine.checking": {
+    "en": "Getting ready. You can start in a moment.",
+    "text": "Bezig met voorbereiden. Je kunt zo beginnen."
+  },
+  "fork.subtitle.align": {
+    "en": "Alignment",
+    "text": "Uitlijning"
+  },
+  "fork.subtitle.alignCenter": {
+    "en": "Centre",
+    "text": "Gecentreerd"
+  },
+  "fork.subtitle.alignLeft": {
+    "en": "Left",
+    "text": "Links"
+  },
+  "fork.subtitle.back": {
+    "en": "Back to the main window",
+    "text": "Terug naar het hoofdvenster"
+  },
+  "fork.subtitle.backdrop": {
+    "en": "Panel",
+    "text": "Achtergrondsterkte"
+  },
+  "fork.subtitle.lanesView": {
+    "en": "Subtitle view",
+    "text": "Ondertitelweergave"
+  },
+  "fork.subtitle.listView": {
+    "en": "List view",
+    "text": "Lijstweergave"
+  },
+  "fork.subtitle.look": {
+    "en": "Look",
+    "text": "Stijl"
+  },
+  "fork.subtitle.lookDark": {
+    "en": "Dark text",
+    "text": "Donkere tekst, witte rand"
+  },
+  "fork.subtitle.lookLight": {
+    "en": "Light text",
+    "text": "Lichte tekst, zwarte rand"
+  },
+  "fork.subtitle.lookPanel": {
+    "en": "Dark panel",
+    "text": "Donkere achtergrond"
+  },
+  "fork.subtitle.lookSample": {
+    "en": "Aa",
+    "text": "Ondertitels"
+  },
+  "fork.subtitle.lookSoft": {
+    "en": "Faint panel",
+    "text": "Lichte achtergrond, zachte schaduw"
+  },
+  "fork.subtitle.moreColors": {
+    "en": "More colours (source text, panel)",
+    "text": "Meer kleuren (brontekst, achtergrond)"
+  },
+  "fork.subtitle.off": {
+    "en": "Off",
+    "text": "Uit"
+  },
+  "fork.subtitle.outline": {
+    "en": "Outline",
+    "text": "Randsterkte"
+  },
+  "fork.subtitle.shadow": {
+    "en": "Shadow",
+    "text": "Schaduwsterkte"
+  },
+  "fork.subtitle.through": {
+    "en": "Click-through: the mouse passes through the captions",
+    "text": "Doorklikken: muisklikken gaan door de ondertiteling naar het venster eronder"
+  },
+  "fork.subtitle.throughOff": {
+    "en": "Stop click-through",
+    "text": "Doorklikken uitschakelen"
+  },
+  "fork.subtitle.type": {
+    "en": "Type to translate (Ctrl+K)",
+    "text": "Typen om te vertalen (Ctrl+K)"
+  },
+  "fork.subtitle.typePlaceholder": {
+    "en": "What you want to say — Enter translates",
+    "text": "Wat je wilt zeggen, Enter om te vertalen"
+  },
+  "fork.vrchat.chatbox": {
+    "en": "Above my avatar",
+    "text": "Boven mijn avatar"
+  },
+  "fork.vrchat.chatboxHearBoth": {
+    "en": "Switch to Both",
+    "text": "Overschakelen naar Beide"
+  },
+  "fork.vrchat.chatboxOff": {
+    "en": "Off",
+    "text": "Uit"
+  },
+  "fork.vrchat.chatboxSourceFirst": {
+    "en": "Original on top",
+    "text": "Origineel bovenaan"
+  },
+  "fork.vrchat.chatboxTranslation": {
+    "en": "Translation",
+    "text": "Vertaling"
+  },
+  "fork.vrchat.chatboxTranslationFirst": {
+    "en": "Translation on top",
+    "text": "Vertaling bovenaan"
+  },
+  "fork.vrchat.chatboxUnheard": {
+    "en": "Only the other side is translated now: what you say won't show above your avatar.",
+    "text": "Nu wordt alleen de ander vertaald. Wat jij zegt, verschijnt niet boven je avatar."
+  },
+  "fork.vrchat.connected": {
+    "en": "Connected",
+    "text": "Verbonden"
+  },
+  "fork.vrchat.end": {
+    "en": "End",
+    "text": "Beëindigen"
+  },
+  "fork.vrchat.help": {
+    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
+    "text": "Werkt samen met VRChat op deze computer. Als je in VRChat gedempt bent, herkent Kotomimi je spraak niet. Je vertalingen kunnen boven je avatar verschijnen, zodat anderen ze kunnen lezen. Als er in een wereld een video speelt: komt het videogeluid niet uit een bepaalde richting, dan wordt het gescheiden van de stemmen van spelers. Komt het wel uit een bepaalde richting, dan wordt de spraak van anderen in kortere stukken verwerkt."
+  },
+  "fork.vrchat.mutedNotHeard": {
+    "en": "Muted in VRChat: what you say is not recognized.",
+    "text": "Gedempt in VRChat: wat je zegt, wordt niet herkend."
+  },
+  "fork.vrchat.mutedThere": {
+    "en": "Muted in VRChat",
+    "text": "Gedempt in VRChat"
+  },
+  "fork.vrchat.muteGate": {
+    "en": "Don't hear me while muted in VRChat",
+    "text": "Mijn spraak niet herkennen als ik gedempt ben in VRChat"
+  },
+  "fork.vrchat.notConnected": {
+    "en": "Not connected",
+    "text": "Niet verbonden"
+  },
+  "fork.vrchat.onVideo": {
+    "en": "When a world plays a video",
+    "text": "Als er een video speelt in de wereld"
+  },
+  "fork.vrchat.pausedOn": {
+    "en": "Not translating",
+    "text": "Vertaling gepauzeerd"
+  },
+  "fork.vrchat.quickOn": {
+    "en": "Shorter sentences",
+    "text": "Zinnen ingekort"
+  },
+  "fork.vrchat.remember": {
+    "en": "Remember",
+    "text": "Onthouden"
+  },
+  "fork.vrchat.removedOn": {
+    "en": "Video sound removed",
+    "text": "Videogeluid verwijderd"
+  },
+  "fork.vrchat.separatedOn": {
+    "en": "Video sound separated",
+    "text": "Videogeluid gescheiden"
+  },
+  "fork.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
+  },
+  "fork.vrchat.turnOnOsc": {
+    "en": "Turn on OSC in the VRChat quick menu",
+    "text": "Schakel OSC in via het snelmenu van VRChat"
+  },
+  "fork.vrchat.videoAsk": {
+    "en": "Ask me",
+    "text": "Elke keer vragen"
+  },
+  "fork.vrchat.videoAskResult": {
+    "en": "Asks you when a video starts.",
+    "text": "Vraagt je wat je wilt doen zodra een video begint."
+  },
+  "fork.vrchat.videoBoth": {
+    "en": "People + video",
+    "text": "Stemmen en video vertalen"
+  },
+  "fork.vrchat.videoBothResult": {
+    "en": "The video gets its own line and uses more power; if it can't be separated, sentences are cut shorter.",
+    "text": "De video krijgt een eigen regel en vraagt meer rekenkracht. Kan het geluid niet worden gescheiden, dan worden zinnen ingekort."
+  },
+  "fork.vrchat.videoPause": {
+    "en": "Pause",
+    "text": "Even niet vertalen"
+  },
+  "fork.vrchat.videoPauseResult": {
+    "en": "The other side is not translated while it plays.",
+    "text": "Vertaalt de ander niet zolang de video speelt."
+  },
+  "fork.vrchat.videoQuick": {
+    "en": "People only",
+    "text": "Alleen stemmen vertalen"
+  },
+  "fork.vrchat.videoQuickResult": {
+    "en": "Takes out video sound; if it can't, sentences are cut shorter.",
+    "text": "Verwijdert waar mogelijk het videogeluid. Lukt dat niet, dan worden zinnen ingekort."
+  },
+  "fork.vrchat.videoShort": {
+    "en": "Video",
+    "text": "Video"
+  },
+  "fork.vrchat.videoStarted": {
+    "en": "Video started",
+    "text": "Video gestart"
+  },
+  "fork.wizard.addressMissing": {
+    "en": "Choose a device from the list above, or type its address, for example 192.168.1.10:8790.",
+    "text": "Kies eerst een apparaat uit de lijst hierboven of voer het adres in, bijvoorbeeld 192.168.1.10:8790."
+  },
+  "fork.wizard.device": {
+    "en": "This computer",
+    "text": "Deze computer"
+  },
+  "fork.wizard.deviceDesc": {
+    "en": "Recognition and translation run on this computer using native models. Download a model for each stage before starting.",
+    "text": "Spraakherkenning en vertaling draaien op deze computer met native modellen. Download voor beide stappen een model voordat je begint."
+  },
+  "fork.wizard.deviceNotice": {
+    "en": "After setup, open Model library in the Speech recognition and Translation cards and download a native model for each. Translation requires a downloaded model, or you can switch that stage to an API model or another device.",
+    "text": "Open na het instellen de Modelbibliotheek onder Spraakherkenning en Vertaling en download voor beide een native model. Voor vertaling is een gedownload model nodig. Je kunt voor die stap ook een API-model of een ander apparaat kiezen."
+  },
+  "fork.wizard.intro": {
+    "en": "Pick a starting point. Later, in Settings, recognition and translation can each run in a different place.",
+    "text": "Kies waar je wilt beginnen. Later kun je in de instellingen voor spraakherkenning en vertaling apart kiezen waar ze draaien."
+  },
+  "fork.wizard.keyNeeded": {
+    "en": "This device asks for an access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options), then press Connect.",
+    "text": "Dit apparaat vraagt om een toegangssleutel. Voer de sleutel in die op dat apparaat is ingesteld en klik op Verbinden. Bij een andere Kotomimi vind je de sleutel onder Opties bij delen."
+  },
+  "fork.wizard.pathBadge": {
+    "en": "Recommended",
+    "text": "Aanbevolen"
+  },
+  "fork.wizard.pathCost": {
+    "en": "No account and no API key. Text only: subtitles with furigana, typed translation and grammar feedback. Another device means a Kotomimi sharing its models, or a model server such as LocalAI; this computer downloads models onto your disk.",
+    "text": "Geen account of API-sleutel nodig. Alleen tekst: ondertitels met furigana, getypte vertalingen en grammaticafeedback. Het andere apparaat kan Kotomimi met ingeschakeld delen gebruiken, of een modelserver zoals LocalAI. Op deze computer worden de modellen lokaal gedownload."
+  },
+  "fork.wizard.pathDesc": {
+    "en": "Use the models of another device on your network, or this computer's own — and any mix of the two.",
+    "text": "Gebruik modellen op een ander apparaat in je lokale netwerk, op deze computer of op allebei."
+  },
+  "fork.wizard.pathTitle": {
+    "en": "Kotomimi Pipeline",
+    "text": "Kotomimi vrij combineren"
+  },
+  "fork.wizard.pendingAddress": {
+    "en": "No device chosen yet — choose one in Settings before you start.",
+    "text": "Nog geen apparaat gekozen. Kies er een in de instellingen voordat je begint."
+  },
+  "fork.wizard.server": {
+    "en": "Another device on my network",
+    "text": "Ander apparaat in mijn lokale netwerk"
+  },
+  "fork.wizard.serverDesc": {
+    "en": "The models run on another computer: a Kotomimi with sharing turned on, or a model server such as LocalAI. This computer stays light.",
+    "text": "De modellen draaien op een andere computer: Kotomimi met ingeschakeld delen, of een modelserver zoals LocalAI. Deze computer wordt nauwelijks belast."
+  },
+  "fork.wizard.serverFound": {
+    "en": "Connected — it offers {{count}} model(s).",
+    "text": "Verbonden: {{count}} model(len) beschikbaar."
+  },
+  "fork.wizard.serverUnreachable": {
+    "en": "Could not connect: {{message}}",
+    "text": "Verbinden mislukt: {{message}}"
+  },
+  "fork.wizard.share": {
+    "en": "This computer, for my other devices",
+    "text": "Deze computer voor mijn andere apparaten"
+  },
+  "fork.wizard.shareDesc": {
+    "en": "Computing power to spare here? Let the models run on this computer for the other devices on your network — and for this computer itself.",
+    "text": "Heeft deze computer rekenkracht over? Laat de modellen hier draaien voor andere apparaten in je lokale netwerk en voor deze computer zelf."
+  },
+  "fork.wizard.shareNotice": {
+    "en": "Nothing to enter. Finishing turns on sharing, so other Kotomimi devices on your network can find this computer. After setup, download models in the Speech recognition card: those are what the others can use.",
+    "text": "Je hoeft hier niets in te vullen. Na het afronden wordt delen automatisch ingeschakeld, zodat andere Kotomimi-apparaten in je lokale netwerk deze computer kunnen vinden. Download daarna modellen onder Spraakherkenning in de instellingen. Die kunnen de andere apparaten gebruiken."
+  },
+  "fork.wizard.shareSummary": {
+    "en": "Sharing",
+    "text": "Delen"
+  },
+  "fork.wizard.shareSummaryOn": {
+    "en": "Turned on when you finish: other devices on your network can use this computer's models",
+    "text": "Wordt ingeschakeld na het afronden: andere apparaten in je lokale netwerk kunnen de modellen van deze computer gebruiken"
+  },
+  "fork.wizard.title": {
+    "en": "Which device does the work?",
+    "text": "Welk apparaat doet het werk?"
+  },
+  "fork.wizard.tryServer": {
+    "en": "Connect",
+    "text": "Verbinden"
+  },
+  "logsPanel.client": {
+    "en": "client",
+    "text": "client"
+  },
+  "logsPanel.server": {
+    "en": "server",
+    "text": "server"
+  },
+  "mainPanel.debug": {
+    "en": "Debug",
+    "text": "Foutopsporing"
+  },
+  "models.deviceAuto": {
+    "en": "Auto",
+    "text": "Automatisch"
+  },
+  "models.deviceCpu": {
+    "en": "CPU",
+    "text": "CPU"
+  },
+  "models.deviceGpu": {
+    "en": "GPU",
+    "text": "GPU"
+  },
+  "models.hwFramework": {
+    "en": "Engine",
+    "text": "Inferentie-engine"
+  },
+  "models.hwRepo": {
+    "en": "Repo",
+    "text": "Repository"
+  },
+  "models.importRepo": {
+    "en": "Repository",
+    "text": "Repository"
+  },
+  "models.multiLanguage": {
+    "en": "Multi",
+    "text": "Meertalig"
+  },
+  "models.online": {
+    "en": "Online",
+    "text": "Online"
+  },
+  "providers.gemini.name": {
+    "en": "Google Gemini",
+    "text": "Google Gemini"
+  },
+  "providers.kizunaai_soniox.name": {
+    "en": "KizunaAI",
+    "text": "KizunaAI"
+  },
+  "providers.local_inference.modelAsr": {
+    "en": "ASR",
+    "text": "Spraakherkenning"
+  },
+  "providers.local_inference.modelTranslation": {
+    "en": "MT",
+    "text": "Vertaling"
+  },
+  "providers.local_inference.modelTts": {
+    "en": "TTS",
+    "text": "Spraaksynthese"
+  },
+  "providers.localai.addressMissing": {
+    "en": "No other device is chosen yet. In Settings, under \"Another device\", search for it or type its address.",
+    "text": "Er is nog geen ander apparaat gekozen. Zoek het in Instellingen onder 'Ander apparaat' of vul het adres in."
+  },
+  "providers.localai.advanced": {
+    "en": "Advanced",
+    "text": "Geavanceerd"
+  },
+  "providers.localai.apiKey": {
+    "en": "API key",
+    "text": "API-sleutel"
+  },
+  "providers.localai.apiKeyNeeded": {
+    "en": "The API at {{address}} asks for a key. In its card, turn on \"The API asks for a key\" and enter it.",
+    "text": "De API op {{address}} vraagt om een sleutel. Schakel in het bijbehorende paneel 'Deze API vraagt om een sleutel' in en vul de sleutel in."
+  },
+  "providers.localai.apiKeyRefused": {
+    "en": "The API at {{address}} did not accept the key. Check the API key in its card.",
+    "text": "De API op {{address}} accepteert deze sleutel niet. Controleer de API-sleutel in het bijbehorende paneel."
+  },
+  "providers.localai.apiKeyReused": {
+    "en": "Filled in with the key saved under \"{{name}}\".",
+    "text": "Ingevuld met de sleutel die je bij ‘{{name}}’ hebt opgeslagen."
+  },
+  "providers.localai.apiService": {
+    "en": "Service",
+    "text": "Dienst"
+  },
+  "providers.localai.apiServiceArk": {
+    "en": "Doubao (Volcengine Ark)",
+    "text": "Doubao (Volcengine Ark)"
+  },
+  "providers.localai.apiServiceArkModel": {
+    "en": "A model's name, or your endpoint id (ep-…)",
+    "text": "Modelnaam of je eindpunt-ID (ep-…)"
+  },
+  "providers.localai.apiServiceCustom": {
+    "en": "Custom address",
+    "text": "Eigen adres"
+  },
+  "providers.localai.apiServiceModel": {
+    "en": "Choose from the list on the right, or type a name",
+    "text": "Kies rechts uit de lijst of typ een naam"
+  },
+  "providers.localai.apiServiceOllama": {
+    "en": "Ollama on this computer",
+    "text": "Ollama op deze computer"
+  },
+  "providers.localai.apiServiceSiliconFlow": {
+    "en": "SiliconFlow",
+    "text": "SiliconFlow"
+  },
+  "providers.localai.apiUnreachable": {
+    "en": "The API at {{address}} could not be reached. Check the address in its card, and that this computer is online.",
+    "text": "De API op {{address}} is niet bereikbaar. Controleer het adres in het bijbehorende paneel en de internetverbinding van deze computer."
+  },
+  "providers.localai.asrApiBaseUrl": {
+    "en": "API address",
+    "text": "API-adres"
+  },
+  "providers.localai.asrApiBaseUrlPlaceholder": {
+    "en": "e.g. https://api.openai.com/v1",
+    "text": "Bijv. https://api.openai.com/v1"
+  },
+  "providers.localai.asrApiModelPlaceholder": {
+    "en": "e.g. whisper-1, whisper-large-v3",
+    "text": "Bijv. whisper-1, whisper-large-v3"
+  },
+  "providers.localai.asrApiNeedsKey": {
+    "en": "The API asks for a key",
+    "text": "Deze API vereist een sleutel"
+  },
+  "providers.localai.asrFixedNote": {
+    "en": "That device is reached as a plain LocalAI, which always hears with its own default recognizer when the translation or the feedback uses a model chosen here. Through the Kotomimi on that device, the recognizer can be chosen here.",
+    "text": "Je bent nu rechtstreeks verbonden met LocalAI op dat apparaat. Als je een ander model kiest voor vertaling of grammaticafeedback, gebruikt het alleen zijn standaardmodel voor spraakherkenning. Verbind met Kotomimi op dat apparaat om hier een spraakherkenningsmodel te kunnen kiezen."
+  },
+  "providers.localai.asrKey": {
+    "en": "API key of the speech recognition API",
+    "text": "API-sleutel voor de spraakherkennings-API"
+  },
+  "providers.localai.asrUnnamed": {
+    "en": "Speech recognition has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "Er is nog geen model voor spraakherkenning beschikbaar. Kies er een in het paneel 'Spraakherkenning' onder de aanbieder. Vul bij een API-model het adres en de modelnaam in, of kies een andere locatie."
+  },
+  "providers.localai.auto": {
+    "en": "Automatic · {{name}}",
+    "text": "Automatisch · {{name}}"
+  },
+  "providers.localai.browse": {
+    "en": "Model library",
+    "text": "Modelbibliotheek"
+  },
+  "providers.localai.bySentence": {
+    "en": "Translate sentence by sentence",
+    "text": "Zin voor zin vertalen"
+  },
+  "providers.localai.bySentenceTooltip": {
+    "en": "On: each sentence is translated as soon as it ends — sooner, but without the sentences around it. Off: the whole stretch is translated once the speaker pauses — with its context, but later.",
+    "text": "Aan: elke zin wordt meteen vertaald zodra de spreker die afmaakt. De vertaling verschijnt eerder, maar mist de context van de omliggende zinnen. Uit: het hele stuk wordt vertaald zodra de spreker pauzeert. De context is volledig, maar je wacht langer."
+  },
+  "providers.localai.checking": {
+    "en": "Checking…",
+    "text": "Controleren…"
+  },
+  "providers.localai.checkNow": {
+    "en": "Check",
+    "text": "Controleren"
+  },
+  "providers.localai.checkSlow": {
+    "en": "No answer within {{seconds}} s: the device may be off or loading a model, or the address wrong. It is asked again by itself.",
+    "text": "Geen reactie na {{seconds}} s: het apparaat staat mogelijk uit, laadt een model of het adres klopt niet. Er wordt automatisch opnieuw geprobeerd."
+  },
+  "providers.localai.choiceDevice": {
+    "en": "Use this computer",
+    "text": "Deze computer gebruiken"
+  },
+  "providers.localai.choiceServer": {
+    "en": "Use another device",
+    "text": "Ander apparaat gebruiken"
+  },
+  "providers.localai.coach": {
+    "en": "Check my grammar when I speak their language",
+    "text": "Controleer mijn grammatica als ik hun taal spreek"
+  },
+  "providers.localai.coachKey": {
+    "en": "API key of the feedback model",
+    "text": "API-sleutel voor het model voor grammaticafeedback"
+  },
+  "providers.localai.coachNeedsSpeaker": {
+    "en": "Feedback answers what you say. Switch the mode to \"Me\" or \"Both\".",
+    "text": "Voor grammaticafeedback moet je zelf spreken. Zet de modus op 'Ik' of 'Beide'."
+  },
+  "providers.localai.coachNoModel": {
+    "en": "The other device has no text model that can give feedback. Use an API model or this computer instead.",
+    "text": "Het andere apparaat heeft geen tekstmodel voor grammaticafeedback. Gebruik een API-model of deze computer."
+  },
+  "providers.localai.coachPrompt": {
+    "en": "Feedback instructions",
+    "text": "Instructies voor grammaticafeedback"
+  },
+  "providers.localai.coachPromptPlaceholder": {
+    "en": "Blank: written automatically for your two languages. Your own text may use {{spoken}} and {{native}}.",
+    "text": "Leeg: automatisch opgesteld voor je moedertaal en de taal die je oefent. In je eigen tekst kun je {{spoken}} en {{native}} gebruiken voor deze twee talen."
+  },
+  "providers.localai.coachPromptPreview": {
+    "en": "Used while the box is blank, for this language pair:",
+    "text": "Als het veld leeg is, worden deze instructies gebruikt voor dit talenpaar:"
+  },
+  "providers.localai.coachStage": {
+    "en": "Grammar feedback",
+    "text": "Grammaticafeedback"
+  },
+  "providers.localai.coachStageTooltip": {
+    "en": "When you speak the other language, a model checks your grammar and answers with a check mark, or a corrected sentence and an explanation. Enable \"I speak the other language too\" as well to get both a translation and private feedback. Your own language and typed text are translated without feedback.",
+    "text": "Als je de andere taal spreekt, controleert een model je grammatica. Je krijgt een vinkje of een verbeterde zin met uitleg. Schakel ook 'Ik spreek de andere taal ook' in om zowel een vertaling als privéfeedback te krijgen. Je eigen taal en getypte tekst worden zonder feedback vertaald."
+  },
+  "providers.localai.coachUnnamed": {
+    "en": "Grammar feedback has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "Er is nog geen model voor grammaticafeedback beschikbaar. Kies er een in het paneel 'Grammaticafeedback' onder de aanbieder. Vul bij een API-model het adres en de modelnaam in, of kies een andere locatie."
+  },
+  "providers.localai.connectFirst": {
+    "en": "No other device is connected yet: search for one above, or type its address.",
+    "text": "Er is nog geen ander apparaat verbonden. Zoek er hierboven een of vul het adres in."
+  },
+  "providers.localai.description": {
+    "en": "Recognition, translation and grammar feedback — and you mix where each model runs: this computer, another device on your network, or any API model.",
+    "text": "Spraakherkenning, vertaling en grammaticafeedback. Kies voor elke stap waar het model draait: op deze computer, op een ander apparaat in je lokale netwerk of via een API."
+  },
+  "providers.localai.detectOther": {
+    "en": "Detect the other side's language",
+    "text": "Taal van anderen automatisch herkennen"
+  },
+  "providers.localai.detectOtherNeeds": {
+    "en": "Only Qwen3-ASR 1.7B GGUF can tell the language by itself. Choose it here.",
+    "text": "Alleen Qwen3-ASR 1.7B GGUF kan zelf de taal herkennen. Kies dat model hier."
+  },
+  "providers.localai.detectOtherNote": {
+    "en": "The other side's language is detected, so a model that can tell languages apart hears them.",
+    "text": "De taal van anderen wordt automatisch herkend. Daarom wordt hier een model gebruikt dat talen kan onderscheiden."
+  },
+  "providers.localai.detectOtherTooltip": {
+    "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
+    "text": "Welke taal anderen ook spreken, die wordt automatisch herkend en naar jouw taal vertaald. Je hoeft niets om te schakelen. Wat je zelf zegt, wordt nog steeds vertaald naar de hierboven gekozen taal. Voor herkenning is Qwen3-ASR 1.7B GGUF of een API nodig, voor vertaling de native engine of een API."
+  },
+  "providers.localai.deviceDefault": {
+    "en": "The device's own choice",
+    "text": "Het apparaat laten kiezen"
+  },
+  "providers.localai.endpoint": {
+    "en": "Address",
+    "text": "Adres"
+  },
+  "providers.localai.familyUnheard": {
+    "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
+    "text": "Op het andere apparaat ontbreken {{languages}} voor {{name}}. Het apparaat kiest hiervoor zelf een model. Download daar eerst {{languages}} om {{name}} te gebruiken."
+  },
+  "providers.localai.feedbackFailed": {
+    "en": "One sentence got no grammar feedback: the feedback model did not answer.",
+    "text": "Een zin kreeg geen grammaticafeedback: het feedbackmodel reageerde niet."
+  },
+  "providers.localai.groupNative": {
+    "en": "Native engine",
+    "text": "Native engine"
+  },
+  "providers.localai.hearApiNote": {
+    "en": "Any service with OpenAI's transcription API works (OpenAI, Groq, a LocalAI). This computer cuts the sentences and uploads each one, so the text appears when a sentence is finished.",
+    "text": "Elke dienst met de transcriptie-API van OpenAI werkt, zoals OpenAI, Groq of LocalAI. Deze computer splitst de spraak in zinnen en uploadt elke zin zodra die klaar is. De tekst verschijnt dus pas na afloop van een zin."
+  },
+  "providers.localai.hears": {
+    "en": "Recognizes {{language}}",
+    "text": "Herkent {{language}}"
+  },
+  "providers.localai.hearsEither": {
+    "en": "Recognizes {{first}} or {{second}}",
+    "text": "Herkent {{first}} of {{second}}"
+  },
+  "providers.localai.hearsOther": {
+    "en": "Hears the other side (any language)",
+    "text": "Luistert naar anderen (automatische taalherkenning)"
+  },
+  "providers.localai.hearStage": {
+    "en": "Speech recognition",
+    "text": "Spraakherkenning"
+  },
+  "providers.localai.hearStageTooltip": {
+    "en": "What listens: it decides when a sentence ends and writes down what was said.",
+    "text": "Het onderdeel dat luistert: bepaalt wanneer een zin klaar is en zet het gesprokene om in tekst."
+  },
+  "providers.localai.hereDown": {
+    "en": "The LocalAI on this computer is not running yet. Start it in the stage's card — or, if Kotomimi has only just opened, give it a moment.",
+    "text": "LocalAI draait nog niet op deze computer. Klik in het paneel van dit onderdeel op 'LocalAI starten'. Heb je Kotomimi net geopend? Wacht dan even tot LocalAI opstart."
+  },
+  "providers.localai.hereModelPick": {
+    "en": "Choose a model",
+    "text": "Kies een model"
+  },
+  "providers.localai.inUse": {
+    "en": "In use: {{name}}",
+    "text": "In gebruik: {{name}}"
+  },
+  "providers.localai.inUseLegs": {
+    "en": "In use: {{theirs}} (them), {{mine}} (me)",
+    "text": "In gebruik: {{theirs}} (anderen), {{mine}} (ik)"
+  },
+  "providers.localai.kotomimiServer": {
+    "en": "It is another Kotomimi sharing its models.",
+    "text": "Dit is een andere Kotomimi die modellen deelt."
+  },
+  "providers.localai.kotomimiThere": {
+    "en": "Use the Kotomimi on that device",
+    "text": "Verbind met Kotomimi op dat apparaat"
+  },
+  "providers.localai.kotomimiThereLooking": {
+    "en": "Looking for it…",
+    "text": "Zoeken…"
+  },
+  "providers.localai.kotomimiThereNone": {
+    "en": "No Kotomimi is sharing on that device. Open Kotomimi there, turn on \"Share with other devices\", then try again.",
+    "text": "Op dat apparaat deelt geen Kotomimi zijn modellen. Open Kotomimi daar, schakel 'Delen met andere apparaten' in en probeer het opnieuw."
+  },
+  "providers.localai.localServerNote": {
+    "en": "This address is this computer itself: a model server running here, such as LocalAI. Choose \"Another device\" in a stage to use its models.",
+    "text": "Dit adres verwijst naar deze computer: hier draait een modelserver, zoals LocalAI. Kies bij een stap ‘Ander apparaat’ om de modellen daarvan te gebruiken."
+  },
+  "providers.localai.model": {
+    "en": "Model",
+    "text": "Model"
+  },
+  "providers.localai.modelGone": {
+    "en": "{{name}} (no longer on that device)",
+    "text": "{{name}} (niet meer op dat apparaat)"
+  },
+  "providers.localai.modelList": {
+    "en": "Choose from the models this service lists",
+    "text": "Kiezen uit de modellenlijst van deze dienst"
+  },
+  "providers.localai.modelListAsking": {
+    "en": "Getting the list…",
+    "text": "Modellenlijst ophalen…"
+  },
+  "providers.localai.modelListKeyMissing": {
+    "en": "Fill in the API key first.",
+    "text": "Vul eerst de API-sleutel in."
+  },
+  "providers.localai.modelListKeyRefused": {
+    "en": "The service refused this key.",
+    "text": "Deze dienst accepteert de sleutel niet."
+  },
+  "providers.localai.modelListNoAddress": {
+    "en": "Fill in the address first.",
+    "text": "Vul eerst het adres in."
+  },
+  "providers.localai.modelListNoMatch": {
+    "en": "No model found. Try fewer letters.",
+    "text": "Geen model gevonden. Probeer minder letters."
+  },
+  "providers.localai.modelListNone": {
+    "en": "This service lists no models. Type the name instead.",
+    "text": "Deze dienst biedt geen modellenlijst. Typ de modelnaam."
+  },
+  "providers.localai.modelListUnreachable": {
+    "en": "The service could not be reached.",
+    "text": "Deze dienst is niet bereikbaar."
+  },
+  "providers.localai.modelSearch": {
+    "en": "Search models",
+    "text": "Modellen zoeken"
+  },
+  "providers.localai.modelSuggested": {
+    "en": "Suits this step",
+    "text": "Geschikt voor deze stap"
+  },
+  "providers.localai.name": {
+    "en": "Kotomimi Pipeline",
+    "text": "Kotomimi zelf samenstellen"
+  },
+  "providers.localai.nativeBusy": {
+    "en": "A device you share with is using this engine with {{name}}. Wait for it to finish, or choose {{name}} here too.",
+    "text": "Een apparaat waarmee je deelt, gebruikt deze engine met {{name}}. Wacht tot het klaar is of kies hier ook {{name}}."
+  },
+  "providers.localai.nativeCoachFailed": {
+    "en": "The feedback engine could not start. In the Grammar feedback card, press \"Try again\" — or choose another model.",
+    "text": "De engine voor grammaticafeedback kon niet starten. Klik in het paneel 'Grammaticafeedback' op 'Opnieuw proberen' of kies een ander model."
+  },
+  "providers.localai.nativeCoachFailedShort": {
+    "en": "The feedback engine could not start.",
+    "text": "De engine voor grammaticafeedback kon niet starten."
+  },
+  "providers.localai.nativeCoachMissing": {
+    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} is nog niet gedownload. Download een native model in het paneel 'Grammaticafeedback' of kies 'API-model' of 'Ander apparaat'."
+  },
+  "providers.localai.nativeCoachReady": {
+    "en": "The feedback engine is ready.",
+    "text": "De engine voor grammaticafeedback is klaar."
+  },
+  "providers.localai.nativeCoachUnsupported": {
+    "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
+    "text": "De native engine voor grammaticafeedback wordt nog niet ondersteund op dit systeem. Kies in het paneel 'Grammaticafeedback' voor 'API-model' of 'Ander apparaat'."
+  },
+  "providers.localai.nativeCoachWarming": {
+    "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
+    "text": "De engine voor grammaticafeedback start nog op. Dit duurt maar een paar seconden. Zodra de engine klaar is, kun je beginnen."
+  },
+  "providers.localai.nativeCoachWarmingShort": {
+    "en": "Starting the feedback engine…",
+    "text": "Engine voor grammaticafeedback starten…"
+  },
+  "providers.localai.nativeEntry": {
+    "en": "{{name}} (native engine)",
+    "text": "{{name}} (native engine)"
+  },
+  "providers.localai.nativeFailed": {
+    "en": "The recognition engine of this computer could not start. In the Speech recognition card, press \"Try again\" — or choose another model.",
+    "text": "De spraakherkenningsengine op deze computer kon niet starten. Klik in het paneel 'Spraakherkenning' op 'Opnieuw proberen' of kies een ander model."
+  },
+  "providers.localai.nativeFailedShort": {
+    "en": "The engine could not start.",
+    "text": "De engine kon niet starten."
+  },
+  "providers.localai.nativeInterrupted": {
+    "en": "The engine stopped while it was starting. Press Start again.",
+    "text": "De engine is tijdens het opstarten gestopt. Klik nogmaals op 'Starten'."
+  },
+  "providers.localai.nativeLoading": {
+    "en": "Loading the models… About half a minute the first time after the computer boots.",
+    "text": "Modellen laden… De eerste keer na het opstarten van de computer duurt dit ongeveer een halve minuut."
+  },
+  "providers.localai.nativeMissing": {
+    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} is nog niet gedownload. Download een native model in het paneel 'Spraakherkenning' of kies 'API-model' of 'Ander apparaat'."
+  },
+  "providers.localai.nativeNone": {
+    "en": "No model chosen",
+    "text": "Geen model gekozen"
+  },
+  "providers.localai.nativeReady": {
+    "en": "The engine is ready.",
+    "text": "De engine is klaar."
+  },
+  "providers.localai.nativeRetry": {
+    "en": "Try again",
+    "text": "Opnieuw proberen"
+  },
+  "providers.localai.nativeRuntime": {
+    "en": "Downloading the runtime first. This happens only once.",
+    "text": "Eerst wordt de runtime gedownload. Dit hoeft maar één keer."
+  },
+  "providers.localai.nativeTwoModels": {
+    "en": "{{name}} and {{other}} cannot run at the same time. Choose the same model for both languages.",
+    "text": "{{name}} en {{other}} kunnen niet tegelijk draaien. Kies voor beide talen hetzelfde model."
+  },
+  "providers.localai.nativeUnchosen": {
+    "en": "No speech recognition model is chosen for {{source}} yet. Choose one in the Speech recognition card.",
+    "text": "Er is nog geen spraakherkenningsmodel gekozen voor {{source}}. Kies er een in het paneel 'Spraakherkenning'."
+  },
+  "providers.localai.nativeUnheard": {
+    "en": "{{name}} does not hear one of your two languages. Choose another model for it.",
+    "text": "{{name}} herkent een van je twee gekozen talen niet. Kies daarvoor een ander model."
+  },
+  "providers.localai.nativeUnsupported": {
+    "en": "The native recognition engine is not available for this system. In the Speech recognition card, switch to \"API model\" or \"Another device\".",
+    "text": "De native spraakherkenningsengine wordt nog niet ondersteund op dit systeem. Kies in het paneel 'Spraakherkenning' voor 'API-model' of 'Ander apparaat'."
+  },
+  "providers.localai.nativeUnsupportedShort": {
+    "en": "Not available for this system",
+    "text": "Nog niet ondersteund op dit systeem"
+  },
+  "providers.localai.nativeWarming": {
+    "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
+    "text": "De spraakherkenningsengine start nog op. De eerste keer na het opstarten van de computer duurt dit ongeveer een halve minuut. Zodra de engine klaar is, kun je beginnen."
+  },
+  "providers.localai.nativeWarmingShort": {
+    "en": "Starting the engine… About half a minute the first time after the computer boots.",
+    "text": "Engine starten… De eerste keer na het opstarten van de computer duurt dit ongeveer een halve minuut."
+  },
+  "providers.localai.notDownloaded": {
+    "en": "No model downloaded yet",
+    "text": "Nog geen model gedownload"
+  },
+  "providers.localai.noteAppleSpeech": {
+    "en": "Japanese talk, measured: about 13% of the characters wrong, the most accurate of all. It writes as it listens (about 2 s behind).",
+    "text": "Getest met informele Japanse gesprekken: ongeveer 13% van de tekens fout, het nauwkeurigste van alle modellen. De tekst verschijnt tijdens het luisteren (ongeveer 2 s vertraging)."
+  },
+  "providers.localai.noteCohere": {
+    "en": "Measured on Japanese VRChat talk: about 33% of the characters wrong, and about a quarter of what was said left out. Not a good choice for Japanese conversation.",
+    "text": "Getest met informele Japanse gesprekken in VRChat: ongeveer 33% van de tekens fout. Laat ook ongeveer een kwart van het gesprokene weg. Niet aanbevolen voor Japanse gesprekken."
+  },
+  "providers.localai.noteGemma4": {
+    "en": "Japanese grammar, measured: it caught 11 of 14 mistakes and left right casual speech alone; about 0.1 s an answer. About 1.5 GB of video memory.",
+    "text": "Getest op Japanse grammatica: herkende fouten in 11 van de 14 foutieve zinnen en liet correcte spreektaal ongemoeid. Ongeveer 0.1 s per zin. Gebruikt ongeveer 1.5 GB videogeheugen."
+  },
+  "providers.localai.noteGranite41": {
+    "en": "Measured on Japanese VRChat talk: it keeps repeating the same sentence. Not usable for Japanese conversation.",
+    "text": "Getest met Japanse gesprekken in VRChat: blijft dezelfde zin herhalen. Vrijwel onbruikbaar voor Japanse gesprekken."
+  },
+  "providers.localai.noteHyMt15": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences, and it tends to add words of its own.",
+    "text": "Getest van Japans naar Chinees: ernstige fouten in ongeveer 8 van de 30 zinnen. Voegt ook zelf woorden toe."
+  },
+  "providers.localai.noteHyMt2": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences; about 0.1 s a sentence.",
+    "text": "Getest van Japans naar Chinees: ernstige fouten in ongeveer 8 van de 30 zinnen. Ongeveer 0.1 s per zin."
+  },
+  "providers.localai.noteIndexTranslate": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
+    "text": "Getest van Japans naar Chinees: ernstige fouten in ongeveer 3 van de 30 zinnen, het beste resultaat van alle geteste modellen. Ongeveer 0.1 s per zin. Gebruikt ongeveer 2 GB videogeheugen en ondersteunt meer dan 100 talen."
+  },
+  "providers.localai.noteMoonshineJa": {
+    "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
+    "text": "Getest met Japanse gesprekken in VRChat: ongeveer 70% van de tekens fout. Alleen als noodoplossing wanneer de videokaart helemaal niet bruikbaar is."
+  },
+  "providers.localai.noteNativeNemotron": {
+    "en": "Small: about 1 GB of video memory. Japanese talk, measured: about 27% of the characters wrong, and a short sentence is sometimes left out altogether. Choose it only when the ones above do not fit or do not hear the language. Over thirty languages.",
+    "text": "Weinig geheugengebruik: ongeveer 1 GB videogeheugen. Getest met informele Japanse gesprekken: ongeveer 27% van de tekens fout. Korte zinnen worden soms helemaal overgeslagen. Kies dit alleen als de modellen hierboven niet in het geheugen passen of de gewenste taal niet ondersteunen. Ondersteunt meer dan 30 talen."
+  },
+  "providers.localai.noteNativeQwen": {
+    "en": "Japanese talk, measured: about 16% of the characters wrong. It writes as you speak (about 1 s behind); the last few words settle when the sentence ends. When the graphics card is busy it only refreshes less often. About 3 GB of video memory, thirty languages.",
+    "text": "Getest met informele Japanse gesprekken: ongeveer 16% van de tekens fout. De tekst verschijnt tijdens het spreken (ongeveer 1 s vertraging). De laatste paar tekens worden pas definitief als de zin klaar is. Als de videokaart het druk heeft, wordt de tekst alleen minder vaak bijgewerkt. Gebruikt ongeveer 3 GB videogeheugen en ondersteunt 30 talen."
+  },
+  "providers.localai.noteNativeQwenSmall": {
+    "en": "The light one, for a computer that runs a game at the same time: about 2 GB of video memory instead of 3. Japanese talk, measured: about 22% of the characters wrong, more than the 1.7B. Otherwise it works the same way, with the same thirty languages.",
+    "text": "Een kleiner, zuinig model voor als je op dezelfde computer ook gamet: gebruikt ongeveer 2 GB videogeheugen (1.7B gebruikt ongeveer 3 GB). Getest met informele Japanse gesprekken: ongeveer 22% van de tekens fout, iets meer dan bij 1.7B. Werkt verder hetzelfde als 1.7B en ondersteunt dezelfde 30 talen."
+  },
+  "providers.localai.noteNativeR2t2": {
+    "en": "Japanese talk, measured: about 18% of the characters wrong. It writes as it listens (about 2.5 s behind) and never changes what it wrote. When the graphics card cannot keep up (a weaker card, or a game running), the text falls further and further behind. About 3 GB of video memory.",
+    "text": "Getest met informele Japanse gesprekken: ongeveer 18% van de tekens fout. De tekst verschijnt tijdens het luisteren (ongeveer 2.5 s vertraging) en verandert daarna niet meer. Als de videokaart het niet kan bijhouden, bijvoorbeeld bij een zwakkere kaart of tijdens het gamen, loopt de tekst steeds verder achter. Gebruikt ongeveer 3 GB videogeheugen."
+  },
+  "providers.localai.noteNativeSenseVoice": {
+    "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
+    "text": "Het lichtste en snelste model: gebruikt ongeveer 0.4 GB videogeheugen. In tests met informele Japanse gesprekken even nauwkeurig als Qwen3-ASR 0.6B, maar gebruikt weinig leestekens. Ondersteunt alleen Chinees, Kantonees, Engels, Japans en Koreaans."
+  },
+  "providers.localai.noteQwen06": {
+    "en": "Measured on Japanese VRChat talk: about 35% of the characters wrong. Small: for when the graphics card has little memory to spare.",
+    "text": "Getest met Japanse gesprekken in VRChat: ongeveer 35% van de tekens fout. Klein model, bruikbaar bij weinig vrij videogeheugen."
+  },
+  "providers.localai.noteQwen17": {
+    "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
+    "text": "Getest met informele Japanse gesprekken: ongeveer 19% van de tekens fout. De tekst verschijnt pas als een zin klaar is (ongeveer 10 s vertraging). De GGUF-versie hierboven toont al tekst tijdens het spreken."
+  },
+  "providers.localai.noteSenseVoice": {
+    "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
+    "text": "Getest met Japanse gesprekken in VRChat: geeft geen kana weer, waardoor het Japans vrijwel onleesbaar is."
+  },
+  "providers.localai.noteVoxtral4b": {
+    "en": "Measured on Japanese VRChat talk: quick — the text is about 2.6 s behind the voice — but about 27% of the characters wrong. For when speed matters more than accuracy.",
+    "text": "Getest met informele Japanse gesprekken in VRChat: snelle tekstweergave (ongeveer 2.6 s na de spraak), maar relatief veel fouten (ongeveer 27% van de tekens). Kies dit als snelheid belangrijker is dan nauwkeurigheid."
+  },
+  "providers.localai.noteWhisperMedium": {
+    "en": "Measured on Japanese VRChat talk: about 34% of the characters wrong.",
+    "text": "Getest met Japanse gesprekken in VRChat: ongeveer 34% van de tekens fout."
+  },
+  "providers.localai.noteWhisperTurbo": {
+    "en": "Measured on Japanese VRChat talk: about 21% of the characters wrong, and steady. It writes only once a sentence has ended.",
+    "text": "Getest met informele Japanse gesprekken in VRChat: ongeveer 21% van de tekens fout, met stabiele resultaten. De tekst verschijnt ook hier pas als een zin klaar is."
+  },
+  "providers.localai.otherDeviceHint": {
+    "en": "To use the models of another device on your local network, search the network for it.",
+    "text": "Zoek naar apparaten in je lokale netwerk om de modellen van een ander apparaat te gebruiken."
+  },
+  "providers.localai.phoneKey": {
+    "en": "Access key of {{name}}",
+    "text": "Toegangssleutel van {{name}}"
+  },
+  "providers.localai.phoneKeyNote": {
+    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
+    "text": "Deze telefoon vereist een toegangssleutel. Je vindt die op de telefoon onder ‘Apparaatverbinding’."
+  },
+  "providers.localai.phoneKeyUse": {
+    "en": "Use this phone",
+    "text": "Deze telefoon gebruiken"
+  },
+  "providers.localai.phoneKeyWrong": {
+    "en": "The phone did not take this key.",
+    "text": "Deze sleutel klopt niet. Controleer hem nog eens."
+  },
+  "providers.localai.phoneModelGone": {
+    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
+    "text": "De telefoon ({{address}}) stelt {{name}} nu niet beschikbaar. Kies een ander model in het bijbehorende paneel."
+  },
+  "providers.localai.phoneModelTooBig": {
+    "en": "{{name}} (not enough memory on the phone)",
+    "text": "{{name}} (te weinig geheugen op de telefoon)"
+  },
+  "providers.localai.phoneModelTooBigCheck": {
+    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
+    "text": "De telefoon ({{address}}) heeft nu niet genoeg geheugen voor {{name}}. Kies een kleiner model in het bijbehorende paneel of sluit andere apps op de telefoon."
+  },
+  "providers.localai.phoneNoMemory": {
+    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
+    "text": "De telefoon heeft nu niet genoeg geheugen voor dit model. Kies een kleiner model in het bijbehorende paneel of sluit andere apps op de telefoon."
+  },
+  "providers.localai.phoneOption": {
+    "en": "{{name}} (phone)",
+    "text": "{{name}} (telefoon)"
+  },
+  "providers.localai.phoneQuiet": {
+    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
+    "text": "De telefoon reageert niet. Mogelijk is de app gepauzeerd nadat het scherm is vergrendeld. Open Kotomimi op de telefoon om verder te gaan."
+  },
+  "providers.localai.phoneUnreachable": {
+    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "De telefoon ({{address}}) reageert niet. Controleer of delen aanstaat en de telefoon op hetzelfde wifi-netwerk zit als deze computer."
+  },
+  "providers.localai.pipelineModel": {
+    "en": "Setup name on that device",
+    "text": "Configuratienaam op dat apparaat"
+  },
+  "providers.localai.pipelineNote": {
+    "en": "Normally left alone. Change it only when that device is a LocalAI set up with more than one combination of recognition and translation.",
+    "text": "Meestal hoef je dit niet te wijzigen. Dit is alleen nodig als dat apparaat LocalAI gebruikt met meerdere combinaties van spraakherkenning en vertaling."
+  },
+  "providers.localai.placeDevice": {
+    "en": "This computer",
+    "text": "Deze computer"
+  },
+  "providers.localai.placeServer": {
+    "en": "Another device",
+    "text": "Ander apparaat"
+  },
+  "providers.localai.ready": {
+    "en": "Ready to start",
+    "text": "Klaar om te starten"
+  },
+  "providers.localai.recheck": {
+    "en": "Check again",
+    "text": "Opnieuw controleren"
+  },
+  "providers.localai.serverHttp": {
+    "en": "The other device answered with an error (HTTP {{status}}). Restarting the app or the model server there usually helps.",
+    "text": "Het andere apparaat gaf een fout (HTTP {{status}}). Meestal helpt het om de app of modelserver daar opnieuw te starten."
+  },
+  "providers.localai.serverKey": {
+    "en": "Access key",
+    "text": "Toegangssleutel"
+  },
+  "providers.localai.serverKeyMissing": {
+    "en": "The other device asks for an access key. Enter it in Settings, under \"Another device\".",
+    "text": "Het andere apparaat vraagt om een toegangssleutel. Vul die in bij Instellingen onder 'Ander apparaat'."
+  },
+  "providers.localai.serverKeyNeeded": {
+    "en": "The other device asks for an access key. Under \"Another device\", turn on \"It asks for an access key\" and enter the key set on that device.",
+    "text": "Het andere apparaat vraagt om een toegangssleutel. Schakel onder 'Ander apparaat' de optie 'Vraagt om een toegangssleutel' in en vul de sleutel van dat apparaat in."
+  },
+  "providers.localai.serverKeyRefused": {
+    "en": "The other device did not accept the access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options).",
+    "text": "Het andere apparaat accepteert deze toegangssleutel niet. Vul de sleutel in die op dat apparaat is ingesteld. Bij een andere Kotomimi staat die onder 'Opties' bij delen."
+  },
+  "providers.localai.serverNeedsKey": {
+    "en": "It asks for an access key",
+    "text": "Toegangssleutel vereist"
+  },
+  "providers.localai.serverNeedsKeyTooltip": {
+    "en": "Turn this on when the other device was given an access key — a Kotomimi with one set under its sharing options, for example.",
+    "text": "Schakel dit in als het andere apparaat een toegangssleutel heeft. Bijvoorbeeld als die in Kotomimi is ingesteld bij de opties voor delen."
+  },
+  "providers.localai.serverNoAsr": {
+    "en": "The other device has no speech recognition model for {{source}}. Download one there first (in the model library of its sharing card), or let this computer listen.",
+    "text": "Het andere apparaat heeft geen spraakherkenningsmodel voor {{source}}. Download daar eerst een model via de modelbibliotheek in het deelpaneel, of laat deze computer de spraak herkennen."
+  },
+  "providers.localai.serverNoDetect": {
+    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
+    "text": "Het andere apparaat heeft geen spraakherkenningsmodel dat talen automatisch kan onderscheiden. Dat is nodig voor 'Ik spreek … ook' en automatische taalherkenning bij anderen. Download daar eerst zo'n model, zoals Qwen3-ASR, of schakel beide opties uit."
+  },
+  "providers.localai.serverNoModels": {
+    "en": "The other device has no model yet: install or download one there first.",
+    "text": "Het andere apparaat heeft nog geen modellen. Installeer of download daar eerst een model."
+  },
+  "providers.localai.serverSilent": {
+    "en": "This address does not answer. If Kotomimi is running on that device, enable its sharing to use its installed native models.",
+    "text": "Dit adres is niet bereikbaar. Draait Kotomimi op dat apparaat? Schakel daar delen in om de geïnstalleerde native modellen te gebruiken."
+  },
+  "providers.localai.serverUnreachable": {
+    "en": "The other device ({{address}}) did not answer. Check that it is on and on the same network as this computer, and that Kotomimi there is sharing (or its model server is running). It is asked again by itself.",
+    "text": "Het andere apparaat ({{address}}) reageert niet. Controleer of het aanstaat en op hetzelfde netwerk zit als deze computer, en of Kotomimi daar delen heeft ingeschakeld (of de modelserver draait). Zodra er verbinding is, gaat het automatisch verder."
+  },
+  "providers.localai.sharedDeviceNone": {
+    "en": "No device connected yet",
+    "text": "Nog geen apparaat verbonden"
+  },
+  "providers.localai.sourceAuto": {
+    "en": "The language cannot be detected with this setup. Choose the language you speak.",
+    "text": "Met deze combinatie kan de taal niet automatisch worden herkend. Kies de taal die je spreekt."
+  },
+  "providers.localai.speedAbout": {
+    "en": "About {{seconds}} s",
+    "text": "Ongeveer {{seconds}} s"
+  },
+  "providers.localai.speedAdviceGeneral": {
+    "en": "A smaller model or a faster device is suggested.",
+    "text": "Gebruik een kleiner model of een sneller apparaat."
+  },
+  "providers.localai.speedAdviceModel": {
+    "en": "A smaller model, such as {{name}}, is suggested.",
+    "text": "Gebruik een kleiner model, zoals {{name}}."
+  },
+  "providers.localai.speedAdviceSwitch": {
+    "en": "Switch and test again",
+    "text": "Wisselen en opnieuw testen"
+  },
+  "providers.localai.speedBehind": {
+    "en": "Falls behind",
+    "text": "Loopt steeds verder achter"
+  },
+  "providers.localai.speedCoach": {
+    "en": "{{seconds}} s per sentence for feedback, on average",
+    "text": "Feedback duurt gemiddeld {{seconds}} s per zin"
+  },
+  "providers.localai.speedCoachSlow": {
+    "en": "Feedback is slower than speech, so it will fall further behind. ",
+    "text": "De feedback houdt het spreektempo niet bij en loopt steeds verder achter. "
+  },
+  "providers.localai.speedFailed": {
+    "en": "The test could not finish: {{reason}}",
+    "text": "De test kon niet worden voltooid: {{reason}}"
+  },
+  "providers.localai.speedHead": {
+    "en": "Speed test · {{when}}",
+    "text": "Snelheidstest · {{when}}"
+  },
+  "providers.localai.speedHear": {
+    "en": "Text appears {{seconds}} s after the speech ends",
+    "text": "De oorspronkelijke tekst verschijnt {{seconds}} s na het uitspreken"
+  },
+  "providers.localai.speedHearSlow": {
+    "en": "Recognition is slower than speech, so the captions will fall further behind. ",
+    "text": "De spraakherkenning houdt het spreektempo niet bij. De ondertitels lopen steeds verder achter. "
+  },
+  "providers.localai.speedJustNow": {
+    "en": "just now",
+    "text": "zojuist"
+  },
+  "providers.localai.speedLegCoach": {
+    "en": "From you finishing to the feedback",
+    "text": "Van je laatste woord tot de feedback verschijnt"
+  },
+  "providers.localai.speedLegParticipant": {
+    "en": "From the other side finishing to the translation",
+    "text": "Van het uitspreken door de ander tot de vertaling verschijnt"
+  },
+  "providers.localai.speedLegSpeaker": {
+    "en": "From you finishing to the translation",
+    "text": "Van je laatste woord tot de vertaling verschijnt"
+  },
+  "providers.localai.speedNoClip": {
+    "en": "There is no test recording for this language yet.",
+    "text": "Er is nog geen testopname voor deze taal."
+  },
+  "providers.localai.speedNone": {
+    "en": "No result arrived during the test.",
+    "text": "Tijdens de test is geen resultaat ontvangen."
+  },
+  "providers.localai.speedRetest": {
+    "en": "Test again",
+    "text": "Opnieuw testen"
+  },
+  "providers.localai.speedStop": {
+    "en": "Stop",
+    "text": "Stoppen"
+  },
+  "providers.localai.speedTest": {
+    "en": "Test speed",
+    "text": "Snelheid testen"
+  },
+  "providers.localai.speedTesting": {
+    "en": "Testing speed: a recording of about ten seconds is sent through each step at speaking pace. Nothing is recorded or played.",
+    "text": "Snelheid wordt getest: een opname van ongeveer 10 seconden wordt op normaal spreektempo door alle stappen geleid. De microfoon wordt niet gebruikt en er wordt geen geluid afgespeeld."
+  },
+  "providers.localai.speedTranslate": {
+    "en": "{{seconds}} s per sentence to translate, on average",
+    "text": "Vertalen duurt gemiddeld {{seconds}} s per zin"
+  },
+  "providers.localai.speedTranslateSlow": {
+    "en": "Translation is slower than speech, so the translations will fall further behind. ",
+    "text": "Het vertalen houdt het spreektempo niet bij. De vertalingen lopen steeds verder achter. "
+  },
+  "providers.localai.speedVerdictOk": {
+    "en": "This setup keeps up with live speech.",
+    "text": "Deze combinatie houdt live gesprekken bij."
+  },
+  "providers.localai.speedVerdictSlow": {
+    "en": "Some steps cannot keep up with speech; see the notes above.",
+    "text": "Sommige stappen houden het spreektempo niet bij. Zie de toelichting hierboven."
+  },
+  "providers.localai.stageDevice": {
+    "en": "Device",
+    "text": "Apparaat"
+  },
+  "providers.localai.tag_native": {
+    "en": "Native engine",
+    "text": "Native engine"
+  },
+  "providers.localai.tag_system": {
+    "en": "Built into macOS",
+    "text": "Ingebouwd in macOS"
+  },
+  "providers.localai.tagHint_native": {
+    "en": "Runs on the graphics card using a native engine downloaded with the model. Loads when a session starts; the first start after boot may take about half a minute. Memory is released after the engine is no longer in use.",
+    "text": "Draait op de videokaart via een native engine die samen met het model wordt gedownload. Wordt geladen bij het starten van een sessie. De eerste keer na het opstarten van de computer kan dit ongeveer een halve minuut duren. Het geheugen wordt vrijgegeven zodra de engine niet meer wordt gebruikt."
+  },
+  "providers.localai.tagHint_system": {
+    "en": "The speech recognition of macOS itself: no video memory taken, nothing to warm up. The system downloads each language.",
+    "text": "De ingebouwde spraakherkenning van macOS: gebruikt geen videogeheugen en hoeft niet op te warmen. Het systeem downloadt voor elke taal een taalpakket."
+  },
+  "providers.localai.textBaseUrlPlaceholder": {
+    "en": "e.g. https://api.openai.com/v1 or http://localhost:11434/v1",
+    "text": "Bijv. https://api.openai.com/v1 of http://localhost:11434/v1"
+  },
+  "providers.localai.textModelPlaceholder": {
+    "en": "The model's name, e.g. gpt-4o-mini",
+    "text": "Modelnaam, bijv. gpt-4o-mini"
+  },
+  "providers.localai.translateInSession": {
+    "en": "The device's own choice (translated in the same session it hears in)",
+    "text": "Laat het apparaat kiezen (vertaling en herkenning in dezelfde sessie)"
+  },
+  "providers.localai.translateKey": {
+    "en": "API key of the translation model",
+    "text": "API-sleutel voor het vertaalmodel"
+  },
+  "providers.localai.translateKotomimiOwn": {
+    "en": "The device's own choice (its best model for your languages)",
+    "text": "Laat het apparaat kiezen (beste model voor je talenpaar)"
+  },
+  "providers.localai.translateStage": {
+    "en": "Translation",
+    "text": "Vertaling"
+  },
+  "providers.localai.translateStageTooltip": {
+    "en": "What turns the recognized text into the other language. An API model is any service that speaks the OpenAI chat API: a hosted one, or Ollama or LM Studio on this computer.",
+    "text": "Het onderdeel dat herkende tekst naar een andere taal vertaalt. Een API-model kan elke dienst zijn die de chat-API van OpenAI ondersteunt: in de cloud of via Ollama of LM Studio op deze computer."
+  },
+  "providers.localai.translateUnnamed": {
+    "en": "Translation has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "Er is nog geen vertaalmodel beschikbaar. Kies er een in het paneel 'Vertaling' onder de aanbieder. Vul bij een API-model het adres en de modelnaam in, of kies een andere locatie."
+  },
+  "providers.localai.translatorFailed": {
+    "en": "The translation engine of this computer could not start. In the Translation card, press \"Try again\" — or choose another model.",
+    "text": "De vertaalengine op deze computer kon niet starten. Klik in het paneel 'Vertaling' op 'Opnieuw proberen' of kies een ander model."
+  },
+  "providers.localai.translatorFailedShort": {
+    "en": "The translation engine could not start.",
+    "text": "De vertaalengine kon niet starten."
+  },
+  "providers.localai.translatorMissing": {
+    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} is nog niet gedownload. Download een native model in het paneel 'Vertaling' of kies 'API-model' of 'Ander apparaat'."
+  },
+  "providers.localai.translatorReady": {
+    "en": "The translation engine is ready.",
+    "text": "De vertaalengine is klaar."
+  },
+  "providers.localai.translatorUnfit": {
+    "en": "{{name}} does not translate between your two languages. Choose another model for it.",
+    "text": "{{name}} ondersteunt je twee gekozen talen niet. Kies een ander model."
+  },
+  "providers.localai.translatorUnsupported": {
+    "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
+    "text": "De native vertaalengine wordt nog niet ondersteund op dit systeem. Kies in het paneel 'Vertaling' voor 'API-model' of 'Ander apparaat'."
+  },
+  "providers.localai.translatorWarming": {
+    "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",
+    "text": "De vertaalengine op deze computer start nog op. Dit duurt maar een paar seconden. Zodra de engine klaar is, kun je beginnen."
+  },
+  "providers.localai.translatorWarmingShort": {
+    "en": "Starting the translation engine…",
+    "text": "Vertaalengine starten…"
+  },
+  "providers.localai.typedFailed": {
+    "en": "A sentence you typed was not translated: the translation model did not answer.",
+    "text": "Een getypte zin kon niet worden vertaald: het vertaalmodel reageerde niet."
+  },
+  "providers.localai.viaModel": {
+    "en": "API model",
+    "text": "API-model"
+  },
+  "providers.openai_live.name": {
+    "en": "OpenAI Live",
+    "text": "OpenAI Live"
+  },
+  "providers.openai_translate.name": {
+    "en": "OpenAI Translate",
+    "text": "OpenAI Translate"
+  },
+  "providers.openai.name": {
+    "en": "OpenAI Realtime",
+    "text": "OpenAI Realtime"
+  },
+  "providers.palabraai.authModeApp": {
+    "en": "App Client ID/Secret",
+    "text": "Client-ID/geheim van app"
+  },
+  "providers.palabraai.clientIdPlaceholder": {
+    "en": "Client ID",
+    "text": "Client-ID"
+  },
+  "providers.palabraai.clientSecretPlaceholder": {
+    "en": "Client Secret",
+    "text": "Clientgeheim"
+  },
+  "providers.palabraai.name": {
+    "en": "Palabra AI",
+    "text": "Palabra AI"
+  },
+  "providers.qwen_livetranslate.name": {
+    "en": "Qwen LiveTranslate",
+    "text": "Qwen LiveTranslate"
+  },
+  "providers.soniox.name": {
+    "en": "Soniox",
+    "text": "Soniox"
+  },
+  "providers.volcengine_ast2.accessTokenPlaceholder": {
+    "en": "Access Token",
+    "text": "Toegangstoken"
+  },
+  "providers.volcengine_ast2.appIdPlaceholder": {
+    "en": "APP ID",
+    "text": "App-ID"
+  },
+  "providers.volcengine_ast2.authModeApp": {
+    "en": "App ID + Access Token",
+    "text": "App-ID + toegangstoken"
+  },
+  "providers.volcengine_ast2.name": {
+    "en": "Doubao AST 2.0",
+    "text": "Doubao AST 2.0"
+  },
+  "settings.auto": {
+    "en": "Auto",
+    "text": "Automatisch"
+  },
+  "settings.glossaryAdd": {
+    "en": "Add a word…",
+    "text": "Woord toevoegen…"
+  },
+  "settings.glossaryDelete": {
+    "en": "Delete entry",
+    "text": "Vermelding verwijderen"
+  },
+  "settings.glossaryFixOpen": {
+    "en": "Fix word",
+    "text": "Woord verbeteren"
+  },
+  "settings.glossaryFixSave": {
+    "en": "Save to glossary",
+    "text": "Opslaan in woordenlijst"
+  },
+  "settings.glossaryFixTo": {
+    "en": "Change to",
+    "text": "Wijzigen in"
+  },
+  "settings.glossaryFull": {
+    "en": "Glossary is full",
+    "text": "De woordenlijst is vol"
+  },
+  "settings.glossaryHeard": {
+    "en": "Misheard as",
+    "text": "Verstaan als"
+  },
+  "settings.glossaryOptional": {
+    "en": "Only if misheard",
+    "text": "Alleen invullen bij verkeerde herkenning"
+  },
+  "settings.glossaryTitle": {
+    "en": "Personal glossary",
+    "text": "Persoonlijke woordenlijst"
+  },
+  "settings.glossaryTooltip": {
+    "en": "Names and special words. Write each in the language it is spoken in. Where one has been misheard, add how on the right and it is put right from then on; some recognition models only follow that column. You can also select a misheard word in the conversation and correct it there.",
+    "text": "Voeg namen en vaktermen toe in de taal waarin je ze uitspreekt. Is een woord verkeerd herkend? Vul dan rechts in wat er werd verstaan. Het wordt voortaan automatisch verbeterd. Sommige spraakmodellen gebruiken alleen de rechterkolom. Je kunt ook een verkeerd herkend woord in het gesprek selecteren en daar verbeteren."
+  },
+  "settings.glossaryTooltipLabel": {
+    "en": "About personal glossary",
+    "text": "Over de persoonlijke woordenlijst"
+  },
+  "settings.glossaryWritten": {
+    "en": "Word",
+    "text": "Woord"
+  },
+  "settings.help": {
+    "en": "Help",
+    "text": "Help"
+  },
+  "settings.model": {
+    "en": "Model",
+    "text": "Model"
+  },
+  "settings.pushToTalk": {
+    "en": "Push-to-Talk",
+    "text": "Ingedrukt houden om te praten"
+  },
+  "settings.pushToTranslate": {
+    "en": "Push-to-Translate",
+    "text": "Ingedrukt houden om te vertalen"
+  },
+  "settings.sentenceSegmentationChunkAuto": {
+    "en": "Auto",
+    "text": "Automatisch"
+  },
+  "settings.tabs.audio": {
+    "en": "Audio",
+    "text": "Audio"
+  },
+  "settings.tabs.provider": {
+    "en": "Provider",
+    "text": "Aanbieder"
+  },
+  "settings.transcriptKeywordsPlaceholder": {
+    "en": "Sokuji, Kizuna AI, PulseAudio",
+    "text": "Sokuji, Kizuna AI, PulseAudio"
+  },
+  "settings.vadNegativeThresholdAuto": {
+    "en": "Auto",
+    "text": "Automatisch"
+  },
+  "setup.credentials.accessKeyId": {
+    "en": "Access Key ID",
+    "text": "Toegangssleutel-ID"
+  },
+  "setup.credentials.accessToken": {
+    "en": "Access Token",
+    "text": "Toegangstoken"
+  },
+  "setup.credentials.appId": {
+    "en": "App ID",
+    "text": "App-ID"
+  },
+  "setup.credentials.secretAccessKey": {
+    "en": "Secret Access Key",
+    "text": "Geheime toegangssleutel"
+  },
+  "setup.summary.provider": {
+    "en": "Provider",
+    "text": "Dienst"
+  },
+  "setup.summary.scenario": {
+    "en": "Scenario",
+    "text": "Situatie"
+  },
+  "titleBar.account.label": {
+    "en": "Account",
+    "text": "Account"
+  },
+  "tour.steps.kotomimi-tips.coach": {
+    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
+    "text": "Spreek je zelf de andere taal? Schakel Grammaticafeedback in bij Instellingen. Je kunt ook \"Ik spreek de andere taal ook\" inschakelen om vertaling en grammaticafeedback die alleen jij ziet te combineren."
+  },
+  "tour.steps.kotomimi-tips.content": {
+    "en": "Worth knowing before you start:",
+    "text": "Goed om te weten voordat je begint:"
+  },
+  "tour.steps.kotomimi-tips.share": {
+    "en": "Another device can use this computer's models: Settings → Provider → Share with other devices.",
+    "text": "Een ander apparaat kan de modellen op deze computer ook gebruiken: Instellingen → Aanbieder → Delen met andere apparaten."
+  },
+  "tour.steps.kotomimi-tips.title": {
+    "en": "Three more things",
+    "text": "Nog drie dingen"
+  },
+  "tour.steps.kotomimi-tips.typed": {
+    "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
+    "text": "Tijdens een sessie verschijnt onderaan een invoerveld: typ een zin om die te laten vertalen. Met Ctrl+K ga je direct naar dat veld."
+  },
+  "tour.steps.models.content_kotomimi": {
+    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
+    "text": "Hier download je modellen: klik op \"Modelbibliotheek\" op de kaart van een stap. Modellen met het label Aanbevolen kwamen het beste uit tests met echte gesprekken. Het pictogram naast de modelnaam toont de testresultaten. Na het downloaden wordt het model automatisch ingeschakeld."
+  },
+  "tour.steps.provider-settings.content_kotomimi": {
+    "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",
+    "text": "Elke stap heeft hier een eigen kaart: spraakherkenning, vertaling en grammaticafeedback. Op de kaart kies je waar de stap draait: op een ander apparaat in je lokale netwerk, via een API-model of op deze computer. Daar kies je ook het model. Via Instellingen → Aanbieder kun je de modellen op deze computer delen met een ander apparaat."
+  },
+  "tour.steps.reading-aids.content": {
+    "en": "Help for reading the other language, switched here:",
+    "text": "Hier schakel je hulpmiddelen in om de andere taal te lezen:"
+  },
+  "tour.steps.reading-aids.fonts": {
+    "en": "Fonts for each language are under Settings → Fonts.",
+    "text": "Lettertypen per taal kies je via Instellingen → Lettertypen."
+  },
+  "tour.steps.reading-aids.furigana": {
+    "en": "Furigana — kana above Japanese kanji.",
+    "text": "Furigana: kana boven Japanse kanji om de uitspraak aan te geven."
+  },
+  "tour.steps.reading-aids.pinyin": {
+    "en": "Pinyin — tone-marked pinyin above Chinese.",
+    "text": "Pinyin: pinyin met toontekens boven Chinese tekst."
+  },
+  "tour.steps.reading-aids.romanization": {
+    "en": "Romanization — a line in Latin letters under Japanese, Korean, Russian and Ukrainian.",
+    "text": "Romanisatie: een regel met de uitspraak in Latijnse letters onder Japans, Koreaans, Russisch en Oekraïens."
+  },
+  "tour.steps.reading-aids.title": {
+    "en": "Reading aids",
+    "text": "Leeshulp"
+  },
+  "tour.steps.start.title": {
+    "en": "Start",
+    "text": "Starten"
+  },
+  "update.later": {
+    "en": "Later",
+    "text": "Later"
+  },
+  "viewer.status.live": {
+    "en": "Live",
+    "text": "Live"
+  },
+  "voiceLibrary.cloneVoiceRequired": {
+    "en": "This voice needs a clip before it can speak — open the voice list and add one.",
+    "text": "Deze stem kan nog niet spreken. Open de stemmenlijst en voeg een spraakfragment toe."
+  },
+  "voiceLibrary.filter.accent.african": {
+    "en": "African",
+    "text": "Afrikaans"
+  },
+  "voiceLibrary.filter.accent.american": {
+    "en": "American",
+    "text": "Amerikaans"
+  },
+  "voiceLibrary.filter.accent.arabic": {
+    "en": "Arabic",
+    "text": "Arabisch"
+  },
+  "voiceLibrary.filter.accent.australian": {
+    "en": "Australian",
+    "text": "Australisch"
+  },
+  "voiceLibrary.filter.accent.brazilian": {
+    "en": "Brazilian",
+    "text": "Braziliaans"
+  },
+  "voiceLibrary.filter.accent.british": {
+    "en": "British",
+    "text": "Brits"
+  },
+  "voiceLibrary.filter.accent.chinese": {
+    "en": "Chinese",
+    "text": "Chinees"
+  },
+  "voiceLibrary.filter.accent.french": {
+    "en": "French",
+    "text": "Frans"
+  },
+  "voiceLibrary.filter.accent.german": {
+    "en": "German",
+    "text": "Duits"
+  },
+  "voiceLibrary.filter.accent.indian": {
+    "en": "Indian",
+    "text": "Indiaas"
+  },
+  "voiceLibrary.filter.accent.italian": {
+    "en": "Italian",
+    "text": "Italiaans"
+  },
+  "voiceLibrary.filter.accent.japanese": {
+    "en": "Japanese",
+    "text": "Japans"
+  },
+  "voiceLibrary.filter.accent.korean": {
+    "en": "Korean",
+    "text": "Koreaans"
+  },
+  "voiceLibrary.filter.accent.latin_american": {
+    "en": "Latin American",
+    "text": "Latijns-Amerikaans"
+  },
+  "voiceLibrary.filter.accent.portuguese": {
+    "en": "Portuguese",
+    "text": "Portugees"
+  },
+  "voiceLibrary.filter.accent.slavic": {
+    "en": "Slavic",
+    "text": "Slavisch"
+  },
+  "voiceLibrary.filter.accent.southeast_asian": {
+    "en": "Southeast Asian",
+    "text": "Zuidoost-Aziatisch"
+  },
+  "voiceLibrary.filter.accent.spanish": {
+    "en": "Spanish",
+    "text": "Spaans"
+  },
+  "voiceLibrary.filter.accentLabel": {
+    "en": "Accent",
+    "text": "Accent"
+  },
+  "voiceLibrary.filter.age.child": {
+    "en": "Child",
+    "text": "Kind"
+  },
+  "voiceLibrary.filter.age.middle_aged": {
+    "en": "Middle-aged",
+    "text": "Middelbare leeftijd"
+  },
+  "voiceLibrary.filter.age.old": {
+    "en": "Mature",
+    "text": "Ouder"
+  },
+  "voiceLibrary.filter.age.teen": {
+    "en": "Teen",
+    "text": "Tiener"
+  },
+  "voiceLibrary.filter.age.young": {
+    "en": "Young",
+    "text": "Jong"
+  },
+  "voiceLibrary.filter.ageLabel": {
+    "en": "Age",
+    "text": "Leeftijd"
+  },
+  "voiceLibrary.filter.anyAccent": {
+    "en": "Any accent",
+    "text": "Alle accenten"
+  },
+  "voiceLibrary.filter.anyAge": {
+    "en": "Any age",
+    "text": "Alle leeftijden"
+  },
+  "voiceLibrary.filter.anyGender": {
+    "en": "Any gender",
+    "text": "Alle geslachten"
+  },
+  "voiceLibrary.filter.anyStyle": {
+    "en": "Any style",
+    "text": "Alle stijlen"
+  },
+  "voiceLibrary.filter.anyUseCase": {
+    "en": "Any use case",
+    "text": "Alle toepassingen"
+  },
+  "voiceLibrary.filter.clear": {
+    "en": "Clear filters",
+    "text": "Filters wissen"
+  },
+  "voiceLibrary.filter.count": {
+    "en": "{shown} of {total} voices",
+    "text": "{shown} van {total} stemmen"
+  },
+  "voiceLibrary.filter.empty": {
+    "en": "No voices match these filters.",
+    "text": "Geen stemmen gevonden met deze filters."
+  },
+  "voiceLibrary.filter.gender.female": {
+    "en": "Female",
+    "text": "Vrouwelijk"
+  },
+  "voiceLibrary.filter.gender.male": {
+    "en": "Male",
+    "text": "Mannelijk"
+  },
+  "voiceLibrary.filter.gender.neutral": {
+    "en": "Neutral",
+    "text": "Neutraal"
+  },
+  "voiceLibrary.filter.genderLabel": {
+    "en": "Gender",
+    "text": "Geslacht"
+  },
+  "voiceLibrary.filter.style.breathy": {
+    "en": "Breathy",
+    "text": "Luchtig"
+  },
+  "voiceLibrary.filter.style.breezy": {
+    "en": "Breezy",
+    "text": "Vlot"
+  },
+  "voiceLibrary.filter.style.bright": {
+    "en": "Bright",
+    "text": "Helder"
+  },
+  "voiceLibrary.filter.style.calm": {
+    "en": "Calm",
+    "text": "Kalm"
+  },
+  "voiceLibrary.filter.style.casual": {
+    "en": "Casual",
+    "text": "Ongedwongen"
+  },
+  "voiceLibrary.filter.style.clear": {
+    "en": "Clear",
+    "text": "Duidelijk"
+  },
+  "voiceLibrary.filter.style.confident": {
+    "en": "Confident",
+    "text": "Zelfverzekerd"
+  },
+  "voiceLibrary.filter.style.deep": {
+    "en": "Deep",
+    "text": "Diep"
+  },
+  "voiceLibrary.filter.style.dramatic": {
+    "en": "Dramatic",
+    "text": "Theatraal"
+  },
+  "voiceLibrary.filter.style.easy_going": {
+    "en": "Easy-going",
+    "text": "Gemoedelijk"
+  },
+  "voiceLibrary.filter.style.energetic": {
+    "en": "Energetic",
+    "text": "Energiek"
+  },
+  "voiceLibrary.filter.style.even": {
+    "en": "Even",
+    "text": "Gelijkmatig"
+  },
+  "voiceLibrary.filter.style.excitable": {
+    "en": "Excitable",
+    "text": "Vurig"
+  },
+  "voiceLibrary.filter.style.expressive": {
+    "en": "Expressive",
+    "text": "Expressief"
+  },
+  "voiceLibrary.filter.style.firm": {
+    "en": "Firm",
+    "text": "Standvastig"
+  },
+  "voiceLibrary.filter.style.formal": {
+    "en": "Formal",
+    "text": "Formeel"
+  },
+  "voiceLibrary.filter.style.forward": {
+    "en": "Forward",
+    "text": "Direct"
+  },
+  "voiceLibrary.filter.style.friendly": {
+    "en": "Friendly",
+    "text": "Vriendelijk"
+  },
+  "voiceLibrary.filter.style.gentle": {
+    "en": "Gentle",
+    "text": "Zachtaardig"
+  },
+  "voiceLibrary.filter.style.gravelly": {
+    "en": "Gravelly",
+    "text": "Ruw"
+  },
+  "voiceLibrary.filter.style.informative": {
+    "en": "Informative",
+    "text": "Informatief"
+  },
+  "voiceLibrary.filter.style.knowledgeable": {
+    "en": "Knowledgeable",
+    "text": "Deskundig"
+  },
+  "voiceLibrary.filter.style.lively": {
+    "en": "Lively",
+    "text": "Levendig"
+  },
+  "voiceLibrary.filter.style.mature": {
+    "en": "Mature",
+    "text": "Volwassen"
+  },
+  "voiceLibrary.filter.style.neutral": {
+    "en": "Neutral",
+    "text": "Neutraal"
+  },
+  "voiceLibrary.filter.style.playful": {
+    "en": "Playful",
+    "text": "Speels"
+  },
+  "voiceLibrary.filter.style.raspy": {
+    "en": "Raspy",
+    "text": "Hees"
+  },
+  "voiceLibrary.filter.style.smooth": {
+    "en": "Smooth",
+    "text": "Vloeiend"
+  },
+  "voiceLibrary.filter.style.soft": {
+    "en": "Soft",
+    "text": "Zacht"
+  },
+  "voiceLibrary.filter.style.upbeat": {
+    "en": "Upbeat",
+    "text": "Opgewekt"
+  },
+  "voiceLibrary.filter.style.warm": {
+    "en": "Warm",
+    "text": "Warm"
+  },
+  "voiceLibrary.filter.style.youthful": {
+    "en": "Youthful",
+    "text": "Jeugdig"
+  },
+  "voiceLibrary.filter.styleLabel": {
+    "en": "Style",
+    "text": "Stijl"
+  },
+  "voiceLibrary.filter.useCase.conversational": {
+    "en": "Conversation",
+    "text": "Gesprekken"
+  },
+  "voiceLibrary.filter.useCase.educational": {
+    "en": "Teaching",
+    "text": "Uitleg"
+  },
+  "voiceLibrary.filter.useCase.entertainment": {
+    "en": "Entertainment",
+    "text": "Amusement"
+  },
+  "voiceLibrary.filter.useCase.narration": {
+    "en": "Narration",
+    "text": "Vertelling"
+  },
+  "voiceLibrary.filter.useCase.social_media": {
+    "en": "Social media",
+    "text": "Sociale media"
+  },
+  "voiceLibrary.filter.useCaseLabel": {
+    "en": "Use case",
+    "text": "Gebruik"
+  },
+  "voiceLibrary.presets": {
+    "en": "Presets",
+    "text": "Voorinstellingen"
+  },
+  "voiceLibrary.transcript": {
+    "en": "Transcript",
+    "text": "Transcriptie"
+  }
+}

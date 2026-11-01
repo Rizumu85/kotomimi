@@ -1,0 +1,2170 @@
+{
+  "audioSystem.installCommand": {
+    "en": "sudo apt install pulseaudio-utils",
+    "text": "sudo apt install pulseaudio-utils"
+  },
+  "auth.emailPlaceholder": {
+    "en": "your@email.com",
+    "text": "your@email.com"
+  },
+  "captionShare.kinds.wifi": {
+    "en": "Wi‑Fi",
+    "text": "Wi‑Fi"
+  },
+  "engine.status.devVenv": {
+    "en": "dev venv",
+    "text": "สภาพแวดล้อมเสมือนสำหรับพัฒนา"
+  },
+  "engine.status.native": {
+    "en": "native {{version}}",
+    "text": "แบบเนทีฟ {{version}}"
+  },
+  "fork.aids.furigana": {
+    "en": "Furigana",
+    "text": "ฟุริงานะ"
+  },
+  "fork.aids.highlight": {
+    "en": "Highlight new",
+    "text": "เน้นข้อความใหม่"
+  },
+  "fork.aids.italic": {
+    "en": "Italic source",
+    "text": "ต้นฉบับตัวเอียง"
+  },
+  "fork.aids.pinyin": {
+    "en": "Pinyin",
+    "text": "พินอิน"
+  },
+  "fork.aids.readings": {
+    "en": "Readings",
+    "text": "คำอ่าน"
+  },
+  "fork.aids.roman": {
+    "en": "Romanization",
+    "text": "คำอ่านอักษรโรมัน"
+  },
+  "fork.aids.text": {
+    "en": "Text",
+    "text": "ข้อความ"
+  },
+  "fork.audio.echoAction": {
+    "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
+    "text": "ใช้หูฟังเพื่อตัดเสียงวนกลับ หรือเพิ่มเกณฑ์เปิดใช้งานไมโครโฟนใน การตั้งค่า → ไมโครโฟน"
+  },
+  "fork.audio.gate": {
+    "en": "Mic activation threshold",
+    "text": "เกณฑ์เปิดใช้งานไมโครโฟน"
+  },
+  "fork.audio.gateHint": {
+    "en": "Press the microphone, speak, and set the mark under where the bar reaches — and above where it sits while only your speakers are heard.",
+    "text": "กดไอคอนไมโครโฟนแล้วพูด ตั้งเครื่องหมายให้ต่ำกว่าจุดที่แถบขึ้นเมื่อคุณพูด และสูงกว่าระดับที่แถบค้างเมื่อได้ยินเฉพาะเสียงจากลำโพง"
+  },
+  "fork.audio.gateOff": {
+    "en": "Off",
+    "text": "ปิด"
+  },
+  "fork.audio.gateQuiet": {
+    "en": "Nothing from the microphone yet.",
+    "text": "ยังไม่มีเสียงจากไมโครโฟน"
+  },
+  "fork.audio.gateTest": {
+    "en": "Test the microphone: the bar shows its level",
+    "text": "ทดสอบไมโครโฟน: แถบแสดงระดับเสียง"
+  },
+  "fork.audio.gateTestStop": {
+    "en": "Stop the test",
+    "text": "หยุดการทดสอบ"
+  },
+  "fork.audio.gateTooltip": {
+    "en": "Sound quieter than this is heard as silence — the other side's voice from your speakers, the keyboard, the room — so it is neither translated nor checked. The microphone is heard about 0.2 s later while this is on. Off: everything is heard.",
+    "text": "เสียงที่เบากว่านี้จะถือเป็นความเงียบ — เสียงจากอีกฝ่ายในลำโพง เสียงแป้นพิมพ์ หรือเสียงในห้อง — จึงไม่ถูกแปลหรือส่งไปตรวจไวยากรณ์ เมื่อเปิดใช้ เสียงจากไมโครโฟนจะช้าลงประมาณ 0.2 วินาที ปิด: รับฟังทุกเสียง"
+  },
+  "fork.audio.vbcableInstall": {
+    "en": "Install VB-CABLE",
+    "text": "ติดตั้ง VB-CABLE"
+  },
+  "fork.audio.vbcableInstalling": {
+    "en": "Downloading… this can take a minute",
+    "text": "กำลังดาวน์โหลด… อาจใช้เวลาสักครู่"
+  },
+  "fork.audio.vbcableMissing": {
+    "en": "The VB-CABLE virtual audio driver is not installed, so a spoken translation cannot be sent into a meeting. Subtitles do not need it.",
+    "text": "ไม่ได้ติดตั้งไดรเวอร์เสียงเสมือน VB-CABLE จึงส่งเสียงแปลเข้าโปรแกรมประชุมไม่ได้ แต่ไม่จำเป็นต้องใช้หากดูเฉพาะคำบรรยาย"
+  },
+  "fork.autostart.note": {
+    "en": "Kotomimi waits in the background after you sign in, with an icon in the notification area, and loads the models once ahead of time so the first session does not wait for it.",
+    "text": "หลังลงชื่อเข้าใช้ Kotomimi จะรอทำงานเบื้องหลัง โดยมีไอคอนในพื้นที่แจ้งเตือนมุมขวาล่าง และโหลดโมเดลเตรียมไว้ล่วงหน้า เพื่อให้เริ่มการสนทนาครั้งแรกได้โดยไม่ต้องรอนาน"
+  },
+  "fork.autostart.title": {
+    "en": "Startup",
+    "text": "การเริ่มต้น"
+  },
+  "fork.autostart.toggle": {
+    "en": "Start in the background when I sign in to Windows",
+    "text": "เริ่มทำงานเบื้องหลังเมื่อฉันลงชื่อเข้าใช้ Windows"
+  },
+  "fork.custom.add": {
+    "en": "Add",
+    "text": "เพิ่ม"
+  },
+  "fork.custom.added": {
+    "en": "Added {{name}} ({{size}} MB). Download it in the model library.",
+    "text": "เพิ่ม {{name}} ({{size}} MB) แล้ว ดาวน์โหลดได้ในคลังโมเดล"
+  },
+  "fork.custom.adding": {
+    "en": "Looking…",
+    "text": "กำลังค้นหา…"
+  },
+  "fork.custom.anyLanguage": {
+    "en": "Every language",
+    "text": "หลายภาษา"
+  },
+  "fork.custom.downloaded": {
+    "en": "downloaded",
+    "text": "ดาวน์โหลดแล้ว"
+  },
+  "fork.custom.error_bad_repo": {
+    "en": "That is not a repository id. It looks like owner/name.",
+    "text": "ชื่อคลังไม่ถูกต้อง ต้องอยู่ในรูปแบบ เจ้าของ/ชื่อ"
+  },
+  "fork.custom.error_exists": {
+    "en": "This model is already added.",
+    "text": "เพิ่มโมเดลนี้ไว้แล้ว"
+  },
+  "fork.custom.error_not_found": {
+    "en": "No public repository by that name.",
+    "text": "ไม่พบคลังสาธารณะชื่อนี้"
+  },
+  "fork.custom.error_not_whisper": {
+    "en": "This repository is not a Whisper model in the ONNX layout. {{detail}}",
+    "text": "คลังนี้ไม่ใช่โมเดล Whisper ในรูปแบบ ONNX {{detail}}"
+  },
+  "fork.custom.error_unreachable": {
+    "en": "Could not reach Hugging Face: {{detail}}",
+    "text": "เชื่อมต่อ Hugging Face ไม่ได้: {{detail}}"
+  },
+  "fork.custom.intro": {
+    "en": "For a Whisper model the library does not list, such as one fine-tuned for your language. Give its Hugging Face repository id (most onnx-community/… and Xenova/… Whisper repositories work); it needs a graphics card.",
+    "text": "สำหรับโมเดล Whisper ที่ไม่มีในคลัง เช่น โมเดลที่ปรับแต่งมาสำหรับภาษาของคุณ กรอกชื่อคลังบน Hugging Face (คลัง Whisper ส่วนใหญ่ใน onnx-community/… และ Xenova/… ใช้ได้) ต้องใช้การ์ดจอ"
+  },
+  "fork.custom.language": {
+    "en": "The language it hears",
+    "text": "ภาษาที่โมเดลรู้จำ"
+  },
+  "fork.custom.notDownloaded": {
+    "en": "not downloaded",
+    "text": "ยังไม่ได้ดาวน์โหลด"
+  },
+  "fork.custom.remove": {
+    "en": "Remove {{name}}",
+    "text": "นำ {{name}} ออก"
+  },
+  "fork.custom.repo": {
+    "en": "Repository id",
+    "text": "ชื่อคลัง"
+  },
+  "fork.custom.title": {
+    "en": "Add a Whisper model from Hugging Face",
+    "text": "เพิ่มโมเดล Whisper จาก Hugging Face"
+  },
+  "fork.echoCancellationApp": {
+    "en": "Kotomimi only",
+    "text": "เฉพาะ Kotomimi"
+  },
+  "fork.echoCancellationAppTooltip": {
+    "en": "Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "เฉพาะ Kotomimi: ตัดเฉพาะเสียงแปลที่ Kotomimi เล่นเอง เลือกตัวเลือกนี้เมื่อไมโครโฟนเป็นอุปกรณ์เสียงเสมือน (VB-Cable, BlackHole)"
+  },
+  "fork.find.again": {
+    "en": "Search again",
+    "text": "ค้นหาอีกครั้ง"
+  },
+  "fork.find.kindKotomimi": {
+    "en": "Kotomimi",
+    "text": "Kotomimi ที่แชร์"
+  },
+  "fork.find.kindPhone": {
+    "en": "Phone · speech recognition",
+    "text": "โทรศัพท์ · การรู้จำเสียงพูด"
+  },
+  "fork.find.kindPhoneLends": {
+    "en": "Phone · {{what}}",
+    "text": "โทรศัพท์ · {{what}}"
+  },
+  "fork.find.kindServer": {
+    "en": "Model server",
+    "text": "เซิร์ฟเวอร์โมเดล"
+  },
+  "fork.find.lendsAsr": {
+    "en": "speech recognition",
+    "text": "การรู้จำเสียงพูด"
+  },
+  "fork.find.lendsCoach": {
+    "en": "grammar feedback",
+    "text": "คำแนะนำไวยากรณ์"
+  },
+  "fork.find.lendsTranslate": {
+    "en": "translation",
+    "text": "การแปล"
+  },
+  "fork.find.manual": {
+    "en": "Or type its address",
+    "text": "หรือกรอกที่อยู่ด้วยตนเอง"
+  },
+  "fork.find.models": {
+    "en": "{{count}} model(s)",
+    "text": "{{count}} โมเดล"
+  },
+  "fork.find.needsKey": {
+    "en": "asks for an access key",
+    "text": "ต้องใช้คีย์เข้าถึง"
+  },
+  "fork.find.none": {
+    "en": "Nothing found. Check that the other device is on, is on the same Wi-Fi or router as this one, and has \"Share this computer's models\" turned on in its Kotomimi. You can also type its address below.",
+    "text": "ไม่พบอุปกรณ์ โปรดตรวจสอบว่าอุปกรณ์อีกเครื่องเปิดอยู่ เชื่อมต่อ Wi‑Fi หรือเราเตอร์เดียวกับคอมพิวเตอร์นี้ และเปิด «แชร์โมเดลของคอมพิวเตอร์เครื่องนี้» ใน Kotomimi แล้ว คุณยังกรอกที่อยู่ด้านล่างด้วยตนเองได้"
+  },
+  "fork.find.productHere": {
+    "en": "{{product}} on this computer",
+    "text": "{{product}} บนคอมพิวเตอร์เครื่องนี้"
+  },
+  "fork.find.search": {
+    "en": "Search my network for devices",
+    "text": "ค้นหาอุปกรณ์ในเครือข่ายของฉัน"
+  },
+  "fork.find.searching": {
+    "en": "Looking for devices on your network…",
+    "text": "กำลังค้นหาอุปกรณ์ในเครือข่ายของคุณ…"
+  },
+  "fork.find.thisComputer": {
+    "en": "On this computer",
+    "text": "เซิร์ฟเวอร์บนคอมพิวเตอร์เครื่องนี้"
+  },
+  "fork.find.title": {
+    "en": "Found on your network",
+    "text": "พบในเครือข่ายของคุณ"
+  },
+  "fork.find.use": {
+    "en": "Use {{name}}",
+    "text": "ใช้ {{name}}"
+  },
+  "fork.fonts.add": {
+    "en": "Add a language…",
+    "text": "เพิ่มภาษา…"
+  },
+  "fork.fonts.default": {
+    "en": "App default",
+    "text": "ค่าเริ่มต้นของแอป"
+  },
+  "fork.fonts.languages": {
+    "en": "Conversation text, by language",
+    "text": "ข้อความสนทนา แยกตามภาษา"
+  },
+  "fork.fonts.latin": {
+    "en": "Latin letters and digits",
+    "text": "อักษรละตินและตัวเลข"
+  },
+  "fork.fonts.latinHint": {
+    "en": "English letters and digits in the conversation",
+    "text": "ตัวอักษรภาษาอังกฤษและตัวเลขในบทสนทนา"
+  },
+  "fork.fonts.loading": {
+    "en": "Reading the installed fonts…",
+    "text": "กำลังอ่านแบบอักษรที่ติดตั้ง…"
+  },
+  "fork.fonts.none": {
+    "en": "No font matches",
+    "text": "ไม่พบแบบอักษรที่ตรงกัน"
+  },
+  "fork.fonts.others": {
+    "en": "Other fonts (may lack this script)",
+    "text": "แบบอักษรอื่น (อาจไม่มีตัวอักษรภาษานี้)"
+  },
+  "fork.fonts.pinyin": {
+    "en": "Pinyin above the text",
+    "text": "พินอินเหนือข้อความ"
+  },
+  "fork.fonts.reading": {
+    "en": "Readings above the text",
+    "text": "ฟุริงานะเหนือข้อความ"
+  },
+  "fork.fonts.remove": {
+    "en": "Reset {{language}}",
+    "text": "คืนค่า {{language}}"
+  },
+  "fork.fonts.roman": {
+    "en": "Romanization",
+    "text": "คำอ่านอักษรโรมัน"
+  },
+  "fork.fonts.romanHint": {
+    "en": "The readings under Japanese, Korean, Russian and Ukrainian",
+    "text": "คำอ่านใต้ข้อความภาษาญี่ปุ่น เกาหลี รัสเซีย และยูเครน"
+  },
+  "fork.fonts.search": {
+    "en": "Search fonts",
+    "text": "ค้นหาแบบอักษร"
+  },
+  "fork.fonts.text": {
+    "en": "Text",
+    "text": "ข้อความ"
+  },
+  "fork.fonts.title": {
+    "en": "Fonts",
+    "text": "แบบอักษร"
+  },
+  "fork.fonts.tooltip": {
+    "en": "Fonts installed on this computer. Characters a font lacks are shown in the app's own.",
+    "text": "ใช้แบบอักษรที่ติดตั้งในเครื่องนี้ ตัวอักษรที่แบบอักษรนั้นไม่มีจะแสดงด้วยแบบอักษรเริ่มต้นของแอป"
+  },
+  "fork.fonts.ui": {
+    "en": "Interface",
+    "text": "ส่วนติดต่อผู้ใช้"
+  },
+  "fork.fonts.uiHint": {
+    "en": "Menus, settings and buttons",
+    "text": "เมนู การตั้งค่า และปุ่ม"
+  },
+  "fork.furigana": {
+    "en": "Furigana over kanji (Japanese)",
+    "text": "แสดงฟุริงานะเหนือคันจิ (ภาษาญี่ปุ่น)"
+  },
+  "fork.help.issues": {
+    "en": "Report a problem",
+    "text": "แจ้งปัญหา"
+  },
+  "fork.help.issuesTooltip": {
+    "en": "Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page.",
+    "text": "Kotomimi เป็นแอปที่แยกพัฒนาอย่างอิสระจาก Sokuji หากพบปัญหาในแอปนี้ โปรดแจ้งที่หน้า GitHub ของ Kotomimi"
+  },
+  "fork.lan.copied": {
+    "en": "Copied",
+    "text": "คัดลอกแล้ว"
+  },
+  "fork.lan.copy": {
+    "en": "Copy",
+    "text": "คัดลอก"
+  },
+  "fork.lan.direction": {
+    "en": "Which direction to show models for",
+    "text": "แสดงโมเดลสำหรับทิศทางใด"
+  },
+  "fork.lan.enable": {
+    "en": "Share this computer's models",
+    "text": "แชร์โมเดลของคอมพิวเตอร์เครื่องนี้"
+  },
+  "fork.lan.failed": {
+    "en": "Sharing could not start: {{message}}",
+    "text": "เริ่มแชร์ไม่ได้: {{message}}"
+  },
+  "fork.lan.firewall": {
+    "en": "The first time, your system's firewall may ask whether to allow Kotomimi on the network: allow it for private networks.",
+    "text": "ครั้งแรก ไฟร์วอลล์ของระบบอาจถามว่าจะอนุญาตให้ Kotomimi ใช้เครือข่ายหรือไม่: โปรดอนุญาตสำหรับเครือข่ายส่วนตัว"
+  },
+  "fork.lan.firewallAllow": {
+    "en": "Allow",
+    "text": "อนุญาต"
+  },
+  "fork.lan.firewallBlocked": {
+    "en": "Windows Firewall is keeping other devices out",
+    "text": "Windows Firewall กำลังบล็อกอุปกรณ์อื่น"
+  },
+  "fork.lan.firewallDeclined": {
+    "en": "Still blocked: Windows was not told yes.",
+    "text": "ยังถูกบล็อกอยู่: ยังไม่ได้ยืนยันอนุญาตใน Windows"
+  },
+  "fork.lan.firewallPrivate": {
+    "en": "Allow opens this port to devices on your network. Windows will ask you to confirm.",
+    "text": "กด «อนุญาต» เพื่อเปิดพอร์ตนี้ให้อุปกรณ์ในเครือข่ายของคุณ Windows จะขอให้คุณยืนยัน"
+  },
+  "fork.lan.firewallPublic": {
+    "en": "Windows treats this network as public. Allow opens this port to devices on this same network only. Windows will ask you to confirm.",
+    "text": "Windows ถือว่าเครือข่ายนี้เป็นเครือข่ายสาธารณะ กด «อนุญาต» เพื่อเปิดพอร์ตนี้เฉพาะอุปกรณ์ในเครือข่ายเดียวกัน Windows จะขอให้คุณยืนยัน"
+  },
+  "fork.lan.firewallWaiting": {
+    "en": "Waiting for Windows…",
+    "text": "กำลังรอ Windows…"
+  },
+  "fork.lan.hideLibrary": {
+    "en": "Hide the model library",
+    "text": "ซ่อนคลังโมเดล"
+  },
+  "fork.lan.key": {
+    "en": "Access key",
+    "text": "คีย์เข้าถึง"
+  },
+  "fork.lan.keyPlaceholder": {
+    "en": "Blank: anyone on the network may connect",
+    "text": "เว้นว่าง: อุปกรณ์ใดก็ได้ในเครือข่ายสามารถเชื่อมต่อ"
+  },
+  "fork.lan.models": {
+    "en": "Models shared · {{count}}",
+    "text": "โมเดลที่แชร์ · {{count}}"
+  },
+  "fork.lan.noNetwork": {
+    "en": "This computer is on no network.",
+    "text": "คอมพิวเตอร์เครื่องนี้ไม่ได้เชื่อมต่อเครือข่าย"
+  },
+  "fork.lan.noRecognizer": {
+    "en": "No speech recognition model downloaded yet",
+    "text": "ยังไม่มีการดาวน์โหลดโมเดลรู้จำเสียงพูด"
+  },
+  "fork.lan.on": {
+    "en": "Sharing — no device connected yet",
+    "text": "กำลังแชร์ — ยังไม่มีอุปกรณ์เชื่อมต่อ"
+  },
+  "fork.lan.onWithClients": {
+    "en": "Sharing — {{count}} connection(s) in use",
+    "text": "กำลังแชร์ — มีการเชื่อมต่อที่ใช้งานอยู่ {{count}} รายการ"
+  },
+  "fork.lan.options": {
+    "en": "Options",
+    "text": "ตัวเลือก"
+  },
+  "fork.lan.otherAddresses": {
+    "en": "This computer's other addresses",
+    "text": "ที่อยู่อื่นของคอมพิวเตอร์เครื่องนี้"
+  },
+  "fork.lan.port": {
+    "en": "Port",
+    "text": "พอร์ต"
+  },
+  "fork.lan.portInUse": {
+    "en": "Port {{port}} is taken by another program. Choose another under Options.",
+    "text": "พอร์ต {{port}} ถูกใช้โดยโปรแกรมอื่น โปรดเลือกพอร์ตใหม่ในตัวเลือก"
+  },
+  "fork.lan.serving": {
+    "en": "Sharing",
+    "text": "กำลังแชร์"
+  },
+  "fork.lan.servingClients": {
+    "en": "Sharing · {{count}} in use",
+    "text": "กำลังแชร์ · ใช้งานอยู่ {{count}} รายการ"
+  },
+  "fork.lan.servingTip": {
+    "en": "This computer is lending its models to other devices. The languages and the choice of model are set on those devices, not here.",
+    "text": "คอมพิวเตอร์เครื่องนี้กำลังให้ยืมโมเดลแก่อุปกรณ์อื่น ภาษาและโมเดลที่ใช้ตั้งค่าบนอุปกรณ์เหล่านั้น ไม่ใช่ที่นี่"
+  },
+  "fork.lan.sessionIdle": {
+    "en": "The other device ended the session: nobody had spoken for a long while, and it let its models go. Start again to continue.",
+    "text": "อุปกรณ์อีกเครื่องจบเซสชันนี้แล้ว: ไม่มีใครพูดเป็นเวลานาน จึงปล่อยโมเดลออกจากหน่วยความจำ กด «เริ่ม» อีกครั้งเพื่อดำเนินการต่อ"
+  },
+  "fork.lan.showLibrary": {
+    "en": "Download or manage models",
+    "text": "ดาวน์โหลดหรือจัดการโมเดล"
+  },
+  "fork.lan.starting": {
+    "en": "Starting…",
+    "text": "กำลังเริ่ม…"
+  },
+  "fork.lan.title": {
+    "en": "Share with other devices",
+    "text": "แชร์กับอุปกรณ์อื่น"
+  },
+  "fork.lan.tooltip": {
+    "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
+    "text": "ให้ยืมโมเดลของคอมพิวเตอร์เครื่องนี้แก่อุปกรณ์อื่นในเครือข่าย อุปกรณ์อีกเครื่องจะพบคอมพิวเตอร์นี้ใน Kotomimi ใต้ «อุปกรณ์อื่น» แล้วเลือกโมเดลและภาษาได้จากที่นั่น ใช้งานได้ขณะ Kotomimi เปิดอยู่"
+  },
+  "fork.languageMenu.detect": {
+    "en": "Auto-detect",
+    "text": "ตรวจจับอัตโนมัติ"
+  },
+  "fork.languageMenu.detectUnavailable": {
+    "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
+    "text": "ระบบรู้จำเสียงที่ใช้อยู่ตรวจจับภาษาอัตโนมัติไม่ได้ ต้องใช้ Qwen3-ASR 1.7B GGUF หรือโมเดล API"
+  },
+  "fork.languageMenu.mine": {
+    "en": "My language",
+    "text": "ภาษาของฉัน"
+  },
+  "fork.languageMenu.mostly": {
+    "en": "Translate into what they mostly speak",
+    "text": "แปลเป็นภาษาที่อีกฝ่ายพูดเป็นหลัก"
+  },
+  "fork.languageMenu.none": {
+    "en": "No language by that name",
+    "text": "ไม่พบภาษาชื่อนี้"
+  },
+  "fork.languageMenu.pin": {
+    "en": "Pin {{name}} to the top",
+    "text": "ปักหมุด{{name}}ไว้บนสุด"
+  },
+  "fork.languageMenu.pinShort": {
+    "en": "Pin to the top",
+    "text": "ปักหมุดไว้บนสุด"
+  },
+  "fork.languageMenu.search": {
+    "en": "Type to find a language",
+    "text": "พิมพ์เพื่อค้นหาภาษา"
+  },
+  "fork.languageMenu.speakBoth": {
+    "en": "I speak {{language}} too",
+    "text": "ฉันพูด{{language}}ด้วย"
+  },
+  "fork.languageMenu.speakBothHelp": {
+    "en": "When you speak {{mine}}, it is translated into {{language}}; when you speak {{language}}, into {{mine}}. Recognition tells the two apart.",
+    "text": "เมื่อคุณพูด{{mine}} จะแปลเป็น{{language}} และเมื่อพูด{{language}} จะแปลเป็น{{mine}} ระบบรู้จำเสียงจะแยกสองภาษานี้ให้อัตโนมัติ"
+  },
+  "fork.languageMenu.speakBothUnavailable": {
+    "en": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
+    "text": "ระบบรู้จำเสียงที่เลือกแยก{{mine}}กับ{{language}}ไม่ได้ เลือก Apple Speech แบบจับคู่ที่ติดตั้งทั้งสองภาษาไว้ หรือระบบรู้จำเสียงที่ระบุได้ทั้งสองภาษา"
+  },
+  "fork.languageMenu.theirs": {
+    "en": "Their language",
+    "text": "ภาษาของอีกฝ่าย"
+  },
+  "fork.languageMenu.unpin": {
+    "en": "Unpin {{name}}",
+    "text": "เลิกปักหมุด{{name}}"
+  },
+  "fork.languageMenu.unpinShort": {
+    "en": "Unpin",
+    "text": "เลิกปักหมุด"
+  },
+  "fork.pinyin": {
+    "en": "Pinyin over Chinese",
+    "text": "แสดงพินอินเหนือข้อความภาษาจีน"
+  },
+  "fork.romanization": {
+    "en": "Romanization",
+    "text": "แสดงคำอ่านอักษรโรมัน"
+  },
+  "fork.sourceItalic": {
+    "en": "Source text in italics",
+    "text": "แสดงต้นฉบับเป็นตัวเอียง"
+  },
+  "fork.speechDetection.title": {
+    "en": "Speech detection",
+    "text": "การตรวจจับเสียงพูด"
+  },
+  "fork.statusLine.checking": {
+    "en": "Getting ready. You can start in a moment.",
+    "text": "กำลังเตรียมพร้อม อีกสักครู่ก็เริ่มได้"
+  },
+  "fork.subtitle.align": {
+    "en": "Alignment",
+    "text": "การจัดแนว"
+  },
+  "fork.subtitle.alignCenter": {
+    "en": "Centre",
+    "text": "กึ่งกลาง"
+  },
+  "fork.subtitle.alignLeft": {
+    "en": "Left",
+    "text": "ชิดซ้าย"
+  },
+  "fork.subtitle.back": {
+    "en": "Back to the main window",
+    "text": "กลับหน้าต่างหลัก"
+  },
+  "fork.subtitle.backdrop": {
+    "en": "Panel",
+    "text": "ความเข้มพื้นหลัง"
+  },
+  "fork.subtitle.lanesView": {
+    "en": "Subtitle view",
+    "text": "มุมมองคำบรรยาย"
+  },
+  "fork.subtitle.listView": {
+    "en": "List view",
+    "text": "มุมมองรายการ"
+  },
+  "fork.subtitle.look": {
+    "en": "Look",
+    "text": "รูปแบบ"
+  },
+  "fork.subtitle.lookDark": {
+    "en": "Dark text",
+    "text": "ตัวอักษรเข้ม ขอบขาว"
+  },
+  "fork.subtitle.lookLight": {
+    "en": "Light text",
+    "text": "ตัวอักษรสว่าง ขอบดำ"
+  },
+  "fork.subtitle.lookPanel": {
+    "en": "Dark panel",
+    "text": "พื้นหลังเข้ม"
+  },
+  "fork.subtitle.lookSample": {
+    "en": "Aa",
+    "text": "คำบรรยาย"
+  },
+  "fork.subtitle.lookSoft": {
+    "en": "Faint panel",
+    "text": "พื้นหลังจาง เงานุ่ม"
+  },
+  "fork.subtitle.moreColors": {
+    "en": "More colours (source text, panel)",
+    "text": "สีเพิ่มเติม (ต้นฉบับ พื้นหลัง)"
+  },
+  "fork.subtitle.off": {
+    "en": "Off",
+    "text": "ปิด"
+  },
+  "fork.subtitle.outline": {
+    "en": "Outline",
+    "text": "ความเข้มเส้นขอบ"
+  },
+  "fork.subtitle.shadow": {
+    "en": "Shadow",
+    "text": "ความเข้มเงา"
+  },
+  "fork.subtitle.through": {
+    "en": "Click-through: the mouse passes through the captions",
+    "text": "คลิกทะลุ: คลิกคำบรรยายไม่ได้ การใช้เมาส์ทั้งหมดจะส่งไปยังหน้าต่างด้านล่าง"
+  },
+  "fork.subtitle.throughOff": {
+    "en": "Stop click-through",
+    "text": "ปิดการคลิกทะลุ"
+  },
+  "fork.subtitle.type": {
+    "en": "Type to translate (Ctrl+K)",
+    "text": "พิมพ์เพื่อแปล (Ctrl+K)"
+  },
+  "fork.subtitle.typePlaceholder": {
+    "en": "What you want to say — Enter translates",
+    "text": "พิมพ์สิ่งที่อยากพูด แล้วกด Enter เพื่อแปล"
+  },
+  "fork.vrchat.chatbox": {
+    "en": "Above my avatar",
+    "text": "แสดงเหนือหัว"
+  },
+  "fork.vrchat.chatboxHearBoth": {
+    "en": "Switch to Both",
+    "text": "เปลี่ยนเป็น “ทั้งสองฝ่าย”"
+  },
+  "fork.vrchat.chatboxOff": {
+    "en": "Off",
+    "text": "ปิด"
+  },
+  "fork.vrchat.chatboxSourceFirst": {
+    "en": "Original on top",
+    "text": "ต้นฉบับอยู่บน"
+  },
+  "fork.vrchat.chatboxTranslation": {
+    "en": "Translation",
+    "text": "คำแปล"
+  },
+  "fork.vrchat.chatboxTranslationFirst": {
+    "en": "Translation on top",
+    "text": "คำแปลอยู่บน"
+  },
+  "fork.vrchat.chatboxUnheard": {
+    "en": "Only the other side is translated now: what you say won't show above your avatar.",
+    "text": "ตอนนี้แปลเฉพาะเสียงอีกฝ่าย คำพูดของคุณจะไม่แสดงเหนือหัว"
+  },
+  "fork.vrchat.connected": {
+    "en": "Connected",
+    "text": "เชื่อมต่อแล้ว"
+  },
+  "fork.vrchat.end": {
+    "en": "End",
+    "text": "จบ"
+  },
+  "fork.vrchat.help": {
+    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
+    "text": "ใช้ร่วมกับ VRChat บนคอมพิวเตอร์เครื่องนี้ได้: เมื่อปิดไมค์ใน VRChat Kotomimi จะไม่รับรู้เสียงพูดของคุณ คำแปลของคุณสามารถแสดงเหนือศีรษะอวาตาร์ให้ผู้เล่นคนอื่นอ่านได้ เมื่อมีวิดีโอเล่นในโลก: หากเสียงวิดีโอไม่มีทิศทาง จะแยกเสียงวิดีโอออกจากเสียงผู้เล่น หากมีทิศทาง จะแบ่งเสียงพูดของอีกฝ่ายเป็นช่วงสั้นลง"
+  },
+  "fork.vrchat.mutedNotHeard": {
+    "en": "Muted in VRChat: what you say is not recognized.",
+    "text": "ปิดไมค์ใน VRChat อยู่ จึงไม่รู้จำคำพูดของคุณ"
+  },
+  "fork.vrchat.mutedThere": {
+    "en": "Muted in VRChat",
+    "text": "ปิดไมค์ใน VRChat อยู่"
+  },
+  "fork.vrchat.muteGate": {
+    "en": "Don't hear me while muted in VRChat",
+    "text": "ไม่รู้จำเสียงฉันเมื่อปิดไมค์ใน VRChat"
+  },
+  "fork.vrchat.notConnected": {
+    "en": "Not connected",
+    "text": "ยังไม่เชื่อมต่อ"
+  },
+  "fork.vrchat.onVideo": {
+    "en": "When a world plays a video",
+    "text": "เมื่อมีวิดีโอเล่นในเวิลด์"
+  },
+  "fork.vrchat.pausedOn": {
+    "en": "Not translating",
+    "text": "พักการแปลอยู่"
+  },
+  "fork.vrchat.quickOn": {
+    "en": "Shorter sentences",
+    "text": "แบ่งประโยคให้สั้นลงแล้ว"
+  },
+  "fork.vrchat.remember": {
+    "en": "Remember",
+    "text": "จำไว้"
+  },
+  "fork.vrchat.removedOn": {
+    "en": "Video sound removed",
+    "text": "ตัดเสียงวิดีโอออกแล้ว"
+  },
+  "fork.vrchat.separatedOn": {
+    "en": "Video sound separated",
+    "text": "แยกเสียงวิดีโอแล้ว"
+  },
+  "fork.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
+  },
+  "fork.vrchat.turnOnOsc": {
+    "en": "Turn on OSC in the VRChat quick menu",
+    "text": "เปิด OSC ในเมนูด่วนของ VRChat"
+  },
+  "fork.vrchat.videoAsk": {
+    "en": "Ask me",
+    "text": "ถามทุกครั้ง"
+  },
+  "fork.vrchat.videoAskResult": {
+    "en": "Asks you when a video starts.",
+    "text": "ถามคุณว่าจะทำอย่างไรเมื่อวิดีโอเริ่มเล่น"
+  },
+  "fork.vrchat.videoBoth": {
+    "en": "People + video",
+    "text": "แปลทั้งเสียงคนและวิดีโอ"
+  },
+  "fork.vrchat.videoBothResult": {
+    "en": "The video gets its own line and uses more power; if it can't be separated, sentences are cut shorter.",
+    "text": "แสดงคำแปลวิดีโอแยกอีกบรรทัด ใช้ทรัพยากรมากขึ้น หากแยกเสียงไม่ได้ จะแบ่งประโยคให้สั้นลง"
+  },
+  "fork.vrchat.videoPause": {
+    "en": "Pause",
+    "text": "พักการแปล"
+  },
+  "fork.vrchat.videoPauseResult": {
+    "en": "The other side is not translated while it plays.",
+    "text": "ไม่แปลเสียงอีกฝ่ายระหว่างที่วิดีโอเล่น"
+  },
+  "fork.vrchat.videoQuick": {
+    "en": "People only",
+    "text": "แปลเฉพาะเสียงคน"
+  },
+  "fork.vrchat.videoQuickResult": {
+    "en": "Takes out video sound; if it can't, sentences are cut shorter.",
+    "text": "พยายามตัดเสียงวิดีโอออก หากแยกไม่ได้ จะแบ่งประโยคให้สั้นลง"
+  },
+  "fork.vrchat.videoShort": {
+    "en": "Video",
+    "text": "วิดีโอ"
+  },
+  "fork.vrchat.videoStarted": {
+    "en": "Video started",
+    "text": "วิดีโอเริ่มเล่นแล้ว"
+  },
+  "fork.wizard.addressMissing": {
+    "en": "Choose a device from the list above, or type its address, for example 192.168.1.10:8790.",
+    "text": "เลือกอุปกรณ์จากรายการด้านบน หรือกรอกที่อยู่ เช่น 192.168.1.10:8790"
+  },
+  "fork.wizard.device": {
+    "en": "This computer",
+    "text": "คอมพิวเตอร์เครื่องนี้"
+  },
+  "fork.wizard.deviceDesc": {
+    "en": "Recognition and translation run on this computer using native models. Download a model for each stage before starting.",
+    "text": "รู้จำเสียงและแปลบนคอมพิวเตอร์เครื่องนี้ด้วยโมเดลที่ทำงานในเครื่อง ต้องดาวน์โหลดโมเดลสำหรับทั้งสองขั้นตอนก่อนเริ่ม"
+  },
+  "fork.wizard.deviceNotice": {
+    "en": "After setup, open Model library in the Speech recognition and Translation cards and download a native model for each. Translation requires a downloaded model, or you can switch that stage to an API model or another device.",
+    "text": "หลังตั้งค่าเสร็จ ให้เปิด “คลังโมเดล” ในส่วน “การรู้จำเสียง” และ “การแปล” แล้วดาวน์โหลดโมเดลสำหรับแต่ละส่วน การแปลต้องใช้โมเดลที่ดาวน์โหลดไว้ หรือจะเปลี่ยนไปใช้โมเดล API หรืออุปกรณ์อื่นก็ได้"
+  },
+  "fork.wizard.intro": {
+    "en": "Pick a starting point. Later, in Settings, recognition and translation can each run in a different place.",
+    "text": "เลือกวิธีเริ่มต้นก่อน ภายหลังสามารถตั้งค่าให้การรู้จำเสียงและการแปลทำงานคนละที่หรือใช้ผสมกันได้"
+  },
+  "fork.wizard.keyNeeded": {
+    "en": "This device asks for an access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options), then press Connect.",
+    "text": "อุปกรณ์นี้ต้องใช้คีย์เข้าถึง กรอกคีย์ที่ตั้งไว้บนอุปกรณ์นั้น (หากเป็น Kotomimi อีกเครื่อง คีย์จะอยู่ใน “ตัวเลือก” ของการแชร์) แล้วกด “เชื่อมต่อ”"
+  },
+  "fork.wizard.pathBadge": {
+    "en": "Recommended",
+    "text": "แนะนำ"
+  },
+  "fork.wizard.pathCost": {
+    "en": "No account and no API key. Text only: subtitles with furigana, typed translation and grammar feedback. Another device means a Kotomimi sharing its models, or a model server such as LocalAI; this computer downloads models onto your disk.",
+    "text": "ไม่ต้องมีบัญชีหรือคีย์ API รองรับเฉพาะข้อความ: คำบรรยายพร้อมฟุริงานะ แปลข้อความที่พิมพ์ และคำแนะนำด้านไวยากรณ์ อุปกรณ์อื่นอาจเป็น Kotomimi ที่เปิดการแชร์ไว้ หรือเซิร์ฟเวอร์โมเดล เช่น LocalAI หากใช้เครื่องนี้ ต้องดาวน์โหลดโมเดลมาเก็บไว้ในเครื่อง"
+  },
+  "fork.wizard.pathDesc": {
+    "en": "Use the models of another device on your network, or this computer's own — and any mix of the two.",
+    "text": "ใช้โมเดลจากอุปกรณ์อื่นในเครือข่ายเดียวกัน หรือจากคอมพิวเตอร์เครื่องนี้ หรือใช้ผสมกันก็ได้"
+  },
+  "fork.wizard.pathTitle": {
+    "en": "Kotomimi Pipeline",
+    "text": "Kotomimi แบบเลือกผสมเอง"
+  },
+  "fork.wizard.pendingAddress": {
+    "en": "No device chosen yet — choose one in Settings before you start.",
+    "text": "ยังไม่ได้เลือกอุปกรณ์อื่น โปรดเลือกในการตั้งค่าก่อนเริ่ม"
+  },
+  "fork.wizard.server": {
+    "en": "Another device on my network",
+    "text": "อุปกรณ์อื่นในเครือข่ายเดียวกัน"
+  },
+  "fork.wizard.serverDesc": {
+    "en": "The models run on another computer: a Kotomimi with sharing turned on, or a model server such as LocalAI. This computer stays light.",
+    "text": "โมเดลทำงานบนคอมพิวเตอร์อีกเครื่องที่ใช้ Kotomimi และเปิดการแชร์ไว้ หรือเซิร์ฟเวอร์โมเดล เช่น LocalAI เครื่องนี้จึงแทบไม่ใช้ทรัพยากร"
+  },
+  "fork.wizard.serverFound": {
+    "en": "Connected — it offers {{count}} model(s).",
+    "text": "เชื่อมต่อแล้ว มีโมเดลให้ใช้ {{count}} โมเดล"
+  },
+  "fork.wizard.serverUnreachable": {
+    "en": "Could not connect: {{message}}",
+    "text": "เชื่อมต่อไม่ได้: {{message}}"
+  },
+  "fork.wizard.share": {
+    "en": "This computer, for my other devices",
+    "text": "ใช้เครื่องนี้ให้บริการอุปกรณ์อื่น"
+  },
+  "fork.wizard.shareDesc": {
+    "en": "Computing power to spare here? Let the models run on this computer for the other devices on your network — and for this computer itself.",
+    "text": "เครื่องนี้มีกำลังประมวลผลเหลือไหม? ให้โมเดลทำงานที่นี่เพื่อให้อุปกรณ์อื่นในเครือข่ายใช้ได้ รวมถึงเครื่องนี้เองด้วย"
+  },
+  "fork.wizard.shareNotice": {
+    "en": "Nothing to enter. Finishing turns on sharing, so other Kotomimi devices on your network can find this computer. After setup, download models in the Speech recognition card: those are what the others can use.",
+    "text": "ไม่ต้องกรอกอะไรที่นี่ เมื่อเสร็จสิ้นจะเปิดการแชร์อัตโนมัติ เพื่อให้ Kotomimi เครื่องอื่นในเครือข่ายพบเครื่องนี้ได้ หลังตั้งค่าเสร็จ ให้ดาวน์โหลดโมเดลในส่วน “การรู้จำเสียง” ของการตั้งค่า อุปกรณ์อื่นจะใช้โมเดลเหล่านี้"
+  },
+  "fork.wizard.shareSummary": {
+    "en": "Sharing",
+    "text": "การแชร์"
+  },
+  "fork.wizard.shareSummaryOn": {
+    "en": "Turned on when you finish: other devices on your network can use this computer's models",
+    "text": "เปิดเมื่อเสร็จสิ้น เพื่อให้อุปกรณ์อื่นในเครือข่ายใช้โมเดลของเครื่องนี้ได้"
+  },
+  "fork.wizard.title": {
+    "en": "Which device does the work?",
+    "text": "ให้อุปกรณ์ไหนประมวลผล?"
+  },
+  "fork.wizard.tryServer": {
+    "en": "Connect",
+    "text": "เชื่อมต่อ"
+  },
+  "models.deviceCpu": {
+    "en": "CPU",
+    "text": "CPU"
+  },
+  "models.deviceGpu": {
+    "en": "GPU",
+    "text": "GPU"
+  },
+  "providers.gemini.name": {
+    "en": "Google Gemini",
+    "text": "Google Gemini"
+  },
+  "providers.kizunaai_soniox.name": {
+    "en": "KizunaAI",
+    "text": "KizunaAI"
+  },
+  "providers.local_inference.modelAsr": {
+    "en": "ASR",
+    "text": "รู้จำเสียงพูด"
+  },
+  "providers.local_inference.modelTranslation": {
+    "en": "MT",
+    "text": "แปลภาษา"
+  },
+  "providers.local_inference.modelTts": {
+    "en": "TTS",
+    "text": "แปลงข้อความเป็นเสียง"
+  },
+  "providers.localai.addressMissing": {
+    "en": "No other device is chosen yet. In Settings, under \"Another device\", search for it or type its address.",
+    "text": "ยังไม่ได้เลือกอุปกรณ์อีกเครื่อง ไปที่ “อุปกรณ์อื่น” ในการตั้งค่า แล้วค้นหาหรือกรอกที่อยู่"
+  },
+  "providers.localai.advanced": {
+    "en": "Advanced",
+    "text": "ขั้นสูง"
+  },
+  "providers.localai.apiKey": {
+    "en": "API key",
+    "text": "คีย์ API"
+  },
+  "providers.localai.apiKeyNeeded": {
+    "en": "The API at {{address}} asks for a key. In its card, turn on \"The API asks for a key\" and enter it.",
+    "text": "API ({{address}}) ต้องใช้คีย์ เปิด “API นี้ต้องใช้คีย์” ในแผงที่เกี่ยวข้องแล้วกรอกคีย์"
+  },
+  "providers.localai.apiKeyRefused": {
+    "en": "The API at {{address}} did not accept the key. Check the API key in its card.",
+    "text": "API ({{address}}) ไม่ยอมรับคีย์นี้ ตรวจคีย์ API ในแผงที่เกี่ยวข้อง"
+  },
+  "providers.localai.apiKeyReused": {
+    "en": "Filled in with the key saved under \"{{name}}\".",
+    "text": "กรอกคีย์ที่คุณบันทึกไว้ใน “{{name}}” แล้ว"
+  },
+  "providers.localai.apiService": {
+    "en": "Service",
+    "text": "บริการ"
+  },
+  "providers.localai.apiServiceArk": {
+    "en": "Doubao (Volcengine Ark)",
+    "text": "Doubao (Volcengine Ark)"
+  },
+  "providers.localai.apiServiceArkModel": {
+    "en": "A model's name, or your endpoint id (ep-…)",
+    "text": "ชื่อโมเดล หรือรหัสจุดเชื่อมต่อของคุณ (ep-…)"
+  },
+  "providers.localai.apiServiceCustom": {
+    "en": "Custom address",
+    "text": "ระบุที่อยู่เอง"
+  },
+  "providers.localai.apiServiceModel": {
+    "en": "Choose from the list on the right, or type a name",
+    "text": "เลือกรายการด้านขวา หรือพิมพ์ชื่อ"
+  },
+  "providers.localai.apiServiceOllama": {
+    "en": "Ollama on this computer",
+    "text": "Ollama บนคอมพิวเตอร์เครื่องนี้"
+  },
+  "providers.localai.apiServiceSiliconFlow": {
+    "en": "SiliconFlow",
+    "text": "SiliconFlow"
+  },
+  "providers.localai.apiUnreachable": {
+    "en": "The API at {{address}} could not be reached. Check the address in its card, and that this computer is online.",
+    "text": "เชื่อมต่อ API ({{address}}) ไม่ได้ ตรวจที่อยู่ในแผงที่เกี่ยวข้อง และตรวจว่าคอมพิวเตอร์นี้เชื่อมต่ออินเทอร์เน็ตได้"
+  },
+  "providers.localai.asrApiBaseUrl": {
+    "en": "API address",
+    "text": "ที่อยู่ API"
+  },
+  "providers.localai.asrApiBaseUrlPlaceholder": {
+    "en": "e.g. https://api.openai.com/v1",
+    "text": "เช่น https://api.openai.com/v1"
+  },
+  "providers.localai.asrApiModelPlaceholder": {
+    "en": "e.g. whisper-1, whisper-large-v3",
+    "text": "เช่น whisper-1, whisper-large-v3"
+  },
+  "providers.localai.asrApiNeedsKey": {
+    "en": "The API asks for a key",
+    "text": "API นี้ต้องใช้คีย์"
+  },
+  "providers.localai.asrFixedNote": {
+    "en": "That device is reached as a plain LocalAI, which always hears with its own default recognizer when the translation or the feedback uses a model chosen here. Through the Kotomimi on that device, the recognizer can be chosen here.",
+    "text": "ตอนนี้เชื่อมต่อกับ LocalAI บนอุปกรณ์นั้นโดยตรง เมื่อเลือกโมเดลอื่นสำหรับการแปลหรือตรวจไวยากรณ์ ระบบจะใช้โมเดลรู้จำเสียงเริ่มต้นของ LocalAI เท่านั้น หากเปลี่ยนไปเชื่อมต่อกับ Kotomimi บนอุปกรณ์นั้น จะเลือกโมเดลรู้จำเสียงที่นี่ได้"
+  },
+  "providers.localai.asrKey": {
+    "en": "API key of the speech recognition API",
+    "text": "คีย์ API สำหรับรู้จำเสียงพูด"
+  },
+  "providers.localai.asrUnnamed": {
+    "en": "Speech recognition has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "ยังไม่มีโมเดลพร้อมใช้สำหรับการรู้จำเสียง เลือกโมเดลในแผง “การรู้จำเสียง” ใต้ผู้ให้บริการ (หากใช้โมเดล API ให้กรอกที่อยู่และชื่อโมเดล) หรือเปลี่ยนไปใช้อุปกรณ์หรือบริการอื่น"
+  },
+  "providers.localai.auto": {
+    "en": "Automatic · {{name}}",
+    "text": "อัตโนมัติ · {{name}}"
+  },
+  "providers.localai.browse": {
+    "en": "Model library",
+    "text": "คลังโมเดล"
+  },
+  "providers.localai.bySentence": {
+    "en": "Translate sentence by sentence",
+    "text": "แปลทีละประโยค"
+  },
+  "providers.localai.bySentenceTooltip": {
+    "en": "On: each sentence is translated as soon as it ends — sooner, but without the sentences around it. Off: the whole stretch is translated once the speaker pauses — with its context, but later.",
+    "text": "เปิด: แปลทันทีที่อีกฝ่ายพูดจบแต่ละประโยค ได้คำแปลเร็วขึ้น แต่ขาดบริบทจากประโยครอบข้าง ปิด: แปลทั้งช่วงเมื่ออีกฝ่ายหยุดพูด ได้บริบทครบ แต่ต้องรอนานขึ้น"
+  },
+  "providers.localai.checking": {
+    "en": "Checking…",
+    "text": "กำลังตรวจสอบ…"
+  },
+  "providers.localai.checkNow": {
+    "en": "Check",
+    "text": "ตรวจสอบ"
+  },
+  "providers.localai.checkSlow": {
+    "en": "No answer within {{seconds}} s: the device may be off or loading a model, or the address wrong. It is asked again by itself.",
+    "text": "รอ {{seconds}} วินาทีแล้วยังไม่ตอบสนอง อุปกรณ์อาจปิดอยู่ กำลังโหลดโมเดล หรือที่อยู่ไม่ถูกต้อง ระบบจะลองอีกครั้งอัตโนมัติ"
+  },
+  "providers.localai.choiceDevice": {
+    "en": "Use this computer",
+    "text": "ใช้คอมพิวเตอร์เครื่องนี้"
+  },
+  "providers.localai.choiceServer": {
+    "en": "Use another device",
+    "text": "ใช้อุปกรณ์อื่น"
+  },
+  "providers.localai.coach": {
+    "en": "Check my grammar when I speak their language",
+    "text": "ตรวจไวยากรณ์เมื่อฉันพูดภาษาของอีกฝ่าย"
+  },
+  "providers.localai.coachKey": {
+    "en": "API key of the feedback model",
+    "text": "คีย์ API ของโมเดลให้คำแนะนำไวยากรณ์"
+  },
+  "providers.localai.coachNeedsSpeaker": {
+    "en": "Feedback answers what you say. Switch the mode to \"Me\" or \"Both\".",
+    "text": "การตรวจไวยากรณ์ต้องได้ยินเสียงคุณ เปลี่ยนโหมดเป็น “ฉัน” หรือ “ทั้งสองฝ่าย”"
+  },
+  "providers.localai.coachNoModel": {
+    "en": "The other device has no text model that can give feedback. Use an API model or this computer instead.",
+    "text": "อุปกรณ์อีกเครื่องไม่มีโมเดลข้อความที่ให้คำแนะนำไวยากรณ์ได้ ลองใช้โมเดล API หรือคอมพิวเตอร์นี้แทน"
+  },
+  "providers.localai.coachPrompt": {
+    "en": "Feedback instructions",
+    "text": "คำสั่งตรวจไวยากรณ์"
+  },
+  "providers.localai.coachPromptPlaceholder": {
+    "en": "Blank: written automatically for your two languages. Your own text may use {{spoken}} and {{native}}.",
+    "text": "เว้นว่าง: สร้างให้อัตโนมัติตามภาษาแม่และภาษาที่ฝึก หากเขียนเอง ใช้ {{spoken}} และ {{native}} แทนสองภาษานี้ได้"
+  },
+  "providers.localai.coachPromptPreview": {
+    "en": "Used while the box is blank, for this language pair:",
+    "text": "เมื่อเว้นว่าง คู่ภาษาปัจจุบันจะใช้คำสั่งนี้:"
+  },
+  "providers.localai.coachStage": {
+    "en": "Grammar feedback",
+    "text": "คำแนะนำไวยากรณ์"
+  },
+  "providers.localai.coachStageTooltip": {
+    "en": "When you speak the other language, a model checks your grammar and answers with a check mark, or a corrected sentence and an explanation. Enable \"I speak the other language too\" as well to get both a translation and private feedback. Your own language and typed text are translated without feedback.",
+    "text": "เมื่อคุณพูดอีกภาษา โมเดลจะตรวจไวยากรณ์และตอบด้วยเครื่องหมายถูก หรือประโยคที่แก้แล้วพร้อมคำอธิบาย เปิด “ฉันพูดอีกภาษาด้วย” เพื่อรับทั้งคำแปลและคำแนะนำที่เห็นเฉพาะคุณ ส่วนภาษาของคุณเองและข้อความที่พิมพ์จะแปลโดยไม่มีคำแนะนำ"
+  },
+  "providers.localai.coachUnnamed": {
+    "en": "Grammar feedback has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "ยังไม่มีโมเดลพร้อมใช้สำหรับคำแนะนำไวยากรณ์ เลือกโมเดลในแผง “คำแนะนำไวยากรณ์” ใต้ผู้ให้บริการ (หากใช้โมเดล API ให้กรอกที่อยู่และชื่อโมเดล) หรือเปลี่ยนไปใช้อุปกรณ์หรือบริการอื่น"
+  },
+  "providers.localai.connectFirst": {
+    "en": "No other device is connected yet: search for one above, or type its address.",
+    "text": "ยังไม่ได้เชื่อมต่ออุปกรณ์อื่น ให้ค้นหาด้านบนหรือกรอกที่อยู่ของอุปกรณ์ก่อน"
+  },
+  "providers.localai.description": {
+    "en": "Recognition, translation and grammar feedback — and you mix where each model runs: this computer, another device on your network, or any API model.",
+    "text": "รู้จำเสียง แปลภาษา และให้คำแนะนำไวยากรณ์ พร้อมเลือกผสมโมเดลที่ทำงานบนคอมพิวเตอร์เครื่องนี้ อุปกรณ์อื่นในเครือข่ายเดียวกัน หรือโมเดลผ่าน API ใดก็ได้"
+  },
+  "providers.localai.detectOther": {
+    "en": "Detect the other side's language",
+    "text": "ตรวจจับภาษาที่อีกฝ่ายพูดอัตโนมัติ"
+  },
+  "providers.localai.detectOtherNeeds": {
+    "en": "Only Qwen3-ASR 1.7B GGUF can tell the language by itself. Choose it here.",
+    "text": "มีเพียง Qwen3-ASR 1.7B GGUF ที่ตรวจจับภาษาเองได้ กรุณาเลือกที่นี่"
+  },
+  "providers.localai.detectOtherNote": {
+    "en": "The other side's language is detected, so a model that can tell languages apart hears them.",
+    "text": "ระบบตรวจจับภาษาของอีกฝ่ายอัตโนมัติ จึงใช้โมเดลที่แยกภาษาได้ในส่วนนี้"
+  },
+  "providers.localai.detectOtherTooltip": {
+    "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
+    "text": "ไม่ว่าอีกฝ่ายพูดภาษาใด ระบบจะรู้จำและแปลเป็นภาษาของคุณโดยไม่ต้องสลับเอง ส่วนคำพูดของคุณยังแปลเป็นภาษาที่เลือกไว้ด้านบน การรู้จำเสียงต้องใช้ Qwen3-ASR 1.7B GGUF หรือ API และการแปลต้องใช้เอนจินเนทีฟหรือ API"
+  },
+  "providers.localai.deviceDefault": {
+    "en": "The device's own choice",
+    "text": "ให้อุปกรณ์นั้นเลือก"
+  },
+  "providers.localai.endpoint": {
+    "en": "Address",
+    "text": "ที่อยู่"
+  },
+  "providers.localai.familyUnheard": {
+    "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
+    "text": "{{name}} บนอุปกรณ์นั้นไม่มี {{languages}} อุปกรณ์นั้นจึงเลือกโมเดลเองสำหรับส่วนนี้ หากต้องการใช้ {{name}} ให้ดาวน์โหลด {{languages}} บนอุปกรณ์นั้นก่อน"
+  },
+  "providers.localai.feedbackFailed": {
+    "en": "One sentence got no grammar feedback: the feedback model did not answer.",
+    "text": "มีหนึ่งประโยคที่ไม่ได้รับคำแนะนำไวยากรณ์ เพราะโมเดลตรวจไวยากรณ์ไม่ตอบสนอง"
+  },
+  "providers.localai.groupNative": {
+    "en": "Native engine",
+    "text": "เอนจินเนทีฟ"
+  },
+  "providers.localai.hearApiNote": {
+    "en": "Any service with OpenAI's transcription API works (OpenAI, Groq, a LocalAI). This computer cuts the sentences and uploads each one, so the text appears when a sentence is finished.",
+    "text": "ใช้บริการใดก็ได้ที่รองรับ API ถอดเสียงของ OpenAI เช่น OpenAI, Groq หรือ LocalAI คอมพิวเตอร์นี้จะแบ่งประโยคและส่งไปถอดเสียงเมื่อพูดจบแต่ละประโยค ข้อความจึงปรากฏหลังพูดจบประโยค"
+  },
+  "providers.localai.hears": {
+    "en": "Recognizes {{language}}",
+    "text": "รู้จำเสียงภาษา{{language}}"
+  },
+  "providers.localai.hearsEither": {
+    "en": "Recognizes {{first}} or {{second}}",
+    "text": "รู้จำเสียงภาษา{{first}}หรือ{{second}}"
+  },
+  "providers.localai.hearsOther": {
+    "en": "Hears the other side (any language)",
+    "text": "ฟังอีกฝ่าย (ตรวจจับภาษาอัตโนมัติ)"
+  },
+  "providers.localai.hearStage": {
+    "en": "Speech recognition",
+    "text": "การรู้จำเสียงพูด"
+  },
+  "providers.localai.hearStageTooltip": {
+    "en": "What listens: it decides when a sentence ends and writes down what was said.",
+    "text": "ส่วนที่ทำหน้าที่ “ฟัง”: ตรวจว่าพูดจบประโยคเมื่อไร แล้วถอดคำพูดเป็นข้อความ"
+  },
+  "providers.localai.hereDown": {
+    "en": "The LocalAI on this computer is not running yet. Start it in the stage's card — or, if Kotomimi has only just opened, give it a moment.",
+    "text": "LocalAI บนคอมพิวเตอร์นี้ยังไม่ทำงาน กด “เริ่ม LocalAI” ในแผงของขั้นตอนนั้น หากเพิ่งเปิด Kotomimi ให้รอสักครู่"
+  },
+  "providers.localai.hereModelPick": {
+    "en": "Choose a model",
+    "text": "เลือกโมเดล"
+  },
+  "providers.localai.inUse": {
+    "en": "In use: {{name}}",
+    "text": "กำลังใช้ {{name}}"
+  },
+  "providers.localai.inUseLegs": {
+    "en": "In use: {{theirs}} (them), {{mine}} (me)",
+    "text": "กำลังใช้: อีกฝ่าย {{theirs}} · ฉัน {{mine}}"
+  },
+  "providers.localai.kotomimiServer": {
+    "en": "It is another Kotomimi sharing its models.",
+    "text": "นี่คือ Kotomimi อีกเครื่องที่กำลังแชร์โมเดล"
+  },
+  "providers.localai.kotomimiThere": {
+    "en": "Use the Kotomimi on that device",
+    "text": "เชื่อมต่อกับ Kotomimi บนอุปกรณ์นั้น"
+  },
+  "providers.localai.kotomimiThereLooking": {
+    "en": "Looking for it…",
+    "text": "กำลังค้นหา…"
+  },
+  "providers.localai.kotomimiThereNone": {
+    "en": "No Kotomimi is sharing on that device. Open Kotomimi there, turn on \"Share with other devices\", then try again.",
+    "text": "ไม่มี Kotomimi ที่เปิดแชร์อยู่บนอุปกรณ์นั้น กรุณาเปิด Kotomimi บนอุปกรณ์นั้น เปิด “แชร์ให้อุปกรณ์อื่น” แล้วลองอีกครั้ง"
+  },
+  "providers.localai.localServerNote": {
+    "en": "This address is this computer itself: a model server running here, such as LocalAI. Choose \"Another device\" in a stage to use its models.",
+    "text": "ที่อยู่นี้คือคอมพิวเตอร์เครื่องนี้เอง ซึ่งมีเซิร์ฟเวอร์โมเดลทำงานอยู่ เช่น LocalAI เลือก “อุปกรณ์อื่น” ในขั้นตอนที่ต้องการเพื่อใช้โมเดลเหล่านี้"
+  },
+  "providers.localai.model": {
+    "en": "Model",
+    "text": "โมเดล"
+  },
+  "providers.localai.modelGone": {
+    "en": "{{name}} (no longer on that device)",
+    "text": "{{name}} (ไม่มีบนอุปกรณ์นั้นแล้ว)"
+  },
+  "providers.localai.modelList": {
+    "en": "Choose from the models this service lists",
+    "text": "เลือกจากรายการโมเดลของบริการนี้"
+  },
+  "providers.localai.modelListAsking": {
+    "en": "Getting the list…",
+    "text": "กำลังโหลดรายการโมเดล…"
+  },
+  "providers.localai.modelListKeyMissing": {
+    "en": "Fill in the API key first.",
+    "text": "กรุณากรอกคีย์ API ก่อน"
+  },
+  "providers.localai.modelListKeyRefused": {
+    "en": "The service refused this key.",
+    "text": "บริการนี้ไม่ยอมรับคีย์นี้"
+  },
+  "providers.localai.modelListNoAddress": {
+    "en": "Fill in the address first.",
+    "text": "กรุณากรอกที่อยู่ก่อน"
+  },
+  "providers.localai.modelListNoMatch": {
+    "en": "No model found. Try fewer letters.",
+    "text": "ไม่พบโมเดล ลองพิมพ์ให้น้อยลง"
+  },
+  "providers.localai.modelListNone": {
+    "en": "This service lists no models. Type the name instead.",
+    "text": "บริการนี้ไม่มีรายการโมเดล กรุณาพิมพ์ชื่อโดยตรง"
+  },
+  "providers.localai.modelListUnreachable": {
+    "en": "The service could not be reached.",
+    "text": "เชื่อมต่อบริการนี้ไม่ได้"
+  },
+  "providers.localai.modelSearch": {
+    "en": "Search models",
+    "text": "ค้นหาโมเดล"
+  },
+  "providers.localai.modelSuggested": {
+    "en": "Suits this step",
+    "text": "เหมาะกับขั้นตอนนี้"
+  },
+  "providers.localai.name": {
+    "en": "Kotomimi Pipeline",
+    "text": "Kotomimi จัดชุดเอง"
+  },
+  "providers.localai.nativeBusy": {
+    "en": "A device you share with is using this engine with {{name}}. Wait for it to finish, or choose {{name}} here too.",
+    "text": "อุปกรณ์ที่คุณแชร์ให้กำลังใช้เอนจินนี้กับ {{name}} รอให้ใช้เสร็จ หรือเลือก {{name}} ที่นี่ด้วย"
+  },
+  "providers.localai.nativeCoachFailed": {
+    "en": "The feedback engine could not start. In the Grammar feedback card, press \"Try again\" — or choose another model.",
+    "text": "เริ่มเอนจินตรวจไวยากรณ์ไม่ได้ กด “ลองอีกครั้ง” ในแผง “คำแนะนำไวยากรณ์” หรือเปลี่ยนโมเดล"
+  },
+  "providers.localai.nativeCoachFailedShort": {
+    "en": "The feedback engine could not start.",
+    "text": "เริ่มเอนจินตรวจไวยากรณ์ไม่ได้"
+  },
+  "providers.localai.nativeCoachMissing": {
+    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "ยังไม่ได้ดาวน์โหลด {{name}} ดาวน์โหลดโมเดลเนทีฟในแผง “คำแนะนำไวยากรณ์” หรือเปลี่ยนเป็น “โมเดล API” หรือ “อุปกรณ์อื่น”"
+  },
+  "providers.localai.nativeCoachReady": {
+    "en": "The feedback engine is ready.",
+    "text": "เอนจินตรวจไวยากรณ์พร้อมแล้ว"
+  },
+  "providers.localai.nativeCoachUnsupported": {
+    "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
+    "text": "ระบบนี้ยังไม่รองรับเอนจินตรวจไวยากรณ์เนทีฟ เปลี่ยนเป็น “โมเดล API” หรือ “อุปกรณ์อื่น” ในแผง “คำแนะนำไวยากรณ์”"
+  },
+  "providers.localai.nativeCoachWarming": {
+    "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
+    "text": "เอนจินตรวจไวยากรณ์กำลังเริ่มทำงาน ใช้เวลาไม่กี่วินาที เริ่มใช้งานได้เมื่อพร้อม"
+  },
+  "providers.localai.nativeCoachWarmingShort": {
+    "en": "Starting the feedback engine…",
+    "text": "กำลังเริ่มเอนจินตรวจไวยากรณ์…"
+  },
+  "providers.localai.nativeEntry": {
+    "en": "{{name}} (native engine)",
+    "text": "{{name}} (เอนจินเนทีฟ)"
+  },
+  "providers.localai.nativeFailed": {
+    "en": "The recognition engine of this computer could not start. In the Speech recognition card, press \"Try again\" — or choose another model.",
+    "text": "เริ่มเอนจินรู้จำเสียงบนคอมพิวเตอร์นี้ไม่ได้ กด “ลองอีกครั้ง” ในแผง “การรู้จำเสียง” หรือเปลี่ยนโมเดล"
+  },
+  "providers.localai.nativeFailedShort": {
+    "en": "The engine could not start.",
+    "text": "เริ่มเอนจินไม่ได้"
+  },
+  "providers.localai.nativeInterrupted": {
+    "en": "The engine stopped while it was starting. Press Start again.",
+    "text": "เอนจินถูกหยุดระหว่างเริ่มทำงาน กรุณากดเริ่มอีกครั้ง"
+  },
+  "providers.localai.nativeLoading": {
+    "en": "Loading the models… About half a minute the first time after the computer boots.",
+    "text": "กำลังโหลดโมเดล… ครั้งแรกหลังเปิดเครื่องใช้เวลาประมาณครึ่งนาที"
+  },
+  "providers.localai.nativeMissing": {
+    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "ยังไม่ได้ดาวน์โหลด {{name}} ดาวน์โหลดโมเดลเนทีฟในแผง “การรู้จำเสียง” หรือเปลี่ยนเป็น “โมเดล API” หรือ “อุปกรณ์อื่น”"
+  },
+  "providers.localai.nativeNone": {
+    "en": "No model chosen",
+    "text": "ยังไม่ได้เลือกโมเดล"
+  },
+  "providers.localai.nativeReady": {
+    "en": "The engine is ready.",
+    "text": "เอนจินพร้อมแล้ว"
+  },
+  "providers.localai.nativeRetry": {
+    "en": "Try again",
+    "text": "ลองอีกครั้ง"
+  },
+  "providers.localai.nativeRuntime": {
+    "en": "Downloading the runtime first. This happens only once.",
+    "text": "ดาวน์โหลดสภาพแวดล้อมสำหรับรันก่อน โดยดาวน์โหลดเพียงครั้งเดียว"
+  },
+  "providers.localai.nativeTwoModels": {
+    "en": "{{name}} and {{other}} cannot run at the same time. Choose the same model for both languages.",
+    "text": "{{name}} และ {{other}} ทำงานพร้อมกันไม่ได้ กรุณาเลือกโมเดลเดียวกันสำหรับทั้งสองภาษา"
+  },
+  "providers.localai.nativeUnchosen": {
+    "en": "No speech recognition model is chosen for {{source}} yet. Choose one in the Speech recognition card.",
+    "text": "ยังไม่ได้เลือกโมเดลรู้จำเสียงสำหรับ {{source}} เลือกในแผง “การรู้จำเสียง”"
+  },
+  "providers.localai.nativeUnheard": {
+    "en": "{{name}} does not hear one of your two languages. Choose another model for it.",
+    "text": "{{name}} ไม่รองรับการฟังหนึ่งในสองภาษาที่คุณเลือก กรุณาเปลี่ยนโมเดล"
+  },
+  "providers.localai.nativeUnsupported": {
+    "en": "The native recognition engine is not available for this system. In the Speech recognition card, switch to \"API model\" or \"Another device\".",
+    "text": "ระบบนี้ยังไม่รองรับเอนจินรู้จำเสียงเนทีฟ เปลี่ยนเป็น “โมเดล API” หรือ “อุปกรณ์อื่น” ในแผง “การรู้จำเสียง”"
+  },
+  "providers.localai.nativeUnsupportedShort": {
+    "en": "Not available for this system",
+    "text": "ยังไม่รองรับระบบนี้"
+  },
+  "providers.localai.nativeWarming": {
+    "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
+    "text": "เอนจินรู้จำเสียงกำลังเริ่มทำงาน ครั้งแรกหลังเปิดเครื่องใช้เวลาประมาณครึ่งนาที เริ่มใช้งานได้เมื่อพร้อม"
+  },
+  "providers.localai.nativeWarmingShort": {
+    "en": "Starting the engine… About half a minute the first time after the computer boots.",
+    "text": "กำลังเริ่มเอนจิน… ครั้งแรกหลังเปิดเครื่องใช้เวลาประมาณครึ่งนาที"
+  },
+  "providers.localai.notDownloaded": {
+    "en": "No model downloaded yet",
+    "text": "ยังไม่ได้ดาวน์โหลดโมเดล"
+  },
+  "providers.localai.noteAppleSpeech": {
+    "en": "Japanese talk, measured: about 13% of the characters wrong, the most accurate of all. It writes as it listens (about 2 s behind).",
+    "text": "ทดสอบบทสนทนาภาษาญี่ปุ่น: ตัวอักษรผิดประมาณ 13% แม่นยำที่สุดในทั้งหมด แสดงข้อความขณะฟัง (ช้ากว่าเสียงประมาณ 2 วินาที)"
+  },
+  "providers.localai.noteCohere": {
+    "en": "Measured on Japanese VRChat talk: about 33% of the characters wrong, and about a quarter of what was said left out. Not a good choice for Japanese conversation.",
+    "text": "ทดสอบบทสนทนาภาษาญี่ปุ่นใน VRChat: ตัวอักษรผิดประมาณ 33% และตกหล่นประมาณหนึ่งในสี่ของคำพูด ไม่แนะนำสำหรับบทสนทนาภาษาญี่ปุ่น"
+  },
+  "providers.localai.noteGemma4": {
+    "en": "Japanese grammar, measured: it caught 11 of 14 mistakes and left right casual speech alone; about 0.1 s an answer. About 1.5 GB of video memory.",
+    "text": "ทดสอบไวยากรณ์ภาษาญี่ปุ่น: ตรวจพบประโยคผิด 11 จาก 14 ประโยค และไม่แก้ภาษาพูดที่ถูกต้องโดยไม่จำเป็น ใช้เวลาประมาณ 0.1 วินาทีต่อประโยค ใช้หน่วยความจำการ์ดจอประมาณ 1.5 GB"
+  },
+  "providers.localai.noteGranite41": {
+    "en": "Measured on Japanese VRChat talk: it keeps repeating the same sentence. Not usable for Japanese conversation.",
+    "text": "ทดสอบบทสนทนาภาษาญี่ปุ่นใน VRChat: แสดงประโยคเดิมซ้ำไม่หยุด แทบใช้กับบทสนทนาภาษาญี่ปุ่นไม่ได้"
+  },
+  "providers.localai.noteHyMt15": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences, and it tends to add words of its own.",
+    "text": "ทดสอบแปลภาษาญี่ปุ่นเป็นจีน: ผิดร้ายแรงประมาณ 8 จาก 30 ประโยค และมักเติมคำขึ้นเอง"
+  },
+  "providers.localai.noteHyMt2": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences; about 0.1 s a sentence.",
+    "text": "ทดสอบแปลภาษาญี่ปุ่นเป็นจีน: ผิดร้ายแรงประมาณ 8 จาก 30 ประโยค ใช้เวลาประมาณ 0.1 วินาทีต่อประโยค"
+  },
+  "providers.localai.noteIndexTranslate": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
+    "text": "ทดสอบแปลภาษาญี่ปุ่นเป็นจีน: ผิดร้ายแรงประมาณ 3 จาก 30 ประโยค ดีที่สุดในกลุ่มที่ทดสอบ ใช้เวลาประมาณ 0.1 วินาทีต่อประโยค ใช้หน่วยความจำการ์ดจอประมาณ 2 GB รองรับมากกว่า 100 ภาษา"
+  },
+  "providers.localai.noteMoonshineJa": {
+    "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
+    "text": "ทดสอบบทสนทนาภาษาญี่ปุ่นใน VRChat: ตัวอักษรผิดประมาณ 70% เหมาะใช้แก้ขัดเฉพาะเมื่อใช้การ์ดจอไม่ได้เลย"
+  },
+  "providers.localai.noteNativeNemotron": {
+    "en": "Small: about 1 GB of video memory. Japanese talk, measured: about 27% of the characters wrong, and a short sentence is sometimes left out altogether. Choose it only when the ones above do not fit or do not hear the language. Over thirty languages.",
+    "text": "ใช้หน่วยความจำการ์ดจอน้อย ประมาณ 1 GB ทดสอบบทสนทนาภาษาญี่ปุ่น: ตัวอักษรผิดประมาณ 27% และบางครั้งตกหล่นทั้งประโยคสั้น ๆ เลือกเมื่อโมเดลด้านบนใช้หน่วยความจำเกินที่มี หรือไม่รองรับภาษาที่ต้องการฟังเท่านั้น รองรับมากกว่า 30 ภาษา"
+  },
+  "providers.localai.noteNativeQwen": {
+    "en": "Japanese talk, measured: about 16% of the characters wrong. It writes as you speak (about 1 s behind); the last few words settle when the sentence ends. When the graphics card is busy it only refreshes less often. About 3 GB of video memory, thirty languages.",
+    "text": "ทดสอบบทสนทนาภาษาญี่ปุ่น: ตัวอักษรผิดประมาณ 16% แสดงข้อความขณะพูด (ช้ากว่าเสียงประมาณ 1 วินาที) คำท้ายประโยคจะสรุปแน่นอนเมื่อพูดจบ หากการ์ดจอทำงานไม่ทัน ข้อความเพียงอัปเดตช้าลง ใช้หน่วยความจำการ์ดจอประมาณ 3 GB รองรับ 30 ภาษา"
+  },
+  "providers.localai.noteNativeQwenSmall": {
+    "en": "The light one, for a computer that runs a game at the same time: about 2 GB of video memory instead of 3. Japanese talk, measured: about 22% of the characters wrong, more than the 1.7B. Otherwise it works the same way, with the same thirty languages.",
+    "text": "โมเดลเล็กที่ใช้ทรัพยากรน้อย เหมาะเมื่อเล่นเกมบนคอมพิวเตอร์เดียวกัน ใช้หน่วยความจำการ์ดจอประมาณ 2 GB (1.7B ใช้ประมาณ 3 GB) ทดสอบบทสนทนาภาษาญี่ปุ่น: ตัวอักษรผิดประมาณ 22% มากกว่า 1.7B เล็กน้อย ส่วนอื่นเหมือน 1.7B และรองรับ 30 ภาษาเช่นกัน"
+  },
+  "providers.localai.noteNativeR2t2": {
+    "en": "Japanese talk, measured: about 18% of the characters wrong. It writes as it listens (about 2.5 s behind) and never changes what it wrote. When the graphics card cannot keep up (a weaker card, or a game running), the text falls further and further behind. About 3 GB of video memory.",
+    "text": "ทดสอบบทสนทนาภาษาญี่ปุ่น: ตัวอักษรผิดประมาณ 18% แสดงข้อความขณะฟัง (ช้ากว่าเสียงประมาณ 2.5 วินาที) และไม่แก้ข้อความที่แสดงแล้ว หากการ์ดจอทำงานไม่ทัน (การ์ดจอไม่แรง หรือเล่นเกมไปด้วย) ข้อความจะยิ่งตามเสียงไม่ทัน ใช้หน่วยความจำการ์ดจอประมาณ 3 GB"
+  },
+  "providers.localai.noteNativeSenseVoice": {
+    "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
+    "text": "เบาและเร็วที่สุด ใช้หน่วยความจำการ์ดจอประมาณ 0.4 GB ทดสอบบทสนทนาภาษาญี่ปุ่น: แม่นยำเท่า Qwen3-ASR 0.6B แต่แทบไม่ใส่เครื่องหมายวรรคตอน รองรับเฉพาะภาษาจีน กวางตุ้ง อังกฤษ ญี่ปุ่น และเกาหลี"
+  },
+  "providers.localai.noteQwen06": {
+    "en": "Measured on Japanese VRChat talk: about 35% of the characters wrong. Small: for when the graphics card has little memory to spare.",
+    "text": "ทดสอบบทสนทนาภาษาญี่ปุ่นใน VRChat: ตัวอักษรผิดประมาณ 35% โมเดลขนาดเล็ก ใช้ได้เมื่อมีหน่วยความจำการ์ดจอจำกัด"
+  },
+  "providers.localai.noteQwen17": {
+    "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
+    "text": "ทดสอบบทสนทนาภาษาญี่ปุ่น: ตัวอักษรผิดประมาณ 19% ต้องรอให้พูดจบประโยคจึงแสดงข้อความ (ช้ากว่าเสียงประมาณ 10 วินาที) ส่วนรุ่น GGUF ด้านบนแสดงข้อความขณะพูด"
+  },
+  "providers.localai.noteSenseVoice": {
+    "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
+    "text": "ทดสอบบทสนทนาภาษาญี่ปุ่นใน VRChat: ไม่แสดงอักษรคานะ ทำให้ข้อความภาษาญี่ปุ่นแทบอ่านไม่รู้เรื่อง"
+  },
+  "providers.localai.noteVoxtral4b": {
+    "en": "Measured on Japanese VRChat talk: quick — the text is about 2.6 s behind the voice — but about 27% of the characters wrong. For when speed matters more than accuracy.",
+    "text": "ทดสอบบทสนทนาภาษาญี่ปุ่นใน VRChat: แสดงข้อความเร็ว (ช้ากว่าเสียงประมาณ 2.6 วินาที) แต่ตัวอักษรผิดค่อนข้างมาก (ประมาณ 27%) เหมาะเมื่อเน้นความเร็วและยอมรับคำผิดได้"
+  },
+  "providers.localai.noteWhisperMedium": {
+    "en": "Measured on Japanese VRChat talk: about 34% of the characters wrong.",
+    "text": "ทดสอบบทสนทนาภาษาญี่ปุ่นใน VRChat: ตัวอักษรผิดประมาณ 34%"
+  },
+  "providers.localai.noteWhisperTurbo": {
+    "en": "Measured on Japanese VRChat talk: about 21% of the characters wrong, and steady. It writes only once a sentence has ended.",
+    "text": "ทดสอบบทสนทนาภาษาญี่ปุ่นใน VRChat: ตัวอักษรผิดประมาณ 21% ทำงานสม่ำเสมอ ต้องรอให้พูดจบประโยคจึงแสดงข้อความเช่นกัน"
+  },
+  "providers.localai.otherDeviceHint": {
+    "en": "To use the models of another device on your local network, search the network for it.",
+    "text": "หากต้องการใช้โมเดลบนอุปกรณ์อื่นในเครือข่ายเดียวกัน ให้ค้นหาอุปกรณ์ในเครือข่าย"
+  },
+  "providers.localai.phoneKey": {
+    "en": "Access key of {{name}}",
+    "text": "คีย์การเข้าถึงของ {{name}}"
+  },
+  "providers.localai.phoneKeyNote": {
+    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
+    "text": "โทรศัพท์เครื่องนี้ตั้งคีย์การเข้าถึงไว้ ดูได้ที่ “การเชื่อมต่ออุปกรณ์” บนโทรศัพท์"
+  },
+  "providers.localai.phoneKeyUse": {
+    "en": "Use this phone",
+    "text": "ใช้โทรศัพท์เครื่องนี้"
+  },
+  "providers.localai.phoneKeyWrong": {
+    "en": "The phone did not take this key.",
+    "text": "คีย์นี้ไม่ถูกต้อง โปรดตรวจสอบอีกครั้ง"
+  },
+  "providers.localai.phoneModelGone": {
+    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
+    "text": "โทรศัพท์ ({{address}}) ไม่ได้แชร์ {{name}} ให้ใช้ในตอนนี้ เลือกโมเดลอื่นในแผง"
+  },
+  "providers.localai.phoneModelTooBig": {
+    "en": "{{name}} (not enough memory on the phone)",
+    "text": "{{name}} (หน่วยความจำโทรศัพท์ไม่พอ)"
+  },
+  "providers.localai.phoneModelTooBigCheck": {
+    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
+    "text": "โทรศัพท์ ({{address}}) มีหน่วยความจำไม่พอสำหรับ {{name}} ในตอนนี้ เลือกโมเดลที่เล็กลงในแผง หรือปิดแอปอื่นบนโทรศัพท์"
+  },
+  "providers.localai.phoneNoMemory": {
+    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
+    "text": "โทรศัพท์มีหน่วยความจำไม่พอสำหรับโมเดลนี้ในตอนนี้ เลือกโมเดลที่เล็กลงในแผง หรือปิดแอปอื่นบนโทรศัพท์"
+  },
+  "providers.localai.phoneOption": {
+    "en": "{{name}} (phone)",
+    "text": "{{name}} (โทรศัพท์)"
+  },
+  "providers.localai.phoneQuiet": {
+    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
+    "text": "โทรศัพท์ไม่ตอบสนอง ระบบอาจพักแอปหลังล็อกหน้าจอ เปิด Kotomimi บนโทรศัพท์เพื่อทำต่อ"
+  },
+  "providers.localai.phoneUnreachable": {
+    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "เชื่อมต่อโทรศัพท์ ({{address}}) ไม่ได้ ตรวจว่าเปิดแชร์อยู่และใช้ Wi-Fi เดียวกับคอมพิวเตอร์นี้"
+  },
+  "providers.localai.pipelineModel": {
+    "en": "Setup name on that device",
+    "text": "ชื่อชุดการตั้งค่าบนอุปกรณ์นั้น"
+  },
+  "providers.localai.pipelineNote": {
+    "en": "Normally left alone. Change it only when that device is a LocalAI set up with more than one combination of recognition and translation.",
+    "text": "ปกติไม่ต้องเปลี่ยน เปลี่ยนเฉพาะเมื่ออุปกรณ์นั้นใช้ LocalAI และตั้งค่าชุดรู้จำเสียงกับการแปลไว้มากกว่าหนึ่งชุด"
+  },
+  "providers.localai.placeDevice": {
+    "en": "This computer",
+    "text": "คอมพิวเตอร์เครื่องนี้"
+  },
+  "providers.localai.placeServer": {
+    "en": "Another device",
+    "text": "อุปกรณ์อื่น"
+  },
+  "providers.localai.ready": {
+    "en": "Ready to start",
+    "text": "พร้อมเริ่ม"
+  },
+  "providers.localai.recheck": {
+    "en": "Check again",
+    "text": "ตรวจสอบอีกครั้ง"
+  },
+  "providers.localai.serverHttp": {
+    "en": "The other device answered with an error (HTTP {{status}}). Restarting the app or the model server there usually helps.",
+    "text": "อุปกรณ์อีกเครื่องส่งข้อผิดพลาดกลับมา (HTTP {{status}}) โดยปกติเริ่มแอปหรือเซิร์ฟเวอร์โมเดลบนเครื่องนั้นใหม่ก็แก้ได้"
+  },
+  "providers.localai.serverKey": {
+    "en": "Access key",
+    "text": "คีย์การเข้าถึง"
+  },
+  "providers.localai.serverKeyMissing": {
+    "en": "The other device asks for an access key. Enter it in Settings, under \"Another device\".",
+    "text": "อุปกรณ์อีกเครื่องต้องใช้คีย์การเข้าถึง กรุณากรอกใน “อุปกรณ์อื่น” ในการตั้งค่า"
+  },
+  "providers.localai.serverKeyNeeded": {
+    "en": "The other device asks for an access key. Under \"Another device\", turn on \"It asks for an access key\" and enter the key set on that device.",
+    "text": "อุปกรณ์อีกเครื่องต้องใช้คีย์การเข้าถึง ใน “อุปกรณ์อื่น” ให้เปิด “ต้องใช้คีย์การเข้าถึง” แล้วกรอกคีย์ที่ตั้งไว้บนอุปกรณ์นั้น"
+  },
+  "providers.localai.serverKeyRefused": {
+    "en": "The other device did not accept the access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options).",
+    "text": "อุปกรณ์อีกเครื่องไม่ยอมรับคีย์การเข้าถึงนี้ กรุณากรอกคีย์ที่ตั้งไว้บนอุปกรณ์นั้น (หากเป็น Kotomimi อีกเครื่อง คีย์จะอยู่ใน “ตัวเลือก” ของการแชร์)"
+  },
+  "providers.localai.serverNeedsKey": {
+    "en": "It asks for an access key",
+    "text": "ต้องใช้คีย์การเข้าถึง"
+  },
+  "providers.localai.serverNeedsKeyTooltip": {
+    "en": "Turn this on when the other device was given an access key — a Kotomimi with one set under its sharing options, for example.",
+    "text": "เปิดเมื่ออุปกรณ์อีกเครื่องตั้งคีย์การเข้าถึงไว้ เช่น Kotomimi อีกเครื่องที่ตั้งคีย์ไว้ใน “ตัวเลือก” ของการแชร์"
+  },
+  "providers.localai.serverNoAsr": {
+    "en": "The other device has no speech recognition model for {{source}}. Download one there first (in the model library of its sharing card), or let this computer listen.",
+    "text": "อุปกรณ์อีกเครื่องไม่มีโมเดลรู้จำเสียงสำหรับ {{source}} ดาวน์โหลดบนเครื่องนั้นก่อน (ในคลังโมเดลของแผงการแชร์) หรือให้คอมพิวเตอร์นี้รู้จำเสียงแทน"
+  },
+  "providers.localai.serverNoDetect": {
+    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
+    "text": "อุปกรณ์อีกเครื่องไม่มีโมเดลรู้จำเสียงที่แยกภาษาได้ ซึ่งจำเป็นสำหรับ “ฉันพูด…ด้วย” และการตรวจจับภาษาของอีกฝ่ายอัตโนมัติ ดาวน์โหลดโมเดลบนเครื่องนั้นก่อน เช่น Qwen3-ASR หรือปิดทั้งสองตัวเลือก"
+  },
+  "providers.localai.serverNoModels": {
+    "en": "The other device has no model yet: install or download one there first.",
+    "text": "อุปกรณ์อีกเครื่องยังไม่มีโมเดล กรุณาติดตั้งหรือดาวน์โหลดบนเครื่องนั้นก่อน"
+  },
+  "providers.localai.serverSilent": {
+    "en": "This address does not answer. If Kotomimi is running on that device, enable its sharing to use its installed native models.",
+    "text": "เชื่อมต่อที่อยู่นี้ไม่ได้ หากอุปกรณ์นั้นเปิด Kotomimi อยู่ ให้เปิดการแชร์เพื่อใช้โมเดลเนทีฟที่ติดตั้งไว้"
+  },
+  "providers.localai.serverUnreachable": {
+    "en": "The other device ({{address}}) did not answer. Check that it is on and on the same network as this computer, and that Kotomimi there is sharing (or its model server is running). It is asked again by itself.",
+    "text": "อุปกรณ์อีกเครื่อง ({{address}}) ไม่ตอบสนอง ตรวจว่าเปิดอยู่ เชื่อมต่อเครือข่ายเดียวกับคอมพิวเตอร์นี้ และ Kotomimi ที่เครื่องนั้นเปิดแชร์อยู่ (หรือเซิร์ฟเวอร์โมเดลกำลังทำงาน) ระบบจะทำต่ออัตโนมัติเมื่อเชื่อมต่อได้"
+  },
+  "providers.localai.sharedDeviceNone": {
+    "en": "No device connected yet",
+    "text": "ยังไม่ได้เชื่อมต่ออุปกรณ์"
+  },
+  "providers.localai.sourceAuto": {
+    "en": "The language cannot be detected with this setup. Choose the language you speak.",
+    "text": "ชุดการตั้งค่านี้ตรวจจับภาษาอัตโนมัติไม่ได้ กรุณาเลือกภาษาที่คุณพูด"
+  },
+  "providers.localai.speedAbout": {
+    "en": "About {{seconds}} s",
+    "text": "ประมาณ {{seconds}} วินาที"
+  },
+  "providers.localai.speedAdviceGeneral": {
+    "en": "A smaller model or a faster device is suggested.",
+    "text": "แนะนำให้ใช้โมเดลที่เล็กลง หรืออุปกรณ์ที่เร็วขึ้น"
+  },
+  "providers.localai.speedAdviceModel": {
+    "en": "A smaller model, such as {{name}}, is suggested.",
+    "text": "แนะนำให้ใช้โมเดลที่เล็กลง เช่น {{name}}"
+  },
+  "providers.localai.speedAdviceSwitch": {
+    "en": "Switch and test again",
+    "text": "เปลี่ยนแล้วทดสอบอีกครั้ง"
+  },
+  "providers.localai.speedBehind": {
+    "en": "Falls behind",
+    "text": "ล่าช้าขึ้นเรื่อยๆ"
+  },
+  "providers.localai.speedCoach": {
+    "en": "{{seconds}} s per sentence for feedback, on average",
+    "text": "ให้คำแนะนำเฉลี่ยประโยคละ {{seconds}} วินาที"
+  },
+  "providers.localai.speedCoachSlow": {
+    "en": "Feedback is slower than speech, so it will fall further behind. ",
+    "text": "การให้คำแนะนำช้ากว่าการพูด คำแนะนำจึงจะล่าช้ามากขึ้นเรื่อยๆ"
+  },
+  "providers.localai.speedFailed": {
+    "en": "The test could not finish: {{reason}}",
+    "text": "ทดสอบไม่สำเร็จ: {{reason}}"
+  },
+  "providers.localai.speedHead": {
+    "en": "Speed test · {{when}}",
+    "text": "ทดสอบความเร็ว · {{when}}"
+  },
+  "providers.localai.speedHear": {
+    "en": "Text appears {{seconds}} s after the speech ends",
+    "text": "แสดงข้อความต้นฉบับหลังพูดจบ {{seconds}} วินาที"
+  },
+  "providers.localai.speedHearSlow": {
+    "en": "Recognition is slower than speech, so the captions will fall further behind. ",
+    "text": "การรู้จำเสียงช้ากว่าการพูด คำบรรยายจึงจะล่าช้ามากขึ้นเรื่อยๆ"
+  },
+  "providers.localai.speedJustNow": {
+    "en": "just now",
+    "text": "เมื่อสักครู่"
+  },
+  "providers.localai.speedLegCoach": {
+    "en": "From you finishing to the feedback",
+    "text": "จากคุณพูดจบจนแสดงคำแนะนำ"
+  },
+  "providers.localai.speedLegParticipant": {
+    "en": "From the other side finishing to the translation",
+    "text": "จากอีกฝ่ายพูดจบจนแสดงคำแปล"
+  },
+  "providers.localai.speedLegSpeaker": {
+    "en": "From you finishing to the translation",
+    "text": "จากคุณพูดจบจนแสดงคำแปล"
+  },
+  "providers.localai.speedNoClip": {
+    "en": "There is no test recording for this language yet.",
+    "text": "ยังไม่มีเสียงบันทึกสำหรับทดสอบภาษานี้"
+  },
+  "providers.localai.speedNone": {
+    "en": "No result arrived during the test.",
+    "text": "ไม่ได้รับผลลัพธ์ระหว่างการทดสอบ"
+  },
+  "providers.localai.speedRetest": {
+    "en": "Test again",
+    "text": "ทดสอบอีกครั้ง"
+  },
+  "providers.localai.speedStop": {
+    "en": "Stop",
+    "text": "หยุด"
+  },
+  "providers.localai.speedTest": {
+    "en": "Test speed",
+    "text": "ทดสอบความเร็ว"
+  },
+  "providers.localai.speedTesting": {
+    "en": "Testing speed: a recording of about ten seconds is sent through each step at speaking pace. Nothing is recorded or played.",
+    "text": "กำลังทดสอบความเร็ว: ส่งเสียงบันทึกยาวประมาณ 10 วินาทีผ่านแต่ละขั้นตอนด้วยความเร็วการพูดปกติ โดยไม่ใช้ไมโครโฟนและไม่เล่นเสียง"
+  },
+  "providers.localai.speedTranslate": {
+    "en": "{{seconds}} s per sentence to translate, on average",
+    "text": "แปลเฉลี่ยประโยคละ {{seconds}} วินาที"
+  },
+  "providers.localai.speedTranslateSlow": {
+    "en": "Translation is slower than speech, so the translations will fall further behind. ",
+    "text": "การแปลช้ากว่าการพูด คำแปลจึงจะล่าช้ามากขึ้นเรื่อยๆ"
+  },
+  "providers.localai.speedVerdictOk": {
+    "en": "This setup keeps up with live speech.",
+    "text": "ชุดที่เลือกใช้งานแบบเรียลไทม์ได้"
+  },
+  "providers.localai.speedVerdictSlow": {
+    "en": "Some steps cannot keep up with speech; see the notes above.",
+    "text": "บางขั้นตอนทำงานไม่ทันการพูด ดูรายละเอียดด้านบน"
+  },
+  "providers.localai.stageDevice": {
+    "en": "Device",
+    "text": "อุปกรณ์"
+  },
+  "providers.localai.tag_native": {
+    "en": "Native engine",
+    "text": "เอนจินเนทีฟ"
+  },
+  "providers.localai.tag_system": {
+    "en": "Built into macOS",
+    "text": "มีในระบบ"
+  },
+  "providers.localai.tagHint_native": {
+    "en": "Runs on the graphics card using a native engine downloaded with the model. Loads when a session starts; the first start after boot may take about half a minute. Memory is released after the engine is no longer in use.",
+    "text": "ทำงานบนการ์ดจอผ่านเอนจินเนทีฟที่ดาวน์โหลดมาพร้อมโมเดล โหลดเมื่อเริ่มเซสชัน ครั้งแรกหลังเปิดเครื่องอาจใช้เวลาประมาณครึ่งนาที และจะคืนหน่วยความจำเมื่อเลิกใช้เอนจิน"
+  },
+  "providers.localai.tagHint_system": {
+    "en": "The speech recognition of macOS itself: no video memory taken, nothing to warm up. The system downloads each language.",
+    "text": "การรู้จำเสียงที่มีในระบบ Mac ไม่ใช้หน่วยความจำการ์ดจอ ไม่ต้องเตรียมระบบก่อนใช้ ระบบจะดาวน์โหลดชุดภาษาของแต่ละภาษาให้"
+  },
+  "providers.localai.textBaseUrlPlaceholder": {
+    "en": "e.g. https://api.openai.com/v1 or http://localhost:11434/v1",
+    "text": "เช่น https://api.openai.com/v1 หรือ http://localhost:11434/v1"
+  },
+  "providers.localai.textModelPlaceholder": {
+    "en": "The model's name, e.g. gpt-4o-mini",
+    "text": "ชื่อโมเดล เช่น gpt-4o-mini"
+  },
+  "providers.localai.translateInSession": {
+    "en": "The device's own choice (translated in the same session it hears in)",
+    "text": "ให้อุปกรณ์นั้นเลือก (แปลในเซสชันเดียวกับการรู้จำเสียง)"
+  },
+  "providers.localai.translateKey": {
+    "en": "API key of the translation model",
+    "text": "คีย์ API ของโมเดลแปลภาษา"
+  },
+  "providers.localai.translateKotomimiOwn": {
+    "en": "The device's own choice (its best model for your languages)",
+    "text": "ให้อุปกรณ์นั้นเลือก (เลือกให้เหมาะกับคู่ภาษาอัตโนมัติ)"
+  },
+  "providers.localai.translateStage": {
+    "en": "Translation",
+    "text": "การแปล"
+  },
+  "providers.localai.translateStageTooltip": {
+    "en": "What turns the recognized text into the other language. An API model is any service that speaks the OpenAI chat API: a hosted one, or Ollama or LM Studio on this computer.",
+    "text": "ส่วนที่แปลข้อความจากการรู้จำเสียงเป็นอีกภาษา โมเดล API ใช้บริการใดก็ได้ที่รองรับ API แชตของ OpenAI ทั้งบริการบนคลาวด์ หรือ Ollama และ LM Studio บนคอมพิวเตอร์นี้"
+  },
+  "providers.localai.translateUnnamed": {
+    "en": "Translation has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "ยังไม่มีโมเดลพร้อมใช้สำหรับการแปล เลือกโมเดลในแผง “การแปล” ใต้ผู้ให้บริการ (หากใช้โมเดล API ให้กรอกที่อยู่และชื่อโมเดล) หรือเปลี่ยนไปใช้อุปกรณ์หรือบริการอื่น"
+  },
+  "providers.localai.translatorFailed": {
+    "en": "The translation engine of this computer could not start. In the Translation card, press \"Try again\" — or choose another model.",
+    "text": "เริ่มเอนจินแปลบนคอมพิวเตอร์นี้ไม่ได้ กด “ลองอีกครั้ง” ในแผง “การแปล” หรือเปลี่ยนโมเดล"
+  },
+  "providers.localai.translatorFailedShort": {
+    "en": "The translation engine could not start.",
+    "text": "เริ่มเอนจินแปลไม่ได้"
+  },
+  "providers.localai.translatorMissing": {
+    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "ยังไม่ได้ดาวน์โหลด {{name}} ดาวน์โหลดโมเดลเนทีฟในแผง “การแปล” หรือเปลี่ยนเป็น “โมเดล API” หรือ “อุปกรณ์อื่น”"
+  },
+  "providers.localai.translatorReady": {
+    "en": "The translation engine is ready.",
+    "text": "เอนจินแปลพร้อมแล้ว"
+  },
+  "providers.localai.translatorUnfit": {
+    "en": "{{name}} does not translate between your two languages. Choose another model for it.",
+    "text": "{{name}} ไม่รองรับคู่ภาษาที่คุณเลือก กรุณาเปลี่ยนโมเดล"
+  },
+  "providers.localai.translatorUnsupported": {
+    "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
+    "text": "ระบบนี้ยังไม่รองรับเอนจินแปลเนทีฟ เปลี่ยนเป็น “โมเดล API” หรือ “อุปกรณ์อื่น” ในแผง “การแปล”"
+  },
+  "providers.localai.translatorWarming": {
+    "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",
+    "text": "เอนจินแปลบนคอมพิวเตอร์นี้กำลังเริ่มทำงาน ใช้เวลาไม่กี่วินาที เริ่มใช้งานได้เมื่อพร้อม"
+  },
+  "providers.localai.translatorWarmingShort": {
+    "en": "Starting the translation engine…",
+    "text": "กำลังเริ่มเอนจินแปล…"
+  },
+  "providers.localai.typedFailed": {
+    "en": "A sentence you typed was not translated: the translation model did not answer.",
+    "text": "มีข้อความที่พิมพ์หนึ่งประโยคแปลไม่สำเร็จ เพราะโมเดลแปลไม่ตอบสนอง"
+  },
+  "providers.localai.viaModel": {
+    "en": "API model",
+    "text": "โมเดลผ่าน API"
+  },
+  "providers.openai_live.name": {
+    "en": "OpenAI Live",
+    "text": "OpenAI Live"
+  },
+  "providers.openai_translate.name": {
+    "en": "OpenAI Translate",
+    "text": "OpenAI Translate"
+  },
+  "providers.openai.name": {
+    "en": "OpenAI Realtime",
+    "text": "OpenAI Realtime"
+  },
+  "providers.palabraai.authModeApp": {
+    "en": "App Client ID/Secret",
+    "text": "รหัสไคลเอนต์/คีย์ลับของแอป"
+  },
+  "providers.palabraai.clientIdPlaceholder": {
+    "en": "Client ID",
+    "text": "รหัสไคลเอนต์"
+  },
+  "providers.palabraai.clientSecretPlaceholder": {
+    "en": "Client Secret",
+    "text": "คีย์ลับของไคลเอนต์"
+  },
+  "providers.palabraai.name": {
+    "en": "Palabra AI",
+    "text": "Palabra AI"
+  },
+  "providers.qwen_livetranslate.name": {
+    "en": "Qwen LiveTranslate",
+    "text": "Qwen LiveTranslate"
+  },
+  "providers.soniox.name": {
+    "en": "Soniox",
+    "text": "Soniox"
+  },
+  "providers.volcengine_ast2.accessTokenPlaceholder": {
+    "en": "Access Token",
+    "text": "โทเค็นการเข้าถึง"
+  },
+  "providers.volcengine_ast2.appIdPlaceholder": {
+    "en": "APP ID",
+    "text": "รหัสแอป"
+  },
+  "providers.volcengine_ast2.authModeApp": {
+    "en": "App ID + Access Token",
+    "text": "รหัสแอป + โทเค็นการเข้าถึง"
+  },
+  "providers.volcengine_ast2.name": {
+    "en": "Doubao AST 2.0",
+    "text": "Doubao แปลพร้อมเสียงพูด 2.0"
+  },
+  "settings.glossaryAdd": {
+    "en": "Add a word…",
+    "text": "เพิ่มคำ…"
+  },
+  "settings.glossaryDelete": {
+    "en": "Delete entry",
+    "text": "ลบรายการ"
+  },
+  "settings.glossaryFixOpen": {
+    "en": "Fix word",
+    "text": "แก้คำ"
+  },
+  "settings.glossaryFixSave": {
+    "en": "Save to glossary",
+    "text": "บันทึกลงพจนานุกรม"
+  },
+  "settings.glossaryFixTo": {
+    "en": "Change to",
+    "text": "แก้เป็น"
+  },
+  "settings.glossaryFull": {
+    "en": "Glossary is full",
+    "text": "พจนานุกรมเต็มแล้ว"
+  },
+  "settings.glossaryHeard": {
+    "en": "Misheard as",
+    "text": "ได้ยินผิดเป็น"
+  },
+  "settings.glossaryOptional": {
+    "en": "Only if misheard",
+    "text": "เว้นว่างได้ถ้าไม่ได้ยินผิด"
+  },
+  "settings.glossaryTitle": {
+    "en": "Personal glossary",
+    "text": "พจนานุกรมส่วนตัว"
+  },
+  "settings.glossaryTooltip": {
+    "en": "Names and special words. Write each in the language it is spoken in. Where one has been misheard, add how on the right and it is put right from then on; some recognition models only follow that column. You can also select a misheard word in the conversation and correct it there.",
+    "text": "เพิ่มชื่อและคำเฉพาะโดยเขียนเป็นภาษาที่ใช้พูด หากเคยได้ยินผิด ให้ใส่คำที่ได้ยินผิดไว้ด้านขวา ครั้งต่อไปจะได้แก้ให้ถูกโดยอัตโนมัติ โมเดลรู้จำเสียงบางตัวใช้เฉพาะคอลัมน์ด้านขวา คุณยังเลือกคำที่ได้ยินผิดในบทสนทนาแล้วแก้ได้โดยตรง"
+  },
+  "settings.glossaryTooltipLabel": {
+    "en": "About personal glossary",
+    "text": "เกี่ยวกับพจนานุกรมส่วนตัว"
+  },
+  "settings.glossaryWritten": {
+    "en": "Word",
+    "text": "คำ"
+  },
+  "settings.transcriptKeywordsPlaceholder": {
+    "en": "Sokuji, Kizuna AI, PulseAudio",
+    "text": "Sokuji, Kizuna AI, PulseAudio"
+  },
+  "setup.credentials.accessKeyId": {
+    "en": "Access Key ID",
+    "text": "รหัสคีย์การเข้าถึง (Access Key ID)"
+  },
+  "setup.credentials.accessToken": {
+    "en": "Access Token",
+    "text": "โทเค็นการเข้าถึง (Access Token)"
+  },
+  "setup.credentials.apiSecret": {
+    "en": "API Secret",
+    "text": "คีย์ลับ API (API Secret)"
+  },
+  "setup.credentials.appId": {
+    "en": "App ID",
+    "text": "รหัสแอป (App ID)"
+  },
+  "setup.credentials.secretAccessKey": {
+    "en": "Secret Access Key",
+    "text": "คีย์ลับสำหรับเข้าถึง (Secret Access Key)"
+  },
+  "tour.steps.kotomimi-tips.coach": {
+    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
+    "text": "พูดภาษาของอีกฝ่ายเองใช่ไหม? เปิดคำแนะนำไวยากรณ์ในการตั้งค่าได้เลย และเปิด \"ฉันพูดภาษาอีกฝ่ายด้วย\" เพื่อใช้การแปลพร้อมรับคำแนะนำไวยากรณ์ที่เห็นเฉพาะคุณ"
+  },
+  "tour.steps.kotomimi-tips.content": {
+    "en": "Worth knowing before you start:",
+    "text": "เรื่องที่ควรรู้ก่อนเริ่ม:"
+  },
+  "tour.steps.kotomimi-tips.share": {
+    "en": "Another device can use this computer's models: Settings → Provider → Share with other devices.",
+    "text": "อุปกรณ์อื่นก็ใช้โมเดลของเครื่องนี้ได้ที่ การตั้งค่า → ผู้ให้บริการ → แชร์กับอุปกรณ์อื่น"
+  },
+  "tour.steps.kotomimi-tips.title": {
+    "en": "Three more things",
+    "text": "อีกสามเรื่อง"
+  },
+  "tour.steps.kotomimi-tips.typed": {
+    "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
+    "text": "เมื่อเริ่มการสนทนา จะมีช่องพิมพ์ที่ด้านล่าง พิมพ์ประโยคเพื่อแปลได้เลย กด Ctrl+K เพื่อไปยังช่องพิมพ์"
+  },
+  "tour.steps.models.content_kotomimi": {
+    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
+    "text": "ดาวน์โหลดโมเดลได้โดยกด \"คลังโมเดล\" ในการ์ดของแต่ละขั้นตอน โมเดลที่ติดป้าย \"แนะนำ\" คือโมเดลที่ทดสอบกับบทสนทนาจริงแล้วได้ผลดีที่สุด ดูผลทดสอบได้จากไอคอนข้างชื่อโมเดล เมื่อดาวน์โหลดเสร็จจะเปิดใช้งานให้อัตโนมัติ"
+  },
+  "tour.steps.provider-settings.content_kotomimi": {
+    "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",
+    "text": "แต่ละขั้นตอนมีการ์ดของตัวเองที่นี่ ทั้งการรู้จำเสียง การแปล และคำแนะนำไวยากรณ์ เลือกในการ์ดว่าจะให้ทำงานที่ไหน (อุปกรณ์อื่นในเครือข่ายเดียวกัน โมเดลผ่าน API หรือคอมพิวเตอร์เครื่องนี้) และเลือกโมเดลได้ในที่เดียวกัน คุณยังแชร์โมเดลของเครื่องนี้ให้อุปกรณ์อื่นใช้ได้ที่ การตั้งค่า → ผู้ให้บริการ"
+  },
+  "tour.steps.reading-aids.content": {
+    "en": "Help for reading the other language, switched here:",
+    "text": "เปิดหรือปิดตัวช่วยอ่านภาษาต่างประเทศได้ที่นี่:"
+  },
+  "tour.steps.reading-aids.fonts": {
+    "en": "Fonts for each language are under Settings → Fonts.",
+    "text": "เลือกแบบอักษรของแต่ละภาษาได้ที่ การตั้งค่า → แบบอักษร"
+  },
+  "tour.steps.reading-aids.furigana": {
+    "en": "Furigana — kana above Japanese kanji.",
+    "text": "ฟุริงานะ: แสดงคำอ่านคานะเหนือคันจิภาษาญี่ปุ่น"
+  },
+  "tour.steps.reading-aids.pinyin": {
+    "en": "Pinyin — tone-marked pinyin above Chinese.",
+    "text": "พินอิน: แสดงพินอินพร้อมเครื่องหมายวรรณยุกต์เหนือข้อความภาษาจีน"
+  },
+  "tour.steps.reading-aids.romanization": {
+    "en": "Romanization — a line in Latin letters under Japanese, Korean, Russian and Ukrainian.",
+    "text": "คำอ่านอักษรโรมัน: เพิ่มบรรทัดคำอ่านด้วยอักษรละตินใต้ภาษาญี่ปุ่น เกาหลี รัสเซีย และยูเครน"
+  },
+  "tour.steps.reading-aids.title": {
+    "en": "Reading aids",
+    "text": "ตัวช่วยการอ่าน"
+  },
+  "voiceLibrary.cloneVoiceRequired": {
+    "en": "This voice needs a clip before it can speak — open the voice list and add one.",
+    "text": "เสียงนี้ยังพูดไม่ได้ กรุณาเปิดรายการเสียงแล้วเพิ่มคลิปเสียง"
+  },
+  "voiceLibrary.filter.accent.african": {
+    "en": "African",
+    "text": "แอฟริกา"
+  },
+  "voiceLibrary.filter.accent.american": {
+    "en": "American",
+    "text": "อเมริกัน"
+  },
+  "voiceLibrary.filter.accent.arabic": {
+    "en": "Arabic",
+    "text": "อาหรับ"
+  },
+  "voiceLibrary.filter.accent.australian": {
+    "en": "Australian",
+    "text": "ออสเตรเลีย"
+  },
+  "voiceLibrary.filter.accent.brazilian": {
+    "en": "Brazilian",
+    "text": "บราซิล"
+  },
+  "voiceLibrary.filter.accent.british": {
+    "en": "British",
+    "text": "บริติช"
+  },
+  "voiceLibrary.filter.accent.chinese": {
+    "en": "Chinese",
+    "text": "จีน"
+  },
+  "voiceLibrary.filter.accent.french": {
+    "en": "French",
+    "text": "ฝรั่งเศส"
+  },
+  "voiceLibrary.filter.accent.german": {
+    "en": "German",
+    "text": "เยอรมัน"
+  },
+  "voiceLibrary.filter.accent.indian": {
+    "en": "Indian",
+    "text": "อินเดีย"
+  },
+  "voiceLibrary.filter.accent.italian": {
+    "en": "Italian",
+    "text": "อิตาลี"
+  },
+  "voiceLibrary.filter.accent.japanese": {
+    "en": "Japanese",
+    "text": "ญี่ปุ่น"
+  },
+  "voiceLibrary.filter.accent.korean": {
+    "en": "Korean",
+    "text": "เกาหลี"
+  },
+  "voiceLibrary.filter.accent.latin_american": {
+    "en": "Latin American",
+    "text": "ลาตินอเมริกา"
+  },
+  "voiceLibrary.filter.accent.portuguese": {
+    "en": "Portuguese",
+    "text": "โปรตุเกส"
+  },
+  "voiceLibrary.filter.accent.slavic": {
+    "en": "Slavic",
+    "text": "สลาฟ"
+  },
+  "voiceLibrary.filter.accent.southeast_asian": {
+    "en": "Southeast Asian",
+    "text": "เอเชียตะวันออกเฉียงใต้"
+  },
+  "voiceLibrary.filter.accent.spanish": {
+    "en": "Spanish",
+    "text": "สเปน"
+  },
+  "voiceLibrary.filter.accentLabel": {
+    "en": "Accent",
+    "text": "สำเนียง"
+  },
+  "voiceLibrary.filter.age.child": {
+    "en": "Child",
+    "text": "เด็ก"
+  },
+  "voiceLibrary.filter.age.middle_aged": {
+    "en": "Middle-aged",
+    "text": "วัยกลางคน"
+  },
+  "voiceLibrary.filter.age.old": {
+    "en": "Mature",
+    "text": "ผู้สูงวัย"
+  },
+  "voiceLibrary.filter.age.teen": {
+    "en": "Teen",
+    "text": "วัยรุ่น"
+  },
+  "voiceLibrary.filter.age.young": {
+    "en": "Young",
+    "text": "วัยหนุ่มสาว"
+  },
+  "voiceLibrary.filter.ageLabel": {
+    "en": "Age",
+    "text": "อายุ"
+  },
+  "voiceLibrary.filter.anyAccent": {
+    "en": "Any accent",
+    "text": "ทุกสำเนียง"
+  },
+  "voiceLibrary.filter.anyAge": {
+    "en": "Any age",
+    "text": "ทุกวัย"
+  },
+  "voiceLibrary.filter.anyGender": {
+    "en": "Any gender",
+    "text": "ทุกเพศ"
+  },
+  "voiceLibrary.filter.anyStyle": {
+    "en": "Any style",
+    "text": "ทุกสไตล์"
+  },
+  "voiceLibrary.filter.anyUseCase": {
+    "en": "Any use case",
+    "text": "ทุกการใช้งาน"
+  },
+  "voiceLibrary.filter.clear": {
+    "en": "Clear filters",
+    "text": "ล้างตัวกรอง"
+  },
+  "voiceLibrary.filter.count": {
+    "en": "{shown} of {total} voices",
+    "text": "{shown} จาก {total} เสียง"
+  },
+  "voiceLibrary.filter.empty": {
+    "en": "No voices match these filters.",
+    "text": "ไม่มีเสียงที่ตรงกับตัวกรองเหล่านี้"
+  },
+  "voiceLibrary.filter.gender.female": {
+    "en": "Female",
+    "text": "เสียงผู้หญิง"
+  },
+  "voiceLibrary.filter.gender.male": {
+    "en": "Male",
+    "text": "เสียงผู้ชาย"
+  },
+  "voiceLibrary.filter.gender.neutral": {
+    "en": "Neutral",
+    "text": "ไม่ระบุเพศ"
+  },
+  "voiceLibrary.filter.genderLabel": {
+    "en": "Gender",
+    "text": "เพศ"
+  },
+  "voiceLibrary.filter.style.breathy": {
+    "en": "Breathy",
+    "text": "มีลมแทรก"
+  },
+  "voiceLibrary.filter.style.breezy": {
+    "en": "Breezy",
+    "text": "เบาสบาย"
+  },
+  "voiceLibrary.filter.style.bright": {
+    "en": "Bright",
+    "text": "สดใส"
+  },
+  "voiceLibrary.filter.style.calm": {
+    "en": "Calm",
+    "text": "สุขุม"
+  },
+  "voiceLibrary.filter.style.casual": {
+    "en": "Casual",
+    "text": "สบายๆ"
+  },
+  "voiceLibrary.filter.style.clear": {
+    "en": "Clear",
+    "text": "ชัดเจน"
+  },
+  "voiceLibrary.filter.style.confident": {
+    "en": "Confident",
+    "text": "มั่นใจ"
+  },
+  "voiceLibrary.filter.style.deep": {
+    "en": "Deep",
+    "text": "ทุ้มต่ำ"
+  },
+  "voiceLibrary.filter.style.dramatic": {
+    "en": "Dramatic",
+    "text": "แบบละคร"
+  },
+  "voiceLibrary.filter.style.easy_going": {
+    "en": "Easy-going",
+    "text": "เป็นกันเอง"
+  },
+  "voiceLibrary.filter.style.energetic": {
+    "en": "Energetic",
+    "text": "มีพลัง"
+  },
+  "voiceLibrary.filter.style.even": {
+    "en": "Even",
+    "text": "สม่ำเสมอ"
+  },
+  "voiceLibrary.filter.style.excitable": {
+    "en": "Excitable",
+    "text": "ฮึกเหิม"
+  },
+  "voiceLibrary.filter.style.expressive": {
+    "en": "Expressive",
+    "text": "สื่ออารมณ์ชัด"
+  },
+  "voiceLibrary.filter.style.firm": {
+    "en": "Firm",
+    "text": "หนักแน่น"
+  },
+  "voiceLibrary.filter.style.formal": {
+    "en": "Formal",
+    "text": "เป็นทางการ"
+  },
+  "voiceLibrary.filter.style.forward": {
+    "en": "Forward",
+    "text": "ตรงไปตรงมา"
+  },
+  "voiceLibrary.filter.style.friendly": {
+    "en": "Friendly",
+    "text": "เป็นมิตร"
+  },
+  "voiceLibrary.filter.style.gentle": {
+    "en": "Gentle",
+    "text": "อ่อนโยน"
+  },
+  "voiceLibrary.filter.style.gravelly": {
+    "en": "Gravelly",
+    "text": "สาก"
+  },
+  "voiceLibrary.filter.style.informative": {
+    "en": "Informative",
+    "text": "แนวอธิบาย"
+  },
+  "voiceLibrary.filter.style.knowledgeable": {
+    "en": "Knowledgeable",
+    "text": "รอบรู้"
+  },
+  "voiceLibrary.filter.style.lively": {
+    "en": "Lively",
+    "text": "มีชีวิตชีวา"
+  },
+  "voiceLibrary.filter.style.mature": {
+    "en": "Mature",
+    "text": "มีวุฒิภาวะ"
+  },
+  "voiceLibrary.filter.style.neutral": {
+    "en": "Neutral",
+    "text": "เป็นกลาง"
+  },
+  "voiceLibrary.filter.style.playful": {
+    "en": "Playful",
+    "text": "ขี้เล่น"
+  },
+  "voiceLibrary.filter.style.raspy": {
+    "en": "Raspy",
+    "text": "แหบ"
+  },
+  "voiceLibrary.filter.style.smooth": {
+    "en": "Smooth",
+    "text": "ลื่นไหล"
+  },
+  "voiceLibrary.filter.style.soft": {
+    "en": "Soft",
+    "text": "นุ่มนวล"
+  },
+  "voiceLibrary.filter.style.upbeat": {
+    "en": "Upbeat",
+    "text": "ร่าเริง"
+  },
+  "voiceLibrary.filter.style.warm": {
+    "en": "Warm",
+    "text": "อบอุ่น"
+  },
+  "voiceLibrary.filter.style.youthful": {
+    "en": "Youthful",
+    "text": "อ่อนวัย"
+  },
+  "voiceLibrary.filter.styleLabel": {
+    "en": "Style",
+    "text": "สไตล์"
+  },
+  "voiceLibrary.filter.useCase.conversational": {
+    "en": "Conversation",
+    "text": "สนทนา"
+  },
+  "voiceLibrary.filter.useCase.educational": {
+    "en": "Teaching",
+    "text": "อธิบาย"
+  },
+  "voiceLibrary.filter.useCase.entertainment": {
+    "en": "Entertainment",
+    "text": "บันเทิง"
+  },
+  "voiceLibrary.filter.useCase.narration": {
+    "en": "Narration",
+    "text": "บรรยาย"
+  },
+  "voiceLibrary.filter.useCase.social_media": {
+    "en": "Social media",
+    "text": "โซเชียลมีเดีย"
+  },
+  "voiceLibrary.filter.useCaseLabel": {
+    "en": "Use case",
+    "text": "การใช้งาน"
+  }
+}

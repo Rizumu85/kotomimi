@@ -1,0 +1,2170 @@
+{
+  "audioSystem.installCommand": {
+    "en": "sudo apt install pulseaudio-utils",
+    "text": "sudo apt install pulseaudio-utils"
+  },
+  "auth.emailPlaceholder": {
+    "en": "your@email.com",
+    "text": "your@email.com"
+  },
+  "captionShare.kinds.wifi": {
+    "en": "Wi‑Fi",
+    "text": "Wi‑Fi"
+  },
+  "engine.status.devVenv": {
+    "en": "dev venv",
+    "text": "உருவாக்க மெய்நிகர் சூழல்"
+  },
+  "engine.status.native": {
+    "en": "native {{version}}",
+    "text": "நேரடி {{version}}"
+  },
+  "fork.aids.furigana": {
+    "en": "Furigana",
+    "text": "ஃபுரிகானா"
+  },
+  "fork.aids.highlight": {
+    "en": "Highlight new",
+    "text": "புதிய உரையை முன்னிலைப்படுத்து"
+  },
+  "fork.aids.italic": {
+    "en": "Italic source",
+    "text": "மூல உரை சாய்வெழுத்தில்"
+  },
+  "fork.aids.pinyin": {
+    "en": "Pinyin",
+    "text": "பின்யின்"
+  },
+  "fork.aids.readings": {
+    "en": "Readings",
+    "text": "உச்சரிப்பு"
+  },
+  "fork.aids.roman": {
+    "en": "Romanization",
+    "text": "இலத்தீன் எழுத்தாக்கம்"
+  },
+  "fork.aids.text": {
+    "en": "Text",
+    "text": "உரை"
+  },
+  "fork.audio.echoAction": {
+    "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
+    "text": "காதணியைப் பயன்படுத்தினால் ஒலி மீண்டும் பதிவாகும் சுழற்சி நிற்கும். அல்லது அமைப்புகள் → ஒலிவாங்கி பகுதியில் செயல்படும் குறைந்தபட்ச ஒலி அளவை உயர்த்துங்கள்."
+  },
+  "fork.audio.gate": {
+    "en": "Mic activation threshold",
+    "text": "ஒலிவாங்கி செயல்படும் குறைந்தபட்ச ஒலி அளவு"
+  },
+  "fork.audio.gateHint": {
+    "en": "Press the microphone, speak, and set the mark under where the bar reaches — and above where it sits while only your speakers are heard.",
+    "text": "ஒலிவாங்கி சின்னத்தை அழுத்தி, சில வார்த்தைகள் பேசுங்கள். நீங்கள் பேசும்போது பட்டை எட்டும் இடத்திற்குக் கீழேயும், ஒலிபெருக்கி மட்டும் ஒலிக்கும்போது காட்டும் இடத்திற்கு மேலேயும் குறியை அமையுங்கள்."
+  },
+  "fork.audio.gateOff": {
+    "en": "Off",
+    "text": "அணை"
+  },
+  "fork.audio.gateQuiet": {
+    "en": "Nothing from the microphone yet.",
+    "text": "ஒலிவாங்கியிலிருந்து இன்னும் ஒலி வரவில்லை."
+  },
+  "fork.audio.gateTest": {
+    "en": "Test the microphone: the bar shows its level",
+    "text": "ஒலிவாங்கியைச் சோதியுங்கள்: பட்டை தற்போதைய ஒலி அளவைக் காட்டும்"
+  },
+  "fork.audio.gateTestStop": {
+    "en": "Stop the test",
+    "text": "சோதனையை நிறுத்து"
+  },
+  "fork.audio.gateTooltip": {
+    "en": "Sound quieter than this is heard as silence — the other side's voice from your speakers, the keyboard, the room — so it is neither translated nor checked. The microphone is heard about 0.2 s later while this is on. Off: everything is heard.",
+    "text": "இதைவிட மெலிதான ஒலிகள் அமைதியாகக் கருதப்படும். ஒலிபெருக்கியில் வரும் எதிர்த்தரப்பின் குரல், விசைப்பலகைச் சத்தம், அறை இரைச்சல் போன்றவை மொழிபெயர்க்கப்படாது; இலக்கணக் கருத்துகளுக்காகவும் அனுப்பப்படாது. இதை இயக்கினால் ஒலிவாங்கியின் ஒலி சுமார் 0.2 வினாடி தாமதமாக வரும். அணைத்தால் எல்லா ஒலிகளும் அனுப்பப்படும்."
+  },
+  "fork.audio.vbcableInstall": {
+    "en": "Install VB-CABLE",
+    "text": "VB-CABLE நிறுவு"
+  },
+  "fork.audio.vbcableInstalling": {
+    "en": "Downloading… this can take a minute",
+    "text": "பதிவிறக்குகிறது, சிறிது நேரம் ஆகலாம்…"
+  },
+  "fork.audio.vbcableMissing": {
+    "en": "The VB-CABLE virtual audio driver is not installed, so a spoken translation cannot be sent into a meeting. Subtitles do not need it.",
+    "text": "VB-CABLE மெய்நிகர் ஒலி இயக்கி நிறுவப்படவில்லை. அதனால் மொழிபெயர்த்த குரலைச் சந்திப்பு செயலிக்கு அனுப்ப முடியாது. வசனங்களை மட்டும் பார்க்க இது தேவையில்லை."
+  },
+  "fork.autostart.note": {
+    "en": "Kotomimi waits in the background after you sign in, with an icon in the notification area, and loads the models once ahead of time so the first session does not wait for it.",
+    "text": "உள்நுழைந்ததும் Kotomimi பின்னணியில் தயாராக இருக்கும். அறிவிப்புப் பகுதியில் அதன் சின்னம் தெரியும். மாதிரிகளை முன்கூட்டியே ஏற்றுவதால் முதல் அமர்வைத் தொடங்கும்போது காத்திருக்க வேண்டியதில்லை."
+  },
+  "fork.autostart.title": {
+    "en": "Startup",
+    "text": "தொடக்கம்"
+  },
+  "fork.autostart.toggle": {
+    "en": "Start in the background when I sign in to Windows",
+    "text": "Windows இல் உள்நுழையும்போது பின்னணியில் தொடங்கு"
+  },
+  "fork.custom.add": {
+    "en": "Add",
+    "text": "சேர்"
+  },
+  "fork.custom.added": {
+    "en": "Added {{name}} ({{size}} MB). Download it in the model library.",
+    "text": "{{name}} ({{size}} MB) சேர்க்கப்பட்டது. மாதிரி நூலகத்தில் பதிவிறக்கவும்."
+  },
+  "fork.custom.adding": {
+    "en": "Looking…",
+    "text": "தேடுகிறது…"
+  },
+  "fork.custom.anyLanguage": {
+    "en": "Every language",
+    "text": "பல மொழிகள்"
+  },
+  "fork.custom.downloaded": {
+    "en": "downloaded",
+    "text": "பதிவிறக்கப்பட்டது"
+  },
+  "fork.custom.error_bad_repo": {
+    "en": "That is not a repository id. It looks like owner/name.",
+    "text": "இது களஞ்சியப் பெயர் அல்ல. உரிமையாளர்/பெயர் என்ற வடிவில் இருக்க வேண்டும்."
+  },
+  "fork.custom.error_exists": {
+    "en": "This model is already added.",
+    "text": "இந்த மாதிரி ஏற்கனவே சேர்க்கப்பட்டுள்ளது."
+  },
+  "fork.custom.error_not_found": {
+    "en": "No public repository by that name.",
+    "text": "இந்தப் பெயரில் பொதுக் களஞ்சியம் கிடைக்கவில்லை."
+  },
+  "fork.custom.error_not_whisper": {
+    "en": "This repository is not a Whisper model in the ONNX layout. {{detail}}",
+    "text": "இந்தக் களஞ்சியத்தில் ONNX வடிவிலான Whisper மாதிரி இல்லை. {{detail}}"
+  },
+  "fork.custom.error_unreachable": {
+    "en": "Could not reach Hugging Face: {{detail}}",
+    "text": "Hugging Face உடன் இணைக்க முடியவில்லை: {{detail}}"
+  },
+  "fork.custom.intro": {
+    "en": "For a Whisper model the library does not list, such as one fine-tuned for your language. Give its Hugging Face repository id (most onnx-community/… and Xenova/… Whisper repositories work); it needs a graphics card.",
+    "text": "உங்கள் மொழிக்காகச் சிறப்பாகப் பயிற்றுவிக்கப்பட்டது போன்ற, நூலகத்தில் இல்லாத Whisper மாதிரியைச் சேர்க்கலாம். அதன் Hugging Face களஞ்சியப் பெயரை உள்ளிடவும். onnx-community/… மற்றும் Xenova/… இல் உள்ள பெரும்பாலான Whisper களஞ்சியங்கள் வேலை செய்யும். வரைகலை அட்டை தேவை."
+  },
+  "fork.custom.language": {
+    "en": "The language it hears",
+    "text": "அடையாளம் காணும் மொழி"
+  },
+  "fork.custom.notDownloaded": {
+    "en": "not downloaded",
+    "text": "பதிவிறக்கப்படவில்லை"
+  },
+  "fork.custom.remove": {
+    "en": "Remove {{name}}",
+    "text": "{{name}} என்பதை நீக்கு"
+  },
+  "fork.custom.repo": {
+    "en": "Repository id",
+    "text": "களஞ்சியப் பெயர்"
+  },
+  "fork.custom.title": {
+    "en": "Add a Whisper model from Hugging Face",
+    "text": "Hugging Face இலிருந்து Whisper மாதிரியைச் சேர்"
+  },
+  "fork.echoCancellationApp": {
+    "en": "Kotomimi only",
+    "text": "Kotomimi மட்டும்"
+  },
+  "fork.echoCancellationAppTooltip": {
+    "en": "Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "Kotomimi மட்டும் — Kotomimi ஒலிக்கும் மொழிபெயர்ப்புப் பேச்சை மட்டும் நீக்கும். மைக்ரோஃபோன் மெய்நிகர் ஒலி அட்டையாக (VB-Cable, BlackHole போன்றவை) இருந்தால் இதைத் தேர்ந்தெடுக்கவும்."
+  },
+  "fork.find.again": {
+    "en": "Search again",
+    "text": "மீண்டும் தேடு"
+  },
+  "fork.find.kindKotomimi": {
+    "en": "Kotomimi",
+    "text": "Kotomimi பகிர்வு"
+  },
+  "fork.find.kindPhone": {
+    "en": "Phone · speech recognition",
+    "text": "கைப்பேசி · பேச்சறிதல்"
+  },
+  "fork.find.kindPhoneLends": {
+    "en": "Phone · {{what}}",
+    "text": "கைப்பேசி · {{what}}"
+  },
+  "fork.find.kindServer": {
+    "en": "Model server",
+    "text": "மாதிரி சேவையகம்"
+  },
+  "fork.find.lendsAsr": {
+    "en": "speech recognition",
+    "text": "பேச்சறிதல்"
+  },
+  "fork.find.lendsCoach": {
+    "en": "grammar feedback",
+    "text": "இலக்கணக் கருத்துகள்"
+  },
+  "fork.find.lendsTranslate": {
+    "en": "translation",
+    "text": "மொழிபெயர்ப்பு"
+  },
+  "fork.find.manual": {
+    "en": "Or type its address",
+    "text": "அல்லது முகவரியை உள்ளிடுங்கள்"
+  },
+  "fork.find.models": {
+    "en": "{{count}} model(s)",
+    "text": "{{count}} மாதிரிகள்"
+  },
+  "fork.find.needsKey": {
+    "en": "asks for an access key",
+    "text": "அணுகல் விசை தேவை"
+  },
+  "fork.find.none": {
+    "en": "Nothing found. Check that the other device is on, is on the same Wi-Fi or router as this one, and has \"Share this computer's models\" turned on in its Kotomimi. You can also type its address below.",
+    "text": "எதுவும் கிடைக்கவில்லை. மற்ற சாதனம் இயங்குகிறதா, இந்தக் கணினியின் அதே Wi-Fi அல்லது திசைவியுடன் இணைந்துள்ளதா, அதன் Kotomimi-இல் \"இந்தக் கணினியின் மாதிரிகளைப் பகிர்\" இயக்கப்பட்டுள்ளதா எனப் பாருங்கள். கீழே அதன் முகவரியை நீங்களே உள்ளிடலாம்."
+  },
+  "fork.find.productHere": {
+    "en": "{{product}} on this computer",
+    "text": "இந்தக் கணினியில் உள்ள {{product}}"
+  },
+  "fork.find.search": {
+    "en": "Search my network for devices",
+    "text": "உள்ளூர் வலையமைப்பில் சாதனங்களைத் தேடு"
+  },
+  "fork.find.searching": {
+    "en": "Looking for devices on your network…",
+    "text": "உள்ளூர் வலையமைப்பில் சாதனங்களைத் தேடுகிறது…"
+  },
+  "fork.find.thisComputer": {
+    "en": "On this computer",
+    "text": "இந்தக் கணினியில் உள்ள சேவையகம்"
+  },
+  "fork.find.title": {
+    "en": "Found on your network",
+    "text": "உள்ளூர் வலையமைப்பில் கண்ட சாதனங்கள்"
+  },
+  "fork.find.use": {
+    "en": "Use {{name}}",
+    "text": "{{name}} பயன்படுத்து"
+  },
+  "fork.fonts.add": {
+    "en": "Add a language…",
+    "text": "மொழியைச் சேர்…"
+  },
+  "fork.fonts.default": {
+    "en": "App default",
+    "text": "செயலியின் இயல்புநிலை"
+  },
+  "fork.fonts.languages": {
+    "en": "Conversation text, by language",
+    "text": "உரையாடல் உரை, மொழிவாரியாக"
+  },
+  "fork.fonts.latin": {
+    "en": "Latin letters and digits",
+    "text": "லத்தீன் எழுத்துகளும் எண்களும்"
+  },
+  "fork.fonts.latinHint": {
+    "en": "English letters and digits in the conversation",
+    "text": "உரையாடலில் உள்ள ஆங்கில எழுத்துகளும் எண்களும்"
+  },
+  "fork.fonts.loading": {
+    "en": "Reading the installed fonts…",
+    "text": "நிறுவப்பட்ட எழுத்துருக்களைப் படிக்கிறது…"
+  },
+  "fork.fonts.none": {
+    "en": "No font matches",
+    "text": "பொருந்தும் எழுத்துரு இல்லை"
+  },
+  "fork.fonts.others": {
+    "en": "Other fonts (may lack this script)",
+    "text": "மற்ற எழுத்துருக்கள் (இந்த எழுத்துமுறை இல்லாமல் இருக்கலாம்)"
+  },
+  "fork.fonts.pinyin": {
+    "en": "Pinyin above the text",
+    "text": "உரைக்கு மேலுள்ள பின்யின்"
+  },
+  "fork.fonts.reading": {
+    "en": "Readings above the text",
+    "text": "உரைக்கு மேலுள்ள கனா உச்சரிப்புக் குறிப்புகள்"
+  },
+  "fork.fonts.remove": {
+    "en": "Reset {{language}}",
+    "text": "{{language}} இயல்பு எழுத்துருவை மீட்டமை"
+  },
+  "fork.fonts.roman": {
+    "en": "Romanization",
+    "text": "ரோமன் எழுத்தாக்கம்"
+  },
+  "fork.fonts.romanHint": {
+    "en": "The readings under Japanese, Korean, Russian and Ukrainian",
+    "text": "ஜப்பானியம், கொரியம், ரஷ்யம், உக்ரேனியம் ஆகியவற்றின் கீழுள்ள உச்சரிப்புகள்"
+  },
+  "fork.fonts.search": {
+    "en": "Search fonts",
+    "text": "எழுத்துருக்களைத் தேடு"
+  },
+  "fork.fonts.text": {
+    "en": "Text",
+    "text": "உரை"
+  },
+  "fork.fonts.title": {
+    "en": "Fonts",
+    "text": "எழுத்துருக்கள்"
+  },
+  "fork.fonts.tooltip": {
+    "en": "Fonts installed on this computer. Characters a font lacks are shown in the app's own.",
+    "text": "இந்தக் கணினியில் நிறுவப்பட்ட எழுத்துருக்களைப் பயன்படுத்தும். எழுத்துருவில் இல்லாத எழுத்துகள் செயலியின் இயல்புநிலை எழுத்துருவில் காட்டப்படும்."
+  },
+  "fork.fonts.ui": {
+    "en": "Interface",
+    "text": "இடைமுகம்"
+  },
+  "fork.fonts.uiHint": {
+    "en": "Menus, settings and buttons",
+    "text": "பட்டிகள், அமைப்புகள், பொத்தான்கள்"
+  },
+  "fork.furigana": {
+    "en": "Furigana over kanji (Japanese)",
+    "text": "காஞ்சிக்கு மேலே கனா காட்டு (ஜப்பானிய மொழி)"
+  },
+  "fork.help.issues": {
+    "en": "Report a problem",
+    "text": "சிக்கலைத் தெரிவி"
+  },
+  "fork.help.issuesTooltip": {
+    "en": "Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page.",
+    "text": "Kotomimi என்பது Sokuji இலிருந்து உருவான தனிக் கிளை. இந்தச் செயலியின் சிக்கல்களை இதன் சொந்த GitHub பக்கத்தில் தெரிவிக்கவும்."
+  },
+  "fork.lan.copied": {
+    "en": "Copied",
+    "text": "நகலெடுக்கப்பட்டது"
+  },
+  "fork.lan.copy": {
+    "en": "Copy",
+    "text": "நகலெடு"
+  },
+  "fork.lan.direction": {
+    "en": "Which direction to show models for",
+    "text": "எந்தத் திசைக்கான மாதிரிகளைக் காட்ட வேண்டும்"
+  },
+  "fork.lan.enable": {
+    "en": "Share this computer's models",
+    "text": "இந்தக் கணினியின் மாதிரிகளைப் பகிர்"
+  },
+  "fork.lan.failed": {
+    "en": "Sharing could not start: {{message}}",
+    "text": "பகிர்வைத் தொடங்க முடியவில்லை: {{message}}"
+  },
+  "fork.lan.firewall": {
+    "en": "The first time, your system's firewall may ask whether to allow Kotomimi on the network: allow it for private networks.",
+    "text": "முதல்முறை இயக்கும்போது, Kotomimi வலையமைப்பைப் பயன்படுத்தலாமா எனக் கணினியின் தீச்சுவர் கேட்கலாம். தனிப்பட்ட வலையமைப்புகளில் தொடர்புகொள்ள அனுமதியுங்கள்."
+  },
+  "fork.lan.firewallAllow": {
+    "en": "Allow",
+    "text": "அனுமதி"
+  },
+  "fork.lan.firewallBlocked": {
+    "en": "Windows Firewall is keeping other devices out",
+    "text": "Windows தீச்சுவர் மற்ற சாதனங்களைத் தடுக்கிறது"
+  },
+  "fork.lan.firewallDeclined": {
+    "en": "Still blocked: Windows was not told yes.",
+    "text": "இன்னும் தடுக்கப்பட்டுள்ளது: Windows-இல் அனுமதி உறுதிப்படுத்தப்படவில்லை."
+  },
+  "fork.lan.firewallPrivate": {
+    "en": "Allow opens this port to devices on your network. Windows will ask you to confirm.",
+    "text": "\"அனுமதி\" என்பதை அழுத்தினால், உள்ளூர் வலையமைப்பில் உள்ள சாதனங்கள் இந்தத் துறையுடன் இணையலாம். முதலில் Windows உங்கள் உறுதிப்படுத்தலைக் கேட்கும்."
+  },
+  "fork.lan.firewallPublic": {
+    "en": "Windows treats this network as public. Allow opens this port to devices on this same network only. Windows will ask you to confirm.",
+    "text": "இந்த வலையமைப்பை Windows பொதுவானதாகக் கருதுகிறது. \"அனுமதி\" என்பதை அழுத்தினால், இதே வலையமைப்பில் உள்ள சாதனங்களுக்கு மட்டும் இந்தத் துறை திறக்கப்படும். முதலில் Windows உங்கள் உறுதிப்படுத்தலைக் கேட்கும்."
+  },
+  "fork.lan.firewallWaiting": {
+    "en": "Waiting for Windows…",
+    "text": "Windows-க்காகக் காத்திருக்கிறது…"
+  },
+  "fork.lan.hideLibrary": {
+    "en": "Hide the model library",
+    "text": "மாதிரி நூலகத்தை மறை"
+  },
+  "fork.lan.key": {
+    "en": "Access key",
+    "text": "அணுகல் விசை"
+  },
+  "fork.lan.keyPlaceholder": {
+    "en": "Blank: anyone on the network may connect",
+    "text": "காலியாக விட்டால்: உள்ளூர் வலையமைப்பில் எந்தச் சாதனமும் இணையலாம்"
+  },
+  "fork.lan.models": {
+    "en": "Models shared · {{count}}",
+    "text": "பகிரப்படும் மாதிரிகள் · {{count}}"
+  },
+  "fork.lan.noNetwork": {
+    "en": "This computer is on no network.",
+    "text": "இந்தக் கணினி தற்போது வலையமைப்பில் இணைக்கப்படவில்லை."
+  },
+  "fork.lan.noRecognizer": {
+    "en": "No speech recognition model downloaded yet",
+    "text": "பேச்சறிதல் மாதிரி இன்னும் பதிவிறக்கப்படவில்லை"
+  },
+  "fork.lan.on": {
+    "en": "Sharing — no device connected yet",
+    "text": "பகிரப்படுகிறது, இன்னும் சாதனங்கள் இணைக்கப்படவில்லை"
+  },
+  "fork.lan.onWithClients": {
+    "en": "Sharing — {{count}} connection(s) in use",
+    "text": "பகிரப்படுகிறது, {{count}} இணைப்புகள் பயன்பாட்டில் உள்ளன"
+  },
+  "fork.lan.options": {
+    "en": "Options",
+    "text": "விருப்பங்கள்"
+  },
+  "fork.lan.otherAddresses": {
+    "en": "This computer's other addresses",
+    "text": "இந்தக் கணினியின் மற்ற முகவரிகள்"
+  },
+  "fork.lan.port": {
+    "en": "Port",
+    "text": "துறை"
+  },
+  "fork.lan.portInUse": {
+    "en": "Port {{port}} is taken by another program. Choose another under Options.",
+    "text": "{{port}} துறையை மற்றொரு நிரல் பயன்படுத்துகிறது. \"விருப்பங்கள்\" பகுதியில் வேறு துறையைத் தேர்ந்தெடுங்கள்."
+  },
+  "fork.lan.serving": {
+    "en": "Sharing",
+    "text": "பகிரப்படுகிறது"
+  },
+  "fork.lan.servingClients": {
+    "en": "Sharing · {{count}} in use",
+    "text": "பகிரப்படுகிறது · {{count}} இணைப்புகள் பயன்பாட்டில்"
+  },
+  "fork.lan.servingTip": {
+    "en": "This computer is lending its models to other devices. The languages and the choice of model are set on those devices, not here.",
+    "text": "இந்தக் கணினியின் மாதிரிகளை மற்ற சாதனங்கள் பயன்படுத்துகின்றன. மொழிகளையும் மாதிரியையும் அந்தச் சாதனங்களில்தான் தேர்ந்தெடுக்க வேண்டும், இங்கே அல்ல."
+  },
+  "fork.lan.sessionIdle": {
+    "en": "The other device ended the session: nobody had spoken for a long while, and it let its models go. Start again to continue.",
+    "text": "நீண்ட நேரமாக யாரும் பேசாததால் மற்ற சாதனம் இந்த அமர்வை முடித்து, மாதிரிகளை நினைவகத்திலிருந்து விடுவித்துவிட்டது. தொடர \"தொடங்கு\" என்பதை மீண்டும் அழுத்துங்கள்."
+  },
+  "fork.lan.showLibrary": {
+    "en": "Download or manage models",
+    "text": "மாதிரிகளைப் பதிவிறக்கு அல்லது நிர்வகி"
+  },
+  "fork.lan.starting": {
+    "en": "Starting…",
+    "text": "தொடங்குகிறது…"
+  },
+  "fork.lan.title": {
+    "en": "Share with other devices",
+    "text": "மற்ற சாதனங்களுடன் பகிர்"
+  },
+  "fork.lan.tooltip": {
+    "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
+    "text": "இந்தக் கணினியின் மாதிரிகளை உள்ளூர் வலையமைப்பில் உள்ள மற்ற சாதனங்கள் பயன்படுத்தலாம். மற்ற சாதனத்தின் Kotomimi-இல் \"மற்றொரு சாதனம்\" பகுதியில் தேடினால் இந்தக் கணினியைக் காணலாம். மாதிரியையும் மொழியையும் அங்கே தேர்ந்தெடுக்கலாம். Kotomimi திறந்திருக்கும் வரை மட்டுமே பகிர முடியும்."
+  },
+  "fork.languageMenu.detect": {
+    "en": "Auto-detect",
+    "text": "தானாகக் கண்டறி"
+  },
+  "fork.languageMenu.detectUnavailable": {
+    "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
+    "text": "தற்போதைய பேச்சறிதலால் மொழிகளைத் தானாகக் கண்டறிய முடியாது. Qwen3-ASR 1.7B GGUF அல்லது API மாதிரி தேவை."
+  },
+  "fork.languageMenu.mine": {
+    "en": "My language",
+    "text": "என் மொழி"
+  },
+  "fork.languageMenu.mostly": {
+    "en": "Translate into what they mostly speak",
+    "text": "மற்றவர் பெரும்பாலும் பேசும் மொழிக்கு மொழிபெயர்"
+  },
+  "fork.languageMenu.none": {
+    "en": "No language by that name",
+    "text": "இந்தப் பெயரில் மொழி இல்லை"
+  },
+  "fork.languageMenu.pin": {
+    "en": "Pin {{name}} to the top",
+    "text": "{{name}} மொழியை மேலே வை"
+  },
+  "fork.languageMenu.pinShort": {
+    "en": "Pin to the top",
+    "text": "மேலே வை"
+  },
+  "fork.languageMenu.search": {
+    "en": "Type to find a language",
+    "text": "மொழியைத் தேட தட்டச்சு செய்யவும்"
+  },
+  "fork.languageMenu.speakBoth": {
+    "en": "I speak {{language}} too",
+    "text": "நானும் {{language}} பேசுவேன்"
+  },
+  "fork.languageMenu.speakBothHelp": {
+    "en": "When you speak {{mine}}, it is translated into {{language}}; when you speak {{language}}, into {{mine}}. Recognition tells the two apart.",
+    "text": "நீங்கள் {{mine}} பேசினால் {{language}} மொழிக்கும், {{language}} பேசினால் {{mine}} மொழிக்கும் மொழிபெயர்க்கப்படும். பேச்சறிதல் இந்த இரு மொழிகளையும் தானாக வேறுபடுத்தும்."
+  },
+  "fork.languageMenu.speakBothUnavailable": {
+    "en": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
+    "text": "தேர்ந்தெடுத்த பேச்சறிதலால் {{mine}}, {{language}} ஆகிய மொழிகளை வேறுபடுத்த முடியாது. இரு மொழிகளும் நிறுவப்பட்ட இணை Apple Speech அமைப்பையோ, இரு மொழிகளையும் அடையாளம் காணும் பேச்சறிதலையோ தேர்ந்தெடுக்கவும்."
+  },
+  "fork.languageMenu.theirs": {
+    "en": "Their language",
+    "text": "மற்றவரின் மொழி"
+  },
+  "fork.languageMenu.unpin": {
+    "en": "Unpin {{name}}",
+    "text": "{{name}} மொழியை மேலிருந்து நீக்கு"
+  },
+  "fork.languageMenu.unpinShort": {
+    "en": "Unpin",
+    "text": "மேலிருந்து நீக்கு"
+  },
+  "fork.pinyin": {
+    "en": "Pinyin over Chinese",
+    "text": "சீன உரைக்கு மேலே பின்யின் காட்டு"
+  },
+  "fork.romanization": {
+    "en": "Romanization",
+    "text": "இலத்தீன் எழுத்தாக்கத்தைக் காட்டு"
+  },
+  "fork.sourceItalic": {
+    "en": "Source text in italics",
+    "text": "மூல உரையைச் சாய்வெழுத்தில் காட்டு"
+  },
+  "fork.speechDetection.title": {
+    "en": "Speech detection",
+    "text": "பேச்சைக் கண்டறிதல்"
+  },
+  "fork.statusLine.checking": {
+    "en": "Getting ready. You can start in a moment.",
+    "text": "தயாராகிறது. இன்னும் சிறிது நேரத்தில் தொடங்கலாம்."
+  },
+  "fork.subtitle.align": {
+    "en": "Alignment",
+    "text": "சீரமைப்பு"
+  },
+  "fork.subtitle.alignCenter": {
+    "en": "Centre",
+    "text": "நடுவில்"
+  },
+  "fork.subtitle.alignLeft": {
+    "en": "Left",
+    "text": "இடது"
+  },
+  "fork.subtitle.back": {
+    "en": "Back to the main window",
+    "text": "முதன்மைச் சாளரத்திற்குத் திரும்பு"
+  },
+  "fork.subtitle.backdrop": {
+    "en": "Panel",
+    "text": "பின்னணி அடர்த்தி"
+  },
+  "fork.subtitle.lanesView": {
+    "en": "Subtitle view",
+    "text": "வசனக் காட்சி"
+  },
+  "fork.subtitle.listView": {
+    "en": "List view",
+    "text": "பட்டியல் காட்சி"
+  },
+  "fork.subtitle.look": {
+    "en": "Look",
+    "text": "தோற்றம்"
+  },
+  "fork.subtitle.lookDark": {
+    "en": "Dark text",
+    "text": "அடர் எழுத்து, வெள்ளை விளிம்பு"
+  },
+  "fork.subtitle.lookLight": {
+    "en": "Light text",
+    "text": "வெளிர் எழுத்து, கருப்பு விளிம்பு"
+  },
+  "fork.subtitle.lookPanel": {
+    "en": "Dark panel",
+    "text": "அடர் பின்னணி"
+  },
+  "fork.subtitle.lookSample": {
+    "en": "Aa",
+    "text": "வசனம்"
+  },
+  "fork.subtitle.lookSoft": {
+    "en": "Faint panel",
+    "text": "மெல்லிய பின்னணி, மென் நிழல்"
+  },
+  "fork.subtitle.moreColors": {
+    "en": "More colours (source text, panel)",
+    "text": "மேலும் நிறங்கள் (மூல உரை, பின்னணி)"
+  },
+  "fork.subtitle.off": {
+    "en": "Off",
+    "text": "வேண்டாம்"
+  },
+  "fork.subtitle.outline": {
+    "en": "Outline",
+    "text": "விளிம்பு அடர்த்தி"
+  },
+  "fork.subtitle.shadow": {
+    "en": "Shadow",
+    "text": "நிழல் அடர்த்தி"
+  },
+  "fork.subtitle.through": {
+    "en": "Click-through: the mouse passes through the captions",
+    "text": "கிளிக்குகள் ஊடுருவும்: வசனங்களைத் தேர்ந்தெடுக்க முடியாது; சுட்டி செயல்கள் கீழுள்ள சாளரத்திற்குச் செல்லும்"
+  },
+  "fork.subtitle.throughOff": {
+    "en": "Stop click-through",
+    "text": "கிளிக் ஊடுருவலை நிறுத்து"
+  },
+  "fork.subtitle.type": {
+    "en": "Type to translate (Ctrl+K)",
+    "text": "தட்டச்சு செய்து மொழிபெயர் (Ctrl+K)"
+  },
+  "fork.subtitle.typePlaceholder": {
+    "en": "What you want to say — Enter translates",
+    "text": "சொல்ல விரும்புவதை உள்ளிட்டு, மொழிபெயர்க்க Enter அழுத்தவும்"
+  },
+  "fork.vrchat.chatbox": {
+    "en": "Above my avatar",
+    "text": "தலைக்கு மேலே காட்டு"
+  },
+  "fork.vrchat.chatboxHearBoth": {
+    "en": "Switch to Both",
+    "text": "இரண்டுக்கும் மாற்று"
+  },
+  "fork.vrchat.chatboxOff": {
+    "en": "Off",
+    "text": "வேண்டாம்"
+  },
+  "fork.vrchat.chatboxSourceFirst": {
+    "en": "Original on top",
+    "text": "மூல உரை மேலே"
+  },
+  "fork.vrchat.chatboxTranslation": {
+    "en": "Translation",
+    "text": "மொழிபெயர்ப்பு"
+  },
+  "fork.vrchat.chatboxTranslationFirst": {
+    "en": "Translation on top",
+    "text": "மொழிபெயர்ப்பு மேலே"
+  },
+  "fork.vrchat.chatboxUnheard": {
+    "en": "Only the other side is translated now: what you say won't show above your avatar.",
+    "text": "இப்போது மற்றவர் பேசுவது மட்டுமே மொழிபெயர்க்கப்படுகிறது. நீங்கள் பேசுவது உங்கள் தலைக்கு மேலே காட்டப்படாது."
+  },
+  "fork.vrchat.connected": {
+    "en": "Connected",
+    "text": "இணைக்கப்பட்டது"
+  },
+  "fork.vrchat.end": {
+    "en": "End",
+    "text": "முடி"
+  },
+  "fork.vrchat.help": {
+    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
+    "text": "இந்தக் கணினியில் உள்ள VRChat உடன் இணைந்து செயல்படும். VRChat இல் மைக்கை அணைத்தால், Kotomimi உங்கள் பேச்சை அடையாளம் காணாது. உங்கள் மொழிபெயர்ப்புகளை அவதாரின் தலைக்கு மேலே காட்டலாம்; மற்ற வீரர்கள் அவற்றைப் படிக்கலாம். உலகில் வீடியோ ஓடும்போது: அதன் ஒலி குறிப்பிட்ட திசையிலிருந்து வரவில்லை என்றால், அதை வீரர்களின் குரல்களிலிருந்து பிரிக்கும்; திசையிலிருந்து வந்தால், மற்றவர்களின் பேச்சைச் சிறிய பகுதிகளாகப் பிரிக்கும்."
+  },
+  "fork.vrchat.mutedNotHeard": {
+    "en": "Muted in VRChat: what you say is not recognized.",
+    "text": "VRChat இல் ஒலி முடக்கப்பட்டுள்ளது. உங்கள் பேச்சு அடையாளம் காணப்படாது."
+  },
+  "fork.vrchat.mutedThere": {
+    "en": "Muted in VRChat",
+    "text": "VRChat இல் ஒலி முடக்கப்பட்டுள்ளது"
+  },
+  "fork.vrchat.muteGate": {
+    "en": "Don't hear me while muted in VRChat",
+    "text": "VRChat இல் ஒலியை முடக்கியிருக்கும்போது என் பேச்சை அடையாளம் காண வேண்டாம்"
+  },
+  "fork.vrchat.notConnected": {
+    "en": "Not connected",
+    "text": "இணைக்கப்படவில்லை"
+  },
+  "fork.vrchat.onVideo": {
+    "en": "When a world plays a video",
+    "text": "உலகில் காணொளி இயங்கும்போது"
+  },
+  "fork.vrchat.pausedOn": {
+    "en": "Not translating",
+    "text": "மொழிபெயர்ப்பு நிறுத்தப்பட்டுள்ளது"
+  },
+  "fork.vrchat.quickOn": {
+    "en": "Shorter sentences",
+    "text": "வாக்கியங்கள் சுருக்கப்பட்டன"
+  },
+  "fork.vrchat.remember": {
+    "en": "Remember",
+    "text": "நினைவில் வை"
+  },
+  "fork.vrchat.removedOn": {
+    "en": "Video sound removed",
+    "text": "காணொளி ஒலி நீக்கப்பட்டது"
+  },
+  "fork.vrchat.separatedOn": {
+    "en": "Video sound separated",
+    "text": "காணொளி ஒலி பிரிக்கப்பட்டது"
+  },
+  "fork.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
+  },
+  "fork.vrchat.turnOnOsc": {
+    "en": "Turn on OSC in the VRChat quick menu",
+    "text": "VRChat விரைவு மெனுவில் OSC ஐ இயக்கவும்"
+  },
+  "fork.vrchat.videoAsk": {
+    "en": "Ask me",
+    "text": "ஒவ்வொரு முறையும் கேள்"
+  },
+  "fork.vrchat.videoAskResult": {
+    "en": "Asks you when a video starts.",
+    "text": "காணொளி தொடங்கும்போது என்ன செய்ய வேண்டும் என்று கேட்கும்."
+  },
+  "fork.vrchat.videoBoth": {
+    "en": "People + video",
+    "text": "பேச்சும் காணொளியும்"
+  },
+  "fork.vrchat.videoBothResult": {
+    "en": "The video gets its own line and uses more power; if it can't be separated, sentences are cut shorter.",
+    "text": "காணொளிக்குத் தனி வரி காட்டப்படும்; அதிகக் கணினி வளங்கள் தேவைப்படும். ஒலியைப் பிரிக்க முடியாவிட்டால் வாக்கியங்களைச் சுருக்கும்."
+  },
+  "fork.vrchat.videoPause": {
+    "en": "Pause",
+    "text": "இப்போது மொழிபெயர்க்க வேண்டாம்"
+  },
+  "fork.vrchat.videoPauseResult": {
+    "en": "The other side is not translated while it plays.",
+    "text": "காணொளி இயங்கும்போது மற்றவர் பேசுவது மொழிபெயர்க்கப்படாது."
+  },
+  "fork.vrchat.videoQuick": {
+    "en": "People only",
+    "text": "பேச்சு மட்டும்"
+  },
+  "fork.vrchat.videoQuickResult": {
+    "en": "Takes out video sound; if it can't, sentences are cut shorter.",
+    "text": "காணொளியின் ஒலியை முடிந்தவரை நீக்கும்; பிரிக்க முடியாவிட்டால் வாக்கியங்களைச் சுருக்கும்."
+  },
+  "fork.vrchat.videoShort": {
+    "en": "Video",
+    "text": "காணொளி"
+  },
+  "fork.vrchat.videoStarted": {
+    "en": "Video started",
+    "text": "காணொளி தொடங்கியது"
+  },
+  "fork.wizard.addressMissing": {
+    "en": "Choose a device from the list above, or type its address, for example 192.168.1.10:8790.",
+    "text": "மேலுள்ள பட்டியலில் ஒரு சாதனத்தைத் தேர்ந்தெடுக்கவும் அல்லது அதன் முகவரியை உள்ளிடவும். எடுத்துக்காட்டு: 192.168.1.10:8790."
+  },
+  "fork.wizard.device": {
+    "en": "This computer",
+    "text": "இந்தக் கணினி"
+  },
+  "fork.wizard.deviceDesc": {
+    "en": "Recognition and translation run on this computer using native models. Download a model for each stage before starting.",
+    "text": "பேச்சறிதலும் மொழிபெயர்ப்பும் இந்தக் கணினியிலேயே இயங்கும் மாதிரிகளைப் பயன்படுத்தும். தொடங்குமுன் ஒவ்வொன்றுக்கும் ஒரு மாதிரியைப் பதிவிறக்கவும்."
+  },
+  "fork.wizard.deviceNotice": {
+    "en": "After setup, open Model library in the Speech recognition and Translation cards and download a native model for each. Translation requires a downloaded model, or you can switch that stage to an API model or another device.",
+    "text": "அமைத்த பிறகு, «பேச்சறிதல்», «மொழிபெயர்ப்பு» பகுதிகளில் «மாதிரி நூலகம்» என்பதைத் திறந்து, கணினியிலேயே இயங்கும் மாதிரியை ஒவ்வொன்றுக்கும் பதிவிறக்கவும். மொழிபெயர்ப்பிற்குப் பதிவிறக்கிய மாதிரி தேவை. அதற்குப் பதிலாக API மாதிரியையோ மற்றொரு சாதனத்தையோ பயன்படுத்தலாம்."
+  },
+  "fork.wizard.intro": {
+    "en": "Pick a starting point. Later, in Settings, recognition and translation can each run in a different place.",
+    "text": "முதலில் ஓர் அமைப்பைத் தேர்ந்தெடுக்கவும். பிறகு அமைப்புகளில் பேச்சறிதலையும் மொழிபெயர்ப்பையும் வெவ்வேறு இடங்களில் இயக்கலாம்."
+  },
+  "fork.wizard.keyNeeded": {
+    "en": "This device asks for an access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options), then press Connect.",
+    "text": "இந்தச் சாதனத்திற்கு அணுகல் விசை தேவை. அந்தச் சாதனத்தில் அமைத்த விசையை உள்ளிட்டு, «இணை» என்பதை அழுத்தவும். மற்றொரு Kotomimi என்றால், அதன் பகிர்வு «விருப்பங்கள்» பகுதியில் விசை இருக்கும்."
+  },
+  "fork.wizard.pathBadge": {
+    "en": "Recommended",
+    "text": "பரிந்துரைக்கப்படுகிறது"
+  },
+  "fork.wizard.pathCost": {
+    "en": "No account and no API key. Text only: subtitles with furigana, typed translation and grammar feedback. Another device means a Kotomimi sharing its models, or a model server such as LocalAI; this computer downloads models onto your disk.",
+    "text": "கணக்கும் API விசையும் தேவையில்லை. உரை மட்டும்: கனா உச்சரிப்புக் குறிப்புகளுடன் வசனங்கள், தட்டச்சு மொழிபெயர்ப்பு, இலக்கணக் கருத்துகள். மற்ற சாதனத்தில் மாதிரிகளைப் பகிரும் Kotomimi அல்லது LocalAI போன்ற மாதிரி சேவையகம் இருக்கலாம். இந்தக் கணினியைப் பயன்படுத்தினால் மாதிரிகளை இதில் பதிவிறக்க வேண்டும்."
+  },
+  "fork.wizard.pathDesc": {
+    "en": "Use the models of another device on your network, or this computer's own — and any mix of the two.",
+    "text": "உள்ளக வலையிலுள்ள வேறொரு சாதனத்தின் மாதிரிகளையோ, இந்தக் கணினியின் மாதிரிகளையோ பயன்படுத்தலாம். இரண்டையும் கலந்து பயன்படுத்தலாம்."
+  },
+  "fork.wizard.pathTitle": {
+    "en": "Kotomimi Pipeline",
+    "text": "Kotomimi விருப்பக் கூட்டமைப்பு"
+  },
+  "fork.wizard.pendingAddress": {
+    "en": "No device chosen yet — choose one in Settings before you start.",
+    "text": "இன்னும் வேறொரு சாதனம் தேர்ந்தெடுக்கப்படவில்லை. தொடங்குமுன் அமைப்புகளில் ஒன்றைத் தேர்ந்தெடுக்கவும்."
+  },
+  "fork.wizard.server": {
+    "en": "Another device on my network",
+    "text": "என் உள்ளக வலையில் மற்றொரு சாதனம்"
+  },
+  "fork.wizard.serverDesc": {
+    "en": "The models run on another computer: a Kotomimi with sharing turned on, or a model server such as LocalAI. This computer stays light.",
+    "text": "பகிர்வு இயக்கப்பட்ட Kotomimi அல்லது LocalAI போன்ற மாதிரி சேவையகம் உள்ள மற்றொரு கணினியில் மாதிரிகள் இயங்கும். இந்தக் கணினியில் வளப் பயன்பாடு மிகக் குறைவாக இருக்கும்."
+  },
+  "fork.wizard.serverFound": {
+    "en": "Connected — it offers {{count}} model(s).",
+    "text": "இணைக்கப்பட்டது. {{count}} மாதிரிகள் கிடைக்கின்றன."
+  },
+  "fork.wizard.serverUnreachable": {
+    "en": "Could not connect: {{message}}",
+    "text": "இணைக்க முடியவில்லை: {{message}}"
+  },
+  "fork.wizard.share": {
+    "en": "This computer, for my other devices",
+    "text": "இந்தக் கணினியை மற்ற சாதனங்களுக்குப் பயன்படுத்து"
+  },
+  "fork.wizard.shareDesc": {
+    "en": "Computing power to spare here? Let the models run on this computer for the other devices on your network — and for this computer itself.",
+    "text": "இந்தக் கணினியில் கூடுதல் செயல்திறன் உள்ளதா? உள்ளக வலையிலுள்ள மற்ற சாதனங்களுக்காக மாதிரிகளை இங்கே இயக்கலாம். இந்தக் கணினியும் அவற்றைப் பயன்படுத்தலாம்."
+  },
+  "fork.wizard.shareNotice": {
+    "en": "Nothing to enter. Finishing turns on sharing, so other Kotomimi devices on your network can find this computer. After setup, download models in the Speech recognition card: those are what the others can use.",
+    "text": "இங்கே எதையும் உள்ளிட வேண்டியதில்லை. முடித்ததும் பகிர்வு தானாக இயக்கப்படும். உங்கள் உள்ளக வலையிலுள்ள மற்ற Kotomimi சாதனங்கள் இந்தக் கணினியைக் கண்டறிய முடியும். அமைத்த பிறகு, அமைப்புகளின் «பேச்சறிதல்» பகுதியில் மாதிரிகளைப் பதிவிறக்கவும். மற்ற சாதனங்கள் அவற்றையே பயன்படுத்தும்."
+  },
+  "fork.wizard.shareSummary": {
+    "en": "Sharing",
+    "text": "பகிர்வு"
+  },
+  "fork.wizard.shareSummaryOn": {
+    "en": "Turned on when you finish: other devices on your network can use this computer's models",
+    "text": "முடித்ததும் இயக்கப்படும்: உள்ளக வலையிலுள்ள மற்ற சாதனங்கள் இந்தக் கணினியின் மாதிரிகளைப் பயன்படுத்தலாம்"
+  },
+  "fork.wizard.title": {
+    "en": "Which device does the work?",
+    "text": "எந்தச் சாதனத்தில் இயக்குவது?"
+  },
+  "fork.wizard.tryServer": {
+    "en": "Connect",
+    "text": "இணை"
+  },
+  "models.deviceCpu": {
+    "en": "CPU",
+    "text": "CPU"
+  },
+  "models.deviceGpu": {
+    "en": "GPU",
+    "text": "GPU"
+  },
+  "providers.gemini.name": {
+    "en": "Google Gemini",
+    "text": "Google Gemini"
+  },
+  "providers.kizunaai_soniox.name": {
+    "en": "KizunaAI",
+    "text": "KizunaAI"
+  },
+  "providers.local_inference.modelAsr": {
+    "en": "ASR",
+    "text": "பேச்சறிதல்"
+  },
+  "providers.local_inference.modelTranslation": {
+    "en": "MT",
+    "text": "மொழிபெயர்ப்பு"
+  },
+  "providers.local_inference.modelTts": {
+    "en": "TTS",
+    "text": "உரையிலிருந்து பேச்சு"
+  },
+  "providers.localai.addressMissing": {
+    "en": "No other device is chosen yet. In Settings, under \"Another device\", search for it or type its address.",
+    "text": "மற்ற சாதனம் இன்னும் தேர்ந்தெடுக்கப்படவில்லை. அமைப்புகளில் \"மற்றொரு சாதனம்\" என்பதன் கீழ் அதைத் தேடுங்கள் அல்லது அதன் முகவரியை உள்ளிடுங்கள்."
+  },
+  "providers.localai.advanced": {
+    "en": "Advanced",
+    "text": "மேம்பட்டவை"
+  },
+  "providers.localai.apiKey": {
+    "en": "API key",
+    "text": "API சாவி"
+  },
+  "providers.localai.apiKeyNeeded": {
+    "en": "The API at {{address}} asks for a key. In its card, turn on \"The API asks for a key\" and enter it.",
+    "text": "API க்கு ({{address}}) விசை தேவை. அதன் அட்டையில் \"இந்த API க்கு விசை தேவை\" என்பதை இயக்கி, விசையை உள்ளிடுங்கள்."
+  },
+  "providers.localai.apiKeyRefused": {
+    "en": "The API at {{address}} did not accept the key. Check the API key in its card.",
+    "text": "API ({{address}}) இந்த விசையை ஏற்கவில்லை. அதன் அட்டையிலுள்ள API விசையைச் சரிபாருங்கள்."
+  },
+  "providers.localai.apiKeyReused": {
+    "en": "Filled in with the key saved under \"{{name}}\".",
+    "text": "\"{{name}}\" என்பதில் சேமித்த சாவி நிரப்பப்பட்டுள்ளது."
+  },
+  "providers.localai.apiService": {
+    "en": "Service",
+    "text": "சேவை"
+  },
+  "providers.localai.apiServiceArk": {
+    "en": "Doubao (Volcengine Ark)",
+    "text": "Doubao (Volcengine Ark)"
+  },
+  "providers.localai.apiServiceArkModel": {
+    "en": "A model's name, or your endpoint id (ep-…)",
+    "text": "மாதிரிப் பெயர் அல்லது உங்கள் இணைப்பு முனை அடையாள எண் (ep-…)"
+  },
+  "providers.localai.apiServiceCustom": {
+    "en": "Custom address",
+    "text": "தனிப்பயன் முகவரி"
+  },
+  "providers.localai.apiServiceModel": {
+    "en": "Choose from the list on the right, or type a name",
+    "text": "வலப்புறப் பட்டியலில் தேர்ந்தெடுங்கள் அல்லது பெயரை உள்ளிடுங்கள்"
+  },
+  "providers.localai.apiServiceOllama": {
+    "en": "Ollama on this computer",
+    "text": "இந்தக் கணினியிலுள்ள Ollama"
+  },
+  "providers.localai.apiServiceSiliconFlow": {
+    "en": "SiliconFlow",
+    "text": "SiliconFlow"
+  },
+  "providers.localai.apiUnreachable": {
+    "en": "The API at {{address}} could not be reached. Check the address in its card, and that this computer is online.",
+    "text": "API உடன் ({{address}}) இணைக்க முடியவில்லை. அதன் அட்டையிலுள்ள முகவரியையும் இந்தக் கணினியின் இணைய இணைப்பையும் சரிபாருங்கள்."
+  },
+  "providers.localai.asrApiBaseUrl": {
+    "en": "API address",
+    "text": "API முகவரி"
+  },
+  "providers.localai.asrApiBaseUrlPlaceholder": {
+    "en": "e.g. https://api.openai.com/v1",
+    "text": "எ.கா. https://api.openai.com/v1"
+  },
+  "providers.localai.asrApiModelPlaceholder": {
+    "en": "e.g. whisper-1, whisper-large-v3",
+    "text": "எ.கா. whisper-1, whisper-large-v3"
+  },
+  "providers.localai.asrApiNeedsKey": {
+    "en": "The API asks for a key",
+    "text": "இந்த API-க்குச் சாவி தேவை"
+  },
+  "providers.localai.asrFixedNote": {
+    "en": "That device is reached as a plain LocalAI, which always hears with its own default recognizer when the translation or the feedback uses a model chosen here. Through the Kotomimi on that device, the recognizer can be chosen here.",
+    "text": "இப்போது அந்தச் சாதனத்தின் LocalAI உடன் நேரடியாக இணைந்துள்ளீர்கள். மொழிபெயர்ப்புக்கோ இலக்கணக் கருத்துக்கோ வேறு மாதிரியைத் தேர்ந்தெடுத்தால், அது தனது இயல்புநிலை பேச்சறிதல் மாதிரியை மட்டுமே பயன்படுத்தும். அந்தச் சாதனத்தின் Kotomimi உடன் இணைந்தால், பேச்சறிதல் மாதிரியை இங்கே தேர்ந்தெடுக்கலாம்."
+  },
+  "providers.localai.asrKey": {
+    "en": "API key of the speech recognition API",
+    "text": "பேச்சறிதல் API-யின் சாவி"
+  },
+  "providers.localai.asrUnnamed": {
+    "en": "Speech recognition has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "பேச்சறிதலுக்கு இன்னும் மாதிரி இல்லை. வழங்குநரின் கீழுள்ள \"பேச்சறிதல்\" அட்டையில் ஒன்றைத் தேர்ந்தெடுங்கள் (API மாதிரிக்கு முகவரியும் மாதிரிப் பெயரும் தேவை), அல்லது வேறு இடத்தைத் தேர்ந்தெடுங்கள்."
+  },
+  "providers.localai.auto": {
+    "en": "Automatic · {{name}}",
+    "text": "தானாக · {{name}}"
+  },
+  "providers.localai.browse": {
+    "en": "Model library",
+    "text": "மாதிரித் தொகுப்பு"
+  },
+  "providers.localai.bySentence": {
+    "en": "Translate sentence by sentence",
+    "text": "வாக்கியம் வாரியாக மொழிபெயர்"
+  },
+  "providers.localai.bySentenceTooltip": {
+    "en": "On: each sentence is translated as soon as it ends — sooner, but without the sentences around it. Off: the whole stretch is translated once the speaker pauses — with its context, but later.",
+    "text": "இயக்கினால்: ஒவ்வொரு வாக்கியம் முடிந்ததும் மொழிபெயர்க்கப்படும். விரைவாகக் கிடைக்கும், ஆனால் சுற்றியுள்ள வாக்கியங்களின் சூழல் இருக்காது. அணைத்தால்: பேசுபவர் இடைநிறுத்தியதும் முழுப் பகுதியும் மொழிபெயர்க்கப்படும். முழுச் சூழலும் கிடைக்கும், ஆனால் காத்திருப்பு அதிகம்."
+  },
+  "providers.localai.checking": {
+    "en": "Checking…",
+    "text": "சரிபார்க்கப்படுகிறது…"
+  },
+  "providers.localai.checkNow": {
+    "en": "Check",
+    "text": "சரிபார்"
+  },
+  "providers.localai.checkSlow": {
+    "en": "No answer within {{seconds}} s: the device may be off or loading a model, or the address wrong. It is asked again by itself.",
+    "text": "{{seconds}} வினாடிகளாகப் பதில் இல்லை: சாதனம் அணைக்கப்பட்டிருக்கலாம், மாதிரி ஏற்றப்படலாம் அல்லது முகவரி தவறாக இருக்கலாம். தானாக மீண்டும் முயலும்."
+  },
+  "providers.localai.choiceDevice": {
+    "en": "Use this computer",
+    "text": "இந்தக் கணினியைப் பயன்படுத்து"
+  },
+  "providers.localai.choiceServer": {
+    "en": "Use another device",
+    "text": "வேறொரு சாதனத்தைப் பயன்படுத்து"
+  },
+  "providers.localai.coach": {
+    "en": "Check my grammar when I speak their language",
+    "text": "அவர்கள் மொழியில் நான் பேசும்போது இலக்கணத்தைச் சரிபார்"
+  },
+  "providers.localai.coachKey": {
+    "en": "API key of the feedback model",
+    "text": "இலக்கணக் கருத்து மாதிரியின் API சாவி"
+  },
+  "providers.localai.coachNeedsSpeaker": {
+    "en": "Feedback answers what you say. Switch the mode to \"Me\" or \"Both\".",
+    "text": "இலக்கணக் கருத்துக்கு உங்கள் பேச்சைக் கேட்க வேண்டும். பயன்முறையை \"நான்\" அல்லது \"இருவரும்\" என மாற்றுங்கள்."
+  },
+  "providers.localai.coachNoModel": {
+    "en": "The other device has no text model that can give feedback. Use an API model or this computer instead.",
+    "text": "மற்ற சாதனத்தில் இலக்கணக் கருத்து தரக்கூடிய உரை மாதிரி இல்லை. API மாதிரியையோ இந்தக் கணினியையோ பயன்படுத்துங்கள்."
+  },
+  "providers.localai.coachPrompt": {
+    "en": "Feedback instructions",
+    "text": "இலக்கணக் கருத்துக்கான வழிமுறைகள்"
+  },
+  "providers.localai.coachPromptPlaceholder": {
+    "en": "Blank: written automatically for your two languages. Your own text may use {{spoken}} and {{native}}.",
+    "text": "காலியாக விட்டால், உங்கள் தாய்மொழிக்கும் பயிலும் மொழிக்கும் ஏற்ப தானாக உருவாகும். நீங்களே எழுதும்போது இந்த மொழிகளைக் குறிக்க {{spoken}}, {{native}} ஆகியவற்றைப் பயன்படுத்தலாம்."
+  },
+  "providers.localai.coachPromptPreview": {
+    "en": "Used while the box is blank, for this language pair:",
+    "text": "காலியாக இருக்கும்போது, இந்த மொழி இணைக்குப் பயன்படுத்தப்படும் வழிமுறைகள்:"
+  },
+  "providers.localai.coachStage": {
+    "en": "Grammar feedback",
+    "text": "இலக்கணக் கருத்து"
+  },
+  "providers.localai.coachStageTooltip": {
+    "en": "When you speak the other language, a model checks your grammar and answers with a check mark, or a corrected sentence and an explanation. Enable \"I speak the other language too\" as well to get both a translation and private feedback. Your own language and typed text are translated without feedback.",
+    "text": "நீங்கள் மற்ற மொழியில் பேசும்போது, ஒரு மாதிரி உங்கள் இலக்கணத்தைச் சரிபார்த்து, சரிக்குறியையோ திருத்திய வாக்கியத்தையும் விளக்கத்தையோ தரும். மொழிபெயர்ப்பும் தனிப்பட்ட கருத்தும் கிடைக்க, \"நானும் மற்ற மொழியில் பேசுவேன்\" என்பதையும் இயக்குங்கள். உங்கள் சொந்த மொழிப் பேச்சும் தட்டச்சு செய்த உரையும் கருத்து இல்லாமல் மொழிபெயர்க்கப்படும்."
+  },
+  "providers.localai.coachUnnamed": {
+    "en": "Grammar feedback has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "இலக்கணக் கருத்துக்கு இன்னும் மாதிரி இல்லை. வழங்குநரின் கீழுள்ள \"இலக்கணக் கருத்து\" அட்டையில் ஒன்றைத் தேர்ந்தெடுங்கள் (API மாதிரிக்கு முகவரியும் மாதிரிப் பெயரும் தேவை), அல்லது வேறு இடத்தைத் தேர்ந்தெடுங்கள்."
+  },
+  "providers.localai.connectFirst": {
+    "en": "No other device is connected yet: search for one above, or type its address.",
+    "text": "வேறொரு சாதனம் இன்னும் இணைக்கப்படவில்லை. மேலே தேடுங்கள் அல்லது அதன் முகவரியை உள்ளிடுங்கள்."
+  },
+  "providers.localai.description": {
+    "en": "Recognition, translation and grammar feedback — and you mix where each model runs: this computer, another device on your network, or any API model.",
+    "text": "பேச்சறிதல், மொழிபெயர்ப்பு, இலக்கணக் கருத்துகள் ஆகியவற்றுக்கான மாதிரிகளை விருப்பப்படி இணைக்கலாம்: இந்தக் கணினி, உள்ளக வலையிலுள்ள வேறொரு சாதனம் அல்லது எந்த API மாதிரியையும் பயன்படுத்தலாம்."
+  },
+  "providers.localai.detectOther": {
+    "en": "Detect the other side's language",
+    "text": "மற்றவர் பேசும் மொழியைத் தானாகக் கண்டறி"
+  },
+  "providers.localai.detectOtherNeeds": {
+    "en": "Only Qwen3-ASR 1.7B GGUF can tell the language by itself. Choose it here.",
+    "text": "Qwen3-ASR 1.7B GGUF மட்டுமே மொழியைத் தானாகக் கண்டறியும். இங்கே அதைத் தேர்ந்தெடுங்கள்."
+  },
+  "providers.localai.detectOtherNote": {
+    "en": "The other side's language is detected, so a model that can tell languages apart hears them.",
+    "text": "மற்றவரின் மொழி தானாகக் கண்டறியப்படுவதால், இங்கே மொழிகளைக் கண்டறியும் மாதிரி பயன்படுத்தப்படும்."
+  },
+  "providers.localai.detectOtherTooltip": {
+    "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
+    "text": "மற்றவர் எந்த மொழியில் பேசினாலும் அதை அறிந்து உங்கள் மொழிக்கு மொழிபெயர்க்கும்; நீங்களே மாற்ற வேண்டாம். உங்கள் பேச்சு மேலே தேர்ந்தெடுத்த மொழிக்கே மொழிபெயர்க்கப்படும். பேச்சறிதலுக்கு Qwen3-ASR 1.7B GGUF அல்லது API தேவை; மொழிபெயர்ப்புக்கு இயல்நிலை இயந்திரம் அல்லது API தேவை."
+  },
+  "providers.localai.deviceDefault": {
+    "en": "The device's own choice",
+    "text": "அந்தச் சாதனமே தேர்ந்தெடுக்கட்டும்"
+  },
+  "providers.localai.endpoint": {
+    "en": "Address",
+    "text": "முகவரி"
+  },
+  "providers.localai.familyUnheard": {
+    "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
+    "text": "அந்தச் சாதனத்தின் {{name}} இல் {{languages}} இல்லை. இந்தப் பகுதிக்கு அந்தச் சாதனமே மாதிரியைத் தேர்ந்தெடுக்கும். {{name}} ஐப் பயன்படுத்த, முதலில் அந்தச் சாதனத்தில் {{languages}} ஐப் பதிவிறக்குங்கள்."
+  },
+  "providers.localai.feedbackFailed": {
+    "en": "One sentence got no grammar feedback: the feedback model did not answer.",
+    "text": "ஒரு வாக்கியத்திற்கு இலக்கணக் கருத்து கிடைக்கவில்லை: கருத்து வழங்கும் மாதிரி பதிலளிக்கவில்லை."
+  },
+  "providers.localai.groupNative": {
+    "en": "Native engine",
+    "text": "இயல்நிலை இயந்திரம்"
+  },
+  "providers.localai.hearApiNote": {
+    "en": "Any service with OpenAI's transcription API works (OpenAI, Groq, a LocalAI). This computer cuts the sentences and uploads each one, so the text appears when a sentence is finished.",
+    "text": "OpenAI இன் பேச்சை எழுத்தாக்கும் API ஐ வழங்கும் எந்தச் சேவையையும் பயன்படுத்தலாம் (OpenAI, Groq, LocalAI போன்றவை). இந்தக் கணினி வாக்கியங்களைப் பிரித்து, ஒவ்வொன்றும் முடிந்ததும் பதிவேற்றி அறியும். எனவே வாக்கியம் முடிந்த பிறகே எழுத்து தோன்றும்."
+  },
+  "providers.localai.hears": {
+    "en": "Recognizes {{language}}",
+    "text": "{{language}} பேச்சை அறியும்"
+  },
+  "providers.localai.hearsEither": {
+    "en": "Recognizes {{first}} or {{second}}",
+    "text": "{{first}} அல்லது {{second}} பேச்சை அறியும்"
+  },
+  "providers.localai.hearsOther": {
+    "en": "Hears the other side (any language)",
+    "text": "மற்றவரைக் கேட்கும் (மொழியைத் தானாகக் கண்டறியும்)"
+  },
+  "providers.localai.hearStage": {
+    "en": "Speech recognition",
+    "text": "பேச்சறிதல்"
+  },
+  "providers.localai.hearStageTooltip": {
+    "en": "What listens: it decides when a sentence ends and writes down what was said.",
+    "text": "கேட்கும் பகுதி: ஒரு வாக்கியம் எப்போது முடிகிறது என்பதை அறிந்து, சொன்னதை எழுத்தாக மாற்றும்."
+  },
+  "providers.localai.hereDown": {
+    "en": "The LocalAI on this computer is not running yet. Start it in the stage's card — or, if Kotomimi has only just opened, give it a moment.",
+    "text": "இந்தக் கணினியில் LocalAI இன்னும் இயங்கவில்லை. அந்தப் பகுதியின் அட்டையில் \"LocalAI ஐத் தொடங்கு\" என்பதை அழுத்துங்கள். Kotomimi ஐ இப்போதுதான் திறந்திருந்தால், சிறிது நேரம் காத்திருங்கள்."
+  },
+  "providers.localai.hereModelPick": {
+    "en": "Choose a model",
+    "text": "மாதிரியைத் தேர்ந்தெடுக்கவும்"
+  },
+  "providers.localai.inUse": {
+    "en": "In use: {{name}}",
+    "text": "பயன்பாட்டில்: {{name}}"
+  },
+  "providers.localai.inUseLegs": {
+    "en": "In use: {{theirs}} (them), {{mine}} (me)",
+    "text": "பயன்பாட்டில்: அவர்கள் {{theirs}} · நான் {{mine}}"
+  },
+  "providers.localai.kotomimiServer": {
+    "en": "It is another Kotomimi sharing its models.",
+    "text": "இது மாதிரிகளைப் பகிரும் வேறொரு Kotomimi."
+  },
+  "providers.localai.kotomimiThere": {
+    "en": "Use the Kotomimi on that device",
+    "text": "அந்தச் சாதனத்தின் Kotomimi உடன் இணை"
+  },
+  "providers.localai.kotomimiThereLooking": {
+    "en": "Looking for it…",
+    "text": "தேடுகிறது…"
+  },
+  "providers.localai.kotomimiThereNone": {
+    "en": "No Kotomimi is sharing on that device. Open Kotomimi there, turn on \"Share with other devices\", then try again.",
+    "text": "அந்தச் சாதனத்தில் எந்த Kotomimi யும் பகிரவில்லை. அங்கே Kotomimi ஐத் திறந்து, \"மற்ற சாதனங்களுடன் பகிர்\" என்பதை இயக்கி, மீண்டும் முயலுங்கள்."
+  },
+  "providers.localai.localServerNote": {
+    "en": "This address is this computer itself: a model server running here, such as LocalAI. Choose \"Another device\" in a stage to use its models.",
+    "text": "இந்த முகவரி இந்தக் கணினியையே குறிக்கிறது: இங்கு இயங்கும் LocalAI போன்ற மாதிரி சேவையகம். அதன் மாதிரிகளைப் பயன்படுத்த, ஒரு படியில் \"வேறொரு சாதனம்\" என்பதைத் தேர்ந்தெடுங்கள்."
+  },
+  "providers.localai.model": {
+    "en": "Model",
+    "text": "மாதிரி"
+  },
+  "providers.localai.modelGone": {
+    "en": "{{name}} (no longer on that device)",
+    "text": "{{name}} (அந்தச் சாதனத்தில் இப்போது இல்லை)"
+  },
+  "providers.localai.modelList": {
+    "en": "Choose from the models this service lists",
+    "text": "இந்தச் சேவையின் மாதிரிப் பட்டியலில் தேர்ந்தெடு"
+  },
+  "providers.localai.modelListAsking": {
+    "en": "Getting the list…",
+    "text": "மாதிரிப் பட்டியல் பெறப்படுகிறது…"
+  },
+  "providers.localai.modelListKeyMissing": {
+    "en": "Fill in the API key first.",
+    "text": "முதலில் API சாவியை உள்ளிடுங்கள்."
+  },
+  "providers.localai.modelListKeyRefused": {
+    "en": "The service refused this key.",
+    "text": "இந்தச் சேவை இந்தச் சாவியை ஏற்கவில்லை."
+  },
+  "providers.localai.modelListNoAddress": {
+    "en": "Fill in the address first.",
+    "text": "முதலில் முகவரியை உள்ளிடுங்கள்."
+  },
+  "providers.localai.modelListNoMatch": {
+    "en": "No model found. Try fewer letters.",
+    "text": "மாதிரி கிடைக்கவில்லை. குறைவான எழுத்துகளுடன் தேடுங்கள்."
+  },
+  "providers.localai.modelListNone": {
+    "en": "This service lists no models. Type the name instead.",
+    "text": "இந்தச் சேவை மாதிரிப் பட்டியலை வழங்கவில்லை. பெயரை நேரடியாக உள்ளிடுங்கள்."
+  },
+  "providers.localai.modelListUnreachable": {
+    "en": "The service could not be reached.",
+    "text": "இந்தச் சேவையுடன் இணைக்க முடியவில்லை."
+  },
+  "providers.localai.modelSearch": {
+    "en": "Search models",
+    "text": "மாதிரிகளைத் தேடு"
+  },
+  "providers.localai.modelSuggested": {
+    "en": "Suits this step",
+    "text": "இந்தப் படிக்கு ஏற்றது"
+  },
+  "providers.localai.name": {
+    "en": "Kotomimi Pipeline",
+    "text": "Kotomimi விருப்பக் கலவை"
+  },
+  "providers.localai.nativeBusy": {
+    "en": "A device you share with is using this engine with {{name}}. Wait for it to finish, or choose {{name}} here too.",
+    "text": "நீங்கள் பகிரும் சாதனம் இந்த இயந்திரத்தில் {{name}} ஐப் பயன்படுத்துகிறது. அது முடியும் வரை காத்திருங்கள் அல்லது இங்கும் {{name}} ஐத் தேர்ந்தெடுங்கள்."
+  },
+  "providers.localai.nativeCoachFailed": {
+    "en": "The feedback engine could not start. In the Grammar feedback card, press \"Try again\" — or choose another model.",
+    "text": "இலக்கணக் கருத்து இயந்திரத்தைத் தொடங்க முடியவில்லை. இலக்கணக் கருத்து அட்டையில் \"மீண்டும் முயல்\" என்பதை அழுத்துங்கள் அல்லது வேறொரு மாதிரியைத் தேர்ந்தெடுங்கள்."
+  },
+  "providers.localai.nativeCoachFailedShort": {
+    "en": "The feedback engine could not start.",
+    "text": "இலக்கணக் கருத்து இயந்திரத்தைத் தொடங்க முடியவில்லை."
+  },
+  "providers.localai.nativeCoachMissing": {
+    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} இன்னும் பதிவிறக்கப்படவில்லை. இலக்கணக் கருத்து அட்டையில் இயல்நிலை மாதிரியைப் பதிவிறக்குங்கள் அல்லது \"API மாதிரி\", \"மற்றொரு சாதனம்\" என்பதற்கு மாறுங்கள்."
+  },
+  "providers.localai.nativeCoachReady": {
+    "en": "The feedback engine is ready.",
+    "text": "இலக்கணக் கருத்து இயந்திரம் தயார்."
+  },
+  "providers.localai.nativeCoachUnsupported": {
+    "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
+    "text": "இந்த இயங்குதளத்தில் இயல்நிலை இலக்கணக் கருத்து இயந்திரத்திற்கு இன்னும் ஆதரவில்லை. இலக்கணக் கருத்து அட்டையில் \"API மாதிரி\" அல்லது \"மற்றொரு சாதனம்\" என்பதற்கு மாறுங்கள்."
+  },
+  "providers.localai.nativeCoachWarming": {
+    "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
+    "text": "இலக்கணக் கருத்து இயந்திரம் இன்னும் தொடங்குகிறது. சில வினாடிகளே ஆகும். தயாரானதும் தொடங்கலாம்."
+  },
+  "providers.localai.nativeCoachWarmingShort": {
+    "en": "Starting the feedback engine…",
+    "text": "இலக்கணக் கருத்து இயந்திரம் தொடங்குகிறது…"
+  },
+  "providers.localai.nativeEntry": {
+    "en": "{{name}} (native engine)",
+    "text": "{{name}} (இயல்நிலை இயந்திரம்)"
+  },
+  "providers.localai.nativeFailed": {
+    "en": "The recognition engine of this computer could not start. In the Speech recognition card, press \"Try again\" — or choose another model.",
+    "text": "இந்தக் கணினியின் பேச்சறிதல் இயந்திரத்தைத் தொடங்க முடியவில்லை. பேச்சறிதல் அட்டையில் \"மீண்டும் முயல்\" என்பதை அழுத்துங்கள் அல்லது வேறொரு மாதிரியைத் தேர்ந்தெடுங்கள்."
+  },
+  "providers.localai.nativeFailedShort": {
+    "en": "The engine could not start.",
+    "text": "இயந்திரத்தைத் தொடங்க முடியவில்லை."
+  },
+  "providers.localai.nativeInterrupted": {
+    "en": "The engine stopped while it was starting. Press Start again.",
+    "text": "தொடங்கும்போதே இயந்திரம் நிறுத்தப்பட்டது. மீண்டும் தொடங்கு என்பதை அழுத்துங்கள்."
+  },
+  "providers.localai.nativeLoading": {
+    "en": "Loading the models… About half a minute the first time after the computer boots.",
+    "text": "மாதிரிகள் ஏற்றப்படுகின்றன… கணினியை இயக்கிய பின் முதல் முறை சுமார் அரை நிமிடம் ஆகும்."
+  },
+  "providers.localai.nativeMissing": {
+    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} இன்னும் பதிவிறக்கப்படவில்லை. பேச்சறிதல் அட்டையில் இயல்நிலை மாதிரியைப் பதிவிறக்குங்கள் அல்லது \"API மாதிரி\", \"மற்றொரு சாதனம்\" என்பதற்கு மாறுங்கள்."
+  },
+  "providers.localai.nativeNone": {
+    "en": "No model chosen",
+    "text": "மாதிரி தேர்ந்தெடுக்கப்படவில்லை"
+  },
+  "providers.localai.nativeReady": {
+    "en": "The engine is ready.",
+    "text": "இயந்திரம் தயார்."
+  },
+  "providers.localai.nativeRetry": {
+    "en": "Try again",
+    "text": "மீண்டும் முயல்"
+  },
+  "providers.localai.nativeRuntime": {
+    "en": "Downloading the runtime first. This happens only once.",
+    "text": "முதலில் இயக்கச் சூழல் பதிவிறக்கப்படுகிறது. இது ஒருமுறை மட்டுமே தேவை."
+  },
+  "providers.localai.nativeTwoModels": {
+    "en": "{{name}} and {{other}} cannot run at the same time. Choose the same model for both languages.",
+    "text": "{{name}}, {{other}} ஆகியவற்றை ஒரே நேரத்தில் இயக்க முடியாது. இரு மொழிகளுக்கும் ஒரே மாதிரியைத் தேர்ந்தெடுங்கள்."
+  },
+  "providers.localai.nativeUnchosen": {
+    "en": "No speech recognition model is chosen for {{source}} yet. Choose one in the Speech recognition card.",
+    "text": "{{source}} மொழிக்கு இன்னும் பேச்சறிதல் மாதிரி தேர்ந்தெடுக்கப்படவில்லை. பேச்சறிதல் அட்டையில் ஒன்றைத் தேர்ந்தெடுங்கள்."
+  },
+  "providers.localai.nativeUnheard": {
+    "en": "{{name}} does not hear one of your two languages. Choose another model for it.",
+    "text": "நீங்கள் தேர்ந்தெடுத்த இரு மொழிகளில் ஒன்றை {{name}} அறியாது. அதற்கு வேறொரு மாதிரியைத் தேர்ந்தெடுங்கள்."
+  },
+  "providers.localai.nativeUnsupported": {
+    "en": "The native recognition engine is not available for this system. In the Speech recognition card, switch to \"API model\" or \"Another device\".",
+    "text": "இந்த இயங்குதளத்தில் இயல்நிலை பேச்சறிதல் இயந்திரத்திற்கு இன்னும் ஆதரவில்லை. பேச்சறிதல் அட்டையில் \"API மாதிரி\" அல்லது \"மற்றொரு சாதனம்\" என்பதற்கு மாறுங்கள்."
+  },
+  "providers.localai.nativeUnsupportedShort": {
+    "en": "Not available for this system",
+    "text": "இந்த இயங்குதளத்தில் இன்னும் ஆதரவில்லை"
+  },
+  "providers.localai.nativeWarming": {
+    "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
+    "text": "பேச்சறிதல் இயந்திரம் இன்னும் தொடங்குகிறது. கணினியை இயக்கிய பின் முதல் முறை சுமார் அரை நிமிடம் ஆகும். தயாரானதும் தொடங்கலாம்."
+  },
+  "providers.localai.nativeWarmingShort": {
+    "en": "Starting the engine… About half a minute the first time after the computer boots.",
+    "text": "இயந்திரம் தொடங்குகிறது… கணினியை இயக்கிய பின் முதல் முறை சுமார் அரை நிமிடம் ஆகும்."
+  },
+  "providers.localai.notDownloaded": {
+    "en": "No model downloaded yet",
+    "text": "இன்னும் மாதிரி பதிவிறக்கப்படவில்லை"
+  },
+  "providers.localai.noteAppleSpeech": {
+    "en": "Japanese talk, measured: about 13% of the characters wrong, the most accurate of all. It writes as it listens (about 2 s behind).",
+    "text": "ஜப்பானிய இயல்புப் பேச்சுச் சோதனையில் சுமார் 13% எழுத்துப் பிழைகள்; அனைத்திலும் இதுவே மிகத் துல்லியமானது. கேட்கும்போதே எழுதும் (சுமார் 2 வினாடிகள் தாமதம்)."
+  },
+  "providers.localai.noteCohere": {
+    "en": "Measured on Japanese VRChat talk: about 33% of the characters wrong, and about a quarter of what was said left out. Not a good choice for Japanese conversation.",
+    "text": "ஜப்பானிய VRChat உரையாடல் சோதனையில்: சுமார் 33% எழுத்துப் பிழைகள்; பேச்சில் சுமார் நான்கில் ஒரு பகுதியையும் விட்டுவிடும். ஜப்பானிய உரையாடலுக்குப் பரிந்துரைக்கப்படவில்லை."
+  },
+  "providers.localai.noteGemma4": {
+    "en": "Japanese grammar, measured: it caught 11 of 14 mistakes and left right casual speech alone; about 0.1 s an answer. About 1.5 GB of video memory.",
+    "text": "ஜப்பானிய இலக்கணச் சோதனையில்: பிழையுள்ள 14 வாக்கியங்களில் 11 ஐக் கண்டறிந்தது; சரியான பேச்சுவழக்கைத் தேவையின்றி மாற்றாது. ஒரு வாக்கியத்திற்குச் சுமார் 0.1 வினாடி. சுமார் 1.5 GB வரைகலை நினைவகம் தேவை."
+  },
+  "providers.localai.noteGranite41": {
+    "en": "Measured on Japanese VRChat talk: it keeps repeating the same sentence. Not usable for Japanese conversation.",
+    "text": "ஜப்பானிய VRChat உரையாடல் சோதனையில்: ஒரே வாக்கியத்தைத் தொடர்ந்து மீண்டும் எழுதும். ஜப்பானிய உரையாடலுக்குப் பயன்படுத்த முடியாத அளவுக்கு உள்ளது."
+  },
+  "providers.localai.noteHyMt15": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences, and it tends to add words of its own.",
+    "text": "ஜப்பானியத்திலிருந்து சீனத்துக்கு மொழிபெயர்த்த சோதனையில்: 30 வாக்கியங்களில் சுமார் 8 இல் பெரிய பிழைகள்; தானாகவே கூடுதல் சொற்களையும் சேர்க்கும்."
+  },
+  "providers.localai.noteHyMt2": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences; about 0.1 s a sentence.",
+    "text": "ஜப்பானியத்திலிருந்து சீனத்துக்கு மொழிபெயர்த்த சோதனையில்: 30 வாக்கியங்களில் சுமார் 8 இல் பெரிய பிழைகள். ஒரு வாக்கியத்திற்குச் சுமார் 0.1 வினாடி."
+  },
+  "providers.localai.noteIndexTranslate": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
+    "text": "ஜப்பானியத்திலிருந்து சீனத்துக்கு மொழிபெயர்த்த சோதனையில்: 30 வாக்கியங்களில் சுமார் 3 இல் பெரிய பிழைகள்; சோதித்தவற்றில் இதுவே சிறந்தது. ஒரு வாக்கியத்திற்குச் சுமார் 0.1 வினாடி. சுமார் 2 GB வரைகலை நினைவகம் தேவை; 100 க்கும் மேற்பட்ட மொழிகளை ஆதரிக்கும்."
+  },
+  "providers.localai.noteMoonshineJa": {
+    "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
+    "text": "ஜப்பானிய VRChat உரையாடல் சோதனையில்: சுமார் 70% எழுத்துப் பிழைகள். வரைகலை அட்டையைப் பயன்படுத்தவே முடியாதபோது மட்டுமே தற்காலிகமாகப் பயன்படுத்த ஏற்றது."
+  },
+  "providers.localai.noteNativeNemotron": {
+    "en": "Small: about 1 GB of video memory. Japanese talk, measured: about 27% of the characters wrong, and a short sentence is sometimes left out altogether. Choose it only when the ones above do not fit or do not hear the language. Over thirty languages.",
+    "text": "குறைந்த இடம் தேவை: சுமார் 1 GB வரைகலை நினைவகம். ஜப்பானிய இயல்புப் பேச்சுச் சோதனையில் சுமார் 27% எழுத்துப் பிழைகள்; சில நேரங்களில் குறுகிய வாக்கியம் முழுவதும் விடுபடும். மேலுள்ள மாதிரிகளுக்கு இடமில்லாதபோது அல்லது தேவையான மொழிக்கு அவற்றில் ஆதரவு இல்லாதபோது மட்டும் இதைத் தேர்ந்தெடுங்கள். 30 க்கும் மேற்பட்ட மொழிகளை ஆதரிக்கும்."
+  },
+  "providers.localai.noteNativeQwen": {
+    "en": "Japanese talk, measured: about 16% of the characters wrong. It writes as you speak (about 1 s behind); the last few words settle when the sentence ends. When the graphics card is busy it only refreshes less often. About 3 GB of video memory, thirty languages.",
+    "text": "ஜப்பானிய இயல்புப் பேச்சுச் சோதனையில் சுமார் 16% எழுத்துப் பிழைகள். பேசும்போதே எழுதும் (சுமார் 1 வினாடி தாமதம்); கடைசிச் சில எழுத்துகள் வாக்கியம் முடிந்ததும் உறுதியாகும். வரைகலை அட்டை அதிக வேலையில் இருந்தால் உரை புதுப்பிக்கும் வேகம் மட்டும் குறையும். சுமார் 3 GB வரைகலை நினைவகம் தேவை; 30 மொழிகளை ஆதரிக்கும்."
+  },
+  "providers.localai.noteNativeQwenSmall": {
+    "en": "The light one, for a computer that runs a game at the same time: about 2 GB of video memory instead of 3. Japanese talk, measured: about 22% of the characters wrong, more than the 1.7B. Otherwise it works the same way, with the same thirty languages.",
+    "text": "குறைந்த வளங்களைப் பயன்படுத்தும் சிறிய மாதிரி; அதே கணினியில் விளையாட்டும் இயங்கும்போது ஏற்றது. சுமார் 2 GB வரைகலை நினைவகம் தேவை (1.7B க்கு சுமார் 3 GB). ஜப்பானிய இயல்புப் பேச்சுச் சோதனையில் சுமார் 22% எழுத்துப் பிழைகள், 1.7B ஐவிடச் சற்று அதிகம். மற்றபடி 1.7B போலவே இயங்கும்; அதே 30 மொழிகளை ஆதரிக்கும்."
+  },
+  "providers.localai.noteNativeR2t2": {
+    "en": "Japanese talk, measured: about 18% of the characters wrong. It writes as it listens (about 2.5 s behind) and never changes what it wrote. When the graphics card cannot keep up (a weaker card, or a game running), the text falls further and further behind. About 3 GB of video memory.",
+    "text": "ஜப்பானிய இயல்புப் பேச்சுச் சோதனையில் சுமார் 18% எழுத்துப் பிழைகள். கேட்கும்போதே எழுதும் (சுமார் 2.5 வினாடிகள் தாமதம்); எழுதியதை மீண்டும் மாற்றாது. வரைகலை அட்டையால் ஈடுகொடுக்க முடியாதபோது (பலவீனமான அட்டை அல்லது விளையாட்டும் இயங்கும்போது), உரையின் தாமதம் அதிகரித்துக்கொண்டே போகும். சுமார் 3 GB வரைகலை நினைவகம் தேவை."
+  },
+  "providers.localai.noteNativeSenseVoice": {
+    "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
+    "text": "மிகக் குறைந்த வளங்களில் மிக வேகமாக இயங்கும்: சுமார் 0.4 GB வரைகலை நினைவகம் தேவை. ஜப்பானிய இயல்புப் பேச்சுச் சோதனையில் Qwen3-ASR 0.6B அளவுக்குத் துல்லியம்; நிறுத்தற்குறிகளை அரிதாகவே இடும். சீனம், கான்டனீஸ், ஆங்கிலம், ஜப்பானியம், கொரியம் மட்டுமே ஆதரிக்கப்படும்."
+  },
+  "providers.localai.noteQwen06": {
+    "en": "Measured on Japanese VRChat talk: about 35% of the characters wrong. Small: for when the graphics card has little memory to spare.",
+    "text": "ஜப்பானிய VRChat உரையாடல் சோதனையில்: சுமார் 35% எழுத்துப் பிழைகள். சிறிய மாதிரி; வரைகலை நினைவகம் குறைவாக இருக்கும்போது பயன்படுத்தலாம்."
+  },
+  "providers.localai.noteQwen17": {
+    "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
+    "text": "ஜப்பானிய இயல்புப் பேச்சுச் சோதனையில் சுமார் 19% எழுத்துப் பிழைகள். வாக்கியம் முடிந்த பிறகே எழுதும் (சுமார் 10 வினாடிகள் தாமதம்); மேலுள்ள GGUF பதிப்பு பேசும்போதே எழுதும்."
+  },
+  "providers.localai.noteSenseVoice": {
+    "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
+    "text": "ஜப்பானிய VRChat உரையாடல் சோதனையில்: கானா எழுத்துகளை எழுதாது; அதனால் ஜப்பானிய உரையைப் புரிந்துகொள்ள முடியாது."
+  },
+  "providers.localai.noteVoxtral4b": {
+    "en": "Measured on Japanese VRChat talk: quick — the text is about 2.6 s behind the voice — but about 27% of the characters wrong. For when speed matters more than accuracy.",
+    "text": "ஜப்பானிய VRChat உரையாடல் சோதனையில்: வேகமாக எழுதும் (குரலைவிடச் சுமார் 2.6 வினாடிகள் தாமதம்), ஆனால் எழுத்துப் பிழைகள் அதிகம் (சுமார் 27%). துல்லியத்தைவிட வேகம் முக்கியமாக இருந்து, பிழைகளை ஏற்க முடிந்தால் தேர்ந்தெடுங்கள்."
+  },
+  "providers.localai.noteWhisperMedium": {
+    "en": "Measured on Japanese VRChat talk: about 34% of the characters wrong.",
+    "text": "ஜப்பானிய VRChat உரையாடல் சோதனையில்: சுமார் 34% எழுத்துப் பிழைகள்."
+  },
+  "providers.localai.noteWhisperTurbo": {
+    "en": "Measured on Japanese VRChat talk: about 21% of the characters wrong, and steady. It writes only once a sentence has ended.",
+    "text": "ஜப்பானிய VRChat உரையாடல் சோதனையில்: சுமார் 21% எழுத்துப் பிழைகள்; சீராக இயங்கும். இதுவும் வாக்கியம் முடிந்த பிறகே எழுதும்."
+  },
+  "providers.localai.otherDeviceHint": {
+    "en": "To use the models of another device on your local network, search the network for it.",
+    "text": "உள்ளக வலையிலுள்ள வேறொரு சாதனத்தின் மாதிரிகளைப் பயன்படுத்த, வலையில் சாதனங்களைத் தேடுங்கள்."
+  },
+  "providers.localai.phoneKey": {
+    "en": "Access key of {{name}}",
+    "text": "{{name}} அணுகல் சாவி"
+  },
+  "providers.localai.phoneKeyNote": {
+    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
+    "text": "இந்தக் கைப்பேசியில் அணுகல் சாவி அமைக்கப்பட்டுள்ளது. கைப்பேசியின் «சாதன இணைப்பு» பகுதியில் அதைப் பார்க்கலாம்."
+  },
+  "providers.localai.phoneKeyUse": {
+    "en": "Use this phone",
+    "text": "இந்தக் கைப்பேசியைப் பயன்படுத்து"
+  },
+  "providers.localai.phoneKeyWrong": {
+    "en": "The phone did not take this key.",
+    "text": "இந்தச் சாவி தவறாக உள்ளது. மீண்டும் சரிபாருங்கள்."
+  },
+  "providers.localai.phoneModelGone": {
+    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
+    "text": "கைபேசி ({{address}}) இப்போது {{name}} ஐப் பகிரவில்லை. அதன் அட்டையில் வேறொரு மாதிரியைத் தேர்ந்தெடுங்கள்."
+  },
+  "providers.localai.phoneModelTooBig": {
+    "en": "{{name}} (not enough memory on the phone)",
+    "text": "{{name}} (கைபேசியில் நினைவகம் போதவில்லை)"
+  },
+  "providers.localai.phoneModelTooBigCheck": {
+    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
+    "text": "கைபேசியில் ({{address}}) இப்போது {{name}} ஐ இயக்கப் போதுமான நினைவகம் இல்லை. அதன் அட்டையில் சிறிய மாதிரியைத் தேர்ந்தெடுங்கள் அல்லது கைபேசியின் மற்ற செயலிகளை மூடுங்கள்."
+  },
+  "providers.localai.phoneNoMemory": {
+    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
+    "text": "இந்த மாதிரியை இயக்கக் கைபேசியில் இப்போது போதுமான நினைவகம் இல்லை. அதன் அட்டையில் சிறிய மாதிரியைத் தேர்ந்தெடுங்கள் அல்லது கைபேசியின் மற்ற செயலிகளை மூடுங்கள்."
+  },
+  "providers.localai.phoneOption": {
+    "en": "{{name}} (phone)",
+    "text": "{{name}} (கைப்பேசி)"
+  },
+  "providers.localai.phoneQuiet": {
+    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
+    "text": "கைபேசி பதிலளிக்கவில்லை. திரை பூட்டப்பட்டதும் செயலி இடைநிறுத்தப்பட்டிருக்கலாம். தொடர, கைபேசியில் Kotomimi ஐத் திறக்கவும்."
+  },
+  "providers.localai.phoneUnreachable": {
+    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "கைபேசியுடன் ({{address}}) இணைக்க முடியவில்லை. அதில் பகிர்வு இயக்கப்பட்டுள்ளதா, இந்தக் கணினியின் அதே Wi-Fi இல் உள்ளதா என்று சரிபாருங்கள்."
+  },
+  "providers.localai.pipelineModel": {
+    "en": "Setup name on that device",
+    "text": "அந்தச் சாதனத்தின் அமைப்புப் பெயர்"
+  },
+  "providers.localai.pipelineNote": {
+    "en": "Normally left alone. Change it only when that device is a LocalAI set up with more than one combination of recognition and translation.",
+    "text": "பொதுவாக இதை மாற்ற வேண்டாம். அந்தச் சாதனத்தின் LocalAI இல் ஒன்றுக்கு மேற்பட்ட பேச்சறிதல், மொழிபெயர்ப்பு சேர்க்கைகள் அமைக்கப்பட்டிருந்தால் மட்டுமே மாற்ற வேண்டும்."
+  },
+  "providers.localai.placeDevice": {
+    "en": "This computer",
+    "text": "இந்தக் கணினி"
+  },
+  "providers.localai.placeServer": {
+    "en": "Another device",
+    "text": "வேறொரு சாதனம்"
+  },
+  "providers.localai.ready": {
+    "en": "Ready to start",
+    "text": "தொடங்கத் தயார்"
+  },
+  "providers.localai.recheck": {
+    "en": "Check again",
+    "text": "மீண்டும் சரிபார்"
+  },
+  "providers.localai.serverHttp": {
+    "en": "The other device answered with an error (HTTP {{status}}). Restarting the app or the model server there usually helps.",
+    "text": "மற்ற சாதனம் பிழையை அனுப்பியுள்ளது (HTTP {{status}}). அங்குள்ள செயலியையோ மாதிரி சேவையகத்தையோ மறுதொடக்கம் செய்தால் பொதுவாகச் சரியாகிவிடும்."
+  },
+  "providers.localai.serverKey": {
+    "en": "Access key",
+    "text": "அணுகல் சாவி"
+  },
+  "providers.localai.serverKeyMissing": {
+    "en": "The other device asks for an access key. Enter it in Settings, under \"Another device\".",
+    "text": "மற்ற சாதனத்திற்கு அணுகல் விசை தேவை. அமைப்புகளில் \"மற்றொரு சாதனம்\" என்பதன் கீழ் அதை உள்ளிடுங்கள்."
+  },
+  "providers.localai.serverKeyNeeded": {
+    "en": "The other device asks for an access key. Under \"Another device\", turn on \"It asks for an access key\" and enter the key set on that device.",
+    "text": "மற்ற சாதனத்திற்கு அணுகல் விசை தேவை. \"மற்றொரு சாதனம்\" என்பதன் கீழ் \"இதற்கு அணுகல் விசை தேவை\" என்பதை இயக்கி, அந்தச் சாதனத்தில் அமைத்த விசையை உள்ளிடுங்கள்."
+  },
+  "providers.localai.serverKeyRefused": {
+    "en": "The other device did not accept the access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options).",
+    "text": "மற்ற சாதனம் இந்த அணுகல் விசையை ஏற்கவில்லை. அந்தச் சாதனத்தில் அமைத்த விசையை உள்ளிடுங்கள் (மற்றொரு Kotomimi இன் விசை, அதன் பகிர்வு \"விருப்பங்கள்\" பகுதியில் இருக்கும்)."
+  },
+  "providers.localai.serverNeedsKey": {
+    "en": "It asks for an access key",
+    "text": "இதற்கு அணுகல் சாவி தேவை"
+  },
+  "providers.localai.serverNeedsKeyTooltip": {
+    "en": "Turn this on when the other device was given an access key — a Kotomimi with one set under its sharing options, for example.",
+    "text": "வேறொரு சாதனத்தில் அணுகல் சாவி அமைக்கப்பட்டிருந்தால் இதை இயக்குங்கள். எடுத்துக்காட்டாக, அந்த Kotomimi-யில் பகிர்வின் விருப்பங்களில் சாவி அமைக்கப்பட்டிருக்கலாம்."
+  },
+  "providers.localai.serverNoAsr": {
+    "en": "The other device has no speech recognition model for {{source}}. Download one there first (in the model library of its sharing card), or let this computer listen.",
+    "text": "மற்ற சாதனத்தில் {{source}} மொழியை அறியும் பேச்சறிதல் மாதிரி இல்லை. முதலில் அங்கே பதிவிறக்குங்கள் (அதன் பகிர்வு அட்டையின் மாதிரி நூலகத்தில்), அல்லது இந்தக் கணினியைப் பேச்சறியப் பயன்படுத்துங்கள்."
+  },
+  "providers.localai.serverNoDetect": {
+    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
+    "text": "மற்ற சாதனத்தில் மொழிகளைத் தானாகக் கண்டறியும் பேச்சறிதல் மாதிரி இல்லை. \"நானும் … பேசுவேன்\" என்பதற்கும் மற்றவரின் மொழியைத் தானாகக் கண்டறிவதற்கும் அது தேவை. Qwen3-ASR போன்ற மாதிரியை அங்கே பதிவிறக்குங்கள் அல்லது இந்த இரு விருப்பங்களையும் அணையுங்கள்."
+  },
+  "providers.localai.serverNoModels": {
+    "en": "The other device has no model yet: install or download one there first.",
+    "text": "மற்ற சாதனத்தில் இன்னும் மாதிரி இல்லை. முதலில் அங்கே ஒரு மாதிரியை நிறுவுங்கள் அல்லது பதிவிறக்குங்கள்."
+  },
+  "providers.localai.serverSilent": {
+    "en": "This address does not answer. If Kotomimi is running on that device, enable its sharing to use its installed native models.",
+    "text": "இந்த முகவரியுடன் இணைக்க முடியவில்லை. அந்தச் சாதனத்தில் Kotomimi இயங்கினால், அதில் பகிர்வை இயக்கி, நிறுவியுள்ள இயல்நிலை மாதிரிகளைப் பயன்படுத்துங்கள்."
+  },
+  "providers.localai.serverUnreachable": {
+    "en": "The other device ({{address}}) did not answer. Check that it is on and on the same network as this computer, and that Kotomimi there is sharing (or its model server is running). It is asked again by itself.",
+    "text": "மற்ற சாதனம் ({{address}}) பதிலளிக்கவில்லை. அது இயங்குகிறதா, இந்தக் கணினியின் அதே பிணையத்தில் உள்ளதா, அங்குள்ள Kotomimi இல் பகிர்வு இயக்கப்பட்டுள்ளதா (அல்லது மாதிரி சேவையகம் இயங்குகிறதா) என்று சரிபாருங்கள். இணைந்ததும் தானாகத் தொடரும்."
+  },
+  "providers.localai.sharedDeviceNone": {
+    "en": "No device connected yet",
+    "text": "இன்னும் சாதனம் இணைக்கப்படவில்லை"
+  },
+  "providers.localai.sourceAuto": {
+    "en": "The language cannot be detected with this setup. Choose the language you speak.",
+    "text": "இந்த அமைப்பில் மொழியைத் தானாகக் கண்டறிய முடியாது. நீங்கள் பேசும் மொழியைத் தேர்ந்தெடுங்கள்."
+  },
+  "providers.localai.speedAbout": {
+    "en": "About {{seconds}} s",
+    "text": "சுமார் {{seconds}} வினாடிகள்"
+  },
+  "providers.localai.speedAdviceGeneral": {
+    "en": "A smaller model or a faster device is suggested.",
+    "text": "சிறிய மாதிரி அல்லது வேகமான சாதனத்தைப் பயன்படுத்துவது நல்லது."
+  },
+  "providers.localai.speedAdviceModel": {
+    "en": "A smaller model, such as {{name}}, is suggested.",
+    "text": "{{name}} போன்ற சிறிய மாதிரிக்கு மாறுவது நல்லது."
+  },
+  "providers.localai.speedAdviceSwitch": {
+    "en": "Switch and test again",
+    "text": "மாற்றி மீண்டும் சோதி"
+  },
+  "providers.localai.speedBehind": {
+    "en": "Falls behind",
+    "text": "தாமதம் அதிகரிக்கும்"
+  },
+  "providers.localai.speedCoach": {
+    "en": "{{seconds}} s per sentence for feedback, on average",
+    "text": "கருத்து வழங்க ஒரு வாக்கியத்துக்குச் சராசரியாக {{seconds}} வினாடிகள்"
+  },
+  "providers.localai.speedCoachSlow": {
+    "en": "Feedback is slower than speech, so it will fall further behind. ",
+    "text": "கருத்து வழங்கும் வேகம் பேச்சை விடக் குறைவாக உள்ளது. கருத்துகள் கிடைக்கும் தாமதம் தொடர்ந்து அதிகரிக்கும்."
+  },
+  "providers.localai.speedFailed": {
+    "en": "The test could not finish: {{reason}}",
+    "text": "சோதனையை முடிக்க முடியவில்லை: {{reason}}"
+  },
+  "providers.localai.speedHead": {
+    "en": "Speed test · {{when}}",
+    "text": "வேகச் சோதனை · {{when}}"
+  },
+  "providers.localai.speedHear": {
+    "en": "Text appears {{seconds}} s after the speech ends",
+    "text": "பேசி முடித்த {{seconds}} வினாடிகளில் மூல உரை தெரியும்"
+  },
+  "providers.localai.speedHearSlow": {
+    "en": "Recognition is slower than speech, so the captions will fall further behind. ",
+    "text": "பேச்சறிதல் வேகம் பேச்சை விடக் குறைவாக உள்ளது. வசனங்களின் தாமதம் தொடர்ந்து அதிகரிக்கும்."
+  },
+  "providers.localai.speedJustNow": {
+    "en": "just now",
+    "text": "இப்போது"
+  },
+  "providers.localai.speedLegCoach": {
+    "en": "From you finishing to the feedback",
+    "text": "நீங்கள் பேசி முடித்ததிலிருந்து கருத்து தெரிவது வரை"
+  },
+  "providers.localai.speedLegParticipant": {
+    "en": "From the other side finishing to the translation",
+    "text": "மற்றவர் பேசி முடித்ததிலிருந்து மொழிபெயர்ப்பு தெரிவது வரை"
+  },
+  "providers.localai.speedLegSpeaker": {
+    "en": "From you finishing to the translation",
+    "text": "நீங்கள் பேசி முடித்ததிலிருந்து மொழிபெயர்ப்பு தெரிவது வரை"
+  },
+  "providers.localai.speedNoClip": {
+    "en": "There is no test recording for this language yet.",
+    "text": "இந்த மொழிக்கான சோதனை ஒலிப்பதிவு இன்னும் இல்லை."
+  },
+  "providers.localai.speedNone": {
+    "en": "No result arrived during the test.",
+    "text": "சோதனையின்போது எந்த முடிவும் கிடைக்கவில்லை."
+  },
+  "providers.localai.speedRetest": {
+    "en": "Test again",
+    "text": "மீண்டும் சோதி"
+  },
+  "providers.localai.speedStop": {
+    "en": "Stop",
+    "text": "நிறுத்து"
+  },
+  "providers.localai.speedTest": {
+    "en": "Test speed",
+    "text": "வேகத்தைச் சோதி"
+  },
+  "providers.localai.speedTesting": {
+    "en": "Testing speed: a recording of about ten seconds is sent through each step at speaking pace. Nothing is recorded or played.",
+    "text": "வேகம் சோதிக்கப்படுகிறது: சுமார் 10 வினாடி ஒலிப்பதிவு இயல்பான பேச்சு வேகத்தில் ஒவ்வொரு படிக்கும் அனுப்பப்படுகிறது. மைக்ரோஃபோன் பயன்படுத்தப்படாது; ஒலியும் இயக்கப்படாது."
+  },
+  "providers.localai.speedTranslate": {
+    "en": "{{seconds}} s per sentence to translate, on average",
+    "text": "மொழிபெயர்க்க ஒரு வாக்கியத்துக்குச் சராசரியாக {{seconds}} வினாடிகள்"
+  },
+  "providers.localai.speedTranslateSlow": {
+    "en": "Translation is slower than speech, so the translations will fall further behind. ",
+    "text": "மொழிபெயர்ப்பு வேகம் பேச்சை விடக் குறைவாக உள்ளது. மொழிபெயர்ப்பின் தாமதம் தொடர்ந்து அதிகரிக்கும்."
+  },
+  "providers.localai.speedVerdictOk": {
+    "en": "This setup keeps up with live speech.",
+    "text": "இந்த அமைப்பு நேரடிப் பேச்சின் வேகத்துக்கு ஈடுகொடுக்கும்."
+  },
+  "providers.localai.speedVerdictSlow": {
+    "en": "Some steps cannot keep up with speech; see the notes above.",
+    "text": "சில படிகள் பேச்சின் வேகத்துக்கு ஈடுகொடுக்கவில்லை. மேலே உள்ள குறிப்புகளைப் பாருங்கள்."
+  },
+  "providers.localai.stageDevice": {
+    "en": "Device",
+    "text": "சாதனம்"
+  },
+  "providers.localai.tag_native": {
+    "en": "Native engine",
+    "text": "இயல்நிலை இயந்திரம்"
+  },
+  "providers.localai.tag_system": {
+    "en": "Built into macOS",
+    "text": "கணினி அமைப்பில் உள்ளமைந்தது"
+  },
+  "providers.localai.tagHint_native": {
+    "en": "Runs on the graphics card using a native engine downloaded with the model. Loads when a session starts; the first start after boot may take about half a minute. Memory is released after the engine is no longer in use.",
+    "text": "மாதிரியுடன் பதிவிறக்கப்படும் இயல்நிலை இயந்திரம் மூலம் வரைகலை அட்டையில் இயங்கும். அமர்வு தொடங்கும்போது ஏற்றப்படும்; கணினியை இயக்கிய பின் முதல் முறை சுமார் அரை நிமிடம் ஆகலாம். இயந்திரம் பயன்பாட்டில் இல்லாதபோது நினைவகம் விடுவிக்கப்படும்."
+  },
+  "providers.localai.tagHint_system": {
+    "en": "The speech recognition of macOS itself: no video memory taken, nothing to warm up. The system downloads each language.",
+    "text": "Mac அமைப்பின் உள்ளமைந்த பேச்சறிதல்: வரைகலை நினைவகத்தைப் பயன்படுத்தாது; தயாராகக் காத்திருக்க வேண்டாம். ஒவ்வொரு மொழிக்கான தொகுப்பையும் கணினி அமைப்பே பதிவிறக்கும்."
+  },
+  "providers.localai.textBaseUrlPlaceholder": {
+    "en": "e.g. https://api.openai.com/v1 or http://localhost:11434/v1",
+    "text": "எ.கா. https://api.openai.com/v1 அல்லது http://localhost:11434/v1"
+  },
+  "providers.localai.textModelPlaceholder": {
+    "en": "The model's name, e.g. gpt-4o-mini",
+    "text": "மாதிரிப் பெயர், எ.கா. gpt-4o-mini"
+  },
+  "providers.localai.translateInSession": {
+    "en": "The device's own choice (translated in the same session it hears in)",
+    "text": "அந்தச் சாதனம் தீர்மானிக்கும் (பேச்சறிதலும் மொழிபெயர்ப்பும் ஒரே அமர்வில்)"
+  },
+  "providers.localai.translateKey": {
+    "en": "API key of the translation model",
+    "text": "மொழிபெயர்ப்பு மாதிரியின் API சாவி"
+  },
+  "providers.localai.translateKotomimiOwn": {
+    "en": "The device's own choice (its best model for your languages)",
+    "text": "அந்தச் சாதனம் தீர்மானிக்கும் (உங்கள் மொழிகளுக்கு ஏற்ற மாதிரியைத் தானாகத் தேர்ந்தெடுக்கும்)"
+  },
+  "providers.localai.translateStage": {
+    "en": "Translation",
+    "text": "மொழிபெயர்ப்பு"
+  },
+  "providers.localai.translateStageTooltip": {
+    "en": "What turns the recognized text into the other language. An API model is any service that speaks the OpenAI chat API: a hosted one, or Ollama or LM Studio on this computer.",
+    "text": "அறியப்பட்ட உரையை வேறொரு மொழிக்கு மாற்றும் பகுதி. OpenAI அரட்டை API ஐ ஆதரிக்கும் எந்தச் சேவையையும் API மாதிரியாகப் பயன்படுத்தலாம்: மேகச் சேவை அல்லது இந்தக் கணினியின் Ollama, LM Studio போன்றவை."
+  },
+  "providers.localai.translateUnnamed": {
+    "en": "Translation has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "மொழிபெயர்ப்புக்கு இன்னும் மாதிரி இல்லை. வழங்குநரின் கீழுள்ள \"மொழிபெயர்ப்பு\" அட்டையில் ஒன்றைத் தேர்ந்தெடுங்கள் (API மாதிரிக்கு முகவரியும் மாதிரிப் பெயரும் தேவை), அல்லது வேறு இடத்தைத் தேர்ந்தெடுங்கள்."
+  },
+  "providers.localai.translatorFailed": {
+    "en": "The translation engine of this computer could not start. In the Translation card, press \"Try again\" — or choose another model.",
+    "text": "இந்தக் கணினியின் மொழிபெயர்ப்பு இயந்திரத்தைத் தொடங்க முடியவில்லை. மொழிபெயர்ப்பு அட்டையில் \"மீண்டும் முயல்\" என்பதை அழுத்துங்கள் அல்லது வேறொரு மாதிரியைத் தேர்ந்தெடுங்கள்."
+  },
+  "providers.localai.translatorFailedShort": {
+    "en": "The translation engine could not start.",
+    "text": "மொழிபெயர்ப்பு இயந்திரத்தைத் தொடங்க முடியவில்லை."
+  },
+  "providers.localai.translatorMissing": {
+    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} இன்னும் பதிவிறக்கப்படவில்லை. மொழிபெயர்ப்பு அட்டையில் இயல்நிலை மாதிரியைப் பதிவிறக்குங்கள் அல்லது \"API மாதிரி\", \"மற்றொரு சாதனம்\" என்பதற்கு மாறுங்கள்."
+  },
+  "providers.localai.translatorReady": {
+    "en": "The translation engine is ready.",
+    "text": "மொழிபெயர்ப்பு இயந்திரம் தயார்."
+  },
+  "providers.localai.translatorUnfit": {
+    "en": "{{name}} does not translate between your two languages. Choose another model for it.",
+    "text": "நீங்கள் தேர்ந்தெடுத்த இரு மொழிகளுக்கும் {{name}} இல் ஆதரவில்லை. வேறொரு மாதிரியைத் தேர்ந்தெடுங்கள்."
+  },
+  "providers.localai.translatorUnsupported": {
+    "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
+    "text": "இந்த இயங்குதளத்தில் இயல்நிலை மொழிபெயர்ப்பு இயந்திரத்திற்கு இன்னும் ஆதரவில்லை. மொழிபெயர்ப்பு அட்டையில் \"API மாதிரி\" அல்லது \"மற்றொரு சாதனம்\" என்பதற்கு மாறுங்கள்."
+  },
+  "providers.localai.translatorWarming": {
+    "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",
+    "text": "இந்தக் கணினியின் மொழிபெயர்ப்பு இயந்திரம் இன்னும் தொடங்குகிறது. சில வினாடிகளே ஆகும். தயாரானதும் தொடங்கலாம்."
+  },
+  "providers.localai.translatorWarmingShort": {
+    "en": "Starting the translation engine…",
+    "text": "மொழிபெயர்ப்பு இயந்திரம் தொடங்குகிறது…"
+  },
+  "providers.localai.typedFailed": {
+    "en": "A sentence you typed was not translated: the translation model did not answer.",
+    "text": "நீங்கள் தட்டச்சு செய்த ஒரு வாக்கியத்தை மொழிபெயர்க்க முடியவில்லை: மொழிபெயர்ப்பு மாதிரி பதிலளிக்கவில்லை."
+  },
+  "providers.localai.viaModel": {
+    "en": "API model",
+    "text": "API மாதிரி"
+  },
+  "providers.openai_live.name": {
+    "en": "OpenAI Live",
+    "text": "OpenAI Live"
+  },
+  "providers.openai_translate.name": {
+    "en": "OpenAI Translate",
+    "text": "OpenAI Translate"
+  },
+  "providers.openai.name": {
+    "en": "OpenAI Realtime",
+    "text": "OpenAI Realtime"
+  },
+  "providers.palabraai.authModeApp": {
+    "en": "App Client ID/Secret",
+    "text": "செயலி கிளையன்ட் அடையாள எண்/ரகசியச் சாவி"
+  },
+  "providers.palabraai.clientIdPlaceholder": {
+    "en": "Client ID",
+    "text": "கிளையன்ட் அடையாள எண்"
+  },
+  "providers.palabraai.clientSecretPlaceholder": {
+    "en": "Client Secret",
+    "text": "கிளையன்ட் ரகசியச் சாவி"
+  },
+  "providers.palabraai.name": {
+    "en": "Palabra AI",
+    "text": "Palabra AI"
+  },
+  "providers.qwen_livetranslate.name": {
+    "en": "Qwen LiveTranslate",
+    "text": "Qwen LiveTranslate"
+  },
+  "providers.soniox.name": {
+    "en": "Soniox",
+    "text": "Soniox"
+  },
+  "providers.volcengine_ast2.accessTokenPlaceholder": {
+    "en": "Access Token",
+    "text": "அணுகல் டோக்கன்"
+  },
+  "providers.volcengine_ast2.appIdPlaceholder": {
+    "en": "APP ID",
+    "text": "செயலி அடையாள எண்"
+  },
+  "providers.volcengine_ast2.authModeApp": {
+    "en": "App ID + Access Token",
+    "text": "செயலி அடையாள எண் + அணுகல் டோக்கன்"
+  },
+  "providers.volcengine_ast2.name": {
+    "en": "Doubao AST 2.0",
+    "text": "Doubao உடனடி மொழிபெயர்ப்பு 2.0"
+  },
+  "settings.glossaryAdd": {
+    "en": "Add a word…",
+    "text": "சொல் சேர்…"
+  },
+  "settings.glossaryDelete": {
+    "en": "Delete entry",
+    "text": "பதிவை நீக்கு"
+  },
+  "settings.glossaryFixOpen": {
+    "en": "Fix word",
+    "text": "சொல்லைத் திருத்து"
+  },
+  "settings.glossaryFixSave": {
+    "en": "Save to glossary",
+    "text": "அகராதியில் சேர்"
+  },
+  "settings.glossaryFixTo": {
+    "en": "Change to",
+    "text": "இவ்வாறு மாற்று"
+  },
+  "settings.glossaryFull": {
+    "en": "Glossary is full",
+    "text": "அகராதி நிரம்பிவிட்டது"
+  },
+  "settings.glossaryHeard": {
+    "en": "Misheard as",
+    "text": "தவறாகக் கேட்டது"
+  },
+  "settings.glossaryOptional": {
+    "en": "Only if misheard",
+    "text": "தவறாகக் கேட்டால் மட்டும் நிரப்பவும்"
+  },
+  "settings.glossaryTitle": {
+    "en": "Personal glossary",
+    "text": "தனிப்பட்ட அகராதி"
+  },
+  "settings.glossaryTooltip": {
+    "en": "Names and special words. Write each in the language it is spoken in. Where one has been misheard, add how on the right and it is put right from then on; some recognition models only follow that column. You can also select a misheard word in the conversation and correct it there.",
+    "text": "பெயர்களையும் சிறப்புச் சொற்களையும் பேசும் மொழியிலேயே எழுதுங்கள். தவறாகக் கேட்டிருந்தால், வலப்புறத்தில் அந்த வடிவத்தைச் சேருங்கள். இனி அது தானாகத் திருத்தப்படும். சில பேச்சறிதல் மாதிரிகள் வலப்புறப் பத்தியை மட்டுமே பயன்படுத்தும். உரையாடலிலும் தவறாகக் கேட்ட சொல்லைத் தேர்ந்தெடுத்து நேரடியாகத் திருத்தலாம்."
+  },
+  "settings.glossaryTooltipLabel": {
+    "en": "About personal glossary",
+    "text": "தனிப்பட்ட அகராதி பற்றி"
+  },
+  "settings.glossaryWritten": {
+    "en": "Word",
+    "text": "சொல்"
+  },
+  "settings.transcriptKeywordsPlaceholder": {
+    "en": "Sokuji, Kizuna AI, PulseAudio",
+    "text": "Sokuji, Kizuna AI, PulseAudio"
+  },
+  "setup.credentials.accessKeyId": {
+    "en": "Access Key ID",
+    "text": "அணுகல் விசை அடையாளம்"
+  },
+  "setup.credentials.accessToken": {
+    "en": "Access Token",
+    "text": "அணுகல் டோக்கன்"
+  },
+  "setup.credentials.apiSecret": {
+    "en": "API Secret",
+    "text": "API ரகசிய விசை"
+  },
+  "setup.credentials.appId": {
+    "en": "App ID",
+    "text": "செயலி அடையாளம்"
+  },
+  "setup.credentials.secretAccessKey": {
+    "en": "Secret Access Key",
+    "text": "ரகசிய அணுகல் விசை"
+  },
+  "tour.steps.kotomimi-tips.coach": {
+    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
+    "text": "அவர்களின் மொழியில் நீங்களே பேசுகிறீர்களா? அமைப்புகளில் இலக்கணக் கருத்துகளை இயக்கவும். மொழிபெயர்ப்புடன் உங்களுக்கு மட்டும் தெரியும் இலக்கணக் கருத்துகளையும் பெற, \"நானும் மற்ற மொழியைப் பேசுவேன்\" என்பதையும் இயக்கலாம்."
+  },
+  "tour.steps.kotomimi-tips.content": {
+    "en": "Worth knowing before you start:",
+    "text": "தொடங்கும் முன் தெரிந்துகொள்ள வேண்டியவை:"
+  },
+  "tour.steps.kotomimi-tips.share": {
+    "en": "Another device can use this computer's models: Settings → Provider → Share with other devices.",
+    "text": "மற்றொரு சாதனமும் இந்தக் கணினியின் மாதிரிகளைப் பயன்படுத்தலாம்: அமைப்புகள் → வழங்குநர் → மற்ற சாதனங்களுடன் பகிர்."
+  },
+  "tour.steps.kotomimi-tips.title": {
+    "en": "Three more things",
+    "text": "மேலும் மூன்று விஷயங்கள்"
+  },
+  "tour.steps.kotomimi-tips.typed": {
+    "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
+    "text": "அமர்வு தொடங்கியதும் கீழே உள்ளீட்டுப் பெட்டி தோன்றும். ஒரு வாக்கியத்தைத் தட்டச்சு செய்தால் மொழிபெயர்க்கப்படும். நேராக அந்தப் பெட்டிக்குச் செல்ல Ctrl+K அழுத்தவும்."
+  },
+  "tour.steps.models.content_kotomimi": {
+    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
+    "text": "மாதிரிகளைப் பதிவிறக்க, படியின் அட்டையிலுள்ள \"மாதிரி நூலகம்\" என்பதைத் திறக்கவும். உண்மையான உரையாடல்களில் சிறப்பாகச் செயல்பட்டவற்றுக்கு \"பரிந்துரை\" குறி இருக்கும். ஒவ்வொரு மாதிரிப் பெயருக்கும் அருகிலுள்ள சிறு குறியீட்டில் சோதனை முடிவுகளைக் காணலாம். பதிவிறக்கியதும் மாதிரி தானாகவே பயன்பாட்டுக்கு வரும்."
+  },
+  "tour.steps.provider-settings.content_kotomimi": {
+    "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",
+    "text": "பேச்சறிதல், மொழிபெயர்ப்பு, இலக்கணக் கருத்துகள் என ஒவ்வொரு படிக்கும் இங்கே ஒரு அட்டை உள்ளது. அது எங்கு இயங்க வேண்டும் என்பதை அட்டையில் தேர்ந்தெடுக்கலாம்: உள்ளூர் வலையிலுள்ள மற்றொரு சாதனம், API மாதிரி அல்லது இந்தக் கணினி. மாதிரியையும் அங்கேயே தேர்ந்தெடுக்கலாம். இந்தக் கணினியின் மாதிரிகளை மற்றொரு சாதனத்துடன் பகிர, அமைப்புகள் → வழங்குநர் பகுதிக்குச் செல்லவும்."
+  },
+  "tour.steps.reading-aids.content": {
+    "en": "Help for reading the other language, switched here:",
+    "text": "வேற்று மொழியைப் படிக்க உதவும் காட்சிகளை இங்கே இயக்கலாம் அல்லது அணைக்கலாம்:"
+  },
+  "tour.steps.reading-aids.fonts": {
+    "en": "Fonts for each language are under Settings → Fonts.",
+    "text": "ஒவ்வொரு மொழிக்குமான எழுத்துருவை அமைப்புகள் → எழுத்துருக்கள் பகுதியில் தேர்ந்தெடுக்கலாம்."
+  },
+  "tour.steps.reading-aids.furigana": {
+    "en": "Furigana — kana above Japanese kanji.",
+    "text": "ஃபுரிகானா — ஜப்பானிய காஞ்சி எழுத்துகளுக்கு மேலே கனா உச்சரிப்பைக் காட்டும்."
+  },
+  "tour.steps.reading-aids.pinyin": {
+    "en": "Pinyin — tone-marked pinyin above Chinese.",
+    "text": "பின்யின் — சீன உரைக்கு மேலே தொனிக்குறிகளுடன் பின்யின் உச்சரிப்பைக் காட்டும்."
+  },
+  "tour.steps.reading-aids.romanization": {
+    "en": "Romanization — a line in Latin letters under Japanese, Korean, Russian and Ukrainian.",
+    "text": "இலத்தீன் எழுத்தாக்கம் — ஜப்பானிய, கொரிய, ரஷ்ய, உக்ரேனிய உரைகளுக்குக் கீழே இலத்தீன் எழுத்துகளில் உச்சரிப்பைக் காட்டும்."
+  },
+  "tour.steps.reading-aids.title": {
+    "en": "Reading aids",
+    "text": "வாசிப்பு உதவிகள்"
+  },
+  "voiceLibrary.cloneVoiceRequired": {
+    "en": "This voice needs a clip before it can speak — open the voice list and add one.",
+    "text": "இந்தக் குரல் இன்னும் பேசத் தயாராகவில்லை. குரல் பட்டியலைத் திறந்து ஒரு குரல் பதிவைச் சேர்க்கவும்."
+  },
+  "voiceLibrary.filter.accent.african": {
+    "en": "African",
+    "text": "ஆப்பிரிக்க"
+  },
+  "voiceLibrary.filter.accent.american": {
+    "en": "American",
+    "text": "அமெரிக்க"
+  },
+  "voiceLibrary.filter.accent.arabic": {
+    "en": "Arabic",
+    "text": "அரபு"
+  },
+  "voiceLibrary.filter.accent.australian": {
+    "en": "Australian",
+    "text": "ஆஸ்திரேலிய"
+  },
+  "voiceLibrary.filter.accent.brazilian": {
+    "en": "Brazilian",
+    "text": "பிரேசிலிய"
+  },
+  "voiceLibrary.filter.accent.british": {
+    "en": "British",
+    "text": "பிரிட்டிஷ்"
+  },
+  "voiceLibrary.filter.accent.chinese": {
+    "en": "Chinese",
+    "text": "சீன"
+  },
+  "voiceLibrary.filter.accent.french": {
+    "en": "French",
+    "text": "பிரெஞ்சு"
+  },
+  "voiceLibrary.filter.accent.german": {
+    "en": "German",
+    "text": "ஜெர்மன்"
+  },
+  "voiceLibrary.filter.accent.indian": {
+    "en": "Indian",
+    "text": "இந்திய"
+  },
+  "voiceLibrary.filter.accent.italian": {
+    "en": "Italian",
+    "text": "இத்தாலிய"
+  },
+  "voiceLibrary.filter.accent.japanese": {
+    "en": "Japanese",
+    "text": "ஜப்பானிய"
+  },
+  "voiceLibrary.filter.accent.korean": {
+    "en": "Korean",
+    "text": "கொரிய"
+  },
+  "voiceLibrary.filter.accent.latin_american": {
+    "en": "Latin American",
+    "text": "லத்தீன் அமெரிக்க"
+  },
+  "voiceLibrary.filter.accent.portuguese": {
+    "en": "Portuguese",
+    "text": "போர்த்துகீசிய"
+  },
+  "voiceLibrary.filter.accent.slavic": {
+    "en": "Slavic",
+    "text": "ஸ்லாவிய"
+  },
+  "voiceLibrary.filter.accent.southeast_asian": {
+    "en": "Southeast Asian",
+    "text": "தென்கிழக்கு ஆசிய"
+  },
+  "voiceLibrary.filter.accent.spanish": {
+    "en": "Spanish",
+    "text": "ஸ்பானிய"
+  },
+  "voiceLibrary.filter.accentLabel": {
+    "en": "Accent",
+    "text": "உச்சரிப்பு"
+  },
+  "voiceLibrary.filter.age.child": {
+    "en": "Child",
+    "text": "குழந்தை"
+  },
+  "voiceLibrary.filter.age.middle_aged": {
+    "en": "Middle-aged",
+    "text": "நடுத்தர வயது"
+  },
+  "voiceLibrary.filter.age.old": {
+    "en": "Mature",
+    "text": "முதியவர்"
+  },
+  "voiceLibrary.filter.age.teen": {
+    "en": "Teen",
+    "text": "பதின்பருவம்"
+  },
+  "voiceLibrary.filter.age.young": {
+    "en": "Young",
+    "text": "இளவயது"
+  },
+  "voiceLibrary.filter.ageLabel": {
+    "en": "Age",
+    "text": "வயது"
+  },
+  "voiceLibrary.filter.anyAccent": {
+    "en": "Any accent",
+    "text": "அனைத்து உச்சரிப்புகளும்"
+  },
+  "voiceLibrary.filter.anyAge": {
+    "en": "Any age",
+    "text": "அனைத்து வயதுகளும்"
+  },
+  "voiceLibrary.filter.anyGender": {
+    "en": "Any gender",
+    "text": "அனைத்துப் பாலினங்களும்"
+  },
+  "voiceLibrary.filter.anyStyle": {
+    "en": "Any style",
+    "text": "அனைத்துப் பாணிகளும்"
+  },
+  "voiceLibrary.filter.anyUseCase": {
+    "en": "Any use case",
+    "text": "அனைத்துப் பயன்பாடுகளும்"
+  },
+  "voiceLibrary.filter.clear": {
+    "en": "Clear filters",
+    "text": "வடிகட்டிகளை நீக்கு"
+  },
+  "voiceLibrary.filter.count": {
+    "en": "{shown} of {total} voices",
+    "text": "{total} குரல்களில் {shown}"
+  },
+  "voiceLibrary.filter.empty": {
+    "en": "No voices match these filters.",
+    "text": "இந்த வடிகட்டிகளுக்குப் பொருந்தும் குரல்கள் இல்லை."
+  },
+  "voiceLibrary.filter.gender.female": {
+    "en": "Female",
+    "text": "பெண் குரல்"
+  },
+  "voiceLibrary.filter.gender.male": {
+    "en": "Male",
+    "text": "ஆண் குரல்"
+  },
+  "voiceLibrary.filter.gender.neutral": {
+    "en": "Neutral",
+    "text": "பாலினச் சார்பற்றது"
+  },
+  "voiceLibrary.filter.genderLabel": {
+    "en": "Gender",
+    "text": "பாலினம்"
+  },
+  "voiceLibrary.filter.style.breathy": {
+    "en": "Breathy",
+    "text": "மூச்சுக் கலந்த"
+  },
+  "voiceLibrary.filter.style.breezy": {
+    "en": "Breezy",
+    "text": "இலகுவான"
+  },
+  "voiceLibrary.filter.style.bright": {
+    "en": "Bright",
+    "text": "ஒளிமிக்க"
+  },
+  "voiceLibrary.filter.style.calm": {
+    "en": "Calm",
+    "text": "அமைதியான"
+  },
+  "voiceLibrary.filter.style.casual": {
+    "en": "Casual",
+    "text": "இயல்பான"
+  },
+  "voiceLibrary.filter.style.clear": {
+    "en": "Clear",
+    "text": "தெளிவான"
+  },
+  "voiceLibrary.filter.style.confident": {
+    "en": "Confident",
+    "text": "தன்னம்பிக்கையான"
+  },
+  "voiceLibrary.filter.style.deep": {
+    "en": "Deep",
+    "text": "ஆழமான"
+  },
+  "voiceLibrary.filter.style.dramatic": {
+    "en": "Dramatic",
+    "text": "நாடகபாணி"
+  },
+  "voiceLibrary.filter.style.easy_going": {
+    "en": "Easy-going",
+    "text": "இணக்கமான"
+  },
+  "voiceLibrary.filter.style.energetic": {
+    "en": "Energetic",
+    "text": "ஆற்றல்மிக்க"
+  },
+  "voiceLibrary.filter.style.even": {
+    "en": "Even",
+    "text": "சீரான"
+  },
+  "voiceLibrary.filter.style.excitable": {
+    "en": "Excitable",
+    "text": "உணர்ச்சிவேகமான"
+  },
+  "voiceLibrary.filter.style.expressive": {
+    "en": "Expressive",
+    "text": "உணர்வுபூர்வமான"
+  },
+  "voiceLibrary.filter.style.firm": {
+    "en": "Firm",
+    "text": "உறுதியான"
+  },
+  "voiceLibrary.filter.style.formal": {
+    "en": "Formal",
+    "text": "முறையான"
+  },
+  "voiceLibrary.filter.style.forward": {
+    "en": "Forward",
+    "text": "வெளிப்படையான"
+  },
+  "voiceLibrary.filter.style.friendly": {
+    "en": "Friendly",
+    "text": "நட்பான"
+  },
+  "voiceLibrary.filter.style.gentle": {
+    "en": "Gentle",
+    "text": "சாந்தமான"
+  },
+  "voiceLibrary.filter.style.gravelly": {
+    "en": "Gravelly",
+    "text": "கரகரப்பான"
+  },
+  "voiceLibrary.filter.style.informative": {
+    "en": "Informative",
+    "text": "விளக்கமளிக்கும்"
+  },
+  "voiceLibrary.filter.style.knowledgeable": {
+    "en": "Knowledgeable",
+    "text": "அறிவார்ந்த"
+  },
+  "voiceLibrary.filter.style.lively": {
+    "en": "Lively",
+    "text": "துடிப்பான"
+  },
+  "voiceLibrary.filter.style.mature": {
+    "en": "Mature",
+    "text": "முதிர்ச்சியான"
+  },
+  "voiceLibrary.filter.style.neutral": {
+    "en": "Neutral",
+    "text": "நடுநிலையான"
+  },
+  "voiceLibrary.filter.style.playful": {
+    "en": "Playful",
+    "text": "குறும்பான"
+  },
+  "voiceLibrary.filter.style.raspy": {
+    "en": "Raspy",
+    "text": "கரகரத்த"
+  },
+  "voiceLibrary.filter.style.smooth": {
+    "en": "Smooth",
+    "text": "சரளமான"
+  },
+  "voiceLibrary.filter.style.soft": {
+    "en": "Soft",
+    "text": "மென்மையான"
+  },
+  "voiceLibrary.filter.style.upbeat": {
+    "en": "Upbeat",
+    "text": "உற்சாகமான"
+  },
+  "voiceLibrary.filter.style.warm": {
+    "en": "Warm",
+    "text": "இதமான"
+  },
+  "voiceLibrary.filter.style.youthful": {
+    "en": "Youthful",
+    "text": "இளமையான"
+  },
+  "voiceLibrary.filter.styleLabel": {
+    "en": "Style",
+    "text": "பாணி"
+  },
+  "voiceLibrary.filter.useCase.conversational": {
+    "en": "Conversation",
+    "text": "உரையாடல்"
+  },
+  "voiceLibrary.filter.useCase.educational": {
+    "en": "Teaching",
+    "text": "விளக்கவுரை"
+  },
+  "voiceLibrary.filter.useCase.entertainment": {
+    "en": "Entertainment",
+    "text": "பொழுதுபோக்கு"
+  },
+  "voiceLibrary.filter.useCase.narration": {
+    "en": "Narration",
+    "text": "பின்னணிப் பேச்சு"
+  },
+  "voiceLibrary.filter.useCase.social_media": {
+    "en": "Social media",
+    "text": "சமூக ஊடகம்"
+  },
+  "voiceLibrary.filter.useCaseLabel": {
+    "en": "Use case",
+    "text": "பயன்பாடு"
+  }
+}

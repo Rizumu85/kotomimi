@@ -1,0 +1,2190 @@
+{
+  "audioSystem.installCommand": {
+    "en": "sudo apt install pulseaudio-utils",
+    "text": "sudo apt install pulseaudio-utils"
+  },
+  "captionShare.kinds.wifi": {
+    "en": "Wi‑Fi",
+    "text": "Wi‑Fi"
+  },
+  "engine.status.devVenv": {
+    "en": "dev venv",
+    "text": "persekitaran maya pembangunan"
+  },
+  "engine.status.native": {
+    "en": "native {{version}}",
+    "text": "asli {{version}}"
+  },
+  "fork.aids.furigana": {
+    "en": "Furigana",
+    "text": "Furigana"
+  },
+  "fork.aids.highlight": {
+    "en": "Highlight new",
+    "text": "Serlahkan teks baharu"
+  },
+  "fork.aids.italic": {
+    "en": "Italic source",
+    "text": "Teks asal condong"
+  },
+  "fork.aids.pinyin": {
+    "en": "Pinyin",
+    "text": "Pinyin"
+  },
+  "fork.aids.readings": {
+    "en": "Readings",
+    "text": "Sebutan"
+  },
+  "fork.aids.roman": {
+    "en": "Romanization",
+    "text": "Perumian"
+  },
+  "fork.aids.text": {
+    "en": "Text",
+    "text": "Teks"
+  },
+  "fork.audio.echoAction": {
+    "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
+    "text": "Gunakan fon kepala untuk memutuskan gelung audio, atau naikkan ambang pengaktifan mikrofon dalam Tetapan → Mikrofon."
+  },
+  "fork.audio.gate": {
+    "en": "Mic activation threshold",
+    "text": "Ambang pengaktifan mikrofon"
+  },
+  "fork.audio.gateHint": {
+    "en": "Press the microphone, speak, and set the mark under where the bar reaches — and above where it sits while only your speakers are heard.",
+    "text": "Tekan ikon mikrofon dan cakap beberapa ayat. Tetapkan penanda di bawah aras bar semasa anda bercakap, tetapi di atas arasnya apabila hanya pembesar suara berbunyi."
+  },
+  "fork.audio.gateOff": {
+    "en": "Off",
+    "text": "Mati"
+  },
+  "fork.audio.gateQuiet": {
+    "en": "Nothing from the microphone yet.",
+    "text": "Belum ada bunyi daripada mikrofon."
+  },
+  "fork.audio.gateTest": {
+    "en": "Test the microphone: the bar shows its level",
+    "text": "Uji mikrofon: bar menunjukkan aras bunyi semasa"
+  },
+  "fork.audio.gateTestStop": {
+    "en": "Stop the test",
+    "text": "Hentikan ujian"
+  },
+  "fork.audio.gateTooltip": {
+    "en": "Sound quieter than this is heard as silence — the other side's voice from your speakers, the keyboard, the room — so it is neither translated nor checked. The microphone is heard about 0.2 s later while this is on. Off: everything is heard.",
+    "text": "Bunyi di bawah aras ini dianggap senyap, termasuk suara orang lain daripada pembesar suara, bunyi papan kekunci dan hingar bilik. Bunyi ini tidak diterjemahkan atau dihantar untuk maklum balas tatabahasa. Apabila diaktifkan, audio mikrofon dilewatkan kira-kira 0.2 saat. Apabila dimatikan, semua bunyi dihantar."
+  },
+  "fork.audio.vbcableInstall": {
+    "en": "Install VB-CABLE",
+    "text": "Pasang VB-CABLE"
+  },
+  "fork.audio.vbcableInstalling": {
+    "en": "Downloading… this can take a minute",
+    "text": "Memuat turun, mungkin mengambil sedikit masa…"
+  },
+  "fork.audio.vbcableMissing": {
+    "en": "The VB-CABLE virtual audio driver is not installed, so a spoken translation cannot be sent into a meeting. Subtitles do not need it.",
+    "text": "Pemacu audio maya VB-CABLE belum dipasang, jadi suara terjemahan tidak dapat dihantar ke aplikasi mesyuarat. Ia tidak diperlukan jika anda hanya menggunakan sari kata."
+  },
+  "fork.autostart.note": {
+    "en": "Kotomimi waits in the background after you sign in, with an icon in the notification area, and loads the models once ahead of time so the first session does not wait for it.",
+    "text": "Selepas anda log masuk, Kotomimi bersedia di latar belakang dengan ikon di ruang pemberitahuan. Model dimuatkan lebih awal supaya anda tidak perlu menunggu lama semasa memulakan sesi pertama."
+  },
+  "fork.autostart.title": {
+    "en": "Startup",
+    "text": "Permulaan"
+  },
+  "fork.autostart.toggle": {
+    "en": "Start in the background when I sign in to Windows",
+    "text": "Mulakan di latar belakang apabila saya log masuk ke Windows"
+  },
+  "fork.custom.add": {
+    "en": "Add",
+    "text": "Tambah"
+  },
+  "fork.custom.added": {
+    "en": "Added {{name}} ({{size}} MB). Download it in the model library.",
+    "text": "{{name}} ditambah ({{size}} MB). Muat turunnya dalam pustaka model."
+  },
+  "fork.custom.adding": {
+    "en": "Looking…",
+    "text": "Mencari…"
+  },
+  "fork.custom.anyLanguage": {
+    "en": "Every language",
+    "text": "Pelbagai bahasa"
+  },
+  "fork.custom.downloaded": {
+    "en": "downloaded",
+    "text": "telah dimuat turun"
+  },
+  "fork.custom.error_bad_repo": {
+    "en": "That is not a repository id. It looks like owner/name.",
+    "text": "Itu bukan nama repositori. Formatnya ialah pemilik/nama."
+  },
+  "fork.custom.error_exists": {
+    "en": "This model is already added.",
+    "text": "Model ini sudah ditambah."
+  },
+  "fork.custom.error_not_found": {
+    "en": "No public repository by that name.",
+    "text": "Tiada repositori awam dengan nama itu."
+  },
+  "fork.custom.error_not_whisper": {
+    "en": "This repository is not a Whisper model in the ONNX layout. {{detail}}",
+    "text": "Repositori ini bukan model Whisper dalam format ONNX. {{detail}}"
+  },
+  "fork.custom.error_unreachable": {
+    "en": "Could not reach Hugging Face: {{detail}}",
+    "text": "Tidak dapat menghubungi Hugging Face: {{detail}}"
+  },
+  "fork.custom.intro": {
+    "en": "For a Whisper model the library does not list, such as one fine-tuned for your language. Give its Hugging Face repository id (most onnx-community/… and Xenova/… Whisper repositories work); it needs a graphics card.",
+    "text": "Untuk model Whisper yang tiada dalam pustaka, seperti model yang ditala khusus untuk bahasa anda. Masukkan nama repositori Hugging Face (kebanyakan repositori Whisper onnx-community/… dan Xenova/… boleh digunakan). Kad grafik diperlukan."
+  },
+  "fork.custom.language": {
+    "en": "The language it hears",
+    "text": "Bahasa yang dicam"
+  },
+  "fork.custom.notDownloaded": {
+    "en": "not downloaded",
+    "text": "belum dimuat turun"
+  },
+  "fork.custom.remove": {
+    "en": "Remove {{name}}",
+    "text": "Alih keluar {{name}}"
+  },
+  "fork.custom.repo": {
+    "en": "Repository id",
+    "text": "Nama repositori"
+  },
+  "fork.custom.title": {
+    "en": "Add a Whisper model from Hugging Face",
+    "text": "Tambah model Whisper daripada Hugging Face"
+  },
+  "fork.echoCancellationApp": {
+    "en": "Kotomimi only",
+    "text": "Kotomimi sahaja"
+  },
+  "fork.echoCancellationAppTooltip": {
+    "en": "Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "Kotomimi sahaja — hanya menyingkirkan suara terjemahan yang dimainkan oleh Kotomimi sendiri. Pilih ini apabila mikrofon menggunakan kad bunyi maya (VB-Cable, BlackHole)."
+  },
+  "fork.find.again": {
+    "en": "Search again",
+    "text": "Cari semula"
+  },
+  "fork.find.kindKotomimi": {
+    "en": "Kotomimi",
+    "text": "Perkongsian Kotomimi"
+  },
+  "fork.find.kindPhone": {
+    "en": "Phone · speech recognition",
+    "text": "Telefon · pengecaman pertuturan"
+  },
+  "fork.find.kindPhoneLends": {
+    "en": "Phone · {{what}}",
+    "text": "Telefon · {{what}}"
+  },
+  "fork.find.kindServer": {
+    "en": "Model server",
+    "text": "Pelayan model"
+  },
+  "fork.find.lendsAsr": {
+    "en": "speech recognition",
+    "text": "pengecaman pertuturan"
+  },
+  "fork.find.lendsCoach": {
+    "en": "grammar feedback",
+    "text": "maklum balas tatabahasa"
+  },
+  "fork.find.lendsTranslate": {
+    "en": "translation",
+    "text": "terjemahan"
+  },
+  "fork.find.manual": {
+    "en": "Or type its address",
+    "text": "Atau masukkan alamatnya"
+  },
+  "fork.find.models": {
+    "en": "{{count}} model(s)",
+    "text": "{{count}} model"
+  },
+  "fork.find.needsKey": {
+    "en": "asks for an access key",
+    "text": "memerlukan kunci akses"
+  },
+  "fork.find.none": {
+    "en": "Nothing found. Check that the other device is on, is on the same Wi-Fi or router as this one, and has \"Share this computer's models\" turned on in its Kotomimi. You can also type its address below.",
+    "text": "Tiada peranti ditemui. Pastikan peranti lain dihidupkan, disambungkan ke Wi-Fi atau penghala yang sama dengan komputer ini, dan \"Kongsi model komputer ini\" diaktifkan dalam Kotomimi pada peranti itu. Anda juga boleh masukkan alamatnya di bawah."
+  },
+  "fork.find.productHere": {
+    "en": "{{product}} on this computer",
+    "text": "{{product}} pada komputer ini"
+  },
+  "fork.find.search": {
+    "en": "Search my network for devices",
+    "text": "Cari peranti pada rangkaian setempat"
+  },
+  "fork.find.searching": {
+    "en": "Looking for devices on your network…",
+    "text": "Mencari peranti pada rangkaian setempat…"
+  },
+  "fork.find.thisComputer": {
+    "en": "On this computer",
+    "text": "Pelayan pada komputer ini"
+  },
+  "fork.find.title": {
+    "en": "Found on your network",
+    "text": "Peranti ditemui pada rangkaian setempat"
+  },
+  "fork.find.use": {
+    "en": "Use {{name}}",
+    "text": "Guna {{name}}"
+  },
+  "fork.fonts.add": {
+    "en": "Add a language…",
+    "text": "Tambah bahasa…"
+  },
+  "fork.fonts.default": {
+    "en": "App default",
+    "text": "Lalai aplikasi"
+  },
+  "fork.fonts.languages": {
+    "en": "Conversation text, by language",
+    "text": "Teks perbualan mengikut bahasa"
+  },
+  "fork.fonts.latin": {
+    "en": "Latin letters and digits",
+    "text": "Huruf Latin dan angka"
+  },
+  "fork.fonts.latinHint": {
+    "en": "English letters and digits in the conversation",
+    "text": "Huruf Inggeris dan angka dalam perbualan"
+  },
+  "fork.fonts.loading": {
+    "en": "Reading the installed fonts…",
+    "text": "Membaca fon yang dipasang…"
+  },
+  "fork.fonts.none": {
+    "en": "No font matches",
+    "text": "Tiada fon yang sepadan"
+  },
+  "fork.fonts.others": {
+    "en": "Other fonts (may lack this script)",
+    "text": "Fon lain (mungkin tiada aksara tulisan ini)"
+  },
+  "fork.fonts.pinyin": {
+    "en": "Pinyin above the text",
+    "text": "Pinyin di atas teks"
+  },
+  "fork.fonts.reading": {
+    "en": "Readings above the text",
+    "text": "Furigana di atas teks"
+  },
+  "fork.fonts.remove": {
+    "en": "Reset {{language}}",
+    "text": "Pulihkan fon lalai {{language}}"
+  },
+  "fork.fonts.roman": {
+    "en": "Romanization",
+    "text": "Perumian"
+  },
+  "fork.fonts.romanHint": {
+    "en": "The readings under Japanese, Korean, Russian and Ukrainian",
+    "text": "Sebutan di bawah teks Jepun, Korea, Rusia dan Ukraine"
+  },
+  "fork.fonts.search": {
+    "en": "Search fonts",
+    "text": "Cari fon"
+  },
+  "fork.fonts.text": {
+    "en": "Text",
+    "text": "Teks utama"
+  },
+  "fork.fonts.title": {
+    "en": "Fonts",
+    "text": "Fon"
+  },
+  "fork.fonts.tooltip": {
+    "en": "Fonts installed on this computer. Characters a font lacks are shown in the app's own.",
+    "text": "Gunakan fon yang dipasang pada komputer ini. Aksara yang tiada dalam fon akan dipaparkan menggunakan fon lalai aplikasi."
+  },
+  "fork.fonts.ui": {
+    "en": "Interface",
+    "text": "Antara muka"
+  },
+  "fork.fonts.uiHint": {
+    "en": "Menus, settings and buttons",
+    "text": "Menu, tetapan dan butang"
+  },
+  "fork.furigana": {
+    "en": "Furigana over kanji (Japanese)",
+    "text": "Furigana di atas kanji (Jepun)"
+  },
+  "fork.help.issues": {
+    "en": "Report a problem",
+    "text": "Laporkan masalah"
+  },
+  "fork.help.issuesTooltip": {
+    "en": "Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page.",
+    "text": "Kotomimi ialah cabang bebas Sokuji. Laporkan masalah aplikasi ini di halaman GitHub Kotomimi sendiri."
+  },
+  "fork.lan.copied": {
+    "en": "Copied",
+    "text": "Disalin"
+  },
+  "fork.lan.copy": {
+    "en": "Copy",
+    "text": "Salin"
+  },
+  "fork.lan.direction": {
+    "en": "Which direction to show models for",
+    "text": "Arah terjemahan untuk paparan model"
+  },
+  "fork.lan.enable": {
+    "en": "Share this computer's models",
+    "text": "Kongsi model komputer ini"
+  },
+  "fork.lan.failed": {
+    "en": "Sharing could not start: {{message}}",
+    "text": "Tidak dapat memulakan perkongsian: {{message}}"
+  },
+  "fork.lan.firewall": {
+    "en": "The first time, your system's firewall may ask whether to allow Kotomimi on the network: allow it for private networks.",
+    "text": "Apabila diaktifkan buat kali pertama, tembok api sistem mungkin meminta kebenaran untuk Kotomimi mengakses rangkaian. Benarkan komunikasi pada rangkaian persendirian."
+  },
+  "fork.lan.firewallAllow": {
+    "en": "Allow",
+    "text": "Benarkan"
+  },
+  "fork.lan.firewallBlocked": {
+    "en": "Windows Firewall is keeping other devices out",
+    "text": "Tembok api Windows menyekat peranti lain"
+  },
+  "fork.lan.firewallDeclined": {
+    "en": "Still blocked: Windows was not told yes.",
+    "text": "Masih disekat: kebenaran belum disahkan dalam Windows."
+  },
+  "fork.lan.firewallPrivate": {
+    "en": "Allow opens this port to devices on your network. Windows will ask you to confirm.",
+    "text": "Tekan \"Benarkan\" untuk membuka port ini kepada peranti pada rangkaian setempat. Windows akan meminta pengesahan anda terlebih dahulu."
+  },
+  "fork.lan.firewallPublic": {
+    "en": "Windows treats this network as public. Allow opens this port to devices on this same network only. Windows will ask you to confirm.",
+    "text": "Windows menganggap rangkaian ini sebagai rangkaian awam. Tekan \"Benarkan\" untuk membuka port ini hanya kepada peranti pada rangkaian yang sama. Windows akan meminta pengesahan anda terlebih dahulu."
+  },
+  "fork.lan.firewallWaiting": {
+    "en": "Waiting for Windows…",
+    "text": "Menunggu Windows…"
+  },
+  "fork.lan.hideLibrary": {
+    "en": "Hide the model library",
+    "text": "Sembunyikan pustaka model"
+  },
+  "fork.lan.key": {
+    "en": "Access key",
+    "text": "Kunci akses"
+  },
+  "fork.lan.keyPlaceholder": {
+    "en": "Blank: anyone on the network may connect",
+    "text": "Kosong: semua peranti pada rangkaian setempat boleh bersambung"
+  },
+  "fork.lan.models": {
+    "en": "Models shared · {{count}}",
+    "text": "Model dikongsi · {{count}}"
+  },
+  "fork.lan.noNetwork": {
+    "en": "This computer is on no network.",
+    "text": "Komputer ini tidak disambungkan ke mana-mana rangkaian."
+  },
+  "fork.lan.noRecognizer": {
+    "en": "No speech recognition model downloaded yet",
+    "text": "Belum ada model pengecaman pertuturan dimuat turun"
+  },
+  "fork.lan.on": {
+    "en": "Sharing — no device connected yet",
+    "text": "Berkongsi, belum ada peranti disambungkan"
+  },
+  "fork.lan.onWithClients": {
+    "en": "Sharing — {{count}} connection(s) in use",
+    "text": "Berkongsi, {{count}} sambungan sedang digunakan"
+  },
+  "fork.lan.options": {
+    "en": "Options",
+    "text": "Pilihan"
+  },
+  "fork.lan.otherAddresses": {
+    "en": "This computer's other addresses",
+    "text": "Alamat lain komputer ini"
+  },
+  "fork.lan.port": {
+    "en": "Port",
+    "text": "Port"
+  },
+  "fork.lan.portInUse": {
+    "en": "Port {{port}} is taken by another program. Choose another under Options.",
+    "text": "Port {{port}} sedang digunakan oleh program lain. Pilih port lain dalam Pilihan."
+  },
+  "fork.lan.serving": {
+    "en": "Sharing",
+    "text": "Berkongsi"
+  },
+  "fork.lan.servingClients": {
+    "en": "Sharing · {{count}} in use",
+    "text": "Berkongsi · {{count}} sambungan digunakan"
+  },
+  "fork.lan.servingTip": {
+    "en": "This computer is lending its models to other devices. The languages and the choice of model are set on those devices, not here.",
+    "text": "Komputer ini sedang berkongsi modelnya dengan peranti lain. Bahasa dan model yang digunakan ditetapkan pada peranti tersebut, bukan di sini."
+  },
+  "fork.lan.sessionIdle": {
+    "en": "The other device ended the session: nobody had spoken for a long while, and it let its models go. Start again to continue.",
+    "text": "Peranti lain telah menamatkan sesi ini kerana tiada sesiapa bercakap terlalu lama, lalu modelnya dikeluarkan daripada memori. Tekan \"Mula\" semula untuk meneruskan."
+  },
+  "fork.lan.showLibrary": {
+    "en": "Download or manage models",
+    "text": "Muat turun atau urus model"
+  },
+  "fork.lan.starting": {
+    "en": "Starting…",
+    "text": "Memulakan…"
+  },
+  "fork.lan.title": {
+    "en": "Share with other devices",
+    "text": "Kongsi dengan peranti lain"
+  },
+  "fork.lan.tooltip": {
+    "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
+    "text": "Benarkan peranti lain pada rangkaian setempat menggunakan model komputer ini. Pada peranti lain, cari komputer ini di bawah \"Peranti lain\" dalam Kotomimi, kemudian pilih model dan bahasa di sana. Perkongsian hanya berfungsi semasa Kotomimi dibuka."
+  },
+  "fork.languageMenu.detect": {
+    "en": "Auto-detect",
+    "text": "Kesan automatik"
+  },
+  "fork.languageMenu.detectUnavailable": {
+    "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
+    "text": "Pengecaman pertuturan semasa tidak boleh mengesan bahasa secara automatik. Qwen3-ASR 1.7B GGUF atau model API diperlukan."
+  },
+  "fork.languageMenu.mine": {
+    "en": "My language",
+    "text": "Bahasa saya"
+  },
+  "fork.languageMenu.mostly": {
+    "en": "Translate into what they mostly speak",
+    "text": "Terjemah bahasa utama pihak lain"
+  },
+  "fork.languageMenu.none": {
+    "en": "No language by that name",
+    "text": "Tiada bahasa dengan nama itu"
+  },
+  "fork.languageMenu.pin": {
+    "en": "Pin {{name}} to the top",
+    "text": "Sematkan {{name}} di atas"
+  },
+  "fork.languageMenu.pinShort": {
+    "en": "Pin to the top",
+    "text": "Sematkan di atas"
+  },
+  "fork.languageMenu.search": {
+    "en": "Type to find a language",
+    "text": "Taip untuk mencari bahasa"
+  },
+  "fork.languageMenu.speakBoth": {
+    "en": "I speak {{language}} too",
+    "text": "Saya juga bertutur dalam {{language}}"
+  },
+  "fork.languageMenu.speakBothHelp": {
+    "en": "When you speak {{mine}}, it is translated into {{language}}; when you speak {{language}}, into {{mine}}. Recognition tells the two apart.",
+    "text": "Apabila anda bertutur dalam {{mine}}, ia diterjemahkan ke {{language}}; apabila anda bertutur dalam {{language}}, ia diterjemahkan ke {{mine}}. Pengecaman membezakan kedua-dua bahasa secara automatik."
+  },
+  "fork.languageMenu.speakBothUnavailable": {
+    "en": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
+    "text": "Pengecam pertuturan yang dipilih tidak boleh membezakan {{mine}} dengan {{language}}. Pilih Apple Speech berpasangan dengan kedua-dua bahasa dipasang, atau pengecam yang mengenal pasti kedua-dua bahasa."
+  },
+  "fork.languageMenu.theirs": {
+    "en": "Their language",
+    "text": "Bahasa pihak lain"
+  },
+  "fork.languageMenu.unpin": {
+    "en": "Unpin {{name}}",
+    "text": "Nyahsemat {{name}}"
+  },
+  "fork.languageMenu.unpinShort": {
+    "en": "Unpin",
+    "text": "Nyahsemat"
+  },
+  "fork.pinyin": {
+    "en": "Pinyin over Chinese",
+    "text": "Pinyin di atas teks Cina"
+  },
+  "fork.romanization": {
+    "en": "Romanization",
+    "text": "Paparkan perumian"
+  },
+  "fork.sourceItalic": {
+    "en": "Source text in italics",
+    "text": "Teks asal dalam huruf condong"
+  },
+  "fork.speechDetection.title": {
+    "en": "Speech detection",
+    "text": "Pengesanan pertuturan"
+  },
+  "fork.statusLine.checking": {
+    "en": "Getting ready. You can start in a moment.",
+    "text": "Sedang bersedia. Anda boleh mula sebentar lagi."
+  },
+  "fork.subtitle.align": {
+    "en": "Alignment",
+    "text": "Penjajaran"
+  },
+  "fork.subtitle.alignCenter": {
+    "en": "Centre",
+    "text": "Tengah"
+  },
+  "fork.subtitle.alignLeft": {
+    "en": "Left",
+    "text": "Kiri"
+  },
+  "fork.subtitle.back": {
+    "en": "Back to the main window",
+    "text": "Kembali ke tetingkap utama"
+  },
+  "fork.subtitle.backdrop": {
+    "en": "Panel",
+    "text": "Kepekatan latar"
+  },
+  "fork.subtitle.lanesView": {
+    "en": "Subtitle view",
+    "text": "Paparan sari kata"
+  },
+  "fork.subtitle.listView": {
+    "en": "List view",
+    "text": "Paparan senarai"
+  },
+  "fork.subtitle.look": {
+    "en": "Look",
+    "text": "Gaya"
+  },
+  "fork.subtitle.lookDark": {
+    "en": "Dark text",
+    "text": "Teks gelap, garis tepi putih"
+  },
+  "fork.subtitle.lookLight": {
+    "en": "Light text",
+    "text": "Teks cerah, garis tepi hitam"
+  },
+  "fork.subtitle.lookPanel": {
+    "en": "Dark panel",
+    "text": "Latar gelap"
+  },
+  "fork.subtitle.lookSample": {
+    "en": "Aa",
+    "text": "Sari kata"
+  },
+  "fork.subtitle.lookSoft": {
+    "en": "Faint panel",
+    "text": "Latar samar, bayang lembut"
+  },
+  "fork.subtitle.moreColors": {
+    "en": "More colours (source text, panel)",
+    "text": "Warna lain (teks asal, latar)"
+  },
+  "fork.subtitle.off": {
+    "en": "Off",
+    "text": "Mati"
+  },
+  "fork.subtitle.outline": {
+    "en": "Outline",
+    "text": "Keamatan garis tepi"
+  },
+  "fork.subtitle.shadow": {
+    "en": "Shadow",
+    "text": "Keamatan bayang"
+  },
+  "fork.subtitle.through": {
+    "en": "Click-through: the mouse passes through the captions",
+    "text": "Klik tembus: klik melepasi sari kata ke tetingkap di bawah"
+  },
+  "fork.subtitle.throughOff": {
+    "en": "Stop click-through",
+    "text": "Matikan klik tembus"
+  },
+  "fork.subtitle.type": {
+    "en": "Type to translate (Ctrl+K)",
+    "text": "Taip untuk terjemah (Ctrl+K)"
+  },
+  "fork.subtitle.typePlaceholder": {
+    "en": "What you want to say — Enter translates",
+    "text": "Apa yang anda mahu katakan, tekan Enter untuk terjemah"
+  },
+  "fork.vrchat.chatbox": {
+    "en": "Above my avatar",
+    "text": "Papar di atas avatar"
+  },
+  "fork.vrchat.chatboxHearBoth": {
+    "en": "Switch to Both",
+    "text": "Tukar kepada Kedua-duanya"
+  },
+  "fork.vrchat.chatboxOff": {
+    "en": "Off",
+    "text": "Mati"
+  },
+  "fork.vrchat.chatboxSourceFirst": {
+    "en": "Original on top",
+    "text": "Teks asal di atas"
+  },
+  "fork.vrchat.chatboxTranslation": {
+    "en": "Translation",
+    "text": "Terjemahan"
+  },
+  "fork.vrchat.chatboxTranslationFirst": {
+    "en": "Translation on top",
+    "text": "Terjemahan di atas"
+  },
+  "fork.vrchat.chatboxUnheard": {
+    "en": "Only the other side is translated now: what you say won't show above your avatar.",
+    "text": "Kini hanya pihak lain diterjemahkan. Kata-kata anda tidak akan dipaparkan di atas avatar."
+  },
+  "fork.vrchat.connected": {
+    "en": "Connected",
+    "text": "Disambungkan"
+  },
+  "fork.vrchat.end": {
+    "en": "End",
+    "text": "Tamat"
+  },
+  "fork.vrchat.help": {
+    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
+    "text": "Berhubung dengan VRChat pada komputer ini. Apabila mikrofon dibisukan dalam VRChat, Kotomimi tidak mengecam pertuturan anda. Terjemahan anda boleh dipaparkan di atas avatar untuk dibaca pemain lain. Apabila dunia memainkan video: jika bunyinya tiada arah, bunyi video diasingkan daripada suara pemain; jika bunyinya berarah, pertuturan pihak lain dibahagikan kepada segmen lebih pendek."
+  },
+  "fork.vrchat.mutedNotHeard": {
+    "en": "Muted in VRChat: what you say is not recognized.",
+    "text": "Mikrofon dibisukan dalam VRChat. Pertuturan anda tidak akan dicam."
+  },
+  "fork.vrchat.mutedThere": {
+    "en": "Muted in VRChat",
+    "text": "Mikrofon dibisukan dalam VRChat"
+  },
+  "fork.vrchat.muteGate": {
+    "en": "Don't hear me while muted in VRChat",
+    "text": "Jangan cam suara saya apabila dibisukan dalam VRChat"
+  },
+  "fork.vrchat.notConnected": {
+    "en": "Not connected",
+    "text": "Belum disambungkan"
+  },
+  "fork.vrchat.onVideo": {
+    "en": "When a world plays a video",
+    "text": "Apabila dunia memainkan video"
+  },
+  "fork.vrchat.pausedOn": {
+    "en": "Not translating",
+    "text": "Terjemahan ditangguhkan"
+  },
+  "fork.vrchat.quickOn": {
+    "en": "Shorter sentences",
+    "text": "Ayat dipendekkan"
+  },
+  "fork.vrchat.remember": {
+    "en": "Remember",
+    "text": "Ingat pilihan"
+  },
+  "fork.vrchat.removedOn": {
+    "en": "Video sound removed",
+    "text": "Bunyi video disingkirkan"
+  },
+  "fork.vrchat.separatedOn": {
+    "en": "Video sound separated",
+    "text": "Bunyi video diasingkan"
+  },
+  "fork.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
+  },
+  "fork.vrchat.turnOnOsc": {
+    "en": "Turn on OSC in the VRChat quick menu",
+    "text": "Hidupkan OSC dalam menu pantas VRChat"
+  },
+  "fork.vrchat.videoAsk": {
+    "en": "Ask me",
+    "text": "Tanya setiap kali"
+  },
+  "fork.vrchat.videoAskResult": {
+    "en": "Asks you when a video starts.",
+    "text": "Tanya anda apa yang perlu dilakukan apabila video bermula."
+  },
+  "fork.vrchat.videoBoth": {
+    "en": "People + video",
+    "text": "Terjemah suara dan video"
+  },
+  "fork.vrchat.videoBothResult": {
+    "en": "The video gets its own line and uses more power; if it can't be separated, sentences are cut shorter.",
+    "text": "Video dipaparkan pada baris berasingan dan menggunakan lebih banyak sumber komputer. Jika bunyi tidak dapat diasingkan, ayat dipendekkan."
+  },
+  "fork.vrchat.videoPause": {
+    "en": "Pause",
+    "text": "Tangguh terjemahan"
+  },
+  "fork.vrchat.videoPauseResult": {
+    "en": "The other side is not translated while it plays.",
+    "text": "Pihak lain tidak diterjemahkan semasa video dimainkan."
+  },
+  "fork.vrchat.videoQuick": {
+    "en": "People only",
+    "text": "Terjemah suara sahaja"
+  },
+  "fork.vrchat.videoQuickResult": {
+    "en": "Takes out video sound; if it can't, sentences are cut shorter.",
+    "text": "Cuba menyingkirkan bunyi video. Jika tidak dapat diasingkan, ayat dipendekkan."
+  },
+  "fork.vrchat.videoShort": {
+    "en": "Video",
+    "text": "Video"
+  },
+  "fork.vrchat.videoStarted": {
+    "en": "Video started",
+    "text": "Video mula dimainkan"
+  },
+  "fork.wizard.addressMissing": {
+    "en": "Choose a device from the list above, or type its address, for example 192.168.1.10:8790.",
+    "text": "Pilih peranti daripada senarai di atas, atau masukkan alamatnya, contohnya 192.168.1.10:8790."
+  },
+  "fork.wizard.device": {
+    "en": "This computer",
+    "text": "Komputer ini"
+  },
+  "fork.wizard.deviceDesc": {
+    "en": "Recognition and translation run on this computer using native models. Download a model for each stage before starting.",
+    "text": "Pengecaman dan terjemahan berjalan pada komputer ini menggunakan model natif. Muat turun model untuk setiap peringkat sebelum bermula."
+  },
+  "fork.wizard.deviceNotice": {
+    "en": "After setup, open Model library in the Speech recognition and Translation cards and download a native model for each. Translation requires a downloaded model, or you can switch that stage to an API model or another device.",
+    "text": "Selepas persediaan, buka Pustaka model dalam kad Pengecaman pertuturan dan Terjemahan, lalu muat turun model natif untuk setiap satu. Terjemahan memerlukan model yang telah dimuat turun, atau anda boleh menukarnya kepada model API atau peranti lain."
+  },
+  "fork.wizard.intro": {
+    "en": "Pick a starting point. Later, in Settings, recognition and translation can each run in a different place.",
+    "text": "Pilih cara untuk bermula. Kemudian dalam Tetapan, anda boleh memilih tempat berbeza untuk pengecaman dan terjemahan."
+  },
+  "fork.wizard.keyNeeded": {
+    "en": "This device asks for an access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options), then press Connect.",
+    "text": "Peranti ini memerlukan kunci akses. Masukkan kunci yang ditetapkan pada peranti itu (pada Kotomimi lain, kunci ada dalam Pilihan perkongsian), kemudian tekan Sambung."
+  },
+  "fork.wizard.pathBadge": {
+    "en": "Recommended",
+    "text": "Disyorkan"
+  },
+  "fork.wizard.pathCost": {
+    "en": "No account and no API key. Text only: subtitles with furigana, typed translation and grammar feedback. Another device means a Kotomimi sharing its models, or a model server such as LocalAI; this computer downloads models onto your disk.",
+    "text": "Tidak perlu akaun atau kunci API. Teks sahaja: sari kata dengan furigana, terjemahan taip dan maklum balas tatabahasa. Peranti lain boleh menjalankan Kotomimi dengan perkongsian dihidupkan, atau pelayan model seperti LocalAI. Untuk komputer ini, model perlu dimuat turun ke cakera."
+  },
+  "fork.wizard.pathDesc": {
+    "en": "Use the models of another device on your network, or this computer's own — and any mix of the two.",
+    "text": "Gunakan model pada peranti lain dalam rangkaian setempat, model pada komputer ini, atau gabungkan kedua-duanya."
+  },
+  "fork.wizard.pathTitle": {
+    "en": "Kotomimi Pipeline",
+    "text": "Kotomimi Padanan Bebas"
+  },
+  "fork.wizard.pendingAddress": {
+    "en": "No device chosen yet — choose one in Settings before you start.",
+    "text": "Belum memilih peranti lain. Pilih satu dalam Tetapan sebelum bermula."
+  },
+  "fork.wizard.server": {
+    "en": "Another device on my network",
+    "text": "Peranti lain dalam rangkaian setempat"
+  },
+  "fork.wizard.serverDesc": {
+    "en": "The models run on another computer: a Kotomimi with sharing turned on, or a model server such as LocalAI. This computer stays light.",
+    "text": "Model berjalan pada komputer lain melalui Kotomimi dengan perkongsian dihidupkan, atau pelayan model seperti LocalAI. Komputer ini hampir tidak menggunakan sumber."
+  },
+  "fork.wizard.serverFound": {
+    "en": "Connected — it offers {{count}} model(s).",
+    "text": "Berjaya disambungkan. {{count}} model tersedia."
+  },
+  "fork.wizard.serverUnreachable": {
+    "en": "Could not connect: {{message}}",
+    "text": "Tidak dapat menyambung: {{message}}"
+  },
+  "fork.wizard.share": {
+    "en": "This computer, for my other devices",
+    "text": "Komputer ini untuk peranti lain"
+  },
+  "fork.wizard.shareDesc": {
+    "en": "Computing power to spare here? Let the models run on this computer for the other devices on your network — and for this computer itself.",
+    "text": "Ada kuasa pemprosesan yang tidak digunakan? Jalankan model pada komputer ini untuk peranti lain dalam rangkaian setempat, serta komputer ini sendiri."
+  },
+  "fork.wizard.shareNotice": {
+    "en": "Nothing to enter. Finishing turns on sharing, so other Kotomimi devices on your network can find this computer. After setup, download models in the Speech recognition card: those are what the others can use.",
+    "text": "Tiada apa yang perlu diisi. Perkongsian dihidupkan selepas persediaan selesai supaya Kotomimi lain dalam rangkaian setempat boleh menemui komputer ini. Selepas itu, muat turun model dalam kad Pengecaman pertuturan di Tetapan. Model inilah yang boleh digunakan oleh peranti lain."
+  },
+  "fork.wizard.shareSummary": {
+    "en": "Sharing",
+    "text": "Perkongsian"
+  },
+  "fork.wizard.shareSummaryOn": {
+    "en": "Turned on when you finish: other devices on your network can use this computer's models",
+    "text": "Dihidupkan selepas selesai: peranti lain dalam rangkaian setempat boleh menggunakan model komputer ini"
+  },
+  "fork.wizard.title": {
+    "en": "Which device does the work?",
+    "text": "Peranti mana yang menjalankannya?"
+  },
+  "fork.wizard.tryServer": {
+    "en": "Connect",
+    "text": "Sambung"
+  },
+  "models.deviceAuto": {
+    "en": "Auto",
+    "text": "Automatik"
+  },
+  "models.deviceCpu": {
+    "en": "CPU",
+    "text": "CPU"
+  },
+  "models.deviceGpu": {
+    "en": "GPU",
+    "text": "GPU"
+  },
+  "models.hwRepo": {
+    "en": "Repo",
+    "text": "Repositori"
+  },
+  "models.import": {
+    "en": "Import",
+    "text": "Import"
+  },
+  "models.importTitle": {
+    "en": "Import model",
+    "text": "Import model"
+  },
+  "models.multiLanguage": {
+    "en": "Multi",
+    "text": "Berbilang bahasa"
+  },
+  "providers.gemini.name": {
+    "en": "Google Gemini",
+    "text": "Google Gemini"
+  },
+  "providers.kizunaai_soniox.name": {
+    "en": "KizunaAI",
+    "text": "KizunaAI"
+  },
+  "providers.local_inference.modelAsr": {
+    "en": "ASR",
+    "text": "Pengecaman pertuturan"
+  },
+  "providers.local_inference.modelTranslation": {
+    "en": "MT",
+    "text": "Terjemahan mesin"
+  },
+  "providers.local_inference.modelTts": {
+    "en": "TTS",
+    "text": "Teks ke pertuturan"
+  },
+  "providers.localai.addressMissing": {
+    "en": "No other device is chosen yet. In Settings, under \"Another device\", search for it or type its address.",
+    "text": "Belum ada peranti lain dipilih. Dalam Tetapan, cari peranti atau masukkan alamatnya di bawah \"Peranti lain\"."
+  },
+  "providers.localai.advanced": {
+    "en": "Advanced",
+    "text": "Lanjutan"
+  },
+  "providers.localai.apiKey": {
+    "en": "API key",
+    "text": "Kunci API"
+  },
+  "providers.localai.apiKeyNeeded": {
+    "en": "The API at {{address}} asks for a key. In its card, turn on \"The API asks for a key\" and enter it.",
+    "text": "API di {{address}} memerlukan kunci. Dalam kad berkenaan, hidupkan \"API ini memerlukan kunci\" dan masukkan kuncinya."
+  },
+  "providers.localai.apiKeyRefused": {
+    "en": "The API at {{address}} did not accept the key. Check the API key in its card.",
+    "text": "API di {{address}} menolak kunci ini. Semak kunci API dalam kad berkenaan."
+  },
+  "providers.localai.apiKeyReused": {
+    "en": "Filled in with the key saved under \"{{name}}\".",
+    "text": "Diisi dengan kunci yang disimpan dalam \"{{name}}\"."
+  },
+  "providers.localai.apiService": {
+    "en": "Service",
+    "text": "Perkhidmatan"
+  },
+  "providers.localai.apiServiceArk": {
+    "en": "Doubao (Volcengine Ark)",
+    "text": "Doubao (Volcengine Ark)"
+  },
+  "providers.localai.apiServiceArkModel": {
+    "en": "A model's name, or your endpoint id (ep-…)",
+    "text": "Nama model atau ID titik akhir anda (ep-…)"
+  },
+  "providers.localai.apiServiceCustom": {
+    "en": "Custom address",
+    "text": "Alamat tersuai"
+  },
+  "providers.localai.apiServiceModel": {
+    "en": "Choose from the list on the right, or type a name",
+    "text": "Pilih daripada senarai di kanan atau masukkan nama"
+  },
+  "providers.localai.apiServiceOllama": {
+    "en": "Ollama on this computer",
+    "text": "Ollama pada komputer ini"
+  },
+  "providers.localai.apiServiceSiliconFlow": {
+    "en": "SiliconFlow",
+    "text": "SiliconFlow"
+  },
+  "providers.localai.apiUnreachable": {
+    "en": "The API at {{address}} could not be reached. Check the address in its card, and that this computer is online.",
+    "text": "API di {{address}} tidak dapat dihubungi. Semak alamat dalam kad berkenaan dan pastikan komputer ini disambungkan ke internet."
+  },
+  "providers.localai.asrApiBaseUrl": {
+    "en": "API address",
+    "text": "Alamat API"
+  },
+  "providers.localai.asrApiBaseUrlPlaceholder": {
+    "en": "e.g. https://api.openai.com/v1",
+    "text": "cth. https://api.openai.com/v1"
+  },
+  "providers.localai.asrApiModelPlaceholder": {
+    "en": "e.g. whisper-1, whisper-large-v3",
+    "text": "cth. whisper-1, whisper-large-v3"
+  },
+  "providers.localai.asrApiNeedsKey": {
+    "en": "The API asks for a key",
+    "text": "API ini memerlukan kunci"
+  },
+  "providers.localai.asrFixedNote": {
+    "en": "That device is reached as a plain LocalAI, which always hears with its own default recognizer when the translation or the feedback uses a model chosen here. Through the Kotomimi on that device, the recognizer can be chosen here.",
+    "text": "Kini disambungkan terus ke LocalAI pada peranti itu. Apabila model lain dipilih untuk terjemahan atau maklum balas tatabahasa, LocalAI hanya menggunakan model pengecaman lalainya. Sambungkan ke Kotomimi pada peranti itu untuk memilih model pengecaman di sini."
+  },
+  "providers.localai.asrKey": {
+    "en": "API key of the speech recognition API",
+    "text": "Kunci API pengecaman pertuturan"
+  },
+  "providers.localai.asrUnnamed": {
+    "en": "Speech recognition has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "Belum ada model untuk pengecaman pertuturan. Pilih model dalam kad \"Pengecaman pertuturan\" di bawah penyedia. Untuk model API, masukkan alamat dan nama model. Anda juga boleh memilih lokasi lain."
+  },
+  "providers.localai.auto": {
+    "en": "Automatic · {{name}}",
+    "text": "Automatik · {{name}}"
+  },
+  "providers.localai.browse": {
+    "en": "Model library",
+    "text": "Pustaka model"
+  },
+  "providers.localai.bySentence": {
+    "en": "Translate sentence by sentence",
+    "text": "Terjemah ayat demi ayat"
+  },
+  "providers.localai.bySentenceTooltip": {
+    "en": "On: each sentence is translated as soon as it ends — sooner, but without the sentences around it. Off: the whole stretch is translated once the speaker pauses — with its context, but later.",
+    "text": "Aktif: setiap ayat diterjemahkan sebaik sahaja selesai dituturkan. Terjemahan muncul lebih awal, tetapi tanpa konteks ayat lain. Tidak aktif: seluruh bahagian diterjemahkan apabila penutur berhenti seketika. Konteks lebih lengkap, tetapi perlu menunggu lebih lama."
+  },
+  "providers.localai.checking": {
+    "en": "Checking…",
+    "text": "Menyemak…"
+  },
+  "providers.localai.checkNow": {
+    "en": "Check",
+    "text": "Semak"
+  },
+  "providers.localai.checkSlow": {
+    "en": "No answer within {{seconds}} s: the device may be off or loading a model, or the address wrong. It is asked again by itself.",
+    "text": "Tiada respons selepas {{seconds}} saat. Peranti mungkin dimatikan, sedang memuatkan model, atau alamatnya salah. Akan dicuba lagi secara automatik."
+  },
+  "providers.localai.choiceDevice": {
+    "en": "Use this computer",
+    "text": "Guna komputer ini"
+  },
+  "providers.localai.choiceServer": {
+    "en": "Use another device",
+    "text": "Guna peranti lain"
+  },
+  "providers.localai.coach": {
+    "en": "Check my grammar when I speak their language",
+    "text": "Semak tatabahasa saya apabila saya bertutur dalam bahasa mereka"
+  },
+  "providers.localai.coachKey": {
+    "en": "API key of the feedback model",
+    "text": "Kunci API model maklum balas tatabahasa"
+  },
+  "providers.localai.coachNeedsSpeaker": {
+    "en": "Feedback answers what you say. Switch the mode to \"Me\" or \"Both\".",
+    "text": "Maklum balas tatabahasa perlu mendengar pertuturan anda. Tukar mod kepada \"Saya\" atau \"Kedua-duanya\"."
+  },
+  "providers.localai.coachNoModel": {
+    "en": "The other device has no text model that can give feedback. Use an API model or this computer instead.",
+    "text": "Peranti lain tiada model teks yang boleh memberikan maklum balas tatabahasa. Gunakan model API atau komputer ini."
+  },
+  "providers.localai.coachPrompt": {
+    "en": "Feedback instructions",
+    "text": "Arahan maklum balas tatabahasa"
+  },
+  "providers.localai.coachPromptPlaceholder": {
+    "en": "Blank: written automatically for your two languages. Your own text may use {{spoken}} and {{native}}.",
+    "text": "Biarkan kosong untuk menjana arahan mengikut bahasa ibunda dan bahasa latihan anda. Jika menulis sendiri, gunakan {{spoken}} dan {{native}} untuk mewakili kedua-dua bahasa."
+  },
+  "providers.localai.coachPromptPreview": {
+    "en": "Used while the box is blank, for this language pair:",
+    "text": "Apabila ruangan kosong, arahan ini digunakan untuk pasangan bahasa semasa:"
+  },
+  "providers.localai.coachStage": {
+    "en": "Grammar feedback",
+    "text": "Maklum balas tatabahasa"
+  },
+  "providers.localai.coachStageTooltip": {
+    "en": "When you speak the other language, a model checks your grammar and answers with a check mark, or a corrected sentence and an explanation. Enable \"I speak the other language too\" as well to get both a translation and private feedback. Your own language and typed text are translated without feedback.",
+    "text": "Apabila anda bertutur dalam bahasa pihak lain, model menyemak tatabahasa anda dan memberikan tanda semak, atau ayat yang dibetulkan berserta penjelasan. Hidupkan juga \"Saya juga bertutur dalam bahasa pihak lain\" untuk menerima terjemahan dan maklum balas peribadi. Pertuturan dalam bahasa anda sendiri dan teks yang ditaip diterjemahkan tanpa maklum balas."
+  },
+  "providers.localai.coachUnnamed": {
+    "en": "Grammar feedback has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "Belum ada model untuk maklum balas tatabahasa. Pilih model dalam kad \"Maklum balas tatabahasa\" di bawah penyedia. Untuk model API, masukkan alamat dan nama model. Anda juga boleh memilih lokasi lain."
+  },
+  "providers.localai.connectFirst": {
+    "en": "No other device is connected yet: search for one above, or type its address.",
+    "text": "Belum ada peranti lain disambungkan. Cari peranti di atas atau masukkan alamatnya."
+  },
+  "providers.localai.description": {
+    "en": "Recognition, translation and grammar feedback — and you mix where each model runs: this computer, another device on your network, or any API model.",
+    "text": "Pengecaman pertuturan, terjemahan dan maklum balas tatabahasa, dengan pilihan gabungan model yang berjalan pada komputer ini, peranti lain dalam rangkaian setempat atau mana-mana model API."
+  },
+  "providers.localai.detectOther": {
+    "en": "Detect the other side's language",
+    "text": "Kesan bahasa pihak lain secara automatik"
+  },
+  "providers.localai.detectOtherNeeds": {
+    "en": "Only Qwen3-ASR 1.7B GGUF can tell the language by itself. Choose it here.",
+    "text": "Hanya Qwen3-ASR 1.7B GGUF boleh mengesan bahasa sendiri. Pilih model itu di sini."
+  },
+  "providers.localai.detectOtherNote": {
+    "en": "The other side's language is detected, so a model that can tell languages apart hears them.",
+    "text": "Bahasa pihak lain dikesan secara automatik, jadi model yang boleh mengesan bahasa digunakan di sini."
+  },
+  "providers.localai.detectOtherTooltip": {
+    "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
+    "text": "Apa-apa bahasa yang dituturkan pihak lain akan dicam dan diterjemahkan ke bahasa anda tanpa perlu menukar bahasa secara manual. Pertuturan anda masih diterjemahkan ke bahasa yang dipilih di atas. Pengecaman memerlukan Qwen3-ASR 1.7B GGUF atau API; terjemahan memerlukan enjin natif atau API."
+  },
+  "providers.localai.deviceDefault": {
+    "en": "The device's own choice",
+    "text": "Ditentukan oleh peranti itu"
+  },
+  "providers.localai.endpoint": {
+    "en": "Address",
+    "text": "Alamat"
+  },
+  "providers.localai.familyUnheard": {
+    "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
+    "text": "{{name}} pada peranti itu tiada {{languages}}, jadi peranti itu memilih modelnya sendiri untuk bahagian ini. Untuk menggunakan {{name}}, muat turun {{languages}} pada peranti itu dahulu."
+  },
+  "providers.localai.feedbackFailed": {
+    "en": "One sentence got no grammar feedback: the feedback model did not answer.",
+    "text": "Satu ayat tidak menerima maklum balas tatabahasa kerana model maklum balas tidak memberi respons."
+  },
+  "providers.localai.groupNative": {
+    "en": "Native engine",
+    "text": "Enjin natif"
+  },
+  "providers.localai.hearApiNote": {
+    "en": "Any service with OpenAI's transcription API works (OpenAI, Groq, a LocalAI). This computer cuts the sentences and uploads each one, so the text appears when a sentence is finished.",
+    "text": "Mana-mana perkhidmatan yang menyediakan API transkripsi OpenAI boleh digunakan, termasuk OpenAI, Groq dan LocalAI. Komputer ini memisahkan pertuturan mengikut ayat dan memuat naik setiap ayat selepas selesai dituturkan. Jadi, teks hanya muncul selepas ayat selesai."
+  },
+  "providers.localai.hears": {
+    "en": "Recognizes {{language}}",
+    "text": "Mengecam {{language}}"
+  },
+  "providers.localai.hearsEither": {
+    "en": "Recognizes {{first}} or {{second}}",
+    "text": "Mengecam {{first}} atau {{second}}"
+  },
+  "providers.localai.hearsOther": {
+    "en": "Hears the other side (any language)",
+    "text": "Dengar pihak lain (kesan bahasa secara automatik)"
+  },
+  "providers.localai.hearStage": {
+    "en": "Speech recognition",
+    "text": "Pengecaman pertuturan"
+  },
+  "providers.localai.hearStageTooltip": {
+    "en": "What listens: it decides when a sentence ends and writes down what was said.",
+    "text": "Bahagian yang mendengar: menentukan bila ayat selesai dituturkan dan menukarkan pertuturan kepada teks."
+  },
+  "providers.localai.hereDown": {
+    "en": "The LocalAI on this computer is not running yet. Start it in the stage's card — or, if Kotomimi has only just opened, give it a moment.",
+    "text": "LocalAI pada komputer ini belum berjalan. Klik \"Mulakan LocalAI\" dalam kad peringkat berkenaan. Jika Kotomimi baru dibuka, tunggu sebentar."
+  },
+  "providers.localai.hereModelPick": {
+    "en": "Choose a model",
+    "text": "Pilih model"
+  },
+  "providers.localai.inUse": {
+    "en": "In use: {{name}}",
+    "text": "Sedang digunakan: {{name}}"
+  },
+  "providers.localai.inUseLegs": {
+    "en": "In use: {{theirs}} (them), {{mine}} (me)",
+    "text": "Sedang digunakan: {{theirs}} (mereka), {{mine}} (saya)"
+  },
+  "providers.localai.kotomimiServer": {
+    "en": "It is another Kotomimi sharing its models.",
+    "text": "Ini ialah Kotomimi pada peranti lain yang sedang berkongsi model."
+  },
+  "providers.localai.kotomimiThere": {
+    "en": "Use the Kotomimi on that device",
+    "text": "Sambung ke Kotomimi pada peranti itu"
+  },
+  "providers.localai.kotomimiThereLooking": {
+    "en": "Looking for it…",
+    "text": "Sedang mencari…"
+  },
+  "providers.localai.kotomimiThereNone": {
+    "en": "No Kotomimi is sharing on that device. Open Kotomimi there, turn on \"Share with other devices\", then try again.",
+    "text": "Tiada Kotomimi yang sedang berkongsi pada peranti itu. Buka Kotomimi di sana, hidupkan \"Kongsi dengan peranti lain\", kemudian cuba lagi."
+  },
+  "providers.localai.localServerNote": {
+    "en": "This address is this computer itself: a model server running here, such as LocalAI. Choose \"Another device\" in a stage to use its models.",
+    "text": "Alamat ini merujuk kepada komputer ini sendiri: pelayan model yang berjalan di sini, seperti LocalAI. Pilih \"Peranti lain\" pada sesuatu langkah untuk menggunakan modelnya."
+  },
+  "providers.localai.model": {
+    "en": "Model",
+    "text": "Model"
+  },
+  "providers.localai.modelGone": {
+    "en": "{{name}} (no longer on that device)",
+    "text": "{{name}} (tiada lagi pada peranti itu)"
+  },
+  "providers.localai.modelList": {
+    "en": "Choose from the models this service lists",
+    "text": "Pilih daripada senarai model perkhidmatan ini"
+  },
+  "providers.localai.modelListAsking": {
+    "en": "Getting the list…",
+    "text": "Mendapatkan senarai model…"
+  },
+  "providers.localai.modelListKeyMissing": {
+    "en": "Fill in the API key first.",
+    "text": "Masukkan kunci API dahulu."
+  },
+  "providers.localai.modelListKeyRefused": {
+    "en": "The service refused this key.",
+    "text": "Perkhidmatan ini menolak kunci tersebut."
+  },
+  "providers.localai.modelListNoAddress": {
+    "en": "Fill in the address first.",
+    "text": "Masukkan alamat dahulu."
+  },
+  "providers.localai.modelListNoMatch": {
+    "en": "No model found. Try fewer letters.",
+    "text": "Tiada model ditemui. Cuba kurangkan aksara carian."
+  },
+  "providers.localai.modelListNone": {
+    "en": "This service lists no models. Type the name instead.",
+    "text": "Perkhidmatan ini tidak menyediakan senarai model. Masukkan nama secara terus."
+  },
+  "providers.localai.modelListUnreachable": {
+    "en": "The service could not be reached.",
+    "text": "Tidak dapat menyambung ke perkhidmatan ini."
+  },
+  "providers.localai.modelSearch": {
+    "en": "Search models",
+    "text": "Cari model"
+  },
+  "providers.localai.modelSuggested": {
+    "en": "Suits this step",
+    "text": "Sesuai untuk langkah ini"
+  },
+  "providers.localai.name": {
+    "en": "Kotomimi Pipeline",
+    "text": "Kotomimi Gabungan Bebas"
+  },
+  "providers.localai.nativeBusy": {
+    "en": "A device you share with is using this engine with {{name}}. Wait for it to finish, or choose {{name}} here too.",
+    "text": "Peranti yang anda kongsi sedang menggunakan enjin ini untuk menjalankan {{name}}. Tunggu sehingga selesai atau pilih {{name}} di sini juga."
+  },
+  "providers.localai.nativeCoachFailed": {
+    "en": "The feedback engine could not start. In the Grammar feedback card, press \"Try again\" — or choose another model.",
+    "text": "Enjin maklum balas tatabahasa gagal dimulakan. Dalam kad \"Maklum balas tatabahasa\", klik \"Cuba lagi\" atau pilih model lain."
+  },
+  "providers.localai.nativeCoachFailedShort": {
+    "en": "The feedback engine could not start.",
+    "text": "Enjin maklum balas tatabahasa gagal dimulakan."
+  },
+  "providers.localai.nativeCoachMissing": {
+    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} belum dimuat turun. Dalam kad \"Maklum balas tatabahasa\", muat turun model natif atau tukar kepada \"Model API\" atau \"Peranti lain\"."
+  },
+  "providers.localai.nativeCoachReady": {
+    "en": "The feedback engine is ready.",
+    "text": "Enjin maklum balas tatabahasa sedia."
+  },
+  "providers.localai.nativeCoachUnsupported": {
+    "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
+    "text": "Sistem ini belum menyokong enjin maklum balas tatabahasa natif. Dalam kad \"Maklum balas tatabahasa\", tukar kepada \"Model API\" atau \"Peranti lain\"."
+  },
+  "providers.localai.nativeCoachWarming": {
+    "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
+    "text": "Enjin maklum balas tatabahasa masih dimulakan. Ini hanya mengambil masa beberapa saat. Anda boleh mula sebaik sahaja enjin sedia."
+  },
+  "providers.localai.nativeCoachWarmingShort": {
+    "en": "Starting the feedback engine…",
+    "text": "Sedang memulakan enjin maklum balas tatabahasa…"
+  },
+  "providers.localai.nativeEntry": {
+    "en": "{{name}} (native engine)",
+    "text": "{{name}} (enjin natif)"
+  },
+  "providers.localai.nativeFailed": {
+    "en": "The recognition engine of this computer could not start. In the Speech recognition card, press \"Try again\" — or choose another model.",
+    "text": "Enjin pengecaman pada komputer ini gagal dimulakan. Dalam kad \"Pengecaman pertuturan\", klik \"Cuba lagi\" atau pilih model lain."
+  },
+  "providers.localai.nativeFailedShort": {
+    "en": "The engine could not start.",
+    "text": "Enjin gagal dimulakan."
+  },
+  "providers.localai.nativeInterrupted": {
+    "en": "The engine stopped while it was starting. Press Start again.",
+    "text": "Enjin dihentikan semasa sedang dimulakan. Klik \"Mula\" sekali lagi."
+  },
+  "providers.localai.nativeLoading": {
+    "en": "Loading the models… About half a minute the first time after the computer boots.",
+    "text": "Sedang memuatkan model… Kali pertama selepas komputer dihidupkan mengambil masa kira-kira setengah minit."
+  },
+  "providers.localai.nativeMissing": {
+    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} belum dimuat turun. Dalam kad \"Pengecaman pertuturan\", muat turun model natif atau tukar kepada \"Model API\" atau \"Peranti lain\"."
+  },
+  "providers.localai.nativeNone": {
+    "en": "No model chosen",
+    "text": "Tiada model dipilih"
+  },
+  "providers.localai.nativeReady": {
+    "en": "The engine is ready.",
+    "text": "Enjin sedia."
+  },
+  "providers.localai.nativeRetry": {
+    "en": "Try again",
+    "text": "Cuba lagi"
+  },
+  "providers.localai.nativeRuntime": {
+    "en": "Downloading the runtime first. This happens only once.",
+    "text": "Memuat turun persekitaran masa jalan dahulu. Ini hanya perlu dilakukan sekali."
+  },
+  "providers.localai.nativeTwoModels": {
+    "en": "{{name}} and {{other}} cannot run at the same time. Choose the same model for both languages.",
+    "text": "{{name}} dan {{other}} tidak boleh berjalan serentak. Pilih model yang sama untuk kedua-dua bahasa."
+  },
+  "providers.localai.nativeUnchosen": {
+    "en": "No speech recognition model is chosen for {{source}} yet. Choose one in the Speech recognition card.",
+    "text": "Belum ada model pengecaman pertuturan dipilih untuk {{source}}. Pilih satu dalam kad \"Pengecaman pertuturan\"."
+  },
+  "providers.localai.nativeUnheard": {
+    "en": "{{name}} does not hear one of your two languages. Choose another model for it.",
+    "text": "{{name}} tidak menyokong pengecaman salah satu bahasa yang anda pilih. Pilih model lain."
+  },
+  "providers.localai.nativeUnsupported": {
+    "en": "The native recognition engine is not available for this system. In the Speech recognition card, switch to \"API model\" or \"Another device\".",
+    "text": "Sistem ini belum menyokong enjin pengecaman pertuturan natif. Dalam kad \"Pengecaman pertuturan\", tukar kepada \"Model API\" atau \"Peranti lain\"."
+  },
+  "providers.localai.nativeUnsupportedShort": {
+    "en": "Not available for this system",
+    "text": "Belum disokong pada sistem ini"
+  },
+  "providers.localai.nativeWarming": {
+    "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
+    "text": "Enjin pengecaman masih dimulakan. Kali pertama selepas komputer dihidupkan mengambil masa kira-kira setengah minit. Anda boleh mula sebaik sahaja enjin sedia."
+  },
+  "providers.localai.nativeWarmingShort": {
+    "en": "Starting the engine… About half a minute the first time after the computer boots.",
+    "text": "Sedang memulakan enjin… Kali pertama selepas komputer dihidupkan mengambil masa kira-kira setengah minit."
+  },
+  "providers.localai.notDownloaded": {
+    "en": "No model downloaded yet",
+    "text": "Belum ada model dimuat turun"
+  },
+  "providers.localai.noteAppleSpeech": {
+    "en": "Japanese talk, measured: about 13% of the characters wrong, the most accurate of all. It writes as it listens (about 2 s behind).",
+    "text": "Ujian perbualan santai bahasa Jepun: kira-kira 13% aksara salah, paling tepat antara semua model. Teks muncul sambil mendengar (lewat kira-kira 2 saat)."
+  },
+  "providers.localai.noteCohere": {
+    "en": "Measured on Japanese VRChat talk: about 33% of the characters wrong, and about a quarter of what was said left out. Not a good choice for Japanese conversation.",
+    "text": "Ujian perbualan santai bahasa Jepun dalam VRChat: kira-kira 33% aksara salah dan kira-kira satu perempat pertuturan tertinggal. Tidak disyorkan untuk perbualan bahasa Jepun."
+  },
+  "providers.localai.noteGemma4": {
+    "en": "Japanese grammar, measured: it caught 11 of 14 mistakes and left right casual speech alone; about 0.1 s an answer. About 1.5 GB of video memory.",
+    "text": "Ujian tatabahasa Jepun: mengesan 11 daripada 14 ayat yang salah tanpa mengubah pertuturan santai yang betul. Kira-kira 0.1 saat setiap ayat. Menggunakan kira-kira 1.5 GB memori grafik."
+  },
+  "providers.localai.noteGranite41": {
+    "en": "Measured on Japanese VRChat talk: it keeps repeating the same sentence. Not usable for Japanese conversation.",
+    "text": "Ujian perbualan santai bahasa Jepun dalam VRChat: terus mengulang ayat yang sama. Hampir tidak boleh digunakan untuk perbualan bahasa Jepun."
+  },
+  "providers.localai.noteHyMt15": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences, and it tends to add words of its own.",
+    "text": "Ujian terjemahan Jepun ke Cina: kesilapan serius dalam kira-kira 8 daripada 30 ayat, dan cenderung menambah perkataan sendiri."
+  },
+  "providers.localai.noteHyMt2": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences; about 0.1 s a sentence.",
+    "text": "Ujian terjemahan Jepun ke Cina: kesilapan serius dalam kira-kira 8 daripada 30 ayat. Kira-kira 0.1 saat setiap ayat."
+  },
+  "providers.localai.noteIndexTranslate": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
+    "text": "Ujian terjemahan Jepun ke Cina: kesilapan serius dalam kira-kira 3 daripada 30 ayat, yang terbaik antara model yang diuji. Kira-kira 0.1 saat setiap ayat. Menggunakan kira-kira 2 GB memori grafik dan menyokong lebih seratus bahasa."
+  },
+  "providers.localai.noteMoonshineJa": {
+    "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
+    "text": "Ujian perbualan santai bahasa Jepun dalam VRChat: kira-kira 70% aksara salah. Hanya sebagai pilihan kecemasan apabila kad grafik langsung tidak boleh digunakan."
+  },
+  "providers.localai.noteNativeNemotron": {
+    "en": "Small: about 1 GB of video memory. Japanese talk, measured: about 27% of the characters wrong, and a short sentence is sometimes left out altogether. Choose it only when the ones above do not fit or do not hear the language. Over thirty languages.",
+    "text": "Penggunaan rendah: kira-kira 1 GB memori grafik. Ujian perbualan santai bahasa Jepun: kira-kira 27% aksara salah, dan kadangkala seluruh ayat pendek tertinggal. Pilih hanya jika model di atas tidak muat dalam memori atau tidak menyokong bahasa yang diperlukan. Menyokong lebih 30 bahasa."
+  },
+  "providers.localai.noteNativeQwen": {
+    "en": "Japanese talk, measured: about 16% of the characters wrong. It writes as you speak (about 1 s behind); the last few words settle when the sentence ends. When the graphics card is busy it only refreshes less often. About 3 GB of video memory, thirty languages.",
+    "text": "Ujian perbualan santai bahasa Jepun: kira-kira 16% aksara salah. Teks muncul semasa anda bercakap (lewat kira-kira 1 saat); beberapa aksara terakhir dimuktamadkan selepas ayat selesai. Apabila kad grafik sibuk, teks hanya dikemas kini dengan lebih jarang. Menggunakan kira-kira 3 GB memori grafik dan menyokong 30 bahasa."
+  },
+  "providers.localai.noteNativeQwenSmall": {
+    "en": "The light one, for a computer that runs a game at the same time: about 2 GB of video memory instead of 3. Japanese talk, measured: about 22% of the characters wrong, more than the 1.7B. Otherwise it works the same way, with the same thirty languages.",
+    "text": "Model kecil yang menjimatkan sumber, sesuai apabila permainan turut berjalan pada komputer yang sama. Menggunakan kira-kira 2 GB memori grafik (1.7B menggunakan kira-kira 3 GB). Ujian perbualan santai bahasa Jepun: kira-kira 22% aksara salah, lebih banyak berbanding 1.7B. Selebihnya sama seperti 1.7B, termasuk sokongan untuk 30 bahasa."
+  },
+  "providers.localai.noteNativeR2t2": {
+    "en": "Japanese talk, measured: about 18% of the characters wrong. It writes as it listens (about 2.5 s behind) and never changes what it wrote. When the graphics card cannot keep up (a weaker card, or a game running), the text falls further and further behind. About 3 GB of video memory.",
+    "text": "Ujian perbualan santai bahasa Jepun: kira-kira 18% aksara salah. Teks muncul sambil mendengar (lewat kira-kira 2.5 saat) dan tidak diubah lagi. Jika kad grafik tidak mampu mengikuti pertuturan, contohnya kad kurang berkuasa atau permainan sedang berjalan, teks semakin ketinggalan. Menggunakan kira-kira 3 GB memori grafik."
+  },
+  "providers.localai.noteNativeSenseVoice": {
+    "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
+    "text": "Paling ringan dan pantas: menggunakan kira-kira 0.4 GB memori grafik. Dalam ujian perbualan santai bahasa Jepun, ketepatannya setanding Qwen3-ASR 0.6B, tetapi jarang menggunakan tanda baca. Hanya menyokong bahasa Cina, Kantonis, Inggeris, Jepun dan Korea."
+  },
+  "providers.localai.noteQwen06": {
+    "en": "Measured on Japanese VRChat talk: about 35% of the characters wrong. Small: for when the graphics card has little memory to spare.",
+    "text": "Ujian perbualan santai bahasa Jepun dalam VRChat: kira-kira 35% aksara salah. Saiznya kecil, sesuai apabila memori grafik terhad."
+  },
+  "providers.localai.noteQwen17": {
+    "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
+    "text": "Ujian perbualan santai bahasa Jepun: kira-kira 19% aksara salah. Teks hanya muncul selepas ayat selesai (lewat kira-kira 10 saat). Versi GGUF di atas memaparkan teks semasa anda bercakap."
+  },
+  "providers.localai.noteSenseVoice": {
+    "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
+    "text": "Ujian perbualan santai bahasa Jepun dalam VRChat: tidak menghasilkan kana, menjadikan teks Jepun hampir tidak dapat difahami."
+  },
+  "providers.localai.noteVoxtral4b": {
+    "en": "Measured on Japanese VRChat talk: quick — the text is about 2.6 s behind the voice — but about 27% of the characters wrong. For when speed matters more than accuracy.",
+    "text": "Ujian perbualan santai bahasa Jepun dalam VRChat: teks muncul dengan pantas (lewat kira-kira 2.6 saat daripada suara), tetapi banyak aksara salah (kira-kira 27%). Pilih apabila kelajuan lebih penting dan anda boleh menerima kesilapan."
+  },
+  "providers.localai.noteWhisperMedium": {
+    "en": "Measured on Japanese VRChat talk: about 34% of the characters wrong.",
+    "text": "Ujian perbualan santai bahasa Jepun dalam VRChat: kira-kira 34% aksara salah."
+  },
+  "providers.localai.noteWhisperTurbo": {
+    "en": "Measured on Japanese VRChat talk: about 21% of the characters wrong, and steady. It writes only once a sentence has ended.",
+    "text": "Ujian perbualan santai bahasa Jepun dalam VRChat: kira-kira 21% aksara salah, dengan prestasi yang konsisten. Teks juga hanya muncul selepas ayat selesai."
+  },
+  "providers.localai.otherDeviceHint": {
+    "en": "To use the models of another device on your local network, search the network for it.",
+    "text": "Untuk menggunakan model pada peranti lain dalam rangkaian setempat, cari peranti itu dalam rangkaian."
+  },
+  "providers.localai.phoneKey": {
+    "en": "Access key of {{name}}",
+    "text": "Kunci akses {{name}}"
+  },
+  "providers.localai.phoneKeyNote": {
+    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
+    "text": "Telefon ini memerlukan kunci akses. Anda boleh melihatnya dalam \"Sambungan peranti\" pada telefon."
+  },
+  "providers.localai.phoneKeyUse": {
+    "en": "Use this phone",
+    "text": "Guna telefon ini"
+  },
+  "providers.localai.phoneKeyWrong": {
+    "en": "The phone did not take this key.",
+    "text": "Kunci ini tidak betul. Sila semak semula."
+  },
+  "providers.localai.phoneModelGone": {
+    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
+    "text": "Telefon ({{address}}) tidak berkongsi {{name}} sekarang. Pilih model lain dalam kadnya."
+  },
+  "providers.localai.phoneModelTooBig": {
+    "en": "{{name}} (not enough memory on the phone)",
+    "text": "{{name}} (memori telefon tidak mencukupi)"
+  },
+  "providers.localai.phoneModelTooBigCheck": {
+    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
+    "text": "Memori telefon ({{address}}) tidak mencukupi untuk menjalankan {{name}} sekarang. Pilih model yang lebih kecil dalam kadnya atau tutup aplikasi lain pada telefon."
+  },
+  "providers.localai.phoneNoMemory": {
+    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
+    "text": "Memori telefon tidak mencukupi untuk menjalankan model ini sekarang. Pilih model yang lebih kecil dalam kadnya atau tutup aplikasi lain pada telefon."
+  },
+  "providers.localai.phoneOption": {
+    "en": "{{name}} (phone)",
+    "text": "{{name}} (telefon)"
+  },
+  "providers.localai.phoneQuiet": {
+    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
+    "text": "Telefon tidak memberi respons. Sistem mungkin menjedakan aplikasi selepas skrin dikunci. Buka Kotomimi pada telefon untuk meneruskan."
+  },
+  "providers.localai.phoneUnreachable": {
+    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "Telefon ({{address}}) tidak dapat dihubungi. Pastikan perkongsian dihidupkan dan telefon berada pada Wi-Fi yang sama dengan komputer ini."
+  },
+  "providers.localai.pipelineModel": {
+    "en": "Setup name on that device",
+    "text": "Nama konfigurasi pada peranti itu"
+  },
+  "providers.localai.pipelineNote": {
+    "en": "Normally left alone. Change it only when that device is a LocalAI set up with more than one combination of recognition and translation.",
+    "text": "Biasanya tidak perlu diubah. Ubah hanya jika peranti itu menggunakan LocalAI dengan lebih daripada satu gabungan pengecaman dan terjemahan."
+  },
+  "providers.localai.placeDevice": {
+    "en": "This computer",
+    "text": "Komputer ini"
+  },
+  "providers.localai.placeServer": {
+    "en": "Another device",
+    "text": "Peranti lain"
+  },
+  "providers.localai.ready": {
+    "en": "Ready to start",
+    "text": "Sedia untuk bermula"
+  },
+  "providers.localai.recheck": {
+    "en": "Check again",
+    "text": "Semak semula"
+  },
+  "providers.localai.serverHttp": {
+    "en": "The other device answered with an error (HTTP {{status}}). Restarting the app or the model server there usually helps.",
+    "text": "Peranti lain memberikan ralat (HTTP {{status}}). Biasanya, memulakan semula aplikasi atau pelayan model di sana dapat membantu."
+  },
+  "providers.localai.serverKey": {
+    "en": "Access key",
+    "text": "Kunci akses"
+  },
+  "providers.localai.serverKeyMissing": {
+    "en": "The other device asks for an access key. Enter it in Settings, under \"Another device\".",
+    "text": "Peranti lain memerlukan kunci akses. Masukkannya dalam Tetapan, di bawah \"Peranti lain\"."
+  },
+  "providers.localai.serverKeyNeeded": {
+    "en": "The other device asks for an access key. Under \"Another device\", turn on \"It asks for an access key\" and enter the key set on that device.",
+    "text": "Peranti lain memerlukan kunci akses. Di bawah \"Peranti lain\", hidupkan \"Peranti ini memerlukan kunci akses\" dan masukkan kunci yang ditetapkan pada peranti itu."
+  },
+  "providers.localai.serverKeyRefused": {
+    "en": "The other device did not accept the access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options).",
+    "text": "Peranti lain menolak kunci akses ini. Masukkan kunci yang ditetapkan pada peranti itu. Untuk Kotomimi lain, kuncinya ada dalam \"Pilihan\" perkongsian."
+  },
+  "providers.localai.serverNeedsKey": {
+    "en": "It asks for an access key",
+    "text": "Peranti ini memerlukan kunci akses"
+  },
+  "providers.localai.serverNeedsKeyTooltip": {
+    "en": "Turn this on when the other device was given an access key — a Kotomimi with one set under its sharing options, for example.",
+    "text": "Aktifkan jika peranti lain menetapkan kunci akses, contohnya Kotomimi pada peranti itu menetapkan kunci dalam \"Pilihan\" perkongsian."
+  },
+  "providers.localai.serverNoAsr": {
+    "en": "The other device has no speech recognition model for {{source}}. Download one there first (in the model library of its sharing card), or let this computer listen.",
+    "text": "Peranti lain tiada model pengecaman pertuturan untuk {{source}}. Muat turun model pada peranti itu dahulu melalui pustaka model dalam kad perkongsiannya, atau gunakan komputer ini untuk pengecaman."
+  },
+  "providers.localai.serverNoDetect": {
+    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
+    "text": "Peranti lain tiada model pengecaman yang boleh mengesan bahasa secara automatik. \"Saya juga bertutur dalam …\" dan pengesanan bahasa pihak lain memerlukan model seperti ini. Muat turun model seperti Qwen3-ASR pada peranti itu, atau matikan kedua-dua pilihan tersebut."
+  },
+  "providers.localai.serverNoModels": {
+    "en": "The other device has no model yet: install or download one there first.",
+    "text": "Peranti lain belum mempunyai model. Pasang atau muat turun model pada peranti itu dahulu."
+  },
+  "providers.localai.serverSilent": {
+    "en": "This address does not answer. If Kotomimi is running on that device, enable its sharing to use its installed native models.",
+    "text": "Alamat ini tidak dapat dihubungi. Jika Kotomimi sedang berjalan pada peranti itu, hidupkan perkongsian untuk menggunakan model natif yang telah dipasang."
+  },
+  "providers.localai.serverUnreachable": {
+    "en": "The other device ({{address}}) did not answer. Check that it is on and on the same network as this computer, and that Kotomimi there is sharing (or its model server is running). It is asked again by itself.",
+    "text": "Peranti lain ({{address}}) tidak memberi respons. Pastikan peranti dihidupkan, berada pada rangkaian yang sama dengan komputer ini, dan Kotomimi di sana sedang berkongsi (atau pelayan modelnya sedang berjalan). Proses akan disambung secara automatik apabila sambungan pulih."
+  },
+  "providers.localai.sharedDeviceNone": {
+    "en": "No device connected yet",
+    "text": "Belum ada peranti disambungkan"
+  },
+  "providers.localai.sourceAuto": {
+    "en": "The language cannot be detected with this setup. Choose the language you speak.",
+    "text": "Gabungan ini tidak dapat mengesan bahasa secara automatik. Pilih bahasa yang anda tuturkan."
+  },
+  "providers.localai.speedAbout": {
+    "en": "About {{seconds}} s",
+    "text": "Kira-kira {{seconds}} saat"
+  },
+  "providers.localai.speedAdviceGeneral": {
+    "en": "A smaller model or a faster device is suggested.",
+    "text": "Cuba model yang lebih kecil atau peranti yang lebih pantas."
+  },
+  "providers.localai.speedAdviceModel": {
+    "en": "A smaller model, such as {{name}}, is suggested.",
+    "text": "Cuba model yang lebih kecil, seperti {{name}}."
+  },
+  "providers.localai.speedAdviceSwitch": {
+    "en": "Switch and test again",
+    "text": "Tukar dan uji semula"
+  },
+  "providers.localai.speedBehind": {
+    "en": "Falls behind",
+    "text": "Semakin ketinggalan"
+  },
+  "providers.localai.speedCoach": {
+    "en": "{{seconds}} s per sentence for feedback, on average",
+    "text": "Purata {{seconds}} saat untuk maklum balas setiap ayat"
+  },
+  "providers.localai.speedCoachSlow": {
+    "en": "Feedback is slower than speech, so it will fall further behind. ",
+    "text": "Maklum balas lebih perlahan daripada pertuturan, jadi maklum balas akan semakin ketinggalan. "
+  },
+  "providers.localai.speedFailed": {
+    "en": "The test could not finish: {{reason}}",
+    "text": "Ujian tidak dapat diselesaikan: {{reason}}"
+  },
+  "providers.localai.speedHead": {
+    "en": "Speed test · {{when}}",
+    "text": "Ujian kelajuan · {{when}}"
+  },
+  "providers.localai.speedHear": {
+    "en": "Text appears {{seconds}} s after the speech ends",
+    "text": "Teks asal muncul {{seconds}} saat selepas pertuturan tamat"
+  },
+  "providers.localai.speedHearSlow": {
+    "en": "Recognition is slower than speech, so the captions will fall further behind. ",
+    "text": "Pengecaman lebih perlahan daripada pertuturan, jadi sari kata akan semakin ketinggalan. "
+  },
+  "providers.localai.speedJustNow": {
+    "en": "just now",
+    "text": "sebentar tadi"
+  },
+  "providers.localai.speedLegCoach": {
+    "en": "From you finishing to the feedback",
+    "text": "Dari anda selesai bercakap hingga maklum balas muncul"
+  },
+  "providers.localai.speedLegParticipant": {
+    "en": "From the other side finishing to the translation",
+    "text": "Dari penutur lain selesai bercakap hingga terjemahan muncul"
+  },
+  "providers.localai.speedLegSpeaker": {
+    "en": "From you finishing to the translation",
+    "text": "Dari anda selesai bercakap hingga terjemahan muncul"
+  },
+  "providers.localai.speedNoClip": {
+    "en": "There is no test recording for this language yet.",
+    "text": "Belum ada rakaman ujian untuk bahasa ini."
+  },
+  "providers.localai.speedNone": {
+    "en": "No result arrived during the test.",
+    "text": "Tiada hasil diterima semasa ujian."
+  },
+  "providers.localai.speedRetest": {
+    "en": "Test again",
+    "text": "Uji semula"
+  },
+  "providers.localai.speedStop": {
+    "en": "Stop",
+    "text": "Hentikan"
+  },
+  "providers.localai.speedTest": {
+    "en": "Test speed",
+    "text": "Uji kelajuan"
+  },
+  "providers.localai.speedTesting": {
+    "en": "Testing speed: a recording of about ten seconds is sent through each step at speaking pace. Nothing is recorded or played.",
+    "text": "Menguji kelajuan: rakaman kira-kira 10 saat dihantar melalui setiap langkah pada kadar pertuturan biasa. Mikrofon tidak digunakan dan tiada audio dimainkan."
+  },
+  "providers.localai.speedTranslate": {
+    "en": "{{seconds}} s per sentence to translate, on average",
+    "text": "Purata {{seconds}} saat untuk menterjemah setiap ayat"
+  },
+  "providers.localai.speedTranslateSlow": {
+    "en": "Translation is slower than speech, so the translations will fall further behind. ",
+    "text": "Terjemahan lebih perlahan daripada pertuturan, jadi terjemahan akan semakin ketinggalan. "
+  },
+  "providers.localai.speedVerdictOk": {
+    "en": "This setup keeps up with live speech.",
+    "text": "Gabungan ini sesuai untuk penggunaan masa nyata."
+  },
+  "providers.localai.speedVerdictSlow": {
+    "en": "Some steps cannot keep up with speech; see the notes above.",
+    "text": "Sesetengah langkah tidak dapat mengikut kelajuan pertuturan. Lihat nota di atas."
+  },
+  "providers.localai.stageDevice": {
+    "en": "Device",
+    "text": "Peranti"
+  },
+  "providers.localai.tag_native": {
+    "en": "Native engine",
+    "text": "Enjin natif"
+  },
+  "providers.localai.tag_system": {
+    "en": "Built into macOS",
+    "text": "Terbina dalam sistem"
+  },
+  "providers.localai.tagHint_native": {
+    "en": "Runs on the graphics card using a native engine downloaded with the model. Loads when a session starts; the first start after boot may take about half a minute. Memory is released after the engine is no longer in use.",
+    "text": "Berjalan pada kad grafik melalui enjin natif yang dimuat turun bersama model. Dimuatkan apabila sesi bermula; permulaan pertama selepas komputer dihidupkan mungkin mengambil masa kira-kira setengah minit. Memori dibebaskan apabila enjin tidak lagi digunakan."
+  },
+  "providers.localai.tagHint_system": {
+    "en": "The speech recognition of macOS itself: no video memory taken, nothing to warm up. The system downloads each language.",
+    "text": "Pengecaman pertuturan terbina dalam Mac: tidak menggunakan memori grafik dan tidak memerlukan persediaan awal. Pek untuk setiap bahasa dimuat turun oleh sistem."
+  },
+  "providers.localai.textBaseUrlPlaceholder": {
+    "en": "e.g. https://api.openai.com/v1 or http://localhost:11434/v1",
+    "text": "Contohnya https://api.openai.com/v1 atau http://localhost:11434/v1"
+  },
+  "providers.localai.textModelPlaceholder": {
+    "en": "The model's name, e.g. gpt-4o-mini",
+    "text": "Nama model, contohnya gpt-4o-mini"
+  },
+  "providers.localai.translateInSession": {
+    "en": "The device's own choice (translated in the same session it hears in)",
+    "text": "Ditentukan oleh peranti itu (dalam sesi yang sama dengan pengecaman)"
+  },
+  "providers.localai.translateKey": {
+    "en": "API key of the translation model",
+    "text": "Kunci API model terjemahan"
+  },
+  "providers.localai.translateKotomimiOwn": {
+    "en": "The device's own choice (its best model for your languages)",
+    "text": "Ditentukan oleh peranti itu (model paling sesuai untuk pasangan bahasa)"
+  },
+  "providers.localai.translateStage": {
+    "en": "Translation",
+    "text": "Terjemahan"
+  },
+  "providers.localai.translateStageTooltip": {
+    "en": "What turns the recognized text into the other language. An API model is any service that speaks the OpenAI chat API: a hosted one, or Ollama or LM Studio on this computer.",
+    "text": "Bahagian yang menterjemahkan teks yang dicam ke bahasa lain. Model API boleh menggunakan mana-mana perkhidmatan yang menyokong API sembang OpenAI, sama ada di awan atau melalui Ollama atau LM Studio pada komputer ini."
+  },
+  "providers.localai.translateUnnamed": {
+    "en": "Translation has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "Belum ada model untuk terjemahan. Pilih model dalam kad \"Terjemahan\" di bawah penyedia. Untuk model API, masukkan alamat dan nama model. Anda juga boleh memilih lokasi lain."
+  },
+  "providers.localai.translatorFailed": {
+    "en": "The translation engine of this computer could not start. In the Translation card, press \"Try again\" — or choose another model.",
+    "text": "Enjin terjemahan pada komputer ini gagal dimulakan. Dalam kad \"Terjemahan\", klik \"Cuba lagi\" atau pilih model lain."
+  },
+  "providers.localai.translatorFailedShort": {
+    "en": "The translation engine could not start.",
+    "text": "Enjin terjemahan gagal dimulakan."
+  },
+  "providers.localai.translatorMissing": {
+    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} belum dimuat turun. Dalam kad \"Terjemahan\", muat turun model natif atau tukar kepada \"Model API\" atau \"Peranti lain\"."
+  },
+  "providers.localai.translatorReady": {
+    "en": "The translation engine is ready.",
+    "text": "Enjin terjemahan sedia."
+  },
+  "providers.localai.translatorUnfit": {
+    "en": "{{name}} does not translate between your two languages. Choose another model for it.",
+    "text": "{{name}} tidak menyokong terjemahan antara kedua-dua bahasa yang anda pilih. Pilih model lain."
+  },
+  "providers.localai.translatorUnsupported": {
+    "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
+    "text": "Sistem ini belum menyokong enjin terjemahan natif. Dalam kad \"Terjemahan\", tukar kepada \"Model API\" atau \"Peranti lain\"."
+  },
+  "providers.localai.translatorWarming": {
+    "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",
+    "text": "Enjin terjemahan pada komputer ini masih dimulakan. Ini hanya mengambil masa beberapa saat. Anda boleh mula sebaik sahaja enjin sedia."
+  },
+  "providers.localai.translatorWarmingShort": {
+    "en": "Starting the translation engine…",
+    "text": "Sedang memulakan enjin terjemahan…"
+  },
+  "providers.localai.typedFailed": {
+    "en": "A sentence you typed was not translated: the translation model did not answer.",
+    "text": "Satu ayat yang anda taip tidak dapat diterjemahkan kerana model terjemahan tidak memberi respons."
+  },
+  "providers.localai.viaModel": {
+    "en": "API model",
+    "text": "Model API"
+  },
+  "providers.openai_live.name": {
+    "en": "OpenAI Live",
+    "text": "OpenAI Live"
+  },
+  "providers.openai_translate.name": {
+    "en": "OpenAI Translate",
+    "text": "OpenAI Translate"
+  },
+  "providers.openai.name": {
+    "en": "OpenAI Realtime",
+    "text": "OpenAI Realtime"
+  },
+  "providers.palabraai.authModeApp": {
+    "en": "App Client ID/Secret",
+    "text": "ID/rahsia klien aplikasi"
+  },
+  "providers.palabraai.clientIdPlaceholder": {
+    "en": "Client ID",
+    "text": "ID klien"
+  },
+  "providers.palabraai.clientSecretPlaceholder": {
+    "en": "Client Secret",
+    "text": "Rahsia klien"
+  },
+  "providers.palabraai.name": {
+    "en": "Palabra AI",
+    "text": "Palabra AI"
+  },
+  "providers.qwen_livetranslate.name": {
+    "en": "Qwen LiveTranslate",
+    "text": "Qwen LiveTranslate"
+  },
+  "providers.soniox.name": {
+    "en": "Soniox",
+    "text": "Soniox"
+  },
+  "providers.volcengine_ast2.accessTokenPlaceholder": {
+    "en": "Access Token",
+    "text": "Token akses"
+  },
+  "providers.volcengine_ast2.appIdPlaceholder": {
+    "en": "APP ID",
+    "text": "ID aplikasi"
+  },
+  "providers.volcengine_ast2.name": {
+    "en": "Doubao AST 2.0",
+    "text": "Doubao AST 2.0"
+  },
+  "settings.glossaryAdd": {
+    "en": "Add a word…",
+    "text": "Tambah perkataan…"
+  },
+  "settings.glossaryDelete": {
+    "en": "Delete entry",
+    "text": "Padam entri"
+  },
+  "settings.glossaryFixOpen": {
+    "en": "Fix word",
+    "text": "Betulkan perkataan"
+  },
+  "settings.glossaryFixSave": {
+    "en": "Save to glossary",
+    "text": "Simpan ke glosari"
+  },
+  "settings.glossaryFixTo": {
+    "en": "Change to",
+    "text": "Tukar kepada"
+  },
+  "settings.glossaryFull": {
+    "en": "Glossary is full",
+    "text": "Glosari penuh"
+  },
+  "settings.glossaryHeard": {
+    "en": "Misheard as",
+    "text": "Tersalah dengar sebagai"
+  },
+  "settings.glossaryOptional": {
+    "en": "Only if misheard",
+    "text": "Isi hanya jika tersalah dengar"
+  },
+  "settings.glossaryTitle": {
+    "en": "Personal glossary",
+    "text": "Glosari peribadi"
+  },
+  "settings.glossaryTooltip": {
+    "en": "Names and special words. Write each in the language it is spoken in. Where one has been misheard, add how on the right and it is put right from then on; some recognition models only follow that column. You can also select a misheard word in the conversation and correct it there.",
+    "text": "Tulis nama dan istilah khusus dalam bahasa yang digunakan semasa bercakap. Jika pernah tersalah dengar, isi bentuk yang salah di sebelah kanan supaya dibetulkan secara automatik selepas ini. Sesetengah model pengecaman hanya menggunakan lajur kanan ini. Anda juga boleh memilih perkataan yang tersalah dengar dalam perbualan dan membetulkannya terus."
+  },
+  "settings.glossaryTooltipLabel": {
+    "en": "About personal glossary",
+    "text": "Tentang glosari peribadi"
+  },
+  "settings.glossaryWritten": {
+    "en": "Word",
+    "text": "Perkataan"
+  },
+  "settings.model": {
+    "en": "Model",
+    "text": "Model"
+  },
+  "settings.noiseSuppressionMode.standard": {
+    "en": "Standard",
+    "text": "Standard"
+  },
+  "settings.tabs.audio": {
+    "en": "Audio",
+    "text": "Audio"
+  },
+  "settings.transcriptKeywordsPlaceholder": {
+    "en": "Sokuji, Kizuna AI, PulseAudio",
+    "text": "Sokuji, Kizuna AI, PulseAudio"
+  },
+  "setup.credentials.accessKeyId": {
+    "en": "Access Key ID",
+    "text": "ID kunci akses"
+  },
+  "setup.credentials.accessToken": {
+    "en": "Access Token",
+    "text": "Token akses"
+  },
+  "setup.credentials.apiSecret": {
+    "en": "API Secret",
+    "text": "Kunci rahsia API"
+  },
+  "setup.credentials.secretAccessKey": {
+    "en": "Secret Access Key",
+    "text": "Kunci akses rahsia"
+  },
+  "tour.steps.kotomimi-tips.coach": {
+    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
+    "text": "Anda sendiri bertutur dalam bahasa mereka? Hidupkan Maklum balas tatabahasa dalam Tetapan. Anda juga boleh menghidupkan \"Saya juga bertutur dalam bahasa satu lagi\" untuk menggunakan terjemahan bersama maklum balas tatabahasa peribadi."
+  },
+  "tour.steps.kotomimi-tips.content": {
+    "en": "Worth knowing before you start:",
+    "text": "Perkara yang perlu diketahui sebelum bermula:"
+  },
+  "tour.steps.kotomimi-tips.share": {
+    "en": "Another device can use this computer's models: Settings → Provider → Share with other devices.",
+    "text": "Peranti lain juga boleh menggunakan model komputer ini: Tetapan → Penyedia → Kongsi dengan peranti lain."
+  },
+  "tour.steps.kotomimi-tips.title": {
+    "en": "Three more things",
+    "text": "Tiga perkara lagi"
+  },
+  "tour.steps.kotomimi-tips.typed": {
+    "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
+    "text": "Selepas sesi bermula, kotak input muncul di bahagian bawah: taip ayat untuk diterjemahkan. Tekan Ctrl+K untuk terus ke kotak itu."
+  },
+  "tour.steps.models.content_kotomimi": {
+    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
+    "text": "Muat turun model di sini: klik \"Pustaka model\" dalam kad peringkat. Model bertanda \"Disyorkan\" memberikan hasil terbaik dalam ujian perbualan sebenar. Ikon kecil di sebelah nama model menunjukkan hasil ujiannya. Model diaktifkan secara automatik selepas dimuat turun."
+  },
+  "tour.steps.provider-settings.content_kotomimi": {
+    "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",
+    "text": "Setiap peringkat ada kad di sini: pengecaman pertuturan, terjemahan dan maklum balas tatabahasa. Dalam kad itu, pilih tempat ia dijalankan (peranti lain dalam rangkaian setempat, model API atau komputer ini) serta modelnya. Di Tetapan → Penyedia, anda juga boleh berkongsi model komputer ini dengan peranti lain."
+  },
+  "tour.steps.reading-aids.content": {
+    "en": "Help for reading the other language, switched here:",
+    "text": "Hidupkan atau matikan paparan bantuan untuk membaca bahasa asing di sini:"
+  },
+  "tour.steps.reading-aids.fonts": {
+    "en": "Fonts for each language are under Settings → Fonts.",
+    "text": "Pilih fon untuk setiap bahasa di Tetapan → Fon."
+  },
+  "tour.steps.reading-aids.furigana": {
+    "en": "Furigana — kana above Japanese kanji.",
+    "text": "Furigana — sebutan dalam kana di atas kanji Jepun."
+  },
+  "tour.steps.reading-aids.pinyin": {
+    "en": "Pinyin — tone-marked pinyin above Chinese.",
+    "text": "Pinyin — pinyin dengan tanda nada di atas teks Cina."
+  },
+  "tour.steps.reading-aids.romanization": {
+    "en": "Romanization — a line in Latin letters under Japanese, Korean, Russian and Ukrainian.",
+    "text": "Perumian — sebaris sebutan dalam huruf Latin di bawah teks Jepun, Korea, Rusia dan Ukraine."
+  },
+  "tour.steps.reading-aids.title": {
+    "en": "Reading aids",
+    "text": "Bantuan membaca"
+  },
+  "voiceLibrary.cloneVoiceRequired": {
+    "en": "This voice needs a clip before it can speak — open the voice list and add one.",
+    "text": "Suara ini belum boleh dituturkan — buka senarai suara dan tambah klip suara."
+  },
+  "voiceLibrary.filter.accent.african": {
+    "en": "African",
+    "text": "Afrika"
+  },
+  "voiceLibrary.filter.accent.american": {
+    "en": "American",
+    "text": "Amerika"
+  },
+  "voiceLibrary.filter.accent.arabic": {
+    "en": "Arabic",
+    "text": "Arab"
+  },
+  "voiceLibrary.filter.accent.australian": {
+    "en": "Australian",
+    "text": "Australia"
+  },
+  "voiceLibrary.filter.accent.brazilian": {
+    "en": "Brazilian",
+    "text": "Brazil"
+  },
+  "voiceLibrary.filter.accent.british": {
+    "en": "British",
+    "text": "British"
+  },
+  "voiceLibrary.filter.accent.chinese": {
+    "en": "Chinese",
+    "text": "Cina"
+  },
+  "voiceLibrary.filter.accent.french": {
+    "en": "French",
+    "text": "Perancis"
+  },
+  "voiceLibrary.filter.accent.german": {
+    "en": "German",
+    "text": "Jerman"
+  },
+  "voiceLibrary.filter.accent.indian": {
+    "en": "Indian",
+    "text": "India"
+  },
+  "voiceLibrary.filter.accent.italian": {
+    "en": "Italian",
+    "text": "Itali"
+  },
+  "voiceLibrary.filter.accent.japanese": {
+    "en": "Japanese",
+    "text": "Jepun"
+  },
+  "voiceLibrary.filter.accent.korean": {
+    "en": "Korean",
+    "text": "Korea"
+  },
+  "voiceLibrary.filter.accent.latin_american": {
+    "en": "Latin American",
+    "text": "Amerika Latin"
+  },
+  "voiceLibrary.filter.accent.portuguese": {
+    "en": "Portuguese",
+    "text": "Portugis"
+  },
+  "voiceLibrary.filter.accent.slavic": {
+    "en": "Slavic",
+    "text": "Slavik"
+  },
+  "voiceLibrary.filter.accent.southeast_asian": {
+    "en": "Southeast Asian",
+    "text": "Asia Tenggara"
+  },
+  "voiceLibrary.filter.accent.spanish": {
+    "en": "Spanish",
+    "text": "Sepanyol"
+  },
+  "voiceLibrary.filter.accentLabel": {
+    "en": "Accent",
+    "text": "Loghat"
+  },
+  "voiceLibrary.filter.age.child": {
+    "en": "Child",
+    "text": "Kanak-kanak"
+  },
+  "voiceLibrary.filter.age.middle_aged": {
+    "en": "Middle-aged",
+    "text": "Pertengahan umur"
+  },
+  "voiceLibrary.filter.age.old": {
+    "en": "Mature",
+    "text": "Berusia"
+  },
+  "voiceLibrary.filter.age.teen": {
+    "en": "Teen",
+    "text": "Remaja"
+  },
+  "voiceLibrary.filter.age.young": {
+    "en": "Young",
+    "text": "Muda"
+  },
+  "voiceLibrary.filter.ageLabel": {
+    "en": "Age",
+    "text": "Umur"
+  },
+  "voiceLibrary.filter.anyAccent": {
+    "en": "Any accent",
+    "text": "Semua loghat"
+  },
+  "voiceLibrary.filter.anyAge": {
+    "en": "Any age",
+    "text": "Semua umur"
+  },
+  "voiceLibrary.filter.anyGender": {
+    "en": "Any gender",
+    "text": "Semua jantina"
+  },
+  "voiceLibrary.filter.anyStyle": {
+    "en": "Any style",
+    "text": "Semua gaya"
+  },
+  "voiceLibrary.filter.anyUseCase": {
+    "en": "Any use case",
+    "text": "Semua kegunaan"
+  },
+  "voiceLibrary.filter.clear": {
+    "en": "Clear filters",
+    "text": "Kosongkan penapis"
+  },
+  "voiceLibrary.filter.count": {
+    "en": "{shown} of {total} voices",
+    "text": "{shown} daripada {total} suara"
+  },
+  "voiceLibrary.filter.empty": {
+    "en": "No voices match these filters.",
+    "text": "Tiada suara yang sepadan dengan penapis ini."
+  },
+  "voiceLibrary.filter.gender.female": {
+    "en": "Female",
+    "text": "Perempuan"
+  },
+  "voiceLibrary.filter.gender.male": {
+    "en": "Male",
+    "text": "Lelaki"
+  },
+  "voiceLibrary.filter.gender.neutral": {
+    "en": "Neutral",
+    "text": "Neutral"
+  },
+  "voiceLibrary.filter.genderLabel": {
+    "en": "Gender",
+    "text": "Jantina"
+  },
+  "voiceLibrary.filter.style.breathy": {
+    "en": "Breathy",
+    "text": "Berdesah"
+  },
+  "voiceLibrary.filter.style.breezy": {
+    "en": "Breezy",
+    "text": "Ringan"
+  },
+  "voiceLibrary.filter.style.bright": {
+    "en": "Bright",
+    "text": "Cerah"
+  },
+  "voiceLibrary.filter.style.calm": {
+    "en": "Calm",
+    "text": "Tenang"
+  },
+  "voiceLibrary.filter.style.casual": {
+    "en": "Casual",
+    "text": "Santai"
+  },
+  "voiceLibrary.filter.style.clear": {
+    "en": "Clear",
+    "text": "Jelas"
+  },
+  "voiceLibrary.filter.style.confident": {
+    "en": "Confident",
+    "text": "Yakin"
+  },
+  "voiceLibrary.filter.style.deep": {
+    "en": "Deep",
+    "text": "Bernada rendah"
+  },
+  "voiceLibrary.filter.style.dramatic": {
+    "en": "Dramatic",
+    "text": "Dramatik"
+  },
+  "voiceLibrary.filter.style.easy_going": {
+    "en": "Easy-going",
+    "text": "Bersahaja"
+  },
+  "voiceLibrary.filter.style.energetic": {
+    "en": "Energetic",
+    "text": "Bertenaga"
+  },
+  "voiceLibrary.filter.style.even": {
+    "en": "Even",
+    "text": "Sekata"
+  },
+  "voiceLibrary.filter.style.excitable": {
+    "en": "Excitable",
+    "text": "Berkobar-kobar"
+  },
+  "voiceLibrary.filter.style.expressive": {
+    "en": "Expressive",
+    "text": "Ekspresif"
+  },
+  "voiceLibrary.filter.style.firm": {
+    "en": "Firm",
+    "text": "Tegas"
+  },
+  "voiceLibrary.filter.style.formal": {
+    "en": "Formal",
+    "text": "Formal"
+  },
+  "voiceLibrary.filter.style.forward": {
+    "en": "Forward",
+    "text": "Berterus terang"
+  },
+  "voiceLibrary.filter.style.friendly": {
+    "en": "Friendly",
+    "text": "Mesra"
+  },
+  "voiceLibrary.filter.style.gentle": {
+    "en": "Gentle",
+    "text": "Lembut"
+  },
+  "voiceLibrary.filter.style.gravelly": {
+    "en": "Gravelly",
+    "text": "Garau"
+  },
+  "voiceLibrary.filter.style.informative": {
+    "en": "Informative",
+    "text": "Bersifat penerangan"
+  },
+  "voiceLibrary.filter.style.knowledgeable": {
+    "en": "Knowledgeable",
+    "text": "Berpengetahuan"
+  },
+  "voiceLibrary.filter.style.lively": {
+    "en": "Lively",
+    "text": "Lincah"
+  },
+  "voiceLibrary.filter.style.mature": {
+    "en": "Mature",
+    "text": "Matang"
+  },
+  "voiceLibrary.filter.style.neutral": {
+    "en": "Neutral",
+    "text": "Neutral"
+  },
+  "voiceLibrary.filter.style.playful": {
+    "en": "Playful",
+    "text": "Nakal"
+  },
+  "voiceLibrary.filter.style.raspy": {
+    "en": "Raspy",
+    "text": "Serak"
+  },
+  "voiceLibrary.filter.style.smooth": {
+    "en": "Smooth",
+    "text": "Lancar"
+  },
+  "voiceLibrary.filter.style.soft": {
+    "en": "Soft",
+    "text": "Lunak"
+  },
+  "voiceLibrary.filter.style.upbeat": {
+    "en": "Upbeat",
+    "text": "Ceria"
+  },
+  "voiceLibrary.filter.style.warm": {
+    "en": "Warm",
+    "text": "Ramah"
+  },
+  "voiceLibrary.filter.style.youthful": {
+    "en": "Youthful",
+    "text": "Muda"
+  },
+  "voiceLibrary.filter.styleLabel": {
+    "en": "Style",
+    "text": "Gaya"
+  },
+  "voiceLibrary.filter.useCase.conversational": {
+    "en": "Conversation",
+    "text": "Perbualan"
+  },
+  "voiceLibrary.filter.useCase.educational": {
+    "en": "Teaching",
+    "text": "Penerangan"
+  },
+  "voiceLibrary.filter.useCase.entertainment": {
+    "en": "Entertainment",
+    "text": "Hiburan"
+  },
+  "voiceLibrary.filter.useCase.narration": {
+    "en": "Narration",
+    "text": "Penceritaan"
+  },
+  "voiceLibrary.filter.useCase.social_media": {
+    "en": "Social media",
+    "text": "Media sosial"
+  },
+  "voiceLibrary.filter.useCaseLabel": {
+    "en": "Use case",
+    "text": "Kegunaan"
+  }
+}

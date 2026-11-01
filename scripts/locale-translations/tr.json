@@ -1,0 +1,2178 @@
+{
+  "audioSystem.installCommand": {
+    "en": "sudo apt install pulseaudio-utils",
+    "text": "sudo apt install pulseaudio-utils"
+  },
+  "auth.emailPlaceholder": {
+    "en": "your@email.com",
+    "text": "your@email.com"
+  },
+  "captionShare.kinds.wifi": {
+    "en": "Wi‑Fi",
+    "text": "Wi‑Fi"
+  },
+  "engine.status.devVenv": {
+    "en": "dev venv",
+    "text": "geliştirme sanal ortamı"
+  },
+  "engine.status.native": {
+    "en": "native {{version}}",
+    "text": "yerel {{version}}"
+  },
+  "fork.aids.furigana": {
+    "en": "Furigana",
+    "text": "Furigana"
+  },
+  "fork.aids.highlight": {
+    "en": "Highlight new",
+    "text": "Yeni metni vurgula"
+  },
+  "fork.aids.italic": {
+    "en": "Italic source",
+    "text": "İtalik kaynak"
+  },
+  "fork.aids.pinyin": {
+    "en": "Pinyin",
+    "text": "Pinyin"
+  },
+  "fork.aids.readings": {
+    "en": "Readings",
+    "text": "Okunuşlar"
+  },
+  "fork.aids.roman": {
+    "en": "Romanization",
+    "text": "Latinleştirme"
+  },
+  "fork.aids.text": {
+    "en": "Text",
+    "text": "Metin"
+  },
+  "fork.audio.echoAction": {
+    "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
+    "text": "Kulaklık kullanmak ses döngüsünü keser. Alternatif olarak Ayarlar → Mikrofon bölümünden mikrofon etkinleşme eşiğini yükseltin."
+  },
+  "fork.audio.gate": {
+    "en": "Mic activation threshold",
+    "text": "Mikrofon etkinleşme eşiği"
+  },
+  "fork.audio.gateHint": {
+    "en": "Press the microphone, speak, and set the mark under where the bar reaches — and above where it sits while only your speakers are heard.",
+    "text": "Mikrofon simgesine basıp birkaç cümle söyleyin. İşareti, konuşurken çubuğun ulaştığı seviyenin altına, yalnızca hoparlörden ses gelirken ulaştığı seviyenin üstüne ayarlayın."
+  },
+  "fork.audio.gateOff": {
+    "en": "Off",
+    "text": "Kapalı"
+  },
+  "fork.audio.gateQuiet": {
+    "en": "Nothing from the microphone yet.",
+    "text": "Mikrofondan henüz ses gelmiyor."
+  },
+  "fork.audio.gateTest": {
+    "en": "Test the microphone: the bar shows its level",
+    "text": "Mikrofonu test et: çubuk mevcut ses seviyesini gösterir"
+  },
+  "fork.audio.gateTestStop": {
+    "en": "Stop the test",
+    "text": "Testi durdur"
+  },
+  "fork.audio.gateTooltip": {
+    "en": "Sound quieter than this is heard as silence — the other side's voice from your speakers, the keyboard, the room — so it is neither translated nor checked. The microphone is heard about 0.2 s later while this is on. Off: everything is heard.",
+    "text": "Bu seviyeden daha düşük sesler sessizlik sayılır: hoparlörden gelen karşı tarafın sesi, klavye sesi ve ortam gürültüsü çevrilmez veya dil bilgisi geri bildirimi için gönderilmez. Açıkken mikrofon sesi yaklaşık 0.2 saniye gecikir. Kapalıyken tüm sesler gönderilir."
+  },
+  "fork.audio.vbcableInstall": {
+    "en": "Install VB-CABLE",
+    "text": "VB-CABLE yükle"
+  },
+  "fork.audio.vbcableInstalling": {
+    "en": "Downloading… this can take a minute",
+    "text": "İndiriliyor, biraz sürebilir…"
+  },
+  "fork.audio.vbcableMissing": {
+    "en": "The VB-CABLE virtual audio driver is not installed, so a spoken translation cannot be sent into a meeting. Subtitles do not need it.",
+    "text": "VB-CABLE sanal ses sürücüsü yüklü olmadığı için sesli çeviri toplantı uygulamasına aktarılamıyor. Yalnızca altyazı için gerekli değildir."
+  },
+  "fork.autostart.note": {
+    "en": "Kotomimi waits in the background after you sign in, with an icon in the notification area, and loads the models once ahead of time so the first session does not wait for it.",
+    "text": "Oturum açtıktan sonra Kotomimi arka planda, bildirim alanındaki simgeyle bekler ve modelleri önceden yükler; böylece ilk oturum için beklemeniz gerekmez."
+  },
+  "fork.autostart.title": {
+    "en": "Startup",
+    "text": "Başlangıç"
+  },
+  "fork.autostart.toggle": {
+    "en": "Start in the background when I sign in to Windows",
+    "text": "Windows'ta oturum açtığımda arka planda başlat"
+  },
+  "fork.custom.add": {
+    "en": "Add",
+    "text": "Ekle"
+  },
+  "fork.custom.added": {
+    "en": "Added {{name}} ({{size}} MB). Download it in the model library.",
+    "text": "{{name}} eklendi ({{size}} MB). Model kitaplığından indirin."
+  },
+  "fork.custom.adding": {
+    "en": "Looking…",
+    "text": "Aranıyor…"
+  },
+  "fork.custom.anyLanguage": {
+    "en": "Every language",
+    "text": "Tüm diller"
+  },
+  "fork.custom.downloaded": {
+    "en": "downloaded",
+    "text": "indirildi"
+  },
+  "fork.custom.error_bad_repo": {
+    "en": "That is not a repository id. It looks like owner/name.",
+    "text": "Bu bir depo kimliği değil. owner/name biçiminde olmalı."
+  },
+  "fork.custom.error_exists": {
+    "en": "This model is already added.",
+    "text": "Bu model zaten eklenmiş."
+  },
+  "fork.custom.error_not_found": {
+    "en": "No public repository by that name.",
+    "text": "Bu ada sahip herkese açık depo yok."
+  },
+  "fork.custom.error_not_whisper": {
+    "en": "This repository is not a Whisper model in the ONNX layout. {{detail}}",
+    "text": "Bu depo ONNX düzeninde bir Whisper modeli değil. {{detail}}"
+  },
+  "fork.custom.error_unreachable": {
+    "en": "Could not reach Hugging Face: {{detail}}",
+    "text": "Hugging Face'e ulaşılamadı: {{detail}}"
+  },
+  "fork.custom.intro": {
+    "en": "For a Whisper model the library does not list, such as one fine-tuned for your language. Give its Hugging Face repository id (most onnx-community/… and Xenova/… Whisper repositories work); it needs a graphics card.",
+    "text": "Kitaplıkta listelenmeyen, örneğin diliniz için özel olarak eğitilmiş bir Whisper modeli içindir. Hugging Face depo kimliğini girin (onnx-community/… ve Xenova/… Whisper depolarının çoğu çalışır); ekran kartı gerekir."
+  },
+  "fork.custom.language": {
+    "en": "The language it hears",
+    "text": "Tanıdığı dil"
+  },
+  "fork.custom.notDownloaded": {
+    "en": "not downloaded",
+    "text": "indirilmedi"
+  },
+  "fork.custom.remove": {
+    "en": "Remove {{name}}",
+    "text": "{{name}} kaldır"
+  },
+  "fork.custom.repo": {
+    "en": "Repository id",
+    "text": "Depo kimliği"
+  },
+  "fork.custom.title": {
+    "en": "Add a Whisper model from Hugging Face",
+    "text": "Hugging Face'ten Whisper modeli ekle"
+  },
+  "fork.echoCancellationApp": {
+    "en": "Kotomimi only",
+    "text": "Yalnızca Kotomimi"
+  },
+  "fork.echoCancellationAppTooltip": {
+    "en": "Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "Yalnızca Kotomimi — sadece Kotomimi'nin çaldığı çevrilmiş konuşmayı kaldırır. Mikrofon sanal bir kabloysa (VB-Cable, BlackHole) bunu seçin."
+  },
+  "fork.find.again": {
+    "en": "Search again",
+    "text": "Yeniden ara"
+  },
+  "fork.find.kindKotomimi": {
+    "en": "Kotomimi",
+    "text": "Kotomimi paylaşımı"
+  },
+  "fork.find.kindPhone": {
+    "en": "Phone · speech recognition",
+    "text": "Telefon · konuşma tanıma"
+  },
+  "fork.find.kindPhoneLends": {
+    "en": "Phone · {{what}}",
+    "text": "Telefon · {{what}}"
+  },
+  "fork.find.kindServer": {
+    "en": "Model server",
+    "text": "Model sunucusu"
+  },
+  "fork.find.lendsAsr": {
+    "en": "speech recognition",
+    "text": "konuşma tanıma"
+  },
+  "fork.find.lendsCoach": {
+    "en": "grammar feedback",
+    "text": "dil bilgisi geri bildirimi"
+  },
+  "fork.find.lendsTranslate": {
+    "en": "translation",
+    "text": "çeviri"
+  },
+  "fork.find.manual": {
+    "en": "Or type its address",
+    "text": "Veya adresini elle girin"
+  },
+  "fork.find.models": {
+    "en": "{{count}} model(s)",
+    "text": "{{count}} model"
+  },
+  "fork.find.needsKey": {
+    "en": "asks for an access key",
+    "text": "erişim anahtarı gerekli"
+  },
+  "fork.find.none": {
+    "en": "Nothing found. Check that the other device is on, is on the same Wi-Fi or router as this one, and has \"Share this computer's models\" turned on in its Kotomimi. You can also type its address below.",
+    "text": "Cihaz bulunamadı. Diğer cihazın açık olduğundan, bu bilgisayarla aynı Wi-Fi ağına veya yönlendiriciye bağlı olduğundan ve Kotomimi'de \"Bu bilgisayarın modellerini paylaş\" seçeneğinin açık olduğundan emin olun. Adresini aşağıya elle de girebilirsiniz."
+  },
+  "fork.find.productHere": {
+    "en": "{{product}} on this computer",
+    "text": "Bu bilgisayardaki {{product}}"
+  },
+  "fork.find.search": {
+    "en": "Search my network for devices",
+    "text": "Yerel ağda cihaz ara"
+  },
+  "fork.find.searching": {
+    "en": "Looking for devices on your network…",
+    "text": "Yerel ağda cihazlar aranıyor…"
+  },
+  "fork.find.thisComputer": {
+    "en": "On this computer",
+    "text": "Bu bilgisayardaki sunucular"
+  },
+  "fork.find.title": {
+    "en": "Found on your network",
+    "text": "Yerel ağda bulunan cihazlar"
+  },
+  "fork.find.use": {
+    "en": "Use {{name}}",
+    "text": "{{name}} kullan"
+  },
+  "fork.fonts.add": {
+    "en": "Add a language…",
+    "text": "Dil ekle…"
+  },
+  "fork.fonts.default": {
+    "en": "App default",
+    "text": "Uygulama varsayılanı"
+  },
+  "fork.fonts.languages": {
+    "en": "Conversation text, by language",
+    "text": "Dile göre konuşma metni"
+  },
+  "fork.fonts.latin": {
+    "en": "Latin letters and digits",
+    "text": "Latin harfleri ve rakamlar"
+  },
+  "fork.fonts.latinHint": {
+    "en": "English letters and digits in the conversation",
+    "text": "Konuşmadaki İngilizce harfler ve rakamlar"
+  },
+  "fork.fonts.loading": {
+    "en": "Reading the installed fonts…",
+    "text": "Yüklü yazı tipleri okunuyor…"
+  },
+  "fork.fonts.none": {
+    "en": "No font matches",
+    "text": "Eşleşen yazı tipi yok"
+  },
+  "fork.fonts.others": {
+    "en": "Other fonts (may lack this script)",
+    "text": "Diğer yazı tipleri (bu yazı sistemini içermeyebilir)"
+  },
+  "fork.fonts.pinyin": {
+    "en": "Pinyin above the text",
+    "text": "Metnin üstünde pinyin"
+  },
+  "fork.fonts.reading": {
+    "en": "Readings above the text",
+    "text": "Metnin üstündeki okunuşlar"
+  },
+  "fork.fonts.remove": {
+    "en": "Reset {{language}}",
+    "text": "{{language}} için varsayılan yazı tipini geri yükle"
+  },
+  "fork.fonts.roman": {
+    "en": "Romanization",
+    "text": "Romanizasyon"
+  },
+  "fork.fonts.romanHint": {
+    "en": "The readings under Japanese, Korean, Russian and Ukrainian",
+    "text": "Japonca, Korece, Rusça ve Ukraynaca altındaki okunuşlar"
+  },
+  "fork.fonts.search": {
+    "en": "Search fonts",
+    "text": "Yazı tiplerinde ara"
+  },
+  "fork.fonts.text": {
+    "en": "Text",
+    "text": "Metin"
+  },
+  "fork.fonts.title": {
+    "en": "Fonts",
+    "text": "Yazı tipleri"
+  },
+  "fork.fonts.tooltip": {
+    "en": "Fonts installed on this computer. Characters a font lacks are shown in the app's own.",
+    "text": "Bu bilgisayarda yüklü yazı tipleri. Bir yazı tipinde olmayan karakterler uygulamanın kendi yazı tipiyle gösterilir."
+  },
+  "fork.fonts.ui": {
+    "en": "Interface",
+    "text": "Arayüz"
+  },
+  "fork.fonts.uiHint": {
+    "en": "Menus, settings and buttons",
+    "text": "Menüler, ayarlar ve düğmeler"
+  },
+  "fork.furigana": {
+    "en": "Furigana over kanji (Japanese)",
+    "text": "Kanjilerin üzerinde furigana (Japonca)"
+  },
+  "fork.help.issues": {
+    "en": "Report a problem",
+    "text": "Sorun bildir"
+  },
+  "fork.help.issuesTooltip": {
+    "en": "Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page.",
+    "text": "Kotomimi, Sokuji'nin bağımsız bir fork'udur. Bu uygulamayla ilgili sorunları kendi GitHub sayfasında bildirin."
+  },
+  "fork.lan.copied": {
+    "en": "Copied",
+    "text": "Kopyalandı"
+  },
+  "fork.lan.copy": {
+    "en": "Copy",
+    "text": "Kopyala"
+  },
+  "fork.lan.direction": {
+    "en": "Which direction to show models for",
+    "text": "Modellerin gösterileceği yön"
+  },
+  "fork.lan.enable": {
+    "en": "Share this computer's models",
+    "text": "Bu bilgisayarın modellerini paylaş"
+  },
+  "fork.lan.failed": {
+    "en": "Sharing could not start: {{message}}",
+    "text": "Paylaşım başlatılamadı: {{message}}"
+  },
+  "fork.lan.firewall": {
+    "en": "The first time, your system's firewall may ask whether to allow Kotomimi on the network: allow it for private networks.",
+    "text": "İlk kez açtığınızda sistem güvenlik duvarı Kotomimi'nin ağa erişmesine izin verip vermediğinizi sorabilir. Özel ağlarda iletişime izin verin."
+  },
+  "fork.lan.firewallAllow": {
+    "en": "Allow",
+    "text": "İzin ver"
+  },
+  "fork.lan.firewallBlocked": {
+    "en": "Windows Firewall is keeping other devices out",
+    "text": "Windows Güvenlik Duvarı diğer cihazları engelliyor"
+  },
+  "fork.lan.firewallDeclined": {
+    "en": "Still blocked: Windows was not told yes.",
+    "text": "Hâlâ engelleniyor: Windows'ta izin onaylanmadı."
+  },
+  "fork.lan.firewallPrivate": {
+    "en": "Allow opens this port to devices on your network. Windows will ask you to confirm.",
+    "text": "İzin ver'e bastığınızda bu bağlantı noktası yerel ağınızdaki cihazlara açılır. Windows önce onayınızı ister."
+  },
+  "fork.lan.firewallPublic": {
+    "en": "Windows treats this network as public. Allow opens this port to devices on this same network only. Windows will ask you to confirm.",
+    "text": "Windows bu ağı ortak ağ olarak görüyor. İzin ver'e bastığınızda bu bağlantı noktası yalnızca aynı ağdaki cihazlara açılır. Windows önce onayınızı ister."
+  },
+  "fork.lan.firewallWaiting": {
+    "en": "Waiting for Windows…",
+    "text": "Windows bekleniyor…"
+  },
+  "fork.lan.hideLibrary": {
+    "en": "Hide the model library",
+    "text": "Model kitaplığını gizle"
+  },
+  "fork.lan.key": {
+    "en": "Access key",
+    "text": "Erişim anahtarı"
+  },
+  "fork.lan.keyPlaceholder": {
+    "en": "Blank: anyone on the network may connect",
+    "text": "Boş bırakılırsa yerel ağdaki her cihaz bağlanabilir"
+  },
+  "fork.lan.models": {
+    "en": "Models shared · {{count}}",
+    "text": "Paylaşılan modeller · {{count}}"
+  },
+  "fork.lan.noNetwork": {
+    "en": "This computer is on no network.",
+    "text": "Bu bilgisayar şu anda bir ağa bağlı değil."
+  },
+  "fork.lan.noRecognizer": {
+    "en": "No speech recognition model downloaded yet",
+    "text": "Henüz konuşma tanıma modeli indirilmedi"
+  },
+  "fork.lan.on": {
+    "en": "Sharing — no device connected yet",
+    "text": "Paylaşılıyor, henüz bağlı cihaz yok"
+  },
+  "fork.lan.onWithClients": {
+    "en": "Sharing — {{count}} connection(s) in use",
+    "text": "Paylaşılıyor, {{count}} bağlantı kullanımda"
+  },
+  "fork.lan.options": {
+    "en": "Options",
+    "text": "Seçenekler"
+  },
+  "fork.lan.otherAddresses": {
+    "en": "This computer's other addresses",
+    "text": "Bu bilgisayarın diğer adresleri"
+  },
+  "fork.lan.port": {
+    "en": "Port",
+    "text": "Bağlantı noktası"
+  },
+  "fork.lan.portInUse": {
+    "en": "Port {{port}} is taken by another program. Choose another under Options.",
+    "text": "{{port}} bağlantı noktası başka bir program tarafından kullanılıyor. Seçenekler bölümünden başka bir bağlantı noktası seçin."
+  },
+  "fork.lan.serving": {
+    "en": "Sharing",
+    "text": "Paylaşılıyor"
+  },
+  "fork.lan.servingClients": {
+    "en": "Sharing · {{count}} in use",
+    "text": "Paylaşılıyor · {{count}} bağlantı kullanımda"
+  },
+  "fork.lan.servingTip": {
+    "en": "This computer is lending its models to other devices. The languages and the choice of model are set on those devices, not here.",
+    "text": "Bu bilgisayar modellerini diğer cihazların kullanımına açıyor. Dil ve model seçimi burada değil, o cihazlarda yapılır."
+  },
+  "fork.lan.sessionIdle": {
+    "en": "The other device ended the session: nobody had spoken for a long while, and it let its models go. Start again to continue.",
+    "text": "Uzun süre kimse konuşmadığı için diğer cihaz oturumu sonlandırdı ve modelleri bellekten kaldırdı. Devam etmek için yeniden Başlat'a basın."
+  },
+  "fork.lan.showLibrary": {
+    "en": "Download or manage models",
+    "text": "Model indir veya yönet"
+  },
+  "fork.lan.starting": {
+    "en": "Starting…",
+    "text": "Başlatılıyor…"
+  },
+  "fork.lan.title": {
+    "en": "Share with other devices",
+    "text": "Diğer cihazlarla paylaş"
+  },
+  "fork.lan.tooltip": {
+    "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
+    "text": "Bu bilgisayarın modellerini yerel ağdaki diğer cihazların kullanımına açar. Diğer cihazda Kotomimi'nin \"Başka bir cihaz\" bölümünde arama yaparak bu bilgisayarı bulabilir, modeli ve dili oradan seçebilirsiniz. Paylaşım için Kotomimi açık olmalıdır."
+  },
+  "fork.languageMenu.detect": {
+    "en": "Auto-detect",
+    "text": "Otomatik algıla"
+  },
+  "fork.languageMenu.detectUnavailable": {
+    "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
+    "text": "Kullanılan konuşma tanıma özelliği dilleri algılayamıyor. Qwen3-ASR 1.7B GGUF veya bir API modeli gerekiyor."
+  },
+  "fork.languageMenu.mine": {
+    "en": "My language",
+    "text": "Benim dilim"
+  },
+  "fork.languageMenu.mostly": {
+    "en": "Translate into what they mostly speak",
+    "text": "Karşı tarafın çoğunlukla konuştuğu dile çevir"
+  },
+  "fork.languageMenu.none": {
+    "en": "No language by that name",
+    "text": "Bu ada sahip dil yok"
+  },
+  "fork.languageMenu.pin": {
+    "en": "Pin {{name}} to the top",
+    "text": "{{name}} dilini üste sabitle"
+  },
+  "fork.languageMenu.pinShort": {
+    "en": "Pin to the top",
+    "text": "Üste sabitle"
+  },
+  "fork.languageMenu.search": {
+    "en": "Type to find a language",
+    "text": "Dil bulmak için yazın"
+  },
+  "fork.languageMenu.speakBoth": {
+    "en": "I speak {{language}} too",
+    "text": "Ben de {{language}} konuşuyorum"
+  },
+  "fork.languageMenu.speakBothHelp": {
+    "en": "When you speak {{mine}}, it is translated into {{language}}; when you speak {{language}}, into {{mine}}. Recognition tells the two apart.",
+    "text": "{{mine}} konuştuğunuzda {{language}} diline, {{language}} konuştuğunuzda {{mine}} diline çevrilir. Tanıma özelliği bu iki dili otomatik olarak ayırt eder."
+  },
+  "fork.languageMenu.speakBothUnavailable": {
+    "en": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
+    "text": "Seçili konuşma tanıyıcı {{mine}} ile {{language}} dillerini ayırt edemiyor. Her iki dil de yüklü olan eşleştirilmiş Apple Speech'i ya da iki dili tanıyabilen bir tanıyıcıyı seçin."
+  },
+  "fork.languageMenu.theirs": {
+    "en": "Their language",
+    "text": "Karşı tarafın dili"
+  },
+  "fork.languageMenu.unpin": {
+    "en": "Unpin {{name}}",
+    "text": "{{name}} sabitlemesini kaldır"
+  },
+  "fork.languageMenu.unpinShort": {
+    "en": "Unpin",
+    "text": "Sabitlemeyi kaldır"
+  },
+  "fork.pinyin": {
+    "en": "Pinyin over Chinese",
+    "text": "Çince metnin üzerinde pinyin"
+  },
+  "fork.romanization": {
+    "en": "Romanization",
+    "text": "Latinleştirme"
+  },
+  "fork.sourceItalic": {
+    "en": "Source text in italics",
+    "text": "Kaynak metin italik"
+  },
+  "fork.speechDetection.title": {
+    "en": "Speech detection",
+    "text": "Konuşma algılama"
+  },
+  "fork.statusLine.checking": {
+    "en": "Getting ready. You can start in a moment.",
+    "text": "Hazırlanıyor. Birazdan başlayabilirsiniz."
+  },
+  "fork.subtitle.align": {
+    "en": "Alignment",
+    "text": "Hizalama"
+  },
+  "fork.subtitle.alignCenter": {
+    "en": "Centre",
+    "text": "Ortaya"
+  },
+  "fork.subtitle.alignLeft": {
+    "en": "Left",
+    "text": "Sola"
+  },
+  "fork.subtitle.back": {
+    "en": "Back to the main window",
+    "text": "Ana pencereye dön"
+  },
+  "fork.subtitle.backdrop": {
+    "en": "Panel",
+    "text": "Panel"
+  },
+  "fork.subtitle.lanesView": {
+    "en": "Subtitle view",
+    "text": "Altyazı görünümü"
+  },
+  "fork.subtitle.listView": {
+    "en": "List view",
+    "text": "Liste görünümü"
+  },
+  "fork.subtitle.look": {
+    "en": "Look",
+    "text": "Görünüm"
+  },
+  "fork.subtitle.lookDark": {
+    "en": "Dark text",
+    "text": "Koyu metin"
+  },
+  "fork.subtitle.lookLight": {
+    "en": "Light text",
+    "text": "Açık metin"
+  },
+  "fork.subtitle.lookPanel": {
+    "en": "Dark panel",
+    "text": "Koyu panel"
+  },
+  "fork.subtitle.lookSample": {
+    "en": "Aa",
+    "text": "Aa"
+  },
+  "fork.subtitle.lookSoft": {
+    "en": "Faint panel",
+    "text": "Soluk panel"
+  },
+  "fork.subtitle.moreColors": {
+    "en": "More colours (source text, panel)",
+    "text": "Daha fazla renk (özgün metin, panel)"
+  },
+  "fork.subtitle.off": {
+    "en": "Off",
+    "text": "Kapalı"
+  },
+  "fork.subtitle.outline": {
+    "en": "Outline",
+    "text": "Kontur"
+  },
+  "fork.subtitle.shadow": {
+    "en": "Shadow",
+    "text": "Gölge"
+  },
+  "fork.subtitle.through": {
+    "en": "Click-through: the mouse passes through the captions",
+    "text": "Tıklama geçişi: fare altyazıların içinden geçer"
+  },
+  "fork.subtitle.throughOff": {
+    "en": "Stop click-through",
+    "text": "Tıklama geçişini durdur"
+  },
+  "fork.subtitle.type": {
+    "en": "Type to translate (Ctrl+K)",
+    "text": "Çevirmek için yazın (Ctrl+K)"
+  },
+  "fork.subtitle.typePlaceholder": {
+    "en": "What you want to say — Enter translates",
+    "text": "Söylemek istediğiniz şey — Enter çevirir"
+  },
+  "fork.vrchat.chatbox": {
+    "en": "Above my avatar",
+    "text": "Avatarımın üstünde"
+  },
+  "fork.vrchat.chatboxHearBoth": {
+    "en": "Switch to Both",
+    "text": "İkisine geç"
+  },
+  "fork.vrchat.chatboxOff": {
+    "en": "Off",
+    "text": "Kapalı"
+  },
+  "fork.vrchat.chatboxSourceFirst": {
+    "en": "Original on top",
+    "text": "Önce özgün metin"
+  },
+  "fork.vrchat.chatboxTranslation": {
+    "en": "Translation",
+    "text": "Çeviri"
+  },
+  "fork.vrchat.chatboxTranslationFirst": {
+    "en": "Translation on top",
+    "text": "Önce çeviri"
+  },
+  "fork.vrchat.chatboxUnheard": {
+    "en": "Only the other side is translated now: what you say won't show above your avatar.",
+    "text": "Şu anda yalnızca karşı taraf çevriliyor: söyledikleriniz avatarınızın üstünde görünmez."
+  },
+  "fork.vrchat.connected": {
+    "en": "Connected",
+    "text": "Bağlandı"
+  },
+  "fork.vrchat.end": {
+    "en": "End",
+    "text": "Bitir"
+  },
+  "fork.vrchat.help": {
+    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
+    "text": "Bu bilgisayardaki VRChat ile çalışır. VRChat'te sessize alındığınızda Kotomimi sizi duymaz; çevirileriniz başınızın üzerinde gösterilerek diğer oyuncuların okuyabilmesini sağlar. Bir dünyada video oynatılırken sesin dünyada yönü yoksa oyuncuların seslerinden ayrılır; yönü varsa karşı tarafın konuşması daha kısa parçalara bölünür."
+  },
+  "fork.vrchat.mutedNotHeard": {
+    "en": "Muted in VRChat: what you say is not recognized.",
+    "text": "VRChat'te sessiz: söyledikleriniz tanınmaz."
+  },
+  "fork.vrchat.mutedThere": {
+    "en": "Muted in VRChat",
+    "text": "VRChat'te sessiz"
+  },
+  "fork.vrchat.muteGate": {
+    "en": "Don't hear me while muted in VRChat",
+    "text": "VRChat'te sessizken beni duymaz"
+  },
+  "fork.vrchat.notConnected": {
+    "en": "Not connected",
+    "text": "Bağlı değil"
+  },
+  "fork.vrchat.onVideo": {
+    "en": "When a world plays a video",
+    "text": "Bir dünyada video oynatıldığında"
+  },
+  "fork.vrchat.pausedOn": {
+    "en": "Not translating",
+    "text": "Çeviri duraklatıldı"
+  },
+  "fork.vrchat.quickOn": {
+    "en": "Shorter sentences",
+    "text": "Cümleler kısaltıldı"
+  },
+  "fork.vrchat.remember": {
+    "en": "Remember",
+    "text": "Hatırla"
+  },
+  "fork.vrchat.removedOn": {
+    "en": "Video sound removed",
+    "text": "Video sesi kaldırıldı"
+  },
+  "fork.vrchat.separatedOn": {
+    "en": "Video sound separated",
+    "text": "Video sesi ayrıldı"
+  },
+  "fork.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
+  },
+  "fork.vrchat.turnOnOsc": {
+    "en": "Turn on OSC in the VRChat quick menu",
+    "text": "VRChat hızlı menüsünden OSC'yi açın"
+  },
+  "fork.vrchat.videoAsk": {
+    "en": "Ask me",
+    "text": "Bana sor"
+  },
+  "fork.vrchat.videoAskResult": {
+    "en": "Asks you when a video starts.",
+    "text": "Video başladığında ne yapılacağını sorar."
+  },
+  "fork.vrchat.videoBoth": {
+    "en": "People + video",
+    "text": "Konuşmalar + video"
+  },
+  "fork.vrchat.videoBothResult": {
+    "en": "The video gets its own line and uses more power; if it can't be separated, sentences are cut shorter.",
+    "text": "Video ayrı bir satırda gösterilir ve daha fazla kaynak kullanır; ayrılamazsa cümleler kısaltılır."
+  },
+  "fork.vrchat.videoPause": {
+    "en": "Pause",
+    "text": "Duraklat"
+  },
+  "fork.vrchat.videoPauseResult": {
+    "en": "The other side is not translated while it plays.",
+    "text": "Video oynarken karşı taraf çevrilmez."
+  },
+  "fork.vrchat.videoQuick": {
+    "en": "People only",
+    "text": "Yalnızca konuşmalar"
+  },
+  "fork.vrchat.videoQuickResult": {
+    "en": "Takes out video sound; if it can't, sentences are cut shorter.",
+    "text": "Video sesini kaldırmayı dener; olmazsa cümleleri kısaltır."
+  },
+  "fork.vrchat.videoShort": {
+    "en": "Video",
+    "text": "Video"
+  },
+  "fork.vrchat.videoStarted": {
+    "en": "Video started",
+    "text": "Video başladı"
+  },
+  "fork.wizard.addressMissing": {
+    "en": "Choose a device from the list above, or type its address, for example 192.168.1.10:8790.",
+    "text": "Yukarıdaki listeden bir cihaz seçin veya adresini yazın; örneğin 192.168.1.10:8790."
+  },
+  "fork.wizard.device": {
+    "en": "This computer",
+    "text": "Bu bilgisayar"
+  },
+  "fork.wizard.deviceDesc": {
+    "en": "Recognition and translation run on this computer using native models. Download a model for each stage before starting.",
+    "text": "Tanıma ve çeviri, yerel modeller kullanılarak bu bilgisayarda çalışır. Başlamadan önce her aşama için bir model indirin."
+  },
+  "fork.wizard.deviceNotice": {
+    "en": "After setup, open Model library in the Speech recognition and Translation cards and download a native model for each. Translation requires a downloaded model, or you can switch that stage to an API model or another device.",
+    "text": "Kurulumdan sonra Konuşma tanıma ve Çeviri kartlarında Model kitaplığını açın ve her biri için bir yerel model indirin. Çeviri için indirilmiş bir model gerekir; bu aşamayı bir API modeline veya başka bir cihaza da geçirebilirsiniz."
+  },
+  "fork.wizard.intro": {
+    "en": "Pick a starting point. Later, in Settings, recognition and translation can each run in a different place.",
+    "text": "Bir başlangıç noktası seçin. Daha sonra Ayarlar'da tanıma ve çeviriyi farklı yerlerde çalıştırabilirsiniz."
+  },
+  "fork.wizard.keyNeeded": {
+    "en": "This device asks for an access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options), then press Connect.",
+    "text": "Bu cihaz bir erişim anahtarı istiyor. O cihazda ayarlanan anahtarı girin (başka bir Kotomimi'de paylaşım Seçenekleri'nde bulunur), ardından Bağlan'a basın."
+  },
+  "fork.wizard.pathBadge": {
+    "en": "Recommended",
+    "text": "Önerilen"
+  },
+  "fork.wizard.pathCost": {
+    "en": "No account and no API key. Text only: subtitles with furigana, typed translation and grammar feedback. Another device means a Kotomimi sharing its models, or a model server such as LocalAI; this computer downloads models onto your disk.",
+    "text": "Hesap veya API anahtarı gerekmez. Yalnızca metin: furigana içeren altyazılar, yazılı çeviri ve dil bilgisi geri bildirimi. Başka bir cihaz, modellerini paylaşan bir Kotomimi veya LocalAI gibi bir model sunucusu olabilir; bu bilgisayar modelleri diskinize indirir."
+  },
+  "fork.wizard.pathDesc": {
+    "en": "Use the models of another device on your network, or this computer's own — and any mix of the two.",
+    "text": "Ağınızdaki başka bir cihazın modellerini, bu bilgisayarın modellerini veya ikisinin karışımını kullanın."
+  },
+  "fork.wizard.pathTitle": {
+    "en": "Kotomimi Pipeline",
+    "text": "Kotomimi İş Akışı"
+  },
+  "fork.wizard.pendingAddress": {
+    "en": "No device chosen yet — choose one in Settings before you start.",
+    "text": "Henüz cihaz seçilmedi — başlamadan önce Ayarlar'dan birini seçin."
+  },
+  "fork.wizard.server": {
+    "en": "Another device on my network",
+    "text": "Ağımdaki başka bir cihaz"
+  },
+  "fork.wizard.serverDesc": {
+    "en": "The models run on another computer: a Kotomimi with sharing turned on, or a model server such as LocalAI. This computer stays light.",
+    "text": "Modeller başka bir bilgisayarda çalışır: paylaşımı açılmış bir Kotomimi veya LocalAI gibi bir model sunucusu. Bu bilgisayar hafif kalır."
+  },
+  "fork.wizard.serverFound": {
+    "en": "Connected — it offers {{count}} model(s).",
+    "text": "Bağlandı — {{count}} model sunuyor."
+  },
+  "fork.wizard.serverUnreachable": {
+    "en": "Could not connect: {{message}}",
+    "text": "Bağlanılamadı: {{message}}"
+  },
+  "fork.wizard.share": {
+    "en": "This computer, for my other devices",
+    "text": "Diğer cihazlarım için bu bilgisayar"
+  },
+  "fork.wizard.shareDesc": {
+    "en": "Computing power to spare here? Let the models run on this computer for the other devices on your network — and for this computer itself.",
+    "text": "Bu bilgisayarda kullanılmayan işlem gücü mü var? Modelleri ağınızdaki diğer cihazlar ve bu bilgisayar için burada çalıştırın."
+  },
+  "fork.wizard.shareNotice": {
+    "en": "Nothing to enter. Finishing turns on sharing, so other Kotomimi devices on your network can find this computer. After setup, download models in the Speech recognition card: those are what the others can use.",
+    "text": "Buraya hiçbir şey girmeniz gerekmez. Kurulum tamamlandığında paylaşım açılır ve ağınızdaki diğer Kotomimi cihazları bu bilgisayarı bulabilir. Kurulumdan sonra Konuşma tanıma kartından modelleri indirin; diğer cihazların kullanacağı modeller bunlardır."
+  },
+  "fork.wizard.shareSummary": {
+    "en": "Sharing",
+    "text": "Paylaşım"
+  },
+  "fork.wizard.shareSummaryOn": {
+    "en": "Turned on when you finish: other devices on your network can use this computer's models",
+    "text": "Tamamlandığında açılır: ağınızdaki diğer cihazlar bu bilgisayarın modellerini kullanabilir"
+  },
+  "fork.wizard.title": {
+    "en": "Which device does the work?",
+    "text": "İşi hangi cihaz yapacak?"
+  },
+  "fork.wizard.tryServer": {
+    "en": "Connect",
+    "text": "Bağlan"
+  },
+  "models.deviceCpu": {
+    "en": "CPU",
+    "text": "CPU"
+  },
+  "models.deviceGpu": {
+    "en": "GPU",
+    "text": "GPU"
+  },
+  "providers.gemini.name": {
+    "en": "Google Gemini",
+    "text": "Google Gemini"
+  },
+  "providers.kizunaai_soniox.name": {
+    "en": "KizunaAI",
+    "text": "KizunaAI"
+  },
+  "providers.local_inference.modelAsr": {
+    "en": "ASR",
+    "text": "Konuşma tanıma"
+  },
+  "providers.local_inference.modelTranslation": {
+    "en": "MT",
+    "text": "Çeviri"
+  },
+  "providers.local_inference.modelTts": {
+    "en": "TTS",
+    "text": "Seslendirme"
+  },
+  "providers.localai.addressMissing": {
+    "en": "No other device is chosen yet. In Settings, under \"Another device\", search for it or type its address.",
+    "text": "Henüz başka bir cihaz seçilmedi. Ayarlar'daki \"Başka bir cihaz\" bölümünde cihazı arayın veya adresini girin."
+  },
+  "providers.localai.advanced": {
+    "en": "Advanced",
+    "text": "Gelişmiş"
+  },
+  "providers.localai.apiKey": {
+    "en": "API key",
+    "text": "API anahtarı"
+  },
+  "providers.localai.apiKeyNeeded": {
+    "en": "The API at {{address}} asks for a key. In its card, turn on \"The API asks for a key\" and enter it.",
+    "text": "{{address}} adresindeki API bir anahtar istiyor. İlgili kartta \"Bu API anahtar istiyor\" seçeneğini açıp anahtarı girin."
+  },
+  "providers.localai.apiKeyRefused": {
+    "en": "The API at {{address}} did not accept the key. Check the API key in its card.",
+    "text": "{{address}} adresindeki API anahtarı kabul etmedi. İlgili karttaki API anahtarını kontrol edin."
+  },
+  "providers.localai.apiKeyReused": {
+    "en": "Filled in with the key saved under \"{{name}}\".",
+    "text": "\"{{name}}\" altında kaydettiğiniz anahtar dolduruldu."
+  },
+  "providers.localai.apiService": {
+    "en": "Service",
+    "text": "Hizmet"
+  },
+  "providers.localai.apiServiceArk": {
+    "en": "Doubao (Volcengine Ark)",
+    "text": "Doubao (Volcengine Ark)"
+  },
+  "providers.localai.apiServiceArkModel": {
+    "en": "A model's name, or your endpoint id (ep-…)",
+    "text": "Model adı veya uç nokta kimliğiniz (ep-…)"
+  },
+  "providers.localai.apiServiceCustom": {
+    "en": "Custom address",
+    "text": "Özel adres"
+  },
+  "providers.localai.apiServiceModel": {
+    "en": "Choose from the list on the right, or type a name",
+    "text": "Sağdaki listeden seçin veya bir ad girin"
+  },
+  "providers.localai.apiServiceOllama": {
+    "en": "Ollama on this computer",
+    "text": "Bu bilgisayardaki Ollama"
+  },
+  "providers.localai.apiServiceSiliconFlow": {
+    "en": "SiliconFlow",
+    "text": "SiliconFlow"
+  },
+  "providers.localai.apiUnreachable": {
+    "en": "The API at {{address}} could not be reached. Check the address in its card, and that this computer is online.",
+    "text": "{{address}} adresindeki API'ye bağlanılamadı. İlgili karttaki adresi ve bu bilgisayarın internet bağlantısını kontrol edin."
+  },
+  "providers.localai.asrApiBaseUrl": {
+    "en": "API address",
+    "text": "API adresi"
+  },
+  "providers.localai.asrApiBaseUrlPlaceholder": {
+    "en": "e.g. https://api.openai.com/v1",
+    "text": "Örn. https://api.openai.com/v1"
+  },
+  "providers.localai.asrApiModelPlaceholder": {
+    "en": "e.g. whisper-1, whisper-large-v3",
+    "text": "Örn. whisper-1, whisper-large-v3"
+  },
+  "providers.localai.asrApiNeedsKey": {
+    "en": "The API asks for a key",
+    "text": "Bu API için anahtar gerekiyor"
+  },
+  "providers.localai.asrFixedNote": {
+    "en": "That device is reached as a plain LocalAI, which always hears with its own default recognizer when the translation or the feedback uses a model chosen here. Through the Kotomimi on that device, the recognizer can be chosen here.",
+    "text": "Şu anda o cihazdaki LocalAI'a doğrudan bağlısınız. Çeviri veya dil bilgisi geri bildirimi için farklı bir model seçildiğinde yalnızca kendi varsayılan tanıma modelini kullanır. O cihazdaki Kotomimi'ye bağlanırsanız tanıma modelini buradan seçebilirsiniz."
+  },
+  "providers.localai.asrKey": {
+    "en": "API key of the speech recognition API",
+    "text": "Konuşma tanıma API anahtarı"
+  },
+  "providers.localai.asrUnnamed": {
+    "en": "Speech recognition has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "Konuşma tanıma için henüz kullanılabilir bir model yok. Sağlayıcının altındaki \"Konuşma tanıma\" kartından bir model seçin (API modeli için adres ve model adını girin) veya başka bir konum seçin."
+  },
+  "providers.localai.auto": {
+    "en": "Automatic · {{name}}",
+    "text": "Otomatik · {{name}}"
+  },
+  "providers.localai.browse": {
+    "en": "Model library",
+    "text": "Model kitaplığı"
+  },
+  "providers.localai.bySentence": {
+    "en": "Translate sentence by sentence",
+    "text": "Cümle cümle çevir"
+  },
+  "providers.localai.bySentenceTooltip": {
+    "en": "On: each sentence is translated as soon as it ends — sooner, but without the sentences around it. Off: the whole stretch is translated once the speaker pauses — with its context, but later.",
+    "text": "Açık: Her cümle biter bitmez çevrilir. Çeviri daha erken görünür, ancak çevredeki cümlelerin bağlamı eksik kalır. Kapalı: Konuşan kişi durakladığında tüm bölüm çevrilir. Bağlam korunur, ancak daha uzun beklersiniz."
+  },
+  "providers.localai.checking": {
+    "en": "Checking…",
+    "text": "Kontrol ediliyor…"
+  },
+  "providers.localai.checkNow": {
+    "en": "Check",
+    "text": "Kontrol et"
+  },
+  "providers.localai.checkSlow": {
+    "en": "No answer within {{seconds}} s: the device may be off or loading a model, or the address wrong. It is asked again by itself.",
+    "text": "{{seconds}} saniyedir yanıt yok. Cihaz kapalı olabilir, model yüklüyor olabilir veya adres yanlış olabilir. Otomatik olarak tekrar denenecek."
+  },
+  "providers.localai.choiceDevice": {
+    "en": "Use this computer",
+    "text": "Bu bilgisayarı kullan"
+  },
+  "providers.localai.choiceServer": {
+    "en": "Use another device",
+    "text": "Başka cihaz kullan"
+  },
+  "providers.localai.coach": {
+    "en": "Check my grammar when I speak their language",
+    "text": "Karşı tarafın dilini konuşurken dil bilgimi kontrol et"
+  },
+  "providers.localai.coachKey": {
+    "en": "API key of the feedback model",
+    "text": "Dil bilgisi geri bildirimi modelinin API anahtarı"
+  },
+  "providers.localai.coachNeedsSpeaker": {
+    "en": "Feedback answers what you say. Switch the mode to \"Me\" or \"Both\".",
+    "text": "Dil bilgisi geri bildirimi için sesiniz duyulmalı. Modu \"Ben\" veya \"İkisi de\" olarak değiştirin."
+  },
+  "providers.localai.coachNoModel": {
+    "en": "The other device has no text model that can give feedback. Use an API model or this computer instead.",
+    "text": "Diğer cihazda dil bilgisi geri bildirimi verebilen bir metin modeli yok. Bir API modeli veya bu bilgisayarı kullanın."
+  },
+  "providers.localai.coachPrompt": {
+    "en": "Feedback instructions",
+    "text": "Dil bilgisi geri bildirimi talimatları"
+  },
+  "providers.localai.coachPromptPlaceholder": {
+    "en": "Blank: written automatically for your two languages. Your own text may use {{spoken}} and {{native}}.",
+    "text": "Boş bırakırsanız ana dilinize ve çalıştığınız dile göre otomatik oluşturulur. Kendiniz yazarken bu iki dil için {{spoken}} ve {{native}} kullanabilirsiniz."
+  },
+  "providers.localai.coachPromptPreview": {
+    "en": "Used while the box is blank, for this language pair:",
+    "text": "Boş bırakıldığında bu dil çifti için kullanılan talimatlar:"
+  },
+  "providers.localai.coachStage": {
+    "en": "Grammar feedback",
+    "text": "Dil bilgisi geri bildirimi"
+  },
+  "providers.localai.coachStageTooltip": {
+    "en": "When you speak the other language, a model checks your grammar and answers with a check mark, or a corrected sentence and an explanation. Enable \"I speak the other language too\" as well to get both a translation and private feedback. Your own language and typed text are translated without feedback.",
+    "text": "Diğer dili konuştuğunuzda bir model dil bilginizi kontrol eder; bir onay işaretiyle ya da düzeltilmiş cümle ve açıklamayla yanıt verir. Hem çeviri hem de yalnızca size görünen geri bildirim almak için \"Diğer dili de konuşuyorum\" seçeneğini de açın. Kendi dilinizde söyledikleriniz ve yazdığınız metinler geri bildirim verilmeden çevrilir."
+  },
+  "providers.localai.coachUnnamed": {
+    "en": "Grammar feedback has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "Dil bilgisi geri bildirimi için henüz kullanılabilir bir model yok. Sağlayıcının altındaki \"Dil bilgisi geri bildirimi\" kartından bir model seçin (API modeli için adres ve model adını girin) veya başka bir konum seçin."
+  },
+  "providers.localai.connectFirst": {
+    "en": "No other device is connected yet: search for one above, or type its address.",
+    "text": "Henüz başka bir cihaza bağlanılmadı. Önce yukarıdan cihaz arayın veya adresini girin."
+  },
+  "providers.localai.description": {
+    "en": "Recognition, translation and grammar feedback — and you mix where each model runs: this computer, another device on your network, or any API model.",
+    "text": "Konuşma tanıma, çeviri ve dil bilgisi geri bildirimi için modelleri ayrı ayrı seçebilirsiniz: bu bilgisayarda, yerel ağınızdaki başka bir cihazda veya herhangi bir API üzerinden çalışan modeller."
+  },
+  "providers.localai.detectOther": {
+    "en": "Detect the other side's language",
+    "text": "Karşı tarafın dilini otomatik algıla"
+  },
+  "providers.localai.detectOtherNeeds": {
+    "en": "Only Qwen3-ASR 1.7B GGUF can tell the language by itself. Choose it here.",
+    "text": "Dili kendi başına yalnızca Qwen3-ASR 1.7B GGUF algılayabilir. Buradan onu seçin."
+  },
+  "providers.localai.detectOtherNote": {
+    "en": "The other side's language is detected, so a model that can tell languages apart hears them.",
+    "text": "Karşı tarafın dili otomatik algılandığı için burada dili algılayabilen bir model kullanılır."
+  },
+  "providers.localai.detectOtherTooltip": {
+    "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
+    "text": "Karşı taraf hangi dili konuşursa konuşsun algılanır ve sizin dilinize çevrilir; elle değiştirmeniz gerekmez. Sizin söyledikleriniz yine yukarıda seçilen dile çevrilir. Tanıma için Qwen3-ASR 1.7B GGUF veya API, çeviri için yerel motor veya API gerekir."
+  },
+  "providers.localai.deviceDefault": {
+    "en": "The device's own choice",
+    "text": "Cihaz seçsin"
+  },
+  "providers.localai.endpoint": {
+    "en": "Address",
+    "text": "Adres"
+  },
+  "providers.localai.familyUnheard": {
+    "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
+    "text": "O cihazdaki {{name}} için {{languages}} yüklü değil. Bu kısmın modelini cihaz kendisi seçer. {{name}} kullanmak için önce o cihaza {{languages}} indirin."
+  },
+  "providers.localai.feedbackFailed": {
+    "en": "One sentence got no grammar feedback: the feedback model did not answer.",
+    "text": "Bir cümle için dil bilgisi geri bildirimi alınamadı: geri bildirim modeli yanıt vermedi."
+  },
+  "providers.localai.groupNative": {
+    "en": "Native engine",
+    "text": "Yerel motor"
+  },
+  "providers.localai.hearApiNote": {
+    "en": "Any service with OpenAI's transcription API works (OpenAI, Groq, a LocalAI). This computer cuts the sentences and uploads each one, so the text appears when a sentence is finished.",
+    "text": "OpenAI'ın yazıya dökme API'sini sunan her hizmet kullanılabilir (OpenAI, Groq, LocalAI gibi). Bu bilgisayar cümleleri ayırır ve her cümle bittiğinde tanınması için gönderir. Bu yüzden metin ancak cümle bitince görünür."
+  },
+  "providers.localai.hears": {
+    "en": "Recognizes {{language}}",
+    "text": "{{language}} konuşmalarını tanır"
+  },
+  "providers.localai.hearsEither": {
+    "en": "Recognizes {{first}} or {{second}}",
+    "text": "{{first}} veya {{second}} konuşmalarını tanır"
+  },
+  "providers.localai.hearsOther": {
+    "en": "Hears the other side (any language)",
+    "text": "Karşı tarafı dinler (dili otomatik algılar)"
+  },
+  "providers.localai.hearStage": {
+    "en": "Speech recognition",
+    "text": "Konuşma tanıma"
+  },
+  "providers.localai.hearStageTooltip": {
+    "en": "What listens: it decides when a sentence ends and writes down what was said.",
+    "text": "Dinleme aşaması: cümlenin ne zaman bittiğini belirler ve söylenenleri yazıya döker."
+  },
+  "providers.localai.hereDown": {
+    "en": "The LocalAI on this computer is not running yet. Start it in the stage's card — or, if Kotomimi has only just opened, give it a moment.",
+    "text": "Bu bilgisayardaki LocalAI henüz çalışmıyor. İlgili aşamanın kartında \"LocalAI'ı başlat\" düğmesine basın. Kotomimi'yi yeni açtıysanız biraz bekleyin."
+  },
+  "providers.localai.hereModelPick": {
+    "en": "Choose a model",
+    "text": "Model seçin"
+  },
+  "providers.localai.inUse": {
+    "en": "In use: {{name}}",
+    "text": "Kullanılan: {{name}}"
+  },
+  "providers.localai.inUseLegs": {
+    "en": "In use: {{theirs}} (them), {{mine}} (me)",
+    "text": "Kullanılan: karşı taraf {{theirs}} · ben {{mine}}"
+  },
+  "providers.localai.kotomimiServer": {
+    "en": "It is another Kotomimi sharing its models.",
+    "text": "Bu, modellerini paylaşan başka bir Kotomimi."
+  },
+  "providers.localai.kotomimiThere": {
+    "en": "Use the Kotomimi on that device",
+    "text": "O cihazdaki Kotomimi'ye bağlan"
+  },
+  "providers.localai.kotomimiThereLooking": {
+    "en": "Looking for it…",
+    "text": "Aranıyor…"
+  },
+  "providers.localai.kotomimiThereNone": {
+    "en": "No Kotomimi is sharing on that device. Open Kotomimi there, turn on \"Share with other devices\", then try again.",
+    "text": "O cihazda paylaşım yapan bir Kotomimi yok. Cihazda Kotomimi'yi açın, \"Diğer cihazlarla paylaş\" seçeneğini etkinleştirip tekrar deneyin."
+  },
+  "providers.localai.localServerNote": {
+    "en": "This address is this computer itself: a model server running here, such as LocalAI. Choose \"Another device\" in a stage to use its models.",
+    "text": "Bu adres, bu bilgisayarda çalışan bir model sunucusuna (örneğin LocalAI) ait. Modellerini kullanmak için ilgili aşamada \"Başka cihaz\" seçin."
+  },
+  "providers.localai.model": {
+    "en": "Model",
+    "text": "Model"
+  },
+  "providers.localai.modelGone": {
+    "en": "{{name}} (no longer on that device)",
+    "text": "{{name}} (artık o cihazda yok)"
+  },
+  "providers.localai.modelList": {
+    "en": "Choose from the models this service lists",
+    "text": "Hizmetin model listesinden seç"
+  },
+  "providers.localai.modelListAsking": {
+    "en": "Getting the list…",
+    "text": "Model listesi alınıyor…"
+  },
+  "providers.localai.modelListKeyMissing": {
+    "en": "Fill in the API key first.",
+    "text": "Önce API anahtarını girin."
+  },
+  "providers.localai.modelListKeyRefused": {
+    "en": "The service refused this key.",
+    "text": "Hizmet bu anahtarı kabul etmedi."
+  },
+  "providers.localai.modelListNoAddress": {
+    "en": "Fill in the address first.",
+    "text": "Önce adresi girin."
+  },
+  "providers.localai.modelListNoMatch": {
+    "en": "No model found. Try fewer letters.",
+    "text": "Model bulunamadı. Daha az harfle aramayı deneyin."
+  },
+  "providers.localai.modelListNone": {
+    "en": "This service lists no models. Type the name instead.",
+    "text": "Bu hizmet model listesi sunmuyor. Model adını doğrudan girin."
+  },
+  "providers.localai.modelListUnreachable": {
+    "en": "The service could not be reached.",
+    "text": "Hizmete bağlanılamadı."
+  },
+  "providers.localai.modelSearch": {
+    "en": "Search models",
+    "text": "Model ara"
+  },
+  "providers.localai.modelSuggested": {
+    "en": "Suits this step",
+    "text": "Bu aşamaya uygun"
+  },
+  "providers.localai.name": {
+    "en": "Kotomimi Pipeline",
+    "text": "Kotomimi Serbest Seçim"
+  },
+  "providers.localai.nativeBusy": {
+    "en": "A device you share with is using this engine with {{name}}. Wait for it to finish, or choose {{name}} here too.",
+    "text": "Paylaşım yaptığınız bir cihaz bu motoru {{name}} ile kullanıyor. Bitirmesini bekleyin veya burada da {{name}} seçin."
+  },
+  "providers.localai.nativeCoachFailed": {
+    "en": "The feedback engine could not start. In the Grammar feedback card, press \"Try again\" — or choose another model.",
+    "text": "Dil bilgisi geri bildirim motoru başlatılamadı. \"Dil bilgisi geri bildirimi\" kartında \"Tekrar dene\" düğmesine basın veya başka bir model seçin."
+  },
+  "providers.localai.nativeCoachFailedShort": {
+    "en": "The feedback engine could not start.",
+    "text": "Dil bilgisi geri bildirim motoru başlatılamadı."
+  },
+  "providers.localai.nativeCoachMissing": {
+    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} henüz indirilmedi. \"Dil bilgisi geri bildirimi\" kartında yerel bir model indirin veya \"API modeli\" ya da \"Başka bir cihaz\" seçeneğine geçin."
+  },
+  "providers.localai.nativeCoachReady": {
+    "en": "The feedback engine is ready.",
+    "text": "Dil bilgisi geri bildirim motoru hazır."
+  },
+  "providers.localai.nativeCoachUnsupported": {
+    "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
+    "text": "Bu sistem yerel dil bilgisi geri bildirim motorunu henüz desteklemiyor. \"Dil bilgisi geri bildirimi\" kartında \"API modeli\" veya \"Başka bir cihaz\" seçeneğine geçin."
+  },
+  "providers.localai.nativeCoachWarming": {
+    "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
+    "text": "Dil bilgisi geri bildirim motoru hâlâ başlatılıyor. Yalnızca birkaç saniye sürer. Hazır olduğunda başlayabilirsiniz."
+  },
+  "providers.localai.nativeCoachWarmingShort": {
+    "en": "Starting the feedback engine…",
+    "text": "Dil bilgisi geri bildirim motoru başlatılıyor…"
+  },
+  "providers.localai.nativeEntry": {
+    "en": "{{name}} (native engine)",
+    "text": "{{name}} (yerel motor)"
+  },
+  "providers.localai.nativeFailed": {
+    "en": "The recognition engine of this computer could not start. In the Speech recognition card, press \"Try again\" — or choose another model.",
+    "text": "Bu bilgisayarın tanıma motoru başlatılamadı. \"Konuşma tanıma\" kartında \"Tekrar dene\" düğmesine basın veya başka bir model seçin."
+  },
+  "providers.localai.nativeFailedShort": {
+    "en": "The engine could not start.",
+    "text": "Motor başlatılamadı."
+  },
+  "providers.localai.nativeInterrupted": {
+    "en": "The engine stopped while it was starting. Press Start again.",
+    "text": "Motor başlatılırken durduruldu. Tekrar \"Başlat\" düğmesine basın."
+  },
+  "providers.localai.nativeLoading": {
+    "en": "Loading the models… About half a minute the first time after the computer boots.",
+    "text": "Modeller yükleniyor… Bilgisayar açıldıktan sonra ilk seferde yaklaşık yarım dakika sürer."
+  },
+  "providers.localai.nativeMissing": {
+    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} henüz indirilmedi. \"Konuşma tanıma\" kartında yerel bir model indirin veya \"API modeli\" ya da \"Başka bir cihaz\" seçeneğine geçin."
+  },
+  "providers.localai.nativeNone": {
+    "en": "No model chosen",
+    "text": "Model seçilmedi"
+  },
+  "providers.localai.nativeReady": {
+    "en": "The engine is ready.",
+    "text": "Motor hazır."
+  },
+  "providers.localai.nativeRetry": {
+    "en": "Try again",
+    "text": "Tekrar dene"
+  },
+  "providers.localai.nativeRuntime": {
+    "en": "Downloading the runtime first. This happens only once.",
+    "text": "Önce çalışma ortamı indiriliyor. Yalnızca bir kez indirilir."
+  },
+  "providers.localai.nativeTwoModels": {
+    "en": "{{name}} and {{other}} cannot run at the same time. Choose the same model for both languages.",
+    "text": "{{name}} ve {{other}} aynı anda çalışamaz. İki dil için de aynı modeli seçin."
+  },
+  "providers.localai.nativeUnchosen": {
+    "en": "No speech recognition model is chosen for {{source}} yet. Choose one in the Speech recognition card.",
+    "text": "{{source}} için henüz konuşma tanıma modeli seçilmedi. \"Konuşma tanıma\" kartından bir model seçin."
+  },
+  "providers.localai.nativeUnheard": {
+    "en": "{{name}} does not hear one of your two languages. Choose another model for it.",
+    "text": "{{name}}, seçtiğiniz iki dilden birini tanıyamıyor. Başka bir model seçin."
+  },
+  "providers.localai.nativeUnsupported": {
+    "en": "The native recognition engine is not available for this system. In the Speech recognition card, switch to \"API model\" or \"Another device\".",
+    "text": "Bu sistem yerel konuşma tanıma motorunu henüz desteklemiyor. \"Konuşma tanıma\" kartında \"API modeli\" veya \"Başka bir cihaz\" seçeneğine geçin."
+  },
+  "providers.localai.nativeUnsupportedShort": {
+    "en": "Not available for this system",
+    "text": "Bu sistem henüz desteklenmiyor"
+  },
+  "providers.localai.nativeWarming": {
+    "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
+    "text": "Tanıma motoru hâlâ başlatılıyor. Bilgisayar açıldıktan sonra ilk seferde yaklaşık yarım dakika sürer. Hazır olduğunda başlayabilirsiniz."
+  },
+  "providers.localai.nativeWarmingShort": {
+    "en": "Starting the engine… About half a minute the first time after the computer boots.",
+    "text": "Motor başlatılıyor… Bilgisayar açıldıktan sonra ilk seferde yaklaşık yarım dakika sürer."
+  },
+  "providers.localai.notDownloaded": {
+    "en": "No model downloaded yet",
+    "text": "Henüz model indirilmedi"
+  },
+  "providers.localai.noteAppleSpeech": {
+    "en": "Japanese talk, measured: about 13% of the characters wrong, the most accurate of all. It writes as it listens (about 2 s behind).",
+    "text": "Japonca sohbet testinde karakter hata oranı yaklaşık %13; tüm modeller arasında en doğrusu. Dinlerken yazar (yaklaşık 2 saniye geriden)."
+  },
+  "providers.localai.noteCohere": {
+    "en": "Measured on Japanese VRChat talk: about 33% of the characters wrong, and about a quarter of what was said left out. Not a good choice for Japanese conversation.",
+    "text": "Japonca VRChat sohbeti testinde karakter hata oranı yaklaşık %33; ayrıca söylenenlerin yaklaşık dörtte birini atlar. Japonca konuşmalar için önerilmez."
+  },
+  "providers.localai.noteGemma4": {
+    "en": "Japanese grammar, measured: it caught 11 of 14 mistakes and left right casual speech alone; about 0.1 s an answer. About 1.5 GB of video memory.",
+    "text": "Japonca dil bilgisi testinde 14 hatalı cümlenin 11'ini yakaladı ve doğru günlük konuşmaları gereksiz yere değiştirmedi. Cümle başına yaklaşık 0.1 saniye sürer. Yaklaşık 1.5 GB ekran kartı belleği kullanır."
+  },
+  "providers.localai.noteGranite41": {
+    "en": "Measured on Japanese VRChat talk: it keeps repeating the same sentence. Not usable for Japanese conversation.",
+    "text": "Japonca VRChat sohbeti testinde aynı cümleyi durmadan tekrarlar. Japonca konuşmalar için neredeyse kullanılamaz."
+  },
+  "providers.localai.noteHyMt15": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences, and it tends to add words of its own.",
+    "text": "Japoncadan Çinceye çeviri testinde 30 cümlenin yaklaşık 8'inde ciddi hata yaptı. Ayrıca kendiliğinden kelimeler ekleyebiliyor."
+  },
+  "providers.localai.noteHyMt2": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences; about 0.1 s a sentence.",
+    "text": "Japoncadan Çinceye çeviri testinde 30 cümlenin yaklaşık 8'inde ciddi hata yaptı. Cümle başına yaklaşık 0.1 saniye sürer."
+  },
+  "providers.localai.noteIndexTranslate": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
+    "text": "Japoncadan Çinceye çeviri testinde 30 cümlenin yaklaşık 3'ünde ciddi hata yaptı; test edilenler arasında en iyisi. Cümle başına yaklaşık 0.1 saniye sürer. Yaklaşık 2 GB ekran kartı belleği kullanır, yüzden fazla dili destekler."
+  },
+  "providers.localai.noteMoonshineJa": {
+    "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
+    "text": "Japonca VRChat sohbeti testinde karakter hata oranı yaklaşık %70. Yalnızca ekran kartı hiç kullanılamadığında son çare olarak uygundur."
+  },
+  "providers.localai.noteNativeNemotron": {
+    "en": "Small: about 1 GB of video memory. Japanese talk, measured: about 27% of the characters wrong, and a short sentence is sometimes left out altogether. Choose it only when the ones above do not fit or do not hear the language. Over thirty languages.",
+    "text": "Az yer kaplar: yaklaşık 1 GB ekran kartı belleği kullanır. Japonca sohbet testinde karakter hata oranı yaklaşık %27; bazen kısa cümleleri tamamen atlar. Yalnızca yukarıdaki modeller belleğe sığmıyorsa veya gereken dili desteklemiyorsa seçin. Otuzdan fazla dili destekler."
+  },
+  "providers.localai.noteNativeQwen": {
+    "en": "Japanese talk, measured: about 16% of the characters wrong. It writes as you speak (about 1 s behind); the last few words settle when the sentence ends. When the graphics card is busy it only refreshes less often. About 3 GB of video memory, thirty languages.",
+    "text": "Japonca sohbet testinde karakter hata oranı yaklaşık %16. Konuşurken yazar (yaklaşık 1 saniye geriden); cümlenin son birkaç karakteri cümle bitince kesinleşir. Ekran kartı yoğunken yalnızca güncelleme sıklığı azalır. Yaklaşık 3 GB ekran kartı belleği kullanır, 30 dili destekler."
+  },
+  "providers.localai.noteNativeQwenSmall": {
+    "en": "The light one, for a computer that runs a game at the same time: about 2 GB of video memory instead of 3. Japanese talk, measured: about 22% of the characters wrong, more than the 1.7B. Otherwise it works the same way, with the same thirty languages.",
+    "text": "Aynı bilgisayarda oyun oynarken kullanmaya uygun, daha hafif model: yaklaşık 2 GB ekran kartı belleği kullanır (1.7B yaklaşık 3 GB). Japonca sohbet testinde karakter hata oranı yaklaşık %22, yani 1.7B'den biraz daha yüksek. Diğer özellikleri 1.7B ile aynıdır; aynı 30 dili destekler."
+  },
+  "providers.localai.noteNativeR2t2": {
+    "en": "Japanese talk, measured: about 18% of the characters wrong. It writes as it listens (about 2.5 s behind) and never changes what it wrote. When the graphics card cannot keep up (a weaker card, or a game running), the text falls further and further behind. About 3 GB of video memory.",
+    "text": "Japonca sohbet testinde karakter hata oranı yaklaşık %18. Dinlerken yazar (yaklaşık 2.5 saniye geriden) ve yazdıklarını değiştirmez. Ekran kartı yetişemediğinde (kart zayıfsa veya aynı anda oyun açıksa) metin giderek daha fazla geride kalır. Yaklaşık 3 GB ekran kartı belleği kullanır."
+  },
+  "providers.localai.noteNativeSenseVoice": {
+    "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
+    "text": "En hafif ve en hızlı model: yaklaşık 0.4 GB ekran kartı belleği kullanır. Japonca sohbet testinde Qwen3-ASR 0.6B kadar doğru sonuç verir, çok az noktalama işareti kullanır. Yalnızca Çince, Kantonca, İngilizce, Japonca ve Korece desteklenir."
+  },
+  "providers.localai.noteQwen06": {
+    "en": "Measured on Japanese VRChat talk: about 35% of the characters wrong. Small: for when the graphics card has little memory to spare.",
+    "text": "Japonca VRChat sohbeti testinde karakter hata oranı yaklaşık %35. Küçüktür; ekran kartı belleği az kaldığında kullanılabilir."
+  },
+  "providers.localai.noteQwen17": {
+    "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
+    "text": "Japonca sohbet testinde karakter hata oranı yaklaşık %19. Metin ancak cümle bitince görünür (yaklaşık 10 saniye geriden); yukarıdaki GGUF sürümü ise konuşurken yazar."
+  },
+  "providers.localai.noteSenseVoice": {
+    "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
+    "text": "Japonca VRChat sohbeti testinde kana karakterleri yazmaz; Japonca metin neredeyse okunamaz hâle gelir."
+  },
+  "providers.localai.noteVoxtral4b": {
+    "en": "Measured on Japanese VRChat talk: quick — the text is about 2.6 s behind the voice — but about 27% of the characters wrong. For when speed matters more than accuracy.",
+    "text": "Japonca VRChat sohbeti testinde hızlıdır (metin sesi yaklaşık 2.6 saniye geriden izler), ancak karakter hata oranı yaklaşık %27. Hız doğruluktan daha önemliyse ve hataları kabul edebiliyorsanız seçin."
+  },
+  "providers.localai.noteWhisperMedium": {
+    "en": "Measured on Japanese VRChat talk: about 34% of the characters wrong.",
+    "text": "Japonca VRChat sohbeti testinde karakter hata oranı yaklaşık %34."
+  },
+  "providers.localai.noteWhisperTurbo": {
+    "en": "Measured on Japanese VRChat talk: about 21% of the characters wrong, and steady. It writes only once a sentence has ended.",
+    "text": "Japonca VRChat sohbeti testinde karakter hata oranı yaklaşık %21, sonuçları tutarlı. Metin yine ancak cümle bitince görünür."
+  },
+  "providers.localai.otherDeviceHint": {
+    "en": "To use the models of another device on your local network, search the network for it.",
+    "text": "Yerel ağınızdaki başka bir cihazın modellerini kullanmak için ağda cihaz arayabilirsiniz."
+  },
+  "providers.localai.phoneKey": {
+    "en": "Access key of {{name}}",
+    "text": "{{name}} erişim anahtarı"
+  },
+  "providers.localai.phoneKeyNote": {
+    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
+    "text": "Bu telefonda bir erişim anahtarı ayarlanmış. Anahtarı telefondaki \"Cihaz bağlantısı\" bölümünde görebilirsiniz."
+  },
+  "providers.localai.phoneKeyUse": {
+    "en": "Use this phone",
+    "text": "Bu telefonu kullan"
+  },
+  "providers.localai.phoneKeyWrong": {
+    "en": "The phone did not take this key.",
+    "text": "Anahtar yanlış. Lütfen tekrar kontrol edin."
+  },
+  "providers.localai.phoneModelGone": {
+    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
+    "text": "Telefon ({{address}}) şu anda {{name}} modelini paylaşıma sunmuyor. Kartından başka bir model seçin."
+  },
+  "providers.localai.phoneModelTooBig": {
+    "en": "{{name}} (not enough memory on the phone)",
+    "text": "{{name}} (telefonun belleği yetersiz)"
+  },
+  "providers.localai.phoneModelTooBigCheck": {
+    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
+    "text": "Telefonun ({{address}}) belleği şu anda {{name}} modelini çalıştırmaya yetmiyor. Kartından daha küçük bir model seçin veya telefondaki diğer uygulamaları kapatın."
+  },
+  "providers.localai.phoneNoMemory": {
+    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
+    "text": "Telefonun belleği şu anda bu modeli çalıştırmaya yetmiyor. Kartından daha küçük bir model seçin veya telefondaki diğer uygulamaları kapatın."
+  },
+  "providers.localai.phoneOption": {
+    "en": "{{name}} (phone)",
+    "text": "{{name}} (telefon)"
+  },
+  "providers.localai.phoneQuiet": {
+    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
+    "text": "Telefon yanıt vermiyor. Ekran kilitlendikten sonra sistem uygulamayı duraklatmış olabilir. Devam etmek için telefonda Kotomimi'yi açın."
+  },
+  "providers.localai.phoneUnreachable": {
+    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "Telefon ({{address}}) yanıt vermiyor. Paylaşımın açık olduğundan ve telefonun bu bilgisayarla aynı Wi-Fi ağına bağlı olduğundan emin olun."
+  },
+  "providers.localai.pipelineModel": {
+    "en": "Setup name on that device",
+    "text": "O cihazdaki yapılandırmanın adı"
+  },
+  "providers.localai.pipelineNote": {
+    "en": "Normally left alone. Change it only when that device is a LocalAI set up with more than one combination of recognition and translation.",
+    "text": "Genellikle değiştirmeniz gerekmez. Yalnızca o cihazda LocalAI kullanılıyorsa ve birden fazla tanıma ve çeviri birleşimi ayarlanmışsa değiştirin."
+  },
+  "providers.localai.placeDevice": {
+    "en": "This computer",
+    "text": "Bu bilgisayar"
+  },
+  "providers.localai.placeServer": {
+    "en": "Another device",
+    "text": "Başka cihaz"
+  },
+  "providers.localai.ready": {
+    "en": "Ready to start",
+    "text": "Başlamaya hazır"
+  },
+  "providers.localai.recheck": {
+    "en": "Check again",
+    "text": "Yeniden kontrol et"
+  },
+  "providers.localai.serverHttp": {
+    "en": "The other device answered with an error (HTTP {{status}}). Restarting the app or the model server there usually helps.",
+    "text": "Diğer cihaz bir hata döndürdü (HTTP {{status}}). O cihazdaki uygulamayı veya model sunucusunu yeniden başlatmak genellikle sorunu çözer."
+  },
+  "providers.localai.serverKey": {
+    "en": "Access key",
+    "text": "Erişim anahtarı"
+  },
+  "providers.localai.serverKeyMissing": {
+    "en": "The other device asks for an access key. Enter it in Settings, under \"Another device\".",
+    "text": "Diğer cihaz bir erişim anahtarı istiyor. Ayarlar'daki \"Başka bir cihaz\" bölümüne girin."
+  },
+  "providers.localai.serverKeyNeeded": {
+    "en": "The other device asks for an access key. Under \"Another device\", turn on \"It asks for an access key\" and enter the key set on that device.",
+    "text": "Diğer cihaz bir erişim anahtarı istiyor. \"Başka bir cihaz\" bölümünde \"Erişim anahtarı istiyor\" seçeneğini açıp o cihazda belirlenen anahtarı girin."
+  },
+  "providers.localai.serverKeyRefused": {
+    "en": "The other device did not accept the access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options).",
+    "text": "Diğer cihaz erişim anahtarını kabul etmedi. O cihazda belirlenen anahtarı girin. Diğer cihaz da Kotomimi kullanıyorsa anahtarı paylaşımın \"Seçenekler\" bölümünde bulabilirsiniz."
+  },
+  "providers.localai.serverNeedsKey": {
+    "en": "It asks for an access key",
+    "text": "Erişim anahtarı gerekiyor"
+  },
+  "providers.localai.serverNeedsKeyTooltip": {
+    "en": "Turn this on when the other device was given an access key — a Kotomimi with one set under its sharing options, for example.",
+    "text": "Diğer cihazda bir erişim anahtarı ayarlandıysa bunu açın. Örneğin, diğer Kotomimi uygulamasının paylaşım seçeneklerinde bir anahtar ayarlanmış olabilir."
+  },
+  "providers.localai.serverNoAsr": {
+    "en": "The other device has no speech recognition model for {{source}}. Download one there first (in the model library of its sharing card), or let this computer listen.",
+    "text": "Diğer cihazda {{source}} konuşmalarını tanıyan bir model yok. Önce o cihazda bir model indirin (paylaşım kartındaki model kitaplığından) veya tanımayı bu bilgisayara bırakın."
+  },
+  "providers.localai.serverNoDetect": {
+    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
+    "text": "Diğer cihazda dili otomatik algılayabilen bir konuşma tanıma modeli yok. \"Ben de … konuşuyorum\" ve karşı tarafın dilini otomatik algılama özellikleri böyle bir model gerektirir. O cihaza Qwen3-ASR gibi bir model indirin veya bu iki seçeneği kapatın."
+  },
+  "providers.localai.serverNoModels": {
+    "en": "The other device has no model yet: install or download one there first.",
+    "text": "Diğer cihazda henüz model yok. Önce o cihaza bir model kurun veya indirin."
+  },
+  "providers.localai.serverSilent": {
+    "en": "This address does not answer. If Kotomimi is running on that device, enable its sharing to use its installed native models.",
+    "text": "Bu adrese bağlanılamıyor. O cihazda Kotomimi çalışıyorsa yüklü yerel modellerini kullanmak için paylaşımı açın."
+  },
+  "providers.localai.serverUnreachable": {
+    "en": "The other device ({{address}}) did not answer. Check that it is on and on the same network as this computer, and that Kotomimi there is sharing (or its model server is running). It is asked again by itself.",
+    "text": "Diğer cihaz ({{address}}) yanıt vermedi. Açık olduğundan, bu bilgisayarla aynı ağa bağlı olduğundan ve Kotomimi'de paylaşımın açık olduğundan (veya model sunucusunun çalıştığından) emin olun. Bağlantı kurulunca otomatik devam edilir."
+  },
+  "providers.localai.sharedDeviceNone": {
+    "en": "No device connected yet",
+    "text": "Henüz bağlı cihaz yok"
+  },
+  "providers.localai.sourceAuto": {
+    "en": "The language cannot be detected with this setup. Choose the language you speak.",
+    "text": "Bu yapılandırmayla dil otomatik algılanamıyor. Konuştuğunuz dili seçin."
+  },
+  "providers.localai.speedAbout": {
+    "en": "About {{seconds}} s",
+    "text": "Yaklaşık {{seconds}} sn"
+  },
+  "providers.localai.speedAdviceGeneral": {
+    "en": "A smaller model or a faster device is suggested.",
+    "text": "Daha küçük bir model veya daha hızlı bir cihaz kullanmanız önerilir."
+  },
+  "providers.localai.speedAdviceModel": {
+    "en": "A smaller model, such as {{name}}, is suggested.",
+    "text": "{{name}} gibi daha küçük bir modele geçmeniz önerilir."
+  },
+  "providers.localai.speedAdviceSwitch": {
+    "en": "Switch and test again",
+    "text": "Değiştir ve yeniden test et"
+  },
+  "providers.localai.speedBehind": {
+    "en": "Falls behind",
+    "text": "Gecikme artıyor"
+  },
+  "providers.localai.speedCoach": {
+    "en": "{{seconds}} s per sentence for feedback, on average",
+    "text": "Cümle başına ortalama geri bildirim süresi: {{seconds}} sn"
+  },
+  "providers.localai.speedCoachSlow": {
+    "en": "Feedback is slower than speech, so it will fall further behind. ",
+    "text": "Geri bildirim, konuşma hızına yetişemiyor. Geri bildirimler giderek daha geç görünecek. "
+  },
+  "providers.localai.speedFailed": {
+    "en": "The test could not finish: {{reason}}",
+    "text": "Test tamamlanamadı: {{reason}}"
+  },
+  "providers.localai.speedHead": {
+    "en": "Speed test · {{when}}",
+    "text": "Hız testi · {{when}}"
+  },
+  "providers.localai.speedHear": {
+    "en": "Text appears {{seconds}} s after the speech ends",
+    "text": "Asıl metin, konuşma bittikten {{seconds}} sn sonra görünür"
+  },
+  "providers.localai.speedHearSlow": {
+    "en": "Recognition is slower than speech, so the captions will fall further behind. ",
+    "text": "Konuşma tanıma, konuşma hızına yetişemiyor. Altyazılar giderek daha geç görünecek. "
+  },
+  "providers.localai.speedJustNow": {
+    "en": "just now",
+    "text": "az önce"
+  },
+  "providers.localai.speedLegCoach": {
+    "en": "From you finishing to the feedback",
+    "text": "Konuşmanız bittikten geri bildirim görünene kadar"
+  },
+  "providers.localai.speedLegParticipant": {
+    "en": "From the other side finishing to the translation",
+    "text": "Karşı tarafın konuşması bittikten çeviri görünene kadar"
+  },
+  "providers.localai.speedLegSpeaker": {
+    "en": "From you finishing to the translation",
+    "text": "Konuşmanız bittikten çeviri görünene kadar"
+  },
+  "providers.localai.speedNoClip": {
+    "en": "There is no test recording for this language yet.",
+    "text": "Bu dil için henüz test kaydı yok."
+  },
+  "providers.localai.speedNone": {
+    "en": "No result arrived during the test.",
+    "text": "Test sırasında sonuç alınamadı."
+  },
+  "providers.localai.speedRetest": {
+    "en": "Test again",
+    "text": "Yeniden test et"
+  },
+  "providers.localai.speedStop": {
+    "en": "Stop",
+    "text": "Durdur"
+  },
+  "providers.localai.speedTest": {
+    "en": "Test speed",
+    "text": "Hızı test et"
+  },
+  "providers.localai.speedTesting": {
+    "en": "Testing speed: a recording of about ten seconds is sent through each step at speaking pace. Nothing is recorded or played.",
+    "text": "Hız test ediliyor: Yaklaşık 10 saniyelik bir kayıt, normal konuşma hızında her aşamaya gönderiliyor. Mikrofon kullanılmaz ve ses çalınmaz."
+  },
+  "providers.localai.speedTranslate": {
+    "en": "{{seconds}} s per sentence to translate, on average",
+    "text": "Cümle başına ortalama çeviri süresi: {{seconds}} sn"
+  },
+  "providers.localai.speedTranslateSlow": {
+    "en": "Translation is slower than speech, so the translations will fall further behind. ",
+    "text": "Çeviri, konuşma hızına yetişemiyor. Çeviriler giderek daha geç görünecek. "
+  },
+  "providers.localai.speedVerdictOk": {
+    "en": "This setup keeps up with live speech.",
+    "text": "Bu yapılandırma canlı konuşmaya yetişebiliyor."
+  },
+  "providers.localai.speedVerdictSlow": {
+    "en": "Some steps cannot keep up with speech; see the notes above.",
+    "text": "Bazı aşamalar konuşma hızına yetişemiyor. Yukarıdaki açıklamalara bakın."
+  },
+  "providers.localai.stageDevice": {
+    "en": "Device",
+    "text": "Cihaz"
+  },
+  "providers.localai.tag_native": {
+    "en": "Native engine",
+    "text": "Yerel motor"
+  },
+  "providers.localai.tag_system": {
+    "en": "Built into macOS",
+    "text": "Sistemde yerleşik"
+  },
+  "providers.localai.tagHint_native": {
+    "en": "Runs on the graphics card using a native engine downloaded with the model. Loads when a session starts; the first start after boot may take about half a minute. Memory is released after the engine is no longer in use.",
+    "text": "Modelle birlikte indirilen yerel motorla ekran kartında çalışır. Oturum başlarken yüklenir; bilgisayar açıldıktan sonraki ilk başlatma yaklaşık yarım dakika sürebilir. Motor artık kullanılmadığında bellek serbest bırakılır."
+  },
+  "providers.localai.tagHint_system": {
+    "en": "The speech recognition of macOS itself: no video memory taken, nothing to warm up. The system downloads each language.",
+    "text": "Mac'in kendi konuşma tanıma özelliği: ekran kartı belleği kullanmaz, ısınma süresi yoktur. Her dilin paketini sistem indirir."
+  },
+  "providers.localai.textBaseUrlPlaceholder": {
+    "en": "e.g. https://api.openai.com/v1 or http://localhost:11434/v1",
+    "text": "Örn. https://api.openai.com/v1 veya http://localhost:11434/v1"
+  },
+  "providers.localai.textModelPlaceholder": {
+    "en": "The model's name, e.g. gpt-4o-mini",
+    "text": "Model adı, örn. gpt-4o-mini"
+  },
+  "providers.localai.translateInSession": {
+    "en": "The device's own choice (translated in the same session it hears in)",
+    "text": "O cihaz seçsin (tanımayla aynı oturumda çevirir)"
+  },
+  "providers.localai.translateKey": {
+    "en": "API key of the translation model",
+    "text": "Çeviri modelinin API anahtarı"
+  },
+  "providers.localai.translateKotomimiOwn": {
+    "en": "The device's own choice (its best model for your languages)",
+    "text": "O cihaz seçsin (dillerinize en uygun modeli seçer)"
+  },
+  "providers.localai.translateStage": {
+    "en": "Translation",
+    "text": "Çeviri"
+  },
+  "providers.localai.translateStageTooltip": {
+    "en": "What turns the recognized text into the other language. An API model is any service that speaks the OpenAI chat API: a hosted one, or Ollama or LM Studio on this computer.",
+    "text": "Tanınan metni diğer dile çeviren aşama. API modeli, OpenAI sohbet API'sini destekleyen herhangi bir hizmet olabilir: buluttaki bir hizmet veya bu bilgisayardaki Ollama ya da LM Studio."
+  },
+  "providers.localai.translateUnnamed": {
+    "en": "Translation has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "Çeviri için henüz kullanılabilir bir model yok. Sağlayıcının altındaki \"Çeviri\" kartından bir model seçin (API modeli için adres ve model adını girin) veya başka bir konum seçin."
+  },
+  "providers.localai.translatorFailed": {
+    "en": "The translation engine of this computer could not start. In the Translation card, press \"Try again\" — or choose another model.",
+    "text": "Bu bilgisayarın çeviri motoru başlatılamadı. \"Çeviri\" kartında \"Tekrar dene\" düğmesine basın veya başka bir model seçin."
+  },
+  "providers.localai.translatorFailedShort": {
+    "en": "The translation engine could not start.",
+    "text": "Çeviri motoru başlatılamadı."
+  },
+  "providers.localai.translatorMissing": {
+    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} henüz indirilmedi. \"Çeviri\" kartında yerel bir model indirin veya \"API modeli\" ya da \"Başka bir cihaz\" seçeneğine geçin."
+  },
+  "providers.localai.translatorReady": {
+    "en": "The translation engine is ready.",
+    "text": "Çeviri motoru hazır."
+  },
+  "providers.localai.translatorUnfit": {
+    "en": "{{name}} does not translate between your two languages. Choose another model for it.",
+    "text": "{{name}}, seçtiğiniz iki dil arasında çeviriyi desteklemiyor. Başka bir model seçin."
+  },
+  "providers.localai.translatorUnsupported": {
+    "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
+    "text": "Bu sistem yerel çeviri motorunu henüz desteklemiyor. \"Çeviri\" kartında \"API modeli\" veya \"Başka bir cihaz\" seçeneğine geçin."
+  },
+  "providers.localai.translatorWarming": {
+    "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",
+    "text": "Bu bilgisayarın çeviri motoru hâlâ başlatılıyor. Yalnızca birkaç saniye sürer. Hazır olduğunda başlayabilirsiniz."
+  },
+  "providers.localai.translatorWarmingShort": {
+    "en": "Starting the translation engine…",
+    "text": "Çeviri motoru başlatılıyor…"
+  },
+  "providers.localai.typedFailed": {
+    "en": "A sentence you typed was not translated: the translation model did not answer.",
+    "text": "Yazdığınız bir cümle çevrilemedi: çeviri modeli yanıt vermedi."
+  },
+  "providers.localai.viaModel": {
+    "en": "API model",
+    "text": "API modeli"
+  },
+  "providers.openai_live.name": {
+    "en": "OpenAI Live",
+    "text": "OpenAI Live"
+  },
+  "providers.openai_translate.name": {
+    "en": "OpenAI Translate",
+    "text": "OpenAI Translate"
+  },
+  "providers.openai.name": {
+    "en": "OpenAI Realtime",
+    "text": "OpenAI Realtime"
+  },
+  "providers.palabraai.authModeApp": {
+    "en": "App Client ID/Secret",
+    "text": "Uygulama istemci kimliği/gizli anahtarı"
+  },
+  "providers.palabraai.clientIdPlaceholder": {
+    "en": "Client ID",
+    "text": "İstemci kimliği"
+  },
+  "providers.palabraai.clientSecretPlaceholder": {
+    "en": "Client Secret",
+    "text": "İstemci gizli anahtarı"
+  },
+  "providers.palabraai.name": {
+    "en": "Palabra AI",
+    "text": "Palabra AI"
+  },
+  "providers.qwen_livetranslate.name": {
+    "en": "Qwen LiveTranslate",
+    "text": "Qwen LiveTranslate"
+  },
+  "providers.soniox.name": {
+    "en": "Soniox",
+    "text": "Soniox"
+  },
+  "providers.volcengine_ast2.accessTokenPlaceholder": {
+    "en": "Access Token",
+    "text": "Erişim belirteci"
+  },
+  "providers.volcengine_ast2.appIdPlaceholder": {
+    "en": "APP ID",
+    "text": "Uygulama kimliği"
+  },
+  "providers.volcengine_ast2.authModeApp": {
+    "en": "App ID + Access Token",
+    "text": "Uygulama kimliği + Erişim belirteci"
+  },
+  "providers.volcengine_ast2.name": {
+    "en": "Doubao AST 2.0",
+    "text": "Doubao AST 2.0"
+  },
+  "settings.glossaryAdd": {
+    "en": "Add a word…",
+    "text": "Kelime ekle…"
+  },
+  "settings.glossaryDelete": {
+    "en": "Delete entry",
+    "text": "Kaydı sil"
+  },
+  "settings.glossaryFixOpen": {
+    "en": "Fix word",
+    "text": "Kelimeyi düzelt"
+  },
+  "settings.glossaryFixSave": {
+    "en": "Save to glossary",
+    "text": "Sözlüğe kaydet"
+  },
+  "settings.glossaryFixTo": {
+    "en": "Change to",
+    "text": "Doğru biçim"
+  },
+  "settings.glossaryFull": {
+    "en": "Glossary is full",
+    "text": "Sözlük dolu"
+  },
+  "settings.glossaryHeard": {
+    "en": "Misheard as",
+    "text": "Yanlış algılanan biçim"
+  },
+  "settings.glossaryOptional": {
+    "en": "Only if misheard",
+    "text": "Yalnızca yanlış algılandıysa"
+  },
+  "settings.glossaryTitle": {
+    "en": "Personal glossary",
+    "text": "Kişisel sözlük"
+  },
+  "settings.glossaryTooltip": {
+    "en": "Names and special words. Write each in the language it is spoken in. Where one has been misheard, add how on the right and it is put right from then on; some recognition models only follow that column. You can also select a misheard word in the conversation and correct it there.",
+    "text": "İsimleri ve özel terimleri, konuşulduğu dilde yazın. Yanlış algılananları sağ sütuna algılandığı biçimiyle ekleyin; bundan sonra otomatik düzeltilir. Bazı konuşma tanıma modelleri yalnızca sağ sütunu kullanır. Sohbette yanlış algılanan bir kelimeyi seçip doğrudan da düzeltebilirsiniz."
+  },
+  "settings.glossaryTooltipLabel": {
+    "en": "About personal glossary",
+    "text": "Kişisel sözlük hakkında"
+  },
+  "settings.glossaryWritten": {
+    "en": "Word",
+    "text": "Kelime"
+  },
+  "settings.model": {
+    "en": "Model",
+    "text": "Model"
+  },
+  "settings.normal": {
+    "en": "Normal",
+    "text": "Normal"
+  },
+  "settings.transcriptKeywordsPlaceholder": {
+    "en": "Sokuji, Kizuna AI, PulseAudio",
+    "text": "Sokuji, Kizuna AI, PulseAudio"
+  },
+  "setup.credentials.accessKeyId": {
+    "en": "Access Key ID",
+    "text": "Erişim anahtarı kimliği"
+  },
+  "setup.credentials.accessToken": {
+    "en": "Access Token",
+    "text": "Erişim belirteci (Access Token)"
+  },
+  "setup.credentials.apiSecret": {
+    "en": "API Secret",
+    "text": "API gizli anahtarı (API Secret)"
+  },
+  "setup.credentials.appId": {
+    "en": "App ID",
+    "text": "Uygulama Kimliği (App ID)"
+  },
+  "setup.credentials.secretAccessKey": {
+    "en": "Secret Access Key",
+    "text": "Gizli erişim anahtarı"
+  },
+  "tour.steps.kotomimi-tips.coach": {
+    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
+    "text": "Karşı tarafın dilini siz de mi konuşuyorsunuz? Ayarlar'da Dilbilgisi geri bildirimini etkinleştirin. Çeviri ile kişisel dilbilgisi geri bildirimini birlikte tutmak için \"Diğer dili de konuşuyorum\" seçeneğini de açabilirsiniz."
+  },
+  "tour.steps.kotomimi-tips.content": {
+    "en": "Worth knowing before you start:",
+    "text": "Başlamadan önce bilmenizde fayda var:"
+  },
+  "tour.steps.kotomimi-tips.share": {
+    "en": "Another device can use this computer's models: Settings → Provider → Share with other devices.",
+    "text": "Başka bir cihaz bu bilgisayarın modellerini kullanabilir: Ayarlar → Sağlayıcı → Diğer cihazlarla paylaş."
+  },
+  "tour.steps.kotomimi-tips.title": {
+    "en": "Three more things",
+    "text": "Üç şey daha"
+  },
+  "tour.steps.kotomimi-tips.typed": {
+    "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
+    "text": "Oturum sırasında altta bir kutu görünür: çevrilmesini istediğiniz cümleyi yazın. Ctrl+K ile doğrudan bu kutuya geçebilirsiniz."
+  },
+  "tour.steps.models.content_kotomimi": {
+    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
+    "text": "Modeller buradan indirilir: bir aşamanın kartında \"Model kitaplığı\"nı açın. Önerilen olarak işaretlenenler gerçek konuşmalarda en iyi sonuç verenlerdir; adın yanındaki işaret, model hakkında yapılan ölçümü gösterir. İndirdiğiniz model hemen kullanılmaya başlanır."
+  },
+  "tour.steps.provider-settings.content_kotomimi": {
+    "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",
+    "text": "Burada her aşamanın bir kartı vardır: konuşma tanıma, çeviri ve dilbilgisi geri bildirimi. Kartta aşamanın nerede çalışacağını (ağınızdaki başka bir cihaz, API modeli veya bu bilgisayar) ve hemen altında kullanılacak modeli seçersiniz. Ayarlar → Sağlayıcı bölümünde bu bilgisayarın modellerini başka bir cihazla da paylaşabilirsiniz."
+  },
+  "tour.steps.reading-aids.content": {
+    "en": "Help for reading the other language, switched here:",
+    "text": "Diğer dili okumanıza yardımcı olan gösterimleri buradan açıp kapatabilirsiniz:"
+  },
+  "tour.steps.reading-aids.fonts": {
+    "en": "Fonts for each language are under Settings → Fonts.",
+    "text": "Her dilin yazı tipi Ayarlar → Yazı tipleri bölümünden seçilir."
+  },
+  "tour.steps.reading-aids.furigana": {
+    "en": "Furigana — kana above Japanese kanji.",
+    "text": "Furigana — Japonca kanjilerin üzerinde kana gösterimi."
+  },
+  "tour.steps.reading-aids.pinyin": {
+    "en": "Pinyin — tone-marked pinyin above Chinese.",
+    "text": "Pinyin — Çince metnin üzerinde ton işaretli pinyin."
+  },
+  "tour.steps.reading-aids.romanization": {
+    "en": "Romanization — a line in Latin letters under Japanese, Korean, Russian and Ukrainian.",
+    "text": "Latinleştirme — Japonca, Korece, Rusça ve Ukraynacanın altında Latin harfleriyle bir satır."
+  },
+  "tour.steps.reading-aids.title": {
+    "en": "Reading aids",
+    "text": "Okuma yardımcıları"
+  },
+  "voiceLibrary.cloneVoiceRequired": {
+    "en": "This voice needs a clip before it can speak — open the voice list and add one.",
+    "text": "Bu ses konuşmadan önce bir kayıt gerektirir — ses listesini açıp bir kayıt ekleyin."
+  },
+  "voiceLibrary.filter.accent.african": {
+    "en": "African",
+    "text": "Afrika"
+  },
+  "voiceLibrary.filter.accent.american": {
+    "en": "American",
+    "text": "Amerikan"
+  },
+  "voiceLibrary.filter.accent.arabic": {
+    "en": "Arabic",
+    "text": "Arap"
+  },
+  "voiceLibrary.filter.accent.australian": {
+    "en": "Australian",
+    "text": "Avustralya"
+  },
+  "voiceLibrary.filter.accent.brazilian": {
+    "en": "Brazilian",
+    "text": "Brezilya"
+  },
+  "voiceLibrary.filter.accent.british": {
+    "en": "British",
+    "text": "Britanya"
+  },
+  "voiceLibrary.filter.accent.chinese": {
+    "en": "Chinese",
+    "text": "Çince"
+  },
+  "voiceLibrary.filter.accent.french": {
+    "en": "French",
+    "text": "Fransızca"
+  },
+  "voiceLibrary.filter.accent.german": {
+    "en": "German",
+    "text": "Almanca"
+  },
+  "voiceLibrary.filter.accent.indian": {
+    "en": "Indian",
+    "text": "Hint"
+  },
+  "voiceLibrary.filter.accent.italian": {
+    "en": "Italian",
+    "text": "İtalyanca"
+  },
+  "voiceLibrary.filter.accent.japanese": {
+    "en": "Japanese",
+    "text": "Japonca"
+  },
+  "voiceLibrary.filter.accent.korean": {
+    "en": "Korean",
+    "text": "Korece"
+  },
+  "voiceLibrary.filter.accent.latin_american": {
+    "en": "Latin American",
+    "text": "Latin Amerika"
+  },
+  "voiceLibrary.filter.accent.portuguese": {
+    "en": "Portuguese",
+    "text": "Portekizce"
+  },
+  "voiceLibrary.filter.accent.slavic": {
+    "en": "Slavic",
+    "text": "Slav"
+  },
+  "voiceLibrary.filter.accent.southeast_asian": {
+    "en": "Southeast Asian",
+    "text": "Güneydoğu Asya"
+  },
+  "voiceLibrary.filter.accent.spanish": {
+    "en": "Spanish",
+    "text": "İspanyolca"
+  },
+  "voiceLibrary.filter.accentLabel": {
+    "en": "Accent",
+    "text": "Aksan"
+  },
+  "voiceLibrary.filter.age.child": {
+    "en": "Child",
+    "text": "Çocuk"
+  },
+  "voiceLibrary.filter.age.middle_aged": {
+    "en": "Middle-aged",
+    "text": "Orta yaşlı"
+  },
+  "voiceLibrary.filter.age.old": {
+    "en": "Mature",
+    "text": "Olgun"
+  },
+  "voiceLibrary.filter.age.teen": {
+    "en": "Teen",
+    "text": "Ergen"
+  },
+  "voiceLibrary.filter.age.young": {
+    "en": "Young",
+    "text": "Genç"
+  },
+  "voiceLibrary.filter.ageLabel": {
+    "en": "Age",
+    "text": "Yaş"
+  },
+  "voiceLibrary.filter.anyAccent": {
+    "en": "Any accent",
+    "text": "Tüm aksanlar"
+  },
+  "voiceLibrary.filter.anyAge": {
+    "en": "Any age",
+    "text": "Tüm yaşlar"
+  },
+  "voiceLibrary.filter.anyGender": {
+    "en": "Any gender",
+    "text": "Tüm cinsiyetler"
+  },
+  "voiceLibrary.filter.anyStyle": {
+    "en": "Any style",
+    "text": "Tüm tarzlar"
+  },
+  "voiceLibrary.filter.anyUseCase": {
+    "en": "Any use case",
+    "text": "Tüm kullanım amaçları"
+  },
+  "voiceLibrary.filter.clear": {
+    "en": "Clear filters",
+    "text": "Filtreleri temizle"
+  },
+  "voiceLibrary.filter.count": {
+    "en": "{shown} of {total} voices",
+    "text": "{total} sesten {shown} tanesi"
+  },
+  "voiceLibrary.filter.empty": {
+    "en": "No voices match these filters.",
+    "text": "Bu filtrelere uyan ses yok."
+  },
+  "voiceLibrary.filter.gender.female": {
+    "en": "Female",
+    "text": "Kadın"
+  },
+  "voiceLibrary.filter.gender.male": {
+    "en": "Male",
+    "text": "Erkek"
+  },
+  "voiceLibrary.filter.gender.neutral": {
+    "en": "Neutral",
+    "text": "Nötr"
+  },
+  "voiceLibrary.filter.genderLabel": {
+    "en": "Gender",
+    "text": "Cinsiyet"
+  },
+  "voiceLibrary.filter.style.breathy": {
+    "en": "Breathy",
+    "text": "Nefesli"
+  },
+  "voiceLibrary.filter.style.breezy": {
+    "en": "Breezy",
+    "text": "Hafif"
+  },
+  "voiceLibrary.filter.style.bright": {
+    "en": "Bright",
+    "text": "Parlak"
+  },
+  "voiceLibrary.filter.style.calm": {
+    "en": "Calm",
+    "text": "Sakin"
+  },
+  "voiceLibrary.filter.style.casual": {
+    "en": "Casual",
+    "text": "Rahat"
+  },
+  "voiceLibrary.filter.style.clear": {
+    "en": "Clear",
+    "text": "Net"
+  },
+  "voiceLibrary.filter.style.confident": {
+    "en": "Confident",
+    "text": "Kendinden emin"
+  },
+  "voiceLibrary.filter.style.deep": {
+    "en": "Deep",
+    "text": "Tok"
+  },
+  "voiceLibrary.filter.style.dramatic": {
+    "en": "Dramatic",
+    "text": "Dramatik"
+  },
+  "voiceLibrary.filter.style.easy_going": {
+    "en": "Easy-going",
+    "text": "Uysal"
+  },
+  "voiceLibrary.filter.style.energetic": {
+    "en": "Energetic",
+    "text": "Enerjik"
+  },
+  "voiceLibrary.filter.style.even": {
+    "en": "Even",
+    "text": "Dengeli"
+  },
+  "voiceLibrary.filter.style.excitable": {
+    "en": "Excitable",
+    "text": "Coşkulu"
+  },
+  "voiceLibrary.filter.style.expressive": {
+    "en": "Expressive",
+    "text": "İfade gücü yüksek"
+  },
+  "voiceLibrary.filter.style.firm": {
+    "en": "Firm",
+    "text": "Kararlı"
+  },
+  "voiceLibrary.filter.style.formal": {
+    "en": "Formal",
+    "text": "Resmî"
+  },
+  "voiceLibrary.filter.style.forward": {
+    "en": "Forward",
+    "text": "Doğrudan"
+  },
+  "voiceLibrary.filter.style.friendly": {
+    "en": "Friendly",
+    "text": "Dostça"
+  },
+  "voiceLibrary.filter.style.gentle": {
+    "en": "Gentle",
+    "text": "Nazik"
+  },
+  "voiceLibrary.filter.style.gravelly": {
+    "en": "Gravelly",
+    "text": "Pürüzlü"
+  },
+  "voiceLibrary.filter.style.informative": {
+    "en": "Informative",
+    "text": "Bilgilendirici"
+  },
+  "voiceLibrary.filter.style.knowledgeable": {
+    "en": "Knowledgeable",
+    "text": "Bilgili"
+  },
+  "voiceLibrary.filter.style.lively": {
+    "en": "Lively",
+    "text": "Canlı"
+  },
+  "voiceLibrary.filter.style.mature": {
+    "en": "Mature",
+    "text": "Olgun"
+  },
+  "voiceLibrary.filter.style.neutral": {
+    "en": "Neutral",
+    "text": "Nötr"
+  },
+  "voiceLibrary.filter.style.playful": {
+    "en": "Playful",
+    "text": "Oyuncu"
+  },
+  "voiceLibrary.filter.style.raspy": {
+    "en": "Raspy",
+    "text": "Kısık"
+  },
+  "voiceLibrary.filter.style.smooth": {
+    "en": "Smooth",
+    "text": "Akıcı"
+  },
+  "voiceLibrary.filter.style.soft": {
+    "en": "Soft",
+    "text": "Yumuşak"
+  },
+  "voiceLibrary.filter.style.upbeat": {
+    "en": "Upbeat",
+    "text": "Neşeli"
+  },
+  "voiceLibrary.filter.style.warm": {
+    "en": "Warm",
+    "text": "Sıcak"
+  },
+  "voiceLibrary.filter.style.youthful": {
+    "en": "Youthful",
+    "text": "Genç"
+  },
+  "voiceLibrary.filter.styleLabel": {
+    "en": "Style",
+    "text": "Tarz"
+  },
+  "voiceLibrary.filter.useCase.conversational": {
+    "en": "Conversation",
+    "text": "Konuşma"
+  },
+  "voiceLibrary.filter.useCase.educational": {
+    "en": "Teaching",
+    "text": "Öğretim"
+  },
+  "voiceLibrary.filter.useCase.entertainment": {
+    "en": "Entertainment",
+    "text": "Eğlence"
+  },
+  "voiceLibrary.filter.useCase.narration": {
+    "en": "Narration",
+    "text": "Anlatım"
+  },
+  "voiceLibrary.filter.useCase.social_media": {
+    "en": "Social media",
+    "text": "Sosyal medya"
+  },
+  "voiceLibrary.filter.useCaseLabel": {
+    "en": "Use case",
+    "text": "Kullanım amacı"
+  }
+}

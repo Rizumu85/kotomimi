@@ -154,7 +154,7 @@ export const VIEWER_WORDS: Record<string, unknown> = {
   "de": {
     "title": "Sokuji-Untertitel",
     "connecting": "Verbinden…",
-    "original": "Original",
+    "original": "Originaltext",
     "enter": {
       "iRead": "Ich möchte lesen",
       "both": "Beide Sprachen",
@@ -539,7 +539,7 @@ export const VIEWER_WORDS: Record<string, unknown> = {
     },
     "status": {
       "waiting": "Hinihintay magsimula",
-      "live": "Live",
+      "live": "Naka-live",
       "paused": "Naka-pause",
       "reconnecting": "Muling kumokonekta…",
       "ended": "Tapos na ang pagbabahagi"
@@ -558,7 +558,7 @@ export const VIEWER_WORDS: Record<string, unknown> = {
       "more": "Higit pa"
     },
     "settings": {
-      "title": "Display",
+      "title": "Mga setting ng pagpapakita",
       "iRead": "Gusto kong basahin",
       "textSize": "Laki ng teksto",
       "sizes": {
@@ -604,7 +604,7 @@ export const VIEWER_WORDS: Record<string, unknown> = {
   "fr": {
     "title": "Sous-titres Sokuji",
     "connecting": "Connexion…",
-    "original": "Original",
+    "original": "Texte original",
     "enter": {
       "iRead": "Je veux lire",
       "both": "Les deux langues",
@@ -1579,7 +1579,7 @@ export const VIEWER_WORDS: Record<string, unknown> = {
   "sv": {
     "title": "Sokuji-undertexter",
     "connecting": "Ansluter…",
-    "original": "Original",
+    "original": "Originaltext",
     "enter": {
       "iRead": "Jag vill läsa",
       "both": "Båda språken",
@@ -1589,7 +1589,7 @@ export const VIEWER_WORDS: Record<string, unknown> = {
     },
     "status": {
       "waiting": "Väntar på start",
-      "live": "Live",
+      "live": "Direktsändning pågår",
       "paused": "Pausad",
       "reconnecting": "Ansluter igen…",
       "ended": "Delningen har avslutats"

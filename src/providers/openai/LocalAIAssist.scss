@@ -77,7 +77,7 @@
   .kt-seg {
     display: flex;
     align-items: stretch;
-    height: vars.$control-height-compact;
+    min-height: vars.$control-height-compact;
     overflow: hidden;
     border: 1px solid vars.$border-default;
     border-radius: vars.$radius-md;
@@ -89,11 +89,12 @@
     align-items: center;
     justify-content: center;
     min-width: 0;
-    padding: 0 6px;
+    padding: 3px 4px;
     font: inherit;
     font-size: vars.$font-caption;
-    line-height: 1;
-    white-space: nowrap;
+    // Three equal buttons in a card: a long name (Russian, Tamil) takes two lines, not more than its share.
+    line-height: 1.15;
+    text-align: center;
     color: vars.$text-tertiary;
     background: vars.$bg-control;
     border: none;

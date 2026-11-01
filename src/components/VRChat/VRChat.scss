@@ -19,13 +19,16 @@
 
   // The app's segmented-control archetype (ModePicker.scss, and the credential choice in Settings.scss — each
   // section keeps its own copy, as they scope their rules to themselves). Active = fill. Across the card, as the stage
-  // cards' place switch is: the room shared out over the options, so that a long one (English) still fits.
+  // cards' place switch is: the room shared out over the options. Four long ones (Filipino, Portuguese) do not fit one
+  // row of a narrow panel: they go on to the next, and the gap over the lines' colour keeps the hairlines between them.
   .segmented-control {
     display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
     width: 100%;
     align-items: stretch;
-    height: vars.$control-height-compact;
     margin-top: 6px;
+    background: vars.$border-default;
     border: 1px solid vars.$border-default;
     border-radius: vars.$radius-md;
     overflow: hidden;
@@ -34,6 +37,7 @@
       display: inline-flex;
       flex: 1 1 auto;
       min-width: 0;
+      min-height: vars.$control-height-compact;
       align-items: center;
       justify-content: center;
       white-space: nowrap;
@@ -45,10 +49,6 @@
       color: vars.$text-tertiary;
       cursor: pointer;
       transition: all 0.15s ease;
-
-      &:not(:last-child) {
-        border-right: 1px solid vars.$border-default;
-      }
 
       &:hover:not(.active) {
         background: vars.$bg-hover;

@@ -1,0 +1,2186 @@
+{
+  "audioSystem.installCommand": {
+    "en": "sudo apt install pulseaudio-utils",
+    "text": "sudo apt install pulseaudio-utils"
+  },
+  "auth.email": {
+    "en": "Email",
+    "text": "Email"
+  },
+  "auth.emailPlaceholder": {
+    "en": "your@email.com",
+    "text": "your@email.com"
+  },
+  "captionShare.kinds.wifi": {
+    "en": "Wi‑Fi",
+    "text": "Wi‑Fi"
+  },
+  "engine.status.devVenv": {
+    "en": "dev venv",
+    "text": "môi trường ảo phát triển"
+  },
+  "engine.status.native": {
+    "en": "native {{version}}",
+    "text": "bản gốc {{version}}"
+  },
+  "fork.aids.furigana": {
+    "en": "Furigana",
+    "text": "Furigana"
+  },
+  "fork.aids.highlight": {
+    "en": "Highlight new",
+    "text": "Tô sáng chữ mới"
+  },
+  "fork.aids.italic": {
+    "en": "Italic source",
+    "text": "In nghiêng bản gốc"
+  },
+  "fork.aids.pinyin": {
+    "en": "Pinyin",
+    "text": "Bính âm"
+  },
+  "fork.aids.readings": {
+    "en": "Readings",
+    "text": "Cách đọc"
+  },
+  "fork.aids.roman": {
+    "en": "Romanization",
+    "text": "Phiên âm Latinh"
+  },
+  "fork.aids.text": {
+    "en": "Text",
+    "text": "Văn bản"
+  },
+  "fork.audio.echoAction": {
+    "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
+    "text": "Dùng tai nghe để ngắt vòng lặp; hoặc tăng ngưỡng kích hoạt mic trong Cài đặt → Mic."
+  },
+  "fork.audio.gate": {
+    "en": "Mic activation threshold",
+    "text": "Ngưỡng kích hoạt mic"
+  },
+  "fork.audio.gateHint": {
+    "en": "Press the microphone, speak, and set the mark under where the bar reaches — and above where it sits while only your speakers are heard.",
+    "text": "Nhấn biểu tượng mic rồi nói vài câu: đặt vạch dưới mức thanh đạt tới khi bạn nói và trên mức khi chỉ có âm thanh từ loa."
+  },
+  "fork.audio.gateOff": {
+    "en": "Off",
+    "text": "Tắt"
+  },
+  "fork.audio.gateQuiet": {
+    "en": "Nothing from the microphone yet.",
+    "text": "Chưa có âm thanh từ mic."
+  },
+  "fork.audio.gateTest": {
+    "en": "Test the microphone: the bar shows its level",
+    "text": "Thử mic: thanh hiển thị âm lượng hiện tại"
+  },
+  "fork.audio.gateTestStop": {
+    "en": "Stop the test",
+    "text": "Dừng thử"
+  },
+  "fork.audio.gateTooltip": {
+    "en": "Sound quieter than this is heard as silence — the other side's voice from your speakers, the keyboard, the room — so it is neither translated nor checked. The microphone is heard about 0.2 s later while this is on. Off: everything is heard.",
+    "text": "Âm thanh nhỏ hơn mức này được coi là im lặng, như giọng người bên kia phát qua loa, tiếng bàn phím hay tiếng ồn trong phòng, nên sẽ không được dịch hay gửi để góp ý ngữ pháp. Khi bật, âm thanh từ mic sẽ trễ khoảng 0.2 giây. Khi tắt: gửi toàn bộ âm thanh."
+  },
+  "fork.audio.vbcableInstall": {
+    "en": "Install VB-CABLE",
+    "text": "Cài VB-CABLE"
+  },
+  "fork.audio.vbcableInstalling": {
+    "en": "Downloading… this can take a minute",
+    "text": "Đang tải, có thể mất một lúc…"
+  },
+  "fork.audio.vbcableMissing": {
+    "en": "The VB-CABLE virtual audio driver is not installed, so a spoken translation cannot be sent into a meeting. Subtitles do not need it.",
+    "text": "Chưa cài trình điều khiển âm thanh ảo VB-CABLE nên không thể gửi giọng đọc bản dịch vào ứng dụng họp. Nếu chỉ xem phụ đề thì không cần."
+  },
+  "fork.autostart.note": {
+    "en": "Kotomimi waits in the background after you sign in, with an icon in the notification area, and loads the models once ahead of time so the first session does not wait for it.",
+    "text": "Sau khi bạn đăng nhập, Kotomimi sẽ chờ ở chế độ nền với biểu tượng trong vùng thông báo và tải sẵn mô hình để bạn không phải chờ thêm khi bắt đầu phiên đầu tiên."
+  },
+  "fork.autostart.title": {
+    "en": "Startup",
+    "text": "Khởi động"
+  },
+  "fork.autostart.toggle": {
+    "en": "Start in the background when I sign in to Windows",
+    "text": "Chạy nền khi tôi đăng nhập Windows"
+  },
+  "fork.custom.add": {
+    "en": "Add",
+    "text": "Thêm"
+  },
+  "fork.custom.added": {
+    "en": "Added {{name}} ({{size}} MB). Download it in the model library.",
+    "text": "Đã thêm {{name}} ({{size}} MB). Hãy tải trong thư viện mô hình."
+  },
+  "fork.custom.adding": {
+    "en": "Looking…",
+    "text": "Đang tìm…"
+  },
+  "fork.custom.anyLanguage": {
+    "en": "Every language",
+    "text": "Đa ngôn ngữ"
+  },
+  "fork.custom.downloaded": {
+    "en": "downloaded",
+    "text": "đã tải"
+  },
+  "fork.custom.error_bad_repo": {
+    "en": "That is not a repository id. It looks like owner/name.",
+    "text": "Tên kho không hợp lệ. Định dạng là tác giả/tên."
+  },
+  "fork.custom.error_exists": {
+    "en": "This model is already added.",
+    "text": "Mô hình này đã được thêm."
+  },
+  "fork.custom.error_not_found": {
+    "en": "No public repository by that name.",
+    "text": "Không tìm thấy kho công khai nào có tên này."
+  },
+  "fork.custom.error_not_whisper": {
+    "en": "This repository is not a Whisper model in the ONNX layout. {{detail}}",
+    "text": "Kho này không chứa mô hình Whisper ở định dạng ONNX. {{detail}}"
+  },
+  "fork.custom.error_unreachable": {
+    "en": "Could not reach Hugging Face: {{detail}}",
+    "text": "Không thể kết nối với Hugging Face: {{detail}}"
+  },
+  "fork.custom.intro": {
+    "en": "For a Whisper model the library does not list, such as one fine-tuned for your language. Give its Hugging Face repository id (most onnx-community/… and Xenova/… Whisper repositories work); it needs a graphics card.",
+    "text": "Dành cho mô hình Whisper chưa có trong thư viện, chẳng hạn mô hình được tinh chỉnh cho một ngôn ngữ. Nhập tên kho Hugging Face (hầu hết kho Whisper thuộc onnx-community/… và Xenova/… đều dùng được). Cần có card đồ họa."
+  },
+  "fork.custom.language": {
+    "en": "The language it hears",
+    "text": "Ngôn ngữ nhận dạng"
+  },
+  "fork.custom.notDownloaded": {
+    "en": "not downloaded",
+    "text": "chưa tải"
+  },
+  "fork.custom.remove": {
+    "en": "Remove {{name}}",
+    "text": "Xóa {{name}}"
+  },
+  "fork.custom.repo": {
+    "en": "Repository id",
+    "text": "Tên kho"
+  },
+  "fork.custom.title": {
+    "en": "Add a Whisper model from Hugging Face",
+    "text": "Thêm mô hình Whisper từ Hugging Face"
+  },
+  "fork.echoCancellationApp": {
+    "en": "Kotomimi only",
+    "text": "Chỉ Kotomimi"
+  },
+  "fork.echoCancellationAppTooltip": {
+    "en": "Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "Chỉ Kotomimi: chỉ khử giọng đọc bản dịch do Kotomimi phát. Chọn mục này khi micrô dùng thiết bị âm thanh ảo (VB-Cable, BlackHole)."
+  },
+  "fork.find.again": {
+    "en": "Search again",
+    "text": "Tìm lại"
+  },
+  "fork.find.kindKotomimi": {
+    "en": "Kotomimi",
+    "text": "Chia sẻ qua Kotomimi"
+  },
+  "fork.find.kindPhone": {
+    "en": "Phone · speech recognition",
+    "text": "Điện thoại · nhận dạng giọng nói"
+  },
+  "fork.find.kindPhoneLends": {
+    "en": "Phone · {{what}}",
+    "text": "Điện thoại · {{what}}"
+  },
+  "fork.find.kindServer": {
+    "en": "Model server",
+    "text": "Máy chủ mô hình"
+  },
+  "fork.find.lendsAsr": {
+    "en": "speech recognition",
+    "text": "nhận dạng giọng nói"
+  },
+  "fork.find.lendsCoach": {
+    "en": "grammar feedback",
+    "text": "góp ý ngữ pháp"
+  },
+  "fork.find.lendsTranslate": {
+    "en": "translation",
+    "text": "dịch"
+  },
+  "fork.find.manual": {
+    "en": "Or type its address",
+    "text": "Hoặc tự nhập địa chỉ"
+  },
+  "fork.find.models": {
+    "en": "{{count}} model(s)",
+    "text": "{{count}} mô hình"
+  },
+  "fork.find.needsKey": {
+    "en": "asks for an access key",
+    "text": "cần khóa truy cập"
+  },
+  "fork.find.none": {
+    "en": "Nothing found. Check that the other device is on, is on the same Wi-Fi or router as this one, and has \"Share this computer's models\" turned on in its Kotomimi. You can also type its address below.",
+    "text": "Không tìm thấy thiết bị nào. Hãy kiểm tra xem thiết bị kia đã bật, có kết nối cùng Wi-Fi hoặc bộ định tuyến với máy tính này và đã bật \"Chia sẻ mô hình của máy tính này\" trong Kotomimi chưa. Bạn cũng có thể tự nhập địa chỉ bên dưới."
+  },
+  "fork.find.productHere": {
+    "en": "{{product}} on this computer",
+    "text": "{{product}} trên máy tính này"
+  },
+  "fork.find.search": {
+    "en": "Search my network for devices",
+    "text": "Tìm thiết bị trong mạng nội bộ"
+  },
+  "fork.find.searching": {
+    "en": "Looking for devices on your network…",
+    "text": "Đang tìm thiết bị trong mạng nội bộ…"
+  },
+  "fork.find.thisComputer": {
+    "en": "On this computer",
+    "text": "Máy chủ trên máy tính này"
+  },
+  "fork.find.title": {
+    "en": "Found on your network",
+    "text": "Thiết bị tìm thấy trong mạng nội bộ"
+  },
+  "fork.find.use": {
+    "en": "Use {{name}}",
+    "text": "Dùng {{name}}"
+  },
+  "fork.fonts.add": {
+    "en": "Add a language…",
+    "text": "Thêm ngôn ngữ…"
+  },
+  "fork.fonts.default": {
+    "en": "App default",
+    "text": "Mặc định của ứng dụng"
+  },
+  "fork.fonts.languages": {
+    "en": "Conversation text, by language",
+    "text": "Văn bản hội thoại, theo ngôn ngữ"
+  },
+  "fork.fonts.latin": {
+    "en": "Latin letters and digits",
+    "text": "Chữ Latinh và chữ số"
+  },
+  "fork.fonts.latinHint": {
+    "en": "English letters and digits in the conversation",
+    "text": "Chữ cái tiếng Anh và chữ số trong hội thoại"
+  },
+  "fork.fonts.loading": {
+    "en": "Reading the installed fonts…",
+    "text": "Đang đọc phông chữ đã cài…"
+  },
+  "fork.fonts.none": {
+    "en": "No font matches",
+    "text": "Không có phông chữ phù hợp"
+  },
+  "fork.fonts.others": {
+    "en": "Other fonts (may lack this script)",
+    "text": "Phông chữ khác (có thể không hỗ trợ hệ chữ này)"
+  },
+  "fork.fonts.pinyin": {
+    "en": "Pinyin above the text",
+    "text": "Pinyin phía trên văn bản"
+  },
+  "fork.fonts.reading": {
+    "en": "Readings above the text",
+    "text": "Furigana phía trên văn bản"
+  },
+  "fork.fonts.remove": {
+    "en": "Reset {{language}}",
+    "text": "Khôi phục phông chữ mặc định cho {{language}}"
+  },
+  "fork.fonts.roman": {
+    "en": "Romanization",
+    "text": "Phiên âm Latinh"
+  },
+  "fork.fonts.romanHint": {
+    "en": "The readings under Japanese, Korean, Russian and Ukrainian",
+    "text": "Cách đọc bên dưới tiếng Nhật, Hàn, Nga và Ukraina"
+  },
+  "fork.fonts.search": {
+    "en": "Search fonts",
+    "text": "Tìm phông chữ"
+  },
+  "fork.fonts.text": {
+    "en": "Text",
+    "text": "Văn bản chính"
+  },
+  "fork.fonts.title": {
+    "en": "Fonts",
+    "text": "Phông chữ"
+  },
+  "fork.fonts.tooltip": {
+    "en": "Fonts installed on this computer. Characters a font lacks are shown in the app's own.",
+    "text": "Dùng phông chữ đã cài trên máy tính này. Ký tự còn thiếu sẽ được hiển thị bằng phông mặc định của ứng dụng."
+  },
+  "fork.fonts.ui": {
+    "en": "Interface",
+    "text": "Giao diện"
+  },
+  "fork.fonts.uiHint": {
+    "en": "Menus, settings and buttons",
+    "text": "Menu, cài đặt và nút"
+  },
+  "fork.furigana": {
+    "en": "Furigana over kanji (Japanese)",
+    "text": "Hiện furigana trên kanji (tiếng Nhật)"
+  },
+  "fork.help.issues": {
+    "en": "Report a problem",
+    "text": "Báo sự cố"
+  },
+  "fork.help.issuesTooltip": {
+    "en": "Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page.",
+    "text": "Kotomimi là một nhánh phát triển độc lập từ Sokuji. Hãy báo sự cố của ứng dụng này trên trang GitHub riêng của Kotomimi."
+  },
+  "fork.lan.copied": {
+    "en": "Copied",
+    "text": "Đã sao chép"
+  },
+  "fork.lan.copy": {
+    "en": "Copy",
+    "text": "Sao chép"
+  },
+  "fork.lan.direction": {
+    "en": "Which direction to show models for",
+    "text": "Hiển thị mô hình cho chiều nào"
+  },
+  "fork.lan.enable": {
+    "en": "Share this computer's models",
+    "text": "Chia sẻ mô hình của máy tính này"
+  },
+  "fork.lan.failed": {
+    "en": "Sharing could not start: {{message}}",
+    "text": "Không thể bắt đầu chia sẻ: {{message}}"
+  },
+  "fork.lan.firewall": {
+    "en": "The first time, your system's firewall may ask whether to allow Kotomimi on the network: allow it for private networks.",
+    "text": "Lần đầu bật, tường lửa của hệ thống có thể hỏi có cho phép Kotomimi truy cập mạng không: hãy cho phép trên mạng riêng tư."
+  },
+  "fork.lan.firewallAllow": {
+    "en": "Allow",
+    "text": "Cho phép"
+  },
+  "fork.lan.firewallBlocked": {
+    "en": "Windows Firewall is keeping other devices out",
+    "text": "Tường lửa Windows đang chặn các thiết bị khác"
+  },
+  "fork.lan.firewallDeclined": {
+    "en": "Still blocked: Windows was not told yes.",
+    "text": "Vẫn bị chặn: chưa có xác nhận cho phép trong Windows."
+  },
+  "fork.lan.firewallPrivate": {
+    "en": "Allow opens this port to devices on your network. Windows will ask you to confirm.",
+    "text": "Nhấn \"Cho phép\" để các thiết bị trong mạng nội bộ kết nối với cổng này. Windows sẽ yêu cầu bạn xác nhận trước."
+  },
+  "fork.lan.firewallPublic": {
+    "en": "Windows treats this network as public. Allow opens this port to devices on this same network only. Windows will ask you to confirm.",
+    "text": "Windows coi mạng hiện tại là mạng công cộng. Nhấn \"Cho phép\" để mở cổng này chỉ cho các thiết bị trong cùng mạng. Windows sẽ yêu cầu bạn xác nhận trước."
+  },
+  "fork.lan.firewallWaiting": {
+    "en": "Waiting for Windows…",
+    "text": "Đang chờ Windows…"
+  },
+  "fork.lan.hideLibrary": {
+    "en": "Hide the model library",
+    "text": "Thu gọn thư viện mô hình"
+  },
+  "fork.lan.key": {
+    "en": "Access key",
+    "text": "Khóa truy cập"
+  },
+  "fork.lan.keyPlaceholder": {
+    "en": "Blank: anyone on the network may connect",
+    "text": "Để trống: mọi thiết bị trong mạng nội bộ đều có thể kết nối"
+  },
+  "fork.lan.models": {
+    "en": "Models shared · {{count}}",
+    "text": "Mô hình được chia sẻ · {{count}}"
+  },
+  "fork.lan.noNetwork": {
+    "en": "This computer is on no network.",
+    "text": "Máy tính này hiện chưa kết nối mạng."
+  },
+  "fork.lan.noRecognizer": {
+    "en": "No speech recognition model downloaded yet",
+    "text": "Chưa tải mô hình nhận dạng giọng nói"
+  },
+  "fork.lan.on": {
+    "en": "Sharing — no device connected yet",
+    "text": "Đang chia sẻ, chưa có thiết bị kết nối"
+  },
+  "fork.lan.onWithClients": {
+    "en": "Sharing — {{count}} connection(s) in use",
+    "text": "Đang chia sẻ, có {{count}} kết nối đang dùng"
+  },
+  "fork.lan.options": {
+    "en": "Options",
+    "text": "Tùy chọn"
+  },
+  "fork.lan.otherAddresses": {
+    "en": "This computer's other addresses",
+    "text": "Địa chỉ khác của máy tính này"
+  },
+  "fork.lan.port": {
+    "en": "Port",
+    "text": "Cổng"
+  },
+  "fork.lan.portInUse": {
+    "en": "Port {{port}} is taken by another program. Choose another under Options.",
+    "text": "Cổng {{port}} đang được chương trình khác sử dụng. Hãy chọn cổng khác trong \"Tùy chọn\"."
+  },
+  "fork.lan.serving": {
+    "en": "Sharing",
+    "text": "Đang chia sẻ"
+  },
+  "fork.lan.servingClients": {
+    "en": "Sharing · {{count}} in use",
+    "text": "Đang chia sẻ · {{count}} kết nối đang dùng"
+  },
+  "fork.lan.servingTip": {
+    "en": "This computer is lending its models to other devices. The languages and the choice of model are set on those devices, not here.",
+    "text": "Máy tính này đang cho các thiết bị khác dùng mô hình. Ngôn ngữ và mô hình được chọn trên các thiết bị đó, không phải ở đây."
+  },
+  "fork.lan.sessionIdle": {
+    "en": "The other device ended the session: nobody had spoken for a long while, and it let its models go. Start again to continue.",
+    "text": "Thiết bị kia đã kết thúc phiên này vì quá lâu không có ai nói và đã giải phóng mô hình khỏi bộ nhớ. Nhấn \"Bắt đầu\" lần nữa để tiếp tục."
+  },
+  "fork.lan.showLibrary": {
+    "en": "Download or manage models",
+    "text": "Tải hoặc quản lý mô hình"
+  },
+  "fork.lan.starting": {
+    "en": "Starting…",
+    "text": "Đang khởi động…"
+  },
+  "fork.lan.title": {
+    "en": "Share with other devices",
+    "text": "Chia sẻ với thiết bị khác"
+  },
+  "fork.lan.tooltip": {
+    "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
+    "text": "Cho các thiết bị khác trong mạng nội bộ dùng mô hình của máy tính này. Trên thiết bị kia, tìm máy tính này trong mục \"Thiết bị khác\" của Kotomimi rồi chọn mô hình và ngôn ngữ tại đó. Chỉ chia sẻ được khi Kotomimi đang mở."
+  },
+  "fork.languageMenu.detect": {
+    "en": "Auto-detect",
+    "text": "Tự động phát hiện"
+  },
+  "fork.languageMenu.detectUnavailable": {
+    "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
+    "text": "Bộ nhận dạng giọng nói hiện tại không thể tự phát hiện ngôn ngữ. Cần Qwen3-ASR 1.7B GGUF hoặc mô hình API."
+  },
+  "fork.languageMenu.mine": {
+    "en": "My language",
+    "text": "Ngôn ngữ của tôi"
+  },
+  "fork.languageMenu.mostly": {
+    "en": "Translate into what they mostly speak",
+    "text": "Dịch sang ngôn ngữ người kia chủ yếu dùng"
+  },
+  "fork.languageMenu.none": {
+    "en": "No language by that name",
+    "text": "Không có ngôn ngữ nào tên như vậy"
+  },
+  "fork.languageMenu.pin": {
+    "en": "Pin {{name}} to the top",
+    "text": "Ghim {{name}} lên đầu"
+  },
+  "fork.languageMenu.pinShort": {
+    "en": "Pin to the top",
+    "text": "Ghim lên đầu"
+  },
+  "fork.languageMenu.search": {
+    "en": "Type to find a language",
+    "text": "Nhập để lọc ngôn ngữ"
+  },
+  "fork.languageMenu.speakBoth": {
+    "en": "I speak {{language}} too",
+    "text": "Tôi cũng nói {{language}}"
+  },
+  "fork.languageMenu.speakBothHelp": {
+    "en": "When you speak {{mine}}, it is translated into {{language}}; when you speak {{language}}, into {{mine}}. Recognition tells the two apart.",
+    "text": "Khi bạn nói {{mine}}, lời nói được dịch sang {{language}}; khi bạn nói {{language}}, lời nói được dịch sang {{mine}}. Tính năng nhận dạng sẽ tự phân biệt hai ngôn ngữ."
+  },
+  "fork.languageMenu.speakBothUnavailable": {
+    "en": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
+    "text": "Bộ nhận dạng giọng nói đã chọn không thể phân biệt {{mine}} và {{language}}. Hãy chọn chế độ ghép đôi Apple Speech với cả hai ngôn ngữ đã cài đặt, hoặc bộ nhận dạng có thể nhận biết cả hai ngôn ngữ."
+  },
+  "fork.languageMenu.theirs": {
+    "en": "Their language",
+    "text": "Ngôn ngữ của người kia"
+  },
+  "fork.languageMenu.unpin": {
+    "en": "Unpin {{name}}",
+    "text": "Bỏ ghim {{name}}"
+  },
+  "fork.languageMenu.unpinShort": {
+    "en": "Unpin",
+    "text": "Bỏ ghim"
+  },
+  "fork.pinyin": {
+    "en": "Pinyin over Chinese",
+    "text": "Hiện bính âm trên tiếng Trung"
+  },
+  "fork.romanization": {
+    "en": "Romanization",
+    "text": "Hiện phiên âm Latinh"
+  },
+  "fork.sourceItalic": {
+    "en": "Source text in italics",
+    "text": "In nghiêng văn bản gốc"
+  },
+  "fork.speechDetection.title": {
+    "en": "Speech detection",
+    "text": "Phát hiện giọng nói"
+  },
+  "fork.statusLine.checking": {
+    "en": "Getting ready. You can start in a moment.",
+    "text": "Đang chuẩn bị. Bạn có thể bắt đầu sau giây lát."
+  },
+  "fork.subtitle.align": {
+    "en": "Alignment",
+    "text": "Căn lề"
+  },
+  "fork.subtitle.alignCenter": {
+    "en": "Centre",
+    "text": "Giữa"
+  },
+  "fork.subtitle.alignLeft": {
+    "en": "Left",
+    "text": "Trái"
+  },
+  "fork.subtitle.back": {
+    "en": "Back to the main window",
+    "text": "Về cửa sổ chính"
+  },
+  "fork.subtitle.backdrop": {
+    "en": "Panel",
+    "text": "Độ đậm nền"
+  },
+  "fork.subtitle.lanesView": {
+    "en": "Subtitle view",
+    "text": "Dạng phụ đề"
+  },
+  "fork.subtitle.listView": {
+    "en": "List view",
+    "text": "Dạng danh sách"
+  },
+  "fork.subtitle.look": {
+    "en": "Look",
+    "text": "Kiểu hiển thị"
+  },
+  "fork.subtitle.lookDark": {
+    "en": "Dark text",
+    "text": "Chữ tối, viền trắng"
+  },
+  "fork.subtitle.lookLight": {
+    "en": "Light text",
+    "text": "Chữ sáng, viền đen"
+  },
+  "fork.subtitle.lookPanel": {
+    "en": "Dark panel",
+    "text": "Nền tối"
+  },
+  "fork.subtitle.lookSample": {
+    "en": "Aa",
+    "text": "Phụ đề"
+  },
+  "fork.subtitle.lookSoft": {
+    "en": "Faint panel",
+    "text": "Nền nhạt, bóng nhẹ"
+  },
+  "fork.subtitle.moreColors": {
+    "en": "More colours (source text, panel)",
+    "text": "Màu khác (bản gốc, nền)"
+  },
+  "fork.subtitle.off": {
+    "en": "Off",
+    "text": "Tắt"
+  },
+  "fork.subtitle.outline": {
+    "en": "Outline",
+    "text": "Độ đậm viền"
+  },
+  "fork.subtitle.shadow": {
+    "en": "Shadow",
+    "text": "Độ đậm bóng"
+  },
+  "fork.subtitle.through": {
+    "en": "Click-through: the mouse passes through the captions",
+    "text": "Nhấp xuyên: không thể nhấp vào phụ đề, mọi thao tác chuột sẽ chuyển tới cửa sổ bên dưới"
+  },
+  "fork.subtitle.throughOff": {
+    "en": "Stop click-through",
+    "text": "Tắt nhấp xuyên"
+  },
+  "fork.subtitle.type": {
+    "en": "Type to translate (Ctrl+K)",
+    "text": "Nhập để dịch (Ctrl+K)"
+  },
+  "fork.subtitle.typePlaceholder": {
+    "en": "What you want to say — Enter translates",
+    "text": "Nhập điều muốn nói, nhấn Enter để dịch"
+  },
+  "fork.vrchat.chatbox": {
+    "en": "Above my avatar",
+    "text": "Hiện trên đầu nhân vật"
+  },
+  "fork.vrchat.chatboxHearBoth": {
+    "en": "Switch to Both",
+    "text": "Chuyển sang Cả hai"
+  },
+  "fork.vrchat.chatboxOff": {
+    "en": "Off",
+    "text": "Tắt"
+  },
+  "fork.vrchat.chatboxSourceFirst": {
+    "en": "Original on top",
+    "text": "Bản gốc ở trên"
+  },
+  "fork.vrchat.chatboxTranslation": {
+    "en": "Translation",
+    "text": "Bản dịch"
+  },
+  "fork.vrchat.chatboxTranslationFirst": {
+    "en": "Translation on top",
+    "text": "Bản dịch ở trên"
+  },
+  "fork.vrchat.chatboxUnheard": {
+    "en": "Only the other side is translated now: what you say won't show above your avatar.",
+    "text": "Hiện chỉ dịch lời người khác, nên lời bạn nói sẽ không hiện trên đầu nhân vật."
+  },
+  "fork.vrchat.connected": {
+    "en": "Connected",
+    "text": "Đã kết nối"
+  },
+  "fork.vrchat.end": {
+    "en": "End",
+    "text": "Kết thúc"
+  },
+  "fork.vrchat.help": {
+    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
+    "text": "Kết nối với VRChat trên máy tính này: khi bạn tắt mic trong VRChat, Kotomimi sẽ không nhận dạng giọng nói của bạn; bản dịch của bạn có thể hiện trên đầu nhân vật để người chơi khác đọc. Khi thế giới phát video: nếu âm thanh video không có hướng, ứng dụng sẽ tách nó khỏi giọng người chơi; nếu có hướng, lời nói của người khác sẽ được chia thành các đoạn ngắn hơn."
+  },
+  "fork.vrchat.mutedNotHeard": {
+    "en": "Muted in VRChat: what you say is not recognized.",
+    "text": "Bạn đang tắt mic trong VRChat, lời bạn nói sẽ không được nhận dạng."
+  },
+  "fork.vrchat.mutedThere": {
+    "en": "Muted in VRChat",
+    "text": "Đang tắt mic trong VRChat"
+  },
+  "fork.vrchat.muteGate": {
+    "en": "Don't hear me while muted in VRChat",
+    "text": "Không nhận dạng giọng tôi khi tắt mic trong VRChat"
+  },
+  "fork.vrchat.notConnected": {
+    "en": "Not connected",
+    "text": "Chưa kết nối"
+  },
+  "fork.vrchat.onVideo": {
+    "en": "When a world plays a video",
+    "text": "Khi thế giới phát video"
+  },
+  "fork.vrchat.pausedOn": {
+    "en": "Not translating",
+    "text": "Tạm ngừng dịch"
+  },
+  "fork.vrchat.quickOn": {
+    "en": "Shorter sentences",
+    "text": "Đã chia câu ngắn hơn"
+  },
+  "fork.vrchat.remember": {
+    "en": "Remember",
+    "text": "Ghi nhớ"
+  },
+  "fork.vrchat.removedOn": {
+    "en": "Video sound removed",
+    "text": "Đã loại bỏ âm thanh video"
+  },
+  "fork.vrchat.separatedOn": {
+    "en": "Video sound separated",
+    "text": "Đã tách âm thanh video"
+  },
+  "fork.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
+  },
+  "fork.vrchat.turnOnOsc": {
+    "en": "Turn on OSC in the VRChat quick menu",
+    "text": "Bật OSC trong menu nhanh của VRChat"
+  },
+  "fork.vrchat.videoAsk": {
+    "en": "Ask me",
+    "text": "Hỏi mỗi lần"
+  },
+  "fork.vrchat.videoAskResult": {
+    "en": "Asks you when a video starts.",
+    "text": "Hỏi bạn cách xử lý khi video bắt đầu."
+  },
+  "fork.vrchat.videoBoth": {
+    "en": "People + video",
+    "text": "Dịch cả người chơi và video"
+  },
+  "fork.vrchat.videoBothResult": {
+    "en": "The video gets its own line and uses more power; if it can't be separated, sentences are cut shorter.",
+    "text": "Video hiện trên một dòng riêng, tốn tài nguyên hơn; nếu không tách được thì chia câu ngắn hơn."
+  },
+  "fork.vrchat.videoPause": {
+    "en": "Pause",
+    "text": "Tạm ngừng dịch"
+  },
+  "fork.vrchat.videoPauseResult": {
+    "en": "The other side is not translated while it plays.",
+    "text": "Không dịch lời người khác khi video đang phát."
+  },
+  "fork.vrchat.videoQuick": {
+    "en": "People only",
+    "text": "Chỉ dịch lời người chơi"
+  },
+  "fork.vrchat.videoQuickResult": {
+    "en": "Takes out video sound; if it can't, sentences are cut shorter.",
+    "text": "Cố gắng loại bỏ âm thanh video; nếu không tách được thì chia câu ngắn hơn."
+  },
+  "fork.vrchat.videoShort": {
+    "en": "Video",
+    "text": "Video"
+  },
+  "fork.vrchat.videoStarted": {
+    "en": "Video started",
+    "text": "Video bắt đầu phát"
+  },
+  "fork.wizard.addressMissing": {
+    "en": "Choose a device from the list above, or type its address, for example 192.168.1.10:8790.",
+    "text": "Hãy chọn thiết bị trong danh sách bên trên hoặc nhập địa chỉ, ví dụ 192.168.1.10:8790."
+  },
+  "fork.wizard.device": {
+    "en": "This computer",
+    "text": "Máy tính này"
+  },
+  "fork.wizard.deviceDesc": {
+    "en": "Recognition and translation run on this computer using native models. Download a model for each stage before starting.",
+    "text": "Nhận dạng và dịch chạy trên máy tính này bằng mô hình cục bộ. Cần tải mô hình cho từng bước trước khi bắt đầu."
+  },
+  "fork.wizard.deviceNotice": {
+    "en": "After setup, open Model library in the Speech recognition and Translation cards and download a native model for each. Translation requires a downloaded model, or you can switch that stage to an API model or another device.",
+    "text": "Sau khi thiết lập, mở Thư viện mô hình trong các mục Nhận dạng giọng nói và Dịch để tải mô hình cục bộ cho từng bước. Bước dịch cần có mô hình đã tải, hoặc bạn có thể chuyển sang dùng mô hình API hay thiết bị khác."
+  },
+  "fork.wizard.intro": {
+    "en": "Pick a starting point. Later, in Settings, recognition and translation can each run in a different place.",
+    "text": "Chọn cách bắt đầu. Sau đó, trong Cài đặt, bạn có thể chọn nơi chạy riêng cho nhận dạng và dịch, hoặc kết hợp nhiều nơi."
+  },
+  "fork.wizard.keyNeeded": {
+    "en": "This device asks for an access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options), then press Connect.",
+    "text": "Thiết bị này yêu cầu khóa truy cập. Hãy nhập khóa đã đặt trên thiết bị đó (với Kotomimi khác, khóa nằm trong Tùy chọn chia sẻ), rồi nhấn Kết nối."
+  },
+  "fork.wizard.pathBadge": {
+    "en": "Recommended",
+    "text": "Đề xuất"
+  },
+  "fork.wizard.pathCost": {
+    "en": "No account and no API key. Text only: subtitles with furigana, typed translation and grammar feedback. Another device means a Kotomimi sharing its models, or a model server such as LocalAI; this computer downloads models onto your disk.",
+    "text": "Không cần tài khoản hay khóa API. Chỉ có văn bản: phụ đề kèm cách đọc bằng kana, dịch văn bản nhập và góp ý ngữ pháp. Thiết bị khác có thể chạy Kotomimi đã bật chia sẻ hoặc máy chủ mô hình như LocalAI; dùng máy tính này thì cần tải mô hình về máy."
+  },
+  "fork.wizard.pathDesc": {
+    "en": "Use the models of another device on your network, or this computer's own — and any mix of the two.",
+    "text": "Dùng mô hình trên thiết bị khác trong mạng nội bộ, trên máy tính này, hoặc kết hợp cả hai."
+  },
+  "fork.wizard.pathTitle": {
+    "en": "Kotomimi Pipeline",
+    "text": "Kotomimi tùy chọn kết hợp"
+  },
+  "fork.wizard.pendingAddress": {
+    "en": "No device chosen yet — choose one in Settings before you start.",
+    "text": "Chưa chọn thiết bị khác. Hãy chọn trong Cài đặt trước khi bắt đầu."
+  },
+  "fork.wizard.server": {
+    "en": "Another device on my network",
+    "text": "Thiết bị khác trong mạng nội bộ"
+  },
+  "fork.wizard.serverDesc": {
+    "en": "The models run on another computer: a Kotomimi with sharing turned on, or a model server such as LocalAI. This computer stays light.",
+    "text": "Mô hình chạy trên máy tính khác: Kotomimi đã bật chia sẻ hoặc máy chủ mô hình như LocalAI. Máy tính này gần như không tốn tài nguyên."
+  },
+  "fork.wizard.serverFound": {
+    "en": "Connected — it offers {{count}} model(s).",
+    "text": "Đã kết nối, thiết bị có {{count}} mô hình khả dụng."
+  },
+  "fork.wizard.serverUnreachable": {
+    "en": "Could not connect: {{message}}",
+    "text": "Không thể kết nối: {{message}}"
+  },
+  "fork.wizard.share": {
+    "en": "This computer, for my other devices",
+    "text": "Máy tính này, cho thiết bị khác dùng"
+  },
+  "fork.wizard.shareDesc": {
+    "en": "Computing power to spare here? Let the models run on this computer for the other devices on your network — and for this computer itself.",
+    "text": "Máy tính này còn dư sức xử lý? Hãy chạy mô hình tại đây cho các thiết bị khác trong mạng nội bộ và cả máy tính này sử dụng."
+  },
+  "fork.wizard.shareNotice": {
+    "en": "Nothing to enter. Finishing turns on sharing, so other Kotomimi devices on your network can find this computer. After setup, download models in the Speech recognition card: those are what the others can use.",
+    "text": "Không cần nhập gì ở đây. Khi hoàn tất, chia sẻ sẽ tự bật để các thiết bị Kotomimi khác trong mạng nội bộ tìm thấy máy tính này. Sau khi thiết lập, hãy tải mô hình trong mục Nhận dạng giọng nói ở Cài đặt. Các thiết bị khác sẽ dùng những mô hình đó."
+  },
+  "fork.wizard.shareSummary": {
+    "en": "Sharing",
+    "text": "Chia sẻ"
+  },
+  "fork.wizard.shareSummaryOn": {
+    "en": "Turned on when you finish: other devices on your network can use this computer's models",
+    "text": "Bật khi hoàn tất: các thiết bị khác trong mạng nội bộ có thể dùng mô hình trên máy tính này"
+  },
+  "fork.wizard.title": {
+    "en": "Which device does the work?",
+    "text": "Chạy trên thiết bị nào?"
+  },
+  "fork.wizard.tryServer": {
+    "en": "Connect",
+    "text": "Kết nối"
+  },
+  "models.deviceCpu": {
+    "en": "CPU",
+    "text": "CPU"
+  },
+  "models.deviceGpu": {
+    "en": "GPU",
+    "text": "GPU"
+  },
+  "providers.gemini.name": {
+    "en": "Google Gemini",
+    "text": "Google Gemini"
+  },
+  "providers.kizunaai_soniox.name": {
+    "en": "KizunaAI",
+    "text": "KizunaAI"
+  },
+  "providers.local_inference.modelAsr": {
+    "en": "ASR",
+    "text": "Nhận dạng giọng nói"
+  },
+  "providers.local_inference.modelTranslation": {
+    "en": "MT",
+    "text": "Dịch máy"
+  },
+  "providers.local_inference.modelTts": {
+    "en": "TTS",
+    "text": "Đọc văn bản"
+  },
+  "providers.localai.addressMissing": {
+    "en": "No other device is chosen yet. In Settings, under \"Another device\", search for it or type its address.",
+    "text": "Chưa chọn thiết bị khác. Hãy tìm hoặc nhập địa chỉ của thiết bị trong mục “Thiết bị khác” ở phần Cài đặt."
+  },
+  "providers.localai.advanced": {
+    "en": "Advanced",
+    "text": "Nâng cao"
+  },
+  "providers.localai.apiKey": {
+    "en": "API key",
+    "text": "Khóa API"
+  },
+  "providers.localai.apiKeyNeeded": {
+    "en": "The API at {{address}} asks for a key. In its card, turn on \"The API asks for a key\" and enter it.",
+    "text": "API tại {{address}} yêu cầu khóa. Trong thẻ tương ứng, bật “API này yêu cầu khóa” rồi nhập khóa."
+  },
+  "providers.localai.apiKeyRefused": {
+    "en": "The API at {{address}} did not accept the key. Check the API key in its card.",
+    "text": "API tại {{address}} không chấp nhận khóa này. Hãy kiểm tra khóa API trong thẻ tương ứng."
+  },
+  "providers.localai.apiKeyReused": {
+    "en": "Filled in with the key saved under \"{{name}}\".",
+    "text": "Đã điền khóa bạn lưu trong “{{name}}”."
+  },
+  "providers.localai.apiService": {
+    "en": "Service",
+    "text": "Dịch vụ"
+  },
+  "providers.localai.apiServiceArk": {
+    "en": "Doubao (Volcengine Ark)",
+    "text": "Doubao (Volcengine Ark)"
+  },
+  "providers.localai.apiServiceArkModel": {
+    "en": "A model's name, or your endpoint id (ep-…)",
+    "text": "Tên mô hình hoặc ID điểm truy cập của bạn (ep-…)"
+  },
+  "providers.localai.apiServiceCustom": {
+    "en": "Custom address",
+    "text": "Địa chỉ tùy chỉnh"
+  },
+  "providers.localai.apiServiceModel": {
+    "en": "Choose from the list on the right, or type a name",
+    "text": "Chọn trong danh sách bên phải hoặc nhập tên"
+  },
+  "providers.localai.apiServiceOllama": {
+    "en": "Ollama on this computer",
+    "text": "Ollama trên máy tính này"
+  },
+  "providers.localai.apiServiceSiliconFlow": {
+    "en": "SiliconFlow",
+    "text": "SiliconFlow"
+  },
+  "providers.localai.apiUnreachable": {
+    "en": "The API at {{address}} could not be reached. Check the address in its card, and that this computer is online.",
+    "text": "Không kết nối được API tại {{address}}. Hãy kiểm tra địa chỉ trong thẻ tương ứng và kết nối mạng của máy tính này."
+  },
+  "providers.localai.asrApiBaseUrl": {
+    "en": "API address",
+    "text": "Địa chỉ API"
+  },
+  "providers.localai.asrApiBaseUrlPlaceholder": {
+    "en": "e.g. https://api.openai.com/v1",
+    "text": "Ví dụ: https://api.openai.com/v1"
+  },
+  "providers.localai.asrApiModelPlaceholder": {
+    "en": "e.g. whisper-1, whisper-large-v3",
+    "text": "Ví dụ: whisper-1, whisper-large-v3"
+  },
+  "providers.localai.asrApiNeedsKey": {
+    "en": "The API asks for a key",
+    "text": "API này yêu cầu khóa"
+  },
+  "providers.localai.asrFixedNote": {
+    "en": "That device is reached as a plain LocalAI, which always hears with its own default recognizer when the translation or the feedback uses a model chosen here. Through the Kotomimi on that device, the recognizer can be chosen here.",
+    "text": "Hiện đang kết nối trực tiếp với LocalAI trên thiết bị đó: khi chọn mô hình riêng để dịch hoặc góp ý ngữ pháp, LocalAI chỉ dùng mô hình nhận dạng mặc định của nó. Chuyển sang kết nối với Kotomimi trên thiết bị đó để chọn mô hình nhận dạng tại đây."
+  },
+  "providers.localai.asrKey": {
+    "en": "API key of the speech recognition API",
+    "text": "Khóa API nhận dạng giọng nói"
+  },
+  "providers.localai.asrUnnamed": {
+    "en": "Speech recognition has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "Chưa có mô hình nhận dạng giọng nói để dùng. Hãy chọn mô hình trong thẻ “Nhận dạng giọng nói” bên dưới nhà cung cấp (với mô hình API, cần nhập địa chỉ và tên mô hình), hoặc chọn nơi chạy khác."
+  },
+  "providers.localai.auto": {
+    "en": "Automatic · {{name}}",
+    "text": "Tự động · {{name}}"
+  },
+  "providers.localai.browse": {
+    "en": "Model library",
+    "text": "Thư viện mô hình"
+  },
+  "providers.localai.bySentence": {
+    "en": "Translate sentence by sentence",
+    "text": "Dịch từng câu"
+  },
+  "providers.localai.bySentenceTooltip": {
+    "en": "On: each sentence is translated as soon as it ends — sooner, but without the sentences around it. Off: the whole stretch is translated once the speaker pauses — with its context, but later.",
+    "text": "Bật: dịch ngay khi người nói nói hết một câu, bản dịch hiện sớm hơn nhưng thiếu ngữ cảnh. Tắt: dịch cả đoạn khi người nói tạm dừng, có đầy đủ ngữ cảnh nhưng phải chờ lâu hơn."
+  },
+  "providers.localai.checking": {
+    "en": "Checking…",
+    "text": "Đang kiểm tra…"
+  },
+  "providers.localai.checkNow": {
+    "en": "Check",
+    "text": "Kiểm tra"
+  },
+  "providers.localai.checkSlow": {
+    "en": "No answer within {{seconds}} s: the device may be off or loading a model, or the address wrong. It is asked again by itself.",
+    "text": "Chưa có phản hồi sau {{seconds}} giây: thiết bị có thể chưa bật, đang tải mô hình hoặc địa chỉ chưa đúng. Sẽ tự thử lại."
+  },
+  "providers.localai.choiceDevice": {
+    "en": "Use this computer",
+    "text": "Dùng máy tính này"
+  },
+  "providers.localai.choiceServer": {
+    "en": "Use another device",
+    "text": "Dùng thiết bị khác"
+  },
+  "providers.localai.coach": {
+    "en": "Check my grammar when I speak their language",
+    "text": "Kiểm tra ngữ pháp khi tôi nói ngôn ngữ của đối phương"
+  },
+  "providers.localai.coachKey": {
+    "en": "API key of the feedback model",
+    "text": "Khóa API của mô hình góp ý ngữ pháp"
+  },
+  "providers.localai.coachNeedsSpeaker": {
+    "en": "Feedback answers what you say. Switch the mode to \"Me\" or \"Both\".",
+    "text": "Cần nghe bạn nói để góp ý ngữ pháp. Hãy chuyển chế độ sang “Tôi” hoặc “Cả hai”."
+  },
+  "providers.localai.coachNoModel": {
+    "en": "The other device has no text model that can give feedback. Use an API model or this computer instead.",
+    "text": "Thiết bị kia không có mô hình văn bản có thể góp ý ngữ pháp. Hãy dùng mô hình API hoặc máy tính này."
+  },
+  "providers.localai.coachPrompt": {
+    "en": "Feedback instructions",
+    "text": "Chỉ dẫn góp ý ngữ pháp"
+  },
+  "providers.localai.coachPromptPlaceholder": {
+    "en": "Blank: written automatically for your two languages. Your own text may use {{spoken}} and {{native}}.",
+    "text": "Để trống: tự tạo theo tiếng mẹ đẻ và ngôn ngữ bạn đang luyện. Khi tự viết, có thể dùng {{spoken}} và {{native}} để chỉ hai ngôn ngữ này."
+  },
+  "providers.localai.coachPromptPreview": {
+    "en": "Used while the box is blank, for this language pair:",
+    "text": "Khi để trống, cặp ngôn ngữ hiện tại dùng chỉ dẫn này:"
+  },
+  "providers.localai.coachStage": {
+    "en": "Grammar feedback",
+    "text": "Góp ý ngữ pháp"
+  },
+  "providers.localai.coachStageTooltip": {
+    "en": "When you speak the other language, a model checks your grammar and answers with a check mark, or a corrected sentence and an explanation. Enable \"I speak the other language too\" as well to get both a translation and private feedback. Your own language and typed text are translated without feedback.",
+    "text": "Khi bạn nói ngôn ngữ của đối phương, mô hình sẽ kiểm tra ngữ pháp và trả về dấu tích hoặc câu đã sửa kèm giải thích. Bật thêm “Tôi cũng nói ngôn ngữ của đối phương” để nhận cả bản dịch lẫn góp ý riêng tư. Lời nói bằng ngôn ngữ của bạn và văn bản bạn gõ chỉ được dịch, không có góp ý."
+  },
+  "providers.localai.coachUnnamed": {
+    "en": "Grammar feedback has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "Chưa có mô hình góp ý ngữ pháp để dùng. Hãy chọn mô hình trong thẻ “Góp ý ngữ pháp” bên dưới nhà cung cấp (với mô hình API, cần nhập địa chỉ và tên mô hình), hoặc chọn nơi chạy khác."
+  },
+  "providers.localai.connectFirst": {
+    "en": "No other device is connected yet: search for one above, or type its address.",
+    "text": "Chưa kết nối thiết bị khác. Hãy tìm ở trên hoặc nhập địa chỉ của thiết bị."
+  },
+  "providers.localai.description": {
+    "en": "Recognition, translation and grammar feedback — and you mix where each model runs: this computer, another device on your network, or any API model.",
+    "text": "Nhận dạng giọng nói, dịch và góp ý ngữ pháp. Bạn có thể kết hợp các mô hình chạy trên máy tính này, thiết bị khác trong mạng nội bộ hoặc qua API."
+  },
+  "providers.localai.detectOther": {
+    "en": "Detect the other side's language",
+    "text": "Tự nhận biết ngôn ngữ của đối phương"
+  },
+  "providers.localai.detectOtherNeeds": {
+    "en": "Only Qwen3-ASR 1.7B GGUF can tell the language by itself. Choose it here.",
+    "text": "Chỉ Qwen3-ASR 1.7B GGUF có thể tự nhận biết ngôn ngữ. Hãy chọn mô hình đó tại đây."
+  },
+  "providers.localai.detectOtherNote": {
+    "en": "The other side's language is detected, so a model that can tell languages apart hears them.",
+    "text": "Ngôn ngữ của đối phương được tự nhận biết, nên ở đây dùng mô hình có thể phân biệt ngôn ngữ."
+  },
+  "providers.localai.detectOtherTooltip": {
+    "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
+    "text": "Tự nhận dạng và dịch lời đối phương sang ngôn ngữ của bạn, bất kể họ nói ngôn ngữ nào, không cần đổi thủ công. Lời bạn nói vẫn được dịch sang ngôn ngữ đã chọn ở trên. Nhận dạng cần Qwen3-ASR 1.7B GGUF hoặc API; dịch cần bộ máy gốc hoặc API."
+  },
+  "providers.localai.deviceDefault": {
+    "en": "The device's own choice",
+    "text": "Để thiết bị đó chọn"
+  },
+  "providers.localai.endpoint": {
+    "en": "Address",
+    "text": "Địa chỉ"
+  },
+  "providers.localai.familyUnheard": {
+    "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
+    "text": "{{name}} trên thiết bị đó chưa có {{languages}}, nên thiết bị sẽ tự chọn mô hình cho phần này. Để dùng {{name}}, hãy tải {{languages}} trên thiết bị đó trước."
+  },
+  "providers.localai.feedbackFailed": {
+    "en": "One sentence got no grammar feedback: the feedback model did not answer.",
+    "text": "Một câu chưa có góp ý ngữ pháp vì mô hình góp ý không phản hồi."
+  },
+  "providers.localai.groupNative": {
+    "en": "Native engine",
+    "text": "Bộ máy gốc"
+  },
+  "providers.localai.hearApiNote": {
+    "en": "Any service with OpenAI's transcription API works (OpenAI, Groq, a LocalAI). This computer cuts the sentences and uploads each one, so the text appears when a sentence is finished.",
+    "text": "Dùng được mọi dịch vụ có API chuyển giọng nói thành văn bản của OpenAI (OpenAI, Groq, LocalAI…). Máy tính này tự tách câu rồi gửi từng câu để nhận dạng, nên văn bản chỉ xuất hiện sau khi nói xong một câu."
+  },
+  "providers.localai.hears": {
+    "en": "Recognizes {{language}}",
+    "text": "Nhận dạng {{language}}"
+  },
+  "providers.localai.hearsEither": {
+    "en": "Recognizes {{first}} or {{second}}",
+    "text": "Nhận dạng {{first}} hoặc {{second}}"
+  },
+  "providers.localai.hearsOther": {
+    "en": "Hears the other side (any language)",
+    "text": "Nghe đối phương (tự nhận biết ngôn ngữ)"
+  },
+  "providers.localai.hearStage": {
+    "en": "Speech recognition",
+    "text": "Nhận dạng giọng nói"
+  },
+  "providers.localai.hearStageTooltip": {
+    "en": "What listens: it decides when a sentence ends and writes down what was said.",
+    "text": "Khâu phụ trách nghe: xác định khi nào nói xong một câu và chuyển lời nói thành văn bản."
+  },
+  "providers.localai.hereDown": {
+    "en": "The LocalAI on this computer is not running yet. Start it in the stage's card — or, if Kotomimi has only just opened, give it a moment.",
+    "text": "LocalAI trên máy tính này chưa chạy. Nhấn “Khởi động LocalAI” trong thẻ của khâu tương ứng; nếu vừa mở Kotomimi, hãy chờ một lát."
+  },
+  "providers.localai.hereModelPick": {
+    "en": "Choose a model",
+    "text": "Chọn mô hình"
+  },
+  "providers.localai.inUse": {
+    "en": "In use: {{name}}",
+    "text": "Đang dùng {{name}}"
+  },
+  "providers.localai.inUseLegs": {
+    "en": "In use: {{theirs}} (them), {{mine}} (me)",
+    "text": "Đang dùng: đối phương {{theirs}} · tôi {{mine}}"
+  },
+  "providers.localai.kotomimiServer": {
+    "en": "It is another Kotomimi sharing its models.",
+    "text": "Đây là một Kotomimi khác đang chia sẻ mô hình."
+  },
+  "providers.localai.kotomimiThere": {
+    "en": "Use the Kotomimi on that device",
+    "text": "Kết nối với Kotomimi trên thiết bị đó"
+  },
+  "providers.localai.kotomimiThereLooking": {
+    "en": "Looking for it…",
+    "text": "Đang tìm…"
+  },
+  "providers.localai.kotomimiThereNone": {
+    "en": "No Kotomimi is sharing on that device. Open Kotomimi there, turn on \"Share with other devices\", then try again.",
+    "text": "Không có Kotomimi nào đang chia sẻ trên thiết bị đó. Hãy mở Kotomimi trên đó, bật “Chia sẻ với thiết bị khác” rồi thử lại."
+  },
+  "providers.localai.localServerNote": {
+    "en": "This address is this computer itself: a model server running here, such as LocalAI. Choose \"Another device\" in a stage to use its models.",
+    "text": "Địa chỉ này trỏ về chính máy tính này: máy chủ mô hình chạy trên máy, chẳng hạn LocalAI. Chọn “Thiết bị khác” ở một bước để dùng các mô hình đó."
+  },
+  "providers.localai.model": {
+    "en": "Model",
+    "text": "Mô hình"
+  },
+  "providers.localai.modelGone": {
+    "en": "{{name}} (no longer on that device)",
+    "text": "{{name}} (không còn trên thiết bị đó)"
+  },
+  "providers.localai.modelList": {
+    "en": "Choose from the models this service lists",
+    "text": "Chọn từ danh sách mô hình của dịch vụ này"
+  },
+  "providers.localai.modelListAsking": {
+    "en": "Getting the list…",
+    "text": "Đang tải danh sách mô hình…"
+  },
+  "providers.localai.modelListKeyMissing": {
+    "en": "Fill in the API key first.",
+    "text": "Vui lòng nhập khóa API trước."
+  },
+  "providers.localai.modelListKeyRefused": {
+    "en": "The service refused this key.",
+    "text": "Dịch vụ không chấp nhận khóa này."
+  },
+  "providers.localai.modelListNoAddress": {
+    "en": "Fill in the address first.",
+    "text": "Vui lòng nhập địa chỉ trước."
+  },
+  "providers.localai.modelListNoMatch": {
+    "en": "No model found. Try fewer letters.",
+    "text": "Không tìm thấy mô hình. Thử nhập ít ký tự hơn."
+  },
+  "providers.localai.modelListNone": {
+    "en": "This service lists no models. Type the name instead.",
+    "text": "Dịch vụ không cung cấp danh sách mô hình. Hãy nhập tên trực tiếp."
+  },
+  "providers.localai.modelListUnreachable": {
+    "en": "The service could not be reached.",
+    "text": "Không thể kết nối với dịch vụ."
+  },
+  "providers.localai.modelSearch": {
+    "en": "Search models",
+    "text": "Tìm mô hình"
+  },
+  "providers.localai.modelSuggested": {
+    "en": "Suits this step",
+    "text": "Phù hợp với bước này"
+  },
+  "providers.localai.name": {
+    "en": "Kotomimi Pipeline",
+    "text": "Kotomimi tùy phối"
+  },
+  "providers.localai.nativeBusy": {
+    "en": "A device you share with is using this engine with {{name}}. Wait for it to finish, or choose {{name}} here too.",
+    "text": "Một thiết bị bạn chia sẻ đang dùng bộ máy này để chạy {{name}}. Hãy chờ thiết bị đó dùng xong, hoặc cũng chọn {{name}} tại đây."
+  },
+  "providers.localai.nativeCoachFailed": {
+    "en": "The feedback engine could not start. In the Grammar feedback card, press \"Try again\" — or choose another model.",
+    "text": "Không khởi động được bộ máy góp ý ngữ pháp. Trong thẻ “Góp ý ngữ pháp”, hãy nhấn “Thử lại” hoặc chọn mô hình khác."
+  },
+  "providers.localai.nativeCoachFailedShort": {
+    "en": "The feedback engine could not start.",
+    "text": "Không khởi động được bộ máy góp ý ngữ pháp."
+  },
+  "providers.localai.nativeCoachMissing": {
+    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "Chưa tải {{name}}. Trong thẻ “Góp ý ngữ pháp”, hãy tải mô hình gốc hoặc chuyển sang “Mô hình API” hay “Thiết bị khác”."
+  },
+  "providers.localai.nativeCoachReady": {
+    "en": "The feedback engine is ready.",
+    "text": "Bộ máy góp ý ngữ pháp đã sẵn sàng."
+  },
+  "providers.localai.nativeCoachUnsupported": {
+    "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
+    "text": "Hệ thống này chưa hỗ trợ bộ máy góp ý ngữ pháp gốc. Trong thẻ “Góp ý ngữ pháp”, hãy chuyển sang “Mô hình API” hoặc “Thiết bị khác”."
+  },
+  "providers.localai.nativeCoachWarming": {
+    "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
+    "text": "Bộ máy góp ý ngữ pháp vẫn đang khởi động, chỉ mất vài giây. Bạn có thể bắt đầu khi bộ máy sẵn sàng."
+  },
+  "providers.localai.nativeCoachWarmingShort": {
+    "en": "Starting the feedback engine…",
+    "text": "Đang khởi động bộ máy góp ý ngữ pháp…"
+  },
+  "providers.localai.nativeEntry": {
+    "en": "{{name}} (native engine)",
+    "text": "{{name}} (bộ máy gốc)"
+  },
+  "providers.localai.nativeFailed": {
+    "en": "The recognition engine of this computer could not start. In the Speech recognition card, press \"Try again\" — or choose another model.",
+    "text": "Không khởi động được bộ máy nhận dạng trên máy tính này. Trong thẻ “Nhận dạng giọng nói”, hãy nhấn “Thử lại” hoặc chọn mô hình khác."
+  },
+  "providers.localai.nativeFailedShort": {
+    "en": "The engine could not start.",
+    "text": "Không khởi động được bộ máy."
+  },
+  "providers.localai.nativeInterrupted": {
+    "en": "The engine stopped while it was starting. Press Start again.",
+    "text": "Bộ máy đã bị dừng khi đang khởi động. Hãy nhấn “Bắt đầu” lần nữa."
+  },
+  "providers.localai.nativeLoading": {
+    "en": "Loading the models… About half a minute the first time after the computer boots.",
+    "text": "Đang nạp mô hình… Lần đầu sau khi bật máy mất khoảng nửa phút."
+  },
+  "providers.localai.nativeMissing": {
+    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "Chưa tải {{name}}. Trong thẻ “Nhận dạng giọng nói”, hãy tải mô hình gốc hoặc chuyển sang “Mô hình API” hay “Thiết bị khác”."
+  },
+  "providers.localai.nativeNone": {
+    "en": "No model chosen",
+    "text": "Chưa chọn mô hình"
+  },
+  "providers.localai.nativeReady": {
+    "en": "The engine is ready.",
+    "text": "Bộ máy đã sẵn sàng."
+  },
+  "providers.localai.nativeRetry": {
+    "en": "Try again",
+    "text": "Thử lại"
+  },
+  "providers.localai.nativeRuntime": {
+    "en": "Downloading the runtime first. This happens only once.",
+    "text": "Đang tải môi trường chạy trước, chỉ cần tải một lần."
+  },
+  "providers.localai.nativeTwoModels": {
+    "en": "{{name}} and {{other}} cannot run at the same time. Choose the same model for both languages.",
+    "text": "{{name}} và {{other}} không thể chạy cùng lúc. Hãy chọn cùng một mô hình cho cả hai ngôn ngữ."
+  },
+  "providers.localai.nativeUnchosen": {
+    "en": "No speech recognition model is chosen for {{source}} yet. Choose one in the Speech recognition card.",
+    "text": "Chưa chọn mô hình nhận dạng giọng nói cho {{source}}. Hãy chọn một mô hình trong thẻ “Nhận dạng giọng nói”."
+  },
+  "providers.localai.nativeUnheard": {
+    "en": "{{name}} does not hear one of your two languages. Choose another model for it.",
+    "text": "{{name}} không hỗ trợ một trong hai ngôn ngữ bạn chọn. Hãy chọn mô hình khác."
+  },
+  "providers.localai.nativeUnsupported": {
+    "en": "The native recognition engine is not available for this system. In the Speech recognition card, switch to \"API model\" or \"Another device\".",
+    "text": "Hệ thống này chưa hỗ trợ bộ máy nhận dạng giọng nói gốc. Trong thẻ “Nhận dạng giọng nói”, hãy chuyển sang “Mô hình API” hoặc “Thiết bị khác”."
+  },
+  "providers.localai.nativeUnsupportedShort": {
+    "en": "Not available for this system",
+    "text": "Chưa hỗ trợ hệ thống này"
+  },
+  "providers.localai.nativeWarming": {
+    "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
+    "text": "Bộ máy nhận dạng vẫn đang khởi động, lần đầu sau khi bật máy mất khoảng nửa phút. Bạn có thể bắt đầu khi bộ máy sẵn sàng."
+  },
+  "providers.localai.nativeWarmingShort": {
+    "en": "Starting the engine… About half a minute the first time after the computer boots.",
+    "text": "Đang khởi động bộ máy… Lần đầu sau khi bật máy mất khoảng nửa phút."
+  },
+  "providers.localai.notDownloaded": {
+    "en": "No model downloaded yet",
+    "text": "Chưa tải mô hình nào"
+  },
+  "providers.localai.noteAppleSpeech": {
+    "en": "Japanese talk, measured: about 13% of the characters wrong, the most accurate of all. It writes as it listens (about 2 s behind).",
+    "text": "Thử với hội thoại tiếng Nhật: khoảng 13% ký tự sai, chính xác nhất trong tất cả. Hiện chữ khi nghe (trễ khoảng 2 giây)."
+  },
+  "providers.localai.noteCohere": {
+    "en": "Measured on Japanese VRChat talk: about 33% of the characters wrong, and about a quarter of what was said left out. Not a good choice for Japanese conversation.",
+    "text": "Thử với hội thoại tiếng Nhật trên VRChat: khoảng 33% ký tự sai, còn bỏ sót khoảng một phần tư lời nói. Không nên dùng cho hội thoại tiếng Nhật."
+  },
+  "providers.localai.noteGemma4": {
+    "en": "Japanese grammar, measured: it caught 11 of 14 mistakes and left right casual speech alone; about 0.1 s an answer. About 1.5 GB of video memory.",
+    "text": "Thử với ngữ pháp tiếng Nhật: phát hiện lỗi trong 11 trên 14 câu sai, không sửa bừa những câu khẩu ngữ đúng; khoảng 0.1 giây mỗi câu. Dùng khoảng 1.5 GB bộ nhớ đồ họa."
+  },
+  "providers.localai.noteGranite41": {
+    "en": "Measured on Japanese VRChat talk: it keeps repeating the same sentence. Not usable for Japanese conversation.",
+    "text": "Thử với hội thoại tiếng Nhật trên VRChat: liên tục lặp lại cùng một câu, gần như không dùng được cho hội thoại tiếng Nhật."
+  },
+  "providers.localai.noteHyMt15": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences, and it tends to add words of its own.",
+    "text": "Thử dịch tiếng Nhật sang tiếng Trung: khoảng 8 trên 30 câu có lỗi nghiêm trọng, còn tự thêm từ."
+  },
+  "providers.localai.noteHyMt2": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences; about 0.1 s a sentence.",
+    "text": "Thử dịch tiếng Nhật sang tiếng Trung: khoảng 8 trên 30 câu có lỗi nghiêm trọng; khoảng 0.1 giây mỗi câu."
+  },
+  "providers.localai.noteIndexTranslate": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
+    "text": "Thử dịch tiếng Nhật sang tiếng Trung: khoảng 3 trên 30 câu có lỗi nghiêm trọng, tốt nhất trong các mô hình đã thử; khoảng 0.1 giây mỗi câu. Dùng khoảng 2 GB bộ nhớ đồ họa, hỗ trợ hơn 100 ngôn ngữ."
+  },
+  "providers.localai.noteMoonshineJa": {
+    "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
+    "text": "Thử với hội thoại tiếng Nhật trên VRChat: khoảng 70% ký tự sai. Chỉ nên dùng tạm khi hoàn toàn không thể dùng card đồ họa."
+  },
+  "providers.localai.noteNativeNemotron": {
+    "en": "Small: about 1 GB of video memory. Japanese talk, measured: about 27% of the characters wrong, and a short sentence is sometimes left out altogether. Choose it only when the ones above do not fit or do not hear the language. Over thirty languages.",
+    "text": "Nhẹ: dùng khoảng 1 GB bộ nhớ đồ họa. Thử với hội thoại tiếng Nhật: khoảng 27% ký tự sai, đôi khi bỏ sót cả câu ngắn. Chỉ nên chọn khi không đủ bộ nhớ cho các mô hình trên hoặc chúng không hỗ trợ ngôn ngữ cần nghe. Hỗ trợ hơn 30 ngôn ngữ."
+  },
+  "providers.localai.noteNativeQwen": {
+    "en": "Japanese talk, measured: about 16% of the characters wrong. It writes as you speak (about 1 s behind); the last few words settle when the sentence ends. When the graphics card is busy it only refreshes less often. About 3 GB of video memory, thirty languages.",
+    "text": "Thử với hội thoại tiếng Nhật: khoảng 16% ký tự sai. Hiện chữ khi nói (trễ khoảng 1 giây); vài chữ cuối chỉ chốt khi nói xong câu. Khi card đồ họa bận, chữ chỉ cập nhật thưa hơn. Dùng khoảng 3 GB bộ nhớ đồ họa, hỗ trợ 30 ngôn ngữ."
+  },
+  "providers.localai.noteNativeQwenSmall": {
+    "en": "The light one, for a computer that runs a game at the same time: about 2 GB of video memory instead of 3. Japanese talk, measured: about 22% of the characters wrong, more than the 1.7B. Otherwise it works the same way, with the same thirty languages.",
+    "text": "Mô hình nhỏ, tiết kiệm tài nguyên, phù hợp khi máy tính cũng đang chạy trò chơi: dùng khoảng 2 GB bộ nhớ đồ họa (bản 1.7B dùng khoảng 3 GB). Thử với hội thoại tiếng Nhật: khoảng 22% ký tự sai, nhiều hơn bản 1.7B. Các điểm khác giống bản 1.7B, cũng hỗ trợ 30 ngôn ngữ."
+  },
+  "providers.localai.noteNativeR2t2": {
+    "en": "Japanese talk, measured: about 18% of the characters wrong. It writes as it listens (about 2.5 s behind) and never changes what it wrote. When the graphics card cannot keep up (a weaker card, or a game running), the text falls further and further behind. About 3 GB of video memory.",
+    "text": "Thử với hội thoại tiếng Nhật: khoảng 18% ký tự sai. Hiện chữ khi nghe (trễ khoảng 2.5 giây), chữ đã hiện sẽ không đổi. Khi card đồ họa xử lý không kịp (card yếu hoặc đang chạy trò chơi), chữ sẽ ngày càng trễ. Dùng khoảng 3 GB bộ nhớ đồ họa."
+  },
+  "providers.localai.noteNativeSenseVoice": {
+    "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
+    "text": "Nhẹ và nhanh nhất: dùng khoảng 0.4 GB bộ nhớ đồ họa. Thử với hội thoại tiếng Nhật: chính xác ngang Qwen3-ASR 0.6B, ít thêm dấu câu. Chỉ hỗ trợ tiếng Trung, Quảng Đông, Anh, Nhật và Hàn."
+  },
+  "providers.localai.noteQwen06": {
+    "en": "Measured on Japanese VRChat talk: about 35% of the characters wrong. Small: for when the graphics card has little memory to spare.",
+    "text": "Thử với hội thoại tiếng Nhật trên VRChat: khoảng 35% ký tự sai. Mô hình nhỏ, có thể dùng khi bộ nhớ đồ họa hạn hẹp."
+  },
+  "providers.localai.noteQwen17": {
+    "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
+    "text": "Thử với hội thoại tiếng Nhật: khoảng 19% ký tự sai. Chỉ hiện chữ sau khi nói xong câu (trễ khoảng 10 giây); bản GGUF ở trên hiện chữ ngay khi nói."
+  },
+  "providers.localai.noteSenseVoice": {
+    "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
+    "text": "Thử với hội thoại tiếng Nhật trên VRChat: không xuất được chữ kana, khiến tiếng Nhật gần như không đọc hiểu được."
+  },
+  "providers.localai.noteVoxtral4b": {
+    "en": "Measured on Japanese VRChat talk: quick — the text is about 2.6 s behind the voice — but about 27% of the characters wrong. For when speed matters more than accuracy.",
+    "text": "Thử với hội thoại tiếng Nhật trên VRChat: hiện chữ nhanh (trễ khoảng 2.6 giây so với giọng nói), nhưng khá nhiều ký tự sai (khoảng 27%). Phù hợp khi ưu tiên tốc độ và chấp nhận chữ sai."
+  },
+  "providers.localai.noteWhisperMedium": {
+    "en": "Measured on Japanese VRChat talk: about 34% of the characters wrong.",
+    "text": "Thử với hội thoại tiếng Nhật trên VRChat: khoảng 34% ký tự sai."
+  },
+  "providers.localai.noteWhisperTurbo": {
+    "en": "Measured on Japanese VRChat talk: about 21% of the characters wrong, and steady. It writes only once a sentence has ended.",
+    "text": "Thử với hội thoại tiếng Nhật trên VRChat: khoảng 21% ký tự sai, hoạt động ổn định. Cũng chỉ hiện chữ sau khi nói xong câu."
+  },
+  "providers.localai.otherDeviceHint": {
+    "en": "To use the models of another device on your local network, search the network for it.",
+    "text": "Để dùng mô hình trên thiết bị khác trong mạng nội bộ, hãy tìm thiết bị trong mạng."
+  },
+  "providers.localai.phoneKey": {
+    "en": "Access key of {{name}}",
+    "text": "Khóa truy cập của {{name}}"
+  },
+  "providers.localai.phoneKeyNote": {
+    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
+    "text": "Điện thoại này đã đặt khóa truy cập. Bạn có thể xem khóa trong mục “Kết nối thiết bị” trên điện thoại."
+  },
+  "providers.localai.phoneKeyUse": {
+    "en": "Use this phone",
+    "text": "Dùng điện thoại này"
+  },
+  "providers.localai.phoneKeyWrong": {
+    "en": "The phone did not take this key.",
+    "text": "Khóa này chưa đúng, vui lòng kiểm tra lại."
+  },
+  "providers.localai.phoneModelGone": {
+    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
+    "text": "Điện thoại ({{address}}) hiện không chia sẻ {{name}}. Hãy chọn mô hình khác trong thẻ tương ứng."
+  },
+  "providers.localai.phoneModelTooBig": {
+    "en": "{{name}} (not enough memory on the phone)",
+    "text": "{{name}} (điện thoại không đủ bộ nhớ)"
+  },
+  "providers.localai.phoneModelTooBigCheck": {
+    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
+    "text": "Điện thoại ({{address}}) hiện không đủ bộ nhớ để chạy {{name}}. Hãy chọn mô hình nhỏ hơn trong thẻ tương ứng hoặc đóng bớt ứng dụng trên điện thoại."
+  },
+  "providers.localai.phoneNoMemory": {
+    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
+    "text": "Điện thoại hiện không đủ bộ nhớ để chạy mô hình này. Hãy chọn mô hình nhỏ hơn trong thẻ tương ứng hoặc đóng bớt ứng dụng trên điện thoại."
+  },
+  "providers.localai.phoneOption": {
+    "en": "{{name}} (phone)",
+    "text": "{{name}} (điện thoại)"
+  },
+  "providers.localai.phoneQuiet": {
+    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
+    "text": "Điện thoại không phản hồi, có thể đã bị hệ thống tạm dừng sau khi khóa màn hình. Mở Kotomimi trên điện thoại để tiếp tục."
+  },
+  "providers.localai.phoneUnreachable": {
+    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "Điện thoại ({{address}}) không phản hồi. Hãy kiểm tra điện thoại đã bật chia sẻ và đang dùng cùng mạng Wi-Fi với máy tính này."
+  },
+  "providers.localai.pipelineModel": {
+    "en": "Setup name on that device",
+    "text": "Tên cấu hình trên thiết bị đó"
+  },
+  "providers.localai.pipelineNote": {
+    "en": "Normally left alone. Change it only when that device is a LocalAI set up with more than one combination of recognition and translation.",
+    "text": "Thường không cần đổi. Chỉ cần đổi khi thiết bị đó dùng LocalAI với nhiều bộ mô hình nhận dạng và dịch khác nhau."
+  },
+  "providers.localai.placeDevice": {
+    "en": "This computer",
+    "text": "Máy tính này"
+  },
+  "providers.localai.placeServer": {
+    "en": "Another device",
+    "text": "Thiết bị khác"
+  },
+  "providers.localai.ready": {
+    "en": "Ready to start",
+    "text": "Sẵn sàng bắt đầu"
+  },
+  "providers.localai.recheck": {
+    "en": "Check again",
+    "text": "Kiểm tra lại"
+  },
+  "providers.localai.serverHttp": {
+    "en": "The other device answered with an error (HTTP {{status}}). Restarting the app or the model server there usually helps.",
+    "text": "Thiết bị kia báo lỗi (HTTP {{status}}). Thường chỉ cần khởi động lại ứng dụng hoặc máy chủ mô hình trên đó."
+  },
+  "providers.localai.serverKey": {
+    "en": "Access key",
+    "text": "Khóa truy cập"
+  },
+  "providers.localai.serverKeyMissing": {
+    "en": "The other device asks for an access key. Enter it in Settings, under \"Another device\".",
+    "text": "Thiết bị kia yêu cầu khóa truy cập. Hãy nhập khóa trong mục “Thiết bị khác” ở phần Cài đặt."
+  },
+  "providers.localai.serverKeyNeeded": {
+    "en": "The other device asks for an access key. Under \"Another device\", turn on \"It asks for an access key\" and enter the key set on that device.",
+    "text": "Thiết bị kia yêu cầu khóa truy cập. Trong mục “Thiết bị khác”, bật “Thiết bị yêu cầu khóa truy cập” rồi nhập khóa đã đặt trên thiết bị đó."
+  },
+  "providers.localai.serverKeyRefused": {
+    "en": "The other device did not accept the access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options).",
+    "text": "Thiết bị kia không chấp nhận khóa truy cập này. Hãy nhập khóa đã đặt trên đó (với Kotomimi, khóa nằm trong “Tùy chọn” chia sẻ)."
+  },
+  "providers.localai.serverNeedsKey": {
+    "en": "It asks for an access key",
+    "text": "Thiết bị yêu cầu khóa truy cập"
+  },
+  "providers.localai.serverNeedsKeyTooltip": {
+    "en": "Turn this on when the other device was given an access key — a Kotomimi with one set under its sharing options, for example.",
+    "text": "Bật khi thiết bị kia đã đặt khóa truy cập, chẳng hạn khóa được đặt trong mục “Tùy chọn” chia sẻ của Kotomimi trên thiết bị đó."
+  },
+  "providers.localai.serverNoAsr": {
+    "en": "The other device has no speech recognition model for {{source}}. Download one there first (in the model library of its sharing card), or let this computer listen.",
+    "text": "Thiết bị kia không có mô hình nhận dạng giọng nói cho {{source}}. Hãy tải một mô hình trên đó trước (trong thư viện mô hình của thẻ chia sẻ), hoặc để máy tính này nhận dạng."
+  },
+  "providers.localai.serverNoDetect": {
+    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
+    "text": "Thiết bị kia không có mô hình nhận dạng có thể tự phân biệt ngôn ngữ, cần cho “Tôi cũng nói…” và tính năng tự nhận biết ngôn ngữ của đối phương. Hãy tải một mô hình trên đó (như Qwen3-ASR), hoặc tắt hai tùy chọn này."
+  },
+  "providers.localai.serverNoModels": {
+    "en": "The other device has no model yet: install or download one there first.",
+    "text": "Thiết bị kia chưa có mô hình nào. Hãy cài hoặc tải mô hình trên đó trước."
+  },
+  "providers.localai.serverSilent": {
+    "en": "This address does not answer. If Kotomimi is running on that device, enable its sharing to use its installed native models.",
+    "text": "Không kết nối được địa chỉ này. Nếu thiết bị đó đang chạy Kotomimi, hãy bật chia sẻ để dùng các mô hình gốc đã cài trên đó."
+  },
+  "providers.localai.serverUnreachable": {
+    "en": "The other device ({{address}}) did not answer. Check that it is on and on the same network as this computer, and that Kotomimi there is sharing (or its model server is running). It is asked again by itself.",
+    "text": "Thiết bị kia ({{address}}) không phản hồi. Hãy kiểm tra thiết bị đã bật, cùng mạng với máy tính này và Kotomimi trên đó đang bật chia sẻ (hoặc máy chủ mô hình đang chạy). Sẽ tự tiếp tục khi kết nối lại."
+  },
+  "providers.localai.sharedDeviceNone": {
+    "en": "No device connected yet",
+    "text": "Chưa kết nối thiết bị nào"
+  },
+  "providers.localai.sourceAuto": {
+    "en": "The language cannot be detected with this setup. Choose the language you speak.",
+    "text": "Cấu hình này không thể tự nhận biết ngôn ngữ. Hãy chọn ngôn ngữ bạn nói."
+  },
+  "providers.localai.speedAbout": {
+    "en": "About {{seconds}} s",
+    "text": "Khoảng {{seconds}} giây"
+  },
+  "providers.localai.speedAdviceGeneral": {
+    "en": "A smaller model or a faster device is suggested.",
+    "text": "Nên đổi sang mô hình nhỏ hơn hoặc dùng thiết bị mạnh hơn."
+  },
+  "providers.localai.speedAdviceModel": {
+    "en": "A smaller model, such as {{name}}, is suggested.",
+    "text": "Nên đổi sang mô hình nhỏ hơn, chẳng hạn {{name}}."
+  },
+  "providers.localai.speedAdviceSwitch": {
+    "en": "Switch and test again",
+    "text": "Đổi và kiểm tra lại"
+  },
+  "providers.localai.speedBehind": {
+    "en": "Falls behind",
+    "text": "Ngày càng trễ"
+  },
+  "providers.localai.speedCoach": {
+    "en": "{{seconds}} s per sentence for feedback, on average",
+    "text": "Góp ý trung bình {{seconds}} giây mỗi câu"
+  },
+  "providers.localai.speedCoachSlow": {
+    "en": "Feedback is slower than speech, so it will fall further behind. ",
+    "text": "Góp ý chậm hơn tốc độ nói nên sẽ ngày càng trễ. "
+  },
+  "providers.localai.speedFailed": {
+    "en": "The test could not finish: {{reason}}",
+    "text": "Không thể hoàn tất kiểm tra: {{reason}}"
+  },
+  "providers.localai.speedHead": {
+    "en": "Speed test · {{when}}",
+    "text": "Kiểm tra tốc độ · {{when}}"
+  },
+  "providers.localai.speedHear": {
+    "en": "Text appears {{seconds}} s after the speech ends",
+    "text": "Văn bản gốc hiện sau khi nói xong {{seconds}} giây"
+  },
+  "providers.localai.speedHearSlow": {
+    "en": "Recognition is slower than speech, so the captions will fall further behind. ",
+    "text": "Nhận dạng chậm hơn tốc độ nói nên phụ đề sẽ ngày càng trễ. "
+  },
+  "providers.localai.speedJustNow": {
+    "en": "just now",
+    "text": "vừa xong"
+  },
+  "providers.localai.speedLegCoach": {
+    "en": "From you finishing to the feedback",
+    "text": "Từ lúc bạn nói xong đến khi hiện góp ý"
+  },
+  "providers.localai.speedLegParticipant": {
+    "en": "From the other side finishing to the translation",
+    "text": "Từ lúc người kia nói xong đến khi hiện bản dịch"
+  },
+  "providers.localai.speedLegSpeaker": {
+    "en": "From you finishing to the translation",
+    "text": "Từ lúc bạn nói xong đến khi hiện bản dịch"
+  },
+  "providers.localai.speedNoClip": {
+    "en": "There is no test recording for this language yet.",
+    "text": "Chưa có bản ghi âm thử cho ngôn ngữ này."
+  },
+  "providers.localai.speedNone": {
+    "en": "No result arrived during the test.",
+    "text": "Không nhận được kết quả trong lúc kiểm tra."
+  },
+  "providers.localai.speedRetest": {
+    "en": "Test again",
+    "text": "Kiểm tra lại"
+  },
+  "providers.localai.speedStop": {
+    "en": "Stop",
+    "text": "Dừng"
+  },
+  "providers.localai.speedTest": {
+    "en": "Test speed",
+    "text": "Kiểm tra tốc độ"
+  },
+  "providers.localai.speedTesting": {
+    "en": "Testing speed: a recording of about ten seconds is sent through each step at speaking pace. Nothing is recorded or played.",
+    "text": "Đang kiểm tra tốc độ: gửi bản ghi âm dài khoảng 10 giây qua từng bước theo tốc độ nói bình thường. Không dùng micrô hay phát âm thanh."
+  },
+  "providers.localai.speedTranslate": {
+    "en": "{{seconds}} s per sentence to translate, on average",
+    "text": "Dịch trung bình {{seconds}} giây mỗi câu"
+  },
+  "providers.localai.speedTranslateSlow": {
+    "en": "Translation is slower than speech, so the translations will fall further behind. ",
+    "text": "Dịch chậm hơn tốc độ nói nên bản dịch sẽ ngày càng trễ. "
+  },
+  "providers.localai.speedVerdictOk": {
+    "en": "This setup keeps up with live speech.",
+    "text": "Cấu hình này đáp ứng được nhu cầu dùng trực tiếp."
+  },
+  "providers.localai.speedVerdictSlow": {
+    "en": "Some steps cannot keep up with speech; see the notes above.",
+    "text": "Một số bước không theo kịp tốc độ nói. Xem giải thích ở trên."
+  },
+  "providers.localai.stageDevice": {
+    "en": "Device",
+    "text": "Thiết bị"
+  },
+  "providers.localai.tag_native": {
+    "en": "Native engine",
+    "text": "Bộ máy gốc"
+  },
+  "providers.localai.tag_system": {
+    "en": "Built into macOS",
+    "text": "Có sẵn trong hệ thống"
+  },
+  "providers.localai.tagHint_native": {
+    "en": "Runs on the graphics card using a native engine downloaded with the model. Loads when a session starts; the first start after boot may take about half a minute. Memory is released after the engine is no longer in use.",
+    "text": "Chạy trên card đồ họa bằng bộ máy gốc được tải cùng mô hình. Được nạp khi bắt đầu phiên; lần đầu sau khi bật máy có thể mất khoảng nửa phút. Bộ nhớ được giải phóng khi bộ máy không còn được dùng."
+  },
+  "providers.localai.tagHint_system": {
+    "en": "The speech recognition of macOS itself: no video memory taken, nothing to warm up. The system downloads each language.",
+    "text": "Nhận dạng giọng nói có sẵn trên Mac: không chiếm bộ nhớ đồ họa, không cần khởi động trước. Hệ thống sẽ tải gói cho từng ngôn ngữ."
+  },
+  "providers.localai.textBaseUrlPlaceholder": {
+    "en": "e.g. https://api.openai.com/v1 or http://localhost:11434/v1",
+    "text": "Ví dụ: https://api.openai.com/v1 hoặc http://localhost:11434/v1"
+  },
+  "providers.localai.textModelPlaceholder": {
+    "en": "The model's name, e.g. gpt-4o-mini",
+    "text": "Tên mô hình, ví dụ: gpt-4o-mini"
+  },
+  "providers.localai.translateInSession": {
+    "en": "The device's own choice (translated in the same session it hears in)",
+    "text": "Để thiết bị đó chọn (dịch trong cùng phiên nhận dạng)"
+  },
+  "providers.localai.translateKey": {
+    "en": "API key of the translation model",
+    "text": "Khóa API của mô hình dịch"
+  },
+  "providers.localai.translateKotomimiOwn": {
+    "en": "The device's own choice (its best model for your languages)",
+    "text": "Để thiết bị đó chọn (tự chọn mô hình phù hợp nhất với cặp ngôn ngữ)"
+  },
+  "providers.localai.translateStage": {
+    "en": "Translation",
+    "text": "Dịch"
+  },
+  "providers.localai.translateStageTooltip": {
+    "en": "What turns the recognized text into the other language. An API model is any service that speaks the OpenAI chat API: a hosted one, or Ollama or LM Studio on this computer.",
+    "text": "Khâu dịch văn bản đã nhận dạng sang ngôn ngữ khác. Mô hình API có thể là bất kỳ dịch vụ nào hỗ trợ API trò chuyện của OpenAI: dịch vụ đám mây, hoặc Ollama, LM Studio trên máy tính này."
+  },
+  "providers.localai.translateUnnamed": {
+    "en": "Translation has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "Chưa có mô hình dịch để dùng. Hãy chọn mô hình trong thẻ “Dịch” bên dưới nhà cung cấp (với mô hình API, cần nhập địa chỉ và tên mô hình), hoặc chọn nơi chạy khác."
+  },
+  "providers.localai.translatorFailed": {
+    "en": "The translation engine of this computer could not start. In the Translation card, press \"Try again\" — or choose another model.",
+    "text": "Không khởi động được bộ máy dịch trên máy tính này. Trong thẻ “Dịch”, hãy nhấn “Thử lại” hoặc chọn mô hình khác."
+  },
+  "providers.localai.translatorFailedShort": {
+    "en": "The translation engine could not start.",
+    "text": "Không khởi động được bộ máy dịch."
+  },
+  "providers.localai.translatorMissing": {
+    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "Chưa tải {{name}}. Trong thẻ “Dịch”, hãy tải mô hình gốc hoặc chuyển sang “Mô hình API” hay “Thiết bị khác”."
+  },
+  "providers.localai.translatorReady": {
+    "en": "The translation engine is ready.",
+    "text": "Bộ máy dịch đã sẵn sàng."
+  },
+  "providers.localai.translatorUnfit": {
+    "en": "{{name}} does not translate between your two languages. Choose another model for it.",
+    "text": "{{name}} không hỗ trợ cặp ngôn ngữ bạn chọn. Hãy chọn mô hình khác."
+  },
+  "providers.localai.translatorUnsupported": {
+    "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
+    "text": "Hệ thống này chưa hỗ trợ bộ máy dịch gốc. Trong thẻ “Dịch”, hãy chuyển sang “Mô hình API” hoặc “Thiết bị khác”."
+  },
+  "providers.localai.translatorWarming": {
+    "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",
+    "text": "Bộ máy dịch trên máy tính này vẫn đang khởi động, chỉ mất vài giây. Bạn có thể bắt đầu khi bộ máy sẵn sàng."
+  },
+  "providers.localai.translatorWarmingShort": {
+    "en": "Starting the translation engine…",
+    "text": "Đang khởi động bộ máy dịch…"
+  },
+  "providers.localai.typedFailed": {
+    "en": "A sentence you typed was not translated: the translation model did not answer.",
+    "text": "Một câu bạn gõ chưa được dịch vì mô hình dịch không phản hồi."
+  },
+  "providers.localai.viaModel": {
+    "en": "API model",
+    "text": "Mô hình API"
+  },
+  "providers.openai_live.name": {
+    "en": "OpenAI Live",
+    "text": "OpenAI Live"
+  },
+  "providers.openai_translate.name": {
+    "en": "OpenAI Translate",
+    "text": "OpenAI Translate"
+  },
+  "providers.openai.name": {
+    "en": "OpenAI Realtime",
+    "text": "OpenAI Realtime"
+  },
+  "providers.palabraai.apiKeyPlaceholder": {
+    "en": "API Key",
+    "text": "Khóa API"
+  },
+  "providers.palabraai.authModeApp": {
+    "en": "App Client ID/Secret",
+    "text": "ID/khóa bí mật ứng dụng"
+  },
+  "providers.palabraai.authModePlatform": {
+    "en": "Platform API Key",
+    "text": "Khóa API nền tảng"
+  },
+  "providers.palabraai.clientIdPlaceholder": {
+    "en": "Client ID",
+    "text": "ID ứng dụng"
+  },
+  "providers.palabraai.clientSecretPlaceholder": {
+    "en": "Client Secret",
+    "text": "Khóa bí mật ứng dụng"
+  },
+  "providers.palabraai.name": {
+    "en": "Palabra AI",
+    "text": "Palabra AI"
+  },
+  "providers.qwen_livetranslate.name": {
+    "en": "Qwen LiveTranslate",
+    "text": "Qwen LiveTranslate"
+  },
+  "providers.soniox.name": {
+    "en": "Soniox",
+    "text": "Soniox"
+  },
+  "providers.volcengine_ast2.accessTokenPlaceholder": {
+    "en": "Access Token",
+    "text": "Mã truy cập"
+  },
+  "providers.volcengine_ast2.appIdPlaceholder": {
+    "en": "APP ID",
+    "text": "ID ứng dụng"
+  },
+  "providers.volcengine_ast2.authModeApp": {
+    "en": "App ID + Access Token",
+    "text": "ID ứng dụng + mã truy cập"
+  },
+  "providers.volcengine_ast2.name": {
+    "en": "Doubao AST 2.0",
+    "text": "Doubao AST 2.0"
+  },
+  "settings.glossaryAdd": {
+    "en": "Add a word…",
+    "text": "Thêm từ…"
+  },
+  "settings.glossaryDelete": {
+    "en": "Delete entry",
+    "text": "Xóa mục"
+  },
+  "settings.glossaryFixOpen": {
+    "en": "Fix word",
+    "text": "Sửa từ"
+  },
+  "settings.glossaryFixSave": {
+    "en": "Save to glossary",
+    "text": "Lưu vào từ điển"
+  },
+  "settings.glossaryFixTo": {
+    "en": "Change to",
+    "text": "Đổi thành"
+  },
+  "settings.glossaryFull": {
+    "en": "Glossary is full",
+    "text": "Từ điển đã đầy"
+  },
+  "settings.glossaryHeard": {
+    "en": "Misheard as",
+    "text": "Nghe nhầm thành"
+  },
+  "settings.glossaryOptional": {
+    "en": "Only if misheard",
+    "text": "Chỉ điền nếu bị nghe nhầm"
+  },
+  "settings.glossaryTitle": {
+    "en": "Personal glossary",
+    "text": "Từ điển cá nhân"
+  },
+  "settings.glossaryTooltip": {
+    "en": "Names and special words. Write each in the language it is spoken in. Where one has been misheard, add how on the right and it is put right from then on; some recognition models only follow that column. You can also select a misheard word in the conversation and correct it there.",
+    "text": "Nhập tên riêng và thuật ngữ bằng ngôn ngữ được dùng khi nói. Với từ từng bị nghe nhầm, điền cách nghe nhầm ở bên phải để tự động sửa đúng về sau; một số mô hình nhận dạng chỉ dùng cột bên phải. Bạn cũng có thể chọn từ bị nghe nhầm trong cuộc trò chuyện để sửa trực tiếp."
+  },
+  "settings.glossaryTooltipLabel": {
+    "en": "About personal glossary",
+    "text": "Về từ điển cá nhân"
+  },
+  "settings.glossaryWritten": {
+    "en": "Word",
+    "text": "Từ ngữ"
+  },
+  "settings.transcriptKeywordsPlaceholder": {
+    "en": "Sokuji, Kizuna AI, PulseAudio",
+    "text": "Sokuji, Kizuna AI, PulseAudio"
+  },
+  "setup.credentials.accessKeyId": {
+    "en": "Access Key ID",
+    "text": "ID khóa truy cập (Access Key ID)"
+  },
+  "setup.credentials.accessToken": {
+    "en": "Access Token",
+    "text": "Mã truy cập (Access Token)"
+  },
+  "setup.credentials.apiSecret": {
+    "en": "API Secret",
+    "text": "Khóa bí mật API (API Secret)"
+  },
+  "setup.credentials.appId": {
+    "en": "App ID",
+    "text": "ID ứng dụng (App ID)"
+  },
+  "setup.credentials.secretAccessKey": {
+    "en": "Secret Access Key",
+    "text": "Khóa truy cập bí mật (Secret Access Key)"
+  },
+  "simpleConfig.microphone": {
+    "en": "Microphone",
+    "text": "Micrô"
+  },
+  "tour.steps.kotomimi-tips.coach": {
+    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
+    "text": "Bạn đang tự nói bằng ngôn ngữ của người kia? Bật Góp ý ngữ pháp trong Cài đặt. Bạn cũng có thể bật \"Tôi cũng nói ngôn ngữ của người kia\" để vừa dịch vừa nhận góp ý ngữ pháp riêng tư."
+  },
+  "tour.steps.kotomimi-tips.content": {
+    "en": "Worth knowing before you start:",
+    "text": "Một vài điều nên biết trước khi bắt đầu:"
+  },
+  "tour.steps.kotomimi-tips.share": {
+    "en": "Another device can use this computer's models: Settings → Provider → Share with other devices.",
+    "text": "Thiết bị khác cũng có thể dùng mô hình trên máy tính này: Cài đặt → Nhà cung cấp → Chia sẻ với thiết bị khác."
+  },
+  "tour.steps.kotomimi-tips.title": {
+    "en": "Three more things",
+    "text": "Thêm ba điều nữa"
+  },
+  "tour.steps.kotomimi-tips.typed": {
+    "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
+    "text": "Khi bắt đầu phiên, ô nhập sẽ xuất hiện ở dưới cùng: gõ một câu để dịch. Nhấn Ctrl+K để chuyển thẳng đến ô nhập."
+  },
+  "tour.steps.models.content_kotomimi": {
+    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
+    "text": "Tải mô hình tại đây: nhấn \"Thư viện mô hình\" trong thẻ của từng bước. Các mô hình có nhãn \"Đề xuất\" đạt kết quả tốt nhất khi thử với hội thoại thực tế. Biểu tượng nhỏ cạnh tên mô hình cho biết kết quả thử nghiệm. Mô hình sẽ tự động được sử dụng sau khi tải xong."
+  },
+  "tour.steps.provider-settings.content_kotomimi": {
+    "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",
+    "text": "Mỗi bước có một thẻ ở đây: nhận dạng giọng nói, dịch và góp ý ngữ pháp. Trong mỗi thẻ, bạn chọn nơi xử lý (thiết bị khác trong mạng nội bộ, mô hình API hoặc máy tính này) và chọn mô hình ngay tại đó. Trong Cài đặt → Nhà cung cấp, bạn còn có thể chia sẻ mô hình trên máy tính này với thiết bị khác."
+  },
+  "tour.steps.reading-aids.content": {
+    "en": "Help for reading the other language, switched here:",
+    "text": "Bật hoặc tắt các hỗ trợ giúp bạn đọc hiểu ngoại ngữ tại đây:"
+  },
+  "tour.steps.reading-aids.fonts": {
+    "en": "Fonts for each language are under Settings → Fonts.",
+    "text": "Chọn phông chữ cho từng ngôn ngữ trong Cài đặt → Phông chữ."
+  },
+  "tour.steps.reading-aids.furigana": {
+    "en": "Furigana — kana above Japanese kanji.",
+    "text": "Furigana: hiển thị cách đọc bằng kana phía trên chữ kanji tiếng Nhật."
+  },
+  "tour.steps.reading-aids.pinyin": {
+    "en": "Pinyin — tone-marked pinyin above Chinese.",
+    "text": "Bính âm: hiển thị bính âm có dấu thanh phía trên tiếng Trung."
+  },
+  "tour.steps.reading-aids.romanization": {
+    "en": "Romanization — a line in Latin letters under Japanese, Korean, Russian and Ukrainian.",
+    "text": "Phiên âm Latinh: thêm một dòng cách đọc bằng chữ Latinh bên dưới tiếng Nhật, Hàn, Nga và Ukraina."
+  },
+  "tour.steps.reading-aids.title": {
+    "en": "Reading aids",
+    "text": "Hỗ trợ đọc"
+  },
+  "voiceLibrary.cloneVoiceRequired": {
+    "en": "This voice needs a clip before it can speak — open the voice list and add one.",
+    "text": "Giọng này chưa thể phát tiếng. Hãy mở danh sách giọng và thêm một đoạn thu âm."
+  },
+  "voiceLibrary.filter.accent.african": {
+    "en": "African",
+    "text": "Châu Phi"
+  },
+  "voiceLibrary.filter.accent.american": {
+    "en": "American",
+    "text": "Mỹ"
+  },
+  "voiceLibrary.filter.accent.arabic": {
+    "en": "Arabic",
+    "text": "Ả Rập"
+  },
+  "voiceLibrary.filter.accent.australian": {
+    "en": "Australian",
+    "text": "Úc"
+  },
+  "voiceLibrary.filter.accent.brazilian": {
+    "en": "Brazilian",
+    "text": "Brasil"
+  },
+  "voiceLibrary.filter.accent.british": {
+    "en": "British",
+    "text": "Anh"
+  },
+  "voiceLibrary.filter.accent.chinese": {
+    "en": "Chinese",
+    "text": "Trung Quốc"
+  },
+  "voiceLibrary.filter.accent.french": {
+    "en": "French",
+    "text": "Pháp"
+  },
+  "voiceLibrary.filter.accent.german": {
+    "en": "German",
+    "text": "Đức"
+  },
+  "voiceLibrary.filter.accent.indian": {
+    "en": "Indian",
+    "text": "Ấn Độ"
+  },
+  "voiceLibrary.filter.accent.italian": {
+    "en": "Italian",
+    "text": "Ý"
+  },
+  "voiceLibrary.filter.accent.japanese": {
+    "en": "Japanese",
+    "text": "Nhật"
+  },
+  "voiceLibrary.filter.accent.korean": {
+    "en": "Korean",
+    "text": "Hàn"
+  },
+  "voiceLibrary.filter.accent.latin_american": {
+    "en": "Latin American",
+    "text": "Mỹ Latinh"
+  },
+  "voiceLibrary.filter.accent.portuguese": {
+    "en": "Portuguese",
+    "text": "Bồ Đào Nha"
+  },
+  "voiceLibrary.filter.accent.slavic": {
+    "en": "Slavic",
+    "text": "Slav"
+  },
+  "voiceLibrary.filter.accent.southeast_asian": {
+    "en": "Southeast Asian",
+    "text": "Đông Nam Á"
+  },
+  "voiceLibrary.filter.accent.spanish": {
+    "en": "Spanish",
+    "text": "Tây Ban Nha"
+  },
+  "voiceLibrary.filter.accentLabel": {
+    "en": "Accent",
+    "text": "Giọng vùng miền"
+  },
+  "voiceLibrary.filter.age.child": {
+    "en": "Child",
+    "text": "Trẻ em"
+  },
+  "voiceLibrary.filter.age.middle_aged": {
+    "en": "Middle-aged",
+    "text": "Trung niên"
+  },
+  "voiceLibrary.filter.age.old": {
+    "en": "Mature",
+    "text": "Lớn tuổi"
+  },
+  "voiceLibrary.filter.age.teen": {
+    "en": "Teen",
+    "text": "Thiếu niên"
+  },
+  "voiceLibrary.filter.age.young": {
+    "en": "Young",
+    "text": "Trẻ"
+  },
+  "voiceLibrary.filter.ageLabel": {
+    "en": "Age",
+    "text": "Độ tuổi"
+  },
+  "voiceLibrary.filter.anyAccent": {
+    "en": "Any accent",
+    "text": "Mọi giọng vùng miền"
+  },
+  "voiceLibrary.filter.anyAge": {
+    "en": "Any age",
+    "text": "Mọi độ tuổi"
+  },
+  "voiceLibrary.filter.anyGender": {
+    "en": "Any gender",
+    "text": "Mọi giới tính"
+  },
+  "voiceLibrary.filter.anyStyle": {
+    "en": "Any style",
+    "text": "Mọi phong cách"
+  },
+  "voiceLibrary.filter.anyUseCase": {
+    "en": "Any use case",
+    "text": "Mọi mục đích"
+  },
+  "voiceLibrary.filter.clear": {
+    "en": "Clear filters",
+    "text": "Xóa bộ lọc"
+  },
+  "voiceLibrary.filter.count": {
+    "en": "{shown} of {total} voices",
+    "text": "{shown} trên {total} giọng"
+  },
+  "voiceLibrary.filter.empty": {
+    "en": "No voices match these filters.",
+    "text": "Không có giọng nào phù hợp với bộ lọc."
+  },
+  "voiceLibrary.filter.gender.female": {
+    "en": "Female",
+    "text": "Giọng nữ"
+  },
+  "voiceLibrary.filter.gender.male": {
+    "en": "Male",
+    "text": "Giọng nam"
+  },
+  "voiceLibrary.filter.gender.neutral": {
+    "en": "Neutral",
+    "text": "Trung tính"
+  },
+  "voiceLibrary.filter.genderLabel": {
+    "en": "Gender",
+    "text": "Giới tính"
+  },
+  "voiceLibrary.filter.style.breathy": {
+    "en": "Breathy",
+    "text": "Nhiều hơi"
+  },
+  "voiceLibrary.filter.style.breezy": {
+    "en": "Breezy",
+    "text": "Nhẹ nhàng"
+  },
+  "voiceLibrary.filter.style.bright": {
+    "en": "Bright",
+    "text": "Trong sáng"
+  },
+  "voiceLibrary.filter.style.calm": {
+    "en": "Calm",
+    "text": "Điềm tĩnh"
+  },
+  "voiceLibrary.filter.style.casual": {
+    "en": "Casual",
+    "text": "Tự nhiên"
+  },
+  "voiceLibrary.filter.style.clear": {
+    "en": "Clear",
+    "text": "Rõ ràng"
+  },
+  "voiceLibrary.filter.style.confident": {
+    "en": "Confident",
+    "text": "Tự tin"
+  },
+  "voiceLibrary.filter.style.deep": {
+    "en": "Deep",
+    "text": "Trầm"
+  },
+  "voiceLibrary.filter.style.dramatic": {
+    "en": "Dramatic",
+    "text": "Kịch tính"
+  },
+  "voiceLibrary.filter.style.easy_going": {
+    "en": "Easy-going",
+    "text": "Dễ gần"
+  },
+  "voiceLibrary.filter.style.energetic": {
+    "en": "Energetic",
+    "text": "Đầy năng lượng"
+  },
+  "voiceLibrary.filter.style.even": {
+    "en": "Even",
+    "text": "Đều đặn"
+  },
+  "voiceLibrary.filter.style.excitable": {
+    "en": "Excitable",
+    "text": "Sôi nổi"
+  },
+  "voiceLibrary.filter.style.expressive": {
+    "en": "Expressive",
+    "text": "Giàu biểu cảm"
+  },
+  "voiceLibrary.filter.style.firm": {
+    "en": "Firm",
+    "text": "Kiên định"
+  },
+  "voiceLibrary.filter.style.formal": {
+    "en": "Formal",
+    "text": "Trang trọng"
+  },
+  "voiceLibrary.filter.style.forward": {
+    "en": "Forward",
+    "text": "Thẳng thắn"
+  },
+  "voiceLibrary.filter.style.friendly": {
+    "en": "Friendly",
+    "text": "Thân thiện"
+  },
+  "voiceLibrary.filter.style.gentle": {
+    "en": "Gentle",
+    "text": "Dịu dàng"
+  },
+  "voiceLibrary.filter.style.gravelly": {
+    "en": "Gravelly",
+    "text": "Khàn đặc"
+  },
+  "voiceLibrary.filter.style.informative": {
+    "en": "Informative",
+    "text": "Thuyết minh"
+  },
+  "voiceLibrary.filter.style.knowledgeable": {
+    "en": "Knowledgeable",
+    "text": "Uyên bác"
+  },
+  "voiceLibrary.filter.style.lively": {
+    "en": "Lively",
+    "text": "Hoạt bát"
+  },
+  "voiceLibrary.filter.style.mature": {
+    "en": "Mature",
+    "text": "Chững chạc"
+  },
+  "voiceLibrary.filter.style.neutral": {
+    "en": "Neutral",
+    "text": "Trung tính"
+  },
+  "voiceLibrary.filter.style.playful": {
+    "en": "Playful",
+    "text": "Tinh nghịch"
+  },
+  "voiceLibrary.filter.style.raspy": {
+    "en": "Raspy",
+    "text": "Khàn"
+  },
+  "voiceLibrary.filter.style.smooth": {
+    "en": "Smooth",
+    "text": "Mượt mà"
+  },
+  "voiceLibrary.filter.style.soft": {
+    "en": "Soft",
+    "text": "Êm dịu"
+  },
+  "voiceLibrary.filter.style.upbeat": {
+    "en": "Upbeat",
+    "text": "Vui tươi"
+  },
+  "voiceLibrary.filter.style.warm": {
+    "en": "Warm",
+    "text": "Ấm áp"
+  },
+  "voiceLibrary.filter.style.youthful": {
+    "en": "Youthful",
+    "text": "Trẻ trung"
+  },
+  "voiceLibrary.filter.styleLabel": {
+    "en": "Style",
+    "text": "Phong cách"
+  },
+  "voiceLibrary.filter.useCase.conversational": {
+    "en": "Conversation",
+    "text": "Trò chuyện"
+  },
+  "voiceLibrary.filter.useCase.educational": {
+    "en": "Teaching",
+    "text": "Giảng giải"
+  },
+  "voiceLibrary.filter.useCase.entertainment": {
+    "en": "Entertainment",
+    "text": "Giải trí"
+  },
+  "voiceLibrary.filter.useCase.narration": {
+    "en": "Narration",
+    "text": "Dẫn chuyện"
+  },
+  "voiceLibrary.filter.useCase.social_media": {
+    "en": "Social media",
+    "text": "Mạng xã hội"
+  },
+  "voiceLibrary.filter.useCaseLabel": {
+    "en": "Use case",
+    "text": "Mục đích"
+  }
+}

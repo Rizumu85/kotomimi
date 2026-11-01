@@ -1,0 +1,2170 @@
+{
+  "audioSystem.installCommand": {
+    "en": "sudo apt install pulseaudio-utils",
+    "text": "sudo apt install pulseaudio-utils"
+  },
+  "auth.emailPlaceholder": {
+    "en": "your@email.com",
+    "text": "your@email.com"
+  },
+  "captionShare.kinds.wifi": {
+    "en": "Wi‑Fi",
+    "text": "Wi‑Fi"
+  },
+  "engine.status.devVenv": {
+    "en": "dev venv",
+    "text": "ডেভেলপমেন্টের ভার্চুয়াল এনভায়রনমেন্ট"
+  },
+  "engine.status.native": {
+    "en": "native {{version}}",
+    "text": "নেটিভ {{version}}"
+  },
+  "fork.aids.furigana": {
+    "en": "Furigana",
+    "text": "ফুরিগানা"
+  },
+  "fork.aids.highlight": {
+    "en": "Highlight new",
+    "text": "নতুন লেখা হাইলাইট"
+  },
+  "fork.aids.italic": {
+    "en": "Italic source",
+    "text": "মূল লেখা তির্যক"
+  },
+  "fork.aids.pinyin": {
+    "en": "Pinyin",
+    "text": "পিনইন"
+  },
+  "fork.aids.readings": {
+    "en": "Readings",
+    "text": "উচ্চারণ"
+  },
+  "fork.aids.roman": {
+    "en": "Romanization",
+    "text": "রোমান হরফে উচ্চারণ"
+  },
+  "fork.aids.text": {
+    "en": "Text",
+    "text": "লেখা"
+  },
+  "fork.audio.echoAction": {
+    "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
+    "text": "হেডফোন ব্যবহার করলে শব্দের এই চক্র থামবে। অথবা সেটিংস → মাইক্রোফোন থেকে মাইক চালু হওয়ার শব্দসীমা বাড়ান।"
+  },
+  "fork.audio.gate": {
+    "en": "Mic activation threshold",
+    "text": "মাইক চালু হওয়ার শব্দসীমা"
+  },
+  "fork.audio.gateHint": {
+    "en": "Press the microphone, speak, and set the mark under where the bar reaches — and above where it sits while only your speakers are heard.",
+    "text": "মাইক আইকনে চাপ দিয়ে কিছু বলুন। চিহ্নটি আপনার কথা বলার সময় বার যতটা ওঠে তার নিচে, আর শুধু স্পিকারের শব্দ চলার সময় যতটা ওঠে তার ওপরে রাখুন।"
+  },
+  "fork.audio.gateOff": {
+    "en": "Off",
+    "text": "বন্ধ"
+  },
+  "fork.audio.gateQuiet": {
+    "en": "Nothing from the microphone yet.",
+    "text": "মাইক থেকে এখনও কোনো শব্দ আসেনি।"
+  },
+  "fork.audio.gateTest": {
+    "en": "Test the microphone: the bar shows its level",
+    "text": "মাইক পরীক্ষা করুন: বারে বর্তমান শব্দের মাত্রা দেখা যায়"
+  },
+  "fork.audio.gateTestStop": {
+    "en": "Stop the test",
+    "text": "পরীক্ষা থামান"
+  },
+  "fork.audio.gateTooltip": {
+    "en": "Sound quieter than this is heard as silence — the other side's voice from your speakers, the keyboard, the room — so it is neither translated nor checked. The microphone is heard about 0.2 s later while this is on. Off: everything is heard.",
+    "text": "এর চেয়ে নিচু শব্দকে নীরবতা ধরা হয়, যেমন স্পিকার থেকে আসা অন্যজনের কণ্ঠ, কিবোর্ডের শব্দ বা ঘরের আওয়াজ। এগুলো অনুবাদ করা হয় না, ব্যাকরণ যাচাইয়ের জন্যও পাঠানো হয় না। এটি চালু থাকলে মাইকের শব্দ প্রায় 0.2 সেকেন্ড দেরিতে পৌঁছায়। বন্ধ থাকলে সব শব্দ পাঠানো হয়।"
+  },
+  "fork.audio.vbcableInstall": {
+    "en": "Install VB-CABLE",
+    "text": "VB-CABLE ইনস্টল করুন"
+  },
+  "fork.audio.vbcableInstalling": {
+    "en": "Downloading… this can take a minute",
+    "text": "ডাউনলোড হচ্ছে, একটু সময় লাগতে পারে…"
+  },
+  "fork.audio.vbcableMissing": {
+    "en": "The VB-CABLE virtual audio driver is not installed, so a spoken translation cannot be sent into a meeting. Subtitles do not need it.",
+    "text": "VB-CABLE ভার্চুয়াল অডিও ড্রাইভার ইনস্টল করা নেই, তাই অনুবাদের কণ্ঠস্বর মিটিং অ্যাপে পাঠানো যাবে না। শুধু সাবটাইটেল দেখতে এটি লাগে না।"
+  },
+  "fork.autostart.note": {
+    "en": "Kotomimi waits in the background after you sign in, with an icon in the notification area, and loads the models once ahead of time so the first session does not wait for it.",
+    "text": "সাইন ইন করার পর Kotomimi পটভূমিতে প্রস্তুত থাকে, নিচের ডানদিকে বিজ্ঞপ্তি এলাকায় একটি আইকন দেখা যায়। মডেলগুলোও আগে থেকে একবার লোড করে রাখে, যাতে প্রথম সেশন শুরু করতে বাড়তি অপেক্ষা না হয়।"
+  },
+  "fork.autostart.title": {
+    "en": "Startup",
+    "text": "চালু হওয়া"
+  },
+  "fork.autostart.toggle": {
+    "en": "Start in the background when I sign in to Windows",
+    "text": "Windows-এ সাইন ইন করলে পটভূমিতে চালু করুন"
+  },
+  "fork.custom.add": {
+    "en": "Add",
+    "text": "যোগ করুন"
+  },
+  "fork.custom.added": {
+    "en": "Added {{name}} ({{size}} MB). Download it in the model library.",
+    "text": "{{name}} ({{size}} MB) যোগ করা হয়েছে। মডেল লাইব্রেরি থেকে ডাউনলোড করুন।"
+  },
+  "fork.custom.adding": {
+    "en": "Looking…",
+    "text": "খোঁজা হচ্ছে…"
+  },
+  "fork.custom.anyLanguage": {
+    "en": "Every language",
+    "text": "একাধিক ভাষা"
+  },
+  "fork.custom.downloaded": {
+    "en": "downloaded",
+    "text": "ডাউনলোড করা হয়েছে"
+  },
+  "fork.custom.error_bad_repo": {
+    "en": "That is not a repository id. It looks like owner/name.",
+    "text": "এটি রিপোজিটরির নাম নয়। নামের ধরন হবে মালিক/নাম।"
+  },
+  "fork.custom.error_exists": {
+    "en": "This model is already added.",
+    "text": "এই মডেল আগেই যোগ করা হয়েছে।"
+  },
+  "fork.custom.error_not_found": {
+    "en": "No public repository by that name.",
+    "text": "এই নামে কোনো উন্মুক্ত রিপোজিটরি পাওয়া যায়নি।"
+  },
+  "fork.custom.error_not_whisper": {
+    "en": "This repository is not a Whisper model in the ONNX layout. {{detail}}",
+    "text": "এই রিপোজিটরিতে ONNX বিন্যাসের Whisper মডেল নেই। {{detail}}"
+  },
+  "fork.custom.error_unreachable": {
+    "en": "Could not reach Hugging Face: {{detail}}",
+    "text": "Hugging Face-এ সংযোগ করা যায়নি: {{detail}}"
+  },
+  "fork.custom.intro": {
+    "en": "For a Whisper model the library does not list, such as one fine-tuned for your language. Give its Hugging Face repository id (most onnx-community/… and Xenova/… Whisper repositories work); it needs a graphics card.",
+    "text": "লাইব্রেরিতে নেই এমন Whisper মডেলের জন্য, যেমন কোনো ভাষার জন্য বিশেষভাবে প্রশিক্ষিত মডেল। Hugging Face রিপোজিটরির নাম লিখুন (onnx-community/… ও Xenova/…-এর বেশিরভাগ Whisper রিপোজিটরি চলে)। গ্রাফিক্স কার্ড দরকার।"
+  },
+  "fork.custom.language": {
+    "en": "The language it hears",
+    "text": "যে ভাষা শনাক্ত করে"
+  },
+  "fork.custom.notDownloaded": {
+    "en": "not downloaded",
+    "text": "ডাউনলোড করা হয়নি"
+  },
+  "fork.custom.remove": {
+    "en": "Remove {{name}}",
+    "text": "{{name}} সরান"
+  },
+  "fork.custom.repo": {
+    "en": "Repository id",
+    "text": "রিপোজিটরির নাম"
+  },
+  "fork.custom.title": {
+    "en": "Add a Whisper model from Hugging Face",
+    "text": "Hugging Face থেকে Whisper মডেল যোগ করুন"
+  },
+  "fork.echoCancellationApp": {
+    "en": "Kotomimi only",
+    "text": "শুধু Kotomimi"
+  },
+  "fork.echoCancellationAppTooltip": {
+    "en": "Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "শুধু Kotomimi: কেবল Kotomimi-এর নিজের বাজানো অনূদিত কথা বাদ দেয়। মাইক্রোফোন হিসেবে ভার্চুয়াল সাউন্ড কার্ড (VB-Cable, BlackHole) ব্যবহার করলে এটি বেছে নিন।"
+  },
+  "fork.find.again": {
+    "en": "Search again",
+    "text": "আবার খুঁজুন"
+  },
+  "fork.find.kindKotomimi": {
+    "en": "Kotomimi",
+    "text": "Kotomimi শেয়ারিং"
+  },
+  "fork.find.kindPhone": {
+    "en": "Phone · speech recognition",
+    "text": "ফোন · কথার স্বীকৃতি"
+  },
+  "fork.find.kindPhoneLends": {
+    "en": "Phone · {{what}}",
+    "text": "ফোন · {{what}}"
+  },
+  "fork.find.kindServer": {
+    "en": "Model server",
+    "text": "মডেল সার্ভার"
+  },
+  "fork.find.lendsAsr": {
+    "en": "speech recognition",
+    "text": "কথার স্বীকৃতি"
+  },
+  "fork.find.lendsCoach": {
+    "en": "grammar feedback",
+    "text": "ব্যাকরণ নিয়ে মতামত"
+  },
+  "fork.find.lendsTranslate": {
+    "en": "translation",
+    "text": "অনুবাদ"
+  },
+  "fork.find.manual": {
+    "en": "Or type its address",
+    "text": "অথবা নিজে ঠিকানা লিখুন"
+  },
+  "fork.find.models": {
+    "en": "{{count}} model(s)",
+    "text": "{{count}}টি মডেল"
+  },
+  "fork.find.needsKey": {
+    "en": "asks for an access key",
+    "text": "অ্যাক্সেস কী প্রয়োজন"
+  },
+  "fork.find.none": {
+    "en": "Nothing found. Check that the other device is on, is on the same Wi-Fi or router as this one, and has \"Share this computer's models\" turned on in its Kotomimi. You can also type its address below.",
+    "text": "কিছু পাওয়া যায়নি। অন্য ডিভাইসটি চালু আছে, এই কম্পিউটারের মতো একই Wi-Fi বা রাউটারে যুক্ত আছে এবং সেটির Kotomimi-তে \"এই কম্পিউটারের মডেল শেয়ার করুন\" চালু আছে কি না দেখুন। নিচে নিজেও ঠিকানা লিখতে পারেন।"
+  },
+  "fork.find.productHere": {
+    "en": "{{product}} on this computer",
+    "text": "এই কম্পিউটারে {{product}}"
+  },
+  "fork.find.search": {
+    "en": "Search my network for devices",
+    "text": "স্থানীয় নেটওয়ার্কে ডিভাইস খুঁজুন"
+  },
+  "fork.find.searching": {
+    "en": "Looking for devices on your network…",
+    "text": "স্থানীয় নেটওয়ার্কে ডিভাইস খোঁজা হচ্ছে…"
+  },
+  "fork.find.thisComputer": {
+    "en": "On this computer",
+    "text": "এই কম্পিউটারের সার্ভার"
+  },
+  "fork.find.title": {
+    "en": "Found on your network",
+    "text": "স্থানীয় নেটওয়ার্কে পাওয়া ডিভাইস"
+  },
+  "fork.find.use": {
+    "en": "Use {{name}}",
+    "text": "{{name}} ব্যবহার করুন"
+  },
+  "fork.fonts.add": {
+    "en": "Add a language…",
+    "text": "ভাষা যোগ করুন…"
+  },
+  "fork.fonts.default": {
+    "en": "App default",
+    "text": "অ্যাপের ডিফল্ট"
+  },
+  "fork.fonts.languages": {
+    "en": "Conversation text, by language",
+    "text": "ভাষা অনুযায়ী কথোপকথনের লেখা"
+  },
+  "fork.fonts.latin": {
+    "en": "Latin letters and digits",
+    "text": "লাতিন অক্ষর ও সংখ্যা"
+  },
+  "fork.fonts.latinHint": {
+    "en": "English letters and digits in the conversation",
+    "text": "কথোপকথনের ইংরেজি অক্ষর ও সংখ্যা"
+  },
+  "fork.fonts.loading": {
+    "en": "Reading the installed fonts…",
+    "text": "ইনস্টল করা ফন্ট পড়া হচ্ছে…"
+  },
+  "fork.fonts.none": {
+    "en": "No font matches",
+    "text": "মিলে যায় এমন ফন্ট নেই"
+  },
+  "fork.fonts.others": {
+    "en": "Other fonts (may lack this script)",
+    "text": "অন্যান্য ফন্ট (এই লিপি নাও থাকতে পারে)"
+  },
+  "fork.fonts.pinyin": {
+    "en": "Pinyin above the text",
+    "text": "লেখার ওপরে পিনইন"
+  },
+  "fork.fonts.reading": {
+    "en": "Readings above the text",
+    "text": "লেখার ওপরে ফুরিগানা"
+  },
+  "fork.fonts.remove": {
+    "en": "Reset {{language}}",
+    "text": "{{language}}-এর ডিফল্ট ফন্ট ফিরিয়ে আনুন"
+  },
+  "fork.fonts.roman": {
+    "en": "Romanization",
+    "text": "রোমান হরফে উচ্চারণ"
+  },
+  "fork.fonts.romanHint": {
+    "en": "The readings under Japanese, Korean, Russian and Ukrainian",
+    "text": "জাপানি, কোরীয়, রুশ ও ইউক্রেনীয় লেখার নিচে উচ্চারণ"
+  },
+  "fork.fonts.search": {
+    "en": "Search fonts",
+    "text": "ফন্ট খুঁজুন"
+  },
+  "fork.fonts.text": {
+    "en": "Text",
+    "text": "মূল লেখা"
+  },
+  "fork.fonts.title": {
+    "en": "Fonts",
+    "text": "ফন্ট"
+  },
+  "fork.fonts.tooltip": {
+    "en": "Fonts installed on this computer. Characters a font lacks are shown in the app's own.",
+    "text": "এই কম্পিউটারে ইনস্টল করা ফন্ট ব্যবহার করুন। কোনো অক্ষর সেই ফন্টে না থাকলে অ্যাপের ডিফল্ট ফন্টে দেখানো হবে।"
+  },
+  "fork.fonts.ui": {
+    "en": "Interface",
+    "text": "ইন্টারফেস"
+  },
+  "fork.fonts.uiHint": {
+    "en": "Menus, settings and buttons",
+    "text": "মেনু, সেটিংস ও বোতাম"
+  },
+  "fork.furigana": {
+    "en": "Furigana over kanji (Japanese)",
+    "text": "কানজির উপরে কানা দেখান (জাপানি)"
+  },
+  "fork.help.issues": {
+    "en": "Report a problem",
+    "text": "সমস্যা জানান"
+  },
+  "fork.help.issuesTooltip": {
+    "en": "Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page.",
+    "text": "Kotomimi হলো Sokuji-এর একটি স্বতন্ত্র সংস্করণ। এই অ্যাপের সমস্যা এর নিজস্ব GitHub পাতায় জানান।"
+  },
+  "fork.lan.copied": {
+    "en": "Copied",
+    "text": "কপি হয়েছে"
+  },
+  "fork.lan.copy": {
+    "en": "Copy",
+    "text": "কপি করুন"
+  },
+  "fork.lan.direction": {
+    "en": "Which direction to show models for",
+    "text": "কোন দিকের মডেল দেখাবেন"
+  },
+  "fork.lan.enable": {
+    "en": "Share this computer's models",
+    "text": "এই কম্পিউটারের মডেল শেয়ার করুন"
+  },
+  "fork.lan.failed": {
+    "en": "Sharing could not start: {{message}}",
+    "text": "শেয়ার করা শুরু করা যায়নি: {{message}}"
+  },
+  "fork.lan.firewall": {
+    "en": "The first time, your system's firewall may ask whether to allow Kotomimi on the network: allow it for private networks.",
+    "text": "প্রথমবার চালু করলে সিস্টেমের ফায়ারওয়াল জিজ্ঞেস করতে পারে Kotomimi-কে নেটওয়ার্ক ব্যবহারের অনুমতি দেবেন কি না। প্রাইভেট নেটওয়ার্কে যোগাযোগের অনুমতি দিন।"
+  },
+  "fork.lan.firewallAllow": {
+    "en": "Allow",
+    "text": "অনুমতি দিন"
+  },
+  "fork.lan.firewallBlocked": {
+    "en": "Windows Firewall is keeping other devices out",
+    "text": "Windows ফায়ারওয়াল অন্য ডিভাইসগুলোকে আটকে দিচ্ছে"
+  },
+  "fork.lan.firewallDeclined": {
+    "en": "Still blocked: Windows was not told yes.",
+    "text": "এখনও আটকে আছে: Windows-এ সম্মতি দেওয়া হয়নি।"
+  },
+  "fork.lan.firewallPrivate": {
+    "en": "Allow opens this port to devices on your network. Windows will ask you to confirm.",
+    "text": "\"অনুমতি দিন\" চাপলে আপনার স্থানীয় নেটওয়ার্কের ডিভাইসগুলো এই পোর্টে যুক্ত হতে পারবে। Windows আগে আপনার সম্মতি চাইবে।"
+  },
+  "fork.lan.firewallPublic": {
+    "en": "Windows treats this network as public. Allow opens this port to devices on this same network only. Windows will ask you to confirm.",
+    "text": "Windows এই নেটওয়ার্ককে \"পাবলিক নেটওয়ার্ক\" হিসেবে ধরছে। \"অনুমতি দিন\" চাপলে শুধু একই নেটওয়ার্কের ডিভাইসগুলোর জন্য এই পোর্ট খুলবে। Windows আগে আপনার সম্মতি চাইবে।"
+  },
+  "fork.lan.firewallWaiting": {
+    "en": "Waiting for Windows…",
+    "text": "Windows-এর জন্য অপেক্ষা করা হচ্ছে…"
+  },
+  "fork.lan.hideLibrary": {
+    "en": "Hide the model library",
+    "text": "মডেল লাইব্রেরি লুকান"
+  },
+  "fork.lan.key": {
+    "en": "Access key",
+    "text": "অ্যাক্সেস কী"
+  },
+  "fork.lan.keyPlaceholder": {
+    "en": "Blank: anyone on the network may connect",
+    "text": "খালি রাখলে স্থানীয় নেটওয়ার্কের যেকোনো ডিভাইস যুক্ত হতে পারবে"
+  },
+  "fork.lan.models": {
+    "en": "Models shared · {{count}}",
+    "text": "শেয়ার করা মডেল · {{count}}টি"
+  },
+  "fork.lan.noNetwork": {
+    "en": "This computer is on no network.",
+    "text": "এই কম্পিউটার এখন কোনো নেটওয়ার্কে যুক্ত নেই।"
+  },
+  "fork.lan.noRecognizer": {
+    "en": "No speech recognition model downloaded yet",
+    "text": "কথার স্বীকৃতির কোনো মডেল এখনও ডাউনলোড করা হয়নি"
+  },
+  "fork.lan.on": {
+    "en": "Sharing — no device connected yet",
+    "text": "শেয়ার হচ্ছে, এখনও কোনো ডিভাইস যুক্ত হয়নি"
+  },
+  "fork.lan.onWithClients": {
+    "en": "Sharing — {{count}} connection(s) in use",
+    "text": "শেয়ার হচ্ছে, {{count}}টি সংযোগ ব্যবহৃত হচ্ছে"
+  },
+  "fork.lan.options": {
+    "en": "Options",
+    "text": "বিকল্প"
+  },
+  "fork.lan.otherAddresses": {
+    "en": "This computer's other addresses",
+    "text": "এই কম্পিউটারের অন্য ঠিকানা"
+  },
+  "fork.lan.port": {
+    "en": "Port",
+    "text": "পোর্ট"
+  },
+  "fork.lan.portInUse": {
+    "en": "Port {{port}} is taken by another program. Choose another under Options.",
+    "text": "অন্য একটি প্রোগ্রাম পোর্ট {{port}} ব্যবহার করছে। \"বিকল্প\" থেকে অন্য পোর্ট বেছে নিন।"
+  },
+  "fork.lan.serving": {
+    "en": "Sharing",
+    "text": "শেয়ার হচ্ছে"
+  },
+  "fork.lan.servingClients": {
+    "en": "Sharing · {{count}} in use",
+    "text": "শেয়ার হচ্ছে · {{count}}টি সংযোগ ব্যবহৃত"
+  },
+  "fork.lan.servingTip": {
+    "en": "This computer is lending its models to other devices. The languages and the choice of model are set on those devices, not here.",
+    "text": "এই কম্পিউটারের মডেল অন্য ডিভাইসে ব্যবহার করা হচ্ছে। ভাষা ও মডেল ওই ডিভাইসগুলোতে বেছে নিতে হবে, এখানে নয়।"
+  },
+  "fork.lan.sessionIdle": {
+    "en": "The other device ended the session: nobody had spoken for a long while, and it let its models go. Start again to continue.",
+    "text": "অন্য ডিভাইসটি এই সেশন শেষ করেছে। অনেকক্ষণ কেউ কথা না বলায় সেটি মেমরি থেকে মডেল সরিয়ে দিয়েছে। চালিয়ে যেতে আবার \"শুরু করুন\" চাপুন।"
+  },
+  "fork.lan.showLibrary": {
+    "en": "Download or manage models",
+    "text": "মডেল ডাউনলোড বা পরিচালনা করুন"
+  },
+  "fork.lan.starting": {
+    "en": "Starting…",
+    "text": "চালু হচ্ছে…"
+  },
+  "fork.lan.title": {
+    "en": "Share with other devices",
+    "text": "অন্য ডিভাইসে শেয়ার করুন"
+  },
+  "fork.lan.tooltip": {
+    "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
+    "text": "এই কম্পিউটারের মডেল স্থানীয় নেটওয়ার্কের অন্য ডিভাইসকে ব্যবহার করতে দেয়। অন্য ডিভাইসে Kotomimi-র \"অন্য ডিভাইস\" থেকে খুঁজলে এই কম্পিউটারটি পাওয়া যাবে। মডেল ও ভাষা সেখানেই বেছে নিতে হবে। শেয়ার করতে Kotomimi খোলা থাকতে হবে।"
+  },
+  "fork.languageMenu.detect": {
+    "en": "Auto-detect",
+    "text": "ভাষা স্বয়ংক্রিয়ভাবে শনাক্ত করুন"
+  },
+  "fork.languageMenu.detectUnavailable": {
+    "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
+    "text": "বর্তমান কথা শনাক্তকরণ ব্যবস্থা নিজে থেকে ভাষা চিনতে পারে না। এর জন্য Qwen3-ASR 1.7B GGUF বা একটি API মডেল দরকার।"
+  },
+  "fork.languageMenu.mine": {
+    "en": "My language",
+    "text": "আমার ভাষা"
+  },
+  "fork.languageMenu.mostly": {
+    "en": "Translate into what they mostly speak",
+    "text": "তাঁরা মূলত যে ভাষায় বলেন, তাতে অনুবাদ করুন"
+  },
+  "fork.languageMenu.none": {
+    "en": "No language by that name",
+    "text": "এই নামে কোনো ভাষা নেই"
+  },
+  "fork.languageMenu.pin": {
+    "en": "Pin {{name}} to the top",
+    "text": "{{name}} সবার ওপরে রাখুন"
+  },
+  "fork.languageMenu.pinShort": {
+    "en": "Pin to the top",
+    "text": "সবার ওপরে রাখুন"
+  },
+  "fork.languageMenu.search": {
+    "en": "Type to find a language",
+    "text": "ভাষা খুঁজতে লিখুন"
+  },
+  "fork.languageMenu.speakBoth": {
+    "en": "I speak {{language}} too",
+    "text": "আমি {{language}} ভাষাতেও কথা বলি"
+  },
+  "fork.languageMenu.speakBothHelp": {
+    "en": "When you speak {{mine}}, it is translated into {{language}}; when you speak {{language}}, into {{mine}}. Recognition tells the two apart.",
+    "text": "আপনি {{mine}} ভাষায় বললে {{language}} ভাষায় অনুবাদ হবে, আর {{language}} ভাষায় বললে {{mine}} ভাষায়। কথা শনাক্ত করার সময় ভাষা দুটি নিজে থেকেই আলাদা করে চিনবে।"
+  },
+  "fork.languageMenu.speakBothUnavailable": {
+    "en": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
+    "text": "বেছে নেওয়া কথা শনাক্তকরণ ব্যবস্থা {{mine}} ও {{language}} আলাদা করে চিনতে পারে না। দুটি ভাষাই ইনস্টল করা জোড়া Apple Speech বেছে নিন, অথবা এমন ব্যবস্থা নিন যা দুটি ভাষাই চিনতে পারে।"
+  },
+  "fork.languageMenu.theirs": {
+    "en": "Their language",
+    "text": "অন্য পক্ষের ভাষা"
+  },
+  "fork.languageMenu.unpin": {
+    "en": "Unpin {{name}}",
+    "text": "{{name}} ওপর থেকে সরান"
+  },
+  "fork.languageMenu.unpinShort": {
+    "en": "Unpin",
+    "text": "ওপর থেকে সরান"
+  },
+  "fork.pinyin": {
+    "en": "Pinyin over Chinese",
+    "text": "চীনা লেখার উপরে পিনইন"
+  },
+  "fork.romanization": {
+    "en": "Romanization",
+    "text": "রোমান হরফে উচ্চারণ দেখান"
+  },
+  "fork.sourceItalic": {
+    "en": "Source text in italics",
+    "text": "মূল লেখা তির্যক হরফে"
+  },
+  "fork.speechDetection.title": {
+    "en": "Speech detection",
+    "text": "কথা শনাক্তকরণ"
+  },
+  "fork.statusLine.checking": {
+    "en": "Getting ready. You can start in a moment.",
+    "text": "প্রস্তুতি চলছে। একটু পরেই শুরু করতে পারবেন।"
+  },
+  "fork.subtitle.align": {
+    "en": "Alignment",
+    "text": "সারিবিন্যাস"
+  },
+  "fork.subtitle.alignCenter": {
+    "en": "Centre",
+    "text": "মাঝে"
+  },
+  "fork.subtitle.alignLeft": {
+    "en": "Left",
+    "text": "বাঁয়ে"
+  },
+  "fork.subtitle.back": {
+    "en": "Back to the main window",
+    "text": "মূল উইন্ডোতে ফিরুন"
+  },
+  "fork.subtitle.backdrop": {
+    "en": "Panel",
+    "text": "পটভূমির গাঢ়ত্ব"
+  },
+  "fork.subtitle.lanesView": {
+    "en": "Subtitle view",
+    "text": "সাবটাইটেল ভিউ"
+  },
+  "fork.subtitle.listView": {
+    "en": "List view",
+    "text": "তালিকা ভিউ"
+  },
+  "fork.subtitle.look": {
+    "en": "Look",
+    "text": "ধরন"
+  },
+  "fork.subtitle.lookDark": {
+    "en": "Dark text",
+    "text": "গাঢ় লেখা, সাদা প্রান্ত"
+  },
+  "fork.subtitle.lookLight": {
+    "en": "Light text",
+    "text": "উজ্জ্বল লেখা, কালো প্রান্ত"
+  },
+  "fork.subtitle.lookPanel": {
+    "en": "Dark panel",
+    "text": "গাঢ় পটভূমি"
+  },
+  "fork.subtitle.lookSample": {
+    "en": "Aa",
+    "text": "সাবটাইটেল"
+  },
+  "fork.subtitle.lookSoft": {
+    "en": "Faint panel",
+    "text": "হালকা পটভূমি, মৃদু ছায়া"
+  },
+  "fork.subtitle.moreColors": {
+    "en": "More colours (source text, panel)",
+    "text": "আরও রং (মূল লেখা, পটভূমি)"
+  },
+  "fork.subtitle.off": {
+    "en": "Off",
+    "text": "বন্ধ"
+  },
+  "fork.subtitle.outline": {
+    "en": "Outline",
+    "text": "প্রান্তরেখার তীব্রতা"
+  },
+  "fork.subtitle.shadow": {
+    "en": "Shadow",
+    "text": "ছায়ার তীব্রতা"
+  },
+  "fork.subtitle.through": {
+    "en": "Click-through: the mouse passes through the captions",
+    "text": "ক্লিক ভেদ করে যাবে: সাবটাইটেলে ক্লিক হবে না, নিচের উইন্ডোতে মাউস কাজ করবে"
+  },
+  "fork.subtitle.throughOff": {
+    "en": "Stop click-through",
+    "text": "ক্লিক ভেদ করা বন্ধ করুন"
+  },
+  "fork.subtitle.type": {
+    "en": "Type to translate (Ctrl+K)",
+    "text": "টাইপ করে অনুবাদ করুন (Ctrl+K)"
+  },
+  "fork.subtitle.typePlaceholder": {
+    "en": "What you want to say — Enter translates",
+    "text": "যা বলতে চান লিখুন, অনুবাদ করতে Enter চাপুন"
+  },
+  "fork.vrchat.chatbox": {
+    "en": "Above my avatar",
+    "text": "মাথার ওপরে দেখান"
+  },
+  "fork.vrchat.chatboxHearBoth": {
+    "en": "Switch to Both",
+    "text": "‘উভয়’ বেছে নিন"
+  },
+  "fork.vrchat.chatboxOff": {
+    "en": "Off",
+    "text": "বন্ধ"
+  },
+  "fork.vrchat.chatboxSourceFirst": {
+    "en": "Original on top",
+    "text": "মূল লেখা ওপরে"
+  },
+  "fork.vrchat.chatboxTranslation": {
+    "en": "Translation",
+    "text": "অনুবাদ"
+  },
+  "fork.vrchat.chatboxTranslationFirst": {
+    "en": "Translation on top",
+    "text": "অনুবাদ ওপরে"
+  },
+  "fork.vrchat.chatboxUnheard": {
+    "en": "Only the other side is translated now: what you say won't show above your avatar.",
+    "text": "এখন শুধু অন্য পক্ষের কথা অনুবাদ হচ্ছে। আপনার কথা মাথার ওপরে দেখাবে না।"
+  },
+  "fork.vrchat.connected": {
+    "en": "Connected",
+    "text": "সংযুক্ত"
+  },
+  "fork.vrchat.end": {
+    "en": "End",
+    "text": "শেষ করুন"
+  },
+  "fork.vrchat.help": {
+    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
+    "text": "এই কম্পিউটারের VRChat-এর সঙ্গে কাজ করে। VRChat-এ মিউট থাকলে Kotomimi আপনার কথা শনাক্ত করবে না। আপনার অনুবাদ অবতারের মাথার উপরে দেখানো যায়, যাতে অন্য খেলোয়াড়রা পড়তে পারেন। কোনো ওয়ার্ল্ডে ভিডিও চললে: ভিডিওর শব্দ নির্দিষ্ট দিক থেকে না এলে সেটিকে খেলোয়াড়দের কণ্ঠ থেকে আলাদা করা হয়। নির্দিষ্ট দিক থেকে এলে অন্যদের কথা ছোট ছোট অংশে নেওয়া হয়।"
+  },
+  "fork.vrchat.mutedNotHeard": {
+    "en": "Muted in VRChat: what you say is not recognized.",
+    "text": "VRChat-এ মিউট করা আছে, তাই আপনার কথা শনাক্ত করা হবে না।"
+  },
+  "fork.vrchat.mutedThere": {
+    "en": "Muted in VRChat",
+    "text": "VRChat-এ মিউট করা"
+  },
+  "fork.vrchat.muteGate": {
+    "en": "Don't hear me while muted in VRChat",
+    "text": "VRChat-এ মিউট থাকলে আমার কথা শনাক্ত করবে না"
+  },
+  "fork.vrchat.notConnected": {
+    "en": "Not connected",
+    "text": "সংযুক্ত নয়"
+  },
+  "fork.vrchat.onVideo": {
+    "en": "When a world plays a video",
+    "text": "ওয়ার্ল্ডে ভিডিও চললে"
+  },
+  "fork.vrchat.pausedOn": {
+    "en": "Not translating",
+    "text": "আপাতত অনুবাদ বন্ধ"
+  },
+  "fork.vrchat.quickOn": {
+    "en": "Shorter sentences",
+    "text": "বাক্য ছোট ভাগে ভাগ করা হয়েছে"
+  },
+  "fork.vrchat.remember": {
+    "en": "Remember",
+    "text": "মনে রাখুন"
+  },
+  "fork.vrchat.removedOn": {
+    "en": "Video sound removed",
+    "text": "ভিডিওর শব্দ বাদ দেওয়া হয়েছে"
+  },
+  "fork.vrchat.separatedOn": {
+    "en": "Video sound separated",
+    "text": "ভিডিওর শব্দ আলাদা করা হয়েছে"
+  },
+  "fork.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
+  },
+  "fork.vrchat.turnOnOsc": {
+    "en": "Turn on OSC in the VRChat quick menu",
+    "text": "VRChat-এর দ্রুত মেনুতে OSC চালু করুন"
+  },
+  "fork.vrchat.videoAsk": {
+    "en": "Ask me",
+    "text": "প্রতিবার জিজ্ঞেস করুন"
+  },
+  "fork.vrchat.videoAskResult": {
+    "en": "Asks you when a video starts.",
+    "text": "ভিডিও শুরু হলে কী করবেন তা জিজ্ঞেস করবে।"
+  },
+  "fork.vrchat.videoBoth": {
+    "en": "People + video",
+    "text": "মানুষের কথা ও ভিডিও"
+  },
+  "fork.vrchat.videoBothResult": {
+    "en": "The video gets its own line and uses more power; if it can't be separated, sentences are cut shorter.",
+    "text": "ভিডিওর অনুবাদ আলাদা লাইনে দেখাবে, এতে বেশি প্রসেসিং শক্তি লাগবে; শব্দ আলাদা করা না গেলে বাক্য ছোট ছোট ভাগে ভাগ করবে।"
+  },
+  "fork.vrchat.videoPause": {
+    "en": "Pause",
+    "text": "আপাতত অনুবাদ বন্ধ"
+  },
+  "fork.vrchat.videoPauseResult": {
+    "en": "The other side is not translated while it plays.",
+    "text": "ভিডিও চলার সময় অন্য পক্ষের কথা অনুবাদ করবে না।"
+  },
+  "fork.vrchat.videoQuick": {
+    "en": "People only",
+    "text": "শুধু মানুষের কথা"
+  },
+  "fork.vrchat.videoQuickResult": {
+    "en": "Takes out video sound; if it can't, sentences are cut shorter.",
+    "text": "যতটা সম্ভব ভিডিওর শব্দ বাদ দেবে; আলাদা করা না গেলে বাক্য ছোট ছোট ভাগে ভাগ করবে।"
+  },
+  "fork.vrchat.videoShort": {
+    "en": "Video",
+    "text": "ভিডিও"
+  },
+  "fork.vrchat.videoStarted": {
+    "en": "Video started",
+    "text": "ভিডিও শুরু হয়েছে"
+  },
+  "fork.wizard.addressMissing": {
+    "en": "Choose a device from the list above, or type its address, for example 192.168.1.10:8790.",
+    "text": "ওপরের তালিকা থেকে একটি ডিভাইস বেছে নিন, অথবা তার ঠিকানা লিখুন, যেমন 192.168.1.10:8790।"
+  },
+  "fork.wizard.device": {
+    "en": "This computer",
+    "text": "এই কম্পিউটার"
+  },
+  "fork.wizard.deviceDesc": {
+    "en": "Recognition and translation run on this computer using native models. Download a model for each stage before starting.",
+    "text": "নিজস্ব মডেল দিয়ে এই কম্পিউটারেই কথা শনাক্তকরণ ও অনুবাদ চলবে। শুরুর আগে দুই ধাপের জন্য আলাদা মডেল ডাউনলোড করতে হবে।"
+  },
+  "fork.wizard.deviceNotice": {
+    "en": "After setup, open Model library in the Speech recognition and Translation cards and download a native model for each. Translation requires a downloaded model, or you can switch that stage to an API model or another device.",
+    "text": "সেটআপের পরে ‘কথা শনাক্তকরণ’ ও ‘অনুবাদ’ অংশের ‘মডেল লাইব্রেরি’ খুলে প্রতিটির জন্য নিজস্ব মডেল ডাউনলোড করুন। অনুবাদের জন্য ডাউনলোড করা মডেল দরকার। চাইলে অনুবাদের ধাপে API মডেল বা অন্য ডিভাইসও ব্যবহার করতে পারেন।"
+  },
+  "fork.wizard.intro": {
+    "en": "Pick a starting point. Later, in Settings, recognition and translation can each run in a different place.",
+    "text": "শুরু করার জন্য একটি বেছে নিন। পরে সেটিংসে কথা শনাক্তকরণ ও অনুবাদের জন্য আলাদা জায়গা বেছে নিতে পারবেন।"
+  },
+  "fork.wizard.keyNeeded": {
+    "en": "This device asks for an access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options), then press Connect.",
+    "text": "এই ডিভাইসে সংযোগের জন্য অ্যাক্সেস কী দরকার। ওই ডিভাইসে সেট করা কী লিখে ‘সংযোগ করুন’ চাপুন। অন্য Kotomimi হলে তার শেয়ারিংয়ের ‘বিকল্প’ অংশে কী পাবেন।"
+  },
+  "fork.wizard.pathBadge": {
+    "en": "Recommended",
+    "text": "প্রস্তাবিত"
+  },
+  "fork.wizard.pathCost": {
+    "en": "No account and no API key. Text only: subtitles with furigana, typed translation and grammar feedback. Another device means a Kotomimi sharing its models, or a model server such as LocalAI; this computer downloads models onto your disk.",
+    "text": "অ্যাকাউন্ট বা API কী দরকার নেই। শুধু লেখা: ফুরিগানাসহ সাবটাইটেল, টাইপ করে অনুবাদ এবং ব্যাকরণ নিয়ে পরামর্শ। অন্য ডিভাইসে মডেল শেয়ার করা Kotomimi বা LocalAI-এর মতো মডেল সার্ভার থাকতে পারে। এই কম্পিউটার ব্যবহার করলে মডেলগুলো এখানে ডাউনলোড করতে হবে।"
+  },
+  "fork.wizard.pathDesc": {
+    "en": "Use the models of another device on your network, or this computer's own — and any mix of the two.",
+    "text": "স্থানীয় নেটওয়ার্কের অন্য ডিভাইসের মডেল বা এই কম্পিউটারের মডেল ব্যবহার করুন। দুটো মিলিয়েও ব্যবহার করতে পারেন।"
+  },
+  "fork.wizard.pathTitle": {
+    "en": "Kotomimi Pipeline",
+    "text": "Kotomimi নিজের মতো সাজান"
+  },
+  "fork.wizard.pendingAddress": {
+    "en": "No device chosen yet — choose one in Settings before you start.",
+    "text": "এখনো অন্য ডিভাইস বেছে নেওয়া হয়নি। শুরুর আগে সেটিংসে বেছে নিন।"
+  },
+  "fork.wizard.server": {
+    "en": "Another device on my network",
+    "text": "স্থানীয় নেটওয়ার্কের অন্য ডিভাইস"
+  },
+  "fork.wizard.serverDesc": {
+    "en": "The models run on another computer: a Kotomimi with sharing turned on, or a model server such as LocalAI. This computer stays light.",
+    "text": "মডেলগুলো অন্য কম্পিউটারে চলবে: শেয়ারিং চালু থাকা Kotomimi বা LocalAI-এর মতো মডেল সার্ভারে। এই কম্পিউটারের রিসোর্স প্রায় লাগবেই না।"
+  },
+  "fork.wizard.serverFound": {
+    "en": "Connected — it offers {{count}} model(s).",
+    "text": "সংযোগ হয়েছে। {{count}}টি মডেল ব্যবহার করা যাবে।"
+  },
+  "fork.wizard.serverUnreachable": {
+    "en": "Could not connect: {{message}}",
+    "text": "সংযোগ করা যায়নি: {{message}}"
+  },
+  "fork.wizard.share": {
+    "en": "This computer, for my other devices",
+    "text": "এই কম্পিউটার অন্য ডিভাইসকে ব্যবহার করতে দিন"
+  },
+  "fork.wizard.shareDesc": {
+    "en": "Computing power to spare here? Let the models run on this computer for the other devices on your network — and for this computer itself.",
+    "text": "এই কম্পিউটারে বাড়তি প্রসেসিং শক্তি আছে? এখানে মডেল চালিয়ে স্থানীয় নেটওয়ার্কের অন্য ডিভাইসকে ব্যবহার করতে দিন। এই কম্পিউটারও সেগুলো ব্যবহার করতে পারবে।"
+  },
+  "fork.wizard.shareNotice": {
+    "en": "Nothing to enter. Finishing turns on sharing, so other Kotomimi devices on your network can find this computer. After setup, download models in the Speech recognition card: those are what the others can use.",
+    "text": "এখানে কিছু লিখতে হবে না। শেষ করলে শেয়ারিং নিজে থেকেই চালু হবে, যাতে স্থানীয় নেটওয়ার্কের অন্য Kotomimi এই কম্পিউটার খুঁজে পায়। সেটআপের পরে সেটিংসের ‘কথা শনাক্তকরণ’ অংশে মডেল ডাউনলোড করুন। অন্য ডিভাইসগুলো সেই মডেলই ব্যবহার করবে।"
+  },
+  "fork.wizard.shareSummary": {
+    "en": "Sharing",
+    "text": "শেয়ারিং"
+  },
+  "fork.wizard.shareSummaryOn": {
+    "en": "Turned on when you finish: other devices on your network can use this computer's models",
+    "text": "শেষ করলে চালু হবে। স্থানীয় নেটওয়ার্কের অন্য ডিভাইস এই কম্পিউটারের মডেল ব্যবহার করতে পারবে"
+  },
+  "fork.wizard.title": {
+    "en": "Which device does the work?",
+    "text": "কোন ডিভাইসে কাজ চলবে?"
+  },
+  "fork.wizard.tryServer": {
+    "en": "Connect",
+    "text": "সংযোগ করুন"
+  },
+  "models.deviceCpu": {
+    "en": "CPU",
+    "text": "CPU"
+  },
+  "models.deviceGpu": {
+    "en": "GPU",
+    "text": "GPU"
+  },
+  "providers.gemini.name": {
+    "en": "Google Gemini",
+    "text": "Google Gemini"
+  },
+  "providers.kizunaai_soniox.name": {
+    "en": "KizunaAI",
+    "text": "KizunaAI"
+  },
+  "providers.local_inference.modelAsr": {
+    "en": "ASR",
+    "text": "কথা শনাক্তকরণ"
+  },
+  "providers.local_inference.modelTranslation": {
+    "en": "MT",
+    "text": "যান্ত্রিক অনুবাদ"
+  },
+  "providers.local_inference.modelTts": {
+    "en": "TTS",
+    "text": "লেখা থেকে কণ্ঠ"
+  },
+  "providers.localai.addressMissing": {
+    "en": "No other device is chosen yet. In Settings, under \"Another device\", search for it or type its address.",
+    "text": "এখনও অন্য ডিভাইস বেছে নেওয়া হয়নি। সেটিংসে “অন্য ডিভাইস” অংশে সেটি খুঁজুন বা তার ঠিকানা লিখুন।"
+  },
+  "providers.localai.advanced": {
+    "en": "Advanced",
+    "text": "উন্নত"
+  },
+  "providers.localai.apiKey": {
+    "en": "API key",
+    "text": "API কী"
+  },
+  "providers.localai.apiKeyNeeded": {
+    "en": "The API at {{address}} asks for a key. In its card, turn on \"The API asks for a key\" and enter it.",
+    "text": "{{address}}-এর API-তে কী লাগবে। সংশ্লিষ্ট কার্ডে “এই API-তে কী লাগে” চালু করে কী লিখুন।"
+  },
+  "providers.localai.apiKeyRefused": {
+    "en": "The API at {{address}} did not accept the key. Check the API key in its card.",
+    "text": "{{address}}-এর API এই কী গ্রহণ করেনি। সংশ্লিষ্ট কার্ডের API কী পরীক্ষা করুন।"
+  },
+  "providers.localai.apiKeyReused": {
+    "en": "Filled in with the key saved under \"{{name}}\".",
+    "text": "‘{{name}}’-এ রাখা কী দিয়ে পূরণ করা হয়েছে।"
+  },
+  "providers.localai.apiService": {
+    "en": "Service",
+    "text": "পরিষেবা"
+  },
+  "providers.localai.apiServiceArk": {
+    "en": "Doubao (Volcengine Ark)",
+    "text": "Doubao (Volcengine Ark)"
+  },
+  "providers.localai.apiServiceArkModel": {
+    "en": "A model's name, or your endpoint id (ep-…)",
+    "text": "মডেলের নাম বা আপনার সংযোগবিন্দুর আইডি (ep-…)"
+  },
+  "providers.localai.apiServiceCustom": {
+    "en": "Custom address",
+    "text": "নিজস্ব ঠিকানা"
+  },
+  "providers.localai.apiServiceModel": {
+    "en": "Choose from the list on the right, or type a name",
+    "text": "ডানদিকের তালিকা থেকে বেছে নিন বা নাম লিখুন"
+  },
+  "providers.localai.apiServiceOllama": {
+    "en": "Ollama on this computer",
+    "text": "এই কম্পিউটারের Ollama"
+  },
+  "providers.localai.apiServiceSiliconFlow": {
+    "en": "SiliconFlow",
+    "text": "SiliconFlow"
+  },
+  "providers.localai.apiUnreachable": {
+    "en": "The API at {{address}} could not be reached. Check the address in its card, and that this computer is online.",
+    "text": "{{address}}-এর API-তে সংযোগ হচ্ছে না। সংশ্লিষ্ট কার্ডের ঠিকানা ও এই কম্পিউটারের ইন্টারনেট সংযোগ পরীক্ষা করুন।"
+  },
+  "providers.localai.asrApiBaseUrl": {
+    "en": "API address",
+    "text": "API ঠিকানা"
+  },
+  "providers.localai.asrApiBaseUrlPlaceholder": {
+    "en": "e.g. https://api.openai.com/v1",
+    "text": "যেমন https://api.openai.com/v1"
+  },
+  "providers.localai.asrApiModelPlaceholder": {
+    "en": "e.g. whisper-1, whisper-large-v3",
+    "text": "যেমন whisper-1, whisper-large-v3"
+  },
+  "providers.localai.asrApiNeedsKey": {
+    "en": "The API asks for a key",
+    "text": "এই API-এর কী দরকার"
+  },
+  "providers.localai.asrFixedNote": {
+    "en": "That device is reached as a plain LocalAI, which always hears with its own default recognizer when the translation or the feedback uses a model chosen here. Through the Kotomimi on that device, the recognizer can be chosen here.",
+    "text": "এখন ওই ডিভাইসের LocalAI-তে সরাসরি সংযুক্ত আছেন। অনুবাদ বা ব্যাকরণের মতামতের জন্য আলাদা মডেল বেছে নিলে এটি নিজের ডিফল্ট শনাক্তকরণ মডেলই ব্যবহার করে। ওই ডিভাইসের Kotomimi-তে সংযুক্ত হলে এখানে শনাক্তকরণ মডেল বেছে নিতে পারবেন।"
+  },
+  "providers.localai.asrKey": {
+    "en": "API key of the speech recognition API",
+    "text": "কথা শনাক্তকরণ API-এর কী"
+  },
+  "providers.localai.asrUnnamed": {
+    "en": "Speech recognition has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "কথা শনাক্তকরণের জন্য এখনও কোনো মডেল নেই। সেবা প্রদানকারীর নিচে “কথা শনাক্তকরণ” কার্ডে একটি বেছে নিন (API মডেল হলে ঠিকানা ও মডেলের নাম লিখুন), অথবা চালানোর অন্য জায়গা বেছে নিন।"
+  },
+  "providers.localai.auto": {
+    "en": "Automatic · {{name}}",
+    "text": "স্বয়ংক্রিয় · {{name}}"
+  },
+  "providers.localai.browse": {
+    "en": "Model library",
+    "text": "মডেল সংগ্রহ"
+  },
+  "providers.localai.bySentence": {
+    "en": "Translate sentence by sentence",
+    "text": "প্রতি বাক্য আলাদা করে অনুবাদ"
+  },
+  "providers.localai.bySentenceTooltip": {
+    "en": "On: each sentence is translated as soon as it ends — sooner, but without the sentences around it. Off: the whole stretch is translated once the speaker pauses — with its context, but later.",
+    "text": "চালু থাকলে: প্রতিটি বাক্য শেষ হলেই অনুবাদ হয়। অনুবাদ আগে আসে, তবে আশপাশের বাক্যের প্রসঙ্গ থাকে না। বন্ধ থাকলে: বক্তা থামলে পুরো অংশ অনুবাদ হয়। পুরো প্রসঙ্গ থাকে, তবে অপেক্ষা বেশি।"
+  },
+  "providers.localai.checking": {
+    "en": "Checking…",
+    "text": "যাচাই হচ্ছে…"
+  },
+  "providers.localai.checkNow": {
+    "en": "Check",
+    "text": "যাচাই করুন"
+  },
+  "providers.localai.checkSlow": {
+    "en": "No answer within {{seconds}} s: the device may be off or loading a model, or the address wrong. It is asked again by itself.",
+    "text": "{{seconds}} সেকেন্ডেও সাড়া পাওয়া যায়নি। ডিভাইসটি বন্ধ থাকতে পারে, মডেল লোড হতে পারে অথবা ঠিকানা ভুল হতে পারে। নিজে থেকেই আবার চেষ্টা করবে।"
+  },
+  "providers.localai.choiceDevice": {
+    "en": "Use this computer",
+    "text": "এই কম্পিউটার ব্যবহার করুন"
+  },
+  "providers.localai.choiceServer": {
+    "en": "Use another device",
+    "text": "অন্য ডিভাইস ব্যবহার করুন"
+  },
+  "providers.localai.coach": {
+    "en": "Check my grammar when I speak their language",
+    "text": "অপর পক্ষের ভাষায় বললে আমার ব্যাকরণ যাচাই করুন"
+  },
+  "providers.localai.coachKey": {
+    "en": "API key of the feedback model",
+    "text": "ব্যাকরণের পরামর্শের মডেলের API কী"
+  },
+  "providers.localai.coachNeedsSpeaker": {
+    "en": "Feedback answers what you say. Switch the mode to \"Me\" or \"Both\".",
+    "text": "ব্যাকরণের মতামত দিতে আপনার কথা শুনতে হবে। মোড “আমি” বা “দুজনই” করুন।"
+  },
+  "providers.localai.coachNoModel": {
+    "en": "The other device has no text model that can give feedback. Use an API model or this computer instead.",
+    "text": "অন্য ডিভাইসে ব্যাকরণের মতামত দেওয়ার মতো কোনো টেক্সট মডেল নেই। API মডেল বা এই কম্পিউটার ব্যবহার করুন।"
+  },
+  "providers.localai.coachPrompt": {
+    "en": "Feedback instructions",
+    "text": "ব্যাকরণের মতামতের নির্দেশনা"
+  },
+  "providers.localai.coachPromptPlaceholder": {
+    "en": "Blank: written automatically for your two languages. Your own text may use {{spoken}} and {{native}}.",
+    "text": "খালি রাখলে আপনার মাতৃভাষা ও অনুশীলনের ভাষা অনুযায়ী তৈরি হবে। নিজে লিখলে ভাষা দুটির জন্য {{spoken}} ও {{native}} ব্যবহার করতে পারেন।"
+  },
+  "providers.localai.coachPromptPreview": {
+    "en": "Used while the box is blank, for this language pair:",
+    "text": "খালি রাখলে বর্তমান ভাষা দুটির জন্য এই নির্দেশনা ব্যবহৃত হবে:"
+  },
+  "providers.localai.coachStage": {
+    "en": "Grammar feedback",
+    "text": "ব্যাকরণের মতামত"
+  },
+  "providers.localai.coachStageTooltip": {
+    "en": "When you speak the other language, a model checks your grammar and answers with a check mark, or a corrected sentence and an explanation. Enable \"I speak the other language too\" as well to get both a translation and private feedback. Your own language and typed text are translated without feedback.",
+    "text": "আপনি অন্য ভাষায় কথা বললে একটি মডেল আপনার ব্যাকরণ যাচাই করে টিক চিহ্ন দেখায়, অথবা সংশোধিত বাক্য ও ব্যাখ্যা দেয়। অনুবাদের পাশাপাশি শুধু আপনার জন্য মতামত পেতে “আমিও অন্য ভাষায় কথা বলি” চালু করুন। আপনার নিজের ভাষার কথা ও টাইপ করা লেখা শুধু অনুবাদ হবে, মতামত দেওয়া হবে না।"
+  },
+  "providers.localai.coachUnnamed": {
+    "en": "Grammar feedback has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "ব্যাকরণের মতামতের জন্য এখনও কোনো মডেল নেই। সেবা প্রদানকারীর নিচে “ব্যাকরণের মতামত” কার্ডে একটি বেছে নিন (API মডেল হলে ঠিকানা ও মডেলের নাম লিখুন), অথবা চালানোর অন্য জায়গা বেছে নিন।"
+  },
+  "providers.localai.connectFirst": {
+    "en": "No other device is connected yet: search for one above, or type its address.",
+    "text": "এখনও অন্য কোনো ডিভাইস যুক্ত নেই। আগে উপরে খুঁজুন বা সেটির ঠিকানা লিখুন।"
+  },
+  "providers.localai.description": {
+    "en": "Recognition, translation and grammar feedback — and you mix where each model runs: this computer, another device on your network, or any API model.",
+    "text": "কথা শনাক্তকরণ, অনুবাদ ও ব্যাকরণের পরামর্শ দেয়। প্রতিটি কাজের মডেল কোথায় চলবে, তা আলাদা করে বেছে নিতে পারেন: এই কম্পিউটারে, একই নেটওয়ার্কের অন্য ডিভাইসে বা যেকোনো API মডেলে।"
+  },
+  "providers.localai.detectOther": {
+    "en": "Detect the other side's language",
+    "text": "অপর পক্ষের ভাষা নিজে থেকে চিনুন"
+  },
+  "providers.localai.detectOtherNeeds": {
+    "en": "Only Qwen3-ASR 1.7B GGUF can tell the language by itself. Choose it here.",
+    "text": "শুধু Qwen3-ASR 1.7B GGUF নিজে থেকে ভাষা চিনতে পারে। এখানে সেটি বেছে নিন।"
+  },
+  "providers.localai.detectOtherNote": {
+    "en": "The other side's language is detected, so a model that can tell languages apart hears them.",
+    "text": "অপর পক্ষের ভাষা নিজে থেকে চেনা হবে, তাই এখানে ভাষা চিনতে পারে এমন মডেল ব্যবহার করা হয়।"
+  },
+  "providers.localai.detectOtherTooltip": {
+    "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
+    "text": "অপর পক্ষ যে ভাষাতেই বলুক, তা শনাক্ত করে আপনার ভাষায় অনুবাদ হবে। হাতে ভাষা বদলাতে হবে না। আপনার কথা ওপরের বেছে নেওয়া ভাষাতেই অনুবাদ হবে। শনাক্তকরণের জন্য Qwen3-ASR 1.7B GGUF বা API এবং অনুবাদের জন্য নেটিভ ইঞ্জিন বা API লাগবে।"
+  },
+  "providers.localai.deviceDefault": {
+    "en": "The device's own choice",
+    "text": "ওই ডিভাইসই বেছে নেবে"
+  },
+  "providers.localai.endpoint": {
+    "en": "Address",
+    "text": "ঠিকানা"
+  },
+  "providers.localai.familyUnheard": {
+    "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
+    "text": "ওই ডিভাইসের {{name}}-এ {{languages}} নেই, তাই এই অংশের মডেল ওই ডিভাইস নিজেই বেছে নেবে। {{name}} ব্যবহার করতে আগে ওই ডিভাইসে {{languages}} ডাউনলোড করুন।"
+  },
+  "providers.localai.feedbackFailed": {
+    "en": "One sentence got no grammar feedback: the feedback model did not answer.",
+    "text": "একটি বাক্যের ব্যাকরণ নিয়ে মতামত পাওয়া যায়নি: মতামত দেওয়ার মডেল সাড়া দেয়নি।"
+  },
+  "providers.localai.groupNative": {
+    "en": "Native engine",
+    "text": "নেটিভ ইঞ্জিন"
+  },
+  "providers.localai.hearApiNote": {
+    "en": "Any service with OpenAI's transcription API works (OpenAI, Groq, a LocalAI). This computer cuts the sentences and uploads each one, so the text appears when a sentence is finished.",
+    "text": "OpenAI-এর কথা লিখে দেওয়ার API আছে এমন যেকোনো সেবা চলবে (OpenAI, Groq, LocalAI ইত্যাদি)। এই কম্পিউটার বাক্য আলাদা করে প্রতিটি বাক্য শেষ হলে শনাক্তকরণের জন্য পাঠায়। তাই বাক্য বলা শেষ হলেই লেখা দেখা যায়।"
+  },
+  "providers.localai.hears": {
+    "en": "Recognizes {{language}}",
+    "text": "{{language}} শনাক্ত করে"
+  },
+  "providers.localai.hearsEither": {
+    "en": "Recognizes {{first}} or {{second}}",
+    "text": "{{first}} বা {{second}} শনাক্ত করে"
+  },
+  "providers.localai.hearsOther": {
+    "en": "Hears the other side (any language)",
+    "text": "অপর পক্ষকে শোনে (ভাষা নিজে থেকে চেনে)"
+  },
+  "providers.localai.hearStage": {
+    "en": "Speech recognition",
+    "text": "কথা শনাক্তকরণ"
+  },
+  "providers.localai.hearStageTooltip": {
+    "en": "What listens: it decides when a sentence ends and writes down what was said.",
+    "text": "শোনার ধাপ: একটি বাক্য কখন শেষ হলো তা বুঝে কথাগুলো লিখে দেয়।"
+  },
+  "providers.localai.hereDown": {
+    "en": "The LocalAI on this computer is not running yet. Start it in the stage's card — or, if Kotomimi has only just opened, give it a moment.",
+    "text": "এই কম্পিউটারের LocalAI এখনও চলছে না। ধাপের কার্ডে “LocalAI চালু করুন” চাপুন। Kotomimi এইমাত্র খুলে থাকলে একটু অপেক্ষা করুন, এটি চালু হয়ে যাবে।"
+  },
+  "providers.localai.hereModelPick": {
+    "en": "Choose a model",
+    "text": "মডেল বেছে নিন"
+  },
+  "providers.localai.inUse": {
+    "en": "In use: {{name}}",
+    "text": "ব্যবহৃত হচ্ছে: {{name}}"
+  },
+  "providers.localai.inUseLegs": {
+    "en": "In use: {{theirs}} (them), {{mine}} (me)",
+    "text": "ব্যবহৃত হচ্ছে: অপর পক্ষ {{theirs}} · আমি {{mine}}"
+  },
+  "providers.localai.kotomimiServer": {
+    "en": "It is another Kotomimi sharing its models.",
+    "text": "এটি অন্য একটি Kotomimi, যা নিজের মডেল শেয়ার করছে।"
+  },
+  "providers.localai.kotomimiThere": {
+    "en": "Use the Kotomimi on that device",
+    "text": "ওই ডিভাইসের Kotomimi-তে সংযুক্ত হোন"
+  },
+  "providers.localai.kotomimiThereLooking": {
+    "en": "Looking for it…",
+    "text": "খোঁজা হচ্ছে…"
+  },
+  "providers.localai.kotomimiThereNone": {
+    "en": "No Kotomimi is sharing on that device. Open Kotomimi there, turn on \"Share with other devices\", then try again.",
+    "text": "ওই ডিভাইসে কোনো Kotomimi শেয়ার করছে না। সেখানে Kotomimi খুলে “অন্য ডিভাইসের সঙ্গে শেয়ার করুন” চালু করে আবার চেষ্টা করুন।"
+  },
+  "providers.localai.localServerNote": {
+    "en": "This address is this computer itself: a model server running here, such as LocalAI. Choose \"Another device\" in a stage to use its models.",
+    "text": "এই ঠিকানা এই কম্পিউটারেরই: এখানে চলা কোনো মডেল সার্ভার, যেমন LocalAI। এর মডেল ব্যবহার করতে সংশ্লিষ্ট ধাপে ‘অন্য ডিভাইস’ বেছে নিন।"
+  },
+  "providers.localai.model": {
+    "en": "Model",
+    "text": "মডেল"
+  },
+  "providers.localai.modelGone": {
+    "en": "{{name}} (no longer on that device)",
+    "text": "{{name}} (ওই ডিভাইসে আর নেই)"
+  },
+  "providers.localai.modelList": {
+    "en": "Choose from the models this service lists",
+    "text": "এই পরিষেবার মডেল তালিকা থেকে বেছে নিন"
+  },
+  "providers.localai.modelListAsking": {
+    "en": "Getting the list…",
+    "text": "মডেলের তালিকা আনা হচ্ছে…"
+  },
+  "providers.localai.modelListKeyMissing": {
+    "en": "Fill in the API key first.",
+    "text": "আগে API কী লিখুন।"
+  },
+  "providers.localai.modelListKeyRefused": {
+    "en": "The service refused this key.",
+    "text": "এই পরিষেবা কীটি গ্রহণ করেনি।"
+  },
+  "providers.localai.modelListNoAddress": {
+    "en": "Fill in the address first.",
+    "text": "আগে ঠিকানা লিখুন।"
+  },
+  "providers.localai.modelListNoMatch": {
+    "en": "No model found. Try fewer letters.",
+    "text": "কোনো মডেল পাওয়া যায়নি। কম অক্ষর লিখে দেখুন।"
+  },
+  "providers.localai.modelListNone": {
+    "en": "This service lists no models. Type the name instead.",
+    "text": "এই পরিষেবায় মডেলের তালিকা নেই। সরাসরি নাম লিখুন।"
+  },
+  "providers.localai.modelListUnreachable": {
+    "en": "The service could not be reached.",
+    "text": "এই পরিষেবায় সংযোগ করা যায়নি।"
+  },
+  "providers.localai.modelSearch": {
+    "en": "Search models",
+    "text": "মডেল খুঁজুন"
+  },
+  "providers.localai.modelSuggested": {
+    "en": "Suits this step",
+    "text": "এই ধাপের জন্য উপযুক্ত"
+  },
+  "providers.localai.name": {
+    "en": "Kotomimi Pipeline",
+    "text": "Kotomimi নিজের মতো সাজান"
+  },
+  "providers.localai.nativeBusy": {
+    "en": "A device you share with is using this engine with {{name}}. Wait for it to finish, or choose {{name}} here too.",
+    "text": "শেয়ার করা একটি ডিভাইস এই ইঞ্জিনে {{name}} চালাচ্ছে। সেটি শেষ হওয়া পর্যন্ত অপেক্ষা করুন অথবা এখানেও {{name}} বেছে নিন।"
+  },
+  "providers.localai.nativeCoachFailed": {
+    "en": "The feedback engine could not start. In the Grammar feedback card, press \"Try again\" — or choose another model.",
+    "text": "ব্যাকরণের মতামতের ইঞ্জিন চালু করা যায়নি। “ব্যাকরণের মতামত” কার্ডে “আবার চেষ্টা করুন” চাপুন অথবা অন্য মডেল বেছে নিন।"
+  },
+  "providers.localai.nativeCoachFailedShort": {
+    "en": "The feedback engine could not start.",
+    "text": "ব্যাকরণের মতামতের ইঞ্জিন চালু করা যায়নি।"
+  },
+  "providers.localai.nativeCoachMissing": {
+    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} এখনও ডাউনলোড করা হয়নি। “ব্যাকরণের মতামত” কার্ডে নেটিভ মডেল ডাউনলোড করুন অথবা “API মডেল” বা “অন্য ডিভাইস” বেছে নিন।"
+  },
+  "providers.localai.nativeCoachReady": {
+    "en": "The feedback engine is ready.",
+    "text": "ব্যাকরণের মতামতের ইঞ্জিন প্রস্তুত।"
+  },
+  "providers.localai.nativeCoachUnsupported": {
+    "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
+    "text": "এই সিস্টেমে ব্যাকরণের মতামতের নেটিভ ইঞ্জিন এখনও সমর্থিত নয়। “ব্যাকরণের মতামত” কার্ডে “API মডেল” বা “অন্য ডিভাইস” বেছে নিন।"
+  },
+  "providers.localai.nativeCoachWarming": {
+    "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
+    "text": "ব্যাকরণের মতামতের ইঞ্জিন এখনও চালু হচ্ছে। কয়েক সেকেন্ডই লাগবে। প্রস্তুত হলেই শুরু করতে পারবেন।"
+  },
+  "providers.localai.nativeCoachWarmingShort": {
+    "en": "Starting the feedback engine…",
+    "text": "ব্যাকরণের মতামতের ইঞ্জিন চালু হচ্ছে…"
+  },
+  "providers.localai.nativeEntry": {
+    "en": "{{name}} (native engine)",
+    "text": "{{name}} (নেটিভ ইঞ্জিন)"
+  },
+  "providers.localai.nativeFailed": {
+    "en": "The recognition engine of this computer could not start. In the Speech recognition card, press \"Try again\" — or choose another model.",
+    "text": "এই কম্পিউটারের শনাক্তকরণ ইঞ্জিন চালু করা যায়নি। “কথা শনাক্তকরণ” কার্ডে “আবার চেষ্টা করুন” চাপুন অথবা অন্য মডেল বেছে নিন।"
+  },
+  "providers.localai.nativeFailedShort": {
+    "en": "The engine could not start.",
+    "text": "ইঞ্জিন চালু করা যায়নি।"
+  },
+  "providers.localai.nativeInterrupted": {
+    "en": "The engine stopped while it was starting. Press Start again.",
+    "text": "চালু হওয়ার সময় ইঞ্জিন থামিয়ে দেওয়া হয়েছে। আবার “শুরু করুন” চাপুন।"
+  },
+  "providers.localai.nativeLoading": {
+    "en": "Loading the models… About half a minute the first time after the computer boots.",
+    "text": "মডেল লোড হচ্ছে… কম্পিউটার চালু করার পর প্রথমবার প্রায় আধা মিনিট লাগবে।"
+  },
+  "providers.localai.nativeMissing": {
+    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} এখনও ডাউনলোড করা হয়নি। “কথা শনাক্তকরণ” কার্ডে নেটিভ মডেল ডাউনলোড করুন অথবা “API মডেল” বা “অন্য ডিভাইস” বেছে নিন।"
+  },
+  "providers.localai.nativeNone": {
+    "en": "No model chosen",
+    "text": "মডেল বেছে নেওয়া হয়নি"
+  },
+  "providers.localai.nativeReady": {
+    "en": "The engine is ready.",
+    "text": "ইঞ্জিন প্রস্তুত।"
+  },
+  "providers.localai.nativeRetry": {
+    "en": "Try again",
+    "text": "আবার চেষ্টা করুন"
+  },
+  "providers.localai.nativeRuntime": {
+    "en": "Downloading the runtime first. This happens only once.",
+    "text": "আগে রানটাইম ডাউনলোড হচ্ছে। শুধু একবারই ডাউনলোড করতে হবে।"
+  },
+  "providers.localai.nativeTwoModels": {
+    "en": "{{name}} and {{other}} cannot run at the same time. Choose the same model for both languages.",
+    "text": "{{name}} ও {{other}} একসঙ্গে চালানো যায় না। দুই ভাষার জন্য একই মডেল বেছে নিন।"
+  },
+  "providers.localai.nativeUnchosen": {
+    "en": "No speech recognition model is chosen for {{source}} yet. Choose one in the Speech recognition card.",
+    "text": "{{source}}-এর জন্য এখনও কথা শনাক্তকরণ মডেল বেছে নেওয়া হয়নি। “কথা শনাক্তকরণ” কার্ডে একটি বেছে নিন।"
+  },
+  "providers.localai.nativeUnheard": {
+    "en": "{{name}} does not hear one of your two languages. Choose another model for it.",
+    "text": "{{name}} আপনার বেছে নেওয়া দুটি ভাষার একটি শনাক্ত করতে পারে না। সেটির জন্য অন্য মডেল বেছে নিন।"
+  },
+  "providers.localai.nativeUnsupported": {
+    "en": "The native recognition engine is not available for this system. In the Speech recognition card, switch to \"API model\" or \"Another device\".",
+    "text": "এই সিস্টেমে নেটিভ কথা শনাক্তকরণ ইঞ্জিন এখনও সমর্থিত নয়। “কথা শনাক্তকরণ” কার্ডে “API মডেল” বা “অন্য ডিভাইস” বেছে নিন।"
+  },
+  "providers.localai.nativeUnsupportedShort": {
+    "en": "Not available for this system",
+    "text": "এই সিস্টেমে এখনও সমর্থিত নয়"
+  },
+  "providers.localai.nativeWarming": {
+    "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
+    "text": "শনাক্তকরণ ইঞ্জিন এখনও চালু হচ্ছে। কম্পিউটার চালু করার পর প্রথমবার প্রায় আধা মিনিট লাগে। প্রস্তুত হলেই শুরু করতে পারবেন।"
+  },
+  "providers.localai.nativeWarmingShort": {
+    "en": "Starting the engine… About half a minute the first time after the computer boots.",
+    "text": "ইঞ্জিন চালু হচ্ছে… কম্পিউটার চালু করার পর প্রথমবার প্রায় আধা মিনিট লাগবে।"
+  },
+  "providers.localai.notDownloaded": {
+    "en": "No model downloaded yet",
+    "text": "এখনও কোনো মডেল ডাউনলোড করা হয়নি"
+  },
+  "providers.localai.noteAppleSpeech": {
+    "en": "Japanese talk, measured: about 13% of the characters wrong, the most accurate of all. It writes as it listens (about 2 s behind).",
+    "text": "জাপানি আড্ডায় পরীক্ষায় প্রায় 13% অক্ষর ভুল হয়েছে, সবগুলোর মধ্যে সবচেয়ে নির্ভুল। শুনতে শুনতে লেখে (প্রায় 2 সেকেন্ড দেরিতে)।"
+  },
+  "providers.localai.noteCohere": {
+    "en": "Measured on Japanese VRChat talk: about 33% of the characters wrong, and about a quarter of what was said left out. Not a good choice for Japanese conversation.",
+    "text": "VRChat-এ জাপানি আড্ডায় পরীক্ষায়: প্রায় 33% অক্ষর ভুল হয়েছে, কথার প্রায় এক-চতুর্থাংশ বাদও পড়েছে। জাপানি কথোপকথনের জন্য উপযুক্ত নয়।"
+  },
+  "providers.localai.noteGemma4": {
+    "en": "Japanese grammar, measured: it caught 11 of 14 mistakes and left right casual speech alone; about 0.1 s an answer. About 1.5 GB of video memory.",
+    "text": "জাপানি ব্যাকরণের পরীক্ষায়: 14টি ভুল বাক্যের মধ্যে 11টির ভুল ধরেছে, সঠিক কথ্য ভাষা অযথা বদলায়নি। প্রতি বাক্যে প্রায় 0.1 সেকেন্ড লাগে। প্রায় 1.5 GB গ্রাফিক্স মেমরি লাগে।"
+  },
+  "providers.localai.noteGranite41": {
+    "en": "Measured on Japanese VRChat talk: it keeps repeating the same sentence. Not usable for Japanese conversation.",
+    "text": "VRChat-এ জাপানি আড্ডায় পরীক্ষায়: একই বাক্য বারবার লিখতে থাকে। জাপানি কথোপকথনে প্রায় ব্যবহারই করা যায় না।"
+  },
+  "providers.localai.noteHyMt15": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences, and it tends to add words of its own.",
+    "text": "জাপানি থেকে চীনা অনুবাদের পরীক্ষায়: 30টি বাক্যের মধ্যে প্রায় 8টিতে বড় ভুল হয়েছে, নিজের থেকেও শব্দ যোগ করে।"
+  },
+  "providers.localai.noteHyMt2": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences; about 0.1 s a sentence.",
+    "text": "জাপানি থেকে চীনা অনুবাদের পরীক্ষায়: 30টি বাক্যের মধ্যে প্রায় 8টিতে বড় ভুল হয়েছে। প্রতি বাক্যে প্রায় 0.1 সেকেন্ড লাগে।"
+  },
+  "providers.localai.noteIndexTranslate": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
+    "text": "জাপানি থেকে চীনা অনুবাদের পরীক্ষায়: 30টি বাক্যের মধ্যে প্রায় 3টিতে বড় ভুল হয়েছে, পরীক্ষা করা মডেলগুলোর মধ্যে সেরা। প্রতি বাক্যে প্রায় 0.1 সেকেন্ড লাগে। প্রায় 2 GB গ্রাফিক্স মেমরি লাগে, একশোর বেশি ভাষা সমর্থন করে।"
+  },
+  "providers.localai.noteMoonshineJa": {
+    "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
+    "text": "VRChat-এ জাপানি আড্ডায় পরীক্ষায়: প্রায় 70% অক্ষর ভুল হয়েছে। গ্রাফিক্স কার্ড একেবারেই ব্যবহার করা না গেলে শুধু জরুরি প্রয়োজনে ব্যবহার করুন।"
+  },
+  "providers.localai.noteNativeNemotron": {
+    "en": "Small: about 1 GB of video memory. Japanese talk, measured: about 27% of the characters wrong, and a short sentence is sometimes left out altogether. Choose it only when the ones above do not fit or do not hear the language. Over thirty languages.",
+    "text": "মেমরি কম লাগে: প্রায় 1 GB গ্রাফিক্স মেমরি। জাপানি আড্ডায় পরীক্ষায় প্রায় 27% অক্ষর ভুল হয়েছে, কখনও ছোট বাক্য পুরোপুরি বাদ পড়ে। ওপরের মডেলগুলোর জন্য মেমরি না থাকলে বা সেগুলো প্রয়োজনীয় ভাষা সমর্থন না করলেই এটি বেছে নিন। ত্রিশটির বেশি ভাষা সমর্থন করে।"
+  },
+  "providers.localai.noteNativeQwen": {
+    "en": "Japanese talk, measured: about 16% of the characters wrong. It writes as you speak (about 1 s behind); the last few words settle when the sentence ends. When the graphics card is busy it only refreshes less often. About 3 GB of video memory, thirty languages.",
+    "text": "জাপানি আড্ডায় পরীক্ষায় প্রায় 16% অক্ষর ভুল হয়েছে। কথা বলার সঙ্গে সঙ্গে লেখে (প্রায় 1 সেকেন্ড দেরিতে)। বাক্যের শেষের কয়েকটি অক্ষর বাক্য শেষ হলে চূড়ান্ত হয়। গ্রাফিক্স কার্ড ব্যস্ত থাকলে শুধু লেখা আপডেট হতে কিছুটা দেরি হয়। প্রায় 3 GB গ্রাফিক্স মেমরি লাগে, 30টি ভাষা সমর্থন করে।"
+  },
+  "providers.localai.noteNativeQwenSmall": {
+    "en": "The light one, for a computer that runs a game at the same time: about 2 GB of video memory instead of 3. Japanese talk, measured: about 22% of the characters wrong, more than the 1.7B. Otherwise it works the same way, with the same thirty languages.",
+    "text": "কম মেমরির ছোট মডেল, একই কম্পিউটারে গেম চললে উপযোগী: প্রায় 2 GB গ্রাফিক্স মেমরি লাগে (1.7B-এর লাগে প্রায় 3 GB)। জাপানি আড্ডায় পরীক্ষায় প্রায় 22% অক্ষর ভুল হয়েছে, 1.7B-এর চেয়ে কিছুটা বেশি। বাকি কাজের ধরন 1.7B-এর মতোই, একই 30টি ভাষা সমর্থন করে।"
+  },
+  "providers.localai.noteNativeR2t2": {
+    "en": "Japanese talk, measured: about 18% of the characters wrong. It writes as it listens (about 2.5 s behind) and never changes what it wrote. When the graphics card cannot keep up (a weaker card, or a game running), the text falls further and further behind. About 3 GB of video memory.",
+    "text": "জাপানি আড্ডায় পরীক্ষায় প্রায় 18% অক্ষর ভুল হয়েছে। শুনতে শুনতে লেখে (প্রায় 2.5 সেকেন্ড দেরিতে), লেখা আর বদলায় না। গ্রাফিক্স কার্ড তাল মেলাতে না পারলে (দুর্বল কার্ড বা একই সঙ্গে গেম চললে) লেখা ক্রমেই পিছিয়ে পড়ে। প্রায় 3 GB গ্রাফিক্স মেমরি লাগে।"
+  },
+  "providers.localai.noteNativeSenseVoice": {
+    "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
+    "text": "সবচেয়ে হালকা ও দ্রুত: প্রায় 0.4 GB গ্রাফিক্স মেমরি লাগে। জাপানি আড্ডায় পরীক্ষায় Qwen3-ASR 0.6B-এর মতোই নির্ভুল, তবে যতিচিহ্ন খুব কম দেয়। শুধু চীনা, ক্যান্টনিজ, ইংরেজি, জাপানি ও কোরীয় সমর্থন করে।"
+  },
+  "providers.localai.noteQwen06": {
+    "en": "Measured on Japanese VRChat talk: about 35% of the characters wrong. Small: for when the graphics card has little memory to spare.",
+    "text": "VRChat-এ জাপানি আড্ডায় পরীক্ষায়: প্রায় 35% অক্ষর ভুল হয়েছে। ছোট মডেল, গ্রাফিক্স মেমরি কম থাকলে ব্যবহার করা যায়।"
+  },
+  "providers.localai.noteQwen17": {
+    "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
+    "text": "জাপানি আড্ডায় পরীক্ষায় প্রায় 19% অক্ষর ভুল হয়েছে। বাক্য বলা শেষ হলে তবেই লেখে (প্রায় 10 সেকেন্ড দেরিতে)। ওপরের GGUF সংস্করণ কথা বলার সঙ্গে সঙ্গেই লেখে।"
+  },
+  "providers.localai.noteSenseVoice": {
+    "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
+    "text": "VRChat-এ জাপানি আড্ডায় পরীক্ষায়: কানা অক্ষর লেখে না, তাই জাপানি লেখা প্রায় পড়াই যায় না।"
+  },
+  "providers.localai.noteVoxtral4b": {
+    "en": "Measured on Japanese VRChat talk: quick — the text is about 2.6 s behind the voice — but about 27% of the characters wrong. For when speed matters more than accuracy.",
+    "text": "VRChat-এ জাপানি আড্ডায় পরীক্ষায়: দ্রুত লেখে (কথার প্রায় 2.6 সেকেন্ড পরে), তবে অক্ষর ভুল বেশি (প্রায় 27%)। নির্ভুলতার চেয়ে গতি বেশি জরুরি হলে বেছে নিন।"
+  },
+  "providers.localai.noteWhisperMedium": {
+    "en": "Measured on Japanese VRChat talk: about 34% of the characters wrong.",
+    "text": "VRChat-এ জাপানি আড্ডায় পরীক্ষায়: প্রায় 34% অক্ষর ভুল হয়েছে।"
+  },
+  "providers.localai.noteWhisperTurbo": {
+    "en": "Measured on Japanese VRChat talk: about 21% of the characters wrong, and steady. It writes only once a sentence has ended.",
+    "text": "VRChat-এ জাপানি আড্ডায় পরীক্ষায়: প্রায় 21% অক্ষর ভুল হয়েছে, ফল স্থিতিশীল। এটিও বাক্য বলা শেষ হলে তবেই লেখে।"
+  },
+  "providers.localai.otherDeviceHint": {
+    "en": "To use the models of another device on your local network, search the network for it.",
+    "text": "একই স্থানীয় নেটওয়ার্কের অন্য ডিভাইসের মডেল ব্যবহার করতে নেটওয়ার্কে ডিভাইস খুঁজুন।"
+  },
+  "providers.localai.phoneKey": {
+    "en": "Access key of {{name}}",
+    "text": "{{name}}-এর অ্যাক্সেস কী"
+  },
+  "providers.localai.phoneKeyNote": {
+    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
+    "text": "এই ফোনে অ্যাক্সেস কী সেট করা আছে। ফোনের ‘ডিভাইস সংযোগ’ অংশে সেটি দেখতে পাবেন।"
+  },
+  "providers.localai.phoneKeyUse": {
+    "en": "Use this phone",
+    "text": "এই ফোন ব্যবহার করুন"
+  },
+  "providers.localai.phoneKeyWrong": {
+    "en": "The phone did not take this key.",
+    "text": "এই কী সঠিক নয়। আবার মিলিয়ে দেখুন।"
+  },
+  "providers.localai.phoneModelGone": {
+    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
+    "text": "ফোন ({{address}}) এখন {{name}} শেয়ার করছে না। কার্ডে অন্য মডেল বেছে নিন।"
+  },
+  "providers.localai.phoneModelTooBig": {
+    "en": "{{name}} (not enough memory on the phone)",
+    "text": "{{name}} (ফোনে পর্যাপ্ত মেমরি নেই)"
+  },
+  "providers.localai.phoneModelTooBigCheck": {
+    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
+    "text": "ফোনে ({{address}}) এখন {{name}} চালানোর মতো মেমরি নেই। কার্ডে ছোট মডেল বেছে নিন অথবা ফোনের অন্য অ্যাপগুলো বন্ধ করুন।"
+  },
+  "providers.localai.phoneNoMemory": {
+    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
+    "text": "ফোনে এখন এই মডেল চালানোর মতো মেমরি নেই। কার্ডে ছোট মডেল বেছে নিন অথবা ফোনের অন্য অ্যাপগুলো বন্ধ করুন।"
+  },
+  "providers.localai.phoneOption": {
+    "en": "{{name}} (phone)",
+    "text": "{{name}} (ফোন)"
+  },
+  "providers.localai.phoneQuiet": {
+    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
+    "text": "ফোন সাড়া দিচ্ছে না। স্ক্রিন লক হওয়ার পর সিস্টেম অ্যাপটি থামিয়ে দিয়ে থাকতে পারে। চালিয়ে যেতে ফোনে Kotomimi খুলুন।"
+  },
+  "providers.localai.phoneUnreachable": {
+    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "ফোনে ({{address}}) সংযোগ হচ্ছে না। ফোনে শেয়ারিং চালু আছে এবং সেটি এই কম্পিউটারের একই Wi-Fi-তে আছে কি না দেখুন।"
+  },
+  "providers.localai.pipelineModel": {
+    "en": "Setup name on that device",
+    "text": "ওই ডিভাইসের কনফিগারেশনের নাম"
+  },
+  "providers.localai.pipelineNote": {
+    "en": "Normally left alone. Change it only when that device is a LocalAI set up with more than one combination of recognition and translation.",
+    "text": "সাধারণত বদলানোর দরকার নেই। ওই ডিভাইসে LocalAI থাকলে এবং শনাক্তকরণ ও অনুবাদের একাধিক সমন্বয় সেট করা থাকলেই এটি বদলাতে হবে।"
+  },
+  "providers.localai.placeDevice": {
+    "en": "This computer",
+    "text": "এই কম্পিউটার"
+  },
+  "providers.localai.placeServer": {
+    "en": "Another device",
+    "text": "অন্য ডিভাইস"
+  },
+  "providers.localai.ready": {
+    "en": "Ready to start",
+    "text": "শুরু করা যাবে"
+  },
+  "providers.localai.recheck": {
+    "en": "Check again",
+    "text": "আবার যাচাই করুন"
+  },
+  "providers.localai.serverHttp": {
+    "en": "The other device answered with an error (HTTP {{status}}). Restarting the app or the model server there usually helps.",
+    "text": "অন্য ডিভাইস ত্রুটি জানিয়েছে (HTTP {{status}})। সাধারণত সেখানকার অ্যাপ বা মডেল সার্ভার আবার চালু করলে ঠিক হয়।"
+  },
+  "providers.localai.serverKey": {
+    "en": "Access key",
+    "text": "অ্যাক্সেস কী"
+  },
+  "providers.localai.serverKeyMissing": {
+    "en": "The other device asks for an access key. Enter it in Settings, under \"Another device\".",
+    "text": "অন্য ডিভাইসে অ্যাক্সেস কী লাগবে। সেটিংসে “অন্য ডিভাইস” অংশে সেটি লিখুন।"
+  },
+  "providers.localai.serverKeyNeeded": {
+    "en": "The other device asks for an access key. Under \"Another device\", turn on \"It asks for an access key\" and enter the key set on that device.",
+    "text": "অন্য ডিভাইসে অ্যাক্সেস কী লাগবে। “অন্য ডিভাইস” অংশে “এতে অ্যাক্সেস কী লাগে” চালু করে ওই ডিভাইসে সেট করা কী লিখুন।"
+  },
+  "providers.localai.serverKeyRefused": {
+    "en": "The other device did not accept the access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options).",
+    "text": "অন্য ডিভাইস এই অ্যাক্সেস কী গ্রহণ করেনি। ওই ডিভাইসে সেট করা কী লিখুন (অন্য Kotomimi-এর কী তার শেয়ারিংয়ের “বিকল্প” অংশে পাবেন)।"
+  },
+  "providers.localai.serverNeedsKey": {
+    "en": "It asks for an access key",
+    "text": "এটির অ্যাক্সেস কী দরকার"
+  },
+  "providers.localai.serverNeedsKeyTooltip": {
+    "en": "Turn this on when the other device was given an access key — a Kotomimi with one set under its sharing options, for example.",
+    "text": "অন্য ডিভাইসে অ্যাক্সেস কী সেট করা থাকলে এটি চালু করুন। যেমন, অন্য Kotomimi-তে শেয়ার করার বিকল্পে কী সেট করা থাকলে।"
+  },
+  "providers.localai.serverNoAsr": {
+    "en": "The other device has no speech recognition model for {{source}}. Download one there first (in the model library of its sharing card), or let this computer listen.",
+    "text": "অন্য ডিভাইসে {{source}} শনাক্ত করার মতো কথা শনাক্তকরণ মডেল নেই। আগে সেখানে একটি ডাউনলোড করুন (তার শেয়ারিং কার্ডের মডেল লাইব্রেরি থেকে), অথবা এই কম্পিউটার দিয়ে শনাক্ত করুন।"
+  },
+  "providers.localai.serverNoDetect": {
+    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
+    "text": "অন্য ডিভাইসে নিজে থেকে ভাষা চেনার মতো শনাক্তকরণ মডেল নেই। “আমিও … বলি” এবং অপর পক্ষের ভাষা স্বয়ংক্রিয়ভাবে চেনার জন্য এটি দরকার। সেখানে Qwen3-ASR-এর মতো একটি মডেল ডাউনলোড করুন অথবা এই দুটি সুইচ বন্ধ করুন।"
+  },
+  "providers.localai.serverNoModels": {
+    "en": "The other device has no model yet: install or download one there first.",
+    "text": "অন্য ডিভাইসে এখনও কোনো মডেল নেই। আগে সেখানে একটি ইনস্টল বা ডাউনলোড করুন।"
+  },
+  "providers.localai.serverSilent": {
+    "en": "This address does not answer. If Kotomimi is running on that device, enable its sharing to use its installed native models.",
+    "text": "এই ঠিকানায় সংযোগ হচ্ছে না। ওই ডিভাইসে Kotomimi চললে শেয়ারিং চালু করুন, যাতে সেখানে ইনস্টল করা নেটিভ মডেলগুলো ব্যবহার করা যায়।"
+  },
+  "providers.localai.serverUnreachable": {
+    "en": "The other device ({{address}}) did not answer. Check that it is on and on the same network as this computer, and that Kotomimi there is sharing (or its model server is running). It is asked again by itself.",
+    "text": "অন্য ডিভাইস ({{address}}) সাড়া দেয়নি। সেটি চালু আছে কি না, এই কম্পিউটারের একই নেটওয়ার্কে আছে কি না এবং সেখানে Kotomimi-এর শেয়ারিং চালু আছে কি না (অথবা মডেল সার্ভার চলছে কি না) দেখুন। সংযোগ হলে নিজে থেকেই চলতে থাকবে।"
+  },
+  "providers.localai.sharedDeviceNone": {
+    "en": "No device connected yet",
+    "text": "এখনও কোনো ডিভাইস যুক্ত নেই"
+  },
+  "providers.localai.sourceAuto": {
+    "en": "The language cannot be detected with this setup. Choose the language you speak.",
+    "text": "এই সমন্বয়ে ভাষা স্বয়ংক্রিয়ভাবে চেনা যায় না। আপনি যে ভাষায় বলবেন তা বেছে নিন।"
+  },
+  "providers.localai.speedAbout": {
+    "en": "About {{seconds}} s",
+    "text": "প্রায় {{seconds}} সেকেন্ড"
+  },
+  "providers.localai.speedAdviceGeneral": {
+    "en": "A smaller model or a faster device is suggested.",
+    "text": "ছোট মডেল বা আরও দ্রুত ডিভাইস ব্যবহার করুন।"
+  },
+  "providers.localai.speedAdviceModel": {
+    "en": "A smaller model, such as {{name}}, is suggested.",
+    "text": "{{name}}-এর মতো ছোট মডেল ব্যবহার করুন।"
+  },
+  "providers.localai.speedAdviceSwitch": {
+    "en": "Switch and test again",
+    "text": "বদলে আবার পরীক্ষা করুন"
+  },
+  "providers.localai.speedBehind": {
+    "en": "Falls behind",
+    "text": "ক্রমেই পিছিয়ে পড়ে"
+  },
+  "providers.localai.speedCoach": {
+    "en": "{{seconds}} s per sentence for feedback, on average",
+    "text": "প্রতি বাক্যের পরামর্শ দিতে গড়ে {{seconds}} সেকেন্ড"
+  },
+  "providers.localai.speedCoachSlow": {
+    "en": "Feedback is slower than speech, so it will fall further behind. ",
+    "text": "কথা বলার চেয়ে পরামর্শ তৈরি ধীর, তাই পরামর্শ ক্রমেই পিছিয়ে পড়বে। "
+  },
+  "providers.localai.speedFailed": {
+    "en": "The test could not finish: {{reason}}",
+    "text": "পরীক্ষা শেষ করা যায়নি: {{reason}}"
+  },
+  "providers.localai.speedHead": {
+    "en": "Speed test · {{when}}",
+    "text": "গতি পরীক্ষা · {{when}}"
+  },
+  "providers.localai.speedHear": {
+    "en": "Text appears {{seconds}} s after the speech ends",
+    "text": "কথা শেষ হওয়ার {{seconds}} সেকেন্ড পর মূল লেখা দেখা যায়"
+  },
+  "providers.localai.speedHearSlow": {
+    "en": "Recognition is slower than speech, so the captions will fall further behind. ",
+    "text": "কথা বলার চেয়ে শনাক্তকরণ ধীর, তাই সাবটাইটেল ক্রমেই পিছিয়ে পড়বে। "
+  },
+  "providers.localai.speedJustNow": {
+    "en": "just now",
+    "text": "এইমাত্র"
+  },
+  "providers.localai.speedLegCoach": {
+    "en": "From you finishing to the feedback",
+    "text": "আপনার কথা শেষ থেকে পরামর্শ দেখা পর্যন্ত"
+  },
+  "providers.localai.speedLegParticipant": {
+    "en": "From the other side finishing to the translation",
+    "text": "অন্যজনের কথা শেষ থেকে অনুবাদ দেখা পর্যন্ত"
+  },
+  "providers.localai.speedLegSpeaker": {
+    "en": "From you finishing to the translation",
+    "text": "আপনার কথা শেষ থেকে অনুবাদ দেখা পর্যন্ত"
+  },
+  "providers.localai.speedNoClip": {
+    "en": "There is no test recording for this language yet.",
+    "text": "এই ভাষার পরীক্ষার রেকর্ডিং এখনও নেই।"
+  },
+  "providers.localai.speedNone": {
+    "en": "No result arrived during the test.",
+    "text": "পরীক্ষার সময় কোনো ফল পাওয়া যায়নি।"
+  },
+  "providers.localai.speedRetest": {
+    "en": "Test again",
+    "text": "আবার পরীক্ষা করুন"
+  },
+  "providers.localai.speedStop": {
+    "en": "Stop",
+    "text": "থামান"
+  },
+  "providers.localai.speedTest": {
+    "en": "Test speed",
+    "text": "গতি পরীক্ষা করুন"
+  },
+  "providers.localai.speedTesting": {
+    "en": "Testing speed: a recording of about ten seconds is sent through each step at speaking pace. Nothing is recorded or played.",
+    "text": "গতি পরীক্ষা চলছে: স্বাভাবিক কথা বলার গতিতে প্রতিটি ধাপে প্রায় 10 সেকেন্ডের একটি রেকর্ডিং পাঠানো হচ্ছে। মাইক্রোফোন ব্যবহার করা হচ্ছে না, কোনো শব্দও বাজবে না।"
+  },
+  "providers.localai.speedTranslate": {
+    "en": "{{seconds}} s per sentence to translate, on average",
+    "text": "প্রতি বাক্য অনুবাদে গড়ে {{seconds}} সেকেন্ড"
+  },
+  "providers.localai.speedTranslateSlow": {
+    "en": "Translation is slower than speech, so the translations will fall further behind. ",
+    "text": "কথা বলার চেয়ে অনুবাদ ধীর, তাই অনুবাদ ক্রমেই পিছিয়ে পড়বে। "
+  },
+  "providers.localai.speedVerdictOk": {
+    "en": "This setup keeps up with live speech.",
+    "text": "এই সেটআপ সরাসরি কথোপকথনের সঙ্গে তাল রাখতে পারে।"
+  },
+  "providers.localai.speedVerdictSlow": {
+    "en": "Some steps cannot keep up with speech; see the notes above.",
+    "text": "কিছু ধাপ কথা বলার গতির সঙ্গে তাল রাখতে পারছে না। উপরের বিবরণ দেখুন।"
+  },
+  "providers.localai.stageDevice": {
+    "en": "Device",
+    "text": "ডিভাইস"
+  },
+  "providers.localai.tag_native": {
+    "en": "Native engine",
+    "text": "নেটিভ ইঞ্জিন"
+  },
+  "providers.localai.tag_system": {
+    "en": "Built into macOS",
+    "text": "সিস্টেমে আগে থেকেই আছে"
+  },
+  "providers.localai.tagHint_native": {
+    "en": "Runs on the graphics card using a native engine downloaded with the model. Loads when a session starts; the first start after boot may take about half a minute. Memory is released after the engine is no longer in use.",
+    "text": "মডেলের সঙ্গে ডাউনলোড করা নেটিভ ইঞ্জিন দিয়ে গ্রাফিক্স কার্ডে চলে। সেশন শুরু হলে লোড হয়। কম্পিউটার চালু করার পর প্রথমবার প্রায় আধা মিনিট লাগতে পারে। ইঞ্জিন আর ব্যবহার না হলে মেমরি খালি করে দেয়।"
+  },
+  "providers.localai.tagHint_system": {
+    "en": "The speech recognition of macOS itself: no video memory taken, nothing to warm up. The system downloads each language.",
+    "text": "Mac-এর নিজস্ব কথা শনাক্তকরণ: গ্রাফিক্স মেমরি লাগে না, প্রস্তুত হতেও সময় লাগে না। প্রতিটি ভাষার প্যাক সিস্টেম ডাউনলোড করে।"
+  },
+  "providers.localai.textBaseUrlPlaceholder": {
+    "en": "e.g. https://api.openai.com/v1 or http://localhost:11434/v1",
+    "text": "যেমন https://api.openai.com/v1 বা http://localhost:11434/v1"
+  },
+  "providers.localai.textModelPlaceholder": {
+    "en": "The model's name, e.g. gpt-4o-mini",
+    "text": "মডেলের নাম, যেমন gpt-4o-mini"
+  },
+  "providers.localai.translateInSession": {
+    "en": "The device's own choice (translated in the same session it hears in)",
+    "text": "ওই ডিভাইস বেছে নেবে (শনাক্তকরণের একই সেশনে অনুবাদ হবে)"
+  },
+  "providers.localai.translateKey": {
+    "en": "API key of the translation model",
+    "text": "অনুবাদ মডেলের API কী"
+  },
+  "providers.localai.translateKotomimiOwn": {
+    "en": "The device's own choice (its best model for your languages)",
+    "text": "ওই ডিভাইস বেছে নেবে (ভাষা অনুযায়ী সবচেয়ে উপযুক্ত মডেল)"
+  },
+  "providers.localai.translateStage": {
+    "en": "Translation",
+    "text": "অনুবাদ"
+  },
+  "providers.localai.translateStageTooltip": {
+    "en": "What turns the recognized text into the other language. An API model is any service that speaks the OpenAI chat API: a hosted one, or Ollama or LM Studio on this computer.",
+    "text": "শনাক্ত করা লেখা অন্য ভাষায় অনুবাদ করার ধাপ। OpenAI-এর চ্যাট API সমর্থন করে এমন যেকোনো সেবা API মডেল হিসেবে ব্যবহার করা যায়: ক্লাউডের সেবা, অথবা এই কম্পিউটারের Ollama বা LM Studio।"
+  },
+  "providers.localai.translateUnnamed": {
+    "en": "Translation has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "অনুবাদের জন্য এখনও কোনো মডেল নেই। সেবা প্রদানকারীর নিচে “অনুবাদ” কার্ডে একটি বেছে নিন (API মডেল হলে ঠিকানা ও মডেলের নাম লিখুন), অথবা চালানোর অন্য জায়গা বেছে নিন।"
+  },
+  "providers.localai.translatorFailed": {
+    "en": "The translation engine of this computer could not start. In the Translation card, press \"Try again\" — or choose another model.",
+    "text": "এই কম্পিউটারের অনুবাদের ইঞ্জিন চালু করা যায়নি। “অনুবাদ” কার্ডে “আবার চেষ্টা করুন” চাপুন অথবা অন্য মডেল বেছে নিন।"
+  },
+  "providers.localai.translatorFailedShort": {
+    "en": "The translation engine could not start.",
+    "text": "অনুবাদের ইঞ্জিন চালু করা যায়নি।"
+  },
+  "providers.localai.translatorMissing": {
+    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} এখনও ডাউনলোড করা হয়নি। “অনুবাদ” কার্ডে নেটিভ মডেল ডাউনলোড করুন অথবা “API মডেল” বা “অন্য ডিভাইস” বেছে নিন।"
+  },
+  "providers.localai.translatorReady": {
+    "en": "The translation engine is ready.",
+    "text": "অনুবাদের ইঞ্জিন প্রস্তুত।"
+  },
+  "providers.localai.translatorUnfit": {
+    "en": "{{name}} does not translate between your two languages. Choose another model for it.",
+    "text": "{{name}} আপনার বেছে নেওয়া ভাষা দুটির মধ্যে অনুবাদ করতে পারে না। অন্য মডেল বেছে নিন।"
+  },
+  "providers.localai.translatorUnsupported": {
+    "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
+    "text": "এই সিস্টেমে নেটিভ অনুবাদের ইঞ্জিন এখনও সমর্থিত নয়। “অনুবাদ” কার্ডে “API মডেল” বা “অন্য ডিভাইস” বেছে নিন।"
+  },
+  "providers.localai.translatorWarming": {
+    "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",
+    "text": "এই কম্পিউটারের অনুবাদের ইঞ্জিন এখনও চালু হচ্ছে। কয়েক সেকেন্ডই লাগবে। প্রস্তুত হলেই শুরু করতে পারবেন।"
+  },
+  "providers.localai.translatorWarmingShort": {
+    "en": "Starting the translation engine…",
+    "text": "অনুবাদের ইঞ্জিন চালু হচ্ছে…"
+  },
+  "providers.localai.typedFailed": {
+    "en": "A sentence you typed was not translated: the translation model did not answer.",
+    "text": "আপনার টাইপ করা একটি বাক্য অনুবাদ হয়নি: অনুবাদের মডেল সাড়া দেয়নি।"
+  },
+  "providers.localai.viaModel": {
+    "en": "API model",
+    "text": "API মডেল"
+  },
+  "providers.openai_live.name": {
+    "en": "OpenAI Live",
+    "text": "OpenAI Live"
+  },
+  "providers.openai_translate.name": {
+    "en": "OpenAI Translate",
+    "text": "OpenAI Translate"
+  },
+  "providers.openai.name": {
+    "en": "OpenAI Realtime",
+    "text": "OpenAI Realtime"
+  },
+  "providers.palabraai.authModeApp": {
+    "en": "App Client ID/Secret",
+    "text": "অ্যাপের ক্লায়েন্ট আইডি/সিক্রেট"
+  },
+  "providers.palabraai.clientIdPlaceholder": {
+    "en": "Client ID",
+    "text": "ক্লায়েন্ট আইডি"
+  },
+  "providers.palabraai.clientSecretPlaceholder": {
+    "en": "Client Secret",
+    "text": "ক্লায়েন্ট সিক্রেট"
+  },
+  "providers.palabraai.name": {
+    "en": "Palabra AI",
+    "text": "Palabra AI"
+  },
+  "providers.qwen_livetranslate.name": {
+    "en": "Qwen LiveTranslate",
+    "text": "Qwen LiveTranslate"
+  },
+  "providers.soniox.name": {
+    "en": "Soniox",
+    "text": "Soniox"
+  },
+  "providers.volcengine_ast2.accessTokenPlaceholder": {
+    "en": "Access Token",
+    "text": "অ্যাক্সেস টোকেন"
+  },
+  "providers.volcengine_ast2.appIdPlaceholder": {
+    "en": "APP ID",
+    "text": "অ্যাপ আইডি"
+  },
+  "providers.volcengine_ast2.authModeApp": {
+    "en": "App ID + Access Token",
+    "text": "অ্যাপ আইডি + অ্যাক্সেস টোকেন"
+  },
+  "providers.volcengine_ast2.name": {
+    "en": "Doubao AST 2.0",
+    "text": "Doubao তাৎক্ষণিক অনুবাদ 2.0"
+  },
+  "settings.glossaryAdd": {
+    "en": "Add a word…",
+    "text": "শব্দ যোগ করুন…"
+  },
+  "settings.glossaryDelete": {
+    "en": "Delete entry",
+    "text": "শব্দটি মুছুন"
+  },
+  "settings.glossaryFixOpen": {
+    "en": "Fix word",
+    "text": "শব্দ ঠিক করুন"
+  },
+  "settings.glossaryFixSave": {
+    "en": "Save to glossary",
+    "text": "শব্দকোষে রাখুন"
+  },
+  "settings.glossaryFixTo": {
+    "en": "Change to",
+    "text": "বদলে লিখুন"
+  },
+  "settings.glossaryFull": {
+    "en": "Glossary is full",
+    "text": "শব্দকোষ পূর্ণ"
+  },
+  "settings.glossaryHeard": {
+    "en": "Misheard as",
+    "text": "ভুল করে যা শোনে"
+  },
+  "settings.glossaryOptional": {
+    "en": "Only if misheard",
+    "text": "ভুল শুনলেই পূরণ করুন"
+  },
+  "settings.glossaryTitle": {
+    "en": "Personal glossary",
+    "text": "ব্যক্তিগত শব্দকোষ"
+  },
+  "settings.glossaryTooltip": {
+    "en": "Names and special words. Write each in the language it is spoken in. Where one has been misheard, add how on the right and it is put right from then on; some recognition models only follow that column. You can also select a misheard word in the conversation and correct it there.",
+    "text": "নাম ও বিশেষ শব্দগুলো যে ভাষায় বলা হয়, সেই ভাষায় লিখুন। আগে ভুল শুনে থাকলে ডানদিকে ভুল শোনা রূপটি লিখুন। এরপর থেকে তা নিজে থেকেই ঠিক হবে। কিছু শনাক্তকরণ মডেল শুধু ডানদিকের কলামটি ব্যবহার করে। কথোপকথনেও ভুল শোনা শব্দ বেছে সরাসরি ঠিক করতে পারেন।"
+  },
+  "settings.glossaryTooltipLabel": {
+    "en": "About personal glossary",
+    "text": "ব্যক্তিগত শব্দকোষ সম্পর্কে"
+  },
+  "settings.glossaryWritten": {
+    "en": "Word",
+    "text": "শব্দ"
+  },
+  "settings.transcriptKeywordsPlaceholder": {
+    "en": "Sokuji, Kizuna AI, PulseAudio",
+    "text": "Sokuji, Kizuna AI, PulseAudio"
+  },
+  "setup.credentials.accessKeyId": {
+    "en": "Access Key ID",
+    "text": "অ্যাক্সেস কী ID (Access Key ID)"
+  },
+  "setup.credentials.accessToken": {
+    "en": "Access Token",
+    "text": "অ্যাক্সেস টোকেন (Access Token)"
+  },
+  "setup.credentials.apiSecret": {
+    "en": "API Secret",
+    "text": "API গোপন কী"
+  },
+  "setup.credentials.appId": {
+    "en": "App ID",
+    "text": "অ্যাপ ID (App ID)"
+  },
+  "setup.credentials.secretAccessKey": {
+    "en": "Secret Access Key",
+    "text": "গোপন অ্যাক্সেস কী (Secret Access Key)"
+  },
+  "tour.steps.kotomimi-tips.coach": {
+    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
+    "text": "নিজেই অন্য ভাষায় কথা বলছেন? সেটিংসে ব্যাকরণের পরামর্শ চালু করুন। অনুবাদের পাশাপাশি শুধু আপনার জন্য ব্যাকরণের পরামর্শ পেতে “আমিও অন্য ভাষায় কথা বলি” চালু করতে পারেন।"
+  },
+  "tour.steps.kotomimi-tips.content": {
+    "en": "Worth knowing before you start:",
+    "text": "শুরু করার আগে জেনে রাখুন:"
+  },
+  "tour.steps.kotomimi-tips.share": {
+    "en": "Another device can use this computer's models: Settings → Provider → Share with other devices.",
+    "text": "অন্য ডিভাইসও এই কম্পিউটারের মডেল ব্যবহার করতে পারে: সেটিংস → পরিষেবা প্রদানকারী → অন্য ডিভাইসে শেয়ার করুন।"
+  },
+  "tour.steps.kotomimi-tips.title": {
+    "en": "Three more things",
+    "text": "আরও তিনটি কথা"
+  },
+  "tour.steps.kotomimi-tips.typed": {
+    "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
+    "text": "সেশন শুরু হলে নিচে লেখার একটি ঘর দেখা যাবে। সেখানে বাক্য লিখলেই অনুবাদ হবে। সরাসরি সেখানে যেতে Ctrl+K চাপুন।"
+  },
+  "tour.steps.models.content_kotomimi": {
+    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
+    "text": "মডেল ডাউনলোড করতে ধাপের কার্ডে “মডেল লাইব্রেরি” খুলুন। বাস্তব কথোপকথনে পরীক্ষায় সেরা মডেলগুলোতে “প্রস্তাবিত” চিহ্ন আছে। প্রতিটি মডেলের নামের পাশের ছোট আইকনে পরীক্ষার ফল পাবেন। ডাউনলোড শেষ হলেই মডেলটি চালু হবে।"
+  },
+  "tour.steps.provider-settings.content_kotomimi": {
+    "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",
+    "text": "এখানে প্রতিটি ধাপের জন্য একটি কার্ড আছে: কথা শনাক্তকরণ, অনুবাদ ও ব্যাকরণের পরামর্শ। কার্ডে বেছে নিন ধাপটি কোথায় চলবে: স্থানীয় নেটওয়ার্কের অন্য ডিভাইসে, API মডেলে, নাকি এই কম্পিউটারে। একই জায়গায় মডেলও বেছে নিতে পারবেন। সেটিংস → পরিষেবা প্রদানকারী থেকে এই কম্পিউটারের মডেল অন্য ডিভাইসের সঙ্গেও শেয়ার করা যায়।"
+  },
+  "tour.steps.reading-aids.content": {
+    "en": "Help for reading the other language, switched here:",
+    "text": "বিদেশি ভাষা পড়তে সহায়ক এই সুবিধাগুলো এখানে চালু বা বন্ধ করুন:"
+  },
+  "tour.steps.reading-aids.fonts": {
+    "en": "Fonts for each language are under Settings → Fonts.",
+    "text": "প্রতিটি ভাষার ফন্ট বেছে নিতে সেটিংস → ফন্টে যান।"
+  },
+  "tour.steps.reading-aids.furigana": {
+    "en": "Furigana — kana above Japanese kanji.",
+    "text": "ফুরিগানা: জাপানি কানজির উপরে কানা অক্ষরে উচ্চারণ দেখায়।"
+  },
+  "tour.steps.reading-aids.pinyin": {
+    "en": "Pinyin — tone-marked pinyin above Chinese.",
+    "text": "পিনইন: চীনা লেখার উপরে স্বরচিহ্নসহ পিনইন দেখায়।"
+  },
+  "tour.steps.reading-aids.romanization": {
+    "en": "Romanization — a line in Latin letters under Japanese, Korean, Russian and Ukrainian.",
+    "text": "রোমান হরফে উচ্চারণ: জাপানি, কোরীয়, রুশ ও ইউক্রেনীয় লেখার নিচে লাতিন অক্ষরে উচ্চারণ দেখায়।"
+  },
+  "tour.steps.reading-aids.title": {
+    "en": "Reading aids",
+    "text": "পড়ার সহায়তা"
+  },
+  "voiceLibrary.cloneVoiceRequired": {
+    "en": "This voice needs a clip before it can speak — open the voice list and add one.",
+    "text": "এই কণ্ঠে এখনও কথা বলা যাচ্ছে না। কণ্ঠের তালিকা খুলে একটি অডিও ক্লিপ যোগ করুন।"
+  },
+  "voiceLibrary.filter.accent.african": {
+    "en": "African",
+    "text": "আফ্রিকান"
+  },
+  "voiceLibrary.filter.accent.american": {
+    "en": "American",
+    "text": "আমেরিকান"
+  },
+  "voiceLibrary.filter.accent.arabic": {
+    "en": "Arabic",
+    "text": "আরবি"
+  },
+  "voiceLibrary.filter.accent.australian": {
+    "en": "Australian",
+    "text": "অস্ট্রেলীয়"
+  },
+  "voiceLibrary.filter.accent.brazilian": {
+    "en": "Brazilian",
+    "text": "ব্রাজিলীয়"
+  },
+  "voiceLibrary.filter.accent.british": {
+    "en": "British",
+    "text": "ব্রিটিশ"
+  },
+  "voiceLibrary.filter.accent.chinese": {
+    "en": "Chinese",
+    "text": "চীনা"
+  },
+  "voiceLibrary.filter.accent.french": {
+    "en": "French",
+    "text": "ফরাসি"
+  },
+  "voiceLibrary.filter.accent.german": {
+    "en": "German",
+    "text": "জার্মান"
+  },
+  "voiceLibrary.filter.accent.indian": {
+    "en": "Indian",
+    "text": "ভারতীয়"
+  },
+  "voiceLibrary.filter.accent.italian": {
+    "en": "Italian",
+    "text": "ইতালীয়"
+  },
+  "voiceLibrary.filter.accent.japanese": {
+    "en": "Japanese",
+    "text": "জাপানি"
+  },
+  "voiceLibrary.filter.accent.korean": {
+    "en": "Korean",
+    "text": "কোরীয়"
+  },
+  "voiceLibrary.filter.accent.latin_american": {
+    "en": "Latin American",
+    "text": "লাতিন আমেরিকান"
+  },
+  "voiceLibrary.filter.accent.portuguese": {
+    "en": "Portuguese",
+    "text": "পর্তুগিজ"
+  },
+  "voiceLibrary.filter.accent.slavic": {
+    "en": "Slavic",
+    "text": "স্লাভিক"
+  },
+  "voiceLibrary.filter.accent.southeast_asian": {
+    "en": "Southeast Asian",
+    "text": "দক্ষিণ-পূর্ব এশীয়"
+  },
+  "voiceLibrary.filter.accent.spanish": {
+    "en": "Spanish",
+    "text": "স্প্যানিশ"
+  },
+  "voiceLibrary.filter.accentLabel": {
+    "en": "Accent",
+    "text": "উচ্চারণের ধরন"
+  },
+  "voiceLibrary.filter.age.child": {
+    "en": "Child",
+    "text": "শিশু"
+  },
+  "voiceLibrary.filter.age.middle_aged": {
+    "en": "Middle-aged",
+    "text": "মধ্যবয়সী"
+  },
+  "voiceLibrary.filter.age.old": {
+    "en": "Mature",
+    "text": "প্রবীণ"
+  },
+  "voiceLibrary.filter.age.teen": {
+    "en": "Teen",
+    "text": "কিশোর"
+  },
+  "voiceLibrary.filter.age.young": {
+    "en": "Young",
+    "text": "তরুণ"
+  },
+  "voiceLibrary.filter.ageLabel": {
+    "en": "Age",
+    "text": "বয়স"
+  },
+  "voiceLibrary.filter.anyAccent": {
+    "en": "Any accent",
+    "text": "যেকোনো উচ্চারণ"
+  },
+  "voiceLibrary.filter.anyAge": {
+    "en": "Any age",
+    "text": "যেকোনো বয়স"
+  },
+  "voiceLibrary.filter.anyGender": {
+    "en": "Any gender",
+    "text": "যেকোনো লিঙ্গ"
+  },
+  "voiceLibrary.filter.anyStyle": {
+    "en": "Any style",
+    "text": "যেকোনো ভঙ্গি"
+  },
+  "voiceLibrary.filter.anyUseCase": {
+    "en": "Any use case",
+    "text": "যেকোনো ব্যবহার"
+  },
+  "voiceLibrary.filter.clear": {
+    "en": "Clear filters",
+    "text": "ফিল্টার মুছুন"
+  },
+  "voiceLibrary.filter.count": {
+    "en": "{shown} of {total} voices",
+    "text": "{total}টির মধ্যে {shown}টি কণ্ঠ"
+  },
+  "voiceLibrary.filter.empty": {
+    "en": "No voices match these filters.",
+    "text": "এই শর্তে কোনো কণ্ঠ পাওয়া যায়নি।"
+  },
+  "voiceLibrary.filter.gender.female": {
+    "en": "Female",
+    "text": "নারী কণ্ঠ"
+  },
+  "voiceLibrary.filter.gender.male": {
+    "en": "Male",
+    "text": "পুরুষ কণ্ঠ"
+  },
+  "voiceLibrary.filter.gender.neutral": {
+    "en": "Neutral",
+    "text": "লিঙ্গনিরপেক্ষ"
+  },
+  "voiceLibrary.filter.genderLabel": {
+    "en": "Gender",
+    "text": "লিঙ্গ"
+  },
+  "voiceLibrary.filter.style.breathy": {
+    "en": "Breathy",
+    "text": "নিশ্বাসমেশানো"
+  },
+  "voiceLibrary.filter.style.breezy": {
+    "en": "Breezy",
+    "text": "ফুরফুরে"
+  },
+  "voiceLibrary.filter.style.bright": {
+    "en": "Bright",
+    "text": "উজ্জ্বল"
+  },
+  "voiceLibrary.filter.style.calm": {
+    "en": "Calm",
+    "text": "শান্ত"
+  },
+  "voiceLibrary.filter.style.casual": {
+    "en": "Casual",
+    "text": "স্বচ্ছন্দ"
+  },
+  "voiceLibrary.filter.style.clear": {
+    "en": "Clear",
+    "text": "স্পষ্ট"
+  },
+  "voiceLibrary.filter.style.confident": {
+    "en": "Confident",
+    "text": "আত্মবিশ্বাসী"
+  },
+  "voiceLibrary.filter.style.deep": {
+    "en": "Deep",
+    "text": "গভীর"
+  },
+  "voiceLibrary.filter.style.dramatic": {
+    "en": "Dramatic",
+    "text": "নাটকীয়"
+  },
+  "voiceLibrary.filter.style.easy_going": {
+    "en": "Easy-going",
+    "text": "সহজ-সরল"
+  },
+  "voiceLibrary.filter.style.energetic": {
+    "en": "Energetic",
+    "text": "উদ্যমী"
+  },
+  "voiceLibrary.filter.style.even": {
+    "en": "Even",
+    "text": "স্থির"
+  },
+  "voiceLibrary.filter.style.excitable": {
+    "en": "Excitable",
+    "text": "উত্তেজনাপূর্ণ"
+  },
+  "voiceLibrary.filter.style.expressive": {
+    "en": "Expressive",
+    "text": "অভিব্যক্তিপূর্ণ"
+  },
+  "voiceLibrary.filter.style.firm": {
+    "en": "Firm",
+    "text": "দৃঢ়"
+  },
+  "voiceLibrary.filter.style.formal": {
+    "en": "Formal",
+    "text": "আনুষ্ঠানিক"
+  },
+  "voiceLibrary.filter.style.forward": {
+    "en": "Forward",
+    "text": "সরাসরি"
+  },
+  "voiceLibrary.filter.style.friendly": {
+    "en": "Friendly",
+    "text": "বন্ধুত্বপূর্ণ"
+  },
+  "voiceLibrary.filter.style.gentle": {
+    "en": "Gentle",
+    "text": "সৌম্য"
+  },
+  "voiceLibrary.filter.style.gravelly": {
+    "en": "Gravelly",
+    "text": "খসখসে"
+  },
+  "voiceLibrary.filter.style.informative": {
+    "en": "Informative",
+    "text": "ব্যাখ্যামূলক"
+  },
+  "voiceLibrary.filter.style.knowledgeable": {
+    "en": "Knowledgeable",
+    "text": "জ্ঞানসমৃদ্ধ"
+  },
+  "voiceLibrary.filter.style.lively": {
+    "en": "Lively",
+    "text": "প্রাণবন্ত"
+  },
+  "voiceLibrary.filter.style.mature": {
+    "en": "Mature",
+    "text": "পরিণত"
+  },
+  "voiceLibrary.filter.style.neutral": {
+    "en": "Neutral",
+    "text": "নিরপেক্ষ"
+  },
+  "voiceLibrary.filter.style.playful": {
+    "en": "Playful",
+    "text": "দুষ্টুমিভরা"
+  },
+  "voiceLibrary.filter.style.raspy": {
+    "en": "Raspy",
+    "text": "কর্কশ"
+  },
+  "voiceLibrary.filter.style.smooth": {
+    "en": "Smooth",
+    "text": "সাবলীল"
+  },
+  "voiceLibrary.filter.style.soft": {
+    "en": "Soft",
+    "text": "কোমল"
+  },
+  "voiceLibrary.filter.style.upbeat": {
+    "en": "Upbeat",
+    "text": "প্রফুল্ল"
+  },
+  "voiceLibrary.filter.style.warm": {
+    "en": "Warm",
+    "text": "উষ্ণ"
+  },
+  "voiceLibrary.filter.style.youthful": {
+    "en": "Youthful",
+    "text": "তারুণ্যভরা"
+  },
+  "voiceLibrary.filter.styleLabel": {
+    "en": "Style",
+    "text": "ভঙ্গি"
+  },
+  "voiceLibrary.filter.useCase.conversational": {
+    "en": "Conversation",
+    "text": "কথোপকথন"
+  },
+  "voiceLibrary.filter.useCase.educational": {
+    "en": "Teaching",
+    "text": "ব্যাখ্যা"
+  },
+  "voiceLibrary.filter.useCase.entertainment": {
+    "en": "Entertainment",
+    "text": "বিনোদন"
+  },
+  "voiceLibrary.filter.useCase.narration": {
+    "en": "Narration",
+    "text": "ধারাবর্ণনা"
+  },
+  "voiceLibrary.filter.useCase.social_media": {
+    "en": "Social media",
+    "text": "সামাজিক মাধ্যম"
+  },
+  "voiceLibrary.filter.useCaseLabel": {
+    "en": "Use case",
+    "text": "ব্যবহার"
+  }
+}

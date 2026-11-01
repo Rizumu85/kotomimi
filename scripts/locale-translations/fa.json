@@ -1,0 +1,2170 @@
+{
+  "audioSystem.installCommand": {
+    "en": "sudo apt install pulseaudio-utils",
+    "text": "sudo apt install pulseaudio-utils"
+  },
+  "auth.emailPlaceholder": {
+    "en": "your@email.com",
+    "text": "your@email.com"
+  },
+  "captionShare.kinds.wifi": {
+    "en": "Wi‑Fi",
+    "text": "وای‌فای"
+  },
+  "engine.status.devVenv": {
+    "en": "dev venv",
+    "text": "محیط مجازی توسعه"
+  },
+  "engine.status.native": {
+    "en": "native {{version}}",
+    "text": "بومی {{version}}"
+  },
+  "fork.aids.furigana": {
+    "en": "Furigana",
+    "text": "فوریگانا"
+  },
+  "fork.aids.highlight": {
+    "en": "Highlight new",
+    "text": "برجسته کردن متن جدید"
+  },
+  "fork.aids.italic": {
+    "en": "Italic source",
+    "text": "متن اصلی مورب"
+  },
+  "fork.aids.pinyin": {
+    "en": "Pinyin",
+    "text": "پین‌یین"
+  },
+  "fork.aids.readings": {
+    "en": "Readings",
+    "text": "تلفظ"
+  },
+  "fork.aids.roman": {
+    "en": "Romanization",
+    "text": "آوانویسی لاتین"
+  },
+  "fork.aids.text": {
+    "en": "Text",
+    "text": "متن"
+  },
+  "fork.audio.echoAction": {
+    "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
+    "text": "با استفاده از هدفون، حلقه بازخورد صدا قطع می‌شود؛ یا در «تنظیمات → میکروفون» آستانه فعال‌سازی میکروفون را بالا ببرید."
+  },
+  "fork.audio.gate": {
+    "en": "Mic activation threshold",
+    "text": "آستانه فعال‌سازی میکروفون"
+  },
+  "fork.audio.gateHint": {
+    "en": "Press the microphone, speak, and set the mark under where the bar reaches — and above where it sits while only your speakers are heard.",
+    "text": "روی نماد میکروفون بزنید و چند جمله بگویید. نشانگر را پایین‌تر از سطح نوار هنگام صحبت خودتان و بالاتر از سطح آن وقتی فقط بلندگوها صدا دارند، تنظیم کنید."
+  },
+  "fork.audio.gateOff": {
+    "en": "Off",
+    "text": "خاموش"
+  },
+  "fork.audio.gateQuiet": {
+    "en": "Nothing from the microphone yet.",
+    "text": "هنوز صدایی از میکروفون دریافت نشده."
+  },
+  "fork.audio.gateTest": {
+    "en": "Test the microphone: the bar shows its level",
+    "text": "آزمایش میکروفون: نوار، بلندی صدا را نشان می‌دهد"
+  },
+  "fork.audio.gateTestStop": {
+    "en": "Stop the test",
+    "text": "توقف آزمایش"
+  },
+  "fork.audio.gateTooltip": {
+    "en": "Sound quieter than this is heard as silence — the other side's voice from your speakers, the keyboard, the room — so it is neither translated nor checked. The microphone is heard about 0.2 s later while this is on. Off: everything is heard.",
+    "text": "صداهای پایین‌تر از این سطح، مثل صدای طرف مقابل از بلندگوها، صدای صفحه‌کلید و سروصدای اتاق، سکوت در نظر گرفته می‌شوند و برای ترجمه یا بازخورد دستوری فرستاده نمی‌شوند. وقتی این گزینه روشن است، صدای میکروفون حدود 0.2 ثانیه تأخیر دارد. خاموش: همه صداها فرستاده می‌شوند."
+  },
+  "fork.audio.vbcableInstall": {
+    "en": "Install VB-CABLE",
+    "text": "نصب VB-CABLE"
+  },
+  "fork.audio.vbcableInstalling": {
+    "en": "Downloading… this can take a minute",
+    "text": "در حال دانلود، ممکن است کمی طول بکشد…"
+  },
+  "fork.audio.vbcableMissing": {
+    "en": "The VB-CABLE virtual audio driver is not installed, so a spoken translation cannot be sent into a meeting. Subtitles do not need it.",
+    "text": "درایور صدای مجازی VB-CABLE نصب نیست، پس صدای ترجمه به برنامه جلسه فرستاده نمی‌شود. برای دیدن زیرنویس نیازی به آن ندارید."
+  },
+  "fork.autostart.note": {
+    "en": "Kotomimi waits in the background after you sign in, with an icon in the notification area, and loads the models once ahead of time so the first session does not wait for it.",
+    "text": "پس از ورود، Kotomimi با نمادی در ناحیه اعلان‌ها در پس‌زمینه آماده می‌ماند و مدل‌ها را از پیش بارگذاری می‌کند تا برای شروع اولین جلسه منتظر نمانید."
+  },
+  "fork.autostart.title": {
+    "en": "Startup",
+    "text": "راه‌اندازی"
+  },
+  "fork.autostart.toggle": {
+    "en": "Start in the background when I sign in to Windows",
+    "text": "اجرای پس‌زمینه هنگام ورود به Windows"
+  },
+  "fork.custom.add": {
+    "en": "Add",
+    "text": "افزودن"
+  },
+  "fork.custom.added": {
+    "en": "Added {{name}} ({{size}} MB). Download it in the model library.",
+    "text": "{{name}} اضافه شد ({{size}} مگابایت). آن را از کتابخانهٔ مدل‌ها دانلود کنید."
+  },
+  "fork.custom.adding": {
+    "en": "Looking…",
+    "text": "در حال جستجو…"
+  },
+  "fork.custom.anyLanguage": {
+    "en": "Every language",
+    "text": "چندزبانه"
+  },
+  "fork.custom.downloaded": {
+    "en": "downloaded",
+    "text": "دانلود شده"
+  },
+  "fork.custom.error_bad_repo": {
+    "en": "That is not a repository id. It looks like owner/name.",
+    "text": "این شناسهٔ مخزن نیست. قالب آن نویسنده/نام است."
+  },
+  "fork.custom.error_exists": {
+    "en": "This model is already added.",
+    "text": "این مدل قبلاً اضافه شده است."
+  },
+  "fork.custom.error_not_found": {
+    "en": "No public repository by that name.",
+    "text": "مخزن عمومی با این نام پیدا نشد."
+  },
+  "fork.custom.error_not_whisper": {
+    "en": "This repository is not a Whisper model in the ONNX layout. {{detail}}",
+    "text": "این مخزن مدل Whisper با قالب ONNX نیست. {{detail}}"
+  },
+  "fork.custom.error_unreachable": {
+    "en": "Could not reach Hugging Face: {{detail}}",
+    "text": "اتصال به Hugging Face برقرار نشد: {{detail}}"
+  },
+  "fork.custom.intro": {
+    "en": "For a Whisper model the library does not list, such as one fine-tuned for your language. Give its Hugging Face repository id (most onnx-community/… and Xenova/… Whisper repositories work); it needs a graphics card.",
+    "text": "برای مدل Whisper که در کتابخانه نیست، مثلاً مدلی که برای زبان شما تنظیم دقیق شده است. شناسهٔ مخزن Hugging Face را وارد کنید؛ بیشتر مخزن‌های Whisper در onnx-community/… و Xenova/… قابل استفاده‌اند. به کارت گرافیک نیاز دارد."
+  },
+  "fork.custom.language": {
+    "en": "The language it hears",
+    "text": "زبان مورد شناسایی"
+  },
+  "fork.custom.notDownloaded": {
+    "en": "not downloaded",
+    "text": "دانلود نشده"
+  },
+  "fork.custom.remove": {
+    "en": "Remove {{name}}",
+    "text": "حذف {{name}}"
+  },
+  "fork.custom.repo": {
+    "en": "Repository id",
+    "text": "شناسهٔ مخزن"
+  },
+  "fork.custom.title": {
+    "en": "Add a Whisper model from Hugging Face",
+    "text": "افزودن مدل Whisper از Hugging Face"
+  },
+  "fork.echoCancellationApp": {
+    "en": "Kotomimi only",
+    "text": "فقط Kotomimi"
+  },
+  "fork.echoCancellationAppTooltip": {
+    "en": "Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "فقط Kotomimi: فقط صدای ترجمه‌ای را حذف می‌کند که خود Kotomimi پخش می‌کند. اگر میکروفون شما کارت صدای مجازی است (مانند VB-Cable یا BlackHole)، این گزینه را انتخاب کنید."
+  },
+  "fork.find.again": {
+    "en": "Search again",
+    "text": "جستجوی دوباره"
+  },
+  "fork.find.kindKotomimi": {
+    "en": "Kotomimi",
+    "text": "اشتراک‌گذاری Kotomimi"
+  },
+  "fork.find.kindPhone": {
+    "en": "Phone · speech recognition",
+    "text": "گوشی · تشخیص گفتار"
+  },
+  "fork.find.kindPhoneLends": {
+    "en": "Phone · {{what}}",
+    "text": "گوشی · {{what}}"
+  },
+  "fork.find.kindServer": {
+    "en": "Model server",
+    "text": "سرور مدل"
+  },
+  "fork.find.lendsAsr": {
+    "en": "speech recognition",
+    "text": "تشخیص گفتار"
+  },
+  "fork.find.lendsCoach": {
+    "en": "grammar feedback",
+    "text": "بازخورد دستوری"
+  },
+  "fork.find.lendsTranslate": {
+    "en": "translation",
+    "text": "ترجمه"
+  },
+  "fork.find.manual": {
+    "en": "Or type its address",
+    "text": "یا نشانی را دستی وارد کنید"
+  },
+  "fork.find.models": {
+    "en": "{{count}} model(s)",
+    "text": "{{count}} مدل"
+  },
+  "fork.find.needsKey": {
+    "en": "asks for an access key",
+    "text": "نیاز به کلید دسترسی دارد"
+  },
+  "fork.find.none": {
+    "en": "Nothing found. Check that the other device is on, is on the same Wi-Fi or router as this one, and has \"Share this computer's models\" turned on in its Kotomimi. You can also type its address below.",
+    "text": "دستگاهی پیدا نشد. مطمئن شوید دستگاه دیگر روشن است، به همان Wi-Fi یا روتر این رایانه وصل است و گزینه «اشتراک‌گذاری مدل‌های این رایانه» در Kotomimi آن روشن است. می‌توانید نشانی آن را هم در پایین وارد کنید."
+  },
+  "fork.find.productHere": {
+    "en": "{{product}} on this computer",
+    "text": "{{product}} روی این رایانه"
+  },
+  "fork.find.search": {
+    "en": "Search my network for devices",
+    "text": "جستجوی دستگاه‌ها در شبکه محلی"
+  },
+  "fork.find.searching": {
+    "en": "Looking for devices on your network…",
+    "text": "در حال جستجوی دستگاه‌ها در شبکه محلی…"
+  },
+  "fork.find.thisComputer": {
+    "en": "On this computer",
+    "text": "سرورهای این رایانه"
+  },
+  "fork.find.title": {
+    "en": "Found on your network",
+    "text": "دستگاه‌های پیدا‌شده در شبکه محلی"
+  },
+  "fork.find.use": {
+    "en": "Use {{name}}",
+    "text": "استفاده از {{name}}"
+  },
+  "fork.fonts.add": {
+    "en": "Add a language…",
+    "text": "افزودن زبان…"
+  },
+  "fork.fonts.default": {
+    "en": "App default",
+    "text": "پیش‌فرض برنامه"
+  },
+  "fork.fonts.languages": {
+    "en": "Conversation text, by language",
+    "text": "متن گفتگو، به تفکیک زبان"
+  },
+  "fork.fonts.latin": {
+    "en": "Latin letters and digits",
+    "text": "حروف لاتین و ارقام"
+  },
+  "fork.fonts.latinHint": {
+    "en": "English letters and digits in the conversation",
+    "text": "حروف انگلیسی و ارقام در گفتگو"
+  },
+  "fork.fonts.loading": {
+    "en": "Reading the installed fonts…",
+    "text": "در حال خواندن قلم‌های نصب‌شده…"
+  },
+  "fork.fonts.none": {
+    "en": "No font matches",
+    "text": "قلمی پیدا نشد"
+  },
+  "fork.fonts.others": {
+    "en": "Other fonts (may lack this script)",
+    "text": "قلم‌های دیگر (ممکن است این خط را نداشته باشند)"
+  },
+  "fork.fonts.pinyin": {
+    "en": "Pinyin above the text",
+    "text": "پین‌یین بالای متن"
+  },
+  "fork.fonts.reading": {
+    "en": "Readings above the text",
+    "text": "آوانویسی کانا بالای متن"
+  },
+  "fork.fonts.remove": {
+    "en": "Reset {{language}}",
+    "text": "بازگرداندن قلم پیش‌فرض {{language}}"
+  },
+  "fork.fonts.roman": {
+    "en": "Romanization",
+    "text": "آوانویسی لاتین"
+  },
+  "fork.fonts.romanHint": {
+    "en": "The readings under Japanese, Korean, Russian and Ukrainian",
+    "text": "تلفظ زیر متن ژاپنی، کره‌ای، روسی و اوکراینی"
+  },
+  "fork.fonts.search": {
+    "en": "Search fonts",
+    "text": "جستجوی قلم"
+  },
+  "fork.fonts.text": {
+    "en": "Text",
+    "text": "متن"
+  },
+  "fork.fonts.title": {
+    "en": "Fonts",
+    "text": "قلم‌ها"
+  },
+  "fork.fonts.tooltip": {
+    "en": "Fonts installed on this computer. Characters a font lacks are shown in the app's own.",
+    "text": "از قلم‌های نصب‌شده روی این رایانه استفاده می‌شود. نویسه‌هایی که در قلم موجود نباشند، با قلم پیش‌فرض برنامه نمایش داده می‌شوند."
+  },
+  "fork.fonts.ui": {
+    "en": "Interface",
+    "text": "رابط کاربری"
+  },
+  "fork.fonts.uiHint": {
+    "en": "Menus, settings and buttons",
+    "text": "منوها، تنظیمات و دکمه‌ها"
+  },
+  "fork.furigana": {
+    "en": "Furigana over kanji (Japanese)",
+    "text": "نمایش فوریگانا بالای کانجی (ژاپنی)"
+  },
+  "fork.help.issues": {
+    "en": "Report a problem",
+    "text": "گزارش مشکل"
+  },
+  "fork.help.issuesTooltip": {
+    "en": "Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page.",
+    "text": "Kotomimi شاخه‌ای مستقل از Sokuji است. مشکلات این برنامه را در صفحهٔ GitHub خود آن گزارش کنید."
+  },
+  "fork.lan.copied": {
+    "en": "Copied",
+    "text": "کپی شد"
+  },
+  "fork.lan.copy": {
+    "en": "Copy",
+    "text": "کپی"
+  },
+  "fork.lan.direction": {
+    "en": "Which direction to show models for",
+    "text": "نمایش مدل‌های کدام جهت ترجمه"
+  },
+  "fork.lan.enable": {
+    "en": "Share this computer's models",
+    "text": "اشتراک‌گذاری مدل‌های این رایانه"
+  },
+  "fork.lan.failed": {
+    "en": "Sharing could not start: {{message}}",
+    "text": "اشتراک‌گذاری شروع نشد: {{message}}"
+  },
+  "fork.lan.firewall": {
+    "en": "The first time, your system's firewall may ask whether to allow Kotomimi on the network: allow it for private networks.",
+    "text": "بار اول ممکن است دیوار آتش سیستم برای دسترسی Kotomimi به شبکه اجازه بخواهد. اجازه ارتباط در شبکه‌های خصوصی را بدهید."
+  },
+  "fork.lan.firewallAllow": {
+    "en": "Allow",
+    "text": "اجازه دادن"
+  },
+  "fork.lan.firewallBlocked": {
+    "en": "Windows Firewall is keeping other devices out",
+    "text": "دیوار آتش Windows جلوی اتصال دستگاه‌های دیگر را گرفته"
+  },
+  "fork.lan.firewallDeclined": {
+    "en": "Still blocked: Windows was not told yes.",
+    "text": "هنوز مسدود است: درخواست Windows تأیید نشد."
+  },
+  "fork.lan.firewallPrivate": {
+    "en": "Allow opens this port to devices on your network. Windows will ask you to confirm.",
+    "text": "با زدن «اجازه دادن»، دستگاه‌های شبکه محلی می‌توانند به این درگاه وصل شوند. Windows ابتدا تأیید شما را می‌خواهد."
+  },
+  "fork.lan.firewallPublic": {
+    "en": "Windows treats this network as public. Allow opens this port to devices on this same network only. Windows will ask you to confirm.",
+    "text": "Windows این شبکه را عمومی در نظر می‌گیرد. با زدن «اجازه دادن»، این درگاه فقط برای دستگاه‌های همین شبکه باز می‌شود. Windows ابتدا تأیید شما را می‌خواهد."
+  },
+  "fork.lan.firewallWaiting": {
+    "en": "Waiting for Windows…",
+    "text": "در انتظار Windows…"
+  },
+  "fork.lan.hideLibrary": {
+    "en": "Hide the model library",
+    "text": "بستن کتابخانه مدل‌ها"
+  },
+  "fork.lan.key": {
+    "en": "Access key",
+    "text": "کلید دسترسی"
+  },
+  "fork.lan.keyPlaceholder": {
+    "en": "Blank: anyone on the network may connect",
+    "text": "خالی: هر دستگاهی در شبکه محلی می‌تواند وصل شود"
+  },
+  "fork.lan.models": {
+    "en": "Models shared · {{count}}",
+    "text": "مدل‌های مشترک · {{count}}"
+  },
+  "fork.lan.noNetwork": {
+    "en": "This computer is on no network.",
+    "text": "این رایانه به هیچ شبکه‌ای وصل نیست."
+  },
+  "fork.lan.noRecognizer": {
+    "en": "No speech recognition model downloaded yet",
+    "text": "هنوز مدل تشخیص گفتاری دانلود نشده"
+  },
+  "fork.lan.on": {
+    "en": "Sharing — no device connected yet",
+    "text": "در حال اشتراک‌گذاری، هنوز دستگاهی وصل نیست"
+  },
+  "fork.lan.onWithClients": {
+    "en": "Sharing — {{count}} connection(s) in use",
+    "text": "در حال اشتراک‌گذاری، {{count}} اتصال فعال"
+  },
+  "fork.lan.options": {
+    "en": "Options",
+    "text": "گزینه‌ها"
+  },
+  "fork.lan.otherAddresses": {
+    "en": "This computer's other addresses",
+    "text": "نشانی‌های دیگر این رایانه"
+  },
+  "fork.lan.port": {
+    "en": "Port",
+    "text": "درگاه"
+  },
+  "fork.lan.portInUse": {
+    "en": "Port {{port}} is taken by another program. Choose another under Options.",
+    "text": "درگاه {{port}} در اختیار برنامه دیگری است. در «گزینه‌ها» درگاه دیگری انتخاب کنید."
+  },
+  "fork.lan.serving": {
+    "en": "Sharing",
+    "text": "در حال اشتراک‌گذاری"
+  },
+  "fork.lan.servingClients": {
+    "en": "Sharing · {{count}} in use",
+    "text": "در حال اشتراک‌گذاری · {{count}} اتصال فعال"
+  },
+  "fork.lan.servingTip": {
+    "en": "This computer is lending its models to other devices. The languages and the choice of model are set on those devices, not here.",
+    "text": "این رایانه مدل‌هایش را در اختیار دستگاه‌های دیگر می‌گذارد. زبان و مدل مورد استفاده را در همان دستگاه‌ها تنظیم کنید، نه اینجا."
+  },
+  "fork.lan.sessionIdle": {
+    "en": "The other device ended the session: nobody had spoken for a long while, and it let its models go. Start again to continue.",
+    "text": "دستگاه دیگر این جلسه را پایان داد: مدت زیادی کسی صحبت نکرده بود و مدل‌ها را از حافظه آزاد کرد. برای ادامه، دوباره روی «شروع» بزنید."
+  },
+  "fork.lan.showLibrary": {
+    "en": "Download or manage models",
+    "text": "دانلود یا مدیریت مدل‌ها"
+  },
+  "fork.lan.starting": {
+    "en": "Starting…",
+    "text": "در حال راه‌اندازی…"
+  },
+  "fork.lan.title": {
+    "en": "Share with other devices",
+    "text": "اشتراک‌گذاری با دستگاه‌های دیگر"
+  },
+  "fork.lan.tooltip": {
+    "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
+    "text": "مدل‌های این رایانه را در اختیار دستگاه‌های دیگر شبکه محلی می‌گذارد. در دستگاه دیگر، از بخش «دستگاه دیگر» در Kotomimi این رایانه را پیدا کنید و مدل و زبان را همان‌جا انتخاب کنید. اشتراک‌گذاری فقط تا وقتی Kotomimi باز است کار می‌کند."
+  },
+  "fork.languageMenu.detect": {
+    "en": "Auto-detect",
+    "text": "تشخیص خودکار"
+  },
+  "fork.languageMenu.detectUnavailable": {
+    "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
+    "text": "تشخیص گفتار فعلی نمی‌تواند زبان را خودکار تشخیص دهد. به Qwen3-ASR 1.7B GGUF یا یک مدل API نیاز است."
+  },
+  "fork.languageMenu.mine": {
+    "en": "My language",
+    "text": "زبان من"
+  },
+  "fork.languageMenu.mostly": {
+    "en": "Translate into what they mostly speak",
+    "text": "ترجمه به زبان اصلی طرف مقابل"
+  },
+  "fork.languageMenu.none": {
+    "en": "No language by that name",
+    "text": "زبانی با این نام پیدا نشد"
+  },
+  "fork.languageMenu.pin": {
+    "en": "Pin {{name}} to the top",
+    "text": "سنجاق کردن {{name}} در بالا"
+  },
+  "fork.languageMenu.pinShort": {
+    "en": "Pin to the top",
+    "text": "سنجاق در بالا"
+  },
+  "fork.languageMenu.search": {
+    "en": "Type to find a language",
+    "text": "برای یافتن زبان تایپ کنید"
+  },
+  "fork.languageMenu.speakBoth": {
+    "en": "I speak {{language}} too",
+    "text": "من {{language}} هم صحبت می‌کنم"
+  },
+  "fork.languageMenu.speakBothHelp": {
+    "en": "When you speak {{mine}}, it is translated into {{language}}; when you speak {{language}}, into {{mine}}. Recognition tells the two apart.",
+    "text": "وقتی {{mine}} صحبت می‌کنید، به {{language}} ترجمه می‌شود و وقتی {{language}} صحبت می‌کنید، به {{mine}}. تشخیص گفتار این دو زبان را خودکار از هم تشخیص می‌دهد."
+  },
+  "fork.languageMenu.speakBothUnavailable": {
+    "en": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
+    "text": "تشخیص گفتار انتخاب‌شده نمی‌تواند {{mine}} را از {{language}} تشخیص دهد. حالت دوزبانهٔ Apple Speech را با نصب هر دو زبان انتخاب کنید، یا از تشخیص گفتاری استفاده کنید که هر دو زبان را تشخیص می‌دهد."
+  },
+  "fork.languageMenu.theirs": {
+    "en": "Their language",
+    "text": "زبان طرف مقابل"
+  },
+  "fork.languageMenu.unpin": {
+    "en": "Unpin {{name}}",
+    "text": "برداشتن سنجاق {{name}}"
+  },
+  "fork.languageMenu.unpinShort": {
+    "en": "Unpin",
+    "text": "برداشتن سنجاق"
+  },
+  "fork.pinyin": {
+    "en": "Pinyin over Chinese",
+    "text": "نمایش پین‌یین بالای متن چینی"
+  },
+  "fork.romanization": {
+    "en": "Romanization",
+    "text": "نمایش آوانویسی لاتین"
+  },
+  "fork.sourceItalic": {
+    "en": "Source text in italics",
+    "text": "نمایش متن اصلی به‌صورت مورب"
+  },
+  "fork.speechDetection.title": {
+    "en": "Speech detection",
+    "text": "تشخیص گفتار"
+  },
+  "fork.statusLine.checking": {
+    "en": "Getting ready. You can start in a moment.",
+    "text": "در حال آماده‌سازی. تا چند لحظه دیگر می‌توانید شروع کنید."
+  },
+  "fork.subtitle.align": {
+    "en": "Alignment",
+    "text": "تراز"
+  },
+  "fork.subtitle.alignCenter": {
+    "en": "Centre",
+    "text": "وسط"
+  },
+  "fork.subtitle.alignLeft": {
+    "en": "Left",
+    "text": "چپ"
+  },
+  "fork.subtitle.back": {
+    "en": "Back to the main window",
+    "text": "بازگشت به پنجرهٔ اصلی"
+  },
+  "fork.subtitle.backdrop": {
+    "en": "Panel",
+    "text": "تیرگی زمینه"
+  },
+  "fork.subtitle.lanesView": {
+    "en": "Subtitle view",
+    "text": "نمای زیرنویس"
+  },
+  "fork.subtitle.listView": {
+    "en": "List view",
+    "text": "نمای فهرست"
+  },
+  "fork.subtitle.look": {
+    "en": "Look",
+    "text": "ظاهر"
+  },
+  "fork.subtitle.lookDark": {
+    "en": "Dark text",
+    "text": "متن تیره، حاشیهٔ سفید"
+  },
+  "fork.subtitle.lookLight": {
+    "en": "Light text",
+    "text": "متن روشن، حاشیهٔ سیاه"
+  },
+  "fork.subtitle.lookPanel": {
+    "en": "Dark panel",
+    "text": "زمینهٔ تیره"
+  },
+  "fork.subtitle.lookSample": {
+    "en": "Aa",
+    "text": "زیرنویس"
+  },
+  "fork.subtitle.lookSoft": {
+    "en": "Faint panel",
+    "text": "زمینهٔ کم‌رنگ، سایهٔ ملایم"
+  },
+  "fork.subtitle.moreColors": {
+    "en": "More colours (source text, panel)",
+    "text": "رنگ‌های بیشتر (متن اصلی، زمینه)"
+  },
+  "fork.subtitle.off": {
+    "en": "Off",
+    "text": "خاموش"
+  },
+  "fork.subtitle.outline": {
+    "en": "Outline",
+    "text": "شدت حاشیه"
+  },
+  "fork.subtitle.shadow": {
+    "en": "Shadow",
+    "text": "شدت سایه"
+  },
+  "fork.subtitle.through": {
+    "en": "Click-through: the mouse passes through the captions",
+    "text": "عبور کلیک: زیرنویس کلیک نمی‌شود و کلیک‌ها به پنجرهٔ زیر آن می‌رسند"
+  },
+  "fork.subtitle.throughOff": {
+    "en": "Stop click-through",
+    "text": "غیرفعال کردن عبور کلیک"
+  },
+  "fork.subtitle.type": {
+    "en": "Type to translate (Ctrl+K)",
+    "text": "ترجمهٔ تایپی (Ctrl+K)"
+  },
+  "fork.subtitle.typePlaceholder": {
+    "en": "What you want to say — Enter translates",
+    "text": "حرفتان را بنویسید؛ با Enter ترجمه می‌شود"
+  },
+  "fork.vrchat.chatbox": {
+    "en": "Above my avatar",
+    "text": "نمایش بالای سر"
+  },
+  "fork.vrchat.chatboxHearBoth": {
+    "en": "Switch to Both",
+    "text": "تغییر به «هر دو»"
+  },
+  "fork.vrchat.chatboxOff": {
+    "en": "Off",
+    "text": "خاموش"
+  },
+  "fork.vrchat.chatboxSourceFirst": {
+    "en": "Original on top",
+    "text": "متن اصلی در بالا"
+  },
+  "fork.vrchat.chatboxTranslation": {
+    "en": "Translation",
+    "text": "ترجمه"
+  },
+  "fork.vrchat.chatboxTranslationFirst": {
+    "en": "Translation on top",
+    "text": "ترجمه در بالا"
+  },
+  "fork.vrchat.chatboxUnheard": {
+    "en": "Only the other side is translated now: what you say won't show above your avatar.",
+    "text": "فعلاً فقط صحبت‌های طرف مقابل ترجمه می‌شود؛ حرف‌های شما بالای سرتان نمایش داده نمی‌شود."
+  },
+  "fork.vrchat.connected": {
+    "en": "Connected",
+    "text": "متصل"
+  },
+  "fork.vrchat.end": {
+    "en": "End",
+    "text": "پایان"
+  },
+  "fork.vrchat.help": {
+    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
+    "text": "با VRChat روی همین رایانه کار می‌کند: وقتی در VRChat میکروفونتان را بی‌صدا می‌کنید، Kotomimi گفتارتان را تشخیص نمی‌دهد؛ ترجمه‌هایتان می‌توانند بالای سر آواتارتان نمایش داده شوند تا بازیکنان دیگر آن‌ها را بخوانند. وقتی در یک دنیا ویدیو پخش می‌شود: اگر صدای ویدیو از جهت مشخصی نیاید، از صدای بازیکنان جدا می‌شود؛ اگر جهت مشخصی داشته باشد، گفتار طرف مقابل به بخش‌های کوتاه‌تری تقسیم می‌شود."
+  },
+  "fork.vrchat.mutedNotHeard": {
+    "en": "Muted in VRChat: what you say is not recognized.",
+    "text": "در VRChat بی‌صدا هستید؛ گفتارتان شناسایی نمی‌شود."
+  },
+  "fork.vrchat.mutedThere": {
+    "en": "Muted in VRChat",
+    "text": "در VRChat بی‌صدا هستید"
+  },
+  "fork.vrchat.muteGate": {
+    "en": "Don't hear me while muted in VRChat",
+    "text": "وقتی در VRChat بی‌صدا هستم، گفتارم شناسایی نشود"
+  },
+  "fork.vrchat.notConnected": {
+    "en": "Not connected",
+    "text": "متصل نیست"
+  },
+  "fork.vrchat.onVideo": {
+    "en": "When a world plays a video",
+    "text": "هنگام پخش ویدیو در جهان"
+  },
+  "fork.vrchat.pausedOn": {
+    "en": "Not translating",
+    "text": "فعلاً ترجمه نمی‌شود"
+  },
+  "fork.vrchat.quickOn": {
+    "en": "Shorter sentences",
+    "text": "جمله‌ها کوتاه‌تر شدند"
+  },
+  "fork.vrchat.remember": {
+    "en": "Remember",
+    "text": "به خاطر بسپار"
+  },
+  "fork.vrchat.removedOn": {
+    "en": "Video sound removed",
+    "text": "صدای ویدیو حذف شد"
+  },
+  "fork.vrchat.separatedOn": {
+    "en": "Video sound separated",
+    "text": "صدای ویدیو جدا شد"
+  },
+  "fork.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
+  },
+  "fork.vrchat.turnOnOsc": {
+    "en": "Turn on OSC in the VRChat quick menu",
+    "text": "OSC را در منوی سریع VRChat روشن کنید"
+  },
+  "fork.vrchat.videoAsk": {
+    "en": "Ask me",
+    "text": "هر بار بپرس"
+  },
+  "fork.vrchat.videoAskResult": {
+    "en": "Asks you when a video starts.",
+    "text": "با شروع ویدیو می‌پرسد چه کار کند."
+  },
+  "fork.vrchat.videoBoth": {
+    "en": "People + video",
+    "text": "صدای افراد و ویدیو"
+  },
+  "fork.vrchat.videoBothResult": {
+    "en": "The video gets its own line and uses more power; if it can't be separated, sentences are cut shorter.",
+    "text": "ویدیو را در خط جداگانه نشان می‌دهد و توان پردازشی بیشتری مصرف می‌کند؛ اگر صداها جدا نشوند، جمله‌ها را کوتاه‌تر می‌کند."
+  },
+  "fork.vrchat.videoPause": {
+    "en": "Pause",
+    "text": "فعلاً ترجمه نکن"
+  },
+  "fork.vrchat.videoPauseResult": {
+    "en": "The other side is not translated while it plays.",
+    "text": "هنگام پخش ویدیو، صحبت‌های طرف مقابل ترجمه نمی‌شود."
+  },
+  "fork.vrchat.videoQuick": {
+    "en": "People only",
+    "text": "فقط صدای افراد"
+  },
+  "fork.vrchat.videoQuickResult": {
+    "en": "Takes out video sound; if it can't, sentences are cut shorter.",
+    "text": "تا جای ممکن صدای ویدیو را حذف می‌کند؛ اگر جدا نشود، جمله‌ها را کوتاه‌تر می‌کند."
+  },
+  "fork.vrchat.videoShort": {
+    "en": "Video",
+    "text": "ویدیو"
+  },
+  "fork.vrchat.videoStarted": {
+    "en": "Video started",
+    "text": "پخش ویدیو شروع شد"
+  },
+  "fork.wizard.addressMissing": {
+    "en": "Choose a device from the list above, or type its address, for example 192.168.1.10:8790.",
+    "text": "ابتدا دستگاهی از فهرست بالا انتخاب کنید یا نشانی آن را وارد کنید، مثلاً 192.168.1.10:8790."
+  },
+  "fork.wizard.device": {
+    "en": "This computer",
+    "text": "همین رایانه"
+  },
+  "fork.wizard.deviceDesc": {
+    "en": "Recognition and translation run on this computer using native models. Download a model for each stage before starting.",
+    "text": "تشخیص گفتار و ترجمه با مدل‌های بومی روی همین رایانه اجرا می‌شوند. پیش از شروع، برای هر مرحله یک مدل دانلود کنید."
+  },
+  "fork.wizard.deviceNotice": {
+    "en": "After setup, open Model library in the Speech recognition and Translation cards and download a native model for each. Translation requires a downloaded model, or you can switch that stage to an API model or another device.",
+    "text": "پس از راه‌اندازی، در بخش‌های «تشخیص گفتار» و «ترجمه»، «کتابخانهٔ مدل‌ها» را باز کنید و برای هرکدام یک مدل بومی دانلود کنید. ترجمه به مدل دانلودشده نیاز دارد؛ همچنین می‌توانید این مرحله را به مدل API یا دستگاه دیگری بسپارید."
+  },
+  "fork.wizard.intro": {
+    "en": "Pick a starting point. Later, in Settings, recognition and translation can each run in a different place.",
+    "text": "برای شروع یک گزینه انتخاب کنید. بعداً در تنظیمات می‌توانید محل اجرای تشخیص گفتار و ترجمه را جداگانه انتخاب کنید و ترکیبی به کار ببرید."
+  },
+  "fork.wizard.keyNeeded": {
+    "en": "This device asks for an access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options), then press Connect.",
+    "text": "این دستگاه کلید دسترسی می‌خواهد. کلید تنظیم‌شده روی آن دستگاه را وارد کنید و «اتصال» را بزنید. در Kotomimi دیگر، کلید در «گزینه‌ها»ی اشتراک‌گذاری است."
+  },
+  "fork.wizard.pathBadge": {
+    "en": "Recommended",
+    "text": "پیشنهادی"
+  },
+  "fork.wizard.pathCost": {
+    "en": "No account and no API key. Text only: subtitles with furigana, typed translation and grammar feedback. Another device means a Kotomimi sharing its models, or a model server such as LocalAI; this computer downloads models onto your disk.",
+    "text": "بدون نیاز به حساب یا کلید API. فقط متن: زیرنویس با آوانویسی کانا، ترجمهٔ تایپی و بازخورد دستوری. دستگاه دیگر می‌تواند Kotomimi با اشتراک‌گذاری فعال یا یک سرور مدل مثل LocalAI باشد؛ روی این رایانه، مدل‌ها دانلود و ذخیره می‌شوند."
+  },
+  "fork.wizard.pathDesc": {
+    "en": "Use the models of another device on your network, or this computer's own — and any mix of the two.",
+    "text": "از مدل‌های دستگاه دیگری در شبکهٔ محلی، مدل‌های همین رایانه یا ترکیبی از هر دو استفاده کنید."
+  },
+  "fork.wizard.pathTitle": {
+    "en": "Kotomimi Pipeline",
+    "text": "ترکیب دلخواه در Kotomimi"
+  },
+  "fork.wizard.pendingAddress": {
+    "en": "No device chosen yet — choose one in Settings before you start.",
+    "text": "هنوز دستگاه دیگری انتخاب نشده است. پیش از شروع، آن را در تنظیمات انتخاب کنید."
+  },
+  "fork.wizard.server": {
+    "en": "Another device on my network",
+    "text": "دستگاه دیگری در شبکهٔ محلی"
+  },
+  "fork.wizard.serverDesc": {
+    "en": "The models run on another computer: a Kotomimi with sharing turned on, or a model server such as LocalAI. This computer stays light.",
+    "text": "مدل‌ها روی رایانهٔ دیگری اجرا می‌شوند: Kotomimi با اشتراک‌گذاری فعال یا یک سرور مدل مثل LocalAI. منابع این رایانه تقریباً آزاد می‌ماند."
+  },
+  "fork.wizard.serverFound": {
+    "en": "Connected — it offers {{count}} model(s).",
+    "text": "متصل شد؛ {{count}} مدل در دسترس است."
+  },
+  "fork.wizard.serverUnreachable": {
+    "en": "Could not connect: {{message}}",
+    "text": "اتصال برقرار نشد: {{message}}"
+  },
+  "fork.wizard.share": {
+    "en": "This computer, for my other devices",
+    "text": "این رایانه، برای دستگاه‌های دیگرم"
+  },
+  "fork.wizard.shareDesc": {
+    "en": "Computing power to spare here? Let the models run on this computer for the other devices on your network — and for this computer itself.",
+    "text": "این رایانه توان پردازشی آزاد دارد؟ مدل‌ها را اینجا اجرا کنید تا هم دستگاه‌های دیگر شبکهٔ محلی و هم خود این رایانه از آن‌ها استفاده کنند."
+  },
+  "fork.wizard.shareNotice": {
+    "en": "Nothing to enter. Finishing turns on sharing, so other Kotomimi devices on your network can find this computer. After setup, download models in the Speech recognition card: those are what the others can use.",
+    "text": "اینجا نیازی به وارد کردن چیزی نیست. با پایان راه‌اندازی، اشتراک‌گذاری خودکار فعال می‌شود و دستگاه‌های دیگر دارای Kotomimi در شبکهٔ محلی می‌توانند این رایانه را پیدا کنند. سپس در بخش «تشخیص گفتار» تنظیمات، مدل دانلود کنید؛ دستگاه‌های دیگر از همین مدل‌ها استفاده می‌کنند."
+  },
+  "fork.wizard.shareSummary": {
+    "en": "Sharing",
+    "text": "اشتراک‌گذاری"
+  },
+  "fork.wizard.shareSummaryOn": {
+    "en": "Turned on when you finish: other devices on your network can use this computer's models",
+    "text": "پس از پایان راه‌اندازی فعال می‌شود تا دستگاه‌های دیگر شبکهٔ محلی از مدل‌های این رایانه استفاده کنند"
+  },
+  "fork.wizard.title": {
+    "en": "Which device does the work?",
+    "text": "کدام دستگاه پردازش را انجام دهد؟"
+  },
+  "fork.wizard.tryServer": {
+    "en": "Connect",
+    "text": "اتصال"
+  },
+  "models.deviceCpu": {
+    "en": "CPU",
+    "text": "پردازنده مرکزی"
+  },
+  "models.deviceGpu": {
+    "en": "GPU",
+    "text": "پردازنده گرافیکی"
+  },
+  "providers.gemini.name": {
+    "en": "Google Gemini",
+    "text": "Google Gemini"
+  },
+  "providers.kizunaai_soniox.name": {
+    "en": "KizunaAI",
+    "text": "KizunaAI"
+  },
+  "providers.local_inference.modelAsr": {
+    "en": "ASR",
+    "text": "تشخیص گفتار"
+  },
+  "providers.local_inference.modelTranslation": {
+    "en": "MT",
+    "text": "ترجمه ماشینی"
+  },
+  "providers.local_inference.modelTts": {
+    "en": "TTS",
+    "text": "تبدیل متن به گفتار"
+  },
+  "providers.localai.addressMissing": {
+    "en": "No other device is chosen yet. In Settings, under \"Another device\", search for it or type its address.",
+    "text": "هنوز دستگاه دیگری انتخاب نشده است. در تنظیمات، بخش «دستگاه دیگر»، آن را جستجو کنید یا آدرسش را وارد کنید."
+  },
+  "providers.localai.advanced": {
+    "en": "Advanced",
+    "text": "پیشرفته"
+  },
+  "providers.localai.apiKey": {
+    "en": "API key",
+    "text": "کلید API"
+  },
+  "providers.localai.apiKeyNeeded": {
+    "en": "The API at {{address}} asks for a key. In its card, turn on \"The API asks for a key\" and enter it.",
+    "text": "API در {{address}} به کلید نیاز دارد. در کارت مربوطه، «این API به کلید نیاز دارد» را فعال کنید و کلید را وارد کنید."
+  },
+  "providers.localai.apiKeyRefused": {
+    "en": "The API at {{address}} did not accept the key. Check the API key in its card.",
+    "text": "API در {{address}} این کلید را نپذیرفت. کلید API را در کارت مربوطه بررسی کنید."
+  },
+  "providers.localai.apiKeyReused": {
+    "en": "Filled in with the key saved under \"{{name}}\".",
+    "text": "کلید ذخیره‌شده در «{{name}}» وارد شد."
+  },
+  "providers.localai.apiService": {
+    "en": "Service",
+    "text": "سرویس"
+  },
+  "providers.localai.apiServiceArk": {
+    "en": "Doubao (Volcengine Ark)",
+    "text": "Doubao (Volcengine Ark)"
+  },
+  "providers.localai.apiServiceArkModel": {
+    "en": "A model's name, or your endpoint id (ep-…)",
+    "text": "نام مدل یا شناسه نقطه اتصال شما (ep-…)"
+  },
+  "providers.localai.apiServiceCustom": {
+    "en": "Custom address",
+    "text": "نشانی دلخواه"
+  },
+  "providers.localai.apiServiceModel": {
+    "en": "Choose from the list on the right, or type a name",
+    "text": "از فهرست سمت راست انتخاب کنید یا نام را بنویسید"
+  },
+  "providers.localai.apiServiceOllama": {
+    "en": "Ollama on this computer",
+    "text": "Ollama روی این رایانه"
+  },
+  "providers.localai.apiServiceSiliconFlow": {
+    "en": "SiliconFlow",
+    "text": "SiliconFlow"
+  },
+  "providers.localai.apiUnreachable": {
+    "en": "The API at {{address}} could not be reached. Check the address in its card, and that this computer is online.",
+    "text": "اتصال به API در {{address}} ممکن نیست. آدرس کارت مربوطه و اتصال اینترنت این رایانه را بررسی کنید."
+  },
+  "providers.localai.asrApiBaseUrl": {
+    "en": "API address",
+    "text": "نشانی API"
+  },
+  "providers.localai.asrApiBaseUrlPlaceholder": {
+    "en": "e.g. https://api.openai.com/v1",
+    "text": "مثلاً https://api.openai.com/v1"
+  },
+  "providers.localai.asrApiModelPlaceholder": {
+    "en": "e.g. whisper-1, whisper-large-v3",
+    "text": "مثلاً whisper-1، whisper-large-v3"
+  },
+  "providers.localai.asrApiNeedsKey": {
+    "en": "The API asks for a key",
+    "text": "این API به کلید نیاز دارد"
+  },
+  "providers.localai.asrFixedNote": {
+    "en": "That device is reached as a plain LocalAI, which always hears with its own default recognizer when the translation or the feedback uses a model chosen here. Through the Kotomimi on that device, the recognizer can be chosen here.",
+    "text": "اکنون مستقیماً به LocalAI آن دستگاه وصل هستید. وقتی برای ترجمه یا بازخورد دستوری مدل دیگری انتخاب می‌کنید، LocalAI فقط از مدل پیش‌فرض تشخیص گفتار خودش استفاده می‌کند. با اتصال به Kotomimi آن دستگاه می‌توانید مدل تشخیص گفتار را اینجا انتخاب کنید."
+  },
+  "providers.localai.asrKey": {
+    "en": "API key of the speech recognition API",
+    "text": "کلید API تشخیص گفتار"
+  },
+  "providers.localai.asrUnnamed": {
+    "en": "Speech recognition has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "هنوز مدلی برای تشخیص گفتار آماده نیست. در کارت «تشخیص گفتار» زیر ارائه‌دهنده، مدلی انتخاب کنید (برای مدل API، آدرس و نام مدل را وارد کنید) یا محل اجرا را تغییر دهید."
+  },
+  "providers.localai.auto": {
+    "en": "Automatic · {{name}}",
+    "text": "خودکار · {{name}}"
+  },
+  "providers.localai.browse": {
+    "en": "Model library",
+    "text": "کتابخانه مدل‌ها"
+  },
+  "providers.localai.bySentence": {
+    "en": "Translate sentence by sentence",
+    "text": "ترجمه جمله‌به‌جمله"
+  },
+  "providers.localai.bySentenceTooltip": {
+    "en": "On: each sentence is translated as soon as it ends — sooner, but without the sentences around it. Off: the whole stretch is translated once the speaker pauses — with its context, but later.",
+    "text": "روشن: هر جمله به‌محض تمام شدن ترجمه می‌شود؛ ترجمه زودتر می‌آید، اما بافت جمله‌های اطراف را ندارد. خاموش: پس از مکث گوینده، کل بخش با هم ترجمه می‌شود؛ بافت کامل است، اما بیشتر منتظر می‌مانید."
+  },
+  "providers.localai.checking": {
+    "en": "Checking…",
+    "text": "در حال بررسی…"
+  },
+  "providers.localai.checkNow": {
+    "en": "Check",
+    "text": "بررسی"
+  },
+  "providers.localai.checkSlow": {
+    "en": "No answer within {{seconds}} s: the device may be off or loading a model, or the address wrong. It is asked again by itself.",
+    "text": "پس از {{seconds}} ثانیه هنوز پاسخی نرسیده است. شاید دستگاه خاموش است، مدل را بارگذاری می‌کند یا آدرس اشتباه است. دوباره خودکار تلاش می‌شود."
+  },
+  "providers.localai.choiceDevice": {
+    "en": "Use this computer",
+    "text": "استفاده از این رایانه"
+  },
+  "providers.localai.choiceServer": {
+    "en": "Use another device",
+    "text": "استفاده از دستگاه دیگر"
+  },
+  "providers.localai.coach": {
+    "en": "Check my grammar when I speak their language",
+    "text": "وقتی به زبان طرف مقابل صحبت می‌کنم، دستور زبانم را بررسی کن"
+  },
+  "providers.localai.coachKey": {
+    "en": "API key of the feedback model",
+    "text": "کلید API مدل بازخورد دستور زبان"
+  },
+  "providers.localai.coachNeedsSpeaker": {
+    "en": "Feedback answers what you say. Switch the mode to \"Me\" or \"Both\".",
+    "text": "برای بازخورد دستوری باید صدای شما شنیده شود. حالت را به «من» یا «هر دو» تغییر دهید."
+  },
+  "providers.localai.coachNoModel": {
+    "en": "The other device has no text model that can give feedback. Use an API model or this computer instead.",
+    "text": "دستگاه دیگر مدل متنی مناسبی برای بازخورد دستوری ندارد. از مدل API یا این رایانه استفاده کنید."
+  },
+  "providers.localai.coachPrompt": {
+    "en": "Feedback instructions",
+    "text": "دستورالعمل بازخورد دستوری"
+  },
+  "providers.localai.coachPromptPlaceholder": {
+    "en": "Blank: written automatically for your two languages. Your own text may use {{spoken}} and {{native}}.",
+    "text": "خالی بگذارید تا بر اساس زبان مادری و زبان تمرین شما خودکار ساخته شود. در متن خودتان می‌توانید از {{spoken}} و {{native}} برای این دو زبان استفاده کنید."
+  },
+  "providers.localai.coachPromptPreview": {
+    "en": "Used while the box is blank, for this language pair:",
+    "text": "وقتی کادر خالی باشد، برای این دو زبان از متن زیر استفاده می‌شود:"
+  },
+  "providers.localai.coachStage": {
+    "en": "Grammar feedback",
+    "text": "بازخورد دستوری"
+  },
+  "providers.localai.coachStageTooltip": {
+    "en": "When you speak the other language, a model checks your grammar and answers with a check mark, or a corrected sentence and an explanation. Enable \"I speak the other language too\" as well to get both a translation and private feedback. Your own language and typed text are translated without feedback.",
+    "text": "وقتی به زبان طرف مقابل صحبت می‌کنید، مدلی دستور زبان شما را بررسی می‌کند و یک علامت تأیید، یا جملهٔ اصلاح‌شده همراه با توضیح نشان می‌دهد. برای دریافت هم‌زمان ترجمه و بازخورد خصوصی، «من به زبان طرف مقابل هم صحبت می‌کنم» را هم فعال کنید. گفته‌های شما به زبان خودتان و متن تایپ‌شده فقط ترجمه می‌شوند و بازخوردی نمی‌گیرند."
+  },
+  "providers.localai.coachUnnamed": {
+    "en": "Grammar feedback has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "هنوز مدلی برای بازخورد دستوری آماده نیست. در کارت «بازخورد دستوری» زیر ارائه‌دهنده، مدلی انتخاب کنید (برای مدل API، آدرس و نام مدل را وارد کنید) یا محل اجرا را تغییر دهید."
+  },
+  "providers.localai.connectFirst": {
+    "en": "No other device is connected yet: search for one above, or type its address.",
+    "text": "هنوز دستگاه دیگری متصل نشده: ابتدا در بالا جستجو کنید یا نشانی آن را وارد کنید."
+  },
+  "providers.localai.description": {
+    "en": "Recognition, translation and grammar feedback — and you mix where each model runs: this computer, another device on your network, or any API model.",
+    "text": "تشخیص گفتار، ترجمه و بازخورد دستور زبان، با امکان ترکیب مدل‌ها از این رایانه، دستگاه دیگری در شبکه محلی یا هر مدل API."
+  },
+  "providers.localai.detectOther": {
+    "en": "Detect the other side's language",
+    "text": "تشخیص خودکار زبان طرف مقابل"
+  },
+  "providers.localai.detectOtherNeeds": {
+    "en": "Only Qwen3-ASR 1.7B GGUF can tell the language by itself. Choose it here.",
+    "text": "فقط Qwen3-ASR 1.7B GGUF می‌تواند خودش زبان را تشخیص دهد. آن را اینجا انتخاب کنید."
+  },
+  "providers.localai.detectOtherNote": {
+    "en": "The other side's language is detected, so a model that can tell languages apart hears them.",
+    "text": "چون زبان طرف مقابل خودکار تشخیص داده می‌شود، اینجا از مدلی با قابلیت تشخیص زبان استفاده می‌شود."
+  },
+  "providers.localai.detectOtherTooltip": {
+    "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
+    "text": "گفتار طرف مقابل به هر زبانی تشخیص داده می‌شود و به زبان شما ترجمه می‌شود، بدون تغییر دستی زبان. گفته‌های شما همچنان به زبان انتخاب‌شده در بالا ترجمه می‌شوند. تشخیص گفتار به Qwen3-ASR 1.7B GGUF یا API نیاز دارد و ترجمه به موتور بومی یا API."
+  },
+  "providers.localai.deviceDefault": {
+    "en": "The device's own choice",
+    "text": "به انتخاب آن دستگاه"
+  },
+  "providers.localai.endpoint": {
+    "en": "Address",
+    "text": "نشانی"
+  },
+  "providers.localai.familyUnheard": {
+    "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
+    "text": "{{name}} در آن دستگاه {{languages}} را ندارد، پس دستگاه برای این بخش خودش مدل انتخاب می‌کند. برای استفاده از {{name}}، ابتدا {{languages}} را در آن دستگاه دانلود کنید."
+  },
+  "providers.localai.feedbackFailed": {
+    "en": "One sentence got no grammar feedback: the feedback model did not answer.",
+    "text": "یکی از جمله‌ها بازخورد دستوری نگرفت: مدل بازخورد پاسخ نداد."
+  },
+  "providers.localai.groupNative": {
+    "en": "Native engine",
+    "text": "موتور بومی"
+  },
+  "providers.localai.hearApiNote": {
+    "en": "Any service with OpenAI's transcription API works (OpenAI, Groq, a LocalAI). This computer cuts the sentences and uploads each one, so the text appears when a sentence is finished.",
+    "text": "هر سرویسی که API تبدیل گفتار به متن OpenAI را ارائه دهد قابل استفاده است، مانند OpenAI، Groq و LocalAI. این رایانه پایان جمله‌ها را تشخیص می‌دهد و هر جمله را پس از تمام شدن برای تشخیص می‌فرستد؛ پس متن فقط پس از پایان جمله ظاهر می‌شود."
+  },
+  "providers.localai.hears": {
+    "en": "Recognizes {{language}}",
+    "text": "تشخیص گفتار {{language}}"
+  },
+  "providers.localai.hearsEither": {
+    "en": "Recognizes {{first}} or {{second}}",
+    "text": "تشخیص گفتار {{first}} یا {{second}}"
+  },
+  "providers.localai.hearsOther": {
+    "en": "Hears the other side (any language)",
+    "text": "شنیدن طرف مقابل (تشخیص خودکار زبان)"
+  },
+  "providers.localai.hearStage": {
+    "en": "Speech recognition",
+    "text": "تشخیص گفتار"
+  },
+  "providers.localai.hearStageTooltip": {
+    "en": "What listens: it decides when a sentence ends and writes down what was said.",
+    "text": "بخش «شنیدن»: پایان هر جمله را تشخیص می‌دهد و گفته‌ها را به متن تبدیل می‌کند."
+  },
+  "providers.localai.hereDown": {
+    "en": "The LocalAI on this computer is not running yet. Start it in the stage's card — or, if Kotomimi has only just opened, give it a moment.",
+    "text": "LocalAI این رایانه هنوز اجرا نشده است. در کارت این بخش روی «راه‌اندازی LocalAI» بزنید. اگر تازه Kotomimi را باز کرده‌اید، کمی صبر کنید تا اجرا شود."
+  },
+  "providers.localai.hereModelPick": {
+    "en": "Choose a model",
+    "text": "مدلی انتخاب کنید"
+  },
+  "providers.localai.inUse": {
+    "en": "In use: {{name}}",
+    "text": "در حال استفاده: {{name}}"
+  },
+  "providers.localai.inUseLegs": {
+    "en": "In use: {{theirs}} (them), {{mine}} (me)",
+    "text": "در حال استفاده: طرف مقابل {{theirs}} · من {{mine}}"
+  },
+  "providers.localai.kotomimiServer": {
+    "en": "It is another Kotomimi sharing its models.",
+    "text": "این دستگاه، Kotomimi دیگری است که مدل‌هایش را به اشتراک گذاشته."
+  },
+  "providers.localai.kotomimiThere": {
+    "en": "Use the Kotomimi on that device",
+    "text": "اتصال به Kotomimi آن دستگاه"
+  },
+  "providers.localai.kotomimiThereLooking": {
+    "en": "Looking for it…",
+    "text": "در حال جستجو…"
+  },
+  "providers.localai.kotomimiThereNone": {
+    "en": "No Kotomimi is sharing on that device. Open Kotomimi there, turn on \"Share with other devices\", then try again.",
+    "text": "هیچ Kotomimi در آن دستگاه در حال اشتراک‌گذاری نیست. Kotomimi را روی آن دستگاه باز کنید، «اشتراک‌گذاری با دستگاه‌های دیگر» را فعال کنید و دوباره امتحان کنید."
+  },
+  "providers.localai.localServerNote": {
+    "en": "This address is this computer itself: a model server running here, such as LocalAI. Choose \"Another device\" in a stage to use its models.",
+    "text": "این نشانی به همین رایانه اشاره دارد: سرور مدلی مثل LocalAI که روی آن اجرا می‌شود. برای استفاده از مدل‌هایش، در مرحله موردنظر «دستگاه دیگر» را انتخاب کنید."
+  },
+  "providers.localai.model": {
+    "en": "Model",
+    "text": "مدل"
+  },
+  "providers.localai.modelGone": {
+    "en": "{{name}} (no longer on that device)",
+    "text": "{{name}} (دیگر روی آن دستگاه نیست)"
+  },
+  "providers.localai.modelList": {
+    "en": "Choose from the models this service lists",
+    "text": "انتخاب از فهرست مدل‌های این سرویس"
+  },
+  "providers.localai.modelListAsking": {
+    "en": "Getting the list…",
+    "text": "در حال دریافت فهرست مدل‌ها…"
+  },
+  "providers.localai.modelListKeyMissing": {
+    "en": "Fill in the API key first.",
+    "text": "ابتدا کلید API را وارد کنید."
+  },
+  "providers.localai.modelListKeyRefused": {
+    "en": "The service refused this key.",
+    "text": "این سرویس کلید را نپذیرفت."
+  },
+  "providers.localai.modelListNoAddress": {
+    "en": "Fill in the address first.",
+    "text": "ابتدا نشانی را وارد کنید."
+  },
+  "providers.localai.modelListNoMatch": {
+    "en": "No model found. Try fewer letters.",
+    "text": "مدلی پیدا نشد. با حروف کمتری جستجو کنید."
+  },
+  "providers.localai.modelListNone": {
+    "en": "This service lists no models. Type the name instead.",
+    "text": "این سرویس فهرست مدل‌ها را ارائه نمی‌کند. نام مدل را بنویسید."
+  },
+  "providers.localai.modelListUnreachable": {
+    "en": "The service could not be reached.",
+    "text": "اتصال به این سرویس ممکن نشد."
+  },
+  "providers.localai.modelSearch": {
+    "en": "Search models",
+    "text": "جستجوی مدل"
+  },
+  "providers.localai.modelSuggested": {
+    "en": "Suits this step",
+    "text": "مناسب این مرحله"
+  },
+  "providers.localai.name": {
+    "en": "Kotomimi Pipeline",
+    "text": "ترکیب دلخواه Kotomimi"
+  },
+  "providers.localai.nativeBusy": {
+    "en": "A device you share with is using this engine with {{name}}. Wait for it to finish, or choose {{name}} here too.",
+    "text": "یکی از دستگاه‌هایی که با آن اشتراک‌گذاری می‌کنید، از این موتور با {{name}} استفاده می‌کند. صبر کنید کارش تمام شود یا اینجا هم {{name}} را انتخاب کنید."
+  },
+  "providers.localai.nativeCoachFailed": {
+    "en": "The feedback engine could not start. In the Grammar feedback card, press \"Try again\" — or choose another model.",
+    "text": "موتور بازخورد دستوری راه‌اندازی نشد. در کارت «بازخورد دستوری» روی «تلاش دوباره» بزنید یا مدل دیگری انتخاب کنید."
+  },
+  "providers.localai.nativeCoachFailedShort": {
+    "en": "The feedback engine could not start.",
+    "text": "موتور بازخورد دستوری راه‌اندازی نشد."
+  },
+  "providers.localai.nativeCoachMissing": {
+    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} هنوز دانلود نشده است. در کارت «بازخورد دستوری»، یک مدل بومی دانلود کنید یا «مدل API» یا «دستگاه دیگر» را انتخاب کنید."
+  },
+  "providers.localai.nativeCoachReady": {
+    "en": "The feedback engine is ready.",
+    "text": "موتور بازخورد دستوری آماده است."
+  },
+  "providers.localai.nativeCoachUnsupported": {
+    "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
+    "text": "این سیستم فعلاً از موتور بومی بازخورد دستوری پشتیبانی نمی‌کند. در کارت «بازخورد دستوری»، «مدل API» یا «دستگاه دیگر» را انتخاب کنید."
+  },
+  "providers.localai.nativeCoachWarming": {
+    "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
+    "text": "موتور بازخورد دستوری هنوز در حال راه‌اندازی است؛ فقط چند ثانیه طول می‌کشد. به‌محض آماده شدن می‌توانید شروع کنید."
+  },
+  "providers.localai.nativeCoachWarmingShort": {
+    "en": "Starting the feedback engine…",
+    "text": "در حال راه‌اندازی موتور بازخورد دستوری…"
+  },
+  "providers.localai.nativeEntry": {
+    "en": "{{name}} (native engine)",
+    "text": "{{name}} (موتور بومی)"
+  },
+  "providers.localai.nativeFailed": {
+    "en": "The recognition engine of this computer could not start. In the Speech recognition card, press \"Try again\" — or choose another model.",
+    "text": "موتور تشخیص گفتار این رایانه راه‌اندازی نشد. در کارت «تشخیص گفتار» روی «تلاش دوباره» بزنید یا مدل دیگری انتخاب کنید."
+  },
+  "providers.localai.nativeFailedShort": {
+    "en": "The engine could not start.",
+    "text": "موتور راه‌اندازی نشد."
+  },
+  "providers.localai.nativeInterrupted": {
+    "en": "The engine stopped while it was starting. Press Start again.",
+    "text": "موتور هنگام راه‌اندازی متوقف شد. دوباره روی «شروع» بزنید."
+  },
+  "providers.localai.nativeLoading": {
+    "en": "Loading the models… About half a minute the first time after the computer boots.",
+    "text": "در حال بارگذاری مدل‌ها… اولین بار پس از روشن شدن رایانه حدود نیم دقیقه طول می‌کشد."
+  },
+  "providers.localai.nativeMissing": {
+    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} هنوز دانلود نشده است. در کارت «تشخیص گفتار»، یک مدل بومی دانلود کنید یا «مدل API» یا «دستگاه دیگر» را انتخاب کنید."
+  },
+  "providers.localai.nativeNone": {
+    "en": "No model chosen",
+    "text": "مدلی انتخاب نشده"
+  },
+  "providers.localai.nativeReady": {
+    "en": "The engine is ready.",
+    "text": "موتور آماده است."
+  },
+  "providers.localai.nativeRetry": {
+    "en": "Try again",
+    "text": "تلاش دوباره"
+  },
+  "providers.localai.nativeRuntime": {
+    "en": "Downloading the runtime first. This happens only once.",
+    "text": "ابتدا محیط اجرا دانلود می‌شود. این کار فقط یک بار انجام می‌شود."
+  },
+  "providers.localai.nativeTwoModels": {
+    "en": "{{name}} and {{other}} cannot run at the same time. Choose the same model for both languages.",
+    "text": "{{name}} و {{other}} نمی‌توانند هم‌زمان اجرا شوند. برای هر دو زبان یک مدل یکسان انتخاب کنید."
+  },
+  "providers.localai.nativeUnchosen": {
+    "en": "No speech recognition model is chosen for {{source}} yet. Choose one in the Speech recognition card.",
+    "text": "هنوز مدل تشخیص گفتار برای {{source}} انتخاب نشده است. در کارت «تشخیص گفتار» مدلی انتخاب کنید."
+  },
+  "providers.localai.nativeUnheard": {
+    "en": "{{name}} does not hear one of your two languages. Choose another model for it.",
+    "text": "{{name}} یکی از دو زبان انتخابی شما را تشخیص نمی‌دهد. برای آن زبان مدل دیگری انتخاب کنید."
+  },
+  "providers.localai.nativeUnsupported": {
+    "en": "The native recognition engine is not available for this system. In the Speech recognition card, switch to \"API model\" or \"Another device\".",
+    "text": "این سیستم فعلاً از موتور بومی تشخیص گفتار پشتیبانی نمی‌کند. در کارت «تشخیص گفتار»، «مدل API» یا «دستگاه دیگر» را انتخاب کنید."
+  },
+  "providers.localai.nativeUnsupportedShort": {
+    "en": "Not available for this system",
+    "text": "فعلاً در این سیستم پشتیبانی نمی‌شود"
+  },
+  "providers.localai.nativeWarming": {
+    "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
+    "text": "موتور تشخیص گفتار هنوز در حال راه‌اندازی است. اولین بار پس از روشن شدن رایانه حدود نیم دقیقه طول می‌کشد. به‌محض آماده شدن می‌توانید شروع کنید."
+  },
+  "providers.localai.nativeWarmingShort": {
+    "en": "Starting the engine… About half a minute the first time after the computer boots.",
+    "text": "در حال راه‌اندازی موتور… اولین بار پس از روشن شدن رایانه حدود نیم دقیقه طول می‌کشد."
+  },
+  "providers.localai.notDownloaded": {
+    "en": "No model downloaded yet",
+    "text": "هنوز مدلی دانلود نشده"
+  },
+  "providers.localai.noteAppleSpeech": {
+    "en": "Japanese talk, measured: about 13% of the characters wrong, the most accurate of all. It writes as it listens (about 2 s behind).",
+    "text": "در آزمون گفتگوی روزمرهٔ ژاپنی، حدود 13% نویسه‌ها اشتباه بودند؛ دقیق‌ترین در میان همه. هم‌زمان با شنیدن متن می‌نویسد (با حدود 2 ثانیه تأخیر)."
+  },
+  "providers.localai.noteCohere": {
+    "en": "Measured on Japanese VRChat talk: about 33% of the characters wrong, and about a quarter of what was said left out. Not a good choice for Japanese conversation.",
+    "text": "در آزمون گفتگوی روزمرهٔ ژاپنی در VRChat، حدود 33% نویسه‌ها اشتباه بودند و حدود یک‌چهارم گفته‌ها حذف می‌شدند. برای گفتگوی ژاپنی توصیه نمی‌شود."
+  },
+  "providers.localai.noteGemma4": {
+    "en": "Japanese grammar, measured: it caught 11 of 14 mistakes and left right casual speech alone; about 0.1 s an answer. About 1.5 GB of video memory.",
+    "text": "در آزمون دستور زبان ژاپنی، 11 جمله از 14 جملهٔ نادرست را تشخیص داد و گفتار محاوره‌ای درست را بی‌دلیل تغییر نداد؛ هر جمله حدود 0.1 ثانیه. حدود 1.5 GB حافظهٔ گرافیکی مصرف می‌کند."
+  },
+  "providers.localai.noteGranite41": {
+    "en": "Measured on Japanese VRChat talk: it keeps repeating the same sentence. Not usable for Japanese conversation.",
+    "text": "در آزمون گفتگوی روزمرهٔ ژاپنی در VRChat، یک جمله را مدام تکرار می‌کرد. عملاً برای گفتگوی ژاپنی قابل استفاده نیست."
+  },
+  "providers.localai.noteHyMt15": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences, and it tends to add words of its own.",
+    "text": "در آزمون ترجمهٔ ژاپنی به چینی، حدود 8 جمله از 30 جمله خطای جدی داشتند و گاهی کلماتی از خودش اضافه می‌کرد."
+  },
+  "providers.localai.noteHyMt2": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences; about 0.1 s a sentence.",
+    "text": "در آزمون ترجمهٔ ژاپنی به چینی، حدود 8 جمله از 30 جمله خطای جدی داشتند؛ هر جمله حدود 0.1 ثانیه."
+  },
+  "providers.localai.noteIndexTranslate": {
+    "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
+    "text": "در آزمون ترجمهٔ ژاپنی به چینی، حدود 3 جمله از 30 جمله خطای جدی داشتند؛ بهترین نتیجه میان مدل‌های آزمایش‌شده. هر جمله حدود 0.1 ثانیه. حدود 2 GB حافظهٔ گرافیکی مصرف می‌کند و از بیش از صد زبان پشتیبانی می‌کند."
+  },
+  "providers.localai.noteMoonshineJa": {
+    "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
+    "text": "در آزمون گفتگوی روزمرهٔ ژاپنی در VRChat، حدود 70% نویسه‌ها اشتباه بودند. فقط برای مواقع اضطراری که کارت گرافیک اصلاً قابل استفاده نیست."
+  },
+  "providers.localai.noteNativeNemotron": {
+    "en": "Small: about 1 GB of video memory. Japanese talk, measured: about 27% of the characters wrong, and a short sentence is sometimes left out altogether. Choose it only when the ones above do not fit or do not hear the language. Over thirty languages.",
+    "text": "کم‌مصرف: حدود 1 GB حافظهٔ گرافیکی مصرف می‌کند. در آزمون گفتگوی روزمرهٔ ژاپنی، حدود 27% نویسه‌ها اشتباه بودند و گاهی جمله‌های کوتاه کاملاً حذف می‌شدند. فقط وقتی مدل‌های بالا در حافظه جا نمی‌شوند یا زبان موردنظر را پشتیبانی نمی‌کنند انتخابش کنید. از بیش از سی زبان پشتیبانی می‌کند."
+  },
+  "providers.localai.noteNativeQwen": {
+    "en": "Japanese talk, measured: about 16% of the characters wrong. It writes as you speak (about 1 s behind); the last few words settle when the sentence ends. When the graphics card is busy it only refreshes less often. About 3 GB of video memory, thirty languages.",
+    "text": "در آزمون گفتگوی روزمرهٔ ژاپنی، حدود 16% نویسه‌ها اشتباه بودند. هم‌زمان با صحبت متن می‌نویسد (با حدود 1 ثانیه تأخیر)؛ چند نویسهٔ آخر پس از پایان جمله نهایی می‌شوند. وقتی کارت گرافیک مشغول باشد، فقط متن دیرتر به‌روز می‌شود. حدود 3 GB حافظهٔ گرافیکی مصرف می‌کند و از 30 زبان پشتیبانی می‌کند."
+  },
+  "providers.localai.noteNativeQwenSmall": {
+    "en": "The light one, for a computer that runs a game at the same time: about 2 GB of video memory instead of 3. Japanese talk, measured: about 22% of the characters wrong, more than the 1.7B. Otherwise it works the same way, with the same thirty languages.",
+    "text": "مدل کوچک و کم‌مصرف، مناسب وقتی روی همین رایانه بازی هم اجرا می‌شود: حدود 2 GB حافظهٔ گرافیکی مصرف می‌کند (مدل 1.7B حدود 3 GB). در آزمون گفتگوی روزمرهٔ ژاپنی، حدود 22% نویسه‌ها اشتباه بودند، کمی بیشتر از 1.7B. بقیهٔ عملکرد مانند 1.7B است و از همان 30 زبان پشتیبانی می‌کند."
+  },
+  "providers.localai.noteNativeR2t2": {
+    "en": "Japanese talk, measured: about 18% of the characters wrong. It writes as it listens (about 2.5 s behind) and never changes what it wrote. When the graphics card cannot keep up (a weaker card, or a game running), the text falls further and further behind. About 3 GB of video memory.",
+    "text": "در آزمون گفتگوی روزمرهٔ ژاپنی، حدود 18% نویسه‌ها اشتباه بودند. هم‌زمان با شنیدن متن می‌نویسد (با حدود 2.5 ثانیه تأخیر) و متن نوشته‌شده را دیگر تغییر نمی‌دهد. اگر کارت گرافیک نرسد (ضعیف باشد یا بازی هم اجرا شود)، متن مدام بیشتر عقب می‌افتد. حدود 3 GB حافظهٔ گرافیکی مصرف می‌کند."
+  },
+  "providers.localai.noteNativeSenseVoice": {
+    "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
+    "text": "سبک‌ترین و سریع‌ترین: حدود 0.4 GB حافظهٔ گرافیکی مصرف می‌کند. در آزمون گفتگوی روزمرهٔ ژاپنی، دقتش مانند Qwen3-ASR 0.6B بود و علائم نگارشی کمی می‌نوشت. فقط از چینی، کانتونی، انگلیسی، ژاپنی و کره‌ای پشتیبانی می‌کند."
+  },
+  "providers.localai.noteQwen06": {
+    "en": "Measured on Japanese VRChat talk: about 35% of the characters wrong. Small: for when the graphics card has little memory to spare.",
+    "text": "در آزمون گفتگوی روزمرهٔ ژاپنی در VRChat، حدود 35% نویسه‌ها اشتباه بودند. کوچک است و وقتی حافظهٔ گرافیکی کمی دارید قابل استفاده است."
+  },
+  "providers.localai.noteQwen17": {
+    "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
+    "text": "در آزمون گفتگوی روزمرهٔ ژاپنی، حدود 19% نویسه‌ها اشتباه بودند. متن فقط پس از پایان جمله ظاهر می‌شود (با حدود 10 ثانیه تأخیر)؛ نسخهٔ GGUF بالا هم‌زمان با صحبت متن می‌نویسد."
+  },
+  "providers.localai.noteSenseVoice": {
+    "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
+    "text": "در آزمون گفتگوی روزمرهٔ ژاپنی در VRChat، نویسه‌های کانا را نمی‌نوشت و متن ژاپنی عملاً خوانا نبود."
+  },
+  "providers.localai.noteVoxtral4b": {
+    "en": "Measured on Japanese VRChat talk: quick — the text is about 2.6 s behind the voice — but about 27% of the characters wrong. For when speed matters more than accuracy.",
+    "text": "در آزمون گفتگوی روزمرهٔ ژاپنی در VRChat، متن سریع ظاهر می‌شد (حدود 2.6 ثانیه پس از صدا)، اما خطا زیاد بود (حدود 27% نویسه‌ها). مناسب وقتی سرعت مهم‌تر است و با خطا کنار می‌آیید."
+  },
+  "providers.localai.noteWhisperMedium": {
+    "en": "Measured on Japanese VRChat talk: about 34% of the characters wrong.",
+    "text": "در آزمون گفتگوی روزمرهٔ ژاپنی در VRChat، حدود 34% نویسه‌ها اشتباه بودند."
+  },
+  "providers.localai.noteWhisperTurbo": {
+    "en": "Measured on Japanese VRChat talk: about 21% of the characters wrong, and steady. It writes only once a sentence has ended.",
+    "text": "در آزمون گفتگوی روزمرهٔ ژاپنی در VRChat، حدود 21% نویسه‌ها اشتباه بودند و عملکرد پایداری داشت. متن این مدل هم فقط پس از پایان جمله ظاهر می‌شود."
+  },
+  "providers.localai.otherDeviceHint": {
+    "en": "To use the models of another device on your local network, search the network for it.",
+    "text": "برای استفاده از مدل‌های دستگاه دیگری در شبکه محلی، دستگاه را در شبکه جستجو کنید."
+  },
+  "providers.localai.phoneKey": {
+    "en": "Access key of {{name}}",
+    "text": "کلید دسترسی {{name}}"
+  },
+  "providers.localai.phoneKeyNote": {
+    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
+    "text": "این گوشی به کلید دسترسی نیاز دارد. می‌توانید آن را در بخش «اتصال دستگاه» گوشی ببینید."
+  },
+  "providers.localai.phoneKeyUse": {
+    "en": "Use this phone",
+    "text": "استفاده از این گوشی"
+  },
+  "providers.localai.phoneKeyWrong": {
+    "en": "The phone did not take this key.",
+    "text": "این کلید درست نیست. لطفاً دوباره بررسی کنید."
+  },
+  "providers.localai.phoneModelGone": {
+    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
+    "text": "گوشی ({{address}}) اکنون {{name}} را به اشتراک نمی‌گذارد. در کارت آن مدل دیگری انتخاب کنید."
+  },
+  "providers.localai.phoneModelTooBig": {
+    "en": "{{name}} (not enough memory on the phone)",
+    "text": "{{name}} (حافظهٔ گوشی کافی نیست)"
+  },
+  "providers.localai.phoneModelTooBigCheck": {
+    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
+    "text": "گوشی ({{address}}) اکنون حافظهٔ کافی برای اجرای {{name}} ندارد. در کارت آن مدل کوچک‌تری انتخاب کنید یا برنامه‌های دیگر گوشی را ببندید."
+  },
+  "providers.localai.phoneNoMemory": {
+    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
+    "text": "گوشی اکنون حافظهٔ کافی برای اجرای این مدل ندارد. در کارت آن مدل کوچک‌تری انتخاب کنید یا برنامه‌های دیگر گوشی را ببندید."
+  },
+  "providers.localai.phoneOption": {
+    "en": "{{name}} (phone)",
+    "text": "{{name}} (گوشی)"
+  },
+  "providers.localai.phoneQuiet": {
+    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
+    "text": "گوشی پاسخ نمی‌دهد. شاید سیستم پس از قفل شدن صفحه، برنامه را متوقف کرده است. برای ادامه، Kotomimi را روی گوشی باز کنید."
+  },
+  "providers.localai.phoneUnreachable": {
+    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "گوشی ({{address}}) پاسخ نمی‌دهد. مطمئن شوید اشتراک‌گذاری آن فعال است و به همان وای‌فای این رایانه وصل است."
+  },
+  "providers.localai.pipelineModel": {
+    "en": "Setup name on that device",
+    "text": "نام پیکربندی در آن دستگاه"
+  },
+  "providers.localai.pipelineNote": {
+    "en": "Normally left alone. Change it only when that device is a LocalAI set up with more than one combination of recognition and translation.",
+    "text": "معمولاً نیازی به تغییر نیست. فقط زمانی تغییرش دهید که آن دستگاه از LocalAI با چند ترکیب مختلف تشخیص گفتار و ترجمه استفاده می‌کند."
+  },
+  "providers.localai.placeDevice": {
+    "en": "This computer",
+    "text": "این رایانه"
+  },
+  "providers.localai.placeServer": {
+    "en": "Another device",
+    "text": "دستگاه دیگر"
+  },
+  "providers.localai.ready": {
+    "en": "Ready to start",
+    "text": "آماده شروع"
+  },
+  "providers.localai.recheck": {
+    "en": "Check again",
+    "text": "بررسی دوباره"
+  },
+  "providers.localai.serverHttp": {
+    "en": "The other device answered with an error (HTTP {{status}}). Restarting the app or the model server there usually helps.",
+    "text": "دستگاه دیگر خطا برگرداند (HTTP {{status}}). معمولاً با راه‌اندازی دوبارهٔ برنامه یا سرور مدل در آن دستگاه رفع می‌شود."
+  },
+  "providers.localai.serverKey": {
+    "en": "Access key",
+    "text": "کلید دسترسی"
+  },
+  "providers.localai.serverKeyMissing": {
+    "en": "The other device asks for an access key. Enter it in Settings, under \"Another device\".",
+    "text": "دستگاه دیگر به کلید دسترسی نیاز دارد. آن را در تنظیمات، بخش «دستگاه دیگر»، وارد کنید."
+  },
+  "providers.localai.serverKeyNeeded": {
+    "en": "The other device asks for an access key. Under \"Another device\", turn on \"It asks for an access key\" and enter the key set on that device.",
+    "text": "دستگاه دیگر به کلید دسترسی نیاز دارد. در بخش «دستگاه دیگر»، «به کلید دسترسی نیاز دارد» را فعال کنید و کلید تنظیم‌شده در آن دستگاه را وارد کنید."
+  },
+  "providers.localai.serverKeyRefused": {
+    "en": "The other device did not accept the access key. Enter the key set on that device (on another Kotomimi, it is in its sharing Options).",
+    "text": "دستگاه دیگر این کلید دسترسی را نپذیرفت. کلید تنظیم‌شده در آن دستگاه را وارد کنید (در Kotomimi دیگر، کلید در «گزینه‌ها»ی اشتراک‌گذاری است)."
+  },
+  "providers.localai.serverNeedsKey": {
+    "en": "It asks for an access key",
+    "text": "به کلید دسترسی نیاز دارد"
+  },
+  "providers.localai.serverNeedsKeyTooltip": {
+    "en": "Turn this on when the other device was given an access key — a Kotomimi with one set under its sharing options, for example.",
+    "text": "اگر دستگاه دیگر کلید دسترسی دارد، این گزینه را روشن کنید؛ مثلاً اگر در Kotomimi آن دستگاه، در «گزینه‌ها»ی اشتراک‌گذاری کلیدی تنظیم شده است."
+  },
+  "providers.localai.serverNoAsr": {
+    "en": "The other device has no speech recognition model for {{source}}. Download one there first (in the model library of its sharing card), or let this computer listen.",
+    "text": "دستگاه دیگر مدل تشخیص گفتار برای {{source}} ندارد. ابتدا از کتابخانهٔ مدل در کارت اشتراک‌گذاری آن مدلی دانلود کنید، یا تشخیص گفتار را به این رایانه بسپارید."
+  },
+  "providers.localai.serverNoDetect": {
+    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
+    "text": "دستگاه دیگر مدل تشخیص گفتاری ندارد که زبان را خودکار تشخیص دهد. «من هم به … صحبت می‌کنم» و تشخیص خودکار زبان طرف مقابل به چنین مدلی نیاز دارند. ابتدا مدلی مانند Qwen3-ASR روی آن دستگاه دانلود کنید یا این دو گزینه را خاموش کنید."
+  },
+  "providers.localai.serverNoModels": {
+    "en": "The other device has no model yet: install or download one there first.",
+    "text": "دستگاه دیگر هنوز مدلی ندارد. ابتدا مدلی روی آن نصب یا دانلود کنید."
+  },
+  "providers.localai.serverSilent": {
+    "en": "This address does not answer. If Kotomimi is running on that device, enable its sharing to use its installed native models.",
+    "text": "اتصال به این آدرس ممکن نیست. اگر Kotomimi روی آن دستگاه باز است، اشتراک‌گذاری را فعال کنید تا از مدل‌های بومی نصب‌شده‌اش استفاده کنید."
+  },
+  "providers.localai.serverUnreachable": {
+    "en": "The other device ({{address}}) did not answer. Check that it is on and on the same network as this computer, and that Kotomimi there is sharing (or its model server is running). It is asked again by itself.",
+    "text": "دستگاه دیگر ({{address}}) پاسخ نداد. مطمئن شوید روشن است، به شبکهٔ این رایانه وصل است و اشتراک‌گذاری Kotomimi آن فعال است (یا سرور مدلش اجرا می‌شود). پس از اتصال، کار خودکار ادامه می‌یابد."
+  },
+  "providers.localai.sharedDeviceNone": {
+    "en": "No device connected yet",
+    "text": "هنوز دستگاهی متصل نشده"
+  },
+  "providers.localai.sourceAuto": {
+    "en": "The language cannot be detected with this setup. Choose the language you speak.",
+    "text": "با این ترکیب نمی‌توان زبان را خودکار تشخیص داد. زبانی را که صحبت می‌کنید انتخاب کنید."
+  },
+  "providers.localai.speedAbout": {
+    "en": "About {{seconds}} s",
+    "text": "حدود {{seconds}} ثانیه"
+  },
+  "providers.localai.speedAdviceGeneral": {
+    "en": "A smaller model or a faster device is suggested.",
+    "text": "بهتر است از مدل کوچک‌تر یا دستگاه قوی‌تری استفاده کنید."
+  },
+  "providers.localai.speedAdviceModel": {
+    "en": "A smaller model, such as {{name}}, is suggested.",
+    "text": "بهتر است از مدل کوچک‌تری مثل {{name}} استفاده کنید."
+  },
+  "providers.localai.speedAdviceSwitch": {
+    "en": "Switch and test again",
+    "text": "تغییر مدل و آزمون دوباره"
+  },
+  "providers.localai.speedBehind": {
+    "en": "Falls behind",
+    "text": "مدام عقب می‌افتد"
+  },
+  "providers.localai.speedCoach": {
+    "en": "{{seconds}} s per sentence for feedback, on average",
+    "text": "بازخورد هر جمله به‌طور میانگین {{seconds}} ثانیه"
+  },
+  "providers.localai.speedCoachSlow": {
+    "en": "Feedback is slower than speech, so it will fall further behind. ",
+    "text": "بازخورد از سرعت صحبت کردن کندتر است و کم‌کم بیشتر عقب می‌افتد. "
+  },
+  "providers.localai.speedFailed": {
+    "en": "The test could not finish: {{reason}}",
+    "text": "آزمون کامل نشد: {{reason}}"
+  },
+  "providers.localai.speedHead": {
+    "en": "Speed test · {{when}}",
+    "text": "آزمون سرعت · {{when}}"
+  },
+  "providers.localai.speedHear": {
+    "en": "Text appears {{seconds}} s after the speech ends",
+    "text": "متن اصلی {{seconds}} ثانیه پس از پایان گفتار نمایش داده می‌شود"
+  },
+  "providers.localai.speedHearSlow": {
+    "en": "Recognition is slower than speech, so the captions will fall further behind. ",
+    "text": "تشخیص گفتار از سرعت صحبت کردن کندتر است و زیرنویس‌ها کم‌کم بیشتر عقب می‌افتند. "
+  },
+  "providers.localai.speedJustNow": {
+    "en": "just now",
+    "text": "همین حالا"
+  },
+  "providers.localai.speedLegCoach": {
+    "en": "From you finishing to the feedback",
+    "text": "از پایان صحبت شما تا نمایش بازخورد"
+  },
+  "providers.localai.speedLegParticipant": {
+    "en": "From the other side finishing to the translation",
+    "text": "از پایان صحبت طرف مقابل تا نمایش ترجمه"
+  },
+  "providers.localai.speedLegSpeaker": {
+    "en": "From you finishing to the translation",
+    "text": "از پایان صحبت شما تا نمایش ترجمه"
+  },
+  "providers.localai.speedNoClip": {
+    "en": "There is no test recording for this language yet.",
+    "text": "هنوز برای این زبان صدای ضبط‌شده آزمایشی وجود ندارد."
+  },
+  "providers.localai.speedNone": {
+    "en": "No result arrived during the test.",
+    "text": "در طول آزمون نتیجه‌ای دریافت نشد."
+  },
+  "providers.localai.speedRetest": {
+    "en": "Test again",
+    "text": "آزمون دوباره"
+  },
+  "providers.localai.speedStop": {
+    "en": "Stop",
+    "text": "توقف"
+  },
+  "providers.localai.speedTest": {
+    "en": "Test speed",
+    "text": "آزمون سرعت"
+  },
+  "providers.localai.speedTesting": {
+    "en": "Testing speed: a recording of about ten seconds is sent through each step at speaking pace. Nothing is recorded or played.",
+    "text": "در حال آزمون سرعت: یک صدای ضبط‌شده حدود 10 ثانیه‌ای با سرعت عادی گفتار به هر مرحله فرستاده می‌شود. میکروفون استفاده نمی‌شود و صدایی پخش نمی‌شود."
+  },
+  "providers.localai.speedTranslate": {
+    "en": "{{seconds}} s per sentence to translate, on average",
+    "text": "ترجمه هر جمله به‌طور میانگین {{seconds}} ثانیه"
+  },
+  "providers.localai.speedTranslateSlow": {
+    "en": "Translation is slower than speech, so the translations will fall further behind. ",
+    "text": "ترجمه از سرعت صحبت کردن کندتر است و ترجمه‌ها کم‌کم بیشتر عقب می‌افتند. "
+  },
+  "providers.localai.speedVerdictOk": {
+    "en": "This setup keeps up with live speech.",
+    "text": "این ترکیب برای استفاده زنده مناسب است."
+  },
+  "providers.localai.speedVerdictSlow": {
+    "en": "Some steps cannot keep up with speech; see the notes above.",
+    "text": "بعضی مراحل به سرعت گفتار نمی‌رسند؛ توضیحات بالا را ببینید."
+  },
+  "providers.localai.stageDevice": {
+    "en": "Device",
+    "text": "دستگاه"
+  },
+  "providers.localai.tag_native": {
+    "en": "Native engine",
+    "text": "موتور بومی"
+  },
+  "providers.localai.tag_system": {
+    "en": "Built into macOS",
+    "text": "داخلی سیستم"
+  },
+  "providers.localai.tagHint_native": {
+    "en": "Runs on the graphics card using a native engine downloaded with the model. Loads when a session starts; the first start after boot may take about half a minute. Memory is released after the engine is no longer in use.",
+    "text": "با موتور بومی دانلودشده همراه مدل، روی کارت گرافیک اجرا می‌شود. هنگام شروع نشست بارگذاری می‌شود؛ اولین اجرا پس از روشن شدن رایانه ممکن است حدود نیم دقیقه طول بکشد. وقتی دیگر از موتور استفاده نشود، حافظه آزاد می‌شود."
+  },
+  "providers.localai.tagHint_system": {
+    "en": "The speech recognition of macOS itself: no video memory taken, nothing to warm up. The system downloads each language.",
+    "text": "تشخیص گفتار داخلی macOS: حافظهٔ گرافیکی اشغال نمی‌کند و نیازی به آماده‌سازی ندارد. بستهٔ هر زبان را خود سیستم دانلود می‌کند."
+  },
+  "providers.localai.textBaseUrlPlaceholder": {
+    "en": "e.g. https://api.openai.com/v1 or http://localhost:11434/v1",
+    "text": "مثلاً https://api.openai.com/v1 یا http://localhost:11434/v1"
+  },
+  "providers.localai.textModelPlaceholder": {
+    "en": "The model's name, e.g. gpt-4o-mini",
+    "text": "نام مدل، مثلاً gpt-4o-mini"
+  },
+  "providers.localai.translateInSession": {
+    "en": "The device's own choice (translated in the same session it hears in)",
+    "text": "به انتخاب آن دستگاه (در همان نشست تشخیص گفتار)"
+  },
+  "providers.localai.translateKey": {
+    "en": "API key of the translation model",
+    "text": "کلید API مدل ترجمه"
+  },
+  "providers.localai.translateKotomimiOwn": {
+    "en": "The device's own choice (its best model for your languages)",
+    "text": "به انتخاب آن دستگاه (مناسب‌ترین مدل برای دو زبان)"
+  },
+  "providers.localai.translateStage": {
+    "en": "Translation",
+    "text": "ترجمه"
+  },
+  "providers.localai.translateStageTooltip": {
+    "en": "What turns the recognized text into the other language. An API model is any service that speaks the OpenAI chat API: a hosted one, or Ollama or LM Studio on this computer.",
+    "text": "بخشی که متن تشخیص‌داده‌شده را به زبان دیگر ترجمه می‌کند. مدل API می‌تواند هر سرویس سازگار با API گفتگوی OpenAI باشد؛ چه سرویس ابری، چه Ollama یا LM Studio روی این رایانه."
+  },
+  "providers.localai.translateUnnamed": {
+    "en": "Translation has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
+    "text": "هنوز مدلی برای ترجمه آماده نیست. در کارت «ترجمه» زیر ارائه‌دهنده، مدلی انتخاب کنید (برای مدل API، آدرس و نام مدل را وارد کنید) یا محل اجرا را تغییر دهید."
+  },
+  "providers.localai.translatorFailed": {
+    "en": "The translation engine of this computer could not start. In the Translation card, press \"Try again\" — or choose another model.",
+    "text": "موتور ترجمهٔ این رایانه راه‌اندازی نشد. در کارت «ترجمه» روی «تلاش دوباره» بزنید یا مدل دیگری انتخاب کنید."
+  },
+  "providers.localai.translatorFailedShort": {
+    "en": "The translation engine could not start.",
+    "text": "موتور ترجمه راه‌اندازی نشد."
+  },
+  "providers.localai.translatorMissing": {
+    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
+    "text": "{{name}} هنوز دانلود نشده است. در کارت «ترجمه»، یک مدل بومی دانلود کنید یا «مدل API» یا «دستگاه دیگر» را انتخاب کنید."
+  },
+  "providers.localai.translatorReady": {
+    "en": "The translation engine is ready.",
+    "text": "موتور ترجمه آماده است."
+  },
+  "providers.localai.translatorUnfit": {
+    "en": "{{name}} does not translate between your two languages. Choose another model for it.",
+    "text": "{{name}} از دو زبان انتخابی شما پشتیبانی نمی‌کند. مدل دیگری انتخاب کنید."
+  },
+  "providers.localai.translatorUnsupported": {
+    "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
+    "text": "این سیستم فعلاً از موتور بومی ترجمه پشتیبانی نمی‌کند. در کارت «ترجمه»، «مدل API» یا «دستگاه دیگر» را انتخاب کنید."
+  },
+  "providers.localai.translatorWarming": {
+    "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",
+    "text": "موتور ترجمهٔ این رایانه هنوز در حال راه‌اندازی است؛ فقط چند ثانیه طول می‌کشد. به‌محض آماده شدن می‌توانید شروع کنید."
+  },
+  "providers.localai.translatorWarmingShort": {
+    "en": "Starting the translation engine…",
+    "text": "در حال راه‌اندازی موتور ترجمه…"
+  },
+  "providers.localai.typedFailed": {
+    "en": "A sentence you typed was not translated: the translation model did not answer.",
+    "text": "یکی از جمله‌های تایپ‌شده ترجمه نشد: مدل ترجمه پاسخ نداد."
+  },
+  "providers.localai.viaModel": {
+    "en": "API model",
+    "text": "مدل API"
+  },
+  "providers.openai_live.name": {
+    "en": "OpenAI Live",
+    "text": "OpenAI Live"
+  },
+  "providers.openai_translate.name": {
+    "en": "OpenAI Translate",
+    "text": "OpenAI Translate"
+  },
+  "providers.openai.name": {
+    "en": "OpenAI Realtime",
+    "text": "OpenAI Realtime"
+  },
+  "providers.palabraai.authModeApp": {
+    "en": "App Client ID/Secret",
+    "text": "شناسه و کلید محرمانه کلاینت برنامه"
+  },
+  "providers.palabraai.clientIdPlaceholder": {
+    "en": "Client ID",
+    "text": "شناسه کلاینت"
+  },
+  "providers.palabraai.clientSecretPlaceholder": {
+    "en": "Client Secret",
+    "text": "کلید محرمانه کلاینت"
+  },
+  "providers.palabraai.name": {
+    "en": "Palabra AI",
+    "text": "Palabra AI"
+  },
+  "providers.qwen_livetranslate.name": {
+    "en": "Qwen LiveTranslate",
+    "text": "Qwen LiveTranslate"
+  },
+  "providers.soniox.name": {
+    "en": "Soniox",
+    "text": "Soniox"
+  },
+  "providers.volcengine_ast2.accessTokenPlaceholder": {
+    "en": "Access Token",
+    "text": "توکن دسترسی"
+  },
+  "providers.volcengine_ast2.appIdPlaceholder": {
+    "en": "APP ID",
+    "text": "شناسه برنامه"
+  },
+  "providers.volcengine_ast2.authModeApp": {
+    "en": "App ID + Access Token",
+    "text": "شناسه برنامه + توکن دسترسی"
+  },
+  "providers.volcengine_ast2.name": {
+    "en": "Doubao AST 2.0",
+    "text": "ترجمه هم‌زمان Doubao 2.0"
+  },
+  "settings.glossaryAdd": {
+    "en": "Add a word…",
+    "text": "افزودن واژه…"
+  },
+  "settings.glossaryDelete": {
+    "en": "Delete entry",
+    "text": "حذف مورد"
+  },
+  "settings.glossaryFixOpen": {
+    "en": "Fix word",
+    "text": "اصلاح واژه"
+  },
+  "settings.glossaryFixSave": {
+    "en": "Save to glossary",
+    "text": "ذخیره در واژه‌نامه"
+  },
+  "settings.glossaryFixTo": {
+    "en": "Change to",
+    "text": "تغییر به"
+  },
+  "settings.glossaryFull": {
+    "en": "Glossary is full",
+    "text": "واژه‌نامه پر است"
+  },
+  "settings.glossaryHeard": {
+    "en": "Misheard as",
+    "text": "اشتباه شنیده‌شده"
+  },
+  "settings.glossaryOptional": {
+    "en": "Only if misheard",
+    "text": "فقط اگر اشتباه شنیده شده"
+  },
+  "settings.glossaryTitle": {
+    "en": "Personal glossary",
+    "text": "واژه‌نامه شخصی"
+  },
+  "settings.glossaryTooltip": {
+    "en": "Names and special words. Write each in the language it is spoken in. Where one has been misheard, add how on the right and it is put right from then on; some recognition models only follow that column. You can also select a misheard word in the conversation and correct it there.",
+    "text": "نام‌ها و واژه‌های خاص را به همان زبانی که گفته می‌شوند بنویسید. اگر واژه‌ای اشتباه شنیده شده، شکل اشتباه آن را در سمت راست وارد کنید تا از این به بعد خودکار اصلاح شود؛ بعضی مدل‌های تشخیص گفتار فقط ستون سمت راست را در نظر می‌گیرند. می‌توانید در گفتگو هم واژه‌ای را که اشتباه شنیده شده انتخاب و همان‌جا اصلاح کنید."
+  },
+  "settings.glossaryTooltipLabel": {
+    "en": "About personal glossary",
+    "text": "درباره واژه‌نامه شخصی"
+  },
+  "settings.glossaryWritten": {
+    "en": "Word",
+    "text": "واژه"
+  },
+  "settings.transcriptKeywordsPlaceholder": {
+    "en": "Sokuji, Kizuna AI, PulseAudio",
+    "text": "Sokuji, Kizuna AI, PulseAudio"
+  },
+  "setup.credentials.accessKeyId": {
+    "en": "Access Key ID",
+    "text": "شناسهٔ کلید دسترسی"
+  },
+  "setup.credentials.accessToken": {
+    "en": "Access Token",
+    "text": "توکن دسترسی"
+  },
+  "setup.credentials.apiSecret": {
+    "en": "API Secret",
+    "text": "کلید محرمانه API"
+  },
+  "setup.credentials.appId": {
+    "en": "App ID",
+    "text": "شناسهٔ برنامه"
+  },
+  "setup.credentials.secretAccessKey": {
+    "en": "Secret Access Key",
+    "text": "کلید دسترسی محرمانه"
+  },
+  "tour.steps.kotomimi-tips.coach": {
+    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
+    "text": "خودتان به زبان طرف مقابل صحبت می‌کنید؟ «بازخورد دستوری» را در تنظیمات فعال کنید. با فعال کردن «من هم به زبان طرف مقابل صحبت می‌کنم»، ترجمه و بازخورد دستوری خصوصی را هم‌زمان خواهید داشت."
+  },
+  "tour.steps.kotomimi-tips.content": {
+    "en": "Worth knowing before you start:",
+    "text": "پیش از شروع خوب است بدانید:"
+  },
+  "tour.steps.kotomimi-tips.share": {
+    "en": "Another device can use this computer's models: Settings → Provider → Share with other devices.",
+    "text": "دستگاه دیگری هم می‌تواند از مدل‌های این رایانه استفاده کند: «تنظیمات → ارائه‌دهنده → اشتراک‌گذاری با دستگاه‌های دیگر»."
+  },
+  "tour.steps.kotomimi-tips.title": {
+    "en": "Three more things",
+    "text": "سه نکته دیگر"
+  },
+  "tour.steps.kotomimi-tips.typed": {
+    "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
+    "text": "با شروع جلسه، کادر ورودی پایین صفحه ظاهر می‌شود: جمله‌ای بنویسید تا ترجمه شود. با Ctrl+K مستقیم به این کادر بروید."
+  },
+  "tour.steps.models.content_kotomimi": {
+    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
+    "text": "مدل‌ها را از اینجا دانلود کنید: در کارت هر مرحله، «کتابخانه مدل‌ها» را باز کنید. مدل‌های دارای نشان «پیشنهادی» در آزمون با گفت‌وگوهای واقعی بهترین نتیجه را داشته‌اند. نماد کوچک کنار نام هر مدل، نتیجه آزمون آن را نشان می‌دهد. مدل پس از دانلود خودکار فعال می‌شود."
+  },
+  "tour.steps.provider-settings.content_kotomimi": {
+    "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",
+    "text": "اینجا هر مرحله یک کارت دارد: تشخیص گفتار، ترجمه و بازخورد دستوری. در هر کارت، محل اجرای آن را انتخاب می‌کنید: دستگاه دیگری در شبکه محلی، مدل API یا همین رایانه. مدل را هم همان‌جا انتخاب می‌کنید. در «تنظیمات → ارائه‌دهنده» می‌توانید مدل‌های این رایانه را با دستگاه دیگری به اشتراک بگذارید."
+  },
+  "tour.steps.reading-aids.content": {
+    "en": "Help for reading the other language, switched here:",
+    "text": "نمایش راهنماهای خواندن زبان دیگر را از اینجا روشن یا خاموش کنید:"
+  },
+  "tour.steps.reading-aids.fonts": {
+    "en": "Fonts for each language are under Settings → Fonts.",
+    "text": "قلم هر زبان را در «تنظیمات → قلم‌ها» انتخاب کنید."
+  },
+  "tour.steps.reading-aids.furigana": {
+    "en": "Furigana — kana above Japanese kanji.",
+    "text": "فوریگانا: نمایش تلفظ با کانا بالای کانجی‌های ژاپنی."
+  },
+  "tour.steps.reading-aids.pinyin": {
+    "en": "Pinyin — tone-marked pinyin above Chinese.",
+    "text": "پین‌یین: نمایش پین‌یین با نشانه‌های نواخت بالای متن چینی."
+  },
+  "tour.steps.reading-aids.romanization": {
+    "en": "Romanization — a line in Latin letters under Japanese, Korean, Russian and Ukrainian.",
+    "text": "آوانویسی لاتین: افزودن یک خط تلفظ با حروف لاتین زیر متن ژاپنی، کره‌ای، روسی و اوکراینی."
+  },
+  "tour.steps.reading-aids.title": {
+    "en": "Reading aids",
+    "text": "کمک‌خوان"
+  },
+  "voiceLibrary.cloneVoiceRequired": {
+    "en": "This voice needs a clip before it can speak — open the voice list and add one.",
+    "text": "این صدا هنوز آماده صحبت نیست. فهرست صداها را باز کنید و یک نمونه صوتی اضافه کنید."
+  },
+  "voiceLibrary.filter.accent.african": {
+    "en": "African",
+    "text": "آفریقایی"
+  },
+  "voiceLibrary.filter.accent.american": {
+    "en": "American",
+    "text": "آمریکایی"
+  },
+  "voiceLibrary.filter.accent.arabic": {
+    "en": "Arabic",
+    "text": "عربی"
+  },
+  "voiceLibrary.filter.accent.australian": {
+    "en": "Australian",
+    "text": "استرالیایی"
+  },
+  "voiceLibrary.filter.accent.brazilian": {
+    "en": "Brazilian",
+    "text": "برزیلی"
+  },
+  "voiceLibrary.filter.accent.british": {
+    "en": "British",
+    "text": "بریتانیایی"
+  },
+  "voiceLibrary.filter.accent.chinese": {
+    "en": "Chinese",
+    "text": "چینی"
+  },
+  "voiceLibrary.filter.accent.french": {
+    "en": "French",
+    "text": "فرانسوی"
+  },
+  "voiceLibrary.filter.accent.german": {
+    "en": "German",
+    "text": "آلمانی"
+  },
+  "voiceLibrary.filter.accent.indian": {
+    "en": "Indian",
+    "text": "هندی"
+  },
+  "voiceLibrary.filter.accent.italian": {
+    "en": "Italian",
+    "text": "ایتالیایی"
+  },
+  "voiceLibrary.filter.accent.japanese": {
+    "en": "Japanese",
+    "text": "ژاپنی"
+  },
+  "voiceLibrary.filter.accent.korean": {
+    "en": "Korean",
+    "text": "کره‌ای"
+  },
+  "voiceLibrary.filter.accent.latin_american": {
+    "en": "Latin American",
+    "text": "آمریکای لاتین"
+  },
+  "voiceLibrary.filter.accent.portuguese": {
+    "en": "Portuguese",
+    "text": "پرتغالی"
+  },
+  "voiceLibrary.filter.accent.slavic": {
+    "en": "Slavic",
+    "text": "اسلاوی"
+  },
+  "voiceLibrary.filter.accent.southeast_asian": {
+    "en": "Southeast Asian",
+    "text": "جنوب شرق آسیا"
+  },
+  "voiceLibrary.filter.accent.spanish": {
+    "en": "Spanish",
+    "text": "اسپانیایی"
+  },
+  "voiceLibrary.filter.accentLabel": {
+    "en": "Accent",
+    "text": "لهجه"
+  },
+  "voiceLibrary.filter.age.child": {
+    "en": "Child",
+    "text": "کودک"
+  },
+  "voiceLibrary.filter.age.middle_aged": {
+    "en": "Middle-aged",
+    "text": "میانسال"
+  },
+  "voiceLibrary.filter.age.old": {
+    "en": "Mature",
+    "text": "سالمند"
+  },
+  "voiceLibrary.filter.age.teen": {
+    "en": "Teen",
+    "text": "نوجوان"
+  },
+  "voiceLibrary.filter.age.young": {
+    "en": "Young",
+    "text": "جوان"
+  },
+  "voiceLibrary.filter.ageLabel": {
+    "en": "Age",
+    "text": "سن"
+  },
+  "voiceLibrary.filter.anyAccent": {
+    "en": "Any accent",
+    "text": "همه لهجه‌ها"
+  },
+  "voiceLibrary.filter.anyAge": {
+    "en": "Any age",
+    "text": "همه سنین"
+  },
+  "voiceLibrary.filter.anyGender": {
+    "en": "Any gender",
+    "text": "همه جنسیت‌ها"
+  },
+  "voiceLibrary.filter.anyStyle": {
+    "en": "Any style",
+    "text": "همه سبک‌ها"
+  },
+  "voiceLibrary.filter.anyUseCase": {
+    "en": "Any use case",
+    "text": "همه کاربردها"
+  },
+  "voiceLibrary.filter.clear": {
+    "en": "Clear filters",
+    "text": "پاک کردن فیلترها"
+  },
+  "voiceLibrary.filter.count": {
+    "en": "{shown} of {total} voices",
+    "text": "{shown} از {total} صدا"
+  },
+  "voiceLibrary.filter.empty": {
+    "en": "No voices match these filters.",
+    "text": "هیچ صدایی با این فیلترها مطابقت ندارد."
+  },
+  "voiceLibrary.filter.gender.female": {
+    "en": "Female",
+    "text": "زنانه"
+  },
+  "voiceLibrary.filter.gender.male": {
+    "en": "Male",
+    "text": "مردانه"
+  },
+  "voiceLibrary.filter.gender.neutral": {
+    "en": "Neutral",
+    "text": "خنثی"
+  },
+  "voiceLibrary.filter.genderLabel": {
+    "en": "Gender",
+    "text": "جنسیت"
+  },
+  "voiceLibrary.filter.style.breathy": {
+    "en": "Breathy",
+    "text": "نفس‌آلود"
+  },
+  "voiceLibrary.filter.style.breezy": {
+    "en": "Breezy",
+    "text": "سبک و سرزنده"
+  },
+  "voiceLibrary.filter.style.bright": {
+    "en": "Bright",
+    "text": "درخشان"
+  },
+  "voiceLibrary.filter.style.calm": {
+    "en": "Calm",
+    "text": "آرام و متین"
+  },
+  "voiceLibrary.filter.style.casual": {
+    "en": "Casual",
+    "text": "خودمانی"
+  },
+  "voiceLibrary.filter.style.clear": {
+    "en": "Clear",
+    "text": "واضح"
+  },
+  "voiceLibrary.filter.style.confident": {
+    "en": "Confident",
+    "text": "بااعتمادبه‌نفس"
+  },
+  "voiceLibrary.filter.style.deep": {
+    "en": "Deep",
+    "text": "بم"
+  },
+  "voiceLibrary.filter.style.dramatic": {
+    "en": "Dramatic",
+    "text": "نمایشی"
+  },
+  "voiceLibrary.filter.style.easy_going": {
+    "en": "Easy-going",
+    "text": "راحت و صمیمی"
+  },
+  "voiceLibrary.filter.style.energetic": {
+    "en": "Energetic",
+    "text": "پرانرژی"
+  },
+  "voiceLibrary.filter.style.even": {
+    "en": "Even",
+    "text": "یکنواخت"
+  },
+  "voiceLibrary.filter.style.excitable": {
+    "en": "Excitable",
+    "text": "پرهیجان"
+  },
+  "voiceLibrary.filter.style.expressive": {
+    "en": "Expressive",
+    "text": "پراحساس"
+  },
+  "voiceLibrary.filter.style.firm": {
+    "en": "Firm",
+    "text": "قاطع"
+  },
+  "voiceLibrary.filter.style.formal": {
+    "en": "Formal",
+    "text": "رسمی"
+  },
+  "voiceLibrary.filter.style.forward": {
+    "en": "Forward",
+    "text": "رک"
+  },
+  "voiceLibrary.filter.style.friendly": {
+    "en": "Friendly",
+    "text": "صمیمی"
+  },
+  "voiceLibrary.filter.style.gentle": {
+    "en": "Gentle",
+    "text": "ملایم"
+  },
+  "voiceLibrary.filter.style.gravelly": {
+    "en": "Gravelly",
+    "text": "زبر"
+  },
+  "voiceLibrary.filter.style.informative": {
+    "en": "Informative",
+    "text": "توضیحی"
+  },
+  "voiceLibrary.filter.style.knowledgeable": {
+    "en": "Knowledgeable",
+    "text": "آگاه"
+  },
+  "voiceLibrary.filter.style.lively": {
+    "en": "Lively",
+    "text": "سرزنده"
+  },
+  "voiceLibrary.filter.style.mature": {
+    "en": "Mature",
+    "text": "پخته"
+  },
+  "voiceLibrary.filter.style.neutral": {
+    "en": "Neutral",
+    "text": "خنثی"
+  },
+  "voiceLibrary.filter.style.playful": {
+    "en": "Playful",
+    "text": "شوخ"
+  },
+  "voiceLibrary.filter.style.raspy": {
+    "en": "Raspy",
+    "text": "خش‌دار"
+  },
+  "voiceLibrary.filter.style.smooth": {
+    "en": "Smooth",
+    "text": "روان"
+  },
+  "voiceLibrary.filter.style.soft": {
+    "en": "Soft",
+    "text": "نرم"
+  },
+  "voiceLibrary.filter.style.upbeat": {
+    "en": "Upbeat",
+    "text": "شاد"
+  },
+  "voiceLibrary.filter.style.warm": {
+    "en": "Warm",
+    "text": "گرم"
+  },
+  "voiceLibrary.filter.style.youthful": {
+    "en": "Youthful",
+    "text": "جوان"
+  },
+  "voiceLibrary.filter.styleLabel": {
+    "en": "Style",
+    "text": "سبک"
+  },
+  "voiceLibrary.filter.useCase.conversational": {
+    "en": "Conversation",
+    "text": "گفت‌وگو"
+  },
+  "voiceLibrary.filter.useCase.educational": {
+    "en": "Teaching",
+    "text": "آموزش"
+  },
+  "voiceLibrary.filter.useCase.entertainment": {
+    "en": "Entertainment",
+    "text": "سرگرمی"
+  },
+  "voiceLibrary.filter.useCase.narration": {
+    "en": "Narration",
+    "text": "روایت"
+  },
+  "voiceLibrary.filter.useCase.social_media": {
+    "en": "Social media",
+    "text": "شبکه‌های اجتماعی"
+  },
+  "voiceLibrary.filter.useCaseLabel": {
+    "en": "Use case",
+    "text": "کاربرد"
+  }
+}

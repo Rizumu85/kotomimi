@@ -457,7 +457,7 @@ useSettingsStore.subscribe(
 - **ws**: WebSocket client for the development wire probes (`scripts/dev/wire-probe/`)
 
 ### Internationalization
-- Complete translations in 30 locale catalogs (`src/locales/*/translation.json`)
+- Complete translations in 30 locale catalogs (`src/locales/*/translation.json`). English and both Chinese are written by hand; after adding or rewording a string run `node scripts/translate-locales.mjs --model <name>` (Codex++ must be running), which fills the other 27 and keeps what it made in `scripts/locale-translations/`. `src/locales/translated.consistency.test.ts` fails on anything left in English
 - English fallback for missing translations
 - Language detection via i18next-browser-languagedetector
 - **UI Language Quick Access**: 12 most common languages directly available
