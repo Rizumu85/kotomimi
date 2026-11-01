@@ -116,6 +116,7 @@ jobs:
           electron/caption-share.test.js
           electron/ipc-channels.test.js
           electron/entry-map.consistency.test.js
+          scripts/check-docs.test.mjs
           electron/update-payload.test.js
           src/lib/subtitle
           src/components/Display

@@ -904,7 +904,6 @@ External LocalAI-compatible servers remain supported directly as remote/API serv
 ## 两台机器之间怎么协作
 
 - 服务器一侧的改动、发现的问题、对客户端的要求：在本仓库开 issue，或直接改这份文件的"给服务器一侧的约定"一节并提 PR。
-- 客户端一侧每次改动都会更新这份文件，所以看这份文件的提交记录就能知道约定有没有变。
 - 两边都可以用下面的实机测试来确认对方的改动没有破坏约定。
 
 ## 实机测试

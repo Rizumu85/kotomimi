@@ -209,6 +209,7 @@
     "make": "npm run build && electron-forge make",
     "make:pkg": "npm run build && electron-builder --mac pkg --publish never -c.directories.output=out/make-mac",
     "postinstall": "electron-rebuild && bash scripts/copy-ort-wasm.sh",
+    "prepare": "git config core.hooksPath .githooks || exit 0",
     "extension:build": "cd extension && npx vite build",
     "extension:dev": "cd extension && npx vite build --watch --mode development",
     "sidecar:setup": "bash sidecar/setup.sh"

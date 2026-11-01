@@ -1,2 +1,3 @@
 # Fork: shell scripts keep Unix line endings on every checkout: bash cannot run one with CRLF.
 *.sh text eol=lf
+.githooks/* text eol=lf

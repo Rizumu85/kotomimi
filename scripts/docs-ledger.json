@@ -1,0 +1,34 @@
+{
+  "AGENTS.md": {
+    "bytes": 1024,
+    "dated": 0
+  },
+  "CLAUDE.md": {
+    "bytes": 52224,
+    "dated": 4
+  },
+  "CONTEXT.md": {
+    "bytes": 10240,
+    "dated": 0
+  },
+  "FORK.md": {
+    "bytes": 195584,
+    "dated": 99
+  },
+  "README.md": {
+    "bytes": 17408,
+    "dated": 0
+  },
+  "android/README.md": {
+    "bytes": 73728,
+    "dated": 30
+  },
+  "docs/apple-speech-lan.md": {
+    "bytes": 14336,
+    "dated": 2
+  },
+  "native/README.md": {
+    "bytes": 37888,
+    "dated": 7
+  }
+}

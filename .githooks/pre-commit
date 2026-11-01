@@ -1,0 +1,4 @@
+#!/bin/sh
+# Docs are not a work log: see scripts/check-docs.mjs. A merge brings upstream's docs with it.
+[ -f "$(git rev-parse --git-dir)/MERGE_HEAD" ] && exit 0
+exec node scripts/check-docs.mjs --staged
