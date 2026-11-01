@@ -16,6 +16,18 @@ describe('glossary', () => {
     expect(addGlossaryEntry(current, { source: 'Sokuji' })).toMatchObject([{ id: 'one' }, { source: 'Sokuji' }]);
   });
 
+  it('keeps what a row is heard as when the row is added again (fork)', () => {
+    const current = normalizeGlossaryEntries([{ id: 'one', source: 'VRChat', aliases: ['V R Chat'] }]);
+    expect(addGlossaryEntry(current, { source: 'VRChat' })).toEqual([{ id: 'one', source: 'VRChat', aliases: ['V R Chat'] }]);
+    expect(addGlossaryEntry(current, { source: 'vrchat', aliases: ['ブイアール', 'V R Chat'] })).toEqual([{ id: 'one', source: 'vrchat', aliases: ['V R Chat', 'ブイアール'] }]);
+  });
+
+  it('keeps an alias that is the term itself: it puts right the case recognition writes (fork)', () => {
+    const entries = normalizeGlossaryEntries([{ id: 'one', source: 'VRC', aliases: ['VRC', 'ブイアールシー'] }]);
+    expect(entries[0].aliases).toEqual(['VRC', 'ブイアールシー']);
+    expect(normalizeRecognitionText('vrc に行こう、VRC だよ', { entries })).toBe('VRC に行こう、VRC だよ');
+  });
+
   it('holds the table to its size', () => {
     const rows = Array.from({ length: MAX_GLOSSARY_ENTRIES + 5 }, (_, i) => ({ source: `Term${i}` }));
     expect(normalizeGlossaryEntries(rows)).toHaveLength(MAX_GLOSSARY_ENTRIES);

@@ -15,12 +15,12 @@ export const parseAliases = (text: string): string[] => text.split(/[,，、]/).
 
 const sameTerm = (a: string, b: string): boolean => a.toLocaleLowerCase() === b.toLocaleLowerCase();
 
-function uniqueTerms(values: unknown, except: string): string[] {
+function uniqueTerms(values: unknown): string[] {
   if (!Array.isArray(values)) return [];
   const result: string[] = [];
   for (const value of values) {
     const term = cleanTerm(value);
-    if (term && term !== except && !result.includes(term)) result.push(term);
+    if (term && !result.includes(term)) result.push(term);
   }
   return result.slice(0, MAX_GLOSSARY_ALIASES);
 }
@@ -30,7 +30,9 @@ export function normalizeGlossaryEntry(value: unknown): GlossaryEntry | null {
   const raw = value as Partial<GlossaryEntry>;
   const source = cleanTerm(raw.source);
   if (!source) return null;
-  return { id: cleanTerm(raw.id) || newId(), source, aliases: uniqueTerms(raw.aliases, source) };
+  // An alias may be the term itself: matching ignores case, so VRC puts right the vrc that recognition writes. Dropped,
+  // what the user had just typed went from the cell with nothing said (the user, 2026-10-31).
+  return { id: cleanTerm(raw.id) || newId(), source, aliases: uniqueTerms(raw.aliases) };
 }
 
 export function normalizeGlossaryEntries(value: unknown): GlossaryEntry[] {
@@ -43,11 +45,13 @@ export function normalizeGlossaryEntries(value: unknown): GlossaryEntry[] {
   return result.slice(0, MAX_GLOSSARY_ENTRIES);
 }
 
-/** A new entry at the end; one the table already has a row for is that row again, as now written. */
+/** A new entry at the end; one the table already has a row for is that row again, as now written, with what it was heard as kept. */
 export function addGlossaryEntry(entries: readonly GlossaryEntry[], input: GlossaryEntryInput): GlossaryEntry[] {
   const at = entries.findIndex((entry) => sameTerm(entry.source, input.source));
   if (at < 0) return normalizeGlossaryEntries([...entries, input]);
-  return normalizeGlossaryEntries(entries.map((entry, index) => (index === at ? { ...input, id: entry.id } : entry)));
+  return normalizeGlossaryEntries(entries.map((entry, index) => (index === at
+    ? { id: entry.id, source: input.source, aliases: [...entry.aliases, ...(input.aliases ?? [])] }
+    : entry)));
 }
 
 function escapeRegExp(term: string): string {
