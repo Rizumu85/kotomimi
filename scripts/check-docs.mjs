@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // scripts/check-docs.mjs
 //
 // Docs are not a work log. FORK.md went from 10 KB to 218 KB in a month because
