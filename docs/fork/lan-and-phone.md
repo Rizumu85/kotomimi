@@ -32,7 +32,7 @@ Every HTTP answer, refusals included, carries the URL-encoded name in `X-Kotomim
 
 Capabilities are `transcript` (plus `bilingual` on Apple Speech), `translate`, `feedback`; the pipeline has `null`. Empty `languages` means any; `auto` among them means the recognizer names the language. `pair: [source, target]` marks a one-way translator.
 
-Translation needs `source_language`, `target_language` and a `user` message; the system message is not read. `model` is a shared translator, or `kotomimi` for the host's choice. A named model is never replaced: 422 `model_unfit`, or 503 `translator_busy` when a model that cannot take the pair holds the engine. Nothing fits: 404 `model_not_found`.
+Translation needs `source_language`, `target_language` and a `user` message; the system message is not read. `model` is a shared translator, or `kotomimi` for the host's choice. A model that cannot take the pair never answers: 422 `model_unfit`, or 503 `translator_busy` when such a model holds the engine. Otherwise the model holding the engine answers for the named one, and the answer's `model` says so. Nothing fits: 404 `model_not_found`.
 
 Feedback: `model` names a feedback model; `messages` pass unchanged, the prompt being the asking device's.
 
@@ -101,7 +101,7 @@ Handshake: `ws://<host>:<port>/v1/realtime?model=<name>`, no subprotocol without
 - Manual turns: `turn_detection: null`. On release `input_audio_buffer.commit`, or `.clear` if nothing was said, and never `response.create`: the server answers by itself after transcribing.
 - Audio: `input_audio_buffer.append`, 24 kHz mono PCM16, base64.
 
-The client reads `input_audio_buffer.committed`, `.speech_started`, `.speech_stopped`, `.cleared`; `conversation.item.input_audio_transcription.delta`, `.completed`, `.failed`; `response.created`, `response.output_item.added`, `response.output_text.delta`, `.done`, `response.output_item.done`, and `response.done`, without which the leg stays busy. `error` before `session.updated` refuses the start; after it, it is logged and the session goes on, unless it is `session_idle` or `segment_ended`.
+The client reads `input_audio_buffer.committed`, `.speech_started`, `.speech_stopped`, `.cleared`; `conversation.item.input_audio_transcription.delta`, `.completed`, `.failed`; `response.created`, `response.output_item.added`, `response.output_text.delta`, `.done`, `response.output_item.done`, and `response.done`, without which the leg stays busy. `error` before `session.updated` refuses the start; after it, it is logged and the session goes on, unless its `code` is `session_idle` or `session_expired`.
 
 Text: `POST <base>/chat/completions` with `{model, stream: true, messages}`, SSE or whole; `<think>…</think>` is stripped. `GET <base>/models` lists. `GET <base>/models/capabilities` is optional (`kindOf`): `transcript` a recognizer, `chat` or `completion` a text model, `translate` a translator, empty a pipeline, others (`vad`, `tts`) offered nowhere.
 

@@ -1,12 +1,61 @@
 // @vitest-environment node
 // The repository's docs against their ledger, and the rules the ledger leans on.
 import { describe, it, expect } from 'vitest';
-import { citedPaths, checkTree, datedLines } from './check-docs.mjs';
+import { execFileSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { checkStaged, citedPaths, checkTree, datedLines } from './check-docs.mjs';
 
 describe('docs', () => {
   it('stay within the ledger', () => {
     expect(checkTree()).toEqual([]);
   }, 20000);
+});
+
+describe('checkStaged', () => {
+  const inRepo = (run) => {
+    const root = mkdtempSync(join(tmpdir(), 'check-docs-'));
+    const git = (...args) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], { cwd: root, stdio: 'pipe' });
+    const write = (file, text) => writeFileSync(join(root, file), text);
+    try {
+      git('init', '-q');
+      mkdirSync(join(root, 'scripts'));
+      write('scripts/docs-ledger.json', JSON.stringify({ 'LISTED.md': { bytes: 10, dated: 0 } }));
+      write('LISTED.md', 'short\n');
+      write('OTHER.md', 'one line\n');
+      git('add', '-A');
+      git('commit', '-qm', 'start');
+      run({ root, git, write });
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  };
+
+  it('judges what was staged, not the working copy', () => {
+    inRepo(({ root, git, write }) => {
+      write('LISTED.md', 'far too long for its cap\n');
+      git('add', 'LISTED.md');
+      write('LISTED.md', 'short\n');
+      expect(checkStaged(root)).toEqual([expect.stringContaining('over its cap')]);
+    });
+  });
+
+  it('sees an unlisted doc grow within a line', () => {
+    inRepo(({ root, git, write }) => {
+      write('OTHER.md', 'one line, and a great deal more of it\n');
+      git('add', 'OTHER.md');
+      expect(checkStaged(root)).toEqual([expect.stringContaining('grows by')]);
+    });
+  });
+
+  it('lets an unlisted doc change in place', () => {
+    inRepo(({ root, git, write }) => {
+      write('OTHER.md', 'two line\n');
+      git('add', 'OTHER.md');
+      expect(checkStaged(root)).toEqual([]);
+    });
+  });
 });
 
 describe('datedLines', () => {

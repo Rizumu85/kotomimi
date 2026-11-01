@@ -55,18 +55,24 @@ export const citedPaths = (text) => {
 // The headings a file has, for code that cites one by name.
 const headings = (text) => lines(text).filter((l) => /^#+ /.test(l)).map((l) => l.replace(/^#+\s*/, '').trim());
 
+const overLedger = (file, text, { bytes, dated }) => {
+  const over = [];
+  const size = Buffer.byteLength(text);
+  if (size > bytes) over.push(`${file}: ${size} bytes, over its cap of ${bytes}`);
+  const count = datedLines(text);
+  if (count > dated) over.push(`${file}: ${count} dated lines, over its ${dated}`);
+  return over;
+};
+
 export function checkTree(root = REPO_ROOT) {
   const problems = [];
   const ledger = JSON.parse(readFileSync(join(root, LEDGER), 'utf8'));
   const tracked = lines(git(root, 'ls-files', '--cached', '--others', '--exclude-standard'));
 
-  for (const [file, { bytes, dated }] of Object.entries(ledger)) {
+  for (const [file, row] of Object.entries(ledger)) {
     if (!existsSync(join(root, file))) { problems.push(`${file}: in the ledger, but there is no such file`); continue; }
     const text = readDoc(root, file);
-    const size = Buffer.byteLength(text);
-    if (size > bytes) problems.push(`${file}: ${size} bytes, over its cap of ${bytes}`);
-    const count = datedLines(text);
-    if (count > dated) problems.push(`${file}: ${count} dated lines, over its ${dated}`);
+    problems.push(...overLedger(file, text, row));
     if (file === 'FORK.md' || file.startsWith(FORK_DOCS)) {
       for (const p of citedPaths(text)) {
         const beside = posix.normalize(posix.join(posix.dirname(file), p));
@@ -92,20 +98,24 @@ export function checkTree(root = REPO_ROOT) {
   return problems;
 }
 
-// What the tree cannot show: what this commit does to the ledger, and to the docs it does not list.
+// What the tree cannot show: what this commit does to the ledger, and to the docs. The index, not
+// the working copy, is what lands, so a doc shortened after `git add` is judged as it was added.
 export function checkStaged(root = REPO_ROOT) {
   const problems = [];
-  const staged = lines(git(root, 'diff', '--cached', '--no-renames', '--numstat', '--diff-filter=AM', '--', '*.md'));
-  const added = new Set(lines(git(root, 'diff', '--cached', '--no-renames', '--name-only', '--diff-filter=A', '--', '*.md')));
-  const ledger = JSON.parse(git(root, 'show', `:${LEDGER}`));
-  for (const row of staged) {
-    const [plus, minus, file] = row.split('\t');
-    if (isFree(file) || ledger[file]) continue;
-    if (added.has(file)) problems.push(`${file}: a new .md file`);
-    else if (Number(plus) > Number(minus)) problems.push(`${file}: grows by ${plus - minus} lines`);
+  const show = (ref) => git(root, 'show', ref).replace(/\r\n/g, '\n');
+  const stagedDocs = (filter) => lines(git(root, 'diff', '--cached', '--no-renames', '--name-only', `--diff-filter=${filter}`, '--', '*.md'));
+  const added = new Set(stagedDocs('A'));
+  const ledger = JSON.parse(show(`:${LEDGER}`));
+  for (const file of stagedDocs('AM')) {
+    if (isFree(file)) continue;
+    const text = show(`:${file}`);
+    if (ledger[file]) { problems.push(...overLedger(file, text, ledger[file])); continue; }
+    if (added.has(file)) { problems.push(`${file}: a new .md file`); continue; }
+    const grew = Buffer.byteLength(text) - Buffer.byteLength(show(`HEAD:${file}`));
+    if (grew > 0) problems.push(`${file}: grows by ${grew} bytes`);
   }
   let before = {};
-  try { before = JSON.parse(git(root, 'show', `HEAD:${LEDGER}`)); } catch { return problems; }
+  try { before = JSON.parse(show(`HEAD:${LEDGER}`)); } catch { return problems; }
   for (const [file, row] of Object.entries(ledger)) {
     const was = before[file];
     if (!was) problems.push(`${LEDGER}: adds ${file}`);
