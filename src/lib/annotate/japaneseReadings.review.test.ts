@@ -1,7 +1,7 @@
 // @vitest-environment node
 // Fork: the cases of a review of `japaneseReadings.ts` against the real dictionary (2026-10-06; the report,
-// REVIEW-japanese-readings.md, is on the branch claude/intelligent-bohr-4ha0y4, and FORK.md says what was done with
-// it). Every case here is a line as the app would get it, and the reading a speaker gives it:
+// REVIEW-japanese-readings.md, is on the branch claude/intelligent-bohr-4ha0y4). Every case here is a line as the app
+// would get it, and the reading a speaker gives it:
 //   - "fired and was wrong": a rule changed the reading to a wrong one. Each is a condition that was narrowed.
 //   - "keeps": readings that were right, and that the narrower or new rules must not break.
 //   - "was not put right": misreadings no rule covered, with the rule that now does.

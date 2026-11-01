@@ -7,7 +7,7 @@
  * as おこなった, 今 before a noun as こん, 金 as きん. It also reads a
  * number and its counter apart, so the sound change between them is lost:
  * 一回 comes out いちかい. Measured on what the app showed of real VRChat
- * talk (FORK.md, "假名注音的读音修正"), these were the mistakes that came
+ * talk (FORK.md), these were the mistakes that came
  * back again and again; another dictionary (Sudachi) made as many of its
  * own. So the dictionary stays, and the words it misreads are read again
  * here, each by a rule that names what has to stand beside it.

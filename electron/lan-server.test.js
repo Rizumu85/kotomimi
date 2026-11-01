@@ -369,7 +369,7 @@ describe('the shared models\' door: a session left running', () => {
   });
 });
 
-// From the security review of 2026-10-06 (FORK.md, "共享的安全加固"): what the door refuses.
+// From the security review of 2026-10-06 (docs/fork/lan-and-phone.md): what the door refuses.
 describe('the shared models\' door: who is turned away', () => {
   /** An HTTP request with its own headers, answered with the status and the headers. */
   const ask = (port, path, headers) => new Promise((resolve, reject) => {

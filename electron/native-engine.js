@@ -89,7 +89,7 @@ const QWEN_LANGUAGES = ['zh', 'en', 'yue', 'ar', 'de', 'fr', 'es', 'pt', 'id', '
 
 /**
  * The models, by the id the page asks with. `options` are the runtime's
- * session options; R2T2's are the ones measured (FORK.md, "原生引擎").
+ * session options; R2T2's are the ones measured (docs/fork/native-engines.md).
  * `requestOptions` are what it is told with every reading (the server's
  * `default_request_options`), and `unspaced` says its text has spaces to be
  * taken out before it is shown (`unspaced`).
@@ -123,7 +123,7 @@ const MODELS = {
     languages: QWEN_LANGUAGES,
   },
   // SenseVoice-Small: a quarter of a gigabyte, and as right as the small Qwen3 below on the stretches the app cuts
-  // (20.3 % of the kana wrong against 20.7 %, the 1.7B 16.9 %; none of its readings empty — FORK.md, "又轻又快").
+  // (20.3 % of the kana wrong against 20.7 %, the 1.7B 16.9 %; none of its readings empty — docs/fork/measurements.md).
   // Another kind of model: it writes a stretch in one pass, not a letter at a time, so it cannot lose its way, and
   // a reading costs it next to nothing. Read a stretch at a time like the others here.
   // For every system the runtime is published for, each run with its own archive (2026-10-12/13): on Windows (Vulkan,
@@ -148,7 +148,7 @@ const MODELS = {
     unspaced: true,
   },
   // The small one, for a computer that runs a game beside it: about 2 GB of video memory where the 1.7B holds 3, a
-  // reading a quarter shorter, and more characters wrong (FORK.md, "小模型"). The same family, read the same way.
+  // reading a quarter shorter, and more characters wrong (docs/fork/measurements.md). The same family, read the same way.
   'qwen3-asr-0.6b-q8': {
     takesContext: true,
     file: 'qwen3-asr-0.6b-q8_0.gguf',
@@ -163,7 +163,7 @@ const MODELS = {
   },
   // The smallest: about 1 GB of video memory, and ten seconds of speech read in 0.15 s on an RTX 5070 Ti. As
   // accurate as the small Qwen3 on a whole clip, but of the sentences the app cuts it writes nothing for one short
-  // one in five (FORK.md, "小模型"): the last choice, for a computer with no memory for another. Read a stretch at
+  // one in five (docs/fork/measurements.md): the last choice, for a computer with no memory for another. Read a stretch at
   // a time, as Qwen3-ASR is: a reading costs it so little that its own streaming would save nothing worth a second
   // path.
   'nemotron-asr-0.6b-q8': {
@@ -268,7 +268,7 @@ const translatorFits = (id, source, target) => {
 /**
  * The chat models that give the grammar feedback, run by the same server: each a Q4_K_M file at a fixed revision.
  * Gemma 4 E2B is the one that, of the small models measured 2026-10-05, caught most mistakes without "correcting"
- * right casual speech (FORK.md, "原生语法反馈引擎").
+ * right casual speech (docs/fork/native-engines.md).
  */
 const COACHES = {
   'gemma-4-e2b': {

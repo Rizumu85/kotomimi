@@ -65,7 +65,7 @@ class Release(val version: String, val code: Long, val apk: String, override val
 
 /**
  * GitHub's release downloads are often not reached from mainland China: they time out, or come at some 30 KB/s (an
- * exit in Beijing, 2026-10-12; FORK.md). These are public relays of them, run by volunteers — the three the desktop
+ * exit in Beijing, 2026-10-12; docs/fork/native-engines.md). These are public relays of them, run by volunteers — the three the desktop
  * app asks (`electron/fetch-file.js`), used as `<relay><the whole GitHub address>`. All three answered a part of a
  * file asked for by its place in it (HTTP 206), which the download in pieces needs, and passed a query on
  * (2026-10-13).

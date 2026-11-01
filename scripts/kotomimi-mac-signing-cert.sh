@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Fork: makes the certificate the macOS build is signed with, and stores it in
-# the repository's secrets (FORK.md, "macOS 的签名"). Run once, by the
+# the repository's secrets (docs/fork/release.md). Run once, by the
 # repository's owner, with Git Bash:
 #
 #   bash scripts/kotomimi-mac-signing-cert.sh [owner/repo]

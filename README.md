@@ -187,4 +187,4 @@ Kotomimi is a personal fork of [Sokuji](https://github.com/kizuna-ai-lab/sokuji)
 
 **Limits**: the Kotomimi provider is text-only; the SenseVoice (int8) among the app's own models drops kana in Japanese, so it is no longer offered for Japanese (the native engine's SenseVoice-Small is another build, and does not); recognition through an API shows text only when a sentence ends.
 
-Everything else — how the stages combine, the wire contract, building and releasing — is in [FORK.md](FORK.md) (Chinese). Sokuji is the work of [Kizuna AI Lab](https://github.com/kizuna-ai-lab); this fork keeps its license, [AGPL-3.0](LICENSE). Please report this fork's problems [here](https://github.com/Rizumu85/kotomimi/issues), not upstream.
+Everything else — how the stages combine, the wire contract, building and releasing — is in [FORK.md](FORK.md). Sokuji is the work of [Kizuna AI Lab](https://github.com/kizuna-ai-lab); this fork keeps its license, [AGPL-3.0](LICENSE). Please report this fork's problems [here](https://github.com/Rizumu85/kotomimi/issues), not upstream.

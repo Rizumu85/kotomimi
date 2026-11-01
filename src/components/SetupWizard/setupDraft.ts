@@ -141,7 +141,7 @@ export function setupReducer(d: SetupDraft, a: SetupAction): SetupDraft {
   switch (a.type) {
     case 'setScenario':
       // Fork: with no step to choose another, a provider the draft has is kept — the saved one, on a re-run, and with
-      // it every place its stages run (FORK.md: "重新运行向导时，已保存的提供商和各环节的去处保持不变").
+      // it every place its stages run.
       if (a.keepProvider || providerKept()) return { ...d, scenario: a.scenario };
       return { ...d, scenario: a.scenario, providerPath: null, provider: null, ...cleared };
     case 'setPath':

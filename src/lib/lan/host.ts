@@ -7,7 +7,7 @@
  * `LanTranscriber` each.
  *
  * To the other device this is a server that speaks the wire the Kotomimi
- * provider already speaks to a LocalAI (`FORK.md`), so nothing new is needed
+ * provider already speaks to a LocalAI (`docs/fork/lan-and-phone.md`), so nothing new is needed
  * there: the address goes where a LocalAI's would.
  *
  * Everything it touches is handed in — the bridge to the main process, the

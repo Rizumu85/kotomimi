@@ -2,7 +2,7 @@
 // electron/mac-keychain.test.js
 //
 // Fork: on a Mac the app does not ask the system keychain for Chromium's cookie key — macOS asks the person for it
-// after every update of an app that is not signed by an Apple team (FORK.md, "macOS 的签名"). The switch that does
+// after every update of an app that is not signed by an Apple team (docs/fork/release.md). The switch that does
 // this has to be set before the app is ready, on macOS alone, and nothing may read the keychain by another way.
 import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
