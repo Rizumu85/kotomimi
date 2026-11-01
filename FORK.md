@@ -52,7 +52,7 @@ With Kotomimi (`localai`) selected, controls that serve translated speech output
 - Recognition has a row for each language a run hears. An explicit choice is kept, including a recognizer that needs best-effort language identification.
 - Native translation has one row: the engine runs one model for the whole stage, so its menu lists only models that take every direction the run translates.
 - **Model library** in a stage downloads native models. A download selects its model for the original stage and row when it finishes, even if the library has closed. Downloads from the sharing library change no selection.
-- Readiness checks that the needed native models are downloaded; only starting a session starts engines.
+- Readiness checks that the needed native models are downloaded and starts nothing. Engines start with a session, once ahead for a start at sign-in, and from a failed engine's retry.
 - A selected native translator that is missing, or cannot translate a required direction, stops the session from starting. Nothing is substituted.
 - Models advertising translation directions are checked for every required direction, the reverse included when you speak both languages. A remote session shows the model that served the request when it differs from the choice.
 

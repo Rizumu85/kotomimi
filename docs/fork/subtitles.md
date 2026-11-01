@@ -25,7 +25,7 @@ Subtitle view is the default (`compactMode`); list view is the conversation list
 Layout computed from live text jumped every second, so nothing is sized by content.
 
 - Text is always the chosen size. Too long, it loses its oldest whole line (`Slot`, `wholeLinesFrom`).
-- Each text has a fixed slot, written in or not. A silent lane keeps its room.
+- Each text but feedback has a fixed slot, written in or not; feedback adds its row when it comes. A silent lane keeps its room.
 - Lanes are centred in the box. Small lines stand on the foot of their slot, so a reading grows into kept room and the words stay put.
 
 ## Window height
@@ -40,7 +40,7 @@ Layout computed from live text jumped every second, so nothing is sized by conte
 
 ## Toolbar
 
-The toolbar is the head of the caption box, in its own room above it (`subtitle-app--framed`), so it covers no caption. With no run it stays out and says the state where the clock goes. `barFit` folds it as the window narrows.
+The toolbar is the head of the caption box, in its own room above it (`subtitle-app--framed`), so it covers no caption. With no run it stays out, the clock at nought when ready; any other state replaces the clock. `barFit` folds it as the window narrows.
 
 ## Click-through
 
@@ -48,7 +48,7 @@ During a run only, the window gives every click to what is under it and the tool
 
 The main process polls the cursor every 50 ms (`watchPointer`) and takes clicks only over that button. Page enter and leave events flickered, because switching mouse capture fires them.
 
-It is never kept: opening or closing the view and the end of a run clear it, since a window found unclickable is a trap. Escape in the subtitle window leaves subtitle mode too.
+It is never kept: opening or closing the view and the end of a run clear it, since a window found unclickable is a trap. Escape in the subtitle window leaves subtitle mode too, once the typing field and fullscreen are closed.
 
 ## Looks
 
@@ -68,7 +68,7 @@ Each side shows source, translation, both or off.
 
 ## Sentence by sentence
 
-A recognizer closes a stretch at a pause (1.4 s) or its longest turn (15 s). With `translateBySentence` on (the default), a leg that translates what it hears closes finished sentences as they come. Sound is not cut, only text; off, a stretch is translated whole.
+A recognizer closes a stretch at a pause (1.4 s) or its longest turn (15 s by default). With `translateBySentence` on (the default), a leg that translates what it hears closes finished sentences as they come. Sound is not cut, only text; off, a stretch is translated whole.
 
 A closed caption cannot be taken back, so right beats early. `cutAt` (`src/providers/openai/sentenceCut.ts`) cuts only:
 
@@ -95,7 +95,7 @@ A request carries only its sentence, except Hunyuan MT's Chinese form (`wrapAfte
 
 ## Glossary
 
-Up to 50 hand-kept rows (`src/lib/glossary/glossary.ts`): a word, and what it was misheard as. Qwen3-ASR gets the words (`takesContext`), cloud providers a list or prompt; Apple Speech gets none. Misheard forms are folded in before translation (`PipelineLeg.complete`) and for display (`Run.glossaryEvent`). `WordFix.tsx` adds a word from a selection in the main list; it holds from the next sentence.
+Up to 50 hand-kept rows (`src/lib/glossary/glossary.ts`): a word, and what it was misheard as. Qwen3-ASR gets the words (`takesContext`), some cloud providers a list or prompt; Apple Speech gets none. Misheard forms are folded in before translation (`PipelineLeg.complete`) and for display (`Run.glossaryEvent`). `WordFix.tsx` adds a word from a selection in the main list; it holds from the next sentence.
 
 ## Limits
 
