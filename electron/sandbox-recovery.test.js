@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+import path from 'node:path';
 import {
   parseIcaclsAces,
   findExplicitOrphanSids,
@@ -425,6 +426,8 @@ describe('applyNoSandboxFlag', () => {
 describe('grantInstallDirSandboxRead', () => {
   const ROOT = 'C:/Users/j/AppData/Local/sokuji';
   const EXE = `${ROOT}/app-0.43.0/sokuji.exe`;
+  const UPDATE = path.join(ROOT, 'Update.exe');
+  const MARKER = path.join(ROOT, INSTALL_ACL_MARKER);
 
   /** An fs whose existsSync answers from `present`, a set of paths. */
   function makeFs(present) {
@@ -435,7 +438,7 @@ describe('grantInstallDirSandboxRead', () => {
   }
 
   it('is a no-op on non-win32', () => {
-    const deps = makeDeps({ fs: makeFs(new Set([`${ROOT}/Update.exe`])) });
+    const deps = makeDeps({ fs: makeFs(new Set([UPDATE])) });
     deps.platform = 'linux';
     expect(grantInstallDirSandboxRead(EXE, { deps })).toBe('skipped');
     expect(deps.execFileSync).not.toHaveBeenCalled();
@@ -449,19 +452,19 @@ describe('grantInstallDirSandboxRead', () => {
   });
 
   it('grants ALL APPLICATION PACKAGES read on the Squirrel root, then writes the marker', () => {
-    const deps = makeDeps({ fs: makeFs(new Set([`${ROOT}/Update.exe`])) });
+    const deps = makeDeps({ fs: makeFs(new Set([UPDATE])) });
     expect(grantInstallDirSandboxRead(EXE, { deps })).toBe('granted');
     expect(deps.execFileSync).toHaveBeenCalledTimes(1);
     const [cmd, args, opts] = deps.execFileSync.mock.calls[0];
     expect(cmd).toBe('icacls');
     expect(args).toEqual([ROOT, '/grant', '*S-1-15-2-1:(OI)(CI)(RX)']);
     expect(opts).toMatchObject({ windowsHide: true });
-    expect(deps.fs.writeFileSync).toHaveBeenCalledWith(`${ROOT}/${INSTALL_ACL_MARKER}`, expect.any(String));
+    expect(deps.fs.writeFileSync).toHaveBeenCalledWith(MARKER, expect.any(String));
   });
 
   it('does not run icacls again once the marker exists', () => {
     const deps = makeDeps({
-      fs: makeFs(new Set([`${ROOT}/Update.exe`, `${ROOT}/${INSTALL_ACL_MARKER}`])),
+      fs: makeFs(new Set([UPDATE, MARKER])),
     });
     expect(grantInstallDirSandboxRead(EXE, { deps })).toBe('already');
     expect(deps.execFileSync).not.toHaveBeenCalled();
@@ -469,7 +472,7 @@ describe('grantInstallDirSandboxRead', () => {
 
   it('reports a failed grant without throwing and writes no marker, so the next launch retries', () => {
     const deps = makeDeps({
-      fs: makeFs(new Set([`${ROOT}/Update.exe`])),
+      fs: makeFs(new Set([UPDATE])),
       execFileSync: vi.fn(() => {
         throw new Error('Access is denied.');
       }),
@@ -479,7 +482,7 @@ describe('grantInstallDirSandboxRead', () => {
   });
 
   it('still reports the grant when only the marker write fails', () => {
-    const fs = makeFs(new Set([`${ROOT}/Update.exe`]));
+    const fs = makeFs(new Set([UPDATE]));
     fs.writeFileSync = vi.fn(() => {
       throw new Error('EPERM');
     });

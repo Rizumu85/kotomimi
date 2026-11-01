@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import path from 'node:path';
 import { resolveAudioHostPath, AUDIO_HOST_REL_PATH } from './audio-host-path.js';
 
 const yes = () => true;
@@ -12,7 +13,7 @@ describe('resolveAudioHostPath', () => {
       appPath: '/repo',
       existsSync: yes,
     });
-    expect(p).toBe(`/app/resources/${AUDIO_HOST_REL_PATH}`);
+    expect(p).toBe(path.join('/app/resources', AUDIO_HOST_REL_PATH));
   });
 
   it('falls back to the repo tree when the packaged copy is absent', () => {
@@ -27,7 +28,7 @@ describe('resolveAudioHostPath', () => {
       existsSync,
     });
 
-    expect(p).toBe(`/repo/${AUDIO_HOST_REL_PATH}`);
+    expect(p).toBe(path.join('/repo', AUDIO_HOST_REL_PATH));
   });
 
   it('works when resourcesPath is undefined (plain node, no Electron)', () => {
@@ -37,7 +38,7 @@ describe('resolveAudioHostPath', () => {
       appPath: '/repo',
       existsSync: yes,
     });
-    expect(p).toBe(`/repo/${AUDIO_HOST_REL_PATH}`);
+    expect(p).toBe(path.join('/repo', AUDIO_HOST_REL_PATH));
   });
 
   it('returns null when the binary is nowhere', () => {
@@ -50,14 +51,14 @@ describe('resolveAudioHostPath', () => {
     expect(resolveAudioHostPath({
       platform: 'darwin', arch: 'arm64', resourcesPath: '/app/resources', appPath: '/repo',
       existsSync: yes,
-    })).toBe('/app/resources/resources/bin/darwin-arm64/sokuji-audio-host');
+    })).toBe(path.join('/app/resources/resources/bin/darwin-arm64/sokuji-audio-host'));
   });
 
   it('resolves the Intel macOS location', () => {
     expect(resolveAudioHostPath({
       platform: 'darwin', arch: 'x64', resourcesPath: '/app/resources', appPath: '/repo',
       existsSync: yes,
-    })).toBe('/app/resources/resources/bin/darwin-x64/sokuji-audio-host');
+    })).toBe(path.join('/app/resources/resources/bin/darwin-x64/sokuji-audio-host'));
   });
 
   it('returns null on linux, which taps PipeWire directly and needs no binary', () => {

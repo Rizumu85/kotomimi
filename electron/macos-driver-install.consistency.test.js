@@ -66,7 +66,8 @@ beforeEach(() => {
   writeFileSync(path.join(root, 'postinstall'), sandboxed, { mode: 0o755 });
 });
 
-describe('pkg postinstall survives PackageKit running it twice', () => {
+// A POSIX shell script with POSIX paths, stood in for by POSIX commands: it has nothing to run on under Windows.
+describe.skipIf(process.platform === 'win32')('pkg postinstall survives PackageKit running it twice', () => {
   it('installs the driver and restarts CoreAudio once across both runs', () => {
     runPostinstall();
     runPostinstall();
