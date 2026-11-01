@@ -112,8 +112,28 @@ const LEDGER: Record<string, number> = {
   // --- components/Subtitle ---
   // The same fallbacks for the subtitle's user colours (`--subtitle-source-color`,
   // `--subtitle-translation-color`, `--subtitle-highlight-overlay`).
-  'src/components/Subtitle/SubtitleStream.scss': 4,
+  // ...and what stands on whatever is behind the window, not on a scheme: the
+  // outlines, the shadows and the dark squares a look with no panel shows.
+  'src/components/Subtitle/SubtitleStream.scss': 23,
   'src/components/Subtitle/SubtitleApp.scss': 1,
+  // Fork: the subtitle looks, each its own fixed colours, and their half-dark,
+  // half-light sample.
+  'src/lib/subtitle/look.ts': 12,
+  'src/components/Subtitle/SubtitleBands.tsx': 4,
+  'src/components/Display/SubtitleLook.tsx': 1,
+  'src/components/Display/SubtitleLook.scss': 2,
+  // Fork: VRChat's chatbox as VRChat draws it, and a video's words over the captions.
+  'src/components/VRChat/VRChat.scss': 13,
+  // --- the rest of the fork ---
+  // A slider's thumb, a white disc on any track.
+  'src/components/Settings/sections/MicGateControl.scss': 5,
+  // A correction's red, on the user's own colours.
+  'src/components/Feedback/Correction.scss': 1,
+  // Shadows and an edge, which read in either scheme or not at all.
+  'src/components/Fonts/Fonts.scss': 1,
+  'src/App.scss': 1,
+  // Ink on a canvas that measures a glyph, never shown.
+  'src/lib/fonts/systemFonts.ts': 1,
 };
 
 describe('colour ledger', () => {

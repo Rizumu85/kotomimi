@@ -20,7 +20,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const repoFile = (rel: string) => readFileSync(resolve(__dirname, '../..', rel), 'utf-8');
+const repoFile = (rel: string) => readFileSync(resolve(__dirname, '../..', rel), 'utf-8').replace(/\r\n/g, '\n');
 
 /** The gates that exist, taken from the only file that reads them. */
 const GATES: string[] = (() => {

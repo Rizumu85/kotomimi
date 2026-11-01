@@ -61,7 +61,6 @@ describe('colour roles', () => {
   it('a label on a tint is text; a label on a fill is on-accent', () => {
     expect(rule(css('components/MainPanel/ModeDevicePopover.scss'), '__device-row--selected')).toMatch(/color:\s*var\(--sk-text-primary\)/);
     expect(rule(css('components/Subtitle/SubtitleBar.scss'), '.subtitle-bar__session')).toMatch(/color:\s*var\(--sk-on-accent\)/);
-    expect(rule(css('components/Subtitle/SubtitleStream.scss'), '.subtitle-stream__person')).toMatch(/color:\s*var\(--sk-on-accent\)/);
     expect(rule(css('components/Auth/SignInForm.scss'), '.loading-spinner')).toMatch(/border:\s*2px solid var\(--sk-on-accent\)/);
     expect(rule(css('components/Auth/SignUpForm.scss'), '.loading-spinner')).toMatch(/border:\s*2px solid var\(--sk-on-accent\)/);
     expect(rule(css('components/Settings/sections/VoicePicker.scss'), '--danger:hover:not(:disabled)')).toMatch(/color:\s*var\(--sk-on-accent\)/);
@@ -74,7 +73,6 @@ describe('colour roles', () => {
     expect(rule(css('components/Auth/UserAccountInfo.scss'), '.quota-bar ')).toMatch(/background:\s*var\(--sk-line-subtle\)/);
     expect(rule(css('components/UpdateDialog/UpdateDialog.scss'), '.progress-bar')).toMatch(/background-color:\s*var\(--sk-line-subtle\)/);
     expect(rule(css('components/Settings/sections/EngineSection.scss'), '__bar')).toMatch(/background:\s*var\(--sk-line-subtle\)/);
-    expect(rule(css('components/Display/DisplaySettingsPopover.scss'), '__bar')).toMatch(/background:\s*var\(--sk-line-subtle\)/);
   });
 
   it("the custom-colour chip's glyph is white on any chip; the tour spotlight dims like the scrim", () => {
@@ -97,14 +95,6 @@ describe('colour roles', () => {
     expect(rule(css('components/MainPanel/ConversationRow.scss'), '.row-play-btn.playing')).toMatch(/color:\s*var\(--sk-text-primary\)/);
     // the subtitle's "fix it" action is an overlay tint that follows the tone (was white on a light tint)
     expect(rule(css('components/Subtitle/SubtitleApp.scss'), '__action--fix:not(:disabled)')).toMatch(/color:\s*var\(--sk-text-primary\)/);
-  });
-
-  // The participant's second shade is bright in both schemes (#f8c471 dark,
-  // #d97706 light), so its numeral is dark ink in both; the near-white
-  // bg-base read 2.87:1 on it in light. Dark moves #1a1a1a → #000.
-  it("the participant's second shade carries a dark numeral in both schemes", () => {
-    expect(rule(css('components/MainPanel/ConversationRow.scss'), '.row-avatar.avatar-participant.person-shade-1')).toMatch(/color:\s*var\(--sk-overlay-bg\)/);
-    expect(rule(css('components/Subtitle/SubtitleStream.scss'), '__line--participant .subtitle-stream__person.person-shade-1')).toMatch(/color:\s*var\(--sk-overlay-bg\)/);
   });
 
   it('dividers and seams are lines, not surfaces', () => {

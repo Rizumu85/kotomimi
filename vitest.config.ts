@@ -32,7 +32,8 @@ export default defineConfig({
     // tests at native/build/<lane>/_deps/transcribe-src/bindings/typescript/,
     // and vitest collected all 78 of them and failed every one (they need a
     // node runtime and a built .node addon, not jsdom). A real file-level
-    // failure had 78 fake ones to hide among.
-    exclude: [...configDefaults.exclude, '**/.claude/**', '**/native/build/**'],
+    // failure had 78 fake ones to hide among. .dev/ is the same again: its
+    // clones (a spike's llama.cpp) bring test suites of their own.
+    exclude: [...configDefaults.exclude, '**/.claude/**', '**/.dev/**', '**/native/build/**'],
   },
 })

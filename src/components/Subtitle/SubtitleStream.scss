@@ -411,7 +411,7 @@
   flex-direction: row;
   gap: 8px;
   background: none;
-  color: #e8e8e8;
+  color: vars.$text-primary;
   font-size: 12px;
 
   .subtitle-idle__hint,
@@ -427,7 +427,7 @@
 
   .subtitle-idle__hint,
   .subtitle-idle__message {
-    color: #e8e8e8;
+    color: vars.$text-primary;
 
     &::before {
       content: '';
@@ -436,7 +436,7 @@
       height: 6px;
       margin-right: 7px;
       border-radius: 50%;
-      background: #9aa0a6;
+      background: vars.$bg-dim;
       vertical-align: 1px;
     }
   }
@@ -455,7 +455,7 @@
     padding: 0;
     gap: 6px;
     background: none;
-    color: #e8e8e8;
+    color: vars.$text-primary;
     font-size: 12px;
     font-weight: 400;
 

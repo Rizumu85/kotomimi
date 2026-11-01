@@ -9,7 +9,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const main = readFileSync(join(__dirname, 'main.js'), 'utf8');
+const main = readFileSync(join(__dirname, 'main.js'), 'utf8').replace(/\r\n/g, '\n');
 
 /** Index of `needle` in `text`; fails (rather than returning -1) when it is gone. */
 function at(text, needle) {

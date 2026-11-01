@@ -73,6 +73,7 @@ jobs:
         run: >-
           npx vitest run --testTimeout=20000
           src/providers
+          src/styles
           src/lib/lan
           src/lib/native
           src/lib/windowShape.test.ts
