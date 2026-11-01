@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import {
@@ -63,6 +63,8 @@ type Source = 'subtitle' | 'conversation';
 
 export interface DisplaySettingsPopoverProps {
   source: Source;
+  /** Fork: what the subtitle bar has no room for: drawn first. */
+  actions?: ReactNode;
 }
 
 interface InnerBindings {
@@ -96,8 +98,8 @@ interface FollowChip {
   follow: () => Promise<void>;
 }
 
-const DisplaySettingsPopover: React.FC<DisplaySettingsPopoverProps> = ({ source }) =>
-  source === 'subtitle' ? <SubtitleBoundPopover /> : <ConversationBoundPopover />;
+const DisplaySettingsPopover: React.FC<DisplaySettingsPopoverProps> = ({ source, actions }) =>
+  source === 'subtitle' ? <SubtitleBoundPopover actions={actions} /> : <ConversationBoundPopover />;
 
 export default DisplaySettingsPopover;
 
@@ -106,7 +108,7 @@ export default DisplaySettingsPopover;
 // of hooks satisfied: hooks are always called in the same order within
 // a given wrapper component.
 
-const SubtitleBoundPopover: React.FC = () => {
+const SubtitleBoundPopover: React.FC<{ actions?: ReactNode }> = ({ actions }) => {
   const bindings: InnerBindings = {
     bgOpacity: useSubtitleBgOpacity(),
     bgColor: useSubtitleBgColor(),
@@ -123,7 +125,7 @@ const SubtitleBoundPopover: React.FC = () => {
     defaultTranslationTextColor: SUBTITLE_DEFAULT_TRANSLATION_TEXT_COLOR,
     surface: 'subtitle',
   };
-  return <DisplaySettingsPopoverInner bindings={bindings} />;
+  return <DisplaySettingsPopoverInner bindings={bindings} actions={actions} />;
 };
 
 const ConversationBoundPopover: React.FC = () => {
@@ -167,7 +169,7 @@ const ConversationBoundPopover: React.FC = () => {
 
 // ──────────── Pure presentational inner ────────────
 
-const DisplaySettingsPopoverInner: React.FC<{ bindings: InnerBindings }> = ({ bindings }) => {
+const DisplaySettingsPopoverInner: React.FC<{ bindings: InnerBindings; actions?: ReactNode }> = ({ bindings, actions }) => {
   const { t } = useTranslation();
   const includeOpacity =
     bindings.bgOpacity !== undefined && bindings.setBgOpacity !== undefined;
@@ -245,6 +247,7 @@ const DisplaySettingsPopoverInner: React.FC<{ bindings: InnerBindings }> = ({ bi
 
   return (
     <div className="display-settings-popover">
+      {actions}
       {includeOpacity ? (
         <>
           <SubtitleLook bgOpacity={bindings.bgOpacity!} onLook={applyLook} onBgOpacity={(value) => void bindings.setBgOpacity!(value)} />

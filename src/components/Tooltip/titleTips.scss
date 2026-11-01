@@ -1,0 +1,34 @@
+@use '../Settings/shared/variables' as vars;
+
+// Fork: a control's `title`, drawn (titleTips.ts). In the document's body, so it stands on its own.
+.kt-title-tip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100000;
+  max-width: 280px;
+  padding: 4px 8px;
+  box-sizing: border-box;
+  font-family: var(--kt-font-base, var(--font-sans));
+  font-size: vars.$font-caption;
+  font-weight: vars.$weight-normal;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  color: vars.$text-primary;
+  background: vars.$bg-popover;
+  border: 1px solid vars.$border-default;
+  border-radius: vars.$radius-md;
+  box-shadow: 0 4px 12px vars.$shadow;
+  pointer-events: none;
+  visibility: hidden;
+  animation: kt-title-tip-in 0.12s ease-out;
+}
+
+@keyframes kt-title-tip-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kt-title-tip { animation: none; }
+}

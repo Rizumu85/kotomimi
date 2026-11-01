@@ -1,4 +1,5 @@
 import { registerThemeDocument } from '../../../lib/theme/theme';
+import { installTitleTips } from '../../Tooltip/titleTips';
 
 /**
  * Size changes of an element that may live in the subtitle window. An observer runs with the frames of the window
@@ -36,8 +37,9 @@ export function mirrorChildDocument(from: Document, to: Document): () => void {
   };
   sync();
   const untheme = registerThemeDocument(to);
+  const untip = installTitleTips(to);
   const observer = new MutationObserver(sync);
   observer.observe(from.head, { childList: true, subtree: true, characterData: true, attributes: true });
   observer.observe(from.documentElement, { attributes: true, attributeFilter: ['style', 'lang'] });
-  return () => { observer.disconnect(); untheme(); };
+  return () => { observer.disconnect(); untheme(); untip(); };
 }

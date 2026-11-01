@@ -84,6 +84,8 @@ function setupPopoverWindowHandlers(mainWindow, onSubtitleWindow = () => {}) {
       if (!isBlankUrl(details.url)) return { action: 'deny' };
       return { action: 'allow', overrideBrowserWindowOptions: {
         show: false, frame: false, transparent: true, skipTaskbar: true,
+        // What the bar's narrowest arrangement needs (`barFit`): any narrower and it would lose its buttons.
+        minWidth: 340,
         resizable: true, minimizable: false, maximizable: false, hasShadow: false,
         webPreferences: { backgroundThrottling: false },
       } };

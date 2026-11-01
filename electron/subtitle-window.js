@@ -39,7 +39,8 @@ function clampToScreen(bounds, work) {
 }
 
 function defaultSubtitleBounds(work) {
-  const width = Math.round(work.width * 0.8);
+  // Wide enough for the whole bar, and no wider: at 80 % of the screen a first strip ran from edge to edge (2026-10-31).
+  const width = Math.min(880, Math.round(work.width * 0.8));
   const height = 200;
   return {
     x: work.x + Math.round((work.width - width) / 2),

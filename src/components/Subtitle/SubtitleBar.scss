@@ -153,6 +153,30 @@
     }
   }
 
+  // Fork: what gives way on a narrow bar, in order (`barFit`): its words, what is not needed every minute, the clock.
+  &[data-fit='compact'],
+  &[data-fit='narrow'],
+  &[data-fit='tiny'] {
+    .display-mode-label,
+    .subtitle-bar__logo {
+      display: none;
+    }
+  }
+
+  &[data-fit='narrow'],
+  &[data-fit='tiny'] {
+    .subtitle-bar__aside {
+      display: none;
+    }
+  }
+
+  &[data-fit='tiny'] {
+    .subtitle-bar__timer,
+    .subtitle-bar__lang {
+      display: none;
+    }
+  }
+
   // Fork: typing what one cannot say, in place of the clock and the pair (`SubtitleBar`'s typing field).
   .subtitle-bar__typing {
     flex: 1 1 auto;
@@ -261,6 +285,43 @@
   @media (max-width: 480px) {
     .subtitle-bar__hold-label {
       display: none;
+    }
+  }
+}
+
+// Fork: what a narrow bar has no room for, at the head of the settings popover (a window or portal of its own).
+.subtitle-bar__folded {
+  display: flex;
+  gap: 4px;
+  margin-bottom: vars.$space-3;
+  padding-bottom: vars.$space-2;
+  border-bottom: 1px solid vars.$border-subtle;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: vars.$control-height-compact;
+    height: vars.$control-height-compact;
+    padding: 0;
+    color: vars.$text-secondary;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: vars.$radius-md;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      color: vars.$text-primary;
+      background: vars.$bg-hover;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: vars.$disabled-opacity;
+    }
+
+    &.active {
+      @include vars.state-selected-fill;
     }
   }
 }

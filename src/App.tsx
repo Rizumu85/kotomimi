@@ -1,4 +1,5 @@
 import React, { lazy, Suspense, useEffect, useState } from 'react';
+import { installTitleTips } from './components/Tooltip/titleTips';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import './App.scss';
 import './locales'; // Initialize i18n
@@ -27,6 +28,7 @@ const router = createMemoryRouter([
 ]);
 
 function App() {
+  useEffect(() => installTitleTips(document), []);
   // Dev-only: Ctrl+Shift+N toggles the native python-sidecar TTS proto.
   const [showNativeTts, setShowNativeTts] = useState(false);
   // Dev-only: Ctrl+Shift+L toggles the notices preview over the running app

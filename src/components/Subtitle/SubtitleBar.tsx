@@ -1,6 +1,6 @@
 // src/components/Subtitle/SubtitleBar.tsx
 import { VideoPill } from '../VRChat/VideoPrompt';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { BRAND } from '../../lib/brand';
 import { useTranslation } from 'react-i18next';
 import {
@@ -16,6 +16,7 @@ import {
 import DisplayModeButton from '../MainPanel/DisplayModeButton';
 import { ExportMenuButton, type ExportMenuButtonProps } from '../MainPanel/ExportButton';
 import { HoldToTalk } from './HoldToTalk';
+import { observeSize } from './surfaces/childDocument';
 import {
   useSubtitleFullscreen,
   useSetSubtitleFullscreen,
@@ -96,6 +97,21 @@ function formatElapsed(ms: number): string {
   return `${hh}:${mm}:${ss}`;
 }
 
+/**
+ * Fork: what fits in a bar this wide, measured with its words on (the whole bar takes some 790 px). Its words go first,
+ * then what is not needed every minute, which moves to the settings popover, then the clock. On a strip dragged narrow
+ * the buttons at the end were cut off by the window's edge, the way back among them (a friend, 2026-10-31).
+ * Not measured (a test's document): as a wide one.
+ */
+interface BarAction { label: string; icon: ReactNode; onClick(): void; disabled?: boolean; active?: boolean }
+
+export type BarFit = 'full' | 'compact' | 'narrow' | 'tiny';
+export function barFit(width: number): BarFit {
+  if (width === 0 || width >= 800) return 'full';
+  if (width >= 620) return 'compact';
+  return width >= 440 ? 'narrow' : 'tiny';
+}
+
 const SubtitleBar: React.FC<Props> = ({
   sessionElapsedMs,
   sourceLanguageCode,
@@ -117,6 +133,14 @@ const SubtitleBar: React.FC<Props> = ({
   const [typed, setTyped] = useState('');
   const typingField = useRef<HTMLInputElement>(null);
   const barElement = useRef<HTMLDivElement>(null);
+  const [fit, setFit] = useState<BarFit>('full');
+  useLayoutEffect(() => {
+    const element = barElement.current;
+    if (!element) return undefined;
+    const measure = () => setFit(barFit(element.clientWidth));
+    measure();
+    return observeSize(element, measure);
+  }, []);
   const typingAvailable = typing !== undefined;
   const onTypingOpenChange = typing?.onOpenChange;
   const openTyping = (open: boolean) => {
@@ -215,9 +239,41 @@ const SubtitleBar: React.FC<Props> = ({
   const role = useRole(context, { role: 'dialog' });
   const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role]);
 
+  // What gives way on a narrow bar: the same actions, in the bar or in the settings popover.
+  const fontDown = { label: t('subtitle.bar.fontDecrease', 'Decrease font size'), icon: <AArrowDown size={14} />, onClick: () => setFontSize(subtitle.fontSize - 2), disabled: subtitle.fontSize <= FONT_SIZE_MIN };
+  const fontUp = { label: t('subtitle.bar.fontIncrease', 'Increase font size'), icon: <AArrowUp size={14} />, onClick: () => setFontSize(subtitle.fontSize + 2), disabled: subtitle.fontSize >= FONT_SIZE_MAX };
+  // Fork: the two views by what they are — the caption lanes, and the conversation as a list.
+  const view = { label: subtitle.compactMode ? t('fork.subtitle.listView', 'List view') : t('fork.subtitle.lanesView', 'Subtitle view'), icon: subtitle.compactMode ? <ChevronsUpDown size={14} /> : <ChevronsDownUp size={14} />, onClick: () => setCompactMode(!subtitle.compactMode) };
+  const clear = { label: t('subtitle.bar.clear', 'Clear conversation'), icon: <Trash2 size={14} />, onClick: onClearConversation };
+  const wholeScreen = { label: fullscreenLabel, icon: fullscreen ? <Minimize size={14} /> : <Maximize size={14} />, onClick: () => void setFullscreen(!fullscreen), active: fullscreen };
+  const inBar = (action: BarAction) => (
+    <button
+      key={action.label}
+      type="button"
+      className={`subtitle-bar__btn subtitle-bar__aside${action.active ? ' active' : ''}`}
+      onClick={action.onClick}
+      disabled={action.disabled}
+      title={action.label}
+      aria-label={action.label}
+    >
+      {action.icon}
+    </button>
+  );
+  const folded = fit === 'narrow' || fit === 'tiny';
+  const foldedActions = folded ? (
+    <div className="subtitle-bar__folded" role="group">
+      {([fontDown, fontUp, view, clear, ...(surface === 'electron' ? [wholeScreen] : [])] as BarAction[]).map((action) => (
+        <button key={action.label} type="button" className={action.active ? 'active' : undefined} onClick={action.onClick} disabled={action.disabled} title={action.label} aria-label={action.label}>
+          {action.icon}
+        </button>
+      ))}
+    </div>
+  ) : undefined;
+
   return (
     <div
       ref={barElement}
+      data-fit={fit}
       className={`subtitle-bar ${subtitle.positionLocked ? 'locked' : ''} ${surface === 'electron' ? 'surface-electron' : 'surface-overlay'}${through ? ' subtitle-bar--through' : ''}${through && near ? ' is-near' : ''}${typing && typingOpen ? ' is-typing' : ''}`}
       role="toolbar"
       {...dragHandleProps}
@@ -305,36 +361,7 @@ const SubtitleBar: React.FC<Props> = ({
         {participantActive && (
           <DisplayModeButton scope="participant" value={participantMode} onChange={setParticipantMode} />
         )}
-        <button
-          type="button"
-          className="subtitle-bar__btn subtitle-bar__aside"
-          onClick={() => setFontSize(subtitle.fontSize - 2)}
-          disabled={subtitle.fontSize <= FONT_SIZE_MIN}
-          title={t('subtitle.bar.fontDecrease', 'Decrease font size')}
-          aria-label={t('subtitle.bar.fontDecrease', 'Decrease font size')}
-        >
-          <AArrowDown size={14} />
-        </button>
-        <button
-          type="button"
-          className="subtitle-bar__btn subtitle-bar__aside"
-          onClick={() => setFontSize(subtitle.fontSize + 2)}
-          disabled={subtitle.fontSize >= FONT_SIZE_MAX}
-          title={t('subtitle.bar.fontIncrease', 'Increase font size')}
-          aria-label={t('subtitle.bar.fontIncrease', 'Increase font size')}
-        >
-          <AArrowUp size={14} />
-        </button>
-        <button
-          type="button"
-          className="subtitle-bar__btn subtitle-bar__aside"
-          onClick={() => setCompactMode(!subtitle.compactMode)}
-          // Fork: the two views by what they are — the caption lanes, and the conversation as a list.
-          title={subtitle.compactMode ? t('fork.subtitle.listView', 'List view') : t('fork.subtitle.lanesView', 'Subtitle view')}
-          aria-label={subtitle.compactMode ? t('fork.subtitle.listView', 'List view') : t('fork.subtitle.lanesView', 'Subtitle view')}
-        >
-          {subtitle.compactMode ? <ChevronsUpDown size={14} /> : <ChevronsDownUp size={14} />}
-        </button>
+        {[fontDown, fontUp, view].map(inBar)}
         {/* In the extension overlay the wire caps entries to the newest
             OVERLAY_ENTRIES (lib/subtitle/wire.ts), so an export here would
             silently omit older messages. The side panel holds the full
@@ -342,15 +369,7 @@ const SubtitleBar: React.FC<Props> = ({
             export on the Electron surface, where SubtitleTakeover reads the
             live entries directly, uncapped. */}
         {surface === 'electron' && exportMenu && <span className="subtitle-bar__aside"><ExportMenuButton {...exportMenu} popoverHost="child-window" /></span>}
-        <button
-          type="button"
-          className="subtitle-bar__btn subtitle-bar__aside"
-          onClick={onClearConversation}
-          title={t('subtitle.bar.clear', 'Clear conversation')}
-          aria-label={t('subtitle.bar.clear', 'Clear conversation')}
-        >
-          <Trash2 size={14} />
-        </button>
+        {inBar(clear)}
 
         <span className="subtitle-bar__divider" />
 
@@ -379,17 +398,7 @@ const SubtitleBar: React.FC<Props> = ({
             <Settings size={14} />
           </button>
         )}
-        {surface === 'electron' && (
-          <button
-            type="button"
-            className={`subtitle-bar__btn subtitle-bar__aside ${fullscreen ? 'active' : ''}`}
-            onClick={() => void setFullscreen(!fullscreen)}
-            title={fullscreenLabel}
-            aria-label={fullscreenLabel}
-          >
-            {fullscreen ? <Minimize size={14} /> : <Maximize size={14} />}
-          </button>
-        )}
+        {surface === 'electron' && inBar(wholeScreen)}
         {surface === 'electron' && (
           <button
             type="button"
@@ -451,7 +460,7 @@ const SubtitleBar: React.FC<Props> = ({
               the child-window host has to supply the same semantics itself,
               matching the trigger's aria-haspopup="dialog". */}
           <div role="dialog" aria-label={t('subtitle.bar.settings', 'Subtitle settings')}>
-            <DisplaySettingsPopover source="subtitle" />
+            <DisplaySettingsPopover source="subtitle" actions={foldedActions} />
           </div>
         </ChildWindowPopover>
       ) : (
@@ -464,7 +473,7 @@ const SubtitleBar: React.FC<Props> = ({
               aria-label={t('subtitle.bar.settings', 'Subtitle settings')}
               {...getFloatingProps()}
             >
-              <DisplaySettingsPopover source="subtitle" />
+              <DisplaySettingsPopover source="subtitle" actions={foldedActions} />
             </div>
           </FloatingPortal>
         )

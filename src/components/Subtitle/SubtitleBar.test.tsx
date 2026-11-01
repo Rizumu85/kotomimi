@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
-import SubtitleBar from './SubtitleBar';
+import SubtitleBar, { barFit } from './SubtitleBar';
 
 // i18n: return the default string passed to t(key, default).
 vi.mock('react-i18next', () => ({
@@ -62,6 +62,12 @@ beforeEach(() => {
   cleanup();
   setSubtitleFullscreen.mockClear();
   fullscreenValue = false;
+});
+
+describe('barFit — what fits in a bar this wide (fork)', () => {
+  it('gives way in order, and takes an unmeasured bar for a wide one', () => {
+    expect([1000, 800, 799, 620, 619, 440, 439, 340, 0].map(barFit)).toEqual(['full', 'full', 'compact', 'compact', 'narrow', 'narrow', 'tiny', 'tiny', 'full']);
+  });
 });
 
 describe('SubtitleBar fullscreen button', () => {
