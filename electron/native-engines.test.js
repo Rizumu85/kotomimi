@@ -72,8 +72,9 @@ describe('two native recognizers as one', () => {
   it('counts a model as downloaded only with the runtime that runs it', async () => {
     // The file is there, the runtime is not: there is still something to fetch.
     expect((await mac({ runtime: 'absent' }).engine.status()).models['qwen3-asr-1.7b-q8'].state).toBe('absent');
-    // The runtime is on its way: so is the model that waits for it.
-    expect((await mac({ runtime: 'downloading', model: absent }).engine.status()).models['qwen3-asr-1.7b-q8'].state).toBe('downloading');
+    // The runtime is on its way: the model it is fetched for says so itself, and the others are not on their way.
+    expect((await mac({ runtime: 'downloading', model: { ...absent, state: 'downloading', runtime: true } }).engine.status()).models['qwen3-asr-1.7b-q8']).toMatchObject({ state: 'downloading', runtime: true });
+    expect((await mac({ runtime: 'downloading', model: { ...absent, waiting: true } }).engine.status()).models['qwen3-asr-1.7b-q8']).toMatchObject({ state: 'absent', waiting: true });
     // The system's models are never touched by the runtime's state.
     expect((await mac({ runtime: 'absent' }).engine.status()).models['apple-speech:ja'].state).toBe('downloaded');
   });

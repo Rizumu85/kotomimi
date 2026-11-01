@@ -702,6 +702,7 @@
       "nativeWarmingShort": "Starting the engine… About half a minute the first time after the computer boots.",
       "nativeFailedShort": "The engine could not start.",
       "nativeRetry": "Try again",
+      "nativeRuntime": "Downloading the runtime first. This happens only once.",
       "nativeUnsupportedShort": "Not available for this system",
       "familyUnheard": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
       "listJoin": ", ",

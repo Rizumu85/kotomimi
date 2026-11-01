@@ -70,7 +70,7 @@ function joinEngines(makers, deps = {}) {
   /** A model as the whole shows it: its own state, unless its runtime is not there to run it. */
   const modelOf = (status, model) => {
     if (status.engine === 'ready') return model;
-    if (status.engine === 'downloading') return model.state === 'absent' || model.state === 'failed' ? { ...model, state: 'downloading' } : model;
+    if (status.engine === 'downloading') return model;
     return model.state === 'downloaded' ? { ...model, state: 'absent' } : model;
   };
 

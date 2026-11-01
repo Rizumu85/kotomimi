@@ -877,6 +877,8 @@ function createNativeEngine(deps = {}) {
   let run = { state: 'stopped', model: null, port: 0, key: null, tail: '' };
   /** What is being fetched: id (or `engine`) → `{ received, total, abort }`. */
   const fetching = new Map();
+  /** The model whose download is fetching the runtime: stopping another's leaves it. */
+  let engineFor = null;
   /** The runtime's archive is here and being unpacked: still on its way, to whoever asks. */
   let unpacking = false;
   const failed = new Map();
@@ -885,9 +887,14 @@ function createNativeEngine(deps = {}) {
   const modelState = (id) => {
     const busy = fetching.get(id);
     if (busy) return { state: busy.verifying ? 'verifying' : 'downloading', received: busy.received, total: busy.total };
-    if (has(fileOf(id))) return { state: 'downloaded', received: MODELS_[id].bytes, total: MODELS_[id].bytes };
+    // The runtime comes first, and it is what the model asked for waits on: its bytes are that model's progress, and the
+    // others wait. Every model used to say 0 % through it, with nothing moving (a friend, 2026-10-31).
+    const runtime = fetching.get('engine');
+    if ((runtime || unpacking) && engineFor === id) return { state: 'downloading', runtime: true, received: runtime?.received ?? build.bytes, total: runtime?.total ?? build.bytes };
+    const waiting = runtime || unpacking ? { waiting: true } : {};
+    if (has(fileOf(id))) return { state: 'downloaded', received: MODELS_[id].bytes, total: MODELS_[id].bytes, ...waiting };
     const error = failed.get(id);
-    return { state: error ? 'failed' : 'absent', received: sizeOf(`${fileOf(id)}.part`), total: MODELS_[id].bytes, ...(error ? { error } : {}) };
+    return { state: error ? 'failed' : 'absent', received: sizeOf(`${fileOf(id)}.part`), total: MODELS_[id].bytes, ...(error ? { error } : {}), ...waiting };
   };
   const status = () => ({
     supported: Boolean(build),
@@ -995,8 +1002,6 @@ function createNativeEngine(deps = {}) {
     return status();
   }
 
-  /** The model whose download is fetching the runtime: stopping another's leaves it. */
-  let engineFor = null;
   function cancel(id) {
     fetching.get(id)?.abort();
     if (engineFor === id) fetching.get('engine')?.abort();

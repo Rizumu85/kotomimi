@@ -702,6 +702,7 @@
       "nativeWarmingShort": "正在启动引擎…开机后第一次大约要半分钟。",
       "nativeFailedShort": "引擎没能启动。",
       "nativeRetry": "重试",
+      "nativeRuntime": "先下载运行环境，只需要下载一次",
       "nativeUnsupportedShort": "这个系统暂不支持",
       "familyUnheard": "那台设备的 {{name}} 没有{{languages}}，这部分由那台设备自己选模型。要用 {{name}}，先在那台设备上下载{{languages}}。",
       "listJoin": "、",

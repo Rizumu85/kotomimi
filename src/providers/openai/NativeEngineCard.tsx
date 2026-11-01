@@ -87,7 +87,7 @@ export function NativeEngineCard({ kind, model, recommended = true, selected, on
   const asked = useStore((s) => s.asked);
   const entry = useMemo(() => entryOf(kind, model, recommended), [kind, model, recommended]);
   const mine = status.models[model.id];
-  const fetching = status.engine === 'downloading' || mine?.state === 'downloading' || mine?.state === 'verifying';
+  const fetching = mine?.state === 'downloading' || mine?.state === 'verifying';
   const downloaded = status.engine === 'ready' && mine?.state === 'downloaded';
   const shown = fetching ? 'downloading' : downloaded ? 'downloaded' : mine?.state === 'failed' ? 'error' : 'not_downloaded';
   const total = mine?.total || model.bytes;
@@ -105,7 +105,7 @@ export function NativeEngineCard({ kind, model, recommended = true, selected, on
       status={shown}
       download={fetching ? { downloadedBytes: received, totalBytes: total, currentFile: '', percent: Math.min(100, Math.floor((received / total) * 100)) } : undefined}
       errorMessage={mine?.error}
-      isSessionActive={Boolean(disabled)}
+      isSessionActive={Boolean(disabled) || mine?.waiting === true}
       isSelected={selected}
       // Before the main process has answered, "no engine for this system" is its blank.
       isCompatible={status.supported || !asked}
@@ -117,7 +117,9 @@ export function NativeEngineCard({ kind, model, recommended = true, selected, on
       onCancel={() => { void store().cancel(model.id); }}
       onDelete={() => { void store().remove(model.id); }}
     >
-      {nativeReady(status, model.id) ? (
+      {mine?.runtime ? (
+        <p className="kt-engine" role="status"><Loader size={13} className="kt-engine__spin" /><span>{t('providers.localai.nativeRuntime')}</span></p>
+      ) : nativeReady(status, model.id) ? (
         <p className="kt-engine kt-engine--ready" role="status"><CircleCheck size={13} /><span>{t(words.ready)}</span></p>
       ) : ours && run.state === 'failed' ? (
         <div className="kt-engine kt-engine--failed" role="status">

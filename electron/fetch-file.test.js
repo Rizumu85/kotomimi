@@ -52,6 +52,18 @@ const network = (speeds, odd = {}) => {
   return { asked, fetch };
 };
 
+describe('a download stopped during the trial', () => {
+  it('stays stopped: a signal already aborted says nothing to what listens afterwards', async () => {
+    const stop = new AbortController();
+    const asked = [];
+    const fetch = async (url) => { asked.push(url); return new Response(new Uint8Array(10), { status: 200 }); };
+    const part = path.join(os.tmpdir(), `kt-trial-stop-${process.pid}.part`);
+    const trial = async ({ sources }) => { stop.abort(); return sources; };
+    await expect(pullWhole({ sources: [GITHUB, RELAY], part, bytes: 10, fetch, signal: stop.signal, trial, trialWorth: 1 })).rejects.toMatchObject({ name: 'AbortError' });
+    expect(asked).toEqual([]);
+  });
+});
+
 describe('which address of a file is asked first', () => {
   it('is the one that brings the most in the time, whatever order they were guessed in', async () => {
     const { asked, fetch } = network({ 'ghfast.top': 500, 'gh-proxy.com': 2_000, 'github.com': 20_000 });

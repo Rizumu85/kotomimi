@@ -31,9 +31,11 @@ function inMainlandChina() {
  * not connect in half a minute or came at some 30 KB/s). These are public relays of GitHub downloads, run by
  * volunteers: asked first there, last elsewhere, and trusted with nothing — what they bring is kept only if it hashes
  * as the release file does. Each served both runtimes whole and right on 2026-10-11; from Beijing the first two were
- * quick and the third slow. One that has gone costs a quarter of a minute, not the download.
+ * quick and the third slow. One that has gone costs a quarter of a minute, not the download. Three more from
+ * 2026-10-31, when a friend on China Mobile's network could not get a runtime with those three: all are abroad or on
+ * one network, and these are on others (EdgeOne's among them). All are tried at once for a large file (`quickestFirst`).
  */
-const GITHUB_RELAYS = ['https://ghfast.top/', 'https://gh-proxy.com/', 'https://ghproxy.net/'];
+const GITHUB_RELAYS = ['https://ghfast.top/', 'https://gh-proxy.com/', 'https://edgeone.gh-proxy.org/', 'https://ghfile.geekertao.top/', 'https://gh.ddlc.top/', 'https://ghproxy.net/'];
 const relaysOf = (url) => (String(url).startsWith('https://github.com/') ? GITHUB_RELAYS.map((relay) => `${relay}${url}`) : []);
 
 /**
@@ -120,6 +122,9 @@ async function pullWhole({ sources: given, part, bytes, fetch: doFetch, signal, 
   onReceived(received);
   // A large file is begun at whichever address is the quickest just now, not at the one guessed to be.
   const sources = trial && given.length > 1 && bytes - received >= trialWorth ? await trial({ sources: given, from: received, bytes, fetch: doFetch, signal, log }) : given;
+  // Stopped during the trial: a signal already aborted says nothing to what listens from now on, and the download
+  // would go on, past every later stop (2026-10-31).
+  signal?.throwIfAborted();
   const said = new Map();
   let at = 0;
   let barren = 0;

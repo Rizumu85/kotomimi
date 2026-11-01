@@ -224,6 +224,15 @@ describe('a download', () => {
     expect(world.changes.some((s) => s.models.m1.state === 'verifying')).toBe(true);
   });
 
+  it('counts the runtime as the progress of the model it is fetched for, and the others wait (fork)', async () => {
+    const { world, engine } = computer();
+    await engine.download('m1');
+    const seen = world.changes.find((s) => s.engine === 'downloading' && s.models.m1.runtime);
+    expect(seen.models.m1).toMatchObject({ state: 'downloading', runtime: true, total: ARCHIVE.length });
+    // Once it is here, the model's own bytes are what is counted.
+    expect(world.changes.at(-1).models.m1.runtime).toBeUndefined();
+  });
+
   it('goes on from where a stopped one left off', async () => {
     const { world, engine } = computer();
     fs.mkdirSync(path.join(dir, 'models'), { recursive: true });

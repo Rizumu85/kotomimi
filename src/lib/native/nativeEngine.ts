@@ -16,6 +16,10 @@ export interface NativeModelStatus {
   total: number;
   /** Why the download failed, in the main process's words. */
   error?: string;
+  /** What is coming for this model is the runtime, which comes before the first model: `received` and `total` are the runtime's. */
+  runtime?: boolean;
+  /** The runtime is being fetched for another model: this one can be asked for once that is over. */
+  waiting?: boolean;
 }
 
 export interface NativeEngineStatus {
@@ -51,7 +55,7 @@ export function nativeEngineStatus(value: unknown): NativeEngineStatus {
   const models: Record<string, NativeModelStatus> = {};
   for (const [id, raw] of Object.entries((answer.models ?? {}) as Record<string, Partial<NativeModelStatus> | null>).slice(0, 50)) {
     if (!raw || !MODEL_STATES.includes(raw.state as NativeModelState)) continue;
-    models[id] = { state: raw.state as NativeModelState, received: count(raw.received), total: count(raw.total), ...(typeof raw.error === 'string' && raw.error ? { error: raw.error.slice(0, 300) } : {}) };
+    models[id] = { state: raw.state as NativeModelState, received: count(raw.received), total: count(raw.total), ...(typeof raw.error === 'string' && raw.error ? { error: raw.error.slice(0, 300) } : {}), ...(raw.runtime === true ? { runtime: true } : {}), ...(raw.waiting === true ? { waiting: true } : {}) };
   }
   const run = (answer.run ?? {}) as Partial<NativeEngineStatus['run']>;
   return {

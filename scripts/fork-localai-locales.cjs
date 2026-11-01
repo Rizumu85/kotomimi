@@ -422,6 +422,7 @@ const PROVIDER = {
   ],
   nativeFailedShort: ["The engine could not start.", "引擎没能启动。", "引擎沒能啟動。"],
   nativeRetry: ["Try again", "重试", "重試"],
+  nativeRuntime: ["Downloading the runtime first. This happens only once.", "先下载运行环境，只需要下载一次", "先下載執行環境，只需要下載一次"],
   nativeUnsupportedShort: ["Not available for this system", "这个系统暂不支持", "這個系統暫不支援"],
   familyUnheard: [
     "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
