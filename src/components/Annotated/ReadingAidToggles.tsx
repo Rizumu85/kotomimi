@@ -29,6 +29,8 @@ export function ReadingAidToggles({ highlight }: { /** The subtitle's own: wheth
   const setRomanized = useAnnotationStore((s) => s.setRomanized);
   const pinyin = useAnnotationStore((s) => s.pinyin);
   const setPinyin = useAnnotationStore((s) => s.setPinyin);
+  const jyutping = useAnnotationStore((s) => s.jyutping);
+  const setJyutping = useAnnotationStore((s) => s.setJyutping);
   const sourceItalic = useAnnotationStore((s) => s.sourceItalic);
   const setSourceItalic = useAnnotationStore((s) => s.setSourceItalic);
   return (
@@ -38,6 +40,7 @@ export function ReadingAidToggles({ highlight }: { /** The subtitle's own: wheth
         <div className="reading-aids__row">
           <Aid on={furigana} onClick={() => void setFurigana(!furigana)} words={t('fork.aids.furigana')} title={t('fork.furigana')} />
           <Aid on={pinyin} onClick={() => void setPinyin(!pinyin)} words={t('fork.aids.pinyin')} title={t('fork.pinyin')} />
+          <Aid on={jyutping} onClick={() => void setJyutping(!jyutping)} words={t('fork.aids.jyutping')} title={t('fork.jyutping')} />
           <Aid on={romanization} onClick={() => void setRomanization(!romanization)} words={t('fork.aids.roman')} title={t('fork.romanization')} />
         </div>
         {romanization && (

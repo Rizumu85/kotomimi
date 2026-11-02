@@ -52,10 +52,11 @@ describe('the source text\'s slant', () => {
   it('has its button beside the reading aids\', and leaves theirs alone', () => {
     render(<ReadingAidToggles />);
     const labels = [...document.querySelectorAll('.reading-aid-toggle')].map((n) => n.textContent);
-    expect(labels).toEqual(['fork.aids.furigana', 'fork.aids.pinyin', 'fork.aids.roman', 'fork.aids.italic']);
+    expect(labels).toEqual(['fork.aids.furigana', 'fork.aids.pinyin', 'fork.aids.jyutping', 'fork.aids.roman', 'fork.aids.italic']);
     fireEvent.click(screen.getByRole('button', { name: 'fork.aids.italic' }));
     expect(useAnnotationStore.getState().sourceItalic).toBe(false);
     expect(useAnnotationStore.getState().furigana).toBe(true);
     expect(useAnnotationStore.getState().pinyin).toBe(false);
+    expect(useAnnotationStore.getState().jyutping).toBe(false);
   });
 });

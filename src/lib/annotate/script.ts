@@ -68,14 +68,10 @@ export function isChinese(code: string | null | undefined): boolean {
   return base === 'zh' || base === 'yue';
 }
 
-/**
- * An app language code as one this module annotates, or null: `ja`, `ja-JP`, `ko-KR`, `ru`, `uk`, `zh-CN`. Not
- * Cantonese: pinyin spells Mandarin, and over Cantonese it would read wrong.
- */
-/** Fork: whether a language is written with a romanization under it: Japanese, Korean, Russian, Ukrainian — not Chinese, whose pinyin is written above. */
+/** Fork: whether a language is written with a romanization under it: Japanese, Korean, Russian, Ukrainian — not Chinese or Cantonese, whose readings are written above. */
 export function romanizedLanguage(code: string | null | undefined): boolean {
   const language = annotatedLanguage(code);
-  return language !== null && language !== 'zh';
+  return language !== null && language !== 'zh' && language !== 'yue';
 }
 
 /**
@@ -89,10 +85,14 @@ export function romanizedText(text: string, code: string | null | undefined, off
   const script = scriptLanguage(text);
   // Cyrillic is Russian by its letters and Ukrainian by its row, as `languageOf` reads it.
   const read = script === 'ru' && language === 'uk' ? 'uk' : script ?? language;
-  return read !== null && read !== 'zh' && !off.includes(read);
+  return read !== null && read !== 'zh' && read !== 'yue' && !off.includes(read);
 }
 
+/**
+ * An app language code as one this module annotates, or null: `ja`, `ja-JP`, `ko-KR`, `ru`, `uk`, `zh-CN`, `yue`.
+ * Cantonese is its own: pinyin spells Mandarin, and over Cantonese it would read wrong.
+ */
 export function annotatedLanguage(code: string | null | undefined): AnnotatedLanguage | null {
   const base = (code ?? '').toLowerCase().split(/[-_]/)[0];
-  return base === 'ja' || base === 'ko' || base === 'ru' || base === 'uk' || base === 'zh' ? base : null;
+  return base === 'ja' || base === 'ko' || base === 'ru' || base === 'uk' || base === 'zh' || base === 'yue' ? base : null;
 }

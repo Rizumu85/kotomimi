@@ -1531,7 +1531,8 @@
         "furigana": "Furigana: cara baca dalam kana di atas kanji bahasa Jepang.",
         "romanization": "Romanisasi: cara baca dalam huruf Latin di bawah teks bahasa Jepang, Korea, Rusia, dan Ukraina.",
         "fonts": "Pilih font tiap bahasa di Pengaturan → Font.",
-        "pinyin": "Pinyin: pinyin dengan tanda nada di atas teks bahasa Mandarin."
+        "pinyin": "Pinyin: pinyin dengan tanda nada di atas teks bahasa Mandarin.",
+        "jyutping": "Jyutping: tampilkan pelafalan di atas teks Kanton, dengan nada berupa angka."
       },
       "kotomimi-tips": {
         "title": "Tiga hal lagi",
@@ -1719,7 +1720,8 @@
       "pinyin": "Pinyin",
       "roman": "Romanisasi",
       "italic": "Teks asli miring",
-      "highlight": "Sorot teks baru"
+      "highlight": "Sorot teks baru",
+      "jyutping": "Jyutping"
     },
     "vrchat": {
       "title": "VRChat",
@@ -1931,6 +1933,7 @@
       "firewallWaiting": "Menunggu Windows…",
       "firewallDeclined": "Masih diblokir: izin belum dikonfirmasi di Windows.",
       "firewall": "Saat pertama kali diaktifkan, firewall sistem mungkin meminta izin agar Kotomimi dapat mengakses jaringan. Izinkan akses pada jaringan privat."
-    }
+    },
+    "jyutping": "Jyutping di atas teks Kanton"
   }
 }

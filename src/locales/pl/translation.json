@@ -1531,7 +1531,8 @@
         "furigana": "Furigana: zapis wymowy kaną nad japońskimi znakami kanji.",
         "romanization": "Latynizacja: dodatkowy wiersz z wymową zapisaną alfabetem łacińskim pod tekstem japońskim, koreańskim, rosyjskim i ukraińskim.",
         "fonts": "Czcionki dla poszczególnych języków wybierzesz w Ustawienia → Czcionki.",
-        "pinyin": "Pinyin: zapis wymowy ze znakami tonów nad chińskim tekstem."
+        "pinyin": "Pinyin: zapis wymowy ze znakami tonów nad chińskim tekstem.",
+        "jyutping": "Jyutping — nad tekstem kantońskim wyświetla się zapis Jyutping, a tony oznacza się cyframi."
       },
       "kotomimi-tips": {
         "title": "Jeszcze trzy rzeczy",
@@ -1719,7 +1720,8 @@
       "pinyin": "Pinyin",
       "roman": "Latynizacja",
       "italic": "Oryginał kursywą",
-      "highlight": "Wyróżniaj nowy tekst"
+      "highlight": "Wyróżniaj nowy tekst",
+      "jyutping": "Jyutping"
     },
     "vrchat": {
       "title": "VRChat",
@@ -1931,6 +1933,7 @@
       "firewallWaiting": "Oczekiwanie na Windows…",
       "firewallDeclined": "Dostęp nadal zablokowany: nie potwierdzono zgody w Windows.",
       "firewall": "Przy pierwszym uruchomieniu zapora systemowa może zapytać o dostęp Kotomimi do sieci. Zezwól na komunikację w sieciach prywatnych."
-    }
+    },
+    "jyutping": "Jyutping nad tekstem kantońskim"
   }
 }

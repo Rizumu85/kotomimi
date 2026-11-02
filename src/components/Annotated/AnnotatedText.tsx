@@ -27,6 +27,7 @@ export function useAnnotation(text: string, language: string | null | undefined,
   const romanOff = useAnnotationStore((s) => s.romanizationOff);
   const pinyinOn = useAnnotationStore((s) => s.pinyin);
   const pinyin = pinyinOn && only !== 'roman';
+  const jyutping = useAnnotationStore((s) => s.jyutping) && only !== 'roman';
   const hint = annotatedLanguage(language);
   const chinese = isChinese(language);
   const wantsJapanese = needsJapanese(text, { furigana, roman, romanOff, language: hint, chinese });
@@ -36,11 +37,11 @@ export function useAnnotation(text: string, language: string | null | undefined,
     if (wantsJapanese) loadJapanese();
   }, [wantsJapanese]);
   return useMemo(() => {
-    if (!furigana && !roman && !pinyin) return null;
-    const annotated = annotateText(text, { furigana, roman, romanOff, pinyin, language: hint, chinese, japanese });
+    if (!furigana && !roman && !pinyin && !jyutping) return null;
+    const annotated = annotateText(text, { furigana, roman, romanOff, pinyin, jyutping, language: hint, chinese, japanese });
     const lines = growing ? holdLastReading(annotated) : annotated;
     return lines.some((line) => line.roman !== undefined || line.parts.some((part) => part.ruby !== undefined)) ? lines : null;
-  }, [text, furigana, roman, romanOff, pinyin, hint, chinese, japanese, growing]);
+  }, [text, furigana, roman, romanOff, pinyin, jyutping, hint, chinese, japanese, growing]);
 }
 
 export interface AnnotatedLinesProps {

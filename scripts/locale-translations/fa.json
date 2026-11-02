@@ -31,6 +31,10 @@
     "en": "Italic source",
     "text": "متن اصلی مورب"
   },
+  "fork.aids.jyutping": {
+    "en": "Jyutping",
+    "text": "جوت‌پینگ"
+  },
   "fork.aids.pinyin": {
     "en": "Pinyin",
     "text": "پین‌یین"
@@ -334,6 +338,10 @@
   "fork.help.issuesTooltip": {
     "en": "Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page.",
     "text": "Kotomimi شاخه‌ای مستقل از Sokuji است. مشکلات این برنامه را در صفحهٔ GitHub خود آن گزارش کنید."
+  },
+  "fork.jyutping": {
+    "en": "Jyutping over Cantonese",
+    "text": "نمایش جوت‌پینگ بالای متن کانتونی"
   },
   "fork.lan.copied": {
     "en": "Copied",
@@ -1846,6 +1854,10 @@
   "tour.steps.reading-aids.furigana": {
     "en": "Furigana — kana above Japanese kanji.",
     "text": "فوریگانا: نمایش تلفظ با کانا بالای کانجی‌های ژاپنی."
+  },
+  "tour.steps.reading-aids.jyutping": {
+    "en": "Jyutping — Cantonese readings above Cantonese, tones as digits.",
+    "text": "جوت‌پینگ — نمایش جوت‌پینگ بالای متن کانتونی، و لحن‌ها با ارقام."
   },
   "tour.steps.reading-aids.pinyin": {
     "en": "Pinyin — tone-marked pinyin above Chinese.",

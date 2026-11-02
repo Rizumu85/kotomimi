@@ -35,6 +35,10 @@
     "en": "Italic source",
     "text": "Kursiv originaltext"
   },
+  "fork.aids.jyutping": {
+    "en": "Jyutping",
+    "text": "Jyutping"
+  },
   "fork.aids.pinyin": {
     "en": "Pinyin",
     "text": "Pinyin"
@@ -338,6 +342,10 @@
   "fork.help.issuesTooltip": {
     "en": "Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page.",
     "text": "Kotomimi är en fristående förgrening av Sokuji. Rapportera problem med den här appen på dess egen GitHub-sida."
+  },
+  "fork.jyutping": {
+    "en": "Jyutping over Cantonese",
+    "text": "Jyutping ovanför kantonesisk text"
   },
   "fork.lan.copied": {
     "en": "Copied",
@@ -1922,6 +1930,10 @@
   "tour.steps.reading-aids.furigana": {
     "en": "Furigana — kana above Japanese kanji.",
     "text": "Furigana: visar uttalet med kana ovanför japanska kanji."
+  },
+  "tour.steps.reading-aids.jyutping": {
+    "en": "Jyutping — Cantonese readings above Cantonese, tones as digits.",
+    "text": "Jyutping: visas ovanför kantonesisk text, med toner som siffror."
   },
   "tour.steps.reading-aids.pinyin": {
     "en": "Pinyin — tone-marked pinyin above Chinese.",

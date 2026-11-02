@@ -3,7 +3,7 @@
  * romanization line — computed on this device from the text alone. No model
  * and no network: a morphological dictionary for Japanese, pronunciation
  * rules for Korean, letter tables for Russian and Ukrainian, a pinyin
- * dictionary for Chinese.
+ * dictionary for Chinese and a Jyutping one for Cantonese.
  */
 
 /** A run of text, with the reading to draw above it when it has one. */
@@ -19,7 +19,7 @@ export interface AnnotatedLine {
 }
 
 /** The languages that have a reading aid here. */
-export type AnnotatedLanguage = 'ja' | 'ko' | 'ru' | 'uk' | 'zh';
+export type AnnotatedLanguage = 'ja' | 'ko' | 'ru' | 'uk' | 'zh' | 'yue';
 
 /** The ones with a romanization under them. */
 export const ROMANIZED_LANGUAGES = ['ja', 'ko', 'ru', 'uk'] as const;
@@ -34,6 +34,8 @@ export interface AnnotateOptions {
   romanOff?: readonly RomanizedLanguage[];
   /** Pinyin over each Han character of Chinese text. */
   pinyin?: boolean;
+  /** Jyutping over each Han character of Cantonese text. */
+  jyutping?: boolean;
 }
 
 /** One token of a Japanese sentence, as the tokenizer names it (kuromoji's IPADIC fields this module reads). */

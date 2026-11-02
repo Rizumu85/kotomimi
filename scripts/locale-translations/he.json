@@ -31,6 +31,10 @@
     "en": "Italic source",
     "text": "מקור בכתב נטוי"
   },
+  "fork.aids.jyutping": {
+    "en": "Jyutping",
+    "text": "ג׳יוטפינג"
+  },
   "fork.aids.pinyin": {
     "en": "Pinyin",
     "text": "פין-יין"
@@ -334,6 +338,10 @@
   "fork.help.issuesTooltip": {
     "en": "Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page.",
     "text": "Kotomimi הוא פיצול עצמאי של Sokuji. על בעיות באפליקציה הזו יש לדווח בעמוד GitHub שלה."
+  },
+  "fork.jyutping": {
+    "en": "Jyutping over Cantonese",
+    "text": "ג׳יוטפינג מעל הקנטונזית"
   },
   "fork.lan.copied": {
     "en": "Copied",
@@ -1846,6 +1854,10 @@
   "tour.steps.reading-aids.furigana": {
     "en": "Furigana — kana above Japanese kanji.",
     "text": "פוריגנה: סימני קאנה מעל הקאנג'י ביפנית לציון ההגייה."
+  },
+  "tour.steps.reading-aids.jyutping": {
+    "en": "Jyutping — Cantonese readings above Cantonese, tones as digits.",
+    "text": "ג׳יוטפינג — הצגת ג׳יוטפינג מעל הקנטונזית, והטונים מסומנים בספרות."
   },
   "tour.steps.reading-aids.pinyin": {
     "en": "Pinyin — tone-marked pinyin above Chinese.",

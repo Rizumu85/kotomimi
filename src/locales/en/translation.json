@@ -1125,7 +1125,8 @@
         "furigana": "Furigana — kana above Japanese kanji.",
         "romanization": "Romanization — a line in Latin letters under Japanese, Korean, Russian and Ukrainian.",
         "fonts": "Fonts for each language are under Settings → Fonts.",
-        "pinyin": "Pinyin — tone-marked pinyin above Chinese."
+        "pinyin": "Pinyin — tone-marked pinyin above Chinese.",
+        "jyutping": "Jyutping — Cantonese readings above Cantonese, tones as digits."
       },
       "kotomimi-tips": {
         "title": "Three more things",
@@ -1699,6 +1700,7 @@
     "furigana": "Furigana over kanji (Japanese)",
     "romanization": "Romanization",
     "pinyin": "Pinyin over Chinese",
+    "jyutping": "Jyutping over Cantonese",
     "echoCancellationApp": "Kotomimi only",
     "echoCancellationAppTooltip": "Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
     "speechDetection": {
@@ -1717,6 +1719,7 @@
       "text": "Text",
       "furigana": "Furigana",
       "pinyin": "Pinyin",
+      "jyutping": "Jyutping",
       "roman": "Romanization",
       "italic": "Italic source",
       "highlight": "Highlight new"

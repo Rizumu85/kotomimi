@@ -20,7 +20,7 @@ Kotomimi is a separate application with its own name, install folder and profile
 | Grammar feedback | A sentence in the practiced language gets ✓, or a correction and its reason | `src/providers/openai/coachPrompt.ts` |
 | Typed lookup | Ctrl+K (Cmd+K) puts the cursor in a box that translates what you type | `src/components/MainPanel/panel/TypedText.tsx` |
 | Mic activation threshold | Sound below a level is heard as silence | `src/lib/audio/capture/micGate.ts`, `src/components/Settings/sections/MicGateControl.tsx` |
-| Reading aids | Furigana, romanization (Japanese, Korean, Russian, Ukrainian), pinyin and source italics, at the foot of the display popover | `src/lib/annotate/annotate.ts`, `src/components/Annotated/ReadingAidToggles.tsx` |
+| Reading aids | Furigana, romanization (Japanese, Korean, Russian, Ukrainian), pinyin, Jyutping and source italics, at the foot of the display popover | `src/lib/annotate/annotate.ts`, `src/components/Annotated/ReadingAidToggles.tsx` |
 | Reading correction | Japanese words the dictionary misreads in speech, read again from context | `src/lib/annotate/japaneseReadings.ts` |
 | Fonts | Separate fonts for the interface, Latin letters, romanization, and each language's text and readings | `src/lib/fonts/fontCss.ts`, `src/components/Fonts/FontSection.tsx` |
 | Language pins | Language menus with pinned languages first and a filter | `src/components/providers/LanguageMenu.tsx`, `src/stores/languagePinStore.ts` |
@@ -114,4 +114,4 @@ A world's video has no place in the world: its sound is the same in both channel
 
 ## License
 
-AGPL-3.0, as upstream ([LICENSE](LICENSE)). The Japanese dictionary is the IPADIC shipped with kuromoji; its license is in the NOTICE.md of the @sglkc/kuromoji package.
+AGPL-3.0, as upstream ([LICENSE](LICENSE)). The Japanese dictionary is the IPADIC shipped with kuromoji; its license is in the NOTICE.md of the @sglkc/kuromoji package. Jyutping comes from CanCLID's to-jyutping (BSD-2-Clause).

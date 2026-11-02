@@ -1531,7 +1531,8 @@
         "furigana": "Furigana — Japonca kanjilerin üzerinde kana gösterimi.",
         "romanization": "Latinleştirme — Japonca, Korece, Rusça ve Ukraynacanın altında Latin harfleriyle bir satır.",
         "fonts": "Her dilin yazı tipi Ayarlar → Yazı tipleri bölümünden seçilir.",
-        "pinyin": "Pinyin — Çince metnin üzerinde ton işaretli pinyin."
+        "pinyin": "Pinyin — Çince metnin üzerinde ton işaretli pinyin.",
+        "jyutping": "Jyutping — Kantonca metnin üzerinde tonları rakamla gösterilen jyutping."
       },
       "kotomimi-tips": {
         "title": "Üç şey daha",
@@ -1719,7 +1720,8 @@
       "pinyin": "Pinyin",
       "roman": "Latinleştirme",
       "italic": "İtalik kaynak",
-      "highlight": "Yeni metni vurgula"
+      "highlight": "Yeni metni vurgula",
+      "jyutping": "Jyutping"
     },
     "vrchat": {
       "title": "VRChat",
@@ -1931,6 +1933,7 @@
       "firewallWaiting": "Windows bekleniyor…",
       "firewallDeclined": "Hâlâ engelleniyor: Windows'ta izin onaylanmadı.",
       "firewall": "İlk kez açtığınızda sistem güvenlik duvarı Kotomimi'nin ağa erişmesine izin verip vermediğinizi sorabilir. Özel ağlarda iletişime izin verin."
-    }
+    },
+    "jyutping": "Kantonca metnin üzerinde jyutping"
   }
 }

@@ -1531,7 +1531,8 @@
         "furigana": "Furigana — sebutan dalam kana di atas kanji Jepun.",
         "romanization": "Perumian — sebaris sebutan dalam huruf Latin di bawah teks Jepun, Korea, Rusia dan Ukraine.",
         "fonts": "Pilih fon untuk setiap bahasa di Tetapan → Fon.",
-        "pinyin": "Pinyin — pinyin dengan tanda nada di atas teks Cina."
+        "pinyin": "Pinyin — pinyin dengan tanda nada di atas teks Cina.",
+        "jyutping": "Jyutping — jyutping dengan nada dalam angka di atas teks Kantonis."
       },
       "kotomimi-tips": {
         "title": "Tiga perkara lagi",
@@ -1719,7 +1720,8 @@
       "pinyin": "Pinyin",
       "roman": "Perumian",
       "italic": "Teks asal condong",
-      "highlight": "Serlahkan teks baharu"
+      "highlight": "Serlahkan teks baharu",
+      "jyutping": "Jyutping"
     },
     "vrchat": {
       "title": "VRChat",
@@ -1931,6 +1933,7 @@
       "firewallWaiting": "Menunggu Windows…",
       "firewallDeclined": "Masih disekat: kebenaran belum disahkan dalam Windows.",
       "firewall": "Apabila diaktifkan buat kali pertama, tembok api sistem mungkin meminta kebenaran untuk Kotomimi mengakses rangkaian. Benarkan komunikasi pada rangkaian persendirian."
-    }
+    },
+    "jyutping": "Jyutping di atas teks Kantonis"
   }
 }

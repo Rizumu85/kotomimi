@@ -31,6 +31,10 @@
     "en": "Italic source",
     "text": "మూల వచనం ఇటాలిక్‌లో"
   },
+  "fork.aids.jyutping": {
+    "en": "Jyutping",
+    "text": "జ్యుట్‌పింగ్"
+  },
   "fork.aids.pinyin": {
     "en": "Pinyin",
     "text": "పిన్‌యిన్"
@@ -334,6 +338,10 @@
   "fork.help.issuesTooltip": {
     "en": "Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page.",
     "text": "Kotomimi, Sokuji యొక్క స్వతంత్ర fork. ఈ యాప్ సమస్యలను దాని స్వంత GitHub పేజీలో నివేదించండి."
+  },
+  "fork.jyutping": {
+    "en": "Jyutping over Cantonese",
+    "text": "కాంటనీస్ పైన జ్యుట్‌పింగ్ చూపించు"
   },
   "fork.lan.copied": {
     "en": "Copied",
@@ -1822,6 +1830,10 @@
   "tour.steps.reading-aids.furigana": {
     "en": "Furigana — kana above Japanese kanji.",
     "text": "ఫురిగానా — జపనీస్ కాంజీ పైన ఉచ్చారణను కన అక్షరాల్లో చూపిస్తుంది."
+  },
+  "tour.steps.reading-aids.jyutping": {
+    "en": "Jyutping — Cantonese readings above Cantonese, tones as digits.",
+    "text": "జ్యుట్‌పింగ్: కాంటనీస్ పాఠ్యం పైన ఉచ్చారణను చూపిస్తుంది. స్వరాలను అంకెలతో సూచిస్తుంది."
   },
   "tour.steps.reading-aids.pinyin": {
     "en": "Pinyin — tone-marked pinyin above Chinese.",

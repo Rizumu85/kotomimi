@@ -1531,7 +1531,8 @@
         "furigana": "假名注音：日语汉字上方显示读音。",
         "romanization": "罗马音：日语、韩语、俄语、乌克兰语下方加一行拉丁字母读音。",
         "fonts": "各语言的字体在「设置 → 字体」里选。",
-        "pinyin": "拼音：中文上方显示带声调的拼音。"
+        "pinyin": "拼音：中文上方显示带声调的拼音。",
+        "jyutping": "粤拼：粤语上方显示粤拼，声调用数字表示。"
       },
       "kotomimi-tips": {
         "title": "还有三件事",
@@ -1699,6 +1700,7 @@
     "furigana": "汉字上方显示假名（日语）",
     "romanization": "显示罗马音",
     "pinyin": "中文上方显示拼音",
+    "jyutping": "粤语上方显示粤拼",
     "echoCancellationApp": "仅 Kotomimi",
     "echoCancellationAppTooltip": "仅 Kotomimi — 只消掉 Kotomimi 自己播放的翻译语音。麦克风是虚拟声卡（VB-Cable、BlackHole 等）时选这一项。",
     "speechDetection": {
@@ -1717,6 +1719,7 @@
       "text": "文字",
       "furigana": "假名",
       "pinyin": "拼音",
+      "jyutping": "粤拼",
       "roman": "罗马音",
       "italic": "原文斜体",
       "highlight": "高亮新文字"

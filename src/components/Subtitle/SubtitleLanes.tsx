@@ -159,7 +159,13 @@ function useRoom(on: boolean, asked: boolean, unsaid = false): boolean {
 }
 
 /** The reading aids' switches. */
-export interface ReadingAids { romanization: boolean; romanOff: readonly string[]; furigana: boolean; pinyin: boolean }
+export interface ReadingAids { romanization: boolean; romanOff: readonly string[]; furigana: boolean; pinyin: boolean; jyutping?: boolean }
+
+/** Whether a language has its readings drawn above it: kana over kanji, pinyin over Chinese, Jyutping over Cantonese. */
+const readsAbove = (code: string | undefined, aids: Pick<ReadingAids, 'furigana' | 'pinyin' | 'jyutping'>): boolean => {
+  const read = annotatedLanguage(code);
+  return read === 'zh' ? aids.pinyin : read === 'yue' ? !!aids.jyutping : read === 'ja' && aids.furigana;
+};
 /** The run's two languages: what the user speaks, and what the other side does. */
 export interface LanePair { source: string; target: string }
 
@@ -172,7 +178,7 @@ function plannedRoom(lanes: readonly Lane[], aids: ReadingAids, pair: LanePair |
   const language = (lane: Lane, side: 'source' | 'answer') => ((lane.leg === 'participant') === (side === 'source') ? pair?.target : pair?.source);
   const known = (code: string | undefined) => !!code && code !== 'auto';
   const roman = (code: string | undefined) => aids.romanization && (!known(code) || romanizedText('', code, aids.romanOff));
-  const reads = (code: string | undefined) => { const read = annotatedLanguage(code); return read === 'zh' ? aids.pinyin : read === 'ja' && aids.furigana; };
+  const reads = (code: string | undefined) => readsAbove(code, aids);
   const pairs = lanes.filter((lane) => lane.shape === 'pair');
   const oneLanguage = pair?.source.toLowerCase() === pair?.target.toLowerCase();
   return {
@@ -297,6 +303,7 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight,
   const romanOff = useAnnotationStore((s) => s.romanizationOff);
   const furigana = useAnnotationStore((s) => s.furigana);
   const pinyin = useAnnotationStore((s) => s.pinyin);
+  const jyutping = useAnnotationStore((s) => s.jyutping);
   // Fork: under grammar feedback the user's own row has none: the correction drawn there has no room for one, and a
   // row that had one only while no correction stood in it would change the window's height from sentence to sentence.
   const rowRoman = !coached;
@@ -306,15 +313,15 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight,
   const unsaid = (texts: Array<LaneText | undefined>) => !texts.some((text) => text?.text);
   const pairTexts = lanes.filter((lane) => lane.shape === 'pair').map((lane) => lane.source);
   const rowTexts = lanes.filter((lane) => lane.shape === 'row').flatMap((lane) => [lane.source, lane.answer]);
-  const planned = plannedRoom(lanes, { romanization, romanOff, furigana, pinyin }, pair);
+  const planned = plannedRoom(lanes, { romanization, romanOff, furigana, pinyin, jyutping }, pair);
   const pairRoman = useRoom(romanization, pairTexts.some(romanized), unsaid(pairTexts) && planned.pairRoman);
   const rowNeeds = useRoom(romanization && rowRoman, rowTexts.some(romanized), unsaid(rowTexts) && planned.rowRoman);
   // And the answer's own: its readings go above it, on taller lines, and its romanization under it. What was said gives
   // the romanization up to the readings, where it has any: at its size, both are more than a line can carry.
-  const reads = (text: LaneText | undefined) => { const language = annotatedLanguage(text?.language); return language === 'zh' ? pinyin : language === 'ja' && furigana; };
+  const reads = (text: LaneText | undefined) => readsAbove(text?.language, { furigana, pinyin, jyutping });
   const answering = lanes.filter((lane) => lane.shape === 'pair');
   const unanswered = unsaid(answering.map((lane) => lane.answer));
-  const answerReads = useRoom(furigana || pinyin, answering.some((lane) => reads(lane.answer)), unanswered && planned.answerReads);
+  const answerReads = useRoom(furigana || pinyin || jyutping, answering.some((lane) => reads(lane.answer)), unanswered && planned.answerReads);
   const answerRoman = useRoom(romanization, answering.some((lane) => romanized(lane.answer) && !(lane.said && reads(lane.answer))), unanswered && planned.answerRoman);
   const roman = `${pairRoman}:${rowNeeds}:${answerReads}:${answerRoman}`;
   const aided = (spacing: LaneSpacing) => withAnswerAids(withRoman(spacing, pairRoman, rowNeeds), answerReads, answerRoman);

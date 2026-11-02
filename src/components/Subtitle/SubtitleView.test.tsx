@@ -236,6 +236,10 @@ describe('SubtitleView', () => {
     cleanup();
     render(<SubtitleView surface="electron" model={{ entries: [], lit: new Map(), session: session({ pair: { source: 'en-US', target: 'ja-JP' } }) }} controls={controls()} />);
     expect(screen.getByTestId('bar').dataset.pair).toBe('EN');
+    cleanup();
+    // A code of three letters keeps them.
+    render(<SubtitleView surface="electron" model={{ entries: [], lit: new Map(), session: session({ pair: { source: 'yue', target: 'zh-CN' } }) }} controls={controls()} />);
+    expect(screen.getByTestId('bar').dataset.pair).toBe('YUE');
   });
 
   it('hands the bar an export menu over the exporter it was given, and none without one', () => {

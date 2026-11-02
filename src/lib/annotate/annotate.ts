@@ -7,8 +7,10 @@
  * characters in a Chinese row get none. And in a Chinese row a Chinese
  * sentence that quotes a Japanese word stays Chinese: readings over an
  * explanation written in Chinese would be noise. A line of Han characters in
- * a Chinese row is Chinese, and takes pinyin where that is asked for.
+ * a Chinese row is Chinese, and takes pinyin where that is asked for; of a
+ * Cantonese row, Cantonese, and Jyutping.
  */
+import { annotateCantonese } from './cantonese';
 import { annotateChinese } from './chinese';
 import { annotateJapanese, japaneseStretches } from './japanese';
 import { romanizeKorean } from './korean';
@@ -33,7 +35,7 @@ function languageOf(line: string, o: Pick<AnnotateInputs, 'language' | 'chinese'
   // Ukrainian does not write one of its own letters in every sentence: the row says what the letters cannot.
   if (script === 'ru' && o.language === 'uk') return 'uk';
   if (script) return script;
-  return (o.language === 'ja' || o.language === 'zh') && KANJI.test(line) ? o.language : null;
+  return (o.language === 'ja' || o.language === 'zh' || o.language === 'yue') && KANJI.test(line) ? o.language : null;
 }
 
 const plain = (line: string): AnnotatedLine => ({ parts: [{ text: line }] });
@@ -42,9 +44,10 @@ const romanFor = (language: AnnotatedLanguage | null, o: Pick<AnnotateOptions, '
   o.roman && !(language && o.romanOff?.includes(language as RomanizedLanguage));
 
 export function annotateLine(line: string, o: AnnotateInputs): AnnotatedLine {
-  if (!o.furigana && !o.roman && !o.pinyin) return plain(line);
+  if (!o.furigana && !o.roman && !o.pinyin && !o.jyutping) return plain(line);
   const language = languageOf(line, o);
   if (language === 'zh') return o.pinyin ? { parts: annotateChinese(line) } : plain(line);
+  if (language === 'yue') return o.jyutping ? { parts: annotateCantonese(line) } : plain(line);
   const roman = romanFor(language, o);
   if (language === 'ja') return o.japanese && (o.furigana || roman) ? annotateJapanese(line, o.japanese, { ...o, roman }) : plain(line);
   if (!roman) return plain(line);

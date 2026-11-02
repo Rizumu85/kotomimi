@@ -1531,7 +1531,8 @@
         "furigana": "Furigana : indiquent la prononciation en kana au-dessus des kanji japonais.",
         "romanization": "Romanisation : ajoute la prononciation en lettres latines sous le japonais, le coréen, le russe et l’ukrainien.",
         "fonts": "Choisissez les polices de chaque langue dans Paramètres → Polices.",
-        "pinyin": "Pinyin : affiche le pinyin avec les tons au-dessus du chinois."
+        "pinyin": "Pinyin : affiche le pinyin avec les tons au-dessus du chinois.",
+        "jyutping": "Jyutping — Jyutping affiché au-dessus du cantonais, tons indiqués par des chiffres."
       },
       "kotomimi-tips": {
         "title": "Encore trois choses",
@@ -1719,7 +1720,8 @@
       "pinyin": "Pinyin",
       "roman": "Romanisation",
       "italic": "Original en italique",
-      "highlight": "Surligner le nouveau texte"
+      "highlight": "Surligner le nouveau texte",
+      "jyutping": "Jyutping"
     },
     "vrchat": {
       "title": "VRChat",
@@ -1931,6 +1933,7 @@
       "firewallWaiting": "En attente de Windows…",
       "firewallDeclined": "Toujours bloqué : l’autorisation n’a pas été confirmée dans Windows.",
       "firewall": "À la première activation, le pare-feu du système peut demander si Kotomimi peut accéder au réseau. Autorisez-le sur les réseaux privés."
-    }
+    },
+    "jyutping": "Jyutping au-dessus du cantonais"
   }
 }

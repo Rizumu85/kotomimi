@@ -57,9 +57,12 @@ export interface SubtitleControls {
   sendText?(text: string): void;
 }
 
-/** Two letters of the pair's base language (`baseLang`): Gemini's `cmn-CN` reads ZH, not CM (Stage 2 Gemini, choice 9). */
+/**
+ * The pair's base language (`baseLang`): Gemini's `cmn-CN` reads ZH, not CM (Stage 2 Gemini, choice 9). A language of
+ * three letters keeps them: Cantonese is YUE, not YU.
+ */
 function languageCodeShort(code: string | undefined): string {
-  return code ? baseLang(code).slice(0, 2).toUpperCase() : '?';
+  return code ? baseLang(code).toUpperCase() : '?';
 }
 
 /** The toolbar's room above the caption box on the desktop: its 36 pixels, the box beginning where it ends (`--kt-bar-room` in `SubtitleStream.scss`). */
@@ -254,13 +257,14 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
   const romanOff = useAnnotationStore((state) => state.romanizationOff);
   const furigana = useAnnotationStore((state) => state.furigana);
   const pinyin = useAnnotationStore((state) => state.pinyin);
+  const jyutping = useAnnotationStore((state) => state.jyutping);
   const pair = session?.pair ?? undefined;
   useEffect(() => {
     if (surface !== 'electron' || lanesShown) return;
-    const resting = !running && subtitle.compactMode && fitsWindow ? restingHeights(laneLegs, filters, subtitle.fontSize, { romanization, romanOff, furigana, pinyin }, pair) : null;
+    const resting = !running && subtitle.compactMode && fitsWindow ? restingHeights(laneLegs, filters, subtitle.fontSize, { romanization, romanOff, furigana, pinyin, jyutping }, pair) : null;
     if (resting) fitWindow(resting.height, resting.least);
     else void window.electron?.invoke?.('subtitle:fit-height', { least: 0 })?.catch?.(() => {});
-  }, [surface, lanesShown, running, subtitle.compactMode, subtitle.fontSize, fitsWindow, fitWindow, laneLegs, filters, romanization, romanOff, furigana, pinyin, pair]);
+  }, [surface, lanesShown, running, subtitle.compactMode, subtitle.fontSize, fitsWindow, fitWindow, laneLegs, filters, romanization, romanOff, furigana, pinyin, jyutping, pair]);
 
   return (
     <div ref={chrome.rootRef} {...rootProps}>

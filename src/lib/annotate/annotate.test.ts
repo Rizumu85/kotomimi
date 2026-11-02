@@ -9,6 +9,7 @@ import { buildJapaneseTokenizer } from './japaneseTokenizer';
 import { romanizeKorean } from './korean';
 import { transliterateRussian } from './russian';
 import { transliterateUkrainian } from './ukrainian';
+import { annotateCantonese } from './cantonese';
 import { annotateChinese } from './chinese';
 import { annotatedLanguage, explainsInChinese, isChinese, quotesJapanese, romanizedLanguage, romanizedText, scriptLanguage } from './script';
 import type { JapaneseTokenizer } from './types';
@@ -44,7 +45,8 @@ describe('the script a line is written in', () => {
     expect(annotatedLanguage('ru')).toBe('ru');
     expect(annotatedLanguage('zh-CN')).toBe('zh');
     expect(annotatedLanguage('uk')).toBe('uk');
-    for (const other of ['yue', 'en', 'auto', '', null, undefined]) expect(annotatedLanguage(other)).toBeNull();
+    expect(annotatedLanguage('yue')).toBe('yue');
+    for (const other of ['en', 'auto', '', null, undefined]) expect(annotatedLanguage(other)).toBeNull();
   });
 
   it('tells a romanized text by its writing where its language is not known (fork)', () => {
@@ -214,8 +216,29 @@ describe('pinyin over Chinese, and Ukrainian by its own system (upstream #632)',
     expect(annotateLine('你好', { ...ZH, pinyin: false, language: 'zh', chinese: true })).toEqual({ parts: [{ text: '你好' }] });
     // Han characters alone in a row of another language, or with no language, are not read as Chinese.
     expect(annotateLine('大丈夫', { ...ZH, language: null })).toEqual({ parts: [{ text: '大丈夫' }] });
-    expect(annotatedLanguage('yue')).toBeNull();
+    // A Cantonese row has no pinyin: it has Jyutping, below.
+    expect(annotateLine('你食咗飯未呀？', { ...ZH, language: 'yue', chinese: true })).toEqual({ parts: [{ text: '你食咗飯未呀？' }] });
     expect(annotatedLanguage('zh-TW')).toBe('zh');
+  });
+
+  it('puts Jyutping over Cantonese, in either script, taking a polyphone’s reading from its words (fork)', () => {
+    expect(annotateCantonese('你食咗飯未呀？')).toEqual([
+      { text: '你', ruby: 'nei5' }, { text: '食', ruby: 'sik6' }, { text: '咗', ruby: 'zo2' }, { text: '飯', ruby: 'faan6' }, { text: '未', ruby: 'mei6' }, { text: '呀', ruby: 'aa3' }, { text: '？' },
+    ]);
+    // Simplified, as SenseVoice-Small writes it.
+    expect(annotateCantonese('你食咗饭未呀').map((p) => p.ruby)).toEqual(['nei5', 'sik6', 'zo2', 'faan6', 'mei6', 'aa3']);
+    expect(annotateCantonese('銀行').map((p) => p.ruby)).toEqual(['ngan4', 'hong4']);
+    expect(annotateCantonese('行街').map((p) => p.ruby)).toEqual(['haang4', 'gaai1']);
+    // What is not Cantonese stays one part.
+    expect(annotateCantonese('玩 VRChat 好正')).toEqual([{ text: '玩', ruby: 'waan2' }, { text: ' VRChat ' }, { text: '好', ruby: 'hou2' }, { text: '正', ruby: 'zeng3' }]);
+    const ON = { furigana: true, roman: true, pinyin: true, jyutping: true };
+    expect(annotateLine('好正', { ...ON, language: 'yue', chinese: true }).parts.map((p) => p.ruby)).toEqual(['hou2', 'zeng3']);
+    expect(annotateLine('好正', { ...ON, jyutping: false, language: 'yue', chinese: true })).toEqual({ parts: [{ text: '好正' }] });
+    // Jyutping is above the line, as pinyin is: no romanization under it.
+    expect(annotateLine('好正', { ...ON, language: 'yue', chinese: true }).roman).toBeUndefined();
+    expect(romanizedLanguage('yue')).toBe(false);
+    // And Chinese keeps its pinyin.
+    expect(annotateLine('好', { ...ON, language: 'zh', chinese: true }).parts).toEqual([{ text: '好', ruby: 'hǎo' }]);
   });
 
   it('writes Ukrainian by the 2010 national system, word-initial letters apart', () => {

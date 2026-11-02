@@ -1531,7 +1531,8 @@
         "furigana": "Furigana: muestra la pronunciación en kana sobre los kanji japoneses.",
         "romanization": "Romanización: añade una línea con la pronunciación en letras latinas debajo del japonés, coreano, ruso y ucraniano.",
         "fonts": "Elige las fuentes de cada idioma en Ajustes → Fuentes.",
-        "pinyin": "Pinyin: muestra el pinyin con marcas de tono sobre el texto chino."
+        "pinyin": "Pinyin: muestra el pinyin con marcas de tono sobre el texto chino.",
+        "jyutping": "Jyutping: pronunciación sobre el texto cantonés, con tonos indicados por números."
       },
       "kotomimi-tips": {
         "title": "Tres cosas más",
@@ -1719,7 +1720,8 @@
       "pinyin": "Pinyin",
       "roman": "Romanización",
       "italic": "Original en cursiva",
-      "highlight": "Resaltar texto nuevo"
+      "highlight": "Resaltar texto nuevo",
+      "jyutping": "Jyutping"
     },
     "vrchat": {
       "title": "VRChat",
@@ -1931,6 +1933,7 @@
       "firewallWaiting": "Esperando a Windows…",
       "firewallDeclined": "Sigue bloqueado: no se confirmó el permiso en Windows.",
       "firewall": "La primera vez, el firewall del sistema puede preguntar si permites que Kotomimi acceda a la red. Permite el acceso en redes privadas."
-    }
+    },
+    "jyutping": "Jyutping sobre el texto cantonés"
   }
 }

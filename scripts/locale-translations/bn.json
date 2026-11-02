@@ -31,6 +31,10 @@
     "en": "Italic source",
     "text": "মূল লেখা তির্যক"
   },
+  "fork.aids.jyutping": {
+    "en": "Jyutping",
+    "text": "জ্যুতপিং"
+  },
   "fork.aids.pinyin": {
     "en": "Pinyin",
     "text": "পিনইন"
@@ -334,6 +338,10 @@
   "fork.help.issuesTooltip": {
     "en": "Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page.",
     "text": "Kotomimi হলো Sokuji-এর একটি স্বতন্ত্র সংস্করণ। এই অ্যাপের সমস্যা এর নিজস্ব GitHub পাতায় জানান।"
+  },
+  "fork.jyutping": {
+    "en": "Jyutping over Cantonese",
+    "text": "ক্যান্টোনিজ লেখার উপরে জ্যুতপিং"
   },
   "fork.lan.copied": {
     "en": "Copied",
@@ -1846,6 +1854,10 @@
   "tour.steps.reading-aids.furigana": {
     "en": "Furigana — kana above Japanese kanji.",
     "text": "ফুরিগানা: জাপানি কানজির উপরে কানা অক্ষরে উচ্চারণ দেখায়।"
+  },
+  "tour.steps.reading-aids.jyutping": {
+    "en": "Jyutping — Cantonese readings above Cantonese, tones as digits.",
+    "text": "জ্যুতপিং: ক্যান্টোনিজ লেখার উপরে সংখ্যায় স্বরসহ জ্যুতপিং দেখায়।"
   },
   "tour.steps.reading-aids.pinyin": {
     "en": "Pinyin — tone-marked pinyin above Chinese.",

@@ -1531,7 +1531,8 @@
         "furigana": "Furigana: japanin kanjimerkkien ääntämisohjeet merkkien yläpuolella.",
         "romanization": "Latinalaistus: ääntämisohjeet latinalaisin kirjaimin japanin, korean, venäjän ja ukrainan tekstin alla.",
         "fonts": "Valitse kielikohtaiset fontit kohdassa Asetukset → Fontit.",
-        "pinyin": "Pinyin: kiinan ääntämisohjeet toonimerkkeineen tekstin yläpuolella."
+        "pinyin": "Pinyin: kiinan ääntämisohjeet toonimerkkeineen tekstin yläpuolella.",
+        "jyutping": "Jyutping: kantoninkiinan ääntämisohjeet tekstin yläpuolella, toonit numeroina."
       },
       "kotomimi-tips": {
         "title": "Vielä kolme asiaa",
@@ -1719,7 +1720,8 @@
       "pinyin": "Pinyin",
       "roman": "Latinalaistus",
       "italic": "Alkuteksti kursiivilla",
-      "highlight": "Korosta uusi teksti"
+      "highlight": "Korosta uusi teksti",
+      "jyutping": "Jyutping"
     },
     "vrchat": {
       "title": "VRChat",
@@ -1931,6 +1933,7 @@
       "firewallWaiting": "Odotetaan Windowsia…",
       "firewallDeclined": "Yhteydet on yhä estetty: Windowsin vahvistus puuttuu.",
       "firewall": "Ensimmäisellä käyttökerralla järjestelmän palomuuri saattaa kysyä, sallitaanko Kotomimin verkkoyhteydet. Salli yhteydet yksityisissä verkoissa."
-    }
+    },
+    "jyutping": "Jyutping kantoninkiinankielisen tekstin yläpuolella"
   }
 }

@@ -1531,7 +1531,8 @@
         "furigana": "Furigana: kana sa ibabaw ng kanji para ipakita ang pagbigkas.",
         "romanization": "Romanisasyon: isang linya ng pagbigkas sa mga titik Latin sa ilalim ng Hapones, Koreano, Ruso, at Ukranyano.",
         "fonts": "Piliin ang font ng bawat wika sa Mga Setting → Mga Font.",
-        "pinyin": "Pinyin: pinyin na may marka ng tono sa ibabaw ng tekstong Tsino."
+        "pinyin": "Pinyin: pinyin na may marka ng tono sa ibabaw ng tekstong Tsino.",
+        "jyutping": "Jyutping — ipinapakita ang Jyutping sa itaas ng Cantonese, mga tono bilang numero."
       },
       "kotomimi-tips": {
         "title": "Tatlo pang bagay",
@@ -1719,7 +1720,8 @@
       "pinyin": "Pinyin",
       "roman": "Romanisasyon",
       "italic": "Pahilig na orihinal",
-      "highlight": "I-highlight ang bagong teksto"
+      "highlight": "I-highlight ang bagong teksto",
+      "jyutping": "Jyutping"
     },
     "vrchat": {
       "title": "VRChat",
@@ -1931,6 +1933,7 @@
       "firewallWaiting": "Hinihintay ang Windows…",
       "firewallDeclined": "Nakaharang pa rin: hindi nakumpirma sa Windows.",
       "firewall": "Sa unang pagbukas, maaaring magtanong ang firewall ng system kung papayagang kumonekta ang Kotomimi sa network: payagan ito sa mga pribadong network."
-    }
+    },
+    "jyutping": "Jyutping sa itaas ng Cantonese"
   }
 }

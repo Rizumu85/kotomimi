@@ -35,6 +35,10 @@
     "en": "Italic source",
     "text": "In nghiêng bản gốc"
   },
+  "fork.aids.jyutping": {
+    "en": "Jyutping",
+    "text": "Jyutping"
+  },
   "fork.aids.pinyin": {
     "en": "Pinyin",
     "text": "Bính âm"
@@ -338,6 +342,10 @@
   "fork.help.issuesTooltip": {
     "en": "Kotomimi is an independent fork of Sokuji. Problems with this app are reported on its own GitHub page.",
     "text": "Kotomimi là một nhánh phát triển độc lập từ Sokuji. Hãy báo sự cố của ứng dụng này trên trang GitHub riêng của Kotomimi."
+  },
+  "fork.jyutping": {
+    "en": "Jyutping over Cantonese",
+    "text": "Hiện jyutping trên tiếng Quảng Đông"
   },
   "fork.lan.copied": {
     "en": "Copied",
@@ -1862,6 +1870,10 @@
   "tour.steps.reading-aids.furigana": {
     "en": "Furigana — kana above Japanese kanji.",
     "text": "Furigana: hiển thị cách đọc bằng kana phía trên chữ kanji tiếng Nhật."
+  },
+  "tour.steps.reading-aids.jyutping": {
+    "en": "Jyutping — Cantonese readings above Cantonese, tones as digits.",
+    "text": "Jyutping: hiển thị jyutping có thanh điệu bằng số phía trên tiếng Quảng Đông."
   },
   "tour.steps.reading-aids.pinyin": {
     "en": "Pinyin — tone-marked pinyin above Chinese.",

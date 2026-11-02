@@ -1531,7 +1531,8 @@
         "furigana": "Furigana: visar uttalet med kana ovanför japanska kanji.",
         "romanization": "Romanisering: visar uttalet med latinska bokstäver under japanska, koreanska, ryska och ukrainska.",
         "fonts": "Välj teckensnitt för varje språk under Inställningar → Teckensnitt.",
-        "pinyin": "Pinyin: visar pinyin med tontecken ovanför kinesisk text."
+        "pinyin": "Pinyin: visar pinyin med tontecken ovanför kinesisk text.",
+        "jyutping": "Jyutping: visas ovanför kantonesisk text, med toner som siffror."
       },
       "kotomimi-tips": {
         "title": "Tre saker till",
@@ -1719,7 +1720,8 @@
       "pinyin": "Pinyin",
       "roman": "Romanisering",
       "italic": "Kursiv originaltext",
-      "highlight": "Markera ny text"
+      "highlight": "Markera ny text",
+      "jyutping": "Jyutping"
     },
     "vrchat": {
       "title": "VRChat",
@@ -1931,6 +1933,7 @@
       "firewallWaiting": "Väntar på Windows…",
       "firewallDeclined": "Fortfarande blockerat: ingen bekräftelse gavs i Windows.",
       "firewall": "Första gången kan systemets brandvägg fråga om Kotomimi ska få åtkomst till nätverket. Tillåt kommunikation i privata nätverk."
-    }
+    },
+    "jyutping": "Jyutping ovanför kantonesisk text"
   }
 }

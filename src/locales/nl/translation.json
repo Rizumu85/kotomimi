@@ -1531,7 +1531,8 @@
         "furigana": "Furigana: kana boven Japanse kanji om de uitspraak aan te geven.",
         "romanization": "Romanisatie: een regel met de uitspraak in Latijnse letters onder Japans, Koreaans, Russisch en Oekraïens.",
         "fonts": "Lettertypen per taal kies je via Instellingen → Lettertypen.",
-        "pinyin": "Pinyin: pinyin met toontekens boven Chinese tekst."
+        "pinyin": "Pinyin: pinyin met toontekens boven Chinese tekst.",
+        "jyutping": "Jyutping: uitspraak boven Kantonese tekst, met cijfers voor de tonen."
       },
       "kotomimi-tips": {
         "title": "Nog drie dingen",
@@ -1719,7 +1720,8 @@
       "pinyin": "Pinyin",
       "roman": "Romanisatie",
       "italic": "Origineel cursief",
-      "highlight": "Nieuwe tekst markeren"
+      "highlight": "Nieuwe tekst markeren",
+      "jyutping": "Jyutping"
     },
     "vrchat": {
       "title": "VRChat",
@@ -1931,6 +1933,7 @@
       "firewallWaiting": "Wachten op Windows…",
       "firewallDeclined": "Nog steeds geblokkeerd: er is geen toestemming gegeven in Windows.",
       "firewall": "De eerste keer kan de firewall vragen of Kotomimi toegang tot het netwerk mag krijgen. Sta dit toe voor privénetwerken."
-    }
+    },
+    "jyutping": "Jyutping boven Kantonese tekst"
   }
 }

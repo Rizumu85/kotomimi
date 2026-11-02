@@ -21,6 +21,8 @@ interface AnnotationState {
   romanizationOff: readonly RomanizedLanguage[];
   /** Pinyin over Chinese text. Off by default: most who read this app's Chinese need no help with it. */
   pinyin: boolean;
+  /** Jyutping over Cantonese text. Off by default, as pinyin is. */
+  jyutping: boolean;
   /**
    * The source text in italics, as upstream sets it. A switch because slanted kana and hanzi are synthesized by the
    * browser (few CJK fonts have an italic), and a reader of them may find the upright form easier. On by default:
@@ -31,13 +33,14 @@ interface AnnotationState {
   setRomanization: (on: boolean) => Promise<void>;
   setRomanized: (language: RomanizedLanguage, on: boolean) => Promise<void>;
   setPinyin: (on: boolean) => Promise<void>;
+  setJyutping: (on: boolean) => Promise<void>;
   setSourceItalic: (on: boolean) => Promise<void>;
   /** Called once at app boot (`src/routes/Home.tsx`). */
   hydrate: () => Promise<void>;
 }
 
-type Field = 'furigana' | 'romanization' | 'pinyin' | 'sourceItalic';
-const DEFAULTS: Record<Field, boolean> = { furigana: true, romanization: false, pinyin: false, sourceItalic: true };
+type Field = 'furigana' | 'romanization' | 'pinyin' | 'jyutping' | 'sourceItalic';
+const DEFAULTS: Record<Field, boolean> = { furigana: true, romanization: false, pinyin: false, jyutping: false, sourceItalic: true };
 
 /**
  * The source text's slant, where the stylesheets read it (`ConversationRow.scss`, `SubtitleStream.scss`): a custom
@@ -80,20 +83,22 @@ export const useAnnotationStore = create<AnnotationState>()(
         if (!(await persistSetting(KEY('romanizationOff'), romanizationOff))) set({ romanizationOff: previous });
       },
       setPinyin: write('pinyin'),
+      setJyutping: write('jyutping'),
       setSourceItalic: write('sourceItalic'),
       hydrate: async () => {
         const { ServiceFactory } = await import('../services/ServiceFactory');
         const service = ServiceFactory.getSettingsService();
-        const [furigana, romanization, romanizationOff, pinyin, sourceItalic] = await Promise.all([
+        const [furigana, romanization, romanizationOff, pinyin, jyutping, sourceItalic] = await Promise.all([
           service.getSetting(KEY('furigana'), DEFAULTS.furigana),
           service.getSetting(KEY('romanization'), DEFAULTS.romanization),
           service.getSetting<unknown>(KEY('romanizationOff'), []),
           service.getSetting(KEY('pinyin'), DEFAULTS.pinyin),
+          service.getSetting(KEY('jyutping'), DEFAULTS.jyutping),
           service.getSetting(KEY('sourceItalic'), DEFAULTS.sourceItalic),
         ]);
         // Only a stored "off" turns the slant off: anything else is the default.
         const off = Array.isArray(romanizationOff) ? ROMANIZED_LANGUAGES.filter((language) => romanizationOff.includes(language)) : [];
-        set({ furigana: furigana === true, romanization: romanization === true, romanizationOff: off, pinyin: pinyin === true, sourceItalic: sourceItalic !== false });
+        set({ furigana: furigana === true, romanization: romanization === true, romanizationOff: off, pinyin: pinyin === true, jyutping: jyutping === true, sourceItalic: sourceItalic !== false });
       },
     };
   }),

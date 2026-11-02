@@ -1531,7 +1531,8 @@
         "furigana": "Furigana: hiển thị cách đọc bằng kana phía trên chữ kanji tiếng Nhật.",
         "romanization": "Phiên âm Latinh: thêm một dòng cách đọc bằng chữ Latinh bên dưới tiếng Nhật, Hàn, Nga và Ukraina.",
         "fonts": "Chọn phông chữ cho từng ngôn ngữ trong Cài đặt → Phông chữ.",
-        "pinyin": "Bính âm: hiển thị bính âm có dấu thanh phía trên tiếng Trung."
+        "pinyin": "Bính âm: hiển thị bính âm có dấu thanh phía trên tiếng Trung.",
+        "jyutping": "Jyutping: hiển thị jyutping có thanh điệu bằng số phía trên tiếng Quảng Đông."
       },
       "kotomimi-tips": {
         "title": "Thêm ba điều nữa",
@@ -1719,7 +1720,8 @@
       "pinyin": "Bính âm",
       "roman": "Phiên âm Latinh",
       "italic": "In nghiêng bản gốc",
-      "highlight": "Tô sáng chữ mới"
+      "highlight": "Tô sáng chữ mới",
+      "jyutping": "Jyutping"
     },
     "vrchat": {
       "title": "VRChat",
@@ -1931,6 +1933,7 @@
       "firewallWaiting": "Đang chờ Windows…",
       "firewallDeclined": "Vẫn bị chặn: chưa có xác nhận cho phép trong Windows.",
       "firewall": "Lần đầu bật, tường lửa của hệ thống có thể hỏi có cho phép Kotomimi truy cập mạng không: hãy cho phép trên mạng riêng tư."
-    }
+    },
+    "jyutping": "Hiện jyutping trên tiếng Quảng Đông"
   }
 }
