@@ -55,7 +55,7 @@ import { boundedFetch } from '../../lib/provider/boundedFetch';
 import { CheckError } from '../../lib/provider/checkError';
 import { AUTO } from '../../lib/provider/languages';
 import { quickOf } from './apiServices';
-import type { CheckContext, CheckResult, CredentialField, CredentialsMissing, MigrationInputs, Provider, ProviderRefusal, SharedSettings } from '../../lib/provider/types';
+import type { CheckContext, CheckResult, CredentialField, CredentialsMissing, LanguageOption, MigrationInputs, Provider, ProviderRefusal, SharedSettings } from '../../lib/provider/types';
 import { LOCAL_INFERENCE_DEFAULTS } from '../localInference/settings';
 import { CHECK_TIMEOUT_MS } from './check';
 import { SERVER_SILENT, isKotomimiServer, kindOf, KOTOMIMI_HOST, fitsPair, modelsFor, serverDefaultModel, translationDefault, type LocalAIModel, type LocalAIModelKind } from './localaiModels';
@@ -1293,6 +1293,12 @@ export function describeLocalAI(c: LocalAIConfig): { translationModel: string; a
 }
 
 /**
+ * Fork: the Realtime list and Cantonese, which the on-device recognizers and translators take (Qwen3-ASR,
+ * SenseVoice-Small, Apple Speech; Index-Translate, Hunyuan MT 2) and Realtime does not list.
+ */
+export const LOCAL_LANGUAGES: readonly LanguageOption[] = [...REALTIME_LANGUAGES, { value: 'yue' }];
+
+/**
  * The pair is the user's own language and the other side's. Their own is
  * never "detect it": it is what they read, and what their words are
  * translated from. The other side's can be left to be detected, which is
@@ -1300,7 +1306,8 @@ export function describeLocalAI(c: LocalAIConfig): { translationModel: string; a
  */
 export const localaiLanguages: Provider<LocalAISettings, never, never>['languages'] = {
   ...realtimeLanguages,
-  sources: () => REALTIME_LANGUAGES,
+  sources: () => LOCAL_LANGUAGES,
+  targets: () => LOCAL_LANGUAGES,
   detection: (stored, models, pair) => {
     // Detection controls describe the selected recognizer. A downloaded alternative must not change the choice
     // or gate a best-effort run; model readiness is checked separately when the session starts.

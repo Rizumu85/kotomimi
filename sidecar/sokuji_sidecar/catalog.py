@@ -609,7 +609,7 @@ def _llm_translate_row(mid, name, family, sort_order, default_quant, default_byt
 # ("multi",): its list is not enumerated here, and the renderer treats it as any.
 _HUNYUAN_LANGUAGES = (
     "zh", "en", "fr", "pt", "es", "ja", "tr", "ru", "ar", "ko", "th", "it", "de", "vi", "ms", "id", "fil", "hi",
-    "pl", "cs", "nl", "km", "my", "fa", "gu", "ur", "te", "mr", "he", "bn", "ta", "uk", "bo", "kk", "mn", "ug",
+    "pl", "cs", "nl", "km", "my", "fa", "gu", "ur", "te", "mr", "he", "bn", "ta", "uk", "bo", "kk", "mn", "ug", "yue",
 )
 _QWEN25_LANGUAGES = (
     "ja", "zh", "en", "ko", "de", "fr", "es", "ru", "ar", "pt", "th", "vi", "id", "tr", "nl", "pl",

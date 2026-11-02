@@ -369,6 +369,14 @@ describe('a sentence already in the language the leg translates into', () => {
     expect(h.calls).toHaveLength(1);
     expect(h.calls[0].body.messages.slice(-1)[0]).toMatchObject({ content: expect.stringContaining('今日は天気がいいですね。') });
   });
+
+  it('is never Cantonese for a Chinese reader: the two are written alike, and Cantonese is translated', async () => {
+    const h = await live({ direction: { source: 'yue', target: 'zh-CN' }, speech: false, turns: 'auto' }, VIA_MODEL, [sse('你吃饭了吗？')]);
+    h.receive(...heard('item_1', '你食咗飯未呀？'));
+    await h.settled();
+    expect(h.calls).toHaveLength(1);
+    expect(h.calls[0].body.messages.slice(-1)[0]).toMatchObject({ content: expect.stringContaining('你食咗飯未呀？') });
+  });
 });
 
 describe('a coached speaker', () => {

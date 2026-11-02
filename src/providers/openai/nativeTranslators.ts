@@ -24,7 +24,7 @@ export interface NativeTranslator {
 }
 
 /** Hunyuan MT's languages, as its card lists them. */
-const HUNYUAN = ['zh', 'en', 'fr', 'pt', 'es', 'ja', 'tr', 'ru', 'ar', 'ko', 'th', 'it', 'de', 'vi', 'ms', 'id', 'fil', 'hi', 'pl', 'cs', 'nl', 'km', 'my', 'fa', 'gu', 'ur', 'te', 'mr', 'he', 'bn', 'ta', 'uk', 'bo', 'kk', 'mn', 'ug'] as const;
+const HUNYUAN = ['zh', 'en', 'fr', 'pt', 'es', 'ja', 'tr', 'ru', 'ar', 'ko', 'th', 'it', 'de', 'vi', 'ms', 'id', 'fil', 'hi', 'pl', 'cs', 'nl', 'km', 'my', 'fa', 'gu', 'ur', 'te', 'mr', 'he', 'bn', 'ta', 'uk', 'bo', 'kk', 'mn', 'ug', 'yue'] as const;
 
 /**
  * Best first, as measured on thirty sentences of Japanese VRChat talk into
@@ -53,6 +53,8 @@ export const nativeTranslator = (id: string): NativeTranslator => NATIVE_TRANSLA
 const baseOf = (code: string): string => code.trim().toLowerCase().split(/[-_]/)[0];
 const isAuto = (code: string): boolean => code.trim() === '' || code.trim().toLowerCase() === 'auto';
 const isTraditional = (code: string): boolean => /^zh[-_](tw|hk|mo|hant)/i.test(code.trim());
+/** Chinese or Cantonese: what a request in Chinese is for. */
+const isSinitic = (code: string): boolean => baseOf(code) === 'zh' || baseOf(code) === 'yue';
 
 /** Whether a model translates this pair. A source left to be detected is no obstacle: the model reads what it is given. */
 export function nativeTranslates(model: NativeTranslator, source: string, target: string): boolean {
@@ -92,9 +94,9 @@ export interface TranslatorRequest {
  * languages by their Chinese names and the source's left out when it is to
  * be detected; greedy, thinking off.
  *
- * Hunyuan MT: its card's two forms — in Chinese when either side is Chinese,
- * in English otherwise — with the sampling the card recommends. And, in
- * Chinese, its card's form for a translation with what came before: a
+ * Hunyuan MT: its card's two forms — in Chinese when either side is Chinese
+ * or Cantonese, in English otherwise — with the sampling the card recommends.
+ * And, in Chinese, its card's form for a translation with what came before: a
  * sentence of a talk is often half of a thought (Japanese leaves its subject
  * out), and translated alone it is guessed at.
  *
@@ -110,7 +112,8 @@ export function translatorRequest(model: NativeTranslator, source: string, targe
       extra: { temperature: 0, max_tokens: 512, chat_template_kwargs: { enable_thinking: false } },
     };
   }
-  const chinese = baseOf(target) === 'zh' || (!isAuto(source) && baseOf(source) === 'zh');
+  // Asked in English for Cantonese, it answered Japanese in English, Tamil or Gujarati: in Chinese, in Cantonese.
+  const chinese = isSinitic(target) || (!isAuto(source) && isSinitic(source));
   return {
     wrap: chinese
       ? `将以下文本翻译为${nameIn(target, 'zh')}，注意只需要输出翻译后的结果，不要额外解释：\n\n${TEXT_SLOT}`

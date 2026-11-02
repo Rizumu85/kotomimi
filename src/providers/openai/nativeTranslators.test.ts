@@ -61,6 +61,10 @@ describe('the words each translation model is asked with', () => {
     expect(toChinese.extra).toEqual({ temperature: 0.7, top_p: 0.6, top_k: 20, repeat_penalty: 1.05, max_tokens: 512 });
     expect(translatorRequest(nativeTranslator('hy-mt1.5-1.8b'), 'zh-CN', 'ja').wrap).toContain('将以下文本翻译为日语，');
     expect(translatorRequest(nativeTranslator('hy-mt2-1.8b'), 'ja', 'en').wrap).toBe(`Translate the following segment into English, without additional explanation.\n\n${TEXT_SLOT}`);
+    // Cantonese is asked for in Chinese, whichever side it is.
+    expect(translatorRequest(nativeTranslator('hy-mt2-1.8b'), 'ja', 'yue').wrap).toBe(`将以下文本翻译为粤语，注意只需要输出翻译后的结果，不要额外解释：\n\n${TEXT_SLOT}`);
+    expect(translatorRequest(nativeTranslator('hy-mt2-1.8b'), 'yue', 'en').wrap).toContain('将以下文本翻译为英语，');
+    expect(nativeTranslates(nativeTranslator('hy-mt2-1.8b'), 'ja', 'yue')).toBe(true);
   });
 
   it('knows which pairs a model translates: any for Index-Translate, its card\'s list for Hunyuan MT', () => {

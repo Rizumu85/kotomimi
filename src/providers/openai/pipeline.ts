@@ -28,7 +28,7 @@ import type { LocalInferenceConfig } from '../localInference/config';
 import type { LocalEngines } from '../localInference/engines';
 import { createApiAsr } from './apiAsr';
 import { createNativeAsr, type NativeLimits } from './nativeAsr';
-import { oneOfTwo, saidInOwn, sameSpeech } from '../../lib/language/script';
+import { oneOfTwo, saidInOwn, sameSpeech, writtenInCantonese } from '../../lib/language/script';
 import { identifyLanguage } from '../../lib/language/identify';
 import { AUTO } from '../../lib/provider/languages';
 import { BEFORE_SLOT, TEXT_SLOT } from './nativeTranslators';
@@ -645,7 +645,9 @@ class PipelineLeg implements AdapterSession {
   private byWriting(text: string): string | undefined {
     const back = this.stages.back;
     // The writing first; a small text detector for the pairs it cannot tell apart (English/French, Spanish/Portuguese).
-    return identifyLanguage(text, back ? [back.own, back.language] : [])?.language;
+    const found = identifyLanguage(text, back ? [back.own, back.language] : [])?.language;
+    // Han characters are Chinese's and Cantonese's alike: spoken Cantonese written down has words of its own.
+    return found === 'zh' && writtenInCantonese(text) ? 'yue' : found;
   }
 
   private otherThanHeard(text: string, language?: string): string | undefined {

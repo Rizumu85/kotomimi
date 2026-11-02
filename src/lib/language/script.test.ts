@@ -59,6 +59,20 @@ describe('a sentence in the speaker\u2019s own language, not the one they practi
     expect(saidInOwn('OK', 'en', 'ja')).toBe(false);
     // The same language both ways is never "their own instead".
     expect(saidInOwn('你好，今天天气真不错。', 'zh-CN', 'zh-TW')).toBe(false);
+    // Chinese and Cantonese are written alike: Cantonese heard is never taken for a Chinese reader's own.
+    expect(saidInOwn('你食咗飯未呀？', 'zh-CN', 'yue')).toBe(false);
+    expect(saidInOwn('我今天很累。', 'yue', 'zh-CN')).toBe(false);
+    // A Cantonese speaker practising Japanese: characters are their own, as a Chinese speaker's are.
+    expect(saidInOwn('我今日好攰，想早啲瞓。', 'yue', 'ja')).toBe(true);
+  });
+
+  it('of two, says Chinese and Cantonese apart only by none, and Cantonese and Japanese as Chinese and Japanese', async () => {
+    const { oneOfTwo, writtenInCantonese } = await import('./script');
+    expect(oneOfTwo('你食咗飯未呀？', 'zh-CN', 'yue')).toBeUndefined();
+    expect(oneOfTwo('我今日好攰，想早啲瞓。', 'yue', 'ja')).toBe('yue');
+    expect(oneOfTwo('今日はとても疲れた。', 'yue', 'ja')).toBe('ja');
+    expect(writtenInCantonese('你食咗饭未呀？')).toBe(true);
+    expect(writtenInCantonese('史密斯飛船已經取消他們巡迴演唱會的剩餘場次。')).toBe(false);
   });
 });
 

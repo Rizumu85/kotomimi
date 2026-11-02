@@ -71,14 +71,28 @@ const HAN_SENTENCE = 5;
 export function saidInOwn(text: string, own: string, practised: string): boolean {
   const base = (code: string) => code.toLowerCase().split(/[-_]/)[0];
   const mine = base(own);
-  if (mine === base(practised) || languageByScript(text) !== mine) return false;
+  // Chinese and Cantonese are written in the same characters: the writing never tells one from the other.
+  if (mine === base(practised) || (isSinitic(mine) && isSinitic(base(practised))) || hanAs(languageByScript(text), mine) !== mine) return false;
   // Chinese and Japanese share their characters: a few of them alone say nothing.
-  if (mine === 'zh' && base(practised) === 'ja') return (text.match(HAN)?.length ?? 0) >= HAN_SENTENCE;
+  if (isSinitic(mine) && base(practised) === 'ja') return (text.match(HAN)?.length ?? 0) >= HAN_SENTENCE;
   return true;
 }
 
+const isSinitic = (language: string): boolean => language === 'zh' || language === 'yue';
+
+/** Characters spoken Cantonese is written with and written Chinese is not, in either script (唔 is Mandarin's "hmm" too). */
+const CANTONESE = /[咗啲嘅喺哋冇嚟乜嘢嗰噉㗎喎嘞攞睇揾搵囉]/u;
+
+/** Fork: whether Han writing is spoken Cantonese, by its words: formal Cantonese is written as Chinese is, and says no. */
+export function writtenInCantonese(text: string): boolean {
+  return CANTONESE.test(text);
+}
+/** What the writing names, where Han characters are Cantonese's for a pair that has Cantonese and not Chinese. */
+const hanAs = (found: string | undefined, ...pair: string[]): string | undefined =>
+  (found === 'zh' && pair.includes('yue') && !pair.includes('zh') ? 'yue' : found);
+
 /** The languages written in a script of their own: any other is taken to be written in Latin letters. */
-const OWN_SCRIPT = new Set([...SCRIPTS.map(([language]) => language), 'zh', 'ja']);
+const OWN_SCRIPT = new Set([...SCRIPTS.map(([language]) => language), 'zh', 'yue', 'ja']);
 
 /**
  * Fork: which of two languages a sentence is in, as far as its writing says — for a speaker who speaks both
@@ -91,11 +105,11 @@ export function oneOfTwo(text: string, a: string, b: string): string | undefined
   const base = (code: string) => code.toLowerCase().split(/[-_]/)[0];
   const first = base(a);
   const second = base(b);
-  if (first === second) return undefined;
-  const found = languageByScript(text);
+  if (first === second || (isSinitic(first) && isSinitic(second))) return undefined;
+  const found = hanAs(languageByScript(text), first, second);
   if (found === first || found === second) {
     // Chinese and Japanese share their characters: a few of them alone say nothing.
-    if (found === 'zh' && (first === 'ja' || second === 'ja') && (text.match(HAN)?.length ?? 0) < HAN_SENTENCE) return undefined;
+    if (isSinitic(found) && (first === 'ja' || second === 'ja') && (text.match(HAN)?.length ?? 0) < HAN_SENTENCE) return undefined;
     return found;
   }
   if (OWN_SCRIPT.has(first) === OWN_SCRIPT.has(second)) return undefined;

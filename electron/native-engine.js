@@ -216,7 +216,7 @@ const LLAMA = {
 /** The languages the Hunyuan MT models take, as their card lists them: the page's `HUNYUAN` names the same ones. */
 const HUNYUAN_LANGUAGES = [
   'zh', 'en', 'fr', 'pt', 'es', 'ja', 'tr', 'ru', 'ar', 'ko', 'th', 'it', 'de', 'vi', 'ms', 'id', 'fil', 'hi',
-  'pl', 'cs', 'nl', 'km', 'my', 'fa', 'gu', 'ur', 'te', 'mr', 'he', 'bn', 'ta', 'uk', 'bo', 'kk', 'mn', 'ug',
+  'pl', 'cs', 'nl', 'km', 'my', 'fa', 'gu', 'ur', 'te', 'mr', 'he', 'bn', 'ta', 'uk', 'bo', 'kk', 'mn', 'ug', 'yue',
 ];
 
 /** The translation models, by the id the page asks with: each a Q4_K_M file from its makers' own repository, at a fixed revision. */
