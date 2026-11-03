@@ -386,6 +386,8 @@ jobs:
       - name: Write the notes
         run: |
           PREVIOUS=$(git describe --tags --abbrev=0 --match 'v[0-9]*' "$GITHUB_REF_NAME^" 2>/dev/null || echo "")
+          # Fork: the phone app's current installer, as the app itself learns of it (android/scripts/publish.sh).
+          PHONE=$(curl -fsSL "https://github.com/${GITHUB_REPOSITORY}/releases/download/phone-latest/phone.json" | jq -r '.apk // empty' 2>/dev/null || true)
           {
             if [ -f "release-notes/${GITHUB_REF_NAME}.md" ]; then
               cat "release-notes/${GITHUB_REF_NAME}.md"
@@ -404,6 +406,9 @@ jobs:
             echo
             echo "- **Windows**：运行 \`Kotomimi-${GITHUB_REF_NAME#v}.Setup.exe\`。安装程序没有签名，Windows 可能提示“未知发布者”，选择“更多信息 → 仍要运行”。Run the installer; it is not code-signed, so Windows may warn that the publisher is unknown."
             echo "- **macOS（Apple 芯片）**：打开 \`.dmg\`，把 Kotomimi 拖进“应用程序”。应用没有经过公证，第一次请右键点击它并选择“打开”。Not notarized: the first time, right-click the app and choose Open."
+            if [ -n "$PHONE" ]; then
+              echo "- **安卓手机端（可选）**：把手机借给电脑做识别和翻译，电脑不够快或要同时开游戏时有用。下载 [$(basename "$PHONE")]($PHONE) 装到手机上（Android 9 及以上，要允许安装未知来源的应用），以后它会自己更新。The Android app lends a phone to the computer for recognition and translation; install the APK once, it updates itself."
+            fi
             echo
             echo "Kotomimi 是 [Sokuji](https://github.com/kizuna-ai-lab/sokuji) 的独立分支，增加的内容见 [FORK.md](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/FORK.md)。An independent fork of Sokuji."
           } > NOTES.md
