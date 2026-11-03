@@ -186,26 +186,25 @@ describe('createAppSession', () => {
     await session.runner.stop();
   });
 
-  // The owner's rule (2026-09-26): the mic strip shows whether the voice is
+  // The owner's rule (2026-09-26): the mic's dot shows whether the voice is
   // fed into processing. The meter runs on the real clock, which barely moves
-  // here: two chunks make a window of the tone, and flat at once on the
-  // release is the gate's reset, not the meter's own staleness.
-  it("keeps the speaker's meter flat under push-to-talk until a press, then follows the chunks until the release", async () => {
+  // here: unheard at once on the release is the gate's reset, not the meter's
+  // own hold.
+  it("keeps the speaker unheard under push-to-talk until a press, then heard until the release", async () => {
     useTurnModeStore.setState({ turnMode: 'push-to-talk' });
     const { session, clock } = await setup({ capture: (app) => app });
     devices.next = createFakeSource(clock, { voiced: true });
-    const flat = (levels: Float32Array) => [...levels].every((v) => v === 0);
     await session.runner.start();
     const { levels } = (await session.audio()).capture;
 
     clock.advance(300);
-    expect(flat(levels.speaker.read())).toBe(true);
+    expect(levels.speaker.heard()).toBe(false);
     session.runner.press();
     clock.advance(200);
-    expect(flat(levels.speaker.read())).toBe(false);
+    expect(levels.speaker.heard()).toBe(true);
     session.runner.release();
     clock.advance(100);
-    expect(flat(levels.speaker.read())).toBe(true);
+    expect(levels.speaker.heard()).toBe(false);
 
     await session.runner.stop();
   });

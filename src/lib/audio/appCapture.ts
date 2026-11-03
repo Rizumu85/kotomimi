@@ -23,7 +23,7 @@ export interface AppCapture {
   openSource: OpenSource;
   /** For the echo notice (plan 1d): `useEchoNotice`'s one-listener contract. */
   echo: EchoWatch;
-  /** Each leg's input spectrum for the footer's waveform: the output strip's frequency bars, over the chunks it delivers while `meterGate` lets them through. */
+  /** Whether each leg hears sound, for the dot on its footer button: over the chunks it delivers while `meterGate` lets them through. */
   levels: Readonly<Record<LegName, LevelMeter>>;
 }
 

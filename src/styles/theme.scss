@@ -76,9 +76,6 @@ $dark: (
   'usage-deep': #d35400,
   'info': #4285f4,
   'toolbar-icon': #8a8a8a,
-  'waveform-speaker': #0099ff,
-  'waveform-participant': #f59e0b,
-  'waveform-output': #ff9900,
 );
 
 $light: (
@@ -145,9 +142,6 @@ $light: (
   'usage-deep': #7a2a0b,
   'info': #175dbe,
   'toolbar-icon': #6e6e6e,
-  'waveform-speaker': #1a73e8,
-  'waveform-participant': #b45309,
-  'waveform-output': #b45309,
 );
 
 @mixin emit($map) {

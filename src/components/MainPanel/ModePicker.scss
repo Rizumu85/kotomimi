@@ -38,6 +38,7 @@
     cursor: pointer;
     user-select: none;
     transition: all 0.15s ease;
+    position: relative;
 
     svg { flex-shrink: 0; }
 
@@ -117,4 +118,22 @@
     padding: 0 10px;
     gap: 0;
   }
+}
+
+// Fork: whether a leg hears sound, during a run (`useHeard`): a dot in its button's corner, dim while silent and lit in
+// the leg's colour while sound comes in. A change of colour, not an animation: nothing is drawn between changes.
+.mode-picker__heard {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: vars.$text-dim;
+  opacity: 0.6;
+  pointer-events: none;
+
+  &.is-on { opacity: 1; }
+  &--speaker.is-on { background: tk.$color-speaker; }
+  &--participant.is-on { background: tk.$color-participant; }
 }

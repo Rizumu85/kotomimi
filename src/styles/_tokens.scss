@@ -55,9 +55,3 @@ $color-info:        var(--sk-info);
 // The conversation toolbar's icon buttons at rest — one value for the whole
 // row, so the two filter buttons never stand out from their neighbours.
 $color-toolbar-icon: var(--sk-toolbar-icon);
-
-// ── Waveforms ──
-// Drawn on canvas: WaveformStrip resolves these names itself (Task 16).
-$color-waveform-speaker:     var(--sk-waveform-speaker);
-$color-waveform-participant: var(--sk-waveform-participant);
-$color-waveform-output:      var(--sk-waveform-output);

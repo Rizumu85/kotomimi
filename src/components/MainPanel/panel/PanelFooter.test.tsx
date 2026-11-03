@@ -244,19 +244,22 @@ describe("PanelFooter — the lease's countdown", () => {
   });
 });
 
-describe('PanelFooter — waveforms', () => {
-  it('advanced renders waveforms.input and .output; basic renders neither', () => {
-    const waveforms = {
-      input: <div data-testid="wf-input" />,
-      output: <div data-testid="wf-output" />,
-    };
-    const { container } = render(<PanelFooter {...baseProps('advanced', { waveforms })} />);
-    expect(container.querySelector('[data-testid="wf-input"]')).toBeTruthy();
-    expect(container.querySelector('[data-testid="wf-output"]')).toBeTruthy();
+describe('PanelFooter — whether the legs hear sound (fork)', () => {
+  it('puts a dot on each captured leg’s button, lit while it hears, and none without a run', () => {
+    const { container } = render(<PanelFooter {...baseProps('advanced', { heard: { speaker: true, participant: false } })} />);
+    expect(container.querySelector('.mode-picker__heard--speaker.is-on')).toBeTruthy();
+    expect(container.querySelector('.mode-picker__heard--participant')).toBeTruthy();
+    expect(container.querySelector('.mode-picker__heard--participant.is-on')).toBeNull();
+    // No strips any more.
+    expect(container.querySelector('.waveform-strip')).toBeNull();
 
     cleanup();
-    const { container: basicContainer } = render(<PanelFooter {...baseProps('basic', { waveforms })} />);
-    expect(basicContainer.querySelector('[data-testid="wf-input"]')).toBeNull();
-    expect(basicContainer.querySelector('[data-testid="wf-output"]')).toBeNull();
+    const { container: onlyMine } = render(<PanelFooter {...baseProps('basic', { heard: { speaker: false } })} />);
+    expect(onlyMine.querySelector('.mode-picker__heard--speaker')).toBeTruthy();
+    expect(onlyMine.querySelector('.mode-picker__heard--participant')).toBeNull();
+
+    cleanup();
+    const { container: idle } = render(<PanelFooter {...baseProps('advanced', { heard: null })} />);
+    expect(idle.querySelector('.mode-picker__heard')).toBeNull();
   });
 });

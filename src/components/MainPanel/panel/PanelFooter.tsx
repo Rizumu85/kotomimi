@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Zap, Mic, Loader, Wrench } from 'lucide-react';
 import ModePicker from '../ModePicker';
@@ -8,6 +7,7 @@ import { startLabel } from './startLabel';
 import type { RunState } from '../../../lib/session/types';
 import type { AudioMode } from '../../../stores/audioStore';
 import type { LanguagePair } from '../../../lib/provider/types';
+import type { Heard } from './useHeard';
 
 export interface PanelFooterProps {
   site: 'basic' | 'advanced';
@@ -30,8 +30,8 @@ export interface PanelFooterProps {
   onLanguages(): void;
   /** Development builds: the test tone. */
   testTone?: { playing: boolean; toggle(): void };
-  /** The advanced footer's input strips and output strip. */
-  waveforms?: { input: ReactNode; output: ReactNode };
+  /** Fork: during a run, whether each captured leg hears sound (`useHeard`): a dot on its mode button. */
+  heard?: Heard | null;
 }
 
 /**
@@ -67,7 +67,7 @@ export function PanelFooter(props: PanelFooterProps) {
     onModeSegment,
     onLanguages,
     testTone,
-    waveforms,
+    heard,
   } = props;
 
   const isIdle = run.phase === 'idle';
@@ -91,6 +91,7 @@ export function PanelFooter(props: PanelFooterProps) {
           locked={!isIdle}
           missingDeviceForMode={missingDevice}
           onSegmentClick={onModeSegment}
+          heard={heard}
         />
 
         <span className="footer-spacer" />
@@ -162,10 +163,8 @@ export function PanelFooter(props: PanelFooterProps) {
         locked={!isIdle}
         missingDeviceForMode={missingDevice}
         onSegmentClick={onModeSegment}
+        heard={heard}
       />
-
-      {/* Input waveforms (mic + system), when the caller has them (Task 12). */}
-      {waveforms?.input}
 
       <span className="footer-spacer" />
 
@@ -220,8 +219,6 @@ export function PanelFooter(props: PanelFooterProps) {
       </div>
 
       <span className="footer-spacer" />
-
-      {waveforms?.output}
 
       <div className="footer-metadata">
         <span

@@ -52,7 +52,7 @@ export interface Playback extends PlaybackPort {
   passthrough(pcm: Int16Array): void;
   /** The translated speech as played, before any route: the echo monitor's reference. */
   readonly ttsTap: PcmTap;
-  /** What a bus carries, for a waveform: the virtual one is what the meeting hears. */
+  /** What a bus carries, for a meter: the virtual one is what the meeting hears. */
   meter(bus: Bus): BusMeter | null;
   dispose(): Promise<void>;
 }

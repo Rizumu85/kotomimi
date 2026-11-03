@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SideMeIcon, SideOtherIcon, SideBothIcon } from '../Icons/SideIcons';
 import { useVRChatStore, vrchatHolds } from '../../stores/vrchatStore';
+import type { Heard } from './panel/useHeard';
 import './ModePicker.scss';
 
 export type FooterMode = 'speaker' | 'participant' | 'both';
@@ -11,6 +12,8 @@ interface ModePickerProps {
   locked: boolean;
   missingDeviceForMode: 'speaker' | 'participant' | 'both' | null;
   onSegmentClick: (segment: 'speaker' | 'participant' | 'both', el: HTMLElement) => void;
+  /** Fork: during a run, whether each captured leg hears sound: a dot on its button, lit while it does. */
+  heard?: Heard | null;
 }
 
 const SEGMENTS: Array<'speaker' | 'participant' | 'both'> = ['speaker', 'participant', 'both'];
@@ -24,7 +27,7 @@ const SEGMENT_ICONS: Record<'speaker' | 'participant' | 'both', React.ComponentT
   both: SideBothIcon,
 };
 
-const ModePicker: React.FC<ModePickerProps> = ({ mode, locked, missingDeviceForMode, onSegmentClick }) => {
+const ModePicker: React.FC<ModePickerProps> = ({ mode, locked, missingDeviceForMode, onSegmentClick, heard }) => {
   const { t } = useTranslation();
   const refs = useRef<Record<string, HTMLButtonElement | null>>({});
   // Fork: muted in VRChat during a session, the user's own leg hears silence (`src/app/vrchat.ts`): "Me" is struck through.
@@ -102,6 +105,9 @@ const ModePicker: React.FC<ModePickerProps> = ({ mode, locked, missingDeviceForM
           >
             <Icon size={14} />
             <span className="mode-picker__label">{label}</span>
+            {seg !== 'both' && heard?.[seg] !== undefined && (
+              <span className={`mode-picker__heard mode-picker__heard--${seg}${heard[seg] ? ' is-on' : ''}`} aria-hidden="true" />
+            )}
           </button>
         );
       })}

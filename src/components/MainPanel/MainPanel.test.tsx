@@ -66,8 +66,8 @@ const capture = vi.hoisted(() => ({
   openSource: async () => { throw new Error('no capture in tests'); },
   echo: { attach: () => () => {}, onNotice: vi.fn(), setDiagnostics: () => {} },
   levels: {
-    speaker: { push() {}, read: () => new Float32Array(32), reset() {} },
-    participant: { push() {}, read: () => new Float32Array(32), reset() {} },
+    speaker: { push() {}, heard: () => false, reset() {} },
+    participant: { push() {}, heard: () => false, reset() {} },
   },
 }));
 vi.mock('../../lib/audio/appCapture', () => ({ createAppCapture: () => capture }));
@@ -486,7 +486,7 @@ describe('MainPanel', () => {
     expect(lastModal()).toMatchObject({ isOpen: true, type: 'screen-recording-denied', note: null });
   });
 
-  it('draws the advanced footer: both input strips, the output strip on the virtual bus, and the debug button', async () => {
+  it('draws the advanced footer: no waveform strips, no meter on the output, and the debug button', async () => {
     const restoreCanvas = stubCanvas();
     const meter = vi.spyOn(playback, 'meter');
     try {
@@ -495,12 +495,12 @@ describe('MainPanel', () => {
       const { container } = await renderPanel();
       expect(container.querySelector('.control-footer.advanced')).not.toBeNull();
       expect(container.querySelector('.control-footer.basic')).toBeNull();
-      expect(container.querySelectorAll('.waveform-input-group .waveform-strip').length).toBe(2);
-      expect(container.querySelector('.waveform-strip--output')).not.toBeNull();
+      expect(container.querySelector('.waveform-strip')).toBeNull();
       expect(container.querySelector('.debug-button')).not.toBeNull();
-      // What the meeting hears (ruling 3), from the loaded playback.
-      expect(meter).toHaveBeenCalledWith('virtual');
-      expect(meter.mock.calls.every(([bus]) => bus === 'virtual')).toBe(true);
+      // Fork: no analyser is wired into the graph for a strip that is no longer drawn.
+      expect(meter).not.toHaveBeenCalled();
+      // Without a run, no leg has a dot.
+      expect(container.querySelector('.mode-picker__heard')).toBeNull();
     } finally {
       meter.mockRestore();
       restoreCanvas();

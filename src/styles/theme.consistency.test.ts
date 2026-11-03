@@ -89,7 +89,6 @@ const DARK_PINNED: Record<string, string> = {
   'success': '#10a37f', 'error': '#e74c3c', 'error-deep': '#c0392b', 'warning': '#ffc107', 'recommended': '#f59e0b',
   'degraded': '#f39c12', 'usage': '#e67e22', 'usage-hover': '#f39c12', 'usage-deep': '#d35400', 'info': '#4285f4',
   'toolbar-icon': '#8a8a8a',
-  'waveform-speaker': '#0099ff', 'waveform-participant': '#f59e0b', 'waveform-output': '#ff9900',
 };
 
 // Spec §7: the light block's floors, each role against the background it sits on.

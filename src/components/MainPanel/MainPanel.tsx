@@ -65,7 +65,7 @@ import { useSessionClock } from './panel/sessionClock';
 import TypedText from './panel/TypedText';
 import { usePermissionWarning } from './panel/usePermissionWarning';
 import { usePushToTalk } from './panel/usePushToTalk';
-import { InputWaveforms, OutputWaveform } from './panel/Waveforms';
+import { useHeard } from './panel/useHeard';
 import { StatusLine } from './StatusLine';
 import { useStatusLine } from './useStatusLine';
 import { toneOf } from '../../lib/view/tone';
@@ -143,6 +143,9 @@ function useUpdateAndAudioSystemListeners(): void {
     return () => cleanupAudioSystemListeners();
   }, [initAudioSystemListeners, cleanupAudioSystemListeners]);
 }
+
+/** Both legs, for the mode that captures both. */
+const BOTH_LEGS: readonly LegName[] = ['speaker', 'participant'];
 
 export default function MainPanel() {
   const { t } = useTranslation();
@@ -283,8 +286,8 @@ export default function MainPanel() {
     const now = runner.state.getState();
     if (now.phase === 'idle' && now.lastEnd) setDismissedEnd(now.lastEnd);
   }, [runner]);
-  // Out of render (review Minor 8): the first call wires an AnalyserNode into the graph.
-  const outputMeter = useMemo(() => audio?.playback.meter('virtual') ?? null, [audio]);
+  // Fork: which legs hear sound, during a run: a dot on each leg's mode button, in place of upstream's waveform strips.
+  const heard = useHeard(audio?.capture.levels ?? null, mode === 'both' ? BOTH_LEGS : [mode], run.phase === 'running');
   const footer = (site: 'basic' | 'advanced') => (
     <PanelFooter
       site={site} run={run} mode={mode} missingDevice={missingDevice}
@@ -297,7 +300,7 @@ export default function MainPanel() {
       onPress={ptt.press} onRelease={ptt.release}
       onModeSegment={onModeSegment} onLanguages={() => navigateToSettings('languages')}
       testTone={site === 'advanced' ? testTone : undefined}
-      waveforms={site === 'advanced' ? { input: <InputWaveforms mode={mode} levels={audio?.capture.levels ?? null} />, output: <OutputWaveform meter={outputMeter} /> } : undefined}
+      heard={heard}
     />
   );
 

@@ -141,7 +141,7 @@ describe('colour ledger', () => {
     const files = scannedFiles();
     expect(files.length).toBeGreaterThan(200);
     expect(files).toContain('src/components/MainPanel/MainPanel.scss');
-    expect(files).toContain('src/components/MainPanel/panel/Waveforms.tsx');
+    expect(files).toContain('src/components/MainPanel/panel/PanelFooter.tsx');
     expect(files).not.toContain('src/styles/theme.scss');
     expect(countStyleLiterals('a { color: #fff; background: rgba(0, 0, 0, .5); border-color: white; }')).toBe(3);
     expect(countStyleLiterals('// #fff\n/* rgba( */\na { color: #1a1a1a; }')).toBe(1);
