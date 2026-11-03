@@ -46,6 +46,7 @@ const media = () => ({ matches: true, addEventListener: vi.fn(), removeEventList
 
 describe('WaveformStrip colour', () => {
   it('draws with the computed value of its token, and the new value after a scheme apply', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     const source = themeSource('dark');
     const uninstall = installTheme({ source, matchMedia: media, storage: null });
     const draw = vi.spyOn(WavRenderer, 'drawBars').mockImplementation(() => {});
@@ -56,8 +57,10 @@ describe('WaveformStrip colour', () => {
     expect(last()).toBe('rgb(1, 2, 3)');
     tokenValue = ' #abcdef ';
     source.set('light');
-    runFrame();
+    // A silent strip is drawn again at its next look, in the new colour.
+    vi.advanceTimersByTime(200);
     expect(last()).toBe('#abcdef');
+    vi.useRealTimers();
     uninstall();
     document.documentElement.removeAttribute('data-theme');
   });

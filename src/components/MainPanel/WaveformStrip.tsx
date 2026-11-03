@@ -6,6 +6,15 @@ import { subscribeScheme } from '../../lib/theme/theme';
 /** Drawn when a strip has nothing to show: muted, ended, or no meter at all. */
 const FLAT = new Float32Array([0]);
 
+/** How often a silent strip looks for sound again. */
+const SILENT_LOOK_MS = 200;
+
+/** Nothing a bar would show: every level under one step of the analyser's 0..255. */
+const isFlat = (levels: Float32Array): boolean => {
+  for (let i = 0; i < levels.length; i++) if (levels[i] >= 1 / 255) return false;
+  return true;
+};
+
 interface WaveformStripProps {
   kind: 'mic' | 'system' | 'output';
   /** Read the current spectrum frame each animation frame; `null` draws flat. */
@@ -57,11 +66,18 @@ function useWaveform(read: () => Float32Array | null, colorToken: string): React
     // frame: a style read per frame per strip is wasted work for a value that
     // only a theme change moves.
     let colour: string | null = null;
-    const unsubscribe = subscribeScheme(() => { colour = null; });
+    // Fork: silence is drawn once, and then looked at a few times a second instead of on every frame. Three strips
+    // redrawing nothing sixty times a second kept an idle app at a fifth of a core, most of it in the GPU process
+    // (2026-11-02). Sound brings the frames back within one look.
+    let drawnFlat = false;
+    let slow = 0;
+    const unsubscribe = subscribeScheme(() => { colour = null; drawnFlat = false; });
     const draw = () => {
       if (!isLoaded) return;
       const canvas = canvasRef.current;
-      if (canvas) {
+      const levels = readRef.current() ?? FLAT;
+      const flat = isFlat(levels);
+      if (canvas && !(flat && drawnFlat)) {
         if (!canvas.width || !canvas.height) {
           canvas.width = canvas.offsetWidth;
           canvas.height = canvas.offsetHeight;
@@ -70,16 +86,19 @@ function useWaveform(read: () => Float32Array | null, colorToken: string): React
         if (ctx) {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           if (colour === null) colour = getComputedStyle(canvas).getPropertyValue(colorToken).trim();
-          WavRenderer.drawBars(canvas, ctx, readRef.current() ?? FLAT, colour, 10, 0, 8);
+          WavRenderer.drawBars(canvas, ctx, levels, colour, 10, 0, 8);
+          drawnFlat = flat;
         }
       }
-      frame = requestAnimationFrame(draw);
+      if (flat && drawnFlat) slow = window.setTimeout(draw, SILENT_LOOK_MS);
+      else frame = requestAnimationFrame(draw);
     };
     draw();
     return () => {
       isLoaded = false;
       unsubscribe();
       cancelAnimationFrame(frame);
+      window.clearTimeout(slow);
     };
   }, [colorToken]);
 

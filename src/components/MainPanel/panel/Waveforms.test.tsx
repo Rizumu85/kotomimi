@@ -83,7 +83,6 @@ describe('InputWaveforms', () => {
 
   it('draws flat and does not throw when levels is null', () => {
     expect(() => render(<InputWaveforms mode="both" levels={null} />)).not.toThrow();
-    drawBarsSpy.mockClear();
     expect(() => runFrame()).not.toThrow();
     expect(drawBarsSpy).toHaveBeenCalled();
     for (const call of drawBarsSpy.mock.calls) {
@@ -160,11 +159,36 @@ describe('OutputWaveform', () => {
 
   it('draws flat when meter is null and does not throw', () => {
     expect(() => render(<OutputWaveform meter={null} />)).not.toThrow();
-    drawBarsSpy.mockClear();
     expect(() => runFrame()).not.toThrow();
     expect(drawBarsSpy).toHaveBeenCalled();
     const data = drawBarsSpy.mock.calls[0][2] as Float32Array;
     expect(Array.from(data)).toEqual([0]);
+  });
+
+  it('draws silence once, then looks for sound a few times a second instead of on every frame (fork)', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    let levels = new Float32Array([0, 0]);
+    const meter: BusMeter = { read: vi.fn(() => levels) };
+    const { unmount } = render(<OutputWaveform meter={meter} />);
+    expect(drawBarsSpy).toHaveBeenCalledTimes(1);
+    // Silent: no frame asked for, and nothing drawn again.
+    expect(frameQueue.length).toBe(0);
+    vi.advanceTimersByTime(1000);
+    expect(drawBarsSpy).toHaveBeenCalledTimes(1);
+    // Sound: drawn at the next look, and on every frame after it.
+    levels = new Float32Array([0.5, 0.2]);
+    vi.advanceTimersByTime(200);
+    expect(drawBarsSpy).toHaveBeenCalledTimes(2);
+    expect(frameQueue.length).toBe(1);
+    runFrame();
+    expect(drawBarsSpy).toHaveBeenCalledTimes(3);
+    // Silent again: drawn flat once, and the frames stop.
+    levels = new Float32Array([0, 0]);
+    runFrame();
+    expect(drawBarsSpy).toHaveBeenCalledTimes(4);
+    expect(frameQueue.length).toBe(0);
+    unmount();
+    vi.useRealTimers();
   });
 
   it('stops the loop on unmount (no frame calls read again)', () => {
