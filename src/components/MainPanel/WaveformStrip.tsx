@@ -9,6 +9,9 @@ const FLAT = new Float32Array([0]);
 /** How often a silent strip looks for sound again. */
 const SILENT_LOOK_MS = 200;
 
+/** The shortest time between two drawings of sound: thirty a second, with a little room for a frame that comes early. */
+const FRAME_MS = 1000 / 30 - 2;
+
 /** Nothing a bar would show: every level under one step of the analyser's 0..255. */
 const isFlat = (levels: Float32Array): boolean => {
   for (let i = 0; i < levels.length; i++) if (levels[i] >= 1 / 255) return false;
@@ -71,9 +74,17 @@ function useWaveform(read: () => Float32Array | null, colorToken: string): React
     // (2026-11-02). Sound brings the frames back within one look.
     let drawnFlat = false;
     let slow = 0;
+    // And sound is drawn at most thirty times a second: at sixty, the strips alone held the GPU process at about 9 % of
+    // a core while anyone spoke (measured with frames off: 0.2 %), and level bars read the same at half the rate.
+    let drawnAt: number | null = null;
     const unsubscribe = subscribeScheme(() => { colour = null; drawnFlat = false; });
-    const draw = () => {
+    const draw = (now?: number) => {
       if (!isLoaded) return;
+      if (now !== undefined && drawnAt !== null && now - drawnAt < FRAME_MS) {
+        frame = requestAnimationFrame(draw);
+        return;
+      }
+      drawnAt = now ?? null;
       const canvas = canvasRef.current;
       const levels = readRef.current() ?? FLAT;
       const flat = isFlat(levels);
@@ -90,7 +101,7 @@ function useWaveform(read: () => Float32Array | null, colorToken: string): React
           drawnFlat = flat;
         }
       }
-      if (flat && drawnFlat) slow = window.setTimeout(draw, SILENT_LOOK_MS);
+      if (flat && drawnFlat) slow = window.setTimeout(() => draw(), SILENT_LOOK_MS);
       else frame = requestAnimationFrame(draw);
     };
     draw();

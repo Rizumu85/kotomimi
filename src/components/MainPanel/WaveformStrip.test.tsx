@@ -8,10 +8,12 @@ import { installTheme, type ThemeSetting, type ThemeSource } from '../../lib/the
 // read a custom property, so the strip resolves it itself — once, and again
 // after every scheme apply, not on every animation frame.
 let frameQueue: FrameRequestCallback[] = [];
+let frameTime = 0;
 const runFrame = () => {
   const queue = frameQueue;
   frameQueue = [];
-  queue.forEach((cb) => cb(0));
+  frameTime += 100;
+  queue.forEach((cb) => cb(frameTime));
 };
 let tokenValue = 'rgb(1, 2, 3)';
 

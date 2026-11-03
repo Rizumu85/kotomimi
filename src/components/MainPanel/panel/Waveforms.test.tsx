@@ -14,11 +14,14 @@ vi.mock('react-i18next', () => ({
 // scheduling them, so a test drives the draw loop one frame at a time.
 let frameQueue: FrameRequestCallback[] = [];
 let rafId = 0;
+// Each frame a tenth of a second after the one before: past the strips' thirty a second.
+let frameTime = 0;
 
-function runFrame() {
+function runFrame(step = 100) {
   const queue = frameQueue;
   frameQueue = [];
-  queue.forEach((cb) => cb(0));
+  frameTime += step;
+  queue.forEach((cb) => cb(frameTime));
 }
 
 let getContextSpy: ReturnType<typeof vi.spyOn>;
@@ -182,6 +185,10 @@ describe('OutputWaveform', () => {
     expect(frameQueue.length).toBe(1);
     runFrame();
     expect(drawBarsSpy).toHaveBeenCalledTimes(3);
+    // A frame that comes sooner than a thirtieth of a second after the last drawing draws nothing.
+    runFrame(16);
+    expect(drawBarsSpy).toHaveBeenCalledTimes(3);
+    expect(frameQueue.length).toBe(1);
     // Silent again: drawn flat once, and the frames stop.
     levels = new Float32Array([0, 0]);
     runFrame();
