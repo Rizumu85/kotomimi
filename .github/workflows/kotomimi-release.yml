@@ -158,6 +158,14 @@ jobs:
         shell: bash
         run: test -f resources/bin/win32-x64/sokuji-audio-host.exe
 
+      # Fork: the SteamVR overlay's helper, likewise built (vr-overlay/); its geometry tests run first.
+      - name: Build the SteamVR overlay helper
+        run: npm run build:vr-overlay
+
+      - name: Verify the overlay helper was produced
+        shell: bash
+        run: test -f vr-overlay/kotomimi-vr/kotomimi-vr.exe && test -f vr-overlay/kotomimi-vr/openvr_api.dll
+
       - name: Make the installer
         run: npx electron-forge make --arch=x64
         env:

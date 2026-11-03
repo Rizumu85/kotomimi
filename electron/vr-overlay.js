@@ -93,6 +93,22 @@ function createVrOverlay({ BrowserWindow, preload, pageUrl, helper, push, spawnH
   const write = (buffer) => {
     if (child && child.stdin.writable) child.stdin.write(buffer);
   };
+  // A picture waits while the pipe is full, and a newer one takes its place: what the helper has not read is never
+  // more than one picture a page.
+  const waiting = {};
+  const sendPicture = (surface, buffer) => {
+    if (!child || !child.stdin.writable) return;
+    if (child.stdin.writableNeedDrain) { waiting[surface] = buffer; return; }
+    child.stdin.write(buffer);
+  };
+  const drain = () => {
+    for (const surface of SURFACES) {
+      const buffer = waiting[surface];
+      if (!buffer) continue;
+      delete waiting[surface];
+      sendPicture(surface, buffer);
+    }
+  };
 
   const openWindows = () => {
     for (const surface of SURFACES) {
@@ -115,7 +131,7 @@ function createVrOverlay({ BrowserWindow, preload, pageUrl, helper, push, spawnH
       win.webContents.on('paint', (_event, _dirty, image) => {
         const { width, height } = image.getSize();
         if (width === 0 || height === 0) return;
-        write(pictureMessage(surface, width, height, image.toBitmap()));
+        sendPicture(surface, pictureMessage(surface, width, height, image.toBitmap()));
         if (dumpDir) fs.writeFile(path.join(dumpDir, `${surface}-${String(dumped++).padStart(4, '0')}.png`), image.toPNG(), () => {});
       });
       win.on('closed', () => { if (windows[surface] === win) delete windows[surface]; });
@@ -162,11 +178,15 @@ function createVrOverlay({ BrowserWindow, preload, pageUrl, helper, push, spawnH
     child = proc;
     proc.stdout.on('data', jsonLines(onHelper));
     proc.stdin.on('error', () => {});
-    proc.on('exit', () => {
+    proc.stdin.on('drain', drain);
+    const ended = () => {
       if (child !== proc) return;
       child = null;
+      for (const surface of SURFACES) delete waiting[surface];
       setVr('off');
-    });
+    };
+    proc.on('exit', ended);
+    proc.on('error', (error) => { log(`SteamVR overlay: the helper failed: ${error.message}`); ended(); });
     if (tuning.length) write(configMessage(tuning));
     setVr('waiting');
   };

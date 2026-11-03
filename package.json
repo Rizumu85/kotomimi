@@ -200,6 +200,7 @@
     "dev": "vite",
     "build": "vite build",
     "build:audio-host": "node scripts/build-audio-host.js",
+    "build:vr-overlay": "node vr-overlay/build.mjs",
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",

@@ -77,7 +77,7 @@ app.on('will-quit', () => vrchat.stop());
 
 // Fork: the SteamVR overlay — captions under the line of sight and a panel on a wrist (electron/vr-overlay.js). Windows only.
 // Unpackaged: `KOTOMIMI_VR_HELPER` names another helper, `KOTOMIMI_VR_DUMP` a folder each picture is written to.
-setupVrOverlay({
+const vrOverlay = setupVrOverlay({
   ipcMain,
   BrowserWindow,
   app,
@@ -619,6 +619,8 @@ function createWindow() {
 
   // Emitted when the window is closed
   mainWindow.on('closed', function () {
+    // Fork: the overlay's offscreen pages are windows too: left open, they would keep the app from quitting.
+    vrOverlay.stop();
     // On macOS closing the window does not quit the app; the before-quit
     // listener below runs the cleanup when it actually quits. (This used to
     // register a second before-quit listener per close, which would run the

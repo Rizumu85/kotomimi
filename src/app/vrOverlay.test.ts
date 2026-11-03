@@ -174,6 +174,22 @@ describe('startVrOverlay', () => {
     t.controller.stop();
   });
 
+  it('does not start the run again when the user stopped it while a change restarted it', async () => {
+    let release = () => {};
+    const t = setup();
+    t.runner.stop.mockImplementationOnce(() => new Promise<void>((resolve) => { release = () => { t.order.push('stop'); t.setRun({ phase: 'idle', lastEnd: { reason: 'user' } }); resolve(); }; }));
+    t.setRun({ phase: 'running', since: 0, legs: {} });
+    await t.connect();
+    t.command({ type: 'hear', id: 'sense' });
+    t.command({ type: 'run', on: false });
+    release();
+    await flush();
+    await flush();
+    expect(t.start).not.toHaveBeenCalled();
+    expect(t.sent.at(-1)!.switching).toBeNull();
+    t.controller.stop();
+  });
+
   it('swaps the pair when the user picks the other side’s language as their own', async () => {
     const t = setup();
     await t.connect();

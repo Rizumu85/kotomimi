@@ -152,6 +152,32 @@ describe('createVrOverlay', () => {
     expect(first.subarray(8).toString()).toBe('wrist.hand left\nstrip.on 0');
   });
 
+  it('keeps one picture a page while the helper’s pipe is full, the newest, and sends it on drain', async () => {
+    const t = setup();
+    t.overlay.set(true);
+    t.say({ t: 'status', vr: 'connected' });
+    await tick();
+    const stdin = t.child.stdin;
+    const writes = [];
+    stdin.write = (b) => { writes.push(b); return true; };
+    Object.defineProperty(stdin, 'writableNeedDrain', { value: true, configurable: true });
+    const paint = (n) => t.windows[1].webContents.emit('paint', {}, {}, { getSize: () => ({ width: 1, height: 1 }), toBitmap: () => Buffer.from([n, n, n, n]) });
+    paint(1);
+    paint(2);
+    expect(writes).toHaveLength(0);
+    Object.defineProperty(stdin, 'writableNeedDrain', { value: false, configurable: true });
+    stdin.emit('drain');
+    expect(writes).toHaveLength(1);
+    expect(writes[0].subarray(20)).toEqual(Buffer.from([2, 2, 2, 2]));
+  });
+
+  it('ends quietly when the helper cannot be started', () => {
+    const t = setup();
+    t.overlay.set(true);
+    t.child.emit('error', new Error('EACCES'));
+    expect(t.overlay.status()).toEqual({ vr: 'off' });
+  });
+
   it('says so when this build has no helper', () => {
     const t = setup();
     const overlay = createVrOverlay({ BrowserWindow: vi.fn(), preload: '', pageUrl: () => '', helper: 'Z:/nowhere/kotomimi-vr.exe', push: (c, p) => t.pushed.push([c, p]), spawnHelper: t.spawnHelper });

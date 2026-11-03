@@ -243,9 +243,12 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
   };
 
   // ── What the wrist asks ───────────────────────────────────────────────────
+  /** Bumped by the user's own start or stop: a restart under way then does not start the run again. */
+  let asked = 0;
   /** Takes a change the run fixes: at once while idle; else the run stops, takes it, and starts again. */
   const restartWith = async (kind: NonNullable<VrState['switching']>['kind'], name: string, change: () => void) => {
     if (switching) return;
+    const mine = asked;
     const phase = runner.state.getState().phase;
     if (phase === 'idle') {
       change();
@@ -258,7 +261,7 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
       await runner.stop();
       change();
       await settings.flush();
-      await deps.start();
+      if (!stopped && mine === asked) await deps.start();
     } catch (error) {
       reportError('VrOverlay', `Restarting for a change from the headset failed: ${describeCause(error)}`, { cause: error });
     } finally {
@@ -285,6 +288,7 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
         }
         break;
       case 'run':
+        asked += 1;
         if (command.on) void deps.start();
         else void runner.stop();
         break;

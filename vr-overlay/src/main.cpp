@@ -456,7 +456,14 @@ int main() {
   if (GetEnvironmentVariableW(L"KOTOMIMI_VR_FAKE", nullptr, 0) > 0) {
     status("connected");
     GpuMemoryReader gpu;
-    while (!inbox.closed) {
+    // `KOTOMIMI_VR_FAKE=poke`: one press in the middle of the panel's lower part, a few seconds in.
+    bool poke = GetEnvironmentVariableW(L"KOTOMIMI_VR_FAKE", nullptr, 0) == 5;
+    for (int second = 0; !inbox.closed; second++) {
+      if (poke && second == 4) {
+        emit("{\"t\":\"pointer\",\"o\":\"wrist\",\"kind\":\"move\",\"u\":0.5,\"v\":0.92}");
+        emit("{\"t\":\"pointer\",\"o\":\"wrist\",\"kind\":\"down\",\"u\":0.5,\"v\":0.92}");
+        emit("{\"t\":\"pointer\",\"o\":\"wrist\",\"kind\":\"up\",\"u\":0.5,\"v\":0.92}");
+      }
       GpuMemory memory = gpu.read();
       char line[200];
       std::snprintf(line, sizeof line, "{\"t\":\"perf\",\"hz\":90.0,\"presents\":89.6,\"dropped\":0.0,\"reprojected\":0.0,\"vramUsed\":%llu,\"vramTotal\":%llu}",
@@ -489,12 +496,19 @@ int main() {
       std::lock_guard<std::mutex> hold(inbox.lock);
       for (Picture& pic : inbox.pictures) pic.fresh = !pic.pixels.empty();
     }
+    auto checked = std::chrono::steady_clock::now();
     while (!inbox.closed && !config.quit && session.tick(inbox, config)) {
       if (vr::VROverlay()->WaitFrameSync(20) != vr::VROverlayError_None) Sleep(11);
+      // SteamVR gone without saying so (it crashed, or was ended): nothing more is asked of it.
+      if (std::chrono::steady_clock::now() - checked > std::chrono::seconds(2)) {
+        checked = std::chrono::steady_clock::now();
+        if (!steamVRRunning()) break;
+      }
     }
     session.close();
     status("waiting");
-    Sleep(2000);
+    // SteamVR quitting stays up a while: connecting to it then would start it again. Wait for it to be gone.
+    while (!inbox.closed && steamVRRunning()) Sleep(1000);
   }
   return 0;
 }
