@@ -1934,6 +1934,40 @@
       "firewallDeclined": "O acesso continua bloqueado: a permissão não foi confirmada no Windows.",
       "firewall": "Na primeira ativação, a firewall do sistema pode perguntar se permite que o Kotomimi aceda à rede. Permita a comunicação em redes privadas."
     },
-    "jyutping": "Jyutping por cima do cantonês"
+    "jyutping": "Jyutping por cima do cantonês",
+    "vr": {
+      "setting": "Mostrar no visor (SteamVR)",
+      "hand": "Pulso",
+      "left": "Esquerdo",
+      "right": "Direito",
+      "linkWaiting": "À espera que o SteamVR inicie",
+      "linkConnected": "Já no visor",
+      "linkMissing": "Esta versão não inclui o componente VR",
+      "me": "Eu",
+      "them": "Outra pessoa",
+      "pause": "Pausar",
+      "resume": "Iniciar",
+      "hide": "Ocultar",
+      "show": "Mostrar",
+      "tune": "Ajustar",
+      "back": "Voltar",
+      "theirs": "A outra pessoa fala",
+      "mine": "Eu falo",
+      "hear": "Transcrição",
+      "translate": "Tradução",
+      "more": "Mais idiomas",
+      "switching": "A mudar para {name}, a escuta retoma dentro de segundos",
+      "loading": "A carregar…",
+      "untried": "Por testar",
+      "behind": "{s} s de atraso",
+      "perSentence": "{s} s por frase",
+      "fps": "VR a {fps} fps",
+      "dropping": "perda de fotogramas",
+      "vram": "Memória gráfica {used} / {total} GB",
+      "idle": "Sem escutar",
+      "stopped": "A transcrição parou. Vire o pulso para recomeçar.",
+      "stoppedShort": "Transcrição parada",
+      "muted": "Microfone silenciado no VRChat"
+    }
   }
 }

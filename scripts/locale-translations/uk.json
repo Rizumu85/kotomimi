@@ -627,6 +627,134 @@
     "en": "What you want to say — Enter translates",
     "text": "Що хочете сказати? Enter — перекласти"
   },
+  "fork.vr.back": {
+    "en": "Back",
+    "text": "Назад"
+  },
+  "fork.vr.behind": {
+    "en": "{s} s behind",
+    "text": "Затримка {s} с"
+  },
+  "fork.vr.dropping": {
+    "en": "dropping frames",
+    "text": "пропуски кадрів"
+  },
+  "fork.vr.fps": {
+    "en": "VR at {fps} fps",
+    "text": "VR: {fps} кадрів/с"
+  },
+  "fork.vr.hand": {
+    "en": "Wrist",
+    "text": "На якій руці"
+  },
+  "fork.vr.hear": {
+    "en": "Recognition",
+    "text": "Розпізнавання мовлення"
+  },
+  "fork.vr.hide": {
+    "en": "Hide",
+    "text": "Приховати"
+  },
+  "fork.vr.idle": {
+    "en": "Not listening",
+    "text": "Не слухає"
+  },
+  "fork.vr.left": {
+    "en": "Left wrist",
+    "text": "На лівій"
+  },
+  "fork.vr.linkConnected": {
+    "en": "In the headset",
+    "text": "Уже в шоломі"
+  },
+  "fork.vr.linkMissing": {
+    "en": "Not in this build",
+    "text": "У цій версії немає компонента VR"
+  },
+  "fork.vr.linkWaiting": {
+    "en": "Waiting for SteamVR",
+    "text": "Очікування запуску SteamVR"
+  },
+  "fork.vr.loading": {
+    "en": "Loading…",
+    "text": "Завантаження…"
+  },
+  "fork.vr.me": {
+    "en": "Me",
+    "text": "Я"
+  },
+  "fork.vr.mine": {
+    "en": "I speak",
+    "text": "Говорю я"
+  },
+  "fork.vr.more": {
+    "en": "More languages",
+    "text": "Більше мов"
+  },
+  "fork.vr.muted": {
+    "en": "Muted in VRChat",
+    "text": "Мікрофон у VRChat вимкнено"
+  },
+  "fork.vr.pause": {
+    "en": "Pause",
+    "text": "Пауза"
+  },
+  "fork.vr.perSentence": {
+    "en": "{s} s a sentence",
+    "text": "{s} с на речення"
+  },
+  "fork.vr.resume": {
+    "en": "Start",
+    "text": "Почати"
+  },
+  "fork.vr.right": {
+    "en": "Right wrist",
+    "text": "На правій"
+  },
+  "fork.vr.setting": {
+    "en": "Show in the headset (SteamVR)",
+    "text": "Показувати в шоломі (SteamVR)"
+  },
+  "fork.vr.show": {
+    "en": "Show",
+    "text": "Показати"
+  },
+  "fork.vr.stopped": {
+    "en": "Recognition stopped. Turn your wrist to start again.",
+    "text": "Розпізнавання зупинено. Поверніть зап’ясток, щоб почати знову."
+  },
+  "fork.vr.stoppedShort": {
+    "en": "Stopped",
+    "text": "Розпізнавання зупинено"
+  },
+  "fork.vr.switching": {
+    "en": "Switching to {name}, back in a few seconds",
+    "text": "Перехід на {name}, слухання відновиться за кілька секунд"
+  },
+  "fork.vr.theirs": {
+    "en": "They speak",
+    "text": "Говорить співрозмовник"
+  },
+  "fork.vr.them": {
+    "en": "Them",
+    "text": "Співрозмовник"
+  },
+  "fork.vr.translate": {
+    "en": "Translation",
+    "text": "Переклад"
+  },
+  "fork.vr.tune": {
+    "en": "Adjust",
+    "text": "Налаштувати"
+  },
+  "fork.vr.untried": {
+    "en": "Not tried",
+    "text": "Ще не випробувано"
+  },
+  "fork.vr.vram": {
+    "en": "VRAM {used} / {total} GB",
+    "text": "Відеопам’ять {used} / {total} ГБ"
+  },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",
     "text": "Над головою"

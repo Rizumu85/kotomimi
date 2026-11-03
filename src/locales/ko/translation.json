@@ -1934,6 +1934,40 @@
       "firewallDeclined": "Windows에서 허용하지 않아 여전히 차단되어 있어요.",
       "firewall": "처음 켤 때 시스템 방화벽이 Kotomimi의 네트워크 접근을 허용할지 물을 수 있어요. 개인 네트워크에서 통신하도록 허용해 주세요."
     },
-    "jyutping": "광둥어 위에 윗핑 표시"
+    "jyutping": "광둥어 위에 윗핑 표시",
+    "vr": {
+      "setting": "헤드셋에 표시 (SteamVR)",
+      "hand": "착용할 손목",
+      "left": "왼쪽",
+      "right": "오른쪽",
+      "linkWaiting": "SteamVR 시작 대기 중",
+      "linkConnected": "헤드셋에 표시 중",
+      "linkMissing": "이 버전에는 VR 구성 요소가 없어요",
+      "me": "나",
+      "them": "상대방",
+      "pause": "일시 정지",
+      "resume": "시작",
+      "hide": "숨기기",
+      "show": "표시",
+      "tune": "조정",
+      "back": "뒤로",
+      "theirs": "상대방 언어",
+      "mine": "내 언어",
+      "hear": "받아쓰기",
+      "translate": "번역",
+      "more": "더 많은 언어",
+      "switching": "{name}(으)로 전환 중이에요. 몇 초 후 다시 들을게요",
+      "loading": "불러오는 중…",
+      "untried": "아직 사용 안 함",
+      "behind": "{s}초 지연",
+      "perSentence": "문장당 {s}초",
+      "fps": "VR 화면 {fps}프레임",
+      "dropping": "프레임 저하",
+      "vram": "비디오 메모리 {used} / {total} GB",
+      "idle": "듣고 있지 않음",
+      "stopped": "음성 인식이 멈췄어요. 손목을 돌려 화면을 보면 다시 시작할 수 있어요.",
+      "stoppedShort": "음성 인식 중지됨",
+      "muted": "VRChat에서 음소거됨"
+    }
   }
 }

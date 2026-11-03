@@ -683,6 +683,134 @@
     "en": "What you want to say — Enter translates",
     "text": "Ang gusto mong sabihin. Enter para isalin"
   },
+  "fork.vr.back": {
+    "en": "Back",
+    "text": "Bumalik"
+  },
+  "fork.vr.behind": {
+    "en": "{s} s behind",
+    "text": "Nahuhuli ng {s} s"
+  },
+  "fork.vr.dropping": {
+    "en": "dropping frames",
+    "text": "Bumabagsak ang mga frame"
+  },
+  "fork.vr.fps": {
+    "en": "VR at {fps} fps",
+    "text": "VR sa {fps} fps"
+  },
+  "fork.vr.hand": {
+    "en": "Wrist",
+    "text": "Pulso"
+  },
+  "fork.vr.hear": {
+    "en": "Recognition",
+    "text": "Pagkilala sa boses"
+  },
+  "fork.vr.hide": {
+    "en": "Hide",
+    "text": "Itago"
+  },
+  "fork.vr.idle": {
+    "en": "Not listening",
+    "text": "Hindi nakikinig"
+  },
+  "fork.vr.left": {
+    "en": "Left wrist",
+    "text": "Kaliwang pulso"
+  },
+  "fork.vr.linkConnected": {
+    "en": "In the headset",
+    "text": "Nasa headset"
+  },
+  "fork.vr.linkMissing": {
+    "en": "Not in this build",
+    "text": "Wala sa bersyong ito"
+  },
+  "fork.vr.linkWaiting": {
+    "en": "Waiting for SteamVR",
+    "text": "Hinihintay ang SteamVR"
+  },
+  "fork.vr.loading": {
+    "en": "Loading…",
+    "text": "Naglo-load…"
+  },
+  "fork.vr.me": {
+    "en": "Me",
+    "text": "Ako"
+  },
+  "fork.vr.mine": {
+    "en": "I speak",
+    "text": "Ako ang nagsasalita"
+  },
+  "fork.vr.more": {
+    "en": "More languages",
+    "text": "Iba pang wika"
+  },
+  "fork.vr.muted": {
+    "en": "Muted in VRChat",
+    "text": "Naka-mute sa VRChat"
+  },
+  "fork.vr.pause": {
+    "en": "Pause",
+    "text": "I-pause"
+  },
+  "fork.vr.perSentence": {
+    "en": "{s} s a sentence",
+    "text": "{s} s bawat pangungusap"
+  },
+  "fork.vr.resume": {
+    "en": "Start",
+    "text": "Magsimula"
+  },
+  "fork.vr.right": {
+    "en": "Right wrist",
+    "text": "Kanang pulso"
+  },
+  "fork.vr.setting": {
+    "en": "Show in the headset (SteamVR)",
+    "text": "Ipakita sa headset (SteamVR)"
+  },
+  "fork.vr.show": {
+    "en": "Show",
+    "text": "Ipakita"
+  },
+  "fork.vr.stopped": {
+    "en": "Recognition stopped. Turn your wrist to start again.",
+    "text": "Huminto ang pagkilala. Iikot ang pulso para magsimulang muli."
+  },
+  "fork.vr.stoppedShort": {
+    "en": "Stopped",
+    "text": "Huminto"
+  },
+  "fork.vr.switching": {
+    "en": "Switching to {name}, back in a few seconds",
+    "text": "Lumilipat sa {name}, babalik pagkalipas ng ilang segundo"
+  },
+  "fork.vr.theirs": {
+    "en": "They speak",
+    "text": "Sila ang nagsasalita"
+  },
+  "fork.vr.them": {
+    "en": "Them",
+    "text": "Sila"
+  },
+  "fork.vr.translate": {
+    "en": "Translation",
+    "text": "Pagsasalin"
+  },
+  "fork.vr.tune": {
+    "en": "Adjust",
+    "text": "Ayusin"
+  },
+  "fork.vr.untried": {
+    "en": "Not tried",
+    "text": "Hindi pa nasusubukan"
+  },
+  "fork.vr.vram": {
+    "en": "VRAM {used} / {total} GB",
+    "text": "VRAM {used} / {total} GB"
+  },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",
     "text": "Sa itaas ng ulo ng avatar ko"

@@ -1934,6 +1934,40 @@
       "firewallDeclined": "Windowsで許可されなかったため、接続はまだブロックされています。",
       "firewall": "初回の共有時に、システムのファイアウォールがKotomimiのネットワーク接続を許可するか尋ねることがあります。プライベートネットワークでの通信を許可してください。"
     },
-    "jyutping": "広東語の上に粤拼を表示"
+    "jyutping": "広東語の上に粤拼を表示",
+    "vr": {
+      "setting": "ヘッドセットに表示（SteamVR）",
+      "hand": "装着する手",
+      "left": "左手",
+      "right": "右手",
+      "linkWaiting": "SteamVR の起動待ち",
+      "linkConnected": "ヘッドセットに表示中",
+      "linkMissing": "このバージョンに VR 機能は含まれていません",
+      "me": "自分",
+      "them": "相手",
+      "pause": "一時停止",
+      "resume": "開始",
+      "hide": "非表示",
+      "show": "表示",
+      "tune": "調整",
+      "back": "戻る",
+      "theirs": "相手が話す言語",
+      "mine": "自分が話す言語",
+      "hear": "文字起こし",
+      "translate": "翻訳",
+      "more": "ほかの言語",
+      "switching": "{name} に切り替え中。数秒後に聞き取りを再開します",
+      "loading": "読み込み中…",
+      "untried": "未試用",
+      "behind": "{s} 秒遅れ",
+      "perSentence": "1文あたり {s} 秒",
+      "fps": "VR 表示 {fps} fps",
+      "dropping": "コマ落ちしています",
+      "vram": "ビデオメモリ {used} / {total} GB",
+      "idle": "聞き取り停止中",
+      "stopped": "音声認識が停止しました。手首を返すと再開できます。",
+      "stoppedShort": "音声認識停止",
+      "muted": "VRChat でミュート中"
+    }
   }
 }

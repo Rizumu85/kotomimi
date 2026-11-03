@@ -100,6 +100,12 @@ const validReceiveChannels = [
   'vrchat:state',
   'vrchat:video',
   'vrchat:world',
+  // Fork: the SteamVR overlay (electron/vr-overlay.js): to the main window, then to the headset pages
+  'vr:status',
+  'vr:wrist',
+  'vr:command',
+  'vr:state',
+  'vr:perf',
 ];
 
 // Expose protected methods that allow the renderer process to use

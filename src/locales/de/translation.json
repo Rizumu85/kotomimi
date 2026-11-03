@@ -1934,6 +1934,40 @@
       "firewallDeclined": "Weiterhin blockiert: Die Bestätigung in Windows fehlt.",
       "firewall": "Beim ersten Aktivieren fragt die Firewall möglicherweise, ob Kotomimi auf das Netzwerk zugreifen darf. Erlaube die Kommunikation in privaten Netzwerken."
     },
-    "jyutping": "Jyutping über kantonesischem Text"
+    "jyutping": "Jyutping über kantonesischem Text",
+    "vr": {
+      "setting": "Im Headset anzeigen (SteamVR)",
+      "hand": "Armband tragen",
+      "left": "Links",
+      "right": "Rechts",
+      "linkWaiting": "Warte auf SteamVR-Start",
+      "linkConnected": "Im Headset angezeigt",
+      "linkMissing": "VR-Komponente in dieser Version nicht enthalten",
+      "me": "Ich",
+      "them": "Gegenüber",
+      "pause": "Pausieren",
+      "resume": "Starten",
+      "hide": "Ausblenden",
+      "show": "Anzeigen",
+      "tune": "Anpassen",
+      "back": "Zurück",
+      "theirs": "Gegenüber spricht",
+      "mine": "Ich spreche",
+      "hear": "Transkription",
+      "translate": "Übersetzung",
+      "more": "Weitere Sprachen",
+      "switching": "Wechsel zu {name}, in wenigen Sekunden geht es weiter",
+      "loading": "Wird geladen…",
+      "untried": "Noch nicht getestet",
+      "behind": "{s} s Verzögerung",
+      "perSentence": "{s} s pro Satz",
+      "fps": "VR mit {fps} fps",
+      "dropping": "Bildaussetzer",
+      "vram": "Grafikspeicher {used} / {total} GB",
+      "idle": "Hört nicht zu",
+      "stopped": "Spracherkennung gestoppt. Drehe dein Handgelenk, um sie erneut zu starten.",
+      "stoppedShort": "Spracherkennung gestoppt",
+      "muted": "In VRChat stummgeschaltet"
+    }
   }
 }

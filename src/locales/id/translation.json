@@ -1934,6 +1934,40 @@
       "firewallDeclined": "Masih diblokir: izin belum dikonfirmasi di Windows.",
       "firewall": "Saat pertama kali diaktifkan, firewall sistem mungkin meminta izin agar Kotomimi dapat mengakses jaringan. Izinkan akses pada jaringan privat."
     },
-    "jyutping": "Jyutping di atas teks Kanton"
+    "jyutping": "Jyutping di atas teks Kanton",
+    "vr": {
+      "setting": "Tampilkan di headset (SteamVR)",
+      "hand": "Pergelangan tangan",
+      "left": "Pergelangan tangan kiri",
+      "right": "Pergelangan tangan kanan",
+      "linkWaiting": "Menunggu SteamVR",
+      "linkConnected": "Di headset",
+      "linkMissing": "Tidak tersedia di versi ini",
+      "me": "Saya",
+      "them": "Mereka",
+      "pause": "Jeda",
+      "resume": "Mulai",
+      "hide": "Sembunyikan",
+      "show": "Tampilkan",
+      "tune": "Sesuaikan",
+      "back": "Kembali",
+      "theirs": "Mereka berbicara",
+      "mine": "Saya berbicara",
+      "hear": "Pengenalan",
+      "translate": "Terjemahan",
+      "more": "Bahasa lainnya",
+      "switching": "Beralih ke {name}, lanjut dalam beberapa detik",
+      "loading": "Memuat…",
+      "untried": "Belum dicoba",
+      "behind": "Terlambat {s} detik",
+      "perSentence": "{s} detik per kalimat",
+      "fps": "VR pada {fps} fps",
+      "dropping": "frame terlewat",
+      "vram": "VRAM {used} / {total} GB",
+      "idle": "Tidak mendengarkan",
+      "stopped": "Pengenalan berhenti. Putar pergelangan tangan untuk memulai lagi.",
+      "stoppedShort": "Berhenti",
+      "muted": "Dibisukan di VRChat"
+    }
   }
 }

@@ -631,6 +631,134 @@
     "en": "What you want to say — Enter translates",
     "text": "حرفتان را بنویسید؛ با Enter ترجمه می‌شود"
   },
+  "fork.vr.back": {
+    "en": "Back",
+    "text": "بازگشت"
+  },
+  "fork.vr.behind": {
+    "en": "{s} s behind",
+    "text": "{s} ثانیه تأخیر"
+  },
+  "fork.vr.dropping": {
+    "en": "dropping frames",
+    "text": "افت فریم"
+  },
+  "fork.vr.fps": {
+    "en": "VR at {fps} fps",
+    "text": "واقعیت مجازی با {fps} فریم بر ثانیه"
+  },
+  "fork.vr.hand": {
+    "en": "Wrist",
+    "text": "محل بستن ساعت"
+  },
+  "fork.vr.hear": {
+    "en": "Recognition",
+    "text": "تبدیل گفتار به متن"
+  },
+  "fork.vr.hide": {
+    "en": "Hide",
+    "text": "پنهان کردن"
+  },
+  "fork.vr.idle": {
+    "en": "Not listening",
+    "text": "در حال شنیدن نیست"
+  },
+  "fork.vr.left": {
+    "en": "Left wrist",
+    "text": "دست چپ"
+  },
+  "fork.vr.linkConnected": {
+    "en": "In the headset",
+    "text": "در هدست نمایش داده می‌شود"
+  },
+  "fork.vr.linkMissing": {
+    "en": "Not in this build",
+    "text": "این نسخه بخش واقعیت مجازی ندارد"
+  },
+  "fork.vr.linkWaiting": {
+    "en": "Waiting for SteamVR",
+    "text": "در انتظار اجرای SteamVR"
+  },
+  "fork.vr.loading": {
+    "en": "Loading…",
+    "text": "در حال بارگذاری…"
+  },
+  "fork.vr.me": {
+    "en": "Me",
+    "text": "من"
+  },
+  "fork.vr.mine": {
+    "en": "I speak",
+    "text": "زبان من"
+  },
+  "fork.vr.more": {
+    "en": "More languages",
+    "text": "زبان‌های بیشتر"
+  },
+  "fork.vr.muted": {
+    "en": "Muted in VRChat",
+    "text": "میکروفون در VRChat بی‌صداست"
+  },
+  "fork.vr.pause": {
+    "en": "Pause",
+    "text": "مکث"
+  },
+  "fork.vr.perSentence": {
+    "en": "{s} s a sentence",
+    "text": "{s} ثانیه برای هر جمله"
+  },
+  "fork.vr.resume": {
+    "en": "Start",
+    "text": "شروع"
+  },
+  "fork.vr.right": {
+    "en": "Right wrist",
+    "text": "دست راست"
+  },
+  "fork.vr.setting": {
+    "en": "Show in the headset (SteamVR)",
+    "text": "نمایش در هدست (SteamVR)"
+  },
+  "fork.vr.show": {
+    "en": "Show",
+    "text": "نمایش"
+  },
+  "fork.vr.stopped": {
+    "en": "Recognition stopped. Turn your wrist to start again.",
+    "text": "تشخیص گفتار متوقف شد. برای شروع دوباره، مچ دستتان را بچرخانید."
+  },
+  "fork.vr.stoppedShort": {
+    "en": "Stopped",
+    "text": "تشخیص گفتار متوقف شد"
+  },
+  "fork.vr.switching": {
+    "en": "Switching to {name}, back in a few seconds",
+    "text": "در حال تغییر به {name}، تا چند ثانیه دیگر شنیدن ادامه پیدا می‌کند"
+  },
+  "fork.vr.theirs": {
+    "en": "They speak",
+    "text": "زبان طرف مقابل"
+  },
+  "fork.vr.them": {
+    "en": "Them",
+    "text": "طرف مقابل"
+  },
+  "fork.vr.translate": {
+    "en": "Translation",
+    "text": "ترجمه"
+  },
+  "fork.vr.tune": {
+    "en": "Adjust",
+    "text": "تنظیم"
+  },
+  "fork.vr.untried": {
+    "en": "Not tried",
+    "text": "امتحان نشده"
+  },
+  "fork.vr.vram": {
+    "en": "VRAM {used} / {total} GB",
+    "text": "حافظهٔ گرافیکی {used} / {total} گیگابایت"
+  },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",
     "text": "نمایش بالای سر"

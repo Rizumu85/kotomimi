@@ -635,6 +635,134 @@
     "en": "What you want to say — Enter translates",
     "text": "Wat je wilt zeggen, Enter om te vertalen"
   },
+  "fork.vr.back": {
+    "en": "Back",
+    "text": "Terug"
+  },
+  "fork.vr.behind": {
+    "en": "{s} s behind",
+    "text": "{s} s achter"
+  },
+  "fork.vr.dropping": {
+    "en": "dropping frames",
+    "text": "Frames vallen weg"
+  },
+  "fork.vr.fps": {
+    "en": "VR at {fps} fps",
+    "text": "VR op {fps} fps"
+  },
+  "fork.vr.hand": {
+    "en": "Wrist",
+    "text": "Pols"
+  },
+  "fork.vr.hear": {
+    "en": "Recognition",
+    "text": "Spraakherkenning"
+  },
+  "fork.vr.hide": {
+    "en": "Hide",
+    "text": "Verbergen"
+  },
+  "fork.vr.idle": {
+    "en": "Not listening",
+    "text": "Luistert niet"
+  },
+  "fork.vr.left": {
+    "en": "Left wrist",
+    "text": "Linkerpols"
+  },
+  "fork.vr.linkConnected": {
+    "en": "In the headset",
+    "text": "In de headset"
+  },
+  "fork.vr.linkMissing": {
+    "en": "Not in this build",
+    "text": "Niet in deze versie"
+  },
+  "fork.vr.linkWaiting": {
+    "en": "Waiting for SteamVR",
+    "text": "Wachten tot SteamVR start"
+  },
+  "fork.vr.loading": {
+    "en": "Loading…",
+    "text": "Laden…"
+  },
+  "fork.vr.me": {
+    "en": "Me",
+    "text": "Ik"
+  },
+  "fork.vr.mine": {
+    "en": "I speak",
+    "text": "Ik praat"
+  },
+  "fork.vr.more": {
+    "en": "More languages",
+    "text": "Meer talen"
+  },
+  "fork.vr.muted": {
+    "en": "Muted in VRChat",
+    "text": "Gedempt in VRChat"
+  },
+  "fork.vr.pause": {
+    "en": "Pause",
+    "text": "Pauzeren"
+  },
+  "fork.vr.perSentence": {
+    "en": "{s} s a sentence",
+    "text": "{s} s per zin"
+  },
+  "fork.vr.resume": {
+    "en": "Start",
+    "text": "Starten"
+  },
+  "fork.vr.right": {
+    "en": "Right wrist",
+    "text": "Rechterpols"
+  },
+  "fork.vr.setting": {
+    "en": "Show in the headset (SteamVR)",
+    "text": "In de headset tonen (SteamVR)"
+  },
+  "fork.vr.show": {
+    "en": "Show",
+    "text": "Tonen"
+  },
+  "fork.vr.stopped": {
+    "en": "Recognition stopped. Turn your wrist to start again.",
+    "text": "Spraakherkenning gestopt. Draai je pols om opnieuw te starten."
+  },
+  "fork.vr.stoppedShort": {
+    "en": "Stopped",
+    "text": "Gestopt"
+  },
+  "fork.vr.switching": {
+    "en": "Switching to {name}, back in a few seconds",
+    "text": "Overschakelen naar {name}, over een paar seconden gaan we verder"
+  },
+  "fork.vr.theirs": {
+    "en": "They speak",
+    "text": "De ander praat"
+  },
+  "fork.vr.them": {
+    "en": "Them",
+    "text": "De ander"
+  },
+  "fork.vr.translate": {
+    "en": "Translation",
+    "text": "Vertaling"
+  },
+  "fork.vr.tune": {
+    "en": "Adjust",
+    "text": "Aanpassen"
+  },
+  "fork.vr.untried": {
+    "en": "Not tried",
+    "text": "Niet geprobeerd"
+  },
+  "fork.vr.vram": {
+    "en": "VRAM {used} / {total} GB",
+    "text": "VRAM {used} / {total} GB"
+  },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",
     "text": "Boven mijn avatar"

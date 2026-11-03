@@ -155,6 +155,13 @@ export const INVOKE_CHANNELS = [
   // Fork: VRChat on the same computer (electron/vrchat.js)
   'vrchat:watch',
   'vrchat:chatbox',
+  // Fork: the SteamVR overlay (electron/vr-overlay.js): the main window's side, then the headset pages'
+  'vr:set',
+  'vr:state',
+  'vr:tune',
+  'vr:command',
+  'vr:ready',
+  'vr:size',
   // LAN caption sharing (electron/caption-share.js)
   'caption-share:start',
   'caption-share:stop',

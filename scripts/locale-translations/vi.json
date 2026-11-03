@@ -635,6 +635,134 @@
     "en": "What you want to say — Enter translates",
     "text": "Nhập điều muốn nói, nhấn Enter để dịch"
   },
+  "fork.vr.back": {
+    "en": "Back",
+    "text": "Quay lại"
+  },
+  "fork.vr.behind": {
+    "en": "{s} s behind",
+    "text": "Trễ {s} giây"
+  },
+  "fork.vr.dropping": {
+    "en": "dropping frames",
+    "text": "đang rớt khung hình"
+  },
+  "fork.vr.fps": {
+    "en": "VR at {fps} fps",
+    "text": "VR ở {fps} khung hình/giây"
+  },
+  "fork.vr.hand": {
+    "en": "Wrist",
+    "text": "Đeo đồng hồ ở"
+  },
+  "fork.vr.hear": {
+    "en": "Recognition",
+    "text": "Chép lời"
+  },
+  "fork.vr.hide": {
+    "en": "Hide",
+    "text": "Ẩn"
+  },
+  "fork.vr.idle": {
+    "en": "Not listening",
+    "text": "Không nghe"
+  },
+  "fork.vr.left": {
+    "en": "Left wrist",
+    "text": "Tay trái"
+  },
+  "fork.vr.linkConnected": {
+    "en": "In the headset",
+    "text": "Đã hiển thị trong kính VR"
+  },
+  "fork.vr.linkMissing": {
+    "en": "Not in this build",
+    "text": "Bản này không có thành phần VR"
+  },
+  "fork.vr.linkWaiting": {
+    "en": "Waiting for SteamVR",
+    "text": "Đang chờ SteamVR khởi động"
+  },
+  "fork.vr.loading": {
+    "en": "Loading…",
+    "text": "Đang tải…"
+  },
+  "fork.vr.me": {
+    "en": "Me",
+    "text": "Tôi"
+  },
+  "fork.vr.mine": {
+    "en": "I speak",
+    "text": "Tôi nói"
+  },
+  "fork.vr.more": {
+    "en": "More languages",
+    "text": "Thêm ngôn ngữ"
+  },
+  "fork.vr.muted": {
+    "en": "Muted in VRChat",
+    "text": "Đã tắt mic trong VRChat"
+  },
+  "fork.vr.pause": {
+    "en": "Pause",
+    "text": "Tạm dừng"
+  },
+  "fork.vr.perSentence": {
+    "en": "{s} s a sentence",
+    "text": "{s} giây mỗi câu"
+  },
+  "fork.vr.resume": {
+    "en": "Start",
+    "text": "Bắt đầu"
+  },
+  "fork.vr.right": {
+    "en": "Right wrist",
+    "text": "Tay phải"
+  },
+  "fork.vr.setting": {
+    "en": "Show in the headset (SteamVR)",
+    "text": "Hiển thị trong kính VR (SteamVR)"
+  },
+  "fork.vr.show": {
+    "en": "Show",
+    "text": "Hiện"
+  },
+  "fork.vr.stopped": {
+    "en": "Recognition stopped. Turn your wrist to start again.",
+    "text": "Đã dừng nhận dạng giọng nói. Lật cổ tay để bắt đầu lại."
+  },
+  "fork.vr.stoppedShort": {
+    "en": "Stopped",
+    "text": "Đã dừng nhận dạng"
+  },
+  "fork.vr.switching": {
+    "en": "Switching to {name}, back in a few seconds",
+    "text": "Đang chuyển sang {name}, sẽ nghe tiếp sau vài giây"
+  },
+  "fork.vr.theirs": {
+    "en": "They speak",
+    "text": "Người kia nói"
+  },
+  "fork.vr.them": {
+    "en": "Them",
+    "text": "Người kia"
+  },
+  "fork.vr.translate": {
+    "en": "Translation",
+    "text": "Dịch"
+  },
+  "fork.vr.tune": {
+    "en": "Adjust",
+    "text": "Điều chỉnh"
+  },
+  "fork.vr.untried": {
+    "en": "Not tried",
+    "text": "Chưa thử"
+  },
+  "fork.vr.vram": {
+    "en": "VRAM {used} / {total} GB",
+    "text": "Bộ nhớ đồ họa {used} / {total} GB"
+  },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",
     "text": "Hiện trên đầu nhân vật"

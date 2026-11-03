@@ -635,6 +635,134 @@
     "en": "What you want to say — Enter translates",
     "text": "Det du vill säga – Enter översätter"
   },
+  "fork.vr.back": {
+    "en": "Back",
+    "text": "Tillbaka"
+  },
+  "fork.vr.behind": {
+    "en": "{s} s behind",
+    "text": "{s} s efter"
+  },
+  "fork.vr.dropping": {
+    "en": "dropping frames",
+    "text": "tappar bildrutor"
+  },
+  "fork.vr.fps": {
+    "en": "VR at {fps} fps",
+    "text": "VR i {fps} fps"
+  },
+  "fork.vr.hand": {
+    "en": "Wrist",
+    "text": "Handled"
+  },
+  "fork.vr.hear": {
+    "en": "Recognition",
+    "text": "Taligenkänning"
+  },
+  "fork.vr.hide": {
+    "en": "Hide",
+    "text": "Dölj"
+  },
+  "fork.vr.idle": {
+    "en": "Not listening",
+    "text": "Lyssnar inte"
+  },
+  "fork.vr.left": {
+    "en": "Left wrist",
+    "text": "Vänster handled"
+  },
+  "fork.vr.linkConnected": {
+    "en": "In the headset",
+    "text": "I headsetet"
+  },
+  "fork.vr.linkMissing": {
+    "en": "Not in this build",
+    "text": "Finns inte i den här versionen"
+  },
+  "fork.vr.linkWaiting": {
+    "en": "Waiting for SteamVR",
+    "text": "Väntar på SteamVR"
+  },
+  "fork.vr.loading": {
+    "en": "Loading…",
+    "text": "Laddar…"
+  },
+  "fork.vr.me": {
+    "en": "Me",
+    "text": "Jag"
+  },
+  "fork.vr.mine": {
+    "en": "I speak",
+    "text": "Jag talar"
+  },
+  "fork.vr.more": {
+    "en": "More languages",
+    "text": "Fler språk"
+  },
+  "fork.vr.muted": {
+    "en": "Muted in VRChat",
+    "text": "Ljudet är avstängt i VRChat"
+  },
+  "fork.vr.pause": {
+    "en": "Pause",
+    "text": "Pausa"
+  },
+  "fork.vr.perSentence": {
+    "en": "{s} s a sentence",
+    "text": "{s} s per mening"
+  },
+  "fork.vr.resume": {
+    "en": "Start",
+    "text": "Starta"
+  },
+  "fork.vr.right": {
+    "en": "Right wrist",
+    "text": "Höger handled"
+  },
+  "fork.vr.setting": {
+    "en": "Show in the headset (SteamVR)",
+    "text": "Visa i headsetet (SteamVR)"
+  },
+  "fork.vr.show": {
+    "en": "Show",
+    "text": "Visa"
+  },
+  "fork.vr.stopped": {
+    "en": "Recognition stopped. Turn your wrist to start again.",
+    "text": "Taligenkänningen stoppades. Vrid handleden för att starta igen."
+  },
+  "fork.vr.stoppedShort": {
+    "en": "Stopped",
+    "text": "Stoppad"
+  },
+  "fork.vr.switching": {
+    "en": "Switching to {name}, back in a few seconds",
+    "text": "Byter till {name}, tillbaka om några sekunder"
+  },
+  "fork.vr.theirs": {
+    "en": "They speak",
+    "text": "De talar"
+  },
+  "fork.vr.them": {
+    "en": "Them",
+    "text": "De"
+  },
+  "fork.vr.translate": {
+    "en": "Translation",
+    "text": "Översättning"
+  },
+  "fork.vr.tune": {
+    "en": "Adjust",
+    "text": "Justera"
+  },
+  "fork.vr.untried": {
+    "en": "Not tried",
+    "text": "Inte testad"
+  },
+  "fork.vr.vram": {
+    "en": "VRAM {used} / {total} GB",
+    "text": "VRAM {used} / {total} GB"
+  },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",
     "text": "Ovanför min avatar"

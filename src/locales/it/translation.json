@@ -1934,6 +1934,40 @@
       "firewallDeclined": "Ancora bloccato: manca la conferma in Windows.",
       "firewall": "Al primo avvio della condivisione, il firewall di sistema potrebbe chiederti se consentire a Kotomimi di accedere alla rete: consenti l'accesso sulle reti private."
     },
-    "jyutping": "Jyutping sopra il testo cantonese"
+    "jyutping": "Jyutping sopra il testo cantonese",
+    "vr": {
+      "setting": "Mostra nel visore (SteamVR)",
+      "hand": "Polso",
+      "left": "Polso sinistro",
+      "right": "Polso destro",
+      "linkWaiting": "In attesa di SteamVR",
+      "linkConnected": "Nel visore",
+      "linkMissing": "Componente VR non incluso in questa versione",
+      "me": "Io",
+      "them": "L'altra persona",
+      "pause": "Pausa",
+      "resume": "Avvia",
+      "hide": "Nascondi",
+      "show": "Mostra",
+      "tune": "Regola",
+      "back": "Indietro",
+      "theirs": "Parlano",
+      "mine": "Parlo",
+      "hear": "Riconoscimento",
+      "translate": "Traduzione",
+      "more": "Altre lingue",
+      "switching": "Passaggio a {name}, riprenderemo tra pochi secondi",
+      "loading": "Caricamento…",
+      "untried": "Non provato",
+      "behind": "{s} s di ritardo",
+      "perSentence": "{s} s per frase",
+      "fps": "VR a {fps} fps",
+      "dropping": "perdita di fotogrammi",
+      "vram": "VRAM {used} / {total} GB",
+      "idle": "Non in ascolto",
+      "stopped": "Riconoscimento interrotto. Ruota il polso per riavviarlo.",
+      "stoppedShort": "Interrotto",
+      "muted": "Audio disattivato in VRChat"
+    }
   }
 }

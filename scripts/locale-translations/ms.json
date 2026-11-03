@@ -627,6 +627,134 @@
     "en": "What you want to say — Enter translates",
     "text": "Apa yang anda mahu katakan, tekan Enter untuk terjemah"
   },
+  "fork.vr.back": {
+    "en": "Back",
+    "text": "Kembali"
+  },
+  "fork.vr.behind": {
+    "en": "{s} s behind",
+    "text": "Lewat {s} saat"
+  },
+  "fork.vr.dropping": {
+    "en": "dropping frames",
+    "text": "bingkai tercicir"
+  },
+  "fork.vr.fps": {
+    "en": "VR at {fps} fps",
+    "text": "VR pada {fps} fps"
+  },
+  "fork.vr.hand": {
+    "en": "Wrist",
+    "text": "Pakai jam pada"
+  },
+  "fork.vr.hear": {
+    "en": "Recognition",
+    "text": "Transkripsi"
+  },
+  "fork.vr.hide": {
+    "en": "Hide",
+    "text": "Sembunyikan"
+  },
+  "fork.vr.idle": {
+    "en": "Not listening",
+    "text": "Tidak mendengar"
+  },
+  "fork.vr.left": {
+    "en": "Left wrist",
+    "text": "Tangan kiri"
+  },
+  "fork.vr.linkConnected": {
+    "en": "In the headset",
+    "text": "Dipaparkan dalam set kepala"
+  },
+  "fork.vr.linkMissing": {
+    "en": "Not in this build",
+    "text": "Versi ini tiada komponen VR"
+  },
+  "fork.vr.linkWaiting": {
+    "en": "Waiting for SteamVR",
+    "text": "Menunggu SteamVR bermula"
+  },
+  "fork.vr.loading": {
+    "en": "Loading…",
+    "text": "Memuatkan…"
+  },
+  "fork.vr.me": {
+    "en": "Me",
+    "text": "Saya"
+  },
+  "fork.vr.mine": {
+    "en": "I speak",
+    "text": "Saya bertutur"
+  },
+  "fork.vr.more": {
+    "en": "More languages",
+    "text": "Bahasa lain"
+  },
+  "fork.vr.muted": {
+    "en": "Muted in VRChat",
+    "text": "Dibisukan dalam VRChat"
+  },
+  "fork.vr.pause": {
+    "en": "Pause",
+    "text": "Jeda"
+  },
+  "fork.vr.perSentence": {
+    "en": "{s} s a sentence",
+    "text": "{s} saat setiap ayat"
+  },
+  "fork.vr.resume": {
+    "en": "Start",
+    "text": "Mula"
+  },
+  "fork.vr.right": {
+    "en": "Right wrist",
+    "text": "Tangan kanan"
+  },
+  "fork.vr.setting": {
+    "en": "Show in the headset (SteamVR)",
+    "text": "Papar dalam set kepala (SteamVR)"
+  },
+  "fork.vr.show": {
+    "en": "Show",
+    "text": "Papar"
+  },
+  "fork.vr.stopped": {
+    "en": "Recognition stopped. Turn your wrist to start again.",
+    "text": "Pengecaman dihentikan. Pusingkan pergelangan tangan untuk mula semula."
+  },
+  "fork.vr.stoppedShort": {
+    "en": "Stopped",
+    "text": "Pengecaman dihentikan"
+  },
+  "fork.vr.switching": {
+    "en": "Switching to {name}, back in a few seconds",
+    "text": "Beralih ke {name}, akan mendengar semula dalam beberapa saat"
+  },
+  "fork.vr.theirs": {
+    "en": "They speak",
+    "text": "Mereka bertutur"
+  },
+  "fork.vr.them": {
+    "en": "Them",
+    "text": "Mereka"
+  },
+  "fork.vr.translate": {
+    "en": "Translation",
+    "text": "Terjemahan"
+  },
+  "fork.vr.tune": {
+    "en": "Adjust",
+    "text": "Laras"
+  },
+  "fork.vr.untried": {
+    "en": "Not tried",
+    "text": "Belum dicuba"
+  },
+  "fork.vr.vram": {
+    "en": "VRAM {used} / {total} GB",
+    "text": "Memori grafik {used} / {total} GB"
+  },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",
     "text": "Papar di atas avatar"

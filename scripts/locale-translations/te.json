@@ -631,6 +631,134 @@
     "en": "What you want to say — Enter translates",
     "text": "మీరు చెప్పాలనేది — Enter అనువదిస్తుంది"
   },
+  "fork.vr.back": {
+    "en": "Back",
+    "text": "వెనక్కి"
+  },
+  "fork.vr.behind": {
+    "en": "{s} s behind",
+    "text": "{s} సెకన్ల ఆలస్యం"
+  },
+  "fork.vr.dropping": {
+    "en": "dropping frames",
+    "text": "ఫ్రేములు తప్పిపోతున్నాయి"
+  },
+  "fork.vr.fps": {
+    "en": "VR at {fps} fps",
+    "text": "VR దృశ్యం {fps} ఫ్రేములు"
+  },
+  "fork.vr.hand": {
+    "en": "Wrist",
+    "text": "ధరించే మణికట్టు"
+  },
+  "fork.vr.hear": {
+    "en": "Recognition",
+    "text": "మాటలను అక్షరాల్లోకి"
+  },
+  "fork.vr.hide": {
+    "en": "Hide",
+    "text": "దాచు"
+  },
+  "fork.vr.idle": {
+    "en": "Not listening",
+    "text": "వినడం లేదు"
+  },
+  "fork.vr.left": {
+    "en": "Left wrist",
+    "text": "ఎడమ చేయి"
+  },
+  "fork.vr.linkConnected": {
+    "en": "In the headset",
+    "text": "హెడ్‌సెట్‌లో కనిపిస్తోంది"
+  },
+  "fork.vr.linkMissing": {
+    "en": "Not in this build",
+    "text": "ఈ వెర్షన్‌లో VR భాగం లేదు"
+  },
+  "fork.vr.linkWaiting": {
+    "en": "Waiting for SteamVR",
+    "text": "SteamVR ప్రారంభం కోసం వేచి ఉంది"
+  },
+  "fork.vr.loading": {
+    "en": "Loading…",
+    "text": "లోడ్ అవుతోంది…"
+  },
+  "fork.vr.me": {
+    "en": "Me",
+    "text": "నేను"
+  },
+  "fork.vr.mine": {
+    "en": "I speak",
+    "text": "నేను మాట్లాడే భాష"
+  },
+  "fork.vr.more": {
+    "en": "More languages",
+    "text": "మరిన్ని భాషలు"
+  },
+  "fork.vr.muted": {
+    "en": "Muted in VRChat",
+    "text": "VRChatలో మ్యూట్ అయింది"
+  },
+  "fork.vr.pause": {
+    "en": "Pause",
+    "text": "పాజ్ చేయి"
+  },
+  "fork.vr.perSentence": {
+    "en": "{s} s a sentence",
+    "text": "వాక్యానికి {s} సెకన్లు"
+  },
+  "fork.vr.resume": {
+    "en": "Start",
+    "text": "ప్రారంభించు"
+  },
+  "fork.vr.right": {
+    "en": "Right wrist",
+    "text": "కుడి చేయి"
+  },
+  "fork.vr.setting": {
+    "en": "Show in the headset (SteamVR)",
+    "text": "హెడ్‌సెట్‌లో చూపించు (SteamVR)"
+  },
+  "fork.vr.show": {
+    "en": "Show",
+    "text": "చూపించు"
+  },
+  "fork.vr.stopped": {
+    "en": "Recognition stopped. Turn your wrist to start again.",
+    "text": "మాటలను గుర్తించడం ఆగింది. మళ్లీ ప్రారంభించడానికి మణికట్టును తిప్పండి."
+  },
+  "fork.vr.stoppedShort": {
+    "en": "Stopped",
+    "text": "మాటలను గుర్తించడం ఆగింది"
+  },
+  "fork.vr.switching": {
+    "en": "Switching to {name}, back in a few seconds",
+    "text": "{name}కి మారుతోంది, కొన్ని సెకన్లలో మళ్లీ వింటుంది"
+  },
+  "fork.vr.theirs": {
+    "en": "They speak",
+    "text": "అవతలి వ్యక్తి మాట్లాడే భాష"
+  },
+  "fork.vr.them": {
+    "en": "Them",
+    "text": "అవతలి వ్యక్తి"
+  },
+  "fork.vr.translate": {
+    "en": "Translation",
+    "text": "అనువాదం"
+  },
+  "fork.vr.tune": {
+    "en": "Adjust",
+    "text": "సర్దుబాటు"
+  },
+  "fork.vr.untried": {
+    "en": "Not tried",
+    "text": "ఇంకా ప్రయత్నించలేదు"
+  },
+  "fork.vr.vram": {
+    "en": "VRAM {used} / {total} GB",
+    "text": "వీడియో మెమరీ {used} / {total} GB"
+  },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",
     "text": "నా అవతార్ తలపైన"

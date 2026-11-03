@@ -1934,6 +1934,40 @@
       "firewallDeclined": "Vẫn bị chặn: chưa có xác nhận cho phép trong Windows.",
       "firewall": "Lần đầu bật, tường lửa của hệ thống có thể hỏi có cho phép Kotomimi truy cập mạng không: hãy cho phép trên mạng riêng tư."
     },
-    "jyutping": "Hiện jyutping trên tiếng Quảng Đông"
+    "jyutping": "Hiện jyutping trên tiếng Quảng Đông",
+    "vr": {
+      "setting": "Hiển thị trong kính VR (SteamVR)",
+      "hand": "Đeo đồng hồ ở",
+      "left": "Tay trái",
+      "right": "Tay phải",
+      "linkWaiting": "Đang chờ SteamVR khởi động",
+      "linkConnected": "Đã hiển thị trong kính VR",
+      "linkMissing": "Bản này không có thành phần VR",
+      "me": "Tôi",
+      "them": "Người kia",
+      "pause": "Tạm dừng",
+      "resume": "Bắt đầu",
+      "hide": "Ẩn",
+      "show": "Hiện",
+      "tune": "Điều chỉnh",
+      "back": "Quay lại",
+      "theirs": "Người kia nói",
+      "mine": "Tôi nói",
+      "hear": "Chép lời",
+      "translate": "Dịch",
+      "more": "Thêm ngôn ngữ",
+      "switching": "Đang chuyển sang {name}, sẽ nghe tiếp sau vài giây",
+      "loading": "Đang tải…",
+      "untried": "Chưa thử",
+      "behind": "Trễ {s} giây",
+      "perSentence": "{s} giây mỗi câu",
+      "fps": "VR ở {fps} khung hình/giây",
+      "dropping": "đang rớt khung hình",
+      "vram": "Bộ nhớ đồ họa {used} / {total} GB",
+      "idle": "Không nghe",
+      "stopped": "Đã dừng nhận dạng giọng nói. Lật cổ tay để bắt đầu lại.",
+      "stoppedShort": "Đã dừng nhận dạng",
+      "muted": "Đã tắt mic trong VRChat"
+    }
   }
 }

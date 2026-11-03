@@ -1934,6 +1934,40 @@
       "firewallDeclined": "Hâlâ engelleniyor: Windows'ta izin onaylanmadı.",
       "firewall": "İlk kez açtığınızda sistem güvenlik duvarı Kotomimi'nin ağa erişmesine izin verip vermediğinizi sorabilir. Özel ağlarda iletişime izin verin."
     },
-    "jyutping": "Kantonca metnin üzerinde jyutping"
+    "jyutping": "Kantonca metnin üzerinde jyutping",
+    "vr": {
+      "setting": "Başlıkta göster (SteamVR)",
+      "hand": "Bilek",
+      "left": "Sol bilek",
+      "right": "Sağ bilek",
+      "linkWaiting": "SteamVR bekleniyor",
+      "linkConnected": "Başlıkta",
+      "linkMissing": "Bu sürümde yok",
+      "me": "Ben",
+      "them": "Karşı taraf",
+      "pause": "Duraklat",
+      "resume": "Başlat",
+      "hide": "Gizle",
+      "show": "Göster",
+      "tune": "Ayarla",
+      "back": "Geri",
+      "theirs": "Karşı taraf konuşuyor",
+      "mine": "Ben konuşuyorum",
+      "hear": "Tanıma",
+      "translate": "Çeviri",
+      "more": "Daha fazla dil",
+      "switching": "{name} diline geçiliyor, birkaç saniye içinde devam edecek",
+      "loading": "Yükleniyor…",
+      "untried": "Denenmedi",
+      "behind": "{s} sn geride",
+      "perSentence": "Cümle başına {s} sn",
+      "fps": "VR {fps} FPS",
+      "dropping": "kareler düşüyor",
+      "vram": "VRAM {used} / {total} GB",
+      "idle": "Dinlemiyor",
+      "stopped": "Tanıma durdu. Yeniden başlatmak için bileğinizi çevirin.",
+      "stoppedShort": "Durduruldu",
+      "muted": "VRChat'te sessize alındı"
+    }
   }
 }

@@ -631,6 +631,134 @@
     "en": "What you want to say — Enter translates",
     "text": "যা বলতে চান লিখুন, অনুবাদ করতে Enter চাপুন"
   },
+  "fork.vr.back": {
+    "en": "Back",
+    "text": "ফিরে যান"
+  },
+  "fork.vr.behind": {
+    "en": "{s} s behind",
+    "text": "{s} সেকেন্ড পিছিয়ে"
+  },
+  "fork.vr.dropping": {
+    "en": "dropping frames",
+    "text": "ফ্রেম কমে যাচ্ছে"
+  },
+  "fork.vr.fps": {
+    "en": "VR at {fps} fps",
+    "text": "VR {fps} fps-এ চলছে"
+  },
+  "fork.vr.hand": {
+    "en": "Wrist",
+    "text": "কবজি"
+  },
+  "fork.vr.hear": {
+    "en": "Recognition",
+    "text": "শ্রুতিলিখন"
+  },
+  "fork.vr.hide": {
+    "en": "Hide",
+    "text": "লুকান"
+  },
+  "fork.vr.idle": {
+    "en": "Not listening",
+    "text": "শুনছে না"
+  },
+  "fork.vr.left": {
+    "en": "Left wrist",
+    "text": "বাম কবজি"
+  },
+  "fork.vr.linkConnected": {
+    "en": "In the headset",
+    "text": "হেডসেটে দেখা যাচ্ছে"
+  },
+  "fork.vr.linkMissing": {
+    "en": "Not in this build",
+    "text": "এই বিল্ডে নেই"
+  },
+  "fork.vr.linkWaiting": {
+    "en": "Waiting for SteamVR",
+    "text": "SteamVR চালু হওয়ার অপেক্ষায়"
+  },
+  "fork.vr.loading": {
+    "en": "Loading…",
+    "text": "লোড হচ্ছে…"
+  },
+  "fork.vr.me": {
+    "en": "Me",
+    "text": "আমি"
+  },
+  "fork.vr.mine": {
+    "en": "I speak",
+    "text": "আমি বলছি"
+  },
+  "fork.vr.more": {
+    "en": "More languages",
+    "text": "আরও ভাষা"
+  },
+  "fork.vr.muted": {
+    "en": "Muted in VRChat",
+    "text": "VRChat-এ মিউট করা আছে"
+  },
+  "fork.vr.pause": {
+    "en": "Pause",
+    "text": "বিরতি"
+  },
+  "fork.vr.perSentence": {
+    "en": "{s} s a sentence",
+    "text": "প্রতি বাক্যে {s} সেকেন্ড"
+  },
+  "fork.vr.resume": {
+    "en": "Start",
+    "text": "শুরু"
+  },
+  "fork.vr.right": {
+    "en": "Right wrist",
+    "text": "ডান কবজি"
+  },
+  "fork.vr.setting": {
+    "en": "Show in the headset (SteamVR)",
+    "text": "হেডসেটে দেখান (SteamVR)"
+  },
+  "fork.vr.show": {
+    "en": "Show",
+    "text": "দেখান"
+  },
+  "fork.vr.stopped": {
+    "en": "Recognition stopped. Turn your wrist to start again.",
+    "text": "শনাক্তকরণ থেমে গেছে। আবার শুরু করতে কবজি ঘুরিয়ে নিন।"
+  },
+  "fork.vr.stoppedShort": {
+    "en": "Stopped",
+    "text": "শনাক্তকরণ থেমেছে"
+  },
+  "fork.vr.switching": {
+    "en": "Switching to {name}, back in a few seconds",
+    "text": "{name}-এ বদলানো হচ্ছে, কয়েক সেকেন্ড পর আবার শুনবে"
+  },
+  "fork.vr.theirs": {
+    "en": "They speak",
+    "text": "ওরা বলছে"
+  },
+  "fork.vr.them": {
+    "en": "Them",
+    "text": "ওরা"
+  },
+  "fork.vr.translate": {
+    "en": "Translation",
+    "text": "অনুবাদ"
+  },
+  "fork.vr.tune": {
+    "en": "Adjust",
+    "text": "সমন্বয়"
+  },
+  "fork.vr.untried": {
+    "en": "Not tried",
+    "text": "চেষ্টা করা হয়নি"
+  },
+  "fork.vr.vram": {
+    "en": "VRAM {used} / {total} GB",
+    "text": "VRAM {used} / {total} GB"
+  },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",
     "text": "মাথার ওপরে দেখান"

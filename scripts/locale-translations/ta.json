@@ -631,6 +631,134 @@
     "en": "What you want to say — Enter translates",
     "text": "சொல்ல விரும்புவதை உள்ளிட்டு, மொழிபெயர்க்க Enter அழுத்தவும்"
   },
+  "fork.vr.back": {
+    "en": "Back",
+    "text": "பின்செல்"
+  },
+  "fork.vr.behind": {
+    "en": "{s} s behind",
+    "text": "{s} நொடி தாமதம்"
+  },
+  "fork.vr.dropping": {
+    "en": "dropping frames",
+    "text": "படங்கள் விடுபடுகின்றன"
+  },
+  "fork.vr.fps": {
+    "en": "VR at {fps} fps",
+    "text": "VR வினாடிக்கு {fps} படங்கள்"
+  },
+  "fork.vr.hand": {
+    "en": "Wrist",
+    "text": "கடிகாரம் அணியும் கை"
+  },
+  "fork.vr.hear": {
+    "en": "Recognition",
+    "text": "பேச்சை எழுத்தாக்குதல்"
+  },
+  "fork.vr.hide": {
+    "en": "Hide",
+    "text": "மறை"
+  },
+  "fork.vr.idle": {
+    "en": "Not listening",
+    "text": "கேட்கவில்லை"
+  },
+  "fork.vr.left": {
+    "en": "Left wrist",
+    "text": "இடது கை"
+  },
+  "fork.vr.linkConnected": {
+    "en": "In the headset",
+    "text": "ஹெட்செட்டில் தெரிகிறது"
+  },
+  "fork.vr.linkMissing": {
+    "en": "Not in this build",
+    "text": "இந்தப் பதிப்பில் VR கூறு இல்லை"
+  },
+  "fork.vr.linkWaiting": {
+    "en": "Waiting for SteamVR",
+    "text": "SteamVR தொடங்கக் காத்திருக்கிறது"
+  },
+  "fork.vr.loading": {
+    "en": "Loading…",
+    "text": "ஏற்றுகிறது…"
+  },
+  "fork.vr.me": {
+    "en": "Me",
+    "text": "நான்"
+  },
+  "fork.vr.mine": {
+    "en": "I speak",
+    "text": "நான் பேசுவது"
+  },
+  "fork.vr.more": {
+    "en": "More languages",
+    "text": "மேலும் மொழிகள்"
+  },
+  "fork.vr.muted": {
+    "en": "Muted in VRChat",
+    "text": "VRChat இல் ஒலி முடக்கப்பட்டுள்ளது"
+  },
+  "fork.vr.pause": {
+    "en": "Pause",
+    "text": "இடைநிறுத்து"
+  },
+  "fork.vr.perSentence": {
+    "en": "{s} s a sentence",
+    "text": "ஒரு வாக்கியத்திற்கு {s} நொடி"
+  },
+  "fork.vr.resume": {
+    "en": "Start",
+    "text": "தொடங்கு"
+  },
+  "fork.vr.right": {
+    "en": "Right wrist",
+    "text": "வலது கை"
+  },
+  "fork.vr.setting": {
+    "en": "Show in the headset (SteamVR)",
+    "text": "ஹெட்செட்டில் காட்டு (SteamVR)"
+  },
+  "fork.vr.show": {
+    "en": "Show",
+    "text": "காட்டு"
+  },
+  "fork.vr.stopped": {
+    "en": "Recognition stopped. Turn your wrist to start again.",
+    "text": "பேச்சை எழுத்தாக்குவது நின்றுவிட்டது. மீண்டும் தொடங்க மணிக்கட்டைத் திருப்புங்கள்."
+  },
+  "fork.vr.stoppedShort": {
+    "en": "Stopped",
+    "text": "பேச்சை எழுத்தாக்குவது நின்றது"
+  },
+  "fork.vr.switching": {
+    "en": "Switching to {name}, back in a few seconds",
+    "text": "{name} மொழிக்கு மாறுகிறது, சில நொடிகளில் மீண்டும் கேட்கும்"
+  },
+  "fork.vr.theirs": {
+    "en": "They speak",
+    "text": "மற்றவர் பேசுவது"
+  },
+  "fork.vr.them": {
+    "en": "Them",
+    "text": "மற்றவர்"
+  },
+  "fork.vr.translate": {
+    "en": "Translation",
+    "text": "மொழிபெயர்ப்பு"
+  },
+  "fork.vr.tune": {
+    "en": "Adjust",
+    "text": "சரிசெய்"
+  },
+  "fork.vr.untried": {
+    "en": "Not tried",
+    "text": "முயற்சிக்கவில்லை"
+  },
+  "fork.vr.vram": {
+    "en": "VRAM {used} / {total} GB",
+    "text": "கிராபிக்ஸ் நினைவகம் {used} / {total} GB"
+  },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",
     "text": "தலைக்கு மேலே காட்டு"

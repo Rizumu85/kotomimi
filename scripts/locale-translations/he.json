@@ -631,6 +631,134 @@
     "en": "What you want to say — Enter translates",
     "text": "מה רצית לומר? Enter לתרגום"
   },
+  "fork.vr.back": {
+    "en": "Back",
+    "text": "חזרה"
+  },
+  "fork.vr.behind": {
+    "en": "{s} s behind",
+    "text": "עיכוב של {s} שניות"
+  },
+  "fork.vr.dropping": {
+    "en": "dropping frames",
+    "text": "יש נפילות פריימים"
+  },
+  "fork.vr.fps": {
+    "en": "VR at {fps} fps",
+    "text": "VR בקצב {fps} פריימים לשנייה"
+  },
+  "fork.vr.hand": {
+    "en": "Wrist",
+    "text": "מיקום השעון"
+  },
+  "fork.vr.hear": {
+    "en": "Recognition",
+    "text": "תמלול"
+  },
+  "fork.vr.hide": {
+    "en": "Hide",
+    "text": "הסתרה"
+  },
+  "fork.vr.idle": {
+    "en": "Not listening",
+    "text": "אין האזנה"
+  },
+  "fork.vr.left": {
+    "en": "Left wrist",
+    "text": "יד שמאל"
+  },
+  "fork.vr.linkConnected": {
+    "en": "In the headset",
+    "text": "מוצג במשקפי VR"
+  },
+  "fork.vr.linkMissing": {
+    "en": "Not in this build",
+    "text": "רכיב VR לא כלול בגרסה הזו"
+  },
+  "fork.vr.linkWaiting": {
+    "en": "Waiting for SteamVR",
+    "text": "ממתין להפעלת SteamVR"
+  },
+  "fork.vr.loading": {
+    "en": "Loading…",
+    "text": "בטעינה…"
+  },
+  "fork.vr.me": {
+    "en": "Me",
+    "text": "אני"
+  },
+  "fork.vr.mine": {
+    "en": "I speak",
+    "text": "אני מדבר"
+  },
+  "fork.vr.more": {
+    "en": "More languages",
+    "text": "שפות נוספות"
+  },
+  "fork.vr.muted": {
+    "en": "Muted in VRChat",
+    "text": "המיקרופון מושתק ב־VRChat"
+  },
+  "fork.vr.pause": {
+    "en": "Pause",
+    "text": "השהיה"
+  },
+  "fork.vr.perSentence": {
+    "en": "{s} s a sentence",
+    "text": "{s} שניות למשפט"
+  },
+  "fork.vr.resume": {
+    "en": "Start",
+    "text": "התחלה"
+  },
+  "fork.vr.right": {
+    "en": "Right wrist",
+    "text": "יד ימין"
+  },
+  "fork.vr.setting": {
+    "en": "Show in the headset (SteamVR)",
+    "text": "הצגה במשקפי VR ‏(SteamVR)"
+  },
+  "fork.vr.show": {
+    "en": "Show",
+    "text": "הצגה"
+  },
+  "fork.vr.stopped": {
+    "en": "Recognition stopped. Turn your wrist to start again.",
+    "text": "התמלול נעצר. אפשר לסובב את פרק כף היד כדי להתחיל שוב."
+  },
+  "fork.vr.stoppedShort": {
+    "en": "Stopped",
+    "text": "התמלול נעצר"
+  },
+  "fork.vr.switching": {
+    "en": "Switching to {name}, back in a few seconds",
+    "text": "עובר ל־{name}, ההאזנה תתחדש בעוד כמה שניות"
+  },
+  "fork.vr.theirs": {
+    "en": "They speak",
+    "text": "הצד השני מדבר"
+  },
+  "fork.vr.them": {
+    "en": "Them",
+    "text": "הצד השני"
+  },
+  "fork.vr.translate": {
+    "en": "Translation",
+    "text": "תרגום"
+  },
+  "fork.vr.tune": {
+    "en": "Adjust",
+    "text": "התאמה"
+  },
+  "fork.vr.untried": {
+    "en": "Not tried",
+    "text": "טרם נוסה"
+  },
+  "fork.vr.vram": {
+    "en": "VRAM {used} / {total} GB",
+    "text": "זיכרון גרפי {used} / {total} GB"
+  },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",
     "text": "מעל הראש שלי"

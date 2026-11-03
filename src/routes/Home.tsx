@@ -1,5 +1,7 @@
 import { useVRChatStore } from '../stores/vrchatStore';
 import { getVRChatController } from '../app/vrchat';
+import { getVrOverlayController } from '../app/vrOverlay';
+import { useVrStore } from '../stores/vrStore';
 import { useEffect } from 'react';
 import MainLayout from '../components/MainLayout/MainLayout';
 import { UserProfileProvider } from '../contexts/UserProfileContext';
@@ -66,6 +68,8 @@ export function Home() {
     void useLanguagePinStore.getState().hydrate();
     // Fork: VRChat on the same computer — its settings, then the mute, the chatbox and its videos followed (Windows).
     void useVRChatStore.getState().hydrate().then(() => getVRChatController());
+    // Fork: the SteamVR overlay — its settings, then the helper asked for while it is on (Windows).
+    void useVrStore.getState().hydrate().then(() => getVrOverlayController());
     // Follow the OS's devices from here on (spec 2026-10-04): plugging,
     // unplugging, a Bluetooth reconnect, a repaired virtual device.
     const unwatchDevices = watchDevices({

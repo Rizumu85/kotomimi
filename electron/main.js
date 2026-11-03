@@ -15,6 +15,7 @@ const { setupPopoverWindowHandlers } = require('./popover-windows.js');
 const { setupTranscriptSaveHandler } = require('./transcript-save.js');
 const { setupCaptionShare } = require('./caption-share.js');
 const { setupVRChat } = require('./vrchat.js');
+const { setupVrOverlay } = require('./vr-overlay.js');
 const { createCloseHandshake } = require('./close-handshake.js');
 const { createWsHeaderRules } = require('./ws-header-rules.js');
 const { startLanServer } = require('./lan-server');
@@ -73,6 +74,17 @@ const vrchat = setupVRChat({
   dir: !app.isPackaged ? process.env.KOTOMIMI_VRCHAT_LOG_DIR : undefined,
 });
 app.on('will-quit', () => vrchat.stop());
+
+// Fork: the SteamVR overlay — captions under the line of sight and a panel on a wrist (electron/vr-overlay.js). Windows only.
+// Unpackaged: `KOTOMIMI_VR_HELPER` names another helper, `KOTOMIMI_VR_DUMP` a folder each picture is written to.
+setupVrOverlay({
+  ipcMain,
+  BrowserWindow,
+  app,
+  isTrustedSender: (sender) => sender === mainWindow?.webContents,
+  getMainWindow: () => mainWindow,
+  loadsDevServer: () => loadsDevServer(),
+});
 
 // Config utility no longer needed - using localStorage in renderer process
 

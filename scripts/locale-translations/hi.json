@@ -631,6 +631,134 @@
     "en": "What you want to say — Enter translates",
     "text": "अपनी बात लिखें, अनुवाद के लिए Enter दबाएँ"
   },
+  "fork.vr.back": {
+    "en": "Back",
+    "text": "वापस"
+  },
+  "fork.vr.behind": {
+    "en": "{s} s behind",
+    "text": "{s} सेकंड पीछे"
+  },
+  "fork.vr.dropping": {
+    "en": "dropping frames",
+    "text": "फ़्रेम छूट रहे हैं"
+  },
+  "fork.vr.fps": {
+    "en": "VR at {fps} fps",
+    "text": "VR में {fps} फ़्रेम प्रति सेकंड"
+  },
+  "fork.vr.hand": {
+    "en": "Wrist",
+    "text": "किस कलाई पर"
+  },
+  "fork.vr.hear": {
+    "en": "Recognition",
+    "text": "बोली से लिखाई"
+  },
+  "fork.vr.hide": {
+    "en": "Hide",
+    "text": "छिपाएँ"
+  },
+  "fork.vr.idle": {
+    "en": "Not listening",
+    "text": "सुनना बंद है"
+  },
+  "fork.vr.left": {
+    "en": "Left wrist",
+    "text": "बायाँ हाथ"
+  },
+  "fork.vr.linkConnected": {
+    "en": "In the headset",
+    "text": "हेडसेट में दिख रहा है"
+  },
+  "fork.vr.linkMissing": {
+    "en": "Not in this build",
+    "text": "इस संस्करण में VR घटक नहीं है"
+  },
+  "fork.vr.linkWaiting": {
+    "en": "Waiting for SteamVR",
+    "text": "SteamVR शुरू होने का इंतज़ार"
+  },
+  "fork.vr.loading": {
+    "en": "Loading…",
+    "text": "लोड हो रहा है…"
+  },
+  "fork.vr.me": {
+    "en": "Me",
+    "text": "मैं"
+  },
+  "fork.vr.mine": {
+    "en": "I speak",
+    "text": "मैं बोलूँ"
+  },
+  "fork.vr.more": {
+    "en": "More languages",
+    "text": "और भाषाएँ"
+  },
+  "fork.vr.muted": {
+    "en": "Muted in VRChat",
+    "text": "VRChat में म्यूट है"
+  },
+  "fork.vr.pause": {
+    "en": "Pause",
+    "text": "रोकें"
+  },
+  "fork.vr.perSentence": {
+    "en": "{s} s a sentence",
+    "text": "हर वाक्य में {s} सेकंड"
+  },
+  "fork.vr.resume": {
+    "en": "Start",
+    "text": "शुरू करें"
+  },
+  "fork.vr.right": {
+    "en": "Right wrist",
+    "text": "दायाँ हाथ"
+  },
+  "fork.vr.setting": {
+    "en": "Show in the headset (SteamVR)",
+    "text": "हेडसेट में दिखाएँ (SteamVR)"
+  },
+  "fork.vr.show": {
+    "en": "Show",
+    "text": "दिखाएँ"
+  },
+  "fork.vr.stopped": {
+    "en": "Recognition stopped. Turn your wrist to start again.",
+    "text": "बोली की पहचान बंद है। फिर शुरू करने के लिए कलाई घुमाएँ।"
+  },
+  "fork.vr.stoppedShort": {
+    "en": "Stopped",
+    "text": "बोली की पहचान बंद है"
+  },
+  "fork.vr.switching": {
+    "en": "Switching to {name}, back in a few seconds",
+    "text": "{name} पर बदल रहे हैं, कुछ सेकंड में फिर सुनेंगे"
+  },
+  "fork.vr.theirs": {
+    "en": "They speak",
+    "text": "सामने वाला बोले"
+  },
+  "fork.vr.them": {
+    "en": "Them",
+    "text": "सामने वाला"
+  },
+  "fork.vr.translate": {
+    "en": "Translation",
+    "text": "अनुवाद"
+  },
+  "fork.vr.tune": {
+    "en": "Adjust",
+    "text": "समायोजित करें"
+  },
+  "fork.vr.untried": {
+    "en": "Not tried",
+    "text": "अभी आज़माया नहीं"
+  },
+  "fork.vr.vram": {
+    "en": "VRAM {used} / {total} GB",
+    "text": "वीडियो मेमोरी {used} / {total} GB"
+  },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",
     "text": "अवतार के सिर के ऊपर"

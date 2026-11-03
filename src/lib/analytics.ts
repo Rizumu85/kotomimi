@@ -185,7 +185,7 @@ export interface AnalyticsEvents {
   'session_control_clicked': {
     action: 'start' | 'stop' | 'cancel';
     /** `window`: the Electron window closing, or an update installing, ended the run. */
-    method: 'button' | 'keyboard' | 'window';
+    method: 'button' | 'keyboard' | 'window' | 'vr';
   };
   'panel_viewed': {
     panel_name: 'main' | 'settings' | 'audio' | 'logs';

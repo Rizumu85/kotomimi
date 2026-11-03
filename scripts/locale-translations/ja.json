@@ -631,6 +631,134 @@
     "en": "What you want to say — Enter translates",
     "text": "伝えたいことを入力、Enter で翻訳"
   },
+  "fork.vr.back": {
+    "en": "Back",
+    "text": "戻る"
+  },
+  "fork.vr.behind": {
+    "en": "{s} s behind",
+    "text": "{s} 秒遅れ"
+  },
+  "fork.vr.dropping": {
+    "en": "dropping frames",
+    "text": "コマ落ちしています"
+  },
+  "fork.vr.fps": {
+    "en": "VR at {fps} fps",
+    "text": "VR 表示 {fps} fps"
+  },
+  "fork.vr.hand": {
+    "en": "Wrist",
+    "text": "装着する手"
+  },
+  "fork.vr.hear": {
+    "en": "Recognition",
+    "text": "文字起こし"
+  },
+  "fork.vr.hide": {
+    "en": "Hide",
+    "text": "非表示"
+  },
+  "fork.vr.idle": {
+    "en": "Not listening",
+    "text": "聞き取り停止中"
+  },
+  "fork.vr.left": {
+    "en": "Left wrist",
+    "text": "左手"
+  },
+  "fork.vr.linkConnected": {
+    "en": "In the headset",
+    "text": "ヘッドセットに表示中"
+  },
+  "fork.vr.linkMissing": {
+    "en": "Not in this build",
+    "text": "このバージョンに VR 機能は含まれていません"
+  },
+  "fork.vr.linkWaiting": {
+    "en": "Waiting for SteamVR",
+    "text": "SteamVR の起動待ち"
+  },
+  "fork.vr.loading": {
+    "en": "Loading…",
+    "text": "読み込み中…"
+  },
+  "fork.vr.me": {
+    "en": "Me",
+    "text": "自分"
+  },
+  "fork.vr.mine": {
+    "en": "I speak",
+    "text": "自分が話す言語"
+  },
+  "fork.vr.more": {
+    "en": "More languages",
+    "text": "ほかの言語"
+  },
+  "fork.vr.muted": {
+    "en": "Muted in VRChat",
+    "text": "VRChat でミュート中"
+  },
+  "fork.vr.pause": {
+    "en": "Pause",
+    "text": "一時停止"
+  },
+  "fork.vr.perSentence": {
+    "en": "{s} s a sentence",
+    "text": "1文あたり {s} 秒"
+  },
+  "fork.vr.resume": {
+    "en": "Start",
+    "text": "開始"
+  },
+  "fork.vr.right": {
+    "en": "Right wrist",
+    "text": "右手"
+  },
+  "fork.vr.setting": {
+    "en": "Show in the headset (SteamVR)",
+    "text": "ヘッドセットに表示（SteamVR）"
+  },
+  "fork.vr.show": {
+    "en": "Show",
+    "text": "表示"
+  },
+  "fork.vr.stopped": {
+    "en": "Recognition stopped. Turn your wrist to start again.",
+    "text": "音声認識が停止しました。手首を返すと再開できます。"
+  },
+  "fork.vr.stoppedShort": {
+    "en": "Stopped",
+    "text": "音声認識停止"
+  },
+  "fork.vr.switching": {
+    "en": "Switching to {name}, back in a few seconds",
+    "text": "{name} に切り替え中。数秒後に聞き取りを再開します"
+  },
+  "fork.vr.theirs": {
+    "en": "They speak",
+    "text": "相手が話す言語"
+  },
+  "fork.vr.them": {
+    "en": "Them",
+    "text": "相手"
+  },
+  "fork.vr.translate": {
+    "en": "Translation",
+    "text": "翻訳"
+  },
+  "fork.vr.tune": {
+    "en": "Adjust",
+    "text": "調整"
+  },
+  "fork.vr.untried": {
+    "en": "Not tried",
+    "text": "未試用"
+  },
+  "fork.vr.vram": {
+    "en": "VRAM {used} / {total} GB",
+    "text": "ビデオメモリ {used} / {total} GB"
+  },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",
     "text": "頭上に表示"

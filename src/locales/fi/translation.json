@@ -1934,6 +1934,40 @@
       "firewallDeclined": "Yhteydet on yhä estetty: Windowsin vahvistus puuttuu.",
       "firewall": "Ensimmäisellä käyttökerralla järjestelmän palomuuri saattaa kysyä, sallitaanko Kotomimin verkkoyhteydet. Salli yhteydet yksityisissä verkoissa."
     },
-    "jyutping": "Jyutping kantoninkiinankielisen tekstin yläpuolella"
+    "jyutping": "Jyutping kantoninkiinankielisen tekstin yläpuolella",
+    "vr": {
+      "setting": "Näytä headsetissä (SteamVR)",
+      "hand": "Ranne",
+      "left": "Vasen ranne",
+      "right": "Oikea ranne",
+      "linkWaiting": "Odotetaan SteamVR:ää",
+      "linkConnected": "Headsetissä",
+      "linkMissing": "Ei tässä versiossa",
+      "me": "Minä",
+      "them": "He",
+      "pause": "Tauko",
+      "resume": "Aloita",
+      "hide": "Piilota",
+      "show": "Näytä",
+      "tune": "Säädä",
+      "back": "Takaisin",
+      "theirs": "He puhuvat",
+      "mine": "Minä puhun",
+      "hear": "Sanelu",
+      "translate": "Käännös",
+      "more": "Lisää kieliä",
+      "switching": "Vaihdetaan kieleen {name}, jatketaan muutaman sekunnin kuluttua",
+      "loading": "Ladataan…",
+      "untried": "Ei kokeiltu",
+      "behind": "{s} s jäljessä",
+      "perSentence": "{s} s per lause",
+      "fps": "VR {fps} fps",
+      "dropping": "kuvia jää väliin",
+      "vram": "VRAM {used} / {total} GB",
+      "idle": "Ei kuuntele",
+      "stopped": "Puheentunnistus pysähtyi. Aloita uudelleen kääntämällä rannettasi.",
+      "stoppedShort": "Pysähtynyt",
+      "muted": "Mykistetty VRChatissa"
+    }
   }
 }

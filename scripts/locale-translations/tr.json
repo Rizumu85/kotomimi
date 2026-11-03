@@ -631,6 +631,134 @@
     "en": "What you want to say — Enter translates",
     "text": "Söylemek istediğiniz şey — Enter çevirir"
   },
+  "fork.vr.back": {
+    "en": "Back",
+    "text": "Geri"
+  },
+  "fork.vr.behind": {
+    "en": "{s} s behind",
+    "text": "{s} sn geride"
+  },
+  "fork.vr.dropping": {
+    "en": "dropping frames",
+    "text": "kareler düşüyor"
+  },
+  "fork.vr.fps": {
+    "en": "VR at {fps} fps",
+    "text": "VR {fps} FPS"
+  },
+  "fork.vr.hand": {
+    "en": "Wrist",
+    "text": "Bilek"
+  },
+  "fork.vr.hear": {
+    "en": "Recognition",
+    "text": "Tanıma"
+  },
+  "fork.vr.hide": {
+    "en": "Hide",
+    "text": "Gizle"
+  },
+  "fork.vr.idle": {
+    "en": "Not listening",
+    "text": "Dinlemiyor"
+  },
+  "fork.vr.left": {
+    "en": "Left wrist",
+    "text": "Sol bilek"
+  },
+  "fork.vr.linkConnected": {
+    "en": "In the headset",
+    "text": "Başlıkta"
+  },
+  "fork.vr.linkMissing": {
+    "en": "Not in this build",
+    "text": "Bu sürümde yok"
+  },
+  "fork.vr.linkWaiting": {
+    "en": "Waiting for SteamVR",
+    "text": "SteamVR bekleniyor"
+  },
+  "fork.vr.loading": {
+    "en": "Loading…",
+    "text": "Yükleniyor…"
+  },
+  "fork.vr.me": {
+    "en": "Me",
+    "text": "Ben"
+  },
+  "fork.vr.mine": {
+    "en": "I speak",
+    "text": "Ben konuşuyorum"
+  },
+  "fork.vr.more": {
+    "en": "More languages",
+    "text": "Daha fazla dil"
+  },
+  "fork.vr.muted": {
+    "en": "Muted in VRChat",
+    "text": "VRChat'te sessize alındı"
+  },
+  "fork.vr.pause": {
+    "en": "Pause",
+    "text": "Duraklat"
+  },
+  "fork.vr.perSentence": {
+    "en": "{s} s a sentence",
+    "text": "Cümle başına {s} sn"
+  },
+  "fork.vr.resume": {
+    "en": "Start",
+    "text": "Başlat"
+  },
+  "fork.vr.right": {
+    "en": "Right wrist",
+    "text": "Sağ bilek"
+  },
+  "fork.vr.setting": {
+    "en": "Show in the headset (SteamVR)",
+    "text": "Başlıkta göster (SteamVR)"
+  },
+  "fork.vr.show": {
+    "en": "Show",
+    "text": "Göster"
+  },
+  "fork.vr.stopped": {
+    "en": "Recognition stopped. Turn your wrist to start again.",
+    "text": "Tanıma durdu. Yeniden başlatmak için bileğinizi çevirin."
+  },
+  "fork.vr.stoppedShort": {
+    "en": "Stopped",
+    "text": "Durduruldu"
+  },
+  "fork.vr.switching": {
+    "en": "Switching to {name}, back in a few seconds",
+    "text": "{name} diline geçiliyor, birkaç saniye içinde devam edecek"
+  },
+  "fork.vr.theirs": {
+    "en": "They speak",
+    "text": "Karşı taraf konuşuyor"
+  },
+  "fork.vr.them": {
+    "en": "Them",
+    "text": "Karşı taraf"
+  },
+  "fork.vr.translate": {
+    "en": "Translation",
+    "text": "Çeviri"
+  },
+  "fork.vr.tune": {
+    "en": "Adjust",
+    "text": "Ayarla"
+  },
+  "fork.vr.untried": {
+    "en": "Not tried",
+    "text": "Denenmedi"
+  },
+  "fork.vr.vram": {
+    "en": "VRAM {used} / {total} GB",
+    "text": "VRAM {used} / {total} GB"
+  },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",
     "text": "Avatarımın üstünde"

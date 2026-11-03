@@ -3,7 +3,8 @@
  * the mute, the chatbox, a video. Shown only where VRChat runs: the desktop app on Windows. What each does is in the
  * title's help; the card itself is the controls. The chatbox is chosen from pictures of it — off, the translation,
  * the original over it, the translation over the original — and shown below as it will look, with the user's last
- * sentence, or one in their pair's languages before they have said any.
+ * sentence, or one in their pair's languages before they have said any. Last, the SteamVR overlay (`src/app/vrOverlay.ts`):
+ * on or off, its wrist, and whether SteamVR shows it.
  */
 import { useEffect } from 'react';
 import { Ban, Gamepad2 } from 'lucide-react';
@@ -13,6 +14,7 @@ import { vrchatOffered } from '../../app/vrchatHandle';
 import useAudioStore from '../../stores/audioStore';
 import { useProviderStore } from '../../stores/providerStore';
 import { useVRChatStore, type ChatboxShows, type OnVideo } from '../../stores/vrchatStore';
+import { useVrStore } from '../../stores/vrStore';
 import ToggleSwitch from '../Settings/shared/ToggleSwitch';
 import Tooltip from '../Tooltip/Tooltip';
 import './VRChat.scss';
@@ -52,6 +54,7 @@ export function VRChatSection() {
   // A video's words are heard apart only by Kotomimi's own pipeline (`laneOffered`): elsewhere `both` hears the people.
   const kotomimi = useProviderStore((state) => state.selected === 'localai');
   const videoChoice = onVideo === 'both' && !kotomimi ? 'quick' : onVideo;
+  const vr = useVrStore();
   // While the card is open the mute is asked, so that whether VRChat answers is shown as it is.
   useEffect(() => {
     if (!vrchatOffered()) return undefined;
@@ -121,6 +124,19 @@ export function VRChatSection() {
         ))}
       </div>
       <p className="kt-vrchat__result" role="status">{t(`fork.vrchat.${ON_VIDEO.find(([value]) => value === videoChoice)?.[1]}Result`)}</p>
+      <div className="kt-vrchat__vr">
+        <ToggleSwitch checked={vr.on} onChange={() => vr.setOn(!vr.on)} label={t('fork.vr.setting')} />
+        {vr.on && <span className={`kt-vrchat__pill${vr.link === 'connected' ? ' is-on' : ''}`} role="status">{t(vr.link === 'connected' ? 'fork.vr.linkConnected' : vr.link === 'missing' ? 'fork.vr.linkMissing' : 'fork.vr.linkWaiting')}</span>}
+      </div>
+      {vr.on && (
+        <div className="segmented-control" role="group" aria-label={t('fork.vr.hand')}>
+          {(['left', 'right'] as const).map((hand) => (
+            <button key={hand} type="button" className={`segmented-option ${vr.hand === hand ? 'active' : ''}`} aria-pressed={vr.hand === hand} onClick={() => vr.setHand(hand)}>
+              {t(`fork.vr.${hand}`)}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -631,6 +631,134 @@
     "en": "What you want to say — Enter translates",
     "text": "พิมพ์สิ่งที่อยากพูด แล้วกด Enter เพื่อแปล"
   },
+  "fork.vr.back": {
+    "en": "Back",
+    "text": "ย้อนกลับ"
+  },
+  "fork.vr.behind": {
+    "en": "{s} s behind",
+    "text": "ช้ากว่า {s} วินาที"
+  },
+  "fork.vr.dropping": {
+    "en": "dropping frames",
+    "text": "เฟรมตก"
+  },
+  "fork.vr.fps": {
+    "en": "VR at {fps} fps",
+    "text": "VR ที่ {fps} fps"
+  },
+  "fork.vr.hand": {
+    "en": "Wrist",
+    "text": "ข้อมือ"
+  },
+  "fork.vr.hear": {
+    "en": "Recognition",
+    "text": "ถอดเสียง"
+  },
+  "fork.vr.hide": {
+    "en": "Hide",
+    "text": "ซ่อน"
+  },
+  "fork.vr.idle": {
+    "en": "Not listening",
+    "text": "ไม่ได้ฟังอยู่"
+  },
+  "fork.vr.left": {
+    "en": "Left wrist",
+    "text": "ข้อมือซ้าย"
+  },
+  "fork.vr.linkConnected": {
+    "en": "In the headset",
+    "text": "แสดงในแว่นแล้ว"
+  },
+  "fork.vr.linkMissing": {
+    "en": "Not in this build",
+    "text": "เวอร์ชันนี้ไม่มีส่วนประกอบ VR"
+  },
+  "fork.vr.linkWaiting": {
+    "en": "Waiting for SteamVR",
+    "text": "กำลังรอ SteamVR"
+  },
+  "fork.vr.loading": {
+    "en": "Loading…",
+    "text": "กำลังโหลด…"
+  },
+  "fork.vr.me": {
+    "en": "Me",
+    "text": "ฉัน"
+  },
+  "fork.vr.mine": {
+    "en": "I speak",
+    "text": "ฉันพูด"
+  },
+  "fork.vr.more": {
+    "en": "More languages",
+    "text": "ภาษาเพิ่มเติม"
+  },
+  "fork.vr.muted": {
+    "en": "Muted in VRChat",
+    "text": "ปิดเสียงใน VRChat"
+  },
+  "fork.vr.pause": {
+    "en": "Pause",
+    "text": "หยุดชั่วคราว"
+  },
+  "fork.vr.perSentence": {
+    "en": "{s} s a sentence",
+    "text": "ประโยคละ {s} วินาที"
+  },
+  "fork.vr.resume": {
+    "en": "Start",
+    "text": "เริ่ม"
+  },
+  "fork.vr.right": {
+    "en": "Right wrist",
+    "text": "ข้อมือขวา"
+  },
+  "fork.vr.setting": {
+    "en": "Show in the headset (SteamVR)",
+    "text": "แสดงในแว่น (SteamVR)"
+  },
+  "fork.vr.show": {
+    "en": "Show",
+    "text": "แสดง"
+  },
+  "fork.vr.stopped": {
+    "en": "Recognition stopped. Turn your wrist to start again.",
+    "text": "หยุดถอดเสียงแล้ว พลิกข้อมือเพื่อเริ่มใหม่"
+  },
+  "fork.vr.stoppedShort": {
+    "en": "Stopped",
+    "text": "หยุดถอดเสียงแล้ว"
+  },
+  "fork.vr.switching": {
+    "en": "Switching to {name}, back in a few seconds",
+    "text": "กำลังเปลี่ยนเป็น {name} จะกลับมาฟังต่อในไม่กี่วินาที"
+  },
+  "fork.vr.theirs": {
+    "en": "They speak",
+    "text": "อีกฝ่ายพูด"
+  },
+  "fork.vr.them": {
+    "en": "Them",
+    "text": "อีกฝ่าย"
+  },
+  "fork.vr.translate": {
+    "en": "Translation",
+    "text": "แปลภาษา"
+  },
+  "fork.vr.tune": {
+    "en": "Adjust",
+    "text": "ปรับ"
+  },
+  "fork.vr.untried": {
+    "en": "Not tried",
+    "text": "ยังไม่ลอง"
+  },
+  "fork.vr.vram": {
+    "en": "VRAM {used} / {total} GB",
+    "text": "VRAM {used} / {total} GB"
+  },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",
     "text": "แสดงเหนือหัว"

@@ -1934,6 +1934,40 @@
       "firewallDeclined": "Dostęp nadal zablokowany: nie potwierdzono zgody w Windows.",
       "firewall": "Przy pierwszym uruchomieniu zapora systemowa może zapytać o dostęp Kotomimi do sieci. Zezwól na komunikację w sieciach prywatnych."
     },
-    "jyutping": "Jyutping nad tekstem kantońskim"
+    "jyutping": "Jyutping nad tekstem kantońskim",
+    "vr": {
+      "setting": "Pokaż w goglach (SteamVR)",
+      "hand": "Nadgarstek",
+      "left": "Lewy nadgarstek",
+      "right": "Prawy nadgarstek",
+      "linkWaiting": "Oczekiwanie na SteamVR",
+      "linkConnected": "W goglach",
+      "linkMissing": "Brak w tej wersji",
+      "me": "Ja",
+      "them": "Druga osoba",
+      "pause": "Wstrzymaj",
+      "resume": "Uruchom",
+      "hide": "Ukryj",
+      "show": "Pokaż",
+      "tune": "Dostosuj",
+      "back": "Wstecz",
+      "theirs": "Mówią",
+      "mine": "Mówię",
+      "hear": "Rozpoznawanie",
+      "translate": "Tłumaczenie",
+      "more": "Więcej języków",
+      "switching": "Przełączanie na {name}, wrócimy za kilka sekund",
+      "loading": "Ładowanie…",
+      "untried": "Nieprzetestowane",
+      "behind": "{s} s opóźnienia",
+      "perSentence": "{s} s na zdanie",
+      "fps": "VR: {fps} kl./s",
+      "dropping": "gubienie klatek",
+      "vram": "VRAM {used} / {total} GB",
+      "idle": "Nie nasłuchuje",
+      "stopped": "Rozpoznawanie zatrzymane. Obróć nadgarstek, aby uruchomić ponownie.",
+      "stoppedShort": "Zatrzymano",
+      "muted": "Wyciszono w VRChat"
+    }
   }
 }

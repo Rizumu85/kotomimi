@@ -635,6 +635,134 @@
     "en": "What you want to say — Enter translates",
     "text": "Was du sagen möchtest. Enter zum Übersetzen"
   },
+  "fork.vr.back": {
+    "en": "Back",
+    "text": "Zurück"
+  },
+  "fork.vr.behind": {
+    "en": "{s} s behind",
+    "text": "{s} s Verzögerung"
+  },
+  "fork.vr.dropping": {
+    "en": "dropping frames",
+    "text": "Bildaussetzer"
+  },
+  "fork.vr.fps": {
+    "en": "VR at {fps} fps",
+    "text": "VR mit {fps} fps"
+  },
+  "fork.vr.hand": {
+    "en": "Wrist",
+    "text": "Armband tragen"
+  },
+  "fork.vr.hear": {
+    "en": "Recognition",
+    "text": "Transkription"
+  },
+  "fork.vr.hide": {
+    "en": "Hide",
+    "text": "Ausblenden"
+  },
+  "fork.vr.idle": {
+    "en": "Not listening",
+    "text": "Hört nicht zu"
+  },
+  "fork.vr.left": {
+    "en": "Left wrist",
+    "text": "Links"
+  },
+  "fork.vr.linkConnected": {
+    "en": "In the headset",
+    "text": "Im Headset angezeigt"
+  },
+  "fork.vr.linkMissing": {
+    "en": "Not in this build",
+    "text": "VR-Komponente in dieser Version nicht enthalten"
+  },
+  "fork.vr.linkWaiting": {
+    "en": "Waiting for SteamVR",
+    "text": "Warte auf SteamVR-Start"
+  },
+  "fork.vr.loading": {
+    "en": "Loading…",
+    "text": "Wird geladen…"
+  },
+  "fork.vr.me": {
+    "en": "Me",
+    "text": "Ich"
+  },
+  "fork.vr.mine": {
+    "en": "I speak",
+    "text": "Ich spreche"
+  },
+  "fork.vr.more": {
+    "en": "More languages",
+    "text": "Weitere Sprachen"
+  },
+  "fork.vr.muted": {
+    "en": "Muted in VRChat",
+    "text": "In VRChat stummgeschaltet"
+  },
+  "fork.vr.pause": {
+    "en": "Pause",
+    "text": "Pausieren"
+  },
+  "fork.vr.perSentence": {
+    "en": "{s} s a sentence",
+    "text": "{s} s pro Satz"
+  },
+  "fork.vr.resume": {
+    "en": "Start",
+    "text": "Starten"
+  },
+  "fork.vr.right": {
+    "en": "Right wrist",
+    "text": "Rechts"
+  },
+  "fork.vr.setting": {
+    "en": "Show in the headset (SteamVR)",
+    "text": "Im Headset anzeigen (SteamVR)"
+  },
+  "fork.vr.show": {
+    "en": "Show",
+    "text": "Anzeigen"
+  },
+  "fork.vr.stopped": {
+    "en": "Recognition stopped. Turn your wrist to start again.",
+    "text": "Spracherkennung gestoppt. Drehe dein Handgelenk, um sie erneut zu starten."
+  },
+  "fork.vr.stoppedShort": {
+    "en": "Stopped",
+    "text": "Spracherkennung gestoppt"
+  },
+  "fork.vr.switching": {
+    "en": "Switching to {name}, back in a few seconds",
+    "text": "Wechsel zu {name}, in wenigen Sekunden geht es weiter"
+  },
+  "fork.vr.theirs": {
+    "en": "They speak",
+    "text": "Gegenüber spricht"
+  },
+  "fork.vr.them": {
+    "en": "Them",
+    "text": "Gegenüber"
+  },
+  "fork.vr.translate": {
+    "en": "Translation",
+    "text": "Übersetzung"
+  },
+  "fork.vr.tune": {
+    "en": "Adjust",
+    "text": "Anpassen"
+  },
+  "fork.vr.untried": {
+    "en": "Not tried",
+    "text": "Noch nicht getestet"
+  },
+  "fork.vr.vram": {
+    "en": "VRAM {used} / {total} GB",
+    "text": "Grafikspeicher {used} / {total} GB"
+  },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",
     "text": "Über meinem Avatar anzeigen"

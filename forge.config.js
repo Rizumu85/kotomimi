@@ -31,7 +31,8 @@ function pruneElectronLocales(buildPath, platform) {
 module.exports = {
   packagerConfig: {
     asar: true,
-    extraResource: ['assets', 'resources'],
+    // Fork: the SteamVR overlay's helper, where it was built (`cmake --build vr-overlay/build --config Release`).
+    extraResource: ['assets', 'resources', ...(process.platform === 'win32' && fs.existsSync(path.join(__dirname, 'vr-overlay', 'kotomimi-vr')) ? ['vr-overlay/kotomimi-vr'] : [])],
     icon: process.platform === 'win32' ? 'assets/icon.ico' : 'assets/icon',
     // Fork: Kotomimi's own identity. The executable's company is what Squirrel names the Start-menu folder after.
     appId: 'io.github.rizumu85.kotomimi',

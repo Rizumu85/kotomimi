@@ -1934,6 +1934,40 @@
       "firewallDeclined": "Toujours bloqué : l’autorisation n’a pas été confirmée dans Windows.",
       "firewall": "À la première activation, le pare-feu du système peut demander si Kotomimi peut accéder au réseau. Autorisez-le sur les réseaux privés."
     },
-    "jyutping": "Jyutping au-dessus du cantonais"
+    "jyutping": "Jyutping au-dessus du cantonais",
+    "vr": {
+      "setting": "Afficher dans le casque (SteamVR)",
+      "hand": "Poignet",
+      "left": "Gauche",
+      "right": "Droit",
+      "linkWaiting": "En attente du démarrage de SteamVR",
+      "linkConnected": "Affiché dans le casque",
+      "linkMissing": "Composant VR absent de cette version",
+      "me": "Moi",
+      "them": "L’autre",
+      "pause": "Pause",
+      "resume": "Démarrer",
+      "hide": "Masquer",
+      "show": "Afficher",
+      "tune": "Ajuster",
+      "back": "Retour",
+      "theirs": "L’autre parle",
+      "mine": "Je parle",
+      "hear": "Transcription",
+      "translate": "Traduction",
+      "more": "Plus de langues",
+      "switching": "Passage à {name}, reprise de l’écoute dans quelques secondes",
+      "loading": "Chargement…",
+      "untried": "Non testé",
+      "behind": "{s} s de retard",
+      "perSentence": "{s} s par phrase",
+      "fps": "VR à {fps} images/s",
+      "dropping": "perte d’images",
+      "vram": "Mémoire vidéo {used} / {total} Go",
+      "idle": "Écoute inactive",
+      "stopped": "Transcription arrêtée. Tournez le poignet pour la relancer.",
+      "stoppedShort": "Transcription arrêtée",
+      "muted": "Micro coupé dans VRChat"
+    }
   }
 }

@@ -1934,6 +1934,40 @@
       "firewallDeclined": "Fortfarande blockerat: ingen bekräftelse gavs i Windows.",
       "firewall": "Första gången kan systemets brandvägg fråga om Kotomimi ska få åtkomst till nätverket. Tillåt kommunikation i privata nätverk."
     },
-    "jyutping": "Jyutping ovanför kantonesisk text"
+    "jyutping": "Jyutping ovanför kantonesisk text",
+    "vr": {
+      "setting": "Visa i headsetet (SteamVR)",
+      "hand": "Handled",
+      "left": "Vänster handled",
+      "right": "Höger handled",
+      "linkWaiting": "Väntar på SteamVR",
+      "linkConnected": "I headsetet",
+      "linkMissing": "Finns inte i den här versionen",
+      "me": "Jag",
+      "them": "De",
+      "pause": "Pausa",
+      "resume": "Starta",
+      "hide": "Dölj",
+      "show": "Visa",
+      "tune": "Justera",
+      "back": "Tillbaka",
+      "theirs": "De talar",
+      "mine": "Jag talar",
+      "hear": "Taligenkänning",
+      "translate": "Översättning",
+      "more": "Fler språk",
+      "switching": "Byter till {name}, tillbaka om några sekunder",
+      "loading": "Laddar…",
+      "untried": "Inte testad",
+      "behind": "{s} s efter",
+      "perSentence": "{s} s per mening",
+      "fps": "VR i {fps} fps",
+      "dropping": "tappar bildrutor",
+      "vram": "VRAM {used} / {total} GB",
+      "idle": "Lyssnar inte",
+      "stopped": "Taligenkänningen stoppades. Vrid handleden för att starta igen.",
+      "stoppedShort": "Stoppad",
+      "muted": "Ljudet är avstängt i VRChat"
+    }
   }
 }

@@ -627,6 +627,134 @@
     "en": "What you want to say — Enter translates",
     "text": "Kirjoita, mitä haluat sanoa. Enter kääntää"
   },
+  "fork.vr.back": {
+    "en": "Back",
+    "text": "Takaisin"
+  },
+  "fork.vr.behind": {
+    "en": "{s} s behind",
+    "text": "{s} s jäljessä"
+  },
+  "fork.vr.dropping": {
+    "en": "dropping frames",
+    "text": "kuvia jää väliin"
+  },
+  "fork.vr.fps": {
+    "en": "VR at {fps} fps",
+    "text": "VR {fps} fps"
+  },
+  "fork.vr.hand": {
+    "en": "Wrist",
+    "text": "Ranne"
+  },
+  "fork.vr.hear": {
+    "en": "Recognition",
+    "text": "Sanelu"
+  },
+  "fork.vr.hide": {
+    "en": "Hide",
+    "text": "Piilota"
+  },
+  "fork.vr.idle": {
+    "en": "Not listening",
+    "text": "Ei kuuntele"
+  },
+  "fork.vr.left": {
+    "en": "Left wrist",
+    "text": "Vasen ranne"
+  },
+  "fork.vr.linkConnected": {
+    "en": "In the headset",
+    "text": "Headsetissä"
+  },
+  "fork.vr.linkMissing": {
+    "en": "Not in this build",
+    "text": "Ei tässä versiossa"
+  },
+  "fork.vr.linkWaiting": {
+    "en": "Waiting for SteamVR",
+    "text": "Odotetaan SteamVR:ää"
+  },
+  "fork.vr.loading": {
+    "en": "Loading…",
+    "text": "Ladataan…"
+  },
+  "fork.vr.me": {
+    "en": "Me",
+    "text": "Minä"
+  },
+  "fork.vr.mine": {
+    "en": "I speak",
+    "text": "Minä puhun"
+  },
+  "fork.vr.more": {
+    "en": "More languages",
+    "text": "Lisää kieliä"
+  },
+  "fork.vr.muted": {
+    "en": "Muted in VRChat",
+    "text": "Mykistetty VRChatissa"
+  },
+  "fork.vr.pause": {
+    "en": "Pause",
+    "text": "Tauko"
+  },
+  "fork.vr.perSentence": {
+    "en": "{s} s a sentence",
+    "text": "{s} s per lause"
+  },
+  "fork.vr.resume": {
+    "en": "Start",
+    "text": "Aloita"
+  },
+  "fork.vr.right": {
+    "en": "Right wrist",
+    "text": "Oikea ranne"
+  },
+  "fork.vr.setting": {
+    "en": "Show in the headset (SteamVR)",
+    "text": "Näytä headsetissä (SteamVR)"
+  },
+  "fork.vr.show": {
+    "en": "Show",
+    "text": "Näytä"
+  },
+  "fork.vr.stopped": {
+    "en": "Recognition stopped. Turn your wrist to start again.",
+    "text": "Puheentunnistus pysähtyi. Aloita uudelleen kääntämällä rannettasi."
+  },
+  "fork.vr.stoppedShort": {
+    "en": "Stopped",
+    "text": "Pysähtynyt"
+  },
+  "fork.vr.switching": {
+    "en": "Switching to {name}, back in a few seconds",
+    "text": "Vaihdetaan kieleen {name}, jatketaan muutaman sekunnin kuluttua"
+  },
+  "fork.vr.theirs": {
+    "en": "They speak",
+    "text": "He puhuvat"
+  },
+  "fork.vr.them": {
+    "en": "Them",
+    "text": "He"
+  },
+  "fork.vr.translate": {
+    "en": "Translation",
+    "text": "Käännös"
+  },
+  "fork.vr.tune": {
+    "en": "Adjust",
+    "text": "Säädä"
+  },
+  "fork.vr.untried": {
+    "en": "Not tried",
+    "text": "Ei kokeiltu"
+  },
+  "fork.vr.vram": {
+    "en": "VRAM {used} / {total} GB",
+    "text": "VRAM {used} / {total} GB"
+  },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",
     "text": "Avatarini yläpuolella"

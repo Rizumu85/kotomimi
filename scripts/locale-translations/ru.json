@@ -627,6 +627,134 @@
     "en": "What you want to say — Enter translates",
     "text": "Введите, что хотите сказать. Enter — перевести"
   },
+  "fork.vr.back": {
+    "en": "Back",
+    "text": "Назад"
+  },
+  "fork.vr.behind": {
+    "en": "{s} s behind",
+    "text": "Отставание: {s} с"
+  },
+  "fork.vr.dropping": {
+    "en": "dropping frames",
+    "text": "Пропуск кадров"
+  },
+  "fork.vr.fps": {
+    "en": "VR at {fps} fps",
+    "text": "VR: {fps} кадр/с"
+  },
+  "fork.vr.hand": {
+    "en": "Wrist",
+    "text": "Запястье"
+  },
+  "fork.vr.hear": {
+    "en": "Recognition",
+    "text": "Распознавание"
+  },
+  "fork.vr.hide": {
+    "en": "Hide",
+    "text": "Скрыть"
+  },
+  "fork.vr.idle": {
+    "en": "Not listening",
+    "text": "Не слушает"
+  },
+  "fork.vr.left": {
+    "en": "Left wrist",
+    "text": "Левое запястье"
+  },
+  "fork.vr.linkConnected": {
+    "en": "In the headset",
+    "text": "В шлеме"
+  },
+  "fork.vr.linkMissing": {
+    "en": "Not in this build",
+    "text": "В этой сборке нет VR-компонента"
+  },
+  "fork.vr.linkWaiting": {
+    "en": "Waiting for SteamVR",
+    "text": "Ожидание SteamVR"
+  },
+  "fork.vr.loading": {
+    "en": "Loading…",
+    "text": "Загрузка…"
+  },
+  "fork.vr.me": {
+    "en": "Me",
+    "text": "Я"
+  },
+  "fork.vr.mine": {
+    "en": "I speak",
+    "text": "Говорю я"
+  },
+  "fork.vr.more": {
+    "en": "More languages",
+    "text": "Другие языки"
+  },
+  "fork.vr.muted": {
+    "en": "Muted in VRChat",
+    "text": "Звук отключён в VRChat"
+  },
+  "fork.vr.pause": {
+    "en": "Pause",
+    "text": "Пауза"
+  },
+  "fork.vr.perSentence": {
+    "en": "{s} s a sentence",
+    "text": "{s} с на предложение"
+  },
+  "fork.vr.resume": {
+    "en": "Start",
+    "text": "Начать"
+  },
+  "fork.vr.right": {
+    "en": "Right wrist",
+    "text": "Правое запястье"
+  },
+  "fork.vr.setting": {
+    "en": "Show in the headset (SteamVR)",
+    "text": "Показывать в шлеме (SteamVR)"
+  },
+  "fork.vr.show": {
+    "en": "Show",
+    "text": "Показать"
+  },
+  "fork.vr.stopped": {
+    "en": "Recognition stopped. Turn your wrist to start again.",
+    "text": "Распознавание остановлено. Поверните запястье, чтобы начать снова."
+  },
+  "fork.vr.stoppedShort": {
+    "en": "Stopped",
+    "text": "Распознавание остановлено"
+  },
+  "fork.vr.switching": {
+    "en": "Switching to {name}, back in a few seconds",
+    "text": "Переключение на {name}, продолжим через несколько секунд"
+  },
+  "fork.vr.theirs": {
+    "en": "They speak",
+    "text": "Говорит собеседник"
+  },
+  "fork.vr.them": {
+    "en": "Them",
+    "text": "Собеседник"
+  },
+  "fork.vr.translate": {
+    "en": "Translation",
+    "text": "Перевод"
+  },
+  "fork.vr.tune": {
+    "en": "Adjust",
+    "text": "Настроить"
+  },
+  "fork.vr.untried": {
+    "en": "Not tried",
+    "text": "Не проверено"
+  },
+  "fork.vr.vram": {
+    "en": "VRAM {used} / {total} GB",
+    "text": "Видеопамять: {used} / {total} ГБ"
+  },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",
     "text": "Над аватаром"

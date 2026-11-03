@@ -366,3 +366,11 @@ span.kt-video-pill__btn {
   pointer-events: none;
   z-index: 2;
 }
+
+// Fork: the SteamVR overlay's switch, its state beside it.
+.kt-vrchat__vr {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}

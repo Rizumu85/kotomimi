@@ -1,0 +1,105 @@
+// src/vr/vr.scss — fork: the headset pages (main.tsx). Dark always; sizes are CSS pixels, drawn at twice that.
+@use '../styles/tokens' as tk;
+@use '../components/Settings/shared/variables' as *;
+
+html, body { margin: 0; background: transparent; overflow: hidden; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; color: $text-primary; }
+* { box-sizing: border-box; }
+
+.vr { display: inline-block; }
+.vr--strip { width: 800px; padding-top: 4px; }
+.vr--wrist { width: 350px; }
+
+// ── The strip ──
+.strip {
+  padding: 14px 22px 16px;
+  border-radius: 14px;
+  background: color-mix(in srgb, $bg-base 88%, transparent);
+  text-align: center;
+}
+.strip__source { font-size: 19px; color: $text-source; line-height: 1.35; margin-bottom: 4px; }
+.strip__answer { font-size: 32px; font-weight: $weight-medium; line-height: 1.3; }
+.strip--quiet .strip__answer { font-size: 24px; color: $text-secondary; }
+.strip--error .strip__answer::before {
+  content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+  background: tk.$color-error; margin-right: 10px; vertical-align: 3px;
+}
+
+// ── The wrist ──
+.wrist {
+  position: relative; width: 350px; border-radius: 18px; background: $bg-base;
+  border: 1px solid $border-default; padding: 14px; display: flex; flex-direction: column; gap: 12px;
+}
+.wrist button { font: inherit; color: inherit; cursor: pointer; }
+
+.tip {
+  position: fixed; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%;
+  border: 2px solid tk.$color-primary; background: color-mix(in srgb, tk.$color-primary 25%, transparent); pointer-events: none;
+}
+
+.status { display: flex; align-items: center; gap: 14px; font-size: 15px; color: $text-secondary; }
+.heard { display: inline-flex; align-items: center; gap: 7px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: $text-dim; }
+.dot--me.is-on { background: tk.$color-primary; }
+.dot--them.is-on { background: tk.$color-participant; }
+.heard.is-muted span:last-child { text-decoration: line-through; color: $text-muted; }
+.status__right { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; color: $text-muted; font-size: 14px; }
+.status__right.is-paused { color: tk.$color-warning; }
+.status__right.is-error { color: tk.$color-error; }
+
+.recent { display: flex; flex-direction: column; gap: 8px; min-height: 132px; }
+.line { font-size: 17px; line-height: 1.35; overflow-wrap: anywhere; }
+.line small { display: block; font-size: 13px; color: $text-source; }
+.line--mine { color: $text-muted; font-size: 15px; }
+.line__who { color: tk.$color-primary; }
+
+.lang { display: flex; flex-direction: column; gap: 8px; }
+.lang__head { font-size: 14px; color: $text-muted; }
+.lang__head b { color: $text-primary; font-weight: $weight-semibold; font-size: 16px; margin-left: 6px; }
+.chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.chip {
+  height: 52px; border-radius: 12px; border: 1px solid $border-default; background: $bg-control;
+  font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 4px;
+}
+.chip:hover { background: $bg-hover; }
+.chip.is-on { background: tk.$color-primary-fill; border-color: tk.$color-primary-fill; color: tk.$color-on-primary; }
+.chip.is-open { border-color: tk.$color-primary; color: tk.$color-primary; background: transparent; }
+.more { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.more .chip { height: 48px; font-size: 16px; }
+
+.actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.act {
+  height: 48px; border-radius: 12px; border: 0; background: $bg-surface; color: $text-secondary; font-size: 16px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+}
+.act:hover { background: $bg-hover; }
+
+// ── The second page ──
+.tune__top { display: flex; align-items: center; gap: 10px; }
+.tune__back {
+  height: 40px; padding: 0 12px 0 8px; border-radius: 10px; border: 0; background: $bg-surface; color: $text-secondary;
+  font-size: 15px; display: inline-flex; align-items: center; gap: 4px;
+}
+.tune__title { font-size: 16px; font-weight: $weight-semibold; }
+.group { display: flex; flex-direction: column; gap: 6px; }
+.group__head { font-size: 14px; color: $text-muted; }
+.chips--mine { grid-template-columns: repeat(4, 1fr); }
+.chips--mine .chip { font-size: 15px; }
+.rows { display: flex; flex-direction: column; gap: 6px; }
+.row {
+  min-height: 52px; padding: 0 14px; border-radius: 12px; border: 1px solid $border-default; background: $bg-control;
+  font-size: 16px; display: flex; align-items: center; gap: 10px; text-align: left;
+}
+.row:hover { background: $bg-hover; }
+.row.is-on { background: tk.$color-primary-fill; border-color: tk.$color-primary-fill; color: tk.$color-on-primary; }
+.row__speed { margin-left: auto; font-size: 14px; color: $text-tertiary; white-space: nowrap; }
+.row.is-on .row__speed { color: color-mix(in srgb, tk.$color-on-primary 85%, transparent); }
+.row__speed.is-slow { color: tk.$color-warning; }
+.row.is-loading { border-color: tk.$color-primary; background: transparent; }
+.row.is-loading .row__speed { color: tk.$color-primary; }
+.perf {
+  display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; background: $bg-surface;
+  font-size: 14px; color: $text-secondary;
+}
+.perf.is-warn { color: tk.$color-warning; }
+.perf__sep { color: $text-dim; }

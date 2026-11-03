@@ -190,7 +190,9 @@ export default defineConfig(({ command, mode }) => {
             // Fork: the icon in the notification area
             'tray': 'electron/tray.js',
             // Fork: the Mac's own speech recognition, through the helper the app ships
-            'apple-speech': 'electron/apple-speech.js'
+            'apple-speech': 'electron/apple-speech.js',
+            // Fork: the SteamVR overlay, through the helper in vr-overlay/
+            'vr-overlay': 'electron/vr-overlay.js'
           },
           onstart(args) {
             // SOKUJI_DEV_NO_ELECTRON=1 serves the renderer alone, for headless
@@ -310,6 +312,8 @@ export default defineConfig(({ command, mode }) => {
         input: {
           main: fileURLToPath(new URL('./index.html', import.meta.url)),
           viewer: fileURLToPath(new URL('./viewer.html', import.meta.url)),
+          // Fork: the SteamVR overlay's two pages (electron/vr-overlay.js)
+          vr: fileURLToPath(new URL('./vr.html', import.meta.url)),
         },
       },
     },

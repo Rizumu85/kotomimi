@@ -631,6 +631,134 @@
     "en": "What you want to say — Enter translates",
     "text": "하고 싶은 말을 입력하고 Enter로 번역"
   },
+  "fork.vr.back": {
+    "en": "Back",
+    "text": "뒤로"
+  },
+  "fork.vr.behind": {
+    "en": "{s} s behind",
+    "text": "{s}초 지연"
+  },
+  "fork.vr.dropping": {
+    "en": "dropping frames",
+    "text": "프레임 저하"
+  },
+  "fork.vr.fps": {
+    "en": "VR at {fps} fps",
+    "text": "VR 화면 {fps}프레임"
+  },
+  "fork.vr.hand": {
+    "en": "Wrist",
+    "text": "착용할 손목"
+  },
+  "fork.vr.hear": {
+    "en": "Recognition",
+    "text": "받아쓰기"
+  },
+  "fork.vr.hide": {
+    "en": "Hide",
+    "text": "숨기기"
+  },
+  "fork.vr.idle": {
+    "en": "Not listening",
+    "text": "듣고 있지 않음"
+  },
+  "fork.vr.left": {
+    "en": "Left wrist",
+    "text": "왼쪽"
+  },
+  "fork.vr.linkConnected": {
+    "en": "In the headset",
+    "text": "헤드셋에 표시 중"
+  },
+  "fork.vr.linkMissing": {
+    "en": "Not in this build",
+    "text": "이 버전에는 VR 구성 요소가 없어요"
+  },
+  "fork.vr.linkWaiting": {
+    "en": "Waiting for SteamVR",
+    "text": "SteamVR 시작 대기 중"
+  },
+  "fork.vr.loading": {
+    "en": "Loading…",
+    "text": "불러오는 중…"
+  },
+  "fork.vr.me": {
+    "en": "Me",
+    "text": "나"
+  },
+  "fork.vr.mine": {
+    "en": "I speak",
+    "text": "내 언어"
+  },
+  "fork.vr.more": {
+    "en": "More languages",
+    "text": "더 많은 언어"
+  },
+  "fork.vr.muted": {
+    "en": "Muted in VRChat",
+    "text": "VRChat에서 음소거됨"
+  },
+  "fork.vr.pause": {
+    "en": "Pause",
+    "text": "일시 정지"
+  },
+  "fork.vr.perSentence": {
+    "en": "{s} s a sentence",
+    "text": "문장당 {s}초"
+  },
+  "fork.vr.resume": {
+    "en": "Start",
+    "text": "시작"
+  },
+  "fork.vr.right": {
+    "en": "Right wrist",
+    "text": "오른쪽"
+  },
+  "fork.vr.setting": {
+    "en": "Show in the headset (SteamVR)",
+    "text": "헤드셋에 표시 (SteamVR)"
+  },
+  "fork.vr.show": {
+    "en": "Show",
+    "text": "표시"
+  },
+  "fork.vr.stopped": {
+    "en": "Recognition stopped. Turn your wrist to start again.",
+    "text": "음성 인식이 멈췄어요. 손목을 돌려 화면을 보면 다시 시작할 수 있어요."
+  },
+  "fork.vr.stoppedShort": {
+    "en": "Stopped",
+    "text": "음성 인식 중지됨"
+  },
+  "fork.vr.switching": {
+    "en": "Switching to {name}, back in a few seconds",
+    "text": "{name}(으)로 전환 중이에요. 몇 초 후 다시 들을게요"
+  },
+  "fork.vr.theirs": {
+    "en": "They speak",
+    "text": "상대방 언어"
+  },
+  "fork.vr.them": {
+    "en": "Them",
+    "text": "상대방"
+  },
+  "fork.vr.translate": {
+    "en": "Translation",
+    "text": "번역"
+  },
+  "fork.vr.tune": {
+    "en": "Adjust",
+    "text": "조정"
+  },
+  "fork.vr.untried": {
+    "en": "Not tried",
+    "text": "아직 사용 안 함"
+  },
+  "fork.vr.vram": {
+    "en": "VRAM {used} / {total} GB",
+    "text": "비디오 메모리 {used} / {total} GB"
+  },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",
     "text": "머리 위에 표시"

@@ -1934,6 +1934,40 @@
       "firewallDeclined": "Nog steeds geblokkeerd: er is geen toestemming gegeven in Windows.",
       "firewall": "De eerste keer kan de firewall vragen of Kotomimi toegang tot het netwerk mag krijgen. Sta dit toe voor privénetwerken."
     },
-    "jyutping": "Jyutping boven Kantonese tekst"
+    "jyutping": "Jyutping boven Kantonese tekst",
+    "vr": {
+      "setting": "In de headset tonen (SteamVR)",
+      "hand": "Pols",
+      "left": "Linkerpols",
+      "right": "Rechterpols",
+      "linkWaiting": "Wachten tot SteamVR start",
+      "linkConnected": "In de headset",
+      "linkMissing": "Niet in deze versie",
+      "me": "Ik",
+      "them": "De ander",
+      "pause": "Pauzeren",
+      "resume": "Starten",
+      "hide": "Verbergen",
+      "show": "Tonen",
+      "tune": "Aanpassen",
+      "back": "Terug",
+      "theirs": "De ander praat",
+      "mine": "Ik praat",
+      "hear": "Spraakherkenning",
+      "translate": "Vertaling",
+      "more": "Meer talen",
+      "switching": "Overschakelen naar {name}, over een paar seconden gaan we verder",
+      "loading": "Laden…",
+      "untried": "Niet geprobeerd",
+      "behind": "{s} s achter",
+      "perSentence": "{s} s per zin",
+      "fps": "VR op {fps} fps",
+      "dropping": "Frames vallen weg",
+      "vram": "VRAM {used} / {total} GB",
+      "idle": "Luistert niet",
+      "stopped": "Spraakherkenning gestopt. Draai je pols om opnieuw te starten.",
+      "stoppedShort": "Gestopt",
+      "muted": "Gedempt in VRChat"
+    }
   }
 }
