@@ -154,7 +154,7 @@ struct ModelsBox: View {
             case .failed(let why):
                 VStack(alignment: .trailing, spacing: 4) {
                     Button("重试") { text.fetch(model) }.buttonStyle(.glass).controlSize(.small)
-                    Text(why).font(.system(size: 12)).foregroundStyle(Palette.inkRed).lineLimit(2).multilineTextAlignment(.trailing)
+                    Text(why).font(.system(size: 12)).foregroundStyle(Palette.inkRed).lineLimit(6).multilineTextAlignment(.trailing)
                 }
             }
         }

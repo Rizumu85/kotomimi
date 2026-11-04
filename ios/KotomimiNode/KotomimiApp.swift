@@ -58,8 +58,9 @@ struct KotomimiApp: App {
                     default: break
                     }
                 }
-                .onChange(of: lending.phase) { _, phase in
-                    UIApplication.shared.isIdleTimerDisabled = phase != .off
+                // Lent, or fetching a model: the screen stays on.
+                .onChange(of: lending.phase != .off || text.downloading, initial: true) { _, awake in
+                    UIApplication.shared.isIdleTimerDisabled = awake
                 }
             }
         }

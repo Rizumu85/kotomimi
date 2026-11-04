@@ -20,11 +20,14 @@ nonisolated struct TextModel: Identifiable, Sendable, Equatable {
     /// What its engine keeps for itself once loaded, in megabytes, roughly: what is held against the memory free.
     let holdsMb: Int
 
+    /// Where it can be had, best first for where this device is: in mainland China (by its time zone) ModelScope
+    /// and the mirror before Hugging Face, which is not reached there without a proxy; elsewhere Hugging Face first.
     var sources: [URL] {
-        var all = [URL(string: "https://huggingface.co/\(repository)/resolve/\(revision)/\(file)")!,
-                   URL(string: "https://hf-mirror.com/\(repository)/resolve/\(revision)/\(file)")!]
-        if let modelScope { all.insert(URL(string: "https://modelscope.cn/models/\(modelScope)/resolve/master/\(file)")!, at: 1) }
-        return all
+        let huggingFace = URL(string: "https://huggingface.co/\(repository)/resolve/\(revision)/\(file)")!
+        let mirror = URL(string: "https://hf-mirror.com/\(repository)/resolve/\(revision)/\(file)")!
+        let scope = modelScope.map { URL(string: "https://modelscope.cn/models/\($0)/resolve/master/\(file)")! }
+        let china = ["Asia/Shanghai", "Asia/Chongqing", "Asia/Harbin", "Asia/Urumqi", "Asia/Kashgar"].contains(TimeZone.current.identifier)
+        return china ? [scope, mirror, huggingFace].compactMap { $0 } : [huggingFace, scope, mirror].compactMap { $0 }
     }
 
     static let all: [TextModel] = [
@@ -41,13 +44,26 @@ nonisolated struct TextModel: Identifiable, Sendable, Equatable {
 }
 
 /// Where the text models are kept, which of them are here, and their downloads.
+///
+/// A download is the system's (`Downloader`, a background session): a model is a gigabyte or three, which takes
+/// minutes, and an app's own download stops when the screen locks or the app leaves the front — on the first iPad,
+/// every source of the first model timed out that way (the user, 2026-11-04). The system's goes on meanwhile, and
+/// the app hears how it went when it is back.
 @Observable
 final class TextStore {
     enum State: Equatable { case missing, fetching(Double, String), checking, ready, failed(String) }
 
     private(set) var states: [String: State] = [:]
     let folder: URL
-    private var downloads: [String: Task<Void, Never>] = [:]
+    private let downloader = Downloader.shared
+    /// Per model, why each source it was asked of did not give it, for when none does.
+    private var why: [String: [String]] = [:]
+    /// What a source that broke off had given, to go on from: per model, the source and the system's resume data.
+    private var resume: [String: (source: Int, data: Data)] = [:]
+    /// Downloads the person stopped: their end is not a failure.
+    private var stopped: Set<String> = []
+
+    var downloading: Bool { states.values.contains { if case .fetching = $0 { true } else { $0 == .checking } } }
 
     init() {
         let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -58,7 +74,23 @@ final class TextStore {
         values.isExcludedFromBackup = true
         var marked = folder
         try? marked.setResourceValues(values)
-        for model in TextModel.all { states[model.id] = FileManager.default.fileExists(atPath: path(model).path) ? .ready : .missing }
+        for model in TextModel.all {
+            states[model.id] = FileManager.default.fileExists(atPath: path(model).path) ? .ready : .missing
+            // What the app's own downloads left before the system's took over.
+            try? FileManager.default.removeItem(at: path(model).appendingPathExtension("part"))
+        }
+        downloader.folder = folder
+        downloader.onEvent = { [weak self] event in Task { @MainActor in self?.heard(event) } }
+        // Downloads the system went on with while the app was not running.
+        downloader.running { [weak self] going in
+            Task { @MainActor in
+                guard let self else { return }
+                for (id, source) in going {
+                    guard let model = TextModel.all.first(where: { $0.id == id }), self.states[id] != .ready else { continue }
+                    self.states[id] = .fetching(0, model.sources[safe: source]?.host() ?? "")
+                }
+            }
+        }
     }
 
     #if DEBUG
@@ -70,92 +102,173 @@ final class TextStore {
     var ready: [TextModel] { TextModel.all.filter { states[$0.id] == .ready } }
 
     func delete(_ model: TextModel) {
-        downloads[model.id]?.cancel()
+        cancel(model)
         try? FileManager.default.removeItem(at: path(model))
-        try? FileManager.default.removeItem(at: path(model).appendingPathExtension("part"))
         states[model.id] = .missing
     }
 
     func cancel(_ model: TextModel) {
-        downloads[model.id]?.cancel()
-        downloads[model.id] = nil
+        stopped.insert(model.id)
+        resume[model.id] = nil
+        downloader.cancel(model.id)
         states[model.id] = .missing
     }
 
-    /// Fetches a model: from the first of its addresses that answers, with what was had before kept (a `.part` file,
-    /// continued by a range request), checked against its SHA-256 at the end and kept only if it matches.
+    /// Fetches a model: from its first source, then the next where one does not give it, going on from what a
+    /// source that broke off had given, and kept only if its SHA-256 is the one expected.
     func fetch(_ model: TextModel) {
-        guard downloads[model.id] == nil else { return }
-        states[model.id] = .fetching(0, "")
-        downloads[model.id] = Task {
-            defer { downloads[model.id] = nil }
-            let part = path(model).appendingPathExtension("part")
-            var why = "没有一个来源能连上"
-            for source in model.sources {
-                if Task.isCancelled { return }
-                do {
-                    try await Fetch.file(from: source, to: part, bytes: model.bytes) { [weak self] had in
-                        self?.states[model.id] = .fetching(Double(had) / Double(model.bytes), source.host() ?? "")
+        if case .fetching = state(model) { return }
+        stopped.remove(model.id)
+        why[model.id] = []
+        let from = resume[model.id]
+        start(model, source: from?.source ?? 0, resume: from?.data)
+    }
+
+    private func start(_ model: TextModel, source: Int, resume data: Data?) {
+        guard let url = model.sources[safe: source] else { return }
+        states[model.id] = .fetching(0, url.host() ?? "")
+        downloader.start(id: model.id, source: source, url: url, resume: data)
+    }
+
+    private func heard(_ event: Downloader.Event) {
+        guard let model = TextModel.all.first(where: { $0.id == event.id }) else { return }
+        let host = model.sources[safe: event.source]?.host() ?? ""
+        switch event.kind {
+        case .progress(let written, let total):
+            guard !stopped.contains(model.id) else { return }
+            states[model.id] = .fetching(Double(written) / Double(total > 0 ? total : model.bytes), host)
+        case .finished(let file):
+            resume[model.id] = nil
+            states[model.id] = .checking
+            Task {
+                let sum = try? await Fetch.sha256(of: file)
+                if sum == model.sha256 {
+                    try? FileManager.default.removeItem(at: path(model))
+                    do {
+                        try FileManager.default.moveItem(at: file, to: path(model))
+                        states[model.id] = .ready
+                    } catch {
+                        states[model.id] = .failed("存不下：\(error.localizedDescription)")
                     }
-                    states[model.id] = .checking
-                    let sum = try await Fetch.sha256(of: part)
-                    guard sum == model.sha256 else {
-                        try? FileManager.default.removeItem(at: part)
-                        why = "下载的文件不完整，已删除，请重试"
-                        continue
-                    }
-                    try FileManager.default.moveItem(at: part, to: path(model))
-                    states[model.id] = .ready
-                    return
-                } catch is CancellationError {
-                    return
-                } catch {
-                    why = "\(source.host() ?? "")：\(error.localizedDescription)"
+                } else {
+                    try? FileManager.default.removeItem(at: file)
+                    tryNext(model, after: event.source, because: "\(host)：下载的文件不对，已删除")
                 }
             }
-            states[model.id] = .failed(why)
+        case .failed(let reason, let data):
+            if stopped.contains(model.id) { return }
+            if let data { resume[model.id] = (event.source, data) }
+            tryNext(model, after: event.source, because: "\(host)：\(reason)")
+        }
+    }
+
+    private func tryNext(_ model: TextModel, after source: Int, because reason: String) {
+        why[model.id, default: []].append(reason)
+        if source + 1 < model.sources.count {
+            start(model, source: source + 1, resume: nil)
+        } else {
+            states[model.id] = .failed((why[model.id] ?? [reason]).joined(separator: "\n"))
         }
     }
 }
 
-/// A download that goes on from what is had.
-nonisolated enum Fetch {
-    static func file(from url: URL, to part: URL, bytes: Int64, progress: @escaping @MainActor (Int64) -> Void) async throws {
-        let had = (try? FileManager.default.attributesOfItem(atPath: part.path)[.size] as? Int64) ?? 0
-        if had >= bytes { return }
-        var request = URLRequest(url: url, timeoutInterval: 30)
-        if had > 0 { request.setValue("bytes=\(had)-", forHTTPHeaderField: "Range") }
-        let (stream, response) = try await URLSession.shared.bytes(for: request)
-        guard let http = response as? HTTPURLResponse, http.statusCode == 200 || http.statusCode == 206 else {
-            throw Refusal("HTTP \((response as? HTTPURLResponse)?.statusCode ?? 0)")
-        }
-        // A server that does not take the range sends the whole file again.
-        let resumed = http.statusCode == 206
-        if !resumed { try? FileManager.default.removeItem(at: part) }
-        if !FileManager.default.fileExists(atPath: part.path) { FileManager.default.createFile(atPath: part.path, contents: nil) }
-        let handle = try FileHandle(forWritingTo: part)
-        defer { try? handle.close() }
-        try handle.seekToEnd()
-        var written = resumed ? had : 0
-        var buffer = Data()
-        buffer.reserveCapacity(1 << 20)
-        var told = Date.distantPast
-        for try await byte in stream {
-            buffer.append(byte)
-            if buffer.count >= 1 << 20 {
-                try handle.write(contentsOf: buffer)
-                written += Int64(buffer.count)
-                buffer.removeAll(keepingCapacity: true)
-                try Task.checkCancellation()
-                if Date().timeIntervalSince(told) > 0.3 { told = Date(); let now = written; await progress(now) }
-            }
-        }
-        try handle.write(contentsOf: buffer)
-        written += Int64(buffer.count)
-        await progress(written)
-        guard written >= bytes else { throw Refusal("连接中断了") }
+/// The system's downloads, in a background session: they go on while the app is suspended, the screen locked, or
+/// the app not running at all. A finished file is moved out of the system's hands at once, beside the models.
+nonisolated final class Downloader: NSObject, URLSessionDownloadDelegate, @unchecked Sendable {
+    static let shared = Downloader()
+
+    struct Event: Sendable {
+        enum Kind: Sendable { case progress(Int64, Int64), finished(URL), failed(String, Data?) }
+        let id: String
+        let source: Int
+        let kind: Kind
     }
 
+    /// Set once, before the first download.
+    var onEvent: @Sendable (Event) -> Void = { _ in }
+    var folder: URL?
+    private var told: [Int: Date] = [:]
+    private let lock = NSLock()
+
+    private var session: URLSession!
+
+    private override init() {
+        super.init()
+        let configuration = URLSessionConfiguration.background(withIdentifier: "io.github.rizumu85.kotomimi.node.models")
+        configuration.isDiscretionary = false
+        configuration.sessionSendsLaunchEvents = true
+        configuration.timeoutIntervalForRequest = 60
+        session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
+    }
+
+    func start(id: String, source: Int, url: URL, resume: Data?) {
+        cancel(id)
+        let task = resume.map { session.downloadTask(withResumeData: $0) } ?? session.downloadTask(with: url)
+        task.taskDescription = "\(id)|\(source)"
+        task.resume()
+    }
+
+    func cancel(_ id: String) {
+        session.getAllTasks { tasks in
+            for task in tasks where task.taskDescription?.hasPrefix("\(id)|") == true { task.cancel() }
+        }
+    }
+
+    /// The downloads under way: each model's id and source.
+    func running(_ then: @escaping @Sendable ([(String, Int)]) -> Void) {
+        session.getAllTasks { tasks in
+            then(tasks.filter { $0.state == .running }.compactMap { Downloader.named($0) })
+        }
+    }
+
+    private static func named(_ task: URLSessionTask) -> (String, Int)? {
+        guard let parts = task.taskDescription?.split(separator: "|"), parts.count == 2, let source = Int(parts[1]) else { return nil }
+        return (String(parts[0]), source)
+    }
+
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
+        guard let (id, source) = Downloader.named(downloadTask) else { return }
+        // A few times a second is all the screen needs.
+        let now = Date()
+        let due = lock.withLock { () -> Bool in
+            if let last = told[downloadTask.taskIdentifier], now.timeIntervalSince(last) < 0.3 { return false }
+            told[downloadTask.taskIdentifier] = now
+            return true
+        }
+        if due { onEvent(Event(id: id, source: source, kind: .progress(totalBytesWritten, totalBytesExpectedToWrite))) }
+    }
+
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
+        guard let (id, source) = Downloader.named(downloadTask), let folder else { return }
+        if let http = downloadTask.response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+            onEvent(Event(id: id, source: source, kind: .failed("HTTP \(http.statusCode)", nil)))
+            return
+        }
+        // The system deletes the file once this returns: it is moved now.
+        let kept = folder.appending(path: "\(id).downloaded")
+        try? FileManager.default.removeItem(at: kept)
+        do {
+            try FileManager.default.moveItem(at: location, to: kept)
+            onEvent(Event(id: id, source: source, kind: .finished(kept)))
+        } catch {
+            onEvent(Event(id: id, source: source, kind: .failed(error.localizedDescription, nil)))
+        }
+    }
+
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
+        lock.withLock { _ = told.removeValue(forKey: task.taskIdentifier) }
+        guard let error, let (id, source) = Downloader.named(task) else { return }
+        let ns = error as NSError
+        if ns.code == NSURLErrorCancelled && ns.userInfo[NSURLSessionDownloadTaskResumeData] == nil { return }
+        onEvent(Event(id: id, source: source, kind: .failed(error.localizedDescription, ns.userInfo[NSURLSessionDownloadTaskResumeData] as? Data)))
+    }
+}
+
+nonisolated extension Array {
+    subscript(safe index: Int) -> Element? { indices.contains(index) ? self[index] : nil }
+}
+
+nonisolated enum Fetch {
     @concurrent static func sha256(of file: URL) async throws -> String {
         let handle = try FileHandle(forReadingFrom: file)
         defer { try? handle.close() }
