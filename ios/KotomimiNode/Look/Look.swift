@@ -6,7 +6,7 @@ import UIKit
 /// the device is doing, warm white widgets, small flat objects that stand for what each widget does. At night,
 /// neutral blacks lit by the colour of the work, after Folia. Where iOS has a control of its own (the switch, the
 /// sheets, the round keys) its Liquid Glass one is used.
-enum Palette {
+nonisolated enum Palette {
     static let wall = Color(day: 0xF2EFE8, night: 0x070708)
     static let mintPale = Color(day: 0xDCEAE2, night: 0x4E9A7E)
     static let mint = Color(day: 0xCFE7DA, night: 0x3FB088)
@@ -35,9 +35,10 @@ enum Palette {
     static let accent = Color(day: 0xE86A52, night: 0x8FE3BE)
 }
 
-extension Color {
+/// The system resolves a colour wherever it draws, the render thread included: nothing here belongs to the main actor.
+nonisolated extension Color {
     init(day: UInt32, night: UInt32) {
-        self.init(uiColor: UIColor { traits in
+        self.init(uiColor: UIColor { @Sendable traits in
             let hex = traits.userInterfaceStyle == .dark ? night : day
             return UIColor(red: CGFloat((hex >> 16) & 0xFF) / 255, green: CGFloat((hex >> 8) & 0xFF) / 255, blue: CGFloat(hex & 0xFF) / 255, alpha: 1)
         })
@@ -59,12 +60,10 @@ struct Wall: View {
                     .fill(working ? Palette.mint : Palette.mintPale)
                     .frame(width: max(w, h) * 1.15, height: max(w, h) * 0.95)
                     .position(x: w * 0.08, y: -h * 0.02)
-                    .blur(radius: 2)
                 Ellipse()
                     .fill(Palette.blue)
                     .frame(width: max(w, h) * 1.05, height: max(w, h) * 0.9)
                     .position(x: w * 0.98, y: h * 1.02)
-                    .blur(radius: 2)
                 Canvas { context, size in
                     let every: CGFloat = 30
                     var y = size.height * 0.55
@@ -88,7 +87,8 @@ struct Wall: View {
     }
 }
 
-/// A widget: warm white, its corners round, a little glass to it so the wall shows faintly through.
+/// A widget: warm white, its corners round, as the Android app draws it. (Glass over the wall made it look out of
+/// focus: the system's own controls carry the glass instead.)
 struct Tile<Content: View>: View {
     var padding: CGFloat = 22
     @ViewBuilder var content: Content
@@ -97,8 +97,7 @@ struct Tile<Content: View>: View {
         content
             .padding(padding)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .background(Palette.tile.opacity(0.82), in: .rect(cornerRadius: 32))
-            .glassEffect(.regular.tint(Palette.tile.opacity(0.25)), in: .rect(cornerRadius: 32))
+            .background(Palette.tile, in: .rect(cornerRadius: 32))
     }
 }
 
