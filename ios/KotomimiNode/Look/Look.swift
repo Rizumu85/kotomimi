@@ -14,6 +14,8 @@ nonisolated enum Palette {
     static let tile = Color(day: 0xFFFDF8, night: 0x26262A)
     static let card = Color(day: 0xF5F2EB, night: 0x303035)
     static let tileFront = Color(day: 0xFFFFFF, night: 0x3A3A40)
+    /// A hairline round a widget: nothing by day, a glint of its rim by night.
+    static let tileEdge = Color(uiColor: UIColor { @Sendable traits in traits.userInterfaceStyle == .dark ? UIColor(white: 1, alpha: 0.06) : .clear })
     static let cardLine = Color(day: 0xE7E1D6, night: 0x3D3D44)
     static let waterTile = Color(day: 0x22343F, night: 0x26262A)
     static let water = Color(day: 0x7FD3AE, night: 0x8FE3BE)
@@ -34,6 +36,8 @@ nonisolated enum Palette {
     static let dot = Color(day: 0x283446, night: 0xDADAE2)
     /// The switch when on: the key's coral by day; by night the work's accent, as Folia takes the album's.
     static let accent = Color(day: 0xE86A52, night: 0x8FE3BE)
+    /// The status word over the title: the key's red by day, white by night.
+    static let kicker = Color(day: 0xE35D45, night: 0xF5F5F7)
 }
 
 /// The system resolves a colour wherever it draws, the render thread included: nothing here belongs to the main actor.
@@ -46,13 +50,26 @@ nonisolated extension Color {
     }
 }
 
-/// The wallpaper: the wall, a field of the work's colour falling from the top left, a pale blue one rising at the
-/// bottom right, and a fine grid of dots fading in towards the bottom. Drawn once for a size: nothing moves on it,
-/// so the device spends nothing on it while it is lent.
+/// The wallpaper. By day: the wall, a field of the work's colour falling from the top left, a pale blue one rising at
+/// the bottom right, and fine dots coming in towards the bottom, drawn once for a size. By night: the smoke and its
+/// linework (`NightWall`), with the same dots over it.
 struct Wall: View {
+    var lent: Bool
     var working: Bool
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
+        if scheme == .dark {
+            ZStack {
+                NightWall(lent: lent, working: working)
+                Canvas { context, size in Wall.dots(context, size) }.ignoresSafeArea().allowsHitTesting(false)
+            }
+        } else {
+            day
+        }
+    }
+
+    private var day: some View {
         GeometryReader { box in
             let w = box.size.width, h = box.size.height
             ZStack {
@@ -121,7 +138,8 @@ struct Tile<Content: View>: View {
         content
             .padding(padding)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .background(Palette.tile, in: .rect(cornerRadius: Metrics.radius))
+            .background(Palette.tile.opacity(0.84), in: .rect(cornerRadius: Metrics.radius))
+            .overlay(RoundedRectangle(cornerRadius: Metrics.radius).stroke(Palette.tileEdge, lineWidth: 0.5))
     }
 }
 
@@ -146,15 +164,25 @@ struct WaterThing: View {
 /// The devices: a camera's lens, its centre lit while a computer is at work with the device.
 struct LensThing: View {
     var lit: Bool
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         GeometryReader { box in
             let s = min(box.size.width, box.size.height)
             ZStack {
-                Circle().fill(Palette.lens).frame(width: s * 0.92).shadow(color: .black.opacity(0.24), radius: 3, y: 2)
-                Circle().fill(Palette.lensInner).frame(width: s * 0.58)
-                Circle().fill(lit ? Palette.water : Palette.lens).frame(width: s * 0.24)
-                    .shadow(color: lit ? Palette.water : .clear, radius: s * 0.12)
+                if scheme == .dark {
+                    // The night draws an object as a face a shade lighter than the widget, with a lighter rim, and
+                    // the light only where it gives it (`night` in Look.kt).
+                    Circle().fill(Palette.dial).overlay(Circle().stroke(Palette.dialEdge, lineWidth: 1.3)).frame(width: s * 0.88)
+                    Circle().stroke(Palette.dialEdge, lineWidth: 1.3).frame(width: s * 0.54)
+                    Circle().fill(lit ? Palette.water : Palette.dialEdge).frame(width: s * 0.22)
+                        .shadow(color: lit ? Palette.water : .clear, radius: s * 0.18)
+                } else {
+                    Circle().fill(Palette.lens).frame(width: s * 0.92).shadow(color: .black.opacity(0.24), radius: 3, y: 2)
+                    Circle().fill(Palette.lensInner).frame(width: s * 0.58)
+                    Circle().fill(lit ? Palette.water : Palette.lens).frame(width: s * 0.24)
+                        .shadow(color: lit ? Palette.water : .clear, radius: s * 0.12)
+                }
             }
             .frame(width: box.size.width, height: box.size.height)
         }
@@ -166,6 +194,7 @@ struct LensThing: View {
 struct DialThing: View {
     /// 0...1: of three times as fast as speech.
     var amount: Double
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         GeometryReader { box in
@@ -174,8 +203,9 @@ struct DialThing: View {
             let mark = Angle.degrees(-210 + 240.0 / 3).radians
             let hand = Angle.degrees(-210 + 240 * min(max(amount, 0), 1)).radians
             ZStack {
-                Circle().fill(Palette.dial).overlay(Circle().stroke(Palette.dialEdge, lineWidth: 1)).frame(width: s * 0.92)
-                Circle().fill(Palette.inkRed).frame(width: s * 0.11)
+                Circle().fill(Palette.dial).overlay(Circle().stroke(Palette.dialEdge, lineWidth: scheme == .dark ? 1.3 : 1)).frame(width: s * 0.92)
+                Circle().fill(scheme == .dark ? Palette.key : Palette.inkRed).frame(width: s * 0.1)
+                    .shadow(color: scheme == .dark ? Palette.key : .clear, radius: s * 0.08)
                     .position(x: c.x + cos(mark) * s * 0.33, y: c.y + sin(mark) * s * 0.33)
                 Path { path in
                     path.move(to: c)
@@ -192,11 +222,21 @@ struct DialThing: View {
 /// its translation model (two panes).
 struct LetterThing: View {
     var letter: String
+    @Environment(\.colorScheme) private var scheme
 
     static let letters = ["ja": "あ", "en": "A", "zh": "中", "yue": "粤", "ko": "한", "es": "ñ", "fr": "é", "de": "ß", "it": "i", "pt": "ã", "hi": "अ"]
 
     var body: some View {
         ZStack(alignment: .topLeading) {
+            if scheme == .dark {
+                RoundedRectangle(cornerRadius: 9).fill(Palette.dial).overlay(RoundedRectangle(cornerRadius: 9).stroke(Palette.dialEdge, lineWidth: 1.3)).frame(width: 28, height: 28)
+                RoundedRectangle(cornerRadius: 9)
+                    .fill(Palette.key.opacity(0.22))
+                    .overlay(RoundedRectangle(cornerRadius: 9).stroke(Palette.key.opacity(0.7), lineWidth: 1.3))
+                    .frame(width: 30, height: 30)
+                    .overlay(Text(letter).font(.system(size: 14, weight: .semibold)).foregroundStyle(Palette.ink))
+                    .offset(x: 11, y: 11)
+            } else {
             RoundedRectangle(cornerRadius: 9).fill(Palette.mint).frame(width: 28, height: 28)
             RoundedRectangle(cornerRadius: 9)
                 .fill(Palette.tileFront)
@@ -204,6 +244,7 @@ struct LetterThing: View {
                 .frame(width: 30, height: 30)
                 .overlay(Text(letter).font(.system(size: 14, weight: .semibold)).foregroundStyle(Palette.ink))
                 .offset(x: 11, y: 11)
+            }
         }
         .frame(width: 44, height: 44, alignment: .topLeading)
     }
@@ -257,6 +298,28 @@ struct Dotted: View {
             path.move(to: CGPoint(x: rect.minX, y: rect.midY))
             path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
             return path
+        }
+    }
+}
+
+/// The settings' object: three faders on a small desk, the middle knob in the key's colour (`settingsIcon` in
+/// Look.kt). Drawn alike by day and by night, in the objects' own faces.
+struct FadersThing: View {
+    var body: some View {
+        Canvas { context, size in
+            let s = min(size.width, size.height)
+            let desk = CGRect(x: s * 0.06, y: s * 0.1, width: s * 0.88, height: s * 0.8)
+            context.fill(Path(roundedRect: desk, cornerRadius: s * 0.18), with: .color(Palette.dial))
+            context.stroke(Path(roundedRect: desk, cornerRadius: s * 0.18), with: .color(Palette.dialEdge), lineWidth: 1.2)
+            for (i, at) in [0.38, 0.64, 0.46].enumerated() {
+                let x = s * (0.28 + 0.22 * Double(i))
+                var groove = Path()
+                groove.move(to: CGPoint(x: x, y: s * 0.24))
+                groove.addLine(to: CGPoint(x: x, y: s * 0.76))
+                context.stroke(groove, with: .color(Palette.dialEdge), style: StrokeStyle(lineWidth: s * 0.05, lineCap: .round))
+                let knob = CGRect(x: x - s * 0.08, y: s * at - s * 0.045, width: s * 0.16, height: s * 0.09)
+                context.fill(Path(roundedRect: knob, cornerRadius: s * 0.03), with: .color(i == 1 ? Palette.key : Palette.dialHand))
+            }
         }
     }
 }

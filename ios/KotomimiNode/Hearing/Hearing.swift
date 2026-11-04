@@ -56,7 +56,11 @@ final class Hearing {
     func name(of code: String) -> String { languages.first { $0.id == code }?.name ?? code }
 
     #if DEBUG
+    /// Set by `pretend`: what the system says is not asked, so the made-up state stays.
+    private var pretending = false
+
     func pretend() {
+        pretending = true
         available = true
         for index in languages.indices { languages[index].state = ["ja", "en"].contains(languages[index].id) ? .ready : .offered }
     }
@@ -64,6 +68,9 @@ final class Hearing {
 
     /// What the system offers and has installed now.
     func refresh() async {
+        #if DEBUG
+        if pretending { return }
+        #endif
         available = SpeechTranscriber.isAvailable
         let supported = Set(await SpeechTranscriber.supportedLocales.map { $0.identifier(.bcp47) })
         let installed = Set(await SpeechTranscriber.installedLocales.map { $0.identifier(.bcp47) })

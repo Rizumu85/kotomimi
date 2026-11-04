@@ -11,6 +11,7 @@ import SwiftUI
 /// A widget opens its box over the page (a sheet), as a box does there.
 struct Home: View {
     @Environment(Lending.self) private var lending
+    @Environment(\.colorScheme) private var scheme
     @State private var open: Box?
 
     enum Box: String, Identifiable { case languages, devices, tools, settings; var id: String { rawValue } }
@@ -18,35 +19,49 @@ struct Home: View {
     var body: some View {
         GeometryReader { box in
             let size = box.size
-            ZStack(alignment: .topTrailing) {
-                Wall(working: lending.phase == .working)
+            ZStack {
+                Wall(lent: lending.phase != .off, working: lending.phase == .working)
                 Group {
                     if size.width > size.height && size.width >= 900 { wide(size) }
                     else if size.width >= 700 { tablet }
                     else { phone }
                 }
-                SettingsKey { open = .settings }
-                    .padding(.top, 18)
-                    .padding(.trailing, Metrics.margin)
-            }
-        }
-        .sheet(item: $open) { which in
-            NavigationStack {
-                switch which {
-                case .languages: LanguagesBox()
-                case .devices: DevicesBox()
-                case .tools: ToolsBox()
-                case .settings: SettingsBox()
+                if let which = open {
+                    // The page beneath is dimmed, not left: a tap on it closes the box.
+                    Color.black.opacity(scheme == .dark ? 0.55 : 0.22)
+                        .ignoresSafeArea()
+                        .onTapGesture { open = nil }
+                        .transition(.opacity)
+                    Group {
+                        switch which {
+                        case .languages: LanguagesBox { open = nil }
+                        case .devices: DevicesBox { open = nil }
+                        case .tools: ToolsBox { open = nil }
+                        case .settings: SettingsBox { open = nil }
+                        }
+                    }
+                    .transition(.asymmetric(insertion: .scale(scale: 0.94).combined(with: .opacity).combined(with: .offset(y: 30)),
+                                            removal: .scale(scale: 0.97).combined(with: .opacity)))
+                    .zIndex(1)
                 }
             }
-            .presentationDetents([.medium, .large])
+            .animation(.spring(duration: 0.42, bounce: 0.24), value: open)
         }
+        #if DEBUG
+        // A box open at launch, for screenshots in the simulator (`-box languages|devices|tools|settings`).
+        .onAppear {
+            let arguments = CommandLine.arguments
+            if let at = arguments.firstIndex(of: "-box"), at + 1 < arguments.count { open = Box(rawValue: arguments[at + 1]) }
+        }
+        #endif
     }
+
+    private var key: some View { SettingsKey { open = .settings } }
 
     private func wide(_ size: CGSize) -> some View {
         HStack(alignment: .top, spacing: Metrics.gap) {
             VStack(alignment: .leading, spacing: Metrics.gap) {
-                Status()
+                Status(key: AnyView(key))
                 HearingTile()
             }
             .frame(width: (size.width - Metrics.margin * 2 - Metrics.gap) * 0.49)
@@ -72,6 +87,8 @@ struct Home: View {
                 Spacer(minLength: 0)
                 ShareTile().frame(width: 360, height: 96)
             }
+            // The key stands at the end of the status word's line, above the share widget.
+            .overlay(alignment: .topTrailing) { key.padding(.top, 36) }
             HearingTile()
             // Four columns, as the Android app's row of widgets: the languages take two.
             GeometryReader { row in
@@ -92,7 +109,7 @@ struct Home: View {
     private var phone: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Metrics.gap) {
-                Status()
+                Status(key: AnyView(key))
                 ShareTile().frame(height: 96)
                 HearingTile().frame(height: 320)
                 HStack(spacing: Metrics.gap) {
@@ -131,16 +148,16 @@ private struct Pressed: ButtonStyle {
     }
 }
 
-/// The settings: a round glass key, the faders the Android app draws.
+/// The settings: three dots at the end of the status word's line, as the Android app has them, on a round glass key.
 private struct SettingsKey: View {
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: "slider.horizontal.3")
-                .font(.system(size: 16, weight: .medium))
-                .foregroundStyle(Palette.ink)
-                .frame(width: 28, height: 28)
+            Image(systemName: "ellipsis")
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(Palette.ink2)
+                .frame(width: 24, height: 24)
         }
         .buttonStyle(.glass)
         .buttonBorderShape(.circle)
@@ -151,16 +168,23 @@ private struct SettingsKey: View {
 // ── The status ─────────────────────────────────────────────────────────────────────────────────────────────
 
 private struct Status: View {
+    /// The settings key, at the end of the status word's line, where it has room there.
+    var key: AnyView?
     @Environment(Lending.self) private var lending
     @Environment(Hearing.self) private var hearing
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(kicker)
-                .font(Metrics.kicker)
-                .tracking(7)
-                .foregroundStyle(Palette.inkRed)
-                .padding(.bottom, 30)
+            HStack {
+                Text(kicker)
+                    .font(Metrics.kicker)
+                    .tracking(7)
+                    .foregroundStyle(Palette.kicker)
+                Spacer(minLength: 0)
+                if let key { key }
+            }
+            .frame(height: 34)
+            .padding(.bottom, 22)
             Text(title)
                 .font(Metrics.headline)
                 .foregroundStyle(Palette.ink)
@@ -171,7 +195,7 @@ private struct Status: View {
                 .foregroundStyle(Palette.ink2)
                 .lineLimit(2)
         }
-        .padding(.top, 52)
+        .padding(.top, 36)
         .padding(.leading, 10)
         .frame(maxWidth: .infinity, alignment: .leading)
         .animation(.easeInOut(duration: 0.3), value: title)
@@ -213,6 +237,7 @@ private struct Status: View {
 private struct ShareTile: View {
     @Environment(Lending.self) private var lending
     @Environment(Hearing.self) private var hearing
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         Tile(padding: 20) {
@@ -230,6 +255,8 @@ private struct ShareTile: View {
                 .tint(Palette.accent)
                 .disabled(hearing.ready.isEmpty && lending.phase == .off)
                 .scaleEffect(1.25)
+                // By night the switch that is on gives light, in the work's accent.
+                .shadow(color: scheme == .dark && lending.phase != .off ? Palette.accent.opacity(0.55) : .clear, radius: 12)
                 .padding(.trailing, 6)
             }
             .frame(maxHeight: .infinity)
