@@ -76,6 +76,10 @@ Both need the same Wi-Fi or router, and the lending computer must have the app o
 
 Is your computer not fast enough, or running VRChat at the same time? Lend it an Android phone, and let the phone do the recognition, translation or grammar feedback.
 
+<p align="center">
+  <img src="./assets/readme/phone.en.svg" width="100%" alt="Kotomimi on an Android phone shares its models; the computer chooses Another device in its speech recognition card, then the phone">
+</p>
+
 1. Open the [latest release](https://github.com/Rizumu85/kotomimi/releases/latest), download `Kotomimi-phone-x.y.z.apk` from the Android line under "Installing", and install it on the phone (Android 9 or later; allow installing apps from unknown sources). You only install it this way once: it updates itself from then on.
 2. Download models on the phone (Wi-Fi recommended), run the self-check to see whether this phone keeps up, then start sharing.
 3. Search under "Another device" on the computer: the phone appears in the list, and one click connects it.
@@ -94,6 +98,10 @@ When VRChat and Kotomimi run on the same Windows computer, the "General" setting
 ### Captions in the headset (trial)
 
 At the bottom of the card, turn on **Show in the headset (SteamVR)** and choose the left or right wrist. Windows and SteamVR only.
+
+<p align="center">
+  <img src="./assets/readme/vr.en.webp" width="100%" alt="In the headset: the other side's words below the line of sight, the original small and the translation large; on the left wrist the panel, with the last lines, their language, and Pause, Hide and Adjust">
+</p>
 
 - **The caption strip**: the other side's latest sentence, the original small and the translation large, below your line of sight. It stays put when you turn your head a little and follows when you turn further; it clears when nothing new has been said for a while.
 - **The wrist panel**: appears when you look at your wrist. Press it directly with the other controller: it uses no buttons, so it works beside tools such as XSOverlay. Its first page shows whether each side is heard, the last few lines, the other side's language, pause, and hiding the strip.
@@ -158,7 +166,6 @@ Test recordings: Japanese from LibriVox (public domain), the other languages fro
 - "Kotomimi Pipeline" gives text only, no synthesized speech. For spoken output, use one of Sokuji's own providers.
 - Recognition through an API shows text only once a sentence is finished.
 - The macOS build is for Apple silicon only.
-- VR captions need Windows and SteamVR.
 - This is a personal fork: its pace and choices follow its author's own use.
 
 </details>

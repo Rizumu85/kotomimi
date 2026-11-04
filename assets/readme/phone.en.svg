@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="346" viewBox="0 0 1200 346" role="img" aria-labelledby="title desc">
+  <title id="title">An Android phone lent to the computer</title>
+  <desc id="desc">An Android phone running Kotomimi lends recognition, translation and feedback to the computer on the same Wi-Fi; the computer picks the phone in a stage card.</desc>
+  <rect width="1200" height="346" rx="24" fill="#1c1c1c"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei UI', 'Hiragino Sans', 'Yu Gothic UI', 'Noto Sans CJK SC', sans-serif">
+    <g id="phone">
+      <rect x="56" y="48" width="452" height="250" rx="16" fill="#262626" stroke="#383838" stroke-width="1.5"/>
+      <rect x="440" y="70" width="44" height="78" rx="9" fill="none" stroke="#d9bf8f" stroke-width="2.5"/>
+      <rect x="455" y="76" width="14" height="3" rx="1.5" fill="#d9bf8f"/>
+      <text x="84" y="92" font-size="20" fill="#8f8a80">Android phone</text>
+      <text x="84" y="132" font-size="28" font-weight="700" fill="#f4efe6">Kotomimi for Android</text>
+      <rect x="84" y="156" width="56" height="30" rx="15" fill="#3f7f61"/>
+      <circle cx="125" cy="171" r="11" fill="#f4efe6"/>
+      <text x="154" y="178" font-size="20" fill="#6fc79c">Sharing</text>
+      <rect x="84" y="206" width="139" height="36" rx="10" fill="#2f2f2f" stroke="#383838"/><text x="154" y="230" font-size="17" text-anchor="middle" fill="#f4efe6">Recognition</text><rect x="233" y="206" width="139" height="36" rx="10" fill="#2f2f2f" stroke="#383838"/><text x="302" y="230" font-size="17" text-anchor="middle" fill="#f4efe6">Translation</text><rect x="382" y="206" width="108" height="36" rx="10" fill="#2f2f2f" stroke="#383838"/><text x="436" y="230" font-size="17" text-anchor="middle" fill="#f4efe6">Feedback</text>
+      <text x="84" y="276" font-size="18" fill="#8f8a80">Models are downloaded and run on the phone</text>
+    </g>
+
+    <g id="link">
+      <path d="M 528 165 H 664" fill="none" stroke="#d9bf8f" stroke-width="2.5" stroke-dasharray="3 9" stroke-linecap="round"/>
+      <path d="M 656 155 l 12 10 l -12 10" fill="none" stroke="#d9bf8f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="596" y="138" font-size="18" text-anchor="middle" fill="#d9bf8f">Same Wi-Fi</text>
+      <text x="596" y="204" font-size="18" text-anchor="middle" fill="#d9bf8f">Found by itself</text>
+    </g>
+
+    <g id="computer">
+      <rect x="692" y="48" width="452" height="250" rx="16" fill="#262626" stroke="#383838" stroke-width="1.5"/>
+      <text x="720" y="92" font-size="20" fill="#8f8a80">Computer</text>
+      <text x="720" y="132" font-size="28" font-weight="700" fill="#f4efe6">Speech recognition</text>
+      <rect x="720" y="150" width="396" height="40" rx="9" fill="#2f2f2f" stroke="#383838"/>
+      <rect x="720" y="150" width="132" height="40" rx="9" fill="#3f7f61"/><text x="786" y="176" font-size="16" text-anchor="middle" fill="#f4efe6" font-weight="600">Another device</text><text x="918" y="176" font-size="16" text-anchor="middle" fill="#8f8a80" font-weight="400">API model</text><text x="1050" y="176" font-size="16" text-anchor="middle" fill="#8f8a80" font-weight="400">This computer</text>
+      <rect x="720" y="204" width="396" height="44" rx="9" fill="#2a332e" stroke="#3f7f61" stroke-width="1.5"/>
+      <text x="740" y="233" font-size="20" font-weight="600" fill="#f4efe6">Pixel 8 (phone)</text>
+      <path d="M 1088 222 l 7 7 l 7 -7" fill="none" stroke="#8f8a80" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="720" y="276" font-size="18" fill="#8f8a80">The phone handles this stage for the computer</text>
+    </g>
+  </g>
+</svg>
