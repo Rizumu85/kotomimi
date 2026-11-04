@@ -14,7 +14,7 @@ struct Home: View {
     @Environment(\.colorScheme) private var scheme
     @State private var open: Box?
 
-    enum Box: String, Identifiable { case languages, devices, tools, settings; var id: String { rawValue } }
+    enum Box: String, Identifiable { case models, devices, tools, settings; var id: String { rawValue } }
 
     var body: some View {
         GeometryReader { box in
@@ -23,7 +23,7 @@ struct Home: View {
                 Wall(lent: lending.phase != .off, working: lending.phase == .working)
                 Group {
                     if size.width > size.height && size.width >= 900 { wide(size) }
-                    else if size.width >= 700 { tablet }
+                    else if size.width >= 700 { tablet(size) }
                     else { phone }
                 }
                 if let which = open {
@@ -34,7 +34,7 @@ struct Home: View {
                         .transition(.opacity)
                     Group {
                         switch which {
-                        case .languages: LanguagesBox { open = nil }
+                        case .models: ModelsBox { open = nil }
                         case .devices: DevicesBox { open = nil }
                         case .tools: ToolsBox { open = nil }
                         case .settings: SettingsBox { open = nil }
@@ -48,10 +48,14 @@ struct Home: View {
             .animation(.spring(duration: 0.42, bounce: 0.24), value: open)
         }
         #if DEBUG
-        // A box open at launch, for screenshots in the simulator (`-box languages|devices|tools|settings`).
+        // A box open at launch, for screenshots in the simulator (`-box models|devices|tools|settings`).
         .onAppear {
             let arguments = CommandLine.arguments
             if let at = arguments.firstIndex(of: "-box"), at + 1 < arguments.count { open = Box(rawValue: arguments[at + 1]) }
+            // Held across, for screenshots of the wide layout (`-landscape`).
+            if arguments.contains("-landscape"), let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                scene.requestGeometryUpdate(.iOS(interfaceOrientations: .landscapeRight))
+            }
         }
         #endif
     }
@@ -62,46 +66,48 @@ struct Home: View {
         HStack(alignment: .top, spacing: Metrics.gap) {
             VStack(alignment: .leading, spacing: Metrics.gap) {
                 Status(key: AnyView(key))
-                HearingTile()
+                FocusTile()
             }
             .frame(width: (size.width - Metrics.margin * 2 - Metrics.gap) * 0.49)
             VStack(spacing: Metrics.gap) {
-                ShareTile().frame(height: 96)
+                ShareTile().frame(height: 92)
+                HStack(spacing: Metrics.gap) {
+                    Button { open = .models } label: { TranslateTile() }
+                    Button { open = .models } label: { CoachTile() }
+                }
                 HStack(spacing: Metrics.gap) {
                     Button { open = .devices } label: { DevicesTile() }
                     Button { open = .tools } label: { CheckTile() }
                 }
-                Button { open = .languages } label: { LanguagesTile() }.frame(height: 172)
+                Button { open = .models } label: { ModelsTile() }.frame(height: 132)
             }
             .buttonStyle(Pressed())
-            .padding(.top, 34)
+            .padding(.top, 30)
         }
         .padding(.horizontal, Metrics.margin)
         .padding(.bottom, Metrics.margin)
     }
 
-    private var tablet: some View {
+    private func tablet(_ size: CGSize) -> some View {
         VStack(spacing: Metrics.gap) {
             HStack(alignment: .bottom, spacing: Metrics.gap) {
                 Status()
                 Spacer(minLength: 0)
-                ShareTile().frame(width: 360, height: 96)
+                ShareTile().frame(width: 340, height: 92)
             }
             // The key stands at the end of the status word's line, above the share widget.
             .overlay(alignment: .topTrailing) { key.padding(.top, 36) }
-            HearingTile()
-            // Four columns, as the Android app's row of widgets: the languages take two.
-            GeometryReader { row in
-                let unit = (row.size.width - Metrics.gap * 3) / 4
-                HStack(spacing: Metrics.gap) {
-                    Button { open = .devices } label: { DevicesTile() }.frame(width: unit)
-                    Button { open = .tools } label: { CheckTile() }.frame(width: unit)
-                    Button { open = .languages } label: { LanguagesTile() }.frame(width: unit * 2 + Metrics.gap)
-                }
-                .buttonStyle(Pressed())
+            FocusTile()
+            HStack(spacing: Metrics.gap) {
+                Button { open = .models } label: { TranslateTile() }
+                Button { open = .models } label: { CoachTile() }
+                Button { open = .devices } label: { DevicesTile() }
+                Button { open = .tools } label: { CheckTile() }
             }
-            .frame(height: 172)
+            .frame(height: 148)
+            Button { open = .models } label: { ModelsTile() }.frame(height: 120)
         }
+        .buttonStyle(Pressed())
         .padding(.horizontal, Metrics.margin)
         .padding(.bottom, Metrics.margin)
     }
@@ -110,14 +116,19 @@ struct Home: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Metrics.gap) {
                 Status(key: AnyView(key))
-                ShareTile().frame(height: 96)
-                HearingTile().frame(height: 320)
+                ShareTile().frame(height: 92)
+                FocusTile().frame(height: 300)
+                HStack(spacing: Metrics.gap) {
+                    Button { open = .models } label: { TranslateTile() }
+                    Button { open = .models } label: { CoachTile() }
+                }
+                .frame(height: 140)
                 HStack(spacing: Metrics.gap) {
                     Button { open = .devices } label: { DevicesTile() }
                     Button { open = .tools } label: { CheckTile() }
                 }
-                .frame(height: 150)
-                Button { open = .languages } label: { LanguagesTile() }.frame(height: 150)
+                .frame(height: 140)
+                Button { open = .models } label: { ModelsTile() }.frame(height: 132)
             }
             .buttonStyle(Pressed())
             .padding(.horizontal, Metrics.margin)
@@ -129,9 +140,9 @@ struct Home: View {
 
 /// The type and spacing, as the Android app sets them.
 nonisolated enum Metrics {
-    static let margin: CGFloat = 24
-    static let gap: CGFloat = 16
-    static let radius: CGFloat = 28
+    static let margin: CGFloat = 28
+    static let gap: CGFloat = 14
+    static let radius: CGFloat = 26
     static let headline = Font.system(size: 52, weight: .regular)
     static let kicker = Font.system(size: 14, weight: .bold)
     static let title = Font.system(size: 18, weight: .semibold)
@@ -279,6 +290,61 @@ private struct ShareTile: View {
     }
 }
 
+/// The big widget: what the device did last, as the Android app's — the glass of water while it hears, a glass of
+/// apricot while it translates, a sheet of paper while it writes feedback.
+private struct FocusTile: View {
+    @Environment(Lending.self) private var lending
+
+    var body: some View {
+        ZStack {
+            switch lending.focus {
+            case .hear: HearingTile()
+            case .translate: TextTile(kind: .translate)
+            case .coach: TextTile(kind: .coach)
+            }
+        }
+        .animation(.easeInOut(duration: 0.35), value: lending.focus)
+    }
+}
+
+/// A text model's last answer: how long it took at the top left, what it is at the top right, what was said and
+/// what came of it in the middle.
+private struct TextTile: View {
+    let kind: TextModel.Kind
+    @Environment(Lending.self) private var lending
+
+    var body: some View {
+        let face = kind == .translate ? Color(day: 0xF4E3C8, night: 0x26262A) : Color(day: 0xFBF7F0, night: 0x26262A)
+        let number = kind == .translate ? Color(day: 0x3A3026, night: 0xF5F5F7) : Color(day: 0x3A2E2C, night: 0xF5F5F7)
+        let sub = kind == .translate ? Color(day: 0x8A7660, night: 0x9C9CA4) : Color(day: 0x8E7A76, night: 0x9C9CA4)
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .top) {
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text(String(format: "%.1f", lending.lastAnswerMs / 1000)).font(.system(size: 30).monospacedDigit()).foregroundStyle(number)
+                    Text("秒 · 上一句").font(Metrics.line).foregroundStyle(sub)
+                }
+                Spacer()
+                VStack(alignment: .trailing, spacing: 6) {
+                    Text(kind == .translate ? "文本翻译" : "语法反馈").font(Metrics.title).foregroundStyle(number)
+                    Text(lending.phase == .working ? "工作中" : "待命").font(Metrics.line).foregroundStyle(sub)
+                }
+            }
+            Spacer(minLength: 12)
+            if let said = lending.lastSaid {
+                Text(said).font(.system(size: 17)).foregroundStyle(sub).lineLimit(3)
+                    .strikethrough(kind == .coach, color: sub.opacity(0.6))
+                    .padding(.bottom, 12)
+            }
+            Text(lending.lastAnswer ?? "").font(.system(size: 22, weight: kind == .coach ? .semibold : .regular))
+                .lineSpacing(5).foregroundStyle(kind == .coach ? Palette.inkRed : number).lineLimit(6).minimumScaleFactor(0.7)
+            Spacer(minLength: 12)
+        }
+        .padding(28)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(face, in: .rect(cornerRadius: 32))
+    }
+}
+
 /// Hearing: the dark glass of water. The speed of the last reading at the top left, what is lent at the top right,
 /// what was heard last in the middle, the water below, swelling while a computer is at work.
 private struct HearingTile: View {
@@ -389,25 +455,62 @@ private struct CheckTile: View {
     }
 }
 
-private struct LanguagesTile: View {
+private struct TranslateTile: View {
+    @Environment(TextStore.self) private var text
+    @Environment(Lending.self) private var lending
+
+    var body: some View {
+        SmallTile(title: "文本翻译", line: TextLine.of(.translate, text, lending)) { PanesThing() }
+    }
+}
+
+private struct CoachTile: View {
+    @Environment(TextStore.self) private var text
+    @Environment(Lending.self) private var lending
+
+    var body: some View {
+        SmallTile(title: "语法反馈", line: TextLine.of(.coach, text, lending)) { NoteThing() }
+    }
+}
+
+/// How a kind of text model stands, in a few words.
+private enum TextLine {
+    static func of(_ kind: TextModel.Kind, _ text: TextStore, _ lending: Lending) -> String {
+        let models = TextModel.all.filter { $0.kind == kind }
+        if models.contains(where: { if case .fetching = text.state($0) { true } else { false } }) { return "下载中" }
+        guard models.contains(where: { text.state($0) == .ready }) else { return "未下载" }
+        let done = kind == .translate ? lending.translatedCount : lending.coachedCount
+        if done > 0 { return kind == .translate ? "已翻译 \(done) 句" : "已批改 \(done) 句" }
+        return lending.phase == .off ? "未启用" : "待命"
+    }
+}
+
+/// The models: the objects of what is here, and how many.
+private struct ModelsTile: View {
     @Environment(Hearing.self) private var hearing
+    @Environment(TextStore.self) private var text
 
     var body: some View {
         Tile(padding: 20) {
-            VStack(alignment: .leading, spacing: 0) {
-                Text("识别语言").font(Metrics.title).foregroundStyle(Palette.ink).padding(.bottom, 14)
-                HStack(spacing: 10) {
-                    if hearing.ready.isEmpty {
-                        LetterThing(letter: "あ").opacity(0.4)
-                    } else {
-                        ForEach(hearing.ready.prefix(6)) { language in LetterThing(letter: LetterThing.letters[language.id] ?? language.id) }
-                    }
+            HStack(alignment: .center, spacing: 0) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("模型管理").font(Metrics.title).foregroundStyle(Palette.ink)
+                    Text(line).font(Metrics.small).foregroundStyle(Palette.ink2)
                 }
-                .frame(height: 44)
-                Spacer(minLength: 10)
-                Text(hearing.ready.isEmpty ? "尚未下载语言" : "已下载 \(hearing.ready.count) 种语言")
-                    .font(Metrics.small).foregroundStyle(Palette.ink2)
+                Spacer(minLength: 12)
+                HStack(spacing: 14) {
+                    WaterThing().frame(width: 40, height: 40).opacity(hearing.ready.isEmpty ? 0.35 : 1)
+                    PanesThing().frame(width: 40, height: 40).opacity(text.ready.contains { $0.kind == .translate } ? 1 : 0.35)
+                    NoteThing().frame(width: 40, height: 40).opacity(text.ready.contains { $0.kind == .coach } ? 1 : 0.35)
+                }
             }
+            .frame(maxHeight: .infinity)
         }
+    }
+
+    private var line: String {
+        let languages = hearing.ready.count, models = text.ready.count
+        if languages == 0 && models == 0 { return "尚未下载" }
+        return [languages > 0 ? "\(languages) 种识别语言" : nil, models > 0 ? "\(models) 个文本模型" : nil].compactMap { $0 }.joined(separator: " · ")
     }
 }

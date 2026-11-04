@@ -42,6 +42,18 @@ final class Lending {
     private(set) var lastLanguage: String?
     private(set) var heardCount = 0
 
+    enum Work: Equatable { case hear, translate, coach }
+    /// What the device did last, which the big widget shows: a stretch heard, a sentence translated, a line of
+    /// feedback written.
+    private(set) var focus: Work = .hear
+    /// The last text model's answer: what it was asked about, what it wrote, into which language, how long it took.
+    private(set) var lastSaid: String?
+    private(set) var lastAnswer: String?
+    private(set) var lastInto: String?
+    private(set) var lastAnswerMs: Double = 0
+    private(set) var translatedCount = 0
+    private(set) var coachedCount = 0
+
     /// Whether the owner wants it lent: the door is opened again whenever the app comes back to the front.
     var wanted: Bool {
         get { UserDefaults.standard.bool(forKey: "share.wanted") }
@@ -49,11 +61,19 @@ final class Lending {
     }
 
     let hearing: Hearing
+    let text: TextStore
+    let engine = TextEngine()
     private var door: Door?
     private var lastUse = Date.distantPast
     private var watch: Task<Void, Never>?
+    /// The text requests in the door, waiting or being answered.
+    private var asking = 0
+    private static let mostAsking = 4
 
-    init(hearing: Hearing) { self.hearing = hearing }
+    init(hearing: Hearing, text: TextStore) {
+        self.hearing = hearing
+        self.text = text
+    }
 
     /// The name the computer lists this device by: the owner's, else the kind of device it is.
     static var name: String {
@@ -109,6 +129,17 @@ final class Lending {
         address = "192.168.1.23:8792"
         seen = "192.168.1.8"
         seenAt = Date().addingTimeInterval(-90)
+        text.pretend()
+        translatedCount = 3
+        if what == "translate" || what == "coach" {
+            phase = .working
+            lastUse = .distantFuture
+            focus = what == "translate" ? .translate : .coach
+            lastSaid = what == "translate" ? "飛べないおじさんはただのおじさんだ。" : "昨日、映画を見ます。"
+            lastAnswer = what == "translate" ? "不会飞的叔叔只是个普通叔叔而已。" : "昨日、映画を見ました。"
+            lastAnswerMs = what == "translate" ? 1400 : 600
+            return
+        }
         guard what == "working" else { phase = .waiting; return }
         phase = .working
         lastText = "今日はいい天気ですね。後で一緒に公園を散歩しませんか。"
@@ -147,7 +178,7 @@ final class Lending {
         case ("POST", "/v1/audio/transcriptions"), ("POST", "/audio/transcriptions"):
             return await transcribe(request, allow)
         case ("POST", "/v1/chat/completions"), ("POST", "/chat/completions"):
-            return .error(404, "This device lends no text models yet.", allow)
+            return await chat(request, allow)
         default:
             return .error(404, "Not here.", allow)
         }
@@ -157,7 +188,100 @@ final class Lending {
         let lent = hearing.ready.isEmpty ? "" : #"{"id":"\#(Lending.modelId)","object":"model","owned_by":"kotomimi-phone","holds_mb":0}"#
         let total = Int(ProcessInfo.processInfo.physicalMemory / 1_048_576)
         let free = Int(os_proc_available_memory() / 1_048_576)
-        return #"{"object":"list","data":[\#(lent)],"text":[],"memory_mb":{"total":\#(total),"available":\#(free)}}"#
+        // The text models stand beside the recognizer in a list of their own, as the Android app's do: a computer
+        // takes every id in `data` for a recognizer.
+        let up = engine.up
+        let textModels = text.ready.map {
+            #"{"id":"\#($0.id)","object":"model","owned_by":"kotomimi-phone","holds_mb":\#($0.holdsMb),"kind":"\#($0.kind.rawValue)","name":\#(jsonQuoted($0.name)),"loaded":\#(up.contains($0.id))}"#
+        }.joined(separator: ",")
+        return #"{"object":"list","data":[\#(lent)],"text":[\#(textModels)],"memory_mb":{"total":\#(total),"available":\#(free)}}"#
+    }
+
+    // ── Text models ─────────────────────────────────────────────────────────────────────────────────────────
+
+    /// One answer of a text model, as the Android app gives it (`Share.chat` and `Chat.requestOf`): a request held
+    /// to the three plain kinds of message and the sampling the desktop sends, answered whole. (The desktop reads
+    /// an answer that is not streamed as it reads one that is: `completeText` in src/providers/openai/textModel.ts.)
+    private func chat(_ request: Request, _ allow: [(String, String)]) async -> Response {
+        guard request.body.count <= 256 * 1024,
+              let json = (try? JSONSerialization.jsonObject(with: request.body)) as? [String: Any] else {
+            return .error(400, "The request is not JSON, or is too long.", allow)
+        }
+        guard let named = json["model"] as? String else { return .error(400, "The request names no model.", allow) }
+        guard let model = text.ready.first(where: { $0.id == named }) else {
+            let known = TextModel.all.contains { $0.id == named }
+            return .error(404, known ? "This device does not lend \"\(named)\": it is not downloaded there." : "This device lends no text model called \"\(named.prefix(40))\".", allow)
+        }
+        guard let said = json["messages"] as? [[String: Any]], (1...64).contains(said.count) else {
+            return .error(400, "The request has no messages, or more than 64.", allow)
+        }
+        var messages: [(role: String, content: String)] = []
+        for message in said {
+            guard let role = message["role"] as? String, ["system", "user", "assistant"].contains(role), let content = message["content"] as? String else {
+                return .error(400, "Every message is said by \"system\", \"user\" or \"assistant\", in plain text.", allow)
+            }
+            messages.append((role, content))
+        }
+        guard messages.reduce(0, { $0 + $1.content.count }) <= 8000 else {
+            return .error(413, "The messages are too long: at most 8000 letters in all.", allow)
+        }
+        var asked = TextEngine.Asked(messages: messages)
+        let most = (json["max_tokens"] as? Int) ?? (json["max_completion_tokens"] as? Int)
+        asked.maxTokens = Int32(min(max(most ?? 1024, 1), 1024))
+        if let value = json["temperature"] as? Double, value.isFinite { asked.temperature = Float(min(max(value, 0), 2)) }
+        if let value = json["top_p"] as? Double, value.isFinite { asked.topP = Float(min(max(value, 0), 1)) }
+        if let value = json["repeat_penalty"] as? Double, value.isFinite { asked.repeatPenalty = Float(min(max(value, 0), 2)) }
+        if let value = json["top_k"] as? Int { asked.topK = Int32(min(max(value, 0), 1000)) }
+        if let value = json["seed"] as? Int { asked.seed = UInt32(truncatingIfNeeded: value) }
+        let stops = (json["stop"] as? [String]) ?? ((json["stop"] as? String).map { [$0] } ?? [])
+        asked.stops = Array(stops.filter { !$0.isEmpty && $0.count <= 64 }.prefix(4))
+        if let kwargs = json["chat_template_kwargs"] as? [String: Any], let thinking = kwargs["enable_thinking"] as? Bool { asked.thinking = thinking ? 1 : 0 }
+
+        guard asking < Lending.mostAsking else {
+            return .error(429, "This device is busy: \(Lending.mostAsking) requests for its text models wait already.", allow + [("Retry-After", "2")])
+        }
+        asking += 1
+        defer { asking -= 1 }
+        seen = request.peer
+        seenAt = Date()
+        lastUse = Date()
+        if phase == .waiting { phase = .working }
+        do {
+            let written = try await engine.answer(model, at: text.path(model), asked)
+            lastUse = Date()
+            let answer = written.text.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !answer.isEmpty {
+                focus = model.kind == .translate ? .translate : .coach
+                lastSaid = Lending.saidIn(messages)
+                lastInto = model.kind == .translate ? Lending.intoIn(messages) : nil
+                lastAnswer = answer
+                lastAnswerMs = written.tookMs
+                if model.kind == .translate { translatedCount += 1 } else { coachedCount += 1 }
+            }
+            let created = Int(Date().timeIntervalSince1970)
+            let body = #"{"id":"chatcmpl-kotomimi-\#(created)","object":"chat.completion","created":\#(created),"model":"\#(model.id)","choices":[{"index":0,"message":{"role":"assistant","content":\#(jsonQuoted(written.text))},"finish_reason":"\#(written.finish)"}],"usage":{"prompt_tokens":\#(written.read),"completion_tokens":\#(written.written),"total_tokens":\#(written.read + written.written)}}"#
+            return .json(200, body, allow)
+        } catch let refusal as Refusal {
+            let short = refusal.description.contains("memory")
+            return .error(short ? 503 : 502, refusal.description, allow + (short ? [("Retry-After", "5")] : []))
+        } catch {
+            return .error(502, "The engine stopped: \(error.localizedDescription)", allow)
+        }
+    }
+
+    /// The sentence a request asks about, for the screen: the last line of the last thing the person said (the
+    /// desktop's translation prompt puts its instructions before it).
+    static func saidIn(_ messages: [(role: String, content: String)]) -> String? {
+        messages.last { $0.role == "user" }.flatMap { $0.content.trimmingCharacters(in: .whitespacesAndNewlines).components(separatedBy: "\n").last }?
+            .trimmingCharacters(in: .whitespaces).unlessBlank
+    }
+
+    /// The language a translation is asked for, as its prompt names it (翻译为中文, into English).
+    static func intoIn(_ messages: [(role: String, content: String)]) -> String? {
+        let all = messages.map(\.content).joined(separator: "\n")
+        if let match = all.firstMatch(of: /翻译[为成](\p{Han}{1,6}?)[，,：:\n]/) { return String(match.1) }
+        if let match = all.firstMatch(of: /into ([A-Z][a-z]+)/) { return String(match.1) }
+        return nil
     }
 
     private func transcribe(_ request: Request, _ allow: [(String, String)]) async -> Response {
@@ -259,4 +383,9 @@ nonisolated enum Network {
         }
         return found
     }
+}
+
+nonisolated extension String {
+    /// Nil for an empty string.
+    var unlessBlank: String? { isEmpty ? nil : self }
 }

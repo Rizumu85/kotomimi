@@ -16,8 +16,8 @@ struct BoxPanel<Thing: View, Content: View>: View {
             VStack(spacing: 0) {
                 if !regular { Capsule().fill(Palette.ink3.opacity(0.5)).frame(width: 36, height: 5).padding(.top, 8) }
                 HStack(spacing: 14) {
-                    thing.frame(width: 44, height: 44)
-                    Text(title).font(.system(size: 22, weight: .semibold)).foregroundStyle(Palette.ink)
+                    thing.frame(width: 36, height: 36)
+                    Text(title).font(.system(size: 19, weight: .semibold)).foregroundStyle(Palette.ink)
                     Spacer(minLength: 0)
                     Button(action: close) {
                         Image(systemName: "xmark").font(.system(size: 14, weight: .semibold)).foregroundStyle(Palette.ink2).frame(width: 26, height: 26)
@@ -26,18 +26,18 @@ struct BoxPanel<Thing: View, Content: View>: View {
                     .buttonBorderShape(.circle)
                     .accessibilityLabel("关闭")
                 }
-                .padding(.horizontal, 22)
-                .padding(.top, regular ? 22 : 12)
-                .padding(.bottom, 14)
+                .padding(.horizontal, 20)
+                .padding(.top, regular ? 18 : 10)
+                .padding(.bottom, 12)
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 12) { content }
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 20)
+                    VStack(alignment: .leading, spacing: 10) { content }
+                        .padding(.horizontal, 14)
+                        .padding(.bottom, 16)
                 }
                 .scrollBounceBehavior(.basedOnSize)
             }
-            .frame(width: regular ? 560 : box.size.width - 16)
-            .frame(maxHeight: box.size.height * (regular ? 0.8 : 0.86), alignment: .top)
+            .frame(width: regular ? 480 : box.size.width - 16)
+            .frame(maxHeight: box.size.height * (regular ? 0.72 : 0.86), alignment: .top)
             .fixedSize(horizontal: false, vertical: true)
             .glassEffect(.regular.tint(Palette.tile.opacity(0.55)), in: .rect(cornerRadius: 36))
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: regular ? .center : .bottom)
@@ -57,9 +57,10 @@ struct BoxCard<Content: View>: View {
             if let title { Text(title).font(.system(size: 16, weight: .semibold)).foregroundStyle(Palette.ink) }
             content
         }
-        .padding(18)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Palette.card.opacity(0.9), in: .rect(cornerRadius: 22))
+        .background(Palette.card.opacity(0.9), in: .rect(cornerRadius: 20))
     }
 }
 
@@ -71,29 +72,34 @@ private struct Note: View {
 
 // ── The boxes ─────────────────────────────────────────────────────────────────────────────────────────────────
 
-struct LanguagesBox: View {
+struct ModelsBox: View {
     let close: () -> Void
     @Environment(Hearing.self) private var hearing
+    @Environment(TextStore.self) private var text
     @State private var failure: String?
 
     var body: some View {
-        BoxPanel(title: "识别语言", close: close) { LetterThing(letter: "あ") } content: {
-            BoxCard {
+        BoxPanel(title: "模型管理", close: close) { WaterThing() } content: {
+            BoxCard(title: "语音识别") {
                 let shown = hearing.languages.filter { $0.state != .unsupported }
-                VStack(spacing: 0) {
-                    ForEach(Array(shown.enumerated()), id: \.element.id) { at, language in
-                        row(language)
-                        if at < shown.count - 1 { Rectangle().fill(Palette.cardLine).frame(height: 1) }
-                    }
-                }
+                Rows(count: shown.count) { at in language(shown[at]) }
             }
             Note(text: "电脑没有指定语言时，用打勾的语言。")
             if let failure { Note(text: failure).foregroundStyle(Palette.inkRed) }
+            BoxCard(title: "文本翻译") {
+                let shown = TextModel.all.filter { $0.kind == .translate }
+                Rows(count: shown.count) { at in model(shown[at]) }
+            }
+            BoxCard(title: "语法反馈") {
+                let shown = TextModel.all.filter { $0.kind == .coach }
+                Rows(count: shown.count) { at in model(shown[at]) }
+            }
+            Note(text: "按住已下载的一行可以删除。")
         }
         .task { await hearing.refresh() }
     }
 
-    @ViewBuilder private func row(_ language: Hearing.Language) -> some View {
+    @ViewBuilder private func language(_ language: Hearing.Language) -> some View {
         HStack(spacing: 12) {
             Text(language.name).font(.system(size: 16)).foregroundStyle(Palette.ink)
             Spacer()
@@ -105,7 +111,7 @@ struct LanguagesBox: View {
                     Text("已下载").font(.system(size: 14)).foregroundStyle(Palette.ink3)
                 }
             case .fetching(let done):
-                ProgressView(value: done).tint(Palette.good).frame(width: 90)
+                ProgressView(value: done).tint(Palette.good).frame(width: 80)
                 Text("\(Int(done * 100))%").font(.system(size: 14).monospacedDigit()).foregroundStyle(Palette.ink2)
             case .offered, .unknown:
                 Button("下载") { fetch(language.id) }.buttonStyle(.glass).controlSize(.small)
@@ -113,7 +119,7 @@ struct LanguagesBox: View {
                 EmptyView()
             }
         }
-        .frame(minHeight: 48)
+        .frame(minHeight: 46)
         .contentShape(.rect)
         .onTapGesture { if language.state == .ready { hearing.preferred = language.id } }
         .contextMenu {
@@ -123,10 +129,63 @@ struct LanguagesBox: View {
         }
     }
 
+    @ViewBuilder private func model(_ model: TextModel) -> some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(model.name).font(.system(size: 16)).foregroundStyle(Palette.ink)
+                Text(String(format: "%.1f GB", Double(model.bytes) / 1_073_741_824)).font(.system(size: 13)).foregroundStyle(Palette.ink3)
+            }
+            Spacer()
+            switch text.state(model) {
+            case .ready:
+                Text("已下载").font(.system(size: 14)).foregroundStyle(Palette.ink3)
+            case .fetching(let done, let from):
+                VStack(alignment: .trailing, spacing: 3) {
+                    ProgressView(value: done).tint(Palette.good).frame(width: 80)
+                    Text(from.isEmpty ? "\(Int(done * 100))%" : "\(Int(done * 100))% · \(from)").font(.system(size: 12).monospacedDigit()).foregroundStyle(Palette.ink2)
+                }
+                Button { text.cancel(model) } label: { Image(systemName: "xmark").font(.system(size: 12, weight: .semibold)) }
+                    .buttonStyle(.glass).buttonBorderShape(.circle).controlSize(.small).accessibilityLabel("停止下载")
+            case .checking:
+                ProgressView().controlSize(.small)
+                Text("核对中").font(.system(size: 14)).foregroundStyle(Palette.ink2)
+            case .missing:
+                Button("下载") { text.fetch(model) }.buttonStyle(.glass).controlSize(.small)
+            case .failed(let why):
+                VStack(alignment: .trailing, spacing: 4) {
+                    Button("重试") { text.fetch(model) }.buttonStyle(.glass).controlSize(.small)
+                    Text(why).font(.system(size: 12)).foregroundStyle(Palette.inkRed).lineLimit(2).multilineTextAlignment(.trailing)
+                }
+            }
+        }
+        .frame(minHeight: 50)
+        .contentShape(.rect)
+        .contextMenu {
+            if text.state(model) == .ready {
+                Button("删除 \(model.name)", systemImage: "trash", role: .destructive) { text.delete(model) }
+            }
+        }
+    }
+
     private func fetch(_ code: String) {
         failure = nil
         Task {
             do { try await hearing.install(code) } catch { failure = "下载没有完成：\(error.localizedDescription)" }
+        }
+    }
+}
+
+/// Rows of a card, with a hairline between them.
+private struct Rows<Row: View>: View {
+    let count: Int
+    @ViewBuilder let row: (Int) -> Row
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ForEach(0..<count, id: \.self) { at in
+                row(at)
+                if at < count - 1 { Rectangle().fill(Palette.cardLine).frame(height: 1) }
+            }
         }
     }
 }

@@ -9,14 +9,17 @@ import UIKit
 struct KotomimiApp: App {
     @State private var hearing: Hearing
     @State private var lending: Lending
+    @State private var text: TextStore
     @State private var check = SelfCheck()
     @AppStorage("look.appearance") private var appearance = "system"
     @Environment(\.scenePhase) private var scene
 
     init() {
         let hearing = Hearing()
+        let text = TextStore()
         _hearing = State(initialValue: hearing)
-        _lending = State(initialValue: Lending(hearing: hearing))
+        _text = State(initialValue: text)
+        _lending = State(initialValue: Lending(hearing: hearing, text: text))
     }
 
     var body: some Scene {
@@ -24,6 +27,9 @@ struct KotomimiApp: App {
             Home()
                 .environment(hearing)
                 .environment(lending)
+                .environment(text)
+                // The system says memory is short: the text models go, before the system ends the app for them.
+                .onReceive(NotificationCenter.default.publisher(for: UIApplication.didReceiveMemoryWarningNotification)) { _ in lending.engine.release() }
                 .environment(check)
                 .preferredColorScheme(appearance == "light" ? .light : appearance == "dark" ? .dark : nil)
                 .task {

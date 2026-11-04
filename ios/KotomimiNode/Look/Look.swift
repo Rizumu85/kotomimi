@@ -147,14 +147,17 @@ struct Tile<Content: View>: View {
 
 /// Hearing: a glass of water, dark with the water's mint in its lower part.
 struct WaterThing: View {
+    @Environment(\.colorScheme) private var scheme
+
     var body: some View {
         GeometryReader { box in
             let s = min(box.size.width, box.size.height)
             ZStack(alignment: .bottom) {
-                RoundedRectangle(cornerRadius: s * 0.2).fill(Palette.waterTile)
-                Palette.water.frame(height: s * 0.92 * 0.42)
+                RoundedRectangle(cornerRadius: s * 0.2).fill(scheme == .dark ? Palette.dial : Palette.waterTile)
+                Palette.water.frame(height: s * 0.92 * 0.42).shadow(color: scheme == .dark ? Palette.water.opacity(0.6) : .clear, radius: s * 0.12)
             }
             .clipShape(.rect(cornerRadius: s * 0.2))
+            .overlay(RoundedRectangle(cornerRadius: s * 0.2).stroke(scheme == .dark ? Palette.dialEdge : .clear, lineWidth: 1.3))
             .frame(width: s * 0.74, height: s * 0.92)
             .frame(width: box.size.width, height: box.size.height)
         }
@@ -321,5 +324,57 @@ struct FadersThing: View {
                 context.fill(Path(roundedRect: knob, cornerRadius: s * 0.03), with: .color(i == 1 ? Palette.key : Palette.dialHand))
             }
         }
+    }
+}
+
+/// Translation: two panes, a pale apricot one behind and a white one in front (`PANES` in Look.kt).
+struct PanesThing: View {
+    @Environment(\.colorScheme) private var scheme
+
+    var body: some View {
+        GeometryReader { box in
+            let s = min(box.size.width, box.size.height)
+            ZStack(alignment: .topLeading) {
+                if scheme == .dark {
+                    RoundedRectangle(cornerRadius: s * 0.18).fill(Palette.dial).overlay(RoundedRectangle(cornerRadius: s * 0.18).stroke(Palette.dialEdge, lineWidth: 1.3))
+                        .frame(width: s * 0.6, height: s * 0.6).offset(x: s * 0.04, y: s * 0.04)
+                    RoundedRectangle(cornerRadius: s * 0.18).fill(Palette.key.opacity(0.25)).overlay(RoundedRectangle(cornerRadius: s * 0.18).stroke(Palette.key.opacity(0.7), lineWidth: 1.3))
+                        .frame(width: s * 0.62, height: s * 0.62).offset(x: s * 0.32, y: s * 0.32)
+                } else {
+                    RoundedRectangle(cornerRadius: s * 0.18).fill(Color(red: 0.94, green: 0.67, blue: 0.35).opacity(0.55))
+                        .frame(width: s * 0.62, height: s * 0.62).offset(x: s * 0.02, y: s * 0.02)
+                    RoundedRectangle(cornerRadius: s * 0.18).fill(.white.opacity(0.94))
+                        .shadow(color: Color(red: 0.59, green: 0.39, blue: 0.16).opacity(0.2), radius: 3, y: 2)
+                        .frame(width: s * 0.62, height: s * 0.62).offset(x: s * 0.32, y: s * 0.32)
+                }
+            }
+            .frame(width: box.size.width, height: box.size.height, alignment: .topLeading)
+        }
+    }
+}
+
+/// Grammar feedback: a sheet of ruled paper with a red dot at its corner (`NOTE` in Look.kt).
+struct NoteThing: View {
+    @Environment(\.colorScheme) private var scheme
+
+    var body: some View {
+        Canvas { context, size in
+            let s = min(size.width, size.height)
+            let dark = scheme == .dark
+            let sheet = CGRect(x: s * 0.14, y: s * 0.08, width: s * 0.68, height: s * 0.86)
+            let shape = Path(roundedRect: sheet, cornerRadius: s * 0.12)
+            context.fill(shape, with: .color(dark ? Palette.dial : .white))
+            if dark { context.stroke(shape, with: .color(Palette.dialEdge), lineWidth: 1.3) }
+            var y = sheet.minY + s * 0.28
+            while y < sheet.maxY - s * 0.1 {
+                var rule = Path()
+                rule.move(to: CGPoint(x: sheet.minX + s * 0.11, y: y)); rule.addLine(to: CGPoint(x: sheet.maxX - s * 0.11, y: y))
+                context.stroke(rule, with: .color(dark ? Palette.dialEdge : Color(red: 0.94, green: 0.91, blue: 0.89)), lineWidth: 1)
+                y += s * 0.18
+            }
+            let dot = CGRect(x: sheet.maxX - s * 0.02 - s * 0.1, y: sheet.minY + s * 0.02 - s * 0.1, width: s * 0.2, height: s * 0.2)
+            context.fill(Path(ellipseIn: dot), with: .color(dark ? Palette.key : Palette.inkRed))
+        }
+        .shadow(color: scheme == .dark ? .clear : Color(red: 0.47, green: 0.31, blue: 0.27).opacity(0.18), radius: 3, y: 2)
     }
 }
