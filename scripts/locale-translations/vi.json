@@ -1344,8 +1344,8 @@
     "text": "Không khởi động được bộ máy góp ý ngữ pháp."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Chưa tải mô hình phản hồi ngữ pháp ({{name}}). Hãy tải xuống để bắt đầu."
+    "en": "The grammar feedback model is not downloaded yet. Download it to start.",
+    "text": "Chưa tải mô hình phản hồi ngữ pháp. Hãy tải xuống để bắt đầu."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1384,8 +1384,8 @@
     "text": "Đang nạp mô hình… Lần đầu sau khi bật máy mất khoảng nửa phút."
   },
   "providers.localai.nativeMissing": {
-    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Chưa tải mô hình nhận dạng giọng nói ({{name}}). Hãy tải xuống để bắt đầu."
+    "en": "The speech recognition model is not downloaded yet. Download it to start.",
+    "text": "Chưa tải mô hình nhận dạng giọng nói. Hãy tải xuống để bắt đầu."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1800,8 +1800,8 @@
     "text": "Không khởi động được bộ máy dịch."
   },
   "providers.localai.translatorMissing": {
-    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Chưa tải mô hình dịch ({{name}}). Hãy tải xuống để bắt đầu."
+    "en": "The translation model is not downloaded yet. Download it to start.",
+    "text": "Chưa tải mô hình dịch. Hãy tải xuống để bắt đầu."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

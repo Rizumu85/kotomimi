@@ -1344,8 +1344,8 @@
     "text": "Kielioppipalautteen moottorin käynnistys epäonnistui."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Kielioppipalautemallia ({{name}}) ei ole vielä ladattu. Lataa se aloittaaksesi."
+    "en": "The grammar feedback model is not downloaded yet. Download it to start.",
+    "text": "Kieliopin palautemallia ei ole vielä ladattu. Lataa se aloittaaksesi."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1384,8 +1384,8 @@
     "text": "Ladataan malleja… Ensimmäisellä kerralla tietokoneen käynnistämisen jälkeen tähän menee noin puoli minuuttia."
   },
   "providers.localai.nativeMissing": {
-    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Puheentunnistusmallia ({{name}}) ei ole vielä ladattu. Lataa se aloittaaksesi."
+    "en": "The speech recognition model is not downloaded yet. Download it to start.",
+    "text": "Puheentunnistusmallia ei ole vielä ladattu. Lataa se aloittaaksesi."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1800,8 +1800,8 @@
     "text": "Käännösmoottorin käynnistys epäonnistui."
   },
   "providers.localai.translatorMissing": {
-    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Käännösmallia ({{name}}) ei ole vielä ladattu. Lataa se aloittaaksesi."
+    "en": "The translation model is not downloaded yet. Download it to start.",
+    "text": "Käännösmallia ei ole vielä ladattu. Lataa se aloittaaksesi."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

@@ -1340,8 +1340,8 @@
     "text": "వ్యాకరణ సూచనల ఇంజిన్ ప్రారంభం కాలేదు."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "వ్యాకరణ సూచన మోడల్ ({{name}}) ఇంకా డౌన్‌లోడ్ కాలేదు. ప్రారంభించడానికి డౌన్‌లోడ్ చేయండి."
+    "en": "The grammar feedback model is not downloaded yet. Download it to start.",
+    "text": "ఇంకా వ్యాకరణ ఫీడ్‌బ్యాక్ మోడల్ డౌన్‌లోడ్ కాలేదు. ప్రారంభించడానికి దీన్ని డౌన్‌లోడ్ చేయండి."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1380,8 +1380,8 @@
     "text": "మోడళ్లు లోడ్ అవుతున్నాయి… కంప్యూటర్ ఆన్ చేశాక మొదటిసారి సుమారు అర నిమిషం పడుతుంది."
   },
   "providers.localai.nativeMissing": {
-    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "వాక్య గుర్తింపు మోడల్ ({{name}}) ఇంకా డౌన్‌లోడ్ కాలేదు. ప్రారంభించడానికి డౌన్‌లోడ్ చేయండి."
+    "en": "The speech recognition model is not downloaded yet. Download it to start.",
+    "text": "ఇంకా ప్రసంగ గుర్తింపు మోడల్ డౌన్‌లోడ్ కాలేదు. ప్రారంభించడానికి దీన్ని డౌన్‌లోడ్ చేయండి."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1796,8 +1796,8 @@
     "text": "అనువాద ఇంజిన్ ప్రారంభం కాలేదు."
   },
   "providers.localai.translatorMissing": {
-    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "అనువాద మోడల్ ({{name}}) ఇంకా డౌన్‌లోడ్ కాలేదు. ప్రారంభించడానికి డౌన్‌లోడ్ చేయండి."
+    "en": "The translation model is not downloaded yet. Download it to start.",
+    "text": "ఇంకా అనువాద మోడల్ డౌన్‌లోడ్ కాలేదు. ప్రారంభించడానికి దీన్ని డౌన్‌లోడ్ చేయండి."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

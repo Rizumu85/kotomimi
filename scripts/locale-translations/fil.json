@@ -1468,8 +1468,8 @@
     "text": "Hindi masimulan ang makina para sa puna sa gramatika."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Hindi pa na-download ang modelo para sa feedback sa grammar ({{name}}). I-download ito para makapagsimula."
+    "en": "The grammar feedback model is not downloaded yet. Download it to start.",
+    "text": "Hindi pa nada-download ang modelo para sa feedback sa gramatika. I-download ito para magsimula."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1508,8 +1508,8 @@
     "text": "Nilo-load ang mga modelo… Mga kalahating minuto sa unang paggamit matapos buksan ang computer."
   },
   "providers.localai.nativeMissing": {
-    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Hindi pa na-download ang modelo sa pagkilala ng pananalita ({{name}}). I-download ito para makapagsimula."
+    "en": "The speech recognition model is not downloaded yet. Download it to start.",
+    "text": "Hindi pa nada-download ang modelo ng pagkilala ng boses. I-download ito para magsimula."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1924,8 +1924,8 @@
     "text": "Hindi masimulan ang makina ng pagsasalin."
   },
   "providers.localai.translatorMissing": {
-    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Hindi pa na-download ang modelo ng pagsasalin ({{name}}). I-download ito para makapagsimula."
+    "en": "The translation model is not downloaded yet. Download it to start.",
+    "text": "Hindi pa nada-download ang modelo ng pagsasalin. I-download ito para magsimula."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

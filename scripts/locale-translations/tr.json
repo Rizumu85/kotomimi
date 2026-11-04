@@ -1340,8 +1340,8 @@
     "text": "Dil bilgisi geri bildirim motoru başlatılamadı."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Dil bilgisi geri bildirim modeli ({{name}}) henüz indirilmedi. Başlamak için indirin."
+    "en": "The grammar feedback model is not downloaded yet. Download it to start.",
+    "text": "Dilbilgisi geri bildirim modeli henüz indirilmedi. Başlamak için indirin."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1380,8 +1380,8 @@
     "text": "Modeller yükleniyor… Bilgisayar açıldıktan sonra ilk seferde yaklaşık yarım dakika sürer."
   },
   "providers.localai.nativeMissing": {
-    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Konuşma tanıma modeli ({{name}}) henüz indirilmedi. Başlamak için indirin."
+    "en": "The speech recognition model is not downloaded yet. Download it to start.",
+    "text": "Konuşma tanıma modeli henüz indirilmedi. Başlamak için indirin."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1796,8 +1796,8 @@
     "text": "Çeviri motoru başlatılamadı."
   },
   "providers.localai.translatorMissing": {
-    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Çeviri modeli ({{name}}) henüz indirilmedi. Başlamak için indirin."
+    "en": "The translation model is not downloaded yet. Download it to start.",
+    "text": "Çeviri modeli henüz indirilmedi. Başlamak için indirin."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

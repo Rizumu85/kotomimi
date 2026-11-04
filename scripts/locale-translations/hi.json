@@ -1340,8 +1340,8 @@
     "text": "व्याकरण की सलाह का इंजन शुरू नहीं हो सका।"
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "व्याकरण प्रतिक्रिया मॉडल ({{name}}) अभी डाउनलोड नहीं किया गया है। शुरू करने के लिए इसे डाउनलोड करें।"
+    "en": "The grammar feedback model is not downloaded yet. Download it to start.",
+    "text": "व्याकरण प्रतिक्रिया मॉडल अभी डाउनलोड नहीं हुआ है। शुरू करने के लिए इसे डाउनलोड करें।"
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1380,8 +1380,8 @@
     "text": "मॉडल लोड हो रहे हैं… कंप्यूटर चालू करने के बाद पहली बार करीब आधा मिनट लगता है।"
   },
   "providers.localai.nativeMissing": {
-    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "भाषण पहचान मॉडल ({{name}}) अभी डाउनलोड नहीं किया गया है। शुरू करने के लिए इसे डाउनलोड करें।"
+    "en": "The speech recognition model is not downloaded yet. Download it to start.",
+    "text": "आवाज़ पहचान मॉडल अभी डाउनलोड नहीं हुआ है। शुरू करने के लिए इसे डाउनलोड करें।"
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1796,8 +1796,8 @@
     "text": "अनुवाद इंजन शुरू नहीं हो सका।"
   },
   "providers.localai.translatorMissing": {
-    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "अनुवाद मॉडल ({{name}}) अभी डाउनलोड नहीं किया गया है। शुरू करने के लिए इसे डाउनलोड करें।"
+    "en": "The translation model is not downloaded yet. Download it to start.",
+    "text": "अनुवाद मॉडल अभी डाउनलोड नहीं हुआ है। शुरू करने के लिए इसे डाउनलोड करें।"
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

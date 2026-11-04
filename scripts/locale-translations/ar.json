@@ -1340,8 +1340,8 @@
     "text": "تعذّر تشغيل محرك ملاحظات القواعد."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "لم يتم تنزيل نموذج ملاحظات القواعد ({{name}}) بعد. نزّله للبدء."
+    "en": "The grammar feedback model is not downloaded yet. Download it to start.",
+    "text": "لم يتم تنزيل نموذج الملاحظات النحوية بعد. نزّله للبدء."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1380,8 +1380,8 @@
     "text": "جارٍ تحميل النماذج… يستغرق ذلك نحو نصف دقيقة في المرة الأولى بعد تشغيل الكمبيوتر."
   },
   "providers.localai.nativeMissing": {
-    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "لم يتم تنزيل نموذج التعرّف على الكلام ({{name}}) بعد. نزّله للبدء."
+    "en": "The speech recognition model is not downloaded yet. Download it to start.",
+    "text": "لم يتم تنزيل نموذج التعرّف على الكلام بعد. نزّله للبدء."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1796,8 +1796,8 @@
     "text": "تعذّر تشغيل محرك الترجمة."
   },
   "providers.localai.translatorMissing": {
-    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "لم يتم تنزيل نموذج الترجمة ({{name}}) بعد. نزّله للبدء."
+    "en": "The translation model is not downloaded yet. Download it to start.",
+    "text": "لم يتم تنزيل نموذج الترجمة بعد. نزّله للبدء."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

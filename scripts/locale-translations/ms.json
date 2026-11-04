@@ -1356,8 +1356,8 @@
     "text": "Enjin maklum balas tatabahasa gagal dimulakan."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Model maklum balas tatabahasa ({{name}}) belum dimuat turun. Muat turunnya untuk mula."
+    "en": "The grammar feedback model is not downloaded yet. Download it to start.",
+    "text": "Model maklum balas tatabahasa belum dimuat turun. Muat turunnya untuk bermula."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1396,8 +1396,8 @@
     "text": "Sedang memuatkan model… Kali pertama selepas komputer dihidupkan mengambil masa kira-kira setengah minit."
   },
   "providers.localai.nativeMissing": {
-    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Model pengecaman pertuturan ({{name}}) belum dimuat turun. Muat turunnya untuk mula."
+    "en": "The speech recognition model is not downloaded yet. Download it to start.",
+    "text": "Model pengecaman pertuturan belum dimuat turun. Muat turunnya untuk bermula."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1812,8 +1812,8 @@
     "text": "Enjin terjemahan gagal dimulakan."
   },
   "providers.localai.translatorMissing": {
-    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Model terjemahan ({{name}}) belum dimuat turun. Muat turunnya untuk mula."
+    "en": "The translation model is not downloaded yet. Download it to start.",
+    "text": "Model terjemahan belum dimuat turun. Muat turunnya untuk bermula."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

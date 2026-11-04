@@ -1336,8 +1336,8 @@
     "text": "Не удалось запустить движок проверки грамматики."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Модель грамматических подсказок ({{name}}) ещё не скачана. Скачайте её, чтобы начать."
+    "en": "The grammar feedback model is not downloaded yet. Download it to start.",
+    "text": "Модель проверки грамматики ещё не скачана. Скачайте её, чтобы начать."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1376,8 +1376,8 @@
     "text": "Загрузка моделей… В первый раз после включения компьютера это занимает около полуминуты."
   },
   "providers.localai.nativeMissing": {
-    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Модель распознавания речи ({{name}}) ещё не скачана. Скачайте её, чтобы начать."
+    "en": "The speech recognition model is not downloaded yet. Download it to start.",
+    "text": "Модель распознавания речи ещё не скачана. Скачайте её, чтобы начать."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1792,8 +1792,8 @@
     "text": "Не удалось запустить движок перевода."
   },
   "providers.localai.translatorMissing": {
-    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Модель перевода ({{name}}) ещё не скачана. Скачайте её, чтобы начать."
+    "en": "The translation model is not downloaded yet. Download it to start.",
+    "text": "Модель перевода ещё не скачана. Скачайте её, чтобы начать."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

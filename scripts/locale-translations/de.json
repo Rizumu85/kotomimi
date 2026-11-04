@@ -1372,8 +1372,8 @@
     "text": "Die Engine für Grammatikfeedback konnte nicht gestartet werden."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Das Grammatik-Feedback-Modell ({{name}}) wurde noch nicht heruntergeladen. Lade es herunter, um zu beginnen."
+    "en": "The grammar feedback model is not downloaded yet. Download it to start.",
+    "text": "Das Grammatik-Feedback-Modell wurde noch nicht heruntergeladen. Lade es herunter, um zu beginnen."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1412,8 +1412,8 @@
     "text": "Modelle werden geladen… Beim ersten Mal nach dem Hochfahren dauert das etwa eine halbe Minute."
   },
   "providers.localai.nativeMissing": {
-    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Das Spracherkennungsmodell ({{name}}) wurde noch nicht heruntergeladen. Lade es herunter, um zu beginnen."
+    "en": "The speech recognition model is not downloaded yet. Download it to start.",
+    "text": "Das Spracherkennungsmodell wurde noch nicht heruntergeladen. Lade es herunter, um zu beginnen."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1828,8 +1828,8 @@
     "text": "Die Übersetzungs-Engine konnte nicht gestartet werden."
   },
   "providers.localai.translatorMissing": {
-    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Das Übersetzungsmodell ({{name}}) wurde noch nicht heruntergeladen. Lade es herunter, um zu beginnen."
+    "en": "The translation model is not downloaded yet. Download it to start.",
+    "text": "Das Übersetzungsmodell wurde noch nicht heruntergeladen. Lade es herunter, um zu beginnen."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

@@ -1340,8 +1340,8 @@
     "text": "இலக்கணக் கருத்து இயந்திரத்தைத் தொடங்க முடியவில்லை."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "இலக்கணப் பின்னூட்ட மாதிரி ({{name}}) இன்னும் பதிவிறக்கப்படவில்லை. தொடங்க இதைப் பதிவிறக்கவும்."
+    "en": "The grammar feedback model is not downloaded yet. Download it to start.",
+    "text": "இலக்கண கருத்தளிப்பு மாடல் இன்னும் பதிவிறக்கப்படவில்லை. தொடங்க அதை பதிவிறக்கவும்."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1380,8 +1380,8 @@
     "text": "மாதிரிகள் ஏற்றப்படுகின்றன… கணினியை இயக்கிய பின் முதல் முறை சுமார் அரை நிமிடம் ஆகும்."
   },
   "providers.localai.nativeMissing": {
-    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "பேச்சு அறிதல் மாதிரி ({{name}}) இன்னும் பதிவிறக்கப்படவில்லை. தொடங்க இதைப் பதிவிறக்கவும்."
+    "en": "The speech recognition model is not downloaded yet. Download it to start.",
+    "text": "பேச்சு அங்கீகார மாடல் இன்னும் பதிவிறக்கப்படவில்லை. தொடங்க அதை பதிவிறக்கவும்."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1796,8 +1796,8 @@
     "text": "மொழிபெயர்ப்பு இயந்திரத்தைத் தொடங்க முடியவில்லை."
   },
   "providers.localai.translatorMissing": {
-    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "மொழிபெயர்ப்பு மாதிரி ({{name}}) இன்னும் பதிவிறக்கப்படவில்லை. தொடங்க இதைப் பதிவிறக்கவும்."
+    "en": "The translation model is not downloaded yet. Download it to start.",
+    "text": "மொழிபெயர்ப்பு மாடல் இன்னும் பதிவிறக்கப்படவில்லை. தொடங்க அதை பதிவிறக்கவும்."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

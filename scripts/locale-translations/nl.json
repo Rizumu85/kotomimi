@@ -1380,8 +1380,8 @@
     "text": "De engine voor grammaticafeedback kon niet starten."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Het grammaticamodel voor feedback ({{name}}) is nog niet gedownload. Download het om te beginnen."
+    "en": "The grammar feedback model is not downloaded yet. Download it to start.",
+    "text": "Het model voor grammaticafeedback is nog niet gedownload. Download het om te beginnen."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1420,8 +1420,8 @@
     "text": "Modellen laden… De eerste keer na het opstarten van de computer duurt dit ongeveer een halve minuut."
   },
   "providers.localai.nativeMissing": {
-    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Het spraakherkenningsmodel ({{name}}) is nog niet gedownload. Download het om te beginnen."
+    "en": "The speech recognition model is not downloaded yet. Download it to start.",
+    "text": "Het spraakherkenningsmodel is nog niet gedownload. Download het om te beginnen."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1836,8 +1836,8 @@
     "text": "De vertaalengine kon niet starten."
   },
   "providers.localai.translatorMissing": {
-    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Het vertaalmodel ({{name}}) is nog niet gedownload. Download het om te beginnen."
+    "en": "The translation model is not downloaded yet. Download it to start.",
+    "text": "Het vertaalmodel is nog niet gedownload. Download het om te beginnen."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

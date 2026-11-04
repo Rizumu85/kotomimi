@@ -1360,8 +1360,8 @@
     "text": "Le moteur de correction grammaticale n'a pas pu démarrer."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Le modèle de correction grammaticale ({{name}}) n’est pas encore téléchargé. Téléchargez-le pour commencer."
+    "en": "The grammar feedback model is not downloaded yet. Download it to start.",
+    "text": "Le modèle de correction grammaticale n’est pas encore téléchargé. Téléchargez-le pour commencer."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1400,8 +1400,8 @@
     "text": "Chargement des modèles… Environ une demi-minute la première fois après le démarrage de l'ordinateur."
   },
   "providers.localai.nativeMissing": {
-    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Le modèle de reconnaissance vocale ({{name}}) n’est pas encore téléchargé. Téléchargez-le pour commencer."
+    "en": "The speech recognition model is not downloaded yet. Download it to start.",
+    "text": "Le modèle de reconnaissance vocale n’est pas encore téléchargé. Téléchargez-le pour commencer."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1816,8 +1816,8 @@
     "text": "Le moteur de traduction n'a pas pu démarrer."
   },
   "providers.localai.translatorMissing": {
-    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Le modèle de traduction ({{name}}) n’est pas encore téléchargé. Téléchargez-le pour commencer."
+    "en": "The translation model is not downloaded yet. Download it to start.",
+    "text": "Le modèle de traduction n’est pas encore téléchargé. Téléchargez-le pour commencer."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

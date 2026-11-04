@@ -1376,8 +1376,8 @@
     "text": "Motorn för grammatikhjälp kunde inte startas."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Modellen för grammatisk feedback ({{name}}) har inte laddats ner än. Ladda ner den för att börja."
+    "en": "The grammar feedback model is not downloaded yet. Download it to start.",
+    "text": "Modellen för grammatisk feedback har inte laddats ner än. Ladda ner den för att börja."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1416,8 +1416,8 @@
     "text": "Läser in modellerna… Första gången efter att datorn startats tar det ungefär en halv minut."
   },
   "providers.localai.nativeMissing": {
-    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Taligenkänningsmodellen ({{name}}) har inte laddats ner än. Ladda ner den för att börja."
+    "en": "The speech recognition model is not downloaded yet. Download it to start.",
+    "text": "Taligenkänningsmodellen har inte laddats ner än. Ladda ner den för att börja."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1832,8 +1832,8 @@
     "text": "Översättningsmotorn kunde inte startas."
   },
   "providers.localai.translatorMissing": {
-    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
-    "text": "Översättningsmodellen ({{name}}) har inte laddats ner än. Ladda ner den för att börja."
+    "en": "The translation model is not downloaded yet. Download it to start.",
+    "text": "Översättningsmodellen har inte laddats ner än. Ladda ner den för att börja."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",
