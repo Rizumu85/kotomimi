@@ -366,8 +366,13 @@ export async function coachUp(id: string, deps: NativeUpDeps = {}): Promise<void
 /** How long the engines stay up after the last run or device that used them: a stop and a start a moment later load nothing twice. */
 export const NATIVE_REST_MS = 60_000;
 
-/** The runs of this computer that are open now, and the devices it shares its models with that are listening or translating through an engine (`src/lib/lan/nativeShare.ts`). */
-const using = { runs: 0, asr: 0, translation: 0, coach: 0 };
+/**
+ * The runs of this computer that are open now, and the devices it shares its models with that are listening or
+ * translating through an engine (`src/lib/lan/nativeShare.ts`). `runAsr`, `runTranslation`: of the runs, those that
+ * hear by the engine the app downloads, or translate by the native translator — a run that hears by the Mac's own
+ * recognition, or translates elsewhere, keeps the engines up but leaves their model free to switch.
+ */
+const using = { runs: 0, asr: 0, translation: 0, coach: 0, runAsr: 0, runTranslation: 0 };
 let resting: ReturnType<typeof setTimeout> | null = null;
 
 export interface NativeRestDeps {
@@ -421,7 +426,7 @@ const release = (kind: keyof typeof using, deps?: NativeRestDeps): (() => void) 
  * first is doing.
  */
 export function nativeTaken(kind: 'asr' | 'translation'): string | null {
-  if (using.runs === 0 && using[kind] === 0) return null;
+  if (using[kind] === 0 && using[kind === 'asr' ? 'runAsr' : 'runTranslation'] === 0) return null;
   return downloadedUp((kind === 'asr' ? useNativeEngineStore : useNativeTranslatorStore).getState().status);
 }
 
@@ -437,8 +442,19 @@ export function preferNative(choice: { asr?: NativePick | null; translation?: st
 }
 export const nativePreference = (): Readonly<typeof preferred> => preferred;
 
-/** A run of this computer is open: its engines stay up until what is returned is called, and a while longer. */
-export const holdNativeForRun = (deps?: NativeRestDeps): (() => void) => release('runs', deps);
+/**
+ * A run of this computer is open: its engines stay up until what is returned is called, and a while longer. `uses`:
+ * the engines whose model it runs by, which nobody else's request switches meanwhile (`nativeTaken`).
+ */
+export function holdNativeForRun(deps?: NativeRestDeps, uses: { asr?: boolean; translation?: boolean } = {}): () => void {
+  const held = [release('runs', deps), ...(uses.asr ? [release('runAsr', deps)] : []), ...(uses.translation ? [release('runTranslation', deps)] : [])];
+  return () => { for (const one of held) one(); };
+}
+
+/** Whether a run that hears these languages by this pick runs by the engine the app downloads, not only the Mac's own recognition. */
+export function hearsByDownloaded(chosen: NativePick | string, heard: readonly string[]): boolean {
+  return hearing(typeof chosen === 'string' ? { model: chosen } : chosen, heard).some((one) => !isApple(one.id));
+}
 
 /**
  * A device this computer shares its models with is using an engine

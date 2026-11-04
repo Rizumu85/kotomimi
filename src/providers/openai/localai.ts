@@ -66,7 +66,7 @@ import { recognizerAsked, serverBilingual } from './serverRecognizers';
 import { phoneBase, plainAddress } from '../../lib/lan/discover';
 import { deviceLanguage, canDetectOther, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, hearsNatively, needsServer, serverDetects, PLACE_FIELDS, PLACES, translatesNatively, type AsrHere, type Place } from './localaiDevice';
 import { NATIVE_MODELS, preferNative, type NativePick } from './localaiNative';
-import { NATIVE_DEFAULT_MODEL, appleAlso, coachBaseUrl, coachGap, coachIdle, coachUp, hearingPick, holdNativeForRun, nativeEither, nativeGap, nativeUp, restNative, translatorUp, nativeIdle, nativeModelFor, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
+import { NATIVE_DEFAULT_MODEL, appleAlso, coachBaseUrl, coachGap, coachIdle, coachUp, hearingPick, hearsByDownloaded, holdNativeForRun, nativeEither, nativeGap, nativeUp, restNative, translatorUp, nativeIdle, nativeModelFor, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_COACH_EXTRA, NATIVE_COACHES, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
 import { NATIVE_DEFAULT_TRANSLATOR, NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator, translatorRequest } from './nativeTranslators';
 import { LocalAITurnDetectionControls, LocalAITurnDetectionHelp, LocalAITurnDetectionSummary } from './LocalAIEngine';
@@ -946,7 +946,7 @@ export async function prepareLocalAI(shape: { pair: { source: string; target: st
   // that never opened, the page going away — the run's signal is aborted on every one of them. Not only from the
   // moment a leg opens: its source may take a minute to open, and the minute's rest would have stopped them by then.
   if (signal && (needs.hears || needs.translates || needs.coaches)) {
-    const done = holdNativeForRun();
+    const done = holdNativeForRun(undefined, { asr: !!needs.hears && hearsByDownloaded(needs.hears.pick, needs.hears.heard), translation: !!needs.translates });
     if (signal.aborted) done();
     else signal.addEventListener('abort', done, { once: true });
   }

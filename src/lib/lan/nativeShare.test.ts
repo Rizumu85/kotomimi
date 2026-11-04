@@ -206,7 +206,7 @@ describe('an engine that is someone\u2019s is not switched to another model', ()
 
   it('leaves a recognizer that a run of this computer is using on its model: a device that needs another is given none of the engine\u2019s', () => {
     useNativeEngineStore.setState({ status: { ...BOTH, run: { state: 'ready', model: 'r2t2-q8', port: 4100, tail: '' }, up: ['r2t2-q8'] } });
-    const done = holdNativeForRun(QUIET);
+    const done = holdNativeForRun(QUIET, { asr: true });
     try {
       // What it hears, it answers for, whichever of the engine's models was named.
       expect(nativeRecognizerFor('ja', 'qwen3-asr-1.7b-q8')).toEqual({ modelId: 'r2t2-q8', streaming: true });
@@ -323,7 +323,12 @@ describe('two sessions of one device at once (fork)', () => {
 
   it('are refused as busy, not as having no model, while the engine is held with one that does not hear the language', () => {
     useNativeEngineStore.setState({ status: { ...BOTH, up: ['sensevoice-small-q8'] } });
-    const done = holdNativeForRun({ stop: { asr() {}, translation() {}, coach() {} }, setTimer: () => 0 as unknown as ReturnType<typeof setTimeout>, clearTimer: () => {} });
+    const quiet = { stop: { asr() {}, translation() {}, coach() {} }, setTimer: () => 0 as unknown as ReturnType<typeof setTimeout>, clearTimer: () => {} };
+    // A run of this computer that hears by the Mac's own recognition leaves the engine's model free.
+    const apple = holdNativeForRun(quiet);
+    expect(nativeRecognizerFor('auto', 'qwen3-asr-1.7b-q8')).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
+    apple();
+    const done = holdNativeForRun(quiet, { asr: true });
     try {
       expect(nativeRecognizerFor('auto', 'qwen3-asr-1.7b-q8')).toBeNull();
       expect(nativeRecognizerRefusal('auto', 'qwen3-asr-1.7b-q8')).toBe('busy');
