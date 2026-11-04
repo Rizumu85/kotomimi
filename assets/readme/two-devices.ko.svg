@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="346" viewBox="0 0 1200 346" role="img" aria-labelledby="title desc">
+  <title id="title">두 기기로 함께 쓰기</title>
+  <desc id="desc">One computer shares the models it has downloaded; another device chooses "another device", finds it on the same network by itself, and uses its models.</desc>
+  <rect width="1200" height="346" rx="24" fill="#1c1c1c"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', 'Hiragino Sans', 'Yu Gothic UI', sans-serif">
+    <g id="lender">
+      <rect x="56" y="48" width="452" height="250" rx="16" fill="#262626" stroke="#383838" stroke-width="1.5"/>
+      <text x="84" y="92" font-size="20" fill="#8f8a80">빌려주는 컴퓨터</text>
+      <text x="84" y="132" font-size="28" font-weight="700" fill="#f4efe6">다른 기기와 공유</text>
+      <rect x="84" y="160" width="56" height="30" rx="15" fill="#3f7f61"/>
+      <circle cx="125" cy="175" r="11" fill="#f4efe6"/>
+      <text x="154" y="182" font-size="20" fill="#6fc79c">이 컴퓨터의 모델 공유</text>
+      <text x="84" y="240" font-size="20" fill="#bdb8ae">다운로드도 실행도 여기서</text>
+      <text x="84" y="268" font-size="18" fill="#8f8a80">어떤 모델을 쓸 수 있는지만 정함</text>
+    </g>
+
+    <g id="link">
+      <path d="M 528 165 H 664" fill="none" stroke="#d9bf8f" stroke-width="2.5" stroke-dasharray="3 9" stroke-linecap="round"/>
+      <path d="M 656 155 l 12 10 l -12 10" fill="none" stroke="#d9bf8f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="596" y="138" font-size="18" text-anchor="middle" fill="#d9bf8f">같은 네트워크</text>
+      <text x="596" y="204" font-size="18" text-anchor="middle" fill="#d9bf8f">자동으로 찾음</text>
+    </g>
+
+    <g id="user">
+      <rect x="692" y="48" width="452" height="250" rx="16" fill="#262626" stroke="#383838" stroke-width="1.5"/>
+      <text x="720" y="92" font-size="20" fill="#8f8a80">사용하는 기기</text>
+      <text x="720" y="132" font-size="28" font-weight="700" fill="#f4efe6">다른 기기</text>
+      <rect x="720" y="156" width="396" height="58" rx="10" fill="#2a332e" stroke="#3f7f61" stroke-width="1.5"/>
+      <text x="738" y="181" font-size="20" font-weight="600" fill="#f4efe6">거실 PC</text>
+      <rect x="850" y="163" width="118" height="24" rx="12" fill="#294536"/>
+      <text x="909" y="180" font-size="14" text-anchor="middle" fill="#6fc79c">Kotomimi 공유</text>
+      <text x="738" y="204" font-size="16" fill="#8f8a80">모델 3개</text>
+      <path d="M 1086 180 l 7 8 l 13 -15" fill="none" stroke="#6fc79c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="720" y="248" font-size="20" fill="#bdb8ae">한 번 누르면 연결, 주소는 몰라도 됨</text>
+      <text x="720" y="276" font-size="18" fill="#8f8a80">언어와 모델은 이 기기에서 선택</text>
+    </g>
+  </g>
+</svg>

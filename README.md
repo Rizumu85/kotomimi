@@ -3,15 +3,18 @@
 </p>
 
 <p align="center">
+  <b>简体中文</b> · <a href="README.en.md">English</a> · <a href="README.ja.md">日本語</a> · <a href="README.ko.md">한국어</a>
+</p>
+
+<p align="center">
   <a href="https://github.com/Rizumu85/kotomimi/releases/latest"><b>下载电脑版</b></a>
   · <a href="#安卓手机端">安卓手机端</a>
   · <a href="#三步上手">三步上手</a>
   · <a href="#和-vrchat-一起用">VRChat 和 VR</a>
-  · <a href="#english">English</a>
 </p>
 
 <p align="center">
-  <img src="./assets/readme/session.png" width="100%" alt="一次真实的会话：说一句中文，得到汉字上方带假名的日语译文">
+  <img src="./assets/readme/session.png" width="100%" alt="一次真实的会话：对方说一句日语，汉字上方带假名，下面是中文译文">
 </p>
 
 ## 这是什么
@@ -38,7 +41,7 @@ Sokuji 原有的云服务提供商（OpenAI、Gemini、Soniox 等）都还在。
    - **Windows**：`Kotomimi-x.y.z.Setup.exe`。安装包没有代码签名，Windows 会提示"未知发布者"：点"更多信息"，再点"仍要运行"。
    - **macOS（Apple 芯片）**：`Kotomimi-x.y.z-arm64.dmg`。没有经过 Apple 公证：拖进"应用程序"后，第一次要右键点应用，选"打开"。
 
-2. **跟着向导走。** 四步：界面语言、用途、语言、完成。结束后引导会带你下载一个语音识别模型；翻译默认用在线翻译，不用下载。之后想换个去处，随时在设置里改。
+2. **跟着向导走。** 四步：界面语言、用途、语言、完成。一切默认在这台电脑上运行：结束后引导会带你在环节卡片的"模型库"里下载听写和翻译模型，下完自动启用。之后想换个去处，随时在设置里改。
 
 3. **点"开始会话"，开口说话。**
 
@@ -64,7 +67,7 @@ Sokuji 原有的云服务提供商（OpenAI、Gemini、Soniox 等）都还在。
   <img src="./assets/readme/two-devices.svg" width="100%" alt="一台电脑打开共享，另一台设备选另一台设备后自动找到它并使用它的模型">
 </p>
 
-1. 在**出力的电脑**上：设置切到高级布局，在"提供商"页最下面打开"共享这台电脑的模型"。
+1. 在**出力的电脑**上：在设置的"提供商"页最下面，打开"共享给其他设备"里的"共享这台电脑的模型"。
 2. 在**另一台设备**上：在"另一台设备"一栏点搜索，点一下找到的设备就连上；再在想交给它的环节卡片里选"另一台设备"。
 
 两台设备要连同一个 Wi-Fi 或路由器，出力的那台要开着应用。Windows 防火墙挡住时，共享卡片里会出现"允许"按钮。语言和用哪个模型，在使用的那台设备上选。
@@ -73,7 +76,7 @@ Sokuji 原有的云服务提供商（OpenAI、Gemini、Soniox 等）都还在。
 
 电脑不够快，或者要同时开 VRChat？把一台安卓手机借给电脑，让手机来听写、翻译或给语法反馈。
 
-1. 打开[最新的发布页](https://github.com/Rizumu85/kotomimi/releases/latest)，在"安装"一节里点"安卓手机端"的链接，下载 `Kotomimi-phone-x.y.z.apk` 装到手机上（Android 9 及以上，要允许"安装未知来源的应用"）。只用这样装一次，以后它会自己更新。
+1. 打开[最新的发布页](https://github.com/Rizumu85/kotomimi/releases/latest)，在"安装"一节"安卓手机端"那一行点链接，下载 `Kotomimi-phone-x.y.z.apk` 装到手机上（Android 9 及以上，要允许"安装未知来源的应用"）。只用这样装一次，以后它会自己更新。
 2. 在手机上下载模型（建议连 Wi-Fi），点"自检"看这台手机跟不跟得上，再点"开始共享"。
 3. 在电脑的"另一台设备"一栏搜索，手机会出现在列表里，点一下就连上。
 
@@ -84,8 +87,8 @@ Sokuji 原有的云服务提供商（OpenAI、Gemini、Soniox 等）都还在。
 VRChat 和 Kotomimi 在同一台 Windows 电脑上时，设置的「常规」里有一张「VRChat」卡片（要在 VRChat 的快捷菜单里打开 OSC）：
 
 - **VRChat 静音时不识别我**：在 VRChat 里静音，Kotomimi 就不识别你说的话。
-- **头顶显示我的翻译**：你说的话（打字的也算）翻译后显示在头顶聊天框里，其他玩家能看到。
-- **播放视频时**：视频的声音会拖慢对方的翻译。可以选择询问、照常、加快或暂停对方；选「加快」时会尽量把视频声去掉，只听玩家说话，也可以把视频里说的话单独翻译出来。
+- **头顶显示**：你说的话（打字的也算）翻译后显示在头顶聊天框里，其他玩家能看到。可以选只显示译文，或原句和译文一起。
+- **世界里放视频时**：视频的声音会拖慢对方的翻译。可以选「每次问我」「只翻人声」「人声和视频都翻」或「先不翻译」；翻人声时会尽量把视频的声音去掉，只听玩家说话。
 - **我也说〇〇语**：在翻译语言下面打开，你说对方的语言时翻成你的语言，聊天框里两边的人都看得懂。
 
 ### 在头显里看字幕（试用）
@@ -122,7 +125,7 @@ VRChat 和 Kotomimi 在同一台 Windows 电脑上时，设置的「常规」里
 
 <br>
 
-电脑版点 **分享字幕**，再点"开启分享"：同一个网络里的人用手机扫码，或在电脑浏览器里输入地址，就能看到这里的字幕和译文，不用装任何东西。"打开投屏页"会显示一个大二维码，适合聚会或活动时投到屏幕上。
+电脑版在对话区右上角点 **分享字幕**，再点"开启分享"：同一个网络里的人用手机扫码，或在电脑浏览器里输入地址，就能看到这里的字幕和译文，不用装任何东西。"打开投屏页"会显示一个大二维码，适合聚会或活动时投到屏幕上。
 
 </details>
 
@@ -143,7 +146,7 @@ VRChat 和 Kotomimi 在同一台 Windows 电脑上时，设置的「常规」里
 <br>
 
 - **假名、拼音、粤拼和罗马音**在对话区右上角的显示设置里开关，在本机算出来，不调用模型，也不联网。
-- **个性化词典**在设置里：写下名字和专有词；被听错过的，在"听错成"里填听错的样子，以后会自动改对。也可以在对话里选中听错的词直接改。
+- **个性化词典**在设置的「常规」里：写下名字和专有词；被听错过的，在"听错成"里填听错的样子，以后会自动改对。也可以在对话里选中听错的词直接改。
 - **字体**在设置的"字体"里选；拉丁字体只作用于拉丁字母和数字，不会盖掉中文、日文的字体。
 
 </details>
@@ -155,7 +158,7 @@ VRChat 和 Kotomimi 在同一台 Windows 电脑上时，设置的「常规」里
 
 - "Kotomimi 自由搭配"只出文字，不合成语音。需要语音输出时，用 Sokuji 原有的提供商。
 - 识别走 API 时，文字要等一句话说完才出现。
-- macOS 版只有 Apple 芯片的构建，而且不能自动更新，新版本要手动下载。
+- macOS 版只有 Apple 芯片的构建。
 - VR 字幕只支持 Windows 和 SteamVR。
 - 这是个人分支，更新节奏和功能取舍以自用为准。
 
@@ -169,22 +172,3 @@ VRChat 和 Kotomimi 在同一台 Windows 电脑上时，设置的「常规」里
 ## 致谢与许可
 
 Kotomimi 建立在 [Kizuna AI Lab](https://github.com/kizuna-ai-lab) 的 [Sokuji](https://github.com/kizuna-ai-lab/sokuji) 之上，绝大部分代码是他们的工作。本仓库沿用同一份许可：[AGPL-3.0](LICENSE)。各模型和依赖的许可见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
-
----
-
-## English
-
-Kotomimi is a personal fork of [Sokuji](https://github.com/kizuna-ai-lab/sokuji), a live speech translation app, made for talking with friends in another language while learning it:
-
-- **Captions you can read**: furigana over Japanese, pinyin over Chinese, Jyutping over Cantonese, and an optional romanization line under Japanese, Korean and Russian.
-- **Stages you place yourself**: speech recognition, translation and grammar feedback each run on this computer, on another computer or an Android phone on your network, or on any OpenAI-compatible API, in any mix — offline if you like.
-- **VRChat**: follows your VRChat mute, puts your translation in the chatbox, and keeps world videos from slowing the translation. **Captions in a SteamVR headset** (trial): the other side's words below your line of sight, and a wrist panel, pressed with the other controller, to switch languages and try models while you play.
-- **The Android app** lends a phone to the computer for recognition, translation or feedback: its APK is linked under Installing on the [latest release](https://github.com/Rizumu85/kotomimi/releases/latest) (Android 9 or later); it updates itself.
-- **Captions shared** with people on the same Wi-Fi, who scan a QR code and read them in their browser.
-- **Typed lookups** (`Ctrl+K`), **grammar feedback** on your own speech, a **personal dictionary** for names and misheard words, **fonts** per language, and light or dark appearance.
-
-**Install**: download from [Releases](https://github.com/Rizumu85/kotomimi/releases/latest). The Windows installer is not code-signed, so Windows warns about an unknown publisher; the macOS build (Apple silicon) is not notarized, so right-click the app and choose Open the first time. Then follow the setup wizard. No account and no API key are needed.
-
-**Limits**: the Kotomimi provider is text-only; recognition through an API shows text only when a sentence ends; VR captions need Windows and SteamVR.
-
-Everything else — how the stages combine, the wire contract, building and releasing — is in [FORK.md](FORK.md) and [docs/fork/](docs/fork/). Sokuji is the work of [Kizuna AI Lab](https://github.com/kizuna-ai-lab); this fork keeps its license, [AGPL-3.0](LICENSE). Please report this fork's problems [here](https://github.com/Rizumu85/kotomimi/issues), not upstream.

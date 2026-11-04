@@ -1538,7 +1538,7 @@
         "title": "还有三件事",
         "content": "开始之前值得知道：",
         "typed": "会话开始后，底部会出现输入框：打一句话就能翻译。按 Ctrl+K 可以直接跳到输入框。",
-        "coach": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
+        "coach": "自己也说对方的语言？在设置里打开「语法反馈」。再打开「我也说对方的语言」，翻译和只给你看的语法反馈就能一起用。",
         "share": "另一台设备也能用这台电脑的模型：「设置 → 提供商 → 共享给其他设备」。"
       }
     }

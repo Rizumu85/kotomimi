@@ -1538,7 +1538,7 @@
         "title": "還有三件事",
         "content": "開始之前值得知道：",
         "typed": "工作階段開始後，底部會出現輸入框：打一句話就能翻譯。按 Ctrl+K 可以直接跳到輸入框。",
-        "coach": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
+        "coach": "自己也說對方的語言？在設定裡打開「文法回饋」。再打開「我也說對方的語言」，翻譯和只給你看的文法回饋就能一起用。",
         "share": "另一台裝置也能用這台電腦的模型：「設定 → 提供商 → 共享給其他裝置」。"
       }
     }

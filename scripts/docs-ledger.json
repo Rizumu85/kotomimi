@@ -16,7 +16,7 @@
     "dated": 0
   },
   "README.md": {
-    "bytes": 17408,
+    "bytes": 12288,
     "dated": 0
   },
   "android/README.md": {
@@ -50,5 +50,17 @@
   "native/README.md": {
     "bytes": 37888,
     "dated": 7
+  },
+  "README.en.md": {
+    "bytes": 13312,
+    "dated": 0
+  },
+  "README.ja.md": {
+    "bytes": 16384,
+    "dated": 0
+  },
+  "README.ko.md": {
+    "bytes": 15360,
+    "dated": 0
   }
 }
