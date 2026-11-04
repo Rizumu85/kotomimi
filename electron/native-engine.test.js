@@ -16,7 +16,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { createNativeEngine, openLive, languageName, languageLocale, modelHears, translatorFits, unspaced, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME } = require('./native-engine.js');
+const { createNativeEngine, openLive, languageName, languageLocale, modelHears, translatorFits, unspaced, echoOf, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME } = require('./native-engine.js');
 const { hfMirrorOf } = require('./fetch-file.js');
 
 const sha = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -205,6 +205,24 @@ describe('the translation runtime', () => {
     expect(again.run.key).toMatch(/^[0-9a-f]{48}$/);
     expect(again.run.key).not.toBe(status.run.key);
     await translator.stop();
+  });
+});
+
+describe('a reading that says the context back (fork)', () => {
+  const hints = ['VRC', '糖豆', '吉庆', '筱筱', '悠米露', 'Nanachiki', 'Jackal', '比翼鸟'];
+  const echo = echoOf(hints);
+
+  it('is nothing heard: the list of words to expect, with or without its lead', () => {
+    expect(echo('VRC、糖豆、吉庆、筱筱、悠米露、Nanachiki、Jackal、比翼鸟。')).toBe('');
+    expect(echo('可能出现的人名和词语：VRC、糖豆、吉庆')).toBe('');
+    expect(echo('糖豆，吉庆。')).toBe('');
+    expect(echo('jackal, nanachiki')).toBe('');
+  });
+
+  it('keeps a sentence that names the words, and one word said alone', () => {
+    expect(echo('今天和糖豆还有吉庆一起去VRC玩了。')).toBe('今天和糖豆还有吉庆一起去VRC玩了。');
+    expect(echo('糖豆。')).toBe('糖豆。');
+    expect(echo('糖豆、你好、明天见、走吧')).toBe('糖豆、你好、明天见、走吧');
   });
 });
 

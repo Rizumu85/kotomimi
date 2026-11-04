@@ -604,6 +604,26 @@ function unspaced(text) {
   return String(text).replace(SPACE_INSIDE, '');
 }
 
+/** What Qwen3-ASR is told to expect, ahead of a stretch (`openStream`). */
+const CONTEXT_LEAD = '可能出现的人名和词语：';
+
+/**
+ * Fork: a reading that is the context said back. Told the words to expect, Qwen3-ASR given a stretch with no clear
+ * voice in it — a game's sound, someone mumbling far off — now and then writes the list itself: 「VRC、糖豆、吉庆、筱筱」
+ * shown as the other side's sentence (the user, 2026-11-04). Such a reading is nothing heard: a run of two or more of
+ * the words with little else, cut at the list's marks. A sentence that names them, written as speech is, is kept.
+ */
+function echoOf(hints) {
+  const known = new Set(hints.map((hint) => String(hint).trim().toLowerCase()).filter(Boolean));
+  return (text) => {
+    const body = String(text).replace(new RegExp(`^\\s*${CONTEXT_LEAD.slice(0, -1)}[：:]\\s*`), '');
+    const parts = body.split(/[、，,。.!?！？;；:：\s]+/u).map((part) => part.trim().toLowerCase()).filter(Boolean);
+    const hits = parts.filter((part) => known.has(part)).length;
+    if (hits >= 2 && hits / parts.length >= 0.75) return '';
+    return body;
+  };
+}
+
 /**
  * Where to cut a stretch in two for reading the halves apart: the quietest fifth of a second in its middle third,
  * as a count of bytes from its start.
@@ -1203,9 +1223,13 @@ function createNativeEngine(deps = {}) {
     const said = model?.languageAs === 'code' ? languageCode(language) : model?.languageAs === 'locale' ? languageLocale(language) : languageName(language);
     // Fork: Qwen3-ASR takes words to expect as its context, and writes them: 1 of 10 rare names right without, 7 with
     // three hundred words told, and nothing invented with forty (measured 2026-10-31).
-    const context = model?.takesContext && hints.length > 0 ? `可能出现的人名和词语：${hints.join('、')}` : undefined;
+    const context = model?.takesContext && hints.length > 0 ? `${CONTEXT_LEAD}${hints.join('、')}` : undefined;
     const target = { port: run.port, model: run.model, sampleRate: rate, language: said, ...(context ? { context } : {}) };
-    const stream = (windowed ? window : live)(windowed ? { ...target, note, ...(model?.unspaced ? { tidy: unspaced } : {}) } : target, (event) => {
+    // What it wrote is put right before anything sees it: its spaces taken out where it puts them, the context it
+    // said back for want of a voice dropped.
+    const echo = context ? echoOf(hints) : null;
+    const tidy = echo && model?.unspaced ? (text) => echo(unspaced(text)) : echo ?? (model?.unspaced ? unspaced : null);
+    const stream = (windowed ? window : live)(windowed ? { ...target, note, ...(tidy ? { tidy } : {}) } : target, (event) => {
       if (event.type !== 'delta' && event.type !== 'partial') streams.delete(id);
       onStream({ id, ...event });
     });
@@ -1233,4 +1257,4 @@ function createNativeEngine(deps = {}) {
   return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream };
 }
 
-module.exports = { createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, unspaced, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, translatorFits, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };
+module.exports = { createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, unspaced, echoOf, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, translatorFits, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };
