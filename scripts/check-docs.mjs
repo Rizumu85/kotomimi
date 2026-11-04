@@ -21,8 +21,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const LEDGER = 'scripts/docs-ledger.json';
 const FORK_DOCS = 'docs/fork/';
-// What grows by nature: one file per release, and the licence texts of the dependencies.
-const FREE = [/^release-notes\//, /^CHANGELOG\.md$/, /^THIRD_PARTY_NOTICES\.md$/];
+// What grows by nature: one file per release, the licence texts of the dependencies, and the root READMEs, the app's
+// introduction in each language, which the user wants unlimited (2026-11-03).
+const FREE = [/^release-notes\//, /^CHANGELOG\.md$/, /^THIRD_PARTY_NOTICES\.md$/, /^README(\.[a-z]{2})?\.md$/];
 const REFUSED = 'Docs hold what is true now, not what happened: change the stale fact in place, and put measured '
   + 'numbers in docs/fork/measurements.md. Only the user can ask for more; see "Docs are not a work log" in CLAUDE.md.';
 
