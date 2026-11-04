@@ -648,12 +648,16 @@
     "text": "VR வினாடிக்கு {fps} படங்கள்"
   },
   "fork.vr.hand": {
-    "en": "Wrist",
-    "text": "கடிகாரம் அணியும் கை"
+    "en": "Wrist menu on",
+    "text": "மணிக்கட்டு மெனு இருக்கும் கை"
   },
   "fork.vr.hear": {
     "en": "Recognition",
     "text": "பேச்சை எழுத்தாக்குதல்"
+  },
+  "fork.vr.help": {
+    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
+    "text": "SteamVR இல், மற்றவர் பேசுவது உங்கள் பார்வைக்குக் கீழே தெரியும். மணிக்கட்டைக் குனிந்து பார்த்தால் ஒரு சிறிய மெனு தோன்றும். மற்ற கையில் உள்ள கன்ட்ரோலரால் அதைத் தொட்டு மொழியை மாற்றலாம், இடைநிறுத்தலாம் அல்லது வேறு மாடலை முயற்சிக்கலாம்."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -716,8 +720,8 @@
     "text": "வலது கை"
   },
   "fork.vr.setting": {
-    "en": "Show in the headset (SteamVR)",
-    "text": "ஹெட்செட்டில் காட்டு (SteamVR)"
+    "en": "Show captions and the wrist menu in the headset",
+    "text": "ஹெட்செட்டில் வசனங்களையும் மணிக்கட்டு மெனுவையும் காட்டு"
   },
   "fork.vr.show": {
     "en": "Show",
@@ -742,6 +746,10 @@
   "fork.vr.them": {
     "en": "Them",
     "text": "மற்றவர்"
+  },
+  "fork.vr.title": {
+    "en": "VR headset",
+    "text": "VR ஹெட்செட்"
   },
   "fork.vr.translate": {
     "en": "Translation",

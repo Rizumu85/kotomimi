@@ -1936,8 +1936,8 @@
     },
     "jyutping": "Jyutping kantoninkiinankielisen tekstin yläpuolella",
     "vr": {
-      "setting": "Näytä headsetissä (SteamVR)",
-      "hand": "Ranne",
+      "setting": "Näytä tekstitykset ja rannevalikko VR-laseissa",
+      "hand": "Rannevalikon käsi",
       "left": "Vasen ranne",
       "right": "Oikea ranne",
       "linkWaiting": "Odotetaan SteamVR:ää",
@@ -1967,7 +1967,9 @@
       "idle": "Ei kuuntele",
       "stopped": "Puheentunnistus pysähtyi. Aloita uudelleen kääntämällä rannettasi.",
       "stoppedShort": "Pysähtynyt",
-      "muted": "Mykistetty VRChatissa"
+      "muted": "Mykistetty VRChatissa",
+      "title": "VR-lasit",
+      "help": "SteamVR:ssä toisen puhe näkyy katseesi alapuolella. Katso ranteeseesi, niin pieni valikko tulee näkyviin. Paina sitä toisen käden ohjaimella, kun haluat vaihtaa kieltä, keskeyttää tai kokeilla toista mallia."
     }
   }
 }

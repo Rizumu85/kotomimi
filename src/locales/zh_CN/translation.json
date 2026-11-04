@@ -1759,8 +1759,10 @@
       "mutedNotHeard": "VRChat 静音中，不会识别你说的话。"
     },
     "vr": {
-      "setting": "在头显里显示（SteamVR）",
-      "hand": "腕表戴在",
+      "title": "VR 头显",
+      "help": "在 SteamVR 里，对方的话会显示在视线下方。低头看手腕会出现一个小菜单，用另一只手的手柄戳它，可以换语言、暂停，或者试试别的模型。",
+      "setting": "在头显里显示字幕和手腕菜单",
+      "hand": "手腕菜单在",
       "left": "左手",
       "right": "右手",
       "linkWaiting": "等 SteamVR 启动",

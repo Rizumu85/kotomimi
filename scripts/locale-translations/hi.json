@@ -648,12 +648,16 @@
     "text": "VR में {fps} फ़्रेम प्रति सेकंड"
   },
   "fork.vr.hand": {
-    "en": "Wrist",
-    "text": "किस कलाई पर"
+    "en": "Wrist menu on",
+    "text": "कलाई का मेन्यू किस हाथ पर"
   },
   "fork.vr.hear": {
     "en": "Recognition",
     "text": "बोली से लिखाई"
+  },
+  "fork.vr.help": {
+    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
+    "text": "SteamVR में सामने वाले की बातें आपकी नज़र से थोड़ा नीचे दिखेंगी। कलाई की ओर देखने पर एक छोटा मेन्यू दिखेगा। भाषा बदलने, रोकने या दूसरा मॉडल आज़माने के लिए दूसरे हाथ के कंट्रोलर से उसे दबाएँ।"
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -716,8 +720,8 @@
     "text": "दायाँ हाथ"
   },
   "fork.vr.setting": {
-    "en": "Show in the headset (SteamVR)",
-    "text": "हेडसेट में दिखाएँ (SteamVR)"
+    "en": "Show captions and the wrist menu in the headset",
+    "text": "हेडसेट में सबटाइटल और कलाई का मेन्यू दिखाएँ"
   },
   "fork.vr.show": {
     "en": "Show",
@@ -742,6 +746,10 @@
   "fork.vr.them": {
     "en": "Them",
     "text": "सामने वाला"
+  },
+  "fork.vr.title": {
+    "en": "VR headset",
+    "text": "VR हेडसेट"
   },
   "fork.vr.translate": {
     "en": "Translation",

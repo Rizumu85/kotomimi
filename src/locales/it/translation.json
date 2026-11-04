@@ -1936,8 +1936,8 @@
     },
     "jyutping": "Jyutping sopra il testo cantonese",
     "vr": {
-      "setting": "Mostra nel visore (SteamVR)",
-      "hand": "Polso",
+      "setting": "Mostra i sottotitoli e il menu al polso nel visore",
+      "hand": "Polso per il menu",
       "left": "Polso sinistro",
       "right": "Polso destro",
       "linkWaiting": "In attesa di SteamVR",
@@ -1967,7 +1967,9 @@
       "idle": "Non in ascolto",
       "stopped": "Riconoscimento interrotto. Ruota il polso per riavviarlo.",
       "stoppedShort": "Interrotto",
-      "muted": "Audio disattivato in VRChat"
+      "muted": "Audio disattivato in VRChat",
+      "title": "Visore VR",
+      "help": "In SteamVR, le parole dell'altra persona appaiono sotto la linea dello sguardo. Abbassa lo sguardo verso il polso per vedere un piccolo menu e toccalo con l'altro controller per cambiare lingua, mettere in pausa o provare un altro modello."
     }
   }
 }

@@ -652,12 +652,16 @@
     "text": "VR: {fps} kl./s"
   },
   "fork.vr.hand": {
-    "en": "Wrist",
-    "text": "Nadgarstek"
+    "en": "Wrist menu on",
+    "text": "Menu na nadgarstku"
   },
   "fork.vr.hear": {
     "en": "Recognition",
     "text": "Rozpoznawanie"
+  },
+  "fork.vr.help": {
+    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
+    "text": "W SteamVR słowa rozmówcy pojawiają się poniżej linii wzroku. Spójrz na nadgarstek, by zobaczyć małe menu. Dotknij go kontrolerem w drugiej ręce, aby zmienić język, wstrzymać tłumaczenie lub wypróbować inny model."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -720,8 +724,8 @@
     "text": "Prawy nadgarstek"
   },
   "fork.vr.setting": {
-    "en": "Show in the headset (SteamVR)",
-    "text": "Pokaż w goglach (SteamVR)"
+    "en": "Show captions and the wrist menu in the headset",
+    "text": "Pokazuj napisy i menu na nadgarstku w goglach"
   },
   "fork.vr.show": {
     "en": "Show",
@@ -746,6 +750,10 @@
   "fork.vr.them": {
     "en": "Them",
     "text": "Druga osoba"
+  },
+  "fork.vr.title": {
+    "en": "VR headset",
+    "text": "Gogle VR"
   },
   "fork.vr.translate": {
     "en": "Translation",

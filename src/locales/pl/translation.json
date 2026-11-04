@@ -1936,8 +1936,8 @@
     },
     "jyutping": "Jyutping nad tekstem kantońskim",
     "vr": {
-      "setting": "Pokaż w goglach (SteamVR)",
-      "hand": "Nadgarstek",
+      "setting": "Pokazuj napisy i menu na nadgarstku w goglach",
+      "hand": "Menu na nadgarstku",
       "left": "Lewy nadgarstek",
       "right": "Prawy nadgarstek",
       "linkWaiting": "Oczekiwanie na SteamVR",
@@ -1967,7 +1967,9 @@
       "idle": "Nie nasłuchuje",
       "stopped": "Rozpoznawanie zatrzymane. Obróć nadgarstek, aby uruchomić ponownie.",
       "stoppedShort": "Zatrzymano",
-      "muted": "Wyciszono w VRChat"
+      "muted": "Wyciszono w VRChat",
+      "title": "Gogle VR",
+      "help": "W SteamVR słowa rozmówcy pojawiają się poniżej linii wzroku. Spójrz na nadgarstek, by zobaczyć małe menu. Dotknij go kontrolerem w drugiej ręce, aby zmienić język, wstrzymać tłumaczenie lub wypróbować inny model."
     }
   }
 }

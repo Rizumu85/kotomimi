@@ -1936,8 +1936,8 @@
     },
     "jyutping": "Jyutping au-dessus du cantonais",
     "vr": {
-      "setting": "Afficher dans le casque (SteamVR)",
-      "hand": "Poignet",
+      "setting": "Afficher les sous-titres et le menu au poignet dans le casque",
+      "hand": "Poignet du menu",
       "left": "Gauche",
       "right": "Droit",
       "linkWaiting": "En attente du démarrage de SteamVR",
@@ -1967,7 +1967,9 @@
       "idle": "Écoute inactive",
       "stopped": "Transcription arrêtée. Tournez le poignet pour la relancer.",
       "stoppedShort": "Transcription arrêtée",
-      "muted": "Micro coupé dans VRChat"
+      "muted": "Micro coupé dans VRChat",
+      "title": "Casque VR",
+      "help": "Dans SteamVR, les paroles de votre interlocuteur s’affichent sous votre champ de vision. Regardez votre poignet pour faire apparaître un petit menu. Touchez-le avec l’autre manette pour changer de langue, mettre en pause ou essayer un autre modèle."
     }
   }
 }

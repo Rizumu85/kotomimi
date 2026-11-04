@@ -648,12 +648,16 @@
     "text": "VR {fps} fps-এ চলছে"
   },
   "fork.vr.hand": {
-    "en": "Wrist",
-    "text": "কবজি"
+    "en": "Wrist menu on",
+    "text": "কবজির মেনু কোন হাতে"
   },
   "fork.vr.hear": {
     "en": "Recognition",
     "text": "শ্রুতিলিখন"
+  },
+  "fork.vr.help": {
+    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
+    "text": "SteamVR-এ অন্যজনের কথা আপনার দৃষ্টিসীমার নিচে দেখাবে। কবজির দিকে তাকালে একটি ছোট মেনু দেখা যাবে। অন্য হাতের কন্ট্রোলার দিয়ে সেটিতে চাপ দিয়ে ভাষা বদলাতে, বিরতি দিতে বা অন্য মডেল ব্যবহার করে দেখতে পারবেন।"
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -716,8 +720,8 @@
     "text": "ডান কবজি"
   },
   "fork.vr.setting": {
-    "en": "Show in the headset (SteamVR)",
-    "text": "হেডসেটে দেখান (SteamVR)"
+    "en": "Show captions and the wrist menu in the headset",
+    "text": "হেডসেটে সাবটাইটেল ও কবজির মেনু দেখান"
   },
   "fork.vr.show": {
     "en": "Show",
@@ -742,6 +746,10 @@
   "fork.vr.them": {
     "en": "Them",
     "text": "ওরা"
+  },
+  "fork.vr.title": {
+    "en": "VR headset",
+    "text": "VR হেডসেট"
   },
   "fork.vr.translate": {
     "en": "Translation",

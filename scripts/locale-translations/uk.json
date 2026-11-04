@@ -644,12 +644,16 @@
     "text": "VR: {fps} кадрів/с"
   },
   "fork.vr.hand": {
-    "en": "Wrist",
-    "text": "На якій руці"
+    "en": "Wrist menu on",
+    "text": "Меню на зап’ястку"
   },
   "fork.vr.hear": {
     "en": "Recognition",
     "text": "Розпізнавання мовлення"
+  },
+  "fork.vr.help": {
+    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
+    "text": "У SteamVR слова співрозмовника з’являються трохи нижче поля зору. Погляньте на зап’ясток — там з’явиться невелике меню. Натискайте на нього контролером в іншій руці, щоб змінити мову, призупинити переклад або спробувати іншу модель."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -712,8 +716,8 @@
     "text": "На правій"
   },
   "fork.vr.setting": {
-    "en": "Show in the headset (SteamVR)",
-    "text": "Показувати в шоломі (SteamVR)"
+    "en": "Show captions and the wrist menu in the headset",
+    "text": "Показувати субтитри й меню на зап’ястку в гарнітурі"
   },
   "fork.vr.show": {
     "en": "Show",
@@ -738,6 +742,10 @@
   "fork.vr.them": {
     "en": "Them",
     "text": "Співрозмовник"
+  },
+  "fork.vr.title": {
+    "en": "VR headset",
+    "text": "VR-гарнітура"
   },
   "fork.vr.translate": {
     "en": "Translation",

@@ -23,7 +23,7 @@ Kotomimi (ことみみ) is a live speech translation app: when you or the other 
 
 - **Captions you can read**: furigana over Japanese kanji, pinyin over Chinese, Jyutping over Cantonese, and an optional romanization line under Japanese, Korean and Russian.
 - **A subtitle window**: the window becomes a single caption strip over your game, and clicks can pass through it to the game below.
-- **Captions in a VR headset** (trial): what the other side says appears below your line of sight, and a small panel on your wrist switches languages with a tap.
+- **Captions in a VR headset** (trial): what the other side says appears below your line of sight, and a wrist menu switches languages with a tap.
 - **VRChat**: follows your VRChat mute, puts your translation in the chatbox above your head, and keeps world videos from slowing the translation.
 - **Models where you want them**: speech recognition, translation and grammar feedback each run on this computer, another device on your network, an Android phone, or any API, in any mix. It works offline too.
 - **Captions for the people around you**: anyone on the same Wi-Fi scans a code and reads the captions and translations on their own phone.
@@ -97,14 +97,14 @@ When VRChat and Kotomimi run on the same Windows computer, the "General" setting
 
 ### Captions in the headset (trial)
 
-At the bottom of the card, turn on **Show in the headset (SteamVR)** and choose the left or right wrist. Windows and SteamVR only.
+The "General" settings have a "VR headset" card: turn on **Show captions and the wrist menu in the headset** and choose the left or right wrist. Windows and SteamVR only; it works in any SteamVR game.
 
 <p align="center">
-  <img src="./assets/readme/vr.en.webp" width="100%" alt="In the headset: the other side's words below the line of sight, the original small and the translation large; on the left wrist the panel, with the last lines, their language, and Pause, Hide and Adjust">
+  <img src="./assets/readme/vr.en.webp" width="100%" alt="In the headset: the other side's words below the line of sight, the original small and the translation large; on the left wrist the wrist menu, with the last lines, their language, and Pause, Hide and Adjust">
 </p>
 
 - **The caption strip**: the other side's latest sentence, the original small and the translation large, below your line of sight. It stays put when you turn your head a little and follows when you turn further; it clears when nothing new has been said for a while.
-- **The wrist panel**: appears when you look at your wrist. Press it directly with the other controller: it uses no buttons, so it works beside tools such as XSOverlay. Its first page shows whether each side is heard, the last few lines, the other side's language, pause, and hiding the strip.
+- **The wrist menu**: appears when you look at your wrist. Press it directly with the other controller: it uses no buttons, so it works beside tools such as XSOverlay. Its first page shows whether each side is heard, the last few lines, the other side's language, pause, and hiding the strip.
 - **Adjust**: switch your own language, the recognition model and the translation model. Each model shows how far behind it actually ran this session, above the headset's frame rate and the graphics memory, so you can try models while you play and see which keeps up without slowing the game. A switch restarts the session by itself, and the strip says "Switching to…".
 
 It is still a trial: feedback on where it sits and how it feels is welcome.

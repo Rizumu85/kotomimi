@@ -1936,8 +1936,8 @@
     },
     "jyutping": "Jyutping di atas teks Kanton",
     "vr": {
-      "setting": "Tampilkan di headset (SteamVR)",
-      "hand": "Pergelangan tangan",
+      "setting": "Tampilkan subtitel dan menu pergelangan tangan di headset",
+      "hand": "Menu di pergelangan tangan",
       "left": "Pergelangan tangan kiri",
       "right": "Pergelangan tangan kanan",
       "linkWaiting": "Menunggu SteamVR",
@@ -1967,7 +1967,9 @@
       "idle": "Tidak mendengarkan",
       "stopped": "Pengenalan berhenti. Putar pergelangan tangan untuk memulai lagi.",
       "stoppedShort": "Berhenti",
-      "muted": "Dibisukan di VRChat"
+      "muted": "Dibisukan di VRChat",
+      "title": "Headset VR",
+      "help": "Di SteamVR, ucapan lawan bicara muncul di bawah pandangan Anda. Lihat ke pergelangan tangan untuk menampilkan menu kecil. Sentuh menu dengan pengontrol di tangan satunya untuk mengganti bahasa, menjeda, atau mencoba model lain."
     }
   }
 }

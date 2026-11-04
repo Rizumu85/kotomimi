@@ -648,12 +648,16 @@
     "text": "VR దృశ్యం {fps} ఫ్రేములు"
   },
   "fork.vr.hand": {
-    "en": "Wrist",
-    "text": "ధరించే మణికట్టు"
+    "en": "Wrist menu on",
+    "text": "మణికట్టు మెనూ ఉండే వైపు"
   },
   "fork.vr.hear": {
     "en": "Recognition",
     "text": "మాటలను అక్షరాల్లోకి"
+  },
+  "fork.vr.help": {
+    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
+    "text": "SteamVR లో అవతలి వారి మాటలు మీ చూపుకు దిగువన కనిపిస్తాయి. తల వంచి మణికట్టు వైపు చూస్తే చిన్న మెనూ కనిపిస్తుంది. మరో చేతిలోని కంట్రోలర్‌తో దాన్ని తాకి భాషలు మార్చవచ్చు, పాజ్ చేయవచ్చు లేదా మరో మోడల్‌ను ప్రయత్నించవచ్చు."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -716,8 +720,8 @@
     "text": "కుడి చేయి"
   },
   "fork.vr.setting": {
-    "en": "Show in the headset (SteamVR)",
-    "text": "హెడ్‌సెట్‌లో చూపించు (SteamVR)"
+    "en": "Show captions and the wrist menu in the headset",
+    "text": "హెడ్‌సెట్‌లో ఉపశీర్షికలు, మణికట్టు మెనూ చూపించు"
   },
   "fork.vr.show": {
     "en": "Show",
@@ -742,6 +746,10 @@
   "fork.vr.them": {
     "en": "Them",
     "text": "అవతలి వ్యక్తి"
+  },
+  "fork.vr.title": {
+    "en": "VR headset",
+    "text": "VR హెడ్‌సెట్"
   },
   "fork.vr.translate": {
     "en": "Translation",

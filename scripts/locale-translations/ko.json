@@ -648,12 +648,16 @@
     "text": "VR 화면 {fps}프레임"
   },
   "fork.vr.hand": {
-    "en": "Wrist",
-    "text": "착용할 손목"
+    "en": "Wrist menu on",
+    "text": "손목 메뉴 위치"
   },
   "fork.vr.hear": {
     "en": "Recognition",
     "text": "받아쓰기"
+  },
+  "fork.vr.help": {
+    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
+    "text": "SteamVR에서는 상대방의 말이 시야 아래쪽에 표시돼요. 고개를 숙여 손목을 보면 작은 메뉴가 나타나요. 반대쪽 컨트롤러로 눌러 언어를 바꾸거나, 일시 정지하거나, 다른 모델을 사용해 보세요."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -716,8 +720,8 @@
     "text": "오른쪽"
   },
   "fork.vr.setting": {
-    "en": "Show in the headset (SteamVR)",
-    "text": "헤드셋에 표시 (SteamVR)"
+    "en": "Show captions and the wrist menu in the headset",
+    "text": "헤드셋에 자막과 손목 메뉴 표시"
   },
   "fork.vr.show": {
     "en": "Show",
@@ -742,6 +746,10 @@
   "fork.vr.them": {
     "en": "Them",
     "text": "상대방"
+  },
+  "fork.vr.title": {
+    "en": "VR headset",
+    "text": "VR 헤드셋"
   },
   "fork.vr.translate": {
     "en": "Translation",

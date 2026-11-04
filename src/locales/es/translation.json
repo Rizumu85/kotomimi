@@ -1936,8 +1936,8 @@
     },
     "jyutping": "Jyutping sobre el texto cantonés",
     "vr": {
-      "setting": "Mostrar en el visor (SteamVR)",
-      "hand": "Muñeca",
+      "setting": "Mostrar subtítulos y el menú de muñeca en el visor",
+      "hand": "Menú de muñeca en",
       "left": "Izquierda",
       "right": "Derecha",
       "linkWaiting": "Esperando a que se inicie SteamVR",
@@ -1967,7 +1967,9 @@
       "idle": "Sin escuchar",
       "stopped": "La transcripción se ha detenido. Gira la muñeca para volver a empezar.",
       "stoppedShort": "Transcripción detenida",
-      "muted": "Micrófono silenciado en VRChat"
+      "muted": "Micrófono silenciado en VRChat",
+      "title": "Visor de VR",
+      "help": "En SteamVR, lo que dice la otra persona aparece debajo de tu campo de visión. Mira hacia tu muñeca para ver un pequeño menú y tócalo con el mando de la otra mano para cambiar de idioma, pausar o probar otro modelo."
     }
   }
 }

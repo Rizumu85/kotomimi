@@ -1936,8 +1936,8 @@
     },
     "jyutping": "Jyutping boven Kantonese tekst",
     "vr": {
-      "setting": "In de headset tonen (SteamVR)",
-      "hand": "Pols",
+      "setting": "Ondertiteling en polsmenu in de headset tonen",
+      "hand": "Polsmenu aan",
       "left": "Linkerpols",
       "right": "Rechterpols",
       "linkWaiting": "Wachten tot SteamVR start",
@@ -1967,7 +1967,9 @@
       "idle": "Luistert niet",
       "stopped": "Spraakherkenning gestopt. Draai je pols om opnieuw te starten.",
       "stoppedShort": "Gestopt",
-      "muted": "Gedempt in VRChat"
+      "muted": "Gedempt in VRChat",
+      "title": "VR-headset",
+      "help": "In SteamVR verschijnen de woorden van je gesprekspartner onder je blikveld. Kijk omlaag naar je pols om een klein menu te zien. Tik erop met de controller in je andere hand om van taal te wisselen, te pauzeren of een ander model te proberen."
     }
   }
 }

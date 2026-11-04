@@ -648,12 +648,16 @@
     "text": "VR בקצב {fps} פריימים לשנייה"
   },
   "fork.vr.hand": {
-    "en": "Wrist",
-    "text": "מיקום השעון"
+    "en": "Wrist menu on",
+    "text": "תפריט פרק כף היד ביד"
   },
   "fork.vr.hear": {
     "en": "Recognition",
     "text": "תמלול"
+  },
+  "fork.vr.help": {
+    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
+    "text": "ב-SteamVR, הדברים של הצד השני מופיעים מתחת לקו הראייה. מבט למטה אל פרק כף היד מציג תפריט קטן. אפשר ללחוץ עליו עם הבקר שביד השנייה כדי להחליף שפה, להשהות או לנסות מודל אחר."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -716,8 +720,8 @@
     "text": "יד ימין"
   },
   "fork.vr.setting": {
-    "en": "Show in the headset (SteamVR)",
-    "text": "הצגה במשקפי VR ‏(SteamVR)"
+    "en": "Show captions and the wrist menu in the headset",
+    "text": "הצגת כתוביות ותפריט פרק כף היד במשקפי המציאות המדומה"
   },
   "fork.vr.show": {
     "en": "Show",
@@ -742,6 +746,10 @@
   "fork.vr.them": {
     "en": "Them",
     "text": "הצד השני"
+  },
+  "fork.vr.title": {
+    "en": "VR headset",
+    "text": "משקפי VR"
   },
   "fork.vr.translate": {
     "en": "Translation",

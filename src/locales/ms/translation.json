@@ -1936,8 +1936,8 @@
     },
     "jyutping": "Jyutping di atas teks Kantonis",
     "vr": {
-      "setting": "Papar dalam set kepala (SteamVR)",
-      "hand": "Pakai jam pada",
+      "setting": "Paparkan sari kata dan menu pergelangan tangan dalam set kepala",
+      "hand": "Menu pada pergelangan tangan",
       "left": "Tangan kiri",
       "right": "Tangan kanan",
       "linkWaiting": "Menunggu SteamVR bermula",
@@ -1967,7 +1967,9 @@
       "idle": "Tidak mendengar",
       "stopped": "Pengecaman dihentikan. Pusingkan pergelangan tangan untuk mula semula.",
       "stoppedShort": "Pengecaman dihentikan",
-      "muted": "Dibisukan dalam VRChat"
+      "muted": "Dibisukan dalam VRChat",
+      "title": "Set kepala VR",
+      "help": "Dalam SteamVR, kata-kata orang lain dipaparkan di bawah pandangan anda. Tunduk ke arah pergelangan tangan untuk melihat menu kecil. Tekan menu itu dengan alat kawalan di tangan sebelah lagi untuk menukar bahasa, menjeda atau mencuba model lain."
     }
   }
 }

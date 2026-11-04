@@ -648,12 +648,16 @@
     "text": "VR ที่ {fps} fps"
   },
   "fork.vr.hand": {
-    "en": "Wrist",
-    "text": "ข้อมือ"
+    "en": "Wrist menu on",
+    "text": "ข้อมือที่แสดงเมนู"
   },
   "fork.vr.hear": {
     "en": "Recognition",
     "text": "ถอดเสียง"
+  },
+  "fork.vr.help": {
+    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
+    "text": "ใน SteamVR คำพูดของอีกฝ่ายจะแสดงใต้แนวสายตา ก้มมองข้อมือจะเห็นเมนูเล็ก ๆ ใช้คอนโทรลเลอร์อีกข้างแตะเมนูเพื่อเปลี่ยนภาษา หยุดชั่วคราว หรือลองโมเดลอื่น"
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -716,8 +720,8 @@
     "text": "ข้อมือขวา"
   },
   "fork.vr.setting": {
-    "en": "Show in the headset (SteamVR)",
-    "text": "แสดงในแว่น (SteamVR)"
+    "en": "Show captions and the wrist menu in the headset",
+    "text": "แสดงคำบรรยายและเมนูข้อมือในแว่น VR"
   },
   "fork.vr.show": {
     "en": "Show",
@@ -742,6 +746,10 @@
   "fork.vr.them": {
     "en": "Them",
     "text": "อีกฝ่าย"
+  },
+  "fork.vr.title": {
+    "en": "VR headset",
+    "text": "แว่น VR"
   },
   "fork.vr.translate": {
     "en": "Translation",

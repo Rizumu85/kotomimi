@@ -1936,8 +1936,8 @@
     },
     "jyutping": "Jyutping acima do cantonês",
     "vr": {
-      "setting": "Mostrar no headset (SteamVR)",
-      "hand": "Usar no pulso",
+      "setting": "Mostrar legendas e o menu de pulso no headset",
+      "hand": "Menu no pulso",
       "left": "Esquerdo",
       "right": "Direito",
       "linkWaiting": "Aguardando o SteamVR iniciar",
@@ -1967,7 +1967,9 @@
       "idle": "Sem ouvir",
       "stopped": "A transcrição parou. Vire o pulso para recomeçar.",
       "stoppedShort": "Transcrição parada",
-      "muted": "Microfone silenciado no VRChat"
+      "muted": "Microfone silenciado no VRChat",
+      "title": "Headset VR",
+      "help": "No SteamVR, a fala da outra pessoa aparece abaixo da sua linha de visão. Olhe para o pulso para ver um pequeno menu e toque nele com o controle da outra mão para trocar de idioma, pausar ou testar outro modelo."
     }
   }
 }

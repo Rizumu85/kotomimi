@@ -644,12 +644,16 @@
     "text": "VR {fps} fps"
   },
   "fork.vr.hand": {
-    "en": "Wrist",
-    "text": "Ranne"
+    "en": "Wrist menu on",
+    "text": "Rannevalikon käsi"
   },
   "fork.vr.hear": {
     "en": "Recognition",
     "text": "Sanelu"
+  },
+  "fork.vr.help": {
+    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
+    "text": "SteamVR:ssä toisen puhe näkyy katseesi alapuolella. Katso ranteeseesi, niin pieni valikko tulee näkyviin. Paina sitä toisen käden ohjaimella, kun haluat vaihtaa kieltä, keskeyttää tai kokeilla toista mallia."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -712,8 +716,8 @@
     "text": "Oikea ranne"
   },
   "fork.vr.setting": {
-    "en": "Show in the headset (SteamVR)",
-    "text": "Näytä headsetissä (SteamVR)"
+    "en": "Show captions and the wrist menu in the headset",
+    "text": "Näytä tekstitykset ja rannevalikko VR-laseissa"
   },
   "fork.vr.show": {
     "en": "Show",
@@ -738,6 +742,10 @@
   "fork.vr.them": {
     "en": "Them",
     "text": "He"
+  },
+  "fork.vr.title": {
+    "en": "VR headset",
+    "text": "VR-lasit"
   },
   "fork.vr.translate": {
     "en": "Translation",

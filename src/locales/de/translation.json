@@ -1936,8 +1936,8 @@
     },
     "jyutping": "Jyutping über kantonesischem Text",
     "vr": {
-      "setting": "Im Headset anzeigen (SteamVR)",
-      "hand": "Armband tragen",
+      "setting": "Untertitel und Handgelenkmenü im Headset anzeigen",
+      "hand": "Handgelenkmenü auf",
       "left": "Links",
       "right": "Rechts",
       "linkWaiting": "Warte auf SteamVR-Start",
@@ -1967,7 +1967,9 @@
       "idle": "Hört nicht zu",
       "stopped": "Spracherkennung gestoppt. Drehe dein Handgelenk, um sie erneut zu starten.",
       "stoppedShort": "Spracherkennung gestoppt",
-      "muted": "In VRChat stummgeschaltet"
+      "muted": "In VRChat stummgeschaltet",
+      "title": "VR-Headset",
+      "help": "In SteamVR erscheinen die Worte deines Gegenübers unterhalb deines Sichtfelds. Schau auf dein Handgelenk, um ein kleines Menü zu sehen. Tippe es mit dem Controller der anderen Hand an, um die Sprache zu wechseln, zu pausieren oder ein anderes Modell auszuprobieren."
     }
   }
 }

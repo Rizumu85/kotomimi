@@ -1936,8 +1936,8 @@
     },
     "jyutping": "Jyutping ovanför kantonesisk text",
     "vr": {
-      "setting": "Visa i headsetet (SteamVR)",
-      "hand": "Handled",
+      "setting": "Visa undertexter och handledsmenyn i headsetet",
+      "hand": "Handledsmeny på",
       "left": "Vänster handled",
       "right": "Höger handled",
       "linkWaiting": "Väntar på SteamVR",
@@ -1967,7 +1967,9 @@
       "idle": "Lyssnar inte",
       "stopped": "Taligenkänningen stoppades. Vrid handleden för att starta igen.",
       "stoppedShort": "Stoppad",
-      "muted": "Ljudet är avstängt i VRChat"
+      "muted": "Ljudet är avstängt i VRChat",
+      "title": "VR-headset",
+      "help": "I SteamVR visas det den andra personen säger strax under ditt synfält. Titta ner på handleden så visas en liten meny. Tryck på den med kontrollen i andra handen för att byta språk, pausa eller prova en annan modell."
     }
   }
 }

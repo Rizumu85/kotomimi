@@ -700,12 +700,16 @@
     "text": "VR sa {fps} fps"
   },
   "fork.vr.hand": {
-    "en": "Wrist",
-    "text": "Pulso"
+    "en": "Wrist menu on",
+    "text": "Menu sa pulso ng"
   },
   "fork.vr.hear": {
     "en": "Recognition",
     "text": "Pagkilala sa boses"
+  },
+  "fork.vr.help": {
+    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
+    "text": "Sa SteamVR, lalabas ang sinasabi ng kausap sa ibaba ng iyong paningin. Tumingin sa iyong pulso para makita ang maliit na menu. Pindutin ito gamit ang controller sa kabilang kamay para magpalit ng wika, mag-pause, o sumubok ng ibang modelo."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -768,8 +772,8 @@
     "text": "Kanang pulso"
   },
   "fork.vr.setting": {
-    "en": "Show in the headset (SteamVR)",
-    "text": "Ipakita sa headset (SteamVR)"
+    "en": "Show captions and the wrist menu in the headset",
+    "text": "Ipakita ang mga subtitle at menu sa pulso sa headset"
   },
   "fork.vr.show": {
     "en": "Show",
@@ -794,6 +798,10 @@
   "fork.vr.them": {
     "en": "Them",
     "text": "Sila"
+  },
+  "fork.vr.title": {
+    "en": "VR headset",
+    "text": "VR headset"
   },
   "fork.vr.translate": {
     "en": "Translation",

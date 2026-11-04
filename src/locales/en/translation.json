@@ -1759,8 +1759,10 @@
       "mutedNotHeard": "Muted in VRChat: what you say is not recognized."
     },
     "vr": {
-      "setting": "Show in the headset (SteamVR)",
-      "hand": "Wrist",
+      "title": "VR headset",
+      "help": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
+      "setting": "Show captions and the wrist menu in the headset",
+      "hand": "Wrist menu on",
       "left": "Left wrist",
       "right": "Right wrist",
       "linkWaiting": "Waiting for SteamVR",

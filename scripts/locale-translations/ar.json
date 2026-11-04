@@ -648,12 +648,16 @@
     "text": "الواقع الافتراضي: {fps} إطار/ثانية"
   },
   "fork.vr.hand": {
-    "en": "Wrist",
-    "text": "معصم الساعة"
+    "en": "Wrist menu on",
+    "text": "موضع قائمة المعصم"
   },
   "fork.vr.hear": {
     "en": "Recognition",
     "text": "إملاء صوتي"
+  },
+  "fork.vr.help": {
+    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
+    "text": "في SteamVR، يظهر كلام الطرف الآخر أسفل مجال رؤيتك. انظر إلى معصمك لتظهر قائمة صغيرة، واضغط عليها بوحدة التحكم في يدك الأخرى لتغيير اللغة أو الإيقاف المؤقت أو تجربة نموذج آخر."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -716,8 +720,8 @@
     "text": "اليمين"
   },
   "fork.vr.setting": {
-    "en": "Show in the headset (SteamVR)",
-    "text": "عرض داخل النظارة (SteamVR)"
+    "en": "Show captions and the wrist menu in the headset",
+    "text": "إظهار الترجمة وقائمة المعصم داخل نظارة الواقع الافتراضي"
   },
   "fork.vr.show": {
     "en": "Show",
@@ -742,6 +746,10 @@
   "fork.vr.them": {
     "en": "Them",
     "text": "الطرف الآخر"
+  },
+  "fork.vr.title": {
+    "en": "VR headset",
+    "text": "نظارة الواقع الافتراضي"
   },
   "fork.vr.translate": {
     "en": "Translation",

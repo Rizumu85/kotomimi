@@ -1936,8 +1936,8 @@
     },
     "jyutping": "Hiện jyutping trên tiếng Quảng Đông",
     "vr": {
-      "setting": "Hiển thị trong kính VR (SteamVR)",
-      "hand": "Đeo đồng hồ ở",
+      "setting": "Hiện phụ đề và menu cổ tay trong kính VR",
+      "hand": "Menu trên cổ tay",
       "left": "Tay trái",
       "right": "Tay phải",
       "linkWaiting": "Đang chờ SteamVR khởi động",
@@ -1967,7 +1967,9 @@
       "idle": "Không nghe",
       "stopped": "Đã dừng nhận dạng giọng nói. Lật cổ tay để bắt đầu lại.",
       "stoppedShort": "Đã dừng nhận dạng",
-      "muted": "Đã tắt mic trong VRChat"
+      "muted": "Đã tắt mic trong VRChat",
+      "title": "Kính VR",
+      "help": "Trong SteamVR, lời của người kia sẽ hiện bên dưới tầm nhìn. Cúi nhìn cổ tay để mở menu nhỏ, rồi dùng tay cầm bên kia chạm vào để đổi ngôn ngữ, tạm dừng hoặc thử mô hình khác."
     }
   }
 }

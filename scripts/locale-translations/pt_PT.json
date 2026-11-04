@@ -644,12 +644,16 @@
     "text": "VR a {fps} fps"
   },
   "fork.vr.hand": {
-    "en": "Wrist",
-    "text": "Pulso"
+    "en": "Wrist menu on",
+    "text": "Menu no pulso"
   },
   "fork.vr.hear": {
     "en": "Recognition",
     "text": "Transcrição"
+  },
+  "fork.vr.help": {
+    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
+    "text": "No SteamVR, o que a outra pessoa diz aparece abaixo do teu campo de visão. Olha para o pulso para ver um pequeno menu e toca-lhe com o comando da outra mão para mudar de idioma, fazer uma pausa ou experimentar outro modelo."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -712,8 +716,8 @@
     "text": "Direito"
   },
   "fork.vr.setting": {
-    "en": "Show in the headset (SteamVR)",
-    "text": "Mostrar no visor (SteamVR)"
+    "en": "Show captions and the wrist menu in the headset",
+    "text": "Mostrar legendas e o menu do pulso nos óculos de realidade virtual"
   },
   "fork.vr.show": {
     "en": "Show",
@@ -738,6 +742,10 @@
   "fork.vr.them": {
     "en": "Them",
     "text": "Outra pessoa"
+  },
+  "fork.vr.title": {
+    "en": "VR headset",
+    "text": "Óculos de RV"
   },
   "fork.vr.translate": {
     "en": "Translation",

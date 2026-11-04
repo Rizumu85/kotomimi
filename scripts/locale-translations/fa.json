@@ -648,12 +648,16 @@
     "text": "واقعیت مجازی با {fps} فریم بر ثانیه"
   },
   "fork.vr.hand": {
-    "en": "Wrist",
-    "text": "محل بستن ساعت"
+    "en": "Wrist menu on",
+    "text": "منوی مچ دست روی"
   },
   "fork.vr.hear": {
     "en": "Recognition",
     "text": "تبدیل گفتار به متن"
+  },
+  "fork.vr.help": {
+    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
+    "text": "در SteamVR، حرف‌های طرف مقابل زیر میدان دیدتان نمایش داده می‌شود. به مچ دستتان نگاه کنید تا یک منوی کوچک ظاهر شود. با کنترلر دست دیگر روی آن بزنید تا زبان را عوض کنید، مکث کنید یا مدل دیگری را امتحان کنید."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -716,8 +720,8 @@
     "text": "دست راست"
   },
   "fork.vr.setting": {
-    "en": "Show in the headset (SteamVR)",
-    "text": "نمایش در هدست (SteamVR)"
+    "en": "Show captions and the wrist menu in the headset",
+    "text": "نمایش زیرنویس و منوی مچ دست در هدست"
   },
   "fork.vr.show": {
     "en": "Show",
@@ -742,6 +746,10 @@
   "fork.vr.them": {
     "en": "Them",
     "text": "طرف مقابل"
+  },
+  "fork.vr.title": {
+    "en": "VR headset",
+    "text": "هدست واقعیت مجازی"
   },
   "fork.vr.translate": {
     "en": "Translation",

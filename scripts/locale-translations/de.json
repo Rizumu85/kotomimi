@@ -652,12 +652,16 @@
     "text": "VR mit {fps} fps"
   },
   "fork.vr.hand": {
-    "en": "Wrist",
-    "text": "Armband tragen"
+    "en": "Wrist menu on",
+    "text": "Handgelenkmenü auf"
   },
   "fork.vr.hear": {
     "en": "Recognition",
     "text": "Transkription"
+  },
+  "fork.vr.help": {
+    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
+    "text": "In SteamVR erscheinen die Worte deines Gegenübers unterhalb deines Sichtfelds. Schau auf dein Handgelenk, um ein kleines Menü zu sehen. Tippe es mit dem Controller der anderen Hand an, um die Sprache zu wechseln, zu pausieren oder ein anderes Modell auszuprobieren."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -720,8 +724,8 @@
     "text": "Rechts"
   },
   "fork.vr.setting": {
-    "en": "Show in the headset (SteamVR)",
-    "text": "Im Headset anzeigen (SteamVR)"
+    "en": "Show captions and the wrist menu in the headset",
+    "text": "Untertitel und Handgelenkmenü im Headset anzeigen"
   },
   "fork.vr.show": {
     "en": "Show",
@@ -746,6 +750,10 @@
   "fork.vr.them": {
     "en": "Them",
     "text": "Gegenüber"
+  },
+  "fork.vr.title": {
+    "en": "VR headset",
+    "text": "VR-Headset"
   },
   "fork.vr.translate": {
     "en": "Translation",

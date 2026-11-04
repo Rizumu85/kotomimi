@@ -648,12 +648,16 @@
     "text": "VR pada {fps} fps"
   },
   "fork.vr.hand": {
-    "en": "Wrist",
-    "text": "Pergelangan tangan"
+    "en": "Wrist menu on",
+    "text": "Menu di pergelangan tangan"
   },
   "fork.vr.hear": {
     "en": "Recognition",
     "text": "Pengenalan"
+  },
+  "fork.vr.help": {
+    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
+    "text": "Di SteamVR, ucapan lawan bicara muncul di bawah pandangan Anda. Lihat ke pergelangan tangan untuk menampilkan menu kecil. Sentuh menu dengan pengontrol di tangan satunya untuk mengganti bahasa, menjeda, atau mencoba model lain."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -716,8 +720,8 @@
     "text": "Pergelangan tangan kanan"
   },
   "fork.vr.setting": {
-    "en": "Show in the headset (SteamVR)",
-    "text": "Tampilkan di headset (SteamVR)"
+    "en": "Show captions and the wrist menu in the headset",
+    "text": "Tampilkan subtitel dan menu pergelangan tangan di headset"
   },
   "fork.vr.show": {
     "en": "Show",
@@ -742,6 +746,10 @@
   "fork.vr.them": {
     "en": "Them",
     "text": "Mereka"
+  },
+  "fork.vr.title": {
+    "en": "VR headset",
+    "text": "Headset VR"
   },
   "fork.vr.translate": {
     "en": "Translation",

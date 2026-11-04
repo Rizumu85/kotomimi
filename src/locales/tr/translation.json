@@ -1936,8 +1936,8 @@
     },
     "jyutping": "Kantonca metnin üzerinde jyutping",
     "vr": {
-      "setting": "Başlıkta göster (SteamVR)",
-      "hand": "Bilek",
+      "setting": "VR başlığında altyazıları ve bilek menüsünü göster",
+      "hand": "Bilek menüsünün konumu",
       "left": "Sol bilek",
       "right": "Sağ bilek",
       "linkWaiting": "SteamVR bekleniyor",
@@ -1967,7 +1967,9 @@
       "idle": "Dinlemiyor",
       "stopped": "Tanıma durdu. Yeniden başlatmak için bileğinizi çevirin.",
       "stoppedShort": "Durduruldu",
-      "muted": "VRChat'te sessize alındı"
+      "muted": "VRChat'te sessize alındı",
+      "title": "VR başlığı",
+      "help": "SteamVR'da karşınızdakinin söyledikleri görüş alanınızın altında görünür. Bileğinize baktığınızda küçük bir menü açılır. Diğer elinizdeki kontrolcüyle menüye dokunarak dili değiştirebilir, duraklatabilir veya başka bir model deneyebilirsiniz."
     }
   }
 }

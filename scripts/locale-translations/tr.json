@@ -648,12 +648,16 @@
     "text": "VR {fps} FPS"
   },
   "fork.vr.hand": {
-    "en": "Wrist",
-    "text": "Bilek"
+    "en": "Wrist menu on",
+    "text": "Bilek menüsünün konumu"
   },
   "fork.vr.hear": {
     "en": "Recognition",
     "text": "Tanıma"
+  },
+  "fork.vr.help": {
+    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
+    "text": "SteamVR'da karşınızdakinin söyledikleri görüş alanınızın altında görünür. Bileğinize baktığınızda küçük bir menü açılır. Diğer elinizdeki kontrolcüyle menüye dokunarak dili değiştirebilir, duraklatabilir veya başka bir model deneyebilirsiniz."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -716,8 +720,8 @@
     "text": "Sağ bilek"
   },
   "fork.vr.setting": {
-    "en": "Show in the headset (SteamVR)",
-    "text": "Başlıkta göster (SteamVR)"
+    "en": "Show captions and the wrist menu in the headset",
+    "text": "VR başlığında altyazıları ve bilek menüsünü göster"
   },
   "fork.vr.show": {
     "en": "Show",
@@ -742,6 +746,10 @@
   "fork.vr.them": {
     "en": "Them",
     "text": "Karşı taraf"
+  },
+  "fork.vr.title": {
+    "en": "VR headset",
+    "text": "VR başlığı"
   },
   "fork.vr.translate": {
     "en": "Translation",

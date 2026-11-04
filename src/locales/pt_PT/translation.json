@@ -1936,8 +1936,8 @@
     },
     "jyutping": "Jyutping por cima do cantonês",
     "vr": {
-      "setting": "Mostrar no visor (SteamVR)",
-      "hand": "Pulso",
+      "setting": "Mostrar legendas e o menu do pulso nos óculos de realidade virtual",
+      "hand": "Menu no pulso",
       "left": "Esquerdo",
       "right": "Direito",
       "linkWaiting": "À espera que o SteamVR inicie",
@@ -1967,7 +1967,9 @@
       "idle": "Sem escutar",
       "stopped": "A transcrição parou. Vire o pulso para recomeçar.",
       "stoppedShort": "Transcrição parada",
-      "muted": "Microfone silenciado no VRChat"
+      "muted": "Microfone silenciado no VRChat",
+      "title": "Óculos de RV",
+      "help": "No SteamVR, o que a outra pessoa diz aparece abaixo do teu campo de visão. Olha para o pulso para ver um pequeno menu e toca-lhe com o comando da outra mão para mudar de idioma, fazer uma pausa ou experimentar outro modelo."
     }
   }
 }
