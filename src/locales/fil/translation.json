@@ -684,6 +684,7 @@
       "apiKeyRefused": "Hindi tinanggap ng API ({{address}}) ang key. Suriin ang API key sa card nito.",
       "serverNoAsr": "Walang modelo sa kabilang device na nakakakilala ng pananalita sa {{source}}. Mag-download muna roon sa aklatan ng mga modelo sa card ng pagbabahagi, o gamitin ang computer na ito sa pagkilala.",
       "serverNoDetect": "Walang modelo sa kabilang device na awtomatikong nakakatukoy ng wika. Kailangan ito ng \"Nagsasalita rin ako ng …\" at awtomatikong pagtukoy ng wika ng kausap. Mag-download muna roon ng gaya ng Qwen3-ASR, o i-off ang dalawang opsyong iyon.",
+      "serverAsrBusy": "Ginagamit ng kabilang device ang speech recognition sa ibang modelo. Maghintay hanggang matapos ito bago subukan ulit.",
       "sourceAuto": "Hindi awtomatikong matukoy ang wika sa ganitong pagsasaayos. Piliin ang wikang sinasalita mo.",
       "asrUnnamed": "Wala pang magagamit na modelo sa pagkilala ng pananalita. Pumili sa card na \"Pagkilala ng pananalita\" sa ilalim ng tagapagbigay. Para sa modelo sa API, ilagay ang address at pangalan ng modelo. Puwede ring pumili ng ibang lokasyon.",
       "translateUnnamed": "Wala pang magagamit na modelo sa pagsasalin. Pumili sa card na \"Pagsasalin\" sa ilalim ng tagapagbigay. Para sa modelo sa API, ilagay ang address at pangalan ng modelo. Puwede ring pumili ng ibang lokasyon.",

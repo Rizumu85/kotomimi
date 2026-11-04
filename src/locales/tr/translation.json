@@ -684,6 +684,7 @@
       "apiKeyRefused": "{{address}} adresindeki API anahtarı kabul etmedi. İlgili karttaki API anahtarını kontrol edin.",
       "serverNoAsr": "Diğer cihazda {{source}} konuşmalarını tanıyan bir model yok. Önce o cihazda bir model indirin (paylaşım kartındaki model kitaplığından) veya tanımayı bu bilgisayara bırakın.",
       "serverNoDetect": "Diğer cihazda dili otomatik algılayabilen bir konuşma tanıma modeli yok. \"Ben de … konuşuyorum\" ve karşı tarafın dilini otomatik algılama özellikleri böyle bir model gerektirir. O cihaza Qwen3-ASR gibi bir model indirin veya bu iki seçeneği kapatın.",
+      "serverAsrBusy": "Diğer cihazın konuşma tanıması başka bir modelle kullanılıyor. Kullanım bitince yeniden başlatın.",
       "sourceAuto": "Bu yapılandırmayla dil otomatik algılanamıyor. Konuştuğunuz dili seçin.",
       "asrUnnamed": "Konuşma tanıma için henüz kullanılabilir bir model yok. Sağlayıcının altındaki \"Konuşma tanıma\" kartından bir model seçin (API modeli için adres ve model adını girin) veya başka bir konum seçin.",
       "translateUnnamed": "Çeviri için henüz kullanılabilir bir model yok. Sağlayıcının altındaki \"Çeviri\" kartından bir model seçin (API modeli için adres ve model adını girin) veya başka bir konum seçin.",

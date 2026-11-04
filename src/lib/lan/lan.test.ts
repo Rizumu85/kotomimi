@@ -38,7 +38,7 @@ function fakeRecognizer() {
   return fake;
 }
 
-function socket(dialled = LAN_PIPELINE, resolve: (language: string, wanted: string, also?: string) => { modelId: string; streaming: boolean; also?: string } | null = () => ({ modelId: 'sensevoice-int8', streaming: false })) {
+function socket(dialled = LAN_PIPELINE, resolve: (language: string, wanted: string, also?: string) => { modelId: string; streaming: boolean; also?: string } | null = () => ({ modelId: 'sensevoice-int8', streaming: false }), refusal?: (language: string, wanted: string) => 'busy' | null) {
   const sent: Array<Record<string, unknown>> = [];
   const closed: Array<{ code: number; reason: string }> = [];
   const engines: Array<ReturnType<typeof fakeRecognizer>> = [];
@@ -47,6 +47,7 @@ function socket(dialled = LAN_PIPELINE, resolve: (language: string, wanted: stri
   const t = new LanTranscriber({
     recognizer: () => { const e = fakeRecognizer(); engines.push(e); return e; },
     resolve: (language, wanted, also) => { asked.push([language, wanted]); return resolve(language, wanted, also); },
+    ...(refusal ? { refusal } : {}),
     send: (event) => sent.push(event),
     close: (code, reason) => closed.push({ code, reason }),
     clock,
@@ -158,6 +159,13 @@ describe('a Realtime socket of a sharing Kotomimi', () => {
     expect(s.sent[0]).toMatchObject({ type: 'error', error: { code: 'language_required' } });
     s.update('sw');
     expect(s.sent[1]).toMatchObject({ type: 'error', error: { code: 'model_not_found', message: expect.stringContaining('"sw"') } });
+    expect(s.engines).toHaveLength(0);
+  });
+
+  it('says its recognizer is busy, not missing, when one that hears the language is in use with another model (fork)', () => {
+    const s = socket(LAN_PIPELINE, () => null, () => 'busy');
+    s.update('auto', { model: 'qwen3-asr-1.7b-q8' });
+    expect(s.sent[0]).toMatchObject({ type: 'error', error: { code: 'recognizer_busy' } });
     expect(s.engines).toHaveLength(0);
   });
 

@@ -5,7 +5,7 @@ import { holdNative, holdNativeForRun, nativeIdle, preferNative, translatorIdle 
 import { useModelStore } from '../../stores/modelStore';
 import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import { appLanModels } from './appModels';
-import { NATIVE_KNOWN_WITHIN_MS, nativeCoachAnswer, nativeCoachFor, nativeKnown, nativeTranslator, nativeRecognizer, nativeRecognizerFor, nativeShared, nativeTranslatorFor } from './nativeShare';
+import { NATIVE_KNOWN_WITHIN_MS, nativeCoachAnswer, nativeCoachFor, nativeKnown, nativeTranslator, nativeRecognizer, nativeRecognizerFor, nativeRecognizerRefusal, nativeShared, nativeTranslatorFor } from './nativeShare';
 
 const downloaded = { state: 'downloaded' as const, received: 1, total: 1 };
 const absent = { state: 'absent' as const, received: 0, total: 1 };
@@ -97,10 +97,10 @@ describe('the recognizer a device gets', () => {
     useNativeEngineStore.setState({ status: status(both) });
     expect(nativeRecognizerFor('ja', '')).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
     expect(nativeRecognizerFor('ja', 'r2t2-q8')).toEqual({ modelId: 'r2t2-q8', streaming: true });
-    // The one running answers for either, where it hears the language.
+    // The one still up answers where none was named and it hears the language; nobody using it, one named is started.
     useNativeEngineStore.setState({ status: status(both, { state: 'ready', model: 'r2t2-q8', port: 5000 }) });
     expect(nativeRecognizerFor('ja', '')).toEqual({ modelId: 'r2t2-q8', streaming: true });
-    expect(nativeRecognizerFor('ja', 'qwen3-asr-1.7b-q8')).toEqual({ modelId: 'r2t2-q8', streaming: true });
+    expect(nativeRecognizerFor('ja', 'qwen3-asr-1.7b-q8')).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
     // It does not hear Thai: the one that does.
     expect(nativeRecognizerFor('th', '')).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
     // A model of the app that was named is still the app to run.
@@ -297,6 +297,47 @@ describe('this computer\u2019s feedback model, lent', () => {
     } finally {
       useNativeCoachStore.setState(before as never, true);
     }
+  });
+});
+
+describe('two sessions of one device at once (fork)', () => {
+  const BOTH = status({ 'sensevoice-small-q8': downloaded, 'qwen3-asr-1.7b-q8': downloaded }, { state: 'ready', model: 'sensevoice-small-q8', port: 5000 });
+  const vad = { threshold: 0.3, minSilenceDuration: 1.4, minSpeechDuration: 0.4, maxSpeechDuration: 15 };
+
+  it('give both the model named, not one still up from an earlier run, though the engine has not said it switched', () => {
+    useNativeEngineStore.setState({ status: BOTH });
+    // The other side, in Chinese: SenseVoice is up and hears it, but Qwen3-ASR was named and nobody uses SenseVoice.
+    const first = nativeRecognizerFor('zh', 'qwen3-asr-1.7b-q8');
+    expect(first).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
+    const recognizer = nativeRecognizer(first!)!;
+    void recognizer.init(first!.modelId, { vadConfig: vad, language: 'zh' }).catch(() => undefined);
+    try {
+      // The speaker's, to be detected, asked before the engine's status names Qwen3-ASR.
+      expect(nativeRecognizerFor('auto', 'qwen3-asr-1.7b-q8')).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
+      // Held with Qwen3-ASR, SenseVoice named is not started under it: Qwen3-ASR hears Chinese, and answers.
+      expect(nativeRecognizerFor('zh', 'sensevoice-small-q8')).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
+    } finally {
+      recognizer.dispose();
+    }
+  });
+
+  it('are refused as busy, not as having no model, while the engine is held with one that does not hear the language', () => {
+    useNativeEngineStore.setState({ status: { ...BOTH, up: ['sensevoice-small-q8'] } });
+    const done = holdNativeForRun({ stop: { asr() {}, translation() {}, coach() {} }, setTimer: () => 0 as unknown as ReturnType<typeof setTimeout>, clearTimer: () => {} });
+    try {
+      expect(nativeRecognizerFor('auto', 'qwen3-asr-1.7b-q8')).toBeNull();
+      expect(nativeRecognizerRefusal('auto', 'qwen3-asr-1.7b-q8')).toBe('busy');
+      expect(nativeRecognizerRefusal('auto', '')).toBe('busy');
+      // Nothing here hears Swahili at all: no model, not a busy one.
+      expect(nativeRecognizerRefusal('sw', '')).toBeNull();
+    } finally {
+      done();
+    }
+  });
+
+  it('answer a pair named of a model other than the Mac’s alone, to be refused as no pair rather than no model', () => {
+    useNativeEngineStore.setState({ status: BOTH });
+    expect(nativeRecognizerFor('zh', 'qwen3-asr-1.7b-q8', 'ko')).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
   });
 });
 

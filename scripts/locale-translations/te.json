@@ -1579,6 +1579,10 @@
     "en": "Check again",
     "text": "మళ్లీ తనిఖీ చేయి"
   },
+  "providers.localai.serverAsrBusy": {
+    "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
+    "text": "ఇతర పరికరంలోని వాయిస్ గుర్తింపు మరో మోడల్‌ను ఉపయోగిస్తోంది. అది ఖాళీ అయిన తర్వాత మళ్లీ ప్రారంభించండి."
+  },
   "providers.localai.serverHttp": {
     "en": "The other device answered with an error (HTTP {{status}}). Restarting the app or the model server there usually helps.",
     "text": "అవతలి పరికరం లోపాన్ని పంపింది (HTTP {{status}}). సాధారణంగా అక్కడి యాప్ లేదా మోడల్ సర్వర్‌ను మళ్లీ ప్రారంభిస్తే సరిపోతుంది."

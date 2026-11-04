@@ -1579,6 +1579,10 @@
     "en": "Check again",
     "text": "আবার যাচাই করুন"
   },
+  "providers.localai.serverAsrBusy": {
+    "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
+    "text": "অন্য ডিভাইসের স্পিচ রিকগনিশন অন্য একটি মডেল ব্যবহার করছে। সেটি ফাঁকা হলে আবার শুরু করুন।"
+  },
   "providers.localai.serverHttp": {
     "en": "The other device answered with an error (HTTP {{status}}). Restarting the app or the model server there usually helps.",
     "text": "অন্য ডিভাইস ত্রুটি জানিয়েছে (HTTP {{status}})। সাধারণত সেখানকার অ্যাপ বা মডেল সার্ভার আবার চালু করলে ঠিক হয়।"

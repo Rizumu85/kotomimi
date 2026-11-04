@@ -684,6 +684,7 @@
       "apiKeyRefused": "API di {{address}} menolak kunci ini. Periksa kunci API di kartu terkait.",
       "serverNoAsr": "Perangkat lain tidak memiliki model pengenalan suara untuk {{source}}. Unduh model di sana terlebih dahulu melalui pustaka model di kartu berbagi, atau gunakan komputer ini untuk pengenalan suara.",
       "serverNoDetect": "Perangkat lain tidak memiliki model pengenalan suara yang bisa mendeteksi bahasa secara otomatis. Fitur \"Saya juga berbicara dalam bahasa …\" dan deteksi bahasa lawan bicara memerlukannya. Unduh model seperti Qwen3-ASR di sana, atau nonaktifkan kedua fitur itu.",
+      "serverAsrBusy": "Pengenalan suara di perangkat lain sedang memakai model lain. Coba mulai lagi setelah selesai digunakan.",
       "sourceAuto": "Kombinasi ini tidak bisa mendeteksi bahasa secara otomatis. Pilih bahasa yang Anda gunakan.",
       "asrUnnamed": "Belum ada model pengenalan suara yang bisa digunakan. Pilih model di kartu \"Pengenalan suara\" di bawah penyedia. Untuk model API, isi alamat dan nama model. Anda juga bisa memilih lokasi lain.",
       "translateUnnamed": "Belum ada model terjemahan yang bisa digunakan. Pilih model di kartu \"Terjemahan\" di bawah penyedia. Untuk model API, isi alamat dan nama model. Anda juga bisa memilih lokasi lain.",

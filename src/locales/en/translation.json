@@ -684,6 +684,7 @@
       "apiKeyRefused": "The API at {{address}} did not accept the key. Check the API key in its card.",
       "serverNoAsr": "The other device has no speech recognition model for {{source}}. Download one there first (in the model library of its sharing card), or let this computer listen.",
       "serverNoDetect": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
+      "serverAsrBusy": "The other device's speech recognition is in use with another model. Start again once it is free.",
       "sourceAuto": "The language cannot be detected with this setup. Choose the language you speak.",
       "asrUnnamed": "Speech recognition has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
       "translateUnnamed": "Translation has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",

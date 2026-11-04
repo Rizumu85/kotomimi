@@ -1579,6 +1579,10 @@
     "en": "Check again",
     "text": "மீண்டும் சரிபார்"
   },
+  "providers.localai.serverAsrBusy": {
+    "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
+    "text": "மற்றொரு சாதனத்தின் பேச்சு அறிதல் வேறு மாதிரியைப் பயன்படுத்துகிறது. அது முடிந்ததும் மீண்டும் தொடங்குங்கள்."
+  },
   "providers.localai.serverHttp": {
     "en": "The other device answered with an error (HTTP {{status}}). Restarting the app or the model server there usually helps.",
     "text": "மற்ற சாதனம் பிழையை அனுப்பியுள்ளது (HTTP {{status}}). அங்குள்ள செயலியையோ மாதிரி சேவையகத்தையோ மறுதொடக்கம் செய்தால் பொதுவாகச் சரியாகிவிடும்."

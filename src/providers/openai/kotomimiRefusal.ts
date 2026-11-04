@@ -9,6 +9,8 @@ import { AUTO } from '../../lib/provider/languages';
 const NO_RECOGNIZER = /shares no speech recognition model for "([^"]+)"/;
 
 export function kotomimiRefusal(error: { code?: string | null; message?: string | null }): { code: string; params?: Record<string, string> } | null {
+  // Its recognizer is in use with another model: nothing is missing, it is busy.
+  if (error.code === 'recognizer_busy') return { code: 'server_asr_busy' };
   if (error.code !== 'model_not_found') return null;
   const language = NO_RECOGNIZER.exec(error.message ?? '')?.[1];
   if (!language) return null;

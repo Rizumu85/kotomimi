@@ -36,6 +36,8 @@ export interface TranscriberDeps {
   recognizer(model: RecognitionModel): Recognizer;
   /** The model for a language: the one named when it is shared and hears that language, else the best shared. Null: none. */
   resolve(language: string, wanted: string, also?: string): RecognitionModel | null;
+  /** Why `resolve` answered null: a model that hears the language is here, but the engine is in use with another ('busy'). */
+  refusal?(language: string, wanted: string): 'busy' | null;
   send(event: Record<string, unknown>): void;
   close(code: number, reason: string): void;
   clock: Clock;
@@ -162,6 +164,9 @@ export class LanTranscriber {
     const named = typeof input.transcription?.model === 'string' ? input.transcription.model : '';
     const wanted = named || (this.dialled !== LAN_PIPELINE ? this.dialled : '');
     const model = also ? this.deps.resolve(language, wanted, also) : this.deps.resolve(language, wanted);
+    if (!model && !also && this.deps.refusal?.(language, wanted) === 'busy') {
+      return this.error('recognizer_busy', `This Kotomimi's speech recognition is in use with another model, which does not hear "${language}".`);
+    }
     if (!model) return this.error('model_not_found', `This Kotomimi shares no speech recognition model for "${language}".`);
     if (also && model.also !== also) return this.error('bilingual_unavailable', 'This recognizer cannot hear the requested pair of languages.');
     const vad = vadFrom(input.turn_detection);

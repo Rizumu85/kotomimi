@@ -684,6 +684,7 @@
       "apiKeyRefused": "API ({{address}}) odrzuciło klucz. Sprawdź klucz API w odpowiednim panelu.",
       "serverNoAsr": "Na drugim urządzeniu nie ma modelu rozpoznawania mowy dla języka {{source}}. Pobierz go tam z biblioteki modeli w panelu udostępniania lub wybierz rozpoznawanie na tym komputerze.",
       "serverNoDetect": "Na drugim urządzeniu nie ma modelu rozpoznawania mowy, który automatycznie wykrywa język. Jest on potrzebny do opcji „Mówię też w języku…” i wykrywania języka rozmówcy. Pobierz tam taki model, np. Qwen3-ASR, lub wyłącz obie opcje.",
+      "serverAsrBusy": "Rozpoznawanie mowy na drugim urządzeniu korzysta z innego modelu. Spróbuj ponownie, gdy będzie dostępne.",
       "sourceAuto": "Ta konfiguracja nie pozwala automatycznie wykrywać języka. Wybierz język, w którym mówisz.",
       "asrUnnamed": "Nie wybrano jeszcze modelu rozpoznawania mowy. Wybierz go w panelu „Rozpoznawanie mowy” pod dostawcą. Dla modelu API wpisz adres i nazwę modelu. Możesz też wybrać inne miejsce uruchamiania.",
       "translateUnnamed": "Nie wybrano jeszcze modelu tłumaczenia. Wybierz go w panelu „Tłumaczenie” pod dostawcą. Dla modelu API wpisz adres i nazwę modelu. Możesz też wybrać inne miejsce uruchamiania.",

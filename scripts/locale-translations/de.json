@@ -1611,6 +1611,10 @@
     "en": "Check again",
     "text": "Erneut prüfen"
   },
+  "providers.localai.serverAsrBusy": {
+    "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
+    "text": "Die Spracherkennung auf dem anderen Gerät verwendet gerade ein anderes Modell. Versuche es erneut, sobald sie wieder frei ist."
+  },
   "providers.localai.serverHttp": {
     "en": "The other device answered with an error (HTTP {{status}}). Restarting the app or the model server there usually helps.",
     "text": "Das andere Gerät meldet einen Fehler (HTTP {{status}}). Meist hilft es, die App oder den Modellserver dort neu zu starten."

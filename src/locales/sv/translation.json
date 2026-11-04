@@ -684,6 +684,7 @@
       "apiKeyRefused": "API på {{address}} godkände inte nyckeln. Kontrollera API-nyckeln i motsvarande kort.",
       "serverNoAsr": "Den andra enheten har ingen taligenkänningsmodell för {{source}}. Hämta en där först, i modellbiblioteket på delningskortet, eller låt den här datorn sköta taligenkänningen.",
       "serverNoDetect": "Den andra enheten har ingen taligenkänningsmodell som automatiskt kan identifiera språk. Det behövs för ”Jag talar också …” och automatisk identifiering av de andras språk. Hämta en sådan modell där, till exempel Qwen3-ASR, eller stäng av båda alternativen.",
+      "serverAsrBusy": "Taligenkänningen på den andra enheten används med en annan modell. Starta igen när den är ledig.",
       "sourceAuto": "Språket kan inte identifieras automatiskt med den här kombinationen. Välj språket du talar.",
       "asrUnnamed": "Ingen modell är klar för taligenkänning ännu. Välj en i kortet ”Taligenkänning” under leverantören. För en API-modell behöver du ange adress och modellnamn. Du kan också välja en annan plats.",
       "translateUnnamed": "Ingen modell är klar för översättning ännu. Välj en i kortet ”Översättning” under leverantören. För en API-modell behöver du ange adress och modellnamn. Du kan också välja en annan plats.",

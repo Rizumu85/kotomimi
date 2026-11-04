@@ -96,22 +96,28 @@ export function nativeRecognizerFor(language: string, wanted: string, also?: str
   if (wanted && !isNativeRecognizer(wanted)) return null;
   if (also) {
     const named = wanted ? nativeModelFor(wanted, language) : NATIVE_MODELS.find((m) => isApple(m.id) && m.languages.includes(language));
-    const second = named && isApple(named.id) ? nativeModelFor(named.id, also) : null;
+    // Only the Mac's recognition hears a pair. Another model named that hears the first language is answered alone,
+    // and the session is refused as unable to hear the pair, not as having no model for its language.
+    if (named && !isApple(named.id)) return usable(named.id) ? { modelId: named.id, streaming: true } : null;
+    const second = named ? nativeModelFor(named.id, also) : null;
     return named && second && named.id !== second.id && usable(named.id) && usable(second.id)
       ? { modelId: named.id, streaming: true, also }
       : null;
   }
-  // The engine the app downloads runs one model at a time. The one running — this computer's own choice, or what
-  // another device is listening through — answers for whichever of that engine's models was named, where it hears the
-  // language: starting another would stop it under whoever is using it. The Mac's own recognition is an engine of its
-  // own, beside it: named, it is what runs, whichever of the two was started last.
-  const running = status.run.state !== 'stopped' && status.run.state !== 'failed' && status.run.model ? nativeModelFor(status.run.model, language) : null;
+  // The engine the app downloads runs one model at a time. While it is someone's — a run of this computer, or a
+  // device listening through it — its model answers for whichever of that engine's models was named, where it hears
+  // the language: starting another would stop it under whoever is using it. A model a device's recognizer here has
+  // just claimed counts before the engine's status says so: two sessions of one device arrive together. Nobody's, a
+  // model named is the one started; one still up from an earlier run answers only when none was named. The Mac's own
+  // recognition is an engine of its own, beside it: named, it is what runs, whichever of the two was started last.
+  const taken = claimedAsr() ?? nativeTaken('asr');
+  const up = taken ?? (status.run.state !== 'stopped' && status.run.state !== 'failed' ? status.run.model : null);
+  const running = up ? nativeModelFor(up, language) : null;
   const sameEngine = (id: string) => !wanted || isApple(wanted) === isApple(id);
-  if (running && isNativeRecognizer(running.id) && usable(running.id) && sameEngine(running.id)) return { modelId: running.id, streaming: true };
+  if (running && (taken !== null || !wanted) && isNativeRecognizer(running.id) && usable(running.id) && sameEngine(running.id)) return { modelId: running.id, streaming: true };
   // The engine is someone's with a model that does not hear this language: it is not switched under them. The
   // system's own recognition (a Mac) runs beside it, and is still offered.
-  const taken = nativeTaken('asr');
-  const free = (id: string) => usable(id) && (taken === null || id === taken || id.startsWith('apple-speech'));
+  const free = (id: string) => usable(id) && (taken === null || id === taken || isApple(id));
   if (wanted) {
     const named = nativeModelFor(wanted, language);
     return named && free(named.id) ? { modelId: named.id, streaming: true } : null;
@@ -125,6 +131,41 @@ export function nativeRecognizerFor(language: string, wanted: string, also?: str
   const best = NATIVE_MODELS.find((m) => free(m.id) && nativeModelFor(m.id, language)?.id === m.id);
   return best ? { modelId: best.id, streaming: true } : null;
 }
+
+/**
+ * Fork: why no recognizer answered a language (`nativeRecognizerFor` gave none): one that hears it is downloaded —
+ * the one named, or any — but the engine is in use with another model ('busy'). Null: none that hears it is here.
+ */
+export function nativeRecognizerRefusal(language: string, wanted: string): 'busy' | null {
+  const status = useNativeEngineStore.getState().status;
+  if (wanted && !isNativeRecognizer(wanted)) return null;
+  const hears = (id: string) => nativeDownloaded(status, id) && nativeModelFor(id, language)?.id === id;
+  if (wanted) {
+    const named = nativeModelFor(wanted, language);
+    return named && hears(named.id) ? 'busy' : null;
+  }
+  return NATIVE_MODELS.some((m) => hears(m.id)) ? 'busy' : null;
+}
+
+/**
+ * The engine's models that devices' recognizers here hold, each with how many: a device that opens two sessions at
+ * once has the second asked for before the engine's status names the model the first started.
+ */
+const claims = new Map<string, number>();
+const claimedAsr = (): string | null => [...claims.keys()].find((id) => !isApple(id)) ?? null;
+const claim = (id: string): (() => void) => {
+  claims.set(id, (claims.get(id) ?? 0) + 1);
+  const held = holdNative('asr');
+  let done = false;
+  return () => {
+    if (done) return;
+    done = true;
+    const left = (claims.get(id) ?? 1) - 1;
+    if (left > 0) claims.set(id, left);
+    else claims.delete(id);
+    held();
+  };
+};
 
 /** The native translator for a pair, the same way. */
 export function nativeTranslatorFor(source: string, target: string, wanted: string): string | null {
@@ -167,7 +208,7 @@ export function nativeRecognizer(model: { modelId: string; also?: string; hints?
   const init = asr.init.bind(asr);
   const dispose = asr.dispose.bind(asr);
   asr.init = async (modelId, options) => {
-    release ??= holdNative('asr');
+    release ??= claim(native.id);
     await init(modelId, options);
   };
   asr.dispose = () => {

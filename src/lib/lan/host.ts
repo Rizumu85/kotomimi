@@ -31,6 +31,8 @@ export interface LanModels {
   /** Every recognizer and translation model ready to run. */
   shared(): SharedModel[];
   recognizer(language: string, wanted: string, also?: string): { modelId: string; streaming: boolean; also?: string } | null;
+  /** Why `recognizer` answered null for a language: one that hears it is here, but the engine is in use with another model ('busy'). Absent, or null: refused as having no model. */
+  recognizerRefusal?(language: string, wanted: string): 'busy' | null;
   translator(source: string, target: string, wanted: string): string | null;
   /**
    * Why a model this computer shares cannot answer for a pair, when `translator` answered null for it
@@ -123,6 +125,7 @@ export function createLanHost(deps: LanHostDeps): LanHost {
           const socket = new LanTranscriber({
             recognizer: deps.engines.recognizer,
             resolve: models.recognizer,
+            ...(models.recognizerRefusal ? { refusal: models.recognizerRefusal } : {}),
             send: (event) => { void bridge.invoke('lan:send', { id, data: JSON.stringify(event) }); },
             close: (code, reason) => { void bridge.invoke('lan:close-socket', { id, code, reason }); },
             clock,

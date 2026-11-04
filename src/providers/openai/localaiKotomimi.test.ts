@@ -266,6 +266,14 @@ describe('another Kotomimi that hears none of a leg\'s language', () => {
     // Heard elsewhere: what that Kotomimi hears does not matter.
     expect(await ask(serving(JA_ONLY), ['speaker'], { asrVia: 'api', asrApiBaseUrl: 'http://x/v1', asrApiModel: 'm', asrApiNeedsKey: false })).toMatchObject({ ok: true });
   });
+
+  it('is refused before Start where the other side is to be detected and none it lists detects: that leg is told its own language (fork)', async () => {
+    const ZH_ONLY: SharedModel[] = [{ id: 'sensevoice-small-q8', kind: 'asr', languages: ['zh'] }, { id: 'bing-translator', kind: 'translate', languages: [] }];
+    // The other side speaks Japanese, which SenseVoice is not said to hear here: the session would be refused at Start.
+    expect(await ask(serving(ZH_ONLY), ['participant'], { asrDetectOther: true })).toMatchObject({ ok: false, code: 'server_no_asr', params: { source: 'ja' } });
+    // One that detects is listed: the leg is told "auto", and nothing is refused.
+    expect(await ask(serving([...ZH_ONLY, { id: 'qwen3-asr-1.7b-q8', kind: 'asr', languages: ['zh', 'ja', 'auto'] }]), ['participant'], { asrDetectOther: true })).toMatchObject({ ok: true });
+  });
 });
 
 describe('a translation model that cannot take a direction of the run (fork)', () => {

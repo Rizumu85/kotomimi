@@ -1579,6 +1579,10 @@
     "en": "Check again",
     "text": "फिर जाँचें"
   },
+  "providers.localai.serverAsrBusy": {
+    "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
+    "text": "दूसरे डिवाइस पर स्पीच रिकग्निशन किसी दूसरे मॉडल में व्यस्त है। उसके खाली होने पर फिर से शुरू करें।"
+  },
   "providers.localai.serverHttp": {
     "en": "The other device answered with an error (HTTP {{status}}). Restarting the app or the model server there usually helps.",
     "text": "दूसरे डिवाइस ने त्रुटि भेजी (HTTP {{status}})। आम तौर पर वहाँ ऐप या मॉडल सर्वर फिर से शुरू करने से ठीक हो जाता है।"

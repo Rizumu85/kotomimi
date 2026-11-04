@@ -1583,6 +1583,10 @@
     "en": "Check again",
     "text": "Kiểm tra lại"
   },
+  "providers.localai.serverAsrBusy": {
+    "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
+    "text": "Nhận dạng giọng nói trên thiết bị kia đang dùng mô hình khác. Hãy thử lại khi thiết bị đó rảnh."
+  },
   "providers.localai.serverHttp": {
     "en": "The other device answered with an error (HTTP {{status}}). Restarting the app or the model server there usually helps.",
     "text": "Thiết bị kia báo lỗi (HTTP {{status}}). Thường chỉ cần khởi động lại ứng dụng hoặc máy chủ mô hình trên đó."

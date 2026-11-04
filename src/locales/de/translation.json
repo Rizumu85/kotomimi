@@ -684,6 +684,7 @@
       "apiKeyRefused": "Die API unter {{address}} akzeptiert den Schlüssel nicht. Prüfe den API-Schlüssel im zugehörigen Bereich.",
       "serverNoAsr": "Auf dem anderen Gerät gibt es kein Spracherkennungsmodell für {{source}}. Lade dort zuerst eines herunter, in der Modellbibliothek des Freigabebereichs. Oder lass diesen Computer die Spracherkennung übernehmen.",
       "serverNoDetect": "Auf dem anderen Gerät gibt es kein Erkennungsmodell, das Sprachen automatisch unterscheiden kann. Das wird für „Ich spreche auch …“ und die automatische Spracherkennung der anderen benötigt. Lade dort ein solches Modell herunter, etwa Qwen3-ASR, oder deaktiviere beide Optionen.",
+      "serverAsrBusy": "Die Spracherkennung auf dem anderen Gerät verwendet gerade ein anderes Modell. Versuche es erneut, sobald sie wieder frei ist.",
       "sourceAuto": "Mit dieser Kombination lässt sich die Sprache nicht automatisch erkennen. Wähle aus, welche Sprache du sprichst.",
       "asrUnnamed": "Für die Spracherkennung ist noch kein Modell verfügbar. Wähle unter dem Anbieter im Bereich „Spracherkennung“ eines aus. Bei einem API-Modell musst du Adresse und Modellname eingeben. Oder wähle einen anderen Ausführungsort.",
       "translateUnnamed": "Für die Übersetzung ist noch kein Modell verfügbar. Wähle unter dem Anbieter im Bereich „Übersetzung“ eines aus. Bei einem API-Modell musst du Adresse und Modellname eingeben. Oder wähle einen anderen Ausführungsort.",

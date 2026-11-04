@@ -684,6 +684,7 @@
       "apiKeyRefused": "A API ({{address}}) não aceitou a chave. Verifique a chave de API no respetivo painel.",
       "serverNoAsr": "O outro dispositivo não tem um modelo de reconhecimento de voz para {{source}}. Transfira um nesse dispositivo (na biblioteca de modelos do painel de partilha) ou use este computador para o reconhecimento.",
       "serverNoDetect": "O outro dispositivo não tem um modelo de reconhecimento que detete automaticamente a língua, necessário para «Também falo…» e para detetar a língua da outra pessoa. Transfira um nesse dispositivo, como Qwen3-ASR, ou desative estas duas opções.",
+      "serverAsrBusy": "O reconhecimento de voz do outro dispositivo está a usar outro modelo. Tente novamente quando terminar.",
       "sourceAuto": "Esta combinação não permite detetar a língua automaticamente. Escolha a língua que fala.",
       "asrUnnamed": "Ainda não há um modelo disponível para o reconhecimento de voz. Escolha um no painel «Reconhecimento de voz», por baixo do fornecedor (para um modelo por API, preencha o endereço e o nome do modelo), ou escolha outro local.",
       "translateUnnamed": "Ainda não há um modelo disponível para a tradução. Escolha um no painel «Tradução», por baixo do fornecedor (para um modelo por API, preencha o endereço e o nome do modelo), ou escolha outro local.",

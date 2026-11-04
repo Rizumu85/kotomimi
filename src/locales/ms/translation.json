@@ -684,6 +684,7 @@
       "apiKeyRefused": "API di {{address}} menolak kunci ini. Semak kunci API dalam kad berkenaan.",
       "serverNoAsr": "Peranti lain tiada model pengecaman pertuturan untuk {{source}}. Muat turun model pada peranti itu dahulu melalui pustaka model dalam kad perkongsiannya, atau gunakan komputer ini untuk pengecaman.",
       "serverNoDetect": "Peranti lain tiada model pengecaman yang boleh mengesan bahasa secara automatik. \"Saya juga bertutur dalam …\" dan pengesanan bahasa pihak lain memerlukan model seperti ini. Muat turun model seperti Qwen3-ASR pada peranti itu, atau matikan kedua-dua pilihan tersebut.",
+      "serverAsrBusy": "Pengecaman pertuturan pada peranti lain sedang digunakan dengan model lain. Cuba lagi selepas ia selesai digunakan.",
       "sourceAuto": "Gabungan ini tidak dapat mengesan bahasa secara automatik. Pilih bahasa yang anda tuturkan.",
       "asrUnnamed": "Belum ada model untuk pengecaman pertuturan. Pilih model dalam kad \"Pengecaman pertuturan\" di bawah penyedia. Untuk model API, masukkan alamat dan nama model. Anda juga boleh memilih lokasi lain.",
       "translateUnnamed": "Belum ada model untuk terjemahan. Pilih model dalam kad \"Terjemahan\" di bawah penyedia. Untuk model API, masukkan alamat dan nama model. Anda juga boleh memilih lokasi lain.",

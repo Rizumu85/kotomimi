@@ -684,6 +684,7 @@
       "apiKeyRefused": "L'API à l'adresse {{address}} a refusé la clé. Vérifiez la clé API dans son panneau.",
       "serverNoAsr": "L'autre appareil n'a aucun modèle de reconnaissance vocale pour la langue {{source}}. Téléchargez-en un sur cet appareil, dans la bibliothèque de modèles du panneau de partage, ou utilisez cet ordinateur pour la reconnaissance.",
       "serverNoDetect": "L'autre appareil n'a aucun modèle de reconnaissance capable de détecter la langue. Les options « Je parle aussi… » et de détection de la langue de l'autre en ont besoin. Téléchargez-y un modèle adapté, comme Qwen3-ASR, ou désactivez ces deux options.",
+      "serverAsrBusy": "La reconnaissance vocale de l’autre appareil utilise un autre modèle. Réessayez lorsqu’il sera disponible.",
       "sourceAuto": "Cette configuration ne permet pas de détecter automatiquement la langue. Choisissez la langue que vous parlez.",
       "asrUnnamed": "Aucun modèle n'est encore disponible pour la reconnaissance vocale. Choisissez-en un dans le panneau « Reconnaissance vocale », sous le fournisseur. Pour un modèle API, renseignez l'adresse et le nom du modèle. Vous pouvez aussi choisir un autre emplacement.",
       "translateUnnamed": "Aucun modèle n'est encore disponible pour la traduction. Choisissez-en un dans le panneau « Traduction », sous le fournisseur. Pour un modèle API, renseignez l'adresse et le nom du modèle. Vous pouvez aussi choisir un autre emplacement.",

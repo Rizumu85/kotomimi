@@ -684,6 +684,7 @@
       "apiKeyRefused": "La API ({{address}}) no acepta esta clave. Comprueba la clave de API en su panel.",
       "serverNoAsr": "El otro dispositivo no tiene un modelo de reconocimiento de voz para {{source}}. Descarga uno allí primero, en la biblioteca de modelos de su panel de uso compartido, o usa este equipo para reconocer la voz.",
       "serverNoDetect": "El otro dispositivo no tiene un modelo de reconocimiento que detecte el idioma automáticamente. Se necesita para «También hablo…» y para detectar el idioma de la otra persona. Descarga uno allí, como Qwen3-ASR, o desactiva esas dos opciones.",
+      "serverAsrBusy": "El reconocimiento de voz del otro dispositivo está usando otro modelo. Vuelve a intentarlo cuando quede libre.",
       "sourceAuto": "Esta configuración no permite detectar el idioma automáticamente. Elige el idioma que hablas.",
       "asrUnnamed": "Aún no hay un modelo disponible para reconocer la voz. Elige uno en el panel «Reconocimiento de voz», debajo del proveedor. Si usas un modelo por API, introduce su dirección y nombre. También puedes elegir otra ubicación.",
       "translateUnnamed": "Aún no hay un modelo disponible para traducir. Elige uno en el panel «Traducción», debajo del proveedor. Si usas un modelo por API, introduce su dirección y nombre. También puedes elegir otra ubicación.",

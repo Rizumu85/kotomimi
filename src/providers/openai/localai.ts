@@ -552,7 +552,8 @@ function undetected(s: LocalAISettings, models: readonly LocalAIModel[], source:
 }
 
 /**
- * A leg another Kotomimi hears in a language none of its recognizers takes:
+ * A leg another Kotomimi hears in a language none of its recognizers takes (a language to detect, where none it lists
+ * detects, is the leg's own source: what the session is told, `serverHeard`):
  * its socket would refuse the session ("shares no speech recognition model",
  * `src/lib/lan/transcriber.ts`), which a start would show in that device's
  * English. It says which languages each recognizer takes, as it picks among
@@ -828,7 +829,7 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
       const both = leg === 'speaker' && speaksBoth(s, found, ctx.pair) && ctx.pair.source.toLowerCase() !== ctx.pair.target.toLowerCase();
       // What the leg translates: the speaker the pair and — when it speaks both — its reverse; the other side its reverse.
       const unfitServer = serverTranslatorUnfit(s, found, ctx.pair, leg, heard, both);
-      const gap = unfitServer ?? unpaired(s, found, ctx.pair, leg === 'speaker') ?? unnamedStage(s, found, coached, plain, both) ?? undetected(s, found, leg === 'speaker' ? ctx.pair.source : heard, coached, leg === 'participant' ? ctx.pair.target : undefined) ?? unheard(s, found, heard)
+      const gap = unfitServer ?? unpaired(s, found, ctx.pair, leg === 'speaker') ?? unnamedStage(s, found, coached, plain, both) ?? undetected(s, found, leg === 'speaker' ? ctx.pair.source : heard, coached, leg === 'participant' ? ctx.pair.target : undefined) ?? unheard(s, found, heard === AUTO && !serverDetects(found, s.asrModel) ? (leg === 'speaker' ? ctx.pair.source : ctx.pair.target) : heard)
         ?? ((coached && !both) || plain ? null : phoneTranslatorUnfit(s, leg === 'speaker' ? ctx.pair.source : heard, leg === 'speaker' ? ctx.pair.target : ctx.pair.source))
         ?? (both ? phoneTranslatorUnfit(s, ctx.pair.target, ctx.pair.source) : null);
       // What the servers listed goes with the refusal: a pick from it is often what answers it.

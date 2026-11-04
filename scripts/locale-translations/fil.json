@@ -1707,6 +1707,10 @@
     "en": "Check again",
     "text": "Suriin ulit"
   },
+  "providers.localai.serverAsrBusy": {
+    "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
+    "text": "Ginagamit ng kabilang device ang speech recognition sa ibang modelo. Maghintay hanggang matapos ito bago subukan ulit."
+  },
   "providers.localai.serverHttp": {
     "en": "The other device answered with an error (HTTP {{status}}). Restarting the app or the model server there usually helps.",
     "text": "Nagbalik ng error ang kabilang device (HTTP {{status}}). Karaniwang naaayos ito sa pag-restart ng app o server ng modelo roon."

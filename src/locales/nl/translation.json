@@ -684,6 +684,7 @@
       "apiKeyRefused": "De API op {{address}} accepteert deze sleutel niet. Controleer de API-sleutel in het bijbehorende paneel.",
       "serverNoAsr": "Het andere apparaat heeft geen spraakherkenningsmodel voor {{source}}. Download daar eerst een model via de modelbibliotheek in het deelpaneel, of laat deze computer de spraak herkennen.",
       "serverNoDetect": "Het andere apparaat heeft geen spraakherkenningsmodel dat talen automatisch kan onderscheiden. Dat is nodig voor 'Ik spreek … ook' en automatische taalherkenning bij anderen. Download daar eerst zo'n model, zoals Qwen3-ASR, of schakel beide opties uit.",
+      "serverAsrBusy": "De spraakherkenning op het andere apparaat gebruikt een ander model. Probeer het opnieuw zodra het beschikbaar is.",
       "sourceAuto": "Met deze combinatie kan de taal niet automatisch worden herkend. Kies de taal die je spreekt.",
       "asrUnnamed": "Er is nog geen model voor spraakherkenning beschikbaar. Kies er een in het paneel 'Spraakherkenning' onder de aanbieder. Vul bij een API-model het adres en de modelnaam in, of kies een andere locatie.",
       "translateUnnamed": "Er is nog geen vertaalmodel beschikbaar. Kies er een in het paneel 'Vertaling' onder de aanbieder. Vul bij een API-model het adres en de modelnaam in, of kies een andere locatie.",

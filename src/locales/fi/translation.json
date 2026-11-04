@@ -684,6 +684,7 @@
       "apiKeyRefused": "API osoitteessa {{address}} ei hyväksynyt avainta. Tarkista API-avain sen kortista.",
       "serverNoAsr": "Toisessa laitteessa ei ole puheentunnistusmallia kielelle {{source}}. Lataa sinne ensin sopiva malli jakamiskortin mallikirjastosta tai käytä tämän tietokoneen puheentunnistusta.",
       "serverNoDetect": "Toisessa laitteessa ei ole mallia, joka tunnistaa kielen automaattisesti. ”Puhun myös…” ja toisen osapuolen kielen automaattinen tunnistus tarvitsevat sellaisen. Lataa sinne esimerkiksi Qwen3-ASR tai poista molemmat asetukset käytöstä.",
+      "serverAsrBusy": "Toisen laitteen puheentunnistus käyttää toista mallia. Yritä uudelleen, kun se vapautuu.",
       "sourceAuto": "Tällä kokoonpanolla kieltä ei voi tunnistaa automaattisesti. Valitse puhumasi kieli.",
       "asrUnnamed": "Puheentunnistukselle ei ole vielä käytettävää mallia. Valitse malli palveluntarjoajan alla olevasta ”Puheentunnistus”-kortista. Jos käytät API-mallia, syötä osoite ja mallin nimi. Voit myös valita toisen suorituspaikan.",
       "translateUnnamed": "Käännökselle ei ole vielä käytettävää mallia. Valitse malli palveluntarjoajan alla olevasta ”Käännös”-kortista. Jos käytät API-mallia, syötä osoite ja mallin nimi. Voit myös valita toisen suorituspaikan.",
