@@ -1,30 +1,33 @@
 import SwiftUI
 
-/// The one screen, as the Android app lays it out (MainActivity's "tablet" and "phone" shapes): on a wide screen the
-/// status and the hearing widget on the left and the widgets on the right; on a narrow one, all of it in a column.
+/// The one screen, as the Android app lays it out (MainActivity's shapes), at its sizes: an Android dp and an iOS
+/// point are near enough the same length.
+///
+/// - Wide (a tablet held across): the status and the hearing widget on the left, the widgets on the right.
+/// - Tablet (held upright): the status with the share widget beside it, the hearing widget filling the middle, a row
+///   of widgets under it.
+/// - Phone: all of it in a column.
+///
 /// A widget opens its box over the page (a sheet), as a box does there.
 struct Home: View {
     @Environment(Lending.self) private var lending
-    @Environment(Hearing.self) private var hearing
-    @Environment(SelfCheck.self) private var check
     @State private var open: Box?
 
     enum Box: String, Identifiable { case languages, devices, tools, settings; var id: String { rawValue } }
 
     var body: some View {
         GeometryReader { box in
-            let wide = box.size.width > box.size.height && box.size.width >= 900
+            let size = box.size
             ZStack(alignment: .topTrailing) {
                 Wall(working: lending.phase == .working)
-                if wide { wideLayout(box.size) } else { narrowLayout }
-                Button { open = .settings } label: {
-                    Image(systemName: "slider.horizontal.3").font(.system(size: 17, weight: .medium)).frame(width: 30, height: 30)
+                Group {
+                    if size.width > size.height && size.width >= 900 { wide(size) }
+                    else if size.width >= 700 { tablet }
+                    else { phone }
                 }
-                .buttonStyle(.glass)
-                .buttonBorderShape(.circle)
-                .accessibilityLabel("设置")
-                .padding(.top, 8)
-                .padding(.trailing, 24)
+                SettingsKey { open = .settings }
+                    .padding(.top, 18)
+                    .padding(.trailing, Metrics.margin)
             }
         }
         .sheet(item: $open) { which in
@@ -40,45 +43,108 @@ struct Home: View {
         }
     }
 
-    private func wideLayout(_ size: CGSize) -> some View {
-        HStack(alignment: .top, spacing: 24) {
-            VStack(alignment: .leading, spacing: 24) {
+    private func wide(_ size: CGSize) -> some View {
+        HStack(alignment: .top, spacing: Metrics.gap) {
+            VStack(alignment: .leading, spacing: Metrics.gap) {
                 Status()
                 HearingTile()
             }
-            .frame(width: size.width * 0.48)
-            VStack(spacing: 20) {
-                ShareTile().frame(height: 118)
-                HStack(spacing: 20) {
+            .frame(width: (size.width - Metrics.margin * 2 - Metrics.gap) * 0.49)
+            VStack(spacing: Metrics.gap) {
+                ShareTile().frame(height: 96)
+                HStack(spacing: Metrics.gap) {
                     Button { open = .devices } label: { DevicesTile() }
                     Button { open = .tools } label: { CheckTile() }
                 }
-                .buttonStyle(.plain)
-                Button { open = .languages } label: { LanguagesTile().frame(height: 200) }.buttonStyle(.plain)
+                Button { open = .languages } label: { LanguagesTile() }.frame(height: 172)
             }
-            .padding(.top, 48)
+            .buttonStyle(Pressed())
+            .padding(.top, 34)
         }
-        .padding(.horizontal, 24)
-        .padding(.bottom, 24)
+        .padding(.horizontal, Metrics.margin)
+        .padding(.bottom, Metrics.margin)
     }
 
-    private var narrowLayout: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
+    private var tablet: some View {
+        VStack(spacing: Metrics.gap) {
+            HStack(alignment: .bottom, spacing: Metrics.gap) {
                 Status()
-                ShareTile().frame(height: 118)
-                HearingTile().frame(height: 340)
-                HStack(spacing: 18) {
-                    Button { open = .devices } label: { DevicesTile().frame(height: 190) }
-                    Button { open = .tools } label: { CheckTile().frame(height: 190) }
-                }
-                .buttonStyle(.plain)
-                Button { open = .languages } label: { LanguagesTile().frame(height: 180) }.buttonStyle(.plain)
+                Spacer(minLength: 0)
+                ShareTile().frame(width: 360, height: 96)
             }
-            .padding(.horizontal, 20)
+            HearingTile()
+            // Four columns, as the Android app's row of widgets: the languages take two.
+            GeometryReader { row in
+                let unit = (row.size.width - Metrics.gap * 3) / 4
+                HStack(spacing: Metrics.gap) {
+                    Button { open = .devices } label: { DevicesTile() }.frame(width: unit)
+                    Button { open = .tools } label: { CheckTile() }.frame(width: unit)
+                    Button { open = .languages } label: { LanguagesTile() }.frame(width: unit * 2 + Metrics.gap)
+                }
+                .buttonStyle(Pressed())
+            }
+            .frame(height: 172)
+        }
+        .padding(.horizontal, Metrics.margin)
+        .padding(.bottom, Metrics.margin)
+    }
+
+    private var phone: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: Metrics.gap) {
+                Status()
+                ShareTile().frame(height: 96)
+                HearingTile().frame(height: 320)
+                HStack(spacing: Metrics.gap) {
+                    Button { open = .devices } label: { DevicesTile() }
+                    Button { open = .tools } label: { CheckTile() }
+                }
+                .frame(height: 150)
+                Button { open = .languages } label: { LanguagesTile() }.frame(height: 150)
+            }
+            .buttonStyle(Pressed())
+            .padding(.horizontal, Metrics.margin)
             .padding(.bottom, 30)
         }
         .scrollIndicators(.hidden)
+    }
+}
+
+/// The type and spacing, as the Android app sets them.
+nonisolated enum Metrics {
+    static let margin: CGFloat = 24
+    static let gap: CGFloat = 16
+    static let radius: CGFloat = 28
+    static let headline = Font.system(size: 52, weight: .regular)
+    static let kicker = Font.system(size: 14, weight: .bold)
+    static let title = Font.system(size: 18, weight: .semibold)
+    static let line = Font.system(size: 14)
+    static let small = Font.system(size: 13)
+}
+
+/// A widget pressed sinks a little, as the Android app's do.
+private struct Pressed: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.975 : 1)
+            .animation(.spring(duration: 0.3, bounce: 0.35), value: configuration.isPressed)
+    }
+}
+
+/// The settings: a round glass key, the faders the Android app draws.
+private struct SettingsKey: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "slider.horizontal.3")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundStyle(Palette.ink)
+                .frame(width: 28, height: 28)
+        }
+        .buttonStyle(.glass)
+        .buttonBorderShape(.circle)
+        .accessibilityLabel("设置")
     }
 }
 
@@ -89,22 +155,25 @@ private struct Status: View {
     @Environment(Hearing.self) private var hearing
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 0) {
             Text(kicker)
-                .font(.system(size: 17, weight: .semibold))
-                .tracking(8)
+                .font(Metrics.kicker)
+                .tracking(7)
                 .foregroundStyle(Palette.inkRed)
+                .padding(.bottom, 30)
             Text(title)
-                .font(.system(size: 64, weight: .medium))
+                .font(Metrics.headline)
                 .foregroundStyle(Palette.ink)
                 .contentTransition(.opacity)
+                .padding(.bottom, 10)
             Text(line)
-                .font(.system(size: 17))
+                .font(Metrics.line)
                 .foregroundStyle(Palette.ink2)
                 .lineLimit(2)
         }
-        .padding(.top, 40)
-        .padding(.leading, 12)
+        .padding(.top, 52)
+        .padding(.leading, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .animation(.easeInOut(duration: 0.3), value: title)
     }
 
@@ -130,9 +199,9 @@ private struct Status: View {
     private var line: String {
         if !hearing.available { return "这台设备不支持系统的语音识别。" }
         switch lending.phase {
-        case .off: return hearing.ready.isEmpty ? "尚未下载语言。请先在「识别语言」中下载。" : "启用共享后，电脑可在局域网找到这台设备。"
+        case .off: return hearing.ready.isEmpty ? "请先在「识别语言」中下载一个语言。" : "启用共享后，电脑可在局域网找到这台设备。"
         case .starting: return "正在打开局域网服务"
-        case .waiting: return lending.seen.map { "待命 · 最近连接 \($0)" } ?? "等待电脑连接"
+        case .waiting: return lending.seen.map { "最近连接 \($0)" } ?? "等待电脑连接"
         case .working: return lending.seen.map { "正在识别 · 来自 \($0)" } ?? "正在识别"
         case .failed(let why): return why
         }
@@ -146,11 +215,11 @@ private struct ShareTile: View {
     @Environment(Hearing.self) private var hearing
 
     var body: some View {
-        Tile {
-            HStack(spacing: 16) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(title).font(.system(size: 22, weight: .semibold)).foregroundStyle(Palette.ink)
-                    Text(line).font(.system(size: 15)).foregroundStyle(Palette.ink2).lineLimit(1)
+        Tile(padding: 20) {
+            HStack(spacing: 14) {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(title).font(Metrics.title).foregroundStyle(Palette.ink)
+                    Text(line).font(Metrics.small).foregroundStyle(Palette.ink2).lineLimit(1)
                 }
                 Spacer(minLength: 0)
                 Toggle("启用共享", isOn: Binding(get: { lending.phase != .off }, set: { on in
@@ -160,7 +229,8 @@ private struct ShareTile: View {
                 .labelsHidden()
                 .tint(Palette.accent)
                 .disabled(hearing.ready.isEmpty && lending.phase == .off)
-                .controlSize(.large)
+                .scaleEffect(1.25)
+                .padding(.trailing, 6)
             }
             .frame(maxHeight: .infinity)
         }
@@ -194,40 +264,42 @@ private struct HearingTile: View {
             Water(moving: lending.phase == .working)
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(speed).font(.system(size: 40, weight: .medium).monospacedDigit()).foregroundStyle(Palette.waterNumber)
-                        Text(verdict).font(.system(size: 15)).foregroundStyle(Palette.waterSub)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(speed).font(.system(size: 30, weight: .regular).monospacedDigit()).foregroundStyle(Palette.waterNumber)
+                        Text(verdict).font(Metrics.line).foregroundStyle(Palette.waterSub)
                     }
                     Spacer()
                     VStack(alignment: .trailing, spacing: 6) {
-                        Text("语音识别").font(.system(size: 22, weight: .semibold)).foregroundStyle(Palette.waterNumber)
-                        Text(lent).font(.system(size: 15)).foregroundStyle(Palette.waterSub)
+                        Text("语音识别").font(Metrics.title).foregroundStyle(Palette.waterNumber)
+                        Text(lent).font(Metrics.line).foregroundStyle(Palette.waterSub)
                     }
                 }
-                Spacer(minLength: 16)
+                Spacer(minLength: 12)
                 if let text = lending.lastText {
                     Text(text)
-                        .font(.system(size: 26, weight: .regular))
+                        .font(.system(size: 22))
+                        .lineSpacing(6)
                         .foregroundStyle(Palette.waterNumber)
-                        .lineLimit(5)
-                        .minimumScaleFactor(0.6)
+                        .lineLimit(6)
+                        .minimumScaleFactor(0.7)
                         .contentTransition(.opacity)
                         .animation(.easeOut(duration: 0.25), value: text)
                 } else {
                     Dotted()
                 }
-                Spacer(minLength: 16)
-                Spacer().frame(height: 60)
+                Spacer(minLength: 12)
+                Spacer().frame(height: 70)
             }
-            .padding(28)
+            .padding(.horizontal, 28)
+            .padding(.top, 28)
         }
-        .clipShape(.rect(cornerRadius: 36))
+        .clipShape(.rect(cornerRadius: 32))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var speed: String {
         guard lending.lastTook > 0 else { return "—" }
-        return String(format: "%.1f 倍速", lending.lastSeconds / lending.lastTook)
+        return String(format: "%.1f×", lending.lastSeconds / lending.lastTook)
     }
 
     private var verdict: String {
@@ -236,9 +308,27 @@ private struct HearingTile: View {
     }
 
     private var lent: String {
+        guard !hearing.ready.isEmpty else { return "未下载" }
         let state = lending.phase == .working ? "工作中" : "待命"
-        let language = hearing.name(of: lending.lastLanguage ?? hearing.preferred)
-        return hearing.ready.isEmpty ? "未下载" : "\(state) · 系统语音识别 · \(language)"
+        return "\(state) · \(hearing.name(of: lending.lastLanguage ?? hearing.preferred))"
+    }
+}
+
+/// A small widget: its object at the top left, its name and how it stands at the bottom.
+private struct SmallTile<Thing: View>: View {
+    let title: String
+    let line: String
+    @ViewBuilder var thing: Thing
+
+    var body: some View {
+        Tile(padding: 20) {
+            VStack(alignment: .leading, spacing: 0) {
+                thing.frame(width: 50, height: 50)
+                Spacer(minLength: 10)
+                Text(title).font(Metrics.title).foregroundStyle(Palette.ink).padding(.bottom, 4)
+                Text(line).font(Metrics.small).foregroundStyle(Palette.ink2).lineLimit(1)
+            }
+        }
     }
 }
 
@@ -246,14 +336,7 @@ private struct DevicesTile: View {
     @Environment(Lending.self) private var lending
 
     var body: some View {
-        Tile {
-            VStack(alignment: .leading) {
-                LensThing(lit: lending.phase == .working).frame(width: 66, height: 66)
-                Spacer(minLength: 12)
-                Text("设备连接").font(.system(size: 22, weight: .semibold)).foregroundStyle(Palette.ink)
-                Text(line).font(.system(size: 15)).foregroundStyle(Palette.ink2).lineLimit(1)
-            }
-        }
+        SmallTile(title: "设备连接", line: line) { LensThing(lit: lending.phase == .working) }
     }
 
     private var line: String {
@@ -269,14 +352,7 @@ private struct CheckTile: View {
     @Environment(SelfCheck.self) private var check
 
     var body: some View {
-        Tile {
-            VStack(alignment: .leading) {
-                DialThing(amount: (check.result?.speed ?? 0) / 3).frame(width: 66, height: 66)
-                Spacer(minLength: 12)
-                Text("性能检测").font(.system(size: 22, weight: .semibold)).foregroundStyle(Palette.ink)
-                Text(line).font(.system(size: 15)).foregroundStyle(Palette.ink2).lineLimit(1)
-            }
-        }
+        SmallTile(title: "性能检测", line: line) { DialThing(amount: (check.result?.speed ?? 0) / 3) }
     }
 
     private var line: String {
@@ -290,21 +366,21 @@ private struct LanguagesTile: View {
     @Environment(Hearing.self) private var hearing
 
     var body: some View {
-        Tile {
-            VStack(alignment: .leading, spacing: 14) {
-                Text("识别语言").font(.system(size: 22, weight: .semibold)).foregroundStyle(Palette.ink)
-                HStack(spacing: 14) {
-                    ForEach(shown, id: \.self) { letters in CardsThing(letters: letters).frame(width: 54, height: 54) }
-                    if shown.isEmpty { CardsThing(letters: "あ").frame(width: 54, height: 54).opacity(0.45) }
+        Tile(padding: 20) {
+            VStack(alignment: .leading, spacing: 0) {
+                Text("识别语言").font(Metrics.title).foregroundStyle(Palette.ink).padding(.bottom, 14)
+                HStack(spacing: 10) {
+                    if hearing.ready.isEmpty {
+                        LetterThing(letter: "あ").opacity(0.4)
+                    } else {
+                        ForEach(hearing.ready.prefix(6)) { language in LetterThing(letter: LetterThing.letters[language.id] ?? language.id) }
+                    }
                 }
-                Spacer(minLength: 0)
+                .frame(height: 44)
+                Spacer(minLength: 10)
                 Text(hearing.ready.isEmpty ? "尚未下载语言" : "已下载 \(hearing.ready.count) 种语言")
-                    .font(.system(size: 15)).foregroundStyle(Palette.ink2)
+                    .font(Metrics.small).foregroundStyle(Palette.ink2)
             }
         }
     }
-
-    private var shown: [String] { hearing.ready.prefix(5).map { Self.letters[$0.id] ?? $0.id.uppercased() } }
-
-    private static let letters = ["ja": "あ", "en": "A", "zh": "中", "yue": "粤", "ko": "한", "es": "Ñ", "fr": "É", "de": "ß", "it": "I", "pt": "Ã", "hi": "अ"]
 }

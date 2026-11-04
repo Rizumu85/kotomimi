@@ -13,6 +13,7 @@ nonisolated enum Palette {
     static let blue = Color(day: 0xDCE6EE, night: 0x4F7A94)
     static let tile = Color(day: 0xFFFDF8, night: 0x26262A)
     static let card = Color(day: 0xF5F2EB, night: 0x303035)
+    static let tileFront = Color(day: 0xFFFFFF, night: 0x3A3A40)
     static let cardLine = Color(day: 0xE7E1D6, night: 0x3D3D44)
     static let waterTile = Color(day: 0x22343F, night: 0x26262A)
     static let water = Color(day: 0x7FD3AE, night: 0x8FE3BE)
@@ -64,40 +65,63 @@ struct Wall: View {
                     .fill(Palette.blue)
                     .frame(width: max(w, h) * 1.05, height: max(w, h) * 0.9)
                     .position(x: w * 0.98, y: h * 1.02)
-                Canvas { context, size in
-                    let every: CGFloat = 30
-                    var y = size.height * 0.55
-                    var row = 0
-                    while y < size.height {
-                        let k = (y - size.height * 0.55) / (size.height * 0.45)
-                        var x: CGFloat = row % 2 == 0 ? 14 : 14 + every / 2
-                        while x < size.width {
-                            let r: CGFloat = 1.5
-                            context.fill(Path(ellipseIn: CGRect(x: x - r, y: y - r, width: r * 2, height: r * 2)), with: .color(Palette.dot.opacity(0.08 + 0.22 * k)))
-                            x += every
-                        }
-                        y += every
-                        row += 1
-                    }
-                }
+                Canvas { context, size in Wall.dots(context, size) }
             }
             .animation(.easeInOut(duration: 1.2), value: working)
         }
         .ignoresSafeArea()
+    }
+
+    /// The Android app's glitter (`Wall.dots` in Look.kt), held still: fine dots on a loose grid, each a little off its
+    /// place, coming in towards the bottom, and here and there one of the four colours instead of ink.
+    nonisolated private static let glints: [Color] = [Color(day: 0xE86A52, night: 0xFFFFFF), Color(day: 0x3FAF8F, night: 0xFFE7C9), Color(day: 0x4D86D9, night: 0xD3E8FF), Color(day: 0xE9A23B, night: 0xF2D6FF)]
+
+    nonisolated static func dots(_ context: GraphicsContext, _ size: CGSize) {
+        let every: CGFloat = 26
+        let top = size.height * 0.5
+        var j = 0
+        var y = top
+        while y < size.height + every {
+            var i = 0
+            var x: CGFloat = 8
+            while x < size.width + every {
+                let k = min(1, max(0, (y - top) / (size.height - top)))
+                let seen = hash(i, j, 3)
+                // Fewer of them higher up.
+                if seen < 0.25 + 0.7 * k {
+                    let px = x + (hash(i, j, 1) - 0.5) * every * 0.5
+                    let py = y + (hash(i, j, 2) - 0.5) * every * 0.5
+                    let glint = hash(i, j, 4) < 0.012
+                    let r: CGFloat = glint ? 1.6 : 1.1
+                    let color = glint ? glints[Int(hash(i, j, 5) * 4) % 4].opacity(0.75) : Palette.dot.opacity(0.06 + 0.2 * k)
+                    context.fill(Path(ellipseIn: CGRect(x: px - r, y: py - r, width: r * 2, height: r * 2)), with: .color(color))
+                }
+                x += every
+                i += 1
+            }
+            y += every
+            j += 1
+        }
+    }
+
+    nonisolated private static func hash(_ i: Int, _ j: Int, _ salt: Int) -> CGFloat {
+        var n = UInt32(truncatingIfNeeded: i &* 374_761_393 &+ j &* 668_265_263 &+ salt &* 982_451_653)
+        n = (n ^ (n >> 13)) &* 1_274_126_177
+        return CGFloat((n ^ (n >> 16)) & 0xFFFFFF) / 16_777_216
     }
 }
 
 /// A widget: warm white, its corners round, as the Android app draws it. (Glass over the wall made it look out of
 /// focus: the system's own controls carry the glass instead.)
 struct Tile<Content: View>: View {
-    var padding: CGFloat = 22
+    var padding: CGFloat = 20
     @ViewBuilder var content: Content
 
     var body: some View {
         content
             .padding(padding)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .background(Palette.tile, in: .rect(cornerRadius: 32))
+            .background(Palette.tile, in: .rect(cornerRadius: Metrics.radius))
     }
 }
 
@@ -164,23 +188,24 @@ struct DialThing: View {
     }
 }
 
-/// Languages: a stack of cards, the language letters on the top one.
-struct CardsThing: View {
-    var letters: String
+/// A language: a pale card behind, a white one in front with the language's letter on it, as the Android app draws
+/// its translation model (two panes).
+struct LetterThing: View {
+    var letter: String
+
+    static let letters = ["ja": "あ", "en": "A", "zh": "中", "yue": "粤", "ko": "한", "es": "ñ", "fr": "é", "de": "ß", "it": "i", "pt": "ã", "hi": "अ"]
 
     var body: some View {
-        GeometryReader { box in
-            let s = min(box.size.width, box.size.height)
-            ZStack {
-                RoundedRectangle(cornerRadius: s * 0.16).fill(Palette.mint).frame(width: s * 0.62, height: s * 0.62).offset(x: -s * 0.15, y: -s * 0.15)
-                RoundedRectangle(cornerRadius: s * 0.16).fill(.white)
-                    .shadow(color: Color(red: 0.59, green: 0.39, blue: 0.16).opacity(0.2), radius: 3, y: 2)
-                    .frame(width: s * 0.62, height: s * 0.62).offset(x: s * 0.15, y: s * 0.15)
-                Text(letters).font(.system(size: s * 0.24, weight: .semibold, design: .rounded)).foregroundStyle(Color(day: 0x3A3026, night: 0x1F2A30))
-                    .offset(x: s * 0.15, y: s * 0.15)
-            }
-            .frame(width: box.size.width, height: box.size.height)
+        ZStack(alignment: .topLeading) {
+            RoundedRectangle(cornerRadius: 9).fill(Palette.mint).frame(width: 28, height: 28)
+            RoundedRectangle(cornerRadius: 9)
+                .fill(Palette.tileFront)
+                .shadow(color: Color(red: 0.59, green: 0.39, blue: 0.16).opacity(0.18), radius: 2.5, y: 1.5)
+                .frame(width: 30, height: 30)
+                .overlay(Text(letter).font(.system(size: 14, weight: .semibold)).foregroundStyle(Palette.ink))
+                .offset(x: 11, y: 11)
         }
+        .frame(width: 44, height: 44, alignment: .topLeading)
     }
 }
 
@@ -202,7 +227,7 @@ struct Water: View {
         .allowsHitTesting(false)
     }
 
-    private func surface(_ size: CGSize, y: CGFloat, swell: CGFloat, t: Double, seed: Double) -> Path {
+    nonisolated private func surface(_ size: CGSize, y: CGFloat, swell: CGFloat, t: Double, seed: Double) -> Path {
         var path = Path()
         path.move(to: CGPoint(x: 0, y: size.height))
         let steps = 48

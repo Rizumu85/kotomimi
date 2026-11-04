@@ -102,6 +102,24 @@ final class Lending {
         phase = .off
     }
 
+    #if DEBUG
+    /// A state to look at, for screenshots in the simulator, where there is no recognizer (launch argument
+    /// `-pretend standby|working`), as the Android app's `--es pretend`.
+    func pretend(_ what: String) {
+        address = "192.168.1.23:8792"
+        seen = "192.168.1.8"
+        seenAt = Date().addingTimeInterval(-90)
+        guard what == "working" else { phase = .waiting; return }
+        phase = .working
+        lastText = "今日はいい天気ですね。後で一緒に公園を散歩しませんか。"
+        lastSeconds = 6
+        lastTook = 0.31
+        lastLanguage = "ja"
+        heardCount = 12
+        lastUse = .distantFuture
+    }
+    #endif
+
     // ── The door's answers ────────────────────────────────────────────────────────────────────────────────────
 
     private func answer(_ request: Request) async -> Response {

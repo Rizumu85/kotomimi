@@ -168,7 +168,7 @@ struct SettingsBox: View {
                 Text(key.isEmpty ? "同一 Wi-Fi 下的设备都能使用这台设备。" : "电脑连接这台设备时需要输入此密钥。")
             }
             Section {
-                LabeledContent("Kotomimi 手机端", value: "版本 \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "")")
+                LabeledContent("Kotomimi", value: "版本 \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "")")
             }
         }
         .navigationTitle("设置")

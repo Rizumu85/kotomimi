@@ -26,8 +26,20 @@ struct KotomimiApp: App {
                 .environment(lending)
                 .environment(check)
                 .preferredColorScheme(appearance == "light" ? .light : appearance == "dark" ? .dark : nil)
-                .task { await hearing.refresh() }
+                .task {
+                    #if DEBUG
+                    if let at = CommandLine.arguments.firstIndex(of: "-pretend"), at + 1 < CommandLine.arguments.count {
+                        hearing.pretend()
+                        lending.pretend(CommandLine.arguments[at + 1])
+                        return
+                    }
+                    #endif
+                    await hearing.refresh()
+                }
                 .onChange(of: scene, initial: true) { _, now in
+                    #if DEBUG
+                    if CommandLine.arguments.contains("-pretend") { return }
+                    #endif
                     switch now {
                     case .active:
                         Task {

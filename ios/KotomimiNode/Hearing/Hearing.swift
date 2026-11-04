@@ -55,6 +55,13 @@ final class Hearing {
 
     func name(of code: String) -> String { languages.first { $0.id == code }?.name ?? code }
 
+    #if DEBUG
+    func pretend() {
+        available = true
+        for index in languages.indices { languages[index].state = ["ja", "en"].contains(languages[index].id) ? .ready : .offered }
+    }
+    #endif
+
     /// What the system offers and has installed now.
     func refresh() async {
         available = SpeechTranscriber.isAvailable
