@@ -52,10 +52,6 @@ struct Home: View {
         .onAppear {
             let arguments = CommandLine.arguments
             if let at = arguments.firstIndex(of: "-box"), at + 1 < arguments.count { open = Box(rawValue: arguments[at + 1]) }
-            // Held across, for screenshots of the wide layout (`-landscape`).
-            if arguments.contains("-landscape"), let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                scene.requestGeometryUpdate(.iOS(interfaceOrientations: .landscapeRight))
-            }
         }
         #endif
     }

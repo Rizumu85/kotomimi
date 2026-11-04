@@ -24,6 +24,7 @@ struct KotomimiApp: App {
 
     var body: some Scene {
         WindowGroup {
+            Landscape {
             Home()
                 .environment(hearing)
                 .environment(lending)
@@ -60,6 +61,31 @@ struct KotomimiApp: App {
                 .onChange(of: lending.phase) { _, phase in
                     UIApplication.shared.isIdleTimerDisabled = phase != .off
                 }
+            }
         }
+    }
+}
+
+/// The page drawn across, for screenshots of the wide layout in the simulator, which does not turn (`-landscape`):
+/// laid out at the screen's size turned, and turned back on the screen. Anywhere else, the page as it is.
+private struct Landscape<Content: View>: View {
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        #if DEBUG
+        if CommandLine.arguments.contains("-landscape") {
+            GeometryReader { box in
+                content
+                    .frame(width: box.size.height, height: box.size.width)
+                    .rotationEffect(.degrees(-90))
+                    .position(x: box.size.width / 2, y: box.size.height / 2)
+            }
+            .ignoresSafeArea()
+        } else {
+            content
+        }
+        #else
+        content
+        #endif
     }
 }
