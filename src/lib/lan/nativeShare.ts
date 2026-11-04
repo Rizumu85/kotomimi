@@ -17,7 +17,7 @@ import { AUTO } from '../provider/languages';
 import { createNativeAsr } from '../../providers/openai/nativeAsr';
 import { NATIVE_COACHES } from '../../providers/openai/nativeCoaches';
 import { coachBaseUrl, coachKey } from '../../providers/openai/localaiNative';
-import { NATIVE_MODELS, holdNative, isApple, nativeDownloaded, nativeModel, nativeModelFor, nativePicked, nativePreference, nativeTaken, translatorBaseUrl, translatorKey } from '../../providers/openai/localaiNative';
+import { NATIVE_MODELS, type NativeModel, holdNative, isApple, nativeDownloaded, nativeModel, nativeModelFor, nativePicked, nativePreference, nativeTaken, translatorBaseUrl, translatorKey } from '../../providers/openai/localaiNative';
 import { NATIVE_TRANSLATORS, TEXT_SLOT, nativeTranslates, translatorRequest } from '../../providers/openai/nativeTranslators';
 import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import type { SharedModel } from './protocol';
@@ -145,6 +145,21 @@ export function nativeRecognizerRefusal(language: string, wanted: string): 'busy
     return named && hears(named.id) ? 'busy' : null;
   }
   return NATIVE_MODELS.some((m) => hears(m.id)) ? 'busy' : null;
+}
+
+/**
+ * Fork: the recognizer to offer for download when a device found none here for a language: the one it chose, or of
+ * the Mac's languages the one for this language, where it hears it; else the first this system offers that does.
+ * Null: one that hears it is downloaded already, or none this system offers does.
+ */
+export function nativeOfferFor(language: string, wanted: string): NativeModel | null {
+  const status = useNativeEngineStore.getState().status;
+  if (!status.supported) return null;
+  const hears = (m: NativeModel) => nativeModelFor(m.id, language)?.id === m.id;
+  const offered = NATIVE_MODELS.filter((m) => status.models[m.id] && hears(m));
+  if (offered.some((m) => nativeDownloaded(status, m.id))) return null;
+  const named = wanted && isNativeRecognizer(wanted) ? nativeModelFor(wanted, language) : null;
+  return (named && offered.find((m) => m.id === named.id)) ?? offered[0] ?? null;
 }
 
 /**

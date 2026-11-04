@@ -453,19 +453,21 @@ const MODELS: LanModels = {
   translator: () => 'bing-translator',
 };
 
-function host(start?: unknown) {
+function host(start?: unknown, models: LanModels = MODELS) {
   const door = bridge(start);
   const recognizers: Array<ReturnType<typeof fakeRecognizer>> = [];
   const translators: Array<ReturnType<typeof fakeTranslator>> = [];
   const clients = vi.fn();
+  const asked = vi.fn();
   const h = createLanHost({
     bridge: door.b,
-    models: MODELS,
+    models,
     engines: { recognizer: () => { const r = fakeRecognizer(); recognizers.push(r); return r; }, translator: () => { const t = fakeTranslator(); translators.push(t); return t; } },
     clock: createVirtualClock(0),
     onClients: clients,
+    onAsked: asked,
   });
-  return { h, door, recognizers, translators, clients };
+  return { h, door, recognizers, translators, clients, asked };
 }
 
 describe('the sharing host', () => {
@@ -478,6 +480,19 @@ describe('the sharing host', () => {
     await vi.waitFor(() => expect(x.door.of('lan:reply')).toHaveLength(2));
     expect(x.door.of('lan:reply')[0]).toMatchObject({ id: 'r1', status: 200, body: modelList(SHARED) });
     expect(x.door.of('lan:reply')[1]).toMatchObject({ id: 'r2', status: 200, body: capabilityList(SHARED) });
+  });
+
+  it('is told of a language a device found nothing here for, by its model list or by a session it opened (fork)', async () => {
+    const x = host(undefined, { ...MODELS, recognizer: () => null });
+    await x.h.start({ port: 8790, key: '' });
+    x.door.deliver('lan:request', { id: 'r1', method: 'GET', path: '/v1/models/capabilities', body: null, query: { asks: 'ko', model: 'apple-speech:ja' } });
+    // Anything that is not a language is no word of one.
+    x.door.deliver('lan:request', { id: 'r2', method: 'GET', path: '/v1/models/capabilities', body: null, query: { asks: '<b>' } });
+    await vi.waitFor(() => expect(x.door.of('lan:reply')).toHaveLength(2));
+    expect(x.door.of('lan:reply')[0]).toMatchObject({ status: 200, body: capabilityList(SHARED) });
+    x.door.deliver('lan:socket-open', { id: 's1', model: LAN_PIPELINE });
+    x.door.deliver('lan:socket-message', { id: 's1', data: JSON.stringify({ type: 'session.update', session: { audio: { input: { transcription: { language: 'auto' } } } } }) });
+    expect(x.asked.mock.calls.map((c) => c[0])).toEqual([{ language: 'ko', model: 'apple-speech:ja' }, { language: 'auto', model: '' }]);
   });
 
   it('answers a chat request with a translation', async () => {

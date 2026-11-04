@@ -41,7 +41,7 @@ export async function askLanFirewall(action: 'status' | 'allow'): Promise<LanFir
 }
 
 /** The app's sharing host; null where there is no main process to listen (the extension, the web). */
-export function createAppLanHost(onClients: (count: number) => void): LanHost | null {
+export function createAppLanHost(onClients: (count: number) => void, onAsked?: (asked: { language: string; model: string }) => void): LanHost | null {
   const bridge = electronBridge();
   if (!bridge) return null;
   return createLanHost({
@@ -60,6 +60,7 @@ export function createAppLanHost(onClients: (count: number) => void): LanHost | 
     },
     clock: realClock,
     onClients,
+    ...(onAsked ? { onAsked } : {}),
     ready: () => nativeKnown(),
   });
 }

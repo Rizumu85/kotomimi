@@ -343,6 +343,14 @@
     "en": "Jyutping over Cantonese",
     "text": "கான்டனீஸ் உரைக்கு மேலே ஜியுட்பிங்"
   },
+  "fork.lan.asked": {
+    "en": "The other device wants to hear {{language}}",
+    "text": "மற்ற சாதனம் {{language}}-ஐ அடையாளம் காண விரும்புகிறது"
+  },
+  "fork.lan.askedDetect": {
+    "en": "The other device wants languages told apart",
+    "text": "மற்ற சாதனம் மொழிகளைத் தானாகப் பிரித்தறிய விரும்புகிறது"
+  },
   "fork.lan.copied": {
     "en": "Copied",
     "text": "நகலெடுக்கப்பட்டது"
@@ -1612,8 +1620,8 @@
     "text": "வேறொரு சாதனத்தில் அணுகல் சாவி அமைக்கப்பட்டிருந்தால் இதை இயக்குங்கள். எடுத்துக்காட்டாக, அந்த Kotomimi-யில் பகிர்வின் விருப்பங்களில் சாவி அமைக்கப்பட்டிருக்கலாம்."
   },
   "providers.localai.serverNoAsr": {
-    "en": "The other device has no speech recognition model for {{source}}. Download one there first (in the model library of its sharing card), or let this computer listen.",
-    "text": "மற்ற சாதனத்தில் {{source}} மொழியை அறியும் பேச்சறிதல் மாதிரி இல்லை. முதலில் அங்கே பதிவிறக்குங்கள் (அதன் பகிர்வு அட்டையின் மாதிரி நூலகத்தில்), அல்லது இந்தக் கணினியைப் பேச்சறியப் பயன்படுத்துங்கள்."
+    "en": "The other device has no speech recognition model for {{source}}. Its sharing card offers one to download, or let this computer listen.",
+    "text": "மற்ற சாதனத்தில் {{source}}-ஐ அடையாளம் காணும் பேச்சு அங்கீகார மாதிரி இல்லை. அதை பதிவிறக்க அதன் பகிர்வு அட்டையைப் பயன்படுத்தலாம்; அல்லது இந்தக் கணினியே கேட்டு அடையாளம் காணலாம்."
   },
   "providers.localai.serverNoDetect": {
     "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",

@@ -355,6 +355,14 @@
     "en": "Jyutping over Cantonese",
     "text": "Jyutping sopra il testo cantonese"
   },
+  "fork.lan.asked": {
+    "en": "The other device wants to hear {{language}}",
+    "text": "L'altro dispositivo vuole riconoscere {{language}}"
+  },
+  "fork.lan.askedDetect": {
+    "en": "The other device wants languages told apart",
+    "text": "L'altro dispositivo vuole distinguere automaticamente le lingue"
+  },
   "fork.lan.copied": {
     "en": "Copied",
     "text": "Copiato"
@@ -1660,8 +1668,8 @@
     "text": "Attiva questa opzione se l'altro dispositivo ha una chiave di accesso, ad esempio se è stata impostata nelle opzioni di condivisione di Kotomimi su quel dispositivo."
   },
   "providers.localai.serverNoAsr": {
-    "en": "The other device has no speech recognition model for {{source}}. Download one there first (in the model library of its sharing card), or let this computer listen.",
-    "text": "L'altro dispositivo non ha un modello di riconoscimento vocale per {{source}}. Scaricane uno su quel dispositivo, dalla libreria modelli nel riquadro di condivisione, oppure usa questo computer per il riconoscimento."
+    "en": "The other device has no speech recognition model for {{source}}. Its sharing card offers one to download, or let this computer listen.",
+    "text": "L'altro dispositivo non ha un modello di riconoscimento vocale per {{source}}. Nella scheda di condivisione di quel dispositivo puoi scaricarne uno oppure usare questo computer per il riconoscimento."
   },
   "providers.localai.serverNoDetect": {
     "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",

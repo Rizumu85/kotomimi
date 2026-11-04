@@ -332,7 +332,7 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
             waiting.delete(id);
           }
         });
-        handlers.request({ id, method: request.method, path, body });
+        handlers.request({ id, method: request.method, path, body, ...(request.method === 'GET' && url.search ? { query: Object.fromEntries(url.searchParams) } : {}) });
       };
       if (!upstream) return hand();
       if (request.method === 'GET') return hand(Promise.resolve().then(() => upstream.models()).catch(() => []));

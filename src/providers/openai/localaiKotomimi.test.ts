@@ -253,7 +253,10 @@ describe('another Kotomimi that hears none of a leg\'s language', () => {
 
   it('is refused before Start, naming the language, where its socket would refuse the session', async () => {
     // I speak Chinese; it hears Japanese only.
-    expect(await ask(serving(JA_ONLY), ['speaker'])).toMatchObject({ ok: false, code: 'server_no_asr', params: { source: 'zh-CN' } });
+    const told = serving(JA_ONLY);
+    expect(await ask(told, ['speaker'])).toMatchObject({ ok: false, code: 'server_no_asr', params: { source: 'zh-CN' } });
+    // It is told which language it found nothing for: its settings then offer a model for it (fork).
+    expect(told.mock.calls.map((c) => String(c[0])).filter((url) => url.includes('asks='))).toEqual([expect.stringMatching(/\/models\/capabilities\?asks=zh-CN(&|$)/)]);
     // What it lists stays: another place, or a model there, is chosen from it.
     expect(await ask(serving(JA_ONLY), ['speaker'])).toMatchObject({ models: expect.arrayContaining([expect.objectContaining({ id: 'custom-kotoba-whisper' })]) });
   });

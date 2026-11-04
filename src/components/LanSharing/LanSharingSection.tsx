@@ -5,9 +5,11 @@ import { useTranslation } from 'react-i18next';
 import ToggleSwitch from '../Settings/shared/ToggleSwitch';
 import Tooltip from '../Tooltip/Tooltip';
 import { appLanModels } from '../../lib/lan/appModels';
+import { nativeOfferFor } from '../../lib/lan/nativeShare';
+import { languageNameFor } from '../Settings/engine/languageName';
 import { useLanStore, validLanPort, lanKeyOf } from '../../stores/lanStore';
 import { NativeEngineCard, nativeStoreOf, type NativeCardModel, type NativeKind } from '../../providers/openai/NativeEngineCard';
-import { NATIVE_MODELS } from '../../providers/openai/localaiNative';
+import { NATIVE_MODELS, isAutoLanguage } from '../../providers/openai/localaiNative';
 import { NATIVE_TRANSLATORS } from '../../providers/openai/nativeTranslators';
 import { NATIVE_COACHES } from '../../providers/openai/nativeCoaches';
 import './LanSharingSection.scss';
@@ -24,6 +26,9 @@ function SharedLibrary({ kind, disabled }: { kind: NativeKind; disabled: boolean
   return <section><h3>{t(`providers.localai.${label}`)}</h3>{models.map((model) => <NativeEngineCard key={model.id} kind={kind} model={model} selected={false} disabled={disabled} />)}</section>;
 }
 
+
+/** How long a device's word of a language it found nothing here for is shown: it asks again at its next start. */
+const ASKED_FOR_MS = 30 * 60_000;
 
 const helpIcon = <CircleHelp className="tooltip-trigger" size={14} style={{ marginLeft: '8px' }} />;
 
@@ -52,6 +57,7 @@ export function LanSharingSection({ disabled = false }: { disabled?: boolean }) 
   const enabled = useLanStore((s) => s.enabled);
   const status = useLanStore((s) => s.status);
   const clients = useLanStore((s) => s.clients);
+  const askedFor = useLanStore((s) => s.asked);
   const port = useLanStore((s) => s.port);
   const key = useLanStore((s) => s.key);
   const firewall = useLanStore((s) => s.firewall);
@@ -73,8 +79,10 @@ export function LanSharingSection({ disabled = false }: { disabled?: boolean }) 
   const translators = shared.filter((m) => m.kind === 'translate');
   const coaches = shared.filter((m) => m.kind === 'feedback');
   const lentCount = recognizers.length + translators.length + coaches.length;
+  // A device found nothing here for its language: the model that would hear it, to download in place.
+  const offer = useMemo(() => (askedFor && Date.now() - askedFor.at < ASKED_FOR_MS ? nativeOfferFor(askedFor.language, askedFor.model) : null), [askedFor, asr]);
   // Looked, and nothing here hears: another device would find nothing to listen with.
-  const deaf = asked && recognizers.length === 0;
+  const deaf = asked && recognizers.length === 0 && !offer;
 
   const commitPort = () => {
     const next = Number(portText);
@@ -130,6 +138,15 @@ export function LanSharingSection({ disabled = false }: { disabled?: boolean }) 
                 </div>
               )}
             </>
+          )}
+          {offer && askedFor && (
+            <div className="kt-lan__asked">
+              <div className="kt-lan__status">
+                <Mic size={14} />
+                <span>{isAutoLanguage(askedFor.language) ? t('fork.lan.askedDetect') : t('fork.lan.asked', { language: languageNameFor(askedFor.language) })}</span>
+              </div>
+              <NativeEngineCard kind="asr" model={offer} selected={false} disabled={disabled} />
+            </div>
           )}
           {deaf && (
             <div className="kt-lan__status kt-lan__status--error">

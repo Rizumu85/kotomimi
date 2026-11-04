@@ -27,6 +27,8 @@ interface LanState {
   status: LanStatus;
   /** Sockets open now: devices being transcribed for. */
   clients: number;
+  /** Fork: the last language a device found no recognizer here for, and the model it chose; `at`: when (ms). Not persisted. */
+  asked: { language: string; model: string; at: number } | null;
   /** Whether the system's firewall lets other devices in, read each time sharing starts. */
   firewall: LanFirewall;
   /** The system is asking the user, or being read. */
@@ -81,12 +83,12 @@ export const useLanStore = create<LanState>()(
         try {
           if (!enabled) {
             if (host) await host.stop();
-            set({ status: { state: 'off' }, clients: 0, ...NO_FIREWALL });
+            set({ status: { state: 'off' }, clients: 0, asked: null, ...NO_FIREWALL });
             return;
           }
           set({ status: { state: 'starting' }, ...NO_FIREWALL });
           const { createAppLanHost } = await import('../lib/lan/appHost');
-          host ??= createAppLanHost((clients) => set({ clients }));
+          host ??= createAppLanHost((clients) => set({ clients }), (asked) => set({ asked: { ...asked, at: Date.now() } }));
           if (!host) {
             set({ status: { state: 'error', code: 'unsupported', message: 'Sharing needs the desktop app.' } });
             return;
@@ -107,6 +109,7 @@ export const useLanStore = create<LanState>()(
       key: '',
       status: { state: 'off' },
       clients: 0,
+      asked: null,
       ...NO_FIREWALL,
       allowFirewall: () => readFirewall('allow'),
       setEnabled: async (on) => {

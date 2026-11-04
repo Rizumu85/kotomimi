@@ -339,6 +339,14 @@
     "en": "Jyutping over Cantonese",
     "text": "Ютпхін над кантонським текстом"
   },
+  "fork.lan.asked": {
+    "en": "The other device wants to hear {{language}}",
+    "text": "Інший пристрій хоче розпізнавати {{language}}"
+  },
+  "fork.lan.askedDetect": {
+    "en": "The other device wants languages told apart",
+    "text": "Інший пристрій хоче автоматично розрізняти мови"
+  },
   "fork.lan.copied": {
     "en": "Copied",
     "text": "Скопійовано"
@@ -1608,8 +1616,8 @@
     "text": "Увімкніть, якщо на іншому пристрої задано ключ доступу. Наприклад, у Kotomimi його можна задати в параметрах спільного доступу."
   },
   "providers.localai.serverNoAsr": {
-    "en": "The other device has no speech recognition model for {{source}}. Download one there first (in the model library of its sharing card), or let this computer listen.",
-    "text": "На іншому пристрої немає моделі розпізнавання мовлення для мови «{{source}}». Спершу завантажте її там у бібліотеці моделей картки спільного доступу або виберіть розпізнавання на цьому комп’ютері."
+    "en": "The other device has no speech recognition model for {{source}}. Its sharing card offers one to download, or let this computer listen.",
+    "text": "На іншому пристрої немає моделі розпізнавання мовлення для {{source}}. Її можна завантажити з картки спільного доступу на тому пристрої або дозволити цьому комп’ютеру слухати."
   },
   "providers.localai.serverNoDetect": {
     "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",

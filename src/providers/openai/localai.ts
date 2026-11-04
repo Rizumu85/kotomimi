@@ -832,6 +832,12 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
       const gap = unfitServer ?? unpaired(s, found, ctx.pair, leg === 'speaker') ?? unnamedStage(s, found, coached, plain, both) ?? undetected(s, found, leg === 'speaker' ? ctx.pair.source : heard, coached, leg === 'participant' ? ctx.pair.target : undefined) ?? unheard(s, found, heard === AUTO && !serverDetects(found, s.asrModel) ? (leg === 'speaker' ? ctx.pair.source : ctx.pair.target) : heard)
         ?? ((coached && !both) || plain ? null : phoneTranslatorUnfit(s, leg === 'speaker' ? ctx.pair.source : heard, leg === 'speaker' ? ctx.pair.target : ctx.pair.source))
         ?? (both ? phoneTranslatorUnfit(s, ctx.pair.target, ctx.pair.source) : null);
+      // Fork: another Kotomimi with nothing for the leg's language is told which, and offers a model to download for it
+      // in its own settings. Not waited for: the refusal stands, whatever it answers.
+      if (gap?.code === 'server_no_asr' && gap.params?.source && needsServer(s)) {
+        const asks = new URLSearchParams({ asks: String(gap.params.source), ...(s.asrModel.trim() ? { model: s.asrModel.trim() } : {}) });
+        void doFetch(`${localaiModelsUrl(k.endpoint)}/capabilities?${asks}`, listing(k.apiKey, AbortSignal.timeout(CHECK_TIMEOUT_MS))).catch(() => undefined);
+      }
       // What the servers listed goes with the refusal: a pick from it is often what answers it.
       if (gap) return { ok: false, reason: gap.refused, ...(gap.code ? { code: gap.code } : {}), ...(gap.params ? { params: gap.params } : {}), ...(servers.models?.length ? { models: servers.models } : {}) };
     }

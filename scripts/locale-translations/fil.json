@@ -395,6 +395,14 @@
     "en": "Jyutping over Cantonese",
     "text": "Jyutping sa itaas ng Cantonese"
   },
+  "fork.lan.asked": {
+    "en": "The other device wants to hear {{language}}",
+    "text": "Gustong kilalanin ng kabilang device ang {{language}}"
+  },
+  "fork.lan.askedDetect": {
+    "en": "The other device wants languages told apart",
+    "text": "Gustong awtomatikong paghiwalayin ng kabilang device ang mga wika"
+  },
   "fork.lan.copied": {
     "en": "Copied",
     "text": "Nakopya na"
@@ -1740,8 +1748,8 @@
     "text": "I-on ito kung may nakatakdang susi sa pag-access ang ibang device, halimbawa, kung nagtakda ng susi sa mga opsyon sa pagbabahagi ng Kotomimi nito."
   },
   "providers.localai.serverNoAsr": {
-    "en": "The other device has no speech recognition model for {{source}}. Download one there first (in the model library of its sharing card), or let this computer listen.",
-    "text": "Walang modelo sa kabilang device na nakakakilala ng pananalita sa {{source}}. Mag-download muna roon sa aklatan ng mga modelo sa card ng pagbabahagi, o gamitin ang computer na ito sa pagkilala."
+    "en": "The other device has no speech recognition model for {{source}}. Its sharing card offers one to download, or let this computer listen.",
+    "text": "Walang modelo sa pagkilala ng pagsasalita ang kabilang device para sa {{source}}. Sa sharing card nito, puwedeng mag-download ng isa, o hayaan ang computer na ito ang kumilala."
   },
   "providers.localai.serverNoDetect": {
     "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",

@@ -343,6 +343,14 @@
     "en": "Jyutping over Cantonese",
     "text": "కాంటనీస్ పైన జ్యుట్‌పింగ్ చూపించు"
   },
+  "fork.lan.asked": {
+    "en": "The other device wants to hear {{language}}",
+    "text": "మరో పరికరం {{language}}ను గుర్తించాలనుకుంటోంది"
+  },
+  "fork.lan.askedDetect": {
+    "en": "The other device wants languages told apart",
+    "text": "మరో పరికరం భాషలను ఆటోమేటిక్‌గా వేరు చేయాలనుకుంటోంది"
+  },
   "fork.lan.copied": {
     "en": "Copied",
     "text": "కాపీ అయింది"
@@ -1612,8 +1620,8 @@
     "text": "మరో పరికరంలో యాక్సెస్ కీ సెట్ చేసి ఉంటే దీన్ని ఆన్ చేయండి. ఉదాహరణకు, ఆ పరికరంలోని Kotomimi షేరింగ్ ఎంపికల్లో కీ సెట్ చేసి ఉంటే."
   },
   "providers.localai.serverNoAsr": {
-    "en": "The other device has no speech recognition model for {{source}}. Download one there first (in the model library of its sharing card), or let this computer listen.",
-    "text": "అవతలి పరికరంలో {{source}}ను గుర్తించే మాటల గుర్తింపు మోడల్ లేదు. ముందుగా అక్కడ డౌన్‌లోడ్ చేయండి (దాని షేరింగ్ కార్డ్‌లోని మోడల్ లైబ్రరీలో), లేదా ఈ కంప్యూటర్‌తో గుర్తించండి."
+    "en": "The other device has no speech recognition model for {{source}}. Its sharing card offers one to download, or let this computer listen.",
+    "text": "మరో పరికరంలో {{source}} కోసం ప్రసంగ గుర్తింపు మోడల్ లేదు. దాని షేరింగ్ కార్డ్‌లో ఒకదాన్ని డౌన్‌లోడ్ చేసుకోవచ్చు, లేదా ఈ కంప్యూటర్ గుర్తించనివ్వండి."
   },
   "providers.localai.serverNoDetect": {
     "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",

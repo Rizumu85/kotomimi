@@ -51,6 +51,8 @@ export interface LanHostDeps {
   clock: Clock;
   /** How many sockets are open changed: the settings show it. */
   onClients?(count: number): void;
+  /** Fork: a device found no recognizer here for a language (`model`: the one it chose, or none): the settings offer one to download. */
+  onAsked?(asked: { language: string; model: string }): void;
   /**
    * Fork: what is to be known before the door opens — the app's engines, what each has downloaded. Opened before,
    * the door told a device asking at once that it shared no such model (a Mac whose app had just restarted,
@@ -61,7 +63,7 @@ export interface LanHostDeps {
 
 export type LanStart = { ok: true; port: number; addresses: string[]; /** This computer's name, as a searching device lists it. */ name?: string } | { ok: false; code: string | null; message: string };
 
-interface WireRequest { id: string; method: string; path: string; body: unknown }
+interface WireRequest { id: string; method: string; path: string; body: unknown; query?: Record<string, string> }
 
 export interface LanHost {
   start(o: { port: number; key: string }): Promise<LanStart>;
@@ -84,7 +86,12 @@ export function createLanHost(deps: LanHostDeps): LanHost {
     let reply: { status: number; body: unknown; contentType?: string };
     try {
       if (request.path === '/v1/models') reply = { status: 200, body: modelList(models.shared()) };
-      else if (request.path === '/v1/models/capabilities') reply = { status: 200, body: capabilityList(models.shared()) };
+      else if (request.path === '/v1/models/capabilities') {
+        // Fork: a device that found no recognizer here for its language says which (`asks`), and the model it chose.
+        const asks = request.query?.asks;
+        if (typeof asks === 'string' && /^[a-z]{2,3}([-_][a-z0-9]+)*$/i.test(asks)) deps.onAsked?.({ language: asks, model: request.query?.model ?? '' });
+        reply = { status: 200, body: capabilityList(models.shared()) };
+      }
       else if (request.path === '/v1/chat/completions' && translator) {
         // A chat that names the feedback model is the feedback engine's; any other is a sentence to translate.
         const named = (request.body as { model?: unknown } | null)?.model;
@@ -126,6 +133,7 @@ export function createLanHost(deps: LanHostDeps): LanHost {
             recognizer: deps.engines.recognizer,
             resolve: models.recognizer,
             ...(models.recognizerRefusal ? { refusal: models.recognizerRefusal } : {}),
+            missing: (language, wanted) => deps.onAsked?.({ language, model: wanted }),
             send: (event) => { void bridge.invoke('lan:send', { id, data: JSON.stringify(event) }); },
             close: (code, reason) => { void bridge.invoke('lan:close-socket', { id, code, reason }); },
             clock,

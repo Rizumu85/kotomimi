@@ -343,6 +343,14 @@
     "en": "Jyutping over Cantonese",
     "text": "광둥어 위에 윗핑 표시"
   },
+  "fork.lan.asked": {
+    "en": "The other device wants to hear {{language}}",
+    "text": "다른 기기가 {{language}}을(를) 인식하려고 합니다"
+  },
+  "fork.lan.askedDetect": {
+    "en": "The other device wants languages told apart",
+    "text": "다른 기기가 언어를 자동으로 구분하려고 합니다"
+  },
   "fork.lan.copied": {
     "en": "Copied",
     "text": "복사됨"
@@ -1608,8 +1616,8 @@
     "text": "다른 기기에 액세스 키가 설정되어 있다면 켜세요. 예를 들어 상대 기기의 Kotomimi에서 공유 설정의 '옵션'에 키를 설정한 경우입니다."
   },
   "providers.localai.serverNoAsr": {
-    "en": "The other device has no speech recognition model for {{source}}. Download one there first (in the model library of its sharing card), or let this computer listen.",
-    "text": "다른 기기에 {{source}} 음성을 인식할 모델이 없어요. 해당 기기의 공유 카드에 있는 모델 라이브러리에서 먼저 다운로드하거나, 이 컴퓨터에서 인식하도록 바꾸세요."
+    "en": "The other device has no speech recognition model for {{source}}. Its sharing card offers one to download, or let this computer listen.",
+    "text": "다른 기기에 {{source}}을(를) 인식할 음성 인식 모델이 없습니다. 해당 기기의 공유 카드에서 다운로드하거나, 이 컴퓨터가 대신 인식하게 할 수 있습니다."
   },
   "providers.localai.serverNoDetect": {
     "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",

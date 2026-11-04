@@ -5,7 +5,7 @@ import { holdNative, holdNativeForRun, nativeIdle, preferNative, translatorIdle 
 import { useModelStore } from '../../stores/modelStore';
 import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import { appLanModels } from './appModels';
-import { NATIVE_KNOWN_WITHIN_MS, nativeCoachAnswer, nativeCoachFor, nativeKnown, nativeTranslator, nativeRecognizer, nativeRecognizerFor, nativeRecognizerRefusal, nativeShared, nativeTranslatorFor } from './nativeShare';
+import { NATIVE_KNOWN_WITHIN_MS, nativeCoachAnswer, nativeCoachFor, nativeKnown, nativeOfferFor, nativeTranslator, nativeRecognizer, nativeRecognizerFor, nativeRecognizerRefusal, nativeShared, nativeTranslatorFor } from './nativeShare';
 
 const downloaded = { state: 'downloaded' as const, received: 1, total: 1 };
 const absent = { state: 'absent' as const, received: 0, total: 1 };
@@ -343,6 +343,27 @@ describe('two sessions of one device at once (fork)', () => {
   it('answer a pair named of a model other than the Mac’s alone, to be refused as no pair rather than no model', () => {
     useNativeEngineStore.setState({ status: BOTH });
     expect(nativeRecognizerFor('zh', 'qwen3-asr-1.7b-q8', 'ko')).toEqual({ modelId: 'qwen3-asr-1.7b-q8', streaming: true });
+  });
+});
+
+describe('the recognizer offered for a language a device found nothing here for (fork)', () => {
+  const MAC_MORE = status({ 'apple-speech:ja': downloaded, 'apple-speech:ko': absent, 'qwen3-asr-1.7b-q8': absent, 'r2t2-q8': absent });
+
+  it('is the one the device chose, in the language it asked, else the first this system offers that hears it', () => {
+    useNativeEngineStore.setState({ status: MAC_MORE });
+    // It chose the Mac's recognition, in Japanese: Korean is another of the Mac's languages.
+    expect(nativeOfferFor('ko', 'apple-speech:ja')?.id).toBe('apple-speech:ko');
+    expect(nativeOfferFor('ko', 'qwen3-asr-1.7b-q8')?.id).toBe('qwen3-asr-1.7b-q8');
+    expect(nativeOfferFor('ko-KR', '')?.id).toBe('apple-speech:ko');
+    expect(nativeOfferFor('auto', '')?.id).toBe('qwen3-asr-1.7b-q8');
+  });
+
+  it('is none where one that hears it is downloaded, or none here does', () => {
+    useNativeEngineStore.setState({ status: MAC_MORE });
+    expect(nativeOfferFor('ja', 'qwen3-asr-1.7b-q8')).toBeNull();
+    expect(nativeOfferFor('sw', '')).toBeNull();
+    useNativeEngineStore.setState({ status: { ...MAC_MORE, supported: false } });
+    expect(nativeOfferFor('ko', '')).toBeNull();
   });
 });
 

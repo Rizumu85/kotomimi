@@ -343,6 +343,14 @@
     "en": "Jyutping over Cantonese",
     "text": "ক্যান্টোনিজ লেখার উপরে জ্যুতপিং"
   },
+  "fork.lan.asked": {
+    "en": "The other device wants to hear {{language}}",
+    "text": "অন্য ডিভাইসটি {{language}} শনাক্ত করতে চায়"
+  },
+  "fork.lan.askedDetect": {
+    "en": "The other device wants languages told apart",
+    "text": "অন্য ডিভাইসটি ভাষাগুলো স্বয়ংক্রিয়ভাবে আলাদা করতে চায়"
+  },
   "fork.lan.copied": {
     "en": "Copied",
     "text": "কপি হয়েছে"
@@ -1612,8 +1620,8 @@
     "text": "অন্য ডিভাইসে অ্যাক্সেস কী সেট করা থাকলে এটি চালু করুন। যেমন, অন্য Kotomimi-তে শেয়ার করার বিকল্পে কী সেট করা থাকলে।"
   },
   "providers.localai.serverNoAsr": {
-    "en": "The other device has no speech recognition model for {{source}}. Download one there first (in the model library of its sharing card), or let this computer listen.",
-    "text": "অন্য ডিভাইসে {{source}} শনাক্ত করার মতো কথা শনাক্তকরণ মডেল নেই। আগে সেখানে একটি ডাউনলোড করুন (তার শেয়ারিং কার্ডের মডেল লাইব্রেরি থেকে), অথবা এই কম্পিউটার দিয়ে শনাক্ত করুন।"
+    "en": "The other device has no speech recognition model for {{source}}. Its sharing card offers one to download, or let this computer listen.",
+    "text": "অন্য ডিভাইসে {{source}} শনাক্ত করার কোনো স্পিচ রিকগনিশন মডেল নেই। ওই ডিভাইসের শেয়ারিং কার্ড থেকে একটি ডাউনলোড করুন, অথবা এই কম্পিউটারকে শুনতে দিন।"
   },
   "providers.localai.serverNoDetect": {
     "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",

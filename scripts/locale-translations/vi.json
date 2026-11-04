@@ -347,6 +347,14 @@
     "en": "Jyutping over Cantonese",
     "text": "Hiện jyutping trên tiếng Quảng Đông"
   },
+  "fork.lan.asked": {
+    "en": "The other device wants to hear {{language}}",
+    "text": "Thiết bị kia muốn nhận dạng {{language}}"
+  },
+  "fork.lan.askedDetect": {
+    "en": "The other device wants languages told apart",
+    "text": "Thiết bị kia muốn tự động phân biệt ngôn ngữ"
+  },
   "fork.lan.copied": {
     "en": "Copied",
     "text": "Đã sao chép"
@@ -1616,8 +1624,8 @@
     "text": "Bật khi thiết bị kia đã đặt khóa truy cập, chẳng hạn khóa được đặt trong mục “Tùy chọn” chia sẻ của Kotomimi trên thiết bị đó."
   },
   "providers.localai.serverNoAsr": {
-    "en": "The other device has no speech recognition model for {{source}}. Download one there first (in the model library of its sharing card), or let this computer listen.",
-    "text": "Thiết bị kia không có mô hình nhận dạng giọng nói cho {{source}}. Hãy tải một mô hình trên đó trước (trong thư viện mô hình của thẻ chia sẻ), hoặc để máy tính này nhận dạng."
+    "en": "The other device has no speech recognition model for {{source}}. Its sharing card offers one to download, or let this computer listen.",
+    "text": "Thiết bị kia không có mô hình nhận dạng giọng nói cho {{source}}. Thẻ chia sẻ trên thiết bị đó có tùy chọn tải xuống, hoặc để máy tính này nhận dạng."
   },
   "providers.localai.serverNoDetect": {
     "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",

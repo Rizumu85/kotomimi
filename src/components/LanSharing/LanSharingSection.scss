@@ -40,6 +40,26 @@
     margin-top: vars.$space-2;
   }
 
+  // A device found nothing here for its language: what would hear it, with its download, under the state.
+  .kt-lan__asked {
+    display: flex;
+    flex-direction: column;
+    gap: vars.$space-2;
+    margin-top: vars.$space-3;
+    padding-top: vars.$space-3;
+    border-top: 1px solid vars.$border-subtle;
+
+    // Its line wraps: the icon stays by the first line.
+    .kt-lan__status {
+      align-items: flex-start;
+
+      svg {
+        flex-shrink: 0;
+        margin-top: 3px;
+      }
+    }
+  }
+
   // What another device finds this one by: its name, and its address.
   .kt-lan__where {
     display: flex;

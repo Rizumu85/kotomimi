@@ -64,6 +64,20 @@ const dial = (url, protocols) => new Promise((resolve) => {
 });
 
 describe('the shared models\' door: HTTP', () => {
+  it('hands a GET\'s query to the page with it, and none where there is none (fork)', async () => {
+    const { server, seen, base } = await start();
+    const answer = fetch(`${base}/v1/models/capabilities?asks=ko&model=apple-speech%3Aja`);
+    await until(() => seen.requests.length === 1);
+    expect(seen.requests[0]).toMatchObject({ method: 'GET', path: '/v1/models/capabilities', query: { asks: 'ko', model: 'apple-speech:ja' } });
+    server.reply(seen.requests[0].id, { body: { object: 'list', data: [] } });
+    expect((await answer).status).toBe(200);
+    const plain = fetch(`${base}/v1/models`);
+    await until(() => seen.requests.length === 2);
+    expect(seen.requests[1].query).toBeUndefined();
+    server.reply(seen.requests[1].id, { body: { object: 'list', data: [] } });
+    await plain;
+  });
+
   it('hands a GET to the page and answers with what the page replies', async () => {
     const { server, seen, base } = await start();
     const answer = fetch(`${base}/v1/models`);
