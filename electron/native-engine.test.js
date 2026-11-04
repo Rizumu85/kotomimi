@@ -16,7 +16,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { createNativeEngine, openLive, languageName, languageLocale, modelHears, translatorFits, unspaced, echoOf, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME } = require('./native-engine.js');
+const { createNativeEngine, openLive, languageName, languageLocale, modelHears, translatorFits, unspaced, echoOf, hintChecked, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME } = require('./native-engine.js');
 const { hfMirrorOf } = require('./fetch-file.js');
 
 const sha = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -223,6 +223,34 @@ describe('a reading that says the context back (fork)', () => {
     expect(echo('今天和糖豆还有吉庆一起去VRC玩了。')).toBe('今天和糖豆还有吉庆一起去VRC玩了。');
     expect(echo('糖豆。')).toBe('糖豆。');
     expect(echo('糖豆、你好、明天见、走吧')).toBe('糖豆、你好、明天见、走吧');
+  });
+});
+
+describe('a reading of nothing but hinted words (fork)', () => {
+  const hints = ['VRC', '糖豆'];
+  const seconds = (s) => Buffer.alloc(Math.round(s * 16000) * 2);
+  const reader = (answers) => {
+    const asked = [];
+    const read = (request) => { asked.push(request); const text = answers[request.context ? 'hinted' : 'plain']; return { done: Promise.resolve({ ok: true, text }), abort: () => {} }; };
+    return { asked, read };
+  };
+
+  it('is read again without the hints, and that kept where it heard clearly more', async () => {
+    const { asked, read } = reader({ hinted: 'The VRC', plain: 'Привет, как у тебя дела сегодня?' });
+    const answer = await hintChecked(read, hints)({ context: '可能出现的人名和词语：VRC、糖豆', pcm: seconds(3), sampleRate: 16000 }).done;
+    expect(answer.text).toBe('Привет, как у тебя дела сегодня?');
+    expect(asked.map((r) => r.context === undefined)).toEqual([false, true]);
+  });
+
+  it('keeps a name that was called, and a short stretch, and a sentence, read once', async () => {
+    const called = reader({ hinted: '糖豆！', plain: '唐豆！' });
+    expect((await hintChecked(called.read, hints)({ context: 'x', pcm: seconds(2), sampleRate: 16000 }).done).text).toBe('糖豆！');
+    const short = reader({ hinted: 'VRC', plain: 'something else entirely' });
+    expect((await hintChecked(short.read, hints)({ context: 'x', pcm: seconds(1), sampleRate: 16000 }).done).text).toBe('VRC');
+    expect(short.asked.length).toBe(1);
+    const sentence = reader({ hinted: '我们去VRC吧', plain: '我们去吧' });
+    expect((await hintChecked(sentence.read, hints)({ context: 'x', pcm: seconds(3), sampleRate: 16000 }).done).text).toBe('我们去VRC吧');
+    expect(sentence.asked.length).toBe(1);
   });
 });
 

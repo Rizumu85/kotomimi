@@ -604,6 +604,46 @@ function unspaced(text) {
   return String(text).replace(SPACE_INSIDE, '');
 }
 
+/** Words that carry nothing alone: a reading of them and a hinted word has heard only the hint. */
+const FILLER = new Set(['the', 'a', 'an', 'and', 'of', 'to', 'in', 'on', 'at', 'is']);
+
+/** The letters and figures of a text, for comparing how much two readings heard. */
+const lettersOf = (text) => [...String(text)].filter((c) => /[\p{L}\p{N}]/u.test(c)).length;
+
+/**
+ * Fork: a reading that is nothing but hinted words, of a stretch longer than they take to say. Told the words to
+ * expect, Qwen3-ASR given speech it does not follow — Russian, read where Chinese was expected — wrote 「The VRC」 for a
+ * whole sentence (the user, 2026-11-04). Such a reading is suspect, not wrong: someone may only have called a name.
+ */
+function hintOnly(text, hints, seconds) {
+  if (seconds < HINT_ONLY_SECONDS) return false;
+  const known = new Set(hints.map((hint) => String(hint).trim().toLowerCase()).filter(Boolean));
+  const parts = String(text).split(/[、，,。.!?！？;；:：\s]+/u).map((part) => part.trim().toLowerCase()).filter(Boolean);
+  const words = parts.filter((part) => !FILLER.has(part));
+  return words.length > 0 && words.every((part) => known.has(part));
+}
+/** A name called takes a second or so: a stretch longer than this read as one is suspect. */
+const HINT_ONLY_SECONDS = 1.6;
+
+/**
+ * The reading of a stretch with hints, made sure of: where it heard nothing but hinted words, the stretch is read
+ * again without them, and that reading is the one kept if it heard clearly more — the hints had stood in for words
+ * the model did not follow. Where it heard about as much, it was a name called, and the hinted reading is kept.
+ */
+function hintChecked(read, hints) {
+  return (asked) => {
+    const first = read(asked);
+    let second = null;
+    const seconds = asked.pcm ? asked.pcm.length / 2 / (asked.sampleRate || 16000) : 0;
+    const done = first.done.then((answer) => {
+      if (!answer.ok || !asked.context || !hintOnly(answer.text, hints, seconds)) return answer;
+      second = read({ ...asked, context: undefined });
+      return second.done.then((plain) => (plain.ok && lettersOf(plain.text) > lettersOf(answer.text) * 1.5 + 2 ? plain : answer));
+    });
+    return { done, abort: () => { first.abort(); second?.abort(); } };
+  };
+}
+
 /** What Qwen3-ASR is told to expect, ahead of a stretch (`openStream`). */
 const CONTEXT_LEAD = '可能出现的人名和词语：';
 
@@ -1229,7 +1269,8 @@ function createNativeEngine(deps = {}) {
     // said back for want of a voice dropped.
     const echo = context ? echoOf(hints) : null;
     const tidy = echo && model?.unspaced ? (text) => echo(unspaced(text)) : echo ?? (model?.unspaced ? unspaced : null);
-    const stream = (windowed ? window : live)(windowed ? { ...target, note, ...(tidy ? { tidy } : {}) } : target, (event) => {
+    const checked = context ? { read: hintChecked(readWhole, hints) } : {};
+    const stream = (windowed ? window : live)(windowed ? { ...target, note, ...checked, ...(tidy ? { tidy } : {}) } : target, (event) => {
       if (event.type !== 'delta' && event.type !== 'partial') streams.delete(id);
       onStream({ id, ...event });
     });
@@ -1257,4 +1298,4 @@ function createNativeEngine(deps = {}) {
   return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream };
 }
 
-module.exports = { createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, unspaced, echoOf, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, translatorFits, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };
+module.exports = { createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, unspaced, echoOf, hintChecked, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, translatorFits, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };
