@@ -139,6 +139,21 @@ export async function showLanguageUncached(lng: string): Promise<string> {
   return lng;
 }
 
+/**
+ * Fork: the interface language a system's language is shown in, by this app's codes (`zh_CN`, not `zh-CN`). Left
+ * to i18next, a region it has no catalog for falls to the first catalog of that language, so a Traditional Chinese
+ * system (zh-TW, zh-HK) was shown Simplified Chinese, and a Portuguese one in Portugal Brazil's Portuguese.
+ */
+export function interfaceCodeOf(detected: string): string {
+  const [language = '', ...rest] = detected.replace(/_/g, '-').split('-');
+  const code = language.toLowerCase();
+  const parts = rest.map((part) => part.toUpperCase());
+  if (code === 'zh') return parts.some((part) => ['TW', 'HK', 'MO', 'HANT'].includes(part)) ? 'zh_TW' : 'zh_CN';
+  if (code === 'pt') return parts.includes('PT') ? 'pt_PT' : 'pt_BR';
+  // Old codes some systems still send.
+  return ({ tl: 'fil', iw: 'he', in: 'id' } as Record<string, string>)[code] ?? code;
+}
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -157,6 +172,8 @@ i18n
     detection: {
       order: ['localStorage', 'navigator', 'htmlTag'],
       caches: ['localStorage'],
+      // A code this app stored itself is already its own; one a system gives is mapped to it.
+      convertDetectedLanguage: (lng: string) => (lng.includes('_') ? lng : interfaceCodeOf(lng)),
     },
     
     react: {

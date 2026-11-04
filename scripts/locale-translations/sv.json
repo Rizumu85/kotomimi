@@ -1376,8 +1376,8 @@
     "text": "Motorn för grammatikhjälp kunde inte startas."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} har inte hämtats ännu. Hämta en inbyggd modell i kortet ”Grammatikhjälp” eller byt till ”API-modell” eller ”Annan enhet”."
+    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Modellen för grammatisk feedback ({{name}}) har inte laddats ner än. Ladda ner den för att börja."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1416,8 +1416,8 @@
     "text": "Läser in modellerna… Första gången efter att datorn startats tar det ungefär en halv minut."
   },
   "providers.localai.nativeMissing": {
-    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} har inte hämtats ännu. Hämta en inbyggd modell i kortet ”Taligenkänning” eller byt till ”API-modell” eller ”Annan enhet”."
+    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Taligenkänningsmodellen ({{name}}) har inte laddats ner än. Ladda ner den för att börja."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1832,8 +1832,8 @@
     "text": "Översättningsmotorn kunde inte startas."
   },
   "providers.localai.translatorMissing": {
-    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} har inte hämtats ännu. Hämta en inbyggd modell i kortet ”Översättning” eller byt till ”API-modell” eller ”Annan enhet”."
+    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Översättningsmodellen ({{name}}) har inte laddats ner än. Ladda ner den för att börja."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

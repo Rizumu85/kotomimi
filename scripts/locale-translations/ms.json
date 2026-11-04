@@ -1356,8 +1356,8 @@
     "text": "Enjin maklum balas tatabahasa gagal dimulakan."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} belum dimuat turun. Dalam kad \"Maklum balas tatabahasa\", muat turun model natif atau tukar kepada \"Model API\" atau \"Peranti lain\"."
+    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Model maklum balas tatabahasa ({{name}}) belum dimuat turun. Muat turunnya untuk mula."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1396,8 +1396,8 @@
     "text": "Sedang memuatkan model… Kali pertama selepas komputer dihidupkan mengambil masa kira-kira setengah minit."
   },
   "providers.localai.nativeMissing": {
-    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} belum dimuat turun. Dalam kad \"Pengecaman pertuturan\", muat turun model natif atau tukar kepada \"Model API\" atau \"Peranti lain\"."
+    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Model pengecaman pertuturan ({{name}}) belum dimuat turun. Muat turunnya untuk mula."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1812,8 +1812,8 @@
     "text": "Enjin terjemahan gagal dimulakan."
   },
   "providers.localai.translatorMissing": {
-    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} belum dimuat turun. Dalam kad \"Terjemahan\", muat turun model natif atau tukar kepada \"Model API\" atau \"Peranti lain\"."
+    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Model terjemahan ({{name}}) belum dimuat turun. Muat turunnya untuk mula."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

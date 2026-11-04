@@ -1340,8 +1340,8 @@
     "text": "व्याकरण की सलाह का इंजन शुरू नहीं हो सका।"
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} अभी डाउनलोड नहीं हुआ है। \"व्याकरण की सलाह\" कार्ड में नेटिव मॉडल डाउनलोड करें या \"API मॉडल\" या \"दूसरा डिवाइस\" चुनें।"
+    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "व्याकरण प्रतिक्रिया मॉडल ({{name}}) अभी डाउनलोड नहीं किया गया है। शुरू करने के लिए इसे डाउनलोड करें।"
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1380,8 +1380,8 @@
     "text": "मॉडल लोड हो रहे हैं… कंप्यूटर चालू करने के बाद पहली बार करीब आधा मिनट लगता है।"
   },
   "providers.localai.nativeMissing": {
-    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} अभी डाउनलोड नहीं हुआ है। \"आवाज़ की पहचान\" कार्ड में नेटिव मॉडल डाउनलोड करें या \"API मॉडल\" या \"दूसरा डिवाइस\" चुनें।"
+    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "भाषण पहचान मॉडल ({{name}}) अभी डाउनलोड नहीं किया गया है। शुरू करने के लिए इसे डाउनलोड करें।"
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1796,8 +1796,8 @@
     "text": "अनुवाद इंजन शुरू नहीं हो सका।"
   },
   "providers.localai.translatorMissing": {
-    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} अभी डाउनलोड नहीं हुआ है। \"अनुवाद\" कार्ड में नेटिव मॉडल डाउनलोड करें या \"API मॉडल\" या \"दूसरा डिवाइस\" चुनें।"
+    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "अनुवाद मॉडल ({{name}}) अभी डाउनलोड नहीं किया गया है। शुरू करने के लिए इसे डाउनलोड करें।"
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

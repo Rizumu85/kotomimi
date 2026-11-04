@@ -38,6 +38,10 @@ export const NOTICE_TARGETS: Readonly<Record<string, string>> = {
   voice_build_failed: 'provider',
   voice_unavailable: 'provider',
   voice_fallback: 'provider',
+  // Fork: a stage's model this computer runs is not downloaded — its card, in the provider section, downloads it.
+  native_missing: 'provider',
+  native_translator_missing: 'provider',
+  native_coach_missing: 'provider',
 };
 
 export function settingsTargetForCode(code: string | undefined): string | null {

@@ -1344,8 +1344,8 @@
     "text": "Kielioppipalautteen moottorin käynnistys epäonnistui."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} on vielä lataamatta. Lataa natiivimalli ”Kielioppipalaute”-kortista tai valitse ”API-malli” tai ”Toinen laite”."
+    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Kielioppipalautemallia ({{name}}) ei ole vielä ladattu. Lataa se aloittaaksesi."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1384,8 +1384,8 @@
     "text": "Ladataan malleja… Ensimmäisellä kerralla tietokoneen käynnistämisen jälkeen tähän menee noin puoli minuuttia."
   },
   "providers.localai.nativeMissing": {
-    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} on vielä lataamatta. Lataa natiivimalli ”Puheentunnistus”-kortista tai valitse ”API-malli” tai ”Toinen laite”."
+    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Puheentunnistusmallia ({{name}}) ei ole vielä ladattu. Lataa se aloittaaksesi."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1800,8 +1800,8 @@
     "text": "Käännösmoottorin käynnistys epäonnistui."
   },
   "providers.localai.translatorMissing": {
-    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} on vielä lataamatta. Lataa natiivimalli ”Käännös”-kortista tai valitse ”API-malli” tai ”Toinen laite”."
+    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Käännösmallia ({{name}}) ei ole vielä ladattu. Lataa se aloittaaksesi."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

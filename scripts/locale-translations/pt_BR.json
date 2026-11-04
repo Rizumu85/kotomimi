@@ -1356,8 +1356,8 @@
     "text": "Não foi possível iniciar o motor de feedback gramatical."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} ainda não foi baixado. No painel \"Feedback gramatical\", baixe um modelo nativo ou mude para \"Modelo via API\" ou \"Outro dispositivo\"."
+    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "O modelo de feedback gramatical ({{name}}) ainda não foi baixado. Baixe-o para começar."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1396,8 +1396,8 @@
     "text": "Carregando modelos… Na primeira vez após ligar o computador, leva cerca de meio minuto."
   },
   "providers.localai.nativeMissing": {
-    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} ainda não foi baixado. No painel \"Reconhecimento de voz\", baixe um modelo nativo ou mude para \"Modelo via API\" ou \"Outro dispositivo\"."
+    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "O modelo de reconhecimento de fala ({{name}}) ainda não foi baixado. Baixe-o para começar."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1812,8 +1812,8 @@
     "text": "Não foi possível iniciar o motor de tradução."
   },
   "providers.localai.translatorMissing": {
-    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} ainda não foi baixado. No painel \"Tradução\", baixe um modelo nativo ou mude para \"Modelo via API\" ou \"Outro dispositivo\"."
+    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "O modelo de tradução ({{name}}) ainda não foi baixado. Baixe-o para começar."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

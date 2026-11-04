@@ -228,9 +228,25 @@ describe('a download', () => {
     const { world, engine } = computer();
     await engine.download('m1');
     const seen = world.changes.find((s) => s.engine === 'downloading' && s.models.m1.runtime);
-    expect(seen.models.m1).toMatchObject({ state: 'downloading', runtime: true, total: ARCHIVE.length });
-    // Once it is here, the model's own bytes are what is counted.
+    // One bar for both: the runtime's bytes and then the model's, out of the two together.
+    expect(seen.models.m1).toMatchObject({ state: 'downloading', runtime: true, total: ARCHIVE.length + MODEL.length });
+    const fetching = world.changes.filter((s) => s.models.m1.state === 'downloading' || s.models.m1.state === 'verifying').map((s) => s.models.m1);
+    expect(fetching.every((m) => m.total === ARCHIVE.length + MODEL.length)).toBe(true);
+    // It never goes back: the model's bytes are counted on from the runtime's.
+    for (let i = 1; i < fetching.length; i++) expect(fetching[i].received).toBeGreaterThanOrEqual(fetching[i - 1].received);
     expect(world.changes.at(-1).models.m1.runtime).toBeUndefined();
+    expect(world.changes.at(-1).models.m1.total).toBe(MODEL.length);
+  });
+
+  it('counts the model alone where the runtime is already here', async () => {
+    const { world, engine } = computer();
+    await engine.download('m1');
+    await engine.remove('m1');
+    world.changes.length = 0;
+    await engine.download('m1');
+    const fetching = world.changes.filter((s) => s.models.m1.state === 'downloading').map((s) => s.models.m1);
+    expect(fetching.length).toBeGreaterThan(0);
+    expect(fetching.every((m) => m.total === MODEL.length && !m.runtime)).toBe(true);
   });
 
   it('goes on from where a stopped one left off', async () => {

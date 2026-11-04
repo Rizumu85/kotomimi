@@ -1336,8 +1336,8 @@
     "text": "문법 피드백 엔진을 시작하지 못했어요."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} 모델을 아직 다운로드하지 않았어요. ‘문법 피드백’ 카드에서 네이티브 모델을 다운로드하거나 ‘API 모델’ 또는 ‘다른 기기’로 바꾸세요."
+    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "문법 피드백 모델({{name}})을 아직 다운로드하지 않았습니다. 다운로드하면 시작할 수 있습니다."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1376,8 +1376,8 @@
     "text": "모델을 불러오는 중… 컴퓨터를 켠 뒤 처음에는 약 30초가 걸려요."
   },
   "providers.localai.nativeMissing": {
-    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} 모델을 아직 다운로드하지 않았어요. ‘음성 인식’ 카드에서 네이티브 모델을 다운로드하거나 ‘API 모델’ 또는 ‘다른 기기’로 바꾸세요."
+    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "음성 인식 모델({{name}})을 아직 다운로드하지 않았습니다. 다운로드하면 시작할 수 있습니다."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1792,8 +1792,8 @@
     "text": "번역 엔진을 시작하지 못했어요."
   },
   "providers.localai.translatorMissing": {
-    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} 모델을 아직 다운로드하지 않았어요. ‘번역’ 카드에서 네이티브 모델을 다운로드하거나 ‘API 모델’ 또는 ‘다른 기기’로 바꾸세요."
+    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "번역 모델({{name}})을 아직 다운로드하지 않았습니다. 다운로드하면 시작할 수 있습니다."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

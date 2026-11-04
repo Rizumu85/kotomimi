@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Globe } from 'lucide-react';
 import { INTERFACE_LANGUAGES } from '../../Settings/sections/interfaceLanguages';
 import { changeLanguageWithLoad } from '../../../locales';
 import { useSetUILanguage } from '../../../stores/settingsStore';
@@ -33,6 +34,10 @@ const StepLanguage: React.FC = () => {
 
   return (
     <section className="setup-step">
+      {/* Fork: the page says what it is in more than the language it is shown in. A first run shows the system's
+          language, which is not always one the person reads, and then the page said nothing they could read about
+          being the place to change it (a friend, 2026-11-04). */}
+      <p className="setup-step__polyglot" aria-hidden="true"><Globe size={16} /><span>{POLYGLOT}</span></p>
       <h2>{t('setup.steps.language.title', 'Which language should Sokuji speak to you in?')}</h2>
       <p>{t('setup.steps.language.desc', 'This is the language of menus and buttons. You choose the languages to translate between later.')}</p>
       <label className="setup-field">
@@ -44,5 +49,8 @@ const StepLanguage: React.FC = () => {
     </section>
   );
 };
+
+/** "Language" in the languages most people who open this read, in their own words. */
+const POLYGLOT = 'Language · 语言 · 語言 · 言語 · 언어 · Idioma · Langue · Sprache · Язык';
 
 export default StepLanguage;

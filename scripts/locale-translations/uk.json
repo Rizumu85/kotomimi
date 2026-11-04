@@ -1336,8 +1336,8 @@
     "text": "Не вдалося запустити рушій перевірки граматики."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} ще не завантажено. У картці «Перевірка граматики» завантажте нативну модель або виберіть «Модель через API» чи «Інший пристрій»."
+    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Модель для перевірки граматики ({{name}}) ще не завантажено. Завантажте її, щоб почати."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1376,8 +1376,8 @@
     "text": "Завантаження моделей… Уперше після ввімкнення комп’ютера це займає близько пів хвилини."
   },
   "providers.localai.nativeMissing": {
-    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} ще не завантажено. У картці «Розпізнавання мовлення» завантажте нативну модель або виберіть «Модель через API» чи «Інший пристрій»."
+    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Модель розпізнавання мовлення ({{name}}) ще не завантажено. Завантажте її, щоб почати."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1792,8 +1792,8 @@
     "text": "Не вдалося запустити рушій перекладу."
   },
   "providers.localai.translatorMissing": {
-    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} ще не завантажено. У картці «Переклад» завантажте нативну модель або виберіть «Модель через API» чи «Інший пристрій»."
+    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Модель перекладу ({{name}}) ще не завантажено. Завантажте її, щоб почати."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

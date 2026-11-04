@@ -1360,8 +1360,8 @@
     "text": "Mesin koreksi tata bahasa gagal dijalankan."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} belum diunduh. Di kartu \"Koreksi tata bahasa\", unduh model native atau beralihlah ke \"Model API\" atau \"Perangkat lain\"."
+    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Model umpan balik tata bahasa ({{name}}) belum diunduh. Unduh untuk mulai."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1400,8 +1400,8 @@
     "text": "Memuat model… Pertama kali setelah komputer dinyalakan perlu sekitar setengah menit."
   },
   "providers.localai.nativeMissing": {
-    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} belum diunduh. Di kartu \"Pengenalan suara\", unduh model native atau beralihlah ke \"Model API\" atau \"Perangkat lain\"."
+    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Model pengenalan suara ({{name}}) belum diunduh. Unduh untuk mulai."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1816,8 +1816,8 @@
     "text": "Mesin terjemahan gagal dijalankan."
   },
   "providers.localai.translatorMissing": {
-    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} belum diunduh. Di kartu \"Terjemahan\", unduh model native atau beralihlah ke \"Model API\" atau \"Perangkat lain\"."
+    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Model penerjemahan ({{name}}) belum diunduh. Unduh untuk mulai."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

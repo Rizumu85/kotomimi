@@ -1372,8 +1372,8 @@
     "text": "Die Engine für Grammatikfeedback konnte nicht gestartet werden."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} wurde noch nicht heruntergeladen. Lade im Bereich „Grammatikfeedback“ ein natives Modell herunter oder wechsle zu „API-Modell“ oder „Anderes Gerät“."
+    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Das Grammatik-Feedback-Modell ({{name}}) wurde noch nicht heruntergeladen. Lade es herunter, um zu beginnen."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1412,8 +1412,8 @@
     "text": "Modelle werden geladen… Beim ersten Mal nach dem Hochfahren dauert das etwa eine halbe Minute."
   },
   "providers.localai.nativeMissing": {
-    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} wurde noch nicht heruntergeladen. Lade im Bereich „Spracherkennung“ ein natives Modell herunter oder wechsle zu „API-Modell“ oder „Anderes Gerät“."
+    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Das Spracherkennungsmodell ({{name}}) wurde noch nicht heruntergeladen. Lade es herunter, um zu beginnen."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1828,8 +1828,8 @@
     "text": "Die Übersetzungs-Engine konnte nicht gestartet werden."
   },
   "providers.localai.translatorMissing": {
-    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} wurde noch nicht heruntergeladen. Lade im Bereich „Übersetzung“ ein natives Modell herunter oder wechsle zu „API-Modell“ oder „Anderes Gerät“."
+    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Das Übersetzungsmodell ({{name}}) wurde noch nicht heruntergeladen. Lade es herunter, um zu beginnen."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

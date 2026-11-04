@@ -1340,8 +1340,8 @@
     "text": "เริ่มเอนจินตรวจไวยากรณ์ไม่ได้"
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "ยังไม่ได้ดาวน์โหลด {{name}} ดาวน์โหลดโมเดลเนทีฟในแผง “คำแนะนำไวยากรณ์” หรือเปลี่ยนเป็น “โมเดล API” หรือ “อุปกรณ์อื่น”"
+    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "ยังไม่ได้ดาวน์โหลดโมเดลให้คำแนะนำไวยากรณ์ ({{name}}) ดาวน์โหลดเพื่อเริ่มใช้งาน"
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1380,8 +1380,8 @@
     "text": "กำลังโหลดโมเดล… ครั้งแรกหลังเปิดเครื่องใช้เวลาประมาณครึ่งนาที"
   },
   "providers.localai.nativeMissing": {
-    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "ยังไม่ได้ดาวน์โหลด {{name}} ดาวน์โหลดโมเดลเนทีฟในแผง “การรู้จำเสียง” หรือเปลี่ยนเป็น “โมเดล API” หรือ “อุปกรณ์อื่น”"
+    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "ยังไม่ได้ดาวน์โหลดโมเดลรู้จำเสียงพูด ({{name}}) ดาวน์โหลดเพื่อเริ่มใช้งาน"
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1796,8 +1796,8 @@
     "text": "เริ่มเอนจินแปลไม่ได้"
   },
   "providers.localai.translatorMissing": {
-    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "ยังไม่ได้ดาวน์โหลด {{name}} ดาวน์โหลดโมเดลเนทีฟในแผง “การแปล” หรือเปลี่ยนเป็น “โมเดล API” หรือ “อุปกรณ์อื่น”"
+    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "ยังไม่ได้ดาวน์โหลดโมเดลแปลภาษา ({{name}}) ดาวน์โหลดเพื่อเริ่มใช้งาน"
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

@@ -69,6 +69,16 @@
   // A line that introduces the control under it, not the step: lighter than the
   // step's own lede so the two do not read as one paragraph.
   > p.setup-step__note { font-size: vars.$font-caption; color: vars.$text-muted; margin: 0 0 vars.$space-2; }
+  // Fork: "Language" in several languages, over the language step's title.
+  > p.setup-step__polyglot {
+    display: flex;
+    align-items: center;
+    gap: vars.$space-2;
+    margin: 0 0 vars.$space-3;
+    font-size: vars.$font-caption;
+    color: vars.$text-muted;
+    svg { flex-shrink: 0; }
+  }
 }
 
 .setup-cards {

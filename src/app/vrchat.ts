@@ -112,19 +112,46 @@ export function chatboxWaiting(waiting: readonly string[]): string {
   return lines;
 }
 
+/** Where a page may end, best first: after a sentence, after a clause, at a space. */
+const SENTENCE_END = /[。！？!?.…]/u;
+const CLAUSE_END = /[，、,;；:：）)」』]/u;
+
 /**
- * Two lines within the chatbox's length: each whole where they fit; else the shorter whole where it takes no more
- * than half, and the other cut to the rest — so that neither is lost to the cut of the whole.
+ * One line in pages the chatbox holds: whole where it fits, else cut where a page can best end — after a sentence,
+ * else a clause, else a space, else where the room runs out — never in its first half. A page that does not end a
+ * sentence says it goes on (…).
  */
-function twoLines(first: string, second: string): string {
-  const a = [...first];
-  const b = [...second];
-  const room = CHATBOX_MOST - 1;
-  if (a.length + b.length <= room) return `${first}\n${second}`;
-  const half = Math.floor(room / 2);
-  const cut = (chars: string[], most: number) => (chars.length <= most ? chars.join('') : `${chars.slice(0, most - 1).join('')}…`);
-  const keepA = a.length <= half ? a.length : b.length <= half ? room - b.length : half;
-  return `${cut(a, keepA)}\n${cut(b, room - Math.min(a.length, keepA))}`;
+function pagesOf(line: string): string[] {
+  const pages: string[] = [];
+  let rest = [...line.trim()];
+  while (rest.length > CHATBOX_MOST) {
+    const room = CHATBOX_MOST - 1;
+    const least = Math.floor(room / 2);
+    const lastWhere = (test: (c: string) => boolean) => {
+      for (let i = room; i >= least; i--) if (test(rest[i - 1])) return i;
+      return -1;
+    };
+    let at = lastWhere((c) => SENTENCE_END.test(c));
+    const sentence = at > 0;
+    if (!sentence) at = lastWhere((c) => CLAUSE_END.test(c));
+    if (at < 0) at = lastWhere((c) => /\s/u.test(c));
+    if (at < 0) at = room;
+    const page = rest.slice(0, at).join('').trim();
+    pages.push(sentence ? page : `${page}…`);
+    rest = [...rest.slice(at).join('').trim()];
+  }
+  if (rest.length > 0) pages.push(rest.join(''));
+  return pages;
+}
+
+/**
+ * What goes up for a finished line, page by page. The chatbox holds 144 characters and VRChat cuts the rest, so a
+ * longer line goes up in pages, one after another, rather than cut short with its end lost (the user, 2026-11-04).
+ * Two lines that fit together go up together; two that do not, each in its own pages, in the order they are shown.
+ */
+export function chatboxPages(line: string): string[] {
+  if ([...line].length <= CHATBOX_MOST) return [line];
+  return line.split('\n').filter((part) => part.trim()).flatMap(pagesOf);
 }
 
 /**
@@ -149,7 +176,7 @@ export function finishedLine(entry: Entry, shows: ChatboxShows, said = false, tr
   if (!translation) return null;
   if (shows !== 'both') return translation;
   const original = textOf(entry.source);
-  return translationFirst ? twoLines(translation, original) : twoLines(original, translation);
+  return translationFirst ? `${translation}\n${original}` : `${original}\n${translation}`;
 }
 
 export interface VRChatController {
@@ -287,16 +314,33 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
 
   // ── The chatbox ───────────────────────────────────────────────────────────
   const sent = new Set<string>();
-  const queue: string[] = [];
+  /** The lines waiting, each in its pages. */
+  const queue: string[][] = [];
+  /** The pages still to go of the line going up now. */
+  let rest: string[] = [];
   let sending = false;
   /** Whether a line may go up now: asked again at the moment it is sent, as the setting may have changed while it waited. */
   const allowed = () => !stopped && store.getState().chatbox !== 'off';
   const pump = () => {
     if (sending) return;
-    if (!allowed()) { queue.length = 0; return; }
-    if (queue.length === 0) return;
-    const line = chatboxWaiting(queue);
-    queue.length = 0;
+    if (!allowed()) { queue.length = 0; rest = []; return; }
+    let line: string;
+    if (rest.length > 0) {
+      line = rest.shift()!;
+    } else {
+      if (queue.length === 0) return;
+      // The newest line: one of several pages goes up page by page; one that fits, together with the ones of a page
+      // that waited before it, as many as fit. What is older than that, the talk has moved past.
+      const newest = queue[queue.length - 1];
+      if (newest.length > 1) {
+        [line, ...rest] = newest;
+      } else {
+        let single = queue.length - 1;
+        while (single > 0 && queue[single - 1].length === 1) single--;
+        line = chatboxWaiting(queue.slice(single).map((pages) => pages[0]));
+      }
+      queue.length = 0;
+    }
     sending = true;
     void ipc.invoke('vrchat:chatbox', { text: line }).catch(() => {});
     later(() => { sending = false; pump(); }, Math.max(gap, chatboxReadingMs(line)));
@@ -331,26 +375,26 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
       const line = finishedLine(entry, shows, said, store.getState().chatboxTranslationFirst, theirs);
       if (line === null) continue;
       sent.add(entry.id);
-      queue.push(line);
+      queue.push(chatboxPages(line));
     }
     pump();
   };
   // What is finished on screen when this begins was said before: it is not sent now. A sentence still under way is.
   for (const entry of deps.view.get().entries) if (finishedLine(entry, 'translation') !== null) sent.add(entry.id);
   offs.push(deps.view.subscribe(look));
-  if (deps.onReset) offs.push(deps.onReset(() => { queue.length = 0; }));
+  if (deps.onReset) offs.push(deps.onReset(() => { queue.length = 0; rest = []; }));
 
   // ── Following the run, the settings and the views ─────────────────────────
   let wasRunning = running();
   offs.push(runner.state.subscribe(() => {
     const now = running();
     // The run is over: a video it heard is forgotten, the pace is the usual for the next.
-    if (wasRunning && !now) { endVideo(); queue.length = 0; }
+    if (wasRunning && !now) { endVideo(); queue.length = 0; rest = []; }
     wasRunning = now;
     watch();
   }));
   offs.push(store.subscribe(() => {
-    if (store.getState().chatbox === 'off') queue.length = 0;
+    if (store.getState().chatbox === 'off') { queue.length = 0; rest = []; }
     watch();
   }));
   watch();

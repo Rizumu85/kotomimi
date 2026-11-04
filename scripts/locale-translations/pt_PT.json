@@ -1352,8 +1352,8 @@
     "text": "Não foi possível iniciar o motor de correção gramatical."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} ainda não foi transferido. No painel «Correção gramatical», transfira um modelo nativo ou mude para «Modelo por API» ou «Outro dispositivo»."
+    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "O modelo de feedback gramatical ({{name}}) ainda não foi descarregado. Descarregue-o para começar."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1392,8 +1392,8 @@
     "text": "A carregar os modelos… A primeira vez após ligar o computador demora cerca de meio minuto."
   },
   "providers.localai.nativeMissing": {
-    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} ainda não foi transferido. No painel «Reconhecimento de voz», transfira um modelo nativo ou mude para «Modelo por API» ou «Outro dispositivo»."
+    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "O modelo de reconhecimento de voz ({{name}}) ainda não foi descarregado. Descarregue-o para começar."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1808,8 +1808,8 @@
     "text": "Não foi possível iniciar o motor de tradução."
   },
   "providers.localai.translatorMissing": {
-    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "{{name}} ainda não foi transferido. No painel «Tradução», transfira um modelo nativo ou mude para «Modelo por API» ou «Outro dispositivo»."
+    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "O modelo de tradução ({{name}}) ainda não foi descarregado. Descarregue-o para começar."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

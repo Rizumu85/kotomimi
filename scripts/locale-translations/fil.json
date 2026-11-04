@@ -1468,8 +1468,8 @@
     "text": "Hindi masimulan ang makina para sa puna sa gramatika."
   },
   "providers.localai.nativeCoachMissing": {
-    "en": "{{name}} is not downloaded yet. In the Grammar feedback card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "Hindi pa na-download ang {{name}}. Sa card na Puna sa gramatika, mag-download ng katutubong modelo o lumipat sa \"Modelo sa API\" o \"Ibang device\"."
+    "en": "The grammar feedback model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Hindi pa na-download ang modelo para sa feedback sa grammar ({{name}}). I-download ito para makapagsimula."
   },
   "providers.localai.nativeCoachReady": {
     "en": "The feedback engine is ready.",
@@ -1508,8 +1508,8 @@
     "text": "Nilo-load ang mga modelo… Mga kalahating minuto sa unang paggamit matapos buksan ang computer."
   },
   "providers.localai.nativeMissing": {
-    "en": "{{name}} is not downloaded yet. In the Speech recognition card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "Hindi pa na-download ang {{name}}. Sa card na Pagkilala ng pananalita, mag-download ng katutubong modelo o lumipat sa \"Modelo sa API\" o \"Ibang device\"."
+    "en": "The speech recognition model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Hindi pa na-download ang modelo sa pagkilala ng pananalita ({{name}}). I-download ito para makapagsimula."
   },
   "providers.localai.nativeNone": {
     "en": "No model chosen",
@@ -1924,8 +1924,8 @@
     "text": "Hindi masimulan ang makina ng pagsasalin."
   },
   "providers.localai.translatorMissing": {
-    "en": "{{name}} is not downloaded yet. In the Translation card, download a native model or switch to \"API model\" or \"Another device\".",
-    "text": "Hindi pa na-download ang {{name}}. Sa card na Pagsasalin, mag-download ng katutubong modelo o lumipat sa \"Modelo ng API\" o \"Ibang device\"."
+    "en": "The translation model ({{name}}) is not downloaded yet. Download it to start.",
+    "text": "Hindi pa na-download ang modelo ng pagsasalin ({{name}}). I-download ito para makapagsimula."
   },
   "providers.localai.translatorReady": {
     "en": "The translation engine is ready.",

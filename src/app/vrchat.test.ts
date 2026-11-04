@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Entry } from '../lib/projection/types';
 import { useVRChatStore, vrchatHolds } from '../stores/vrchatStore';
-import { chatboxReadingMs, chatboxWaiting, finishedLine, linkOf, startVRChat, type VRChatDeps } from './vrchat';
+import { chatboxPages, chatboxReadingMs, chatboxWaiting, finishedLine, linkOf, startVRChat, type VRChatDeps } from './vrchat';
 
 vi.mock('../services/persistSetting', () => ({ persistSetting: async () => {} }));
 
@@ -86,16 +86,10 @@ describe('finishedLine', () => {
     expect(finishedLine(exchange('a', '今天天气真好', '今日はいい天気ですね'), 'both')).toBe('今天天气真好\n今日はいい天気ですね');
   });
 
-  it('puts the translation on top where asked, and keeps both lines within the chatbox\'s length', () => {
+  it('puts the translation on top where asked, and keeps both lines whole', () => {
     expect(finishedLine(exchange('a', '今天天气真好', '今日はいい天気ですね'), 'both', false, true)).toBe('今日はいい天気ですね\n今天天气真好');
     const long = '长'.repeat(200);
-    const line = finishedLine(exchange('a', long, '短い訳'), 'both')!;
-    const [first, second] = line.split('\n');
-    expect(second).toBe('短い訳');
-    expect([...line].length).toBe(144);
-    expect(first.endsWith('…')).toBe(true);
-    const both = finishedLine(exchange('a', long, '訳'.repeat(200)), 'both')!.split('\n');
-    expect(both.map((l) => [...l].length)).toEqual([71, 72]);
+    expect(finishedLine(exchange('a', long, '短い訳'), 'both')).toBe(`${long}\n短い訳`);
   });
 
   it('is nothing while off, unfinished, untranslated, or the other side\'s', () => {
@@ -103,6 +97,44 @@ describe('finishedLine', () => {
     expect(finishedLine(exchange('a', '你好', 'こんにちは', { final: false }), 'translation')).toBeNull();
     expect(finishedLine(exchange('a', '你好', ''), 'translation')).toBeNull();
     expect(finishedLine(exchange('a', 'こんにちは', '你好', { leg: 'participant' }), 'translation')).toBeNull();
+  });
+});
+
+describe('a long line in the chatbox (fork)', () => {
+  it('is one page where it fits, two lines together where they fit', () => {
+    expect(chatboxPages('短い')).toEqual(['短い']);
+    expect(chatboxPages('一\n二')).toEqual(['一\n二']);
+  });
+
+  it('goes up in pages that end a sentence where one can, and says a page goes on where it cannot', () => {
+    const sentence = `${'長'.repeat(90)}。`;
+    const pages = chatboxPages(`${sentence}${'続'.repeat(100)}`);
+    expect(pages).toEqual([sentence, '続'.repeat(100)]);
+    const words = chatboxPages(Array.from({ length: 40 }, () => 'word').join(' '));
+    expect(words.length).toBe(2);
+    expect(words[0].endsWith('…')).toBe(true);
+    expect(words.every((page) => [...page].length <= 144)).toBe(true);
+    expect(words.join(' ').replace('…', '').split(/\s+/).length).toBe(40);
+    const solid = chatboxPages('字'.repeat(300));
+    expect(solid.every((page) => [...page].length <= 144)).toBe(true);
+    expect(solid.join('').replace(/…/g, '')).toBe('字'.repeat(300));
+  });
+
+  it('gives two lines that do not fit together pages of their own, in their order', () => {
+    const original = `${'长'.repeat(100)}。`;
+    const translation = `${'訳'.repeat(80)}。`;
+    expect(chatboxPages(`${original}\n${translation}`)).toEqual([original, translation]);
+  });
+
+  it('sends every page of a long line, one after another', () => {
+    useVRChatStore.setState({ chatbox: 'translation' });
+    const t = setup();
+    const long = `${'長'.repeat(100)}。${'続'.repeat(60)}`;
+    t.show([exchange('a', '长', long)]);
+    expect(t.chatboxLines()).toEqual([`${'長'.repeat(100)}。`]);
+    t.timers.shift()!();
+    expect(t.chatboxLines()).toEqual([`${'長'.repeat(100)}。`, '続'.repeat(60)]);
+    t.controller.stop();
   });
 });
 

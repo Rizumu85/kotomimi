@@ -881,16 +881,24 @@ function createNativeEngine(deps = {}) {
   let engineFor = null;
   /** The runtime's archive is here and being unpacked: still on its way, to whoever asks. */
   let unpacking = false;
+  /** A model whose download fetched the runtime first, and the runtime's bytes: counted into the model's progress. */
+  const carried = new Map();
   const failed = new Map();
   let lastTold = 0;
 
   const modelState = (id) => {
     const busy = fetching.get(id);
-    if (busy) return { state: busy.verifying ? 'verifying' : 'downloading', received: busy.received, total: busy.total };
+    // A download that fetched the runtime first goes on from it: one bar, runtime and model, rather than a bar that
+    // fills for the runtime and starts again at nothing for the model (a friend, 2026-11-04).
+    const before = carried.get(id) ?? 0;
+    if (busy) return { state: busy.verifying ? 'verifying' : 'downloading', received: busy.received + before, total: busy.total + before };
     // The runtime comes first, and it is what the model asked for waits on: its bytes are that model's progress, and the
     // others wait. Every model used to say 0 % through it, with nothing moving (a friend, 2026-10-31).
     const runtime = fetching.get('engine');
-    if ((runtime || unpacking) && engineFor === id) return { state: 'downloading', runtime: true, received: runtime?.received ?? build.bytes, total: runtime?.total ?? build.bytes };
+    if ((runtime || unpacking) && engineFor === id) {
+      const model = has(fileOf(id)) ? 0 : MODELS_[id].bytes;
+      return { state: 'downloading', runtime: true, received: runtime?.received ?? build.bytes, total: (runtime?.total ?? build.bytes) + model };
+    }
     const waiting = runtime || unpacking ? { waiting: true } : {};
     if (has(fileOf(id))) return { state: 'downloaded', received: MODELS_[id].bytes, total: MODELS_[id].bytes, ...waiting };
     const error = failed.get(id);
@@ -989,14 +997,18 @@ function createNativeEngine(deps = {}) {
     if (!build || !MODELS_[id] || fetching.has(id) || fetching.has('engine') || unpacking) return status();
     try {
       engineFor = id;
+      const fetchesEngine = !engineReady();
       await ensureEngine();
       if (!has(fileOf(id))) {
+        if (fetchesEngine) carried.set(id, build.bytes);
         files.mkdirSync(modelsDir, { recursive: true });
         await fetchFile(id, MODELS_[id], fileOf(id));
       }
     } catch (error) {
       // Stopped by the person: nothing failed.
       if (error?.name !== 'AbortError') failed.set(id, String(error?.message ?? error).slice(0, 300));
+    } finally {
+      carried.delete(id);
     }
     tell();
     return status();
