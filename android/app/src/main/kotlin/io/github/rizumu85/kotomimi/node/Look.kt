@@ -72,7 +72,8 @@ enum class Mood { IDLE, HEAR, TRANSLATE, COACH }
  * in an acrylic block of oil with glitter in it (流麻: the user, 2026-10-23, wanted the dots to be a layer that is
  * physically there, not light laid over the page). The fields are coloured by what the phone is doing and always slowly
  * moving — slower while nothing is lent — and answer what happens: a reading heard sets their edges trembling, a
- * sentence translated sends a light sweeping across, a correction spreads like a drop of red ink.
+ * correction spreads like a drop of red ink, and every piece of work sends a wave through the dots. (A band of light
+ * that swept across at each sentence translated is gone: it read as a glitch — the user, 2026-11-05.)
  *
  * The dots stand in a grid, a touch of the technical against the soft fields; how much of it shows flows. The dots
  * gather where the page leaves room — never behind writing or a tile (`covered`), the edge of the room soft and
@@ -103,7 +104,6 @@ class Wall(context: Context) : View(context), SensorEventListener {
         set(value) { field = value; invalidate() }
 
     private var tremble = 0f
-    private var sweep = -1f
     private class Drop(val x: Float, val y: Float, val color: Int, var age: Float = 0f)
     private val drops = ArrayList<Drop>()
 
@@ -185,7 +185,7 @@ class Wall(context: Context) : View(context), SensorEventListener {
     /** A view in front drawn in the wall's frames while it is still: the water of the hearing tile. */
     var beside: View? = null
 
-    private fun calm() = !held && waves.isEmpty() && drops.isEmpty() && stir < 0.08f && sweep < 0f && tremble <= 0f &&
+    private fun calm() = !held && waves.isEmpty() && drops.isEmpty() && stir < 0.08f && tremble <= 0f &&
         turned >= 1f && abs(quickX - slowX) + abs(quickY - slowY) < 0.02f && flash <= 0f && kicked <= 0f
 
     fun moodFor(next: Mood) {
@@ -208,7 +208,7 @@ class Wall(context: Context) : View(context), SensorEventListener {
     fun pulse(task: Task, x: Float = width * 0.5f, y: Float = height * 0.55f) {
         when (task) {
             Task.HEAR -> tremble = 1f
-            Task.TRANSLATE -> sweep = 0f
+            Task.TRANSLATE -> Unit
             Task.COACH -> drops += Drop(x, y, context.getColor(R.color.ink_red))
         }
         waves += Wave(x, y, 0.8f)
@@ -482,14 +482,6 @@ class Wall(context: Context) : View(context), SensorEventListener {
             field(canvas, swayX + w * 1.0f + cos(t * 0.6f) * w * 0.05f, h * 0.68f + shift * 1.5f + sin(t * 0.45f) * w * 0.05f, w * 0.72f, c[2], 2.1f)
         }
 
-        // A sentence translated: a band of light sweeps across, left to right.
-        if (sweep in 0f..1.3f) {
-            val x = -w * 0.3f + sweep * w * 1.6f
-            paint.color = Color.argb((70 * sin(min(1f, sweep) * PI).toFloat()).toInt().coerceAtLeast(0), 255, 255, 255)
-            path.reset()
-            path.moveTo(x, 0f); path.lineTo(x + w * 0.22f, 0f); path.lineTo(x + w * 0.02f, h); path.lineTo(x - w * 0.2f, h); path.close()
-            canvas.drawPath(path, paint)
-        }
         // A correction's red ink, spreading out in a ring.
         for (d in drops) {
             val k = d.age / 1.6f
@@ -507,7 +499,6 @@ class Wall(context: Context) : View(context), SensorEventListener {
         // The colours turn over a second and a half: in the dark the whole room's light changes with them.
         if (turned < 1f) turned = min(1f, turned + dt / 1.5f)
         tremble = max(0f, tremble - dt * 1.2f)
-        if (sweep >= 0f) sweep = if (sweep > 1.3f) -1f else sweep + dt / 1.1f
         drops.forEach { it.age += dt }
         drops.removeAll { it.age > 1.6f }
         val wasX = quickX
