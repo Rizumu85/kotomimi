@@ -47,7 +47,7 @@ import { PHONE_BUSY_RETRIES, PHONE_TEXT_TIMEOUT_MS } from './phoneText';
 import { watchPhones, type PhoneWatch } from './phoneWatch';
 import { phoneKey } from '../../lib/lan/phoneKeys';
 import { unwrapTranslationText } from './wire';
-import { APPLE_PREFIX, NATIVE_MODELS } from './localaiNative';
+import { pairedLanguage, recognitionLimits } from './hearingPlan';
 
 /** The credential a stage's endpoint is called with, by its field. */
 export type StageKey = 'translateKey' | 'coachKey' | 'apiKey' | 'asrKey';
@@ -900,17 +900,10 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
         // this computer's Mac hears with its own, and — where it has both of the pair's languages — in either of them,
         // as the Mac's does (`appleAlso`): a sentence in the other is known for what it is, not guessed from its writing.
         const live = node.live && node.live.model === model ? node.live : undefined;
-        let also: string | undefined;
-        if (live) {
-          const { source, target } = request.context.direction;
-          const told = hearingRequest(request, device, heard).context.direction.source;
-          const other = baseOf(told === baseOf(source) ? target : source);
-          if (other !== told && live.languages.includes(told) && live.languages.includes(other)) {
-            also = other;
-            onPaired();
-          }
-        }
-        const limits = live ? NATIVE_MODELS.find((m) => m.id === `${APPLE_PREFIX}${hearingRequest(request, device, heard).context.direction.source}`)?.limits : NATIVE_MODELS.find((m) => m.id === model)?.limits;
+        const told = hearingRequest(request, device, heard).context.direction.source;
+        const also = live ? pairedLanguage(told, request.context.direction, (language) => live.languages.includes(language)) : undefined;
+        if (also) onPaired();
+        const limits = recognitionLimits(model, live ? told : undefined);
         return createNativeAsr({ bridge: remote.bridge(api.baseUrl, live ? { streamed: true } : {}), start: async () => lent, model, clock: request.clock, named: 'The recognition engine of the other device', limits: { ...(limits ?? api.limits), lastWordsMs: REMOTE_LAST_WORDS_MS }, ...(api.hints?.length ? { hints: api.hints } : {}), ...(also ? { also } : {}) });
       }),
     });

@@ -68,6 +68,7 @@ import { deviceLanguage, canDetectOther, shownAsSaid, speaksBoth, coachIs, coach
 import { NATIVE_MODELS, preferNative, type NativePick } from './localaiNative';
 import { NATIVE_DEFAULT_MODEL, appleAlso, coachBaseUrl, coachGap, coachIdle, coachUp, hearingPick, hearsByDownloaded, holdNativeForRun, nativeEither, nativeGap, nativeUp, restNative, translatorUp, nativeIdle, nativeModelFor, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_COACH_EXTRA, NATIVE_COACHES, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
+import { otherOfPair, recognitionLimits, speechDetection, toldLanguage } from './hearingPlan';
 import { NATIVE_DEFAULT_TRANSLATOR, NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator, translatorRequest } from './nativeTranslators';
 import { LocalAITurnDetectionControls, LocalAITurnDetectionHelp, LocalAITurnDetectionSummary } from './LocalAIEngine';
 import { KotomimiIcon } from './LocalAIIcon';
@@ -1112,7 +1113,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   // What hears is asked first: a run with no recognizer has nothing to translate.
   const heard = both ? AUTO : coached ? target : source;
   // A model that cannot name a language is still told the leg's own source; `identify.ts` names each sentence.
-  const modelHeard = heard === AUTO ? asked.direction.source : heard;
+  const modelHeard = toldLanguage(heard, asked.direction.source, false);
   // Every paired Apple stream hears both languages, including the feedback and participant streams.
   // Open-ended language detection remains a different capability.
   const remotePair = s.asrVia === 'server' && !hearsLocal
@@ -1138,7 +1139,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
       // speaker in either (`speakBoth`), told their own; else any leg, told its own — a sentence in the other is then
       // known for what it is, not guessed from its writing.
       const either = both ? nativeEither(pick) : null;
-      const alsoHeard = either ? either.also : appleAlso(native, modelHeard.toLowerCase().split(/[-_]/)[0] === runPair.source.toLowerCase().split(/[-_]/)[0] ? runPair.target : runPair.source);
+      const alsoHeard = either ? either.also : appleAlso(native, otherOfPair(modelHeard, runPair));
       const first = either ? source : modelHeard;
       recognizer = { modelId: native.id, streaming: true, native: { model: native.id, ...(native.limits ? { limits: native.limits } : {}), ...(alsoHeard ? { either: { first, also: alsoHeard } } : {}), ...(hints.length ? { hints } : {}) } };
     } else if (s.asrVia === 'api') {
@@ -1146,7 +1147,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
       const named = s.asrApiModel.trim();
       // A model of this app's own names: what a Kotomimi phone lends is read by its engine the way it is read here.
       const known = NATIVE_MODELS.find((m) => m.id === named);
-      const limits = known?.limits;
+      const limits = recognitionLimits(named);
       // A model that names the language (Qwen3-ASR, on a lent device) is asked for "auto" as it is here: told the
       // leg's nominal language it heard everything as that.
       detector = known?.detects ? known : null;
@@ -1158,14 +1159,8 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
     device = {
       ...recognizer,
       // Only a soft leg needs the model told a language of its own; a detector is asked for "auto".
-      ...(heard === AUTO && !detector ? { language: modelHeard } : {}),
-      vad: {
-        threshold: s.vadThreshold,
-        minSilenceDuration: s.vadMinSilenceDuration,
-        minSpeechDuration: s.vadMinSpeechDuration,
-        maxSpeechDuration: s.vadMaxSpeechDuration,
-        ...(s.vadNegativeThreshold ? { negativeThreshold: s.vadNegativeThreshold } : {}),
-      },
+      ...(heard === AUTO && !detector ? { language: toldLanguage(heard, modelHeard, false) } : {}),
+      vad: speechDetection(s).vad,
     };
   }
 
@@ -1279,15 +1274,11 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   if (stages && (remotePair || device?.native?.either)) stages = { ...stages, requiresLanguage: true };
 
   // Another Kotomimi whose recognizer does not name the language is told this leg's own source; `identify.ts` names the rest.
-  const serverHeard = heard === AUTO && hearingPlace(s) === 'server' && !serverDetects(models, s.asrModel)
-    ? asked.direction.source
-    : heard;
+  const serverHeard = toldLanguage(heard, asked.direction.source, hearingPlace(s) !== 'server' || serverDetects(models, s.asrModel));
 
   // Another Kotomimi that hears for this one cuts its sentences with this one's own speech detection, as this
   // computer's engine would: its threshold and pause, where Realtime's semantic default became a 0.8 s pause there.
-  const ownDetection = kotomimi && !hearsLocal && !device && config.turnDetection
-    ? { turnDetection: { type: 'server_vad' as const, threshold: s.vadThreshold, prefixPaddingMs: 300, silenceDurationMs: Math.round(s.vadMinSilenceDuration * 1000) } }
-    : {};
+  const ownDetection = kotomimi && !hearsLocal && !device && config.turnDetection ? { turnDetection: speechDetection(s).turnDetection } : {};
 
   return {
     ...config,

@@ -10,7 +10,7 @@
  *
  * A field or a path that differs on purpose is named below with its reason.
  */
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { SessionContext } from '../../lib/contract/adapter';
@@ -47,6 +47,23 @@ describe('what this computer sends a lent device', () => {
   it.skipIf(!existsSync(resolve(ROOT, ipad)))('is read whole by the iPad\'s door', () => {
     const door = read(ipad);
     for (const field of fieldsSent().filter((f) => !NOT_FORWARDED.has(f))) expect(door, `Lending.swift reads no "${field}"`).toContain(`form.fields["${field}"]`);
+  });
+});
+
+describe('the settings that decide how a leg is heard', () => {
+  // Read in one place (`hearingPlan.ts`), so that a place that hears cannot take them its own way.
+  it('are read by the hearing plan only', () => {
+    const dir = resolve(ROOT, 'src/providers/openai');
+    const readers = readdirSync(dir)
+      .filter((f) => /\.tsx?$/.test(f) && !/\.test\.tsx?$/.test(f) && f !== 'hearingPlan.ts')
+      .filter((f) => /s\.vad[A-Z]/.test(readFileSync(resolve(dir, f), 'utf8')));
+    expect(readers).toEqual([]);
+  });
+
+  it('give each model its limits in one place', () => {
+    for (const file of ['src/providers/openai/pipeline.ts', 'src/providers/openai/localai.ts']) {
+      expect(read(file), `${file} looks a model's limits up itself`).not.toMatch(/NATIVE_MODELS\.find\(.*?\)\??\.limits/);
+    }
   });
 });
 

@@ -229,7 +229,7 @@ Prefer the optimized selectors (`useUIMode()`, `useSetUIMode()`), which prevent 
 
 - Vitest with jsdom; test files colocated (`*.test.tsx`); global setup in `src/setupTests.ts`
 - TypeScript strict mode; English-only comments and docs; conventional commits; SASS
-- How a leg is heard, translated and given feedback (dictionary, language, detection, VAD, context, limits) lands on every path: here, a Kotomimi host, Android, iPad. `recognitionPaths`/`textPaths.consistency.test.ts` hold it; a path that differs says why there
+- How a leg is heard, translated and given feedback (dictionary, language, detection, VAD, context, limits) lands on every path: here, a Kotomimi host, Android, iPad. `hearingPlan.ts` decides hearing; `recognitionPaths`/`textPaths.consistency.test.ts` hold it; a path that differs says why there
 
 ## Build Configuration
 
