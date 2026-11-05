@@ -200,10 +200,14 @@ jobs:
   macos:
     name: build (macOS, Apple silicon)
     needs: test
-    runs-on: macos-latest
+    # macos-15, not macos-latest: since November 2026 the macOS 26 arm64 runners behind macos-latest are often not
+    # to be had, and a job left waiting is cancelled after fifteen minutes with no step run (six in a row on
+    # 2026-11-05). macos-15 has Xcode 26 beside its default 16: the speech helper's macOS 26 SDK is chosen below.
+    runs-on: macos-15
     continue-on-error: true
     env:
       HAS_MAC_CERT: ${{ secrets.MACOS_CSC_LINK != '' }}
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
     steps:
       - uses: actions/checkout@v5
         with:
@@ -223,6 +227,16 @@ jobs:
 
       - name: Build the capture helper
         run: npm run build:audio-host
+
+      # The script skips the helper without the macOS 26 SDK, and the app would then not offer the Mac's own
+      # recognition: on a runner, that is a broken release, not a choice.
+      - name: Check for the macOS 26 SDK
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          SDK=$(xcrun --sdk macosx --show-sdk-version)
+          echo "macOS SDK $SDK"
+          [ "${SDK%%.*}" -ge 26 ] || { echo "::error::The speech helper needs the macOS 26 SDK; this runner has $SDK."; exit 1; }
 
       # The Mac's own speech recognition, reached through a helper the app ships (native/apple-speech). It needs the
       # macOS 26 SDK: where the runner has an older one the script says so and builds nothing, and the app simply
