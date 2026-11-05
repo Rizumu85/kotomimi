@@ -38,10 +38,13 @@ describe('telling a Kotomimi phone from any other API', () => {
 
   it('says which model the phone lends now', async () => {
     const lending = (async () => new Response(JSON.stringify({ object: 'list', data: [{ id: 'qwen3-asr-1.7b-q8' }] }), { status: 200, headers: { 'X-Kotomimi-Node': 'engine' } })) as unknown as typeof fetch;
-    expect(await engineNode('http://192.168.1.23:8792/v1', lending)).toEqual({ model: 'qwen3-asr-1.7b-q8' });
+    expect(await engineNode('http://192.168.1.23:8792/v1', lending)).toEqual({ model: 'qwen3-asr-1.7b-q8', hears: [] });
+    // The iPad app lists every recognizer it can be asked for by name.
+    const listing = (async () => new Response(JSON.stringify({ object: 'list', data: [{ id: 'apple-speech' }], hear: [{ id: 'apple-speech' }, { id: 'r2t2-q8' }, { id: 7 }] }), { status: 200, headers: { 'X-Kotomimi-Node': 'engine' } })) as unknown as typeof fetch;
+    expect(await engineNode('http://192.168.1.23:8792/v1', listing)).toEqual({ model: 'apple-speech', hears: ['apple-speech', 'r2t2-q8'] });
     // A list that cannot be read is still a phone: the model written down is asked for.
     const unread = (async () => new Response('not a list', { status: 200, headers: { 'X-Kotomimi-Node': 'engine' } })) as unknown as typeof fetch;
-    expect(await engineNode('http://192.168.1.23:8792/v1', unread)).toEqual({ model: '' });
+    expect(await engineNode('http://192.168.1.23:8792/v1', unread)).toEqual({ model: '', hears: [] });
     expect(await engineNode('http://192.168.1.23:8080/v1', (async () => answer(200)) as unknown as typeof fetch)).toBeNull();
   });
 

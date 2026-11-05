@@ -745,6 +745,8 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   // found this time (the phone asleep, or no search made yet): it stays visible, so the setting is not silently another.
   const ownHearing = plainAddress(settings.asrOther);
   const hearsAtOwn = settings.asrVia === 'server' && ownHearing !== '';
+  // The recognizers the stage's device can be asked for by name, as the search last found it (the iPad app).
+  const ownHears = seen.find((server) => server.kind === 'phone' && plainAddress(server.address) === ownHearing)?.hears ?? [];
   const hearingPhones = [
     ...seen.filter(phoneHears),
     ...(ownHearing !== '' && !seen.some((server) => phoneHears(server) && plainAddress(server.address) === ownHearing) ? [{ address: ownHearing, name: '', model: settings.asrOtherModel }] : []),
@@ -1019,8 +1021,14 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
         )}
         {hearsAtOwn && (
           <>
-            {/* A phone lends one model at a time, the one chosen on it: named here, and asked again at every start. */}
-            <ServerModel label={t('providers.localai.model')} value="" blank={settings.asrOtherModel ? shownName(settings.asrOtherModel) : t('providers.localai.deviceDefault')} options={[]} onChange={() => {}} disabled />
+            {/* A phone lends one model at a time, the one chosen on it: named here, and asked again at every start. A
+                device that can be asked for any of its recognizers (the iPad app) is chosen from here: blank, the one
+                it lends. */}
+            {ownHears.length > 1 ? (
+              <ServerModel label={t('providers.localai.model')} value={settings.asrOtherModel} blank={t('providers.localai.deviceDefault')} options={ownHears.map((id) => ({ id }))} onChange={(asrOtherModel) => put({ asrOtherModel } as Partial<S>)} disabled={disabled} />
+            ) : (
+              <ServerModel label={t('providers.localai.model')} value="" blank={settings.asrOtherModel ? shownName(settings.asrOtherModel) : t('providers.localai.deviceDefault')} options={[]} onChange={() => {}} disabled />
+            )}
             {detectOther}
           </>
         )}

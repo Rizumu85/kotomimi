@@ -35,18 +35,20 @@ export async function isEngineNode(baseUrl: string, fetchIt: typeof fetch, key?:
 
 /**
  * The same question, with what the phone lends now: the model it has loaded, which its owner may have changed since
- * the address was written down — blank where its list could not be read. Null: no phone's engine is there.
+ * the address was written down — blank where its list could not be read — and every recognizer it can be asked for
+ * by name (`hear`, the iPad app; empty for a phone that lends its one). Null: no phone's engine is there.
  */
-export async function engineNode(baseUrl: string, fetchIt: typeof fetch, key?: string, timeoutMs: number = ASK_TIMEOUT_MS): Promise<{ model: string } | null> {
+export async function engineNode(baseUrl: string, fetchIt: typeof fetch, key?: string, timeoutMs: number = ASK_TIMEOUT_MS): Promise<{ model: string; hears: string[] } | null> {
   if (!electron() || !/^http:\/\//i.test(baseUrl.trim())) return null;
   const control = new AbortController();
   const waiting = setTimeout(() => control.abort(), timeoutMs);
   try {
     const answer = await fetchIt(modelsUrl(baseUrl), { signal: control.signal, headers: key ? { Authorization: `Bearer ${key}` } : {} });
     if (!answer.ok || answer.headers.get(NODE_HEADER) !== ENGINE) return null;
-    const list = (await answer.json().catch(() => null)) as { data?: Array<{ id?: unknown }> } | null;
+    const list = (await answer.json().catch(() => null)) as { data?: Array<{ id?: unknown }>; hear?: Array<{ id?: unknown }> } | null;
     const first = list?.data?.[0]?.id;
-    return { model: typeof first === 'string' ? first.slice(0, 80) : '' };
+    const hears = Array.isArray(list?.hear) ? list.hear.flatMap((m) => (typeof m?.id === 'string' && m.id ? [m.id.slice(0, 80)] : [])) : [];
+    return { model: typeof first === 'string' ? first.slice(0, 80) : '', hears };
   } catch {
     return null;
   } finally {

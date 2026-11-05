@@ -175,7 +175,7 @@ export interface PipelineDeps {
    */
   prepare(pipeline: string, transcription: string): Promise<unknown>;
   /** An engine on another device, where the API named for recognition is one (`remoteEngine.ts`): asked, and its recognitions; stand-ins in tests. */
-  remote: { /** Null: what answers there is no phone's engine. `model`: the one it lends now; blank where it did not say. */ node(baseUrl: string): Promise<{ model: string } | null>; bridge(baseUrl: string): NativeBridge };
+  remote: { /** Null: what answers there is no phone's engine. `model`: the one it lends now; blank where it did not say. `hears`: what it can be asked for by name. */ node(baseUrl: string): Promise<{ model: string; hears?: string[] } | null>; bridge(baseUrl: string): NativeBridge };
   /** The native engine, when a leg hears by it: the main process's by default, stand-ins in tests. */
   native: { bridge: NativeBridge; start(model: string): Promise<NativeEngineStatus>; /** Where a native text engine answers now, up with this model, and the key its present run asks for. Rejects when it is not up and cannot be brought up. */ base?(engine: 'translator' | 'coach', model: string): Promise<EngineAddress> };
 }
@@ -840,8 +840,9 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
         const node = await remote.node(api.baseUrl);
         if (!node) return byApi();
         onPhone(api.baseUrl);
-        // The model the phone lends now, whatever was written down when it was chosen: its owner may have changed it.
-        const model = node.model || api.model;
+        // The model chosen here, where the device has it and can be asked for it by name (the iPad app); else the one
+        // the phone lends now, whatever was written down when it was chosen: its owner may have changed it.
+        const model = api.model && (node.hears ?? []).includes(api.model) ? api.model : node.model || api.model;
         const lent: NativeEngineStatus = { ...NO_NATIVE_ENGINE, run: { state: 'ready', model, port: 0, tail: '' }, up: [model] };
         // Its last words are waited for as long as a reading may take there (`READ_TIMEOUT_MS` in
         // `electron/remote-engine.js`): a phone slower than the voice still writes all of it, late, where the wait

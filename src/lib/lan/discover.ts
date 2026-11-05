@@ -27,6 +27,11 @@ export interface FoundServer {
   text?: readonly PhoneTextModel[];
   /** A phone's: it said it is a tablet (the iPad app). Absent for a phone. */
   tablet?: boolean;
+  /**
+   * A phone's: every recognizer it has, by id, where it lists them (the iPad app), any of which a run may ask for by
+   * name; `model` is the one it lends unasked. Absent where it lists none, or only one.
+   */
+  hears?: readonly string[];
 }
 
 /** A text model a phone lends: its id (the desktop's own native id), what it is for, its name, and whether it is loaded now. */
@@ -102,6 +107,9 @@ export function foundServers(value: unknown): FoundServer[] {
       ...(phone && model ? { model } : {}),
       ...(phone && text.length ? { text } : {}),
       ...(phone && item.tablet === true ? { tablet: true } : {}),
+      ...(phone && Array.isArray(item.hears) && item.hears.length > 1 && item.hears.every((id) => typeof id === 'string' && id.length > 0)
+        ? { hears: [...new Set(item.hears.map((id) => id.slice(0, 80)))].slice(0, 8) }
+        : {}),
     });
   }
   return out;

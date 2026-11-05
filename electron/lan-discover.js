@@ -122,6 +122,21 @@ function phoneRoom(list) {
   return available + hearing + loaded;
 }
 
+/**
+ * The recognizers a node has, by id, where it lists them (`hear`, the iPad app): any of them can be asked for by
+ * name, where `data` holds only the one it lends unasked. At most eight; a node that lists none has only that one.
+ */
+function hearing(list) {
+  if (!Array.isArray(list)) return [];
+  const ids = [];
+  for (const m of list) {
+    const id = m && typeof m.id === 'string' ? m.id.slice(0, 80) : '';
+    if (id && !ids.includes(id)) ids.push(id);
+    if (ids.length >= 8) break;
+  }
+  return ids;
+}
+
 /** What an answer to `GET /v1/models` says of the server, or null when it is no such server. */
 function readAnswer(status, headers, body) {
   const named = typeof headers[NAME_HEADER] === 'string' ? headers[NAME_HEADER] : '';
@@ -151,11 +166,13 @@ function readAnswer(status, headers, body) {
   // text models alone has an empty `data`: it is still a device to choose, for the stages those models run.
   if (headers[NODE_HEADER] === 'engine') {
     const text = textModels(list.text, phoneRoom(list));
+    const hears = hearing(list.hear);
     if (!models.length && !text.length) return null;
     return {
       kind: 'phone', name, models: models.length + text.length, needsKey: false, includes: false, ...tablet,
       ...(models.length ? { model: String(models[0].id).slice(0, 80) } : {}),
       ...(text.length ? { text } : {}),
+      ...(hears.length > 1 ? { hears } : {}),
     };
   }
   const kotomimi = models.some((m) => m.owned_by === 'kotomimi');
@@ -254,7 +271,7 @@ async function discoverServers({ interfaces, ports, ownPorts = [], timeoutMs = P
     s.product = product;
   }));
   const order = (s) => `${s.kind === 'kotomimi' ? 0 : s.kind === 'phone' ? 1 : 2}${s.self ? 0 : 1}${toNumber(s.host).toString().padStart(10, '0')}${String(s.port).padStart(5, '0')}`;
-  return others.sort((a, b) => order(a).localeCompare(order(b))).map(({ address, kind, name, product, models, needsKey, self, model, text, tablet }) => ({ address, kind, name, product, models, needsKey, self, ...(model ? { model } : {}), ...(text ? { text } : {}), ...(tablet ? { tablet } : {}) }));
+  return others.sort((a, b) => order(a).localeCompare(order(b))).map(({ address, kind, name, product, models, needsKey, self, model, text, tablet, hears }) => ({ address, kind, name, product, models, needsKey, self, ...(model ? { model } : {}), ...(text ? { text } : {}), ...(tablet ? { tablet } : {}), ...(hears ? { hears } : {}) }));
 }
 
 module.exports = { discoverServers, targets, neighbours, readAnswer, textModels, probe, productOf, nameOf, shown, KOTOMIMI_PORT, SERVER_PORT, PHONE_PORT, NAME_HEADER, INCLUDES_HEADER, NODE_HEADER, FORM_HEADER };

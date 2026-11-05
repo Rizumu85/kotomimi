@@ -27,6 +27,7 @@ vi.mock('../../components/LanSharing/ServerFinder', () => ({
         <button type="button" data-auto={String(Boolean(auto))} data-hint={hint} data-phone={[phone ?? []].flat().join(' ')} onClick={() => onPick({ address: '192.168.1.9:8790', kind: 'kotomimi', name: 'DESK', product: '', models: 2, needsKey: true, self: false })}>finder</button>
         <button type="button" onClick={() => onFound?.([aPhone])}>a search that finds a phone</button>
         <button type="button" onClick={() => onPick(aPhone)}>the phone, picked</button>
+        <button type="button" onClick={() => onFound?.([{ ...aPhone, name: 'iPad', tablet: true, model: 'apple-speech', hears: ['apple-speech', 'r2t2-q8'] }])}>a search that finds an iPad</button>
         <button type="button" onClick={() => onFound?.([lending, textOnly])}>a search that finds phones lending text models</button>
         <button type="button" onClick={() => onPick(lending)}>the lending phone, picked</button>
         <button type="button" onClick={() => onPick(textOnly)}>the text phone, picked</button>
@@ -788,6 +789,18 @@ describe('a phone that lends its recognition: the "another device" of the hearin
     expect(device.options[0].textContent).toBe('192.168.1.9:8790');
     fireEvent.change(device, { target: { value: '192.168.4.28:8792' } });
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrOther: '192.168.4.28:8792', asrOtherModel: 'qwen3-asr-0.6b-q8' }));
+  });
+
+  it('chooses among the recognizers a device can be asked for by name (the iPad app), blank for the one it lends', () => {
+    const { card, update } = draw({ settings: { ...PHONE, asrOtherModel: 'apple-speech' }, values: { endpoint: '192.168.1.9:8790' } });
+    // Not yet found: what it lends, named, and nothing to choose.
+    expect((card(HEAR).getByRole('combobox', { name: 'providers.localai.model' }) as HTMLSelectElement).disabled).toBe(true);
+    fireEvent.click(screen.getByText('a search that finds an iPad'));
+    const model = card(HEAR).getByRole('combobox', { name: 'providers.localai.model' }) as HTMLSelectElement;
+    expect(model.disabled).toBe(false);
+    expect(options(model)).toEqual(['', 'apple-speech', 'r2t2-q8']);
+    fireEvent.change(model, { target: { value: 'r2t2-q8' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrOtherModel: 'r2t2-q8' }));
   });
 
   it('gives the stage back to the shared device when that is chosen', () => {
