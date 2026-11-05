@@ -8,7 +8,11 @@
  *   (`Share.kt`; the iPad's `Lending.swift` where the branch that has it is checked out);
  * - the dictionary's words reach every recognizer that takes them, whichever place hears.
  *
- * A field or a path that differs on purpose is named below with its reason.
+ * A field or a path that differs on purpose is named below with its reason. Named here, as it is no field:
+ *
+ * - The Mac's own recognition hears every leg in both of the pair's languages where it has both; an iPad's only a leg
+ *   whose language is left open (`pipeline.ts`, `also`). iOS runs two recognizers at once in an app, and two
+ *   languages take the careful one's place: each sentence would be heard a little worse for its label.
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';

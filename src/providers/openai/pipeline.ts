@@ -901,7 +901,11 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
         // as the Mac's does (`appleAlso`): a sentence in the other is known for what it is, not guessed from its writing.
         const live = node.live && node.live.model === model ? node.live : undefined;
         const told = hearingRequest(request, device, heard).context.direction.source;
-        const also = live ? pairedLanguage(told, request.context.direction, (language) => live.languages.includes(language)) : undefined;
+        // Only where the leg's language is left open (a speaker who speaks both, the other side detected): the iPad
+        // runs two recognizers at once, so two languages take its slower, careful one's place, and every sentence
+        // would be heard a little worse for a label (`Recognizers` in ios/KotomimiNode/Hearing/Live.swift). The Mac
+        // pairs every leg where it has both; this is where the two differ, on purpose.
+        const also = live && heard === AUTO ? pairedLanguage(told, request.context.direction, (language) => live.languages.includes(language)) : undefined;
         if (also) onPaired();
         const limits = recognitionLimits(model, live ? told : undefined);
         return createNativeAsr({ bridge: remote.bridge(api.baseUrl, live ? { streamed: true } : {}), start: async () => lent, model, clock: request.clock, named: 'The recognition engine of the other device', limits: { ...(limits ?? api.limits), lastWordsMs: REMOTE_LAST_WORDS_MS }, ...(api.hints?.length ? { hints: api.hints } : {}), ...(also ? { also } : {}) });
