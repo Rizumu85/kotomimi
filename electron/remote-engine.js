@@ -14,6 +14,9 @@ const { openWindow, readWhole, unspaced, echoOf, hintChecked, CONTEXT_LEAD, lang
 
 /** A reading over the network is given longer than one on this computer: the phone may be the slower of the two. */
 const READ_TIMEOUT_MS = 60_000;
+/** How long a live stretch waits for the device to take it, and, once it is over, for the device's last words. */
+const LIVE_OPEN_MS = 8_000;
+const LIVE_LAST_WORDS_MS = 60_000;
 /** Recognitions open at once, over all devices: a page that opens more has lost count of them. */
 const MOST_STREAMS = 16;
 
@@ -42,18 +45,108 @@ function saidFor(model, language) {
   return languageName(language);
 }
 
-function createRemoteEngine({ onStream = () => {}, window = openWindow, read = readWhole, note = () => {} } = {}) {
+/**
+ * A stretch heard while it is spoken by a device that hears that way (the iPad app's own recognition,
+ * `ios/KotomimiNode/Door/Lending.swift`, `live`): one WebSocket to `/v1/audio/stream`, the sound sent as it comes, and
+ * what is heard written back as it is, as this computer's Mac hears with its own (`apple-speech.js`). `also` and
+ * `prefer`: the speech may be in either of two languages. `emit` takes what the window's would (`delta`, `partial`,
+ * then `done` or `error`).
+ */
+function liveStretch({ target, language, also, prefer, sampleRate }, emit, { Socket = defaultSocket() } = {}) {
+  let socket = null;
+  let open = false;
+  let ended = false;
+  let over = false;
+  const waiting = [];
+  let timer = null;
+  const finish = (event) => {
+    if (over) return;
+    over = true;
+    clearTimeout(timer);
+    try { socket?.close(); } catch { /* gone already */ }
+    emit(event);
+  };
+  const wait = (ms, why) => { clearTimeout(timer); timer = setTimeout(() => finish({ type: 'error', message: why }), ms); };
+  const send = (data) => { try { socket.send(data); } catch { /* the close says why */ } };
+  const close = () => { send(JSON.stringify({ type: 'end' })); wait(LIVE_LAST_WORDS_MS, 'The device did not finish the stretch in time.'); };
+  try {
+    socket = new Socket(`ws://${target.host}:${target.port}${target.pathname.replace(/\/audio\/transcriptions$/, '/audio/stream')}`, {
+      headers: target.key ? { Authorization: `Bearer ${target.key}` } : {},
+    });
+  } catch (error) {
+    queueMicrotask(() => finish({ type: 'error', message: `The device could not be reached: ${error.message}` }));
+    return { write() {}, end() {}, abort() { over = true; } };
+  }
+  socket.binaryType = 'nodebuffer';
+  wait(LIVE_OPEN_MS, 'The device did not take the stretch in time.');
+  socket.on('open', () => {
+    send(JSON.stringify({ type: 'open', language, ...(also ? { also } : {}), ...(also && prefer ? { prefer } : {}), sampleRate }));
+  });
+  socket.on('message', (data, binary) => {
+    if (binary || over) return;
+    let event;
+    try { event = JSON.parse(String(data)); } catch { return; }
+    if (event?.type === 'ready') {
+      open = true;
+      clearTimeout(timer);
+      for (const pcm of waiting.splice(0)) send(pcm);
+      if (ended) close();
+    } else if (event?.type === 'partial' && typeof event.text === 'string') emit({ type: 'partial', text: event.text });
+    else if (event?.type === 'delta' && typeof event.text === 'string' && event.text) emit({ type: 'delta', text: event.text });
+    else if (event?.type === 'final') finish({ type: 'done', text: typeof event.text === 'string' ? event.text : '', ...(typeof event.language === 'string' && event.language ? { language: event.language } : {}) });
+    else if (event?.type === 'error') finish({ type: 'error', message: String(event.message ?? 'The device reported an error.').slice(0, 300) });
+  });
+  socket.on('unexpected-response', (_request, response) => finish({ type: 'error', message: `The device answered HTTP ${response.statusCode}.` }));
+  socket.on('error', (error) => finish({ type: 'error', message: error.message }));
+  socket.on('close', () => finish({ type: 'error', message: 'The device closed the stretch before it finished.' }));
+  return {
+    write(pcm) {
+      if (over || ended) return;
+      if (open) send(pcm); else waiting.push(pcm);
+    },
+    end() {
+      if (over || ended) return;
+      ended = true;
+      if (open) close();
+    },
+    abort() {
+      over = true;
+      clearTimeout(timer);
+      try { socket.close(); } catch { /* gone already */ }
+    },
+  };
+}
+
+/** `ws`'s client, which takes headers (the device's key): loaded when first asked for. */
+function defaultSocket() {
+  return require('ws');
+}
+
+function createRemoteEngine({ onStream = () => {}, window = openWindow, read = readWhole, note = () => {}, live = liveStretch } = {}) {
   const streams = new Map();
   let nextStream = 1;
 
-  /** A live recognition on the engine at `base`: its id, or null where the address is not one, or too many are open. */
-  function openStream({ base, model, language, sampleRate, key, hints = [] } = {}) {
+  /**
+   * A live recognition on the engine at `base`: its id, or null where the address is not one, or too many are open.
+   * `streamed`: the device hears while it is spoken (its list says `streams`), and is sent the sound as it comes,
+   * not read again and again as the stretch grows; `also` and `prefer` as for this computer's Mac.
+   */
+  function openStream({ base, model, language, sampleRate, key, hints = [], streamed = false, also, prefer } = {}) {
     const found = targetOf(base);
     // The phone's access key, where its owner set one: every reading carries it (`src/lib/lan/phoneKeys.ts`).
     const target = found && typeof key === 'string' && /^[\x21-\x7e]{1,128}$/.test(key) ? { ...found, key } : found;
     if (!target || typeof model !== 'string' || !model || streams.size >= MOST_STREAMS) return null;
     const id = nextStream++;
     const rate = Number.isInteger(sampleRate) && sampleRate >= 8000 && sampleRate <= 48000 ? sampleRate : 16000;
+    if (streamed === true) {
+      const code = (value) => (typeof value === 'string' && /^[a-z]{2,3}([-_][A-Za-z0-9]{2,8})?$/i.test(value) ? value.split(/[-_]/)[0].toLowerCase() : undefined);
+      const stream = live({ target, language: code(language) ?? '', also: code(also), prefer: code(prefer), sampleRate: rate }, (event) => {
+        if (event.type !== 'delta' && event.type !== 'partial') streams.delete(id);
+        onStream({ id, ...event });
+      });
+      streams.set(id, stream);
+      return id;
+    }
     // The words of the user's dictionary, for a model that takes them (Qwen3-ASR), as this computer's own engine is
     // told them (`openStream` in native-engine.js) — with the same checks on what it writes back: the list said back
     // for want of a voice is dropped, and a reading of nothing but the words is read again without them. Without
@@ -98,4 +191,4 @@ function createRemoteEngine({ onStream = () => {}, window = openWindow, read = r
   return { openStream, writeStream, endStream, abortStream, stop };
 }
 
-module.exports = { createRemoteEngine, targetOf, saidFor };
+module.exports = { createRemoteEngine, liveStretch, targetOf, saidFor };

@@ -47,7 +47,7 @@ import { PHONE_BUSY_RETRIES, PHONE_TEXT_TIMEOUT_MS } from './phoneText';
 import { watchPhones, type PhoneWatch } from './phoneWatch';
 import { phoneKey } from '../../lib/lan/phoneKeys';
 import { unwrapTranslationText } from './wire';
-import { NATIVE_MODELS } from './localaiNative';
+import { APPLE_PREFIX, NATIVE_MODELS } from './localaiNative';
 
 /** The credential a stage's endpoint is called with, by its field. */
 export type StageKey = 'translateKey' | 'coachKey' | 'apiKey' | 'asrKey';
@@ -181,7 +181,12 @@ export interface PipelineDeps {
    */
   prepare(pipeline: string, transcription: string): Promise<unknown>;
   /** An engine on another device, where the API named for recognition is one (`remoteEngine.ts`): asked, and its recognitions; stand-ins in tests. */
-  remote: { /** Null: what answers there is no phone's engine. `model`: the one it lends now; blank where it did not say. `hears`: what it can be asked for by name. */ node(baseUrl: string): Promise<{ model: string; hears?: string[] } | null>; bridge(baseUrl: string): NativeBridge };
+  remote: {
+    /** Null: what answers there is no phone's engine. `model`: the one it lends now; blank where it did not say. `hears`: what it can be asked for by name. `live`: the one that hears while it is spoken, and its languages (the iPad's own). */
+    node(baseUrl: string): Promise<{ model: string; hears?: string[]; live?: { model: string; languages: string[] } } | null>;
+    /** `streamed`: sent the sound as it comes (`live`). */
+    bridge(baseUrl: string, options?: { streamed?: boolean }): NativeBridge;
+  };
   /** The native engine, when a leg hears by it: the main process's by default, stand-ins in tests. */
   native: { bridge: NativeBridge; start(model: string): Promise<NativeEngineStatus>; /** Where a native text engine answers now, up with this model, and the key its present run asks for. Rejects when it is not up and cannot be brought up. */ base?(engine: 'translator' | 'coach', model: string): Promise<EngineAddress> };
 }
@@ -296,6 +301,7 @@ class PipelineLeg implements AdapterSession {
     private readonly engineBase: (engine: 'translator' | 'coach', model: string) => Promise<EngineAddress> = engineBaseNow,
   ) {
     this.inner = eventsFrom((e) => this.onInner(e));
+    this.requiresLanguage = stages.requiresLanguage === true;
     this.phones = watchPhones({
       fetch: doFetch,
       clock: request.clock,
@@ -304,6 +310,17 @@ class PipelineLeg implements AdapterSession {
       },
     });
     for (const stage of [stages.speech, stages.typed, stages.back?.stage, stages.feedback?.stage]) if (stage?.phone) this.watchPhone(stage.baseUrl);
+  }
+
+  /**
+   * Whether only a sentence's final language may choose what answers it (`Stages.requiresLanguage`): as built, or
+   * found as the session starts, where a lent device hears in either of two languages (`pairedHearing`).
+   */
+  private requiresLanguage: boolean;
+
+  /** The device that hears does so in either of two languages, and says which at the end, as the Mac's own does. */
+  pairedHearing(): void {
+    this.requiresLanguage = true;
   }
 
   /** A phone this leg uses, watched until the leg ends: one a stage answers on, or what hears (`hearing`). */
@@ -425,7 +442,7 @@ class PipelineLeg implements AdapterSession {
         // Left to be detected: the language its writing shows, or none — which also keeps the leg's own from being assumed.
         // Told one, and written in the leg's other language: said to be in that one.
         // Said by the recognizer: that, which also goes with the sentences closed from it.
-        const heard = e.payload.language ?? (this.stages.requiresLanguage ? undefined : (told === AUTO ? this.byWriting(e.payload.text) ?? AUTO : (open ? this.otherThanHeard(e.payload.text) : undefined) ?? told));
+        const heard = e.payload.language ?? (this.requiresLanguage ? undefined : (told === AUTO ? this.byWriting(e.payload.text) ?? AUTO : (open ? this.otherThanHeard(e.payload.text) : undefined) ?? told));
         if (source && this.cutsSentences()) {
           this.heardSoFar(e.payload.ref, source, heard);
           return;
@@ -528,7 +545,7 @@ class PipelineLeg implements AdapterSession {
    */
   private cutsSentences(): boolean {
     const speech = this.stages.speech;
-    return !!speech && speech.kind !== 'coach' && !this.stages.feedback && this.stages.whole !== true && !this.stages.requiresLanguage;
+    return !!speech && speech.kind !== 'coach' && !this.stages.feedback && this.stages.whole !== true && !this.requiresLanguage;
   }
 
   /** The segment that shows what is left of a stretch: opened when there first is something left. */
@@ -596,7 +613,7 @@ class PipelineLeg implements AdapterSession {
   private closed(payload: { ref: Ref; origin?: string }, source: { origin?: string; text: string } | undefined, text: string | undefined, language?: string): void {
     const coached = this.stages.speech?.kind === 'coach';
     // Failed paired recognition must not seal a provisional guess as final text that the chatbox could send.
-    if (this.stages.requiresLanguage && !language) {
+    if (this.requiresLanguage && !language) {
       this.events.segmentText({ ref: payload.ref, text: '' });
       this.events.segmentClosed(payload);
       return;
@@ -849,7 +866,7 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
     tts: () => { throw new Error('The pipeline has no app-model speech synthesizer.'); },
   };
   /** What hears on this computer: its own recognizer, or — the same adapter with that one engine changed — an API's. */
-  const hearing = (device: DeviceHearing, request: StartRequest<PipelineConfig, PipelineCredentials>, onPhone: (base: string) => void) => {
+  const hearing = (device: DeviceHearing, request: StartRequest<PipelineConfig, PipelineCredentials>, onPhone: (base: string) => void, heard: string | undefined, onPaired: () => void) => {
     const { api, native } = device;
     if (native) {
       const start = deps.native?.start ?? ((model: string) => askNativeEngine('start', model));
@@ -879,7 +896,22 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
         // `electron/remote-engine.js`): a phone slower than the voice still writes all of it, late, where the wait
         // this computer's own engine is given would have kept only what the first reading had (seen 2026-10-10 on a
         // phone at half the speed of speech: "ゲームは、 like" for twenty seconds of talk).
-        return createNativeAsr({ bridge: remote.bridge(api.baseUrl), start: async () => lent, model, clock: request.clock, named: 'The recognition engine of the other device', limits: { ...(NATIVE_MODELS.find((m) => m.id === model)?.limits ?? api.limits), lastWordsMs: REMOTE_LAST_WORDS_MS }, ...(api.hints?.length ? { hints: api.hints } : {}) });
+        // The device's own recognition, heard while it is spoken (the iPad's): streamed to it as the voice comes, as
+        // this computer's Mac hears with its own, and — where it has both of the pair's languages — in either of them,
+        // as the Mac's does (`appleAlso`): a sentence in the other is known for what it is, not guessed from its writing.
+        const live = node.live && node.live.model === model ? node.live : undefined;
+        let also: string | undefined;
+        if (live) {
+          const { source, target } = request.context.direction;
+          const told = hearingRequest(request, device, heard).context.direction.source;
+          const other = baseOf(told === baseOf(source) ? target : source);
+          if (other !== told && live.languages.includes(told) && live.languages.includes(other)) {
+            also = other;
+            onPaired();
+          }
+        }
+        const limits = live ? NATIVE_MODELS.find((m) => m.id === `${APPLE_PREFIX}${hearingRequest(request, device, heard).context.direction.source}`)?.limits : NATIVE_MODELS.find((m) => m.id === model)?.limits;
+        return createNativeAsr({ bridge: remote.bridge(api.baseUrl, live ? { streamed: true } : {}), start: async () => lent, model, clock: request.clock, named: 'The recognition engine of the other device', limits: { ...(limits ?? api.limits), lastWordsMs: REMOTE_LAST_WORDS_MS }, ...(api.hints?.length ? { hints: api.hints } : {}), ...(also ? { also } : {}) });
       }),
     });
   };
@@ -899,7 +931,7 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
       const leg = new PipelineLeg(request, stages ?? { speech: null, typed: null }, events, deps.fetch ?? fetchNow, deps.native?.base ?? engineBaseNow);
       let session: AdapterSession;
       try {
-        session = await (device ? hearing(device, request, (base) => leg.watchPhone(base)).start(hearingRequest(request, device, stages?.heard), leg.inner) : realtime.start(dialled(request), leg.inner));
+        session = await (device ? hearing(device, request, (base) => leg.watchPhone(base), stages?.heard, () => leg.pairedHearing()).start(hearingRequest(request, device, stages?.heard), leg.inner) : realtime.start(dialled(request), leg.inner));
       } catch (error) {
         leg.abandon();
         throw error;

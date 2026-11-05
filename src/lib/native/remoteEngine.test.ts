@@ -48,6 +48,18 @@ describe('telling a Kotomimi phone from any other API', () => {
     expect(await engineNode('http://192.168.1.23:8080/v1', (async () => answer(200)) as unknown as typeof fetch)).toBeNull();
   });
 
+  it('says which recognizer hears while it is spoken, and in which languages (the own recognition of an iPad)', async () => {
+    const streaming = (async () => new Response(JSON.stringify({ object: 'list', data: [{ id: 'apple-speech' }], hear: [{ id: 'apple-speech', streams: true, languages: ['ja', 'en', 'not a code', 7] }, { id: 'r2t2-q8' }] }), { status: 200, headers: { 'X-Kotomimi-Node': 'engine' } })) as unknown as typeof fetch;
+    expect(await engineNode('http://192.168.1.23:8792/v1', streaming)).toEqual({ model: 'apple-speech', hears: ['apple-speech', 'r2t2-q8'], live: { model: 'apple-speech', languages: ['ja', 'en'] } });
+  });
+
+  it('asks the main process to stream a stretch to a device that hears that way', async () => {
+    invoke.mockResolvedValue(undefined).mockResolvedValueOnce(8);
+    const bridge = remoteBridge('http://192.168.1.23:8792/v1', { streamed: true });
+    expect(await bridge.open({ language: 'ja', also: 'en', prefer: 'ja', sampleRate: 16000, model: 'apple-speech' })).toBe(8);
+    expect(invoke).toHaveBeenCalledWith('remote-engine:stream-open', { language: 'ja', also: 'en', prefer: 'ja', sampleRate: 16000, model: 'apple-speech', base: 'http://192.168.1.23:8792/v1', streamed: true });
+  });
+
   it('opens its recognitions at the address it was given', async () => {
     invoke.mockResolvedValue(undefined).mockResolvedValueOnce(7);
     const bridge = remoteBridge('http://192.168.1.23:8792/v1');

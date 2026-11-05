@@ -50,6 +50,26 @@ describe('what this computer sends a lent device', () => {
   });
 });
 
+describe('a stretch heard while it is spoken on an iPad', () => {
+  const ipad = 'ios/KotomimiNode/Door/Lending.swift';
+  const ipadPair = 'ios/KotomimiNode/Hearing/SpeechPairSelection.swift';
+
+  it.skipIf(!existsSync(resolve(ROOT, ipad)))('is told everything this computer sends, by the names it sends them', () => {
+    const client = read('electron/remote-engine.js');
+    const opened = client.slice(client.indexOf("type: 'open'"), client.indexOf("type: 'open'") + 200);
+    const door = read(ipad);
+    for (const field of ['language', 'also', 'prefer', 'sampleRate']) {
+      expect(opened, `remote-engine.js sends no "${field}"`).toContain(field);
+      expect(door, `Lending.swift reads no "${field}"`).toContain(`open["${field}"]`);
+    }
+  });
+
+  // The Mac and the iPad choose between two languages alike: the same file, copied.
+  it.skipIf(!existsSync(resolve(ROOT, ipadPair)))('chooses between two languages as the Mac does', () => {
+    expect(read(ipadPair)).toBe(read('native/apple-speech/SpeechPairSelection.swift'));
+  });
+});
+
 describe('the dictionary\'s words', () => {
   const SPEAKER: SessionContext = { direction: { source: 'zh-CN', target: 'ja' }, speech: false, turns: 'auto' };
   const glossary = { entries: [{ id: 'a', source: '悠米露', aliases: [] }, { id: 'b', source: 'Jackal, ジャカル', aliases: [] }] };

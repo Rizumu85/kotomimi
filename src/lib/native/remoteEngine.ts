@@ -37,18 +37,24 @@ export async function isEngineNode(baseUrl: string, fetchIt: typeof fetch, key?:
  * The same question, with what the phone lends now: the model it has loaded, which its owner may have changed since
  * the address was written down — blank where its list could not be read — and every recognizer it can be asked for
  * by name (`hear`, the iPad app; empty for a phone that lends its one). Null: no phone's engine is there.
+ * `live`: the recognizer that hears while it is spoken (`streams`, the iPad's own), and the languages it has.
  */
-export async function engineNode(baseUrl: string, fetchIt: typeof fetch, key?: string, timeoutMs: number = ASK_TIMEOUT_MS): Promise<{ model: string; hears: string[] } | null> {
+export async function engineNode(baseUrl: string, fetchIt: typeof fetch, key?: string, timeoutMs: number = ASK_TIMEOUT_MS): Promise<EngineNode | null> {
   if (!electron() || !/^http:\/\//i.test(baseUrl.trim())) return null;
   const control = new AbortController();
   const waiting = setTimeout(() => control.abort(), timeoutMs);
   try {
     const answer = await fetchIt(modelsUrl(baseUrl), { signal: control.signal, headers: key ? { Authorization: `Bearer ${key}` } : {} });
     if (!answer.ok || answer.headers.get(NODE_HEADER) !== ENGINE) return null;
-    const list = (await answer.json().catch(() => null)) as { data?: Array<{ id?: unknown }>; hear?: Array<{ id?: unknown }> } | null;
+    const list = (await answer.json().catch(() => null)) as { data?: Array<{ id?: unknown }>; hear?: Array<{ id?: unknown; streams?: unknown; languages?: unknown }> } | null;
     const first = list?.data?.[0]?.id;
     const hears = Array.isArray(list?.hear) ? list.hear.flatMap((m) => (typeof m?.id === 'string' && m.id ? [m.id.slice(0, 80)] : [])) : [];
-    return { model: typeof first === 'string' ? first.slice(0, 80) : '', hears };
+    const streaming = Array.isArray(list?.hear) ? list.hear.find((m) => typeof m?.id === 'string' && m.id && m.streams === true) : undefined;
+    const live = streaming ? {
+      model: (streaming.id as string).slice(0, 80),
+      languages: Array.isArray(streaming.languages) ? streaming.languages.flatMap((l) => (typeof l === 'string' && /^[a-z]{2,3}$/.test(l) ? [l] : [])).slice(0, 40) : [],
+    } : undefined;
+    return { model: typeof first === 'string' ? first.slice(0, 80) : '', hears, ...(live ? { live } : {}) };
   } catch {
     return null;
   } finally {
@@ -56,8 +62,17 @@ export async function engineNode(baseUrl: string, fetchIt: typeof fetch, key?: s
   }
 }
 
-/** The live recognitions of the engine at `base`, over IPC. */
-export function remoteBridge(base: string): NativeBridge {
+export interface EngineNode {
+  model: string;
+  hears: string[];
+  live?: { model: string; languages: string[] };
+}
+
+/**
+ * The live recognitions of the engine at `base`, over IPC. `streamed`: the device hears while it is spoken (`live`
+ * above): the main process sends it the sound as it comes (`liveStretch`), not the stretch read again as it grows.
+ */
+export function remoteBridge(base: string, { streamed = false }: { streamed?: boolean } = {}): NativeBridge {
   return {
     async open(init) {
       const api = electron();
@@ -65,7 +80,7 @@ export function remoteBridge(base: string): NativeBridge {
       try {
         // The phone's key, where its owner set one (`phoneKeys.ts`): every reading of the stretch carries it.
         const key = phoneKey(base);
-        const id = await api.invoke('remote-engine:stream-open', { ...init, base, ...(key ? { key } : {}) });
+        const id = await api.invoke('remote-engine:stream-open', { ...init, base, ...(key ? { key } : {}), ...(streamed ? { streamed: true } : {}) });
         return Number.isInteger(id) ? (id as number) : null;
       } catch {
         return null;

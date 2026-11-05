@@ -140,3 +140,105 @@ describe('a recognition on another device', () => {
     expect(engine.writeStream(second, sound())).toBe(false);
   });
 });
+
+describe('a stretch a device hears while it is spoken (the iPad\'s own recognition)', () => {
+  const { liveStretch } = require('./remote-engine.js');
+  const { EventEmitter } = require('node:events');
+  const target = { host: '192.168.4.30', port: 8792, pathname: '/v1/audio/transcriptions', key: 'k3y' };
+
+  /** A WebSocket the test drives: what the stretch sends, and the device's answers. */
+  function fakeSocket() {
+    const made = [];
+    class Socket extends EventEmitter {
+      constructor(url, options) { super(); this.url = url; this.options = options; this.sent = []; this.closed = false; made.push(this); }
+      send(data) { this.sent.push(data); }
+      close() { this.closed = true; }
+      say(event) { this.emit('message', Buffer.from(JSON.stringify(event)), false); }
+    }
+    return { Socket, made };
+  }
+
+  it('opens one socket at the device\'s address with its key, and tells it the languages', () => {
+    const { Socket, made } = fakeSocket();
+    liveStretch({ target, language: 'ja', also: 'en', prefer: 'ja', sampleRate: 16000 }, () => {}, { Socket });
+    expect(made[0].url).toBe('ws://192.168.4.30:8792/v1/audio/stream');
+    expect(made[0].options.headers).toEqual({ Authorization: 'Bearer k3y' });
+    made[0].emit('open');
+    expect(JSON.parse(made[0].sent[0])).toEqual({ type: 'open', language: 'ja', also: 'en', prefer: 'ja', sampleRate: 16000 });
+  });
+
+  it('holds the sound until the device is ready, then sends it as it comes, and the end after it', () => {
+    const { Socket, made } = fakeSocket();
+    const stretch = liveStretch({ target, language: 'ja', sampleRate: 16000 }, () => {}, { Socket });
+    const socket = made[0];
+    socket.emit('open');
+    stretch.write(sound(0.1));
+    stretch.end();
+    expect(socket.sent).toHaveLength(1);
+    socket.say({ type: 'ready' });
+    expect(socket.sent.slice(1).map((m) => (Buffer.isBuffer(m) ? 'pcm' : JSON.parse(m).type))).toEqual(['pcm', 'end']);
+  });
+
+  it('passes on what is heard so far, and ends with the text and the language it was in', () => {
+    const { Socket, made } = fakeSocket();
+    const events = [];
+    liveStretch({ target, language: 'ja', also: 'en', sampleRate: 16000 }, (e) => events.push(e), { Socket });
+    const socket = made[0];
+    socket.emit('open');
+    socket.say({ type: 'ready' });
+    socket.say({ type: 'partial', text: 'hello' });
+    socket.say({ type: 'delta', text: '' });
+    socket.say({ type: 'final', text: 'Hello there.', language: 'en' });
+    socket.emit('close');
+    expect(events).toEqual([{ type: 'partial', text: 'hello' }, { type: 'done', text: 'Hello there.', language: 'en' }]);
+    expect(socket.closed).toBe(true);
+  });
+
+  it('ends with an error, once, where the device refuses or goes away first', () => {
+    const { Socket, made } = fakeSocket();
+    const refused = [];
+    liveStretch({ target, language: 'ja', sampleRate: 16000 }, (e) => refused.push(e), { Socket });
+    made[0].say({ type: 'error', message: 'Japanese is not downloaded on this device.' });
+    made[0].emit('close');
+    expect(refused).toEqual([{ type: 'error', message: 'Japanese is not downloaded on this device.' }]);
+    const gone = [];
+    liveStretch({ target, language: 'ja', sampleRate: 16000 }, (e) => gone.push(e), { Socket });
+    made[1].emit('close');
+    expect(gone).toEqual([{ type: 'error', message: 'The device closed the stretch before it finished.' }]);
+  });
+
+  it('is what the engine opens for a device that streams, and the window for one that does not', () => {
+    const asked = [];
+    const engine = createRemoteEngine({ live: (args) => { asked.push(args); return { write() {}, end() {}, abort() {} }; }, window: () => { asked.push('window'); return { write() {}, end() {}, abort() {} }; } });
+    expect(engine.openStream({ base: 'http://192.168.4.30:8792/v1', model: 'apple-speech', language: 'ja-JP', also: 'en', prefer: 'ja', sampleRate: 16000, streamed: true })).toBe(1);
+    expect(asked[0]).toMatchObject({ language: 'ja', also: 'en', prefer: 'ja', sampleRate: 16000, target: { host: '192.168.4.30', port: 8792 } });
+    engine.openStream({ base: 'http://192.168.4.30:8792/v1', model: 'apple-speech', language: 'ja', sampleRate: 16000 });
+    expect(asked[1]).toBe('window');
+  });
+
+  it('speaks to a real WebSocket server as the iPad answers', async () => {
+    const { WebSocketServer } = require('ws');
+    const server = new WebSocketServer({ port: 0 });
+    const port = server.address().port;
+    const got = { headers: null, open: null, bytes: 0 };
+    server.on('connection', (socket, request) => {
+      got.headers = request.headers;
+      socket.on('message', (data, binary) => {
+        if (binary) { got.bytes += data.length; return; }
+        const message = JSON.parse(String(data));
+        if (message.type === 'open') { got.open = message; socket.send(JSON.stringify({ type: 'ready' })); }
+        if (message.type === 'end') socket.send(JSON.stringify({ type: 'final', text: 'こんにちは。', language: 'ja' }));
+      });
+    });
+    const done = new Promise((resolve) => {
+      const stretch = liveStretch({ target: { host: '127.0.0.1', port, pathname: '/v1/audio/transcriptions', key: 'k3y' }, language: 'ja', sampleRate: 16000 }, (e) => { if (e.type !== 'partial') resolve(e); });
+      stretch.write(sound(0.5));
+      stretch.end();
+    });
+    expect(await done).toEqual({ type: 'done', text: 'こんにちは。', language: 'ja' });
+    expect(got.headers.authorization).toBe('Bearer k3y');
+    expect(got.open).toEqual({ type: 'open', language: 'ja', sampleRate: 16000 });
+    expect(got.bytes).toBe(16000);
+    await new Promise((resolve) => server.close(resolve));
+  });
+});
