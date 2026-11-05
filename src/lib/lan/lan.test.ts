@@ -32,6 +32,8 @@ function fakeRecognizer() {
     feedAudio(samples: Int16Array) { fake.fed.push(samples.length); },
     flush() { fake.flushes += 1; },
     dispose() { fake.disposes += 1; },
+    paces: [] as string[],
+    pace(pace: string) { fake.paces.push(pace); },
     async loaded() { settle?.resolve(); await Promise.resolve(); await Promise.resolve(); },
     async broken(message: string) { settle?.reject(new Error(message)); await Promise.resolve(); await Promise.resolve(); },
   };
@@ -76,6 +78,17 @@ describe('what a sharing Kotomimi says of itself', () => {
     expect(baseLanguage('zh-CN')).toBe('zh');
     expect(baseLanguage(' JA ')).toBe('ja');
     expect(baseLanguage(undefined)).toBe('');
+  });
+
+  it('takes the quick pace a client asks for, and the usual again, for its recognizer', () => {
+    const s = socket();
+    s.update('ja');
+    s.say({ type: 'kotomimi.pace', pace: 'quick' });
+    s.say({ type: 'kotomimi.pace', pace: 'normal' });
+    s.say({ type: 'kotomimi.pace', pace: 'sideways' });
+    expect(s.engine().paces).toEqual(['quick', 'normal', 'normal']);
+    // Nothing is answered: it is no Realtime event a client waits on.
+    expect(s.sent.filter((e) => e.type === 'error')).toEqual([]);
   });
 
   it('turns a client\'s turn detection into this computer\'s knobs', () => {

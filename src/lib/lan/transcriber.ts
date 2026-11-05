@@ -22,6 +22,8 @@ export interface Recognizer {
   feedAudio(samples: Int16Array, sampleRate: number): void;
   flush(): void;
   dispose(): void;
+  /** Fork: a shorter stretch, or the usual (`AdapterSession.pace`). Absent: the recognizer cuts as it does. */
+  pace?(pace: 'normal' | 'quick'): void;
   onPartialResult: ((text: string) => void) | null;
   onResult: ((result: { text: string; durationMs: number; recognitionTimeMs: number; language?: string }) => void) | null;
   onSpeechStart: (() => void) | null;
@@ -132,6 +134,8 @@ export class LanTranscriber {
       case 'input_audio_buffer.append': return this.append(e.audio);
       case 'input_audio_buffer.commit': return this.commit();
       case 'input_audio_buffer.clear': return this.clear();
+      // Fork: a shorter stretch while a video plays without a pause, or the usual, as this computer's own engine cuts.
+      case 'kotomimi.pace': return this.engine?.pace?.((e as { pace?: unknown }).pace === 'quick' ? 'quick' : 'normal');
       case 'response.create':
       case 'conversation.item.create':
         return this.error('transcription_only', 'This Kotomimi only transcribes in its socket: ask it for a translation over /v1/chat/completions.');

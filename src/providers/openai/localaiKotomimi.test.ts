@@ -106,6 +106,8 @@ describe('a leg another Kotomimi hears', () => {
     expect(configFor({ asrVia: 'server', vadThreshold: 0.35, vadMinSilenceDuration: 1.2 }).turnDetection).toEqual({ type: 'server_vad', threshold: 0.35, prefixPaddingMs: 300, silenceDurationMs: 1200 });
     // A leg whose turns are its own commits them, as ever.
     expect(configFor({ asrVia: 'server' }, { ...SPEAKER, turns: 'manual' }).turnDetection).toBeNull();
+    // And it takes the quick pace a video asks for.
+    expect(configFor({ asrVia: 'server' }).paces).toBe(true);
   });
 
   it('keeps a selected non-detecting recognizer when the host also advertises a detector', () => {

@@ -48,6 +48,8 @@ export interface RealtimeConfig {
   commitAnswers?: true;
   /** Fork (LocalAI): a transcription session — the server detects turns and writes the source text, and answers nothing; a text model elsewhere does (`pipeline.ts`). Absent: a conversation session. */
   transcribeOnly?: true;
+  /** Fork: the server is another Kotomimi, which takes `kotomimi.pace` (`AdapterSession.pace`); an older one ignores it. Absent: never sent — OpenAI's would answer it as an error. */
+  paces?: true;
 }
 
 const NOISE: Readonly<Record<NoiseReduction, RealtimeConfig['noiseReduction']>> = {

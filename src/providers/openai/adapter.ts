@@ -222,6 +222,15 @@ class RealtimeLeg implements AdapterSession {
     if (!this.request.config.commitAnswers) this.queue.push({ kind: 'turn' });
   }
 
+  /**
+   * Fork: a shorter stretch, or the usual (`AdapterSession.pace`), told to another Kotomimi that hears for this one —
+   * the recognizer is there, and cuts its stretches there (`LanTranscriber`).
+   */
+  pace(pace: 'normal' | 'quick'): void {
+    if (!this.request.config.paces || this.phase !== 'live') return;
+    if (this.send(JSON.stringify({ type: 'kotomimi.pace', pace }))) this.frame('out', 'kotomimi.pace', { pace });
+  }
+
   /** A release without speech: the press's audio is cleared, never left to join the next turn (spec, "Defects removed by construction"; choice 12). */
   cancelTurn(): void {
     if (this.phase !== 'live' || this.request.context.turns !== 'manual') return;

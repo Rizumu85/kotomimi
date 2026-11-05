@@ -392,6 +392,16 @@ describe('the OpenAI Realtime adapter: audio, turns and typed text going up', ()
     expect(h.frames('input_audio_buffer.clear')).toHaveLength(1);
   });
 
+  it('tells another Kotomimi the pace a video asks for, and an OpenAI server nothing (it would answer an error)', async () => {
+    const kotomimi = await liveRealtime({ config: { paces: true } });
+    kotomimi.session.pace?.('quick');
+    kotomimi.session.pace?.('normal');
+    expect(kotomimi.said().filter((m) => m.type === 'kotomimi.pace')).toEqual([{ type: 'kotomimi.pace', pace: 'quick' }, { type: 'kotomimi.pace', pace: 'normal' }]);
+    const openai = await liveRealtime();
+    openai.session.pace?.('quick');
+    expect(openai.said().map((m) => m.type)).not.toContain('kotomimi.pace');
+  });
+
   it('under automatic turns the turn keys send nothing', async () => {
     const h = await liveRealtime();
     h.session.beginTurn();

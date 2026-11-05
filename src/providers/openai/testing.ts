@@ -128,13 +128,13 @@ export function exchange(n: number, o: { source?: string; translation?: string; 
 }
 
 /** An OpenAI Realtime leg started over `FakeSocket`s on a tracked virtual clock; its socket not yet opened. */
-export function startRealtime(o: { context?: SessionContext; patch?: Partial<RealtimeSettings>; credentials?: RealtimeCredentials } = {}) {
+export function startRealtime(o: { context?: SessionContext; patch?: Partial<RealtimeSettings>; credentials?: RealtimeCredentials; /** Over what the settings build (a LocalAI flag). */ config?: Partial<ReturnType<typeof configFor>> } = {}) {
   const sockets = fakeSockets();
   const { clock, timers } = trackedClock();
   const { events, log } = recordEvents();
   const controller = new AbortController();
   const context = o.context ?? AUTO_CTX;
-  const config = configFor(context, o.patch);
+  const config = { ...configFor(context, o.patch), ...o.config };
   const starting = createRealtimeAdapter({ openSocket: sockets.create }).start({ context, config, credentials: o.credentials ?? KEY, clock, signal: controller.signal }, events);
   const socket = () => sockets.last();
   const of = <K extends AdapterEvent['kind']>(kind: K) => log.filter((e): e is Extract<AdapterEvent, { kind: K }> => e.kind === kind);

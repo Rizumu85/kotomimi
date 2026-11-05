@@ -1291,6 +1291,8 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   return {
     ...config,
     ...ownDetection,
+    // Another Kotomimi hearing for this one takes the quick pace a video in VRChat asks for.
+    ...(kotomimi && !hearsLocal && !device ? { paces: true as const } : {}),
     model,
     modalities: ['text'],
     // This computer's LocalAI is told its recognizer through its pipeline, before the socket opens: the session names none.
