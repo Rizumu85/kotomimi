@@ -21,8 +21,10 @@ extension View {
 /// The wallpaper as the Android app's (`Wall` in Look.kt), alive: large soft fields of colour — by night a smoke of
 /// soft folds — coloured by what the device is doing and always slowly moving, slower while nothing is lent; and in
 /// front of them a layer of fine dots held as if in an acrylic block of oil with glitter in it (流麻). It answers
-/// what happens: a stretch heard sets the fields' edges trembling, a sentence translated sends a light sweeping
-/// across, a correction spreads like a drop of red ink. The dots gather in drifts that slowly move, keep clear of
+/// what happens: a stretch heard sets the fields' edges trembling, a correction spreads like a drop of red ink, and
+/// every piece of work sends a wave through the dots. (The Android app's light sweeping across at each sentence
+/// translated is left out: on a tablet's large screen, over the night's smoke, it read as a glitch — the user,
+/// 2026-11-05.) The dots gather in drifts that slowly move, keep clear of
 /// what stands in front, settle toward the way the device is held and sway as it is turned; a few catch the light,
 /// as glitter does. A finger sends a wave out through them.
 struct Living: View {
@@ -40,7 +42,7 @@ struct Living: View {
     @Environment(\.colorScheme) private var scheme
     @Environment(\.accessibilityReduceMotion) private var still
     @State private var motion = WallMotion()
-    /// Whether something moves more than the drift — a wave, a sweep, the device turned, the colours changing.
+    /// Whether something moves more than the drift — a wave, the device turned, the colours changing.
     @State private var lively = false
 
     var body: some View {
@@ -94,7 +96,6 @@ nonisolated final class WallMotion: @unchecked Sendable {
 
     // ── What happened ──
     private var tremble: Double = 0
-    private var sweep: Double = -1
     private struct Drop { let x, y: Double; var age: Double = 0 }
     private var drops: [Drop] = []
     private struct Wave { let x, y, strength: Double; var age: Double = 0 }
@@ -149,7 +150,7 @@ nonisolated final class WallMotion: @unchecked Sendable {
         let x = size.width * 0.5, y = size.height * 0.55
         switch work {
         case .hear: tremble = 1
-        case .translate: sweep = 0
+        case .translate: break
         case .coach: drops.append(Drop(x: x, y: y))
         case .idle: break
         }
@@ -177,7 +178,7 @@ nonisolated final class WallMotion: @unchecked Sendable {
 
     /// Nothing moves but the drift.
     var calm: Bool {
-        !held && waves.isEmpty && drops.isEmpty && stir < 0.08 && sweep < 0 && tremble <= 0 && turned >= 1 && flash <= 0
+        !held && waves.isEmpty && drops.isEmpty && stir < 0.08 && tremble <= 0 && turned >= 1 && flash <= 0
             && abs(quick.x - slow.x) + abs(quick.y - slow.y) < 0.02
     }
 
@@ -185,7 +186,6 @@ nonisolated final class WallMotion: @unchecked Sendable {
         t += dt * pace
         if turned < 1 { turned = min(1, turned + dt / 1.5) }
         tremble = max(0, tremble - dt * 1.2)
-        if sweep >= 0 { sweep = sweep > 1.3 ? -1 : sweep + dt / 1.1 }
         for i in drops.indices { drops[i].age += dt }
         drops.removeAll { $0.age > 1.6 }
         let was = quick
@@ -246,14 +246,6 @@ nonisolated final class WallMotion: @unchecked Sendable {
             let u = min(w, h)
             field(&context, x: sway.x + w * 0.08 + sin(t * 0.7) * u * 0.05, y: h * 0.06 + sway.y + cos(t * 0.5) * u * 0.04, r: u * 0.85, color: c1, seed: 0)
             field(&context, x: sway.x + w * 1.0 + cos(t * 0.6) * u * 0.05, y: h * 0.7 + sway.y * 1.5 + sin(t * 0.45) * u * 0.05, r: u * 0.8, color: c2, seed: 2.1)
-        }
-        // A sentence translated: a band of light sweeps across, left to right.
-        if sweep >= 0 && sweep <= 1.3 {
-            let x = -w * 0.3 + sweep * w * 1.6
-            var band = Path()
-            band.move(to: CGPoint(x: x, y: 0)); band.addLine(to: CGPoint(x: x + w * 0.22, y: 0))
-            band.addLine(to: CGPoint(x: x + w * 0.02, y: h)); band.addLine(to: CGPoint(x: x - w * 0.2, y: h)); band.closeSubpath()
-            context.fill(band, with: .color(.white.opacity(max(0, 0.27 * sin(min(1, sweep) * .pi)))))
         }
         // A correction's red ink, spreading out in a ring.
         for d in drops {
