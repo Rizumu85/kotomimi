@@ -195,6 +195,7 @@ private struct Status: View {
                     .font(Metrics.kicker)
                     .tracking(7)
                     .foregroundStyle(Palette.kicker)
+                    .covers()
                 Spacer(minLength: 0)
                 if let key { key }
             }
@@ -204,16 +205,19 @@ private struct Status: View {
                 .font(Metrics.headline)
                 .foregroundStyle(Palette.ink)
                 .contentTransition(.opacity)
+                .covers()
                 .padding(.bottom, 10)
             Text(line)
                 .font(Metrics.line)
                 .foregroundStyle(Palette.ink2)
                 .lineLimit(2)
+                .covers()
         }
         .padding(.top, 36)
         .padding(.leading, 10)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .covers()
+        // Its writing stands in front of the wallpaper, not the room around it: the dots fill that, as the Android
+        // app's do, and a finger's wave shows there.
         .animation(.easeInOut(duration: 0.3), value: title)
     }
 
