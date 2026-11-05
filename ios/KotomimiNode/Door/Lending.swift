@@ -6,9 +6,9 @@ import UIKit
 /// app's interface (`Share.kt`), unchanged, so that a published desktop finds this device in its "another device"
 /// search and reads through it as it reads through a phone:
 ///
-/// - `GET /v1/models` — in `data`, the one recognition model lent, with the device's name in `X-Kotomimi-Name` and
-///   `X-Kotomimi-Node: engine`. The desktop takes every id in `data` for a recognizer, so nothing else goes there;
-///   the text models' list, `text`, is empty until this app lends translation.
+/// - `GET /v1/models` — in `data`, the one recognition model lent, with the device's name in `X-Kotomimi-Name`,
+///   `X-Kotomimi-Node: engine`, and `X-Kotomimi-Form: tablet` on an iPad. The desktop takes every id in `data` for a
+///   recognizer, so nothing else goes there; the text models are listed apart, in `text`.
 /// - `POST /v1/audio/transcriptions` — one stretch of sound read whole: a form with a WAV recording and perhaps the
 ///   language. What goes back is `{"text": …}`.
 ///
@@ -46,13 +46,35 @@ final class Lending {
     /// What the device did last, which the big widget shows: a stretch heard, a sentence translated, a line of
     /// feedback written.
     private(set) var focus: Work = .hear
-    /// The last text model's answer: what it was asked about, what it wrote, into which language, how long it took.
-    private(set) var lastSaid: String?
-    private(set) var lastAnswer: String?
-    private(set) var lastInto: String?
-    private(set) var lastAnswerMs: Double = 0
-    private(set) var translatedCount = 0
-    private(set) var coachedCount = 0
+    /// When a stretch was last asked to be heard.
+    private(set) var heardAt = Date.distantPast
+
+    /// A kind of text work's last answer: what it was asked about, what it wrote, into which language, how long it
+    /// took; how many there were, and when the last was.
+    struct TextWork: Equatable {
+        var said: String?
+        var answer: String?
+        var into: String?
+        var ms: Double = 0
+        var count = 0
+        var at = Date.distantPast
+    }
+    private(set) var translated = TextWork()
+    private(set) var coached = TextWork()
+    func work(_ kind: TextModel.Kind) -> TextWork { kind == .translate ? translated : coached }
+
+    /// How long a kind of work counts as going on after it was last asked for: a tablet shows a big widget for each
+    /// kind going on. A computer asks for a translation and its feedback a sentence at a time, with talk between.
+    static let goingFor: TimeInterval = 120
+
+    /// The kinds of work going on, in the widgets' order: what was done last, and what else was asked for lately.
+    func going(at now: Date) -> [Work] {
+        guard phase == .waiting || phase == .working else { return [focus] }
+        let lately = { (at: Date) in now.timeIntervalSince(at) < Lending.goingFor }
+        return [Work.hear, .translate, .coach].filter { work in
+            work == focus || lately(work == .hear ? heardAt : work == .translate ? translated.at : coached.at)
+        }
+    }
 
     /// Whether the owner wants it lent: the door is opened again whenever the app comes back to the front.
     var wanted: Bool {
@@ -88,7 +110,9 @@ final class Lending {
         // The name as the Android app sends it: percent-encoded, a header being ASCII only.
         let plain = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~")
         let sent = Lending.name.addingPercentEncoding(withAllowedCharacters: plain) ?? "Kotomimi"
-        let headers: @Sendable () -> [(String, String)] = { [("X-Kotomimi-Name", sent), ("X-Kotomimi-Node", "engine")] }
+        // What kind of device it is, for the computer to call it by: a desktop before this listed every node as a phone.
+        let form = UIDevice.current.userInterfaceIdiom == .pad ? "tablet" : "phone"
+        let headers: @Sendable () -> [(String, String)] = { [("X-Kotomimi-Name", sent), ("X-Kotomimi-Node", "engine"), ("X-Kotomimi-Form", form)] }
         let made = Door(named: headers) { [weak self] request in
             guard let self else { return .error(503, "This device is no longer lent.") }
             return await self.answer(request)
@@ -130,18 +154,17 @@ final class Lending {
         seen = "192.168.1.8"
         seenAt = Date().addingTimeInterval(-90)
         text.pretend()
-        translatedCount = 3
-        if what == "translate" || what == "coach" {
+        if what == "translate" || what == "coach" || what == "all" {
             phase = .working
             lastUse = .distantFuture
-            focus = what == "translate" ? .translate : .coach
-            lastSaid = what == "translate" ? "飛べないおじさんはただのおじさんだ。" : "昨日、映画を見ます。"
-            lastAnswer = what == "translate" ? "不会飞的叔叔只是个普通叔叔而已。" : "昨日、映画を見ました。"
-            lastAnswerMs = what == "translate" ? 1400 : 600
-            return
+            focus = what == "coach" ? .coach : .translate
+            translated = TextWork(said: "飛べないおじさんはただのおじさんだ。", answer: "不会飞的叔叔只是个普通叔叔而已。", into: "中文", ms: 1400, count: 3, at: Date())
+            if what != "translate" { coached = TextWork(said: "昨日、映画を見ます。", answer: "昨日、映画を見ました。\n说的是昨天的事，要用过去式。", ms: 600, count: 2, at: Date()) }
+            guard what == "all" else { return }
         }
-        guard what == "working" else { phase = .waiting; return }
+        guard what == "working" || what == "all" else { phase = .waiting; return }
         phase = .working
+        heardAt = Date()
         lastText = "今日はいい天気ですね。後で一緒に公園を散歩しませんか。"
         lastSeconds = 6
         lastTook = 0.31
@@ -161,7 +184,7 @@ final class Lending {
         }
         // The app's own page, where it says where it comes from, is told it may read the answer.
         let allow: [(String, String)] = origin.map {
-            [("Access-Control-Allow-Origin", $0), ("Vary", "Origin"), ("Access-Control-Expose-Headers", "X-Kotomimi-Name, X-Kotomimi-Node")]
+            [("Access-Control-Allow-Origin", $0), ("Vary", "Origin"), ("Access-Control-Expose-Headers", "X-Kotomimi-Name, X-Kotomimi-Node, X-Kotomimi-Form")]
         } ?? []
         // The owner's access key, where one is set: without it, nothing but the device's name is answered.
         let key = DoorKey.value
@@ -252,11 +275,14 @@ final class Lending {
             let answer = written.text.trimmingCharacters(in: .whitespacesAndNewlines)
             if !answer.isEmpty {
                 focus = model.kind == .translate ? .translate : .coach
-                lastSaid = Lending.saidIn(messages)
-                lastInto = model.kind == .translate ? Lending.intoIn(messages) : nil
-                lastAnswer = answer
-                lastAnswerMs = written.tookMs
-                if model.kind == .translate { translatedCount += 1 } else { coachedCount += 1 }
+                var done = work(model.kind)
+                done.said = Lending.saidIn(messages)
+                done.into = model.kind == .translate ? Lending.intoIn(messages) : nil
+                done.answer = answer
+                done.ms = written.tookMs
+                done.count += 1
+                done.at = Date()
+                if model.kind == .translate { translated = done } else { coached = done }
             }
             let created = Int(Date().timeIntervalSince1970)
             let body = #"{"id":"chatcmpl-kotomimi-\#(created)","object":"chat.completion","created":\#(created),"model":"\#(model.id)","choices":[{"index":0,"message":{"role":"assistant","content":\#(jsonQuoted(written.text))},"finish_reason":"\#(written.finish)"}],"usage":{"prompt_tokens":\#(written.read),"completion_tokens":\#(written.written),"total_tokens":\#(written.read + written.written)}}"#
@@ -315,6 +341,7 @@ final class Lending {
             return .error(400, "This device reads \(names) only, not \"\(said.prefix(20))\".", allow)
         }
         lastUse = Date()
+        heardAt = Date()
         if phase == .waiting { phase = .working }
         let began = Date()
         do {

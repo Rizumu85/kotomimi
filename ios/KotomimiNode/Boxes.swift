@@ -5,6 +5,8 @@ import SwiftUI
 /// its contents on cards (`card` in colors.xml). The page stays where it was beneath.
 struct BoxPanel<Thing: View, Content: View>: View {
     let title: String
+    /// The card it opens at, by its `id`, where the widget that opened it is about one part of it.
+    var start: String? = nil
     let close: () -> Void
     @ViewBuilder var thing: Thing
     @ViewBuilder var content: Content
@@ -29,12 +31,19 @@ struct BoxPanel<Thing: View, Content: View>: View {
                 .padding(.horizontal, 20)
                 .padding(.top, regular ? 18 : 10)
                 .padding(.bottom, 12)
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 10) { content }
-                        .padding(.horizontal, 14)
-                        .padding(.bottom, 16)
+                ScrollViewReader { scroll in
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 10) { content }
+                            .padding(.horizontal, 14)
+                            .padding(.bottom, 16)
+                    }
+                    .scrollBounceBehavior(.basedOnSize)
+                    .onAppear {
+                        guard let start else { return }
+                        // After the box has its size: before it, there is nothing yet to scroll.
+                        Task { @MainActor in scroll.scrollTo(start, anchor: .top) }
+                    }
                 }
-                .scrollBounceBehavior(.basedOnSize)
             }
             .frame(width: regular ? 480 : box.size.width - 16)
             .frame(maxHeight: box.size.height * (regular ? 0.72 : 0.86), alignment: .top)
@@ -73,13 +82,16 @@ private struct Note: View {
 // ── The boxes ─────────────────────────────────────────────────────────────────────────────────────────────────
 
 struct ModelsBox: View {
+    /// The parts of the box, by the widgets that open it there.
+    enum Part: String { case hearing, translate, coach }
+    var start: Part = .hearing
     let close: () -> Void
     @Environment(Hearing.self) private var hearing
     @Environment(TextStore.self) private var text
     @State private var failure: String?
 
     var body: some View {
-        BoxPanel(title: "模型管理", close: close) { WaterThing() } content: {
+        BoxPanel(title: "模型管理", start: start == .hearing ? nil : start.rawValue, close: close) { WaterThing() } content: {
             BoxCard(title: "语音识别") {
                 let shown = hearing.languages.filter { $0.state != .unsupported }
                 Rows(count: shown.count) { at in language(shown[at]) }
@@ -90,10 +102,12 @@ struct ModelsBox: View {
                 let shown = TextModel.all.filter { $0.kind == .translate }
                 Rows(count: shown.count) { at in model(shown[at]) }
             }
+            .id(Part.translate.rawValue)
             BoxCard(title: "语法反馈") {
                 let shown = TextModel.all.filter { $0.kind == .coach }
                 Rows(count: shown.count) { at in model(shown[at]) }
             }
+            .id(Part.coach.rawValue)
             Note(text: "按住已下载的一行可以删除。")
         }
         .task { await hearing.refresh() }

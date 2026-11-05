@@ -145,6 +145,9 @@ extern "C" char *kt_answer(kt_model *m, const kt_message *messages, int count, k
         std::string text = written;
         try {
             common_chat_parser_params parsing(chat);
+            // The template's own parser, as the server loads it (`chat_parser`): without it everything is content,
+            // the generation prompt and the thinking with it.
+            if (!chat.parser.empty()) parsing.parser.load(chat.parser);
             parsing.reasoning_format = COMMON_REASONING_FORMAT_DEEPSEEK;
             parsing.parse_tool_calls = false;
             text = common_chat_parse(written, false, parsing).content;
