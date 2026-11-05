@@ -261,7 +261,14 @@ final class Lending {
         let textModels = text.ready.filter { $0.kind != .hear }.map {
             #"{"id":"\#($0.id)","object":"model","owned_by":"kotomimi-phone","holds_mb":\#($0.holdsMb),"kind":"\#($0.kind.rawValue)","name":\#(jsonQuoted($0.name)),"loaded":\#(up.contains($0.id))}"#
         }.joined(separator: ",")
-        return #"{"object":"list","data":[\#(lent)],"text":[\#(textModels)],"memory_mb":{"total":\#(total),"available":\#(free)}}"#
+        // Every recognizer here, which a computer may ask for by name (`model` in a stretch's form): `data` keeps the
+        // one lent unasked, for a computer that reads only that.
+        let engineUp = hearEngine.loadedId
+        let hears = ((hearing.ready.isEmpty ? [] : [#"{"id":"\#(Lending.modelId)","name":"Apple Speech","holds_mb":0,"loaded":true}"#])
+            + text.ready.filter { $0.kind == .hear }.map {
+                #"{"id":"\#($0.id)","name":\#(jsonQuoted($0.name)),"holds_mb":\#($0.holdsMb),"loaded":\#($0.id == engineUp)}"#
+            }).joined(separator: ",")
+        return #"{"object":"list","data":[\#(lent)],"hear":[\#(hears)],"text":[\#(textModels)],"memory_mb":{"total":\#(total),"available":\#(free)}}"#
     }
 
     // ── Text models ─────────────────────────────────────────────────────────────────────────────────────────
@@ -369,7 +376,7 @@ final class Lending {
     }
 
     private func transcribe(_ request: Request, _ allow: [(String, String)]) async -> Response {
-        let model = lentModel
+        var model = lentModel
         guard model != nil || !hearing.ready.isEmpty else {
             return .error(404, "This device lends no speech recognition now: no language is downloaded there.", allow)
         }
@@ -390,6 +397,13 @@ final class Lending {
             return .error(413, "The sound is too long: this device reads at most \(Int(Lending.mostSeconds)) seconds at once.", allow)
         }
         let said = form.fields["language"]?.trimmingCharacters(in: .whitespaces) ?? ""
+        // The recognizer the computer asks for by name, where it is here; else the one lent.
+        let asked = form.fields["model"]?.trimmingCharacters(in: .whitespaces) ?? ""
+        if asked == Lending.modelId && !hearing.ready.isEmpty {
+            model = nil
+        } else if let named = text.ready.first(where: { $0.kind == .hear && $0.id == asked }) {
+            model = named
+        }
         if let model { return await engineRead(model, wav, said, allow) }
         let code: String
         if said.isEmpty || said.lowercased() == "auto" {
