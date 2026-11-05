@@ -1145,7 +1145,11 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
       const baseUrl = s.asrApiBaseUrl.trim();
       const named = s.asrApiModel.trim();
       // A model of this app's own names: what a Kotomimi phone lends is read by its engine the way it is read here.
-      const limits = NATIVE_MODELS.find((m) => m.id === named)?.limits;
+      const known = NATIVE_MODELS.find((m) => m.id === named);
+      const limits = known?.limits;
+      // A model that names the language (Qwen3-ASR, on a lent device) is asked for "auto" as it is here: told the
+      // leg's nominal language it heard everything as that.
+      detector = known?.detects ? known : null;
       recognizer = { modelId: named, streaming: false, api: { baseUrl, model: named, ...(s.asrApiNeedsKey ? { key: 'asrKey' as const } : {}), ...(limits ? { limits } : {}), ...(hints.length ? { hints } : {}) } };
     } else {
       recognizer = null;
@@ -1278,8 +1282,15 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
     ? asked.direction.source
     : heard;
 
+  // Another Kotomimi that hears for this one cuts its sentences with this one's own speech detection, as this
+  // computer's engine would: its threshold and pause, where Realtime's semantic default became a 0.8 s pause there.
+  const ownDetection = kotomimi && !hearsLocal && !device && config.turnDetection
+    ? { turnDetection: { type: 'server_vad' as const, threshold: s.vadThreshold, prefixPaddingMs: 300, silenceDurationMs: Math.round(s.vadMinSilenceDuration * 1000) } }
+    : {};
+
   return {
     ...config,
+    ...ownDetection,
     model,
     modalities: ['text'],
     // This computer's LocalAI is told its recognizer through its pipeline, before the socket opens: the session names none.

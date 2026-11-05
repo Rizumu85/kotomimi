@@ -102,6 +102,12 @@ describe('another Kotomimi\'s model lists', () => {
 });
 
 describe('a leg another Kotomimi hears', () => {
+  it('is cut into sentences there with this computer\'s own speech detection, not Realtime\'s semantic default', () => {
+    expect(configFor({ asrVia: 'server', vadThreshold: 0.35, vadMinSilenceDuration: 1.2 }).turnDetection).toEqual({ type: 'server_vad', threshold: 0.35, prefixPaddingMs: 300, silenceDurationMs: 1200 });
+    // A leg whose turns are its own commits them, as ever.
+    expect(configFor({ asrVia: 'server' }, { ...SPEAKER, turns: 'manual' }).turnDetection).toBeNull();
+  });
+
   it('keeps a selected non-detecting recognizer when the host also advertises a detector', () => {
     const models: LocalAIModel[] = [...FOUND, { id: 'qwen3-asr-1.7b-q8', host: 'kotomimi', kind: 'asr', languages: ['auto', 'zh', 'ja'] }];
     const s = settings({ asrModel: 'sensevoice-int8', speakBoth: true, asrDetectOther: true });

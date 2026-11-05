@@ -53,6 +53,14 @@ describe('recognition by an API: the run it builds', () => {
     expect(configFor(SPEAKER, { ...API, asrApiNeedsKey: false }).device?.api).toEqual({ baseUrl: 'https://api.example.com/v1/', model: 'whisper-large-v3' });
   });
 
+  it('asks a lent model that names the language (Qwen3-ASR) to detect it, as this computer\'s engine is asked', () => {
+    const detect = { ...SPEAKER, direction: { source: 'auto', target: 'ja' } };
+    const phone = { ...API, asrApiBaseUrl: 'http://192.168.4.28:8792/v1', asrApiModel: 'qwen3-asr-1.7b-q8', asrApiNeedsKey: false };
+    expect(configFor(detect, phone).device).not.toHaveProperty('language');
+    // One that cannot is told a language of its own.
+    expect(configFor(detect, { ...phone, asrApiModel: 'apple-speech' }).device).toHaveProperty('language');
+  });
+
   it('takes a language to detect, which this computer\'s own recognizers do not', () => {
     const c = configFor({ ...SPEAKER, direction: { source: 'auto', target: 'ja' } }, API);
     expect(c.device?.api?.model).toBe('whisper-large-v3');

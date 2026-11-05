@@ -47,6 +47,7 @@ import { PHONE_BUSY_RETRIES, PHONE_TEXT_TIMEOUT_MS } from './phoneText';
 import { watchPhones, type PhoneWatch } from './phoneWatch';
 import { phoneKey } from '../../lib/lan/phoneKeys';
 import { unwrapTranslationText } from './wire';
+import { NATIVE_MODELS } from './localaiNative';
 
 /** The credential a stage's endpoint is called with, by its field. */
 export type StageKey = 'translateKey' | 'coachKey' | 'apiKey' | 'asrKey';
@@ -741,8 +742,10 @@ class PipelineLeg implements AdapterSession {
       }
     }
     // A term written right is kept by the model unprompted; written wrong, it is translated as what it sounds like.
+    // Feedback is given on the sentence as it is shown, its names put right too: it judged a misheard name as the
+    // user's mistake.
     const { glossary } = this.request.config;
-    const text = glossary && stage.kind === 'translate' ? normalizeRecognitionText(heard, glossary) : heard;
+    const text = glossary ? normalizeRecognitionText(heard, glossary) : heard;
     return completeText(
       {
         url: chatUrl(base),
@@ -832,12 +835,15 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
     const asked = deps.fetch ?? fetchNow;
     const byApi = () => createApiAsr({ baseUrl: api.baseUrl, model: api.model, ...(key ? { key } : {}), fetch: asked, clock: request.clock });
     // The address may be a Kotomimi phone lending its engine: that is read as this computer's own engine is, while
-    // the voice is heard, not a sentence at a time. Asked once, as the run begins; anything else is the API named.
+    // the voice is heard, not a sentence at a time. Asked as the run begins, up to three times — a device just woken,
+    // or a busy Wi-Fi, may not answer the first in time, and the plain API it otherwise falls to for the whole run
+    // has no words to expect, no filters and no partial text; anything that is no phone is the API named.
     const remote = deps.remote ?? { node: (baseUrl: string) => engineNode(baseUrl, asked, key || phoneKey(baseUrl) || undefined), bridge: remoteBridge };
     return createLocalInferenceAdapter({
       ...engines,
       asr: () => createEitherAsr(async () => {
-        const node = await remote.node(api.baseUrl);
+        let node = await remote.node(api.baseUrl);
+        for (let again = 0; !node && again < 2; again++) node = await remote.node(api.baseUrl);
         if (!node) return byApi();
         onPhone(api.baseUrl);
         // The model chosen here, where the device has it and can be asked for it by name (the iPad app); else the one
@@ -848,7 +854,7 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
         // `electron/remote-engine.js`): a phone slower than the voice still writes all of it, late, where the wait
         // this computer's own engine is given would have kept only what the first reading had (seen 2026-10-10 on a
         // phone at half the speed of speech: "ゲームは、 like" for twenty seconds of talk).
-        return createNativeAsr({ bridge: remote.bridge(api.baseUrl), start: async () => lent, model, clock: request.clock, named: 'The recognition engine of the other device', limits: { ...api.limits, lastWordsMs: REMOTE_LAST_WORDS_MS }, ...(api.hints?.length ? { hints: api.hints } : {}) });
+        return createNativeAsr({ bridge: remote.bridge(api.baseUrl), start: async () => lent, model, clock: request.clock, named: 'The recognition engine of the other device', limits: { ...(NATIVE_MODELS.find((m) => m.id === model)?.limits ?? api.limits), lastWordsMs: REMOTE_LAST_WORDS_MS }, ...(api.hints?.length ? { hints: api.hints } : {}) });
       }),
     });
   };
