@@ -107,7 +107,8 @@ nonisolated struct Drift: Sendable {
         return Double((n ^ (n >> 16)) & 0xFFFFFF) / 16_777_216
     }
 
-    func draw(_ context: GraphicsContext, _ size: CGSize, t: Double) {
+    /// `flash`: how much work done just lit the lines.
+    func draw(_ context: GraphicsContext, _ size: CGSize, t: Double, flash: Double = 0) {
         // About one to every 130 points square, as there.
         let count = min(seeds.count, max(8, Int(size.width * size.height / (130 * 130))))
         for seed in seeds.prefix(count) {
@@ -123,7 +124,7 @@ nonisolated struct Drift: Sendable {
             let size1 = Drift.hash(seed.index * 31 + life, 9)
             let span: Double = switch kind { case 0: 110 + size1 * 150; case 4: 46 + size1 * 40; case 1: 26 + size1 * 20; default: 10 + size1 * 8 }
             let envelope = smooth(0, 0.2, k) * (1 - smooth(0.75, 1, k))
-            let alpha = (0.12 + 0.22 * seed.depth) * envelope
+            let alpha = (0.12 + 0.22 * seed.depth) * envelope * (1 + flash * 1.5)
             guard alpha > 0.01 else { continue }
             let ink = GraphicsContext.Shading.color(Color(red: 0.855, green: 0.855, blue: 0.886).opacity(alpha))
             let stroke = StrokeStyle(lineWidth: 1, lineCap: .round)

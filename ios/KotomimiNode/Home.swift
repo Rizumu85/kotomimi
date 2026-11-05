@@ -15,6 +15,8 @@ struct Home: View {
     @State private var open: Box?
     /// Where the models box opens: at the part of the widget that opened it.
     @State private var part: ModelsBox.Part = .hearing
+    /// What stands in front of the wallpaper, for its dots to keep clear of.
+    @State private var covered: [CGRect] = []
 
     enum Box: String, Identifiable { case models, devices, tools, settings; var id: String { rawValue } }
 
@@ -22,7 +24,8 @@ struct Home: View {
         GeometryReader { box in
             let size = box.size
             ZStack {
-                Wall(lent: lending.phase != .off, working: lending.phase == .working)
+                Living(mood: lending.mood, lent: lending.phase == .waiting || lending.phase == .working, working: lending.phase == .working,
+                       heard: lending.heardCount, translated: lending.translated.count, coached: lending.coached.count, covered: covered)
                 Group {
                     if size.width > size.height && size.width >= 900 { wide(size) }
                     else if size.width >= 700 { tablet(size) }
@@ -48,6 +51,8 @@ struct Home: View {
                 }
             }
             .animation(.spring(duration: 0.42, bounce: 0.24), value: open)
+            .coordinateSpace(name: Living.space)
+            .onPreferenceChange(CoverKey.self) { covered = $0 }
         }
         #if DEBUG
         // A box open at launch, for screenshots in the simulator (`-box models|devices|tools|settings`).
@@ -208,6 +213,7 @@ private struct Status: View {
         .padding(.top, 36)
         .padding(.leading, 10)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .covers()
         .animation(.easeInOut(duration: 0.3), value: title)
     }
 
@@ -365,6 +371,7 @@ private struct TextTile: View {
         .padding(28)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(face, in: .rect(cornerRadius: 32))
+        .covers()
     }
 }
 
@@ -411,6 +418,7 @@ private struct HearingTile: View {
         }
         .clipShape(.rect(cornerRadius: 32))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .covers()
     }
 
     private var speed: String {

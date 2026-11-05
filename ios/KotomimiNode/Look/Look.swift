@@ -50,84 +50,6 @@ nonisolated extension Color {
     }
 }
 
-/// The wallpaper. By day: the wall, a field of the work's colour falling from the top left, a pale blue one rising at
-/// the bottom right, and fine dots coming in towards the bottom, drawn once for a size. By night: the smoke and its
-/// linework (`NightWall`), with the same dots over it.
-struct Wall: View {
-    var lent: Bool
-    var working: Bool
-    @Environment(\.colorScheme) private var scheme
-
-    var body: some View {
-        if scheme == .dark {
-            ZStack {
-                NightWall(lent: lent, working: working)
-                Canvas { context, size in Wall.dots(context, size) }.ignoresSafeArea().allowsHitTesting(false)
-            }
-        } else {
-            day
-        }
-    }
-
-    private var day: some View {
-        GeometryReader { box in
-            let w = box.size.width, h = box.size.height
-            ZStack {
-                Palette.wall
-                Ellipse()
-                    .fill(working ? Palette.mint : Palette.mintPale)
-                    .frame(width: max(w, h) * 1.15, height: max(w, h) * 0.95)
-                    .position(x: w * 0.08, y: -h * 0.02)
-                Ellipse()
-                    .fill(Palette.blue)
-                    .frame(width: max(w, h) * 1.05, height: max(w, h) * 0.9)
-                    .position(x: w * 0.98, y: h * 1.02)
-                Canvas { context, size in Wall.dots(context, size) }
-            }
-            .animation(.easeInOut(duration: 1.2), value: working)
-        }
-        .ignoresSafeArea()
-    }
-
-    /// The Android app's glitter (`Wall.dots` in Look.kt), held still: fine dots on a loose grid, each a little off its
-    /// place, coming in towards the bottom, and here and there one of the four colours instead of ink.
-    nonisolated private static let glints: [Color] = [Color(day: 0xE86A52, night: 0xFFFFFF), Color(day: 0x3FAF8F, night: 0xFFE7C9), Color(day: 0x4D86D9, night: 0xD3E8FF), Color(day: 0xE9A23B, night: 0xF2D6FF)]
-
-    nonisolated static func dots(_ context: GraphicsContext, _ size: CGSize) {
-        let every: CGFloat = 26
-        let top = size.height * 0.5
-        var j = 0
-        var y = top
-        while y < size.height + every {
-            var i = 0
-            var x: CGFloat = 8
-            while x < size.width + every {
-                let k = min(1, max(0, (y - top) / (size.height - top)))
-                let seen = hash(i, j, 3)
-                // Fewer of them higher up.
-                if seen < 0.25 + 0.7 * k {
-                    let px = x + (hash(i, j, 1) - 0.5) * every * 0.5
-                    let py = y + (hash(i, j, 2) - 0.5) * every * 0.5
-                    let glint = hash(i, j, 4) < 0.012
-                    let r: CGFloat = glint ? 1.6 : 1.1
-                    let color = glint ? glints[Int(hash(i, j, 5) * 4) % 4].opacity(0.75) : Palette.dot.opacity(0.06 + 0.2 * k)
-                    context.fill(Path(ellipseIn: CGRect(x: px - r, y: py - r, width: r * 2, height: r * 2)), with: .color(color))
-                }
-                x += every
-                i += 1
-            }
-            y += every
-            j += 1
-        }
-    }
-
-    nonisolated private static func hash(_ i: Int, _ j: Int, _ salt: Int) -> CGFloat {
-        var n = UInt32(truncatingIfNeeded: i &* 374_761_393 &+ j &* 668_265_263 &+ salt &* 982_451_653)
-        n = (n ^ (n >> 13)) &* 1_274_126_177
-        return CGFloat((n ^ (n >> 16)) & 0xFFFFFF) / 16_777_216
-    }
-}
-
 /// A widget: warm white, its corners round, as the Android app draws it. (Glass over the wall made it look out of
 /// focus: the system's own controls carry the glass instead.)
 struct Tile<Content: View>: View {
@@ -140,6 +62,7 @@ struct Tile<Content: View>: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .background(Palette.tile.opacity(0.84), in: .rect(cornerRadius: Metrics.radius))
             .overlay(RoundedRectangle(cornerRadius: Metrics.radius).stroke(Palette.tileEdge, lineWidth: 0.5))
+            .covers()
     }
 }
 

@@ -47,6 +47,11 @@ final class Lending {
     /// What the device did last, which the big widget shows: a stretch heard, a sentence translated, a line of
     /// feedback written.
     private(set) var focus: Work = .hear
+    /// What the wallpaper is coloured by: the work done last, while lent.
+    var mood: Mood {
+        guard phase == .waiting || phase == .working else { return .idle }
+        return switch focus { case .hear: .hear; case .translate: .translate; case .coach: .coach }
+    }
     /// When a stretch was last asked to be heard.
     private(set) var heardAt = Date.distantPast
 
