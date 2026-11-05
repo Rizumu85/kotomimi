@@ -8,10 +8,19 @@
  *   its own. A longer one may differ in tones, and in one syllable by a sound near it (z/zh, n/l, an/ang …).
  * - Japanese written in kana, with voicing, long vowels, small kana and the double consonant set aside.
  *
+ * - Latin, by a key of its sounds (`phonetic.ts`): "Risom" is "Rizum". A word written with a capital is only found
+ *   written with one, so an everyday word that sounds like a name keeps its own. Hangul and Cyrillic are written as
+ *   they sound: a recognizer that spells a name in them another way heard another name (서연, 서윤).
+ * - Across scripts, by the same keys, looser: a name in Latin letters found where recognition wrote it in katakana,
+ *   Han, Hangul or Cyrillic (リズム, 里祖姆, 리점 for Rizum), and the other way round. Katakana only, not hiragana, and
+ *   in Han a stretch of three consonants or more: shorter ones are everyday words too often.
+ *
  * The words' own spellings and their listed mishearings are matched, so a mishearing listed once stands for every
- * spelling that sounds like it. Latin letters are left to the exact matching: a name in them is spelled the same.
+ * spelling that sounds like it. A word written exactly as one of the table's is never touched, so a name kept in two
+ * scripts (Rizum and リズム) keeps both; where two words sound like one stretch, one in its script comes first.
  */
 import { pinyin } from 'pinyin-pro';
+import { lettersOf, pinyinLetters, scriptOf, sound, soundKey, soundsAlike, type Script, type Sound } from './phonetic';
 import type { GlossaryEntry } from './types';
 
 const HAN = /^\p{Script=Han}+$/u;
@@ -73,7 +82,20 @@ function kanaKey(kana: string): string {
     .replace(/[ァィゥェォャュョヮヵヶ]/g, (c) => small[c]).normalize('NFC');
 }
 
-interface Found { start: number; end: number; source: string }
+/** `rank`: 0 for a match in the word's own script, 1 for one across scripts. */
+interface Found { start: number; end: number; source: string; rank: number }
+
+const LATIN_RUN = /\p{Script=Latin}+/gu;
+const CYRILLIC_RUN = /\p{Script=Cyrillic}+/gu;
+const HANGUL_RUN = /\p{Script=Hangul}+/gu;
+const KATAKANA_RUN = /[\p{Script=Katakana}ー]+/gu;
+const CAPITAL = /^\p{Lu}/u;
+
+/** A form of a word kept by its sound in its script (`strict`) and across scripts (`loose`). */
+interface Heard { source: string; script: Script; strict: string; loose: Sound; capital: boolean }
+
+/** Enough of a word to be told from others by sound: two consonants and four sounds. */
+const enough = (s: { key: string; consonants: string }) => s.consonants.length >= 2 && s.key.length >= 4;
 
 /**
  * The text with every stretch that sounds like a word of the dictionary written as the word. What is already one of
@@ -97,13 +119,22 @@ const cache = new WeakMap<readonly GlossaryEntry[], Map<string, string>>();
 function fold(text: string, entries: readonly GlossaryEntry[]): string {
   const hanWords: Array<{ source: string; sound: Syllable[] }> = [];
   const kanaWords: Array<{ source: string; key: string; length: number }> = [];
+  const heardBy = new Map<string, Heard[]>();
   for (const entry of entries) {
     for (const form of [entry.source, ...entry.aliases]) {
       if (HAN.test(form) && form.length >= 2 && form.length <= 8) hanWords.push({ source: entry.source, sound: syllables(form) });
       else if (KANA.test(form) && kanaKey(form).length >= 2) kanaWords.push({ source: entry.source, key: kanaKey(form), length: [...form].length });
+      const script = scriptOf(form);
+      if (!script || [...form].length > 16) continue;
+      const letters = lettersOf(form, script);
+      const loose = sound(letters, true);
+      if (!enough(loose)) continue;
+      const one: Heard = { source: entry.source, script, strict: soundKey(letters, false), loose, capital: CAPITAL.test(form) };
+      const same = heardBy.get(loose.consonants);
+      if (same) same.push(one); else heardBy.set(loose.consonants, [one]);
     }
   }
-  if (hanWords.length === 0 && kanaWords.length === 0) return text;
+  if (hanWords.length === 0 && kanaWords.length === 0 && heardBy.size === 0) return text;
 
   // Where the words already stand: nothing over them is touched.
   const kept: Array<[number, number]> = [];
@@ -125,7 +156,7 @@ function fold(text: string, entries: readonly GlossaryEntry[]): string {
           const start = run.index! + i;
           const end = start + n;
           if (text.slice(start, end) === word.source || !free(start, end)) continue;
-          if (soundsLike(heard.slice(i, i + n), word.sound)) found.push({ start, end, source: word.source });
+          if (soundsLike(heard.slice(i, i + n), word.sound)) found.push({ start, end, source: word.source, rank: 0 });
         }
       }
     }
@@ -141,20 +172,79 @@ function fold(text: string, entries: readonly GlossaryEntry[]): string {
             const start = run.index! + chars.slice(0, i).join('').length;
             const end = start + piece.length;
             if (piece === word.source || !free(start, end)) continue;
-            if (kanaKey(piece) === word.key) found.push({ start, end, source: word.source });
+            if (kanaKey(piece) === word.key) found.push({ start, end, source: word.source, rank: 0 });
           }
         }
       }
     }
   }
+  if (heardBy.size > 0) found.push(...bySoundKey(text, heardBy, free));
   if (found.length === 0) return text;
 
-  // The longest first, then the earliest; none over another.
-  found.sort((a, b) => (b.end - b.start) - (a.end - a.start) || a.start - b.start);
+  // The longest first, then the earliest, then one in its own script; none over another.
+  found.sort((a, b) => (b.end - b.start) - (a.end - a.start) || a.start - b.start || a.rank - b.rank);
   const taken: Found[] = [];
   for (const f of found) if (!taken.some((t) => f.start < t.end && t.start < f.end)) taken.push(f);
   taken.sort((a, b) => b.start - a.start);
   let out = text;
   for (const t of taken) out = out.slice(0, t.start) + t.source + out.slice(t.end);
   return out;
+}
+
+/** The stretches of `text` a word of the table sounds like by its key (`phonetic.ts`): in its own script, and across. */
+function bySoundKey(text: string, heardBy: ReadonlyMap<string, Heard[]>, free: (start: number, end: number) => boolean): Found[] {
+  const all = [...heardBy.values()].flat();
+  const found: Found[] = [];
+  const consider = (start: number, end: number, script: Script, letters: string, capital: boolean, crossOnly = false) => {
+    const piece = text.slice(start, end);
+    if (!free(start, end)) return;
+    const loose = sound(letters, true);
+    if (!enough(loose)) return;
+    // In Han, two consonants are too many everyday words, however long.
+    const cross = script !== 'han' || loose.consonants.length >= 3;
+    if (!crossOnly && script === 'latin') {
+      const strict = soundKey(letters, false);
+      for (const word of all) {
+        if (word.script !== script || word.strict !== strict || piece === word.source) continue;
+        if (word.capital && !capital) continue;
+        found.push({ start, end, source: word.source, rank: 0 });
+      }
+    }
+    if (!cross) return;
+    for (const word of heardBy.get(loose.consonants) ?? []) {
+      if (word.script === script || piece === word.source || !soundsAlike(word.loose, loose)) continue;
+      // Two consonants across scripts are too many everyday words (李子 is リスト's first half): only a longer word,
+      // every vowel the same (悠米露, Yumilu).
+      if (loose.consonants.length < 3 && (loose.key !== word.loose.key || loose.key.length < 5)) continue;
+      // A word in small Latin letters may be an everyday one: it is never taken for a name in another script.
+      if (script === 'latin' && !capital) continue;
+      found.push({ start, end, source: word.source, rank: 1 });
+    }
+  };
+  // Words with spaces between them: each word whole.
+  for (const [re, script] of [[LATIN_RUN, 'latin'], [CYRILLIC_RUN, 'cyrillic']] as const) {
+    for (const run of text.matchAll(re)) consider(run.index!, run.index! + run[0].length, script, lettersOf(run[0], script), CAPITAL.test(run[0]));
+  }
+  // A name written by sound in Hangul starts a word, its particles after it (리점이); in katakana it is the whole run
+  // (リズムさん): a stretch inside a word is part of another word (시작할, インターネット).
+  for (const run of text.matchAll(HANGUL_RUN)) {
+    const chars = [...run[0]];
+    // The shortest that sounds like a word: 이 after 리점 is its particle, not a vowel added.
+    for (let n = 1, had = found.length; n <= 8 && n <= chars.length && found.length === had; n++) {
+      consider(run.index!, run.index! + chars.slice(0, n).join('').length, 'hangul', lettersOf(chars.slice(0, n).join(''), 'hangul'), false);
+    }
+  }
+  for (const run of text.matchAll(KATAKANA_RUN)) {
+    if ([...run[0]].length <= 12) consider(run.index!, run.index! + run[0].length, 'kana', lettersOf(run[0], 'kana'), false, true);
+  }
+  // Han has no words to keep to: any stretch, up to a name's length.
+  for (const run of text.matchAll(HAN_RUN)) {
+    const read = syllables(run[0]);
+    if (read.length !== run[0].length) continue;
+    const letters = read.map((s) => pinyinLetters(s.plain));
+    for (let i = 0; i < letters.length; i++) {
+      for (let n = 2; n <= 8 && i + n <= letters.length; n++) consider(run.index! + i, run.index! + i + n, 'han', letters.slice(i, i + n).join(''), false, true);
+    }
+  }
+  return found;
 }
