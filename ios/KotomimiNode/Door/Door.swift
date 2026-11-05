@@ -56,10 +56,15 @@ nonisolated final class Door: @unchecked Sendable {
     private var open = 0
     private let handle: @Sendable (Request) async -> Response
     private let named: @Sendable () -> [(String, String)]
+    private let upgrade: @Sendable (Request) async -> Upgrade
 
-    /// `named`: the headers every answer carries (who this device is). `handle`: the answer to a request.
-    init(named: @escaping @Sendable () -> [(String, String)], handle: @escaping @Sendable (Request) async -> Response) {
+    /// `named`: the headers every answer carries (who this device is). `handle`: the answer to a request. `upgrade`:
+    /// what is done with a request to switch to a WebSocket (`Socket`); by default, it is refused.
+    init(named: @escaping @Sendable () -> [(String, String)],
+         upgrade: @escaping @Sendable (Request) async -> Upgrade = { _ in .refuse(.error(404, "Not here.")) },
+         handle: @escaping @Sendable (Request) async -> Response) {
         self.named = named
+        self.upgrade = upgrade
         self.handle = handle
     }
 
@@ -124,6 +129,19 @@ nonisolated final class Door: @unchecked Sendable {
             let response: Response
             if let request = await read(connection, peer: peer) {
                 deadline.cancel()
+                if Door.upgrades(request) {
+                    switch await upgrade(request) {
+                    case .refuse(let refusal):
+                        write(refusal, to: connection)
+                    case .take(let run):
+                        // Held open for as long as `run` keeps it: the request's own deadline is over.
+                        connection.send(content: Socket.accepting(request.headers["sec-websocket-key"] ?? ""), completion: .contentProcessed { _ in })
+                        let socket = Socket(connection, leftover: request.body)
+                        await run(socket)
+                        socket.close()
+                    }
+                    return
+                }
                 response = await handle(request)
             } else {
                 deadline.cancel()
@@ -132,6 +150,12 @@ nonisolated final class Door: @unchecked Sendable {
             }
             write(response, to: connection)
         }
+    }
+
+    /// A request to switch to a WebSocket, with the key the answer is made from.
+    static func upgrades(_ request: Request) -> Bool {
+        request.method == "GET" && request.headers["upgrade"]?.lowercased() == "websocket"
+            && request.headers["sec-websocket-version"] == "13" && !(request.headers["sec-websocket-key"] ?? "").isEmpty
     }
 
     private static func peerOf(_ connection: NWConnection) -> String? {
@@ -184,7 +208,8 @@ nonisolated final class Door: @unchecked Sendable {
             guard let piece = await more(connection) else { return nil }
             body.append(piece)
         }
-        if body.count > length { body = body.prefix(length) }
+        // What follows a request to switch is the WebSocket's first frames, not a body: kept for it.
+        if body.count > length && headers["upgrade"]?.lowercased() != "websocket" { body = body.prefix(length) }
         return Request(method: String(first[0]), path: String(first[1].split(separator: "?").first ?? ""), headers: headers, body: body, peer: peer)
     }
 

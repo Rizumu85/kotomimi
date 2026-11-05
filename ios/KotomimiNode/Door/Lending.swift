@@ -151,7 +151,10 @@ final class Lending {
         // What kind of device it is, for the computer to call it by: a desktop before this listed every node as a phone.
         let form = UIDevice.current.userInterfaceIdiom == .pad ? "tablet" : "phone"
         let headers: @Sendable () -> [(String, String)] = { [("X-Kotomimi-Name", sent), ("X-Kotomimi-Node", "engine"), ("X-Kotomimi-Form", form)] }
-        let made = Door(named: headers) { [weak self] request in
+        let made = Door(named: headers, upgrade: { [weak self] request in
+            guard let self else { return .refuse(.error(503, "This device is no longer lent.")) }
+            return await self.upgrade(request)
+        }) { [weak self] request in
             guard let self else { return .error(503, "This device is no longer lent.") }
             return await self.answer(request)
         }
@@ -246,6 +249,96 @@ final class Lending {
         }
     }
 
+    // ── A stretch heard while it is spoken ──────────────────────────────────────────────────────────────────
+
+    /// A computer asks to stream a stretch (`/v1/audio/stream`): the same checks as any request, then the socket is
+    /// taken over (`live`).
+    private func upgrade(_ request: Request) -> Upgrade {
+        let origin = request.headers["origin"]
+        let own = origin == nil || origin == "null" || origin!.hasPrefix("file://")
+        guard own, Lending.localName(request.headers["host"]) else { return .refuse(.error(403, "This device answers the devices around it only.")) }
+        let key = DoorKey.value
+        if !key.isEmpty, request.headers["authorization"] != "Bearer \(key)" { return .refuse(.error(401, "This device asks for its access key.")) }
+        guard request.path == "/v1/audio/stream" || request.path == "/audio/stream" else { return .refuse(.error(404, "Not here.")) }
+        guard !hearing.ready.isEmpty else { return .refuse(.error(404, "This device lends no speech recognition now: no language is downloaded there.")) }
+        seen = request.peer
+        seenAt = Date()
+        return .take { [weak self] socket in await self?.live(socket) }
+    }
+
+    /// One stretch, heard while the computer sends it, by the device's own recognition (`LiveHearing`), as the Mac's
+    /// own is heard there (`electron/apple-speech.js`). The computer sends
+    ///
+    ///   `{"type":"open","language":"ja","also":"en","prefer":"ja","sampleRate":16000}` — `also` and `prefer` where the
+    ///   speech may be in either of two languages — then the sound, 16-bit little-endian mono, in binary messages, and
+    ///   `{"type":"end"}`;
+    ///
+    /// and is written `{"type":"ready"}`, then `partial` (all heard so far) and `delta` (text that stays) as it goes,
+    /// and at the end `{"type":"final","text":…,"language":"ja"}`, or `{"type":"error","message":…}`.
+    private func live(_ socket: Socket) async {
+        func say(_ fields: [String: Any]) {
+            guard let data = try? JSONSerialization.data(withJSONObject: fields, options: [.sortedKeys]) else { return }
+            socket.send(String(decoding: data, as: UTF8.self))
+        }
+        func refuse(_ message: String) { say(["type": "error", "message": message]) }
+        guard case .text(let first)? = await socket.receive(),
+              let open = (try? JSONSerialization.jsonObject(with: Data(first.utf8))) as? [String: Any], open["type"] as? String == "open" else {
+            return refuse("The stream did not begin with its open message.")
+        }
+        guard (open["sampleRate"] as? Int ?? 16000) == 16000 else { return refuse("This device takes sound at 16 kHz only.") }
+        let ready = Set(hearing.ready.map(\.id))
+        let said = (open["language"] as? String ?? "").trimmingCharacters(in: .whitespaces)
+        let code: String? = said.isEmpty || said.lowercased() == "auto" ? hearing.preferred : Hearing.code(for: said)
+        guard let code, ready.contains(code) else {
+            return refuse("This device reads \(ready.sorted().joined(separator: ", ")) only, not \"\(said.prefix(20))\".")
+        }
+        // A second language where it is downloaded here too; without it, the stretch is heard in the one.
+        let also = (open["also"] as? String).flatMap(Hearing.code(for:)).flatMap { ready.contains($0) && $0 != code ? $0 : nil }
+        let prefer = (open["prefer"] as? String).flatMap(Hearing.code(for:))
+        lastUse = Date()
+        heardAt = Date()
+        if phase == .waiting { phase = .working }
+        let stream: LiveHearing
+        do {
+            stream = try await LiveHearing.open(code, also: also, prefer: prefer, in: hearing) { say($0) }
+        } catch {
+            return refuse(String(describing: error))
+        }
+        say(["type": "ready"])
+        var ended = false
+        var count = 0
+        while let message = await socket.receive() {
+            switch message {
+            case .binary(let data):
+                count += data.count / 2
+                do { try stream.hear(data) } catch {
+                    await stream.cancel()
+                    return refuse(String(describing: error))
+                }
+            case .text(let text):
+                if text.contains(#""end""#) { ended = true }
+            }
+            if ended { break }
+        }
+        // The computer went away, or dropped the stretch: nothing is written.
+        guard ended else { return await stream.cancel() }
+        let began = Date()
+        do {
+            let (text, heardIn) = try await stream.finish()
+            lastUse = Date()
+            if !text.isEmpty {
+                lastText = text
+                lastSeconds = Double(count) / 16000
+                lastTook = Date().timeIntervalSince(began)
+                lastLanguage = heardIn
+                heardCount += 1
+            }
+            say(["type": "final", "text": text, "language": heardIn])
+        } catch {
+            refuse("The recognizer stopped: \(error)")
+        }
+    }
+
     private func modelsJson() -> String {
         let lent: String
         if let model = lentModel {
@@ -264,7 +357,11 @@ final class Lending {
         // Every recognizer here, which a computer may ask for by name (`model` in a stretch's form): `data` keeps the
         // one lent unasked, for a computer that reads only that.
         let engineUp = hearEngine.loadedId
-        let hears = ((hearing.ready.isEmpty ? [] : [#"{"id":"\#(Lending.modelId)","name":"Apple Speech","holds_mb":0,"loaded":true}"#])
+        // The device's own recognition is also heard while it is spoken (`streams`, `/v1/audio/stream`), in the
+        // languages downloaded here: a computer that knows it streams, and pairs two of them where the speech may be
+        // in either.
+        let languages = hearing.ready.map { #""\#($0.id)""# }.joined(separator: ",")
+        let hears = ((hearing.ready.isEmpty ? [] : [#"{"id":"\#(Lending.modelId)","name":"Apple Speech","holds_mb":0,"loaded":true,"streams":true,"languages":[\#(languages)]}"#])
             + text.ready.filter { $0.kind == .hear }.map {
                 #"{"id":"\#($0.id)","name":\#(jsonQuoted($0.name)),"holds_mb":\#($0.holdsMb),"loaded":\#($0.id == engineUp)}"#
             }).joined(separator: ",")
