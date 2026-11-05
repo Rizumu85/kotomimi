@@ -323,12 +323,12 @@ function fakeTranslator(answer: (text: string) => string | Error = (text) => `[$
   const fake = {
     onError: null as Translator['onError'],
     inits: [] as Array<[string, string, string | undefined]>,
-    calls: [] as Array<{ text: string; system: string; wrap: boolean }>,
+    calls: [] as Array<{ text: string; system: string; wrap: boolean; previous?: string }>,
     disposes: 0,
     failInit: null as Error | null,
     async init(source: string, target: string, model?: string) { fake.inits.push([source, target, model]); if (fake.failInit) throw fake.failInit; },
-    async translate(text: string, system: string, wrap: boolean) {
-      fake.calls.push({ text, system, wrap });
+    async translate(text: string, system: string, wrap: boolean, previous?: string) {
+      fake.calls.push({ text, system, wrap, ...(previous ? { previous } : {}) });
       const out = answer(text);
       if (out instanceof Error) throw out;
       return { translatedText: out };
@@ -361,10 +361,25 @@ describe('a sharing Kotomimi\'s translations', () => {
     const answer = await x.ask();
     expect(answer.status).toBe(200);
     expect(answer.body).toMatchObject({ object: 'chat.completion', model: 'bing-translator', choices: [{ index: 0, message: { role: 'assistant', content: '[你好]' }, finish_reason: 'stop' }] });
-    expect(x.made[0].inits).toEqual([['zh', 'ja', 'bing-translator']]);
+    // Chosen by the bases, worded from the codes as sent.
+    expect(x.made[0].inits).toEqual([['zh-CN', 'ja', 'bing-translator']]);
     expect(x.made[0].calls[0]).toMatchObject({ text: '你好', wrap: true });
     expect(x.made[0].calls[0].system).toContain('Chinese');
     expect(x.made[0].calls[0].system).not.toContain('ignored');
+  });
+
+  it('tells its model Traditional Chinese where the client asks for it, and a language to detect where it is one', async () => {
+    const x = translator();
+    await x.ask({ source_language: 'ja', target_language: 'zh-TW' });
+    await x.ask({ source_language: 'auto', target_language: 'zh-TW' });
+    expect(x.made.map((m) => m.inits[0])).toEqual([['ja', 'zh-TW', 'bing-translator'], ['auto', 'zh-TW', 'bing-translator']]);
+  });
+
+  it('hands its engine the sentence the client said before, where one is sent', async () => {
+    const x = translator();
+    await x.ask({ previous_text: ' 明天去吗？ ' });
+    await x.ask();
+    expect(x.made[0].calls.map((c) => c.previous)).toEqual(['明天去吗？', undefined]);
   });
 
   it('answers a client that asked for a stream with one', async () => {

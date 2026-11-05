@@ -182,6 +182,11 @@ describe('a leg another Kotomimi hears', () => {
     expect(stage).toMatchObject({ model: 'bing-translator', pair: { source: 'zh-CN', target: 'ja' } });
   });
 
+  it('tells it a language to detect for the other side left to be detected, as the translators here and on a phone are told', () => {
+    const stage = configFor({ asrDetectOther: true }, { ...SPEAKER, direction: { source: 'ja', target: 'zh-CN' } }).stages?.speech as TextStage;
+    expect(stage).toMatchObject({ pair: { source: 'auto', target: 'zh-CN' } });
+  });
+
   it('tells no pair to a chat model elsewhere: a hosted API may refuse a field it does not know', () => {
     const stage = configFor({ translateAt: 'api', translateModel: 'gpt-4.1-mini', translateBaseUrl: 'https://api.example.com/v1', translateNeedsKey: false }).stages?.speech as TextStage;
     expect(stage).not.toHaveProperty('pair');
@@ -208,8 +213,11 @@ describe('a leg another Kotomimi hears', () => {
     const { clock } = trackedClock();
     const { events, log } = recordEvents();
     const calls: Array<{ url: string; body: Record<string, unknown>; headers: Record<string, string> }> = [];
+    const warms: typeof calls = [];
     const fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-      calls.push({ url: String(input), body: JSON.parse(init?.body as string), headers: init?.headers as Record<string, string> });
+      const call = { url: String(input), body: JSON.parse(init?.body as string), headers: init?.headers as Record<string, string> };
+      // The load asked as the session starts (`PipelineLeg.warm`): one token, apart from the sentences.
+      (call.body.max_tokens === 1 ? warms : calls).push(call);
       // The device leaves the model to itself here, and names the one it ran in its answer.
       return json({ model: 'index-translate-2b', choices: [{ message: { role: 'assistant', content: 'こんにちは' } }] });
     });
@@ -234,6 +242,9 @@ describe('a leg another Kotomimi hears', () => {
     expect(calls[0].url).toBe(`${SERVER}/chat/completions`);
     expect(calls[0].body).toMatchObject({ model: LAN_PIPELINE, source_language: 'zh-CN', target_language: 'ja' });
     expect(calls[0].headers.Authorization).toBe('Bearer s3cret');
+    // That Kotomimi was asked to load its translator as the session started, with the same pair and key.
+    expect(warms).toHaveLength(1);
+    expect(warms[0]).toMatchObject({ url: `${SERVER}/chat/completions`, body: { model: LAN_PIPELINE, source_language: 'zh-CN', target_language: 'ja' }, headers: { Authorization: 'Bearer s3cret' } });
     expect(of('segmentText').map((e) => [e.payload.ref, e.payload.text])).toEqual([[1, '你好'], [FIRST_REF + 1, 'こんにちは']]);
     expect(of('segmentOpened').map((e) => e.payload.origin)).toEqual(['item_1', 'item_1']);
     // The one that ran, as its answer named it — not the pipeline's name that was asked.
@@ -241,6 +252,16 @@ describe('a leg another Kotomimi hears', () => {
       .toMatchObject([{ model: LAN_PIPELINE, served: 'index-translate-2b' }]);
     // The key is never framed.
     expect(JSON.stringify(of('frame'))).not.toContain('s3cret');
+    // The next sentence goes with the one before, as this computer's own translator is asked; the first with none.
+    for (const e of [
+      { type: 'input_audio_buffer.speech_started', item_id: 'item_2' },
+      { type: 'input_audio_buffer.speech_stopped', item_id: 'item_2' },
+      { type: 'input_audio_buffer.committed', item_id: 'item_2', previous_item_id: 'item_1' },
+      { type: 'conversation.item.input_audio_transcription.completed', item_id: 'item_2', content_index: 0, transcript: '明天见' },
+    ]) socket.receive(JSON.stringify(e));
+    await vi.waitFor(() => expect(calls).toHaveLength(2));
+    expect(calls[0].body).not.toHaveProperty('previous_text');
+    expect(calls[1].body).toMatchObject({ source_language: 'zh-CN', target_language: 'ja', previous_text: '你好' });
   });
 });
 

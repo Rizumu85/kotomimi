@@ -32,8 +32,10 @@ export const NATIVE_DEFAULT_COACH = NATIVE_COACHES[0].id;
  * thinking before the answer, and the likeliest words. Left to itself Gemma
  * thinks first — the same sentence took 1.8 s where this takes 0.3 s
  * (2026-10-06), and an answer cut short by its thoughts comes back empty.
+ * At most what a phone, an iPad and another Kotomimi let feedback run to (`MOST_TOKENS` in src/lib/lan/coach.ts): a
+ * model that loses its way here is stopped there too, not left writing until the request times out.
  */
-export const NATIVE_COACH_EXTRA: Readonly<Record<string, unknown>> = { temperature: 0, chat_template_kwargs: { enable_thinking: false } };
+export const NATIVE_COACH_EXTRA: Readonly<Record<string, unknown>> = { temperature: 0, max_tokens: 1024, chat_template_kwargs: { enable_thinking: false } };
 
 /** The model a setting names; the first for a name the app no longer has. */
 export const nativeCoach = (id: string): NativeCoach => NATIVE_COACHES.find((m) => m.id === id) ?? NATIVE_COACHES[0];

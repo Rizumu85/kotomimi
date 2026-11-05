@@ -70,6 +70,11 @@ export interface TextStage {
    * when to come back — so the answer is given longer, and a busy answer is asked again.
    */
   phone?: boolean;
+  /**
+   * The model is one another Kotomimi shares: it loads it on the first request, one model at a time. Given a phone's
+   * time and retries, and asked to load it as the session starts, as a phone is (`warmPhones`).
+   */
+  loads?: true;
   model: string;
   /** Absent: the endpoint takes no key. */
   key?: StageKey;
@@ -309,7 +314,26 @@ class PipelineLeg implements AdapterSession {
   attach(session: AdapterSession): this {
     this.session = session;
     this.info = session.info;
+    this.warm();
     return this;
+  }
+
+  /** Stops the loads this leg asked for, with the leg. */
+  private readonly warming = new AbortController();
+
+  /**
+   * Another Kotomimi's text models, asked once as the session starts with a word to answer, so that it loads them
+   * now and the first sentence does not wait for the load. Not waited for, and nothing is shown: whatever fails here
+   * fails again, and is said, on that sentence.
+   */
+  private warm(): void {
+    const seen = new Set<string>();
+    for (const stage of [this.stages.speech, this.stages.typed, this.stages.back?.stage, this.stages.feedback?.stage]) {
+      if (!stage?.loads || seen.has(`${stage.kind}|${stage.model}`)) continue;
+      seen.add(`${stage.kind}|${stage.model}`);
+      // One token, as a phone is warmed (`warmPhones`): what answers is not wanted.
+      void this.complete({ ...stage, extra: { ...stage.extra, max_tokens: 1 } }, 'Hello', this.warming.signal, () => undefined).catch(() => undefined);
+    }
   }
 
   appendAudio(pcm: Int16Array): void {
@@ -369,6 +393,7 @@ class PipelineLeg implements AdapterSession {
 
   private end(): void {
     this.ended = true;
+    this.warming.abort(new Error('the session ended'));
     this.phones.stop();
     this.cuts.clear();
     for (let i = heardLately.length - 1; i >= 0; i--) if (heardLately[i].leg === this) heardLately.splice(i, 1);
@@ -753,9 +778,9 @@ class PipelineLeg implements AdapterSession {
         ...(key ? { key } : {}),
         system: stage.wrap ? '' : stage.system,
         ...(stage.shots?.length ? { shots: stage.shots } : {}),
-        ...(stage.pair ? { pair: stage.pair } : {}),
+        ...(stage.pair ? { pair: stage.pair, ...(before ? { previous: before } : {}) } : {}),
         ...(stage.extra ? { extra: stage.extra } : {}),
-        ...(stage.phone ? { timeoutMs: PHONE_TEXT_TIMEOUT_MS, busyRetries: PHONE_BUSY_RETRIES } : {}),
+        ...(stage.phone || stage.loads ? { timeoutMs: PHONE_TEXT_TIMEOUT_MS, busyRetries: PHONE_BUSY_RETRIES } : {}),
         // A function, so that nothing in the sentence is read as a pattern.
         user: stage.wrapAfter && before
           ? stage.wrapAfter.replace(BEFORE_SLOT, () => before).replace(TEXT_SLOT, () => text)

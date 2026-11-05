@@ -21,7 +21,8 @@ import { baseLanguage, LAN_PIPELINE, wireError } from './protocol';
 /** The translation engine as the sharing host drives it: `engines.ts`'s `TranslationLike`, named here so `lib` imports no provider. */
 export interface Translator {
   init(sourceLang: string, targetLang: string, modelId?: string): Promise<unknown>;
-  translate(text: string, systemPrompt: string, wrapTranscript: boolean): Promise<{ translatedText: string }>;
+  /** `previous`: the sentence the client's side said just before, for a model that takes one. */
+  translate(text: string, systemPrompt: string, wrapTranscript: boolean, previous?: string): Promise<{ translatedText: string }>;
   dispose(): void;
   onError: ((error: string) => void) | null;
 }
@@ -59,6 +60,12 @@ function userText(messages: unknown): string {
   return '';
 }
 
+/** The most of the sentence before that is read: a client sends 120 characters (`BEFORE_MOST`, pipeline.ts). */
+const PREVIOUS_MOST = 400;
+
+/** A language code as a client sent it, trimmed: zh-TW stays zh-TW. */
+const exactLanguage = (code: unknown): string => (typeof code === 'string' ? code.trim() : '');
+
 export class LanTranslator {
   private readonly loaded = new Map<string, Loaded>();
   private ids = 0;
@@ -68,9 +75,12 @@ export class LanTranslator {
   constructor(private readonly deps: TranslatorDeps) {}
 
   async complete(body: unknown): Promise<HttpAnswer> {
-    const request = (body ?? {}) as { model?: unknown; messages?: unknown; stream?: unknown; source_language?: unknown; target_language?: unknown };
+    const request = (body ?? {}) as { model?: unknown; messages?: unknown; stream?: unknown; source_language?: unknown; target_language?: unknown; previous_text?: unknown };
     const source = baseLanguage(request.source_language);
     const target = baseLanguage(request.target_language);
+    // The model is chosen by the languages' bases; the request is worded from the codes as sent: a model told zh for
+    // zh-TW answers in Simplified Chinese.
+    const asked = { source: exactLanguage(request.source_language), target: exactLanguage(request.target_language) };
     if (!source || !target) return refusal(400, 'languages_required', 'Name the pair: this Kotomimi runs translation models, and they are told what to translate from and into (source_language, target_language).');
     const text = userText(request.messages);
     if (!text) return refusal(400, 'no_text', 'There is no user message to translate.');
@@ -86,11 +96,12 @@ export class LanTranslator {
 
     let translated: string;
     // Held while it loads and answers: room is made for another model only among those answering nobody.
-    const entry = this.entryFor(model, source, target);
+    const entry = this.entryFor(model, asked.source, asked.target);
     entry.busy += 1;
     try {
       await entry.ready;
-      translated = (await entry.engine.translate(text, buildDefaultLocalPrompt(source, target), true)).translatedText ?? '';
+      const previous = typeof request.previous_text === 'string' && request.previous_text.trim() ? request.previous_text.trim().slice(-PREVIOUS_MOST) : undefined;
+      translated = (await entry.engine.translate(text, buildDefaultLocalPrompt(asked.source, asked.target), true, previous)).translatedText ?? '';
     } catch (cause) {
       return refusal(500, 'server_error', `The translation failed: ${cause instanceof Error ? cause.message : String(cause)}`);
     } finally {

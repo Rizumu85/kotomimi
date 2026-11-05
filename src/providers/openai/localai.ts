@@ -1170,13 +1170,13 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   }
 
   /**
-   * What translates `from` → `to` (`said`: the pair's language for a translation that must be told one; `instructions`
-   * for a chat model): null where the other device's pipeline answers, inside the session it hears in, or where a
+   * What translates `from` → `to` (`instructions` for a chat model; `from` is `auto` for a leg left to be detected,
+   * and another Kotomimi is told so, as this computer's and a phone's translators are): null where the other device's pipeline answers, inside the session it hears in, or where a
    * coached speaker has none (what they type then goes untranslated). Fork: asked twice for a speaker who speaks both.
    */
-  const translatorFor = (from: string, said: string, to: string, instructions: string): AnswerStage | null | ProviderRefusal => {
+  const translatorFor = (from: string, to: string, instructions: string): AnswerStage | null | ProviderRefusal => {
     /** A model another Kotomimi shares is told the pair: it runs a translation model, not a chat model. */
-    const pairFor = (id: string, kind: 'translate' | undefined) => (models.some((m) => m.id === id && m.host === KOTOMIMI_HOST && m.from === kind) ? { pair: { source: said, target: to } } : {});
+    const pairFor = (id: string, kind: 'translate' | undefined) => (models.some((m) => m.id === id && m.host === KOTOMIMI_HOST && m.from === kind) ? { pair: { source: from, target: to } } : {});
     if (translatesAtOwnDevice(s)) {
       // A phone that lends the translation: one of this computer's native translators, asked as this computer asks its
       // own — in the model's own form of request — at the phone's address. With no `engine`: that would ask this
@@ -1200,7 +1200,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
     if (asksServer && askedServerModel) {
       // Another Kotomimi answers nothing inside its socket: its pipeline's name, asked over chat, runs its own best translation model for the pair.
       const itsOwn = !serverModel && kotomimi && askedServerModel === pipeline;
-      return { kind: 'translate', baseUrl: '', model: askedServerModel, ...serverKeyOf(s), system: instructions, ...(itsOwn ? { pair: { source: said, target: to } } : pairFor(askedServerModel, undefined)) };
+      return { kind: 'translate', baseUrl: '', model: askedServerModel, ...serverKeyOf(s), ...(kotomimi ? { loads: true as const } : {}), system: instructions, ...(itsOwn ? { pair: { source: from, target: to } } : pairFor(askedServerModel, undefined)) };
     }
     return null;
   };
@@ -1208,7 +1208,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   // Null: the other device's pipeline answers, inside the session it hears in. A leg shown as said has nothing.
   let translate: AnswerStage | null = null;
   if (!plain) {
-    const chosen = translatorFor(source, told, target, base.instructions);
+    const chosen = translatorFor(source, target, base.instructions);
     if (chosen && 'refused' in chosen) return chosen;
     translate = chosen;
   }
@@ -1216,7 +1216,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   let back: AnswerStage | undefined;
   if (both && translate) {
     const reversed = buildRealtime({ ...context, direction: { source: target, target: told } }, { ...s, model: pinned }, { ...shared, models: [{ id: pinned }] });
-    const chosen = translatorFor(target, target, told, 'refused' in reversed ? base.instructions : reversed.instructions);
+    const chosen = translatorFor(target, told, 'refused' in reversed ? base.instructions : reversed.instructions);
     if (chosen && 'refused' in chosen) return chosen;
     // Its answers are in the speaker's own language; this computer's engine is loaded for that direction.
     if (chosen) back = { ...chosen, language: told };
@@ -1244,6 +1244,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
         baseUrl,
         model: named,
         ...(api ? (s.coachNeedsKey ? { key: 'coachKey' as const } : {}) : serverKeyOf(s)),
+        ...(!api && kotomimi ? { loads: true as const } : {}),
         system: prompt.system,
         ...(prompt.shots.length ? { shots: prompt.shots } : {}),
         // Feedback is written in the speaker's own language, around a sentence in the one they practise.

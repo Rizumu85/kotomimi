@@ -52,9 +52,11 @@ async function live(context: SessionContext, patch: Partial<LocalAISettings>, wi
   const fakes = createFakeEngines();
   const sockets = fakeSockets();
   const calls: TextCall[] = [];
+  /** The loads asked as the session starts (`PipelineLeg.warm`): one token each, apart from the sentences. */
+  const warms: TextCall[] = [];
   const fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const body = JSON.parse(init?.body as string) as TextCall['body'];
-    calls.push({ url: String(input), body });
+    ((body as { max_tokens?: unknown }).max_tokens === 1 ? warms : calls).push({ url: String(input), body });
     const content = body.model === 'feedback-model' ? 'Your sentence is clear.' : `Translation into ${body.target_language}`;
     return new Response(JSON.stringify({ choices: [{ message: { content } }] }), { headers: { 'Content-Type': 'application/json' } });
   });
@@ -95,7 +97,7 @@ async function live(context: SessionContext, patch: Partial<LocalAISettings>, wi
     expect(calls).toHaveLength(count);
     expect(of('busy').map((event) => event.payload).pop()).toBe(false);
   });
-  return { config, socket, serverEvents, resolve, recognizer, asr: fakes.asr, clock, calls, of, lastText, settled, log };
+  return { config, socket, serverEvents, resolve, recognizer, asr: fakes.asr, clock, calls, warms, of, lastText, settled, log };
 }
 
 type Live = Awaited<ReturnType<typeof live>>;
@@ -144,6 +146,8 @@ describe('paired Apple recognition across the LAN wire and client pipeline', () 
     const h = await live(SPEAKER, { speakBoth: true, coach: true });
     expectPair(h, 'en', 'fr');
     expect(h.config.stages).toMatchObject({ heard: 'auto', feedback: { language: 'fr', stage: { kind: 'coach' } } });
+    // The Mac is asked to load each of its models as the session starts, once, as a phone is.
+    expect(h.warms.map((call) => call.body.model).sort()).toEqual(['feedback-model', 'translation-model']);
     await tentative(h, 1, FRENCH);
     h.asr.final(FRENCH, 'fr');
     await h.settled(2);

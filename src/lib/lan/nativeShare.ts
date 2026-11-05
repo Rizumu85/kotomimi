@@ -18,7 +18,7 @@ import { createNativeAsr } from '../../providers/openai/nativeAsr';
 import { NATIVE_COACHES } from '../../providers/openai/nativeCoaches';
 import { coachBaseUrl, coachKey } from '../../providers/openai/localaiNative';
 import { NATIVE_MODELS, type NativeModel, holdNative, isApple, nativeDownloaded, nativeModel, nativeModelFor, nativePicked, nativePreference, nativeTaken, translatorBaseUrl, translatorKey } from '../../providers/openai/localaiNative';
-import { NATIVE_TRANSLATORS, TEXT_SLOT, nativeTranslates, translatorRequest } from '../../providers/openai/nativeTranslators';
+import { BEFORE_SLOT, NATIVE_TRANSLATORS, TEXT_SLOT, nativeTranslates, translatorRequest } from '../../providers/openai/nativeTranslators';
 import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import type { SharedModel } from './protocol';
 import type { Recognizer } from './transcriber';
@@ -234,6 +234,11 @@ export function nativeRecognizer(model: { modelId: string; also?: string; hints?
   return asr;
 }
 
+/** The request's words: with the sentence before, where the model takes one, as the client's own engine is asked (`pipeline.ts`). */
+const userOf = (request: ReturnType<typeof translatorRequest>, text: string, previous: string | undefined) => request.wrapAfter && previous
+  ? request.wrapAfter.replace(BEFORE_SLOT, () => previous).replace(TEXT_SLOT, () => text)
+  : request.wrap.replace(TEXT_SLOT, () => text);
+
 /** A native translation engine held for the lifetime of a shared translator. */
 export function nativeTranslator(doFetch: typeof fetch = (input, init) => fetch(input, init)): Translator {
   let native: { id: string; source: string; target: string } | null = null;
@@ -248,13 +253,13 @@ export function nativeTranslator(doFetch: typeof fetch = (input, init) => fetch(
       native = { id: modelId, source: sourceLang, target: targetLang };
       return undefined;
     },
-    async translate(text) {
+    async translate(text, _system, _wrap, previous) {
       if (!native) throw new Error('The translator was not told its model.');
       const request = translatorRequest(NATIVE_TRANSLATORS.find((m) => m.id === native!.id)!, native.source, native.target);
       const response = await doFetch(`${translatorBaseUrl()}/chat/completions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${translatorKey() || 'no-key'}` },
-        body: JSON.stringify({ ...request.extra, model: native.id, stream: false, messages: [{ role: 'user', content: request.wrap.replace(TEXT_SLOT, () => text) }] }),
+        body: JSON.stringify({ ...request.extra, model: native.id, stream: false, messages: [{ role: 'user', content: userOf(request, text, previous) }] }),
       });
       if (!response.ok) throw new Error(`The translation engine answered HTTP ${response.status}.`);
       const body = (await response.json()) as { choices?: Array<{ message?: { content?: unknown } }> } | null;

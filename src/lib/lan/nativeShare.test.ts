@@ -6,6 +6,7 @@ import { useModelStore } from '../../stores/modelStore';
 import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import { appLanModels } from './appModels';
 import { NATIVE_KNOWN_WITHIN_MS, nativeCoachAnswer, nativeCoachFor, nativeKnown, nativeOfferFor, nativeTranslator, nativeRecognizer, nativeRecognizerFor, nativeRecognizerRefusal, nativeShared, nativeTranslatorFor } from './nativeShare';
+import { BEFORE_SLOT, NATIVE_TRANSLATORS, TEXT_SLOT, translatorRequest } from '../../providers/openai/nativeTranslators';
 
 const downloaded = { state: 'downloaded' as const, received: 1, total: 1 };
 const absent = { state: 'absent' as const, received: 0, total: 1 };
@@ -171,6 +172,25 @@ describe('the translator a device gets', () => {
     translator.dispose();
     translatorIdle({ stop });
     expect(stop).toHaveBeenCalledTimes(1);
+  });
+
+  it('words the Traditional Chinese a client asks for, and the sentence it said before, into the request as this computer would', async () => {
+    const ready: NativeEngineStatus = { ...TRANSLATORS, run: { state: 'ready', model: 'hy-mt2-1.8b', port: 6000, tail: '' } };
+    useNativeTranslatorStore.setState({ status: ready, start: async () => ready });
+    const sent: Array<Record<string, unknown>> = [];
+    const fetch = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+      sent.push(JSON.parse(String(init?.body)));
+      return new Response(JSON.stringify({ choices: [{ message: { content: '好。' } }] }), { status: 200 });
+    });
+    const translator = nativeTranslator(fetch as unknown as typeof globalThis.fetch);
+    await translator.init('ja', 'zh-TW', 'hy-mt2-1.8b');
+    await translator.translate('はい。', 'ignored', true, '明日行く？');
+    await translator.translate('はい。', 'ignored', true);
+    const [withBefore, alone] = sent.map((body) => (body.messages as Array<{ content: string }>)[0].content);
+    expect(withBefore).toBe(translatorRequest(NATIVE_TRANSLATORS.find((m) => m.id === 'hy-mt2-1.8b')!, 'ja', 'zh-TW').wrapAfter!.replace(BEFORE_SLOT, '明日行く？').replace(TEXT_SLOT, 'はい。'));
+    expect(withBefore).toContain('繁体中文');
+    expect(alone).not.toContain('明日行く？');
+    translator.dispose();
   });
 
   it('rejects an app translator instead of starting a local worker', async () => {

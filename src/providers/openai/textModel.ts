@@ -38,6 +38,8 @@ export interface TextRequest {
    * only when set: a hosted API may refuse a field it does not know.
    */
   pair?: { source: string; target: string };
+  /** With `pair`: the sentence this side said just before, as `previous_text` — another Kotomimi words it into the request of a model that takes one, as this computer does (`wrapAfter`). */
+  previous?: string;
   /** What else the body carries: the sampling a model's makers name (`nativeTranslators.ts`). Never the model, the stream or the messages. */
   extra?: Readonly<Record<string, unknown>>;
   /** How long the answer may take, retries and their waits included. Absent: `TEXT_TIMEOUT_MS`. */
@@ -145,7 +147,7 @@ export async function completeText(request: TextRequest, deps: TextDeps): Promis
     ...(request.extra ?? {}),
     model: request.model,
     stream: true,
-    ...(request.pair ? { source_language: request.pair.source, target_language: request.pair.target } : {}),
+    ...(request.pair ? { source_language: request.pair.source, target_language: request.pair.target, ...(request.previous ? { previous_text: request.previous } : {}) } : {}),
     messages: [
       ...(request.system ? [{ role: 'system', content: request.system }] : []),
       ...(request.shots ?? []).flatMap((shot) => [{ role: 'user', content: shot.said }, { role: 'assistant', content: shot.answer }]),
