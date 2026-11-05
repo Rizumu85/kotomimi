@@ -404,7 +404,8 @@ final class Lending {
         } else if let named = text.ready.first(where: { $0.kind == .hear && $0.id == asked }) {
             model = named
         }
-        if let model { return await engineRead(model, wav, said, allow) }
+        // The words to expect, as the computer tells its own Qwen3-ASR (the form's `text`).
+        if let model { return await engineRead(model, wav, said, form.fields["text"].map { String($0.prefix(4000)) }, allow) }
         let code: String
         if said.isEmpty || said.lowercased() == "auto" {
             code = hearing.preferred
@@ -438,7 +439,7 @@ final class Lending {
 
     /// A stretch read by a downloaded model: told the language the computer says, by the app's code; where it says
     /// none, the model tells it where it can, else the language ticked here.
-    private func engineRead(_ model: TextModel, _ wav: Wav, _ said: String, _ allow: [(String, String)]) async -> Response {
+    private func engineRead(_ model: TextModel, _ wav: Wav, _ said: String, _ context: String?, _ allow: [(String, String)]) async -> Response {
         let base = said.lowercased().split(whereSeparator: { $0 == "-" || $0 == "_" }).first.map(String.init) ?? ""
         let language: String?
         if base.isEmpty || base == "auto" {
@@ -461,7 +462,7 @@ final class Lending {
         let began = Date()
         let samples = wav.samples.map { Float($0) / 32768 }
         do {
-            let text = try await hearEngine.read(model, at: self.text.path(model), samples: samples, rate: Int(wav.rate), language: language)
+            let text = try await hearEngine.read(model, at: self.text.path(model), samples: samples, rate: Int(wav.rate), language: language, context: context)
             lastUse = Date()
             if !text.isEmpty {
                 lastText = text

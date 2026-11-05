@@ -20,11 +20,12 @@ nonisolated final class HearingEngine: @unchecked Sendable {
     /// The model loaded now, if any: read from any thread.
     var loadedId: String? { up.withLock { $0 } }
 
-    /// What a stretch says. `language`: the app's code (`ja`), or nil for one the model is to tell itself.
-    func read(_ model: TextModel, at path: URL, samples: [Float], rate: Int, language: String?) async throws -> String {
+    /// What a stretch says. `language`: the app's code (`ja`), or nil for one the model is to tell itself. `context`:
+    /// the words to expect, for a model that takes them (Qwen3-ASR), as the computer words them.
+    func read(_ model: TextModel, at path: URL, samples: [Float], rate: Int, language: String?, context: String? = nil) async throws -> String {
         try await withCheckedThrowingContinuation { (done: CheckedContinuation<String, Error>) in
             queue.async { [self] in
-                do { done.resume(returning: try readHere(model, at: path, samples: samples, rate: rate, language: language)) } catch { done.resume(throwing: error) }
+                do { done.resume(returning: try readHere(model, at: path, samples: samples, rate: rate, language: language, context: context)) } catch { done.resume(throwing: error) }
             }
         }
     }
@@ -98,7 +99,7 @@ nonisolated final class HearingEngine: @unchecked Sendable {
         return session
     }
 
-    private func readHere(_ model: TextModel, at path: URL, samples: [Float], rate: Int, language: String?) throws -> String {
+    private func readHere(_ model: TextModel, at path: URL, samples: [Float], rate: Int, language: String?, context: String?) throws -> String {
         let session = try sessionHere(model, at: path)
         guard let request = audiocpp_request_create() else { throw Refusal(description: "The engine has no memory for the request.") }
         defer { audiocpp_request_free(request) }
@@ -109,6 +110,9 @@ nonisolated final class HearingEngine: @unchecked Sendable {
             let said = model.languageAs == .name ? TextModel.languageNames[language] : language
             if let said { _ = audiocpp_request_set_option(request, "language", said) }
         }
+        // The words to expect go as the request's text, as the desktop's server passes its form's `text`; only
+        // Qwen3-ASR reads it.
+        if let context, !context.isEmpty, model.family == "qwen3_asr" { _ = audiocpp_request_set_text(request, context, nil) }
         var result: OpaquePointer?
         let ran = audiocpp_session_run(session, request, &result)
         guard ran == AUDIOCPP_OK, let result else { throw HearingEngine.failure("\(model.name) could not read the sound", ran) }
