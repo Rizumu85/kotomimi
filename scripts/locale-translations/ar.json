@@ -199,6 +199,10 @@
     "en": "Model server",
     "text": "خادم نماذج"
   },
+  "fork.find.kindTabletLends": {
+    "en": "Tablet · {{what}}",
+    "text": "جهاز لوحي · {{what}}"
+  },
   "fork.find.lendsAsr": {
     "en": "speech recognition",
     "text": "التعرّف على الكلام"
@@ -1750,6 +1754,10 @@
   "providers.localai.stageDevice": {
     "en": "Device",
     "text": "الجهاز"
+  },
+  "providers.localai.tabletOption": {
+    "en": "{{name}} (tablet)",
+    "text": "{{name}} (جهاز لوحي)"
   },
   "providers.localai.tag_native": {
     "en": "Native engine",

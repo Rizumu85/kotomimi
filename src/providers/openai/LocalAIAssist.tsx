@@ -109,7 +109,7 @@ function ServerModel({ label, value, blank, options, onChange, disabled, aside, 
 }
 
 /** A device a stage can be given beside the shared one: a phone, by its address, and its name where it gave one. */
-interface OwnDevice { address: string; name: string }
+interface OwnDevice { address: string; name: string; tablet?: boolean }
 
 /**
  * A stage's device, where there is more than the shared one to run it: the device the stages share first (by the
@@ -123,7 +123,7 @@ function StageDevice({ value, shared, phones, onChange, disabled }: { value: str
     <Field label={label}>
       <select className="select-dropdown" aria-label={label} value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled}>
         <option value="">{shared}</option>
-        {phones.map((phone) => <option key={phone.address} value={plainAddress(phone.address)}>{t('providers.localai.phoneOption', { name: phone.name || plainAddress(phone.address).replace(/:\d+$/, '') })}</option>)}
+        {phones.map((phone) => <option key={phone.address} value={plainAddress(phone.address)}>{t(phone.tablet ? 'providers.localai.tabletOption' : 'providers.localai.phoneOption', { name: phone.name || plainAddress(phone.address).replace(/:\d+$/, '') })}</option>)}
       </select>
     </Field>
   );

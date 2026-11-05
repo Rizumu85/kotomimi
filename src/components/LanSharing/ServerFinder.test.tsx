@@ -107,6 +107,16 @@ describe('the devices found on the network', () => {
       expect(alone).toContain('192.168.4.30:8792 · Index-Translate 2B');
     });
 
+    it('is called a tablet where it says it is one (the iPad app), even lending its recognizer alone', async () => {
+      const ipad: FoundServer = { address: '192.168.4.31:8792', kind: 'phone', name: 'iPad', product: '', models: 1, needsKey: false, self: false, model: 'apple-speech', tablet: true };
+      expect(foundServers([ipad])).toEqual([ipad]);
+      // Only a node is one.
+      expect(foundServers([{ ...ipad, kind: 'server', model: undefined }])[0]).not.toHaveProperty('tablet');
+      render(<ServerFinder auto value="" phone="" onPick={() => {}} find={async () => [ipad]} />);
+      await waitFor(() => expect(screen.getAllByRole('listitem')).toHaveLength(1));
+      expect(screen.getByRole('listitem').textContent).toContain('fork.find.kindTabletLends {"what":"fork.find.lendsAsr"}');
+    });
+
     it('is marked as in use by whichever stage asks it', async () => {
       render(<ServerFinder auto value="" phone={['192.168.4.30:8792']} onPick={() => {}} find={async () => [lending, textOnly]} />);
       await waitFor(() => expect(screen.getAllByRole('listitem')).toHaveLength(2));

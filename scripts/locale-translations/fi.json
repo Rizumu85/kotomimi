@@ -195,6 +195,10 @@
     "en": "Model server",
     "text": "Mallipalvelin"
   },
+  "fork.find.kindTabletLends": {
+    "en": "Tablet · {{what}}",
+    "text": "Tabletti · {{what}}"
+  },
   "fork.find.lendsAsr": {
     "en": "speech recognition",
     "text": "puheentunnistus"
@@ -1754,6 +1758,10 @@
   "providers.localai.stageDevice": {
     "en": "Device",
     "text": "Laite"
+  },
+  "providers.localai.tabletOption": {
+    "en": "{{name}} (tablet)",
+    "text": "{{name}} (tabletti)"
   },
   "providers.localai.tag_native": {
     "en": "Native engine",

@@ -77,6 +77,7 @@ export function ServerFinder({ value, onPick, disabled = false, auto = false, hi
       ...(server.text?.some((m) => m.kind === 'coach') ? [t('fork.find.lendsCoach')] : []),
     ];
     // A phone of an earlier version lends its recognizer alone: said as it always was.
+    if (server.tablet) return t('fork.find.kindTabletLends', { what: what.join(t('fork.find.lendsJoin')) });
     return server.text?.length ? t('fork.find.kindPhoneLends', { what: what.join(t('fork.find.lendsJoin')) }) : t('fork.find.kindPhone');
   };
   const phoneModels = (server: FoundServer) => [...(server.model ? [server.model] : []), ...(server.text ?? []).map((m) => m.name || m.id)].join(' · ');

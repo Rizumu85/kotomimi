@@ -199,6 +199,10 @@
     "en": "Model server",
     "text": "మోడల్ సర్వర్"
   },
+  "fork.find.kindTabletLends": {
+    "en": "Tablet · {{what}}",
+    "text": "టాబ్లెట్ · {{what}}"
+  },
   "fork.find.lendsAsr": {
     "en": "speech recognition",
     "text": "మాటల గుర్తింపు"
@@ -1750,6 +1754,10 @@
   "providers.localai.stageDevice": {
     "en": "Device",
     "text": "పరికరం"
+  },
+  "providers.localai.tabletOption": {
+    "en": "{{name}} (tablet)",
+    "text": "{{name}} (టాబ్లెట్)"
   },
   "providers.localai.tag_native": {
     "en": "Native engine",

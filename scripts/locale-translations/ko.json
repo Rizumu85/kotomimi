@@ -199,6 +199,10 @@
     "en": "Model server",
     "text": "모델 서버"
   },
+  "fork.find.kindTabletLends": {
+    "en": "Tablet · {{what}}",
+    "text": "태블릿 · {{what}}"
+  },
   "fork.find.lendsAsr": {
     "en": "speech recognition",
     "text": "음성 인식"
@@ -1746,6 +1750,10 @@
   "providers.localai.stageDevice": {
     "en": "Device",
     "text": "기기"
+  },
+  "providers.localai.tabletOption": {
+    "en": "{{name}} (tablet)",
+    "text": "{{name}} (태블릿)"
   },
   "providers.localai.tag_native": {
     "en": "Native engine",

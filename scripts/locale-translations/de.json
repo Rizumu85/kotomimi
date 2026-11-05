@@ -203,6 +203,10 @@
     "en": "Model server",
     "text": "Modellserver"
   },
+  "fork.find.kindTabletLends": {
+    "en": "Tablet · {{what}}",
+    "text": "Tablet · {{what}}"
+  },
   "fork.find.lendsAsr": {
     "en": "speech recognition",
     "text": "Spracherkennung"
@@ -1782,6 +1786,10 @@
   "providers.localai.stageDevice": {
     "en": "Device",
     "text": "Gerät"
+  },
+  "providers.localai.tabletOption": {
+    "en": "{{name}} (tablet)",
+    "text": "{{name}} (Tablet)"
   },
   "providers.localai.tag_native": {
     "en": "Native engine",

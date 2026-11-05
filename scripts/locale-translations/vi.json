@@ -203,6 +203,10 @@
     "en": "Model server",
     "text": "Máy chủ mô hình"
   },
+  "fork.find.kindTabletLends": {
+    "en": "Tablet · {{what}}",
+    "text": "Máy tính bảng · {{what}}"
+  },
   "fork.find.lendsAsr": {
     "en": "speech recognition",
     "text": "nhận dạng giọng nói"
@@ -1754,6 +1758,10 @@
   "providers.localai.stageDevice": {
     "en": "Device",
     "text": "Thiết bị"
+  },
+  "providers.localai.tabletOption": {
+    "en": "{{name}} (tablet)",
+    "text": "{{name}} (máy tính bảng)"
   },
   "providers.localai.tag_native": {
     "en": "Native engine",

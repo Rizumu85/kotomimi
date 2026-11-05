@@ -29,6 +29,8 @@ const SERVER_PORT = 8080;
 const PHONE_PORT = 8792;
 /** What such a phone says of itself on every answer. */
 const NODE_HEADER = 'x-kotomimi-node';
+// What kind of device a node is, where it says: `tablet` (the iPad app); a node that does not say is a phone.
+const FORM_HEADER = 'x-kotomimi-form';
 /** A device on the same network answers in a few milliseconds: this long is for a busy one. */
 const PROBE_TIMEOUT_MS = 600;
 /** Requests in flight at once. */
@@ -132,7 +134,8 @@ function readAnswer(status, headers, body) {
   // A Kotomimi that shares the models of a model server on its own computer says so: that server is then not listed apart.
   const includes = headers[INCLUDES_HEADER] === 'model-server';
   // A phone whose owner set an access key still says what it is (android/ 0.9.1 on): it is listed as a phone that wants one.
-  if ((status === 401 || status === 403) && headers[NODE_HEADER] === 'engine') return { kind: 'phone', name, models: 0, needsKey: true, includes: false };
+  const tablet = headers[FORM_HEADER] === 'tablet' ? { tablet: true } : {};
+  if ((status === 401 || status === 403) && headers[NODE_HEADER] === 'engine') return { kind: 'phone', name, models: 0, needsKey: true, includes: false, ...tablet };
   if (status === 401 || status === 403) return { kind: named ? 'kotomimi' : 'server', name, models: 0, needsKey: true, includes: false };
   if (status !== 200) return null;
   let list;
@@ -150,7 +153,7 @@ function readAnswer(status, headers, body) {
     const text = textModels(list.text, phoneRoom(list));
     if (!models.length && !text.length) return null;
     return {
-      kind: 'phone', name, models: models.length + text.length, needsKey: false, includes: false,
+      kind: 'phone', name, models: models.length + text.length, needsKey: false, includes: false, ...tablet,
       ...(models.length ? { model: String(models[0].id).slice(0, 80) } : {}),
       ...(text.length ? { text } : {}),
     };
@@ -251,7 +254,7 @@ async function discoverServers({ interfaces, ports, ownPorts = [], timeoutMs = P
     s.product = product;
   }));
   const order = (s) => `${s.kind === 'kotomimi' ? 0 : s.kind === 'phone' ? 1 : 2}${s.self ? 0 : 1}${toNumber(s.host).toString().padStart(10, '0')}${String(s.port).padStart(5, '0')}`;
-  return others.sort((a, b) => order(a).localeCompare(order(b))).map(({ address, kind, name, product, models, needsKey, self, model, text }) => ({ address, kind, name, product, models, needsKey, self, ...(model ? { model } : {}), ...(text ? { text } : {}) }));
+  return others.sort((a, b) => order(a).localeCompare(order(b))).map(({ address, kind, name, product, models, needsKey, self, model, text, tablet }) => ({ address, kind, name, product, models, needsKey, self, ...(model ? { model } : {}), ...(text ? { text } : {}), ...(tablet ? { tablet } : {}) }));
 }
 
-module.exports = { discoverServers, targets, neighbours, readAnswer, textModels, probe, productOf, nameOf, shown, KOTOMIMI_PORT, SERVER_PORT, PHONE_PORT, NAME_HEADER, INCLUDES_HEADER, NODE_HEADER };
+module.exports = { discoverServers, targets, neighbours, readAnswer, textModels, probe, productOf, nameOf, shown, KOTOMIMI_PORT, SERVER_PORT, PHONE_PORT, NAME_HEADER, INCLUDES_HEADER, NODE_HEADER, FORM_HEADER };

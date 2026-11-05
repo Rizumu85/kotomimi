@@ -199,6 +199,10 @@
     "en": "Model server",
     "text": "মডেল সার্ভার"
   },
+  "fork.find.kindTabletLends": {
+    "en": "Tablet · {{what}}",
+    "text": "ট্যাবলেট · {{what}}"
+  },
   "fork.find.lendsAsr": {
     "en": "speech recognition",
     "text": "কথার স্বীকৃতি"
@@ -1750,6 +1754,10 @@
   "providers.localai.stageDevice": {
     "en": "Device",
     "text": "ডিভাইস"
+  },
+  "providers.localai.tabletOption": {
+    "en": "{{name}} (tablet)",
+    "text": "{{name}} (ট্যাবলেট)"
   },
   "providers.localai.tag_native": {
     "en": "Native engine",

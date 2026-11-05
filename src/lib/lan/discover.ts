@@ -25,6 +25,8 @@ export interface FoundServer {
   model?: string;
   /** A phone's: the text models it lends (0.8.0 on), each for a translation or grammar feedback. Absent where none. */
   text?: readonly PhoneTextModel[];
+  /** A phone's: it said it is a tablet (the iPad app). Absent for a phone. */
+  tablet?: boolean;
 }
 
 /** A text model a phone lends: its id (the desktop's own native id), what it is for, its name, and whether it is loaded now. */
@@ -99,6 +101,7 @@ export function foundServers(value: unknown): FoundServer[] {
       self: item.self === true,
       ...(phone && model ? { model } : {}),
       ...(phone && text.length ? { text } : {}),
+      ...(phone && item.tablet === true ? { tablet: true } : {}),
     });
   }
   return out;

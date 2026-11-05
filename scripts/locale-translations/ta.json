@@ -199,6 +199,10 @@
     "en": "Model server",
     "text": "மாதிரி சேவையகம்"
   },
+  "fork.find.kindTabletLends": {
+    "en": "Tablet · {{what}}",
+    "text": "டேப்லெட் · {{what}}"
+  },
   "fork.find.lendsAsr": {
     "en": "speech recognition",
     "text": "பேச்சறிதல்"
@@ -1750,6 +1754,10 @@
   "providers.localai.stageDevice": {
     "en": "Device",
     "text": "சாதனம்"
+  },
+  "providers.localai.tabletOption": {
+    "en": "{{name}} (tablet)",
+    "text": "{{name}} (டேப்லெட்)"
   },
   "providers.localai.tag_native": {
     "en": "Native engine",

@@ -91,6 +91,15 @@ describe('what an answer says of a server', () => {
     expect(readAnswer(200, {}, list)).toMatchObject({ kind: 'server', models: 1 });
   });
 
+  it('knows a node that says it is a tablet (the iPad app), with or without its key', () => {
+    const list = JSON.stringify({ object: 'list', data: [{ id: 'apple-speech', object: 'model', owned_by: 'kotomimi-phone' }] });
+    expect(readAnswer(200, { [NAME_HEADER]: 'iPad', 'x-kotomimi-node': 'engine', 'x-kotomimi-form': 'tablet' }, list)).toMatchObject({ kind: 'phone', name: 'iPad', tablet: true });
+    expect(readAnswer(401, { 'x-kotomimi-node': 'engine', 'x-kotomimi-form': 'tablet' }, '{}')).toMatchObject({ kind: 'phone', needsKey: true, tablet: true });
+    // A phone says nothing of it, or says it is one.
+    expect(readAnswer(200, { 'x-kotomimi-node': 'engine' }, list)).not.toHaveProperty('tablet');
+    expect(readAnswer(200, { 'x-kotomimi-node': 'engine', 'x-kotomimi-form': 'phone' }, list)).not.toHaveProperty('tablet');
+  });
+
   it('knows what a phone of 0.8.0 lends besides: its text models, apart from its recognizer', () => {
     const text = [
       { id: 'hy-mt2-1.8b', object: 'model', owned_by: 'kotomimi-phone', holds_mb: 1210, kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: false },

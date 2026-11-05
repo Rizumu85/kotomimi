@@ -195,6 +195,10 @@
     "en": "Model server",
     "text": "Сервер моделей"
   },
+  "fork.find.kindTabletLends": {
+    "en": "Tablet · {{what}}",
+    "text": "Планшет · {{what}}"
+  },
   "fork.find.lendsAsr": {
     "en": "speech recognition",
     "text": "распознавание речи"
@@ -1746,6 +1750,10 @@
   "providers.localai.stageDevice": {
     "en": "Device",
     "text": "Устройство"
+  },
+  "providers.localai.tabletOption": {
+    "en": "{{name}} (tablet)",
+    "text": "{{name}} (планшет)"
   },
   "providers.localai.tag_native": {
     "en": "Native engine",
