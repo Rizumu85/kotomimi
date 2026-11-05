@@ -149,6 +149,11 @@ final class Hearing {
         guard let language = languages.first(where: { $0.id == code }) else { throw Refusal("No such language: \(code).") }
         await turn.take()
         defer { Task { await turn.give() } }
+        // One of the app's places for a recognizer (`Recognizers`), as a stretch heard live takes them.
+        guard await Recognizers.shared.take(1) else {
+            throw Refusal("This device is hearing as much as it can at once: it runs \(Recognizers.most) recognitions at a time.")
+        }
+        defer { Recognizers.shared.give(1) }
         let locale = try await Hearing.locale(language.locale)
         guard await SpeechTranscriber.installedLocales.contains(where: { $0.identifier == locale.identifier }) else {
             throw Refusal("\(language.name) is not downloaded on this device: download it there first.")

@@ -2,15 +2,44 @@ import AVFoundation
 import Foundation
 import Speech
 
+/// The recognizers the app has running at once. iOS gives an app two: a third is refused ("Maximum number of
+/// recognizers reached", SFSpeechErrorDomain 16; measured on an iPad M2, iPadOS 26, 2026-11-05) — where the Mac's
+/// helper, a process for each stretch, runs four for two languages. So they are shared out here: what is kept takes
+/// a place first, and a fast recognizer that only shows what is being said (`LiveHearing`) gives its place up to it.
+final class Recognizers {
+    static let shared = Recognizers()
+    static let most = 2
+
+    private(set) var used = 0
+    /// Fast recognizers that may be stopped for a place: each frees its places and says how many.
+    private var yielding: [(owner: ObjectIdentifier, free: () async -> Int)] = []
+
+    /// `count` places, freeing fast ones where there are too few (`yield`): false where there are not enough even so.
+    func take(_ count: Int, yield: Bool = true) async -> Bool {
+        while Recognizers.most - used < count, yield, let last = yielding.popLast() { used -= await last.free() }
+        guard Recognizers.most - used >= count else { return false }
+        used += count
+        return true
+    }
+
+    func give(_ count: Int) { used = max(0, used - count) }
+
+    func mayYield(_ owner: AnyObject, free: @escaping () async -> Int) { yielding.append((ObjectIdentifier(owner), free)) }
+
+    func keep(_ owner: AnyObject) { yielding.removeAll { $0.owner == ObjectIdentifier(owner) } }
+}
+
 /// One stretch of speech heard while it is spoken, as the Mac's own recognition hears it: the same recognizer, driven
 /// the same way (`stream` in native/apple-speech/SpeechHelper.swift, which this follows step for step), so that a
 /// computer lent this device reads it as it reads its Mac. Reading a stretch whole and again as it grew
 /// (`Hearing.read`) heard less well: the recognizer works best on a voice as it comes.
 ///
-/// Two recognizers listen to the same sound. The considered one writes the text that is kept; the fast one, what shows
-/// while someone speaks (asked for fast results, the considered one writes worse). Given a second language
-/// (`also`), each language has its two, and the sentence is given to the language it was in
-/// (`SpeechPairSelection`, the Mac's own file).
+/// In one language, a considered recognizer writes the text that is kept and a fast one what shows while someone
+/// speaks (asked for fast results, the considered one writes worse), as on the Mac. Given a second language (`also`),
+/// the app's two places hold one recognizer for each, asked for fast results, kept and shown alike: the Mac's four do
+/// not fit (`Recognizers`), and a considered one shows nothing for ten seconds at a time. The sentence is given to the
+/// language it was in (`SpeechPairSelection`, the Mac's own file). Where another stretch has taken the fast one's
+/// place, the considered one also says what it has so far, less often.
 ///
 /// What it writes goes to `emit`: `partial` — everything heard so far, as it stands now — and `delta`, text that will
 /// not change any more (one language only: with two, which one is known only at the end).
@@ -26,12 +55,13 @@ final class LiveHearing {
         private let continuation: AsyncStream<AnalyzerInput>.Continuation
         private let input: AsyncStream<AnalyzerInput>
 
-        init(locale: Locale, fast: Bool, confidence: Bool) async throws {
+        /// `fast`: asked for fast results; `volatile`: also says what it has so far.
+        init(locale: Locale, fast: Bool, volatile: Bool, confidence: Bool) async throws {
             transcriber = SpeechTranscriber(
                 locale: locale,
                 transcriptionOptions: [],
-                reportingOptions: fast ? [.volatileResults, .fastResults] : [],
-                attributeOptions: (fast ? [] : [.audioTimeRange] as Set<SpeechTranscriber.ResultAttributeOption>).union(confidence ? [.transcriptionConfidence] : [])
+                reportingOptions: fast ? [.volatileResults, .fastResults] : volatile ? [.volatileResults] : [],
+                attributeOptions: confidence ? [.audioTimeRange, .transcriptionConfidence] : [.audioTimeRange]
             )
             // The recognizer takes 16-bit samples as they are; it traps on floating point rather than converting it.
             let formats = await transcriber.availableCompatibleAudioFormats
@@ -72,7 +102,7 @@ final class LiveHearing {
         }
     }
 
-    /// What shows while someone speaks: the quick text of the preferred language, unless the other's is surer of
+    /// What shows while someone speaks: the text so far of the preferred language, unless the other's is surer of
     /// itself by more than a tie, so that it does not go back and forth between the two.
     private final class Shown {
         private var now: [Settled?]
@@ -95,18 +125,21 @@ final class LiveHearing {
     private let locales: [Locale]
     private let preferred: Int
     private let considered: [Listener]
-    private let quick: [Listener]
+    private var quick: Listener?
     private var kept: [Task<Settled, Error>] = []
     private var shown: [Task<Void, Never>] = []
     private var samples = 0
     private var over = false
+    /// The places this stretch holds (`Recognizers`).
+    private var holds: Int
 
-    private init(codes: [String], locales: [Locale], preferred: Int, considered: [Listener], quick: [Listener]) {
+    private init(codes: [String], locales: [Locale], preferred: Int, considered: [Listener], quick: Listener?, holds: Int) {
         self.codes = codes
         self.locales = locales
         self.preferred = preferred
         self.considered = considered
         self.quick = quick
+        self.holds = holds
     }
 
     /// A stretch begun, in the language `code` (the app's), or — given `also` — in either; `prefer` breaks a tie.
@@ -124,33 +157,52 @@ final class LiveHearing {
         }
         let both = locales.count > 1
         let preferred = codes.firstIndex { $0 == prefer } ?? 0
-        var considered: [Listener] = []
-        var quick: [Listener] = []
-        for locale in locales {
-            considered.append(try await Listener(locale: locale, fast: false, confidence: both))
-            quick.append(try await Listener(locale: locale, fast: true, confidence: both))
+        let places = Recognizers.shared
+        guard await places.take(locales.count) else {
+            throw Refusal("This device is hearing as much as it can at once: it runs \(Recognizers.most) recognitions at a time.")
         }
-        let live = LiveHearing(codes: codes, locales: locales, preferred: preferred, considered: considered, quick: quick)
-        // What is kept: each considered recognizer's text, in the order it was spoken.
-        live.kept = considered.map { listener in
+        // One language: a considered recognizer, and a fast one for what shows where there is a place left for it,
+        // taken from no one. Two fill the app's places: each language's one recognizer is asked for fast results,
+        // which show at once and are kept — a considered one says what it has so far only every ten seconds or so,
+        // and the speaker would see nothing while speaking.
+        let fast = !both ? await places.take(1, yield: false) : false
+        var considered: [Listener] = []
+        var quick: Listener?
+        do {
+            for locale in locales { considered.append(try await Listener(locale: locale, fast: both, volatile: !fast, confidence: both)) }
+            if fast { quick = try await Listener(locale: locales[0], fast: true, volatile: true, confidence: false) }
+        } catch {
+            places.give(locales.count + (fast ? 1 : 0))
+            throw error
+        }
+        let live = LiveHearing(codes: codes, locales: locales, preferred: preferred, considered: considered, quick: quick, holds: locales.count + (fast ? 1 : 0))
+        let shownNow = Shown(count: locales.count, preferred: preferred)
+        // What is kept: each considered recognizer's text, in the order it was spoken — and what shows, where no fast
+        // one runs.
+        live.kept = considered.enumerated().map { at, listener in
             Task { () -> Settled in
                 var settled = Settled()
                 var lastEnd = CMTime.zero
                 for try await result in listener.transcriber.results {
-                    guard result.isFinal else { continue }
-                    guard CMTimeCompare(result.range.start, lastEnd) >= 0 else { throw Refusal("Overlapping stretches of settled speech.") }
-                    lastEnd = CMTimeRangeGetEnd(result.range)
-                    let delta = String(result.text.characters)
-                    settled.text += delta
-                    settled.add(result.text)
-                    if !both, !delta.isEmpty { emit(["type": "delta", "text": delta]) }
+                    if result.isFinal {
+                        guard CMTimeCompare(result.range.start, lastEnd) >= 0 else { throw Refusal("Overlapping stretches of settled speech.") }
+                        lastEnd = CMTimeRangeGetEnd(result.range)
+                        let delta = String(result.text.characters)
+                        settled.text += delta
+                        settled.add(result.text)
+                        if !both, !delta.isEmpty { emit(["type": "delta", "text": delta]) }
+                    }
+                    if !fast {
+                        var now = settled
+                        if !result.isFinal { now.text += String(result.text.characters); now.add(result.text) }
+                        if !result.isFinal || both, let text = shownNow.update(at, now) { emit(["type": "partial", "text": text]) }
+                    }
                 }
                 return settled
             }
         }
-        // What shows meanwhile: the quick recognizer's text so far, settled and not, of the language surer so far.
-        let shownNow = Shown(count: locales.count, preferred: preferred)
-        live.shown = quick.enumerated().map { at, listener in
+        // What shows meanwhile: the fast recognizer's text so far, settled and not, of the language surer so far.
+        live.shown = (quick.map { [$0] } ?? []).enumerated().map { at, listener in
             Task {
                 var settled = Settled()
                 do {
@@ -165,12 +217,26 @@ final class LiveHearing {
             }
         }
         do {
-            for listener in considered + quick { try await listener.start() }
+            for listener in considered { try await listener.start() }
+            try await quick?.start()
         } catch {
             await live.cancel()
             throw error
         }
+        // Another stretch that needs a place takes a fast one's: this one then shows nothing more until it ends.
+        if fast { places.mayYield(live) { [weak live] in await live?.stopFast() ?? 0 } }
         return live
+    }
+
+    /// The fast recognizers stopped, for another stretch to have their places: how many there were.
+    private func stopFast() async -> Int {
+        guard let stopped = quick else { return 0 }
+        quick = nil
+        stopped.finish()
+        await stopped.analyzer.cancelAndFinishNow()
+        for task in shown { task.cancel() }
+        holds -= 1
+        return 1
     }
 
     /// Some more of the stretch: 16-bit little-endian mono samples at 16 kHz.
@@ -180,22 +246,25 @@ final class LiveHearing {
         guard !data.isEmpty else { return }
         samples += data.count / 2
         guard samples <= LiveHearing.mostSamples else { throw Refusal("The sound is longer than one stretch takes.") }
-        for listener in considered + quick { try listener.hear(data) }
+        for listener in considered { try listener.hear(data) }
+        try quick?.hear(data)
     }
 
     /// The stretch is over: the text kept, and the language (the app's code) it was heard in.
     func finish() async throws -> (text: String, code: String) {
         over = true
-        let listeners = considered + quick
-        for listener in listeners { listener.finish() }
+        Recognizers.shared.keep(self)
+        for listener in considered { listener.finish() }
+        quick?.finish()
         if samples == 0 {
-            for listener in listeners { await listener.analyzer.cancelAndFinishNow() }
+            for listener in considered { await listener.analyzer.cancelAndFinishNow() }
+            await quick?.analyzer.cancelAndFinishNow()
             end()
             return ("", codes[0])
         }
         do {
-            // The quick ones have done their part: only the considered text is waited for, every language's at once.
-            for listener in quick { await listener.analyzer.cancelAndFinishNow() }
+            // The fast one has done its part: only the kept text is waited for, every language's at once.
+            await quick?.analyzer.cancelAndFinishNow()
             let analyzers = considered.map(\.analyzer)
             try await withThrowingTaskGroup(of: Void.self) { group in
                 for analyzer in analyzers { group.addTask { try await analyzer.finalizeAndFinishThroughEndOfInput() } }
@@ -217,15 +286,21 @@ final class LiveHearing {
     /// The stretch dropped: nothing more is written.
     func cancel() async {
         over = true
-        for listener in considered + quick {
+        Recognizers.shared.keep(self)
+        for listener in considered {
             listener.finish()
             await listener.analyzer.cancelAndFinishNow()
         }
+        quick?.finish()
+        await quick?.analyzer.cancelAndFinishNow()
         end()
     }
 
+    /// The tasks stopped and the places given back, once.
     private func end() {
         for task in kept { task.cancel() }
         for task in shown { task.cancel() }
+        Recognizers.shared.give(holds)
+        holds = 0
     }
 }
