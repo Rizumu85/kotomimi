@@ -757,10 +757,14 @@ class Share(private val context: Context, private val engine: Engine, private va
         val seconds = ms / 1000.0
         if (seconds > MOST_SECONDS) return 413 to errorOf("The sound is too long: this phone reads at most $MOST_SECONDS seconds at once.")
         val begun = languageOf(form.fields["language"])?.let { "language $it${Llama.TEXT_MARK}" }
+        // The words to expect (the computer's form `text`, the user's dictionary), as Qwen3-ASR's own template takes
+        // them: a system message before the sound. Without them a name came out another way at each reading.
+        val context = form.fields["text"]?.trim()?.take(CONTEXT_MOST)?.takeIf { it.isNotEmpty() }
 
         // The request, written by hand around the sound: letters of base64 need nothing done to them, and a
         // minute of sound put through a JSON library would be copied several times over.
-        val before = """{"temperature":0,"max_tokens":${tokensFor(seconds)},"cache_prompt":false,"messages":[{"role":"user","content":[{"type":"input_audio","input_audio":{"data":""""
+        val system = context?.let { """{"role":"system","content":${JSONObject.quote(it)}},""" }.orEmpty()
+        val before = """{"temperature":0,"max_tokens":${tokensFor(seconds)},"cache_prompt":false,"messages":[$system{"role":"user","content":[{"type":"input_audio","input_audio":{"data":""""
         val beginning = begun?.let { """,{"role":"assistant","content":${JSONObject.quote(it)}}""" }.orEmpty()
         val after = """","format":"wav"}}]}$beginning]}"""
         val pieces = listOf(before.toByteArray(), Base64.encode(sound, Base64.NO_WRAP), after.toByteArray())
@@ -830,7 +834,8 @@ class Share(private val context: Context, private val engine: Engine, private va
 
         val boundary = "----kotomimi${UUID.randomUUID().toString().replace("-", "")}"
         fun field(name: String, value: String) = "--$boundary\r\nContent-Disposition: form-data; name=\"$name\"\r\n\r\n$value\r\n"
-        val before = field("model", model.id) + language?.let { field("language", it) }.orEmpty() +
+        val context = form.fields["text"]?.trim()?.take(CONTEXT_MOST)?.takeIf { it.isNotEmpty() }
+        val before = field("model", model.id) + language?.let { field("language", it) }.orEmpty() + context?.let { field("text", it) }.orEmpty() +
             "--$boundary\r\nContent-Disposition: form-data; name=\"file\"; filename=\"stretch.wav\"\r\nContent-Type: audio/wav\r\n\r\n"
         val pieces = listOf(before.toByteArray(), sound, "\r\n--$boundary--\r\n".toByteArray())
         val head = "POST /v1/audio/transcriptions HTTP/1.1\r\nHost: $LOOPBACK\r\nContent-Type: multipart/form-data; boundary=$boundary\r\nContent-Length: ${pieces.sumOf { it.size }}\r\nConnection: close\r\n\r\n"
@@ -1044,6 +1049,8 @@ class Share(private val context: Context, private val engine: Engine, private va
 
         /** A language nobody reads is shown in a refusal to this length: it is whatever the request said. */
         private const val LANGUAGE_SHOWN = 20
+        /** The most of the words to expect passed on: a hundred names and a few phrases. */
+        private const val CONTEXT_MOST = 4000
 
         /**
          * A text without the spaces a model put where the writing has none: between two characters of Japanese or
