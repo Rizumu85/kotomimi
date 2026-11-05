@@ -4,8 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { ServerFinder } from '../../components/LanSharing/ServerFinder';
 import ToggleSwitch from '../../components/Settings/shared/ToggleSwitch';
 import Tooltip from '../../components/Tooltip/Tooltip';
-import { canFindServers, findServers, phoneHears, phoneLends, plainAddress, type FoundServer, type PhoneTextModel } from '../../lib/lan/discover';
-import { setPhoneKey } from '../../lib/lan/phoneKeys';
+import { canFindServers, findServers, phoneBase, phoneHears, phoneLends, plainAddress, type FoundServer, type PhoneTextModel } from '../../lib/lan/discover';
+import { phoneKey, setPhoneKey } from '../../lib/lan/phoneKeys';
+import { engineNode } from '../../lib/native/remoteEngine';
 import { modelLabel } from '../../lib/lan/modelLabel';
 import { getManifestEntry } from '../../lib/local-inference/modelManifest';
 import { shortenModelName } from '../../lib/local-inference/modelName';
@@ -745,8 +746,21 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   // found this time (the phone asleep, or no search made yet): it stays visible, so the setting is not silently another.
   const ownHearing = plainAddress(settings.asrOther);
   const hearsAtOwn = settings.asrVia === 'server' && ownHearing !== '';
-  // The recognizers the stage's device can be asked for by name, as the search last found it (the iPad app).
-  const ownHears = seen.find((server) => server.kind === 'phone' && plainAddress(server.address) === ownHearing)?.hears ?? [];
+  // The recognizers the stage's device can be asked for by name (the iPad app): as the search last found it — or, where
+  // no search has found it since this card was drawn (a run began and ended, the app was opened again), as the device
+  // itself says when asked, as a run asks it at Start.
+  const foundHears = seen.find((server) => server.kind === 'phone' && plainAddress(server.address) === ownHearing)?.hears ?? [];
+  const [askedHears, setAskedHears] = useState<{ address: string; hears: readonly string[] } | null>(null);
+  useEffect(() => {
+    if (!hearsAtOwn || foundHears.length > 0) return undefined;
+    let gone = false;
+    const base = phoneBase({ address: ownHearing });
+    void engineNode(base, fetch, phoneKey(base) || undefined).then((node) => {
+      if (!gone && node) setAskedHears({ address: ownHearing, hears: node.hears });
+    });
+    return () => { gone = true; };
+  }, [hearsAtOwn, ownHearing, foundHears.length]);
+  const ownHears = foundHears.length > 0 ? foundHears : askedHears?.address === ownHearing ? askedHears.hears : [];
   const hearingPhones = [
     ...seen.filter(phoneHears),
     ...(ownHearing !== '' && !seen.some((server) => phoneHears(server) && plainAddress(server.address) === ownHearing) ? [{ address: ownHearing, name: '', model: settings.asrOtherModel }] : []),

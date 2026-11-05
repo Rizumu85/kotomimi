@@ -40,6 +40,12 @@ const saved = vi.hoisted(() => ({ keys: {} as Record<string, string> }));
 vi.mock('./apiServiceKey', () => ({ savedKeyOf: async (prefix: string) => saved.keys[prefix] ?? '' }));
 // What the network holds, for the one search the cards make themselves (`KotomimiThere`).
 const network = vi.hoisted(() => ({ servers: [] as unknown[] }));
+// What a device says of itself when the card asks it (`engineNode`): none unless a test says.
+const asked = vi.hoisted(() => ({ node: null as null | { model: string; hears: string[] } }));
+vi.mock('../../lib/native/remoteEngine', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../lib/native/remoteEngine')>()),
+  engineNode: async () => asked.node,
+}));
 vi.mock('../../lib/lan/discover', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../lib/lan/discover')>()),
   canFindServers: () => true,
@@ -801,6 +807,19 @@ describe('a phone that lends its recognition: the "another device" of the hearin
     expect(options(model)).toEqual(['', 'apple-speech', 'r2t2-q8']);
     fireEvent.change(model, { target: { value: 'r2t2-q8' } });
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrOtherModel: 'r2t2-q8' }));
+  });
+
+  it('asks the device for its recognizers where no search has found it since (a run began and ended, the app reopened)', async () => {
+    asked.node = { model: 'apple-speech', hears: ['apple-speech', 'r2t2-q8'] };
+    try {
+      const { card } = draw({ settings: { ...PHONE, asrOtherModel: 'r2t2-q8' }, values: { endpoint: '192.168.1.9:8790' } });
+      await waitFor(() => expect((card(HEAR).getByRole('combobox', { name: 'providers.localai.model' }) as HTMLSelectElement).disabled).toBe(false));
+      const model = card(HEAR).getByRole('combobox', { name: 'providers.localai.model' }) as HTMLSelectElement;
+      expect(options(model)).toEqual(['', 'apple-speech', 'r2t2-q8']);
+      expect(model.value).toBe('r2t2-q8');
+    } finally {
+      asked.node = null;
+    }
   });
 
   it('gives the stage back to the shared device when that is chosen', () => {
