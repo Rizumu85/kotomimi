@@ -51,7 +51,7 @@ struct KotomimiApp: App {
                     case .active:
                         Task {
                             await hearing.refresh()
-                            if lending.wanted, !hearing.ready.isEmpty, lending.phase == .off { lending.start() }
+                            if lending.wanted, lending.lends, lending.phase == .off { lending.start() }
                         }
                     case .background:
                         if lending.phase != .off { lending.stop() }

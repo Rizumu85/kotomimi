@@ -23,6 +23,11 @@ targets:
       - path: KotomimiNode
       - path: ../android/app/src/main/assets/selfcheck-ja.wav
         buildPhase: resources
+    dependencies:
+      # audio.cpp v0.9.0 (the desktop's recognition engine), built by scripts/build-audiocpp.sh into ../audiocpp
+      # (not kept in git): a framework of its own, its ggml kept inside apart from llama.cpp's.
+      - framework: ../audiocpp/audiocpp.xcframework
+        embed: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.rizumu85.kotomimi.node

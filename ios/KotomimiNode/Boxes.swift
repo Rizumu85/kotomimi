@@ -88,11 +88,18 @@ struct ModelsBox: View {
     let close: () -> Void
     @Environment(Hearing.self) private var hearing
     @Environment(TextStore.self) private var text
+    @Environment(Lending.self) private var lending
     @State private var failure: String?
 
     var body: some View {
         BoxPanel(title: "模型管理", start: start == .hearing ? nil : start.rawValue, close: close) { WaterThing() } content: {
+            // What is lent to hear with: the device's own recognition, or one of the desktop's models. One at a time,
+            // the one ticked: a computer takes the first a device lists.
             BoxCard(title: "语音识别") {
+                let shown = TextModel.all.filter { $0.kind == .hear }
+                Rows(count: shown.count + 1) { at in at == 0 ? AnyView(system) : AnyView(model(shown[at - 1])) }
+            }
+            BoxCard(title: "系统识别语言") {
                 let shown = hearing.languages.filter { $0.state != .unsupported }
                 Rows(count: shown.count) { at in language(shown[at]) }
             }
@@ -111,6 +118,24 @@ struct ModelsBox: View {
             Note(text: "按住已下载的一行可以删除。")
         }
         .task { await hearing.refresh() }
+    }
+
+    /// The device's own recognition, as a row beside the models: ticked while it is the one lent.
+    private var system: some View {
+        let languages = hearing.ready.count
+        return HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("系统语音识别").font(.system(size: 16)).foregroundStyle(Palette.ink)
+                Text(languages > 0 ? "\(languages) 种语言" : "尚未下载语言").font(.system(size: 13)).foregroundStyle(Palette.ink3)
+            }
+            Spacer()
+            if languages > 0 && lending.lentModel == nil {
+                Image(systemName: "checkmark").font(.system(size: 15, weight: .semibold)).foregroundStyle(Palette.good)
+            }
+        }
+        .frame(minHeight: 50)
+        .contentShape(.rect)
+        .onTapGesture { if languages > 0 { lending.chosenRecognizer = Lending.modelId } }
     }
 
     @ViewBuilder private func language(_ language: Hearing.Language) -> some View {
@@ -152,7 +177,11 @@ struct ModelsBox: View {
             Spacer()
             switch text.state(model) {
             case .ready:
-                Text("已下载").font(.system(size: 14)).foregroundStyle(Palette.ink3)
+                if model.kind == .hear && lending.lentModel?.id == model.id {
+                    Image(systemName: "checkmark").font(.system(size: 15, weight: .semibold)).foregroundStyle(Palette.good)
+                } else {
+                    Text("已下载").font(.system(size: 14)).foregroundStyle(Palette.ink3)
+                }
             case .fetching(let done, let from):
                 VStack(alignment: .trailing, spacing: 3) {
                     ProgressView(value: done).tint(Palette.good).frame(width: 80)
@@ -174,9 +203,14 @@ struct ModelsBox: View {
         }
         .frame(minHeight: 50)
         .contentShape(.rect)
+        .onTapGesture { if model.kind == .hear && text.state(model) == .ready { lending.chosenRecognizer = model.id } }
         .contextMenu {
             if text.state(model) == .ready {
-                Button("删除 \(model.name)", systemImage: "trash", role: .destructive) { text.delete(model) }
+                Button("删除 \(model.name)", systemImage: "trash", role: .destructive) {
+                    // The engine holds the file it reads from: it lets it go first.
+                    if model.kind == .hear { lending.hearEngine.release() }
+                    text.delete(model)
+                }
             }
         }
     }

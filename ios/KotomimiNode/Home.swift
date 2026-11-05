@@ -238,7 +238,7 @@ private struct Status: View {
     private var line: String {
         if !hearing.available { return "这台设备不支持系统的语音识别。" }
         switch lending.phase {
-        case .off: return hearing.ready.isEmpty ? "请先在「识别语言」中下载一个语言。" : "启用共享后，电脑可在局域网找到这台设备。"
+        case .off: return lending.lends ? "启用共享后，电脑可在局域网找到这台设备。" : "请先在「模型管理」中下载一个模型或语言。"
         case .starting: return "正在打开局域网服务"
         case .waiting: return lending.seen.map { "最近连接 \($0)" } ?? "等待电脑连接"
         case .working: return lending.seen.map { "正在识别 · 来自 \($0)" } ?? "正在识别"
@@ -268,7 +268,7 @@ private struct ShareTile: View {
                 }))
                 .labelsHidden()
                 .tint(Palette.accent)
-                .disabled(hearing.ready.isEmpty && lending.phase == .off)
+                .disabled(!lending.lends && lending.phase == .off)
                 .scaleEffect(1.25)
                 // By night the switch that is on gives light, in the work's accent.
                 .shadow(color: scheme == .dark && lending.phase != .off ? Palette.accent.opacity(0.55) : .clear, radius: 12)
@@ -288,7 +288,7 @@ private struct ShareTile: View {
 
     private var line: String {
         switch lending.phase {
-        case .off, .failed: hearing.ready.isEmpty ? "请先下载一个语言" : "将这台设备的语音识别提供给电脑使用"
+        case .off, .failed: lending.lends ? "将这台设备的模型提供给电脑使用" : "请先下载一个模型"
         default: lending.address.map { "本机 \($0)" } ?? "这台设备未连接 Wi-Fi"
         }
     }
@@ -430,8 +430,9 @@ private struct HearingTile: View {
     }
 
     private var lent: String {
-        guard !hearing.ready.isEmpty else { return "未下载" }
         let state = lending.phase == .working ? "工作中" : "待命"
+        if let model = lending.lentModel { return "\(state) · \(model.name)" }
+        guard !hearing.ready.isEmpty else { return "未下载" }
         return "\(state) · \(hearing.name(of: lending.lastLanguage ?? hearing.preferred))"
     }
 }
@@ -528,7 +529,7 @@ private struct ModelsTile: View {
                 }
                 Spacer(minLength: 12)
                 HStack(spacing: 14) {
-                    WaterThing().frame(width: 40, height: 40).opacity(hearing.ready.isEmpty ? 0.35 : 1)
+                    WaterThing().frame(width: 40, height: 40).opacity(hearing.ready.isEmpty && !text.ready.contains { $0.kind == .hear } ? 0.35 : 1)
                     PanesThing().frame(width: 40, height: 40).opacity(text.ready.contains { $0.kind == .translate } ? 1 : 0.35)
                     NoteThing().frame(width: 40, height: 40).opacity(text.ready.contains { $0.kind == .coach } ? 1 : 0.35)
                 }
@@ -538,8 +539,10 @@ private struct ModelsTile: View {
     }
 
     private var line: String {
-        let languages = hearing.ready.count, models = text.ready.count
-        if languages == 0 && models == 0 { return "尚未下载" }
-        return [languages > 0 ? "\(languages) 种识别语言" : nil, models > 0 ? "\(models) 个文本模型" : nil].compactMap { $0 }.joined(separator: " · ")
+        let languages = hearing.ready.count
+        let hearers = text.ready.filter { $0.kind == .hear }.count, models = text.ready.count - hearers
+        if languages == 0 && models == 0 && hearers == 0 { return "尚未下载" }
+        return [languages > 0 ? "\(languages) 种识别语言" : nil, hearers > 0 ? "\(hearers) 个识别模型" : nil, models > 0 ? "\(models) 个文本模型" : nil]
+            .compactMap { $0 }.joined(separator: " · ")
     }
 }

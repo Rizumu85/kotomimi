@@ -85,6 +85,8 @@ final class Lending {
     let hearing: Hearing
     let text: TextStore
     let engine = TextEngine()
+    /// The desktop's recognition models, where one is downloaded and lent (`lentModel`).
+    let hearEngine = HearingEngine()
     private var door: Door?
     private var lastUse = Date.distantPast
     private var watch: Task<Void, Never>?
@@ -96,6 +98,23 @@ final class Lending {
         self.hearing = hearing
         self.text = text
     }
+
+    /// The recognizer the owner chose to lend: the device's own (`apple-speech`) or a downloaded model's id.
+    var chosenRecognizer: String = UserDefaults.standard.string(forKey: "hearing.lent") ?? Lending.modelId {
+        didSet { UserDefaults.standard.set(chosenRecognizer, forKey: "hearing.lent") }
+    }
+
+    /// The downloaded recognition model lent, or nil where the device's own recognition is: the one chosen where it
+    /// is here, else the device's own where it has a language, else the first model downloaded. A computer takes the
+    /// first recognizer listed for the one a device lends, so one is listed, as the Android app lists one.
+    var lentModel: TextModel? {
+        let models = text.ready.filter { $0.kind == .hear }
+        if let chosen = models.first(where: { $0.id == chosenRecognizer }) { return chosen }
+        return hearing.ready.isEmpty ? models.first : nil
+    }
+
+    /// Whether anything can be lent: a recognizer, or a text model.
+    var lends: Bool { !hearing.ready.isEmpty || !text.ready.isEmpty }
 
     /// The name the computer lists this device by: the owner's, else the kind of device it is.
     static var name: String {
@@ -208,13 +227,18 @@ final class Lending {
     }
 
     private func modelsJson() -> String {
-        let lent = hearing.ready.isEmpty ? "" : #"{"id":"\#(Lending.modelId)","object":"model","owned_by":"kotomimi-phone","holds_mb":0}"#
+        let lent: String
+        if let model = lentModel {
+            lent = #"{"id":"\#(model.id)","object":"model","owned_by":"kotomimi-phone","holds_mb":\#(model.holdsMb)}"#
+        } else {
+            lent = hearing.ready.isEmpty ? "" : #"{"id":"\#(Lending.modelId)","object":"model","owned_by":"kotomimi-phone","holds_mb":0}"#
+        }
         let total = Int(ProcessInfo.processInfo.physicalMemory / 1_048_576)
         let free = Int(os_proc_available_memory() / 1_048_576)
         // The text models stand beside the recognizer in a list of their own, as the Android app's do: a computer
         // takes every id in `data` for a recognizer.
         let up = engine.up
-        let textModels = text.ready.map {
+        let textModels = text.ready.filter { $0.kind != .hear }.map {
             #"{"id":"\#($0.id)","object":"model","owned_by":"kotomimi-phone","holds_mb":\#($0.holdsMb),"kind":"\#($0.kind.rawValue)","name":\#(jsonQuoted($0.name)),"loaded":\#(up.contains($0.id))}"#
         }.joined(separator: ",")
         return #"{"object":"list","data":[\#(lent)],"text":[\#(textModels)],"memory_mb":{"total":\#(total),"available":\#(free)}}"#
@@ -231,8 +255,8 @@ final class Lending {
             return .error(400, "The request is not JSON, or is too long.", allow)
         }
         guard let named = json["model"] as? String else { return .error(400, "The request names no model.", allow) }
-        guard let model = text.ready.first(where: { $0.id == named }) else {
-            let known = TextModel.all.contains { $0.id == named }
+        guard let model = text.ready.first(where: { $0.id == named && $0.kind != .hear }) else {
+            let known = TextModel.all.contains { $0.id == named && $0.kind != .hear }
             return .error(404, known ? "This device does not lend \"\(named)\": it is not downloaded there." : "This device lends no text model called \"\(named.prefix(40))\".", allow)
         }
         guard let said = json["messages"] as? [[String: Any]], (1...64).contains(said.count) else {
@@ -311,7 +335,8 @@ final class Lending {
     }
 
     private func transcribe(_ request: Request, _ allow: [(String, String)]) async -> Response {
-        guard !hearing.ready.isEmpty else {
+        let model = lentModel
+        guard model != nil || !hearing.ready.isEmpty else {
             return .error(404, "This device lends no speech recognition now: no language is downloaded there.", allow)
         }
         let length = Int(request.headers["content-length"] ?? "")
@@ -331,6 +356,7 @@ final class Lending {
             return .error(413, "The sound is too long: this device reads at most \(Int(Lending.mostSeconds)) seconds at once.", allow)
         }
         let said = form.fields["language"]?.trimmingCharacters(in: .whitespaces) ?? ""
+        if let model { return await engineRead(model, wav, said, allow) }
         let code: String
         if said.isEmpty || said.lowercased() == "auto" {
             code = hearing.preferred
@@ -357,6 +383,47 @@ final class Lending {
             return .json(200, #"{"text":\#(jsonQuoted(text))}"#, allow)
         } catch let refusal as Refusal {
             return .error(400, refusal.description, allow)
+        } catch {
+            return .error(502, "The recognizer stopped: \(error.localizedDescription)", allow)
+        }
+    }
+
+    /// A stretch read by a downloaded model: told the language the computer says, by the app's code; where it says
+    /// none, the model tells it where it can, else the language ticked here.
+    private func engineRead(_ model: TextModel, _ wav: Wav, _ said: String, _ allow: [(String, String)]) async -> Response {
+        let base = said.lowercased().split(whereSeparator: { $0 == "-" || $0 == "_" }).first.map(String.init) ?? ""
+        let language: String?
+        if base.isEmpty || base == "auto" {
+            language = model.detects ? nil : model.languages.contains(hearing.preferred) ? hearing.preferred : nil
+            if language == nil && !model.detects {
+                return .error(400, "\(model.name) does not tell languages apart: the computer must say which it is to hear.", allow)
+            }
+        } else if model.languages.contains(base) {
+            language = base
+        } else if let named = Hearing.code(for: said), model.languages.contains(named) {
+            language = named
+        } else {
+            return .error(400, "\(model.name) does not hear \"\(said.prefix(20))\".", allow)
+        }
+        lastUse = Date()
+        heardAt = Date()
+        if phase == .waiting { phase = .working }
+        let began = Date()
+        let samples = wav.samples.map { Float($0) / 32768 }
+        do {
+            let text = try await hearEngine.read(model, at: self.text.path(model), samples: samples, rate: Int(wav.rate), language: language)
+            lastUse = Date()
+            if !text.isEmpty {
+                lastText = text
+                lastSeconds = wav.seconds
+                lastTook = Date().timeIntervalSince(began)
+                lastLanguage = language
+                heardCount += 1
+            }
+            return .json(200, #"{"text":\#(jsonQuoted(text))}"#, allow)
+        } catch let refusal as HearingEngine.Refusal {
+            let short = refusal.description.contains("memory")
+            return .error(short ? 503 : 502, refusal.description, allow + (short ? [("Retry-After", "5")] : []))
         } catch {
             return .error(502, "The recognizer stopped: \(error.localizedDescription)", allow)
         }

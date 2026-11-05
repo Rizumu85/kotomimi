@@ -6,7 +6,9 @@ import os
 /// under the desktop's own names for them (`id`), which is what a computer asks for them by (`TEXT_MODELS` in the
 /// Android app's Models.kt, `TRANSLATORS` and `COACHES` in electron/native-engine.js).
 nonisolated struct TextModel: Identifiable, Sendable, Equatable {
-    enum Kind: String, Sendable { case translate, coach }
+    /// `hear`: a recognition model of the desktop's engine, audio.cpp (`HearingEngine`), kept and fetched as the text
+    /// models are; lent beside the device's own recognition.
+    enum Kind: String, Sendable { case translate, coach, hear }
     let id: String
     let name: String
     let kind: Kind
@@ -19,12 +21,22 @@ nonisolated struct TextModel: Identifiable, Sendable, Equatable {
     let modelScope: String?
     /// What its engine keeps for itself once loaded, in megabytes, roughly: what is held against the memory free.
     let holdsMb: Int
+    /// Where the file lies in its repository, where not at the top.
+    var remote: String? = nil
+    /// A recognition model's: its audio.cpp family, the languages it hears (the app's codes), and how it is told one.
+    var family: String? = nil
+    var languages: [String] = []
+    var languageAs: LanguageAs = .code
+    /// A recognition model's: whether it tells the language itself where it is told none.
+    var detects = false
+
+    enum LanguageAs: Sendable { case code, name }
 
     /// Where it can be had, best first for where this device is: in mainland China (by its time zone) ModelScope
     /// and the mirror before Hugging Face, which is not reached there without a proxy; elsewhere Hugging Face first.
     var sources: [URL] {
-        let huggingFace = URL(string: "https://huggingface.co/\(repository)/resolve/\(revision)/\(file)")!
-        let mirror = URL(string: "https://hf-mirror.com/\(repository)/resolve/\(revision)/\(file)")!
+        let huggingFace = URL(string: "https://huggingface.co/\(repository)/resolve/\(revision)/\(remote ?? file)")!
+        let mirror = URL(string: "https://hf-mirror.com/\(repository)/resolve/\(revision)/\(remote ?? file)")!
         let scope = modelScope.map { URL(string: "https://modelscope.cn/models/\($0)/resolve/master/\(file)")! }
         let china = ["Asia/Shanghai", "Asia/Chongqing", "Asia/Harbin", "Asia/Urumqi", "Asia/Kashgar"].contains(TimeZone.current.identifier)
         return china ? [scope, mirror, huggingFace].compactMap { $0 } : [huggingFace, scope, mirror].compactMap { $0 }
@@ -40,7 +52,30 @@ nonisolated struct TextModel: Identifiable, Sendable, Equatable {
         TextModel(id: "gemma-4-e2b", name: "Gemma 4 E2B", kind: .coach, file: "gemma-4-E2B-it-Q4_K_M.gguf", bytes: 3_106_738_272,
                   sha256: "740185b21d22ceb83a11c3aa62ad5842ef32c70f6096d756bbee85a1e4ec34b8",
                   repository: "unsloth/gemma-4-E2B-it-GGUF", revision: "0314792d7f1f7e229411f620751375812bb9faf2", modelScope: "unsloth/gemma-4-E2B-it-GGUF", holdsMb: 3400),
+        // The desktop's own recognition models (MODELS in electron/native-engine.js), by the same files and ids. Not
+        // asked of ModelScope: its copies of the Qwen3 files are newer files than these (seen 2026-10-26 by the
+        // Android app), and R2T2 has none there.
+        TextModel(id: "qwen3-asr-1.7b-q8", name: "Qwen3-ASR 1.7B", kind: .hear, file: "qwen3-asr-1.7b-q8_0.gguf", bytes: 2_473_010_048,
+                  sha256: "da4fc2ac7f24dee784d1684eb1f35836cdbf559519452ae11777670734c0a4f8",
+                  repository: "audio-cpp/audio.cpp-gguf", revision: "e36610ac69b5262e914a52635324050bee8f1ad2", modelScope: nil, holdsMb: 3000,
+                  remote: "Qwen3-ASR-1.7B-GGUF/qwen3-asr-1.7b-q8_0.gguf", family: "qwen3_asr", languages: TextModel.qwenLanguages, detects: true),
+        TextModel(id: "qwen3-asr-0.6b-q8", name: "Qwen3-ASR 0.6B", kind: .hear, file: "qwen3-asr-0.6b-q8_0.gguf", bytes: 1_151_272_416,
+                  sha256: "6c44ec2fb4cee513892d7863c1fcc3ea6b699ffa4d899b0ef4ab19956d9544f7",
+                  repository: "audio-cpp/audio.cpp-gguf", revision: "e36610ac69b5262e914a52635324050bee8f1ad2", modelScope: nil, holdsMb: 1500,
+                  remote: "Qwen3-ASR-0.6B-GGUF/qwen3-asr-0.6b-q8_0.gguf", family: "qwen3_asr", languages: TextModel.qwenLanguages, detects: true),
+        // Read a stretch at once: on an M2 it reads one five times as fast as it is spoken, where its own streaming,
+        // the desktop's way, falls behind (measured on the Mac, 2026-11-05).
+        TextModel(id: "r2t2-q8", name: "Confucius4 R2T2", kind: .hear, file: "r2t2-q8_0.gguf", bytes: 2_477_512_064,
+                  sha256: "19f5ccd624484bcb5d44301437de41560b0ecc40c430e8850dfeefefbe82ccf5",
+                  repository: "davidxifeng/Confucius4-R2T2-gguf", revision: "a8e6b385d7df7eae9519363e07034a209004797a", modelScope: nil, holdsMb: 3000,
+                  family: "confucius4_r2t2", languages: ["ja", "zh", "en", "ko", "fr", "de", "it", "pt", "ru", "es", "ar"], languageAs: .name),
     ]
+
+    static let qwenLanguages = ["zh", "en", "yue", "ar", "de", "fr", "es", "pt", "id", "it", "ko", "ru", "th", "vi", "ja", "tr", "hi", "ms", "nl", "sv", "da", "fi", "pl", "cs", "fil", "fa", "el", "hu", "mk", "ro"]
+
+    /// The names R2T2 is told a language by (`LANGUAGE_NAMES` in electron/native-engine.js).
+    static let languageNames = ["ja": "Japanese", "zh": "Chinese", "en": "English", "ko": "Korean", "fr": "French", "de": "German", "it": "Italian",
+                                "pt": "Portuguese", "ru": "Russian", "es": "Spanish", "ar": "Arabic"]
 }
 
 /// Where the text models are kept, which of them are here, and their downloads.
