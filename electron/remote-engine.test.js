@@ -66,6 +66,30 @@ describe('a recognition on another device', () => {
     expect(engine.writeStream(id, sound())).toBe(false);
   });
 
+  it('tells a model that takes them the dictionary’s words, as this computer’s own engine is told, and drops the list said back', async () => {
+    const asked = [];
+    const events = [];
+    const engine = createRemoteEngine({
+      onStream: (event) => events.push(event),
+      read: (request) => { asked.push(request); return { done: Promise.resolve({ ok: true, text: 'Rizum、VRC' }), abort() {} }; },
+    });
+    const id = engine.openStream({ base: 'http://192.168.1.23:8792/v1', model: 'qwen3-asr-1.7b-q8', language: 'zh', sampleRate: 16000, hints: ['Rizum', 'VRC', 7] });
+    engine.writeStream(id, sound());
+    engine.endStream(id);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(asked[0].context).toBe('可能出现的人名和词语：Rizum、VRC');
+    // The list itself, with no voice behind it, is nothing heard.
+    expect(events).toEqual([{ id, type: 'done', text: '' }]);
+    // A model that takes no words is told none.
+    const plain = [];
+    const other = createRemoteEngine({ read: (request) => { plain.push(request); return { done: Promise.resolve({ ok: true, text: 'x' }), abort() {} }; } });
+    const two = other.openStream({ base: 'http://192.168.1.23:8792/v1', model: 'r2t2-q8', language: 'zh', sampleRate: 16000, hints: ['Rizum'] });
+    other.writeStream(two, sound());
+    other.endStream(two);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(plain[0].context).toBeUndefined();
+  });
+
   it('takes a model’s spaces out of what the device wrote, where this computer does so with its own readings of that model', async () => {
     const texts = (model) => new Promise((resolve) => {
       const events = [];

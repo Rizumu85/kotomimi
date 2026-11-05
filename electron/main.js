@@ -1503,7 +1503,7 @@ app.on('will-quit', () => { void nativeEngine?.stop(); });
 // Fork: a recognition engine on another device — a phone lent to this computer (electron/remote-engine.js). Its live
 // recognitions, for the page; nothing of it runs here.
 const remoteEngine = createRemoteEngine({ onStream: (event) => toPage('remote-engine:stream', event) });
-ipcMain.handle('remote-engine:stream-open', (event, args) => remoteEngine.openStream({ base: args?.base, model: args?.model, language: args?.language, sampleRate: args?.sampleRate, key: typeof args?.key === 'string' ? args.key : undefined }));
+ipcMain.handle('remote-engine:stream-open', (event, args) => remoteEngine.openStream({ base: args?.base, model: args?.model, language: args?.language, sampleRate: args?.sampleRate, key: typeof args?.key === 'string' ? args.key : undefined, hints: Array.isArray(args?.hints) ? args.hints : [] }));
 ipcMain.handle('remote-engine:stream-audio', (event, args) => remoteEngine.writeStream(args?.id, args?.pcm));
 ipcMain.handle('remote-engine:stream-end', (event, args) => remoteEngine.endStream(args?.id));
 ipcMain.handle('remote-engine:stream-abort', (event, args) => remoteEngine.abortStream(args?.id));

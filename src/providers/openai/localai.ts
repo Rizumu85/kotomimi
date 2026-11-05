@@ -1146,7 +1146,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
       const named = s.asrApiModel.trim();
       // A model of this app's own names: what a Kotomimi phone lends is read by its engine the way it is read here.
       const limits = NATIVE_MODELS.find((m) => m.id === named)?.limits;
-      recognizer = { modelId: named, streaming: false, api: { baseUrl, model: named, ...(s.asrApiNeedsKey ? { key: 'asrKey' as const } : {}), ...(limits ? { limits } : {}) } };
+      recognizer = { modelId: named, streaming: false, api: { baseUrl, model: named, ...(s.asrApiNeedsKey ? { key: 'asrKey' as const } : {}), ...(limits ? { limits } : {}), ...(hints.length ? { hints } : {}) } };
     } else {
       recognizer = null;
     }

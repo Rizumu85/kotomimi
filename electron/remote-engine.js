@@ -10,7 +10,7 @@
 // open on such an engine, each under an id, for the page (`src/lib/native/remoteEngine.ts`).
 //
 // No Electron import, and the reading is handed in, so its tests need neither.
-const { openWindow, readWhole, unspaced, languageCode, languageName, languageLocale, MODELS } = require('./native-engine');
+const { openWindow, readWhole, unspaced, echoOf, hintChecked, CONTEXT_LEAD, languageCode, languageName, languageLocale, MODELS } = require('./native-engine');
 
 /** A reading over the network is given longer than one on this computer: the phone may be the slower of the two. */
 const READ_TIMEOUT_MS = 60_000;
@@ -47,21 +47,32 @@ function createRemoteEngine({ onStream = () => {}, window = openWindow, read = r
   let nextStream = 1;
 
   /** A live recognition on the engine at `base`: its id, or null where the address is not one, or too many are open. */
-  function openStream({ base, model, language, sampleRate, key } = {}) {
+  function openStream({ base, model, language, sampleRate, key, hints = [] } = {}) {
     const found = targetOf(base);
     // The phone's access key, where its owner set one: every reading carries it (`src/lib/lan/phoneKeys.ts`).
     const target = found && typeof key === 'string' && /^[\x21-\x7e]{1,128}$/.test(key) ? { ...found, key } : found;
     if (!target || typeof model !== 'string' || !model || streams.size >= MOST_STREAMS) return null;
     const id = nextStream++;
     const rate = Number.isInteger(sampleRate) && sampleRate >= 8000 && sampleRate <= 48000 ? sampleRate : 16000;
+    // The words of the user's dictionary, for a model that takes them (Qwen3-ASR), as this computer's own engine is
+    // told them (`openStream` in native-engine.js) — with the same checks on what it writes back: the list said back
+    // for want of a voice is dropped, and a reading of nothing but the words is read again without them. Without
+    // them a name heard on a device came out another way at each reading (the user, 2026-11-05).
+    const words = Array.isArray(hints) ? hints.filter((hint) => typeof hint === 'string' && hint.trim()).slice(0, 100) : [];
+    const context = MODELS[model]?.takesContext && words.length > 0 ? `${CONTEXT_LEAD}${words.join('、')}` : undefined;
+    const echo = context ? echoOf(words) : null;
+    // The phone takes a model's spaces out itself; taken out here as well, the text is the same whoever sent it.
+    const spaced = MODELS[model]?.unspaced ? unspaced : null;
+    const tidy = echo && spaced ? (text) => echo(spaced(text)) : echo ?? spaced;
+    const reading = (asked) => read({ ...asked, ...target });
     const stream = window({
       model,
       sampleRate: rate,
       language: saidFor(model, typeof language === 'string' ? language : ''),
+      ...(context ? { context } : {}),
       timeoutMs: READ_TIMEOUT_MS,
-      read: (asked) => read({ ...asked, ...target }),
-      // The phone takes a model's spaces out itself; taken out here as well, the text is the same whoever sent it.
-      ...(MODELS[model]?.unspaced ? { tidy: unspaced } : {}),
+      read: context ? hintChecked(reading, words) : reading,
+      ...(tidy ? { tidy } : {}),
       note,
     }, (event) => {
       if (event.type !== 'delta' && event.type !== 'partial') streams.delete(id);

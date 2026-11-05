@@ -135,7 +135,7 @@ export interface DeviceHearing {
    */
   language?: string;
   /** Present: the recognizer is an API (`apiAsr.ts`) — this computer still cuts the sentences, and uploads each one. */
-  api?: { baseUrl: string; model: string; key?: StageKey; /** Where what answers there turns out to be a Kotomimi phone's engine (`remoteEngine.ts`), and the model is one this app knows: how long one recognition may run on it, as on this computer. */ limits?: Partial<NativeLimits> };
+  api?: { baseUrl: string; model: string; key?: StageKey; /** Where what answers there turns out to be a Kotomimi phone's engine (`remoteEngine.ts`), and the model is one this app knows: how long one recognition may run on it, as on this computer. */ limits?: Partial<NativeLimits>; /** The dictionary's words, told to such an engine as this computer's own is told them. */ hints?: readonly string[] };
   /** Present: the recognizer is the native engine's (`nativeAsr.ts`), given the voice as it comes; `limits` where one recognition may not run as long as the default. */
   /** Fork: `either`, a recognizer hearing the speaker in either of two languages (the Mac's): told the first, and the other. */
   native?: { model: string; limits?: Partial<NativeLimits>; either?: { first: string; also: string }; hints?: readonly string[] };
@@ -848,7 +848,7 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
         // `electron/remote-engine.js`): a phone slower than the voice still writes all of it, late, where the wait
         // this computer's own engine is given would have kept only what the first reading had (seen 2026-10-10 on a
         // phone at half the speed of speech: "ゲームは、 like" for twenty seconds of talk).
-        return createNativeAsr({ bridge: remote.bridge(api.baseUrl), start: async () => lent, model, clock: request.clock, named: 'The recognition engine of the other device', limits: { ...api.limits, lastWordsMs: REMOTE_LAST_WORDS_MS } });
+        return createNativeAsr({ bridge: remote.bridge(api.baseUrl), start: async () => lent, model, clock: request.clock, named: 'The recognition engine of the other device', limits: { ...api.limits, lastWordsMs: REMOTE_LAST_WORDS_MS }, ...(api.hints?.length ? { hints: api.hints } : {}) });
       }),
     });
   };
