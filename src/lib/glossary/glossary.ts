@@ -1,4 +1,5 @@
 import type { GlossaryEntry, GlossaryEntryInput, GlossarySnapshot } from './types';
+import { foldBySound } from './sound';
 
 /** A small table the user keeps by hand: a recognizer is told all of it, and a long list slows it down. */
 export const MAX_GLOSSARY_ENTRIES = 50;
@@ -80,7 +81,9 @@ export function normalizeRecognitionText(text: string, { entries }: GlossarySnap
   for (const entry of entries) for (const term of [entry.source, ...entry.aliases]) written.set(term.toLocaleLowerCase(), entry.source);
   if (written.size === 0) return text;
   const terms = entries.flatMap((entry) => [entry.source, ...entry.aliases]).sort((a, b) => b.length - a.length);
-  return text.replace(new RegExp(terms.map(termPattern).join('|'), 'giu'), (found) => written.get(found.toLocaleLowerCase()) ?? found);
+  const spelled = text.replace(new RegExp(terms.map(termPattern).join('|'), 'giu'), (found) => written.get(found.toLocaleLowerCase()) ?? found);
+  // Then what only sounds like one of them: recognition spells a name another way nearly every time (`sound.ts`).
+  return foldBySound(spelled, entries);
 }
 
 /** What a recognizer is told to expect. The aliases are what it writes by mistake: those are put right afterwards. */
