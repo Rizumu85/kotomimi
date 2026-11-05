@@ -86,9 +86,17 @@ export function normalizeRecognitionText(text: string, { entries }: GlossarySnap
   return foldBySound(spelled, entries);
 }
 
-/** What a recognizer is told to expect. The aliases are what it writes by mistake: those are put right afterwards. */
+/**
+ * What a recognizer is told to expect. The aliases are what it writes by mistake: those are put right afterwards. A
+ * word written with a comma in it ("Jackal, ジャカル") is told as its pieces: the list is joined with marks of its
+ * own, and a small model read the comma back as the list's (2026-11-05).
+ */
 export function glossaryRecognitionTerms({ entries }: GlossarySnapshot, limit = 100): string[] {
-  return entries.map((entry) => entry.source).slice(0, limit);
+  const terms: string[] = [];
+  for (const entry of entries) {
+    for (const piece of parseAliases(entry.source)) if (!terms.includes(piece)) terms.push(piece);
+  }
+  return terms.slice(0, limit);
 }
 
 /** A provider's instructions with the terms after them, for models without a word list of their own. */

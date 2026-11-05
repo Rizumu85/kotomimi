@@ -16,7 +16,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { createNativeEngine, openLive, languageName, languageLocale, modelHears, translatorFits, unspaced, echoOf, hintChecked, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME } = require('./native-engine.js');
+const { createNativeEngine, openLive, languageName, languageLocale, modelHears, translatorFits, unspaced, echoOf, endless, hintChecked, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME } = require('./native-engine.js');
 const { hfMirrorOf } = require('./fetch-file.js');
 
 const sha = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -219,10 +219,26 @@ describe('a reading that says the context back (fork)', () => {
     expect(echo('jackal, nanachiki')).toBe('');
   });
 
+  it('is nothing heard where a word of the list has a comma in it and comes back in pieces, said over and over (2026-11-05)', () => {
+    const theirs = echoOf(['VRC', '糖豆', 'Jackal, ジャカル', '比翼鸟', 'Rizum,リズム', 'Rizum天才', '天才', '我牛逼死了', '我太牛了', '要发财了']);
+    expect(theirs('我牛逼死了！我太牛了、要发财了、Jackal, ジャカル、比翼鸟、Rizum,リズム、Rizum天才、天才、我牛逼死了、我太牛了、要发财了、Jackal, ジャカル、比翼鸟、Rizum,リズム、Rizum天才、天才、我牛逼死了、我太牛了、要发财了')).toBe('');
+  });
+
   it('keeps a sentence that names the words, and one word said alone', () => {
     expect(echo('今天和糖豆还有吉庆一起去VRC玩了。')).toBe('今天和糖豆还有吉庆一起去VRC玩了。');
     expect(echo('糖豆。')).toBe('糖豆。');
     expect(echo('糖豆、你好、明天见、走吧')).toBe('糖豆、你好、明天见、走吧');
+  });
+});
+
+describe('a reading that runs on to its end (fork)', () => {
+  it('is kept up to the end of the first time', () => {
+    expect(endless('今天天气很好。我们去公园吧我们去公园吧我们去公园吧我们去')).toBe('今天天气很好。我们去公园吧');
+    expect(endless('可能出现的人名和词语可能出现的人名和词语可能')).toBe('可能出现的人名和词语');
+  });
+
+  it('keeps what is said twice on purpose, and what does not repeat to its end', () => {
+    for (const text of ['哈哈哈哈哈哈', '好的好的', '谢谢你谢谢你', '对对对对对对对对', '这个这个可以', '今天和糖豆一起去VRC玩了。']) expect(endless(text)).toBe(text);
   });
 });
 

@@ -654,14 +654,33 @@ const CONTEXT_LEAD = '可能出现的人名和词语：';
  * the words with little else, cut at the list's marks. A sentence that names them, written as speech is, is kept.
  */
 function echoOf(hints) {
-  const known = new Set(hints.map((hint) => String(hint).trim().toLowerCase()).filter(Boolean));
+  // A word of the list written with a comma in it ("Jackal, ジャカル") comes back cut at the comma: its pieces count too.
+  const known = new Set(hints.flatMap((hint) => [String(hint), ...String(hint).split(/[、，,。.!?！？;；:：\s]+/u)]).map((part) => part.trim().toLowerCase()).filter(Boolean));
   return (text) => {
-    const body = String(text).replace(new RegExp(`^\\s*${CONTEXT_LEAD.slice(0, -1)}[：:]\\s*`), '');
+    const body = endless(String(text)).replace(new RegExp(`^\\s*${CONTEXT_LEAD.slice(0, -1)}[：:]\\s*`), '');
     const parts = body.split(/[、，,。.!?！？;；:：\s]+/u).map((part) => part.trim().toLowerCase()).filter(Boolean);
     const hits = parts.filter((part) => known.has(part)).length;
     if (hits >= 2 && hits / parts.length >= 0.75) return '';
     return body;
   };
+}
+
+/**
+ * Fork: a reading that runs on, saying the same again and again to its end — a small model lost in a stretch it does
+ * not follow (Qwen3-ASR 0.6B wrote the list of words to expect three times over, 2026-11-05): kept up to the end of the
+ * first time. A stretch said twice on purpose is short: a run is cut only where it goes on to the end, eight letters or
+ * more said twice, or four or more said three times.
+ */
+function endless(text) {
+  const n = text.length;
+  for (let start = 0; start < n - 16; start++) {
+    for (let period = 4; start + period * 2 <= n; period++) {
+      let k = start + period;
+      while (k < n && text[k] === text[k - period]) k++;
+      if (k === n && (period >= 8 || n - start >= period * 3)) return text.slice(0, start + period);
+    }
+  }
+  return text;
 }
 
 /**
@@ -1298,4 +1317,4 @@ function createNativeEngine(deps = {}) {
   return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream };
 }
 
-module.exports = { createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, unspaced, echoOf, hintChecked, CONTEXT_LEAD, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, translatorFits, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };
+module.exports = { createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, unspaced, echoOf, endless, hintChecked, CONTEXT_LEAD, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, translatorFits, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };

@@ -54,6 +54,8 @@ describe('glossary', () => {
   it('tells a recognizer the terms as written, and a provider\'s instructions too', () => {
     const snapshot = { entries: [{ id: '1', source: 'Rizum', aliases: ['リズム'] }] } as const;
     expect(glossaryRecognitionTerms(snapshot)).toEqual(['Rizum']);
+    // A word written with a comma in it is told as its pieces, each once.
+    expect(glossaryRecognitionTerms({ entries: [{ id: 'a', source: 'Jackal, ジャカル', aliases: [] }, { id: 'b', source: 'Jackal', aliases: ['Jackero'] }] })).toEqual(['Jackal', 'ジャカル']);
     expect(withGlossary('Translate.', snapshot)).toContain('Rizum');
     expect(withGlossary('Translate.', { entries: [] })).toBe('Translate.');
   });
