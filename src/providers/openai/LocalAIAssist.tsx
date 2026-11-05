@@ -538,6 +538,13 @@ function DeviceModels({ stage, settings, pair, legs, models, disabled, tour, nat
             </select>
             {mine === null && <p className="kt-note kt-note--todo" role="status">{isAutoLanguage(heardIn(slot)) ? t('providers.localai.detectOtherNeeds') : t('providers.localai.nativeUnchosen', { source: languageLabel(heardIn(slot), i18n.language) })}</p>}
             {mine && !fits(mine.id, slot) && <p className="kt-note kt-note--todo" role="status">{t(stage === 'asr' ? 'providers.localai.nativeUnheard' : 'providers.localai.translatorUnfit', { name: mine.name })}</p>}
+            {/* The engine runs one of its models at a time (`chooseNative` moves a language over where it can): said
+                here, on the row, not first at Start. Said once, on the later row. */}
+            {(() => {
+              if (stage !== 'asr' || !mine || isApple(mine.id) || !fits(mine.id, slot)) return null;
+              const before = slots.slice(0, slots.indexOf(slot)).map(using).find((other) => other && !isApple(other.id) && other.id !== mine.id);
+              return before ? <p className="kt-note kt-note--todo" role="status">{t('providers.localai.nativeTwoModels', { name: mine.name, other: before.name })}</p> : null;
+            })()}
           </div>
         );
       })}

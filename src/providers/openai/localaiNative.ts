@@ -249,6 +249,21 @@ export function chooseNative(pick: NativePick, id: string, languages: readonly s
       ?? (pick.bestEffort && isAutoLanguage(language) ? nativeModel(id) : null);
     if (model) byLanguage[baseOf(language)] = model.id;
   }
+  // The engine the app downloads runs one model at a time (`nativeGap`'s `native_two_models`): a language heard by
+  // another of its models goes over to this one where this one hears it, so the card never shows two that cannot
+  // run together. Where it does not hear it, the row says so (on the card). The Mac's own recognition runs beside.
+  // A model chosen to tell languages apart already hears every language it can while it does (`nativePicked`'s
+  // `detecting`): the choices of the others stand, for when it no longer does.
+  if (!isApple(id) && !pick.detecting && !languages.some(isAutoLanguage)) {
+    for (const language of heard) {
+      const base = baseOf(language);
+      if (chosenFor.has(base)) continue;
+      const now = byLanguage[base];
+      if (!now || isApple(now) || now === id) continue;
+      const follows = nativeModelFor(id, language) ?? (pick.bestEffort && isAutoLanguage(language) ? nativeModel(id) : null);
+      if (follows && !isApple(follows.id)) byLanguage[base] = follows.id;
+    }
+  }
   return { model: id, byLanguage };
 }
 

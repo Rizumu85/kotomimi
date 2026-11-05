@@ -498,10 +498,27 @@ describe('one menu for a stage of this computer, whoever runs it', () => {
     }
   });
 
+  it('says on the row when its model cannot run beside the other row’s', () => {
+    useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'downloaded', 'sensevoice-small-q8': 'downloaded' }) });
+    const { card, unmount } = draw({ legs: ['speaker', 'participant'], pair: { source: 'zh-CN', target: 'ru' }, settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'sensevoice-small-q8', asrNativeByLanguage: { zh: 'sensevoice-small-q8', ru: 'qwen3-asr-1.7b-q8' } } });
+    try {
+      expect(card(HEAR).getAllByText(/providers\.localai\.nativeTwoModels/)).toHaveLength(1);
+    } finally {
+      unmount();
+    }
+    const same = draw({ legs: ['speaker', 'participant'], pair: { source: 'zh-CN', target: 'ru' }, settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'qwen3-asr-1.7b-q8', asrNativeByLanguage: { zh: 'qwen3-asr-1.7b-q8', ru: 'qwen3-asr-1.7b-q8' } } });
+    try {
+      expect(same.card(HEAR).queryByText(/providers\.localai\.nativeTwoModels/)).toBeNull();
+    } finally {
+      same.unmount();
+    }
+  });
+
   it('keeps a recognition download assigned to the row that requested it', () => {
     const previous = useNativeEngineStore.getState().download;
     useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'downloaded', 'sensevoice-small-q8': 'absent' }), download: vi.fn(async () => {}) });
-    const { card, update, unmount } = draw({ legs: ['speaker', 'participant'], pair: { source: 'zh-CN', target: 'en' }, settings: { asrVia: 'device', asrNativeModel: 'qwen3-asr-1.7b-q8', asrNativeByLanguage: {} } });
+    // Russian, which SenseVoice does not hear: the other row keeps its model (and is told the two cannot run together).
+    const { card, update, unmount } = draw({ legs: ['speaker', 'participant'], pair: { source: 'zh-CN', target: 'ru' }, settings: { asrVia: 'device', asrNativeModel: 'qwen3-asr-1.7b-q8', asrNativeByLanguage: {} } });
     try {
       fireEvent.click(card(HEAR).getAllByRole('button', { name: 'providers.localai.browse' })[0]);
       fireEvent.click(within(screen.getByTestId('model-card-native:sensevoice-small-q8')).getByRole('button', { name: 'models.download' }));
@@ -510,7 +527,7 @@ describe('one menu for a stage of this computer, whoever runs it', () => {
       act(() => useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'downloaded', 'sensevoice-small-q8': 'downloaded' }) }));
       const picked = update.mock.calls.find(([patch]) => patch.asrNativeByLanguage?.zh === 'sensevoice-small-q8')?.[0];
       expect(picked).toBeDefined();
-      expect(picked!.asrNativeByLanguage?.en).not.toBe('sensevoice-small-q8');
+      expect(picked!.asrNativeByLanguage?.ru).toBe('qwen3-asr-1.7b-q8');
     } finally {
       unmount();
       useNativeEngineStore.setState({ download: previous });

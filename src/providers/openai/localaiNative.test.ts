@@ -293,6 +293,19 @@ describe('the other side\u2019s language left to be detected', () => {
     expect(chooseNative({ model: 'r2t2-q8' }, 'qwen3-asr-1.7b-q8', ['auto'], ['ja', 'auto']).byLanguage).toEqual({ ja: 'r2t2-q8', auto: 'qwen3-asr-1.7b-q8' });
   });
 
+  it('moves the other language over to a model chosen for one, where it hears it: the engine runs one at a time', () => {
+    const pick = { model: 'qwen3-asr-1.7b-q8', byLanguage: { ja: 'qwen3-asr-1.7b-q8', ko: 'qwen3-asr-1.7b-q8' } };
+    // SenseVoice hears Korean too: one model for both.
+    expect(chooseNative(pick, 'sensevoice-small-q8', ['ja'], ['ja', 'ko']).byLanguage).toEqual({ ja: 'sensevoice-small-q8', ko: 'sensevoice-small-q8' });
+    // It does not hear Russian: that one stays, and the card says the two cannot run together.
+    expect(chooseNative({ model: 'qwen3-asr-1.7b-q8', byLanguage: { ja: 'qwen3-asr-1.7b-q8', ru: 'qwen3-asr-1.7b-q8' } }, 'sensevoice-small-q8', ['ja'], ['ja', 'ru']).byLanguage)
+      .toEqual({ ja: 'sensevoice-small-q8', ru: 'qwen3-asr-1.7b-q8' });
+    // The Mac's recognition runs beside the engine's model: neither moves the other.
+    expect(chooseNative({ model: 'qwen3-asr-1.7b-q8', byLanguage: { ja: `${APPLE_PREFIX}ja`, ko: 'qwen3-asr-1.7b-q8' } }, 'sensevoice-small-q8', ['ko'], ['ja', 'ko']).byLanguage)
+      .toEqual({ ja: `${APPLE_PREFIX}ja`, ko: 'sensevoice-small-q8' });
+    expect(chooseNative(pick, `${APPLE_PREFIX}ja`, ['ja'], ['ja', 'ko']).byLanguage).toEqual({ ja: `${APPLE_PREFIX}ja`, ko: 'qwen3-asr-1.7b-q8' });
+  });
+
   it('builds the other side\u2019s leg with no language to hear, and a translation that is told no source', () => {
     // The pair is Chinese → Japanese: the other side's leg is its reverse, and `reversed` says so.
     const other = { ...PARTICIPANT, direction: { source: 'ja', target: 'zh-CN' } };
