@@ -114,7 +114,9 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({ toggleSettings, act
                 isLocked={lockMic}
                 showMicrophone={true}
                 showSpeaker={false}
-                showEchoCancellation={showVoiceOutputControls}
+                // Shown for every provider: it acts on the microphone whether or not translations are spoken, and
+                // hidden it kept 'all' working unseen (2026-11-05).
+                showEchoCancellation
               />
 
               <SystemAudioSection

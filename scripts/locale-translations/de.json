@@ -180,8 +180,8 @@
     "text": "Nur Kotomimi"
   },
   "fork.echoCancellationAppTooltip": {
-    "en": "Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
-    "text": "Nur Kotomimi – entfernt nur die übersetzte Sprachausgabe von Kotomimi selbst. Wähle diese Option bei einer virtuellen Soundkarte als Mikrofon (VB-Cable, BlackHole)."
+    "en": "Kotomimi only — removes only the sound Kotomimi itself plays. Choose this with headphones or a VR headset, or when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "Nur Kotomimi — entfernt ausschließlich den Ton, den Kotomimi selbst abspielt. Wähle diese Option mit Kopfhörern oder einem VR-Headset oder wenn das Mikrofon eine virtuelle Soundkarte ist (VB-Cable, BlackHole)."
   },
   "fork.find.again": {
     "en": "Search again",
@@ -1938,6 +1938,10 @@
   "settings.auto": {
     "en": "Auto",
     "text": "Automatisch"
+  },
+  "settings.echoCancellationTooltip.all": {
+    "en": "All sounds — Also removes what other apps play through the speakers, such as a game or a meeting app: choose this when you listen on loudspeakers, so the other side is not heard as you. While they speak it can turn your own voice down. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
+    "text": "Alle Töne — entfernt auch die Wiedergabe anderer Apps über die Lautsprecher, etwa eines Spiels oder einer Meeting-App: Wähle diese Option, wenn du über Lautsprecher hörst, damit die Stimme der anderen Seite nicht als deine erkannt wird. Während die andere Person spricht, kann deine eigene Stimme leiser werden. Eine als Mikrofon verwendete virtuelle Soundkarte überträgt genau diesen Ton und wäre daher stumm."
   },
   "settings.glossaryAdd": {
     "en": "Add a word…",

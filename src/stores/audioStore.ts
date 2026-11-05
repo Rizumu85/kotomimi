@@ -188,7 +188,10 @@ const useAudioStore = create<AudioStore>()(
     noiseSuppressionMode: 'standard' as NoiseSuppressionMode,
     noiseSuppressionState: null,
     micGateThreshold: 0,
-    echoCancellationMode: 'all' as EchoCancellationMode,
+    // Fork: what Kotomimi plays alone, by default. Kotomimi speaks no translation, so 'all' only took the other
+    // players' voices out of the microphone — and while they spoke, the user's own with them (the user, 2026-11-05:
+    // "my speech stops while the other side talks"). A loudspeaker user chooses 'all' in the settings.
+    echoCancellationMode: 'app' as EchoCancellationMode,
 
     // Mode + per-channel mute flags
     mode: 'speaker' as AudioMode,
@@ -485,7 +488,7 @@ const useAudioStore = create<AudioStore>()(
         }
 
         const savedEchoCancellation = await settingsService.getSetting<string | null>(STORAGE_KEYS.ECHO_CANCELLATION_MODE, null);
-        set({ echoCancellationMode: savedEchoCancellation === 'app' ? 'app' : 'all' });
+        set({ echoCancellationMode: savedEchoCancellation === 'all' ? 'all' : 'app' });
 
         const savedIsMicMuted = await settingsService.getSetting<boolean | null>(STORAGE_KEYS.IS_MIC_MUTED, null);
         if (typeof savedIsMicMuted === 'boolean') {

@@ -61,7 +61,7 @@
     "echoCancellationTooltip": {
       "app": "Yalnızca Sokuji — Mikrofon Sokuji'nin çevrilmiş konuşmasını alırsa onu kaldırır. Mikrofon BlackHole gibi sanal bir kablo ise bunu seçin.",
       "browser": "Yalnızca tarayıcı — Mikrofon bu tarayıcının çaldığı sesleri (toplantı sekmeleri dahil) alırsa onları kaldırır. Mikrofon, başka bir uygulamanın sesini taşıyan BlackHole gibi sanal bir kablo ise bunu seçin.",
-      "all": "Tüm sesler — Toplantı uygulaması gibi diğer uygulamaların hoparlörden çaldığı sesleri de kaldırır. Mikrofon olarak kullanılan sanal kablo tam olarak bu sesi taşıdığından sessiz kalır."
+      "all": "Tüm sesler — Oyun veya toplantı uygulaması gibi diğer uygulamaların hoparlörlerden çaldığı sesleri de kaldırır: Hoparlörden dinliyorsanız bunu seçin; böylece karşı tarafın sesi siz konuşuyormuşsunuz gibi algılanmaz. Karşı taraf konuşurken kendi sesiniz kısılabilir. Mikrofon olarak kullanılan sanal kablo tam olarak bu sesi ilettiğinden tamamen sessiz kalır."
     },
     "echoCancellationMode": {
       "app": "Yalnızca Sokuji",
@@ -1703,7 +1703,7 @@
     "romanization": "Latinleştirme",
     "pinyin": "Çince metnin üzerinde pinyin",
     "echoCancellationApp": "Yalnızca Kotomimi",
-    "echoCancellationAppTooltip": "Yalnızca Kotomimi — sadece Kotomimi'nin çaldığı çevrilmiş konuşmayı kaldırır. Mikrofon sanal bir kabloysa (VB-Cable, BlackHole) bunu seçin.",
+    "echoCancellationAppTooltip": "Yalnızca Kotomimi — sadece Kotomimi'nin çaldığı sesi kaldırır. Kulaklık veya VR başlığı kullanıyorsanız ya da mikrofon sanal kabloysa (VB-Cable, BlackHole) bunu seçin.",
     "speechDetection": {
       "title": "Konuşma algılama"
     },

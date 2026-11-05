@@ -61,7 +61,7 @@
     "echoCancellationTooltip": {
       "app": "Vain Sokuji — Poistaa Sokujin käännetyn puheen, jos mikrofoni poimii sen. Valitse tämä, kun mikrofoni on virtuaalinen kaapeli, kuten BlackHole.",
       "browser": "Vain selain — Poistaa tämän selaimen toistaman äänen kokousvälilehdet mukaan lukien, jos mikrofoni poimii sen. Valitse tämä, kun mikrofoni on virtuaalinen kaapeli, kuten BlackHole, joka välittää toisen sovelluksen ääntä.",
-      "all": "Kaikki äänet — Poistaa myös äänen, jonka muut sovellukset toistavat kaiuttimista, kuten kokoussovelluksen. Mikrofonina käytetty virtuaalinen kaapeli välittää juuri tätä ääntä, joten se hiljenisi."
+      "all": "Kaikki äänet — Poistaa myös muiden sovellusten kaiuttimista toistamat äänet, kuten pelin tai kokoussovelluksen äänen. Valitse tämä, kun kuuntelet kaiuttimista, jotta toisen osapuolen puhetta ei tulkita omaksi puheeksesi. Kun toinen puhuu, oma äänesi voi myös vaimentua. Mikrofonina käytettävä virtuaalikaapeli välittää juuri nämä äänet, joten se mykistyy."
     },
     "echoCancellationMode": {
       "app": "Vain Sokuji",
@@ -1703,7 +1703,7 @@
     "romanization": "Näytä latinalaistus",
     "pinyin": "Pinyin kiinankielisen tekstin yläpuolella",
     "echoCancellationApp": "Vain Kotomimi",
-    "echoCancellationAppTooltip": "Vain Kotomimi: poistaa vain Kotomimin itse toistaman käännöspuheen. Valitse tämä, jos mikrofonina on virtuaalinen äänikortti (VB-Cable, BlackHole).",
+    "echoCancellationAppTooltip": "Vain Kotomimi — poistaa ainoastaan Kotomimin itsensä toistamat äänet. Valitse tämä kuulokkeilla tai VR-kuulokkeilla; valitse tämä myös, kun mikrofoni on virtuaalinen äänikaapeli (VB-Cable, BlackHole jne.).",
     "speechDetection": {
       "title": "Puheen havaitseminen"
     },

@@ -176,8 +176,8 @@
     "text": "Kotomimi のみ"
   },
   "fork.echoCancellationAppTooltip": {
-    "en": "Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
-    "text": "Kotomimi のみ：Kotomimi 自身が再生する翻訳音声だけを除去します。マイクが仮想オーディオデバイス（VB-Cable、BlackHole など）の場合に選んでください。"
+    "en": "Kotomimi only — removes only the sound Kotomimi itself plays. Choose this with headphones or a VR headset, or when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "Kotomimiのみ — Kotomimiが再生する音だけを除去します。ヘッドホンやVRヘッドセットを使う場合、またはマイクが仮想オーディオケーブル（VB-Cable、BlackHoleなど）の場合はこちらを選んでください。"
   },
   "fork.find.again": {
     "en": "Search again",
@@ -1898,6 +1898,10 @@
   "providers.volcengine_ast2.name": {
     "en": "Doubao AST 2.0",
     "text": "Doubao 同時通訳 2.0"
+  },
+  "settings.echoCancellationTooltip.all": {
+    "en": "All sounds — Also removes what other apps play through the speakers, such as a game or a meeting app: choose this when you listen on loudspeakers, so the other side is not heard as you. While they speak it can turn your own voice down. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
+    "text": "すべての音 — ゲームや通話アプリなど、他のアプリがスピーカーから再生する音も除去します。スピーカーで聞く場合は、相手の声が自分の発言として認識されないよう、これを選んでください。相手が話している間は、自分の声が小さくなることがあります。マイクに使っている仮想オーディオケーブルにはまさにこの音が流れるため、無音になります。"
   },
   "settings.glossaryAdd": {
     "en": "Add a word…",

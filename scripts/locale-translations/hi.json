@@ -176,8 +176,8 @@
     "text": "सिर्फ़ Kotomimi"
   },
   "fork.echoCancellationAppTooltip": {
-    "en": "Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
-    "text": "सिर्फ़ Kotomimi: केवल Kotomimi की अपनी अनुवादित आवाज़ हटाता है। माइक्रोफ़ोन के तौर पर वर्चुअल साउंड कार्ड (VB-Cable, BlackHole आदि) इस्तेमाल करते समय यह विकल्प चुनें।"
+    "en": "Kotomimi only — removes only the sound Kotomimi itself plays. Choose this with headphones or a VR headset, or when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "केवल Kotomimi — सिर्फ़ Kotomimi द्वारा चलायी जाने वाली ध्वनि हटाता है। हेडफ़ोन या VR हेडसेट इस्तेमाल करते समय इसे चुनें; माइक्रोफ़ोन वर्चुअल केबल (VB-Cable, BlackHole) हो तो भी यही चुनें।"
   },
   "fork.find.again": {
     "en": "Search again",
@@ -1898,6 +1898,10 @@
   "providers.volcengine_ast2.name": {
     "en": "Doubao AST 2.0",
     "text": "Doubao साथ-साथ अनुवाद 2.0"
+  },
+  "settings.echoCancellationTooltip.all": {
+    "en": "All sounds — Also removes what other apps play through the speakers, such as a game or a meeting app: choose this when you listen on loudspeakers, so the other side is not heard as you. While they speak it can turn your own voice down. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
+    "text": "सभी ध्वनियाँ — अन्य ऐप्स द्वारा स्पीकर से चलायी जाने वाली आवाज़ें, जैसे गेम या मीटिंग ऐप की ध्वनि, भी हटा दी जाती हैं। स्पीकर पर सुनते समय इसे चुनें, ताकि सामने वाले की आवाज़ आपकी आवाज़ न समझी जाए। उनके बोलने पर आपकी अपनी आवाज़ धीमी हो सकती है। माइक्रोफ़ोन के रूप में इस्तेमाल होने वाली वर्चुअल केबल यही ध्वनि भेजती है, इसलिए वह पूरी तरह मौन हो जाएगी।"
   },
   "settings.glossaryAdd": {
     "en": "Add a word…",

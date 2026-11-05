@@ -61,7 +61,7 @@
     "echoCancellationTooltip": {
       "app": "Sokuji のみ — マイクが拾った Sokuji の翻訳音声を除去します。マイクが BlackHole などの仮想オーディオデバイスの場合はこちらを選んでください。",
       "browser": "ブラウザのみ — マイクが拾ったこのブラウザの音（会議のタブを含む）を除去します。マイクが他のアプリの音を運ぶ BlackHole などの仮想オーディオデバイスの場合はこちらを選んでください。",
-      "all": "すべての音 — 会議アプリなど、他のアプリがスピーカーから再生する音も除去します。マイクとして使う仮想オーディオデバイスはまさにその音を運ぶため、無音になります。"
+      "all": "すべての音 — ゲームや通話アプリなど、他のアプリがスピーカーから再生する音も除去します。スピーカーで聞く場合は、相手の声が自分の発言として認識されないよう、これを選んでください。相手が話している間は、自分の声が小さくなることがあります。マイクに使っている仮想オーディオケーブルにはまさにこの音が流れるため、無音になります。"
     },
     "echoCancellationMode": {
       "app": "Sokuji のみ",
@@ -1703,7 +1703,7 @@
     "romanization": "ローマ字を表示",
     "pinyin": "中国語の上にピンインを表示",
     "echoCancellationApp": "Kotomimi のみ",
-    "echoCancellationAppTooltip": "Kotomimi のみ：Kotomimi 自身が再生する翻訳音声だけを除去します。マイクが仮想オーディオデバイス（VB-Cable、BlackHole など）の場合に選んでください。",
+    "echoCancellationAppTooltip": "Kotomimiのみ — Kotomimiが再生する音だけを除去します。ヘッドホンやVRヘッドセットを使う場合、またはマイクが仮想オーディオケーブル（VB-Cable、BlackHoleなど）の場合はこちらを選んでください。",
     "speechDetection": {
       "title": "音声検出"
     },

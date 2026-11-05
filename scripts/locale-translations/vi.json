@@ -180,8 +180,8 @@
     "text": "Chỉ Kotomimi"
   },
   "fork.echoCancellationAppTooltip": {
-    "en": "Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
-    "text": "Chỉ Kotomimi: chỉ khử giọng đọc bản dịch do Kotomimi phát. Chọn mục này khi micrô dùng thiết bị âm thanh ảo (VB-Cable, BlackHole)."
+    "en": "Kotomimi only — removes only the sound Kotomimi itself plays. Choose this with headphones or a VR headset, or when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "Chỉ Kotomimi — chỉ loại bỏ âm thanh do chính Kotomimi phát. Chọn mục này khi dùng tai nghe hoặc kính VR; cũng chọn khi micrô là cáp âm thanh ảo (VB-Cable, BlackHole, v.v.)."
   },
   "fork.find.again": {
     "en": "Search again",
@@ -1914,6 +1914,10 @@
   "providers.volcengine_ast2.name": {
     "en": "Doubao AST 2.0",
     "text": "Doubao AST 2.0"
+  },
+  "settings.echoCancellationTooltip.all": {
+    "en": "All sounds — Also removes what other apps play through the speakers, such as a game or a meeting app: choose this when you listen on loudspeakers, so the other side is not heard as you. While they speak it can turn your own voice down. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
+    "text": "Tất cả âm thanh — Cũng loại bỏ âm thanh do các ứng dụng khác phát qua loa, chẳng hạn như trò chơi hoặc ứng dụng họp: hãy chọn mục này khi bạn nghe bằng loa ngoài để giọng đối phương không bị nhận nhầm là giọng của bạn. Khi đối phương nói, giọng của bạn có thể bị giảm âm lượng. Cáp âm thanh ảo dùng làm micrô truyền chính những âm thanh này, nên sẽ bị tắt tiếng."
   },
   "settings.glossaryAdd": {
     "en": "Add a word…",

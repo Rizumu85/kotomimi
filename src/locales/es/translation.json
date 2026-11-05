@@ -61,7 +61,7 @@
     "echoCancellationTooltip": {
       "app": "Solo Sokuji — Elimina la voz traducida de Sokuji si el micrófono la capta. Elija esta opción si el micrófono es un cable virtual como BlackHole.",
       "browser": "Solo navegador — Elimina lo que reproduce este navegador, incluidas las pestañas de reuniones, si el micrófono lo capta. Elija esta opción si el micrófono es un cable virtual como BlackHole que transmite el sonido de otra aplicación.",
-      "all": "Todos los sonidos — También elimina lo que otras aplicaciones reproducen por los altavoces, como una aplicación de reuniones. Un cable virtual usado como micrófono transmite justo ese sonido, así que quedaría en silencio."
+      "all": "Todos los sonidos — También elimina lo que otras aplicaciones reproducen por los altavoces, como un juego o una aplicación de reuniones: elige esta opción si escuchas por altavoces, para que la voz de la otra persona no se detecte como tuya. Mientras habla, tu propia voz puede bajar de volumen. Un cable virtual usado como micrófono transmite exactamente ese sonido, por lo que quedaría en silencio."
     },
     "echoCancellationMode": {
       "app": "Solo Sokuji",
@@ -1703,7 +1703,7 @@
     "romanization": "Mostrar romanización",
     "pinyin": "Pinyin sobre el texto chino",
     "echoCancellationApp": "Solo Kotomimi",
-    "echoCancellationAppTooltip": "Solo Kotomimi: elimina únicamente la voz traducida que reproduce Kotomimi. Elige esta opción si usas una tarjeta de sonido virtual (VB-Cable, BlackHole) como micrófono.",
+    "echoCancellationAppTooltip": "Solo Kotomimi — elimina únicamente el sonido que reproduce Kotomimi. Elige esta opción con auriculares o un visor de realidad virtual, o cuando el micrófono sea un cable virtual (VB-Cable, BlackHole).",
     "speechDetection": {
       "title": "Detección de voz"
     },

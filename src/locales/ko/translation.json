@@ -61,7 +61,7 @@
     "echoCancellationTooltip": {
       "app": "Sokuji만 — 마이크에 들어온 Sokuji의 번역 음성을 제거합니다. 마이크가 BlackHole 같은 가상 오디오 장치라면 이 옵션을 선택하세요.",
       "browser": "브라우저만 — 마이크에 들어온 이 브라우저의 소리(회의 탭 포함)를 제거합니다. 마이크가 다른 앱의 소리를 전달하는 BlackHole 같은 가상 오디오 장치라면 이 옵션을 선택하세요.",
-      "all": "모든 소리 — 회의 앱처럼 다른 앱이 스피커로 재생하는 소리도 제거합니다. 마이크로 쓰는 가상 오디오 장치는 바로 그 소리를 전달하므로 무음이 됩니다."
+      "all": "모든 소리 — 게임이나 회의 앱처럼 다른 앱이 스피커로 재생하는 소리도 함께 제거합니다. 스피커로 들을 때 선택하면 상대방의 목소리가 내 말로 인식되지 않습니다. 상대방이 말할 때 내 목소리가 작아질 수도 있습니다. 마이크로 사용하는 가상 케이블은 바로 이 소리를 전달하므로 음소거됩니다."
     },
     "echoCancellationMode": {
       "app": "Sokuji만",
@@ -1703,7 +1703,7 @@
     "romanization": "로마자 발음 표시",
     "pinyin": "중국어 위에 병음 표시",
     "echoCancellationApp": "Kotomimi만",
-    "echoCancellationAppTooltip": "Kotomimi만: Kotomimi가 재생하는 번역 음성만 제거해요. 마이크가 가상 오디오 장치(VB-Cable, BlackHole 등)일 때 선택하세요.",
+    "echoCancellationAppTooltip": "Kotomimi만 — Kotomimi가 직접 재생하는 소리만 제거합니다. 헤드폰이나 VR 헤드셋을 사용할 때 선택하세요. 마이크가 가상 케이블(VB-Cable, BlackHole 등)인 경우에도 이 항목을 선택하세요.",
     "speechDetection": {
       "title": "음성 감지"
     },

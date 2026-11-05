@@ -61,7 +61,7 @@
     "echoCancellationTooltip": {
       "app": "Sokuji sahaja — Membuang pertuturan terjemahan Sokuji jika ditangkap mikrofon. Pilih ini apabila mikrofon ialah kabel maya seperti BlackHole.",
       "browser": "Pelayar sahaja — Membuang bunyi yang dimainkan pelayar ini, termasuk tab mesyuarat, jika ditangkap mikrofon. Pilih ini apabila mikrofon ialah kabel maya seperti BlackHole yang membawa bunyi aplikasi lain.",
-      "all": "Semua bunyi — Turut membuang bunyi yang dimainkan aplikasi lain melalui pembesar suara, seperti aplikasi mesyuarat. Kabel maya yang digunakan sebagai mikrofon membawa bunyi itu, jadi ia akan menjadi senyap."
+      "all": "Semua bunyi — Turut menghapuskan bunyi yang dimainkan oleh aplikasi lain melalui pembesar suara, seperti permainan atau aplikasi mesyuarat: pilih ini apabila anda mendengar melalui pembesar suara supaya suara pihak lain tidak disangka sebagai suara anda. Semasa mereka bercakap, kelantangan suara anda sendiri mungkin dikecilkan. Kabel maya yang digunakan sebagai mikrofon menghantar bunyi yang sama, jadi ia akan menjadi senyap."
     },
     "echoCancellationMode": {
       "app": "Sokuji sahaja",
@@ -1703,7 +1703,7 @@
     "romanization": "Paparkan perumian",
     "pinyin": "Pinyin di atas teks Cina",
     "echoCancellationApp": "Kotomimi sahaja",
-    "echoCancellationAppTooltip": "Kotomimi sahaja — hanya menyingkirkan suara terjemahan yang dimainkan oleh Kotomimi sendiri. Pilih ini apabila mikrofon menggunakan kad bunyi maya (VB-Cable, BlackHole).",
+    "echoCancellationAppTooltip": "Kotomimi sahaja — hanya menghapuskan bunyi yang dimainkan oleh Kotomimi sendiri. Pilih ini apabila menggunakan fon kepala atau set kepala VR, atau apabila mikrofon ialah kabel maya (VB-Cable, BlackHole).",
     "speechDetection": {
       "title": "Pengesanan pertuturan"
     },

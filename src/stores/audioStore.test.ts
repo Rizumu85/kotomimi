@@ -645,7 +645,7 @@ describe('audioStore — refreshDevices and the saved device', () => {
 describe('echo cancellation', () => {
   const KEY = 'audio.echoCancellationMode';
 
-  it('defaults to all sounds, persists a choice, and restores it', async () => {
+  it('defaults to Kotomimi only, persists a choice, and restores it', async () => {
     useAudioStore.setState({ echoCancellationMode: 'all' });
     useAudioStore.getState().setEchoCancellationMode('app');
     expect(useAudioStore.getState().echoCancellationMode).toBe('app');
@@ -656,9 +656,12 @@ describe('echo cancellation', () => {
     expect(useAudioStore.getState().echoCancellationMode).toBe('app');
   });
 
-  it('reads an unknown stored value as all sounds', async () => {
+  it('reads an unknown stored value, or none, as Kotomimi only, and a stored all sounds as that', async () => {
     await ServiceFactory.getSettingsService().setSetting(KEY, 'off');
-    useAudioStore.setState({ echoCancellationMode: 'app' });
+    useAudioStore.setState({ echoCancellationMode: 'all' });
+    await useAudioStore.getState().refreshDevices();
+    expect(useAudioStore.getState().echoCancellationMode).toBe('app');
+    await ServiceFactory.getSettingsService().setSetting(KEY, 'all');
     await useAudioStore.getState().refreshDevices();
     expect(useAudioStore.getState().echoCancellationMode).toBe('all');
   });

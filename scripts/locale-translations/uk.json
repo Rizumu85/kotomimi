@@ -172,8 +172,8 @@
     "text": "Лише Kotomimi"
   },
   "fork.echoCancellationAppTooltip": {
-    "en": "Kotomimi only — removes only the translated speech Kotomimi itself plays. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
-    "text": "Лише Kotomimi: усуває тільки перекладене мовлення, яке відтворює сама Kotomimi. Виберіть цей варіант, якщо мікрофон — це віртуальна звукова карта (VB-Cable, BlackHole тощо)."
+    "en": "Kotomimi only — removes only the sound Kotomimi itself plays. Choose this with headphones or a VR headset, or when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "Лише Kotomimi — усуває тільки звук, який відтворює сама Kotomimi. Оберіть цей варіант із навушниками або VR-гарнітурою; також оберіть його, якщо мікрофон — це віртуальна звукова карта (VB-Cable, BlackHole тощо)."
   },
   "fork.find.again": {
     "en": "Search again",
@@ -1898,6 +1898,10 @@
   "providers.volcengine_ast2.name": {
     "en": "Doubao AST 2.0",
     "text": "Doubao AST 2.0"
+  },
+  "settings.echoCancellationTooltip.all": {
+    "en": "All sounds — Also removes what other apps play through the speakers, such as a game or a meeting app: choose this when you listen on loudspeakers, so the other side is not heard as you. While they speak it can turn your own voice down. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
+    "text": "Усі звуки — також усуває звуки, які інші програми відтворюють через динаміки, наприклад гра чи застосунок для зустрічей: оберіть цей варіант, якщо слухаєте через динаміки, щоб голос співрозмовника не сприймався як ваш. Під час його мовлення ваш голос може стати тихішим. Віртуальний кабель, використаний як мікрофон, передає саме цей звук, тому він стане беззвучним."
   },
   "settings.glossaryAdd": {
     "en": "Add a word…",
