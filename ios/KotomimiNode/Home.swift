@@ -74,22 +74,27 @@ struct Home: View {
     private var checkButton: some View { Button { open = .tools } label: { CheckTile() } }
 
     /// Held across: the status and the big widgets take the larger part on the left, where every kind of work going
-    /// on has room; the switch and the small widgets stand in a narrower column on the right.
+    /// on has room. On the right, the settings key on the status word's line, the switch level with the status
+    /// word, and six small widgets of one size in a grid of two by three, sharing the height left: a widget is never
+    /// stretched to fill a row of its own.
     private func wide(_ size: CGSize) -> some View {
         HStack(alignment: .top, spacing: Metrics.gap) {
             VStack(alignment: .leading, spacing: Metrics.gap) {
-                Status(key: AnyView(key))
+                Status()
                 FocusTiles(several: true)
             }
             .frame(width: (size.width - Metrics.margin * 2 - Metrics.gap) * 0.6)
             VStack(spacing: Metrics.gap) {
+                // The status's kicker line: 36 from the top, 34 high, as `Status` lays it out.
+                HStack { Spacer(); key }.frame(height: 34).padding(.top, 36)
                 ShareTile().frame(height: 92)
-                HStack(spacing: Metrics.gap) { hearButton; translateButton; coachButton }
-                HStack(spacing: Metrics.gap) { devicesButton; checkButton }
-                Button { models(.hearing) } label: { ModelsTile() }.frame(height: 120)
+                Grid(horizontalSpacing: Metrics.gap, verticalSpacing: Metrics.gap) {
+                    GridRow { hearButton; translateButton }
+                    GridRow { coachButton; devicesButton }
+                    GridRow { checkButton; Button { models(.hearing) } label: { ModelsTile(compact: true) } }
+                }
             }
             .buttonStyle(Pressed())
-            .padding(.top, 30)
         }
         .padding(.horizontal, Metrics.margin)
         .padding(.bottom, Metrics.margin)
@@ -430,12 +435,14 @@ private struct HearingTile: View {
 private struct SmallTile<Thing: View>: View {
     let title: String
     let line: String
+    /// The object's width: one object is 50 square; the models widget's three stand in a row.
+    var thingWidth: CGFloat = 50
     @ViewBuilder var thing: Thing
 
     var body: some View {
         Tile(padding: 20) {
             VStack(alignment: .leading, spacing: 0) {
-                thing.frame(width: 50, height: 50)
+                thing.frame(width: thingWidth, height: 50, alignment: .leading)
                 Spacer(minLength: 10)
                 Text(title).font(Metrics.title).foregroundStyle(Palette.ink).padding(.bottom, 4)
                 Text(line).font(Metrics.small).foregroundStyle(Palette.ink2).lineLimit(1)
@@ -529,11 +536,11 @@ private struct ModelsTile: View {
 
     var body: some View {
         if compact {
-            SmallTile(title: "模型管理", line: "\(hearing.ready.count + text.ready.count) 项已下载") {
-                HStack(spacing: 2) {
-                    WaterThing().frame(width: 16, height: 16)
-                    PanesThing().frame(width: 16, height: 16)
-                    NoteThing().frame(width: 16, height: 16)
+            SmallTile(title: "模型管理", line: "\(hearing.ready.count + text.ready.count) 项已下载", thingWidth: 112) {
+                HStack(spacing: 6) {
+                    WaterThing().frame(width: 32, height: 32).opacity(hearing.ready.isEmpty && !text.ready.contains { $0.kind == .hear } ? 0.35 : 1)
+                    PanesThing().frame(width: 32, height: 32).opacity(text.ready.contains { $0.kind == .translate } ? 1 : 0.35)
+                    NoteThing().frame(width: 32, height: 32).opacity(text.ready.contains { $0.kind == .coach } ? 1 : 0.35)
                 }
             }
         } else {
