@@ -158,7 +158,8 @@ export function chatboxPages(line: string): string[] {
  * A sentence of the user's that is done, as it goes above their avatar: its own words and its translation final.
  * Coached and spoken, it is the sentence as they said it, once that is final — what answers it is feedback for them,
  * never shown to others. With both shown, each has a line of its own: the original first, or — `translationFirst` —
- * the translation. Null while it is not done, or for anything else.
+ * the translation. With the original alone (`source`), it goes up once its own words are final, with no translation
+ * waited for. Null while it is not done, or for anything else.
  */
 const base = (code: string) => code.toLowerCase().split(/[-_]/)[0];
 
@@ -166,7 +167,7 @@ export function finishedLine(entry: Entry, shows: ChatboxShows, said = false, tr
   if (shows === 'off' || entry.kind !== 'exchange' || entry.leg !== 'speaker') return null;
   // Speech already in the other language is shown as said unless the user enabled translation back into their own.
   const inTheirs = theirs !== undefined && entry.source.length > 0 && entry.source.every((row) => row.language !== undefined && base(row.language) === base(theirs.language));
-  if (said || (inTheirs && !theirs.back)) {
+  if (said || shows === 'source' || (inTheirs && !theirs.back)) {
     const words = textOf(entry.source);
     return entry.source.length > 0 && entry.source.every((row) => row.final) && words ? words : null;
   }

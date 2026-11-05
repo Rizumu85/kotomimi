@@ -86,6 +86,13 @@ describe('finishedLine', () => {
     expect(finishedLine(exchange('a', '今天天气真好', '今日はいい天気ですね'), 'both')).toBe('今天天气真好\n今日はいい天気ですね');
   });
 
+  it('is what was said alone, once final, with no translation waited for, where the original alone shows', () => {
+    expect(finishedLine(exchange('a', '今天天气真好', '今日はいい天気ですね'), 'source')).toBe('今天天气真好');
+    expect(finishedLine(exchange('a', '今天天气真好', ''), 'source')).toBe('今天天气真好');
+    expect(finishedLine(exchange('a', '今天天气', '', { final: false }), 'source')).toBeNull();
+    expect(finishedLine(exchange('a', 'こんにちは', '你好', { leg: 'participant' }), 'source')).toBeNull();
+  });
+
   it('puts the translation on top where asked, and keeps both lines whole', () => {
     expect(finishedLine(exchange('a', '今天天气真好', '今日はいい天気ですね'), 'both', false, true)).toBe('今日はいい天気ですね\n今天天气真好');
     const long = '长'.repeat(200);

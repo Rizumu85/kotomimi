@@ -791,6 +791,10 @@
     "en": "Off",
     "text": "Kapalı"
   },
+  "fork.vrchat.chatboxSource": {
+    "en": "Original",
+    "text": "Orijinal"
+  },
   "fork.vrchat.chatboxSourceFirst": {
     "en": "Original on top",
     "text": "Önce özgün metin"
@@ -816,8 +820,8 @@
     "text": "Bitir"
   },
   "fork.vrchat.help": {
-    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
-    "text": "Bu bilgisayardaki VRChat ile çalışır. VRChat'te sessize alındığınızda Kotomimi sizi duymaz; çevirileriniz başınızın üzerinde gösterilerek diğer oyuncuların okuyabilmesini sağlar. Bir dünyada video oynatılırken sesin dünyada yönü yoksa oyuncuların seslerinden ayrılır; yönü varsa karşı tarafın konuşması daha kısa parçalara bölünür."
+    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; what you say, or its translation, can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
+    "text": "Bu bilgisayardaki VRChat ile çalışır. VRChat'te mikrofonunuzu kapattığınızda Kotomimi sizi duymaz; söyledikleriniz veya çevirisi, diğerlerinin okuyabilmesi için avatarınızın üzerinde gösterilebilir. Bir dünyada video oynatılırken: sesin dünyada yönü yoksa oyuncuların seslerinden ayrılır; yönü varsa karşı tarafın sesi daha kısa parçalar hâlinde duyulur."
   },
   "fork.vrchat.mutedNotHeard": {
     "en": "Muted in VRChat: what you say is not recognized.",

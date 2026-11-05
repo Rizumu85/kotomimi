@@ -791,6 +791,10 @@
     "en": "Off",
     "text": "வேண்டாம்"
   },
+  "fork.vrchat.chatboxSource": {
+    "en": "Original",
+    "text": "அசல்"
+  },
   "fork.vrchat.chatboxSourceFirst": {
     "en": "Original on top",
     "text": "மூல உரை மேலே"
@@ -816,8 +820,8 @@
     "text": "முடி"
   },
   "fork.vrchat.help": {
-    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
-    "text": "இந்தக் கணினியில் உள்ள VRChat உடன் இணைந்து செயல்படும். VRChat இல் மைக்கை அணைத்தால், Kotomimi உங்கள் பேச்சை அடையாளம் காணாது. உங்கள் மொழிபெயர்ப்புகளை அவதாரின் தலைக்கு மேலே காட்டலாம்; மற்ற வீரர்கள் அவற்றைப் படிக்கலாம். உலகில் வீடியோ ஓடும்போது: அதன் ஒலி குறிப்பிட்ட திசையிலிருந்து வரவில்லை என்றால், அதை வீரர்களின் குரல்களிலிருந்து பிரிக்கும்; திசையிலிருந்து வந்தால், மற்றவர்களின் பேச்சைச் சிறிய பகுதிகளாகப் பிரிக்கும்."
+    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; what you say, or its translation, can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
+    "text": "இந்தக் கணினியில் VRChat உடன் செயல்படும். VRChat-ல் மியூட் செய்திருந்தால், உங்கள் குரலை Kotomimi அடையாளம் காணாது; நீங்கள் சொல்வதோ அதன் மொழிபெயர்ப்போ உங்கள் அவதாரத்தின் தலைக்கு மேல் காட்டப்பட்டு, மற்ற வீரர்கள் பார்க்கலாம். உலகில் வீடியோ ஓடும் போது: வீடியோ ஒலிக்கு உலகில் திசை இல்லையெனில், அதை வீரர்களின் குரல்களிலிருந்து பிரிக்கும்; திசை இருந்தால், மறுபக்கக் குரல் குறுகிய துண்டுகளாகக் கேட்கும்."
   },
   "fork.vrchat.mutedNotHeard": {
     "en": "Muted in VRChat: what you say is not recognized.",

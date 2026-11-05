@@ -795,6 +795,10 @@
     "en": "Off",
     "text": "Tắt"
   },
+  "fork.vrchat.chatboxSource": {
+    "en": "Original",
+    "text": "Bản gốc"
+  },
   "fork.vrchat.chatboxSourceFirst": {
     "en": "Original on top",
     "text": "Bản gốc ở trên"
@@ -820,8 +824,8 @@
     "text": "Kết thúc"
   },
   "fork.vrchat.help": {
-    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
-    "text": "Kết nối với VRChat trên máy tính này: khi bạn tắt mic trong VRChat, Kotomimi sẽ không nhận dạng giọng nói của bạn; bản dịch của bạn có thể hiện trên đầu nhân vật để người chơi khác đọc. Khi thế giới phát video: nếu âm thanh video không có hướng, ứng dụng sẽ tách nó khỏi giọng người chơi; nếu có hướng, lời nói của người khác sẽ được chia thành các đoạn ngắn hơn."
+    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; what you say, or its translation, can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
+    "text": "Hoạt động cùng VRChat trên máy tính này: khi bạn tắt tiếng trong VRChat, Kotomimi sẽ không nhận diện giọng nói của bạn; lời bạn nói hoặc bản dịch có thể hiển thị phía trên avatar để người chơi khác đọc. Khi thế giới phát video: nếu âm thanh video không có hướng, âm thanh đó được tách khỏi giọng người chơi; nếu có hướng, giọng phía bên kia được chia thành các đoạn ngắn hơn."
   },
   "fork.vrchat.mutedNotHeard": {
     "en": "Muted in VRChat: what you say is not recognized.",

@@ -795,6 +795,10 @@
     "en": "Off",
     "text": "Uit"
   },
+  "fork.vrchat.chatboxSource": {
+    "en": "Original",
+    "text": "Origineel"
+  },
   "fork.vrchat.chatboxSourceFirst": {
     "en": "Original on top",
     "text": "Origineel bovenaan"
@@ -820,8 +824,8 @@
     "text": "Beëindigen"
   },
   "fork.vrchat.help": {
-    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
-    "text": "Werkt samen met VRChat op deze computer. Als je in VRChat gedempt bent, herkent Kotomimi je spraak niet. Je vertalingen kunnen boven je avatar verschijnen, zodat anderen ze kunnen lezen. Als er in een wereld een video speelt: komt het videogeluid niet uit een bepaalde richting, dan wordt het gescheiden van de stemmen van spelers. Komt het wel uit een bepaalde richting, dan wordt de spraak van anderen in kortere stukken verwerkt."
+    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; what you say, or its translation, can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
+    "text": "Werkt samen met VRChat op deze computer. Als je in VRChat gedempt bent, hoort Kotomimi je niet. Wat je zegt of de vertaling ervan kan boven je avatar worden weergegeven, zodat anderen het kunnen lezen. Wanneer er in een wereld een video wordt afgespeeld: als het geluid geen richting in de wereld heeft, wordt het gescheiden van de stemmen van spelers; als het wel richting heeft, wordt de stem van de andere kant in kortere stukken opgeknipt."
   },
   "fork.vrchat.mutedNotHeard": {
     "en": "Muted in VRChat: what you say is not recognized.",

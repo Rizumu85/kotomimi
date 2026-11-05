@@ -791,6 +791,10 @@
     "en": "Off",
     "text": "Desativado"
   },
+  "fork.vrchat.chatboxSource": {
+    "en": "Original",
+    "text": "Original"
+  },
   "fork.vrchat.chatboxSourceFirst": {
     "en": "Original on top",
     "text": "Original em cima"
@@ -816,8 +820,8 @@
     "text": "Encerrar"
   },
   "fork.vrchat.help": {
-    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
-    "text": "Integração com o VRChat neste computador: quando seu microfone está silenciado no VRChat, o Kotomimi não reconhece sua fala. Suas traduções podem aparecer acima do seu avatar para outros jogadores lerem. Quando um mundo reproduz um vídeo: se o áudio não vem de uma direção específica, ele é separado das vozes dos jogadores; se vem, a fala dos outros é dividida em trechos mais curtos."
+    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; what you say, or its translation, can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
+    "text": "Funciona com o VRChat neste computador. Quando você silencia o microfone no VRChat, o Kotomimi não reconhece sua voz; o que você diz ou a tradução pode aparecer acima do seu avatar para outros lerem. Quando um mundo reproduz um vídeo: se o som não tiver direção no mundo, ele é separado das vozes dos jogadores; se tiver, a fala do outro lado é dividida em trechos mais curtos."
   },
   "fork.vrchat.mutedNotHeard": {
     "en": "Muted in VRChat: what you say is not recognized.",

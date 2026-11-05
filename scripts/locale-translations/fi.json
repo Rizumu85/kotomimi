@@ -787,6 +787,10 @@
     "en": "Off",
     "text": "Pois"
   },
+  "fork.vrchat.chatboxSource": {
+    "en": "Original",
+    "text": "Alkuperäinen"
+  },
   "fork.vrchat.chatboxSourceFirst": {
     "en": "Original on top",
     "text": "Alkuperäinen yllä"
@@ -812,8 +816,8 @@
     "text": "Lopeta"
   },
   "fork.vrchat.help": {
-    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
-    "text": "Toimii yhdessä tämän tietokoneen VRChatin kanssa: kun mykistät mikrofonisi VRChatissa, Kotomimi ei tunnista puhettasi. Käännöksesi voivat näkyä avatarisi yläpuolella muille pelaajille. Kun maailmassa toistetaan videota, sen ääni erotetaan pelaajien puheesta, jos ääni ei tule tietystä suunnasta. Jos ääni tulee tietystä suunnasta, keskustelukumppanin puhe käsitellään lyhyempinä jaksoina."
+    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; what you say, or its translation, can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
+    "text": "Toimii tällä tietokoneella VRChatin kanssa. Kun olet mykistetty VRChatissa, Kotomimi ei kuule puhettasi; sanomasi tai sen käännös voi näkyä avatarisi yläpuolella muiden luettavana. Kun maailma toistaa videota: jos videon äänellä ei ole maailmassa suuntaa, se erotetaan pelaajien puheesta; jos on, vastapuolen puhe pilkotaan lyhyemmiksi jaksoiksi."
   },
   "fork.vrchat.mutedNotHeard": {
     "en": "Muted in VRChat: what you say is not recognized.",

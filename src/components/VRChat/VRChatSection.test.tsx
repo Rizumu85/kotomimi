@@ -28,6 +28,10 @@ describe('VRChatSection — the chatbox chosen from pictures of it (fork)', () =
     fireEvent.click(screen.getByText('fork.vrchat.chatboxTranslation'));
     expect(useVRChatStore.getState().chatbox).toBe('translation');
     expect(screen.getByText('fork.vrchat.chatboxTranslation').closest('button')?.getAttribute('aria-pressed')).toBe('true');
+    // What was said alone, for a player who has it written for them.
+    fireEvent.click(screen.getByText('fork.vrchat.chatboxSource'));
+    expect(useVRChatStore.getState().chatbox).toBe('source');
+    expect([...document.querySelectorAll('.kt-chatbox-preview__line')].map((l) => l.textContent)).toEqual(['我们去下一个世界吧']);
   });
 
   it('shows the user’s last sentence once there is one', () => {

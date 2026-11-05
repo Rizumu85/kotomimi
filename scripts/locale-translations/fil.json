@@ -843,6 +843,10 @@
     "en": "Off",
     "text": "Naka-off"
   },
+  "fork.vrchat.chatboxSource": {
+    "en": "Original",
+    "text": "Orihinal"
+  },
   "fork.vrchat.chatboxSourceFirst": {
     "en": "Original on top",
     "text": "Orihinal sa itaas"
@@ -868,8 +872,8 @@
     "text": "Tapusin"
   },
   "fork.vrchat.help": {
-    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
-    "text": "Gumagana kasama ng VRChat sa computer na ito. Kapag naka-mute ka sa VRChat, hindi kikilalanin ng Kotomimi ang boses mo. Puwedeng lumabas ang salin mo sa ibabaw ng ulo ng avatar mo para mabasa ng ibang manlalaro. Kapag may video na pinapatugtog sa world: kung walang direksiyon ang tunog nito, ihihiwalay ito sa boses ng mga manlalaro; kung mayroon, hahatiin sa mas maiikling bahagi ang pagsasalita ng kausap mo."
+    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; what you say, or its translation, can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
+    "text": "Gumagana kasama ng VRChat sa computer na ito. Kapag naka-mute ka sa VRChat, hindi maririnig ng Kotomimi ang boses mo; maaaring ipakita sa ibabaw ng avatar mo ang sinabi mo o ang salin nito para mabasa ng ibang manlalaro. Kapag may video sa isang mundo: kung walang direksiyon ang tunog nito, ihihiwalay ito sa mga boses ng mga manlalaro; kung mayroon, hahatiin ang boses ng kabilang panig sa mas maiikling bahagi."
   },
   "fork.vrchat.mutedNotHeard": {
     "en": "Muted in VRChat: what you say is not recognized.",

@@ -791,6 +791,10 @@
     "en": "Off",
     "text": "ปิด"
   },
+  "fork.vrchat.chatboxSource": {
+    "en": "Original",
+    "text": "ต้นฉบับ"
+  },
   "fork.vrchat.chatboxSourceFirst": {
     "en": "Original on top",
     "text": "ต้นฉบับอยู่บน"
@@ -816,8 +820,8 @@
     "text": "จบ"
   },
   "fork.vrchat.help": {
-    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
-    "text": "ใช้ร่วมกับ VRChat บนคอมพิวเตอร์เครื่องนี้ได้: เมื่อปิดไมค์ใน VRChat Kotomimi จะไม่รับรู้เสียงพูดของคุณ คำแปลของคุณสามารถแสดงเหนือศีรษะอวาตาร์ให้ผู้เล่นคนอื่นอ่านได้ เมื่อมีวิดีโอเล่นในโลก: หากเสียงวิดีโอไม่มีทิศทาง จะแยกเสียงวิดีโอออกจากเสียงผู้เล่น หากมีทิศทาง จะแบ่งเสียงพูดของอีกฝ่ายเป็นช่วงสั้นลง"
+    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; what you say, or its translation, can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
+    "text": "ทำงานร่วมกับ VRChat บนคอมพิวเตอร์เครื่องนี้: เมื่อปิดเสียงใน VRChat Kotomimi จะไม่รับเสียงของคุณ คำพูดของคุณหรือคำแปลสามารถแสดงเหนืออวตารให้ผู้เล่นคนอื่นอ่านได้ เมื่อโลกกำลังเล่นวิดีโอ: หากเสียงวิดีโอไม่มีทิศทางในโลก ระบบจะแยกเสียงนั้นออกจากเสียงผู้เล่น หากมีทิศทาง จะตัดเสียงของอีกฝ่ายเป็นช่วงสั้นลง"
   },
   "fork.vrchat.mutedNotHeard": {
     "en": "Muted in VRChat: what you say is not recognized.",

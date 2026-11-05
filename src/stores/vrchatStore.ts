@@ -5,10 +5,11 @@
  * - `muteGate`: muted in VRChat, the user's own leg is not heard (on by
  *   default). Off for a player who keeps silent in VRChat and still wants
  *   what they say translated into the chatbox.
- * - `chatbox`: the user's translations above their avatar — off, the
- *   translation, or the original with it, on lines of their own, the
- *   original first or — `chatboxTranslationFirst` — the translation.
- *   Typed text goes the same way.
+ * - `chatbox`: what goes above the user's avatar — off, what they said
+ *   alone (`source`: for a player who has it written for them rather than
+ *   translated), the translation, or the original with it, on lines of
+ *   their own, the original first or — `chatboxTranslationFirst` — the
+ *   translation. Typed text goes the same way.
  * - `onVideo`: when a world's video player begins a video — ask, hear the
  *   people (`quick`), hear the people and the video apart (`both`), or not
  *   hear the other side at all. The first two take the video's sound out
@@ -21,7 +22,7 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 
-export type ChatboxShows = 'off' | 'translation' | 'both';
+export type ChatboxShows = 'off' | 'source' | 'translation' | 'both';
 export type OnVideo = 'ask' | 'quick' | 'both' | 'pause';
 /**
  * A video in the world: none, asked about, or being heard at a pace (`auto`: chosen for the user, who could not be
@@ -46,7 +47,7 @@ const KEYS = {
   /** Older builds' switch for `both`: read once, into `onVideo`. */
   translateVideo: 'settings.vrchat.translateVideo',
 } as const;
-const CHATBOX: readonly ChatboxShows[] = ['off', 'translation', 'both'];
+const CHATBOX: readonly ChatboxShows[] = ['off', 'source', 'translation', 'both'];
 const ON_VIDEO: readonly OnVideo[] = ['ask', 'quick', 'both', 'pause'];
 
 interface VRChatStore {

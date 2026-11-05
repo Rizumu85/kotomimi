@@ -1,8 +1,8 @@
 /**
  * Fork: VRChat on the same computer, in the settings (`src/app/vrchat.ts`): whether it answers, and its settings —
  * the mute, the chatbox, a video. Shown only where VRChat runs: the desktop app on Windows. What each does is in the
- * title's help; the card itself is the controls. The chatbox is chosen from pictures of it — off, the translation,
- * the original over it, the translation over the original — and shown below as it will look, with the user's last
+ * title's help; the card itself is the controls. The chatbox is chosen from pictures of it — off, the original alone,
+ * the translation, the original over it, the translation over the original — and shown below as it will look, with the user's last
  * sentence, or one in their pair's languages before they have said any. The SteamVR overlay has a card of its own
  * below this one (`VrHeadsetSection.tsx`).
  */
@@ -18,10 +18,11 @@ import ToggleSwitch from '../Settings/shared/ToggleSwitch';
 import Tooltip from '../Tooltip/Tooltip';
 import './VRChat.scss';
 
-/** The chatbox's four looks: what is shown, the translation first, and the name under its picture. */
+/** The chatbox's five looks: what is shown, the translation first, and the name under its picture. */
 type Look = { shows: ChatboxShows; translationFirst: boolean; words: string; lines: Array<'said' | 'translation'> };
 const LOOKS: Look[] = [
   { shows: 'off', translationFirst: false, words: 'chatboxOff', lines: [] },
+  { shows: 'source', translationFirst: false, words: 'chatboxSource', lines: ['said'] },
   { shows: 'translation', translationFirst: false, words: 'chatboxTranslation', lines: ['translation'] },
   { shows: 'both', translationFirst: false, words: 'chatboxSourceFirst', lines: ['said', 'translation'] },
   { shows: 'both', translationFirst: true, words: 'chatboxTranslationFirst', lines: ['translation', 'said'] },

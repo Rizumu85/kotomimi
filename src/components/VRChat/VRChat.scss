@@ -124,14 +124,15 @@
 // The chatbox's looks, as pictures of it: grey the original, green the translation.
 .kt-chatbox-looks {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
   margin-top: 6px;
 }
 
 .kt-chatbox-look {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   align-items: center;
   gap: 6px;
   padding: 0;
@@ -176,11 +177,15 @@
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
+// Narrower than its column, whatever the column's width: at a fixed 46 px, five of them made the row, and the
+// settings panel with it, wider than four had.
 .kt-chatbox-look__bubble {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  width: 46px;
+  box-sizing: border-box;
+  width: 78%;
+  max-width: 46px;
   padding: 6px;
   border-radius: 6px;
   background: #e9e9ea;

@@ -791,6 +791,10 @@
     "en": "Off",
     "text": "Nonaktif"
   },
+  "fork.vrchat.chatboxSource": {
+    "en": "Original",
+    "text": "Asli"
+  },
   "fork.vrchat.chatboxSourceFirst": {
     "en": "Original on top",
     "text": "Teks asli di atas"
@@ -816,8 +820,8 @@
     "text": "Akhiri"
   },
   "fork.vrchat.help": {
-    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; your translations can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
-    "text": "Terhubung dengan VRChat di komputer ini: saat mikrofon dibisukan di VRChat, Kotomimi tidak mengenali ucapan Anda. Terjemahan Anda bisa muncul di atas avatar agar pemain lain bisa membacanya. Saat dunia memutar video: jika suara video tidak memiliki arah, suaranya dipisahkan dari suara pemain; jika memiliki arah, ucapan lawan bicara dibagi menjadi potongan lebih pendek."
+    "en": "Works with VRChat on this computer. Muted in VRChat, Kotomimi does not hear you; what you say, or its translation, can show above your avatar for others to read. When a world plays a video: if its sound has no direction in the world, it is separated from the players' voices; if it has, the other side is heard in shorter stretches.",
+    "text": "Terhubung dengan VRChat di komputer ini. Saat Anda membisukan mikrofon di VRChat, Kotomimi tidak mendengar suara Anda; ucapan Anda atau terjemahannya dapat ditampilkan di atas avatar agar pemain lain dapat membacanya. Saat dunia memutar video: jika suara video tidak memiliki arah di dunia, suara tersebut dipisahkan dari suara pemain; jika memiliki arah, suara pihak lain dipotong menjadi bagian-bagian yang lebih pendek."
   },
   "fork.vrchat.mutedNotHeard": {
     "en": "Muted in VRChat: what you say is not recognized.",
