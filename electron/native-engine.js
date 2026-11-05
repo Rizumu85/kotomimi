@@ -299,6 +299,8 @@ const WARM_TIMEOUT_MS = 240_000;
 const STOP_PATIENCE_MS = 3000;
 /** Progress is told this often at most. */
 const PROGRESS_MS = 300;
+/** Kept free on the drive beyond what a download needs: the drive is not filled to its last byte. */
+const ROOM_MARGIN = 256 * 1024 ** 2;
 const TAIL_LINES = 30;
 
 /** A file's SHA-256, read in pieces. */
@@ -939,6 +941,17 @@ function createNativeEngine(deps = {}) {
   const fileOf = (id) => path.join(modelsDir, MODELS_[id].file);
   const has = (file) => { try { return files.statSync(file).isFile(); } catch { return false; } };
   const sizeOf = (file) => { try { return files.statSync(file).size; } catch { return 0; } };
+  /** The bytes free on the drive `at` is on, asked of its nearest folder that is there; null where that cannot be told. */
+  const freeBytes = (at) => {
+    if (typeof files.statfsSync !== 'function') return null;
+    let where = path.resolve(at);
+    for (;;) {
+      try { const s = files.statfsSync(where); return Number(s.bavail) * Number(s.bsize); } catch { /* not there: its parent */ }
+      const up = path.dirname(where);
+      if (up === where) return null;
+      where = up;
+    }
+  };
   /**
    * The runtime is being unpacked while this file is beside it. An unpacking that stopped halfway — the app closed,
    * the disk full, the archive refused — can leave the program and not the libraries it needs: with this left
@@ -1077,6 +1090,13 @@ function createNativeEngine(deps = {}) {
     try {
       engineFor = id;
       const fetchesEngine = !engineReady();
+      // Room for it, asked first: a drive that fills halfway through leaves a broken file and an error of the disk's.
+      // The runtime counts twice (its archive, then what it unpacks to).
+      const needed = (fetchesEngine ? build.bytes * 2 : 0) + (has(fileOf(id)) ? 0 : MODELS_[id].bytes - sizeOf(`${fileOf(id)}.part`));
+      const room = freeBytes(dir);
+      if (room !== null && needed + ROOM_MARGIN > room) {
+        throw new Error(`There is not enough room on the drive: ${(room / 1024 ** 3).toFixed(1)} GB free, ${(needed / 1024 ** 3).toFixed(1)} GB needed.`);
+      }
       await ensureEngine();
       if (!has(fileOf(id))) {
         if (fetchesEngine) carried.set(id, build.bytes);

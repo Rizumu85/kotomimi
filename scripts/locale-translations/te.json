@@ -559,6 +559,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "సిద్ధమవుతోంది. కాసేపట్లో ప్రారంభించవచ్చు."
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "సెషన్ జరుగుతున్నప్పుడు మార్చలేరు"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "మోడళ్లు షేర్ చేస్తున్నప్పుడు మార్చలేరు"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "రద్దు చేయి"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "స్థానం మార్చండి"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "మోడళ్లను మార్చండి"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "మళ్లీ ఎంచుకోండి"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "{{name}} డ్రైవ్"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "మోడళ్లు ఇప్పటికే మారుతున్నాయి."
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "మార్పు పూర్తికాలేదు. మోడళ్లు మునుపటి స్థానంలోనే ఉన్నాయి."
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "ఒక మోడల్ డౌన్‌లోడ్ అవుతోంది. అది పూర్తయ్యాక మార్చండి."
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "మోడళ్ల స్వంత ఫోల్డర్లలోకి ఎంచుకోలేరు. వేరేదాన్ని ఎంచుకోండి."
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "మార్పు పూర్తికాలేదు. మోడళ్లు మునుపటి స్థానంలోనే ఉన్నాయి."
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "{{drive}}లో తగినంత స్థలం లేదు."
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "ఈ ఫోల్డర్‌లో రాయలేరు. వేరేదాన్ని ఎంచుకోండి."
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "మోడళ్లు ఇప్పటికే ఇక్కడే ఉన్నాయి."
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "రద్దు చేయబడింది. మోడళ్లు మునుపటి స్థానంలోనే ఉన్నాయి."
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "సుమారు {{count}} నిమిషాలు"
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "1 నిమిషంలోపు"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "{{drive}}లో {{size}} ఖాళీ"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "{{drive}}లో {{size}} ఖాళీ అయింది"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "ఈ ఫోల్డర్ కనిపించలేదు. బాహ్య డ్రైవ్ కనెక్ట్ అయిందా?"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "మోడళ్లు"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "మార్చు"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "{{drive}}లో {{size}} మాత్రమే మిగిలింది; సరిపోదు"
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "ఫోల్డర్ తెరవండి"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "ఈ కంప్యూటర్"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "మోడల్ నిల్వ"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "మార్చాల్సింది"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "డౌన్‌లోడ్ చేసిన గుర్తింపు, అనువాదం మరియు వ్యాకరణ అభిప్రాయ మోడళ్లను ఇక్కడ ఉంచుతారు. ఎక్కువ స్థలం ఉన్న డ్రైవ్‌కు మార్చితే, డౌన్‌లోడ్ చేసిన మోడళ్లు కూడా మారతాయి; మళ్లీ డౌన్‌లోడ్ చేయాల్సిన అవసరం లేదు."
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "డిఫాల్ట్ స్థానాన్ని ఉపయోగించండి"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "అమరిక"

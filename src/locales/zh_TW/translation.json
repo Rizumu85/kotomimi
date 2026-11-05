@@ -1976,6 +1976,41 @@
       "firewallWaiting": "等待 Windows…",
       "firewallDeclined": "仍然被擋住：Windows 那邊沒有得到確認。",
       "firewall": "第一次開啟時，系統防火牆可能詢問是否允許 Kotomimi 存取網路：請允許它在私人網路上通訊。"
+    },
+    "storage": {
+      "title": "模型儲存",
+      "tooltip": "下載的辨識、翻譯和文法回饋模型都放在這裡。換到空間更大的磁碟時，已下載的模型會一起移過去，不用重新下載。",
+      "change": "變更位置",
+      "open": "開啟資料夾",
+      "models": "模型",
+      "free": "{{drive}}剩餘 {{size}}",
+      "drive": "{{name}} 槽",
+      "thisComputer": "這台電腦",
+      "toMove": "要移動",
+      "move": "移動",
+      "cancel": "取消",
+      "moving": "{{done}} / {{total}}",
+      "etaSoon": "不到 1 分鐘",
+      "etaMinutes": "約 {{count}} 分鐘",
+      "freed": "{{drive}}空出 {{size}}",
+      "missing": "找不到這個資料夾，外接硬碟可能沒接上",
+      "useDefault": "用預設位置",
+      "chooseAgain": "重新選擇",
+      "busySession": "工作階段進行中不能移動",
+      "busySharing": "共用模型時不能移動",
+      "noRoom": "{{drive}}只剩 {{size}}，放不下",
+      "changePlace": "換位置",
+      "errors": {
+        "same": "模型已經在這裡了。",
+        "inside": "不能放進模型自己的資料夾裡，換一個吧。",
+        "not_writable": "這個資料夾無法寫入，換一個吧。",
+        "no_space": "{{drive}}空間不夠。",
+        "downloading": "有模型正在下載，下載完再移動。",
+        "busy": "模型正在移動。",
+        "stopped": "已取消，模型還在原來的位置。",
+        "copy_failed": "移動沒有完成，模型還在原來的位置。",
+        "move_failed": "移動沒有完成，模型還在原來的位置。"
+      }
     }
   }
 }

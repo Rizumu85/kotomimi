@@ -559,6 +559,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "প্রস্তুতি চলছে। একটু পরেই শুরু করতে পারবেন।"
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "সেশন চলাকালে স্থানান্তর করা যায় না"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "মডেল শেয়ার করার সময় স্থানান্তর করা যায় না"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "বাতিল"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "অবস্থান পরিবর্তন"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "মডেল স্থানান্তর"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "আবার বেছে নিন"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "{{name}} ড্রাইভ"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "মডেলগুলো ইতিমধ্যেই স্থানান্তর করা হচ্ছে।"
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "স্থানান্তর শেষ হয়নি। মডেলগুলো আগের অবস্থানেই আছে।"
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "একটি মডেল ডাউনলোড হচ্ছে। শেষ হলে স্থানান্তর করুন।"
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "মডেলগুলোর নিজস্ব ফোল্ডারের বাইরে একটি ফোল্ডার বেছে নিন।"
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "স্থানান্তর শেষ হয়নি। মডেলগুলো আগের অবস্থানেই আছে।"
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "{{drive}}-এ যথেষ্ট জায়গা নেই।"
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "এই ফোল্ডারে লেখা যায় না। অন্যটি বেছে নিন।"
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "মডেলগুলো ইতিমধ্যেই এখানে আছে।"
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "বাতিল করা হয়েছে। মডেলগুলো আগের অবস্থানেই আছে।"
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "প্রায় {{count}} মিনিট"
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "এক মিনিটের কম"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "{{drive}}-এ {{size}} খালি"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "{{drive}}-এ {{size}} জায়গা খালি হয়েছে"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "এই ফোল্ডারটি পাওয়া যাচ্ছে না। বাহ্যিক ড্রাইভটি কি সংযুক্ত আছে?"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "মডেল"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "স্থানান্তর"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "{{drive}}-এ মাত্র {{size}} বাকি, জায়গা হবে না"
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "ফোল্ডার খুলুন"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "এই কম্পিউটার"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "মডেল সংরক্ষণস্থান"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "স্থানান্তর করতে"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "ডাউনলোড করা শনাক্তকরণ, অনুবাদ ও ব্যাকরণ-প্রতিক্রিয়া মডেল এখানে রাখা হয়। বেশি জায়গার ড্রাইভে স্থানান্তর করলে ডাউনলোড করা মডেলগুলোও সঙ্গে যায়, তাই আবার ডাউনলোড করতে হয় না।"
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "ডিফল্ট অবস্থান ব্যবহার করুন"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "সারিবিন্যাস"

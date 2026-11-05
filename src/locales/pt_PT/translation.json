@@ -1976,6 +1976,41 @@
       "muted": "Microfone silenciado no VRChat",
       "title": "Óculos de RV",
       "help": "No SteamVR, o que a outra pessoa diz aparece abaixo do teu campo de visão. Olha para o pulso para ver um pequeno menu e toca-lhe com o comando da outra mão para mudar de idioma, fazer uma pausa ou experimentar outro modelo."
+    },
+    "storage": {
+      "title": "Armazenamento de modelos",
+      "tooltip": "É aqui que ficam os modelos de reconhecimento, tradução e feedback gramatical descarregados. Ao mudar para uma unidade com mais espaço, os modelos descarregados são transferidos, sem ser preciso descarregá-los novamente.",
+      "change": "Alterar localização",
+      "open": "Abrir pasta",
+      "models": "Modelos",
+      "free": "{{size}} livres em {{drive}}",
+      "drive": "unidade {{name}}",
+      "thisComputer": "este computador",
+      "toMove": "A mover",
+      "move": "Mover",
+      "cancel": "Cancelar",
+      "moving": "{{done}} / {{total}}",
+      "etaSoon": "menos de um minuto",
+      "etaMinutes": "cerca de {{count}} min",
+      "freed": "{{size}} libertados em {{drive}}",
+      "missing": "Não é possível encontrar esta pasta. A unidade externa está ligada?",
+      "useDefault": "Usar localização predefinida",
+      "chooseAgain": "Escolher novamente",
+      "busySession": "Não é possível mover durante uma sessão",
+      "busySharing": "Não é possível mover enquanto os modelos estão a ser partilhados",
+      "noRoom": "Só restam {{size}} em {{drive}}; não há espaço suficiente",
+      "changePlace": "Mover modelos",
+      "errors": {
+        "same": "Os modelos já estão aqui.",
+        "inside": "Escolha uma pasta fora das pastas dos próprios modelos.",
+        "not_writable": "Não é possível escrever nesta pasta. Escolha outra.",
+        "no_space": "Não há espaço suficiente em {{drive}}.",
+        "downloading": "Há um modelo a ser descarregado. Mova-o quando terminar.",
+        "busy": "Os modelos já estão a ser movidos.",
+        "stopped": "Cancelado. Os modelos continuam no local anterior.",
+        "copy_failed": "A transferência não foi concluída. Os modelos continuam no local anterior.",
+        "move_failed": "A transferência não foi concluída. Os modelos continuam no local anterior."
+      }
     }
   }
 }

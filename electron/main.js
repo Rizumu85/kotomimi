@@ -25,6 +25,7 @@ const { discoverServers } = require('./lan-discover');
 const { createNativeEngine, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME, modelHears: nativeModelHears, translatorFits } = require('./native-engine');
 const { joinEngines } = require('./native-engines');
 const { createRemoteEngine } = require('./remote-engine');
+const { createModelStorage } = require('./model-storage');
 const { createAutostart } = require('./autostart');
 const { createAppleSpeech } = require('./apple-speech');
 const { applyLinuxGpuFlags } = require('./linux-gpu-flags');
@@ -1454,6 +1455,14 @@ const engineLog = (name) => {
   };
 };
 
+// Fork: where the engines keep their runtimes and models (electron/model-storage.js): the app's data folder unless the
+// user chose another, for a drive C with no room for gigabytes of models. An unpackaged run that names its own
+// (`KOTOMIMI_NATIVE_DIR`) keeps it, and offers no other.
+let modelStorage = null;
+const getModelStorage = () => modelStorage ??= createModelStorage({ userData: app.getPath('userData') });
+const nativeDirFixed = () => !app.isPackaged && Boolean(process.env.KOTOMIMI_NATIVE_DIR);
+const engineDir = (kind) => path.join(getModelStorage().root(), kind);
+
 let nativeEngine = null;
 const getNativeEngine = () => {
   if (nativeEngine) return nativeEngine;
@@ -1463,7 +1472,7 @@ const getNativeEngine = () => {
   const { net } = require('electron');
   const downloaded = (tell) => createNativeEngine({
     // An unpackaged run can keep it elsewhere (`KOTOMIMI_NATIVE_DIR`): gigabytes a test profile need not fetch again.
-    dir: !app.isPackaged && process.env.KOTOMIMI_NATIVE_DIR ? process.env.KOTOMIMI_NATIVE_DIR : path.join(app.getPath('userData'), 'native-engine'),
+    dir: nativeDirFixed() ? process.env.KOTOMIMI_NATIVE_DIR : engineDir('native-engine'),
     fetch: (url, init) => net.fetch(url, init),
     // An unpackaged run can keep what the engine was given to hear (`KOTOMIMI_NATIVE_DUMP`), to measure with.
     dumpDir: !app.isPackaged && process.env.KOTOMIMI_NATIVE_DUMP ? process.env.KOTOMIMI_NATIVE_DUMP : null,
@@ -1517,7 +1526,7 @@ const getNativeTranslator = () => {
   const { net } = require('electron');
   nativeTranslator = createNativeEngine({
     // As the recognition engine's folder: an unpackaged run can keep it elsewhere (`KOTOMIMI_NATIVE_DIR`, beside it).
-    dir: !app.isPackaged && process.env.KOTOMIMI_NATIVE_DIR ? `${process.env.KOTOMIMI_NATIVE_DIR}-translator` : path.join(app.getPath('userData'), 'native-translator'),
+    dir: nativeDirFixed() ? `${process.env.KOTOMIMI_NATIVE_DIR}-translator` : engineDir('native-translator'),
     catalog: { engine: LLAMA, models: TRANSLATORS },
     runtime: LLAMA_RUNTIME,
     fetch: (url, init) => net.fetch(url, init),
@@ -1545,7 +1554,7 @@ const getNativeCoach = () => {
   const log = engineLog('native-coach.log');
   const { net } = require('electron');
   nativeCoach = createNativeEngine({
-    dir: !app.isPackaged && process.env.KOTOMIMI_NATIVE_DIR ? `${process.env.KOTOMIMI_NATIVE_DIR}-coach` : path.join(app.getPath('userData'), 'native-coach'),
+    dir: nativeDirFixed() ? `${process.env.KOTOMIMI_NATIVE_DIR}-coach` : engineDir('native-coach'),
     catalog: { engine: LLAMA, models: COACHES },
     runtime: LLAMA_RUNTIME,
     fetch: (url, init) => net.fetch(url, init),
@@ -1564,6 +1573,59 @@ ipcMain.handle('native-coach:start', async (event, args) => {
 });
 ipcMain.handle('native-coach:stop', () => getNativeCoach().stop());
 app.on('will-quit', () => { void nativeCoach?.stop(); });
+
+// Fork: the models' folder, and moving it. A move stops the engines first — their runtimes are in the folders that
+// move — and makes them afresh after, at the new folder; the page is told their states again. Nothing moves while a
+// model is downloading.
+let storageMove = null;
+const storageStatus = () => ({ ...getModelStorage().status(), fixed: nativeDirFixed(), moving: Boolean(storageMove) });
+const remakeEngines = () => {
+  nativeEngine = null;
+  nativeTranslator = null;
+  nativeCoach = null;
+  toPage('native-engine:status', getNativeEngine().status());
+  toPage('native-translator:status', getNativeTranslator().status());
+  toPage('native-coach:status', getNativeCoach().status());
+};
+const downloading = () => [nativeEngine, nativeTranslator, nativeCoach].some((engine) => engine
+  && (engine.status().engine === 'downloading' || Object.values(engine.status().models).some((m) => m.state === 'downloading' || m.state === 'verifying')));
+ipcMain.handle('model-storage:status', () => storageStatus());
+ipcMain.handle('model-storage:choose', async () => {
+  if (nativeDirFixed()) return null;
+  const owner = BrowserWindow.getFocusedWindow() ?? mainWindow ?? undefined;
+  const picked = await dialog.showOpenDialog(owner, { properties: ['openDirectory', 'createDirectory', 'promptToCreate'] });
+  if (picked.canceled || !picked.filePaths[0]) return null;
+  return getModelStorage().plan(picked.filePaths[0]);
+});
+ipcMain.handle('model-storage:move', async (event, args) => {
+  if (nativeDirFixed() || storageMove) return { error: 'busy' };
+  if (downloading()) return { error: 'downloading' };
+  const controller = new AbortController();
+  storageMove = controller;
+  try {
+    await Promise.allSettled([nativeEngine?.stop(), nativeTranslator?.stop(), nativeCoach?.stop()]);
+    await getModelStorage().move(String(args?.target ?? ''), { signal: controller.signal, onProgress: (progress) => toPage('model-storage:progress', progress) });
+    return { status: storageStatus() };
+  } catch (error) {
+    return { error: error?.code ?? 'move_failed', message: String(error?.message ?? error).slice(0, 300) };
+  } finally {
+    storageMove = null;
+    remakeEngines();
+  }
+});
+ipcMain.handle('model-storage:cancel', () => { storageMove?.abort(); return true; });
+ipcMain.handle('model-storage:reset', async () => {
+  if (nativeDirFixed() || storageMove) return storageStatus();
+  await Promise.allSettled([nativeEngine?.stop(), nativeTranslator?.stop(), nativeCoach?.stop()]);
+  getModelStorage().reset();
+  remakeEngines();
+  return storageStatus();
+});
+ipcMain.handle('model-storage:open', async () => {
+  const where = getModelStorage().root();
+  require('fs').mkdirSync(where, { recursive: true });
+  return shell.openPath(where);
+});
 
 // Fork: on a Mac the app stays in the Dock after its window is closed. The engines are let go by the page, a minute
 // after the last session (`restNative`): with the page gone nothing would, and they would hold their memory until

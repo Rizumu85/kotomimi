@@ -1976,6 +1976,41 @@
       "muted": "Audio disattivato in VRChat",
       "title": "Visore VR",
       "help": "In SteamVR, le parole dell'altra persona appaiono sotto la linea dello sguardo. Abbassa lo sguardo verso il polso per vedere un piccolo menu e toccalo con l'altro controller per cambiare lingua, mettere in pausa o provare un altro modello."
+    },
+    "storage": {
+      "title": "Archiviazione modelli",
+      "tooltip": "Qui vengono conservati i modelli scaricati per il riconoscimento, la traduzione e il feedback grammaticale. Spostandoli su un'unità con più spazio, i modelli scaricati verranno trasferiti senza doverli scaricare di nuovo.",
+      "change": "Cambia posizione",
+      "open": "Apri cartella",
+      "models": "Modelli",
+      "free": "{{size}} disponibili su {{drive}}",
+      "drive": "unità {{name}}",
+      "thisComputer": "questo computer",
+      "toMove": "Da spostare",
+      "move": "Sposta",
+      "cancel": "Annulla",
+      "moving": "{{done}} / {{total}}",
+      "etaSoon": "meno di un minuto",
+      "etaMinutes": "circa {{count}} min",
+      "freed": "{{size}} liberati su {{drive}}",
+      "missing": "Impossibile trovare questa cartella. L'unità esterna è collegata?",
+      "useDefault": "Usa posizione predefinita",
+      "chooseAgain": "Scegli di nuovo",
+      "busySession": "Impossibile spostare durante una sessione",
+      "busySharing": "Impossibile spostare mentre i modelli sono condivisi",
+      "noRoom": "Restano solo {{size}} su {{drive}}: spazio insufficiente",
+      "changePlace": "Sposta modelli",
+      "errors": {
+        "same": "I modelli sono già qui.",
+        "inside": "Scegli una cartella esterna alle cartelle dei modelli.",
+        "not_writable": "Impossibile scrivere in questa cartella. Scegline un'altra.",
+        "no_space": "Spazio insufficiente su {{drive}}.",
+        "downloading": "È in corso il download di un modello. Spostalo al termine.",
+        "busy": "I modelli sono già in fase di spostamento.",
+        "stopped": "Annullato. I modelli sono nella posizione precedente.",
+        "copy_failed": "Lo spostamento non è terminato. I modelli sono nella posizione precedente.",
+        "move_failed": "Lo spostamento non è terminato. I modelli sono nella posizione precedente."
+      }
     }
   }
 }

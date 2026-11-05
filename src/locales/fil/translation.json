@@ -1976,6 +1976,41 @@
       "muted": "Naka-mute sa VRChat",
       "title": "VR headset",
       "help": "Sa SteamVR, lalabas ang sinasabi ng kausap sa ibaba ng iyong paningin. Tumingin sa iyong pulso para makita ang maliit na menu. Pindutin ito gamit ang controller sa kabilang kamay para magpalit ng wika, mag-pause, o sumubok ng ibang modelo."
+    },
+    "storage": {
+      "title": "Imbakan ng modelo",
+      "tooltip": "Dito naka-save ang mga na-download na modelo para sa pagkilala, pagsasalin, at feedback. Kapag inilipat sa mas malaking drive, kasama ring maililipat ang mga na-download na modelo, kaya hindi na kailangang mag-download ulit.",
+      "change": "Baguhin ang lokasyon",
+      "open": "Buksan ang folder",
+      "models": "Mga modelo",
+      "free": "{{size}} ang libreng espasyo sa {{drive}}",
+      "drive": "drive na {{name}}",
+      "thisComputer": "computer na ito",
+      "toMove": "Ililipat",
+      "move": "Ilipat",
+      "cancel": "Kanselahin",
+      "moving": "{{done}} / {{total}}",
+      "etaSoon": "wala pang isang minuto",
+      "etaMinutes": "mga {{count}} minuto",
+      "freed": "{{size}} ang nabakanteng espasyo sa {{drive}}",
+      "missing": "Hindi makita ang folder na ito. Nakakonekta ba ang external drive?",
+      "useDefault": "Gamitin ang default na lokasyon",
+      "chooseAgain": "Pumili ulit",
+      "busySession": "Hindi maililipat habang may session",
+      "busySharing": "Hindi maililipat habang nagbabahagi ng mga modelo",
+      "noRoom": "{{size}} na lang ang natitira sa {{drive}}; kulang ang espasyo",
+      "changePlace": "Ilipat ang mga modelo",
+      "errors": {
+        "same": "Nandito na ang mga modelo.",
+        "inside": "Pumili ng folder na nasa labas ng mga folder ng modelo.",
+        "not_writable": "Hindi masulatan ang folder na ito. Pumili ng iba.",
+        "no_space": "Kulang ang espasyo sa {{drive}}.",
+        "downloading": "May modelong dina-download. Ilipat pagkatapos nitong matapos.",
+        "busy": "Inililipat na ang mga modelo.",
+        "stopped": "Kinansela. Nasa dati pa ring lokasyon ang mga modelo.",
+        "copy_failed": "Hindi natapos ang paglilipat. Nasa dati pa ring lokasyon ang mga modelo.",
+        "move_failed": "Hindi natapos ang paglilipat. Nasa dati pa ring lokasyon ang mga modelo."
+      }
     }
   }
 }

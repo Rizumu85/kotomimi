@@ -611,6 +611,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "Naghahanda. Makakapagsimula ka na sandali."
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "Hindi maililipat habang may session"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "Hindi maililipat habang nagbabahagi ng mga modelo"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "Kanselahin"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "Baguhin ang lokasyon"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "Ilipat ang mga modelo"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "Pumili ulit"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "drive na {{name}}"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "Inililipat na ang mga modelo."
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "Hindi natapos ang paglilipat. Nasa dati pa ring lokasyon ang mga modelo."
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "May modelong dina-download. Ilipat pagkatapos nitong matapos."
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "Pumili ng folder na nasa labas ng mga folder ng modelo."
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "Hindi natapos ang paglilipat. Nasa dati pa ring lokasyon ang mga modelo."
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "Kulang ang espasyo sa {{drive}}."
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "Hindi masulatan ang folder na ito. Pumili ng iba."
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "Nandito na ang mga modelo."
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "Kinansela. Nasa dati pa ring lokasyon ang mga modelo."
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "mga {{count}} minuto"
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "wala pang isang minuto"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "{{size}} ang libreng espasyo sa {{drive}}"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "{{size}} ang nabakanteng espasyo sa {{drive}}"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "Hindi makita ang folder na ito. Nakakonekta ba ang external drive?"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "Mga modelo"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "Ilipat"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "{{size}} na lang ang natitira sa {{drive}}; kulang ang espasyo"
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "Buksan ang folder"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "computer na ito"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "Imbakan ng modelo"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "Ililipat"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "Dito naka-save ang mga na-download na modelo para sa pagkilala, pagsasalin, at feedback. Kapag inilipat sa mas malaking drive, kasama ring maililipat ang mga na-download na modelo, kaya hindi na kailangang mag-download ulit."
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "Gamitin ang default na lokasyon"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "Pagkakahanay"

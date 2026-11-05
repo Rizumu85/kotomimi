@@ -104,6 +104,13 @@ export const INVOKE_CHANNELS = [
   'native-coach:remove',
   'native-coach:start',
   'native-coach:stop',
+  // Fork: where the downloaded models are kept, and moving them (electron/model-storage.js)
+  'model-storage:status',
+  'model-storage:choose',
+  'model-storage:move',
+  'model-storage:cancel',
+  'model-storage:reset',
+  'model-storage:open',
   // Fork: starting with the computer, in the background (electron/autostart.js)
   'autostart:get',
   'autostart:set',

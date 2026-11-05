@@ -559,6 +559,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "Preparando. Você já vai poder começar."
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "Não é possível mover durante uma sessão"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "Não é possível mover enquanto os modelos estão sendo compartilhados"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "Cancelar"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "Alterar local"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "Mover modelos"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "Escolher novamente"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "Unidade {{name}}"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "Os modelos já estão sendo movidos."
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "A transferência não foi concluída. Os modelos continuam no local original."
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "Um modelo está sendo baixado. Mova depois que o download terminar."
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "Escolha uma pasta fora das pastas dos próprios modelos."
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "A transferência não foi concluída. Os modelos continuam no local original."
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "Não há espaço suficiente em {{drive}}."
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "Não é possível gravar nesta pasta. Escolha outra."
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "Os modelos já estão aqui."
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "Cancelado. Os modelos continuam no local original."
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "cerca de {{count}} min"
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "menos de um minuto"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "{{size}} livres em {{drive}}"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "{{size}} liberados em {{drive}}"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "Não foi possível encontrar esta pasta. A unidade externa está conectada?"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "Modelos"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "Mover"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "Restam apenas {{size}} em {{drive}}"
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "Abrir pasta"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "este computador"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "Armazenamento de modelos"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "Para mover"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "Os modelos de reconhecimento, tradução e feedback gramatical baixados ficam aqui. Ao mudar para uma unidade com mais espaço, os modelos baixados são transferidos junto, sem precisar baixá-los novamente."
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "Usar local padrão"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "Alinhamento"

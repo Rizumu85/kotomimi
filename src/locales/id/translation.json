@@ -1976,6 +1976,41 @@
       "muted": "Dibisukan di VRChat",
       "title": "Headset VR",
       "help": "Di SteamVR, ucapan lawan bicara muncul di bawah pandangan Anda. Lihat ke pergelangan tangan untuk menampilkan menu kecil. Sentuh menu dengan pengontrol di tangan satunya untuk mengganti bahasa, menjeda, atau mencoba model lain."
+    },
+    "storage": {
+      "title": "Penyimpanan model",
+      "tooltip": "Model pengenalan, terjemahan, dan umpan balik tata bahasa yang diunduh disimpan di sini. Jika dipindahkan ke drive yang lebih lega, model yang sudah diunduh ikut dipindahkan, jadi tidak perlu mengunduhnya lagi.",
+      "change": "Ubah lokasi",
+      "open": "Buka folder",
+      "models": "Model",
+      "free": "{{size}} tersedia di {{drive}}",
+      "drive": "drive {{name}}",
+      "thisComputer": "komputer ini",
+      "toMove": "Yang akan dipindahkan",
+      "move": "Pindahkan",
+      "cancel": "Batal",
+      "moving": "{{done}} / {{total}}",
+      "etaSoon": "kurang dari 1 menit",
+      "etaMinutes": "sekitar {{count}} menit",
+      "freed": "{{size}} tersedia di {{drive}}",
+      "missing": "Folder ini tidak ditemukan. Apakah drive eksternal belum tersambung?",
+      "useDefault": "Gunakan lokasi default",
+      "chooseAgain": "Pilih lagi",
+      "busySession": "Tidak dapat memindahkan selama sesi berlangsung",
+      "busySharing": "Tidak dapat memindahkan saat model dibagikan",
+      "noRoom": "Hanya tersisa {{size}} di {{drive}}, tidak cukup ruang",
+      "changePlace": "Pindahkan model",
+      "errors": {
+        "same": "Model sudah berada di sini.",
+        "inside": "Pilih folder di luar folder model itu sendiri.",
+        "not_writable": "Folder ini tidak dapat ditulis. Pilih folder lain.",
+        "no_space": "Ruang di {{drive}} tidak cukup.",
+        "downloading": "Ada model yang sedang diunduh. Pindahkan setelah selesai.",
+        "busy": "Model sedang dipindahkan.",
+        "stopped": "Dibatalkan. Model tetap berada di lokasi semula.",
+        "copy_failed": "Pemindahan tidak selesai. Model tetap berada di lokasi semula.",
+        "move_failed": "Pemindahan tidak selesai. Model tetap berada di lokasi semula."
+      }
     }
   }
 }

@@ -89,6 +89,20 @@ function computer({ platform = 'win32', arch = 'x64', served = { 'https://exampl
 const modelFile = () => path.join(dir, 'models', 'm1.gguf');
 const exeFile = () => path.join(dir, 'engine-1.0.0', 'server.exe');
 
+describe('a download on a drive without room', () => {
+  it('is refused before anything is fetched, saying how much room there is and is needed', async () => {
+    const fetched = [];
+    const engine = createNativeEngine({
+      dir, platform: 'win32', arch: 'x64', catalog: CATALOG,
+      files: { ...fs, statfsSync: () => ({ bavail: 1024, bsize: 1024 }) },
+      fetch: async (url) => { fetched.push(url); throw new Error('nothing is fetched'); },
+    });
+    const after = await engine.download('m1');
+    expect(fetched).toEqual([]);
+    expect(after.models.m1).toMatchObject({ state: 'failed', error: expect.stringMatching(/not enough room on the drive: 0\.0 GB free/) });
+  });
+});
+
 describe('what is fetched', () => {
   it('is fixed by address, size and hash, for the platforms the runtime is published for', () => {
     for (const build of Object.values(ENGINE.builds)) {

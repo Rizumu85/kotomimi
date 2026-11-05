@@ -1976,6 +1976,41 @@
       "muted": "Micrófono silenciado en VRChat",
       "title": "Visor de VR",
       "help": "En SteamVR, lo que dice la otra persona aparece debajo de tu campo de visión. Mira hacia tu muñeca para ver un pequeño menú y tócalo con el mando de la otra mano para cambiar de idioma, pausar o probar otro modelo."
+    },
+    "storage": {
+      "title": "Almacenamiento de modelos",
+      "tooltip": "Aquí se guardan los modelos descargados de reconocimiento, traducción y corrección gramatical. Si cambias a una unidad con más espacio, los modelos descargados se trasladan allí y no tendrás que descargarlos de nuevo.",
+      "change": "Cambiar ubicación",
+      "open": "Abrir carpeta",
+      "models": "Modelos",
+      "free": "{{size}} libres en {{drive}}",
+      "drive": "unidad {{name}}",
+      "thisComputer": "este equipo",
+      "toMove": "Para mover",
+      "move": "Mover",
+      "cancel": "Cancelar",
+      "moving": "{{done}} / {{total}}",
+      "etaSoon": "menos de un minuto",
+      "etaMinutes": "aprox. {{count}} min",
+      "freed": "{{size}} liberados en {{drive}}",
+      "missing": "No se encuentra esta carpeta. ¿Está conectada la unidad externa?",
+      "useDefault": "Usar ubicación predeterminada",
+      "chooseAgain": "Elegir de nuevo",
+      "busySession": "No se puede mover durante una sesión",
+      "busySharing": "No se puede mover mientras se comparten modelos",
+      "noRoom": "Solo quedan {{size}} en {{drive}}; no hay espacio suficiente",
+      "changePlace": "Mover modelos",
+      "errors": {
+        "same": "Los modelos ya están aquí.",
+        "inside": "Elige una carpeta fuera de las carpetas de los modelos.",
+        "not_writable": "No se puede escribir en esta carpeta. Elige otra.",
+        "no_space": "No hay suficiente espacio en {{drive}}.",
+        "downloading": "Se está descargando un modelo. Muévelo cuando termine.",
+        "busy": "Los modelos ya se están moviendo.",
+        "stopped": "Cancelado. Los modelos siguen donde estaban.",
+        "copy_failed": "El traslado no terminó. Los modelos siguen donde estaban.",
+        "move_failed": "El traslado no terminó. Los modelos siguen donde estaban."
+      }
     }
   }
 }

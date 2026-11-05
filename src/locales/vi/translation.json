@@ -1976,6 +1976,41 @@
       "muted": "Đã tắt mic trong VRChat",
       "title": "Kính VR",
       "help": "Trong SteamVR, lời của người kia sẽ hiện bên dưới tầm nhìn. Cúi nhìn cổ tay để mở menu nhỏ, rồi dùng tay cầm bên kia chạm vào để đổi ngôn ngữ, tạm dừng hoặc thử mô hình khác."
+    },
+    "storage": {
+      "title": "Nơi lưu model",
+      "tooltip": "Các model nhận dạng, dịch và phản hồi ngữ pháp đã tải xuống được lưu tại đây. Khi chuyển sang ổ đĩa còn nhiều chỗ hơn, các model đã tải xuống cũng được chuyển theo nên không cần tải lại.",
+      "change": "Đổi vị trí",
+      "open": "Mở thư mục",
+      "models": "Model",
+      "free": "{{drive}} còn trống {{size}}",
+      "drive": "ổ đĩa {{name}}",
+      "thisComputer": "máy tính này",
+      "toMove": "Sẽ chuyển",
+      "move": "Chuyển",
+      "cancel": "Hủy",
+      "moving": "{{done}} / {{total}}",
+      "etaSoon": "dưới một phút",
+      "etaMinutes": "khoảng {{count}} phút",
+      "freed": "{{drive}} đã trống thêm {{size}}",
+      "missing": "Không tìm thấy thư mục này. Ổ đĩa ngoài đã được cắm chưa?",
+      "useDefault": "Dùng vị trí mặc định",
+      "chooseAgain": "Chọn lại",
+      "busySession": "Không thể chuyển trong khi đang có phiên",
+      "busySharing": "Không thể chuyển khi đang chia sẻ model",
+      "noRoom": "{{drive}} chỉ còn {{size}}, không đủ chỗ",
+      "changePlace": "Chuyển model",
+      "errors": {
+        "same": "Model đã ở đây rồi.",
+        "inside": "Hãy chọn thư mục bên ngoài các thư mục của model.",
+        "not_writable": "Không thể ghi vào thư mục này. Hãy chọn thư mục khác.",
+        "no_space": "Ổ {{drive}} không đủ chỗ.",
+        "downloading": "Đang tải một model xuống. Hãy chuyển sau khi tải xong.",
+        "busy": "Model đang được chuyển.",
+        "stopped": "Đã hủy. Model vẫn ở vị trí cũ.",
+        "copy_failed": "Chuyển chưa hoàn tất. Model vẫn ở vị trí cũ.",
+        "move_failed": "Chuyển chưa hoàn tất. Model vẫn ở vị trí cũ."
+      }
     }
   }
 }

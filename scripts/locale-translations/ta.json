@@ -559,6 +559,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "தயாராகிறது. இன்னும் சிறிது நேரத்தில் தொடங்கலாம்."
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "அமர்வு நடைபெறும்போது மாற்ற முடியாது"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "மாதிரிகளைப் பகிரும்போது மாற்ற முடியாது"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "ரத்து செய்"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "இடத்தை மாற்று"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "மாதிரிகளை மாற்று"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "மீண்டும் தேர்ந்தெடு"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "{{name}} இயக்ககம்"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "மாதிரிகள் ஏற்கனவே மாற்றப்படுகின்றன."
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "மாற்றம் முடியவில்லை. மாதிரிகள் இருந்த இடத்திலேயே உள்ளன."
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "ஒரு மாதிரி பதிவிறக்கப்படுகிறது. அது முடிந்ததும் மாற்றவும்."
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "மாதிரிகளின் சொந்தக் கோப்புறைகளுக்கு வெளியிலுள்ள கோப்புறையைத் தேர்ந்தெடுக்கவும்."
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "மாற்றம் முடியவில்லை. மாதிரிகள் இருந்த இடத்திலேயே உள்ளன."
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "{{drive}} இல் போதிய இடமில்லை."
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "இந்தக் கோப்புறையில் எழுத முடியாது. வேறொன்றைத் தேர்ந்தெடுக்கவும்."
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "மாதிரிகள் ஏற்கனவே இங்கே உள்ளன."
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "ரத்து செய்யப்பட்டது. மாதிரிகள் இருந்த இடத்திலேயே உள்ளன."
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "சுமார் {{count}} நிமிடங்கள்"
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "1 நிமிடத்திற்குள்"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "{{drive}} இல் {{size}} காலி"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "{{drive}} இல் {{size}} காலியானது"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "இந்தக் கோப்புறையைக் கண்டுபிடிக்க முடியவில்லை. வெளிப்புற இயக்ககம் இணைக்கப்பட்டுள்ளதா?"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "மாதிரிகள்"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "மாற்று"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "{{drive}} இல் {{size}} மட்டுமே உள்ளது; போதாது"
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "கோப்புறையைத் திற"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "இந்தக் கணினி"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "மாதிரி சேமிப்பு"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "மாற்ற வேண்டியது"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "பதிவிறக்கப்பட்ட பேச்சறிதல், மொழிபெயர்ப்பு மற்றும் இலக்கண பின்னூட்ட மாதிரிகள் இங்கே வைக்கப்படும். அதிக இடமுள்ள இயக்ககத்துக்கு மாற்றினால், பதிவிறக்கிய மாதிரிகளும் உடன் மாற்றப்படும்; மீண்டும் பதிவிறக்க வேண்டியதில்லை."
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "இயல்புநிலை இடத்தைப் பயன்படுத்து"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "சீரமைப்பு"

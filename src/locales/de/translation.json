@@ -1976,6 +1976,41 @@
       "muted": "In VRChat stummgeschaltet",
       "title": "VR-Headset",
       "help": "In SteamVR erscheinen die Worte deines Gegenübers unterhalb deines Sichtfelds. Schau auf dein Handgelenk, um ein kleines Menü zu sehen. Tippe es mit dem Controller der anderen Hand an, um die Sprache zu wechseln, zu pausieren oder ein anderes Modell auszuprobieren."
+    },
+    "storage": {
+      "title": "Modellspeicher",
+      "tooltip": "Hier werden heruntergeladene Erkennungs-, Übersetzungs- und Grammatik-Feedbackmodelle gespeichert. Wenn du zu einem Laufwerk mit mehr Speicher wechselst, werden die heruntergeladenen Modelle mitgenommen und nicht erneut heruntergeladen.",
+      "change": "Speicherort ändern",
+      "open": "Ordner öffnen",
+      "models": "Modelle",
+      "free": "{{size}} auf {{drive}} frei",
+      "drive": "Laufwerk {{name}}",
+      "thisComputer": "Dieser Computer",
+      "toMove": "Zu verschieben",
+      "move": "Verschieben",
+      "cancel": "Abbrechen",
+      "moving": "{{done}} / {{total}}",
+      "etaSoon": "unter einer Minute",
+      "etaMinutes": "etwa {{count}} Min.",
+      "freed": "{{size}} auf {{drive}} freigegeben",
+      "missing": "Dieser Ordner wurde nicht gefunden. Ist das externe Laufwerk angeschlossen?",
+      "useDefault": "Standardort verwenden",
+      "chooseAgain": "Erneut auswählen",
+      "busySession": "Während einer Sitzung nicht verschiebbar",
+      "busySharing": "Während der Modellfreigabe nicht verschiebbar",
+      "noRoom": "Auf {{drive}} sind nur noch {{size}} frei – nicht genug Speicherplatz.",
+      "changePlace": "Modelle verschieben",
+      "errors": {
+        "same": "Die Modelle sind bereits hier.",
+        "inside": "Wähle einen Ordner außerhalb der Modellordner.",
+        "not_writable": "In diesen Ordner kann nicht geschrieben werden. Wähle einen anderen.",
+        "no_space": "Auf {{drive}} ist nicht genügend Speicherplatz frei.",
+        "downloading": "Ein Modell wird heruntergeladen. Verschiebe es, sobald der Download abgeschlossen ist.",
+        "busy": "Die Modelle werden bereits verschoben.",
+        "stopped": "Abgebrochen. Die Modelle befinden sich weiterhin am ursprünglichen Speicherort.",
+        "copy_failed": "Das Verschieben wurde nicht abgeschlossen. Die Modelle befinden sich weiterhin am ursprünglichen Speicherort.",
+        "move_failed": "Das Verschieben wurde nicht abgeschlossen. Die Modelle befinden sich weiterhin am ursprünglichen Speicherort."
+      }
     }
   }
 }

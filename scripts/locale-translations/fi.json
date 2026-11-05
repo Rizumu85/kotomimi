@@ -555,6 +555,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "Valmistellaan. Voit aloittaa pian."
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "Siirtoa ei voi tehdä istunnon aikana"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "Siirtoa ei voi tehdä mallien jakamisen aikana"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "Peruuta"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "Vaihda sijaintia"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "Siirrä mallit"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "Valitse uudelleen"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "asema {{name}}"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "Malleja siirretään jo."
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "Siirto ei valmistunut. Mallit ovat alkuperäisessä sijainnissaan."
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "Malli latautuu parhaillaan. Siirrä se, kun lataus on valmis."
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "Valitse kansio mallien omien kansioiden ulkopuolelta."
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "Siirto ei valmistunut. Mallit ovat alkuperäisessä sijainnissaan."
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "Asemalla {{drive}} ei ole tarpeeksi tilaa."
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "Tähän kansioon ei voi kirjoittaa. Valitse toinen."
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "Mallit ovat jo täällä."
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "Peruutettu. Mallit ovat alkuperäisessä sijainnissaan."
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "noin {{count}} min"
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "alle minuutti"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "{{drive}}-asemalla vapaana {{size}}"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "{{drive}}-asemalta vapautui {{size}}"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "Tätä kansiota ei löydy. Onko ulkoinen asema kytketty?"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "Mallit"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "Siirrä"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "{{drive}}-asemalla on jäljellä vain {{size}}, tila ei riitä"
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "Avaa kansio"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "tämä tietokone"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "Mallien tallennus"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "Siirrettävät"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "Ladatut tunnistus-, käännös- ja kielipalautemallit säilytetään täällä. Kun vaihdat tilavammalle asemalle, ladatut mallit siirretään mukana, joten niitä ei tarvitse ladata uudelleen."
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "Käytä oletussijaintia"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "Tasaus"

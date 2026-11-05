@@ -1976,6 +1976,41 @@
       "muted": "Gedempt in VRChat",
       "title": "VR-headset",
       "help": "In SteamVR verschijnen de woorden van je gesprekspartner onder je blikveld. Kijk omlaag naar je pols om een klein menu te zien. Tik erop met de controller in je andere hand om van taal te wisselen, te pauzeren of een ander model te proberen."
+    },
+    "storage": {
+      "title": "Modelopslag",
+      "tooltip": "Hier worden gedownloade herkennings-, vertaal- en grammaticafeedbackmodellen bewaard. Als je ze naar een schijf met meer ruimte verplaatst, gaan de gedownloade modellen mee en hoef je niets opnieuw te downloaden.",
+      "change": "Locatie wijzigen",
+      "open": "Map openen",
+      "models": "Modellen",
+      "free": "{{size}} vrij op {{drive}}",
+      "drive": "schijf {{name}}",
+      "thisComputer": "deze computer",
+      "toMove": "Te verplaatsen",
+      "move": "Verplaatsen",
+      "cancel": "Annuleren",
+      "moving": "{{done}} / {{total}}",
+      "etaSoon": "minder dan een minuut",
+      "etaMinutes": "ongeveer {{count}} min",
+      "freed": "{{size}} vrijgemaakt op {{drive}}",
+      "missing": "Deze map kan niet worden gevonden. Is de externe schijf aangesloten?",
+      "useDefault": "Standaardlocatie gebruiken",
+      "chooseAgain": "Opnieuw kiezen",
+      "busySession": "Kan tijdens een sessie niet worden verplaatst",
+      "busySharing": "Kan niet worden verplaatst tijdens het delen van modellen",
+      "noRoom": "Er is nog maar {{size}} vrij op {{drive}}; dat is niet genoeg",
+      "changePlace": "Modellen verplaatsen",
+      "errors": {
+        "same": "De modellen staan hier al.",
+        "inside": "Kies een map buiten de mappen van de modellen.",
+        "not_writable": "Naar deze map kan niet worden geschreven. Kies een andere.",
+        "no_space": "Niet genoeg ruimte op {{drive}}.",
+        "downloading": "Er wordt een model gedownload. Verplaats het nadat de download is voltooid.",
+        "busy": "De modellen worden al verplaatst.",
+        "stopped": "Geannuleerd. De modellen staan nog op hun oorspronkelijke locatie.",
+        "copy_failed": "De verplaatsing is niet voltooid. De modellen staan nog op hun oorspronkelijke locatie.",
+        "move_failed": "De verplaatsing is niet voltooid. De modellen staan nog op hun oorspronkelijke locatie."
+      }
     }
   }
 }

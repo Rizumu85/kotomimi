@@ -1976,6 +1976,41 @@
       "firewallWaiting": "Waiting for Windows…",
       "firewallDeclined": "Still blocked: Windows was not told yes.",
       "firewall": "The first time, your system's firewall may ask whether to allow Kotomimi on the network: allow it for private networks."
+    },
+    "storage": {
+      "title": "Model storage",
+      "tooltip": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+      "change": "Change location",
+      "open": "Open folder",
+      "models": "Models",
+      "free": "{{size}} free on {{drive}}",
+      "drive": "drive {{name}}",
+      "thisComputer": "this computer",
+      "toMove": "To move",
+      "move": "Move",
+      "cancel": "Cancel",
+      "moving": "{{done}} / {{total}}",
+      "etaSoon": "under a minute",
+      "etaMinutes": "about {{count}} min",
+      "freed": "{{size}} freed on {{drive}}",
+      "missing": "This folder can’t be found. Is the external drive plugged in?",
+      "useDefault": "Use default location",
+      "chooseAgain": "Choose again",
+      "busySession": "Can’t move during a session",
+      "busySharing": "Can’t move while sharing models",
+      "noRoom": "Only {{size}} left on {{drive}}",
+      "changePlace": "Move models",
+      "errors": {
+        "same": "The models are already here.",
+        "inside": "Choose a folder outside the models’ own folders.",
+        "not_writable": "This folder can’t be written to. Choose another.",
+        "no_space": "Not enough room on {{drive}}.",
+        "downloading": "A model is downloading. Move after it finishes.",
+        "busy": "The models are already being moved.",
+        "stopped": "Cancelled. The models are where they were.",
+        "copy_failed": "The move didn’t finish. The models are where they were.",
+        "move_failed": "The move didn’t finish. The models are where they were."
+      }
     }
   }
 }

@@ -94,6 +94,8 @@ const validReceiveChannels = [
   'native-translator:status',
   // Fork: the native feedback engine's state as it changes
   'native-coach:status',
+  // Fork: how far a move of the models has come (electron/model-storage.js)
+  'model-storage:progress',
   // LAN caption sharing status (main → renderer)
   'caption-share:status',
   // Fork: VRChat's mute, a video begun, another world (electron/vrchat.js)

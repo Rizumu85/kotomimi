@@ -563,6 +563,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "Bezig met voorbereiden. Je kunt zo beginnen."
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "Kan tijdens een sessie niet worden verplaatst"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "Kan niet worden verplaatst tijdens het delen van modellen"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "Annuleren"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "Locatie wijzigen"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "Modellen verplaatsen"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "Opnieuw kiezen"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "schijf {{name}}"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "De modellen worden al verplaatst."
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "De verplaatsing is niet voltooid. De modellen staan nog op hun oorspronkelijke locatie."
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "Er wordt een model gedownload. Verplaats het nadat de download is voltooid."
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "Kies een map buiten de mappen van de modellen."
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "De verplaatsing is niet voltooid. De modellen staan nog op hun oorspronkelijke locatie."
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "Niet genoeg ruimte op {{drive}}."
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "Naar deze map kan niet worden geschreven. Kies een andere."
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "De modellen staan hier al."
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "Geannuleerd. De modellen staan nog op hun oorspronkelijke locatie."
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "ongeveer {{count}} min"
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "minder dan een minuut"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "{{size}} vrij op {{drive}}"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "{{size}} vrijgemaakt op {{drive}}"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "Deze map kan niet worden gevonden. Is de externe schijf aangesloten?"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "Modellen"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "Verplaatsen"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "Er is nog maar {{size}} vrij op {{drive}}; dat is niet genoeg"
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "Map openen"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "deze computer"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "Modelopslag"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "Te verplaatsen"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "Hier worden gedownloade herkennings-, vertaal- en grammaticafeedbackmodellen bewaard. Als je ze naar een schijf met meer ruimte verplaatst, gaan de gedownloade modellen mee en hoef je niets opnieuw te downloaden."
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "Standaardlocatie gebruiken"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "Uitlijning"

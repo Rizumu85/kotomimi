@@ -559,6 +559,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "準備中です。もう少しで始められます。"
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "セッション中は移動できません"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "モデルの共有中は移動できません"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "キャンセル"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "保存先を変更"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "モデルの保存先を変更"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "もう一度選ぶ"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "ドライブ {{name}}"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "モデルはすでに移動中です。"
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "移動が完了しませんでした。モデルは元の場所にあります。"
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "モデルをダウンロード中です。完了してから移動してください。"
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "モデル自身のフォルダー内は選べません。別の場所を選んでください。"
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "移動が完了しませんでした。モデルは元の場所にあります。"
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "{{drive}}の空き容量が足りません。"
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "このフォルダーには書き込めません。別の場所を選んでください。"
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "モデルはすでにここにあります。"
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "キャンセルしました。モデルは元の場所にあります。"
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "約{{count}}分"
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "1分未満"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "{{drive}}の空き容量 {{size}}"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "{{drive}}に{{size}}の空き容量ができました"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "このフォルダーが見つかりません。外付けドライブが接続されているか確認してください。"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "モデル"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "移動"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "{{drive}}の空きは{{size}}だけで、入りません"
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "フォルダーを開く"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "このコンピューター"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "モデルの保存先"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "移動するモデル"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "ダウンロードした認識・翻訳・文法フィードバックのモデルはここに保存されます。容量の大きいドライブに移すと、ダウンロード済みのモデルも一緒に移動するため、再ダウンロードは不要です。"
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "既定の保存先を使う"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "文字揃え"

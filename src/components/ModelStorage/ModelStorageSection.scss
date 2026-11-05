@@ -1,0 +1,272 @@
+@use '../Settings/shared/variables' as vars;
+
+// Fork: where the downloaded models are kept. In the settings' own dialect, like the sharing section above it: the
+// folder as a place (not a field to type in), the drive drawn as a bar, a move confirmed in a card of its own.
+
+.kt-storage {
+  h2 {
+    display: flex;
+    align-items: center;
+  }
+
+  .kt-storage__head {
+    margin-left: auto;
+  }
+
+  .kt-storage__body {
+    display: flex;
+    flex-direction: column;
+    gap: vars.$space-3;
+  }
+
+  .kt-storage__btn {
+    height: vars.$control-height-compact;
+    padding: 0 vars.$space-3;
+    border: 1px solid vars.$border-default;
+    border-radius: vars.$radius-sm;
+    background: transparent;
+    color: vars.$text-secondary;
+    font: inherit;
+    font-size: vars.$font-body;
+    font-weight: vars.$weight-normal;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background vars.$transition-fast, color vars.$transition-fast;
+
+    &:hover:not(:disabled) {
+      background: vars.$bg-hover;
+      color: vars.$text-primary;
+    }
+
+    &:focus-visible {
+      outline: vars.$focus-ring-width solid vars.$focus-ring-color;
+      outline-offset: vars.$focus-ring-offset;
+    }
+
+    &:disabled {
+      opacity: vars.$disabled-opacity;
+      cursor: not-allowed;
+    }
+
+    &.is-primary {
+      background: vars.$color-primary-fill;
+      border-color: vars.$color-primary-fill;
+      color: vars.$color-on-primary;
+
+      &:hover:not(:disabled) {
+        background: vars.$color-primary-fill-hover;
+        color: vars.$color-on-primary;
+      }
+    }
+  }
+
+  // The folder: a place, written out, opened from the icon at its end.
+  .kt-storage__where {
+    display: flex;
+    align-items: center;
+    gap: vars.$space-2;
+    min-height: 32px;
+    padding: 0 vars.$space-1 0 vars.$space-3;
+    border-radius: vars.$radius-md;
+    background: vars.$bg-surface;
+
+    &.is-warn {
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, vars.$color-warning 60%, transparent);
+
+      .kt-storage__path {
+        color: vars.$color-warning;
+      }
+    }
+  }
+
+  .kt-storage__path {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: vars.$font-body;
+    color: vars.$text-secondary;
+  }
+
+  .kt-storage__open {
+    width: 26px;
+    height: 26px;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: vars.$radius-sm;
+    background: transparent;
+    color: vars.$text-muted;
+    cursor: pointer;
+
+    &:hover {
+      background: vars.$bg-hover;
+      color: vars.$text-primary;
+    }
+
+    &:focus-visible {
+      outline: vars.$focus-ring-width solid vars.$focus-ring-color;
+    }
+  }
+
+  .kt-storage__meter {
+    display: flex;
+    flex-direction: column;
+    gap: vars.$space-2;
+  }
+
+  // The drive: what is used in grey, the models in the accent over it, the room left empty.
+  .kt-storage__bar {
+    position: relative;
+    height: 6px;
+    border-radius: 3px;
+    background: vars.$bg-control;
+    overflow: hidden;
+
+    i {
+      position: absolute;
+      inset: 0 auto 0 0;
+      border-radius: 3px;
+      background: vars.$text-muted;
+      transition: width vars.$transition-normal;
+
+      &.is-low {
+        background: vars.$color-warning;
+      }
+
+      &.is-models {
+        background: vars.$color-primary;
+      }
+    }
+  }
+
+  .kt-storage__legend {
+    display: flex;
+    justify-content: space-between;
+    gap: vars.$space-2;
+    font-size: vars.$font-caption;
+    color: vars.$text-tertiary;
+    font-variant-numeric: tabular-nums;
+
+    b {
+      font-weight: vars.$weight-medium;
+      color: vars.$text-secondary;
+    }
+
+    .is-warn {
+      color: vars.$color-warning;
+    }
+  }
+
+  // A move: where from, where to, what moves and the room there.
+  .kt-storage__move {
+    display: flex;
+    flex-direction: column;
+    gap: vars.$space-3;
+    padding: vars.$space-3;
+    border: 1px solid vars.$border-subtle;
+    border-radius: vars.$radius-lg;
+    background: vars.$bg-surface;
+  }
+
+  .kt-storage__route {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+    gap: vars.$space-2;
+    font-size: vars.$font-body;
+    color: vars.$text-secondary;
+
+    svg {
+      color: vars.$text-muted;
+    }
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .is-to {
+      color: vars.$text-primary;
+    }
+  }
+
+  .kt-storage__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: vars.$space-2;
+  }
+
+  .kt-storage__grow {
+    flex: 1;
+    font-size: vars.$font-caption;
+    color: vars.$text-tertiary;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .kt-storage__note {
+    display: flex;
+    align-items: flex-start;
+    gap: vars.$space-2;
+    margin: 0;
+    font-size: vars.$font-caption;
+    color: vars.$color-success;
+
+    svg {
+      flex: none;
+      margin-top: 1px;
+    }
+
+    &.is-warn {
+      color: vars.$color-warning;
+    }
+  }
+}
+
+// On a model card: the drive has no room for it, and where to put the models instead.
+.kt-native-card .kt-room {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: vars.$space-2;
+  margin-top: vars.$space-3;
+  padding-top: vars.$space-3;
+  border-top: 1px solid vars.$border-subtle;
+
+  .kt-room__why {
+    display: inline-flex;
+    align-items: center;
+    gap: vars.$space-1;
+    min-width: 0;
+    font-size: vars.$font-caption;
+    color: vars.$color-warning;
+  }
+
+  .kt-room__btn {
+    height: vars.$control-height-compact;
+    padding: 0 vars.$space-3;
+    border: 1px solid vars.$border-default;
+    border-radius: vars.$radius-sm;
+    background: transparent;
+    color: vars.$text-secondary;
+    font: inherit;
+    font-size: vars.$font-body;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: vars.$bg-hover;
+      color: vars.$text-primary;
+    }
+
+    &:disabled {
+      opacity: vars.$disabled-opacity;
+      cursor: not-allowed;
+    }
+  }
+}

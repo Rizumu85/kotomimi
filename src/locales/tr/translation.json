@@ -1976,6 +1976,41 @@
       "muted": "VRChat'te sessize alındı",
       "title": "VR başlığı",
       "help": "SteamVR'da karşınızdakinin söyledikleri görüş alanınızın altında görünür. Bileğinize baktığınızda küçük bir menü açılır. Diğer elinizdeki kontrolcüyle menüye dokunarak dili değiştirebilir, duraklatabilir veya başka bir model deneyebilirsiniz."
+    },
+    "storage": {
+      "title": "Model depolama",
+      "tooltip": "İndirilen tanıma, çeviri ve dilbilgisi geri bildirim modelleri burada tutulur. Daha geniş bir diske taşıdığınızda indirilen modeller de birlikte taşınır; yeniden indirmek gerekmez.",
+      "change": "Konumu değiştir",
+      "open": "Klasörü aç",
+      "models": "Modeller",
+      "free": "{{drive}} üzerinde {{size}} boş alan",
+      "drive": "{{name}} sürücüsü",
+      "thisComputer": "bu bilgisayar",
+      "toMove": "Taşınacak",
+      "move": "Taşı",
+      "cancel": "İptal",
+      "moving": "{{done}} / {{total}}",
+      "etaSoon": "bir dakikadan kısa",
+      "etaMinutes": "yaklaşık {{count}} dk",
+      "freed": "{{drive}} üzerinde {{size}} alan açıldı",
+      "missing": "Bu klasör bulunamıyor. Harici disk takılı mı?",
+      "useDefault": "Varsayılan konumu kullan",
+      "chooseAgain": "Tekrar seç",
+      "busySession": "Oturum sırasında taşınamaz",
+      "busySharing": "Modeller paylaşılırken taşınamaz",
+      "noRoom": "{{drive}} üzerinde yalnızca {{size}} kaldı; sığmıyor",
+      "changePlace": "Modelleri taşı",
+      "errors": {
+        "same": "Modeller zaten burada.",
+        "inside": "Modellerin kendi klasörlerinin dışından bir klasör seçin.",
+        "not_writable": "Bu klasöre yazılamıyor. Başka bir klasör seçin.",
+        "no_space": "{{drive}} üzerinde yeterli alan yok.",
+        "downloading": "Bir model indiriliyor. İndirme tamamlandıktan sonra taşıyın.",
+        "busy": "Modeller zaten taşınıyor.",
+        "stopped": "İptal edildi. Modeller eski konumunda.",
+        "copy_failed": "Taşıma tamamlanamadı. Modeller eski konumunda.",
+        "move_failed": "Taşıma tamamlanamadı. Modeller eski konumunda."
+      }
     }
   }
 }

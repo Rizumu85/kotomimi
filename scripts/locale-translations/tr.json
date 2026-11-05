@@ -559,6 +559,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "Hazırlanıyor. Birazdan başlayabilirsiniz."
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "Oturum sırasında taşınamaz"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "Modeller paylaşılırken taşınamaz"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "İptal"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "Konumu değiştir"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "Modelleri taşı"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "Tekrar seç"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "{{name}} sürücüsü"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "Modeller zaten taşınıyor."
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "Taşıma tamamlanamadı. Modeller eski konumunda."
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "Bir model indiriliyor. İndirme tamamlandıktan sonra taşıyın."
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "Modellerin kendi klasörlerinin dışından bir klasör seçin."
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "Taşıma tamamlanamadı. Modeller eski konumunda."
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "{{drive}} üzerinde yeterli alan yok."
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "Bu klasöre yazılamıyor. Başka bir klasör seçin."
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "Modeller zaten burada."
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "İptal edildi. Modeller eski konumunda."
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "yaklaşık {{count}} dk"
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "bir dakikadan kısa"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "{{drive}} üzerinde {{size}} boş alan"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "{{drive}} üzerinde {{size}} alan açıldı"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "Bu klasör bulunamıyor. Harici disk takılı mı?"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "Modeller"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "Taşı"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "{{drive}} üzerinde yalnızca {{size}} kaldı; sığmıyor"
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "Klasörü aç"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "bu bilgisayar"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "Model depolama"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "Taşınacak"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "İndirilen tanıma, çeviri ve dilbilgisi geri bildirim modelleri burada tutulur. Daha geniş bir diske taşıdığınızda indirilen modeller de birlikte taşınır; yeniden indirmek gerekmez."
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "Varsayılan konumu kullan"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "Hizalama"

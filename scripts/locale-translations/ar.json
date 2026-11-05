@@ -559,6 +559,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "جارٍ التحضير. يمكنك البدء بعد قليل."
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "لا يمكن النقل أثناء الجلسة"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "لا يمكن النقل أثناء مشاركة النماذج"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "إلغاء"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "تغيير الموقع"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "نقل النماذج"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "اختيار مجددًا"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "القرص {{name}}"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "يجري نقل النماذج بالفعل."
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "لم يكتمل النقل. ما زالت النماذج في مكانها السابق."
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "يجري تنزيل نموذج. انقل النماذج بعد اكتمال التنزيل."
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "اختر مجلدًا خارج مجلدات النماذج نفسها."
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "لم يكتمل النقل. ما زالت النماذج في مكانها السابق."
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "لا توجد مساحة كافية على {{drive}}."
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "لا يمكن الكتابة إلى هذا المجلد. اختر مجلدًا آخر."
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "النماذج موجودة هنا بالفعل."
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "أُلغي النقل. ما زالت النماذج في مكانها السابق."
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "حوالي {{count}} دقيقة"
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "أقل من دقيقة"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "متاح {{size}} على {{drive}}"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "تم تحرير {{size}} على {{drive}}"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "تعذّر العثور على هذا المجلد. هل القرص الخارجي متصل؟"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "النماذج"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "نقل"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "لم يتبقَّ سوى {{size}} على {{drive}}، والمساحة غير كافية"
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "فتح المجلد"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "هذا الكمبيوتر"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "تخزين النماذج"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "للنقل"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "تُحفظ هنا نماذج التعرّف والترجمة والتعليقات التي تم تنزيلها. عند نقلها إلى قرص أكبر، تنتقل النماذج المنزّلة أيضًا، لذلك لن تحتاج إلى تنزيلها مجددًا."
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "استخدام الموقع الافتراضي"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "المحاذاة"

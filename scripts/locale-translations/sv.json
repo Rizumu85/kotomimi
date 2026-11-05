@@ -563,6 +563,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "Förbereder. Du kan snart börja."
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "Kan inte flytta under en session"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "Kan inte flytta medan modeller delas"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "Avbryt"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "Byt plats"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "Flytta modeller"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "Välj igen"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "Enhet {{name}}"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "Modellerna flyttas redan."
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "Flytten slutfördes inte. Modellerna är kvar på sin ursprungliga plats."
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "En modell laddas ned. Flytta den när nedladdningen är klar."
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "Välj en mapp utanför modellernas egna mappar."
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "Flytten slutfördes inte. Modellerna är kvar på sin ursprungliga plats."
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "Det finns inte tillräckligt med plats på {{drive}}."
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "Det går inte att skriva till den här mappen. Välj en annan."
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "Modellerna finns redan här."
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "Avbrutet. Modellerna är kvar på sin ursprungliga plats."
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "cirka {{count}} min"
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "mindre än en minut"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "{{size}} ledigt på {{drive}}"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "{{size}} frigjort på {{drive}}"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "Mappen kan inte hittas. Är den externa enheten ansluten?"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "Modeller"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "Flytta"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "Bara {{size}} kvar på {{drive}} – inte tillräckligt med plats"
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "Öppna mapp"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "den här datorn"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "Modellagring"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "Att flytta"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "Nedladdade modeller för igenkänning, översättning och grammatikkontroll sparas här. Om du flyttar dem till en enhet med mer plats följer de nedladdade modellerna med, så inget behöver laddas ned igen."
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "Använd standardplats"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "Justering"

@@ -1976,6 +1976,41 @@
       "muted": "Mykistetty VRChatissa",
       "title": "VR-lasit",
       "help": "SteamVR:ssä toisen puhe näkyy katseesi alapuolella. Katso ranteeseesi, niin pieni valikko tulee näkyviin. Paina sitä toisen käden ohjaimella, kun haluat vaihtaa kieltä, keskeyttää tai kokeilla toista mallia."
+    },
+    "storage": {
+      "title": "Mallien tallennus",
+      "tooltip": "Ladatut tunnistus-, käännös- ja kielipalautemallit säilytetään täällä. Kun vaihdat tilavammalle asemalle, ladatut mallit siirretään mukana, joten niitä ei tarvitse ladata uudelleen.",
+      "change": "Vaihda sijaintia",
+      "open": "Avaa kansio",
+      "models": "Mallit",
+      "free": "{{drive}}-asemalla vapaana {{size}}",
+      "drive": "asema {{name}}",
+      "thisComputer": "tämä tietokone",
+      "toMove": "Siirrettävät",
+      "move": "Siirrä",
+      "cancel": "Peruuta",
+      "moving": "{{done}} / {{total}}",
+      "etaSoon": "alle minuutti",
+      "etaMinutes": "noin {{count}} min",
+      "freed": "{{drive}}-asemalta vapautui {{size}}",
+      "missing": "Tätä kansiota ei löydy. Onko ulkoinen asema kytketty?",
+      "useDefault": "Käytä oletussijaintia",
+      "chooseAgain": "Valitse uudelleen",
+      "busySession": "Siirtoa ei voi tehdä istunnon aikana",
+      "busySharing": "Siirtoa ei voi tehdä mallien jakamisen aikana",
+      "noRoom": "{{drive}}-asemalla on jäljellä vain {{size}}, tila ei riitä",
+      "changePlace": "Siirrä mallit",
+      "errors": {
+        "same": "Mallit ovat jo täällä.",
+        "inside": "Valitse kansio mallien omien kansioiden ulkopuolelta.",
+        "not_writable": "Tähän kansioon ei voi kirjoittaa. Valitse toinen.",
+        "no_space": "Asemalla {{drive}} ei ole tarpeeksi tilaa.",
+        "downloading": "Malli latautuu parhaillaan. Siirrä se, kun lataus on valmis.",
+        "busy": "Malleja siirretään jo.",
+        "stopped": "Peruutettu. Mallit ovat alkuperäisessä sijainnissaan.",
+        "copy_failed": "Siirto ei valmistunut. Mallit ovat alkuperäisessä sijainnissaan.",
+        "move_failed": "Siirto ei valmistunut. Mallit ovat alkuperäisessä sijainnissaan."
+      }
     }
   }
 }

@@ -563,6 +563,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "Préparation en cours. Vous pourrez bientôt commencer."
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "Impossible de déplacer pendant une session"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "Impossible de déplacer pendant le partage de modèles"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "Annuler"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "Changer d’emplacement"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "Déplacer les modèles"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "Choisir à nouveau"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "disque {{name}}"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "Les modèles sont déjà en cours de déplacement."
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "Le déplacement n’est pas terminé. Les modèles sont restés à leur emplacement d’origine."
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "Un modèle est en cours de téléchargement. Déplacez-les une fois terminé."
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "Choisissez un dossier en dehors des dossiers des modèles."
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "Le déplacement n’est pas terminé. Les modèles sont restés à leur emplacement d’origine."
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "Espace insuffisant sur {{drive}}."
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "Impossible d’écrire dans ce dossier. Choisissez-en un autre."
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "Les modèles sont déjà ici."
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "Annulé. Les modèles sont restés à leur emplacement d’origine."
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "environ {{count}} min"
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "moins d’une minute"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "{{size}} libres sur {{drive}}"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "{{size}} libérés sur {{drive}}"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "Ce dossier est introuvable. Le disque externe est-il branché ?"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "Modèles"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "Déplacer"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "Il ne reste que {{size}} sur {{drive}}, espace insuffisant"
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "Ouvrir le dossier"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "cet ordinateur"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "Stockage des modèles"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "À déplacer"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "Les modèles de reconnaissance, de traduction et de correction grammaticale téléchargés sont conservés ici. En choisissant un disque plus grand, les modèles téléchargés sont déplacés avec eux, sans avoir à les télécharger à nouveau."
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "Utiliser l’emplacement par défaut"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "Alignement"

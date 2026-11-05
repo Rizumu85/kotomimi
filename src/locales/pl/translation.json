@@ -1976,6 +1976,41 @@
       "muted": "Wyciszono w VRChat",
       "title": "Gogle VR",
       "help": "W SteamVR słowa rozmówcy pojawiają się poniżej linii wzroku. Spójrz na nadgarstek, by zobaczyć małe menu. Dotknij go kontrolerem w drugiej ręce, aby zmienić język, wstrzymać tłumaczenie lub wypróbować inny model."
+    },
+    "storage": {
+      "title": "Miejsce przechowywania modeli",
+      "tooltip": "Pobrane modele rozpoznawania, tłumaczenia i informacji zwrotnych są przechowywane tutaj. Przeniesienie ich na pojemniejszy dysk przeniesie też pobrane modele, więc nie trzeba ich pobierać ponownie.",
+      "change": "Zmień lokalizację",
+      "open": "Otwórz folder",
+      "models": "Modele",
+      "free": "{{size}} wolnego miejsca na {{drive}}",
+      "drive": "dysk {{name}}",
+      "thisComputer": "ten komputer",
+      "toMove": "Do przeniesienia",
+      "move": "Przenieś",
+      "cancel": "Anuluj",
+      "moving": "{{done}} / {{total}}",
+      "etaSoon": "mniej niż minuta",
+      "etaMinutes": "około {{count}} min",
+      "freed": "Zwolniono {{size}} na {{drive}}",
+      "missing": "Nie można znaleźć tego folderu. Czy dysk zewnętrzny jest podłączony?",
+      "useDefault": "Użyj domyślnej lokalizacji",
+      "chooseAgain": "Wybierz ponownie",
+      "busySession": "Nie można przenieść podczas sesji",
+      "busySharing": "Nie można przenieść podczas udostępniania modeli",
+      "noRoom": "Na {{drive}} pozostało tylko {{size}} — za mało miejsca",
+      "changePlace": "Przenieś modele",
+      "errors": {
+        "same": "Modele już się tutaj znajdują.",
+        "inside": "Wybierz folder poza folderami modeli.",
+        "not_writable": "Nie można zapisywać w tym folderze. Wybierz inny.",
+        "no_space": "Za mało miejsca na {{drive}}.",
+        "downloading": "Model jest pobierany. Przenieś go po zakończeniu pobierania.",
+        "busy": "Modele są już przenoszone.",
+        "stopped": "Anulowano. Modele pozostały na swoim miejscu.",
+        "copy_failed": "Przenoszenie nie zostało ukończone. Modele pozostały na swoim miejscu.",
+        "move_failed": "Przenoszenie nie zostało ukończone. Modele pozostały na swoim miejscu."
+      }
     }
   }
 }

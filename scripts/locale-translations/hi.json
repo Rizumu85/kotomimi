@@ -559,6 +559,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "तैयारी हो रही है। थोड़ी देर में शुरू कर सकेंगे।"
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "सेशन के दौरान नहीं ले जा सकते"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "मॉडल साझा करते समय नहीं ले जा सकते"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "रद्द करें"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "स्थान बदलें"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "मॉडल ले जाएँ"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "फिर से चुनें"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "ड्राइव {{name}}"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "मॉडल पहले से ले जाए जा रहे हैं।"
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "मॉडल ले जाना पूरा नहीं हुआ। वे वहीं हैं जहाँ पहले थे।"
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "एक मॉडल डाउनलोड हो रहा है। पूरा होने के बाद ले जाएँ।"
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "मॉडल के अपने फ़ोल्डरों के अंदर का फ़ोल्डर न चुनें।"
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "मॉडल ले जाना पूरा नहीं हुआ। वे वहीं हैं जहाँ पहले थे।"
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "{{drive}} पर पर्याप्त जगह नहीं है।"
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "इस फ़ोल्डर में लिखा नहीं जा सकता। कोई दूसरा चुनें।"
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "मॉडल पहले से यहीं हैं।"
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "रद्द किया गया। मॉडल वहीं हैं जहाँ पहले थे।"
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "लगभग {{count}} मिनट"
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "एक मिनट से कम"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "{{drive}} पर {{size}} खाली है"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "{{drive}} पर {{size}} जगह खाली हुई"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "यह फ़ोल्डर नहीं मिल रहा। क्या बाहरी ड्राइव कनेक्ट है?"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "मॉडल"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "ले जाएँ"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "{{drive}} पर केवल {{size}} बचा है, जगह पर्याप्त नहीं है"
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "फ़ोल्डर खोलें"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "यह कंप्यूटर"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "मॉडल स्टोरेज"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "ले जाने के लिए"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "डाउनलोड किए गए पहचान, अनुवाद और व्याकरण फ़ीडबैक मॉडल यहाँ रखे जाते हैं। अधिक जगह वाली ड्राइव पर ले जाने पर डाउनलोड किए गए मॉडल भी साथ चले जाते हैं, इसलिए दोबारा डाउनलोड नहीं करना पड़ता।"
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "डिफ़ॉल्ट स्थान इस्तेमाल करें"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "संरेखण"

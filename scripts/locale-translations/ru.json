@@ -555,6 +555,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "Идёт подготовка. Скоро можно будет начать."
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "Нельзя перемещать во время сеанса"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "Нельзя перемещать во время обмена моделями"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "Отмена"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "Изменить расположение"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "Переместить модели"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "Выбрать заново"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "диск {{name}}"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "Модели уже перемещаются."
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "Перемещение не завершено. Модели остались на прежнем месте."
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "Модель загружается. Переместите её после завершения загрузки."
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "Выберите папку вне папок моделей."
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "Перемещение не завершено. Модели остались на прежнем месте."
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "На {{drive}} недостаточно места."
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "В эту папку нельзя записывать. Выберите другую."
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "Модели уже находятся здесь."
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "Отменено. Модели остались на прежнем месте."
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "около {{count}} мин"
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "меньше минуты"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "{{drive}}: свободно {{size}}"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "{{drive}}: освобождено {{size}}"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "Эту папку не удаётся найти. Внешний диск подключён?"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "Модели"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "Переместить"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "На {{drive}} осталось только {{size}} — места не хватит"
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "Открыть папку"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "этот компьютер"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "Хранилище моделей"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "К перемещению"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "Здесь хранятся загруженные модели распознавания, перевода и проверки грамматики. При переносе на диск с большим объёмом загруженные модели переместятся вместе с папкой, поэтому скачивать их заново не придётся."
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "Использовать расположение по умолчанию"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "Выравнивание"

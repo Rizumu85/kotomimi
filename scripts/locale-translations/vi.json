@@ -563,6 +563,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "Đang chuẩn bị. Bạn có thể bắt đầu sau giây lát."
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "Không thể chuyển trong khi đang có phiên"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "Không thể chuyển khi đang chia sẻ model"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "Hủy"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "Đổi vị trí"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "Chuyển model"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "Chọn lại"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "ổ đĩa {{name}}"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "Model đang được chuyển."
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "Chuyển chưa hoàn tất. Model vẫn ở vị trí cũ."
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "Đang tải một model xuống. Hãy chuyển sau khi tải xong."
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "Hãy chọn thư mục bên ngoài các thư mục của model."
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "Chuyển chưa hoàn tất. Model vẫn ở vị trí cũ."
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "Ổ {{drive}} không đủ chỗ."
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "Không thể ghi vào thư mục này. Hãy chọn thư mục khác."
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "Model đã ở đây rồi."
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "Đã hủy. Model vẫn ở vị trí cũ."
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "khoảng {{count}} phút"
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "dưới một phút"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "{{drive}} còn trống {{size}}"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "{{drive}} đã trống thêm {{size}}"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "Không tìm thấy thư mục này. Ổ đĩa ngoài đã được cắm chưa?"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "Model"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "Chuyển"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "{{drive}} chỉ còn {{size}}, không đủ chỗ"
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "Mở thư mục"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "máy tính này"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "Nơi lưu model"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "Sẽ chuyển"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "Các model nhận dạng, dịch và phản hồi ngữ pháp đã tải xuống được lưu tại đây. Khi chuyển sang ổ đĩa còn nhiều chỗ hơn, các model đã tải xuống cũng được chuyển theo nên không cần tải lại."
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "Dùng vị trí mặc định"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "Căn lề"

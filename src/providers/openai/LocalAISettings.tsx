@@ -1,5 +1,6 @@
 import { InstructionsField } from '../../components/providers/fields/InstructionsField';
 import { LanSharingSection } from '../../components/LanSharing/LanSharingSection';
+import { ModelStorageSection } from '../../components/ModelStorage/ModelStorageSection';
 import { resolveInstructions } from '../../lib/provider/instructions';
 import type { SettingsProps } from '../../lib/provider/types';
 // Type only: `localai.ts` imports this view, and a value import back would close a cycle.
@@ -11,8 +12,8 @@ import './LocalAISettings.scss';
  * Fork: what the provider's own page holds besides the stages. The stages —
  * where each runs, and its model — are the cards under the provider
  * (`LocalAIAssist`), the same in both layouts; here are the two things that
- * belong to no single stage: the translation's instructions, and sharing this
- * computer's models with other devices.
+ * belong to no single stage: the translation's instructions, sharing this
+ * computer's models with other devices, and where those models are kept.
  */
 export function LocalAISettingsView({ settings, update, disabled = false, pair }: SettingsProps<S>) {
   const initial = realtimeLanguages.initial?.(settings);
@@ -24,6 +25,7 @@ export function LocalAISettingsView({ settings, update, disabled = false, pair }
       {/* The instructions are the other device's pipeline's and a text model's: this computer's translation models carry their own. */}
       {settings.translateAt !== 'device' && <InstructionsField value={settings} onChange={update} preview={preview} disabled={disabled} />}
       <LanSharingSection disabled={disabled} />
+      <ModelStorageSection disabled={disabled} />
     </div>
   );
 }

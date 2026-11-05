@@ -559,6 +559,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "ההכנות בעיצומן. עוד רגע אפשר להתחיל."
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "אי אפשר להעביר במהלך הפעלה"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "אי אפשר להעביר בזמן שיתוף מודלים"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "ביטול"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "שינוי מיקום"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "העברת מודלים"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "בחירה מחדש"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "כונן {{name}}"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "המודלים כבר מועברים."
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "ההעברה לא הושלמה. המודלים נשארו במיקומם הקודם."
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "מודל נמצא בהורדה. העבירו אותו לאחר סיום ההורדה."
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "בחרו תיקייה מחוץ לתיקיות של המודלים עצמם."
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "ההעברה לא הושלמה. המודלים נשארו במיקומם הקודם."
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "אין מספיק מקום ב־{{drive}}."
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "אי אפשר לכתוב לתיקייה הזו. בחרו תיקייה אחרת."
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "המודלים כבר נמצאים כאן."
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "בוטל. המודלים נשארו במיקומם הקודם."
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "בערך {{count}} דקות"
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "פחות מדקה"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "{{size}} פנויים ב־{{drive}}"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "התפנו {{size}} ב־{{drive}}"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "אי אפשר למצוא את התיקייה הזו. הכונן החיצוני מחובר?"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "מודלים"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "העברה"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "נשארו רק {{size}} ב־{{drive}}, אין מספיק מקום"
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "פתיחת תיקייה"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "מחשב זה"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "אחסון מודלים"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "להעברה"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "מודלי הזיהוי, התרגום והמשוב שהורדו נשמרים כאן. העברה לכונן עם יותר מקום תעביר גם את המודלים שכבר הורדו, כך שלא יהיה צורך להוריד אותם שוב."
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "שימוש במיקום ברירת המחדל"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "יישור"

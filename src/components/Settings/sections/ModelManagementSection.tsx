@@ -92,6 +92,8 @@ export function ModelCard({
   note,
   tag,
   children,
+  downloadBlocked = false,
+  footer,
 }: {
   entry: ModelManifestEntry | null; // null = "None" card
   status: ModelStatus;
@@ -113,6 +115,10 @@ export function ModelCard({
   /** Fork: what kind of model this is, as a chip that says on hover what all of its kind share. */
   tag?: { label: string; hint: string };
   children?: React.ReactNode;
+  /** Fork: the model cannot be downloaded now (no room on the drive): the button steps back, and `footer` says why. */
+  downloadBlocked?: boolean;
+  /** Fork: a line at the card's foot, shown whether or not the card is selected (`children` are the selected card's). */
+  footer?: React.ReactNode;
 }) {
   const { t } = useTranslation();
   const isNone = entry === null;
@@ -207,7 +213,7 @@ export function ModelCard({
               </div>
             )}
 
-            {!isCloud && status === 'not_downloaded' && (
+            {!isCloud && status === 'not_downloaded' && !downloadBlocked && (
               <>
                 <button
                   className="model-card__btn model-card__btn--download"
@@ -312,6 +318,7 @@ export function ModelCard({
           </div>
         </div>
       </div>
+      {footer}
       {isSelected && children && (
         // stopPropagation so interacting with the body (e.g. the voice picker's
         // dropdown/buttons) does not bubble to the card root's onClick and re-select.

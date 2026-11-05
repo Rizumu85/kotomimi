@@ -555,6 +555,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "Sedang bersedia. Anda boleh mula sebentar lagi."
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "Tidak boleh dipindahkan semasa sesi berlangsung"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "Tidak boleh dipindahkan semasa berkongsi model"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "Batal"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "Tukar lokasi"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "Pindahkan model"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "Pilih lagi"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "pemacu {{name}}"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "Model sedang dipindahkan."
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "Pemindahan tidak selesai. Model kekal di lokasi asal."
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "Model sedang dimuat turun. Pindahkan selepas selesai."
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "Pilih folder di luar folder model itu sendiri."
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "Pemindahan tidak selesai. Model kekal di lokasi asal."
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "Ruang tidak mencukupi pada {{drive}}."
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "Folder ini tidak boleh ditulis. Pilih yang lain."
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "Model sudah berada di sini."
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "Dibatalkan. Model kekal di lokasi asal."
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "kira-kira {{count}} min"
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "kurang seminit"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "{{size}} tersedia pada {{drive}}"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "{{size}} dikosongkan pada {{drive}}"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "Folder ini tidak ditemui. Adakah pemacu luaran telah disambungkan?"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "Model"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "Pindah"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "Hanya {{size}} tersedia pada {{drive}}, tidak mencukupi"
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "Buka folder"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "komputer ini"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "Storan model"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "Untuk dipindahkan"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "Model pengecaman, terjemahan dan maklum balas tatabahasa yang dimuat turun disimpan di sini. Apabila dipindahkan ke pemacu yang lebih luas, model yang dimuat turun turut dipindahkan, jadi tidak perlu memuat turun semula."
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "Guna lokasi lalai"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "Penjajaran"

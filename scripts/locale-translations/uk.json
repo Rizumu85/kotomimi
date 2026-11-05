@@ -555,6 +555,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "Триває підготовка. За мить можна починати."
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "Не можна переміщувати під час сеансу"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "Не можна переміщувати під час спільного доступу до моделей"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "Скасувати"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "Змінити розташування"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "Перемістити моделі"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "Вибрати ще раз"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "диск {{name}}"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "Моделі вже переміщуються."
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "Переміщення не завершено. Моделі залишилися на попередньому місці."
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "Модель завантажується. Перемістіть її після завершення завантаження."
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "Виберіть папку за межами папок самих моделей."
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "Переміщення не завершено. Моделі залишилися на попередньому місці."
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "На диску {{drive}} недостатньо місця."
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "У цю папку не можна записувати. Виберіть іншу."
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "Моделі вже тут."
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "Скасовано. Моделі залишилися на попередньому місці."
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "приблизно {{count}} хв"
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "менше хвилини"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "Вільно: {{size}} на диску {{drive}}"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "На диску {{drive}} звільнено {{size}}"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "Не вдається знайти цю папку. Можливо, зовнішній диск не під’єднано?"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "Моделі"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "Перемістити"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "На диску {{drive}} залишилося лише {{size}} — недостатньо місця"
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "Відкрити папку"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "цей комп’ютер"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "Сховище моделей"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "До переміщення"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "Тут зберігаються завантажені моделі розпізнавання, перекладу та граматичних підказок. Якщо перемістити їх на диск із більшим вільним місцем, завантажені моделі перемістяться разом із ними — повторно завантажувати нічого не потрібно."
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "Використовувати розташування за замовчуванням"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "Вирівнювання"

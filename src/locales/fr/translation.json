@@ -1976,6 +1976,41 @@
       "muted": "Micro coupé dans VRChat",
       "title": "Casque VR",
       "help": "Dans SteamVR, les paroles de votre interlocuteur s’affichent sous votre champ de vision. Regardez votre poignet pour faire apparaître un petit menu. Touchez-le avec l’autre manette pour changer de langue, mettre en pause ou essayer un autre modèle."
+    },
+    "storage": {
+      "title": "Stockage des modèles",
+      "tooltip": "Les modèles de reconnaissance, de traduction et de correction grammaticale téléchargés sont conservés ici. En choisissant un disque plus grand, les modèles téléchargés sont déplacés avec eux, sans avoir à les télécharger à nouveau.",
+      "change": "Changer d’emplacement",
+      "open": "Ouvrir le dossier",
+      "models": "Modèles",
+      "free": "{{size}} libres sur {{drive}}",
+      "drive": "disque {{name}}",
+      "thisComputer": "cet ordinateur",
+      "toMove": "À déplacer",
+      "move": "Déplacer",
+      "cancel": "Annuler",
+      "moving": "{{done}} / {{total}}",
+      "etaSoon": "moins d’une minute",
+      "etaMinutes": "environ {{count}} min",
+      "freed": "{{size}} libérés sur {{drive}}",
+      "missing": "Ce dossier est introuvable. Le disque externe est-il branché ?",
+      "useDefault": "Utiliser l’emplacement par défaut",
+      "chooseAgain": "Choisir à nouveau",
+      "busySession": "Impossible de déplacer pendant une session",
+      "busySharing": "Impossible de déplacer pendant le partage de modèles",
+      "noRoom": "Il ne reste que {{size}} sur {{drive}}, espace insuffisant",
+      "changePlace": "Déplacer les modèles",
+      "errors": {
+        "same": "Les modèles sont déjà ici.",
+        "inside": "Choisissez un dossier en dehors des dossiers des modèles.",
+        "not_writable": "Impossible d’écrire dans ce dossier. Choisissez-en un autre.",
+        "no_space": "Espace insuffisant sur {{drive}}.",
+        "downloading": "Un modèle est en cours de téléchargement. Déplacez-les une fois terminé.",
+        "busy": "Les modèles sont déjà en cours de déplacement.",
+        "stopped": "Annulé. Les modèles sont restés à leur emplacement d’origine.",
+        "copy_failed": "Le déplacement n’est pas terminé. Les modèles sont restés à leur emplacement d’origine.",
+        "move_failed": "Le déplacement n’est pas terminé. Les modèles sont restés à leur emplacement d’origine."
+      }
     }
   }
 }

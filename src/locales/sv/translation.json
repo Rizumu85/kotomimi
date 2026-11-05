@@ -1976,6 +1976,41 @@
       "muted": "Ljudet är avstängt i VRChat",
       "title": "VR-headset",
       "help": "I SteamVR visas det den andra personen säger strax under ditt synfält. Titta ner på handleden så visas en liten meny. Tryck på den med kontrollen i andra handen för att byta språk, pausa eller prova en annan modell."
+    },
+    "storage": {
+      "title": "Modellagring",
+      "tooltip": "Nedladdade modeller för igenkänning, översättning och grammatikkontroll sparas här. Om du flyttar dem till en enhet med mer plats följer de nedladdade modellerna med, så inget behöver laddas ned igen.",
+      "change": "Byt plats",
+      "open": "Öppna mapp",
+      "models": "Modeller",
+      "free": "{{size}} ledigt på {{drive}}",
+      "drive": "Enhet {{name}}",
+      "thisComputer": "den här datorn",
+      "toMove": "Att flytta",
+      "move": "Flytta",
+      "cancel": "Avbryt",
+      "moving": "{{done}} / {{total}}",
+      "etaSoon": "mindre än en minut",
+      "etaMinutes": "cirka {{count}} min",
+      "freed": "{{size}} frigjort på {{drive}}",
+      "missing": "Mappen kan inte hittas. Är den externa enheten ansluten?",
+      "useDefault": "Använd standardplats",
+      "chooseAgain": "Välj igen",
+      "busySession": "Kan inte flytta under en session",
+      "busySharing": "Kan inte flytta medan modeller delas",
+      "noRoom": "Bara {{size}} kvar på {{drive}} – inte tillräckligt med plats",
+      "changePlace": "Flytta modeller",
+      "errors": {
+        "same": "Modellerna finns redan här.",
+        "inside": "Välj en mapp utanför modellernas egna mappar.",
+        "not_writable": "Det går inte att skriva till den här mappen. Välj en annan.",
+        "no_space": "Det finns inte tillräckligt med plats på {{drive}}.",
+        "downloading": "En modell laddas ned. Flytta den när nedladdningen är klar.",
+        "busy": "Modellerna flyttas redan.",
+        "stopped": "Avbrutet. Modellerna är kvar på sin ursprungliga plats.",
+        "copy_failed": "Flytten slutfördes inte. Modellerna är kvar på sin ursprungliga plats.",
+        "move_failed": "Flytten slutfördes inte. Modellerna är kvar på sin ursprungliga plats."
+      }
     }
   }
 }

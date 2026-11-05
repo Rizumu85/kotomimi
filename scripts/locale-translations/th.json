@@ -559,6 +559,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "กำลังเตรียมพร้อม อีกสักครู่ก็เริ่มได้"
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "ย้ายระหว่างเซสชันไม่ได้"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "ย้ายขณะกำลังแชร์โมเดลไม่ได้"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "ยกเลิก"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "เปลี่ยนตำแหน่ง"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "ย้ายโมเดล"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "เลือกใหม่"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "ไดรฟ์ {{name}}"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "กำลังย้ายโมเดลอยู่"
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "ย้ายไม่เสร็จ โมเดลยังอยู่ที่เดิม"
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "กำลังดาวน์โหลดโมเดล รอให้เสร็จแล้วค่อยย้าย"
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "เลือกโฟลเดอร์ที่อยู่นอกโฟลเดอร์ของโมเดล"
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "ย้ายไม่เสร็จ โมเดลยังอยู่ที่เดิม"
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "พื้นที่ใน {{drive}} ไม่เพียงพอ"
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "เขียนลงโฟลเดอร์นี้ไม่ได้ เลือกโฟลเดอร์อื่น"
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "โมเดลอยู่ที่นี่แล้ว"
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "ยกเลิกแล้ว โมเดลยังอยู่ที่เดิม"
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "ประมาณ {{count}} นาที"
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "ไม่ถึง 1 นาที"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "เหลือ {{size}} ใน {{drive}}"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "{{drive}} มีพื้นที่ว่างเพิ่ม {{size}}"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "หาโฟลเดอร์นี้ไม่พบ เสียบไดรฟ์ภายนอกอยู่หรือยัง"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "โมเดล"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "ย้าย"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "{{drive}} เหลือเพียง {{size}} พื้นที่ไม่พอ"
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "เปิดโฟลเดอร์"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "คอมพิวเตอร์เครื่องนี้"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "ที่เก็บโมเดล"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "รายการที่จะย้าย"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "โมเดลการรู้จำ การแปล และคำติชมไวยากรณ์ที่ดาวน์โหลดไว้จะเก็บอยู่ที่นี่ เมื่อย้ายไปยังไดรฟ์ที่มีพื้นที่มากขึ้น โมเดลที่ดาวน์โหลดไว้จะถูกย้ายไปด้วย จึงไม่ต้องดาวน์โหลดใหม่"
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "ใช้ตำแหน่งเริ่มต้น"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "การจัดแนว"

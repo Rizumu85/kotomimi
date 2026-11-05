@@ -559,6 +559,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "در حال آماده‌سازی. تا چند لحظه دیگر می‌توانید شروع کنید."
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "هنگام برگزاری جلسه نمی‌توان انتقال داد"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "هنگام اشتراک‌گذاری مدل‌ها نمی‌توان انتقال داد"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "لغو"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "تغییر محل"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "انتقال مدل‌ها"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "انتخاب دوباره"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "درایو {{name}}"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "مدل‌ها از قبل در حال انتقال هستند."
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "انتقال کامل نشد. مدل‌ها در محل قبلی خود هستند."
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "مدلی در حال دانلود است. پس از پایان دانلود، انتقال دهید."
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "پوشه‌ای خارج از پوشه‌های خود مدل‌ها انتخاب کنید."
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "انتقال کامل نشد. مدل‌ها در محل قبلی خود هستند."
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "فضای کافی در {{drive}} نیست."
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "امکان نوشتن در این پوشه نیست. پوشه دیگری انتخاب کنید."
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "مدل‌ها از قبل اینجا هستند."
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "لغو شد. مدل‌ها در محل قبلی خود هستند."
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "حدود {{count}} دقیقه"
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "کمتر از یک دقیقه"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "{{size}} فضای خالی در {{drive}}"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "{{size}} فضا در {{drive}} آزاد شد"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "این پوشه پیدا نشد. آیا درایو خارجی وصل است؟"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "مدل‌ها"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "انتقال"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "فقط {{size}} فضا در {{drive}} باقی مانده؛ کافی نیست"
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "باز کردن پوشه"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "این رایانه"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "محل ذخیره مدل‌ها"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "برای انتقال"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "مدل‌های دانلودشدهٔ تشخیص، ترجمه و بازخورد زبانی اینجا نگه‌داری می‌شوند. با انتقال به درایوی با فضای بیشتر، مدل‌های دانلودشده هم منتقل می‌شوند و نیازی به دانلود دوباره نیست."
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "استفاده از محل پیش‌فرض"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "تراز"

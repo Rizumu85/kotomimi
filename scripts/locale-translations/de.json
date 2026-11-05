@@ -563,6 +563,126 @@
     "en": "Getting ready. You can start in a moment.",
     "text": "Wird vorbereitet. Gleich kannst du starten."
   },
+  "fork.storage.busySession": {
+    "en": "Can’t move during a session",
+    "text": "Während einer Sitzung nicht verschiebbar"
+  },
+  "fork.storage.busySharing": {
+    "en": "Can’t move while sharing models",
+    "text": "Während der Modellfreigabe nicht verschiebbar"
+  },
+  "fork.storage.cancel": {
+    "en": "Cancel",
+    "text": "Abbrechen"
+  },
+  "fork.storage.change": {
+    "en": "Change location",
+    "text": "Speicherort ändern"
+  },
+  "fork.storage.changePlace": {
+    "en": "Move models",
+    "text": "Modelle verschieben"
+  },
+  "fork.storage.chooseAgain": {
+    "en": "Choose again",
+    "text": "Erneut auswählen"
+  },
+  "fork.storage.drive": {
+    "en": "drive {{name}}",
+    "text": "Laufwerk {{name}}"
+  },
+  "fork.storage.errors.busy": {
+    "en": "The models are already being moved.",
+    "text": "Die Modelle werden bereits verschoben."
+  },
+  "fork.storage.errors.copy_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "Das Verschieben wurde nicht abgeschlossen. Die Modelle befinden sich weiterhin am ursprünglichen Speicherort."
+  },
+  "fork.storage.errors.downloading": {
+    "en": "A model is downloading. Move after it finishes.",
+    "text": "Ein Modell wird heruntergeladen. Verschiebe es, sobald der Download abgeschlossen ist."
+  },
+  "fork.storage.errors.inside": {
+    "en": "Choose a folder outside the models’ own folders.",
+    "text": "Wähle einen Ordner außerhalb der Modellordner."
+  },
+  "fork.storage.errors.move_failed": {
+    "en": "The move didn’t finish. The models are where they were.",
+    "text": "Das Verschieben wurde nicht abgeschlossen. Die Modelle befinden sich weiterhin am ursprünglichen Speicherort."
+  },
+  "fork.storage.errors.no_space": {
+    "en": "Not enough room on {{drive}}.",
+    "text": "Auf {{drive}} ist nicht genügend Speicherplatz frei."
+  },
+  "fork.storage.errors.not_writable": {
+    "en": "This folder can’t be written to. Choose another.",
+    "text": "In diesen Ordner kann nicht geschrieben werden. Wähle einen anderen."
+  },
+  "fork.storage.errors.same": {
+    "en": "The models are already here.",
+    "text": "Die Modelle sind bereits hier."
+  },
+  "fork.storage.errors.stopped": {
+    "en": "Cancelled. The models are where they were.",
+    "text": "Abgebrochen. Die Modelle befinden sich weiterhin am ursprünglichen Speicherort."
+  },
+  "fork.storage.etaMinutes": {
+    "en": "about {{count}} min",
+    "text": "etwa {{count}} Min."
+  },
+  "fork.storage.etaSoon": {
+    "en": "under a minute",
+    "text": "unter einer Minute"
+  },
+  "fork.storage.free": {
+    "en": "{{size}} free on {{drive}}",
+    "text": "{{size}} auf {{drive}} frei"
+  },
+  "fork.storage.freed": {
+    "en": "{{size}} freed on {{drive}}",
+    "text": "{{size}} auf {{drive}} freigegeben"
+  },
+  "fork.storage.missing": {
+    "en": "This folder can’t be found. Is the external drive plugged in?",
+    "text": "Dieser Ordner wurde nicht gefunden. Ist das externe Laufwerk angeschlossen?"
+  },
+  "fork.storage.models": {
+    "en": "Models",
+    "text": "Modelle"
+  },
+  "fork.storage.move": {
+    "en": "Move",
+    "text": "Verschieben"
+  },
+  "fork.storage.noRoom": {
+    "en": "Only {{size}} left on {{drive}}",
+    "text": "Auf {{drive}} sind nur noch {{size}} frei – nicht genug Speicherplatz."
+  },
+  "fork.storage.open": {
+    "en": "Open folder",
+    "text": "Ordner öffnen"
+  },
+  "fork.storage.thisComputer": {
+    "en": "this computer",
+    "text": "Dieser Computer"
+  },
+  "fork.storage.title": {
+    "en": "Model storage",
+    "text": "Modellspeicher"
+  },
+  "fork.storage.toMove": {
+    "en": "To move",
+    "text": "Zu verschieben"
+  },
+  "fork.storage.tooltip": {
+    "en": "Downloaded recognition, translation and feedback models are kept here. Moving to a roomier drive takes the downloaded models along, so nothing is downloaded again.",
+    "text": "Hier werden heruntergeladene Erkennungs-, Übersetzungs- und Grammatik-Feedbackmodelle gespeichert. Wenn du zu einem Laufwerk mit mehr Speicher wechselst, werden die heruntergeladenen Modelle mitgenommen und nicht erneut heruntergeladen."
+  },
+  "fork.storage.useDefault": {
+    "en": "Use default location",
+    "text": "Standardort verwenden"
+  },
   "fork.subtitle.align": {
     "en": "Alignment",
     "text": "Ausrichtung"

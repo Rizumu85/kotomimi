@@ -6,13 +6,15 @@
  * card for both engines: the one that hears and the one that translates.
  */
 import { restNative } from './localaiNative';
-import { useMemo } from 'react';
-import { CircleCheck, Loader, RefreshCw } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
+import { CircleCheck, Loader, RefreshCw, TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ModelCard } from '../../components/Settings/sections/ModelManagementSection';
 import type { ModelManifestEntry } from '../../lib/local-inference/modelManifest';
 import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import { nativeReady } from './localaiNative';
+import { ROOM_MARGIN, sizeText, useModelStorageStore } from '../../lib/native/modelStorage';
+import { driveLabel } from '../../components/ModelStorage/ModelStorageSection';
 
 export type NativeKind = 'asr' | 'translation' | 'coach';
 
@@ -97,6 +99,13 @@ export function NativeEngineCard({ kind, model, recommended = true, selected, on
   const ours = run.model === model.id;
   const words = WORDS[kind];
   const note = nativeNoteKey(model.id);
+  // Room on the drive the models are kept on (`modelStorage.ts`), for a model not downloaded yet: the runtime too,
+  // where it is not either (its archive, then what it unpacks to).
+  const storage = useModelStorageStore((s) => s.status);
+  useEffect(() => { void useModelStorageStore.getState().refresh(); }, []);
+  const needs = model.bytes - (mine?.received ?? 0) + (status.engine === 'ready' ? 0 : status.engineBytes * 2);
+  const room = storage?.drive.freeBytes ?? null;
+  const noRoom = model.bytes > 0 && !fetching && !downloaded && room !== null && needs + ROOM_MARGIN > room;
   return (
     // No size is shown for a model the system fetches itself: it does not say how large it is.
     <div className={`kt-native-card${model.bytes > 0 ? '' : ' kt-native-card--unsized'}`}>
@@ -116,6 +125,13 @@ export function NativeEngineCard({ kind, model, recommended = true, selected, on
       onDownload={() => { onDownloadStarted?.(); void store().download(model.id); }}
       onCancel={() => { void store().cancel(model.id); }}
       onDelete={() => { void store().remove(model.id); }}
+      downloadBlocked={noRoom}
+      footer={noRoom ? (
+        <div className="kt-room">
+          <span className="kt-room__why"><TriangleAlert size={14} />{t('fork.storage.noRoom', { drive: driveLabel(t, storage?.drive), size: sizeText(room ?? 0) })}</span>
+          <button type="button" className="kt-room__btn" onClick={(e) => { e.stopPropagation(); void useModelStorageStore.getState().choose(); }} disabled={disabled}>{t('fork.storage.changePlace')}</button>
+        </div>
+      ) : undefined}
     >
       {mine?.runtime ? (
         <p className="kt-engine" role="status"><Loader size={13} className="kt-engine__spin" /><span>{t('providers.localai.nativeRuntime')}</span></p>
