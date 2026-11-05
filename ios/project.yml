@@ -45,6 +45,12 @@ targets:
         "LIBRARY_SEARCH_PATHS[sdk=iphoneos*]": $(SRCROOT)/../llama/ios/lib
         "LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]": $(SRCROOT)/../llama/sim/lib
         OTHER_LDFLAGS: -lllama-common -lllama-common-base -lllama -lggml -lggml-base -lggml-cpu -lggml-metal -lcpp-httplib -lc++ -framework Metal -framework MetalKit -framework Accelerate
+    # Three models of two or three gigabytes each (a recognizer, a translator, the feedback model) do not fit the
+    # memory iOS gives an app by default (about 5 GB on a 16 GB iPad): asked for more.
+    entitlements:
+      path: KotomimiNode/Kotomimi.entitlements
+      properties:
+        com.apple.developer.kernel.increased-memory-limit: true
     info:
       path: KotomimiNode/Info.plist
       properties:

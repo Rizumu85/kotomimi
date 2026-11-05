@@ -275,43 +275,86 @@ struct ToolsBox: View {
     let close: () -> Void
     @Environment(Hearing.self) private var hearing
     @Environment(Lending.self) private var lending
+    @Environment(TextStore.self) private var text
     @Environment(SelfCheck.self) private var check
 
+    /// Every recognizer here, the one lent first: the device's own, where it has a language, and each model downloaded.
+    private var recognizers: [(id: String, name: String)] {
+        let all = (hearing.ready.isEmpty ? [] : [(Lending.modelId, "系统语音识别")]) + text.ready.filter { $0.kind == .hear }.map { ($0.id, $0.name) }
+        let lent = lending.lentModel?.id ?? Lending.modelId
+        return all.filter { $0.0 == lent } + all.filter { $0.0 != lent }
+    }
+
     var body: some View {
-        BoxPanel(title: "性能检测", close: close) { DialThing(amount: (check.result?.speed ?? 0) / 3) } content: {
+        let lent = check.result(lending)
+        BoxPanel(title: "性能检测", close: close) { DialThing(amount: (lent?.speed ?? 0) / 3) } content: {
             BoxCard {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    if let result = check.result {
-                        Text(String(format: "%.1f", result.speed)).font(.system(size: 44, weight: .light).monospacedDigit()).foregroundStyle(Palette.ink)
+                    if let lent {
+                        Text(String(format: "%.1f", lent.speed)).font(.system(size: 44, weight: .light).monospacedDigit()).foregroundStyle(Palette.ink)
                         Text("倍速").font(.system(size: 15)).foregroundStyle(Palette.ink2)
                         Spacer()
-                        Text(result.speed >= 4 ? "可实时识别" : "会有延迟")
-                            .font(.system(size: 13, weight: .medium)).foregroundStyle(Palette.ink)
-                            .padding(.horizontal, 10).padding(.vertical, 5)
-                            .background(result.speed >= 4 ? Palette.mint : Color(day: 0xF3D5CC, night: 0x2E2E33), in: .capsule)
+                        Badge(speed: lent.speed)
                     } else {
                         Text("尚未检测").font(.system(size: 20, weight: .semibold)).foregroundStyle(Palette.ink)
                     }
                 }
-                if case .running(let done) = check.phase { ProgressView(value: done).tint(Palette.good) }
+                if case .running(let done, let name) = check.phase {
+                    ProgressView(value: done).tint(Palette.good)
+                    Text("正在检测 \(name)").font(.system(size: 13)).foregroundStyle(Palette.ink2)
+                }
                 if case .failed(let why) = check.phase { Text(why).font(.system(size: 14)).foregroundStyle(Palette.inkRed) }
-                Button(check.running ? "停止检测" : check.result == nil ? "开始检测" : "重新检测") {
-                    if check.running { check.cancel() } else { check.start(hearing) }
+                Button(check.running ? "停止检测" : check.results.isEmpty ? "开始检测" : "重新检测") {
+                    if check.running { check.cancel() } else { check.start(hearing, lending, text) }
                 }
                 .buttonStyle(.glassProminent)
                 .tint(Palette.key)
                 .foregroundStyle(Color(day: 0xFFFDF8, night: 0x111113))
                 .disabled(lending.phase != .off && !check.running)
             }
-            Note(text: lending.phase != .off ? "共享期间无法检测，请先停止共享。" : "用一段日语录音测试识别速度。")
-            if let result = check.result {
-                BoxCard(title: "读出的内容") {
-                    Text(result.text.isEmpty ? "（没有读出字）" : result.text).font(.system(size: 15)).foregroundStyle(Palette.ink)
-                    if !result.right { Text("和录音差得较多").font(.system(size: 14)).foregroundStyle(Palette.inkRed) }
-                    Text(String(format: "第一次 %.1f 秒（含加载）", result.firstSeconds)).font(.system(size: 13)).foregroundStyle(Palette.ink2)
+            Note(text: lending.phase != .off ? "共享期间无法检测，请先停止共享。" : "用一段日语录音测试每个识别模型的速度。")
+            if recognizers.count > 0 {
+                BoxCard(title: "各识别模型") {
+                    let shown = recognizers
+                    Rows(count: shown.count) { at in row(shown[at], lent: at == 0) }
                 }
             }
         }
+    }
+
+    @ViewBuilder private func row(_ recognizer: (id: String, name: String), lent: Bool) -> some View {
+        let result = check.results[recognizer.id]
+        HStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text(recognizer.name).font(.system(size: 16)).foregroundStyle(Palette.ink)
+                    if lent { Image(systemName: "checkmark").font(.system(size: 12, weight: .semibold)).foregroundStyle(Palette.good) }
+                }
+                if let result {
+                    Text(result.right ? String(format: "第一次 %.1f 秒（含加载）", result.firstSeconds) : "读出的和录音差得较多")
+                        .font(.system(size: 13)).foregroundStyle(result.right ? Palette.ink3 : Palette.inkRed)
+                }
+            }
+            Spacer()
+            if let result {
+                Text(String(format: "%.1f 倍速", result.speed)).font(.system(size: 15).monospacedDigit()).foregroundStyle(Palette.ink)
+                Badge(speed: result.speed)
+            } else {
+                Text("尚未检测").font(.system(size: 14)).foregroundStyle(Palette.ink3)
+            }
+        }
+        .frame(minHeight: 50)
+    }
+}
+
+/// Whether a speed keeps up with a voice read live.
+private struct Badge: View {
+    let speed: Double
+    var body: some View {
+        Text(speed >= 4 ? "可实时识别" : "会有延迟")
+            .font(.system(size: 13, weight: .medium)).foregroundStyle(Palette.ink)
+            .padding(.horizontal, 10).padding(.vertical, 5)
+            .background(speed >= 4 ? Palette.mint : Color(day: 0xF3D5CC, night: 0x2E2E33), in: .capsule)
     }
 }
 

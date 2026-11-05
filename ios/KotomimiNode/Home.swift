@@ -66,24 +66,27 @@ struct Home: View {
         open = .models
     }
 
+    /// The widgets that open a box, each for one kind of thing: hearing, translation, feedback, the devices, the check.
+    private var hearButton: some View { Button { models(.hearing) } label: { HearTile() } }
+    private var translateButton: some View { Button { models(.translate) } label: { TranslateTile() } }
+    private var coachButton: some View { Button { models(.coach) } label: { CoachTile() } }
+    private var devicesButton: some View { Button { open = .devices } label: { DevicesTile() } }
+    private var checkButton: some View { Button { open = .tools } label: { CheckTile() } }
+
+    /// Held across: the status and the big widgets take the larger part on the left, where every kind of work going
+    /// on has room; the switch and the small widgets stand in a narrower column on the right.
     private func wide(_ size: CGSize) -> some View {
         HStack(alignment: .top, spacing: Metrics.gap) {
             VStack(alignment: .leading, spacing: Metrics.gap) {
                 Status(key: AnyView(key))
                 FocusTiles(several: true)
             }
-            .frame(width: (size.width - Metrics.margin * 2 - Metrics.gap) * 0.49)
+            .frame(width: (size.width - Metrics.margin * 2 - Metrics.gap) * 0.6)
             VStack(spacing: Metrics.gap) {
                 ShareTile().frame(height: 92)
-                HStack(spacing: Metrics.gap) {
-                    Button { models(.translate) } label: { TranslateTile() }
-                    Button { models(.coach) } label: { CoachTile() }
-                }
-                HStack(spacing: Metrics.gap) {
-                    Button { open = .devices } label: { DevicesTile() }
-                    Button { open = .tools } label: { CheckTile() }
-                }
-                Button { models(.hearing) } label: { ModelsTile() }.frame(height: 132)
+                HStack(spacing: Metrics.gap) { hearButton; translateButton; coachButton }
+                HStack(spacing: Metrics.gap) { devicesButton; checkButton }
+                Button { models(.hearing) } label: { ModelsTile() }.frame(height: 120)
             }
             .buttonStyle(Pressed())
             .padding(.top, 30)
@@ -102,13 +105,8 @@ struct Home: View {
             // The key stands at the end of the status word's line, above the share widget.
             .overlay(alignment: .topTrailing) { key.padding(.top, 36) }
             FocusTiles(several: true)
-            HStack(spacing: Metrics.gap) {
-                Button { models(.translate) } label: { TranslateTile() }
-                Button { models(.coach) } label: { CoachTile() }
-                Button { open = .devices } label: { DevicesTile() }
-                Button { open = .tools } label: { CheckTile() }
-            }
-            .frame(height: 148)
+            HStack(spacing: Metrics.gap) { hearButton; translateButton; coachButton; devicesButton; checkButton }
+                .frame(height: 148)
             Button { models(.hearing) } label: { ModelsTile() }.frame(height: 120)
         }
         .buttonStyle(Pressed())
@@ -122,17 +120,9 @@ struct Home: View {
                 Status(key: AnyView(key))
                 ShareTile().frame(height: 92)
                 FocusTiles(several: false).frame(height: 300)
-                HStack(spacing: Metrics.gap) {
-                    Button { models(.translate) } label: { TranslateTile() }
-                    Button { models(.coach) } label: { CoachTile() }
-                }
-                .frame(height: 140)
-                HStack(spacing: Metrics.gap) {
-                    Button { open = .devices } label: { DevicesTile() }
-                    Button { open = .tools } label: { CheckTile() }
-                }
-                .frame(height: 140)
-                Button { models(.hearing) } label: { ModelsTile() }.frame(height: 132)
+                HStack(spacing: Metrics.gap) { hearButton; translateButton }.frame(height: 140)
+                HStack(spacing: Metrics.gap) { coachButton; devicesButton }.frame(height: 140)
+                HStack(spacing: Metrics.gap) { checkButton; Button { models(.hearing) } label: { ModelsTile(compact: true) } }.frame(height: 140)
             }
             .buttonStyle(Pressed())
             .padding(.horizontal, Metrics.margin)
@@ -303,23 +293,20 @@ private struct FocusTiles: View {
     @Environment(Lending.self) private var lending
 
     var body: some View {
-        // Looked at again now and then: a kind of work stops counting as going on with no request to tell.
-        TimelineView(.periodic(from: .now, by: 5)) { time in
-            let shown = several ? lending.going(at: time.date) : [lending.focus]
-            VStack(spacing: Metrics.gap) {
-                ForEach(shown, id: \.self) { work in
-                    Group {
-                        switch work {
-                        case .hear: HearingTile()
-                        case .translate: TextTile(kind: .translate)
-                        case .coach: TextTile(kind: .coach)
-                        }
+        let shown = several ? lending.going() : [lending.focus]
+        let texts = shown.filter { $0 != .hear }
+        // Hearing across the top where it is going on, the text work side by side under it.
+        VStack(spacing: Metrics.gap) {
+            if shown.contains(.hear) { HearingTile().transition(.opacity) }
+            if !texts.isEmpty {
+                HStack(spacing: Metrics.gap) {
+                    ForEach(texts, id: \.self) { work in
+                        TextTile(kind: work == .translate ? .translate : .coach).transition(.opacity.combined(with: .scale(scale: 0.98)))
                     }
-                    .transition(.opacity.combined(with: .scale(scale: 0.98)))
                 }
             }
-            .animation(.spring(duration: 0.45, bounce: 0.15), value: shown)
         }
+        .animation(.spring(duration: 0.45, bounce: 0.15), value: shown)
     }
 }
 
@@ -359,7 +346,9 @@ private struct TextTile: View {
             Text(work.said ?? (kind == .translate ? "原文将显示在这里" : "等待第一句")).font(.system(size: 17)).foregroundStyle(sub).lineLimit(3)
                 .strikethrough(kind == .coach && work.answer != nil && !fine, color: sub.opacity(0.6))
                 .padding(.bottom, 12)
-            if work.answer != nil {
+            if let failed = work.failed {
+                Text(failed).font(.system(size: 17, weight: .medium)).foregroundStyle(Palette.inkRed).lineLimit(3)
+            } else if work.answer != nil {
                 Text(answer).font(.system(size: 22, weight: kind == .coach ? .semibold : .regular))
                     .lineSpacing(5).foregroundStyle(kind == .coach && !fine ? Palette.inkRed : number).lineLimit(6).minimumScaleFactor(0.7)
                 if !why.isEmpty {
@@ -473,15 +462,31 @@ private struct DevicesTile: View {
 
 private struct CheckTile: View {
     @Environment(SelfCheck.self) private var check
+    @Environment(Lending.self) private var lending
 
     var body: some View {
-        SmallTile(title: "性能检测", line: line) { DialThing(amount: (check.result?.speed ?? 0) / 3) }
+        SmallTile(title: "性能检测", line: line) { DialThing(amount: (check.result(lending)?.speed ?? 0) / 3) }
     }
 
     private var line: String {
-        if case .running(let done) = check.phase { return "检测中 \(Int(done * 100))%" }
-        guard let result = check.result else { return "尚未检测" }
+        if case .running(let done, _) = check.phase { return "检测中 \(Int(done * 100))%" }
+        guard let result = check.result(lending) else { return "尚未检测" }
         return result.speed >= 4 ? "可流畅使用" : "可能跟不上说话"
+    }
+}
+
+/// What hears for the computer: the model lent, or the device's own recognition in the language ticked.
+private struct HearTile: View {
+    @Environment(Hearing.self) private var hearing
+    @Environment(Lending.self) private var lending
+
+    var body: some View {
+        SmallTile(title: "语音识别", line: line) { WaterThing() }
+    }
+
+    private var line: String {
+        if let model = lending.lentModel { return model.name }
+        return hearing.ready.isEmpty ? "未下载" : "系统 · \(hearing.name(of: hearing.preferred))"
     }
 }
 
@@ -517,10 +522,26 @@ private enum TextLine {
 
 /// The models: the objects of what is here, and how many.
 private struct ModelsTile: View {
+    /// As a small widget, its objects small above its name.
+    var compact = false
     @Environment(Hearing.self) private var hearing
     @Environment(TextStore.self) private var text
 
     var body: some View {
+        if compact {
+            SmallTile(title: "模型管理", line: "\(hearing.ready.count + text.ready.count) 项已下载") {
+                HStack(spacing: 2) {
+                    WaterThing().frame(width: 16, height: 16)
+                    PanesThing().frame(width: 16, height: 16)
+                    NoteThing().frame(width: 16, height: 16)
+                }
+            }
+        } else {
+            wide
+        }
+    }
+
+    private var wide: some View {
         Tile(padding: 20) {
             HStack(alignment: .center, spacing: 0) {
                 VStack(alignment: .leading, spacing: 4) {

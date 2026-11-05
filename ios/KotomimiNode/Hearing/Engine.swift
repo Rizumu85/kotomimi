@@ -34,6 +34,16 @@ nonisolated final class HearingEngine: @unchecked Sendable {
         queue.async { [self] in freeHere() }
     }
 
+    /// The same, done once this returns.
+    func releaseNow() async {
+        await withCheckedContinuation { (done: CheckedContinuation<Void, Never>) in
+            queue.async { [self] in
+                freeHere()
+                done.resume()
+            }
+        }
+    }
+
     private func freeHere() {
         if let held = loaded {
             audiocpp_session_free(held.session)

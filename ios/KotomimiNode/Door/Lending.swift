@@ -27,8 +27,9 @@ final class Lending {
     static let mostSeconds = 90.0
     /// Shorter than this is no sound: a click of a twentieth of a second has no word in it.
     static let leastSeconds = 0.05
-    /// Whether it is working is told by whether anything was asked of it lately.
-    private static let workingFor: TimeInterval = 4
+    /// Whether it is working is told by whether anything was asked of it lately: as long as a pause in a talk, so
+    /// that the status does not flip to standby between two sentences.
+    private static let workingFor: TimeInterval = 30
 
     private(set) var phase: Phase = .off
     private(set) var address: String?
@@ -57,22 +58,25 @@ final class Lending {
         var into: String?
         var ms: Double = 0
         var count = 0
+        /// When it was last asked for, answered or not.
         var at = Date.distantPast
+        /// Why the last request was not answered, for the screen; nil where it was.
+        var failed: String?
     }
     private(set) var translated = TextWork()
     private(set) var coached = TextWork()
     func work(_ kind: TextModel.Kind) -> TextWork { kind == .translate ? translated : coached }
 
-    /// How long a kind of work counts as going on after it was last asked for: a tablet shows a big widget for each
-    /// kind going on. A computer asks for a translation and its feedback a sentence at a time, with talk between.
-    static let goingFor: TimeInterval = 120
+    /// When sharing began: a tablet shows a big widget for each kind of work a computer asked for since, so a widget
+    /// does not come and go with the pauses of a talk.
+    private(set) var sharedSince = Date.distantFuture
 
-    /// The kinds of work going on, in the widgets' order: what was done last, and what else was asked for lately.
-    func going(at now: Date) -> [Work] {
+    /// The kinds of work going on, in the widgets' order: what was done last, and what else was asked for since
+    /// sharing began.
+    func going() -> [Work] {
         guard phase == .waiting || phase == .working else { return [focus] }
-        let lately = { (at: Date) in now.timeIntervalSince(at) < Lending.goingFor }
         return [Work.hear, .translate, .coach].filter { work in
-            work == focus || lately(work == .hear ? heardAt : work == .translate ? translated.at : coached.at)
+            work == focus || (work == .hear ? heardAt : work == .translate ? translated.at : coached.at) >= sharedSince
         }
     }
 
@@ -101,7 +105,10 @@ final class Lending {
 
     /// The recognizer the owner chose to lend: the device's own (`apple-speech`) or a downloaded model's id.
     var chosenRecognizer: String = UserDefaults.standard.string(forKey: "hearing.lent") ?? Lending.modelId {
-        didSet { UserDefaults.standard.set(chosenRecognizer, forKey: "hearing.lent") }
+        didSet {
+            UserDefaults.standard.set(chosenRecognizer, forKey: "hearing.lent")
+            Task { await freeIdleRecognizer() }
+        }
     }
 
     /// The downloaded recognition model lent, or nil where the device's own recognition is: the one chosen where it
@@ -111,6 +118,12 @@ final class Lending {
         let models = text.ready.filter { $0.kind == .hear }
         if let chosen = models.first(where: { $0.id == chosenRecognizer }) { return chosen }
         return hearing.ready.isEmpty ? models.first : nil
+    }
+
+    /// A downloaded recognizer held though another is lent (chosen since, or checked by the self-check) lets its
+    /// gigabytes go: the text models need them.
+    func freeIdleRecognizer() async {
+        if let up = hearEngine.loadedId, up != lentModel?.id { await hearEngine.releaseNow() }
     }
 
     /// Whether anything can be lent: a recognizer, or a text model.
@@ -125,6 +138,7 @@ final class Lending {
     func start() {
         guard door == nil else { return }
         phase = .starting
+        sharedSince = Date()
         address = Network.address(port: Door.port)
         // The name as the Android app sends it: percent-encoded, a header being ASCII only.
         let plain = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~")
@@ -170,6 +184,7 @@ final class Lending {
     /// `-pretend standby|working`), as the Android app's `--es pretend`.
     func pretend(_ what: String) {
         address = "192.168.1.23:8792"
+        sharedSince = .distantPast
         seen = "192.168.1.8"
         seenAt = Date().addingTimeInterval(-90)
         text.pretend()
@@ -293,6 +308,7 @@ final class Lending {
         seenAt = Date()
         lastUse = Date()
         if phase == .waiting { phase = .working }
+        await freeIdleRecognizer()
         do {
             let written = try await engine.answer(model, at: text.path(model), asked)
             lastUse = Date()
@@ -306,6 +322,7 @@ final class Lending {
                 done.ms = written.tookMs
                 done.count += 1
                 done.at = Date()
+                done.failed = nil
                 if model.kind == .translate { translated = done } else { coached = done }
             }
             let created = Int(Date().timeIntervalSince1970)
@@ -313,10 +330,22 @@ final class Lending {
             return .json(200, body, allow)
         } catch let refusal as Refusal {
             let short = refusal.description.contains("memory")
+            failed(model, Lending.saidIn(messages), short ? "这台设备内存不够运行 \(model.name)" : "没能完成，请重试")
             return .error(short ? 503 : 502, refusal.description, allow + (short ? [("Retry-After", "5")] : []))
         } catch {
+            failed(model, Lending.saidIn(messages), "没能完成，请重试")
             return .error(502, "The engine stopped: \(error.localizedDescription)", allow)
         }
+    }
+
+    /// A request a text model did not answer: said on its widget, which a tablet shows for it.
+    private func failed(_ model: TextModel, _ said: String?, _ why: String) {
+        var done = work(model.kind)
+        done.said = said ?? done.said
+        done.failed = why
+        done.at = Date()
+        focus = model.kind == .translate ? .translate : .coach
+        if model.kind == .translate { translated = done } else { coached = done }
     }
 
     /// The sentence a request asks about, for the screen: the last line of the last thing the person said (the
