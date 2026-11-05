@@ -40,6 +40,10 @@ struct KotomimiApp: App {
                         lending.pretend(CommandLine.arguments[at + 1])
                         return
                     }
+                    // The recognizer to lend, chosen from the Mac for a test on a device (`-lend r2t2-q8`).
+                    if let at = CommandLine.arguments.firstIndex(of: "-lend"), at + 1 < CommandLine.arguments.count {
+                        lending.chosenRecognizer = CommandLine.arguments[at + 1]
+                    }
                     #endif
                     await hearing.refresh()
                 }

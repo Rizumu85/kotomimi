@@ -400,7 +400,9 @@ final class Lending {
             }
         } else if model.languages.contains(base) {
             language = base
-        } else if let named = Hearing.code(for: said), model.languages.contains(named) {
+        } else if let named = Hearing.code(for: said) ?? TextModel.languageNames.first(where: { $0.value.lowercased() == said.lowercased() })?.key,
+                  model.languages.contains(named) {
+            // Named in English, as the desktop names R2T2's (`saidFor` in electron/remote-engine.js).
             language = named
         } else {
             return .error(400, "\(model.name) does not hear \"\(said.prefix(20))\".", allow)
