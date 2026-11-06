@@ -1771,15 +1771,15 @@
       "unpinShort": "Lossa",
       "mine": "Mitt språk",
       "theirs": "Deras språk",
-      "detect": "Identifiera automatiskt",
-      "detectUnavailable": "Den aktuella taligenkänningen kan inte identifiera språk automatiskt. Det kräver Qwen3-ASR 1.7B GGUF eller en API-modell.",
-      "bestEffortSummary": "Språket härleds från texten och kan identifieras fel.",
-      "bestEffortHelp": "Den valda taligenkänningsmodellen anger inte transkriptionens språk. Kotomimi uppskattar det utifrån texten, så språkidentifieringen kan vara mindre tillförlitlig.",
       "pairHelp": "Välj de språk som du och den andra personen främst använder. Det du säger översätts till deras språk och det de säger till ditt.",
       "alsoSpeak": "Jag talar också",
-      "theyMaySpeak": "De kan tala",
+      "theyMaySpeak": "De kan också tala",
       "hearingBy": "Taligenkänning: {{name}}",
-      "moreLanguages": "Ytterligare {{count}} språk"
+      "anyLanguage": "Vilket språk som helst",
+      "addLanguage": "Lägg till ett språk",
+      "removeLanguage": "Ta bort {{name}}",
+      "hearsMe": "Hör mig",
+      "hearsThem": "Hör dem"
     },
     "wizard": {
       "pathTitle": "Kotomimi med valfria modeller",

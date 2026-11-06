@@ -1771,15 +1771,15 @@
       "unpinShort": "Lepas sematan",
       "mine": "Bahasa saya",
       "theirs": "Bahasa lawan bicara",
-      "detect": "Deteksi otomatis",
-      "detectUnavailable": "Pengenal ucapan yang digunakan tidak bisa mendeteksi bahasa secara otomatis. Gunakan Qwen3-ASR 1.7B GGUF atau model API.",
-      "bestEffortSummary": "Bahasa diperkirakan dari teks dan bisa salah dikenali.",
-      "bestEffortHelp": "Model pengenalan ucapan yang dipilih tidak melaporkan bahasa transkrip. Kotomimi memperkirakannya dari teks, sehingga deteksi bahasa mungkin kurang andal.",
       "pairHelp": "Pilih bahasa yang terutama digunakan oleh Anda dan lawan bicara. Ucapan Anda diterjemahkan ke bahasanya, dan ucapannya ke bahasa Anda.",
       "alsoSpeak": "Saya juga berbicara",
-      "theyMaySpeak": "Mereka mungkin berbicara",
+      "theyMaySpeak": "Mereka mungkin juga berbicara",
       "hearingBy": "Pengenalan suara: {{name}}",
-      "moreLanguages": "{{count}} bahasa lainnya"
+      "anyLanguage": "Bahasa apa pun",
+      "addLanguage": "Tambah bahasa",
+      "removeLanguage": "Hapus {{name}}",
+      "hearsMe": "Mendengar saya",
+      "hearsThem": "Mendengar mereka"
     },
     "wizard": {
       "pathTitle": "Kotomimi Bebas Kombinasi",

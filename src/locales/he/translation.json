@@ -1771,15 +1771,15 @@
       "unpinShort": "ביטול הצמדה",
       "mine": "השפה שלי",
       "theirs": "השפה של הצד השני",
-      "detect": "זיהוי אוטומטי",
-      "detectUnavailable": "זיהוי הדיבור הנוכחי לא תומך בזיהוי שפות אוטומטי. נדרש Qwen3-ASR 1.7B GGUF או מודל API.",
-      "bestEffortSummary": "השפה מוסקת מהטקסט ועלולה להיות מזוהה בטעות.",
-      "bestEffortHelp": "מודל זיהוי הדיבור שנבחר אינו מדווח על שפת התמלול. Kotomimi מנסה להסיק אותה מהטקסט, ולכן זיהוי השפה עשוי להיות פחות אמין.",
       "pairHelp": "בחרו את השפות שבהן אתם והצד השני משתמשים בעיקר. הדיבור שלכם יתורגם לשפתו, והדיבור שלו לשפתכם.",
       "alsoSpeak": "אני דובר/ת גם",
-      "theyMaySpeak": "ייתכן שהם מדברים",
+      "theyMaySpeak": "ייתכן שהם מדברים גם",
       "hearingBy": "זיהוי דיבור: {{name}}",
-      "moreLanguages": "{{count}} שפות נוספות"
+      "anyLanguage": "כל שפה",
+      "addLanguage": "הוסף שפה",
+      "removeLanguage": "הסר את {{name}}",
+      "hearsMe": "שומע אותי",
+      "hearsThem": "שומע אותם"
     },
     "wizard": {
       "pathTitle": "Kotomimi בהתאמה אישית",

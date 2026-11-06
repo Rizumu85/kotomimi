@@ -1771,15 +1771,15 @@
       "unpinShort": "Losmaken",
       "mine": "Mijn taal",
       "theirs": "Taal van de ander",
-      "detect": "Automatisch detecteren",
-      "detectUnavailable": "De huidige spraakherkenning kan talen niet automatisch detecteren. Daarvoor is Qwen3-ASR 1.7B GGUF of een API-model nodig.",
-      "bestEffortSummary": "De taal wordt uit de tekst afgeleid en kan verkeerd worden herkend.",
-      "bestEffortHelp": "Het geselecteerde spraakherkenningsmodel geeft de taal van de transcriptie niet aan. Kotomimi schat die in op basis van de tekst, waardoor de taaldetectie minder betrouwbaar kan zijn.",
       "pairHelp": "Kies de talen die jij en de ander het meest gebruiken. Wat jij zegt wordt vertaald naar hun taal, en wat zij zeggen naar die van jou.",
       "alsoSpeak": "Ik spreek ook",
-      "theyMaySpeak": "Zij spreken mogelijk",
+      "theyMaySpeak": "Ze spreken mogelijk ook",
       "hearingBy": "Spraakherkenning: {{name}}",
-      "moreLanguages": "Nog {{count}} talen"
+      "anyLanguage": "Elke taal",
+      "addLanguage": "Een taal toevoegen",
+      "removeLanguage": "Verwijder {{name}}",
+      "hearsMe": "Hoort mij",
+      "hearsThem": "Hoort de ander"
     },
     "wizard": {
       "pathTitle": "Kotomimi vrij combineren",

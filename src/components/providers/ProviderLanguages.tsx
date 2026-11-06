@@ -37,18 +37,14 @@ export function ProviderLanguages({ providers, disabled, sentence, followed }: P
   if (!selection?.entry) return null;
   const { provider, entry } = selection;
   const { setPair, updateSettings } = useProviderStore.getState();
-  // Fork: the Kotomimi provider's pair is the user's language and the other side's, named so; and a language can be
-  // left to be detected where the provider says (`languages.detection`): the other side's — a choice of their
-  // language, made while they are heard at all — or the user's own in either of the pair's, while they are. Each is
-  // shown as a run does it.
+  // Fork: the Kotomimi provider's pair is the user's language and the other side's, named so; and each side may speak
+  // more than its main language where what hears it can tell them apart (`languages.more`): the user's own other
+  // languages while they are heard, and the other side's while they are.
   const kotomimi = (provider.id as string) === 'localai';
-  const detection = provider.languages.detection?.(entry.settings, selection.models, entry.pair);
-  const offer = (kind: 'other' | 'both') => detection && { on: detection[kind].on, available: detection[kind].available, bestEffort: detection[kind].bestEffort, set: (on: boolean) => updateSettings(provider, detection[kind].turn(on)) };
-  const detect = legs.includes('participant') ? offer('other') : undefined;
-  // Fork: the user's other languages, and what hears each side (`LanguageHearing`).
-  const speakAlso = legs.includes('speaker') && pairDiffers(entry.pair) ? provider.languages.speakAlso?.(entry.settings, selection.models, entry.pair) : undefined;
-  const also = speakAlso && { chosen: speakAlso.chosen, offered: speakAlso.offered, available: speakAlso.available, set: (chosen: string[]) => updateSettings(provider, speakAlso.set(chosen)) };
-  const hearing = provider.languages.hearing?.(entry.settings, selection.models, entry.pair);
+  const more = provider.languages.more?.(entry.settings, selection.models, entry.pair);
+  const bound = (side: NonNullable<typeof more>['mine']) => side && { ...side, set: (chosen: string[]) => updateSettings(provider, side.set(chosen)) };
+  const mine = legs.includes('speaker') && pairDiffers(entry.pair) ? bound(more?.mine) : undefined;
+  const theirs = legs.includes('participant') ? bound(more?.theirs) : undefined;
 
   return (
     <LanguagePairSection
@@ -58,9 +54,7 @@ export function ProviderLanguages({ providers, disabled, sentence, followed }: P
       disabled={disabled}
       sentence={sentence}
       context={languageContext(provider, legs, speech)}
-      detect={detect}
-      {...(also ? { also } : {})}
-      {...(hearing ? { hearing } : {})}
+      {...(mine || theirs ? { more: { ...(mine ? { mine } : {}), ...(theirs ? { theirs } : {}) } } : {})}
       {...(followed ? { followed } : {})}
       onOpenHearing={() => useSettingsStore.getState().navigateToSettings('hearing')}
       owners={kotomimi}

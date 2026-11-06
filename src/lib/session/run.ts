@@ -894,9 +894,10 @@ export class Run {
   /** Fork: whether the user's speech follows the other side's language this run (`follow.ts`): from the pair's target. */
   private startFollowing(): void {
     const { shape, built } = this;
-    const follows = !!built && shape.legs.includes('speaker') && shape.legs.includes('participant')
-      && shape.provider.languages.follows?.(built.settings as never, built.shared.models ?? [], shape.pair) === true;
-    this.follower = follows ? createFollower(shape.pair.target, shape.pair.source) : null;
+    const follows = built && shape.legs.includes('speaker') && shape.legs.includes('participant')
+      ? shape.provider.languages.follows?.(built.settings as never, built.shared.models ?? [], shape.pair) ?? false
+      : false;
+    this.follower = follows ? createFollower(shape.pair.target, shape.pair.source, follows === true ? undefined : follows.among) : null;
     this.host.followed?.(null);
   }
 

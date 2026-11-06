@@ -483,9 +483,17 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "مدل‌های این رایانه را در اختیار دستگاه‌های دیگر شبکه محلی می‌گذارد. در دستگاه دیگر، از بخش «دستگاه دیگر» در Kotomimi این رایانه را پیدا کنید و مدل و زبان را همان‌جا انتخاب کنید. اشتراک‌گذاری فقط تا وقتی Kotomimi باز است کار می‌کند."
   },
+  "fork.languageMenu.addLanguage": {
+    "en": "Add a language",
+    "text": "افزودن زبان"
+  },
   "fork.languageMenu.alsoSpeak": {
     "en": "I also speak",
     "text": "من هم صحبت می‌کنم"
+  },
+  "fork.languageMenu.anyLanguage": {
+    "en": "Any language",
+    "text": "هر زبانی"
   },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
@@ -498,6 +506,14 @@
   "fork.languageMenu.hearingBy": {
     "en": "Speech recognition: {{name}}",
     "text": "تشخیص گفتار: {{name}}"
+  },
+  "fork.languageMenu.hearsMe": {
+    "en": "Hears me",
+    "text": "صدای من را می‌شنود"
+  },
+  "fork.languageMenu.hearsThem": {
+    "en": "Hears them",
+    "text": "صدای طرف مقابل را می‌شنود"
   },
   "fork.languageMenu.mine": {
     "en": "My language",
@@ -523,6 +539,10 @@
     "en": "Pin to the top",
     "text": "سنجاق در بالا"
   },
+  "fork.languageMenu.removeLanguage": {
+    "en": "Remove {{name}}",
+    "text": "حذف {{name}}"
+  },
   "fork.languageMenu.search": {
     "en": "Type to find a language",
     "text": "برای یافتن زبان تایپ کنید"
@@ -544,8 +564,8 @@
     "text": "زبان طرف مقابل"
   },
   "fork.languageMenu.theyMaySpeak": {
-    "en": "They may speak",
-    "text": "ممکن است طرف مقابل صحبت کند"
+    "en": "They may also speak",
+    "text": "ممکن است طرف مقابل هم صحبت کند"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",

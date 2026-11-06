@@ -102,10 +102,24 @@ export interface CredentialsMissing { missing: string; code?: string; params?: R
 
 export interface ModelOption { id: string }
 
-/** Fork: what hears a side (`languages.hearing`): its name, and the languages it tells apart (null: every one offered). */
+/** Fork: what hears a side (`languages.more`): its name, and the languages it tells apart (null: every one offered). */
 export interface Hearer {
   name: string;
   languages: readonly string[] | null;
+}
+
+/**
+ * Fork: one side's languages beside its main one (`languages.more`): those chosen (`AUTO`: any language); those that
+ * can be (null: every one offered); how many more it can hear at all (0: none, null: as many as offered); whether "any
+ * language" is offered; what hears it; and the settings a choice writes.
+ */
+export interface MoreLanguages<S> {
+  hearer?: Hearer;
+  chosen: readonly string[];
+  offered: readonly string[] | null;
+  most: number | null;
+  any: boolean;
+  set(chosen: readonly string[]): Partial<S>;
 }
 
 /**
@@ -416,18 +430,14 @@ export interface Provider<S, K extends { missing?: never } & object, C extends {
      * Fork: the user's speech is translated into the language the other side is heard in, not only the pair's target
      * (`src/lib/session/follow.ts`): where their language is left to be detected. Absent: it never follows.
      */
-    follows?(s: S, models: readonly ModelOption[], pair: LanguagePair): boolean;
+    follows?(s: S, models: readonly ModelOption[], pair: LanguagePair): boolean | { among: readonly string[] };
     /**
-     * Fork: what hears each side, as the language section names it beside the languages it can hear (`Hearer`).
-     * Absent, or a side absent: not named.
+     * Fork: the languages each side may speak beside its main one (`MoreLanguages`): the user's ("我也会说") and the
+     * other side's ("对方也可能说"), and what hears each. Every place a leg can run states it here — this computer's
+     * models, another device, an API, a cloud provider — and the language section, the follow and the VRChat chatbox
+     * read it. Absent, or a side absent: that side has its main language alone.
      */
-    hearing?(s: S, models: readonly ModelOption[], pair: LanguagePair): { mine?: Hearer; theirs?: Hearer };
-    /**
-     * Fork: the languages the user speaks besides their own ("我也会说"): those picked; those that can be (null: every
-     * language offered); whether what hears them can tell them from their own; and the settings a pick writes. Absent:
-     * not offered.
-     */
-    speakAlso?(s: S, models: readonly ModelOption[], pair: LanguagePair): { chosen: readonly string[]; offered: readonly string[] | null; available: boolean; set(chosen: readonly string[]): Partial<S> };
+    more?(s: S, models: readonly ModelOption[], pair: LanguagePair): { mine?: MoreLanguages<S>; theirs?: MoreLanguages<S> };
   };
 
   // the only capabilities generic code reads

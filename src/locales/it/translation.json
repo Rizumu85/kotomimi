@@ -1771,15 +1771,15 @@
       "unpinShort": "Non fissare più",
       "mine": "La mia lingua",
       "theirs": "La lingua degli altri",
-      "detect": "Rilevamento automatico",
-      "detectUnavailable": "Il riconoscimento vocale in uso non può rilevare automaticamente le lingue. Serve Qwen3-ASR 1.7B GGUF o un modello API.",
-      "bestEffortSummary": "La lingua viene dedotta dal testo e può essere identificata male.",
-      "bestEffortHelp": "Il modello di riconoscimento vocale selezionato non indica la lingua della trascrizione. Kotomimi la stima dal testo, quindi il rilevamento della lingua potrebbe essere meno affidabile.",
       "pairHelp": "Scegli le lingue che tu e l’altra persona usate di più. Le tue parole vengono tradotte nella sua lingua e le sue nella tua.",
       "alsoSpeak": "Parlo anche",
-      "theyMaySpeak": "Potrebbero parlare",
+      "theyMaySpeak": "Potrebbero parlare anche",
       "hearingBy": "Riconoscimento vocale: {{name}}",
-      "moreLanguages": "Altre {{count}} lingue"
+      "anyLanguage": "Qualsiasi lingua",
+      "addLanguage": "Aggiungi una lingua",
+      "removeLanguage": "Rimuovi {{name}}",
+      "hearsMe": "Mi sente",
+      "hearsThem": "Sente l'interlocutore"
     },
     "wizard": {
       "pathTitle": "Kotomimi su misura",

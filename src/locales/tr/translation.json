@@ -1771,15 +1771,15 @@
       "unpinShort": "Sabitlemeyi kaldır",
       "mine": "Benim dilim",
       "theirs": "Karşı tarafın dili",
-      "detect": "Otomatik algıla",
-      "detectUnavailable": "Kullanılan konuşma tanıma özelliği dilleri algılayamıyor. Qwen3-ASR 1.7B GGUF veya bir API modeli gerekiyor.",
-      "bestEffortSummary": "Dil metinden çıkarılır ve yanlış belirlenebilir.",
-      "bestEffortHelp": "Seçilen konuşma tanıma modeli, dökümün dilini bildirmez. Kotomimi dili metinden tahmin eder; bu nedenle dil algılama daha az güvenilir olabilir.",
       "pairHelp": "Sizin ve karşınızdakinin en çok kullandığı dilleri seçin. Söyledikleriniz onun diline, onun söyledikleri sizin dilinize çevrilir.",
       "alsoSpeak": "Ben de konuşuyorum",
-      "theyMaySpeak": "Karşı taraf konuşabilir",
+      "theyMaySpeak": "Karşı taraf şunları da konuşabilir",
       "hearingBy": "Ses tanıma: {{name}}",
-      "moreLanguages": "{{count}} dil daha"
+      "anyLanguage": "Herhangi bir dil",
+      "addLanguage": "Dil ekle",
+      "removeLanguage": "{{name}} dilini kaldır",
+      "hearsMe": "Beni duyar",
+      "hearsThem": "Karşı tarafı duyar"
     },
     "wizard": {
       "pathTitle": "Kotomimi İş Akışı",

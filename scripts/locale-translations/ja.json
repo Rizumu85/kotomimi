@@ -483,9 +483,17 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "このパソコンのモデルを、ローカルネットワーク内のほかのデバイスで使えるようにします。相手のKotomimiの「別のデバイス」で検索すると、このパソコンが見つかります。使うモデルと言語は相手側で選びます。共有できるのはKotomimiを開いている間だけです。"
   },
+  "fork.languageMenu.addLanguage": {
+    "en": "Add a language",
+    "text": "言語を追加"
+  },
   "fork.languageMenu.alsoSpeak": {
     "en": "I also speak",
     "text": "私も話せる"
+  },
+  "fork.languageMenu.anyLanguage": {
+    "en": "Any language",
+    "text": "すべての言語"
   },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
@@ -498,6 +506,14 @@
   "fork.languageMenu.hearingBy": {
     "en": "Speech recognition: {{name}}",
     "text": "音声認識：{{name}}"
+  },
+  "fork.languageMenu.hearsMe": {
+    "en": "Hears me",
+    "text": "自分の声を聞く"
+  },
+  "fork.languageMenu.hearsThem": {
+    "en": "Hears them",
+    "text": "相手の声を聞く"
   },
   "fork.languageMenu.mine": {
     "en": "My language",
@@ -523,6 +539,10 @@
     "en": "Pin to the top",
     "text": "先頭に固定"
   },
+  "fork.languageMenu.removeLanguage": {
+    "en": "Remove {{name}}",
+    "text": "{{name}}を削除"
+  },
   "fork.languageMenu.search": {
     "en": "Type to find a language",
     "text": "入力して言語を絞り込み"
@@ -544,8 +564,8 @@
     "text": "相手の言語"
   },
   "fork.languageMenu.theyMaySpeak": {
-    "en": "They may speak",
-    "text": "相手が話すかもしれない言語"
+    "en": "They may also speak",
+    "text": "相手も話すかも"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",

@@ -1771,15 +1771,15 @@
       "unpinShort": "Alisin sa itaas",
       "mine": "Wika ko",
       "theirs": "Wika ng kausap",
-      "detect": "Awtomatikong tukuyin",
-      "detectUnavailable": "Hindi awtomatikong matukoy ng kasalukuyang pagkilala sa pananalita ang wika. Kailangan ng Qwen3-ASR 1.7B GGUF o isang modelong API.",
-      "bestEffortSummary": "Hinuhulaan ang wika mula sa teksto at maaaring magkamali.",
-      "bestEffortHelp": "Hindi ibinibigay ng napiling modelo ng pagkilala sa pagsasalita ang wika ng transkripsiyon. Tinatantiya ito ng Kotomimi mula sa teksto, kaya maaaring hindi gaanong maaasahan ang pagtukoy sa wika.",
       "pairHelp": "Piliin ang mga wikang pangunahing ginagamit mo at ng kausap mo. Isasalin ang sinasabi mo sa wika niya, at ang sinasabi niya sa wika mo.",
       "alsoSpeak": "Marunong din ako ng",
-      "theyMaySpeak": "Maaaring magsalita sila ng",
+      "theyMaySpeak": "Maaari rin silang magsalita ng",
       "hearingBy": "Pagkilala sa pananalita: {{name}}",
-      "moreLanguages": "{{count}} pang wika"
+      "anyLanguage": "Anumang wika",
+      "addLanguage": "Magdagdag ng wika",
+      "removeLanguage": "Alisin ang {{name}}",
+      "hearsMe": "Naririnig ako",
+      "hearsThem": "Naririnig sila"
     },
     "wizard": {
       "pathTitle": "Kotomimi na malayang pagsasamahin",

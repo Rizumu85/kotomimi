@@ -483,9 +483,17 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "ఈ కంప్యూటర్‌లోని మోడళ్లను మీ స్థానిక నెట్‌వర్క్‌లోని ఇతర పరికరాలకు అందిస్తుంది. అవతలి పరికరంలో Kotomimiలోని \"మరో పరికరం\" కింద వెతికితే ఈ కంప్యూటర్ కనిపిస్తుంది. మోడల్, భాషను అక్కడే ఎంచుకోవచ్చు. Kotomimi తెరిచి ఉన్నప్పుడే పంచుకోవచ్చు."
   },
+  "fork.languageMenu.addLanguage": {
+    "en": "Add a language",
+    "text": "భాషను జోడించండి"
+  },
   "fork.languageMenu.alsoSpeak": {
     "en": "I also speak",
     "text": "నేను కూడా మాట్లాడుతాను"
+  },
+  "fork.languageMenu.anyLanguage": {
+    "en": "Any language",
+    "text": "ఏ భాషైనా"
   },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
@@ -498,6 +506,14 @@
   "fork.languageMenu.hearingBy": {
     "en": "Speech recognition: {{name}}",
     "text": "మాటల గుర్తింపు: {{name}}"
+  },
+  "fork.languageMenu.hearsMe": {
+    "en": "Hears me",
+    "text": "నా మాట వింటుంది"
+  },
+  "fork.languageMenu.hearsThem": {
+    "en": "Hears them",
+    "text": "వారి మాట వింటుంది"
   },
   "fork.languageMenu.mine": {
     "en": "My language",
@@ -523,6 +539,10 @@
     "en": "Pin to the top",
     "text": "పైకి పిన్ చేయి"
   },
+  "fork.languageMenu.removeLanguage": {
+    "en": "Remove {{name}}",
+    "text": "{{name}} తొలగించండి"
+  },
   "fork.languageMenu.search": {
     "en": "Type to find a language",
     "text": "భాషను కనుగొనడానికి టైప్ చేయండి"
@@ -544,8 +564,8 @@
     "text": "వారి భాష"
   },
   "fork.languageMenu.theyMaySpeak": {
-    "en": "They may speak",
-    "text": "వారు మాట్లాడవచ్చు"
+    "en": "They may also speak",
+    "text": "వారు కూడా మాట్లాడవచ్చు"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",

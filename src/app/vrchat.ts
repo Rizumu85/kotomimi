@@ -450,9 +450,9 @@ async function build(): Promise<VRChatController> {
       const run = session.runner.state.getState();
       const language = (run.phase === 'running' && run.followed) || entry.pair.target;
       const listed = models[selected!] ?? [];
-      const also = provider.languages.speakAlso?.(entry.settings, listed, entry.pair);
+      const also = provider.languages.more?.(entry.settings, listed, entry.pair).mine;
       const base = (code: string) => code.toLowerCase().split(/[-_]/)[0];
-      const speaks = also ? also.chosen.some((code) => base(code) === base(language)) : true;
+      const speaks = also ? also.chosen.some((code: string) => base(code) === base(language)) : true;
       return { language, back: speaks && provider.languages.detection?.(entry.settings, listed, entry.pair).both.on === true };
     },
     onReset: (listener) => session.runner.conversation.onReset(() => listener()),

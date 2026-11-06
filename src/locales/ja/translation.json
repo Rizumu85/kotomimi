@@ -1771,15 +1771,15 @@
       "unpinShort": "固定を解除",
       "mine": "自分の言語",
       "theirs": "相手の言語",
-      "detect": "自動検出",
-      "detectUnavailable": "現在の音声認識では言語を自動検出できません。Qwen3-ASR 1.7B GGUF または API モデルが必要です。",
-      "bestEffortSummary": "言語は文字から推測するため、誤判定することがあります。",
-      "bestEffortHelp": "選択した音声認識モデルは、文字起こしの言語を返しません。Kotomimi がテキストから推測するため、言語判定の精度が下がる場合があります。",
       "pairHelp": "自分と相手が主に使う言語を選びます。自分の発言は相手の言語に、相手の発言は自分の言語に翻訳されます。",
       "alsoSpeak": "私も話せる",
-      "theyMaySpeak": "相手が話すかもしれない言語",
+      "theyMaySpeak": "相手も話すかも",
       "hearingBy": "音声認識：{{name}}",
-      "moreLanguages": "ほか{{count}}言語"
+      "anyLanguage": "すべての言語",
+      "addLanguage": "言語を追加",
+      "removeLanguage": "{{name}}を削除",
+      "hearsMe": "自分の声を聞く",
+      "hearsThem": "相手の声を聞く"
     },
     "wizard": {
       "pathTitle": "Kotomimi 自由に組み合わせ",

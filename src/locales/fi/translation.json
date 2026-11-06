@@ -1771,15 +1771,15 @@
       "unpinShort": "Poista kiinnitys",
       "mine": "Oma kieleni",
       "theirs": "Toisen kieli",
-      "detect": "Tunnista automaattisesti",
-      "detectUnavailable": "Nykyinen puheentunnistus ei tunnista kieltä automaattisesti. Siihen tarvitaan Qwen3-ASR 1.7B GGUF tai API-malli.",
-      "bestEffortSummary": "Kieli päätellään tekstistä, ja se voi tunnistua väärin.",
-      "bestEffortHelp": "Valittu puheentunnistusmalli ei ilmoita litteroinnin kieltä. Kotomimi arvioi sen tekstin perusteella, joten kielen tunnistus voi olla epävarmempaa.",
       "pairHelp": "Valitse kielet, joita sinä ja toinen henkilö pääasiassa käytätte. Puheesi käännetään hänen kielelleen ja hänen puheensa sinun kielellesi.",
       "alsoSpeak": "Puhun myös",
-      "theyMaySpeak": "Toinen saattaa puhua",
+      "theyMaySpeak": "He saattavat puhua myös",
       "hearingBy": "Puheentunnistus: {{name}}",
-      "moreLanguages": "{{count}} muuta kieltä"
+      "anyLanguage": "Mikä tahansa kieli",
+      "addLanguage": "Lisää kieli",
+      "removeLanguage": "Poista {{name}}",
+      "hearsMe": "Kuulee minut",
+      "hearsThem": "Kuulee heidät"
     },
     "wizard": {
       "pathTitle": "Kotomimi omilla valinnoilla",

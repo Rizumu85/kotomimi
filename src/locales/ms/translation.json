@@ -1771,15 +1771,15 @@
       "unpinShort": "Nyahsemat",
       "mine": "Bahasa saya",
       "theirs": "Bahasa pihak lain",
-      "detect": "Kesan automatik",
-      "detectUnavailable": "Pengecaman pertuturan semasa tidak boleh mengesan bahasa secara automatik. Qwen3-ASR 1.7B GGUF atau model API diperlukan.",
-      "bestEffortSummary": "Bahasa dianggarkan daripada teks dan mungkin salah dikenal pasti.",
-      "bestEffortHelp": "Model pengecaman pertuturan yang dipilih tidak menyatakan bahasa transkrip. Kotomimi menganggarkannya berdasarkan teks, jadi pengesanan bahasa mungkin kurang tepat.",
       "pairHelp": "Pilih bahasa yang paling kerap digunakan oleh anda dan orang lain itu. Percakapan anda diterjemahkan ke bahasanya, dan percakapannya ke bahasa anda.",
       "alsoSpeak": "Saya juga boleh bertutur dalam",
-      "theyMaySpeak": "Mereka mungkin bercakap",
+      "theyMaySpeak": "Mereka mungkin juga bercakap",
       "hearingBy": "Pengecaman pertuturan: {{name}}",
-      "moreLanguages": "{{count}} bahasa lagi"
+      "anyLanguage": "Sebarang bahasa",
+      "addLanguage": "Tambah bahasa",
+      "removeLanguage": "Buang {{name}}",
+      "hearsMe": "Mendengar saya",
+      "hearsThem": "Mendengar mereka"
     },
     "wizard": {
       "pathTitle": "Kotomimi Padanan Bebas",

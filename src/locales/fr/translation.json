@@ -1771,15 +1771,15 @@
       "unpinShort": "Détacher",
       "mine": "Ma langue",
       "theirs": "Langue de l’autre",
-      "detect": "Détection automatique",
-      "detectUnavailable": "La reconnaissance vocale utilisée ne peut pas détecter les langues automatiquement. Il faut Qwen3-ASR 1.7B GGUF ou un modèle via API.",
-      "bestEffortSummary": "La langue est déduite du texte et peut être mal identifiée.",
-      "bestEffortHelp": "Le modèle de reconnaissance vocale sélectionné ne précise pas la langue de la transcription. Kotomimi l’estime à partir du texte ; la détection de la langue peut donc être moins fiable.",
       "pairHelp": "Choisissez les langues que vous et votre interlocuteur utilisez le plus. Vos propos sont traduits dans sa langue, et les siens dans la vôtre.",
       "alsoSpeak": "Je parle aussi",
-      "theyMaySpeak": "L’autre personne peut parler",
+      "theyMaySpeak": "L’autre personne peut aussi parler",
       "hearingBy": "Reconnaissance vocale : {{name}}",
-      "moreLanguages": "Encore {{count}} langues"
+      "anyLanguage": "N’importe quelle langue",
+      "addLanguage": "Ajouter une langue",
+      "removeLanguage": "Retirer {{name}}",
+      "hearsMe": "M’entend",
+      "hearsThem": "Entend l’autre personne"
     },
     "wizard": {
       "pathTitle": "Kotomimi à la carte",

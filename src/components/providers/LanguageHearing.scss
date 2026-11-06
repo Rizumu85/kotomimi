@@ -69,39 +69,16 @@
 .language-chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   height: 28px;
-  padding: 0 11px;
+  padding: 0 4px 0 11px;
   border: 1px solid vars.$border-default;
   border-radius: 14px;
-  background: transparent;
-  color: vars.$text-secondary;
-  font: inherit;
+  color: vars.$text-primary;
   font-size: vars.$font-body;
   white-space: nowrap;
-  cursor: pointer;
-  transition: border-color vars.$transition-fast, background-color vars.$transition-fast, color vars.$transition-fast;
 
-  &:hover:not(:disabled) { border-color: vars.$text-muted; color: vars.$text-primary; }
-  &:focus-visible { @include vars.focus-ring; }
-  &:disabled { opacity: vars.$disabled-opacity; cursor: not-allowed; }
-
-  // One of several the user speaks: a check, on a raised ground.
-  &.is-on {
-    padding-left: 8px;
-    border-color: vars.$text-muted;
-    background: vars.$bg-hover;
-    color: vars.$text-primary;
-  }
-
-  // The one the user's speech goes into at first.
-  &.is-chosen {
-    border-color: vars.$color-primary;
-    background: color-mix(in srgb, vars.$color-primary 12%, transparent);
-    color: vars.$color-primary;
-  }
-
-  // The one it follows into now: filled, with a mark of its own.
+  // The one the user's speech follows into now, in a session: filled, with a mark of its own.
   &.is-live {
     padding-left: 9px;
     border-color: vars.$color-primary-fill;
@@ -112,14 +89,54 @@
       content: '';
       width: 6px;
       height: 6px;
-      margin-right: 1px;
+      margin-right: 4px;
       border-radius: 50%;
       background: currentColor;
     }
   }
 }
 
-.language-chip--more {
-  border-style: dashed;
+.language-chip__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
   color: vars.$text-muted;
+  cursor: pointer;
+
+  .language-chip.is-live & { color: inherit; opacity: 0.75; }
+  &:hover:not(:disabled) { color: vars.$text-primary; background: vars.$bg-hover; }
+  &:focus-visible { @include vars.focus-ring; }
+  &:disabled { cursor: not-allowed; opacity: vars.$disabled-opacity; }
+}
+
+// "+": more fit; there while what hears the side can take another.
+.language-chip__add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px dashed vars.$border-default;
+  border-radius: 14px;
+  background: transparent;
+  color: vars.$text-muted;
+  cursor: pointer;
+  transition: border-color vars.$transition-fast, color vars.$transition-fast;
+
+  &:hover:not(:disabled) { border-color: vars.$text-muted; color: vars.$text-primary; }
+  &:focus-visible { @include vars.focus-ring; }
+  &:disabled { cursor: not-allowed; opacity: vars.$disabled-opacity; }
+}
+
+// The section's heading names what hears both sides, where it is the same: its chevron meets the selects' right edge.
+#languages-section h3 .language-hearing__hearer {
+  margin-left: auto;
+  font-weight: 400;
 }

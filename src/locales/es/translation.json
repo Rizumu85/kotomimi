@@ -1771,15 +1771,15 @@
       "unpinShort": "Dejar de fijar",
       "mine": "Mi idioma",
       "theirs": "Idioma de los demás",
-      "detect": "Detectar automáticamente",
-      "detectUnavailable": "El reconocimiento de voz actual no puede detectar idiomas automáticamente. Se necesita Qwen3-ASR 1.7B GGUF o un modelo por API.",
-      "bestEffortSummary": "El idioma se deduce del texto y puede identificarse mal.",
-      "bestEffortHelp": "El modelo de reconocimiento de voz seleccionado no indica el idioma de la transcripción. Kotomimi lo estima a partir del texto, por lo que la detección del idioma puede ser menos fiable.",
       "pairHelp": "Elige los idiomas que tú y la otra persona usáis principalmente. Lo que dices se traduce a su idioma y lo que dice a tu idioma.",
       "alsoSpeak": "También hablo",
-      "theyMaySpeak": "Puede que hable",
+      "theyMaySpeak": "También puede hablar",
       "hearingBy": "Reconocimiento de voz: {{name}}",
-      "moreLanguages": "{{count}} idiomas más"
+      "anyLanguage": "Cualquier idioma",
+      "addLanguage": "Añadir un idioma",
+      "removeLanguage": "Quitar {{name}}",
+      "hearsMe": "Me oye",
+      "hearsThem": "Oye a la otra persona"
     },
     "wizard": {
       "pathTitle": "Kotomimi a tu medida",

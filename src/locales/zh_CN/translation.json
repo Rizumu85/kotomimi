@@ -1808,15 +1808,15 @@
       "unpinShort": "取消置顶",
       "mine": "我的语言",
       "theirs": "对方的语言",
-      "detect": "自动检测",
-      "detectUnavailable": "当前的语音识别不能自动检测语言，需要 Qwen3-ASR 1.7B GGUF 或 API 模型。",
-      "bestEffortSummary": "根据文本推测语言，可能判断不准",
-      "bestEffortHelp": "当前选择的语音识别模型不会返回转写文本的语言。Kotomimi 会根据文本推测，因此语言判断可能不够准确。",
       "pairHelp": "选择你和对方主要使用的语言。你说的话默认翻成对方的语言，对方的话翻成你的语言。",
       "alsoSpeak": "我也会说",
-      "theyMaySpeak": "对方可能说",
+      "theyMaySpeak": "对方也可能说",
       "hearingBy": "语音识别：{{name}}",
-      "moreLanguages": "还有 {{count}} 种语言"
+      "anyLanguage": "任何语言",
+      "addLanguage": "添加语言",
+      "removeLanguage": "去掉{{name}}",
+      "hearsMe": "听我",
+      "hearsThem": "听对方"
     },
     "wizard": {
       "pathTitle": "Kotomimi 自由搭配",

@@ -1808,15 +1808,15 @@
       "unpinShort": "Unpin",
       "mine": "My language",
       "theirs": "Their language",
-      "detect": "Auto-detect",
-      "detectUnavailable": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
-      "bestEffortSummary": "Language is inferred from text and may be misidentified.",
-      "bestEffortHelp": "The selected speech recognition model does not report the transcript's language. Kotomimi estimates it from the text, so language detection may be less reliable.",
       "pairHelp": "Choose the languages you and the other person mainly use. Your speech is translated into their language, and theirs into yours.",
       "alsoSpeak": "I also speak",
-      "theyMaySpeak": "They may speak",
+      "theyMaySpeak": "They may also speak",
       "hearingBy": "Speech recognition: {{name}}",
-      "moreLanguages": "{{count}} more languages"
+      "anyLanguage": "Any language",
+      "addLanguage": "Add a language",
+      "removeLanguage": "Remove {{name}}",
+      "hearsMe": "Hears me",
+      "hearsThem": "Hears them"
     },
     "wizard": {
       "pathTitle": "Kotomimi Pipeline",

@@ -1771,15 +1771,15 @@
       "unpinShort": "Bỏ ghim",
       "mine": "Ngôn ngữ của tôi",
       "theirs": "Ngôn ngữ của người kia",
-      "detect": "Tự động phát hiện",
-      "detectUnavailable": "Bộ nhận dạng giọng nói hiện tại không thể tự phát hiện ngôn ngữ. Cần Qwen3-ASR 1.7B GGUF hoặc mô hình API.",
-      "bestEffortSummary": "Ngôn ngữ được suy đoán từ văn bản và có thể bị nhận sai.",
-      "bestEffortHelp": "Mô hình nhận dạng giọng nói đã chọn không cho biết ngôn ngữ của bản chép lời. Kotomimi suy đoán từ văn bản, nên việc phát hiện ngôn ngữ có thể kém tin cậy hơn.",
       "pairHelp": "Chọn các ngôn ngữ mà bạn và người kia chủ yếu sử dụng. Lời của bạn được dịch sang ngôn ngữ của họ, và lời của họ sang ngôn ngữ của bạn.",
       "alsoSpeak": "Tôi cũng nói",
-      "theyMaySpeak": "Họ có thể nói",
+      "theyMaySpeak": "Đối phương cũng có thể nói",
       "hearingBy": "Nhận dạng giọng nói: {{name}}",
-      "moreLanguages": "Thêm {{count}} ngôn ngữ"
+      "anyLanguage": "Bất kỳ ngôn ngữ nào",
+      "addLanguage": "Thêm ngôn ngữ",
+      "removeLanguage": "Xóa {{name}}",
+      "hearsMe": "Nghe tôi",
+      "hearsThem": "Nghe đối phương"
     },
     "wizard": {
       "pathTitle": "Kotomimi tùy chọn kết hợp",

@@ -479,9 +479,17 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "Benarkan peranti lain pada rangkaian setempat menggunakan model komputer ini. Pada peranti lain, cari komputer ini di bawah \"Peranti lain\" dalam Kotomimi, kemudian pilih model dan bahasa di sana. Perkongsian hanya berfungsi semasa Kotomimi dibuka."
   },
+  "fork.languageMenu.addLanguage": {
+    "en": "Add a language",
+    "text": "Tambah bahasa"
+  },
   "fork.languageMenu.alsoSpeak": {
     "en": "I also speak",
     "text": "Saya juga boleh bertutur dalam"
+  },
+  "fork.languageMenu.anyLanguage": {
+    "en": "Any language",
+    "text": "Sebarang bahasa"
   },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
@@ -494,6 +502,14 @@
   "fork.languageMenu.hearingBy": {
     "en": "Speech recognition: {{name}}",
     "text": "Pengecaman pertuturan: {{name}}"
+  },
+  "fork.languageMenu.hearsMe": {
+    "en": "Hears me",
+    "text": "Mendengar saya"
+  },
+  "fork.languageMenu.hearsThem": {
+    "en": "Hears them",
+    "text": "Mendengar mereka"
   },
   "fork.languageMenu.mine": {
     "en": "My language",
@@ -519,6 +535,10 @@
     "en": "Pin to the top",
     "text": "Sematkan di atas"
   },
+  "fork.languageMenu.removeLanguage": {
+    "en": "Remove {{name}}",
+    "text": "Buang {{name}}"
+  },
   "fork.languageMenu.search": {
     "en": "Type to find a language",
     "text": "Taip untuk mencari bahasa"
@@ -540,8 +560,8 @@
     "text": "Bahasa pihak lain"
   },
   "fork.languageMenu.theyMaySpeak": {
-    "en": "They may speak",
-    "text": "Mereka mungkin bercakap"
+    "en": "They may also speak",
+    "text": "Mereka mungkin juga bercakap"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",

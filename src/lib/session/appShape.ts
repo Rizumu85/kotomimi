@@ -86,7 +86,7 @@ export function watchCoachingFromStores(): () => void {
 
 /**
  * Fork: calls `changed` whenever the selected provider's languages change — its pair (a pick, or a pair derived
- * again), or whether a language is left to be detected (`languages.detection`) — so that a running session goes on
+ * again), or the languages each side may speak beside it (`languages.more`) — so that a running session goes on
  * in them (`Runner.retarget`). Not at once, and not for another provider's. Returns the unsubscribe.
  */
 export function watchPairFromStores(changed: () => void): () => void {
@@ -96,8 +96,8 @@ export function watchPairFromStores(changed: () => void): () => void {
     const { provider, entry } = selected;
     let detected = '';
     try {
-      const detection = provider.languages.detection?.(entry.settings, [], entry.pair);
-      if (detection) detected = `|${detection.other.on}|${detection.both.on}`;
+      const more = provider.languages.more?.(entry.settings, [], entry.pair);
+      if (more) detected = `|${(more.mine?.chosen ?? []).join(',')}|${(more.theirs?.chosen ?? []).join(',')}`;
     } catch {
       // A provider that cannot say goes by its pair alone.
     }

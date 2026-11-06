@@ -73,6 +73,15 @@ export function alsoSpoken(s: { speakAlso?: readonly string[]; speakBoth?: boole
 }
 
 /**
+ * Fork: the languages the other side may speak besides the pair's target ("对方也可能说", `theyAlso`), `auto` for any.
+ * An older build's "detect their language" alone (`asrDetectOther`, no list) is any language.
+ */
+export function theyAlsoSpeak(s: { theyAlso?: readonly string[]; asrDetectOther?: boolean }): string[] {
+  if (s.theyAlso?.length) return [...s.theyAlso];
+  return s.asrDetectOther ? ['auto'] : [];
+}
+
+/**
  * Fork: the one of them the speaker is heard beside now, where only one can be (the Mac's recognition hears two
  * languages at once): the pair's target where they speak it — the other side's language, followed or chosen — else the
  * first they picked. Undefined where they speak none.

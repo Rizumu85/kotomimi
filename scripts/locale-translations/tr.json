@@ -483,9 +483,17 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "Bu bilgisayarın modellerini yerel ağdaki diğer cihazların kullanımına açar. Diğer cihazda Kotomimi'nin \"Başka bir cihaz\" bölümünde arama yaparak bu bilgisayarı bulabilir, modeli ve dili oradan seçebilirsiniz. Paylaşım için Kotomimi açık olmalıdır."
   },
+  "fork.languageMenu.addLanguage": {
+    "en": "Add a language",
+    "text": "Dil ekle"
+  },
   "fork.languageMenu.alsoSpeak": {
     "en": "I also speak",
     "text": "Ben de konuşuyorum"
+  },
+  "fork.languageMenu.anyLanguage": {
+    "en": "Any language",
+    "text": "Herhangi bir dil"
   },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
@@ -498,6 +506,14 @@
   "fork.languageMenu.hearingBy": {
     "en": "Speech recognition: {{name}}",
     "text": "Ses tanıma: {{name}}"
+  },
+  "fork.languageMenu.hearsMe": {
+    "en": "Hears me",
+    "text": "Beni duyar"
+  },
+  "fork.languageMenu.hearsThem": {
+    "en": "Hears them",
+    "text": "Karşı tarafı duyar"
   },
   "fork.languageMenu.mine": {
     "en": "My language",
@@ -523,6 +539,10 @@
     "en": "Pin to the top",
     "text": "Üste sabitle"
   },
+  "fork.languageMenu.removeLanguage": {
+    "en": "Remove {{name}}",
+    "text": "{{name}} dilini kaldır"
+  },
   "fork.languageMenu.search": {
     "en": "Type to find a language",
     "text": "Dil bulmak için yazın"
@@ -544,8 +564,8 @@
     "text": "Karşı tarafın dili"
   },
   "fork.languageMenu.theyMaySpeak": {
-    "en": "They may speak",
-    "text": "Karşı taraf konuşabilir"
+    "en": "They may also speak",
+    "text": "Karşı taraf şunları da konuşabilir"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",

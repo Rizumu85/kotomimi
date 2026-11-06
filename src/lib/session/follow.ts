@@ -40,19 +40,21 @@ export interface Follower {
   reset(now: string, own: string): void;
 }
 
-export function createFollower(start: string, own: string): Follower {
+/** `among`: the languages the other side may speak, those chosen for them; absent, any. */
+export function createFollower(start: string, own: string, among?: readonly string[]): Follower {
   let now = start;
   let mine = baseLanguage(own) ?? own;
   let last: string | null = null;
   const unfit = new Set<string>();
   const base = (code: string) => (baseLanguage(code) ?? code).toLowerCase();
+  const allowed = among ? new Set(among.map(base)) : null;
   return {
     get now() { return now; },
     heard(text, language) {
       if (!language || language === 'auto') return null;
       const said = base(language);
       const weight = followWeight(text);
-      if (weight < FOLLOW_LEAST || said === base(mine) || unfit.has(said)) return null;
+      if (weight < FOLLOW_LEAST || said === base(mine) || unfit.has(said) || (allowed && !allowed.has(said))) return null;
       if (said === base(now)) {
         last = said;
         return null;

@@ -1771,15 +1771,15 @@
       "unpinShort": "Odepnij",
       "mine": "Mój język",
       "theirs": "Język rozmówcy",
-      "detect": "Wykrywaj automatycznie",
-      "detectUnavailable": "Obecny model rozpoznawania mowy nie wykrywa języków automatycznie. Potrzebny jest Qwen3-ASR 1.7B GGUF lub model API.",
-      "bestEffortSummary": "Język jest ustalany na podstawie tekstu i może zostać rozpoznany błędnie.",
-      "bestEffortHelp": "Wybrany model rozpoznawania mowy nie podaje języka transkrypcji. Kotomimi szacuje go na podstawie tekstu, więc wykrywanie języka może być mniej wiarygodne.",
       "pairHelp": "Wybierz języki, których ty i druga osoba głównie używacie. Twoje słowa są tłumaczone na jej język, a jej na twój.",
       "alsoSpeak": "Mówię także",
-      "theyMaySpeak": "Mogą mówić",
+      "theyMaySpeak": "Mogą też mówić",
       "hearingBy": "Rozpoznawanie mowy: {{name}}",
-      "moreLanguages": "Jeszcze {{count}} języków"
+      "anyLanguage": "Dowolny język",
+      "addLanguage": "Dodaj język",
+      "removeLanguage": "Usuń {{name}}",
+      "hearsMe": "Słyszy mnie",
+      "hearsThem": "Słyszy rozmówcę"
     },
     "wizard": {
       "pathTitle": "Kotomimi — własna konfiguracja",

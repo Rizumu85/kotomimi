@@ -1771,15 +1771,15 @@
       "unpinShort": "고정 해제",
       "mine": "내 언어",
       "theirs": "상대방 언어",
-      "detect": "자동 감지",
-      "detectUnavailable": "현재 음성 인식은 언어 자동 감지를 지원하지 않아요. Qwen3-ASR 1.7B GGUF 또는 API 모델이 필요해요.",
-      "bestEffortSummary": "언어는 텍스트로 추정하므로 잘못 판별될 수 있습니다.",
-      "bestEffortHelp": "선택한 음성 인식 모델은 받아쓴 텍스트의 언어를 알려 주지 않습니다. Kotomimi가 텍스트를 바탕으로 추정하므로 언어 감지의 정확도가 낮아질 수 있습니다.",
       "pairHelp": "나와 상대방이 주로 쓰는 언어를 선택하세요. 내 말은 상대방의 언어로, 상대방의 말은 내 언어로 번역됩니다.",
       "alsoSpeak": "나도 말할 수 있는 언어",
-      "theyMaySpeak": "상대방이 말할 수 있는 언어",
+      "theyMaySpeak": "상대방이 말할 수도 있음",
       "hearingBy": "음성 인식: {{name}}",
-      "moreLanguages": "언어 {{count}}개 더"
+      "anyLanguage": "모든 언어",
+      "addLanguage": "언어 추가",
+      "removeLanguage": "{{name}} 제거",
+      "hearsMe": "내 말 듣기",
+      "hearsThem": "상대방 말 듣기"
     },
     "wizard": {
       "pathTitle": "Kotomimi 자유 조합",

@@ -47,4 +47,11 @@ describe('follow — the language the user is answered in follows the other side
     expect(f.now).toBe('en');
     expect(f.heard('오늘 날씨가 좋네요', 'ko')).toBeNull();
   });
+
+  it('follows only into the languages chosen for the other side, where some are', () => {
+    const f = createFollower('ja', 'zh-CN', ['ja', 'ko']);
+    expect(f.heard('I was wondering whether you have been to this world before today', 'en')).toBeNull();
+    f.heard('안녕하세요 반가워요', 'ko');
+    expect(f.heard('오늘 날씨가 좋네요', 'ko')).toBe('ko');
+  });
 });
