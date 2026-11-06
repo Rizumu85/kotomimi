@@ -3,9 +3,9 @@
 # GitHub's macOS arm64 runners are often not to be had: such a job waits fifteen minutes, runs no step, and is
 # cancelled with "The job was not acquired by Runner of type hosted even after multiple attempts" (5 of 16 Mac builds
 # on 2026-11-04..06, on macos-latest and macos-15 alike; minutes later the same job is usually taken at once). This
-# re-runs the failed jobs of that release — the Mac build, and the draft that collects it — up to three times, a few
-# minutes apart, and leaves any other failure alone. A re-run asked with this workflow's token starts no new
-# workflow_run, so the attempts are made and waited for here, in one job.
+# re-runs the failed jobs of that release — the Mac build, and the draft that collects it — a few minutes later, and
+# leaves any other failure alone. Each re-run's end fires this workflow again, so every pass re-runs once, and the
+# release's attempt number bounds them: three re-runs, then a warning.
 name: Kotomimi release retry
 
 on:
@@ -17,41 +17,37 @@ permissions:
   actions: write
   contents: read
 
+concurrency:
+  group: kotomimi-release-retry-${{ github.event.workflow_run.id }}
+  cancel-in-progress: false
+
 jobs:
   retry:
     name: re-run a Mac build no machine took
     if: startsWith(github.event.workflow_run.head_branch, 'v')
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 15
     env:
       GH_TOKEN: ${{ github.token }}
       REPO: ${{ github.repository }}
       RUN: ${{ github.event.workflow_run.id }}
+      ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
     steps:
-      - name: Re-run while the Mac build got no machine
+      - name: Re-run once if the Mac build got no machine
         run: |
           set -euo pipefail
-          # The Mac build of the run's latest attempt, where no machine took it: cancelled, no step run, and said so.
-          untaken() {
-            local attempt job
-            attempt=$(gh api "repos/$REPO/actions/runs/$RUN" --jq '.run_attempt')
-            job=$(gh api "repos/$REPO/actions/runs/$RUN/attempts/$attempt/jobs" \
-              --jq '.jobs[] | select(.name | startswith("build (macOS")) | select(.conclusion == "cancelled") | select((.steps | length) == 0) | .id' | head -n1)
-            [ -n "$job" ] || return 1
-            gh api "repos/$REPO/check-runs/$job/annotations" --jq '.[].message' | grep -q "not acquired"
-          }
-          for try in 1 2 3; do
-            if ! untaken; then
-              echo "The Mac build ran (or failed for another reason): nothing to re-run."
-              exit 0
-            fi
-            echo "No machine took the Mac build: re-running it (try $try of 3) in three minutes."
-            sleep 180
-            gh run rerun "$RUN" --failed --repo "$REPO"
-            # Wait for that attempt to end before looking at it.
-            sleep 30
-            until [ "$(gh api "repos/$REPO/actions/runs/$RUN" --jq '.status')" = "completed" ]; do sleep 60; done
-          done
-          if untaken; then
-            echo "::warning::No machine took the Mac build in three re-runs: re-run it by hand, or build it on a Mac."
+          # The Mac build of this attempt, where no machine took it: cancelled, no step run, and said so.
+          job=$(gh api "repos/$REPO/actions/runs/$RUN/attempts/$ATTEMPT/jobs"             --jq '.jobs[] | select(.name | startswith("build (macOS")) | select(.conclusion == "cancelled") | select((.steps | length) == 0) | .id' | head -n1)
+          if [ -z "$job" ] || ! gh api "repos/$REPO/check-runs/$job/annotations" --jq '.[].message' | grep -q "not acquired"; then
+            echo "The Mac build ran (or failed for another reason): nothing to re-run."
+            exit 0
           fi
+          if [ "$ATTEMPT" -ge 4 ]; then
+            echo "::warning::No machine took the Mac build in three re-runs: re-run it by hand, or build it on a Mac."
+            exit 0
+          fi
+          echo "No machine took the Mac build (attempt $ATTEMPT): re-running it in three minutes."
+          sleep 180
+          # A newer attempt started meanwhile (by hand): leave it.
+          [ "$(gh api "repos/$REPO/actions/runs/$RUN" --jq '.run_attempt')" = "$ATTEMPT" ] || exit 0
+          gh run rerun "$RUN" --failed --repo "$REPO"
