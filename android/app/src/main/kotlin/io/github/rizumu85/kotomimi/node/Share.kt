@@ -738,7 +738,8 @@ class Share(private val context: Context, private val engine: Engine, private va
      *
      * The computer sent a form: the sound as a WAV file, and perhaps the language. The server is asked as a chat
      * with the sound as the one thing said, and the model answers `language Japanese<asr_text>…the text…`. The
-     * text alone goes back, as `{"text": …}` — what audio.cpp's server answers, and all a computer reads of it.
+     * text goes back as `{"text": …}`, what audio.cpp's server answers, with the language beside it where the model
+     * was left to tell it (`replyOf`).
      *
      * Where the computer named the language, the answer is begun for the model — `language Japanese<asr_text>` —
      * and it goes on from there: this is how the model is told a language (audio.cpp does the same, inside). It
@@ -795,7 +796,7 @@ class Share(private val context: Context, private val engine: Engine, private va
         }
         val written = json.optJSONArray("choices")?.optJSONObject(0)?.optJSONObject("message")?.takeIf { it.has("content") && !it.isNull("content") }?.optString("content")
             ?: return 502 to errorOf("The engine's answer has no text in it.")
-        return 200 to """{"text":${JSONObject.quote(textOf(written, begun != null))}}"""
+        return 200 to replyOf(textOf(written, begun != null), if (begun == null) languageIn(written) else null)
     }
 
     /**
@@ -838,7 +839,11 @@ class Share(private val context: Context, private val engine: Engine, private va
         val before = field("model", model.id) + language?.let { field("language", it) }.orEmpty() + context?.let { field("text", it) }.orEmpty() +
             "--$boundary\r\nContent-Disposition: form-data; name=\"file\"; filename=\"stretch.wav\"\r\nContent-Type: audio/wav\r\n\r\n"
         val pieces = listOf(before.toByteArray(), sound, "\r\n--$boundary--\r\n".toByteArray())
-        val head = "POST /v1/audio/transcriptions HTTP/1.1\r\nHost: $LOOPBACK\r\nContent-Type: multipart/form-data; boundary=$boundary\r\nContent-Length: ${pieces.sumOf { it.size }}\r\nConnection: close\r\n\r\n"
+        // Told none, a model that names the language it heard is asked where the engine says which (Qwen3-ASR,
+        // SenseVoice): the computer follows the other side by it.
+        val saysLanguage = language == null && model.family in SAYS_LANGUAGE
+        val route = if (saysLanguage) "/v1/audio/transcriptions/details" else "/v1/audio/transcriptions"
+        val head = "POST $route HTTP/1.1\r\nHost: $LOOPBACK\r\nContent-Type: multipart/form-data; boundary=$boundary\r\nContent-Length: ${pieces.sumOf { it.size }}\r\nConnection: close\r\n\r\n"
         // Its turn, as llama.cpp's readings take theirs. (audio.cpp's server reads to the end whoever has gone
         // meanwhile: closing its line stops nothing there, so it is not looked whether the computer still waits.)
         val running = when (val mine = turnFor(model, gone)) {
@@ -864,7 +869,7 @@ class Share(private val context: Context, private val engine: Engine, private va
             return 502 to errorOf("The engine answered HTTP $status: ${why.take(200)}")
         }
         val written = json.takeIf { it.has("text") && !it.isNull("text") }?.optString("text") ?: return 502 to errorOf("The engine's answer has no text in it.")
-        return 200 to """{"text":${JSONObject.quote(if (model.unspaced) unspaced(written) else written)}}"""
+        return 200 to replyOf(if (model.unspaced) unspaced(written) else written, if (saysLanguage) json.optString("language") else null)
     }
 
     /** A form's fields by their names, and the file it carries. */
@@ -1081,6 +1086,29 @@ class Share(private val context: Context, private val engine: Engine, private va
                 begun || !written.trimStart().startsWith("language ") -> written
                 else -> ""
             }.trim()
+        }
+
+        /** The families that, told no language, say which they heard (audio.cpp's `/v1/audio/transcriptions/details`). */
+        val SAYS_LANGUAGE = setOf("qwen3_asr", "sense_asr")
+
+        /**
+         * The language a model left to tell it wrote before its mark — `language Japanese<asr_text>…` — as it wrote it
+         * ("Japanese"); null where it wrote none, or `None`. Only for an answer that was not begun for it.
+         */
+        fun languageIn(written: String): String? {
+            val head = written.trimStart()
+            val at = head.indexOf(Llama.TEXT_MARK)
+            if (at < 0 || !head.startsWith("language ")) return null
+            return head.substring("language ".length, at).trim().takeIf { it.isNotEmpty() && !it.equals("None", ignoreCase = true) }
+        }
+
+        /**
+         * What a computer is answered with: the text, and the language heard where the model said one (its English name
+         * or its code, as the computer reads either: `heardLanguage` in electron/native-engine.js).
+         */
+        fun replyOf(text: String, language: String?): String {
+            val heard = language?.trim()?.take(LANGUAGE_SHOWN)?.takeIf { it.isNotEmpty() && !it.equals("None", ignoreCase = true) }
+            return if (heard == null) """{"text":${JSONObject.quote(text)}}""" else """{"text":${JSONObject.quote(text)},"language":${JSONObject.quote(heard)}}"""
         }
     }
 }
