@@ -228,6 +228,16 @@ describe('a reading in which the model lost its way', () => {
     expect(world.events.at(-1)).toEqual({ type: 'done', text: '飲んだ方がいいかもしれない。波の上下なんで結構酔います。' });
   });
 
+  it('keeps the language the reading it gave up on heard, where reading again said none', async () => {
+    const { world, stream } = recognition({ language: null });
+    stream.write(sound(2));
+    stream.end();
+    await world.readings[0].answer({ ok: true, text: LOST, language: 'ja' }, 3000);
+    // Read again, it still loses its way, and the stretch is too short to read in halves.
+    await world.readings[1].answer({ ok: true, text: LOST });
+    expect(world.events).toEqual([{ type: 'done', text: '飲んだ方がいいかもしれない。波で', language: 'ja' }]);
+  });
+
   it('is read again, as the last one, with half a second of silence before the stretch', async () => {
     const { world, stream } = recognition();
     stream.write(sound(8));

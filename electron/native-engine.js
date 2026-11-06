@@ -830,16 +830,17 @@ function openWindow({ port, pathname, model, sampleRate, language, context, time
    * and if it still repeats, in two halves cut at a quiet moment — a half that repeats is cut where it begins to,
    * and what the other half heard is kept.
    */
-  function reread(sound, whole) {
+  function reread(sound, lost) {
+    const whole = lost.text;
     ask(Buffer.concat([Buffer.alloc(Math.round(sampleRate * LOOP_LEAD_SECONDS) * 2), sound]), (again) => {
       if (again.ok && loopAt(again.text) < 0) { finish(said(again.text, again)); return; }
       const at = sound.length >= LOOP_SPLIT_SECONDS * sampleRate * 2 && now() - endedAt <= WINDOW_LAST_MS ? quietMiddle(sound, sampleRate) : 0;
-      if (at <= 0 || at >= sound.length) { finish({ type: 'done', text: unloop(whole) }); return; }
+      if (at <= 0 || at >= sound.length) { finish(said(unloop(whole), again.ok && again.language ? again : lost)); return; }
       ask(sound.subarray(0, at), (first) => {
         // A half that cannot be read leaves what the whole had before it lost its way.
-        if (!first.ok) { finish({ type: 'done', text: unloop(whole) }); return; }
+        if (!first.ok) { finish(said(unloop(whole), lost)); return; }
         ask(sound.subarray(at), (second) => {
-          finish(said(joinHalves(unloop(first.text), second.ok ? unloop(second.text) : '').trim(), first));
+          finish(said(joinHalves(unloop(first.text), second.ok ? unloop(second.text) : '').trim(), first.language ? first : second.ok && second.language ? second : lost));
         });
       });
     });
@@ -866,7 +867,7 @@ function openWindow({ port, pathname, model, sampleRate, language, context, time
       // The stretch ended while this was read: it is the last reading if it had all the voice, else one more is.
       if (ended) {
         if (!answer.ok) { if (last) finish({ type: 'error', message: answer.message }); else start(true); }
-        else if (lost) { if (last) reread(sound, answer.text); else start(true); }
+        else if (lost) { if (last) reread(sound, answer); else start(true); }
         else if (last || restIsQuiet()) finish(said(answer.text, answer));
         else start(true);
         return;
