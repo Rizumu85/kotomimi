@@ -68,7 +68,26 @@ export interface AudioDevice {
    * (macOS gates window titles behind Screen Recording).
    */
   windowTitles?: string[];
+  /**
+   * Fork: the application chosen is not playing any sound now (not started yet, or gone): this row stands for it
+   * while it is waited for (`waitingFor`), and nothing is captured meanwhile.
+   */
+  waiting?: true;
 }
+
+/** The id of the row that stands for an application waited for: `systemAudio.ts` captures nothing from it. */
+export const WAITING_SOURCE_PREFIX = 'app-waiting:';
+/** How often the applications playing sound are listed again while one chosen is waited for. */
+const WAITING_LOOK_MS = 3000;
+/** An application's name from its key: `VRChat.exe` → `VRChat`. */
+const appNameOf = (key: string) => key.replace(/\.(exe|app)$/i, '').split(/[\\/]/).pop() || key;
+/**
+ * Fork: the row an application chosen stands under while it plays nothing. It used to fall back to the whole system
+ * then — the application not started yet when Kotomimi was, or closed — and the user's own music was translated as
+ * the other side (2026-11-06).
+ */
+export const waitingFor = (key: string): AudioDevice => ({ deviceId: `${WAITING_SOURCE_PREFIX}${key}`, label: appNameOf(key), appKey: key, waiting: true });
+let waitingLook: ReturnType<typeof setInterval> | null = null;
 
 /**
  * Whole-system capture - the participant source used unless the user picks a
@@ -135,6 +154,8 @@ interface AudioStore {
   selectMonitorDevice: (device: AudioDevice) => void;
   setParticipantSources: (sources: AudioDevice[]) => void;
   selectParticipantSource: (source: AudioDevice) => void;
+  /** Fork: the application captured stopped (closed, or restarted): it is waited for again, not widened to the whole system. */
+  participantAppLost: () => void;
   toggleRealVoicePassthrough: () => void;
   setRealVoicePassthroughVolume: (volume: number) => void;
   setNoiseSuppressionMode: (mode: NoiseSuppressionMode) => void;
@@ -237,9 +258,21 @@ const useAudioStore = create<AudioStore>()(
         }
       }
 
-      // Genuinely gone: keeping a stale selection would fail the next session.
+      // Fork: chosen, and playing nothing now (not started yet, or closed): waited for, and listed again until it
+      // plays — never the whole system in its place, which took in everything else the computer played.
+      if (wantedKey) {
+        lookAgainWhileWaiting(get);
+        return { participantSources: [...sources, waitingFor(wantedKey)], selectedParticipantSource: waitingFor(wantedKey) };
+      }
       return { participantSources: sources, selectedParticipantSource: DEFAULT_PARTICIPANT_SOURCE };
     }),
+
+    participantAppLost: () => {
+      const key = get().selectedParticipantSource?.appKey ?? get().persistedParticipantAppKey;
+      if (!key) return;
+      set((state) => ({ selectedParticipantSource: waitingFor(key), participantSources: [...state.participantSources.filter((s) => s.appKey !== key), waitingFor(key)] }));
+      lookAgainWhileWaiting(get);
+    },
 
     selectParticipantSource: (source) => {
       console.info(`[Sokuji] [AudioStore] Selected participant source: ${source.label} (${source.deviceId})`);
@@ -655,6 +688,21 @@ export const useToggleNoiseSuppression = () => {
 export const useSelectInputDevice = () => useAudioStore((state) => state.selectInputDevice);
 export const useSelectMonitorDevice = () => useAudioStore((state) => state.selectMonitorDevice);
 export const useParticipantSources = () => useAudioStore((state) => state.participantSources);
+/** Lists the applications playing sound again, every few seconds, while the one chosen is waited for. */
+function lookAgainWhileWaiting(get: () => AudioStore): void {
+  if (waitingLook) return;
+  waitingLook = setInterval(() => {
+    if (!get().selectedParticipantSource?.waiting) {
+      clearInterval(waitingLook!);
+      waitingLook = null;
+      return;
+    }
+    void listSystemAudioSources().then((sources) => {
+      if (get().selectedParticipantSource?.waiting) get().setParticipantSources(sources);
+    }).catch(() => undefined);
+  }, WAITING_LOOK_MS);
+}
+
 export const useSelectedParticipantSource = () => useAudioStore((state) => state.selectedParticipantSource);
 export const useSelectParticipantSource = () => useAudioStore((state) => state.selectParticipantSource);
 export const useToggleRealVoicePassthrough = () => useAudioStore((state) => state.toggleRealVoicePassthrough);

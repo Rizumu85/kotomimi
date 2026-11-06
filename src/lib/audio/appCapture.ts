@@ -67,6 +67,7 @@ export function micSettings(): MicSettings {
 export function systemAudioSettings(): SystemAudioSettings {
   return {
     sourceId: () => audio().selectedParticipantSource?.deviceId ?? 'desktop-audio-loopback',
+    appLost: () => audio().participantAppLost(),
     muted: () => audio().isParticipantMuted,
     subscribe: onAudioChange,
     audioSeen: () => audio().markParticipantTapAudioSeen(),

@@ -186,6 +186,35 @@ describe('openSystemAudio — running', () => {
     expect(s.loopback.begun).toEqual([undefined]);
   });
 
+  it('waits for the application again when the helper dies, where the settings follow it, and widens to nothing', async () => {
+    // Fork (2026-11-06): widened to the whole system, the user's own music was translated as the other side.
+    const s = setup({ sourceId: 'app:42', answer: { success: true, capture: 'app' } });
+    const appLost = vi.fn(() => s.set({ sourceId: 'app-waiting:VRChat.exe' }));
+    const settings = { ...s.settings, appLost };
+    await openSystemAudio(settings, live(), s.deps);
+    s.app.onLost?.();
+    await settle();
+    expect(appLost).toHaveBeenCalledTimes(1);
+    expect(s.app.ended).toBe(1);
+    expect(s.loopback.begun).toEqual([]);
+    // The waiting row connects nothing in the main process.
+    expect(s.invoked.filter(([c, d]) => c === 'connect-system-audio-source' && String(d).startsWith('app-waiting:'))).toEqual([]);
+  });
+
+  it('opens silent for an application waited for, and records it once it plays', async () => {
+    const s = setup({ sourceId: 'app-waiting:VRChat.exe', answer: { success: true, capture: 'app' } });
+    const source = await openSystemAudio(s.settings, live(), s.deps);
+    const heard = vi.fn();
+    source.onPcm(heard);
+    expect(s.invoked.filter(([c]) => c === 'connect-system-audio-source')).toEqual([]);
+    expect(s.loopback.begun).toEqual([]);
+    s.set({ sourceId: 'app:77' });
+    await settle();
+    expect(s.invoked).toContainEqual(['connect-system-audio-source', 'app:77']);
+    s.app.push();
+    expect(heard).toHaveBeenCalledTimes(1);
+  });
+
   it('ends when the fallback cannot start', async () => {
     const s = setup({ sourceId: 'app:42', answer: { success: true, capture: 'app' }, loopback: fakeCapture({ begins: false }) });
     const source = await openSystemAudio(s.settings, live(), s.deps);

@@ -22,8 +22,10 @@ export const LOOPBACK_DENIED = 'loopback_denied';
 
 /** The settings a system-audio source follows, read live. */
 export interface SystemAudioSettings {
-  /** The chosen participant source: 'desktop-audio-loopback' (the whole system) or an 'app:…' id. */
+  /** The chosen participant source: 'desktop-audio-loopback' (the whole system), an 'app:…' id, or 'app-waiting:…' (an application chosen and playing nothing now: nothing is captured). */
   sourceId(): string;
+  /** Fork: the application captured stopped: it is waited for again (`participantAppLost`). Absent: widened to the whole system, as before. */
+  appLost?(): void;
   muted(): boolean;
   subscribe(listener: () => void): () => void;
   /** The helper heard audible audio: remembered, so a later silence reads as a permission problem (#492). */
@@ -76,7 +78,9 @@ export const electronSystemAudio = (): SystemAudioDeps => ({
   },
 });
 
-type Connection = { mode: 'app' } | { mode: 'device'; monitorId: string } | { mode: 'loopback' };
+type Connection = { mode: 'app' } | { mode: 'device'; monitorId: string } | { mode: 'loopback' } | { mode: 'waiting' };
+/** An application chosen and playing nothing now (`WAITING_SOURCE_PREFIX` in audioStore.ts): nothing is captured until it plays. */
+const isWaiting = (id: string) => id.startsWith('app-waiting:');
 
 interface ConnectAnswer {
   success?: boolean;
@@ -146,6 +150,7 @@ export async function openSystemAudio(
   };
 
   const connect = async (id: string): Promise<Connection> => {
+    if (isWaiting(id)) return { mode: 'waiting' };
     const answer = (await deps.invoke('connect-system-audio-source', id)) as ConnectAnswer | undefined;
     if (answer?.success === false) throw new Error(answer.error || 'The system audio source did not connect.');
     connected = true;
@@ -160,6 +165,8 @@ export async function openSystemAudio(
   };
 
   const record = async (connection: Connection) => {
+    // Waited for: the source stays open and silent; the application found, the source follows it (`subscribe`).
+    if (connection.mode === 'waiting') return;
     // Today's `requestLoopbackAudioStream` denial (MainPanel's Screen Recording
     // modal): the start fails (D22) with a code the idle surface puts into
     // words and plan 1e-3b's modal deep-links from. Asked only before a
@@ -197,6 +204,13 @@ export async function openSystemAudio(
    */
   const fallBack = async (lost: ParticipantCapture) => {
     if (core.stopped || core.ended || recorder !== lost) return;
+    // Fork: the application chosen is waited for again, not widened to the whole system: that took in everything
+    // else the computer played (the user's own music, translated as the other side). It comes back by itself.
+    if (settings.appLost) {
+      await stopRecorder();
+      settings.appLost();
+      return;
+    }
     core.degrade({ code: APP_CAPTURE_LOST, message: 'The application capture stopped, so all system audio is being translated instead.' });
     await stopRecorder();
     await record({ mode: 'loopback' });

@@ -386,16 +386,37 @@ describe('audioStore - participant source survives a restart', () => {
     expect(useAudioStore.getState().selectedParticipantSource?.deviceId).toBe('app:pid:8271');
   });
 
-  it('falls back to whole-system capture when the application is gone', () => {
+  it('waits for the application while it plays nothing, never the whole system in its place', () => {
+    // Fork (2026-11-06): with VRChat not yet playing when Kotomimi started, the whole system was captured, and the
+    // user's own music was translated as the other side.
     useAudioStore.getState().selectParticipantSource(CHROME_RUN_1);
     useAudioStore.getState().setParticipantSources([DEFAULT_PARTICIPANT_SOURCE]);
-    expect(useAudioStore.getState().selectedParticipantSource?.deviceId).toBe('desktop-audio-loopback');
+    const waiting = useAudioStore.getState().selectedParticipantSource;
+    expect(waiting).toMatchObject({ deviceId: `app-waiting:${CHROME_RUN_1.appKey}`, appKey: CHROME_RUN_1.appKey, waiting: true });
+    // It is listed, so the settings show what is chosen.
+    expect(useAudioStore.getState().participantSources.map((s) => s.deviceId)).toContain(waiting?.deviceId);
+    // Playing again, under another pid: followed.
+    const back: AudioDevice = { ...CHROME_RUN_1, deviceId: 'app:pid:4321' };
+    useAudioStore.getState().setParticipantSources([DEFAULT_PARTICIPANT_SOURCE, back]);
+    expect(useAudioStore.getState().selectedParticipantSource?.deviceId).toBe('app:pid:4321');
+  });
+
+  it('waits for the application again when its capture stops, rather than widening', () => {
+    useAudioStore.getState().selectParticipantSource(CHROME_RUN_1);
+    useAudioStore.getState().participantAppLost();
+    expect(useAudioStore.getState().selectedParticipantSource).toMatchObject({ waiting: true, appKey: CHROME_RUN_1.appKey });
   });
 
   it('does not match a different application that happens to share a label', () => {
     useAudioStore.setState({ persistedParticipantAppKey: 'com.google.Chrome' });
     const other: AudioDevice = { deviceId: 'app:pid:99', label: 'Google Chrome', appKey: 'org.chromium.Chromium' };
     useAudioStore.getState().setParticipantSources([DEFAULT_PARTICIPANT_SOURCE, other]);
+    expect(useAudioStore.getState().selectedParticipantSource).toMatchObject({ deviceId: 'app-waiting:com.google.Chrome', waiting: true });
+  });
+
+  it('captures the whole system where no application was chosen', () => {
+    useAudioStore.setState({ persistedParticipantAppKey: null, selectedParticipantSource: DEFAULT_PARTICIPANT_SOURCE });
+    useAudioStore.getState().setParticipantSources([DEFAULT_PARTICIPANT_SOURCE]);
     expect(useAudioStore.getState().selectedParticipantSource?.deviceId).toBe('desktop-audio-loopback');
   });
 });
