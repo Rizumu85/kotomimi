@@ -305,6 +305,39 @@ describe('AppAudioRecorder observes audio before handing it off', () => {
     expect(line).not.toContain('silent');
   });
 
+  it('schedules nothing while its context is not running, and never more than half a second ahead of its clock', async () => {
+    // Seen 2026-11-06: a suspended context, its clock stuck for hours, fed a hundred buffers a second it never played:
+    // 8.8 GB and a core of CPU by morning.
+    let state = 'suspended';
+    let resumes = 0;
+    let made = 0;
+    (globalThis as any).AudioContext = class {
+      currentTime = 0;
+      get state() { return state; }
+      destination = {};
+      createAnalyser() { return { fftSize: 0, frequencyBinCount: 128, connect: () => {} }; }
+      createGain() { return { gain: { value: 1 }, connect: () => {} }; }
+      createBuffer(_c: number, len: number) { made++; return { duration: len / 24000, getChannelData: () => new Float32Array(len) }; }
+      createBufferSource() { return { buffer: null, connect: () => {}, start: () => {} }; }
+      resume() { resumes++; return new Promise(() => {}); }
+      close() { return Promise.resolve(); }
+    };
+    const rec = await started();
+    await rec.record(() => {});
+    // 240 samples = 10 ms a chunk.
+    const chunk = new Array(240).fill(0).flatMap(() => [0x00, 0x01]);
+    for (let i = 0; i < 100; i++) pushPcm(chunk);
+    expect(made).toBe(0);
+    // Asked to resume once, not once a chunk.
+    expect(resumes).toBe(1);
+    // Running, its clock standing still: half a second is queued, and the rest dropped.
+    state = 'running';
+    for (let i = 0; i < 300; i++) pushPcm(chunk);
+    expect(made).toBeGreaterThanOrEqual(50);
+    expect(made).toBeLessThanOrEqual(52);
+    delete (globalThis as any).AudioContext;
+  });
+
   it('disables the analyser after one failure instead of every chunk', async () => {
     (globalThis as any).AudioContext = class {
       currentTime = 0; state = 'running';

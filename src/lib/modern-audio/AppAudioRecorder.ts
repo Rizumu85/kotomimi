@@ -4,6 +4,9 @@ import {
   AudioDataCallback,
 } from './IParticipantAudioRecorder';
 
+/** Fork: how far ahead of the analyser's clock its buffers may be scheduled (`feedAnalyser`); past it, a chunk is dropped. */
+const ANALYSER_AHEAD_S = 0.5;
+
 /**
  * Participant recorder fed by the per-application capture helper (issue #335),
  * used on both Windows and macOS - the two share one CLI contract.
@@ -18,6 +21,7 @@ import {
  * a MediaStream, and forcing already-decoded PCM through a synthetic MediaStream
  * would add a buffering stage and a pointless conversion round-trip.
  */
+
 export class AppAudioRecorder implements IParticipantAudioRecorder {
   private callback: AudioDataCallback | null = null;
   private status: 'ended' | 'paused' | 'recording' = 'ended';
@@ -45,6 +49,8 @@ export class AppAudioRecorder implements IParticipantAudioRecorder {
   private audioContext: AudioContext | null = null;
   private analyser: AnalyserNode | null = null;
   private nextPlayTime = 0;
+  /** A resume of the analyser's context asked and not yet answered: asked once, not on every chunk. */
+  private resuming = false;
   /** Set once the graph has failed, so one bad chunk cannot spam the console. */
   private analyserBroken = false;
 
@@ -307,7 +313,18 @@ export class AppAudioRecorder implements IParticipantAudioRecorder {
         this.nextPlayTime = this.audioContext.currentTime;
       }
       const ctx = this.audioContext;
-      if (ctx.state === 'suspended') void ctx.resume();
+      // Fork: only while its clock runs. A context left suspended (its clock stuck for hours) or one whose clock
+      // crawls was fed a hundred buffers a second, each scheduled further into a future it never reached, none ever
+      // played or freed: the page grew to 8.8 GB and a core of CPU over a night's session (0.43.146, 2026-11-06).
+      if (ctx.state !== 'running') {
+        if (ctx.state === 'suspended' && !this.resuming) {
+          this.resuming = true;
+          void ctx.resume().catch(() => undefined).finally(() => { this.resuming = false; });
+        }
+        return;
+      }
+      // Fallen behind the sound by more than this, the waveform drops what comes rather than queue it.
+      if (this.nextPlayTime - ctx.currentTime > ANALYSER_AHEAD_S) return;
 
       const buffer = ctx.createBuffer(1, mono.length, this.sampleRate);
       const channel = buffer.getChannelData(0);
