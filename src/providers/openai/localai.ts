@@ -1323,6 +1323,12 @@ export const localaiLanguages: Provider<LocalAISettings, never, never>['language
   ...realtimeLanguages,
   sources: () => LOCAL_LANGUAGES,
   targets: () => LOCAL_LANGUAGES,
+  // Fork: the other side left to be detected, the user's speech goes into whichever language they are heard in — a
+  // Korean and a Japanese speaker answered each in theirs. Not a coached speaker, whose speech is answered with feedback.
+  follows: (stored, models) => {
+    const s = settled(stored);
+    return detectsOther(s, models) && !s.coach;
+  },
   detection: (stored, models, pair) => {
     // Detection controls describe the selected recognizer. A downloaded alternative must not change the choice
     // or gate a best-effort run; model readiness is checked separately when the session starts.

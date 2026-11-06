@@ -21,13 +21,14 @@ interface Started { request: StartRequest<unknown, unknown>; events: AdapterEven
  * The fake's definition, with sessions the test drives by hand; `startFails(n)` makes the n-th start (1-based) throw,
  * and `beforeStart(n, fn)` runs `fn` on the n-th session before its start resolves (and waits for it).
  */
-function manualProvider() {
+function manualProvider(follows = false) {
   const started: Started[] = [];
   const failing = new Set<number>();
   const before = new Map<number, (one: Started) => Promise<void> | void>();
   let calls = 0;
   const provider = {
     ...fakeProvider,
+    languages: { ...fakeProvider.languages, ...(follows ? { follows: () => true } : {}) },
     start: async (request: StartRequest<unknown, unknown>, events: AdapterEvents): Promise<AdapterSession> => {
       calls++;
       if (failing.has(calls)) throw new Error('no session for that');
@@ -48,10 +49,10 @@ function manualProvider() {
   return { provider, started, startFails: (n: number) => failing.add(n), beforeStart: (n: number, fn: (one: Started) => Promise<void> | void) => before.set(n, fn) };
 }
 
-function setup(o: { legs?: RunShape['legs']; ensureReady?: () => Promise<Readiness> } = {}) {
+function setup(o: { legs?: RunShape['legs']; ensureReady?: () => Promise<Readiness>; follows?: boolean } = {}) {
   const clock = createVirtualClock(0);
   const sources: FakeSource[] = [];
-  const manual = manualProvider();
+  const manual = manualProvider(o.follows);
   const tracked: Array<[string, unknown]> = [];
   const shape: RunShape = {
     provider: manual.provider,
@@ -313,5 +314,77 @@ describe('retarget — the edges', () => {
     lane.events.segmentOpened({ ref: 1, side: 'source', origin: 'x' });
     const origins = runner.conversation.snapshot()[0].segments.map((s) => s.origin);
     expect(origins).toEqual([`${handle!.origin}x`]);
+  });
+});
+
+describe('follow — the user is answered in the language the other side speaks', () => {
+  const said = (one: Started, ref: number, text: string, language: string) => {
+    one.events.segmentOpened({ ref, side: 'source', origin: `o${ref}` });
+    one.events.segmentText({ ref, text, language });
+    one.events.segmentClosed({ ref });
+  };
+
+  it('swaps only the speaker leg into the other side\'s language once two sentences say it', async () => {
+    const { runner, started } = setup({ legs: ['speaker', 'participant'], follows: true });
+    await runner.start();
+    const [speaker, participant] = started;
+    said(participant, 1, '你好，今天天气很好', 'zh');
+    await flush();
+    expect(started).toHaveLength(2);
+    said(participant, 2, '我们一起去那边看看吧', 'zh');
+    await flush();
+    await flush();
+    expect(started).toHaveLength(3);
+    expect(started[2].request.context.direction).toEqual({ source: 'en', target: 'zh' });
+    expect(speaker.stopped).toBe(1);
+    expect(participant.stopped).toBe(0);
+    expect(runner.state.getState()).toMatchObject({ phase: 'running', followed: 'zh' });
+    expect(runner.conversation.snapshot()[0].languages).toEqual({ source: 'en', target: 'zh' });
+  });
+
+  it('waits for what the user is saying to finish before it swaps', async () => {
+    const { runner, started } = setup({ legs: ['speaker', 'participant'], follows: true });
+    await runner.start();
+    const [speaker, participant] = started;
+    speaker.events.segmentOpened({ ref: 1, side: 'source', origin: 'mine' });
+    speaker.events.segmentText({ ref: 1, text: 'I was saying' });
+    said(participant, 1, '你好，今天天气很好', 'zh');
+    said(participant, 2, '我们一起去那边看看吧', 'zh');
+    await flush();
+    await flush();
+    expect(speaker.stopped).toBe(0);
+    speaker.events.segmentClosed({ ref: 1 });
+    await flush();
+    expect(speaker.stopped).toBe(1);
+    expect(runner.conversation.snapshot()[0].segments[0]).toMatchObject({ text: 'I was saying', final: true });
+  });
+
+  it('follows back, and counts afresh from a pair the user picks', async () => {
+    const { runner, started, shape } = setup({ legs: ['speaker', 'participant'], follows: true });
+    await runner.start();
+    const participant = started[1];
+    said(participant, 1, '你好，今天天气很好', 'zh');
+    said(participant, 2, '我们一起去那边看看吧', 'zh');
+    await flush();
+    await flush();
+    said(participant, 3, 'こんにちは、元気ですか', 'ja');
+    said(participant, 4, '今日はいい天気ですね', 'ja');
+    await flush();
+    await flush();
+    expect(started[started.length - 1].request.context.direction.target).toBe('ja');
+    expect(runner.state.getState()).not.toHaveProperty('followed');
+    shape.pair = { source: 'en', target: 'zh' };
+    await runner.retarget();
+    expect(runner.state.getState()).not.toHaveProperty('followed');
+  });
+
+  it('does not follow where the provider does not', async () => {
+    const { runner, started } = setup({ legs: ['speaker', 'participant'] });
+    await runner.start();
+    said(started[1], 1, '你好，今天天气很好', 'zh');
+    said(started[1], 2, '我们一起去那边看看吧', 'zh');
+    await flush();
+    await flush();
+    expect(started).toHaveLength(2);
   });
 });

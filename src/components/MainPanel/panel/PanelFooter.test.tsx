@@ -190,6 +190,12 @@ describe('PanelFooter — language pair', () => {
     expect(onLanguages).toHaveBeenCalledTimes(1);
   });
 
+  it.each(SITES)('%s: names the language what the user says follows the other side into', (site) => {
+    const run: RunState = { phase: 'running', since: 0, legs: {}, followed: 'ko' };
+    const { container } = render(<PanelFooter {...baseProps(site, { run, pair: { source: 'ja', target: 'en' } })} />);
+    expect((container.querySelector('.language-pair') as HTMLElement).textContent).toBe(`${languageLabel('ja', 'en')} → ${languageLabel('ko', 'en')}`);
+  });
+
   it.each(SITES)('%s: a bidirectional pair (source === target) is named once', (site) => {
     const { container } = render(
       <PanelFooter {...baseProps(site, { pair: { source: 'zh+en', target: 'zh+en' } })} />,

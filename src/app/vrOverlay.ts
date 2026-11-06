@@ -168,7 +168,8 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
       heard,
       muted: deps.muted(),
       lines: vrLines(deps.view.get().entries),
-      theirs: { value: pair.target, options: choices(theirs), quick: quickLanguages(pair.target, theirs, settings.pins()) },
+      // Fork: the user's speech following the other side's language (`follow.ts`): the language it goes into now.
+      theirs: { value: (run.phase === 'running' && run.followed) || pair.target, options: choices(theirs), quick: quickLanguages((run.phase === 'running' && run.followed) || pair.target, theirs, settings.pins()) },
       mine: { value: pair.source, options: choices(myQuick) },
       hear: models(settings.hearers(), hearLags),
       translate: models(settings.translators(), translateLags),

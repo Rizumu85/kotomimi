@@ -406,6 +406,11 @@ export interface Provider<S, K extends { missing?: never } & object, C extends {
      * shown. Absent: not offered.
      */
     detection?(s: S, models: readonly ModelOption[], pair: LanguagePair): { other: Detection<S>; both: Detection<S> };
+    /**
+     * Fork: the user's speech is translated into the language the other side is heard in, not only the pair's target
+     * (`src/lib/session/follow.ts`): where their language is left to be detected. Absent: it never follows.
+     */
+    follows?(s: S, models: readonly ModelOption[], pair: LanguagePair): boolean;
   };
 
   // the only capabilities generic code reads

@@ -78,7 +78,9 @@ export function PanelFooter(props: PanelFooterProps) {
 
   const statusDotClass = `status-dot ${isReconnecting ? 'reconnecting' : isRunning ? 'active' : ''}`;
   // A bidirectional pair (`zh+en`) is both ends at once: name it once, not `X → X`.
-  const languagePairText = !pair ? '' : pair.source === pair.target ? label(pair.source) : `${label(pair.source)} → ${label(pair.target)}`;
+  // Fork: the user's speech following the other side's language (`follow.ts`): the language it goes into now.
+  const target = (run.phase === 'running' && run.followed) || pair?.target;
+  const languagePairText = !pair ? '' : pair.source === pair.target ? label(pair.source) : `${label(pair.source)} → ${label(target ?? pair.target)}`;
   const handleActionClick = isIdle ? onStart : onStop;
   const actionDisabled = (isIdle && !canStart) || run.phase === 'stopping';
 

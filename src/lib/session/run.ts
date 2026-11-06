@@ -23,6 +23,7 @@ import { ResourceStack } from './stack';
 import { Turn } from './turn';
 import type { Budget, LegState, LoadingProgress, Prepared, Resources, RunEnd, RunNotice, RunShape } from './types';
 import { normalizeRecognitionText } from '../glossary/glossary';
+import { createFollower, type Follower } from './follow';
 
 const DEFAULT_TIMEOUT_MS = 5_000;
 const API_ERROR_TYPES = ['auth', 'rate_limit', 'network', 'server', 'client'] as const;
@@ -58,6 +59,8 @@ export interface RunHost {
   legState(leg: LegName, state: LegState): void;
   /** A leg is loading its models while it opens: the starting state shows it. */
   loading(leg: LegName, progress: Omit<LoadingProgress, 'leg'>): void;
+  /** Fork: the language the user's speech is translated into, followed after the other side's; null: the pair's own. */
+  followed?(language: string | null): void;
   /** The run's legs exist: they become the conversation now, so text shows as it arrives. */
   conversations(legs: ReadonlyMap<LegName, Conversation>, info: ConversationInfo): void;
   /** A leg ended on its own, or a lease did: end the run. */
@@ -86,6 +89,8 @@ export interface SideHandle {
   origin: string;
 }
 const SIDE_REFS = 1_000_000_000;
+/** Fork: the longest a session swapped in to follow the other side's language waits for the user to finish (`untilQuiet`). */
+const QUIET_MOST_MS = 8_000;
 /** A side session as the run keeps it: where its origins and refs start, which of its segments are open, and whether it is over. */
 interface Side { origin: string; refs: number; open: Set<number>; done: boolean }
 /**
@@ -147,6 +152,10 @@ export class Run {
   private retargeting = false;
   /** Fork: the sessions a retarget in flight is replacing: one that fails or closes meanwhile is replaced, not the run's end. */
   private readonly replacing = new Set<Generation>();
+  /** Fork: what moves the language the user's speech is translated into after the other side's (`follow.ts`); null: it stays. */
+  private follower: Follower | null = null;
+  /** Fork: waiting for a quiet moment to swap a session in (`untilQuiet`): asked again as a segment closes. */
+  private readonly quietWaiters = new Set<() => void>();
   /** Fork: the side lanes open now, each told to follow the leg's new request (`openSide`, `retarget`). */
   private readonly followers = new Set<{ leg: LegName; follow(request: StartRequest<unknown, unknown>): void }>();
   /** Fork: each session's one stop: a session a retarget replaced is stopped then, and not again as the run unwinds. */
@@ -363,6 +372,7 @@ export class Run {
     }
     this.throwIfAborted();
     this.liveSince = deps.clock.now();
+    this.startFollowing();
   }
 
   /** Ends the run: decide nothing more, close an open turn, abort, wait for a leg still opening, unwind, finalize the legs, say each leg stopped, wait (bounded) for fill-in. */
@@ -371,6 +381,7 @@ export class Run {
     this.ending = true;
     if (this.turn?.close()) this.hold(false);
     this.controller.abort(new Error('the run ended'));
+    for (const check of [...this.quietWaiters]) check();
     // A `start()` / `startBoth` / `openSource` / `acquire` still in flight
     // finishes (and defers its release) before we unwind, so every resource
     // lands on the stack in the right order and is released in the right
@@ -761,7 +772,12 @@ export class Run {
       if (this.finished) return;
       const terminal = event.kind === 'failed' || event.kind === 'closed';
       if (generation.stage === 'current' && !(terminal && this.replacing.has(generation))) {
-        this.onEvent(leg, this.moved(generation, event));
+        const moved = this.moved(generation, event);
+        this.onEvent(leg, moved);
+        if (moved.kind === 'segmentClosed') {
+          for (const check of [...this.quietWaiters]) check();
+          if (leg === 'participant' && !this.ending) this.heardFromThem(moved.payload.ref);
+        }
         return;
       }
       if (event.kind === 'frame') this.deps.frames?.frame(leg, event.payload);
@@ -839,70 +855,155 @@ export class Run {
 
   /**
    * Fork: the language pair, or the provider's settings, changed while the run is live (`next`, the shape as it
-   * stands now). Each leg is given a session for them beside the one it has, checked and prepared as a start is, and
-   * swapped in once that has started: the sources, the conversation and the run go on, and only a sentence half heard
-   * at the swap is lost. A side lane on a leg follows it. False where it cannot be done so — the provider starts its
-   * legs together or under a lease, the shape changed more than its pair and settings, a check, a build or a start
-   * refuses — and the caller restarts the run instead, which says why where there is a why. True as well where the
-   * run ended meanwhile: there is nothing left to restart.
+   * stands now). Each leg is given a session for them beside the one it has (`rebuild`): the sources, the
+   * conversation and the run go on, and only a sentence half heard at the swap is lost. A side lane on a leg follows
+   * it. False where it cannot be done so — the provider starts its legs together or under a lease, the shape changed
+   * more than its pair and settings, a check, a build or a start refuses — and the caller restarts the run instead,
+   * which says why where there is a why. True as well where the run ended meanwhile: there is nothing left to restart.
    */
   async retarget(next: RunShape): Promise<boolean> {
     if (!this.retargetOffered(next) || gate(next, this.deps.platform)) return false;
+    const outcome = await this.rebuild(next, next.legs, false);
+    if (outcome === 'swapped') {
+      this.shape = next;
+      this.startFollowing();
+    }
+    return outcome !== 'refused';
+  }
+
+  /**
+   * Fork: the user's speech goes into `language` from now on, the other side being heard in it (`follow.ts`): only
+   * the speaker's leg is given a new session, swapped in once what it is saying and translating now is done
+   * (`untilQuiet`); the other side's is left as it is. Where the user's speech cannot be translated into it, it is
+   * not followed there again.
+   */
+  private async follow(language: string): Promise<void> {
+    const follower = this.follower;
+    if (!follower || this.retargeting || this.ending) return;
+    const next: RunShape = { ...this.shape, pair: { source: this.shape.pair.source, target: language } };
+    const outcome = gate(next, this.deps.platform) ? 'refused' : await this.rebuild(next, ['speaker'], true);
+    if (follower !== this.follower) return;
+    if (outcome === 'swapped') {
+      follower.moved(language);
+      this.host.followed?.(language === this.shape.pair.target ? null : language);
+    } else if (outcome === 'refused') {
+      follower.unfit(language);
+    }
+  }
+
+  /** Fork: whether the user's speech follows the other side's language this run (`follow.ts`): from the pair's target. */
+  private startFollowing(): void {
+    const { shape, built } = this;
+    const follows = !!built && shape.legs.includes('speaker') && shape.legs.includes('participant')
+      && shape.provider.languages.follows?.(built.settings as never, built.shared.models ?? [], shape.pair) === true;
+    this.follower = follows ? createFollower(shape.pair.target, shape.pair.source) : null;
+    this.host.followed?.(null);
+  }
+
+  /** Fork: a sentence of the other side's closed: what it was said in may move the language the user is answered in. */
+  private heardFromThem(ref: number): void {
+    const follower = this.follower;
+    if (!follower) return;
+    const segments = this.conversations.get('participant')?.snapshot().segments ?? [];
+    for (let i = segments.length - 1; i >= 0; i--) {
+      const seg = segments[i];
+      if (seg.ref !== ref || seg.side !== 'source') continue;
+      const to = follower.heard(seg.text, seg.language);
+      if (to) void this.follow(to);
+      return;
+    }
+  }
+
+  /**
+   * Fork: resolves once none of `legs`' sessions has a segment open — what the user is saying now, and its
+   * translation, done — or after `ms`, or as the run ends.
+   */
+  private untilQuiet(legs: readonly LegName[], ms: number): Promise<void> {
+    const quiet = () => this.ending || legs.every((leg) => (this.generations.get(leg)?.open.size ?? 0) === 0);
+    if (quiet()) return Promise.resolve();
+    return new Promise<void>((resolve) => {
+      let cancel = () => {};
+      const check = () => {
+        if (!quiet()) return;
+        this.quietWaiters.delete(check);
+        cancel();
+        resolve();
+      };
+      this.quietWaiters.add(check);
+      cancel = this.deps.clock.setTimeout(() => {
+        this.quietWaiters.delete(check);
+        resolve();
+      }, ms);
+    });
+  }
+
+  /**
+   * Fork: `legs` given sessions built for `next`, checked and prepared as a start is, and swapped in once they have
+   * started — after a quiet moment, and with the models the run already knows rather than a check of its own, where
+   * `following` (`untilQuiet`; a check writes what it finds where the settings show it, about a pair they do not).
+   * `swapped`; `refused` where a check, a build or a start would not; `ended` where the run ended meanwhile.
+   */
+  private async rebuild(next: RunShape, legs: readonly LegName[], following: boolean): Promise<'swapped' | 'refused' | 'ended'> {
     const p = this.shape.provider;
     this.retargeting = true;
-    for (const leg of this.shape.legs) {
+    for (const leg of legs) {
       const now = this.generations.get(leg);
       if (now) this.replacing.add(now);
     }
     const started = new Map<LegName, { session: AdapterSession; generation: Generation }>();
     try {
-      const readiness = await this.untilAborted(this.deps.ensureReady(next, this.signal));
-      if (this.ending) return true;
-      if (readiness.state !== 'ready') return false;
-      const shared: SharedSettings = { ...next.shared, models: readiness.models };
+      let models = this.built?.shared.models ?? [];
+      if (!following) {
+        const readiness = await this.untilAborted(this.deps.ensureReady(next, this.signal));
+        if (this.ending) return 'ended';
+        if (readiness.state !== 'ready') return 'refused';
+        models = readiness.models;
+      }
+      const shared: SharedSettings = { ...next.shared, models };
       let settings = next.settings;
       if (p.session?.prepare) {
         const prepared = await this.untilAborted(p.session.prepare(next, settings, this.signal));
-        if (this.ending) return true;
+        if (this.ending) return 'ended';
         if (prepared.override) settings = { ...(settings as object), ...prepared.override };
         if (prepared.persist) this.deps.persistIfUnchanged(p, next.settings, prepared.persist);
       }
       const contexts = contextsFor(next);
-      const configs: Partial<Record<LegName, unknown>> = {};
-      for (const leg of next.legs) {
+      const configs: Partial<Record<LegName, unknown>> = Object.fromEntries(this.shape.legs.map((leg) => [leg, this.requests[leg]?.config]));
+      for (const leg of legs) {
         const built = p.build(contexts[leg]!, settings, shared);
-        if (typeof built?.refused === 'string') return false;
+        if (typeof built?.refused === 'string') return 'refused';
         configs[leg] = built;
       }
-      if (p.session?.admit && p.session.admit(configs) !== true) return false;
-      const requests = Object.fromEntries(next.legs.map((leg) => [leg, { ...this.requests[leg]!, context: contexts[leg]!, config: configs[leg] }])) as Record<LegName, StartRequest<unknown, unknown>>;
+      if (p.session?.admit && p.session.admit(configs) !== true) return 'refused';
+      const requests = Object.fromEntries(legs.map((leg) => [leg, { ...this.requests[leg]!, context: contexts[leg]!, config: configs[leg] }])) as Record<LegName, StartRequest<unknown, unknown>>;
       // Every leg's, whatever another's does: one that starts after another failed is stopped with the run all the same.
-      const results = await Promise.allSettled(next.legs.map(async (leg) => {
+      const results = await Promise.allSettled(legs.map(async (leg) => {
         const n = ++this.sides;
         const generation: Generation = { refs: SIDE_REFS * n, suffix: `␞${n}`, open: new Set(), stage: 'waiting', held: [] };
         const session = await this.startWhileLive(leg, p.start(requests[leg], this.generationEvents(leg, generation)));
         started.set(leg, { session, generation });
       }));
-      if (this.ending) return true;
+      if (this.ending) return 'ended';
       const failed = results.find((result): result is PromiseRejectedResult => result.status === 'rejected');
       if (failed) {
         reportWarning('SessionRunner', `The session could not go on in the new languages: ${describeCause(failed.reason)}`, { cause: failed.reason, dedupeKey: 'retarget:start' });
-        return false;
+        return 'refused';
       }
-      if ([...started.values()].some(({ generation }) => generation.ended !== undefined)) return false;
+      if (following) await this.untilQuiet(legs, QUIET_MOST_MS);
+      if (this.ending) return 'ended';
+      if ([...started.values()].some(({ generation }) => generation.ended !== undefined)) return 'refused';
       this.replacing.clear();
-      for (const leg of next.legs) this.swap(leg, started.get(leg)!, contexts[leg]!.direction);
+      for (const leg of legs) this.swap(leg, started.get(leg)!, contexts[leg]!.direction);
       started.clear();
-      this.shape = next;
-      this.requests = requests;
+      this.requests = { ...this.requests, ...requests };
       this.built = { settings, shared };
       this.models = p.describe(configs.speaker ?? configs.participant);
-      for (const follower of this.followers) follower.follow(requests[follower.leg]);
-      return true;
+      for (const follower of this.followers) if (legs.includes(follower.leg)) follower.follow(requests[follower.leg]);
+      return 'swapped';
     } catch (error) {
-      if (this.signal.aborted) return true;
+      if (this.signal.aborted) return 'ended';
       reportWarning('SessionRunner', `The session could not go on in the new languages: ${describeCause(error)}`, { cause: error, dedupeKey: 'retarget' });
-      return false;
+      return 'refused';
     } finally {
       this.retargeting = false;
       this.replacing.clear();
