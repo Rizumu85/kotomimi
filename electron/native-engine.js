@@ -613,34 +613,43 @@ const FILLER = new Set(['the', 'a', 'an', 'and', 'of', 'to', 'in', 'on', 'at', '
 const lettersOf = (text) => [...String(text)].filter((c) => /[\p{L}\p{N}]/u.test(c)).length;
 
 /**
- * Fork: a reading that is nothing but hinted words, of a stretch longer than they take to say. Told the words to
- * expect, Qwen3-ASR given speech it does not follow — Russian, read where Chinese was expected — wrote 「The VRC」 for a
- * whole sentence (the user, 2026-11-04). Such a reading is suspect, not wrong: someone may only have called a name.
+ * Fork: a reading that is nothing but hinted words. Told the words to expect, Qwen3-ASR given speech it does not
+ * follow — Russian, read where Chinese was expected — wrote 「The VRC」 for a whole sentence (the user, 2026-11-04);
+ * given a game's sound or a breath, a single word of the list (the user, 2026-11-06). Such a reading is suspect, not
+ * wrong: someone may only have called a name.
  */
-function hintOnly(text, hints, seconds) {
-  if (seconds < HINT_ONLY_SECONDS) return false;
+function hintOnly(text, hints) {
   const known = new Set(hints.map((hint) => String(hint).trim().toLowerCase()).filter(Boolean));
   const parts = String(text).split(/[、，,。.!?！？;；:：\s]+/u).map((part) => part.trim().toLowerCase()).filter(Boolean);
   const words = parts.filter((part) => !FILLER.has(part));
   return words.length > 0 && words.every((part) => known.has(part));
 }
-/** A name called takes a second or so: a stretch longer than this read as one is suspect. */
-const HINT_ONLY_SECONDS = 1.6;
-
 /**
- * The reading of a stretch with hints, made sure of: where it heard nothing but hinted words, the stretch is read
- * again without them, and that reading is the one kept if it heard clearly more — the hints had stood in for words
- * the model did not follow. Where it heard about as much, it was a name called, and the hinted reading is kept.
+ * The reading of a stretch with hints, made sure of: where it heard nothing but hinted words, however short, the
+ * stretch is read again without them. Read so, it heard nothing: the words were the list said back over a sound, and
+ * nothing is kept. It heard clearly more, or far less: the hints had stood in for words the model did not follow, or
+ * been laid over a mumble, and that reading is kept. About as much: it was a name called, and the hinted reading — the
+ * name as the list writes it — is kept.
  */
 function hintChecked(read, hints) {
   return (asked) => {
     const first = read(asked);
     let second = null;
-    const seconds = asked.pcm ? asked.pcm.length / 2 / (asked.sampleRate || 16000) : 0;
     const done = first.done.then((answer) => {
-      if (!answer.ok || !asked.context || !hintOnly(answer.text, hints, seconds)) return answer;
+      if (!answer.ok || !asked.context || !hintOnly(answer.text, hints)) return answer;
       second = read({ ...asked, context: undefined });
-      return second.done.then((plain) => (plain.ok && lettersOf(plain.text) > lettersOf(answer.text) * 1.5 + 2 ? plain : answer));
+      return second.done.then((plain) => {
+        if (!plain.ok) return answer;
+        const heard = String(plain.text).split(/[、，,。.!?！？;；:：\s]+/u).filter((part) => lettersOf(part) > 0 && !FILLER.has(part.toLowerCase()));
+        if (heard.length === 0) return { ...plain, text: '' };
+        const got = lettersOf(plain.text);
+        const hinted = lettersOf(answer.text);
+        // Far less than the word the hints made of it: a mumble, a breath, a quiet sound they were laid over (a
+        // friend of the user's, 2026-11-06) — what was heard is kept, not the word. A name called reads about as long
+        // either way (「糖豆」, 「唐豆」).
+        if (got * 2 < hinted) return plain;
+        return got > hinted * 1.5 + 2 ? plain : answer;
+      });
     });
     return { done, abort: () => { first.abort(); second?.abort(); } };
   };

@@ -265,6 +265,20 @@ describe('a reading of nothing but hinted words (fork)', () => {
     return { asked, read };
   };
 
+  it('keeps nothing where read without the hints it heard nothing: the list said back over a sound, however short', async () => {
+    for (const plain of ['', '。', 'the']) {
+      const noise = reader({ hinted: '糖豆', plain });
+      expect((await hintChecked(noise.read, hints)({ context: 'x', pcm: seconds(0.6), sampleRate: 16000 }).done).text).toBe('');
+    }
+  });
+
+  it('keeps what a mumble was heard as, not the word the hints made of it', async () => {
+    const mumble = reader({ hinted: 'インスタンス', plain: '嗯' });
+    expect((await hintChecked(mumble.read, ['インスタンス'])({ context: 'x', pcm: seconds(0.7), sampleRate: 16000 }).done).text).toBe('嗯');
+    const name = reader({ hinted: 'Rizum', plain: 'リズム' });
+    expect((await hintChecked(name.read, ['Rizum'])({ context: 'x', pcm: seconds(0.7), sampleRate: 16000 }).done).text).toBe('Rizum');
+  });
+
   it('is read again without the hints, and that kept where it heard clearly more', async () => {
     const { asked, read } = reader({ hinted: 'The VRC', plain: 'Привет, как у тебя дела сегодня?' });
     const answer = await hintChecked(read, hints)({ context: '可能出现的人名和词语：VRC、糖豆', pcm: seconds(3), sampleRate: 16000 }).done;
@@ -272,12 +286,11 @@ describe('a reading of nothing but hinted words (fork)', () => {
     expect(asked.map((r) => r.context === undefined)).toEqual([false, true]);
   });
 
-  it('keeps a name that was called, and a short stretch, and a sentence, read once', async () => {
+  it('keeps a name that was called, short or not, and a sentence, read once', async () => {
     const called = reader({ hinted: '糖豆！', plain: '唐豆！' });
     expect((await hintChecked(called.read, hints)({ context: 'x', pcm: seconds(2), sampleRate: 16000 }).done).text).toBe('糖豆！');
-    const short = reader({ hinted: 'VRC', plain: 'something else entirely' });
-    expect((await hintChecked(short.read, hints)({ context: 'x', pcm: seconds(1), sampleRate: 16000 }).done).text).toBe('VRC');
-    expect(short.asked.length).toBe(1);
+    const short = reader({ hinted: 'VRC', plain: 'VRC.' });
+    expect((await hintChecked(short.read, hints)({ context: 'x', pcm: seconds(0.8), sampleRate: 16000 }).done).text).toBe('VRC');
     const sentence = reader({ hinted: '我们去VRC吧', plain: '我们去吧' });
     expect((await hintChecked(sentence.read, hints)({ context: 'x', pcm: seconds(3), sampleRate: 16000 }).done).text).toBe('我们去VRC吧');
     expect(sentence.asked.length).toBe(1);

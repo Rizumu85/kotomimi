@@ -324,11 +324,12 @@ describe('follow — the user is answered in the language the other side speaks'
     one.events.segmentClosed({ ref });
   };
 
-  it('swaps only the speaker leg into the other side\'s language once two sentences say it', async () => {
+  it('swaps only the speaker leg into the other side\'s language once a sentence says it', async () => {
     const { runner, started } = setup({ legs: ['speaker', 'participant'], follows: true });
     await runner.start();
     const [speaker, participant] = started;
-    said(participant, 1, '你好，今天天气很好', 'zh');
+    // A word alone says nothing.
+    said(participant, 1, '好的', 'zh');
     await flush();
     expect(started).toHaveLength(2);
     said(participant, 2, '我们一起去那边看看吧', 'zh');

@@ -1,18 +1,17 @@
 /**
  * Fork: the language the user's speech is translated into follows the other side's (`Run`'s follow): talking with a
  * Korean and a Japanese speaker at once, each is answered in theirs. A short VRChat chatbox holds one translation, so
- * the user's speech goes into one language at a time, and that language must not jump about on a stray word.
+ * the user's speech goes into one language at a time: the one the other side was last heard in.
  *
- * Only the other side's sentences that clearly say a language move it: long enough to tell (`FOLLOW_LEAST`), not the
- * user's own language (their voice come back, or the other side speaking it), and one the user's speech can be
- * translated into. It moves after two such sentences in a row in the new language, or one long one (`FOLLOW_ALONE`).
+ * Only the other side's sentences that clearly say a language move it: long enough to tell (`FOLLOW_LEAST`; a "はい"
+ * or an "ok" does not), not the user's own language (their voice come back, or the other side speaking it), and one
+ * the user's speech can be translated into. One such sentence moves it: two in a row were asked for at first, and it
+ * did not follow anyone who answered in a sentence (the user, 2026-11-06).
  */
 import { baseLanguage } from '../language/code';
 
 /** How much a sentence must hold to count: a letter of a script written without spaces counts three. */
 export const FOLLOW_LEAST = 12;
-/** A sentence this long moves it by itself. */
-export const FOLLOW_ALONE = 45;
 
 /** Letters, a CJK, kana, Hangul or Thai one weighed as about a word's worth of a spaced script's. */
 export function followWeight(text: string): number {
@@ -44,7 +43,6 @@ export interface Follower {
 export function createFollower(start: string, own: string, among?: readonly string[]): Follower {
   let now = start;
   let mine = baseLanguage(own) ?? own;
-  let last: string | null = null;
   const unfit = new Set<string>();
   const base = (code: string) => (baseLanguage(code) ?? code).toLowerCase();
   const allowed = among ? new Set(among.map(base)) : null;
@@ -55,13 +53,7 @@ export function createFollower(start: string, own: string, among?: readonly stri
       const said = base(language);
       const weight = followWeight(text);
       if (weight < FOLLOW_LEAST || said === base(mine) || unfit.has(said) || (allowed && !allowed.has(said))) return null;
-      if (said === base(now)) {
-        last = said;
-        return null;
-      }
-      const moves = last === said || weight >= FOLLOW_ALONE;
-      last = said;
-      return moves ? language : null;
+      return said === base(now) ? null : language;
     },
     moved(language) {
       now = language;
@@ -72,7 +64,6 @@ export function createFollower(start: string, own: string, among?: readonly stri
     reset(start2, own2) {
       now = start2;
       mine = baseLanguage(own2) ?? own2;
-      last = null;
     },
   };
 }

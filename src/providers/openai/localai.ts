@@ -1387,14 +1387,12 @@ export const localaiLanguages: Provider<LocalAISettings, never, never>['language
   ...realtimeLanguages,
   sources: () => LOCAL_LANGUAGES,
   targets: () => LOCAL_LANGUAGES,
-  // Fork: the other side left to be detected, the user's speech goes into whichever language they are heard in — a
-  // Korean and a Japanese speaker answered each in theirs — among those chosen for them, or any. Not a coached speaker,
-  // whose speech is answered with feedback.
-  follows: (stored, models, pair) => {
+  // Fork: the other side left to be detected, the user's speech goes into whichever language they were last heard in —
+  // a Korean and a Japanese speaker answered each in theirs — whether it is among those chosen for them or not: what
+  // was chosen is what the recognizer is asked to expect. Not a coached speaker, whose speech is answered with feedback.
+  follows: (stored, models) => {
     const s = settled(stored);
-    if (!detectsOther(s, models) || s.coach) return false;
-    const chosen = theyAlsoSpeak(s);
-    return chosen.includes(AUTO) ? true : { among: [pair.target, ...chosen] };
+    return detectsOther(s, models) && !s.coach;
   },
   // Fork: what each side may speak beside its main language, and what hears it (`MoreLanguages`).
   more: (stored, models, pair) => {

@@ -51,9 +51,9 @@ describe('the languages beside each side’s main one', () => {
     expect(theirs!.chosen).toEqual(['auto']);
   });
 
-  it('follows the other side among the languages chosen for them, or any', () => {
+  it('follows the other side into whatever they were last heard in, where their language is detected', () => {
     const follows = (settings: Record<string, unknown>) => localaiLanguages.follows!({ ...LOCALAI_DEFAULTS, asrVia: 'server', asrModel: 'qwen3-asr-1.7b-q8', ...settings } as never, MAC, PAIR);
-    expect(follows({ theyAlso: ['ko'], asrDetectOther: true })).toEqual({ among: ['ja', 'ko'] });
+    expect(follows({ theyAlso: ['ko'], asrDetectOther: true })).toBe(true);
     expect(follows({ theyAlso: ['auto'], asrDetectOther: true })).toBe(true);
     expect(follows({})).toBe(false);
   });
