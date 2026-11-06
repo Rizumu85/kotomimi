@@ -483,6 +483,10 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "مدل‌های این رایانه را در اختیار دستگاه‌های دیگر شبکه محلی می‌گذارد. در دستگاه دیگر، از بخش «دستگاه دیگر» در Kotomimi این رایانه را پیدا کنید و مدل و زبان را همان‌جا انتخاب کنید. اشتراک‌گذاری فقط تا وقتی Kotomimi باز است کار می‌کند."
   },
+  "fork.languageMenu.alsoSpeak": {
+    "en": "I also speak",
+    "text": "من هم صحبت می‌کنم"
+  },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
     "text": "تشخیص خودکار"
@@ -491,9 +495,17 @@
     "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
     "text": "تشخیص گفتار فعلی نمی‌تواند زبان را خودکار تشخیص دهد. به Qwen3-ASR 1.7B GGUF یا یک مدل API نیاز است."
   },
+  "fork.languageMenu.hearingBy": {
+    "en": "Speech recognition: {{name}}",
+    "text": "تشخیص گفتار: {{name}}"
+  },
   "fork.languageMenu.mine": {
     "en": "My language",
     "text": "زبان من"
+  },
+  "fork.languageMenu.moreLanguages": {
+    "en": "{{count}} more languages",
+    "text": "{{count}} زبان دیگر"
   },
   "fork.languageMenu.mostly": {
     "en": "Translate into what they mostly speak",
@@ -530,6 +542,10 @@
   "fork.languageMenu.theirs": {
     "en": "Their language",
     "text": "زبان طرف مقابل"
+  },
+  "fork.languageMenu.theyMaySpeak": {
+    "en": "They may speak",
+    "text": "ممکن است طرف مقابل صحبت کند"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",
@@ -1119,6 +1135,10 @@
     "en": "Connect",
     "text": "اتصال"
   },
+  "models.detectsGroup": {
+    "en": "Detects the language",
+    "text": "زبان را خودکار تشخیص می‌دهد"
+  },
   "models.deviceCpu": {
     "en": "CPU",
     "text": "پردازنده مرکزی"
@@ -1126,6 +1146,10 @@
   "models.deviceGpu": {
     "en": "GPU",
     "text": "پردازنده گرافیکی"
+  },
+  "models.namedGroup": {
+    "en": "Needs the language set",
+    "text": "باید زبان را مشخص کنید"
   },
   "providers.gemini.name": {
     "en": "Google Gemini",

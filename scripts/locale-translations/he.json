@@ -483,6 +483,10 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "מאפשר למכשירים אחרים ברשת המקומית להשתמש במודלים של המחשב הזה. במכשיר השני אפשר למצוא את המחשב בחיפוש תחת \"מכשיר אחר\" ב-Kotomimi, ולבחור שם את המודל והשפה. השיתוף פועל רק כש-Kotomimi פתוח."
   },
+  "fork.languageMenu.alsoSpeak": {
+    "en": "I also speak",
+    "text": "אני דובר/ת גם"
+  },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
     "text": "זיהוי אוטומטי"
@@ -491,9 +495,17 @@
     "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
     "text": "זיהוי הדיבור הנוכחי לא תומך בזיהוי שפות אוטומטי. נדרש Qwen3-ASR 1.7B GGUF או מודל API."
   },
+  "fork.languageMenu.hearingBy": {
+    "en": "Speech recognition: {{name}}",
+    "text": "זיהוי דיבור: {{name}}"
+  },
   "fork.languageMenu.mine": {
     "en": "My language",
     "text": "השפה שלי"
+  },
+  "fork.languageMenu.moreLanguages": {
+    "en": "{{count}} more languages",
+    "text": "{{count}} שפות נוספות"
   },
   "fork.languageMenu.mostly": {
     "en": "Translate into what they mostly speak",
@@ -530,6 +542,10 @@
   "fork.languageMenu.theirs": {
     "en": "Their language",
     "text": "השפה של הצד השני"
+  },
+  "fork.languageMenu.theyMaySpeak": {
+    "en": "They may speak",
+    "text": "ייתכן שהם מדברים"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",
@@ -1119,6 +1135,10 @@
     "en": "Connect",
     "text": "התחברות"
   },
+  "models.detectsGroup": {
+    "en": "Detects the language",
+    "text": "מזהה את השפה"
+  },
   "models.deviceCpu": {
     "en": "CPU",
     "text": "מעבד"
@@ -1126,6 +1146,10 @@
   "models.deviceGpu": {
     "en": "GPU",
     "text": "מעבד גרפי"
+  },
+  "models.namedGroup": {
+    "en": "Needs the language set",
+    "text": "יש להגדיר את השפה"
   },
   "providers.gemini.name": {
     "en": "Google Gemini",

@@ -48,7 +48,38 @@ export interface StagePlacement {
 export interface DeviceChoices extends StagePlacement {
   /** Fork: the speaker speaks the other side's language too (`speakBoth`): their sentences in it are translated back. */
   speakBoth?: boolean;
+  /** Fork: the languages the speaker speaks besides their own (`alsoSpoken`). */
+  speakAlso?: readonly string[];
   asrModel?: string;
+}
+
+const baseCode = (code: string): string => code.trim().toLowerCase().split(/[-_]/)[0];
+
+/**
+ * Fork: the languages the speaker speaks besides their own ("我也会说", `speakAlso`), as they were picked, their own and
+ * any repeat left out. An older `speakBoth` — "I speak the other side's language too" — is the pair's target among them.
+ */
+export function alsoSpoken(s: { speakAlso?: readonly string[]; speakBoth?: boolean }, pair: { source: string; target: string }): string[] {
+  const own = baseCode(pair.source);
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const code of [...(s.speakAlso ?? []), ...(s.speakBoth ? [pair.target] : [])]) {
+    const base = baseCode(code);
+    if (!base || base === 'auto' || base === own || seen.has(base)) continue;
+    seen.add(base);
+    out.push(code);
+  }
+  return out;
+}
+
+/**
+ * Fork: the one of them the speaker is heard beside now, where only one can be (the Mac's recognition hears two
+ * languages at once): the pair's target where they speak it — the other side's language, followed or chosen — else the
+ * first they picked. Undefined where they speak none.
+ */
+export function alsoFirst(s: { speakAlso?: readonly string[]; speakBoth?: boolean }, pair: { source: string; target: string }): string | undefined {
+  const also = alsoSpoken(s, pair);
+  return also.find((code) => baseCode(code) === baseCode(pair.target)) ?? also[0];
 }
 
 /**
@@ -130,11 +161,14 @@ export function canDetectOther(s: { asrVia: Place; asrHere?: AsrHere; asrOther?:
  * Fork: the speaker speaks the other side's language too (`speakBoth`), and what hears can tell the two apart: their
  * sentences in either are heard, and each translated into the other. Feedback can also answer their foreign speech.
  */
-export const speaksBoth = (s: { speakBoth?: boolean; coach: boolean; asrVia: Place; asrHere?: AsrHere; asrOther?: string; asrModel?: string }, models: Listed = [], pair?: LanguagePair): boolean =>
-  s.speakBoth === true && (canDetectOther(s, models) || (hearingPlace(s) === 'server' && !!pair && serverBilingual(s.asrModel ?? '', pair, models as readonly LocalAIModel[]) !== null));
+export const speaksBoth = (s: { speakBoth?: boolean; speakAlso?: readonly string[]; coach: boolean; asrVia: Place; asrHere?: AsrHere; asrOther?: string; asrModel?: string }, models: Listed = [], pair?: LanguagePair): boolean => {
+  const also = pair ? alsoFirst(s, pair) : (s.speakAlso?.[0] ?? (s.speakBoth ? 'other' : undefined));
+  if (!also) return false;
+  return canDetectOther(s, models) || (hearingPlace(s) === 'server' && !!pair && serverBilingual(s.asrModel ?? '', { source: pair.source, target: also }, models as readonly LocalAIModel[]) !== null);
+};
 
 /** What a leg hears: the speaker their own language, or — coached — the one they practise, or either (`speaksBoth`); the other side theirs, or whatever it turns out to be. */
-export function heardBy(s: { asrDetectOther?: boolean; speakBoth?: boolean; asrVia: Place; asrHere?: AsrHere; asrOther?: string; asrModel?: string; coach: boolean }, pair: { source: string; target: string }, leg: 'speaker' | 'participant', models: Listed = []): string {
+export function heardBy(s: { asrDetectOther?: boolean; speakBoth?: boolean; speakAlso?: readonly string[]; asrVia: Place; asrHere?: AsrHere; asrOther?: string; asrModel?: string; coach: boolean }, pair: { source: string; target: string }, leg: 'speaker' | 'participant', models: Listed = []): string {
   if (leg === 'speaker') return speaksBoth(s, models, pair) && pair.source.toLowerCase() !== pair.target.toLowerCase() ? AUTO : s.coach ? pair.target : pair.source;
   return detectsOther(s, models) ? AUTO : pair.target;
 }
@@ -190,7 +224,10 @@ export function deviceNeeds(s: DeviceChoices, pair: LanguagePair, legs: readonly
     if (s.translateAt === 'device') out.push({ leg, dir: slot(source, target), stage: 'translation', source, target, required: (!coached || both) && source.toLowerCase() !== target.toLowerCase() });
     // Fork: a speaker who speaks both has their sentences in the other side's language translated back: that
     // direction too, the other side's leg's (`Stages.back`), where what hears can tell the two apart.
-    if (s.translateAt === 'device' && both) out.push({ leg, dir: slot(target, source), stage: 'translation', source: target, target: source, required: true });
+    // Each language they speak besides their own, where they speak more than the other side's.
+    if (s.translateAt === 'device' && both) {
+      for (const also of alsoSpoken(s, pair)) out.push({ leg, dir: slot(also, source), stage: 'translation', source: also, target: source, required: true });
+    }
   }
   return out;
 }

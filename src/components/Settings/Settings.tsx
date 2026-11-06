@@ -50,6 +50,8 @@ const NAVIGATION_TAB_MAP: Record<string, string> = {
   'turn-detection': 'audio',
   // A direct link also expands the speech-detection controls in Audio.
   'turn-detection-tuning': 'audio',
+  // Fork: what hears each side, from the language section's model names (`LanguagePairSection`).
+  'hearing': 'provider',
   'model-management': 'provider',
   'model-asr': 'provider',
   'model-translation': 'provider',

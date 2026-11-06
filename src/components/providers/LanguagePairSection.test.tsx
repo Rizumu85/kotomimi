@@ -179,7 +179,9 @@ describe('LanguagePairSection — my language and theirs (fork)', () => {
   };
   const mine = () => screen.getByLabelText('fork.languageMenu.mine') as HTMLSelectElement;
   const theirs = () => screen.getByLabelText('fork.languageMenu.theirs') as HTMLSelectElement;
-  const mostly = () => screen.queryByLabelText('fork.languageMenu.mostly') as HTMLSelectElement | null;
+  const maySpeak = () => screen.queryByRole('group', { name: 'fork.languageMenu.theyMaySpeak' });
+  const chipsOf = (group: HTMLElement) => [...group.querySelectorAll<HTMLButtonElement>('.language-chip')];
+  const chipFor = (group: HTMLElement, code: string) => chipsOf(group).find((c) => c.textContent === languageLabel(code, 'en'))!;
 
   it('names the two selects for whose language they hold, the same in every mode, with nothing written under them', () => {
     for (const mode of ['speaker', 'participant', 'both'] as const) {
@@ -206,22 +208,35 @@ describe('LanguagePairSection — my language and theirs (fork)', () => {
       expect(theirs().options[0].value).toBe(DETECT);
       expect(theirs().options[0].textContent).toBe('fork.languageMenu.detect');
       expect(values(mine())).not.toContain(DETECT);
-      expect(mostly()).toBeNull();
+      expect(maySpeak()).toBeNull();
       fireEvent.change(theirs(), { target: { value: DETECT } });
       expect(set).toHaveBeenCalledWith(true);
       expect(onChange).not.toHaveBeenCalled();
     }
   });
 
-  it('asks, while it is chosen, which language they mostly speak: that one stays the pair\u2019s', () => {
+  it('shows, while it is chosen, the languages they may speak as chips: the pair’s the one started with, another made it by a press', () => {
     const set = vi.fn();
     const onChange = show('both', { on: true, set });
     expect(theirs().value).toBe(DETECT);
-    expect(mostly()!.value).toBe('ja');
-    expect(values(mostly()!)).not.toContain(DETECT);
-    fireEvent.change(mostly()!, { target: { value: 'zh' } });
+    // Their languages, never mine: the fake's three, less English.
+    expect(chipsOf(maySpeak()!)).toHaveLength(2);
+    const ja = chipFor(maySpeak()!, 'ja');
+    expect(ja.className).toContain('is-chosen');
+    expect(ja.getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(chipFor(maySpeak()!, 'zh'));
     expect(onChange).toHaveBeenCalledWith({ source: 'en', target: 'zh' });
+    // The one already started with: nothing changes.
+    fireEvent.click(ja);
+    expect(onChange).toHaveBeenCalledTimes(1);
     expect(set).not.toHaveBeenCalled();
+  });
+
+  it('marks the language followed into in a session apart from the one started with', () => {
+    cleanup();
+    render(<LanguagePairSection provider={fakeProvider} settings={FAKE_DEFAULTS} pair={{ source: 'en', target: 'ja' }} onChange={vi.fn()} detect={{ on: true, available: true, set: vi.fn() }} followed="zh" owners />);
+    expect(chipFor(maySpeak()!, 'ja').className).toContain('is-chosen');
+    expect(chipFor(maySpeak()!, 'zh').className).toContain('is-live');
   });
 
   it('is turned off by choosing a language for them, which is then the pair\u2019s', () => {
@@ -248,35 +263,72 @@ describe('LanguagePairSection — my language and theirs (fork)', () => {
   });
 });
 
-describe('LanguagePairSection — "I speak their language too" (fork)', () => {
-  const show = (given: { on: boolean; available?: boolean; set(on: boolean): void } | undefined, pair = { source: 'en', target: 'ja' }) =>
-    render(<LanguagePairSection provider={fakeProvider} settings={FAKE_DEFAULTS} pair={pair} onChange={vi.fn()} both={given && { available: true, ...given }} owners />);
+describe('LanguagePairSection — "I also speak" and what hears (fork)', () => {
+  type Also = { chosen: string[]; offered?: string[] | null; available?: boolean; set(chosen: string[]): void };
+  type Hearing = { mine?: { name: string; languages: string[] | null }; theirs?: { name: string; languages: string[] | null } };
+  const show = (also: Also | undefined, extra: { hearing?: Hearing; detect?: boolean; onOpenHearing?: () => void } = {}) =>
+    render(
+      <LanguagePairSection
+        provider={fakeProvider}
+        settings={FAKE_DEFAULTS}
+        pair={{ source: 'en', target: 'ja' }}
+        onChange={vi.fn()}
+        also={also && { offered: null, available: true, ...also }}
+        {...(extra.hearing ? { hearing: extra.hearing } : {})}
+        {...(extra.detect ? { detect: { on: true, available: true, set: vi.fn() } } : {})}
+        {...(extra.onOpenHearing ? { onOpenHearing: extra.onOpenHearing } : {})}
+        owners
+      />,
+    );
+  const alsoSpeak = () => screen.queryByRole('group', { name: 'fork.languageMenu.alsoSpeak' });
+  const chips = () => [...alsoSpeak()!.querySelectorAll<HTMLButtonElement>('.language-chip')];
+  const chip = (code: string) => chips().find((c) => c.textContent?.endsWith(languageLabel(code, 'en')))!;
 
-  it('is a switch under the pair, turned as asked', () => {
+  it('offers the languages besides mine as chips, each turned on and off by a press', () => {
     const set = vi.fn();
-    show({ on: false, set });
-    const toggle = screen.getByRole('switch');
-    expect(toggle.getAttribute('aria-checked')).toBe('false');
-    fireEvent.click(toggle);
-    expect(set).toHaveBeenCalledWith(true);
+    show({ chosen: [], set });
+    expect(chips()).toHaveLength(2);
+    fireEvent.click(chip('ja'));
+    expect(set).toHaveBeenCalledWith(['ja']);
+    cleanup();
+    const again = vi.fn();
+    show({ chosen: ['ja'], set: again });
+    expect(chip('ja').className).toContain('is-on');
+    fireEvent.click(chip('zh'));
+    expect(again).toHaveBeenCalledWith(['ja', 'zh']);
+    fireEvent.click(chip('ja'));
+    expect(again).toHaveBeenLastCalledWith([]);
     cleanup();
   });
 
-  it('is greyed where what hears cannot tell the two apart, unless it is on', () => {
-    show({ on: false, available: false, set: vi.fn() });
-    expect(screen.getByRole('switch').getAttribute('aria-disabled')).toBe('true');
+  it('offers only what hears can tell apart, and is greyed where it can tell none, unless some are on', () => {
+    show({ chosen: [], offered: ['zh'], set: vi.fn() });
+    expect(chips()).toHaveLength(1);
     cleanup();
-    show({ on: true, available: false, set: vi.fn() });
-    expect(screen.getByRole('switch').getAttribute('aria-disabled')).toBe('false');
+    show({ chosen: [], available: false, set: vi.fn() });
+    expect(chips().every((c) => c.disabled)).toBe(true);
+    cleanup();
+    show({ chosen: ['ja'], available: false, set: vi.fn() });
+    expect(chips().every((c) => !c.disabled)).toBe(true);
     cleanup();
   });
 
-  it('is not offered where not handed in, nor for one language on both sides', () => {
+  it('is not offered where not handed in', () => {
     show(undefined);
-    expect(screen.queryByRole('switch')).toBeNull();
+    expect(alsoSpeak()).toBeNull();
     cleanup();
-    show({ on: false, set: vi.fn() }, { source: 'ja', target: 'ja' });
-    expect(screen.queryByRole('switch')).toBeNull();
+  });
+
+  it('names what hears once where both sides have the same, and opens its settings when pressed', () => {
+    const open = vi.fn();
+    show({ chosen: [], set: vi.fn() }, { hearing: { mine: { name: 'Qwen3-ASR 0.6B', languages: null }, theirs: { name: 'Qwen3-ASR 0.6B', languages: null } }, detect: true, onOpenHearing: open });
+    const named = screen.getAllByRole('button', { name: 'fork.languageMenu.hearingBy' });
+    expect(named).toHaveLength(1);
+    fireEvent.click(named[0]);
+    expect(open).toHaveBeenCalledTimes(1);
+    cleanup();
+    show({ chosen: [], set: vi.fn() }, { hearing: { mine: { name: 'Apple Speech', languages: null }, theirs: { name: 'SenseVoice-Small', languages: ['ja', 'zh', 'en', 'ko', 'yue'] } }, detect: true });
+    expect(screen.getAllByRole('button', { name: 'fork.languageMenu.hearingBy' })).toHaveLength(2);
     cleanup();
   });
 });

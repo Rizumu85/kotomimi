@@ -483,6 +483,10 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "このパソコンのモデルを、ローカルネットワーク内のほかのデバイスで使えるようにします。相手のKotomimiの「別のデバイス」で検索すると、このパソコンが見つかります。使うモデルと言語は相手側で選びます。共有できるのはKotomimiを開いている間だけです。"
   },
+  "fork.languageMenu.alsoSpeak": {
+    "en": "I also speak",
+    "text": "私も話せる"
+  },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
     "text": "自動検出"
@@ -491,9 +495,17 @@
     "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
     "text": "現在の音声認識では言語を自動検出できません。Qwen3-ASR 1.7B GGUF または API モデルが必要です。"
   },
+  "fork.languageMenu.hearingBy": {
+    "en": "Speech recognition: {{name}}",
+    "text": "音声認識：{{name}}"
+  },
   "fork.languageMenu.mine": {
     "en": "My language",
     "text": "自分の言語"
+  },
+  "fork.languageMenu.moreLanguages": {
+    "en": "{{count}} more languages",
+    "text": "ほか{{count}}言語"
   },
   "fork.languageMenu.mostly": {
     "en": "Translate into what they mostly speak",
@@ -530,6 +542,10 @@
   "fork.languageMenu.theirs": {
     "en": "Their language",
     "text": "相手の言語"
+  },
+  "fork.languageMenu.theyMaySpeak": {
+    "en": "They may speak",
+    "text": "相手が話すかもしれない言語"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",
@@ -1119,6 +1135,10 @@
     "en": "Connect",
     "text": "接続"
   },
+  "models.detectsGroup": {
+    "en": "Detects the language",
+    "text": "言語を自動検出"
+  },
   "models.deviceCpu": {
     "en": "CPU",
     "text": "CPU"
@@ -1126,6 +1146,10 @@
   "models.deviceGpu": {
     "en": "GPU",
     "text": "GPU"
+  },
+  "models.namedGroup": {
+    "en": "Needs the language set",
+    "text": "言語の指定が必要"
   },
   "providers.gemini.name": {
     "en": "Google Gemini",

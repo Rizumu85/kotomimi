@@ -1066,7 +1066,9 @@
       "cancel": "Hủy",
       "accept": "Tôi hiểu — chỉ dùng phi thương mại",
       "acceptRestricted": "Tôi hiểu — chấp nhận giấy phép"
-    }
+    },
+    "detectsGroup": "Tự động nhận diện ngôn ngữ",
+    "namedGroup": "Cần chọn ngôn ngữ"
   },
   "notes": {
     "stageAsr": "nhận dạng giọng nói",
@@ -1761,8 +1763,6 @@
       "mutedNotHeard": "Bạn đang tắt mic trong VRChat, lời bạn nói sẽ không được nhận dạng."
     },
     "languageMenu": {
-      "speakBoth": "Tôi cũng nói {{language}}",
-      "speakBothHelp": "Khi bạn nói {{mine}}, lời nói được dịch sang {{language}}; khi bạn nói {{language}}, lời nói được dịch sang {{mine}}. Tính năng nhận dạng sẽ tự phân biệt hai ngôn ngữ.",
       "search": "Nhập để lọc ngôn ngữ",
       "none": "Không có ngôn ngữ nào tên như vậy",
       "pin": "Ghim {{name}} lên đầu",
@@ -1771,13 +1771,15 @@
       "unpinShort": "Bỏ ghim",
       "mine": "Ngôn ngữ của tôi",
       "theirs": "Ngôn ngữ của người kia",
-      "mostly": "Dịch sang ngôn ngữ người kia chủ yếu dùng",
       "detect": "Tự động phát hiện",
       "detectUnavailable": "Bộ nhận dạng giọng nói hiện tại không thể tự phát hiện ngôn ngữ. Cần Qwen3-ASR 1.7B GGUF hoặc mô hình API.",
-      "speakBothUnavailable": "Bộ nhận dạng giọng nói đã chọn không thể phân biệt {{mine}} và {{language}}. Hãy chọn chế độ ghép đôi Apple Speech với cả hai ngôn ngữ đã cài đặt, hoặc bộ nhận dạng có thể nhận biết cả hai ngôn ngữ.",
       "bestEffortSummary": "Ngôn ngữ được suy đoán từ văn bản và có thể bị nhận sai.",
       "bestEffortHelp": "Mô hình nhận dạng giọng nói đã chọn không cho biết ngôn ngữ của bản chép lời. Kotomimi suy đoán từ văn bản, nên việc phát hiện ngôn ngữ có thể kém tin cậy hơn.",
-      "pairHelp": "Chọn các ngôn ngữ mà bạn và người kia chủ yếu sử dụng. Lời của bạn được dịch sang ngôn ngữ của họ, và lời của họ sang ngôn ngữ của bạn."
+      "pairHelp": "Chọn các ngôn ngữ mà bạn và người kia chủ yếu sử dụng. Lời của bạn được dịch sang ngôn ngữ của họ, và lời của họ sang ngôn ngữ của bạn.",
+      "alsoSpeak": "Tôi cũng nói",
+      "theyMaySpeak": "Họ có thể nói",
+      "hearingBy": "Nhận dạng giọng nói: {{name}}",
+      "moreLanguages": "Thêm {{count}} ngôn ngữ"
     },
     "wizard": {
       "pathTitle": "Kotomimi tùy chọn kết hợp",

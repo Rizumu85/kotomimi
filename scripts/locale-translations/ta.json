@@ -483,6 +483,10 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "இந்தக் கணினியின் மாதிரிகளை உள்ளூர் வலையமைப்பில் உள்ள மற்ற சாதனங்கள் பயன்படுத்தலாம். மற்ற சாதனத்தின் Kotomimi-இல் \"மற்றொரு சாதனம்\" பகுதியில் தேடினால் இந்தக் கணினியைக் காணலாம். மாதிரியையும் மொழியையும் அங்கே தேர்ந்தெடுக்கலாம். Kotomimi திறந்திருக்கும் வரை மட்டுமே பகிர முடியும்."
   },
+  "fork.languageMenu.alsoSpeak": {
+    "en": "I also speak",
+    "text": "நானும் பேசுவேன்"
+  },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
     "text": "தானாகக் கண்டறி"
@@ -491,9 +495,17 @@
     "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
     "text": "தற்போதைய பேச்சறிதலால் மொழிகளைத் தானாகக் கண்டறிய முடியாது. Qwen3-ASR 1.7B GGUF அல்லது API மாதிரி தேவை."
   },
+  "fork.languageMenu.hearingBy": {
+    "en": "Speech recognition: {{name}}",
+    "text": "குரல் அறிதல்: {{name}}"
+  },
   "fork.languageMenu.mine": {
     "en": "My language",
     "text": "என் மொழி"
+  },
+  "fork.languageMenu.moreLanguages": {
+    "en": "{{count}} more languages",
+    "text": "மேலும் {{count}} மொழிகள்"
   },
   "fork.languageMenu.mostly": {
     "en": "Translate into what they mostly speak",
@@ -530,6 +542,10 @@
   "fork.languageMenu.theirs": {
     "en": "Their language",
     "text": "மற்றவரின் மொழி"
+  },
+  "fork.languageMenu.theyMaySpeak": {
+    "en": "They may speak",
+    "text": "அவர்கள் பேசக்கூடும்"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",
@@ -1119,6 +1135,10 @@
     "en": "Connect",
     "text": "இணை"
   },
+  "models.detectsGroup": {
+    "en": "Detects the language",
+    "text": "மொழியைத் தானாகக் கண்டறியும்"
+  },
   "models.deviceCpu": {
     "en": "CPU",
     "text": "CPU"
@@ -1126,6 +1146,10 @@
   "models.deviceGpu": {
     "en": "GPU",
     "text": "GPU"
+  },
+  "models.namedGroup": {
+    "en": "Needs the language set",
+    "text": "மொழியை அமைக்க வேண்டும்"
   },
   "providers.gemini.name": {
     "en": "Google Gemini",

@@ -1066,7 +1066,9 @@
       "cancel": "취소",
       "accept": "이해했습니다 — 비상업적 사용만",
       "acceptRestricted": "이해했습니다 — 라이선스에 동의"
-    }
+    },
+    "detectsGroup": "언어 자동 인식",
+    "namedGroup": "언어 지정 필요"
   },
   "notes": {
     "stageAsr": "음성 인식",
@@ -1761,8 +1763,6 @@
       "mutedNotHeard": "VRChat에서 마이크가 꺼져 있어 내 말을 인식하지 않아요."
     },
     "languageMenu": {
-      "speakBoth": "{{language}} 언어로도 말하기",
-      "speakBothHelp": "{{mine}} 언어로 말하면 {{language}} 언어로, {{language}} 언어로 말하면 {{mine}} 언어로 번역해요. 음성 인식이 두 언어를 자동으로 구분해요.",
       "search": "언어 검색",
       "none": "해당 이름의 언어가 없어요",
       "pin": "{{name}} 맨 위에 고정",
@@ -1771,13 +1771,15 @@
       "unpinShort": "고정 해제",
       "mine": "내 언어",
       "theirs": "상대방 언어",
-      "mostly": "상대방이 주로 쓰는 언어 번역",
       "detect": "자동 감지",
       "detectUnavailable": "현재 음성 인식은 언어 자동 감지를 지원하지 않아요. Qwen3-ASR 1.7B GGUF 또는 API 모델이 필요해요.",
-      "speakBothUnavailable": "선택한 음성 인식은 {{mine}} 언어와 {{language}} 언어를 구분하지 못해요. 두 언어가 모두 설치된 Apple Speech를 언어별로 함께 사용하거나, 두 언어를 모두 구분할 수 있는 음성 인식을 선택하세요.",
       "bestEffortSummary": "언어는 텍스트로 추정하므로 잘못 판별될 수 있습니다.",
       "bestEffortHelp": "선택한 음성 인식 모델은 받아쓴 텍스트의 언어를 알려 주지 않습니다. Kotomimi가 텍스트를 바탕으로 추정하므로 언어 감지의 정확도가 낮아질 수 있습니다.",
-      "pairHelp": "나와 상대방이 주로 쓰는 언어를 선택하세요. 내 말은 상대방의 언어로, 상대방의 말은 내 언어로 번역됩니다."
+      "pairHelp": "나와 상대방이 주로 쓰는 언어를 선택하세요. 내 말은 상대방의 언어로, 상대방의 말은 내 언어로 번역됩니다.",
+      "alsoSpeak": "나도 말할 수 있는 언어",
+      "theyMaySpeak": "상대방이 말할 수 있는 언어",
+      "hearingBy": "음성 인식: {{name}}",
+      "moreLanguages": "언어 {{count}}개 더"
     },
     "wizard": {
       "pathTitle": "Kotomimi 자유 조합",

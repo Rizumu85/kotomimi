@@ -27,7 +27,10 @@ export interface NativeModel {
   languages: readonly string[];
   /** How long one recognition of it may run, where that is not the default (`nativeAsr.ts`). */
   limits?: Partial<NativeLimits>;
-  /** It finds the language itself when told none: it can hear a leg whose language is left to be detected. */
+  /**
+   * It finds the language itself when told none: it can hear a leg whose language is left to be detected — among its
+   * own `languages` (SenseVoice's five: told none, it writes any other as one of them).
+   */
   detects?: boolean;
 }
 
@@ -86,14 +89,15 @@ export const NATIVE_MODELS: readonly NativeModel[] = [
   { id: 'r2t2-q8', name: 'Confucius4 R2T2 GGUF', bytes: 2477512064, languages: ['ja', 'zh', 'en', 'ko', 'fr', 'de', 'it', 'pt', 'ru', 'es', 'ar'] },
   // The lightest and the quickest: 0.3-0.4 GB of video memory, a stretch read in a twentieth of a second, and as
   // right as the small Qwen3 below. Read a stretch at a time, as that one is, and begun again as often: its
-  // measurement is of stretches cut that way. Five languages; told another it writes the speech down as one of its
-  // five, and it has no way to say that what it hears is none of them — so it is not left to detect the other
-  // side's language, which may be any.
-  { id: 'sensevoice-small-q8', name: 'SenseVoice-Small GGUF', bytes: 254211200, languages: SENSEVOICE_LANGUAGES, limits: WINDOW_LIMITS },
+  // measurement is of stretches cut that way. Five languages, and told none it tells them apart (measured
+  // 2026-11-06 on whole clips of each); it has no way to say that what it hears is none of them, and writes any other
+  // language as one of its five — so it detects among those five, and the settings say which they are.
+  { id: 'sensevoice-small-q8', name: 'SenseVoice-Small GGUF', bytes: 254211200, languages: SENSEVOICE_LANGUAGES, limits: WINDOW_LIMITS, detects: true },
   // The small one of thirty languages: for a computer that runs a game beside it. Two thirds of the video memory of
   // the two at the top, and about 22 % of the characters wrong where the 1.7B has 16 (measured 2026-10-06 on the
-  // stretches the app cuts). Left to detect the language it mixed Spanish with Portuguese: it is not offered for that.
-  { id: 'qwen3-asr-0.6b-q8', name: 'Qwen3-ASR 0.6B GGUF', bytes: 1151272416, languages: QWEN_LANGUAGES, limits: WINDOW_LIMITS },
+  // stretches the app cuts). Told none it wrote Korean, Japanese, English, Chinese, Spanish, Portuguese, French,
+  // German and Russian each in its own language, as the 1.7B did (measured 2026-11-06 on whole clips of each).
+  { id: 'qwen3-asr-0.6b-q8', name: 'Qwen3-ASR 0.6B GGUF', bytes: 1151272416, languages: QWEN_LANGUAGES, limits: WINDOW_LIMITS, detects: true },
   // The last choice: half the video memory of the small Qwen3 again, and about 27 % of the characters wrong in the
   // app — of the sentences the app cuts, it writes nothing for one short one in five. What it has over
   // SenseVoice-Small, which is lighter and more right, is its languages.

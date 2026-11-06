@@ -479,6 +479,10 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "Benarkan peranti lain pada rangkaian setempat menggunakan model komputer ini. Pada peranti lain, cari komputer ini di bawah \"Peranti lain\" dalam Kotomimi, kemudian pilih model dan bahasa di sana. Perkongsian hanya berfungsi semasa Kotomimi dibuka."
   },
+  "fork.languageMenu.alsoSpeak": {
+    "en": "I also speak",
+    "text": "Saya juga boleh bertutur dalam"
+  },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
     "text": "Kesan automatik"
@@ -487,9 +491,17 @@
     "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
     "text": "Pengecaman pertuturan semasa tidak boleh mengesan bahasa secara automatik. Qwen3-ASR 1.7B GGUF atau model API diperlukan."
   },
+  "fork.languageMenu.hearingBy": {
+    "en": "Speech recognition: {{name}}",
+    "text": "Pengecaman pertuturan: {{name}}"
+  },
   "fork.languageMenu.mine": {
     "en": "My language",
     "text": "Bahasa saya"
+  },
+  "fork.languageMenu.moreLanguages": {
+    "en": "{{count}} more languages",
+    "text": "{{count}} bahasa lagi"
   },
   "fork.languageMenu.mostly": {
     "en": "Translate into what they mostly speak",
@@ -526,6 +538,10 @@
   "fork.languageMenu.theirs": {
     "en": "Their language",
     "text": "Bahasa pihak lain"
+  },
+  "fork.languageMenu.theyMaySpeak": {
+    "en": "They may speak",
+    "text": "Mereka mungkin bercakap"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",
@@ -1115,6 +1131,10 @@
     "en": "Connect",
     "text": "Sambung"
   },
+  "models.detectsGroup": {
+    "en": "Detects the language",
+    "text": "Boleh mengesan bahasa secara automatik"
+  },
   "models.deviceAuto": {
     "en": "Auto",
     "text": "Automatik"
@@ -1142,6 +1162,10 @@
   "models.multiLanguage": {
     "en": "Multi",
     "text": "Berbilang bahasa"
+  },
+  "models.namedGroup": {
+    "en": "Needs the language set",
+    "text": "Perlu tetapkan bahasa"
   },
   "providers.gemini.name": {
     "en": "Google Gemini",

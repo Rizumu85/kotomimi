@@ -56,9 +56,9 @@ describe('LanguageTags', () => {
       expect(getByTestId('tooltip-content').querySelector('.model-card__lang-list')).toBeNull();
     });
 
-  it('two or more languages: one Multi chip, the tooltip lists them by name with a count', () => {
+  it('two to five languages: one chip that names them, the tooltip lists them by name with a count', () => {
     const { container, getByTestId } = render(<LanguageTags languages={['ja', 'en', 'zh', 'cantonese']} />);
-    expect(tags(container)).toEqual(['Multi']);
+    expect(tags(container)).toEqual(['JA EN ZH CANTONESE']);
     expect(container.querySelector('.model-card__lang-tag--multi')).not.toBeNull();
     const tip = getByTestId('tooltip-content');
     expect(tip.querySelector('.model-card__lang-list-count')).toHaveTextContent('4 languages');
@@ -67,9 +67,14 @@ describe('LanguageTags', () => {
 
   it('duplicates collapse and a stray "multilingual" marker is not listed as a language', () => {
     const { container, getByTestId } = render(<LanguageTags languages={['en', 'en', 'multilingual', 'ja']} />);
-    expect(tags(container)).toEqual(['Multi']);
+    expect(tags(container)).toEqual(['EN JA']);
     const tip = getByTestId('tooltip-content');
     expect(tip.querySelector('.model-card__lang-list-count')).toHaveTextContent('2 languages');
     expect(tip).toHaveTextContent('English, 日本語');
+  });
+
+  it('more than five: one chip that says how many', () => {
+    const { container } = render(<LanguageTags languages={['ja', 'en', 'zh', 'ko', 'fr', 'de']} />);
+    expect(tags(container)).toEqual(['6 languages']);
   });
 });

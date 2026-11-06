@@ -1066,7 +1066,9 @@
       "cancel": "Cancelar",
       "accept": "Entendi — apenas uso não comercial",
       "acceptRestricted": "Entendi — aceito a licença"
-    }
+    },
+    "detectsGroup": "Reconhece o idioma automaticamente",
+    "namedGroup": "Requer idioma definido"
   },
   "notes": {
     "stageAsr": "reconhecimento de fala",
@@ -1761,8 +1763,6 @@
       "mutedNotHeard": "Microfone silenciado no VRChat: sua fala não será reconhecida."
     },
     "languageMenu": {
-      "speakBoth": "Também falo {{language}}",
-      "speakBothHelp": "Quando você fala {{mine}}, a tradução é para {{language}}; quando fala {{language}}, é para {{mine}}. O reconhecimento distingue os dois idiomas automaticamente.",
       "search": "Digite para buscar um idioma",
       "none": "Nenhum idioma com esse nome",
       "pin": "Fixar {{name}} no topo",
@@ -1771,13 +1771,15 @@
       "unpinShort": "Desafixar",
       "mine": "Meu idioma",
       "theirs": "Idioma da outra pessoa",
-      "mostly": "Traduzir para o idioma que a outra pessoa mais fala",
       "detect": "Detectar automaticamente",
       "detectUnavailable": "O reconhecimento de fala atual não detecta idiomas automaticamente. É necessário usar Qwen3-ASR 1.7B GGUF ou um modelo via API.",
-      "speakBothUnavailable": "O reconhecimento de fala selecionado não distingue {{mine}} de {{language}}. Escolha o Apple Speech em par, com os dois idiomas instalados, ou um reconhecimento que identifique ambos.",
       "bestEffortSummary": "O idioma é deduzido do texto e pode ser identificado incorretamente.",
       "bestEffortHelp": "O modelo de reconhecimento de fala selecionado não informa o idioma da transcrição. O Kotomimi o estima a partir do texto, por isso a detecção do idioma pode ser menos confiável.",
-      "pairHelp": "Escolha os idiomas que você e a outra pessoa mais usam. Sua fala é traduzida para o idioma dela, e a dela para o seu."
+      "pairHelp": "Escolha os idiomas que você e a outra pessoa mais usam. Sua fala é traduzida para o idioma dela, e a dela para o seu.",
+      "alsoSpeak": "Também falo",
+      "theyMaySpeak": "A outra pessoa pode falar",
+      "hearingBy": "Reconhecimento de fala: {{name}}",
+      "moreLanguages": "Mais {{count}} idiomas"
     },
     "wizard": {
       "pathTitle": "Kotomimi do seu jeito",

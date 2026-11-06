@@ -1066,7 +1066,9 @@
       "cancel": "Annuler",
       "accept": "J’ai compris — usage non commercial uniquement",
       "acceptRestricted": "J’ai compris — j’accepte la licence"
-    }
+    },
+    "detectsGroup": "Détecte la langue",
+    "namedGroup": "Langue à sélectionner"
   },
   "notes": {
     "stageAsr": "reconnaissance vocale",
@@ -1761,8 +1763,6 @@
       "mutedNotHeard": "Micro coupé dans VRChat : vos paroles ne sont pas reconnues."
     },
     "languageMenu": {
-      "speakBoth": "Je parle aussi {{language}}",
-      "speakBothHelp": "Quand vous parlez {{mine}}, vos paroles sont traduites en {{language}} ; quand vous parlez {{language}}, elles sont traduites en {{mine}}. La reconnaissance vocale distingue automatiquement les deux langues.",
       "search": "Rechercher une langue",
       "none": "Aucune langue de ce nom",
       "pin": "Épingler {{name}} en haut",
@@ -1771,13 +1771,15 @@
       "unpinShort": "Détacher",
       "mine": "Ma langue",
       "theirs": "Langue de l’autre",
-      "mostly": "Traduire dans sa langue principale",
       "detect": "Détection automatique",
       "detectUnavailable": "La reconnaissance vocale utilisée ne peut pas détecter les langues automatiquement. Il faut Qwen3-ASR 1.7B GGUF ou un modèle via API.",
-      "speakBothUnavailable": "La reconnaissance vocale choisie ne peut pas distinguer {{mine}} de {{language}}. Choisissez Apple Speech en mode bilingue avec les deux langues installées, ou un moteur capable d’identifier ces deux langues.",
       "bestEffortSummary": "La langue est déduite du texte et peut être mal identifiée.",
       "bestEffortHelp": "Le modèle de reconnaissance vocale sélectionné ne précise pas la langue de la transcription. Kotomimi l’estime à partir du texte ; la détection de la langue peut donc être moins fiable.",
-      "pairHelp": "Choisissez les langues que vous et votre interlocuteur utilisez le plus. Vos propos sont traduits dans sa langue, et les siens dans la vôtre."
+      "pairHelp": "Choisissez les langues que vous et votre interlocuteur utilisez le plus. Vos propos sont traduits dans sa langue, et les siens dans la vôtre.",
+      "alsoSpeak": "Je parle aussi",
+      "theyMaySpeak": "L’autre personne peut parler",
+      "hearingBy": "Reconnaissance vocale : {{name}}",
+      "moreLanguages": "Encore {{count}} langues"
     },
     "wizard": {
       "pathTitle": "Kotomimi à la carte",

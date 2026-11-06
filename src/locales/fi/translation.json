@@ -1066,7 +1066,9 @@
       "cancel": "Peruuta",
       "accept": "Ymmärrän — vain ei-kaupallinen käyttö",
       "acceptRestricted": "Ymmärrän — hyväksyn lisenssin"
-    }
+    },
+    "detectsGroup": "Tunnistaa kielen",
+    "namedGroup": "Kieli on määritettävä"
   },
   "notes": {
     "stageAsr": "puheentunnistus",
@@ -1761,8 +1763,6 @@
       "mutedNotHeard": "Olet mykistetty VRChatissa. Puhettasi ei tunnisteta."
     },
     "languageMenu": {
-      "speakBoth": "Puhun myös kieltä {{language}}",
-      "speakBothHelp": "Kun puhut kieltä {{mine}}, käännöskieli on {{language}}. Kun puhut kieltä {{language}}, käännöskieli on {{mine}}. Puheentunnistus erottaa kielet automaattisesti.",
       "search": "Hae kieltä kirjoittamalla",
       "none": "Tämännimistä kieltä ei löydy",
       "pin": "Kiinnitä {{name}} ylimmäksi",
@@ -1771,13 +1771,15 @@
       "unpinShort": "Poista kiinnitys",
       "mine": "Oma kieleni",
       "theirs": "Toisen kieli",
-      "mostly": "Käännä toisen pääasialliselle puhekielelle",
       "detect": "Tunnista automaattisesti",
       "detectUnavailable": "Nykyinen puheentunnistus ei tunnista kieltä automaattisesti. Siihen tarvitaan Qwen3-ASR 1.7B GGUF tai API-malli.",
-      "speakBothUnavailable": "Valittu puheentunnistus ei erota kieliä {{mine}} ja {{language}} toisistaan. Valitse Apple Speech kahdelle kielelle ja asenna molemmat kielet tai käytä puheentunnistusta, joka tunnistaa molemmat kielet.",
       "bestEffortSummary": "Kieli päätellään tekstistä, ja se voi tunnistua väärin.",
       "bestEffortHelp": "Valittu puheentunnistusmalli ei ilmoita litteroinnin kieltä. Kotomimi arvioi sen tekstin perusteella, joten kielen tunnistus voi olla epävarmempaa.",
-      "pairHelp": "Valitse kielet, joita sinä ja toinen henkilö pääasiassa käytätte. Puheesi käännetään hänen kielelleen ja hänen puheensa sinun kielellesi."
+      "pairHelp": "Valitse kielet, joita sinä ja toinen henkilö pääasiassa käytätte. Puheesi käännetään hänen kielelleen ja hänen puheensa sinun kielellesi.",
+      "alsoSpeak": "Puhun myös",
+      "theyMaySpeak": "Toinen saattaa puhua",
+      "hearingBy": "Puheentunnistus: {{name}}",
+      "moreLanguages": "{{count}} muuta kieltä"
     },
     "wizard": {
       "pathTitle": "Kotomimi omilla valinnoilla",

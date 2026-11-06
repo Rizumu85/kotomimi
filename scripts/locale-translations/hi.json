@@ -483,6 +483,10 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "इस कंप्यूटर के मॉडल लोकल नेटवर्क के अन्य डिवाइस को इस्तेमाल करने दें। दूसरे डिवाइस पर Kotomimi में \"दूसरा डिवाइस\" के तहत खोजने पर यह कंप्यूटर मिल जाएगा। मॉडल और भाषा वहीं चुने जाते हैं। साझा करने के लिए Kotomimi खुला रहना चाहिए।"
   },
+  "fork.languageMenu.alsoSpeak": {
+    "en": "I also speak",
+    "text": "मैं भी बोलता/बोलती हूँ"
+  },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
     "text": "अपने आप पहचानें"
@@ -491,9 +495,17 @@
     "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
     "text": "मौजूदा आवाज़ पहचान भाषाओं को अपने आप नहीं पहचान सकती। इसके लिए Qwen3-ASR 1.7B GGUF या API मॉडल चाहिए।"
   },
+  "fork.languageMenu.hearingBy": {
+    "en": "Speech recognition: {{name}}",
+    "text": "वाक् पहचान: {{name}}"
+  },
   "fork.languageMenu.mine": {
     "en": "My language",
     "text": "मेरी भाषा"
+  },
+  "fork.languageMenu.moreLanguages": {
+    "en": "{{count}} more languages",
+    "text": "और {{count}} भाषाएँ"
   },
   "fork.languageMenu.mostly": {
     "en": "Translate into what they mostly speak",
@@ -530,6 +542,10 @@
   "fork.languageMenu.theirs": {
     "en": "Their language",
     "text": "सामने वाले की भाषा"
+  },
+  "fork.languageMenu.theyMaySpeak": {
+    "en": "They may speak",
+    "text": "वे शायद बोलते हैं"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",
@@ -1119,6 +1135,10 @@
     "en": "Connect",
     "text": "कनेक्ट करें"
   },
+  "models.detectsGroup": {
+    "en": "Detects the language",
+    "text": "भाषा अपने-आप पहचानता है"
+  },
   "models.deviceCpu": {
     "en": "CPU",
     "text": "CPU"
@@ -1126,6 +1146,10 @@
   "models.deviceGpu": {
     "en": "GPU",
     "text": "GPU"
+  },
+  "models.namedGroup": {
+    "en": "Needs the language set",
+    "text": "भाषा चुनना ज़रूरी है"
   },
   "providers.gemini.name": {
     "en": "Google Gemini",

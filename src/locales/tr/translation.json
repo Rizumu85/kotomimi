@@ -1066,7 +1066,9 @@
       "cancel": "İptal",
       "accept": "Anladım — yalnızca ticari olmayan kullanım",
       "acceptRestricted": "Anladım — lisansı kabul ediyorum"
-    }
+    },
+    "detectsGroup": "Dili otomatik algılar",
+    "namedGroup": "Dil belirtilmeli"
   },
   "notes": {
     "stageAsr": "konuşma tanıma",
@@ -1761,8 +1763,6 @@
       "mutedNotHeard": "VRChat'te sessiz: söyledikleriniz tanınmaz."
     },
     "languageMenu": {
-      "speakBoth": "Ben de {{language}} konuşuyorum",
-      "speakBothHelp": "{{mine}} konuştuğunuzda {{language}} diline, {{language}} konuştuğunuzda {{mine}} diline çevrilir. Tanıma özelliği bu iki dili otomatik olarak ayırt eder.",
       "search": "Dil bulmak için yazın",
       "none": "Bu ada sahip dil yok",
       "pin": "{{name}} dilini üste sabitle",
@@ -1771,13 +1771,15 @@
       "unpinShort": "Sabitlemeyi kaldır",
       "mine": "Benim dilim",
       "theirs": "Karşı tarafın dili",
-      "mostly": "Karşı tarafın çoğunlukla konuştuğu dile çevir",
       "detect": "Otomatik algıla",
       "detectUnavailable": "Kullanılan konuşma tanıma özelliği dilleri algılayamıyor. Qwen3-ASR 1.7B GGUF veya bir API modeli gerekiyor.",
-      "speakBothUnavailable": "Seçili konuşma tanıyıcı {{mine}} ile {{language}} dillerini ayırt edemiyor. Her iki dil de yüklü olan eşleştirilmiş Apple Speech'i ya da iki dili tanıyabilen bir tanıyıcıyı seçin.",
       "bestEffortSummary": "Dil metinden çıkarılır ve yanlış belirlenebilir.",
       "bestEffortHelp": "Seçilen konuşma tanıma modeli, dökümün dilini bildirmez. Kotomimi dili metinden tahmin eder; bu nedenle dil algılama daha az güvenilir olabilir.",
-      "pairHelp": "Sizin ve karşınızdakinin en çok kullandığı dilleri seçin. Söyledikleriniz onun diline, onun söyledikleri sizin dilinize çevrilir."
+      "pairHelp": "Sizin ve karşınızdakinin en çok kullandığı dilleri seçin. Söyledikleriniz onun diline, onun söyledikleri sizin dilinize çevrilir.",
+      "alsoSpeak": "Ben de konuşuyorum",
+      "theyMaySpeak": "Karşı taraf konuşabilir",
+      "hearingBy": "Ses tanıma: {{name}}",
+      "moreLanguages": "{{count}} dil daha"
     },
     "wizard": {
       "pathTitle": "Kotomimi İş Akışı",

@@ -479,6 +479,10 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "Надає іншим пристроям у локальній мережі доступ до моделей цього комп’ютера. На іншому пристрої знайдіть цей комп’ютер у розділі «Інший пристрій» у Kotomimi та виберіть там модель і мову. Спільний доступ працює, поки Kotomimi відкрито."
   },
+  "fork.languageMenu.alsoSpeak": {
+    "en": "I also speak",
+    "text": "Я також розмовляю"
+  },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
     "text": "Визначати автоматично"
@@ -487,9 +491,17 @@
     "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
     "text": "Поточна модель розпізнавання мовлення не може автоматично визначати мову. Потрібна Qwen3-ASR 1.7B GGUF або модель через API."
   },
+  "fork.languageMenu.hearingBy": {
+    "en": "Speech recognition: {{name}}",
+    "text": "Розпізнавання мовлення: {{name}}"
+  },
   "fork.languageMenu.mine": {
     "en": "My language",
     "text": "Моя мова"
+  },
+  "fork.languageMenu.moreLanguages": {
+    "en": "{{count}} more languages",
+    "text": "Ще {{count}} мов"
   },
   "fork.languageMenu.mostly": {
     "en": "Translate into what they mostly speak",
@@ -526,6 +538,10 @@
   "fork.languageMenu.theirs": {
     "en": "Their language",
     "text": "Мова співрозмовника"
+  },
+  "fork.languageMenu.theyMaySpeak": {
+    "en": "They may speak",
+    "text": "Співрозмовник може говорити"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",
@@ -1115,6 +1131,10 @@
     "en": "Connect",
     "text": "Підключитися"
   },
+  "models.detectsGroup": {
+    "en": "Detects the language",
+    "text": "Автоматично визначає мову"
+  },
   "models.deviceCpu": {
     "en": "CPU",
     "text": "Процесор"
@@ -1122,6 +1142,10 @@
   "models.deviceGpu": {
     "en": "GPU",
     "text": "Графічний процесор"
+  },
+  "models.namedGroup": {
+    "en": "Needs the language set",
+    "text": "Потрібно вказати мову"
   },
   "providers.gemini.name": {
     "en": "Google Gemini",

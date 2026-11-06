@@ -66,7 +66,7 @@ R2T2 is the only `mode: 'streaming'` model. Streaming costs it far more than rea
 
 A language resolves (`nativePicked`) to the model chosen for it, else the model in use if it hears it, else the first downloaded that hears it, else none. An explicit choice is kept: readiness reports it missing rather than substituting. Two downloaded-engine models in one run are refused (`native_two_models`); Apple Speech can run beside the downloaded engine.
 
-Only Qwen3-ASR 1.7B has `detects`. R2T2 writes the first words in the wrong language, 0.6B mixed Spanish with Portuguese, Nemotron wrote Japanese as an English letter, and SenseVoice cannot say a language is not one of its five.
+Both Qwen3-ASR sizes and SenseVoice have `detects`; SenseVoice only among its five, writing any other language as one of them. R2T2 writes the first words in the wrong language and Nemotron wrote Japanese as an English letter.
 
 ## Qwen3-ASR windowed reading
 

@@ -1066,7 +1066,9 @@
       "cancel": "Kanselahin",
       "accept": "Nauunawaan ko — hindi pangkomersyo lamang",
       "acceptRestricted": "Nauunawaan ko — tinatanggap ko ang lisensya"
-    }
+    },
+    "detectsGroup": "Awtomatikong nakikilala ang wika",
+    "namedGroup": "Kailangang itakda ang wika"
   },
   "notes": {
     "stageAsr": "pagkilala sa pagsasalita",
@@ -1761,8 +1763,6 @@
       "mutedNotHeard": "Naka-mute sa VRChat: hindi kikilalanin ang sinasabi mo."
     },
     "languageMenu": {
-      "speakBoth": "Nagsasalita rin ako ng {{language}}",
-      "speakBothHelp": "Kapag {{mine}} ang sinasalita mo, isasalin ito sa {{language}}; kapag {{language}}, sa {{mine}}. Awtomatikong makikilala ang dalawang wika.",
       "search": "Mag-type para maghanap ng wika",
       "none": "Walang wikang ganyan ang pangalan",
       "pin": "I-pin ang {{name}} sa itaas",
@@ -1771,13 +1771,15 @@
       "unpinShort": "Alisin sa itaas",
       "mine": "Wika ko",
       "theirs": "Wika ng kausap",
-      "mostly": "Isalin sa wikang karaniwang ginagamit ng kausap",
       "detect": "Awtomatikong tukuyin",
       "detectUnavailable": "Hindi awtomatikong matukoy ng kasalukuyang pagkilala sa pananalita ang wika. Kailangan ng Qwen3-ASR 1.7B GGUF o isang modelong API.",
-      "speakBothUnavailable": "Hindi mapag-iba ng napiling pagkilala sa pananalita ang {{mine}} at {{language}}. Piliin ang magkaparis na Apple Speech na parehong naka-install ang dalawang wika, o isang pagkilala sa pananalita na kayang tumukoy sa parehong wika.",
       "bestEffortSummary": "Hinuhulaan ang wika mula sa teksto at maaaring magkamali.",
       "bestEffortHelp": "Hindi ibinibigay ng napiling modelo ng pagkilala sa pagsasalita ang wika ng transkripsiyon. Tinatantiya ito ng Kotomimi mula sa teksto, kaya maaaring hindi gaanong maaasahan ang pagtukoy sa wika.",
-      "pairHelp": "Piliin ang mga wikang pangunahing ginagamit mo at ng kausap mo. Isasalin ang sinasabi mo sa wika niya, at ang sinasabi niya sa wika mo."
+      "pairHelp": "Piliin ang mga wikang pangunahing ginagamit mo at ng kausap mo. Isasalin ang sinasabi mo sa wika niya, at ang sinasabi niya sa wika mo.",
+      "alsoSpeak": "Marunong din ako ng",
+      "theyMaySpeak": "Maaaring magsalita sila ng",
+      "hearingBy": "Pagkilala sa pananalita: {{name}}",
+      "moreLanguages": "{{count}} pang wika"
     },
     "wizard": {
       "pathTitle": "Kotomimi na malayang pagsasamahin",

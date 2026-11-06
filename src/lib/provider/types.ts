@@ -102,6 +102,12 @@ export interface CredentialsMissing { missing: string; code?: string; params?: R
 
 export interface ModelOption { id: string }
 
+/** Fork: what hears a side (`languages.hearing`): its name, and the languages it tells apart (null: every one offered). */
+export interface Hearer {
+  name: string;
+  languages: readonly string[] | null;
+}
+
 /**
  * Fork: one kind of language detection (`languages.detection`): whether a run does it, whether it can be had, and the
  * settings that turn it on — moving what hears to what can detect, where that takes it — or off.
@@ -411,6 +417,17 @@ export interface Provider<S, K extends { missing?: never } & object, C extends {
      * (`src/lib/session/follow.ts`): where their language is left to be detected. Absent: it never follows.
      */
     follows?(s: S, models: readonly ModelOption[], pair: LanguagePair): boolean;
+    /**
+     * Fork: what hears each side, as the language section names it beside the languages it can hear (`Hearer`).
+     * Absent, or a side absent: not named.
+     */
+    hearing?(s: S, models: readonly ModelOption[], pair: LanguagePair): { mine?: Hearer; theirs?: Hearer };
+    /**
+     * Fork: the languages the user speaks besides their own ("我也会说"): those picked; those that can be (null: every
+     * language offered); whether what hears them can tell them from their own; and the settings a pick writes. Absent:
+     * not offered.
+     */
+    speakAlso?(s: S, models: readonly ModelOption[], pair: LanguagePair): { chosen: readonly string[]; offered: readonly string[] | null; available: boolean; set(chosen: readonly string[]): Partial<S> };
   };
 
   // the only capabilities generic code reads

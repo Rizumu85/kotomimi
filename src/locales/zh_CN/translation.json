@@ -1066,7 +1066,9 @@
       "cancel": "取消",
       "accept": "我已了解——仅限非商业用途",
       "acceptRestricted": "我已了解——接受该许可"
-    }
+    },
+    "detectsGroup": "能自动识别语言",
+    "namedGroup": "要指定语言"
   },
   "notes": {
     "stageAsr": "语音识别",
@@ -1798,8 +1800,6 @@
       "muted": "VRChat 已静音"
     },
     "languageMenu": {
-      "speakBoth": "我也说{{language}}",
-      "speakBothHelp": "你说{{mine}}时翻成{{language}}，说{{language}}时翻成{{mine}}。识别会自动分辨这两种语言。",
       "search": "输入筛选语言",
       "none": "没有这个名字的语言",
       "pin": "把{{name}}置顶",
@@ -1808,13 +1808,15 @@
       "unpinShort": "取消置顶",
       "mine": "我的语言",
       "theirs": "对方的语言",
-      "mostly": "翻译对方主要说的语言",
       "detect": "自动检测",
       "detectUnavailable": "当前的语音识别不能自动检测语言，需要 Qwen3-ASR 1.7B GGUF 或 API 模型。",
-      "speakBothUnavailable": "The selected speech recognizer cannot distinguish {{mine}} from {{language}}. Choose paired Apple Speech with both languages installed, or a recognizer that identifies both languages.",
       "bestEffortSummary": "根据文本推测语言，可能判断不准",
       "bestEffortHelp": "当前选择的语音识别模型不会返回转写文本的语言。Kotomimi 会根据文本推测，因此语言判断可能不够准确。",
-      "pairHelp": "选择你和对方主要使用的语言。你说的话默认翻成对方的语言，对方的话翻成你的语言。"
+      "pairHelp": "选择你和对方主要使用的语言。你说的话默认翻成对方的语言，对方的话翻成你的语言。",
+      "alsoSpeak": "我也会说",
+      "theyMaySpeak": "对方可能说",
+      "hearingBy": "语音识别：{{name}}",
+      "moreLanguages": "还有 {{count}} 种语言"
     },
     "wizard": {
       "pathTitle": "Kotomimi 自由搭配",

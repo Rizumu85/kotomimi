@@ -535,6 +535,10 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "Ipinapahiram ang mga modelo ng computer na ito sa ibang device sa iyong network. Sa Kotomimi ng ibang device, hanapin ang computer na ito sa \"Ibang device\" at doon piliin ang modelo at wika. Gumagana lang habang bukas ang Kotomimi."
   },
+  "fork.languageMenu.alsoSpeak": {
+    "en": "I also speak",
+    "text": "Marunong din ako ng"
+  },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
     "text": "Awtomatikong tukuyin"
@@ -543,9 +547,17 @@
     "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
     "text": "Hindi awtomatikong matukoy ng kasalukuyang pagkilala sa pananalita ang wika. Kailangan ng Qwen3-ASR 1.7B GGUF o isang modelong API."
   },
+  "fork.languageMenu.hearingBy": {
+    "en": "Speech recognition: {{name}}",
+    "text": "Pagkilala sa pananalita: {{name}}"
+  },
   "fork.languageMenu.mine": {
     "en": "My language",
     "text": "Wika ko"
+  },
+  "fork.languageMenu.moreLanguages": {
+    "en": "{{count}} more languages",
+    "text": "{{count}} pang wika"
   },
   "fork.languageMenu.mostly": {
     "en": "Translate into what they mostly speak",
@@ -582,6 +594,10 @@
   "fork.languageMenu.theirs": {
     "en": "Their language",
     "text": "Wika ng kausap"
+  },
+  "fork.languageMenu.theyMaySpeak": {
+    "en": "They may speak",
+    "text": "Maaaring magsalita sila ng"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",
@@ -1203,6 +1219,10 @@
     "en": "Compute device",
     "text": "Device sa pagkukuwenta"
   },
+  "models.detectsGroup": {
+    "en": "Detects the language",
+    "text": "Awtomatikong nakikilala ang wika"
+  },
   "models.deviceAuto": {
     "en": "Auto",
     "text": "Awtomatiko"
@@ -1250,6 +1270,10 @@
   "models.multiLanguage": {
     "en": "Multi",
     "text": "Maraming wika"
+  },
+  "models.namedGroup": {
+    "en": "Needs the language set",
+    "text": "Kailangang itakda ang wika"
   },
   "models.online": {
     "en": "Online",

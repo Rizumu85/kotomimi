@@ -495,6 +495,10 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "Condivide i modelli di questo computer con altri dispositivi nella rete locale. Sull'altro dispositivo, cerca questo computer in \"Un altro dispositivo\" in Kotomimi e scegli lì il modello e la lingua. La condivisione funziona solo mentre Kotomimi è aperto."
   },
+  "fork.languageMenu.alsoSpeak": {
+    "en": "I also speak",
+    "text": "Parlo anche"
+  },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
     "text": "Rilevamento automatico"
@@ -503,9 +507,17 @@
     "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
     "text": "Il riconoscimento vocale in uso non può rilevare automaticamente le lingue. Serve Qwen3-ASR 1.7B GGUF o un modello API."
   },
+  "fork.languageMenu.hearingBy": {
+    "en": "Speech recognition: {{name}}",
+    "text": "Riconoscimento vocale: {{name}}"
+  },
   "fork.languageMenu.mine": {
     "en": "My language",
     "text": "La mia lingua"
+  },
+  "fork.languageMenu.moreLanguages": {
+    "en": "{{count}} more languages",
+    "text": "Altre {{count}} lingue"
   },
   "fork.languageMenu.mostly": {
     "en": "Translate into what they mostly speak",
@@ -542,6 +554,10 @@
   "fork.languageMenu.theirs": {
     "en": "Their language",
     "text": "La lingua degli altri"
+  },
+  "fork.languageMenu.theyMaySpeak": {
+    "en": "They may speak",
+    "text": "Potrebbero parlare"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",
@@ -1147,6 +1163,10 @@
     "en": "No",
     "text": "No"
   },
+  "models.detectsGroup": {
+    "en": "Detects the language",
+    "text": "Rileva la lingua"
+  },
   "models.deviceAuto": {
     "en": "Auto",
     "text": "Automatico"
@@ -1170,6 +1190,10 @@
   "models.multiLanguage": {
     "en": "Multi",
     "text": "Multilingue"
+  },
+  "models.namedGroup": {
+    "en": "Needs the language set",
+    "text": "Richiede una lingua impostata"
   },
   "models.online": {
     "en": "Online",

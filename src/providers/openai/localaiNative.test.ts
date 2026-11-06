@@ -117,7 +117,7 @@ describe('the native engine as what hears on this computer', () => {
     expect(families).toEqual(['Apple Speech', 'Qwen3-ASR 1.7B GGUF', 'Confucius4 R2T2 GGUF', 'SenseVoice-Small GGUF', 'Qwen3-ASR 0.6B GGUF', 'Nemotron 3.5 ASR 0.6B GGUF']);
   });
 
-  it('has, between the accurate ones and the small Qwen3 it is level with, the lightest: five languages, read a stretch at a time, never left to detect', () => {
+  it('has, between the accurate ones and the small Qwen3 it is level with, the lightest: five languages, read a stretch at a time, left to detect only among them', () => {
     const light = nativeModel('sensevoice-small-q8');
     expect(light).toMatchObject({ name: 'SenseVoice-Small GGUF', bytes: 254211200 });
     const order = NATIVE_MODELS.map((m) => m.id).filter((id) => !id.startsWith(APPLE_PREFIX));
@@ -129,10 +129,10 @@ describe('the native engine as what hears on this computer', () => {
     for (const language of ['ru', 'fr', 'th', 'es']) expect(nativeHears(light, language)).toBe(false);
     // Read and begun again as the small Qwen3 is: what was measured of it is stretches cut that way.
     expect(light.limits).toEqual(nativeModel('qwen3-asr-0.6b-q8').limits);
-    // It tells five languages apart and no more: the other side's may be any, so it is not what detects it.
-    expect(light.detects).toBeUndefined();
-    expect(nativeHears(light, 'auto')).toBe(false);
-    expect(nativePicked({ model: 'sensevoice-small-q8' }, 'auto')).toBeNull();
+    // It tells its five languages apart, told none (measured 2026-11-06): the settings show which five they are.
+    expect(light.detects).toBe(true);
+    expect(nativeHears(light, 'auto')).toBe(true);
+    expect(nativePicked({ model: 'sensevoice-small-q8' }, 'auto')?.id).toBe('sensevoice-small-q8');
     expect(nativeModelFor('sensevoice-small-q8', 'ru')).toBeNull();
     const config = buildLocalAI(SPEAKER, settings({ ...NATIVE, asrNativeModel: 'sensevoice-small-q8' }), shared);
     expect(config).toMatchObject({ device: { modelId: 'sensevoice-small-q8', streaming: true, native: { model: 'sensevoice-small-q8', limits: { rollAfter: 8, rollAt: 8 } } } });
@@ -158,7 +158,7 @@ describe('the native engine as what hears on this computer', () => {
     expect(config).toMatchObject({ device: { modelId: 'nemotron-asr-0.6b-q8', streaming: true, native: { model: 'nemotron-asr-0.6b-q8', limits: { rollAfter: 8 } } } });
   });
 
-  it('has a small model before it, for a computer that runs a game beside it: read as the large one is, and never left to detect the language', () => {
+  it('has a small model before it, for a computer that runs a game beside it: read as the large one is, and left to detect the language as it is', () => {
     const small = nativeModel('qwen3-asr-0.6b-q8');
     const large = nativeModel('qwen3-asr-1.7b-q8');
     expect(NATIVE_MODELS[NATIVE_MODELS.length - 2]).toBe(small);
@@ -166,8 +166,9 @@ describe('the native engine as what hears on this computer', () => {
     expect(small.languages).toEqual(large.languages);
     expect(small.limits).toEqual(large.limits);
     expect(nativeHears(small, 'ru')).toBe(true);
-    expect(nativeHears(small, 'auto')).toBe(false);
-    expect(nativePicked({ model: 'qwen3-asr-0.6b-q8' }, 'auto')).toBeNull();
+    // Told none, it wrote ten languages each in its own, as the large one did (measured 2026-11-06).
+    expect(nativeHears(small, 'auto')).toBe(true);
+    expect(nativePicked({ model: 'qwen3-asr-0.6b-q8' }, 'auto')?.id).toBe('qwen3-asr-0.6b-q8');
     const config = buildLocalAI(SPEAKER, settings({ ...NATIVE, asrNativeModel: 'qwen3-asr-0.6b-q8' }), shared);
     expect(config).toMatchObject({ device: { modelId: 'qwen3-asr-0.6b-q8', streaming: true, native: { model: 'qwen3-asr-0.6b-q8', limits: { rollAfter: 8 } } } });
   });
@@ -927,8 +928,9 @@ describe('a language\u2019s model by default', () => {
   it('is, for a language left to be detected, one that can tell languages apart — and no other', () => {
     expect(nativePicked({ model: 'r2t2-q8' }, 'auto', HERE('r2t2-q8', 'qwen3-asr-0.6b-q8', 'qwen3-asr-1.7b-q8'))?.id).toBe('qwen3-asr-1.7b-q8');
     expect(nativePicked({ model: `${APPLE_PREFIX}ja` }, 'auto', HERE(`${APPLE_PREFIX}ja`, `${APPLE_PREFIX}en`, 'qwen3-asr-1.7b-q8'))?.id).toBe('qwen3-asr-1.7b-q8');
-    // The small models and the Mac's own tell no language: with only those here there is none.
-    expect(nativePicked({ model: 'r2t2-q8' }, 'auto', HERE('r2t2-q8', 'qwen3-asr-0.6b-q8', `${APPLE_PREFIX}ja`))).toBeNull();
+    // The small Qwen3 tells languages apart too; R2T2 and the Mac's own do not: with only those here there is none.
+    expect(nativePicked({ model: 'r2t2-q8' }, 'auto', HERE('r2t2-q8', 'qwen3-asr-0.6b-q8', `${APPLE_PREFIX}ja`))?.id).toBe('qwen3-asr-0.6b-q8');
+    expect(nativePicked({ model: 'r2t2-q8' }, 'auto', HERE('r2t2-q8', `${APPLE_PREFIX}ja`))).toBeNull();
     // Fork: best effort — the named model stays even though it cannot tell languages apart.
     const bestEffort = hearingPick({ asrNativeModel: 'r2t2-q8' }, PAIR, { detecting: true, both: true, bestEffort: true }, HERE('r2t2-q8'));
     expect(bestEffort).toMatchObject({ model: 'r2t2-q8', detecting: true, bestEffort: true });

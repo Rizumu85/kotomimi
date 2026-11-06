@@ -86,6 +86,16 @@
         color: vars.$color-primary;
       }
     }
+
+    // Fork: models that must be told a language, under a row whose language is left to be detected: there, and greyed.
+    &--off {
+      margin-top: 6px;
+
+      .model-card {
+        opacity: 0.42;
+        pointer-events: none;
+      }
+    }
   }
 }
 

@@ -483,6 +483,10 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "ให้ยืมโมเดลของคอมพิวเตอร์เครื่องนี้แก่อุปกรณ์อื่นในเครือข่าย อุปกรณ์อีกเครื่องจะพบคอมพิวเตอร์นี้ใน Kotomimi ใต้ «อุปกรณ์อื่น» แล้วเลือกโมเดลและภาษาได้จากที่นั่น ใช้งานได้ขณะ Kotomimi เปิดอยู่"
   },
+  "fork.languageMenu.alsoSpeak": {
+    "en": "I also speak",
+    "text": "ฉันก็พูดได้"
+  },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
     "text": "ตรวจจับอัตโนมัติ"
@@ -491,9 +495,17 @@
     "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
     "text": "ระบบรู้จำเสียงที่ใช้อยู่ตรวจจับภาษาอัตโนมัติไม่ได้ ต้องใช้ Qwen3-ASR 1.7B GGUF หรือโมเดล API"
   },
+  "fork.languageMenu.hearingBy": {
+    "en": "Speech recognition: {{name}}",
+    "text": "การรู้จำเสียงพูด: {{name}}"
+  },
   "fork.languageMenu.mine": {
     "en": "My language",
     "text": "ภาษาของฉัน"
+  },
+  "fork.languageMenu.moreLanguages": {
+    "en": "{{count}} more languages",
+    "text": "ภาษาเพิ่มเติมอีก {{count}} ภาษา"
   },
   "fork.languageMenu.mostly": {
     "en": "Translate into what they mostly speak",
@@ -530,6 +542,10 @@
   "fork.languageMenu.theirs": {
     "en": "Their language",
     "text": "ภาษาของอีกฝ่าย"
+  },
+  "fork.languageMenu.theyMaySpeak": {
+    "en": "They may speak",
+    "text": "อีกฝ่ายอาจพูด"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",
@@ -1119,6 +1135,10 @@
     "en": "Connect",
     "text": "เชื่อมต่อ"
   },
+  "models.detectsGroup": {
+    "en": "Detects the language",
+    "text": "ตรวจจับภาษาอัตโนมัติ"
+  },
   "models.deviceCpu": {
     "en": "CPU",
     "text": "CPU"
@@ -1126,6 +1146,10 @@
   "models.deviceGpu": {
     "en": "GPU",
     "text": "GPU"
+  },
+  "models.namedGroup": {
+    "en": "Needs the language set",
+    "text": "ต้องตั้งค่าภาษา"
   },
   "providers.gemini.name": {
     "en": "Google Gemini",

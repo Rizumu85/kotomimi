@@ -342,7 +342,8 @@ describe('two sessions of one device at once (fork)', () => {
   });
 
   it('are refused as busy, not as having no model, while the engine is held with one that does not hear the language', () => {
-    useNativeEngineStore.setState({ status: { ...BOTH, up: ['sensevoice-small-q8'] } });
+    // Held with a model that cannot tell languages apart: R2T2.
+    useNativeEngineStore.setState({ status: { ...status({ 'r2t2-q8': downloaded, 'qwen3-asr-1.7b-q8': downloaded }, { state: 'ready', model: 'r2t2-q8', port: 5000 }), up: ['r2t2-q8'] } });
     const quiet = { stop: { asr() {}, translation() {}, coach() {} }, setTimer: () => 0 as unknown as ReturnType<typeof setTimeout>, clearTimer: () => {} };
     // A run of this computer that hears by the Mac's own recognition leaves the engine's model free.
     const apple = holdNativeForRun(quiet);
@@ -409,10 +410,10 @@ describe('a recognizer that tells languages apart, lent', () => {
 });
 
 describe('SenseVoice-Small, lent as the engine’s other models are', () => {
-  it('is listed with its five languages, and not as one that tells languages apart', () => {
+  it('is listed with its five languages, as one that tells them apart', () => {
     useNativeEngineStore.setState({ status: status({ 'sensevoice-small-q8': downloaded, 'qwen3-asr-0.6b-q8': absent }) });
-    expect(nativeShared()).toEqual([{ id: 'sensevoice-small-q8', kind: 'asr', languages: ['zh', 'yue', 'en', 'ja', 'ko'] }]);
-    expect(appLanModels.shared()[0]).toEqual({ id: 'sensevoice-small-q8', kind: 'asr', languages: ['zh', 'yue', 'en', 'ja', 'ko'] });
+    expect(nativeShared()).toEqual([{ id: 'sensevoice-small-q8', kind: 'asr', languages: ['zh', 'yue', 'en', 'ja', 'ko', 'auto'] }]);
+    expect(appLanModels.shared()[0]).toEqual({ id: 'sensevoice-small-q8', kind: 'asr', languages: ['zh', 'yue', 'en', 'ja', 'ko', 'auto'] });
   });
 
   it('answers a device for a language it hears — named, or left to this computer — and for no other', () => {
@@ -421,8 +422,10 @@ describe('SenseVoice-Small, lent as the engine’s other models are', () => {
       expect(nativeRecognizerFor(language, ''), language).toEqual({ modelId: 'sensevoice-small-q8', streaming: true });
       expect(nativeRecognizerFor(language, 'sensevoice-small-q8'), language).toEqual({ modelId: 'sensevoice-small-q8', streaming: true });
     }
+    // Left to tell them apart, it does, among its five (measured 2026-11-06).
+    expect(nativeRecognizerFor('auto', ''), 'auto').toEqual({ modelId: 'sensevoice-small-q8', streaming: true });
     // Told another language it would write the speech down as one of its five: it is not asked.
-    for (const language of ['ru', 'fr', 'auto']) {
+    for (const language of ['ru', 'fr']) {
       expect(nativeRecognizerFor(language, ''), language).toBeNull();
       expect(nativeRecognizerFor(language, 'sensevoice-small-q8'), language).toBeNull();
     }

@@ -22,7 +22,7 @@ import { coachPrompt } from './coachPrompt';
 import type { LocalAISettings as S } from './localai';
 import { coachesAtOwnDevice, deviceLanguage, hearingPlace, needsServer, PLACE_FIELDS, PLACES, translatePlace, translatesAtOwnDevice, type DeviceNeed, type Place } from './localaiDevice';
 import { NATIVE_MODELS, chooseNative, hearingPick, isApple, isAutoLanguage, nativeDownloaded, nativeEither, nativeHears, nativeModel, nativeModelFor, nativePicked } from './localaiNative';
-import { detectsOther, heardBy, speaksBoth } from './localaiDevice';
+import { alsoFirst, alsoSpoken, detectsOther, heardBy, speaksBoth } from './localaiDevice';
 import { AUTO } from '../../lib/provider/languages';
 import { languageLabel } from '../../lib/language/label';
 import { NativeEngineCard, nativeStoreOf, type NativeCardModel, type NativeKind } from './NativeEngineCard';
@@ -77,9 +77,9 @@ function PlaceSwitch({ label, value, onChange, disabled }: { label: string; valu
 }
 
 /** One stage: its name, and everything that decides how it runs. */
-function StageCard({ icon, title, tooltip, lead, children }: { icon: ReactNode; title: string; tooltip: string; lead?: ReactNode; children?: ReactNode }) {
+function StageCard({ id, icon, title, tooltip, lead, children }: { id?: string; icon: ReactNode; title: string; tooltip: string; lead?: ReactNode; children?: ReactNode }) {
   return (
-    <section className="kt-card" aria-label={title}>
+    <section className="kt-card" aria-label={title} {...(id ? { id } : {})}>
       <h4 className="kt-card__head">
         <span className="kt-card__icon">{icon}</span>
         <span className="kt-card__title">{title}</span>
@@ -399,10 +399,10 @@ function DeviceModels({ stage, settings, pair, legs, models, disabled, tour, nat
    * (`nativeEither`) — offered for them as their own language's model.
    */
   const hearsEither = (id: string, slot: DeviceNeed): boolean => stage === 'asr' && slot.leg === 'speaker' && isAutoLanguage(heardIn(slot)) && isApple(id)
-    && nativeModelFor(id, slot.source)?.id === id && nativeEither({ model: id, either: { own: pair.source, other: pair.target } }, (one) => nativeDownloaded(status, one)) !== null;
+    && nativeModelFor(id, slot.source)?.id === id && nativeEither({ model: id, either: { own: pair.source, other: alsoFirst(settings, pair) ?? pair.target } }, (one) => nativeDownloaded(status, one)) !== null;
   // A model that cannot name the language still fits a best-effort row, where it hears one of the pair's languages.
   const bestEffortFits = (id: string): boolean => stage === 'asr'
-    && (settings.speakBoth === true || settings.asrDetectOther === true)
+    && (alsoSpoken(settings, pair).length > 0 || settings.asrDetectOther === true)
     && !nativeModel(id).detects && !isApple(id)
     && (nativeHears(nativeModel(id), pair.source) || nativeHears(nativeModel(id), pair.target));
   const fits = (id: string, slot: DeviceNeed): boolean => nativeFits(stage, id, heardIn(slot), slot.target) || hearsEither(id, slot) || bestEffortFits(id);
@@ -494,6 +494,11 @@ function DeviceModels({ stage, settings, pair, legs, models, disabled, tour, nat
   const openSlot = slots.find((slot) => slot.dir === open);
   const fitting = native && openSlot ? engine.offered.filter((m) => offers(m.id, openSlot)) : [];
   const usedThere = openSlot ? using(openSlot) : undefined;
+  // Fork: a row whose language is left to be detected lists apart the models that tell languages apart and those that
+  // must be told one: the latter greyed, under a name of their own, so that what can hear it shows by where it is.
+  const detectRow = stage === 'asr' && !!openSlot && isAutoLanguage(heardIn(openSlot));
+  const tellApart = detectRow ? fitting.filter((m) => nativeModel(m.id).detects || hearsEither(m.id, openSlot!)) : fitting;
+  const mustBeTold = detectRow && native ? engine.offered.filter((m) => !tellApart.includes(m)) : [];
 
   const title = (slot: DeviceNeed) => {
     if (stage !== 'asr') return `${nameOf(deviceLanguage(slot.source))} → ${nameOf(deviceLanguage(slot.target))}`;
@@ -501,7 +506,7 @@ function DeviceModels({ stage, settings, pair, legs, models, disabled, tour, nat
     const heard = heardIn(slot);
     const named = (code: string) => nameOf(deviceLanguage(code));
     if (!isAutoLanguage(heard)) return t('providers.localai.hears', { language: named(heard) });
-    return slot.leg === 'speaker' ? t('providers.localai.hearsEither', { first: named(pair.source), second: named(pair.target) }) : t('providers.localai.hearsOther');
+    return slot.leg === 'speaker' ? t('providers.localai.hearsEither', { first: named(pair.source), second: named(alsoFirst(settings, pair) ?? pair.target) }) : t('providers.localai.hearsOther');
   };
 
   return (
@@ -553,12 +558,20 @@ function DeviceModels({ stage, settings, pair, legs, models, disabled, tour, nat
       {open !== null && openSlot && (
         <div className="kt-here__library">
           {/* The native engines' models first, as a group of their own: what serves this direction best, where it was measured. */}
-          {fitting.length > 0 && (
+          {(tellApart.length > 0 || mustBeTold.length > 0) && (
             <div className="model-management-section kt-here__native">
-              <div className="model-subgroup">
-                <div className="model-subgroup__label"><Star size={11} />{t('models.recommendedGroup', 'Recommended')}</div>
-                {fitting.map((m) => <NativeEngineCard key={m.id} kind={stage} model={m} onDownloadStarted={() => downloading(m.id, openSlot)} recommended={m.name === fitting[0].name} selected={usedThere?.id === m.id} onSelect={() => { if (usedThere?.id !== m.id) native.onPick(m.id, openSlot); }} disabled={disabled} />)}
-              </div>
+              {tellApart.length > 0 && (
+                <div className="model-subgroup">
+                  <div className="model-subgroup__label">{detectRow ? t('models.detectsGroup') : <><Star size={11} />{t('models.recommendedGroup', 'Recommended')}</>}</div>
+                  {tellApart.map((m) => <NativeEngineCard key={m.id} kind={stage} model={m} onDownloadStarted={() => downloading(m.id, openSlot)} recommended={m.name === tellApart[0].name} selected={usedThere?.id === m.id} onSelect={() => { if (usedThere?.id !== m.id) native.onPick(m.id, openSlot); }} disabled={disabled} />)}
+                </div>
+              )}
+              {mustBeTold.length > 0 && (
+                <div className="model-subgroup model-subgroup--off">
+                  <div className="model-subgroup__label">{t('models.namedGroup')}</div>
+                  {mustBeTold.map((m) => <NativeEngineCard key={m.id} kind={stage} model={m} onDownloadStarted={() => downloading(m.id, openSlot)} recommended={false} selected={false} onSelect={() => undefined} disabled />)}
+                </div>
+              )}
             </div>
           )}
 
@@ -660,7 +673,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
     const hearing = 'asrVia' in asked || 'asrHere' in asked || 'asrOther' in asked;
     const patch: Partial<S> = {
       ...(hearing && now.asrDetectOther && !detectsOther(now, listed.current) ? { asrDetectOther: false } : {}),
-      ...(hearing && now.speakBoth && !speaksBoth(now, listed.current, pair) ? { speakBoth: false } : {}),
+      ...(hearing && alsoSpoken(now, pair).length > 0 && !speaksBoth(now, listed.current, pair) ? { speakBoth: false, speakAlso: [] } : {}),
       ...asked,
     };
     if (pinned.current) {
@@ -865,7 +878,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
     detecting: detectsOther(settings, models),
     both: bothOn,
     // A model that cannot name the language is a best effort, not a reason to keep another one in its place.
-    bestEffort: settings.speakBoth === true || settings.asrDetectOther === true,
+    bestEffort: alsoSpoken(settings, pair).length > 0 || settings.asrDetectOther === true,
   });
   const pickNative = (id: string, languages: readonly string[], heard: readonly string[] = heardByLegs) => {
     // The row's chosen model may be a non-detecting one even while the default still is a detector.
@@ -882,11 +895,11 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   const pickNativeFor = (id: string, slot?: DeviceNeed) => {
     // A model that cannot name the language still gets a best-effort guess here; only a place that cannot try at all ends the choice.
     const detectOff = settings.asrDetectOther === true && !detectsOther(settings, models) && legs.includes('participant');
-    const bothOff = settings.speakBoth === true && !speaksBoth(settings, models, pair) && legs.includes('speaker') && pair.source.toLowerCase() !== pair.target.toLowerCase();
+    const bothOff = alsoSpoken(settings, pair).length > 0 && !speaksBoth(settings, models, pair) && legs.includes('speaker') && pair.source.toLowerCase() !== pair.target.toLowerCase();
     // Fork: the Mac's recognition, chosen for a speaker who speaks both, where it has both languages: it hears them in
     // either, as their own language's model, and they go on speaking both. The other side's language is no longer
     // detected: that takes the model that tells languages apart, for every leg.
-    if (bothOff && (!slot || slot.leg === 'speaker') && isApple(id) && nativeEither({ model: id, either: { own: pair.source, other: pair.target } })) {
+    if (bothOff && (!slot || slot.leg === 'speaker') && isApple(id) && nativeEither({ model: id, either: { own: pair.source, other: alsoFirst(settings, pair) ?? pair.target } })) {
       const ended = detectOff ? { asrDetectOther: false } : {};
       const heard = legs.map((leg) => heardBy({ ...settings, ...ended }, pair, leg, models));
       const next = chooseNative({ model: settings.asrNativeModel, byLanguage: settings.asrNativeByLanguage }, id, [pair.source], heard);
@@ -896,7 +909,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
     if (nativeModel(id).detects || !(detectOff || bothOff)) {
       // A row a best-effort detection keeps is named by the language it hears, not by "auto" (which no model runs).
       const languageOf = (leg: 'speaker' | 'participant') => (
-        leg === 'speaker' && settings.speakBoth
+        leg === 'speaker' && alsoSpoken(settings, pair).length > 0
           // The Mac's pair is one member per language; a model that only hears a language is named "auto".
           ? (isApple(id) ? pair.source : AUTO)
           : (leg === 'participant' && settings.asrDetectOther) ? AUTO : heardBy(settings, pair, leg)
@@ -908,7 +921,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
       );
       return;
     }
-    const ended = { ...(detectOff ? { asrDetectOther: false } : {}), ...(bothOff ? { speakBoth: false } : {}) };
+    const ended = { ...(detectOff ? { asrDetectOther: false } : {}), ...(bothOff ? { speakBoth: false, speakAlso: [] } : {}) };
     const told = { ...settings, ...ended };
     const heard = legs.map((leg) => heardBy(told, pair, leg, models));
     const next = chooseNative({ model: settings.asrNativeModel, byLanguage: settings.asrNativeByLanguage }, id, slot ? [heardBy(told, pair, slot.leg)] : heard.filter((language) => nativeHears(nativeModel(id), language)), heard);
@@ -1018,7 +1031,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
         )}
       </section>
 
-      <StageCard icon={<Mic size={14} />} title={t('providers.localai.hearStage')} tooltip={t('providers.localai.hearStageTooltip')}>
+      <StageCard id="hearing-section" icon={<Mic size={14} />} title={t('providers.localai.hearStage')} tooltip={t('providers.localai.hearStageTooltip')}>
         <PlaceSwitch label={t('providers.localai.hearStage')} value={settings.asrVia} onChange={(asrVia) => put({ asrVia })} disabled={disabled} />
         {/* Which device, where there is more than the shared one to choose from: the phones that lend their recognition. */}
         {settings.asrVia === 'server' && hearingPhones.length > 0 && (

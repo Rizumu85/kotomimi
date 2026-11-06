@@ -487,6 +487,10 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "Udostępnia modele tego komputera innym urządzeniom w sieci lokalnej. Na drugim urządzeniu wyszukaj ten komputer w sekcji „Inne urządzenie” w Kotomimi. Tam też wybierzesz model i język. Udostępnianie działa, gdy Kotomimi jest otwarte."
   },
+  "fork.languageMenu.alsoSpeak": {
+    "en": "I also speak",
+    "text": "Mówię także"
+  },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
     "text": "Wykrywaj automatycznie"
@@ -495,9 +499,17 @@
     "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
     "text": "Obecny model rozpoznawania mowy nie wykrywa języków automatycznie. Potrzebny jest Qwen3-ASR 1.7B GGUF lub model API."
   },
+  "fork.languageMenu.hearingBy": {
+    "en": "Speech recognition: {{name}}",
+    "text": "Rozpoznawanie mowy: {{name}}"
+  },
   "fork.languageMenu.mine": {
     "en": "My language",
     "text": "Mój język"
+  },
+  "fork.languageMenu.moreLanguages": {
+    "en": "{{count}} more languages",
+    "text": "Jeszcze {{count}} języków"
   },
   "fork.languageMenu.mostly": {
     "en": "Translate into what they mostly speak",
@@ -534,6 +546,10 @@
   "fork.languageMenu.theirs": {
     "en": "Their language",
     "text": "Język rozmówcy"
+  },
+  "fork.languageMenu.theyMaySpeak": {
+    "en": "They may speak",
+    "text": "Mogą mówić"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",
@@ -1123,6 +1139,10 @@
     "en": "Connect",
     "text": "Połącz"
   },
+  "models.detectsGroup": {
+    "en": "Detects the language",
+    "text": "Wykrywa język"
+  },
   "models.deviceAuto": {
     "en": "Auto",
     "text": "Automatycznie"
@@ -1138,6 +1158,10 @@
   "models.multiLanguage": {
     "en": "Multi",
     "text": "Wielojęzyczny"
+  },
+  "models.namedGroup": {
+    "en": "Needs the language set",
+    "text": "Wymaga wybrania języka"
   },
   "models.online": {
     "en": "Online",

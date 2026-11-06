@@ -2,15 +2,15 @@ import { ArrowLeftRight, Info, Languages } from 'lucide-react';
 import { useId, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Tooltip from '../Tooltip/Tooltip';
-import ToggleSwitch from '../Settings/shared/ToggleSwitch';
 import { pairSentence } from '../SetupWizard/languageSentence';
 import { normalizePair, swapped } from '../../lib/provider/languages';
-import type { AnyProvider, LanguageContext, LanguageOption, LanguagePair } from '../../lib/provider/types';
+import type { AnyProvider, Hearer, LanguageContext, LanguageOption, LanguagePair } from '../../lib/provider/types';
 import type { AudioMode } from '../../stores/audioStore';
 import { useLanguageLabel } from '../../lib/language/useLanguageLabel';
 import { orderLanguages, pinnedLanguages, PIN_SEPARATOR, type OrderContext } from '../../lib/language/order';
 import { effectiveTextOnly } from '../../utils/effectiveTextOnly';
 import { useLanguageMenu } from './LanguageMenu';
+import { LanguageHearing } from './LanguageHearing';
 
 const SEPARATOR = '──────────';
 
@@ -31,17 +31,22 @@ interface LanguagePairSectionProps {
   /**
    * Fork: the other side is heard, and their language can be left to be
    * detected: "Detect the language" is then the first choice of their
-   * language. While it is chosen the language they mostly speak — the pair's —
-   * is chosen in a row under the pair: what the speaker's own words are
-   * translated into, and what a translation that must be told a language is
-   * told. Absent: not offered.
+   * language. While it is chosen, the languages what hears them can tell apart
+   * are chips under the pair ("对方可能说", `LanguageHearing`): the pair's
+   * target, the one the user's speech goes into at first, and the one it
+   * follows into now (`followed`). Absent: not offered.
    */
   detect?: { on: boolean; available: boolean; bestEffort?: boolean; set(on: boolean): void };
   /**
-   * Fork: the speaker speaks the other side's language too — a switch under the pair, named with that language:
-   * what they say in it is translated into their own. What it does is in its help. Absent: not offered.
+   * Fork: the languages the speaker speaks besides their own ("我也会说"), chips under the pair: a sentence of theirs in
+   * one is translated into their own. Absent: not offered.
    */
-  both?: { on: boolean; available: boolean; bestEffort?: boolean; set(on: boolean): void };
+  also?: { chosen: readonly string[]; offered: readonly string[] | null; available: boolean; set(chosen: string[]): void };
+  /** Fork: what hears each side, named beside its chips; pressing the name opens its settings (`onOpenHearing`). */
+  hearing?: { mine?: Hearer; theirs?: Hearer };
+  /** Fork: the language the user's speech follows the other side into now, in a session (`follow.ts`). */
+  followed?: string;
+  onOpenHearing?(): void;
   /**
    * Fork: the two selects are named for whose language they hold — "my
    * language", "their language" — whatever the mode, and nothing is written
@@ -62,7 +67,7 @@ const DETECT = '\u0000detect';
  * allowed whenever the provider supports the reversed pair. Markup is
  * LanguageSection's translation-languages block.
  */
-export function LanguagePairSection({ provider, settings, pair, onChange, disabled, sentence, context, detect, both, owners }: LanguagePairSectionProps) {
+export function LanguagePairSection({ provider, settings, pair, onChange, disabled, sentence, context, detect, also, hearing, followed, onOpenHearing, owners }: LanguagePairSectionProps) {
   const { t, i18n } = useTranslation();
   const id = useId();
   const label = useLanguageLabel();
@@ -113,17 +118,10 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
     disabled,
   });
   const detecting = detect?.on === true;
-  const showBoth = !!both && pair.source.toLowerCase() !== pair.target.toLowerCase();
-  const bothBestEffort = showBoth && both?.on && both.bestEffort;
   const detectionBestEffort = detecting && detect?.bestEffort;
-  const bothUnavailable = showBoth && !both?.available && !both?.on;
-  const bothHelp = t(bothUnavailable ? 'fork.languageMenu.speakBothUnavailable' : 'fork.languageMenu.speakBothHelp', {
-    language: label(pair.target), mine: label(pair.source),
-  });
   const sectionHelp = [
     t(owners ? 'fork.languageMenu.pairHelp' : 'simpleConfig.translationLanguagesDesc'),
-    ...(showBoth ? [bothHelp] : []),
-    ...(bothBestEffort || detectionBestEffort ? [t('fork.languageMenu.bestEffortHelp')] : []),
+    ...(detectionBestEffort ? [t('fork.languageMenu.bestEffortHelp')] : []),
   ].join('\n\n');
   /** Their language was chosen: a language, which is the pair's, or its detection. */
   const pickTheirs = (target: string) => {
@@ -140,15 +138,6 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
     disabled,
     // What hears cannot detect, and nothing here that could is downloaded: there, and greyed, with why on it.
     ...(detect ? { first: { code: DETECT, name: t('fork.languageMenu.detect'), ...(detect.available || detecting ? {} : { unavailable: t('fork.languageMenu.detectUnavailable') }) } } : {}),
-  });
-  // While their language is detected: the one they mostly speak, which the pair still names.
-  const mostlyMenu = useLanguageMenu({
-    ordered: targetOptions.ordered,
-    suggested: targetOptions.pinned,
-    value: pair.target,
-    onPick: (target) => onChange({ source: pair.source, target }),
-    label,
-    disabled,
   });
 
   return (
@@ -206,38 +195,18 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
           </select>
           {targetMenu.list}
         </div>
-        {detecting && (
-          // In the pair's own grid, a row of its own: what it is for at the left, the choice under their language.
-          <>
-            <label className="language-mostly-label" htmlFor={`${id}-mostly`}>{t('fork.languageMenu.mostly')}</label>
-            <div className="language-select-group language-select-group--mostly">
-              <select
-                id={`${id}-mostly`}
-                className="language-select"
-                value={pair.target}
-                onChange={(e) => onChange({ source: pair.source, target: e.target.value })}
-                disabled={disabled}
-                {...mostlyMenu.selectProps}
-              >
-                {options(targetOptions)}
-              </select>
-              {mostlyMenu.list}
-            </div>
-          </>
-        )}
       </div>
-      {detectionBestEffort && !bothBestEffort && (
-        <p className="language-detection-note">{t('fork.languageMenu.bestEffortSummary')}</p>
-      )}
-      {both && showBoth && (
-        <ToggleSwitch
-          checked={both.on}
-          onChange={() => both.set(!both.on)}
-          label={t('fork.languageMenu.speakBoth', { language: label(pair.target) })}
-          description={bothUnavailable ? bothHelp : bothBestEffort ? t('fork.languageMenu.bestEffortSummary') : undefined}
-          disabled={disabled || (!both.available && !both.on)}
-        />
-      )}
+      <LanguageHearing
+        own={pair.source}
+        ordered={targetOptions.ordered}
+        suggested={targetOptions.pinned}
+        label={label}
+        {...(also ? { mine: { ...also, ...(hearing?.mine ? { hearer: hearing.mine } : {}) } } : {})}
+        {...(detecting ? { theirs: { start: pair.target, ...(followed ? { followed } : {}), ...(hearing?.theirs ? { hearer: hearing.theirs } : {}), onStart: (target: string) => onChange({ source: pair.source, target }) } } : {})}
+        {...(onOpenHearing ? { onOpenHearing } : {})}
+        disabled={disabled}
+        note={detectionBestEffort ? <p className="language-detection-note">{t('fork.languageMenu.bestEffortSummary')}</p> : undefined}
+      />
       {resolved?.showMirror && !owners && (
         <div className="language-mirror-line" data-testid="language-mirror-line">
           {t('settings.langSentence.mirror', 'They speak {{their}} → I read {{mine}}', {

@@ -52,8 +52,8 @@ export function languageRows(ordered: readonly LanguageOption[], suggested: read
 }
 
 export function useLanguageMenu({ ordered, suggested, value, onPick, label, disabled = false, first }: LanguageMenuOptions): {
-  /** For the select: pressing it opens this list, not the system's. */
-  selectProps: { ref(node: HTMLSelectElement | null): void; onMouseDown(e: MouseEvent<HTMLSelectElement>): void; onKeyDown(e: KeyboardEvent<HTMLSelectElement>): void };
+  /** For the select (or a button, a language chip's "+N"): pressing it opens this list, not the system's. */
+  selectProps: { ref(node: HTMLElement | null): void; onMouseDown(e: MouseEvent<HTMLElement>): void; onKeyDown(e: KeyboardEvent<HTMLElement>): void };
   list: ReactNode;
 } {
   const { t } = useTranslation();
@@ -121,15 +121,15 @@ export function useLanguageMenu({ ordered, suggested, value, onPick, label, disa
   };
 
   const selectProps = {
-    ref: (node: HTMLSelectElement | null) => refs.setReference(node),
-    onMouseDown: (e: MouseEvent<HTMLSelectElement>) => {
+    ref: (node: HTMLElement | null) => refs.setReference(node),
+    onMouseDown: (e: MouseEvent<HTMLElement>) => {
       if (disabled || e.button !== 0) return;
       // The system's own list stays shut: this one opens in its place.
       e.preventDefault();
       e.currentTarget.focus();
       setOpen((was) => !was);
     },
-    onKeyDown: (e: KeyboardEvent<HTMLSelectElement>) => {
+    onKeyDown: (e: KeyboardEvent<HTMLElement>) => {
       if (disabled) return;
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault();

@@ -17,7 +17,7 @@ vi.mock('../../../services/ServiceFactory', () => ({
 }));
 
 const run = vi.hoisted(() => ({ locked: false }));
-vi.mock('../../../app/useRun', () => ({ useSessionLocked: () => run.locked, useRunPhase: () => (run.locked ? 'running' : 'idle') }));
+vi.mock('../../../app/useRun', () => ({ useSessionLocked: () => run.locked, useRunPhase: () => (run.locked ? 'running' : 'idle'), useFollowedLanguage: () => undefined }));
 
 vi.mock('../shared/WarningModal', () => ({ default: () => null }));
 vi.mock('../sections/SpeechSection', () => ({

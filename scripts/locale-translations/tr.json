@@ -483,6 +483,10 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "Bu bilgisayarın modellerini yerel ağdaki diğer cihazların kullanımına açar. Diğer cihazda Kotomimi'nin \"Başka bir cihaz\" bölümünde arama yaparak bu bilgisayarı bulabilir, modeli ve dili oradan seçebilirsiniz. Paylaşım için Kotomimi açık olmalıdır."
   },
+  "fork.languageMenu.alsoSpeak": {
+    "en": "I also speak",
+    "text": "Ben de konuşuyorum"
+  },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
     "text": "Otomatik algıla"
@@ -491,9 +495,17 @@
     "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
     "text": "Kullanılan konuşma tanıma özelliği dilleri algılayamıyor. Qwen3-ASR 1.7B GGUF veya bir API modeli gerekiyor."
   },
+  "fork.languageMenu.hearingBy": {
+    "en": "Speech recognition: {{name}}",
+    "text": "Ses tanıma: {{name}}"
+  },
   "fork.languageMenu.mine": {
     "en": "My language",
     "text": "Benim dilim"
+  },
+  "fork.languageMenu.moreLanguages": {
+    "en": "{{count}} more languages",
+    "text": "{{count}} dil daha"
   },
   "fork.languageMenu.mostly": {
     "en": "Translate into what they mostly speak",
@@ -530,6 +542,10 @@
   "fork.languageMenu.theirs": {
     "en": "Their language",
     "text": "Karşı tarafın dili"
+  },
+  "fork.languageMenu.theyMaySpeak": {
+    "en": "They may speak",
+    "text": "Karşı taraf konuşabilir"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",
@@ -1119,6 +1135,10 @@
     "en": "Connect",
     "text": "Bağlan"
   },
+  "models.detectsGroup": {
+    "en": "Detects the language",
+    "text": "Dili otomatik algılar"
+  },
   "models.deviceCpu": {
     "en": "CPU",
     "text": "CPU"
@@ -1126,6 +1146,10 @@
   "models.deviceGpu": {
     "en": "GPU",
     "text": "GPU"
+  },
+  "models.namedGroup": {
+    "en": "Needs the language set",
+    "text": "Dil belirtilmeli"
   },
   "providers.gemini.name": {
     "en": "Google Gemini",

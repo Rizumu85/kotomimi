@@ -479,6 +479,10 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "Jakaa tämän tietokoneen mallit lähiverkon muille laitteille. Tämä tietokone löytyy toisen laitteen Kotomimi-sovelluksen kohdasta ”Toinen laite”. Malli ja kieli valitaan siellä. Jakaminen toimii vain, kun Kotomimi on auki."
   },
+  "fork.languageMenu.alsoSpeak": {
+    "en": "I also speak",
+    "text": "Puhun myös"
+  },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
     "text": "Tunnista automaattisesti"
@@ -487,9 +491,17 @@
     "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
     "text": "Nykyinen puheentunnistus ei tunnista kieltä automaattisesti. Siihen tarvitaan Qwen3-ASR 1.7B GGUF tai API-malli."
   },
+  "fork.languageMenu.hearingBy": {
+    "en": "Speech recognition: {{name}}",
+    "text": "Puheentunnistus: {{name}}"
+  },
   "fork.languageMenu.mine": {
     "en": "My language",
     "text": "Oma kieleni"
+  },
+  "fork.languageMenu.moreLanguages": {
+    "en": "{{count}} more languages",
+    "text": "{{count}} muuta kieltä"
   },
   "fork.languageMenu.mostly": {
     "en": "Translate into what they mostly speak",
@@ -526,6 +538,10 @@
   "fork.languageMenu.theirs": {
     "en": "Their language",
     "text": "Toisen kieli"
+  },
+  "fork.languageMenu.theyMaySpeak": {
+    "en": "They may speak",
+    "text": "Toinen saattaa puhua"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",
@@ -1115,6 +1131,10 @@
     "en": "Connect",
     "text": "Yhdistä"
   },
+  "models.detectsGroup": {
+    "en": "Detects the language",
+    "text": "Tunnistaa kielen"
+  },
   "models.deviceAuto": {
     "en": "Auto",
     "text": "Automaattinen"
@@ -1130,6 +1150,10 @@
   "models.multiLanguage": {
     "en": "Multi",
     "text": "Monikielinen"
+  },
+  "models.namedGroup": {
+    "en": "Needs the language set",
+    "text": "Kieli on määritettävä"
   },
   "providers.gemini.name": {
     "en": "Google Gemini",

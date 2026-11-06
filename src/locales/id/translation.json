@@ -1066,7 +1066,9 @@
       "cancel": "Batal",
       "accept": "Saya mengerti — hanya nonkomersial",
       "acceptRestricted": "Saya mengerti — saya menerima lisensinya"
-    }
+    },
+    "detectsGroup": "Mendeteksi bahasa",
+    "namedGroup": "Perlu menentukan bahasa"
   },
   "notes": {
     "stageAsr": "pengenalan suara",
@@ -1761,8 +1763,6 @@
       "mutedNotHeard": "Mikrofon dibisukan di VRChat: ucapan Anda tidak dikenali."
     },
     "languageMenu": {
-      "speakBoth": "Saya juga berbicara {{language}}",
-      "speakBothHelp": "Saat Anda berbicara {{mine}}, ucapan diterjemahkan ke {{language}}; saat Anda berbicara {{language}}, ucapan diterjemahkan ke {{mine}}. Kedua bahasa dikenali secara otomatis.",
       "search": "Ketik untuk mencari bahasa",
       "none": "Tidak ada bahasa dengan nama itu",
       "pin": "Sematkan {{name}} di atas",
@@ -1771,13 +1771,15 @@
       "unpinShort": "Lepas sematan",
       "mine": "Bahasa saya",
       "theirs": "Bahasa lawan bicara",
-      "mostly": "Terjemahkan ke bahasa utama lawan bicara",
       "detect": "Deteksi otomatis",
       "detectUnavailable": "Pengenal ucapan yang digunakan tidak bisa mendeteksi bahasa secara otomatis. Gunakan Qwen3-ASR 1.7B GGUF atau model API.",
-      "speakBothUnavailable": "Pengenal ucapan yang dipilih tidak bisa membedakan {{mine}} dan {{language}}. Gunakan pasangan Apple Speech dengan kedua bahasa terpasang, atau pengenal ucapan yang bisa mengenali keduanya.",
       "bestEffortSummary": "Bahasa diperkirakan dari teks dan bisa salah dikenali.",
       "bestEffortHelp": "Model pengenalan ucapan yang dipilih tidak melaporkan bahasa transkrip. Kotomimi memperkirakannya dari teks, sehingga deteksi bahasa mungkin kurang andal.",
-      "pairHelp": "Pilih bahasa yang terutama digunakan oleh Anda dan lawan bicara. Ucapan Anda diterjemahkan ke bahasanya, dan ucapannya ke bahasa Anda."
+      "pairHelp": "Pilih bahasa yang terutama digunakan oleh Anda dan lawan bicara. Ucapan Anda diterjemahkan ke bahasanya, dan ucapannya ke bahasa Anda.",
+      "alsoSpeak": "Saya juga berbicara",
+      "theyMaySpeak": "Mereka mungkin berbicara",
+      "hearingBy": "Pengenalan suara: {{name}}",
+      "moreLanguages": "{{count}} bahasa lainnya"
     },
     "wizard": {
       "pathTitle": "Kotomimi Bebas Kombinasi",

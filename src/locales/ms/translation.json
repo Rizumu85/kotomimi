@@ -1066,7 +1066,9 @@
       "cancel": "Batal",
       "accept": "Saya faham — bukan komersial sahaja",
       "acceptRestricted": "Saya faham — saya menerima lesen ini"
-    }
+    },
+    "detectsGroup": "Boleh mengesan bahasa secara automatik",
+    "namedGroup": "Perlu tetapkan bahasa"
   },
   "notes": {
     "stageAsr": "pengecaman suara",
@@ -1761,8 +1763,6 @@
       "mutedNotHeard": "Mikrofon dibisukan dalam VRChat. Pertuturan anda tidak akan dicam."
     },
     "languageMenu": {
-      "speakBoth": "Saya juga bertutur dalam {{language}}",
-      "speakBothHelp": "Apabila anda bertutur dalam {{mine}}, ia diterjemahkan ke {{language}}; apabila anda bertutur dalam {{language}}, ia diterjemahkan ke {{mine}}. Pengecaman membezakan kedua-dua bahasa secara automatik.",
       "search": "Taip untuk mencari bahasa",
       "none": "Tiada bahasa dengan nama itu",
       "pin": "Sematkan {{name}} di atas",
@@ -1771,13 +1771,15 @@
       "unpinShort": "Nyahsemat",
       "mine": "Bahasa saya",
       "theirs": "Bahasa pihak lain",
-      "mostly": "Terjemah bahasa utama pihak lain",
       "detect": "Kesan automatik",
       "detectUnavailable": "Pengecaman pertuturan semasa tidak boleh mengesan bahasa secara automatik. Qwen3-ASR 1.7B GGUF atau model API diperlukan.",
-      "speakBothUnavailable": "Pengecam pertuturan yang dipilih tidak boleh membezakan {{mine}} dengan {{language}}. Pilih Apple Speech berpasangan dengan kedua-dua bahasa dipasang, atau pengecam yang mengenal pasti kedua-dua bahasa.",
       "bestEffortSummary": "Bahasa dianggarkan daripada teks dan mungkin salah dikenal pasti.",
       "bestEffortHelp": "Model pengecaman pertuturan yang dipilih tidak menyatakan bahasa transkrip. Kotomimi menganggarkannya berdasarkan teks, jadi pengesanan bahasa mungkin kurang tepat.",
-      "pairHelp": "Pilih bahasa yang paling kerap digunakan oleh anda dan orang lain itu. Percakapan anda diterjemahkan ke bahasanya, dan percakapannya ke bahasa anda."
+      "pairHelp": "Pilih bahasa yang paling kerap digunakan oleh anda dan orang lain itu. Percakapan anda diterjemahkan ke bahasanya, dan percakapannya ke bahasa anda.",
+      "alsoSpeak": "Saya juga boleh bertutur dalam",
+      "theyMaySpeak": "Mereka mungkin bercakap",
+      "hearingBy": "Pengecaman pertuturan: {{name}}",
+      "moreLanguages": "{{count}} bahasa lagi"
     },
     "wizard": {
       "pathTitle": "Kotomimi Padanan Bebas",

@@ -483,6 +483,10 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "يتيح للأجهزة الأخرى على الشبكة المحلية استخدام نماذج هذا الكمبيوتر. يمكنها العثور عليه في قسم «جهاز آخر» في Kotomimi، واختيار النموذج واللغة من هناك. تستمر المشاركة ما دام Kotomimi مفتوحًا."
   },
+  "fork.languageMenu.alsoSpeak": {
+    "en": "I also speak",
+    "text": "أتحدث أيضًا"
+  },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
     "text": "اكتشاف تلقائي"
@@ -491,9 +495,17 @@
     "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
     "text": "لا يدعم التعرّف على الكلام الحالي اكتشاف اللغة تلقائيًا. يلزم استخدام Qwen3-ASR 1.7B GGUF أو نموذج عبر API."
   },
+  "fork.languageMenu.hearingBy": {
+    "en": "Speech recognition: {{name}}",
+    "text": "التعرّف على الكلام: {{name}}"
+  },
   "fork.languageMenu.mine": {
     "en": "My language",
     "text": "لغتي"
+  },
+  "fork.languageMenu.moreLanguages": {
+    "en": "{{count}} more languages",
+    "text": "{{count}} لغة إضافية"
   },
   "fork.languageMenu.mostly": {
     "en": "Translate into what they mostly speak",
@@ -530,6 +542,10 @@
   "fork.languageMenu.theirs": {
     "en": "Their language",
     "text": "لغة الطرف الآخر"
+  },
+  "fork.languageMenu.theyMaySpeak": {
+    "en": "They may speak",
+    "text": "قد يتحدث الطرف الآخر"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",
@@ -1119,6 +1135,10 @@
     "en": "Connect",
     "text": "اتصال"
   },
+  "models.detectsGroup": {
+    "en": "Detects the language",
+    "text": "يكتشف اللغة تلقائيًا"
+  },
   "models.deviceCpu": {
     "en": "CPU",
     "text": "المعالج المركزي"
@@ -1126,6 +1146,10 @@
   "models.deviceGpu": {
     "en": "GPU",
     "text": "معالج الرسومات"
+  },
+  "models.namedGroup": {
+    "en": "Needs the language set",
+    "text": "يتطلب تحديد اللغة"
   },
   "providers.gemini.name": {
     "en": "Google Gemini",

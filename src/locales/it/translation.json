@@ -1066,7 +1066,9 @@
       "cancel": "Annulla",
       "accept": "Ho capito: solo uso non commerciale",
       "acceptRestricted": "Ho capito: accetto la licenza"
-    }
+    },
+    "detectsGroup": "Rileva la lingua",
+    "namedGroup": "Richiede una lingua impostata"
   },
   "notes": {
     "stageAsr": "riconoscimento vocale",
@@ -1761,8 +1763,6 @@
       "mutedNotHeard": "Microfono disattivato in VRChat: le tue parole non vengono riconosciute."
     },
     "languageMenu": {
-      "speakBoth": "Parlo anche {{language}}",
-      "speakBothHelp": "Quando parli {{mine}}, la traduzione è in {{language}}; quando parli {{language}}, è in {{mine}}. Il riconoscimento distingue automaticamente le due lingue.",
       "search": "Digita per cercare una lingua",
       "none": "Nessuna lingua con questo nome",
       "pin": "Fissa {{name}} in cima",
@@ -1771,13 +1771,15 @@
       "unpinShort": "Non fissare più",
       "mine": "La mia lingua",
       "theirs": "La lingua degli altri",
-      "mostly": "Traduci nella lingua che parlano di più",
       "detect": "Rilevamento automatico",
       "detectUnavailable": "Il riconoscimento vocale in uso non può rilevare automaticamente le lingue. Serve Qwen3-ASR 1.7B GGUF o un modello API.",
-      "speakBothUnavailable": "Il sistema di riconoscimento vocale selezionato non può distinguere {{mine}} da {{language}}. Scegli Apple Speech in modalità abbinata con entrambe le lingue installate, oppure un sistema che riconosca entrambe le lingue.",
       "bestEffortSummary": "La lingua viene dedotta dal testo e può essere identificata male.",
       "bestEffortHelp": "Il modello di riconoscimento vocale selezionato non indica la lingua della trascrizione. Kotomimi la stima dal testo, quindi il rilevamento della lingua potrebbe essere meno affidabile.",
-      "pairHelp": "Scegli le lingue che tu e l’altra persona usate di più. Le tue parole vengono tradotte nella sua lingua e le sue nella tua."
+      "pairHelp": "Scegli le lingue che tu e l’altra persona usate di più. Le tue parole vengono tradotte nella sua lingua e le sue nella tua.",
+      "alsoSpeak": "Parlo anche",
+      "theyMaySpeak": "Potrebbero parlare",
+      "hearingBy": "Riconoscimento vocale: {{name}}",
+      "moreLanguages": "Altre {{count}} lingue"
     },
     "wizard": {
       "pathTitle": "Kotomimi su misura",

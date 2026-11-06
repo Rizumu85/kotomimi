@@ -487,6 +487,10 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "Partage les modèles de cet ordinateur avec les autres appareils du réseau local. Sur l’autre appareil, recherchez cet ordinateur dans « Un autre appareil » de Kotomimi, puis choisissez le modèle et la langue à utiliser. Kotomimi doit rester ouvert pour maintenir le partage."
   },
+  "fork.languageMenu.alsoSpeak": {
+    "en": "I also speak",
+    "text": "Je parle aussi"
+  },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
     "text": "Détection automatique"
@@ -495,9 +499,17 @@
     "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
     "text": "La reconnaissance vocale utilisée ne peut pas détecter les langues automatiquement. Il faut Qwen3-ASR 1.7B GGUF ou un modèle via API."
   },
+  "fork.languageMenu.hearingBy": {
+    "en": "Speech recognition: {{name}}",
+    "text": "Reconnaissance vocale : {{name}}"
+  },
   "fork.languageMenu.mine": {
     "en": "My language",
     "text": "Ma langue"
+  },
+  "fork.languageMenu.moreLanguages": {
+    "en": "{{count}} more languages",
+    "text": "Encore {{count}} langues"
   },
   "fork.languageMenu.mostly": {
     "en": "Translate into what they mostly speak",
@@ -534,6 +546,10 @@
   "fork.languageMenu.theirs": {
     "en": "Their language",
     "text": "Langue de l’autre"
+  },
+  "fork.languageMenu.theyMaySpeak": {
+    "en": "They may speak",
+    "text": "L’autre personne peut parler"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",
@@ -1127,6 +1143,10 @@
     "en": "client",
     "text": "client"
   },
+  "models.detectsGroup": {
+    "en": "Detects the language",
+    "text": "Détecte la langue"
+  },
   "models.deviceAuto": {
     "en": "Auto",
     "text": "Auto"
@@ -1142,6 +1162,10 @@
   "models.multiLanguage": {
     "en": "Multi",
     "text": "Multilingue"
+  },
+  "models.namedGroup": {
+    "en": "Needs the language set",
+    "text": "Langue à sélectionner"
   },
   "modePicker.deviceMic": {
     "en": "Microphone",

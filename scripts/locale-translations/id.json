@@ -483,6 +483,10 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "Bagikan model komputer ini ke perangkat lain di jaringan lokal. Di perangkat lain, cari komputer ini melalui \"Perangkat lain\" di Kotomimi, lalu pilih model dan bahasanya di sana. Berbagi hanya tersedia selama Kotomimi terbuka."
   },
+  "fork.languageMenu.alsoSpeak": {
+    "en": "I also speak",
+    "text": "Saya juga berbicara"
+  },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
     "text": "Deteksi otomatis"
@@ -491,9 +495,17 @@
     "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
     "text": "Pengenal ucapan yang digunakan tidak bisa mendeteksi bahasa secara otomatis. Gunakan Qwen3-ASR 1.7B GGUF atau model API."
   },
+  "fork.languageMenu.hearingBy": {
+    "en": "Speech recognition: {{name}}",
+    "text": "Pengenalan suara: {{name}}"
+  },
   "fork.languageMenu.mine": {
     "en": "My language",
     "text": "Bahasa saya"
+  },
+  "fork.languageMenu.moreLanguages": {
+    "en": "{{count}} more languages",
+    "text": "{{count}} bahasa lainnya"
   },
   "fork.languageMenu.mostly": {
     "en": "Translate into what they mostly speak",
@@ -530,6 +542,10 @@
   "fork.languageMenu.theirs": {
     "en": "Their language",
     "text": "Bahasa lawan bicara"
+  },
+  "fork.languageMenu.theyMaySpeak": {
+    "en": "They may speak",
+    "text": "Mereka mungkin berbicara"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",
@@ -1127,6 +1143,10 @@
     "en": "Debug",
     "text": "Debug"
   },
+  "models.detectsGroup": {
+    "en": "Detects the language",
+    "text": "Mendeteksi bahasa"
+  },
   "models.deviceCpu": {
     "en": "CPU",
     "text": "CPU"
@@ -1142,6 +1162,10 @@
   "models.multiLanguage": {
     "en": "Multi",
     "text": "Multibahasa"
+  },
+  "models.namedGroup": {
+    "en": "Needs the language set",
+    "text": "Perlu menentukan bahasa"
   },
   "models.online": {
     "en": "Online",

@@ -479,6 +479,10 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "Permite que otros dispositivos de tu red local usen los modelos de este equipo. En el otro dispositivo, busca este equipo en «Otro dispositivo» de Kotomimi y elige allí el modelo y el idioma. Solo funciona mientras Kotomimi esté abierto."
   },
+  "fork.languageMenu.alsoSpeak": {
+    "en": "I also speak",
+    "text": "También hablo"
+  },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
     "text": "Detectar automáticamente"
@@ -487,9 +491,17 @@
     "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
     "text": "El reconocimiento de voz actual no puede detectar idiomas automáticamente. Se necesita Qwen3-ASR 1.7B GGUF o un modelo por API."
   },
+  "fork.languageMenu.hearingBy": {
+    "en": "Speech recognition: {{name}}",
+    "text": "Reconocimiento de voz: {{name}}"
+  },
   "fork.languageMenu.mine": {
     "en": "My language",
     "text": "Mi idioma"
+  },
+  "fork.languageMenu.moreLanguages": {
+    "en": "{{count}} more languages",
+    "text": "{{count}} idiomas más"
   },
   "fork.languageMenu.mostly": {
     "en": "Translate into what they mostly speak",
@@ -526,6 +538,10 @@
   "fork.languageMenu.theirs": {
     "en": "Their language",
     "text": "Idioma de los demás"
+  },
+  "fork.languageMenu.theyMaySpeak": {
+    "en": "They may speak",
+    "text": "Puede que hable"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",
@@ -1123,6 +1139,10 @@
     "en": "No",
     "text": "No"
   },
+  "models.detectsGroup": {
+    "en": "Detects the language",
+    "text": "Detecta el idioma"
+  },
   "models.deviceAuto": {
     "en": "Auto",
     "text": "Automático"
@@ -1146,6 +1166,10 @@
   "models.multiLanguage": {
     "en": "Multi",
     "text": "Multilingüe"
+  },
+  "models.namedGroup": {
+    "en": "Needs the language set",
+    "text": "Requiere indicar el idioma"
   },
   "providers.gemini.name": {
     "en": "Google Gemini",

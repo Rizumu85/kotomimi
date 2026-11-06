@@ -123,7 +123,7 @@ export interface Stages {
    * Fork: the speaker speaks the other side's language too (`speakBoth`; `heard` is then `auto`): a sentence in it —
    * `language` — is answered by `stage`, into their own (`own`); one in their own by `speech`, as ever.
    */
-  back?: { stage: AnswerStage; language: string; own: string };
+  back?: { stage: AnswerStage; language: string; own: string; languages?: readonly string[] };
   /** Feedback alongside translation, only for speech in the language being practised. */
   feedback?: { stage: AnswerStage; language: string };
   /**
@@ -729,14 +729,17 @@ class PipelineLeg implements AdapterSession {
   private backFor(text: string, language?: string): AnswerStage | undefined {
     const back = this.stages.back;
     if (!back) return undefined;
-    return (language ? baseOf(language) : oneOfTwo(text, back.own, back.language)) === baseOf(back.language) ? back.stage : undefined;
+    // Fork: of the languages they speak besides their own, any (`languages`); else the one.
+    const spoken = back.languages?.length ? back.languages : [back.language];
+    const said = language ? baseOf(language) : spoken.length === 1 ? oneOfTwo(text, back.own, back.language) : identifyLanguage(text, [back.own, ...spoken])?.language;
+    return said && spoken.some((one) => baseOf(one) === baseOf(said)) ? back.stage : undefined;
   }
 
   /** The language a sentence of a leg left to detect it is written in: of a speaker who speaks both, one of the two. */
   private byWriting(text: string): string | undefined {
     const back = this.stages.back;
     // The writing first; a small text detector for the pairs it cannot tell apart (English/French, Spanish/Portuguese).
-    const found = identifyLanguage(text, back ? [back.own, back.language] : [])?.language;
+    const found = identifyLanguage(text, back ? [back.own, ...(back.languages?.length ? back.languages : [back.language])] : [])?.language;
     // Han characters are Chinese's and Cantonese's alike: spoken Cantonese written down has words of its own.
     return found === 'zh' && writtenInCantonese(text) ? 'yue' : found;
   }

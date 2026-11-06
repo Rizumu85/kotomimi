@@ -1,11 +1,12 @@
 import { useAnalytics } from '../../lib/analytics';
-import type { AnyProvider } from '../../lib/provider/types';
+import type { AnyProvider, LanguagePair } from '../../lib/provider/types';
 import { languageContext } from '../../lib/session/shape';
 import type { AudioMode } from '../../stores/audioStore';
 import { useNativeEngineStore } from '../../stores/nativeEngineStore';
 import { useProviderStore } from '../../stores/providerStore';
 import { LanguagePairSection } from './LanguagePairSection';
 import { useSelectedProvider } from './useSelectedProvider';
+import { useSettingsStore } from '../../stores/settingsStore';
 
 interface ProviderLanguagesProps {
   providers: readonly AnyProvider[];
@@ -13,6 +14,8 @@ interface ProviderLanguagesProps {
   disabled?: boolean;
   /** The language pair's sentence (ruling 4); the app passes it, the preview does not. */
   sentence?: { mode: AudioMode; textOnly: boolean };
+  /** Fork: the language the user's speech follows the other side into now, in a session (`follow.ts`). */
+  followed?: string;
 }
 
 /**
@@ -21,7 +24,10 @@ interface ProviderLanguagesProps {
  * AST2, choice 1). Tracks each side that changed with today's
  * `language_changed` (ruling 14) before persisting the new pair.
  */
-export function ProviderLanguages({ providers, disabled, sentence }: ProviderLanguagesProps) {
+/** A pair of two languages: one of one (Chinese to Chinese, to hear someone more clearly) has no other to speak. */
+const pairDiffers = (pair: LanguagePair): boolean => pair.source.toLowerCase() !== pair.target.toLowerCase();
+
+export function ProviderLanguages({ providers, disabled, sentence, followed }: ProviderLanguagesProps) {
   const { trackEvent } = useAnalytics();
   const selection = useSelectedProvider(providers);
   const legs = useProviderStore((st) => st.legs);
@@ -39,7 +45,10 @@ export function ProviderLanguages({ providers, disabled, sentence }: ProviderLan
   const detection = provider.languages.detection?.(entry.settings, selection.models, entry.pair);
   const offer = (kind: 'other' | 'both') => detection && { on: detection[kind].on, available: detection[kind].available, bestEffort: detection[kind].bestEffort, set: (on: boolean) => updateSettings(provider, detection[kind].turn(on)) };
   const detect = legs.includes('participant') ? offer('other') : undefined;
-  const both = legs.includes('speaker') ? offer('both') : undefined;
+  // Fork: the user's other languages, and what hears each side (`LanguageHearing`).
+  const speakAlso = legs.includes('speaker') && pairDiffers(entry.pair) ? provider.languages.speakAlso?.(entry.settings, selection.models, entry.pair) : undefined;
+  const also = speakAlso && { chosen: speakAlso.chosen, offered: speakAlso.offered, available: speakAlso.available, set: (chosen: string[]) => updateSettings(provider, speakAlso.set(chosen)) };
+  const hearing = provider.languages.hearing?.(entry.settings, selection.models, entry.pair);
 
   return (
     <LanguagePairSection
@@ -50,7 +59,10 @@ export function ProviderLanguages({ providers, disabled, sentence }: ProviderLan
       sentence={sentence}
       context={languageContext(provider, legs, speech)}
       detect={detect}
-      both={both}
+      {...(also ? { also } : {})}
+      {...(hearing ? { hearing } : {})}
+      {...(followed ? { followed } : {})}
+      onOpenHearing={() => useSettingsStore.getState().navigateToSettings('hearing')}
       owners={kotomimi}
       onChange={(pair) => {
         if (pair.source !== entry.pair.source) trackEvent('language_changed', { to_language: pair.source, language_type: 'source' });

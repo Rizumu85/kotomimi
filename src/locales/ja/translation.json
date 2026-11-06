@@ -1066,7 +1066,9 @@
       "cancel": "キャンセル",
       "accept": "理解しました — 非商用のみ",
       "acceptRestricted": "理解しました — ライセンスに同意する"
-    }
+    },
+    "detectsGroup": "言語を自動検出",
+    "namedGroup": "言語の指定が必要"
   },
   "notes": {
     "stageAsr": "音声認識",
@@ -1761,8 +1763,6 @@
       "mutedNotHeard": "VRChat でミュート中のため、自分の音声は認識されません。"
     },
     "languageMenu": {
-      "speakBoth": "{{language}}でも話す",
-      "speakBothHelp": "{{mine}}で話すと{{language}}に、{{language}}で話すと{{mine}}に翻訳します。音声認識が2つの言語を自動で判別します。",
       "search": "入力して言語を絞り込み",
       "none": "その名前の言語はありません",
       "pin": "{{name}}を先頭に固定",
@@ -1771,13 +1771,15 @@
       "unpinShort": "固定を解除",
       "mine": "自分の言語",
       "theirs": "相手の言語",
-      "mostly": "相手が主に話す言語に翻訳",
       "detect": "自動検出",
       "detectUnavailable": "現在の音声認識では言語を自動検出できません。Qwen3-ASR 1.7B GGUF または API モデルが必要です。",
-      "speakBothUnavailable": "選択中の音声認識では{{mine}}と{{language}}を判別できません。両方の言語をインストールした Apple Speech のペア構成か、両方の言語を判別できる音声認識を選んでください。",
       "bestEffortSummary": "言語は文字から推測するため、誤判定することがあります。",
       "bestEffortHelp": "選択した音声認識モデルは、文字起こしの言語を返しません。Kotomimi がテキストから推測するため、言語判定の精度が下がる場合があります。",
-      "pairHelp": "自分と相手が主に使う言語を選びます。自分の発言は相手の言語に、相手の発言は自分の言語に翻訳されます。"
+      "pairHelp": "自分と相手が主に使う言語を選びます。自分の発言は相手の言語に、相手の発言は自分の言語に翻訳されます。",
+      "alsoSpeak": "私も話せる",
+      "theyMaySpeak": "相手が話すかもしれない言語",
+      "hearingBy": "音声認識：{{name}}",
+      "moreLanguages": "ほか{{count}}言語"
     },
     "wizard": {
       "pathTitle": "Kotomimi 自由に組み合わせ",

@@ -1066,7 +1066,9 @@
       "cancel": "Anuluj",
       "accept": "Rozumiem — tylko użytek niekomercyjny",
       "acceptRestricted": "Rozumiem — akceptuję licencję"
-    }
+    },
+    "detectsGroup": "Wykrywa język",
+    "namedGroup": "Wymaga wybrania języka"
   },
   "notes": {
     "stageAsr": "rozpoznawania mowy",
@@ -1761,8 +1763,6 @@
       "mutedNotHeard": "Mikrofon jest wyciszony w VRChat. Twoja mowa nie jest rozpoznawana."
     },
     "languageMenu": {
-      "speakBoth": "Mówię też w języku: {{language}}",
-      "speakBothHelp": "Gdy mówisz w języku {{mine}}, tłumaczenie jest na {{language}}, a gdy w języku {{language}}, na {{mine}}. Rozpoznawanie mowy automatycznie odróżnia te dwa języki.",
       "search": "Wpisz, aby znaleźć język",
       "none": "Nie ma języka o tej nazwie",
       "pin": "Przypnij {{name}} na górze",
@@ -1771,13 +1771,15 @@
       "unpinShort": "Odepnij",
       "mine": "Mój język",
       "theirs": "Język rozmówcy",
-      "mostly": "Tłumacz na główny język rozmówcy",
       "detect": "Wykrywaj automatycznie",
       "detectUnavailable": "Obecny model rozpoznawania mowy nie wykrywa języków automatycznie. Potrzebny jest Qwen3-ASR 1.7B GGUF lub model API.",
-      "speakBothUnavailable": "Wybrany model rozpoznawania mowy nie odróżnia języków {{mine}} i {{language}}. Wybierz sparowane Apple Speech z zainstalowanymi oboma językami albo model, który rozpoznaje oba języki.",
       "bestEffortSummary": "Język jest ustalany na podstawie tekstu i może zostać rozpoznany błędnie.",
       "bestEffortHelp": "Wybrany model rozpoznawania mowy nie podaje języka transkrypcji. Kotomimi szacuje go na podstawie tekstu, więc wykrywanie języka może być mniej wiarygodne.",
-      "pairHelp": "Wybierz języki, których ty i druga osoba głównie używacie. Twoje słowa są tłumaczone na jej język, a jej na twój."
+      "pairHelp": "Wybierz języki, których ty i druga osoba głównie używacie. Twoje słowa są tłumaczone na jej język, a jej na twój.",
+      "alsoSpeak": "Mówię także",
+      "theyMaySpeak": "Mogą mówić",
+      "hearingBy": "Rozpoznawanie mowy: {{name}}",
+      "moreLanguages": "Jeszcze {{count}} języków"
     },
     "wizard": {
       "pathTitle": "Kotomimi — własna konfiguracja",

@@ -479,6 +479,10 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "Позволяет другим устройствам в локальной сети использовать модели этого компьютера. На другом устройстве найдите этот компьютер в разделе «Другое устройство» в Kotomimi и выберите там модель и язык. Общий доступ работает, пока открыт Kotomimi."
   },
+  "fork.languageMenu.alsoSpeak": {
+    "en": "I also speak",
+    "text": "Я также говорю на"
+  },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
     "text": "Определять автоматически"
@@ -487,9 +491,17 @@
     "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
     "text": "Текущее распознавание речи не поддерживает автоматическое определение языка. Нужна модель Qwen3-ASR 1.7B GGUF или модель через API."
   },
+  "fork.languageMenu.hearingBy": {
+    "en": "Speech recognition: {{name}}",
+    "text": "Распознавание речи: {{name}}"
+  },
   "fork.languageMenu.mine": {
     "en": "My language",
     "text": "Мой язык"
+  },
+  "fork.languageMenu.moreLanguages": {
+    "en": "{{count}} more languages",
+    "text": "Ещё языков: {{count}}"
   },
   "fork.languageMenu.mostly": {
     "en": "Translate into what they mostly speak",
@@ -526,6 +538,10 @@
   "fork.languageMenu.theirs": {
     "en": "Their language",
     "text": "Язык собеседника"
+  },
+  "fork.languageMenu.theyMaySpeak": {
+    "en": "They may speak",
+    "text": "Возможно, они говорят на"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",
@@ -1115,6 +1131,10 @@
     "en": "Connect",
     "text": "Подключиться"
   },
+  "models.detectsGroup": {
+    "en": "Detects the language",
+    "text": "Определяет язык"
+  },
   "models.deviceCpu": {
     "en": "CPU",
     "text": "ЦП"
@@ -1122,6 +1142,10 @@
   "models.deviceGpu": {
     "en": "GPU",
     "text": "ГП"
+  },
+  "models.namedGroup": {
+    "en": "Needs the language set",
+    "text": "Нужно указать язык"
   },
   "providers.gemini.name": {
     "en": "Google Gemini",

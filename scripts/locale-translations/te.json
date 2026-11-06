@@ -483,6 +483,10 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "ఈ కంప్యూటర్‌లోని మోడళ్లను మీ స్థానిక నెట్‌వర్క్‌లోని ఇతర పరికరాలకు అందిస్తుంది. అవతలి పరికరంలో Kotomimiలోని \"మరో పరికరం\" కింద వెతికితే ఈ కంప్యూటర్ కనిపిస్తుంది. మోడల్, భాషను అక్కడే ఎంచుకోవచ్చు. Kotomimi తెరిచి ఉన్నప్పుడే పంచుకోవచ్చు."
   },
+  "fork.languageMenu.alsoSpeak": {
+    "en": "I also speak",
+    "text": "నేను కూడా మాట్లాడుతాను"
+  },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
     "text": "స్వయంచాలక గుర్తింపు"
@@ -491,9 +495,17 @@
     "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
     "text": "ప్రస్తుతం ఉపయోగిస్తున్న వాక్కు గుర్తింపు భాషలను గుర్తించలేను. Qwen3-ASR 1.7B GGUF లేదా API మోడల్ అవసరం."
   },
+  "fork.languageMenu.hearingBy": {
+    "en": "Speech recognition: {{name}}",
+    "text": "మాటల గుర్తింపు: {{name}}"
+  },
   "fork.languageMenu.mine": {
     "en": "My language",
     "text": "నా భాష"
+  },
+  "fork.languageMenu.moreLanguages": {
+    "en": "{{count}} more languages",
+    "text": "ఇంకా {{count}} భాషలు"
   },
   "fork.languageMenu.mostly": {
     "en": "Translate into what they mostly speak",
@@ -530,6 +542,10 @@
   "fork.languageMenu.theirs": {
     "en": "Their language",
     "text": "వారి భాష"
+  },
+  "fork.languageMenu.theyMaySpeak": {
+    "en": "They may speak",
+    "text": "వారు మాట్లాడవచ్చు"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",
@@ -1119,6 +1135,10 @@
     "en": "Connect",
     "text": "కనెక్ట్ చేయి"
   },
+  "models.detectsGroup": {
+    "en": "Detects the language",
+    "text": "భాషను ఆటోమేటిక్‌గా గుర్తిస్తుంది"
+  },
   "models.deviceCpu": {
     "en": "CPU",
     "text": "CPU"
@@ -1126,6 +1146,10 @@
   "models.deviceGpu": {
     "en": "GPU",
     "text": "GPU"
+  },
+  "models.namedGroup": {
+    "en": "Needs the language set",
+    "text": "భాషను పేర్కొనాలి"
   },
   "providers.gemini.name": {
     "en": "Google Gemini",

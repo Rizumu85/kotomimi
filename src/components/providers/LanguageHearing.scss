@@ -1,0 +1,125 @@
+// Fork: under the language pair (`LanguageHearing.tsx`): what hears each side, and the languages it tells apart as
+// chips. Every edge lines up with the pair above: the rows' labels are the selects' labels, the chips start at the
+// selects' left edge, and the hearer's chevron ends at their right edge.
+@use '../Settings/shared/variables' as vars;
+
+.language-hearing {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.language-hearing__row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.language-hearing__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: vars.$space-2;
+  min-height: 22px;
+}
+
+.language-hearing__label {
+  font-size: vars.$font-title;
+  font-weight: 500;
+  color: vars.$text-secondary;
+  white-space: nowrap;
+}
+
+// The hearer: a quiet link to its settings. Its chevron's ink, not its box, meets the selects' right edge.
+.language-hearing__hearer {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  height: 22px;
+  margin-right: -3px;
+  padding: 0 0 0 4px;
+  border: 0;
+  border-radius: vars.$radius-sm;
+  background: transparent;
+  color: vars.$text-muted;
+  font: inherit;
+  font-size: vars.$font-caption;
+  cursor: pointer;
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  svg { flex: none; }
+  &:hover { color: vars.$text-primary; }
+  &:focus-visible { @include vars.focus-ring; }
+}
+
+.language-hearing__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.language-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 11px;
+  border: 1px solid vars.$border-default;
+  border-radius: 14px;
+  background: transparent;
+  color: vars.$text-secondary;
+  font: inherit;
+  font-size: vars.$font-body;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color vars.$transition-fast, background-color vars.$transition-fast, color vars.$transition-fast;
+
+  &:hover:not(:disabled) { border-color: vars.$text-muted; color: vars.$text-primary; }
+  &:focus-visible { @include vars.focus-ring; }
+  &:disabled { opacity: vars.$disabled-opacity; cursor: not-allowed; }
+
+  // One of several the user speaks: a check, on a raised ground.
+  &.is-on {
+    padding-left: 8px;
+    border-color: vars.$text-muted;
+    background: vars.$bg-hover;
+    color: vars.$text-primary;
+  }
+
+  // The one the user's speech goes into at first.
+  &.is-chosen {
+    border-color: vars.$color-primary;
+    background: color-mix(in srgb, vars.$color-primary 12%, transparent);
+    color: vars.$color-primary;
+  }
+
+  // The one it follows into now: filled, with a mark of its own.
+  &.is-live {
+    padding-left: 9px;
+    border-color: vars.$color-primary-fill;
+    background: vars.$color-primary-fill;
+    color: vars.$color-on-primary;
+
+    &::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      margin-right: 1px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+  }
+}
+
+.language-chip--more {
+  border-style: dashed;
+  color: vars.$text-muted;
+}

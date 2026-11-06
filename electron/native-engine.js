@@ -142,7 +142,7 @@ const MODELS = {
     // and fails for the lack of it. A stretch is read whole.
     requestOptions: { audio_chunk_mode: 'none' },
     // Told a language that is not one of these it does not refuse: it reads as though told none, and writes the
-    // speech down as one of its five. So it is offered for these alone, and never left to detect.
+    // speech down as one of its five. So it is offered for these alone, and left to detect only among them.
     languageAs: 'code',
     languages: ['zh', 'yue', 'en', 'ja', 'ko'],
     unspaced: true,

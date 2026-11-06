@@ -1066,7 +1066,9 @@
       "cancel": "Avbryt",
       "accept": "Jag förstår — endast icke-kommersiellt",
       "acceptRestricted": "Jag förstår — jag accepterar licensen"
-    }
+    },
+    "detectsGroup": "Identifierar språk automatiskt",
+    "namedGroup": "Språk måste anges"
   },
   "notes": {
     "stageAsr": "taligenkänning",
@@ -1761,8 +1763,6 @@
       "mutedNotHeard": "Mikrofonen är avstängd i VRChat. Det du säger känns inte igen."
     },
     "languageMenu": {
-      "speakBoth": "Jag talar också {{language}}",
-      "speakBothHelp": "När du talar {{mine}} översätts det till {{language}}, och när du talar {{language}} översätts det till {{mine}}. Taligenkänningen skiljer automatiskt mellan språken.",
       "search": "Skriv för att hitta ett språk",
       "none": "Inget språk med det namnet",
       "pin": "Fäst {{name}} överst",
@@ -1771,13 +1771,15 @@
       "unpinShort": "Lossa",
       "mine": "Mitt språk",
       "theirs": "Deras språk",
-      "mostly": "Översätt till språket de talar mest",
       "detect": "Identifiera automatiskt",
       "detectUnavailable": "Den aktuella taligenkänningen kan inte identifiera språk automatiskt. Det kräver Qwen3-ASR 1.7B GGUF eller en API-modell.",
-      "speakBothUnavailable": "Den valda taligenkänningen kan inte skilja mellan {{mine}} och {{language}}. Välj parkopplad Apple Speech med båda språken installerade, eller en taligenkänning som identifierar båda språken.",
       "bestEffortSummary": "Språket härleds från texten och kan identifieras fel.",
       "bestEffortHelp": "Den valda taligenkänningsmodellen anger inte transkriptionens språk. Kotomimi uppskattar det utifrån texten, så språkidentifieringen kan vara mindre tillförlitlig.",
-      "pairHelp": "Välj de språk som du och den andra personen främst använder. Det du säger översätts till deras språk och det de säger till ditt."
+      "pairHelp": "Välj de språk som du och den andra personen främst använder. Det du säger översätts till deras språk och det de säger till ditt.",
+      "alsoSpeak": "Jag talar också",
+      "theyMaySpeak": "De kan tala",
+      "hearingBy": "Taligenkänning: {{name}}",
+      "moreLanguages": "Ytterligare {{count}} språk"
     },
     "wizard": {
       "pathTitle": "Kotomimi med valfria modeller",

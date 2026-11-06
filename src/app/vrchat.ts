@@ -445,7 +445,15 @@ async function build(): Promise<VRChatController> {
       const entry = selected ? entries[selected] : undefined;
       const provider = selected ? getProvider(selected) : undefined;
       if (!entry || !provider) return undefined;
-      return { language: entry.pair.target, back: provider.languages.detection?.(entry.settings, models[selected!] ?? [], entry.pair).both.on === true };
+      // Fork: the language the user's speech follows the other side into now, where it does (`follow.ts`); and whether
+      // the user speaks it ("我也会说").
+      const run = session.runner.state.getState();
+      const language = (run.phase === 'running' && run.followed) || entry.pair.target;
+      const listed = models[selected!] ?? [];
+      const also = provider.languages.speakAlso?.(entry.settings, listed, entry.pair);
+      const base = (code: string) => code.toLowerCase().split(/[-_]/)[0];
+      const speaks = also ? also.chosen.some((code) => base(code) === base(language)) : true;
+      return { language, back: speaks && provider.languages.detection?.(entry.settings, listed, entry.pair).both.on === true };
     },
     onReset: (listener) => session.runner.conversation.onReset(() => listener()),
     store: useVRChatStore,

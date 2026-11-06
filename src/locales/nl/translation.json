@@ -1066,7 +1066,9 @@
       "cancel": "Annuleren",
       "accept": "Begrepen — alleen niet-commercieel",
       "acceptRestricted": "Begrepen — licentie accepteren"
-    }
+    },
+    "detectsGroup": "Herkent de taal",
+    "namedGroup": "Taal selecteren vereist"
   },
   "notes": {
     "stageAsr": "spraakherkenning",
@@ -1761,8 +1763,6 @@
       "mutedNotHeard": "Gedempt in VRChat: wat je zegt, wordt niet herkend."
     },
     "languageMenu": {
-      "speakBoth": "Ik spreek ook {{language}}",
-      "speakBothHelp": "Als je {{mine}} spreekt, wordt dat vertaald naar {{language}}. Spreek je {{language}}, dan wordt dat vertaald naar {{mine}}. De spraakherkenning onderscheidt de twee talen automatisch.",
       "search": "Typ om een taal te zoeken",
       "none": "Geen taal met die naam",
       "pin": "{{name}} bovenaan vastzetten",
@@ -1771,13 +1771,15 @@
       "unpinShort": "Losmaken",
       "mine": "Mijn taal",
       "theirs": "Taal van de ander",
-      "mostly": "Vertalen naar de taal die de ander meestal spreekt",
       "detect": "Automatisch detecteren",
       "detectUnavailable": "De huidige spraakherkenning kan talen niet automatisch detecteren. Daarvoor is Qwen3-ASR 1.7B GGUF of een API-model nodig.",
-      "speakBothUnavailable": "De gekozen spraakherkenning kan {{mine}} en {{language}} niet onderscheiden. Kies gekoppelde Apple Speech met beide talen geïnstalleerd, of spraakherkenning die beide talen herkent.",
       "bestEffortSummary": "De taal wordt uit de tekst afgeleid en kan verkeerd worden herkend.",
       "bestEffortHelp": "Het geselecteerde spraakherkenningsmodel geeft de taal van de transcriptie niet aan. Kotomimi schat die in op basis van de tekst, waardoor de taaldetectie minder betrouwbaar kan zijn.",
-      "pairHelp": "Kies de talen die jij en de ander het meest gebruiken. Wat jij zegt wordt vertaald naar hun taal, en wat zij zeggen naar die van jou."
+      "pairHelp": "Kies de talen die jij en de ander het meest gebruiken. Wat jij zegt wordt vertaald naar hun taal, en wat zij zeggen naar die van jou.",
+      "alsoSpeak": "Ik spreek ook",
+      "theyMaySpeak": "Zij spreken mogelijk",
+      "hearingBy": "Spraakherkenning: {{name}}",
+      "moreLanguages": "Nog {{count}} talen"
     },
     "wizard": {
       "pathTitle": "Kotomimi vrij combineren",

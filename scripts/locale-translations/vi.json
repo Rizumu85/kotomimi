@@ -487,6 +487,10 @@
     "en": "Lends the models of this computer to other devices on your network. On the other device, Kotomimi finds this computer under \"Another device\", and the model and language are chosen there. Works while Kotomimi is open.",
     "text": "Cho các thiết bị khác trong mạng nội bộ dùng mô hình của máy tính này. Trên thiết bị kia, tìm máy tính này trong mục \"Thiết bị khác\" của Kotomimi rồi chọn mô hình và ngôn ngữ tại đó. Chỉ chia sẻ được khi Kotomimi đang mở."
   },
+  "fork.languageMenu.alsoSpeak": {
+    "en": "I also speak",
+    "text": "Tôi cũng nói"
+  },
   "fork.languageMenu.detect": {
     "en": "Auto-detect",
     "text": "Tự động phát hiện"
@@ -495,9 +499,17 @@
     "en": "The speech recognition in use can't detect languages. It needs Qwen3-ASR 1.7B GGUF or an API model.",
     "text": "Bộ nhận dạng giọng nói hiện tại không thể tự phát hiện ngôn ngữ. Cần Qwen3-ASR 1.7B GGUF hoặc mô hình API."
   },
+  "fork.languageMenu.hearingBy": {
+    "en": "Speech recognition: {{name}}",
+    "text": "Nhận dạng giọng nói: {{name}}"
+  },
   "fork.languageMenu.mine": {
     "en": "My language",
     "text": "Ngôn ngữ của tôi"
+  },
+  "fork.languageMenu.moreLanguages": {
+    "en": "{{count}} more languages",
+    "text": "Thêm {{count}} ngôn ngữ"
   },
   "fork.languageMenu.mostly": {
     "en": "Translate into what they mostly speak",
@@ -534,6 +546,10 @@
   "fork.languageMenu.theirs": {
     "en": "Their language",
     "text": "Ngôn ngữ của người kia"
+  },
+  "fork.languageMenu.theyMaySpeak": {
+    "en": "They may speak",
+    "text": "Họ có thể nói"
   },
   "fork.languageMenu.unpin": {
     "en": "Unpin {{name}}",
@@ -1123,6 +1139,10 @@
     "en": "Connect",
     "text": "Kết nối"
   },
+  "models.detectsGroup": {
+    "en": "Detects the language",
+    "text": "Tự động nhận diện ngôn ngữ"
+  },
   "models.deviceCpu": {
     "en": "CPU",
     "text": "CPU"
@@ -1130,6 +1150,10 @@
   "models.deviceGpu": {
     "en": "GPU",
     "text": "GPU"
+  },
+  "models.namedGroup": {
+    "en": "Needs the language set",
+    "text": "Cần chọn ngôn ngữ"
   },
   "providers.gemini.name": {
     "en": "Google Gemini",

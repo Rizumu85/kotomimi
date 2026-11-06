@@ -36,6 +36,8 @@ The 59 stretches the app cut from the seven clips, each read alone:
 
 Rejected on the engine, whole clips: Nemotron 3.5 Streaming 0.6B 20.6 %, Fun-ASR Nano 51 % (two clips fell into repetition).
 
+Told no language, 12 s of each of ten speed-test clips: both Qwen3-ASR sizes wrote all ten in the right language; SenseVoice-Small its five, the other five as garbled English.
+
 R2T2 parameters, engine direct, 60 s unbroken:
 
 | chunk ms / unfixed_chunk_num / unfixed_token_num | Error | Lag |
