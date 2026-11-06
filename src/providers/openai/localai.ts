@@ -895,6 +895,9 @@ const heardForModel = (s: LocalAISettings, pair: { source: string; target: strin
  * Fork: what hears a leg, as the language section names it (`languages.hearing`): this computer's model by its name and
  * the languages it tells apart; another device's or an API's by the model named, its languages not known here.
  */
+/** The Mac's recognition as another device's model names it whole (its languages are `apple-speech:<code>`). */
+const APPLE_NAME = 'apple-speech';
+
 function hearerOf(s: LocalAISettings, models: readonly LocalAIModel[], pair: { source: string; target: string }, leg: LegName): { name: string; languages: readonly string[] | null; apple?: true } | undefined {
   if (hearsNatively(s)) {
     const heard = heardBy(s, pair, leg, models);
@@ -904,9 +907,20 @@ function hearerOf(s: LocalAISettings, models: readonly LocalAIModel[], pair: { s
   }
   const named = (s.asrVia === 'api' ? s.asrApiModel : hearsAtOwnDevice(s) ? s.asrOtherModel : s.asrModel).trim();
   if (!named) return undefined;
-  // Another Kotomimi lists a model's languages, and "auto" among them where it tells them apart (`nativeShared`).
-  const listed = models.find((m) => m.id === named)?.languages?.filter((code) => code !== AUTO);
-  return { name: nativeTextName(named), languages: listed?.length ? listed : null };
+  // Another Kotomimi lists a model's languages, and "auto" among them where it tells them apart (`nativeShared`); the
+  // Mac's recognition there, as one that hears two at once (`bilingual`): the user's own and one other, as here.
+  // The Mac's recognition is named as a whole ("apple-speech") and listed a language at a time ("apple-speech:ja").
+  const apple = named === APPLE_NAME || isApple(named);
+  if (apple) {
+    const languages = models.filter((m) => isApple(m.id)).map((m) => m.id.slice(APPLE_NAME.length + 1));
+    return { name: 'Apple Speech', languages: languages.length ? languages : null, apple: true };
+  }
+  const model = models.find((m) => m.id === named);
+  const listed = model?.languages?.filter((code) => code !== AUTO);
+  const pairsTwo = model?.bilingual === true && !model.languages?.includes(AUTO);
+  const known = NATIVE_MODELS.find((m) => m.id === named);
+  const name = known ? known.name.replace(/ GGUF$/, '') : nativeTextName(named);
+  return { name, languages: listed?.length ? listed : null, ...(pairsTwo ? { apple: true as const } : {}) };
 }
 
 function nativeNeeds(s: LocalAISettings, pair: { source: string; target: string }, legs: readonly ('speaker' | 'participant')[]): NativeNeeds {
@@ -1382,8 +1396,11 @@ export const localaiLanguages: Provider<LocalAISettings, never, never>['language
     const mine = hearerOf(s, listed, pair, 'speaker');
     const either = (hearsNatively(s) && nativeEither({ model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage, either: { own: pair.source, other: pair.target } }) !== null)
       || (hearingPlace(s) === 'server' && serverBilingual(s.asrModel, pair, listed) !== null);
+    // The Mac's recognition hears one language beside the user's own: theirs. Only that one is shown picked there.
+    const chosen = alsoSpoken(s, pair);
+    const base = (code: string) => code.toLowerCase().split(/[-_]/)[0];
     return {
-      chosen: alsoSpoken(s, pair),
+      chosen: mine?.apple ? chosen.filter((code) => base(code) === base(pair.target)) : chosen,
       offered: mine?.apple ? [pair.target] : mine?.languages ?? null,
       available: canDetectOther(s, models) || either,
       set: (chosen) => ({ speakAlso: [...chosen], speakBoth: false }),
