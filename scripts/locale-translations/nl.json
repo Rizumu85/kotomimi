@@ -1759,6 +1759,10 @@
     "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "De telefoon ({{address}}) heeft nu niet genoeg geheugen voor {{name}}. Kies een kleiner model in het bijbehorende paneel of sluit andere apps op de telefoon."
   },
+  "providers.localai.phoneNoLanguage": {
+    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
+    "text": "{{name}} op de telefoon ({{address}}) kan {{source}} niet verstaan. Voeg die taal toe op de telefoon of kies een ander model in de kaart."
+  },
   "providers.localai.phoneNoMemory": {
     "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "De telefoon heeft nu niet genoeg geheugen voor dit model. Kies een kleiner model in het bijbehorende paneel of sluit andere apps op de telefoon."

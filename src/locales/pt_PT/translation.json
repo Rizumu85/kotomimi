@@ -754,7 +754,8 @@
       "noteQwen06": "Em testes com conversas informais em japonês no VRChat, cerca de 35% dos caracteres estavam errados. É pequeno e pode ser útil quando há pouca memória gráfica disponível.",
       "noteMoonshineJa": "Em testes com conversas informais em japonês no VRChat, cerca de 70% dos caracteres estavam errados. Apenas como último recurso, quando não é possível usar a placa gráfica.",
       "noteGranite41": "Em testes com conversas informais em japonês no VRChat, repetia constantemente a mesma frase. Praticamente inutilizável para conversas em japonês.",
-      "noteSenseVoice": "Em testes com conversas informais em japonês no VRChat, não produziu caracteres kana, tornando o japonês praticamente ilegível."
+      "noteSenseVoice": "Em testes com conversas informais em japonês no VRChat, não produziu caracteres kana, tornando o japonês praticamente ilegível.",
+      "phoneNoLanguage": "{{name}} no telefone ({{address}}) não reconhece {{source}}. Adicione esse idioma no telefone ou escolha outro modelo no respetivo cartão."
     }
   },
   "logsPanel": {

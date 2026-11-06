@@ -754,7 +754,8 @@
       "noteQwen06": "Sa pagsubok sa usapang Hapones sa VRChat: mga 35% ng mga karakter ang mali. Maliit ito, kaya puwedeng gamitin kapag kaunti ang libreng memorya ng graphics card.",
       "noteMoonshineJa": "Sa pagsubok sa usapang Hapones sa VRChat: mga 70% ng mga karakter ang mali. Pansamantalang gamitin lang kapag hindi talaga magamit ang graphics card.",
       "noteGranite41": "Sa pagsubok sa usapang Hapones sa VRChat: paulit-ulit ang parehong pangungusap. Halos hindi magamit para sa usapang Hapones.",
-      "noteSenseVoice": "Sa pagsubok sa usapang Hapones sa VRChat: walang kana sa teksto, kaya halos hindi mabasa ang Hapones."
+      "noteSenseVoice": "Sa pagsubok sa usapang Hapones sa VRChat: walang kana sa teksto, kaya halos hindi mabasa ang Hapones.",
+      "phoneNoLanguage": "Hindi nauunawaan ng {{name}} sa telepono ({{address}}) ang {{source}}. Idagdag ang wikang ito sa telepono, o pumili ng ibang modelo sa card nito."
     }
   },
   "logsPanel": {

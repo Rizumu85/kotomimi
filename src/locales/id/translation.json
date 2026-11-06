@@ -754,7 +754,8 @@
       "noteQwen06": "Hasil uji obrolan bahasa Jepang di VRChat: sekitar 35% karakter salah. Ukurannya kecil, cocok saat memori kartu grafis terbatas.",
       "noteMoonshineJa": "Hasil uji obrolan bahasa Jepang di VRChat: sekitar 70% karakter salah. Hanya untuk keadaan darurat saat kartu grafis sama sekali tidak bisa digunakan.",
       "noteGranite41": "Hasil uji obrolan bahasa Jepang di VRChat: terus mengulang kalimat yang sama. Praktis tidak bisa dipakai untuk percakapan bahasa Jepang.",
-      "noteSenseVoice": "Hasil uji obrolan bahasa Jepang di VRChat: tidak menghasilkan kana, sehingga teks bahasa Jepangnya sulit dipahami."
+      "noteSenseVoice": "Hasil uji obrolan bahasa Jepang di VRChat: tidak menghasilkan kana, sehingga teks bahasa Jepangnya sulit dipahami.",
+      "phoneNoLanguage": "{{name}} di ponsel ({{address}}) tidak dapat mengenali {{source}}. Tambahkan bahasa tersebut di ponsel, atau pilih model lain pada kartunya."
     }
   },
   "logsPanel": {

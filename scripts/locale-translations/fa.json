@@ -1719,6 +1719,10 @@
     "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "گوشی ({{address}}) اکنون حافظهٔ کافی برای اجرای {{name}} ندارد. در کارت آن مدل کوچک‌تری انتخاب کنید یا برنامه‌های دیگر گوشی را ببندید."
   },
+  "providers.localai.phoneNoLanguage": {
+    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
+    "text": "{{name}} روی تلفن ({{address}}) نمی‌تواند {{source}} را تشخیص دهد. این زبان را به تلفن اضافه کنید یا مدل دیگری را در کارت آن انتخاب کنید."
+  },
   "providers.localai.phoneNoMemory": {
     "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "گوشی اکنون حافظهٔ کافی برای اجرای این مدل ندارد. در کارت آن مدل کوچک‌تری انتخاب کنید یا برنامه‌های دیگر گوشی را ببندید."

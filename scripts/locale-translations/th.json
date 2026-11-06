@@ -1719,6 +1719,10 @@
     "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "โทรศัพท์ ({{address}}) มีหน่วยความจำไม่พอสำหรับ {{name}} ในตอนนี้ เลือกโมเดลที่เล็กลงในแผง หรือปิดแอปอื่นบนโทรศัพท์"
   },
+  "providers.localai.phoneNoLanguage": {
+    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
+    "text": "{{name}} บนโทรศัพท์ ({{address}}) ไม่รองรับ {{source}} เพิ่มภาษานี้บนโทรศัพท์ หรือเลือกโมเดลอื่นในการ์ดของมัน"
+  },
   "providers.localai.phoneNoMemory": {
     "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "โทรศัพท์มีหน่วยความจำไม่พอสำหรับโมเดลนี้ในตอนนี้ เลือกโมเดลที่เล็กลงในแผง หรือปิดแอปอื่นบนโทรศัพท์"

@@ -1719,6 +1719,10 @@
     "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "スマートフォン（{{address}}）の空きメモリが足りず、{{name}} を実行できません。カードで小さいモデルに変更するか、スマートフォンのほかのアプリを閉じてください。"
   },
+  "providers.localai.phoneNoLanguage": {
+    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
+    "text": "{{address}} のスマートフォン上の {{name}} は {{source}} を聞き取れません。スマートフォンにその言語を追加するか、カードで別のモデルを選んでください。"
+  },
   "providers.localai.phoneNoMemory": {
     "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "スマートフォンの空きメモリが足りず、このモデルを実行できません。カードで小さいモデルに変更するか、スマートフォンのほかのアプリを閉じてください。"

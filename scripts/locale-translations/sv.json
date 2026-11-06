@@ -1755,6 +1755,10 @@
     "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "Telefonen ({{address}}) har inte tillräckligt med ledigt minne för {{name}} just nu. Välj en mindre modell i kortet eller stäng andra appar på telefonen."
   },
+  "providers.localai.phoneNoLanguage": {
+    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
+    "text": "{{name}} på telefonen ({{address}}) kan inte höra {{source}}. Lägg till språket på telefonen eller välj en annan modell i dess kort."
+  },
   "providers.localai.phoneNoMemory": {
     "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "Telefonen har inte tillräckligt med ledigt minne för den här modellen just nu. Välj en mindre modell i kortet eller stäng andra appar på telefonen."

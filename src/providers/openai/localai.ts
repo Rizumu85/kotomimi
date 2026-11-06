@@ -586,6 +586,30 @@ function unheard(s: LocalAISettings, models: readonly LocalAIModel[], heard: str
   return { refused: `The other device shares no speech recognition model for ${heard}.`, code: 'server_no_asr', params: { source: heard } };
 }
 
+/**
+ * A device lent to hear (a phone, the iPad) whose recognizer is known not to take a language the leg asks of it: its
+ * main language, or one the user also speaks. Refused here, at the start and at a switch alike, rather than every
+ * stretch being refused there once it runs. A recognizer whose languages are not known is left to answer for itself.
+ */
+function phoneUnheard(s: LocalAISettings, models: readonly LocalAIModel[], pair: { source: string; target: string }, leg: LegName): ProviderRefusal | null {
+  const address = s.asrOther?.trim() ?? '';
+  if (!address || s.asrVia !== 'api' || s.asrApiBaseUrl.trim().replace(/\/+$/, '') !== phoneTextBase(address)) return null;
+  const hearer = hearerOf(s, models, pair, leg);
+  const languages = hearer?.languages?.filter((code) => code !== AUTO) ?? [];
+  if (!hearer || languages.length === 0) return null;
+  const heard = heardBy(s, pair, leg, models);
+  // Apple Speech hears one beside the user's own, theirs (`languages.more`): the others kept from another recognizer are not asked of it.
+  const also = s.coach ? [] : alsoSpoken(s, pair).filter((code) => !hearer.apple || hearer.detects || deviceLanguage(code) === deviceLanguage(pair.target));
+  const asked = leg === 'speaker' ? [heard === AUTO ? pair.source : heard, ...also] : heard === AUTO ? [] : [heard];
+  const missing = asked.find((code) => !languages.some((has) => deviceLanguage(has) === deviceLanguage(code)));
+  if (!missing) return null;
+  return {
+    refused: `The phone (${plainAddress(address)}) hears no ${missing} with ${hearer.name}.`,
+    code: 'phone_no_language',
+    params: { address: plainAddress(address), name: hearer.name, source: missing },
+  };
+}
+
 /** An explicitly selected paired recognizer or bilingual mode must not silently become single-language. */
 function unpaired(s: LocalAISettings, models: readonly LocalAIModel[], pair: { source: string; target: string }, speaker: boolean): ProviderRefusal | null {
   const also = alsoFirst(s, pair);
@@ -666,6 +690,19 @@ const listed = (body: unknown): Listed[] => {
     if (typeof m.id === 'string' && m.id && !seen.has(m.id)) seen.set(m.id, { id: m.id, kotomimi: m.owned_by === KOTOMIMI_HOST });
   }
   return [...seen.values()];
+};
+
+/** A lent device's recognizers (`hear`, the iPad app's), each with the languages it lists for it: none, where it lists none. */
+const hearListing = (body: unknown): Map<string, string[]> => {
+  const out = new Map<string, string[]>();
+  const hear = (body as { hear?: unknown } | null)?.hear;
+  if (!Array.isArray(hear)) return out;
+  for (const m of hear as Array<{ id?: unknown; languages?: unknown }>) {
+    if (typeof m?.id !== 'string' || !m.id || out.has(m.id)) continue;
+    const languages = Array.isArray(m.languages) ? m.languages.filter((l): l is string => typeof l === 'string' && /^[a-z]{2,3}([-_][A-Za-z0-9]{2,8})?$/i.test(l)).slice(0, 60) : [];
+    out.set(m.id.slice(0, 80), languages);
+  }
+  return out;
 };
 
 /** A GET of a model list: the key as a Bearer token when the server has one, and no header at all otherwise. */
@@ -781,10 +818,17 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
             continue;
           }
           if (!answer.ok) continue;
-          const theirs = listed(await answer.json().catch(() => null));
+          const body: unknown = await answer.json().catch(() => null);
+          const theirs = listed(body);
           // The speech recognition API's list is offered for its model field as it is: nothing says which of them hear.
+          // A lent device (the iPad) also lists every recognizer it can be asked for by name, with the languages of
+          // those it has them for (`hear`): what a side may add, and what a run may ask of it, is read from them.
           if (other.slot === 'asr') {
-            for (const m of theirs) models.push({ id: m.id, kind: 'asr', from: 'asr' });
+            const hears = hearListing(body);
+            for (const m of theirs) models.push({ id: m.id, kind: 'asr', from: 'asr', ...(hears.get(m.id)?.length ? { languages: hears.get(m.id) } : {}) });
+            for (const [id, languages] of hears) {
+              if (!theirs.some((m) => m.id === id)) models.push({ id, kind: 'asr', from: 'asr', ...(languages.length ? { languages } : {}) });
+            }
             continue;
           }
           // Another Kotomimi lists its recognizers too: its pipeline and its translation models are what a text slot can ask.
@@ -849,6 +893,7 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
       // What the leg translates: the speaker the pair and — when it speaks both — its reverse; the other side its reverse.
       const unfitServer = serverTranslatorUnfit(s, found, ctx.pair, leg, heard, both);
       const gap = unfitServer ?? unpaired(s, found, ctx.pair, leg === 'speaker') ?? unnamedStage(s, found, coached, plain, both) ?? undetected(s, found, leg === 'speaker' ? ctx.pair.source : heard, coached, leg === 'participant' ? ctx.pair.target : undefined) ?? unheard(s, found, heard === AUTO && !serverDetects(found, s.asrModel) ? (leg === 'speaker' ? ctx.pair.source : ctx.pair.target) : heard)
+        ?? phoneUnheard(s, found, ctx.pair, leg)
         ?? ((coached && !both) || plain ? null : phoneTranslatorUnfit(s, leg === 'speaker' ? ctx.pair.source : heard, leg === 'speaker' ? ctx.pair.target : ctx.pair.source))
         ?? (both ? alsoSpoken(s, ctx.pair).reduce<ProviderRefusal | null>((found, also) => found ?? phoneTranslatorUnfit(s, also, ctx.pair.source), null) : null);
       // Fork: another Kotomimi with nothing for the leg's language is told which, and offers a model to download for it
@@ -909,7 +954,7 @@ const ANY_PAST = 5;
 /** The Mac's recognition as another device's model names it whole (its languages are `apple-speech:<code>`). */
 const APPLE_NAME = 'apple-speech';
 
-function hearerOf(s: LocalAISettings, models: readonly LocalAIModel[], pair: { source: string; target: string }, leg: LegName): { name: string; languages: readonly string[] | null; apple?: true; detects?: true } | undefined {
+function hearerOf(s: LocalAISettings, models: readonly LocalAIModel[], pair: { source: string; target: string }, leg: LegName): { name: string; languages: readonly string[] | null; apple?: true; detects?: true; listed?: true } | undefined {
   if (hearsNatively(s)) {
     const heard = heardBy(s, pair, leg, models);
     const model = nativePicked(runHearing(s, pair, models), heard) ?? nativePicked(runHearing(s, pair, models), leg === 'speaker' ? pair.source : pair.target);
@@ -922,9 +967,12 @@ function hearerOf(s: LocalAISettings, models: readonly LocalAIModel[], pair: { s
   // Mac's recognition there, as one that hears two at once (`bilingual`): the user's own and one other, as here.
   // The Mac's recognition is named as a whole ("apple-speech") and listed a language at a time ("apple-speech:ja").
   const apple = named === APPLE_NAME || isApple(named);
+  // The iPad names it whole too, and lists the languages downloaded there with it (`hearListing`).
   if (apple) {
-    const languages = models.filter((m) => isApple(m.id)).map((m) => m.id.slice(APPLE_NAME.length + 1));
-    return { name: 'Apple Speech', languages: languages.length ? languages : null, apple: true };
+    const each = models.filter((m) => isApple(m.id)).map((m) => m.id.slice(APPLE_NAME.length + 1));
+    const languages = each.length ? each : models.find((m) => m.id === named)?.languages?.filter((code) => code !== AUTO) ?? [];
+    // `listed`: every language it has, not this computer's one model of a language (`apple-speech:zh`).
+    return { name: 'Apple Speech', languages: languages.length ? languages : null, apple: true, ...(languages.length ? { listed: true as const } : {}) };
   }
   const model = models.find((m) => m.id === named);
   const listed = model?.languages?.filter((code) => code !== AUTO);
@@ -1406,7 +1454,8 @@ export const localaiLanguages: Provider<LocalAISettings, never, never>['language
      */
     const reach = (hearer: ReturnType<typeof hearerOf>, mine: boolean) => {
       if (hearer?.detects) return { offered: hearer.languages, most: null, any: (hearer.languages?.length ?? 0) > ANY_PAST };
-      if (hearer?.apple && mine) return { offered: [pair.target], most: 1, any: false };
+      // Only where it has theirs: a device that lists its languages and has not it reaches the user's own alone.
+      if (hearer?.apple && mine && (!hearer.listed || hearer.languages?.some((code) => base(code) === base(pair.target)))) return { offered: [pair.target], most: 1, any: false };
       return { offered: hearer?.languages ?? null, most: 0, any: false };
     };
     const mineHearer = hearerOf(s, listed, pair, 'speaker');

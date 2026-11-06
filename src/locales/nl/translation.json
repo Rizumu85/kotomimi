@@ -754,7 +754,8 @@
       "noteQwen06": "Getest met Japanse gesprekken in VRChat: ongeveer 35% van de tekens fout. Klein model, bruikbaar bij weinig vrij videogeheugen.",
       "noteMoonshineJa": "Getest met Japanse gesprekken in VRChat: ongeveer 70% van de tekens fout. Alleen als noodoplossing wanneer de videokaart helemaal niet bruikbaar is.",
       "noteGranite41": "Getest met Japanse gesprekken in VRChat: blijft dezelfde zin herhalen. Vrijwel onbruikbaar voor Japanse gesprekken.",
-      "noteSenseVoice": "Getest met Japanse gesprekken in VRChat: geeft geen kana weer, waardoor het Japans vrijwel onleesbaar is."
+      "noteSenseVoice": "Getest met Japanse gesprekken in VRChat: geeft geen kana weer, waardoor het Japans vrijwel onleesbaar is.",
+      "phoneNoLanguage": "{{name}} op de telefoon ({{address}}) kan {{source}} niet verstaan. Voeg die taal toe op de telefoon of kies een ander model in de kaart."
     }
   },
   "logsPanel": {

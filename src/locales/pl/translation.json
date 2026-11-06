@@ -754,7 +754,8 @@
       "noteQwen06": "Test rozmów po japońsku w VRChat: około 35% błędnych znaków. Mały model, przydatny przy małej ilości wolnej pamięci karty graficznej.",
       "noteMoonshineJa": "Test rozmów po japońsku w VRChat: około 70% błędnych znaków. Tylko awaryjnie, gdy w ogóle nie można użyć karty graficznej.",
       "noteGranite41": "Test rozmów po japońsku w VRChat: ciągle powtarza to samo zdanie. Praktycznie nie nadaje się do rozmów po japońsku.",
-      "noteSenseVoice": "Test rozmów po japońsku w VRChat: nie zapisuje kany, więc japoński tekst jest praktycznie niezrozumiały."
+      "noteSenseVoice": "Test rozmów po japońsku w VRChat: nie zapisuje kany, więc japoński tekst jest praktycznie niezrozumiały.",
+      "phoneNoLanguage": "{{name}} na telefonie ({{address}}) nie rozpoznaje języka {{source}}. Dodaj ten język na telefonie lub wybierz inny model w jego karcie."
     }
   },
   "logsPanel": {

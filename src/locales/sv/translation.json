@@ -754,7 +754,8 @@
       "noteQwen06": "Testad med japanska samtal i VRChat: cirka 35% felaktiga tecken. Liten modell som kan användas när grafikminnet är knappt.",
       "noteMoonshineJa": "Testad med japanska samtal i VRChat: cirka 70% felaktiga tecken. Bara en nödlösning när grafikkortet inte kan användas alls.",
       "noteGranite41": "Testad med japanska samtal i VRChat: upprepar samma mening om och om igen. I princip oanvändbar för japanska samtal.",
-      "noteSenseVoice": "Testad med japanska samtal i VRChat: skriver inga kana, så japanskan blir i stort sett oläslig."
+      "noteSenseVoice": "Testad med japanska samtal i VRChat: skriver inga kana, så japanskan blir i stort sett oläslig.",
+      "phoneNoLanguage": "{{name}} på telefonen ({{address}}) kan inte höra {{source}}. Lägg till språket på telefonen eller välj en annan modell i dess kort."
     }
   },
   "logsPanel": {

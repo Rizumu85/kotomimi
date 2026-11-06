@@ -1715,6 +1715,10 @@
     "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "휴대폰({{address}})에 지금 {{name}} 모델을 실행할 메모리가 부족해요. 카드에서 더 작은 모델을 선택하거나 휴대폰의 다른 앱을 닫으세요."
   },
+  "providers.localai.phoneNoLanguage": {
+    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
+    "text": "{{address}}의 휴대폰에서 {{name}}이(가) {{source}}을(를) 인식하지 못합니다. 휴대폰에 해당 언어를 추가하거나 카드에서 다른 모델을 선택하세요."
+  },
   "providers.localai.phoneNoMemory": {
     "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "휴대폰에 지금 이 모델을 실행할 메모리가 부족해요. 카드에서 더 작은 모델을 선택하거나 휴대폰의 다른 앱을 닫으세요."

@@ -754,7 +754,8 @@
       "noteQwen06": "En pruebas con charlas en japonés en VRChat: alrededor de un 35% de caracteres erróneos. Es pequeño y puede servir si queda poca memoria gráfica.",
       "noteMoonshineJa": "En pruebas con charlas en japonés en VRChat: alrededor de un 70% de caracteres erróneos. Solo como último recurso si no puedes usar la tarjeta gráfica.",
       "noteGranite41": "Probado en charlas en japonés en VRChat: repite la misma frase sin parar. Prácticamente inutilizable para conversar en japonés.",
-      "noteSenseVoice": "Probado en charlas en japonés en VRChat: no escribe kana, por lo que el japonés resulta casi ilegible."
+      "noteSenseVoice": "Probado en charlas en japonés en VRChat: no escribe kana, por lo que el japonés resulta casi ilegible.",
+      "phoneNoLanguage": "{{name}} en el teléfono ({{address}}) no entiende {{source}}. Añade ese idioma en el teléfono o elige otro modelo en su tarjeta."
     }
   },
   "logsPanel": {

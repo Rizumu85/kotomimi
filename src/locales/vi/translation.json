@@ -754,7 +754,8 @@
       "noteQwen06": "Thử với hội thoại tiếng Nhật trên VRChat: khoảng 35% ký tự sai. Mô hình nhỏ, có thể dùng khi bộ nhớ đồ họa hạn hẹp.",
       "noteMoonshineJa": "Thử với hội thoại tiếng Nhật trên VRChat: khoảng 70% ký tự sai. Chỉ nên dùng tạm khi hoàn toàn không thể dùng card đồ họa.",
       "noteGranite41": "Thử với hội thoại tiếng Nhật trên VRChat: liên tục lặp lại cùng một câu, gần như không dùng được cho hội thoại tiếng Nhật.",
-      "noteSenseVoice": "Thử với hội thoại tiếng Nhật trên VRChat: không xuất được chữ kana, khiến tiếng Nhật gần như không đọc hiểu được."
+      "noteSenseVoice": "Thử với hội thoại tiếng Nhật trên VRChat: không xuất được chữ kana, khiến tiếng Nhật gần như không đọc hiểu được.",
+      "phoneNoLanguage": "{{name}} trên điện thoại ({{address}}) không nghe được {{source}}. Hãy thêm ngôn ngữ đó trên điện thoại hoặc chọn model khác trong thẻ."
     }
   },
   "logsPanel": {

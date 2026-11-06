@@ -1735,6 +1735,10 @@
     "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "O celular ({{address}}) está sem memória suficiente para executar {{name}}. Escolha um modelo menor no painel correspondente ou feche outros aplicativos no celular."
   },
+  "providers.localai.phoneNoLanguage": {
+    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
+    "text": "{{name}} no celular ({{address}}) não entende {{source}}. Adicione esse idioma no celular ou escolha outro modelo no cartão."
+  },
   "providers.localai.phoneNoMemory": {
     "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "O celular está sem memória suficiente para executar este modelo. Escolha um modelo menor no painel correspondente ou feche outros aplicativos no celular."

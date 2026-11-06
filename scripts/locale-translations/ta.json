@@ -1719,6 +1719,10 @@
     "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "கைபேசியில் ({{address}}) இப்போது {{name}} ஐ இயக்கப் போதுமான நினைவகம் இல்லை. அதன் அட்டையில் சிறிய மாதிரியைத் தேர்ந்தெடுங்கள் அல்லது கைபேசியின் மற்ற செயலிகளை மூடுங்கள்."
   },
+  "providers.localai.phoneNoLanguage": {
+    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
+    "text": "{{address}} என்ற தொலைபேசியில் உள்ள {{name}}க்கு {{source}} புரியவில்லை. அந்த மொழியைத் தொலைபேசியில் சேர்க்கவும் அல்லது அதன் அட்டையில் வேறு மாதிரியைத் தேர்ந்தெடுக்கவும்."
+  },
   "providers.localai.phoneNoMemory": {
     "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "இந்த மாதிரியை இயக்கக் கைபேசியில் இப்போது போதுமான நினைவகம் இல்லை. அதன் அட்டையில் சிறிய மாதிரியைத் தேர்ந்தெடுங்கள் அல்லது கைபேசியின் மற்ற செயலிகளை மூடுங்கள்."

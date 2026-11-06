@@ -754,7 +754,8 @@
       "noteQwen06": "Ujian perbualan santai bahasa Jepun dalam VRChat: kira-kira 35% aksara salah. Saiznya kecil, sesuai apabila memori grafik terhad.",
       "noteMoonshineJa": "Ujian perbualan santai bahasa Jepun dalam VRChat: kira-kira 70% aksara salah. Hanya sebagai pilihan kecemasan apabila kad grafik langsung tidak boleh digunakan.",
       "noteGranite41": "Ujian perbualan santai bahasa Jepun dalam VRChat: terus mengulang ayat yang sama. Hampir tidak boleh digunakan untuk perbualan bahasa Jepun.",
-      "noteSenseVoice": "Ujian perbualan santai bahasa Jepun dalam VRChat: tidak menghasilkan kana, menjadikan teks Jepun hampir tidak dapat difahami."
+      "noteSenseVoice": "Ujian perbualan santai bahasa Jepun dalam VRChat: tidak menghasilkan kana, menjadikan teks Jepun hampir tidak dapat difahami.",
+      "phoneNoLanguage": "{{name}} pada telefon ({{address}}) tidak dapat mengenali {{source}}. Tambahkan bahasa itu pada telefon, atau pilih model lain pada kadnya."
     }
   },
   "logsPanel": {

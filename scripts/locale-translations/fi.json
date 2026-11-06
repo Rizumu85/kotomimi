@@ -1723,6 +1723,10 @@
     "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "Puhelimen ({{address}}) muisti ei nyt riitä mallille {{name}}. Valitse kortista pienempi malli tai sulje puhelimen muita sovelluksia."
   },
+  "providers.localai.phoneNoLanguage": {
+    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
+    "text": "{{name}} puhelimessa ({{address}}) ei kuule kieltä {{source}}. Lisää tämä kieli puhelimeen tai valitse kortista toinen malli."
+  },
   "providers.localai.phoneNoMemory": {
     "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "Puhelimen muisti ei nyt riitä tälle mallille. Valitse kortista pienempi malli tai sulje puhelimen muita sovelluksia."

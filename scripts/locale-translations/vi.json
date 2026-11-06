@@ -1723,6 +1723,10 @@
     "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "Điện thoại ({{address}}) hiện không đủ bộ nhớ để chạy {{name}}. Hãy chọn mô hình nhỏ hơn trong thẻ tương ứng hoặc đóng bớt ứng dụng trên điện thoại."
   },
+  "providers.localai.phoneNoLanguage": {
+    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
+    "text": "{{name}} trên điện thoại ({{address}}) không nghe được {{source}}. Hãy thêm ngôn ngữ đó trên điện thoại hoặc chọn model khác trong thẻ."
+  },
   "providers.localai.phoneNoMemory": {
     "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "Điện thoại hiện không đủ bộ nhớ để chạy mô hình này. Hãy chọn mô hình nhỏ hơn trong thẻ tương ứng hoặc đóng bớt ứng dụng trên điện thoại."

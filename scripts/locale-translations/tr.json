@@ -1719,6 +1719,10 @@
     "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "Telefonun ({{address}}) belleği şu anda {{name}} modelini çalıştırmaya yetmiyor. Kartından daha küçük bir model seçin veya telefondaki diğer uygulamaları kapatın."
   },
+  "providers.localai.phoneNoLanguage": {
+    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
+    "text": "{{address}} adresindeki telefonda {{name}}, {{source}} dilini duyamıyor. Telefona bu dili ekleyin veya kartındaki başka bir modeli seçin."
+  },
   "providers.localai.phoneNoMemory": {
     "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
     "text": "Telefonun belleği şu anda bu modeli çalıştırmaya yetmiyor. Kartından daha küçük bir model seçin veya telefondaki diğer uygulamaları kapatın."

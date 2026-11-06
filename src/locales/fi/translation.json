@@ -754,7 +754,8 @@
       "noteQwen06": "Japaninkielisessä VRChat-arkikeskustelussa mitattu merkkivirheiden osuus on noin 35%. Pieni malli, jota voi käyttää näytönohjaimen muistin ollessa vähissä.",
       "noteMoonshineJa": "Japaninkielisessä VRChat-arkikeskustelussa mitattu merkkivirheiden osuus on noin 70%. Vain vararatkaisuksi, kun näytönohjainta ei voi käyttää lainkaan.",
       "noteGranite41": "Japaninkielisessä VRChat-arkikeskustelussa toistaa jatkuvasti samaa lausetta. Käytännössä käyttökelvoton japaninkielisissä keskusteluissa.",
-      "noteSenseVoice": "Japaninkielisessä VRChat-arkikeskustelussa ei tuota kana-merkkejä, joten japaninkielinen teksti on käytännössä lukukelvotonta."
+      "noteSenseVoice": "Japaninkielisessä VRChat-arkikeskustelussa ei tuota kana-merkkejä, joten japaninkielinen teksti on käytännössä lukukelvotonta.",
+      "phoneNoLanguage": "{{name}} puhelimessa ({{address}}) ei kuule kieltä {{source}}. Lisää tämä kieli puhelimeen tai valitse kortista toinen malli."
     }
   },
   "logsPanel": {
