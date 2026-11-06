@@ -17,7 +17,7 @@ Worktree directory: `.claude/worktrees/` (gitignored)
 
 ## Project Overview
 
-Sokuji is a real-time AI-powered translation application available as both an Electron desktop app and a browser extension. It provides live speech translation through Kizuna AI (managed Soniox), free on-device inference, Google Gemini, Doubao AST 2.0, Qwen LiveTranslate, OpenAI Realtime, OpenAI Translate, OpenAI Live, Soniox and Palabra AI. Local Native, the Electron sidecar, still runs on the old provider path until kizuna-ai-lab/sokuji#578.
+Sokuji is real-time AI speech translation, an Electron app and a browser extension, through Kizuna AI (managed Soniox), on-device inference, Google Gemini, Doubao AST 2.0, Qwen LiveTranslate, OpenAI Realtime, OpenAI Translate, OpenAI Live, Soniox and Palabra AI. Local Native, the Electron sidecar, still runs on the old provider path until kizuna-ai-lab/sokuji#578.
 
 ## Development Commands
 
@@ -44,7 +44,7 @@ All five version sites land in a single `chore(release): vX.Y.Z` commit BEFORE t
 ## Architecture Overview
 
 ### Dual Platform Architecture
-The codebase supports both Electron desktop app and Chrome/Edge browser extension from a shared React codebase: `src/` is shared, `electron/` is desktop-specific (virtual audio device management is Linux only), `extension/` holds the manifest and background scripts.
+One React codebase for the Electron app and the Chrome/Edge extension: `src/` is shared, `electron/` desktop-only (virtual audio devices on Linux only), `extension/` the manifest and background scripts.
 
 ### Key Architectural Components
 
@@ -222,14 +222,14 @@ Prefer the optimized selectors (`useUIMode()`, `useSetUIMode()`), which prevent 
 
 ### Audio Handling
 - Capture through the runner's sources (`src/lib/audio/capture/`, the microphone over `ModernAudioRecorder`); play through `src/lib/audio/playback.ts`
-- Passthrough: the microphone's processed voice, under the translation, into the meeting (the virtual output) on its own `passthrough` feed (`src/lib/audio/routes.ts`); off by default, its volume `audioStore`'s `realVoicePassthroughVolume`, default 0.2 — the settings show 20%, on a 0–60% slider
-- Echo cancellation on, by default asking for `true` ("Kotomimi only", `fork.echoCancellationApp`; "Browser only" outside Electron): Kotomimi speaks no translation, and `'all'` — every sound the system plays, a game's voices included (`AUDIO_CONSTRAINT_PROFILES` in `src/lib/config/performance.js`) — turned the user's own voice down while others spoke. The Echo Cancellation control under Noise Suppression (`audioStore.echoCancellationMode`, `audio.echoCancellationMode`; Windows and macOS only, every provider) can ask for `'all'`, for loudspeakers; Chromium 141+ grants it on Windows and macOS, falls back to `true` on Linux, and `track.getSettings().echoCancellation` (logged at `begin()`) says which took effect. A loopback microphone such as BlackHole carries system playout, which `'all'` cancels to silence. A change mid-session reopens the microphone (`openMic`'s `follow`)
+- Passthrough: the processed microphone voice under the translation, into the virtual output on its own `passthrough` feed (`src/lib/audio/routes.ts`); off by default, volume `audioStore.realVoicePassthroughVolume`, default 0.2 (20% on a 0–60% slider)
+- Echo cancellation asks for `true` by default ("Kotomimi only", `fork.echoCancellationApp`; "Browser only" outside Electron): `'all'` cancels every sound the system plays, a game's voices included (`AUDIO_CONSTRAINT_PROFILES`, `src/lib/config/performance.js`), and turned the user's voice down while others spoke. The control under Noise Suppression (`audioStore.echoCancellationMode`, `audio.echoCancellationMode`; Windows and macOS, every provider) can ask for `'all'` for loudspeakers: Chromium 141+ grants it there, Linux falls back to `true`, and `track.getSettings().echoCancellation` (logged at `begin()`) says which took effect. A loopback microphone (BlackHole) carries system playout, which `'all'` silences. A change mid-session reopens the microphone (`openMic`'s `follow`)
 
 ## Testing and Quality
 
 - Vitest with jsdom; test files colocated (`*.test.tsx`); global setup in `src/setupTests.ts`
 - TypeScript strict mode; English-only comments and docs; conventional commits; SASS
-- How a leg is heard, translated and given feedback (dictionary, language, detection, VAD, context, limits) lands on every path: here, a Kotomimi host, Android, iPad. `hearingPlan.ts` decides hearing; `recognitionPaths`/`textPaths.consistency.test.ts` hold it; a path that differs says why there
+- A feature lands on every place a leg runs and every model it runs on: this computer's models, Apple Speech, another Kotomimi (PC, Mac, iPad, Android), an API, each cloud provider. Design for all at once its interaction (the layout shows what this model can and cannot do) and structure (a capability the definition states and every path reads, not a one-case branch); an unknown (an API) gets the plainest. Hearing, translation and feedback (dictionary, language, detection, VAD, context, limits) are decided once (`hearingPlan.ts`), held by `recognitionPaths`/`textPaths.consistency.test.ts`; a path that differs says why there
 
 ## Build Configuration
 
@@ -253,7 +253,7 @@ Prefer the optimized selectors (`useUIMode()`, `useSetUIMode()`), which prevent 
 - **ws**: WebSocket client for the development wire probes (`scripts/dev/wire-probe/`)
 
 ### Internationalization
-Complete translations in 30 locale catalogs (`src/locales/*/translation.json`). English and both Chinese are written by hand; after adding or rewording a string run `node scripts/translate-locales.mjs --model <name>` (Codex++ must be running), which fills the other 27 and keeps what it made in `scripts/locale-translations/`. `src/locales/translated.consistency.test.ts` fails on anything left in English.
+Complete translations in 30 locale catalogs (`src/locales/*/translation.json`). English and both Chinese are written by hand; after adding a key run `node scripts/sync-locale-keys.mjs`, then for a new or reworded string `node scripts/translate-locales.mjs --model <name>` (Codex++ must be running), which fills the other 27 and keeps what it made in `scripts/locale-translations/`. `src/locales/translated.consistency.test.ts` fails on anything left in English.
 
 ## Common Development Tasks
 
@@ -278,7 +278,7 @@ What the spec's "What adding a provider then touches" lists
 exception until kizuna-ai-lab/sokuji#578.
 
 ### Adding a native model or TTS family
-Upstream's sidecar catalog (`sidecar/sokuji_sidecar/catalog.py`), which Kotomimi does not release. The step-by-step recipes for an ASR model, an ASR architecture, a translation model, a TTS family and a quant rung: `git show 62ef6af27:CLAUDE.md`. If prose and code disagree, the code wins.
+Upstream's sidecar catalog (`sidecar/sokuji_sidecar/catalog.py`), which Kotomimi does not release. Recipes for an ASR model or architecture, a translation model, a TTS family and a quant rung: `git show 62ef6af27:CLAUDE.md`. Where prose and code disagree, code wins.
 
 ### Modifying Audio Pipeline
 Test with both regular and passthrough audio, confirm echo cancellation, handle browser security restrictions and permissions, and test the AudioWorklet and ScriptProcessor paths.
@@ -289,7 +289,7 @@ Test with both regular and passthrough audio, confirm echo cancellation, handle 
 - Infinite loops in device switching: use `selectedInputDevice?.deviceId` in React dependencies, not the device object
 
 ### Dynamic Audio Device Switching
-The microphone source (`openMic`, `src/lib/audio/capture/mic.ts`) reads its device and noise suppression live (`MicSettings`, bound to `audioStore` in `src/lib/audio/appCapture.ts`); when the device changes it ends the recorder and begins it again without interrupting the session. A switch in flight finishes before the source stops; a switch that fails ends the source with its reason.
+The microphone source (`openMic`, `src/lib/audio/capture/mic.ts`) reads its device and noise suppression live (`MicSettings`, bound to `audioStore` in `src/lib/audio/appCapture.ts`); a device change restarts the recorder without interrupting the session. A switch in flight finishes before the source stops; one that fails ends the source with its reason.
 
 ## UI Components
 
@@ -357,4 +357,4 @@ Strict CSP for extension pages; connections allowed to the AI provider APIs (Ope
 - User-managed keys: OpenAI (Realtime, Translate, Live), Gemini, Doubao AST 2.0, Qwen LiveTranslate, Soniox, Palabra AI
 - Backend-managed keys: Kizuna AI, through Better Auth (`src/lib/auth-client.ts`, `src/lib/auth/`)
 
-Kizuna AI's flow: the managed provider (`src/providers/soniox/kizuna.ts`) asks for the sign-in in place of a key, and for the balance floor its budget sets. At Start its lease (`src/providers/soniox/lease.ts`) buys the session's keys from the backend, one per stream; the run ends when the grant does, and the lease tells the backend when the session is over. It is offered where `isKizunaAIEnabled()` holds: every development build, and a release built with `VITE_ENABLE_KIZUNA_AI=true`.
+Kizuna AI's flow: the managed provider (`src/providers/soniox/kizuna.ts`) asks for the sign-in in place of a key, and for its budget's balance floor. At Start its lease (`src/providers/soniox/lease.ts`) buys one key per stream from the backend; the run ends with the grant, and the lease tells the backend when it is over. It is offered where `isKizunaAIEnabled()` holds: every development build, and a release built with `VITE_ENABLE_KIZUNA_AI=true`.
