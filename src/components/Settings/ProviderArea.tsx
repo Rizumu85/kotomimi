@@ -9,16 +9,20 @@ import { presentProviders } from '../../providers/registry';
 import { useMode } from '../../stores/audioStore';
 import { SENTENCE_SEGMENTATION_SHOWN, useEngineSlotTarget, useSetEngineSlotTarget, useTextOnly } from '../../stores/settingsStore';
 import { GlossarySection } from './sections/GlossarySection';
+import { useRunPhase } from '../../app/useRun';
 
 /** General and Provider categories read the same provider entry and session lock. */
 export function SessionSettingsGeneral({ locked }: { locked: boolean }) {
   const providers = useMemo(() => presentProviders(), []);
   const mode = useMode();
   const textOnly = useTextOnly();
+  // Fork: the languages change while a session runs, and it goes on in them (`Runner.retarget`); only while it starts
+  // or stops are they held.
+  const phase = useRunPhase();
   return (
     <>
       {/* Language pair and output preferences. */}
-      <ProviderLanguages providers={providers} disabled={locked} sentence={{ mode, textOnly }} />
+      <ProviderLanguages providers={providers} disabled={locked && phase !== 'running'} sentence={{ mode, textOnly }} />
       <GlossarySection />
       <OutputToggles locked={locked} />
       {SENTENCE_SEGMENTATION_SHOWN && <SentenceSegmentationSection isSessionActive={locked} />}

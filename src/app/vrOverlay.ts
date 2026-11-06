@@ -56,6 +56,8 @@ export interface VrOverlayDeps {
   runner: {
     state: { getState(): RunState; subscribe(listener: () => void): () => void };
     stop(): Promise<void>;
+    /** Fork: the run goes on in the languages and settings as they stand now, restarted only where it cannot (`Runner.retarget`). */
+    retarget?(): Promise<void>;
   };
   /** The one start every surface calls (`AppSession.start`). */
   start(): Promise<void>;
@@ -245,7 +247,10 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
   // ── What the wrist asks ───────────────────────────────────────────────────
   /** Bumped by the user's own start or stop: a restart under way then does not start the run again. */
   let asked = 0;
-  /** Takes a change the run fixes: at once while idle; else the run stops, takes it, and starts again. */
+  /**
+   * Takes a change the run fixes: at once while idle; else the run goes on in it (`retarget`), stopping and starting
+   * again only where it cannot.
+   */
   const restartWith = async (kind: NonNullable<VrState['switching']>['kind'], name: string, change: () => void) => {
     if (switching) return;
     const mine = asked;
@@ -258,6 +263,12 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
     switching = { kind, label: name };
     publish();
     try {
+      if (runner.retarget) {
+        change();
+        await settings.flush();
+        if (!stopped && mine === asked) await runner.retarget();
+        return;
+      }
       await runner.stop();
       change();
       await settings.flush();
@@ -366,7 +377,7 @@ async function build(): Promise<VrOverlayController | null> {
   const session = getAppSession();
   return startVrOverlay({
     ipc,
-    runner: { state: session.runner.state, stop: () => session.runner.stop('vr') },
+    runner: { state: session.runner.state, stop: () => session.runner.stop('vr'), retarget: () => session.runner.retarget() },
     start: () => session.start('vr'),
     view: { get: () => session.view.get(), subscribe: (listener) => session.view.subscribe(listener) },
     levels: () => session.audio().then((a) => a.capture.levels, () => null),

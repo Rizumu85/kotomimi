@@ -41,6 +41,12 @@ export interface Runner {
   openSide(leg: LegName, lane: SideLane): Promise<SideHandle | null>;
   /** Fork: whether the running run can open one on `leg` now. */
   sideOffered(leg: LegName): boolean;
+  /**
+   * Fork: the language pair, or the provider's settings, changed. A running run goes on in them where it can
+   * (`Run.retarget`), else it is stopped and started again in them; a run starting or stopping, or none, is left as it
+   * is (a start reads them then). Changes that come while one is being made are made after it, the last of them only.
+   */
+  retarget(): Promise<void>;
   /** Empties the conversation, and the queued audio with it. */
   clear(): void;
 }
@@ -282,6 +288,45 @@ export function createRunner(rawDeps: RunnerDeps): Runner {
     });
   };
 
+  /** The retarget in flight, of the run it is for: a later run's goes on its own (`retarget`). */
+  let retargeting: { run: Run; done: Promise<void> } | null = null;
+  let retargetAgain = false;
+  /** Resolves once the phase is no longer `starting`. */
+  const started = () => new Promise<void>((resolve) => {
+    if (state.getState().phase !== 'starting') return resolve();
+    const off = state.subscribe((now) => {
+      if (now.phase === 'starting') return;
+      off();
+      resolve();
+    });
+  });
+  const retarget = (): Promise<void> => {
+    if (retargeting && retargeting.run === current) {
+      retargetAgain = true;
+      return retargeting.done;
+    }
+    const mine = current;
+    if (!mine) return Promise.resolve();
+    const done = (async () => {
+      do {
+        retargetAgain = false;
+        // A run still starting read the stores before the change: it is retargeted once it runs.
+        await started();
+        const run = current;
+        if (run !== mine || state.getState().phase !== 'running') return;
+        const next = deps.readShape();
+        if (!next || (next.pair.source === run.shape.pair.source && next.pair.target === run.shape.pair.target && next.settings === run.shape.settings)) continue;
+        if (await run.retarget(next)) continue;
+        if (run !== current || state.getState().phase !== 'running') return;
+        await stop('language');
+        await start('language');
+        return;
+      } while (retargetAgain);
+    })().finally(() => { if (retargeting?.done === done) retargeting = null; });
+    retargeting = { run: mine, done };
+    return done;
+  };
+
   const stop = (method: ControlMethod = 'button'): Promise<void> => {
     const run = current;
     if (!run) return Promise.resolve();
@@ -324,6 +369,7 @@ export function createRunner(rawDeps: RunnerDeps): Runner {
     sendText: (text) => current?.sendText(text),
     openSide: (leg, lane) => (current && state.getState().phase === 'running' ? current.openSide(leg, lane) : Promise.resolve(null)),
     sideOffered: (leg) => state.getState().phase === 'running' && (current?.sideOffered(leg) ?? false),
+    retarget,
     setLegPace: (leg, pace) => {
       paces.set(leg, pace);
       current?.setPace(leg, pace);

@@ -9,7 +9,7 @@ import { useSelectedProvider } from './useSelectedProvider';
 
 interface ProviderLanguagesProps {
   providers: readonly AnyProvider[];
-  /** A run is not idle: both selects and the swap are locked. */
+  /** Both selects and the swap are locked: a run is starting or stopping (a running one goes on in a new pair). */
   disabled?: boolean;
   /** The language pair's sentence (ruling 4); the app passes it, the preview does not. */
   sentence?: { mode: AudioMode; textOnly: boolean };

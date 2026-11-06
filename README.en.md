@@ -105,7 +105,7 @@ The "General" settings have a "VR headset" card: turn on **Show captions and the
 
 - **The caption strip**: the other side's latest sentence, the original small and the translation large, below your line of sight. It stays put when you turn your head a little and follows when you turn further; it clears when nothing new has been said for a while.
 - **The wrist menu**: appears when you look at your wrist. Press it directly with the other controller: it uses no buttons, so it works beside tools such as XSOverlay. Its first page shows whether each side is heard, the last few lines, the other side's language, pause, and hiding the strip.
-- **Adjust**: switch your own language, the recognition model and the translation model. Each model shows how far behind it actually ran this session, above the headset's frame rate and the graphics memory, so you can try models while you play and see which keeps up without slowing the game. A switch restarts the session by itself, and the strip says "Switching to…".
+- **Adjust**: switch your own language, the recognition model and the translation model. Each model shows how far behind it actually ran this session, above the headset's frame rate and the graphics memory, so you can try models while you play and see which keeps up without slowing the game. The session keeps going through a switch; the strip says "Switching to…" meanwhile.
 
 It is still a trial: feedback on where it sits and how it feels is welcome.
 

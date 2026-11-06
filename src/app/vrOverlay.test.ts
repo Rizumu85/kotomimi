@@ -174,6 +174,26 @@ describe('startVrOverlay', () => {
     t.controller.stop();
   });
 
+  it('has a running run go on in the change where the runner can, the strip saying so meanwhile', async () => {
+    let finish = () => {};
+    const order: string[] = [];
+    const retarget = vi.fn(() => new Promise<void>((resolve) => { order.push('retarget'); finish = resolve; }));
+    const t = setup();
+    (t.runner as { retarget?: () => Promise<void> }).retarget = retarget;
+    t.setRun({ phase: 'running', since: 0, legs: {} });
+    await t.connect();
+    t.command({ type: 'theirs', value: 'en' });
+    await flush();
+    expect([...t.order, ...order]).toEqual(['pair zh-CN>en', 'flush', 'retarget']);
+    expect(t.sent[t.sent.length - 1].switching?.label).toBeTruthy();
+    finish();
+    await flush();
+    expect(t.runner.stop).not.toHaveBeenCalled();
+    expect(t.start).not.toHaveBeenCalled();
+    expect(t.sent[t.sent.length - 1].switching).toBeNull();
+    t.controller.stop();
+  });
+
   it('does not start the run again when the user stopped it while a change restarted it', async () => {
     let release = () => {};
     const t = setup();

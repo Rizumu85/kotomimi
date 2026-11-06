@@ -84,6 +84,34 @@ export function watchCoachingFromStores(): () => void {
   return useProviderStore.subscribe(apply);
 }
 
+/**
+ * Fork: calls `changed` whenever the selected provider's languages change — its pair (a pick, or a pair derived
+ * again), or whether a language is left to be detected (`languages.detection`) — so that a running session goes on
+ * in them (`Runner.retarget`). Not at once, and not for another provider's. Returns the unsubscribe.
+ */
+export function watchPairFromStores(changed: () => void): () => void {
+  const pairOf = () => {
+    const selected = selectedFromStores();
+    if (!selected) return null;
+    const { provider, entry } = selected;
+    let detected = '';
+    try {
+      const detection = provider.languages.detection?.(entry.settings, [], entry.pair);
+      if (detection) detected = `|${detection.other.on}|${detection.both.on}`;
+    } catch {
+      // A provider that cannot say goes by its pair alone.
+    }
+    return `${entry.pair.source}|${entry.pair.target}${detected}`;
+  };
+  let last = pairOf();
+  return useProviderStore.subscribe(() => {
+    const now = pairOf();
+    if (now === last) return;
+    last = now;
+    if (now !== null) changed();
+  });
+}
+
 export function readShapeFromStores(auth: AuthContext): RunShape | null {
   const selected = selectedFromStores();
   if (!selected) return null;

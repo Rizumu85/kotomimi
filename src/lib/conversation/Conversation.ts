@@ -74,7 +74,22 @@ export class Conversation {
   /** Index of the oldest segment that may still hold pcm; `afterAudio` scans from here, not 0. */
   private trimCursor = 0;
 
-  constructor(private readonly opts: ConversationOptions) { this.retention = opts.retention ?? DEFAULT_RETENTION; }
+  constructor(private opts: ConversationOptions) { this.retention = opts.retention ?? DEFAULT_RETENTION; }
+
+  /** Fork: the run went on in another language pair (`Run.retarget`): what is heard from now on is in these. */
+  setLanguages(languages: Languages): void {
+    const before = this.opts.languages;
+    if (languages.source === before.source && languages.target === before.target) return;
+    // What was said before goes on reading as the languages it was said in: a segment that names none is read in its
+    // leg's, which are about to change. (Feedback names its own, or none to begin with.)
+    this.segments.forEach((seg, i) => {
+      if (seg.language || seg.purpose === 'feedback') return;
+      const was = seg.side === 'source' ? before.source : before.target;
+      if (was && was !== 'auto') this.replace(i, { ...seg, language: was });
+    });
+    this.opts = { ...this.opts, languages };
+    this.touch();
+  }
 
   apply(event: AdapterEvent): void {
     this.batch(() => this.dispatch(event));

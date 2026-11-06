@@ -13,7 +13,7 @@ import { redact } from '../lib/diagnostics/redact';
 import { describeCause, reportWarning } from '../lib/diagnostics/report';
 import { autoSaveConversation } from '../lib/export/appAutoSave';
 import type { AuthContext } from '../lib/provider/types';
-import { appReplayAudio, ensureReadyFromStores, persistIfUnchanged, readShapeFromStores, watchCoachingFromStores, watchLegsFromStores, watchSpeechFromStores } from '../lib/session/appShape';
+import { appReplayAudio, ensureReadyFromStores, persistIfUnchanged, readShapeFromStores, watchCoachingFromStores, watchLegsFromStores, watchPairFromStores, watchSpeechFromStores } from '../lib/session/appShape';
 import type { AnalyticsPort, ControlMethod, FramePort } from '../lib/session/ports';
 import { createRunner, type Runner } from '../lib/session/runner';
 import type { OpenSource } from '../lib/session/source';
@@ -271,6 +271,8 @@ export function createAppSession(options: AppSessionOptions = {}): AppSession {
         watchSpeechFromStores(),
         // Fork: whether the user's own answers are grammar feedback, for what draws them.
         watchCoachingFromStores(),
+        // Fork: a language picked while a session runs: the session goes on in it, without a stop.
+        watchPairFromStores(() => { const { phase } = runner.state.getState(); if (phase === 'running' || phase === 'starting') void runner.retarget(); }),
         driveReadiness({
           runner, providers: () => presentProviders(), auth: () => bridges.auth, clock,
           watchSignIn: (fn) => { signInWatchers.add(fn); return () => { signInWatchers.delete(fn); }; },

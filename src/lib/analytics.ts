@@ -184,8 +184,8 @@ export interface AnalyticsEvents {
   };
   'session_control_clicked': {
     action: 'start' | 'stop' | 'cancel';
-    /** `window`: the Electron window closing, or an update installing, ended the run. */
-    method: 'button' | 'keyboard' | 'window' | 'vr';
+    /** `window`: the Electron window closing, or an update installing, ended the run. `language`: a language changed mid-session, and the session could only go on in it by starting again. */
+    method: 'button' | 'keyboard' | 'window' | 'vr' | 'language';
   };
   'panel_viewed': {
     panel_name: 'main' | 'settings' | 'audio' | 'logs';
