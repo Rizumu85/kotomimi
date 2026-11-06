@@ -443,6 +443,32 @@ describe('a coached speaker', () => {
     await mine.session.stop();
   });
 
+  it('does not translate the other side come back through loudspeakers into the microphone, and translates the user’s own', async () => {
+    // Asked by the user 2026-11-06: echo cancellation of every sound took their own voice down with the other side's;
+    // with it on Kotomimi's alone, what the loudspeakers played was written and translated as theirs.
+    const theirs = await live(PARTICIPANT, { translateServerModel: 'hy-mt2-1.8b' }, [sse('never mind')]);
+    const mine = await live(SPEAKER, { translateServerModel: 'hy-mt2-1.8b' }, [sse('先に行くね'), sse('またね')]);
+    theirs.receive(SERVER.committed('item_1'), SERVER.inputDelta('item_1', '我们明天一起去公园吧，好不好？'));
+    mine.receive(...heard('item_1', '我们明天一起去公园吧好不好'));
+    await vi.waitFor(() => expect(mine.of('segmentClosed')).toHaveLength(1));
+    expect(mine.lastText(1)).toMatchObject({ text: '' });
+    expect(mine.of('frame').filter((e) => e.payload.type === 'speech.dropped')).toHaveLength(1);
+    expect(mine.calls).toHaveLength(0);
+    // Said over them, and reading otherwise: their own, translated once the other leg has had its time to write.
+    mine.receive(...heard('item_2', '我先走了。'));
+    expect(mine.calls).toHaveLength(0);
+    mine.clock.advance(2100);
+    await vi.waitFor(() => expect(mine.calls).toHaveLength(1));
+    expect(mine.calls[0].body.messages.slice(-1)[0].content).toContain('我先走了。');
+    // With nobody else heard, nothing waits.
+    theirs.receive(SERVER.inputDone('item_1', '我们明天一起去公园吧，好不好？'));
+    mine.clock.advance(31_000);
+    mine.receive(...heard('item_3', '回头见。'));
+    await vi.waitFor(() => expect(mine.calls).toHaveLength(2));
+    await theirs.session.stop();
+    await mine.session.stop();
+  });
+
   it('is coached on a sentence repeated after the other side has finished it', async () => {
     const theirs = await live(PARTICIPANT, { translateServerModel: 'hy-mt2-1.8b' }, [sse('对对对，我就是喜欢这个。')]);
     const mine = await live(SPEAKER, COACH, [sse('OK')]);

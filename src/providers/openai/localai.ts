@@ -1272,6 +1272,9 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   // A paired recognizer identifies the language at finalization. Show tentative words immediately, but do not
   // translate or classify them by their script before that decision (English and French share one, for example).
   if (stages && (remotePair || device?.native?.either)) stages = { ...stages, requiresLanguage: true };
+  // The speaker's microphone: the other side's sound, come back through loudspeakers, is told from their own voice by
+  // the other leg hearing it at the same moment (`leakCheck` in pipeline.ts). The other side's leg is that sound.
+  if (stages && !shared.reversed(asked.direction)) stages = { ...stages, leakCheck: true };
 
   // Another Kotomimi whose recognizer does not name the language is told this leg's own source; `identify.ts` names the rest.
   const serverHeard = toldLanguage(heard, asked.direction.source, hearingPlace(s) !== 'server' || serverDetects(models, s.asrModel));

@@ -126,6 +126,14 @@ export interface Stages {
   back?: { stage: AnswerStage; language: string; own: string };
   /** Feedback alongside translation, only for speech in the language being practised. */
   feedback?: { stage: AnswerStage; language: string };
+  /**
+   * Fork: the speaker's microphone, with the other side's sound perhaps captured beside it (the participant leg).
+   * Played on loudspeakers, that sound comes back through the microphone and is written as if the user had said it.
+   * A sentence this leg hears that another leg was hearing at the same moment, and that reads as that one does, is
+   * that sound, and is dropped (`settleLeak`) — in place of the browser's echo cancellation of every sound, which
+   * also turned the user's own voice down while the other side spoke.
+   */
+  leakCheck?: true;
 }
 
 /** This computer hears: its own recognizer and turn detection, and no socket. */
@@ -255,6 +263,11 @@ const HEARD_TRAIL_MS = 800;
 const HEARD_ASK_EVERY_MS = 500;
 /** …while the other leg is still hearing its stretch; once that has closed, its last writing is given this many more. */
 const HEARD_ASK_TIMES = 10;
+/**
+ * The same, of a sentence the speaker's leg asks about before it is translated (`leakCheck`): fewer, since the
+ * user's own sentence waits on them, and only while the other side was heard at the same moment.
+ */
+const HEARD_LEAK_ASKS = 4;
 const HEARD_ASK_TIMES_CLOSED = 2;
 
 /** A stretch whose finished sentences are closed as they come: see `PipelineLeg.cuts`. */
@@ -535,7 +548,36 @@ class PipelineLeg implements AdapterSession {
       this.request.clock.setTimeout(() => this.settleOwn(heard, closed, origin, text, left, language), HEARD_ASK_EVERY_MS);
       return;
     }
-    this.closed(closed, { origin, text }, text, language);
+    this.closed(closed, { origin, text }, text, language, true);
+  }
+
+  /**
+   * A sentence of the speaker's leg, closed (`leakCheck`): the other side's sound come back through the loudspeakers
+   * is taken off the screen and not translated; the user's own goes on. While another leg was hearing something as
+   * its stretch began, that leg's writing is waited for a little (`HEARD_LEAK_ASKS`); with no other leg hearing
+   * anything, nothing waits.
+   */
+  private settleLeak(mine: Heard, closed: { ref: Ref; origin?: string }, source: { origin?: string; text: string } | undefined, text: string, language: string | undefined, asksLeft: number): void {
+    if (this.ended) return;
+    const there = this.heardElsewhere(mine, text);
+    if (there === 'same') {
+      this.frame('in', 'speech.dropped', { reason: 'the other side, through the loudspeakers', chars: text.length });
+      this.events.segmentText({ ref: closed.ref, text: '' });
+      this.events.segmentClosed(closed);
+      return;
+    }
+    if (there !== 'none' && asksLeft > 0) {
+      const left = there === 'open' ? asksLeft - 1 : Math.min(asksLeft - 1, HEARD_ASK_TIMES_CLOSED - 1);
+      this.request.clock.setTimeout(() => this.settleLeak(mine, closed, source, text, language, left), HEARD_ASK_EVERY_MS);
+      return;
+    }
+    this.closed(closed, source, text, language, true);
+  }
+
+  /** The stretch this leg heard last: the one a sentence closing now is of. */
+  private lastHeard(): Heard | undefined {
+    for (let i = heardLately.length - 1; i >= 0; i--) if (heardLately[i].leg === this) return heardLately[i];
+    return undefined;
   }
 
   /**
@@ -610,7 +652,13 @@ class PipelineLeg implements AdapterSession {
   }
 
   /** A source sentence, closed: said so, and handed to what answers it. `language`: what the recognizer said it heard it in. */
-  private closed(payload: { ref: Ref; origin?: string }, source: { origin?: string; text: string } | undefined, text: string | undefined, language?: string): void {
+  private closed(payload: { ref: Ref; origin?: string }, source: { origin?: string; text: string } | undefined, text: string | undefined, language?: string, settled = false): void {
+    // The other side's sound, come back through the loudspeakers into the microphone: asked of every sentence, as it
+    // closes, whether a stretch closed at its end or one closed from it as it came.
+    if (!settled && this.stages.leakCheck && text) {
+      const mine = this.lastHeard();
+      if (mine) { this.settleLeak(mine, payload, source, text, language, HEARD_LEAK_ASKS); return; }
+    }
     const coached = this.stages.speech?.kind === 'coach';
     // Failed paired recognition must not seal a provisional guess as final text that the chatbox could send.
     if (this.requiresLanguage && !language) {
@@ -652,7 +700,7 @@ class PipelineLeg implements AdapterSession {
    * leg is still hearing it, 'other' once it has closed. 'none': no other leg
    * was hearing anything. Older stretches are forgotten here.
    */
-  private heardElsewhere(mine: Heard): 'same' | 'open' | 'other' | 'none' {
+  private heardElsewhere(mine: Heard, text: string = mine.text): 'same' | 'open' | 'other' | 'none' {
     const now = this.request.clock.now();
     for (let i = heardLately.length - 1; i >= 0; i--) {
       const h = heardLately[i];
@@ -660,7 +708,7 @@ class PipelineLeg implements AdapterSession {
     }
     const there = heardLately.filter((h) => h.leg !== this && mine.from >= h.from - HEARD_SLACK_MS && (h.until === null || mine.from <= h.until - HEARD_TRAIL_MS));
     if (there.length === 0) return 'none';
-    if (sameSpeech(mine.text, there.map((h) => h.text).join(' '))) return 'same';
+    if (sameSpeech(text, there.map((h) => h.text).join(' '))) return 'same';
     return there.some((h) => h.until === null) ? 'open' : 'other';
   }
 
