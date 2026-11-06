@@ -4,9 +4,6 @@ import {
   AudioDataCallback,
 } from './IParticipantAudioRecorder';
 
-/** Fork: how far ahead of the analyser's clock its buffers may be scheduled (`feedAnalyser`); past it, a chunk is dropped. */
-const ANALYSER_AHEAD_S = 0.5;
-
 /**
  * Participant recorder fed by the per-application capture helper (issue #335),
  * used on both Windows and macOS - the two share one CLI contract.
@@ -43,16 +40,6 @@ export class AppAudioRecorder implements IParticipantAudioRecorder {
   private samplesSinceLog = 0;
   private everHeardAudio = false;
 
-  // A Web Audio branch that exists only to drive the waveform: the PCM already
-  // went to the client by the time it gets here, and this graph is deliberately
-  // never connected to the destination, so it makes no sound.
-  private audioContext: AudioContext | null = null;
-  private analyser: AnalyserNode | null = null;
-  private nextPlayTime = 0;
-  /** A resume of the analyser's context asked and not yet answered: asked once, not on every chunk. */
-  private resuming = false;
-  /** Set once the graph has failed, so one bad chunk cannot spam the console. */
-  private analyserBroken = false;
 
   /**
    * Distinguishes the two ways capture can look broken: PCM arriving but silent,
@@ -104,12 +91,12 @@ export class AppAudioRecorder implements IParticipantAudioRecorder {
   }
 
   /**
-   * Analyser over the captured audio, so the participant waveform animates on
-   * this path too. Without it a flat waveform gave no way to tell working
-   * capture from silent capture.
+   * Fork: none. The waveform it drove is gone (the conversation shows who is heard by a dot), and feeding it scheduled
+   * every chunk on an AudioContext of its own: one left suspended, its clock stuck for hours, was fed a hundred buffers
+   * a second it never played or freed — 8.8 GB and a core of CPU over a night's session (0.43.146, 2026-11-06).
    */
   getAnalyser(): AnalyserNode | null {
-    return this.analyser;
+    return null;
   }
 
   async begin(options?: ParticipantAudioOptions): Promise<boolean> {
@@ -206,11 +193,6 @@ export class AppAudioRecorder implements IParticipantAudioRecorder {
     this.callback = null;
     this.leftover = new Uint8Array(0);
     this.status = 'ended';
-    this.analyser = null;
-    if (this.audioContext) {
-      void this.audioContext.close().catch(() => { /* already closing */ });
-      this.audioContext = null;
-    }
   }
 
   private onPcm(payload: Uint8Array): void {
@@ -257,10 +239,8 @@ export class AppAudioRecorder implements IParticipantAudioRecorder {
 
     // Observe BEFORE dispatching. The callback transfers this ArrayBuffer to a
     // worker, which detaches it and leaves mono.length at 0 - which silently
-    // zeroed every level reading and made the analyser ask for a 0-frame buffer
-    // on every single chunk.
+    // zeroed every level reading.
     this.observeLevel(mono);
-    this.feedAnalyser(mono);
     this.callback({ mono, raw: mono, ...(stereo ?? {}) });
   }
 
@@ -289,65 +269,6 @@ export class AppAudioRecorder implements IParticipantAudioRecorder {
     this.samplesSinceLog = 0;
   }
 
-  /**
-   * Push the PCM through a detached Web Audio graph purely to drive the
-   * waveform. Scheduling short buffers back to back keeps the analyser fed
-   * without a worklet or a SharedArrayBuffer.
-   */
-  private feedAnalyser(mono: Int16Array): void {
-    if (this.analyserBroken || mono.length === 0) return;
-    try {
-      if (!this.audioContext) {
-        this.audioContext = new AudioContext({ sampleRate: this.sampleRate });
-        this.analyser = this.audioContext.createAnalyser();
-        this.analyser.fftSize = 256;
-        // The render graph is pulled from the destination: a node with no path
-        // to it is never processed, so an unconnected analyser stays empty and
-        // the waveform stays flat. Route through a silent gain instead of
-        // leaving it detached - audible playback would be fed back into the
-        // capture.
-        const mute = this.audioContext.createGain();
-        mute.gain.value = 0;
-        this.analyser.connect(mute);
-        mute.connect(this.audioContext.destination);
-        this.nextPlayTime = this.audioContext.currentTime;
-      }
-      const ctx = this.audioContext;
-      // Fork: only while its clock runs. A context left suspended (its clock stuck for hours) or one whose clock
-      // crawls was fed a hundred buffers a second, each scheduled further into a future it never reached, none ever
-      // played or freed: the page grew to 8.8 GB and a core of CPU over a night's session (0.43.146, 2026-11-06).
-      if (ctx.state !== 'running') {
-        if (ctx.state === 'suspended' && !this.resuming) {
-          this.resuming = true;
-          void ctx.resume().catch(() => undefined).finally(() => { this.resuming = false; });
-        }
-        return;
-      }
-      // Fallen behind the sound by more than this, the waveform drops what comes rather than queue it.
-      if (this.nextPlayTime - ctx.currentTime > ANALYSER_AHEAD_S) return;
-
-      const buffer = ctx.createBuffer(1, mono.length, this.sampleRate);
-      const channel = buffer.getChannelData(0);
-      for (let i = 0; i < mono.length; i++) channel[i] = mono[i] / 32768;
-
-      const source = ctx.createBufferSource();
-      source.buffer = buffer;
-      source.connect(this.analyser!);
-
-      const now = ctx.currentTime;
-      if (this.nextPlayTime < now) this.nextPlayTime = now;
-      source.start(this.nextPlayTime);
-      this.nextPlayTime += buffer.duration;
-    } catch (error) {
-      // The waveform is cosmetic; never let it break capture - and never let it
-      // repeat, since this runs on every chunk about a hundred times a second.
-      console.warn('[Sokuji] [AppAudioRecorder] Analyser disabled after:', error);
-      this.analyserBroken = true;
-      this.analyser = null;
-      void this.audioContext?.close().catch(() => { /* already closing */ });
-      this.audioContext = null;
-    }
-  }
 
   private onHelperEvent(payload: { event?: string; code?: string; channels?: number }): void {
     if (payload?.event === 'format') {

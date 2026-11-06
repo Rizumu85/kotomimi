@@ -210,47 +210,16 @@ describe('AppAudioRecorder lifecycle', () => {
     expect(onLost).not.toHaveBeenCalled();
   });
 
-  it('exposes an analyser once audio has been pushed, so the waveform animates', async () => {
-    // jsdom has no Web Audio, so stand one up. A permanently flat waveform gave
-    // no way to tell working capture from silent capture, which is exactly the
-    // question this analyser exists to answer.
-    const destination = { id: 'destination' };
-    const gain = { gain: { value: 1 }, connect: (n: unknown) => gainTo.push(n) };
-    const gainTo: unknown[] = [];
-    const analyserTo: unknown[] = [];
-    const analyser = { fftSize: 0, frequencyBinCount: 128, connect: (n: unknown) => analyserTo.push(n) };
-    const connected: unknown[] = [];
-    (globalThis as any).AudioContext = class {
-      currentTime = 0;
-      state = 'running';
-      destination = destination;
-      createAnalyser() { return analyser; }
-      createGain() { return gain; }
-      createBuffer(_c: number, len: number) {
-        return { duration: len / 24000, getChannelData: () => new Float32Array(len) };
-      }
-      createBufferSource() {
-        return { buffer: null, connect: (n: unknown) => connected.push(n), start: () => {} };
-      }
-      close() { return Promise.resolve(); }
-    };
-
+  it('makes no Web Audio graph of its own: nothing reads one, and one stalled leaked every chunk', async () => {
+    // Seen 2026-11-06 on 0.43.146: an AudioContext left suspended for hours was fed a hundred buffers a second for a
+    // waveform the app no longer draws — 8.8 GB and a core of CPU by morning.
+    let made = 0;
+    (globalThis as any).AudioContext = class { constructor() { made++; } };
     const rec = await started();
-    expect(rec.getAnalyser()).toBeNull();   // nothing captured yet
-
     await rec.record(() => {});
-    pushPcm([0x00, 0x01, 0x00, 0x02]);
-
-    expect(rec.getAnalyser()).toBe(analyser);
-    expect(connected).toEqual([analyser]);
-    // The render graph is pulled from the destination, so a detached analyser is
-    // never processed and the waveform stays flat. It must reach the
-    // destination - through a silenced gain, so nothing is played back into the
-    // capture.
-    expect(analyserTo).toEqual([gain]);
-    expect(gainTo).toEqual([destination]);
-    expect(gain.gain.value).toBe(0);
-
+    for (let i = 0; i < 100; i++) pushPcm(new Array(240).fill(0).flatMap(() => [0x00, 0x01]));
+    expect(made).toBe(0);
+    expect(rec.getAnalyser()).toBeNull();
     delete (globalThis as any).AudioContext;
   });
 
@@ -303,61 +272,6 @@ describe('AppAudioRecorder observes audio before handing it off', () => {
     const line = logged.find((l) => l.includes('captured level'));
     expect(line).toContain('peak=0.5000');
     expect(line).not.toContain('silent');
-  });
-
-  it('schedules nothing while its context is not running, and never more than half a second ahead of its clock', async () => {
-    // Seen 2026-11-06: a suspended context, its clock stuck for hours, fed a hundred buffers a second it never played:
-    // 8.8 GB and a core of CPU by morning.
-    let state = 'suspended';
-    let resumes = 0;
-    let made = 0;
-    (globalThis as any).AudioContext = class {
-      currentTime = 0;
-      get state() { return state; }
-      destination = {};
-      createAnalyser() { return { fftSize: 0, frequencyBinCount: 128, connect: () => {} }; }
-      createGain() { return { gain: { value: 1 }, connect: () => {} }; }
-      createBuffer(_c: number, len: number) { made++; return { duration: len / 24000, getChannelData: () => new Float32Array(len) }; }
-      createBufferSource() { return { buffer: null, connect: () => {}, start: () => {} }; }
-      resume() { resumes++; return new Promise(() => {}); }
-      close() { return Promise.resolve(); }
-    };
-    const rec = await started();
-    await rec.record(() => {});
-    // 240 samples = 10 ms a chunk.
-    const chunk = new Array(240).fill(0).flatMap(() => [0x00, 0x01]);
-    for (let i = 0; i < 100; i++) pushPcm(chunk);
-    expect(made).toBe(0);
-    // Asked to resume once, not once a chunk.
-    expect(resumes).toBe(1);
-    // Running, its clock standing still: half a second is queued, and the rest dropped.
-    state = 'running';
-    for (let i = 0; i < 300; i++) pushPcm(chunk);
-    expect(made).toBeGreaterThanOrEqual(50);
-    expect(made).toBeLessThanOrEqual(52);
-    delete (globalThis as any).AudioContext;
-  });
-
-  it('disables the analyser after one failure instead of every chunk', async () => {
-    (globalThis as any).AudioContext = class {
-      currentTime = 0; state = 'running';
-      createAnalyser() { return { fftSize: 0, frequencyBinCount: 128, connect: () => {} }; }
-      createGain() { return { gain: { value: 1 }, connect: () => {} }; }
-      destination = {};
-      createBuffer() { throw new Error('boom'); }
-      createBufferSource() { return { connect: () => {}, start: () => {} }; }
-      close() { return Promise.resolve(); }
-    };
-    const rec = await started();
-    await rec.record(() => {});
-
-    const warns: string[] = [];
-    const spy = vi.spyOn(console, 'warn').mockImplementation((m: any) => { warns.push(String(m)); });
-    for (let i = 0; i < 20; i++) pushPcm([0x00, 0x01]);
-    spy.mockRestore();
-
-    expect(warns.filter((w) => w.includes('Analyser disabled'))).toHaveLength(1);
-    delete (globalThis as any).AudioContext;
   });
 });
 
