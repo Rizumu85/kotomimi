@@ -129,7 +129,7 @@ Feedback runs in its own llama.cpp process, because one run can need it and tran
 
 ## Language identification
 
-The selected recognizer stays selected even when it cannot report the language. The pipeline infers it from the text, by script and then a small detector (`src/lib/language/script.ts`, `src/lib/language/identify.ts`), and the language menu calls this a best effort. No installed model silently replaces the selection. Short or uncertain text stays unlabelled while translation continues.
+Qwen3-ASR and SenseVoice, told no language, report the one they heard (audio.cpp's `/v1/audio/transcriptions/details`; the phone app's answer); the pipeline keeps it when it is one the leg may be in. The selected recognizer stays selected even when it cannot report the language. The pipeline then infers it from the text, by script and then a small detector (`src/lib/language/script.ts`, `src/lib/language/identify.ts`), and the language menu calls this a best effort. No installed model silently replaces the selection. Short or uncertain text stays unlabelled while translation continues.
 
 ## Sharing
 

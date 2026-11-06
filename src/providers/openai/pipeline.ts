@@ -444,18 +444,21 @@ class PipelineLeg implements AdapterSession {
         return;
       case 'segmentText': {
         const source = this.sources.get(e.payload.ref);
+        // Said by a recognizer left to detect it (Qwen3-ASR, SenseVoice): kept where it is one the leg may be in, and
+        // one outside them read from the writing, as a sentence it said nothing of is.
+        const said = e.payload.language && (this.stages.heard !== AUTO || this.mayBeIn(e.payload.language)) ? e.payload.language : undefined;
         if (source) {
           source.text = e.payload.text;
-          if (e.payload.language) source.language = e.payload.language;
+          if (said) source.language = said;
           const heard = this.heardOf(e.payload.ref);
           if (heard) heard.text = e.payload.text;
         }
-        const open = source !== undefined && e.payload.language === undefined;
+        const open = source !== undefined && said === undefined;
         const told = open ? this.stages.heard : undefined;
         // Left to be detected: the language its writing shows, or none — which also keeps the leg's own from being assumed.
         // Told one, and written in the leg's other language: said to be in that one.
         // Said by the recognizer: that, which also goes with the sentences closed from it.
-        const heard = e.payload.language ?? (this.requiresLanguage ? undefined : (told === AUTO ? this.byWriting(e.payload.text) ?? AUTO : (open ? this.otherThanHeard(e.payload.text) : undefined) ?? told));
+        const heard = said ?? (this.requiresLanguage ? undefined : (told === AUTO ? this.byWriting(e.payload.text) ?? AUTO : (open ? this.otherThanHeard(e.payload.text) : undefined) ?? told));
         if (source && this.cutsSentences()) {
           this.heardSoFar(e.payload.ref, source, heard);
           return;
@@ -742,6 +745,13 @@ class PipelineLeg implements AdapterSession {
     const found = identifyLanguage(text, back ? [back.own, ...(back.languages?.length ? back.languages : [back.language])] : [])?.language;
     // Han characters are Chinese's and Cantonese's alike: spoken Cantonese written down has words of its own.
     return found === 'zh' && writtenInCantonese(text) ? 'yue' : found;
+  }
+
+  /** Whether a leg left to detect its language may be in `language`: among its others, or any where none are named. */
+  private mayBeIn(language: string): boolean {
+    const back = this.stages.back;
+    const among = back ? [back.own, ...(back.languages?.length ? back.languages : [back.language])] : [];
+    return among.length === 0 || among.some((one) => one === AUTO || baseOf(one) === baseOf(language));
   }
 
   private otherThanHeard(text: string, language?: string): string | undefined {

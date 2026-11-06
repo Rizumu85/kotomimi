@@ -559,6 +559,7 @@ describe('a live recognition', () => {
       languageAs: 'code',
       languages: ['zh', 'yue', 'en', 'ja', 'ko'],
       unspaced: true,
+      saysLanguage: true,
     });
     for (const language of ['ja', 'zh-CN', 'zh-TW', 'yue', 'en-GB', 'ko-KR']) expect(modelHears('sensevoice-small-q8', language)).toBe(true);
     // Told another language it would not refuse, and write the speech down as one of its five: it is not offered for it.

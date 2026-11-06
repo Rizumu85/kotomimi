@@ -322,6 +322,27 @@ describe('a leg whose language is left to be detected', () => {
   // The leg's stages say so (`heard: 'auto'`): here it is said to a leg heard over a socket, which shows what the wrapper does with it.
   const detected = (config: LocalAIConfig) => { if (config.stages) config.stages.heard = 'auto'; };
 
+  /** A sentence and the language the recognizer says it heard (a sharing Kotomimi's, Qwen3-ASR told none). */
+  const said = (id: string, text: string, language: string) => [SERVER.committed(id), SERVER.inputDelta(id, text), JSON.stringify({ ...JSON.parse(SERVER.inputDone(id, text)), language })];
+
+  it('takes the language the recognizer says it heard over its writing: a short line in Han characters alone', async () => {
+    const h = await live(PARTICIPANT, VIA_MODEL, [sse('真的。')], K, detected);
+    h.receive(...said('item_1', '本当本当', 'ja'));
+    await h.settled();
+    expect(h.lastText(1)).toMatchObject({ text: '本当本当', language: 'ja' });
+  });
+
+  it('reads the writing instead where the recognizer names a language the leg is not to be heard in', async () => {
+    const among = (config: LocalAIConfig) => {
+      detected(config);
+      if (config.stages?.speech) config.stages.back = { stage: config.stages.speech, language: 'ko', own: 'ja', languages: ['ko'] };
+    };
+    const h = await live(PARTICIPANT, VIA_MODEL, [sse('你好。')], K, among);
+    h.receive(...said('item_1', '안녕하세요.', 'es'));
+    await h.settled();
+    expect(h.lastText(1)).toMatchObject({ text: '안녕하세요.', language: 'ko' });
+  });
+
   it('gives each sentence the language its writing shows, and translates it', async () => {
     const h = await live(PARTICIPANT, VIA_MODEL, [sse('你好。'), sse('你好！')], K, detected);
     h.receive(...heard('item_1', '안녕하세요.'));

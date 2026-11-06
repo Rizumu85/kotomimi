@@ -121,6 +121,8 @@ const MODELS = {
     // It is told the language by its code, and these are the ones it hears.
     languageAs: 'code',
     languages: QWEN_LANGUAGES,
+    // Told none, it says which it heard (`DETAILS_PATH`).
+    saysLanguage: true,
   },
   // SenseVoice-Small: a quarter of a gigabyte, and as right as the small Qwen3 below on the stretches the app cuts
   // (20.3 % of the kana wrong against 20.7 %, the 1.7B 16.9 %; none of its readings empty — docs/fork/measurements.md).
@@ -146,6 +148,7 @@ const MODELS = {
     languageAs: 'code',
     languages: ['zh', 'yue', 'en', 'ja', 'ko'],
     unspaced: true,
+    saysLanguage: true,
   },
   // The small one, for a computer that runs a game beside it: about 2 GB of video memory where the 1.7B holds 3, a
   // reading a quarter shorter, and more characters wrong (docs/fork/measurements.md). The same family, read the same way.
@@ -160,6 +163,7 @@ const MODELS = {
     mode: 'offline',
     languageAs: 'code',
     languages: QWEN_LANGUAGES,
+    saysLanguage: true,
   },
   // The smallest: about 1 GB of video memory, and ten seconds of speech read in 0.15 s on an RTX 5070 Ti. As
   // accurate as the small Qwen3 on a whole clip, but of the sentences the app cuts it writes nothing for one short
@@ -284,6 +288,23 @@ const COACHES = {
 const LANGUAGE_NAMES = {
   ja: 'Japanese', zh: 'Chinese', en: 'English', ko: 'Korean', fr: 'French', de: 'German', it: 'Italian', pt: 'Portuguese', ru: 'Russian', es: 'Spanish', ar: 'Arabic',
 };
+/**
+ * Fork: the language a recognizer left to detect says it heard, as the app's code. Qwen3-ASR names it in English
+ * ("Japanese"; "None" for nothing heard), SenseVoice by its code; a language told is said back as told. Null: none.
+ */
+const HEARD_NAMES = {
+  chinese: 'zh', english: 'en', cantonese: 'yue', arabic: 'ar', german: 'de', french: 'fr', spanish: 'es', portuguese: 'pt',
+  indonesian: 'id', italian: 'it', korean: 'ko', russian: 'ru', thai: 'th', vietnamese: 'vi', japanese: 'ja', turkish: 'tr',
+  hindi: 'hi', malay: 'ms', dutch: 'nl', swedish: 'sv', danish: 'da', finnish: 'fi', polish: 'pl', czech: 'cs', filipino: 'fil',
+  persian: 'fa', greek: 'el', hungarian: 'hu', macedonian: 'mk', romanian: 'ro',
+};
+function heardLanguage(said) {
+  const word = String(said ?? '').trim().toLowerCase();
+  if (!word || word === 'none') return null;
+  return HEARD_NAMES[word] ?? (/^[a-z]{2,3}$/.test(word) ? word : null);
+}
+/** audio.cpp's route that answers a stretch with what else the model said of it — the language it heard among it. */
+const DETAILS_PATH = '/v1/audio/transcriptions/details';
 const languageCode = (code) => /^[a-z]{2,8}$/.exec(String(code ?? '').trim().toLowerCase().split(/[-_]/)[0])?.[0] ?? null;
 const languageName = (code) => LANGUAGE_NAMES[languageCode(code) ?? ''] ?? null;
 /** The locale Nemotron is told for a language of the app: its own regional one where it has it, the language's usual one otherwise. */
@@ -523,7 +544,8 @@ function wavOf(pcm, sampleRate) {
 
 /**
  * One stretch of sound read whole by the runtime (POST /v1/audio/transcriptions, a form): `done` resolves with
- * `{ ok, text }` or `{ ok: false, message }`, and `abort` drops the request.
+ * `{ ok, text, language? }` or `{ ok: false, message }`, and `abort` drops the request. `language`: the one a
+ * recognizer told none says it heard (at `DETAILS_PATH`, or a phone's answer).
  */
 function readWhole({ host = LOOPBACK, port, pathname = '/v1/audio/transcriptions', model, sampleRate, language, context, pcm, timeoutMs, key }) {
   const boundary = `----kotomimi${crypto.randomBytes(12).toString('hex')}`;
@@ -545,8 +567,11 @@ function readWhole({ host = LOOPBACK, port, pathname = '/v1/audio/transcriptions
       response.on('end', () => {
         if (response.statusCode !== 200) { resolve({ ok: false, message: `The engine answered HTTP ${response.statusCode}: ${answer.replace(/\s+/g, ' ').slice(0, 200)}` }); return; }
         let text = answer;
-        try { text = JSON.parse(answer)?.text ?? ''; } catch { /* the text itself */ }
-        resolve({ ok: true, text: String(text).trim() });
+        let said = null;
+        try { const body = JSON.parse(answer); text = body?.text ?? ''; said = body?.language; } catch { /* the text itself */ }
+        // The language it heard, where it was left to detect one and says (a language told is only said back).
+        const heard = language ? null : heardLanguage(said);
+        resolve({ ok: true, text: String(text).trim(), ...(heard ? { language: heard } : {}) });
       });
       response.on('error', (error) => resolve({ ok: false, message: error.message }));
     });
@@ -755,7 +780,7 @@ const WINDOW_MOST_SECONDS = 120;
  * `tidy`: what every reading's text goes through before anything is made of
  * it, for a model whose writing needs it (`unspaced`).
  */
-function openWindow({ port, model, sampleRate, language, context, timeoutMs = WINDOW_READ_TIMEOUT_MS, read: readAsIs = readWhole, tidy = null, now = () => Date.now(), setTimer = setTimeout, clearTimer = clearTimeout, note = () => {} }, onEvent) {
+function openWindow({ port, pathname, model, sampleRate, language, context, timeoutMs = WINDOW_READ_TIMEOUT_MS, read: readAsIs = readWhole, tidy = null, now = () => Date.now(), setTimer = setTimeout, clearTimer = clearTimeout, note = () => {} }, onEvent) {
   const read = tidy ? (asked) => {
     const one = readAsIs(asked);
     return { done: one.done.then((answer) => (answer.ok ? { ...answer, text: tidy(answer.text) } : answer)), abort: () => one.abort() };
@@ -768,6 +793,10 @@ function openWindow({ port, model, sampleRate, language, context, timeoutMs = WI
   /** How much of the sound the reading under way — or the last — was given, and what it wrote; null where it wrote nothing to keep (it failed, or lost its way). */
   let readBytes = 0;
   let lastText = null;
+  /** The language the reading that wrote `lastText` says it heard. */
+  let lastLanguage = null;
+  /** A last reading, with the language it says it heard. */
+  const said = (text, answer) => ({ type: 'done', text, ...(answer?.language ? { language: answer.language } : {}) });
   let lastTook = 0;
   let reading = null;
   let timer = null;
@@ -787,7 +816,7 @@ function openWindow({ port, model, sampleRate, language, context, timeoutMs = WI
 
   /** One more reading, of this sound; `then` is given its answer unless the recognition was dropped meanwhile. */
   function ask(pcm, then) {
-    const mine = read({ port, model, sampleRate, language, context, pcm, timeoutMs });
+    const mine = read({ port, ...(pathname ? { pathname } : {}), model, sampleRate, language, context, pcm, timeoutMs });
     reading = mine;
     mine.done.then((answer) => {
       if (reading === mine) reading = null;
@@ -803,14 +832,14 @@ function openWindow({ port, model, sampleRate, language, context, timeoutMs = WI
    */
   function reread(sound, whole) {
     ask(Buffer.concat([Buffer.alloc(Math.round(sampleRate * LOOP_LEAD_SECONDS) * 2), sound]), (again) => {
-      if (again.ok && loopAt(again.text) < 0) { finish({ type: 'done', text: again.text }); return; }
+      if (again.ok && loopAt(again.text) < 0) { finish(said(again.text, again)); return; }
       const at = sound.length >= LOOP_SPLIT_SECONDS * sampleRate * 2 && now() - endedAt <= WINDOW_LAST_MS ? quietMiddle(sound, sampleRate) : 0;
       if (at <= 0 || at >= sound.length) { finish({ type: 'done', text: unloop(whole) }); return; }
       ask(sound.subarray(0, at), (first) => {
         // A half that cannot be read leaves what the whole had before it lost its way.
         if (!first.ok) { finish({ type: 'done', text: unloop(whole) }); return; }
         ask(sound.subarray(at), (second) => {
-          finish({ type: 'done', text: joinHalves(unloop(first.text), second.ok ? unloop(second.text) : '').trim() });
+          finish(said(joinHalves(unloop(first.text), second.ok ? unloop(second.text) : '').trim(), first));
         });
       });
     });
@@ -821,7 +850,7 @@ function openWindow({ port, model, sampleRate, language, context, timeoutMs = WI
     readBytes = bytes;
     unreadPeak = 0;
     const sound = Buffer.concat(chunks, bytes);
-    const mine = read({ port, model, sampleRate, language, context, pcm: sound, timeoutMs });
+    const mine = read({ port, ...(pathname ? { pathname } : {}), model, sampleRate, language, context, pcm: sound, timeoutMs });
     reading = mine;
     mine.done.then((answer) => {
       if (reading === mine) reading = null;
@@ -833,11 +862,12 @@ function openWindow({ port, model, sampleRate, language, context, timeoutMs = WI
 `);
       // A reading that lost its way is not one to end on.
       lastText = answer.ok && !lost ? answer.text : null;
+      lastLanguage = lastText !== null ? answer.language ?? null : null;
       // The stretch ended while this was read: it is the last reading if it had all the voice, else one more is.
       if (ended) {
         if (!answer.ok) { if (last) finish({ type: 'error', message: answer.message }); else start(true); }
         else if (lost) { if (last) reread(sound, answer.text); else start(true); }
-        else if (last || restIsQuiet()) finish({ type: 'done', text: answer.text });
+        else if (last || restIsQuiet()) finish(said(answer.text, answer));
         else start(true);
         return;
       }
@@ -883,7 +913,7 @@ function openWindow({ port, model, sampleRate, language, context, timeoutMs = WI
       // A reading under way decides when it comes back.
       if (reading) return;
       if (bytes === 0) finish({ type: 'done', text: '' });
-      else if (lastText !== null && restIsQuiet()) finish({ type: 'done', text: lastText });
+      else if (lastText !== null && restIsQuiet()) finish(said(lastText, { language: lastLanguage }));
       else start(true);
     },
     abort() {
@@ -1312,7 +1342,8 @@ function createNativeEngine(deps = {}) {
     // Fork: Qwen3-ASR takes words to expect as its context, and writes them: 1 of 10 rare names right without, 7 with
     // three hundred words told, and nothing invented with forty (measured 2026-10-31).
     const context = model?.takesContext && hints.length > 0 ? `${CONTEXT_LEAD}${hints.join('、')}` : undefined;
-    const target = { port: run.port, model: run.model, sampleRate: rate, language: said, ...(context ? { context } : {}) };
+    // Told none, a model that says what it heard is asked where it says so.
+    const target = { port: run.port, model: run.model, sampleRate: rate, language: said, ...(context ? { context } : {}), ...(!said && model?.saysLanguage ? { pathname: DETAILS_PATH } : {}) };
     // What it wrote is put right before anything sees it: its spaces taken out where it puts them, the context it
     // said back for want of a voice dropped.
     const echo = context ? echoOf(hints) : null;

@@ -318,6 +318,34 @@ describe('a reading (a real socket on this computer)', () => {
     expect(wav.readUInt32LE(40)).toBe(pcm.length);
   });
 
+  it('asks where the model says the language it heard, when told none, and carries that language to the end', async () => {
+    const seen = [];
+    const server = http.createServer((request, response) => {
+      seen.push(request.url);
+      request.resume();
+      request.on('end', () => { response.writeHead(200, { 'Content-Type': 'application/json' }); response.end(JSON.stringify({ text: '안녕하세요', language: 'Korean' })); });
+    });
+    const port = await new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve(server.address().port)));
+    const ask = (extra) => new Promise((resolve) => { const stream = openWindow({ port, model: 'qwen3-asr-1.7b-q8', sampleRate: RATE, ...extra }, resolve); stream.write(sound(0.5)); stream.end(); });
+    expect(await ask({ language: null, pathname: '/v1/audio/transcriptions/details' })).toEqual({ type: 'done', text: '안녕하세요', language: 'ko' });
+    expect(seen.at(-1)).toBe('/v1/audio/transcriptions/details');
+    // Told one, what it says back is only that: nothing is made of it.
+    expect(await ask({ language: 'ko' })).toEqual({ type: 'done', text: '안녕하세요' });
+    server.close();
+  });
+
+  it('reads a language said as a name, as a code, and "None" as none', async () => {
+    const answers = [{ text: 'hola', language: 'Spanish' }, { text: '你好', language: 'zh' }, { text: '', language: 'None' }, { text: 'x', language: 'Klingon' }];
+    const server = http.createServer((request, response) => { request.resume(); request.on('end', () => { response.writeHead(200); response.end(JSON.stringify(answers.shift())); }); });
+    const port = await new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve(server.address().port)));
+    const ask = () => new Promise((resolve) => { const stream = openWindow({ port, model: 'q', sampleRate: RATE, language: null }, resolve); stream.write(sound(0.2)); stream.end(); });
+    expect(await ask()).toEqual({ type: 'done', text: 'hola', language: 'es' });
+    expect(await ask()).toEqual({ type: 'done', text: '你好', language: 'zh' });
+    expect(await ask()).toEqual({ type: 'done', text: '' });
+    expect(await ask()).toEqual({ type: 'done', text: 'x' });
+    server.close();
+  });
+
   it('says what the runtime refused with, and when nothing listens there', async () => {
     const server = http.createServer((request, response) => { request.resume(); response.writeHead(503); response.end('{"error":"model busy"}'); });
     const port = await new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve(server.address().port)));
