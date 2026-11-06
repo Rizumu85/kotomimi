@@ -23,7 +23,13 @@ nonisolated final class HearingEngine: @unchecked Sendable {
     /// What a stretch says. `language`: the app's code (`ja`), or nil for one the model is to tell itself. `context`:
     /// the words to expect, for a model that takes them (Qwen3-ASR), as the computer words them.
     func read(_ model: TextModel, at path: URL, samples: [Float], rate: Int, language: String?, context: String? = nil) async throws -> String {
-        try await withCheckedThrowingContinuation { (done: CheckedContinuation<String, Error>) in
+        try await reading(model, at: path, samples: samples, rate: rate, language: language, context: context).text
+    }
+
+    /// The same, with the language the model says it heard where it was told none (Qwen3-ASR names it in English,
+    /// "Japanese"; SenseVoice by its code), as the computer reads either; nil where it says none.
+    func reading(_ model: TextModel, at path: URL, samples: [Float], rate: Int, language: String?, context: String? = nil) async throws -> (text: String, language: String?) {
+        try await withCheckedThrowingContinuation { (done: CheckedContinuation<(text: String, language: String?), Error>) in
             queue.async { [self] in
                 do { done.resume(returning: try readHere(model, at: path, samples: samples, rate: rate, language: language, context: context)) } catch { done.resume(throwing: error) }
             }
@@ -99,7 +105,7 @@ nonisolated final class HearingEngine: @unchecked Sendable {
         return session
     }
 
-    private func readHere(_ model: TextModel, at path: URL, samples: [Float], rate: Int, language: String?, context: String?) throws -> String {
+    private func readHere(_ model: TextModel, at path: URL, samples: [Float], rate: Int, language: String?, context: String?) throws -> (text: String, language: String?) {
         let session = try sessionHere(model, at: path)
         guard let request = audiocpp_request_create() else { throw Refusal(description: "The engine has no memory for the request.") }
         defer { audiocpp_request_free(request) }
@@ -118,9 +124,12 @@ nonisolated final class HearingEngine: @unchecked Sendable {
         guard ran == AUDIOCPP_OK, let result else { throw HearingEngine.failure("\(model.name) could not read the sound", ran) }
         defer { audiocpp_result_free(result) }
         var text: UnsafePointer<CChar>?
-        let got = audiocpp_result_text(result, &text, nil)
-        if got == AUDIOCPP_ERR_NOT_AVAILABLE { return "" }
+        var heard: UnsafePointer<CChar>?
+        let got = audiocpp_result_text(result, &text, &heard)
+        if got == AUDIOCPP_ERR_NOT_AVAILABLE { return ("", nil) }
         guard got == AUDIOCPP_OK, let text else { throw HearingEngine.failure("\(model.name) gave no text", got) }
-        return String(cString: text).trimmingCharacters(in: .whitespacesAndNewlines)
+        // Told one, the model only says it back.
+        let said = language == nil ? heard.map { String(cString: $0).trimmingCharacters(in: .whitespaces) } : nil
+        return (String(cString: text).trimmingCharacters(in: .whitespacesAndNewlines), said.flatMap { $0.isEmpty || $0.lowercased() == "none" ? nil : $0 })
     }
 }

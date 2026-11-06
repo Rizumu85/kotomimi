@@ -561,7 +561,7 @@ final class Lending {
         let began = Date()
         let samples = wav.samples.map { Float($0) / 32768 }
         do {
-            let text = try await hearEngine.read(model, at: self.text.path(model), samples: samples, rate: Int(wav.rate), language: language, context: context)
+            let (text, heard) = try await hearEngine.reading(model, at: self.text.path(model), samples: samples, rate: Int(wav.rate), language: language, context: context)
             lastUse = Date()
             if !text.isEmpty {
                 lastText = text
@@ -570,7 +570,9 @@ final class Lending {
                 lastLanguage = language
                 heardCount += 1
             }
-            return .json(200, #"{"text":\#(jsonQuoted(text))}"#, allow)
+            // The language it heard, where it was left to tell it: the computer follows the other side by it.
+            let saying = heard.map { #","language":\#(jsonQuoted(String($0.prefix(20))))"# } ?? ""
+            return .json(200, #"{"text":\#(jsonQuoted(text))\#(saying)}"#, allow)
         } catch let refusal as HearingEngine.Refusal {
             let short = refusal.description.contains("memory")
             return .error(short ? 503 : 502, refusal.description, allow + (short ? [("Retry-After", "5")] : []))
