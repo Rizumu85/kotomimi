@@ -1,0 +1,3 @@
+# Made by XcodeGen from project.yml, and by the build.
+*.xcodeproj/
+build/

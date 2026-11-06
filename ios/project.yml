@@ -1,0 +1,76 @@
+# The iPad and iPhone app that lends a device to Kotomimi on a computer, as the Android app does (android/).
+# XcodeGen makes the Xcode project from this file (`scripts/build.sh` on the Mac); the project itself is not kept.
+name: KotomimiNode
+options:
+  bundleIdPrefix: io.github.rizumu85.kotomimi
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+    SWIFT_APPROACHABLE_CONCURRENCY: "YES"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: ${KOTOMIMI_TEAM}
+    CODE_SIGN_STYLE: Automatic
+targets:
+  KotomimiNode:
+    type: application
+    platform: iOS
+    sources:
+      - path: KotomimiNode
+      - path: ../android/app/src/main/assets/selfcheck-ja.wav
+        buildPhase: resources
+    dependencies:
+      # audio.cpp v0.9.0 (the desktop's recognition engine), built by scripts/build-audiocpp.sh into ../audiocpp
+      # (not kept in git): a framework of its own, its ggml kept inside apart from llama.cpp's.
+      - framework: ../audiocpp/audiocpp.xcframework
+        embed: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.rizumu85.kotomimi.node
+        PRODUCT_NAME: Kotomimi
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        GENERATE_INFOPLIST_FILE: "NO"
+        INFOPLIST_FILE: KotomimiNode/Info.plist
+        # llama.cpp b11401, built for iOS by scripts/build-llama.sh into ../llama/{ios,sim} (not kept in git).
+        SWIFT_OBJC_BRIDGING_HEADER: KotomimiNode/Text/Bridge.h
+        CLANG_CXX_LANGUAGE_STANDARD: c++17
+        "EXCLUDED_ARCHS[sdk=iphonesimulator*]": x86_64
+        "HEADER_SEARCH_PATHS[sdk=iphoneos*]": $(SRCROOT)/../llama/ios/include $(SRCROOT)/../llama/ios/include/vendor
+        "HEADER_SEARCH_PATHS[sdk=iphonesimulator*]": $(SRCROOT)/../llama/sim/include $(SRCROOT)/../llama/sim/include/vendor
+        "LIBRARY_SEARCH_PATHS[sdk=iphoneos*]": $(SRCROOT)/../llama/ios/lib
+        "LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]": $(SRCROOT)/../llama/sim/lib
+        OTHER_LDFLAGS: -lllama-common -lllama-common-base -lllama -lggml -lggml-base -lggml-cpu -lggml-metal -lcpp-httplib -lc++ -framework Metal -framework MetalKit -framework Accelerate
+    # Three models of two or three gigabytes each (a recognizer, a translator, the feedback model) do not fit the
+    # memory iOS gives an app by default (about 5 GB on a 16 GB iPad): asked for more.
+    entitlements:
+      path: KotomimiNode/Kotomimi.entitlements
+      properties:
+        com.apple.developer.kernel.increased-memory-limit: true
+    info:
+      path: KotomimiNode/Info.plist
+      properties:
+        CFBundleDisplayName: Kotomimi
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        NSLocalNetworkUsageDescription: 让同一 Wi-Fi 下的电脑找到并使用这台设备。
+        NSBonjourServices:
+          - _kotomimi._tcp
+        NSSpeechRecognitionUsageDescription: 用这台设备的语音识别替电脑上的 Kotomimi 听写。
+        ITSAppUsesNonExemptEncryption: false
