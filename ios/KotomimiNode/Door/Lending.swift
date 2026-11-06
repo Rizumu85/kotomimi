@@ -298,13 +298,15 @@ final class Lending {
         lastUse = Date()
         heardAt = Date()
         if phase == .waiting { phase = .working }
+        // Ready at once: the computer sends the sound as it comes, and it is kept on the connection while the stretch
+        // waits for a recognizer to be free (`Recognizers.take`), rather than the computer giving up on waiting.
+        say(["type": "ready"])
         let stream: LiveHearing
         do {
             stream = try await LiveHearing.open(code, also: also, prefer: prefer, in: hearing) { say($0) }
         } catch {
             return refuse(String(describing: error))
         }
-        say(["type": "ready"])
         var ended = false
         var count = 0
         while let message = await socket.receive() {

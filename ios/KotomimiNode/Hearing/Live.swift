@@ -14,12 +14,21 @@ final class Recognizers {
     /// Fast recognizers that may be stopped for a place: each frees its places and says how many.
     private var yielding: [(owner: ObjectIdentifier, free: () async -> Int)] = []
 
-    /// `count` places, freeing fast ones where there are too few (`yield`): false where there are not enough even so.
-    func take(_ count: Int, yield: Bool = true) async -> Bool {
-        while Recognizers.most - used < count, yield, let last = yielding.popLast() { used -= await last.free() }
-        guard Recognizers.most - used >= count else { return false }
-        used += count
-        return true
+    /// `count` places, freeing fast ones where there are too few (`yield`), and waiting up to `waitUpTo` for one that
+    /// is finishing to give its place back: false where there are not enough even so. Two legs of a computer's run,
+    /// each beginning a stretch while its last one is still being finished, ask for more than two at once now and
+    /// then; refused, that speech was lost (2026-11-06).
+    func take(_ count: Int, yield: Bool = true, waitUpTo: Duration = .zero) async -> Bool {
+        let deadline = ContinuousClock.now + waitUpTo
+        while true {
+            while Recognizers.most - used < count, yield, let last = yielding.popLast() { used -= await last.free() }
+            if Recognizers.most - used >= count {
+                used += count
+                return true
+            }
+            guard ContinuousClock.now < deadline else { return false }
+            try? await Task.sleep(for: .milliseconds(100))
+        }
     }
 
     func give(_ count: Int) { used = max(0, used - count) }
@@ -158,7 +167,8 @@ final class LiveHearing {
         let both = locales.count > 1
         let preferred = codes.firstIndex { $0 == prefer } ?? 0
         let places = Recognizers.shared
-        guard await places.take(locales.count) else {
+        // A stretch that comes while two are still being heard waits for one to finish, its sound kept meanwhile.
+        guard await places.take(locales.count, waitUpTo: .seconds(30)) else {
             throw Refusal("This device is hearing as much as it can at once: it runs \(Recognizers.most) recognitions at a time.")
         }
         // One language: a considered recognizer, and a fast one for what shows where there is a place left for it,
