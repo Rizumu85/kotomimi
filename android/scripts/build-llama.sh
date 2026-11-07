@@ -53,7 +53,7 @@
 # not already on the PATH), elsewhere gcc or clang.
 set -euo pipefail
 
-LLAMA_TAG=b11401
+LLAMA_TAG=b12182
 # The Vulkan headers audio.cpp is built against (build-engine.sh).
 VULKAN_TAG=vulkan-sdk-1.4.357.0
 # Khronos's OpenCL headers, and its loader: only to link against (the phone's own libOpenCL.so is what runs).

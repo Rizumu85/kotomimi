@@ -287,6 +287,10 @@ private const val HUNYUAN = "tencent/Hy-MT2-1.8B-GGUF"
 private const val HUNYUAN_REVISION = "a0c709d9fac510f2c807aa3af52872340dc37a4a"
 private const val INDEX_TRANSLATE = "IndexTeam/Index-Translate-2B-GGUF"
 private const val INDEX_TRANSLATE_REVISION = "449c9e6457b3632d328c6cbb78ae8e8e0c8059a5"
+private const val PLAMO = "pfnet/plamo-3-translate-2b-GGUF"
+private const val PLAMO_REVISION = "4e4500666915b3a2cc0d667b64d9745c0821b63c"
+private const val PLAMO_SMALL = "pfnet/plamo-3-translate-0.8b-GGUF"
+private const val PLAMO_SMALL_REVISION = "e11a613b483edceab3450941f18cc79307fc93e9"
 private const val GEMMA = "unsloth/gemma-4-E2B-it-GGUF"
 private const val GEMMA_REVISION = "0314792d7f1f7e229411f620751375812bb9faf2"
 
@@ -311,6 +315,27 @@ private const val GEMMA_REVISION = "0314792d7f1f7e229411f620751375812bb9faf2"
  * and what Index-Translate holds beyond its own.
  */
 val TEXT_MODELS = listOf(
+    // PLaMo 3 Translate (Preferred Networks), free for non-commercial use only: the 2B reads the most natural of the
+    // desktop's translators, the 0.8B is the lightest. llama.cpp b12182 or later reads its tokenizer.
+    Model(
+        id = "plamo-3-translate-0.8b",
+        name = "PLaMo 3 Translate 0.8B",
+        reader = Reader.LLAMA_CPP,
+        family = "plamo",
+        task = Task.TRANSLATE,
+        accuracy = 3,
+        note = "最轻 · 非商业使用",
+        holdsMb = 720,
+        files = listOf(
+            ModelFile(
+                PLAMO_SMALL, PLAMO_SMALL_REVISION,
+                path = "plamo-3-translate-0.8b-Q4_K_M.gguf",
+                name = "plamo-3-translate-0.8b-Q4_K_M.gguf",
+                bytes = 573_125_696,
+                sha256 = "ff10c4aed0c478af8be61fe4d22fb463c0f639acfc168012062efba35ccbdd48",
+            ),
+        ),
+    ),
     Model(
         id = "hy-mt2-1.8b",
         name = "Hunyuan MT 2 1.8B",
@@ -346,6 +371,25 @@ val TEXT_MODELS = listOf(
                 name = "Index-Translate-2B.Q4_K_M.gguf",
                 bytes = 1_312_164_352,
                 sha256 = "044b313d29342bd3b2c77cbb64023ca0d209bd9b3247763f9d162767ef2d746a",
+            ),
+        ),
+    ),
+    Model(
+        id = "plamo-3-translate-2b",
+        name = "PLaMo 3 Translate 2B",
+        reader = Reader.LLAMA_CPP,
+        family = "plamo",
+        task = Task.TRANSLATE,
+        accuracy = 2,
+        note = "更自然 · 非商业使用",
+        holdsMb = 2120,
+        files = listOf(
+            ModelFile(
+                PLAMO, PLAMO_REVISION,
+                path = "plamo-3-translate-2b-Q4_K_M.gguf",
+                name = "plamo-3-translate-2b-Q4_K_M.gguf",
+                bytes = 1_807_201_888,
+                sha256 = "ac60fbb2e392349a6d3b53c7903655005377cf543703ad3869b31ab5d96a7ffb",
             ),
         ),
     ),

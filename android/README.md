@@ -13,7 +13,7 @@
 | 翻译 · Index-Translate 2B | llama.cpp | 1.2 GB | 和电脑版同一个文件 |
 | 语法反馈 · Gemma 4 E2B | llama.cpp | 2.9 GB | 和电脑版同一个文件；4 GB 的手机放不下 |
 
-[audio.cpp](https://github.com/0xShug0/audio.cpp) 0.9.0 是电脑版用的引擎；[llama.cpp](https://github.com/ggml-org/llama.cpp) b11401 在手机处理器上读 Qwen3-ASR 快一倍左右。两个引擎都只在处理器上跑（见"量过、去掉了的三种"）。
+[audio.cpp](https://github.com/0xShug0/audio.cpp) 0.9.0 是电脑版用的引擎；[llama.cpp](https://github.com/ggml-org/llama.cpp) b12182 在手机处理器上读 Qwen3-ASR 快一倍左右。两个引擎都只在处理器上跑（见"量过、去掉了的三种"）。
 
 ## 给朋友测
 

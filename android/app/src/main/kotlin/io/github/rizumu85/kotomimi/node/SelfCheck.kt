@@ -660,7 +660,7 @@ class SelfCheck(private val context: Context, private val engine: Engine, privat
 
 /** What the build knows of itself. */
 object BuildConfigLite {
-    const val VERSION = "0.9.5"
+    const val VERSION = "0.9.6"
     const val ENGINE = "0.9.0"
-    const val LLAMA = "b11401"
+    const val LLAMA = "b12182"
 }

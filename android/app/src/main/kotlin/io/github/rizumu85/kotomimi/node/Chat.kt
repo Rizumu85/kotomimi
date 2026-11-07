@@ -49,9 +49,14 @@ object Chat {
 
     /** The language a translation is asked for, as its prompt names it (翻译为中文, into English); null where none is named. */
     fun intoIn(body: String): String? {
-        val text = runCatching { JSONObject(body).getJSONArray("messages").toString() }.getOrNull() ?: return null
+        val json = runCatching { JSONObject(body) }.getOrNull() ?: return null
+        val text = runCatching { json.getJSONArray("messages").toString() }.getOrNull() ?: return null
         return INTO.find(text)?.groupValues?.drop(1)?.firstOrNull { it.isNotEmpty() }
+            // PLaMo 3 Translate is told it by its template's options, by a code.
+            ?: (json.optJSONObject("chat_template_kwargs")?.opt("target_lang") as? String)?.let { CODE_NAMES[it] ?: it }
     }
+
+    private val CODE_NAMES = mapOf("zh-hans" to "中文", "zh-hant" to "繁体中文", "ja" to "日语", "ko" to "韩语", "en" to "英语")
 
     private val INTO = Regex("翻译[为成]([\\p{IsHan}]{1,6}?)[，,：:\\\\]|into ([A-Z][a-z]+)")
 
@@ -89,8 +94,13 @@ object Chat {
             else -> emptyList()
         }.filter { it.isNotEmpty() && it.length <= STOP_MOST }.take(STOPS_MOST)
         if (stop.isNotEmpty()) out.put("stop", JSONArray(stop))
-        // Of what a request may tell the model's template, the one thing the desktop tells it.
-        (json.optJSONObject("chat_template_kwargs")?.opt("enable_thinking") as? Boolean)?.let { out.put("chat_template_kwargs", JSONObject().put("enable_thinking", it)) }
+        // Of what a request may tell the model's template, what the desktop tells it: whether it thinks first, and
+        // PLaMo 3 Translate's languages (`translatorRequest`), each a language's code and nothing else.
+        val asked = json.optJSONObject("chat_template_kwargs")
+        val told = JSONObject()
+        (asked?.opt("enable_thinking") as? Boolean)?.let { told.put("enable_thinking", it) }
+        for (name in LANGUAGE_OPTIONS) (asked?.opt(name) as? String)?.takeIf { LANGUAGE_CODE.matches(it) }?.let { told.put(name, it) }
+        if (told.length() > 0) out.put("chat_template_kwargs", told)
         return Asked(model, json.opt("stream") == true, out.toString())
     }
 
@@ -319,4 +329,7 @@ object Chat {
     private const val STOPS_MOST = 4
     private const val STOP_MOST = 32
     private const val NAME_SHOWN = 60
+    /** PLaMo 3 Translate's options for its template: the languages, by codes such as `ja`, `zh-hans`, `tl`. */
+    private val LANGUAGE_OPTIONS = listOf("source_lang", "target_lang")
+    private val LANGUAGE_CODE = Regex("[a-z]{2,3}(-[a-z]{4})?")
 }
