@@ -46,6 +46,8 @@ const NOTES: Readonly<Record<string, string>> = {
   'apple-speech': 'noteAppleSpeech',
   'index-translate-2b': 'noteIndexTranslate',
   'hy-mt2-1.8b': 'noteHyMt2',
+  'plamo-3-translate-2b': 'notePlamo3',
+  'plamo-3-translate-0.8b': 'notePlamo3Small',
   'hy-mt1.5-1.8b': 'noteHyMt15',
   'gemma-4-e2b': 'noteGemma4',
 };

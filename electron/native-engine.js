@@ -219,6 +219,16 @@ const LLAMA = {
   },
 };
 
+/**
+ * The languages PLaMo 3 Translate takes, as its card lists them, by the app's codes (its own `tl` is the app's `fil`,
+ * its `zh-hans`/`zh-hant` the app's `zh`): the page's `PLAMO` names the same ones. No Cantonese.
+ */
+const PLAMO_LANGUAGES = [
+  'ja', 'en', 'zh', 'ko', 'ar', 'az', 'be', 'bg', 'bn', 'ca', 'ceb', 'de', 'es', 'et', 'eu', 'fa', 'fr', 'gu', 'he', 'hi',
+  'hr', 'hu', 'hy', 'id', 'it', 'jv', 'ka', 'kk', 'km', 'lt', 'lv', 'ml', 'mr', 'ms', 'my', 'ne', 'nl', 'pa', 'pl', 'ru',
+  'si', 'sk', 'sl', 'sr', 'sw', 'ta', 'te', 'th', 'fil', 'ur', 'uz', 'vi',
+];
+
 /** The languages the Hunyuan MT models take, as their card lists them: the page's `HUNYUAN` names the same ones. */
 const HUNYUAN_LANGUAGES = [
   'zh', 'en', 'fr', 'pt', 'es', 'ja', 'tr', 'ru', 'ar', 'ko', 'th', 'it', 'de', 'vi', 'ms', 'id', 'fil', 'hi',
@@ -243,6 +253,24 @@ const TRANSLATORS = {
     bytes: 1133080448,
     sha256: 'dc5f44fcf1fa496ee7ad725982c0c8c553a4de00259b53af84c4b89fb0c06699',
     languages: HUNYUAN_LANGUAGES,
+  },
+  // PLaMo 3 Translate (Preferred Networks), free for non-commercial use only (the PLaMo Community License): it needs
+  // llama.cpp b12182 or later, which reads its tokenizer.
+  'plamo-3-translate-2b': {
+    file: 'plamo-3-translate-2b-Q4_K_M.gguf',
+    url: 'https://huggingface.co/pfnet/plamo-3-translate-2b-GGUF/resolve/4e4500666915b3a2cc0d667b64d9745c0821b63c/plamo-3-translate-2b-Q4_K_M.gguf',
+    mirror: 'https://modelscope.cn/models/pfnet/plamo-3-translate-2b-GGUF/resolve/master/plamo-3-translate-2b-Q4_K_M.gguf',
+    bytes: 1807201888,
+    sha256: 'ac60fbb2e392349a6d3b53c7903655005377cf543703ad3869b31ab5d96a7ffb',
+    languages: PLAMO_LANGUAGES,
+  },
+  'plamo-3-translate-0.8b': {
+    file: 'plamo-3-translate-0.8b-Q4_K_M.gguf',
+    url: 'https://huggingface.co/pfnet/plamo-3-translate-0.8b-GGUF/resolve/e11a613b483edceab3450941f18cc79307fc93e9/plamo-3-translate-0.8b-Q4_K_M.gguf',
+    mirror: 'https://modelscope.cn/models/pfnet/plamo-3-translate-0.8b-GGUF/resolve/master/plamo-3-translate-0.8b-Q4_K_M.gguf',
+    bytes: 573125696,
+    sha256: 'ff10c4aed0c478af8be61fe4d22fb463c0f639acfc168012062efba35ccbdd48',
+    languages: PLAMO_LANGUAGES,
   },
   'hy-mt1.5-1.8b': {
     file: 'HY-MT1.5-1.8B-Q4_K_M.gguf',

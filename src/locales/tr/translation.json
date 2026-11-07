@@ -755,7 +755,9 @@
       "noteMoonshineJa": "Japonca VRChat sohbeti testinde karakter hata oranı yaklaşık %70. Yalnızca ekran kartı hiç kullanılamadığında son çare olarak uygundur.",
       "noteGranite41": "Japonca VRChat sohbeti testinde aynı cümleyi durmadan tekrarlar. Japonca konuşmalar için neredeyse kullanılamaz.",
       "noteSenseVoice": "Japonca VRChat sohbeti testinde kana karakterleri yazmaz; Japonca metin neredeyse okunamaz hâle gelir.",
-      "phoneNoLanguage": "{{address}} adresindeki telefonda {{name}}, {{source}} dilini duyamıyor. Telefona bu dili ekleyin veya kartındaki başka bir modeli seçin."
+      "phoneNoLanguage": "{{address}} adresindeki telefonda {{name}}, {{source}} dilini duyamıyor. Telefona bu dili ekleyin veya kartındaki başka bir modeli seçin.",
+      "notePlamo3": "En doğal okunan çeviriler; zaman zaman anlam kayabilir. Yaklaşık 2 GB VRAM. Yalnızca ticari olmayan kullanım.",
+      "notePlamo3Small": "En hafifi: yaklaşık 0.6 GB VRAM kullanır ve hızlıdır; doğruluğu biraz daha düşük. Yalnızca ticari olmayan kullanım."
     }
   },
   "logsPanel": {

@@ -83,8 +83,9 @@ Thirty sentences of Japanese VRChat talk into Chinese:
 |---|---|---|---|
 | Index-Translate 2B Q4_K_M | about 3 | | 2026-10-05 |
 | Hunyuan MT 2 1.8B Q4_K_M | about 8 | | 2026-10-05 |
-| Hunyuan MT 1.5 1.8B Q4_K_M | about 8 | adds words of its own | 2026-10-05 |
 | Index-Translate 9B Q4_K_M | 3-4 | twice as slow, about 4 GB more VRAM | 2026-10-05 |
+
+105 sentences (57 app stretches of Japanese VRChat talk as Qwen3-ASR read them, 48 casual lines among zh/ja/ko/en), blind-judged by GPT, RTX 5070 Ti (2026-11-07): serious errors / best of four / time a sentence / VRAM: Index-Translate 2B 4 / 26 / 0.19 s / 1.5 GB; PLaMo 3 Translate 2B 9 / 39 / 0.16 s / 1.9 GB; Hunyuan MT 2 1.8B 8 / 15 / 0.20 s / 1.4 GB; PLaMo 3 Translate 0.8B 11 / 25 / 0.08 s / 0.6 GB.
 
 ## Native feedback
 

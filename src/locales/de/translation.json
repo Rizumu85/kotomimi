@@ -755,7 +755,9 @@
       "noteMoonshineJa": "Im Test mit japanischen VRChat-Gesprächen: etwa 70% der Zeichen falsch. Nur als Notlösung, wenn die Grafikkarte gar nicht nutzbar ist.",
       "noteGranite41": "Im Test mit japanischen VRChat-Gesprächen: wiederholt ständig denselben Satz. Für japanische Gespräche praktisch unbrauchbar.",
       "noteSenseVoice": "Im Test mit japanischen VRChat-Gesprächen: gibt keine Kana aus. Das Japanische ist dadurch kaum lesbar.",
-      "phoneNoLanguage": "{{name}} auf dem Telefon ({{address}}) kann {{source}} nicht erkennen. Füge diese Sprache auf dem Telefon hinzu oder wähle in seiner Karte ein anderes Modell."
+      "phoneNoLanguage": "{{name}} auf dem Telefon ({{address}}) kann {{source}} nicht erkennen. Füge diese Sprache auf dem Telefon hinzu oder wähle in seiner Karte ein anderes Modell.",
+      "notePlamo3": "Liest sich am natürlichsten; gelegentlich weicht die Bedeutung ab. Benötigt etwa 2 GB Videospeicher. Nur für nichtkommerzielle Nutzung.",
+      "notePlamo3Small": "Am sparsamsten: benötigt etwa 0.6 GB Videospeicher und ist schnell, aber etwas weniger genau. Nur für nichtkommerzielle Nutzung."
     }
   },
   "logsPanel": {

@@ -87,7 +87,9 @@ describe('a stretch heard while it is spoken on an iPad', () => {
 
   // The Mac and the iPad choose between two languages alike: the same file, copied.
   it.skipIf(!existsSync(resolve(ROOT, ipadPair)))('chooses between two languages as the Mac does', () => {
-    expect(read(ipadPair)).toBe(read('native/apple-speech/SpeechPairSelection.swift'));
+    // As committed: a Windows checkout may give either copy CRLF line ends.
+    const lines = (path: string) => read(path).replace(/\r\n/g, '\n');
+    expect(lines(ipadPair)).toBe(lines('native/apple-speech/SpeechPairSelection.swift'));
   });
 });
 

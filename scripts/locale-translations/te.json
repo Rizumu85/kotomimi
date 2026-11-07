@@ -1663,6 +1663,14 @@
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "అతి తక్కువ వనరులు వాడుతుంది, అన్నిటికంటే వేగంగా ఉంటుంది: సుమారు 0.4 GB గ్రాఫిక్స్ మెమరీ. జపనీస్ సంభాషణ పరీక్షల్లో Qwen3-ASR 0.6Bతో సమానమైన ఖచ్చితత్వం, విరామ చిహ్నాలు చాలా తక్కువ. చైనీస్, కాంటనీస్, ఇంగ్లీష్, జపనీస్, కొరియన్‌కు మాత్రమే మద్దతు ఉంది."
   },
+  "providers.localai.notePlamo3": {
+    "en": "Reads the most natural; now and then the meaning drifts. About 2 GB of video memory. Non-commercial use only.",
+    "text": "అత్యంత సహజంగా చదవబడుతుంది; అప్పుడప్పుడు అర్థం కొద్దిగా మారవచ్చు. సుమారు 2 GB వీడియో మెమరీ అవసరం. వాణిజ్యేతర వినియోగానికి మాత్రమే."
+  },
+  "providers.localai.notePlamo3Small": {
+    "en": "The lightest: about 0.6 GB of video memory and quick, a little less accurate. Non-commercial use only.",
+    "text": "అత్యంత తేలికైనది: సుమారు 0.6 GB వీడియో మెమరీ అవసరం, వేగంగా పనిచేస్తుంది, కానీ ఖచ్చితత్వం కొద్దిగా తక్కువ. వాణిజ్యేతర వినియోగానికి మాత్రమే."
+  },
   "providers.localai.noteQwen06": {
     "en": "Measured on Japanese VRChat talk: about 35% of the characters wrong. Small: for when the graphics card has little memory to spare.",
     "text": "జపనీస్ VRChat సంభాషణ పరీక్షల్లో: సుమారు 35% అక్షరాలు తప్పుగా వచ్చాయి. చిన్న మోడల్ కాబట్టి గ్రాఫిక్స్ మెమరీ తక్కువగా ఉన్నప్పుడు వాడవచ్చు."

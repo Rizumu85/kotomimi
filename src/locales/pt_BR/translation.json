@@ -755,7 +755,9 @@
       "noteMoonshineJa": "Em testes com conversas em japonês no VRChat: cerca de 70% de erro nos caracteres. Apenas como último recurso, quando não for possível usar a placa de vídeo.",
       "noteGranite41": "Em testes com conversas em japonês no VRChat: repete a mesma frase sem parar. Praticamente inutilizável para conversas em japonês.",
       "noteSenseVoice": "Testado em conversas em japonês no VRChat: não gera kana, e o japonês fica praticamente incompreensível.",
-      "phoneNoLanguage": "{{name}} no celular ({{address}}) não entende {{source}}. Adicione esse idioma no celular ou escolha outro modelo no cartão."
+      "phoneNoLanguage": "{{name}} no celular ({{address}}) não entende {{source}}. Adicione esse idioma no celular ou escolha outro modelo no cartão.",
+      "notePlamo3": "Lê de forma mais natural; às vezes o sentido se perde. Cerca de 2 GB de memória de vídeo. Apenas para uso não comercial.",
+      "notePlamo3Small": "A opção mais leve: cerca de 0,6 GB de memória de vídeo, é rápida e um pouco menos precisa. Apenas para uso não comercial."
     }
   },
   "logsPanel": {

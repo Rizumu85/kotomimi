@@ -156,12 +156,12 @@ describe('the translation runtime', () => {
       expect(build.sha256).toMatch(/^[0-9a-f]{64}$/);
       expect(build.exe).toMatch(/llama-server(\.exe)?$/);
     }
-    expect(Object.keys(TRANSLATORS)).toEqual(['index-translate-2b', 'hy-mt2-1.8b', 'hy-mt1.5-1.8b']);
+    expect(Object.keys(TRANSLATORS)).toEqual(['index-translate-2b', 'hy-mt2-1.8b', 'plamo-3-translate-2b', 'plamo-3-translate-0.8b', 'hy-mt1.5-1.8b']);
     for (const model of Object.values(TRANSLATORS)) {
-      expect(model.url).toMatch(/^https:\/\/huggingface\.co\/(IndexTeam|tencent)\/[^/]+\/resolve\/[0-9a-f]{40}\//);
+      expect(model.url).toMatch(/^https:\/\/huggingface\.co\/(IndexTeam|tencent|pfnet)\/[^/]+\/resolve\/[0-9a-f]{40}\//);
       expect(model.url.endsWith(`/${model.file}`)).toBe(true);
       expect(model.sha256).toMatch(/^[0-9a-f]{64}$/);
-      expect(model.bytes).toBeGreaterThan(1_000_000_000);
+      expect(model.bytes).toBeGreaterThan(500_000_000);
     }
   });
 
@@ -1139,7 +1139,7 @@ describe('a download, once more', () => {
     it('gives every model ModelScope keeps its address there, on the same file', () => {
       const every = { ...MODELS, ...TRANSLATORS, ...COACHES };
       const mirrored = Object.values(every).filter((model) => model.mirror);
-      expect(mirrored.length).toBe(7);
+      expect(mirrored.length).toBe(9);
       for (const model of mirrored) {
         expect(model.mirror).toMatch(/^https:\/\/modelscope\.cn\/models\/[^/]+\/[^/]+\/resolve\/master\//);
         expect(model.mirror.endsWith(`/${model.url.split('/').pop()}`)).toBe(true);

@@ -16,7 +16,7 @@ export interface NativeTranslator {
   /** The download, in bytes. The runtime itself is fetched with the first one. */
   bytes: number;
   /** Whose form of request it takes. */
-  prompt: 'index' | 'hunyuan';
+  prompt: 'index' | 'hunyuan' | 'plamo';
   /** What it translates between, in the app's base codes; `'any'` for a model of well over a hundred languages. */
   languages: readonly string[] | 'any';
   /** No longer offered for download: shown only where it is already on the computer. */
@@ -27,11 +27,23 @@ export interface NativeTranslator {
 const HUNYUAN = ['zh', 'en', 'fr', 'pt', 'es', 'ja', 'tr', 'ru', 'ar', 'ko', 'th', 'it', 'de', 'vi', 'ms', 'id', 'fil', 'hi', 'pl', 'cs', 'nl', 'km', 'my', 'fa', 'gu', 'ur', 'te', 'mr', 'he', 'bn', 'ta', 'uk', 'bo', 'kk', 'mn', 'ug', 'yue'] as const;
 
 /**
+ * PLaMo 3 Translate's languages, as its card lists them, by the app's codes (its `tl` is `fil`, its `zh-hans` and
+ * `zh-hant` are `zh`). No Cantonese.
+ */
+const PLAMO = ['ja', 'en', 'zh', 'ko', 'ar', 'az', 'be', 'bg', 'bn', 'ca', 'ceb', 'de', 'es', 'et', 'eu', 'fa', 'fr', 'gu', 'he', 'hi', 'hr', 'hu', 'hy', 'id', 'it', 'jv', 'ka', 'kk', 'km', 'lt', 'lv', 'ml', 'mr', 'ms', 'my', 'ne', 'nl', 'pa', 'pl', 'ru', 'si', 'sk', 'sl', 'sr', 'sw', 'ta', 'te', 'th', 'fil', 'ur', 'uz', 'vi'] as const;
+
+/**
  * Best first, as measured on thirty sentences of Japanese VRChat talk into
  * Chinese (2026-10-05): serious errors in about 3, 8 and 8 of them. Hunyuan MT
  * 1.5 does nothing its successor does not — the same languages, the same
  * size, as many errors, and words of its own added besides — so it is no
  * longer offered: a computer that has it keeps it.
+ *
+ * PLaMo 3 Translate (2026-11-07, 105 sentences — 57 of the app's own stretches of Japanese VRChat talk as Qwen3-ASR
+ * read them, and casual lines between Chinese, Japanese, Korean and English — judged blind): the 2B reads the most
+ * natural (best of four in 39, Index-Translate in 26) with serious errors in 9 against Index-Translate's 4, so it
+ * stands beside the default, not before it; the 0.8B holds a third of the video memory at twice the speed, with 11.
+ * Both are free for non-commercial use only, and need llama.cpp b12182 or later.
  *
  * The retired model's id (`hy-mt1.5-1.8b`) keeps its dot, where the sidecar's
  * catalog and the app's own catalog name the same weights `hy-mt15-1.8b`: each
@@ -41,7 +53,9 @@ const HUNYUAN = ['zh', 'en', 'fr', 'pt', 'es', 'ja', 'tr', 'ru', 'ar', 'ko', 'th
  */
 export const NATIVE_TRANSLATORS: readonly NativeTranslator[] = [
   { id: 'index-translate-2b', name: 'Index-Translate 2B', bytes: 1312164352, prompt: 'index', languages: 'any' },
+  { id: 'plamo-3-translate-2b', name: 'PLaMo 3 Translate 2B', bytes: 1807201888, prompt: 'plamo', languages: PLAMO },
   { id: 'hy-mt2-1.8b', name: 'Hunyuan MT 2 1.8B', bytes: 1133080448, prompt: 'hunyuan', languages: HUNYUAN },
+  { id: 'plamo-3-translate-0.8b', name: 'PLaMo 3 Translate 0.8B', bytes: 573125696, prompt: 'plamo', languages: PLAMO },
   { id: 'hy-mt1.5-1.8b', name: 'Hunyuan MT 1.5 1.8B', bytes: 1133080512, prompt: 'hunyuan', languages: HUNYUAN, retired: true },
 ];
 
@@ -106,6 +120,20 @@ export interface TranslatorRequest {
  * MT 2, by its card's form, in none, and better in three).
  */
 export function translatorRequest(model: NativeTranslator, source: string, target: string): TranslatorRequest {
+  if (model.prompt === 'plamo') {
+    // Its chat template writes its own request from the sentence and the languages (`chat_template_kwargs`); a
+    // source left to be detected is left out, and it tells the language itself. Greedy, as its card's examples.
+    const code = (language: string) => (baseOf(language) === 'zh' ? (isTraditional(language) ? 'zh-hant' : 'zh-hans') : baseOf(language) === 'fil' ? 'tl' : baseOf(language));
+    return {
+      wrap: TEXT_SLOT,
+      extra: {
+        temperature: 0,
+        max_tokens: 512,
+        stop: ['<|plamo:tag|>', '<|plamo:bos|>'],
+        chat_template_kwargs: { target_lang: code(target), ...(isAuto(source) ? {} : { source_lang: code(source) }) },
+      },
+    };
+  }
   if (model.prompt === 'index') {
     return {
       wrap: `请将以下${isAuto(source) ? '' : nameIn(source, 'zh')}文本翻译为${nameIn(target, 'zh')}，直接输出翻译结果，不要进行任何解释。\n\n${TEXT_SLOT}`,

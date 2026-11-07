@@ -73,9 +73,24 @@ describe('the words each translation model is asked with', () => {
     expect(nativeTranslates(nativeTranslator('hy-mt2-1.8b'), 'auto', 'zh-CN')).toBe(true);
     expect(nativeTranslates(nativeTranslator('hy-mt2-1.8b'), 'ja', 'sw')).toBe(false);
     expect(nativeTranslator('gone').id).toBe(NATIVE_DEFAULT_TRANSLATOR);
-    expect(NATIVE_TRANSLATORS.map((m) => m.id)).toEqual(['index-translate-2b', 'hy-mt2-1.8b', 'hy-mt1.5-1.8b']);
+    expect(NATIVE_TRANSLATORS.map((m) => m.id)).toEqual(['index-translate-2b', 'plamo-3-translate-2b', 'hy-mt2-1.8b', 'plamo-3-translate-0.8b', 'hy-mt1.5-1.8b']);
+    // PLaMo 3 Translate: its card's list, without Cantonese.
+    expect(nativeTranslates(nativeTranslator('plamo-3-translate-2b'), 'ja', 'zh-TW')).toBe(true);
+    expect(nativeTranslates(nativeTranslator('plamo-3-translate-2b'), 'ja', 'yue')).toBe(false);
     // The older Hunyuan model is no longer offered: its successor does all it does. It stays for a computer that has it.
     expect(NATIVE_TRANSLATORS.filter((m) => m.retired).map((m) => m.id)).toEqual(['hy-mt1.5-1.8b']);
+  });
+
+  it('asks PLaMo 3 Translate in its own form: the sentence alone, the languages by its codes, the source left out where it is to be detected', () => {
+    const plamo = nativeTranslator('plamo-3-translate-2b');
+    expect(translatorRequest(plamo, 'ja', 'zh-CN')).toEqual({
+      wrap: TEXT_SLOT,
+      extra: { temperature: 0, max_tokens: 512, stop: ['<|plamo:tag|>', '<|plamo:bos|>'], chat_template_kwargs: { target_lang: 'zh-hans', source_lang: 'ja' } },
+    });
+    expect(translatorRequest(plamo, 'auto', 'zh-TW').extra.chat_template_kwargs).toEqual({ target_lang: 'zh-hant' });
+    expect(translatorRequest(plamo, 'fil', 'en').extra.chat_template_kwargs).toEqual({ target_lang: 'en', source_lang: 'tl' });
+    // Asked alone, always: no form with the sentence before.
+    expect(translatorRequest(plamo, 'ja', 'zh-CN').wrapAfter).toBeUndefined();
   });
 });
 

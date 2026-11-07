@@ -1791,6 +1791,14 @@
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "Pinakamagaan at pinakamabilis: mga 0.4 GB na memorya ng graphics card. Sa pagsubok sa usapang Hapon: kasingtumpak ng Qwen3-ASR 0.6B, pero bihirang maglagay ng bantas. Tsino, Cantonese, Ingles, Hapon, at Koreano lang."
   },
+  "providers.localai.notePlamo3": {
+    "en": "Reads the most natural; now and then the meaning drifts. About 2 GB of video memory. Non-commercial use only.",
+    "text": "Pinakanatural basahin ang salin, pero paminsan-minsan ay may paglihis sa kahulugan. Humigit-kumulang 2 GB ng memorya ng video. Para sa di-komersyal na paggamit lamang."
+  },
+  "providers.localai.notePlamo3Small": {
+    "en": "The lightest: about 0.6 GB of video memory and quick, a little less accurate. Non-commercial use only.",
+    "text": "Pinakamagaan: humigit-kumulang 0.6 GB ng memorya ng video at mabilis, pero bahagyang hindi gaanong tumpak. Para sa di-komersyal na paggamit lamang."
+  },
   "providers.localai.noteQwen06": {
     "en": "Measured on Japanese VRChat talk: about 35% of the characters wrong. Small: for when the graphics card has little memory to spare.",
     "text": "Sa pagsubok sa usapang Hapones sa VRChat: mga 35% ng mga karakter ang mali. Maliit ito, kaya puwedeng gamitin kapag kaunti ang libreng memorya ng graphics card."
