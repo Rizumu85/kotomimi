@@ -125,6 +125,17 @@ describe('a model kept from an earlier version of the app', () => {
     expect(engine.updateRuntime()).toBeNull();
     expect(world.requests).toEqual([]);
   });
+
+  it('clears an earlier runtime where this version’s was fetched before', async () => {
+    const { world, engine } = computer();
+    fs.mkdirSync(path.dirname(exeFile()), { recursive: true });
+    fs.writeFileSync(exeFile(), 'exe');
+    fs.mkdirSync(path.join(dir, 'engine-0.9.0'), { recursive: true });
+    expect(engine.updateRuntime()).toBeNull();
+    expect(fs.existsSync(path.join(dir, 'engine-0.9.0'))).toBe(false);
+    expect(fs.existsSync(exeFile())).toBe(true);
+    expect(world.requests).toEqual([]);
+  });
 });
 
 describe('a download on a drive without room', () => {

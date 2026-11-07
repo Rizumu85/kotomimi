@@ -1155,7 +1155,11 @@ function createNativeEngine(deps = {}) {
     }
     if (!whole) throw new Error('The engine could not be unpacked.');
     if (platform !== 'win32') { try { files.chmodSync(exe, 0o755); } catch { /* already runnable, or it will say so when run */ } }
-    // The runtimes of earlier versions: no model runs on them any more, and each holds a hundred megabytes or more.
+    removeEarlierRuntimes();
+  }
+
+  /** The runtimes of earlier versions: no model runs on them any more, and each holds a hundred megabytes or more. */
+  function removeEarlierRuntimes() {
     try {
       for (const name of files.readdirSync(dir)) {
         if (/^engine-/.test(name) && path.join(dir, name) !== engineDir) files.rmSync(path.join(dir, name), { recursive: true, force: true });
@@ -1170,6 +1174,8 @@ function createNativeEngine(deps = {}) {
    * nothing is to be done: the runtime is here or on its way, or no model is.
    */
   function updateRuntime() {
+    // This version's runtime is here already (fetched by an earlier start): what an earlier one left goes.
+    if (build && engineReady() && !unpacking) removeEarlierRuntimes();
     if (!build || engineReady() || fetching.has('engine') || unpacking) return null;
     const kept = Object.keys(MODELS_).find((id) => has(fileOf(id)));
     return kept ? download(kept) : null;
