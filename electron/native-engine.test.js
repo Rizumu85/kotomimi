@@ -89,6 +89,44 @@ function computer({ platform = 'win32', arch = 'x64', served = { 'https://exampl
 const modelFile = () => path.join(dir, 'models', 'm1.gguf');
 const exeFile = () => path.join(dir, 'engine-1.0.0', 'server.exe');
 
+describe('a model kept from an earlier version of the app', () => {
+  it('gets this version’s runtime by itself, fetching nothing else, and the earlier runtime goes', async () => {
+    const { world, engine } = computer();
+    fs.mkdirSync(path.join(dir, 'models'), { recursive: true });
+    fs.writeFileSync(modelFile(), MODEL);
+    fs.mkdirSync(path.join(dir, 'engine-0.9.0'), { recursive: true });
+    fs.writeFileSync(path.join(dir, 'engine-0.9.0', 'server.exe'), 'old');
+    expect(engine.status()).toMatchObject({ engine: 'absent', models: { m1: { state: 'downloaded' } } });
+    await engine.updateRuntime();
+    expect(world.requests.map((r) => r.url)).toEqual(['https://example.test/engine.zip']);
+    expect(engine.status()).toMatchObject({ engine: 'ready', models: { m1: { state: 'downloaded' } } });
+    expect(fs.existsSync(exeFile())).toBe(true);
+    expect(fs.existsSync(path.join(dir, 'engine-0.9.0'))).toBe(false);
+    // Nothing more to do now.
+    expect(engine.updateRuntime()).toBeNull();
+  });
+
+  it('says the model is kept while the runtime comes for it', async () => {
+    let release;
+    const gate = new Promise((resolve) => { release = resolve; });
+    const { engine } = computer({ fetch: async (url) => { await gate; return answer([url.endsWith('.zip') ? ARCHIVE : MODEL]); } });
+    fs.mkdirSync(path.join(dir, 'models'), { recursive: true });
+    fs.writeFileSync(modelFile(), MODEL);
+    const done = engine.updateRuntime();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(engine.status()).toMatchObject({ engine: 'downloading', models: { m1: { state: 'downloading', runtime: true, kept: true } } });
+    release();
+    await done;
+    expect(engine.status().engine).toBe('ready');
+  });
+
+  it('is left alone where no model was kept, or the runtime is this version’s', async () => {
+    const { world, engine } = computer();
+    expect(engine.updateRuntime()).toBeNull();
+    expect(world.requests).toEqual([]);
+  });
+});
+
 describe('a download on a drive without room', () => {
   it('is refused before anything is fetched, saying how much room there is and is needed', async () => {
     const fetched = [];

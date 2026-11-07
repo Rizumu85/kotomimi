@@ -1423,6 +1423,18 @@
     "en": "Address",
     "text": "Adres"
   },
+  "providers.localai.engineUpdate": {
+    "en": "The engine needs an update",
+    "text": "De engine moet worden bijgewerkt"
+  },
+  "providers.localai.engineUpdateNow": {
+    "en": "Update",
+    "text": "Bijwerken"
+  },
+  "providers.localai.engineUpdating": {
+    "en": "Updating the engine",
+    "text": "Engine wordt bijgewerkt"
+  },
   "providers.localai.familyUnheard": {
     "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
     "text": "Op het andere apparaat ontbreken {{languages}} voor {{name}}. Het apparaat kiest hiervoor zelf een model. Download daar eerst {{languages}} om {{name}} te gebruiken."
@@ -1571,6 +1583,10 @@
     "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
     "text": "De native engine voor grammaticafeedback wordt nog niet ondersteund op dit systeem. Kies in het paneel 'Grammaticafeedback' voor 'API-model' of 'Ander apparaat'."
   },
+  "providers.localai.nativeCoachUpdating": {
+    "en": "Updating the grammar feedback engine. You can start once it is done.",
+    "text": "De engine voor grammaticafeedback wordt bijgewerkt. Zodra dit klaar is, kun je beginnen."
+  },
   "providers.localai.nativeCoachWarming": {
     "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
     "text": "De engine voor grammaticafeedback start nog op. Dit duurt maar een paar seconden. Zodra de engine klaar is, kun je beginnen."
@@ -1638,6 +1654,10 @@
   "providers.localai.nativeUnsupportedShort": {
     "en": "Not available for this system",
     "text": "Nog niet ondersteund op dit systeem"
+  },
+  "providers.localai.nativeUpdating": {
+    "en": "Updating the speech recognition engine. You can start once it is done.",
+    "text": "De spraakherkenningsengine wordt bijgewerkt. Zodra dit klaar is, kun je beginnen."
   },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
@@ -2050,6 +2070,10 @@
   "providers.localai.translatorUnsupported": {
     "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
     "text": "De native vertaalengine wordt nog niet ondersteund op dit systeem. Kies in het paneel 'Vertaling' voor 'API-model' of 'Ander apparaat'."
+  },
+  "providers.localai.translatorUpdating": {
+    "en": "Updating the translation engine. You can start once it is done.",
+    "text": "De vertaalengine wordt bijgewerkt. Zodra dit klaar is, kun je beginnen."
   },
   "providers.localai.translatorWarming": {
     "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",

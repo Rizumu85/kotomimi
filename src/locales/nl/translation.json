@@ -757,7 +757,13 @@
       "noteSenseVoice": "Getest met Japanse gesprekken in VRChat: geeft geen kana weer, waardoor het Japans vrijwel onleesbaar is.",
       "phoneNoLanguage": "{{name}} op de telefoon ({{address}}) kan {{source}} niet verstaan. Voeg die taal toe op de telefoon of kies een ander model in de kaart.",
       "notePlamo3": "Leest het natuurlijkst; soms wijkt de betekenis iets af. Ongeveer 2 GB videogeheugen. Alleen voor niet-commercieel gebruik.",
-      "notePlamo3Small": "De lichtste: ongeveer 0,6 GB videogeheugen en snel, maar iets minder nauwkeurig. Alleen voor niet-commercieel gebruik."
+      "notePlamo3Small": "De lichtste: ongeveer 0,6 GB videogeheugen en snel, maar iets minder nauwkeurig. Alleen voor niet-commercieel gebruik.",
+      "nativeUpdating": "De spraakherkenningsengine wordt bijgewerkt. Zodra dit klaar is, kun je beginnen.",
+      "translatorUpdating": "De vertaalengine wordt bijgewerkt. Zodra dit klaar is, kun je beginnen.",
+      "nativeCoachUpdating": "De engine voor grammaticafeedback wordt bijgewerkt. Zodra dit klaar is, kun je beginnen.",
+      "engineUpdating": "Engine wordt bijgewerkt",
+      "engineUpdate": "De engine moet worden bijgewerkt",
+      "engineUpdateNow": "Bijwerken"
     }
   },
   "logsPanel": {

@@ -280,6 +280,22 @@ export const nativeReady = (status: NativeEngineStatus, id: string): boolean => 
 /** The model is on disk, with the runtime that runs it. */
 export const nativeDownloaded = (status: NativeEngineStatus, id: string): boolean => status.engine === 'ready' && status.models[id]?.state === 'downloaded';
 
+/**
+ * Fork: a model kept from an earlier version of the app whose runtime is not this version's yet: the main process
+ * fetches the new runtime by itself (`updateRuntime` in electron/native-engine.js), and the model is not missing.
+ */
+export const nativeUpdating = (status: NativeEngineStatus, id: string): boolean =>
+  (status.engine === 'absent' || status.engine === 'downloading') && (status.models[id]?.state === 'downloaded' || status.models[id]?.kept === true);
+
+/**
+ * The refusal while a kept model's runtime is being updated: said as that, not as a model to download. One that is
+ * not on its way (the update failed, or the app was offline) is asked for again here.
+ */
+function updating(status: NativeEngineStatus, id: string, fetch: (id: string) => unknown, code: string, what: string): Extract<CheckResult, { ok: false }> {
+  if (status.engine === 'absent') void fetch(id);
+  return { ok: false, reason: `The ${what} engine is being updated.`, code };
+}
+
 
 export interface NativeCheckDeps {
   /** The engine's state now, and its stop; the store's by default. */
@@ -306,6 +322,8 @@ export async function nativeGap(chosen: NativePick | string, heard: readonly str
   const unchosen = heard.find((language) => !nativePicked(pick, language, has));
   if (unchosen !== undefined) return { ok: false, reason: `No native recognition model is chosen for ${unchosen}.`, code: 'native_unchosen', params: { source: unchosen } };
   const models = hearing(pick, heard, has);
+  const kept = models.find((one) => nativeUpdating(status, one.id));
+  if (kept) return updating(status, kept.id, (id) => store.download(id), 'native_updating', 'recognition');
   const absent = models.find((one) => !nativeDownloaded(status, one.id));
   if (absent) return { ok: false, reason: `${absent.name} is not downloaded.`, code: 'native_missing', params: { name: absent.name } };
   // The engine the app downloads runs one model at a time: two of its models cannot hear in one run.
@@ -501,6 +519,7 @@ export async function translatorGap(id: string, pairs: ReadonlyArray<{ source: s
   if (!status.supported) return { ok: false, reason: 'The native translation engine is not available for this system.', code: 'native_translator_unsupported' };
   const untranslated = pairs.find((pair) => !nativeTranslates(model, pair.source, pair.target));
   if (untranslated) return { ok: false, reason: `${model.name} does not translate ${untranslated.source} → ${untranslated.target}.`, code: 'local_models_missing' };
+  if (nativeUpdating(status, model.id)) return updating(status, model.id, (one) => store.download(one), 'native_translator_updating', 'translation');
   if (!nativeDownloaded(status, model.id)) return { ok: false, reason: `${model.name} is not downloaded.`, code: 'native_translator_missing', params: { name: model.name } };
   if (!nativeReady(status, model.id) && status.run.state === 'failed' && status.run.model === model.id) return { ok: false, reason: `The native translation engine could not start: ${status.run.tail.trim().split('\n').pop() ?? ''}`, code: 'native_translator_failed' };
   return null;
@@ -523,6 +542,7 @@ export async function coachGap(id: string, deps: NativeCheckDeps = {}): Promise<
   const status = await (deps.status ?? store.refresh)();
   const model = nativeCoach(id);
   if (!status.supported) return { ok: false, reason: 'The native feedback engine is not available for this system.', code: 'native_coach_unsupported' };
+  if (nativeUpdating(status, model.id)) return updating(status, model.id, (one) => store.download(one), 'native_coach_updating', 'feedback');
   if (!nativeDownloaded(status, model.id)) return { ok: false, reason: `${model.name} is not downloaded.`, code: 'native_coach_missing', params: { name: model.name } };
   if (!nativeReady(status, model.id) && status.run.state === 'failed' && status.run.model === model.id) return { ok: false, reason: `The native feedback engine could not start: ${status.run.tail.trim().split('\n').pop() ?? ''}`, code: 'native_coach_failed' };
   return null;

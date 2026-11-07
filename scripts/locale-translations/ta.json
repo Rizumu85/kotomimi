@@ -1383,6 +1383,18 @@
     "en": "Address",
     "text": "முகவரி"
   },
+  "providers.localai.engineUpdate": {
+    "en": "The engine needs an update",
+    "text": "இயந்திரத்தைப் புதுப்பிக்க வேண்டும்"
+  },
+  "providers.localai.engineUpdateNow": {
+    "en": "Update",
+    "text": "புதுப்பி"
+  },
+  "providers.localai.engineUpdating": {
+    "en": "Updating the engine",
+    "text": "இயந்திரம் புதுப்பிக்கப்படுகிறது"
+  },
   "providers.localai.familyUnheard": {
     "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
     "text": "அந்தச் சாதனத்தின் {{name}} இல் {{languages}} இல்லை. இந்தப் பகுதிக்கு அந்தச் சாதனமே மாதிரியைத் தேர்ந்தெடுக்கும். {{name}} ஐப் பயன்படுத்த, முதலில் அந்தச் சாதனத்தில் {{languages}} ஐப் பதிவிறக்குங்கள்."
@@ -1531,6 +1543,10 @@
     "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
     "text": "இந்த இயங்குதளத்தில் இயல்நிலை இலக்கணக் கருத்து இயந்திரத்திற்கு இன்னும் ஆதரவில்லை. இலக்கணக் கருத்து அட்டையில் \"API மாதிரி\" அல்லது \"மற்றொரு சாதனம்\" என்பதற்கு மாறுங்கள்."
   },
+  "providers.localai.nativeCoachUpdating": {
+    "en": "Updating the grammar feedback engine. You can start once it is done.",
+    "text": "இலக்கணக் கருத்து இயந்திரம் புதுப்பிக்கப்படுகிறது. முடிந்ததும் தொடங்கலாம்."
+  },
   "providers.localai.nativeCoachWarming": {
     "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
     "text": "இலக்கணக் கருத்து இயந்திரம் இன்னும் தொடங்குகிறது. சில வினாடிகளே ஆகும். தயாரானதும் தொடங்கலாம்."
@@ -1598,6 +1614,10 @@
   "providers.localai.nativeUnsupportedShort": {
     "en": "Not available for this system",
     "text": "இந்த இயங்குதளத்தில் இன்னும் ஆதரவில்லை"
+  },
+  "providers.localai.nativeUpdating": {
+    "en": "Updating the speech recognition engine. You can start once it is done.",
+    "text": "பேச்சு அறிதல் இயந்திரம் புதுப்பிக்கப்படுகிறது. முடிந்ததும் தொடங்கலாம்."
   },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
@@ -2010,6 +2030,10 @@
   "providers.localai.translatorUnsupported": {
     "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
     "text": "இந்த இயங்குதளத்தில் இயல்நிலை மொழிபெயர்ப்பு இயந்திரத்திற்கு இன்னும் ஆதரவில்லை. மொழிபெயர்ப்பு அட்டையில் \"API மாதிரி\" அல்லது \"மற்றொரு சாதனம்\" என்பதற்கு மாறுங்கள்."
+  },
+  "providers.localai.translatorUpdating": {
+    "en": "Updating the translation engine. You can start once it is done.",
+    "text": "மொழிபெயர்ப்பு இயந்திரம் புதுப்பிக்கப்படுகிறது. முடிந்ததும் தொடங்கலாம்."
   },
   "providers.localai.translatorWarming": {
     "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",

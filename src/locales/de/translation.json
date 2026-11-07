@@ -757,7 +757,13 @@
       "noteSenseVoice": "Im Test mit japanischen VRChat-Gesprächen: gibt keine Kana aus. Das Japanische ist dadurch kaum lesbar.",
       "phoneNoLanguage": "{{name}} auf dem Telefon ({{address}}) kann {{source}} nicht erkennen. Füge diese Sprache auf dem Telefon hinzu oder wähle in seiner Karte ein anderes Modell.",
       "notePlamo3": "Liest sich am natürlichsten; gelegentlich weicht die Bedeutung ab. Benötigt etwa 2 GB Videospeicher. Nur für nichtkommerzielle Nutzung.",
-      "notePlamo3Small": "Am sparsamsten: benötigt etwa 0.6 GB Videospeicher und ist schnell, aber etwas weniger genau. Nur für nichtkommerzielle Nutzung."
+      "notePlamo3Small": "Am sparsamsten: benötigt etwa 0.6 GB Videospeicher und ist schnell, aber etwas weniger genau. Nur für nichtkommerzielle Nutzung.",
+      "nativeUpdating": "Die Spracherkennungs-Engine wird aktualisiert. Danach können Sie starten.",
+      "translatorUpdating": "Die Übersetzungs-Engine wird aktualisiert. Danach können Sie starten.",
+      "nativeCoachUpdating": "Die Engine für Grammatikfeedback wird aktualisiert. Danach können Sie starten.",
+      "engineUpdating": "Engine wird aktualisiert",
+      "engineUpdate": "Die Engine muss aktualisiert werden",
+      "engineUpdateNow": "Aktualisieren"
     }
   },
   "logsPanel": {

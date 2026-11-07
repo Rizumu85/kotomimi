@@ -757,7 +757,13 @@
       "noteSenseVoice": "VRChat での日本語の雑談による実測では、かなが出力されず、日本語としてほとんど読めません。",
       "phoneNoLanguage": "{{address}} のスマートフォン上の {{name}} は {{source}} を聞き取れません。スマートフォンにその言語を追加するか、カードで別のモデルを選んでください。",
       "notePlamo3": "訳文が最も自然。時々意味がずれます。約 2 GB のビデオメモリ。非商用利用のみ。",
-      "notePlamo3Small": "最軽量：約 0.6 GB のビデオメモリで高速ですが、精度はやや低めです。非商用利用のみ。"
+      "notePlamo3Small": "最軽量：約 0.6 GB のビデオメモリで高速ですが、精度はやや低めです。非商用利用のみ。",
+      "nativeUpdating": "音声認識エンジンを更新中です。完了すると開始できます。",
+      "translatorUpdating": "翻訳エンジンを更新中です。完了すると開始できます。",
+      "nativeCoachUpdating": "文法フィードバックエンジンを更新中です。完了すると開始できます。",
+      "engineUpdating": "エンジンを更新中",
+      "engineUpdate": "エンジンの更新が必要です",
+      "engineUpdateNow": "更新"
     }
   },
   "logsPanel": {

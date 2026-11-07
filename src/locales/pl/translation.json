@@ -757,7 +757,13 @@
       "noteSenseVoice": "Test rozmów po japońsku w VRChat: nie zapisuje kany, więc japoński tekst jest praktycznie niezrozumiały.",
       "phoneNoLanguage": "{{name}} na telefonie ({{address}}) nie rozpoznaje języka {{source}}. Dodaj ten język na telefonie lub wybierz inny model w jego karcie.",
       "notePlamo3": "Tłumaczenie brzmi najbardziej naturalnie, choć czasem sens może się zmienić. Około 2 GB pamięci wideo. Tylko do użytku niekomercyjnego.",
-      "notePlamo3Small": "Najlżejszy: około 0,6 GB pamięci wideo, działa szybko, ale jest nieco mniej dokładny. Tylko do użytku niekomercyjnego."
+      "notePlamo3Small": "Najlżejszy: około 0,6 GB pamięci wideo, działa szybko, ale jest nieco mniej dokładny. Tylko do użytku niekomercyjnego.",
+      "nativeUpdating": "Aktualizowanie silnika rozpoznawania mowy. Możesz rozpocząć po zakończeniu.",
+      "translatorUpdating": "Aktualizowanie silnika tłumaczenia. Możesz rozpocząć po zakończeniu.",
+      "nativeCoachUpdating": "Aktualizowanie silnika informacji zwrotnej dotyczącej gramatyki. Możesz rozpocząć po zakończeniu.",
+      "engineUpdating": "Aktualizowanie silnika",
+      "engineUpdate": "Silnik wymaga aktualizacji",
+      "engineUpdateNow": "Aktualizuj"
     }
   },
   "logsPanel": {

@@ -994,6 +994,8 @@ function createNativeEngine(deps = {}) {
     dumpDir = null,
     /** What is fetched: the lists above, unless a test brings its own. */
     catalog = { engine: ENGINE, models: MODELS },
+    /** Fork: fetch this version's runtime by itself for models an earlier version left (`updateRuntime`): the app's engines. */
+    autoUpdate = false,
   } = deps;
   const { engine: ENGINE_ } = catalog;
   const system = `${platform}-${arch}`;
@@ -1059,7 +1061,8 @@ function createNativeEngine(deps = {}) {
     const runtime = fetching.get('engine');
     if ((runtime || unpacking) && engineFor === id) {
       const model = has(fileOf(id)) ? 0 : MODELS_[id].bytes;
-      return { state: 'downloading', runtime: true, received: runtime?.received ?? build.bytes, total: (runtime?.total ?? build.bytes) + model };
+      // `kept`: its own file is here, and only the runtime is coming — a new version of it, after the app's update.
+      return { state: 'downloading', runtime: true, received: runtime?.received ?? build.bytes, total: (runtime?.total ?? build.bytes) + model, ...(model === 0 ? { kept: true } : {}) };
     }
     const waiting = runtime || unpacking ? { waiting: true } : {};
     if (has(fileOf(id))) return { state: 'downloaded', received: MODELS_[id].bytes, total: MODELS_[id].bytes, ...waiting };
@@ -1152,9 +1155,26 @@ function createNativeEngine(deps = {}) {
     }
     if (!whole) throw new Error('The engine could not be unpacked.');
     if (platform !== 'win32') { try { files.chmodSync(exe, 0o755); } catch { /* already runnable, or it will say so when run */ } }
+    // The runtimes of earlier versions: no model runs on them any more, and each holds a hundred megabytes or more.
+    try {
+      for (const name of files.readdirSync(dir)) {
+        if (/^engine-/.test(name) && path.join(dir, name) !== engineDir) files.rmSync(path.join(dir, name), { recursive: true, force: true });
+      }
+    } catch { /* a courtesy to the drive, never a condition */ }
   }
 
   /** The runtime and a model, fetched: resolves with the state of things, which says what failed. */
+  /**
+   * Fork: models kept from an earlier version of the app, whose runtime is not this version's: the new runtime is
+   * fetched for them by itself (`autoUpdate`), so that a model already downloaded is not shown as missing. Null where
+   * nothing is to be done: the runtime is here or on its way, or no model is.
+   */
+  function updateRuntime() {
+    if (!build || engineReady() || fetching.has('engine') || unpacking) return null;
+    const kept = Object.keys(MODELS_).find((id) => has(fileOf(id)));
+    return kept ? download(kept) : null;
+  }
+
   async function download(id) {
     if (!build || !MODELS_[id] || fetching.has(id) || fetching.has('engine') || unpacking) return status();
     try {
@@ -1405,7 +1425,9 @@ function createNativeEngine(deps = {}) {
   function endStream(id) { streams.get(id)?.end(); undump(id); return true; }
   function abortStream(id) { streams.get(id)?.abort(); streams.delete(id); undump(id); return true; }
 
-  return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream };
+  // Fork: the runtime of a new version fetched for the models an earlier one left (`updateRuntime`), when asked to.
+  if (autoUpdate) setTimeout(() => { void updateRuntime(); }, 0);
+  return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream, updateRuntime };
 }
 
 module.exports = { createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, unspaced, echoOf, endless, hintChecked, CONTEXT_LEAD, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, translatorFits, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };

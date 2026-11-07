@@ -1383,6 +1383,18 @@
     "en": "Address",
     "text": "ঠিকানা"
   },
+  "providers.localai.engineUpdate": {
+    "en": "The engine needs an update",
+    "text": "ইঞ্জিন আপডেট করা দরকার"
+  },
+  "providers.localai.engineUpdateNow": {
+    "en": "Update",
+    "text": "আপডেট"
+  },
+  "providers.localai.engineUpdating": {
+    "en": "Updating the engine",
+    "text": "ইঞ্জিন আপডেট হচ্ছে"
+  },
   "providers.localai.familyUnheard": {
     "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
     "text": "ওই ডিভাইসের {{name}}-এ {{languages}} নেই, তাই এই অংশের মডেল ওই ডিভাইস নিজেই বেছে নেবে। {{name}} ব্যবহার করতে আগে ওই ডিভাইসে {{languages}} ডাউনলোড করুন।"
@@ -1531,6 +1543,10 @@
     "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
     "text": "এই সিস্টেমে ব্যাকরণের মতামতের নেটিভ ইঞ্জিন এখনও সমর্থিত নয়। “ব্যাকরণের মতামত” কার্ডে “API মডেল” বা “অন্য ডিভাইস” বেছে নিন।"
   },
+  "providers.localai.nativeCoachUpdating": {
+    "en": "Updating the grammar feedback engine. You can start once it is done.",
+    "text": "ব্যাকরণ প্রতিক্রিয়া ইঞ্জিন আপডেট হচ্ছে। শেষ হলে শুরু করতে পারবেন।"
+  },
   "providers.localai.nativeCoachWarming": {
     "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
     "text": "ব্যাকরণের মতামতের ইঞ্জিন এখনও চালু হচ্ছে। কয়েক সেকেন্ডই লাগবে। প্রস্তুত হলেই শুরু করতে পারবেন।"
@@ -1598,6 +1614,10 @@
   "providers.localai.nativeUnsupportedShort": {
     "en": "Not available for this system",
     "text": "এই সিস্টেমে এখনও সমর্থিত নয়"
+  },
+  "providers.localai.nativeUpdating": {
+    "en": "Updating the speech recognition engine. You can start once it is done.",
+    "text": "ভয়েস শনাক্তকরণ ইঞ্জিন আপডেট হচ্ছে। শেষ হলে শুরু করতে পারবেন।"
   },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
@@ -2010,6 +2030,10 @@
   "providers.localai.translatorUnsupported": {
     "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
     "text": "এই সিস্টেমে নেটিভ অনুবাদের ইঞ্জিন এখনও সমর্থিত নয়। “অনুবাদ” কার্ডে “API মডেল” বা “অন্য ডিভাইস” বেছে নিন।"
+  },
+  "providers.localai.translatorUpdating": {
+    "en": "Updating the translation engine. You can start once it is done.",
+    "text": "অনুবাদ ইঞ্জিন আপডেট হচ্ছে। শেষ হলে শুরু করতে পারবেন।"
   },
   "providers.localai.translatorWarming": {
     "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",

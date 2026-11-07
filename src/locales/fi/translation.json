@@ -757,7 +757,13 @@
       "noteSenseVoice": "Japaninkielisessä VRChat-arkikeskustelussa ei tuota kana-merkkejä, joten japaninkielinen teksti on käytännössä lukukelvotonta.",
       "phoneNoLanguage": "{{name}} puhelimessa ({{address}}) ei kuule kieltä {{source}}. Lisää tämä kieli puhelimeen tai valitse kortista toinen malli.",
       "notePlamo3": "Luontevin käännös; merkitys voi joskus hieman muuttua. Noin 2 GB videomuistia. Vain ei-kaupalliseen käyttöön.",
-      "notePlamo3Small": "Kevyin: käyttää noin 0.6 GB videomuistia ja on nopea, mutta hieman epätarkempi. Vain ei-kaupalliseen käyttöön."
+      "notePlamo3Small": "Kevyin: käyttää noin 0.6 GB videomuistia ja on nopea, mutta hieman epätarkempi. Vain ei-kaupalliseen käyttöön.",
+      "nativeUpdating": "Puheentunnistusmoottoria päivitetään. Voit aloittaa, kun päivitys on valmis.",
+      "translatorUpdating": "Käännösmoottoria päivitetään. Voit aloittaa, kun päivitys on valmis.",
+      "nativeCoachUpdating": "Kielioppipalautemoottoria päivitetään. Voit aloittaa, kun päivitys on valmis.",
+      "engineUpdating": "Moottoria päivitetään",
+      "engineUpdate": "Moottori on päivitettävä",
+      "engineUpdateNow": "Päivitä"
     }
   },
   "logsPanel": {

@@ -1399,6 +1399,18 @@
     "en": "Address",
     "text": "Adres"
   },
+  "providers.localai.engineUpdate": {
+    "en": "The engine needs an update",
+    "text": "Silnik wymaga aktualizacji"
+  },
+  "providers.localai.engineUpdateNow": {
+    "en": "Update",
+    "text": "Aktualizuj"
+  },
+  "providers.localai.engineUpdating": {
+    "en": "Updating the engine",
+    "text": "Aktualizowanie silnika"
+  },
   "providers.localai.familyUnheard": {
     "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
     "text": "{{name}} na tamtym urządzeniu nie ma obsługi języków: {{languages}}. Urządzenie samo wybierze dla nich model. Aby używać {{name}}, najpierw pobierz na tamtym urządzeniu: {{languages}}."
@@ -1547,6 +1559,10 @@
     "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
     "text": "Ten system nie obsługuje jeszcze natywnego silnika sprawdzania gramatyki. W panelu „Sprawdzanie gramatyki” wybierz „Model API” lub „Inne urządzenie”."
   },
+  "providers.localai.nativeCoachUpdating": {
+    "en": "Updating the grammar feedback engine. You can start once it is done.",
+    "text": "Aktualizowanie silnika informacji zwrotnej dotyczącej gramatyki. Możesz rozpocząć po zakończeniu."
+  },
   "providers.localai.nativeCoachWarming": {
     "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
     "text": "Silnik sprawdzania gramatyki jeszcze się uruchamia. Zajmie to kilka sekund. Możesz zacząć, gdy będzie gotowy."
@@ -1614,6 +1630,10 @@
   "providers.localai.nativeUnsupportedShort": {
     "en": "Not available for this system",
     "text": "Ten system nie jest jeszcze obsługiwany"
+  },
+  "providers.localai.nativeUpdating": {
+    "en": "Updating the speech recognition engine. You can start once it is done.",
+    "text": "Aktualizowanie silnika rozpoznawania mowy. Możesz rozpocząć po zakończeniu."
   },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
@@ -2026,6 +2046,10 @@
   "providers.localai.translatorUnsupported": {
     "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
     "text": "Ten system nie obsługuje jeszcze natywnego silnika tłumaczenia. W panelu „Tłumaczenie” wybierz „Model API” lub „Inne urządzenie”."
+  },
+  "providers.localai.translatorUpdating": {
+    "en": "Updating the translation engine. You can start once it is done.",
+    "text": "Aktualizowanie silnika tłumaczenia. Możesz rozpocząć po zakończeniu."
   },
   "providers.localai.translatorWarming": {
     "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",

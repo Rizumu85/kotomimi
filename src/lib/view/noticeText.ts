@@ -129,6 +129,9 @@ export const NOTICE_ALIASES: Readonly<Record<string, string>> = {
   // Fork: the native recognition engine of this computer — not downloaded, coming up, or failed to.
   native_unsupported: 'providers.localai.nativeUnsupported',
   native_missing: 'providers.localai.nativeMissing',
+  native_updating: 'providers.localai.nativeUpdating',
+  native_translator_updating: 'providers.localai.translatorUpdating',
+  native_coach_updating: 'providers.localai.nativeCoachUpdating',
   native_unchosen: 'providers.localai.nativeUnchosen',
   native_two_models: 'providers.localai.nativeTwoModels',
   native_warming: 'providers.localai.nativeWarming',

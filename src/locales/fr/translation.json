@@ -757,7 +757,13 @@
       "noteSenseVoice": "Testé sur des conversations en japonais dans VRChat : ne produit aucun kana, ce qui rend le japonais pratiquement illisible.",
       "phoneNoLanguage": "{{name}} sur le téléphone ({{address}}) ne reconnaît pas {{source}}. Ajoutez cette langue sur le téléphone ou choisissez un autre modèle dans sa fiche.",
       "notePlamo3": "Traductions très naturelles, mais le sens peut parfois dériver. Environ 2 GB de mémoire vidéo. Usage non commercial uniquement.",
-      "notePlamo3Small": "Le plus léger : environ 0.6 GB de mémoire vidéo, rapide mais un peu moins précis. Usage non commercial uniquement."
+      "notePlamo3Small": "Le plus léger : environ 0.6 GB de mémoire vidéo, rapide mais un peu moins précis. Usage non commercial uniquement.",
+      "nativeUpdating": "Mise à jour du moteur de reconnaissance vocale. Vous pourrez commencer une fois terminée.",
+      "translatorUpdating": "Mise à jour du moteur de traduction. Vous pourrez commencer une fois terminée.",
+      "nativeCoachUpdating": "Mise à jour du moteur de correction grammaticale. Vous pourrez commencer une fois terminée.",
+      "engineUpdating": "Mise à jour du moteur",
+      "engineUpdate": "Le moteur doit être mis à jour",
+      "engineUpdateNow": "Mettre à jour"
     }
   },
   "logsPanel": {

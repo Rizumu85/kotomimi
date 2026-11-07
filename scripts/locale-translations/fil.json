@@ -1511,6 +1511,18 @@
     "en": "Address",
     "text": "Address"
   },
+  "providers.localai.engineUpdate": {
+    "en": "The engine needs an update",
+    "text": "Kailangang i-update ang engine"
+  },
+  "providers.localai.engineUpdateNow": {
+    "en": "Update",
+    "text": "I-update"
+  },
+  "providers.localai.engineUpdating": {
+    "en": "Updating the engine",
+    "text": "Ina-update ang engine"
+  },
   "providers.localai.familyUnheard": {
     "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
     "text": "Walang {{languages}} ang {{name}} sa device na iyon, kaya ito na ang pipili ng modelo para rito. Para magamit ang {{name}}, i-download muna ang {{languages}} sa device na iyon."
@@ -1659,6 +1671,10 @@
     "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
     "text": "Hindi pa suportado sa system na ito ang katutubong makina para sa puna sa gramatika. Sa card na Puna sa gramatika, lumipat sa \"Modelo sa API\" o \"Ibang device\"."
   },
+  "providers.localai.nativeCoachUpdating": {
+    "en": "Updating the grammar feedback engine. You can start once it is done.",
+    "text": "Ina-update ang engine ng feedback sa gramatika. Maaari ka nang magsimula kapag tapos na."
+  },
   "providers.localai.nativeCoachWarming": {
     "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
     "text": "Sinisimulan pa ang makina para sa puna sa gramatika. Ilang segundo lang ito. Puwede ka nang magsimula kapag handa na."
@@ -1726,6 +1742,10 @@
   "providers.localai.nativeUnsupportedShort": {
     "en": "Not available for this system",
     "text": "Hindi pa suportado sa system na ito"
+  },
+  "providers.localai.nativeUpdating": {
+    "en": "Updating the speech recognition engine. You can start once it is done.",
+    "text": "Ina-update ang engine ng pagkilala sa pagsasalita. Maaari ka nang magsimula kapag tapos na."
   },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
@@ -2138,6 +2158,10 @@
   "providers.localai.translatorUnsupported": {
     "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
     "text": "Hindi pa suportado sa sistemang ito ang katutubong makina ng pagsasalin. Sa card na Pagsasalin, lumipat sa \"Modelo ng API\" o \"Ibang device\"."
+  },
+  "providers.localai.translatorUpdating": {
+    "en": "Updating the translation engine. You can start once it is done.",
+    "text": "Ina-update ang engine ng pagsasalin. Maaari ka nang magsimula kapag tapos na."
   },
   "providers.localai.translatorWarming": {
     "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",

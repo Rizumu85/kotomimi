@@ -757,7 +757,13 @@
       "noteSenseVoice": "Sa pagsubok sa usapang Hapones sa VRChat: walang kana sa teksto, kaya halos hindi mabasa ang Hapones.",
       "phoneNoLanguage": "Hindi nauunawaan ng {{name}} sa telepono ({{address}}) ang {{source}}. Idagdag ang wikang ito sa telepono, o pumili ng ibang modelo sa card nito.",
       "notePlamo3": "Pinakanatural basahin ang salin, pero paminsan-minsan ay may paglihis sa kahulugan. Humigit-kumulang 2 GB ng memorya ng video. Para sa di-komersyal na paggamit lamang.",
-      "notePlamo3Small": "Pinakamagaan: humigit-kumulang 0.6 GB ng memorya ng video at mabilis, pero bahagyang hindi gaanong tumpak. Para sa di-komersyal na paggamit lamang."
+      "notePlamo3Small": "Pinakamagaan: humigit-kumulang 0.6 GB ng memorya ng video at mabilis, pero bahagyang hindi gaanong tumpak. Para sa di-komersyal na paggamit lamang.",
+      "nativeUpdating": "Ina-update ang engine ng pagkilala sa pagsasalita. Maaari ka nang magsimula kapag tapos na.",
+      "translatorUpdating": "Ina-update ang engine ng pagsasalin. Maaari ka nang magsimula kapag tapos na.",
+      "nativeCoachUpdating": "Ina-update ang engine ng feedback sa gramatika. Maaari ka nang magsimula kapag tapos na.",
+      "engineUpdating": "Ina-update ang engine",
+      "engineUpdate": "Kailangang i-update ang engine",
+      "engineUpdateNow": "I-update"
     }
   },
   "logsPanel": {

@@ -757,7 +757,13 @@
       "noteSenseVoice": "Testad med japanska samtal i VRChat: skriver inga kana, så japanskan blir i stort sett oläslig.",
       "phoneNoLanguage": "{{name}} på telefonen ({{address}}) kan inte höra {{source}}. Lägg till språket på telefonen eller välj en annan modell i dess kort.",
       "notePlamo3": "Ger den naturligaste översättningen, men betydelsen kan ibland förskjutas. Kräver cirka 2 GB videominne. Endast för icke-kommersiell användning.",
-      "notePlamo3Small": "Den lättaste: kräver cirka 0.6 GB videominne och är snabb, men något mindre träffsäker. Endast för icke-kommersiell användning."
+      "notePlamo3Small": "Den lättaste: kräver cirka 0.6 GB videominne och är snabb, men något mindre träffsäker. Endast för icke-kommersiell användning.",
+      "nativeUpdating": "Uppdaterar taligenkänningsmotorn. Du kan börja när det är klart.",
+      "translatorUpdating": "Uppdaterar översättningsmotorn. Du kan börja när det är klart.",
+      "nativeCoachUpdating": "Uppdaterar motorn för grammatikfeedback. Du kan börja när det är klart.",
+      "engineUpdating": "Uppdaterar motorn",
+      "engineUpdate": "Motorn behöver uppdateras",
+      "engineUpdateNow": "Uppdatera"
     }
   },
   "logsPanel": {

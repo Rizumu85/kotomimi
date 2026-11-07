@@ -20,6 +20,8 @@ export interface NativeModelStatus {
   runtime?: boolean;
   /** The runtime is being fetched for another model: this one can be asked for once that is over. */
   waiting?: boolean;
+  /** While the runtime comes for it: its own file is here already (a new version of the runtime, after an update). */
+  kept?: boolean;
 }
 
 export interface NativeEngineStatus {
@@ -55,7 +57,7 @@ export function nativeEngineStatus(value: unknown): NativeEngineStatus {
   const models: Record<string, NativeModelStatus> = {};
   for (const [id, raw] of Object.entries((answer.models ?? {}) as Record<string, Partial<NativeModelStatus> | null>).slice(0, 50)) {
     if (!raw || !MODEL_STATES.includes(raw.state as NativeModelState)) continue;
-    models[id] = { state: raw.state as NativeModelState, received: count(raw.received), total: count(raw.total), ...(typeof raw.error === 'string' && raw.error ? { error: raw.error.slice(0, 300) } : {}), ...(raw.runtime === true ? { runtime: true } : {}), ...(raw.waiting === true ? { waiting: true } : {}) };
+    models[id] = { state: raw.state as NativeModelState, received: count(raw.received), total: count(raw.total), ...(typeof raw.error === 'string' && raw.error ? { error: raw.error.slice(0, 300) } : {}), ...(raw.runtime === true ? { runtime: true } : {}), ...(raw.waiting === true ? { waiting: true } : {}), ...(raw.kept === true ? { kept: true } : {}) };
   }
   const run = (answer.run ?? {}) as Partial<NativeEngineStatus['run']>;
   return {

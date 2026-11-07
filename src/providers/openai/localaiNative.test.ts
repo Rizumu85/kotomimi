@@ -525,7 +525,15 @@ describe('whether a run that hears by the engine can start', () => {
     expect(await asked(NO_NATIVE_ENGINE).gap).toMatchObject({ ok: false, code: 'native_unsupported' });
     const absent = asked(engine({ models: { 'r2t2-q8': { state: 'absent', received: 0, total: 2477512064 } } }));
     expect(await absent.gap).toMatchObject({ ok: false, code: 'native_missing', params: { name: 'Confucius4 R2T2 GGUF' } });
-    expect(await asked(engine({ engine: 'absent' })).gap).toMatchObject({ ok: false, code: 'native_missing' });
+    // A runtime not this version's, the model kept from an earlier one: being updated, not missing.
+    const download = vi.spyOn(useNativeEngineStore.getState(), 'download').mockResolvedValue();
+    expect(await asked(engine({ engine: 'absent' })).gap).toMatchObject({ ok: false, code: 'native_updating' });
+    // Not on its way (offline when the app started): asked for again.
+    expect(download).toHaveBeenCalledWith('r2t2-q8');
+    download.mockClear();
+    expect(await asked(engine({ engine: 'downloading' })).gap).toMatchObject({ ok: false, code: 'native_updating' });
+    expect(download).not.toHaveBeenCalled();
+    download.mockRestore();
   });
 
   it('cannot for a language the model does not hear', async () => {

@@ -757,7 +757,13 @@
       "noteSenseVoice": "Ujian perbualan santai bahasa Jepun dalam VRChat: tidak menghasilkan kana, menjadikan teks Jepun hampir tidak dapat difahami.",
       "phoneNoLanguage": "{{name}} pada telefon ({{address}}) tidak dapat mengenali {{source}}. Tambahkan bahasa itu pada telefon, atau pilih model lain pada kadnya.",
       "notePlamo3": "Terjemahan paling semula jadi dibaca; kadangkala maksudnya tersasar. Menggunakan kira-kira 2 GB memori video. Untuk kegunaan bukan komersial sahaja.",
-      "notePlamo3Small": "Paling ringan: kira-kira 0.6 GB memori video dan pantas, dengan ketepatan sedikit lebih rendah. Untuk kegunaan bukan komersial sahaja."
+      "notePlamo3Small": "Paling ringan: kira-kira 0.6 GB memori video dan pantas, dengan ketepatan sedikit lebih rendah. Untuk kegunaan bukan komersial sahaja.",
+      "nativeUpdating": "Sedang mengemas kini enjin pengecaman pertuturan. Anda boleh mula selepas selesai.",
+      "translatorUpdating": "Sedang mengemas kini enjin terjemahan. Anda boleh mula selepas selesai.",
+      "nativeCoachUpdating": "Sedang mengemas kini enjin maklum balas tatabahasa. Anda boleh mula selepas selesai.",
+      "engineUpdating": "Sedang mengemas kini enjin",
+      "engineUpdate": "Enjin perlu dikemas kini",
+      "engineUpdateNow": "Kemas kini"
     }
   },
   "logsPanel": {

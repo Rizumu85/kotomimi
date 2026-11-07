@@ -1383,6 +1383,18 @@
     "en": "Address",
     "text": "Adres"
   },
+  "providers.localai.engineUpdate": {
+    "en": "The engine needs an update",
+    "text": "Motorun güncellenmesi gerekiyor"
+  },
+  "providers.localai.engineUpdateNow": {
+    "en": "Update",
+    "text": "Güncelle"
+  },
+  "providers.localai.engineUpdating": {
+    "en": "Updating the engine",
+    "text": "Motor güncelleniyor"
+  },
   "providers.localai.familyUnheard": {
     "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
     "text": "O cihazdaki {{name}} için {{languages}} yüklü değil. Bu kısmın modelini cihaz kendisi seçer. {{name}} kullanmak için önce o cihaza {{languages}} indirin."
@@ -1531,6 +1543,10 @@
     "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
     "text": "Bu sistem yerel dil bilgisi geri bildirim motorunu henüz desteklemiyor. \"Dil bilgisi geri bildirimi\" kartında \"API modeli\" veya \"Başka bir cihaz\" seçeneğine geçin."
   },
+  "providers.localai.nativeCoachUpdating": {
+    "en": "Updating the grammar feedback engine. You can start once it is done.",
+    "text": "Dilbilgisi geri bildirim motoru güncelleniyor. Tamamlandığında başlayabilirsiniz."
+  },
   "providers.localai.nativeCoachWarming": {
     "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
     "text": "Dil bilgisi geri bildirim motoru hâlâ başlatılıyor. Yalnızca birkaç saniye sürer. Hazır olduğunda başlayabilirsiniz."
@@ -1598,6 +1614,10 @@
   "providers.localai.nativeUnsupportedShort": {
     "en": "Not available for this system",
     "text": "Bu sistem henüz desteklenmiyor"
+  },
+  "providers.localai.nativeUpdating": {
+    "en": "Updating the speech recognition engine. You can start once it is done.",
+    "text": "Konuşma tanıma motoru güncelleniyor. Tamamlandığında başlayabilirsiniz."
   },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
@@ -2010,6 +2030,10 @@
   "providers.localai.translatorUnsupported": {
     "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
     "text": "Bu sistem yerel çeviri motorunu henüz desteklemiyor. \"Çeviri\" kartında \"API modeli\" veya \"Başka bir cihaz\" seçeneğine geçin."
+  },
+  "providers.localai.translatorUpdating": {
+    "en": "Updating the translation engine. You can start once it is done.",
+    "text": "Çeviri motoru güncelleniyor. Tamamlandığında başlayabilirsiniz."
   },
   "providers.localai.translatorWarming": {
     "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",

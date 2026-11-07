@@ -1399,6 +1399,18 @@
     "en": "Address",
     "text": "Alamat"
   },
+  "providers.localai.engineUpdate": {
+    "en": "The engine needs an update",
+    "text": "Enjin perlu dikemas kini"
+  },
+  "providers.localai.engineUpdateNow": {
+    "en": "Update",
+    "text": "Kemas kini"
+  },
+  "providers.localai.engineUpdating": {
+    "en": "Updating the engine",
+    "text": "Sedang mengemas kini enjin"
+  },
   "providers.localai.familyUnheard": {
     "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
     "text": "{{name}} pada peranti itu tiada {{languages}}, jadi peranti itu memilih modelnya sendiri untuk bahagian ini. Untuk menggunakan {{name}}, muat turun {{languages}} pada peranti itu dahulu."
@@ -1547,6 +1559,10 @@
     "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
     "text": "Sistem ini belum menyokong enjin maklum balas tatabahasa natif. Dalam kad \"Maklum balas tatabahasa\", tukar kepada \"Model API\" atau \"Peranti lain\"."
   },
+  "providers.localai.nativeCoachUpdating": {
+    "en": "Updating the grammar feedback engine. You can start once it is done.",
+    "text": "Sedang mengemas kini enjin maklum balas tatabahasa. Anda boleh mula selepas selesai."
+  },
   "providers.localai.nativeCoachWarming": {
     "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
     "text": "Enjin maklum balas tatabahasa masih dimulakan. Ini hanya mengambil masa beberapa saat. Anda boleh mula sebaik sahaja enjin sedia."
@@ -1614,6 +1630,10 @@
   "providers.localai.nativeUnsupportedShort": {
     "en": "Not available for this system",
     "text": "Belum disokong pada sistem ini"
+  },
+  "providers.localai.nativeUpdating": {
+    "en": "Updating the speech recognition engine. You can start once it is done.",
+    "text": "Sedang mengemas kini enjin pengecaman pertuturan. Anda boleh mula selepas selesai."
   },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
@@ -2026,6 +2046,10 @@
   "providers.localai.translatorUnsupported": {
     "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
     "text": "Sistem ini belum menyokong enjin terjemahan natif. Dalam kad \"Terjemahan\", tukar kepada \"Model API\" atau \"Peranti lain\"."
+  },
+  "providers.localai.translatorUpdating": {
+    "en": "Updating the translation engine. You can start once it is done.",
+    "text": "Sedang mengemas kini enjin terjemahan. Anda boleh mula selepas selesai."
   },
   "providers.localai.translatorWarming": {
     "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",

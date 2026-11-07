@@ -757,7 +757,13 @@
       "noteSenseVoice": "Thử với hội thoại tiếng Nhật trên VRChat: không xuất được chữ kana, khiến tiếng Nhật gần như không đọc hiểu được.",
       "phoneNoLanguage": "{{name}} trên điện thoại ({{address}}) không nghe được {{source}}. Hãy thêm ngôn ngữ đó trên điện thoại hoặc chọn model khác trong thẻ.",
       "notePlamo3": "Bản dịch tự nhiên nhất; đôi khi ý nghĩa bị lệch. Khoảng 2 GB VRAM. Chỉ dùng cho mục đích phi thương mại.",
-      "notePlamo3Small": "Nhẹ nhất: khoảng 0.6 GB VRAM, nhanh nhưng độ chính xác thấp hơn một chút. Chỉ dùng cho mục đích phi thương mại."
+      "notePlamo3Small": "Nhẹ nhất: khoảng 0.6 GB VRAM, nhanh nhưng độ chính xác thấp hơn một chút. Chỉ dùng cho mục đích phi thương mại.",
+      "nativeUpdating": "Đang cập nhật công cụ nhận dạng giọng nói. Bạn có thể bắt đầu khi hoàn tất.",
+      "translatorUpdating": "Đang cập nhật công cụ dịch. Bạn có thể bắt đầu khi hoàn tất.",
+      "nativeCoachUpdating": "Đang cập nhật công cụ phản hồi ngữ pháp. Bạn có thể bắt đầu khi hoàn tất.",
+      "engineUpdating": "Đang cập nhật công cụ",
+      "engineUpdate": "Công cụ cần được cập nhật",
+      "engineUpdateNow": "Cập nhật"
     }
   },
   "logsPanel": {

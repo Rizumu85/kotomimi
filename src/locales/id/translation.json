@@ -757,7 +757,13 @@
       "noteSenseVoice": "Hasil uji obrolan bahasa Jepang di VRChat: tidak menghasilkan kana, sehingga teks bahasa Jepangnya sulit dipahami.",
       "phoneNoLanguage": "{{name}} di ponsel ({{address}}) tidak dapat mengenali {{source}}. Tambahkan bahasa tersebut di ponsel, atau pilih model lain pada kartunya.",
       "notePlamo3": "Hasil terjemahan paling natural, tetapi sesekali maknanya melenceng. Menggunakan sekitar 2 GB memori video. Hanya untuk penggunaan nonkomersial.",
-      "notePlamo3Small": "Yang paling ringan: menggunakan sekitar 0,6 GB memori video dan cepat, tetapi sedikit kurang akurat. Hanya untuk penggunaan nonkomersial."
+      "notePlamo3Small": "Yang paling ringan: menggunakan sekitar 0,6 GB memori video dan cepat, tetapi sedikit kurang akurat. Hanya untuk penggunaan nonkomersial.",
+      "nativeUpdating": "Memperbarui mesin pengenalan ucapan. Anda bisa mulai setelah selesai.",
+      "translatorUpdating": "Memperbarui mesin terjemahan. Anda bisa mulai setelah selesai.",
+      "nativeCoachUpdating": "Memperbarui mesin umpan balik tata bahasa. Anda bisa mulai setelah selesai.",
+      "engineUpdating": "Memperbarui mesin",
+      "engineUpdate": "Mesin perlu diperbarui",
+      "engineUpdateNow": "Perbarui"
     }
   },
   "logsPanel": {

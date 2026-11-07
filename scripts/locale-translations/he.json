@@ -1383,6 +1383,18 @@
     "en": "Address",
     "text": "כתובת"
   },
+  "providers.localai.engineUpdate": {
+    "en": "The engine needs an update",
+    "text": "המנוע דורש עדכון"
+  },
+  "providers.localai.engineUpdateNow": {
+    "en": "Update",
+    "text": "עדכון"
+  },
+  "providers.localai.engineUpdating": {
+    "en": "Updating the engine",
+    "text": "המנוע מתעדכן"
+  },
   "providers.localai.familyUnheard": {
     "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
     "text": "ב-{{name}} שבמכשיר ההוא חסרה תמיכה ב-{{languages}}, לכן המכשיר בוחר בעצמו מודל לחלק הזה. כדי להשתמש ב-{{name}}, יש להוריד תחילה את {{languages}} במכשיר ההוא."
@@ -1531,6 +1543,10 @@
     "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
     "text": "מנוע המשוב הדקדוקי המובנה עדיין לא נתמך במערכת הזו. בכרטיס \"משוב דקדוקי\", יש לעבור ל\"מודל API\" או ל\"מכשיר אחר\"."
   },
+  "providers.localai.nativeCoachUpdating": {
+    "en": "Updating the grammar feedback engine. You can start once it is done.",
+    "text": "מנוע המשוב הדקדוקי מתעדכן. אפשר להתחיל כשהעדכון יסתיים."
+  },
   "providers.localai.nativeCoachWarming": {
     "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
     "text": "מנוע המשוב הדקדוקי עדיין עולה. זה לוקח כמה שניות. אפשר להתחיל ברגע שיהיה מוכן."
@@ -1598,6 +1614,10 @@
   "providers.localai.nativeUnsupportedShort": {
     "en": "Not available for this system",
     "text": "עדיין לא נתמך במערכת הזו"
+  },
+  "providers.localai.nativeUpdating": {
+    "en": "Updating the speech recognition engine. You can start once it is done.",
+    "text": "מנוע זיהוי הדיבור מתעדכן. אפשר להתחיל כשהעדכון יסתיים."
   },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
@@ -2010,6 +2030,10 @@
   "providers.localai.translatorUnsupported": {
     "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
     "text": "מנוע התרגום המובנה עדיין לא נתמך במערכת הזו. בכרטיס \"תרגום\", יש לעבור ל\"מודל API\" או ל\"מכשיר אחר\"."
+  },
+  "providers.localai.translatorUpdating": {
+    "en": "Updating the translation engine. You can start once it is done.",
+    "text": "מנוע התרגום מתעדכן. אפשר להתחיל כשהעדכון יסתיים."
   },
   "providers.localai.translatorWarming": {
     "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",

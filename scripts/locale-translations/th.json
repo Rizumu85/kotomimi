@@ -1383,6 +1383,18 @@
     "en": "Address",
     "text": "ที่อยู่"
   },
+  "providers.localai.engineUpdate": {
+    "en": "The engine needs an update",
+    "text": "เอ็นจินต้องอัปเดต"
+  },
+  "providers.localai.engineUpdateNow": {
+    "en": "Update",
+    "text": "อัปเดต"
+  },
+  "providers.localai.engineUpdating": {
+    "en": "Updating the engine",
+    "text": "กำลังอัปเดตเอ็นจิน"
+  },
   "providers.localai.familyUnheard": {
     "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
     "text": "{{name}} บนอุปกรณ์นั้นไม่มี {{languages}} อุปกรณ์นั้นจึงเลือกโมเดลเองสำหรับส่วนนี้ หากต้องการใช้ {{name}} ให้ดาวน์โหลด {{languages}} บนอุปกรณ์นั้นก่อน"
@@ -1531,6 +1543,10 @@
     "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
     "text": "ระบบนี้ยังไม่รองรับเอนจินตรวจไวยากรณ์เนทีฟ เปลี่ยนเป็น “โมเดล API” หรือ “อุปกรณ์อื่น” ในแผง “คำแนะนำไวยากรณ์”"
   },
+  "providers.localai.nativeCoachUpdating": {
+    "en": "Updating the grammar feedback engine. You can start once it is done.",
+    "text": "กำลังอัปเดตเอ็นจินให้คำแนะนำไวยากรณ์ เริ่มใช้งานได้เมื่อเสร็จแล้ว"
+  },
   "providers.localai.nativeCoachWarming": {
     "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
     "text": "เอนจินตรวจไวยากรณ์กำลังเริ่มทำงาน ใช้เวลาไม่กี่วินาที เริ่มใช้งานได้เมื่อพร้อม"
@@ -1598,6 +1614,10 @@
   "providers.localai.nativeUnsupportedShort": {
     "en": "Not available for this system",
     "text": "ยังไม่รองรับระบบนี้"
+  },
+  "providers.localai.nativeUpdating": {
+    "en": "Updating the speech recognition engine. You can start once it is done.",
+    "text": "กำลังอัปเดตเอ็นจินรู้จำเสียง เริ่มใช้งานได้เมื่อเสร็จแล้ว"
   },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
@@ -2010,6 +2030,10 @@
   "providers.localai.translatorUnsupported": {
     "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
     "text": "ระบบนี้ยังไม่รองรับเอนจินแปลเนทีฟ เปลี่ยนเป็น “โมเดล API” หรือ “อุปกรณ์อื่น” ในแผง “การแปล”"
+  },
+  "providers.localai.translatorUpdating": {
+    "en": "Updating the translation engine. You can start once it is done.",
+    "text": "กำลังอัปเดตเอ็นจินแปลภาษา เริ่มใช้งานได้เมื่อเสร็จแล้ว"
   },
   "providers.localai.translatorWarming": {
     "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",

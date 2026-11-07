@@ -1387,6 +1387,18 @@
     "en": "Address",
     "text": "Osoite"
   },
+  "providers.localai.engineUpdate": {
+    "en": "The engine needs an update",
+    "text": "Moottori on päivitettävä"
+  },
+  "providers.localai.engineUpdateNow": {
+    "en": "Update",
+    "text": "Päivitä"
+  },
+  "providers.localai.engineUpdating": {
+    "en": "Updating the engine",
+    "text": "Moottoria päivitetään"
+  },
   "providers.localai.familyUnheard": {
     "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
     "text": "Toisen laitteen mallista {{name}} puuttuvat kielipaketit: {{languages}}. Laite valitsee niille mallin itse. Jos haluat käyttää mallia {{name}}, lataa ensin kyseiseen laitteeseen kielipaketit: {{languages}}."
@@ -1535,6 +1547,10 @@
     "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
     "text": "Tämä järjestelmä ei vielä tue natiivia kielioppipalautteen moottoria. Valitse ”Kielioppipalaute”-kortista ”API-malli” tai ”Toinen laite”."
   },
+  "providers.localai.nativeCoachUpdating": {
+    "en": "Updating the grammar feedback engine. You can start once it is done.",
+    "text": "Kielioppipalautemoottoria päivitetään. Voit aloittaa, kun päivitys on valmis."
+  },
   "providers.localai.nativeCoachWarming": {
     "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
     "text": "Kielioppipalautteen moottori käynnistyy vielä muutaman sekunnin ajan. Voit aloittaa heti, kun se on valmis."
@@ -1602,6 +1618,10 @@
   "providers.localai.nativeUnsupportedShort": {
     "en": "Not available for this system",
     "text": "Ei vielä tuettu tässä järjestelmässä"
+  },
+  "providers.localai.nativeUpdating": {
+    "en": "Updating the speech recognition engine. You can start once it is done.",
+    "text": "Puheentunnistusmoottoria päivitetään. Voit aloittaa, kun päivitys on valmis."
   },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
@@ -2014,6 +2034,10 @@
   "providers.localai.translatorUnsupported": {
     "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
     "text": "Tämä järjestelmä ei vielä tue natiivia käännösmoottoria. Valitse ”Käännös”-kortista ”API-malli” tai ”Toinen laite”."
+  },
+  "providers.localai.translatorUpdating": {
+    "en": "Updating the translation engine. You can start once it is done.",
+    "text": "Käännösmoottoria päivitetään. Voit aloittaa, kun päivitys on valmis."
   },
   "providers.localai.translatorWarming": {
     "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",

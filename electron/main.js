@@ -1477,6 +1477,8 @@ const getNativeEngine = () => {
     // An unpackaged run can keep what the engine was given to hear (`KOTOMIMI_NATIVE_DUMP`), to measure with.
     dumpDir: !app.isPackaged && process.env.KOTOMIMI_NATIVE_DUMP ? process.env.KOTOMIMI_NATIVE_DUMP : null,
     log,
+    // Models kept from an earlier version get this version's runtime by themselves.
+    autoUpdate: true,
     ...tell,
   });
   // On a Mac the first native recognizer is the system's own (electron/apple-speech.js), through the helper the app
@@ -1532,6 +1534,7 @@ const getNativeTranslator = () => {
     fetch: (url, init) => net.fetch(url, init),
     log,
     onChange: (status) => toPage('native-translator:status', status),
+    autoUpdate: true,
   });
   return nativeTranslator;
 };
@@ -1560,6 +1563,7 @@ const getNativeCoach = () => {
     fetch: (url, init) => net.fetch(url, init),
     log,
     onChange: (status) => toPage('native-coach:status', status),
+    autoUpdate: true,
   });
   return nativeCoach;
 };

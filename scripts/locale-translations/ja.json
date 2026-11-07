@@ -1383,6 +1383,18 @@
     "en": "Address",
     "text": "アドレス"
   },
+  "providers.localai.engineUpdate": {
+    "en": "The engine needs an update",
+    "text": "エンジンの更新が必要です"
+  },
+  "providers.localai.engineUpdateNow": {
+    "en": "Update",
+    "text": "更新"
+  },
+  "providers.localai.engineUpdating": {
+    "en": "Updating the engine",
+    "text": "エンジンを更新中"
+  },
   "providers.localai.familyUnheard": {
     "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
     "text": "そのデバイスの {{name}} には{{languages}}がないため、この部分はそのデバイスがモデルを選びます。{{name}} を使うには、先にそのデバイスで{{languages}}をダウンロードしてください。"
@@ -1531,6 +1543,10 @@
     "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
     "text": "このシステムはネイティブ文法チェックエンジンに未対応です。「文法チェック」カードで「API モデル」か「別のデバイス」に切り替えてください。"
   },
+  "providers.localai.nativeCoachUpdating": {
+    "en": "Updating the grammar feedback engine. You can start once it is done.",
+    "text": "文法フィードバックエンジンを更新中です。完了すると開始できます。"
+  },
   "providers.localai.nativeCoachWarming": {
     "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
     "text": "文法チェックエンジンを起動中です。数秒で準備ができ、開始できます。"
@@ -1598,6 +1614,10 @@
   "providers.localai.nativeUnsupportedShort": {
     "en": "Not available for this system",
     "text": "このシステムには未対応"
+  },
+  "providers.localai.nativeUpdating": {
+    "en": "Updating the speech recognition engine. You can start once it is done.",
+    "text": "音声認識エンジンを更新中です。完了すると開始できます。"
   },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
@@ -2010,6 +2030,10 @@
   "providers.localai.translatorUnsupported": {
     "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
     "text": "このシステムはネイティブ翻訳エンジンに未対応です。「翻訳」カードで「API モデル」か「別のデバイス」に切り替えてください。"
+  },
+  "providers.localai.translatorUpdating": {
+    "en": "Updating the translation engine. You can start once it is done.",
+    "text": "翻訳エンジンを更新中です。完了すると開始できます。"
   },
   "providers.localai.translatorWarming": {
     "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",

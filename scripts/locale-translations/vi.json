@@ -1387,6 +1387,18 @@
     "en": "Address",
     "text": "Địa chỉ"
   },
+  "providers.localai.engineUpdate": {
+    "en": "The engine needs an update",
+    "text": "Công cụ cần được cập nhật"
+  },
+  "providers.localai.engineUpdateNow": {
+    "en": "Update",
+    "text": "Cập nhật"
+  },
+  "providers.localai.engineUpdating": {
+    "en": "Updating the engine",
+    "text": "Đang cập nhật công cụ"
+  },
   "providers.localai.familyUnheard": {
     "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
     "text": "{{name}} trên thiết bị đó chưa có {{languages}}, nên thiết bị sẽ tự chọn mô hình cho phần này. Để dùng {{name}}, hãy tải {{languages}} trên thiết bị đó trước."
@@ -1535,6 +1547,10 @@
     "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
     "text": "Hệ thống này chưa hỗ trợ bộ máy góp ý ngữ pháp gốc. Trong thẻ “Góp ý ngữ pháp”, hãy chuyển sang “Mô hình API” hoặc “Thiết bị khác”."
   },
+  "providers.localai.nativeCoachUpdating": {
+    "en": "Updating the grammar feedback engine. You can start once it is done.",
+    "text": "Đang cập nhật công cụ phản hồi ngữ pháp. Bạn có thể bắt đầu khi hoàn tất."
+  },
   "providers.localai.nativeCoachWarming": {
     "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
     "text": "Bộ máy góp ý ngữ pháp vẫn đang khởi động, chỉ mất vài giây. Bạn có thể bắt đầu khi bộ máy sẵn sàng."
@@ -1602,6 +1618,10 @@
   "providers.localai.nativeUnsupportedShort": {
     "en": "Not available for this system",
     "text": "Chưa hỗ trợ hệ thống này"
+  },
+  "providers.localai.nativeUpdating": {
+    "en": "Updating the speech recognition engine. You can start once it is done.",
+    "text": "Đang cập nhật công cụ nhận dạng giọng nói. Bạn có thể bắt đầu khi hoàn tất."
   },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
@@ -2014,6 +2034,10 @@
   "providers.localai.translatorUnsupported": {
     "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
     "text": "Hệ thống này chưa hỗ trợ bộ máy dịch gốc. Trong thẻ “Dịch”, hãy chuyển sang “Mô hình API” hoặc “Thiết bị khác”."
+  },
+  "providers.localai.translatorUpdating": {
+    "en": "Updating the translation engine. You can start once it is done.",
+    "text": "Đang cập nhật công cụ dịch. Bạn có thể bắt đầu khi hoàn tất."
   },
   "providers.localai.translatorWarming": {
     "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",

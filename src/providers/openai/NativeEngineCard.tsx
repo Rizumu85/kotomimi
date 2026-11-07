@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { ModelCard } from '../../components/Settings/sections/ModelManagementSection';
 import type { ModelManifestEntry } from '../../lib/local-inference/modelManifest';
 import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
-import { nativeReady } from './localaiNative';
+import { nativeReady, nativeUpdating } from './localaiNative';
 import { ROOM_MARGIN, sizeText, useModelStorageStore } from '../../lib/native/modelStorage';
 import { driveLabel } from '../../components/ModelStorage/ModelStorageSection';
 
@@ -92,7 +92,9 @@ export function NativeEngineCard({ kind, model, recommended = true, selected, on
   const entry = useMemo(() => entryOf(kind, model, recommended), [kind, model, recommended]);
   const mine = status.models[model.id];
   const fetching = mine?.state === 'downloading' || mine?.state === 'verifying';
-  const downloaded = status.engine === 'ready' && mine?.state === 'downloaded';
+  // Kept from an earlier version, its runtime being updated (`nativeUpdating`): downloaded, and not to be fetched again.
+  const kept = nativeUpdating(status, model.id);
+  const downloaded = (status.engine === 'ready' || kept) && mine?.state === 'downloaded';
   const shown = fetching ? 'downloading' : downloaded ? 'downloaded' : mine?.state === 'failed' ? 'error' : 'not_downloaded';
   const total = mine?.total || model.bytes;
   const received = mine?.received ?? 0;
@@ -135,7 +137,18 @@ export function NativeEngineCard({ kind, model, recommended = true, selected, on
         </div>
       ) : undefined}
     >
-      {mine?.runtime ? (
+      {kept && status.engine === 'absent' ? (
+        // The update did not come by itself (offline when the app started, or it failed): asked for here.
+        <div className="kt-engine" role="status">
+          <span>{t('providers.localai.engineUpdate')}</span>
+          <button type="button" className="kt-there__switch" onClick={(e) => { e.stopPropagation(); void store().download(model.id); }} disabled={disabled}>
+            <RefreshCw size={12} />
+            <span>{t('providers.localai.engineUpdateNow')}</span>
+          </button>
+        </div>
+      ) : kept || (mine?.runtime && mine.kept) ? (
+        <p className="kt-engine" role="status"><Loader size={13} className="kt-engine__spin" /><span>{t('providers.localai.engineUpdating')}</span></p>
+      ) : mine?.runtime ? (
         <p className="kt-engine" role="status"><Loader size={13} className="kt-engine__spin" /><span>{t('providers.localai.nativeRuntime')}</span></p>
       ) : nativeReady(status, model.id) ? (
         <p className="kt-engine kt-engine--ready" role="status"><CircleCheck size={13} /><span>{t(words.ready)}</span></p>

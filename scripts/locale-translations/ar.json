@@ -1383,6 +1383,18 @@
     "en": "Address",
     "text": "العنوان"
   },
+  "providers.localai.engineUpdate": {
+    "en": "The engine needs an update",
+    "text": "يحتاج المحرّك إلى تحديث"
+  },
+  "providers.localai.engineUpdateNow": {
+    "en": "Update",
+    "text": "تحديث"
+  },
+  "providers.localai.engineUpdating": {
+    "en": "Updating the engine",
+    "text": "جارٍ تحديث المحرّك"
+  },
   "providers.localai.familyUnheard": {
     "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
     "text": "لا تتوفر {{languages}} في {{name}} على ذلك الجهاز، لذا يختار الجهاز نموذجًا لها بنفسه. لاستخدام {{name}}، نزّل {{languages}} على ذلك الجهاز أولًا."
@@ -1531,6 +1543,10 @@
     "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
     "text": "لا يدعم هذا النظام محرك ملاحظات القواعد الأصلي حاليًا. اختر «نموذج API» أو «جهاز آخر» في بطاقة «ملاحظات القواعد»."
   },
+  "providers.localai.nativeCoachUpdating": {
+    "en": "Updating the grammar feedback engine. You can start once it is done.",
+    "text": "جارٍ تحديث محرّك الملاحظات النحوية. يمكنك البدء بعد اكتمال التحديث."
+  },
   "providers.localai.nativeCoachWarming": {
     "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
     "text": "لا يزال محرك ملاحظات القواعد قيد التشغيل. يستغرق ذلك بضع ثوانٍ فقط. يمكنك البدء بمجرد أن يجهز."
@@ -1598,6 +1614,10 @@
   "providers.localai.nativeUnsupportedShort": {
     "en": "Not available for this system",
     "text": "غير مدعوم على هذا النظام حاليًا"
+  },
+  "providers.localai.nativeUpdating": {
+    "en": "Updating the speech recognition engine. You can start once it is done.",
+    "text": "جارٍ تحديث محرّك التعرّف على الكلام. يمكنك البدء بعد اكتمال التحديث."
   },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
@@ -2010,6 +2030,10 @@
   "providers.localai.translatorUnsupported": {
     "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
     "text": "لا يدعم هذا النظام محرك الترجمة الأصلي حاليًا. اختر «نموذج API» أو «جهاز آخر» في بطاقة «الترجمة»."
+  },
+  "providers.localai.translatorUpdating": {
+    "en": "Updating the translation engine. You can start once it is done.",
+    "text": "جارٍ تحديث محرّك الترجمة. يمكنك البدء بعد اكتمال التحديث."
   },
   "providers.localai.translatorWarming": {
     "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",

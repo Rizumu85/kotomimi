@@ -1383,6 +1383,18 @@
     "en": "Address",
     "text": "చిరునామా"
   },
+  "providers.localai.engineUpdate": {
+    "en": "The engine needs an update",
+    "text": "ఇంజిన్‌ను నవీకరించాలి"
+  },
+  "providers.localai.engineUpdateNow": {
+    "en": "Update",
+    "text": "నవీకరించు"
+  },
+  "providers.localai.engineUpdating": {
+    "en": "Updating the engine",
+    "text": "ఇంజిన్‌ను నవీకరిస్తోంది"
+  },
   "providers.localai.familyUnheard": {
     "en": "The other device's {{name}} has no {{languages}}, so the device picks its own model for it. To use {{name}}, download {{languages}} on that device first.",
     "text": "ఆ పరికరంలోని {{name}}లో {{languages}} లేవు. ఆ భాగానికి పరికరమే మోడల్‌ను ఎంచుకుంటుంది. {{name}} వాడాలంటే ముందుగా ఆ పరికరంలో {{languages}} డౌన్‌లోడ్ చేయండి."
@@ -1531,6 +1543,10 @@
     "en": "The native feedback engine is not available for this system. In the Grammar feedback card, switch to \"API model\" or \"Another device\".",
     "text": "ఈ సిస్టమ్‌లో నేటివ్ వ్యాకరణ సూచనల ఇంజిన్‌కు ఇంకా మద్దతు లేదు. “వ్యాకరణ సూచనలు” కార్డ్‌లో “API మోడల్” లేదా “మరో పరికరం”కి మార్చండి."
   },
+  "providers.localai.nativeCoachUpdating": {
+    "en": "Updating the grammar feedback engine. You can start once it is done.",
+    "text": "వ్యాకరణ అభిప్రాయ ఇంజిన్‌ను నవీకరిస్తోంది. పూర్తయిన తర్వాత ప్రారంభించవచ్చు."
+  },
   "providers.localai.nativeCoachWarming": {
     "en": "The feedback engine is still starting — a few seconds. You can start as soon as it is ready.",
     "text": "వ్యాకరణ సూచనల ఇంజిన్ ఇంకా ప్రారంభమవుతోంది. కొన్ని సెకన్లే పడుతుంది. సిద్ధమైన వెంటనే మొదలుపెట్టవచ్చు."
@@ -1598,6 +1614,10 @@
   "providers.localai.nativeUnsupportedShort": {
     "en": "Not available for this system",
     "text": "ఈ సిస్టమ్‌కు ఇంకా మద్దతు లేదు"
+  },
+  "providers.localai.nativeUpdating": {
+    "en": "Updating the speech recognition engine. You can start once it is done.",
+    "text": "స్పీచ్ గుర్తింపు ఇంజిన్‌ను నవీకరిస్తోంది. పూర్తయిన తర్వాత ప్రారంభించవచ్చు."
   },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
@@ -2010,6 +2030,10 @@
   "providers.localai.translatorUnsupported": {
     "en": "The native translation engine is not available for this system. In the Translation card, switch to \"API model\" or \"Another device\".",
     "text": "ఈ సిస్టమ్‌లో నేటివ్ అనువాద ఇంజిన్‌కు ఇంకా మద్దతు లేదు. “అనువాదం” కార్డ్‌లో “API మోడల్” లేదా “మరో పరికరం”కి మార్చండి."
+  },
+  "providers.localai.translatorUpdating": {
+    "en": "Updating the translation engine. You can start once it is done.",
+    "text": "అనువాద ఇంజిన్‌ను నవీకరిస్తోంది. పూర్తయిన తర్వాత ప్రారంభించవచ్చు."
   },
   "providers.localai.translatorWarming": {
     "en": "The translation engine of this computer is still starting — a few seconds. You can start as soon as it is ready.",
