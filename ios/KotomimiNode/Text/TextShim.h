@@ -28,6 +28,9 @@ typedef struct {
     int enable_thinking;
     const char *const *stops;
     int stop_count;
+    /// PLaMo 3 Translate's languages, told to its template (`source_lang`, `target_lang`); NULL where not told.
+    const char *source_lang;
+    const char *target_lang;
 } kt_settings;
 
 typedef struct {

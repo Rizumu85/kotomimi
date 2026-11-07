@@ -1,11 +1,11 @@
 #!/bin/sh
-# Builds llama.cpp b11401 (the desktop app's version) as static libraries for iOS devices and the simulator, with
+# Builds llama.cpp b12182 (the desktop app's version) as static libraries for iOS devices and the simulator, with
 # Metal, and its common library (chat templates, sampling). Output: ../llama/{ios,sim}/lib/*.a and include/, beside
 # this ios/ folder (project.yml looks there). Run on the Mac: scripts/build-llama.sh
 set -e
 export PATH=/opt/homebrew/bin:$PATH
 cd "$(dirname "$0")/../.."
-[ -d llama.cpp ] || git clone --depth 1 --branch b11401 https://github.com/ggml-org/llama.cpp.git llama.cpp
+[ -d llama.cpp ] || git clone --depth 1 --branch b12182 https://github.com/ggml-org/llama.cpp.git llama.cpp
 for target in ios sim; do
   if [ $target = ios ]; then sysroot=iphoneos; else sysroot=iphonesimulator; fi
   cmake -S llama.cpp -B build-llama-$target -G Ninja -DCMAKE_BUILD_TYPE=Release \

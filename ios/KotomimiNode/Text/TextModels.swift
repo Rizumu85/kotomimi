@@ -49,6 +49,15 @@ nonisolated struct TextModel: Identifiable, Sendable, Equatable {
         TextModel(id: "index-translate-2b", name: "Index-Translate 2B", kind: .translate, file: "Index-Translate-2B.Q4_K_M.gguf", bytes: 1_312_164_352,
                   sha256: "044b313d29342bd3b2c77cbb64023ca0d209bd9b3247763f9d162767ef2d746a",
                   repository: "IndexTeam/Index-Translate-2B-GGUF", revision: "449c9e6457b3632d328c6cbb78ae8e8e0c8059a5", modelScope: "IndexTeam/Index-Translate-2B-GGUF", holdsMb: 1600),
+        // PLaMo 3 Translate (Preferred Networks), free for non-commercial use only: the 2B reads the most natural of the
+        // desktop's translators, the 0.8B is the lightest. llama.cpp b12182 or later reads its tokenizer; it is told the
+        // languages by its template's options (`source_lang`, `target_lang` in `chat_template_kwargs`).
+        TextModel(id: "plamo-3-translate-2b", name: "PLaMo 3 Translate 2B", kind: .translate, file: "plamo-3-translate-2b-Q4_K_M.gguf", bytes: 1_807_201_888,
+                  sha256: "ac60fbb2e392349a6d3b53c7903655005377cf543703ad3869b31ab5d96a7ffb",
+                  repository: "pfnet/plamo-3-translate-2b-GGUF", revision: "4e4500666915b3a2cc0d667b64d9745c0821b63c", modelScope: "pfnet/plamo-3-translate-2b-GGUF", holdsMb: 2200),
+        TextModel(id: "plamo-3-translate-0.8b", name: "PLaMo 3 Translate 0.8B", kind: .translate, file: "plamo-3-translate-0.8b-Q4_K_M.gguf", bytes: 573_125_696,
+                  sha256: "ff10c4aed0c478af8be61fe4d22fb463c0f639acfc168012062efba35ccbdd48",
+                  repository: "pfnet/plamo-3-translate-0.8b-GGUF", revision: "e11a613b483edceab3450941f18cc79307fc93e9", modelScope: "pfnet/plamo-3-translate-0.8b-GGUF", holdsMb: 800),
         TextModel(id: "gemma-4-e2b", name: "Gemma 4 E2B", kind: .coach, file: "gemma-4-E2B-it-Q4_K_M.gguf", bytes: 3_106_738_272,
                   sha256: "740185b21d22ceb83a11c3aa62ad5842ef32c70f6096d756bbee85a1e4ec34b8",
                   repository: "unsloth/gemma-4-E2B-it-GGUF", revision: "0314792d7f1f7e229411f620751375812bb9faf2", modelScope: "unsloth/gemma-4-E2B-it-GGUF", holdsMb: 3400),
@@ -357,6 +366,9 @@ nonisolated final class TextEngine: @unchecked Sendable {
         var maxTokens: Int32 = 512
         var thinking: Int32 = -1
         var stops: [String] = []
+        /// PLaMo 3 Translate's languages, for its template: codes such as `ja`, `zh-hans`; nil where not told.
+        var sourceLang: String?
+        var targetLang: String?
     }
 
     func answer(_ model: TextModel, at path: URL, _ asked: Asked) async throws -> Answer {
@@ -385,12 +397,18 @@ nonisolated final class TextEngine: @unchecked Sendable {
         let roles = asked.messages.map { strdup($0.role) }
         let contents = asked.messages.map { strdup($0.content) }
         let stops = asked.stops.map { UnsafePointer(strdup($0)) }
-        defer { roles.forEach { free($0) }; contents.forEach { free($0) }; stops.forEach { free(UnsafeMutablePointer(mutating: $0)) } }
+        let source: UnsafeMutablePointer<CChar>? = asked.sourceLang.flatMap { strdup($0) }
+        let target: UnsafeMutablePointer<CChar>? = asked.targetLang.flatMap { strdup($0) }
+        defer {
+            roles.forEach { free($0) }; contents.forEach { free($0) }; stops.forEach { free(UnsafeMutablePointer(mutating: $0)) }
+            free(source); free(target)
+        }
         var messages = zip(roles, contents).map { kt_message(role: $0.0, content: $0.1) }
         let text: UnsafeMutablePointer<CChar>? = stops.withUnsafeBufferPointer { stopList in
             let settings = kt_settings(temperature: asked.temperature, top_p: asked.topP, top_k: asked.topK, repeat_penalty: asked.repeatPenalty,
                                        seed: asked.seed, max_tokens: asked.maxTokens, enable_thinking: asked.thinking,
-                                       stops: stopList.baseAddress.map { UnsafePointer($0) }, stop_count: Int32(stopList.count))
+                                       stops: stopList.baseAddress.map { UnsafePointer($0) }, stop_count: Int32(stopList.count),
+                                       source_lang: source.map { UnsafePointer($0) }, target_lang: target.map { UnsafePointer($0) })
             return messages.withUnsafeMutableBufferPointer { list in
                 kt_answer(engine, list.baseAddress, Int32(list.count), settings, &outcome, cancel, &error, Int32(error.count))
             }

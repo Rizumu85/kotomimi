@@ -36,7 +36,7 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         GENERATE_INFOPLIST_FILE: "NO"
         INFOPLIST_FILE: KotomimiNode/Info.plist
-        # llama.cpp b11401, built for iOS by scripts/build-llama.sh into ../llama/{ios,sim} (not kept in git).
+        # llama.cpp b12182, built for iOS by scripts/build-llama.sh into ../llama/{ios,sim} (not kept in git).
         SWIFT_OBJC_BRIDGING_HEADER: KotomimiNode/Text/Bridge.h
         CLANG_CXX_LANGUAGE_STANDARD: c++17
         "EXCLUDED_ARCHS[sdk=iphonesimulator*]": x86_64

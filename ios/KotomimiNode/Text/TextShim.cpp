@@ -88,10 +88,22 @@ extern "C" char *kt_answer(kt_model *m, const kt_message *messages, int count, k
             inputs.enable_thinking = settings.enable_thinking != 0;
             inputs.chat_template_kwargs["enable_thinking"] = settings.enable_thinking ? "true" : "false";
         }
+        // Told as llama.cpp's server tells them: each value as JSON. The door lets through only a language's code
+        // (letters and a hyphen), which needs no escaping.
+        if (settings.source_lang) inputs.chat_template_kwargs["source_lang"] = std::string("\"") + settings.source_lang + "\"";
+        if (settings.target_lang) inputs.chat_template_kwargs["target_lang"] = std::string("\"") + settings.target_lang + "\"";
         common_chat_params chat = common_chat_templates_apply(m->templates.get(), inputs);
 
         const llama_vocab *vocab = llama_model_get_vocab(m->model);
-        std::vector<llama_token> prompt = common_tokenize(vocab, chat.prompt, true, true);
+        // The template's own text with its special tokens read as such, what a person sent as plain text: a sentence
+        // that spells out a control token is not one (llama.cpp b12182 keeps the two apart).
+        std::vector<llama_token> prompt;
+        bool first = true;
+        for (const auto &part : chat.prompt.parts) {
+            std::vector<llama_token> piece = common_tokenize(vocab, part.text, first, !part.is_input);
+            prompt.insert(prompt.end(), piece.begin(), piece.end());
+            first = false;
+        }
         int room = m->size - (int)prompt.size();
         if (prompt.empty() || room < 16) { say(error, error_length, "the request is longer than the model's room"); return nullptr; }
         int most = settings.max_tokens > 0 ? std::min(settings.max_tokens, room) : room;
@@ -145,12 +157,10 @@ extern "C" char *kt_answer(kt_model *m, const kt_message *messages, int count, k
         std::string text = written;
         try {
             common_chat_parser_params parsing(chat);
-            // The template's own parser, as the server loads it (`chat_parser`): without it everything is content,
-            // the generation prompt and the thinking with it.
-            if (!chat.parser.empty()) parsing.parser.load(chat.parser);
-            parsing.reasoning_format = COMMON_REASONING_FORMAT_DEEPSEEK;
-            parsing.parse_tool_calls = false;
-            text = common_chat_parse(written, false, parsing).content;
+            // The template's own parser, as the server takes it: without it everything is content, the generation
+            // prompt and the thinking with it.
+            parsing.parser = chat.parser;
+            text = common_chat_parse(common_chat_input(written), false, parsing).content;
         } catch (...) {
             size_t end = written.rfind("</think>");
             if (end != std::string::npos) text = written.substr(end + 8);

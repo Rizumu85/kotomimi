@@ -408,7 +408,13 @@ final class Lending {
         if let value = json["seed"] as? Int { asked.seed = UInt32(truncatingIfNeeded: value) }
         let stops = (json["stop"] as? [String]) ?? ((json["stop"] as? String).map { [$0] } ?? [])
         asked.stops = Array(stops.filter { !$0.isEmpty && $0.count <= 64 }.prefix(4))
-        if let kwargs = json["chat_template_kwargs"] as? [String: Any], let thinking = kwargs["enable_thinking"] as? Bool { asked.thinking = thinking ? 1 : 0 }
+        if let kwargs = json["chat_template_kwargs"] as? [String: Any] {
+            if let thinking = kwargs["enable_thinking"] as? Bool { asked.thinking = thinking ? 1 : 0 }
+            // PLaMo 3 Translate's languages (`translatorRequest` on the desktop): a language's code and nothing else.
+            let code = /^[a-z]{2,3}(-[a-z]{4})?$/
+            if let value = kwargs["source_lang"] as? String, value.wholeMatch(of: code) != nil { asked.sourceLang = value }
+            if let value = kwargs["target_lang"] as? String, value.wholeMatch(of: code) != nil { asked.targetLang = value }
+        }
 
         guard asking < Lending.mostAsking else {
             return .error(429, "This device is busy: \(Lending.mostAsking) requests for its text models wait already.", allow + [("Retry-After", "2")])
