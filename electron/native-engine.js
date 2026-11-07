@@ -54,20 +54,22 @@ const LOOPBACK = '127.0.0.1';
 
 /** The runtime: audio.cpp's own release archives, as published. */
 const ENGINE = {
-  version: '0.9.0',
+  version: '0.9.4',
   builds: {
     'win32-x64': {
-      url: 'https://github.com/0xShug0/audio.cpp/releases/download/v0.9.0/audio-v0.9.0-bin-windows-x64-vulkan.zip',
-      bytes: 60320440,
-      sha256: 'f884538138e44528a0bf17bb75dbe7ff7350cb91a14cb72c3e9cc1d4a31d6f1f',
+      // The portable build: the plain one is compiled for the CPU of the machine that built it (AVX-512 there), and a
+      // computer without it would crash (audio.cpp's own release notes, from v0.9.1).
+      url: 'https://github.com/0xShug0/audio.cpp/releases/download/v0.9.4/audio-v0.9.4-bin-windows-x64-vulkan-portable.zip',
+      bytes: 83953489,
+      sha256: '295ca309160e59ec3ce3cff0e07edb6709e28d43b4c0a5ad76760938ae6a4e5c',
       archive: 'engine.zip',
       exe: 'audiocpp_server.exe',
       backend: 'vulkan',
     },
     'darwin-arm64': {
-      url: 'https://github.com/0xShug0/audio.cpp/releases/download/v0.9.0/audio-v0.9.0-bin-macos-arm64-metal.tar.gz',
-      bytes: 29162796,
-      sha256: '7cea9219d5f06475011c5d225d71d988cecef633ff7d098ee8a4c7b08583b1b4',
+      url: 'https://github.com/0xShug0/audio.cpp/releases/download/v0.9.4/audio-v0.9.4-bin-macos-arm64-metal.tar.gz',
+      bytes: 36947118,
+      sha256: '5722c4f33e56114345965c0dee472a9239218f7499ace6393bba6a951a41b86a',
       archive: 'engine.tar.gz',
       exe: 'audiocpp_server',
       backend: 'metal',
@@ -196,22 +198,22 @@ const MODELS = {
 
 /** llama.cpp's server, for the translation models: the project's own release archives, as published. */
 const LLAMA = {
-  version: 'b11401',
+  version: 'b12182',
   builds: {
     'win32-x64': {
-      url: 'https://github.com/ggml-org/llama.cpp/releases/download/b11401/llama-b11401-bin-win-vulkan-x64.zip',
-      bytes: 33308209,
-      sha256: '4bdbc0b2e79f04ef3e66ecd34a996499401d94501e8387dec0c8963544ef6419',
+      url: 'https://github.com/ggml-org/llama.cpp/releases/download/b12182/llama-b12182-bin-win-vulkan-x64.zip',
+      bytes: 37709766,
+      sha256: 'f75238d0cbd2a9e1ff66074ae368246f5bf91c8f6cd8c1f78b3bc6f6f3a1aa8f',
       archive: 'engine.zip',
       exe: 'llama-server.exe',
       backend: 'vulkan',
     },
     'darwin-arm64': {
-      url: 'https://github.com/ggml-org/llama.cpp/releases/download/b11401/llama-b11401-bin-macos-arm64.tar.gz',
-      bytes: 11921253,
-      sha256: 'cf6410ec5cb373e7f161852a0e2ad30e96c190b9282e75cbd7eae00bd96736b4',
+      url: 'https://github.com/ggml-org/llama.cpp/releases/download/b12182/llama-b12182-bin-macos-arm64.tar.gz',
+      bytes: 16698597,
+      sha256: '71cfee075e0c54852e225dafdc8dc79c32b26e8d45f052369b7d4f78d2ccf1a6',
       archive: 'engine.tar.gz',
-      exe: 'llama-b11401/llama-server',
+      exe: 'llama-b12182/llama-server',
       backend: 'metal',
     },
   },
