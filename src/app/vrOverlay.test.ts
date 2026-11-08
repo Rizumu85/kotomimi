@@ -84,6 +84,8 @@ function setup(over: Partial<VrOverlayDeps> = {}) {
   };
   let clock = 1000;
   const ticks: Array<() => void> = [];
+  const look = { filters: { speaker: 'both', participant: 'both' } as const, coached: false, aids: { furigana: true, romanization: false, romanizationOff: [], pinyin: false, jyutping: false, sourceItalic: true } };
+  const lookListeners = new Set<() => void>();
   const heard = { speaker: false, participant: false };
   const deps: VrOverlayDeps = {
     ipc,
@@ -100,6 +102,8 @@ function setup(over: Partial<VrOverlayDeps> = {}) {
     subscribeMuted: () => () => {},
     words: () => ({ me: 'Me' } as VrWords),
     uiLanguage: () => 'en',
+    captionLook: () => look,
+    subscribeCaptionLook: (l) => { lookListeners.add(l); return () => lookListeners.delete(l); },
     now: () => clock,
     setInterval: (fn) => { ticks.push(fn); return ticks.length; },
     clearInterval: () => { ticks.length = 0; },
@@ -147,6 +151,17 @@ describe('startVrOverlay', () => {
     t.setEntries([exchange('a', 'こんばんは', '晚上好')]);
     await flush();
     expect(t.sent).toHaveLength(1);
+    t.controller.stop();
+  });
+
+  it('sends the strip the conversation as the subtitle draws it: the latest entries, a video left out, with the legs and the look', async () => {
+    const t = setup();
+    await t.connect();
+    t.setEntries([exchange('a', 'こんばんは', '晚上好'), { ...exchange('v', 'video', 'words'), lane: 'video' }, exchange('b', '你好', 'こんにちは', { leg: 'speaker' })]);
+    await flush();
+    const captions = t.sent[t.sent.length - 1].captions;
+    expect(captions.entries.map((e) => e.id)).toEqual(['a', 'b']);
+    expect(captions).toMatchObject({ legs: ['speaker', 'participant'], pair: { source: 'zh-CN', target: 'ja' }, language: 'en', coached: false, filters: { speaker: 'both', participant: 'both' } });
     t.controller.stop();
   });
 

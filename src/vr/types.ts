@@ -6,6 +6,8 @@
  * into the user's language by the main window: the pages hold no strings.
  */
 import type { LegName } from '../lib/conversation/types';
+import type { Entry } from '../lib/projection/types';
+import type { LegFilters } from '../lib/view/filter';
 
 export type VrSurface = 'strip' | 'wrist';
 
@@ -75,6 +77,29 @@ export interface VrState {
   hear: { value: string; options: VrModel[] };
   translate: { value: string; options: VrModel[] };
   strip: boolean;
+  /** What the strip draws, as the computer's subtitle does (`SubtitleLanes`). */
+  captions: VrCaptions;
+}
+
+/**
+ * Fork: the strip is the computer's subtitle, drawn in the headset: each side's newest sentence with its translation
+ * and, where grammar feedback is on, the feedback — the same lanes, held the same while each is read. The page is a
+ * window of its own: what the subtitle reads from the app's stores comes along.
+ */
+export interface VrCaptions {
+  /** The conversation's latest entries, oldest first (a video's words left out, as the subtitle leaves them). */
+  entries: Entry[];
+  /** The legs the run hears: each has its lane. */
+  legs: LegName[];
+  /** The subtitle's own display modes. */
+  filters: LegFilters;
+  /** What answers the user's own sentences is grammar feedback (`useCoachingStore`). */
+  coached: boolean;
+  /** The reading aids switched on (`useAnnotationStore`). */
+  aids: { furigana: boolean; romanization: boolean; romanizationOff: string[]; pinyin: boolean; jyutping: boolean; sourceItalic: boolean };
+  pair: { source: string; target: string } | null;
+  /** The app's language, for the few words the lanes write (a notice). */
+  language: string;
 }
 
 export interface VrPerf {

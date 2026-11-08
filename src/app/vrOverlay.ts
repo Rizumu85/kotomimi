@@ -23,7 +23,7 @@ import type { LanguagePair } from '../lib/provider/types';
 import { languageLabel } from '../lib/language/label';
 import { toViewerEntry } from '../lib/share/viewerEntry';
 import { describeCause, reportError } from '../lib/diagnostics/report';
-import type { VrChoice, VrCommand, VrLine, VrModel, VrState, VrWords } from '../vr/types';
+import type { VrCaptions, VrChoice, VrCommand, VrLine, VrModel, VrState, VrWords } from '../vr/types';
 import { useVrStore, type VrLink } from '../stores/vrStore';
 
 export interface VrIpc {
@@ -70,6 +70,9 @@ export interface VrOverlayDeps {
   subscribeMuted(listener: () => void): () => void;
   words(): VrWords;
   uiLanguage(): string;
+  /** What the strip reads beside the conversation, as the computer's subtitle reads it (`VrCaptions`), and its changes. */
+  captionLook(): Pick<VrCaptions, 'filters' | 'coached' | 'aids'>;
+  subscribeCaptionLook(listener: () => void): () => void;
   store?: typeof useVrStore;
   now?(): number;
   setInterval?(fn: () => void, ms: number): unknown;
@@ -113,6 +116,15 @@ export function quickLanguages(current: string, offered: readonly string[], pins
   const list = base.slice(0, most);
   if (current && !list.includes(current)) list[Math.min(list.length, most - 1)] = current;
   return [...new Set(list)];
+}
+
+/** How many of the conversation's entries the strip is sent: enough for each side's newest and the ones still held. */
+const CAPTION_ENTRIES = 24;
+
+/** The strip's entries: the latest, a video's words left out (the subtitle draws those apart, and the strip not). */
+export function captionEntries(entries: readonly Entry[]): Entry[] {
+  const people = entries.filter((e) => !(e.kind === 'exchange' && e.lane === 'video'));
+  return people.slice(-CAPTION_ENTRIES);
 }
 
 /** A model's last few runs: their average. */
@@ -174,6 +186,13 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
       hear: models(settings.hearers(), hearLags),
       translate: models(settings.translators(), translateLags),
       strip,
+      captions: {
+        entries: captionEntries(deps.view.get().entries),
+        legs: [...deps.legs()],
+        pair: settings.pair(),
+        language: deps.uiLanguage(),
+        ...deps.captionLook(),
+      },
     };
   };
 
@@ -345,6 +364,7 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
   offs.push(deps.view.subscribe(() => { measure(); publish(); }));
   offs.push(settings.subscribe(publish));
   offs.push(deps.subscribeMuted(publish));
+  offs.push(deps.subscribeCaptionLook(publish));
 
   return {
     stop() {
@@ -368,12 +388,15 @@ async function build(): Promise<VrOverlayController | null> {
   const { isElectron } = await import('../utils/environment');
   const ipc = (window as unknown as { electron?: VrIpc }).electron;
   if (!isElectron() || !ipc || !/Windows/.test(navigator.userAgent)) return null;
-  const [{ getAppSession }, { vrSettingsPort, vrWords }, { default: useAudioStore }, { useVRChatStore, vrchatHolds }, { default: i18n }] = await Promise.all([
+  const [{ getAppSession }, { vrSettingsPort, vrWords }, { default: useAudioStore }, { useVRChatStore, vrchatHolds }, { default: i18n }, { useSubtitleStore }, { useAnnotationStore }, { useCoachingStore }] = await Promise.all([
     import('./session'),
     import('./vrOverlayPorts'),
     import('../stores/audioStore'),
     import('../stores/vrchatStore'),
     import('../locales'),
+    import('../stores/subtitleStore'),
+    import('../stores/annotationStore'),
+    import('../stores/coachingStore'),
   ]);
   const session = getAppSession();
   return startVrOverlay({
@@ -388,5 +411,18 @@ async function build(): Promise<VrOverlayController | null> {
     subscribeMuted: (listener) => useVRChatStore.subscribe(listener),
     words: () => vrWords((key, fallback) => i18n.t(key, fallback) as string),
     uiLanguage: () => i18n.language ?? 'en',
+    captionLook: () => {
+      const subtitle = useSubtitleStore.getState();
+      const aids = useAnnotationStore.getState();
+      return {
+        filters: { speaker: subtitle.speakerDisplayMode, participant: subtitle.participantDisplayMode },
+        coached: useCoachingStore.getState().coached,
+        aids: { furigana: aids.furigana, romanization: aids.romanization, romanizationOff: [...aids.romanizationOff], pinyin: aids.pinyin, jyutping: aids.jyutping, sourceItalic: aids.sourceItalic },
+      };
+    },
+    subscribeCaptionLook: (listener) => {
+      const offs = [useSubtitleStore.subscribe(listener), useAnnotationStore.subscribe(listener), useCoachingStore.subscribe(listener)];
+      return () => { for (const off of offs) off(); };
+    },
   });
 }
