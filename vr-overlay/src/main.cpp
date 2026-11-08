@@ -206,9 +206,13 @@ class Session {
       status("error", vr::VR_GetVRInitErrorAsEnglishDescription(err));
       return false;
     }
-    if (!openDevice() || !create(kStrip, "kotomimi.captions", "Kotomimi captions") || !create(kWrist, "kotomimi.wrist", "Kotomimi")) {
+    // Which step failed, and SteamVR's word for why: what a person's report can be read by.
+    std::string why;
+    if (!openDevice(why)) why = "could not open the graphics device: " + why;
+    else if (!create(kStrip, "kotomimi.captions", "Kotomimi captions", why) || !create(kWrist, "kotomimi.wrist", "Kotomimi", why)) why = "could not create the overlays: " + why;
+    if (!why.empty()) {
       close();
-      status("error", "could not create the overlays");
+      status("error", why.c_str());
       return false;
     }
     vr::VROverlay()->SetOverlaySortOrder(surfaces_[kStrip].handle, 10);
@@ -267,7 +271,7 @@ class Session {
   }
 
  private:
-  bool openDevice() {
+  bool openDevice(std::string& why) {
     int32_t index = -1;
     vr::VRSystem()->GetDXGIOutputInfo(&index);
     IDXGIFactory1* factory = nullptr;
@@ -279,12 +283,21 @@ class Session {
     HRESULT hr = D3D11CreateDevice(adapter, adapter ? D3D_DRIVER_TYPE_UNKNOWN : D3D_DRIVER_TYPE_HARDWARE, nullptr,
                                    D3D11_CREATE_DEVICE_BGRA_SUPPORT, nullptr, 0, D3D11_SDK_VERSION, &device_, nullptr, &context_);
     if (adapter) adapter->Release();
+    if (FAILED(hr)) {
+      char text[96];
+      std::snprintf(text, sizeof text, "adapter %d, HRESULT 0x%08lx", index, static_cast<unsigned long>(hr));
+      why = text;
+    }
     return SUCCEEDED(hr);
   }
 
-  bool create(int which, const char* key, const char* name) {
+  bool create(int which, const char* key, const char* name, std::string& why) {
     Surface& s = surfaces_[which];
-    if (vr::VROverlay()->CreateOverlay(key, name, &s.handle) != vr::VROverlayError_None) return false;
+    vr::EVROverlayError error = vr::VROverlay()->CreateOverlay(key, name, &s.handle);
+    if (error != vr::VROverlayError_None) {
+      why = std::string(key) + " " + vr::VROverlay()->GetOverlayErrorNameFromEnum(error);
+      return false;
+    }
     vr::VROverlay()->SetOverlayFlag(s.handle, vr::VROverlayFlags_IsPremultiplied, true);
     vr::VROverlay()->SetOverlayFlag(s.handle, vr::VROverlayFlags_NoBackside, true);
     return true;

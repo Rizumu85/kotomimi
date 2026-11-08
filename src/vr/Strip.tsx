@@ -13,6 +13,8 @@ import i18n from '../locales';
 import { SubtitleBody } from '../components/Subtitle/SubtitleBands';
 import { useAnnotationStore } from '../stores/annotationStore';
 import { useCoachingStore } from '../stores/coachingStore';
+import { useSubtitleLookStore } from '../stores/subtitleLookStore';
+import { LOOKS } from '../lib/subtitle/look';
 import type { RomanizedLanguage } from '../lib/annotate/types';
 import type { SegmentId } from '../lib/conversation/types';
 import { fill } from './bridge';
@@ -20,6 +22,13 @@ import type { VrState } from './types';
 
 /** The size the strip's text is drawn at: the page is 800 px wide, drawn twice that, and read 1.4 m away. */
 export const STRIP_FONT_SIZE = 30;
+/**
+ * As a film's subtitles: centred, on a faint panel, the letters set off it by a soft shadow — the subtitle's `soft`
+ * look, centred. A game's world is behind it, bright or dark, and a full panel hides what it covers (the user,
+ * 2026-11-08).
+ */
+const LOOK = { ...LOOKS.soft, align: 'center' as const };
+useSubtitleLookStore.setState({ look: 'soft', shadow: LOOK.shadow, align: LOOK.align });
 const NOTHING_LIT: ReadonlyMap<SegmentId, number> = new Map();
 
 export default function Strip({ state }: { state: VrState }) {
@@ -40,7 +49,7 @@ export default function Strip({ state }: { state: VrState }) {
   }
   if (!captions.entries.some((entry) => entry.kind === 'exchange')) return null;
   return (
-    <div className="strip strip--lanes">
+    <div className="strip strip--lanes" style={{ background: `color-mix(in srgb, ${LOOK.bgColor} ${LOOK.bgOpacity}%, transparent)` }}>
       <SubtitleBody
         entries={captions.entries}
         lit={NOTHING_LIT}
@@ -49,6 +58,9 @@ export default function Strip({ state }: { state: VrState }) {
         filters={captions.filters}
         legs={captions.legs}
         newItemHighlightEnabled={false}
+        bgOpacity={LOOK.bgOpacity}
+        sourceTextColor={LOOK.sourceTextColor}
+        translationTextColor={LOOK.translationTextColor}
         {...(captions.pair ? { pair: captions.pair } : {})}
       />
     </div>
