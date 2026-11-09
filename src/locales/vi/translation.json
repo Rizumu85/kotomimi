@@ -1977,7 +1977,6 @@
       "fps": "VR ở {fps} khung hình/giây",
       "dropping": "đang rớt khung hình",
       "vram": "Bộ nhớ đồ họa {used} / {total} GB",
-      "idle": "Không nghe",
       "stopped": "Đã dừng nhận dạng giọng nói. Lật cổ tay để bắt đầu lại.",
       "stoppedShort": "Đã dừng nhận dạng",
       "muted": "Đã tắt mic trong VRChat",

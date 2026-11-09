@@ -1977,7 +1977,6 @@
       "fps": "VR {fps} fps",
       "dropping": "kuvia jää väliin",
       "vram": "VRAM {used} / {total} GB",
-      "idle": "Ei kuuntele",
       "stopped": "Puheentunnistus pysähtyi. Aloita uudelleen kääntämällä rannettasi.",
       "stoppedShort": "Pysähtynyt",
       "muted": "Mykistetty VRChatissa",

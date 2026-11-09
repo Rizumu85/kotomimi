@@ -30,9 +30,7 @@ function Dots({ state }: { state: VrState }) {
       </span>
       {state.failed && state.phase === 'idle' ? (
         <span className="status__right is-error">{words.stoppedShort}</span>
-      ) : state.phase === 'idle' ? (
-        <span className="status__right">{words.idle}</span>
-      ) : state.muted ? (
+      ) : state.muted && state.phase !== 'idle' ? (
         <span className="status__right"><MicOff size={ICON} />{words.muted}</span>
       ) : null}
     </div>

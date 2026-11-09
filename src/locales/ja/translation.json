@@ -1977,7 +1977,6 @@
       "fps": "VR 表示 {fps} fps",
       "dropping": "コマ落ちしています",
       "vram": "ビデオメモリ {used} / {total} GB",
-      "idle": "聞き取り停止中",
       "stopped": "音声認識が停止しました。手首を返すと再開できます。",
       "stoppedShort": "音声認識停止",
       "muted": "VRChat でミュート中",

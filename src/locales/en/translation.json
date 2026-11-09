@@ -1801,7 +1801,6 @@
       "fps": "VR at {fps} fps",
       "dropping": "dropping frames",
       "vram": "VRAM {used} / {total} GB",
-      "idle": "Not listening",
       "stopped": "Recognition stopped. Turn your wrist to start again.",
       "stoppedShort": "Stopped",
       "muted": "Muted in VRChat",

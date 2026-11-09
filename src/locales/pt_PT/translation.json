@@ -1977,7 +1977,6 @@
       "fps": "VR a {fps} fps",
       "dropping": "perda de fotogramas",
       "vram": "Memória gráfica {used} / {total} GB",
-      "idle": "Sem escutar",
       "stopped": "A transcrição parou. Vire o pulso para recomeçar.",
       "stoppedShort": "Transcrição parada",
       "muted": "Microfone silenciado no VRChat",

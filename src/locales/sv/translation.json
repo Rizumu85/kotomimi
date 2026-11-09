@@ -1977,7 +1977,6 @@
       "fps": "VR i {fps} fps",
       "dropping": "tappar bildrutor",
       "vram": "VRAM {used} / {total} GB",
-      "idle": "Lyssnar inte",
       "stopped": "Taligenkänningen stoppades. Vrid handleden för att starta igen.",
       "stoppedShort": "Stoppad",
       "muted": "Ljudet är avstängt i VRChat",

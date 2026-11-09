@@ -142,7 +142,6 @@ export function vrWords(t: T): VrWords {
     fps: t('fork.vr.fps', 'VR at {fps} fps'),
     dropping: t('fork.vr.dropping', 'dropping frames'),
     vram: t('fork.vr.vram', 'VRAM {used} / {total} GB'),
-    idle: t('fork.vr.idle', 'Not listening'),
     stopped: t('fork.vr.stopped', 'Recognition stopped. Turn your wrist to start again.'),
     stoppedShort: t('fork.vr.stoppedShort', 'Stopped'),
     muted: t('fork.vr.muted', 'Muted in VRChat'),

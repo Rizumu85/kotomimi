@@ -1977,7 +1977,6 @@
       "fps": "VR op {fps} fps",
       "dropping": "Frames vallen weg",
       "vram": "VRAM {used} / {total} GB",
-      "idle": "Luistert niet",
       "stopped": "Spraakherkenning gestopt. Draai je pols om opnieuw te starten.",
       "stoppedShort": "Gestopt",
       "muted": "Gedempt in VRChat",

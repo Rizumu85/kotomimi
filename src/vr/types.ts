@@ -54,7 +54,6 @@ export interface VrWords {
   dropping: string;
   /** "{used}" and "{total}", in GB. */
   vram: string;
-  idle: string;
   stopped: string;
   stoppedShort: string;
   muted: string;

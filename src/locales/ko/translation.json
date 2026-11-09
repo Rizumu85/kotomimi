@@ -1977,7 +1977,6 @@
       "fps": "VR 화면 {fps}프레임",
       "dropping": "프레임 저하",
       "vram": "비디오 메모리 {used} / {total} GB",
-      "idle": "듣고 있지 않음",
       "stopped": "음성 인식이 멈췄어요. 손목을 돌려 화면을 보면 다시 시작할 수 있어요.",
       "stoppedShort": "음성 인식 중지됨",
       "muted": "VRChat에서 음소거됨",

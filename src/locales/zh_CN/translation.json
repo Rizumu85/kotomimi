@@ -1801,7 +1801,6 @@
       "fps": "VR 画面 {fps} 帧",
       "dropping": "掉帧了",
       "vram": "显存 {used} / {total} GB",
-      "idle": "没在听",
       "stopped": "识别停了，翻开手腕可以重新开始",
       "stoppedShort": "识别停了",
       "muted": "VRChat 已静音",

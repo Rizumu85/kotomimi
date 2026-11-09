@@ -1977,7 +1977,6 @@
       "fps": "VR: {fps} kl./s",
       "dropping": "gubienie klatek",
       "vram": "VRAM {used} / {total} GB",
-      "idle": "Nie nasłuchuje",
       "stopped": "Rozpoznawanie zatrzymane. Obróć nadgarstek, aby uruchomić ponownie.",
       "stoppedShort": "Zatrzymano",
       "muted": "Wyciszono w VRChat",

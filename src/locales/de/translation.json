@@ -1977,7 +1977,6 @@
       "fps": "VR mit {fps} fps",
       "dropping": "Bildaussetzer",
       "vram": "Grafikspeicher {used} / {total} GB",
-      "idle": "Hört nicht zu",
       "stopped": "Spracherkennung gestoppt. Drehe dein Handgelenk, um sie erneut zu starten.",
       "stoppedShort": "Spracherkennung gestoppt",
       "muted": "In VRChat stummgeschaltet",

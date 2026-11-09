@@ -1977,7 +1977,6 @@
       "fps": "VR {fps} FPS",
       "dropping": "kareler düşüyor",
       "vram": "VRAM {used} / {total} GB",
-      "idle": "Dinlemiyor",
       "stopped": "Tanıma durdu. Yeniden başlatmak için bileğinizi çevirin.",
       "stoppedShort": "Durduruldu",
       "muted": "VRChat'te sessize alındı",

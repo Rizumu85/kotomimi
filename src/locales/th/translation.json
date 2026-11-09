@@ -1977,7 +1977,6 @@
       "fps": "VR ที่ {fps} fps",
       "dropping": "เฟรมตก",
       "vram": "VRAM {used} / {total} GB",
-      "idle": "ไม่ได้ฟังอยู่",
       "stopped": "หยุดถอดเสียงแล้ว พลิกข้อมือเพื่อเริ่มใหม่",
       "stoppedShort": "หยุดถอดเสียงแล้ว",
       "muted": "ปิดเสียงใน VRChat",

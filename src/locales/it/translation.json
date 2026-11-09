@@ -1977,7 +1977,6 @@
       "fps": "VR a {fps} fps",
       "dropping": "perdita di fotogrammi",
       "vram": "VRAM {used} / {total} GB",
-      "idle": "Non in ascolto",
       "stopped": "Riconoscimento interrotto. Ruota il polso per riavviarlo.",
       "stoppedShort": "Interrotto",
       "muted": "Audio disattivato in VRChat",
