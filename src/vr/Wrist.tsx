@@ -40,7 +40,7 @@ function Dots({ state }: { state: VrState }) {
 function Recent({ state }: { state: VrState }) {
   return (
     <div className="recent">
-      {state.lines.slice(-5).map((line) => (line.leg === 'speaker' ? (
+      {state.lines.slice(-6).map((line) => (line.leg === 'speaker' ? (
         <div key={line.id} className="line line--mine"><span className="line__who">{state.words.me} · </span>{line.source}</div>
       ) : (
         <div key={line.id} className="line">

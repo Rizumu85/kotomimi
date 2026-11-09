@@ -45,10 +45,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 .status__right.is-paused { color: tk.$color-warning; }
 .status__right.is-error { color: tk.$color-error; }
 
-// The room two rows of buttons leave. A fixed height, the newest at the bottom and the oldest leaving at the top: the
+// The room two rows of buttons leave in the panel's first size (350 × 480, `START_SIZE` in electron/vr-overlay.js),
+// all the captions': the panel keeps its shape, and holds about one exchange more. A fixed height, the newest at the bottom and the oldest leaving at the top: the
 // window is the page's size, and a wrist tool would rescale it at every wrapped line.
 .recent {
-  display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; height: 230px; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; height: 305px; overflow: hidden;
   // The line leaving at the top fades out rather than being cut through (the mask reads only the alpha).
   mask-image: linear-gradient(to bottom, transparent, currentColor 28px);
 }
@@ -66,7 +67,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 .chip.is-on { background: tk.$color-primary-fill; border-color: tk.$color-primary-fill; color: tk.$color-on-primary; }
 .chip.is-open { border-color: tk.$color-primary; color: tk.$color-primary; background: transparent; }
 // Every language, in the captions' place while a language is chosen.
-.more { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; min-height: 230px; max-height: 230px; overflow-y: auto; align-content: start; }
+.more { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; min-height: 305px; max-height: 305px; overflow-y: auto; align-content: start; }
 .more .chip { height: 48px; font-size: 16px; }
 
 // Two rows: a wide button of their language, and two small squares whose icons say what they do.
