@@ -11,6 +11,7 @@
  */
 import { useEffect, useState, type ReactNode } from 'react';
 import { ChevronLeft, Eye, EyeOff, MessageSquare, MessageSquareOff, MicOff, Pause, Play, Plus, SlidersHorizontal } from 'lucide-react';
+import Tooltip from '../components/Tooltip/Tooltip';
 import { fill, send } from './bridge';
 import type { VrModel, VrPerf, VrState, VrWords } from './types';
 
@@ -72,8 +73,11 @@ function Main({ state, onTune }: { state: VrState; onTune: () => void }) {
   const langButton = (value: string) => (
     <button key={value} type="button" className="act act--lang is-lit" aria-pressed onClick={() => (two && theirs.row ? pick(value) : setMore(!more))}>{label(value)}</button>
   );
+  // Their names in the app's own tooltip, as everywhere in it, not the browser's.
   const square = (name: string, icon: ReactNode, onClick: () => void, on?: boolean) => (
-    <button type="button" className={`act act--icon${on ? ' is-on' : ''}`} aria-label={name} title={name} {...(on !== undefined ? { 'aria-pressed': on } : {})} onClick={onClick}>{icon}</button>
+    <Tooltip content={name} position="top" icon="none">
+      <button type="button" className={`act act--icon${on ? ' is-on' : ''}`} aria-label={name} {...(on !== undefined ? { 'aria-pressed': on } : {})} onClick={onClick}>{icon}</button>
+    </Tooltip>
   );
   return (
     <>
@@ -90,7 +94,9 @@ function Main({ state, onTune }: { state: VrState; onTune: () => void }) {
         {square(running ? words.pause : words.resume, running ? <Pause size={ICON} /> : <Play size={ICON} />, () => send({ type: 'run', on: !running }))}
         {square(state.strip ? words.hide : words.show, state.strip ? <EyeOff size={ICON} /> : <Eye size={ICON} />, () => send({ type: 'strip', on: !state.strip }))}
         {two ? langButton(lit[1]) : (
-          <button type="button" className={`act act--lang${more ? ' is-open' : ''}`} aria-label={words.more} title={words.more} onClick={() => setMore(!more)}><Plus size={ICON} /></button>
+          <Tooltip content={words.more} position="top" icon="none">
+            <button type="button" className={`act act--lang${more ? ' is-open' : ''}`} aria-label={words.more} onClick={() => setMore(!more)}><Plus size={ICON} /></button>
+          </Tooltip>
         )}
         {square(words.chatbox, state.chatbox ? <MessageSquare size={ICON} /> : <MessageSquareOff size={ICON} />, () => send({ type: 'chatbox', on: !state.chatbox }), state.chatbox)}
         {square(words.tune, <SlidersHorizontal size={ICON} />, onTune)}
