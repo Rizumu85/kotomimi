@@ -60,6 +60,23 @@ export function ProviderLanguages({ providers, disabled, sentence }: ProviderLan
       updateSettings(provider, { ...side.set(next.row), ...side.light!(next.lit) });
     },
   } : undefined;
+  // Fork: the user's own row ("我说") beside theirs: a press writes their own language — the pair's source — and the
+  // provider's row of what they speak together.
+  const own = more?.mine;
+  const myRow = theirs ? {
+    ...(own?.hearer ? { hearer: own.hearer } : {}),
+    main: entry.pair.source,
+    row: own?.row ?? [entry.pair.source],
+    using: legs.includes('speaker') ? own?.using ?? [] : [],
+    more: !!own && own.most !== 0,
+    apply: (next: { main: string; row: readonly string[] }) => {
+      if (next.main !== entry.pair.source) {
+        trackEvent('language_changed', { to_language: next.main, language_type: 'source' });
+        setPair(provider, { source: next.main, target: entry.pair.target });
+      }
+      if (own) updateSettings(provider, own.set([...next.row]));
+    },
+  } : undefined;
 
   return (
     <LanguagePairSection
@@ -71,6 +88,7 @@ export function ProviderLanguages({ providers, disabled, sentence }: ProviderLan
       context={languageContext(provider, legs, speech)}
       {...(mine ? { more: { mine } } : {})}
       {...(theirs ? { theirs } : {})}
+      {...(myRow ? { mine: myRow } : {})}
       onOpenHearing={() => useSettingsStore.getState().navigateToSettings('hearing')}
       owners={kotomimi}
       onChange={(pair) => {

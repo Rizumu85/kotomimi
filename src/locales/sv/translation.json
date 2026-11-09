@@ -1780,7 +1780,7 @@
       "unpinShort": "Lossa",
       "mine": "Mitt språk",
       "theirs": "Deras språk",
-      "pairHelp": "Välj de språk som du och den andra personen främst använder. Det du säger översätts till deras språk och det de säger till ditt. Tryck på ett språk under ”De talar” för att tända det, högst två: den andra personen hörs på de tända språken, och det du säger översätts till vart och ett. Av de språk du också talar används bara de som är tända för dem.",
+      "pairHelp": "Välj de språk som du och den andra personen främst använder. Det du säger översätts till deras språk och det de säger till ditt. Tryck på ett språk under ”Jag talar” för att göra det till ditt; av de andra används bara de som är tända för dem. Tryck på ett språk under ”De talar” för att tända eller släcka det, högst två: den andra personen hörs på de tända språken, och det du säger översätts till vart och ett.",
       "alsoSpeak": "Jag talar också",
       "hearingBy": "Taligenkänning: {{name}}",
       "anyLanguage": "Vilket språk som helst",

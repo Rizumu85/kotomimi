@@ -1780,7 +1780,7 @@
       "unpinShort": "Lösen",
       "mine": "Meine Sprache",
       "theirs": "Sprache der anderen",
-      "pairHelp": "Wähle die Sprachen, die du und dein Gegenüber hauptsächlich verwenden. Deine Sprache wird in ihre übersetzt, ihre in deine. Tippe unter „Sie sprechen“ auf eine Sprache, um sie einzuschalten, höchstens zwei: Dein Gegenüber wird in den eingeschalteten erkannt, und deine Sprache wird in jede übersetzt. Von den Sprachen, die du auch sprichst, werden nur die für sie eingeschalteten verwendet.",
+      "pairHelp": "Wähle die Sprachen, die du und dein Gegenüber hauptsächlich verwenden. Deine Sprache wird in ihre übersetzt, ihre in deine. Tippe unter „Ich spreche“ auf eine Sprache, um sie zu deiner zu machen; von den übrigen werden nur die für dein Gegenüber eingeschalteten verwendet. Tippe unter „Sie sprechen“ auf eine Sprache, um sie ein- oder auszuschalten, höchstens zwei: Dein Gegenüber wird in den eingeschalteten erkannt, und deine Sprache wird in jede übersetzt.",
       "alsoSpeak": "Ich spreche auch",
       "hearingBy": "Spracherkennung: {{name}}",
       "anyLanguage": "Jede Sprache",

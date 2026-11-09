@@ -59,3 +59,32 @@ export function removeTheirs(t: TheirLanguages, code: string): TheirNext | null 
   if (!next) return null;
   return { main: next, row, lit: same(next, t.lit) ? '' : t.lit };
 }
+
+/**
+ * Fork: the user's own row ("我说"), the same kind of row: their own language — the pair's source, which what the other
+ * side says is translated into — filled, and the others they speak beside it, in use where the other side has them lit.
+ * Pressing another makes it their own; "+" adds one, or takes one out, their own then passing to the next in the row.
+ */
+export interface MyLanguages {
+  main: string;
+  row: readonly string[];
+}
+
+export type MyNext = MyLanguages;
+
+/** The row after `code` is pressed: it becomes the user's own; null where it is already. */
+export function pressMine(t: MyLanguages, code: string): MyNext | null {
+  return same(code, t.main) ? null : { main: code, row: t.row };
+}
+
+/** The row with `code` added beside the user's own. */
+export function addMine(t: MyLanguages, code: string): MyNext {
+  return { main: t.main, row: t.row.some((one) => same(one, code)) ? t.row : [...t.row, code] };
+}
+
+/** The row with `code` taken out; null where it is the only one. */
+export function removeMine(t: MyLanguages, code: string): MyNext | null {
+  const row = t.row.filter((one) => !same(one, code));
+  if (row.length === 0) return null;
+  return { main: same(code, t.main) ? row[0] : t.main, row };
+}

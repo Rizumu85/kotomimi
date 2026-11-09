@@ -64,7 +64,7 @@ import { buildRealtime } from './config';
 import { glossaryRecognitionTerms } from '../../lib/glossary/glossary';
 import { recognizerAsked, serverBilingual } from './serverRecognizers';
 import { phoneBase, plainAddress } from '../../lib/lan/discover';
-import { alsoFirst, alsoInto, alsoListed, alsoSpoken, backInto, crossings, theirRow, theyLitOf, deviceLanguage, canDetectOther, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, hearsNatively, needsServer, serverDetects, PLACE_FIELDS, PLACES, translatesNatively, type AsrHere, type Place } from './localaiDevice';
+import { alsoFirst, alsoInto, alsoListed, alsoSpoken, backInto, crossings, myRow, theirRow, theyLitOf, deviceLanguage, canDetectOther, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, hearsNatively, needsServer, serverDetects, PLACE_FIELDS, PLACES, translatesNatively, type AsrHere, type Place } from './localaiDevice';
 import { NATIVE_MODELS, isApple, preferNative, type NativePick } from './localaiNative';
 import { NATIVE_DEFAULT_MODEL, appleAlso, coachBaseUrl, coachGap, coachIdle, coachUp, hearingPick, hearsByDownloaded, holdNativeForRun, nativeEither, nativeGap, nativeUp, restNative, translatorUp, nativeIdle, nativeModelFor, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_COACH_EXTRA, NATIVE_COACHES, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
@@ -1506,8 +1506,9 @@ export const localaiLanguages: Provider<LocalAISettings, never, never>['language
         ...reach(mineHearer, true),
         // The Mac's recognition hears one beside the user's own: theirs, the only one shown chosen there.
         chosen: mineHearer?.apple && !mineHearer.detects ? spoken.filter((code) => base(code) === base(pair.target)) : spoken,
-        // In use: those the other side has lit.
+        // In use: those the other side has lit. The row as shown, their own language among it.
         using: alsoSpoken(s, pair),
+        row: myRow(s, pair),
         set: (chosen) => ({ speakAlso: [...chosen], speakBoth: false }),
       },
       theirs: {

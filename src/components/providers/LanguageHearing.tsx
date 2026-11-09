@@ -1,7 +1,7 @@
 import { ChevronRight, Mic, Plus, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Hearer, LanguageOption } from '../../lib/provider/types';
-import { addTheirs, isLit, pressTheirs, removeTheirs, type TheirNext } from '../../lib/language/theirLanguages';
+import { addMine, addTheirs, isLit, pressMine, pressTheirs, removeMine, removeTheirs, type MyNext, type TheirNext } from '../../lib/language/theirLanguages';
 import { useLanguageMenu } from './LanguageMenu';
 import './LanguageHearing.scss';
 
@@ -51,6 +51,20 @@ export interface TheirSide {
   two: boolean;
   any: boolean;
   apply(next: TheirNext): void;
+}
+
+/**
+ * Fork: the user's own row ("我说", `MyLanguages`): their own language and the others they speak, those in use now (lit
+ * for the other side), whether what hears them takes more than their own, and what a change writes — the pair's source
+ * and the provider's settings together.
+ */
+export interface MySide {
+  hearer?: Hearer;
+  main: string;
+  row: readonly string[];
+  using: readonly string[];
+  more: boolean;
+  apply(next: MyNext): void;
 }
 
 function HearerButton({ hearer, onOpen }: { hearer: Hearer; onOpen?(): void }) {
@@ -118,6 +132,72 @@ function Row({ label, side, leaveOut, ordered, suggested, name, showHearer, onOp
             <Plus size={15} aria-hidden />
           </button>
         )}
+        {menu.list}
+      </div>
+    </div>
+  );
+}
+
+interface MyRowProps {
+  side: MySide;
+  ordered: readonly LanguageOption[];
+  suggested: readonly LanguageOption[];
+  name(code: string): string;
+  showHearer: boolean;
+  onOpenHearing?(): void;
+  disabled?: boolean;
+}
+
+/**
+ * "我说": the user's own language filled, pressing another makes it theirs (`pressMine`); the others they speak beside
+ * it as they are, dimmed while the other side has not lit them. "+" lists every language, the row's checked first.
+ * Where what hears them takes their own alone, one picked there becomes it.
+ */
+function MyRow({ side, ordered, suggested, name, showHearer, onOpenHearing, disabled }: MyRowProps) {
+  const { t } = useTranslation();
+  const now = { main: side.main, row: side.row };
+  const inRow = (code: string) => side.row.some((one) => baseOf(one) === baseOf(code));
+  const offered = (o: LanguageOption) => o.value !== ANY_LANGUAGE && (!inRow(o.value) || side.row.includes(o.value));
+  const menu = useLanguageMenu({
+    ordered: ordered.filter(offered),
+    suggested: suggested.filter(offered),
+    value: '',
+    checked: side.row,
+    onPick: (code) => {
+      if (inRow(code)) { const next = removeMine(now, code); if (next) side.apply(next); return; }
+      const added = addMine(now, code);
+      side.apply(side.more ? added : { ...added, main: code });
+    },
+    label: name,
+    disabled,
+  });
+  const label = t('fork.languageMenu.iSay');
+  return (
+    <div className="language-hearing__row" role="group" aria-label={label}>
+      <div className="language-hearing__head">
+        <span className="language-hearing__label">{label}</span>
+        {showHearer && side.hearer && <HearerButton hearer={side.hearer} onOpen={onOpenHearing} />}
+      </div>
+      <div className="language-hearing__chips">
+        {side.row.map((code) => {
+          const own = baseOf(code) === baseOf(side.main);
+          const idle = !own && !side.using.some((one) => baseOf(one) === baseOf(code));
+          return (
+            <button
+              key={code}
+              type="button"
+              className={`language-chip language-chip--switch${own ? ' is-lit' : ''}${idle ? ' is-idle' : ''}`}
+              aria-pressed={own}
+              onClick={() => { const next = pressMine(now, code); if (next) side.apply(next); }}
+              disabled={disabled}
+            >
+              {name(code)}
+            </button>
+          );
+        })}
+        <button type="button" className="language-chip__add" disabled={disabled} aria-label={t('fork.languageMenu.addLanguage')} title={t('fork.languageMenu.addLanguage')} aria-haspopup="listbox" {...menu.selectProps}>
+          <Plus size={15} aria-hidden />
+        </button>
         {menu.list}
       </div>
     </div>
@@ -199,6 +279,11 @@ export interface LanguageHearingProps {
   label(code: string): string;
   /** "我也会说": the languages the user speaks beside their own. Absent: the user is not heard. */
   mine?: SideLanguages;
+  /** "我说": the user's own row, in place of `mine` and of the pair's select. */
+  myRow?: MySide;
+  /** The user's own language's list (the pair's sources), for `myRow`'s "+". */
+  myOrdered?: readonly LanguageOption[];
+  mySuggested?: readonly LanguageOption[];
   /** "对方说": the other side's languages, switched by hand. Absent: the pair's select holds theirs. */
   theirs?: TheirSide;
   /** The two sides are heard by the same: it is named once, in the section's heading, not here. */
@@ -212,11 +297,12 @@ export interface LanguageHearingProps {
  * use now dimmed, and the other side's, one or two lit by pressing them (heard, and the user's speech translated into
  * each). Where the two are heard by different recognizers, each names its own; pressing a name opens its settings.
  */
-export function LanguageHearing({ own, ordered, suggested, label, mine, theirs, sameHearer, onOpenHearing, disabled }: LanguageHearingProps) {
+export function LanguageHearing({ own, ordered, suggested, label, mine, myRow, myOrdered, mySuggested, theirs, sameHearer, onOpenHearing, disabled }: LanguageHearingProps) {
   const { t } = useTranslation();
-  const shows = (side?: SideLanguages) => !!side && (side.most !== 0 || side.chosen.length > 0);
-  const hearerOnly = !sameHearer && !!mine?.hearer && !shows(mine);
+  const shows = (side?: SideLanguages) => !myRow && !!side && (side.most !== 0 || side.chosen.length > 0);
+  const hearerOnly = !myRow && !sameHearer && !!mine?.hearer && !shows(mine);
   const rows = [
+    myRow && <MyRow key="me" side={myRow} ordered={myOrdered ?? ordered} suggested={mySuggested ?? suggested} name={label} showHearer={!sameHearer} onOpenHearing={onOpenHearing} disabled={disabled} />,
     shows(mine) && <Row key="mine" label={t('fork.languageMenu.alsoSpeak')} side={mine!} leaveOut={[own]} ordered={ordered} suggested={suggested} name={label} showHearer={!sameHearer} onOpenHearing={onOpenHearing} disabled={disabled} />,
     hearerOnly && (
       <div key="mine-hearer" className="language-hearing__head language-hearing__row">

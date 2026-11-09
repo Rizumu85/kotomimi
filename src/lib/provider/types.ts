@@ -126,6 +126,8 @@ export interface MoreLanguages<S> {
   set(chosen: readonly string[]): Partial<S>;
   /** Fork: those of `chosen` in use now (the user's: those the other side has lit); absent, all of them. */
   using?: readonly string[];
+  /** Fork: the side's whole row as shown ("我说"), its main language among the rest, in the order kept; `set` takes it so. */
+  row?: readonly string[];
   /** The one of `chosen` lit beside the side's main language; '' none. Absent: the side's languages are not switched (the user's own). */
   lit?: string;
   /** Lights `code` (one of `chosen`), or none with ''. */

@@ -1817,7 +1817,7 @@
       "unpinShort": "Unpin",
       "mine": "My language",
       "theirs": "Their language",
-      "pairHelp": "Choose the languages you and the other person mainly use. Your speech is translated into their language, and theirs into yours. Press a language under “They speak” to light it, two at most: they are heard in the lit ones, and your speech is translated into each. Of the languages you also speak, only those lit for them are used.",
+      "pairHelp": "Choose the languages you and the other person mainly use. Your speech is translated into their language, and theirs into yours. Press a language under “I speak” to make it yours; of the others there, only those lit for them are used. Press one under “They speak” to light it or put it out, two at most: they are heard in the lit ones, and your speech is translated into each.",
       "alsoSpeak": "I also speak",
       "hearingBy": "Speech recognition: {{name}}",
       "anyLanguage": "Any language",

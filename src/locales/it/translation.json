@@ -1780,7 +1780,7 @@
       "unpinShort": "Non fissare più",
       "mine": "La mia lingua",
       "theirs": "La lingua degli altri",
-      "pairHelp": "Scegli le lingue che tu e l’altra persona usate di più. Le tue parole vengono tradotte nella sua lingua e le sue nella tua. Tocca una lingua in «Parlano» per accenderla, al massimo due: l’altra persona viene ascoltata in quelle accese e le tue parole vengono tradotte in ciascuna. Delle lingue che parli anche tu, si usano solo quelle accese per loro.",
+      "pairHelp": "Scegli le lingue che tu e l’altra persona usate di più. Le tue parole vengono tradotte nella sua lingua e le sue nella tua. Tocca una lingua in «Io parlo» per renderla la tua; delle altre, si usano solo quelle accese per loro. Tocca una lingua in «Parlano» per accenderla o spegnerla, al massimo due: l’altra persona viene ascoltata in quelle accese e le tue parole vengono tradotte in ciascuna.",
       "alsoSpeak": "Parlo anche",
       "hearingBy": "Riconoscimento vocale: {{name}}",
       "anyLanguage": "Qualsiasi lingua",

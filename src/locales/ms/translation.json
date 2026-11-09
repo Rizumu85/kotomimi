@@ -1780,7 +1780,7 @@
       "unpinShort": "Nyahsemat",
       "mine": "Bahasa saya",
       "theirs": "Bahasa pihak lain",
-      "pairHelp": "Pilih bahasa yang paling kerap digunakan oleh anda dan orang lain itu. Percakapan anda diterjemahkan ke bahasanya, dan percakapannya ke bahasa anda. Tekan satu bahasa di bawah “Mereka bercakap” untuk menyalakannya, paling banyak dua: percakapan mereka didengar dalam bahasa yang menyala, dan percakapan anda diterjemahkan ke setiap satu. Daripada bahasa yang anda juga tahu, hanya yang menyala untuk mereka digunakan.",
+      "pairHelp": "Pilih bahasa yang paling kerap digunakan oleh anda dan orang lain itu. Percakapan anda diterjemahkan ke bahasanya, dan percakapannya ke bahasa anda. Tekan satu bahasa di bawah “Saya bercakap” untuk menjadikannya bahasa anda; daripada yang lain, hanya yang menyala untuk mereka digunakan. Tekan satu di bawah “Mereka bercakap” untuk menyalakan atau memadamkannya, paling banyak dua: percakapan mereka didengar dalam bahasa yang menyala, dan percakapan anda diterjemahkan ke setiap satu.",
       "alsoSpeak": "Saya juga boleh bertutur dalam",
       "hearingBy": "Pengecaman pertuturan: {{name}}",
       "anyLanguage": "Sebarang bahasa",

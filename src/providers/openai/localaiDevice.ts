@@ -100,6 +100,27 @@ export function theirRow(s: { theyAlso?: readonly string[]; asrDetectOther?: boo
   return all.filter((code) => { const base = baseCode(code); if (seen.has(base)) return false; seen.add(base); return true; });
 }
 
+/**
+ * Fork: the user's own row as shown ("我说"): their own language — the pair's source — and the others they speak, in the
+ * order kept (`speakAlso` holds the whole row once the row is used; an older build kept only the others, their own first
+ * then). Each once.
+ */
+export function myRow(s: { speakAlso?: readonly string[]; speakBoth?: boolean }, pair: { source: string; target: string }): string[] {
+  const own = baseCode(pair.source);
+  const kept = s.speakAlso ?? [];
+  const listed = alsoListed(s, pair);
+  if (!kept.some((code) => baseCode(code) === own)) return [pair.source, ...listed];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const code of [...kept, ...listed]) {
+    const base = baseCode(code);
+    if (!base || base === 'auto' || seen.has(base)) continue;
+    seen.add(base);
+    out.push(base === own ? pair.source : code);
+  }
+  return out;
+}
+
 /** Fork: the other side's languages lit: their main one, and the one lit beside it where it is a language (not "any"). */
 export function theirLitLanguages(s: Lit, pair: { source: string; target: string }): string[] {
   const lit = theyLitOf(s, pair.target);

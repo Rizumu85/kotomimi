@@ -10,7 +10,7 @@ import { useLanguageLabel } from '../../lib/language/useLanguageLabel';
 import { orderLanguages, pinnedLanguages, PIN_SEPARATOR, type OrderContext } from '../../lib/language/order';
 import { effectiveTextOnly } from '../../utils/effectiveTextOnly';
 import { useLanguageMenu } from './LanguageMenu';
-import { HearerButton, LanguageHearing, type SideLanguages, type TheirSide } from './LanguageHearing';
+import { HearerButton, LanguageHearing, type MySide, type SideLanguages, type TheirSide } from './LanguageHearing';
 
 const SEPARATOR = '──────────';
 
@@ -39,6 +39,8 @@ interface LanguagePairSectionProps {
    * select and of the swap, and the user's own select is named "我说".
    */
   theirs?: TheirSide;
+  /** Fork: the user's own row ("我说", `MySide`), with `theirs`: the pair's select goes, and "我也会说" with it. */
+  mine?: MySide;
   /** Fork: pressing what hears a side opens its settings. */
   onOpenHearing?(): void;
   /**
@@ -58,7 +60,7 @@ interface LanguagePairSectionProps {
  * allowed whenever the provider supports the reversed pair. Markup is
  * LanguageSection's translation-languages block.
  */
-export function LanguagePairSection({ provider, settings, pair, onChange, disabled, sentence, context, more, theirs, onOpenHearing, owners }: LanguagePairSectionProps) {
+export function LanguagePairSection({ provider, settings, pair, onChange, disabled, sentence, context, more, theirs, mine, onOpenHearing, owners }: LanguagePairSectionProps) {
   const { t, i18n } = useTranslation();
   const id = useId();
   const label = useLanguageLabel();
@@ -122,7 +124,7 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
     disabled,
   });
   // Fork: what hears both sides, where it is the same (or only one side is heard): named once, in the heading.
-  const mineHearer = more?.mine?.hearer;
+  const mineHearer = mine?.hearer ?? more?.mine?.hearer;
   const theirsHearer = theirs?.hearer;
   const shared = mineHearer && theirsHearer ? (mineHearer.name === theirsHearer.name ? mineHearer : undefined) : (mineHearer ?? theirsHearer);
 
@@ -141,7 +143,7 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
         </Tooltip>
         {shared && <HearerButton hearer={shared} {...(onOpenHearing ? { onOpen: onOpenHearing } : {})} />}
       </h3>
-      <div className={`language-pair-row${theirs ? ' is-mine-only' : ''}`}>
+      {!(theirs && mine) && <div className={`language-pair-row${theirs ? ' is-mine-only' : ''}`}>
         <div className="language-select-group">
           <label htmlFor={`${id}-source`}>{sourceLabel}</label>
           <select
@@ -181,13 +183,14 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
           </select>
           {targetMenu.list}
         </div>}
-      </div>
+      </div>}
       <LanguageHearing
         own={pair.source}
         ordered={targetOptions.ordered}
         suggested={targetOptions.pinned}
         label={label}
-        {...(more?.mine ? { mine: more.mine } : {})}
+        {...(more?.mine && !mine ? { mine: more.mine } : {})}
+        {...(mine ? { myRow: mine, myOrdered: sourceOptions.ordered, mySuggested: sourceOptions.pinned } : {})}
         {...(theirs ? { theirs } : {})}
         sameHearer={!!shared}
         {...(onOpenHearing ? { onOpenHearing } : {})}

@@ -1780,7 +1780,7 @@
       "unpinShort": "Desafixar",
       "mine": "Meu idioma",
       "theirs": "Idioma da outra pessoa",
-      "pairHelp": "Escolha os idiomas que você e a outra pessoa mais usam. Sua fala é traduzida para o idioma dela, e a dela para o seu. Toque em um idioma em “Eles falam” para acendê-lo, no máximo dois: a outra pessoa é ouvida nos acesos, e sua fala é traduzida para cada um. Dos idiomas que você também fala, só os acesos para ela são usados.",
+      "pairHelp": "Escolha os idiomas que você e a outra pessoa mais usam. Sua fala é traduzida para o idioma dela, e a dela para o seu. Toque em um idioma em “Eu falo” para torná-lo o seu; dos outros, só os acesos para a outra pessoa são usados. Toque em um idioma em “Eles falam” para acendê-lo ou apagá-lo, no máximo dois: a outra pessoa é ouvida nos acesos, e sua fala é traduzida para cada um.",
       "alsoSpeak": "Também falo",
       "hearingBy": "Reconhecimento de fala: {{name}}",
       "anyLanguage": "Qualquer idioma",

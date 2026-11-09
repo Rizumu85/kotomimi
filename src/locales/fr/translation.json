@@ -1780,7 +1780,7 @@
       "unpinShort": "Détacher",
       "mine": "Ma langue",
       "theirs": "Langue de l’autre",
-      "pairHelp": "Choisissez les langues que vous et votre interlocuteur utilisez le plus. Vos propos sont traduits dans sa langue, et les siens dans la vôtre. Appuyez sur une langue sous « Ils parlent » pour l’allumer, deux au plus : votre interlocuteur est écouté dans celles allumées, et vos propos sont traduits dans chacune. Parmi les langues que vous parlez aussi, seules celles allumées pour lui sont utilisées.",
+      "pairHelp": "Choisissez les langues que vous et votre interlocuteur utilisez le plus. Vos propos sont traduits dans sa langue, et les siens dans la vôtre. Appuyez sur une langue sous « Je parle » pour en faire la vôtre ; parmi les autres, seules celles allumées pour votre interlocuteur sont utilisées. Appuyez sur une langue sous « Ils parlent » pour l’allumer ou l’éteindre, deux au plus : il est écouté dans celles allumées, et vos propos sont traduits dans chacune.",
       "alsoSpeak": "Je parle aussi",
       "hearingBy": "Reconnaissance vocale : {{name}}",
       "anyLanguage": "N’importe quelle langue",

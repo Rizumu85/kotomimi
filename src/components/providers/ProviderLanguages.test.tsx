@@ -121,7 +121,7 @@ describe('ProviderLanguages — the Kotomimi provider: my language, theirs, and 
 
   it('offers a row a side while each is heard, and a choice there is saved as the run reads it', () => {
     show({}, ['speaker', 'participant']);
-    expect(row('fork.languageMenu.alsoSpeak')).not.toBeNull();
+    expect(row('fork.languageMenu.iSay')).not.toBeNull();
     expect(row('fork.languageMenu.theySay')).not.toBeNull();
     // One recognizer for both: named once, in the heading.
     expect(screen.getAllByRole('button', { name: 'fork.languageMenu.hearingBy' })).toHaveLength(1);
@@ -148,6 +148,19 @@ describe('ProviderLanguages — the Kotomimi provider: my language, theirs, and 
     expect(saved()).toMatchObject({ theyAlso: ['ja', 'en', 'ko'], theyLit: '', asrDetectOther: false });
   });
 
+  it('makes a language of the user’s row theirs by pressing it, and dims the ones the other side has not lit', () => {
+    show({ speakAlso: ['zh', 'en', 'ja'], theyAlso: ['ja', 'en'] }, ['speaker', 'participant']);
+    const mine = row('fork.languageMenu.iSay')!;
+    const chip = (i: number) => mine.querySelectorAll<HTMLButtonElement>('.language-chip--switch')[i];
+    const pair = () => (useProviderStore.getState().entries as unknown as Record<string, { pair: { source: string; target: string } }>).localai.pair;
+    // Their main one, Japanese, is in use; English is not lit for them.
+    expect([0, 1, 2].map((i) => chip(i).className.includes('is-idle'))).toEqual([false, true, false]);
+    expect(chip(0).getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(chip(1));
+    expect(pair().source).toBe('en');
+    expect(saved()).toMatchObject({ speakAlso: ['zh', 'en', 'ja'] });
+  });
+
   it('reads an older "detect their language" as any language', () => {
     show({ asrDetectOther: true }, ['participant']);
     expect(screen.getByText('fork.languageMenu.anyLanguage')).toBeInTheDocument();
@@ -160,11 +173,10 @@ describe('ProviderLanguages — the Kotomimi provider: my language, theirs, and 
       run: { state: 'stopped', model: null, port: 0, tail: '' },
     } as never });
     show({ asrNativeModel: 'apple-speech:zh' }, ['speaker', 'participant']);
-    const mine = row('fork.languageMenu.alsoSpeak')!;
+    const mine = row('fork.languageMenu.iSay')!;
     fireEvent.mouseDown(add(mine)!, { button: 0 });
-    expect(screen.getAllByRole('option').map((o) => o.textContent)).toHaveLength(1);
-    fireEvent.click(screen.getAllByRole('option')[0]);
-    expect(saved()).toMatchObject({ speakAlso: ['ja'], speakBoth: false });
+    fireEvent.click(screen.getAllByRole('option').find((o) => /ja|日|Japanese/i.test(o.textContent ?? ''))!);
+    expect(saved()).toMatchObject({ speakAlso: ['zh', 'ja'], speakBoth: false });
     // Theirs is one language at a time there: a press moves it.
     expect(row('fork.languageMenu.theySay')).not.toBeNull();
   });

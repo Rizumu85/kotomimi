@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addTheirs, isLit, pressTheirs, removeTheirs, type TheirLanguages } from './theirLanguages';
+import { addMine, addTheirs, isLit, pressMine, pressTheirs, removeMine, removeTheirs, type TheirLanguages } from './theirLanguages';
 
 const row = ['en', 'ko', 'ja'];
 const one: TheirLanguages = { main: 'en', row, lit: '', two: true };
@@ -38,5 +38,21 @@ describe('the other side’s languages switched by hand (fork)', () => {
     expect(removeTheirs(two, 'en')).toEqual({ main: 'ko', row: ['ko', 'ja'], lit: '' });
     expect(removeTheirs(one, 'en')).toEqual({ main: 'ko', row: ['ko', 'ja'], lit: '' });
     expect(removeTheirs({ main: 'en', row: ['en'], lit: '', two: true }, 'en')).toBeNull();
+  });
+});
+
+describe('the user’s own row (fork)', () => {
+  const mine = { main: 'zh-CN', row: ['zh-CN', 'en', 'ja'] };
+
+  it('makes a pressed one their own, keeping the row as it is', () => {
+    expect(pressMine(mine, 'en')).toEqual({ main: 'en', row: mine.row });
+    expect(pressMine(mine, 'zh-CN')).toBeNull();
+  });
+
+  it('adds beside their own, and takes one out: their own passing to the next, never the last', () => {
+    expect(addMine(mine, 'ko')).toEqual({ main: 'zh-CN', row: [...mine.row, 'ko'] });
+    expect(removeMine(mine, 'en')).toEqual({ main: 'zh-CN', row: ['zh-CN', 'ja'] });
+    expect(removeMine(mine, 'zh-CN')).toEqual({ main: 'en', row: ['en', 'ja'] });
+    expect(removeMine({ main: 'zh-CN', row: ['zh-CN'] }, 'zh-CN')).toBeNull();
   });
 });
