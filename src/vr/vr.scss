@@ -70,8 +70,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 .more { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; min-height: 305px; max-height: 305px; overflow-y: auto; align-content: start; }
 .more .chip { height: 48px; font-size: 16px; }
 
-// Two rows: a wide button of their language, and two small squares whose icons say what they do.
-.actions { display: grid; grid-template-columns: 1fr 48px 48px; gap: 6px; }
+// Two rows: a button of their language, and two whose icons say what they do, wide enough to hit in a headset and to
+// keep the languages from outweighing the captions.
+.actions { display: grid; grid-template-columns: 1fr 64px 64px; gap: 6px; }
 .act {
   height: 48px; border-radius: 12px; border: 0; background: $bg-surface; color: $text-secondary; font-size: 16px;
   display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 6px;
@@ -81,9 +82,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 .act svg { flex-shrink: 0; }
 .act:hover { background: $bg-hover; }
 .act.is-on { color: tk.$color-primary; }
-// Their languages, lit: filled, as their chips in the settings are.
+// Their languages, lit: a light tint and the primary's text, as a selection in the settings; a solid fill outweighed
+// the captions (a friend's look, 2026-11-09).
 .act--lang { overflow: hidden; text-overflow: ellipsis; font-weight: $weight-medium; }
-.act--lang.is-lit { background: tk.$color-primary-fill; color: tk.$color-on-primary; }
+.act--lang.is-lit { background: color-mix(in srgb, tk.$color-primary 16%, transparent); color: tk.$color-primary; font-weight: $weight-semibold; }
 .act--icon { padding: 0; }
 .act--lang.is-open { box-shadow: inset 0 0 0 1px tk.$color-primary; color: tk.$color-primary; }
 
