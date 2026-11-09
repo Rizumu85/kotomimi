@@ -35,11 +35,13 @@ case "$DR" in
   *) fail "Not signed with the certificate (designated requirement: $DR)." ;;
 esac
 codesign --verify --deep --strict "$APP"
-codesign -dv "$APP" 2>&1 | grep -Eq 'flags=0x[0-9a-f]+\([^)]*runtime' || fail "Not signed with the Hardened Runtime."
+# Read whole before grep: `grep -q` stops reading, and under pipefail the writer's broken pipe would fail the check.
+SIGNATURE=$(codesign -dv "$APP" 2>&1)
+grep -Eq 'flags=0x[0-9a-f]+\([^)]*runtime' <<<"$SIGNATURE" || fail "Not signed with the Hardened Runtime."
 # Under the Hardened Runtime the microphone is refused, with no question asked, to a bundle without this entitlement.
 for BUNDLE in "$APP" "$APP"/Contents/Frameworks/*.app; do
-  codesign -d --entitlements - "$BUNDLE" 2>/dev/null | grep -q 'com.apple.security.device.audio-input' \
-    || fail "$(basename "$BUNDLE") lacks the audio-input entitlement."
+  ENTITLEMENTS=$(codesign -d --entitlements - "$BUNDLE" 2>/dev/null)
+  grep -q 'com.apple.security.device.audio-input' <<<"$ENTITLEMENTS" || fail "$(basename "$BUNDLE") lacks the audio-input entitlement."
 done
 ZIP=$(find out/make-mac -maxdepth 1 -name '*.zip' | head -1)
 [ -n "$ZIP" ] || fail "No .zip: the updater has nothing to install."
