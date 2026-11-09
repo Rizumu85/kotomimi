@@ -140,7 +140,8 @@ function createRemoteEngine({ onStream = () => {}, window = openWindow, read = r
     const rate = Number.isInteger(sampleRate) && sampleRate >= 8000 && sampleRate <= 48000 ? sampleRate : 16000;
     if (streamed === true) {
       const code = (value) => (typeof value === 'string' && /^[a-z]{2,3}([-_][A-Za-z0-9]{2,8})?$/i.test(value) ? value.split(/[-_]/)[0].toLowerCase() : undefined);
-      const stream = live({ target, language: code(language) ?? '', also: code(also), prefer: code(prefer), sampleRate: rate }, (event) => {
+      const extras = Array.isArray(also) ? also : (typeof also === 'string' ? [also] : []);
+      const stream = live({ target, language: code(language) ?? '', also: extras.map(code).find(Boolean), prefer: code(prefer), sampleRate: rate }, (event) => {
         if (event.type !== 'delta' && event.type !== 'partial') streams.delete(id);
         onStream({ id, ...event });
       });

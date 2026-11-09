@@ -56,8 +56,8 @@ describe('telling a Kotomimi phone from any other API', () => {
   it('asks the main process to stream a stretch to a device that hears that way', async () => {
     invoke.mockResolvedValue(undefined).mockResolvedValueOnce(8);
     const bridge = remoteBridge('http://192.168.1.23:8792/v1', { streamed: true });
-    expect(await bridge.open({ language: 'ja', also: 'en', prefer: 'ja', sampleRate: 16000, model: 'apple-speech' })).toBe(8);
-    expect(invoke).toHaveBeenCalledWith('remote-engine:stream-open', { language: 'ja', also: 'en', prefer: 'ja', sampleRate: 16000, model: 'apple-speech', base: 'http://192.168.1.23:8792/v1', streamed: true });
+    expect(await bridge.open({ language: 'ja', also: ['en'], prefer: 'ja', sampleRate: 16000, model: 'apple-speech' })).toBe(8);
+    expect(invoke).toHaveBeenCalledWith('remote-engine:stream-open', { language: 'ja', also: ['en'], prefer: 'ja', sampleRate: 16000, model: 'apple-speech', base: 'http://192.168.1.23:8792/v1', streamed: true });
   });
 
   it('opens its recognitions at the address it was given', async () => {

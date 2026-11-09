@@ -5,7 +5,7 @@
  *
  * - where the sentences are cut: the user's own speech detection (`speechDetection`), in the shape each place takes;
  * - what a recognizer that cannot tell languages apart is told, where the leg is left to be detected (`toldLanguage`);
- * - the second language a recognizer that hears either of two is given beside the leg's own (`pairedLanguage`);
+ * - the extra languages a recognizer hears beside the leg's own (`pairedLanguages`);
  * - how long one recognition may run on a model this app knows (`recognitionLimits`).
  *
  * `recognitionPaths.consistency.test.ts` holds that the settings these read are read here only.
@@ -56,21 +56,41 @@ export function toldLanguage(heard: string, nominal: string, detects: boolean): 
 
 const baseOf = (code: string): string => code.trim().toLowerCase().split(/[-_]/)[0];
 
+export type HearingLeg = 'speaker' | 'participant';
+
 /** The other of a pair's two languages, from the side of `told` (by base: `zh-CN` is `zh`). */
 export function otherOfPair(told: string, pair: { source: string; target: string }): string {
   return baseOf(told) === baseOf(pair.source) ? pair.target : pair.source;
 }
 
-/**
- * The second language a recognizer that hears either of two is given beside `told`: the pair's other, where it has
- * both (`has`, by base code), as the Mac's recognition is given it — a sentence in the other is then known for what
- * it is, not guessed from its writing. Undefined where it lacks one, or the pair is one language. Its base code.
- */
-export function pairedLanguage(told: string, pair: { source: string; target: string }, has: (language: string) => boolean): string | undefined {
-  const own = baseOf(told);
-  const other = baseOf(otherOfPair(told, pair));
-  if (!own || own === 'auto' || !other || other === 'auto' || own === other) return undefined;
-  return has(own) && has(other) ? other : undefined;
+/** The extra languages a recognizer hears beside `told`, in priority order, with at most two extras. */
+export function pairedLanguages(input: {
+  leg: HearingLeg;
+  told: string;
+  pair: { source: string; target: string };
+  theirLit?: readonly string[];
+  alsoFirst?: string;
+  has?: (language: string) => boolean;
+}): string[] {
+  const own = baseOf(input.told);
+  if (!own || own === 'auto') return [];
+  const extras: string[] = [];
+  const add = (language: string | undefined) => {
+    if (!language) return;
+    const code = baseOf(language);
+    if (!code || code === 'auto' || code === own || extras.includes(code)) return;
+    extras.push(code);
+  };
+  if (input.leg === 'participant') {
+    const lit = input.theirLit?.[1];
+    if (lit && baseOf(lit) !== 'auto') add(lit);
+    add(otherOfPair(input.told, input.pair));
+  } else {
+    const also = input.alsoFirst;
+    add(also && baseOf(also) !== 'auto' && baseOf(also) !== own ? also : otherOfPair(input.told, input.pair));
+  }
+  const has = input.has ?? (() => true);
+  return has(own) ? extras.filter(has).slice(0, 2) : [];
 }
 
 /**

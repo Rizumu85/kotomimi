@@ -1508,7 +1508,7 @@ ipcMain.handle('native-engine:start', async (event, args) => {
   return getNativeEngine().start(String(args?.id ?? ''));
 });
 ipcMain.handle('native-engine:stop', () => getNativeEngine().stop());
-ipcMain.handle('native-engine:stream-open', (event, args) => getNativeEngine().openStream({ language: args?.language, ...(typeof args?.also === 'string' ? { also: args.also } : {}), ...(typeof args?.prefer === 'string' ? { prefer: args.prefer } : {}), ...(Array.isArray(args?.hints) ? { hints: args.hints.filter((hint) => typeof hint === 'string') } : {}), sampleRate: args?.sampleRate, model: typeof args?.model === 'string' ? args.model : undefined }));
+ipcMain.handle('native-engine:stream-open', (event, args) => getNativeEngine().openStream({ language: args?.language, ...(Array.isArray(args?.also) ? { also: args.also.filter((language) => typeof language === 'string') } : {}), ...(typeof args?.prefer === 'string' ? { prefer: args.prefer } : {}), ...(Array.isArray(args?.hints) ? { hints: args.hints.filter((hint) => typeof hint === 'string') } : {}), sampleRate: args?.sampleRate, model: typeof args?.model === 'string' ? args.model : undefined }));
 ipcMain.handle('native-engine:stream-audio', (event, args) => getNativeEngine().writeStream(args?.id, args?.pcm));
 ipcMain.handle('native-engine:stream-end', (event, args) => getNativeEngine().endStream(args?.id));
 ipcMain.handle('native-engine:stream-abort', (event, args) => getNativeEngine().abortStream(args?.id));

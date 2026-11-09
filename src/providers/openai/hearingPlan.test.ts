@@ -2,7 +2,7 @@
  * Fork: how a leg is heard, decided once for every place that hears it (`hearingPlan.ts`).
  */
 import { describe, expect, it } from 'vitest';
-import { otherOfPair, pairedLanguage, recognitionLimits, speechDetection, toldLanguage } from './hearingPlan';
+import { otherOfPair, pairedLanguages, recognitionLimits, speechDetection, toldLanguage } from './hearingPlan';
 
 const PAIR = { source: 'zh-CN', target: 'ja' };
 
@@ -24,11 +24,21 @@ describe('how a leg is heard', () => {
     expect(otherOfPair('zh', PAIR)).toBe('ja');
     expect(otherOfPair('ja', PAIR)).toBe('zh-CN');
     const has = (l: string) => ['zh', 'ja'].includes(l);
-    expect(pairedLanguage('zh', PAIR, has)).toBe('ja');
-    expect(pairedLanguage('ja-JP', PAIR, has)).toBe('zh');
-    expect(pairedLanguage('zh', PAIR, (l) => l === 'zh')).toBeUndefined();
-    expect(pairedLanguage('zh', { source: 'zh-CN', target: 'zh-TW' }, has)).toBeUndefined();
-    expect(pairedLanguage('auto', PAIR, has)).toBeUndefined();
+    expect(pairedLanguages({ leg: 'participant', told: 'zh', pair: PAIR, has })).toEqual(['ja']);
+    expect(pairedLanguages({ leg: 'participant', told: 'ja-JP', pair: PAIR, has })).toEqual(['zh']);
+    expect(pairedLanguages({ leg: 'participant', told: 'zh', pair: PAIR, has: (l) => l === 'zh' })).toEqual([]);
+    expect(pairedLanguages({ leg: 'participant', told: 'zh', pair: { source: 'zh-CN', target: 'zh-TW' }, has })).toEqual([]);
+    expect(pairedLanguages({ leg: 'participant', told: 'auto', pair: PAIR, has })).toEqual([]);
+  });
+
+  it('uses the lit languages for the participant and the first language in use for the speaker', () => {
+    const has = () => true;
+    expect(pairedLanguages({ leg: 'participant', told: 'ja', pair: PAIR, theirLit: ['ja', 'en'], has })).toEqual(['en', 'zh']);
+    expect(pairedLanguages({ leg: 'participant', told: 'ja', pair: PAIR, theirLit: ['ja', 'auto'], has })).toEqual(['zh']);
+    expect(pairedLanguages({ leg: 'speaker', told: 'zh-CN', pair: PAIR, alsoFirst: 'en', has })).toEqual(['en']);
+    expect(pairedLanguages({ leg: 'speaker', told: 'zh-CN', pair: PAIR, alsoFirst: 'auto', has })).toEqual(['ja']);
+    expect(pairedLanguages({ leg: 'speaker', told: 'ja', pair: PAIR, alsoFirst: 'ja', has })).toEqual(['zh']);
+    expect(pairedLanguages({ leg: 'speaker', told: 'ja', pair: PAIR, has })).toEqual(['zh']);
   });
 
   it('gives a model this app knows the same limits wherever it runs, the system’s own recognition by language', () => {

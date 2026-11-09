@@ -27,7 +27,7 @@ function fakeVad() {
 
 /** The engine as a recorder: each recognition it opened, with the samples it was given and how it was left. */
 function fakeEngine(options: { down?: boolean } = {}) {
-  const streams: Array<{ id: number; language: string; also?: string; prefer?: string; sampleRate: number; model?: string; samples: number; ended: boolean; aborted: boolean }> = [];
+  const streams: Array<{ id: number; language: string; also?: readonly string[]; prefer?: string; sampleRate: number; model?: string; samples: number; ended: boolean; aborted: boolean }> = [];
   const listeners = new Set<(event: NativeStreamEvent) => void>();
   const state = { down: options.down ?? false, listening: 0 };
   const bridge: NativeBridge = {
@@ -49,7 +49,7 @@ function fakeEngine(options: { down?: boolean } = {}) {
   return { bridge, streams, state, say: (event: NativeStreamEvent) => { for (const listener of listeners) listener(event); } };
 }
 
-async function started(engine = fakeEngine(), options: { status?: NativeEngineStatus; vad?: typeof VAD; limits?: { rollAfter?: number; rollAt?: number; rollHard?: number; lastWordsMs?: number }; model?: string; also?: string } = {}) {
+async function started(engine = fakeEngine(), options: { status?: NativeEngineStatus; vad?: typeof VAD; limits?: { rollAfter?: number; rollAt?: number; rollHard?: number; lastWordsMs?: number }; model?: string; also?: readonly string[] } = {}) {
   const vad = fakeVad();
   const clock = createVirtualClock();
   const asr = createNativeAsr({ bridge: engine.bridge, start: async () => options.status ?? READY, vad: () => vad.worker, now: () => clock.now(), clock, ...(options.limits ? { limits: options.limits } : {}), ...(options.model ? { model: options.model } : {}), ...(options.also ? { also: options.also } : {}) });
@@ -125,11 +125,11 @@ describe('this computer\'s native recognizer', () => {
   });
 
   it('asks for a second language where told one, and gives the language the engine heard with the result (fork)', async () => {
-    const { asr, vad, engine, seen } = await started(fakeEngine(), { also: 'zh' });
+    const { asr, vad, engine, seen } = await started(fakeEngine(), { also: ['zh'] });
     vad.worker.say('speech_start');
     await settled();
     asr.feedAudio(seconds(2), RATE);
-    expect(engine.streams[0]).toMatchObject({ language: 'ja', also: 'zh' });
+    expect(engine.streams[0]).toMatchObject({ language: 'ja', also: ['zh'] });
     asr.feedAudio(seconds(1.4, 0), RATE);
     vad.worker.say('speech_end');
     engine.say({ id: 1, type: 'done', text: '天气预报', language: 'zh' });
@@ -138,7 +138,7 @@ describe('this computer\'s native recognizer', () => {
   });
 
   it('uses a shorter paired final from the chosen language instead of a longer earlier candidate', async () => {
-    const { asr, vad, engine, seen } = await started(fakeEngine(), { also: 'zh' });
+    const { asr, vad, engine, seen } = await started(fakeEngine(), { also: ['zh'] });
     vad.worker.say('speech_start');
     await settled();
     asr.feedAudio(seconds(2), RATE);
@@ -155,7 +155,7 @@ describe('this computer\'s native recognizer', () => {
   });
 
   it('keeps an empty paired final empty despite earlier text, without remembering its language', async () => {
-    const { asr, vad, engine, seen } = await started(fakeEngine(), { also: 'zh' });
+    const { asr, vad, engine, seen } = await started(fakeEngine(), { also: ['zh'] });
     vad.worker.say('speech_start');
     await settled();
     asr.feedAudio(seconds(2), RATE);
@@ -172,7 +172,7 @@ describe('this computer\'s native recognizer', () => {
   });
 
   it('waits for the paired final language at a detector cut without consuming any candidate text', async () => {
-    const { asr, vad, engine, seen } = await started(fakeEngine(), { also: 'zh' });
+    const { asr, vad, engine, seen } = await started(fakeEngine(), { also: ['zh'] });
     vad.worker.say('speech_start');
     await settled();
     talk(asr, engine, 1, 15);
@@ -208,8 +208,8 @@ describe('this computer\'s native recognizer', () => {
 
   it('remembers successful languages only within each recognizer sharing the same engine', async () => {
     const engine = fakeEngine();
-    const speaker = await started(engine, { also: 'zh' });
-    const participant = await started(engine, { also: 'zh' });
+    const speaker = await started(engine, { also: ['zh'] });
+    const participant = await started(engine, { also: ['zh'] });
     speaker.vad.worker.say('speech_start');
     await settled();
     expect(engine.streams[0].prefer).toBeUndefined();
@@ -235,7 +235,7 @@ describe('this computer\'s native recognizer', () => {
   });
 
   it('keeps its last successful candidate across empty results and invalid final languages', async () => {
-    const { vad, engine, seen, asr } = await started(fakeEngine(), { also: 'zh' });
+    const { vad, engine, seen, asr } = await started(fakeEngine(), { also: ['zh'] });
     vad.worker.say('speech_start');
     await settled();
     vad.worker.say('speech_end');
@@ -266,7 +266,7 @@ describe('this computer\'s native recognizer', () => {
   });
 
   it('resets its remembered candidate when initialized again, including after disposal', async () => {
-    const { asr, vad, engine } = await started(fakeEngine(), { also: 'zh' });
+    const { asr, vad, engine } = await started(fakeEngine(), { also: ['zh'] });
     for (const dispose of [false, true]) {
       vad.worker.say('speech_start');
       await settled();
@@ -453,7 +453,7 @@ describe('this computer\'s native recognizer', () => {
   });
 
   it('fails a paired utterance whose final language never arrives, without promoting partial text', async () => {
-    const { asr, vad, engine, seen, clock } = await started(fakeEngine(), { also: 'zh', limits: { lastWordsMs: 15_000 } });
+    const { asr, vad, engine, seen, clock } = await started(fakeEngine(), { also: ['zh'], limits: { lastWordsMs: 15_000 } });
     vad.worker.say('speech_start');
     await settled();
     engine.say({ id: 1, type: 'partial', text: '你好。' });

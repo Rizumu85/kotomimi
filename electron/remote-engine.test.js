@@ -210,7 +210,7 @@ describe('a stretch a device hears while it is spoken (the iPad\'s own recogniti
   it('is what the engine opens for a device that streams, and the window for one that does not', () => {
     const asked = [];
     const engine = createRemoteEngine({ live: (args) => { asked.push(args); return { write() {}, end() {}, abort() {} }; }, window: () => { asked.push('window'); return { write() {}, end() {}, abort() {} }; } });
-    expect(engine.openStream({ base: 'http://192.168.4.30:8792/v1', model: 'apple-speech', language: 'ja-JP', also: 'en', prefer: 'ja', sampleRate: 16000, streamed: true })).toBe(1);
+    expect(engine.openStream({ base: 'http://192.168.4.30:8792/v1', model: 'apple-speech', language: 'ja-JP', also: ['en'], prefer: 'ja', sampleRate: 16000, streamed: true })).toBe(1);
     expect(asked[0]).toMatchObject({ language: 'ja', also: 'en', prefer: 'ja', sampleRate: 16000, target: { host: '192.168.4.30', port: 8792 } });
     engine.openStream({ base: 'http://192.168.4.30:8792/v1', model: 'apple-speech', language: 'ja', sampleRate: 16000 });
     expect(asked[1]).toBe('window');

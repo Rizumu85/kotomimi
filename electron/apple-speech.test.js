@@ -178,6 +178,16 @@ describe('a live recognition', () => {
     expect(speech.openStream({ language: 'zh', also: 'ru', sampleRate: 16000 })).toBeNull();
   });
 
+  it('passes two extra languages to the helper in order and keeps all three downloaded languages held', async () => {
+    const { world, speech } = mac({ installed: ['zh_CN', 'ja_JP', 'en_US'] });
+    await speech.start(`${PREFIX}zh`);
+    speech.openStream({ language: 'zh', also: ['ja', 'en'], prefer: 'zh', sampleRate: 16000 });
+    expect(world.started.at(-1).args).toEqual(['stream', 'zh_CN', '--also', 'ja_JP', '--also', 'en_US', '--prefer', 'zh_CN']);
+    world.started.at(-1).child.say({ type: 'final', text: 'Hello', locale: 'en_US' });
+    world.started.at(-1).child.finish();
+    expect(world.events.at(-1)).toMatchObject({ type: 'done', language: 'en' });
+  });
+
   it('ignores a preference outside the requested pair, and every preference for a single language', async () => {
     for (const prefer of ['en', 'ru', '', undefined]) {
       const { world, speech } = mac({ installed: ['ja_JP', 'zh_CN'] });

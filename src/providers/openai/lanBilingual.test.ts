@@ -19,6 +19,7 @@ const MODELS: LocalAIModel[] = [
   { id: LAN_PIPELINE, host: 'kotomimi', kind: 'pipeline' },
   { id: 'apple-speech:en', host: 'kotomimi', kind: 'asr', languages: ['en'], bilingual: true },
   { id: 'apple-speech:fr', host: 'kotomimi', kind: 'asr', languages: ['fr'], bilingual: true },
+  { id: 'apple-speech:es', host: 'kotomimi', kind: 'asr', languages: ['es'], bilingual: true },
   { id: 'translation-model', host: 'kotomimi', kind: 'translate', languages: ['en', 'fr'] },
   { id: 'feedback-model', host: 'kotomimi', kind: 'feedback', languages: ['en', 'fr'] },
 ];
@@ -142,6 +143,11 @@ function expectHeard(h: Live, ref: number, text: string, language: string) {
 const userText = (call: TextCall) => call.body.messages[call.body.messages.length - 1].content;
 
 describe('paired Apple recognition across the LAN wire and client pipeline', () => {
+  it('uses the participant side’s lit language beside its target', async () => {
+    const h = await live(PARTICIPANT, { asrDetectOther: true, theyAlso: ['es'], theyLit: 'es' });
+    expectPair(h, 'fr', 'es');
+  });
+
   it('translates both directions with grammar feedback attached only to spoken foreign sentences', async () => {
     const h = await live(SPEAKER, { speakBoth: true, coach: true });
     expectPair(h, 'en', 'fr');

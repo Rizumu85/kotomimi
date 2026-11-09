@@ -148,7 +148,7 @@ export interface NativePick {
    * stretch is heard by the Mac's recognition where it is the one chosen for their own language and the other's is
    * downloaded too: in both at once, the surer kept (`nativeEither`); else by the model that tells languages apart.
    */
-  either?: { own: string; other: string };
+  either?: { own: string; others?: readonly string[]; other?: string };
   /** Fork: an auto leg may use a model that does not name the language; the pipeline guesses each sentence. */
   bestEffort?: boolean;
 }
@@ -157,26 +157,33 @@ export interface NativePick {
 const hereNow = (id: string): boolean => nativeDownloaded(useNativeEngineStore.getState().status, id);
 
 /**
- * Fork: the Mac's recognition hearing a speaker in either of two languages (`NativePick.either`): the model of their
- * own language, and the other one it hears beside it. Null where the model chosen for their own language is not the
- * Mac's, or the other language's is not downloaded.
+ * Fork: the Mac's recognition hearing a speaker in several languages (`NativePick.either`): the model of their own
+ * language, and each extra it hears beside it. Null where the model chosen for their own language is not the Mac's,
+ * or none of the requested extras is downloaded.
  */
-export function nativeEither(pick: NativePick, has: (id: string) => boolean = hereNow): { model: NativeModel; also: string } | null {
+export function nativeEither(pick: NativePick, has: (id: string) => boolean = hereNow): { model: NativeModel; also: string[] } | null {
   if (!pick.either) return null;
   const mine = nativePicked({ model: pick.model, byLanguage: pick.byLanguage }, pick.either.own, has);
-  const also = mine && has(mine.id) ? appleAlso(mine, pick.either.other, has) : null;
-  return mine && also ? { model: mine, also } : null;
+  const requested = [...(pick.either.others ?? []), ...(pick.either.other ? [pick.either.other] : [])];
+  const also = mine && has(mine.id) ? appleAlso(mine, requested, has) : [];
+  return mine && also.length > 0 ? { model: mine, also } : null;
 }
 
 /**
- * Fork: the other of a pair's languages, which the Mac's recognition hears beside a leg's own where it has both — so
- * that a sentence in it is known for what it is (the other side speaking the reader's language; a coached speaker
- * saying one in their own): its base code. Null for any other model, the same language, or one not downloaded.
+ * Fork: the pair's extra languages, which the Mac's recognition hears beside a leg's own where it has them — so that
+ * a sentence in one is known for what it is. Each downloaded extra's base code is returned.
  */
-export function appleAlso(model: NativeModel, other: string, has: (id: string) => boolean = hereNow): string | null {
-  if (!isApple(model.id) || isAutoLanguage(other)) return null;
-  const theirs = nativeModelFor(model.id, other);
-  return theirs && theirs.id !== model.id && has(theirs.id) ? baseOf(other) : null;
+export function appleAlso(model: NativeModel, others: readonly string[], has: (id: string) => boolean = hereNow): string[] {
+  if (!isApple(model.id)) return [];
+  const seen = new Set<string>();
+  return others.flatMap((other) => {
+    if (isAutoLanguage(other)) return [];
+    const theirs = nativeModelFor(model.id, other);
+    const code = baseOf(other);
+    if (!theirs || theirs.id === model.id || !has(theirs.id) || seen.has(code)) return [];
+    seen.add(code);
+    return [code];
+  });
 }
 
 /**
@@ -194,7 +201,7 @@ export function hearingPick(s: { asrNativeModel: string; asrNativeByLanguage?: R
   const pick: NativePick = { model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage, ...(bestEffort ? { bestEffort: true } : {}) };
   if (kinds.detecting) return { ...pick, detecting: true };
   if (!kinds.both) return pick;
-  const either: NativePick = { ...pick, either: { own: pair.source, other: pair.target } };
+  const either: NativePick = { ...pick, either: { own: pair.source, others: [pair.target] } };
   return nativeEither(either, has) ? either : { ...pick, detecting: true };
 }
 

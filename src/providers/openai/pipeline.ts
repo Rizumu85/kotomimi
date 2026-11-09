@@ -48,7 +48,7 @@ import { watchPhones, type PhoneWatch } from './phoneWatch';
 import { phoneKey } from '../../lib/lan/phoneKeys';
 import { knownDeviceLabel } from '../../lib/lan/knownDevices';
 import { unwrapTranslationText } from './wire';
-import { pairedLanguage, recognitionLimits } from './hearingPlan';
+import { recognitionLimits } from './hearingPlan';
 
 /** The credential a stage's endpoint is called with, by its field. */
 export type StageKey = 'translateKey' | 'coachKey' | 'apiKey' | 'asrKey';
@@ -162,8 +162,10 @@ export interface DeviceHearing {
   /** Present: the recognizer is an API (`apiAsr.ts`) — this computer still cuts the sentences, and uploads each one. */
   api?: { baseUrl: string; model: string; key?: StageKey; /** Where what answers there turns out to be a Kotomimi phone's engine (`remoteEngine.ts`), and the model is one this app knows: how long one recognition may run on it, as on this computer. */ limits?: Partial<NativeLimits>; /** The dictionary's words, told to such an engine as this computer's own is told them. */ hints?: readonly string[] };
   /** Present: the recognizer is the native engine's (`nativeAsr.ts`), given the voice as it comes; `limits` where one recognition may not run as long as the default. */
-  /** Fork: `either`, a recognizer hearing the speaker in either of two languages (the Mac's): told the first, and the other. */
-  native?: { model: string; limits?: Partial<NativeLimits>; either?: { first: string; also: string }; hints?: readonly string[] };
+  /** Fork: `either`, a recognizer hearing the speaker in its first language plus the listed extras (the Mac's). */
+  native?: { model: string; limits?: Partial<NativeLimits>; either?: { first: string; also: readonly string[] }; hints?: readonly string[] };
+  /** The extra languages chosen once for the leg; the iPad takes only the first. */
+  pairedWith?: readonly string[];
 }
 
 export interface PipelineConfig extends RealtimeConfig {
@@ -997,10 +999,12 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
         // runs two recognizers at once, so two languages take its slower, careful one's place, and every sentence
         // would be heard a little worse for a label (`Recognizers` in ios/KotomimiNode/Hearing/Live.swift). The Mac
         // pairs every leg where it has both; this is where the two differ, on purpose.
-        const also = live && heard === AUTO ? pairedLanguage(told, request.context.direction, (language) => live.languages.includes(language)) : undefined;
+        const requested = device.pairedWith?.[0];
+        const primary = baseOf(told);
+        const also = live && heard === AUTO && requested && live.languages.some((language) => baseOf(language) === primary) && live.languages.some((language) => baseOf(language) === baseOf(requested)) ? requested : undefined;
         if (also) onPaired();
         const limits = recognitionLimits(model, live ? told : undefined);
-        return createNativeAsr({ bridge: remote.bridge(api.baseUrl, live ? { streamed: true } : {}), start: async () => lent, model, clock: request.clock, named: 'The recognition engine of the other device', limits: { ...(limits ?? api.limits), lastWordsMs: REMOTE_LAST_WORDS_MS }, ...(api.hints?.length ? { hints: api.hints } : {}), ...(also ? { also } : {}) });
+        return createNativeAsr({ bridge: remote.bridge(api.baseUrl, live ? { streamed: true } : {}), start: async () => lent, model, clock: request.clock, named: 'The recognition engine of the other device', limits: { ...(limits ?? api.limits), lastWordsMs: REMOTE_LAST_WORDS_MS }, ...(api.hints?.length ? { hints: api.hints } : {}), ...(also ? { also: [also] } : {}) });
       }),
     });
   };

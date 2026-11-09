@@ -223,7 +223,7 @@ function createAppleSpeech(deps = {}) {
   const streams = new Map();
   let nextStream = 1;
   /** The languages recognitions hear now: never let go to make room. */
-  const hearing = () => [...new Set([...streams.values()].flatMap((stream) => [stream.locale, ...(stream.also ? [stream.also] : [])]))];
+  const hearing = () => [...new Set([...streams.values()].flatMap((stream) => [stream.locale, ...stream.also]))];
   async function stop() {
     // Each open recognition is told, as the downloaded engine tells its own: the page otherwise waits for last words that never come.
     for (const [id, stream] of [...streams]) { stream.kill(); onStream({ id, type: 'error', message: 'The speech recognizer was stopped.' }); }
@@ -240,15 +240,15 @@ function createAppleSpeech(deps = {}) {
    */
   function openStream({ language, also, prefer, sampleRate } = {}) {
     const locale = localeFor(language);
-    const second = also ? localeFor(also) : null;
-    if (!supported || run.state !== 'ready' || !locale || (also && !second) || sampleRate !== 16000) return null;
-    const pair = second && second !== locale;
+    const requested = Array.isArray(also) ? also : (typeof also === 'string' ? [also] : []);
+    const extras = [...new Set(requested.map(localeFor).filter((candidate) => candidate && candidate !== locale))];
+    if (!supported || run.state !== 'ready' || !locale || requested.some((candidate) => !localeFor(candidate)) || sampleRate !== 16000) return null;
+    const pair = extras.length > 0;
     const preferred = pair ? localeFor(prefer) : null;
-    const preference = preferred === locale || preferred === second ? preferred : null;
+    const preference = preferred && [locale, ...extras].includes(preferred) ? preferred : null;
     const id = nextStream++;
-    const args = ['stream', locale, ...(pair ? ['--also', second, ...(preference ? ['--prefer', preference] : [])] : []), ...roomArgs(hearing())];
-    touch(locale);
-    if (pair) touch(second);
+    const args = ['stream', locale, ...(pair ? extras.flatMap((candidate) => ['--also', candidate]).concat(preference ? ['--prefer', preference] : []) : []), ...roomArgs(hearing())];
+    [locale, ...extras].forEach(touch);
     let child;
     try {
       child = spawn(helper, args, { stdio: ['pipe', 'pipe', 'pipe'] });
@@ -267,7 +267,7 @@ function createAppleSpeech(deps = {}) {
       if (event?.type === 'partial' && typeof event.text === 'string') onStream({ id, type: 'partial', text: event.text });
       else if (event?.type === 'delta' && typeof event.text === 'string' && event.text) onStream({ id, type: 'delta', text: event.text });
       else if (event?.type === 'final') {
-        const heardIn = pair && typeof event.locale === 'string' && (event.locale === locale || event.locale === second) ? event.locale : null;
+        const heardIn = pair && typeof event.locale === 'string' && [locale, ...extras].includes(event.locale) ? event.locale : null;
         finish({ type: 'done', text: typeof event.text === 'string' ? event.text : '', ...(heardIn ? { language: languageAt(heardIn) } : {}) });
       }
       else if (event?.type === 'error') finish({ type: 'error', message: String(event.message ?? 'The speech recognizer reported an error.').slice(0, 300) });
@@ -279,7 +279,7 @@ function createAppleSpeech(deps = {}) {
     child.on('close', () => finish({ type: 'error', message: 'The speech recognizer closed before it finished.' }));
     streams.set(id, {
       locale,
-      also: pair ? second : null,
+      also: extras,
       write: (line) => { if (!over && child.stdin?.writable) child.stdin.write(line); },
       kill: () => { over = true; try { child.kill(); } catch { /* gone already */ } },
     });

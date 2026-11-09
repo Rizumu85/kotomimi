@@ -70,8 +70,8 @@ export interface NativeAsrOptions {
   limits?: Partial<NativeLimits>;
   /** What the engine is called when it cannot start, where it is not this computer's own. */
   named?: string;
-  /** Fork: a second language the speech may be in, for a recognizer that hears either of two and says which (the Mac's). */
-  also?: string;
+  /** Fork: extra languages the speech may be in, for a recognizer that hears either of them and says which (the Mac's). */
+  also?: readonly string[];
   /** Fork: words to expect (the glossary's), for an engine that takes them. */
   hints?: readonly string[];
 }
@@ -175,10 +175,10 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
   let unlisten: (() => void) | null = null;
   let disposed = false;
   let language = '';
-  const also = options.also ? apiLanguage(options.also) : undefined;
+  const also = (options.also ?? []).map(apiLanguage).filter((language, at, all): language is string => Boolean(language) && all.indexOf(language) === at);
   /** Only this recognizer's last successful language: another audio source must not influence its ties. */
   let preferred: string | undefined;
-  const paired = () => Boolean(also && also !== language);
+  const paired = () => also.some((candidate) => candidate !== language);
   let rate = 24000;
   let padSeconds = 0;
   /** The last moments heard while nobody speaks. */
@@ -239,7 +239,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     const head = queue[0];
     if (!head || head.id !== null || head.opening || disposed) return;
     head.opening = true;
-    void bridge.open({ language, ...(options.also ? { also: options.also } : {}), ...(paired() && preferred ? { prefer: preferred } : {}), ...(options.hints?.length ? { hints: options.hints } : {}), sampleRate: head.resampler ? TARGET_RATE : rate, ...(options.model ? { model: options.model } : {}) }).then((id) => {
+    void bridge.open({ language, ...(options.also?.length ? { also: options.also } : {}), ...(paired() && preferred ? { prefer: preferred } : {}), ...(options.hints?.length ? { hints: options.hints } : {}), sampleRate: head.resampler ? TARGET_RATE : rate, ...(options.model ? { model: options.model } : {}) }).then((id) => {
       head.opening = false;
       if (head.over || disposed) {
         if (id !== null) bridge.abort(id);
@@ -373,7 +373,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     } else if (event.type === 'done') {
       const heardIn = event.language ? apiLanguage(event.language) : undefined;
       const both = paired();
-      if (both && heardIn !== language && heardIn !== also) {
+      if (both && heardIn !== language && !also.includes(heardIn ?? '')) {
         fail(s, 'The speech recognizer did not identify one of the requested languages.');
         return;
       }

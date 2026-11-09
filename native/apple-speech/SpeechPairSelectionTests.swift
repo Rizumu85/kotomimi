@@ -18,6 +18,16 @@ struct SpeechPairSelectionTests {
         ]
         check("English is not Chinese just because Chinese was preferred", english, preferred: 0, expected: 1)
         check("English remains English with the opposite preference", english, preferred: 1, expected: 1)
+        check("Three candidates choose the surest non-preferred language", [
+            candidate("Maybe", 0.80, "zh_CN"),
+            candidate("Maybe", 0.82, "en_US"),
+            candidate("Maybe", 0.92, "fr_FR"),
+        ], preferred: 0, expected: 2)
+        check("Three matching transcripts choose their one matching locale", [
+            candidate("Yesterday I go to the park with my friends.", 0.80, "zh_CN"),
+            candidate("Yesterday I go to the park with my friends.", 0.82, "en_US"),
+            candidate("Yesterday I go to the park with my friends.", 0.92, "fr_FR"),
+        ], preferred: 0, expected: 1)
         check("Same-script French consensus", [
             candidate("Je voudrais apprendre une nouvelle langue avec mes amis.", 0.94, "en_US"),
             candidate("Je voudrais apprendre une nouvelle langue avec mes amis.", 0.92, "fr_FR"),

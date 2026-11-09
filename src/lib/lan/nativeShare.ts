@@ -215,7 +215,7 @@ export function nativeRecognizer(model: { modelId: string; also?: string; hints?
     bridge: ipcNativeBridge,
     start: () => useNativeEngineStore.getState().start(native.id),
     model: native.id,
-    ...(model.also ? { also: model.also } : {}),
+    ...(model.also ? { also: [model.also] } : {}),
     ...(model.hints?.length ? { hints: model.hints } : {}),
     ...(native.limits ? { limits: native.limits } : {}),
   });

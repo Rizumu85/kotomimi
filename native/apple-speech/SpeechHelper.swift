@@ -11,7 +11,7 @@
 //   speech-helper install LOCALE     fetch a language's assets, with progress
 //   speech-helper release LOCALE     let a language's assets go
 //   speech-helper stream LOCALE      recognize what is given on standard input
-//     [--also LOCALE2 [--prefer L]]  Kotomimi: in either of two languages (see `stream`)
+//     [--also LOCALE [--also LOCALE] [--prefer L]]  Kotomimi: in up to three languages (see `stream`)
 //
 // A stream takes  {"type":"audio","pcm":"<base64 of 16-bit little-endian mono at 16 kHz>"}
 // and at the end  {"type":"end"};  it writes  {"type":"ready"},  then
@@ -55,7 +55,7 @@ private final class Listener {
     private let continuation: AsyncStream<AnalyzerInput>.Continuation
     private let input: AsyncStream<AnalyzerInput>
 
-    /// `confidence`: each piece of text says how sure the recognizer is of it (Kotomimi: to choose between two languages).
+    /// `confidence`: each piece of text says how sure the recognizer is of it (Kotomimi: to choose between candidates).
     init(locale: Locale, fast: Bool, confidence: Bool = false) async throws {
         transcriber = SpeechTranscriber(
             locale: locale,
@@ -88,9 +88,8 @@ private final class Listener {
     func finish() { continuation.finish() }
 }
 
-/// Kotomimi: what shows while someone speaks, of a stream that hears one language or two: the quick text so far of
-/// the preferred language, unless the other's is surer of itself by more than a tie, so that what shows does not
-/// go back and forth between the two while each has a word or two. Text-language agreement is checked at finalization.
+/// Kotomimi: what shows while someone speaks: the preferred language's quick text, unless the surest other candidate
+/// is surer by more than a tie, so that what shows does not go back and forth while each has a word or two.
 @MainActor
 private final class Shown {
     private var now: [SpeechHelper.Settled?]
@@ -104,9 +103,13 @@ private final class Shown {
         return after == before ? nil : after
     }
     private func shown() -> String? {
-        guard now.count > 1, let first = now[preferred] else { return now.compactMap { $0 }.first?.text }
-        guard let second = now[1 - preferred] else { return first.text }
-        return second.confidence > first.confidence + SpeechHelper.tie ? second.text : first.text
+        guard let first = now[preferred] else { return now.compactMap { $0 }.first?.text }
+        let others = now.indices.filter { $0 != preferred }.compactMap { index -> (Int, SpeechHelper.Settled)? in
+            guard let candidate = now[index] else { return nil }
+            return (index, candidate)
+        }
+        guard let surestOther = others.max(by: { $0.1.confidence < $1.1.confidence }) else { return first.text }
+        return surestOther.1.confidence > first.confidence + SpeechHelper.tie ? surestOther.1.text : first.text
     }
 }
 
@@ -175,7 +178,7 @@ struct SpeechHelper {
         try emit(["type": "released", "locale": locale.identifier])
     }
 
-    /// Kotomimi: within this much of each other, two languages' confidences say nothing: the one preferred is taken.
+    /// Kotomimi: within this much of each other, candidates' confidences say nothing: the preferred one is taken.
     static let tie = SpeechPairSelection.tie
 
     /// The text a recognizer settled on, and how sure it was of it (its characters' mean confidence; -1 for none).
@@ -189,14 +192,17 @@ struct SpeechHelper {
         }
     }
 
-    /// Kotomimi: `also`, a second language the same speech may be in (a speaker who speaks both): each language has
-    /// its two recognizers. Clear text-language agreement selects the matching candidate; otherwise speech
+    /// Kotomimi: `also`, extra languages the same speech may be in (a speaker who speaks both): each language has
+    /// its recognizer. Clear text-language agreement selects the matching candidate; otherwise speech
     /// confidence wins, with `prefer` breaking ties. See `SpeechPairSelection` for the conservative text check.
     /// What shows meanwhile is the quick text of the one surer so far. Nothing settles before the end then (no
     /// `delta`): which language a sentence was in is known only once it is all heard.
-    static func stream(_ identifier: String, also: String? = nil, prefer: String? = nil, keep: Set<String> = [], order: [String] = []) async throws {
+    static func stream(_ identifier: String, also: [String] = [], prefer: String? = nil, keep: Set<String> = [], order: [String] = []) async throws {
         var locales = [try await locale(identifier)]
-        if let also { let second = try await locale(also); if second.identifier != locales[0].identifier { locales.append(second) } }
+        for identifier in also {
+            let extra = try await locale(identifier)
+            if !locales.contains(where: { $0.identifier == extra.identifier }) { locales.append(extra) }
+        }
         let both = locales.count > 1
         let preferred = locales.firstIndex { $0.identifier == prefer } ?? 0
         for locale in locales {
@@ -305,23 +311,28 @@ struct SpeechHelper {
                 throw HelperError("The system's speech recognition is not available to this program")
             }
             let arguments = Array(CommandLine.arguments.dropFirst())
-            // Kotomimi: `--keep A,B` and `--order A,B` after the locale, for `makeRoom`; `--also L` and `--prefer L`, for a
-            // stream that hears two languages.
+            // Kotomimi: `--keep A,B` and `--order A,B` after the locale, for `makeRoom`; repeated `--also L` and
+            // `--prefer L`, for a stream that hears up to three languages.
             var options: [String: [String]] = [:]
             var at = 2
             while at + 1 < arguments.count, arguments[at].hasPrefix("--") {
-                options[String(arguments[at].dropFirst(2))] = arguments[at + 1].split(separator: ",").map(String.init)
+                let key = String(arguments[at].dropFirst(2))
+                let values = arguments[at + 1].split(separator: ",").map(String.init)
+                if key == "also" { options[key, default: []].append(contentsOf: values) } else { options[key] = values }
                 at += 2
             }
             let plain = at >= arguments.count
             let keep = Set(options["keep"] ?? [])
             let order = options["order"] ?? []
+            var also: [String] = []
+            for identifier in options["also"] ?? [] where !also.contains(identifier) { also.append(identifier) }
+            guard also.count <= 2 else { throw HelperError("A stream takes at most two --also languages") }
             switch (arguments.first, min(arguments.count, 2), plain) {
             case ("inventory", 1, _): try await inventory()
             case ("install", 2, true): try await install(arguments[1], keep: keep, order: order)
             case ("release", 2, true): try await release(arguments[1])
-            case ("stream", 2, true): try await stream(arguments[1], also: options["also"]?.first, prefer: options["prefer"]?.first, keep: keep, order: order)
-            default: throw HelperError("Usage: speech-helper inventory | install LOCALE [--keep L,...] [--order L,...] | release LOCALE | stream LOCALE [--also L] [--prefer L] [--keep L,...] [--order L,...]")
+            case ("stream", 2, true): try await stream(arguments[1], also: also, prefer: options["prefer"]?.first, keep: keep, order: order)
+            default: throw HelperError("Usage: speech-helper inventory | install LOCALE [--keep L,...] [--order L,...] | release LOCALE | stream LOCALE [--also L]... [--prefer L] [--keep L,...] [--order L,...]")
             }
         } catch {
             try? emit(["type": "error", "message": String(describing: error)])
