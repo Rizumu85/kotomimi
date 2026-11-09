@@ -611,9 +611,13 @@ function phoneUnheard(s: LocalAISettings, models: readonly LocalAIModel[], pair:
   const languages = hearer?.languages?.filter((code) => code !== AUTO) ?? [];
   if (!hearer || languages.length === 0) return null;
   const heard = heardBy(s, pair, leg, models);
-  // Apple Speech hears one beside the user's own, theirs (`languages.more`): the others kept from another recognizer are not asked of it.
-  const also = s.coach ? [] : alsoSpoken(s, pair).filter((code) => !hearer.apple || hearer.detects || deviceLanguage(code) === deviceLanguage(pair.target));
-  const asked = leg === 'speaker' ? [heard === AUTO ? pair.source : heard, ...also] : heard === AUTO ? [] : [heard];
+  // Apple Speech hears one beside the leg's own (`pairedLanguages`): the user's first other language in use; the other
+  // side's second lit one. The others kept from another recognizer are not asked of it.
+  const paired = hearer.apple && !hearer.detects;
+  const first = alsoFirst(s, pair);
+  const also = s.coach ? [] : alsoSpoken(s, pair).filter((code) => !paired || (first !== undefined && deviceLanguage(code) === deviceLanguage(first)));
+  const theirs = paired ? theirLitLanguages(s, pair) : [];
+  const asked = leg === 'speaker' ? [heard === AUTO ? pair.source : heard, ...also] : heard !== AUTO ? [heard] : theirs.length > 1 ? theirs : [];
   const missing = asked.find((code) => !languages.some((has) => deviceLanguage(has) === deviceLanguage(code)));
   if (!missing) return null;
   return {

@@ -148,7 +148,7 @@ export interface NativePick {
    * stretch is heard by the Mac's recognition where it is the one chosen for their own language and the other's is
    * downloaded too: in both at once, the surer kept (`nativeEither`); else by the model that tells languages apart.
    */
-  either?: { own: string; others?: readonly string[]; other?: string };
+  either?: { own: string; others: readonly string[] };
   /** Fork: an auto leg may use a model that does not name the language; the pipeline guesses each sentence. */
   bestEffort?: boolean;
 }
@@ -164,8 +164,7 @@ const hereNow = (id: string): boolean => nativeDownloaded(useNativeEngineStore.g
 export function nativeEither(pick: NativePick, has: (id: string) => boolean = hereNow): { model: NativeModel; also: string[] } | null {
   if (!pick.either) return null;
   const mine = nativePicked({ model: pick.model, byLanguage: pick.byLanguage }, pick.either.own, has);
-  const requested = [...(pick.either.others ?? []), ...(pick.either.other ? [pick.either.other] : [])];
-  const also = mine && has(mine.id) ? appleAlso(mine, requested, has) : [];
+  const also = mine && has(mine.id) ? appleAlso(mine, pick.either.others, has) : [];
   return mine && also.length > 0 ? { model: mine, also } : null;
 }
 

@@ -407,7 +407,7 @@ function DeviceModels({ stage, settings, pair, legs, models, disabled, tour, nat
    * (`nativeEither`) — offered for them as their own language's model.
    */
   const hearsEither = (id: string, slot: DeviceNeed): boolean => stage === 'asr' && slot.leg === 'speaker' && isAutoLanguage(heardIn(slot)) && isApple(id)
-    && nativeModelFor(id, slot.source)?.id === id && nativeEither({ model: id, either: { own: pair.source, other: alsoFirst(settings, pair) ?? pair.target } }, (one) => nativeDownloaded(status, one)) !== null;
+    && nativeModelFor(id, slot.source)?.id === id && nativeEither({ model: id, either: { own: pair.source, others: [alsoFirst(settings, pair) ?? pair.target] } }, (one) => nativeDownloaded(status, one)) !== null;
   // A model that cannot name the language still fits a best-effort row, where it hears one of the pair's languages.
   const bestEffortFits = (id: string): boolean => stage === 'asr'
     && (alsoSpoken(settings, pair).length > 0 || settings.asrDetectOther === true)
@@ -908,7 +908,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
     // Fork: the Mac's recognition, chosen for a speaker who speaks both, where it has both languages: it hears them in
     // either, as their own language's model, and they go on speaking both. The other side's language is no longer
     // detected: that takes the model that tells languages apart, for every leg.
-    if (bothOff && (!slot || slot.leg === 'speaker') && isApple(id) && nativeEither({ model: id, either: { own: pair.source, other: alsoFirst(settings, pair) ?? pair.target } })) {
+    if (bothOff && (!slot || slot.leg === 'speaker') && isApple(id) && nativeEither({ model: id, either: { own: pair.source, others: [alsoFirst(settings, pair) ?? pair.target] } })) {
       const ended = detectOff ? { asrDetectOther: false } : {};
       const heard = legs.map((leg) => heardBy({ ...settings, ...ended }, pair, leg, models));
       const next = chooseNative({ model: settings.asrNativeModel, byLanguage: settings.asrNativeByLanguage }, id, [pair.source], heard);

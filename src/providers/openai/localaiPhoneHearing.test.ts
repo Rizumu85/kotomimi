@@ -57,6 +57,13 @@ describe('a phone or an iPad lent to hear', () => {
     expect(await check(IPAD(['en', 'ja']), ON_DEVICE('apple-speech'), pair)).toMatchObject({ ok: false, code: 'phone_no_language', params: { source: 'zh-CN' } });
   });
 
+  it('asks the iPad for both of the other side’s languages while two are lit', async () => {
+    const pair = { source: 'zh-CN', target: 'ja' };
+    const lit = ON_DEVICE('apple-speech', { theyAlso: ['en'], theyLit: 'en', asrDetectOther: true });
+    expect(await check(IPAD(['zh', 'ja']), lit, pair)).toMatchObject({ ok: false, code: 'phone_no_language', params: { source: 'en' } });
+    expect(await check(IPAD(['zh', 'ja', 'en']), lit, pair)).toMatchObject({ ok: true });
+  });
+
   it('refuses a language SenseVoice on the Android phone does not hear, and none Qwen3-ASR does', async () => {
     expect(await check(ANDROID('sensevoice-small-q8'), ON_DEVICE('sensevoice-small-q8'), { source: 'zh-CN', target: 'ja' })).toMatchObject({ ok: true });
     expect(await check(ANDROID('sensevoice-small-q8'), ON_DEVICE('sensevoice-small-q8'), { source: 'zh-CN', target: 'fr' })).toMatchObject({
