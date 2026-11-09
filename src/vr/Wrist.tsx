@@ -16,6 +16,9 @@ import { fill, send } from './bridge';
 import type { VrModel, VrPerf, VrState, VrWords } from './types';
 
 const ICON = 18;
+// Lucide's captions box is shorter than its other icons' and its lines small: drawn larger, at the same stroke, to weigh as they do.
+const CAPTIONS = 22;
+const ICON_STROKE = (2 * ICON) / 24;
 
 function Dots({ state }: { state: VrState }) {
   const { words, heard } = state;
@@ -92,7 +95,7 @@ function Main({ state, onTune }: { state: VrState; onTune: () => void }) {
       <div className="actions">
         {langButton(lit[0])}
         {square(running ? words.pause : words.resume, running ? <Pause size={ICON} /> : <Play size={ICON} />, () => send({ type: 'run', on: !running }))}
-        {square(state.strip ? words.hide : words.show, state.strip ? <Captions size={ICON} /> : <CaptionsOff size={ICON} />, () => send({ type: 'strip', on: !state.strip }), state.strip)}
+        {square(state.strip ? words.hide : words.show, state.strip ? <Captions size={CAPTIONS} absoluteStrokeWidth strokeWidth={ICON_STROKE} /> : <CaptionsOff size={CAPTIONS} absoluteStrokeWidth strokeWidth={ICON_STROKE} />, () => send({ type: 'strip', on: !state.strip }), state.strip)}
         {two ? langButton(lit[1]) : (
           <Tooltip content={words.more} position="top" icon="none">
             <button type="button" className={`act act--lang${more ? ' is-open' : ''}`} aria-label={words.more} onClick={() => setMore(!more)}><Plus size={ICON} /></button>
