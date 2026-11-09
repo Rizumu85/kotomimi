@@ -227,6 +227,22 @@ describe('startVrOverlay', () => {
     t.controller.stop();
   });
 
+  it('hides the strip from the wrist with the app’s own switch, and shows the wrist what the app sets', async () => {
+    const t = setup();
+    await t.connect();
+    useVrStore.setState({ on: true, panel: true });
+    t.command({ type: 'strip', on: false });
+    await flush();
+    expect(useVrStore.getState().on).toBe(false);
+    expect(t.invoked).toContainEqual(['vr:set', { on: false }]);
+    expect(t.sent[t.sent.length - 1].strip).toBe(false);
+    useVrStore.getState().setOn(true);
+    await flush();
+    expect(t.sent[t.sent.length - 1].strip).toBe(true);
+    useVrStore.setState({ on: false, panel: false });
+    t.controller.stop();
+  });
+
   it('changes the language at once while idle', async () => {
     const t = setup();
     await t.connect();

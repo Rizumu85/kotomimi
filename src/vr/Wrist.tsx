@@ -10,7 +10,7 @@
  * card's memory, for trying a model out while playing.
  */
 import { useEffect, useState, type ReactNode } from 'react';
-import { ChevronLeft, Eye, EyeOff, MessageSquare, MessageSquareOff, MicOff, Pause, Play, Plus, SlidersHorizontal } from 'lucide-react';
+import { Captions, CaptionsOff, ChevronLeft, MessageSquare, MessageSquareOff, MicOff, Pause, Play, Plus, SlidersHorizontal } from 'lucide-react';
 import Tooltip from '../components/Tooltip/Tooltip';
 import { fill, send } from './bridge';
 import type { VrModel, VrPerf, VrState, VrWords } from './types';
@@ -92,7 +92,7 @@ function Main({ state, onTune }: { state: VrState; onTune: () => void }) {
       <div className="actions">
         {langButton(lit[0])}
         {square(running ? words.pause : words.resume, running ? <Pause size={ICON} /> : <Play size={ICON} />, () => send({ type: 'run', on: !running }))}
-        {square(state.strip ? words.hide : words.show, state.strip ? <EyeOff size={ICON} /> : <Eye size={ICON} />, () => send({ type: 'strip', on: !state.strip }))}
+        {square(state.strip ? words.hide : words.show, state.strip ? <Captions size={ICON} /> : <CaptionsOff size={ICON} />, () => send({ type: 'strip', on: !state.strip }), state.strip)}
         {two ? langButton(lit[1]) : (
           <Tooltip content={words.more} position="top" icon="none">
             <button type="button" className={`act act--lang${more ? ' is-open' : ''}`} aria-label={words.more} onClick={() => setMore(!more)}><Plus size={ICON} /></button>

@@ -167,7 +167,6 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
   const offs: Array<() => void> = [];
   let stopped = false;
 
-  let strip = true;
   let switching: VrState['switching'] = null;
   let heard: VrState['heard'] = null;
   const hearLags = new Lags();
@@ -204,7 +203,8 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
       mine: { value: pair.source, options: choices(myQuick) },
       hear: models(settings.hearers(), hearLags),
       translate: models(settings.translators(), translateLags),
-      strip,
+      // The app's own switch (`vrStore.on`): hiding the strip from the wrist turns it off there too, and the other way.
+      strip: store.getState().on,
       chatbox: deps.chatbox() !== 'off',
       height: store.getState().height,
       captions: {
@@ -357,8 +357,7 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
         else void runner.stop();
         break;
       case 'strip':
-        strip = command.on === true;
-        publish();
+        store.getState().setOn(command.on === true);
         break;
       case 'height':
         if (command.value === 'high' || command.value === 'mid' || command.value === 'low') store.getState().setHeight(command.value);
@@ -401,7 +400,7 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
   offs.push(store.subscribe((s) => s.height, () => { sendHeight(); publish(); }));
   sendOn(store.getState().on);
   if (store.getState().panel) sendPanel(true);
-  offs.push(store.subscribe((s) => s.on, sendOn));
+  offs.push(store.subscribe((s) => s.on, (on) => { sendOn(on); publish(); }));
   offs.push(store.subscribe((s) => s.panel, (on) => { sendPanel(on); last = ''; watchHeard(); publish(); }));
   offs.push(store.subscribe((s) => s.link, () => { last = ''; watchHeard(); publish(); }));
   offs.push(runner.state.subscribe(() => { watchHeard(); publish(); }));
