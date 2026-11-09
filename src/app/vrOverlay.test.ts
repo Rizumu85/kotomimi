@@ -127,7 +127,7 @@ function setup(over: Partial<VrOverlayDeps> = {}) {
 
 describe('startVrOverlay', () => {
   beforeEach(() => {
-    useVrStore.setState({ on: false, panel: false, link: 'off' });
+    useVrStore.setState({ on: false, panel: false, link: 'off', height: 'mid' });
   });
 
   it('asks for the helper and the panel window as the settings say', async () => {
@@ -212,6 +212,18 @@ describe('startVrOverlay', () => {
     t.command({ type: 'theirs', value: 'fr' });
     await flush();
     expect(applied[applied.length - 1]).toEqual({ main: 'en', row: ['ja', 'en', 'ko', 'fr'], lit: 'fr' });
+    t.controller.stop();
+  });
+
+  it('tells the helper the strip’s height, and changes it from the wrist', async () => {
+    const t = setup();
+    await flush();
+    expect(t.invoked).toContainEqual(['vr:tune', { lines: ['strip.below 22'] }]);
+    t.command({ type: 'height', value: 'low' });
+    await flush();
+    expect(useVrStore.getState().height).toBe('low');
+    expect(t.invoked).toContainEqual(['vr:tune', { lines: ['strip.below 30'] }]);
+    useVrStore.setState({ height: 'mid' });
     t.controller.stop();
   });
 

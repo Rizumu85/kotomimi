@@ -45,15 +45,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 .status__right.is-paused { color: tk.$color-warning; }
 .status__right.is-error { color: tk.$color-error; }
 
-.recent { display: flex; flex-direction: column; gap: 8px; min-height: 132px; }
+// Four lines: the room the row of their languages had, now the captions'.
+.recent { display: flex; flex-direction: column; gap: 8px; min-height: 176px; }
 .line { font-size: 17px; line-height: 1.35; overflow-wrap: anywhere; }
 .line small { display: block; font-size: 13px; color: $text-source; }
 .line--mine { color: $text-muted; font-size: 15px; }
 .line__who { color: tk.$color-primary; }
 
-.lang { display: flex; flex-direction: column; gap: 8px; }
-.lang__head { font-size: 14px; color: $text-muted; }
-.lang__head b { color: $text-primary; font-weight: $weight-semibold; font-size: 16px; margin-left: 6px; }
 .chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .chip {
   height: 52px; border-radius: 12px; border: 1px solid $border-default; background: $bg-control;
@@ -62,7 +60,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 .chip:hover { background: $bg-hover; }
 .chip.is-on { background: tk.$color-primary-fill; border-color: tk.$color-primary-fill; color: tk.$color-on-primary; }
 .chip.is-open { border-color: tk.$color-primary; color: tk.$color-primary; background: transparent; }
-.more { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+// Every language, in the captions' place while a language is chosen.
+.more { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; min-height: 176px; max-height: 176px; overflow-y: auto; align-content: start; }
 .more .chip { height: 48px; font-size: 16px; }
 
 .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
@@ -75,6 +74,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 .act svg { flex-shrink: 0; }
 .act:hover { background: $bg-hover; }
 .act.is-on { color: tk.$color-primary; }
+// Their languages, lit: filled, as their chips in the settings are.
+.act--lang { overflow: hidden; text-overflow: ellipsis; font-weight: $weight-medium; }
+.act--lang.is-lit { background: tk.$color-primary-fill; color: tk.$color-on-primary; }
+.act--lang.is-open { box-shadow: inset 0 0 0 1px tk.$color-primary; color: tk.$color-primary; }
 
 // ── The second page ──
 .tune__top { display: flex; align-items: center; gap: 10px; }
@@ -87,6 +90,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 .group__head { font-size: 14px; color: $text-muted; }
 .chips--mine { grid-template-columns: repeat(4, 1fr); }
 .chips--mine .chip { font-size: 15px; }
+.chips--height { grid-template-columns: repeat(3, 1fr); }
 .rows { display: flex; flex-direction: column; gap: 6px; }
 .row {
   min-height: 52px; padding: 0 14px; border-radius: 12px; border: 1px solid $border-default; background: $bg-control;

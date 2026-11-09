@@ -3,14 +3,14 @@
  * Fork: the wrist panel, a window on the desktop that a wrist tool such as
  * XSOverlay carries on a wrist (`electron/vr-overlay.js`); its presses arrive
  * as the tool's clicks. Its first page is what a conversation in VRChat needs
- * at hand: whether each side is heard, the last few lines, the other side's
- * language, and stopping, hiding the strip, VRChat's chatbox, or turning to
- * the second page — the user's own language and this computer's models, each
+ * at hand: whether each side is heard, the last few lines, and six buttons —
+ * the other side's languages lit (pressed to put one out, or to choose), and
+ * stopping, hiding the strip, VRChat's chatbox, or turning to the second page — the user's own language and this computer's models, each
  * with how it ran in this session, under the headset's frame rate and the
  * card's memory, for trying a model out while playing.
  */
 import { useEffect, useState } from 'react';
-import { ChevronLeft, Eye, EyeOff, MessageSquare, MessageSquareOff, MicOff, Pause, Play, SlidersHorizontal } from 'lucide-react';
+import { ChevronLeft, Eye, EyeOff, MessageSquare, MessageSquareOff, MicOff, Pause, Play, Plus, SlidersHorizontal } from 'lucide-react';
 import { fill, send } from './bridge';
 import type { VrModel, VrPerf, VrState, VrWords } from './types';
 
@@ -42,7 +42,7 @@ function Dots({ state }: { state: VrState }) {
 function Recent({ state }: { state: VrState }) {
   return (
     <div className="recent">
-      {state.lines.slice(-3).map((line) => (line.leg === 'speaker' ? (
+      {state.lines.slice(-4).map((line) => (line.leg === 'speaker' ? (
         <div key={line.id} className="line line--mine"><span className="line__who">{state.words.me} · </span>{line.source}</div>
       ) : (
         <div key={line.id} className="line">
@@ -65,27 +65,29 @@ function Main({ state, onTune }: { state: VrState; onTune: () => void }) {
   };
   const on = (value: string) => value === theirs.value || value === theirs.lit;
   const running = state.phase !== 'idle';
+  // Their languages lit, in the first row of the buttons (a friend's ask, 2026-11-09: the captions get the room the row
+  // of chips had). With two lit, a press puts one out; the only one lit, or "+", opens every language in the captions'
+  // place, theirs first.
+  const lit = [theirs.value, ...(theirs.lit ? [theirs.lit] : [])];
+  const two = lit.length > 1;
+  const listed = [...theirs.quick.filter((value) => theirs.options.some((o) => o.value === value)), ...theirs.options.map((o) => o.value).filter((value) => !theirs.quick.includes(value))];
   return (
     <>
       <Dots state={state} />
-      {more ? null : <Recent state={state} />}
-      <div className="lang">
-        <div className="lang__head">{words.theirs}{theirs.row ? null : <b>{label(theirs.value)}</b>}</div>
-        <div className="chips">
-          {theirs.quick.map((value) => (
-            <button key={value} type="button" className={`chip${on(value) && !more ? ' is-on' : ''}`} onClick={() => pick(value)}>{label(value)}</button>
+      {more ? (
+        <div className="more" role="group" aria-label={words.theirs}>
+          {listed.map((value) => (
+            <button key={value} type="button" className={`chip${on(value) ? ' is-on' : ''}`} onClick={() => pick(value)}>{label(value)}</button>
           ))}
-          <button type="button" className={`chip${more ? ' is-open' : ''}`} aria-label={words.more} onClick={() => setMore(!more)}>…</button>
         </div>
-        {more ? (
-          <div className="more">
-            {theirs.options.map((o) => (
-              <button key={o.value} type="button" className={`chip${on(o.value) ? ' is-on' : ''}`} onClick={() => pick(o.value)}>{o.label}</button>
-            ))}
-          </div>
-        ) : null}
-      </div>
+      ) : <Recent state={state} />}
       <div className="actions">
+        {lit.map((value) => (
+          <button key={value} type="button" className="act act--lang is-lit" aria-pressed onClick={() => (two && theirs.row ? pick(value) : setMore(!more))}>{label(value)}</button>
+        ))}
+        {!two && (
+          <button type="button" className={`act act--lang${more ? ' is-open' : ''}`} aria-label={words.more} onClick={() => setMore(!more)}><Plus size={ICON} /></button>
+        )}
         <button type="button" className="act" onClick={() => send({ type: 'run', on: !running })}>
           {running ? <><Pause size={ICON} />{words.pause}</> : <><Play size={ICON} />{words.resume}</>}
         </button>
@@ -153,6 +155,17 @@ function Tune({ state, perf, onBack }: { state: VrState; perf: VrPerf | null; on
           {mine.options.map((o) => (
             <button key={o.value} type="button" className={`chip${o.value === mine.value ? ' is-on' : ''}`}
               onClick={() => { if (o.value !== mine.value) send({ type: 'mine', value: o.value }); }}>{o.label}</button>
+          ))}
+        </div>
+      </div>
+      <div className="group">
+        <div className="group__head">{words.height}</div>
+        <div className="chips chips--height">
+          {(['high', 'mid', 'low'] as const).map((value) => (
+            <button key={value} type="button" className={`chip${state.height === value ? ' is-on' : ''}`}
+              onClick={() => { if (value !== state.height) send({ type: 'height', value }); }}>
+              {value === 'high' ? words.heightHigh : value === 'mid' ? words.heightMid : words.heightLow}
+            </button>
           ))}
         </div>
       </div>

@@ -61,6 +61,11 @@ export interface VrWords {
   muted: string;
   /** VRChat's chatbox: what goes above the user's avatar. */
   chatbox: string;
+  /** The strip's height, and its three. */
+  height: string;
+  heightHigh: string;
+  heightMid: string;
+  heightLow: string;
   /** The panel window's title, which a wrist tool lists it by. */
   panel: string;
 }
@@ -89,6 +94,8 @@ export interface VrState {
   strip: boolean;
   /** VRChat's chatbox shows the user's sentences. */
   chatbox: boolean;
+  /** How high the strip sits (`VrHeight`). */
+  height: 'high' | 'mid' | 'low';
   /** What the strip draws, as the computer's subtitle does (`SubtitleLanes`). */
   captions: VrCaptions;
 }
@@ -130,6 +137,7 @@ export type VrCommand =
   | { type: 'run'; on: boolean }
   | { type: 'strip'; on: boolean }
   | { type: 'chatbox'; on: boolean }
+  | { type: 'height'; value: 'high' | 'mid' | 'low' }
   | { type: 'hear'; id: string }
   | { type: 'translate'; id: string };
 

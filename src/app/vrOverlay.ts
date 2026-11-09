@@ -26,7 +26,7 @@ import { addTheirs, pressTheirs, type TheirLanguages, type TheirNext } from '../
 import { toViewerEntry } from '../lib/share/viewerEntry';
 import { describeCause, reportError } from '../lib/diagnostics/report';
 import type { VrCaptions, VrChoice, VrCommand, VrLine, VrModel, VrState, VrWords } from '../vr/types';
-import { useVrStore, type VrLink } from '../stores/vrStore';
+import { useVrStore, type VrHeight, type VrLink } from '../stores/vrStore';
 import type { ChatboxShows } from '../stores/vrchatStore';
 
 export interface VrIpc {
@@ -131,6 +131,9 @@ export function quickLanguages(current: string, offered: readonly string[], pins
   return [...new Set(list)];
 }
 
+/** Degrees under the horizon the strip sits at, looking about level, for each height (`vr-overlay/src/geometry.cpp`). */
+export const STRIP_BELOW: Readonly<Record<VrHeight, number>> = { high: 14, mid: 22, low: 30 };
+
 /** How many of the conversation's entries the strip is sent: enough for each side's newest and the ones still held. */
 const CAPTION_ENTRIES = 24;
 
@@ -203,6 +206,7 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
       translate: models(settings.translators(), translateLags),
       strip,
       chatbox: deps.chatbox() !== 'off',
+      height: store.getState().height,
       captions: {
         entries: captionEntries(deps.view.get().entries),
         legs: [...deps.legs()],
@@ -356,6 +360,9 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
         strip = command.on === true;
         publish();
         break;
+      case 'height':
+        if (command.value === 'high' || command.value === 'mid' || command.value === 'low') store.getState().setHeight(command.value);
+        break;
       case 'chatbox':
         deps.turnChatbox(command.on === true);
         break;
@@ -388,6 +395,10 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
     }, () => {});
   };
   const sendPanel = (on: boolean) => { void ipc.invoke('vr:panel', { on }).catch(() => {}); };
+  // The strip's height, told to the helper (kept for its next start: `electron/vr-overlay.js` `tune`).
+  const sendHeight = () => { void ipc.invoke('vr:tune', { lines: [`strip.below ${STRIP_BELOW[store.getState().height]}`] }).catch(() => {}); };
+  sendHeight();
+  offs.push(store.subscribe((s) => s.height, () => { sendHeight(); publish(); }));
   sendOn(store.getState().on);
   if (store.getState().panel) sendPanel(true);
   offs.push(store.subscribe((s) => s.on, sendOn));

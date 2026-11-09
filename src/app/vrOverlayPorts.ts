@@ -148,6 +148,10 @@ export function vrWords(t: T): VrWords {
     stoppedShort: t('fork.vr.stoppedShort', 'Stopped'),
     muted: t('fork.vr.muted', 'Muted in VRChat'),
     chatbox: t('fork.vr.chatbox', 'Chatbox'),
+    height: t('fork.vr.height', 'Caption height'),
+    heightHigh: t('fork.vr.heightHigh', 'High'),
+    heightMid: t('fork.vr.heightMid', 'Middle'),
+    heightLow: t('fork.vr.heightLow', 'Low'),
     panel: t('fork.vr.panelTitle', 'Kotomimi wrist panel'),
   };
 }
