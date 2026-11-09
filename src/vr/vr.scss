@@ -45,8 +45,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 .status__right.is-paused { color: tk.$color-warning; }
 .status__right.is-error { color: tk.$color-error; }
 
-// Four lines: the room the row of their languages had, now the captions'.
-.recent { display: flex; flex-direction: column; gap: 8px; min-height: 176px; }
+// Four lines: the room the row of their languages had, now the captions'. A fixed height, the newest at the bottom and
+// the oldest leaving at the top: the window is the page's size, and a wrist tool would rescale it at every wrapped line.
+.recent {
+  display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; height: 176px; overflow: hidden;
+  // The line leaving at the top fades out rather than being cut through (the mask reads only the alpha).
+  mask-image: linear-gradient(to bottom, transparent, currentColor 28px);
+}
 .line { font-size: 17px; line-height: 1.35; overflow-wrap: anywhere; }
 .line small { display: block; font-size: 13px; color: $text-source; }
 .line--mine { color: $text-muted; font-size: 15px; }
