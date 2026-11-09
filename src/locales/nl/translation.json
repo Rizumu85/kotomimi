@@ -1780,7 +1780,7 @@
       "unpinShort": "Losmaken",
       "mine": "Mijn taal",
       "theirs": "Taal van de ander",
-      "pairHelp": "Kies de talen die jij en de ander het meest gebruiken. Wat jij zegt wordt vertaald naar hun taal, en wat zij zeggen naar die van jou.",
+      "pairHelp": "Kies de talen die jij en de ander het meest gebruiken. Wat jij zegt wordt vertaald naar hun taal, en wat zij zeggen naar die van jou. Tik op een taal onder ‘Ze spreken mogelijk ook’ om die aan te zetten: de ander wordt dan ook in die taal verstaan, en wat jij zegt wordt ook naar die taal vertaald.",
       "alsoSpeak": "Ik spreek ook",
       "theyMaySpeak": "Ze spreken mogelijk ook",
       "hearingBy": "Spraakherkenning: {{name}}",

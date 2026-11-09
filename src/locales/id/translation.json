@@ -1780,7 +1780,7 @@
       "unpinShort": "Lepas sematan",
       "mine": "Bahasa saya",
       "theirs": "Bahasa lawan bicara",
-      "pairHelp": "Pilih bahasa yang terutama digunakan oleh Anda dan lawan bicara. Ucapan Anda diterjemahkan ke bahasanya, dan ucapannya ke bahasa Anda.",
+      "pairHelp": "Pilih bahasa yang terutama digunakan oleh Anda dan lawan bicara. Ucapan Anda diterjemahkan ke bahasanya, dan ucapannya ke bahasa Anda. Tekan salah satu bahasa di “Mereka mungkin juga berbicara” untuk menyalakannya: ucapan mereka dalam bahasa itu juga didengar, dan ucapan Anda juga diterjemahkan ke bahasa itu.",
       "alsoSpeak": "Saya juga berbicara",
       "theyMaySpeak": "Mereka mungkin juga berbicara",
       "hearingBy": "Pengenalan suara: {{name}}",

@@ -71,11 +71,11 @@ describe('finishedLine', () => {
       const e = exchange('a', '次のワールドに行こう', translation);
       return e.kind === 'exchange' ? { ...e, source: e.source.map((r) => ({ ...r, language: 'ja' })) } : e;
     };
-    const back = { language: 'ja', back: true };
+    const back = { languages: ['ja'], back: true };
     expect(finishedLine(inJapanese('我们去下一个世界吧'), 'translation', false, false, back)).toBe('我们去下一个世界吧');
     expect(finishedLine(inJapanese('我们去下一个世界吧'), 'both', false, false, back)).toBe('次のワールドに行こう\n我们去下一个世界吧');
     // Not answered back: shown as said, with no translation to wait for.
-    expect(finishedLine(inJapanese(''), 'both', false, false, { language: 'ja', back: false })).toBe('次のワールドに行こう');
+    expect(finishedLine(inJapanese(''), 'both', false, false, { languages: ['ja'], back: false })).toBe('次のワールドに行こう');
     // Their own language: the translation, as ever.
     const inChinese = exchange('b', '今天天气真好', '今日はいい天気ですね');
     expect(finishedLine(inChinese.kind === 'exchange' ? { ...inChinese, source: inChinese.source.map((r) => ({ ...r, language: 'zh' })) } : inChinese, 'translation', false, false, back)).toBe('今日はいい天気ですね');
@@ -104,6 +104,26 @@ describe('finishedLine', () => {
     expect(finishedLine(exchange('a', '你好', 'こんにちは', { final: false }), 'translation')).toBeNull();
     expect(finishedLine(exchange('a', '你好', ''), 'translation')).toBeNull();
     expect(finishedLine(exchange('a', 'こんにちは', '你好', { leg: 'participant' }), 'translation')).toBeNull();
+  });
+
+  // Their main language and one lit beside it: a sentence of the user's has a translation into each.
+  const twice = (source: string, first: string, second: string): Entry => {
+    const one = exchange('a', source, first);
+    return one.kind === 'exchange' ? { ...one, translation: [...one.translation, { ...row(second), side: 'translation' as const, language: 'en' }] } : one;
+  };
+  const two = { languages: ['ja', 'en'], back: false };
+
+  it('waits for both translations where two of their languages are lit, and puts each on a line of its own', () => {
+    expect(finishedLine(exchange('a', '我们走吧', '行こう'), 'translation', false, false, two)).toBeNull();
+    expect(finishedLine(exchange('a', '我们走吧', '行こう'), 'translation', false, false, two, true)).toBe('行こう');
+    expect(finishedLine(twice('我们走吧', '行こう', "Let's go"), 'translation', false, false, two)).toBe("行こう\nLet's go");
+    expect(finishedLine(twice('我们走吧', '行こう', "Let's go"), 'both', false, false, two)).toBe("我们走吧\n行こう\nLet's go");
+  });
+
+  it('leaves the original out where it and the two translations do not fit the chatbox together', () => {
+    const said = '我们'.repeat(30);
+    const line = finishedLine(twice(said, '行こう'.repeat(15), "Let's go ".repeat(5).trim()), 'both', false, false, two);
+    expect(line).toBe(`${'行こう'.repeat(15)}\n${"Let's go ".repeat(5).trim()}`);
   });
 });
 
@@ -288,7 +308,7 @@ describe('the chatbox', () => {
 
   it('translates a coached speaker switching to their own language without publishing feedback', () => {
     useVRChatStore.setState({ chatbox: 'translation' });
-    const t = setup({ coached: () => true, theirs: () => ({ language: 'fr', back: false }) });
+    const t = setup({ coached: () => true, theirs: () => ({ languages: ['fr'], back: false }) });
     const sentence = (id: string, source: string, answer: string, language: string): Entry => {
       const e = exchange(id, source, answer);
       return e.kind === 'exchange' ? { ...e, source: e.source.map((r) => ({ ...r, language })) } : e;
@@ -303,7 +323,7 @@ describe('the chatbox', () => {
 
   it.each(['before', 'after'] as const)('publishes only the translation when combined feedback arrives %s it', (order) => {
     useVRChatStore.setState({ chatbox: 'translation' });
-    const t = setup({ coached: () => true, theirs: () => ({ language: 'fr', back: true }) });
+    const t = setup({ coached: () => true, theirs: () => ({ languages: ['fr'], back: true }) });
     const sentence = (translated: boolean, feedback: boolean): Entry => {
       const entry = exchange('both', 'Je suis ici', translated ? 'I am here' : '');
       if (entry.kind !== 'exchange') throw new Error('expected exchange');

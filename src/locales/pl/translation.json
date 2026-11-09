@@ -1780,7 +1780,7 @@
       "unpinShort": "Odepnij",
       "mine": "Mój język",
       "theirs": "Język rozmówcy",
-      "pairHelp": "Wybierz języki, których ty i druga osoba głównie używacie. Twoje słowa są tłumaczone na jej język, a jej na twój.",
+      "pairHelp": "Wybierz języki, których ty i druga osoba głównie używacie. Twoje słowa są tłumaczone na jej język, a jej na twój. Naciśnij język w sekcji „Mogą też mówić”, aby go włączyć: druga osoba będzie rozpoznawana także w tym języku, a twoje słowa będą tłumaczone również na niego.",
       "alsoSpeak": "Mówię także",
       "theyMaySpeak": "Mogą też mówić",
       "hearingBy": "Rozpoznawanie mowy: {{name}}",

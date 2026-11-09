@@ -14,6 +14,7 @@ import { useNativeEngineStore, useNativeTranslatorStore } from '../stores/native
 import { useProviderStore } from '../stores/providerStore';
 import type { VrWords } from '../vr/types';
 import type { VrSettingsPort } from './vrOverlay';
+import { litLanguageOf } from './useLitLanguage';
 
 const baseOf = (code: string) => code.trim().toLowerCase().split(/[-_]/)[0];
 
@@ -48,6 +49,12 @@ export function vrSettingsPort(): VrSettingsPort {
       return s.provider.languages.sources(s.entry.settings).map((o) => o.value).filter((v) => v !== 'auto');
     },
     pins: () => useLanguagePinStore.getState().pins,
+    lit: () => litLanguageOf(useProviderStore.getState()),
+    light: (code) => {
+      const s = selected();
+      const theirs = s?.provider.languages.more?.(s.entry.settings, useProviderStore.getState().models[s.id] ?? [], s.entry.pair).theirs;
+      if (s && theirs?.light) useProviderStore.getState().updateSettings(s.provider, theirs.light(code));
+    },
     hearers: () => {
       const s = localai();
       const pair = selected()?.entry.pair;

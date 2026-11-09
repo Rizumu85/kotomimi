@@ -1780,7 +1780,7 @@
       "unpinShort": "Détacher",
       "mine": "Ma langue",
       "theirs": "Langue de l’autre",
-      "pairHelp": "Choisissez les langues que vous et votre interlocuteur utilisez le plus. Vos propos sont traduits dans sa langue, et les siens dans la vôtre.",
+      "pairHelp": "Choisissez les langues que vous et votre interlocuteur utilisez le plus. Vos propos sont traduits dans sa langue, et les siens dans la vôtre. Appuyez sur une langue sous « L’autre personne peut aussi parler » pour l’allumer : votre interlocuteur est aussi écouté dans cette langue, et vos propos y sont également traduits.",
       "alsoSpeak": "Je parle aussi",
       "theyMaySpeak": "L’autre personne peut aussi parler",
       "hearingBy": "Reconnaissance vocale : {{name}}",

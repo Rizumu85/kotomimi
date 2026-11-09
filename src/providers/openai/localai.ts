@@ -64,7 +64,7 @@ import { buildRealtime } from './config';
 import { glossaryRecognitionTerms } from '../../lib/glossary/glossary';
 import { recognizerAsked, serverBilingual } from './serverRecognizers';
 import { phoneBase, plainAddress } from '../../lib/lan/discover';
-import { alsoFirst, alsoSpoken, theyAlsoSpeak, deviceLanguage, canDetectOther, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, hearsNatively, needsServer, serverDetects, PLACE_FIELDS, PLACES, translatesNatively, type AsrHere, type Place } from './localaiDevice';
+import { alsoFirst, alsoSpoken, theyAlsoSpeak, theyLitOf, deviceLanguage, canDetectOther, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, hearsNatively, needsServer, serverDetects, PLACE_FIELDS, PLACES, translatesNatively, type AsrHere, type Place } from './localaiDevice';
 import { NATIVE_MODELS, isApple, preferNative, type NativePick } from './localaiNative';
 import { NATIVE_DEFAULT_MODEL, appleAlso, coachBaseUrl, coachGap, coachIdle, coachUp, hearingPick, hearsByDownloaded, holdNativeForRun, nativeEither, nativeGap, nativeUp, restNative, translatorUp, nativeIdle, nativeModelFor, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_COACH_EXTRA, NATIVE_COACHES, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
@@ -125,11 +125,16 @@ export interface LocalAISettings extends RealtimeSettings {
    */
   speakAlso: readonly string[];
   /**
-   * Fork: the languages the other side may speak besides the pair's target ("对方也可能说"), `AUTO` for any: they
-   * are heard in whichever, and the user's speech follows them (`follow.ts`). Written with `asrDetectOther`, which an
-   * older build set alone and which counts as any language here (`theyAlsoSpeak`).
+   * Fork: the languages the other side may speak besides the pair's target ("对方也可能说"), `AUTO` for any, kept to be
+   * switched to by hand: the one lit (`theyLit`) is heard. An older build's `asrDetectOther` alone counts as any
+   * language here (`theyAlsoSpeak`).
    */
   theyAlso: readonly string[];
+  /**
+   * Fork: the one of `theyAlso` lit (`theyLitOf`): the other side heard in it beside the pair's target, and the user's
+   * speech translated into it too. Written with `asrDetectOther`, which is on exactly while one is lit.
+   */
+  theyLit: string;
   /**
    * What is heard is translated a sentence at a time, as it is said, where the recognizer writes as it hears
    * (`sentenceCut.ts`). Off: a stretch is translated when the recognizer closes it, as upstream does — later, and by
@@ -217,6 +222,7 @@ export const LOCALAI_DEFAULTS: LocalAISettings = {
   speakBoth: false,
   speakAlso: [],
   theyAlso: [],
+  theyLit: '',
   translateBySentence: true,
   translateAt: 'server',
   translateServerModel: '',
@@ -367,6 +373,7 @@ export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>
     speakBoth: flag('speakBoth'),
     speakAlso: Array.isArray(stored.speakAlso) ? (stored.speakAlso as unknown[]).filter((code): code is string => typeof code === 'string' && code.trim() !== '') : [],
     theyAlso: Array.isArray(stored.theyAlso) ? (stored.theyAlso as unknown[]).filter((code): code is string => typeof code === 'string' && code.trim() !== '') : [],
+    theyLit: typeof stored.theyLit === 'string' ? stored.theyLit : LOCALAI_DEFAULTS.theyLit,
     translateBySentence: flag('translateBySentence'),
     translateOther: text('translateOther'),
     translateOtherModel: text('translateOtherModel'),
@@ -1328,6 +1335,17 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
     // Its answers are in the speaker's own language; this computer's engine is loaded for that direction.
     if (chosen) back = { ...chosen, language: told };
   }
+  // Fork: the other side's second language, lit by hand (`theyLitOf`): the speaker's sentences go into it as well, a
+  // second answer beside the first (the VRChat chatbox shows both). Not into "any language", which is no language.
+  let into: AnswerStage | undefined;
+  const lit = shared.reversed(asked.direction) || soloCoach ? '' : theyLitOf(s);
+  const lower = (code: string) => code.toLowerCase().split(/[-_]/)[0];
+  if (translate && lit && lit !== AUTO && lower(lit) !== lower(target) && lower(lit) !== lower(told)) {
+    const forward = buildRealtime({ ...context, direction: { source, target: lit } }, { ...s, model: pinned }, { ...shared, models: [{ id: pinned }] });
+    const chosen = translatorFor(source, lit, 'refused' in forward ? base.instructions : forward.instructions);
+    if (chosen && 'refused' in chosen) return chosen;
+    if (chosen) into = { ...chosen, language: lit };
+  }
 
   let coaching: AnswerStage | undefined;
   if (coached) {
@@ -1377,6 +1395,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
       // The pair's two languages, each answered by the stage that translates out of it.
       ...(back ? { back: { stage: back, language: alsoMain, own: told, languages: also } } : {}),
       ...(coaching ? { feedback: { stage: coaching, language: target } } : {}),
+      ...(into ? { into } : {}),
       ...(s.translateBySentence ? {} : { whole: true }),
     };
   }
@@ -1435,13 +1454,6 @@ export const localaiLanguages: Provider<LocalAISettings, never, never>['language
   ...realtimeLanguages,
   sources: () => LOCAL_LANGUAGES,
   targets: () => LOCAL_LANGUAGES,
-  // Fork: the other side left to be detected, the user's speech goes into whichever language they were last heard in —
-  // a Korean and a Japanese speaker answered each in theirs — whether it is among those chosen for them or not: what
-  // was chosen is what the recognizer is asked to expect. Not a coached speaker, whose speech is answered with feedback.
-  follows: (stored, models) => {
-    const s = settled(stored);
-    return detectsOther(s, models) && !s.coach;
-  },
   // Fork: what each side may speak beside its main language, and what hears it (`MoreLanguages`).
   more: (stored, models, pair) => {
     const s = settled(stored);
@@ -1474,7 +1486,15 @@ export const localaiLanguages: Provider<LocalAISettings, never, never>['language
         ...strip(theirsHearer),
         ...reach(theirsHearer, false),
         chosen: theyAlsoSpeak(s),
-        set: (chosen) => ({ theyAlso: [...chosen], asrDetectOther: chosen.length > 0 }),
+        lit: theyLitOf(s),
+        // One added is the one wanted now: it is lit. One taken away that was lit goes dark.
+        set: (chosen) => {
+          const was = theyAlsoSpeak(s);
+          const added = chosen.find((code) => !was.includes(code));
+          const lit = added ?? chosen.find((code) => code === theyLitOf(s)) ?? '';
+          return { theyAlso: [...chosen], theyLit: lit, asrDetectOther: lit !== '' };
+        },
+        light: (code) => ({ theyLit: code, asrDetectOther: code !== '' }),
       },
     };
   },

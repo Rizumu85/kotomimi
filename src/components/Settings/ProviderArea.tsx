@@ -9,7 +9,7 @@ import { presentProviders } from '../../providers/registry';
 import { useMode } from '../../stores/audioStore';
 import { SENTENCE_SEGMENTATION_SHOWN, useEngineSlotTarget, useSetEngineSlotTarget, useTextOnly } from '../../stores/settingsStore';
 import { GlossarySection } from './sections/GlossarySection';
-import { useFollowedLanguage, useRunPhase } from '../../app/useRun';
+import { useRunPhase } from '../../app/useRun';
 
 /** General and Provider categories read the same provider entry and session lock. */
 export function SessionSettingsGeneral({ locked }: { locked: boolean }) {
@@ -19,11 +19,10 @@ export function SessionSettingsGeneral({ locked }: { locked: boolean }) {
   // Fork: the languages change while a session runs, and it goes on in them (`Runner.retarget`); only while it starts
   // or stops are they held.
   const phase = useRunPhase();
-  const followed = useFollowedLanguage();
   return (
     <>
       {/* Language pair and output preferences. */}
-      <ProviderLanguages providers={providers} disabled={locked && phase !== 'running'} sentence={{ mode, textOnly }} {...(followed ? { followed } : {})} />
+      <ProviderLanguages providers={providers} disabled={locked && phase !== 'running'} sentence={{ mode, textOnly }} />
       <GlossarySection />
       <OutputToggles locked={locked} />
       {SENTENCE_SEGMENTATION_SHOWN && <SentenceSegmentationSection isSessionActive={locked} />}

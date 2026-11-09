@@ -112,6 +112,10 @@ export interface Hearer {
  * Fork: one side's languages beside its main one (`languages.more`): those chosen (`AUTO`: any language); those that
  * can be (null: every one offered); how many more it can hear at all (0: none, null: as many as offered); whether "any
  * language" is offered; what hears it; and the settings a choice writes.
+ *
+ * The other side's are switched by hand (`lit`, `light`): the one of them lit is heard beside their main language, and
+ * the user's speech is translated into it as well — two languages at most, where a lobby speaks two. The others are
+ * kept, one press away, and are neither heard nor translated into.
  */
 export interface MoreLanguages<S> {
   hearer?: Hearer;
@@ -120,6 +124,10 @@ export interface MoreLanguages<S> {
   most: number | null;
   any: boolean;
   set(chosen: readonly string[]): Partial<S>;
+  /** The one of `chosen` lit; '' none. Absent: the side's languages are not switched (the user's own). */
+  lit?: string;
+  /** Lights `code` (one of `chosen`), or none with ''. */
+  light?(code: string): Partial<S>;
 }
 
 /**
@@ -427,14 +435,9 @@ export interface Provider<S, K extends { missing?: never } & object, C extends {
      */
     detection?(s: S, models: readonly ModelOption[], pair: LanguagePair): { other: Detection<S>; both: Detection<S> };
     /**
-     * Fork: the user's speech is translated into the language the other side is heard in, not only the pair's target
-     * (`src/lib/session/follow.ts`): where their language is left to be detected. Absent: it never follows.
-     */
-    follows?(s: S, models: readonly ModelOption[], pair: LanguagePair): boolean | { among: readonly string[] };
-    /**
      * Fork: the languages each side may speak beside its main one (`MoreLanguages`): the user's ("我也会说") and the
      * other side's ("对方也可能说"), and what hears each. Every place a leg can run states it here — this computer's
-     * models, another device, an API, a cloud provider — and the language section, the follow and the VRChat chatbox
+     * models, another device, an API, a cloud provider — and the language section, the run and the VRChat chatbox
      * read it. Absent, or a side absent: that side has its main language alone.
      */
     more?(s: S, models: readonly ModelOption[], pair: LanguagePair): { mine?: MoreLanguages<S>; theirs?: MoreLanguages<S> };

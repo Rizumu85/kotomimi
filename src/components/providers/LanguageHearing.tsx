@@ -33,6 +33,9 @@ export interface SideLanguages {
   most: number | null;
   any: boolean;
   set(chosen: string[]): void;
+  /** The one lit, switched by hand (the other side's: heard, and translated into); absent where a side has none. */
+  lit?: string;
+  light?(code: string): void;
 }
 
 function HearerButton({ hearer, onOpen }: { hearer: Hearer; onOpen?(): void }) {
@@ -55,12 +58,11 @@ interface RowProps {
   name(code: string): string;
   /** Named here where the two sides are not heard by the same. */
   showHearer: boolean;
-  followed?: string;
   onOpenHearing?(): void;
   disabled?: boolean;
 }
 
-function Row({ label, side, leaveOut, ordered, suggested, name, showHearer, followed, onOpenHearing, disabled }: RowProps) {
+function Row({ label, side, leaveOut, ordered, suggested, name, showHearer, onOpenHearing, disabled }: RowProps) {
   const { t } = useTranslation();
   const pool = offeredLanguages(ordered, [...leaveOut, ...side.chosen], side.offered);
   const any = side.chosen.includes(ANY_LANGUAGE);
@@ -85,10 +87,12 @@ function Row({ label, side, leaveOut, ordered, suggested, name, showHearer, foll
       </div>
       <div className="language-hearing__chips">
         {side.chosen.map((code) => {
-          const live = !!followed && baseOf(code) === baseOf(followed);
+          const lit = !!side.lit && baseOf(code) === baseOf(side.lit);
           return (
-            <span key={code} className={`language-chip${live ? ' is-live' : ''}`}>
-              {nameOf(code)}
+            <span key={code} className={`language-chip${lit ? ' is-lit' : ''}${side.light ? ' is-switch' : ''}`}>
+              {side.light ? (
+                <button type="button" className="language-chip__name" aria-pressed={lit} onClick={() => side.light!(lit ? '' : code)} disabled={disabled}>{nameOf(code)}</button>
+              ) : nameOf(code)}
               <button type="button" className="language-chip__remove" onClick={() => side.set(side.chosen.filter((one) => one !== code))} aria-label={t('fork.languageMenu.removeLanguage', { name: nameOf(code) })} disabled={disabled}>
                 <X size={12} aria-hidden />
               </button>
@@ -115,10 +119,8 @@ export interface LanguageHearingProps {
   label(code: string): string;
   /** "我也会说": the languages the user speaks beside their own. Absent: the user is not heard. */
   mine?: SideLanguages;
-  /** "对方也可能说": the languages the other side may speak beside their main one. Absent: they are not heard. */
+  /** "对方也可能说": the languages the other side may speak beside their main one, one of them lit. Absent: none. */
   theirsMore?: SideLanguages;
-  /** The language the user's speech follows the other side into now, in a session (`follow.ts`). */
-  followed?: string;
   /** The two sides are heard by the same: it is named once, in the section's heading, not here. */
   sameHearer: boolean;
   onOpenHearing?(): void;
@@ -127,11 +129,11 @@ export interface LanguageHearingProps {
 
 /**
  * Fork: under the language pair, a labelled row a side for the languages it may speak beside its main one — the
- * user's, several at once, and the other side's, followed in a session — each with "+" while what hears it can take
- * more. A side that can take none has no row; where the two are heard by different recognizers, each names its own,
+ * user's, several at once, and the other side's, one lit at a time by pressing it (heard, and the user's speech
+ * translated into it too) — each with "+" while what hears it can take more. A side that can take none has no row; where the two are heard by different recognizers, each names its own,
  * a side that has no row on one of its own ("听我", "听对方"). Pressing a name opens its settings.
  */
-export function LanguageHearing({ own, theirs, ordered, suggested, label, mine, theirsMore, followed, sameHearer, onOpenHearing, disabled }: LanguageHearingProps) {
+export function LanguageHearing({ own, theirs, ordered, suggested, label, mine, theirsMore, sameHearer, onOpenHearing, disabled }: LanguageHearingProps) {
   const { t } = useTranslation();
   const shows = (side?: SideLanguages) => !!side && (side.most !== 0 || side.chosen.length > 0);
   const hearerOnly = (side?: SideLanguages) => !sameHearer && !!side?.hearer && !shows(side);
@@ -143,7 +145,7 @@ export function LanguageHearing({ own, theirs, ordered, suggested, label, mine, 
         <HearerButton hearer={mine!.hearer!} onOpen={onOpenHearing} />
       </div>
     ),
-    shows(theirsMore) && <Row key="theirs" label={t('fork.languageMenu.theyMaySpeak')} side={theirsMore!} leaveOut={[own, theirs]} ordered={ordered} suggested={suggested} name={label} showHearer={!sameHearer} followed={followed} onOpenHearing={onOpenHearing} disabled={disabled} />,
+    shows(theirsMore) && <Row key="theirs" label={t('fork.languageMenu.theyMaySpeak')} side={theirsMore!} leaveOut={[own, theirs]} ordered={ordered} suggested={suggested} name={label} showHearer={!sameHearer} onOpenHearing={onOpenHearing} disabled={disabled} />,
     hearerOnly(theirsMore) && (
       <div key="theirs-hearer" className="language-hearing__head language-hearing__row">
         <span className="language-hearing__label">{t('fork.languageMenu.hearsThem')}</span>

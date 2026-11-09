@@ -127,6 +127,11 @@ export interface Stages {
   /** Feedback alongside translation, only for speech in the language being practised. */
   feedback?: { stage: AnswerStage; language: string };
   /**
+   * Fork: the other side's second language, lit by hand (`theyLitOf`): what `speech` translates — said or typed — is
+   * translated into it as well, by this stage (its `language` set), a second answer beside the first.
+   */
+  into?: AnswerStage;
+  /**
    * Fork: the speaker's microphone, with the other side's sound perhaps captured beside it (the participant leg).
    * Played on loudspeakers, that sound comes back through the microphone and is written as if the user had said it.
    * A sentence this leg hears that another leg was hearing at the same moment, and that reads as that one does, is
@@ -322,7 +327,7 @@ class PipelineLeg implements AdapterSession {
         if (!this.ended) this.events.degraded({ code: 'phone_quiet', message: 'A phone this session uses stopped answering.' });
       },
     });
-    for (const stage of [stages.speech, stages.typed, stages.back?.stage, stages.feedback?.stage]) if (stage?.phone) this.watchPhone(stage.baseUrl);
+    for (const stage of [stages.speech, stages.typed, stages.back?.stage, stages.feedback?.stage, stages.into]) if (stage?.phone) this.watchPhone(stage.baseUrl);
   }
 
   /**
@@ -358,7 +363,7 @@ class PipelineLeg implements AdapterSession {
    */
   private warm(): void {
     const seen = new Set<string>();
-    for (const stage of [this.stages.speech, this.stages.typed, this.stages.back?.stage, this.stages.feedback?.stage]) {
+    for (const stage of [this.stages.speech, this.stages.typed, this.stages.back?.stage, this.stages.feedback?.stage, this.stages.into]) {
       if (!stage?.loads || seen.has(`${stage.kind}|${stage.model}`)) continue;
       seen.add(`${stage.kind}|${stage.model}`);
       // One token, as a phone is warmed (`warmPhones`): what answers is not wanted.
@@ -394,8 +399,11 @@ class PipelineLeg implements AdapterSession {
     this.events.segmentOpened({ ref, side: 'source', origin });
     this.events.segmentText({ ref, text: trimmed });
     this.events.segmentClosed({ ref });
-    if (stage) this.push({ stage: this.backFor(trimmed) ?? stage, text: trimmed, origin, typed: true });
-    else if (!this.stages.asIs) this.events.degraded({ code: 'translation_unavailable', message: 'Typed text has no translation stage in this session — shown as typed.' });
+    if (stage) {
+      const answer = this.backFor(trimmed) ?? stage;
+      this.push({ stage: answer, text: trimmed, origin, typed: true });
+      if (answer === stage) this.alsoInto(trimmed, origin, true);
+    } else if (!this.stages.asIs) this.events.degraded({ code: 'translation_unavailable', message: 'Typed text has no translation stage in this session — shown as typed.' });
   }
 
   beginTurn(): void {
@@ -684,12 +692,20 @@ class PipelineLeg implements AdapterSession {
       const before = stage.kind === 'translate' && this.said && now - this.said.at <= BEFORE_WITHIN_MS ? this.said.text.slice(-BEFORE_MOST) : undefined;
       if (stage.kind === 'translate') this.said = { text, at: now };
       this.push({ stage, text, origin: payload.origin ?? source.origin, typed: false, ...(before ? { before } : {}) });
+      if (stage === this.stages.speech) this.alsoInto(text, payload.origin ?? source.origin, false, before);
     }
     const feedback = this.stages.feedback;
     if (source && text && feedback) {
       const spoken = language ? baseOf(language) : oneOfTwo(text, this.request.context.direction.source, feedback.language);
       if (spoken === baseOf(feedback.language)) this.push({ stage: feedback.stage, text, origin: payload.origin ?? source.origin, typed: false });
     }
+  }
+
+  /** Fork: a sentence translated forward is translated into the other side's second language too (`Stages.into`). */
+  private alsoInto(text: string, origin: string | undefined, typed: boolean, before?: string): void {
+    const into = this.stages.into;
+    if (!into || this.stages.speech?.kind !== 'translate') return;
+    this.push({ stage: into, text, origin, typed, ...(before ? { before } : {}) });
   }
 
   private heardOf(ref: Ref): Heard | undefined {

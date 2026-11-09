@@ -1780,7 +1780,7 @@
       "unpinShort": "Poista kiinnitys",
       "mine": "Oma kieleni",
       "theirs": "Toisen kieli",
-      "pairHelp": "Valitse kielet, joita sinä ja toinen henkilö pääasiassa käytätte. Puheesi käännetään hänen kielelleen ja hänen puheensa sinun kielellesi.",
+      "pairHelp": "Valitse kielet, joita sinä ja toinen henkilö pääasiassa käytätte. Puheesi käännetään hänen kielelleen ja hänen puheensa sinun kielellesi. Sytytä kieli painamalla sitä kohdassa ”He saattavat puhua myös”: myös sitä kuunnellaan, ja puheesi käännetään lisäksi sille.",
       "alsoSpeak": "Puhun myös",
       "theyMaySpeak": "He saattavat puhua myös",
       "hearingBy": "Puheentunnistus: {{name}}",

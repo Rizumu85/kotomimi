@@ -195,9 +195,12 @@ export function buildLanes(
       const heard: LaneText = { ...streamOf(sentences), language: row?.language || said.languages.source, ...(row ? { segmentId: row.segmentId } : {}) };
       if (lane.source) lane.source = heard;
       if (lane.source && lane.answer && joined(said.source)) lane.answers = joined(said.source);
-      if (lane.answer && joined(said.translation)) {
-        const row = said.translation[0];
-        lane.answer = { text: joined(said.translation), pieces: piecesOf(said.translation), language: row?.language || said.languages.target, ...(row ? { segmentId: row.segmentId } : {}), ...(row?.purpose ? { purpose: row.purpose } : {}) };
+      // Fork: with a second language of theirs lit, a sentence of the user's has two translations: the lane reads the
+      // first, in their main language (the chatbox carries both).
+      const first = said.translation.filter((row) => row.segmentId === said.translation[0]?.segmentId);
+      if (lane.answer && joined(first)) {
+        const row = first[0];
+        lane.answer = { text: joined(first), pieces: piecesOf(first), language: row?.language || said.languages.target, ...(row ? { segmentId: row.segmentId } : {}), ...(row?.purpose ? { purpose: row.purpose } : {}) };
       }
       if (own) {
         const first = said.source[0];

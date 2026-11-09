@@ -876,3 +876,32 @@ describe('retired app-model recognition', () => {
     expect(log.some((e) => e.kind === 'segmentOpened')).toBe(false);
   });
 });
+
+describe('the other side’s second language, lit by hand (fork)', () => {
+  const LIT: Partial<LocalAISettings> = { ...VIA_MODEL, theyAlso: ['en'], theyLit: 'en', asrDetectOther: true };
+
+  it('is built on the user’s leg alone, and not into "any language" or none', () => {
+    expect(buildLocalAI(SPEAKER, { ...LOCALAI_DEFAULTS, ...LIT }, shared)).toMatchObject({ stages: { into: { kind: 'translate', language: 'en' } } });
+    expect((buildLocalAI(PARTICIPANT, { ...LOCALAI_DEFAULTS, ...LIT }, shared) as LocalAIConfig).stages?.into).toBeUndefined();
+    expect((buildLocalAI(SPEAKER, { ...LOCALAI_DEFAULTS, ...LIT, theyLit: 'auto', theyAlso: ['auto'] }, shared) as LocalAIConfig).stages?.into).toBeUndefined();
+    expect((buildLocalAI(SPEAKER, { ...LOCALAI_DEFAULTS, ...LIT, theyLit: '', asrDetectOther: false }, shared) as LocalAIConfig).stages?.into).toBeUndefined();
+  });
+
+  it('translates what is said, and what is typed, into it too: a second answer beside the first, after it', async () => {
+    // Without the loudspeaker check, which earlier legs in this file, never stopped, would hold the sentence for.
+    const h = await live(SPEAKER, LIT, [sse('次のワールドに行こう'), sse("Let's go to the next world"), sse('はい'), sse('Yes')], K, (config) => { delete config.stages!.leakCheck; });
+    h.receive(...heard('first', '我们去下一个世界吧'));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(2));
+    await h.settled();
+    const answers = h.of('segmentOpened').filter((e) => e.payload.side === 'translation').map((e) => e.payload);
+    expect(answers).toEqual([
+      { ref: FIRST_REF + 1, side: 'translation', purpose: 'translation', origin: 'first' },
+      { ref: FIRST_REF + 2, side: 'translation', purpose: 'translation', origin: 'first' },
+    ]);
+    expect(h.lastText(FIRST_REF + 2)).toMatchObject({ text: "Let's go to the next world", language: 'en' });
+    h.session.appendText('是');
+    await vi.waitFor(() => expect(h.calls).toHaveLength(4));
+    await h.settled();
+    expect(h.of('segmentText').filter((e) => e.payload.ref > FIRST_REF + 2 && e.payload.language === 'en').pop()?.payload.text).toBe('Yes');
+  });
+});

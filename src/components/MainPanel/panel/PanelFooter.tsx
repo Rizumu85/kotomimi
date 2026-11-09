@@ -22,6 +22,8 @@ export interface PanelFooterProps {
   held: boolean;
   micMuted: boolean;
   pair: LanguagePair | null;
+  /** Fork: the other side's language lit beside their main one: the user's speech goes into it too (`useLitLanguage`). */
+  lit?: string;
   duration: string | null;
   onStart(): void;
   onStop(): void;
@@ -60,6 +62,7 @@ export function PanelFooter(props: PanelFooterProps) {
     held,
     micMuted,
     pair,
+    lit,
     duration,
     onStart,
     onStop,
@@ -79,9 +82,8 @@ export function PanelFooter(props: PanelFooterProps) {
 
   const statusDotClass = `status-dot ${isReconnecting ? 'reconnecting' : isRunning ? 'active' : ''}`;
   // A bidirectional pair (`zh+en`) is both ends at once: name it once, not `X → X`.
-  // Fork: the user's speech following the other side's language (`follow.ts`): the language it goes into now.
-  const target = (run.phase === 'running' && run.followed) || pair?.target;
-  const languagePairText = !pair ? '' : pair.source === pair.target ? label(pair.source) : `${label(pair.source)} → ${label(target ?? pair.target)}`;
+  // Fork: the other side's second language, lit by hand: the user's speech goes into it too.
+  const languagePairText = !pair ? '' : pair.source === pair.target ? label(pair.source) : `${label(pair.source)} → ${label(pair.target)}${lit ? ` · ${label(lit)}` : ''}`;
   const handleActionClick = isIdle ? onStart : onStop;
   const actionDisabled = (isIdle && !canStart) || run.phase === 'stopping';
 

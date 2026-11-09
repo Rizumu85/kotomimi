@@ -34,6 +34,7 @@ import { useCleanupAudioSystemListeners, useInitAudioSystemListeners } from '../
 import { useConversationColours, useConversationDisplayStore } from '../../stores/conversationDisplayStore';
 import { usePanelNotes, usePanelNotesStore } from '../../stores/panelNotesStore';
 import { useProviderStore } from '../../stores/providerStore';
+import { useLitLanguage } from '../../app/useLitLanguage';
 import { useRoutingStore } from '../../stores/routingStore';
 import {
   useKeepReplayAudio,
@@ -288,12 +289,13 @@ export default function MainPanel() {
   }, [runner]);
   // Fork: which legs hear sound, during a run: a dot on each leg's mode button, in place of upstream's waveform strips.
   const heard = useHeard(audio?.capture.levels ?? null, mode === 'both' ? BOTH_LEGS : [mode], run.phase === 'running');
+  const theirLit = useLitLanguage();
   const footer = (site: 'basic' | 'advanced') => (
     <PanelFooter
       site={site} run={run} mode={mode} missingDevice={missingDevice}
       canStart={subtitle.canStart}
       holdToTalk={speakerLive && subtitle.holdToTalk} held={ptt.held} micMuted={micMuted}
-      pair={subtitle.pair} duration={duration}
+      pair={subtitle.pair} {...(theirLit ? { lit: theirLit } : {})} duration={duration}
       // Ruling 11: `session.start` is the one start every surface calls — never a start while the gate is shut, the button is off then; this also holds for a click that beat its render (as the takeover's Start).
       onStart={() => void session.start('button')}
       onStop={() => void runner.stop('button')}

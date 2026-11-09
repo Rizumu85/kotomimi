@@ -197,9 +197,9 @@ describe('LanguagePairSection — my language and theirs (fork)', () => {
 });
 
 describe('LanguagePairSection — the languages beside the main ones (fork)', () => {
-  type Side = { chosen?: string[]; offered?: string[] | null; most?: number | null; any?: boolean; hearer?: { name: string; languages: string[] | null }; set?(chosen: string[]): void };
+  type Side = { chosen?: string[]; offered?: string[] | null; most?: number | null; any?: boolean; hearer?: { name: string; languages: string[] | null }; set?(chosen: string[]): void; lit?: string; light?(code: string): void };
   const side = (given: Side) => ({ chosen: [], offered: null, most: null, any: false, set: vi.fn(), ...given });
-  const show = (more: { mine?: Side; theirs?: Side }, extra: { followed?: string; onOpenHearing?: () => void } = {}) => {
+  const show = (more: { mine?: Side; theirs?: Side }, extra: { onOpenHearing?: () => void } = {}) => {
     cleanup();
     const sides = { ...(more.mine ? { mine: side(more.mine) } : {}), ...(more.theirs ? { theirs: side(more.theirs) } : {}) };
     render(<LanguagePairSection provider={fakeProvider} settings={FAKE_DEFAULTS} pair={{ source: 'en', target: 'ja' }} onChange={vi.fn()} more={sides} {...extra} owners />);
@@ -247,9 +247,18 @@ describe('LanguagePairSection — the languages beside the main ones (fork)', ()
     expect(add(group)).toBeNull();
   });
 
-  it('marks the language followed into in a session', () => {
-    show({ theirs: { chosen: ['zh'] } }, { followed: 'zh' });
-    expect(chips(row('fork.languageMenu.theyMaySpeak')!)[0].className).toContain('is-live');
+  it('lights one of their languages by pressing it, and puts it out by pressing it again', () => {
+    const light = vi.fn();
+    show({ theirs: { chosen: ['zh', 'ko'], lit: 'zh', light } });
+    const [zh, ko] = chips(row('fork.languageMenu.theyMaySpeak')!);
+    expect(zh.className).toContain('is-lit');
+    expect(ko.className).not.toContain('is-lit');
+    const name = (chip: HTMLElement) => chip.querySelector<HTMLButtonElement>('.language-chip__name')!;
+    expect(name(zh).getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(name(ko));
+    expect(light).toHaveBeenLastCalledWith('ko');
+    fireEvent.click(name(zh));
+    expect(light).toHaveBeenLastCalledWith('');
   });
 
   it('names what hears once in the heading where both sides have the same, and each side its own where not', () => {

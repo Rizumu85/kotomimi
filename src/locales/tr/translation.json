@@ -1780,7 +1780,7 @@
       "unpinShort": "Sabitlemeyi kaldır",
       "mine": "Benim dilim",
       "theirs": "Karşı tarafın dili",
-      "pairHelp": "Sizin ve karşınızdakinin en çok kullandığı dilleri seçin. Söyledikleriniz onun diline, onun söyledikleri sizin dilinize çevrilir.",
+      "pairHelp": "Sizin ve karşınızdakinin en çok kullandığı dilleri seçin. Söyledikleriniz onun diline, onun söyledikleri sizin dilinize çevrilir. “Karşı taraf şunları da konuşabilir” altındaki bir dile dokunarak onu açın: karşı taraf o dilde de dinlenir ve söyledikleriniz o dile de çevrilir.",
       "alsoSpeak": "Ben de konuşuyorum",
       "theyMaySpeak": "Karşı taraf şunları da konuşabilir",
       "hearingBy": "Ses tanıma: {{name}}",

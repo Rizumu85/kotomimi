@@ -1780,7 +1780,7 @@
       "unpinShort": "Dejar de fijar",
       "mine": "Mi idioma",
       "theirs": "Idioma de los demás",
-      "pairHelp": "Elige los idiomas que tú y la otra persona usáis principalmente. Lo que dices se traduce a su idioma y lo que dice a tu idioma.",
+      "pairHelp": "Elige los idiomas que tú y la otra persona usáis principalmente. Lo que dices se traduce a su idioma y lo que dice a tu idioma. Pulsa un idioma en «También puede hablar» para activarlo: también se le escucha en ese idioma y lo que dices se traduce además a él.",
       "alsoSpeak": "También hablo",
       "theyMaySpeak": "También puede hablar",
       "hearingBy": "Reconocimiento de voz: {{name}}",

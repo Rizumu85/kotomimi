@@ -29,8 +29,9 @@ describe('the languages beside each side’s main one', () => {
     const { mine, theirs } = more({ asrVia: 'server', asrModel: 'qwen3-asr-1.7b-q8' });
     expect(mine).toMatchObject({ hearer: { name: 'Qwen3-ASR 1.7B' }, most: null, any: true });
     expect(theirs).toMatchObject({ most: null, any: true });
-    expect(theirs!.set(['ko', 'es'])).toEqual({ theyAlso: ['ko', 'es'], asrDetectOther: true });
-    expect(theirs!.set([])).toEqual({ theyAlso: [], asrDetectOther: false });
+    // One added is lit: heard, and translated into.
+    expect(theirs!.set(['ko'])).toEqual({ theyAlso: ['ko'], theyLit: 'ko', asrDetectOther: true });
+    expect(theirs!.set([])).toEqual({ theyAlso: [], theyLit: '', asrDetectOther: false });
   });
 
   it('keeps SenseVoice to its five, with no "any language"', () => {
@@ -51,10 +52,19 @@ describe('the languages beside each side’s main one', () => {
     expect(theirs!.chosen).toEqual(['auto']);
   });
 
-  it('follows the other side into whatever they were last heard in, where their language is detected', () => {
-    const follows = (settings: Record<string, unknown>) => localaiLanguages.follows!({ ...LOCALAI_DEFAULTS, asrVia: 'server', asrModel: 'qwen3-asr-1.7b-q8', ...settings } as never, MAC, PAIR);
-    expect(follows({ theyAlso: ['ko'], asrDetectOther: true })).toBe(true);
-    expect(follows({ theyAlso: ['auto'], asrDetectOther: true })).toBe(true);
-    expect(follows({})).toBe(false);
+  it('switches their languages by hand: one lit, heard and translated into; another pressed takes the light', () => {
+    const lit = (settings: Record<string, unknown>) => more({ asrVia: 'server', asrModel: 'qwen3-asr-1.7b-q8', ...settings }).theirs!;
+    expect(lit({ theyAlso: ['ko', 'es'] }).lit).toBe('');
+    expect(lit({ theyAlso: ['ko', 'es'], theyLit: 'es', asrDetectOther: true }).lit).toBe('es');
+    // An older build followed them by itself, with no light: the first of theirs, or any.
+    expect(lit({ theyAlso: ['ko', 'es'], asrDetectOther: true }).lit).toBe('ko');
+    expect(lit({ asrDetectOther: true }).lit).toBe('auto');
+    const side = lit({ theyAlso: ['ko', 'es'], theyLit: 'ko', asrDetectOther: true });
+    expect(side.light!('es')).toEqual({ theyLit: 'es', asrDetectOther: true });
+    expect(side.light!('')).toEqual({ theyLit: '', asrDetectOther: false });
+    // A third added takes the light; the lit one taken away puts it out.
+    expect(side.set(['ko', 'es', 'fr'])).toMatchObject({ theyLit: 'fr', asrDetectOther: true });
+    expect(side.set(['es'])).toMatchObject({ theyLit: '', asrDetectOther: false });
+    expect(side.set(['ko'])).toMatchObject({ theyLit: 'ko', asrDetectOther: true });
   });
 });

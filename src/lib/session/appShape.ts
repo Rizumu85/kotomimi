@@ -97,7 +97,7 @@ export function watchPairFromStores(changed: () => void): () => void {
     let detected = '';
     try {
       const more = provider.languages.more?.(entry.settings, [], entry.pair);
-      if (more) detected = `|${(more.mine?.chosen ?? []).join(',')}|${(more.theirs?.chosen ?? []).join(',')}`;
+      if (more) detected = `|${(more.mine?.chosen ?? []).join(',')}|${(more.theirs?.chosen ?? []).join(',')}|${more.theirs?.lit ?? ''}`;
     } catch {
       // A provider that cannot say goes by its pair alone.
     }

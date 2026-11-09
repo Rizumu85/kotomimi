@@ -60,25 +60,28 @@ function Main({ state, onTune }: { state: VrState; onTune: () => void }) {
   const label = (value: string) => theirs.options.find((o) => o.value === value)?.label ?? value;
   const pick = (value: string) => {
     setMore(false);
-    if (value !== theirs.value) send({ type: 'theirs', value });
+    // Their lit language pressed: it goes dark. Any other becomes their main one.
+    if (value === theirs.lit) send({ type: 'light', value: '' });
+    else if (value !== theirs.value) send({ type: 'theirs', value });
   };
+  const on = (value: string) => value === theirs.value || value === theirs.lit;
   const running = state.phase !== 'idle';
   return (
     <>
       <Dots state={state} />
       {more ? null : <Recent state={state} />}
       <div className="lang">
-        <div className="lang__head">{words.theirs}<b>{label(theirs.value)}</b></div>
+        <div className="lang__head">{words.theirs}<b>{label(theirs.value)}{theirs.lit ? ` · ${label(theirs.lit)}` : ''}</b></div>
         <div className="chips">
           {theirs.quick.map((value) => (
-            <button key={value} type="button" className={`chip${value === theirs.value && !more ? ' is-on' : ''}`} onClick={() => pick(value)}>{label(value)}</button>
+            <button key={value} type="button" className={`chip${on(value) && !more ? ' is-on' : ''}`} onClick={() => pick(value)}>{label(value)}</button>
           ))}
           <button type="button" className={`chip${more ? ' is-open' : ''}`} aria-label={words.more} onClick={() => setMore(!more)}>…</button>
         </div>
         {more ? (
           <div className="more">
             {theirs.options.map((o) => (
-              <button key={o.value} type="button" className={`chip${o.value === theirs.value ? ' is-on' : ''}`} onClick={() => pick(o.value)}>{o.label}</button>
+              <button key={o.value} type="button" className={`chip${on(o.value) ? ' is-on' : ''}`} onClick={() => pick(o.value)}>{o.label}</button>
             ))}
           </div>
         ) : null}

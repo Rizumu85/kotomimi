@@ -34,8 +34,6 @@ interface LanguagePairSectionProps {
    * is all its recognizer takes and no other names it.
    */
   more?: { mine?: SideLanguages; theirs?: SideLanguages };
-  /** Fork: the language the user's speech follows the other side into now, in a session (`follow.ts`). */
-  followed?: string;
   /** Fork: pressing what hears a side opens its settings. */
   onOpenHearing?(): void;
   /**
@@ -55,7 +53,7 @@ interface LanguagePairSectionProps {
  * allowed whenever the provider supports the reversed pair. Markup is
  * LanguageSection's translation-languages block.
  */
-export function LanguagePairSection({ provider, settings, pair, onChange, disabled, sentence, context, more, followed, onOpenHearing, owners }: LanguagePairSectionProps) {
+export function LanguagePairSection({ provider, settings, pair, onChange, disabled, sentence, context, more, onOpenHearing, owners }: LanguagePairSectionProps) {
   const { t, i18n } = useTranslation();
   const id = useId();
   const label = useLanguageLabel();
@@ -187,7 +185,6 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
         label={label}
         {...(more?.mine ? { mine: more.mine } : {})}
         {...(more?.theirs ? { theirsMore: more.theirs } : {})}
-        {...(followed ? { followed } : {})}
         sameHearer={!!shared}
         {...(onOpenHearing ? { onOpenHearing } : {})}
         disabled={disabled}

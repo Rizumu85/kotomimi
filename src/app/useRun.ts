@@ -15,11 +15,6 @@ export function useRunPhase(): RunState['phase'] {
   return useStore(getAppSession().runner.state, (s) => s.phase);
 }
 
-/** Fork: the language the user's speech follows the other side into now, while a run follows one (`follow.ts`). */
-export function useFollowedLanguage(): string | undefined {
-  return useStore(getAppSession().runner.state, (s) => (s.phase === 'running' ? s.followed : undefined));
-}
-
 /** The settings "What may change during a run" does not list are locked while the phase is not idle — through starting and stopping too (1e-3 ruling 9). */
 export function useSessionLocked(): boolean {
   return useRunPhase() !== 'idle';

@@ -133,6 +133,5 @@ export interface LoadingProgress {
 export type RunState =
   | { phase: 'idle'; lastEnd?: RunEnd }
   | { phase: 'starting'; step: 'checking' | 'preparing' | 'opening'; loading?: LoadingProgress }
-  /** Fork: `followed`, the language the user's speech is translated into where it follows the other side's away from the pair's (`follow.ts`). */
-  | { phase: 'running'; since: number; legs: Partial<Record<LegName, LegState>>; budget?: Budget; followed?: string }
+  | { phase: 'running'; since: number; legs: Partial<Record<LegName, LegState>>; budget?: Budget }
   | { phase: 'stopping' };

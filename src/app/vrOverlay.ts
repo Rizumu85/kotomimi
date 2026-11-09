@@ -42,6 +42,9 @@ export interface VrSettingsPort {
   /** The user's own languages the provider offers. */
   myOptions(): readonly string[];
   pins(): readonly string[];
+  /** Fork: the other side's language lit beside their main one (heard, and translated into too); and lighting one, or none with ''. */
+  lit?(): string | undefined;
+  light?(code: string): void;
   /** This computer's recognizers that hear the other side's language and are downloaded, and the one that does; null where the run does not hear on this computer. */
   hearers(): { value: string; options: readonly { id: string; label: string }[] } | null;
   setHearer(id: string): void;
@@ -178,6 +181,7 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
     const theirs = settings.theirOptions();
     const mine = settings.myOptions();
     const myQuick = quickLanguages(pair.source, mine, settings.pins(), 4);
+    const lit = settings.lit?.();
     return {
       words: deps.words(),
       phase: run.phase,
@@ -186,8 +190,8 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
       heard,
       muted: deps.muted(),
       lines: vrLines(deps.view.get().entries),
-      // Fork: the user's speech following the other side's language (`follow.ts`): the language it goes into now.
-      theirs: { value: (run.phase === 'running' && run.followed) || pair.target, options: choices(theirs), quick: quickLanguages((run.phase === 'running' && run.followed) || pair.target, theirs, settings.pins()) },
+      // Fork: their language lit beside the main one, among the quick ones.
+      theirs: { value: pair.target, ...(lit ? { lit } : {}), options: choices(theirs), quick: quickLanguages(pair.target, theirs, lit ? [lit, ...settings.pins().filter((code) => code !== lit)] : settings.pins()) },
       mine: { value: pair.source, options: choices(myQuick) },
       hear: models(settings.hearers(), hearLags),
       translate: models(settings.translators(), translateLags),
@@ -315,6 +319,10 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
     const command = raw as VrCommand;
     const pair = settings.pair();
     switch (command.type) {
+      case 'light':
+        // Their lit language turned off from the wrist: the run goes on without it (`Runner.retarget`).
+        if (typeof command.value === 'string') settings.light?.(command.value);
+        break;
       case 'theirs':
         if (pair && typeof command.value === 'string' && command.value !== pair.target) {
           const target = command.value;

@@ -1780,7 +1780,7 @@
       "unpinShort": "Non fissare più",
       "mine": "La mia lingua",
       "theirs": "La lingua degli altri",
-      "pairHelp": "Scegli le lingue che tu e l’altra persona usate di più. Le tue parole vengono tradotte nella sua lingua e le sue nella tua.",
+      "pairHelp": "Scegli le lingue che tu e l’altra persona usate di più. Le tue parole vengono tradotte nella sua lingua e le sue nella tua. Tocca una lingua in «Potrebbero parlare anche» per accenderla: l’altra persona viene ascoltata anche in quella lingua e le tue parole vengono tradotte anche in essa.",
       "alsoSpeak": "Parlo anche",
       "theyMaySpeak": "Potrebbero parlare anche",
       "hearingBy": "Riconoscimento vocale: {{name}}",

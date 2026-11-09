@@ -78,8 +78,11 @@
   font-size: vars.$font-body;
   white-space: nowrap;
 
-  // The one the user's speech follows into now, in a session: filled, with a mark of its own.
-  &.is-live {
+  // Switched by hand: the chip's name is pressed to light it.
+  &.is-switch:not(.is-lit):hover { background: vars.$bg-hover; }
+
+  // The other side's language lit: heard, and the user's speech translated into it too. Filled, with a mark of its own.
+  &.is-lit {
     padding-left: 9px;
     border-color: vars.$color-primary-fill;
     background: vars.$color-primary-fill;
@@ -109,10 +112,23 @@
   color: vars.$text-muted;
   cursor: pointer;
 
-  .language-chip.is-live & { color: inherit; opacity: 0.75; }
+  .language-chip.is-lit & { color: inherit; opacity: 0.75; }
   &:hover:not(:disabled) { color: vars.$text-primary; background: vars.$bg-hover; }
   &:focus-visible { @include vars.focus-ring; }
   &:disabled { cursor: not-allowed; opacity: vars.$disabled-opacity; }
+}
+
+// The name of a chip switched by hand: the chip's own text, pressed.
+.language-chip__name {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:focus-visible { @include vars.focus-ring; }
+  &:disabled { cursor: not-allowed; }
 }
 
 // "+": more fit; there while what hears the side can take another.

@@ -24,7 +24,7 @@
  *   out, when the video's sound has stopped; VRChat writes nothing then.
  */
 import { createVideoJudge, participantSplit, type ParticipantSplit } from '../lib/audio/capture/stereoSplit';
-import { VIDEO_ORIGIN, type Entry } from '../lib/projection/types';
+import { VIDEO_ORIGIN, type Entry, type Row } from '../lib/projection/types';
 import type { LegName } from '../lib/conversation/types';
 import type { LegPace, SideHandle } from '../lib/session/run';
 import type { Runner } from '../lib/session/runner';
@@ -54,10 +54,11 @@ export interface VRChatDeps {
   canAsk(): boolean;
   coached(): boolean;
   /**
-   * Fork: the other side's language, and whether the user's sentences in it are translated back into their own
-   * (`speakBoth`): what a sentence the user said in that language goes up as (`finishedLine`). Absent: none known.
+   * Fork: the other side's languages — their main one, and the one lit beside it — and whether the user's sentences in
+   * them are translated back into their own (`speakBoth`): what a sentence the user said in one goes up as
+   * (`finishedLine`), and how many translations a sentence of theirs waits for. Absent: none known.
    */
-  theirs?(): { language: string; back: boolean } | undefined;
+  theirs?(): Theirs | undefined;
   /** The conversation emptied (a clear, a new run): what waits to be sent was said there, and is not sent. */
   onReset?(listener: () => void): () => void;
   store: typeof useVRChatStore;
@@ -163,21 +164,45 @@ export function chatboxPages(line: string): string[] {
  */
 const base = (code: string) => code.toLowerCase().split(/[-_]/)[0];
 
-export function finishedLine(entry: Entry, shows: ChatboxShows, said = false, translationFirst = false, theirs?: { language: string; back: boolean }): string | null {
+/** Fork: the other side's languages (their main one first, then the one lit), and whether the user's speech in them is translated back. */
+export interface Theirs { languages: readonly string[]; back: boolean }
+
+/** Each answer's text, in order: one per translation segment (the second language lit gives a sentence two). */
+export const answersOf = (rows: readonly Row[]): string[] => {
+  const out: { id: string; text: string }[] = [];
+  for (const row of rows) {
+    if (row.purpose === 'feedback') continue;
+    if (out[out.length - 1]?.id !== row.segmentId) out.push({ id: row.segmentId, text: '' });
+    out[out.length - 1].text += row.text;
+  }
+  return out.map((answer) => answer.text.trim()).filter(Boolean);
+};
+
+/**
+ * With two languages lit a sentence has two translations, each on a line of its own; where the two and the original do
+ * not fit the chatbox together, the original goes, and the two go up alone (the user, 2026-11-08). `settled`: the
+ * second will not come — a later sentence of the user's is already translated, and translations are done in order.
+ */
+export function finishedLine(entry: Entry, shows: ChatboxShows, said = false, translationFirst = false, theirs?: Theirs, settled = false): string | null {
   if (shows === 'off' || entry.kind !== 'exchange' || entry.leg !== 'speaker') return null;
   // Speech already in the other language is shown as said unless the user enabled translation back into their own.
-  const inTheirs = theirs !== undefined && entry.source.length > 0 && entry.source.every((row) => row.language !== undefined && base(row.language) === base(theirs.language));
+  const inTheirs = theirs !== undefined && entry.source.length > 0 && entry.source.every((row) => row.language !== undefined && theirs.languages.some((code) => base(code) === base(row.language!)));
   if (said || shows === 'source' || (inTheirs && !theirs.back)) {
     const words = textOf(entry.source);
     return entry.source.length > 0 && entry.source.every((row) => row.final) && words ? words : null;
   }
   if (entry.source.length === 0 || entry.translation.length === 0) return null;
   if (!entry.source.every((row) => row.final) || !entry.translation.every((row) => row.final)) return null;
-  const translation = textOf(entry.translation);
-  if (!translation) return null;
+  const answers = answersOf(entry.translation);
+  if (answers.length === 0) return null;
+  // Back into their own, a sentence has one; else one for each language of theirs.
+  const wanted = inTheirs ? 1 : Math.max(1, theirs?.languages.length ?? 1);
+  if (answers.length < wanted && !settled) return null;
+  const translation = answers.join('\n');
   if (shows !== 'both') return translation;
   const original = textOf(entry.source);
-  return translationFirst ? `${translation}\n${original}` : `${original}\n${translation}`;
+  const line = translationFirst ? `${translation}\n${original}` : `${original}\n${translation}`;
+  return answers.length > 1 && [...line].length > CHATBOX_MOST ? translation : line;
 }
 
 export interface VRChatController {
@@ -359,7 +384,7 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
       && !theirs?.back
       && !entry.translation.some((row) => row.purpose === 'translation')
       && !entry.source.some((row) => typed.has(row.segmentId))
-      && !(theirs && entry.source.length > 0 && entry.source.every((row) => row.language && base(row.language) !== base(theirs.language)));
+      && !(theirs && entry.source.length > 0 && entry.source.every((row) => row.language && !theirs.languages.some((code) => base(code) === base(row.language!))));
     // The last sentence of the user's translated as it would go up, for the settings to show the chatbox with: not
     // one answered with feedback, which is theirs alone.
     for (let i = state.entries.length - 1; i >= 0; i--) {
@@ -367,17 +392,20 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
       if (entry.kind !== 'exchange' || entry.leg !== 'speaker') continue;
       if (feedback(entry)) continue;
       if (finishedLine(entry, 'translation') === null) continue;
-      store.getState().setRecent({ said: textOf(entry.source), translation: textOf(entry.translation) });
+      store.getState().setRecent({ said: textOf(entry.source), translation: answersOf(entry.translation).join('\n') });
       break;
     }
-    for (const entry of state.entries) {
-      if (entry.kind !== 'exchange' || sent.has(entry.id)) continue;
+    // The newest of the user's sentences that is translated: every one before it has all the translations it will get.
+    let newest = -1;
+    state.entries.forEach((entry, i) => { if (entry.kind === 'exchange' && entry.leg === 'speaker' && answersOf(entry.translation).length > 0) newest = i; });
+    state.entries.forEach((entry, i) => {
+      if (entry.kind !== 'exchange' || sent.has(entry.id)) return;
       const said = feedback(entry);
-      const line = finishedLine(entry, shows, said, store.getState().chatboxTranslationFirst, theirs);
-      if (line === null) continue;
+      const line = finishedLine(entry, shows, said, store.getState().chatboxTranslationFirst, theirs, i < newest);
+      if (line === null) return;
       sent.add(entry.id);
       queue.push(chatboxPages(line));
-    }
+    });
     pump();
   };
   // What is finished on screen when this begins was said before: it is not sent now. A sentence still under way is.
@@ -445,15 +473,15 @@ async function build(): Promise<VRChatController> {
       const entry = selected ? entries[selected] : undefined;
       const provider = selected ? getProvider(selected) : undefined;
       if (!entry || !provider) return undefined;
-      // Fork: the language the user's speech follows the other side into now, where it does (`follow.ts`); and whether
-      // the user speaks it ("我也会说").
-      const run = session.runner.state.getState();
-      const language = (run.phase === 'running' && run.followed) || entry.pair.target;
+      // Fork: the other side's languages — their main one, and the one lit beside it — and whether the user speaks
+      // them ("我也会说").
       const listed = models[selected!] ?? [];
-      const also = provider.languages.more?.(entry.settings, listed, entry.pair).mine;
+      const more = provider.languages.more?.(entry.settings, listed, entry.pair);
+      const lit = more?.theirs?.lit;
+      const languages = [entry.pair.target, ...(lit && lit !== 'auto' ? [lit] : [])];
       const base = (code: string) => code.toLowerCase().split(/[-_]/)[0];
-      const speaks = also ? also.chosen.some((code: string) => base(code) === base(language)) : true;
-      return { language, back: speaks && provider.languages.detection?.(entry.settings, listed, entry.pair).both.on === true };
+      const speaks = more?.mine ? more.mine.chosen.some((code: string) => languages.some((one) => base(one) === base(code))) : true;
+      return { languages, back: speaks && provider.languages.detection?.(entry.settings, listed, entry.pair).both.on === true };
     },
     onReset: (listener) => session.runner.conversation.onReset(() => listener()),
     store: useVRChatStore,

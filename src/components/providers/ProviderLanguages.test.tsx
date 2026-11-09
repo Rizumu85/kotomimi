@@ -125,9 +125,24 @@ describe('ProviderLanguages — the Kotomimi provider: my language, theirs, and 
     expect(screen.getAllByRole('button', { name: 'fork.languageMenu.hearingBy' })).toHaveLength(1);
     fireEvent.mouseDown(add(row('fork.languageMenu.theyMaySpeak')!)!, { button: 0 });
     fireEvent.click(screen.getAllByRole('option').find((o) => o.textContent === 'fork.languageMenu.anyLanguage')!);
-    expect(saved()).toMatchObject({ theyAlso: ['auto'], asrDetectOther: true });
+    expect(saved()).toMatchObject({ theyAlso: ['auto'], theyLit: 'auto', asrDetectOther: true });
+    // Only the user heard: their languages are still what the user's speech is translated into.
     show({}, ['speaker']);
-    expect(row('fork.languageMenu.theyMaySpeak')).toBeNull();
+    expect(row('fork.languageMenu.theyMaySpeak')).not.toBeNull();
+  });
+
+  it('lights one of their languages by pressing it, moves the light to another, and puts it out: heard no more, translated into no more', () => {
+    show({ theyAlso: ['en', 'ko'] }, ['speaker', 'participant']);
+    const theirs = row('fork.languageMenu.theyMaySpeak')!;
+    const name = (i: number) => theirs.querySelectorAll<HTMLButtonElement>('.language-chip__name')[i];
+    expect(theirs.querySelector('.is-lit')).toBeNull();
+    fireEvent.click(name(0));
+    expect(saved()).toMatchObject({ theyLit: 'en', asrDetectOther: true });
+    fireEvent.click(name(1));
+    expect(saved()).toMatchObject({ theyAlso: ['en', 'ko'], theyLit: 'ko', asrDetectOther: true });
+    expect(name(1).getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(name(1));
+    expect(saved()).toMatchObject({ theyAlso: ['en', 'ko'], theyLit: '', asrDetectOther: false });
   });
 
   it('reads an older "detect their language" as any language', () => {

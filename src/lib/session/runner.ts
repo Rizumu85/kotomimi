@@ -198,12 +198,6 @@ export function createRunner(rawDeps: RunnerDeps): Runner {
       const now = state.getState();
       if (run === current && now.phase === 'running') set({ ...now, legs: legs(run) });
     },
-    followed: (language) => {
-      const now = state.getState();
-      if (run !== current || now.phase !== 'running' || (now.followed ?? null) === language) return;
-      const { followed: _was, ...rest } = now;
-      set(language ? { ...rest, followed: language } : rest);
-    },
     loading: (leg, progress) => {
       const now = state.getState();
       if (run === current && now.phase === 'starting') set({ ...now, loading: { leg, ...progress } });

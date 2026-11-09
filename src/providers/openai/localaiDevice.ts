@@ -82,6 +82,19 @@ export function theyAlsoSpeak(s: { theyAlso?: readonly string[]; asrDetectOther?
 }
 
 /**
+ * Fork: the one of the other side's languages lit beside the pair's target (`theyLit`), switched by hand: they are
+ * heard in either — their language left to be detected (`asrDetectOther`) — and the user's speech is translated into
+ * it as well, unless it is `auto`. '' none: they are heard in the pair's target alone. A build that followed them by
+ * itself stored detection with no light: the first of their languages, or any.
+ */
+export function theyLitOf(s: { theyAlso?: readonly string[]; theyLit?: string; asrDetectOther?: boolean }): string {
+  if (!s.asrDetectOther) return '';
+  const chosen = theyAlsoSpeak(s);
+  const lit = s.theyLit ?? '';
+  return chosen.find((code) => baseCode(code) === baseCode(lit)) ?? chosen[0] ?? 'auto';
+}
+
+/**
  * Fork: the one of them the speaker is heard beside now, where only one can be (the Mac's recognition hears two
  * languages at once): the pair's target where they speak it — the other side's language, followed or chosen — else the
  * first they picked. Undefined where they speak none.

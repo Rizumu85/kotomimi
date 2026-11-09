@@ -1780,7 +1780,7 @@
       "unpinShort": "Lösen",
       "mine": "Meine Sprache",
       "theirs": "Sprache der anderen",
-      "pairHelp": "Wähle die Sprachen, die du und dein Gegenüber hauptsächlich verwenden. Deine Sprache wird in ihre übersetzt, ihre in deine.",
+      "pairHelp": "Wähle die Sprachen, die du und dein Gegenüber hauptsächlich verwenden. Deine Sprache wird in ihre übersetzt, ihre in deine. Tippe unter „Die andere Person spricht vielleicht auch“ auf eine Sprache, um sie einzuschalten: Dein Gegenüber wird dann auch in dieser Sprache erkannt, und deine Sprache wird zusätzlich in sie übersetzt.",
       "alsoSpeak": "Ich spreche auch",
       "theyMaySpeak": "Die andere Person spricht vielleicht auch",
       "hearingBy": "Spracherkennung: {{name}}",
