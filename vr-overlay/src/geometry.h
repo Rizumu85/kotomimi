@@ -31,18 +31,23 @@ Mat34 wristOffset(bool leftHand, Vec3 at, Vec3 turn);
 /** Whether a panel at `panel` faces eyes at `hmd` closely enough to be shown; looser while already shown. */
 bool facesEyes(const Mat34& panel, const Mat34& hmd, bool shown);
 
+/**
+ * Where a film's subtitles are: low in the view, out of the way of the world, a glance down away. 14° read as the
+ * middle of a headset's view (a friend's test, 2026-11-08).
+ */
 struct StripConfig {
   float distance = 1.4f;       // metres from the eyes
-  float below = 14.0f;         // degrees under the line of sight
-  float yawSlack = 20.0f;      // degrees the head may turn before the strip follows
-  float pitchSlack = 18.0f;
-  float rate = 4.0f;           // how fast it catches up, per second
+  float below = 22.0f;         // degrees under the line of sight
+  float yawSlack = 8.0f;       // degrees the head may turn before the strip follows: it stays in view through a fight
+  float pitchSlack = 25.0f;    // a glance down at a watch does not drag it along
+  float rate = 5.0f;           // how fast it catches up, per second
 };
 
 /** Where the strip is: it stays put while the head turns a little, then glides back under the line of sight. */
 struct LazyFollow {
   bool placed = false;
-  bool moving = false;
+  bool turning = false;        // catching up with the head's turn
+  bool tilting = false;        // and with its tilt, apart
   float yaw = 0, pitch = 0;    // radians
 };
 

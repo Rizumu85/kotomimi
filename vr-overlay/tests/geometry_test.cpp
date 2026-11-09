@@ -50,14 +50,35 @@ int main() {
   Vec3 at = column(s, 3);
   CHECK(at.z < -1.2f && at.y < 1.6f);
   CHECK(column(s, 2).z > 0.9f);
-  Mat34 small = fromEulerDeg(10, 0, 0, {0, 1.6f, 0});
+  // Low, as a film's subtitles: its centre some 22° under the line of sight.
+  float below = std::atan2(1.6f - at.y, -at.z) * 180.0f / 3.14159265f;
+  CHECK(std::fabs(below - sc.below) < 0.5f);
+  auto yawOf = [](const Mat34& m) { Vec3 p = column(m, 3); return std::atan2(-p.x, -p.z) * 180.0f / 3.14159265f; };
+  auto pitchOf = [](const Mat34& m) { Vec3 p = column(m, 3); return std::atan2(p.y - 1.6f, std::sqrt(p.x * p.x + p.z * p.z)) * 180.0f / 3.14159265f; };
+  Mat34 small = fromEulerDeg(5, 0, 0, {0, 1.6f, 0});
   for (int i = 0; i < 60; i++) s = followStrip(f, small, 0.016f, sc);
   CHECK(near(column(s, 3).x, at.x, 1e-4f));
+  // A turn past the slack: it follows within half a second, and settles under the line of sight.
   Mat34 large = fromEulerDeg(60, 0, 0, {0, 1.6f, 0});
-  for (int i = 0; i < 240; i++) s = followStrip(f, large, 0.016f, sc);
-  Vec3 dir = {column(s, 3).x, 0, column(s, 3).z + 0.0f};
-  float yaw = std::atan2(-dir.x, -dir.z) * 180.0f / 3.14159265f;
-  CHECK(std::fabs(yaw - 60) < 3);
+  for (int i = 0; i < 30; i++) s = followStrip(f, large, 0.016f, sc);
+  CHECK(yawOf(s) > 45);
+  for (int i = 0; i < 210; i++) s = followStrip(f, large, 0.016f, sc);
+  CHECK(std::fabs(yawOf(s) - 60) < 1.5f);
+  // The same glide at 144 Hz as at 72.
+  LazyFollow slow, fast;
+  followStrip(slow, head, 0.016f, sc);
+  followStrip(fast, head, 0.016f, sc);
+  Mat34 a = head, b = head;
+  for (int i = 0; i < 18; i++) a = followStrip(slow, large, 1.0f / 72, sc);
+  for (int i = 0; i < 36; i++) b = followStrip(fast, large, 1.0f / 144, sc);
+  CHECK(std::fabs(yawOf(a) - yawOf(b)) < 0.5f);
+  // A glance down at the watch, turning a little on the way: the strip turns, and stays up.
+  LazyFollow g;
+  followStrip(g, head, 0.016f, sc);
+  Mat34 watch = fromEulerDeg(15, -20, 0, {0, 1.6f, 0});
+  for (int i = 0; i < 120; i++) s = followStrip(g, watch, 0.016f, sc);
+  CHECK(std::fabs(yawOf(s) - 15) < 1.5f);
+  CHECK(std::fabs(pitchOf(s) + sc.below) < 0.5f);
 
   // A poke: hover in front, press on the face, release on drawing back; leaving releases a press.
   PokeConfig pc;

@@ -103,12 +103,18 @@ Mat34 followStrip(LazyFollow& f, const Mat34& hmd, float dt, const StripConfig& 
   }
   float dy = wrapAngle(wantYaw - f.yaw);
   float dp = wantPitch - f.pitch;
-  if (!f.moving && (std::fabs(dy) > c.yawSlack * kDeg || std::fabs(dp) > c.pitchSlack * kDeg)) f.moving = true;
-  if (f.moving) {
-    float k = std::min(1.0f, dt * c.rate);
+  // A turn and a tilt are followed apart: turning while looking down at a watch does not bring the strip down to it.
+  if (std::fabs(dy) > c.yawSlack * kDeg) f.turning = true;
+  if (std::fabs(dp) > c.pitchSlack * kDeg) f.tilting = true;
+  // Eased by the time passed, not the frames: the same glide at 72 Hz and 144.
+  float k = 1.0f - std::exp(-dt * c.rate);
+  if (f.turning) {
     f.yaw = wrapAngle(f.yaw + dy * k);
+    if (std::fabs(dy) < 1.0f * kDeg) f.turning = false;
+  }
+  if (f.tilting) {
     f.pitch += dp * k;
-    if (std::fabs(dy) < 1.5f * kDeg && std::fabs(dp) < 1.5f * kDeg) f.moving = false;
+    if (std::fabs(dp) < 1.0f * kDeg) f.tilting = false;
   }
   Vec3 dir = {-std::sin(f.yaw) * std::cos(f.pitch), std::sin(f.pitch), -std::cos(f.yaw) * std::cos(f.pitch)};
   Vec3 eyes = column(hmd, 3);
