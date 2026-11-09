@@ -183,6 +183,10 @@
     "en": "Search again",
     "text": "மீண்டும் தேடு"
   },
+  "fork.find.kindComputer": {
+    "en": "Computer",
+    "text": "கணினி"
+  },
   "fork.find.kindKotomimi": {
     "en": "Kotomimi",
     "text": "Kotomimi பகிர்வு"

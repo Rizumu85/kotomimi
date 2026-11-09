@@ -1886,7 +1886,6 @@
       "again": "Buscar de nuevo",
       "searching": "Buscando dispositivos en tu red local…",
       "none": "No se encontró ningún dispositivo. Comprueba que el otro dispositivo esté encendido, conectado a la misma red Wi-Fi o al mismo router que este equipo y que tenga activado «Compartir los modelos de este equipo» en Kotomimi. También puedes introducir su dirección abajo.",
-      "kindKotomimi": "Compartido por Kotomimi",
       "kindServer": "Servidor de modelos",
       "kindPhone": "Teléfono",
       "lendsAsr": "reconocimiento de voz",
@@ -1899,7 +1898,8 @@
       "productHere": "{{product}} en este equipo",
       "use": "Usar {{name}}",
       "manual": "O introduce su dirección",
-      "kindTablet": "Tableta"
+      "kindTablet": "Tableta",
+      "kindComputer": "Computadora"
     },
     "audio": {
       "vbcableMissing": "El controlador de audio virtual VB-CABLE no está instalado, por lo que no se puede enviar la traducción de voz a la aplicación de reuniones. No hace falta para ver los subtítulos.",

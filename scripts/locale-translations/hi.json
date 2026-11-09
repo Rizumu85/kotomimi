@@ -183,6 +183,10 @@
     "en": "Search again",
     "text": "फिर से खोजें"
   },
+  "fork.find.kindComputer": {
+    "en": "Computer",
+    "text": "कंप्यूटर"
+  },
   "fork.find.kindKotomimi": {
     "en": "Kotomimi",
     "text": "Kotomimi साझाकरण"

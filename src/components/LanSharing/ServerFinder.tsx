@@ -78,9 +78,9 @@ export function ServerFinder({ value = '', onPick, disabled = false, auto = fals
   if (find === findServers && !canFindServers()) return heading ? <>{heading}</> : null;
 
   const current = plainAddress(value);
-  // What it is, said once: the stages it can run are chosen in their cards.
+  // What device it is (a Kotomimi runs on each of them), or a model server: the stages it can run are chosen in their cards.
   const kind = (server: FoundServer) => (server.kind === 'kotomimi'
-    ? t('fork.find.kindKotomimi')
+    ? t('fork.find.kindComputer')
     : server.kind === 'phone' ? t(server.tablet ? 'fork.find.kindTablet' : 'fork.find.kindPhone') : t('fork.find.kindServer'));
   // A phone counts what it lends: its recognizer and its text models.
   const count = (server: FoundServer) => (server.kind === 'phone' ? (server.model ? 1 : 0) + (server.text?.length ?? 0) : server.models);

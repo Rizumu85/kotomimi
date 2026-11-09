@@ -1886,7 +1886,6 @@
       "again": "Cari semula",
       "searching": "Mencari peranti pada rangkaian setempat…",
       "none": "Tiada peranti ditemui. Pastikan peranti lain dihidupkan, disambungkan ke Wi-Fi atau penghala yang sama dengan komputer ini, dan \"Kongsi model komputer ini\" diaktifkan dalam Kotomimi pada peranti itu. Anda juga boleh masukkan alamatnya di bawah.",
-      "kindKotomimi": "Perkongsian Kotomimi",
       "kindServer": "Pelayan model",
       "kindPhone": "Telefon",
       "lendsAsr": "pengecaman pertuturan",
@@ -1899,7 +1898,8 @@
       "productHere": "{{product}} pada komputer ini",
       "use": "Guna {{name}}",
       "manual": "Atau masukkan alamatnya",
-      "kindTablet": "Tablet"
+      "kindTablet": "Tablet",
+      "kindComputer": "Komputer"
     },
     "audio": {
       "vbcableMissing": "Pemacu audio maya VB-CABLE belum dipasang, jadi suara terjemahan tidak dapat dihantar ke aplikasi mesyuarat. Ia tidak diperlukan jika anda hanya menggunakan sari kata.",

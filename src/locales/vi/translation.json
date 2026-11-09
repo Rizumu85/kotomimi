@@ -1886,7 +1886,6 @@
       "again": "Tìm lại",
       "searching": "Đang tìm thiết bị trong mạng nội bộ…",
       "none": "Không tìm thấy thiết bị nào. Hãy kiểm tra xem thiết bị kia đã bật, có kết nối cùng Wi-Fi hoặc bộ định tuyến với máy tính này và đã bật \"Chia sẻ mô hình của máy tính này\" trong Kotomimi chưa. Bạn cũng có thể tự nhập địa chỉ bên dưới.",
-      "kindKotomimi": "Chia sẻ qua Kotomimi",
       "kindServer": "Máy chủ mô hình",
       "kindPhone": "Điện thoại",
       "lendsAsr": "nhận dạng giọng nói",
@@ -1899,7 +1898,8 @@
       "productHere": "{{product}} trên máy tính này",
       "use": "Dùng {{name}}",
       "manual": "Hoặc tự nhập địa chỉ",
-      "kindTablet": "Máy tính bảng"
+      "kindTablet": "Máy tính bảng",
+      "kindComputer": "Máy tính"
     },
     "audio": {
       "vbcableMissing": "Chưa cài trình điều khiển âm thanh ảo VB-CABLE nên không thể gửi giọng đọc bản dịch vào ứng dụng họp. Nếu chỉ xem phụ đề thì không cần.",

@@ -235,6 +235,10 @@
     "en": "Search again",
     "text": "Maghanap muli"
   },
+  "fork.find.kindComputer": {
+    "en": "Computer",
+    "text": "Computer"
+  },
   "fork.find.kindKotomimi": {
     "en": "Kotomimi",
     "text": "Pagbabahagi ng Kotomimi"

@@ -43,7 +43,7 @@ describe('the devices found on the network', () => {
     expect(find).toHaveBeenCalledTimes(1);
     const rows = screen.getAllByRole('listitem').map((row) => row.textContent);
     expect(rows[0]).toContain('DESK');
-    expect(rows[0]).toContain('fork.find.kindKotomimi');
+    expect(rows[0]).toContain('fork.find.kindComputer');
     // Where it is, without the port that says nothing to a person.
     expect(rows[0]).toContain('192.168.4.29');
     expect(rows[0]).not.toContain(':8790');

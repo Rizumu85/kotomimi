@@ -1886,7 +1886,6 @@
       "again": "Etsi uudelleen",
       "searching": "Etsitään laitteita lähiverkosta…",
       "none": "Laitteita ei löytynyt. Varmista, että toinen laite on päällä, yhdistetty samaan Wi-Fi-verkkoon tai reitittimeen ja että sen Kotomimi-sovelluksessa on käytössä ”Jaa tämän tietokoneen mallit”. Voit myös kirjoittaa laitteen osoitteen alle.",
-      "kindKotomimi": "Kotomimi-jako",
       "kindServer": "Mallipalvelin",
       "kindPhone": "Puhelin",
       "lendsAsr": "puheentunnistus",
@@ -1899,7 +1898,8 @@
       "productHere": "{{product}} tällä tietokoneella",
       "use": "Käytä: {{name}}",
       "manual": "Tai kirjoita osoite",
-      "kindTablet": "Tabletti"
+      "kindTablet": "Tabletti",
+      "kindComputer": "Tietokone"
     },
     "audio": {
       "vbcableMissing": "VB-CABLE-virtuaaliääniajuria ei ole asennettu, joten käännettyä puhetta ei voi lähettää kokoussovellukseen. Pelkät tekstitykset eivät tarvitse sitä.",

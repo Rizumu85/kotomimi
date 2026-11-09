@@ -195,6 +195,10 @@
     "en": "Search again",
     "text": "Cerca di nuovo"
   },
+  "fork.find.kindComputer": {
+    "en": "Computer",
+    "text": "Computer"
+  },
   "fork.find.kindKotomimi": {
     "en": "Kotomimi",
     "text": "Condivisione Kotomimi"

@@ -1886,7 +1886,6 @@
       "again": "Cari lagi",
       "searching": "Mencari perangkat di jaringan lokal…",
       "none": "Tidak ada perangkat ditemukan. Pastikan perangkat lain menyala, terhubung ke Wi-Fi atau router yang sama dengan komputer ini, dan opsi \"Bagikan model komputer ini\" di Kotomimi-nya aktif. Anda juga bisa memasukkan alamatnya di bawah.",
-      "kindKotomimi": "Berbagi Kotomimi",
       "kindServer": "Server model",
       "kindPhone": "Ponsel",
       "lendsAsr": "pengenalan ucapan",
@@ -1899,7 +1898,8 @@
       "productHere": "{{product}} di komputer ini",
       "use": "Gunakan {{name}}",
       "manual": "Atau masukkan alamatnya",
-      "kindTablet": "Tablet"
+      "kindTablet": "Tablet",
+      "kindComputer": "Komputer"
     },
     "audio": {
       "vbcableMissing": "Driver audio virtual VB-CABLE belum terpasang, jadi suara terjemahan tidak bisa dikirim ke aplikasi rapat. Untuk melihat subtitel saja, driver ini tidak diperlukan.",

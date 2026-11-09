@@ -179,6 +179,10 @@
     "en": "Search again",
     "text": "Etsi uudelleen"
   },
+  "fork.find.kindComputer": {
+    "en": "Computer",
+    "text": "Tietokone"
+  },
   "fork.find.kindKotomimi": {
     "en": "Kotomimi",
     "text": "Kotomimi-jako"

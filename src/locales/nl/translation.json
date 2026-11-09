@@ -1886,7 +1886,6 @@
       "again": "Opnieuw zoeken",
       "searching": "Apparaten op je lokale netwerk zoeken…",
       "none": "Niets gevonden. Controleer of het andere apparaat aanstaat, met hetzelfde wifi-netwerk of dezelfde router is verbonden en in Kotomimi 'Modellen van deze computer delen' heeft ingeschakeld. Je kunt hieronder ook zelf het adres invullen.",
-      "kindKotomimi": "Kotomimi-deling",
       "kindServer": "Modelserver",
       "kindPhone": "Telefoon",
       "lendsAsr": "spraakherkenning",
@@ -1899,7 +1898,8 @@
       "productHere": "{{product}} op deze computer",
       "use": "{{name}} gebruiken",
       "manual": "Of vul zelf het adres in",
-      "kindTablet": "Tablet"
+      "kindTablet": "Tablet",
+      "kindComputer": "Computer"
     },
     "audio": {
       "vbcableMissing": "Het virtuele audiostuurprogramma VB-CABLE is niet geïnstalleerd. Daardoor kan de vertaalde spraak niet naar je vergaderapp worden gestuurd. Voor alleen ondertiteling is het niet nodig.",

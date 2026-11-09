@@ -183,6 +183,10 @@
     "en": "Search again",
     "text": "ค้นหาอีกครั้ง"
   },
+  "fork.find.kindComputer": {
+    "en": "Computer",
+    "text": "คอมพิวเตอร์"
+  },
   "fork.find.kindKotomimi": {
     "en": "Kotomimi",
     "text": "Kotomimi ที่แชร์"

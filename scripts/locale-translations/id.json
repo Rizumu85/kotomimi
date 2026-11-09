@@ -183,6 +183,10 @@
     "en": "Search again",
     "text": "Cari lagi"
   },
+  "fork.find.kindComputer": {
+    "en": "Computer",
+    "text": "Komputer"
+  },
   "fork.find.kindKotomimi": {
     "en": "Kotomimi",
     "text": "Berbagi Kotomimi"

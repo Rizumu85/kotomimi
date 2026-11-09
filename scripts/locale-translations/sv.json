@@ -187,6 +187,10 @@
     "en": "Search again",
     "text": "Sök igen"
   },
+  "fork.find.kindComputer": {
+    "en": "Computer",
+    "text": "Dator"
+  },
   "fork.find.kindKotomimi": {
     "en": "Kotomimi",
     "text": "Kotomimi-delning"

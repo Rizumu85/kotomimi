@@ -179,6 +179,10 @@
     "en": "Search again",
     "text": "Buscar de nuevo"
   },
+  "fork.find.kindComputer": {
+    "en": "Computer",
+    "text": "Computadora"
+  },
   "fork.find.kindKotomimi": {
     "en": "Kotomimi",
     "text": "Compartido por Kotomimi"

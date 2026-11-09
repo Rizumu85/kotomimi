@@ -1886,7 +1886,6 @@
       "again": "Szukaj ponownie",
       "searching": "Szukanie urządzeń w sieci lokalnej…",
       "none": "Nic nie znaleziono. Sprawdź, czy drugie urządzenie jest włączone, połączone z tą samą siecią Wi-Fi lub routerem i ma włączoną opcję „Udostępniaj modele tego komputera” w Kotomimi. Możesz też wpisać jego adres poniżej.",
-      "kindKotomimi": "Udostępnianie Kotomimi",
       "kindServer": "Serwer modeli",
       "kindPhone": "Telefon",
       "lendsAsr": "rozpoznawanie mowy",
@@ -1899,7 +1898,8 @@
       "productHere": "{{product}} na tym komputerze",
       "use": "Użyj {{name}}",
       "manual": "Lub wpisz adres ręcznie",
-      "kindTablet": "Tablet"
+      "kindTablet": "Tablet",
+      "kindComputer": "Komputer"
     },
     "audio": {
       "vbcableMissing": "Sterownik wirtualnej karty dźwiękowej VB-CABLE nie jest zainstalowany, więc tłumaczenia głosowego nie można przesłać do aplikacji do spotkań. Same napisy go nie wymagają.",

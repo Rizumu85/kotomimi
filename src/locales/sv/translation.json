@@ -1886,7 +1886,6 @@
       "again": "Sök igen",
       "searching": "Söker efter enheter i ditt lokala nätverk…",
       "none": "Inga enheter hittades. Kontrollera att den andra enheten är på, är ansluten till samma Wi-Fi eller router som den här datorn och har ”Dela den här datorns modeller” aktiverat i Kotomimi. Du kan också ange adressen nedan.",
-      "kindKotomimi": "Kotomimi-delning",
       "kindServer": "Modellserver",
       "kindPhone": "Telefon",
       "lendsAsr": "taligenkänning",
@@ -1899,7 +1898,8 @@
       "productHere": "{{product}} på den här datorn",
       "use": "Använd {{name}}",
       "manual": "Eller ange adressen",
-      "kindTablet": "Surfplatta"
+      "kindTablet": "Surfplatta",
+      "kindComputer": "Dator"
     },
     "audio": {
       "vbcableMissing": "Den virtuella ljuddrivrutinen VB-CABLE är inte installerad, så upplästa översättningar kan inte skickas till mötesappen. Den behövs inte om du bara använder undertexter.",

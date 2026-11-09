@@ -183,6 +183,10 @@
     "en": "Search again",
     "text": "Yeniden ara"
   },
+  "fork.find.kindComputer": {
+    "en": "Computer",
+    "text": "Bilgisayar"
+  },
   "fork.find.kindKotomimi": {
     "en": "Kotomimi",
     "text": "Kotomimi paylaşımı"

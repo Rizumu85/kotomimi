@@ -179,6 +179,10 @@
     "en": "Search again",
     "text": "Искать снова"
   },
+  "fork.find.kindComputer": {
+    "en": "Computer",
+    "text": "Компьютер"
+  },
   "fork.find.kindKotomimi": {
     "en": "Kotomimi",
     "text": "Общий доступ Kotomimi"

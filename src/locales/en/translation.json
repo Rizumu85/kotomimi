@@ -1925,7 +1925,7 @@
       "again": "Search again",
       "searching": "Looking for devices on your network…",
       "none": "Nothing found. Check that the other device is on, is on the same Wi-Fi or router as this one, and has \"Share this computer's models\" turned on in its Kotomimi. You can also type its address below.",
-      "kindKotomimi": "Kotomimi",
+      "kindComputer": "Computer",
       "kindServer": "Model server",
       "kindPhone": "Phone",
       "kindTablet": "Tablet",

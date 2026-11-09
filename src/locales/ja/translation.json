@@ -1886,7 +1886,6 @@
       "again": "再検索",
       "searching": "ローカルネットワークのデバイスを検索中…",
       "none": "見つかりませんでした。相手のデバイスの電源が入り、このパソコンと同じWi-Fiまたはルーターに接続されていることを確認してください。相手のKotomimiで「このパソコンのモデルを共有」もオンにしてください。下にアドレスを直接入力することもできます。",
-      "kindKotomimi": "Kotomimi共有",
       "kindServer": "モデルサーバー",
       "kindPhone": "スマートフォン",
       "lendsAsr": "音声認識",
@@ -1899,7 +1898,8 @@
       "productHere": "このパソコン上の{{product}}",
       "use": "{{name}}を使う",
       "manual": "またはアドレスを直接入力",
-      "kindTablet": "タブレット"
+      "kindTablet": "タブレット",
+      "kindComputer": "パソコン"
     },
     "audio": {
       "vbcableMissing": "VB-CABLE仮想オーディオドライバーがインストールされていないため、翻訳音声を会議アプリに送れません。字幕だけなら不要です。",

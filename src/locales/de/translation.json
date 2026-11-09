@@ -1886,7 +1886,6 @@
       "again": "Erneut suchen",
       "searching": "Geräte im lokalen Netzwerk werden gesucht…",
       "none": "Nichts gefunden. Prüfe, ob das andere Gerät eingeschaltet und mit demselben WLAN oder Router verbunden ist und ob dort in Kotomimi „Modelle dieses Computers freigeben“ aktiviert ist. Du kannst die Adresse auch unten eingeben.",
-      "kindKotomimi": "Kotomimi-Freigabe",
       "kindServer": "Modellserver",
       "kindPhone": "Handy",
       "lendsAsr": "Spracherkennung",
@@ -1899,7 +1898,8 @@
       "productHere": "{{product}} auf diesem Computer",
       "use": "{{name}} verwenden",
       "manual": "Oder Adresse eingeben",
-      "kindTablet": "Tablet"
+      "kindTablet": "Tablet",
+      "kindComputer": "Computer"
     },
     "audio": {
       "vbcableMissing": "Der virtuelle Audiotreiber VB-CABLE ist nicht installiert. Deshalb kann die gesprochene Übersetzung nicht an die Konferenz-App gesendet werden. Für Untertitel ist er nicht nötig.",

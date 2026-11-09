@@ -1886,7 +1886,6 @@
       "again": "Maghanap muli",
       "searching": "Naghahanap ng mga device sa iyong network…",
       "none": "Walang nakita. Tiyaking nakabukas ang ibang device, nakakonekta sa parehong Wi-Fi o router, at nakabukas ang \"Ibahagi ang mga modelo ng computer na ito\" sa Kotomimi nito. Maaari mo ring ilagay ang address nito sa ibaba.",
-      "kindKotomimi": "Pagbabahagi ng Kotomimi",
       "kindServer": "Server ng mga modelo",
       "kindPhone": "Telepono",
       "lendsAsr": "pagkilala sa pagsasalita",
@@ -1899,7 +1898,8 @@
       "productHere": "{{product}} sa computer na ito",
       "use": "Gamitin ang {{name}}",
       "manual": "O ilagay ang address nito",
-      "kindTablet": "Tablet"
+      "kindTablet": "Tablet",
+      "kindComputer": "Computer"
     },
     "audio": {
       "vbcableMissing": "Hindi naka-install ang virtual na audio driver ng VB-CABLE, kaya hindi maipapadala sa app ng pagpupulong ang isinaling boses. Hindi ito kailangan para sa mga subtitle.",

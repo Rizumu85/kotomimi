@@ -1886,7 +1886,6 @@
       "again": "Relancer la recherche",
       "searching": "Recherche d’appareils sur le réseau local…",
       "none": "Aucun appareil trouvé. Vérifiez que l’autre appareil est allumé, connecté au même Wi-Fi ou routeur que cet ordinateur, et que l’option « Partager les modèles de cet ordinateur » est activée dans son application Kotomimi. Vous pouvez aussi saisir son adresse ci-dessous.",
-      "kindKotomimi": "Partage Kotomimi",
       "kindServer": "Serveur de modèles",
       "kindPhone": "Téléphone",
       "lendsAsr": "reconnaissance vocale",
@@ -1899,7 +1898,8 @@
       "productHere": "{{product}} sur cet ordinateur",
       "use": "Utiliser {{name}}",
       "manual": "Ou saisir son adresse",
-      "kindTablet": "Tablette"
+      "kindTablet": "Tablette",
+      "kindComputer": "Ordinateur"
     },
     "audio": {
       "vbcableMissing": "Le pilote audio virtuel VB-CABLE n’est pas installé. La traduction vocale ne peut donc pas être transmise au logiciel de réunion. Il n’est pas nécessaire pour les sous-titres.",

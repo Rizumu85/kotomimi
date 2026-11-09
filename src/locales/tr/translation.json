@@ -1886,7 +1886,6 @@
       "again": "Yeniden ara",
       "searching": "Yerel ağda cihazlar aranıyor…",
       "none": "Cihaz bulunamadı. Diğer cihazın açık olduğundan, bu bilgisayarla aynı Wi-Fi ağına veya yönlendiriciye bağlı olduğundan ve Kotomimi'de \"Bu bilgisayarın modellerini paylaş\" seçeneğinin açık olduğundan emin olun. Adresini aşağıya elle de girebilirsiniz.",
-      "kindKotomimi": "Kotomimi paylaşımı",
       "kindServer": "Model sunucusu",
       "kindPhone": "Telefon",
       "lendsAsr": "konuşma tanıma",
@@ -1899,7 +1898,8 @@
       "productHere": "Bu bilgisayardaki {{product}}",
       "use": "{{name}} kullan",
       "manual": "Veya adresini elle girin",
-      "kindTablet": "Tablet"
+      "kindTablet": "Tablet",
+      "kindComputer": "Bilgisayar"
     },
     "audio": {
       "vbcableMissing": "VB-CABLE sanal ses sürücüsü yüklü olmadığı için sesli çeviri toplantı uygulamasına aktarılamıyor. Yalnızca altyazı için gerekli değildir.",
