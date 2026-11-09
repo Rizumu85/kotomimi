@@ -83,6 +83,7 @@ const vrOverlay = setupVrOverlay({
   BrowserWindow,
   // Read when the panel opens, after the app is ready, as the screen module wants.
   scaleFactor: () => require('electron').screen.getPrimaryDisplay().scaleFactor,
+  icon: iconFile({ beta: isBeta, exists: (file) => require('fs').existsSync(file) }),
   app,
   isTrustedSender: (sender) => sender === mainWindow?.webContents,
   getMainWindow: () => mainWindow,

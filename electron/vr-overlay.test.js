@@ -79,6 +79,7 @@ function setup({ scale = 1 } = {}) {
     push: (channel, payload) => pushed.push([channel, payload]),
     spawnHelper,
     scaleFactor: () => scale,
+    icon: 'icon.ico',
   });
   const say = (line) => stdout.write(`${JSON.stringify(line)}\n`);
   return { overlay, windows, written, child, spawnHelper, pushed, say };
@@ -126,7 +127,7 @@ describe('createVrOverlay', () => {
     const t = setup({ scale: 1 });
     expect(t.overlay.panel(true)).toEqual({ on: true });
     const [panel] = t.windows;
-    expect(panel.options).toMatchObject({ frame: false, resizable: false, width: 525, height: 720 });
+    expect(panel.options).toMatchObject({ frame: false, resizable: false, width: 525, height: 720, icon: 'icon.ico' });
     expect(panel.options.webPreferences.offscreen).toBeUndefined();
     expect(panel.loadURL.mock.calls[0][0]).toBe('vr.html#wrist');
     expect(t.spawnHelper).not.toHaveBeenCalled();

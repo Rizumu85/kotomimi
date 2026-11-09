@@ -75,7 +75,7 @@ function helperFile(app, env = process.env) {
   return path.join(app.getAppPath(), 'vr-overlay', 'build', 'Release', 'kotomimi-vr.exe');
 }
 
-function createVrOverlay({ BrowserWindow, preload, pageUrl, helper, push, spawnHelper = spawn, scaleFactor = () => 1, dumpDir = null, log = () => {} }) {
+function createVrOverlay({ BrowserWindow, preload, pageUrl, helper, push, spawnHelper = spawn, scaleFactor = () => 1, icon = null, dumpDir = null, log = () => {} }) {
   let child = null;
   let vr = 'off';
   let state = null;
@@ -167,6 +167,8 @@ function createVrOverlay({ BrowserWindow, preload, pageUrl, helper, push, spawnH
       resizable: false,
       maximizable: false,
       fullscreenable: false,
+      // The app's own, as the main window's: without it the taskbar and a wrist tool's window list show Electron's.
+      ...(icon ? { icon } : {}),
       backgroundColor: PANEL_BACKGROUND,
       webPreferences: { partition: PARTITION.wrist, preload, contextIsolation: true, nodeIntegration: false, sandbox: true },
     });
@@ -266,7 +268,7 @@ function createVrOverlay({ BrowserWindow, preload, pageUrl, helper, push, spawnH
   };
 }
 
-function setupVrOverlay({ ipcMain, BrowserWindow, scaleFactor, app, isTrustedSender, getMainWindow, loadsDevServer, platform = process.platform }) {
+function setupVrOverlay({ ipcMain, BrowserWindow, scaleFactor, icon = null, app, isTrustedSender, getMainWindow, loadsDevServer, platform = process.platform }) {
   const push = (channel, payload) => {
     const win = getMainWindow();
     if (win && !win.isDestroyed()) win.webContents.send(channel, payload);
@@ -288,6 +290,7 @@ function setupVrOverlay({ ipcMain, BrowserWindow, scaleFactor, app, isTrustedSen
     helper: helperFile(app),
     push,
     scaleFactor,
+    icon,
     dumpDir,
     log: (text) => console.info(text),
   });
