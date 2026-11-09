@@ -14,7 +14,6 @@ import { useNativeEngineStore, useNativeTranslatorStore } from '../stores/native
 import { useProviderStore } from '../stores/providerStore';
 import type { VrWords } from '../vr/types';
 import type { VrSettingsPort } from './vrOverlay';
-import { litLanguageOf } from './useLitLanguage';
 
 const baseOf = (code: string) => code.trim().toLowerCase().split(/[-_]/)[0];
 
@@ -29,6 +28,13 @@ function selected() {
 function localai(): LocalAISettings | null {
   const s = selected();
   return s && s.id === 'localai' ? (s.entry.settings as unknown as LocalAISettings) : null;
+}
+
+/** Fork: the other side's languages, where the selected provider switches them by hand (`MoreLanguages.light`). */
+function theirSide() {
+  const s = selected();
+  const theirs = s?.provider.languages.more?.(s.entry.settings, useProviderStore.getState().models[s.id] ?? [], s.entry.pair).theirs;
+  return s && theirs?.light ? { s, theirs } : null;
 }
 
 export function vrSettingsPort(): VrSettingsPort {
@@ -49,11 +55,18 @@ export function vrSettingsPort(): VrSettingsPort {
       return s.provider.languages.sources(s.entry.settings).map((o) => o.value).filter((v) => v !== 'auto');
     },
     pins: () => useLanguagePinStore.getState().pins,
-    lit: () => litLanguageOf(useProviderStore.getState()),
-    light: (code) => {
-      const s = selected();
-      const theirs = s?.provider.languages.more?.(s.entry.settings, useProviderStore.getState().models[s.id] ?? [], s.entry.pair).theirs;
-      if (s && theirs?.light) useProviderStore.getState().updateSettings(s.provider, theirs.light(code));
+    theirs: () => {
+      const side = theirSide();
+      if (!side) return null;
+      return { main: side.s.entry.pair.target, row: side.theirs.chosen, lit: side.theirs.lit ?? '', two: side.theirs.most !== 0 };
+    },
+    applyTheirs: (next) => {
+      const side = theirSide();
+      if (!side) return;
+      const { s, theirs } = side;
+      const store = useProviderStore.getState();
+      if (next.main !== s.entry.pair.target) store.setPair(s.provider, { source: s.entry.pair.source, target: next.main });
+      store.updateSettings(s.provider, { ...theirs.set(next.row), ...theirs.light!(next.lit) });
     },
     hearers: () => {
       const s = localai();

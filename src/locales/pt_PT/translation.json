@@ -1780,15 +1780,15 @@
       "unpinShort": "Desafixar",
       "mine": "A minha língua",
       "theirs": "A língua dos outros",
-      "pairHelp": "Escolha os idiomas que você e a outra pessoa mais utilizam. A sua fala é traduzida para o idioma dela, e a dela para o seu. Toque num idioma em «Também podem falar» para o acender: a outra pessoa também é ouvida nesse idioma, e a sua fala é traduzida também para ele.",
+      "pairHelp": "Escolha os idiomas que você e a outra pessoa mais utilizam. A sua fala é traduzida para o idioma dela, e a dela para o seu. Toque num idioma em «Eles falam» para o acender, no máximo dois: a outra pessoa é ouvida nos acesos, e a sua fala é traduzida para cada um. Dos idiomas que também fala, só são usados os acesos para ela.",
       "alsoSpeak": "Também falo",
-      "theyMaySpeak": "Também podem falar",
       "hearingBy": "Reconhecimento de voz: {{name}}",
       "anyLanguage": "Qualquer idioma",
       "addLanguage": "Adicionar um idioma",
       "removeLanguage": "Remover {{name}}",
       "hearsMe": "Ouve-me",
-      "hearsThem": "Ouve a outra pessoa"
+      "iSay": "Eu falo",
+      "theySay": "Eles falam"
     },
     "wizard": {
       "pathTitle": "Kotomimi à tua medida",

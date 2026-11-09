@@ -1780,15 +1780,15 @@
       "unpinShort": "Alisin sa itaas",
       "mine": "Wika ko",
       "theirs": "Wika ng kausap",
-      "pairHelp": "Piliin ang mga wikang pangunahing ginagamit mo at ng kausap mo. Isasalin ang sinasabi mo sa wika niya, at ang sinasabi niya sa wika mo. Pindutin ang isang wika sa “Maaari rin silang magsalita ng” para buksan ito: pakikinggan din sila sa wikang iyon, at isasalin din dito ang sinasabi mo.",
+      "pairHelp": "Piliin ang mga wikang pangunahing ginagamit mo at ng kausap mo. Isasalin ang sinasabi mo sa wika niya, at ang sinasabi niya sa wika mo. Pindutin ang isang wika sa “Nagsasalita sila ng” para buksan ito, hanggang dalawa: pinakikinggan sila sa mga nakabukas, at isinasalin ang sinasabi mo sa bawat isa. Sa mga wikang alam mo rin, ang mga nakabukas lang para sa kanila ang ginagamit.",
       "alsoSpeak": "Marunong din ako ng",
-      "theyMaySpeak": "Maaari rin silang magsalita ng",
       "hearingBy": "Pagkilala sa pananalita: {{name}}",
       "anyLanguage": "Anumang wika",
       "addLanguage": "Magdagdag ng wika",
       "removeLanguage": "Alisin ang {{name}}",
       "hearsMe": "Naririnig ako",
-      "hearsThem": "Naririnig sila"
+      "iSay": "Nagsasalita ako ng",
+      "theySay": "Nagsasalita sila ng"
     },
     "wizard": {
       "pathTitle": "Kotomimi na malayang pagsasamahin",

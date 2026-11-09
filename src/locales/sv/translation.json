@@ -1780,15 +1780,15 @@
       "unpinShort": "Lossa",
       "mine": "Mitt språk",
       "theirs": "Deras språk",
-      "pairHelp": "Välj de språk som du och den andra personen främst använder. Det du säger översätts till deras språk och det de säger till ditt. Tryck på ett språk under ”De kan också tala” för att tända det: den andra personen hörs då även på det språket, och det du säger översätts också till det.",
+      "pairHelp": "Välj de språk som du och den andra personen främst använder. Det du säger översätts till deras språk och det de säger till ditt. Tryck på ett språk under ”De talar” för att tända det, högst två: den andra personen hörs på de tända språken, och det du säger översätts till vart och ett. Av de språk du också talar används bara de som är tända för dem.",
       "alsoSpeak": "Jag talar också",
-      "theyMaySpeak": "De kan också tala",
       "hearingBy": "Taligenkänning: {{name}}",
       "anyLanguage": "Vilket språk som helst",
       "addLanguage": "Lägg till ett språk",
       "removeLanguage": "Ta bort {{name}}",
       "hearsMe": "Hör mig",
-      "hearsThem": "Hör dem"
+      "iSay": "Jag talar",
+      "theySay": "De talar"
     },
     "wizard": {
       "pathTitle": "Kotomimi med valfria modeller",

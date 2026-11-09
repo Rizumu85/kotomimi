@@ -30,9 +30,11 @@ export interface LanguageMenuOptions {
   disabled?: boolean;
   /** A choice that is no language, listed first and never pinned ("detect the language"); `unavailable`: greyed, and why. */
   first?: { code: string; name: string; unavailable?: string };
+  /** Fork: a list of several: these are checked and listed first, and pressing one hands it to `onPick` all the same (to take it out). */
+  checked?: readonly string[];
 }
 
-interface Row { code: string; name: string; pinned: boolean; group: 'first' | 'pinned' | 'suggested' | 'all'; unavailable?: string }
+interface Row { code: string; name: string; pinned: boolean; group: 'first' | 'chosen' | 'pinned' | 'suggested' | 'all'; unavailable?: string }
 
 /** The rows as listed: the person's pins, then what the app suggests, then every other language — each once. */
 export function languageRows(ordered: readonly LanguageOption[], suggested: readonly LanguageOption[], pins: readonly string[], label: (code: string) => string, query = ''): Row[] {
@@ -51,7 +53,7 @@ export function languageRows(ordered: readonly LanguageOption[], suggested: read
   return [...pinned.map((code) => row(code, 'pinned')), ...next.map((code) => row(code, 'suggested')), ...ordered.filter((o) => !above.has(o.value)).map((o) => row(o.value, 'all'))];
 }
 
-export function useLanguageMenu({ ordered, suggested, value, onPick, label, disabled = false, first }: LanguageMenuOptions): {
+export function useLanguageMenu({ ordered, suggested, value, onPick, label, disabled = false, first, checked }: LanguageMenuOptions): {
   /** For the select (or a button, a language chip's "+N"): pressing it opens this list, not the system's. */
   selectProps: { ref(node: HTMLElement | null): void; onMouseDown(e: MouseEvent<HTMLElement>): void; onKeyDown(e: KeyboardEvent<HTMLElement>): void };
   list: ReactNode;
@@ -85,13 +87,23 @@ export function useLanguageMenu({ ordered, suggested, value, onPick, label, disa
   const firstCode = first?.code;
   const firstName = first?.name;
   const firstUnavailable = first?.unavailable;
+  const checkedKey = (checked ?? []).join(',');
   const rows = useMemo(() => {
-    const languages = languageRows(ordered, suggested, pins, label, query);
+    let languages = languageRows(ordered, suggested, pins, label, query);
+    // Fork: the ones checked first, in their own order, each once.
+    if (checkedKey) {
+      const order = checkedKey.split(',');
+      const isChecked = (code: string) => order.includes(code);
+      languages = [
+        ...order.flatMap((code) => languages.filter((row) => row.code === code).map((row) => ({ ...row, group: 'chosen' as const }))),
+        ...languages.filter((row) => !isChecked(row.code)),
+      ];
+    }
     if (firstCode === undefined || firstName === undefined) return languages;
     // Found by its own name too, when letters are typed.
     const wanted = query.trim().toLowerCase();
     return !wanted || firstName.toLowerCase().includes(wanted) ? [{ code: firstCode, name: firstName, pinned: false, group: 'first' as const, unavailable: firstUnavailable }, ...languages] : languages;
-  }, [ordered, suggested, pins, label, query, firstCode, firstName, firstUnavailable]);
+  }, [ordered, suggested, pins, label, query, firstCode, firstName, firstUnavailable, checkedKey]);
 
   // Opening starts from an empty search, on the current choice.
   useEffect(() => {
@@ -151,10 +163,10 @@ export function useLanguageMenu({ ordered, suggested, value, onPick, label, disa
             {rows.map((row, i) => (
               <div key={row.code} role="presentation">
                 {/* A line under the block at the top: the pins and the suggestions are one block, every other language follows. */}
-                {i > 0 && ((row.group === 'all' && rows[i - 1].group !== 'all') || rows[i - 1].group === 'first') && <div className="kt-lang-divider" role="separator" />}
+                {i > 0 && ((row.group === 'all' && rows[i - 1].group !== 'all') || rows[i - 1].group === 'first' || (rows[i - 1].group === 'chosen' && row.group !== 'chosen')) && <div className="kt-lang-divider" role="separator" />}
                 <div
                   role="option"
-                  aria-selected={row.code === value}
+                  aria-selected={row.code === value || !!checked?.includes(row.code)}
                   aria-disabled={row.unavailable ? true : undefined}
                   title={row.unavailable}
                   data-row={i}
@@ -163,7 +175,7 @@ export function useLanguageMenu({ ordered, suggested, value, onPick, label, disa
                   onClick={() => choose(row)}
                 >
                   <span className="kt-font-option__name">{row.name}</span>
-                  {row.code === value && <Check size={14} className="kt-font-option__check" aria-hidden />}
+                  {(row.code === value || checked?.includes(row.code)) && <Check size={14} className="kt-font-option__check" aria-hidden />}
                   {row.group !== 'first' && <button
                     type="button"
                     className="kt-lang-pin"

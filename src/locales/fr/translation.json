@@ -1780,15 +1780,15 @@
       "unpinShort": "Détacher",
       "mine": "Ma langue",
       "theirs": "Langue de l’autre",
-      "pairHelp": "Choisissez les langues que vous et votre interlocuteur utilisez le plus. Vos propos sont traduits dans sa langue, et les siens dans la vôtre. Appuyez sur une langue sous « L’autre personne peut aussi parler » pour l’allumer : votre interlocuteur est aussi écouté dans cette langue, et vos propos y sont également traduits.",
+      "pairHelp": "Choisissez les langues que vous et votre interlocuteur utilisez le plus. Vos propos sont traduits dans sa langue, et les siens dans la vôtre. Appuyez sur une langue sous « Ils parlent » pour l’allumer, deux au plus : votre interlocuteur est écouté dans celles allumées, et vos propos sont traduits dans chacune. Parmi les langues que vous parlez aussi, seules celles allumées pour lui sont utilisées.",
       "alsoSpeak": "Je parle aussi",
-      "theyMaySpeak": "L’autre personne peut aussi parler",
       "hearingBy": "Reconnaissance vocale : {{name}}",
       "anyLanguage": "N’importe quelle langue",
       "addLanguage": "Ajouter une langue",
       "removeLanguage": "Retirer {{name}}",
       "hearsMe": "M’entend",
-      "hearsThem": "Entend l’autre personne"
+      "iSay": "Je parle",
+      "theySay": "Ils parlent"
     },
     "wizard": {
       "pathTitle": "Kotomimi à la carte",

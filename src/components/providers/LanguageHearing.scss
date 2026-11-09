@@ -78,12 +78,31 @@
   font-size: vars.$font-body;
   white-space: nowrap;
 
-  // Switched by hand: the chip's name is pressed to light it.
-  &.is-switch:not(.is-lit):hover { background: vars.$bg-hover; }
+  // One of the user's languages the other side has not lit: kept, not in use now.
+  &.is-idle {
+    color: vars.$text-muted;
+    border-color: vars.$border-subtle;
+  }
 
-  // The other side's language lit: heard, and the user's speech translated into it too. Filled, with a mark of its own.
+  // The other side's: the chip itself is pressed, to light it or put it out.
+  &--switch {
+    padding: 0 12px;
+    background: transparent;
+    color: vars.$text-secondary;
+    font: inherit;
+    font-size: vars.$font-body;
+    cursor: pointer;
+    transition: background vars.$transition-fast, color vars.$transition-fast;
+
+    &:hover:not(:disabled):not(.is-lit) { background: vars.$bg-hover; color: vars.$text-primary; }
+    &:focus-visible { @include vars.focus-ring; }
+    &:disabled { cursor: not-allowed; opacity: vars.$disabled-opacity; }
+  }
+
+  // Lit: heard, and the user's speech translated into it. Filled, with a mark of its own.
   &.is-lit {
-    padding-left: 9px;
+    padding-left: 10px;
+    font-weight: 500;
     border-color: vars.$color-primary-fill;
     background: vars.$color-primary-fill;
     color: vars.$color-on-primary;
@@ -116,19 +135,6 @@
   &:hover:not(:disabled) { color: vars.$text-primary; background: vars.$bg-hover; }
   &:focus-visible { @include vars.focus-ring; }
   &:disabled { cursor: not-allowed; opacity: vars.$disabled-opacity; }
-}
-
-// The name of a chip switched by hand: the chip's own text, pressed.
-.language-chip__name {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-
-  &:focus-visible { @include vars.focus-ring; }
-  &:disabled { cursor: not-allowed; }
 }
 
 // "+": more fit; there while what hears the side can take another.

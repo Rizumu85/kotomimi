@@ -1780,15 +1780,15 @@
       "unpinShort": "Nyahsemat",
       "mine": "Bahasa saya",
       "theirs": "Bahasa pihak lain",
-      "pairHelp": "Pilih bahasa yang paling kerap digunakan oleh anda dan orang lain itu. Percakapan anda diterjemahkan ke bahasanya, dan percakapannya ke bahasa anda. Tekan satu bahasa di bawah “Mereka mungkin juga bercakap” untuk menyalakannya: percakapan mereka dalam bahasa itu turut didengar, dan percakapan anda turut diterjemahkan ke bahasa itu.",
+      "pairHelp": "Pilih bahasa yang paling kerap digunakan oleh anda dan orang lain itu. Percakapan anda diterjemahkan ke bahasanya, dan percakapannya ke bahasa anda. Tekan satu bahasa di bawah “Mereka bercakap” untuk menyalakannya, paling banyak dua: percakapan mereka didengar dalam bahasa yang menyala, dan percakapan anda diterjemahkan ke setiap satu. Daripada bahasa yang anda juga tahu, hanya yang menyala untuk mereka digunakan.",
       "alsoSpeak": "Saya juga boleh bertutur dalam",
-      "theyMaySpeak": "Mereka mungkin juga bercakap",
       "hearingBy": "Pengecaman pertuturan: {{name}}",
       "anyLanguage": "Sebarang bahasa",
       "addLanguage": "Tambah bahasa",
       "removeLanguage": "Buang {{name}}",
       "hearsMe": "Mendengar saya",
-      "hearsThem": "Mendengar mereka"
+      "iSay": "Saya bercakap",
+      "theySay": "Mereka bercakap"
     },
     "wizard": {
       "pathTitle": "Kotomimi Padanan Bebas",

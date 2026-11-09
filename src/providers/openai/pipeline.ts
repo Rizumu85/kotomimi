@@ -123,7 +123,12 @@ export interface Stages {
    * Fork: the speaker speaks the other side's language too (`speakBoth`; `heard` is then `auto`): a sentence in it —
    * `language` — is answered by `stage`, into their own (`own`); one in their own by `speech`, as ever.
    */
-  back?: { stage: AnswerStage; language: string; own: string; languages?: readonly string[] };
+  back?: { stage?: AnswerStage; language: string; own: string; languages?: readonly string[] };
+  /**
+   * Fork: two of the other side's languages lit, and the speaker speaks one of them (`crossings`): a sentence in it
+   * (`language`) is answered by `stage`, into the other — not back into their own.
+   */
+  cross?: ReadonlyArray<{ language: string; stage: AnswerStage }>;
   /** Feedback alongside translation, only for speech in the language being practised. */
   feedback?: { stage: AnswerStage; language: string };
   /**
@@ -327,7 +332,7 @@ class PipelineLeg implements AdapterSession {
         if (!this.ended) this.events.degraded({ code: 'phone_quiet', message: 'A phone this session uses stopped answering.' });
       },
     });
-    for (const stage of [stages.speech, stages.typed, stages.back?.stage, stages.feedback?.stage, stages.into]) if (stage?.phone) this.watchPhone(stage.baseUrl);
+    for (const stage of [stages.speech, stages.typed, stages.back?.stage, stages.feedback?.stage, stages.into, ...(stages.cross ?? []).map((c) => c.stage)]) if (stage?.phone) this.watchPhone(stage.baseUrl);
   }
 
   /**
@@ -363,7 +368,7 @@ class PipelineLeg implements AdapterSession {
    */
   private warm(): void {
     const seen = new Set<string>();
-    for (const stage of [this.stages.speech, this.stages.typed, this.stages.back?.stage, this.stages.feedback?.stage, this.stages.into]) {
+    for (const stage of [this.stages.speech, this.stages.typed, this.stages.back?.stage, this.stages.feedback?.stage, this.stages.into, ...(this.stages.cross ?? []).map((c) => c.stage)]) {
       if (!stage?.loads || seen.has(`${stage.kind}|${stage.model}`)) continue;
       seen.add(`${stage.kind}|${stage.model}`);
       // One token, as a phone is warmed (`warmPhones`): what answers is not wanted.
@@ -751,7 +756,9 @@ class PipelineLeg implements AdapterSession {
     // Fork: of the languages they speak besides their own, any (`languages`); else the one.
     const spoken = back.languages?.length ? back.languages : [back.language];
     const said = language ? baseOf(language) : spoken.length === 1 ? oneOfTwo(text, back.own, back.language) : identifyLanguage(text, [back.own, ...spoken])?.language;
-    return said && spoken.some((one) => baseOf(one) === baseOf(said)) ? back.stage : undefined;
+    if (!said || !spoken.some((one) => baseOf(one) === baseOf(said))) return undefined;
+    // Fork: into the other lit language of theirs, where it is one of two; else back into their own.
+    return this.stages.cross?.find((c) => baseOf(c.language) === baseOf(said))?.stage ?? back.stage;
   }
 
   /** The language a sentence of a leg left to detect it is written in: of a speaker who speaks both, one of the two. */

@@ -60,9 +60,8 @@ function Main({ state, onTune }: { state: VrState; onTune: () => void }) {
   const label = (value: string) => theirs.options.find((o) => o.value === value)?.label ?? value;
   const pick = (value: string) => {
     setMore(false);
-    // Their lit language pressed: it goes dark. Any other becomes their main one.
-    if (value === theirs.lit) send({ type: 'light', value: '' });
-    else if (value !== theirs.value) send({ type: 'theirs', value });
+    // Their row: every press is the row's to settle (`theirLanguages.ts`). Else one other than theirs now becomes it.
+    if (theirs.row || value !== theirs.value) send({ type: 'theirs', value });
   };
   const on = (value: string) => value === theirs.value || value === theirs.lit;
   const running = state.phase !== 'idle';
@@ -71,7 +70,7 @@ function Main({ state, onTune }: { state: VrState; onTune: () => void }) {
       <Dots state={state} />
       {more ? null : <Recent state={state} />}
       <div className="lang">
-        <div className="lang__head">{words.theirs}<b>{label(theirs.value)}{theirs.lit ? ` · ${label(theirs.lit)}` : ''}</b></div>
+        <div className="lang__head">{words.theirs}{theirs.row ? null : <b>{label(theirs.value)}</b>}</div>
         <div className="chips">
           {theirs.quick.map((value) => (
             <button key={value} type="button" className={`chip${on(value) && !more ? ' is-on' : ''}`} onClick={() => pick(value)}>{label(value)}</button>

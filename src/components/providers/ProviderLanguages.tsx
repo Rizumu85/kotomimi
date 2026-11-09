@@ -40,13 +40,26 @@ export function ProviderLanguages({ providers, disabled, sentence }: ProviderLan
   // languages while they are heard, and the other side's while they are heard or translated into.
   const kotomimi = (provider.id as string) === 'localai';
   const more = provider.languages.more?.(entry.settings, selection.models, entry.pair);
-  const bound = (side: NonNullable<typeof more>['mine']) => side && {
-    ...side,
-    set: (chosen: string[]) => updateSettings(provider, side.set(chosen)),
-    ...(side.light ? { light: (code: string) => updateSettings(provider, side.light!(code)) } : {}),
-  };
+  const bound = (side: NonNullable<typeof more>['mine']) => side && { ...side, set: (chosen: string[]) => updateSettings(provider, side.set(chosen)) };
   const mine = legs.includes('speaker') && pairDiffers(entry.pair) ? bound(more?.mine) : undefined;
-  const theirs = legs.includes('participant') || legs.includes('speaker') ? bound(more?.theirs) : undefined;
+  // Fork: the other side's languages switched by hand ("对方说"): a press writes their main one — the pair's target —
+  // and the provider's row and light together.
+  const side = more?.theirs;
+  const theirs = side?.light ? {
+    ...(side.hearer ? { hearer: side.hearer } : {}),
+    main: entry.pair.target,
+    row: side.chosen,
+    lit: side.lit ?? '',
+    two: side.most !== 0,
+    any: side.any,
+    apply: (next: { main: string; row: readonly string[]; lit: string }) => {
+      if (next.main !== entry.pair.target) {
+        trackEvent('language_changed', { to_language: next.main, language_type: 'target' });
+        setPair(provider, { source: entry.pair.source, target: next.main });
+      }
+      updateSettings(provider, { ...side.set(next.row), ...side.light!(next.lit) });
+    },
+  } : undefined;
 
   return (
     <LanguagePairSection
@@ -56,7 +69,8 @@ export function ProviderLanguages({ providers, disabled, sentence }: ProviderLan
       disabled={disabled}
       sentence={sentence}
       context={languageContext(provider, legs, speech)}
-      {...(mine || theirs ? { more: { ...(mine ? { mine } : {}), ...(theirs ? { theirs } : {}) } } : {})}
+      {...(mine ? { more: { mine } } : {})}
+      {...(theirs ? { theirs } : {})}
       onOpenHearing={() => useSettingsStore.getState().navigateToSettings('hearing')}
       owners={kotomimi}
       onChange={(pair) => {

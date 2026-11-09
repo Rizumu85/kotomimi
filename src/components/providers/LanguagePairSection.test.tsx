@@ -197,13 +197,16 @@ describe('LanguagePairSection — my language and theirs (fork)', () => {
 });
 
 describe('LanguagePairSection — the languages beside the main ones (fork)', () => {
-  type Side = { chosen?: string[]; offered?: string[] | null; most?: number | null; any?: boolean; hearer?: { name: string; languages: string[] | null }; set?(chosen: string[]): void; lit?: string; light?(code: string): void };
+  type Side = { chosen?: string[]; offered?: string[] | null; most?: number | null; any?: boolean; hearer?: { name: string; languages: string[] | null }; set?(chosen: string[]): void; using?: string[] };
+  type Theirs = { hearer?: { name: string; languages: string[] | null }; main?: string; row?: string[]; lit?: string; two?: boolean; any?: boolean };
   const side = (given: Side) => ({ chosen: [], offered: null, most: null, any: false, set: vi.fn(), ...given });
-  const show = (more: { mine?: Side; theirs?: Side }, extra: { onOpenHearing?: () => void } = {}) => {
+  const their = (given: Theirs) => ({ main: 'ja', row: ['ja'], lit: '', two: true, any: false, apply: vi.fn(), ...given });
+  const show = (more: { mine?: Side; theirs?: Theirs }, extra: { onOpenHearing?: () => void } = {}) => {
     cleanup();
-    const sides = { ...(more.mine ? { mine: side(more.mine) } : {}), ...(more.theirs ? { theirs: side(more.theirs) } : {}) };
-    render(<LanguagePairSection provider={fakeProvider} settings={FAKE_DEFAULTS} pair={{ source: 'en', target: 'ja' }} onChange={vi.fn()} more={sides} {...extra} owners />);
-    return sides;
+    const mine = more.mine ? side(more.mine) : undefined;
+    const theirs = more.theirs ? their(more.theirs) : undefined;
+    render(<LanguagePairSection provider={fakeProvider} settings={FAKE_DEFAULTS} pair={{ source: 'en', target: 'ja' }} onChange={vi.fn()} {...(mine ? { more: { mine } } : {})} {...(theirs ? { theirs } : {})} {...extra} owners />);
+    return { mine, theirs };
   };
   const row = (name: string) => screen.queryByRole('group', { name });
   const add = (group: HTMLElement) => group.querySelector<HTMLButtonElement>('.language-chip__add');
@@ -214,51 +217,55 @@ describe('LanguagePairSection — the languages beside the main ones (fork)', ()
   it('names each side’s row, and adds with "+" a language from what its recognizer tells apart', () => {
     const { mine } = show({ mine: {}, theirs: {} });
     expect(row('fork.languageMenu.alsoSpeak')).not.toBeNull();
-    expect(row('fork.languageMenu.theyMaySpeak')).not.toBeNull();
+    expect(row('fork.languageMenu.theySay')).not.toBeNull();
     open(row('fork.languageMenu.alsoSpeak')!);
     fireEvent.click(option(languageLabel('zh', 'en')));
     expect(mine!.set).toHaveBeenCalledWith(['zh']);
   });
 
-  it('takes a language off with its ×', () => {
-    const { mine } = show({ mine: { chosen: ['zh'] } });
-    fireEvent.click(screen.getByRole('button', { name: 'fork.languageMenu.removeLanguage' }));
-    expect(mine!.set).toHaveBeenCalledWith([]);
+  it('takes a language off with its ×, and dims the ones the other side has not lit', () => {
+    const { mine } = show({ mine: { chosen: ['zh', 'ko'], using: ['ko'] } });
+    const [zh, ko] = chips(row('fork.languageMenu.alsoSpeak')!);
+    expect(zh.className).toContain('is-idle');
+    expect(ko.className).not.toContain('is-idle');
+    fireEvent.click(screen.getAllByRole('button', { name: 'fork.languageMenu.removeLanguage' })[0]);
+    expect(mine!.set).toHaveBeenCalledWith(['ko']);
   });
 
-  it('has no "+" where its recognizer can take no more, and no row where it takes none', () => {
-    show({ mine: { chosen: ['zh'], most: 1 }, theirs: { most: 0 } });
+  it('has no "+" where its recognizer can take no more', () => {
+    show({ mine: { chosen: ['zh'], most: 1 } });
     expect(add(row('fork.languageMenu.alsoSpeak')!)).toBeNull();
-    expect(row('fork.languageMenu.theyMaySpeak')).toBeNull();
-    // Only what it tells apart is offered: none left, no "+" either.
+    // Only what it tells apart is offered.
     show({ mine: { offered: ['ja'] } });
     open(row('fork.languageMenu.alsoSpeak')!);
     expect(screen.getAllByRole('option').map((o) => o.textContent)).toEqual([languageLabel('ja', 'en')]);
   });
 
-  it('offers any language first where its recognizer tells many apart, and nothing beside it once chosen', () => {
-    const { theirs } = show({ theirs: { any: true } });
-    open(row('fork.languageMenu.theyMaySpeak')!);
-    fireEvent.click(option('fork.languageMenu.anyLanguage'));
-    expect(theirs!.set).toHaveBeenCalledWith(['auto']);
-    show({ theirs: { any: true, chosen: ['auto'] } });
-    const group = row('fork.languageMenu.theyMaySpeak')!;
-    expect(chips(group).map((c) => c.textContent)).toEqual(['fork.languageMenu.anyLanguage']);
-    expect(add(group)).toBeNull();
+  it('shows their row in place of their select and of the swap, and the user’s own select as "I speak"', () => {
+    show({ theirs: { row: ['ja', 'zh'] } });
+    expect(screen.queryByLabelText('fork.languageMenu.theirs')).toBeNull();
+    expect(screen.queryByTitle('simpleConfig.swapLanguages')).toBeNull();
+    expect(screen.getByLabelText('fork.languageMenu.iSay')).toBeTruthy();
   });
 
-  it('lights one of their languages by pressing it, and puts it out by pressing it again', () => {
-    const light = vi.fn();
-    show({ theirs: { chosen: ['zh', 'ko'], lit: 'zh', light } });
-    const [zh, ko] = chips(row('fork.languageMenu.theyMaySpeak')!);
-    expect(zh.className).toContain('is-lit');
-    expect(ko.className).not.toContain('is-lit');
-    const name = (chip: HTMLElement) => chip.querySelector<HTMLButtonElement>('.language-chip__name')!;
-    expect(name(zh).getAttribute('aria-pressed')).toBe('true');
-    fireEvent.click(name(ko));
-    expect(light).toHaveBeenLastCalledWith('ko');
-    fireEvent.click(name(zh));
-    expect(light).toHaveBeenLastCalledWith('');
+  it('presses their chips: one lit, another lit beside it, the main one handed over', () => {
+    const { theirs } = show({ theirs: { row: ['ja', 'zh', 'fr'], lit: 'zh' } });
+    const [ja, zh, fr] = chips(row('fork.languageMenu.theySay')!);
+    expect([ja, zh, fr].map((c) => c.getAttribute('aria-pressed'))).toEqual(['true', 'true', 'false']);
+    fireEvent.click(fr);
+    expect(theirs!.apply).toHaveBeenLastCalledWith({ main: 'zh', row: ['ja', 'zh', 'fr'], lit: 'fr' });
+    fireEvent.click(zh);
+    expect(theirs!.apply).toHaveBeenLastCalledWith({ main: 'ja', row: ['ja', 'zh', 'fr'], lit: '' });
+  });
+
+  it('lists every language from "+", theirs checked first: one added lit, a checked one taken out', () => {
+    const { theirs } = show({ theirs: { row: ['ja', 'zh'], any: true } });
+    open(row('fork.languageMenu.theySay')!);
+    const names = screen.getAllByRole('option').map((o) => o.textContent);
+    expect(names.slice(0, 3)).toEqual(['fork.languageMenu.anyLanguage', languageLabel('ja', 'en'), languageLabel('zh', 'en')]);
+    expect(screen.getAllByRole('option').filter((o) => o.getAttribute('aria-selected') === 'true')).toHaveLength(2);
+    fireEvent.click(option(languageLabel('zh', 'en')));
+    expect(theirs!.apply).toHaveBeenLastCalledWith({ main: 'ja', row: ['ja'], lit: '' });
   });
 
   it('names what hears once in the heading where both sides have the same, and each side its own where not', () => {
@@ -270,9 +277,8 @@ describe('LanguagePairSection — the languages beside the main ones (fork)', ()
     expect(named[0].closest('h3')).not.toBeNull();
     fireEvent.click(named[0]);
     expect(openHearing).toHaveBeenCalledTimes(1);
-    // The other side on an iPad, which takes no more than their main language: a row naming it alone.
-    show({ mine: { hearer: same }, theirs: { hearer: { name: 'iPad · Apple Speech', languages: null }, most: 0 } });
+    // The other side on an iPad: their row names it.
+    show({ mine: { hearer: same }, theirs: { hearer: { name: 'iPad · Apple Speech', languages: null }, two: false } });
     expect(screen.getAllByRole('button', { name: 'fork.languageMenu.hearingBy' })).toHaveLength(2);
-    expect(screen.getByText('fork.languageMenu.hearsThem')).toBeInTheDocument();
   });
 });

@@ -64,7 +64,7 @@ import { buildRealtime } from './config';
 import { glossaryRecognitionTerms } from '../../lib/glossary/glossary';
 import { recognizerAsked, serverBilingual } from './serverRecognizers';
 import { phoneBase, plainAddress } from '../../lib/lan/discover';
-import { alsoFirst, alsoSpoken, theyAlsoSpeak, theyLitOf, deviceLanguage, canDetectOther, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, hearsNatively, needsServer, serverDetects, PLACE_FIELDS, PLACES, translatesNatively, type AsrHere, type Place } from './localaiDevice';
+import { alsoFirst, alsoInto, alsoListed, alsoSpoken, backInto, crossings, theirRow, theyLitOf, deviceLanguage, canDetectOther, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, hearsNatively, needsServer, serverDetects, PLACE_FIELDS, PLACES, translatesNatively, type AsrHere, type Place } from './localaiDevice';
 import { NATIVE_MODELS, isApple, preferNative, type NativePick } from './localaiNative';
 import { NATIVE_DEFAULT_MODEL, appleAlso, coachBaseUrl, coachGap, coachIdle, coachUp, hearingPick, hearsByDownloaded, holdNativeForRun, nativeEither, nativeGap, nativeUp, restNative, translatorUp, nativeIdle, nativeModelFor, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_COACH_EXTRA, NATIVE_COACHES, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
@@ -541,7 +541,12 @@ function serverTranslatorUnfit(
   if (!model) return null;
   // A speaker who speaks other languages has each translated back (`Stages.back`); a named model must take every direction.
   const directions: Array<[string, string]> = leg === 'speaker'
-    ? [[pair.source, pair.target], ...(both ? alsoSpoken(s, pair).map((also) => [also, pair.source] as [string, string]) : [])]
+    ? [
+      [pair.source, pair.target],
+      ...(both ? backInto(s, pair).map((also) => [also, pair.source] as [string, string]) : []),
+      ...(both ? crossings(s, pair).map((c) => [c.source, c.target] as [string, string]) : []),
+      ...((into) => (into ? [[pair.source, into] as [string, string]] : []))(alsoInto(s, pair)),
+    ]
     : [[heard, pair.source]];
   for (const [source, target] of directions) {
     // A leg whose language is left to be detected has no source the model could be measured against.
@@ -902,7 +907,9 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
       const gap = unfitServer ?? unpaired(s, found, ctx.pair, leg === 'speaker') ?? unnamedStage(s, found, coached, plain, both) ?? undetected(s, found, leg === 'speaker' ? ctx.pair.source : heard, coached, leg === 'participant' ? ctx.pair.target : undefined) ?? unheard(s, found, heard === AUTO && !serverDetects(found, s.asrModel) ? (leg === 'speaker' ? ctx.pair.source : ctx.pair.target) : heard)
         ?? phoneUnheard(s, found, ctx.pair, leg)
         ?? ((coached && !both) || plain ? null : phoneTranslatorUnfit(s, leg === 'speaker' ? ctx.pair.source : heard, leg === 'speaker' ? ctx.pair.target : ctx.pair.source))
-        ?? (both ? alsoSpoken(s, ctx.pair).reduce<ProviderRefusal | null>((found, also) => found ?? phoneTranslatorUnfit(s, also, ctx.pair.source), null) : null);
+        ?? (both ? backInto(s, ctx.pair).reduce<ProviderRefusal | null>((found, also) => found ?? phoneTranslatorUnfit(s, also, ctx.pair.source), null) : null)
+        ?? (both ? crossings(s, ctx.pair).reduce<ProviderRefusal | null>((found, c) => found ?? phoneTranslatorUnfit(s, c.source, c.target), null) : null)
+        ?? ((into) => (leg === 'speaker' && into && !(coached && !both) ? phoneTranslatorUnfit(s, ctx.pair.source, into) : null))(alsoInto(s, ctx.pair));
       // Fork: another Kotomimi with nothing for the leg's language is told which, and offers a model to download for it
       // in its own settings. Not waited for: the refusal stands, whatever it answers.
       if (gap?.code === 'server_no_asr' && gap.params?.source && needsServer(s)) {
@@ -1117,8 +1124,12 @@ export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISe
     // What each leg translates: the speaker the pair, plus its reverse when bilingual; the other side its reverse.
     const reverse = { source: ctx.pair.target, target: ctx.pair.source };
     const both = speaksBoth(s, [], ctx.pair) && ctx.pair.source.toLowerCase() !== ctx.pair.target.toLowerCase();
-    const back = both ? alsoSpoken(s, ctx.pair).map((also) => ({ source: also, target: ctx.pair.source })) : [];
-    translates = (native.translatorGap ?? translatorGap)(s.translateNativeModel, ctx.legs.flatMap((leg) => (leg === 'speaker' ? [ctx.pair, ...back] : [reverse])));
+    const back = both ? backInto(s, ctx.pair).map((also) => ({ source: also, target: ctx.pair.source })) : [];
+    // Fork: a sentence in one of two lit languages of theirs goes into the other; the speech into their second one lit.
+    const cross = both ? crossings(s, ctx.pair) : [];
+    const into = alsoInto(s, ctx.pair);
+    const forward = [ctx.pair, ...back, ...cross, ...(into && !s.coach ? [{ source: ctx.pair.source, target: into }] : [])];
+    translates = (native.translatorGap ?? translatorGap)(s.translateNativeModel, ctx.legs.flatMap((leg) => (leg === 'speaker' ? forward : [reverse])));
     translates.catch(() => undefined);
   } else {
     (native.translatorIdle ?? translatorIdle)();
@@ -1205,8 +1216,13 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   // Fork: the speaker heard in either language, each sentence translated into the other (`speakBoth`).
   const both = source.toLowerCase() !== target.toLowerCase() && !shared.reversed(asked.direction) && speaksBoth(s, models, asked.direction);
   const soloCoach = coached && !both;
-  /** Fork: the languages they speak besides their own, each translated back (`Stages.back`); the first, what pairs with theirs. */
+  /**
+   * Fork: the languages they speak besides their own that are in use (those the other side has lit): each heard, and
+   * translated back (`Stages.back`) or across into the other lit one (`Stages.cross`); the first, what pairs with theirs.
+   */
   const also = both ? alsoSpoken(s, asked.direction) : [];
+  const backs = both ? backInto(s, asked.direction) : [];
+  const crossed = both ? crossings(s, asked.direction) : [];
   const alsoMain = both ? alsoFirst(s, asked.direction) ?? target : target;
 
   // Every stage named, before anything is built: a run with none has nothing to say. A coached speaker's translation
@@ -1326,21 +1342,30 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   }
   // Fork: a speaker who speaks both is answered in their own language when they speak the other side's.
   let back: AnswerStage | undefined;
-  if (both && translate) {
+  if (both && translate && backs.length > 0) {
     // Out of the one language they speak besides their own, or — where they speak more — whichever it was.
-    const from = also.length === 1 ? also[0] : AUTO;
+    const from = backs.length === 1 ? backs[0] : AUTO;
     const reversed = buildRealtime({ ...context, direction: { source: from, target: told } }, { ...s, model: pinned }, { ...shared, models: [{ id: pinned }] });
     const chosen = translatorFor(from, told, 'refused' in reversed ? base.instructions : reversed.instructions);
     if (chosen && 'refused' in chosen) return chosen;
     // Its answers are in the speaker's own language; this computer's engine is loaded for that direction.
     if (chosen) back = { ...chosen, language: told };
   }
-  // Fork: the other side's second language, lit by hand (`theyLitOf`): the speaker's sentences go into it as well, a
+  // Fork: a sentence in one of two lit languages of theirs, which the speaker speaks too, goes into the other one.
+  const cross: Array<{ language: string; stage: AnswerStage }> = [];
+  if (both && translate) {
+    for (const c of crossed) {
+      const across = buildRealtime({ ...context, direction: { source: c.source, target: c.target } }, { ...s, model: pinned }, { ...shared, models: [{ id: pinned }] });
+      const chosen = translatorFor(c.source, c.target, 'refused' in across ? base.instructions : across.instructions);
+      if (chosen && 'refused' in chosen) return chosen;
+      if (chosen) cross.push({ language: c.source, stage: { ...chosen, language: c.target } });
+    }
+  }
+  // Fork: the other side's second language, lit by hand (`alsoInto`): the speaker's sentences go into it as well, a
   // second answer beside the first (the VRChat chatbox shows both). Not into "any language", which is no language.
   let into: AnswerStage | undefined;
-  const lit = shared.reversed(asked.direction) || soloCoach ? '' : theyLitOf(s);
-  const lower = (code: string) => code.toLowerCase().split(/[-_]/)[0];
-  if (translate && lit && lit !== AUTO && lower(lit) !== lower(target) && lower(lit) !== lower(told)) {
+  const lit = shared.reversed(asked.direction) || soloCoach ? undefined : alsoInto(s, asked.direction);
+  if (translate && lit) {
     const forward = buildRealtime({ ...context, direction: { source, target: lit } }, { ...s, model: pinned }, { ...shared, models: [{ id: pinned }] });
     const chosen = translatorFor(source, lit, 'refused' in forward ? base.instructions : forward.instructions);
     if (chosen && 'refused' in chosen) return chosen;
@@ -1393,7 +1418,8 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
       typed: translate,
       ...(detected || both ? { heard: AUTO } : {}),
       // The pair's two languages, each answered by the stage that translates out of it.
-      ...(back ? { back: { stage: back, language: alsoMain, own: told, languages: also } } : {}),
+      ...(back || cross.length ? { back: { ...(back ? { stage: back } : {}), language: alsoMain, own: told, languages: also } } : {}),
+      ...(cross.length ? { cross } : {}),
       ...(coaching ? { feedback: { stage: coaching, language: target } } : {}),
       ...(into ? { into } : {}),
       ...(s.translateBySentence ? {} : { whole: true }),
@@ -1473,27 +1499,24 @@ export const localaiLanguages: Provider<LocalAISettings, never, never>['language
     const mineHearer = hearerOf(s, listed, pair, 'speaker');
     const theirsHearer = hearerOf(s, listed, pair, 'participant');
     const strip = (h: typeof mineHearer) => (h ? { hearer: { name: h.name, languages: h.languages } } : {});
-    const spoken = alsoSpoken(s, pair);
+    const spoken = alsoListed(s, pair);
     return {
       mine: {
         ...strip(mineHearer),
         ...reach(mineHearer, true),
         // The Mac's recognition hears one beside the user's own: theirs, the only one shown chosen there.
         chosen: mineHearer?.apple && !mineHearer.detects ? spoken.filter((code) => base(code) === base(pair.target)) : spoken,
+        // In use: those the other side has lit.
+        using: alsoSpoken(s, pair),
         set: (chosen) => ({ speakAlso: [...chosen], speakBoth: false }),
       },
       theirs: {
         ...strip(theirsHearer),
         ...reach(theirsHearer, false),
-        chosen: theyAlsoSpeak(s),
-        lit: theyLitOf(s),
-        // One added is the one wanted now: it is lit. One taken away that was lit goes dark.
-        set: (chosen) => {
-          const was = theyAlsoSpeak(s);
-          const added = chosen.find((code) => !was.includes(code));
-          const lit = added ?? chosen.find((code) => code === theyLitOf(s)) ?? '';
-          return { theyAlso: [...chosen], theyLit: lit, asrDetectOther: lit !== '' };
-        },
+        // Their row, their main language among it; the one lit beside it (`theirLanguages.ts` switches them).
+        chosen: theirRow(s, pair.target),
+        lit: theyLitOf(s, pair.target),
+        set: (chosen) => ({ theyAlso: [...chosen], ...(chosen.includes(theyLitOf(s, pair.target)) ? {} : { theyLit: '', asrDetectOther: false }) }),
         light: (code) => ({ theyLit: code, asrDetectOther: code !== '' }),
       },
     };

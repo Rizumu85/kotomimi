@@ -905,3 +905,39 @@ describe('the other side’s second language, lit by hand (fork)', () => {
     expect(h.of('segmentText').filter((e) => e.payload.ref > FIRST_REF + 2 && e.payload.language === 'en').pop()?.payload.text).toBe('Yes');
   });
 });
+
+describe('a sentence in one of two lit languages of theirs, which the user speaks too (fork)', () => {
+  const api = { ...VIA_MODEL, asrVia: 'api' as const, asrApiBaseUrl: 'http://127.0.0.1:9000/v1', asrApiModel: 'whisper' };
+
+  it('is built to go into the other lit one, not back into the user’s own; nothing is built for a language not lit', () => {
+    const lit = { ...api, speakAlso: ['en', 'ko'], theyAlso: ['ja', 'en'], theyLit: 'en', asrDetectOther: true };
+    const built = buildLocalAI(SPEAKER, { ...LOCALAI_DEFAULTS, ...lit }, shared) as LocalAIConfig;
+    expect(built.stages?.cross).toEqual([{ language: 'en', stage: expect.objectContaining({ kind: 'translate', language: 'ja' }) }]);
+    expect(built.stages?.back?.stage).toBeUndefined();
+    expect(built.stages?.back?.languages).toEqual(['en']);
+    // Korean is one the user speaks, and not lit for them: the user is not heard in it.
+    const dark = buildLocalAI(SPEAKER, { ...LOCALAI_DEFAULTS, ...api, speakAlso: ['ko'] }, shared) as LocalAIConfig;
+    expect(dark.stages?.back).toBeUndefined();
+    expect(dark.stages?.heard).toBeUndefined();
+  });
+
+  it('answers it with the other lit language, and the user’s own as ever', async () => {
+    const crossing = (config: LocalAIConfig) => {
+      config.stages = {
+        ...config.stages!, heard: 'auto',
+        back: { own: 'zh-CN', language: 'en', languages: ['en'] },
+        cross: [{ language: 'en', stage: { kind: 'translate', model: 'across', baseUrl: '', system: 'Translate into Japanese', language: 'ja' } }],
+      };
+      delete config.stages.leakCheck;
+    };
+    const h = await live(SPEAKER, VIA_MODEL, [sse('次のワールドに行こう'), sse('次へ')], K, crossing);
+    h.receive(...heard('first', "Let's go to the next world, everyone"));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(1));
+    await h.settled();
+    expect(h.calls[0].body.model).toBe('across');
+    expect(h.lastText(FIRST_REF + 1)).toMatchObject({ text: '次のワールドに行こう', language: 'ja' });
+    h.receive(...heard('second', '我们走吧大家一起去'));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(2));
+    expect(h.calls[1].body.model).toBe('hy-mt2-1.8b');
+  });
+});

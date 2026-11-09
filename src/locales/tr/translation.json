@@ -1780,15 +1780,15 @@
       "unpinShort": "Sabitlemeyi kaldır",
       "mine": "Benim dilim",
       "theirs": "Karşı tarafın dili",
-      "pairHelp": "Sizin ve karşınızdakinin en çok kullandığı dilleri seçin. Söyledikleriniz onun diline, onun söyledikleri sizin dilinize çevrilir. “Karşı taraf şunları da konuşabilir” altındaki bir dile dokunarak onu açın: karşı taraf o dilde de dinlenir ve söyledikleriniz o dile de çevrilir.",
+      "pairHelp": "Sizin ve karşınızdakinin en çok kullandığı dilleri seçin. Söyledikleriniz onun diline, onun söyledikleri sizin dilinize çevrilir. “Konuştukları dil” altındaki bir dile dokunarak onu açın, en fazla iki: karşı taraf açık dillerde dinlenir ve söyledikleriniz her birine çevrilir. Sizin de konuştuğunuz dillerden yalnızca onlar için açık olanlar kullanılır.",
       "alsoSpeak": "Ben de konuşuyorum",
-      "theyMaySpeak": "Karşı taraf şunları da konuşabilir",
       "hearingBy": "Ses tanıma: {{name}}",
       "anyLanguage": "Herhangi bir dil",
       "addLanguage": "Dil ekle",
       "removeLanguage": "{{name}} dilini kaldır",
       "hearsMe": "Beni duyar",
-      "hearsThem": "Karşı tarafı duyar"
+      "iSay": "Konuştuğum dil",
+      "theySay": "Konuştukları dil"
     },
     "wizard": {
       "pathTitle": "Kotomimi İş Akışı",

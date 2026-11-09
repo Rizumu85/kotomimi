@@ -77,8 +77,12 @@ export interface VrState {
   muted: boolean;
   /** The last few lines, oldest first. */
   lines: VrLine[];
-  /** `lit`: their language lit beside the main one (`MoreLanguages.lit`): heard, and the user's speech translated into it too. */
-  theirs: { value: string; lit?: string; options: VrChoice[]; quick: string[] };
+  /**
+   * `lit`: their language lit beside the main one (`MoreLanguages.lit`): heard, and the user's speech translated into it
+   * too. `row`: `quick` is their row ("对方说"), pressed to light or put out as in the settings, and a language picked from
+   * `options` joins it lit; else `quick` is a few to switch their main one to.
+   */
+  theirs: { value: string; lit?: string; options: VrChoice[]; quick: string[]; row?: boolean };
   mine: { value: string; options: VrChoice[] };
   hear: { value: string; options: VrModel[] };
   translate: { value: string; options: VrModel[] };
@@ -122,8 +126,6 @@ export interface VrPerf {
 
 export type VrCommand =
   | { type: 'theirs'; value: string }
-  /** Lights one of their languages beside the main one, or none with ''. */
-  | { type: 'light'; value: string }
   | { type: 'mine'; value: string }
   | { type: 'run'; on: boolean }
   | { type: 'strip'; on: boolean }

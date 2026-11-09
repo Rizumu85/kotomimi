@@ -1780,15 +1780,15 @@
       "unpinShort": "Lepas sematan",
       "mine": "Bahasa saya",
       "theirs": "Bahasa lawan bicara",
-      "pairHelp": "Pilih bahasa yang terutama digunakan oleh Anda dan lawan bicara. Ucapan Anda diterjemahkan ke bahasanya, dan ucapannya ke bahasa Anda. Tekan salah satu bahasa di “Mereka mungkin juga berbicara” untuk menyalakannya: ucapan mereka dalam bahasa itu juga didengar, dan ucapan Anda juga diterjemahkan ke bahasa itu.",
+      "pairHelp": "Pilih bahasa yang terutama digunakan oleh Anda dan lawan bicara. Ucapan Anda diterjemahkan ke bahasanya, dan ucapannya ke bahasa Anda. Tekan salah satu bahasa di “Mereka berbicara” untuk menyalakannya, paling banyak dua: ucapan mereka didengar dalam bahasa yang menyala, dan ucapan Anda diterjemahkan ke masing-masing. Dari bahasa yang juga Anda kuasai, hanya yang menyala untuk mereka yang dipakai.",
       "alsoSpeak": "Saya juga berbicara",
-      "theyMaySpeak": "Mereka mungkin juga berbicara",
       "hearingBy": "Pengenalan suara: {{name}}",
       "anyLanguage": "Bahasa apa pun",
       "addLanguage": "Tambah bahasa",
       "removeLanguage": "Hapus {{name}}",
       "hearsMe": "Mendengar saya",
-      "hearsThem": "Mendengar mereka"
+      "iSay": "Saya berbicara",
+      "theySay": "Mereka berbicara"
     },
     "wizard": {
       "pathTitle": "Kotomimi Bebas Kombinasi",

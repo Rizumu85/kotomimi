@@ -29,9 +29,9 @@ describe('the languages beside each side’s main one', () => {
     const { mine, theirs } = more({ asrVia: 'server', asrModel: 'qwen3-asr-1.7b-q8' });
     expect(mine).toMatchObject({ hearer: { name: 'Qwen3-ASR 1.7B' }, most: null, any: true });
     expect(theirs).toMatchObject({ most: null, any: true });
-    // One added is lit: heard, and translated into.
-    expect(theirs!.set(['ko'])).toEqual({ theyAlso: ['ko'], theyLit: 'ko', asrDetectOther: true });
-    expect(theirs!.set([])).toEqual({ theyAlso: [], theyLit: '', asrDetectOther: false });
+    // Their row is kept as given; what is lit is lit apart (`light`).
+    expect(theirs!.set(['ja', 'ko'])).toMatchObject({ theyAlso: ['ja', 'ko'] });
+    expect(theirs!.light!('ko')).toEqual({ theyLit: 'ko', asrDetectOther: true });
   });
 
   it('keeps SenseVoice to its five, with no "any language"', () => {
@@ -49,22 +49,30 @@ describe('the languages beside each side’s main one', () => {
   it('counts an older "I speak theirs too" and "detect their language" among the languages chosen', () => {
     const { mine, theirs } = more({ asrVia: 'server', asrModel: 'qwen3-asr-1.7b-q8', speakBoth: true, asrDetectOther: true });
     expect(mine!.chosen).toEqual(['ja']);
-    expect(theirs!.chosen).toEqual(['auto']);
+    // Their row holds their main language, and "any language" lit beside it.
+    expect(theirs!.chosen).toEqual(['ja', 'auto']);
+    expect(theirs!.lit).toBe('auto');
   });
 
-  it('switches their languages by hand: one lit, heard and translated into; another pressed takes the light', () => {
-    const lit = (settings: Record<string, unknown>) => more({ asrVia: 'server', asrModel: 'qwen3-asr-1.7b-q8', ...settings }).theirs!;
-    expect(lit({ theyAlso: ['ko', 'es'] }).lit).toBe('');
-    expect(lit({ theyAlso: ['ko', 'es'], theyLit: 'es', asrDetectOther: true }).lit).toBe('es');
+  it('switches their languages by hand: their row holds the main one, one lit beside it; a light taken out of the row goes', () => {
+    const theirs = (settings: Record<string, unknown>) => more({ asrVia: 'server', asrModel: 'qwen3-asr-1.7b-q8', ...settings }).theirs!;
+    expect(theirs({ theyAlso: ['ko', 'es'] })).toMatchObject({ chosen: ['ja', 'ko', 'es'], lit: '' });
+    expect(theirs({ theyAlso: ['ja', 'ko', 'es'], theyLit: 'es', asrDetectOther: true }).lit).toBe('es');
     // An older build followed them by itself, with no light: the first of theirs, or any.
-    expect(lit({ theyAlso: ['ko', 'es'], asrDetectOther: true }).lit).toBe('ko');
-    expect(lit({ asrDetectOther: true }).lit).toBe('auto');
-    const side = lit({ theyAlso: ['ko', 'es'], theyLit: 'ko', asrDetectOther: true });
-    expect(side.light!('es')).toEqual({ theyLit: 'es', asrDetectOther: true });
+    expect(theirs({ theyAlso: ['ko', 'es'], asrDetectOther: true }).lit).toBe('ko');
+    expect(theirs({ asrDetectOther: true }).lit).toBe('auto');
+    const side = theirs({ theyAlso: ['ja', 'ko', 'es'], theyLit: 'ko', asrDetectOther: true });
     expect(side.light!('')).toEqual({ theyLit: '', asrDetectOther: false });
-    // A third added takes the light; the lit one taken away puts it out.
-    expect(side.set(['ko', 'es', 'fr'])).toMatchObject({ theyLit: 'fr', asrDetectOther: true });
-    expect(side.set(['es'])).toMatchObject({ theyLit: '', asrDetectOther: false });
-    expect(side.set(['ko'])).toMatchObject({ theyLit: 'ko', asrDetectOther: true });
+    expect(side.set(['ja', 'es'])).toEqual({ theyAlso: ['ja', 'es'], theyLit: '', asrDetectOther: false });
+    expect(side.set(['ja', 'ko'])).toEqual({ theyAlso: ['ja', 'ko'] });
+  });
+
+  it('uses only those of the user’s other languages the other side has lit, so a long list does not muddle what is heard', () => {
+    const mine = (settings: Record<string, unknown>) => more({ asrVia: 'server', asrModel: 'qwen3-asr-1.7b-q8', speakAlso: ['en', 'ko', 'ja'], ...settings }).mine!;
+    expect(mine({}).chosen).toEqual(['en', 'ko', 'ja']);
+    expect(mine({}).using).toEqual(['ja']);
+    expect(mine({ theyAlso: ['ja', 'ko'], theyLit: 'ko', asrDetectOther: true }).using).toEqual(['ko', 'ja']);
+    // "Any language" lit: any of them may be it.
+    expect(mine({ theyAlso: ['auto'], theyLit: 'auto', asrDetectOther: true }).using).toEqual(['en', 'ko', 'ja']);
   });
 });

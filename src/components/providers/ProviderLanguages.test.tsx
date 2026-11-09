@@ -108,6 +108,8 @@ describe('ProviderLanguages — the Kotomimi provider: my language, theirs, and 
     useProviderStore.setState({
       entries: { localai: { settings: { ...LOCALAI_DEFAULTS, asrVia: 'device', asrHere: 'native', ...settings }, credentials: {}, pair: { source: 'zh', target: 'ja' } } } as never,
       selected: 'localai' as never,
+      // The pair as picked: a settings write derives the pair from it.
+      intent: { source: 'zh', target: 'ja' },
       legs,
       models: { localai: models } as never,
     });
@@ -120,29 +122,30 @@ describe('ProviderLanguages — the Kotomimi provider: my language, theirs, and 
   it('offers a row a side while each is heard, and a choice there is saved as the run reads it', () => {
     show({}, ['speaker', 'participant']);
     expect(row('fork.languageMenu.alsoSpeak')).not.toBeNull();
-    expect(row('fork.languageMenu.theyMaySpeak')).not.toBeNull();
+    expect(row('fork.languageMenu.theySay')).not.toBeNull();
     // One recognizer for both: named once, in the heading.
     expect(screen.getAllByRole('button', { name: 'fork.languageMenu.hearingBy' })).toHaveLength(1);
-    fireEvent.mouseDown(add(row('fork.languageMenu.theyMaySpeak')!)!, { button: 0 });
+    fireEvent.mouseDown(add(row('fork.languageMenu.theySay')!)!, { button: 0 });
     fireEvent.click(screen.getAllByRole('option').find((o) => o.textContent === 'fork.languageMenu.anyLanguage')!);
-    expect(saved()).toMatchObject({ theyAlso: ['auto'], theyLit: 'auto', asrDetectOther: true });
+    expect(saved()).toMatchObject({ theyAlso: ['ja', 'auto'], theyLit: 'auto', asrDetectOther: true });
     // Only the user heard: their languages are still what the user's speech is translated into.
     show({}, ['speaker']);
-    expect(row('fork.languageMenu.theyMaySpeak')).not.toBeNull();
+    expect(row('fork.languageMenu.theySay')).not.toBeNull();
   });
 
-  it('lights one of their languages by pressing it, moves the light to another, and puts it out: heard no more, translated into no more', () => {
+  it('presses their row: one lit beside the main one, a third handing the main on, one put out: heard and translated into no more', () => {
     show({ theyAlso: ['en', 'ko'] }, ['speaker', 'participant']);
-    const theirs = row('fork.languageMenu.theyMaySpeak')!;
-    const name = (i: number) => theirs.querySelectorAll<HTMLButtonElement>('.language-chip__name')[i];
-    expect(theirs.querySelector('.is-lit')).toBeNull();
-    fireEvent.click(name(0));
-    expect(saved()).toMatchObject({ theyLit: 'en', asrDetectOther: true });
-    fireEvent.click(name(1));
-    expect(saved()).toMatchObject({ theyAlso: ['en', 'ko'], theyLit: 'ko', asrDetectOther: true });
-    expect(name(1).getAttribute('aria-pressed')).toBe('true');
-    fireEvent.click(name(1));
-    expect(saved()).toMatchObject({ theyAlso: ['en', 'ko'], theyLit: '', asrDetectOther: false });
+    const theirs = row('fork.languageMenu.theySay')!;
+    const chip = (i: number) => theirs.querySelectorAll<HTMLButtonElement>('.language-chip--switch')[i];
+    const target = () => (useProviderStore.getState().entries as unknown as Record<string, { pair: { target: string } }>).localai.pair.target;
+    expect([0, 1, 2].map((i) => chip(i).getAttribute('aria-pressed'))).toEqual(['true', 'false', 'false']);
+    fireEvent.click(chip(1));
+    expect(saved()).toMatchObject({ theyAlso: ['ja', 'en', 'ko'], theyLit: 'en', asrDetectOther: true });
+    fireEvent.click(chip(2));
+    expect(target()).toBe('en');
+    expect(saved()).toMatchObject({ theyLit: 'ko', asrDetectOther: true });
+    fireEvent.click(chip(2));
+    expect(saved()).toMatchObject({ theyAlso: ['ja', 'en', 'ko'], theyLit: '', asrDetectOther: false });
   });
 
   it('reads an older "detect their language" as any language', () => {
@@ -162,13 +165,18 @@ describe('ProviderLanguages — the Kotomimi provider: my language, theirs, and 
     expect(screen.getAllByRole('option').map((o) => o.textContent)).toHaveLength(1);
     fireEvent.click(screen.getAllByRole('option')[0]);
     expect(saved()).toMatchObject({ speakAlso: ['ja'], speakBoth: false });
-    expect(row('fork.languageMenu.theyMaySpeak')).toBeNull();
+    // Theirs is one language at a time there: a press moves it.
+    expect(row('fork.languageMenu.theySay')).not.toBeNull();
   });
 
   it('offers nothing beside a recognizer that must be told the language', () => {
     engine('r2t2-q8');
     show({ asrNativeModel: 'r2t2-q8' }, ['speaker', 'participant']);
     expect(row('fork.languageMenu.alsoSpeak')).toBeNull();
-    expect(row('fork.languageMenu.theyMaySpeak')).toBeNull();
+    // Theirs is switched one at a time.
+    show({ asrNativeModel: 'r2t2-q8', theyAlso: ['en'] }, ['speaker', 'participant']);
+    fireEvent.click(row('fork.languageMenu.theySay')!.querySelectorAll<HTMLButtonElement>('.language-chip--switch')[1]);
+    expect((useProviderStore.getState().entries as unknown as Record<string, { pair: { target: string } }>).localai.pair.target).toBe('en');
+    expect(saved()).toMatchObject({ theyLit: '', asrDetectOther: false });
   });
 });

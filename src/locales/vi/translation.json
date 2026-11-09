@@ -1780,15 +1780,15 @@
       "unpinShort": "Bỏ ghim",
       "mine": "Ngôn ngữ của tôi",
       "theirs": "Ngôn ngữ của người kia",
-      "pairHelp": "Chọn các ngôn ngữ mà bạn và người kia chủ yếu sử dụng. Lời của bạn được dịch sang ngôn ngữ của họ, và lời của họ sang ngôn ngữ của bạn. Nhấn vào một ngôn ngữ trong “Đối phương cũng có thể nói” để bật nó: lời của người kia bằng ngôn ngữ đó cũng được nghe, và lời của bạn cũng được dịch sang ngôn ngữ đó.",
+      "pairHelp": "Chọn các ngôn ngữ mà bạn và người kia chủ yếu sử dụng. Lời của bạn được dịch sang ngôn ngữ của họ, và lời của họ sang ngôn ngữ của bạn. Nhấn vào một ngôn ngữ trong “Họ nói” để bật, tối đa hai: lời của họ được nghe bằng các ngôn ngữ đang bật, và lời của bạn được dịch sang từng ngôn ngữ đó. Trong các ngôn ngữ bạn cũng nói được, chỉ những ngôn ngữ đang bật cho họ mới được dùng.",
       "alsoSpeak": "Tôi cũng nói",
-      "theyMaySpeak": "Đối phương cũng có thể nói",
       "hearingBy": "Nhận dạng giọng nói: {{name}}",
       "anyLanguage": "Bất kỳ ngôn ngữ nào",
       "addLanguage": "Thêm ngôn ngữ",
       "removeLanguage": "Xóa {{name}}",
       "hearsMe": "Nghe tôi",
-      "hearsThem": "Nghe đối phương"
+      "iSay": "Tôi nói",
+      "theySay": "Họ nói"
     },
     "wizard": {
       "pathTitle": "Kotomimi tùy chọn kết hợp",

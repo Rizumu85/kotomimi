@@ -124,7 +124,9 @@ export interface MoreLanguages<S> {
   most: number | null;
   any: boolean;
   set(chosen: readonly string[]): Partial<S>;
-  /** The one of `chosen` lit; '' none. Absent: the side's languages are not switched (the user's own). */
+  /** Fork: those of `chosen` in use now (the user's: those the other side has lit); absent, all of them. */
+  using?: readonly string[];
+  /** The one of `chosen` lit beside the side's main language; '' none. Absent: the side's languages are not switched (the user's own). */
   lit?: string;
   /** Lights `code` (one of `chosen`), or none with ''. */
   light?(code: string): Partial<S>;

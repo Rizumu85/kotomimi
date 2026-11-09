@@ -1,3 +1,4 @@
+import type { TheirLanguages } from '../lib/language/theirLanguages';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Entry } from '../lib/projection/types';
 import type { RunState } from '../lib/session/types';
@@ -115,7 +116,7 @@ function setup(over: Partial<VrOverlayDeps> = {}) {
   };
   const controller = startVrOverlay(deps);
   return {
-    controller, handlers, sent, invoked, order, runner, start, setRun, heard, ticks,
+    controller, handlers, sent, invoked, order, runner, start, setRun, heard, ticks, settings,
     setEntries: (next: Entry[]) => { entries = next; for (const l of viewListeners) l(); },
     advance: (ms: number) => { clock += ms; },
     // After the answer to the first `vr:set`, as the main process sends them.
@@ -193,6 +194,24 @@ describe('startVrOverlay', () => {
     const captions = t.sent[t.sent.length - 1].captions;
     expect(captions.entries.map((e) => e.id)).toEqual(['a', 'b']);
     expect(captions).toMatchObject({ legs: ['speaker', 'participant'], pair: { source: 'zh-CN', target: 'ja' }, language: 'en', coached: false, filters: { speaker: 'both', participant: 'both' } });
+    t.controller.stop();
+  });
+
+  it('presses their row as the settings do, where the provider switches them by hand', async () => {
+    const t = setup();
+    let theirs: TheirLanguages = { main: 'ja', row: ['ja', 'en', 'ko'], lit: '', two: true };
+    const applied: unknown[] = [];
+    t.settings.theirs = () => theirs;
+    t.settings.applyTheirs = (next) => { applied.push(next); theirs = { ...theirs, ...next }; };
+    await t.connect();
+    expect(t.sent[t.sent.length - 1].theirs).toMatchObject({ value: 'ja', quick: ['ja', 'en', 'ko'], row: true });
+    t.command({ type: 'theirs', value: 'en' });
+    await flush();
+    expect(applied[applied.length - 1]).toEqual({ main: 'ja', row: ['ja', 'en', 'ko'], lit: 'en' });
+    // One from the full list joins the row, lit; the one lit first goes dark.
+    t.command({ type: 'theirs', value: 'fr' });
+    await flush();
+    expect(applied[applied.length - 1]).toEqual({ main: 'en', row: ['ja', 'en', 'ko', 'fr'], lit: 'fr' });
     t.controller.stop();
   });
 

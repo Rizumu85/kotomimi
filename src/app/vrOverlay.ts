@@ -22,6 +22,7 @@ import type { Readable } from '../lib/view/conversationView';
 import type { RunState } from '../lib/session/types';
 import type { LanguagePair } from '../lib/provider/types';
 import { languageLabel } from '../lib/language/label';
+import { addTheirs, pressTheirs, type TheirLanguages, type TheirNext } from '../lib/language/theirLanguages';
 import { toViewerEntry } from '../lib/share/viewerEntry';
 import { describeCause, reportError } from '../lib/diagnostics/report';
 import type { VrCaptions, VrChoice, VrCommand, VrLine, VrModel, VrState, VrWords } from '../vr/types';
@@ -42,9 +43,12 @@ export interface VrSettingsPort {
   /** The user's own languages the provider offers. */
   myOptions(): readonly string[];
   pins(): readonly string[];
-  /** Fork: the other side's language lit beside their main one (heard, and translated into too); and lighting one, or none with ''. */
-  lit?(): string | undefined;
-  light?(code: string): void;
+  /**
+   * Fork: the other side's languages switched by hand ("对方说", `theirLanguages.ts`), where the provider switches them;
+   * and a change to them, their main one and their row and light together. Absent: the pair's target alone.
+   */
+  theirs?(): TheirLanguages | null;
+  applyTheirs?(next: TheirNext): void;
   /** This computer's recognizers that hear the other side's language and are downloaded, and the one that does; null where the run does not hear on this computer. */
   hearers(): { value: string; options: readonly { id: string; label: string }[] } | null;
   setHearer(id: string): void;
@@ -181,7 +185,7 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
     const theirs = settings.theirOptions();
     const mine = settings.myOptions();
     const myQuick = quickLanguages(pair.source, mine, settings.pins(), 4);
-    const lit = settings.lit?.();
+    const switched = settings.theirs?.() ?? null;
     return {
       words: deps.words(),
       phase: run.phase,
@@ -190,8 +194,10 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
       heard,
       muted: deps.muted(),
       lines: vrLines(deps.view.get().entries),
-      // Fork: their language lit beside the main one, among the quick ones.
-      theirs: { value: pair.target, ...(lit ? { lit } : {}), options: choices(theirs), quick: quickLanguages(pair.target, theirs, lit ? [lit, ...settings.pins().filter((code) => code !== lit)] : settings.pins()) },
+      // Fork: their row where it is switched by hand ("对方说"), the main one and the one lit beside it; else the quick ones.
+      theirs: switched
+        ? { value: pair.target, ...(switched.lit && switched.lit !== 'auto' ? { lit: switched.lit } : {}), options: choices(theirs), quick: switched.row.filter((code) => code !== 'auto'), row: true }
+        : { value: pair.target, options: choices(theirs), quick: quickLanguages(pair.target, theirs, settings.pins()) },
       mine: { value: pair.source, options: choices(myQuick) },
       hear: models(settings.hearers(), hearLags),
       translate: models(settings.translators(), translateLags),
@@ -319,16 +325,22 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
     const command = raw as VrCommand;
     const pair = settings.pair();
     switch (command.type) {
-      case 'light':
-        // Their lit language turned off from the wrist: the run goes on without it (`Runner.retarget`).
-        if (typeof command.value === 'string') settings.light?.(command.value);
-        break;
-      case 'theirs':
+      case 'theirs': {
+        // Fork: their row pressed as the settings' is (`theirLanguages.ts`): one in it lit or put out, another added lit.
+        const switched = settings.theirs?.();
+        if (switched && settings.applyTheirs && typeof command.value === 'string') {
+          const value = command.value;
+          const inRow = switched.row.some((code) => code.toLowerCase().split(/[-_]/)[0] === value.toLowerCase().split(/[-_]/)[0]);
+          const next = inRow ? pressTheirs(switched, value) : addTheirs(switched, value);
+          if (next) void restartWith('theirs', label(value), () => settings.applyTheirs!(next));
+          break;
+        }
         if (pair && typeof command.value === 'string' && command.value !== pair.target) {
           const target = command.value;
           void restartWith('theirs', label(target), () => settings.setPair(target === pair.source ? { source: pair.target, target } : { source: pair.source, target }));
         }
         break;
+      }
       case 'mine':
         if (pair && typeof command.value === 'string' && command.value !== pair.source) {
           const source = command.value;
