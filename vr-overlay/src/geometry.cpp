@@ -7,7 +7,6 @@
 namespace {
 constexpr float kDeg = 3.14159265358979f / 180.0f;
 
-Vec3 sub(Vec3 a, Vec3 b) { return {a.x - b.x, a.y - b.y, a.z - b.z}; }
 float dot(Vec3 a, Vec3 b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
 Vec3 cross(Vec3 a, Vec3 b) { return {a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x}; }
 float length(Vec3 a) { return std::sqrt(dot(a, a)); }
@@ -67,29 +66,6 @@ Mat34 fromEulerDeg(float yaw, float pitch, float roll, Vec3 t) {
   return r;
 }
 
-Mat34 wristOffset(bool leftHand, Vec3 at, Vec3 turn) {
-  // The controller's -Z runs along the fingers and +Y out of the back of the hand. The panel faces +Y; on the left
-  // hand, held across the chest, the body is toward the controller's +X, so the panel's top is -X; mirrored on the right.
-  Mat34 base = leftHand ? fromAxes({0, 0, -1}, {-1, 0, 0}, {0, 1, 0}, at) : fromAxes({0, 0, 1}, {1, 0, 0}, {0, 1, 0}, at);
-  return mul(base, fromEulerDeg(turn.x, turn.y, turn.z, {0, 0, 0}));
-}
-
-bool facesEyes(const Mat34& panel, const Mat34& hmd, bool shown) {
-  Vec3 centre = column(panel, 3);
-  Vec3 eyes = column(hmd, 3);
-  Vec3 toEyes = sub(eyes, centre);
-  float distance = length(toEyes);
-  if (distance > (shown ? 0.9f : 0.75f) || distance < 0.05f) return false;
-  toEyes = normalize(toEyes);
-  // The panel's face toward the eyes, and the eyes toward the panel: both, so it shows only when looked at.
-  float facing = dot(normalize(column(panel, 2)), toEyes);
-  Vec3 gaze = normalize(Vec3{-hmd.m[0][2], -hmd.m[1][2], -hmd.m[2][2]});
-  float looking = dot(gaze, Vec3{-toEyes.x, -toEyes.y, -toEyes.z});
-  float faceMin = std::cos((shown ? 65.0f : 50.0f) * kDeg);
-  float lookMin = std::cos((shown ? 50.0f : 38.0f) * kDeg);
-  return facing > faceMin && looking > lookMin;
-}
-
 Mat34 followStrip(LazyFollow& f, const Mat34& hmd, float dt, const StripConfig& c) {
   Vec3 gaze = normalize(Vec3{-hmd.m[0][2], -hmd.m[1][2], -hmd.m[2][2]});
   float headYaw = std::atan2(-gaze.x, -gaze.z);
@@ -125,33 +101,3 @@ Mat34 followStrip(LazyFollow& f, const Mat34& hmd, float dt, const StripConfig& 
   return fromAxes(x, y, z, at);
 }
 
-PokeEvent updatePoke(Poke& p, Vec3 tip, float w, float h, const PokeConfig& c) {
-  bool over = tip.x > -w / 2 - c.margin && tip.x < w / 2 + c.margin && tip.y > -h / 2 - c.margin && tip.y < h / 2 + c.margin;
-  bool inReach = over && tip.z < c.hoverDepth && tip.z > -0.05f;
-  if (inReach) {
-    p.u = std::clamp((tip.x + w / 2) / w, 0.0f, 1.0f);
-    p.v = std::clamp((h / 2 - tip.y) / h, 0.0f, 1.0f);
-  }
-  if (p.down) {
-    // Pressed: released by drawing back, or by leaving the panel (still released, so a press never sticks).
-    if (!inReach || tip.z > c.releaseDepth) {
-      p.down = false;
-      p.hovering = inReach;
-      return PokeEvent::Up;
-    }
-    return PokeEvent::None;
-  }
-  if (!inReach) {
-    if (p.hovering) {
-      p.hovering = false;
-      return PokeEvent::Leave;
-    }
-    return PokeEvent::None;
-  }
-  p.hovering = true;
-  if (tip.z < c.pressDepth) {
-    p.down = true;
-    return PokeEvent::Down;
-  }
-  return PokeEvent::Hover;
-}

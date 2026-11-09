@@ -1,17 +1,16 @@
 // src/vr/Wrist.tsx
 /**
- * Fork: the wrist panel. Its first page is what a conversation in VRChat
- * needs at hand: whether each side is heard, the last few lines, the other
- * side's language, and stopping, hiding the strip, or turning to the second
- * page — the user's own language and this computer's models, each with how it
- * ran in this headset session, under the headset's frame rate and the card's
- * memory, for trying a model out while playing.
- *
- * The other hand's poke arrives as mouse events (`electron/vr-overlay.js`):
- * the page draws where the tip is, as there is no cursor in the picture.
+ * Fork: the wrist panel, a window on the desktop that a wrist tool such as
+ * XSOverlay carries on a wrist (`electron/vr-overlay.js`); its presses arrive
+ * as the tool's clicks. Its first page is what a conversation in VRChat needs
+ * at hand: whether each side is heard, the last few lines, the other side's
+ * language, and stopping, hiding the strip, VRChat's chatbox, or turning to
+ * the second page — the user's own language and this computer's models, each
+ * with how it ran in this session, under the headset's frame rate and the
+ * card's memory, for trying a model out while playing.
  */
-import { useState } from 'react';
-import { ChevronLeft, Eye, EyeOff, MicOff, Pause, Play, SlidersHorizontal } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ChevronLeft, Eye, EyeOff, MessageSquare, MessageSquareOff, MicOff, Pause, Play, SlidersHorizontal } from 'lucide-react';
 import { fill, send } from './bridge';
 import type { VrModel, VrPerf, VrState, VrWords } from './types';
 
@@ -91,6 +90,9 @@ function Main({ state, onTune }: { state: VrState; onTune: () => void }) {
         <button type="button" className="act" onClick={() => send({ type: 'strip', on: !state.strip })}>
           {state.strip ? <><EyeOff size={ICON} />{words.hide}</> : <><Eye size={ICON} />{words.show}</>}
         </button>
+        <button type="button" className={`act${state.chatbox ? ' is-on' : ''}`} aria-pressed={state.chatbox} onClick={() => send({ type: 'chatbox', on: !state.chatbox })}>
+          {state.chatbox ? <MessageSquare size={ICON} /> : <MessageSquareOff size={ICON} />}{words.chatbox}
+        </button>
         <button type="button" className="act" onClick={onTune}><SlidersHorizontal size={ICON} />{words.tune}</button>
       </div>
     </>
@@ -165,11 +167,11 @@ function Tune({ state, perf, onBack }: { state: VrState; perf: VrPerf | null; on
 
 export default function Wrist({ state, perf }: { state: VrState; perf: VrPerf | null }) {
   const [tune, setTune] = useState(false);
-  const [tip, setTip] = useState<{ x: number; y: number } | null>(null);
+  // The window's title: what a wrist tool lists it by.
+  useEffect(() => { document.title = state.words.panel; }, [state.words.panel]);
   return (
-    <div className="wrist" onMouseMove={(e) => setTip({ x: e.clientX, y: e.clientY })} onMouseLeave={() => setTip(null)}>
+    <div className="wrist">
       {tune ? <Tune state={state} perf={perf} onBack={() => setTune(false)} /> : <Main state={state} onTune={() => setTune(true)} />}
-      {tip ? <span className="tip" style={{ left: tip.x, top: tip.y }} /> : null}
     </div>
   );
 }

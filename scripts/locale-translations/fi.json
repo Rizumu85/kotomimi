@@ -803,6 +803,10 @@
     "en": "{s} s behind",
     "text": "{s} s jäljessä"
   },
+  "fork.vr.chatbox": {
+    "en": "Chatbox",
+    "text": "Pään yllä näkyvä chat"
+  },
   "fork.vr.dropping": {
     "en": "dropping frames",
     "text": "kuvia jää väliin"
@@ -820,8 +824,8 @@
     "text": "Sanelu"
   },
   "fork.vr.help": {
-    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-    "text": "SteamVR:ssä toisen puhe näkyy katseesi alapuolella. Katso ranteeseesi, niin pieni valikko tulee näkyviin. Paina sitä toisen käden ohjaimella, kun haluat vaihtaa kieltä, keskeyttää tai kokeilla toista mallia."
+    "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+    "text": "SteamVR:ssä toisen osapuolen puhe näkyy näkökenttäsi alapuolella. Rannepaneeli on työpöydällä oleva pieni ikkuna: lisää se XSOverlayhin ikkunana, niin voit käyttää sitä ranteessasi ja vaihtaa kieltä, keskeyttää, ottaa pään yllä näkyvän chatin käyttöön tai pois käytöstä tai kokeilla toista mallia."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -867,6 +871,14 @@
     "en": "Muted in VRChat",
     "text": "Mykistetty VRChatissa"
   },
+  "fork.vr.panel": {
+    "en": "Wrist panel window",
+    "text": "Rannepaneelin ikkuna"
+  },
+  "fork.vr.panelTitle": {
+    "en": "Kotomimi wrist panel",
+    "text": "Kotomimi-rannepaneeli"
+  },
   "fork.vr.pause": {
     "en": "Pause",
     "text": "Tauko"
@@ -884,8 +896,8 @@
     "text": "Oikea ranne"
   },
   "fork.vr.setting": {
-    "en": "Show captions and the wrist menu in the headset",
-    "text": "Näytä tekstitykset ja rannevalikko VR-laseissa"
+    "en": "Show captions in the headset",
+    "text": "Näytä tekstitykset laseissa"
   },
   "fork.vr.show": {
     "en": "Show",

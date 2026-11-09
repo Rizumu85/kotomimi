@@ -807,6 +807,10 @@
     "en": "{s} s behind",
     "text": "{s} సెకన్ల ఆలస్యం"
   },
+  "fork.vr.chatbox": {
+    "en": "Chatbox",
+    "text": "తలపై ప్రదర్శన"
+  },
   "fork.vr.dropping": {
     "en": "dropping frames",
     "text": "ఫ్రేములు తప్పిపోతున్నాయి"
@@ -824,8 +828,8 @@
     "text": "మాటలను అక్షరాల్లోకి"
   },
   "fork.vr.help": {
-    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-    "text": "SteamVR లో అవతలి వారి మాటలు మీ చూపుకు దిగువన కనిపిస్తాయి. తల వంచి మణికట్టు వైపు చూస్తే చిన్న మెనూ కనిపిస్తుంది. మరో చేతిలోని కంట్రోలర్‌తో దాన్ని తాకి భాషలు మార్చవచ్చు, పాజ్ చేయవచ్చు లేదా మరో మోడల్‌ను ప్రయత్నించవచ్చు."
+    "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+    "text": "SteamVRలో, ఎదుటివారి మాటలు మీ చూపు రేఖకు దిగువన కనిపిస్తాయి. మణికట్టు విండో డెస్క్‌టాప్‌లోని చిన్న విండో. దాన్ని XSOverlayలో విండోగా జోడిస్తే, మణికట్టుపై ధరించి భాష మార్చడం, పాజ్ చేయడం, తలపై ప్రదర్శనను ఆన్ లేదా ఆఫ్ చేయడం, లేదా మరో మోడల్‌ను ప్రయత్నించడం చేయవచ్చు."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -871,6 +875,14 @@
     "en": "Muted in VRChat",
     "text": "VRChatలో మ్యూట్ అయింది"
   },
+  "fork.vr.panel": {
+    "en": "Wrist panel window",
+    "text": "మణికట్టు ప్యానెల్ విండో"
+  },
+  "fork.vr.panelTitle": {
+    "en": "Kotomimi wrist panel",
+    "text": "Kotomimi మణికట్టు ప్యానెల్"
+  },
   "fork.vr.pause": {
     "en": "Pause",
     "text": "పాజ్ చేయి"
@@ -888,8 +900,8 @@
     "text": "కుడి చేయి"
   },
   "fork.vr.setting": {
-    "en": "Show captions and the wrist menu in the headset",
-    "text": "హెడ్‌సెట్‌లో ఉపశీర్షికలు, మణికట్టు మెనూ చూపించు"
+    "en": "Show captions in the headset",
+    "text": "హెడ్‌సెట్‌లో క్యాప్షన్‌లను చూపించు"
   },
   "fork.vr.show": {
     "en": "Show",

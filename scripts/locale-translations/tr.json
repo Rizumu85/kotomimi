@@ -807,6 +807,10 @@
     "en": "{s} s behind",
     "text": "{s} sn geride"
   },
+  "fork.vr.chatbox": {
+    "en": "Chatbox",
+    "text": "Baş üstü gösterimi"
+  },
   "fork.vr.dropping": {
     "en": "dropping frames",
     "text": "kareler düşüyor"
@@ -824,8 +828,8 @@
     "text": "Tanıma"
   },
   "fork.vr.help": {
-    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-    "text": "SteamVR'da karşınızdakinin söyledikleri görüş alanınızın altında görünür. Bileğinize baktığınızda küçük bir menü açılır. Diğer elinizdeki kontrolcüyle menüye dokunarak dili değiştirebilir, duraklatabilir veya başka bir model deneyebilirsiniz."
+    "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+    "text": "SteamVR'da karşı tarafın sözleri görüş alanınızın altında görünür. Bilek paneli, masaüstündeki küçük bir penceredir: XSOverlay'de pencere olarak ekleyip bileğinizde kullanabilir, dili değiştirebilir, duraklatabilir, baş üstü gösterimini açıp kapatabilir veya başka bir model deneyebilirsiniz."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -871,6 +875,14 @@
     "en": "Muted in VRChat",
     "text": "VRChat'te sessize alındı"
   },
+  "fork.vr.panel": {
+    "en": "Wrist panel window",
+    "text": "Bilek paneli penceresi"
+  },
+  "fork.vr.panelTitle": {
+    "en": "Kotomimi wrist panel",
+    "text": "Kotomimi bilek paneli"
+  },
   "fork.vr.pause": {
     "en": "Pause",
     "text": "Duraklat"
@@ -888,8 +900,8 @@
     "text": "Sağ bilek"
   },
   "fork.vr.setting": {
-    "en": "Show captions and the wrist menu in the headset",
-    "text": "VR başlığında altyazıları ve bilek menüsünü göster"
+    "en": "Show captions in the headset",
+    "text": "Başlıkta altyazıları göster"
   },
   "fork.vr.show": {
     "en": "Show",

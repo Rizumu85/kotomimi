@@ -1,13 +1,14 @@
 // src/app/vrOverlay.ts
 /**
  * Fork: the SteamVR overlay as the page drives it (`electron/vr-overlay.js`
- * is the main process's side, `src/vr/` the two pages it draws in the
- * headset, `vrStore` the settings).
+ * is the main process's side, `src/vr/` its two pages — the strip it draws in
+ * the headset and the wrist panel's window — `vrStore` the settings).
  *
- * - **What the headset shows** (`VrState`): the last few lines, whether each
- *   side is heard, the pair, this computer's models with how each ran, all in
- *   the user's words. Built while SteamVR shows it, sent only when it changes.
- * - **What the wrist asks.** A language or a model is a setting the run fixes:
+ * - **What they show** (`VrState`): the last few lines, whether each side is
+ *   heard, the pair, this computer's models with how each ran, all in the
+ *   user's words. Built while SteamVR shows the strip or the panel's window is
+ *   open, sent only when it changes.
+ * - **What the panel asks.** A language or a model is a setting the run fixes:
  *   a running run stops, takes the change, and starts again, and the strip
  *   says what it changes to meanwhile.
  * - **How a model ran**, measured in this session: for a recognizer, from the
@@ -25,6 +26,7 @@ import { toViewerEntry } from '../lib/share/viewerEntry';
 import { describeCause, reportError } from '../lib/diagnostics/report';
 import type { VrCaptions, VrChoice, VrCommand, VrLine, VrModel, VrState, VrWords } from '../vr/types';
 import { useVrStore, type VrLink } from '../stores/vrStore';
+import type { ChatboxShows } from '../stores/vrchatStore';
 
 export interface VrIpc {
   invoke(channel: string, data?: unknown): Promise<unknown>;
@@ -68,6 +70,9 @@ export interface VrOverlayDeps {
   /** VRChat has the user muted, and the run follows it. */
   muted(): boolean;
   subscribeMuted(listener: () => void): () => void;
+  /** VRChat's chatbox setting; it changes beside `muted` (one store). */
+  chatbox(): ChatboxShows;
+  setChatbox(shows: ChatboxShows): void;
   words(): VrWords;
   uiLanguage(): string;
   /** What the strip reads beside the conversation, as the computer's subtitle reads it (`VrCaptions`), and its changes. */
@@ -152,6 +157,8 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
   let stopped = false;
 
   let strip = true;
+  /** What the chatbox showed before the panel turned it off: what it shows when turned on again. */
+  let chatboxWas: ChatboxShows = deps.chatbox() === 'off' ? 'translation' : deps.chatbox();
   let switching: VrState['switching'] = null;
   let heard: VrState['heard'] = null;
   const hearLags = new Lags();
@@ -186,6 +193,7 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
       hear: models(settings.hearers(), hearLags),
       translate: models(settings.translators(), translateLags),
       strip,
+      chatbox: deps.chatbox() !== 'off',
       captions: {
         entries: captionEntries(deps.view.get().entries),
         legs: [...deps.legs()],
@@ -196,14 +204,16 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
     };
   };
 
+  /** Someone looks: SteamVR shows the strip, or the panel's window is open. */
+  const shown = () => store.getState().link === 'connected' || store.getState().panel;
   const publish = () => {
-    if (stopped || store.getState().link !== 'connected') return;
+    if (stopped || !shown()) return;
     if (queued) return;
     queued = true;
     // Many changes in one turn (a sentence's rows, a run's phase) make one picture.
     queueMicrotask(() => {
       queued = false;
-      if (stopped || store.getState().link !== 'connected') return;
+      if (stopped || !shown()) return;
       const state = build();
       const text = JSON.stringify(state);
       if (text === last) return;
@@ -218,7 +228,7 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
   /** When the other side's sound last stopped: what a recognizer's lag is counted from. */
   let soundEnded: number | null = null;
   const watchHeard = () => {
-    const want = !stopped && store.getState().link === 'connected' && runner.state.getState().phase === 'running';
+    const want = !stopped && shown() && runner.state.getState().phase === 'running';
     if (want && look === null) {
       void deps.levels().then((l) => { levels = l; });
       look = every(() => {
@@ -327,6 +337,14 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
         strip = command.on === true;
         publish();
         break;
+      case 'chatbox': {
+        // Off, or back to what it showed before.
+        const current = deps.chatbox();
+        if (current !== 'off') chatboxWas = current;
+        const next: ChatboxShows = command.on === true ? chatboxWas : 'off';
+        if (next !== current) deps.setChatbox(next);
+        break;
+      }
       case 'hear': {
         const model = settings.hearers()?.options.find((m) => m.id === command.id);
         if (model) void restartWith('hear', model.label, () => settings.setHearer(model.id));
@@ -345,7 +363,8 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
     const link = (s as { vr?: string } | null)?.vr;
     store.getState().setLink((['off', 'waiting', 'connected', 'missing'] as const).includes(link as VrLink) ? (link as VrLink) : 'off');
   });
-  ipc.receive?.('vr:wrist', (s) => store.getState().setWristShown((s as { shown?: boolean } | null)?.shown === true));
+  // The panel's window closed by itself: shown closed until the switch opens it again, or the next start.
+  ipc.receive?.('vr:panel', (s) => { if ((s as { on?: boolean } | null)?.on === false && store.getState().panel) store.getState().panelClosed(); });
   ipc.receive?.('vr:command', onCommand);
 
   const sendOn = (on: boolean) => {
@@ -354,11 +373,11 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
       if (!stopped && link) store.getState().setLink(link as VrLink);
     }, () => {});
   };
-  const sendHand = () => { void ipc.invoke('vr:tune', { lines: [`wrist.hand ${store.getState().hand}`] }).catch(() => {}); };
-  sendHand();
+  const sendPanel = (on: boolean) => { void ipc.invoke('vr:panel', { on }).catch(() => {}); };
   sendOn(store.getState().on);
+  if (store.getState().panel) sendPanel(true);
   offs.push(store.subscribe((s) => s.on, sendOn));
-  offs.push(store.subscribe((s) => s.hand, sendHand));
+  offs.push(store.subscribe((s) => s.panel, (on) => { sendPanel(on); last = ''; watchHeard(); publish(); }));
   offs.push(store.subscribe((s) => s.link, () => { last = ''; watchHeard(); publish(); }));
   offs.push(runner.state.subscribe(() => { watchHeard(); publish(); }));
   offs.push(deps.view.subscribe(() => { measure(); publish(); }));
@@ -409,6 +428,8 @@ async function build(): Promise<VrOverlayController | null> {
     settings: vrSettingsPort(),
     muted: () => vrchatHolds(useVRChatStore.getState()),
     subscribeMuted: (listener) => useVRChatStore.subscribe(listener),
+    chatbox: () => useVRChatStore.getState().chatbox,
+    setChatbox: (shows) => useVRChatStore.getState().setChatbox(shows),
     words: () => vrWords((key, fallback) => i18n.t(key, fallback) as string),
     uiLanguage: () => i18n.language ?? 'en',
     captionLook: () => {

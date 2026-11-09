@@ -803,6 +803,10 @@
     "en": "{s} s behind",
     "text": "{s} s de retraso"
   },
+  "fork.vr.chatbox": {
+    "en": "Chatbox",
+    "text": "Texto sobre la cabeza"
+  },
   "fork.vr.dropping": {
     "en": "dropping frames",
     "text": "pérdida de fotogramas"
@@ -820,8 +824,8 @@
     "text": "Transcripción"
   },
   "fork.vr.help": {
-    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-    "text": "En SteamVR, lo que dice la otra persona aparece debajo de tu campo de visión. Mira hacia tu muñeca para ver un pequeño menú y tócalo con el mando de la otra mano para cambiar de idioma, pausar o probar otro modelo."
+    "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+    "text": "En SteamVR, las palabras de la otra persona aparecen debajo de tu línea de visión. El panel de muñeca es una pequeña ventana del escritorio: añádela como ventana en XSOverlay para llevarla en la muñeca y cambiar de idioma, pausar, activar o desactivar el texto sobre la cabeza o probar otro modelo."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -867,6 +871,14 @@
     "en": "Muted in VRChat",
     "text": "Micrófono silenciado en VRChat"
   },
+  "fork.vr.panel": {
+    "en": "Wrist panel window",
+    "text": "Ventana del panel de muñeca"
+  },
+  "fork.vr.panelTitle": {
+    "en": "Kotomimi wrist panel",
+    "text": "Panel de muñeca de Kotomimi"
+  },
   "fork.vr.pause": {
     "en": "Pause",
     "text": "Pausar"
@@ -884,8 +896,8 @@
     "text": "Derecha"
   },
   "fork.vr.setting": {
-    "en": "Show captions and the wrist menu in the headset",
-    "text": "Mostrar subtítulos y el menú de muñeca en el visor"
+    "en": "Show captions in the headset",
+    "text": "Mostrar subtítulos en el visor"
   },
   "fork.vr.show": {
     "en": "Show",

@@ -1953,10 +1953,7 @@
     },
     "jyutping": "Hiện jyutping trên tiếng Quảng Đông",
     "vr": {
-      "setting": "Hiện phụ đề và menu cổ tay trong kính VR",
-      "hand": "Menu trên cổ tay",
-      "left": "Tay trái",
-      "right": "Tay phải",
+      "setting": "Hiển thị phụ đề trong kính",
       "linkWaiting": "Đang chờ SteamVR khởi động",
       "linkConnected": "Đã hiển thị trong kính VR",
       "linkMissing": "Bản này không có thành phần VR",
@@ -1986,7 +1983,10 @@
       "stoppedShort": "Đã dừng nhận dạng",
       "muted": "Đã tắt mic trong VRChat",
       "title": "Kính VR",
-      "help": "Trong SteamVR, lời của người kia sẽ hiện bên dưới tầm nhìn. Cúi nhìn cổ tay để mở menu nhỏ, rồi dùng tay cầm bên kia chạm vào để đổi ngôn ngữ, tạm dừng hoặc thử mô hình khác."
+      "help": "Trong SteamVR, lời của đối phương sẽ hiện bên dưới tầm nhìn của bạn. Bảng điều khiển cổ tay là một cửa sổ nhỏ trên máy tính để bàn; thêm cửa sổ này vào XSOverlay để đeo trên cổ tay, đổi ngôn ngữ, tạm dừng, bật hoặc tắt hiển thị trên đầu, hay thử model khác.",
+      "panel": "Cửa sổ bảng điều khiển cổ tay",
+      "chatbox": "Hiển thị trên đầu",
+      "panelTitle": "Bảng điều khiển cổ tay Kotomimi"
     },
     "storage": {
       "title": "Nơi lưu model",

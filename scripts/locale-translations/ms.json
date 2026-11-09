@@ -803,6 +803,10 @@
     "en": "{s} s behind",
     "text": "Lewat {s} saat"
   },
+  "fork.vr.chatbox": {
+    "en": "Chatbox",
+    "text": "Paparan atas kepala"
+  },
   "fork.vr.dropping": {
     "en": "dropping frames",
     "text": "bingkai tercicir"
@@ -820,8 +824,8 @@
     "text": "Transkripsi"
   },
   "fork.vr.help": {
-    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-    "text": "Dalam SteamVR, kata-kata orang lain dipaparkan di bawah pandangan anda. Tunduk ke arah pergelangan tangan untuk melihat menu kecil. Tekan menu itu dengan alat kawalan di tangan sebelah lagi untuk menukar bahasa, menjeda atau mencuba model lain."
+    "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+    "text": "Dalam SteamVR, kata-kata pihak lain muncul di bawah garis pandangan anda. Tetingkap panel pergelangan tangan ialah tetingkap kecil pada desktop. Tambahkannya sebagai tetingkap dalam XSOverlay untuk memakainya di pergelangan tangan, menukar bahasa, menjeda, menghidupkan atau mematikan paparan atas kepala, atau mencuba model lain."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -867,6 +871,14 @@
     "en": "Muted in VRChat",
     "text": "Dibisukan dalam VRChat"
   },
+  "fork.vr.panel": {
+    "en": "Wrist panel window",
+    "text": "Tetingkap panel pergelangan tangan"
+  },
+  "fork.vr.panelTitle": {
+    "en": "Kotomimi wrist panel",
+    "text": "Panel pergelangan tangan Kotomimi"
+  },
   "fork.vr.pause": {
     "en": "Pause",
     "text": "Jeda"
@@ -884,8 +896,8 @@
     "text": "Tangan kanan"
   },
   "fork.vr.setting": {
-    "en": "Show captions and the wrist menu in the headset",
-    "text": "Paparkan sari kata dan menu pergelangan tangan dalam set kepala"
+    "en": "Show captions in the headset",
+    "text": "Tunjukkan sari kata dalam set kepala"
   },
   "fork.vr.show": {
     "en": "Show",

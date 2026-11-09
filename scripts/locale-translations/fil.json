@@ -859,6 +859,10 @@
     "en": "{s} s behind",
     "text": "Nahuhuli ng {s} s"
   },
+  "fork.vr.chatbox": {
+    "en": "Chatbox",
+    "text": "Chatbox"
+  },
   "fork.vr.dropping": {
     "en": "dropping frames",
     "text": "Bumabagsak ang mga frame"
@@ -876,8 +880,8 @@
     "text": "Pagkilala sa boses"
   },
   "fork.vr.help": {
-    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-    "text": "Sa SteamVR, lalabas ang sinasabi ng kausap sa ibaba ng iyong paningin. Tumingin sa iyong pulso para makita ang maliit na menu. Pindutin ito gamit ang controller sa kabilang kamay para magpalit ng wika, mag-pause, o sumubok ng ibang modelo."
+    "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+    "text": "Sa SteamVR, lalabas ang mga salita ng kausap sa ibaba ng iyong linya ng paningin. Ang panel sa pulso ay maliit na window sa desktop; idagdag ito bilang window sa XSOverlay para maisuot sa pulso, makapagpalit ng wika, mag-pause, i-on o i-off ang Chatbox, o sumubok ng ibang modelo."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -923,6 +927,14 @@
     "en": "Muted in VRChat",
     "text": "Naka-mute sa VRChat"
   },
+  "fork.vr.panel": {
+    "en": "Wrist panel window",
+    "text": "Window ng panel sa pulso"
+  },
+  "fork.vr.panelTitle": {
+    "en": "Kotomimi wrist panel",
+    "text": "Panel sa pulso ng Kotomimi"
+  },
   "fork.vr.pause": {
     "en": "Pause",
     "text": "I-pause"
@@ -940,8 +952,8 @@
     "text": "Kanang pulso"
   },
   "fork.vr.setting": {
-    "en": "Show captions and the wrist menu in the headset",
-    "text": "Ipakita ang mga subtitle at menu sa pulso sa headset"
+    "en": "Show captions in the headset",
+    "text": "Ipakita ang mga subtitle sa headset"
   },
   "fork.vr.show": {
     "en": "Show",

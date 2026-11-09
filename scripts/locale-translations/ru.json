@@ -803,6 +803,10 @@
     "en": "{s} s behind",
     "text": "Отставание: {s} с"
   },
+  "fork.vr.chatbox": {
+    "en": "Chatbox",
+    "text": "Надпись над головой"
+  },
   "fork.vr.dropping": {
     "en": "dropping frames",
     "text": "Пропуск кадров"
@@ -820,8 +824,8 @@
     "text": "Распознавание"
   },
   "fork.vr.help": {
-    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-    "text": "В SteamVR слова собеседника появляются внизу поля зрения. Посмотрите на запястье — появится небольшое меню. Нажимайте на него контроллером в другой руке, чтобы сменить язык, включить паузу или попробовать другую модель."
+    "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+    "text": "В SteamVR слова собеседника появляются ниже линии взгляда. Окно панели на запястье — это небольшое окно на рабочем столе. Добавьте его в XSOverlay как окно, чтобы закрепить на запястье и менять язык, ставить перевод на паузу, включать или выключать надпись над головой либо пробовать другую модель."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -867,6 +871,14 @@
     "en": "Muted in VRChat",
     "text": "Звук отключён в VRChat"
   },
+  "fork.vr.panel": {
+    "en": "Wrist panel window",
+    "text": "Окно панели на запястье"
+  },
+  "fork.vr.panelTitle": {
+    "en": "Kotomimi wrist panel",
+    "text": "Панель Kotomimi на запястье"
+  },
   "fork.vr.pause": {
     "en": "Pause",
     "text": "Пауза"
@@ -884,8 +896,8 @@
     "text": "Правое запястье"
   },
   "fork.vr.setting": {
-    "en": "Show captions and the wrist menu in the headset",
-    "text": "Показывать субтитры и меню на запястье в шлеме"
+    "en": "Show captions in the headset",
+    "text": "Показывать субтитры в шлеме"
   },
   "fork.vr.show": {
     "en": "Show",

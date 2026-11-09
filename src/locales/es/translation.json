@@ -1953,10 +1953,7 @@
     },
     "jyutping": "Jyutping sobre el texto cantonés",
     "vr": {
-      "setting": "Mostrar subtítulos y el menú de muñeca en el visor",
-      "hand": "Menú de muñeca en",
-      "left": "Izquierda",
-      "right": "Derecha",
+      "setting": "Mostrar subtítulos en el visor",
       "linkWaiting": "Esperando a que se inicie SteamVR",
       "linkConnected": "Ya en el visor",
       "linkMissing": "Esta versión no incluye el componente VR",
@@ -1986,7 +1983,10 @@
       "stoppedShort": "Transcripción detenida",
       "muted": "Micrófono silenciado en VRChat",
       "title": "Visor de VR",
-      "help": "En SteamVR, lo que dice la otra persona aparece debajo de tu campo de visión. Mira hacia tu muñeca para ver un pequeño menú y tócalo con el mando de la otra mano para cambiar de idioma, pausar o probar otro modelo."
+      "help": "En SteamVR, las palabras de la otra persona aparecen debajo de tu línea de visión. El panel de muñeca es una pequeña ventana del escritorio: añádela como ventana en XSOverlay para llevarla en la muñeca y cambiar de idioma, pausar, activar o desactivar el texto sobre la cabeza o probar otro modelo.",
+      "panel": "Ventana del panel de muñeca",
+      "chatbox": "Texto sobre la cabeza",
+      "panelTitle": "Panel de muñeca de Kotomimi"
     },
     "storage": {
       "title": "Almacenamiento de modelos",

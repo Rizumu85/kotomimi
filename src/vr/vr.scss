@@ -1,4 +1,4 @@
-// src/vr/vr.scss — fork: the headset pages (main.tsx). Dark always; sizes are CSS pixels, drawn at twice that.
+// src/vr/vr.scss — fork: the overlay's pages (main.tsx). Dark always; sizes are CSS pixels, drawn larger (vr-overlay.js).
 @use '../styles/tokens' as tk;
 @use '../components/Settings/shared/variables' as *;
 
@@ -27,19 +27,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
   background: tk.$color-error; margin-right: 10px; vertical-align: 3px;
 }
 
-// ── The wrist ──
+// ── The wrist panel: the whole of its window ──
 .wrist {
-  position: relative; width: 350px; border-radius: 18px; background: $bg-base;
-  border: 1px solid $border-default; padding: 14px; display: flex; flex-direction: column; gap: 12px;
+  position: relative; width: 350px; background: $bg-base;
+  padding: 14px; display: flex; flex-direction: column; gap: 12px;
 }
 .wrist button { font: inherit; color: inherit; cursor: pointer; }
 
-.tip {
-  position: fixed; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%;
-  border: 2px solid tk.$color-primary; background: color-mix(in srgb, tk.$color-primary 25%, transparent); pointer-events: none;
-}
-
-.status { display: flex; align-items: center; gap: 14px; font-size: 15px; color: $text-secondary; }
+// The window has no frame: its top row moves it on the desktop.
+.status { display: flex; align-items: center; gap: 14px; font-size: 15px; color: $text-secondary; -webkit-app-region: drag; }
 .heard { display: inline-flex; align-items: center; gap: 7px; }
 .dot { width: 9px; height: 9px; border-radius: 50%; background: $text-dim; }
 .dot--me.is-on { background: tk.$color-primary; }
@@ -69,7 +65,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 .more { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .more .chip { height: 48px; font-size: 16px; }
 
-.actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .act {
   height: 48px; border-radius: 12px; border: 0; background: $bg-surface; color: $text-secondary; font-size: 16px;
   display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 6px;
@@ -78,6 +74,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 }
 .act svg { flex-shrink: 0; }
 .act:hover { background: $bg-hover; }
+.act.is-on { color: tk.$color-primary; }
 
 // ── The second page ──
 .tune__top { display: flex; align-items: center; gap: 10px; }

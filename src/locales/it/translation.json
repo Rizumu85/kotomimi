@@ -1953,10 +1953,7 @@
     },
     "jyutping": "Jyutping sopra il testo cantonese",
     "vr": {
-      "setting": "Mostra i sottotitoli e il menu al polso nel visore",
-      "hand": "Polso per il menu",
-      "left": "Polso sinistro",
-      "right": "Polso destro",
+      "setting": "Mostra i sottotitoli nel visore",
       "linkWaiting": "In attesa di SteamVR",
       "linkConnected": "Nel visore",
       "linkMissing": "Componente VR non incluso in questa versione",
@@ -1986,7 +1983,10 @@
       "stoppedShort": "Interrotto",
       "muted": "Audio disattivato in VRChat",
       "title": "Visore VR",
-      "help": "In SteamVR, le parole dell'altra persona appaiono sotto la linea dello sguardo. Abbassa lo sguardo verso il polso per vedere un piccolo menu e toccalo con l'altro controller per cambiare lingua, mettere in pausa o provare un altro modello."
+      "help": "In SteamVR, le parole dell’altra persona compaiono sotto la linea dello sguardo. Il pannello da polso è una piccola finestra sul desktop: aggiungila come finestra in XSOverlay per portarla al polso e cambiare lingua, mettere in pausa, attivare o disattivare il display sopra la testa oppure provare un altro modello.",
+      "panel": "Finestra del pannello da polso",
+      "chatbox": "Display sopra la testa",
+      "panelTitle": "Pannello da polso di Kotomimi"
     },
     "storage": {
       "title": "Archiviazione modelli",

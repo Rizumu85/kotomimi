@@ -1,7 +1,8 @@
 // src/vr/types.ts
 /**
- * Fork: what the main window, the main process and the two headset pages
- * (`vr.html#strip`, `vr.html#wrist`) exchange for the SteamVR overlay.
+ * Fork: what the main window, the main process and the two pages — the
+ * headset's strip (`vr.html#strip`) and the wrist panel's window
+ * (`vr.html#wrist`) — exchange for the SteamVR overlay.
  * Plain data, JSON-safe. Every word the pages show comes in `words`, put
  * into the user's language by the main window: the pages hold no strings.
  */
@@ -58,6 +59,10 @@ export interface VrWords {
   stopped: string;
   stoppedShort: string;
   muted: string;
+  /** VRChat's chatbox: what goes above the user's avatar. */
+  chatbox: string;
+  /** The panel window's title, which a wrist tool lists it by. */
+  panel: string;
 }
 
 export interface VrState {
@@ -77,6 +82,8 @@ export interface VrState {
   hear: { value: string; options: VrModel[] };
   translate: { value: string; options: VrModel[] };
   strip: boolean;
+  /** VRChat's chatbox shows the user's sentences. */
+  chatbox: boolean;
   /** What the strip draws, as the computer's subtitle does (`SubtitleLanes`). */
   captions: VrCaptions;
 }
@@ -117,6 +124,7 @@ export type VrCommand =
   | { type: 'mine'; value: string }
   | { type: 'run'; on: boolean }
   | { type: 'strip'; on: boolean }
+  | { type: 'chatbox'; on: boolean }
   | { type: 'hear'; id: string }
   | { type: 'translate'; id: string };
 

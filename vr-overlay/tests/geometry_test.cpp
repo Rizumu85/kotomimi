@@ -22,26 +22,6 @@ int main() {
   Vec3 p = apply(inverseRigid(m), apply(m, {0.2f, -0.4f, 0.7f}));
   CHECK(near(p.x, 0.2f) && near(p.y, -0.4f) && near(p.z, 0.7f));
 
-  // Left forearm across the chest, pointing right (+X world), back of the hand up: the controller's -Z is +X, its +Y up,
-  // so its +X is +Z (toward the body). The wrist panel faces up, its top away from the body (-Z), its lines toward the hand.
-  Mat34 controller = {{{0, 0, -1, 0}, {0, 1, 0, 1.2f}, {1, 0, 0, -0.3f}}};
-  Mat34 panel = mul(controller, wristOffset(true, {0, 0, 0}, {0, 0, 0}));
-  Vec3 face = column(panel, 2), top = column(panel, 1), lines = column(panel, 0);
-  CHECK(near(face.y, 1));
-  CHECK(near(top.z, -1));
-  CHECK(near(lines.x, 1));
-
-  // Eyes above and behind the wrist, looking down at it: shown. Looking away: not.
-  Mat34 lookingDown = fromEulerDeg(0, -60, 0, {0, 1.6f, 0.0f});
-  // A panel facing up: pitch -90 turns its +Z to +Y.
-  Mat34 atWrist = fromEulerDeg(0, -90, 0, {0, 1.2f, -0.25f});
-  CHECK(column(atWrist, 2).y > 0.99f);
-  CHECK(facesEyes(atWrist, lookingDown, false));
-  Mat34 lookingAhead = fromEulerDeg(0, 0, 0, {0, 1.6f, 0.0f});
-  CHECK(!facesEyes(atWrist, lookingAhead, false));
-  Mat34 lookingBehind = fromEulerDeg(180, -60, 0, {0, 1.6f, 0.0f});
-  CHECK(!facesEyes(atWrist, lookingBehind, true));
-
   // The strip: below the line of sight, facing the eyes; it stays for a small turn and follows a large one.
   StripConfig sc;
   LazyFollow f;
@@ -79,19 +59,6 @@ int main() {
   for (int i = 0; i < 120; i++) s = followStrip(g, watch, 0.016f, sc);
   CHECK(std::fabs(yawOf(s) - 15) < 1.5f);
   CHECK(std::fabs(pitchOf(s) + sc.below) < 0.5f);
-
-  // A poke: hover in front, press on the face, release on drawing back; leaving releases a press.
-  PokeConfig pc;
-  Poke k;
-  CHECK(updatePoke(k, {0, 0, 0.2f}, 0.13f, 0.18f, pc) == PokeEvent::None);
-  CHECK(updatePoke(k, {0.0325f, 0.045f, 0.05f}, 0.13f, 0.18f, pc) == PokeEvent::Hover);
-  CHECK(near(k.u, 0.75f) && near(k.v, 0.25f));
-  CHECK(updatePoke(k, {0.0325f, 0.045f, 0.002f}, 0.13f, 0.18f, pc) == PokeEvent::Down);
-  CHECK(updatePoke(k, {0.0325f, 0.045f, -0.01f}, 0.13f, 0.18f, pc) == PokeEvent::None);
-  CHECK(updatePoke(k, {0.0325f, 0.045f, 0.03f}, 0.13f, 0.18f, pc) == PokeEvent::Up);
-  CHECK(updatePoke(k, {0.0325f, 0.045f, 0.0f}, 0.13f, 0.18f, pc) == PokeEvent::Down);
-  CHECK(updatePoke(k, {0.5f, 0.045f, 0.0f}, 0.13f, 0.18f, pc) == PokeEvent::Up);
-  CHECK(updatePoke(k, {0.5f, 0.045f, 0.0f}, 0.13f, 0.18f, pc) == PokeEvent::None);
 
   if (failures == 0) std::printf("geometry: all passed\n");
   return failures == 0 ? 0 : 1;

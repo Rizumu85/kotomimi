@@ -1,15 +1,15 @@
 // vr-overlay/src/main.cpp
 //
 // Fork: Kotomimi's SteamVR overlay helper. Electron
-// draws the caption strip and the wrist panel offscreen and writes each new
-// picture to this process's stdin; this process puts them into SteamVR, keeps
-// the strip under the line of sight and the panel on a wrist, turns the other
-// hand's poke into pointer events, and reports the headset's frame rate and
-// the graphics card's memory — one JSON line each, on stdout.
+// draws the caption strip offscreen and writes each new picture to this
+// process's stdin; this process puts it into SteamVR, keeps it under the line
+// of sight, and reports the headset's frame rate and the graphics card's
+// memory — one JSON line each, on stdout. The wrist panel is not drawn here:
+// it is a window on the desktop, which a wrist tool such as XSOverlay shows.
 //
 // stdin: messages of [u32 kind][u32 length][payload], little-endian.
 //   kind 1, config: lines of "key value..." (see applyConfig).
-//   kind 2, picture: [u8 overlay (0 strip, 1 wrist)][3 pad][u32 width][u32 height], then BGRA, premultiplied.
+//   kind 2, picture: [u8 overlay (0, the strip)][3 pad][u32 width][u32 height], then BGRA, premultiplied.
 // It ends when stdin closes.
 #include <windows.h>
 #include <d3d11.h>
@@ -35,7 +35,6 @@
 namespace {
 
 constexpr int kStrip = 0;
-constexpr int kWrist = 1;
 constexpr uint32_t kMaxSide = 4096;
 
 // ── Output ────────────────────────────────────────────────────────────────
@@ -60,7 +59,7 @@ struct Picture {
 
 struct Inbox {
   std::mutex lock;
-  Picture pictures[2];
+  Picture pictures[1];
   std::string config;
   std::atomic<bool> closed{false};
 };
@@ -93,7 +92,7 @@ void readInput(Inbox* inbox) {
       uint32_t which = payload[0], w, h;
       std::memcpy(&w, &payload[4], 4);
       std::memcpy(&h, &payload[8], 4);
-      if (which > 1 || w == 0 || h == 0 || w > kMaxSide || h > kMaxSide || payload.size() != 12 + size_t(w) * h * 4) continue;
+      if (which > 0 || w == 0 || h == 0 || w > kMaxSide || h > kMaxSide || payload.size() != 12 + size_t(w) * h * 4) continue;
       Picture& pic = inbox->pictures[which];
       pic.width = w;
       pic.height = h;
@@ -106,17 +105,9 @@ void readInput(Inbox* inbox) {
 
 // ── Settings Electron sends ───────────────────────────────────────────────
 struct Config {
-  bool leftHand = true;
-  Vec3 wristAt = {0.0f, 0.03f, 0.13f};
-  Vec3 wristTurn = {0, 0, 0};
-  float wristWidth = 0.13f;
-  bool wristAlways = false;
-  bool wristOn = true;
   float stripWidth = 0.8f;
   bool stripOn = true;
   StripConfig strip;
-  Vec3 pokeTip = {0.0f, -0.015f, -0.06f};
-  PokeConfig poke;
   bool quit = false;
 };
 
@@ -127,25 +118,7 @@ void applyConfig(Config& c, const std::string& text, bool& placementChanged) {
     std::istringstream in(line);
     std::string key;
     in >> key;
-    if (key == "wrist.hand") {
-      std::string hand;
-      in >> hand;
-      c.leftHand = hand != "right";
-      placementChanged = true;
-    } else if (key == "wrist.at") {
-      in >> c.wristAt.x >> c.wristAt.y >> c.wristAt.z;
-      placementChanged = true;
-    } else if (key == "wrist.turn") {
-      in >> c.wristTurn.x >> c.wristTurn.y >> c.wristTurn.z;
-      placementChanged = true;
-    } else if (key == "wrist.width") {
-      in >> c.wristWidth;
-      placementChanged = true;
-    } else if (key == "wrist.always") {
-      in >> c.wristAlways;
-    } else if (key == "wrist.on") {
-      in >> c.wristOn;
-    } else if (key == "strip.width") {
+    if (key == "strip.width") {
       in >> c.stripWidth;
       placementChanged = true;
     } else if (key == "strip.on") {
@@ -154,8 +127,6 @@ void applyConfig(Config& c, const std::string& text, bool& placementChanged) {
       in >> c.strip.distance;
     } else if (key == "strip.below") {
       in >> c.strip.below;
-    } else if (key == "poke.tip") {
-      in >> c.pokeTip.x >> c.pokeTip.y >> c.pokeTip.z;
     } else if (key == "quit") {
       c.quit = true;
     }
@@ -209,7 +180,7 @@ class Session {
     // Which step failed, and SteamVR's word for why: what a person's report can be read by.
     std::string why;
     if (!openDevice(why)) why = "could not open the graphics device: " + why;
-    else if (!create(kStrip, "kotomimi.captions", "Kotomimi captions", why) || !create(kWrist, "kotomimi.wrist", "Kotomimi", why)) why = "could not create the overlays: " + why;
+    else if (!create(kStrip, "kotomimi.captions", "Kotomimi captions", why)) why = "could not create the overlays: " + why;
     if (!why.empty()) {
       close();
       status("error", why.c_str());
@@ -243,7 +214,7 @@ class Session {
         applyConfig(config, inbox.config, placementChanged);
         inbox.config.clear();
       }
-      for (int i = 0; i < 2; i++) {
+      for (int i = 0; i < 1; i++) {
         Picture& pic = inbox.pictures[i];
         if (!pic.fresh) continue;
         upload(i, pic);
@@ -257,10 +228,6 @@ class Session {
       if (event.eventType == vr::VREvent_Quit) {
         vr::VRSystem()->AcknowledgeQuit_Exiting();
         return false;
-      }
-      if (event.eventType == vr::VREvent_TrackedDeviceRoleChanged || event.eventType == vr::VREvent_TrackedDeviceActivated ||
-          event.eventType == vr::VREvent_TrackedDeviceDeactivated) {
-        placementChanged = true;
       }
     }
 
@@ -333,17 +300,7 @@ class Session {
   void place(const Config& c) {
     vr::IVROverlay* overlay = vr::VROverlay();
     overlay->SetOverlayWidthInMeters(surfaces_[kStrip].handle, c.stripWidth);
-    overlay->SetOverlayWidthInMeters(surfaces_[kWrist].handle, c.wristWidth);
-    auto role = c.leftHand ? vr::TrackedControllerRole_LeftHand : vr::TrackedControllerRole_RightHand;
-    auto other = c.leftHand ? vr::TrackedControllerRole_RightHand : vr::TrackedControllerRole_LeftHand;
-    wristDevice_ = vr::VRSystem()->GetTrackedDeviceIndexForControllerRole(role);
-    pokeDevice_ = vr::VRSystem()->GetTrackedDeviceIndexForControllerRole(other);
-    wristOffset_ = wristOffset(c.leftHand, c.wristAt, c.wristTurn);
     placed_ = true;
-    if (wristDevice_ != vr::k_unTrackedDeviceIndexInvalid) {
-      vr::HmdMatrix34_t m = toVr(wristOffset_);
-      overlay->SetOverlayTransformTrackedDeviceRelative(surfaces_[kWrist].handle, wristDevice_, &m);
-    }
   }
 
   void show(int which, bool on) {
@@ -353,7 +310,6 @@ class Session {
     s.shown = on;
     if (on) vr::VROverlay()->ShowOverlay(s.handle);
     else vr::VROverlay()->HideOverlay(s.handle);
-    if (which == kWrist) emit(std::string("{\"t\":\"wrist\",\"shown\":") + (on ? "true" : "false") + "}");
   }
 
   void track(const Config& c) {
@@ -373,7 +329,6 @@ class Session {
     const vr::TrackedDevicePose_t& hmd = poses[vr::k_unTrackedDeviceIndex_Hmd];
     if (!hmd.bPoseIsValid) {
       show(kStrip, false);
-      show(kWrist, false);
       return;
     }
     Mat34 head = toMat(hmd.mDeviceToAbsoluteTracking);
@@ -384,33 +339,6 @@ class Session {
       vr::VROverlay()->SetOverlayTransformAbsolute(surfaces_[kStrip].handle, vr::TrackingUniverseStanding, &m);
     }
     show(kStrip, c.stripOn);
-
-    // The wrist panel, while looked at; the other hand presses it.
-    bool wristTracked = wristDevice_ < vr::k_unMaxTrackedDeviceCount && poses[wristDevice_].bPoseIsValid;
-    Mat34 panel = wristTracked ? mul(toMat(poses[wristDevice_].mDeviceToAbsoluteTracking), wristOffset_) : identity();
-    Surface& wrist = surfaces_[kWrist];
-    bool want = c.wristOn && wristTracked && (c.wristAlways || facesEyes(panel, head, wrist.shown));
-    show(kWrist, want);
-    if (!wrist.shown) {
-      if (poke_.hovering || poke_.down) pointer(PokeEvent::Leave);
-      poke_ = Poke{};
-      return;
-    }
-    if (pokeDevice_ >= vr::k_unMaxTrackedDeviceCount || !poses[pokeDevice_].bPoseIsValid) return;
-    Vec3 tip = apply(toMat(poses[pokeDevice_].mDeviceToAbsoluteTracking), c.pokeTip);
-    Vec3 local = apply(inverseRigid(panel), tip);
-    float lastU = poke_.u, lastV = poke_.v;
-    PokeEvent e = updatePoke(poke_, local, c.wristWidth, heightOf(wrist, c.wristWidth), c.poke);
-    // A hover that did not move is not news.
-    if (e == PokeEvent::Hover && std::fabs(poke_.u - lastU) < 0.003f && std::fabs(poke_.v - lastV) < 0.003f) return;
-    if (e != PokeEvent::None) pointer(e);
-  }
-
-  void pointer(PokeEvent e) {
-    const char* kind = e == PokeEvent::Hover ? "move" : e == PokeEvent::Down ? "down" : e == PokeEvent::Up ? "up" : "leave";
-    char line[160];
-    std::snprintf(line, sizeof line, "{\"t\":\"pointer\",\"o\":\"wrist\",\"kind\":\"%s\",\"u\":%.4f,\"v\":%.4f}", kind, poke_.u, poke_.v);
-    emit(line);
   }
 
   void perf() {
@@ -441,13 +369,9 @@ class Session {
 
   ID3D11Device* device_ = nullptr;
   ID3D11DeviceContext* context_ = nullptr;
-  Surface surfaces_[2];
-  vr::TrackedDeviceIndex_t wristDevice_ = vr::k_unTrackedDeviceIndexInvalid;
-  vr::TrackedDeviceIndex_t pokeDevice_ = vr::k_unTrackedDeviceIndexInvalid;
-  Mat34 wristOffset_ = identity();
+  Surface surfaces_[1];
   bool placed_ = false;
   LazyFollow follow_;
-  Poke poke_;
   float hz_ = 0;
   std::chrono::steady_clock::time_point lastTrack_ = std::chrono::steady_clock::now();
   std::chrono::steady_clock::time_point lastPerf_ = std::chrono::steady_clock::now();
@@ -469,14 +393,7 @@ int main() {
   if (GetEnvironmentVariableW(L"KOTOMIMI_VR_FAKE", nullptr, 0) > 0) {
     status("connected");
     GpuMemoryReader gpu;
-    // `KOTOMIMI_VR_FAKE=poke`: one press in the middle of the panel's lower part, a few seconds in.
-    bool poke = GetEnvironmentVariableW(L"KOTOMIMI_VR_FAKE", nullptr, 0) == 5;
-    for (int second = 0; !inbox.closed; second++) {
-      if (poke && second == 4) {
-        emit("{\"t\":\"pointer\",\"o\":\"wrist\",\"kind\":\"move\",\"u\":0.5,\"v\":0.92}");
-        emit("{\"t\":\"pointer\",\"o\":\"wrist\",\"kind\":\"down\",\"u\":0.5,\"v\":0.92}");
-        emit("{\"t\":\"pointer\",\"o\":\"wrist\",\"kind\":\"up\",\"u\":0.5,\"v\":0.92}");
-      }
+    while (!inbox.closed) {
       GpuMemory memory = gpu.read();
       char line[200];
       std::snprintf(line, sizeof line, "{\"t\":\"perf\",\"hz\":90.0,\"presents\":89.6,\"dropped\":0.0,\"reprojected\":0.0,\"vramUsed\":%llu,\"vramTotal\":%llu}",

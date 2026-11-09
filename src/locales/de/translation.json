@@ -1953,10 +1953,7 @@
     },
     "jyutping": "Jyutping über kantonesischem Text",
     "vr": {
-      "setting": "Untertitel und Handgelenkmenü im Headset anzeigen",
-      "hand": "Handgelenkmenü auf",
-      "left": "Links",
-      "right": "Rechts",
+      "setting": "Untertitel im Headset anzeigen",
       "linkWaiting": "Warte auf SteamVR-Start",
       "linkConnected": "Im Headset angezeigt",
       "linkMissing": "VR-Komponente in dieser Version nicht enthalten",
@@ -1986,7 +1983,10 @@
       "stoppedShort": "Spracherkennung gestoppt",
       "muted": "In VRChat stummgeschaltet",
       "title": "VR-Headset",
-      "help": "In SteamVR erscheinen die Worte deines Gegenübers unterhalb deines Sichtfelds. Schau auf dein Handgelenk, um ein kleines Menü zu sehen. Tippe es mit dem Controller der anderen Hand an, um die Sprache zu wechseln, zu pausieren oder ein anderes Modell auszuprobieren."
+      "help": "In SteamVR werden die Worte der anderen unterhalb deines Sichtfelds eingeblendet. Das Handgelenkfenster ist ein kleines Fenster auf dem Desktop. Füge es in XSOverlay als Fenster hinzu, um es am Handgelenk zu tragen, die Sprache zu wechseln, zu pausieren, die Anzeige über dem Kopf ein- oder auszuschalten oder ein anderes Modell auszuprobieren.",
+      "panel": "Handgelenkfenster",
+      "chatbox": "Anzeige über dem Kopf",
+      "panelTitle": "Kotomimi-Handgelenkpanel"
     },
     "storage": {
       "title": "Modellspeicher",

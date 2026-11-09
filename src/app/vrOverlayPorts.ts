@@ -127,5 +127,7 @@ export function vrWords(t: T): VrWords {
     stopped: t('fork.vr.stopped', 'Recognition stopped. Turn your wrist to start again.'),
     stoppedShort: t('fork.vr.stoppedShort', 'Stopped'),
     muted: t('fork.vr.muted', 'Muted in VRChat'),
+    chatbox: t('fork.vr.chatbox', 'Chatbox'),
+    panel: t('fork.vr.panelTitle', 'Kotomimi wrist panel'),
   };
 }

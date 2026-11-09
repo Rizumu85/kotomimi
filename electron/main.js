@@ -76,11 +76,13 @@ const vrchat = setupVRChat({
 });
 app.on('will-quit', () => vrchat.stop());
 
-// Fork: the SteamVR overlay — captions under the line of sight and a panel on a wrist (electron/vr-overlay.js). Windows only.
+// Fork: the SteamVR overlay — captions under the line of sight, and a panel window a wrist tool carries (electron/vr-overlay.js). Windows only.
 // Unpackaged: `KOTOMIMI_VR_HELPER` names another helper, `KOTOMIMI_VR_DUMP` a folder each picture is written to.
 const vrOverlay = setupVrOverlay({
   ipcMain,
   BrowserWindow,
+  // Read when the panel opens, after the app is ready, as the screen module wants.
+  scaleFactor: () => require('electron').screen.getPrimaryDisplay().scaleFactor,
   app,
   isTrustedSender: (sender) => sender === mainWindow?.webContents,
   getMainWindow: () => mainWindow,
@@ -620,7 +622,7 @@ function createWindow() {
 
   // Emitted when the window is closed
   mainWindow.on('closed', function () {
-    // Fork: the overlay's offscreen pages are windows too: left open, they would keep the app from quitting.
+    // Fork: the overlay's windows (the strip, offscreen, and the wrist panel): left open, they would keep the app from quitting.
     vrOverlay.stop();
     // On macOS closing the window does not quit the app; the before-quit
     // listener below runs the cleanup when it actually quits. (This used to

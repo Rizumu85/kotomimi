@@ -807,6 +807,10 @@
     "en": "{s} s behind",
     "text": "{s}초 지연"
   },
+  "fork.vr.chatbox": {
+    "en": "Chatbox",
+    "text": "머리 위 표시"
+  },
   "fork.vr.dropping": {
     "en": "dropping frames",
     "text": "프레임 저하"
@@ -824,8 +828,8 @@
     "text": "받아쓰기"
   },
   "fork.vr.help": {
-    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-    "text": "SteamVR에서는 상대방의 말이 시야 아래쪽에 표시돼요. 고개를 숙여 손목을 보면 작은 메뉴가 나타나요. 반대쪽 컨트롤러로 눌러 언어를 바꾸거나, 일시 정지하거나, 다른 모델을 사용해 보세요."
+    "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+    "text": "SteamVR에서는 상대방의 말이 시야 아래에 표시됩니다. 손목 패널은 데스크톱의 작은 창입니다. XSOverlay에서 창으로 추가하면 손목에 띄워 언어 변경, 일시정지, 머리 위 표시 켜기/끄기, 다른 모델 사용을 할 수 있습니다."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -871,6 +875,14 @@
     "en": "Muted in VRChat",
     "text": "VRChat에서 음소거됨"
   },
+  "fork.vr.panel": {
+    "en": "Wrist panel window",
+    "text": "손목 패널 창"
+  },
+  "fork.vr.panelTitle": {
+    "en": "Kotomimi wrist panel",
+    "text": "Kotomimi 손목 패널"
+  },
   "fork.vr.pause": {
     "en": "Pause",
     "text": "일시 정지"
@@ -888,8 +900,8 @@
     "text": "오른쪽"
   },
   "fork.vr.setting": {
-    "en": "Show captions and the wrist menu in the headset",
-    "text": "헤드셋에 자막과 손목 메뉴 표시"
+    "en": "Show captions in the headset",
+    "text": "헤드셋에서 자막 표시"
   },
   "fork.vr.show": {
     "en": "Show",

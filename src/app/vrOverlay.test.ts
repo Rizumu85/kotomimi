@@ -4,9 +4,10 @@ import type { RunState } from '../lib/session/types';
 import type { LanguagePair } from '../lib/provider/types';
 import type { VrState, VrWords } from '../vr/types';
 import { useVrStore } from '../stores/vrStore';
+import type { ChatboxShows } from '../stores/vrchatStore';
 import { quickLanguages, startVrOverlay, vrLines, type VrOverlayDeps, type VrSettingsPort } from './vrOverlay';
 
-vi.mock('../services/persistSetting', () => ({ persistSetting: async () => {} }));
+vi.mock('../services/persistSetting', () => ({ persistSetting: vi.fn(async () => true) }));
 
 const row = (text: string, final = true) => ({ key: `${text}:0`, segmentId: text, side: 'source' as const, start: 0, end: text.length, text, final });
 const exchange = (id: string, source: string, translation: string, { leg = 'participant', final = true } = {}): Entry => ({
@@ -87,6 +88,7 @@ function setup(over: Partial<VrOverlayDeps> = {}) {
   const look = { filters: { speaker: 'both', participant: 'both' } as const, coached: false, aids: { furigana: true, romanization: false, romanizationOff: [], pinyin: false, jyutping: false, sourceItalic: true } };
   const lookListeners = new Set<() => void>();
   const heard = { speaker: false, participant: false };
+  let chatbox: ChatboxShows = 'off';
   const deps: VrOverlayDeps = {
     ipc,
     runner,
@@ -100,6 +102,8 @@ function setup(over: Partial<VrOverlayDeps> = {}) {
     settings,
     muted: () => false,
     subscribeMuted: () => () => {},
+    chatbox: () => chatbox,
+    setChatbox: (shows) => { order.push(`chatbox ${shows}`); chatbox = shows; },
     words: () => ({ me: 'Me' } as VrWords),
     uiLanguage: () => 'en',
     captionLook: () => look,
@@ -122,20 +126,56 @@ function setup(over: Partial<VrOverlayDeps> = {}) {
 
 describe('startVrOverlay', () => {
   beforeEach(() => {
-    useVrStore.setState({ on: false, hand: 'left', link: 'off', wristShown: false });
+    useVrStore.setState({ on: false, panel: false, link: 'off' });
   });
 
-  it('asks for the helper as the setting says, and tells it the wrist', async () => {
+  it('asks for the helper and the panel window as the settings say', async () => {
     const t = setup();
     await flush();
     expect(t.invoked).toContainEqual(['vr:set', { on: false }]);
-    expect(t.invoked).toContainEqual(['vr:tune', { lines: ['wrist.hand left'] }]);
+    expect(t.invoked.some(([c]) => c === 'vr:panel')).toBe(false);
     useVrStore.getState().setOn(true);
-    useVrStore.getState().setHand('right');
+    useVrStore.getState().setPanel(true);
     await flush();
     expect(t.invoked).toContainEqual(['vr:set', { on: true }]);
-    expect(t.invoked).toContainEqual(['vr:tune', { lines: ['wrist.hand right'] }]);
+    expect(t.invoked).toContainEqual(['vr:panel', { on: true }]);
+    // Closed by itself: shown closed, and not stored, so the next start opens it again.
+    const persisted = vi.mocked((await import('../services/persistSetting')).persistSetting);
+    persisted.mockClear();
+    t.handlers.get('vr:panel')!({ on: false });
+    expect(useVrStore.getState().panel).toBe(false);
+    expect(persisted).not.toHaveBeenCalled();
     t.controller.stop();
+  });
+
+  it('sends the state to the panel window without SteamVR', async () => {
+    const t = setup();
+    t.setEntries([exchange('a', 'こんばんは', '晚上好')]);
+    await flush();
+    expect(t.sent).toHaveLength(0);
+    useVrStore.getState().setPanel(true);
+    await flush();
+    expect(t.sent).toHaveLength(1);
+    expect(t.sent[0].lines.map((l) => l.translation)).toEqual(['晚上好']);
+    t.controller.stop();
+  });
+
+  it('turns the chatbox off from the panel, and on again to what it showed', async () => {
+    const t = setup();
+    await t.connect();
+    t.command({ type: 'chatbox', on: true });
+    t.command({ type: 'chatbox', on: false });
+    expect(t.order).toEqual(['chatbox translation', 'chatbox off']);
+    t.controller.stop();
+    // Showing both: off, then on again shows both.
+    let shows: ChatboxShows = 'both';
+    const u = setup({ chatbox: () => shows, setChatbox: (next) => { shows = next; } });
+    await u.connect();
+    u.command({ type: 'chatbox', on: false });
+    expect(shows).toBe('off');
+    u.command({ type: 'chatbox', on: true });
+    expect(shows).toBe('both');
+    u.controller.stop();
   });
 
   it('sends the state only while SteamVR shows it, and only when it changed', async () => {

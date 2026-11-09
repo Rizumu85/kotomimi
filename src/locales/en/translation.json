@@ -1774,11 +1774,9 @@
     },
     "vr": {
       "title": "VR headset",
-      "help": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-      "setting": "Show captions and the wrist menu in the headset",
-      "hand": "Wrist menu on",
-      "left": "Left wrist",
-      "right": "Right wrist",
+      "help": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+      "setting": "Show captions in the headset",
+      "panel": "Wrist panel window",
       "linkWaiting": "Waiting for SteamVR",
       "linkConnected": "In the headset",
       "linkMissing": "Not in this build",
@@ -1806,7 +1804,9 @@
       "idle": "Not listening",
       "stopped": "Recognition stopped. Turn your wrist to start again.",
       "stoppedShort": "Stopped",
-      "muted": "Muted in VRChat"
+      "muted": "Muted in VRChat",
+      "chatbox": "Chatbox",
+      "panelTitle": "Kotomimi wrist panel"
     },
     "languageMenu": {
       "search": "Type to find a language",

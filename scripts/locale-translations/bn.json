@@ -807,6 +807,10 @@
     "en": "{s} s behind",
     "text": "{s} সেকেন্ড পিছিয়ে"
   },
+  "fork.vr.chatbox": {
+    "en": "Chatbox",
+    "text": "মাথার ওপরের প্রদর্শন"
+  },
   "fork.vr.dropping": {
     "en": "dropping frames",
     "text": "ফ্রেম কমে যাচ্ছে"
@@ -824,8 +828,8 @@
     "text": "শ্রুতিলিখন"
   },
   "fork.vr.help": {
-    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-    "text": "SteamVR-এ অন্যজনের কথা আপনার দৃষ্টিসীমার নিচে দেখাবে। কবজির দিকে তাকালে একটি ছোট মেনু দেখা যাবে। অন্য হাতের কন্ট্রোলার দিয়ে সেটিতে চাপ দিয়ে ভাষা বদলাতে, বিরতি দিতে বা অন্য মডেল ব্যবহার করে দেখতে পারবেন।"
+    "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+    "text": "SteamVR-এ অন্য পক্ষের কথা আপনার দৃষ্টির নিচে দেখা যাবে। কব্জির প্যানেলটি ডেস্কটপের একটি ছোট উইন্ডো। XSOverlay-এ এটিকে উইন্ডো হিসেবে যোগ করলে কব্জিতে পরে ভাষা বদলাতে, বিরতি দিতে, মাথার ওপরের প্রদর্শন চালু বা বন্ধ করতে, কিংবা অন্য মডেল চেষ্টা করতে পারবেন।"
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -871,6 +875,14 @@
     "en": "Muted in VRChat",
     "text": "VRChat-এ মিউট করা আছে"
   },
+  "fork.vr.panel": {
+    "en": "Wrist panel window",
+    "text": "কব্জির প্যানেল উইন্ডো"
+  },
+  "fork.vr.panelTitle": {
+    "en": "Kotomimi wrist panel",
+    "text": "Kotomimi কব্জির প্যানেল"
+  },
   "fork.vr.pause": {
     "en": "Pause",
     "text": "বিরতি"
@@ -888,8 +900,8 @@
     "text": "ডান কবজি"
   },
   "fork.vr.setting": {
-    "en": "Show captions and the wrist menu in the headset",
-    "text": "হেডসেটে সাবটাইটেল ও কবজির মেনু দেখান"
+    "en": "Show captions in the headset",
+    "text": "হেডসেটে সাবটাইটেল দেখান"
   },
   "fork.vr.show": {
     "en": "Show",

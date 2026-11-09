@@ -164,6 +164,7 @@ export const INVOKE_CHANNELS = [
   'vrchat:chatbox',
   // Fork: the SteamVR overlay (electron/vr-overlay.js): the main window's side, then the headset pages'
   'vr:set',
+  'vr:panel',
   'vr:state',
   'vr:tune',
   'vr:command',

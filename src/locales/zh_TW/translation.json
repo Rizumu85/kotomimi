@@ -1774,11 +1774,9 @@
     },
     "vr": {
       "title": "VR 頭顯",
-      "help": "在 SteamVR 裡，對方的話會顯示在視線下方。低頭看手腕會出現一個小選單，用另一隻手的手把戳它，可以換語言、暫停，或者試試別的模型。",
-      "setting": "在頭顯裡顯示字幕和手腕選單",
-      "hand": "手腕選單在",
-      "left": "左手",
-      "right": "右手",
+      "help": "在 SteamVR 裡，對方的話會顯示在視線下方。腕錶視窗是桌面上的一個小視窗，在 XSOverlay 裡把它加入為視窗，就能戴在手腕上，用來換語言、暫停、開關頭頂顯示，或者試試別的模型。",
+      "setting": "在頭顯裡顯示字幕",
+      "panel": "腕錶視窗",
       "linkWaiting": "等 SteamVR 啟動",
       "linkConnected": "已在頭顯裡",
       "linkMissing": "這個版本沒帶 VR 元件",
@@ -1806,7 +1804,9 @@
       "idle": "沒在聽",
       "stopped": "辨識停了，翻開手腕可以重新開始",
       "stoppedShort": "辨識停了",
-      "muted": "VRChat 已靜音"
+      "muted": "VRChat 已靜音",
+      "chatbox": "頭頂顯示",
+      "panelTitle": "Kotomimi 腕錶"
     },
     "languageMenu": {
       "search": "輸入篩選語言",

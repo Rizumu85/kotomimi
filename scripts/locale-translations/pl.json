@@ -811,6 +811,10 @@
     "en": "{s} s behind",
     "text": "{s} s opóźnienia"
   },
+  "fork.vr.chatbox": {
+    "en": "Chatbox",
+    "text": "Wyświetlanie nad głową"
+  },
   "fork.vr.dropping": {
     "en": "dropping frames",
     "text": "gubienie klatek"
@@ -828,8 +832,8 @@
     "text": "Rozpoznawanie"
   },
   "fork.vr.help": {
-    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-    "text": "W SteamVR słowa rozmówcy pojawiają się poniżej linii wzroku. Spójrz na nadgarstek, by zobaczyć małe menu. Dotknij go kontrolerem w drugiej ręce, aby zmienić język, wstrzymać tłumaczenie lub wypróbować inny model."
+    "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+    "text": "W SteamVR słowa rozmówcy pojawiają się poniżej pola widzenia. Panel na nadgarstek to małe okno na pulpicie. Dodaj je jako okno w XSOverlay, aby umieścić je na nadgarstku i zmieniać język, wstrzymywać działanie, włączać lub wyłączać wyświetlanie nad głową albo wypróbować inny model."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -875,6 +879,14 @@
     "en": "Muted in VRChat",
     "text": "Wyciszono w VRChat"
   },
+  "fork.vr.panel": {
+    "en": "Wrist panel window",
+    "text": "Okno panelu na nadgarstek"
+  },
+  "fork.vr.panelTitle": {
+    "en": "Kotomimi wrist panel",
+    "text": "Panel Kotomimi na nadgarstek"
+  },
   "fork.vr.pause": {
     "en": "Pause",
     "text": "Wstrzymaj"
@@ -892,8 +904,8 @@
     "text": "Prawy nadgarstek"
   },
   "fork.vr.setting": {
-    "en": "Show captions and the wrist menu in the headset",
-    "text": "Pokazuj napisy i menu na nadgarstku w goglach"
+    "en": "Show captions in the headset",
+    "text": "Pokazuj napisy w goglach"
   },
   "fork.vr.show": {
     "en": "Show",

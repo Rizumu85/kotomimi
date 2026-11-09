@@ -807,6 +807,10 @@
     "en": "{s} s behind",
     "text": "עיכוב של {s} שניות"
   },
+  "fork.vr.chatbox": {
+    "en": "Chatbox",
+    "text": "תצוגה מעל הראש"
+  },
   "fork.vr.dropping": {
     "en": "dropping frames",
     "text": "יש נפילות פריימים"
@@ -824,8 +828,8 @@
     "text": "תמלול"
   },
   "fork.vr.help": {
-    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-    "text": "ב-SteamVR, הדברים של הצד השני מופיעים מתחת לקו הראייה. מבט למטה אל פרק כף היד מציג תפריט קטן. אפשר ללחוץ עליו עם הבקר שביד השנייה כדי להחליף שפה, להשהות או לנסות מודל אחר."
+    "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+    "text": "ב‑SteamVR, דברי הצד השני יופיעו מתחת לקו הראייה שלך. חלונית פרק כף היד היא חלון קטן בשולחן העבודה: הוסף אותה כחלון ב‑XSOverlay כדי לענוד אותה על פרק כף היד, להחליף שפות, להשהות, להפעיל או לכבות את התצוגה מעל הראש, או לנסות מודל אחר."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -871,6 +875,14 @@
     "en": "Muted in VRChat",
     "text": "המיקרופון מושתק ב־VRChat"
   },
+  "fork.vr.panel": {
+    "en": "Wrist panel window",
+    "text": "חלונית פרק כף היד"
+  },
+  "fork.vr.panelTitle": {
+    "en": "Kotomimi wrist panel",
+    "text": "חלונית פרק כף היד של Kotomimi"
+  },
   "fork.vr.pause": {
     "en": "Pause",
     "text": "השהיה"
@@ -888,8 +900,8 @@
     "text": "יד ימין"
   },
   "fork.vr.setting": {
-    "en": "Show captions and the wrist menu in the headset",
-    "text": "הצגת כתוביות ותפריט פרק כף היד במשקפי המציאות המדומה"
+    "en": "Show captions in the headset",
+    "text": "הצג כתוביות בקסדה"
   },
   "fork.vr.show": {
     "en": "Show",

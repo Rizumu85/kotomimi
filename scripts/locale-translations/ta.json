@@ -807,6 +807,10 @@
     "en": "{s} s behind",
     "text": "{s} நொடி தாமதம்"
   },
+  "fork.vr.chatbox": {
+    "en": "Chatbox",
+    "text": "மேலே காட்டப்படும் உரை"
+  },
   "fork.vr.dropping": {
     "en": "dropping frames",
     "text": "படங்கள் விடுபடுகின்றன"
@@ -824,8 +828,8 @@
     "text": "பேச்சை எழுத்தாக்குதல்"
   },
   "fork.vr.help": {
-    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-    "text": "SteamVR இல், மற்றவர் பேசுவது உங்கள் பார்வைக்குக் கீழே தெரியும். மணிக்கட்டைக் குனிந்து பார்த்தால் ஒரு சிறிய மெனு தோன்றும். மற்ற கையில் உள்ள கன்ட்ரோலரால் அதைத் தொட்டு மொழியை மாற்றலாம், இடைநிறுத்தலாம் அல்லது வேறு மாடலை முயற்சிக்கலாம்."
+    "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+    "text": "SteamVR-ல், எதிர்புறத்தவரின் பேச்சு உங்கள் பார்வைக்குக் கீழே தோன்றும். மணிக்கட்டு பேனல் டெஸ்க்டாப்பில் உள்ள சிறிய சாளரம். அதை XSOverlay-ல் சாளரமாகச் சேர்த்து மணிக்கட்டில் அணியலாம்; மொழியை மாற்றலாம், இடைநிறுத்தலாம், மேலே காட்டப்படும் உரையை இயக்கலாம் அல்லது முடக்கலாம், மேலும் வேறு மாதிரியை முயற்சிக்கலாம்."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -871,6 +875,14 @@
     "en": "Muted in VRChat",
     "text": "VRChat இல் ஒலி முடக்கப்பட்டுள்ளது"
   },
+  "fork.vr.panel": {
+    "en": "Wrist panel window",
+    "text": "மணிக்கட்டு பேனல் சாளரம்"
+  },
+  "fork.vr.panelTitle": {
+    "en": "Kotomimi wrist panel",
+    "text": "Kotomimi மணிக்கட்டு பேனல்"
+  },
   "fork.vr.pause": {
     "en": "Pause",
     "text": "இடைநிறுத்து"
@@ -888,8 +900,8 @@
     "text": "வலது கை"
   },
   "fork.vr.setting": {
-    "en": "Show captions and the wrist menu in the headset",
-    "text": "ஹெட்செட்டில் வசனங்களையும் மணிக்கட்டு மெனுவையும் காட்டு"
+    "en": "Show captions in the headset",
+    "text": "ஹெட்செட்டில் வசனங்களைக் காட்டு"
   },
   "fork.vr.show": {
     "en": "Show",

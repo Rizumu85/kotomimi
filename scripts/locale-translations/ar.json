@@ -807,6 +807,10 @@
     "en": "{s} s behind",
     "text": "تأخير {s} ثانية"
   },
+  "fork.vr.chatbox": {
+    "en": "Chatbox",
+    "text": "عرض أعلى الرأس"
+  },
   "fork.vr.dropping": {
     "en": "dropping frames",
     "text": "تساقط إطارات"
@@ -824,8 +828,8 @@
     "text": "إملاء صوتي"
   },
   "fork.vr.help": {
-    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-    "text": "في SteamVR، يظهر كلام الطرف الآخر أسفل مجال رؤيتك. انظر إلى معصمك لتظهر قائمة صغيرة، واضغط عليها بوحدة التحكم في يدك الأخرى لتغيير اللغة أو الإيقاف المؤقت أو تجربة نموذج آخر."
+    "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+    "text": "في SteamVR، تظهر كلمات الطرف الآخر أسفل مجال رؤيتك. نافذة لوحة المعصم هي نافذة صغيرة على سطح المكتب؛ أضفها كنافذة في XSOverlay لتضعها على معصمك وتبدّل اللغات أو توقف الترجمة مؤقتًا أو تشغّل عرض الدردشة أعلى الرأس أو تطفئه أو تجرّب نموذجًا آخر."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -871,6 +875,14 @@
     "en": "Muted in VRChat",
     "text": "الميكروفون مكتوم في VRChat"
   },
+  "fork.vr.panel": {
+    "en": "Wrist panel window",
+    "text": "نافذة لوحة المعصم"
+  },
+  "fork.vr.panelTitle": {
+    "en": "Kotomimi wrist panel",
+    "text": "لوحة معصم Kotomimi"
+  },
   "fork.vr.pause": {
     "en": "Pause",
     "text": "إيقاف مؤقت"
@@ -888,8 +900,8 @@
     "text": "اليمين"
   },
   "fork.vr.setting": {
-    "en": "Show captions and the wrist menu in the headset",
-    "text": "إظهار الترجمة وقائمة المعصم داخل نظارة الواقع الافتراضي"
+    "en": "Show captions in the headset",
+    "text": "عرض الترجمة في النظارة"
   },
   "fork.vr.show": {
     "en": "Show",

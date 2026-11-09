@@ -9,19 +9,21 @@ import { useVrStore } from '../../stores/vrStore';
 import { VrHeadsetSection } from './VrHeadsetSection';
 
 beforeEach(() => {
-  useVrStore.setState({ on: false, hand: 'left', link: 'off', wristShown: false });
+  useVrStore.setState({ on: false, panel: false, link: 'off' });
 });
 
 describe('VrHeadsetSection — the SteamVR overlay, a card of its own (fork)', () => {
-  it('is one switch while off: no state, no wrist', () => {
+  it('is two switches, the strip and the panel window, and no state while off', () => {
     render(<VrHeadsetSection />);
     expect(screen.getByText('fork.vr.title')).toBeTruthy();
     expect(screen.getByText('fork.vr.setting')).toBeTruthy();
     expect(screen.queryByRole('status')).toBeNull();
-    expect(screen.queryByRole('group', { name: 'fork.vr.hand' })).toBeNull();
+    fireEvent.click(screen.getByText('fork.vr.panel'));
+    expect(useVrStore.getState().panel).toBe(true);
+    expect(useVrStore.getState().on).toBe(false);
   });
 
-  it('turned on, says where SteamVR is beside the title and offers the wrist', () => {
+  it('turned on, says where SteamVR is beside the title', () => {
     const { rerender } = render(<VrHeadsetSection />);
     fireEvent.click(screen.getByText('fork.vr.setting'));
     expect(useVrStore.getState().on).toBe(true);
@@ -30,7 +32,5 @@ describe('VrHeadsetSection — the SteamVR overlay, a card of its own (fork)', (
     useVrStore.setState({ link: 'connected' });
     rerender(<VrHeadsetSection />);
     expect(screen.getByRole('status').textContent).toBe('fork.vr.linkConnected');
-    fireEvent.click(screen.getByText('fork.vr.right'));
-    expect(useVrStore.getState().hand).toBe('right');
   });
 });

@@ -811,6 +811,10 @@
     "en": "{s} s behind",
     "text": "{s} s efter"
   },
+  "fork.vr.chatbox": {
+    "en": "Chatbox",
+    "text": "Visning ovanför huvudet"
+  },
   "fork.vr.dropping": {
     "en": "dropping frames",
     "text": "tappar bildrutor"
@@ -828,8 +832,8 @@
     "text": "Taligenkänning"
   },
   "fork.vr.help": {
-    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-    "text": "I SteamVR visas det den andra personen säger strax under ditt synfält. Titta ner på handleden så visas en liten meny. Tryck på den med kontrollen i andra handen för att byta språk, pausa eller prova en annan modell."
+    "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+    "text": "I SteamVR visas den andra personens ord under ditt synfält. Handledspanelen är ett litet fönster på skrivbordet. Lägg till det som ett fönster i XSOverlay för att bära det på handleden och byta språk, pausa, slå på eller av visningen ovanför huvudet eller prova en annan modell."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -875,6 +879,14 @@
     "en": "Muted in VRChat",
     "text": "Ljudet är avstängt i VRChat"
   },
+  "fork.vr.panel": {
+    "en": "Wrist panel window",
+    "text": "Handledspanel"
+  },
+  "fork.vr.panelTitle": {
+    "en": "Kotomimi wrist panel",
+    "text": "Kotomimi handledspanel"
+  },
   "fork.vr.pause": {
     "en": "Pause",
     "text": "Pausa"
@@ -892,8 +904,8 @@
     "text": "Höger handled"
   },
   "fork.vr.setting": {
-    "en": "Show captions and the wrist menu in the headset",
-    "text": "Visa undertexter och handledsmenyn i headsetet"
+    "en": "Show captions in the headset",
+    "text": "Visa undertexter i headsetet"
   },
   "fork.vr.show": {
     "en": "Show",

@@ -1953,10 +1953,7 @@
     },
     "jyutping": "Jyutping di atas teks Kanton",
     "vr": {
-      "setting": "Tampilkan subtitel dan menu pergelangan tangan di headset",
-      "hand": "Menu di pergelangan tangan",
-      "left": "Pergelangan tangan kiri",
-      "right": "Pergelangan tangan kanan",
+      "setting": "Tampilkan subtitle di headset",
       "linkWaiting": "Menunggu SteamVR",
       "linkConnected": "Di headset",
       "linkMissing": "Tidak tersedia di versi ini",
@@ -1986,7 +1983,10 @@
       "stoppedShort": "Berhenti",
       "muted": "Dibisukan di VRChat",
       "title": "Headset VR",
-      "help": "Di SteamVR, ucapan lawan bicara muncul di bawah pandangan Anda. Lihat ke pergelangan tangan untuk menampilkan menu kecil. Sentuh menu dengan pengontrol di tangan satunya untuk mengganti bahasa, menjeda, atau mencoba model lain."
+      "help": "Di SteamVR, ucapan lawan bicara muncul di bawah garis pandang Anda. Panel pergelangan tangan adalah jendela kecil di desktop. Tambahkan sebagai jendela di XSOverlay untuk memasangnya di pergelangan tangan, lalu ganti bahasa, jeda, nyalakan atau matikan tampilan di atas kepala, atau coba model lain.",
+      "panel": "Jendela panel pergelangan tangan",
+      "chatbox": "Tampilan di atas kepala",
+      "panelTitle": "Panel pergelangan tangan Kotomimi"
     },
     "storage": {
       "title": "Penyimpanan model",

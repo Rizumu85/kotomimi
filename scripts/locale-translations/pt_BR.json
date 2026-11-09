@@ -807,6 +807,10 @@
     "en": "{s} s behind",
     "text": "{s} s de atraso"
   },
+  "fork.vr.chatbox": {
+    "en": "Chatbox",
+    "text": "Exibição acima da cabeça"
+  },
   "fork.vr.dropping": {
     "en": "dropping frames",
     "text": "perdendo quadros"
@@ -824,8 +828,8 @@
     "text": "Transcrição"
   },
   "fork.vr.help": {
-    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-    "text": "No SteamVR, a fala da outra pessoa aparece abaixo da sua linha de visão. Olhe para o pulso para ver um pequeno menu e toque nele com o controle da outra mão para trocar de idioma, pausar ou testar outro modelo."
+    "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+    "text": "No SteamVR, as falas da outra pessoa aparecem abaixo da sua linha de visão. O painel de pulso é uma pequena janela na área de trabalho: adicione-a como janela no XSOverlay para colocá-la no pulso e trocar o idioma, pausar, ativar ou desativar a exibição acima da cabeça ou testar outro modelo."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -871,6 +875,14 @@
     "en": "Muted in VRChat",
     "text": "Microfone silenciado no VRChat"
   },
+  "fork.vr.panel": {
+    "en": "Wrist panel window",
+    "text": "Janela do painel de pulso"
+  },
+  "fork.vr.panelTitle": {
+    "en": "Kotomimi wrist panel",
+    "text": "Painel de pulso do Kotomimi"
+  },
   "fork.vr.pause": {
     "en": "Pause",
     "text": "Pausar"
@@ -888,8 +900,8 @@
     "text": "Direito"
   },
   "fork.vr.setting": {
-    "en": "Show captions and the wrist menu in the headset",
-    "text": "Mostrar legendas e o menu de pulso no headset"
+    "en": "Show captions in the headset",
+    "text": "Mostrar legendas no headset"
   },
   "fork.vr.show": {
     "en": "Show",

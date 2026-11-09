@@ -1,10 +1,10 @@
 // src/vr/main.tsx
 /**
- * Fork: the headset's two pages, drawn offscreen by `electron/vr-overlay.js`
- * and shown by the SteamVR helper: `#strip`, the captions under the line of
- * sight, and `#wrist`, the panel on a wrist. They draw what the main window
- * sends and ask it for changes; a picture goes to the headset only when one
- * changes, so nothing here animates.
+ * Fork: the overlay's two pages (`electron/vr-overlay.js`): `#strip`, the
+ * captions under the line of sight, drawn offscreen and shown by the SteamVR
+ * helper — a picture goes to the headset only when it changes, so nothing
+ * here animates — and `#wrist`, the panel, a window on the desktop a wrist
+ * tool carries. They draw what the main window sends and ask it for changes.
  */
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -26,7 +26,7 @@ function App() {
     bridge?.receive('vr:perf', (p) => setPerf(p as VrPerf));
     void bridge?.invoke('vr:ready', { surface });
   }, []);
-  // The picture is the page's size: the main process sizes the window to it.
+  // The window is the page's size: the main process sizes it to the page.
   useLayoutEffect(() => {
     const el = root.current;
     if (!el) return;

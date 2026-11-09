@@ -803,6 +803,10 @@
     "en": "{s} s behind",
     "text": "Затримка {s} с"
   },
+  "fork.vr.chatbox": {
+    "en": "Chatbox",
+    "text": "Відображення над головою"
+  },
   "fork.vr.dropping": {
     "en": "dropping frames",
     "text": "пропуски кадрів"
@@ -820,8 +824,8 @@
     "text": "Розпізнавання мовлення"
   },
   "fork.vr.help": {
-    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-    "text": "У SteamVR слова співрозмовника з’являються трохи нижче поля зору. Погляньте на зап’ясток — там з’явиться невелике меню. Натискайте на нього контролером в іншій руці, щоб змінити мову, призупинити переклад або спробувати іншу модель."
+    "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+    "text": "У SteamVR слова співрозмовника з’являються нижче лінії погляду. Панель на зап’ясті — це невелике вікно на робочому столі. Додайте його як вікно в XSOverlay, щоб носити його на зап’ясті, змінювати мову, призупиняти переклад, вмикати чи вимикати відображення над головою або випробувати іншу модель."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -867,6 +871,14 @@
     "en": "Muted in VRChat",
     "text": "Мікрофон у VRChat вимкнено"
   },
+  "fork.vr.panel": {
+    "en": "Wrist panel window",
+    "text": "Вікно панелі на зап’ясті"
+  },
+  "fork.vr.panelTitle": {
+    "en": "Kotomimi wrist panel",
+    "text": "Панель Kotomimi на зап’ясті"
+  },
   "fork.vr.pause": {
     "en": "Pause",
     "text": "Пауза"
@@ -884,8 +896,8 @@
     "text": "На правій"
   },
   "fork.vr.setting": {
-    "en": "Show captions and the wrist menu in the headset",
-    "text": "Показувати субтитри й меню на зап’ястку в гарнітурі"
+    "en": "Show captions in the headset",
+    "text": "Показувати субтитри в гарнітурі"
   },
   "fork.vr.show": {
     "en": "Show",

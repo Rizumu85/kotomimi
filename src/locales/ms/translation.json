@@ -1953,10 +1953,7 @@
     },
     "jyutping": "Jyutping di atas teks Kantonis",
     "vr": {
-      "setting": "Paparkan sari kata dan menu pergelangan tangan dalam set kepala",
-      "hand": "Menu pada pergelangan tangan",
-      "left": "Tangan kiri",
-      "right": "Tangan kanan",
+      "setting": "Tunjukkan sari kata dalam set kepala",
       "linkWaiting": "Menunggu SteamVR bermula",
       "linkConnected": "Dipaparkan dalam set kepala",
       "linkMissing": "Versi ini tiada komponen VR",
@@ -1986,7 +1983,10 @@
       "stoppedShort": "Pengecaman dihentikan",
       "muted": "Dibisukan dalam VRChat",
       "title": "Set kepala VR",
-      "help": "Dalam SteamVR, kata-kata orang lain dipaparkan di bawah pandangan anda. Tunduk ke arah pergelangan tangan untuk melihat menu kecil. Tekan menu itu dengan alat kawalan di tangan sebelah lagi untuk menukar bahasa, menjeda atau mencuba model lain."
+      "help": "Dalam SteamVR, kata-kata pihak lain muncul di bawah garis pandangan anda. Tetingkap panel pergelangan tangan ialah tetingkap kecil pada desktop. Tambahkannya sebagai tetingkap dalam XSOverlay untuk memakainya di pergelangan tangan, menukar bahasa, menjeda, menghidupkan atau mematikan paparan atas kepala, atau mencuba model lain.",
+      "panel": "Tetingkap panel pergelangan tangan",
+      "chatbox": "Paparan atas kepala",
+      "panelTitle": "Panel pergelangan tangan Kotomimi"
     },
     "storage": {
       "title": "Storan model",

@@ -1953,10 +1953,7 @@
     },
     "jyutping": "Jyutping ovanför kantonesisk text",
     "vr": {
-      "setting": "Visa undertexter och handledsmenyn i headsetet",
-      "hand": "Handledsmeny på",
-      "left": "Vänster handled",
-      "right": "Höger handled",
+      "setting": "Visa undertexter i headsetet",
       "linkWaiting": "Väntar på SteamVR",
       "linkConnected": "I headsetet",
       "linkMissing": "Finns inte i den här versionen",
@@ -1986,7 +1983,10 @@
       "stoppedShort": "Stoppad",
       "muted": "Ljudet är avstängt i VRChat",
       "title": "VR-headset",
-      "help": "I SteamVR visas det den andra personen säger strax under ditt synfält. Titta ner på handleden så visas en liten meny. Tryck på den med kontrollen i andra handen för att byta språk, pausa eller prova en annan modell."
+      "help": "I SteamVR visas den andra personens ord under ditt synfält. Handledspanelen är ett litet fönster på skrivbordet. Lägg till det som ett fönster i XSOverlay för att bära det på handleden och byta språk, pausa, slå på eller av visningen ovanför huvudet eller prova en annan modell.",
+      "panel": "Handledspanel",
+      "chatbox": "Visning ovanför huvudet",
+      "panelTitle": "Kotomimi handledspanel"
     },
     "storage": {
       "title": "Modellagring",

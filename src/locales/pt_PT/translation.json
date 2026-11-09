@@ -1953,10 +1953,7 @@
     },
     "jyutping": "Jyutping por cima do cantonês",
     "vr": {
-      "setting": "Mostrar legendas e o menu do pulso nos óculos de realidade virtual",
-      "hand": "Menu no pulso",
-      "left": "Esquerdo",
-      "right": "Direito",
+      "setting": "Mostrar legendas no headset",
       "linkWaiting": "À espera que o SteamVR inicie",
       "linkConnected": "Já no visor",
       "linkMissing": "Esta versão não inclui o componente VR",
@@ -1986,7 +1983,10 @@
       "stoppedShort": "Transcrição parada",
       "muted": "Microfone silenciado no VRChat",
       "title": "Óculos de RV",
-      "help": "No SteamVR, o que a outra pessoa diz aparece abaixo do teu campo de visão. Olha para o pulso para ver um pequeno menu e toca-lhe com o comando da outra mão para mudar de idioma, fazer uma pausa ou experimentar outro modelo."
+      "help": "No SteamVR, as palavras da outra pessoa aparecem abaixo da linha de visão. A janela do painel de pulso é uma pequena janela no ambiente de trabalho: adicione-a como janela no XSOverlay para a usar no pulso e mudar de idioma, pausar, ativar ou desativar o texto sobre a cabeça ou experimentar outro modelo.",
+      "panel": "Janela do painel de pulso",
+      "chatbox": "Texto sobre a cabeça",
+      "panelTitle": "Painel de pulso do Kotomimi"
     },
     "storage": {
       "title": "Armazenamento de modelos",

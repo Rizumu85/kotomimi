@@ -807,6 +807,10 @@
     "en": "{s} s behind",
     "text": "{s} ثانیه تأخیر"
   },
+  "fork.vr.chatbox": {
+    "en": "Chatbox",
+    "text": "نمایش بالای سر"
+  },
   "fork.vr.dropping": {
     "en": "dropping frames",
     "text": "افت فریم"
@@ -824,8 +828,8 @@
     "text": "تبدیل گفتار به متن"
   },
   "fork.vr.help": {
-    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-    "text": "در SteamVR، حرف‌های طرف مقابل زیر میدان دیدتان نمایش داده می‌شود. به مچ دستتان نگاه کنید تا یک منوی کوچک ظاهر شود. با کنترلر دست دیگر روی آن بزنید تا زبان را عوض کنید، مکث کنید یا مدل دیگری را امتحان کنید."
+    "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+    "text": "در SteamVR، حرف‌های طرف مقابل پایین میدان دیدتان نمایش داده می‌شود. پنجرهٔ پنل مچی، پنجرهٔ کوچکی روی دسکتاپ است؛ آن را در XSOverlay به‌عنوان پنجره اضافه کنید تا روی مچ دستتان داشته باشید و زبان را عوض کنید، مکث کنید، نمایش بالای سر را روشن یا خاموش کنید یا مدل دیگری را امتحان کنید."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -871,6 +875,14 @@
     "en": "Muted in VRChat",
     "text": "میکروفون در VRChat بی‌صداست"
   },
+  "fork.vr.panel": {
+    "en": "Wrist panel window",
+    "text": "پنجرهٔ پنل مچی"
+  },
+  "fork.vr.panelTitle": {
+    "en": "Kotomimi wrist panel",
+    "text": "پنل مچی Kotomimi"
+  },
   "fork.vr.pause": {
     "en": "Pause",
     "text": "مکث"
@@ -888,8 +900,8 @@
     "text": "دست راست"
   },
   "fork.vr.setting": {
-    "en": "Show captions and the wrist menu in the headset",
-    "text": "نمایش زیرنویس و منوی مچ دست در هدست"
+    "en": "Show captions in the headset",
+    "text": "نمایش زیرنویس در هدست"
   },
   "fork.vr.show": {
     "en": "Show",

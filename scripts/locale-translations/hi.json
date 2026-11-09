@@ -807,6 +807,10 @@
     "en": "{s} s behind",
     "text": "{s} सेकंड पीछे"
   },
+  "fork.vr.chatbox": {
+    "en": "Chatbox",
+    "text": "चैटबॉक्स"
+  },
   "fork.vr.dropping": {
     "en": "dropping frames",
     "text": "फ़्रेम छूट रहे हैं"
@@ -824,8 +828,8 @@
     "text": "बोली से लिखाई"
   },
   "fork.vr.help": {
-    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-    "text": "SteamVR में सामने वाले की बातें आपकी नज़र से थोड़ा नीचे दिखेंगी। कलाई की ओर देखने पर एक छोटा मेन्यू दिखेगा। भाषा बदलने, रोकने या दूसरा मॉडल आज़माने के लिए दूसरे हाथ के कंट्रोलर से उसे दबाएँ।"
+    "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+    "text": "SteamVR में, सामने वाले की बातें आपकी नज़र के नीचे दिखाई देंगी। कलाई पैनल डेस्कटॉप की एक छोटी विंडो है। इसे XSOverlay में विंडो के रूप में जोड़कर कलाई पर रखें और भाषा बदलें, रोकें, चैटबॉक्स चालू या बंद करें, या कोई दूसरा मॉडल आज़माएँ।"
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -871,6 +875,14 @@
     "en": "Muted in VRChat",
     "text": "VRChat में म्यूट है"
   },
+  "fork.vr.panel": {
+    "en": "Wrist panel window",
+    "text": "कलाई पैनल विंडो"
+  },
+  "fork.vr.panelTitle": {
+    "en": "Kotomimi wrist panel",
+    "text": "Kotomimi कलाई पैनल"
+  },
   "fork.vr.pause": {
     "en": "Pause",
     "text": "रोकें"
@@ -888,8 +900,8 @@
     "text": "दायाँ हाथ"
   },
   "fork.vr.setting": {
-    "en": "Show captions and the wrist menu in the headset",
-    "text": "हेडसेट में सबटाइटल और कलाई का मेन्यू दिखाएँ"
+    "en": "Show captions in the headset",
+    "text": "हेडसेट में सबटाइटल दिखाएँ"
   },
   "fork.vr.show": {
     "en": "Show",

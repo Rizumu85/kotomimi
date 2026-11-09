@@ -807,6 +807,10 @@
     "en": "{s} s behind",
     "text": "{s} 秒遅れ"
   },
+  "fork.vr.chatbox": {
+    "en": "Chatbox",
+    "text": "頭上表示"
+  },
   "fork.vr.dropping": {
     "en": "dropping frames",
     "text": "コマ落ちしています"
@@ -824,8 +828,8 @@
     "text": "文字起こし"
   },
   "fork.vr.help": {
-    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-    "text": "SteamVRでは、相手の言葉が視線の下に表示されます。手首に目を向けると小さなメニューが現れます。もう片方のコントローラーでタッチすると、言語の切り替えや一時停止、別のモデルのお試しができます。"
+    "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+    "text": "SteamVRでは、相手の言葉が視線の下に表示されます。手首パネルはデスクトップ上の小さなウィンドウです。XSOverlayでウィンドウとして追加すれば、手首に表示して、言語の切り替え、一時停止、頭上表示のオン・オフ、別のモデルの試用ができます。"
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -871,6 +875,14 @@
     "en": "Muted in VRChat",
     "text": "VRChat でミュート中"
   },
+  "fork.vr.panel": {
+    "en": "Wrist panel window",
+    "text": "手首パネルウィンドウ"
+  },
+  "fork.vr.panelTitle": {
+    "en": "Kotomimi wrist panel",
+    "text": "Kotomimi 手首パネル"
+  },
   "fork.vr.pause": {
     "en": "Pause",
     "text": "一時停止"
@@ -888,8 +900,8 @@
     "text": "右手"
   },
   "fork.vr.setting": {
-    "en": "Show captions and the wrist menu in the headset",
-    "text": "ヘッドセット内に字幕と手首メニューを表示"
+    "en": "Show captions in the headset",
+    "text": "ヘッドセットに字幕を表示"
   },
   "fork.vr.show": {
     "en": "Show",

@@ -8,24 +8,24 @@ import { PassThrough } from 'node:stream';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { createVrOverlay, pictureMessage, configMessage, jsonLines, pokeEvents } = require('./vr-overlay.js');
+const { createVrOverlay, pictureMessage, configMessage, jsonLines } = require('./vr-overlay.js');
 
 describe('the helper’s messages', () => {
   it('frames a picture as kind 2: the overlay, its size, then its pixels', () => {
     const pixels = Buffer.alloc(2 * 3 * 4, 7);
-    const m = pictureMessage('wrist', 2, 3, pixels);
+    const m = pictureMessage('strip', 2, 3, pixels);
     expect(m.readUInt32LE(0)).toBe(2);
     expect(m.readUInt32LE(4)).toBe(12 + pixels.length);
-    expect(m.readUInt8(8)).toBe(1);
+    expect(m.readUInt8(8)).toBe(0);
     expect(m.readUInt32LE(12)).toBe(2);
     expect(m.readUInt32LE(16)).toBe(3);
     expect(m.subarray(20)).toEqual(pixels);
   });
 
   it('frames config as kind 1: its lines', () => {
-    const m = configMessage(['wrist.hand right', 'strip.on 0']);
+    const m = configMessage(['strip.below 22', 'strip.on 0']);
     expect(m.readUInt32LE(0)).toBe(1);
-    expect(m.subarray(8).toString()).toBe('wrist.hand right\nstrip.on 0');
+    expect(m.subarray(8).toString()).toBe('strip.below 22\nstrip.on 0');
   });
 
   it('reads the helper’s lines across chunks, and drops what is not JSON', () => {
@@ -34,14 +34,6 @@ describe('the helper’s messages', () => {
     feed(Buffer.from('{"t":"status","vr":"wai'));
     feed(Buffer.from('ting"}\nnoise\n{"t":"perf"}\n'));
     expect(lines).toEqual([{ t: 'status', vr: 'waiting' }, { t: 'perf' }]);
-  });
-
-  it('turns a poke into mouse events on the page', () => {
-    const size = { width: 700, height: 1000 };
-    expect(pokeEvents('move', 0.5, 0.25, size)).toEqual([{ type: 'mouseMove', x: 350, y: 250 }]);
-    expect(pokeEvents('down', 0.5, 0.25, size).map((e) => e.type)).toEqual(['mouseMove', 'mouseDown']);
-    expect(pokeEvents('up', 0.5, 0.25, size)[0]).toMatchObject({ type: 'mouseUp', button: 'left' });
-    expect(pokeEvents('leave', 0, 0, size)[0].type).toBe('mouseLeave');
   });
 });
 
@@ -62,13 +54,14 @@ function fakeWindow(options) {
     size: [options.width, options.height],
     isDestroyed() { return this.destroyed; },
     destroy() { this.destroyed = true; this.emit('closed'); },
+    show: vi.fn(),
     setContentSize(w, h) { this.size = [w, h]; },
     loadURL: vi.fn(async () => {}),
   });
   return win;
 }
 
-function setup() {
+function setup({ scale = 1 } = {}) {
   const windows = [];
   function BrowserWindow(options) { const w = fakeWindow(options); windows.push(w); return w; }
   const stdin = new PassThrough();
@@ -85,6 +78,7 @@ function setup() {
     helper: process.execPath,
     push: (channel, payload) => pushed.push([channel, payload]),
     spawnHelper,
+    scaleFactor: () => scale,
   });
   const say = (line) => stdout.write(`${JSON.stringify(line)}\n`);
   return { overlay, windows, written, child, spawnHelper, pushed, say };
@@ -93,15 +87,15 @@ function setup() {
 const tick = () => new Promise((r) => setImmediate(r));
 
 describe('createVrOverlay', () => {
-  it('runs the helper while asked, and draws the pages only while SteamVR shows them', async () => {
+  it('runs the helper while asked, and draws the strip only while SteamVR shows it', async () => {
     const t = setup();
     expect(t.overlay.set(true)).toEqual({ vr: 'waiting' });
     expect(t.spawnHelper).toHaveBeenCalledTimes(1);
     expect(t.windows).toHaveLength(0);
     t.say({ t: 'status', vr: 'connected' });
     await tick();
-    expect(t.windows.map((w) => w.options.webPreferences.offscreen)).toEqual([true, true]);
-    expect(t.windows.map((w) => w.loadURL.mock.calls[0][0])).toEqual(['vr.html#strip', 'vr.html#wrist']);
+    expect(t.windows.map((w) => w.options.webPreferences.offscreen)).toEqual([true]);
+    expect(t.windows.map((w) => w.loadURL.mock.calls[0][0])).toEqual(['vr.html#strip']);
     expect(t.pushed).toContainEqual(['vr:status', { vr: 'connected' }]);
     t.say({ t: 'status', vr: 'waiting' });
     await tick();
@@ -110,46 +104,71 @@ describe('createVrOverlay', () => {
     expect(t.pushed.at(-1)).toEqual(['vr:status', { vr: 'off' }]);
   });
 
-  it('sends each picture a page paints, and the state to both pages', async () => {
+  it('sends each picture the strip paints, and the state to the strip', async () => {
     const t = setup();
     t.overlay.set(true);
     t.say({ t: 'status', vr: 'connected' });
     await tick();
-    const [, wrist] = t.windows;
+    const [strip] = t.windows;
     const bitmap = Buffer.alloc(4 * 4 * 4, 1);
-    wrist.webContents.emit('paint', {}, {}, { getSize: () => ({ width: 4, height: 4 }), toBitmap: () => bitmap });
+    strip.webContents.emit('paint', {}, {}, { getSize: () => ({ width: 4, height: 4 }), toBitmap: () => bitmap });
     await tick();
     const all = Buffer.concat(t.written);
     expect(all.readUInt32LE(0)).toBe(2);
-    expect(all.readUInt8(8)).toBe(1);
+    expect(all.readUInt8(8)).toBe(0);
     t.overlay.state({ phase: 'idle' });
-    expect(t.windows.map((w) => w.webContents.sent.at(-1))).toEqual([['vr:state', { phase: 'idle' }], ['vr:state', { phase: 'idle' }]]);
-    expect(t.overlay.isPage(wrist.webContents)).toBe(true);
+    expect(strip.webContents.sent.at(-1)).toEqual(['vr:state', { phase: 'idle' }]);
+    expect(t.overlay.isPage(strip.webContents)).toBe(true);
     expect(t.overlay.isPage({})).toBe(false);
   });
 
-  it('pokes the wrist page where the helper says, at the picture’s scale', async () => {
-    const t = setup();
+  it('opens the wrist panel as a window of its own, without SteamVR, sized to the page and sharp', async () => {
+    const t = setup({ scale: 1 });
+    expect(t.overlay.panel(true)).toEqual({ on: true });
+    const [panel] = t.windows;
+    expect(panel.options).toMatchObject({ frame: false, resizable: false, width: 525, height: 720 });
+    expect(panel.options.webPreferences.offscreen).toBeUndefined();
+    expect(panel.loadURL.mock.calls[0][0]).toBe('vr.html#wrist');
+    expect(t.spawnHelper).not.toHaveBeenCalled();
+    t.overlay.resize('wrist', 350, 500);
+    expect(panel.size).toEqual([525, 750]);
+    t.overlay.state({ phase: 'idle' });
+    expect(panel.webContents.sent.at(-1)).toEqual(['vr:state', { phase: 'idle' }]);
+    expect(t.overlay.isPage(panel.webContents)).toBe(true);
+    // The helper's frame rate goes to it; the strip's window is in another session, whose zoom would size it.
     t.overlay.set(true);
+    t.say({ t: 'perf', hz: 90 });
+    await tick();
+    expect(panel.webContents.sent.at(-1)).toEqual(['vr:perf', { t: 'perf', hz: 90 }]);
     t.say({ t: 'status', vr: 'connected' });
     await tick();
-    t.overlay.resize('wrist', 350, 500);
-    expect(t.windows[1].size).toEqual([700, 1000]);
-    t.say({ t: 'pointer', o: 'wrist', kind: 'down', u: 0.5, v: 0.1 });
-    await tick();
-    expect(t.windows[1].webContents.inputs).toEqual([
-      { type: 'mouseMove', x: 350, y: 100 },
-      { type: 'mouseDown', x: 350, y: 100, button: 'left', clickCount: 1 },
-    ]);
+    expect(t.windows[1].options.webPreferences.partition).not.toBe(panel.options.webPreferences.partition);
+    // Asked again: the one window, shown.
+    t.overlay.panel(true);
+    expect(t.windows.filter((w) => w.loadURL.mock.calls[0]?.[0] === 'vr.html#wrist')).toHaveLength(1);
+    expect(panel.show).toHaveBeenCalled();
+    // Closed from the settings: nothing said back; by the user: the setting is told.
+    t.overlay.panel(false);
+    expect(panel.destroyed).toBe(true);
+    expect(t.pushed.some(([c]) => c === 'vr:panel')).toBe(false);
+    t.overlay.panel(true);
+    t.windows.at(-1).destroy();
+    expect(t.pushed).toContainEqual(['vr:panel', { on: false }]);
+  });
+
+  it('opens the panel no larger than the page on a display that already has the pixels', () => {
+    const t = setup({ scale: 2 });
+    t.overlay.panel(true);
+    expect(t.windows[0].options).toMatchObject({ width: 350, height: 480 });
   });
 
   it('keeps the tuning for the helper’s next start, one line per key', () => {
     const t = setup();
-    t.overlay.tune(['wrist.hand right']);
-    t.overlay.tune(['wrist.hand left', 'strip.on 0']);
+    t.overlay.tune(['strip.below 20']);
+    t.overlay.tune(['strip.below 22', 'strip.on 0']);
     t.overlay.set(true);
     const first = Buffer.concat(t.written);
-    expect(first.subarray(8).toString()).toBe('wrist.hand left\nstrip.on 0');
+    expect(first.subarray(8).toString()).toBe('strip.below 22\nstrip.on 0');
   });
 
   it('keeps one picture a page while the helper’s pipe is full, the newest, and sends it on drain', async () => {
@@ -161,7 +180,7 @@ describe('createVrOverlay', () => {
     const writes = [];
     stdin.write = (b) => { writes.push(b); return true; };
     Object.defineProperty(stdin, 'writableNeedDrain', { value: true, configurable: true });
-    const paint = (n) => t.windows[1].webContents.emit('paint', {}, {}, { getSize: () => ({ width: 1, height: 1 }), toBitmap: () => Buffer.from([n, n, n, n]) });
+    const paint = (n) => t.windows[0].webContents.emit('paint', {}, {}, { getSize: () => ({ width: 1, height: 1 }), toBitmap: () => Buffer.from([n, n, n, n]) });
     paint(1);
     paint(2);
     expect(writes).toHaveLength(0);

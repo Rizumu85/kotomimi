@@ -3,22 +3,35 @@
 // Fork: the SteamVR overlay's main-process side (vr-overlay/src/main.cpp). Windows only.
 //
 // While the main window asks for it (`vr:set`), the helper `kotomimi-vr.exe`
-// runs and waits for SteamVR. Once SteamVR is up, two offscreen windows draw
-// `vr.html#strip` and `vr.html#wrist`; each new picture goes to the helper's
-// stdin, which shows it in the headset. The helper's poke on the wrist panel
-// comes back as mouse events into that page; its frame rate and memory lines
-// go to the wrist page. What the pages show (`vr:state`) comes from the main
-// window; what the wrist asks (`vr:command`) goes back to it.
+// runs and waits for SteamVR. Once SteamVR is up, an offscreen window draws
+// `vr.html#strip`; each new picture goes to the helper's stdin, which shows it
+// in the headset.
+//
+// The wrist panel, `vr.html#wrist`, is a small window on the desktop, open
+// while the main window asks for it (`vr:panel`): a wrist tool such as
+// XSOverlay adds it as a window and carries it on a wrist, presses included.
+// It opens at the panel's size, at one and a half device pixels a CSS pixel,
+// crisp in a headset; its top row moves it. The helper's frame rate and memory
+// lines go to it. What the pages show (`vr:state`) comes from the main window;
+// what the panel asks (`vr:command`) goes back to it.
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
 
-/** The pictures are drawn at twice the pages' CSS size: crisp at reading distance in a headset. */
+/** The strip's pictures are drawn at twice the page's CSS size: crisp at reading distance in a headset. */
 const ZOOM = 2;
-const SURFACES = ['strip', 'wrist'];
-const INDEX = { strip: 0, wrist: 1 };
-/** Widths before a page has measured itself (src/vr/vr.scss). */
+/** The panel window's device pixels per CSS pixel: a wrist tool's picture of it is that sharp. */
+const PANEL_PIXELS = 1.5;
+const INDEX = { strip: 0 };
+/** Sizes before a page has measured itself (src/vr/vr.scss). */
 const START_SIZE = { strip: { width: 800, height: 160 }, wrist: { width: 350, height: 480 } };
+/**
+ * Each page in a session of its own (in memory): Chromium keeps one zoom for every page of an origin in a session, and
+ * the strip's would size the panel, both being vr.html.
+ */
+const PARTITION = { strip: 'kotomimi-vr-strip', wrist: 'kotomimi-vr-panel' };
+/** The panel's own background (`--sk-bg-base`, dark), shown before the page paints. */
+const PANEL_BACKGROUND = '#1a1a1a';
 
 /** One message to the helper: [u32 kind][u32 length][payload]. */
 function message(kind, payload) {
@@ -56,28 +69,21 @@ function jsonLines(onLine) {
   };
 }
 
-/** The mouse events a poke at (u, v) on a page of `size` makes. */
-function pokeEvents(kind, u, v, size) {
-  const x = Math.round(u * size.width);
-  const y = Math.round(v * size.height);
-  if (kind === 'move') return [{ type: 'mouseMove', x, y }];
-  if (kind === 'down') return [{ type: 'mouseMove', x, y }, { type: 'mouseDown', x, y, button: 'left', clickCount: 1 }];
-  if (kind === 'up') return [{ type: 'mouseUp', x, y, button: 'left', clickCount: 1 }];
-  if (kind === 'leave') return [{ type: 'mouseLeave', x, y }];
-  return [];
-}
-
 function helperFile(app, env = process.env) {
   if (!app.isPackaged && env.KOTOMIMI_VR_HELPER) return env.KOTOMIMI_VR_HELPER;
   if (app.isPackaged) return path.join(process.resourcesPath, 'kotomimi-vr', 'kotomimi-vr.exe');
   return path.join(app.getAppPath(), 'vr-overlay', 'build', 'Release', 'kotomimi-vr.exe');
 }
 
-function createVrOverlay({ BrowserWindow, preload, pageUrl, helper, push, spawnHelper = spawn, dumpDir = null, log = () => {} }) {
+function createVrOverlay({ BrowserWindow, preload, pageUrl, helper, push, spawnHelper = spawn, scaleFactor = () => 1, dumpDir = null, log = () => {} }) {
   let child = null;
   let vr = 'off';
   let state = null;
-  const windows = {};
+  /** The strip's offscreen window, while SteamVR shows it. */
+  let strip = null;
+  /** The wrist panel's window, while asked for. */
+  let panel = null;
+  let panelZoom = 1;
   const sizes = { strip: { ...START_SIZE.strip }, wrist: { ...START_SIZE.wrist } };
   const tuning = [];
 
@@ -86,34 +92,34 @@ function createVrOverlay({ BrowserWindow, preload, pageUrl, helper, push, spawnH
     if (vr === next) return;
     vr = next;
     push('vr:status', status());
-    if (vr === 'connected') openWindows();
-    else closeWindows();
+    if (vr === 'connected') openStrip();
+    else closeStrip();
   };
 
   const write = (buffer) => {
     if (child && child.stdin.writable) child.stdin.write(buffer);
   };
   // A picture waits while the pipe is full, and a newer one takes its place: what the helper has not read is never
-  // more than one picture a page.
-  const waiting = {};
-  const sendPicture = (surface, buffer) => {
+  // more than one picture.
+  let waiting = null;
+  const sendPicture = (buffer) => {
     if (!child || !child.stdin.writable) return;
-    if (child.stdin.writableNeedDrain) { waiting[surface] = buffer; return; }
+    if (child.stdin.writableNeedDrain) { waiting = buffer; return; }
     child.stdin.write(buffer);
   };
   const drain = () => {
-    for (const surface of SURFACES) {
-      const buffer = waiting[surface];
-      if (!buffer) continue;
-      delete waiting[surface];
-      sendPicture(surface, buffer);
-    }
+    const buffer = waiting;
+    waiting = null;
+    if (buffer) sendPicture(buffer);
   };
 
-  const openWindows = () => {
-    for (const surface of SURFACES) {
-      if (windows[surface] && !windows[surface].isDestroyed()) continue;
-      const size = sizes[surface];
+  const alive = (win) => Boolean(win && !win.isDestroyed());
+
+  const openStrip = () => {
+    if (alive(strip)) return;
+    {
+      const surface = 'strip';
+      const size = sizes.strip;
       const win = new BrowserWindow({
         show: false,
         frame: false,
@@ -122,34 +128,68 @@ function createVrOverlay({ BrowserWindow, preload, pageUrl, helper, push, spawnH
         width: size.width * ZOOM,
         height: size.height * ZOOM,
         useContentSize: true,
-        webPreferences: { offscreen: true, preload, contextIsolation: true, nodeIntegration: false, sandbox: true },
+        webPreferences: { offscreen: true, partition: PARTITION.strip, preload, contextIsolation: true, nodeIntegration: false, sandbox: true },
       });
-      windows[surface] = win;
-      win.webContents.setFrameRate(surface === 'wrist' ? 30 : 20);
+      strip = win;
+      win.webContents.setFrameRate(20);
       win.webContents.on('did-finish-load', () => win.webContents.setZoomFactor(ZOOM));
       let dumped = 0;
       win.webContents.on('paint', (_event, _dirty, image) => {
         const { width, height } = image.getSize();
         if (width === 0 || height === 0) return;
-        sendPicture(surface, pictureMessage(surface, width, height, image.toBitmap()));
+        sendPicture(pictureMessage(surface, width, height, image.toBitmap()));
         if (dumpDir) fs.writeFile(path.join(dumpDir, `${surface}-${String(dumped++).padStart(4, '0')}.png`), image.toPNG(), () => {});
       });
-      win.on('closed', () => { if (windows[surface] === win) delete windows[surface]; });
+      win.on('closed', () => { if (strip === win) strip = null; });
       void win.loadURL(pageUrl(surface));
     }
   };
 
-  const closeWindows = () => {
-    for (const surface of SURFACES) {
-      const win = windows[surface];
-      delete windows[surface];
-      if (win && !win.isDestroyed()) win.destroy();
-    }
+  const closeStrip = () => {
+    const win = strip;
+    strip = null;
+    if (alive(win)) win.destroy();
+  };
+
+  const panelContent = () => ({ width: Math.round(sizes.wrist.width * panelZoom), height: Math.round(sizes.wrist.height * panelZoom) });
+
+  const openPanel = () => {
+    if (alive(panel)) { panel.show(); return; }
+    // As sharp on any display: one and a half device pixels a CSS pixel, never smaller than the page.
+    panelZoom = Math.max(1, PANEL_PIXELS / (scaleFactor() || 1));
+    const { width, height } = panelContent();
+    const win = new BrowserWindow({
+      title: 'Kotomimi',
+      width,
+      height,
+      useContentSize: true,
+      frame: false,
+      resizable: false,
+      maximizable: false,
+      fullscreenable: false,
+      backgroundColor: PANEL_BACKGROUND,
+      webPreferences: { partition: PARTITION.wrist, preload, contextIsolation: true, nodeIntegration: false, sandbox: true },
+    });
+    panel = win;
+    win.webContents.on('did-finish-load', () => win.webContents.setZoomFactor(panelZoom));
+    // Closed otherwise (Alt+F4, the app quitting): the main window is told, and shows it closed.
+    win.on('closed', () => {
+      if (panel !== win) return;
+      panel = null;
+      push('vr:panel', { on: false });
+    });
+    void win.loadURL(pageUrl('wrist'));
+  };
+
+  const closePanel = () => {
+    const win = panel;
+    panel = null;
+    if (alive(win)) win.destroy();
   };
 
   const toPage = (surface, channel, payload) => {
-    const win = windows[surface];
-    if (win && !win.isDestroyed()) win.webContents.send(channel, payload);
+    const win = surface === 'strip' ? strip : panel;
+    if (alive(win)) win.webContents.send(channel, payload);
   };
 
   const onHelper = (line) => {
@@ -158,12 +198,6 @@ function createVrOverlay({ BrowserWindow, preload, pageUrl, helper, push, spawnH
       setVr(line.vr === 'connected' ? 'connected' : 'waiting');
     } else if (line.t === 'perf') {
       toPage('wrist', 'vr:perf', line);
-    } else if (line.t === 'pointer' && line.o === 'wrist') {
-      const win = windows.wrist;
-      if (!win || win.isDestroyed()) return;
-      for (const event of pokeEvents(line.kind, line.u, line.v, { width: sizes.wrist.width * ZOOM, height: sizes.wrist.height * ZOOM })) win.webContents.sendInputEvent(event);
-    } else if (line.t === 'wrist') {
-      push('vr:wrist', { shown: line.shown === true });
     }
   };
 
@@ -182,7 +216,7 @@ function createVrOverlay({ BrowserWindow, preload, pageUrl, helper, push, spawnH
     const ended = () => {
       if (child !== proc) return;
       child = null;
-      for (const surface of SURFACES) delete waiting[surface];
+      waiting = null;
       setVr('off');
     };
     proc.on('exit', ended);
@@ -204,16 +238,19 @@ function createVrOverlay({ BrowserWindow, preload, pageUrl, helper, push, spawnH
   return {
     status,
     set(on) { if (on) start(); else stop(); return status(); },
+    /** The wrist panel's window, opened or closed. */
+    panel(on) { if (on) openPanel(); else closePanel(); return { on: alive(panel) }; },
     state(next) {
       state = next;
-      for (const surface of SURFACES) toPage(surface, 'vr:state', state);
+      toPage('strip', 'vr:state', state);
+      toPage('wrist', 'vr:state', state);
     },
     ready(surface) { if (state) toPage(surface, 'vr:state', state); },
     resize(surface, width, height) {
-      if (!SURFACES.includes(surface) || !(width > 0 && height > 0 && width <= 2000 && height <= 2000)) return;
+      if (!(surface in sizes) || !(width > 0 && height > 0 && width <= 2000 && height <= 2000)) return;
       sizes[surface] = { width, height };
-      const win = windows[surface];
-      if (win && !win.isDestroyed()) win.setContentSize(Math.round(width * ZOOM), Math.round(height * ZOOM));
+      if (surface === 'strip' && alive(strip)) strip.setContentSize(Math.round(width * ZOOM), Math.round(height * ZOOM));
+      if (surface === 'wrist' && alive(panel)) { const c = panelContent(); panel.setContentSize(c.width, c.height); }
     },
     /** Lines of the helper's config (`applyConfig` in vr-overlay/src/main.cpp), kept for its next start. */
     tune(lines) {
@@ -224,18 +261,19 @@ function createVrOverlay({ BrowserWindow, preload, pageUrl, helper, push, spawnH
       }
       write(configMessage(lines));
     },
-    isPage(sender) { return SURFACES.some((s) => windows[s] && !windows[s].isDestroyed() && windows[s].webContents === sender); },
-    stop,
+    isPage(sender) { return [strip, panel].some((win) => alive(win) && win.webContents === sender); },
+    stop() { stop(); closePanel(); },
   };
 }
 
-function setupVrOverlay({ ipcMain, BrowserWindow, app, isTrustedSender, getMainWindow, loadsDevServer, platform = process.platform }) {
+function setupVrOverlay({ ipcMain, BrowserWindow, scaleFactor, app, isTrustedSender, getMainWindow, loadsDevServer, platform = process.platform }) {
   const push = (channel, payload) => {
     const win = getMainWindow();
     if (win && !win.isDestroyed()) win.webContents.send(channel, payload);
   };
   if (platform !== 'win32') {
     ipcMain.handle('vr:set', () => ({ vr: 'off' }));
+    ipcMain.handle('vr:panel', () => ({ on: false }));
     for (const channel of ['vr:state', 'vr:tune', 'vr:command', 'vr:ready', 'vr:size']) ipcMain.handle(channel, () => undefined);
     return { stop() {} };
   }
@@ -249,10 +287,12 @@ function setupVrOverlay({ ipcMain, BrowserWindow, app, isTrustedSender, getMainW
       : `file://${path.join(app.getAppPath(), 'build', 'vr.html').replace(/\\/g, '/')}#${surface}`),
     helper: helperFile(app),
     push,
+    scaleFactor,
     dumpDir,
     log: (text) => console.info(text),
   });
   ipcMain.handle('vr:set', (event, payload) => (isTrustedSender(event.sender) ? overlay.set(Boolean(payload && payload.on)) : undefined));
+  ipcMain.handle('vr:panel', (event, payload) => (isTrustedSender(event.sender) ? overlay.panel(Boolean(payload && payload.on)) : undefined));
   ipcMain.handle('vr:state', (event, payload) => { if (isTrustedSender(event.sender) && payload && typeof payload === 'object') overlay.state(payload); });
   ipcMain.handle('vr:tune', (event, payload) => {
     if (!isTrustedSender(event.sender) || !payload || !Array.isArray(payload.lines)) return;
@@ -265,4 +305,4 @@ function setupVrOverlay({ ipcMain, BrowserWindow, app, isTrustedSender, getMainW
   return overlay;
 }
 
-module.exports = { setupVrOverlay, createVrOverlay, pictureMessage, configMessage, jsonLines, pokeEvents };
+module.exports = { setupVrOverlay, createVrOverlay, pictureMessage, configMessage, jsonLines };

@@ -1953,10 +1953,7 @@
     },
     "jyutping": "Jyutping nad tekstem kantońskim",
     "vr": {
-      "setting": "Pokazuj napisy i menu na nadgarstku w goglach",
-      "hand": "Menu na nadgarstku",
-      "left": "Lewy nadgarstek",
-      "right": "Prawy nadgarstek",
+      "setting": "Pokazuj napisy w goglach",
       "linkWaiting": "Oczekiwanie na SteamVR",
       "linkConnected": "W goglach",
       "linkMissing": "Brak w tej wersji",
@@ -1986,7 +1983,10 @@
       "stoppedShort": "Zatrzymano",
       "muted": "Wyciszono w VRChat",
       "title": "Gogle VR",
-      "help": "W SteamVR słowa rozmówcy pojawiają się poniżej linii wzroku. Spójrz na nadgarstek, by zobaczyć małe menu. Dotknij go kontrolerem w drugiej ręce, aby zmienić język, wstrzymać tłumaczenie lub wypróbować inny model."
+      "help": "W SteamVR słowa rozmówcy pojawiają się poniżej pola widzenia. Panel na nadgarstek to małe okno na pulpicie. Dodaj je jako okno w XSOverlay, aby umieścić je na nadgarstku i zmieniać język, wstrzymywać działanie, włączać lub wyłączać wyświetlanie nad głową albo wypróbować inny model.",
+      "panel": "Okno panelu na nadgarstek",
+      "chatbox": "Wyświetlanie nad głową",
+      "panelTitle": "Panel Kotomimi na nadgarstek"
     },
     "storage": {
       "title": "Miejsce przechowywania modeli",

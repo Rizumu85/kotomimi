@@ -1953,10 +1953,7 @@
     },
     "jyutping": "Kantonca metnin üzerinde jyutping",
     "vr": {
-      "setting": "VR başlığında altyazıları ve bilek menüsünü göster",
-      "hand": "Bilek menüsünün konumu",
-      "left": "Sol bilek",
-      "right": "Sağ bilek",
+      "setting": "Başlıkta altyazıları göster",
       "linkWaiting": "SteamVR bekleniyor",
       "linkConnected": "Başlıkta",
       "linkMissing": "Bu sürümde yok",
@@ -1986,7 +1983,10 @@
       "stoppedShort": "Durduruldu",
       "muted": "VRChat'te sessize alındı",
       "title": "VR başlığı",
-      "help": "SteamVR'da karşınızdakinin söyledikleri görüş alanınızın altında görünür. Bileğinize baktığınızda küçük bir menü açılır. Diğer elinizdeki kontrolcüyle menüye dokunarak dili değiştirebilir, duraklatabilir veya başka bir model deneyebilirsiniz."
+      "help": "SteamVR'da karşı tarafın sözleri görüş alanınızın altında görünür. Bilek paneli, masaüstündeki küçük bir penceredir: XSOverlay'de pencere olarak ekleyip bileğinizde kullanabilir, dili değiştirebilir, duraklatabilir, baş üstü gösterimini açıp kapatabilir veya başka bir model deneyebilirsiniz.",
+      "panel": "Bilek paneli penceresi",
+      "chatbox": "Baş üstü gösterimi",
+      "panelTitle": "Kotomimi bilek paneli"
     },
     "storage": {
       "title": "Model depolama",

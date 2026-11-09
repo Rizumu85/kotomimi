@@ -807,6 +807,10 @@
     "en": "{s} s behind",
     "text": "Terlambat {s} detik"
   },
+  "fork.vr.chatbox": {
+    "en": "Chatbox",
+    "text": "Tampilan di atas kepala"
+  },
   "fork.vr.dropping": {
     "en": "dropping frames",
     "text": "frame terlewat"
@@ -824,8 +828,8 @@
     "text": "Pengenalan"
   },
   "fork.vr.help": {
-    "en": "In SteamVR, the other side's words appear below your line of sight. Look at your wrist for a small menu, and press it with the other controller to switch languages, pause, or try another model.",
-    "text": "Di SteamVR, ucapan lawan bicara muncul di bawah pandangan Anda. Lihat ke pergelangan tangan untuk menampilkan menu kecil. Sentuh menu dengan pengontrol di tangan satunya untuk mengganti bahasa, menjeda, atau mencoba model lain."
+    "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
+    "text": "Di SteamVR, ucapan lawan bicara muncul di bawah garis pandang Anda. Panel pergelangan tangan adalah jendela kecil di desktop. Tambahkan sebagai jendela di XSOverlay untuk memasangnya di pergelangan tangan, lalu ganti bahasa, jeda, nyalakan atau matikan tampilan di atas kepala, atau coba model lain."
   },
   "fork.vr.hide": {
     "en": "Hide",
@@ -871,6 +875,14 @@
     "en": "Muted in VRChat",
     "text": "Dibisukan di VRChat"
   },
+  "fork.vr.panel": {
+    "en": "Wrist panel window",
+    "text": "Jendela panel pergelangan tangan"
+  },
+  "fork.vr.panelTitle": {
+    "en": "Kotomimi wrist panel",
+    "text": "Panel pergelangan tangan Kotomimi"
+  },
   "fork.vr.pause": {
     "en": "Pause",
     "text": "Jeda"
@@ -888,8 +900,8 @@
     "text": "Pergelangan tangan kanan"
   },
   "fork.vr.setting": {
-    "en": "Show captions and the wrist menu in the headset",
-    "text": "Tampilkan subtitel dan menu pergelangan tangan di headset"
+    "en": "Show captions in the headset",
+    "text": "Tampilkan subtitle di headset"
   },
   "fork.vr.show": {
     "en": "Show",

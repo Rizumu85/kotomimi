@@ -1953,10 +1953,7 @@
     },
     "jyutping": "Jyutping au-dessus du cantonais",
     "vr": {
-      "setting": "Afficher les sous-titres et le menu au poignet dans le casque",
-      "hand": "Poignet du menu",
-      "left": "Gauche",
-      "right": "Droit",
+      "setting": "Afficher les sous-titres dans le casque",
       "linkWaiting": "En attente du démarrage de SteamVR",
       "linkConnected": "Affiché dans le casque",
       "linkMissing": "Composant VR absent de cette version",
@@ -1986,7 +1983,10 @@
       "stoppedShort": "Transcription arrêtée",
       "muted": "Micro coupé dans VRChat",
       "title": "Casque VR",
-      "help": "Dans SteamVR, les paroles de votre interlocuteur s’affichent sous votre champ de vision. Regardez votre poignet pour faire apparaître un petit menu. Touchez-le avec l’autre manette pour changer de langue, mettre en pause ou essayer un autre modèle."
+      "help": "Dans SteamVR, les paroles de l’autre personne s’affichent sous votre ligne de regard. Le panneau au poignet est une petite fenêtre sur le bureau : ajoutez-la comme fenêtre dans XSOverlay pour l’avoir au poignet et changer de langue, mettre en pause, activer ou désactiver l’affichage au-dessus de la tête, ou essayer un autre modèle.",
+      "panel": "Fenêtre du panneau au poignet",
+      "chatbox": "Affichage au-dessus de la tête",
+      "panelTitle": "Panneau au poignet Kotomimi"
     },
     "storage": {
       "title": "Stockage des modèles",
