@@ -59,6 +59,20 @@ int main() {
   for (int i = 0; i < 120; i++) s = followStrip(g, watch, 0.016f, sc);
   CHECK(std::fabs(yawOf(s) - 15) < 1.5f);
   CHECK(std::fabs(pitchOf(s) + sc.below) < 0.5f);
+  // A look up past the slack, then back about level: the strip comes back down to its height, not left high.
+  LazyFollow u;
+  followStrip(u, head, 0.016f, sc);
+  Mat34 up = fromEulerDeg(0, 35, 0, {0, 1.6f, 0});
+  for (int i = 0; i < 240; i++) s = followStrip(u, up, 0.016f, sc);
+  CHECK(pitchOf(s) > 5);
+  Mat34 nearly = fromEulerDeg(0, 6, 0, {0, 1.6f, 0});
+  for (int i = 0; i < 240; i++) s = followStrip(u, nearly, 0.016f, sc);
+  CHECK(std::fabs(pitchOf(s) + sc.below) < 1.0f);
+  // Small nods about level leave it where it is.
+  Mat34 nod = fromEulerDeg(0, -7, 0, {0, 1.6f, 0});
+  for (int i = 0; i < 120; i++) s = followStrip(u, nod, 0.016f, sc);
+  CHECK(std::fabs(pitchOf(s) + sc.below) < 1.0f);
+
   // Looking straight down and shaking the head a little: the strip keeps its heading.
   LazyFollow d;
   followStrip(d, head, 0.016f, sc);

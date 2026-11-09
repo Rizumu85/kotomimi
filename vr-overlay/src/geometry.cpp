@@ -75,7 +75,10 @@ Mat34 followStrip(LazyFollow& f, const Mat34& hmd, float dt, const StripConfig& 
   float headYaw = std::atan2(-level.x, -level.z);
   float headPitch = std::asin(std::clamp(gaze.y, -1.0f, 1.0f));
   float wantYaw = headYaw;
-  float wantPitch = std::clamp(headPitch - c.below * kDeg, -60.0f * kDeg, 25.0f * kDeg);
+  // Looking about level, the strip's place is its own height under the horizon, whatever small nod the head makes; it
+  // is not left high after a look up (a friend's report, 2026-11-09). Looking well up or down, under the line of sight.
+  const bool aboutLevel = std::fabs(headPitch) < c.levelBand * kDeg;
+  float wantPitch = aboutLevel ? -c.below * kDeg : std::clamp(headPitch - c.below * kDeg, -60.0f * kDeg, 25.0f * kDeg);
   if (!f.placed) {
     f.placed = true;
     f.yaw = wantYaw;
@@ -85,7 +88,7 @@ Mat34 followStrip(LazyFollow& f, const Mat34& hmd, float dt, const StripConfig& 
   float dp = wantPitch - f.pitch;
   // A turn and a tilt are followed apart: turning while looking down at a watch does not bring the strip down to it.
   if (std::fabs(dy) > c.yawSlack * kDeg) f.turning = true;
-  if (std::fabs(dp) > c.pitchSlack * kDeg) f.tilting = true;
+  if (std::fabs(dp) > (aboutLevel ? 1.0f : c.pitchSlack) * kDeg) f.tilting = true;
   // Eased by the time passed, not the frames: the same glide at 72 Hz and 144.
   float k = 1.0f - std::exp(-dt * c.rate);
   if (f.turning) {

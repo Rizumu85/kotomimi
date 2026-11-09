@@ -27,6 +27,7 @@ struct StripConfig {
   float below = 22.0f;         // degrees under the line of sight
   float yawSlack = 8.0f;       // degrees the head may turn before the strip follows: it stays in view through a fight
   float pitchSlack = 25.0f;    // a glance down at a watch does not drag it along
+  float levelBand = 10.0f;     // the head this near level: the strip goes back to its height under the horizon
   float rate = 5.0f;           // how fast it catches up, per second
 };
 
