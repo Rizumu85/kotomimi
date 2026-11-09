@@ -556,7 +556,6 @@
       "placeDevice": "이 컴퓨터",
       "choiceServer": "다른 기기 사용",
       "choiceDevice": "이 컴퓨터 사용",
-      "otherDeviceHint": "같은 네트워크에 있는 다른 기기의 모델을 사용하려면 네트워크에서 기기를 찾아보세요.",
       "endpoint": "주소",
       "endpointPlaceholder": "e.g. 192.168.1.10:8790",
       "serverNeedsKey": "액세스 키 필요",
@@ -1889,9 +1888,7 @@
       "none": "기기를 찾지 못했어요. 다른 기기가 켜져 있고, 이 컴퓨터와 같은 Wi-Fi나 공유기에 연결되어 있는지 확인해 주세요. 해당 기기의 Kotomimi에서 \"이 컴퓨터의 모델 공유\"도 켜져 있어야 해요. 아래에 주소를 직접 입력할 수도 있어요.",
       "kindKotomimi": "Kotomimi 공유",
       "kindServer": "모델 서버",
-      "kindPhone": "휴대폰 · 음성 인식",
-      "kindPhoneLends": "휴대폰 · {{what}}",
-      "kindTabletLends": "태블릿 · {{what}}",
+      "kindPhone": "휴대폰",
       "lendsAsr": "음성 인식",
       "lendsTranslate": "번역",
       "lendsCoach": "문법 피드백",
@@ -1901,7 +1898,8 @@
       "thisComputer": "이 컴퓨터의 서버",
       "productHere": "이 컴퓨터의 {{product}}",
       "use": "{{name}} 사용",
-      "manual": "또는 주소 직접 입력"
+      "manual": "또는 주소 직접 입력",
+      "kindTablet": "태블릿"
     },
     "audio": {
       "vbcableMissing": "VB-CABLE 가상 오디오 드라이버가 설치되지 않아 번역 음성을 회의 앱으로 보낼 수 없어요. 자막만 볼 때는 필요하지 않아요.",

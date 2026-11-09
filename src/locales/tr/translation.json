@@ -556,7 +556,6 @@
       "placeDevice": "Bu bilgisayar",
       "choiceServer": "Başka cihaz kullan",
       "choiceDevice": "Bu bilgisayarı kullan",
-      "otherDeviceHint": "Yerel ağınızdaki başka bir cihazın modellerini kullanmak için ağda cihaz arayabilirsiniz.",
       "endpoint": "Adres",
       "endpointPlaceholder": "e.g. 192.168.1.10:8790",
       "serverNeedsKey": "Erişim anahtarı gerekiyor",
@@ -1889,9 +1888,7 @@
       "none": "Cihaz bulunamadı. Diğer cihazın açık olduğundan, bu bilgisayarla aynı Wi-Fi ağına veya yönlendiriciye bağlı olduğundan ve Kotomimi'de \"Bu bilgisayarın modellerini paylaş\" seçeneğinin açık olduğundan emin olun. Adresini aşağıya elle de girebilirsiniz.",
       "kindKotomimi": "Kotomimi paylaşımı",
       "kindServer": "Model sunucusu",
-      "kindPhone": "Telefon · konuşma tanıma",
-      "kindPhoneLends": "Telefon · {{what}}",
-      "kindTabletLends": "Tablet · {{what}}",
+      "kindPhone": "Telefon",
       "lendsAsr": "konuşma tanıma",
       "lendsTranslate": "çeviri",
       "lendsCoach": "dil bilgisi geri bildirimi",
@@ -1901,7 +1898,8 @@
       "thisComputer": "Bu bilgisayardaki sunucular",
       "productHere": "Bu bilgisayardaki {{product}}",
       "use": "{{name}} kullan",
-      "manual": "Veya adresini elle girin"
+      "manual": "Veya adresini elle girin",
+      "kindTablet": "Tablet"
     },
     "audio": {
       "vbcableMissing": "VB-CABLE sanal ses sürücüsü yüklü olmadığı için sesli çeviri toplantı uygulamasına aktarılamıyor. Yalnızca altyazı için gerekli değildir.",

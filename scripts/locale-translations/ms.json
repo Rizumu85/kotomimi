@@ -184,8 +184,8 @@
     "text": "Perkongsian Kotomimi"
   },
   "fork.find.kindPhone": {
-    "en": "Phone · speech recognition",
-    "text": "Telefon · pengecaman pertuturan"
+    "en": "Phone",
+    "text": "Telefon"
   },
   "fork.find.kindPhoneLends": {
     "en": "Phone · {{what}}",
@@ -194,6 +194,10 @@
   "fork.find.kindServer": {
     "en": "Model server",
     "text": "Pelayan model"
+  },
+  "fork.find.kindTablet": {
+    "en": "Tablet",
+    "text": "Tablet"
   },
   "fork.find.kindTabletLends": {
     "en": "Tablet · {{what}}",

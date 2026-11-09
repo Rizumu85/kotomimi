@@ -188,8 +188,8 @@
     "text": "Kotomimi பகிர்வு"
   },
   "fork.find.kindPhone": {
-    "en": "Phone · speech recognition",
-    "text": "கைப்பேசி · பேச்சறிதல்"
+    "en": "Phone",
+    "text": "தொலைபேசி"
   },
   "fork.find.kindPhoneLends": {
     "en": "Phone · {{what}}",
@@ -198,6 +198,10 @@
   "fork.find.kindServer": {
     "en": "Model server",
     "text": "மாதிரி சேவையகம்"
+  },
+  "fork.find.kindTablet": {
+    "en": "Tablet",
+    "text": "டேப்லெட்"
   },
   "fork.find.kindTabletLends": {
     "en": "Tablet · {{what}}",

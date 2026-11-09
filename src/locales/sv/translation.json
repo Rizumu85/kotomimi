@@ -556,7 +556,6 @@
       "placeDevice": "Den här datorn",
       "choiceServer": "Använd en annan enhet",
       "choiceDevice": "Använd den här datorn",
-      "otherDeviceHint": "Sök efter enheter i ditt lokala nätverk för att använda modeller på en annan enhet.",
       "endpoint": "Adress",
       "endpointPlaceholder": "e.g. 192.168.1.10:8790",
       "serverNeedsKey": "Den kräver en åtkomstnyckel",
@@ -1889,9 +1888,7 @@
       "none": "Inga enheter hittades. Kontrollera att den andra enheten är på, är ansluten till samma Wi-Fi eller router som den här datorn och har ”Dela den här datorns modeller” aktiverat i Kotomimi. Du kan också ange adressen nedan.",
       "kindKotomimi": "Kotomimi-delning",
       "kindServer": "Modellserver",
-      "kindPhone": "Mobil · taligenkänning",
-      "kindPhoneLends": "Mobil · {{what}}",
-      "kindTabletLends": "Surfplatta · {{what}}",
+      "kindPhone": "Telefon",
       "lendsAsr": "taligenkänning",
       "lendsTranslate": "översättning",
       "lendsCoach": "grammatikrespons",
@@ -1901,7 +1898,8 @@
       "thisComputer": "Server på den här datorn",
       "productHere": "{{product}} på den här datorn",
       "use": "Använd {{name}}",
-      "manual": "Eller ange adressen"
+      "manual": "Eller ange adressen",
+      "kindTablet": "Surfplatta"
     },
     "audio": {
       "vbcableMissing": "Den virtuella ljuddrivrutinen VB-CABLE är inte installerad, så upplästa översättningar kan inte skickas till mötesappen. Den behövs inte om du bara använder undertexter.",

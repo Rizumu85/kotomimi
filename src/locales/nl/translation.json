@@ -556,7 +556,6 @@
       "placeDevice": "Deze computer",
       "choiceServer": "Ander apparaat gebruiken",
       "choiceDevice": "Deze computer gebruiken",
-      "otherDeviceHint": "Zoek naar apparaten in je lokale netwerk om de modellen van een ander apparaat te gebruiken.",
       "endpoint": "Adres",
       "endpointPlaceholder": "e.g. 192.168.1.10:8790",
       "serverNeedsKey": "Toegangssleutel vereist",
@@ -1889,9 +1888,7 @@
       "none": "Niets gevonden. Controleer of het andere apparaat aanstaat, met hetzelfde wifi-netwerk of dezelfde router is verbonden en in Kotomimi 'Modellen van deze computer delen' heeft ingeschakeld. Je kunt hieronder ook zelf het adres invullen.",
       "kindKotomimi": "Kotomimi-deling",
       "kindServer": "Modelserver",
-      "kindPhone": "Telefoon · spraakherkenning",
-      "kindPhoneLends": "Telefoon · {{what}}",
-      "kindTabletLends": "Tablet · {{what}}",
+      "kindPhone": "Telefoon",
       "lendsAsr": "spraakherkenning",
       "lendsTranslate": "vertaling",
       "lendsCoach": "grammaticafeedback",
@@ -1901,7 +1898,8 @@
       "thisComputer": "Server op deze computer",
       "productHere": "{{product}} op deze computer",
       "use": "{{name}} gebruiken",
-      "manual": "Of vul zelf het adres in"
+      "manual": "Of vul zelf het adres in",
+      "kindTablet": "Tablet"
     },
     "audio": {
       "vbcableMissing": "Het virtuele audiostuurprogramma VB-CABLE is niet geïnstalleerd. Daardoor kan de vertaalde spraak niet naar je vergaderapp worden gestuurd. Voor alleen ondertiteling is het niet nodig.",

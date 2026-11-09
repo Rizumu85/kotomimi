@@ -556,7 +556,6 @@
       "placeDevice": "Este computador",
       "choiceServer": "Usar outro dispositivo",
       "choiceDevice": "Usar este computador",
-      "otherDeviceHint": "Para usar modelos de outro dispositivo na sua rede local, procure por ele na rede.",
       "endpoint": "Endereço",
       "endpointPlaceholder": "e.g. 192.168.1.10:8790",
       "serverNeedsKey": "Exige chave de acesso",
@@ -1889,9 +1888,7 @@
       "none": "Nenhum dispositivo encontrado. Confira se o outro dispositivo está ligado, conectado ao mesmo Wi-Fi ou roteador que este computador e com \"Compartilhar os modelos deste computador\" ativado no Kotomimi. Você também pode digitar o endereço abaixo.",
       "kindKotomimi": "Compartilhamento do Kotomimi",
       "kindServer": "Servidor de modelos",
-      "kindPhone": "Celular · reconhecimento de fala",
-      "kindPhoneLends": "Celular · {{what}}",
-      "kindTabletLends": "Tablet · {{what}}",
+      "kindPhone": "Celular",
       "lendsAsr": "reconhecimento de fala",
       "lendsTranslate": "tradução",
       "lendsCoach": "avaliação gramatical",
@@ -1901,7 +1898,8 @@
       "thisComputer": "Servidor neste computador",
       "productHere": "{{product}} neste computador",
       "use": "Usar {{name}}",
-      "manual": "Ou digite o endereço"
+      "manual": "Ou digite o endereço",
+      "kindTablet": "Tablet"
     },
     "audio": {
       "vbcableMissing": "O driver de áudio virtual VB-CABLE não está instalado, então o áudio da tradução não pode ser enviado ao aplicativo de reuniões. Ele não é necessário para usar apenas legendas.",

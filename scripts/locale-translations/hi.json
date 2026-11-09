@@ -188,8 +188,8 @@
     "text": "Kotomimi साझाकरण"
   },
   "fork.find.kindPhone": {
-    "en": "Phone · speech recognition",
-    "text": "फ़ोन · आवाज़ की पहचान"
+    "en": "Phone",
+    "text": "फ़ोन"
   },
   "fork.find.kindPhoneLends": {
     "en": "Phone · {{what}}",
@@ -198,6 +198,10 @@
   "fork.find.kindServer": {
     "en": "Model server",
     "text": "मॉडल सर्वर"
+  },
+  "fork.find.kindTablet": {
+    "en": "Tablet",
+    "text": "टैबलेट"
   },
   "fork.find.kindTabletLends": {
     "en": "Tablet · {{what}}",

@@ -556,7 +556,6 @@
       "placeDevice": "Este equipo",
       "choiceServer": "Usar otro dispositivo",
       "choiceDevice": "Usar este equipo",
-      "otherDeviceHint": "Para usar los modelos de otro dispositivo de tu red local, búscalo en la red.",
       "endpoint": "Dirección",
       "endpointPlaceholder": "e.g. 192.168.1.10:8790",
       "serverNeedsKey": "Requiere una clave de acceso",
@@ -1889,9 +1888,7 @@
       "none": "No se encontró ningún dispositivo. Comprueba que el otro dispositivo esté encendido, conectado a la misma red Wi-Fi o al mismo router que este equipo y que tenga activado «Compartir los modelos de este equipo» en Kotomimi. También puedes introducir su dirección abajo.",
       "kindKotomimi": "Compartido por Kotomimi",
       "kindServer": "Servidor de modelos",
-      "kindPhone": "Móvil · reconocimiento de voz",
-      "kindPhoneLends": "Móvil · {{what}}",
-      "kindTabletLends": "Tableta · {{what}}",
+      "kindPhone": "Teléfono",
       "lendsAsr": "reconocimiento de voz",
       "lendsTranslate": "traducción",
       "lendsCoach": "revisión gramatical",
@@ -1901,7 +1898,8 @@
       "thisComputer": "Servidor en este equipo",
       "productHere": "{{product}} en este equipo",
       "use": "Usar {{name}}",
-      "manual": "O introduce su dirección"
+      "manual": "O introduce su dirección",
+      "kindTablet": "Tableta"
     },
     "audio": {
       "vbcableMissing": "El controlador de audio virtual VB-CABLE no está instalado, por lo que no se puede enviar la traducción de voz a la aplicación de reuniones. No hace falta para ver los subtítulos.",

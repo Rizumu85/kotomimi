@@ -184,8 +184,8 @@
     "text": "Общий доступ Kotomimi"
   },
   "fork.find.kindPhone": {
-    "en": "Phone · speech recognition",
-    "text": "Телефон · распознавание речи"
+    "en": "Phone",
+    "text": "Телефон"
   },
   "fork.find.kindPhoneLends": {
     "en": "Phone · {{what}}",
@@ -194,6 +194,10 @@
   "fork.find.kindServer": {
     "en": "Model server",
     "text": "Сервер моделей"
+  },
+  "fork.find.kindTablet": {
+    "en": "Tablet",
+    "text": "Планшет"
   },
   "fork.find.kindTabletLends": {
     "en": "Tablet · {{what}}",

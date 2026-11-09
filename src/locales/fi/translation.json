@@ -556,7 +556,6 @@
       "placeDevice": "Tämä tietokone",
       "choiceServer": "Käytä toista laitetta",
       "choiceDevice": "Käytä tätä tietokonetta",
-      "otherDeviceHint": "Etsi lähiverkon laitteita, jos haluat käyttää toisella laitteella olevia malleja.",
       "endpoint": "Osoite",
       "endpointPlaceholder": "e.g. 192.168.1.10:8790",
       "serverNeedsKey": "Laite vaatii pääsyavaimen",
@@ -1889,9 +1888,7 @@
       "none": "Laitteita ei löytynyt. Varmista, että toinen laite on päällä, yhdistetty samaan Wi-Fi-verkkoon tai reitittimeen ja että sen Kotomimi-sovelluksessa on käytössä ”Jaa tämän tietokoneen mallit”. Voit myös kirjoittaa laitteen osoitteen alle.",
       "kindKotomimi": "Kotomimi-jako",
       "kindServer": "Mallipalvelin",
-      "kindPhone": "Puhelin · puheentunnistus",
-      "kindPhoneLends": "Puhelin · {{what}}",
-      "kindTabletLends": "Tabletti · {{what}}",
+      "kindPhone": "Puhelin",
       "lendsAsr": "puheentunnistus",
       "lendsTranslate": "kääntäminen",
       "lendsCoach": "kielioppipalaute",
@@ -1901,7 +1898,8 @@
       "thisComputer": "Tämän tietokoneen palvelimet",
       "productHere": "{{product}} tällä tietokoneella",
       "use": "Käytä: {{name}}",
-      "manual": "Tai kirjoita osoite"
+      "manual": "Tai kirjoita osoite",
+      "kindTablet": "Tabletti"
     },
     "audio": {
       "vbcableMissing": "VB-CABLE-virtuaaliääniajuria ei ole asennettu, joten käännettyä puhetta ei voi lähettää kokoussovellukseen. Pelkät tekstitykset eivät tarvitse sitä.",

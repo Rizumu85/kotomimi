@@ -192,8 +192,8 @@
     "text": "Kotomimi-delning"
   },
   "fork.find.kindPhone": {
-    "en": "Phone · speech recognition",
-    "text": "Mobil · taligenkänning"
+    "en": "Phone",
+    "text": "Telefon"
   },
   "fork.find.kindPhoneLends": {
     "en": "Phone · {{what}}",
@@ -202,6 +202,10 @@
   "fork.find.kindServer": {
     "en": "Model server",
     "text": "Modellserver"
+  },
+  "fork.find.kindTablet": {
+    "en": "Tablet",
+    "text": "Surfplatta"
   },
   "fork.find.kindTabletLends": {
     "en": "Tablet · {{what}}",

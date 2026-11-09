@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { CircleCheck, CircleHelp, GraduationCap, Languages, LibraryBig, Loader, Mic, MonitorSmartphone, RefreshCw, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { ServerFinder } from '../../components/LanSharing/ServerFinder';
+import { ServerFinder, type FinderStage } from '../../components/LanSharing/ServerFinder';
 import ToggleSwitch from '../../components/Settings/shared/ToggleSwitch';
 import Tooltip from '../../components/Tooltip/Tooltip';
 import { canFindServers, findServers, phoneBase, phoneHears, phoneLends, plainAddress, type FoundServer, type PhoneTextModel } from '../../lib/lan/discover';
@@ -21,7 +21,7 @@ import { API_SERVICES, preferredModel, serviceOf, servicesFor, type ApiKind, typ
 import { coachPrompt } from './coachPrompt';
 // Type only: `localai.ts` imports this view, and a value import back would close a cycle.
 import type { LocalAISettings as S } from './localai';
-import { coachesAtOwnDevice, deviceLanguage, hearingPlace, needsServer, PLACE_FIELDS, PLACES, translatePlace, translatesAtOwnDevice, type DeviceNeed, type Place } from './localaiDevice';
+import { coachesAtOwnDevice, coachesOnShared, deviceLanguage, hearingPlace, hearsAtOwnDevice, needsServer, PLACE_FIELDS, PLACES, translatePlace, translatesAtOwnDevice, type DeviceNeed, type Place } from './localaiDevice';
 import { NATIVE_MODELS, chooseNative, hearingPick, isApple, isAutoLanguage, nativeDownloaded, nativeEither, nativeHears, nativeModel, nativeModelFor, nativePicked } from './localaiNative';
 import { alsoFirst, alsoSpoken, detectsOther, heardBy, speaksBoth } from './localaiDevice';
 import { AUTO } from '../../lib/provider/languages';
@@ -973,21 +973,35 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   const translateOptions = modelsFor(found, 'translate').filter((m) => translateDirections.every(([from, to]) => fitsPair(m, from, to)));
   const translatePresent = modelsFor(found, 'translate').some((m) => m.id === settings.translateServerModel);
   const switchTo = (patch: () => void) => () => { patch(); speed.againAfterChange(); };
+  // The stages each device found runs now: the device they share, and a phone each asks of its own. Only while a
+  // stage is on the shared device is its address one: with a phone hearing, the address may be one nothing asks.
+  const deviceUses = (server: FoundServer): FinderStage[] => {
+    const at = plainAddress(server.address);
+    const is = (one: string) => one.trim() !== '' && plainAddress(one) === at;
+    const shared = serverInUse && is(address);
+    const hears = hearsAtOwnDevice(settings) ? is(settings.asrOther)
+      : settings.asrVia === 'api' ? server.kind === 'phone' && is(settings.asrApiBaseUrl)
+      : shared && hearingPlace(settings) === 'server';
+    return [
+      ...(hears ? ['asr' as const] : []),
+      ...((translatesAtOwn ? is(settings.translateOther) : shared && translatePlace(settings) === 'server') ? ['translate' as const] : []),
+      ...((coachesAtOwn ? is(settings.coachOther) : shared && coachesOnShared(settings)) ? ['coach' as const] : []),
+    ];
+  };
 
   return (
     <div className="kt-stages-assist">
       <section className={`kt-device${serverInUse ? ' is-used' : ''}`} aria-label={t('providers.localai.placeServer')}>
-        <h4 className="kt-card__head">
-          <span className="kt-card__icon"><MonitorSmartphone size={14} /></span>
-          <span className="kt-card__title">{t('providers.localai.placeServer')}</span>
-        </h4>
         <ServerFinder
           key={searchTurn}
-          hint={t('providers.localai.otherDeviceHint')}
-          // Marked as in use only while a stage is on it: with a phone hearing, the address may be one nothing asks.
-          value={serverInUse ? address : ''}
-          // The phones the stages ask now: each is marked as in use.
-          phone={[settings.asrVia === 'server' ? settings.asrOther : settings.asrVia === 'api' ? settings.asrApiBaseUrl : '', translatesAtOwn ? settings.translateOther : '', coachesAtOwn ? settings.coachOther : ''].filter((one) => one.trim() !== '')}
+          heading={(
+            <h4 className="kt-card__head">
+              <span className="kt-card__icon"><MonitorSmartphone size={14} /></span>
+              <span className="kt-card__title">{t('providers.localai.placeServer')}</span>
+            </h4>
+          )}
+          phones
+          uses={deviceUses}
           onFound={searched}
           auto={(serverInUse && !address.trim()) || searchTurn > 0}
           disabled={disabled}

@@ -556,7 +556,6 @@
       "placeDevice": "Máy tính này",
       "choiceServer": "Dùng thiết bị khác",
       "choiceDevice": "Dùng máy tính này",
-      "otherDeviceHint": "Để dùng mô hình trên thiết bị khác trong mạng nội bộ, hãy tìm thiết bị trong mạng.",
       "endpoint": "Địa chỉ",
       "endpointPlaceholder": "e.g. 192.168.1.10:8790",
       "serverNeedsKey": "Thiết bị yêu cầu khóa truy cập",
@@ -1889,9 +1888,7 @@
       "none": "Không tìm thấy thiết bị nào. Hãy kiểm tra xem thiết bị kia đã bật, có kết nối cùng Wi-Fi hoặc bộ định tuyến với máy tính này và đã bật \"Chia sẻ mô hình của máy tính này\" trong Kotomimi chưa. Bạn cũng có thể tự nhập địa chỉ bên dưới.",
       "kindKotomimi": "Chia sẻ qua Kotomimi",
       "kindServer": "Máy chủ mô hình",
-      "kindPhone": "Điện thoại · nhận dạng giọng nói",
-      "kindPhoneLends": "Điện thoại · {{what}}",
-      "kindTabletLends": "Máy tính bảng · {{what}}",
+      "kindPhone": "Điện thoại",
       "lendsAsr": "nhận dạng giọng nói",
       "lendsTranslate": "dịch",
       "lendsCoach": "góp ý ngữ pháp",
@@ -1901,7 +1898,8 @@
       "thisComputer": "Máy chủ trên máy tính này",
       "productHere": "{{product}} trên máy tính này",
       "use": "Dùng {{name}}",
-      "manual": "Hoặc tự nhập địa chỉ"
+      "manual": "Hoặc tự nhập địa chỉ",
+      "kindTablet": "Máy tính bảng"
     },
     "audio": {
       "vbcableMissing": "Chưa cài trình điều khiển âm thanh ảo VB-CABLE nên không thể gửi giọng đọc bản dịch vào ứng dụng họp. Nếu chỉ xem phụ đề thì không cần.",

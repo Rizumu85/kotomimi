@@ -240,8 +240,8 @@
     "text": "Pagbabahagi ng Kotomimi"
   },
   "fork.find.kindPhone": {
-    "en": "Phone · speech recognition",
-    "text": "Telepono · pagkilala sa pagsasalita"
+    "en": "Phone",
+    "text": "Telepono"
   },
   "fork.find.kindPhoneLends": {
     "en": "Phone · {{what}}",
@@ -250,6 +250,10 @@
   "fork.find.kindServer": {
     "en": "Model server",
     "text": "Server ng mga modelo"
+  },
+  "fork.find.kindTablet": {
+    "en": "Tablet",
+    "text": "Tablet"
   },
   "fork.find.kindTabletLends": {
     "en": "Tablet · {{what}}",

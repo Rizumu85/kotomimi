@@ -188,8 +188,8 @@
     "text": "Kotomimi భాగస్వామ్యం"
   },
   "fork.find.kindPhone": {
-    "en": "Phone · speech recognition",
-    "text": "ఫోన్ · మాటల గుర్తింపు"
+    "en": "Phone",
+    "text": "ఫోన్"
   },
   "fork.find.kindPhoneLends": {
     "en": "Phone · {{what}}",
@@ -198,6 +198,10 @@
   "fork.find.kindServer": {
     "en": "Model server",
     "text": "మోడల్ సర్వర్"
+  },
+  "fork.find.kindTablet": {
+    "en": "Tablet",
+    "text": "టాబ్లెట్"
   },
   "fork.find.kindTabletLends": {
     "en": "Tablet · {{what}}",

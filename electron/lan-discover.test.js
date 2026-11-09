@@ -67,6 +67,8 @@ describe('what an answer says of a server', () => {
     expect(readAnswer(200, { [NAME_HEADER]: encodeURIComponent('里兹的电脑') }, JSON.stringify(kotomimiList))).toEqual({ kind: 'kotomimi', name: '里兹的电脑', models: 2, needsKey: false, includes: false });
     // One that shares its computer's model server too says so.
     expect(readAnswer(200, { [NAME_HEADER]: 'MAC', [INCLUDES_HEADER]: 'model-server' }, JSON.stringify(kotomimiList)).includes).toBe(true);
+    // A Mac names itself `<name>.local`: listed by its name alone.
+    expect(readAnswer(200, { [NAME_HEADER]: 'RizumMacbook.local' }, JSON.stringify(kotomimiList)).name).toBe('RizumMacbook');
   });
 
   it('takes any other model list for a server', () => {

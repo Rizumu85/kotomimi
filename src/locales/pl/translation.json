@@ -556,7 +556,6 @@
       "placeDevice": "Ten komputer",
       "choiceServer": "Użyj innego urządzenia",
       "choiceDevice": "Użyj tego komputera",
-      "otherDeviceHint": "Aby korzystać z modeli na innym urządzeniu w sieci lokalnej, wyszukaj je w sieci.",
       "endpoint": "Adres",
       "endpointPlaceholder": "e.g. 192.168.1.10:8790",
       "serverNeedsKey": "Wymaga klucza dostępu",
@@ -1889,9 +1888,7 @@
       "none": "Nic nie znaleziono. Sprawdź, czy drugie urządzenie jest włączone, połączone z tą samą siecią Wi-Fi lub routerem i ma włączoną opcję „Udostępniaj modele tego komputera” w Kotomimi. Możesz też wpisać jego adres poniżej.",
       "kindKotomimi": "Udostępnianie Kotomimi",
       "kindServer": "Serwer modeli",
-      "kindPhone": "Telefon · rozpoznawanie mowy",
-      "kindPhoneLends": "Telefon · {{what}}",
-      "kindTabletLends": "Tablet · {{what}}",
+      "kindPhone": "Telefon",
       "lendsAsr": "rozpoznawanie mowy",
       "lendsTranslate": "tłumaczenie",
       "lendsCoach": "uwagi gramatyczne",
@@ -1901,7 +1898,8 @@
       "thisComputer": "Serwer na tym komputerze",
       "productHere": "{{product}} na tym komputerze",
       "use": "Użyj {{name}}",
-      "manual": "Lub wpisz adres ręcznie"
+      "manual": "Lub wpisz adres ręcznie",
+      "kindTablet": "Tablet"
     },
     "audio": {
       "vbcableMissing": "Sterownik wirtualnej karty dźwiękowej VB-CABLE nie jest zainstalowany, więc tłumaczenia głosowego nie można przesłać do aplikacji do spotkań. Same napisy go nie wymagają.",

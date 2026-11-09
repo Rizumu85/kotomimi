@@ -556,7 +556,6 @@
       "placeDevice": "Komputer ini",
       "choiceServer": "Gunakan perangkat lain",
       "choiceDevice": "Gunakan komputer ini",
-      "otherDeviceHint": "Untuk menggunakan model dari perangkat lain di jaringan lokal, cari perangkat tersebut di jaringan.",
       "endpoint": "Alamat",
       "endpointPlaceholder": "e.g. 192.168.1.10:8790",
       "serverNeedsKey": "Perlu kunci akses",
@@ -1889,9 +1888,7 @@
       "none": "Tidak ada perangkat ditemukan. Pastikan perangkat lain menyala, terhubung ke Wi-Fi atau router yang sama dengan komputer ini, dan opsi \"Bagikan model komputer ini\" di Kotomimi-nya aktif. Anda juga bisa memasukkan alamatnya di bawah.",
       "kindKotomimi": "Berbagi Kotomimi",
       "kindServer": "Server model",
-      "kindPhone": "Ponsel · pengenalan ucapan",
-      "kindPhoneLends": "Ponsel · {{what}}",
-      "kindTabletLends": "Tablet · {{what}}",
+      "kindPhone": "Ponsel",
       "lendsAsr": "pengenalan ucapan",
       "lendsTranslate": "terjemahan",
       "lendsCoach": "masukan tata bahasa",
@@ -1901,7 +1898,8 @@
       "thisComputer": "Server di komputer ini",
       "productHere": "{{product}} di komputer ini",
       "use": "Gunakan {{name}}",
-      "manual": "Atau masukkan alamatnya"
+      "manual": "Atau masukkan alamatnya",
+      "kindTablet": "Tablet"
     },
     "audio": {
       "vbcableMissing": "Driver audio virtual VB-CABLE belum terpasang, jadi suara terjemahan tidak bisa dikirim ke aplikasi rapat. Untuk melihat subtitel saja, driver ini tidak diperlukan.",

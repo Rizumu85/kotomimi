@@ -184,8 +184,8 @@
     "text": "Compartido por Kotomimi"
   },
   "fork.find.kindPhone": {
-    "en": "Phone · speech recognition",
-    "text": "Móvil · reconocimiento de voz"
+    "en": "Phone",
+    "text": "Teléfono"
   },
   "fork.find.kindPhoneLends": {
     "en": "Phone · {{what}}",
@@ -194,6 +194,10 @@
   "fork.find.kindServer": {
     "en": "Model server",
     "text": "Servidor de modelos"
+  },
+  "fork.find.kindTablet": {
+    "en": "Tablet",
+    "text": "Tableta"
   },
   "fork.find.kindTabletLends": {
     "en": "Tablet · {{what}}",

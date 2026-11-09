@@ -556,7 +556,6 @@
       "placeDevice": "このパソコン",
       "choiceServer": "別のデバイスを使う",
       "choiceDevice": "このパソコンを使う",
-      "otherDeviceHint": "同じネットワークにある別のデバイスのモデルを使うには、ネットワーク内のデバイスを検索してください。",
       "endpoint": "アドレス",
       "endpointPlaceholder": "e.g. 192.168.1.10:8790",
       "serverNeedsKey": "アクセスキーが必要",
@@ -1889,9 +1888,7 @@
       "none": "見つかりませんでした。相手のデバイスの電源が入り、このパソコンと同じWi-Fiまたはルーターに接続されていることを確認してください。相手のKotomimiで「このパソコンのモデルを共有」もオンにしてください。下にアドレスを直接入力することもできます。",
       "kindKotomimi": "Kotomimi共有",
       "kindServer": "モデルサーバー",
-      "kindPhone": "スマートフォン · 音声認識",
-      "kindPhoneLends": "スマートフォン · {{what}}",
-      "kindTabletLends": "タブレット・{{what}}",
+      "kindPhone": "スマートフォン",
       "lendsAsr": "音声認識",
       "lendsTranslate": "翻訳",
       "lendsCoach": "文法フィードバック",
@@ -1901,7 +1898,8 @@
       "thisComputer": "このパソコン上のサーバー",
       "productHere": "このパソコン上の{{product}}",
       "use": "{{name}}を使う",
-      "manual": "またはアドレスを直接入力"
+      "manual": "またはアドレスを直接入力",
+      "kindTablet": "タブレット"
     },
     "audio": {
       "vbcableMissing": "VB-CABLE仮想オーディオドライバーがインストールされていないため、翻訳音声を会議アプリに送れません。字幕だけなら不要です。",

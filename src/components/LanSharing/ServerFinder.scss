@@ -19,11 +19,18 @@
     color: vars.$text-secondary;
   }
 
+  // In a card: the card's heading, and searching again an icon at its end.
+  .kt-find__head--card {
+    margin-bottom: 0;
+  }
+
   .kt-find__again {
     display: inline-flex;
+    flex-shrink: 0;
     align-items: center;
     gap: 4px;
     padding: 2px 6px;
+    white-space: nowrap;
     font: inherit;
     font-size: vars.$font-caption;
     color: vars.$text-muted;
@@ -46,6 +53,14 @@
     &:focus-visible {
       @include vars.focus-ring;
     }
+  }
+
+  .kt-find__again--icon {
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    cursor: pointer;
   }
 
   .kt-find__search {
@@ -154,32 +169,51 @@
   }
 
   .kt-find__name {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
+    overflow: hidden;
     font-size: vars.$font-body;
     font-weight: vars.$weight-medium;
     color: vars.$text-primary;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  .kt-find__kind {
-    padding: 1px 6px;
-    font-size: 10px;
-    font-style: normal;
-    font-weight: 400;
-    color: vars.$color-primary;
-    background: color-mix(in srgb, vars.$color-primary 15%, transparent);
-    border-radius: 10px;
-  }
-
+  // What it is · where · what it has: each part kept whole, the line breaking between them.
   .kt-find__detail {
-    display: inline-flex;
+    display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 4px;
     font-size: vars.$font-caption;
     color: vars.$text-muted;
+
+    > span {
+      white-space: nowrap;
+    }
+
+    // The dot ends a part, so a broken line ends with it and the next starts clean.
+    > span:not(:last-child)::after {
+      content: '·';
+      margin: 0 5px;
+    }
+  }
+
+  .kt-find__key {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  // The stages it runs now, by their cards' icons.
+  .kt-find__uses {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 6px;
+    color: vars.$color-primary;
+    cursor: inherit;
+
+    &:hover {
+      color: vars.$color-primary;
+    }
   }
 
   .kt-find__check {

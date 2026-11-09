@@ -556,7 +556,6 @@
       "placeDevice": "Dieser Computer",
       "choiceServer": "Anderes Gerät verwenden",
       "choiceDevice": "Diesen Computer verwenden",
-      "otherDeviceHint": "Suche im lokalen Netzwerk nach einem anderen Gerät, um dessen Modelle zu verwenden.",
       "endpoint": "Adresse",
       "endpointPlaceholder": "e.g. 192.168.1.10:8790",
       "serverNeedsKey": "Zugriffsschlüssel erforderlich",
@@ -1889,9 +1888,7 @@
       "none": "Nichts gefunden. Prüfe, ob das andere Gerät eingeschaltet und mit demselben WLAN oder Router verbunden ist und ob dort in Kotomimi „Modelle dieses Computers freigeben“ aktiviert ist. Du kannst die Adresse auch unten eingeben.",
       "kindKotomimi": "Kotomimi-Freigabe",
       "kindServer": "Modellserver",
-      "kindPhone": "Smartphone · Spracherkennung",
-      "kindPhoneLends": "Smartphone · {{what}}",
-      "kindTabletLends": "Tablet · {{what}}",
+      "kindPhone": "Handy",
       "lendsAsr": "Spracherkennung",
       "lendsTranslate": "Übersetzung",
       "lendsCoach": "Grammatikfeedback",
@@ -1901,7 +1898,8 @@
       "thisComputer": "Server auf diesem Computer",
       "productHere": "{{product}} auf diesem Computer",
       "use": "{{name}} verwenden",
-      "manual": "Oder Adresse eingeben"
+      "manual": "Oder Adresse eingeben",
+      "kindTablet": "Tablet"
     },
     "audio": {
       "vbcableMissing": "Der virtuelle Audiotreiber VB-CABLE ist nicht installiert. Deshalb kann die gesprochene Übersetzung nicht an die Konferenz-App gesendet werden. Für Untertitel ist er nicht nötig.",

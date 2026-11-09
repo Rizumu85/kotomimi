@@ -14,7 +14,7 @@ import type { LocalAIModel } from './localaiModels';
 vi.mock('react-i18next', async (importOriginal) => ({ ...(await importOriginal<typeof import('react-i18next')>()), useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }) }));
 // The search of the network is the finder's own test: here only that it is drawn, and what a pick does.
 vi.mock('../../components/LanSharing/ServerFinder', () => ({
-  ServerFinder: ({ onPick, onFound, auto, hint, phone }: { onPick(server: unknown): void; onFound?(servers: unknown[]): void; auto?: boolean; hint?: string; phone?: string | string[] }) => {
+  ServerFinder: ({ onPick, onFound, auto, phones, uses }: { onPick(server: unknown): void; onFound?(servers: unknown[]): void; auto?: boolean; phones?: boolean; uses?(server: unknown): readonly string[] }) => {
     const aPhone = { address: '192.168.4.28:8792', kind: 'phone', name: 'Pixel', product: '', models: 1, needsKey: false, self: false, model: 'qwen3-asr-0.6b-q8' };
     // A phone of 0.8.0: its recognizer, two translators and the feedback model; and one that lends a translator alone.
     const lending = { ...aPhone, models: 4, text: [
@@ -25,9 +25,12 @@ vi.mock('../../components/LanSharing/ServerFinder', () => ({
     const textOnly = { address: '192.168.4.30:8792', kind: 'phone', name: 'F22', product: '', models: 1, needsKey: false, self: false, text: [{ id: 'hy-mt2-1.8b', kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: true }] };
     // As the real search does (`findServers`): what it finds is kept (`knownDevices.ts`), and the cards read that.
     const found = (servers: unknown[]) => { knownStore.getState().reconcile(servers as never); onFound?.(servers); };
+    // The stages each device runs, as the search would show them: `address=stage,stage` for each device in use.
+    const desk = { address: '192.168.1.9:8790', kind: 'kotomimi', name: 'DESK', product: '', models: 2, needsKey: true, self: false };
+    const inUse = [desk, aPhone, textOnly].map((server) => [server.address, uses?.(server) ?? []] as const).filter(([, stages]) => stages.length > 0).map(([at, stages]) => `${at}=${stages.join(',')}`).join(' ');
     return (
       <>
-        <button type="button" data-auto={String(Boolean(auto))} data-hint={hint} data-phone={[phone ?? []].flat().join(' ')} onClick={() => onPick({ address: '192.168.1.9:8790', kind: 'kotomimi', name: 'DESK', product: '', models: 2, needsKey: true, self: false })}>finder</button>
+        <button type="button" data-auto={String(Boolean(auto))} data-phones={String(Boolean(phones))} data-uses={inUse} onClick={() => onPick(desk)}>finder</button>
         <button type="button" onClick={() => found([aPhone])}>a search that finds a phone</button>
         <button type="button" onClick={() => onPick(aPhone)}>the phone, picked</button>
         <button type="button" onClick={() => found([{ ...aPhone, name: 'iPad', tablet: true, model: 'apple-speech', hears: ['apple-speech', 'r2t2-q8'] }])}>a search that finds an iPad</button>
@@ -244,7 +247,7 @@ describe('the stage cards: on the other device', () => {
     const finder = screen.getByText('finder');
     // A stage wants the device and no address is set: the search runs by itself.
     expect(finder.dataset.auto).toBe('true');
-    expect(finder.dataset.hint).toBe('providers.localai.otherDeviceHint');
+    expect(finder.dataset.phones).toBe('true');
     expect(screen.getAllByText('providers.localai.connectFirst').length).toBeGreaterThan(0);
     fireEvent.click(finder);
     expect(update).toHaveBeenCalledWith(expect.objectContaining({ serverNeedsKey: true }));
@@ -786,7 +789,7 @@ describe('a phone that lends its recognition: the "another device" of the hearin
     expect((card(HEAR).getByRole('combobox', { name: 'providers.localai.model' }) as HTMLSelectElement).selectedOptions[0].textContent).toContain('Qwen3-ASR 0.6B');
     expect(card(HEAR).queryByText('providers.localai.connectFirst')).toBeNull();
     // The search marks it as the one recognition is asked of.
-    expect(screen.getByText('finder').getAttribute('data-phone')).toBe('192.168.4.28:8792');
+    expect(screen.getByText('finder').getAttribute('data-uses')).toBe('192.168.4.28:8792=asr');
   });
 
   it('is offered beside the shared device once a search has found it, and either can be chosen there', () => {
@@ -938,7 +941,12 @@ describe('a phone that lends its text models: the "another device" of the transl
 
   it('is marked in the search as in use by the stages that ask it', () => {
     draw({ settings: { asrVia: 'device', translateAt: 'server', translateOther: '192.168.4.30:8792', translateOtherModel: 'hy-mt2-1.8b', coach: true, coachAt: 'server', coachOther: '192.168.4.28:8792', coachOtherModel: 'gemma-4-e2b' } });
-    expect(screen.getByText('finder').getAttribute('data-phone')).toBe('192.168.4.30:8792 192.168.4.28:8792');
+    expect(screen.getByText('finder').getAttribute('data-uses')).toBe('192.168.4.28:8792=coach 192.168.4.30:8792=translate');
+  });
+
+  it('is marked in the search with the stages the shared device runs', () => {
+    draw({ settings: { asrVia: 'server', asrOther: '192.168.4.28:8792', translateAt: 'server', coach: true, coachAt: 'server' }, values: { endpoint: '192.168.1.9:8790' } });
+    expect(screen.getByText('finder').getAttribute('data-uses')).toBe('192.168.1.9:8790=translate,coach 192.168.4.28:8792=asr');
   });
 
   it("leaves the shared device's silence unsaid where no stage is on it", () => {

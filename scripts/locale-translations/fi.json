@@ -184,8 +184,8 @@
     "text": "Kotomimi-jako"
   },
   "fork.find.kindPhone": {
-    "en": "Phone · speech recognition",
-    "text": "Puhelin · puheentunnistus"
+    "en": "Phone",
+    "text": "Puhelin"
   },
   "fork.find.kindPhoneLends": {
     "en": "Phone · {{what}}",
@@ -194,6 +194,10 @@
   "fork.find.kindServer": {
     "en": "Model server",
     "text": "Mallipalvelin"
+  },
+  "fork.find.kindTablet": {
+    "en": "Tablet",
+    "text": "Tabletti"
   },
   "fork.find.kindTabletLends": {
     "en": "Tablet · {{what}}",

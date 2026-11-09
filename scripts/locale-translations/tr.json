@@ -188,8 +188,8 @@
     "text": "Kotomimi paylaşımı"
   },
   "fork.find.kindPhone": {
-    "en": "Phone · speech recognition",
-    "text": "Telefon · konuşma tanıma"
+    "en": "Phone",
+    "text": "Telefon"
   },
   "fork.find.kindPhoneLends": {
     "en": "Phone · {{what}}",
@@ -198,6 +198,10 @@
   "fork.find.kindServer": {
     "en": "Model server",
     "text": "Model sunucusu"
+  },
+  "fork.find.kindTablet": {
+    "en": "Tablet",
+    "text": "Tablet"
   },
   "fork.find.kindTabletLends": {
     "en": "Tablet · {{what}}",

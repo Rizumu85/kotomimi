@@ -137,12 +137,15 @@ function hearing(list) {
   return ids;
 }
 
+/** A computer's name without the network's suffix: a Mac's own name is `<name>.local`. */
+const bareName = (name) => String(name).replace(/\.(local|lan|home|localdomain)\.?$/i, '');
+
 /** What an answer to `GET /v1/models` says of the server, or null when it is no such server. */
 function readAnswer(status, headers, body) {
   const named = typeof headers[NAME_HEADER] === 'string' ? headers[NAME_HEADER] : '';
   let name = '';
   try {
-    name = decodeURIComponent(named).slice(0, 80);
+    name = bareName(decodeURIComponent(named)).slice(0, 80);
   } catch {
     name = '';
   }
@@ -233,7 +236,7 @@ async function productOf({ host, port }, timeoutMs = PROBE_TIMEOUT_MS) {
 /** A computer's name for an address, where the network knows one: asked briefly, and never waited for long. */
 function nameOf(host, reverse = dns.promises.reverse, waitMs = 400) {
   return Promise.race([
-    reverse(host).then((names) => String(names?.[0] ?? '').replace(/\.(local|lan|home|localdomain)\.?$/i, ''), () => ''),
+    reverse(host).then((names) => bareName(names?.[0] ?? ''), () => ''),
     new Promise((resolve) => setTimeout(() => resolve(''), waitMs)),
   ]);
 }

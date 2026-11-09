@@ -192,8 +192,8 @@
     "text": "Chia sẻ qua Kotomimi"
   },
   "fork.find.kindPhone": {
-    "en": "Phone · speech recognition",
-    "text": "Điện thoại · nhận dạng giọng nói"
+    "en": "Phone",
+    "text": "Điện thoại"
   },
   "fork.find.kindPhoneLends": {
     "en": "Phone · {{what}}",
@@ -202,6 +202,10 @@
   "fork.find.kindServer": {
     "en": "Model server",
     "text": "Máy chủ mô hình"
+  },
+  "fork.find.kindTablet": {
+    "en": "Tablet",
+    "text": "Máy tính bảng"
   },
   "fork.find.kindTabletLends": {
     "en": "Tablet · {{what}}",

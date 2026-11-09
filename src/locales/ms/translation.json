@@ -556,7 +556,6 @@
       "placeDevice": "Komputer ini",
       "choiceServer": "Guna peranti lain",
       "choiceDevice": "Guna komputer ini",
-      "otherDeviceHint": "Untuk menggunakan model pada peranti lain dalam rangkaian setempat, cari peranti itu dalam rangkaian.",
       "endpoint": "Alamat",
       "endpointPlaceholder": "e.g. 192.168.1.10:8790",
       "serverNeedsKey": "Peranti ini memerlukan kunci akses",
@@ -1889,9 +1888,7 @@
       "none": "Tiada peranti ditemui. Pastikan peranti lain dihidupkan, disambungkan ke Wi-Fi atau penghala yang sama dengan komputer ini, dan \"Kongsi model komputer ini\" diaktifkan dalam Kotomimi pada peranti itu. Anda juga boleh masukkan alamatnya di bawah.",
       "kindKotomimi": "Perkongsian Kotomimi",
       "kindServer": "Pelayan model",
-      "kindPhone": "Telefon · pengecaman pertuturan",
-      "kindPhoneLends": "Telefon · {{what}}",
-      "kindTabletLends": "Tablet · {{what}}",
+      "kindPhone": "Telefon",
       "lendsAsr": "pengecaman pertuturan",
       "lendsTranslate": "terjemahan",
       "lendsCoach": "maklum balas tatabahasa",
@@ -1901,7 +1898,8 @@
       "thisComputer": "Pelayan pada komputer ini",
       "productHere": "{{product}} pada komputer ini",
       "use": "Guna {{name}}",
-      "manual": "Atau masukkan alamatnya"
+      "manual": "Atau masukkan alamatnya",
+      "kindTablet": "Tablet"
     },
     "audio": {
       "vbcableMissing": "Pemacu audio maya VB-CABLE belum dipasang, jadi suara terjemahan tidak dapat dihantar ke aplikasi mesyuarat. Ia tidak diperlukan jika anda hanya menggunakan sari kata.",

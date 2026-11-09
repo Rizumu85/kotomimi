@@ -44,7 +44,9 @@ describe('the devices found on the network', () => {
     const rows = screen.getAllByRole('listitem').map((row) => row.textContent);
     expect(rows[0]).toContain('DESK');
     expect(rows[0]).toContain('fork.find.kindKotomimi');
-    expect(rows[0]).toContain('192.168.4.29:8790');
+    // Where it is, without the port that says nothing to a person.
+    expect(rows[0]).toContain('192.168.4.29');
+    expect(rows[0]).not.toContain(':8790');
     expect(rows[0]).toContain('fork.find.models {"count":3}');
     // No name: the address stands for it.
     expect(rows[1]).toContain('192.168.4.105');
@@ -55,27 +57,32 @@ describe('the devices found on the network', () => {
   describe('a phone that lends its recognition engine', () => {
     const phone: FoundServer = { address: '192.168.4.28:8792', kind: 'phone', name: '朋友的手机', product: '', models: 1, needsKey: false, self: false, model: 'qwen3-asr-0.6b-q8' };
 
-    it('is listed where recognition can be set to it, as a phone, with the model it lends', async () => {
+    it('is listed where recognition can be set to it, as a phone, with how many models it lends', async () => {
       const onPick = vi.fn();
-      render(<ServerFinder auto value="" phone="" onPick={onPick} find={async () => [desk, phone]} />);
+      render(<ServerFinder auto phones onPick={onPick} find={async () => [desk, phone]} />);
       await waitFor(() => expect(screen.getAllByRole('listitem')).toHaveLength(2));
       const row = screen.getAllByRole('listitem')[1];
       expect(row.textContent).toContain('朋友的手机');
       expect(row.textContent).toContain('fork.find.kindPhone');
-      expect(row.textContent).toContain('qwen3-asr-0.6b-q8');
+      expect(row.textContent).toContain('fork.find.models {"count":1}');
       fireEvent.click(screen.getByRole('button', { name: 'fork.find.use {"name":"朋友的手机"}' }));
       expect(onPick).toHaveBeenCalledWith(phone);
     });
 
-    it('is marked as the one in use by the address recognition is asked at, not the other device\'s', async () => {
-      render(<ServerFinder auto value="192.168.4.29:8790" phone="http://192.168.4.28:8792/v1" onPick={() => {}} find={async () => [desk, phone]} />);
+    it('shows the stages each device runs, by their cards\' icons, in place of a check', async () => {
+      const uses = (server: FoundServer) => (server === phone ? ['asr' as const] : server === desk ? ['translate' as const, 'coach' as const] : []);
+      render(<ServerFinder auto phones uses={uses} onPick={() => {}} find={async () => [desk, phone]} />);
       await waitFor(() => expect(screen.getAllByRole('listitem')).toHaveLength(2));
-      expect(screen.getByRole('button', { name: 'fork.find.use {"name":"朋友的手机"}' }).getAttribute('aria-pressed')).toBe('true');
-      expect(screen.getByRole('button', { name: 'fork.find.use {"name":"DESK"}' }).getAttribute('aria-pressed')).toBe('true');
+      const used = (name: string) => screen.getByRole('button', { name: `fork.find.use {"name":"${name}"}` });
+      expect(used('朋友的手机').getAttribute('aria-pressed')).toBe('true');
+      expect(used('DESK').getAttribute('aria-pressed')).toBe('true');
+      expect(used('朋友的手机').querySelectorAll('.kt-find__uses svg')).toHaveLength(1);
+      expect(used('DESK').querySelectorAll('.kt-find__uses svg')).toHaveLength(2);
+      expect(used('DESK').querySelector('.kt-find__check')).toBeNull();
     });
 
     it('is not listed where it could not be used: the wizard asks for a device with a whole pipeline', async () => {
-      render(<ServerFinder auto value="" onPick={() => {}} find={async () => [desk, phone]} />);
+      render(<ServerFinder auto onPick={() => {}} find={async () => [desk, phone]} />);
       await waitFor(() => expect(screen.getAllByRole('listitem')).toHaveLength(1));
     });
 
@@ -97,14 +104,14 @@ describe('the devices found on the network', () => {
       expect(foundServers([{ ...textOnly, text: [{ id: 'x', kind: 'asr' }] }])[0]).toEqual({ address: '192.168.4.30:8792', kind: 'server', name: 'F22', product: '', models: 1, needsKey: false, self: false });
     });
 
-    it('is listed by the stages it can run, with the models it lends', async () => {
-      render(<ServerFinder auto value="" phone="" onPick={() => {}} find={async () => [lending, textOnly]} />);
+    it('is listed as a phone with how many models it lends: its recognizer and its text models', async () => {
+      render(<ServerFinder auto phones onPick={() => {}} find={async () => [lending, textOnly]} />);
       await waitFor(() => expect(screen.getAllByRole('listitem')).toHaveLength(2));
       const [both, alone] = screen.getAllByRole('listitem').map((row) => row.textContent ?? '');
-      expect(both).toContain('fork.find.kindPhoneLends {"what":"fork.find.lendsAsrfork.find.lendsJoinfork.find.lendsTranslatefork.find.lendsJoinfork.find.lendsCoach"}');
-      expect(both).toContain('qwen3-asr-0.6b-q8 · Index-Translate 2B · Gemma 4 E2B');
-      expect(alone).toContain('fork.find.kindPhoneLends {"what":"fork.find.lendsTranslate"}');
-      expect(alone).toContain('192.168.4.30:8792 · Index-Translate 2B');
+      expect(both).toContain('fork.find.kindPhone');
+      expect(both).toContain('fork.find.models {"count":3}');
+      expect(alone).toContain('192.168.4.30');
+      expect(alone).toContain('fork.find.models {"count":1}');
     });
 
     it('is called a tablet where it says it is one (the iPad app), even lending its recognizer alone', async () => {
@@ -112,13 +119,13 @@ describe('the devices found on the network', () => {
       expect(foundServers([ipad])).toEqual([ipad]);
       // Only a node is one.
       expect(foundServers([{ ...ipad, kind: 'server', model: undefined }])[0]).not.toHaveProperty('tablet');
-      render(<ServerFinder auto value="" phone="" onPick={() => {}} find={async () => [ipad]} />);
+      render(<ServerFinder auto phones onPick={() => {}} find={async () => [ipad]} />);
       await waitFor(() => expect(screen.getAllByRole('listitem')).toHaveLength(1));
-      expect(screen.getByRole('listitem').textContent).toContain('fork.find.kindTabletLends {"what":"fork.find.lendsAsr"}');
+      expect(screen.getByRole('listitem').textContent).toContain('fork.find.kindTablet');
     });
 
     it('is marked as in use by whichever stage asks it', async () => {
-      render(<ServerFinder auto value="" phone={['192.168.4.30:8792']} onPick={() => {}} find={async () => [lending, textOnly]} />);
+      render(<ServerFinder auto phones uses={(server) => (server === textOnly ? ['translate'] : [])} onPick={() => {}} find={async () => [lending, textOnly]} />);
       await waitFor(() => expect(screen.getAllByRole('listitem')).toHaveLength(2));
       expect(screen.getByRole('button', { name: 'fork.find.use {"name":"F22"}' }).getAttribute('aria-pressed')).toBe('true');
       expect(screen.getByRole('button', { name: 'fork.find.use {"name":"朋友的手机"}' }).getAttribute('aria-pressed')).toBe('false');
@@ -144,9 +151,20 @@ describe('the devices found on the network', () => {
     await waitFor(() => expect(find).toHaveBeenCalledTimes(2));
   });
 
+  it('stands under a card\'s own heading, searching again an icon beside it', async () => {
+    const find = vi.fn(async () => [desk]);
+    render(<ServerFinder auto heading={<h4>card</h4>} onPick={() => {}} find={find} />);
+    await screen.findByRole('listitem');
+    expect(screen.queryByText('fork.find.title')).toBeNull();
+    const again = screen.getByRole('button', { name: 'fork.find.again' });
+    expect(again.textContent).toBe('');
+    fireEvent.click(again);
+    await waitFor(() => expect(find).toHaveBeenCalledTimes(2));
+  });
+
   it('calls a server with no name by what it is, when that is known', async () => {
     render(<ServerFinder auto value="" onPick={() => {}} find={async () => [{ ...mac, product: 'LocalAI' }]} />);
-    expect((await screen.findByRole('button', { name: 'fork.find.use {"name":"LocalAI"}' })).textContent).toContain('192.168.4.105:8080');
+    expect((await screen.findByRole('button', { name: 'fork.find.use {"name":"LocalAI"}' })).textContent).toContain('192.168.4.105');
   });
 
   it('says what to check when nothing is found', async () => {

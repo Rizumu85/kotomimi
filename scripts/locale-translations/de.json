@@ -192,8 +192,8 @@
     "text": "Kotomimi-Freigabe"
   },
   "fork.find.kindPhone": {
-    "en": "Phone · speech recognition",
-    "text": "Smartphone · Spracherkennung"
+    "en": "Phone",
+    "text": "Handy"
   },
   "fork.find.kindPhoneLends": {
     "en": "Phone · {{what}}",
@@ -202,6 +202,10 @@
   "fork.find.kindServer": {
     "en": "Model server",
     "text": "Modellserver"
+  },
+  "fork.find.kindTablet": {
+    "en": "Tablet",
+    "text": "Tablet"
   },
   "fork.find.kindTabletLends": {
     "en": "Tablet · {{what}}",

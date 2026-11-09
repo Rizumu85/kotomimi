@@ -556,7 +556,6 @@
       "placeDevice": "Cet ordinateur",
       "choiceServer": "Utiliser un autre appareil",
       "choiceDevice": "Utiliser cet ordinateur",
-      "otherDeviceHint": "Pour utiliser les modèles d’un autre appareil sur votre réseau local, recherchez cet appareil sur le réseau.",
       "endpoint": "Adresse",
       "endpointPlaceholder": "e.g. 192.168.1.10:8790",
       "serverNeedsKey": "Une clé d’accès est requise",
@@ -1889,9 +1888,7 @@
       "none": "Aucun appareil trouvé. Vérifiez que l’autre appareil est allumé, connecté au même Wi-Fi ou routeur que cet ordinateur, et que l’option « Partager les modèles de cet ordinateur » est activée dans son application Kotomimi. Vous pouvez aussi saisir son adresse ci-dessous.",
       "kindKotomimi": "Partage Kotomimi",
       "kindServer": "Serveur de modèles",
-      "kindPhone": "Téléphone · reconnaissance vocale",
-      "kindPhoneLends": "Téléphone · {{what}}",
-      "kindTabletLends": "Tablette · {{what}}",
+      "kindPhone": "Téléphone",
       "lendsAsr": "reconnaissance vocale",
       "lendsTranslate": "traduction",
       "lendsCoach": "correction grammaticale",
@@ -1901,7 +1898,8 @@
       "thisComputer": "Serveur sur cet ordinateur",
       "productHere": "{{product}} sur cet ordinateur",
       "use": "Utiliser {{name}}",
-      "manual": "Ou saisir son adresse"
+      "manual": "Ou saisir son adresse",
+      "kindTablet": "Tablette"
     },
     "audio": {
       "vbcableMissing": "Le pilote audio virtuel VB-CABLE n’est pas installé. La traduction vocale ne peut donc pas être transmise au logiciel de réunion. Il n’est pas nécessaire pour les sous-titres.",
