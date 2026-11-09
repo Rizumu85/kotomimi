@@ -103,7 +103,7 @@ function setup(over: Partial<VrOverlayDeps> = {}) {
     muted: () => false,
     subscribeMuted: () => () => {},
     chatbox: () => chatbox,
-    setChatbox: (shows) => { order.push(`chatbox ${shows}`); chatbox = shows; },
+    turnChatbox: (on) => { order.push(`chatbox ${on}`); chatbox = on ? 'translation' : 'off'; },
     words: () => ({ me: 'Me' } as VrWords),
     uiLanguage: () => 'en',
     captionLook: () => look,
@@ -160,22 +160,13 @@ describe('startVrOverlay', () => {
     t.controller.stop();
   });
 
-  it('turns the chatbox off from the panel, and on again to what it showed', async () => {
+  it('turns the chatbox on and off from the panel', async () => {
     const t = setup();
     await t.connect();
     t.command({ type: 'chatbox', on: true });
     t.command({ type: 'chatbox', on: false });
-    expect(t.order).toEqual(['chatbox translation', 'chatbox off']);
+    expect(t.order).toEqual(['chatbox true', 'chatbox false']);
     t.controller.stop();
-    // Showing both: off, then on again shows both.
-    let shows: ChatboxShows = 'both';
-    const u = setup({ chatbox: () => shows, setChatbox: (next) => { shows = next; } });
-    await u.connect();
-    u.command({ type: 'chatbox', on: false });
-    expect(shows).toBe('off');
-    u.command({ type: 'chatbox', on: true });
-    expect(shows).toBe('both');
-    u.controller.stop();
   });
 
   it('sends the state only while SteamVR shows it, and only when it changed', async () => {

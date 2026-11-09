@@ -1953,7 +1953,6 @@
     },
     "jyutping": "광둥어 위에 윗핑 표시",
     "vr": {
-      "setting": "헤드셋에서 자막 표시",
       "linkWaiting": "SteamVR 시작 대기 중",
       "linkConnected": "헤드셋에 표시 중",
       "linkMissing": "이 버전에는 VR 구성 요소가 없어요",
@@ -1984,9 +1983,10 @@
       "muted": "VRChat에서 음소거됨",
       "title": "VR 헤드셋",
       "help": "SteamVR에서는 상대방의 말이 시야 아래에 표시됩니다. 손목 패널은 데스크톱의 작은 창입니다. XSOverlay에서 창으로 추가하면 손목에 띄워 언어 변경, 일시정지, 머리 위 표시 켜기/끄기, 다른 모델 사용을 할 수 있습니다.",
-      "panel": "손목 패널 창",
       "chatbox": "머리 위 표시",
-      "panelTitle": "Kotomimi 손목 패널"
+      "panelTitle": "Kotomimi 손목 패널",
+      "strip": "자막",
+      "wrist": "손목 패널"
     },
     "storage": {
       "title": "모델 저장 위치",

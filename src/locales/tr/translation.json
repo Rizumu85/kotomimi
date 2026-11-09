@@ -1953,7 +1953,6 @@
     },
     "jyutping": "Kantonca metnin üzerinde jyutping",
     "vr": {
-      "setting": "Başlıkta altyazıları göster",
       "linkWaiting": "SteamVR bekleniyor",
       "linkConnected": "Başlıkta",
       "linkMissing": "Bu sürümde yok",
@@ -1984,9 +1983,10 @@
       "muted": "VRChat'te sessize alındı",
       "title": "VR başlığı",
       "help": "SteamVR'da karşı tarafın sözleri görüş alanınızın altında görünür. Bilek paneli, masaüstündeki küçük bir penceredir: XSOverlay'de pencere olarak ekleyip bileğinizde kullanabilir, dili değiştirebilir, duraklatabilir, baş üstü gösterimini açıp kapatabilir veya başka bir model deneyebilirsiniz.",
-      "panel": "Bilek paneli penceresi",
       "chatbox": "Baş üstü gösterimi",
-      "panelTitle": "Kotomimi bilek paneli"
+      "panelTitle": "Kotomimi bilek paneli",
+      "strip": "Altyazılar",
+      "wrist": "Bilek paneli"
     },
     "storage": {
       "title": "Model depolama",

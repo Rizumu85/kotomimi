@@ -915,6 +915,10 @@
     "en": "Stopped",
     "text": "توقف التعرّف على الكلام"
   },
+  "fork.vr.strip": {
+    "en": "Captions",
+    "text": "الترجمة"
+  },
   "fork.vr.switching": {
     "en": "Switching to {name}, back in a few seconds",
     "text": "جارٍ التبديل إلى {name}، سيُستأنف الاستماع بعد ثوانٍ"
@@ -946,6 +950,10 @@
   "fork.vr.vram": {
     "en": "VRAM {used} / {total} GB",
     "text": "ذاكرة الرسوميات {used} / {total} غيغابايت"
+  },
+  "fork.vr.wrist": {
+    "en": "Wrist panel",
+    "text": "لوحة المعصم"
   },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",

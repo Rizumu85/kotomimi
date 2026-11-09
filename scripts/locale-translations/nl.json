@@ -919,6 +919,10 @@
     "en": "Stopped",
     "text": "Gestopt"
   },
+  "fork.vr.strip": {
+    "en": "Captions",
+    "text": "Ondertitels"
+  },
   "fork.vr.switching": {
     "en": "Switching to {name}, back in a few seconds",
     "text": "Overschakelen naar {name}, over een paar seconden gaan we verder"
@@ -950,6 +954,10 @@
   "fork.vr.vram": {
     "en": "VRAM {used} / {total} GB",
     "text": "VRAM {used} / {total} GB"
+  },
+  "fork.vr.wrist": {
+    "en": "Wrist panel",
+    "text": "Polspaneel"
   },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",

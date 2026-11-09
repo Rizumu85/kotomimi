@@ -911,6 +911,10 @@
     "en": "Stopped",
     "text": "Розпізнавання зупинено"
   },
+  "fork.vr.strip": {
+    "en": "Captions",
+    "text": "Субтитри"
+  },
   "fork.vr.switching": {
     "en": "Switching to {name}, back in a few seconds",
     "text": "Перехід на {name}, слухання відновиться за кілька секунд"
@@ -942,6 +946,10 @@
   "fork.vr.vram": {
     "en": "VRAM {used} / {total} GB",
     "text": "Відеопам’ять {used} / {total} ГБ"
+  },
+  "fork.vr.wrist": {
+    "en": "Wrist panel",
+    "text": "Панель на зап’ясті"
   },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",

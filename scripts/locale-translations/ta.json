@@ -915,6 +915,10 @@
     "en": "Stopped",
     "text": "பேச்சை எழுத்தாக்குவது நின்றது"
   },
+  "fork.vr.strip": {
+    "en": "Captions",
+    "text": "வசனங்கள்"
+  },
   "fork.vr.switching": {
     "en": "Switching to {name}, back in a few seconds",
     "text": "{name} மொழிக்கு மாறுகிறது, சில நொடிகளில் மீண்டும் கேட்கும்"
@@ -946,6 +950,10 @@
   "fork.vr.vram": {
     "en": "VRAM {used} / {total} GB",
     "text": "கிராபிக்ஸ் நினைவகம் {used} / {total} GB"
+  },
+  "fork.vr.wrist": {
+    "en": "Wrist panel",
+    "text": "மணிக்கட்டு பலகை"
   },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",

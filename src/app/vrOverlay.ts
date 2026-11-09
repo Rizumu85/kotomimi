@@ -72,7 +72,8 @@ export interface VrOverlayDeps {
   subscribeMuted(listener: () => void): () => void;
   /** VRChat's chatbox setting; it changes beside `muted` (one store). */
   chatbox(): ChatboxShows;
-  setChatbox(shows: ChatboxShows): void;
+  /** Off, or back to the last look that showed something (`useVRChatStore.turnChatbox`). */
+  turnChatbox(on: boolean): void;
   words(): VrWords;
   uiLanguage(): string;
   /** What the strip reads beside the conversation, as the computer's subtitle reads it (`VrCaptions`), and its changes. */
@@ -157,8 +158,6 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
   let stopped = false;
 
   let strip = true;
-  /** What the chatbox showed before the panel turned it off: what it shows when turned on again. */
-  let chatboxWas: ChatboxShows = deps.chatbox() === 'off' ? 'translation' : deps.chatbox();
   let switching: VrState['switching'] = null;
   let heard: VrState['heard'] = null;
   const hearLags = new Lags();
@@ -337,14 +336,9 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
         strip = command.on === true;
         publish();
         break;
-      case 'chatbox': {
-        // Off, or back to what it showed before.
-        const current = deps.chatbox();
-        if (current !== 'off') chatboxWas = current;
-        const next: ChatboxShows = command.on === true ? chatboxWas : 'off';
-        if (next !== current) deps.setChatbox(next);
+      case 'chatbox':
+        deps.turnChatbox(command.on === true);
         break;
-      }
       case 'hear': {
         const model = settings.hearers()?.options.find((m) => m.id === command.id);
         if (model) void restartWith('hear', model.label, () => settings.setHearer(model.id));
@@ -429,7 +423,7 @@ async function build(): Promise<VrOverlayController | null> {
     muted: () => vrchatHolds(useVRChatStore.getState()),
     subscribeMuted: (listener) => useVRChatStore.subscribe(listener),
     chatbox: () => useVRChatStore.getState().chatbox,
-    setChatbox: (shows) => useVRChatStore.getState().setChatbox(shows),
+    turnChatbox: (on) => useVRChatStore.getState().turnChatbox(on),
     words: () => vrWords((key, fallback) => i18n.t(key, fallback) as string),
     uiLanguage: () => i18n.language ?? 'en',
     captionLook: () => {

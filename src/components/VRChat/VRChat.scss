@@ -207,6 +207,57 @@
   text-align: center;
 }
 
+// The VR card's two parts, pressed on or off as the looks are: the captions low in the view, and the wrist panel.
+.kt-vr-parts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 2px;
+}
+
+.kt-vr-part {
+  position: relative;
+  overflow: hidden;
+}
+
+.kt-vr-part__strip {
+  position: absolute;
+  left: 50%;
+  bottom: 9px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 46%;
+  transform: translateX(-50%);
+
+  .kt-chatbox-look__bar {
+    width: 64%;
+  }
+
+  .kt-chatbox-look__bar.is-translation {
+    width: 100%;
+  }
+}
+
+.kt-vr-part__wrist {
+  display: grid;
+  grid-template-columns: repeat(2, 10px);
+  gap: 4px;
+  padding: 7px 6px 6px;
+  border: 1px solid vars.$border-strong;
+  border-top-width: 5px;
+  border-radius: 6px;
+}
+
+.kt-vr-part__key {
+  height: 9px;
+  border-radius: 2px;
+  background: vars.$border-strong;
+
+  &.is-on {
+    background: tk.$color-primary;
+  }
+}
+
 // The chatbox as it will look above the avatar.
 .kt-chatbox-preview {
   display: flex;
@@ -228,6 +279,39 @@
   margin: 14px 0 0;
   font-size: 13px;
   color: vars.$text-secondary;
+}
+
+// The chatbox's switch in the main panel's footer, after the mode picker: as tall as it, the green tint when on.
+.kt-chatbox-toggle {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  margin-left: 8px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: vars.$radius-md;
+  font: inherit;
+  font-size: 12px;
+  white-space: nowrap;
+  color: vars.$text-tertiary;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: vars.$bg-hover;
+  }
+
+  &.is-on {
+    color: tk.$color-primary;
+    background: color-mix(in srgb, tk.$color-primary 15%, transparent);
+  }
+
+  &:focus-visible {
+    @include vars.focus-ring;
+  }
 }
 
 // The triangle before "video": the app's green, drawn, so it sits on the text's line in any font.

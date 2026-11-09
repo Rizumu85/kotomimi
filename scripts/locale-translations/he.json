@@ -915,6 +915,10 @@
     "en": "Stopped",
     "text": "התמלול נעצר"
   },
+  "fork.vr.strip": {
+    "en": "Captions",
+    "text": "כתוביות"
+  },
   "fork.vr.switching": {
     "en": "Switching to {name}, back in a few seconds",
     "text": "עובר ל־{name}, ההאזנה תתחדש בעוד כמה שניות"
@@ -946,6 +950,10 @@
   "fork.vr.vram": {
     "en": "VRAM {used} / {total} GB",
     "text": "זיכרון גרפי {used} / {total} GB"
+  },
+  "fork.vr.wrist": {
+    "en": "Wrist panel",
+    "text": "לוח על פרק היד"
   },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",

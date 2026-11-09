@@ -915,6 +915,10 @@
     "en": "Stopped",
     "text": "음성 인식 중지됨"
   },
+  "fork.vr.strip": {
+    "en": "Captions",
+    "text": "자막"
+  },
   "fork.vr.switching": {
     "en": "Switching to {name}, back in a few seconds",
     "text": "{name}(으)로 전환 중이에요. 몇 초 후 다시 들을게요"
@@ -946,6 +950,10 @@
   "fork.vr.vram": {
     "en": "VRAM {used} / {total} GB",
     "text": "비디오 메모리 {used} / {total} GB"
+  },
+  "fork.vr.wrist": {
+    "en": "Wrist panel",
+    "text": "손목 패널"
   },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",

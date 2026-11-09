@@ -51,3 +51,34 @@ describe('vrchatStore — what an older build saved about a video (fork)', () =>
     expect(await load('whatever')).toBe('ask');
   });
 });
+
+describe('vrchatStore — the chatbox turned off and on again (fork)', () => {
+  beforeEach(() => {
+    stored.clear();
+    useVRChatStore.setState({ chatbox: 'off', chatboxLast: null });
+  });
+
+  it('shows the translation the first time, then the last look that showed something', () => {
+    const store = useVRChatStore.getState();
+    store.turnChatbox(true);
+    expect(useVRChatStore.getState().chatbox).toBe('translation');
+    store.setChatbox('both');
+    store.turnChatbox(false);
+    expect(useVRChatStore.getState()).toMatchObject({ chatbox: 'off', chatboxLast: 'both' });
+    store.turnChatbox(true);
+    expect(useVRChatStore.getState().chatbox).toBe('both');
+  });
+
+  it('remembers it across a restart, and takes an older build’s look for it', async () => {
+    stored.set('settings.vrchat.chatboxLast', 'source');
+    await useVRChatStore.getState().hydrate();
+    expect(useVRChatStore.getState()).toMatchObject({ chatbox: 'off', chatboxLast: 'source' });
+    stored.clear();
+    stored.set('settings.vrchat.chatbox', 'both');
+    await useVRChatStore.getState().hydrate();
+    expect(useVRChatStore.getState().chatboxLast).toBe('both');
+    stored.clear();
+    await useVRChatStore.getState().hydrate();
+    expect(useVRChatStore.getState().chatboxLast).toBeNull();
+  });
+});

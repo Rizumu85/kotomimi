@@ -919,6 +919,10 @@
     "en": "Stopped",
     "text": "Spracherkennung gestoppt"
   },
+  "fork.vr.strip": {
+    "en": "Captions",
+    "text": "Untertitel"
+  },
   "fork.vr.switching": {
     "en": "Switching to {name}, back in a few seconds",
     "text": "Wechsel zu {name}, in wenigen Sekunden geht es weiter"
@@ -950,6 +954,10 @@
   "fork.vr.vram": {
     "en": "VRAM {used} / {total} GB",
     "text": "Grafikspeicher {used} / {total} GB"
+  },
+  "fork.vr.wrist": {
+    "en": "Wrist panel",
+    "text": "Handgelenk-Panel"
   },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",

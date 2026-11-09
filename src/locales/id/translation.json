@@ -1953,7 +1953,6 @@
     },
     "jyutping": "Jyutping di atas teks Kanton",
     "vr": {
-      "setting": "Tampilkan subtitle di headset",
       "linkWaiting": "Menunggu SteamVR",
       "linkConnected": "Di headset",
       "linkMissing": "Tidak tersedia di versi ini",
@@ -1984,9 +1983,10 @@
       "muted": "Dibisukan di VRChat",
       "title": "Headset VR",
       "help": "Di SteamVR, ucapan lawan bicara muncul di bawah garis pandang Anda. Panel pergelangan tangan adalah jendela kecil di desktop. Tambahkan sebagai jendela di XSOverlay untuk memasangnya di pergelangan tangan, lalu ganti bahasa, jeda, nyalakan atau matikan tampilan di atas kepala, atau coba model lain.",
-      "panel": "Jendela panel pergelangan tangan",
       "chatbox": "Tampilan di atas kepala",
-      "panelTitle": "Panel pergelangan tangan Kotomimi"
+      "panelTitle": "Panel pergelangan tangan Kotomimi",
+      "strip": "Subtitel",
+      "wrist": "Panel pergelangan tangan"
     },
     "storage": {
       "title": "Penyimpanan model",

@@ -919,6 +919,10 @@
     "en": "Stopped",
     "text": "Đã dừng nhận dạng"
   },
+  "fork.vr.strip": {
+    "en": "Captions",
+    "text": "Phụ đề"
+  },
   "fork.vr.switching": {
     "en": "Switching to {name}, back in a few seconds",
     "text": "Đang chuyển sang {name}, sẽ nghe tiếp sau vài giây"
@@ -950,6 +954,10 @@
   "fork.vr.vram": {
     "en": "VRAM {used} / {total} GB",
     "text": "Bộ nhớ đồ họa {used} / {total} GB"
+  },
+  "fork.vr.wrist": {
+    "en": "Wrist panel",
+    "text": "Bảng cổ tay"
   },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",

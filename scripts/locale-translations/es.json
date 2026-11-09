@@ -911,6 +911,10 @@
     "en": "Stopped",
     "text": "Transcripción detenida"
   },
+  "fork.vr.strip": {
+    "en": "Captions",
+    "text": "Subtítulos"
+  },
   "fork.vr.switching": {
     "en": "Switching to {name}, back in a few seconds",
     "text": "Cambiando a {name}, la escucha se reanudará en unos segundos"
@@ -942,6 +946,10 @@
   "fork.vr.vram": {
     "en": "VRAM {used} / {total} GB",
     "text": "Memoria gráfica: {used} / {total} GB"
+  },
+  "fork.vr.wrist": {
+    "en": "Wrist panel",
+    "text": "Panel de muñeca"
   },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",

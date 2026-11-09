@@ -915,6 +915,10 @@
     "en": "Stopped",
     "text": "音声認識停止"
   },
+  "fork.vr.strip": {
+    "en": "Captions",
+    "text": "字幕"
+  },
   "fork.vr.switching": {
     "en": "Switching to {name}, back in a few seconds",
     "text": "{name} に切り替え中。数秒後に聞き取りを再開します"
@@ -946,6 +950,10 @@
   "fork.vr.vram": {
     "en": "VRAM {used} / {total} GB",
     "text": "ビデオメモリ {used} / {total} GB"
+  },
+  "fork.vr.wrist": {
+    "en": "Wrist panel",
+    "text": "手首パネル"
   },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",

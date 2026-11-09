@@ -915,6 +915,10 @@
     "en": "Stopped",
     "text": "మాటలను గుర్తించడం ఆగింది"
   },
+  "fork.vr.strip": {
+    "en": "Captions",
+    "text": "ఉపశీర్షికలు"
+  },
   "fork.vr.switching": {
     "en": "Switching to {name}, back in a few seconds",
     "text": "{name}కి మారుతోంది, కొన్ని సెకన్లలో మళ్లీ వింటుంది"
@@ -946,6 +950,10 @@
   "fork.vr.vram": {
     "en": "VRAM {used} / {total} GB",
     "text": "వీడియో మెమరీ {used} / {total} GB"
+  },
+  "fork.vr.wrist": {
+    "en": "Wrist panel",
+    "text": "మణికట్టు ప్యానెల్"
   },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",

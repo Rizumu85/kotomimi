@@ -91,13 +91,13 @@ Which models a phone can run, and how to read the self-check, is in the [phone a
 When VRChat and Kotomimi run on the same Windows computer, the "General" settings have a "VRChat" card (turn on OSC in VRChat's quick menu):
 
 - **Don't hear me while muted in VRChat**: mute yourself in VRChat, and Kotomimi stops recognizing what you say.
-- **Above my avatar**: what you say (or type) goes into the chatbox above your head, translated, for the other players to read: the translation alone, or with what you said.
+- **Above my avatar**: what you say (or type) goes into the chatbox above your head, translated, for the other players to read: the translation alone, or with what you said. Once you have chosen one, an "Above my avatar" button beside the mode buttons at the bottom of the main window turns it off or on in one click.
 - **When a world plays a video**: its sound slows the other side's translation. Choose "Ask me", "People only", "People + video" or "Pause"; translating people takes the video's sound out where it can and hears only the players.
 - **I speak ⟨their language⟩ too**: turned on under the translation languages, what you say in their language is translated into yours, so the chatbox reads for both sides.
 
 ### Captions in the headset (trial)
 
-The "General" settings have a "VR headset" card: turn on **Show captions in the headset**; for the wrist panel, also turn on **Wrist panel window** and add "Kotomimi wrist panel" as a window in XSOverlay. Windows and SteamVR only; it works in any SteamVR game.
+The "General" settings have a "VR headset" card: press **Captions**; for the wrist panel, also press **Wrist panel** and add "Kotomimi wrist panel" as a window in XSOverlay. Windows and SteamVR only; it works in any SteamVR game.
 
 <p align="center">
   <img src="./assets/readme/vr.en.webp" width="100%" alt="In the headset: the other side's words below the line of sight, the original small and the translation large; on the left wrist the wrist menu, with the last lines, their language, and Pause, Hide and Adjust">

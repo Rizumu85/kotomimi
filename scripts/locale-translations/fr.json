@@ -919,6 +919,10 @@
     "en": "Stopped",
     "text": "Transcription arrêtée"
   },
+  "fork.vr.strip": {
+    "en": "Captions",
+    "text": "Sous-titres"
+  },
   "fork.vr.switching": {
     "en": "Switching to {name}, back in a few seconds",
     "text": "Passage à {name}, reprise de l’écoute dans quelques secondes"
@@ -950,6 +954,10 @@
   "fork.vr.vram": {
     "en": "VRAM {used} / {total} GB",
     "text": "Mémoire vidéo {used} / {total} Go"
+  },
+  "fork.vr.wrist": {
+    "en": "Wrist panel",
+    "text": "Panneau au poignet"
   },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",

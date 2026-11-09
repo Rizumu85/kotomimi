@@ -1953,7 +1953,6 @@
     },
     "jyutping": "Jyutping ovanför kantonesisk text",
     "vr": {
-      "setting": "Visa undertexter i headsetet",
       "linkWaiting": "Väntar på SteamVR",
       "linkConnected": "I headsetet",
       "linkMissing": "Finns inte i den här versionen",
@@ -1984,9 +1983,10 @@
       "muted": "Ljudet är avstängt i VRChat",
       "title": "VR-headset",
       "help": "I SteamVR visas den andra personens ord under ditt synfält. Handledspanelen är ett litet fönster på skrivbordet. Lägg till det som ett fönster i XSOverlay för att bära det på handleden och byta språk, pausa, slå på eller av visningen ovanför huvudet eller prova en annan modell.",
-      "panel": "Handledspanel",
       "chatbox": "Visning ovanför huvudet",
-      "panelTitle": "Kotomimi handledspanel"
+      "panelTitle": "Kotomimi handledspanel",
+      "strip": "Undertexter",
+      "wrist": "Handledspanel"
     },
     "storage": {
       "title": "Modellagring",

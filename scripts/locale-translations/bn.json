@@ -915,6 +915,10 @@
     "en": "Stopped",
     "text": "শনাক্তকরণ থেমেছে"
   },
+  "fork.vr.strip": {
+    "en": "Captions",
+    "text": "সাবটাইটেল"
+  },
   "fork.vr.switching": {
     "en": "Switching to {name}, back in a few seconds",
     "text": "{name}-এ বদলানো হচ্ছে, কয়েক সেকেন্ড পর আবার শুনবে"
@@ -946,6 +950,10 @@
   "fork.vr.vram": {
     "en": "VRAM {used} / {total} GB",
     "text": "VRAM {used} / {total} GB"
+  },
+  "fork.vr.wrist": {
+    "en": "Wrist panel",
+    "text": "কব্জি প্যানেল"
   },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",

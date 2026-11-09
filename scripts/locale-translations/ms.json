@@ -911,6 +911,10 @@
     "en": "Stopped",
     "text": "Pengecaman dihentikan"
   },
+  "fork.vr.strip": {
+    "en": "Captions",
+    "text": "Sari kata"
+  },
   "fork.vr.switching": {
     "en": "Switching to {name}, back in a few seconds",
     "text": "Beralih ke {name}, akan mendengar semula dalam beberapa saat"
@@ -942,6 +946,10 @@
   "fork.vr.vram": {
     "en": "VRAM {used} / {total} GB",
     "text": "Memori grafik {used} / {total} GB"
+  },
+  "fork.vr.wrist": {
+    "en": "Wrist panel",
+    "text": "Panel pergelangan tangan"
   },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",

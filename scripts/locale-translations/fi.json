@@ -911,6 +911,10 @@
     "en": "Stopped",
     "text": "Pysähtynyt"
   },
+  "fork.vr.strip": {
+    "en": "Captions",
+    "text": "Tekstitykset"
+  },
   "fork.vr.switching": {
     "en": "Switching to {name}, back in a few seconds",
     "text": "Vaihdetaan kieleen {name}, jatketaan muutaman sekunnin kuluttua"
@@ -942,6 +946,10 @@
   "fork.vr.vram": {
     "en": "VRAM {used} / {total} GB",
     "text": "VRAM {used} / {total} GB"
+  },
+  "fork.vr.wrist": {
+    "en": "Wrist panel",
+    "text": "Rannepaneeli"
   },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",

@@ -1775,8 +1775,8 @@
     "vr": {
       "title": "VR 頭顯",
       "help": "在 SteamVR 裡，對方的話會顯示在視線下方。腕錶視窗是桌面上的一個小視窗，在 XSOverlay 裡把它加入為視窗，就能戴在手腕上，用來換語言、暫停、開關頭頂顯示，或者試試別的模型。",
-      "setting": "在頭顯裡顯示字幕",
-      "panel": "腕錶視窗",
+      "strip": "字幕",
+      "wrist": "腕錶",
       "linkWaiting": "等 SteamVR 啟動",
       "linkConnected": "已在頭顯裡",
       "linkMissing": "這個版本沒帶 VR 元件",

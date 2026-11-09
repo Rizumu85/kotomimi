@@ -1953,7 +1953,6 @@
     },
     "jyutping": "広東語の上に粤拼を表示",
     "vr": {
-      "setting": "ヘッドセットに字幕を表示",
       "linkWaiting": "SteamVR の起動待ち",
       "linkConnected": "ヘッドセットに表示中",
       "linkMissing": "このバージョンに VR 機能は含まれていません",
@@ -1984,9 +1983,10 @@
       "muted": "VRChat でミュート中",
       "title": "VRヘッドセット",
       "help": "SteamVRでは、相手の言葉が視線の下に表示されます。手首パネルはデスクトップ上の小さなウィンドウです。XSOverlayでウィンドウとして追加すれば、手首に表示して、言語の切り替え、一時停止、頭上表示のオン・オフ、別のモデルの試用ができます。",
-      "panel": "手首パネルウィンドウ",
       "chatbox": "頭上表示",
-      "panelTitle": "Kotomimi 手首パネル"
+      "panelTitle": "Kotomimi 手首パネル",
+      "strip": "字幕",
+      "wrist": "手首パネル"
     },
     "storage": {
       "title": "モデルの保存先",

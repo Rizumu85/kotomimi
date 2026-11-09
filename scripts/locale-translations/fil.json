@@ -967,6 +967,10 @@
     "en": "Stopped",
     "text": "Huminto"
   },
+  "fork.vr.strip": {
+    "en": "Captions",
+    "text": "Mga subtitle"
+  },
   "fork.vr.switching": {
     "en": "Switching to {name}, back in a few seconds",
     "text": "Lumilipat sa {name}, babalik pagkalipas ng ilang segundo"
@@ -998,6 +1002,10 @@
   "fork.vr.vram": {
     "en": "VRAM {used} / {total} GB",
     "text": "VRAM {used} / {total} GB"
+  },
+  "fork.vr.wrist": {
+    "en": "Wrist panel",
+    "text": "Panel sa pulso"
   },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",

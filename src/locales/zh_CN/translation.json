@@ -1775,8 +1775,8 @@
     "vr": {
       "title": "VR 头显",
       "help": "在 SteamVR 里，对方的话会显示在视线下方。腕表窗口是桌面上的一个小窗口，在 XSOverlay 里把它添加为窗口，就能戴在手腕上，用来换语言、暂停、开关头顶显示，或者试试别的模型。",
-      "setting": "在头显里显示字幕",
-      "panel": "腕表窗口",
+      "strip": "字幕",
+      "wrist": "腕表",
       "linkWaiting": "等 SteamVR 启动",
       "linkConnected": "已在头显里",
       "linkMissing": "这个版本没带 VR 组件",

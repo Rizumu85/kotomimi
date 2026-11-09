@@ -1953,7 +1953,6 @@
     },
     "jyutping": "Jyutping sa itaas ng Cantonese",
     "vr": {
-      "setting": "Ipakita ang mga subtitle sa headset",
       "linkWaiting": "Hinihintay ang SteamVR",
       "linkConnected": "Nasa headset",
       "linkMissing": "Wala sa bersyong ito",
@@ -1984,9 +1983,10 @@
       "muted": "Naka-mute sa VRChat",
       "title": "VR headset",
       "help": "Sa SteamVR, lalabas ang mga salita ng kausap sa ibaba ng iyong linya ng paningin. Ang panel sa pulso ay maliit na window sa desktop; idagdag ito bilang window sa XSOverlay para maisuot sa pulso, makapagpalit ng wika, mag-pause, i-on o i-off ang Chatbox, o sumubok ng ibang modelo.",
-      "panel": "Window ng panel sa pulso",
       "chatbox": "Chatbox",
-      "panelTitle": "Panel sa pulso ng Kotomimi"
+      "panelTitle": "Panel sa pulso ng Kotomimi",
+      "strip": "Mga subtitle",
+      "wrist": "Panel sa pulso"
     },
     "storage": {
       "title": "Imbakan ng modelo",

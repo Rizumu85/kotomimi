@@ -1775,8 +1775,8 @@
     "vr": {
       "title": "VR headset",
       "help": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
-      "setting": "Show captions in the headset",
-      "panel": "Wrist panel window",
+      "strip": "Captions",
+      "wrist": "Wrist panel",
       "linkWaiting": "Waiting for SteamVR",
       "linkConnected": "In the headset",
       "linkMissing": "Not in this build",

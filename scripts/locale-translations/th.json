@@ -915,6 +915,10 @@
     "en": "Stopped",
     "text": "หยุดถอดเสียงแล้ว"
   },
+  "fork.vr.strip": {
+    "en": "Captions",
+    "text": "คำบรรยาย"
+  },
   "fork.vr.switching": {
     "en": "Switching to {name}, back in a few seconds",
     "text": "กำลังเปลี่ยนเป็น {name} จะกลับมาฟังต่อในไม่กี่วินาที"
@@ -946,6 +950,10 @@
   "fork.vr.vram": {
     "en": "VRAM {used} / {total} GB",
     "text": "VRAM {used} / {total} GB"
+  },
+  "fork.vr.wrist": {
+    "en": "Wrist panel",
+    "text": "แผงข้อมือ"
   },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",

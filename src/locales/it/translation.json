@@ -1953,7 +1953,6 @@
     },
     "jyutping": "Jyutping sopra il testo cantonese",
     "vr": {
-      "setting": "Mostra i sottotitoli nel visore",
       "linkWaiting": "In attesa di SteamVR",
       "linkConnected": "Nel visore",
       "linkMissing": "Componente VR non incluso in questa versione",
@@ -1984,9 +1983,10 @@
       "muted": "Audio disattivato in VRChat",
       "title": "Visore VR",
       "help": "In SteamVR, le parole dell’altra persona compaiono sotto la linea dello sguardo. Il pannello da polso è una piccola finestra sul desktop: aggiungila come finestra in XSOverlay per portarla al polso e cambiare lingua, mettere in pausa, attivare o disattivare il display sopra la testa oppure provare un altro modello.",
-      "panel": "Finestra del pannello da polso",
       "chatbox": "Display sopra la testa",
-      "panelTitle": "Pannello da polso di Kotomimi"
+      "panelTitle": "Pannello da polso di Kotomimi",
+      "strip": "Sottotitoli",
+      "wrist": "Pannello da polso"
     },
     "storage": {
       "title": "Archiviazione modelli",

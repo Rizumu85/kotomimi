@@ -915,6 +915,10 @@
     "en": "Stopped",
     "text": "बोली की पहचान बंद है"
   },
+  "fork.vr.strip": {
+    "en": "Captions",
+    "text": "उपशीर्षक"
+  },
   "fork.vr.switching": {
     "en": "Switching to {name}, back in a few seconds",
     "text": "{name} पर बदल रहे हैं, कुछ सेकंड में फिर सुनेंगे"
@@ -946,6 +950,10 @@
   "fork.vr.vram": {
     "en": "VRAM {used} / {total} GB",
     "text": "वीडियो मेमोरी {used} / {total} GB"
+  },
+  "fork.vr.wrist": {
+    "en": "Wrist panel",
+    "text": "कलाई पैनल"
   },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",

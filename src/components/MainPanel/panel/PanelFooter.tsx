@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { X, Zap, Mic, Loader, Wrench } from 'lucide-react';
 import ModePicker from '../ModePicker';
 import SessionCountdown from '../SessionCountdown';
+import { ChatboxToggle } from '../../VRChat/ChatboxToggle';
 import { useLanguageLabel } from '../../../lib/language/useLanguageLabel';
 import { startLabel } from './startLabel';
 import type { RunState } from '../../../lib/session/types';
@@ -95,6 +96,7 @@ export function PanelFooter(props: PanelFooterProps) {
           onSegmentClick={onModeSegment}
           heard={heard}
         />
+        <ChatboxToggle />
 
         <span className="footer-spacer" />
 
@@ -167,6 +169,7 @@ export function PanelFooter(props: PanelFooterProps) {
         onSegmentClick={onModeSegment}
         heard={heard}
       />
+      <ChatboxToggle />
 
       <span className="footer-spacer" />
 

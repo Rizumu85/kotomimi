@@ -915,6 +915,10 @@
     "en": "Stopped",
     "text": "Durduruldu"
   },
+  "fork.vr.strip": {
+    "en": "Captions",
+    "text": "Altyazılar"
+  },
   "fork.vr.switching": {
     "en": "Switching to {name}, back in a few seconds",
     "text": "{name} diline geçiliyor, birkaç saniye içinde devam edecek"
@@ -946,6 +950,10 @@
   "fork.vr.vram": {
     "en": "VRAM {used} / {total} GB",
     "text": "VRAM {used} / {total} GB"
+  },
+  "fork.vr.wrist": {
+    "en": "Wrist panel",
+    "text": "Bilek paneli"
   },
   "fork.vrchat.chatbox": {
     "en": "Above my avatar",
