@@ -59,6 +59,12 @@ int main() {
   for (int i = 0; i < 120; i++) s = followStrip(g, watch, 0.016f, sc);
   CHECK(std::fabs(yawOf(s) - 15) < 1.5f);
   CHECK(std::fabs(pitchOf(s) + sc.below) < 0.5f);
+  // Looking straight down and shaking the head a little: the strip keeps its heading.
+  LazyFollow d;
+  followStrip(d, head, 0.016f, sc);
+  Mat34 down = fromEulerDeg(0, -89, 0, {0, 1.6f, 0});
+  for (int i = 0; i < 240; i++) s = followStrip(d, mul(down, fromEulerDeg(i % 2 ? 3.0f : -3.0f, 0, 0, {0, 0, 0})), 0.016f, sc);
+  CHECK(std::fabs(yawOf(s)) < 1.5f);
 
   if (failures == 0) std::printf("geometry: all passed\n");
   return failures == 0 ? 0 : 1;

@@ -68,7 +68,11 @@ Mat34 fromEulerDeg(float yaw, float pitch, float roll, Vec3 t) {
 
 Mat34 followStrip(LazyFollow& f, const Mat34& hmd, float dt, const StripConfig& c) {
   Vec3 gaze = normalize(Vec3{-hmd.m[0][2], -hmd.m[1][2], -hmd.m[2][2]});
-  float headYaw = std::atan2(-gaze.x, -gaze.z);
+  // Looking nearly straight down or up, the gaze has almost no level part, and a small nod would swing its heading
+  // round: the top of the head says where the face is turned instead (backwards, looking up).
+  Vec3 up = column(hmd, 1);
+  Vec3 level = std::sqrt(gaze.x * gaze.x + gaze.z * gaze.z) > 0.34f ? gaze : gaze.y < 0 ? up : Vec3{-up.x, -up.y, -up.z};
+  float headYaw = std::atan2(-level.x, -level.z);
   float headPitch = std::asin(std::clamp(gaze.y, -1.0f, 1.0f));
   float wantYaw = headYaw;
   float wantPitch = std::clamp(headPitch - c.below * kDeg, -60.0f * kDeg, 25.0f * kDeg);

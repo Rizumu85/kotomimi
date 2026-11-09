@@ -75,7 +75,7 @@ function helperFile(app, env = process.env) {
   return path.join(app.getAppPath(), 'vr-overlay', 'build', 'Release', 'kotomimi-vr.exe');
 }
 
-function createVrOverlay({ BrowserWindow, preload, pageUrl, helper, push, spawnHelper = spawn, scaleFactor = () => 1, icon = null, dumpDir = null, log = () => {} }) {
+function createVrOverlay({ BrowserWindow, preload, pageUrl, helper, push, spawnHelper = spawn, scaleFactor = () => 1, icon = null, mainShown = () => true, whenMainShown = () => {}, dumpDir = null, log = () => {} }) {
   let child = null;
   let vr = 'off';
   let state = null;
@@ -158,8 +158,11 @@ function createVrOverlay({ BrowserWindow, preload, pageUrl, helper, push, spawnH
     // As sharp on any display: one and a half device pixels a CSS pixel, never smaller than the page.
     panelZoom = Math.max(1, PANEL_PIXELS / (scaleFactor() || 1));
     const { width, height } = panelContent();
+    // A start with the computer keeps the app out of sight: the panel comes up with the main window.
+    const show = mainShown();
     const win = new BrowserWindow({
       title: 'Kotomimi',
+      show,
       width,
       height,
       useContentSize: true,
@@ -173,6 +176,7 @@ function createVrOverlay({ BrowserWindow, preload, pageUrl, helper, push, spawnH
       webPreferences: { partition: PARTITION.wrist, preload, contextIsolation: true, nodeIntegration: false, sandbox: true },
     });
     panel = win;
+    if (!show) whenMainShown(() => { if (panel === win && alive(win)) win.show(); });
     win.webContents.on('did-finish-load', () => win.webContents.setZoomFactor(panelZoom));
     // Closed otherwise (Alt+F4, the app quitting): the main window is told, and shows it closed.
     win.on('closed', () => {
@@ -291,6 +295,8 @@ function setupVrOverlay({ ipcMain, BrowserWindow, scaleFactor, icon = null, app,
     push,
     scaleFactor,
     icon,
+    mainShown: () => { const win = getMainWindow(); return !win || win.isDestroyed() || win.isVisible(); },
+    whenMainShown: (fn) => { const win = getMainWindow(); if (win && !win.isDestroyed()) win.once('show', fn); },
     dumpDir,
     log: (text) => console.info(text),
   });

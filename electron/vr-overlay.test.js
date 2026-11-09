@@ -61,7 +61,7 @@ function fakeWindow(options) {
   return win;
 }
 
-function setup({ scale = 1 } = {}) {
+function setup({ scale = 1, mainShown = () => true, whenMainShown = () => {} } = {}) {
   const windows = [];
   function BrowserWindow(options) { const w = fakeWindow(options); windows.push(w); return w; }
   const stdin = new PassThrough();
@@ -80,6 +80,8 @@ function setup({ scale = 1 } = {}) {
     spawnHelper,
     scaleFactor: () => scale,
     icon: 'icon.ico',
+    mainShown,
+    whenMainShown,
   });
   const say = (line) => stdout.write(`${JSON.stringify(line)}\n`);
   return { overlay, windows, written, child, spawnHelper, pushed, say };
@@ -155,6 +157,18 @@ describe('createVrOverlay', () => {
     t.overlay.panel(true);
     t.windows.at(-1).destroy();
     expect(t.pushed).toContainEqual(['vr:panel', { on: false }]);
+  });
+
+  it('keeps the panel out of sight with a main window started hidden, and shows it with that window', () => {
+    let shown = null;
+    const t = setup({ mainShown: () => false, whenMainShown: (fn) => { shown = fn; } });
+    t.overlay.panel(true);
+    const [panel] = t.windows;
+    expect(panel.options.show).toBe(false);
+    expect(panel.show).not.toHaveBeenCalled();
+    shown();
+    expect(panel.show).toHaveBeenCalled();
+    expect(setup().overlay.panel(true)).toEqual({ on: true });
   });
 
   it('opens the panel no larger than the page on a display that already has the pixels', () => {
