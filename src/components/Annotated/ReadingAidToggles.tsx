@@ -45,6 +45,7 @@ export function ReadingAidToggles({ highlight }: { /** The subtitle's own: wheth
         </div>
         {romanization && (
           <div className="reading-aids__row reading-aid-languages" role="group" aria-label={t('fork.romanization')}>
+            <span className="reading-aid-languages__label" aria-hidden>{t('fork.aids.roman')}</span>
             {ROMANIZED_LANGUAGES.map((language) => {
               const on = !romanizationOff.includes(language);
               return (

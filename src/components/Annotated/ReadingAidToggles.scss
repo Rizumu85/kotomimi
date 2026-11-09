@@ -56,7 +56,19 @@
   }
 }
 
-// The romanization's languages belong to its button: smaller, under it.
+// The romanization's languages belong to its button: under it, led by its name and a rule, smaller.
+.reading-aid-languages {
+  align-items: center;
+  padding-left: 8px;
+  border-left: 2px solid color-mix(in srgb, tk.$color-primary 45%, transparent);
+}
+
+.reading-aid-languages__label {
+  margin-right: 2px;
+  font-size: 11px;
+  color: vars.$text-tertiary;
+}
+
 .reading-aid-language {
   padding: 2px 8px;
   font-size: 11px;
