@@ -111,7 +111,8 @@ function Rows({ list, value, kind, state }: { list: VrModel[]; value: string; ki
       {list.map((m) => {
         const isLoading = m.label === loading;
         const speed = isLoading ? words.loading
-          : m.ms === undefined ? words.untried
+          // Not used this session: no number, and nothing in its place.
+          : m.ms === undefined ? ''
           : fill(kind === 'hear' ? words.behind : words.perSentence, { s: (m.ms / 1000).toFixed(1) });
         const slow = !isLoading && m.ms !== undefined && m.ms > (kind === 'hear' ? 2500 : 1500);
         return (
@@ -142,7 +143,12 @@ function Perf({ perf, words }: { perf: VrPerf | null; words: VrWords }) {
 }
 
 function Tune({ state, perf, onBack }: { state: VrState; perf: VrPerf | null; onBack: () => void }) {
-  const { words, mine } = state;
+  const { words, mine, theirs } = state;
+  // Their languages, as the settings' row: theirs first, pressed to light or put out; "…" every other language.
+  const [all, setAll] = useState(false);
+  const label = (value: string) => theirs.options.find((o) => o.value === value)?.label ?? value;
+  const lit = (value: string) => value === theirs.value || value === theirs.lit;
+  const shown = all ? [...theirs.quick, ...theirs.options.map((o) => o.value).filter((value) => !theirs.quick.includes(value))] : theirs.quick;
   return (
     <>
       <div className="tune__top">
@@ -156,6 +162,16 @@ function Tune({ state, perf, onBack }: { state: VrState; perf: VrPerf | null; on
             <button key={o.value} type="button" className={`chip${o.value === mine.value ? ' is-on' : ''}`}
               onClick={() => { if (o.value !== mine.value) send({ type: 'mine', value: o.value }); }}>{o.label}</button>
           ))}
+        </div>
+      </div>
+      <div className="group">
+        <div className="group__head">{words.theirs}</div>
+        <div className="chips chips--mine">
+          {shown.map((value) => (
+            <button key={value} type="button" className={`chip${lit(value) ? ' is-on' : ''}`}
+              onClick={() => { if (theirs.row || value !== theirs.value) send({ type: 'theirs', value }); }}>{label(value)}</button>
+          ))}
+          {!all && <button type="button" className="chip" aria-label={words.more} onClick={() => setAll(true)}>…</button>}
         </div>
       </div>
       <div className="group">

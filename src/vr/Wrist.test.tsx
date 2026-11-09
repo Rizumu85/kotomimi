@@ -46,3 +46,17 @@ describe('the wrist panel: their languages in the first row of six buttons (fork
     expect(document.querySelector('.more')).toBeNull();
   });
 });
+
+describe('the wrist panel’s second page: their languages there too (fork)', () => {
+  it('lists their row with "…" for every other language, and presses them as the first page does', () => {
+    sent.length = 0;
+    render(<Wrist state={state({ lit: 'ko', quick: ['en', 'ko'] })} perf={null} />);
+    fireEvent.click(screen.getByRole('button', { name: /tune/ }));
+    const group = () => [...document.querySelectorAll('.group')].find((g) => g.querySelector('.group__head')?.textContent === 'theirs')!;
+    expect([...group().querySelectorAll('button')].map((b) => b.textContent)).toEqual(['英语', '韩语', '…']);
+    fireEvent.click(screen.getByRole('button', { name: 'more' }));
+    expect([...group().querySelectorAll('button')].map((b) => b.textContent)).toEqual(['英语', '韩语', '日语']);
+    fireEvent.click(screen.getByRole('button', { name: '日语' }));
+    expect(sent).toEqual([{ type: 'theirs', value: 'ja' }]);
+  });
+});

@@ -1972,7 +1972,6 @@
       "more": "더 많은 언어",
       "switching": "{name}(으)로 전환 중이에요. 몇 초 후 다시 들을게요",
       "loading": "불러오는 중…",
-      "untried": "아직 사용 안 함",
       "behind": "{s}초 지연",
       "perSentence": "문장당 {s}초",
       "fps": "VR 화면 {fps}프레임",

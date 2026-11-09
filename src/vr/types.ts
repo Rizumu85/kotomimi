@@ -46,7 +46,6 @@ export interface VrWords {
   /** "{name}" for the model or language being switched to. */
   switching: string;
   loading: string;
-  untried: string;
   /** "{s}" seconds. */
   behind: string;
   perSentence: string;

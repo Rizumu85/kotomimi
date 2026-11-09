@@ -137,7 +137,6 @@ export function vrWords(t: T): VrWords {
     more: t('fork.vr.more', 'More languages'),
     switching: t('fork.vr.switching', 'Switching to {name}, back in a few seconds'),
     loading: t('fork.vr.loading', 'Loading…'),
-    untried: t('fork.vr.untried', 'Not tried'),
     behind: t('fork.vr.behind', '{s} s behind'),
     perSentence: t('fork.vr.perSentence', '{s} s a sentence'),
     fps: t('fork.vr.fps', 'VR at {fps} fps'),
