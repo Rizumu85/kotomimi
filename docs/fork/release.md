@@ -9,7 +9,7 @@ npm run build:audio-host   # Windows needs the C++ components of the VS Build To
 npx electron-forge make --arch=x64
 ```
 
-The macOS build uses electron-builder: see the `macos` job in `.github/workflows/kotomimi-release.yml`. The Windows installer is not code-signed.
+The macOS build uses electron-builder, on a Mac: `scripts/kotomimi-mac-release.sh`. The Windows installer is not code-signed.
 
 On Windows, keep the checkout on a short path such as `C:\src\kotomimi`, as the installer tools fail past 260 characters, and do not package from a drive root, where files go missing.
 
@@ -41,7 +41,7 @@ All five sites change in one `chore(release): vX.Y.Z` commit: `package.json`, `e
 git tag -a vX.Y.Z -m "Kotomimi X.Y.Z" && git push origin vX.Y.Z
 ```
 
-`.github/workflows/kotomimi-release.yml` refuses a tag that is not `v` plus the `package.json` version, because the updater builds its download address from the tag. It runs the fork's test list (upstream's whole suite has failures of its own), builds Windows, tries macOS (Apple silicon), which may fail, and creates a draft Release. Publish it from the Releases page: "Check for updates" sees published releases only. A manual `workflow_dispatch` run is a rehearsal that leaves Releases alone.
+`.github/workflows/kotomimi-release.yml` refuses a tag that is not `v` plus the `package.json` version, because the updater builds its download address from the tag. It runs the fork's test list (upstream's whole suite has failures of its own), builds Windows and creates a draft Release. On the Mac, in a Terminal window (the keychain is locked over SSH), run `scripts/kotomimi-mac-release.sh` on a checkout of the tag and upload what it leaves in `out/make-mac` to the draft. Then publish it: "Check for updates" sees published releases only. A manual `workflow_dispatch` run is a rehearsal that leaves Releases alone.
 
 The update feed is this repository's Releases (`electron/update-manager.js`). The app does not check at startup; Help has the check.
 
@@ -63,7 +63,7 @@ Without that file the workflow lists first-parent commit titles since the last `
 
 macOS ties keychain and microphone permissions to the signature, and Squirrel.Mac accepts only an update signed like the running app. An ad-hoc signature differs on every build, so each update is a new app to macOS: permissions are asked again and the app cannot update itself.
 
-The answer is a self-signed certificate in two repository secrets (reasoning in `docs/build/macos-auto-update.md`): `MACOS_CSC_LINK`, the `.p12` in base64, and `MACOS_CSC_KEY_PASSWORD`, its password. It must be named `Kotomimi Code Signing` (`build.mac.identity` in `package.json`). `scripts/kotomimi-mac-signing-cert.sh` makes it and stores both. The key lands beside the script, which refuses to run from `scripts`, so copy it out:
+The answer is a self-signed certificate (reasoning in `docs/build/macos-auto-update.md`) named `Kotomimi Code Signing` (`build.mac.identity` in `package.json`), imported into the Mac's login keychain and trusted for code signing. `scripts/kotomimi-mac-signing-cert.sh` makes it. The key lands beside the script, which refuses to run from `scripts`, so copy it out:
 
 ```bash
 mkdir -p ~/kotomimi-signing && cp scripts/kotomimi-mac-signing-cert.sh ~/kotomimi-signing/make-cert.sh
@@ -72,7 +72,7 @@ bash ~/kotomimi-signing/make-cert.sh
 
 On Windows, run it with Git Bash. A second run keeps the certificate and only stores it again.
 
-With the secrets, the workflow trusts the certificate (otherwise electron-builder skips signing without failing), checks the signature is pinned to it, and publishes the `.zip`, `.blockmap` and `latest-mac.yml` for in-place updates. Without them `scripts/electron-builder-fuses.js` signs ad hoc, and `latest-mac.yml` and the `.blockmap` stay out.
+electron-builder skips signing without failing when it finds no identity, so the script checks the signature is pinned to the certificate before anything is uploaded; the `.zip`, `.blockmap` and `latest-mac.yml` are what in-place updates read.
 
 Always use the same certificate: a new one means installed apps cannot update and permissions are asked again. Back up the folder and keep it out of the repository.
 
