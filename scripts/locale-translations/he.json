@@ -827,6 +827,22 @@
     "en": "Recognition",
     "text": "תמלול"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "גובה הכתוביות"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "גבוה"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "נמוך"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "בינוני"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "ב‑SteamVR, דברי הצד השני יופיעו מתחת לקו הראייה שלך. חלונית פרק כף היד היא חלון קטן בשולחן העבודה: הוסף אותה כחלון ב‑XSOverlay כדי לענוד אותה על פרק כף היד, להחליף שפות, להשהות, להפעיל או לכבות את התצוגה מעל הראש, או לנסות מודל אחר."
@@ -1395,6 +1411,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "הדיבור של הצד השני מזוהה ומתורגם לשפה שלך, בלי להחליף שפה ידנית. הדיבור שלך עדיין מתורגם לשפה שנבחרה למעלה. לזיהוי נדרש Qwen3-ASR 1.7B GGUF או API; לתרגום נדרש המנוע המובנה או API."
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · לא זמין כרגע"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "לפי בחירת המכשיר"
@@ -1744,48 +1764,48 @@
     "text": "מפתח הגישה של {{name}}"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "בטלפון הזה הוגדר מפתח גישה. אפשר למצוא אותו בטלפון תחת ״חיבור מכשירים״."
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "המכשיר הזה דורש מפתח גישה. אפשר למצוא אותו במכשיר, תחת „חיבור מכשירים“."
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "שימוש בטלפון הזה"
+    "en": "Use this device",
+    "text": "השתמש במכשיר הזה"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "המפתח שגוי. כדאי לבדוק אותו שוב."
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "הטלפון ({{address}}) לא משתף כרגע את {{name}}. יש לבחור מודל אחר בכרטיס שלו."
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "{{device}} לא מספק כרגע את {{name}}. בחר דגם אחר בכרטיס שלו."
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (אין מספיק זיכרון בטלפון)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}} (אין מספיק זיכרון במכשיר השני)"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "לטלפון ({{address}}) אין כרגע מספיק זיכרון להפעלת {{name}}. יש לבחור מודל קטן יותר בכרטיס שלו, או לסגור אפליקציות אחרות בטלפון."
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "כרגע אין ל-{{device}} מספיק זיכרון כדי להפעיל את {{name}}. בחר דגם קטן יותר בכרטיס שלו, או סגור אפליקציות אחרות במכשיר."
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "{{name}} בטלפון ({{address}}) לא מזהה את {{source}}. הוסיפו את השפה הזו בטלפון, או בחרו דגם אחר בכרטיס שלו."
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "{{name}} ב-{{device}} לא יכול לקלוט את {{source}}. הוסף את השפה הזו במכשיר, או בחר דגם אחר בכרטיס שלו."
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "לטלפון אין כרגע מספיק זיכרון להפעלת המודל הזה. יש לבחור מודל קטן יותר בכרטיס שלו, או לסגור אפליקציות אחרות בטלפון."
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "כרגע אין למכשיר השני מספיק זיכרון כדי להפעיל את הדגם הזה. בחר דגם קטן יותר בכרטיס שלו, או סגור אפליקציות אחרות בו."
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (טלפון)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "הטלפון לא מגיב. ייתכן שהמערכת השהתה אותו אחרי נעילת המסך. פתיחת Kotomimi בטלפון תאפשר להמשיך."
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "{{device}} לא מגיב. ייתכן שהוא הושהה לאחר נעילת המסך. פתח בו את Kotomimi כדי להמשיך."
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "הטלפון ({{address}}) לא מגיב. יש לוודא שהשיתוף בו מופעל ושהוא מחובר לאותה רשת Wi-Fi כמו המחשב הזה."
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "לא ניתן להתחבר אל {{device}}. ודא שהשיתוף מופעל ושהוא מחובר לאותה רשת Wi‑Fi כמו המחשב הזה."
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

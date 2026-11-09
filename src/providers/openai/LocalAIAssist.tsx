@@ -5,6 +5,7 @@ import { ServerFinder } from '../../components/LanSharing/ServerFinder';
 import ToggleSwitch from '../../components/Settings/shared/ToggleSwitch';
 import Tooltip from '../../components/Tooltip/Tooltip';
 import { canFindServers, findServers, phoneBase, phoneHears, phoneLends, plainAddress, type FoundServer, type PhoneTextModel } from '../../lib/lan/discover';
+import { useKnownDeviceStore } from '../../lib/lan/knownDevices';
 import { phoneKey, setPhoneKey } from '../../lib/lan/phoneKeys';
 import { engineNode } from '../../lib/native/remoteEngine';
 import { modelLabel } from '../../lib/lan/modelLabel';
@@ -109,8 +110,11 @@ function ServerModel({ label, value, blank, options, onChange, disabled, aside, 
   );
 }
 
-/** A device a stage can be given beside the shared one: a phone, by its address, and its name where it gave one. */
-interface OwnDevice { address: string; name: string; tablet?: boolean }
+/**
+ * A device a stage can be given beside the shared one (a phone, an iPad), by its address, its name where it gave one,
+ * and whether it answered last time it was asked (`knownDevices.ts`): one not answering now stays chosen.
+ */
+interface OwnDevice { address: string; name: string; reachable?: boolean }
 
 /**
  * A stage's device, where there is more than the shared one to run it: the device the stages share first (by the
@@ -124,7 +128,11 @@ function StageDevice({ value, shared, phones, onChange, disabled }: { value: str
     <Field label={label}>
       <select className="select-dropdown" aria-label={label} value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled}>
         <option value="">{shared}</option>
-        {phones.map((phone) => <option key={phone.address} value={plainAddress(phone.address)}>{t(phone.tablet ? 'providers.localai.tabletOption' : 'providers.localai.phoneOption', { name: phone.name || plainAddress(phone.address).replace(/:\d+$/, '') })}</option>)}
+        {phones.map((phone) => {
+          // As it names itself (an iPad, a MacBook, a phone): its address where it gave no name.
+          const named = phone.name || plainAddress(phone.address).replace(/:\d+$/, '');
+          return <option key={phone.address} value={plainAddress(phone.address)}>{phone.reachable === false ? t('providers.localai.deviceAway', { name: named }) : named}</option>;
+        })}
       </select>
     </Field>
   );
@@ -746,8 +754,10 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   // The device says what its models are for, and none of them is a text model.
   const coachNone = ownModels.some((m) => m.kind !== undefined) && coachOptions.length === 0;
 
-  // What the search above the cards last found: the devices a stage can be given a device of its own from.
-  const [seen, setSeen] = useState<readonly FoundServer[]>([]);
+  // Fork: every device a search has found, kept (`knownDevices.ts`): what a stage can be given a device of its own from,
+  // as it named itself, whether or not it answers now — not only what the last search found.
+  const seen = useKnownDeviceStore((st) => st.devices);
+  useEffect(() => { void useKnownDeviceStore.getState().hydrate(); }, []);
   // A phone that asks for an access key, picked: its key is typed under the search, which then looks again with it,
   // and the phone found answering is used as a pick of it would be (`phoneKeys.ts`).
   const [keyFor, setKeyFor] = useState<FoundServer | null>(null);
@@ -776,12 +786,12 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   const ownHears = foundHears.length > 0 ? foundHears : askedHears?.address === ownHearing ? askedHears.hears : [];
   const hearingPhones = [
     ...seen.filter(phoneHears),
-    ...(ownHearing !== '' && !seen.some((server) => phoneHears(server) && plainAddress(server.address) === ownHearing) ? [{ address: ownHearing, name: '', model: settings.asrOtherModel }] : []),
+    ...(ownHearing !== '' && !seen.some((server) => phoneHears(server) && plainAddress(server.address) === ownHearing) ? [{ address: ownHearing, name: '', model: settings.asrOtherModel, reachable: false }] : []),
   ];
   // The same of the translation and the feedback: the phones that lend a model of the stage's kind, and the one saved.
   const textPhones = (kind: PhoneTextModel['kind'], saved: string): OwnDevice[] => [
     ...seen.filter((server) => phoneLends(server, kind).length > 0),
-    ...(saved !== '' && !seen.some((server) => phoneLends(server, kind).length > 0 && plainAddress(server.address) === saved) ? [{ address: saved, name: '' }] : []),
+    ...(saved !== '' && !seen.some((server) => phoneLends(server, kind).length > 0 && plainAddress(server.address) === saved) ? [{ address: saved, name: '', reachable: false }] : []),
   ];
   // What a phone lends of a kind, as the search last found it; null where it did not find it this time.
   const lentBy = (address: string, kind: PhoneTextModel['kind']): readonly PhoneTextModel[] | null => {
@@ -853,7 +863,6 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   };
   /** What the search found: and, after a key was typed, the phone it was for, used where it now answers. */
   const searched = (servers: FoundServer[]) => {
-    setSeen(servers);
     const asked = keyAsked.current;
     if (!asked) return;
     keyAsked.current = null;

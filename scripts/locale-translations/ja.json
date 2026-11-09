@@ -827,6 +827,22 @@
     "en": "Recognition",
     "text": "文字起こし"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "字幕の高さ"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "高"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "低"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "中"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "SteamVRでは、相手の言葉が視線の下に表示されます。手首パネルはデスクトップ上の小さなウィンドウです。XSOverlayでウィンドウとして追加すれば、手首に表示して、言語の切り替え、一時停止、頭上表示のオン・オフ、別のモデルの試用ができます。"
@@ -1395,6 +1411,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "相手がどの言語で話しても、自分の言語に翻訳します。手動の切り替えは不要です。自分の発言は、上で選んだ言語に翻訳されます。音声認識には Qwen3-ASR 1.7B GGUF または API、翻訳にはネイティブエンジンまたは API が必要です。"
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · 一時的に接続できません"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "接続先のデバイスに任せる"
@@ -1744,48 +1764,48 @@
     "text": "{{name}} のアクセスキー"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "このスマホにはアクセスキーが設定されています。スマホの「デバイス接続」で確認できます。"
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "このデバイスにはアクセスキーが設定されています。「デバイス接続」で確認できます。"
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "このスマホを使う"
+    "en": "Use this device",
+    "text": "このデバイスを使う"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "キーが正しくありません。もう一度確認してください。"
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "スマートフォン（{{address}}）では現在 {{name}} を共有していません。カードで別のモデルを選んでください。"
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "{{device}}は現在、{{name}}を提供していません。カードで別のモデルを選んでください。"
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}}（スマートフォンのメモリ不足）"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}}（そのデバイスのメモリ不足）"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "スマートフォン（{{address}}）の空きメモリが足りず、{{name}} を実行できません。カードで小さいモデルに変更するか、スマートフォンのほかのアプリを閉じてください。"
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "{{device}}は現在、{{name}}を実行するメモリが足りません。カードで小さいモデルを選ぶか、そのデバイスの他のアプリを閉じてください。"
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "{{address}} のスマートフォン上の {{name}} は {{source}} を聞き取れません。スマートフォンにその言語を追加するか、カードで別のモデルを選んでください。"
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "{{device}}の{{name}}は{{source}}を認識できません。そのデバイスでこの言語を追加するか、カードで別のモデルを選んでください。"
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "スマートフォンの空きメモリが足りず、このモデルを実行できません。カードで小さいモデルに変更するか、スマートフォンのほかのアプリを閉じてください。"
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "もう一方のデバイスは現在、このモデルを実行するメモリが足りません。カードで小さいモデルを選ぶか、そのデバイスの他のアプリを閉じてください。"
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}}（スマホ）"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "スマートフォンから応答がありません。画面ロック後にシステムが動作を一時停止した可能性があります。スマートフォンで Kotomimi を開くと再開できます。"
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "{{device}}から応答がありません。ロック後にシステムで一時停止された可能性があります。そのデバイスでKotomimiを開くと再開できます。"
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "スマートフォン（{{address}}）に接続できません。共有がオンで、このパソコンと同じ Wi-Fi に接続されているか確認してください。"
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "{{device}}に接続できません。共有が有効で、このパソコンと同じWi-Fiに接続されているか確認してください。"
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

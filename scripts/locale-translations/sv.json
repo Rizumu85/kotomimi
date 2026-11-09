@@ -831,6 +831,22 @@
     "en": "Recognition",
     "text": "Taligenkänning"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "Undertextens höjd"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "Hög"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "Låg"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "Medel"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "I SteamVR visas den andra personens ord under ditt synfält. Handledspanelen är ett litet fönster på skrivbordet. Lägg till det som ett fönster i XSOverlay för att bära det på handleden och byta språk, pausa, slå på eller av visningen ovanför huvudet eller prova en annan modell."
@@ -1431,6 +1447,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "De andras tal identifieras och översätts till ditt språk oavsett vilket språk de talar. Du behöver inte byta manuellt. Det du säger översätts fortfarande till språket som valts ovan. Taligenkänningen kräver Qwen3-ASR 1.7B GGUF eller API, och översättningen kräver den inbyggda motorn eller API."
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · tillfälligt otillgänglig"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "Låt den enheten välja"
@@ -1780,48 +1800,48 @@
     "text": "Åtkomstnyckel för {{name}}"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "Den här mobilen kräver en åtkomstnyckel. Du hittar den under ”Enhetsanslutning” på mobilen."
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "Den här enheten kräver en åtkomstnyckel. Den visas på enheten under Enhetsanslutning."
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "Använd den här mobilen"
+    "en": "Use this device",
+    "text": "Använd den här enheten"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "Nyckeln stämmer inte. Kontrollera den igen."
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "Telefonen ({{address}}) delar inte {{name}} just nu. Välj en annan modell i kortet."
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "{{device}} lånar inte ut {{name}} just nu. Välj en annan modell i kortet."
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (för lite minne på telefonen)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}} (otillräckligt minne på enheten)"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "Telefonen ({{address}}) har inte tillräckligt med ledigt minne för {{name}} just nu. Välj en mindre modell i kortet eller stäng andra appar på telefonen."
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "{{device}} har inte tillräckligt med minne för {{name}} just nu. Välj en mindre modell i kortet eller stäng andra appar på enheten."
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "{{name}} på telefonen ({{address}}) kan inte höra {{source}}. Lägg till språket på telefonen eller välj en annan modell i dess kort."
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "{{name}} på {{device}} kan inte känna igen {{source}}. Lägg till språket på enheten eller välj en annan modell i kortet."
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "Telefonen har inte tillräckligt med ledigt minne för den här modellen just nu. Välj en mindre modell i kortet eller stäng andra appar på telefonen."
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "Den andra enheten har inte tillräckligt med minne för den här modellen just nu. Välj en mindre modell i kortet eller stäng andra appar på den."
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (mobil)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "Telefonen svarar inte. Systemet kan ha pausat appen när skärmen låstes. Öppna Kotomimi på telefonen för att fortsätta."
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "{{device}} svarar inte. Den kan ha pausats efter att skärmen låstes. Öppna Kotomimi på enheten för att fortsätta."
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "Telefonen ({{address}}) svarar inte. Kontrollera att delning är på och att telefonen är ansluten till samma Wi-Fi som den här datorn."
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "{{device}} svarar inte. Kontrollera att den delar och är ansluten till samma Wi-Fi som den här datorn."
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

@@ -827,6 +827,22 @@
     "en": "Recognition",
     "text": "మాటలను అక్షరాల్లోకి"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "ఉపశీర్షిక ఎత్తు"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "అధిక"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "తక్కువ"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "మధ్య"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "SteamVRలో, ఎదుటివారి మాటలు మీ చూపు రేఖకు దిగువన కనిపిస్తాయి. మణికట్టు విండో డెస్క్‌టాప్‌లోని చిన్న విండో. దాన్ని XSOverlayలో విండోగా జోడిస్తే, మణికట్టుపై ధరించి భాష మార్చడం, పాజ్ చేయడం, తలపై ప్రదర్శనను ఆన్ లేదా ఆఫ్ చేయడం, లేదా మరో మోడల్‌ను ప్రయత్నించడం చేయవచ్చు."
@@ -1395,6 +1411,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "అవతలి వారు ఏ భాషలో మాట్లాడినా గుర్తించి మీ భాషలోకి అనువదిస్తుంది. మీరు చేతితో మార్చనవసరం లేదు. మీ మాటలు మాత్రం పైన ఎంచుకున్న భాషలోకి అనువదించబడతాయి. గుర్తింపుకు Qwen3-ASR 1.7B GGUF లేదా API, అనువాదానికి నేటివ్ ఇంజిన్ లేదా API అవసరం."
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · తాత్కాలికంగా కనెక్ట్ కాలేదు"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "ఆ పరికరమే ఎంచుకుంటుంది"
@@ -1744,48 +1764,48 @@
     "text": "{{name}} యాక్సెస్ కీ"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "ఈ ఫోన్‌కు యాక్సెస్ కీ అవసరం. ఫోన్‌లోని “పరికర కనెక్షన్”లో దాన్ని చూడవచ్చు."
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "ఈ పరికరం యాక్సెస్ కీని అడుగుతోంది. ఇది పరికరంలోని「పరికర కనెక్షన్」కింద కనిపిస్తుంది."
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "ఈ ఫోన్‌ను వాడు"
+    "en": "Use this device",
+    "text": "ఈ పరికరాన్ని ఉపయోగించండి"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "ఈ కీ సరైనది కాదు. మరోసారి తనిఖీ చేయండి."
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "ఫోన్ ({{address}}) ప్రస్తుతం {{name}}ను షేర్ చేయడం లేదు. దాని కార్డ్‌లో మరో మోడల్ ఎంచుకోండి."
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "{{device}} ఇప్పుడు {{name}}ను అందించడం లేదు. దాని కార్డ్‌లో మరో మోడల్‌ను ఎంచుకోండి."
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (ఫోన్‌లో మెమరీ సరిపోదు)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}} (ఆ పరికరంలో సరిపడా మెమరీ లేదు)"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "ఫోన్‌లో ({{address}}) ఇప్పుడు {{name}} నడపడానికి సరిపడా మెమరీ లేదు. దాని కార్డ్‌లో చిన్న మోడల్ ఎంచుకోండి లేదా ఫోన్‌లో ఇతర యాప్‌లను మూసివేయండి."
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "{{device}}లో ఇప్పుడు {{name}}ను నడపడానికి సరిపడా మెమరీ లేదు. దాని కార్డ్‌లో చిన్న మోడల్‌ను ఎంచుకోండి లేదా ఆ పరికరంలోని ఇతర యాప్‌లను మూసివేయండి."
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "ఫోన్‌లోని {{name}} ({{address}})కు {{source}} అర్థం కాదు. ఫోన్‌లో ఆ భాషను జోడించండి లేదా దాని కార్డ్‌లో మరో మోడల్‌ను ఎంచుకోండి."
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "{{device}}లోని {{name}}కు {{source}} వినిపించదు. ఆ పరికరంలో ఆ భాషను జోడించండి లేదా దాని కార్డ్‌లో మరో మోడల్‌ను ఎంచుకోండి."
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "ఫోన్‌లో ఇప్పుడు ఈ మోడల్ నడపడానికి సరిపడా మెమరీ లేదు. దాని కార్డ్‌లో చిన్న మోడల్ ఎంచుకోండి లేదా ఫోన్‌లో ఇతర యాప్‌లను మూసివేయండి."
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "ఆ పరికరంలో ఇప్పుడు ఈ మోడల్‌ను నడపడానికి సరిపడా మెమరీ లేదు. దాని కార్డ్‌లో చిన్న మోడల్‌ను ఎంచుకోండి లేదా అందులోని ఇతర యాప్‌లను మూసివేయండి."
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (ఫోన్)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "ఫోన్ స్పందించడం లేదు. స్క్రీన్ లాక్ అయ్యాక సిస్టమ్ యాప్‌ను ఆపి ఉండవచ్చు. కొనసాగించేందుకు ఫోన్‌లో Kotomimi తెరవండి."
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "{{device}} స్పందించడం లేదు. లాక్ చేసిన తర్వాత అది పాజ్ అయి ఉండవచ్చు: కొనసాగించడానికి ఆ పరికరంలో Kotomimi తెరవండి."
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "ఫోన్‌కు ({{address}}) కనెక్ట్ కాలేకపోయాం. షేరింగ్ ఆన్‌లో ఉందో, ఈ కంప్యూటర్‌తో ఒకే Wi-Fiలో ఉందో చూడండి."
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "{{device}} స్పందించడం లేదు. అది షేరింగ్‌లో ఉందో, ఈ కంప్యూటర్‌తో అదే Wi-Fiలో ఉందో తనిఖీ చేయండి."
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

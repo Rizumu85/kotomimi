@@ -831,6 +831,22 @@
     "en": "Recognition",
     "text": "Transkription"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "Untertitelhöhe"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "Hoch"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "Niedrig"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "Mittel"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "In SteamVR werden die Worte der anderen unterhalb deines Sichtfelds eingeblendet. Das Handgelenkfenster ist ein kleines Fenster auf dem Desktop. Füge es in XSOverlay als Fenster hinzu, um es am Handgelenk zu tragen, die Sprache zu wechseln, zu pausieren, die Anzeige über dem Kopf ein- oder auszuschalten oder ein anderes Modell auszuprobieren."
@@ -1427,6 +1443,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "Die Sprache der anderen wird automatisch erkannt und in deine Sprache übersetzt, ohne manuelles Umschalten. Was du selbst sagst, wird weiterhin in die oben gewählte Sprache übersetzt. Die Erkennung benötigt Qwen3-ASR 1.7B GGUF oder eine API, die Übersetzung eine native Engine oder eine API."
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · vorübergehend nicht erreichbar"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "Das Gerät entscheidet"
@@ -1776,48 +1796,48 @@
     "text": "Zugriffsschlüssel für {{name}}"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "Dieses Smartphone benötigt einen Zugriffsschlüssel. Du findest ihn auf dem Smartphone unter „Geräteverbindung“."
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "Dieses Gerät verwendet einen Zugriffsschlüssel. Du findest ihn auf dem Gerät unter „Geräteverbindung“."
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "Dieses Smartphone verwenden"
+    "en": "Use this device",
+    "text": "Dieses Gerät verwenden"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "Der Schlüssel stimmt nicht. Bitte prüfe ihn noch einmal."
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "Das Smartphone ({{address}}) stellt {{name}} gerade nicht bereit. Wähle im zugehörigen Bereich ein anderes Modell."
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "{{device}} stellt {{name}} derzeit nicht zur Verfügung. Wähle in der Karte ein anderes Modell."
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (zu wenig Arbeitsspeicher auf dem Smartphone)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}} (dort nicht genug Speicher)"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "Das Smartphone ({{address}}) hat gerade nicht genug Arbeitsspeicher für {{name}}. Wähle im zugehörigen Bereich ein kleineres Modell oder schließe andere Apps auf dem Smartphone."
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "{{device}} hat derzeit nicht genug Speicher für {{name}}. Wähle in der Karte ein kleineres Modell oder schließe andere Apps auf dem Gerät."
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "{{name}} auf dem Telefon ({{address}}) kann {{source}} nicht erkennen. Füge diese Sprache auf dem Telefon hinzu oder wähle in seiner Karte ein anderes Modell."
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "{{name}} auf {{device}} unterstützt {{source}} nicht. Füge die Sprache auf dem Gerät hinzu oder wähle in der Karte ein anderes Modell."
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "Das Smartphone hat gerade nicht genug Arbeitsspeicher für dieses Modell. Wähle im zugehörigen Bereich ein kleineres Modell oder schließe andere Apps auf dem Smartphone."
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "Das andere Gerät hat derzeit nicht genug Speicher für dieses Modell. Wähle in der Karte ein kleineres Modell oder schließe andere Apps auf dem Gerät."
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (Smartphone)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "Das Smartphone antwortet nicht. Möglicherweise wurde die App nach dem Sperren angehalten. Öffne Kotomimi auf dem Smartphone, um fortzufahren."
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "{{device}} antwortet nicht. Nach dem Sperren wurde es möglicherweise pausiert. Öffne Kotomimi auf dem Gerät, um fortzufahren."
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "Das Smartphone ({{address}}) ist nicht erreichbar. Prüfe, ob die Freigabe aktiviert ist und es im selben WLAN wie dieser Computer ist."
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "{{device}} antwortet nicht. Prüfe, ob die Freigabe aktiviert ist und das Gerät mit demselben WLAN wie dieser Computer verbunden ist."
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

@@ -7,6 +7,7 @@
  */
 import { nativeStreamEvent, type NativeBridge } from './nativeEngine';
 import { phoneKey } from '../lan/phoneKeys';
+import { markKnownDevice, useKnownDeviceStore } from '../lan/knownDevices';
 
 /** What a Kotomimi phone says of itself, on every answer: that what is here is the engine. */
 export const NODE_HEADER = 'X-Kotomimi-Node';
@@ -41,11 +42,16 @@ export async function isEngineNode(baseUrl: string, fetchIt: typeof fetch, key?:
  */
 export async function engineNode(baseUrl: string, fetchIt: typeof fetch, key?: string, timeoutMs: number = ASK_TIMEOUT_MS): Promise<EngineNode | null> {
   if (!electron() || !/^http:\/\//i.test(baseUrl.trim())) return null;
+  await useKnownDeviceStore.getState().hydrate();
+  const address = new URL(baseUrl).host;
   const control = new AbortController();
   const waiting = setTimeout(() => control.abort(), timeoutMs);
   try {
     const answer = await fetchIt(modelsUrl(baseUrl), { signal: control.signal, headers: key ? { Authorization: `Bearer ${key}` } : {} });
-    if (!answer.ok || answer.headers.get(NODE_HEADER) !== ENGINE) return null;
+    markKnownDevice(address, true);
+    if (!answer.ok || answer.headers.get(NODE_HEADER) !== ENGINE) {
+      return null;
+    }
     const list = (await answer.json().catch(() => null)) as { data?: Array<{ id?: unknown }>; hear?: Array<{ id?: unknown; streams?: unknown; languages?: unknown }> } | null;
     const first = list?.data?.[0]?.id;
     const hears = Array.isArray(list?.hear) ? list.hear.flatMap((m) => (typeof m?.id === 'string' && m.id ? [m.id.slice(0, 80)] : [])) : [];
@@ -56,6 +62,7 @@ export async function engineNode(baseUrl: string, fetchIt: typeof fetch, key?: s
     } : undefined;
     return { model: typeof first === 'string' ? first.slice(0, 80) : '', hears, ...(live ? { live } : {}) };
   } catch {
+    markKnownDevice(address, false);
     return null;
   } finally {
     clearTimeout(waiting);
@@ -78,6 +85,7 @@ export function remoteBridge(base: string, { streamed = false }: { streamed?: bo
       const api = electron();
       if (!api) return null;
       try {
+        await useKnownDeviceStore.getState().hydrate();
         // The phone's key, where its owner set one (`phoneKeys.ts`): every reading of the stretch carries it.
         const key = phoneKey(base);
         const id = await api.invoke('remote-engine:stream-open', { ...init, base, ...(key ? { key } : {}), ...(streamed ? { streamed: true } : {}) });

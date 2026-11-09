@@ -831,6 +831,22 @@
     "en": "Recognition",
     "text": "Spraakherkenning"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "Hoogte ondertitels"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "Hoog"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "Laag"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "Midden"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "In SteamVR verschijnen de woorden van de andere persoon onder je blikveld. Het polsvenster is een klein venster op je desktop. Voeg het in XSOverlay toe als venster om het om je pols te dragen en van taal te wisselen, te pauzeren, de Chatbox aan of uit te zetten of een ander model te proberen."
@@ -1435,6 +1451,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "Welke taal anderen ook spreken, die wordt automatisch herkend en naar jouw taal vertaald. Je hoeft niets om te schakelen. Wat je zelf zegt, wordt nog steeds vertaald naar de hierboven gekozen taal. Voor herkenning is Qwen3-ASR 1.7B GGUF of een API nodig, voor vertaling de native engine of een API."
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · reageert niet"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "Het apparaat laten kiezen"
@@ -1784,48 +1804,48 @@
     "text": "Toegangssleutel van {{name}}"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "Deze telefoon vereist een toegangssleutel. Je vindt die op de telefoon onder ‘Apparaatverbinding’."
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "Dit apparaat heeft een toegangssleutel nodig. Je vindt die op het apparaat onder Apparaatverbinding."
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "Deze telefoon gebruiken"
+    "en": "Use this device",
+    "text": "Dit apparaat gebruiken"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "Deze sleutel klopt niet. Controleer hem nog eens."
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "De telefoon ({{address}}) stelt {{name}} nu niet beschikbaar. Kies een ander model in het bijbehorende paneel."
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "{{device}} leent {{name}} momenteel niet uit. Kies een ander model in de kaart."
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (te weinig geheugen op de telefoon)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}} (onvoldoende geheugen op dat apparaat)"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "De telefoon ({{address}}) heeft nu niet genoeg geheugen voor {{name}}. Kies een kleiner model in het bijbehorende paneel of sluit andere apps op de telefoon."
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "{{device}} heeft nu niet genoeg geheugen voor {{name}}. Kies een kleiner model in de kaart of sluit andere apps op dat apparaat."
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "{{name}} op de telefoon ({{address}}) kan {{source}} niet verstaan. Voeg die taal toe op de telefoon of kies een ander model in de kaart."
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "{{name}} op {{device}} kan {{source}} niet herkennen. Voeg die taal toe op dat apparaat of kies een ander model in de kaart."
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "De telefoon heeft nu niet genoeg geheugen voor dit model. Kies een kleiner model in het bijbehorende paneel of sluit andere apps op de telefoon."
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "Het andere apparaat heeft nu niet genoeg geheugen voor dit model. Kies een kleiner model in de kaart of sluit daar andere apps."
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (telefoon)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "De telefoon reageert niet. Mogelijk is de app gepauzeerd nadat het scherm is vergrendeld. Open Kotomimi op de telefoon om verder te gaan."
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "{{device}} reageert niet. Het is mogelijk na het vergrendelen gepauzeerd. Open Kotomimi erop om door te gaan."
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "De telefoon ({{address}}) reageert niet. Controleer of delen aanstaat en de telefoon op hetzelfde wifi-netwerk zit als deze computer."
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "{{device}} reageert niet. Controleer of het apparaat delen heeft ingeschakeld en met dezelfde wifi als deze computer is verbonden."
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

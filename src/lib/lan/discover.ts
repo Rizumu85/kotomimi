@@ -134,7 +134,13 @@ export async function findServers(): Promise<FoundServer[]> {
   try {
     const { loadPhoneKeys, phoneKeysNow } = await import('./phoneKeys');
     await loadPhoneKeys();
-    return foundServers(await api.invoke('lan:discover', { keys: phoneKeysNow() }));
+    const found = foundServers(await api.invoke('lan:discover', { keys: phoneKeysNow() }));
+    // Discovery is a snapshot. Keep the durable registry in sync so a sleeping
+    // device remains selectable and its self-reported form/capabilities survive.
+    const { useKnownDeviceStore } = await import('./knownDevices');
+    await useKnownDeviceStore.getState().hydrate();
+    useKnownDeviceStore.getState().reconcile(found);
+    return found;
   } catch {
     return [];
   }

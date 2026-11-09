@@ -827,6 +827,22 @@
     "en": "Recognition",
     "text": "Pengenalan"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "Tinggi subtitle"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "Tinggi"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "Rendah"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "Sedang"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "Di SteamVR, ucapan lawan bicara muncul di bawah garis pandang Anda. Panel pergelangan tangan adalah jendela kecil di desktop. Tambahkan sebagai jendela di XSOverlay untuk memasangnya di pergelangan tangan, lalu ganti bahasa, jeda, nyalakan atau matikan tampilan di atas kepala, atau coba model lain."
@@ -1415,6 +1431,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "Bahasa apa pun yang digunakan lawan bicara akan dikenali dan diterjemahkan ke bahasa Anda tanpa perlu beralih secara manual. Ucapan Anda tetap diterjemahkan ke bahasa yang dipilih di atas. Pengenalan suara memerlukan Qwen3-ASR 1.7B GGUF atau API; terjemahan memerlukan mesin native atau API."
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · tidak merespons"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "Ditentukan perangkat tersebut"
@@ -1764,48 +1784,48 @@
     "text": "Kunci akses {{name}}"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "Ponsel ini memerlukan kunci akses. Kuncinya dapat dilihat di menu Koneksi perangkat pada ponsel."
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "Perangkat ini menggunakan kunci akses. Anda bisa melihatnya di perangkat, pada bagian “Koneksi perangkat”."
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "Gunakan ponsel ini"
+    "en": "Use this device",
+    "text": "Gunakan perangkat ini"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "Kunci ini salah. Periksa kembali."
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "Ponsel ({{address}}) saat ini tidak membagikan {{name}}. Pilih model lain di kartunya."
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "{{device}} saat ini tidak menyediakan {{name}}. Pilih model lain di kartunya."
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (memori ponsel tidak cukup)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}} (memori perangkat tidak cukup)"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "Memori ponsel ({{address}}) saat ini tidak cukup untuk menjalankan {{name}}. Pilih model yang lebih kecil di kartunya, atau tutup aplikasi lain di ponsel."
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "{{device}} saat ini tidak memiliki cukup memori untuk menjalankan {{name}}. Pilih model yang lebih kecil di kartunya, atau tutup aplikasi lain di perangkat tersebut."
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "{{name}} di ponsel ({{address}}) tidak dapat mengenali {{source}}. Tambahkan bahasa tersebut di ponsel, atau pilih model lain pada kartunya."
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "{{name}} di {{device}} tidak mendukung bahasa {{source}}. Tambahkan bahasa tersebut di perangkat itu, atau pilih model lain di kartunya."
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "Memori ponsel saat ini tidak cukup untuk menjalankan model ini. Pilih model yang lebih kecil di kartunya, atau tutup aplikasi lain di ponsel."
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "Perangkat lain saat ini tidak memiliki cukup memori untuk menjalankan model ini. Pilih model yang lebih kecil di kartunya, atau tutup aplikasi lain di perangkat tersebut."
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (ponsel)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "Ponsel tidak merespons. Sistem mungkin menjeda aplikasi setelah layar terkunci. Buka Kotomimi di ponsel untuk melanjutkan."
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "{{device}} tidak merespons. Perangkat mungkin dijeda setelah dikunci. Buka Kotomimi di perangkat tersebut untuk melanjutkan."
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "Ponsel ({{address}}) tidak dapat dihubungi. Pastikan berbagi aktif dan ponsel terhubung ke Wi-Fi yang sama dengan komputer ini."
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "{{device}} tidak merespons. Pastikan perangkat sedang berbagi dan terhubung ke Wi-Fi yang sama dengan komputer ini."
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

@@ -823,6 +823,22 @@
     "en": "Recognition",
     "text": "Распознавание"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "Высота субтитров"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "Высокая"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "Низкая"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "Средняя"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "В SteamVR слова собеседника появляются ниже линии взгляда. Окно панели на запястье — это небольшое окно на рабочем столе. Добавьте его в XSOverlay как окно, чтобы закрепить на запястье и менять язык, ставить перевод на паузу, включать или выключать надпись над головой либо пробовать другую модель."
@@ -1391,6 +1407,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "Речь собеседника на любом языке распознаётся и переводится на ваш язык без ручного переключения. Ваша речь по-прежнему переводится на выбранный выше язык. Для распознавания нужен Qwen3-ASR 1.7B GGUF или API, для перевода — нативный движок или API."
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · временно недоступно"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "На выбор устройства"
@@ -1740,48 +1760,48 @@
     "text": "Ключ доступа для {{name}}"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "На этом телефоне задан ключ доступа. Его можно посмотреть на телефоне в разделе «Подключение устройств»."
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "Это устройство запрашивает ключ доступа. Он указан на устройстве в разделе «设备连接»."
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "Использовать этот телефон"
+    "en": "Use this device",
+    "text": "Использовать это устройство"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "Неверный ключ. Проверьте его ещё раз."
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "Телефон ({{address}}) сейчас не предоставляет доступ к {{name}}. Выберите другую модель в его карточке."
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "{{device}} сейчас не предоставляет {{name}}. Выберите другую модель в её карточке."
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (не хватает памяти на телефоне)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}} (недостаточно памяти на устройстве)"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "На телефоне ({{address}}) сейчас не хватает памяти для {{name}}. Выберите модель поменьше в его карточке или закройте другие приложения на телефоне."
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "На {{device}} сейчас недостаточно памяти для {{name}}. Выберите в карточке модель поменьше или закройте другие приложения на этом устройстве."
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "{{name}} на телефоне ({{address}}) не распознаёт {{source}}. Добавьте этот язык на телефоне или выберите другую модель в её карточке."
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "{{name}} на устройстве {{device}} не поддерживает {{source}}. Добавьте этот язык на том устройстве или выберите другую модель в её карточке."
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "На телефоне сейчас не хватает памяти для этой модели. Выберите модель поменьше в его карточке или закройте другие приложения на телефоне."
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "На другом устройстве сейчас недостаточно памяти для этой модели. Выберите в её карточке модель поменьше или закройте на нём другие приложения."
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (телефон)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "Телефон не отвечает. Возможно, система приостановила приложение после блокировки экрана. Откройте Kotomimi на телефоне, чтобы продолжить."
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "{{device}} не отвечает. Возможно, после блокировки система приостановила его работу. Откройте на нём Kotomimi, чтобы продолжить."
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "Телефон ({{address}}) не отвечает. Убедитесь, что на нём включён общий доступ и он подключён к той же сети Wi-Fi, что и этот компьютер."
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "{{device}} не отвечает. Убедитесь, что на нём включён общий доступ и оно подключено к той же сети Wi‑Fi, что и этот компьютер."
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

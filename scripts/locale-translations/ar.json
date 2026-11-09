@@ -827,6 +827,22 @@
     "en": "Recognition",
     "text": "إملاء صوتي"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "ارتفاع الترجمة النصية"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "مرتفع"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "منخفض"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "متوسط"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "في SteamVR، تظهر كلمات الطرف الآخر أسفل مجال رؤيتك. نافذة لوحة المعصم هي نافذة صغيرة على سطح المكتب؛ أضفها كنافذة في XSOverlay لتضعها على معصمك وتبدّل اللغات أو توقف الترجمة مؤقتًا أو تشغّل عرض الدردشة أعلى الرأس أو تطفئه أو تجرّب نموذجًا آخر."
@@ -1395,6 +1411,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "يتعرّف على كلام الطرف الآخر ويترجمه إلى لغتك مهما كانت لغته، دون تبديل يدوي. يظل كلامك يُترجم إلى اللغة المختارة أعلاه. يتطلب التعرّف Qwen3-ASR 1.7B GGUF أو API، وتتطلب الترجمة محركًا أصليًا أو API."
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · لا يستجيب"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "يحدده الجهاز الآخر"
@@ -1744,48 +1764,48 @@
     "text": "مفتاح وصول {{name}}"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "يتطلب هذا الهاتف مفتاح وصول. يمكنك العثور عليه في قسم «اتصال الأجهزة» على الهاتف."
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "يطلب هذا الجهاز مفتاح وصول. ستجده على الجهاز ضمن «اتصال الجهاز»."
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "استخدام هذا الهاتف"
+    "en": "Use this device",
+    "text": "استخدم هذا الجهاز"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "المفتاح غير صحيح، يُرجى التحقق منه."
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "لا يتيح الهاتف ({{address}}) استخدام {{name}} حاليًا. اختر نموذجًا آخر في بطاقته."
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "لا يوفّر {{device}} نموذج {{name}} حاليًا. اختر نموذجًا آخر من بطاقته."
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (ذاكرة الهاتف غير كافية)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}} (لا توجد ذاكرة كافية هناك)"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "لا تتوفر حاليًا ذاكرة كافية على الهاتف ({{address}}) لتشغيل {{name}}. اختر نموذجًا أصغر في بطاقته أو أغلق التطبيقات الأخرى على الهاتف."
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "لا تملك ذاكرة {{device}} الكافية لتشغيل {{name}} حاليًا. اختر نموذجًا أصغر من بطاقته، أو أغلق التطبيقات الأخرى على ذلك الجهاز."
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "{{name}} على الهاتف ({{address}}) لا يفهم {{source}}. أضف هذه اللغة على الهاتف، أو اختر نموذجًا آخر في بطاقته."
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "لا يستطيع {{name}} على {{device}} التعرّف على {{source}}. أضف تلك اللغة على الجهاز، أو اختر نموذجًا آخر من بطاقته."
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "لا تتوفر حاليًا ذاكرة كافية على الهاتف لتشغيل هذا النموذج. اختر نموذجًا أصغر في بطاقته أو أغلق التطبيقات الأخرى على الهاتف."
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "لا تملك ذاكرة الجهاز الآخر الكافية لتشغيل هذا النموذج حاليًا. اختر نموذجًا أصغر من بطاقته، أو أغلق التطبيقات الأخرى عليه."
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (هاتف)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "لا يستجيب الهاتف. ربما أوقف النظام التطبيق مؤقتًا بعد قفل الشاشة. افتح Kotomimi على الهاتف للمتابعة."
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "لا يستجيب {{device}}. ربما أوقفه النظام بعد قفل الشاشة. افتح Kotomimi عليه للمتابعة."
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "تعذّر الاتصال بالهاتف ({{address}}). تأكد من تفعيل المشاركة عليه واتصاله بشبكة Wi-Fi نفسها التي يتصل بها هذا الكمبيوتر."
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "لا يستجيب {{device}}. تأكد من تفعيل المشاركة واتصاله بشبكة Wi‑Fi نفسها المتصلة بها هذه الكمبيوتر."
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

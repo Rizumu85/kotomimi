@@ -823,6 +823,22 @@
     "en": "Recognition",
     "text": "Transcrição"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "Altura das legendas"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "Alta"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "Baixa"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "Média"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "No SteamVR, as palavras da outra pessoa aparecem abaixo da linha de visão. A janela do painel de pulso é uma pequena janela no ambiente de trabalho: adicione-a como janela no XSOverlay para a usar no pulso e mudar de idioma, pausar, ativar ou desativar o texto sobre a cabeça ou experimentar outro modelo."
@@ -1407,6 +1423,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "Reconhece a língua da outra pessoa e traduz para a sua, sem ter de mudar manualmente. O que diz continua a ser traduzido para a língua escolhida acima. O reconhecimento requer Qwen3-ASR 1.7B GGUF ou uma API; a tradução requer o motor nativo ou uma API."
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · temporariamente inacessível"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "Deixar o outro dispositivo escolher"
@@ -1756,48 +1776,48 @@
     "text": "Chave de acesso de {{name}}"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "Este telemóvel tem uma chave de acesso definida. Pode consultá-la em «Ligação de dispositivos» no telemóvel."
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "Este dispositivo pede uma chave de acesso. Ela aparece no dispositivo, em «Ligação do dispositivo»."
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "Usar este telemóvel"
+    "en": "Use this device",
+    "text": "Usar este dispositivo"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "Esta chave está incorreta. Verifique-a novamente."
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "O telemóvel ({{address}}) não está a disponibilizar {{name}} neste momento. Escolha outro modelo no respetivo painel."
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "{{device}} não disponibiliza {{name}} neste momento. Escolha outro modelo no respetivo cartão."
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (memória insuficiente no telemóvel)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}} (memória insuficiente nesse dispositivo)"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "O telemóvel ({{address}}) não tem memória suficiente para executar {{name}} neste momento. Escolha um modelo mais pequeno no respetivo painel ou feche outras aplicações no telemóvel."
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "{{device}} não tem memória suficiente para {{name}} neste momento. Escolha um modelo mais pequeno no respetivo cartão ou feche outras aplicações nesse dispositivo."
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "{{name}} no telefone ({{address}}) não reconhece {{source}}. Adicione esse idioma no telefone ou escolha outro modelo no respetivo cartão."
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "{{name}} em {{device}} não consegue reconhecer {{source}}. Adicione esse idioma nesse dispositivo ou escolha outro modelo no respetivo cartão."
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "O telemóvel não tem memória suficiente para executar este modelo neste momento. Escolha um modelo mais pequeno no respetivo painel ou feche outras aplicações no telemóvel."
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "O outro dispositivo não tem memória suficiente para este modelo neste momento. Escolha um modelo mais pequeno no respetivo cartão ou feche outras aplicações nesse dispositivo."
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (telemóvel)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "O telemóvel não responde. O sistema pode ter suspendido a aplicação após o bloqueio do ecrã. Abra o Kotomimi no telemóvel para continuar."
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "{{device}} não responde. Pode ter sido pausado após o bloqueio do ecrã: abra o Kotomimi nesse dispositivo para continuar."
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "O telemóvel ({{address}}) não responde. Confirme que está a partilhar e ligado à mesma rede Wi-Fi deste computador."
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "{{device}} não responde. Confirme que está a partilhar e ligado à mesma rede Wi-Fi que este computador."
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

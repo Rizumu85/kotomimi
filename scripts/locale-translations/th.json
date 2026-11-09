@@ -827,6 +827,22 @@
     "en": "Recognition",
     "text": "ถอดเสียง"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "ความสูงคำบรรยาย"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "สูง"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "ต่ำ"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "ปานกลาง"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "ใน SteamVR คำพูดของอีกฝ่ายจะแสดงอยู่ด้านล่างระดับสายตา หน้าต่างแผงข้อมือเป็นหน้าต่างเล็ก ๆ บนเดสก์ท็อป ให้เพิ่มเป็นหน้าต่างใน XSOverlay เพื่อสวมไว้ที่ข้อมือ แล้วใช้เปลี่ยนภาษา หยุดชั่วคราว เปิดหรือปิดการแสดงข้อความเหนือศีรษะ หรือทดลองใช้โมเดลอื่น"
@@ -1395,6 +1411,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "ไม่ว่าอีกฝ่ายพูดภาษาใด ระบบจะรู้จำและแปลเป็นภาษาของคุณโดยไม่ต้องสลับเอง ส่วนคำพูดของคุณยังแปลเป็นภาษาที่เลือกไว้ด้านบน การรู้จำเสียงต้องใช้ Qwen3-ASR 1.7B GGUF หรือ API และการแปลต้องใช้เอนจินเนทีฟหรือ API"
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · เชื่อมต่อไม่ได้ชั่วคราว"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "ให้อุปกรณ์นั้นเลือก"
@@ -1744,48 +1764,48 @@
     "text": "คีย์การเข้าถึงของ {{name}}"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "โทรศัพท์เครื่องนี้ตั้งคีย์การเข้าถึงไว้ ดูได้ที่ “การเชื่อมต่ออุปกรณ์” บนโทรศัพท์"
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "อุปกรณ์นี้ตั้งรหัสเข้าถึงไว้ ดูได้ในเมนู «การเชื่อมต่ออุปกรณ์»"
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "ใช้โทรศัพท์เครื่องนี้"
+    "en": "Use this device",
+    "text": "ใช้อุปกรณ์นี้"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "คีย์นี้ไม่ถูกต้อง โปรดตรวจสอบอีกครั้ง"
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "โทรศัพท์ ({{address}}) ไม่ได้แชร์ {{name}} ให้ใช้ในตอนนี้ เลือกโมเดลอื่นในแผง"
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "{{device}} ไม่มี {{name}} ให้ยืมในตอนนี้ เปลี่ยนเป็นโมเดลอื่นในการ์ด"
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (หน่วยความจำโทรศัพท์ไม่พอ)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}} (หน่วยความจำบนอุปกรณ์นั้นไม่พอ)"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "โทรศัพท์ ({{address}}) มีหน่วยความจำไม่พอสำหรับ {{name}} ในตอนนี้ เลือกโมเดลที่เล็กลงในแผง หรือปิดแอปอื่นบนโทรศัพท์"
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "{{device}} มีหน่วยความจำไม่พอสำหรับ {{name}} ในตอนนี้ เปลี่ยนเป็นโมเดลที่เล็กลงในการ์ด หรือปิดแอปอื่นบนอุปกรณ์นั้น"
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "{{name}} บนโทรศัพท์ ({{address}}) ไม่รองรับ {{source}} เพิ่มภาษานี้บนโทรศัพท์ หรือเลือกโมเดลอื่นในการ์ดของมัน"
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "{{name}} บน {{device}} ไม่สามารถฟัง {{source}} ได้ เพิ่มภาษานั้นบนอุปกรณ์นั้น หรือเปลี่ยนเป็นโมเดลอื่นในการ์ด"
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "โทรศัพท์มีหน่วยความจำไม่พอสำหรับโมเดลนี้ในตอนนี้ เลือกโมเดลที่เล็กลงในแผง หรือปิดแอปอื่นบนโทรศัพท์"
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "อุปกรณ์อีกเครื่องมีหน่วยความจำไม่พอสำหรับโมเดลนี้ในตอนนี้ เปลี่ยนเป็นโมเดลที่เล็กลงในการ์ด หรือปิดแอปอื่นบนนั้น"
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (โทรศัพท์)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "โทรศัพท์ไม่ตอบสนอง ระบบอาจพักแอปหลังล็อกหน้าจอ เปิด Kotomimi บนโทรศัพท์เพื่อทำต่อ"
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "{{device}} ไม่ตอบสนอง อาจถูกหยุดชั่วคราวหลังล็อกหน้าจอ เปิด Kotomimi บนอุปกรณ์นั้นเพื่อใช้งานต่อ"
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "เชื่อมต่อโทรศัพท์ ({{address}}) ไม่ได้ ตรวจว่าเปิดแชร์อยู่และใช้ Wi-Fi เดียวกับคอมพิวเตอร์นี้"
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "{{device}} ไม่ตอบสนอง ตรวจสอบว่าเปิดการแชร์อยู่ และเชื่อมต่อ Wi‑Fi เดียวกับคอมพิวเตอร์เครื่องนี้"
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

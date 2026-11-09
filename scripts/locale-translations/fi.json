@@ -823,6 +823,22 @@
     "en": "Recognition",
     "text": "Sanelu"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "Tekstityksen korkeus"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "Korkea"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "Matala"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "Keskitaso"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "SteamVR:ssä toisen osapuolen puhe näkyy näkökenttäsi alapuolella. Rannepaneeli on työpöydällä oleva pieni ikkuna: lisää se XSOverlayhin ikkunana, niin voit käyttää sitä ranteessasi ja vaihtaa kieltä, keskeyttää, ottaa pään yllä näkyvän chatin käyttöön tai pois käytöstä tai kokeilla toista mallia."
@@ -1399,6 +1415,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "Toisen osapuolen puhe tunnistetaan ja käännetään omalle kielellesi kielestä riippumatta, eikä kieltä tarvitse vaihtaa käsin. Oma puheesi käännetään edelleen yllä valitulle kielelle. Tunnistus vaatii mallin Qwen3-ASR 1.7B GGUF tai API:n, käännös natiivimoottorin tai API:n."
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · ei vastaa"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "Laite valitsee"
@@ -1748,48 +1768,48 @@
     "text": "Laitteen {{name}} pääsyavain"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "Tämä puhelin vaatii pääsyavaimen. Löydät sen puhelimen laiteyhteysasetuksista."
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "Tämä laite pyytää käyttöavainta. Se näkyy laitteen kohdassa ”Laitteen yhteys”."
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "Käytä tätä puhelinta"
+    "en": "Use this device",
+    "text": "Käytä tätä laitetta"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "Pääsyavain on väärä. Tarkista se uudelleen."
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "Puhelin ({{address}}) ei nyt jaa mallia {{name}}. Valitse kortista toinen malli."
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "{{device}} ei tarjoa mallia {{name}} tällä hetkellä. Valitse kortista toinen malli."
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (puhelimen muisti ei riitä)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}} (laitteessa ei ole tarpeeksi muistia)"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "Puhelimen ({{address}}) muisti ei nyt riitä mallille {{name}}. Valitse kortista pienempi malli tai sulje puhelimen muita sovelluksia."
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "{{device}}-laitteessa ei ole nyt tarpeeksi muistia mallille {{name}}. Valitse kortista pienempi malli tai sulje laitteen muut sovellukset."
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "{{name}} puhelimessa ({{address}}) ei kuule kieltä {{source}}. Lisää tämä kieli puhelimeen tai valitse kortista toinen malli."
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "{{device}}-laitteen {{name}} ei tunnista kieltä {{source}}. Lisää kieli laitteessa tai valitse kortista toinen malli."
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "Puhelimen muisti ei nyt riitä tälle mallille. Valitse kortista pienempi malli tai sulje puhelimen muita sovelluksia."
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "Toisessa laitteessa ei ole nyt tarpeeksi muistia tälle mallille. Valitse kortista pienempi malli tai sulje laitteen muut sovellukset."
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (puhelin)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "Puhelin ei vastaa. Järjestelmä on voinut keskeyttää sovelluksen näytön lukittuessa. Avaa Kotomimi puhelimessa jatkaaksesi."
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "{{device}} ei vastaa. Se on ehkä keskeytetty lukituksen jälkeen. Avaa Kotomimi laitteessa jatkaaksesi."
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "Puhelimeen ({{address}}) ei saada yhteyttä. Tarkista, että jakaminen on käytössä ja puhelin on samassa Wi-Fi-verkossa tämän tietokoneen kanssa."
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "{{device}} ei vastaa. Tarkista, että jakaminen on käytössä ja että laite on samassa Wi-Fi-verkossa tämän tietokoneen kanssa."
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

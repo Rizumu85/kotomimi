@@ -82,6 +82,7 @@ import {
 import { httpBaseOf } from './textModel';
 import { phoneTextBase, phoneTextList, warmPhones, type PhoneWarm } from './phoneText';
 import { loadPhoneKeys, phoneKey } from '../../lib/lan/phoneKeys';
+import { knownDeviceLabel, markKnownDevice, useKnownDeviceStore } from '../../lib/lan/knownDevices';
 import { normalizeTranscriptionLanguage, type TranscriptionHint } from './transcription';
 
 /** Where a stage runs (`localaiDevice.ts`): the same three places for what hears, what translates and what gives feedback. */
@@ -497,7 +498,7 @@ export const localaiCredentials: Provider<LocalAISettings, LocalAICredentials, n
 /**
  * What a leg leaves unnamed — a stage with no model to run, or an API with no
  * address — in the words its start refuses it with, coded by the stage, whose
- * card is where it is fixed (`noticeText`'s aliases). Asked by the builder, and
+ * card is where it is fixed (`noticeText`'s parameters). Asked by the builder, and
  * by the check for every leg, so the card never says "ready" to a run its
  * start would refuse. `coached`: the speaker's own leg, whose speech the
  * feedback answers. Without bilingual speech, only typed text needs translation.
@@ -745,6 +746,7 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
   const clock = deps.clock ?? realClock;
   return async (k: LocalAICredentials, s: LocalAISettings, ctx: CheckContext): Promise<CheckResult> => {
     const doFetch = deps.fetch ?? ((input: RequestInfo | URL, init?: RequestInit) => fetch(input, init));
+    void useKnownDeviceStore.getState().hydrate();
     const late = `A server did not answer its model list within ${CHECK_TIMEOUT_MS / 1000} s.`;
     // The other device's and the APIs' failures are coded (`CheckError`, `providers.localai.*` by `noticeText`): a person reads
     // where to look, not the check's English, which stays the message for the logs. The bound passing is one more.
@@ -816,10 +818,15 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
             answer = await doFetch(`${other.base}/models`, listing(other.key, signal));
           } catch (error) {
             if (signal.aborted) throw error;
+            if (other.phone) markKnownDevice(other.phone, false);
             // A phone the stage was given as its device is said to be one, by the address it was found at.
-            if (other.phone) throw new CheckError(`The phone (${other.phone}) could not be reached.`, 'phone_unreachable', { address: other.phone });
+            if (other.phone) {
+              const label = knownDeviceLabel(other.phone);
+              throw new CheckError(`The ${label.tablet ? 'tablet' : 'phone'} (${label.address}) could not be reached.`, 'phone_unreachable', { address: label.address, name: label.name, form: label.tablet ? 'tablet' : 'phone' });
+            }
             throw new CheckError(`The ${other.name} model's server (${other.base}) could not be reached.`, 'api_unreachable', { address: other.base });
           }
+          if (other.phone) markKnownDevice(other.phone, true);
           if (answer.status === 401 || answer.status === 403) {
             return { ok: false, code: other.key ? 'api_key_refused' : 'api_key_needed', params: { address: other.base }, reason: `The ${other.name} model's server refused the key (HTTP ${answer.status}).` };
           }
@@ -877,7 +884,10 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
             if (signal.aborted) throw error;
             lent = null;
           }
-          if (lent === null) throw new CheckError(`The phone (${phone.address}) could not be reached.`, 'phone_unreachable', { address: phone.address });
+          if (lent === null) {
+            const label = knownDeviceLabel(phone.address);
+            throw new CheckError(`The ${label.tablet ? 'tablet' : 'phone'} (${label.address}) could not be reached.`, 'phone_unreachable', { address: label.address, name: label.name, form: label.tablet ? 'tablet' : 'phone' });
+          }
           const chosen = lent.find((m) => m.id === phone.model && m.kind === phone.kind);
           if (!chosen) {
             const what = phone.kind === 'translate' ? 'translation' : 'feedback';

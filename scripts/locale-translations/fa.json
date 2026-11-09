@@ -827,6 +827,22 @@
     "en": "Recognition",
     "text": "تبدیل گفتار به متن"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "ارتفاع زیرنویس"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "بالا"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "پایین"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "متوسط"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "در SteamVR، حرف‌های طرف مقابل پایین میدان دیدتان نمایش داده می‌شود. پنجرهٔ پنل مچی، پنجرهٔ کوچکی روی دسکتاپ است؛ آن را در XSOverlay به‌عنوان پنجره اضافه کنید تا روی مچ دستتان داشته باشید و زبان را عوض کنید، مکث کنید، نمایش بالای سر را روشن یا خاموش کنید یا مدل دیگری را امتحان کنید."
@@ -1395,6 +1411,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "گفتار طرف مقابل به هر زبانی تشخیص داده می‌شود و به زبان شما ترجمه می‌شود، بدون تغییر دستی زبان. گفته‌های شما همچنان به زبان انتخاب‌شده در بالا ترجمه می‌شوند. تشخیص گفتار به Qwen3-ASR 1.7B GGUF یا API نیاز دارد و ترجمه به موتور بومی یا API."
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · موقتاً در دسترس نیست"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "به انتخاب آن دستگاه"
@@ -1744,48 +1764,48 @@
     "text": "کلید دسترسی {{name}}"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "این گوشی به کلید دسترسی نیاز دارد. می‌توانید آن را در بخش «اتصال دستگاه» گوشی ببینید."
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "این دستگاه کلید دسترسی می‌خواهد. کلید را در دستگاه، زیر بخش «اتصال دستگاه» می‌توانید ببینید."
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "استفاده از این گوشی"
+    "en": "Use this device",
+    "text": "استفاده از این دستگاه"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "این کلید درست نیست. لطفاً دوباره بررسی کنید."
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "گوشی ({{address}}) اکنون {{name}} را به اشتراک نمی‌گذارد. در کارت آن مدل دیگری انتخاب کنید."
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "{{device}} اکنون {{name}} را ارائه نمی‌کند. در کارت آن مدل دیگری انتخاب کنید."
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (حافظهٔ گوشی کافی نیست)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}} (حافظه آن دستگاه کافی نیست)"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "گوشی ({{address}}) اکنون حافظهٔ کافی برای اجرای {{name}} ندارد. در کارت آن مدل کوچک‌تری انتخاب کنید یا برنامه‌های دیگر گوشی را ببندید."
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "{{device}} اکنون حافظه کافی برای اجرای {{name}} ندارد. در کارت آن مدل کوچک‌تری انتخاب کنید یا برنامه‌های دیگر را در آن دستگاه ببندید."
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "{{name}} روی تلفن ({{address}}) نمی‌تواند {{source}} را تشخیص دهد. این زبان را به تلفن اضافه کنید یا مدل دیگری را در کارت آن انتخاب کنید."
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "{{name}} در {{device}} نمی‌تواند {{source}} را تشخیص دهد. آن زبان را در دستگاه اضافه کنید یا در کارت مدل دیگری انتخاب کنید."
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "گوشی اکنون حافظهٔ کافی برای اجرای این مدل ندارد. در کارت آن مدل کوچک‌تری انتخاب کنید یا برنامه‌های دیگر گوشی را ببندید."
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "آن دستگاه اکنون حافظه کافی برای اجرای این مدل ندارد. در کارت آن مدل کوچک‌تری انتخاب کنید یا برنامه‌های دیگر را در آن ببندید."
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (گوشی)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "گوشی پاسخ نمی‌دهد. شاید سیستم پس از قفل شدن صفحه، برنامه را متوقف کرده است. برای ادامه، Kotomimi را روی گوشی باز کنید."
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "{{device}} پاسخ نمی‌دهد. ممکن است پس از قفل شدن متوقف شده باشد؛ برای ادامه، Kotomimi را در آن باز کنید."
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "گوشی ({{address}}) پاسخ نمی‌دهد. مطمئن شوید اشتراک‌گذاری آن فعال است و به همان وای‌فای این رایانه وصل است."
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "{{device}} پاسخ نمی‌دهد. مطمئن شوید اشتراک‌گذاری روشن است و دستگاه به همان Wi-Fi این رایانه وصل است."
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

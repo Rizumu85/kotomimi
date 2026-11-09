@@ -827,6 +827,22 @@
     "en": "Recognition",
     "text": "பேச்சை எழுத்தாக்குதல்"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "வசன உயரம்"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "உயர்"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "குறைவு"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "நடுத்தரம்"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "SteamVR-ல், எதிர்புறத்தவரின் பேச்சு உங்கள் பார்வைக்குக் கீழே தோன்றும். மணிக்கட்டு பேனல் டெஸ்க்டாப்பில் உள்ள சிறிய சாளரம். அதை XSOverlay-ல் சாளரமாகச் சேர்த்து மணிக்கட்டில் அணியலாம்; மொழியை மாற்றலாம், இடைநிறுத்தலாம், மேலே காட்டப்படும் உரையை இயக்கலாம் அல்லது முடக்கலாம், மேலும் வேறு மாதிரியை முயற்சிக்கலாம்."
@@ -1395,6 +1411,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "மற்றவர் எந்த மொழியில் பேசினாலும் அதை அறிந்து உங்கள் மொழிக்கு மொழிபெயர்க்கும்; நீங்களே மாற்ற வேண்டாம். உங்கள் பேச்சு மேலே தேர்ந்தெடுத்த மொழிக்கே மொழிபெயர்க்கப்படும். பேச்சறிதலுக்கு Qwen3-ASR 1.7B GGUF அல்லது API தேவை; மொழிபெயர்ப்புக்கு இயல்நிலை இயந்திரம் அல்லது API தேவை."
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · தற்காலிகமாக இணைக்க முடியவில்லை"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "அந்தச் சாதனமே தேர்ந்தெடுக்கட்டும்"
@@ -1744,48 +1764,48 @@
     "text": "{{name}} அணுகல் சாவி"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "இந்தக் கைப்பேசியில் அணுகல் சாவி அமைக்கப்பட்டுள்ளது. கைப்பேசியின் «சாதன இணைப்பு» பகுதியில் அதைப் பார்க்கலாம்."
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "இந்தச் சாதனம் அணுகல் விசையைக் கேட்கிறது. சாதனத்தில் உள்ள「设备连接」பகுதியில் அதை பார்க்கலாம்。"
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "இந்தக் கைப்பேசியைப் பயன்படுத்து"
+    "en": "Use this device",
+    "text": "இந்தச் சாதனத்தைப் பயன்படுத்து"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "இந்தச் சாவி தவறாக உள்ளது. மீண்டும் சரிபாருங்கள்."
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "கைபேசி ({{address}}) இப்போது {{name}} ஐப் பகிரவில்லை. அதன் அட்டையில் வேறொரு மாதிரியைத் தேர்ந்தெடுங்கள்."
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "{{device}} இப்போது {{name}}-ஐ வழங்கவில்லை. அதன் கார்டில் வேறு மாடலைத் தேர்ந்தெடுக்கவும்。"
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (கைபேசியில் நினைவகம் போதவில்லை)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}}（அந்தச் சாதனத்தில் போதுமான நினைவகம் இல்லை）"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "கைபேசியில் ({{address}}) இப்போது {{name}} ஐ இயக்கப் போதுமான நினைவகம் இல்லை. அதன் அட்டையில் சிறிய மாதிரியைத் தேர்ந்தெடுங்கள் அல்லது கைபேசியின் மற்ற செயலிகளை மூடுங்கள்."
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "{{device}}-இல் இப்போது {{name}}-ஐ இயக்க போதுமான நினைவகம் இல்லை. அதன் கார்டில் சிறிய மாடலைத் தேர்ந்தெடுக்கவும் அல்லது அந்தச் சாதனத்தில் உள்ள பிற பயன்பாடுகளை மூடவும்。"
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "{{address}} என்ற தொலைபேசியில் உள்ள {{name}}க்கு {{source}} புரியவில்லை. அந்த மொழியைத் தொலைபேசியில் சேர்க்கவும் அல்லது அதன் அட்டையில் வேறு மாதிரியைத் தேர்ந்தெடுக்கவும்."
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "{{device}}-இல் உள்ள {{name}}-க்கு {{source}} மொழி புரியவில்லை. அந்தச் சாதனத்தில் அந்த மொழியைச் சேர்க்கவும் அல்லது அதன் கார்டில் வேறு மாடலைத் தேர்ந்தெடுக்கவும்。"
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "இந்த மாதிரியை இயக்கக் கைபேசியில் இப்போது போதுமான நினைவகம் இல்லை. அதன் அட்டையில் சிறிய மாதிரியைத் தேர்ந்தெடுங்கள் அல்லது கைபேசியின் மற்ற செயலிகளை மூடுங்கள்."
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "மற்ற சாதனத்தில் இப்போது இந்த மாடலை இயக்க போதுமான நினைவகம் இல்லை. அதன் கார்டில் சிறிய மாடலைத் தேர்ந்தெடுக்கவும் அல்லது அதிலுள்ள பிற பயன்பாடுகளை மூடவும்。"
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (கைப்பேசி)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "கைபேசி பதிலளிக்கவில்லை. திரை பூட்டப்பட்டதும் செயலி இடைநிறுத்தப்பட்டிருக்கலாம். தொடர, கைபேசியில் Kotomimi ஐத் திறக்கவும்."
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "{{device}} பதிலளிக்கவில்லை. பூட்டிய பிறகு அது இடைநிறுத்தப்பட்டிருக்கலாம். தொடர அந்தச் சாதனத்தில் Kotomimi-ஐத் திறக்கவும்。"
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "கைபேசியுடன் ({{address}}) இணைக்க முடியவில்லை. அதில் பகிர்வு இயக்கப்பட்டுள்ளதா, இந்தக் கணினியின் அதே Wi-Fi இல் உள்ளதா என்று சரிபாருங்கள்."
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "{{device}} பதிலளிக்கவில்லை. அது பகிர்வை இயக்கியுள்ளதையும், இந்தக் கணினியுடன் அதே Wi‑Fi-யில் இருப்பதையும் சரிபார்க்கவும்。"
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

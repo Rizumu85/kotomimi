@@ -108,12 +108,12 @@ export class Conversation {
         return;
       }
       case 'degraded': {
-        const { code, message } = event.payload;
+        const { code, message, params } = event.payload;
         // Per-utterance recognition misses stay in frames/diagnostics, not in the transcript.
         // A failed session still takes the fatal path above and remains visible.
         if (code === 'transcription_failed') return;
         if (!this.admitDegraded(code)) return;
-        return this.addNotice({ severity: CLIENT_DIAGNOSTICS[code]?.severity ?? 'warning', message, code });
+        return this.addNotice({ severity: CLIENT_DIAGNOSTICS[code]?.severity ?? 'warning', message, code, params });
       }
       case 'closed': return this.finalizeAll();
       default: return;

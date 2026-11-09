@@ -9,6 +9,7 @@
  */
 import type { Clock } from '../../lib/contract/clock';
 import { phoneKey } from '../../lib/lan/phoneKeys';
+import { markKnownDevice } from '../../lib/lan/knownDevices';
 
 /** How often a phone in use is asked, and how long it has to answer. */
 export const PHONE_WATCH_EVERY_MS = 5_000;
@@ -64,9 +65,11 @@ export function watchPhones({ fetch: doFetch, clock, onQuiet }: {
     if (answered) {
       w.misses = 0;
       w.quiet = false;
+      markKnownDevice(base, true);
       if (saidQuiet.get(base) === self) saidQuiet.delete(base);
     } else if (++w.misses >= PHONE_WATCH_MISSES && !w.quiet) {
       w.quiet = true;
+      markKnownDevice(base, false);
       if (!saidQuiet.has(base)) {
         saidQuiet.set(base, self);
         onQuiet(base);

@@ -879,6 +879,22 @@
     "en": "Recognition",
     "text": "Pagkilala sa boses"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "Taas ng subtitle"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "Mataas"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "Mababa"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "Katamtaman"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "Sa SteamVR, lalabas ang mga salita ng kausap sa ibaba ng iyong linya ng paningin. Ang panel sa pulso ay maliit na window sa desktop; idagdag ito bilang window sa XSOverlay para maisuot sa pulso, makapagpalit ng wika, mag-pause, i-on o i-off ang Chatbox, o sumubok ng ibang modelo."
@@ -1523,6 +1539,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "Anumang wika ang gamitin ng kausap ay makikilala at maisasalin sa wika mo, nang hindi kailangang manu-manong magpalit. Ang sinasabi mo ay isasalin pa rin sa wikang pinili sa itaas. Kailangan ng Qwen3-ASR 1.7B GGUF o API para sa pagkilala, at ng katutubong makina o API para sa pagsasalin."
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · hindi sumasagot"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "Ang device ang pipili"
@@ -1872,48 +1892,48 @@
     "text": "Susi sa pag-access ng {{name}}"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "May nakatakdang susi sa pag-access ang teleponong ito. Makikita ito sa “Koneksyon ng device” sa telepono."
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "Humihingi ang device na ito ng access key. Makikita ito sa device, sa ilalim ng Koneksyon ng device."
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "Gamitin ang teleponong ito"
+    "en": "Use this device",
+    "text": "Gamitin ang device na ito"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "Mali ang susi. Pakisuri ulit."
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "Hindi ibinabahagi ng telepono ({{address}}) ang {{name}} ngayon. Pumili ng ibang modelo sa card nito."
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "Hindi ipinapahiram ngayon ng {{device}} ang {{name}}. Pumili ng ibang modelo sa card nito."
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (kulang ang memorya ng telepono)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}} (kulang ang memory doon)"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "Kulang ang memorya ng telepono ({{address}}) para patakbuhin ang {{name}} ngayon. Pumili ng mas maliit na modelo sa card nito, o isara ang ibang app sa telepono."
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "Kulang ngayon ang memory ng {{device}} para sa {{name}}. Pumili ng mas maliit na modelo sa card nito, o isara ang ibang app sa device na iyon."
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "Hindi nauunawaan ng {{name}} sa telepono ({{address}}) ang {{source}}. Idagdag ang wikang ito sa telepono, o pumili ng ibang modelo sa card nito."
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "Hindi naririnig ng {{name}} sa {{device}} ang {{source}}. Idagdag ang wikang iyon sa device na iyon, o pumili ng ibang modelo sa card nito."
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "Kulang ang memorya ng telepono para patakbuhin ang modelong ito ngayon. Pumili ng mas maliit na modelo sa card nito, o isara ang ibang app sa telepono."
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "Kulang ngayon ang memory ng kabilang device para sa modelong ito. Pumili ng mas maliit na modelo sa card nito, o isara ang ibang app dito."
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (telepono)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "Hindi sumasagot ang telepono. Maaaring pinahinto ito ng system matapos ma-lock ang screen. Buksan ang Kotomimi sa telepono para magpatuloy."
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "Hindi sumasagot ang {{device}}. Maaaring na-pause ito matapos i-lock: buksan ang Kotomimi dito para magpatuloy."
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "Hindi makakonekta sa telepono ({{address}}). Tiyaking naka-on ang pagbabahagi nito at nasa parehong Wi-Fi ng computer na ito."
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "Hindi sumasagot ang {{device}}. Tiyaking naka-share ito at nasa parehong Wi-Fi ng computer na ito."
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

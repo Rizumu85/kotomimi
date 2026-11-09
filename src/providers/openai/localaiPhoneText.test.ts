@@ -145,7 +145,7 @@ describe('the check of a text stage on a phone', () => {
     const refused = await check(phoneOnly({ ...LENT, data: [{ id: 'index-translate-2b' }], text: [] }));
     expect(refused).toMatchObject({ ok: false, code: 'phone_model_gone', params: { address: PHONE, name: 'Index-Translate 2B' } });
     if (refused.ok) return;
-    expect(noticeText(t, { code: refused.code, params: refused.params, message: refused.reason })).toBe('手机（192.168.4.28:8792）现在没有借出 Index-Translate 2B。请在卡片里换一个模型。');
+    expect(noticeText(t, { code: refused.code, params: refused.params, message: refused.reason })).toBe('另一台设备（192.168.4.28:8792）现在没有借出 Index-Translate 2B。请在卡片里换一个模型。');
   });
 
   it('refuses a model the phone has not the memory for now, and says where to look', async () => {
@@ -153,7 +153,7 @@ describe('the check of a text stage on a phone', () => {
     const refused = await check(phoneOnly(small));
     expect(refused).toMatchObject({ ok: false, code: 'phone_model_too_big', params: { address: PHONE, name: 'Index-Translate 2B' } });
     if (refused.ok) return;
-    expect(noticeText(t, { code: refused.code, params: refused.params, message: refused.reason })).toBe('手机（192.168.4.28:8792）现在内存不够运行 Index-Translate 2B。请在卡片里换一个小一点的模型，或关掉手机上的其他应用。');
+    expect(noticeText(t, { code: refused.code, params: refused.params, message: refused.reason })).toBe('另一台设备（192.168.4.28:8792）现在内存不够运行 Index-Translate 2B。请在卡片里换一个小一点的模型，或关掉那台设备上的其他应用。');
     await expect(check(phoneOnly(small), { translateOtherModel: 'hy-mt2-1.8b' })).resolves.toMatchObject({ ok: true });
   });
 
@@ -166,7 +166,7 @@ describe('the check of a text stage on a phone', () => {
     const unreachable = async () => { throw new TypeError('Failed to fetch'); };
     const thrown = await check(unreachable as unknown as typeof fetch).then(() => null, (error: unknown) => error as { code?: string; params?: Record<string, string>; message: string });
     expect(thrown).toMatchObject({ code: 'phone_unreachable', params: { address: PHONE } });
-    expect(noticeText(t, { code: thrown?.code, params: thrown?.params, message: thrown?.message ?? '' })).toBe('手机（192.168.4.28:8792）连不上。请确认它开着共享，并且和这台电脑在同一个 Wi-Fi 下。');
+    expect(noticeText(t, { code: thrown?.code, params: thrown?.params, message: thrown?.message ?? '' })).toBe('另一台设备（192.168.4.28:8792）连不上。请确认它开着共享，并且和这台电脑在同一个 Wi-Fi 下。');
     // The hearing stage's phone too, though past the cards it is read as an API.
     const hearingOnly = await check(unreachable as unknown as typeof fetch, { translateAt: 'device', translateHere: 'native' }).then(() => null, (error: unknown) => error as { code?: string });
     expect(hearingOnly).toMatchObject({ code: 'phone_unreachable' });

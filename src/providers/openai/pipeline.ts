@@ -46,6 +46,7 @@ import { chatUrl, completeText, httpBaseOf } from './textModel';
 import { PHONE_BUSY_RETRIES, PHONE_TEXT_TIMEOUT_MS } from './phoneText';
 import { watchPhones, type PhoneWatch } from './phoneWatch';
 import { phoneKey } from '../../lib/lan/phoneKeys';
+import { knownDeviceLabel } from '../../lib/lan/knownDevices';
 import { unwrapTranslationText } from './wire';
 import { pairedLanguage, recognitionLimits } from './hearingPlan';
 
@@ -328,8 +329,15 @@ class PipelineLeg implements AdapterSession {
     this.phones = watchPhones({
       fetch: doFetch,
       clock: request.clock,
-      onQuiet: () => {
-        if (!this.ended) this.events.degraded({ code: 'phone_quiet', message: 'A phone this session uses stopped answering.' });
+      onQuiet: (base) => {
+        if (!this.ended) {
+          const device = knownDeviceLabel(base);
+          this.events.degraded({
+            code: 'phone_quiet',
+            message: `The ${device.tablet ? 'tablet' : 'phone'}${device.name ? ` ${device.name}` : ''} is not answering.`,
+            params: { address: device.address, name: device.name, form: device.tablet ? 'tablet' : 'phone' },
+          });
+        }
       },
     });
     for (const stage of [stages.speech, stages.typed, stages.back?.stage, stages.feedback?.stage, stages.into, ...(stages.cross ?? []).map((c) => c.stage)]) if (stage?.phone) this.watchPhone(stage.baseUrl);

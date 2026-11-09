@@ -831,6 +831,22 @@
     "en": "Recognition",
     "text": "Rozpoznawanie"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "Wysokość napisów"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "Wysoka"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "Niska"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "Średnia"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "W SteamVR słowa rozmówcy pojawiają się poniżej pola widzenia. Panel na nadgarstek to małe okno na pulpicie. Dodaj je jako okno w XSOverlay, aby umieścić je na nadgarstku i zmieniać język, wstrzymywać działanie, włączać lub wyłączać wyświetlanie nad głową albo wypróbować inny model."
@@ -1411,6 +1427,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "Wypowiedzi rozmówcy są rozpoznawane w dowolnym języku i tłumaczone na Twój, bez ręcznego przełączania. Twoje wypowiedzi nadal są tłumaczone na język wybrany powyżej. Rozpoznawanie wymaga Qwen3-ASR 1.7B GGUF lub API, a tłumaczenie silnika natywnego lub API."
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · brak odpowiedzi"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "Wybór po stronie urządzenia"
@@ -1760,48 +1780,48 @@
     "text": "Klucz dostępu do {{name}}"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "Ten telefon wymaga klucza dostępu. Znajdziesz go na telefonie w sekcji „Połączenie urządzeń”."
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "To urządzenie wymaga klucza dostępu. Znajdziesz go na urządzeniu w sekcji „设备连接”."
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "Użyj tego telefonu"
+    "en": "Use this device",
+    "text": "Użyj tego urządzenia"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "Ten klucz jest nieprawidłowy. Sprawdź go ponownie."
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "Telefon ({{address}}) nie udostępnia teraz modelu {{name}}. Wybierz inny model w jego panelu."
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "{{device}} nie udostępnia teraz {{name}}. Wybierz inny model na jego karcie."
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (za mało pamięci w telefonie)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}} (za mało pamięci na tym urządzeniu)"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "Telefon ({{address}}) ma teraz za mało pamięci, aby uruchomić {{name}}. Wybierz mniejszy model w jego panelu lub zamknij inne aplikacje na telefonie."
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "{{device}} nie ma teraz wystarczającej pamięci dla {{name}}. Wybierz mniejszy model na jego karcie lub zamknij inne aplikacje na tym urządzeniu."
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "{{name}} na telefonie ({{address}}) nie rozpoznaje języka {{source}}. Dodaj ten język na telefonie lub wybierz inny model w jego karcie."
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "{{name}} na urządzeniu {{device}} nie obsługuje języka {{source}}. Dodaj ten język na tym urządzeniu lub wybierz inny model na jego karcie."
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "Telefon ma teraz za mało pamięci na ten model. Wybierz mniejszy model w jego panelu lub zamknij inne aplikacje na telefonie."
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "Drugie urządzenie nie ma teraz wystarczającej pamięci dla tego modelu. Wybierz mniejszy model na jego karcie lub zamknij na nim inne aplikacje."
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (telefon)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "Telefon nie odpowiada. System mógł wstrzymać aplikację po zablokowaniu ekranu. Otwórz Kotomimi na telefonie, aby kontynuować."
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "{{device}} nie odpowiada. Po zablokowaniu ekranу system mógł je wstrzymać. Otwórz na nim Kotomimi, aby wznowić działanie."
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "Telefon ({{address}}) nie odpowiada. Sprawdź, czy udostępnianie jest włączone i czy telefon jest w tej samej sieci Wi-Fi co ten komputer."
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "{{device}} nie odpowiada. Sprawdź, czy udostępnia połączenie i jest w tej samej sieci Wi‑Fi co ten komputer."
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

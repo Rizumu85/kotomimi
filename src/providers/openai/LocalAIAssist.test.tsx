@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { resetKnownDevicesForTests, useKnownDeviceStore as knownStore } from '../../lib/lan/knownDevices';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { Readiness } from '../../lib/provider/types';
 import { useHeardByStore } from '../../stores/heardByStore';
@@ -22,13 +23,15 @@ vi.mock('../../components/LanSharing/ServerFinder', () => ({
       { id: 'gemma-4-e2b', kind: 'coach', name: 'Gemma 4 E2B', loaded: false },
     ] };
     const textOnly = { address: '192.168.4.30:8792', kind: 'phone', name: 'F22', product: '', models: 1, needsKey: false, self: false, text: [{ id: 'hy-mt2-1.8b', kind: 'translate', name: 'Hunyuan MT 2 1.8B', loaded: true }] };
+    // As the real search does (`findServers`): what it finds is kept (`knownDevices.ts`), and the cards read that.
+    const found = (servers: unknown[]) => { knownStore.getState().reconcile(servers as never); onFound?.(servers); };
     return (
       <>
         <button type="button" data-auto={String(Boolean(auto))} data-hint={hint} data-phone={[phone ?? []].flat().join(' ')} onClick={() => onPick({ address: '192.168.1.9:8790', kind: 'kotomimi', name: 'DESK', product: '', models: 2, needsKey: true, self: false })}>finder</button>
-        <button type="button" onClick={() => onFound?.([aPhone])}>a search that finds a phone</button>
+        <button type="button" onClick={() => found([aPhone])}>a search that finds a phone</button>
         <button type="button" onClick={() => onPick(aPhone)}>the phone, picked</button>
-        <button type="button" onClick={() => onFound?.([{ ...aPhone, name: 'iPad', tablet: true, model: 'apple-speech', hears: ['apple-speech', 'r2t2-q8'] }])}>a search that finds an iPad</button>
-        <button type="button" onClick={() => onFound?.([lending, textOnly])}>a search that finds phones lending text models</button>
+        <button type="button" onClick={() => found([{ ...aPhone, name: 'iPad', tablet: true, model: 'apple-speech', hears: ['apple-speech', 'r2t2-q8'] }])}>a search that finds an iPad</button>
+        <button type="button" onClick={() => found([lending, textOnly])}>a search that finds phones lending text models</button>
         <button type="button" onClick={() => onPick(lending)}>the lending phone, picked</button>
         <button type="button" onClick={() => onPick(textOnly)}>the text phone, picked</button>
       </>
@@ -83,6 +86,7 @@ const pressed = (buttons: Element[]) => buttons.find((b) => b.getAttribute('aria
 const options = (select: HTMLElement) => [...(select as HTMLSelectElement).options].map((o) => o.value);
 
 beforeEach(() => {
+  resetKnownDevicesForTests();
   // Nothing downloaded; the online translator is always there.
   useModelStore.setState({ initialized: true, webgpuAvailable: true, deviceFeatures: [], modelStatuses: {}, downloads: {} });
   saved.keys = {};
@@ -807,6 +811,18 @@ describe('a phone that lends its recognition: the "another device" of the hearin
     expect(options(model)).toEqual(['', 'apple-speech', 'r2t2-q8']);
     fireEvent.change(model, { target: { value: 'r2t2-q8' } });
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrOtherModel: 'r2t2-q8' }));
+  });
+
+  it('keeps a device found once, named as it names itself, after it stops answering and the card is drawn again', () => {
+    const first = draw({ settings: { asrVia: 'server' }, values: { endpoint: '192.168.1.9:8790' } });
+    fireEvent.click(screen.getByText('a search that finds an iPad'));
+    first.unmount();
+    // Asleep now: a search finds nothing of it.
+    knownStore.getState().reconcile([]);
+    const { card } = draw({ settings: { asrVia: 'server' }, values: { endpoint: '192.168.1.9:8790' } });
+    const device = card(HEAR).getByRole('combobox', { name: 'providers.localai.stageDevice' }) as HTMLSelectElement;
+    expect(options(device)).toEqual(['', '192.168.4.28:8792']);
+    expect(device.options[1].textContent).toBe('providers.localai.deviceAway');
   });
 
   it('asks the device for its recognizers where no search has found it since (a run began and ended, the app reopened)', async () => {

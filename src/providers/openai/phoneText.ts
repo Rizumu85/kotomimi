@@ -11,6 +11,7 @@
  * run's start asks it to load what it will be asked for (`warmPhones`).
  */
 import { phoneBase, phoneRoom, phoneTextModels, plainAddress, type PhoneTextModel } from '../../lib/lan/discover';
+import { markKnownDevice, useKnownDeviceStore } from '../../lib/lan/knownDevices';
 import { NATIVE_COACHES } from './nativeCoaches';
 import { NATIVE_TRANSLATORS, nativeTranslates } from './nativeTranslators';
 import { chatUrl, NO_KEY } from './textModel';
@@ -31,8 +32,16 @@ export const phoneTextBase = (address: string): string => phoneBase({ address: p
 
 /** A phone's model list, as far as a text stage asks: what it lends of text models. Null: it could not be read. */
 export async function phoneTextList(address: string, fetchIt: typeof fetch, signal: AbortSignal): Promise<PhoneTextModel[] | null> {
+  await useKnownDeviceStore.getState().hydrate();
   const key = phoneKey(address);
-  const answer = await fetchIt(`${phoneTextBase(address)}/models`, { method: 'GET', signal, ...(key ? { headers: { Authorization: `Bearer ${key}` } } : {}) });
+  let answer: Response;
+  try {
+    answer = await fetchIt(`${phoneTextBase(address)}/models`, { method: 'GET', signal, ...(key ? { headers: { Authorization: `Bearer ${key}` } } : {}) });
+  } catch (error) {
+    if (!signal.aborted) markKnownDevice(address, false);
+    throw error;
+  }
+  markKnownDevice(address, true);
   if (!answer.ok) return null;
   const body = (await answer.json().catch(() => null)) as { text?: unknown } | null;
   return body ? phoneTextModels(body.text, phoneRoom(body)) : null;

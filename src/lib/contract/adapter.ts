@@ -109,7 +109,7 @@ export interface AdapterEvents {
    * never the cause; absent, the runner's `api_error` reads `code`
    * (Stage 2 Kizuna Soniox, ruling 8).
    */
-  degraded(e: { code: ClientDiagnosticCode; message: string; cause?: unknown; reason?: string }): void;
+  degraded(e: { code: ClientDiagnosticCode; message: string; cause?: unknown; reason?: string; params?: Record<string, string | number> }): void;
   loading(e: { stage: string; done: number; total: number }): void;
   busy(e: boolean): void;
   /** Wire traffic for the Logs panel. Never audio, never a credential. */

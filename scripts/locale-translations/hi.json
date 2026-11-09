@@ -827,6 +827,22 @@
     "en": "Recognition",
     "text": "बोली से लिखाई"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "कैप्शन की ऊँचाई"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "उच्च"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "कम"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "मध्यम"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "SteamVR में, सामने वाले की बातें आपकी नज़र के नीचे दिखाई देंगी। कलाई पैनल डेस्कटॉप की एक छोटी विंडो है। इसे XSOverlay में विंडो के रूप में जोड़कर कलाई पर रखें और भाषा बदलें, रोकें, चैटबॉक्स चालू या बंद करें, या कोई दूसरा मॉडल आज़माएँ।"
@@ -1395,6 +1411,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "दूसरा व्यक्ति जो भी भाषा बोले, उसे पहचानकर आपकी भाषा में अनुवाद किया जाएगा। आपको भाषा बदलने की ज़रूरत नहीं है। आपकी बात का अनुवाद ऊपर चुनी गई भाषा में ही होगा। पहचान के लिए Qwen3-ASR 1.7B GGUF या API और अनुवाद के लिए नेटिव इंजन या API चाहिए।"
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · अभी जवाब नहीं दे रहा"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "उस डिवाइस को चुनने दें"
@@ -1744,48 +1764,48 @@
     "text": "{{name}} की एक्सेस कुंजी"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "इस फ़ोन पर एक्सेस कुंजी सेट है। उसे फ़ोन के “डिवाइस कनेक्शन” में देख सकते हैं।"
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "यह डिवाइस ऐक्सेस कुंजी मांगता है। यह डिवाइस पर «डिवाइस कनेक्शन» के तहत दिखाई देती है।"
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "यह फ़ोन इस्तेमाल करें"
+    "en": "Use this device",
+    "text": "इस डिवाइस का उपयोग करें"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "यह कुंजी सही नहीं है। कृपया दोबारा जाँचें।"
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "फ़ोन ({{address}}) अभी {{name}} शेयर नहीं कर रहा। उसके कार्ड में दूसरा मॉडल चुनें।"
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "{{device}} अभी {{name}} उपलब्ध नहीं करा रहा। उसके कार्ड में कोई दूसरा मॉडल चुनें।"
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (फ़ोन में मेमोरी कम है)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}} (वहाँ पर्याप्त मेमोरी नहीं है)"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "फ़ोन ({{address}}) में अभी {{name}} चलाने के लिए पर्याप्त मेमोरी नहीं है। उसके कार्ड में छोटा मॉडल चुनें या फ़ोन पर दूसरे ऐप बंद करें।"
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "{{device}} में अभी {{name}} चलाने के लिए पर्याप्त मेमोरी नहीं है। उसके कार्ड में छोटा मॉडल चुनें या उस डिवाइस पर दूसरे ऐप बंद करें।"
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "{{address}} वाले फ़ोन पर {{name}} को {{source}} समझ नहीं आ रही। फ़ोन पर यह भाषा जोड़ें या उसके कार्ड में कोई दूसरा मॉडल चुनें।"
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "{{device}} पर {{name}}, {{source}} भाषा नहीं सुन सकता। उस डिवाइस पर यह भाषा जोड़ें या उसके कार्ड में कोई दूसरा मॉडल चुनें।"
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "फ़ोन में अभी यह मॉडल चलाने के लिए पर्याप्त मेमोरी नहीं है। उसके कार्ड में छोटा मॉडल चुनें या फ़ोन पर दूसरे ऐप बंद करें।"
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "दूसरे डिवाइस में अभी इस मॉडल के लिए पर्याप्त मेमोरी नहीं है। उसके कार्ड में छोटा मॉडल चुनें या उस पर दूसरे ऐप बंद करें।"
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (फ़ोन)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "फ़ोन से जवाब नहीं मिल रहा। लॉक होने के बाद सिस्टम ने शायद उसे रोक दिया है। जारी रखने के लिए फ़ोन पर Kotomimi खोलें।"
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "{{device}} जवाब नहीं दे रहा। लॉक करने के बाद यह रुक गया हो सकता है। जारी रखने के लिए उस डिवाइस पर Kotomimi खोलें।"
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "फ़ोन ({{address}}) से कनेक्ट नहीं हो रहा। जाँचें कि उसकी शेयरिंग चालू है और वह इस कंप्यूटर वाले Wi-Fi से जुड़ा है।"
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "{{device}} जवाब नहीं दे रहा। जाँचें कि शेयरिंग चालू है और यह कंप्यूटर उसी Wi‑Fi से जुड़ा है।"
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

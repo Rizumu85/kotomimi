@@ -29,6 +29,14 @@ describe('noticeText', () => {
     expect(words).toBe('notices.source_ended:3');
   });
 
+  it('names another device as it names itself, at its address; by its address alone where it gave no name', () => {
+    const words = ((key: string, options: Record<string, unknown>) => (key === 'providers.localai.deviceAt' ? `${String(options.name)} (${String(options.address)})` : key === 'providers.localai.deviceUnnamed' ? `device ${String(options.address)}` : `${key}:${String(options.device)}`)) as unknown as TFunction;
+    expect(noticeText(words, { code: 'phone_unreachable', message: 'x', params: { address: '192.168.4.33:8792', name: 'Rizum iPad', form: 'tablet' } })).toBe('providers.localai.phoneUnreachable:Rizum iPad (192.168.4.33:8792)');
+    expect(noticeText(words, { code: 'phone_unreachable', message: 'x', params: { address: '192.168.4.33:8792', name: '' } })).toBe('providers.localai.phoneUnreachable:device 192.168.4.33:8792');
+    // A model's name is never taken for the device's.
+    expect(noticeText(words, { code: 'phone_model_gone', message: 'x', params: { address: '192.168.4.33:8792', name: 'Index-Translate 2B' } })).toBe('providers.localai.phoneModelGone:device 192.168.4.33:8792');
+  });
+
   it('shows the message itself for a code it has no words for, or no code', () => {
     expect(noticeText(t, { code: 'fake_build_refused', message: 'The fake refuses to build (fault knob).' })).toBe('The fake refuses to build (fault knob).');
     expect(noticeText(t, { message: 'plain' })).toBe('plain');

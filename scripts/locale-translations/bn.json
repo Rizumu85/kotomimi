@@ -827,6 +827,22 @@
     "en": "Recognition",
     "text": "শ্রুতিলিখন"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "সাবটাইটেলের উচ্চতা"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "উচ্চ"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "নিম্ন"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "মাঝারি"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "SteamVR-এ অন্য পক্ষের কথা আপনার দৃষ্টির নিচে দেখা যাবে। কব্জির প্যানেলটি ডেস্কটপের একটি ছোট উইন্ডো। XSOverlay-এ এটিকে উইন্ডো হিসেবে যোগ করলে কব্জিতে পরে ভাষা বদলাতে, বিরতি দিতে, মাথার ওপরের প্রদর্শন চালু বা বন্ধ করতে, কিংবা অন্য মডেল চেষ্টা করতে পারবেন।"
@@ -1395,6 +1411,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "অপর পক্ষ যে ভাষাতেই বলুক, তা শনাক্ত করে আপনার ভাষায় অনুবাদ হবে। হাতে ভাষা বদলাতে হবে না। আপনার কথা ওপরের বেছে নেওয়া ভাষাতেই অনুবাদ হবে। শনাক্তকরণের জন্য Qwen3-ASR 1.7B GGUF বা API এবং অনুবাদের জন্য নেটিভ ইঞ্জিন বা API লাগবে।"
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · সাড়া দিচ্ছে না"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "ওই ডিভাইসই বেছে নেবে"
@@ -1744,48 +1764,48 @@
     "text": "{{name}}-এর অ্যাক্সেস কী"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "এই ফোনে অ্যাক্সেস কী সেট করা আছে। ফোনের ‘ডিভাইস সংযোগ’ অংশে সেটি দেখতে পাবেন।"
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "এই ডিভাইসে একটি অ্যাক্সেস কী সেট করা আছে। ডিভাইসটির «ডিভাইস সংযোগ» বিভাগে এটি দেখা যাবে।"
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "এই ফোন ব্যবহার করুন"
+    "en": "Use this device",
+    "text": "এই ডিভাইসটি ব্যবহার করুন"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "এই কী সঠিক নয়। আবার মিলিয়ে দেখুন।"
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "ফোন ({{address}}) এখন {{name}} শেয়ার করছে না। কার্ডে অন্য মডেল বেছে নিন।"
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "{{device}} এখন {{name}} ধার দিচ্ছে না। এর কার্ডে অন্য একটি মডেল বেছে নিন।"
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (ফোনে পর্যাপ্ত মেমরি নেই)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}} (ওই ডিভাইসে পর্যাপ্ত মেমরি নেই)"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "ফোনে ({{address}}) এখন {{name}} চালানোর মতো মেমরি নেই। কার্ডে ছোট মডেল বেছে নিন অথবা ফোনের অন্য অ্যাপগুলো বন্ধ করুন।"
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "{{device}}-এ এখন {{name}} চালানোর মতো মেমরি নেই। এর কার্ডে ছোট একটি মডেল বেছে নিন, অথবা ওই ডিভাইসের অন্য অ্যাপগুলো বন্ধ করুন।"
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "{{address}} ফোনে থাকা {{name}} {{source}} শুনতে পায় না। ফোনে এই ভাষা যোগ করুন, অথবা এর কার্ডে অন্য একটি মডেল বেছে নিন।"
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "{{device}}-এর {{name}} {{source}} শুনতে পারে না। ওই ডিভাইসে ভাষাটি যোগ করুন, অথবা এর কার্ডে অন্য একটি মডেল বেছে নিন।"
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "ফোনে এখন এই মডেল চালানোর মতো মেমরি নেই। কার্ডে ছোট মডেল বেছে নিন অথবা ফোনের অন্য অ্যাপগুলো বন্ধ করুন।"
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "অন্য ডিভাইসে এখন এই মডেল চালানোর মতো মেমরি নেই। এর কার্ডে ছোট একটি মডেল বেছে নিন, অথবা সেটির অন্য অ্যাপগুলো বন্ধ করুন।"
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (ফোন)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "ফোন সাড়া দিচ্ছে না। স্ক্রিন লক হওয়ার পর সিস্টেম অ্যাপটি থামিয়ে দিয়ে থাকতে পারে। চালিয়ে যেতে ফোনে Kotomimi খুলুন।"
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "{{device}} সাড়া দিচ্ছে না। লক করার পর এটি সম্ভবত বিরতিতে গেছে। চালিয়ে যেতে ওই ডিভাইসে Kotomimi খুলুন।"
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "ফোনে ({{address}}) সংযোগ হচ্ছে না। ফোনে শেয়ারিং চালু আছে এবং সেটি এই কম্পিউটারের একই Wi-Fi-তে আছে কি না দেখুন।"
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "{{device}} সাড়া দিচ্ছে না। এটি শেয়ার করা আছে এবং এই কম্পিউটারের একই Wi-Fi-এ আছে কি না দেখুন।"
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

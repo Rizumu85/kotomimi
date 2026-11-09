@@ -831,6 +831,22 @@
     "en": "Recognition",
     "text": "Chép lời"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "Chiều cao phụ đề"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "Cao"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "Thấp"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "Trung bình"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "Trong SteamVR, lời của đối phương sẽ hiện bên dưới tầm nhìn của bạn. Bảng điều khiển cổ tay là một cửa sổ nhỏ trên máy tính để bàn; thêm cửa sổ này vào XSOverlay để đeo trên cổ tay, đổi ngôn ngữ, tạm dừng, bật hoặc tắt hiển thị trên đầu, hay thử model khác."
@@ -1399,6 +1415,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "Tự nhận dạng và dịch lời đối phương sang ngôn ngữ của bạn, bất kể họ nói ngôn ngữ nào, không cần đổi thủ công. Lời bạn nói vẫn được dịch sang ngôn ngữ đã chọn ở trên. Nhận dạng cần Qwen3-ASR 1.7B GGUF hoặc API; dịch cần bộ máy gốc hoặc API."
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · tạm thời không phản hồi"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "Để thiết bị đó chọn"
@@ -1748,48 +1768,48 @@
     "text": "Khóa truy cập của {{name}}"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "Điện thoại này đã đặt khóa truy cập. Bạn có thể xem khóa trong mục “Kết nối thiết bị” trên điện thoại."
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "Thiết bị này yêu cầu khóa truy cập. Bạn có thể xem khóa trong mục \"Kết nối thiết bị\" trên thiết bị."
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "Dùng điện thoại này"
+    "en": "Use this device",
+    "text": "Dùng thiết bị này"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "Khóa này chưa đúng, vui lòng kiểm tra lại."
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "Điện thoại ({{address}}) hiện không chia sẻ {{name}}. Hãy chọn mô hình khác trong thẻ tương ứng."
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "{{device}} hiện không cung cấp {{name}}. Hãy chọn model khác trong thẻ của model đó."
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (điện thoại không đủ bộ nhớ)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}} (thiết bị kia không đủ bộ nhớ)"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "Điện thoại ({{address}}) hiện không đủ bộ nhớ để chạy {{name}}. Hãy chọn mô hình nhỏ hơn trong thẻ tương ứng hoặc đóng bớt ứng dụng trên điện thoại."
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "{{device}} hiện không đủ bộ nhớ để chạy {{name}}. Hãy chọn model nhỏ hơn trong thẻ của model đó hoặc đóng các ứng dụng khác trên thiết bị."
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "{{name}} trên điện thoại ({{address}}) không nghe được {{source}}. Hãy thêm ngôn ngữ đó trên điện thoại hoặc chọn model khác trong thẻ."
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "{{name}} trên {{device}} không nhận dạng được {{source}}. Hãy thêm ngôn ngữ đó trên thiết bị hoặc chọn model khác trong thẻ của model đó."
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "Điện thoại hiện không đủ bộ nhớ để chạy mô hình này. Hãy chọn mô hình nhỏ hơn trong thẻ tương ứng hoặc đóng bớt ứng dụng trên điện thoại."
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "Thiết bị kia hiện không đủ bộ nhớ để chạy model này. Hãy chọn model nhỏ hơn trong thẻ của model đó hoặc đóng các ứng dụng khác trên thiết bị."
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (điện thoại)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "Điện thoại không phản hồi, có thể đã bị hệ thống tạm dừng sau khi khóa màn hình. Mở Kotomimi trên điện thoại để tiếp tục."
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "{{device}} không phản hồi, có thể đã bị hệ thống tạm dừng sau khi khóa màn hình. Mở Kotomimi trên thiết bị đó để tiếp tục."
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "Điện thoại ({{address}}) không phản hồi. Hãy kiểm tra điện thoại đã bật chia sẻ và đang dùng cùng mạng Wi-Fi với máy tính này."
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "Không nhận được phản hồi từ {{device}}. Hãy kiểm tra thiết bị đang bật chia sẻ và dùng cùng Wi-Fi với máy tính này."
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

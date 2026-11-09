@@ -827,6 +827,22 @@
     "en": "Recognition",
     "text": "받아쓰기"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "자막 높이"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "높음"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "낮음"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "중간"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "SteamVR에서는 상대방의 말이 시야 아래에 표시됩니다. 손목 패널은 데스크톱의 작은 창입니다. XSOverlay에서 창으로 추가하면 손목에 띄워 언어 변경, 일시정지, 머리 위 표시 켜기/끄기, 다른 모델 사용을 할 수 있습니다."
@@ -1391,6 +1407,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "상대방이 어떤 언어로 말하든 자동으로 인식해 내 언어로 번역해요. 직접 전환할 필요가 없어요. 내가 하는 말은 위에서 선택한 언어로 번역해요. 음성 인식에는 Qwen3-ASR 1.7B GGUF 또는 API가, 번역에는 네이티브 엔진 또는 API가 필요해요."
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · 일시적으로 연결할 수 없음"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "해당 기기에서 결정"
@@ -1740,48 +1760,48 @@
     "text": "{{name}}의 액세스 키"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "이 휴대폰에는 액세스 키가 설정되어 있습니다. 휴대폰의 '기기 연결'에서 확인할 수 있습니다."
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "이 기기는 액세스 키를 설정했습니다. 기기의 「기기 연결」에서 확인할 수 있습니다."
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "이 휴대폰 사용"
+    "en": "Use this device",
+    "text": "이 기기 사용"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "키가 올바르지 않습니다. 다시 확인해 주세요."
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "휴대폰({{address}})에서 현재 {{name}} 모델을 공유하지 않아요. 카드에서 다른 모델을 선택하세요."
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "{{device}}에서 지금 {{name}}을(를) 빌려주지 않습니다. 카드에서 다른 모델을 선택하세요."
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (휴대폰 메모리 부족)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}} (해당 기기의 메모리 부족)"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "휴대폰({{address}})에 지금 {{name}} 모델을 실행할 메모리가 부족해요. 카드에서 더 작은 모델을 선택하거나 휴대폰의 다른 앱을 닫으세요."
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "{{device}}의 메모리가 부족해 지금 {{name}}을(를) 실행할 수 없습니다. 카드에서 더 작은 모델을 선택하거나 해당 기기의 다른 앱을 닫으세요."
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "{{address}}의 휴대폰에서 {{name}}이(가) {{source}}을(를) 인식하지 못합니다. 휴대폰에 해당 언어를 추가하거나 카드에서 다른 모델을 선택하세요."
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "{{device}}의 {{name}}은(는) {{source}}을(를) 인식하지 못합니다. 해당 기기에서 이 언어를 추가하거나 카드에서 다른 모델을 선택하세요."
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "휴대폰에 지금 이 모델을 실행할 메모리가 부족해요. 카드에서 더 작은 모델을 선택하거나 휴대폰의 다른 앱을 닫으세요."
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "다른 기기의 메모리가 부족해 지금 이 모델을 실행할 수 없습니다. 카드에서 더 작은 모델을 선택하거나 해당 기기의 다른 앱을 닫으세요."
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (휴대폰)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "휴대폰에서 응답이 없어요. 화면이 잠긴 뒤 시스템이 앱을 일시 중지했을 수 있어요. 휴대폰에서 Kotomimi를 열면 계속할 수 있어요."
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "{{device}}이(가) 응답하지 않습니다. 잠금 후 일시 중지되었을 수 있습니다. 해당 기기에서 Kotomimi를 열면 계속할 수 있습니다."
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "휴대폰({{address}})에 연결할 수 없어요. 공유가 켜져 있고 이 컴퓨터와 같은 Wi-Fi에 연결되어 있는지 확인하세요."
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "{{device}}이(가) 응답하지 않습니다. 공유가 켜져 있고 이 컴퓨터와 같은 Wi-Fi에 연결되어 있는지 확인하세요."
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

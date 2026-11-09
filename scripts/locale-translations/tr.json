@@ -827,6 +827,22 @@
     "en": "Recognition",
     "text": "Tanıma"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "Altyazı yüksekliği"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "Yüksek"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "Düşük"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "Orta"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "SteamVR'da karşı tarafın sözleri görüş alanınızın altında görünür. Bilek paneli, masaüstündeki küçük bir penceredir: XSOverlay'de pencere olarak ekleyip bileğinizde kullanabilir, dili değiştirebilir, duraklatabilir, baş üstü gösterimini açıp kapatabilir veya başka bir model deneyebilirsiniz."
@@ -1395,6 +1411,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "Karşı taraf hangi dili konuşursa konuşsun algılanır ve sizin dilinize çevrilir; elle değiştirmeniz gerekmez. Sizin söyledikleriniz yine yukarıda seçilen dile çevrilir. Tanıma için Qwen3-ASR 1.7B GGUF veya API, çeviri için yerel motor veya API gerekir."
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · geçici olarak ulaşılamıyor"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "Cihaz seçsin"
@@ -1744,48 +1764,48 @@
     "text": "{{name}} erişim anahtarı"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "Bu telefonda bir erişim anahtarı ayarlanmış. Anahtarı telefondaki \"Cihaz bağlantısı\" bölümünde görebilirsiniz."
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "Bu cihaz bir erişim anahtarı istiyor. Anahtarı cihazdaki「设备连接」bölümünde bulabilirsiniz."
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "Bu telefonu kullan"
+    "en": "Use this device",
+    "text": "Bu cihazı kullan"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "Anahtar yanlış. Lütfen tekrar kontrol edin."
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "Telefon ({{address}}) şu anda {{name}} modelini paylaşıma sunmuyor. Kartından başka bir model seçin."
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "{{device}} şu anda {{name}} modelini paylaşmıyor. Kartından başka bir model seçin."
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (telefonun belleği yetersiz)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}} (cihazda yeterli bellek yok)"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "Telefonun ({{address}}) belleği şu anda {{name}} modelini çalıştırmaya yetmiyor. Kartından daha küçük bir model seçin veya telefondaki diğer uygulamaları kapatın."
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "{{device}} şu anda {{name}} çalıştırmak için yeterli belleğe sahip değil. Kartından daha küçük bir model seçin veya cihazdaki diğer uygulamaları kapatın."
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "{{address}} adresindeki telefonda {{name}}, {{source}} dilini duyamıyor. Telefona bu dili ekleyin veya kartındaki başka bir modeli seçin."
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "{{device}} üzerindeki {{name}}, {{source}} dilini anlayamıyor. Bu dili cihazda ekleyin veya kartından başka bir model seçin."
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "Telefonun belleği şu anda bu modeli çalıştırmaya yetmiyor. Kartından daha küçük bir model seçin veya telefondaki diğer uygulamaları kapatın."
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "Diğer cihaz şu anda bu modeli çalıştırmak için yeterli belleğe sahip değil. Kartından daha küçük bir model seçin veya cihazdaki diğer uygulamaları kapatın."
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (telefon)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "Telefon yanıt vermiyor. Ekran kilitlendikten sonra sistem uygulamayı duraklatmış olabilir. Devam etmek için telefonda Kotomimi'yi açın."
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "{{device}} yanıt vermiyor. Kilitlendikten sonra duraklatılmış olabilir: devam etmek için cihazda Kotomimi'yi açın."
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "Telefon ({{address}}) yanıt vermiyor. Paylaşımın açık olduğundan ve telefonun bu bilgisayarla aynı Wi-Fi ağına bağlı olduğundan emin olun."
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "{{device}} yanıt vermiyor. Paylaşımın açık ve bilgisayarınızla aynı Wi-Fi ağında olduğundan emin olun."
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

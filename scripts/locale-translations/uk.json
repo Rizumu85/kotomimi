@@ -823,6 +823,22 @@
     "en": "Recognition",
     "text": "Розпізнавання мовлення"
   },
+  "fork.vr.height": {
+    "en": "Caption height",
+    "text": "Висота субтитрів"
+  },
+  "fork.vr.heightHigh": {
+    "en": "High",
+    "text": "Висока"
+  },
+  "fork.vr.heightLow": {
+    "en": "Low",
+    "text": "Низька"
+  },
+  "fork.vr.heightMid": {
+    "en": "Middle",
+    "text": "Середня"
+  },
   "fork.vr.help": {
     "en": "In SteamVR, the other side's words appear below your line of sight. The wrist panel is a small window on the desktop: add it as a window in XSOverlay to wear it on your wrist and switch languages, pause, turn the chatbox on or off, or try another model.",
     "text": "У SteamVR слова співрозмовника з’являються нижче лінії погляду. Панель на зап’ясті — це невелике вікно на робочому столі. Додайте його як вікно в XSOverlay, щоб носити його на зап’ясті, змінювати мову, призупиняти переклад, вмикати чи вимикати відображення над головою або випробувати іншу модель."
@@ -1391,6 +1407,10 @@
     "en": "Whatever language the others speak is recognized and translated into yours, with nothing to switch. What you say is still translated into the language chosen above. Recognition needs Qwen3-ASR 1.7B GGUF or an API; translation needs the native engine or an API.",
     "text": "Мовлення співрозмовника розпізнається й перекладається вашою мовою незалежно від того, якою мовою він говорить. Нічого перемикати не потрібно. Ваше мовлення й надалі перекладається мовою, вибраною вище. Для розпізнавання потрібна Qwen3-ASR 1.7B GGUF або API, для перекладу — нативний рушій або API."
   },
+  "providers.localai.deviceAway": {
+    "en": "{{name}} · not answering",
+    "text": "{{name}} · тимчасово недоступний"
+  },
   "providers.localai.deviceDefault": {
     "en": "The device's own choice",
     "text": "За вибором того пристрою"
@@ -1740,48 +1760,48 @@
     "text": "Ключ доступу до {{name}}"
   },
   "providers.localai.phoneKeyNote": {
-    "en": "This phone asks for an access key. It is shown on the phone, under 设备连接.",
-    "text": "На цьому телефоні задано ключ доступу. Його можна переглянути на телефоні в розділі «Підключення пристроїв»."
+    "en": "This device asks for an access key. It is shown on the device, under 设备连接.",
+    "text": "Цей пристрій запитує ключ доступу. Його можна переглянути на пристрої в розділі «Підключення пристроїв»."
   },
   "providers.localai.phoneKeyUse": {
-    "en": "Use this phone",
-    "text": "Використати цей телефон"
+    "en": "Use this device",
+    "text": "Використати цей пристрій"
   },
   "providers.localai.phoneKeyWrong": {
     "en": "The phone did not take this key.",
     "text": "Неправильний ключ. Перевірте його ще раз."
   },
   "providers.localai.phoneModelGone": {
-    "en": "The phone ({{address}}) does not lend {{name}} now. Choose another model in its card.",
-    "text": "Телефон ({{address}}) зараз не надає доступу до {{name}}. Виберіть іншу модель у картці."
+    "en": "{{device}} does not lend {{name}} now. Choose another model in its card.",
+    "text": "{{device}} зараз не надає {{name}}. Виберіть іншу модель у її картці."
   },
   "providers.localai.phoneModelTooBig": {
-    "en": "{{name}} (not enough memory on the phone)",
-    "text": "{{name}} (бракує пам’яті на телефоні)"
+    "en": "{{name}} (not enough memory there)",
+    "text": "{{name}} (недостатньо пам’яті на тому пристрої)"
   },
   "providers.localai.phoneModelTooBigCheck": {
-    "en": "The phone ({{address}}) has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "Телефону ({{address}}) зараз бракує пам’яті для {{name}}. Виберіть меншу модель у картці або закрийте інші застосунки на телефоні."
+    "en": "{{device}} has not the memory for {{name}} now. Choose a smaller model in its card, or close other apps on that device.",
+    "text": "На {{device}} зараз недостатньо пам’яті для {{name}}. Виберіть меншу модель у її картці або закрийте інші програми на цьому пристрої."
   },
   "providers.localai.phoneNoLanguage": {
-    "en": "{{name}} on the phone ({{address}}) does not hear {{source}}. Add that language on the phone, or choose another model in its card.",
-    "text": "{{name}} на телефоні ({{address}}) не розпізнає {{source}}. Додайте цю мову на телефоні або виберіть іншу модель у його картці."
+    "en": "{{name}} on {{device}} does not hear {{source}}. Add that language on that device, or choose another model in its card.",
+    "text": "{{name}} на {{device}} не розпізнає {{source}}. Додайте цю мову на тому пристрої або виберіть іншу модель у її картці."
   },
   "providers.localai.phoneNoMemory": {
-    "en": "The phone has not the memory for this model now. Choose a smaller model in its card, or close other apps on the phone.",
-    "text": "Телефону зараз бракує пам’яті для цієї моделі. Виберіть меншу модель у картці або закрийте інші застосунки на телефоні."
+    "en": "The other device has not the memory for this model now. Choose a smaller model in its card, or close other apps on it.",
+    "text": "На іншому пристрої зараз недостатньо пам’яті для цієї моделі. Виберіть меншу модель у її картці або закрийте на ньому інші програми."
   },
   "providers.localai.phoneOption": {
     "en": "{{name}} (phone)",
     "text": "{{name}} (телефон)"
   },
   "providers.localai.phoneQuiet": {
-    "en": "The phone is not answering. It may have been paused after locking: open Kotomimi on the phone to go on.",
-    "text": "Телефон не відповідає. Можливо, система призупинила застосунок після блокування екрана. Відкрийте Kotomimi на телефоні, щоб продовжити."
+    "en": "{{device}} is not answering. It may have been paused after locking: open Kotomimi on it to go on.",
+    "text": "{{device}} не відповідає. Можливо, після блокування екрана система призупинила його роботу. Відкрийте на ньому Kotomimi, щоб продовжити."
   },
   "providers.localai.phoneUnreachable": {
-    "en": "The phone ({{address}}) does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
-    "text": "Телефон ({{address}}) не відповідає. Перевірте, чи ввімкнено на ньому спільний доступ і чи підключений він до тієї ж мережі Wi-Fi, що й цей комп’ютер."
+    "en": "{{device}} does not answer. Check that it is sharing, on the same Wi-Fi as this computer.",
+    "text": "{{device}} не відповідає. Переконайтеся, що на ньому ввімкнено спільний доступ і він підключений до тієї самої мережі Wi-Fi, що й цей комп’ютер."
   },
   "providers.localai.pipelineModel": {
     "en": "Setup name on that device",

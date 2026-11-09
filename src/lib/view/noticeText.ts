@@ -23,6 +23,20 @@ function named(params: Record<string, string | number> | undefined): Record<stri
   return Object.fromEntries(Object.entries(params).map(([key, value]) => [key, LANGUAGE_PARAMS.has(key) && typeof value === 'string' ? languageLabel(value, i18next.language) : value]));
 }
 
+/**
+ * Fork: another device a notice is about, named as it names itself at its address (`{{device}}`), its address alone
+ * where it gave no name — never "phone" for an iPad or a Mac. Only these two carry its name; in the others `name` is a
+ * model's.
+ */
+const DEVICE_NAMED = new Set(['phone_unreachable', 'phone_quiet']);
+const DEVICE_AT = new Set([...DEVICE_NAMED, 'phone_model_too_big', 'phone_model_gone', 'phone_no_language']);
+function withDevice(t: TFunction, code: string | undefined, params: Record<string, string | number> | undefined): Record<string, string | number> | undefined {
+  if (code === undefined || !DEVICE_AT.has(code) || !params) return params;
+  const address = String(params.address ?? '');
+  const name = DEVICE_NAMED.has(code) && typeof params.name === 'string' ? params.name.trim() : '';
+  return { ...params, device: name && address ? t('providers.localai.deviceAt', { name, address }) : name || t('providers.localai.deviceUnnamed', { address }) };
+}
+
 /** The English for every code a surface puts into words; `src/locales/en/translation.json`'s `notices` holds the same, word for word. */
 export const NOTICE_WORDS: Readonly<Record<string, string>> = {
   // The runner's own (RUN_NOTICE_CODES).
@@ -193,8 +207,9 @@ export const NOTICE_ALIASES: Readonly<Record<string, string>> = {
 export function noticeText(t: TFunction, notice: NoticeWords): string {
   const alias = notice.code === undefined ? undefined : NOTICE_ALIASES[notice.code];
   // A catalog lacking the key shows the diagnostic English, as a code with no words does.
-  if (alias !== undefined) return t(alias, { defaultValue: notice.message, ...named(notice.params), detail: notice.message });
+  const params = withDevice(t, notice.code, named(notice.params));
+  if (alias !== undefined) return t(alias, { defaultValue: notice.message, ...params, detail: notice.message });
   const words = notice.code === undefined ? undefined : NOTICE_WORDS[notice.code];
   if (words === undefined) return notice.message;
-  return t(`notices.${notice.code}`, { defaultValue: words, ...named(notice.params), detail: notice.message });
+  return t(`notices.${notice.code}`, { defaultValue: words, ...params, detail: notice.message });
 }
