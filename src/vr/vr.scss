@@ -45,10 +45,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 .status__right.is-paused { color: tk.$color-warning; }
 .status__right.is-error { color: tk.$color-error; }
 
-// Four lines: the room the row of their languages had, now the captions'. A fixed height, the newest at the bottom and
-// the oldest leaving at the top: the window is the page's size, and a wrist tool would rescale it at every wrapped line.
+// The room two rows of buttons leave. A fixed height, the newest at the bottom and the oldest leaving at the top: the
+// window is the page's size, and a wrist tool would rescale it at every wrapped line.
 .recent {
-  display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; height: 176px; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; height: 230px; overflow: hidden;
   // The line leaving at the top fades out rather than being cut through (the mask reads only the alpha).
   mask-image: linear-gradient(to bottom, transparent, currentColor 28px);
 }
@@ -66,10 +66,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 .chip.is-on { background: tk.$color-primary-fill; border-color: tk.$color-primary-fill; color: tk.$color-on-primary; }
 .chip.is-open { border-color: tk.$color-primary; color: tk.$color-primary; background: transparent; }
 // Every language, in the captions' place while a language is chosen.
-.more { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; min-height: 176px; max-height: 176px; overflow-y: auto; align-content: start; }
+.more { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; min-height: 230px; max-height: 230px; overflow-y: auto; align-content: start; }
 .more .chip { height: 48px; font-size: 16px; }
 
-.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+// Two rows: a wide button of their language, and two small squares whose icons say what they do.
+.actions { display: grid; grid-template-columns: 1fr 48px 48px; gap: 6px; }
 .act {
   height: 48px; border-radius: 12px; border: 0; background: $bg-surface; color: $text-secondary; font-size: 16px;
   display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 6px;
@@ -82,6 +83,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 // Their languages, lit: filled, as their chips in the settings are.
 .act--lang { overflow: hidden; text-overflow: ellipsis; font-weight: $weight-medium; }
 .act--lang.is-lit { background: tk.$color-primary-fill; color: tk.$color-on-primary; }
+.act--icon { padding: 0; }
 .act--lang.is-open { box-shadow: inset 0 0 0 1px tk.$color-primary; color: tk.$color-primary; }
 
 // ── The second page ──

@@ -30,8 +30,9 @@ describe('the wrist panel: their languages in the first row of six buttons (fork
     render(<Wrist state={state({ lit: 'ko' })} perf={null} />);
     const buttons = document.querySelectorAll('.actions button');
     expect(buttons).toHaveLength(6);
-    expect([...buttons].slice(0, 2).map((b) => b.textContent)).toEqual(['英语', '韩语']);
-    fireEvent.click(buttons[1]);
+    // Two rows: their language wide, then two squares named by their icons' labels.
+    expect([...buttons].map((b) => b.textContent || b.getAttribute('aria-label'))).toEqual(['英语', 'resume', 'hide', '韩语', 'chatbox', 'tune']);
+    fireEvent.click(buttons[3]);
     expect(sent).toEqual([{ type: 'theirs', value: 'ko' }]);
   });
 

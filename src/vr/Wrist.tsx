@@ -9,7 +9,7 @@
  * with how it ran in this session, under the headset's frame rate and the
  * card's memory, for trying a model out while playing.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { ChevronLeft, Eye, EyeOff, MessageSquare, MessageSquareOff, MicOff, Pause, Play, Plus, SlidersHorizontal } from 'lucide-react';
 import { fill, send } from './bridge';
 import type { VrModel, VrPerf, VrState, VrWords } from './types';
@@ -40,7 +40,7 @@ function Dots({ state }: { state: VrState }) {
 function Recent({ state }: { state: VrState }) {
   return (
     <div className="recent">
-      {state.lines.slice(-4).map((line) => (line.leg === 'speaker' ? (
+      {state.lines.slice(-5).map((line) => (line.leg === 'speaker' ? (
         <div key={line.id} className="line line--mine"><span className="line__who">{state.words.me} · </span>{line.source}</div>
       ) : (
         <div key={line.id} className="line">
@@ -63,12 +63,18 @@ function Main({ state, onTune }: { state: VrState; onTune: () => void }) {
   };
   const on = (value: string) => value === theirs.value || value === theirs.lit;
   const running = state.phase !== 'idle';
-  // Their languages lit, in the first row of the buttons (a friend's ask, 2026-11-09: the captions get the room the row
-  // of chips had). With two lit, a press puts one out; the only one lit, or "+", opens every language in the captions'
-  // place, theirs first.
+  // Two rows of buttons, a wide one of their languages lit and two small squares each (a friend's ask, 2026-11-09: the
+  // icons say what they do, and the captions take the room). With two lit, a press puts one out; the only one lit, or
+  // "+", opens every language in the captions' place, theirs first.
   const lit = [theirs.value, ...(theirs.lit ? [theirs.lit] : [])];
   const two = lit.length > 1;
   const listed = [...theirs.quick.filter((value) => theirs.options.some((o) => o.value === value)), ...theirs.options.map((o) => o.value).filter((value) => !theirs.quick.includes(value))];
+  const langButton = (value: string) => (
+    <button key={value} type="button" className="act act--lang is-lit" aria-pressed onClick={() => (two && theirs.row ? pick(value) : setMore(!more))}>{label(value)}</button>
+  );
+  const square = (name: string, icon: ReactNode, onClick: () => void, on?: boolean) => (
+    <button type="button" className={`act act--icon${on ? ' is-on' : ''}`} aria-label={name} title={name} {...(on !== undefined ? { 'aria-pressed': on } : {})} onClick={onClick}>{icon}</button>
+  );
   return (
     <>
       <Dots state={state} />
@@ -80,22 +86,14 @@ function Main({ state, onTune }: { state: VrState; onTune: () => void }) {
         </div>
       ) : <Recent state={state} />}
       <div className="actions">
-        {lit.map((value) => (
-          <button key={value} type="button" className="act act--lang is-lit" aria-pressed onClick={() => (two && theirs.row ? pick(value) : setMore(!more))}>{label(value)}</button>
-        ))}
-        {!two && (
-          <button type="button" className={`act act--lang${more ? ' is-open' : ''}`} aria-label={words.more} onClick={() => setMore(!more)}><Plus size={ICON} /></button>
+        {langButton(lit[0])}
+        {square(running ? words.pause : words.resume, running ? <Pause size={ICON} /> : <Play size={ICON} />, () => send({ type: 'run', on: !running }))}
+        {square(state.strip ? words.hide : words.show, state.strip ? <EyeOff size={ICON} /> : <Eye size={ICON} />, () => send({ type: 'strip', on: !state.strip }))}
+        {two ? langButton(lit[1]) : (
+          <button type="button" className={`act act--lang${more ? ' is-open' : ''}`} aria-label={words.more} title={words.more} onClick={() => setMore(!more)}><Plus size={ICON} /></button>
         )}
-        <button type="button" className="act" onClick={() => send({ type: 'run', on: !running })}>
-          {running ? <><Pause size={ICON} />{words.pause}</> : <><Play size={ICON} />{words.resume}</>}
-        </button>
-        <button type="button" className="act" onClick={() => send({ type: 'strip', on: !state.strip })}>
-          {state.strip ? <><EyeOff size={ICON} />{words.hide}</> : <><Eye size={ICON} />{words.show}</>}
-        </button>
-        <button type="button" className={`act${state.chatbox ? ' is-on' : ''}`} aria-pressed={state.chatbox} onClick={() => send({ type: 'chatbox', on: !state.chatbox })}>
-          {state.chatbox ? <MessageSquare size={ICON} /> : <MessageSquareOff size={ICON} />}{words.chatbox}
-        </button>
-        <button type="button" className="act" onClick={onTune}><SlidersHorizontal size={ICON} />{words.tune}</button>
+        {square(words.chatbox, state.chatbox ? <MessageSquare size={ICON} /> : <MessageSquareOff size={ICON} />, () => send({ type: 'chatbox', on: !state.chatbox }), state.chatbox)}
+        {square(words.tune, <SlidersHorizontal size={ICON} />, onTune)}
       </div>
     </>
   );
