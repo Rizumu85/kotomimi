@@ -844,8 +844,8 @@
     "text": "No SteamVR, as palavras da outra pessoa aparecem abaixo da linha de visão. A janela do painel de pulso é uma pequena janela no ambiente de trabalho: adicione-a como janela no XSOverlay para a usar no pulso e mudar de idioma, pausar, ativar ou desativar o texto sobre a cabeça ou experimentar outro modelo."
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "Ocultar"
+    "en": "Hide headset captions",
+    "text": "Ocultar legendas do visor"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -916,8 +916,8 @@
     "text": "Mostrar legendas no headset"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "Mostrar"
+    "en": "Show headset captions",
+    "text": "Mostrar legendas do visor"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

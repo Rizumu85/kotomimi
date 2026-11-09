@@ -852,8 +852,8 @@
     "text": "In SteamVR werden die Worte der anderen unterhalb deines Sichtfelds eingeblendet. Das Handgelenkfenster ist ein kleines Fenster auf dem Desktop. Füge es in XSOverlay als Fenster hinzu, um es am Handgelenk zu tragen, die Sprache zu wechseln, zu pausieren, die Anzeige über dem Kopf ein- oder auszuschalten oder ein anderes Modell auszuprobieren."
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "Ausblenden"
+    "en": "Hide headset captions",
+    "text": "Untertitel im Headset ausblenden"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -924,8 +924,8 @@
     "text": "Untertitel im Headset anzeigen"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "Anzeigen"
+    "en": "Show headset captions",
+    "text": "Untertitel im Headset anzeigen"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

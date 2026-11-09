@@ -848,8 +848,8 @@
     "text": "ใน SteamVR คำพูดของอีกฝ่ายจะแสดงอยู่ด้านล่างระดับสายตา หน้าต่างแผงข้อมือเป็นหน้าต่างเล็ก ๆ บนเดสก์ท็อป ให้เพิ่มเป็นหน้าต่างใน XSOverlay เพื่อสวมไว้ที่ข้อมือ แล้วใช้เปลี่ยนภาษา หยุดชั่วคราว เปิดหรือปิดการแสดงข้อความเหนือศีรษะ หรือทดลองใช้โมเดลอื่น"
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "ซ่อน"
+    "en": "Hide headset captions",
+    "text": "ซ่อนคำบรรยายบนเฮดเซ็ต"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -920,8 +920,8 @@
     "text": "แสดงคำบรรยายในเฮดเซ็ต"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "แสดง"
+    "en": "Show headset captions",
+    "text": "แสดงคำบรรยายบนเฮดเซ็ต"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

@@ -852,8 +852,8 @@
     "text": "I SteamVR visas den andra personens ord under ditt synfält. Handledspanelen är ett litet fönster på skrivbordet. Lägg till det som ett fönster i XSOverlay för att bära det på handleden och byta språk, pausa, slå på eller av visningen ovanför huvudet eller prova en annan modell."
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "Dölj"
+    "en": "Hide headset captions",
+    "text": "Dölj undertexter i headset"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -924,8 +924,8 @@
     "text": "Visa undertexter i headsetet"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "Visa"
+    "en": "Show headset captions",
+    "text": "Visa undertexter i headset"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

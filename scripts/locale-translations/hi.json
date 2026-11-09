@@ -848,8 +848,8 @@
     "text": "SteamVR में, सामने वाले की बातें आपकी नज़र के नीचे दिखाई देंगी। कलाई पैनल डेस्कटॉप की एक छोटी विंडो है। इसे XSOverlay में विंडो के रूप में जोड़कर कलाई पर रखें और भाषा बदलें, रोकें, चैटबॉक्स चालू या बंद करें, या कोई दूसरा मॉडल आज़माएँ।"
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "छिपाएँ"
+    "en": "Hide headset captions",
+    "text": "हेडसेट के कैप्शन छिपाएँ"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -920,8 +920,8 @@
     "text": "हेडसेट में सबटाइटल दिखाएँ"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "दिखाएँ"
+    "en": "Show headset captions",
+    "text": "हेडसेट के कैप्शन दिखाएँ"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

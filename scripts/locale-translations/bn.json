@@ -848,8 +848,8 @@
     "text": "SteamVR-এ অন্য পক্ষের কথা আপনার দৃষ্টির নিচে দেখা যাবে। কব্জির প্যানেলটি ডেস্কটপের একটি ছোট উইন্ডো। XSOverlay-এ এটিকে উইন্ডো হিসেবে যোগ করলে কব্জিতে পরে ভাষা বদলাতে, বিরতি দিতে, মাথার ওপরের প্রদর্শন চালু বা বন্ধ করতে, কিংবা অন্য মডেল চেষ্টা করতে পারবেন।"
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "লুকান"
+    "en": "Hide headset captions",
+    "text": "হেডসেট সাবটাইটেল লুকান"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -920,8 +920,8 @@
     "text": "হেডসেটে সাবটাইটেল দেখান"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "দেখান"
+    "en": "Show headset captions",
+    "text": "হেডসেট সাবটাইটেল দেখান"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

@@ -844,8 +844,8 @@
     "text": "SteamVR:ssä toisen osapuolen puhe näkyy näkökenttäsi alapuolella. Rannepaneeli on työpöydällä oleva pieni ikkuna: lisää se XSOverlayhin ikkunana, niin voit käyttää sitä ranteessasi ja vaihtaa kieltä, keskeyttää, ottaa pään yllä näkyvän chatin käyttöön tai pois käytöstä tai kokeilla toista mallia."
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "Piilota"
+    "en": "Hide headset captions",
+    "text": "Piilota VR-lasien tekstitykset"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -916,8 +916,8 @@
     "text": "Näytä tekstitykset laseissa"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "Näytä"
+    "en": "Show headset captions",
+    "text": "Näytä VR-lasien tekstitykset"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

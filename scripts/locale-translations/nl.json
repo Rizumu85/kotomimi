@@ -852,8 +852,8 @@
     "text": "In SteamVR verschijnen de woorden van de andere persoon onder je blikveld. Het polsvenster is een klein venster op je desktop. Voeg het in XSOverlay toe als venster om het om je pols te dragen en van taal te wisselen, te pauzeren, de Chatbox aan of uit te zetten of een ander model te proberen."
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "Verbergen"
+    "en": "Hide headset captions",
+    "text": "Ondertiteling in headset verbergen"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -924,8 +924,8 @@
     "text": "Ondertiteling in de headset tonen"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "Tonen"
+    "en": "Show headset captions",
+    "text": "Ondertiteling in headset weergeven"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

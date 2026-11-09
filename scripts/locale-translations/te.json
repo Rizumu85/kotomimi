@@ -848,8 +848,8 @@
     "text": "SteamVRలో, ఎదుటివారి మాటలు మీ చూపు రేఖకు దిగువన కనిపిస్తాయి. మణికట్టు విండో డెస్క్‌టాప్‌లోని చిన్న విండో. దాన్ని XSOverlayలో విండోగా జోడిస్తే, మణికట్టుపై ధరించి భాష మార్చడం, పాజ్ చేయడం, తలపై ప్రదర్శనను ఆన్ లేదా ఆఫ్ చేయడం, లేదా మరో మోడల్‌ను ప్రయత్నించడం చేయవచ్చు."
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "దాచు"
+    "en": "Hide headset captions",
+    "text": "హెడ్‌సెట్ క్యాప్షన్లను దాచు"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -920,8 +920,8 @@
     "text": "హెడ్‌సెట్‌లో క్యాప్షన్‌లను చూపించు"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "చూపించు"
+    "en": "Show headset captions",
+    "text": "హెడ్‌సెట్ క్యాప్షన్లను చూపు"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

@@ -852,8 +852,8 @@
     "text": "W SteamVR słowa rozmówcy pojawiają się poniżej pola widzenia. Panel na nadgarstek to małe okno na pulpicie. Dodaj je jako okno w XSOverlay, aby umieścić je na nadgarstku i zmieniać język, wstrzymywać działanie, włączać lub wyłączać wyświetlanie nad głową albo wypróbować inny model."
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "Ukryj"
+    "en": "Hide headset captions",
+    "text": "Ukryj napisy w goglach"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -924,8 +924,8 @@
     "text": "Pokazuj napisy w goglach"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "Pokaż"
+    "en": "Show headset captions",
+    "text": "Pokaż napisy w goglach"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

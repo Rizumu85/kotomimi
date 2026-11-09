@@ -848,8 +848,8 @@
     "text": "ב‑SteamVR, דברי הצד השני יופיעו מתחת לקו הראייה שלך. חלונית פרק כף היד היא חלון קטן בשולחן העבודה: הוסף אותה כחלון ב‑XSOverlay כדי לענוד אותה על פרק כף היד, להחליף שפות, להשהות, להפעיל או לכבות את התצוגה מעל הראש, או לנסות מודל אחר."
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "הסתרה"
+    "en": "Hide headset captions",
+    "text": "הסתר כתוביות במשקף"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -920,8 +920,8 @@
     "text": "הצג כתוביות בקסדה"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "הצגה"
+    "en": "Show headset captions",
+    "text": "הצג כתוביות במשקף"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

@@ -848,8 +848,8 @@
     "text": "SteamVR에서는 상대방의 말이 시야 아래에 표시됩니다. 손목 패널은 데스크톱의 작은 창입니다. XSOverlay에서 창으로 추가하면 손목에 띄워 언어 변경, 일시정지, 머리 위 표시 켜기/끄기, 다른 모델 사용을 할 수 있습니다."
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "숨기기"
+    "en": "Hide headset captions",
+    "text": "헤드셋 자막 숨기기"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -920,8 +920,8 @@
     "text": "헤드셋에서 자막 표시"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "표시"
+    "en": "Show headset captions",
+    "text": "헤드셋 자막 표시"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

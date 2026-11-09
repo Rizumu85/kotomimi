@@ -848,8 +848,8 @@
     "text": "في SteamVR، تظهر كلمات الطرف الآخر أسفل مجال رؤيتك. نافذة لوحة المعصم هي نافذة صغيرة على سطح المكتب؛ أضفها كنافذة في XSOverlay لتضعها على معصمك وتبدّل اللغات أو توقف الترجمة مؤقتًا أو تشغّل عرض الدردشة أعلى الرأس أو تطفئه أو تجرّب نموذجًا آخر."
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "إخفاء"
+    "en": "Hide headset captions",
+    "text": "إخفاء ترجمات النظارة"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -920,8 +920,8 @@
     "text": "عرض الترجمة في النظارة"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "إظهار"
+    "en": "Show headset captions",
+    "text": "إظهار ترجمات النظارة"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

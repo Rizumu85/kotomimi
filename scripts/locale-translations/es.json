@@ -844,8 +844,8 @@
     "text": "En SteamVR, las palabras de la otra persona aparecen debajo de tu línea de visión. El panel de muñeca es una pequeña ventana del escritorio: añádela como ventana en XSOverlay para llevarla en la muñeca y cambiar de idioma, pausar, activar o desactivar el texto sobre la cabeza o probar otro modelo."
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "Ocultar"
+    "en": "Hide headset captions",
+    "text": "Ocultar subtítulos del visor"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -916,8 +916,8 @@
     "text": "Mostrar subtítulos en el visor"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "Mostrar"
+    "en": "Show headset captions",
+    "text": "Mostrar subtítulos del visor"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

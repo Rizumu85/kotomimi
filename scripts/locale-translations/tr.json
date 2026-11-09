@@ -848,8 +848,8 @@
     "text": "SteamVR'da karşı tarafın sözleri görüş alanınızın altında görünür. Bilek paneli, masaüstündeki küçük bir penceredir: XSOverlay'de pencere olarak ekleyip bileğinizde kullanabilir, dili değiştirebilir, duraklatabilir, baş üstü gösterimini açıp kapatabilir veya başka bir model deneyebilirsiniz."
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "Gizle"
+    "en": "Hide headset captions",
+    "text": "Başlık altyazılarını gizle"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -920,8 +920,8 @@
     "text": "Başlıkta altyazıları göster"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "Göster"
+    "en": "Show headset captions",
+    "text": "Başlık altyazılarını göster"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

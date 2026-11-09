@@ -848,8 +848,8 @@
     "text": "Di SteamVR, ucapan lawan bicara muncul di bawah garis pandang Anda. Panel pergelangan tangan adalah jendela kecil di desktop. Tambahkan sebagai jendela di XSOverlay untuk memasangnya di pergelangan tangan, lalu ganti bahasa, jeda, nyalakan atau matikan tampilan di atas kepala, atau coba model lain."
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "Sembunyikan"
+    "en": "Hide headset captions",
+    "text": "Sembunyikan subtitle headset"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -920,8 +920,8 @@
     "text": "Tampilkan subtitle di headset"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "Tampilkan"
+    "en": "Show headset captions",
+    "text": "Tampilkan subtitle headset"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

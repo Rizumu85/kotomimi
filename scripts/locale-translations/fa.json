@@ -848,8 +848,8 @@
     "text": "در SteamVR، حرف‌های طرف مقابل پایین میدان دیدتان نمایش داده می‌شود. پنجرهٔ پنل مچی، پنجرهٔ کوچکی روی دسکتاپ است؛ آن را در XSOverlay به‌عنوان پنجره اضافه کنید تا روی مچ دستتان داشته باشید و زبان را عوض کنید، مکث کنید، نمایش بالای سر را روشن یا خاموش کنید یا مدل دیگری را امتحان کنید."
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "پنهان کردن"
+    "en": "Hide headset captions",
+    "text": "پنهان کردن زیرنویس هدست"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -920,8 +920,8 @@
     "text": "نمایش زیرنویس در هدست"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "نمایش"
+    "en": "Show headset captions",
+    "text": "نمایش زیرنویس هدست"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

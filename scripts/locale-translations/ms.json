@@ -844,8 +844,8 @@
     "text": "Dalam SteamVR, kata-kata pihak lain muncul di bawah garis pandangan anda. Tetingkap panel pergelangan tangan ialah tetingkap kecil pada desktop. Tambahkannya sebagai tetingkap dalam XSOverlay untuk memakainya di pergelangan tangan, menukar bahasa, menjeda, menghidupkan atau mematikan paparan atas kepala, atau mencuba model lain."
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "Sembunyikan"
+    "en": "Hide headset captions",
+    "text": "Sembunyikan sari kata set kepala"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -916,8 +916,8 @@
     "text": "Tunjukkan sari kata dalam set kepala"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "Papar"
+    "en": "Show headset captions",
+    "text": "Paparkan sari kata set kepala"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

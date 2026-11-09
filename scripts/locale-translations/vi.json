@@ -852,8 +852,8 @@
     "text": "Trong SteamVR, lời của đối phương sẽ hiện bên dưới tầm nhìn của bạn. Bảng điều khiển cổ tay là một cửa sổ nhỏ trên máy tính để bàn; thêm cửa sổ này vào XSOverlay để đeo trên cổ tay, đổi ngôn ngữ, tạm dừng, bật hoặc tắt hiển thị trên đầu, hay thử model khác."
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "Ẩn"
+    "en": "Hide headset captions",
+    "text": "Ẩn phụ đề trên kính"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -924,8 +924,8 @@
     "text": "Hiển thị phụ đề trong kính"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "Hiện"
+    "en": "Show headset captions",
+    "text": "Hiện phụ đề trên kính"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

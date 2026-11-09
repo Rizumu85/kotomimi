@@ -848,8 +848,8 @@
     "text": "SteamVRでは、相手の言葉が視線の下に表示されます。手首パネルはデスクトップ上の小さなウィンドウです。XSOverlayでウィンドウとして追加すれば、手首に表示して、言語の切り替え、一時停止、頭上表示のオン・オフ、別のモデルの試用ができます。"
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "非表示"
+    "en": "Hide headset captions",
+    "text": "ヘッドセット字幕を非表示"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -920,8 +920,8 @@
     "text": "ヘッドセットに字幕を表示"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "表示"
+    "en": "Show headset captions",
+    "text": "ヘッドセット字幕を表示"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

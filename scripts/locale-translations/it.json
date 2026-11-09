@@ -860,8 +860,8 @@
     "text": "In SteamVR, le parole dell’altra persona compaiono sotto la linea dello sguardo. Il pannello da polso è una piccola finestra sul desktop: aggiungila come finestra in XSOverlay per portarla al polso e cambiare lingua, mettere in pausa, attivare o disattivare il display sopra la testa oppure provare un altro modello."
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "Nascondi"
+    "en": "Hide headset captions",
+    "text": "Nascondi i sottotitoli nel visore"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -932,8 +932,8 @@
     "text": "Mostra i sottotitoli nel visore"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "Mostra"
+    "en": "Show headset captions",
+    "text": "Mostra i sottotitoli nel visore"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",

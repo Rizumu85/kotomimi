@@ -852,8 +852,8 @@
     "text": "Dans SteamVR, les paroles de l’autre personne s’affichent sous votre ligne de regard. Le panneau au poignet est une petite fenêtre sur le bureau : ajoutez-la comme fenêtre dans XSOverlay pour l’avoir au poignet et changer de langue, mettre en pause, activer ou désactiver l’affichage au-dessus de la tête, ou essayer un autre modèle."
   },
   "fork.vr.hide": {
-    "en": "Hide",
-    "text": "Masquer"
+    "en": "Hide headset captions",
+    "text": "Masquer les sous-titres du casque"
   },
   "fork.vr.idle": {
     "en": "Not listening",
@@ -924,8 +924,8 @@
     "text": "Afficher les sous-titres dans le casque"
   },
   "fork.vr.show": {
-    "en": "Show",
-    "text": "Afficher"
+    "en": "Show headset captions",
+    "text": "Afficher les sous-titres du casque"
   },
   "fork.vr.stopped": {
     "en": "Recognition stopped. Turn your wrist to start again.",
