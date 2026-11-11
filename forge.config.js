@@ -104,6 +104,8 @@ module.exports = {
         exe: 'kotomimi.exe',
         description: 'AI-powered live speech translation application',
         setupIcon: 'assets/icon.ico',
+        // Shown while it installs; made by scripts/make-install-gif.py.
+        loadingGif: 'assets/install.gif',
         iconUrl: 'https://raw.githubusercontent.com/Rizumu85/kotomimi/main/assets/icon.ico',
         noMsi: true
       }
