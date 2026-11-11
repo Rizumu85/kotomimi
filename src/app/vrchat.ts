@@ -371,7 +371,7 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     const state = deps.view.get();
     const typed = new Set((state.legs ?? []).flatMap((leg) => leg.segments.filter((s) => TYPED.test(s.origin ?? '')).map((s) => s.id)));
     const coming = state.entries
-      .filter((entry) => entry.kind === 'exchange' && entry.leg === 'speaker' && !sent.has(entry.id)
+      .filter((entry): entry is Extract<Entry, { kind: 'exchange' }> => entry.kind === 'exchange' && entry.leg === 'speaker' && !sent.has(entry.id)
         && !entry.source.some((row) => typed.has(row.segmentId)) && textOf(entry.source).trim() !== '')
       .map((entry) => `${entry.id}:${textOf(entry.source)}`)
       .join('|');
