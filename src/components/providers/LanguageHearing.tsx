@@ -150,7 +150,7 @@ interface MyRowProps {
 
 /**
  * "我说": the user's own language filled, pressing another makes it theirs (`pressMine`); the others they speak beside
- * it as they are, dimmed while the other side has not lit them. "+" lists every language, the row's checked first.
+ * it tinted while the other side has them lit, so in use, and dimmed while not. "+" lists every language, the row's checked first.
  * Where what hears them takes their own alone, one picked there becomes it.
  */
 function MyRow({ side, ordered, suggested, name, showHearer, onOpenHearing, disabled }: MyRowProps) {
@@ -186,7 +186,7 @@ function MyRow({ side, ordered, suggested, name, showHearer, onOpenHearing, disa
             <button
               key={code}
               type="button"
-              className={`language-chip language-chip--switch${own ? ' is-lit' : ''}${idle ? ' is-idle' : ''}`}
+              className={`language-chip language-chip--switch${own ? ' is-lit' : idle ? ' is-idle' : ' is-used'}`}
               aria-pressed={own}
               onClick={() => { const next = pressMine(now, code); if (next) side.apply(next); }}
               disabled={disabled}

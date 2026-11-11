@@ -148,13 +148,14 @@ describe('ProviderLanguages — the Kotomimi provider: my language, theirs, and 
     expect(saved()).toMatchObject({ theyAlso: ['ja', 'en', 'ko'], theyLit: '', asrDetectOther: false });
   });
 
-  it('makes a language of the user’s row theirs by pressing it, and dims the ones the other side has not lit', () => {
+  it('makes a language of the user’s row theirs by pressing it, tints the ones the other side has lit and dims the rest', () => {
     show({ speakAlso: ['zh', 'en', 'ja'], theyAlso: ['ja', 'en'] }, ['speaker', 'participant']);
     const mine = row('fork.languageMenu.iSay')!;
     const chip = (i: number) => mine.querySelectorAll<HTMLButtonElement>('.language-chip--switch')[i];
     const pair = () => (useProviderStore.getState().entries as unknown as Record<string, { pair: { source: string; target: string } }>).localai.pair;
     // Their main one, Japanese, is in use; English is not lit for them.
     expect([0, 1, 2].map((i) => chip(i).className.includes('is-idle'))).toEqual([false, true, false]);
+    expect([0, 1, 2].map((i) => chip(i).className.includes('is-used'))).toEqual([false, false, true]);
     expect(chip(0).getAttribute('aria-pressed')).toBe('true');
     fireEvent.click(chip(1));
     expect(pair().source).toBe('en');

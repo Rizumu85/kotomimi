@@ -99,6 +99,25 @@
     &:disabled { cursor: not-allowed; opacity: vars.$disabled-opacity; }
   }
 
+  // One of the user's languages in use beside their own, the other side having lit it: the lit chip's colour, not filled.
+  &.is-used {
+    padding-left: 10px;
+    border-color: color-mix(in srgb, vars.$color-primary 50%, transparent);
+    background: color-mix(in srgb, vars.$color-primary 14%, transparent);
+    color: vars.$color-primary;
+
+    &::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      margin-right: 4px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    &:hover:not(:disabled) { background: color-mix(in srgb, vars.$color-primary 22%, transparent); color: vars.$color-primary; }
+  }
+
   // Lit: heard, and the user's speech translated into it. Filled, with a mark of its own.
   &.is-lit {
     padding-left: 10px;
