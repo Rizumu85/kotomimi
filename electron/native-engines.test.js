@@ -57,6 +57,30 @@ function mac({ runtime = 'ready', model = downloaded, system = true } = {}) {
 }
 
 describe('two native recognizers as one', () => {
+  it('keeps CPU and GPU streams separate while both engines are running on Windows', async () => {
+    const log = [];
+    const events = [];
+    const engine = joinEngines([
+      standIn('gpu', { models: { qwen: downloaded }, log }),
+      standIn('cpu', { models: { xasr: downloaded }, log }),
+    ], { onStream: (event) => events.push(event), idleMs: Infinity });
+    await engine.status();
+    await Promise.all([engine.start('qwen'), engine.start('xasr')]);
+    expect((await engine.status()).up.sort()).toEqual(['qwen', 'xasr']);
+    const gpu = engine.openStream({ model: 'qwen', sampleRate: 16000 });
+    const cpu = engine.openStream({ model: 'xasr', sampleRate: 16000 });
+    expect(gpu).not.toBe(cpu);
+    engine.writeStream(gpu, 'gpu audio'); engine.writeStream(cpu, 'cpu audio');
+    const a = standIn.made.gpu; const b = standIn.made.cpu;
+    expect(a.streams[0].written).toEqual(['gpu audio']);
+    expect(b.streams[0].written).toEqual(['cpu audio']);
+    b.tell.onStream({ id: 1, type: 'partial', text: 'Hello' });
+    a.tell.onStream({ id: 1, type: 'done', text: 'こんにちは' });
+    b.tell.onStream({ id: 1, type: 'done', text: 'Hello!', language: 'en' });
+    expect(events.map((e) => e.id)).toEqual([cpu, gpu, cpu]);
+    expect(engine.writeStream(cpu, 'late')).toBe(false);
+    await engine.stop();
+  });
   it('lists the models of both, the system\'s first, and is ready wherever either can run', async () => {
     const { engine } = mac();
     const status = await engine.status();

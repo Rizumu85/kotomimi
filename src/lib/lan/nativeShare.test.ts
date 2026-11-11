@@ -54,6 +54,18 @@ describe('what of the native engines is shared', () => {
 });
 
 describe('the recognizer a device gets', () => {
+  it('keeps claims on separate downloaded engines while retaining the one-model rule within audio.cpp', () => {
+    vi.useFakeTimers();
+    const gpu = 'qwen3-asr-1.7b-q8';
+    const cpu = 'x-asr-zh-en';
+    useNativeEngineStore.setState({ status: { ...status({ [gpu]: downloaded, [cpu]: downloaded, 'r2t2-q8': downloaded }), up: [gpu, cpu] } });
+    const release = holdNativeForRun(undefined, { asr: true });
+    try {
+      expect(nativeRecognizerFor('zh', cpu)?.modelId).toBe(cpu);
+      expect(nativeRecognizerFor('ja', gpu)?.modelId).toBe(gpu);
+      expect(nativeRecognizerFor('ja', 'r2t2-q8')?.modelId).toBe(gpu);
+    } finally { release(); vi.clearAllTimers(); vi.useRealTimers(); }
+  });
   it('opens any installed Apple pair and refuses missing languages or a different engine', () => {
     useNativeEngineStore.setState({ status: status({ 'apple-speech:en': downloaded, 'apple-speech:fr': downloaded, 'apple-speech:ko': absent }) });
     expect(appLanModels.recognizer('en', 'apple-speech:en', 'fr')).toEqual({ modelId: 'apple-speech:en', streaming: true, also: 'fr' });

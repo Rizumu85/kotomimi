@@ -1731,6 +1731,10 @@
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "সবচেয়ে হালকা ও দ্রুত: প্রায় 0.4 GB গ্রাফিক্স মেমরি লাগে। জাপানি আড্ডায় পরীক্ষায় Qwen3-ASR 0.6B-এর মতোই নির্ভুল, তবে যতিচিহ্ন খুব কম দেয়। শুধু চীনা, ক্যান্টনিজ, ইংরেজি, জাপানি ও কোরীয় সমর্থন করে।"
   },
+  "providers.localai.noteNativeXAsr": {
+    "en": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
+    "text": "কথা বলার সঙ্গে সঙ্গেই লেখা আসে। শুধু প্রসেসর ব্যবহার করে, ভিডিও মেমরি লাগে না: একটি কোরের প্রায় এক-পঞ্চমাংশ ব্যবহার করে। শুধু চীনা ও ইংরেজি সমর্থিত। ব্যক্তিগত শব্দতালিকার শব্দগুলো একে আগে জানানো হয় না; কথা শনাক্ত করার পর উচ্চারণ মিলিয়ে সেগুলো ঠিক করা হয়।"
+  },
   "providers.localai.notePlamo3": {
     "en": "Reads the most natural; now and then the meaning drifts. About 2 GB of video memory. Non-commercial use only.",
     "text": "অনুবাদ পড়তে সবচেয়ে স্বাভাবিক লাগে, তবে মাঝে মাঝে অর্থে সামান্য হেরফের হয়। প্রায় 2 GB ভিডিও মেমরি লাগে। শুধুমাত্র অবাণিজ্যিক ব্যবহারের জন্য।"
@@ -2027,6 +2031,10 @@
     "en": "{{name}} (tablet)",
     "text": "{{name}} (ট্যাবলেট)"
   },
+  "providers.localai.tag_cpu": {
+    "en": "CPU only",
+    "text": "শুধু CPU"
+  },
   "providers.localai.tag_native": {
     "en": "Native engine",
     "text": "নেটিভ ইঞ্জিন"
@@ -2034,6 +2042,10 @@
   "providers.localai.tag_system": {
     "en": "Built into macOS",
     "text": "সিস্টেমে আগে থেকেই আছে"
+  },
+  "providers.localai.tagHint_cpu": {
+    "en": "Runs on the processor, leaving the graphics card to the game. Loads when a session starts.",
+    "text": "প্রসেসরে চলে, গ্রাফিক্স কার্ড ব্যবহার করে না, তাই সেটি গেমের জন্য ফাঁকা থাকে। সেশন শুরু হলে লোড হয়।"
   },
   "providers.localai.tagHint_native": {
     "en": "Runs on the graphics card using a native engine downloaded with the model. Loads when a session starts; the first start after boot may take about half a minute. Memory is released after the engine is no longer in use.",

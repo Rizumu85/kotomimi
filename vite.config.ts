@@ -179,6 +179,7 @@ export default defineConfig(({ command, mode }) => {
             'lan-discover': 'electron/lan-discover.js',
             // Fork: the native recognition engine the app downloads and runs
             'native-engine': 'electron/native-engine.js',
+            'sherpa-engine': 'electron/sherpa-engine.js',
             // Fork: one file from several addresses of it — the engines' downloads and the app's own update
             'fetch-file': 'electron/fetch-file.js',
             // Fork: a Mac's two native recognizers, joined

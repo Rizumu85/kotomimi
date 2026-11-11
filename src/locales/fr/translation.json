@@ -770,7 +770,10 @@
         "small": "Cet ordinateur a peu de mémoire vidéo. Un modèle léger est recommandé.",
         "hearDefault": "Assez précis, et laisse de la place pour un jeu.",
         "translateDefault": "Les meilleures traductions lors de nos tests."
-      }
+      },
+      "tag_cpu": "CPU uniquement",
+      "tagHint_cpu": "Fonctionne sur le processeur et laisse la carte graphique au jeu. Se charge au début de la session.",
+      "noteNativeXAsr": "Transcrit au fil de la parole, sur le processeur, sans utiliser de mémoire vidéo : environ un cinquième d’un cœur. Chinois et anglais uniquement. Les mots du dictionnaire personnalisé ne lui sont pas fournis à l’avance ; ils sont corrigés après la reconnaissance selon leur prononciation."
     }
   },
   "logsPanel": {

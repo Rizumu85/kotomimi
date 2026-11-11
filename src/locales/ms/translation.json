@@ -770,7 +770,10 @@
         "small": "Memori grafik komputer ini terhad, jadi model yang menggunakan sedikit memori disyorkan.",
         "hearDefault": "Cukup tepat, dan masih ada ruang memori untuk permainan.",
         "translateDefault": "Hasil terjemahan terbaik dalam ujian kami."
-      }
+      },
+      "tag_cpu": "CPU sahaja",
+      "tagHint_cpu": "Berjalan pada pemproses, jadi kad grafik boleh digunakan untuk permainan. Dimuatkan apabila sesi bermula.",
+      "noteNativeXAsr": "Memaparkan teks semasa anda bercakap, hanya menggunakan pemproses tanpa menggunakan memori grafik: kira-kira satu perlima daripada satu teras. Hanya menyokong bahasa Cina dan Inggeris. Perkataan dalam kamus peribadi tidak diberikan terlebih dahulu; selepas pengecaman, perkataan tetap dibetulkan mengikut sebutan."
     }
   },
   "logsPanel": {

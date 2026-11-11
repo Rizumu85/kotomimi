@@ -17,7 +17,7 @@ import { AUTO } from '../provider/languages';
 import { createNativeAsr } from '../../providers/openai/nativeAsr';
 import { NATIVE_COACHES } from '../../providers/openai/nativeCoaches';
 import { coachBaseUrl, coachKey } from '../../providers/openai/localaiNative';
-import { NATIVE_MODELS, type NativeModel, holdNative, isApple, nativeDownloaded, nativeModel, nativeModelFor, nativePicked, nativePreference, nativeTaken, translatorBaseUrl, translatorKey } from '../../providers/openai/localaiNative';
+import { NATIVE_MODELS, type NativeModel, holdNative, isApple, nativeDownloaded, nativeEngineOf, nativeModel, nativeModelFor, nativePicked, nativePreference, nativeTaken, translatorBaseUrl, translatorKey } from '../../providers/openai/localaiNative';
 import { BEFORE_SLOT, NATIVE_TRANSLATORS, TEXT_SLOT, nativeTranslates, translatorRequest } from '../../providers/openai/nativeTranslators';
 import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import type { SharedModel } from './protocol';
@@ -110,14 +110,15 @@ export function nativeRecognizerFor(language: string, wanted: string, also?: str
   // just claimed counts before the engine's status says so: two sessions of one device arrive together. Nobody's, a
   // model named is the one started; one still up from an earlier run answers only when none was named. The Mac's own
   // recognition is an engine of its own, beside it: named, it is what runs, whichever of the two was started last.
-  const taken = claimedAsr() ?? nativeTaken('asr');
+  const takenFor = (id?: string) => claimedAsr(id) ?? nativeTaken('asr', id);
+  const taken = takenFor(wanted || undefined);
   const up = taken ?? (status.run.state !== 'stopped' && status.run.state !== 'failed' ? status.run.model : null);
   const running = up ? nativeModelFor(up, language) : null;
-  const sameEngine = (id: string) => !wanted || isApple(wanted) === isApple(id);
+  const sameEngine = (id: string) => !wanted || nativeEngineOf(wanted) === nativeEngineOf(id);
   if (running && (taken !== null || !wanted) && isNativeRecognizer(running.id) && usable(running.id) && sameEngine(running.id)) return { modelId: running.id, streaming: true };
   // The engine is someone's with a model that does not hear this language: it is not switched under them. The
   // system's own recognition (a Mac) runs beside it, and is still offered.
-  const free = (id: string) => usable(id) && (taken === null || id === taken || isApple(id));
+  const free = (id: string) => usable(id) && (takenFor(id) === null || id === takenFor(id) || isApple(id));
   if (wanted) {
     const named = nativeModelFor(wanted, language);
     return named && free(named.id) ? { modelId: named.id, streaming: true } : null;
@@ -167,10 +168,10 @@ export function nativeOfferFor(language: string, wanted: string): NativeModel | 
  * once has the second asked for before the engine's status names the model the first started.
  */
 const claims = new Map<string, number>();
-const claimedAsr = (): string | null => [...claims.keys()].find((id) => !isApple(id)) ?? null;
+const claimedAsr = (model?: string): string | null => [...claims.keys()].find((id) => !isApple(id) && (!model || nativeEngineOf(id) === nativeEngineOf(model))) ?? null;
 const claim = (id: string): (() => void) => {
   claims.set(id, (claims.get(id) ?? 0) + 1);
-  const held = holdNative('asr');
+  const held = holdNative('asr', undefined, id);
   let done = false;
   return () => {
     if (done) return;
@@ -216,7 +217,7 @@ export function nativeRecognizer(model: { modelId: string; also?: string; hints?
     start: () => useNativeEngineStore.getState().start(native.id),
     model: native.id,
     ...(model.also ? { also: [model.also] } : {}),
-    ...(model.hints?.length ? { hints: model.hints } : {}),
+    ...(native.takesHints !== false && model.hints?.length ? { hints: model.hints } : {}),
     ...(native.limits ? { limits: native.limits } : {}),
   });
   let release: (() => void) | null = null;

@@ -770,7 +770,10 @@
         "small": "Este equipo tiene poca memoria gráfica. Se recomienda un modelo que ocupe poco.",
         "hearDefault": "Tiene suficiente precisión y deja memoria libre para jugar.",
         "translateDefault": "El que mejor tradujo en nuestras pruebas."
-      }
+      },
+      "tag_cpu": "Solo CPU",
+      "tagHint_cpu": "Funciona en el procesador y deja la tarjeta gráfica libre para el juego. Se carga al iniciar una sesión.",
+      "noteNativeXAsr": "Transcribe mientras hablas usando solo el procesador, sin ocupar memoria gráfica: consume aproximadamente una quinta parte de un núcleo. Solo admite chino e inglés. No recibe de antemano las palabras del diccionario personalizado; las corrige por su pronunciación después del reconocimiento."
     }
   },
   "logsPanel": {

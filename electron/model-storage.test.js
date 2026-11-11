@@ -97,12 +97,15 @@ describe('a move', () => {
 
   it('renames on one drive', async () => {
     model(userData, 'native-coach', 'gemma.gguf', 2000);
+    model(userData, 'sherpa-engine', 'encoder-480ms.onnx', 1000);
     const target = path.join(scratch, 'Elsewhere');
     const storage = createModelStorage({ userData, statfs: disk(10 ** 10), platform: 'linux' });
     expect(storage.plan(target).sameDrive).toBe(true);
     await storage.move(target);
     expect(statSync(path.join(target, 'native-coach', 'models', 'gemma.gguf')).size).toBe(2000);
     expect(existsSync(path.join(userData, 'native-coach'))).toBe(false);
+    expect(statSync(path.join(target, 'sherpa-engine', 'models', 'encoder-480ms.onnx')).size).toBe(1000);
+    expect(existsSync(path.join(userData, 'sherpa-engine'))).toBe(false);
   });
 
   it('stopped halfway, leaves the models where they were and takes back what it copied', async () => {

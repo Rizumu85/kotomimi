@@ -770,7 +770,10 @@
         "small": "Bu bilgisayarın ekran kartı belleği az. Bu yüzden az yer kaplayan model önerilir.",
         "hearDefault": "Yeterince doğru sonuçlar verir, oyun için de yer bırakır.",
         "translateDefault": "Testlerimizde en iyi çeviriyi yaptı."
-      }
+      },
+      "tag_cpu": "Yalnızca CPU",
+      "tagHint_cpu": "İşlemcide çalışır, ekran kartını oyuna bırakır. Oturum başladığında yüklenir.",
+      "noteNativeXAsr": "Konuştukça yazıya döker. Yalnızca işlemciyi kullanır, ekran kartı belleğinde yer kaplamaz: tek bir çekirdeğin yaklaşık beşte birini kullanır. Yalnızca Çince ve İngilizce desteklenir. Kişisel sözlüğünüzdeki kelimeler önceden verilmez; tanıma sonrasında telaffuza göre düzeltilir."
     }
   },
   "logsPanel": {

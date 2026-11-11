@@ -770,7 +770,10 @@
         "small": "Dieser Computer hat wenig Grafikspeicher. Wir empfehlen ein Modell mit geringem Speicherbedarf.",
         "hearDefault": "Genau genug und lässt noch Platz für ein Spiel.",
         "translateDefault": "Liefert in unseren Tests die besten Übersetzungen."
-      }
+      },
+      "tag_cpu": "Nur CPU",
+      "tagHint_cpu": "Läuft auf dem Prozessor und lässt die Grafikkarte fürs Spiel frei. Wird beim Sitzungsstart geladen.",
+      "noteNativeXAsr": "Schreibt beim Sprechen mit und nutzt nur den Prozessor, keinen Grafikspeicher: etwa ein Fünftel eines Prozessorkerns. Unterstützt nur Chinesisch und Englisch. Wörter aus dem persönlichen Wörterbuch werden nicht vorab übergeben, aber nach der Erkennung anhand der Aussprache korrigiert."
     }
   },
   "logsPanel": {

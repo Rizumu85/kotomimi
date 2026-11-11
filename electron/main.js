@@ -24,6 +24,7 @@ const { firewallStatus, allowThroughFirewall } = require('./lan-firewall');
 const { discoverServers } = require('./lan-discover');
 const { createNativeEngine, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME, modelHears: nativeModelHears, translatorFits } = require('./native-engine');
 const { joinEngines } = require('./native-engines');
+const { createSherpaEngine } = require('./sherpa-engine');
 const { createRemoteEngine } = require('./remote-engine');
 const { createModelStorage } = require('./model-storage');
 const { createModelMemoryReader } = require('./model-memory');
@@ -1489,6 +1490,7 @@ const getNativeEngine = () => {
     autoUpdate: true,
     ...tell,
   });
+  const sherpa = (tell) => createSherpaEngine({ dir: engineDir('sherpa-engine'), fetch: (url, init) => net.fetch(url, init), log, autoUpdate: true, ...tell });
   // On a Mac the first native recognizer is the system's own (electron/apple-speech.js), through the helper the app
   // ships beside its other one; the runtime the app downloads stands behind it, for the languages the system does
   // not hear. The two answer as one (electron/native-engines.js), so everything below this line is the same.
@@ -1498,10 +1500,10 @@ const getNativeEngine = () => {
       .find((candidate) => candidate && require('fs').existsSync(candidate)) ?? null;
     // `idleMs: Infinity`: the page holds the engines while a run or a sharing device uses them and stops them a minute
     // after (`restNative`); the joined engines' own idle stop would take one from under a leg that had been silent.
-    nativeEngine = joinEngines([(tell) => createAppleSpeech({ helper, log, usedFile: path.join(app.getPath('userData'), 'apple-speech-used.json'), ...tell }), downloaded], { onChange: toStatus, onStream: toStream, idleMs: Infinity });
+    nativeEngine = joinEngines([(tell) => createAppleSpeech({ helper, log, usedFile: path.join(app.getPath('userData'), 'apple-speech-used.json'), ...tell }), downloaded, sherpa], { onChange: toStatus, onStream: toStream, idleMs: Infinity });
     return nativeEngine;
   }
-  nativeEngine = downloaded({ onChange: toStatus, onStream: toStream });
+  nativeEngine = joinEngines([downloaded, sherpa], { onChange: toStatus, onStream: toStream, idleMs: Infinity });
   return nativeEngine;
 };
 ipcMain.handle('native-engine:get', () => getNativeEngine().status());

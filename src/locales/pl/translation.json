@@ -770,7 +770,10 @@
         "small": "Ten komputer ma mało pamięci graficznej, więc polecamy model, który zajmuje jej mniej.",
         "hearDefault": "Wystarczająco dokładny i zostawia dość pamięci na grę.",
         "translateDefault": "Najlepiej tłumaczył w naszych testach."
-      }
+      },
+      "tag_cpu": "Tylko CPU",
+      "tagHint_cpu": "Działa na procesorze, zostawiając kartę graficzną grze. Ładuje się przy rozpoczęciu sesji.",
+      "noteNativeXAsr": "Zapisuje tekst na bieżąco, gdy mówisz. Korzysta tylko z procesora, bez zajmowania pamięci karty graficznej: zużywa około jednej piątej mocy jednego rdzenia. Obsługuje tylko chiński i angielski. Nie otrzymuje wcześniej słów z osobistego słownika, ale po rozpoznaniu mowy poprawia je na podstawie brzmienia."
     }
   },
   "logsPanel": {

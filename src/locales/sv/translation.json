@@ -770,7 +770,10 @@
         "small": "Den här datorn har lite grafikminne, så vi rekommenderar en modell som tar mindre plats.",
         "hearDefault": "Tillräckligt träffsäker och lämnar plats för ett spel.",
         "translateDefault": "Översatte bäst i våra tester."
-      }
+      },
+      "tag_cpu": "Endast CPU",
+      "tagHint_cpu": "Körs på processorn och lämnar grafikkortet åt spelet. Laddas när en session startar.",
+      "noteNativeXAsr": "Skriver medan du pratar och använder bara processorn, inget grafikminne: ungefär en femtedel av en kärna. Stöder bara kinesiska och engelska. Orden i din personliga ordlista ges inte till modellen i förväg, men texten rättas ändå efteråt utifrån uttalet."
     }
   },
   "logsPanel": {

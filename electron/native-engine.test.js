@@ -89,6 +89,46 @@ function computer({ platform = 'win32', arch = 'x64', served = { 'https://exampl
 const modelFile = () => path.join(dir, 'models', 'm1.gguf');
 const exeFile = () => path.join(dir, 'engine-1.0.0', 'server.exe');
 
+describe('a model made of several pinned files', () => {
+  const second = { file: 'decoder.onnx', url: 'https://example.test/decoder', bytes: 3, sha256: sha(Buffer.from('two')) };
+  const catalog = { ...CATALOG, models: { m1: { ...CATALOG.models.m1, bytes: MODEL.length + 3, files: [CATALOG.models.m1, second] } } };
+  const served = { 'https://example.test/engine.zip': ARCHIVE, 'https://example.test/m1.gguf': MODEL, [second.url]: Buffer.from('two') };
+  it('is ready only with all parts, keeps progress on one total, and removes every part', async () => {
+    const { engine, world } = computer({ catalog, served });
+    await engine.download('m1');
+    expect(engine.status().models.m1.state).toBe('downloaded');
+    expect(world.changes.filter((s) => s.models.m1.state === 'downloading').every((s) => s.models.m1.total === ARCHIVE.length + MODEL.length + 3)).toBe(true);
+    fs.rmSync(path.join(dir, 'models', second.file));
+    expect(engine.status().models.m1.state).toBe('absent');
+    expect((await engine.start('m1')).run.state).toBe('failed');
+    world.requests.length = 0;
+    await engine.download('m1');
+    expect(world.requests.map((r) => r.url)).toEqual([second.url]);
+    await engine.remove('m1');
+    expect(fs.existsSync(modelFile())).toBe(false);
+    expect(fs.existsSync(path.join(dir, 'models', second.file))).toBe(false);
+  });
+  it('keeps good parts but discards a corrupt part, and retries only what is missing', async () => {
+    const { engine, world } = computer({ catalog, served: { ...served, [second.url]: Buffer.from('bad') } });
+    expect((await engine.download('m1')).models.m1.state).toBe('failed');
+    expect(fs.existsSync(modelFile())).toBe(true);
+    expect(fs.existsSync(path.join(dir, 'models', second.file))).toBe(false);
+    expect(fs.existsSync(path.join(dir, 'models', `${second.file}.part`))).toBe(false);
+    expect(world.requests.map((r) => r.url)).toContain(second.url);
+  });
+  it('cancels between parts without fetching the next one', async () => {
+    let engine;
+    const made = computer({ catalog, fetch: async (url) => {
+      if (url === CATALOG.models.m1.url) queueMicrotask(() => engine.cancel('m1'));
+      return answer([served[url]]);
+    } });
+    engine = made.engine;
+    await engine.download('m1');
+    expect(engine.status().models.m1.state).not.toBe('downloaded');
+    expect(fs.existsSync(path.join(dir, 'models', second.file))).toBe(false);
+  });
+});
+
 describe('a model kept from an earlier version of the app', () => {
   it('gets this version’s runtime by itself, fetching nothing else, and the earlier runtime goes', async () => {
     const { world, engine } = computer();

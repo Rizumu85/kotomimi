@@ -770,7 +770,10 @@
         "small": "This computer has little graphics memory, so a small model is recommended.",
         "hearDefault": "Accurate enough, and leaves room for a game.",
         "translateDefault": "Translated best in our tests."
-      }
+      },
+      "tag_cpu": "CPU only",
+      "tagHint_cpu": "Runs on the processor, leaving the graphics card to the game. Loads when a session starts.",
+      "noteNativeXAsr": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards."
     }
   },
   "logsPanel": {

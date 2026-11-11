@@ -770,7 +770,10 @@
         "small": "Memori grafis komputer ini terbatas, jadi disarankan memakai model yang ringan.",
         "hearDefault": "Cukup akurat dan masih menyisakan memori untuk bermain game.",
         "translateDefault": "Hasil terjemahan terbaik dalam pengujian kami."
-      }
+      },
+      "tag_cpu": "Hanya CPU",
+      "tagHint_cpu": "Berjalan di prosesor tanpa memakai kartu grafis, sehingga kartu grafis bisa dipakai untuk game. Dimuat saat sesi dimulai.",
+      "noteNativeXAsr": "Teks muncul sambil Anda berbicara. Hanya memakai prosesor tanpa memori grafis: sekitar seperlima dari satu inti. Hanya mendukung bahasa Mandarin dan Inggris. Kata dalam kamus pribadi tidak diberikan sebelumnya, tetapi hasil pengenalan tetap dikoreksi berdasarkan bunyinya."
     }
   },
   "logsPanel": {

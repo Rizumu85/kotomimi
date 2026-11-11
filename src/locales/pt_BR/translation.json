@@ -770,7 +770,10 @@
         "small": "Este computador tem pouca memória de vídeo. Recomendamos um modelo que use menos memória.",
         "hearDefault": "Tem boa precisão e deixa memória livre para jogar.",
         "translateDefault": "Teve a melhor tradução nos nossos testes."
-      }
+      },
+      "tag_cpu": "Só CPU",
+      "tagHint_cpu": "Roda no processador e deixa a placa de vídeo livre para o jogo. É carregado ao iniciar uma sessão.",
+      "noteNativeXAsr": "Transcreve enquanto você fala, usando só o processador, sem ocupar memória de vídeo: cerca de um quinto de um núcleo. Só oferece suporte a chinês e inglês. As palavras do dicionário personalizado não são fornecidas antes do reconhecimento, mas o texto é corrigido depois com base na pronúncia."
     }
   },
   "logsPanel": {

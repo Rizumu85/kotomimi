@@ -1727,6 +1727,10 @@
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "가장 가볍고 빨라요. 그래픽 메모리 약 0.4 GB를 사용해요. 일본어 일상 대화 실측 정확도는 Qwen3-ASR 0.6B와 같고, 문장 부호를 거의 넣지 않아요. 중국어, 광둥어, 영어, 일본어, 한국어만 지원해요."
   },
+  "providers.localai.noteNativeXAsr": {
+    "en": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
+    "text": "말하는 대로 글자가 표시돼요. CPU만 사용하고 그래픽 메모리는 쓰지 않아요. 코어 하나의 약 20%를 사용해요. 중국어와 영어만 지원해요. 개인 사전의 단어를 미리 알려 주지는 않지만, 인식 후 발음에 맞춰 교정해요."
+  },
   "providers.localai.notePlamo3": {
     "en": "Reads the most natural; now and then the meaning drifts. About 2 GB of video memory. Non-commercial use only.",
     "text": "번역이 가장 자연스럽게 읽히지만, 가끔 의미가 달라질 수 있습니다. 비디오 메모리 약 2 GB. 비상업적 용도로만 사용하세요."
@@ -2023,6 +2027,10 @@
     "en": "{{name}} (tablet)",
     "text": "{{name}} (태블릿)"
   },
+  "providers.localai.tag_cpu": {
+    "en": "CPU only",
+    "text": "CPU만 사용"
+  },
   "providers.localai.tag_native": {
     "en": "Native engine",
     "text": "네이티브 엔진"
@@ -2030,6 +2038,10 @@
   "providers.localai.tag_system": {
     "en": "Built into macOS",
     "text": "시스템 기본 제공"
+  },
+  "providers.localai.tagHint_cpu": {
+    "en": "Runs on the processor, leaving the graphics card to the game. Loads when a session starts.",
+    "text": "CPU에서 실행되어 그래픽 카드를 게임에 온전히 쓸 수 있어요. 세션을 시작할 때 불러와요."
   },
   "providers.localai.tagHint_native": {
     "en": "Runs on the graphics card using a native engine downloaded with the model. Loads when a session starts; the first start after boot may take about half a minute. Memory is released after the engine is no longer in use.",

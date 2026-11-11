@@ -13,7 +13,7 @@ const fs = require('fs');
 const path = require('path');
 
 /** Each engine's folder under the root (`main.js`). */
-const KINDS = ['native-engine', 'native-translator', 'native-coach'];
+const KINDS = ['native-engine', 'native-translator', 'native-coach', 'sherpa-engine'];
 /** Written in the app's data folder: the root, where it is not the default. */
 const CONFIG = 'model-storage.json';
 /** Kept free on the drive moved to, beyond what moves: the drive is not filled to its last byte. */

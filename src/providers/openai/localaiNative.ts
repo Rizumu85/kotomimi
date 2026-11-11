@@ -32,6 +32,12 @@ export interface NativeModel {
    * own `languages` (SenseVoice's five: told none, it writes any other as one of them).
    */
   detects?: boolean;
+  /** The downloaded engine, when it is not audio.cpp. Apple Speech is identified by its prefix. */
+  engine?: 'sherpa-onnx';
+  /** False: CPU inference, with no graphics memory required. Absent: no promise about graphics memory. */
+  usesGpu?: boolean;
+  /** False: recognition terms must not be sent to this model. */
+  takesHints?: boolean;
 }
 
 /**
@@ -102,7 +108,11 @@ export const NATIVE_MODELS: readonly NativeModel[] = [
   // app — of the sentences the app cuts, it writes nothing for one short one in five. What it has over
   // SenseVoice-Small, which is lighter and more right, is its languages.
   { id: 'nemotron-asr-0.6b-q8', name: 'Nemotron 3.5 ASR 0.6B GGUF', bytes: 930625888, languages: NEMOTRON_LANGUAGES, limits: WINDOW_LIMITS },
+  { id: 'x-asr-zh-en', name: 'X-ASR-zh-en', bytes: 614596718, languages: ['zh', 'en'], detects: true, engine: 'sherpa-onnx', usesGpu: false, takesHints: false },
 ];
+
+/** Models on different engines can hear together; each downloaded engine holds one model at a time. */
+export const nativeEngineOf = (id: string): string => isApple(id) ? 'apple-speech' : NATIVE_MODELS.find((model) => model.id === id)?.engine ?? 'audio.cpp';
 
 /** The one every system the engine is published for can run. */
 export const NATIVE_DEFAULT_MODEL = 'qwen3-asr-1.7b-q8';
@@ -135,12 +145,8 @@ export interface NativePick {
   model: string;
   byLanguage?: Readonly<Record<string, string>>;
   /**
-   * The other side's language is left to be detected in this run. The engine
-   * the app downloads runs one model at a time, so the model that tells
-   * languages apart then hears every language it can — the user's own too —
-   * whatever was chosen for it: two legs asking the engine for two models is
-   * a run that cannot start (seen 2026-10-06, as "the recognition engine of
-   * this computer could not start").
+   * The other side's language is detected. Its detector also hears the user's language where both choices use
+   * one downloaded engine; a choice on a separate downloaded engine stays independent.
    */
   detecting?: boolean;
   /**
@@ -221,7 +227,9 @@ export function nativePicked(pick: NativePick, language: string, has: (id: strin
   if (either) return either.model;
   if (pick.detecting && !isAutoLanguage(language)) {
     const detects = nativePicked({ ...pick, detecting: false }, 'auto', has);
-    if (detects && !isApple(detects.id) && nativeHears(detects, language)) return detects;
+    const own = nativePicked({ ...pick, detecting: false }, language, has);
+    if (detects && !isApple(detects.id) && nativeHears(detects, language)
+      && (!own || isApple(own.id) || nativeEngineOf(own.id) === nativeEngineOf(detects.id))) return detects;
   }
   const chosen = pick.byLanguage?.[baseOf(language)];
   // A name the app no longer has is no choice.
@@ -259,9 +267,9 @@ export function chooseNative(pick: NativePick, id: string, languages: readonly s
       ?? (pick.bestEffort && isAutoLanguage(language) ? nativeModel(id) : null);
     if (model) byLanguage[baseOf(language)] = model.id;
   }
-  // The engine the app downloads runs one model at a time (`nativeGap`'s `native_two_models`): a language heard by
+  // Each downloaded engine runs one model at a time (`nativeGap`'s `native_two_models`): a language heard by
   // another of its models goes over to this one where this one hears it, so the card never shows two that cannot
-  // run together. Where it does not hear it, the row says so (on the card). The Mac's own recognition runs beside.
+  // run together. Where it does not hear it, the row says so (on the card). Other engines run beside it.
   // A model chosen to tell languages apart already hears every language it can while it does (`nativePicked`'s
   // `detecting`): the choices of the others stand, for when it no longer does.
   if (!isApple(id) && !pick.detecting && !languages.some(isAutoLanguage)) {
@@ -269,7 +277,7 @@ export function chooseNative(pick: NativePick, id: string, languages: readonly s
       const base = baseOf(language);
       if (chosenFor.has(base)) continue;
       const now = byLanguage[base];
-      if (!now || isApple(now) || now === id) continue;
+      if (!now || isApple(now) || now === id || nativeEngineOf(now) !== nativeEngineOf(id)) continue;
       const follows = nativeModelFor(id, language) ?? (pick.bestEffort && isAutoLanguage(language) ? nativeModel(id) : null);
       if (follows && !isApple(follows.id)) byLanguage[base] = follows.id;
     }
@@ -332,9 +340,12 @@ export async function nativeGap(chosen: NativePick | string, heard: readonly str
   if (kept) return updating(status, kept.id, (id) => store.download(id), 'native_updating', 'recognition');
   const absent = models.find((one) => !nativeDownloaded(status, one.id));
   if (absent) return { ok: false, reason: `${absent.name} is not downloaded.`, code: 'native_missing', params: { name: absent.name } };
-  // The engine the app downloads runs one model at a time: two of its models cannot hear in one run.
+  // Each downloaded engine runs one model at a time; models on different engines can hear in one run.
   const run = models.filter((one) => !isApple(one.id));
-  if (run.length > 1) return { ok: false, reason: `${run[0].name} and ${run[1].name} cannot run at the same time.`, code: 'native_two_models', params: { name: run[0].name, other: run[1].name } };
+  for (const first of run) {
+    const other = run.find((one) => one.id !== first.id && nativeEngineOf(one.id) === nativeEngineOf(first.id));
+    if (other) return { ok: false, reason: `${first.name} and ${other.name} cannot run at the same time.`, code: 'native_two_models', params: { name: first.name, other: other.name } };
+  }
   const failed = models.find((one) => !nativeReady(status, one.id) && status.run.state === 'failed' && status.run.model === one.id);
   if (failed) return { ok: false, reason: `The native recognition engine could not start: ${status.run.tail.trim().split('\n').pop() ?? ''}`, code: 'native_failed' };
   return null;
@@ -358,10 +369,10 @@ const notUp = (code: string, status: NativeEngineStatus, id: string): AdapterSta
   ? new AdapterStartError(`The engine could not start: ${status.run.tail.trim().split('\n').pop() ?? ''}`, code)
   : new AdapterStartError(`The engine was not up when its start ended (${status.run.state}).`, 'native_interrupted'));
 
-/** The model of the engine the app downloads that is up now, or coming up: it runs one at a time. Null: none. */
-const downloadedUp = (status: NativeEngineStatus): string | null => {
+/** A downloaded model up now or coming up, optionally restricted to its engine. Null: none. */
+const downloadedUp = (status: NativeEngineStatus, engine?: string): string | null => {
   const coming = status.run.state === 'starting' || status.run.state === 'warming' || status.run.state === 'ready' ? status.run.model : null;
-  return [...status.up, ...(coming ? [coming] : [])].find((id) => !isApple(id)) ?? null;
+  return [...status.up, ...(coming ? [coming] : [])].find((id) => !isApple(id) && (!engine || nativeEngineOf(id) === engine)) ?? null;
 };
 
 /** An engine in use with another model: who asks is told, and what is using it is left alone. */
@@ -369,8 +380,8 @@ const busy = (code: string, name: string): AdapterStartError => new AdapterStart
 
 /**
  * The engine brought up for a run that hears by it, and waited for: one start
- * for the system's recognition, whatever its languages, and one for the
- * engine the app downloads. Rejects with the notice a failed start is told
+ * for the system's recognition, whatever its languages, and one for each
+ * downloaded engine. Rejects with the notice a failed start is told
  * by.
  */
 export async function nativeUp(chosen: NativePick | string, heard: readonly string[], deps: NativeUpDeps = {}): Promise<void> {
@@ -378,13 +389,13 @@ export async function nativeUp(chosen: NativePick | string, heard: readonly stri
   const start = deps.start ?? ((id: string) => useNativeEngineStore.getState().start(id));
   const asked = new Set<string>();
   await Promise.all(hearing(pick, heard).map(async (one) => {
-    const engine = isApple(one.id) ? APPLE_PREFIX : one.id;
+    const engine = nativeEngineOf(one.id);
     if (asked.has(engine)) return;
     asked.add(engine);
     // A device this computer shares with is listening through another of the engine's models: starting this one
     // would stop that one under it, and the device's next sentence would start it again under this run.
-    const up = isApple(one.id) ? null : downloadedUp(useNativeEngineStore.getState().status);
-    if (up && up !== one.id && using.asr > 0) throw busy('native_busy', nativeModel(up).name);
+    const up = isApple(one.id) ? null : downloadedUp(useNativeEngineStore.getState().status, engine);
+    if (up && up !== one.id && asrHeld(one.id, true)) throw busy('native_busy', nativeModel(up).name);
     const status = await start(one.id);
     if (!nativeReady(status, one.id)) throw notUp('native_failed', status, one.id);
   }));
@@ -461,6 +472,25 @@ const release = (kind: keyof typeof using, deps?: NativeRestDeps): (() => void) 
   };
 };
 
+// Counts by engine keep a shared CPU recognizer from reserving an idle audio.cpp model (and vice versa).
+const sharedAsr = new Map<string, number>();
+const runningAsr = new Map<string, number>();
+const asrHeld = (model: string, sharedOnly = false): boolean => [sharedAsr, ...(sharedOnly ? [] : [runningAsr])]
+  .some((held) => (held.get(nativeEngineOf(model)) ?? 0) > 0 || (held.get('*') ?? 0) > 0);
+function holdAsr(held: Map<string, number>, models?: readonly string[]): () => void {
+  const engines = models ? [...new Set(models.map(nativeEngineOf))] : ['*'];
+  for (const engine of engines) held.set(engine, (held.get(engine) ?? 0) + 1);
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    for (const engine of engines) {
+      const left = (held.get(engine) ?? 1) - 1;
+      if (left) held.set(engine, left); else held.delete(engine);
+    }
+  };
+}
+
 /**
  * Whether an engine is someone's now — a run of this computer, or a device it
  * shares with — and with which model. While it is, nobody else's request
@@ -468,9 +498,14 @@ const release = (kind: keyof typeof using, deps?: NativeRestDeps): (() => void) 
  * app downloads runs one at a time, and a start of another ends what the
  * first is doing.
  */
-export function nativeTaken(kind: 'asr' | 'translation'): string | null {
+export function nativeTaken(kind: 'asr' | 'translation', model?: string): string | null {
   if (using[kind] === 0 && using[kind === 'asr' ? 'runAsr' : 'runTranslation'] === 0) return null;
-  return downloadedUp((kind === 'asr' ? useNativeEngineStore : useNativeTranslatorStore).getState().status);
+  if (kind === 'asr') {
+    const status = useNativeEngineStore.getState().status;
+    const coming = status.run.state !== 'stopped' && status.run.state !== 'failed' ? status.run.model : null;
+    return [...status.up, ...(coming ? [coming] : [])].find((id) => !isApple(id) && (!model || nativeEngineOf(id) === nativeEngineOf(model)) && asrHeld(id)) ?? null;
+  }
+  return downloadedUp(useNativeTranslatorStore.getState().status);
 }
 
 /**
@@ -489,8 +524,8 @@ export const nativePreference = (): Readonly<typeof preferred> => preferred;
  * A run of this computer is open: its engines stay up until what is returned is called, and a while longer. `uses`:
  * the engines whose model it runs by, which nobody else's request switches meanwhile (`nativeTaken`).
  */
-export function holdNativeForRun(deps?: NativeRestDeps, uses: { asr?: boolean; translation?: boolean } = {}): () => void {
-  const held = [release('runs', deps), ...(uses.asr ? [release('runAsr', deps)] : []), ...(uses.translation ? [release('runTranslation', deps)] : [])];
+export function holdNativeForRun(deps?: NativeRestDeps, uses: { asr?: boolean; asrModels?: readonly string[]; translation?: boolean } = {}): () => void {
+  const held = [release('runs', deps), ...(uses.asr ? [release('runAsr', deps), holdAsr(runningAsr, uses.asrModels)] : []), ...(uses.translation ? [release('runTranslation', deps)] : [])];
   return () => { for (const one of held) one(); };
 }
 
@@ -504,7 +539,11 @@ export function hearsByDownloaded(chosen: NativePick | string, heard: readonly s
  * (`src/lib/lan/nativeShare.ts`): while it does, the engine is not stopped —
  * not for being unused by this computer, and not for not being its choice.
  */
-export const holdNative = (kind: 'asr' | 'translation' | 'coach', deps?: NativeRestDeps): (() => void) => release(kind, deps);
+export function holdNative(kind: 'asr' | 'translation' | 'coach', deps?: NativeRestDeps, model?: string): () => void {
+  const done = release(kind, deps);
+  const asr = kind === 'asr' ? holdAsr(sharedAsr, model ? [model] : undefined) : null;
+  return () => { asr?.(); done(); };
+}
 
 /** A run that does not hear by the engine has no use for it: it gives its memory back. */
 export function nativeIdle(deps: NativeCheckDeps = {}): void {

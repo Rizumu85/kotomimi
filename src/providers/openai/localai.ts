@@ -1087,7 +1087,11 @@ export async function prepareLocalAI(shape: { pair: { source: string; target: st
   // that never opened, the page going away — the run's signal is aborted on every one of them. Not only from the
   // moment a leg opens: its source may take a minute to open, and the minute's rest would have stopped them by then.
   if (signal && (needs.hears || needs.translates || needs.coaches)) {
-    const done = holdNativeForRun(undefined, { asr: !!needs.hears && hearsByDownloaded(needs.hears.pick, needs.hears.heard), translation: !!needs.translates });
+    const asrModels = needs.hears ? needs.hears.heard.flatMap((language) => {
+      const model = nativePicked(needs.hears!.pick, language);
+      return model ? [model.id] : [];
+    }) : [];
+    const done = holdNativeForRun(undefined, { asr: !!needs.hears && hearsByDownloaded(needs.hears.pick, needs.hears.heard), asrModels, translation: !!needs.translates });
     if (signal.aborted) done();
     else signal.addEventListener('abort', done, { once: true });
   }
@@ -1286,7 +1290,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   if (hearsHere) {
     let recognizer: Pick<DeviceHearing, 'modelId' | 'streaming' | 'api' | 'native'> | null;
     if (hearsNatively(s)) {
-      // Of the run, not of this leg: the engine runs one model for both.
+      // Of the run: each engine runs one model, while separate engines can serve the two legs.
       const pick = runHearing(s, runPair, models);
       // Resolve the actual leg once. Looking up an unrelated detector first would replace an explicit choice.
       // The run's pick already applies detection and bilingual rules where they are enabled.
@@ -1302,7 +1306,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
       const paired = appleAlso(native, pairedWith);
       const alsoHeard = either ? either.also : paired;
       const first = either ? source : modelHeard;
-      recognizer = { modelId: native.id, streaming: true, native: { model: native.id, ...(native.limits ? { limits: native.limits } : {}), ...(alsoHeard.length ? { either: { first, also: alsoHeard } } : {}), ...(hints.length ? { hints } : {}) } };
+      recognizer = { modelId: native.id, streaming: true, native: { model: native.id, ...(native.limits ? { limits: native.limits } : {}), ...(alsoHeard.length ? { either: { first, also: alsoHeard } } : {}), ...(native.takesHints !== false && hints.length ? { hints } : {}) } };
     } else if (s.asrVia === 'api') {
       const baseUrl = s.asrApiBaseUrl.trim();
       const named = s.asrApiModel.trim();

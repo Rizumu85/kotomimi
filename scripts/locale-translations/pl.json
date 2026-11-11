@@ -1747,6 +1747,10 @@
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "Najlżejszy i najszybszy: zajmuje około 0.4 GB pamięci karty graficznej. W testach rozmów po japońsku równie dokładny jak Qwen3-ASR 0.6B, ale rzadko dodaje interpunkcję. Obsługuje tylko chiński, kantoński, angielski, japoński i koreański."
   },
+  "providers.localai.noteNativeXAsr": {
+    "en": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
+    "text": "Zapisuje tekst na bieżąco, gdy mówisz. Korzysta tylko z procesora, bez zajmowania pamięci karty graficznej: zużywa około jednej piątej mocy jednego rdzenia. Obsługuje tylko chiński i angielski. Nie otrzymuje wcześniej słów z osobistego słownika, ale po rozpoznaniu mowy poprawia je na podstawie brzmienia."
+  },
   "providers.localai.notePlamo3": {
     "en": "Reads the most natural; now and then the meaning drifts. About 2 GB of video memory. Non-commercial use only.",
     "text": "Tłumaczenie brzmi najbardziej naturalnie, choć czasem sens może się zmienić. Około 2 GB pamięci wideo. Tylko do użytku niekomercyjnego."
@@ -2043,6 +2047,10 @@
     "en": "{{name}} (tablet)",
     "text": "{{name}} (tablet)"
   },
+  "providers.localai.tag_cpu": {
+    "en": "CPU only",
+    "text": "Tylko CPU"
+  },
   "providers.localai.tag_native": {
     "en": "Native engine",
     "text": "Silnik natywny"
@@ -2050,6 +2058,10 @@
   "providers.localai.tag_system": {
     "en": "Built into macOS",
     "text": "Wbudowane w system"
+  },
+  "providers.localai.tagHint_cpu": {
+    "en": "Runs on the processor, leaving the graphics card to the game. Loads when a session starts.",
+    "text": "Działa na procesorze, zostawiając kartę graficzną grze. Ładuje się przy rozpoczęciu sesji."
   },
   "providers.localai.tagHint_native": {
     "en": "Runs on the graphics card using a native engine downloaded with the model. Loads when a session starts; the first start after boot may take about half a minute. Memory is released after the engine is no longer in use.",

@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { ModelCard } from '../../components/Settings/sections/ModelManagementSection';
 import type { ModelManifestEntry } from '../../lib/local-inference/modelManifest';
 import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
-import { nativeReady, nativeUpdating } from './localaiNative';
+import { NATIVE_MODELS, nativeReady, nativeUpdating } from './localaiNative';
 import { ROOM_MARGIN, sizeText, useModelStorageStore } from '../../lib/native/modelStorage';
 import { driveLabel } from '../../components/ModelStorage/ModelStorageSection';
 
@@ -43,6 +43,7 @@ const NOTES: Readonly<Record<string, string>> = {
   'sensevoice-small-q8': 'noteNativeSenseVoice',
   'qwen3-asr-0.6b-q8': 'noteNativeQwenSmall',
   'nemotron-asr-0.6b-q8': 'noteNativeNemotron',
+  'x-asr-zh-en': 'noteNativeXAsr',
   'apple-speech': 'noteAppleSpeech',
   'index-translate-2b': 'noteIndexTranslate',
   'hy-mt2-1.8b': 'noteHyMt2',
@@ -57,9 +58,11 @@ export const nativeNoteKey = (id: string): string | undefined => NOTES[id] ?? NO
 
 /**
  * What every model of a kind shares, said once by a chip on its card rather than in each model's own note: one run
- * by an engine the app downloads has to warm up; the system's own recognition needs nothing of the graphics card.
+ * by an engine the app downloads has to warm up; the system's own recognition needs nothing of the graphics card, and
+ * neither does a model the processor runs (`usesGpu: false`).
  */
-const tagOf = (id: string): 'native' | 'system' => (id.startsWith('apple-speech') ? 'system' : 'native');
+const tagOf = (id: string): 'native' | 'system' | 'cpu' => (id.startsWith('apple-speech') ? 'system'
+  : NATIVE_MODELS.some((model) => model.id === id && model.usesGpu === false) ? 'cpu' : 'native');
 
 /** Enough languages for the card to say "multilingual", for a model that lists none. */
 const MANY = ['zh', 'en', 'ja', 'ko', 'es', 'ru', 'fr', 'de', 'pt', 'it', 'ar', 'hi', 'th', 'vi', 'id', 'tr'];

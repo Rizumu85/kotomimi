@@ -1081,7 +1081,8 @@ function createNativeEngine(deps = {}) {
   const engineDir = path.join(dir, `engine-${ENGINE_.version}`);
   const modelsDir = path.join(dir, 'models');
   const exe = build ? path.join(engineDir, build.exe) : null;
-  const fileOf = (id) => path.join(modelsDir, MODELS_[id].file);
+  const partsOf = (id) => MODELS_[id].files ?? [MODELS_[id]];
+  const modelHere = (id) => partsOf(id).every((part) => has(path.join(modelsDir, part.file)));
   const has = (file) => { try { return files.statSync(file).isFile(); } catch { return false; } };
   const sizeOf = (file) => { try { return files.statSync(file).size; } catch { return 0; } };
   /** The bytes free on the drive `at` is on, asked of its nearest folder that is there; null where that cannot be told. */
@@ -1119,6 +1120,7 @@ function createNativeEngine(deps = {}) {
   /** A model whose download fetched the runtime first, and the runtime's bytes: counted into the model's progress. */
   const carried = new Map();
   const failed = new Map();
+  const downloads = new Map();
   let lastTold = 0;
 
   const modelState = (id) => {
@@ -1131,14 +1133,14 @@ function createNativeEngine(deps = {}) {
     // others wait. Every model used to say 0 % through it, with nothing moving (a friend, 2026-10-31).
     const runtime = fetching.get('engine');
     if ((runtime || unpacking) && engineFor === id) {
-      const model = has(fileOf(id)) ? 0 : MODELS_[id].bytes;
+      const model = modelHere(id) ? 0 : MODELS_[id].bytes;
       // `kept`: its own file is here, and only the runtime is coming — a new version of it, after the app's update.
       return { state: 'downloading', runtime: true, received: runtime?.received ?? build.bytes, total: (runtime?.total ?? build.bytes) + model, ...(model === 0 ? { kept: true } : {}) };
     }
     const waiting = runtime || unpacking ? { waiting: true } : {};
-    if (has(fileOf(id))) return { state: 'downloaded', received: MODELS_[id].bytes, total: MODELS_[id].bytes, ...waiting };
+    if (modelHere(id)) return { state: 'downloaded', received: MODELS_[id].bytes, total: MODELS_[id].bytes, ...waiting };
     const error = failed.get(id);
-    return { state: error ? 'failed' : 'absent', received: sizeOf(`${fileOf(id)}.part`), total: MODELS_[id].bytes, ...(error ? { error } : {}), ...waiting };
+    return { state: error ? 'failed' : 'absent', received: partsOf(id).reduce((sum, part) => sum + sizeOf(path.join(modelsDir, part.file)) + sizeOf(path.join(modelsDir, `${part.file}.part`)), 0), total: MODELS_[id].bytes, ...(error ? { error } : {}), ...waiting };
   };
   const status = () => ({
     supported: Boolean(build),
@@ -1166,10 +1168,10 @@ function createNativeEngine(deps = {}) {
    * right. Where it has a mirror, the other address is asked when the first does not answer or breaks off — and goes
    * on from what the first brought, the file being the same.
    */
-  async function fetchFile(key, { url, mirror, bytes, sha256 }, dest) {
+  async function fetchFile(key, { url, mirror, bytes, sha256 }, dest, progressTotal = bytes) {
     const part = `${dest}.part`;
     const control = new AbortController();
-    const state = { received: sizeOf(part), total: bytes, abort: () => control.abort(), verifying: false };
+    const state = { received: sizeOf(part), total: progressTotal, abort: () => control.abort(), verifying: false };
     // A part larger than the whole is no part of it.
     if (state.received > bytes) { files.rmSync(part, { force: true }); state.received = 0; }
     fetching.set(key, state);
@@ -1248,39 +1250,52 @@ function createNativeEngine(deps = {}) {
     // This version's runtime is here already (fetched by an earlier start): what an earlier one left goes.
     if (build && engineReady() && !unpacking) removeEarlierRuntimes();
     if (!build || engineReady() || fetching.has('engine') || unpacking) return null;
-    const kept = Object.keys(MODELS_).find((id) => has(fileOf(id)));
+    const kept = Object.keys(MODELS_).find(modelHere);
     return kept ? download(kept) : null;
   }
 
   async function download(id) {
-    if (!build || !MODELS_[id] || fetching.has(id) || fetching.has('engine') || unpacking) return status();
+    if (!build || !MODELS_[id] || downloads.has(id) || fetching.has(id) || fetching.has('engine') || unpacking) return status();
+    const download = { cancelled: false, done: null };
+    let settled;
+    download.done = new Promise((resolve) => { settled = resolve; });
+    downloads.set(id, download);
     try {
       engineFor = id;
       const fetchesEngine = !engineReady();
       // Room for it, asked first: a drive that fills halfway through leaves a broken file and an error of the disk's.
       // The runtime counts twice (its archive, then what it unpacks to).
-      const needed = (fetchesEngine ? build.bytes * 2 : 0) + (has(fileOf(id)) ? 0 : MODELS_[id].bytes - sizeOf(`${fileOf(id)}.part`));
+      const needed = (fetchesEngine ? build.bytes * 2 : 0) + (modelHere(id) ? 0 : MODELS_[id].bytes - modelState(id).received);
       const room = freeBytes(dir);
       if (room !== null && needed + ROOM_MARGIN > room) {
         throw new Error(`There is not enough room on the drive: ${(room / 1024 ** 3).toFixed(1)} GB free, ${(needed / 1024 ** 3).toFixed(1)} GB needed.`);
       }
       await ensureEngine();
-      if (!has(fileOf(id))) {
-        if (fetchesEngine) carried.set(id, build.bytes);
+      if (!download.cancelled && !modelHere(id)) {
+        let before = fetchesEngine ? build.bytes : 0;
         files.mkdirSync(modelsDir, { recursive: true });
-        await fetchFile(id, MODELS_[id], fileOf(id));
+        for (const part of partsOf(id)) {
+          if (download.cancelled) break;
+          const dest = path.join(modelsDir, part.file);
+          carried.set(id, before);
+          if (!has(dest)) await fetchFile(id, part, dest, MODELS_[id].bytes + (fetchesEngine ? build.bytes : 0) - before);
+          before += part.bytes;
+        }
       }
     } catch (error) {
       // Stopped by the person: nothing failed.
       if (error?.name !== 'AbortError') failed.set(id, String(error?.message ?? error).slice(0, 300));
     } finally {
       carried.delete(id);
+      downloads.delete(id);
+      settled();
     }
     tell();
     return status();
   }
 
   function cancel(id) {
+    if (downloads.has(id)) downloads.get(id).cancelled = true;
     fetching.get(id)?.abort();
     if (engineFor === id) fetching.get('engine')?.abort();
     return status();
@@ -1289,10 +1304,13 @@ function createNativeEngine(deps = {}) {
   async function remove(id) {
     if (!MODELS_[id]) return status();
     cancel(id);
+    await downloads.get(id)?.done;
     // Up with it, or on the way up: the runtime has ended before its file is deleted — Windows deletes no file a process holds.
     if (run.model === id || starting?.id === id) await stop();
-    files.rmSync(fileOf(id), { force: true });
-    files.rmSync(`${fileOf(id)}.part`, { force: true });
+    for (const part of partsOf(id)) {
+      files.rmSync(path.join(modelsDir, part.file), { force: true });
+      files.rmSync(path.join(modelsDir, `${part.file}.part`), { force: true });
+    }
     failed.delete(id);
     tell();
     return status();
@@ -1384,7 +1402,7 @@ function createNativeEngine(deps = {}) {
     await halt();
     await reaped;
     if (myTurn !== turn) return status();
-    if (!engineReady() || !has(fileOf(id))) return setRun({ state: 'failed', model: id, tail: 'The model is not downloaded.' });
+    if (!engineReady() || !modelHere(id)) return setRun({ state: 'failed', model: id, tail: 'The model is not downloaded.' });
     tail = [];
     let port;
     try {

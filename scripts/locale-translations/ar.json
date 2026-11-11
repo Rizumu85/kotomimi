@@ -1731,6 +1731,10 @@
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "الأخف والأسرع: يشغل نحو 0.4 GB من ذاكرة بطاقة الرسوميات. في اختبار محادثة يابانية، كانت دقته مماثلة لـQwen3-ASR 0.6B، مع قلة علامات الترقيم. يدعم الصينية والكانتونية والإنجليزية واليابانية والكورية فقط."
   },
+  "providers.localai.noteNativeXAsr": {
+    "en": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
+    "text": "يكتب أثناء كلامك باستخدام المعالج فقط، دون استهلاك ذاكرة بطاقة الرسوميات: يستهلك نحو خُمس نواة واحدة. يدعم الصينية والإنجليزية فقط. لا يتلقى كلمات قاموسك الشخصي مسبقًا، لكنه يصححها بعد التعرّف على الكلام بحسب نطقها."
+  },
   "providers.localai.notePlamo3": {
     "en": "Reads the most natural; now and then the meaning drifts. About 2 GB of video memory. Non-commercial use only.",
     "text": "يقرأ بأكثر طريقة طبيعية، لكن المعنى ينحرف أحيانًا. يستهلك نحو 2 GB من ذاكرة الفيديو. للاستخدام غير التجاري فقط."
@@ -2027,6 +2031,10 @@
     "en": "{{name}} (tablet)",
     "text": "{{name}} (جهاز لوحي)"
   },
+  "providers.localai.tag_cpu": {
+    "en": "CPU only",
+    "text": "المعالج فقط"
+  },
   "providers.localai.tag_native": {
     "en": "Native engine",
     "text": "محرك أصلي"
@@ -2034,6 +2042,10 @@
   "providers.localai.tag_system": {
     "en": "Built into macOS",
     "text": "مدمج في النظام"
+  },
+  "providers.localai.tagHint_cpu": {
+    "en": "Runs on the processor, leaving the graphics card to the game. Loads when a session starts.",
+    "text": "يعمل على المعالج ويترك بطاقة الرسوميات للعبة. يُحمّل عند بدء الجلسة."
   },
   "providers.localai.tagHint_native": {
     "en": "Runs on the graphics card using a native engine downloaded with the model. Loads when a session starts; the first start after boot may take about half a minute. Memory is released after the engine is no longer in use.",

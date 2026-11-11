@@ -1731,6 +1731,10 @@
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "सबसे हल्का और तेज़: करीब 0.4 GB ग्राफ़िक्स मेमोरी। जापानी बातचीत के परीक्षण में Qwen3-ASR 0.6B जितना सटीक मिला, लेकिन विराम चिह्न बहुत कम लगाता है। केवल चीनी, कैंटोनीज़, अंग्रेज़ी, जापानी और कोरियाई का समर्थन करता है।"
   },
+  "providers.localai.noteNativeXAsr": {
+    "en": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
+    "text": "बोलते ही शब्द दिखने लगते हैं। सिर्फ़ प्रोसेसर इस्तेमाल होता है, वीडियो मेमोरी नहीं: एक कोर की क्षमता का लगभग पाँचवाँ हिस्सा। सिर्फ़ चीनी और अंग्रेज़ी के लिए। निजी शब्दकोश के शब्द इसे पहले से नहीं बताए जाते; पहचान के बाद उच्चारण के आधार पर शब्द सुधारे जाते हैं।"
+  },
   "providers.localai.notePlamo3": {
     "en": "Reads the most natural; now and then the meaning drifts. About 2 GB of video memory. Non-commercial use only.",
     "text": "अनुवाद सबसे स्वाभाविक लगता है; कभी-कभी अर्थ में थोड़ा बदलाव हो जाता है। लगभग 2 GB वीडियो मेमोरी। केवल गैर-वाणिज्यिक उपयोग के लिए।"
@@ -2027,6 +2031,10 @@
     "en": "{{name}} (tablet)",
     "text": "{{name}} (टैबलेट)"
   },
+  "providers.localai.tag_cpu": {
+    "en": "CPU only",
+    "text": "सिर्फ़ CPU"
+  },
   "providers.localai.tag_native": {
     "en": "Native engine",
     "text": "नेटिव इंजन"
@@ -2034,6 +2042,10 @@
   "providers.localai.tag_system": {
     "en": "Built into macOS",
     "text": "सिस्टम में शामिल"
+  },
+  "providers.localai.tagHint_cpu": {
+    "en": "Runs on the processor, leaving the graphics card to the game. Loads when a session starts.",
+    "text": "प्रोसेसर पर चलता है। ग्राफ़िक्स कार्ड गेम के लिए खाली रहता है। सत्र शुरू होने पर लोड होता है।"
   },
   "providers.localai.tagHint_native": {
     "en": "Runs on the graphics card using a native engine downloaded with the model. Loads when a session starts; the first start after boot may take about half a minute. Memory is released after the engine is no longer in use.",
