@@ -14,9 +14,13 @@ module.exports = function configureBeta(config) {
     icon: 'assets/beta/icon.ico',
     win32metadata: { CompanyName: 'Kotomimi Beta', ProductName: 'Kotomimi Beta', FileDescription: 'Kotomimi Beta' },
   });
+  // The stable installer's settings (its picture while it installs, its icon address), with the beta's identity: what
+  // is tested is what ships.
+  const stable = config.makers.find((maker) => maker.name === '@electron-forge/maker-squirrel')?.config ?? {};
   config.makers = [{
     name: '@electron-forge/maker-squirrel',
     config: {
+      ...stable,
       name: 'KotomimiBeta',
       authors: 'Rizumu85',
       exe: 'kotomimi-beta.exe',
