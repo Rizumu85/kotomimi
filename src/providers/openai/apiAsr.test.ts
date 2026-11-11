@@ -76,6 +76,35 @@ describe('the pieces of a transcription request', () => {
 });
 
 describe('a recognizer that is an API', () => {
+  it.each(['ja', 'ja-JP'])('keeps the detected language %s returned with an ambiguous transcript', async (language) => {
+    const api = fakeApi({ body: { text: '世界', language } });
+    const { asr, vad, seen } = await started(api, { language: 'auto' });
+    vad.worker.say('speech_start');
+    asr.feedAudio(seconds(1), RATE);
+    vad.worker.say('speech_end');
+    await settled();
+    await settled();
+    expect(seen.results).toEqual([expect.objectContaining({ text: '世界', language })]);
+    asr.dispose();
+  });
+
+  it.each([
+    { requested: 'ja', returned: 'ja' },
+    { requested: 'auto', returned: 'auto' },
+    { requested: 'auto', returned: { code: 'ja' } },
+  ])('does not treat an echoed request or an invalid language as detection: %j', async ({ requested, returned }) => {
+    const api = fakeApi({ body: { text: '世界', language: returned } });
+    const { asr, vad, seen } = await started(api, { language: requested });
+    vad.worker.say('speech_start');
+    asr.feedAudio(seconds(1), RATE);
+    vad.worker.say('speech_end');
+    await settled();
+    await settled();
+    expect(seen.results).toHaveLength(1);
+    expect(seen.results[0]).not.toHaveProperty('language');
+    asr.dispose();
+  });
+
   it('starts the detector with this computer\'s own settings, and feeds it everything it hears', async () => {
     const { asr, vad } = await started(fakeApi());
     expect(vad.sent[0]).toMatchObject({ type: 'init', vadConfig: VAD });

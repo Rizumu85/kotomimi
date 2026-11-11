@@ -1521,6 +1521,7 @@ export const localaiLanguages: Provider<LocalAISettings, never, never>['language
      */
     const reach = (hearer: ReturnType<typeof hearerOf>, mine: boolean) => {
       if (hearer?.detects) return { offered: hearer.languages, most: null, any: (hearer.languages?.length ?? 0) > ANY_PAST };
+      if (hearer?.apple && !mine) return { offered: hearer.languages, most: 1, any: false };
       // Only where it has theirs: a device that lists its languages and has not it reaches the user's own alone.
       if (hearer?.apple && mine && (!hearer.listed || hearer.languages?.some((code) => base(code) === base(pair.target)))) return { offered: [pair.target], most: 1, any: false };
       return { offered: hearer?.languages ?? null, most: 0, any: false };

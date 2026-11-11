@@ -15,6 +15,7 @@ import { realClock, type Clock } from '../../lib/contract/clock';
 import type { AsrInit, AsrLike } from '../localInference/engines';
 import { NO_KEY } from './textModel';
 import { phoneKey } from '../../lib/lan/phoneKeys';
+import { parseCode } from '../../lib/language/code';
 
 /** The detector's worker, as far as it is used here (`native-vad.worker.ts`: it posts the edges of speech and nothing else). */
 export interface VadWorker {
@@ -239,8 +240,11 @@ export function createApiAsr(options: ApiAsrOptions): AsrLike {
           asr.onError?.(`The speech recognition API answered HTTP ${response.status}${said ? `: ${said}` : ''}`);
           return;
         }
-        const text = String(((await response.json()) as { text?: unknown } | null)?.text ?? '').trim();
-        if (text) asr.onResult?.({ text, durationMs: Math.round((trimmed.length / sampleRate) * 1000), recognitionTimeMs: now() - started });
+        const body = (await response.json()) as { text?: unknown; language?: unknown } | null;
+        const text = String(body?.text ?? '').trim();
+        // A language supplied in the request may only be echoed back, as with the native engine's readWhole.
+        const heard = !language && typeof body?.language === 'string' && parseCode(body.language)?.kind === 'tag' ? body.language : undefined;
+        if (text) asr.onResult?.({ text, durationMs: Math.round((trimmed.length / sampleRate) * 1000), recognitionTimeMs: now() - started, ...(heard ? { language: heard } : {}) });
       } catch (error) {
         if (stop.signal.aborted) return;
         asr.onError?.(late

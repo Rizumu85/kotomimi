@@ -3,7 +3,10 @@
  * place a leg can run: another device's Apple Speech, a model it lends, an API whose reach is not known.
  */
 import { describe, it, expect } from 'vitest';
-import { LOCALAI_DEFAULTS, localaiLanguages, type LocalAIModel } from './localai';
+import { buildLocalAI, LOCALAI_DEFAULTS, localaiLanguages, type LocalAIModel } from './localai';
+import { pressTheirs } from '../../lib/language/theirLanguages';
+import { LAN_PIPELINE } from '../../lib/lan/protocol';
+import { SHARED } from './testing';
 
 const PAIR = { source: 'zh-CN', target: 'ja' };
 /** Another Kotomimi on a Mac, as it lists itself (`/v1/models/capabilities`): its recognition a language at a time, and its models. */
@@ -18,11 +21,23 @@ const MAC: LocalAIModel[] = [
 const more = (settings: Record<string, unknown>) => localaiLanguages.more!({ ...LOCALAI_DEFAULTS, ...settings } as never, MAC, PAIR);
 
 describe('the languages beside each side’s main one', () => {
-  it('has the Mac’s recognition on another device hear one beside the user’s own, and none beside theirs', () => {
+  it('has the Mac’s recognition on another device hear one beside each side’s main language', () => {
     const { mine, theirs } = more({ asrVia: 'server', asrModel: 'apple-speech', speakAlso: ['ja', 'en', 'es'] });
     expect(mine).toMatchObject({ hearer: { name: 'Apple Speech' }, offered: ['ja'], most: 1, chosen: ['ja'] });
-    expect(theirs).toMatchObject({ most: 0 });
+    expect(theirs).toMatchObject({ most: 1, any: false });
     expect(mine!.set(['ja'])).toEqual({ speakAlso: ['ja'], speakBoth: false });
+  });
+
+  it('lights a second Apple language without replacing the first, and sends both to the sharing Mac', () => {
+    const models: LocalAIModel[] = [{ id: LAN_PIPELINE, kind: 'pipeline', host: 'kotomimi' }, ...MAC.map((m) => ({ ...m, host: 'kotomimi' as const }))];
+    const settings = { ...LOCALAI_DEFAULTS, asrModel: 'apple-speech', model: LAN_PIPELINE, translateServerModel: 'translator', theyAlso: ['ja', 'en'] };
+    const side = localaiLanguages.more!(settings, models, PAIR).theirs!;
+    const next = pressTheirs({ main: PAIR.target, row: side.chosen, lit: side.lit ?? '', two: side.most !== 0 }, 'en')!;
+    expect(next).toMatchObject({ main: 'ja', lit: 'en' });
+    const config = buildLocalAI({ direction: { source: next.main, target: PAIR.source }, speech: false, turns: 'auto' }, {
+      ...settings, ...side.set(next.row), ...side.light!(next.lit),
+    }, { ...SHARED, models, reversed: () => true });
+    expect(config).toMatchObject({ transcription: { model: 'apple-speech:ja', language: 'ja', languages: ['ja', 'en'] } });
   });
 
   it('has a model that tells languages apart, lent by another device, take as many as it has — any, where it has many', () => {

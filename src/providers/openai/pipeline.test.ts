@@ -90,6 +90,49 @@ describe('a leg heard in the language it is shown in (fork)', () => {
     const coached = buildLocalAI(SAME, { ...settings, coach: true, coachServerModel: 'qwen3-4b' }, shared);
     expect(coached).toMatchObject({ stages: { speech: { kind: 'coach' } } });
   });
+
+  it.each([false, true])('runs Simplified to Traditional conversion with language detection %s', async (detect) => {
+    const context = { ...SPEAKER, direction: { source: 'zh-CN', target: 'zh-TW' } };
+    const h = await live(context, VIA_MODEL, [sse('這個世界真漂亮。')], K, (config) => {
+      delete config.stages!.leakCheck;
+      if (detect) config.stages!.heard = 'auto';
+    });
+    h.receive(SERVER.committed('script'), frame({ type: 'conversation.item.input_audio_transcription.completed', item_id: 'script', content_index: 0, transcript: '这个世界真漂亮。', language: 'zh' }));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(1));
+    await h.settled();
+    expect(h.lastText(FIRST_REF + 1)?.text).toBe('這個世界真漂亮。');
+    await h.session.stop();
+  });
+});
+
+describe('a bilingual sentence whose language needs text detection', () => {
+  const text = 'Vraiment magnifique cette exposition photographique';
+  const context = { ...SPEAKER, direction: { source: 'en', target: 'fr' } };
+  const bilingual = (config: LocalAIConfig) => {
+    config.stages = {
+      ...config.stages!, heard: 'auto', whole: true,
+      back: { own: 'en', language: 'fr', languages: ['fr'], stage: { kind: 'translate', model: 'back', baseUrl: '', system: 'Translate into English', language: 'en' } },
+    };
+    delete config.stages.leakCheck;
+  };
+
+  it('uses the same French detection for the source label and its translation into English', async () => {
+    const h = await live(context, VIA_MODEL, [sse('A magnificent photography exhibition')], K, bilingual);
+    h.receive(...heard('french', text));
+    expect(h.lastText(1)).toMatchObject({ language: 'fr' });
+    await vi.waitFor(() => expect(h.calls.map((call) => call.body.model)).toEqual(['back']));
+    await h.settled();
+    await h.session.stop();
+  });
+
+  it('labels typed French with the language used to choose its answer', async () => {
+    const h = await live(context, VIA_MODEL, [sse('A magnificent photography exhibition')], K, bilingual);
+    h.session.appendText(text);
+    await h.settled();
+    expect(h.lastText(FIRST_REF + 1)).toMatchObject({ text, language: 'fr' });
+    expect(h.calls.map((call) => call.body.model)).toEqual(['back']);
+    await h.session.stop();
+  });
 });
 
 describe('a leg whose translation runs on a text model', () => {

@@ -411,11 +411,12 @@ class PipelineLeg implements AdapterSession {
     if (this.ended || !this.session || !trimmed) return;
     const ref = ++this.refs;
     const origin = `sokuji_typed_${++this.typedIds}`;
+    const language = this.stages.back ? this.byWriting(trimmed) ?? AUTO : undefined;
     this.events.segmentOpened({ ref, side: 'source', origin });
-    this.events.segmentText({ ref, text: trimmed });
+    this.events.segmentText({ ref, text: trimmed, ...(language ? { language } : {}) });
     this.events.segmentClosed({ ref });
     if (stage) {
-      const answer = this.backFor(trimmed) ?? stage;
+      const answer = this.backFor(trimmed, language) ?? stage;
       this.push({ stage: answer, text: trimmed, origin, typed: true });
       if (answer === stage) this.alsoInto(trimmed, origin, true);
     } else if (!this.stages.asIs) this.events.degraded({ code: 'translation_unavailable', message: 'Typed text has no translation stage in this session — shown as typed.' });
@@ -697,7 +698,8 @@ class PipelineLeg implements AdapterSession {
     // Fork: a speaker who speaks both said this one in the other side's language: it is translated into their own.
     const backward = text !== undefined ? this.backFor(text, language) : undefined;
     // What was said in the reader's own language needs no translating: detected, or told another and written in theirs.
-    const already = !backward && !coached && text !== undefined && (other !== undefined || (this.stages.heard === AUTO && (language ? baseOf(language) : this.byWriting(text)) === baseOf(this.request.context.direction.target)));
+    const { source: from, target: into } = this.request.context.direction;
+    const already = !backward && !coached && text !== undefined && (other !== undefined || (this.stages.heard === AUTO && baseOf(from) !== baseOf(into) && (language ? baseOf(language) : this.byWriting(text)) === baseOf(into)));
     // A coached speaker who says a sentence in their own language is not practising with it: it is translated, as what
     // they type is, and not sent for feedback. No translation in this run: it is shown as said.
     const stage = backward ?? (coached && other !== undefined ? this.stages.typed : this.stages.speech);
@@ -765,7 +767,7 @@ class PipelineLeg implements AdapterSession {
     if (!back) return undefined;
     // Fork: of the languages they speak besides their own, any (`languages`); else the one.
     const spoken = back.languages?.length ? back.languages : [back.language];
-    const said = language ? baseOf(language) : spoken.length === 1 ? oneOfTwo(text, back.own, back.language) : identifyLanguage(text, [back.own, ...spoken])?.language;
+    const said = language ? baseOf(language) : this.byWriting(text);
     if (!said || !spoken.some((one) => baseOf(one) === baseOf(said))) return undefined;
     // Fork: into the other lit language of theirs, where it is one of two; else back into their own.
     return this.stages.cross?.find((c) => baseOf(c.language) === baseOf(said))?.stage ?? back.stage;
@@ -791,6 +793,8 @@ class PipelineLeg implements AdapterSession {
     const speech = this.stages.speech;
     if (!speech || this.stages.heard === AUTO) return undefined;
     const { source, target } = this.request.context.direction;
+    // A requested conversion between variants of one language still needs its translation stage.
+    if (speech.kind === 'translate' && baseOf(source) === baseOf(target)) return undefined;
     const other = speech.kind === 'coach' ? source : target;
     // Fork: the language the recognizer says it heard (the Mac's, hearing both of the pair's): that, not the writing.
     if (language) return baseOf(language) === baseOf(other) ? other : undefined;
