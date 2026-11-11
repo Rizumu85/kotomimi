@@ -1,8 +1,32 @@
 const { app } = require('electron');
+const fs = require('fs');
 const path = require('path');
-const { spawn } = require('child_process');
+const { spawn, spawnSync } = require('child_process');
 
-module.exports = function handleSquirrelEvent() {
+/**
+ * Fork: the icon Windows shows for the app in its list of installed apps, put where Squirrel looks for it before the
+ * hook returns. Squirrel opens the app first and then downloads that icon from the package's `iconUrl`, its install
+ * animation left on the screen until the download ends: with raw.githubusercontent.com slow or out of reach, a friend
+ * of the user's had it over the open app (2026-11-11). With `app.ico` already there it downloads nothing, and sets no
+ * `DisplayIcon` either, which is set here instead.
+ */
+function placeUninstallIcon({ execPath = process.execPath, resourcesPath = process.resourcesPath, beta = /-beta\./.test(app.getVersion()), files = fs, run = spawnSync } = {}) {
+  const root = path.resolve(execPath, '..', '..');
+  const target = path.join(root, 'app.ico');
+  const source = [path.join(resourcesPath, beta ? 'assets/beta' : 'assets', 'icon.ico'), path.join(resourcesPath, 'assets', 'icon.ico')].find((file) => files.existsSync(file));
+  if (!source) return null;
+  try {
+    files.copyFileSync(source, target);
+  } catch {
+    return null;
+  }
+  // The key Squirrel writes its entry under, named as the package is.
+  const name = path.basename(root);
+  run('reg.exe', ['add', `HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${name}`, '/v', 'DisplayIcon', '/t', 'REG_SZ', '/d', target, '/f'], { windowsHide: true, timeout: 5000 });
+  return target;
+}
+
+function handleSquirrelEvent() {
   if (process.argv.length === 1) {
     return false;
   }
@@ -24,6 +48,7 @@ module.exports = function handleSquirrelEvent() {
       // Create shortcuts on Desktop and Start Menu
       console.log('[Sokuji] Creating shortcuts for:', exeName);
       spawnUpdate(['--createShortcut', exeName]);
+      try { placeUninstallIcon(); } catch { /* the list's icon is a convenience */ }
 
       // Always quit when done
       setTimeout(app.quit, 1000);
@@ -46,4 +71,7 @@ module.exports = function handleSquirrelEvent() {
   }
 
   return false;
-};
+}
+
+module.exports = handleSquirrelEvent;
+module.exports.placeUninstallIcon = placeUninstallIcon;
