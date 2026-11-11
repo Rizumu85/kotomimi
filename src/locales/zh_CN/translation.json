@@ -61,7 +61,7 @@
     "echoCancellationTooltip": {
       "app": "仅 Sokuji — 麦克风收进 Sokuji 播放的翻译语音时将其消除。麦克风是 BlackHole 等虚拟声卡时请选择此项。",
       "browser": "仅浏览器 — 麦克风收进本浏览器播放的声音（包括会议标签页）时将其消除。麦克风是传送其他应用声音的 BlackHole 等虚拟声卡时请选择此项。",
-      "all": "全部声音 — 连其他应用从扬声器播放的声音（例如游戏、会议软件）也一并消除：用扬声器听声音时选这一项，免得对方的声音被当成你说的话。对方说话时，你的声音也可能被压低。用作麦克风的虚拟声卡传送的正是这些声音，因此会变成静音。"
+      "all": "全部声音 — 连游戏、会议软件从扬声器放出来的声音也一起消掉，免得对方的话被当成你说的。适合用扬声器、模式是「我」的时候。代价是对方说话时你的声音也会被压低，你说的话容易漏掉或识别错。用作麦克风的虚拟声卡会因此变成静音。"
     },
     "echoCancellationMode": {
       "app": "仅 Sokuji",
@@ -1737,7 +1737,7 @@
     "pinyin": "中文上方显示拼音",
     "jyutping": "粤语上方显示粤拼",
     "echoCancellationApp": "仅 Kotomimi",
-    "echoCancellationAppTooltip": "仅 Kotomimi — 只消掉 Kotomimi 自己播放的声音。戴耳机或 VR 头显时选这一项；麦克风是虚拟声卡（VB-Cable、BlackHole 等）时也选这一项。",
+    "echoCancellationAppTooltip": "仅 Kotomimi — 只消掉 Kotomimi 自己播放的声音，你的声音收得最清楚。适合戴耳机或 VR 头显；用扬声器时，模式选「两者」也能用。麦克风是虚拟声卡（VB-Cable、BlackHole 等）时选这一项。",
     "speechDetection": {
       "title": "语音检测"
     },

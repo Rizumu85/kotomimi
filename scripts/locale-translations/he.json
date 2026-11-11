@@ -176,8 +176,8 @@
     "text": "רק Kotomimi"
   },
   "fork.echoCancellationAppTooltip": {
-    "en": "Kotomimi only — removes only the sound Kotomimi itself plays. Choose this with headphones or a VR headset, or when the microphone is a virtual cable (VB-Cable, BlackHole).",
-    "text": "Kotomimi בלבד — מסיר רק את הצלילים ש-Kotomimi משמיעה בעצמה. בחרו באפשרות זו עם אוזניות או משקף VR, או כשהמיקרופון הוא כבל וירטואלי (VB-Cable, BlackHole)."
+    "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "רק Kotomimi — מסנן רק את הצלילים ש-Kotomimi עצמה משמיעה, כך שהקול שלך נקלט בצורה הברורה ביותר. מתאים לאוזניות או למשקפי VR; עם רמקולים אפשר להשתמש בו גם במצב \"שניהם\". יש לבחור באפשרות הזו כשהמיקרופון הוא כרטיס קול וירטואלי (VB-Cable, BlackHole)."
   },
   "fork.find.again": {
     "en": "Search again",
@@ -2172,8 +2172,8 @@
     "text": "Doubao תרגום סימולטני 2.0"
   },
   "settings.echoCancellationTooltip.all": {
-    "en": "All sounds — Also removes what other apps play through the speakers, such as a game or a meeting app: choose this when you listen on loudspeakers, so the other side is not heard as you. While they speak it can turn your own voice down. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
-    "text": "כל הצלילים — מסיר גם צלילים שאפליקציות אחרות משמיעות דרך הרמקולים, כמו משחק או אפליקציית פגישות: בחרו באפשרות זו כשאתם מאזינים דרך רמקולים, כדי שקולו של הצד השני לא יזוהה כקולכם. בזמן שהם מדברים, ייתכן שעוצמת הקול שלכם תונמך. כבל וירטואלי המשמש כמיקרופון מעביר בדיוק את הצלילים האלה, ולכן הוא ישתתק."
+    "en": "All sounds — also removes what a game or a meeting app plays through the loudspeakers, so the other side is not taken for you. Suits loudspeakers in \"Me\" mode. The cost: while they speak your own voice is turned down too, and what you say is easily missed or misheard. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
+    "text": "כל הצלילים — מסנן גם צלילים שמשחקים ואפליקציות לפגישות משמיעים ברמקולים, כדי שדברי הצד השני לא יזוהו כדברים שלך. מתאים לשימוש ברמקולים במצב \"אני\". החיסרון: כשהצד השני מדבר, גם הקול שלך מונמך, ולכן דברים שאמרת עלולים להתפספס או להיות מזוהים לא נכון. כרטיס קול וירטואלי שמשמש כמיקרופון יושתק במצב הזה."
   },
   "settings.glossaryAdd": {
     "en": "Add a word…",

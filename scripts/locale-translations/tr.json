@@ -176,8 +176,8 @@
     "text": "Yalnızca Kotomimi"
   },
   "fork.echoCancellationAppTooltip": {
-    "en": "Kotomimi only — removes only the sound Kotomimi itself plays. Choose this with headphones or a VR headset, or when the microphone is a virtual cable (VB-Cable, BlackHole).",
-    "text": "Yalnızca Kotomimi — sadece Kotomimi'nin çaldığı sesi kaldırır. Kulaklık veya VR başlığı kullanıyorsanız ya da mikrofon sanal kabloysa (VB-Cable, BlackHole) bunu seçin."
+    "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "Yalnızca Kotomimi — Sadece Kotomimi'nin çaldığı sesleri giderir, böylece sesiniz en net şekilde alınır. Kulaklık veya VR başlığı için uygundur. Hoparlör kullanırken \"Her ikisi\" modunda da çalışır. Mikrofon olarak sanal ses kartı (VB-Cable, BlackHole vb.) kullanıyorsanız bunu seçin."
   },
   "fork.find.again": {
     "en": "Search again",
@@ -2172,8 +2172,8 @@
     "text": "Doubao AST 2.0"
   },
   "settings.echoCancellationTooltip.all": {
-    "en": "All sounds — Also removes what other apps play through the speakers, such as a game or a meeting app: choose this when you listen on loudspeakers, so the other side is not heard as you. While they speak it can turn your own voice down. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
-    "text": "Tüm sesler — Oyun veya toplantı uygulaması gibi diğer uygulamaların hoparlörlerden çaldığı sesleri de kaldırır: Hoparlörden dinliyorsanız bunu seçin; böylece karşı tarafın sesi siz konuşuyormuşsunuz gibi algılanmaz. Karşı taraf konuşurken kendi sesiniz kısılabilir. Mikrofon olarak kullanılan sanal kablo tam olarak bu sesi ilettiğinden tamamen sessiz kalır."
+    "en": "All sounds — also removes what a game or a meeting app plays through the loudspeakers, so the other side is not taken for you. Suits loudspeakers in \"Me\" mode. The cost: while they speak your own voice is turned down too, and what you say is easily missed or misheard. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
+    "text": "Tüm sesler — Oyunların ve toplantı uygulamalarının hoparlörden verdiği sesleri de giderir. Böylece karşı tarafın söyledikleri sizin sözleriniz sanılmaz. Hoparlör kullanırken \"Ben\" moduna uygundur. Ancak karşı taraf konuşurken sizin sesiniz de kısılır; söyledikleriniz atlanabilir veya yanlış anlaşılabilir. Mikrofon olarak kullanılan sanal ses kartı da bu yüzden sessiz kalır."
   },
   "settings.glossaryAdd": {
     "en": "Add a word…",

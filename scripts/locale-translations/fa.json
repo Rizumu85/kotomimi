@@ -176,8 +176,8 @@
     "text": "فقط Kotomimi"
   },
   "fork.echoCancellationAppTooltip": {
-    "en": "Kotomimi only — removes only the sound Kotomimi itself plays. Choose this with headphones or a VR headset, or when the microphone is a virtual cable (VB-Cable, BlackHole).",
-    "text": "فقط Kotomimi — فقط صدایی را که خود Kotomimi پخش می‌کند حذف می‌کند. با هدفون یا هدست واقعیت مجازی این گزینه را انتخاب کنید؛ اگر میکروفون کابل مجازی (VB-Cable، BlackHole و مانند آن) است نیز همین گزینه را انتخاب کنید."
+    "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "فقط Kotomimi — فقط صدایی را حذف می‌کند که خود Kotomimi پخش می‌کند تا صدای شما واضح‌تر دریافت شود. برای هدفون یا هدست واقعیت مجازی مناسب است؛ با بلندگو هم در حالت «هر دو» کار می‌کند. اگر میکروفونتان کارت صدای مجازی است (مثل VB-Cable یا BlackHole)، این گزینه را انتخاب کنید."
   },
   "fork.find.again": {
     "en": "Search again",
@@ -2172,8 +2172,8 @@
     "text": "ترجمه هم‌زمان Doubao 2.0"
   },
   "settings.echoCancellationTooltip.all": {
-    "en": "All sounds — Also removes what other apps play through the speakers, such as a game or a meeting app: choose this when you listen on loudspeakers, so the other side is not heard as you. While they speak it can turn your own voice down. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
-    "text": "همه صداها — صدای پخش‌شده از بلندگو توسط برنامه‌های دیگر، مثل بازی یا برنامهٔ جلسه، را هم حذف می‌کند. اگر با بلندگو گوش می‌دهید این گزینه را انتخاب کنید تا صدای طرف مقابل به‌عنوان صدای شما تشخیص داده نشود. هنگام صحبت او، ممکن است صدای خودتان هم کم شود. کابل مجازیِ مورد استفاده به‌عنوان میکروفون دقیقاً همین صدا را منتقل می‌کند، بنابراین خروجی آن قطع و بی‌صدا می‌شود."
+    "en": "All sounds — also removes what a game or a meeting app plays through the loudspeakers, so the other side is not taken for you. Suits loudspeakers in \"Me\" mode. The cost: while they speak your own voice is turned down too, and what you say is easily missed or misheard. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
+    "text": "همهٔ صداها — حتی صدای بازی یا برنامهٔ جلسه را که از بلندگو پخش می‌شود حذف می‌کند تا حرف طرف مقابل به‌جای حرف شما تشخیص داده نشود. برای استفاده از بلندگو در حالت «من» مناسب است. اما وقتی طرف مقابل صحبت می‌کند، صدای شما هم کم می‌شود و ممکن است حرفتان جا بیفتد یا اشتباه تشخیص داده شود. اگر از کارت صدای مجازی به‌عنوان میکروفون استفاده کنید، صدای آن قطع می‌شود."
   },
   "settings.glossaryAdd": {
     "en": "Add a word…",

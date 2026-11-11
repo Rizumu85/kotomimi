@@ -180,8 +180,8 @@
     "text": "Kotomimi uniquement"
   },
   "fork.echoCancellationAppTooltip": {
-    "en": "Kotomimi only — removes only the sound Kotomimi itself plays. Choose this with headphones or a VR headset, or when the microphone is a virtual cable (VB-Cable, BlackHole).",
-    "text": "Kotomimi uniquement — supprime seulement les sons diffusés par Kotomimi. Choisissez cette option avec un casque ou un casque VR, ou lorsque le microphone est un câble virtuel (VB-Cable, BlackHole)."
+    "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "Kotomimi uniquement — supprime seulement le son diffusé par Kotomimi, pour capter votre voix le plus clairement possible. Idéal avec un casque audio ou VR ; fonctionne aussi avec des haut-parleurs en mode « Les deux ». Choisissez cette option si votre microphone est une carte son virtuelle (VB-Cable, BlackHole)."
   },
   "fork.find.again": {
     "en": "Search again",
@@ -2196,8 +2196,8 @@
     "text": "Auto"
   },
   "settings.echoCancellationTooltip.all": {
-    "en": "All sounds — Also removes what other apps play through the speakers, such as a game or a meeting app: choose this when you listen on loudspeakers, so the other side is not heard as you. While they speak it can turn your own voice down. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
-    "text": "Tous les sons — Supprime aussi les sons diffusés par les haut-parleurs par d’autres applications, comme un jeu ou une appli de réunion : choisissez cette option si vous écoutez sur des haut-parleurs, afin que la voix de l’autre personne ne soit pas prise pour la vôtre. Lorsqu’elle parle, votre propre voix peut être atténuée. Un câble virtuel utilisé comme microphone transmet exactement ces sons et devient donc silencieux."
+    "en": "All sounds — also removes what a game or a meeting app plays through the loudspeakers, so the other side is not taken for you. Suits loudspeakers in \"Me\" mode. The cost: while they speak your own voice is turned down too, and what you say is easily missed or misheard. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
+    "text": "Tous les sons — supprime aussi les sons des jeux et des applications de réunion diffusés par les haut-parleurs, pour éviter de prendre la voix des autres pour la vôtre. Adapté aux haut-parleurs en mode « Moi ». En contrepartie, votre voix est aussi atténuée quand les autres parlent : vos paroles risquent de passer inaperçues ou d’être mal reconnues. Une carte son virtuelle utilisée comme microphone sera alors muette."
   },
   "settings.glossaryAdd": {
     "en": "Add a word…",

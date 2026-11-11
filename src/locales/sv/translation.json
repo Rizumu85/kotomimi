@@ -61,7 +61,7 @@
     "echoCancellationTooltip": {
       "app": "Bara Sokuji — Tar bort Sokujis översatta tal om mikrofonen fångar upp det. Välj detta när mikrofonen är en virtuell kabel som BlackHole.",
       "browser": "Bara webbläsaren — Tar bort det som den här webbläsaren spelar upp, mötesflikar inräknade, om mikrofonen fångar upp det. Välj detta när mikrofonen är en virtuell kabel som BlackHole som bär ljud från en annan app.",
-      "all": "Alla ljud — tar även bort ljud som andra appar spelar upp via högtalarna, till exempel ett spel eller en mötesapp: välj detta när du lyssnar via högtalare, så att motpartens röst inte tolkas som din. När motparten pratar kan din egen röst sänkas. En virtuell ljudkabel som används som mikrofon överför just detta ljud, så den blir helt tyst."
+      "all": "Alla ljud — tar även bort ljud som spel eller mötesappar spelar upp i högtalarna, så att andras tal inte tolkas som ditt. Passar när du använder högtalare i läget ”Jag”. Nackdelen är att din röst också dämpas när andra pratar, så det du säger lätt missas eller feltolkas. Ett virtuellt ljudkort som används som mikrofon blir då tyst."
     },
     "echoCancellationMode": {
       "app": "Bara Sokuji",
@@ -1736,7 +1736,7 @@
     "romanization": "Visa romanisering",
     "pinyin": "Visa pinyin ovanför kinesiskan",
     "echoCancellationApp": "Endast Kotomimi",
-    "echoCancellationAppTooltip": "Endast Kotomimi — tar bara bort ljudet som Kotomimi själv spelar upp. Välj detta med hörlurar eller ett VR-headset, eller när mikrofonen är en virtuell ljudkabel (VB-Cable, BlackHole).",
+    "echoCancellationAppTooltip": "Endast Kotomimi — tar bara bort ljud som Kotomimi själv spelar upp, så att din röst hörs så tydligt som möjligt. Passar med hörlurar eller VR-headset. Med högtalare fungerar det också i läget ”Båda”. Välj detta om mikrofonen är ett virtuellt ljudkort (VB-Cable, BlackHole).",
     "speechDetection": {
       "title": "Talidentifiering"
     },

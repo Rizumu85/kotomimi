@@ -61,7 +61,7 @@
     "echoCancellationTooltip": {
       "app": "Sokuji lang — Inaalis ang isinaling boses ng Sokuji kapag nasagap ito ng mikropono. Piliin ito kapag ang mikropono ay virtual cable gaya ng BlackHole.",
       "browser": "Browser lang — Inaalis ang pinapatugtog ng browser na ito, kasama ang mga tab ng meeting, kapag nasagap ito ng mikropono. Piliin ito kapag ang mikropono ay virtual cable gaya ng BlackHole na nagdadala ng tunog ng ibang app.",
-      "all": "Lahat ng tunog — Inaalis din ang tunog na pinapatugtog ng ibang app sa mga speaker, gaya ng laro o meeting app: piliin ito kapag sa speaker ka nakikinig para hindi mapagkamalang ikaw ang nagsasalita. Kapag nagsasalita ang kausap, maaaring hinaan ang sarili mong boses. Dahil ang virtual cable na ginagamit bilang mikropono ay eksaktong tunog na iyon ang ipinapadala, tuluyan itong mawawalan ng tunog."
+      "all": "Lahat ng tunog — inaalis pati ang tunog ng laro o meeting app na lumalabas sa mga speaker, para hindi mapagkamalang ikaw ang nagsasalita kapag kausap mo ang nagsasalita. Angkop kapag gumagamit ng speaker sa mode na \"Ako\". Kapalit nito, humihina rin ang boses mo habang nagsasalita ang kausap, kaya maaaring hindi makuha o mali ang pagkilala sa sinasabi mo. Kung virtual sound card ang gamit bilang mikropono, mawawalan ito ng tunog."
     },
     "echoCancellationMode": {
       "app": "Sokuji lang",
@@ -1736,7 +1736,7 @@
     "romanization": "Ipakita ang romanisasyon",
     "pinyin": "Pinyin sa itaas ng tekstong Tsino",
     "echoCancellationApp": "Kotomimi lang",
-    "echoCancellationAppTooltip": "Kotomimi lang — inaalis lang ang tunog na mismong pinapatugtog ng Kotomimi. Piliin ito kapag naka-headphone o VR headset ka, o kapag virtual cable (VB-Cable, BlackHole) ang mikropono.",
+    "echoCancellationAppTooltip": "Kotomimi lang — inaalis lang ang tunog na pinapatugtog ng Kotomimi para pinakamalinaw na makuha ang boses mo. Angkop kapag naka-headphone o VR headset; puwede rin sa speaker kung \"Pareho\" ang mode. Piliin ito kung virtual sound card (VB-Cable, BlackHole) ang gamit bilang mikropono.",
     "speechDetection": {
       "title": "Pagtukoy sa pananalita"
     },

@@ -61,7 +61,7 @@
     "echoCancellationTooltip": {
       "app": "Apenas Sokuji — Remove a fala traduzida do Sokuji se o microfone a captar. Escolha esta opção se o microfone for um cabo virtual como o BlackHole.",
       "browser": "Apenas navegador — Remove o que este navegador reproduz, incluindo abas de reunião, se o microfone captar. Escolha esta opção se o microfone for um cabo virtual como o BlackHole que transporta o som de outro aplicativo.",
-      "all": "Todos os sons — Também remove o que outros aplicativos reproduzem nos alto-falantes, como um jogo ou aplicativo de reunião: escolha esta opção quando ouvir pelos alto-falantes, para que a voz da outra pessoa não seja confundida com a sua. Enquanto ela fala, sua própria voz pode ficar mais baixa. Um cabo virtual usado como microfone transmite exatamente esse som, então ele ficaria mudo."
+      "all": "Todos os sons — também elimina o som de jogos e apps de reunião que sai pelos alto-falantes, para não confundir a fala dos outros com a sua. Ideal para usar alto-falantes no modo \"Eu\". A desvantagem é que, enquanto a outra pessoa fala, sua voz também fica mais baixa, e partes da sua fala podem não ser captadas ou ser reconhecidas errado. Se você usar um cabo de áudio virtual como microfone, ele ficará mudo."
     },
     "echoCancellationMode": {
       "app": "Apenas Sokuji",
@@ -1736,7 +1736,7 @@
     "romanization": "Mostrar romanização",
     "pinyin": "Pinyin acima do chinês",
     "echoCancellationApp": "Somente Kotomimi",
-    "echoCancellationAppTooltip": "Somente Kotomimi — remove apenas o som reproduzido pelo próprio Kotomimi. Escolha esta opção com fones de ouvido ou um headset de VR, ou quando o microfone for um cabo virtual (VB-Cable, BlackHole).",
+    "echoCancellationAppTooltip": "Só Kotomimi — elimina apenas o som reproduzido pelo próprio Kotomimi, captando sua voz com mais clareza. Ideal para fones de ouvido ou um headset de VR; com alto-falantes, também funciona no modo \"Ambos\". Escolha esta opção se o microfone for um cabo de áudio virtual (VB-Cable, BlackHole).",
     "speechDetection": {
       "title": "Detecção de fala"
     },

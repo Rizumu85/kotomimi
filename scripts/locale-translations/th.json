@@ -176,8 +176,8 @@
     "text": "เฉพาะ Kotomimi"
   },
   "fork.echoCancellationAppTooltip": {
-    "en": "Kotomimi only — removes only the sound Kotomimi itself plays. Choose this with headphones or a VR headset, or when the microphone is a virtual cable (VB-Cable, BlackHole).",
-    "text": "เฉพาะ Kotomimi — ตัดเฉพาะเสียงที่ Kotomimi เล่นเอง เลือกตัวเลือกนี้เมื่อใช้หูฟังหรือชุดแว่น VR และเมื่อไมโครโฟนเป็นสายสัญญาณเสมือน (VB-Cable, BlackHole เป็นต้น)"
+    "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "เฉพาะ Kotomimi — ตัดเฉพาะเสียงที่ Kotomimi เล่นเอง จึงรับเสียงคุณได้ชัดที่สุด เหมาะกับหูฟังหรือแว่น VR หากใช้ลำโพงก็ใช้ได้เมื่อเลือกโหมด \"ทั้งคู่\" เลือกตัวเลือกนี้หากใช้การ์ดเสียงเสมือน (VB-Cable, BlackHole) เป็นไมโครโฟน"
   },
   "fork.find.again": {
     "en": "Search again",
@@ -2172,8 +2172,8 @@
     "text": "Doubao แปลพร้อมเสียงพูด 2.0"
   },
   "settings.echoCancellationTooltip.all": {
-    "en": "All sounds — Also removes what other apps play through the speakers, such as a game or a meeting app: choose this when you listen on loudspeakers, so the other side is not heard as you. While they speak it can turn your own voice down. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
-    "text": "เสียงทั้งหมด — จะตัดเสียงที่แอปอื่นเล่นผ่านลำโพงด้วย เช่น เกมหรือแอปประชุม: เลือกตัวเลือกนี้เมื่อฟังผ่านลำโพง เพื่อไม่ให้เสียงของอีกฝ่ายถูกเข้าใจว่าเป็นเสียงคุณ ขณะที่อีกฝ่ายพูด เสียงของคุณอาจถูกลดลงด้วย สายสัญญาณเสมือนที่ใช้เป็นไมโครโฟนจะส่งเสียงเหล่านี้โดยตรง จึงอาจกลายเป็นความเงียบ"
+    "en": "All sounds — also removes what a game or a meeting app plays through the loudspeakers, so the other side is not taken for you. Suits loudspeakers in \"Me\" mode. The cost: while they speak your own voice is turned down too, and what you say is easily missed or misheard. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
+    "text": "เสียงทั้งหมด — ตัดเสียงที่เกมหรือแอปประชุมเล่นผ่านลำโพงด้วย เพื่อไม่ให้เข้าใจผิดว่าเสียงของอีกฝ่ายเป็นเสียงคุณ เหมาะกับการใช้ลำโพงในโหมด \"ฉัน\" แต่ตอนที่อีกฝ่ายพูด เสียงคุณจะถูกลดลงด้วย ทำให้คำพูดของคุณตกหล่นหรือถูกฟังผิดได้ง่าย หากใช้การ์ดเสียงเสมือนเป็นไมโครโฟน เสียงจะเงียบไปเลย"
   },
   "settings.glossaryAdd": {
     "en": "Add a word…",

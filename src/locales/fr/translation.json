@@ -61,7 +61,7 @@
     "echoCancellationTooltip": {
       "app": "Sokuji uniquement — Supprime la voix traduite de Sokuji si le microphone la capte. Choisissez cette option si le microphone est un câble virtuel comme BlackHole.",
       "browser": "Navigateur uniquement — Supprime ce que lit ce navigateur, onglets de réunion compris, si le microphone le capte. Choisissez cette option si le microphone est un câble virtuel comme BlackHole qui transporte le son d'une autre application.",
-      "all": "Tous les sons — Supprime aussi les sons diffusés par les haut-parleurs par d’autres applications, comme un jeu ou une appli de réunion : choisissez cette option si vous écoutez sur des haut-parleurs, afin que la voix de l’autre personne ne soit pas prise pour la vôtre. Lorsqu’elle parle, votre propre voix peut être atténuée. Un câble virtuel utilisé comme microphone transmet exactement ces sons et devient donc silencieux."
+      "all": "Tous les sons — supprime aussi les sons des jeux et des applications de réunion diffusés par les haut-parleurs, pour éviter de prendre la voix des autres pour la vôtre. Adapté aux haut-parleurs en mode « Moi ». En contrepartie, votre voix est aussi atténuée quand les autres parlent : vos paroles risquent de passer inaperçues ou d’être mal reconnues. Une carte son virtuelle utilisée comme microphone sera alors muette."
     },
     "echoCancellationMode": {
       "app": "Sokuji uniquement",
@@ -1736,7 +1736,7 @@
     "romanization": "Afficher la romanisation",
     "pinyin": "Pinyin au-dessus du chinois",
     "echoCancellationApp": "Kotomimi uniquement",
-    "echoCancellationAppTooltip": "Kotomimi uniquement — supprime seulement les sons diffusés par Kotomimi. Choisissez cette option avec un casque ou un casque VR, ou lorsque le microphone est un câble virtuel (VB-Cable, BlackHole).",
+    "echoCancellationAppTooltip": "Kotomimi uniquement — supprime seulement le son diffusé par Kotomimi, pour capter votre voix le plus clairement possible. Idéal avec un casque audio ou VR ; fonctionne aussi avec des haut-parleurs en mode « Les deux ». Choisissez cette option si votre microphone est une carte son virtuelle (VB-Cable, BlackHole).",
     "speechDetection": {
       "title": "Détection de la parole"
     },

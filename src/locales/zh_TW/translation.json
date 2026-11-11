@@ -61,7 +61,7 @@
     "echoCancellationTooltip": {
       "app": "僅 Sokuji — 麥克風收進 Sokuji 播放的翻譯語音時將其消除。麥克風是 BlackHole 等虛擬音效卡時請選擇此項。",
       "browser": "僅瀏覽器 — 麥克風收進本瀏覽器播放的聲音（包括會議分頁）時將其消除。麥克風是傳送其他應用程式聲音的 BlackHole 等虛擬音效卡時請選擇此項。",
-      "all": "所有聲音 — 連其他應用程式從喇叭播放的聲音（例如遊戲、會議軟體）也一併消除：用喇叭聽聲音時選這一項，免得對方的聲音被當成你說的話。對方說話時，你的聲音也可能被壓低。用作麥克風的虛擬音效卡傳送的正是這些聲音，因此會變成靜音。"
+      "all": "所有聲音 — 連遊戲、會議軟體從喇叭播放的聲音也一起消掉，免得對方的話被當成你說的。適合用喇叭、模式是「我」的時候。代價是對方說話時你的聲音也會被壓低，你說的話容易漏掉或辨識錯。用作麥克風的虛擬音效卡會因此變成靜音。"
     },
     "echoCancellationMode": {
       "app": "僅 Sokuji",
@@ -1737,7 +1737,7 @@
     "pinyin": "中文上方顯示拼音",
     "jyutping": "粵語上方顯示粵拼",
     "echoCancellationApp": "僅 Kotomimi",
-    "echoCancellationAppTooltip": "僅 Kotomimi — 只消掉 Kotomimi 自己播放的聲音。戴耳機或 VR 頭顯時選這一項；麥克風是虛擬音效卡（VB-Cable、BlackHole 等）時也選這一項。",
+    "echoCancellationAppTooltip": "僅 Kotomimi — 只消掉 Kotomimi 自己播放的聲音，你的聲音收得最清楚。適合戴耳機或 VR 頭顯；用喇叭時，模式選「兩者」也能用。麥克風是虛擬音效卡（VB-Cable、BlackHole 等）時選這一項。",
     "speechDetection": {
       "title": "語音偵測"
     },

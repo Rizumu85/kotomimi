@@ -61,7 +61,7 @@
     "echoCancellationTooltip": {
       "app": "Alleen Sokuji — Verwijdert de vertaalde spraak van Sokuji als de microfoon die opvangt. Kies dit als de microfoon een virtuele kabel zoals BlackHole is.",
       "browser": "Alleen browser — Verwijdert wat deze browser afspeelt, vergadertabbladen inbegrepen, als de microfoon het opvangt. Kies dit als de microfoon een virtuele kabel zoals BlackHole is die het geluid van een andere app draagt.",
-      "all": "Alle geluiden — Verwijdert ook geluid dat andere apps via de luidsprekers afspelen, zoals een game of vergaderapp: kies dit als je via luidsprekers luistert, zodat het geluid van de andere persoon niet als jouw stem wordt gehoord. Tijdens het praten van de andere persoon kan je eigen stem zachter worden gezet. Een virtuele kabel die als microfoon wordt gebruikt, geeft precies dat geluid door en wordt daardoor stil."
+      "all": "Alle geluiden — onderdrukt ook geluid dat games en vergaderapps via de luidsprekers afspelen, zodat de woorden van de ander niet als jouw spraak worden herkend. Geschikt voor luidsprekers in de modus \"Ik\". Nadeel: als de ander praat, wordt jouw stem ook zachter. Wat je zegt, kan daardoor wegvallen of verkeerd worden herkend. Een virtuele geluidskaart die als microfoon wordt gebruikt, wordt hierdoor stil."
     },
     "echoCancellationMode": {
       "app": "Alleen Sokuji",
@@ -1736,7 +1736,7 @@
     "romanization": "Romanisatie tonen",
     "pinyin": "Pinyin boven Chinese tekst",
     "echoCancellationApp": "Alleen Kotomimi",
-    "echoCancellationAppTooltip": "Alleen Kotomimi — verwijdert alleen het geluid dat Kotomimi zelf afspeelt. Kies dit met een koptelefoon of VR-headset, of als de microfoon een virtuele kabel is (VB-Cable, BlackHole).",
+    "echoCancellationAppTooltip": "Alleen Kotomimi — onderdrukt alleen geluid dat Kotomimi zelf afspeelt, zodat je stem zo duidelijk mogelijk wordt opgevangen. Geschikt voor een koptelefoon of VR-headset. Met luidsprekers werkt dit ook in de modus \"Beide\". Kies deze optie als je een virtuele geluidskaart (VB-Cable, BlackHole) als microfoon gebruikt.",
     "speechDetection": {
       "title": "Spraakdetectie"
     },

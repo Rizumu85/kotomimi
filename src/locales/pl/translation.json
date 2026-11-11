@@ -61,7 +61,7 @@
     "echoCancellationTooltip": {
       "app": "Tylko Sokuji — Usuwa przetłumaczoną mowę Sokuji, jeśli mikrofon ją wychwyci. Wybierz tę opcję, gdy mikrofonem jest wirtualny kabel, np. BlackHole.",
       "browser": "Tylko przeglądarka — Usuwa to, co odtwarza ta przeglądarka, łącznie z kartami spotkań, jeśli mikrofon to wychwyci. Wybierz tę opcję, gdy mikrofonem jest wirtualny kabel, np. BlackHole, przenoszący dźwięk innej aplikacji.",
-      "all": "Wszystkie dźwięki — Usuwa także dźwięki odtwarzane przez inne aplikacje przez głośniki, np. grę lub aplikację do spotkań: wybierz tę opcję, gdy słuchasz przez głośniki, aby głos rozmówcy nie został uznany za Twój. Gdy rozmówca mówi, Twój głos może zostać ściszony. Wirtualny kabel używany jako mikrofon przesyła dokładnie ten dźwięk, więc zamilknie."
+      "all": "Wszystkie dźwięki — usuwa też dźwięki odtwarzane przez grę lub aplikację do spotkań przez głośniki, aby wypowiedzi rozmówcy nie były uznawane za Twoje. Przydatne przy używaniu głośników w trybie „Ja”. Gdy jednak rozmówca mówi, Twój głos też jest ściszany, więc Twoje słowa mogą zostać pominięte lub błędnie rozpoznane. Wirtualna karta dźwiękowa używana jako mikrofon zostanie przez to wyciszona."
     },
     "echoCancellationMode": {
       "app": "Tylko Sokuji",
@@ -1736,7 +1736,7 @@
     "romanization": "Latynizacja",
     "pinyin": "Pinyin nad chińskim tekstem",
     "echoCancellationApp": "Tylko Kotomimi",
-    "echoCancellationAppTooltip": "Tylko Kotomimi — usuwa wyłącznie dźwięk odtwarzany przez samo Kotomimi. Wybierz tę opcję przy słuchawkach lub goglach VR, a także gdy mikrofonem jest wirtualna karta dźwiękowa (VB-Cable, BlackHole).",
+    "echoCancellationAppTooltip": "Tylko Kotomimi — usuwa jedynie dźwięk odtwarzany przez Kotomimi, dzięki czemu Twój głos jest odbierany najwyraźniej. Najlepiej sprawdza się ze słuchawkami lub goglami VR. Z głośnikami działa też w trybie „Oboje”. Wybierz tę opcję, jeśli jako mikrofon służy wirtualna karta dźwiękowa (VB-Cable, BlackHole).",
     "speechDetection": {
       "title": "Wykrywanie mowy"
     },

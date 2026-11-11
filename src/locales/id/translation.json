@@ -61,7 +61,7 @@
     "echoCancellationTooltip": {
       "app": "Hanya Sokuji — Menghapus ucapan terjemahan Sokuji jika tertangkap mikrofon. Pilih ini jika mikrofon adalah kabel virtual seperti BlackHole.",
       "browser": "Hanya browser — Menghapus suara yang diputar browser ini, termasuk tab rapat, jika tertangkap mikrofon. Pilih ini jika mikrofon adalah kabel virtual seperti BlackHole yang membawa suara aplikasi lain.",
-      "all": "Semua suara — Juga menghapus suara yang diputar aplikasi lain melalui speaker, seperti game atau aplikasi rapat: pilih ini saat mendengarkan lewat speaker agar suara lawan bicara tidak dianggap sebagai suara Anda. Saat mereka berbicara, suara Anda sendiri bisa ikut dikecilkan. Kabel virtual yang digunakan sebagai mikrofon membawa suara yang sama persis, sehingga akan menjadi hening."
+      "all": "Semua suara — juga menghilangkan suara game atau aplikasi rapat yang diputar lewat speaker, agar ucapan lawan bicara tidak dianggap sebagai ucapanmu. Cocok saat memakai speaker dalam mode \"Saya\". Namun, saat lawan bicara berbicara, suaramu ikut dikecilkan sehingga ucapanmu mudah terlewat atau salah dikenali. Kartu suara virtual yang dipakai sebagai mikrofon akan menjadi senyap."
     },
     "echoCancellationMode": {
       "app": "Hanya Sokuji",
@@ -1736,7 +1736,7 @@
     "romanization": "Tampilkan romanisasi",
     "pinyin": "Pinyin di atas teks Mandarin",
     "echoCancellationApp": "Hanya Kotomimi",
-    "echoCancellationAppTooltip": "Hanya Kotomimi — hanya menghapus suara yang diputar Kotomimi. Pilih ini saat memakai headphone atau headset VR, atau ketika mikrofon berupa kabel virtual (VB-Cable, BlackHole).",
+    "echoCancellationAppTooltip": "Hanya Kotomimi — hanya menghilangkan suara yang diputar Kotomimi, agar suaramu tertangkap paling jelas. Cocok saat memakai headphone atau headset VR; jika memakai speaker, gunakan mode \"Keduanya\". Pilih ini jika mikrofonmu berupa kartu suara virtual (VB-Cable, BlackHole).",
     "speechDetection": {
       "title": "Deteksi ucapan"
     },

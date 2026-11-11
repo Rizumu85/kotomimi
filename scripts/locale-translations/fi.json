@@ -172,8 +172,8 @@
     "text": "Vain Kotomimi"
   },
   "fork.echoCancellationAppTooltip": {
-    "en": "Kotomimi only — removes only the sound Kotomimi itself plays. Choose this with headphones or a VR headset, or when the microphone is a virtual cable (VB-Cable, BlackHole).",
-    "text": "Vain Kotomimi — poistaa ainoastaan Kotomimin itsensä toistamat äänet. Valitse tämä kuulokkeilla tai VR-kuulokkeilla; valitse tämä myös, kun mikrofoni on virtuaalinen äänikaapeli (VB-Cable, BlackHole jne.)."
+    "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "Vain Kotomimi — poistaa vain Kotomimin oman toistoäänen, jolloin oma äänesi kuuluu selkeimmin. Sopii kuulokkeille tai VR-laseille. Kaiuttimien kanssa tätä voi käyttää Molemmat-tilassa. Valitse tämä, jos mikrofonina on virtuaalinen äänikortti (VB-Cable, BlackHole)."
   },
   "fork.find.again": {
     "en": "Search again",
@@ -2180,8 +2180,8 @@
     "text": "Automaattinen"
   },
   "settings.echoCancellationTooltip.all": {
-    "en": "All sounds — Also removes what other apps play through the speakers, such as a game or a meeting app: choose this when you listen on loudspeakers, so the other side is not heard as you. While they speak it can turn your own voice down. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
-    "text": "Kaikki äänet — Poistaa myös muiden sovellusten kaiuttimista toistamat äänet, kuten pelin tai kokoussovelluksen äänen. Valitse tämä, kun kuuntelet kaiuttimista, jotta toisen osapuolen puhetta ei tulkita omaksi puheeksesi. Kun toinen puhuu, oma äänesi voi myös vaimentua. Mikrofonina käytettävä virtuaalikaapeli välittää juuri nämä äänet, joten se mykistyy."
+    "en": "All sounds — also removes what a game or a meeting app plays through the loudspeakers, so the other side is not taken for you. Suits loudspeakers in \"Me\" mode. The cost: while they speak your own voice is turned down too, and what you say is easily missed or misheard. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
+    "text": "Kaikki äänet — poistaa myös pelin tai kokoussovelluksen kaiuttimista toistaman äänen, jotta toisen puhetta ei tulkita sinun puheeksesi. Sopii kaiuttimien kanssa Minä-tilaan. Haittapuolena on, että myös oma äänesi vaimenee toisen puhuessa, jolloin sanojasi voi jäädä pois tai puheesi voidaan tunnistaa väärin. Mikrofonina käytetty virtuaalinen äänikortti mykistyy tämän vuoksi."
   },
   "settings.glossaryAdd": {
     "en": "Add a word…",

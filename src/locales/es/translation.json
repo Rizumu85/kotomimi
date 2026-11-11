@@ -61,7 +61,7 @@
     "echoCancellationTooltip": {
       "app": "Solo Sokuji — Elimina la voz traducida de Sokuji si el micrófono la capta. Elija esta opción si el micrófono es un cable virtual como BlackHole.",
       "browser": "Solo navegador — Elimina lo que reproduce este navegador, incluidas las pestañas de reuniones, si el micrófono lo capta. Elija esta opción si el micrófono es un cable virtual como BlackHole que transmite el sonido de otra aplicación.",
-      "all": "Todos los sonidos — También elimina lo que otras aplicaciones reproducen por los altavoces, como un juego o una aplicación de reuniones: elige esta opción si escuchas por altavoces, para que la voz de la otra persona no se detecte como tuya. Mientras habla, tu propia voz puede bajar de volumen. Un cable virtual usado como micrófono transmite exactamente ese sonido, por lo que quedaría en silencio."
+      "all": "Todos los sonidos — elimina también el sonido de juegos y aplicaciones de reuniones que sale por los altavoces, para que no se confunda lo que dice la otra persona con lo que dices tú. Recomendado si usas altavoces en el modo «Yo». A cambio, tu voz también baja de volumen mientras habla la otra persona, por lo que algunas palabras pueden perderse o reconocerse mal. Si usas una tarjeta de sonido virtual como micrófono, quedará en silencio."
     },
     "echoCancellationMode": {
       "app": "Solo Sokuji",
@@ -1736,7 +1736,7 @@
     "romanization": "Mostrar romanización",
     "pinyin": "Pinyin sobre el texto chino",
     "echoCancellationApp": "Solo Kotomimi",
-    "echoCancellationAppTooltip": "Solo Kotomimi — elimina únicamente el sonido que reproduce Kotomimi. Elige esta opción con auriculares o un visor de realidad virtual, o cuando el micrófono sea un cable virtual (VB-Cable, BlackHole).",
+    "echoCancellationAppTooltip": "Solo Kotomimi — elimina únicamente el sonido que reproduce Kotomimi, para captar tu voz con la mayor claridad. Recomendado con auriculares o un visor de VR; con altavoces también funciona en el modo «Ambos». Elige esta opción si usas una tarjeta de sonido virtual como micrófono (VB-Cable, BlackHole, etc.).",
     "speechDetection": {
       "title": "Detección de voz"
     },

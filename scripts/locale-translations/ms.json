@@ -172,8 +172,8 @@
     "text": "Kotomimi sahaja"
   },
   "fork.echoCancellationAppTooltip": {
-    "en": "Kotomimi only — removes only the sound Kotomimi itself plays. Choose this with headphones or a VR headset, or when the microphone is a virtual cable (VB-Cable, BlackHole).",
-    "text": "Kotomimi sahaja — hanya menghapuskan bunyi yang dimainkan oleh Kotomimi sendiri. Pilih ini apabila menggunakan fon kepala atau set kepala VR, atau apabila mikrofon ialah kabel maya (VB-Cable, BlackHole)."
+    "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "Kotomimi sahaja — hanya menyingkirkan bunyi yang dimainkan oleh Kotomimi, supaya suara anda dirakam paling jelas. Sesuai jika anda memakai fon kepala atau set kepala VR; dengan pembesar suara, mod \"Kedua-duanya\" juga boleh digunakan. Pilih ini jika mikrofon anda ialah kad bunyi maya (VB-Cable, BlackHole)."
   },
   "fork.find.again": {
     "en": "Search again",
@@ -2184,8 +2184,8 @@
     "text": "Doubao AST 2.0"
   },
   "settings.echoCancellationTooltip.all": {
-    "en": "All sounds — Also removes what other apps play through the speakers, such as a game or a meeting app: choose this when you listen on loudspeakers, so the other side is not heard as you. While they speak it can turn your own voice down. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
-    "text": "Semua bunyi — Turut menghapuskan bunyi yang dimainkan oleh aplikasi lain melalui pembesar suara, seperti permainan atau aplikasi mesyuarat: pilih ini apabila anda mendengar melalui pembesar suara supaya suara pihak lain tidak disangka sebagai suara anda. Semasa mereka bercakap, kelantangan suara anda sendiri mungkin dikecilkan. Kabel maya yang digunakan sebagai mikrofon menghantar bunyi yang sama, jadi ia akan menjadi senyap."
+    "en": "All sounds — also removes what a game or a meeting app plays through the loudspeakers, so the other side is not taken for you. Suits loudspeakers in \"Me\" mode. The cost: while they speak your own voice is turned down too, and what you say is easily missed or misheard. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
+    "text": "Semua bunyi — turut menyingkirkan bunyi permainan atau aplikasi mesyuarat yang dimainkan melalui pembesar suara, supaya percakapan orang lain tidak dianggap sebagai suara anda. Sesuai jika anda menggunakan pembesar suara dalam mod \"Saya\". Namun, suara anda juga diperlahankan semasa orang lain bercakap, jadi percakapan anda mudah terlepas atau tersalah dikenal pasti. Kad bunyi maya yang digunakan sebagai mikrofon akan menjadi senyap."
   },
   "settings.glossaryAdd": {
     "en": "Add a word…",

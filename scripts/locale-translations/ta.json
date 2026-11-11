@@ -176,8 +176,8 @@
     "text": "Kotomimi மட்டும்"
   },
   "fork.echoCancellationAppTooltip": {
-    "en": "Kotomimi only — removes only the sound Kotomimi itself plays. Choose this with headphones or a VR headset, or when the microphone is a virtual cable (VB-Cable, BlackHole).",
-    "text": "Kotomimi மட்டும் — Kotomimi இயக்கும் ஒலியை மட்டும் நீக்கும். ஹெட்ஃபோன் அல்லது VR ஹெட்செட் பயன்படுத்தும்போது இதைத் தேர்ந்தெடுக்கவும்; மைக்ரோஃபோன் மெய்நிகர் ஆடியோ சாதனமாக (VB-Cable, BlackHole போன்றவை) இருந்தாலும் இதைத் தேர்ந்தெடுக்கவும்."
+    "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "Kotomimi மட்டும் — Kotomimi இயக்கும் ஒலியை மட்டும் நீக்கும். இதனால் உங்கள் குரல் மிகத் தெளிவாகப் பதிவாகும். ஹெட்ஃபோன் அல்லது VR ஹெட்செட் பயன்படுத்தும்போது ஏற்றது. ஒலிபெருக்கியைப் பயன்படுத்தினால் \"இரண்டும்\" பயன்முறையிலும் வேலை செய்யும். மைக்ரோஃபோனாக மெய்நிகர் ஒலி அட்டையை (VB-Cable, BlackHole போன்றவை) பயன்படுத்தினால் இதைத் தேர்ந்தெடுக்கவும்."
   },
   "fork.find.again": {
     "en": "Search again",
@@ -2172,8 +2172,8 @@
     "text": "Doubao உடனடி மொழிபெயர்ப்பு 2.0"
   },
   "settings.echoCancellationTooltip.all": {
-    "en": "All sounds — Also removes what other apps play through the speakers, such as a game or a meeting app: choose this when you listen on loudspeakers, so the other side is not heard as you. While they speak it can turn your own voice down. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
-    "text": "அனைத்து ஒலிகளும் — கேம் அல்லது மீட்டிங் ஆப் போன்ற பிற செயலிகள் ஸ்பீக்கர்கள் வழியாக இயக்கும் ஒலிகளையும் நீக்கும்: ஸ்பீக்கர்களில் கேட்கும்போது இதைத் தேர்ந்தெடுக்கவும்; இல்லையெனில் எதிர் தரப்பின் குரல் உங்கள் குரலாகக் கேட்கப்படலாம். அவர்கள் பேசும்போது உங்கள் குரலின் ஒலி குறையக்கூடும். மைக்ரோஃபோனாகப் பயன்படுத்தும் மெய்நிகர் ஆடியோ சாதனம் இதே ஒலியையே அனுப்புவதால், அது அமைதியாகிவிடும்."
+    "en": "All sounds — also removes what a game or a meeting app plays through the loudspeakers, so the other side is not taken for you. Suits loudspeakers in \"Me\" mode. The cost: while they speak your own voice is turned down too, and what you say is easily missed or misheard. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
+    "text": "எல்லா ஒலிகளும் — கேம் அல்லது மீட்டிங் செயலி ஒலிபெருக்கியில் இயக்கும் ஒலியையும் நீக்கும். இதனால் மற்றவர் பேசுவது நீங்கள் பேசியதாக எடுத்துக்கொள்ளப்படாது. ஒலிபெருக்கியுடன் \"நான்\" பயன்முறையைப் பயன்படுத்தும்போது ஏற்றது. ஆனால் மற்றவர் பேசும்போது உங்கள் குரலும் குறைக்கப்படும். அதனால் நீங்கள் சொல்வது விடுபடலாம் அல்லது தவறாகப் புரிந்துகொள்ளப்படலாம். மைக்ரோஃபோனாகப் பயன்படுத்தும் மெய்நிகர் ஒலி அட்டையும் இதனால் ஒலியிழக்கும்."
   },
   "settings.glossaryAdd": {
     "en": "Add a word…",

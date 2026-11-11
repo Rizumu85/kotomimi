@@ -61,7 +61,7 @@
     "echoCancellationTooltip": {
       "app": "Sokuji sahaja — Membuang pertuturan terjemahan Sokuji jika ditangkap mikrofon. Pilih ini apabila mikrofon ialah kabel maya seperti BlackHole.",
       "browser": "Pelayar sahaja — Membuang bunyi yang dimainkan pelayar ini, termasuk tab mesyuarat, jika ditangkap mikrofon. Pilih ini apabila mikrofon ialah kabel maya seperti BlackHole yang membawa bunyi aplikasi lain.",
-      "all": "Semua bunyi — Turut menghapuskan bunyi yang dimainkan oleh aplikasi lain melalui pembesar suara, seperti permainan atau aplikasi mesyuarat: pilih ini apabila anda mendengar melalui pembesar suara supaya suara pihak lain tidak disangka sebagai suara anda. Semasa mereka bercakap, kelantangan suara anda sendiri mungkin dikecilkan. Kabel maya yang digunakan sebagai mikrofon menghantar bunyi yang sama, jadi ia akan menjadi senyap."
+      "all": "Semua bunyi — turut menyingkirkan bunyi permainan atau aplikasi mesyuarat yang dimainkan melalui pembesar suara, supaya percakapan orang lain tidak dianggap sebagai suara anda. Sesuai jika anda menggunakan pembesar suara dalam mod \"Saya\". Namun, suara anda juga diperlahankan semasa orang lain bercakap, jadi percakapan anda mudah terlepas atau tersalah dikenal pasti. Kad bunyi maya yang digunakan sebagai mikrofon akan menjadi senyap."
     },
     "echoCancellationMode": {
       "app": "Sokuji sahaja",
@@ -1736,7 +1736,7 @@
     "romanization": "Paparkan perumian",
     "pinyin": "Pinyin di atas teks Cina",
     "echoCancellationApp": "Kotomimi sahaja",
-    "echoCancellationAppTooltip": "Kotomimi sahaja — hanya menghapuskan bunyi yang dimainkan oleh Kotomimi sendiri. Pilih ini apabila menggunakan fon kepala atau set kepala VR, atau apabila mikrofon ialah kabel maya (VB-Cable, BlackHole).",
+    "echoCancellationAppTooltip": "Kotomimi sahaja — hanya menyingkirkan bunyi yang dimainkan oleh Kotomimi, supaya suara anda dirakam paling jelas. Sesuai jika anda memakai fon kepala atau set kepala VR; dengan pembesar suara, mod \"Kedua-duanya\" juga boleh digunakan. Pilih ini jika mikrofon anda ialah kad bunyi maya (VB-Cable, BlackHole).",
     "speechDetection": {
       "title": "Pengesanan pertuturan"
     },

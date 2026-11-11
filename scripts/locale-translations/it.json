@@ -188,8 +188,8 @@
     "text": "Solo Kotomimi"
   },
   "fork.echoCancellationAppTooltip": {
-    "en": "Kotomimi only — removes only the sound Kotomimi itself plays. Choose this with headphones or a VR headset, or when the microphone is a virtual cable (VB-Cable, BlackHole).",
-    "text": "Solo Kotomimi — elimina esclusivamente l’audio riprodotto da Kotomimi. Scegli questa opzione con cuffie o un visore VR, oppure quando il microfono è un cavo virtuale (VB-Cable, BlackHole)."
+    "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "Solo Kotomimi — elimina solo l'audio riprodotto da Kotomimi, così la tua voce viene captata con la massima chiarezza. Ideale con cuffie o un visore VR; con gli altoparlanti funziona anche in modalità \"Entrambi\". Scegli questa opzione se usi una scheda audio virtuale come microfono (VB-Cable, BlackHole)."
   },
   "fork.find.again": {
     "en": "Search again",
@@ -2224,8 +2224,8 @@
     "text": "Automatico"
   },
   "settings.echoCancellationTooltip.all": {
-    "en": "All sounds — Also removes what other apps play through the speakers, such as a game or a meeting app: choose this when you listen on loudspeakers, so the other side is not heard as you. While they speak it can turn your own voice down. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
-    "text": "Tutti i suoni — Elimina anche l’audio riprodotto dagli altoparlanti da altre app, come un gioco o un’app per riunioni: scegli questa opzione se ascolti dagli altoparlanti, per evitare che la voce dell’interlocutore venga riconosciuta come la tua. Mentre parla, la tua voce potrebbe essere abbassata. Un cavo virtuale usato come microfono trasmette proprio questo audio, quindi diventerebbe muto."
+    "en": "All sounds — also removes what a game or a meeting app plays through the loudspeakers, so the other side is not taken for you. Suits loudspeakers in \"Me\" mode. The cost: while they speak your own voice is turned down too, and what you say is easily missed or misheard. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
+    "text": "Tutti i suoni — elimina anche l'audio riprodotto dagli altoparlanti da giochi e app per riunioni, per evitare che le parole degli altri vengano scambiate per le tue. Adatto se usi gli altoparlanti in modalità \"Io\". Lo svantaggio: mentre gli altri parlano, anche la tua voce viene attenuata e le tue parole possono andare perse o essere riconosciute male. Se usi una scheda audio virtuale come microfono, verrà silenziata."
   },
   "settings.glossaryAdd": {
     "en": "Add a word…",

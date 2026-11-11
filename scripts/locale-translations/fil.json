@@ -228,8 +228,8 @@
     "text": "Kotomimi lang"
   },
   "fork.echoCancellationAppTooltip": {
-    "en": "Kotomimi only — removes only the sound Kotomimi itself plays. Choose this with headphones or a VR headset, or when the microphone is a virtual cable (VB-Cable, BlackHole).",
-    "text": "Kotomimi lang — inaalis lang ang tunog na mismong pinapatugtog ng Kotomimi. Piliin ito kapag naka-headphone o VR headset ka, o kapag virtual cable (VB-Cable, BlackHole) ang mikropono."
+    "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "Kotomimi lang — inaalis lang ang tunog na pinapatugtog ng Kotomimi para pinakamalinaw na makuha ang boses mo. Angkop kapag naka-headphone o VR headset; puwede rin sa speaker kung \"Pareho\" ang mode. Piliin ito kung virtual sound card (VB-Cable, BlackHole) ang gamit bilang mikropono."
   },
   "fork.find.again": {
     "en": "Search again",
@@ -2328,8 +2328,8 @@
     "text": "Sundin ang system"
   },
   "settings.echoCancellationTooltip.all": {
-    "en": "All sounds — Also removes what other apps play through the speakers, such as a game or a meeting app: choose this when you listen on loudspeakers, so the other side is not heard as you. While they speak it can turn your own voice down. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
-    "text": "Lahat ng tunog — Inaalis din ang tunog na pinapatugtog ng ibang app sa mga speaker, gaya ng laro o meeting app: piliin ito kapag sa speaker ka nakikinig para hindi mapagkamalang ikaw ang nagsasalita. Kapag nagsasalita ang kausap, maaaring hinaan ang sarili mong boses. Dahil ang virtual cable na ginagamit bilang mikropono ay eksaktong tunog na iyon ang ipinapadala, tuluyan itong mawawalan ng tunog."
+    "en": "All sounds — also removes what a game or a meeting app plays through the loudspeakers, so the other side is not taken for you. Suits loudspeakers in \"Me\" mode. The cost: while they speak your own voice is turned down too, and what you say is easily missed or misheard. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
+    "text": "Lahat ng tunog — inaalis pati ang tunog ng laro o meeting app na lumalabas sa mga speaker, para hindi mapagkamalang ikaw ang nagsasalita kapag kausap mo ang nagsasalita. Angkop kapag gumagamit ng speaker sa mode na \"Ako\". Kapalit nito, humihina rin ang boses mo habang nagsasalita ang kausap, kaya maaaring hindi makuha o mali ang pagkilala sa sinasabi mo. Kung virtual sound card ang gamit bilang mikropono, mawawalan ito ng tunog."
   },
   "settings.glossaryAdd": {
     "en": "Add a word…",

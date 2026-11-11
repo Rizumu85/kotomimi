@@ -176,8 +176,8 @@
     "text": "सिर्फ़ Kotomimi"
   },
   "fork.echoCancellationAppTooltip": {
-    "en": "Kotomimi only — removes only the sound Kotomimi itself plays. Choose this with headphones or a VR headset, or when the microphone is a virtual cable (VB-Cable, BlackHole).",
-    "text": "केवल Kotomimi — सिर्फ़ Kotomimi द्वारा चलायी जाने वाली ध्वनि हटाता है। हेडफ़ोन या VR हेडसेट इस्तेमाल करते समय इसे चुनें; माइक्रोफ़ोन वर्चुअल केबल (VB-Cable, BlackHole) हो तो भी यही चुनें।"
+    "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
+    "text": "केवल Kotomimi — सिर्फ़ Kotomimi की अपनी चलाई हुई आवाज़ हटाता है, जिससे आपकी आवाज़ सबसे साफ़ सुनाई देती है। हेडफ़ोन या VR हेडसेट के लिए सही है; स्पीकर के साथ \"दोनों\" मोड में भी काम करता है। माइक्रोफ़ोन के तौर पर वर्चुअल साउंड कार्ड (VB-Cable, BlackHole आदि) इस्तेमाल कर रहे हों तो इसे चुनें।"
   },
   "fork.find.again": {
     "en": "Search again",
@@ -2168,8 +2168,8 @@
     "text": "Doubao साथ-साथ अनुवाद 2.0"
   },
   "settings.echoCancellationTooltip.all": {
-    "en": "All sounds — Also removes what other apps play through the speakers, such as a game or a meeting app: choose this when you listen on loudspeakers, so the other side is not heard as you. While they speak it can turn your own voice down. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
-    "text": "सभी ध्वनियाँ — अन्य ऐप्स द्वारा स्पीकर से चलायी जाने वाली आवाज़ें, जैसे गेम या मीटिंग ऐप की ध्वनि, भी हटा दी जाती हैं। स्पीकर पर सुनते समय इसे चुनें, ताकि सामने वाले की आवाज़ आपकी आवाज़ न समझी जाए। उनके बोलने पर आपकी अपनी आवाज़ धीमी हो सकती है। माइक्रोफ़ोन के रूप में इस्तेमाल होने वाली वर्चुअल केबल यही ध्वनि भेजती है, इसलिए वह पूरी तरह मौन हो जाएगी।"
+    "en": "All sounds — also removes what a game or a meeting app plays through the loudspeakers, so the other side is not taken for you. Suits loudspeakers in \"Me\" mode. The cost: while they speak your own voice is turned down too, and what you say is easily missed or misheard. A virtual cable used as the microphone carries exactly that sound, so it would go silent.",
+    "text": "सभी आवाज़ें — गेम या मीटिंग ऐप से स्पीकर पर चलने वाली आवाज़ भी हटाता है, ताकि सामने वाले की बात आपकी न समझ ली जाए। स्पीकर के साथ \"मैं\" मोड के लिए सही है। लेकिन सामने वाला बोलता है तो आपकी आवाज़ भी दब जाती है, जिससे आपकी बातें छूट सकती हैं या गलत पहचानी जा सकती हैं। माइक्रोफ़ोन के तौर पर इस्तेमाल हो रहा वर्चुअल साउंड कार्ड इससे मूक हो जाएगा।"
   },
   "settings.glossaryAdd": {
     "en": "Add a word…",

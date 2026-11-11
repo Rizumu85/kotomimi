@@ -61,7 +61,7 @@
     "echoCancellationTooltip": {
       "app": "Chỉ Sokuji — Loại bỏ giọng dịch của Sokuji nếu micro thu vào. Chọn mục này khi micro là một cáp ảo như BlackHole.",
       "browser": "Chỉ trình duyệt — Loại bỏ âm thanh trình duyệt này phát, kể cả các thẻ cuộc họp, nếu micro thu vào. Chọn mục này khi micro là một cáp ảo như BlackHole mang âm thanh của ứng dụng khác.",
-      "all": "Tất cả âm thanh — Cũng loại bỏ âm thanh do các ứng dụng khác phát qua loa, chẳng hạn như trò chơi hoặc ứng dụng họp: hãy chọn mục này khi bạn nghe bằng loa ngoài để giọng đối phương không bị nhận nhầm là giọng của bạn. Khi đối phương nói, giọng của bạn có thể bị giảm âm lượng. Cáp âm thanh ảo dùng làm micrô truyền chính những âm thanh này, nên sẽ bị tắt tiếng."
+      "all": "Tất cả âm thanh — khử cả âm thanh từ trò chơi hoặc ứng dụng họp phát qua loa, để lời của người khác không bị nhận nhầm là của bạn. Phù hợp khi dùng loa ở chế độ \"Tôi\". Đổi lại, khi người khác nói, giọng bạn cũng bị giảm âm lượng nên lời bạn nói dễ bị bỏ sót hoặc nhận dạng sai. Nếu dùng thiết bị âm thanh ảo làm micrô, âm thanh từ thiết bị đó sẽ bị tắt hoàn toàn."
     },
     "echoCancellationMode": {
       "app": "Chỉ Sokuji",
@@ -1736,7 +1736,7 @@
     "romanization": "Hiện phiên âm Latinh",
     "pinyin": "Hiện bính âm trên tiếng Trung",
     "echoCancellationApp": "Chỉ Kotomimi",
-    "echoCancellationAppTooltip": "Chỉ Kotomimi — chỉ loại bỏ âm thanh do chính Kotomimi phát. Chọn mục này khi dùng tai nghe hoặc kính VR; cũng chọn khi micrô là cáp âm thanh ảo (VB-Cable, BlackHole, v.v.).",
+    "echoCancellationAppTooltip": "Chỉ Kotomimi — chỉ khử âm thanh do Kotomimi phát, giúp thu giọng bạn rõ nhất. Phù hợp khi đeo tai nghe hoặc kính VR; nếu dùng loa, bạn cũng có thể chọn chế độ \"Cả hai\". Chọn mục này khi dùng thiết bị âm thanh ảo (VB-Cable, BlackHole) làm micrô.",
     "speechDetection": {
       "title": "Phát hiện giọng nói"
     },
