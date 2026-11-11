@@ -221,6 +221,9 @@ export interface VRChatController {
  */
 const ASK_WAIT_MS = 12_000;
 
+/** How long the typing bubble stays with no news of the sentence it is for: one that never goes up lets it go. */
+const TYPING_HOLD_MS = 8_000;
+
 export function startVRChat(deps: VRChatDeps): VRChatController {
   const { ipc, runner, store } = deps;
   const later = deps.setTimeout ?? ((fn: () => void, ms: number) => setTimeout(fn, ms));
@@ -347,6 +350,37 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
   let sending = false;
   /** Whether a line may go up now: asked again at the moment it is sent, as the setting may have changed while it waited. */
   const allowed = () => !stopped && store.getState().chatbox !== 'off';
+  /**
+   * Fork: VRChat's typing bubble over the avatar while a sentence of the user's is on its way to the chatbox, from the
+   * moment it is heard to the moment it goes up, as Kikitan shows it: the others see that an answer is coming. What it
+   * is for: the user's spoken sentences not sent yet, and lines waiting their turn. A sentence that never goes up (its
+   * translation failed, its feedback is the user's alone) lets it go after `TYPING_HOLD_MS` with no change to it.
+   */
+  let typing = false;
+  let typingFor = '';
+  let typingArmed = 0;
+  const setTyping = (on: boolean) => {
+    const mine = ++typingArmed;
+    if (on) later(() => { if (mine === typingArmed && !stopped) setTyping(false); }, TYPING_HOLD_MS);
+    if (on === typing) return;
+    typing = on;
+    void ipc.invoke('vrchat:typing', { on }).catch(() => {});
+  };
+  const showTyping = () => {
+    if (!allowed() || !running()) { typingFor = ''; setTyping(false); return; }
+    const state = deps.view.get();
+    const typed = new Set((state.legs ?? []).flatMap((leg) => leg.segments.filter((s) => TYPED.test(s.origin ?? '')).map((s) => s.id)));
+    const coming = state.entries
+      .filter((entry) => entry.kind === 'exchange' && entry.leg === 'speaker' && !sent.has(entry.id)
+        && !entry.source.some((row) => typed.has(row.segmentId)) && textOf(entry.source).trim() !== '')
+      .map((entry) => `${entry.id}:${textOf(entry.source)}`)
+      .join('|');
+    const waiting = queue.length > 0 || rest.length > 0 ? `waiting:${queue.length}:${rest.length}` : '';
+    const now = `${coming}${waiting}`;
+    if (now === '') { typingFor = ''; setTyping(false); return; }
+    // Only news of the sentence holds it longer: the other side talking on does not.
+    if (now !== typingFor) { typingFor = now; setTyping(true); }
+  };
   const pump = () => {
     if (sending) return;
     if (!allowed()) { queue.length = 0; rest = []; return; }
@@ -369,6 +403,7 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     }
     sending = true;
     void ipc.invoke('vrchat:chatbox', { text: line }).catch(() => {});
+    showTyping();
     later(() => { sending = false; pump(); }, Math.max(gap, chatboxReadingMs(line)));
   };
   const look = () => {
@@ -407,6 +442,7 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
       queue.push(chatboxPages(line));
     });
     pump();
+    showTyping();
   };
   // What is finished on screen when this begins was said before: it is not sent now. A sentence still under way is.
   for (const entry of deps.view.get().entries) if (finishedLine(entry, 'translation') !== null) sent.add(entry.id);
@@ -418,12 +454,13 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
   offs.push(runner.state.subscribe(() => {
     const now = running();
     // The run is over: a video it heard is forgotten, the pace is the usual for the next.
-    if (wasRunning && !now) { endVideo(); queue.length = 0; rest = []; }
+    if (wasRunning && !now) { endVideo(); queue.length = 0; rest = []; showTyping(); }
     wasRunning = now;
     watch();
   }));
   offs.push(store.subscribe(() => {
     if (store.getState().chatbox === 'off') { queue.length = 0; rest = []; }
+    showTyping();
     watch();
   }));
   watch();
@@ -439,6 +476,8 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
       if (stopped) return;
       // The pace back to the usual first: a paused leg must not stay paused for the runs after.
       endVideo();
+      typingFor = '';
+      setTyping(false);
       stopped = true;
       for (const off of offs.splice(0)) off();
       queue.length = 0;

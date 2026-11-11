@@ -66,6 +66,11 @@ function chatboxMessage(text) {
   return Buffer.concat([oscString('/chatbox/input'), oscString(',sTF'), oscString(text)]);
 }
 
+/** `/chatbox/typing`: VRChat's typing bubble over the avatar, on or off. */
+function typingMessage(on) {
+  return Buffer.concat([oscString('/chatbox/typing'), oscString(on ? ',T' : ',F')]);
+}
+
 /**
  * What the chatbox takes: its lines kept (the original over its translation, as VRChat draws a line break), each on
  * one line, and within its length, cut at the last whole character.
@@ -238,6 +243,10 @@ function createVRChat({ push, dir = LOG_DIR, tailEveryMs = TAIL_EVERY_MS, muteEv
       socket ??= udp();
       socket.send(chatboxMessage(line), oscPort, '127.0.0.1', () => {});
     },
+    typing(on) {
+      socket ??= udp();
+      socket.send(typingMessage(Boolean(on)), oscPort, '127.0.0.1', () => {});
+    },
     stop() {
       watching = false;
       generation += 1;
@@ -254,6 +263,7 @@ function setupVRChat({ ipcMain, isTrustedSender, getMainWindow, platform = proce
   if (platform !== 'win32') {
     ipcMain.handle('vrchat:watch', () => ({ found: false, connected: false, muted: null }));
     ipcMain.handle('vrchat:chatbox', () => undefined);
+    ipcMain.handle('vrchat:typing', () => undefined);
     return { stop() {} };
   }
   const vrchat = createVRChat({
@@ -272,7 +282,11 @@ function setupVRChat({ ipcMain, isTrustedSender, getMainWindow, platform = proce
     if (!isTrustedSender(event.sender)) return;
     if (payload && typeof payload.text === 'string') vrchat.chatbox(payload.text);
   });
+  ipcMain.handle('vrchat:typing', (event, payload) => {
+    if (!isTrustedSender(event.sender)) return;
+    vrchat.typing(Boolean(payload && payload.on));
+  });
   return vrchat;
 }
 
-module.exports = { setupVRChat, createVRChat, readLine, chatboxMessage, forChatbox, CHATBOX_MOST };
+module.exports = { setupVRChat, createVRChat, readLine, chatboxMessage, typingMessage, forChatbox, CHATBOX_MOST };

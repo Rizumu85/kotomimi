@@ -345,6 +345,69 @@ describe('the chatbox', () => {
   });
 });
 
+describe('the typing bubble (fork)', () => {
+  const typing = (t: ReturnType<typeof setup>) => t.invoked.filter(([channel]) => channel === 'vrchat:typing').map(([, data]) => (data as { on: boolean }).on);
+
+  it('is on from the moment a sentence of the user is heard to the moment it goes up', () => {
+    useVRChatStore.setState({ chatbox: 'translation' });
+    const t = setup();
+    t.run('running');
+    t.show([exchange('a', '你好', '', { final: false })]);
+    expect(typing(t)).toEqual([true]);
+    t.show([exchange('a', '你好吗', '', { final: false })]);
+    expect(typing(t)).toEqual([true]);
+    t.show([exchange('a', '你好吗', 'お元気ですか')]);
+    expect(t.chatboxLines()).toEqual(['お元気ですか']);
+    expect(typing(t)).toEqual([true, false]);
+  });
+
+  it('is never on with the chatbox off, outside a run, for the other side, or for typed text', () => {
+    const heard = (chatbox: 'off' | 'translation', phase: string, entries: Entry[], legs: Array<{ segments: Array<{ id: string; origin?: string }> }> = []) => {
+      useVRChatStore.setState({ chatbox });
+      const t = setup();
+      t.run(phase);
+      t.show(entries, legs);
+      const on = typing(t).filter(Boolean);
+      t.controller.stop();
+      return on;
+    };
+    expect(heard('off', 'running', [exchange('a', '你好', '', { final: false })])).toEqual([]);
+    expect(heard('translation', 'idle', [exchange('b', '谢谢', '', { final: false })])).toEqual([]);
+    expect(heard('translation', 'running', [exchange('c', 'こんにちは', '', { leg: 'participant', final: false })])).toEqual([]);
+    expect(heard('translation', 'running', [exchange('d', '打字', '', { final: false })], [{ segments: [{ id: '打字', origin: 'sokuji_typed_1' }] }])).toEqual([]);
+  });
+
+  it('lets go of a sentence that never goes up, however long the other side talks on', () => {
+    useVRChatStore.setState({ chatbox: 'translation' });
+    const t = setup();
+    t.run('running');
+    t.show([exchange('a', '你好', '')]);
+    expect(typing(t)).toEqual([true]);
+    // The other side talks on: the user's sentence is unchanged, so its hold is not renewed.
+    t.show([exchange('a', '你好', ''), exchange('p', 'はい', '', { leg: 'participant', final: false })]);
+    for (const fire of t.timers.splice(0)) fire();
+    expect(typing(t)).toEqual([true, false]);
+  });
+
+  it('is put out when the run ends, the chatbox is turned off, or it stops', () => {
+    useVRChatStore.setState({ chatbox: 'translation' });
+    const t = setup();
+    t.run('running');
+    t.show([exchange('a', '你好', '', { final: false })]);
+    t.run('idle');
+    expect(last(typing(t))).toBe(false);
+    t.run('running');
+    t.show([exchange('b', '谢谢', '', { final: false })]);
+    useVRChatStore.setState({ chatbox: 'off' });
+    expect(last(typing(t))).toBe(false);
+    useVRChatStore.setState({ chatbox: 'translation' });
+    t.show([exchange('c', '再见', '', { final: false })]);
+    expect(last(typing(t))).toBe(true);
+    t.controller.stop();
+    expect(last(typing(t))).toBe(false);
+  });
+});
+
 describe('the mute', () => {
   it('is asked while a run hears the user with the gate on, or while the card is open', async () => {
     const t = setup();
