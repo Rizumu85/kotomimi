@@ -684,17 +684,22 @@ function hintOnly(text, hints) {
  * stretch is read again without them. Read so, it heard nothing: the words were the list said back over a sound, and
  * nothing is kept. It heard clearly more, or far less: the hints had stood in for words the model did not follow, or
  * been laid over a mumble, and that reading is kept. About as much: it was a name called, and the hinted reading — the
- * name as the list writes it — is kept.
+ * name as the list writes it — is kept. Where it heard more than the words, it is read again too, and a word with
+ * nothing in its place in the plain reading is taken out (`withoutSlipped`).
  */
 function hintChecked(read, hints) {
   return (asked) => {
     const first = read(asked);
     let second = null;
     const done = first.done.then((answer) => {
-      if (!answer.ok || !asked.context || !hintOnly(answer.text, hints)) return answer;
+      if (!answer.ok || !asked.context) return answer;
+      const only = hintOnly(answer.text, hints);
+      const among = only ? [] : hintedAt(answer.text, hints);
+      if (!only && among.length === 0) return answer;
       second = read({ ...asked, context: undefined });
       return second.done.then((plain) => {
         if (!plain.ok) return answer;
+        if (!only) return { ...answer, text: withoutSlipped(answer.text, plain.text, among) };
         const heard = String(plain.text).split(/[、，,。.!?！？;；:：\s]+/u).filter((part) => lettersOf(part) > 0 && !FILLER.has(part.toLowerCase()));
         if (heard.length === 0) return { ...plain, text: '' };
         const got = lettersOf(plain.text);
@@ -708,6 +713,72 @@ function hintChecked(read, hints) {
     });
     return { done, abort: () => { first.abort(); second?.abort(); } };
   };
+}
+
+const HINT_MARKS = /[、，,。.!?！？;；:：\s]+/u;
+const isLetter = (c) => /[\p{L}\p{N}]/u.test(c);
+
+/** The hinted words in a reading, as [start, end) of it: the longest first, none over another, in order. */
+function hintedAt(text, hints) {
+  const words = [...new Set(hints.flatMap((hint) => [String(hint), ...String(hint).split(HINT_MARKS)]).map((word) => word.trim().toLowerCase()).filter((word) => [...word].some(isLetter)))]
+    .sort((a, b) => b.length - a.length);
+  const lower = String(text).toLowerCase();
+  if (lower.length !== String(text).length) return [];
+  const found = [];
+  for (const word of words) {
+    for (let at = lower.indexOf(word); at >= 0; at = lower.indexOf(word, at + 1)) {
+      const end = at + word.length;
+      if (!found.some(([a, b]) => at < b && a < end)) found.push([at, end]);
+    }
+  }
+  return found.sort((a, b) => a[0] - b[0]);
+}
+
+/** About how long a stretch is to say: a letter of an alphabet is less than a syllable, a kana or a Han character one. */
+const sayLength = (chars) => chars.reduce((n, c) => n + (/\p{Script=Latin}/u.test(c) ? 0.4 : 1), 0);
+
+/**
+ * Fork: a reading with the hinted words in it, put beside the same stretch read without them. Told the words to expect,
+ * Qwen3-ASR given voices over one another — a crowded room — writes one of the words into a sentence where nobody said
+ * it: 「なんでもこうやってJackal。」 (the user, 2026-11-11). A word read without the hints as nothing, or as far too
+ * little to be it, at its place in the sentence, was laid over noise and is taken out; one read as anything about its
+ * length was a name said and misheard, and is kept as the list writes it.
+ */
+function withoutSlipped(hinted, plain, among) {
+  const letters = (text, from, to) => {
+    const out = [];
+    for (let i = from; i < to; i++) if (isLetter(text[i])) out.push(text[i].toLowerCase());
+    return out;
+  };
+  const heard = letters(String(plain), 0, String(plain).length);
+  const slipped = among.filter(([start, end]) => {
+    const before = letters(hinted, 0, start);
+    const after = letters(hinted, end, hinted.length);
+    const rest = [...before, ...after];
+    // Where the rest of the sentence meets the plain reading: what the plain reading has between is in the word's place.
+    const n = rest.length;
+    const m = heard.length;
+    if (n * m > 250000) return false;
+    const common = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
+    for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) common[i][j] = rest[i] === heard[j] ? common[i + 1][j + 1] + 1 : Math.max(common[i + 1][j], common[i][j + 1]);
+    let lastBefore = -1;
+    let firstAfter = m;
+    for (let i = 0, j = 0; i < n && j < m;) {
+      if (rest[i] === heard[j]) {
+        if (i < before.length) lastBefore = j;
+        else if (firstAfter === m) firstAfter = j;
+        i++; j++;
+      } else if (common[i + 1][j] >= common[i][j + 1]) i++;
+      else j++;
+    }
+    const between = heard.slice(lastBefore + 1, firstAfter);
+    return sayLength(between) * 2 < sayLength(letters(hinted, start, end));
+  });
+  if (slipped.length === 0) return hinted;
+  let out = hinted;
+  for (const [start, end] of [...slipped].reverse()) out = out.slice(0, start) + out.slice(end);
+  out = out.replace(/\s{2,}/g, ' ').replace(/\s+([、，,。.!?！？;；:：])/gu, '$1').trim();
+  return [...out].some(isLetter) ? out : '';
 }
 
 /** What Qwen3-ASR is told to expect, ahead of a stretch (`openStream`). */

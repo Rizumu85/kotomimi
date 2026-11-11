@@ -150,7 +150,7 @@ function createRemoteEngine({ onStream = () => {}, window = openWindow, read = r
     }
     // The words of the user's dictionary, for a model that takes them (Qwen3-ASR), as this computer's own engine is
     // told them (`openStream` in native-engine.js) — with the same checks on what it writes back: the list said back
-    // for want of a voice is dropped, and a reading of nothing but the words is read again without them. Without
+    // for want of a voice is dropped, and a reading with the words in it is read again without them. Without
     // them a name heard on a device came out another way at each reading (the user, 2026-11-05).
     const words = Array.isArray(hints) ? hints.filter((hint) => typeof hint === 'string' && hint.trim()).slice(0, 100) : [];
     const context = MODELS[model]?.takesContext && words.length > 0 ? `${CONTEXT_LEAD}${words.join('、')}` : undefined;

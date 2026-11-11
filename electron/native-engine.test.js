@@ -305,7 +305,7 @@ describe('a reading that runs on to its end (fork)', () => {
   });
 });
 
-describe('a reading of nothing but hinted words (fork)', () => {
+describe('a reading with hinted words in it (fork)', () => {
   const hints = ['VRC', '糖豆'];
   const seconds = (s) => Buffer.alloc(Math.round(s * 16000) * 2);
   const reader = (answers) => {
@@ -335,14 +335,41 @@ describe('a reading of nothing but hinted words (fork)', () => {
     expect(asked.map((r) => r.context === undefined)).toEqual([false, true]);
   });
 
-  it('keeps a name that was called, short or not, and a sentence, read once', async () => {
+  it('keeps a name that was called, short or not', async () => {
     const called = reader({ hinted: '糖豆！', plain: '唐豆！' });
     expect((await hintChecked(called.read, hints)({ context: 'x', pcm: seconds(2), sampleRate: 16000 }).done).text).toBe('糖豆！');
     const short = reader({ hinted: 'VRC', plain: 'VRC.' });
     expect((await hintChecked(short.read, hints)({ context: 'x', pcm: seconds(0.8), sampleRate: 16000 }).done).text).toBe('VRC');
-    const sentence = reader({ hinted: '我们去VRC吧', plain: '我们去吧' });
-    expect((await hintChecked(sentence.read, hints)({ context: 'x', pcm: seconds(3), sampleRate: 16000 }).done).text).toBe('我们去VRC吧');
-    expect(sentence.asked.length).toBe(1);
+  });
+
+  it('reads a sentence with no hinted word once', async () => {
+    const plain = reader({ hinted: '我们去吧', plain: '我们去吧' });
+    expect((await hintChecked(plain.read, hints)({ context: 'x', pcm: seconds(3), sampleRate: 16000 }).done).text).toBe('我们去吧');
+    expect(plain.asked.length).toBe(1);
+  });
+
+  it('keeps a hinted word in a sentence where the plain reading heard something in its place', async () => {
+    const said = reader({ hinted: '今天和糖豆一起去VRC玩了。', plain: '今天和唐斗一起去VR西玩了。' });
+    expect((await hintChecked(said.read, hints)({ context: 'x', pcm: seconds(3), sampleRate: 16000 }).done).text).toBe('今天和糖豆一起去VRC玩了。');
+    const jackal = reader({ hinted: 'さっきJackalが来た', plain: 'さっきジャッカルが来た' });
+    expect((await hintChecked(jackal.read, ['Jackal'])({ context: 'x', pcm: seconds(3), sampleRate: 16000 }).done).text).toBe('さっきJackalが来た');
+    expect(said.asked.map((r) => r.context === undefined)).toEqual([false, true]);
+  });
+
+  it('takes out a hinted word laid into a sentence over noise: nothing, or far too little, in its place', async () => {
+    const crowd = reader({ hinted: 'なんでもこうやってJackal。ああ、誰もいない。', plain: 'なんでもこうやって。ああ、誰もいない。' });
+    expect((await hintChecked(crowd.read, ['Jackal', 'Rizum'])({ context: 'x', pcm: seconds(4), sampleRate: 16000 }).done).text).toBe('なんでもこうやって。ああ、誰もいない。');
+    const little = reader({ hinted: '我们去VRC吧', plain: '我们去吧' });
+    expect((await hintChecked(little.read, hints)({ context: 'x', pcm: seconds(3), sampleRate: 16000 }).done).text).toBe('我们去吧');
+    const english = reader({ hinted: 'I think Rizum is right', plain: 'I think it is right' });
+    expect((await hintChecked(english.read, ['Rizum'])({ context: 'x', pcm: seconds(3), sampleRate: 16000 }).done).text).toBe('I think is right');
+    const kana = reader({ hinted: 'それはJackalだね', plain: 'それはあだね' });
+    expect((await hintChecked(kana.read, ['Jackal'])({ context: 'x', pcm: seconds(3), sampleRate: 16000 }).done).text).toBe('それはだね');
+  });
+
+  it('keeps the hinted reading where the plain one failed', async () => {
+    const read = (request) => ({ done: Promise.resolve(request.context ? { ok: true, text: '我们去VRC吧' } : { ok: false, message: 'busy' }), abort: () => {} });
+    expect((await hintChecked(read, hints)({ context: 'x', pcm: seconds(3), sampleRate: 16000 }).done).text).toBe('我们去VRC吧');
   });
 });
 
