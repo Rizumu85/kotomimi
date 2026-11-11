@@ -1892,8 +1892,8 @@
     "text": "다른 기기에 {{source}}을(를) 인식할 음성 인식 모델이 없습니다. 해당 기기의 공유 카드에서 다운로드하거나, 이 컴퓨터가 대신 인식하게 할 수 있습니다."
   },
   "providers.localai.serverNoDetect": {
-    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
-    "text": "다른 기기에 언어를 자동으로 구분하는 음성 인식 모델이 없어요. ‘나도 …로 말하기’와 상대방 언어 자동 감지에 필요한 모델이에요. 해당 기기에 Qwen3-ASR 같은 모델을 다운로드하거나 두 설정을 끄세요."
+    "en": "The other device has no speech recognition model that tells languages apart, which another language under \"I speak\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or remove those languages.",
+    "text": "다른 기기에 언어를 자동으로 구분하는 음성 인식 모델이 없어요. '내 언어'에 다른 언어를 추가하거나 상대방의 언어를 자동으로 감지하려면 이 모델이 필요해요. 먼저 해당 기기에 Qwen3-ASR 같은 모델을 다운로드하거나, 추가한 언어를 빼 주세요."
   },
   "providers.localai.serverNoModels": {
     "en": "The other device has no model yet: install or download one there first.",
@@ -2239,9 +2239,17 @@
     "en": "Secret Access Key",
     "text": "비밀 액세스 키"
   },
+  "tour.steps.glossary.content": {
+    "en": "Add friends' names and game words: recognition tries to write them right, and translation keeps them as they are. To fix a misheard word, select it in the conversation and press the small button beside it.",
+    "text": "친구 이름이나 게임 용어를 사전에 추가하세요. 음성 인식 시 최대한 정확히 적고, 번역할 때는 그대로 유지해요. 대화에서 잘못 인식된 단어를 선택하고 옆의 작은 버튼을 누르면 바로잡을 수 있어요."
+  },
+  "tour.steps.glossary.title": {
+    "en": "Personal glossary",
+    "text": "나만의 용어집"
+  },
   "tour.steps.kotomimi-tips.coach": {
-    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-    "text": "상대방의 언어로 직접 말하시나요? 설정에서 문법 피드백을 켜세요. \"상대방 언어로도 말하기\"를 켜면 번역과 나만 볼 수 있는 문법 피드백을 함께 받을 수 있어요."
+    "en": "Practising their language? Turn on Grammar feedback: what you say in it gets feedback only you see. Add it under \"I speak\" with \"+\" to mix both: what you say in your own language is translated as usual.",
+    "text": "상대방의 언어를 연습하고 싶나요? '문법 피드백'을 켜면 그 언어로 한 말에 대해 나만 볼 수 있는 피드백을 받아요. '내 언어'에서 '+'로 그 언어를 추가하면 두 언어를 섞어 말할 수 있어요. 모국어로 한 말은 평소처럼 번역돼요."
   },
   "tour.steps.kotomimi-tips.content": {
     "en": "Worth knowing before you start:",
@@ -2258,6 +2266,26 @@
   "tour.steps.kotomimi-tips.typed": {
     "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
     "text": "대화를 시작하면 아래에 입력란이 나타나요. 문장을 입력하면 바로 번역할 수 있어요. Ctrl+K를 누르면 입력란으로 이동해요."
+  },
+  "tour.steps.languages.content": {
+    "en": "Pick what each side speaks:",
+    "text": "나와 상대방이 쓸 언어를 여기서 선택하세요:"
+  },
+  "tour.steps.languages.inUse": {
+    "en": "A language you add under \"I speak\" is used once the other side has it lit too; it is tinted green then.",
+    "text": "「내가 쓰는 언어」에 추가한 언어는 상대방도 켜야 사용돼요. 사용 중인 언어는 연한 초록색으로 표시돼요."
+  },
+  "tour.steps.languages.mine": {
+    "en": "\"I speak\": the filled one is your own language; everything is translated into it. Speak others too? Add them with \"+ I also speak\".",
+    "text": "「내가 쓰는 언어」: 초록색으로 채워진 언어가 모국어예요. 모든 내용이 이 언어로 번역돼요. 다른 언어도 할 수 있다면 「+ 이 언어도 할 수 있어요」를 눌러 추가하세요."
+  },
+  "tour.steps.languages.theirs": {
+    "en": "\"They speak\": press to light a language or put it out, two at most. They are heard in the lit ones, and your speech is translated into each.",
+    "text": "'상대방 언어': 눌러서 켜거나 끌 수 있고, 최대 두 개까지 켤 수 있어요. 켜진 언어로 상대방의 말을 인식하고, 내 말도 각 언어로 번역해요."
+  },
+  "tour.steps.languages.title": {
+    "en": "Languages",
+    "text": "언어"
   },
   "tour.steps.models.content_kotomimi": {
     "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
@@ -2294,6 +2322,14 @@
   "tour.steps.reading-aids.title": {
     "en": "Reading aids",
     "text": "읽기 보조"
+  },
+  "tour.steps.vrchat.content": {
+    "en": "Works with VRChat on this computer: nothing is heard while you are muted there, your words or their translation can show above your head, and with a SteamVR headset the captions can show in the headset.",
+    "text": "이 컴퓨터의 VRChat과 연동돼요. VRChat에서 마이크를 끄면 내 음성을 인식하지 않고, 내 말이나 번역을 머리 위에 표시할 수 있어요. SteamVR 헤드셋을 쓰면 헤드셋 안에도 자막을 표시할 수 있어요."
+  },
+  "tour.steps.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
   },
   "voiceLibrary.cloneVoiceRequired": {
     "en": "This voice needs a clip before it can speak — open the voice list and add one.",

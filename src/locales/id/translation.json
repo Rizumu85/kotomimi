@@ -681,7 +681,7 @@
       "apiKeyNeeded": "API di {{address}} memerlukan kunci. Di kartu terkait, aktifkan \"API ini memerlukan kunci\" lalu masukkan kuncinya.",
       "apiKeyRefused": "API di {{address}} menolak kunci ini. Periksa kunci API di kartu terkait.",
       "serverNoAsr": "Perangkat lain tidak memiliki model pengenalan ucapan untuk mengenali {{source}}. Kartu berbagi di perangkat itu menawarkan model untuk diunduh, atau biarkan komputer ini mendengarkan.",
-      "serverNoDetect": "Perangkat lain tidak memiliki model pengenalan suara yang bisa mendeteksi bahasa secara otomatis. Fitur \"Saya juga berbicara dalam bahasa …\" dan deteksi bahasa lawan bicara memerlukannya. Unduh model seperti Qwen3-ASR di sana, atau nonaktifkan kedua fitur itu.",
+      "serverNoDetect": "Perangkat lain belum punya model pengenalan ucapan yang bisa membedakan bahasa secara otomatis. Model ini diperlukan jika ada bahasa tambahan di \"Saya bicara\" atau untuk mendeteksi bahasa lawan bicara. Unduh model di perangkat itu, misalnya Qwen3-ASR, atau hapus bahasa-bahasa tersebut.",
       "serverAsrBusy": "Pengenalan suara di perangkat lain sedang memakai model lain. Coba mulai lagi setelah selesai digunakan.",
       "sourceAuto": "Kombinasi ini tidak bisa mendeteksi bahasa secara otomatis. Pilih bahasa yang Anda gunakan.",
       "asrUnnamed": "Belum ada model pengenalan suara yang bisa digunakan. Pilih model di kartu \"Pengenalan suara\" di bawah penyedia. Untuk model API, isi alamat dan nama model. Anda juga bisa memilih lokasi lain.",
@@ -1558,8 +1558,23 @@
         "title": "Tiga hal lagi",
         "content": "Perlu diketahui sebelum mulai:",
         "typed": "Setelah sesi dimulai, kotak input muncul di bagian bawah. Ketik kalimat untuk menerjemahkannya. Tekan Ctrl+K untuk langsung ke kotak input.",
-        "coach": "Berbicara langsung dalam bahasa lawan bicara? Aktifkan Masukan tata bahasa di Pengaturan. Kamu juga bisa mengaktifkan \"Saya juga berbicara bahasa lawan bicara\" agar terjemahan dan masukan tata bahasa pribadi tetap tersedia bersama.",
+        "coach": "Ingin berlatih bahasa lawan bicara? Aktifkan \"Masukan tata bahasa\": ucapan Anda dalam bahasa itu akan mendapat masukan yang hanya bisa Anda lihat. Tambahkan juga bahasa itu di \"Saya bicara\" dengan \"+\" agar Anda bisa bergantian memakai kedua bahasa. Ucapan dalam bahasa ibu tetap diterjemahkan seperti biasa.",
         "share": "Perangkat lain juga bisa memakai model di komputer ini: Pengaturan → Penyedia → Bagikan ke perangkat lain."
+      },
+      "languages": {
+        "title": "Bahasa",
+        "content": "Pilih bahasa yang digunakan masing-masing pihak di sini:",
+        "mine": "\"Saya berbicara\": bahasa dengan warna hijau penuh adalah bahasa ibu Anda; semua terjemahan akan menggunakan bahasa ini. Bisa bahasa lain juga? Tambahkan lewat \"+ Saya juga bisa\".",
+        "theirs": "\"Lawan bicara\": klik untuk mengaktifkan atau menonaktifkan bahasa, maksimal dua. Ucapan lawan bicara dikenali dalam bahasa yang aktif, dan ucapan Anda diterjemahkan ke setiap bahasa itu.",
+        "inUse": "Bahasa yang kamu tambahkan di “Saya berbicara” baru dipakai jika lawan bicara juga mengaktifkannya. Saat dipakai, warnanya hijau muda."
+      },
+      "glossary": {
+        "title": "Kamus pribadi",
+        "content": "Tambahkan nama teman dan istilah dalam game ke kamus: pengenalan ucapan akan berusaha menuliskannya dengan benar, dan terjemahan akan mempertahankannya. Untuk memperbaiki kata yang salah dikenali, pilih kata itu dalam percakapan lalu klik tombol kecil di sebelahnya."
+      },
+      "vrchat": {
+        "title": "VRChat",
+        "content": "Terhubung dengan VRChat di komputer ini: ucapan Anda tidak dikenali saat mikrofon dibisukan di VRChat; ucapan atau terjemahannya bisa tampil di atas kepala Anda; jika memakai headset SteamVR, subtitel juga bisa tampil di dalam headset."
       }
     }
   },

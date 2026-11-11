@@ -67,6 +67,11 @@ export const BASICS_STEPS: readonly TourStep[] = [
   // Fork: also for the Kotomimi provider while a stage runs on this computer: it draws the same chips.
   // Its own words there: which model to take is said by the library itself — the measured ones are marked, each with what was found of it.
   { id: 'models', anchor: 'engine-chips', when: (c) => c.providerPath === 'offline' || c.deviceStages === true, prepare: (_c, a) => a.openSettings('provider'), placement: 'left', copyVariant: (c) => (isKotomimi(c) ? 'kotomimi' : null) },
+  // Fork: what is set in General for its own provider's users: the languages each side speaks, the glossary, and VRChat
+  // where it runs (Windows' desktop app).
+  { id: 'languages', anchor: 'languages', when: isKotomimi, prepare: (_c, a) => a.openSettings('languages'), placement: 'left', bullets: ['mine', 'theirs', 'inUse'] },
+  { id: 'glossary', anchor: 'glossary', when: isKotomimi, prepare: (_c, a) => a.openSettings('glossary'), placement: 'left' },
+  { id: 'vrchat', anchor: 'vrchat', when: (c) => isKotomimi(c) && c.platform === 'electron' && c.os === 'windows', prepare: (_c, a) => a.openSettings('vrchat'), placement: 'left' },
   // Fork: the reading aids and the fonts, then what else this fork adds — for its own provider's users.
   { id: 'reading-aids', anchor: 'display-settings', when: isKotomimi, prepare: (_c, a) => a.closeSettings(), placement: 'bottom', bullets: ['furigana', 'romanization', 'pinyin', 'jyutping', 'fonts'] },
   { id: 'kotomimi-tips', when: isKotomimi, bullets: ['typed', 'coach', 'share'] },

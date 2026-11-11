@@ -195,9 +195,17 @@ function MyRow({ side, ordered, suggested, name, showHearer, onOpenHearing, disa
             </button>
           );
         })}
-        <button type="button" className="language-chip__add" disabled={disabled} aria-label={t('fork.languageMenu.addLanguage')} title={t('fork.languageMenu.addLanguage')} aria-haspopup="listbox" {...menu.selectProps}>
-          <Plus size={15} aria-hidden />
-        </button>
+        {/* With the user's own language alone, "+" says what it adds: a row with nothing else in it explains nothing. */}
+        {side.row.length <= 1 ? (
+          <button type="button" className="language-chip__add language-chip__add--named" disabled={disabled} aria-haspopup="listbox" {...menu.selectProps}>
+            <Plus size={14} aria-hidden />
+            <span>{t('fork.languageMenu.alsoSpeak')}</span>
+          </button>
+        ) : (
+          <button type="button" className="language-chip__add" disabled={disabled} aria-label={t('fork.languageMenu.addLanguage')} title={t('fork.languageMenu.addLanguage')} aria-haspopup="listbox" {...menu.selectProps}>
+            <Plus size={15} aria-hidden />
+          </button>
+        )}
         {menu.list}
       </div>
     </div>

@@ -83,7 +83,7 @@ export function GlossarySection() {
   }, [entries]);
 
   return (
-    <div className="config-section glossary-section" id="glossary-section">
+    <div className="config-section glossary-section" id="glossary-section" data-tour="glossary">
       <h3>
         <BookOpen size={18} />
         <span>{t('settings.glossaryTitle')}</span>

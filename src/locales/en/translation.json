@@ -682,7 +682,7 @@
       "apiKeyNeeded": "The API at {{address}} asks for a key. In its card, turn on \"The API asks for a key\" and enter it.",
       "apiKeyRefused": "The API at {{address}} did not accept the key. Check the API key in its card.",
       "serverNoAsr": "The other device has no speech recognition model for {{source}}. Its sharing card offers one to download, or let this computer listen.",
-      "serverNoDetect": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
+      "serverNoDetect": "The other device has no speech recognition model that tells languages apart, which another language under \"I speak\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or remove those languages.",
       "serverAsrBusy": "The other device's speech recognition is in use with another model. Start again once it is free.",
       "sourceAuto": "The language cannot be detected with this setup. Choose the language you speak.",
       "asrUnnamed": "Speech recognition has no model to run yet. In its card under the provider, choose one — for an API model, fill in its address and model name — or choose another place.",
@@ -1137,6 +1137,21 @@
         "title": "That's it",
         "content": "Use the tabs in Settings to find what you need. Replay this guide any time from Help."
       },
+      "languages": {
+        "title": "Languages",
+        "content": "Pick what each side speaks:",
+        "mine": "\"I speak\": the filled one is your own language; everything is translated into it. Speak others too? Add them with \"+ I also speak\".",
+        "theirs": "\"They speak\": press to light a language or put it out, two at most. They are heard in the lit ones, and your speech is translated into each.",
+        "inUse": "A language you add under \"I speak\" is used once the other side has it lit too; it is tinted green then."
+      },
+      "glossary": {
+        "title": "Personal glossary",
+        "content": "Add friends' names and game words: recognition tries to write them right, and translation keeps them as they are. To fix a misheard word, select it in the conversation and press the small button beside it."
+      },
+      "vrchat": {
+        "title": "VRChat",
+        "content": "Works with VRChat on this computer: nothing is heard while you are muted there, your words or their translation can show above your head, and with a SteamVR headset the captions can show in the headset."
+      },
       "reading-aids": {
         "title": "Reading aids",
         "content": "Help for reading the other language, switched here:",
@@ -1150,7 +1165,7 @@
         "title": "Three more things",
         "content": "Worth knowing before you start:",
         "typed": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
-        "coach": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
+        "coach": "Practising their language? Turn on Grammar feedback: what you say in it gets feedback only you see. Add it under \"I speak\" with \"+\" to mix both: what you say in your own language is translated as usual.",
         "share": "Another device can use this computer's models: Settings → Provider → Share with other devices."
       }
     }

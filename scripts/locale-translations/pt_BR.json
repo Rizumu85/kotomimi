@@ -1912,8 +1912,8 @@
     "text": "O outro dispositivo não tem um modelo de reconhecimento de fala para {{source}}. O cartão de compartilhamento dele oferece um para baixar, ou você pode deixar este computador fazer o reconhecimento."
   },
   "providers.localai.serverNoDetect": {
-    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
-    "text": "O outro dispositivo não tem um modelo de reconhecimento que detecte o idioma automaticamente. Esse recurso é necessário para \"Eu também falo…\" e para detectar o idioma da outra pessoa. Baixe um modelo compatível nele, como Qwen3-ASR, ou desative essas duas opções."
+    "en": "The other device has no speech recognition model that tells languages apart, which another language under \"I speak\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or remove those languages.",
+    "text": "O outro dispositivo não tem um modelo de reconhecimento de fala capaz de distinguir idiomas automaticamente. Ele é necessário quando você adiciona outros idiomas em \"Eu falo\" ou usa a detecção automática do idioma da outra pessoa. Baixe um modelo nesse dispositivo, como Qwen3-ASR, ou remova esses idiomas."
   },
   "providers.localai.serverNoModels": {
     "en": "The other device has no model yet: install or download one there first.",
@@ -2283,9 +2283,17 @@
     "en": "Secret Access Key",
     "text": "Chave de acesso secreta"
   },
+  "tour.steps.glossary.content": {
+    "en": "Add friends' names and game words: recognition tries to write them right, and translation keeps them as they are. To fix a misheard word, select it in the conversation and press the small button beside it.",
+    "text": "Adicione nomes de amigos e termos de jogos ao glossário: o reconhecimento tentará escrevê-los corretamente, e a tradução os manterá como estão. Para corrigir uma palavra reconhecida errado na conversa, selecione-a e clique no pequeno botão ao lado."
+  },
+  "tour.steps.glossary.title": {
+    "en": "Personal glossary",
+    "text": "Glossário personalizado"
+  },
   "tour.steps.kotomimi-tips.coach": {
-    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-    "text": "Você fala o idioma da outra pessoa? Ative a Revisão gramatical nas Configurações. Você também pode ativar \"Também falo o outro idioma\" para manter a tradução e receber sugestões gramaticais em particular."
+    "en": "Practising their language? Turn on Grammar feedback: what you say in it gets feedback only you see. Add it under \"I speak\" with \"+\" to mix both: what you say in your own language is translated as usual.",
+    "text": "Quer praticar o idioma da outra pessoa? Ative \"Correções gramaticais\": você receberá comentários sobre o que disser nesse idioma, visíveis só para você. Adicione esse idioma em \"Eu falo\" com \"+\" para alternar entre os dois: o que você disser no seu idioma nativo será traduzido normalmente."
   },
   "tour.steps.kotomimi-tips.content": {
     "en": "Worth knowing before you start:",
@@ -2302,6 +2310,26 @@
   "tour.steps.kotomimi-tips.typed": {
     "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
     "text": "Ao iniciar uma sessão, um campo aparece na parte inferior: digite uma frase para traduzi-la. Pressione Ctrl+K para ir direto ao campo."
+  },
+  "tour.steps.languages.content": {
+    "en": "Pick what each side speaks:",
+    "text": "Escolha aqui os idiomas que cada pessoa fala:"
+  },
+  "tour.steps.languages.inUse": {
+    "en": "A language you add under \"I speak\" is used once the other side has it lit too; it is tinted green then.",
+    "text": "Um idioma adicionado em \"Eu falo\" só será usado se a outra pessoa também o ativar. Quando estiver em uso, ele aparecerá em verde-claro."
+  },
+  "tour.steps.languages.mine": {
+    "en": "\"I speak\": the filled one is your own language; everything is translated into it. Speak others too? Add them with \"+ I also speak\".",
+    "text": "\"Eu falo\": o idioma com fundo verde é sua língua materna; todas as traduções serão para ele. Fala outros idiomas? Adicione em \"+ Também falo\"."
+  },
+  "tour.steps.languages.theirs": {
+    "en": "\"They speak\": press to light a language or put it out, two at most. They are heard in the lit ones, and your speech is translated into each.",
+    "text": "\"A outra pessoa fala\": clique para ativar ou desativar um idioma, até dois de cada vez. A fala da outra pessoa será reconhecida nesses idiomas, e a sua será traduzida para cada um deles."
+  },
+  "tour.steps.languages.title": {
+    "en": "Languages",
+    "text": "Idiomas"
   },
   "tour.steps.models.content_kotomimi": {
     "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
@@ -2338,6 +2366,14 @@
   "tour.steps.reading-aids.title": {
     "en": "Reading aids",
     "text": "Auxílios de leitura"
+  },
+  "tour.steps.vrchat.content": {
+    "en": "Works with VRChat on this computer: nothing is heard while you are muted there, your words or their translation can show above your head, and with a SteamVR headset the captions can show in the headset.",
+    "text": "Funciona com o VRChat neste computador: sua fala não é reconhecida enquanto seu microfone está silenciado no VRChat; sua fala ou a tradução pode aparecer acima da sua cabeça; e, com um headset SteamVR, as legendas também podem aparecer dentro dele."
+  },
+  "tour.steps.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
   },
   "viewer.original": {
     "en": "Original",

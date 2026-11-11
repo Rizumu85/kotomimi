@@ -681,7 +681,7 @@
       "apiKeyNeeded": "API osoitteessa {{address}} vaatii avaimen. Ota sen kortista käyttöön ”API vaatii avaimen” ja syötä avain.",
       "apiKeyRefused": "API osoitteessa {{address}} ei hyväksynyt avainta. Tarkista API-avain sen kortista.",
       "serverNoAsr": "Toisella laitteella ei ole puheentunnistusmallia kielelle {{source}}. Sen jakamiskortilta voi ladata mallin tai antaa tämän tietokoneen kuunnella.",
-      "serverNoDetect": "Toisessa laitteessa ei ole mallia, joka tunnistaa kielen automaattisesti. ”Puhun myös…” ja toisen osapuolen kielen automaattinen tunnistus tarvitsevat sellaisen. Lataa sinne esimerkiksi Qwen3-ASR tai poista molemmat asetukset käytöstä.",
+      "serverNoDetect": "Toisella laitteella ei ole puheentunnistusmallia, joka tunnistaa kielen automaattisesti. Sitä tarvitaan, jos lisäät muita kieliä kohtaan \"Puhun\" tai tunnistat vastapuolen kielen automaattisesti. Lataa ensin toiselle laitteelle sopiva malli, kuten Qwen3-ASR, tai poista nämä kielet.",
       "serverAsrBusy": "Toisen laitteen puheentunnistus käyttää toista mallia. Yritä uudelleen, kun se vapautuu.",
       "sourceAuto": "Tällä kokoonpanolla kieltä ei voi tunnistaa automaattisesti. Valitse puhumasi kieli.",
       "asrUnnamed": "Puheentunnistukselle ei ole vielä käytettävää mallia. Valitse malli palveluntarjoajan alla olevasta ”Puheentunnistus”-kortista. Jos käytät API-mallia, syötä osoite ja mallin nimi. Voit myös valita toisen suorituspaikan.",
@@ -1558,8 +1558,23 @@
         "title": "Vielä kolme asiaa",
         "content": "Hyvä tietää ennen aloittamista:",
         "typed": "Istunnon alettua alareunaan ilmestyy tekstikenttä: kirjoita lause, niin se käännetään. Siirry kenttään painamalla Ctrl+K.",
-        "coach": "Puhutko itse keskustelukumppanisi kieltä? Ota kielioppipalaute käyttöön asetuksista. Voit ottaa käyttöön myös valinnan ”Puhun myös toista kieltä”, jolloin saat sekä käännökset että vain sinulle näkyvän kielioppipalautteen.",
+        "coach": "Haluatko harjoitella vastapuolen kieltä? Ota \"Kielioppipalaute\" käyttöön: saat sillä puhumastasi puheesta palautetta, jonka vain sinä näet. Lisää kieli myös kohtaan \"Puhun\" painamalla \"+\", niin voit käyttää molempia kieliä sekaisin. Äidinkielellä puhumasi käännetään tavalliseen tapaan.",
         "share": "Toinenkin laite voi käyttää tämän tietokoneen malleja: Asetukset → Palveluntarjoaja → Jaa muille laitteille."
+      },
+      "languages": {
+        "title": "Kielet",
+        "content": "Valitse tästä, mitä kieliä kumpikin puhuu:",
+        "mine": "”Puhun”: vihreällä täytetty kieli on äidinkielesi. Kaikki käännetään sille. Puhutko muitakin kieliä? Lisää ne painamalla ”+ Puhun myös”.",
+        "theirs": "\"Vastapuoli puhuu\": ota kieli käyttöön tai poista se käytöstä painamalla sitä. Voit valita enintään kaksi. Vastapuolen puhe tunnistetaan valituilla kielillä, ja oma puheesi käännetään niille kaikille.",
+        "inUse": "\"Puhun\"-kohtaan lisäämäsi kieli otetaan käyttöön, kun myös toinen osapuoli valitsee sen. Käytössä oleva kieli näkyy vaaleanvihreänä."
+      },
+      "glossary": {
+        "title": "Oma sanasto",
+        "content": "Lisää sanastoon ystävien nimiä ja pelitermejä: puheentunnistus pyrkii kirjoittamaan ne oikein, ja käännös säilyttää ne ennallaan. Voit korjata väärin kuullun sanan valitsemalla sen keskustelusta ja painamalla sen vieressä olevaa pientä painiketta."
+      },
+      "vrchat": {
+        "title": "VRChat",
+        "content": "Toimii yhdessä tällä tietokoneella olevan VRChatin kanssa: puhettasi ei tunnisteta, kun olet mykistettynä VRChatissa. Puheesi tai sen käännös voi näkyä pääsi yläpuolella. SteamVR-laseilla tekstitykset voi näyttää myös laseissa."
       }
     }
   },

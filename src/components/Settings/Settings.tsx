@@ -32,6 +32,8 @@ const NAVIGATION_TAB_MAP: Record<string, string> = {
   'user-account': 'general',
   'languages': 'general',
   'glossary': 'general',
+  // Fork: the tour's VRChat step.
+  'vrchat': 'general',
   'sentence-segmentation': 'general',
   'microphone': 'audio',
   'speaker': 'audio',

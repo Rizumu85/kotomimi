@@ -681,7 +681,7 @@
       "apiKeyNeeded": "De API op {{address}} vraagt om een sleutel. Schakel in het bijbehorende paneel 'Deze API vraagt om een sleutel' in en vul de sleutel in.",
       "apiKeyRefused": "De API op {{address}} accepteert deze sleutel niet. Controleer de API-sleutel in het bijbehorende paneel.",
       "serverNoAsr": "Het andere apparaat heeft geen spraakherkenningsmodel voor {{source}}. Op de deelkaart van dat apparaat kun je er een downloaden, of deze computer laten luisteren.",
-      "serverNoDetect": "Het andere apparaat heeft geen spraakherkenningsmodel dat talen automatisch kan onderscheiden. Dat is nodig voor 'Ik spreek … ook' en automatische taalherkenning bij anderen. Download daar eerst zo'n model, zoals Qwen3-ASR, of schakel beide opties uit.",
+      "serverNoDetect": "Op het andere apparaat staat geen spraakherkenningsmodel dat talen automatisch herkent. Dat is nodig voor extra talen onder \"Ik spreek\" en om de taal van de ander automatisch te herkennen. Download daar eerst een model, zoals Qwen3-ASR, of verwijder die talen.",
       "serverAsrBusy": "De spraakherkenning op het andere apparaat gebruikt een ander model. Probeer het opnieuw zodra het beschikbaar is.",
       "sourceAuto": "Met deze combinatie kan de taal niet automatisch worden herkend. Kies de taal die je spreekt.",
       "asrUnnamed": "Er is nog geen model voor spraakherkenning beschikbaar. Kies er een in het paneel 'Spraakherkenning' onder de aanbieder. Vul bij een API-model het adres en de modelnaam in, of kies een andere locatie.",
@@ -1558,8 +1558,23 @@
         "title": "Nog drie dingen",
         "content": "Goed om te weten voordat je begint:",
         "typed": "Tijdens een sessie verschijnt onderaan een invoerveld: typ een zin om die te laten vertalen. Met Ctrl+K ga je direct naar dat veld.",
-        "coach": "Spreek je zelf de andere taal? Schakel Grammaticafeedback in bij Instellingen. Je kunt ook \"Ik spreek de andere taal ook\" inschakelen om vertaling en grammaticafeedback die alleen jij ziet te combineren.",
+        "coach": "Wil je de taal van de ander oefenen? Zet \"Grammaticafeedback\" aan: je krijgt feedback op wat je in die taal zegt, die alleen jij kunt zien. Voeg die taal ook met \"+\" toe onder \"Ik spreek\" om beide talen door elkaar te spreken. Wat je in je moedertaal zegt, wordt gewoon vertaald.",
         "share": "Een ander apparaat kan de modellen op deze computer ook gebruiken: Instellingen → Aanbieder → Delen met andere apparaten."
+      },
+      "languages": {
+        "title": "Talen",
+        "content": "Kies hier welke talen jullie spreken:",
+        "mine": "\"Ik spreek\": de taal met de effen groene achtergrond is je moedertaal. Alles wordt naar die taal vertaald. Spreek je nog andere talen? Voeg ze toe met \"+ Ik spreek ook\".",
+        "theirs": "\"De ander spreekt\": klik op een taal om die aan of uit te zetten, maximaal twee tegelijk. De ander wordt in de ingeschakelde talen herkend en jouw woorden worden naar elk van die talen vertaald.",
+        "inUse": "Een taal die je onder \"Ik spreek\" toevoegt, wordt pas gebruikt als de ander die ook heeft ingeschakeld. De taal wordt dan lichtgroen."
+      },
+      "glossary": {
+        "title": "Persoonlijke woordenlijst",
+        "content": "Voeg namen van vrienden en termen uit games toe: de spraakherkenning probeert ze goed te schrijven en de vertaling laat ze ongewijzigd. Is een woord verkeerd verstaan? Selecteer het in het gesprek en klik op het knopje ernaast om het te verbeteren."
+      },
+      "vrchat": {
+        "title": "VRChat",
+        "content": "Werkt samen met VRChat op deze computer: als je microfoon daar gedempt is, wordt je spraak niet herkend. Je woorden of de vertaling kunnen boven je hoofd verschijnen. Met een SteamVR-headset kun je de ondertiteling ook in je headset zien."
       }
     }
   },

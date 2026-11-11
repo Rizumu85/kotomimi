@@ -17,9 +17,14 @@ const ids = (c: TourCtx) => visibleSteps(c).map((s) => s.id);
 const at = (catalog: unknown, key: string) => key.split('.').reduce<unknown>((node, part) => (node as Record<string, unknown> | undefined)?.[part], catalog);
 
 describe('the tour for the Kotomimi provider', () => {
-  it('adds the reading aids and the tips before Start, and nothing for any other provider', () => {
-    expect(ids(ctx('localai'))).toEqual(['welcome', 'mode-picker', 'microphone', 'participant-source', 'subtitle', 'provider-settings', 'reading-aids', 'kotomimi-tips', 'start', 'done']);
+  it('adds the languages, the glossary, VRChat, the reading aids and the tips before Start, and nothing for any other provider', () => {
+    expect(ids(ctx('localai'))).toEqual(['welcome', 'mode-picker', 'microphone', 'participant-source', 'subtitle', 'provider-settings', 'languages', 'glossary', 'vrchat', 'reading-aids', 'kotomimi-tips', 'start', 'done']);
     expect(ids(ctx(Provider.OPENAI))).toEqual(['welcome', 'mode-picker', 'microphone', 'participant-source', 'subtitle', 'provider-settings', 'start', 'done']);
+  });
+
+  it('shows VRChat in the Windows desktop app alone', () => {
+    expect(ids(ctx('localai', { env: { ...electron, isWindows: false, isMacOS: true } }))).not.toContain('vrchat');
+    expect(ids(ctx('localai', { env: { ...electron, isElectron: false, isExtension: true } }))).not.toContain('vrchat');
   });
 
   it('shows where the models are downloaded while a stage runs on this computer', () => {
@@ -37,7 +42,7 @@ describe('the tour for the Kotomimi provider', () => {
 
   it('has every word it shows, in English and in Chinese', () => {
     const c = ctx('localai', { deviceStages: true });
-    for (const step of visibleSteps(c).filter((s) => ['provider-settings', 'reading-aids', 'kotomimi-tips'].includes(s.id))) {
+    for (const step of visibleSteps(c).filter((s) => ['provider-settings', 'languages', 'glossary', 'vrchat', 'reading-aids', 'kotomimi-tips'].includes(s.id))) {
       const keys = [titleKey(step), contentKey(step, c), ...(step.bullets ?? []).map((b) => bulletKey(step, b))];
       for (const key of keys) {
         expect(typeof at(en, key), `en ${key}`).toBe('string');

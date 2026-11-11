@@ -1896,8 +1896,8 @@
     "text": "במכשיר השני אין מודל לזיהוי דיבור עבור {{source}}. בכרטיס השיתוף שלו אפשר להוריד מודל כזה, או לתת למחשב הזה להאזין."
   },
   "providers.localai.serverNoDetect": {
-    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
-    "text": "במכשיר האחר אין מודל לזיהוי דיבור שמזהה שפות אוטומטית. הוא נדרש גם ל\"אני מדבר גם…\" וגם לזיהוי אוטומטי של שפת הצד השני. יש להוריד בו מודל מתאים, כמו Qwen3-ASR, או לכבות את שתי האפשרויות."
+    "en": "The other device has no speech recognition model that tells languages apart, which another language under \"I speak\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or remove those languages.",
+    "text": "במכשיר השני אין מודל לזיהוי דיבור שמבחין אוטומטית בין שפות. הוא נחוץ כשמוסיפים שפה תחת \"אני מדבר/ת\" או כשמזהים אוטומטית את שפת הצד השני. יש להוריד במכשיר ההוא מודל כזה, למשל Qwen3-ASR, או להסיר את השפות האלה."
   },
   "providers.localai.serverNoModels": {
     "en": "The other device has no model yet: install or download one there first.",
@@ -2247,9 +2247,17 @@
     "en": "Secret Access Key",
     "text": "מפתח גישה סודי"
   },
+  "tour.steps.glossary.content": {
+    "en": "Add friends' names and game words: recognition tries to write them right, and translation keeps them as they are. To fix a misheard word, select it in the conversation and press the small button beside it.",
+    "text": "אפשר להוסיף למילון שמות של חברים ומונחים ממשחקים: זיהוי הדיבור ינסה לכתוב אותם נכון, והתרגום ישאיר אותם כפי שהם. כדי לתקן מילה שנקלטה לא נכון בשיחה, מסמנים אותה ולוחצים על הכפתור הקטן שלידה."
+  },
+  "tour.steps.glossary.title": {
+    "en": "Personal glossary",
+    "text": "מילון אישי"
+  },
   "tour.steps.kotomimi-tips.coach": {
-    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-    "text": "מדברים בעצמכם בשפה השנייה? הפעילו משוב דקדוקי בהגדרות. אפשר להפעיל גם את \"אני מדבר גם בשפה השנייה\" כדי לקבל תרגום לצד משוב דקדוקי פרטי."
+    "en": "Practising their language? Turn on Grammar feedback: what you say in it gets feedback only you see. Add it under \"I speak\" with \"+\" to mix both: what you say in your own language is translated as usual.",
+    "text": "רוצה לתרגל את השפה של הצד השני? הפעלת \"משוב על דקדוק\" תיתן לך משוב פרטי על הדיבור שלך בשפה הזו. הוספת השפה עם \"+\" תחת \"אני מדבר/ת\" תאפשר לשלב בין שתי השפות בשיחה. הדיבור בשפת האם יתורגם כרגיל."
   },
   "tour.steps.kotomimi-tips.content": {
     "en": "Worth knowing before you start:",
@@ -2266,6 +2274,26 @@
   "tour.steps.kotomimi-tips.typed": {
     "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
     "text": "בתחילת השיחה מופיעה תיבת טקסט בתחתית: מקלידים משפט והוא מתורגם. Ctrl+K מעביר את הסמן ישר לתיבה."
+  },
+  "tour.steps.languages.content": {
+    "en": "Pick what each side speaks:",
+    "text": "כאן בוחרים באילו שפות כל צד מדבר:"
+  },
+  "tour.steps.languages.inUse": {
+    "en": "A language you add under \"I speak\" is used once the other side has it lit too; it is tinted green then.",
+    "text": "שפה שהוספת ב״אני מדבר/ת״ תהיה בשימוש רק כשהיא מסומנת גם אצל הצד השני. כשהיא בשימוש, היא מופיעה בירוק בהיר."
+  },
+  "tour.steps.languages.mine": {
+    "en": "\"I speak\": the filled one is your own language; everything is translated into it. Speak others too? Add them with \"+ I also speak\".",
+    "text": "״אני מדבר/ת״: השפה שמסומנת בירוק מלא היא שפת האם שלך. כל התרגומים יהיו לשפה הזו. כדי להוסיף שפות נוספות שאת/ה מדבר/ת, לוחצים על ״+ אני מדבר/ת גם״."
+  },
+  "tour.steps.languages.theirs": {
+    "en": "\"They speak\": press to light a language or put it out, two at most. They are heard in the lit ones, and your speech is translated into each.",
+    "text": "\"הצד השני מדבר\": לחיצה על שפה מפעילה או מכבה אותה, עד שתי שפות פעילות. הדיבור של הצד השני יזוהה בשפות הפעילות, והדיבור שלך יתורגם לכל אחת מהן."
+  },
+  "tour.steps.languages.title": {
+    "en": "Languages",
+    "text": "שפות"
   },
   "tour.steps.models.content_kotomimi": {
     "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
@@ -2302,6 +2330,14 @@
   "tour.steps.reading-aids.title": {
     "en": "Reading aids",
     "text": "עזרי קריאה"
+  },
+  "tour.steps.vrchat.content": {
+    "en": "Works with VRChat on this computer: nothing is heard while you are muted there, your words or their translation can show above your head, and with a SteamVR headset the captions can show in the headset.",
+    "text": "מתחבר ל-VRChat במחשב הזה: כשהמיקרופון מושתק ב-VRChat, הדיבור שלך לא מזוהה. אפשר להציג את דבריך או את התרגום מעל הראש, ועם משקפי SteamVR אפשר להציג את הכתוביות גם בתוכם."
+  },
+  "tour.steps.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
   },
   "voiceLibrary.cloneVoiceRequired": {
     "en": "This voice needs a clip before it can speak — open the voice list and add one.",

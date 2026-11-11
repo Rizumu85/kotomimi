@@ -176,6 +176,15 @@
   &:disabled { cursor: not-allowed; opacity: vars.$disabled-opacity; }
 }
 
+// "+" with its name, in a row that has nothing else yet.
+.language-chip__add--named {
+  gap: 4px;
+  width: auto;
+  padding: 0 12px 0 9px;
+  font: inherit;
+  font-size: vars.$font-body;
+}
+
 // The section's heading names what hears both sides, where it is the same: its chevron meets the selects' right edge.
 #languages-section h3 .language-hearing__hearer {
   margin-left: auto;

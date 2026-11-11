@@ -681,7 +681,7 @@
       "apiKeyNeeded": "L'API ({{address}}) richiede una chiave. Nel relativo riquadro, attiva \"Questa API richiede una chiave\" e inseriscila.",
       "apiKeyRefused": "L'API ({{address}}) non ha accettato la chiave. Controlla la chiave API nel relativo riquadro.",
       "serverNoAsr": "L'altro dispositivo non ha un modello di riconoscimento vocale per {{source}}. Nella scheda di condivisione di quel dispositivo puoi scaricarne uno oppure usare questo computer per il riconoscimento.",
-      "serverNoDetect": "L'altro dispositivo non ha un modello di riconoscimento vocale che distingue le lingue, necessario per \"Parlo anche …\" e per rilevare la lingua dell'altra persona. Scaricane uno su quel dispositivo, ad esempio Qwen3-ASR, oppure disattiva entrambe le opzioni.",
+      "serverNoDetect": "Sull'altro dispositivo non c'è un modello di riconoscimento vocale capace di distinguere automaticamente le lingue. Serve se aggiungi altre lingue in \"Io parlo\" o vuoi rilevare la lingua dell'altra persona. Scaricane uno su quel dispositivo, come Qwen3-ASR, oppure rimuovi queste lingue.",
       "serverAsrBusy": "Il riconoscimento vocale dell’altro dispositivo sta usando un altro modello. Riprova quando sarà disponibile.",
       "sourceAuto": "Questa combinazione non consente di rilevare automaticamente la lingua. Scegli la lingua che parli.",
       "asrUnnamed": "Nessun modello disponibile per il riconoscimento vocale. Scegline uno nel riquadro \"Riconoscimento vocale\" sotto il fornitore. Per un modello API, inserisci indirizzo e nome del modello. In alternativa, scegli dove eseguirlo.",
@@ -1558,8 +1558,23 @@
         "title": "Altre tre cose",
         "content": "Da sapere prima di iniziare:",
         "typed": "Quando avvii una sessione, in basso appare un campo di testo: scrivi una frase per tradurla. Premi Ctrl+K per passare direttamente al campo.",
-        "coach": "Parli direttamente nell'altra lingua? Attiva Correzione grammaticale nelle Impostazioni. Puoi anche attivare \"Parlo anche l'altra lingua\" per avere sia la traduzione sia le correzioni grammaticali visibili solo a te.",
+        "coach": "Vuoi esercitarti nella lingua dell'altra persona? Attiva \"Correzioni grammaticali\": riceverai suggerimenti su ciò che dici in quella lingua, visibili solo a te. Aggiungila anche in \"Io parlo\" con \"+\" per alternare le due lingue: ciò che dici nella tua madrelingua verrà tradotto come sempre.",
         "share": "Un altro dispositivo può usare i modelli di questo computer: Impostazioni → Fornitore → Condividi con altri dispositivi."
+      },
+      "languages": {
+        "title": "Lingue",
+        "content": "Scegli qui le lingue parlate da ciascuno:",
+        "mine": "\"Parlo\": la lingua evidenziata in verde pieno è la tua lingua madre; tutte le traduzioni saranno in questa lingua. Parli anche altre lingue? Aggiungile con \"+ Parlo anche\".",
+        "theirs": "\"L'altra persona parla\": premi una lingua per attivarla o disattivarla, fino a un massimo di due. Le lingue attive servono a riconoscere ciò che dice l'altra persona e a tradurre ciò che dici tu.",
+        "inUse": "Una lingua aggiunta in \"Parlo\" viene usata solo se anche l'altra persona l'ha attivata. Quando è in uso, appare in verde chiaro."
+      },
+      "glossary": {
+        "title": "Glossario personale",
+        "content": "Aggiungi al dizionario i nomi degli amici e i termini dei giochi: il riconoscimento cercherà di scriverli correttamente e la traduzione li lascerà invariati. Per correggere una parola capita male nella conversazione, selezionala e premi il piccolo pulsante accanto."
+      },
+      "vrchat": {
+        "title": "VRChat",
+        "content": "Si integra con VRChat su questo computer: quando disattivi il microfono in VRChat, la tua voce non viene riconosciuta. Le tue parole o la loro traduzione possono apparire sopra la tua testa e, se usi un visore SteamVR, puoi vedere i sottotitoli anche nel visore."
       }
     }
   },

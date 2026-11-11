@@ -1896,8 +1896,8 @@
     "text": "మరో పరికరంలో {{source}} కోసం ప్రసంగ గుర్తింపు మోడల్ లేదు. దాని షేరింగ్ కార్డ్‌లో ఒకదాన్ని డౌన్‌లోడ్ చేసుకోవచ్చు, లేదా ఈ కంప్యూటర్ గుర్తించనివ్వండి."
   },
   "providers.localai.serverNoDetect": {
-    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
-    "text": "అవతలి పరికరంలో భాషలను ఆటోమేటిక్‌గా గుర్తించే మోడల్ లేదు. “నేనూ … మాట్లాడతాను”, అవతలి వారి భాషను గుర్తించే ఎంపికలకు ఇది అవసరం. అక్కడ Qwen3-ASR వంటి మోడల్‌ను డౌన్‌లోడ్ చేయండి లేదా ఈ రెండు ఎంపికలను ఆఫ్ చేయండి."
+    "en": "The other device has no speech recognition model that tells languages apart, which another language under \"I speak\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or remove those languages.",
+    "text": "మరో పరికరంలో భాషలను స్వయంగా గుర్తించే మాటల గుర్తింపు మోడల్ లేదు. “నేను మాట్లాడేది”లో ఇతర భాషలు జోడించినప్పుడు లేదా అవతలి వారి భాషను స్వయంగా గుర్తించేటప్పుడు ఇది అవసరం. ముందుగా ఆ పరికరంలో Qwen3-ASR వంటి మోడల్‌ను డౌన్‌లోడ్ చేయండి లేదా ఆ భాషలను తీసేయండి."
   },
   "providers.localai.serverNoModels": {
     "en": "The other device has no model yet: install or download one there first.",
@@ -2223,9 +2223,17 @@
     "en": "Sokuji, Kizuna AI, PulseAudio",
     "text": "Sokuji, Kizuna AI, PulseAudio"
   },
+  "tour.steps.glossary.content": {
+    "en": "Add friends' names and game words: recognition tries to write them right, and translation keeps them as they are. To fix a misheard word, select it in the conversation and press the small button beside it.",
+    "text": "స్నేహితుల పేర్లు, గేమ్‌లోని పదాలను పదకోశంలో జోడించండి: మాటలను గుర్తించేటప్పుడు వాటిని సరిగ్గా రాయడానికి ప్రయత్నిస్తుంది, అనువాదంలో వాటిని అలాగే ఉంచుతుంది. సంభాషణలో తప్పుగా విన్న పదాన్ని సరిచేయడానికి, దాన్ని ఎంచుకుని పక్కనున్న చిన్న బటన్‌ను నొక్కండి."
+  },
+  "tour.steps.glossary.title": {
+    "en": "Personal glossary",
+    "text": "వ్యక్తిగత పదకోశం"
+  },
   "tour.steps.kotomimi-tips.coach": {
-    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-    "text": "ఎదుటివారి భాషలో మీరే మాట్లాడుతున్నారా? సెట్టింగ్‌లలో వ్యాకరణ సూచనలను ఆన్ చేయండి. అనువాదంతో పాటు మీకు మాత్రమే కనిపించే వ్యాకరణ సూచనల కోసం \"నేనూ అవతలి భాష మాట్లాడతాను\" కూడా ఆన్ చేయవచ్చు."
+    "en": "Practising their language? Turn on Grammar feedback: what you say in it gets feedback only you see. Add it under \"I speak\" with \"+\" to mix both: what you say in your own language is translated as usual.",
+    "text": "అవతలి వారి భాషను సాధన చేయాలనుకుంటున్నారా? “వ్యాకరణ సూచనలు” ఆన్ చేయండి: ఆ భాషలో మీరు చెప్పిన మాటలపై మీకు మాత్రమే కనిపించే సూచనలు వస్తాయి. “నేను మాట్లాడేది”లో “+”తో ఆ భాషను జోడిస్తే రెండు భాషలను కలిపి మాట్లాడవచ్చు. మీ మాతృభాషలో చెప్పిన మాటలు ఎప్పటిలాగే అనువదించబడతాయి."
   },
   "tour.steps.kotomimi-tips.content": {
     "en": "Worth knowing before you start:",
@@ -2242,6 +2250,26 @@
   "tour.steps.kotomimi-tips.typed": {
     "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
     "text": "సెషన్ ప్రారంభమయ్యాక కింద ఇన్‌పుట్ బాక్స్ కనిపిస్తుంది: ఒక వాక్యం టైప్ చేస్తే అనువాదం వస్తుంది. నేరుగా ఆ బాక్స్‌కు వెళ్లడానికి Ctrl+K నొక్కండి."
+  },
+  "tour.steps.languages.content": {
+    "en": "Pick what each side speaks:",
+    "text": "రెండు వైపులా ఏ భాషలు మాట్లాడతారో ఇక్కడ ఎంచుకోండి:"
+  },
+  "tour.steps.languages.inUse": {
+    "en": "A language you add under \"I speak\" is used once the other side has it lit too; it is tinted green then.",
+    "text": "「నేను మాట్లాడే భాషలు」లో మీరు జోడించిన భాషను అవతలి వారు కూడా ఎంచుకుంటేనే అది వాడుకలోకి వస్తుంది. అప్పుడు అది లేత ఆకుపచ్చలో కనిపిస్తుంది."
+  },
+  "tour.steps.languages.mine": {
+    "en": "\"I speak\": the filled one is your own language; everything is translated into it. Speak others too? Add them with \"+ I also speak\".",
+    "text": "\"నేను మాట్లాడేది\": ఆకుపచ్చ రంగుతో నిండినది మీ మాతృభాష; అన్ని అనువాదాలు ఆ భాషలోకే వస్తాయి. ఇతర భాషలూ మాట్లాడగలరా? \"+ నేను ఇవీ మాట్లాడగలను\" నొక్కి వాటిని జోడించండి."
+  },
+  "tour.steps.languages.theirs": {
+    "en": "\"They speak\": press to light a language or put it out, two at most. They are heard in the lit ones, and your speech is translated into each.",
+    "text": "“వారు మాట్లాడేది”: భాషను నొక్కి ఎంచుకోండి లేదా తీసేయండి. గరిష్ఠంగా రెండు ఎంచుకోవచ్చు. ఎంచుకున్న భాషల్లో అవతలి వారి మాటలను గుర్తిస్తుంది, మీ మాటలను కూడా ఒక్కో భాషలోకి అనువదిస్తుంది."
+  },
+  "tour.steps.languages.title": {
+    "en": "Languages",
+    "text": "భాషలు"
   },
   "tour.steps.models.content_kotomimi": {
     "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
@@ -2278,6 +2306,14 @@
   "tour.steps.reading-aids.title": {
     "en": "Reading aids",
     "text": "చదవడానికి సహాయం"
+  },
+  "tour.steps.vrchat.content": {
+    "en": "Works with VRChat on this computer: nothing is heard while you are muted there, your words or their translation can show above your head, and with a SteamVR headset the captions can show in the headset.",
+    "text": "ఈ కంప్యూటర్‌లోని VRChatతో కలిసి పనిచేస్తుంది: అక్కడ మీరు మ్యూట్‌లో ఉన్నప్పుడు మీ మాటలను గుర్తించదు. మీ మాటలు లేదా వాటి అనువాదం మీ తలపై కనిపించవచ్చు. SteamVR హెడ్‌సెట్ వాడితే ఉపశీర్షికలు హెడ్‌సెట్‌లోనూ కనిపించవచ్చు."
+  },
+  "tour.steps.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
   },
   "voiceLibrary.cloneVoiceRequired": {
     "en": "This voice needs a clip before it can speak — open the voice list and add one.",

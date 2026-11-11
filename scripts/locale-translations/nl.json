@@ -1936,8 +1936,8 @@
     "text": "Het andere apparaat heeft geen spraakherkenningsmodel voor {{source}}. Op de deelkaart van dat apparaat kun je er een downloaden, of deze computer laten luisteren."
   },
   "providers.localai.serverNoDetect": {
-    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
-    "text": "Het andere apparaat heeft geen spraakherkenningsmodel dat talen automatisch kan onderscheiden. Dat is nodig voor 'Ik spreek … ook' en automatische taalherkenning bij anderen. Download daar eerst zo'n model, zoals Qwen3-ASR, of schakel beide opties uit."
+    "en": "The other device has no speech recognition model that tells languages apart, which another language under \"I speak\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or remove those languages.",
+    "text": "Op het andere apparaat staat geen spraakherkenningsmodel dat talen automatisch herkent. Dat is nodig voor extra talen onder \"Ik spreek\" en om de taal van de ander automatisch te herkennen. Download daar eerst een model, zoals Qwen3-ASR, of verwijder die talen."
   },
   "providers.localai.serverNoModels": {
     "en": "The other device has no model yet: install or download one there first.",
@@ -2331,9 +2331,17 @@
     "en": "Account",
     "text": "Account"
   },
+  "tour.steps.glossary.content": {
+    "en": "Add friends' names and game words: recognition tries to write them right, and translation keeps them as they are. To fix a misheard word, select it in the conversation and press the small button beside it.",
+    "text": "Voeg namen van vrienden en termen uit games toe: de spraakherkenning probeert ze goed te schrijven en de vertaling laat ze ongewijzigd. Is een woord verkeerd verstaan? Selecteer het in het gesprek en klik op het knopje ernaast om het te verbeteren."
+  },
+  "tour.steps.glossary.title": {
+    "en": "Personal glossary",
+    "text": "Persoonlijke woordenlijst"
+  },
   "tour.steps.kotomimi-tips.coach": {
-    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-    "text": "Spreek je zelf de andere taal? Schakel Grammaticafeedback in bij Instellingen. Je kunt ook \"Ik spreek de andere taal ook\" inschakelen om vertaling en grammaticafeedback die alleen jij ziet te combineren."
+    "en": "Practising their language? Turn on Grammar feedback: what you say in it gets feedback only you see. Add it under \"I speak\" with \"+\" to mix both: what you say in your own language is translated as usual.",
+    "text": "Wil je de taal van de ander oefenen? Zet \"Grammaticafeedback\" aan: je krijgt feedback op wat je in die taal zegt, die alleen jij kunt zien. Voeg die taal ook met \"+\" toe onder \"Ik spreek\" om beide talen door elkaar te spreken. Wat je in je moedertaal zegt, wordt gewoon vertaald."
   },
   "tour.steps.kotomimi-tips.content": {
     "en": "Worth knowing before you start:",
@@ -2350,6 +2358,26 @@
   "tour.steps.kotomimi-tips.typed": {
     "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
     "text": "Tijdens een sessie verschijnt onderaan een invoerveld: typ een zin om die te laten vertalen. Met Ctrl+K ga je direct naar dat veld."
+  },
+  "tour.steps.languages.content": {
+    "en": "Pick what each side speaks:",
+    "text": "Kies hier welke talen jullie spreken:"
+  },
+  "tour.steps.languages.inUse": {
+    "en": "A language you add under \"I speak\" is used once the other side has it lit too; it is tinted green then.",
+    "text": "Een taal die je onder \"Ik spreek\" toevoegt, wordt pas gebruikt als de ander die ook heeft ingeschakeld. De taal wordt dan lichtgroen."
+  },
+  "tour.steps.languages.mine": {
+    "en": "\"I speak\": the filled one is your own language; everything is translated into it. Speak others too? Add them with \"+ I also speak\".",
+    "text": "\"Ik spreek\": de taal met de effen groene achtergrond is je moedertaal. Alles wordt naar die taal vertaald. Spreek je nog andere talen? Voeg ze toe met \"+ Ik spreek ook\"."
+  },
+  "tour.steps.languages.theirs": {
+    "en": "\"They speak\": press to light a language or put it out, two at most. They are heard in the lit ones, and your speech is translated into each.",
+    "text": "\"De ander spreekt\": klik op een taal om die aan of uit te zetten, maximaal twee tegelijk. De ander wordt in de ingeschakelde talen herkend en jouw woorden worden naar elk van die talen vertaald."
+  },
+  "tour.steps.languages.title": {
+    "en": "Languages",
+    "text": "Talen"
   },
   "tour.steps.models.content_kotomimi": {
     "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
@@ -2390,6 +2418,14 @@
   "tour.steps.start.title": {
     "en": "Start",
     "text": "Starten"
+  },
+  "tour.steps.vrchat.content": {
+    "en": "Works with VRChat on this computer: nothing is heard while you are muted there, your words or their translation can show above your head, and with a SteamVR headset the captions can show in the headset.",
+    "text": "Werkt samen met VRChat op deze computer: als je microfoon daar gedempt is, wordt je spraak niet herkend. Je woorden of de vertaling kunnen boven je hoofd verschijnen. Met een SteamVR-headset kun je de ondertiteling ook in je headset zien."
+  },
+  "tour.steps.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
   },
   "update.later": {
     "en": "Later",

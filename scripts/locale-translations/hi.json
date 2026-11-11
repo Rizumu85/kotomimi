@@ -1896,8 +1896,8 @@
     "text": "दूसरे डिवाइस पर {{source}} पहचानने वाला वाक् पहचान मॉडल नहीं है। उस डिवाइस के शेयरिंग कार्ड से इसे डाउनलोड करें, या इस कंप्यूटर से पहचान करवाएँ।"
   },
   "providers.localai.serverNoDetect": {
-    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
-    "text": "दूसरे डिवाइस पर भाषा अपने आप पहचानने वाला आवाज़ पहचान मॉडल नहीं है। \"मैं … भी बोलता हूँ\" और दूसरे व्यक्ति की भाषा अपने आप पहचानने के लिए इसकी ज़रूरत है। पहले वहाँ Qwen3-ASR जैसा मॉडल डाउनलोड करें या ये दोनों विकल्प बंद करें।"
+    "en": "The other device has no speech recognition model that tells languages apart, which another language under \"I speak\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or remove those languages.",
+    "text": "दूसरे डिवाइस पर ऐसा कोई वाक् पहचान मॉडल नहीं है जो भाषाएँ अपने आप पहचान सके। \"मैं बोलता हूँ\" में दूसरी भाषाएँ जोड़ने या सामने वाले की भाषा अपने आप पहचानने के लिए इसकी ज़रूरत है। पहले उस डिवाइस पर ऐसा मॉडल डाउनलोड करें, जैसे Qwen3-ASR, या ये भाषाएँ हटा दें।"
   },
   "providers.localai.serverNoModels": {
     "en": "The other device has no model yet: install or download one there first.",
@@ -2223,9 +2223,17 @@
     "en": "Sokuji, Kizuna AI, PulseAudio",
     "text": "Sokuji, Kizuna AI, PulseAudio"
   },
+  "tour.steps.glossary.content": {
+    "en": "Add friends' names and game words: recognition tries to write them right, and translation keeps them as they are. To fix a misheard word, select it in the conversation and press the small button beside it.",
+    "text": "दोस्तों के नाम और गेम के शब्द शब्दकोश में जोड़ें: बोली गई बात को लिखते समय उन्हें सही लिखने की कोशिश होगी और अनुवाद में वे वैसे ही रहेंगे। बातचीत में कोई शब्द गलत सुना गया हो, तो उसे चुनें और पास के छोटे बटन पर क्लिक करके सुधारें।"
+  },
+  "tour.steps.glossary.title": {
+    "en": "Personal glossary",
+    "text": "निजी शब्दकोश"
+  },
   "tour.steps.kotomimi-tips.coach": {
-    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-    "text": "खुद उनकी भाषा बोल रहे हैं? सेटिंग्स में व्याकरण संबंधी सुझाव चालू करें। अनुवाद और सिर्फ़ आपको दिखने वाले व्याकरण के सुझाव साथ पाने के लिए \"मैं दूसरी भाषा भी बोलता हूँ\" भी चालू कर सकते हैं।"
+    "en": "Practising their language? Turn on Grammar feedback: what you say in it gets feedback only you see. Add it under \"I speak\" with \"+\" to mix both: what you say in your own language is translated as usual.",
+    "text": "सामने वाले की भाषा का अभ्यास करना है? \"व्याकरण पर सुझाव\" चालू करें: उस भाषा में बोलने पर सुझाव मिलेंगे, जो सिर्फ़ आपको दिखेंगे। \"मैं बोलता हूँ\" में \"+\" से वह भाषा भी जोड़ें, ताकि दोनों भाषाएँ मिलाकर बोल सकें। मातृभाषा में कही गई बात का अनुवाद हमेशा की तरह होगा।"
   },
   "tour.steps.kotomimi-tips.content": {
     "en": "Worth knowing before you start:",
@@ -2242,6 +2250,26 @@
   "tour.steps.kotomimi-tips.typed": {
     "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
     "text": "सत्र शुरू होने पर नीचे एक टेक्स्ट बॉक्स दिखेगा: कोई वाक्य लिखें और उसका अनुवाद पाएँ। सीधे उस बॉक्स पर जाने के लिए Ctrl+K दबाएँ।"
+  },
+  "tour.steps.languages.content": {
+    "en": "Pick what each side speaks:",
+    "text": "दोनों तरफ़ कौन-सी भाषाएँ बोली जाएँगी, यहाँ चुनें:"
+  },
+  "tour.steps.languages.inUse": {
+    "en": "A language you add under \"I speak\" is used once the other side has it lit too; it is tinted green then.",
+    "text": "「मैं बोलता हूँ」में जोड़ी गई भाषा तभी इस्तेमाल होगी, जब सामने वाला भी उसे चालू करे। तब वह हल्के हरे रंग में दिखेगी।"
+  },
+  "tour.steps.languages.mine": {
+    "en": "\"I speak\": the filled one is your own language; everything is translated into it. Speak others too? Add them with \"+ I also speak\".",
+    "text": "“मैं बोलता हूँ”: ठोस हरे रंग वाली आपकी मातृभाषा है। सभी अनुवाद इसी में होंगे। और भाषाएँ भी बोलते हैं? “+ मैं यह भी बोलता हूँ” से जोड़ें।"
+  },
+  "tour.steps.languages.theirs": {
+    "en": "\"They speak\": press to light a language or put it out, two at most. They are heard in the lit ones, and your speech is translated into each.",
+    "text": "\"वे बोलते हैं\": भाषा चालू या बंद करने के लिए क्लिक करें। एक साथ दो भाषाएँ चालू रख सकते हैं। सामने वाले की बात इन्हीं भाषाओं में पहचानी जाएगी और आपकी बात का अनुवाद हर चालू भाषा में होगा।"
+  },
+  "tour.steps.languages.title": {
+    "en": "Languages",
+    "text": "भाषाएँ"
   },
   "tour.steps.models.content_kotomimi": {
     "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
@@ -2278,6 +2306,14 @@
   "tour.steps.reading-aids.title": {
     "en": "Reading aids",
     "text": "पढ़ने में मदद"
+  },
+  "tour.steps.vrchat.content": {
+    "en": "Works with VRChat on this computer: nothing is heard while you are muted there, your words or their translation can show above your head, and with a SteamVR headset the captions can show in the headset.",
+    "text": "इस कंप्यूटर पर VRChat के साथ काम करता है: VRChat में म्यूट होने पर आपकी आवाज़ नहीं पहचानी जाएगी। आपकी बात या उसका अनुवाद आपके सिर के ऊपर दिख सकता है। SteamVR हेडसेट पहनने पर उसमें भी सबटाइटल दिख सकते हैं।"
+  },
+  "tour.steps.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
   },
   "voiceLibrary.cloneVoiceRequired": {
     "en": "This voice needs a clip before it can speak — open the voice list and add one.",

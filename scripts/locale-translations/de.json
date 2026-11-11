@@ -1928,8 +1928,8 @@
     "text": "Auf dem anderen Gerät gibt es kein Spracherkennungsmodell für {{source}}. Über die Freigabekarte dort kannst du eines herunterladen oder stattdessen diesen Computer zuhören lassen."
   },
   "providers.localai.serverNoDetect": {
-    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
-    "text": "Auf dem anderen Gerät gibt es kein Erkennungsmodell, das Sprachen automatisch unterscheiden kann. Das wird für „Ich spreche auch …“ und die automatische Spracherkennung der anderen benötigt. Lade dort ein solches Modell herunter, etwa Qwen3-ASR, oder deaktiviere beide Optionen."
+    "en": "The other device has no speech recognition model that tells languages apart, which another language under \"I speak\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or remove those languages.",
+    "text": "Auf dem anderen Gerät fehlt ein Spracherkennungsmodell, das Sprachen automatisch unterscheiden kann. Es wird benötigt, wenn du unter „Ich spreche“ weitere Sprachen hinzufügst oder die Sprache deines Gegenübers automatisch erkennen lässt. Lade dort zuerst eines herunter, etwa Qwen3-ASR, oder entferne diese Sprachen."
   },
   "providers.localai.serverNoModels": {
     "en": "The other device has no model yet: install or download one there first.",
@@ -2315,9 +2315,17 @@
     "en": "Secret Access Key",
     "text": "Geheimer Zugriffsschlüssel (Secret Access Key)"
   },
+  "tour.steps.glossary.content": {
+    "en": "Add friends' names and game words: recognition tries to write them right, and translation keeps them as they are. To fix a misheard word, select it in the conversation and press the small button beside it.",
+    "text": "Füge Namen von Freunden und Begriffe aus Spielen hinzu: Die Spracherkennung versucht, sie richtig zu schreiben, und die Übersetzung behält sie unverändert bei. Wurde ein Wort im Gespräch falsch erkannt, markiere es und klicke auf die kleine Schaltfläche daneben, um es zu korrigieren."
+  },
+  "tour.steps.glossary.title": {
+    "en": "Personal glossary",
+    "text": "Persönliches Wörterbuch"
+  },
   "tour.steps.kotomimi-tips.coach": {
-    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-    "text": "Du sprichst selbst in der anderen Sprache? Aktiviere das Grammatikfeedback in den Einstellungen. Mit „Ich spreche auch die andere Sprache“ kannst du Übersetzungen und privates Grammatikfeedback gleichzeitig nutzen."
+    "en": "Practising their language? Turn on Grammar feedback: what you say in it gets feedback only you see. Add it under \"I speak\" with \"+\" to mix both: what you say in your own language is translated as usual.",
+    "text": "Du möchtest die Sprache deines Gegenübers üben? Aktiviere „Grammatikfeedback“: Wenn du diese Sprache sprichst, erhältst du Feedback, das nur du siehst. Füge sie unter „Ich spreche“ mit „+“ hinzu, um beide Sprachen im Wechsel zu sprechen. Deine Muttersprache wird wie gewohnt übersetzt."
   },
   "tour.steps.kotomimi-tips.content": {
     "en": "Worth knowing before you start:",
@@ -2334,6 +2342,26 @@
   "tour.steps.kotomimi-tips.typed": {
     "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
     "text": "Sobald eine Sitzung läuft, erscheint unten ein Eingabefeld. Tippe einen Satz ein, um ihn übersetzen zu lassen. Mit Ctrl+K springst du direkt ins Feld."
+  },
+  "tour.steps.languages.content": {
+    "en": "Pick what each side speaks:",
+    "text": "Wähle hier aus, welche Sprachen ihr sprecht:"
+  },
+  "tour.steps.languages.inUse": {
+    "en": "A language you add under \"I speak\" is used once the other side has it lit too; it is tinted green then.",
+    "text": "Eine unter „Ich spreche“ hinzugefügte Sprache wird erst verwendet, wenn dein Gegenüber sie ebenfalls aktiviert hat. Dann ist sie hellgrün markiert."
+  },
+  "tour.steps.languages.mine": {
+    "en": "\"I speak\": the filled one is your own language; everything is translated into it. Speak others too? Add them with \"+ I also speak\".",
+    "text": "„Ich spreche“: Die grün ausgefüllte Sprache ist deine Muttersprache. Alles wird in diese Sprache übersetzt. Sprichst du weitere Sprachen? Füge sie mit „+ Ich spreche auch“ hinzu."
+  },
+  "tour.steps.languages.theirs": {
+    "en": "\"They speak\": press to light a language or put it out, two at most. They are heard in the lit ones, and your speech is translated into each.",
+    "text": "„Gegenüber spricht“: Klicke auf eine Sprache, um sie ein- oder auszuschalten. Höchstens zwei können aktiv sein. Dein Gegenüber wird in diesen Sprachen erkannt, und deine Worte werden in jede davon übersetzt."
+  },
+  "tour.steps.languages.title": {
+    "en": "Languages",
+    "text": "Sprachen"
   },
   "tour.steps.models.content_kotomimi": {
     "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
@@ -2370,6 +2398,14 @@
   "tour.steps.reading-aids.title": {
     "en": "Reading aids",
     "text": "Lesehilfen"
+  },
+  "tour.steps.vrchat.content": {
+    "en": "Works with VRChat on this computer: nothing is heard while you are muted there, your words or their translation can show above your head, and with a SteamVR headset the captions can show in the headset.",
+    "text": "Funktioniert mit VRChat auf diesem Computer: Wenn du dort stummgeschaltet bist, wird deine Sprache nicht erkannt. Deine Worte oder ihre Übersetzung können über deinem Kopf erscheinen. Mit einem SteamVR-Headset lassen sich die Untertitel auch im Headset anzeigen."
+  },
+  "tour.steps.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
   },
   "viewer.original": {
     "en": "Original",

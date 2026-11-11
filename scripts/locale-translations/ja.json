@@ -1896,8 +1896,8 @@
     "text": "別のデバイスには{{source}}用の音声認識モデルがありません。共有カードからダウンロードするか、このパソコンで認識します。"
   },
   "providers.localai.serverNoDetect": {
-    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
-    "text": "もう一方のデバイスには言語を自動判別できる音声認識モデルがありません。「自分も○○を話す」と相手の言語の自動判別には、この機能が必要です。そのデバイスで Qwen3-ASR などをダウンロードするか、この 2 つの設定をオフにしてください。"
+    "en": "The other device has no speech recognition model that tells languages apart, which another language under \"I speak\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or remove those languages.",
+    "text": "もう一方のデバイスに、言語を自動判別できる音声認識モデルがありません。「自分の言語」に他の言語を追加した場合や、相手の言語を自動判別する場合に必要です。そのデバイスで Qwen3-ASR などのモデルをダウンロードするか、追加した言語を削除してください。"
   },
   "providers.localai.serverNoModels": {
     "en": "The other device has no model yet: install or download one there first.",
@@ -2223,9 +2223,17 @@
     "en": "Sokuji, Kizuna AI, PulseAudio",
     "text": "Sokuji, Kizuna AI, PulseAudio"
   },
+  "tour.steps.glossary.content": {
+    "en": "Add friends' names and game words: recognition tries to write them right, and translation keeps them as they are. To fix a misheard word, select it in the conversation and press the small button beside it.",
+    "text": "友達の名前やゲーム用語を辞書に追加すると、音声認識で正しく表記されやすくなり、翻訳でもそのまま残ります。会話で聞き間違えた単語は、選択して横の小さなボタンを押すと修正できます。"
+  },
+  "tour.steps.glossary.title": {
+    "en": "Personal glossary",
+    "text": "ユーザー辞書"
+  },
   "tour.steps.kotomimi-tips.coach": {
-    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-    "text": "相手の言語で話すときは、設定で「文法チェック」をオンにしてみてください。「相手の言語も話す」もオンにすると、翻訳と自分だけに見える文法チェックを両方使えます。"
+    "en": "Practising their language? Turn on Grammar feedback: what you say in it gets feedback only you see. Add it under \"I speak\" with \"+\" to mix both: what you say in your own language is translated as usual.",
+    "text": "相手の言語を練習したいときは、「文法フィードバック」をオンに。その言語で話すと、自分だけに見えるフィードバックが届きます。「自分の言語」に「+」で追加すれば、母語と混ぜて話せます。母語での発言はいつもどおり翻訳されます。"
   },
   "tour.steps.kotomimi-tips.content": {
     "en": "Worth knowing before you start:",
@@ -2242,6 +2250,26 @@
   "tour.steps.kotomimi-tips.typed": {
     "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
     "text": "セッションを開始すると、下部に入力欄が表示されます。文を入力すると翻訳できます。Ctrl+K で入力欄に移動できます。"
+  },
+  "tour.steps.languages.content": {
+    "en": "Pick what each side speaks:",
+    "text": "自分と相手が話す言語を、ここで選びます："
+  },
+  "tour.steps.languages.inUse": {
+    "en": "A language you add under \"I speak\" is used once the other side has it lit too; it is tinted green then.",
+    "text": "「話せる言語」に追加した言語は、相手もその言語をオンにすると使われます。使用中は薄い緑色で表示されます。"
+  },
+  "tour.steps.languages.mine": {
+    "en": "\"I speak\": the filled one is your own language; everything is translated into it. Speak others too? Add them with \"+ I also speak\".",
+    "text": "「話す言語」：緑色で塗られているのが母語です。翻訳はすべてこの言語になります。ほかにも話せる言語があれば、「+ ほかにも話せます」から追加できます。"
+  },
+  "tour.steps.languages.theirs": {
+    "en": "\"They speak\": press to light a language or put it out, two at most. They are heard in the lit ones, and your speech is translated into each.",
+    "text": "「相手の言語」：押すたびにオン・オフが切り替わります。オンにできるのは最大2言語。相手の声をその言語で認識し、自分の発言もそれぞれの言語に翻訳します。"
+  },
+  "tour.steps.languages.title": {
+    "en": "Languages",
+    "text": "言語"
   },
   "tour.steps.models.content_kotomimi": {
     "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
@@ -2278,5 +2306,13 @@
   "tour.steps.reading-aids.title": {
     "en": "Reading aids",
     "text": "読み方サポート"
+  },
+  "tour.steps.vrchat.content": {
+    "en": "Works with VRChat on this computer: nothing is heard while you are muted there, your words or their translation can show above your head, and with a SteamVR headset the captions can show in the headset.",
+    "text": "このパソコンの VRChat と連携します。VRChat でミュート中は自分の声を認識せず、自分の発言や翻訳を頭上に表示できます。SteamVR ヘッドセットなら、ヘッドセット内にも字幕を表示できます。"
+  },
+  "tour.steps.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
   }
 }

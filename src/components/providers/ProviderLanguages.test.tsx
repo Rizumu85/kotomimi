@@ -148,6 +148,16 @@ describe('ProviderLanguages — the Kotomimi provider: my language, theirs, and 
     expect(saved()).toMatchObject({ theyAlso: ['ja', 'en', 'ko'], theyLit: '', asrDetectOther: false });
   });
 
+  it('names "+" in the user’s row while their own language is all it holds', () => {
+    show({ speakAlso: [], theyAlso: ['ja'] }, ['speaker', 'participant']);
+    expect(row('fork.languageMenu.iSay')!.querySelector('.language-chip__add--named')?.textContent).toBe('fork.languageMenu.alsoSpeak');
+    cleanup();
+    show({ speakAlso: ['zh', 'en'], theyAlso: ['ja'] }, ['speaker', 'participant']);
+    const mine = row('fork.languageMenu.iSay')!;
+    expect(mine.querySelector('.language-chip__add--named')).toBeNull();
+    expect(mine.querySelector('.language-chip__add')?.getAttribute('aria-label')).toBe('fork.languageMenu.addLanguage');
+  });
+
   it('makes a language of the user’s row theirs by pressing it, tints the ones the other side has lit and dims the rest', () => {
     show({ speakAlso: ['zh', 'en', 'ja'], theyAlso: ['ja', 'en'] }, ['speaker', 'participant']);
     const mine = row('fork.languageMenu.iSay')!;

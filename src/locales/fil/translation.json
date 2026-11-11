@@ -681,7 +681,7 @@
       "apiKeyNeeded": "Kailangan ng API ({{address}}) ng key. Sa card nito, i-on ang \"Kailangan ng key ng API na ito\" at ilagay ang key.",
       "apiKeyRefused": "Hindi tinanggap ng API ({{address}}) ang key. Suriin ang API key sa card nito.",
       "serverNoAsr": "Walang modelo sa pagkilala ng pagsasalita ang kabilang device para sa {{source}}. Sa sharing card nito, puwedeng mag-download ng isa, o hayaan ang computer na ito ang kumilala.",
-      "serverNoDetect": "Walang modelo sa kabilang device na awtomatikong nakakatukoy ng wika. Kailangan ito ng \"Nagsasalita rin ako ng …\" at awtomatikong pagtukoy ng wika ng kausap. Mag-download muna roon ng gaya ng Qwen3-ASR, o i-off ang dalawang opsyong iyon.",
+      "serverNoDetect": "Walang modelo sa kabilang device na kayang kumilala ng wika mula sa boses. Kailangan ito kapag may dagdag na wika sa \"Wika ko\" o awtomatikong kinikilala ang wika ng kausap. Mag-download muna roon ng modelo gaya ng Qwen3-ASR, o alisin ang mga wikang iyon.",
       "serverAsrBusy": "Ginagamit ng kabilang device ang speech recognition sa ibang modelo. Maghintay hanggang matapos ito bago subukan ulit.",
       "sourceAuto": "Hindi awtomatikong matukoy ang wika sa ganitong pagsasaayos. Piliin ang wikang sinasalita mo.",
       "asrUnnamed": "Wala pang magagamit na modelo sa pagkilala ng pananalita. Pumili sa card na \"Pagkilala ng pananalita\" sa ilalim ng tagapagbigay. Para sa modelo sa API, ilagay ang address at pangalan ng modelo. Puwede ring pumili ng ibang lokasyon.",
@@ -1558,8 +1558,23 @@
         "title": "Tatlo pang bagay",
         "content": "Mahalagang malaman bago magsimula:",
         "typed": "Kapag nagsimula ang sesyon, may lalabas na kahon sa ibaba: mag-type ng pangungusap para isalin ito. Pindutin ang Ctrl+K para dumiretso rito.",
-        "coach": "Ikaw mismo ang nagsasalita ng wika nila? I-on ang Puna sa gramatika sa Mga Setting. Maaari mo ring i-on ang \"Nagsasalita rin ako ng kabilang wika\" para sabay na gumana ang pagsasalin at pribadong puna sa gramatika.",
+        "coach": "Gustong magsanay sa wika ng kausap? I-on ang \"Puna sa gramatika\": makakatanggap ka ng mga punang ikaw lang ang makakakita kapag nagsalita ka sa wikang iyon. Idagdag din ito sa \"Wika ko\" gamit ang \"+\" para makapagsalita sa parehong wika: isasalin pa rin gaya ng dati ang sinasabi mo sa katutubong wika mo.",
         "share": "Magagamit din ng ibang device ang mga modelo ng computer na ito: Mga Setting → Tagapagbigay → Ibahagi sa ibang device."
+      },
+      "languages": {
+        "title": "Mga wika",
+        "content": "Piliin dito ang wikang sinasalita ng bawat panig:",
+        "mine": "“Wika ko”: ang may solidong berdeng kulay ang katutubong wika mo; dito isasalin ang lahat. May iba ka pang wikang alam? Idagdag sa “+ Marunong din ako ng”.",
+        "theirs": "\"Wika nila\": pindutin ang isang wika para i-on o i-off ito, hanggang dalawang wika lang. Gagamitin ang mga naka-on na wika para makilala ang sinasabi ng kausap, at isasalin din sa bawat isa ang sinasabi mo.",
+        "inUse": "Ang wikang idinagdag mo sa “Sinasalita ko” ay gagamitin lang kapag pinili rin ito ng kausap mo. Mapusyaw na berde ito kapag ginagamit."
+      },
+      "glossary": {
+        "title": "Personal na talahulugan",
+        "content": "Idagdag ang mga pangalan ng kaibigan at mga salita sa laro: susubukang isulat nang tama ang mga ito at panatilihin sa pagsasalin. Para itama ang salitang mali ang pagkakarinig sa usapan, piliin ito at pindutin ang maliit na button sa tabi nito."
+      },
+      "vrchat": {
+        "title": "VRChat",
+        "content": "Gumagana kasama ng VRChat sa computer na ito: hindi kinikilala ang sinasabi mo kapag naka-mute ka roon, puwedeng lumabas sa ibabaw ng ulo mo ang sinasabi mo o ang salin nito, at puwede ring makita ang mga subtitle sa loob ng SteamVR headset."
       }
     }
   },

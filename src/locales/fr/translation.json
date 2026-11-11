@@ -681,7 +681,7 @@
       "apiKeyNeeded": "L'API à l'adresse {{address}} demande une clé. Dans son panneau, activez « Cette API demande une clé » et saisissez-la.",
       "apiKeyRefused": "L'API à l'adresse {{address}} a refusé la clé. Vérifiez la clé API dans son panneau.",
       "serverNoAsr": "L’autre appareil n’a pas de modèle de reconnaissance vocale pour {{source}}. Sa carte de partage en propose un à télécharger, ou vous pouvez laisser cet ordinateur écouter.",
-      "serverNoDetect": "L'autre appareil n'a aucun modèle de reconnaissance capable de détecter la langue. Les options « Je parle aussi… » et de détection de la langue de l'autre en ont besoin. Téléchargez-y un modèle adapté, comme Qwen3-ASR, ou désactivez ces deux options.",
+      "serverNoDetect": "L’autre appareil n’a aucun modèle de reconnaissance vocale capable de distinguer les langues. Il en faut un pour ajouter d’autres langues dans « Je parle » ou détecter automatiquement la langue de l’autre personne. Téléchargez-en un sur cet appareil, comme Qwen3-ASR, ou retirez ces langues.",
       "serverAsrBusy": "La reconnaissance vocale de l’autre appareil utilise un autre modèle. Réessayez lorsqu’il sera disponible.",
       "sourceAuto": "Cette configuration ne permet pas de détecter automatiquement la langue. Choisissez la langue que vous parlez.",
       "asrUnnamed": "Aucun modèle n'est encore disponible pour la reconnaissance vocale. Choisissez-en un dans le panneau « Reconnaissance vocale », sous le fournisseur. Pour un modèle API, renseignez l'adresse et le nom du modèle. Vous pouvez aussi choisir un autre emplacement.",
@@ -1558,8 +1558,23 @@
         "title": "Encore trois choses",
         "content": "À savoir avant de commencer :",
         "typed": "Une fois la session lancée, un champ apparaît en bas : saisissez une phrase pour la traduire. Ctrl+K permet d’y accéder directement.",
-        "coach": "Vous parlez vous-même la langue de votre interlocuteur ? Activez les conseils de grammaire dans les paramètres. Vous pouvez aussi activer « Je parle aussi l’autre langue » pour garder la traduction et recevoir des conseils de grammaire en privé.",
+        "coach": "Envie de pratiquer la langue de l’autre personne ? Activez « Conseils de grammaire » : vous recevrez des conseils sur vos phrases dans cette langue, visibles uniquement par vous. Ajoutez-la aussi dans « Je parle » avec « + » pour alterner entre les deux langues : vos paroles dans votre langue maternelle seront traduites comme d’habitude.",
         "share": "Un autre appareil peut utiliser les modèles de cet ordinateur : Paramètres → Fournisseur → Partager avec d’autres appareils."
+      },
+      "languages": {
+        "title": "Langues",
+        "content": "Choisissez ici les langues que chacun parle :",
+        "mine": "« Je parle » : la langue en vert plein est votre langue maternelle. Toutes les traductions se font vers cette langue. Vous parlez d’autres langues ? Ajoutez-les avec « + Je parle aussi ».",
+        "theirs": "« L’autre personne parle » : cliquez sur une langue pour l’activer ou la désactiver, jusqu’à deux à la fois. La reconnaissance utilise les langues actives et vos paroles sont traduites dans chacune d’elles.",
+        "inUse": "Une langue ajoutée dans « Je parle » est utilisée si votre interlocuteur l’a aussi activée. Elle apparaît alors en vert clair."
+      },
+      "glossary": {
+        "title": "Glossaire personnel",
+        "content": "Ajoutez les noms de vos amis et les termes de vos jeux au dictionnaire : la reconnaissance essaiera de les écrire correctement et la traduction les conservera tels quels. Pour corriger un mot mal reconnu dans la conversation, sélectionnez-le et cliquez sur le petit bouton à côté."
+      },
+      "vrchat": {
+        "title": "VRChat",
+        "content": "Fonctionne avec VRChat sur cet ordinateur : votre voix n’est pas reconnue quand votre micro y est coupé, vos paroles ou leur traduction peuvent s’afficher au-dessus de votre tête et les sous-titres peuvent aussi s’afficher dans votre casque SteamVR."
       }
     }
   },

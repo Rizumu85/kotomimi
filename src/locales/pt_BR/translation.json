@@ -681,7 +681,7 @@
       "apiKeyNeeded": "A API ({{address}}) exige uma chave. No painel correspondente, ative \"Esta API exige uma chave\" e insira a chave.",
       "apiKeyRefused": "A API ({{address}}) não aceitou esta chave. Confira a chave da API no painel correspondente.",
       "serverNoAsr": "O outro dispositivo não tem um modelo de reconhecimento de fala para {{source}}. O cartão de compartilhamento dele oferece um para baixar, ou você pode deixar este computador fazer o reconhecimento.",
-      "serverNoDetect": "O outro dispositivo não tem um modelo de reconhecimento que detecte o idioma automaticamente. Esse recurso é necessário para \"Eu também falo…\" e para detectar o idioma da outra pessoa. Baixe um modelo compatível nele, como Qwen3-ASR, ou desative essas duas opções.",
+      "serverNoDetect": "O outro dispositivo não tem um modelo de reconhecimento de fala capaz de distinguir idiomas automaticamente. Ele é necessário quando você adiciona outros idiomas em \"Eu falo\" ou usa a detecção automática do idioma da outra pessoa. Baixe um modelo nesse dispositivo, como Qwen3-ASR, ou remova esses idiomas.",
       "serverAsrBusy": "O reconhecimento de fala do outro dispositivo está usando outro modelo. Tente novamente quando estiver disponível.",
       "sourceAuto": "Esta combinação não permite detectar o idioma automaticamente. Escolha o idioma que você fala.",
       "asrUnnamed": "Ainda não há um modelo disponível para reconhecimento de voz. Escolha um no painel \"Reconhecimento de voz\", abaixo do provedor. Para modelos via API, preencha o endereço e o nome do modelo. Você também pode escolher outro local.",
@@ -1558,8 +1558,23 @@
         "title": "Mais três coisas",
         "content": "Vale saber antes de começar:",
         "typed": "Ao iniciar uma sessão, um campo aparece na parte inferior: digite uma frase para traduzi-la. Pressione Ctrl+K para ir direto ao campo.",
-        "coach": "Você fala o idioma da outra pessoa? Ative a Revisão gramatical nas Configurações. Você também pode ativar \"Também falo o outro idioma\" para manter a tradução e receber sugestões gramaticais em particular.",
+        "coach": "Quer praticar o idioma da outra pessoa? Ative \"Correções gramaticais\": você receberá comentários sobre o que disser nesse idioma, visíveis só para você. Adicione esse idioma em \"Eu falo\" com \"+\" para alternar entre os dois: o que você disser no seu idioma nativo será traduzido normalmente.",
         "share": "Outro dispositivo também pode usar os modelos deste computador: Configurações → Provedor → Compartilhar com outros dispositivos."
+      },
+      "languages": {
+        "title": "Idiomas",
+        "content": "Escolha aqui os idiomas que cada pessoa fala:",
+        "mine": "\"Eu falo\": o idioma com fundo verde é sua língua materna; todas as traduções serão para ele. Fala outros idiomas? Adicione em \"+ Também falo\".",
+        "theirs": "\"A outra pessoa fala\": clique para ativar ou desativar um idioma, até dois de cada vez. A fala da outra pessoa será reconhecida nesses idiomas, e a sua será traduzida para cada um deles.",
+        "inUse": "Um idioma adicionado em \"Eu falo\" só será usado se a outra pessoa também o ativar. Quando estiver em uso, ele aparecerá em verde-claro."
+      },
+      "glossary": {
+        "title": "Glossário personalizado",
+        "content": "Adicione nomes de amigos e termos de jogos ao glossário: o reconhecimento tentará escrevê-los corretamente, e a tradução os manterá como estão. Para corrigir uma palavra reconhecida errado na conversa, selecione-a e clique no pequeno botão ao lado."
+      },
+      "vrchat": {
+        "title": "VRChat",
+        "content": "Funciona com o VRChat neste computador: sua fala não é reconhecida enquanto seu microfone está silenciado no VRChat; sua fala ou a tradução pode aparecer acima da sua cabeça; e, com um headset SteamVR, as legendas também podem aparecer dentro dele."
       }
     }
   },

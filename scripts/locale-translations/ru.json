@@ -1892,8 +1892,8 @@
     "text": "На другом устройстве нет модели распознавания речи для {{source}}. На его карточке общего доступа можно скачать модель или передать распознавание этому компьютеру."
   },
   "providers.localai.serverNoDetect": {
-    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
-    "text": "На другом устройстве нет модели распознавания, которая умеет определять язык. Она нужна для настройки «Я тоже говорю на…» и автоматического определения языка собеседника. Скачайте там такую модель, например Qwen3-ASR, или выключите обе настройки."
+    "en": "The other device has no speech recognition model that tells languages apart, which another language under \"I speak\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or remove those languages.",
+    "text": "На другом устройстве нет модели распознавания речи, которая автоматически определяет язык. Она нужна, если в разделе «Я говорю» добавлены другие языки или включено автоопределение языка собеседника. Сначала скачайте на том устройстве такую модель, например Qwen3-ASR, или уберите эти языки."
   },
   "providers.localai.serverNoModels": {
     "en": "The other device has no model yet: install or download one there first.",
@@ -2243,9 +2243,17 @@
     "en": "Secret Access Key",
     "text": "Секретный ключ доступа (Secret Access Key)"
   },
+  "tour.steps.glossary.content": {
+    "en": "Add friends' names and game words: recognition tries to write them right, and translation keeps them as they are. To fix a misheard word, select it in the conversation and press the small button beside it.",
+    "text": "Добавьте в словарь имена друзей и игровые термины: распознавание постарается записать их правильно, а перевод сохранит без изменений. Чтобы исправить неверно распознанное слово, выделите его в беседе и нажмите маленькую кнопку рядом."
+  },
+  "tour.steps.glossary.title": {
+    "en": "Personal glossary",
+    "text": "Личный словарь"
+  },
   "tour.steps.kotomimi-tips.coach": {
-    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-    "text": "Сами говорите на языке собеседника? Включите проверку грамматики в настройках. Также можно включить «Я тоже говорю на другом языке», чтобы пользоваться переводом и получать замечания по грамматике, видимые только вам."
+    "en": "Practising their language? Turn on Grammar feedback: what you say in it gets feedback only you see. Add it under \"I speak\" with \"+\" to mix both: what you say in your own language is translated as usual.",
+    "text": "Хотите попрактиковаться в языке собеседника? Включите «Разбор грамматики»: замечания к вашей речи на этом языке будут видны только вам. Добавьте этот язык через «+» в разделе «Я говорю», чтобы говорить на обоих языках вперемешку. Речь на родном языке будет переводиться как обычно."
   },
   "tour.steps.kotomimi-tips.content": {
     "en": "Worth knowing before you start:",
@@ -2262,6 +2270,26 @@
   "tour.steps.kotomimi-tips.typed": {
     "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
     "text": "После начала сеанса внизу появится поле ввода: напишите фразу, чтобы перевести её. Ctrl+K переводит курсор в это поле."
+  },
+  "tour.steps.languages.content": {
+    "en": "Pick what each side speaks:",
+    "text": "Выберите здесь, на каких языках говорите вы и собеседник:"
+  },
+  "tour.steps.languages.inUse": {
+    "en": "A language you add under \"I speak\" is used once the other side has it lit too; it is tinted green then.",
+    "text": "Язык, добавленный в разделе «Я говорю», используется, только когда собеседник тоже включит его у себя. Тогда он подсвечивается светло-зелёным."
+  },
+  "tour.steps.languages.mine": {
+    "en": "\"I speak\": the filled one is your own language; everything is translated into it. Speak others too? Add them with \"+ I also speak\".",
+    "text": "«Я говорю»: язык с зелёной заливкой — ваш родной, на него переводится вся речь. Говорите и на других языках? Добавьте их кнопкой «+ Я также говорю»."
+  },
+  "tour.steps.languages.theirs": {
+    "en": "\"They speak\": press to light a language or put it out, two at most. They are heard in the lit ones, and your speech is translated into each.",
+    "text": "«Собеседник говорит»: нажмите на язык, чтобы включить или выключить его. Можно включить не больше двух. Речь собеседника распознаётся на включённых языках, а ваша переводится на каждый из них."
+  },
+  "tour.steps.languages.title": {
+    "en": "Languages",
+    "text": "Языки"
   },
   "tour.steps.models.content_kotomimi": {
     "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
@@ -2298,6 +2326,14 @@
   "tour.steps.reading-aids.title": {
     "en": "Reading aids",
     "text": "Помощь при чтении"
+  },
+  "tour.steps.vrchat.content": {
+    "en": "Works with VRChat on this computer: nothing is heard while you are muted there, your words or their translation can show above your head, and with a SteamVR headset the captions can show in the headset.",
+    "text": "Работает вместе с VRChat на этом компьютере: когда микрофон в VRChat выключен, ваша речь не распознаётся. Ваши слова или их перевод могут отображаться над головой, а с гарнитурой SteamVR субтитры можно видеть прямо в ней."
+  },
+  "tour.steps.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
   },
   "voiceLibrary.cloneVoiceRequired": {
     "en": "This voice needs a clip before it can speak — open the voice list and add one.",

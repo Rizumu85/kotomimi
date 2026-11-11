@@ -1896,8 +1896,8 @@
     "text": "لا يملك الجهاز الآخر نموذجًا للتعرّف على الكلام يدعم {{source}}. تتيح بطاقة المشاركة فيه تنزيل نموذج، أو يمكنك جعل هذا الكمبيوتر يتولّى التعرّف."
   },
   "providers.localai.serverNoDetect": {
-    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
-    "text": "لا يوجد على الجهاز الآخر نموذج تعرّف يميّز اللغات تلقائيًا، وهو مطلوب لخيار «أتحدث … أيضًا» وللكشف التلقائي عن لغة الطرف الآخر. نزّل نموذجًا مثل Qwen3-ASR عليه أولًا، أو عطّل الخيارين."
+    "en": "The other device has no speech recognition model that tells languages apart, which another language under \"I speak\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or remove those languages.",
+    "text": "لا يوجد على الجهاز الآخر نموذج للتعرّف على الكلام يستطيع تمييز اللغات تلقائيًا. تحتاج إليه عند إضافة لغات أخرى ضمن «أتحدث» أو اكتشاف لغة الطرف الآخر تلقائيًا. نزّل نموذجًا على ذلك الجهاز، مثل Qwen3-ASR، أو أزل هذه اللغات."
   },
   "providers.localai.serverNoModels": {
     "en": "The other device has no model yet: install or download one there first.",
@@ -2247,9 +2247,17 @@
     "en": "Secret Access Key",
     "text": "مفتاح الوصول السري"
   },
+  "tour.steps.glossary.content": {
+    "en": "Add friends' names and game words: recognition tries to write them right, and translation keeps them as they are. To fix a misheard word, select it in the conversation and press the small button beside it.",
+    "text": "أضف أسماء أصدقائك ومصطلحات الألعاب إلى القاموس: سيحاول التعرّف على الكلام كتابتها بشكل صحيح، وستبقيها الترجمة كما هي. لتصحيح كلمة سُمعت خطأ، حدّدها في المحادثة واضغط على الزر الصغير بجانبها."
+  },
+  "tour.steps.glossary.title": {
+    "en": "Personal glossary",
+    "text": "قاموسك الشخصي"
+  },
   "tour.steps.kotomimi-tips.coach": {
-    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-    "text": "هل تتحدث لغة الطرف الآخر بنفسك؟ فعّل «ملاحظات القواعد» في الإعدادات. ويمكنك أيضًا تفعيل «أتحدث اللغة الأخرى أيضًا» للجمع بين الترجمة وملاحظات القواعد التي تظهر لك وحدك."
+    "en": "Practising their language? Turn on Grammar feedback: what you say in it gets feedback only you see. Add it under \"I speak\" with \"+\" to mix both: what you say in your own language is translated as usual.",
+    "text": "تريد التدرّب على لغة الطرف الآخر؟ فعّل «ملاحظات نحوية» لتتلقى ملاحظات على كلامك بها لا يراها سواك. ثم أضفها ضمن «أتحدث» باستخدام «+» لتتحدث باللغتين معًا، وسيُترجم كلامك بلغتك الأم كالمعتاد."
   },
   "tour.steps.kotomimi-tips.content": {
     "en": "Worth knowing before you start:",
@@ -2266,6 +2274,26 @@
   "tour.steps.kotomimi-tips.typed": {
     "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
     "text": "بعد بدء الجلسة، يظهر مربع إدخال في الأسفل: اكتب جملة لترجمتها. اضغط Ctrl+K للانتقال إليه مباشرة."
+  },
+  "tour.steps.languages.content": {
+    "en": "Pick what each side speaks:",
+    "text": "اختر هنا اللغة التي يتحدث بها كل طرف:"
+  },
+  "tour.steps.languages.inUse": {
+    "en": "A language you add under \"I speak\" is used once the other side has it lit too; it is tinted green then.",
+    "text": "اللغة التي تضيفها ضمن «أتحدث» تُستخدم عندما يفعّلها الطرف الآخر أيضًا، وتظهر حينها باللون الأخضر الفاتح."
+  },
+  "tour.steps.languages.mine": {
+    "en": "\"I speak\": the filled one is your own language; everything is translated into it. Speak others too? Add them with \"+ I also speak\".",
+    "text": "«أتحدث»: اللغة المظللة بالأخضر هي لغتك الأم، وتُترجم كل المحادثات إليها. هل تتحدث لغات أخرى؟ أضفها من «+ أتحدث أيضًا»."
+  },
+  "tour.steps.languages.theirs": {
+    "en": "\"They speak\": press to light a language or put it out, two at most. They are heard in the lit ones, and your speech is translated into each.",
+    "text": "«الطرف الآخر يتحدث»: اضغط على لغة لتفعيلها أو تعطيلها، بحد أقصى لغتين. يُتعرّف على كلام الطرف الآخر باللغات المفعّلة، ويُترجم كلامك إلى كل منها."
+  },
+  "tour.steps.languages.title": {
+    "en": "Languages",
+    "text": "اللغات"
   },
   "tour.steps.models.content_kotomimi": {
     "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
@@ -2302,6 +2330,14 @@
   "tour.steps.reading-aids.title": {
     "en": "Reading aids",
     "text": "مساعدات القراءة"
+  },
+  "tour.steps.vrchat.content": {
+    "en": "Works with VRChat on this computer: nothing is heard while you are muted there, your words or their translation can show above your head, and with a SteamVR headset the captions can show in the headset.",
+    "text": "يتكامل مع VRChat على هذا الكمبيوتر: لا يتعرّف على كلامك عندما تكتم صوتك في VRChat، ويمكن عرض كلامك أو ترجمته فوق رأسك. وعند استخدام نظارة SteamVR، يمكن عرض النصوص داخل النظارة أيضًا."
+  },
+  "tour.steps.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
   },
   "voiceLibrary.cloneVoiceRequired": {
     "en": "This voice needs a clip before it can speak — open the voice list and add one.",

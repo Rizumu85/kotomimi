@@ -681,7 +681,7 @@
       "apiKeyNeeded": "{{address}} adresindeki API bir anahtar istiyor. İlgili kartta \"Bu API anahtar istiyor\" seçeneğini açıp anahtarı girin.",
       "apiKeyRefused": "{{address}} adresindeki API anahtarı kabul etmedi. İlgili karttaki API anahtarını kontrol edin.",
       "serverNoAsr": "Diğer cihazda {{source}} için konuşma tanıma modeli yok. Paylaşım kartından bir model indirebilir veya bu bilgisayarın dinlemesini sağlayabilirsiniz.",
-      "serverNoDetect": "Diğer cihazda dili otomatik algılayabilen bir konuşma tanıma modeli yok. \"Ben de … konuşuyorum\" ve karşı tarafın dilini otomatik algılama özellikleri böyle bir model gerektirir. O cihaza Qwen3-ASR gibi bir model indirin veya bu iki seçeneği kapatın.",
+      "serverNoDetect": "Diğer cihazda dilleri otomatik ayırt edebilen bir konuşma tanıma modeli yok. \"Konuştuğum diller\" bölümüne başka diller eklediğinizde veya karşı tarafın dilini otomatik algılarken böyle bir model gerekir. Önce o cihaza bir model (örneğin Qwen3-ASR) indirin ya da bu dilleri kaldırın.",
       "serverAsrBusy": "Diğer cihazın konuşma tanıması başka bir modelle kullanılıyor. Kullanım bitince yeniden başlatın.",
       "sourceAuto": "Bu yapılandırmayla dil otomatik algılanamıyor. Konuştuğunuz dili seçin.",
       "asrUnnamed": "Konuşma tanıma için henüz kullanılabilir bir model yok. Sağlayıcının altındaki \"Konuşma tanıma\" kartından bir model seçin (API modeli için adres ve model adını girin) veya başka bir konum seçin.",
@@ -1558,8 +1558,23 @@
         "title": "Üç şey daha",
         "content": "Başlamadan önce bilmenizde fayda var:",
         "typed": "Oturum sırasında altta bir kutu görünür: çevrilmesini istediğiniz cümleyi yazın. Ctrl+K ile doğrudan bu kutuya geçebilirsiniz.",
-        "coach": "Karşı tarafın dilini siz de mi konuşuyorsunuz? Ayarlar'da Dilbilgisi geri bildirimini etkinleştirin. Çeviri ile kişisel dilbilgisi geri bildirimini birlikte tutmak için \"Diğer dili de konuşuyorum\" seçeneğini de açabilirsiniz.",
+        "coach": "Karşı tarafın dilini pratik etmek ister misiniz? \"Dil bilgisi geri bildirimi\"ni açın: O dilde söyledikleriniz için yalnızca sizin görebileceğiniz geri bildirim alırsınız. Ardından \"Konuştuğum diller\" bölümünde \"+\" ile o dili ekleyerek iki dili birlikte kullanabilirsiniz. Ana dilinizde söyledikleriniz her zamanki gibi çevrilir.",
         "share": "Başka bir cihaz bu bilgisayarın modellerini kullanabilir: Ayarlar → Sağlayıcı → Diğer cihazlarla paylaş."
+      },
+      "languages": {
+        "title": "Diller",
+        "content": "İki tarafın konuştuğu dilleri buradan seçin:",
+        "mine": "“Konuştuğum dil”: içi yeşil olan ana dilinizdir; tüm çeviriler bu dile yapılır. Başka diller de biliyorsanız “+ Başka dil de konuşuyorum” ile ekleyin.",
+        "theirs": "\"Karşı tarafın dilleri\": Bir dili açıp kapatmak için tıklayın. En fazla iki dil açık olabilir. Karşı taraf bu dillerde dinlenir, söyledikleriniz de her birine çevrilir.",
+        "inUse": "“Konuştuğum diller” bölümüne eklediğin bir dil, karşı taraf da o dili etkinleştirdiğinde kullanılır ve açık yeşil görünür."
+      },
+      "glossary": {
+        "title": "Kişisel sözlük",
+        "content": "Arkadaşlarınızın adlarını ve oyun terimlerini sözlüğe ekleyin: Konuşma tanıma bunları doğru yazmaya çalışır, çeviri ise aynen korur. Yanlış duyulan bir kelimeyi düzeltmek için konuşmada kelimeyi seçip yanındaki küçük düğmeye tıklayın."
+      },
+      "vrchat": {
+        "title": "VRChat",
+        "content": "Bu bilgisayardaki VRChat ile birlikte çalışır: VRChat'te mikrofonunuz kapalıyken söyledikleriniz algılanmaz. Sözleriniz veya çevirileri başınızın üzerinde görünebilir. SteamVR başlığı kullanıyorsanız altyazıları başlıkta da görebilirsiniz."
       }
     }
   },

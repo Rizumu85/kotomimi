@@ -681,7 +681,7 @@
       "apiKeyNeeded": "API på {{address}} kräver en nyckel. Slå på ”Detta API kräver en nyckel” i motsvarande kort och ange nyckeln.",
       "apiKeyRefused": "API på {{address}} godkände inte nyckeln. Kontrollera API-nyckeln i motsvarande kort.",
       "serverNoAsr": "Den andra enheten saknar en taligenkänningsmodell för {{source}}. På dess delningskort kan du ladda ner en eller låta den här datorn känna igen talet.",
-      "serverNoDetect": "Den andra enheten har ingen taligenkänningsmodell som automatiskt kan identifiera språk. Det behövs för ”Jag talar också …” och automatisk identifiering av de andras språk. Hämta en sådan modell där, till exempel Qwen3-ASR, eller stäng av båda alternativen.",
+      "serverNoDetect": "Den andra enheten saknar en taligenkänningsmodell som kan skilja mellan språk. Den behövs när du lägger till fler språk under ”Jag talar” eller identifierar motpartens språk automatiskt. Ladda först ner en sådan modell på den enheten, till exempel Qwen3-ASR, eller ta bort de språken.",
       "serverAsrBusy": "Taligenkänningen på den andra enheten används med en annan modell. Starta igen när den är ledig.",
       "sourceAuto": "Språket kan inte identifieras automatiskt med den här kombinationen. Välj språket du talar.",
       "asrUnnamed": "Ingen modell är klar för taligenkänning ännu. Välj en i kortet ”Taligenkänning” under leverantören. För en API-modell behöver du ange adress och modellnamn. Du kan också välja en annan plats.",
@@ -1558,8 +1558,23 @@
         "title": "Tre saker till",
         "content": "Bra att veta innan du börjar:",
         "typed": "När en session har startat visas ett textfält längst ner. Skriv en mening för att översätta den. Tryck på Ctrl+K för att gå direkt till textfältet.",
-        "coach": "Talar du själv det andra språket? Aktivera Grammatikrespons i Inställningar. Du kan också aktivera ”Jag talar också det andra språket” för att få både översättning och privat grammatikrespons.",
+        "coach": "Vill du öva på motpartens språk? Slå på ”Grammatikfeedback” så får du respons på det du säger på språket, som bara du ser. Lägg sedan till språket under ”Jag talar” med ”+” för att kunna blanda båda språken. Det du säger på ditt modersmål översätts som vanligt.",
         "share": "En annan enhet kan också använda datorns modeller: Inställningar → Leverantör → Dela med andra enheter."
+      },
+      "languages": {
+        "title": "Språk",
+        "content": "Välj vilka språk ni talar här:",
+        "mine": "”Jag talar”: det helgröna språket är ditt modersmål. Allt översätts till det. Talar du fler språk? Lägg till dem med ”+ Jag talar också”.",
+        "theirs": "”De talar”: klicka för att markera eller avmarkera språk, högst två åt gången. Motpartens tal känns igen på de markerade språken, och det du säger översätts till vart och ett.",
+        "inUse": "Ett språk du lägger till under ”Jag talar” används först när den andra personen också har aktiverat det. Då visas det i ljusgrönt."
+      },
+      "glossary": {
+        "title": "Personlig ordlista",
+        "content": "Lägg till vänners namn och ord från spel i ordlistan. Taligenkänningen försöker stava dem rätt, och översättningen behåller dem som de är. Om ett ord uppfattats fel i samtalet kan du markera det och klicka på den lilla knappen bredvid för att rätta det."
+      },
+      "vrchat": {
+        "title": "VRChat",
+        "content": "Fungerar ihop med VRChat på den här datorn: när din mikrofon är avstängd i VRChat känns ditt tal inte igen. Det du säger eller översättningen kan visas ovanför ditt huvud. Med ett SteamVR-headset kan du också se undertexterna i headsetet."
       }
     }
   },

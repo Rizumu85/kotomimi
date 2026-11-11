@@ -63,7 +63,7 @@ export function VRChatSection() {
   if (!vrchatOffered()) return null;
 
   return (
-    <div className="config-section kt-vrchat" id="vrchat-section">
+    <div className="config-section kt-vrchat" id="vrchat-section" data-tour="vrchat">
       <h3>
         <Gamepad2 size={18} />
         <span>{t('fork.vrchat.title')}</span>

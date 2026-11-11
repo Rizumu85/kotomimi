@@ -681,7 +681,7 @@
       "apiKeyNeeded": "API ({{address}}) wymaga klucza. W odpowiednim panelu włącz „To API wymaga klucza” i wpisz go.",
       "apiKeyRefused": "API ({{address}}) odrzuciło klucz. Sprawdź klucz API w odpowiednim panelu.",
       "serverNoAsr": "Na drugim urządzeniu nie ma modelu rozpoznawania mowy dla {{source}}. Na jego karcie udostępniania można pobrać odpowiedni model albo pozwolić, by nasłuchiwał ten komputer.",
-      "serverNoDetect": "Na drugim urządzeniu nie ma modelu rozpoznawania mowy, który automatycznie wykrywa język. Jest on potrzebny do opcji „Mówię też w języku…” i wykrywania języka rozmówcy. Pobierz tam taki model, np. Qwen3-ASR, lub wyłącz obie opcje.",
+      "serverNoDetect": "Na drugim urządzeniu nie ma modelu rozpoznawania mowy, który automatycznie rozróżnia języki. Jest on potrzebny, gdy dodasz inne języki w sekcji „Mówię” lub włączysz wykrywanie języka rozmówcy. Pobierz tam taki model, np. Qwen3-ASR, albo usuń te języki.",
       "serverAsrBusy": "Rozpoznawanie mowy na drugim urządzeniu korzysta z innego modelu. Spróbuj ponownie, gdy będzie dostępne.",
       "sourceAuto": "Ta konfiguracja nie pozwala automatycznie wykrywać języka. Wybierz język, w którym mówisz.",
       "asrUnnamed": "Nie wybrano jeszcze modelu rozpoznawania mowy. Wybierz go w panelu „Rozpoznawanie mowy” pod dostawcą. Dla modelu API wpisz adres i nazwę modelu. Możesz też wybrać inne miejsce uruchamiania.",
@@ -1558,8 +1558,23 @@
         "title": "Jeszcze trzy rzeczy",
         "content": "Warto wiedzieć przed rozpoczęciem:",
         "typed": "Po rozpoczęciu sesji na dole pojawi się pole tekstowe. Wpisz zdanie, aby je przetłumaczyć. Ctrl+K przenosi bezpośrednio do tego pola.",
-        "coach": "Mówisz w języku rozmówcy? Włącz „Uwagi gramatyczne” w ustawieniach. Możesz też włączyć „Mówię też w drugim języku”, aby korzystać jednocześnie z tłumaczenia i prywatnych uwag gramatycznych.",
+        "coach": "Chcesz ćwiczyć język rozmówcy? Włącz „Uwagi gramatyczne”, aby otrzymywać widoczne tylko dla ciebie uwagi do wypowiedzi w tym języku. Dodaj go też przyciskiem „+” w sekcji „Mówię”, aby swobodnie używać obu języków. Wypowiedzi w języku ojczystym będą tłumaczone jak zwykle.",
         "share": "Inne urządzenie też może korzystać z modeli na tym komputerze: Ustawienia → Dostawca → Udostępnij innym urządzeniom."
+      },
+      "languages": {
+        "title": "Języki",
+        "content": "Tutaj wybierzesz języki obu stron:",
+        "mine": "„Mówię”: język zaznaczony pełnym zielonym kolorem to Twój język ojczysty. Wszystko jest na niego tłumaczone. Znasz też inne języki? Dodaj je przyciskiem „+ Mówię też”.",
+        "theirs": "„Rozmówca mówi”: kliknij język, aby włączyć lub wyłączyć jego podświetlenie. Możesz wybrać maksymalnie dwa. W tych językach będzie rozpoznawana mowa rozmówcy, a twoje słowa będą tłumaczone na każdy z nich.",
+        "inUse": "Język dodany w sekcji „Mówię” będzie używany, gdy druga osoba też go włączy. Wtedy pojawi się na jasnozielonym tle."
+      },
+      "glossary": {
+        "title": "Własny słownik",
+        "content": "Dodaj do słownika imiona znajomych i słowa z gier: rozpoznawanie mowy postara się zapisać je poprawnie, a tłumaczenie zachowa je bez zmian. Aby poprawić źle rozpoznane słowo w rozmowie, zaznacz je i kliknij mały przycisk obok."
+      },
+      "vrchat": {
+        "title": "VRChat",
+        "content": "Współpracuje z VRChat na tym komputerze: gdy wyciszysz tam mikrofon, twoja mowa nie będzie rozpoznawana. Twoje słowa lub ich tłumaczenie mogą pojawiać się nad twoją głową, a z goglami SteamVR napisy mogą być też widoczne w goglach."
       }
     }
   },

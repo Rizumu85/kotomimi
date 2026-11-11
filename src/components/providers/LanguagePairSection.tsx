@@ -129,7 +129,7 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
   const shared = mineHearer && theirsHearer ? (mineHearer.name === theirsHearer.name ? mineHearer : undefined) : (mineHearer ?? theirsHearer);
 
   return (
-    <div className="config-section" id="languages-section">
+    <div className="config-section" id="languages-section" data-tour="languages">
       <h3>
         <Languages size={18} />
         <span>{t('simpleConfig.translationLanguages')}</span>

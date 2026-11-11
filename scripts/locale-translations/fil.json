@@ -2024,8 +2024,8 @@
     "text": "Walang modelo sa pagkilala ng pagsasalita ang kabilang device para sa {{source}}. Sa sharing card nito, puwedeng mag-download ng isa, o hayaan ang computer na ito ang kumilala."
   },
   "providers.localai.serverNoDetect": {
-    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
-    "text": "Walang modelo sa kabilang device na awtomatikong nakakatukoy ng wika. Kailangan ito ng \"Nagsasalita rin ako ng …\" at awtomatikong pagtukoy ng wika ng kausap. Mag-download muna roon ng gaya ng Qwen3-ASR, o i-off ang dalawang opsyong iyon."
+    "en": "The other device has no speech recognition model that tells languages apart, which another language under \"I speak\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or remove those languages.",
+    "text": "Walang modelo sa kabilang device na kayang kumilala ng wika mula sa boses. Kailangan ito kapag may dagdag na wika sa \"Wika ko\" o awtomatikong kinikilala ang wika ng kausap. Mag-download muna roon ng modelo gaya ng Qwen3-ASR, o alisin ang mga wikang iyon."
   },
   "providers.localai.serverNoModels": {
     "en": "The other device has no model yet: install or download one there first.",
@@ -2491,9 +2491,17 @@
     "en": "Account",
     "text": "Account"
   },
+  "tour.steps.glossary.content": {
+    "en": "Add friends' names and game words: recognition tries to write them right, and translation keeps them as they are. To fix a misheard word, select it in the conversation and press the small button beside it.",
+    "text": "Idagdag ang mga pangalan ng kaibigan at mga salita sa laro: susubukang isulat nang tama ang mga ito at panatilihin sa pagsasalin. Para itama ang salitang mali ang pagkakarinig sa usapan, piliin ito at pindutin ang maliit na button sa tabi nito."
+  },
+  "tour.steps.glossary.title": {
+    "en": "Personal glossary",
+    "text": "Personal na talahulugan"
+  },
   "tour.steps.kotomimi-tips.coach": {
-    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-    "text": "Ikaw mismo ang nagsasalita ng wika nila? I-on ang Puna sa gramatika sa Mga Setting. Maaari mo ring i-on ang \"Nagsasalita rin ako ng kabilang wika\" para sabay na gumana ang pagsasalin at pribadong puna sa gramatika."
+    "en": "Practising their language? Turn on Grammar feedback: what you say in it gets feedback only you see. Add it under \"I speak\" with \"+\" to mix both: what you say in your own language is translated as usual.",
+    "text": "Gustong magsanay sa wika ng kausap? I-on ang \"Puna sa gramatika\": makakatanggap ka ng mga punang ikaw lang ang makakakita kapag nagsalita ka sa wikang iyon. Idagdag din ito sa \"Wika ko\" gamit ang \"+\" para makapagsalita sa parehong wika: isasalin pa rin gaya ng dati ang sinasabi mo sa katutubong wika mo."
   },
   "tour.steps.kotomimi-tips.content": {
     "en": "Worth knowing before you start:",
@@ -2510,6 +2518,26 @@
   "tour.steps.kotomimi-tips.typed": {
     "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
     "text": "Kapag nagsimula ang sesyon, may lalabas na kahon sa ibaba: mag-type ng pangungusap para isalin ito. Pindutin ang Ctrl+K para dumiretso rito."
+  },
+  "tour.steps.languages.content": {
+    "en": "Pick what each side speaks:",
+    "text": "Piliin dito ang wikang sinasalita ng bawat panig:"
+  },
+  "tour.steps.languages.inUse": {
+    "en": "A language you add under \"I speak\" is used once the other side has it lit too; it is tinted green then.",
+    "text": "Ang wikang idinagdag mo sa “Sinasalita ko” ay gagamitin lang kapag pinili rin ito ng kausap mo. Mapusyaw na berde ito kapag ginagamit."
+  },
+  "tour.steps.languages.mine": {
+    "en": "\"I speak\": the filled one is your own language; everything is translated into it. Speak others too? Add them with \"+ I also speak\".",
+    "text": "“Wika ko”: ang may solidong berdeng kulay ang katutubong wika mo; dito isasalin ang lahat. May iba ka pang wikang alam? Idagdag sa “+ Marunong din ako ng”."
+  },
+  "tour.steps.languages.theirs": {
+    "en": "\"They speak\": press to light a language or put it out, two at most. They are heard in the lit ones, and your speech is translated into each.",
+    "text": "\"Wika nila\": pindutin ang isang wika para i-on o i-off ito, hanggang dalawang wika lang. Gagamitin ang mga naka-on na wika para makilala ang sinasabi ng kausap, at isasalin din sa bawat isa ang sinasabi mo."
+  },
+  "tour.steps.languages.title": {
+    "en": "Languages",
+    "text": "Mga wika"
   },
   "tour.steps.models.content_kotomimi": {
     "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
@@ -2550,6 +2578,14 @@
   "tour.steps.subtitle.title": {
     "en": "Subtitle mode",
     "text": "Modo ng subtitle"
+  },
+  "tour.steps.vrchat.content": {
+    "en": "Works with VRChat on this computer: nothing is heard while you are muted there, your words or their translation can show above your head, and with a SteamVR headset the captions can show in the headset.",
+    "text": "Gumagana kasama ng VRChat sa computer na ito: hindi kinikilala ang sinasabi mo kapag naka-mute ka roon, puwedeng lumabas sa ibabaw ng ulo mo ang sinasabi mo o ang salin nito, at puwede ring makita ang mga subtitle sa loob ng SteamVR headset."
+  },
+  "tour.steps.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
   },
   "viewer.present.password": {
     "en": "Password: {{password}}",

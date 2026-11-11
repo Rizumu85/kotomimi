@@ -1896,8 +1896,8 @@
     "text": "อุปกรณ์อีกเครื่องไม่มีโมเดลรู้จำเสียงสำหรับ {{source}} การ์ดแชร์ของเครื่องนั้นมีให้ดาวน์โหลด หรือให้คอมพิวเตอร์เครื่องนี้ฟังแทน"
   },
   "providers.localai.serverNoDetect": {
-    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
-    "text": "อุปกรณ์อีกเครื่องไม่มีโมเดลรู้จำเสียงที่แยกภาษาได้ ซึ่งจำเป็นสำหรับ “ฉันพูด…ด้วย” และการตรวจจับภาษาของอีกฝ่ายอัตโนมัติ ดาวน์โหลดโมเดลบนเครื่องนั้นก่อน เช่น Qwen3-ASR หรือปิดทั้งสองตัวเลือก"
+    "en": "The other device has no speech recognition model that tells languages apart, which another language under \"I speak\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or remove those languages.",
+    "text": "อุปกรณ์อีกเครื่องยังไม่มีโมเดลรู้จำเสียงที่แยกภาษาได้ ซึ่งจำเป็นเมื่อเพิ่มภาษาอื่นใน \"ฉันพูด\" หรือตรวจหาภาษาของคู่สนทนาอัตโนมัติ กรุณาดาวน์โหลดโมเดลบนเครื่องนั้นก่อน เช่น Qwen3-ASR หรือนำภาษาเหล่านี้ออก"
   },
   "providers.localai.serverNoModels": {
     "en": "The other device has no model yet: install or download one there first.",
@@ -2247,9 +2247,17 @@
     "en": "Secret Access Key",
     "text": "คีย์ลับสำหรับเข้าถึง (Secret Access Key)"
   },
+  "tour.steps.glossary.content": {
+    "en": "Add friends' names and game words: recognition tries to write them right, and translation keeps them as they are. To fix a misheard word, select it in the conversation and press the small button beside it.",
+    "text": "เพิ่มชื่อเพื่อนและคำศัพท์ในเกมลงในพจนานุกรม ระบบจะพยายามถอดเสียงให้ถูกต้อง และคงคำเหล่านี้ไว้ตามเดิมเมื่อแปล หากมีคำที่ฟังผิดในบทสนทนา ให้เลือกคำนั้นแล้วกดปุ่มเล็กข้างๆ เพื่อแก้ไข"
+  },
+  "tour.steps.glossary.title": {
+    "en": "Personal glossary",
+    "text": "พจนานุกรมส่วนตัว"
+  },
   "tour.steps.kotomimi-tips.coach": {
-    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-    "text": "พูดภาษาของอีกฝ่ายเองใช่ไหม? เปิดคำแนะนำไวยากรณ์ในการตั้งค่าได้เลย และเปิด \"ฉันพูดภาษาอีกฝ่ายด้วย\" เพื่อใช้การแปลพร้อมรับคำแนะนำไวยากรณ์ที่เห็นเฉพาะคุณ"
+    "en": "Practising their language? Turn on Grammar feedback: what you say in it gets feedback only you see. Add it under \"I speak\" with \"+\" to mix both: what you say in your own language is translated as usual.",
+    "text": "อยากฝึกภาษาของคู่สนทนาไหม? เปิด \"คำแนะนำไวยากรณ์\" แล้วคำพูดของคุณในภาษานั้นจะได้รับคำแนะนำที่มีเพียงคุณเห็น จากนั้นใช้ \"+\" เพิ่มภาษานั้นใน \"ฉันพูด\" เพื่อพูดสลับกันได้ทั้งสองภาษา ส่วนที่พูดเป็นภาษาแม่จะยังแปลตามปกติ"
   },
   "tour.steps.kotomimi-tips.content": {
     "en": "Worth knowing before you start:",
@@ -2266,6 +2274,26 @@
   "tour.steps.kotomimi-tips.typed": {
     "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
     "text": "เมื่อเริ่มการสนทนา จะมีช่องพิมพ์ที่ด้านล่าง พิมพ์ประโยคเพื่อแปลได้เลย กด Ctrl+K เพื่อไปยังช่องพิมพ์"
+  },
+  "tour.steps.languages.content": {
+    "en": "Pick what each side speaks:",
+    "text": "เลือกภาษาที่แต่ละฝ่ายพูดได้ที่นี่:"
+  },
+  "tour.steps.languages.inUse": {
+    "en": "A language you add under \"I speak\" is used once the other side has it lit too; it is tinted green then.",
+    "text": "ภาษาที่เพิ่มใน “ฉันพูด” จะเริ่มใช้เมื่ออีกฝ่ายเปิดภาษานั้นด้วย โดยจะแสดงเป็นสีเขียวอ่อนเมื่อใช้งาน"
+  },
+  "tour.steps.languages.mine": {
+    "en": "\"I speak\": the filled one is your own language; everything is translated into it. Speak others too? Add them with \"+ I also speak\".",
+    "text": "“ฉันพูด”: ภาษาที่มีพื้นหลังสีเขียวคือภาษาแม่ของคุณ ทุกอย่างจะแปลเป็นภาษานี้ ถ้าพูดภาษาอื่นได้ด้วย ให้กด “+ ฉันพูดภาษาอื่นได้ด้วย” เพื่อเพิ่ม"
+  },
+  "tour.steps.languages.theirs": {
+    "en": "\"They speak\": press to light a language or put it out, two at most. They are heard in the lit ones, and your speech is translated into each.",
+    "text": "\"คู่สนทนาพูด\": กดเพื่อเปิดหรือปิดภาษา เลือกได้สูงสุดสองภาษา ระบบจะฟังคู่สนทนาตามภาษาที่เปิดไว้ และแปลคำพูดของคุณเป็นแต่ละภาษานั้น"
+  },
+  "tour.steps.languages.title": {
+    "en": "Languages",
+    "text": "ภาษา"
   },
   "tour.steps.models.content_kotomimi": {
     "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
@@ -2302,6 +2330,14 @@
   "tour.steps.reading-aids.title": {
     "en": "Reading aids",
     "text": "ตัวช่วยการอ่าน"
+  },
+  "tour.steps.vrchat.content": {
+    "en": "Works with VRChat on this computer: nothing is heard while you are muted there, your words or their translation can show above your head, and with a SteamVR headset the captions can show in the headset.",
+    "text": "เชื่อมกับ VRChat บนคอมพิวเตอร์เครื่องนี้: เมื่อปิดไมค์ใน VRChat ระบบจะไม่ถอดเสียงของคุณ คำพูดหรือคำแปลของคุณแสดงเหนือศีรษะได้ และเมื่อสวมแว่น SteamVR ก็แสดงคำบรรยายในแว่นได้ด้วย"
+  },
+  "tour.steps.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
   },
   "voiceLibrary.cloneVoiceRequired": {
     "en": "This voice needs a clip before it can speak — open the voice list and add one.",

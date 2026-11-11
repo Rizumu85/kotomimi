@@ -1896,8 +1896,8 @@
     "text": "மற்ற சாதனத்தில் {{source}}-ஐ அடையாளம் காணும் பேச்சு அங்கீகார மாதிரி இல்லை. அதை பதிவிறக்க அதன் பகிர்வு அட்டையைப் பயன்படுத்தலாம்; அல்லது இந்தக் கணினியே கேட்டு அடையாளம் காணலாம்."
   },
   "providers.localai.serverNoDetect": {
-    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
-    "text": "மற்ற சாதனத்தில் மொழிகளைத் தானாகக் கண்டறியும் பேச்சறிதல் மாதிரி இல்லை. \"நானும் … பேசுவேன்\" என்பதற்கும் மற்றவரின் மொழியைத் தானாகக் கண்டறிவதற்கும் அது தேவை. Qwen3-ASR போன்ற மாதிரியை அங்கே பதிவிறக்குங்கள் அல்லது இந்த இரு விருப்பங்களையும் அணையுங்கள்."
+    "en": "The other device has no speech recognition model that tells languages apart, which another language under \"I speak\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or remove those languages.",
+    "text": "மற்ற சாதனத்தில் மொழிகளைத் தானாக வேறுபடுத்தி அறியும் பேச்சு அறிதல் மாடல் இல்லை. \"நான் பேசுவது\" என்பதில் கூடுதல் மொழிகளைச் சேர்த்தாலோ, மற்றவர் பேசும் மொழியைத் தானாகக் கண்டறியவோ அது தேவை. அந்தச் சாதனத்தில் முதலில் Qwen3-ASR போன்ற ஒன்றைப் பதிவிறக்கவும் அல்லது அந்த மொழிகளை நீக்கவும்."
   },
   "providers.localai.serverNoModels": {
     "en": "The other device has no model yet: install or download one there first.",
@@ -2247,9 +2247,17 @@
     "en": "Secret Access Key",
     "text": "ரகசிய அணுகல் விசை"
   },
+  "tour.steps.glossary.content": {
+    "en": "Add friends' names and game words: recognition tries to write them right, and translation keeps them as they are. To fix a misheard word, select it in the conversation and press the small button beside it.",
+    "text": "நண்பர்களின் பெயர்களையும் விளையாட்டுச் சொற்களையும் அகராதியில் சேர்க்கவும்: பேச்சை எழுத்தாக்கும்போது அவற்றைச் சரியாக எழுத முயலும்; மொழிபெயர்ப்பிலும் அவை அப்படியே இருக்கும். உரையாடலில் தவறாகக் கேட்டுச் எழுதப்பட்ட சொல்லைத் தேர்ந்தெடுத்து, அருகிலுள்ள சிறிய பொத்தானை அழுத்தித் திருத்தலாம்."
+  },
+  "tour.steps.glossary.title": {
+    "en": "Personal glossary",
+    "text": "தனிப்பட்ட சொற்களஞ்சியம்"
+  },
   "tour.steps.kotomimi-tips.coach": {
-    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-    "text": "அவர்களின் மொழியில் நீங்களே பேசுகிறீர்களா? அமைப்புகளில் இலக்கணக் கருத்துகளை இயக்கவும். மொழிபெயர்ப்புடன் உங்களுக்கு மட்டும் தெரியும் இலக்கணக் கருத்துகளையும் பெற, \"நானும் மற்ற மொழியைப் பேசுவேன்\" என்பதையும் இயக்கலாம்."
+    "en": "Practising their language? Turn on Grammar feedback: what you say in it gets feedback only you see. Add it under \"I speak\" with \"+\" to mix both: what you say in your own language is translated as usual.",
+    "text": "மற்றவரின் மொழியைப் பயிற்சி செய்கிறீர்களா? \"இலக்கணக் கருத்துகள்\" என்பதை இயக்கவும்: அந்த மொழியில் நீங்கள் பேசுவதற்கான கருத்துகள் உங்களுக்கு மட்டும் தெரியும். \"நான் பேசுவது\" என்பதில் \"+\" மூலம் அந்த மொழியையும் சேர்த்தால், இரு மொழிகளையும் கலந்து பேசலாம். தாய்மொழியில் பேசுவது வழக்கம்போல் மொழிபெயர்க்கப்படும்."
   },
   "tour.steps.kotomimi-tips.content": {
     "en": "Worth knowing before you start:",
@@ -2266,6 +2274,26 @@
   "tour.steps.kotomimi-tips.typed": {
     "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
     "text": "அமர்வு தொடங்கியதும் கீழே உள்ளீட்டுப் பெட்டி தோன்றும். ஒரு வாக்கியத்தைத் தட்டச்சு செய்தால் மொழிபெயர்க்கப்படும். நேராக அந்தப் பெட்டிக்குச் செல்ல Ctrl+K அழுத்தவும்."
+  },
+  "tour.steps.languages.content": {
+    "en": "Pick what each side speaks:",
+    "text": "இரு தரப்பினரும் பேசும் மொழிகளை இங்கே தேர்ந்தெடுக்கவும்:"
+  },
+  "tour.steps.languages.inUse": {
+    "en": "A language you add under \"I speak\" is used once the other side has it lit too; it is tinted green then.",
+    "text": "「நான் பேசும் மொழிகள்」 பகுதியில் நீங்கள் சேர்த்த மொழியை எதிர்தரப்பினரும் தேர்ந்தெடுத்திருந்தால்தான் அது பயன்படும். அப்போது அது வெளிர் பச்சையாகக் காட்டப்படும்."
+  },
+  "tour.steps.languages.mine": {
+    "en": "\"I speak\": the filled one is your own language; everything is translated into it. Speak others too? Add them with \"+ I also speak\".",
+    "text": "\"நான் பேசும் மொழி\": பச்சை நிறத்தில் நிரப்பப்பட்டிருப்பது உங்கள் தாய்மொழி; எல்லா மொழிபெயர்ப்புகளும் அதில் வரும். வேறு மொழிகளும் பேசுவீர்களா? \"+ நான் பேசும் பிற மொழிகள்\" மூலம் சேர்க்கலாம்."
+  },
+  "tour.steps.languages.theirs": {
+    "en": "\"They speak\": press to light a language or put it out, two at most. They are heard in the lit ones, and your speech is translated into each.",
+    "text": "\"மற்றவர் பேசுவது\": ஒரு மொழியைத் தட்டி இயக்கலாம் அல்லது அணைக்கலாம். அதிகபட்சம் இரண்டு மொழிகளை இயக்கலாம். மற்றவரின் பேச்சு அந்த மொழிகளில் அறியப்படும்; உங்கள் பேச்சும் அவை ஒவ்வொன்றிலும் மொழிபெயர்க்கப்படும்."
+  },
+  "tour.steps.languages.title": {
+    "en": "Languages",
+    "text": "மொழிகள்"
   },
   "tour.steps.models.content_kotomimi": {
     "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
@@ -2302,6 +2330,14 @@
   "tour.steps.reading-aids.title": {
     "en": "Reading aids",
     "text": "வாசிப்பு உதவிகள்"
+  },
+  "tour.steps.vrchat.content": {
+    "en": "Works with VRChat on this computer: nothing is heard while you are muted there, your words or their translation can show above your head, and with a SteamVR headset the captions can show in the headset.",
+    "text": "இந்தக் கணினியில் உள்ள VRChat உடன் இணைந்து செயல்படும்: VRChat இல் உங்கள் மைக்கை அணைத்திருக்கும்போது உங்கள் பேச்சு அறியப்படாது. உங்கள் பேச்சையோ அதன் மொழிபெயர்ப்பையோ தலைக்கு மேலே காட்டலாம். SteamVR ஹெட்செட் அணிந்திருந்தால், அதிலும் வசனங்களைக் காட்டலாம்."
+  },
+  "tour.steps.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
   },
   "voiceLibrary.cloneVoiceRequired": {
     "en": "This voice needs a clip before it can speak — open the voice list and add one.",

@@ -681,7 +681,7 @@
       "apiKeyNeeded": "API di {{address}} memerlukan kunci. Dalam kad berkenaan, hidupkan \"API ini memerlukan kunci\" dan masukkan kuncinya.",
       "apiKeyRefused": "API di {{address}} menolak kunci ini. Semak kunci API dalam kad berkenaan.",
       "serverNoAsr": "Peranti lain tiada model pengecaman pertuturan untuk {{source}}. Kad perkongsiannya menawarkan pilihan untuk memuat turunnya, atau biarkan komputer ini melakukan pengecaman.",
-      "serverNoDetect": "Peranti lain tiada model pengecaman yang boleh mengesan bahasa secara automatik. \"Saya juga bertutur dalam …\" dan pengesanan bahasa pihak lain memerlukan model seperti ini. Muat turun model seperti Qwen3-ASR pada peranti itu, atau matikan kedua-dua pilihan tersebut.",
+      "serverNoDetect": "Peranti satu lagi tiada model pengecaman pertuturan yang boleh mengenal pasti bahasa secara automatik. Model ini diperlukan apabila anda menambah bahasa lain dalam \"Saya bertutur\" atau mengesan bahasa pihak satu lagi secara automatik. Muat turun model seperti Qwen3-ASR pada peranti itu dahulu, atau buang bahasa-bahasa tersebut.",
       "serverAsrBusy": "Pengecaman pertuturan pada peranti lain sedang digunakan dengan model lain. Cuba lagi selepas ia selesai digunakan.",
       "sourceAuto": "Gabungan ini tidak dapat mengesan bahasa secara automatik. Pilih bahasa yang anda tuturkan.",
       "asrUnnamed": "Belum ada model untuk pengecaman pertuturan. Pilih model dalam kad \"Pengecaman pertuturan\" di bawah penyedia. Untuk model API, masukkan alamat dan nama model. Anda juga boleh memilih lokasi lain.",
@@ -1558,8 +1558,23 @@
         "title": "Tiga perkara lagi",
         "content": "Perkara yang perlu diketahui sebelum bermula:",
         "typed": "Selepas sesi bermula, kotak input muncul di bahagian bawah: taip ayat untuk diterjemahkan. Tekan Ctrl+K untuk terus ke kotak itu.",
-        "coach": "Anda sendiri bertutur dalam bahasa mereka? Hidupkan Maklum balas tatabahasa dalam Tetapan. Anda juga boleh menghidupkan \"Saya juga bertutur dalam bahasa satu lagi\" untuk menggunakan terjemahan bersama maklum balas tatabahasa peribadi.",
+        "coach": "Mahu berlatih bahasa mereka? Hidupkan \"Maklum balas tatabahasa\": apabila anda bertutur dalam bahasa itu, hanya anda yang boleh melihat maklum balasnya. Tambah bahasa itu dalam \"Saya bertutur\" dengan \"+\" untuk menggunakan kedua-dua bahasa secara berselang-seli. Pertuturan dalam bahasa ibunda anda tetap diterjemahkan seperti biasa.",
         "share": "Peranti lain juga boleh menggunakan model komputer ini: Tetapan → Penyedia → Kongsi dengan peranti lain."
+      },
+      "languages": {
+        "title": "Bahasa",
+        "content": "Pilih bahasa yang dituturkan oleh setiap pihak di sini:",
+        "mine": "\"Saya bertutur\": bahasa dengan latar hijau penuh ialah bahasa ibunda anda. Semua terjemahan akan diterjemahkan ke bahasa ini. Boleh bertutur bahasa lain juga? Tambah dengan \"+ Saya juga bertutur\".",
+        "theirs": "\"Mereka bertutur\": klik untuk mengaktifkan atau menyahaktifkan bahasa, maksimum dua. Pertuturan mereka akan dikenal pasti dalam bahasa yang aktif, dan kata-kata anda diterjemahkan ke setiap bahasa itu.",
+        "inUse": "Bahasa yang anda tambah di bawah “Saya bertutur” hanya digunakan apabila pihak satu lagi turut mengaktifkannya. Apabila digunakan, bahasa itu dipaparkan dalam warna hijau muda."
+      },
+      "glossary": {
+        "title": "Glosari peribadi",
+        "content": "Tambah nama rakan dan istilah permainan ke dalam kamus: pengecaman akan cuba mengejanya dengan betul, dan terjemahan akan mengekalkannya. Untuk membetulkan perkataan yang tersalah dengar dalam perbualan, pilih perkataan itu dan klik butang kecil di sebelahnya."
+      },
+      "vrchat": {
+        "title": "VRChat",
+        "content": "Berfungsi bersama VRChat pada komputer ini: pertuturan anda tidak dikenal pasti semasa mikrofon dibisukan dalam VRChat; kata-kata anda atau terjemahannya boleh dipaparkan di atas kepala anda; jika memakai set kepala SteamVR, sari kata juga boleh dipaparkan di dalamnya."
       }
     }
   },

@@ -681,7 +681,7 @@
       "apiKeyNeeded": "Die API unter {{address}} benötigt einen Schlüssel. Aktiviere im zugehörigen Bereich „API-Schlüssel erforderlich“ und gib ihn ein.",
       "apiKeyRefused": "Die API unter {{address}} akzeptiert den Schlüssel nicht. Prüfe den API-Schlüssel im zugehörigen Bereich.",
       "serverNoAsr": "Auf dem anderen Gerät gibt es kein Spracherkennungsmodell für {{source}}. Über die Freigabekarte dort kannst du eines herunterladen oder stattdessen diesen Computer zuhören lassen.",
-      "serverNoDetect": "Auf dem anderen Gerät gibt es kein Erkennungsmodell, das Sprachen automatisch unterscheiden kann. Das wird für „Ich spreche auch …“ und die automatische Spracherkennung der anderen benötigt. Lade dort ein solches Modell herunter, etwa Qwen3-ASR, oder deaktiviere beide Optionen.",
+      "serverNoDetect": "Auf dem anderen Gerät fehlt ein Spracherkennungsmodell, das Sprachen automatisch unterscheiden kann. Es wird benötigt, wenn du unter „Ich spreche“ weitere Sprachen hinzufügst oder die Sprache deines Gegenübers automatisch erkennen lässt. Lade dort zuerst eines herunter, etwa Qwen3-ASR, oder entferne diese Sprachen.",
       "serverAsrBusy": "Die Spracherkennung auf dem anderen Gerät verwendet gerade ein anderes Modell. Versuche es erneut, sobald sie wieder frei ist.",
       "sourceAuto": "Mit dieser Kombination lässt sich die Sprache nicht automatisch erkennen. Wähle aus, welche Sprache du sprichst.",
       "asrUnnamed": "Für die Spracherkennung ist noch kein Modell verfügbar. Wähle unter dem Anbieter im Bereich „Spracherkennung“ eines aus. Bei einem API-Modell musst du Adresse und Modellname eingeben. Oder wähle einen anderen Ausführungsort.",
@@ -1558,8 +1558,23 @@
         "title": "Noch drei Dinge",
         "content": "Gut zu wissen, bevor du loslegst:",
         "typed": "Sobald eine Sitzung läuft, erscheint unten ein Eingabefeld. Tippe einen Satz ein, um ihn übersetzen zu lassen. Mit Ctrl+K springst du direkt ins Feld.",
-        "coach": "Du sprichst selbst in der anderen Sprache? Aktiviere das Grammatikfeedback in den Einstellungen. Mit „Ich spreche auch die andere Sprache“ kannst du Übersetzungen und privates Grammatikfeedback gleichzeitig nutzen.",
+        "coach": "Du möchtest die Sprache deines Gegenübers üben? Aktiviere „Grammatikfeedback“: Wenn du diese Sprache sprichst, erhältst du Feedback, das nur du siehst. Füge sie unter „Ich spreche“ mit „+“ hinzu, um beide Sprachen im Wechsel zu sprechen. Deine Muttersprache wird wie gewohnt übersetzt.",
         "share": "Ein anderes Gerät kann die Modelle dieses Computers mitnutzen: Einstellungen → Anbieter → Für andere Geräte freigeben."
+      },
+      "languages": {
+        "title": "Sprachen",
+        "content": "Wähle hier aus, welche Sprachen ihr sprecht:",
+        "mine": "„Ich spreche“: Die grün ausgefüllte Sprache ist deine Muttersprache. Alles wird in diese Sprache übersetzt. Sprichst du weitere Sprachen? Füge sie mit „+ Ich spreche auch“ hinzu.",
+        "theirs": "„Gegenüber spricht“: Klicke auf eine Sprache, um sie ein- oder auszuschalten. Höchstens zwei können aktiv sein. Dein Gegenüber wird in diesen Sprachen erkannt, und deine Worte werden in jede davon übersetzt.",
+        "inUse": "Eine unter „Ich spreche“ hinzugefügte Sprache wird erst verwendet, wenn dein Gegenüber sie ebenfalls aktiviert hat. Dann ist sie hellgrün markiert."
+      },
+      "glossary": {
+        "title": "Persönliches Wörterbuch",
+        "content": "Füge Namen von Freunden und Begriffe aus Spielen hinzu: Die Spracherkennung versucht, sie richtig zu schreiben, und die Übersetzung behält sie unverändert bei. Wurde ein Wort im Gespräch falsch erkannt, markiere es und klicke auf die kleine Schaltfläche daneben, um es zu korrigieren."
+      },
+      "vrchat": {
+        "title": "VRChat",
+        "content": "Funktioniert mit VRChat auf diesem Computer: Wenn du dort stummgeschaltet bist, wird deine Sprache nicht erkannt. Deine Worte oder ihre Übersetzung können über deinem Kopf erscheinen. Mit einem SteamVR-Headset lassen sich die Untertitel auch im Headset anzeigen."
       }
     }
   },

@@ -1932,8 +1932,8 @@
     "text": "Den andra enheten saknar en taligenkänningsmodell för {{source}}. På dess delningskort kan du ladda ner en eller låta den här datorn känna igen talet."
   },
   "providers.localai.serverNoDetect": {
-    "en": "The other device has no speech recognition model that tells languages apart, which \"I speak … too\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or turn those off.",
-    "text": "Den andra enheten har ingen taligenkänningsmodell som automatiskt kan identifiera språk. Det behövs för ”Jag talar också …” och automatisk identifiering av de andras språk. Hämta en sådan modell där, till exempel Qwen3-ASR, eller stäng av båda alternativen."
+    "en": "The other device has no speech recognition model that tells languages apart, which another language under \"I speak\" and detecting the other side's language need. Download one there, such as Qwen3-ASR, or remove those languages.",
+    "text": "Den andra enheten saknar en taligenkänningsmodell som kan skilja mellan språk. Den behövs när du lägger till fler språk under ”Jag talar” eller identifierar motpartens språk automatiskt. Ladda först ner en sådan modell på den enheten, till exempel Qwen3-ASR, eller ta bort de språken."
   },
   "providers.localai.serverNoModels": {
     "en": "The other device has no model yet: install or download one there first.",
@@ -2323,9 +2323,17 @@
     "en": "Scenario",
     "text": "Användningsområde"
   },
+  "tour.steps.glossary.content": {
+    "en": "Add friends' names and game words: recognition tries to write them right, and translation keeps them as they are. To fix a misheard word, select it in the conversation and press the small button beside it.",
+    "text": "Lägg till vänners namn och ord från spel i ordlistan. Taligenkänningen försöker stava dem rätt, och översättningen behåller dem som de är. Om ett ord uppfattats fel i samtalet kan du markera det och klicka på den lilla knappen bredvid för att rätta det."
+  },
+  "tour.steps.glossary.title": {
+    "en": "Personal glossary",
+    "text": "Personlig ordlista"
+  },
   "tour.steps.kotomimi-tips.coach": {
-    "en": "Speaking their language yourself? Enable Grammar feedback in Settings. You can also enable \"I speak the other language too\" to keep translation and private grammar feedback together.",
-    "text": "Talar du själv det andra språket? Aktivera Grammatikrespons i Inställningar. Du kan också aktivera ”Jag talar också det andra språket” för att få både översättning och privat grammatikrespons."
+    "en": "Practising their language? Turn on Grammar feedback: what you say in it gets feedback only you see. Add it under \"I speak\" with \"+\" to mix both: what you say in your own language is translated as usual.",
+    "text": "Vill du öva på motpartens språk? Slå på ”Grammatikfeedback” så får du respons på det du säger på språket, som bara du ser. Lägg sedan till språket under ”Jag talar” med ”+” för att kunna blanda båda språken. Det du säger på ditt modersmål översätts som vanligt."
   },
   "tour.steps.kotomimi-tips.content": {
     "en": "Worth knowing before you start:",
@@ -2342,6 +2350,26 @@
   "tour.steps.kotomimi-tips.typed": {
     "en": "During a session a box appears at the bottom: type a sentence to have it translated. Ctrl+K jumps to it.",
     "text": "När en session har startat visas ett textfält längst ner. Skriv en mening för att översätta den. Tryck på Ctrl+K för att gå direkt till textfältet."
+  },
+  "tour.steps.languages.content": {
+    "en": "Pick what each side speaks:",
+    "text": "Välj vilka språk ni talar här:"
+  },
+  "tour.steps.languages.inUse": {
+    "en": "A language you add under \"I speak\" is used once the other side has it lit too; it is tinted green then.",
+    "text": "Ett språk du lägger till under ”Jag talar” används först när den andra personen också har aktiverat det. Då visas det i ljusgrönt."
+  },
+  "tour.steps.languages.mine": {
+    "en": "\"I speak\": the filled one is your own language; everything is translated into it. Speak others too? Add them with \"+ I also speak\".",
+    "text": "”Jag talar”: det helgröna språket är ditt modersmål. Allt översätts till det. Talar du fler språk? Lägg till dem med ”+ Jag talar också”."
+  },
+  "tour.steps.languages.theirs": {
+    "en": "\"They speak\": press to light a language or put it out, two at most. They are heard in the lit ones, and your speech is translated into each.",
+    "text": "”De talar”: klicka för att markera eller avmarkera språk, högst två åt gången. Motpartens tal känns igen på de markerade språken, och det du säger översätts till vart och ett."
+  },
+  "tour.steps.languages.title": {
+    "en": "Languages",
+    "text": "Språk"
   },
   "tour.steps.models.content_kotomimi": {
     "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
@@ -2378,6 +2406,14 @@
   "tour.steps.reading-aids.title": {
     "en": "Reading aids",
     "text": "Lässtöd"
+  },
+  "tour.steps.vrchat.content": {
+    "en": "Works with VRChat on this computer: nothing is heard while you are muted there, your words or their translation can show above your head, and with a SteamVR headset the captions can show in the headset.",
+    "text": "Fungerar ihop med VRChat på den här datorn: när din mikrofon är avstängd i VRChat känns ditt tal inte igen. Det du säger eller översättningen kan visas ovanför ditt huvud. Med ett SteamVR-headset kan du också se undertexterna i headsetet."
+  },
+  "tour.steps.vrchat.title": {
+    "en": "VRChat",
+    "text": "VRChat"
   },
   "viewer.original": {
     "en": "Original",

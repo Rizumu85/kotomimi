@@ -681,7 +681,7 @@
       "apiKeyNeeded": "API tại {{address}} yêu cầu khóa. Trong thẻ tương ứng, bật “API này yêu cầu khóa” rồi nhập khóa.",
       "apiKeyRefused": "API tại {{address}} không chấp nhận khóa này. Hãy kiểm tra khóa API trong thẻ tương ứng.",
       "serverNoAsr": "Thiết bị kia không có mô hình nhận dạng giọng nói cho {{source}}. Thẻ chia sẻ trên thiết bị đó có tùy chọn tải xuống, hoặc để máy tính này nhận dạng.",
-      "serverNoDetect": "Thiết bị kia không có mô hình nhận dạng có thể tự phân biệt ngôn ngữ, cần cho “Tôi cũng nói…” và tính năng tự nhận biết ngôn ngữ của đối phương. Hãy tải một mô hình trên đó (như Qwen3-ASR), hoặc tắt hai tùy chọn này.",
+      "serverNoDetect": "Thiết bị kia chưa có mô hình nhận dạng giọng nói có thể tự phân biệt ngôn ngữ. Bạn cần mô hình này khi thêm ngôn ngữ khác vào \"Tôi nói\" hoặc tự nhận diện ngôn ngữ của đối phương. Hãy tải một mô hình trên thiết bị đó (như Qwen3-ASR), hoặc bỏ các ngôn ngữ này.",
       "serverAsrBusy": "Nhận dạng giọng nói trên thiết bị kia đang dùng mô hình khác. Hãy thử lại khi thiết bị đó rảnh.",
       "sourceAuto": "Cấu hình này không thể tự nhận biết ngôn ngữ. Hãy chọn ngôn ngữ bạn nói.",
       "asrUnnamed": "Chưa có mô hình nhận dạng giọng nói để dùng. Hãy chọn mô hình trong thẻ “Nhận dạng giọng nói” bên dưới nhà cung cấp (với mô hình API, cần nhập địa chỉ và tên mô hình), hoặc chọn nơi chạy khác.",
@@ -1558,8 +1558,23 @@
         "title": "Thêm ba điều nữa",
         "content": "Một vài điều nên biết trước khi bắt đầu:",
         "typed": "Khi bắt đầu phiên, ô nhập sẽ xuất hiện ở dưới cùng: gõ một câu để dịch. Nhấn Ctrl+K để chuyển thẳng đến ô nhập.",
-        "coach": "Bạn đang tự nói bằng ngôn ngữ của người kia? Bật Góp ý ngữ pháp trong Cài đặt. Bạn cũng có thể bật \"Tôi cũng nói ngôn ngữ của người kia\" để vừa dịch vừa nhận góp ý ngữ pháp riêng tư.",
+        "coach": "Muốn luyện ngôn ngữ của đối phương? Bật \"Góp ý ngữ pháp\": khi nói bằng ngôn ngữ đó, bạn sẽ nhận được góp ý chỉ mình bạn thấy. Dùng \"+\" trong \"Tôi nói\" để thêm ngôn ngữ đó, rồi bạn có thể nói xen kẽ cả hai: lời nói bằng tiếng mẹ đẻ vẫn được dịch như thường.",
         "share": "Thiết bị khác cũng có thể dùng mô hình trên máy tính này: Cài đặt → Nhà cung cấp → Chia sẻ với thiết bị khác."
+      },
+      "languages": {
+        "title": "Ngôn ngữ",
+        "content": "Chọn ngôn ngữ mỗi bên nói tại đây:",
+        "mine": "\"Tôi nói\": ngôn ngữ có nền xanh lá là tiếng mẹ đẻ của bạn; mọi bản dịch đều được dịch sang ngôn ngữ này. Nếu bạn còn nói được ngôn ngữ khác, nhấn \"+ Tôi cũng nói\" để thêm.",
+        "theirs": "\"Đối phương nói\": nhấn để bật hoặc tắt, tối đa hai ngôn ngữ. Ứng dụng sẽ nghe đối phương theo các ngôn ngữ đang bật và dịch lời bạn sang từng ngôn ngữ đó.",
+        "inUse": "Ngôn ngữ bạn thêm trong “Tôi nói” chỉ được dùng khi phía bên kia cũng bật ngôn ngữ đó; khi được dùng, ô sẽ có màu xanh lá nhạt."
+      },
+      "glossary": {
+        "title": "Từ điển cá nhân",
+        "content": "Thêm tên bạn bè và từ ngữ trong trò chơi vào từ điển: ứng dụng sẽ cố nhận dạng đúng và giữ nguyên khi dịch. Để sửa từ bị nghe nhầm trong cuộc trò chuyện, hãy chọn từ đó rồi nhấn nút nhỏ bên cạnh."
+      },
+      "vrchat": {
+        "title": "VRChat",
+        "content": "Kết nối với VRChat trên máy tính này: ứng dụng ngừng nhận dạng lời bạn khi bạn tắt mic trong VRChat; lời bạn hoặc bản dịch có thể hiện trên đầu bạn; phụ đề cũng có thể hiện trong kính SteamVR khi bạn đeo kính."
       }
     }
   },
