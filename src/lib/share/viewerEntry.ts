@@ -2,7 +2,7 @@
 import type { Entry, Row } from '../projection/types';
 import type { ViewerEntry, ViewerRow } from './types';
 
-const row = (r: Row): ViewerRow => ({ key: r.key, text: r.text, final: r.final });
+const row = (r: Row): ViewerRow => ({ key: r.key, text: r.text, final: r.final, language: r.language });
 
 /**
  * What a viewer reads of one entry; notices stay with the host (spec 2026-10-04 §3.1). Fork: `feedback`, the entry's

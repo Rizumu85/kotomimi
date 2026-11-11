@@ -5,7 +5,7 @@
  */
 import type { LegName } from '../conversation/types';
 
-export interface ViewerRow { key: string; text: string; final: boolean }
+export interface ViewerRow { key: string; text: string; final: boolean; language?: string }
 
 export interface ViewerEntry {
   id: string;

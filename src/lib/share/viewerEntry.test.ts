@@ -8,17 +8,28 @@ const row = (key: string, text: string, final: boolean) => ({
 });
 
 describe('toViewerEntry', () => {
+  it('keeps the languages actually spoken and translated when they reverse the configured pair', () => {
+    const entry: Entry = {
+      kind: 'exchange', id: 'bilingual', leg: 'speaker', t: 0, pairing: 'stated',
+      languages: { source: 'zh-CN', target: 'ja' },
+      source: [row('source:0', 'こんにちは', true)],
+      translation: [{ ...row('translation:0', '你好', true), side: 'translation', language: 'zh-CN' }],
+    };
+    expect(toViewerEntry(entry)?.source[0]).toHaveProperty('language', 'ja');
+    expect(toViewerEntry(entry)?.translation[0]).toHaveProperty('language', 'zh-CN');
+  });
+
   it('keeps what a viewer reads and nothing else', () => {
     const entry: Entry = {
       kind: 'exchange', id: 'speaker:s:r1:speaker:1', leg: 'speaker', languages: { source: 'ja', target: 'zh-CN' },
       pairing: 'stated', t: 1000,
       source: [row('r1:speaker:1:0', 'こんにちは', true)],
-      translation: [{ ...row('r1:speaker:2:0', '你好', false), side: 'translation' }],
+      translation: [{ ...row('r1:speaker:2:0', '你好', false), side: 'translation', language: 'zh-CN' }],
     };
     expect(toViewerEntry(entry)).toEqual({
       id: 'speaker:s:r1:speaker:1', leg: 'speaker', t: 1000, languages: { source: 'ja', target: 'zh-CN' },
-      source: [{ key: 'r1:speaker:1:0', text: 'こんにちは', final: true }],
-      translation: [{ key: 'r1:speaker:2:0', text: '你好', final: false }],
+      source: [{ key: 'r1:speaker:1:0', text: 'こんにちは', final: true, language: 'ja' }],
+      translation: [{ key: 'r1:speaker:2:0', text: '你好', final: false, language: 'zh-CN' }],
     });
   });
 
@@ -31,10 +42,10 @@ describe('toViewerEntry', () => {
     const entry: Entry = {
       kind: 'exchange', id: 'both', leg: 'speaker', languages: { source: 'en', target: 'fr' }, pairing: 'stated', t: 0,
       source: [row('source:0', 'Je suis ici', true)],
-      translation: [{ ...row('translation:0', 'I am here', true), side: 'translation', purpose: 'translation' }],
+      translation: [{ ...row('translation:0', 'I am here', true), side: 'translation', purpose: 'translation', language: 'en' }],
       feedback: [{ ...row('feedback:0', 'Private grammar explanation', true), side: 'translation', purpose: 'feedback' }],
     };
-    expect(toViewerEntry(entry, true)?.translation).toEqual([{ key: 'translation:0', text: 'I am here', final: true }]);
+    expect(toViewerEntry(entry, true)?.translation).toEqual([{ key: 'translation:0', text: 'I am here', final: true, language: 'en' }]);
     expect(JSON.stringify(toViewerEntry(entry, true))).not.toContain('Private grammar explanation');
     expect(toViewerEntry({ ...entry, translation: [{ ...row('legacy:0', 'Legacy feedback', true), side: 'translation' }] }, true)?.translation).toEqual([]);
   });

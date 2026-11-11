@@ -29,11 +29,21 @@ export function validChoice(choice: Choice, pair: Pair): Choice {
   return choice.code === pair.source || choice.code === pair.target ? choice : { code: pair.target, both: true };
 }
 
-/** The entry's rows in the chosen language first. A target match reads the translation; anything else the source (an auto-detected source included). */
+/** The chosen language can be on either side, independently for each row. */
 export function sidesFor(entry: ViewerEntry, code: string): { primary: ViewerRow[]; secondary: ViewerRow[] } {
-  return entry.languages.target === code
-    ? { primary: entry.translation, secondary: entry.source }
-    : { primary: entry.source, secondary: entry.translation };
+  // "Auto" is the source choice, not a language to match against detected text.
+  if (code === 'auto') return { primary: entry.source, secondary: entry.translation };
+  const rows = (['source', 'translation'] as const).flatMap((side) => entry[side].map((row) => ({
+    row, language: (row.language ?? entry.languages[side === 'source' ? 'source' : 'target']).toLowerCase(),
+  })));
+  const chosen = code.toLowerCase();
+  const primary: ViewerRow[] = [], secondary: ViewerRow[] = [];
+  for (const { row, language } of rows) {
+    // A recognizer may name only "zh"; two explicit variants still stay apart.
+    const matches = language === chosen || language === base(chosen) || base(language) === chosen;
+    (matches ? primary : secondary).push(row);
+  }
+  return { primary, secondary };
 }
 
 export interface Piece { text: string; final: boolean; space: boolean }

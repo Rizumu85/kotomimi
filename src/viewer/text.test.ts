@@ -35,6 +35,40 @@ describe('choices', () => {
 });
 
 describe('sidesFor', () => {
+  it('follows each row when a bilingual speaker uses their other language', () => {
+    const entry = {
+      ...speaker, languages: { source: 'zh-CN', target: 'ja' },
+      source: [{ ...speaker.source[0], language: 'ja' }],
+      translation: [{ ...speaker.translation[0], language: 'zh-CN' }],
+    };
+    expect(sidesFor(entry, 'zh-CN')).toEqual({ primary: entry.translation, secondary: entry.source });
+    expect(sidesFor(entry, 'ja')).toEqual({ primary: entry.source, secondary: entry.translation });
+  });
+
+  it('selects only the chosen translation when two languages are lit', () => {
+    const entry = {
+      ...speaker,
+      translation: [
+        { ...speaker.translation[0], language: 'zh-CN' },
+        { key: 'r:speaker:3:0', text: 'Hello', final: true, language: 'en' },
+      ],
+    };
+    expect(sidesFor(entry, 'zh-CN')).toEqual({ primary: [entry.translation[0]], secondary: [...entry.source, entry.translation[1]] });
+    expect(sidesFor(entry, 'en').primary).toEqual([entry.translation[1]]);
+  });
+
+  it('matches a detected base code, but keeps explicitly different variants apart', () => {
+    const entry = { ...speaker, source: [{ ...speaker.source[0], language: 'zh' }], translation: [] };
+    expect(sidesFor(entry, 'zh-CN').primary).toEqual(entry.source);
+    const mixedTags = { ...entry, translation: [{ ...speaker.translation[0], language: 'zh-CN' }] };
+    expect(sidesFor(mixedTags, 'zh-CN').primary).toEqual([...mixedTags.source, ...mixedTags.translation]);
+    const variants = {
+      ...entry, source: [{ ...entry.source[0], language: 'zh-TW' }],
+      translation: [{ ...speaker.translation[0], language: 'zh-CN' }],
+    };
+    expect(sidesFor(variants, 'zh-CN').primary).toEqual(variants.translation);
+  });
+
   it('picks by language, not by role', () => {
     expect(sidesFor(speaker, 'zh-CN').primary[0].text).toBe('你好');
     expect(sidesFor(participant, 'zh-CN').primary[0].text).toBe('谢谢');
