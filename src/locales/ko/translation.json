@@ -763,7 +763,14 @@
       "engineUpdateNow": "업데이트",
       "deviceAt": "{{name}} ({{address}})",
       "deviceAway": "{{name}} · 일시적으로 연결할 수 없음",
-      "deviceUnnamed": "{{address}}"
+      "deviceUnnamed": "{{address}}",
+      "recommendWhy": {
+        "lending": "이 컴퓨터의 모델을 다른 기기에서도 사용하므로 더 정확한 대형 모델을 추천해요.",
+        "big": "이 컴퓨터는 그래픽 메모리가 충분해 더 정확한 대형 모델을 사용할 수 있어요.",
+        "small": "이 컴퓨터는 그래픽 메모리가 적어 메모리를 적게 쓰는 모델을 추천해요.",
+        "hearDefault": "정확도가 충분하고, 게임을 켜도 메모리가 넉넉해요.",
+        "translateDefault": "직접 테스트했을 때 번역이 가장 좋았어요."
+      }
     }
   },
   "logsPanel": {

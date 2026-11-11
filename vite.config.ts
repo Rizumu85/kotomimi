@@ -187,6 +187,7 @@ export default defineConfig(({ command, mode }) => {
             'remote-engine': 'electron/remote-engine.js',
             // Fork: where the downloaded models are kept, and moving them
             'model-storage': 'electron/model-storage.js',
+            'model-memory': 'electron/model-memory.js',
             // Fork: starting with the computer, in the background
             'autostart': 'electron/autostart.js',
             // Fork: the icon in the notification area

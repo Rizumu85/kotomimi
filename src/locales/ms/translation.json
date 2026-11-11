@@ -763,7 +763,14 @@
       "engineUpdateNow": "Kemas kini",
       "deviceAt": "{{name}} ({{address}})",
       "deviceAway": "{{name}} · buat sementara tidak dapat disambungkan",
-      "deviceUnnamed": "{{address}}"
+      "deviceUnnamed": "{{address}}",
+      "recommendWhy": {
+        "lending": "Komputer ini berkongsi modelnya dengan peranti lain, jadi model besar yang lebih tepat disyorkan.",
+        "big": "Komputer ini mempunyai memori grafik yang cukup untuk model besar yang lebih tepat.",
+        "small": "Memori grafik komputer ini terhad, jadi model yang menggunakan sedikit memori disyorkan.",
+        "hearDefault": "Cukup tepat, dan masih ada ruang memori untuk permainan.",
+        "translateDefault": "Hasil terjemahan terbaik dalam ujian kami."
+      }
     }
   },
   "logsPanel": {

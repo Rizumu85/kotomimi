@@ -1839,6 +1839,26 @@
     "en": "Check again",
     "text": "بررسی دوباره"
   },
+  "providers.localai.recommendWhy.big": {
+    "en": "This computer has the memory for the more accurate large model.",
+    "text": "حافظهٔ گرافیکی این رایانه برای مدل بزرگ‌تر و دقیق‌تر کافی است."
+  },
+  "providers.localai.recommendWhy.hearDefault": {
+    "en": "Accurate enough, and leaves room for a game.",
+    "text": "دقتش کافی است و برای اجرای هم‌زمان بازی هم حافظه می‌ماند."
+  },
+  "providers.localai.recommendWhy.lending": {
+    "en": "This computer lends its models to other devices, so the more accurate large model is recommended.",
+    "text": "این رایانه مدل‌هایش را در اختیار دستگاه‌های دیگر می‌گذارد؛ مدل بزرگ‌تر و دقیق‌تر پیشنهاد می‌شود."
+  },
+  "providers.localai.recommendWhy.small": {
+    "en": "This computer has little graphics memory, so a small model is recommended.",
+    "text": "حافظهٔ گرافیکی این رایانه کم است؛ مدلی با مصرف حافظهٔ کمتر پیشنهاد می‌شود."
+  },
+  "providers.localai.recommendWhy.translateDefault": {
+    "en": "Translated best in our tests.",
+    "text": "در آزمایش‌های ما بهترین ترجمه را داشت."
+  },
   "providers.localai.serverAsrBusy": {
     "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
     "text": "تشخیص گفتار دستگاه دیگر با مدل دیگری در حال استفاده است. وقتی آزاد شد دوباره شروع کنید."

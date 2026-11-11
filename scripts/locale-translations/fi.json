@@ -1843,6 +1843,26 @@
     "en": "Check again",
     "text": "Tarkista uudelleen"
   },
+  "providers.localai.recommendWhy.big": {
+    "en": "This computer has the memory for the more accurate large model.",
+    "text": "Tämän tietokoneen näyttömuisti riittää tarkemmalle suurelle mallille."
+  },
+  "providers.localai.recommendWhy.hearDefault": {
+    "en": "Accurate enough, and leaves room for a game.",
+    "text": "Riittävän tarkka ja jättää muistia myös pelille."
+  },
+  "providers.localai.recommendWhy.lending": {
+    "en": "This computer lends its models to other devices, so the more accurate large model is recommended.",
+    "text": "Tämä tietokone jakaa mallejaan muille laitteille, joten suosittelemme tarkempaa suurta mallia."
+  },
+  "providers.localai.recommendWhy.small": {
+    "en": "This computer has little graphics memory, so a small model is recommended.",
+    "text": "Tässä tietokoneessa on vähän näyttömuistia, joten suosittelemme vähän muistia käyttävää mallia."
+  },
+  "providers.localai.recommendWhy.translateDefault": {
+    "en": "Translated best in our tests.",
+    "text": "Tuotti testeissämme parhaat käännökset."
+  },
   "providers.localai.serverAsrBusy": {
     "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
     "text": "Toisen laitteen puheentunnistus käyttää toista mallia. Yritä uudelleen, kun se vapautuu."

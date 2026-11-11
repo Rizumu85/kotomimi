@@ -1875,6 +1875,26 @@
     "en": "Check again",
     "text": "Kontrollera igen"
   },
+  "providers.localai.recommendWhy.big": {
+    "en": "This computer has the memory for the more accurate large model.",
+    "text": "Den här datorn har tillräckligt med grafikminne för den större, mer träffsäkra modellen."
+  },
+  "providers.localai.recommendWhy.hearDefault": {
+    "en": "Accurate enough, and leaves room for a game.",
+    "text": "Tillräckligt träffsäker och lämnar plats för ett spel."
+  },
+  "providers.localai.recommendWhy.lending": {
+    "en": "This computer lends its models to other devices, so the more accurate large model is recommended.",
+    "text": "Den här datorn delar sina modeller med andra enheter, så vi rekommenderar den större, mer träffsäkra modellen."
+  },
+  "providers.localai.recommendWhy.small": {
+    "en": "This computer has little graphics memory, so a small model is recommended.",
+    "text": "Den här datorn har lite grafikminne, så vi rekommenderar en modell som tar mindre plats."
+  },
+  "providers.localai.recommendWhy.translateDefault": {
+    "en": "Translated best in our tests.",
+    "text": "Översatte bäst i våra tester."
+  },
   "providers.localai.serverAsrBusy": {
     "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
     "text": "Taligenkänningen på den andra enheten används med en annan modell. Starta igen när den är ledig."

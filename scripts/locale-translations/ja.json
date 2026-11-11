@@ -1839,6 +1839,26 @@
     "en": "Check again",
     "text": "再確認"
   },
+  "providers.localai.recommendWhy.big": {
+    "en": "This computer has the memory for the more accurate large model.",
+    "text": "このパソコンのビデオメモリなら、精度の高い大きなモデルを使えます。"
+  },
+  "providers.localai.recommendWhy.hearDefault": {
+    "en": "Accurate enough, and leaves room for a game.",
+    "text": "十分な精度があり、ゲームを起動していてもメモリに余裕があります。"
+  },
+  "providers.localai.recommendWhy.lending": {
+    "en": "This computer lends its models to other devices, so the more accurate large model is recommended.",
+    "text": "このパソコンのモデルをほかの端末でも使っているため、精度の高い大きなモデルがおすすめです。"
+  },
+  "providers.localai.recommendWhy.small": {
+    "en": "This computer has little graphics memory, so a small model is recommended.",
+    "text": "このパソコンはビデオメモリが少ないため、メモリ使用量の少ないモデルがおすすめです。"
+  },
+  "providers.localai.recommendWhy.translateDefault": {
+    "en": "Translated best in our tests.",
+    "text": "実際のテストで翻訳の精度が最も高かったモデルです。"
+  },
   "providers.localai.serverAsrBusy": {
     "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
     "text": "他のデバイスの音声認識は別のモデルで使用中です。空いてからもう一度開始してください。"

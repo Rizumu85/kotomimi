@@ -763,7 +763,14 @@
       "engineUpdateNow": "Aktualizuj",
       "deviceAt": "{{name}} ({{address}})",
       "deviceAway": "{{name}} · brak odpowiedzi",
-      "deviceUnnamed": "{{address}}"
+      "deviceUnnamed": "{{address}}",
+      "recommendWhy": {
+        "lending": "Ten komputer udostępnia modele innym urządzeniom, więc polecamy większy, dokładniejszy model.",
+        "big": "Ten komputer ma dość pamięci graficznej na większy, dokładniejszy model.",
+        "small": "Ten komputer ma mało pamięci graficznej, więc polecamy model, który zajmuje jej mniej.",
+        "hearDefault": "Wystarczająco dokładny i zostawia dość pamięci na grę.",
+        "translateDefault": "Najlepiej tłumaczył w naszych testach."
+      }
     }
   },
   "logsPanel": {

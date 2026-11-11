@@ -763,7 +763,14 @@
       "engineUpdateNow": "Actualizar",
       "deviceAt": "{{name}} ({{address}})",
       "deviceAway": "{{name}} · no responde",
-      "deviceUnnamed": "{{address}}"
+      "deviceUnnamed": "{{address}}",
+      "recommendWhy": {
+        "lending": "Este equipo comparte sus modelos con otros dispositivos. Se recomienda el modelo grande por su mayor precisión.",
+        "big": "Este equipo tiene suficiente memoria gráfica para el modelo grande, más preciso.",
+        "small": "Este equipo tiene poca memoria gráfica. Se recomienda un modelo que ocupe poco.",
+        "hearDefault": "Tiene suficiente precisión y deja memoria libre para jugar.",
+        "translateDefault": "El que mejor tradujo en nuestras pruebas."
+      }
     }
   },
   "logsPanel": {

@@ -1967,6 +1967,26 @@
     "en": "Check again",
     "text": "Suriin ulit"
   },
+  "providers.localai.recommendWhy.big": {
+    "en": "This computer has the memory for the more accurate large model.",
+    "text": "Sapat ang graphics memory ng computer na ito para sa mas malaking modelong mas tumpak."
+  },
+  "providers.localai.recommendWhy.hearDefault": {
+    "en": "Accurate enough, and leaves room for a game.",
+    "text": "Sapat ang katumpakan, at kasya pa rin sa memory kahit may bukas na laro."
+  },
+  "providers.localai.recommendWhy.lending": {
+    "en": "This computer lends its models to other devices, so the more accurate large model is recommended.",
+    "text": "Ipinapagamit ng computer na ito ang mga modelo nito sa ibang device, kaya inirerekomenda ang mas malaking modelong mas tumpak."
+  },
+  "providers.localai.recommendWhy.small": {
+    "en": "This computer has little graphics memory, so a small model is recommended.",
+    "text": "Kaunti ang graphics memory ng computer na ito, kaya inirerekomenda ang modelong mas tipid sa memory."
+  },
+  "providers.localai.recommendWhy.translateDefault": {
+    "en": "Translated best in our tests.",
+    "text": "Pinakamahusay magsalin sa aming mga pagsubok."
+  },
   "providers.localai.serverAsrBusy": {
     "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
     "text": "Ginagamit ng kabilang device ang speech recognition sa ibang modelo. Maghintay hanggang matapos ito bago subukan ulit."

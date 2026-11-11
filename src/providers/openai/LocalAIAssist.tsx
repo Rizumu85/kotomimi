@@ -31,6 +31,8 @@ import { NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator } from './native
 import { NATIVE_COACHES, nativeCoach } from './nativeCoaches';
 import { lentChoice } from './phoneText';
 import { useNativeStageSlots } from './LocalAIEngine';
+import { recommendNativeModel, type NativeRecommendation } from './nativeRecommendation';
+import { useNativeRecommendationInputs } from './useNativeRecommendationInputs';
 import { fitsPair, isKotomimiServer, modelsFor, SERVER_SILENT, serverDefaultModel, translationDefault, type LocalAIModel } from './localaiModels';
 import { choiceOf, perLanguage, recognizerChoices } from './serverRecognizers';
 import { isRealtimeModelId } from './settings';
@@ -432,6 +434,22 @@ function DeviceModels({ stage, settings, pair, legs, models, disabled, tour, nat
     const mine = using(slot);
     return mine && !ready.some((m) => m.id === mine.id) ? [mine, ...ready] : ready;
   };
+  // Fork: the one model recommended in a list, by what this computer can run (`nativeRecommendation.ts`), and why.
+  const { memoryMB, lending } = useNativeRecommendationInputs();
+  const advise = (kind: 'asr' | 'translation', offered: readonly NativeCardModel[], languages: readonly string[]): { id: string | null; hint?: string } => {
+    // The Mac's own recognition is the most accurate there, and leads its list.
+    if (kind === 'asr' && offered[0] && isApple(offered[0].id)) return { id: offered[0].id };
+    // Not answered yet: no mark, and the list in its own order, rather than one that moves when the answer comes.
+    if (memoryMB === undefined) return { id: null };
+    const advice: NativeRecommendation = recommendNativeModel(kind, offered.map((m) => m.id), memoryMB, lending, languages);
+    const said = advice.reason !== 'default' ? advice.reason
+      : advice.id === 'qwen3-asr-0.6b-q8' ? 'hearDefault'
+        : advice.id === 'index-translate-2b' ? 'translateDefault'
+          : null;
+    return { id: advice.id, ...(said ? { hint: t(`providers.localai.recommendWhy.${said}`) } : {}) };
+  };
+  /** The list with the recommended one first. */
+  const leading = <M extends NativeCardModel>(list: readonly M[], id: string | null): M[] => [...list.filter((m) => m.id === id), ...list.filter((m) => m.id !== id)];
   const downloading = useNativeDownloads(stage, disabled, (id, slot) => {
     if (engineOne ? engineFits(id) : slot && slots.some((current) => current.dir === slot.dir && current.leg === slot.leg) && fits(id, slot)) native.onPick(id, slot);
   });
@@ -449,6 +467,7 @@ function DeviceModels({ stage, settings, pair, legs, models, disabled, tour, nat
     const missingModel = mine === null || !nativeDownloaded(status, mine.id);
     const libraryOpen = picked === undefined ? (looked && missingModel) : picked === ENGINE_ROW;
     const fittingAll = engine.offered.filter((m) => engineFits(m.id));
+    const advice = advise('translation', fittingAll, []);
     const label = slots.length > 1
       ? `${nameOf(source)} ⇄ ${nameOf(target)}`
       : `${nameOf(deviceLanguage(slots[0]!.source))} → ${nameOf(deviceLanguage(slots[0]!.target))}`;
@@ -488,7 +507,7 @@ function DeviceModels({ stage, settings, pair, legs, models, disabled, tour, nat
               <div className="model-management-section kt-here__native">
                 <div className="model-subgroup">
                   <div className="model-subgroup__label"><Star size={11} />{t('models.recommendedGroup', 'Recommended')}</div>
-                  {fittingAll.map((m) => <NativeEngineCard key={m.id} kind="translation" model={m} onDownloadStarted={() => downloading(m.id)} recommended={m.name === fittingAll[0].name} selected={mine?.id === m.id} onSelect={() => { if (mine?.id !== m.id) native.onPick(m.id); }} disabled={disabled} />)}
+                  {leading(fittingAll, advice.id).map((m) => <NativeEngineCard key={m.id} kind="translation" model={m} onDownloadStarted={() => downloading(m.id)} recommended={m.id === advice.id} {...(advice.hint ? { recommendHint: advice.hint } : {})} selected={mine?.id === m.id} onSelect={() => { if (mine?.id !== m.id) native.onPick(m.id); }} disabled={disabled} />)}
                 </div>
               </div>
             )}
@@ -507,6 +526,9 @@ function DeviceModels({ stage, settings, pair, legs, models, disabled, tour, nat
   const detectRow = stage === 'asr' && !!openSlot && isAutoLanguage(heardIn(openSlot));
   const tellApart = detectRow ? fitting.filter((m) => nativeModel(m.id).detects || hearsEither(m.id, openSlot!)) : fitting;
   const mustBeTold = detectRow && native ? engine.offered.filter((m) => !tellApart.includes(m)) : [];
+  // What the open row must hear: its language; where it is detected, the user's own languages; else unknown.
+  const rowLanguages = !openSlot ? [] : !detectRow ? [heardIn(openSlot)] : openSlot.leg === 'speaker' ? [pair.source, ...alsoSpoken(settings, pair)] : [];
+  const advice = advise(stage === 'asr' ? 'asr' : 'translation', tellApart, rowLanguages);
 
   const title = (slot: DeviceNeed) => {
     if (stage !== 'asr') return `${nameOf(deviceLanguage(slot.source))} → ${nameOf(deviceLanguage(slot.target))}`;
@@ -571,7 +593,7 @@ function DeviceModels({ stage, settings, pair, legs, models, disabled, tour, nat
               {tellApart.length > 0 && (
                 <div className="model-subgroup">
                   <div className="model-subgroup__label">{detectRow ? t('models.detectsGroup') : <><Star size={11} />{t('models.recommendedGroup', 'Recommended')}</>}</div>
-                  {tellApart.map((m) => <NativeEngineCard key={m.id} kind={stage} model={m} onDownloadStarted={() => downloading(m.id, openSlot)} recommended={m.name === tellApart[0].name} selected={usedThere?.id === m.id} onSelect={() => { if (usedThere?.id !== m.id) native.onPick(m.id, openSlot); }} disabled={disabled} />)}
+                  {leading(tellApart, advice.id).map((m) => <NativeEngineCard key={m.id} kind={stage} model={m} onDownloadStarted={() => downloading(m.id, openSlot)} recommended={m.id === advice.id} {...(advice.hint ? { recommendHint: advice.hint } : {})} selected={usedThere?.id === m.id} onSelect={() => { if (usedThere?.id !== m.id) native.onPick(m.id, openSlot); }} disabled={disabled} />)}
                 </div>
               )}
               {mustBeTold.length > 0 && (

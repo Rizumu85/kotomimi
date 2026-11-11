@@ -763,7 +763,14 @@
       "engineUpdateNow": "Päivitä",
       "deviceAt": "{{name}} ({{address}})",
       "deviceAway": "{{name}} · ei vastaa",
-      "deviceUnnamed": "{{address}}"
+      "deviceUnnamed": "{{address}}",
+      "recommendWhy": {
+        "lending": "Tämä tietokone jakaa mallejaan muille laitteille, joten suosittelemme tarkempaa suurta mallia.",
+        "big": "Tämän tietokoneen näyttömuisti riittää tarkemmalle suurelle mallille.",
+        "small": "Tässä tietokoneessa on vähän näyttömuistia, joten suosittelemme vähän muistia käyttävää mallia.",
+        "hearDefault": "Riittävän tarkka ja jättää muistia myös pelille.",
+        "translateDefault": "Tuotti testeissämme parhaat käännökset."
+      }
     }
   },
   "logsPanel": {

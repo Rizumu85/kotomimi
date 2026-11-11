@@ -1839,6 +1839,26 @@
     "en": "Check again",
     "text": "మళ్లీ తనిఖీ చేయి"
   },
+  "providers.localai.recommendWhy.big": {
+    "en": "This computer has the memory for the more accurate large model.",
+    "text": "మరింత కచ్చితమైన పెద్ద మోడల్‌కు సరిపడా గ్రాఫిక్స్ మెమరీ ఈ కంప్యూటర్‌లో ఉంది."
+  },
+  "providers.localai.recommendWhy.hearDefault": {
+    "en": "Accurate enough, and leaves room for a game.",
+    "text": "తగినంత కచ్చితంగా ఉంటుంది. గేమ్ ఆడుతున్నా మెమరీ సరిపోతుంది."
+  },
+  "providers.localai.recommendWhy.lending": {
+    "en": "This computer lends its models to other devices, so the more accurate large model is recommended.",
+    "text": "ఈ కంప్యూటర్‌లోని మోడళ్లను ఇతర పరికరాలు వాడుతున్నాయి కాబట్టి, మరింత కచ్చితమైన పెద్ద మోడల్‌ను సూచిస్తున్నాం."
+  },
+  "providers.localai.recommendWhy.small": {
+    "en": "This computer has little graphics memory, so a small model is recommended.",
+    "text": "ఈ కంప్యూటర్‌లో గ్రాఫిక్స్ మెమరీ తక్కువగా ఉంది కాబట్టి, తక్కువ మెమరీ వాడే మోడల్‌ను సూచిస్తున్నాం."
+  },
+  "providers.localai.recommendWhy.translateDefault": {
+    "en": "Translated best in our tests.",
+    "text": "మా పరీక్షల్లో అన్నిటికంటే బాగా అనువదించింది."
+  },
   "providers.localai.serverAsrBusy": {
     "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
     "text": "ఇతర పరికరంలోని వాయిస్ గుర్తింపు మరో మోడల్‌ను ఉపయోగిస్తోంది. అది ఖాళీ అయిన తర్వాత మళ్లీ ప్రారంభించండి."

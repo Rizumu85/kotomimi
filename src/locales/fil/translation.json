@@ -763,7 +763,14 @@
       "engineUpdateNow": "I-update",
       "deviceAt": "{{name}} ({{address}})",
       "deviceAway": "{{name}} · hindi sumasagot",
-      "deviceUnnamed": "{{address}}"
+      "deviceUnnamed": "{{address}}",
+      "recommendWhy": {
+        "lending": "Ipinapagamit ng computer na ito ang mga modelo nito sa ibang device, kaya inirerekomenda ang mas malaking modelong mas tumpak.",
+        "big": "Sapat ang graphics memory ng computer na ito para sa mas malaking modelong mas tumpak.",
+        "small": "Kaunti ang graphics memory ng computer na ito, kaya inirerekomenda ang modelong mas tipid sa memory.",
+        "hearDefault": "Sapat ang katumpakan, at kasya pa rin sa memory kahit may bukas na laro.",
+        "translateDefault": "Pinakamahusay magsalin sa aming mga pagsubok."
+      }
     }
   },
   "logsPanel": {

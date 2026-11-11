@@ -1839,6 +1839,26 @@
     "en": "Check again",
     "text": "בדיקה חוזרת"
   },
+  "providers.localai.recommendWhy.big": {
+    "en": "This computer has the memory for the more accurate large model.",
+    "text": "למחשב הזה יש מספיק זיכרון גרפי למודל גדול ומדויק יותר."
+  },
+  "providers.localai.recommendWhy.hearDefault": {
+    "en": "Accurate enough, and leaves room for a game.",
+    "text": "מדויק מספיק, ומשאיר מקום בזיכרון גם למשחק."
+  },
+  "providers.localai.recommendWhy.lending": {
+    "en": "This computer lends its models to other devices, so the more accurate large model is recommended.",
+    "text": "המחשב הזה משתף את המודלים שלו עם מכשירים אחרים, לכן מומלץ מודל גדול ומדויק יותר."
+  },
+  "providers.localai.recommendWhy.small": {
+    "en": "This computer has little graphics memory, so a small model is recommended.",
+    "text": "למחשב הזה יש מעט זיכרון גרפי, לכן מומלץ מודל שצורך פחות זיכרון."
+  },
+  "providers.localai.recommendWhy.translateDefault": {
+    "en": "Translated best in our tests.",
+    "text": "נתן את התרגום הטוב ביותר בבדיקות שלנו."
+  },
   "providers.localai.serverAsrBusy": {
     "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
     "text": "זיהוי הדיבור במכשיר השני משתמש במודל אחר. נסו שוב כשהוא יתפנה."

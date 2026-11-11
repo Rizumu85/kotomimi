@@ -763,7 +763,14 @@
       "engineUpdateNow": "Uppdatera",
       "deviceAt": "{{name}} ({{address}})",
       "deviceAway": "{{name}} · tillfälligt otillgänglig",
-      "deviceUnnamed": "{{address}}"
+      "deviceUnnamed": "{{address}}",
+      "recommendWhy": {
+        "lending": "Den här datorn delar sina modeller med andra enheter, så vi rekommenderar den större, mer träffsäkra modellen.",
+        "big": "Den här datorn har tillräckligt med grafikminne för den större, mer träffsäkra modellen.",
+        "small": "Den här datorn har lite grafikminne, så vi rekommenderar en modell som tar mindre plats.",
+        "hearDefault": "Tillräckligt träffsäker och lämnar plats för ett spel.",
+        "translateDefault": "Översatte bäst i våra tester."
+      }
     }
   },
   "logsPanel": {

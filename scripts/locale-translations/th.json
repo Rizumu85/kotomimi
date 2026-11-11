@@ -1839,6 +1839,26 @@
     "en": "Check again",
     "text": "ตรวจสอบอีกครั้ง"
   },
+  "providers.localai.recommendWhy.big": {
+    "en": "This computer has the memory for the more accurate large model.",
+    "text": "คอมพิวเตอร์เครื่องนี้มีหน่วยความจำการ์ดจอเพียงพอสำหรับโมเดลขนาดใหญ่ที่แม่นยำกว่า"
+  },
+  "providers.localai.recommendWhy.hearDefault": {
+    "en": "Accurate enough, and leaves room for a game.",
+    "text": "แม่นยำเพียงพอ และยังมีหน่วยความจำเหลือให้เล่นเกมได้"
+  },
+  "providers.localai.recommendWhy.lending": {
+    "en": "This computer lends its models to other devices, so the more accurate large model is recommended.",
+    "text": "คอมพิวเตอร์เครื่องนี้แชร์โมเดลให้อุปกรณ์อื่นใช้อยู่ จึงแนะนำโมเดลขนาดใหญ่ที่แม่นยำกว่า"
+  },
+  "providers.localai.recommendWhy.small": {
+    "en": "This computer has little graphics memory, so a small model is recommended.",
+    "text": "คอมพิวเตอร์เครื่องนี้มีหน่วยความจำการ์ดจอไม่มาก จึงแนะนำโมเดลที่ใช้หน่วยความจำน้อย"
+  },
+  "providers.localai.recommendWhy.translateDefault": {
+    "en": "Translated best in our tests.",
+    "text": "แปลได้ดีที่สุดจากการทดสอบจริง"
+  },
   "providers.localai.serverAsrBusy": {
     "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
     "text": "อุปกรณ์อีกเครื่องกำลังใช้การรู้จำเสียงพูดด้วยโมเดลอื่น โปรดลองเริ่มใหม่เมื่อว่างแล้ว"

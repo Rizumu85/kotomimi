@@ -26,6 +26,7 @@ const { createNativeEngine, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME, modelHea
 const { joinEngines } = require('./native-engines');
 const { createRemoteEngine } = require('./remote-engine');
 const { createModelStorage } = require('./model-storage');
+const { createModelMemoryReader } = require('./model-memory');
 const { createAutostart } = require('./autostart');
 const { createAppleSpeech } = require('./apple-speech');
 const { applyLinuxGpuFlags } = require('./linux-gpu-flags');
@@ -1467,6 +1468,10 @@ const nativeDirFixed = () => !app.isPackaged && Boolean(process.env.KOTOMIMI_NAT
 const engineDir = (kind) => path.join(getModelStorage().root(), kind);
 
 let nativeEngine = null;
+const modelMemory = createModelMemoryReader();
+// Start the cached read before settings open, without holding up the window.
+void modelMemory();
+ipcMain.handle('model-memory:get', () => modelMemory());
 const getNativeEngine = () => {
   if (nativeEngine) return nativeEngine;
   const log = engineLog('native-engine.log');

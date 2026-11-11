@@ -597,54 +597,75 @@ describe('one menu for a stage of this computer, whoever runs it', () => {
     <LocalAIAssist settings={{ ...LOCALAI_DEFAULTS, asrVia: 'device', asrHere: 'native', asrNativeModel: chosen, translateAt: 'device' }} values={{ endpoint: '' }} set={vi.fn()} fill={vi.fn()} update={vi.fn()} pair={pair} legs={['speaker']} models={[]} readiness={{ state: 'unknown' }} check={vi.fn()} />,
   );
 
-  it('offers SenseVoice-Small among the engine’s models for the five languages it hears: after the more accurate ones, before the small Qwen3, and never with the mark', () => {
+  /** The library once this computer's memory has been asked for (none here: unknown). */
+  const settled = async (...args: Parameters<typeof hearing>) => { const view = hearing(...args); await act(async () => {}); return view; };
+
+  it('recommends by the computer: the large Qwen3 on a 16 GB card, SenseVoice on a small one, each first and saying why', async () => {
+    useNativeEngineStore.setState({ status: engineOf(EVERY) });
+    const host = window as unknown as { electron?: unknown };
+    const before = host.electron;
+    try {
+      for (const [memory, first, why] of [[16303, 'qwen3-asr-1.7b-q8', 'big'], [6144, 'sensevoice-small-q8', 'small']] as const) {
+        host.electron = { invoke: async (channel: string) => (channel === 'model-memory:get' ? memory : undefined) };
+        const view = hearing({ source: 'ja', target: 'zh-CN' });
+        await waitFor(() => expect(cards(view.container)[0]).toBe(`${first} ★`));
+        expect(cards(view.container).filter((one) => one.endsWith('★'))).toHaveLength(1);
+        expect(view.container.innerHTML).not.toContain(`recommendWhy.${why === 'big' ? 'small' : 'big'}`);
+        view.unmount();
+      }
+    } finally {
+      host.electron = before;
+    }
+  });
+
+  it('offers SenseVoice-Small among the engine’s models for the five languages it hears, the one recommended first (memory unknown: the small Qwen3)', async () => {
     // Windows: every model of the engine the app downloads, R2T2 among them. None is here yet, so the library is open.
     useNativeEngineStore.setState({ status: engineOf(EVERY) });
     for (const source of ['ja', 'zh-CN', 'en', 'ko']) {
-      const view = hearing({ source, target: 'ru' });
-      expect(cards(view.container), source).toEqual(['qwen3-asr-1.7b-q8 ★', 'r2t2-q8', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
+      const view = await settled({ source, target: 'ru' });
+      expect(cards(view.container), source).toEqual(['qwen3-asr-0.6b-q8 ★', 'qwen3-asr-1.7b-q8', 'r2t2-q8', 'sensevoice-small-q8', 'nemotron-asr-0.6b-q8']);
       view.unmount();
     }
     // Cantonese: R2T2 and Nemotron do not hear it.
-    const cantonese = hearing({ source: 'yue', target: 'en' });
-    expect(cards(cantonese.container)).toEqual(['qwen3-asr-1.7b-q8 ★', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8']);
+    const cantonese = await settled({ source: 'yue', target: 'en' });
+    expect(cards(cantonese.container)).toEqual(['qwen3-asr-0.6b-q8 ★', 'qwen3-asr-1.7b-q8', 'sensevoice-small-q8']);
     cantonese.unmount();
     // A language it does not hear has no card of it.
-    const russian = hearing({ source: 'ru', target: 'zh-CN' });
-    expect(cards(russian.container)).toEqual(['qwen3-asr-1.7b-q8 ★', 'r2t2-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
+    const russian = await settled({ source: 'ru', target: 'zh-CN' });
+    expect(cards(russian.container)).toEqual(['qwen3-asr-0.6b-q8 ★', 'qwen3-asr-1.7b-q8', 'r2t2-q8', 'nemotron-asr-0.6b-q8']);
     russian.unmount();
     // One only the last model hears: that one alone, and so the one marked.
-    const ukrainian = hearing({ source: 'uk', target: 'zh-CN' }, 'nemotron-asr-0.6b-q8');
+    const ukrainian = await settled({ source: 'uk', target: 'zh-CN' }, 'nemotron-asr-0.6b-q8');
     expect(cards(ukrainian.container)).toEqual(['nemotron-asr-0.6b-q8 ★']);
   });
 
-  it('offers it on a Mac too, after the system’s own recognition and Qwen3-ASR 1.7B: the system’s is the one marked for each of its five languages', () => {
+  it('offers it on a Mac too, after the system’s own recognition and Qwen3-ASR 1.7B: the system’s is the one marked for each of its five languages', async () => {
     // A Mac: the system's recognition, a model to a language, and the engine's models but R2T2, which names Windows alone.
     const MAC = { 'apple-speech:ja': 'absent', 'apple-speech:zh': 'absent', 'apple-speech:en': 'absent', 'apple-speech:ko': 'absent', 'apple-speech:yue': 'absent', 'qwen3-asr-1.7b-q8': 'absent', 'sensevoice-small-q8': 'absent', 'qwen3-asr-0.6b-q8': 'absent', 'nemotron-asr-0.6b-q8': 'absent' } as const;
     useNativeEngineStore.setState({ status: engineOf(MAC) });
     for (const [source, own] of [['ja', 'ja'], ['zh-CN', 'zh'], ['en', 'en'], ['ko', 'ko']] as const) {
-      const view = hearing({ source, target: 'ru' });
+      const view = await settled({ source, target: 'ru' });
       expect(cards(view.container), source).toEqual([`apple-speech:${own} ★`, 'qwen3-asr-1.7b-q8', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
       view.unmount();
     }
     // Cantonese: Nemotron does not hear it.
-    const cantonese = hearing({ source: 'yue', target: 'en' });
+    const cantonese = await settled({ source: 'yue', target: 'en' });
     expect(cards(cantonese.container)).toEqual(['apple-speech:yue ★', 'qwen3-asr-1.7b-q8', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8']);
     cantonese.unmount();
     // A language neither the system nor it hears: Qwen3-ASR's, as before.
-    const russian = hearing({ source: 'ru', target: 'zh-CN' });
-    expect(cards(russian.container)).toEqual(['qwen3-asr-1.7b-q8 ★', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
+    const russian = await settled({ source: 'ru', target: 'zh-CN' });
+    expect(cards(russian.container)).toEqual(['qwen3-asr-0.6b-q8 ★', 'qwen3-asr-1.7b-q8', 'nemotron-asr-0.6b-q8']);
     russian.unmount();
     // A Mac whose system has no such recognition (before macOS 26): the engine's models alone, in their order.
     useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'absent', 'sensevoice-small-q8': 'absent', 'qwen3-asr-0.6b-q8': 'absent', 'nemotron-asr-0.6b-q8': 'absent' }) });
-    const older = hearing({ source: 'ja', target: 'zh-CN' });
-    expect(cards(older.container)).toEqual(['qwen3-asr-1.7b-q8 ★', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']);
+    const older = await settled({ source: 'ja', target: 'zh-CN' });
+    expect(cards(older.container)).toEqual(['qwen3-asr-0.6b-q8 ★', 'qwen3-asr-1.7b-q8', 'sensevoice-small-q8', 'nemotron-asr-0.6b-q8']);
   });
 
-  it('has no card of a model the engine of this system does not list', () => {
+  it('has no card of a model the engine of this system does not list', async () => {
     useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'absent', 'qwen3-asr-0.6b-q8': 'absent' }) });
-    const japanese = hearing({ source: 'ja', target: 'zh-CN' });
-    expect(cards(japanese.container)).toEqual(['qwen3-asr-1.7b-q8 ★', 'qwen3-asr-0.6b-q8']);
+    const japanese = await settled({ source: 'ja', target: 'zh-CN' });
+    expect(cards(japanese.container)).toEqual(['qwen3-asr-0.6b-q8 ★', 'qwen3-asr-1.7b-q8']);
   });
 
   it('lists it in a row’s menu once it is downloaded, for a language it hears and for no other', () => {

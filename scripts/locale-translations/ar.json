@@ -1839,6 +1839,26 @@
     "en": "Check again",
     "text": "إعادة التحقق"
   },
+  "providers.localai.recommendWhy.big": {
+    "en": "This computer has the memory for the more accurate large model.",
+    "text": "ذاكرة الرسوميات في هذا الكمبيوتر تكفي لتشغيل النموذج الكبير والأكثر دقة."
+  },
+  "providers.localai.recommendWhy.hearDefault": {
+    "en": "Accurate enough, and leaves room for a game.",
+    "text": "دقته كافية، ويترك ذاكرة كافية لتشغيل لعبة."
+  },
+  "providers.localai.recommendWhy.lending": {
+    "en": "This computer lends its models to other devices, so the more accurate large model is recommended.",
+    "text": "هذا الكمبيوتر يتيح لأجهزة أخرى استخدام نماذجه، لذا نوصي بالنموذج الكبير لدقته الأعلى."
+  },
+  "providers.localai.recommendWhy.small": {
+    "en": "This computer has little graphics memory, so a small model is recommended.",
+    "text": "ذاكرة الرسوميات في هذا الكمبيوتر محدودة، لذا نوصي بنموذج خفيف."
+  },
+  "providers.localai.recommendWhy.translateDefault": {
+    "en": "Translated best in our tests.",
+    "text": "قدّم أفضل ترجمة في اختباراتنا."
+  },
   "providers.localai.serverAsrBusy": {
     "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
     "text": "الجهاز الآخر يستخدم التعرّف على الكلام بنموذج آخر. ابدأ مجددًا بعد أن يصبح متاحًا."

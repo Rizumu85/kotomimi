@@ -1839,6 +1839,26 @@
     "en": "Check again",
     "text": "மீண்டும் சரிபார்"
   },
+  "providers.localai.recommendWhy.big": {
+    "en": "This computer has the memory for the more accurate large model.",
+    "text": "அதிகத் துல்லியமான பெரிய மாடலை இயக்க இந்தக் கணினியில் போதுமான கிராபிக்ஸ் நினைவகம் உள்ளது."
+  },
+  "providers.localai.recommendWhy.hearDefault": {
+    "en": "Accurate enough, and leaves room for a game.",
+    "text": "போதுமான துல்லியம். விளையாட்டை இயக்கவும் நினைவகம் இருக்கும்."
+  },
+  "providers.localai.recommendWhy.lending": {
+    "en": "This computer lends its models to other devices, so the more accurate large model is recommended.",
+    "text": "இந்தக் கணினியின் மாடல்களை மற்ற சாதனங்களும் பயன்படுத்துவதால், அதிகத் துல்லியமான பெரிய மாடல் பரிந்துரைக்கப்படுகிறது."
+  },
+  "providers.localai.recommendWhy.small": {
+    "en": "This computer has little graphics memory, so a small model is recommended.",
+    "text": "இந்தக் கணினியில் கிராபிக்ஸ் நினைவகம் குறைவாக இருப்பதால், குறைந்த இடம் பிடிக்கும் மாடல் பரிந்துரைக்கப்படுகிறது."
+  },
+  "providers.localai.recommendWhy.translateDefault": {
+    "en": "Translated best in our tests.",
+    "text": "எங்கள் சோதனைகளில் சிறந்த மொழிபெயர்ப்பை வழங்கியது."
+  },
   "providers.localai.serverAsrBusy": {
     "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
     "text": "மற்றொரு சாதனத்தின் பேச்சு அறிதல் வேறு மாதிரியைப் பயன்படுத்துகிறது. அது முடிந்ததும் மீண்டும் தொடங்குங்கள்."

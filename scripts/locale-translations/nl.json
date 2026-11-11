@@ -1879,6 +1879,26 @@
     "en": "Check again",
     "text": "Opnieuw controleren"
   },
+  "providers.localai.recommendWhy.big": {
+    "en": "This computer has the memory for the more accurate large model.",
+    "text": "Deze computer heeft genoeg videogeheugen voor het nauwkeurigere grote model."
+  },
+  "providers.localai.recommendWhy.hearDefault": {
+    "en": "Accurate enough, and leaves room for a game.",
+    "text": "Nauwkeurig genoeg, met genoeg geheugen over voor een game."
+  },
+  "providers.localai.recommendWhy.lending": {
+    "en": "This computer lends its models to other devices, so the more accurate large model is recommended.",
+    "text": "Deze computer deelt zijn modellen met andere apparaten. Daarom raden we het nauwkeurigere grote model aan."
+  },
+  "providers.localai.recommendWhy.small": {
+    "en": "This computer has little graphics memory, so a small model is recommended.",
+    "text": "Deze computer heeft weinig videogeheugen. Daarom raden we een model aan dat weinig geheugen gebruikt."
+  },
+  "providers.localai.recommendWhy.translateDefault": {
+    "en": "Translated best in our tests.",
+    "text": "Gaf in onze tests de beste vertalingen."
+  },
   "providers.localai.serverAsrBusy": {
     "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
     "text": "De spraakherkenning op het andere apparaat gebruikt een ander model. Probeer het opnieuw zodra het beschikbaar is."

@@ -1843,6 +1843,26 @@
     "en": "Check again",
     "text": "Kiểm tra lại"
   },
+  "providers.localai.recommendWhy.big": {
+    "en": "This computer has the memory for the more accurate large model.",
+    "text": "Máy này có đủ bộ nhớ đồ họa để dùng mô hình lớn có độ chính xác cao hơn."
+  },
+  "providers.localai.recommendWhy.hearDefault": {
+    "en": "Accurate enough, and leaves room for a game.",
+    "text": "Đủ chính xác, vẫn còn bộ nhớ để chơi game."
+  },
+  "providers.localai.recommendWhy.lending": {
+    "en": "This computer lends its models to other devices, so the more accurate large model is recommended.",
+    "text": "Máy này đang chia sẻ mô hình với thiết bị khác, nên dùng mô hình lớn để có độ chính xác cao hơn."
+  },
+  "providers.localai.recommendWhy.small": {
+    "en": "This computer has little graphics memory, so a small model is recommended.",
+    "text": "Máy này có ít bộ nhớ đồ họa, nên dùng mô hình nhẹ."
+  },
+  "providers.localai.recommendWhy.translateDefault": {
+    "en": "Translated best in our tests.",
+    "text": "Dịch tốt nhất trong các thử nghiệm của chúng tôi."
+  },
   "providers.localai.serverAsrBusy": {
     "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
     "text": "Nhận dạng giọng nói trên thiết bị kia đang dùng mô hình khác. Hãy thử lại khi thiết bị đó rảnh."

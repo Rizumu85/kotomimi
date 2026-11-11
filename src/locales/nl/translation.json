@@ -763,7 +763,14 @@
       "engineUpdateNow": "Bijwerken",
       "deviceAt": "{{name}} ({{address}})",
       "deviceAway": "{{name}} · reageert niet",
-      "deviceUnnamed": "{{address}}"
+      "deviceUnnamed": "{{address}}",
+      "recommendWhy": {
+        "lending": "Deze computer deelt zijn modellen met andere apparaten. Daarom raden we het nauwkeurigere grote model aan.",
+        "big": "Deze computer heeft genoeg videogeheugen voor het nauwkeurigere grote model.",
+        "small": "Deze computer heeft weinig videogeheugen. Daarom raden we een model aan dat weinig geheugen gebruikt.",
+        "hearDefault": "Nauwkeurig genoeg, met genoeg geheugen over voor een game.",
+        "translateDefault": "Gaf in onze tests de beste vertalingen."
+      }
     }
   },
   "logsPanel": {

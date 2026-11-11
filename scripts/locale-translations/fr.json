@@ -1859,6 +1859,26 @@
     "en": "Check again",
     "text": "Vérifier à nouveau"
   },
+  "providers.localai.recommendWhy.big": {
+    "en": "This computer has the memory for the more accurate large model.",
+    "text": "Cet ordinateur a assez de mémoire vidéo pour le grand modèle, plus précis."
+  },
+  "providers.localai.recommendWhy.hearDefault": {
+    "en": "Accurate enough, and leaves room for a game.",
+    "text": "Assez précis, et laisse de la place pour un jeu."
+  },
+  "providers.localai.recommendWhy.lending": {
+    "en": "This computer lends its models to other devices, so the more accurate large model is recommended.",
+    "text": "Cet ordinateur partage ses modèles avec d’autres appareils. Le grand modèle, plus précis, est recommandé."
+  },
+  "providers.localai.recommendWhy.small": {
+    "en": "This computer has little graphics memory, so a small model is recommended.",
+    "text": "Cet ordinateur a peu de mémoire vidéo. Un modèle léger est recommandé."
+  },
+  "providers.localai.recommendWhy.translateDefault": {
+    "en": "Translated best in our tests.",
+    "text": "Les meilleures traductions lors de nos tests."
+  },
   "providers.localai.serverAsrBusy": {
     "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
     "text": "La reconnaissance vocale de l’autre appareil utilise un autre modèle. Réessayez lorsqu’il sera disponible."

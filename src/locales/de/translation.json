@@ -763,7 +763,14 @@
       "engineUpdateNow": "Aktualisieren",
       "deviceAt": "{{name}} ({{address}})",
       "deviceAway": "{{name}} · vorübergehend nicht erreichbar",
-      "deviceUnnamed": "{{address}}"
+      "deviceUnnamed": "{{address}}",
+      "recommendWhy": {
+        "lending": "Dieser Computer stellt seine Modelle anderen Geräten bereit. Dafür empfehlen wir das genauere große Modell.",
+        "big": "Dieser Computer hat genug Grafikspeicher für das genauere große Modell.",
+        "small": "Dieser Computer hat wenig Grafikspeicher. Wir empfehlen ein Modell mit geringem Speicherbedarf.",
+        "hearDefault": "Genau genug und lässt noch Platz für ein Spiel.",
+        "translateDefault": "Liefert in unseren Tests die besten Übersetzungen."
+      }
     }
   },
   "logsPanel": {

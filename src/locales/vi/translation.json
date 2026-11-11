@@ -763,7 +763,14 @@
       "engineUpdateNow": "Cập nhật",
       "deviceAt": "{{name}} ({{address}})",
       "deviceAway": "{{name}} · tạm thời không phản hồi",
-      "deviceUnnamed": "{{address}}"
+      "deviceUnnamed": "{{address}}",
+      "recommendWhy": {
+        "lending": "Máy này đang chia sẻ mô hình với thiết bị khác, nên dùng mô hình lớn để có độ chính xác cao hơn.",
+        "big": "Máy này có đủ bộ nhớ đồ họa để dùng mô hình lớn có độ chính xác cao hơn.",
+        "small": "Máy này có ít bộ nhớ đồ họa, nên dùng mô hình nhẹ.",
+        "hearDefault": "Đủ chính xác, vẫn còn bộ nhớ để chơi game.",
+        "translateDefault": "Dịch tốt nhất trong các thử nghiệm của chúng tôi."
+      }
     }
   },
   "logsPanel": {

@@ -763,7 +763,14 @@
       "engineUpdateNow": "Mettre à jour",
       "deviceAt": "{{name}} ({{address}})",
       "deviceAway": "{{name}} · ne répond pas",
-      "deviceUnnamed": "{{address}}"
+      "deviceUnnamed": "{{address}}",
+      "recommendWhy": {
+        "lending": "Cet ordinateur partage ses modèles avec d’autres appareils. Le grand modèle, plus précis, est recommandé.",
+        "big": "Cet ordinateur a assez de mémoire vidéo pour le grand modèle, plus précis.",
+        "small": "Cet ordinateur a peu de mémoire vidéo. Un modèle léger est recommandé.",
+        "hearDefault": "Assez précis, et laisse de la place pour un jeu.",
+        "translateDefault": "Les meilleures traductions lors de nos tests."
+      }
     }
   },
   "logsPanel": {

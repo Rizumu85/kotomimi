@@ -104,6 +104,8 @@ export const INVOKE_CHANNELS = [
   'native-coach:remove',
   'native-coach:start',
   'native-coach:stop',
+  // Fork: this computer's memory for native model recommendations
+  'model-memory:get',
   // Fork: where the downloaded models are kept, and moving them (electron/model-storage.js)
   'model-storage:status',
   'model-storage:choose',

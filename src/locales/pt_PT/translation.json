@@ -763,7 +763,14 @@
       "engineUpdateNow": "Atualizar",
       "deviceAt": "{{name}} ({{address}})",
       "deviceAway": "{{name}} · temporariamente inacessível",
-      "deviceUnnamed": "{{address}}"
+      "deviceUnnamed": "{{address}}",
+      "recommendWhy": {
+        "lending": "Este computador partilha os seus modelos com outros dispositivos, por isso recomendamos o modelo maior e mais preciso.",
+        "big": "Este computador tem memória gráfica suficiente para o modelo maior e mais preciso.",
+        "small": "Este computador tem pouca memória gráfica, por isso recomendamos um modelo que ocupe menos memória.",
+        "hearDefault": "Tem precisão suficiente e deixa memória livre para um jogo.",
+        "translateDefault": "Foi o que traduziu melhor nos nossos testes."
+      }
     }
   },
   "logsPanel": {

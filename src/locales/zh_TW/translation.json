@@ -763,7 +763,14 @@
       "noteSenseVoice": "日語 VRChat 閒聊實測：不會輸出假名，日語基本讀不通。",
       "deviceAt": "{{name}}（{{address}}）",
       "deviceAway": "{{name}} · 暫時連不上",
-      "deviceUnnamed": "另一台設備（{{address}}）"
+      "deviceUnnamed": "另一台設備（{{address}}）",
+      "recommendWhy": {
+        "lending": "這台電腦正把模型借給其他裝置用，推薦更準的大模型。",
+        "big": "這台電腦的顯示記憶體夠用更準的大模型。",
+        "small": "這台電腦的顯示記憶體不多，推薦占用小的模型。",
+        "hearDefault": "準確度夠用，開著遊戲也放得下。",
+        "translateDefault": "實測翻譯得最好。"
+      }
     }
   },
   "logsPanel": {

@@ -1859,6 +1859,26 @@
     "en": "Check again",
     "text": "Periksa ulang"
   },
+  "providers.localai.recommendWhy.big": {
+    "en": "This computer has the memory for the more accurate large model.",
+    "text": "Memori grafis komputer ini cukup untuk model besar yang lebih akurat."
+  },
+  "providers.localai.recommendWhy.hearDefault": {
+    "en": "Accurate enough, and leaves room for a game.",
+    "text": "Cukup akurat dan masih menyisakan memori untuk bermain game."
+  },
+  "providers.localai.recommendWhy.lending": {
+    "en": "This computer lends its models to other devices, so the more accurate large model is recommended.",
+    "text": "Komputer ini berbagi model dengan perangkat lain, jadi disarankan memakai model besar yang lebih akurat."
+  },
+  "providers.localai.recommendWhy.small": {
+    "en": "This computer has little graphics memory, so a small model is recommended.",
+    "text": "Memori grafis komputer ini terbatas, jadi disarankan memakai model yang ringan."
+  },
+  "providers.localai.recommendWhy.translateDefault": {
+    "en": "Translated best in our tests.",
+    "text": "Hasil terjemahan terbaik dalam pengujian kami."
+  },
   "providers.localai.serverAsrBusy": {
     "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
     "text": "Pengenalan suara di perangkat lain sedang memakai model lain. Coba mulai lagi setelah selesai digunakan."

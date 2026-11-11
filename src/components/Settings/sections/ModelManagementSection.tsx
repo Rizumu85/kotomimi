@@ -91,6 +91,7 @@ export function ModelCard({
   onImport,
   note,
   tag,
+  recommendHint,
   children,
   downloadBlocked = false,
   footer,
@@ -114,6 +115,8 @@ export function ModelCard({
   note?: React.ReactNode;
   /** Fork: what kind of model this is, as a chip that says on hover what all of its kind share. */
   tag?: { label: string; hint: string };
+  /** Fork: why this one is recommended here, said on hover over the mark. */
+  recommendHint?: string;
   children?: React.ReactNode;
   /** Fork: the model cannot be downloaded now (no room on the drive): the button steps back, and `footer` says why. */
   downloadBlocked?: boolean;
@@ -176,12 +179,17 @@ export function ModelCard({
                   <span className="model-card__lang-tag model-card__kind-tag">{tag.label}</span>
                 </Tooltip>
               )}
-              {entry.recommended && (
-                <span className="model-card__recommended-badge">
-                  <Star size={10} />
-                  {t('models.recommended', 'Recommended')}
-                </span>
-              )}
+              {entry.recommended && (() => {
+                const badge = (
+                  <span className="model-card__recommended-badge">
+                    <Star size={10} />
+                    {t('models.recommended', 'Recommended')}
+                  </span>
+                );
+                return recommendHint
+                  ? <Tooltip content={recommendHint} icon="none" position="top" maxWidth={260}>{badge}</Tooltip>
+                  : badge;
+              })()}
               {isAutoSelected && (
                 <span className="model-card__auto-badge">
                   <Zap size={10} />

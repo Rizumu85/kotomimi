@@ -1835,6 +1835,26 @@
     "en": "Check again",
     "text": "Перевірити ще раз"
   },
+  "providers.localai.recommendWhy.big": {
+    "en": "This computer has the memory for the more accurate large model.",
+    "text": "Цей комп’ютер має достатньо відеопам’яті для точнішої великої моделі."
+  },
+  "providers.localai.recommendWhy.hearDefault": {
+    "en": "Accurate enough, and leaves room for a game.",
+    "text": "Достатньо точна й залишає пам’ять для гри."
+  },
+  "providers.localai.recommendWhy.lending": {
+    "en": "This computer lends its models to other devices, so the more accurate large model is recommended.",
+    "text": "Цей комп’ютер надає свої моделі іншим пристроям, тому радимо точнішу велику модель."
+  },
+  "providers.localai.recommendWhy.small": {
+    "en": "This computer has little graphics memory, so a small model is recommended.",
+    "text": "Цей комп’ютер має мало відеопам’яті, тому радимо модель, що займає менше місця."
+  },
+  "providers.localai.recommendWhy.translateDefault": {
+    "en": "Translated best in our tests.",
+    "text": "Найкраще перекладала в наших тестах."
+  },
   "providers.localai.serverAsrBusy": {
     "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
     "text": "Інший пристрій зараз використовує розпізнавання мовлення з іншою моделлю. Спробуйте ще раз, коли воно завершиться."

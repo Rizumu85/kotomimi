@@ -763,7 +763,14 @@
       "noteSenseVoice": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
       "deviceAt": "{{name}} ({{address}})",
       "deviceAway": "{{name}} · not answering",
-      "deviceUnnamed": "{{address}}"
+      "deviceUnnamed": "{{address}}",
+      "recommendWhy": {
+        "lending": "This computer lends its models to other devices, so the more accurate large model is recommended.",
+        "big": "This computer has the memory for the more accurate large model.",
+        "small": "This computer has little graphics memory, so a small model is recommended.",
+        "hearDefault": "Accurate enough, and leaves room for a game.",
+        "translateDefault": "Translated best in our tests."
+      }
     }
   },
   "logsPanel": {

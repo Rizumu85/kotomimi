@@ -763,7 +763,14 @@
       "engineUpdateNow": "Perbarui",
       "deviceAt": "{{name}} ({{address}})",
       "deviceAway": "{{name}} · tidak merespons",
-      "deviceUnnamed": "{{address}}"
+      "deviceUnnamed": "{{address}}",
+      "recommendWhy": {
+        "lending": "Komputer ini berbagi model dengan perangkat lain, jadi disarankan memakai model besar yang lebih akurat.",
+        "big": "Memori grafis komputer ini cukup untuk model besar yang lebih akurat.",
+        "small": "Memori grafis komputer ini terbatas, jadi disarankan memakai model yang ringan.",
+        "hearDefault": "Cukup akurat dan masih menyisakan memori untuk bermain game.",
+        "translateDefault": "Hasil terjemahan terbaik dalam pengujian kami."
+      }
     }
   },
   "logsPanel": {

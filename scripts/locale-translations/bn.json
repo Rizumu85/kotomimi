@@ -1839,6 +1839,26 @@
     "en": "Check again",
     "text": "আবার যাচাই করুন"
   },
+  "providers.localai.recommendWhy.big": {
+    "en": "This computer has the memory for the more accurate large model.",
+    "text": "এই কম্পিউটারে আরও নির্ভুল বড় মডেল চালানোর মতো গ্রাফিক্স মেমরি আছে।"
+  },
+  "providers.localai.recommendWhy.hearDefault": {
+    "en": "Accurate enough, and leaves room for a game.",
+    "text": "যথেষ্ট নির্ভুল, আর গেম চালিয়েও মেমরিতে জায়গা হয়।"
+  },
+  "providers.localai.recommendWhy.lending": {
+    "en": "This computer lends its models to other devices, so the more accurate large model is recommended.",
+    "text": "এই কম্পিউটারের মডেল অন্য ডিভাইসও ব্যবহার করছে, তাই আরও নির্ভুল বড় মডেল ব্যবহার করার পরামর্শ দেওয়া হচ্ছে।"
+  },
+  "providers.localai.recommendWhy.small": {
+    "en": "This computer has little graphics memory, so a small model is recommended.",
+    "text": "এই কম্পিউটারে গ্রাফিক্স মেমরি কম, তাই কম মেমরি লাগে এমন মডেল ব্যবহার করার পরামর্শ দেওয়া হচ্ছে।"
+  },
+  "providers.localai.recommendWhy.translateDefault": {
+    "en": "Translated best in our tests.",
+    "text": "আমাদের পরীক্ষায় সবচেয়ে ভালো অনুবাদ করেছে।"
+  },
   "providers.localai.serverAsrBusy": {
     "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
     "text": "অন্য ডিভাইসের স্পিচ রিকগনিশন অন্য একটি মডেল ব্যবহার করছে। সেটি ফাঁকা হলে আবার শুরু করুন।"

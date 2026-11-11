@@ -1839,6 +1839,26 @@
     "en": "Check again",
     "text": "Yeniden kontrol et"
   },
+  "providers.localai.recommendWhy.big": {
+    "en": "This computer has the memory for the more accurate large model.",
+    "text": "Bu bilgisayarın ekran kartı belleği, daha doğru sonuçlar veren büyük model için yeterli."
+  },
+  "providers.localai.recommendWhy.hearDefault": {
+    "en": "Accurate enough, and leaves room for a game.",
+    "text": "Yeterince doğru sonuçlar verir, oyun için de yer bırakır."
+  },
+  "providers.localai.recommendWhy.lending": {
+    "en": "This computer lends its models to other devices, so the more accurate large model is recommended.",
+    "text": "Bu bilgisayar modellerini diğer cihazlarla paylaşıyor. Bu yüzden daha doğru sonuçlar veren büyük model önerilir."
+  },
+  "providers.localai.recommendWhy.small": {
+    "en": "This computer has little graphics memory, so a small model is recommended.",
+    "text": "Bu bilgisayarın ekran kartı belleği az. Bu yüzden az yer kaplayan model önerilir."
+  },
+  "providers.localai.recommendWhy.translateDefault": {
+    "en": "Translated best in our tests.",
+    "text": "Testlerimizde en iyi çeviriyi yaptı."
+  },
   "providers.localai.serverAsrBusy": {
     "en": "The other device's speech recognition is in use with another model. Start again once it is free.",
     "text": "Diğer cihazın konuşma tanıması başka bir modelle kullanılıyor. Kullanım bitince yeniden başlatın."

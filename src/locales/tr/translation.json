@@ -763,7 +763,14 @@
       "engineUpdateNow": "Güncelle",
       "deviceAt": "{{name}} ({{address}})",
       "deviceAway": "{{name}} · geçici olarak ulaşılamıyor",
-      "deviceUnnamed": "{{address}}"
+      "deviceUnnamed": "{{address}}",
+      "recommendWhy": {
+        "lending": "Bu bilgisayar modellerini diğer cihazlarla paylaşıyor. Bu yüzden daha doğru sonuçlar veren büyük model önerilir.",
+        "big": "Bu bilgisayarın ekran kartı belleği, daha doğru sonuçlar veren büyük model için yeterli.",
+        "small": "Bu bilgisayarın ekran kartı belleği az. Bu yüzden az yer kaplayan model önerilir.",
+        "hearDefault": "Yeterince doğru sonuçlar verir, oyun için de yer bırakır.",
+        "translateDefault": "Testlerimizde en iyi çeviriyi yaptı."
+      }
     }
   },
   "logsPanel": {
