@@ -1236,8 +1236,6 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   const runPair = participant ? { source: asked.direction.target, target: asked.direction.source } : asked.direction;
   // What a translation that has to be told a pair is told: the pair's own language, where the leg's is left to be detected.
   const told = detected ? asked.direction.source : source;
-  // LocalAI is retired: this computer's stages are the app's own models or the native engines, never a LocalAI socket.
-  const hearsLocal = false;
   // Heard without any Realtime session: by this computer's own recognizer, or by an API it uploads each sentence to.
   const hearsHere = cutsSentencesHere(s);
   // The other device's pipeline: what its Realtime socket runs, and — on another Kotomimi — the name its own choice of translation model is asked by.
@@ -1271,7 +1269,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   const apiModel = s.translateModel.trim();
   const serverModel = s.translateServerModel.trim();
   // No session of the device's own pipeline answers this leg's text: one of its models is asked instead.
-  const asksServer = translatePlace(s) === 'server' && (serverModel !== '' || kotomimi || hearsHere || hearsLocal || coached || both);
+  const asksServer = translatePlace(s) === 'server' && (serverModel !== '' || kotomimi || hearsHere || coached || both);
   const askedServerModel = serverModel || (kotomimi && pipeline ? pipeline : translationDefault(models));
 
   // OpenAI Realtime's builder for the instructions and the detection, with the model pinned so it picks no other.
@@ -1295,7 +1293,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
     alsoFirst: alsoFirst(s, runPair),
   });
   const remoteSecond = pairedWith[0];
-  const remotePair = s.asrVia === 'server' && !hearsLocal
+  const remotePair = s.asrVia === 'server'
     ? serverBilingual(s.asrModel, soloCoach
       ? { source: target, target: source }
       : participant
@@ -1489,17 +1487,16 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
 
   // Another Kotomimi that hears for this one cuts its sentences with this one's own speech detection, as this
   // computer's engine would: its threshold and pause, where Realtime's semantic default became a 0.8 s pause there.
-  const ownDetection = kotomimi && !hearsLocal && !device && config.turnDetection ? { turnDetection: speechDetection(s).turnDetection } : {};
+  const ownDetection = kotomimi && !device && config.turnDetection ? { turnDetection: speechDetection(s).turnDetection } : {};
 
   return {
     ...config,
     ...ownDetection,
     // Another Kotomimi hearing for this one takes the quick pace a video in VRChat asks for.
-    ...(kotomimi && !hearsLocal && !device ? { paces: true as const } : {}),
+    ...(kotomimi && !device ? { paces: true as const } : {}),
     model,
     modalities: ['text'],
-    // This computer's LocalAI is told its recognizer through its pipeline, before the socket opens: the session names none.
-    transcription: { ...(remotePair ? { ...remotePair, language: remotePair.languages[0] } : transcriptionFor(s, serverHeard, Boolean(stages?.speech) || plain || hearsLocal, kotomimi && !hearsLocal, models)), ...(kotomimi && hints.length ? { keywords: [...hints] } : {}) },
+    transcription: { ...(remotePair ? { ...remotePair, language: remotePair.languages[0] } : transcriptionFor(s, serverHeard, Boolean(stages?.speech) || plain, kotomimi, models)), ...(kotomimi && hints.length ? { keywords: [...hints] } : {}) },
     anchor: false,
     commitAnswers: true,
     ...((stages?.speech || plain) && !device ? { transcribeOnly: true as const } : {}),
