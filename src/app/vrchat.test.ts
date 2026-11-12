@@ -153,7 +153,7 @@ describe('a long line in the chatbox (fork)', () => {
     expect(chatboxPages(`${original}\n${translation}`)).toEqual([original, translation]);
   });
 
-  it('holds each page of a long line for its own reading time, up to a page’s most, longer than a line’s (fork)', () => {
+  it('holds each page of a long line, and a line that fits, for its own reading time, by one rule (fork)', () => {
     useVRChatStore.setState({ chatbox: 'translation' });
     const waits: number[] = [];
     const pending: Array<() => void> = [];
@@ -162,11 +162,11 @@ describe('a long line in the chatbox (fork)', () => {
     expect(waits[waits.length - 1]).toBe(12_000);
     pending.shift()!();
     // The last page: 60 characters, about 11 s to read.
-    expect(waits[waits.length - 1]).toBe(chatboxReadingMs('続'.repeat(60), 12));
+    expect(waits[waits.length - 1]).toBe(chatboxReadingMs('続'.repeat(60)));
     pending.shift()!();
-    // A line that fits stays at a line's most.
+    // A line that fits is read as long as a page of the same words.
     t.show([exchange('a', '长', `${'長'.repeat(100)}。${'続'.repeat(60)}`), exchange('b', '短', '短'.repeat(60))]);
-    expect(waits[waits.length - 1]).toBe(6_000);
+    expect(waits[waits.length - 1]).toBe(chatboxReadingMs('短'.repeat(60)));
     t.controller.stop();
   });
 
@@ -265,7 +265,7 @@ describe('the chatbox', () => {
     expect(chatboxReadingMs('Hi')).toBe(3000);
     expect(chatboxReadingMs('中'.repeat(60))).toBeGreaterThan(chatboxReadingMs('a'.repeat(60)));
     expect(chatboxReadingMs('a'.repeat(1000))).toBe(chatboxReadingMs('a'.repeat(144)));
-    expect(chatboxReadingMs('中'.repeat(144))).toBe(6000);
+    expect(chatboxReadingMs('中'.repeat(144))).toBe(12000);
   });
 
   it('sends the lines that piled up together, and lets the oldest go when they do not fit', () => {
