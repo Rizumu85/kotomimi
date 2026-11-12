@@ -159,14 +159,14 @@ describe('a long line in the chatbox (fork)', () => {
     const pending: Array<() => void> = [];
     const t = setup({ setTimeout: (fn, ms) => { waits.push(ms); pending.push(fn); } });
     t.show([exchange('a', '长', `${'長'.repeat(100)}。${'続'.repeat(60)}`)]);
-    expect(waits.at(-1)).toBe(12_000);
+    expect(waits[waits.length - 1]).toBe(12_000);
     pending.shift()!();
     // The last page: 60 characters, about 11 s to read.
-    expect(waits.at(-1)).toBe(chatboxReadingMs('続'.repeat(60), 12));
+    expect(waits[waits.length - 1]).toBe(chatboxReadingMs('続'.repeat(60), 12));
     pending.shift()!();
     // A line that fits stays at a line's most.
     t.show([exchange('a', '长', `${'長'.repeat(100)}。${'続'.repeat(60)}`), exchange('b', '短', '短'.repeat(60))]);
-    expect(waits.at(-1)).toBe(6_000);
+    expect(waits[waits.length - 1]).toBe(6_000);
     t.controller.stop();
   });
 

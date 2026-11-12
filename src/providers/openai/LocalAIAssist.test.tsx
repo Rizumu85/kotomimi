@@ -563,7 +563,8 @@ describe('one menu for a stage of this computer, whoever runs it', () => {
       fireEvent.click(card(HEAR).getAllByRole('button', { name: 'providers.localai.browse' })[0]);
       fireEvent.click(within(screen.getByTestId('model-card-native:sensevoice-small-q8')).getByRole('button', { name: 'models.download' }));
       act(() => useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'downloaded', 'sensevoice-small-q8': 'downloading' }) }));
-      fireEvent.click(card(HEAR).getAllByRole('button', { name: 'providers.localai.browse' }).at(-1)!);
+      const browse = card(HEAR).getAllByRole('button', { name: 'providers.localai.browse' });
+      fireEvent.click(browse[browse.length - 1]);
       act(() => useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'downloaded', 'sensevoice-small-q8': 'downloaded' }) }));
       const picked = update.mock.calls.find(([patch]) => patch.asrNativeByLanguage?.zh === 'sensevoice-small-q8')?.[0];
       expect(picked).toBeUndefined();
