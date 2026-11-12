@@ -11,6 +11,7 @@ import { Home } from './routes/Home';
 const SpinePreview = import.meta.env.DEV ? lazy(() => import('./components/dev/SpinePreview').then((m) => ({ default: m.SpinePreview }))) : null;
 const OverlayPreview = import.meta.env.DEV ? lazy(() => import('./components/dev/OverlayPreview').then((m) => ({ default: m.OverlayPreview }))) : null;
 const NoticesPreview = import.meta.env.DEV ? lazy(() => import('./components/dev/NoticesPreview').then((m) => ({ default: m.NoticesPreview }))) : null;
+const SubtitleReplay = import.meta.env.DEV ? lazy(() => import('./components/dev/SubtitleReplay').then((m) => ({ default: m.SubtitleReplay }))) : null;
 
 // Create the memory router for Chrome extension
 // Memory router is recommended for Chrome extensions as they don't have a URL bar
@@ -49,6 +50,17 @@ function App() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
+
+  // Dev-only, fork: `?preview=subtitle-replay` draws a saved subtitle capture again (`SubtitleReplay`).
+  if (SubtitleReplay && new URLSearchParams(window.location.search).get('preview') === 'subtitle-replay') {
+    return (
+      <div className="App">
+        <Suspense fallback={null}>
+          <SubtitleReplay />
+        </Suspense>
+      </div>
+    );
+  }
 
   // Dev-only: `?preview=spine` shows the new provider layer alone (plans 1b–1d).
   if (SpinePreview && new URLSearchParams(window.location.search).get('preview') === 'spine') {

@@ -107,6 +107,22 @@
     "en": "Start in the background when I sign in to Windows",
     "text": "הפעלה ברקע בכניסה ל-Windows"
   },
+  "fork.capture.failed": {
+    "en": "Could not save it.",
+    "text": "לא ניתן לשמור."
+  },
+  "fork.capture.hint": {
+    "en": "Saves the last minute of what the subtitle showed to a file. When the layout goes wrong, send it to the developer to replay it exactly.",
+    "text": "שמירת הכתוביות שהוצגו בדקה האחרונה בקובץ. אם יש בעיה בפריסה, אפשר לשלוח את הקובץ למפתח כדי לשחזר בדיוק את מה שהוצג."
+  },
+  "fork.capture.save": {
+    "en": "Save what the subtitle just showed",
+    "text": "שמירת הכתוביות האחרונות"
+  },
+  "fork.capture.saved": {
+    "en": "Saved",
+    "text": "נשמר"
+  },
   "fork.custom.add": {
     "en": "Add",
     "text": "הוספה"

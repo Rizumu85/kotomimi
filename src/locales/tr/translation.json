@@ -2091,6 +2091,12 @@
       "unheard": "{{language}} dilini algılayamaz",
       "noDetect": "dilleri otomatik ayırt edemez",
       "fix": "Hepsi için {{model}} kullan"
+    },
+    "capture": {
+      "save": "Son altyazıları kaydet",
+      "saved": "Kaydedildi",
+      "failed": "Kaydedilemedi.",
+      "hint": "Son bir dakikada gösterilen altyazıları bir dosyaya kaydeder. Görünümde bir sorun olduğunda dosyayı geliştiriciye göndererek sorunun aynen yeniden oluşturulmasını sağlayabilirsiniz."
     }
   }
 }

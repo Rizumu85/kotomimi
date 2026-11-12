@@ -2091,6 +2091,12 @@
       "unheard": "versteht kein {{language}}",
       "noDetect": "kann Sprachen nicht automatisch unterscheiden",
       "fix": "Für alle {{model}} verwenden"
+    },
+    "capture": {
+      "save": "Letzte Untertitel speichern",
+      "saved": "Gespeichert",
+      "failed": "Speichern fehlgeschlagen.",
+      "hint": "Speichert die angezeigten Untertitel der letzten Minute in einer Datei. Bei Darstellungsproblemen kannst du sie an den Entwickler schicken, damit er das Problem genau nachvollziehen kann."
     }
   }
 }

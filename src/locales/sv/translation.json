@@ -2091,6 +2091,12 @@
       "unheard": "kan inte uppfatta {{language}}",
       "noDetect": "kan inte identifiera språk automatiskt",
       "fix": "Använd {{model}} för alla"
+    },
+    "capture": {
+      "save": "Spara de senaste undertexterna",
+      "saved": "Sparat",
+      "failed": "Det gick inte att spara.",
+      "hint": "Sparar den senaste minutens undertexter i en fil. Om layouten blir fel kan du skicka filen till utvecklaren för att återskapa exakt hur det såg ut."
     }
   }
 }

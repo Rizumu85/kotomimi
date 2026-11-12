@@ -2091,6 +2091,12 @@
       "unheard": "não reconhece {{language}}",
       "noDetect": "não distingue idiomas automaticamente",
       "fix": "Usar {{model}} para tudo"
+    },
+    "capture": {
+      "save": "Guardar as legendas recentes",
+      "saved": "Guardado",
+      "failed": "Não foi possível guardar.",
+      "hint": "Guarda num ficheiro as legendas apresentadas no último minuto. Se houver um problema na disposição do texto, envie o ficheiro ao programador para que possa reproduzi-lo exatamente."
     }
   }
 }

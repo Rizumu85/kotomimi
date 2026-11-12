@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { Entry } from '../../lib/projection/types';
 import type { SubtitleSession } from '../../lib/subtitle/session';
+vi.mock('./useSubtitleCapture', () => ({ useSubtitleCapture: vi.fn() }));
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({

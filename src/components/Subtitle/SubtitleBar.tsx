@@ -1,4 +1,5 @@
 // src/components/Subtitle/SubtitleBar.tsx
+import { SubtitleCaptureButton } from './SubtitleCaptureButton';
 import { VideoPill } from '../VRChat/VideoPrompt';
 import React, { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { BRAND } from '../../lib/brand';
@@ -460,7 +461,7 @@ const SubtitleBar: React.FC<Props> = ({
               the child-window host has to supply the same semantics itself,
               matching the trigger's aria-haspopup="dialog". */}
           <div role="dialog" aria-label={t('subtitle.bar.settings', 'Subtitle settings')}>
-            <DisplaySettingsPopover source="subtitle" actions={foldedActions} />
+            <DisplaySettingsPopover source="subtitle" actions={foldedActions} footer={surface === 'electron' ? <SubtitleCaptureButton /> : undefined} />
           </div>
         </ChildWindowPopover>
       ) : (

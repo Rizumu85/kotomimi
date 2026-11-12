@@ -2091,6 +2091,12 @@
       "unheard": "tidak dapat mendengar {{language}}",
       "noDetect": "tidak dapat membezakan bahasa secara automatik",
       "fix": "Guna {{model}} untuk semua"
+    },
+    "capture": {
+      "save": "Simpan sari kata tadi",
+      "saved": "Disimpan",
+      "failed": "Tidak dapat disimpan.",
+      "hint": "Simpan sari kata yang dipaparkan sepanjang satu minit terakhir ke fail. Jika susun atur bermasalah, hantar fail itu kepada pembangun supaya paparan yang sama dapat dihasilkan semula."
     }
   }
 }

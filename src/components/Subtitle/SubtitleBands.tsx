@@ -26,6 +26,8 @@ export interface SubtitleBodyProps {
   notes?: readonly Entry[];
   /** The action a system row in the expanded list offers, if any. */
   noticeAction?: ConversationListProps['noticeAction'];
+  /** Fork: the lanes' held lines, from a replay (`SubtitleLanes`' `held`). */
+  held?: Partial<Record<LegName, string>>;
   /** Fork: the legs this run hears, for the compact view's lanes. Absent: the legs that have said something. */
   legs?: readonly LegName[];
   /** Fork: told the height the compact view is laid out for and the least it can be squeezed into, whenever either changes: the window is fitted to the one and held above the other. */
@@ -88,7 +90,7 @@ export function SubtitleBody(props: SubtitleBodyProps) {
   return (
     <div className={`subtitle-stream ${compact ? 'compact' : 'expanded'}`} data-align={align} data-edge={edged} data-panel={panel} style={style}>
       {compact ? (
-        <SubtitleLanes entries={entries} lit={lit} legs={legs} filters={filters} fontSize={fontSize} onHeight={onHeight} pair={pair} />
+        <SubtitleLanes entries={entries} lit={lit} legs={legs} filters={filters} fontSize={fontSize} onHeight={onHeight} pair={pair} {...(props.held ? { held: props.held } : {})} />
       ) : (
         <ConversationList
           items={items}

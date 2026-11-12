@@ -2091,6 +2091,12 @@
       "unheard": "ne comprend pas {{language}} à l’oral",
       "noDetect": "ne distingue pas automatiquement les langues",
       "fix": "Utiliser {{model}} pour tout"
+    },
+    "capture": {
+      "save": "Enregistrer les derniers sous-titres",
+      "saved": "Enregistré",
+      "failed": "Impossible d’enregistrer.",
+      "hint": "Enregistre dans un fichier les sous-titres affichés durant la dernière minute. En cas de problème de mise en page, envoyez ce fichier au développeur pour qu’il puisse le reproduire à l’identique."
     }
   }
 }

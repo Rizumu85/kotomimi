@@ -2091,6 +2091,12 @@
       "unheard": "hindi makilala ang pagsasalita sa {{language}}",
       "noDetect": "hindi awtomatikong matukoy ang wika",
       "fix": "Gamitin ang {{model}} sa lahat"
+    },
+    "capture": {
+      "save": "I-save ang mga huling subtitle",
+      "saved": "Na-save na",
+      "failed": "Hindi na-save.",
+      "hint": "Sine-save sa file ang mga subtitle na ipinakita sa nakaraang isang minuto. Kapag may problema sa pagkakaayos, ipadala ang file sa developer para maipakita niya ulit ang eksaktong nangyari."
     }
   }
 }

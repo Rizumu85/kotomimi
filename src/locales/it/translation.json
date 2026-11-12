@@ -2091,6 +2091,12 @@
       "unheard": "non riconosce l'audio in {{language}}",
       "noDetect": "non distingue automaticamente le lingue",
       "fix": "Usa {{model}} per tutti"
+    },
+    "capture": {
+      "save": "Salva i sottotitoli appena mostrati",
+      "saved": "Salvato",
+      "failed": "Impossibile salvare.",
+      "hint": "Salva in un file i sottotitoli mostrati nell'ultimo minuto. Se ci sono problemi di impaginazione, invialo allo sviluppatore per riprodurli esattamente."
     }
   }
 }

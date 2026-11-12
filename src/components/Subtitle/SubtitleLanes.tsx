@@ -19,6 +19,7 @@ import { useCoached } from '../Feedback/useCoached';
 import { fixOf } from '../../lib/feedback/correction';
 import { observeSize } from './surfaces/childDocument';
 import '../../styles/karaoke.scss';
+import { useSubtitleCaptureLanes } from './captureLaneState';
 
 /**
  * Where the lines of a rolled text begin to show whole: pixels down from its top. Its lines are not of one height —
@@ -210,11 +211,12 @@ export function restingHeights(legs: readonly LegName[], filters: LegFilters, fo
  * Which answered sentence each side's pair shows, by its entry: the newest — once the one before it has been on
  * the screen long enough to be read (`dwell.ts`). The clock is kept here; what is shown by it is `buildLanes`'.
  */
-function useHeld(entries: readonly Entry[]): Partial<Record<LegName, string>> {
+function useHeld(entries: readonly Entry[], enabled = true): Partial<Record<LegName, string>> {
   const shown = useRef<Partial<Record<LegName, { id: string; since: number }>>>({});
   const [held, setHeld] = useState<Partial<Record<LegName, string>>>({});
   const [turn, setTurn] = useState(0);
   useEffect(() => {
+    if (!enabled) return;
     const now = Date.now();
     let soonest = Infinity;
     const next: Partial<Record<LegName, string>> = {};
@@ -237,7 +239,7 @@ function useHeld(entries: readonly Entry[]): Partial<Record<LegName, string>> {
     if (soonest === Infinity) return undefined;
     const timer = setTimeout(() => setTurn((n) => n + 1), Math.max(0, soonest - now) + 10);
     return () => clearTimeout(timer);
-  }, [entries, turn]);
+  }, [entries, turn, enabled]);
   return held;
 }
 
@@ -282,6 +284,8 @@ export interface SubtitleLanesProps {
    * there are — so the window can be fitted to the one and held above the other.
    */
   onHeight?(height: number, least: number): void;
+  /** A captured dwell choice for deterministic development replay. */
+  held?: Partial<Record<LegName, string>>;
 }
 
 /**
@@ -290,10 +294,11 @@ export interface SubtitleLanesProps {
  * answers it. Each text keeps its place and its number of lines; what does
  * not fit is drawn smaller.
  */
-export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight, pair }: SubtitleLanesProps) {
+export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight, pair, held: replayHeld }: SubtitleLanesProps) {
   const { t } = useTranslation();
   const coached = useCoached();
-  const held = useHeld(entries);
+  const liveHeld = useHeld(entries, replayHeld === undefined);
+  const held = replayHeld ?? liveHeld;
   const lanes = useMemo(() => buildLanes(entries, legs, filters, (notice) => noticeText(t, notice), held), [entries, legs, filters, t, held]);
   // The layout the window is fitted to: the size chosen and which texts there are, not what they say.
   const shape = lanes.map((lane) => `${lane.leg}:${lane.source ? 's' : ''}${lane.answer ? 'a' : ''}${lane.feedback ? 'f' : ''}`).join(',');
@@ -328,6 +333,7 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight,
   const [roomySpacing, tightSpacing] = [aided(ROOMY), aided(TIGHT)];
   const [roomy, least] = useMemo(() => [lanesHeight(lanes, fontSize, roomySpacing), lanesHeight(lanes, fontSize, tightSpacing)], [shape, fontSize, roman]); // eslint-disable-line react-hooks/exhaustive-deps
   const strip = useRef<HTMLDivElement>(null);
+  useSubtitleCaptureLanes(strip, entries, held);
   // The window is fitted to the lanes. A window the user made higher than that keeps what they added — the room a
   // long sentence is written out in — through a change of size or of lanes, and for the next time the view opens.
   const fitted = useRef(0);

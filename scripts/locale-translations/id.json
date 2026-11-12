@@ -107,6 +107,22 @@
     "en": "Start in the background when I sign in to Windows",
     "text": "Jalankan di latar belakang saat saya masuk ke Windows"
   },
+  "fork.capture.failed": {
+    "en": "Could not save it.",
+    "text": "Gagal menyimpan."
+  },
+  "fork.capture.hint": {
+    "en": "Saves the last minute of what the subtitle showed to a file. When the layout goes wrong, send it to the developer to replay it exactly.",
+    "text": "Menyimpan tampilan subtitel selama satu menit terakhir ke file. Jika tata letaknya bermasalah, kirim file ini ke pengembang agar masalahnya bisa ditampilkan ulang persis seperti semula."
+  },
+  "fork.capture.save": {
+    "en": "Save what the subtitle just showed",
+    "text": "Simpan subtitel tadi"
+  },
+  "fork.capture.saved": {
+    "en": "Saved",
+    "text": "Tersimpan"
+  },
   "fork.custom.add": {
     "en": "Add",
     "text": "Tambahkan"

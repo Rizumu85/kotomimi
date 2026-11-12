@@ -2091,6 +2091,12 @@
       "unheard": "ei tunnista kieltä {{language}}",
       "noDetect": "ei erota kieliä automaattisesti",
       "fix": "Käytä mallia {{model}} kaikille"
+    },
+    "capture": {
+      "save": "Tallenna viimeisimmät tekstitykset",
+      "saved": "Tallennettu",
+      "failed": "Tallennus epäonnistui.",
+      "hint": "Tallentaa viimeisen minuutin aikana näytetyt tekstitykset tiedostoon. Jos asettelussa on ongelmia, lähetä tiedosto kehittäjälle, jotta hän voi toistaa tilanteen täsmälleen."
     }
   }
 }

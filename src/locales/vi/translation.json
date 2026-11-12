@@ -2091,6 +2091,12 @@
       "unheard": "không nghe được {{language}}",
       "noDetect": "không tự động phân biệt được ngôn ngữ",
       "fix": "Dùng {{model}} cho tất cả"
+    },
+    "capture": {
+      "save": "Lưu phụ đề vừa hiển thị",
+      "saved": "Đã lưu",
+      "failed": "Không lưu được.",
+      "hint": "Lưu nội dung phụ đề đã hiển thị trong một phút vừa qua vào tệp. Khi bố cục bị lỗi, hãy gửi tệp cho nhà phát triển để tái hiện chính xác."
     }
   }
 }

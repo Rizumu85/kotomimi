@@ -64,6 +64,8 @@ export interface DisplaySettingsPopoverProps {
   source: Source;
   /** Fork: what the subtitle bar has no room for: drawn first. */
   actions?: ReactNode;
+  /** Fork: drawn last, under everything else (the subtitle's "save what it just showed"). */
+  footer?: ReactNode;
 }
 
 interface InnerBindings {
@@ -97,8 +99,8 @@ interface FollowChip {
   follow: () => Promise<void>;
 }
 
-const DisplaySettingsPopover: React.FC<DisplaySettingsPopoverProps> = ({ source, actions }) =>
-  source === 'subtitle' ? <SubtitleBoundPopover actions={actions} /> : <ConversationBoundPopover />;
+const DisplaySettingsPopover: React.FC<DisplaySettingsPopoverProps> = ({ source, actions, footer }) =>
+  source === 'subtitle' ? <SubtitleBoundPopover actions={actions} footer={footer} /> : <ConversationBoundPopover />;
 
 export default DisplaySettingsPopover;
 
@@ -107,7 +109,7 @@ export default DisplaySettingsPopover;
 // of hooks satisfied: hooks are always called in the same order within
 // a given wrapper component.
 
-const SubtitleBoundPopover: React.FC<{ actions?: ReactNode }> = ({ actions }) => {
+const SubtitleBoundPopover: React.FC<{ actions?: ReactNode; footer?: ReactNode }> = ({ actions, footer }) => {
   const bindings: InnerBindings = {
     bgOpacity: useSubtitleBgOpacity(),
     bgColor: useSubtitleBgColor(),
@@ -124,7 +126,7 @@ const SubtitleBoundPopover: React.FC<{ actions?: ReactNode }> = ({ actions }) =>
     defaultTranslationTextColor: SUBTITLE_DEFAULT_TRANSLATION_TEXT_COLOR,
     surface: 'subtitle',
   };
-  return <DisplaySettingsPopoverInner bindings={bindings} actions={actions} />;
+  return <DisplaySettingsPopoverInner bindings={bindings} actions={actions} footer={footer} />;
 };
 
 const ConversationBoundPopover: React.FC = () => {
@@ -168,7 +170,7 @@ const ConversationBoundPopover: React.FC = () => {
 
 // ──────────── Pure presentational inner ────────────
 
-const DisplaySettingsPopoverInner: React.FC<{ bindings: InnerBindings; actions?: ReactNode }> = ({ bindings, actions }) => {
+const DisplaySettingsPopoverInner: React.FC<{ bindings: InnerBindings; actions?: ReactNode; footer?: ReactNode }> = ({ bindings, actions, footer }) => {
   const { t } = useTranslation();
   const includeOpacity =
     bindings.bgOpacity !== undefined && bindings.setBgOpacity !== undefined;
@@ -270,6 +272,7 @@ const DisplaySettingsPopoverInner: React.FC<{ bindings: InnerBindings; actions?:
       <ReadingAidToggles
         highlight={includeHighlightToggle ? { on: bindings.newItemHighlightEnabled!, toggle: () => void bindings.setNewItemHighlightEnabled!(!bindings.newItemHighlightEnabled) } : undefined}
       />
+      {footer}
     </div>
   );
 };

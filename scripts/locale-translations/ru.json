@@ -103,6 +103,22 @@
     "en": "Start in the background when I sign in to Windows",
     "text": "Запускать в фоне при входе в Windows"
   },
+  "fork.capture.failed": {
+    "en": "Could not save it.",
+    "text": "Не удалось сохранить."
+  },
+  "fork.capture.hint": {
+    "en": "Saves the last minute of what the subtitle showed to a file. When the layout goes wrong, send it to the developer to replay it exactly.",
+    "text": "Сохраняет в файл всё, что отображалось в субтитрах за последнюю минуту. Если возникнут проблемы с оформлением, отправьте файл разработчику, чтобы он мог точно их воспроизвести."
+  },
+  "fork.capture.save": {
+    "en": "Save what the subtitle just showed",
+    "text": "Сохранить недавние субтитры"
+  },
+  "fork.capture.saved": {
+    "en": "Saved",
+    "text": "Сохранено"
+  },
   "fork.custom.add": {
     "en": "Add",
     "text": "Добавить"

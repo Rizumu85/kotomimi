@@ -107,3 +107,43 @@
     }
   }
 }
+
+// Fork: the subtitle's "save what it just showed" (SubtitleCaptureButton.tsx), quiet at the foot.
+.subtitle-capture {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid vars.$border-subtle;
+}
+
+.subtitle-capture__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 6px;
+  font: inherit;
+  font-size: vars.$font-caption;
+  color: vars.$text-tertiary;
+  background: transparent;
+  border: none;
+  border-radius: vars.$radius-sm;
+  cursor: pointer;
+
+  &:hover:not(:disabled) { color: vars.$text-primary; background: vars.$bg-hover; }
+  &:focus-visible { @include vars.focus-ring; }
+  &:disabled { cursor: default; }
+}
+
+.subtitle-capture__spin { animation: subtitle-capture-spin 1s linear infinite; }
+
+.subtitle-capture__error {
+  font-size: vars.$font-caption;
+  color: vars.$color-error;
+}
+
+@keyframes subtitle-capture-spin {
+  to { transform: rotate(360deg); }
+}

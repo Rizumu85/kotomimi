@@ -2091,6 +2091,12 @@
       "unheard": "tidak bisa mengenali ucapan {{language}}",
       "noDetect": "tidak bisa membedakan bahasa otomatis",
       "fix": "Gunakan {{model}} untuk semua"
+    },
+    "capture": {
+      "save": "Simpan subtitel tadi",
+      "saved": "Tersimpan",
+      "failed": "Gagal menyimpan.",
+      "hint": "Menyimpan tampilan subtitel selama satu menit terakhir ke file. Jika tata letaknya bermasalah, kirim file ini ke pengembang agar masalahnya bisa ditampilkan ulang persis seperti semula."
     }
   }
 }

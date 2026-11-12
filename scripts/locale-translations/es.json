@@ -103,6 +103,22 @@
     "en": "Start in the background when I sign in to Windows",
     "text": "Iniciar en segundo plano al iniciar sesión en Windows"
   },
+  "fork.capture.failed": {
+    "en": "Could not save it.",
+    "text": "No se pudo guardar."
+  },
+  "fork.capture.hint": {
+    "en": "Saves the last minute of what the subtitle showed to a file. When the layout goes wrong, send it to the developer to replay it exactly.",
+    "text": "Guarda en un archivo los subtítulos mostrados durante el último minuto. Si hay problemas de formato, envíaselo al desarrollador para que pueda reproducirlos tal como aparecieron."
+  },
+  "fork.capture.save": {
+    "en": "Save what the subtitle just showed",
+    "text": "Guardar los últimos subtítulos"
+  },
+  "fork.capture.saved": {
+    "en": "Saved",
+    "text": "Guardado"
+  },
   "fork.custom.add": {
     "en": "Add",
     "text": "Añadir"

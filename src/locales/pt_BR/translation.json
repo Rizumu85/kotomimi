@@ -2091,6 +2091,12 @@
       "unheard": "não entende áudio em {{language}}",
       "noDetect": "não identifica idiomas automaticamente",
       "fix": "Usar {{model}} para tudo"
+    },
+    "capture": {
+      "save": "Salvar as legendas recentes",
+      "saved": "Salvo",
+      "failed": "Não foi possível salvar.",
+      "hint": "Salva em um arquivo as legendas exibidas no último minuto. Se houver um problema de layout, envie o arquivo ao desenvolvedor para reproduzir exatamente o que aconteceu."
     }
   }
 }

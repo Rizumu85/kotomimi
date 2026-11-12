@@ -92,7 +92,7 @@ export interface PanelControls {
  * empty on the overlay just because the other leg has been busy. Sent in the
  * conversation's own order.
  */
-function overlayTail(entries: readonly Entry[]): readonly Entry[] {
+export function overlayTail(entries: readonly Entry[]): readonly Entry[] {
   const tail = entries.slice(-OVERLAY_ENTRIES);
   const legs = new Set(entries.map((entry) => entry.leg));
   const included = new Set<Entry>(tail);

@@ -103,6 +103,22 @@
     "en": "Start in the background when I sign in to Windows",
     "text": "Iniciar em segundo plano ao entrar no Windows"
   },
+  "fork.capture.failed": {
+    "en": "Could not save it.",
+    "text": "Não foi possível guardar."
+  },
+  "fork.capture.hint": {
+    "en": "Saves the last minute of what the subtitle showed to a file. When the layout goes wrong, send it to the developer to replay it exactly.",
+    "text": "Guarda num ficheiro as legendas apresentadas no último minuto. Se houver um problema na disposição do texto, envie o ficheiro ao programador para que possa reproduzi-lo exatamente."
+  },
+  "fork.capture.save": {
+    "en": "Save what the subtitle just showed",
+    "text": "Guardar as legendas recentes"
+  },
+  "fork.capture.saved": {
+    "en": "Saved",
+    "text": "Guardado"
+  },
   "fork.custom.add": {
     "en": "Add",
     "text": "Adicionar"

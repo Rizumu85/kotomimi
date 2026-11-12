@@ -3,7 +3,7 @@ import { VideoLine, VideoMark } from '../VRChat/VideoPrompt';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import type { SegmentId } from '../../lib/conversation/types';
+import type { LegName, SegmentId } from '../../lib/conversation/types';
 import type { Exporter } from '../../lib/export/exporter';
 import type { Entry } from '../../lib/projection/types';
 import { baseLang } from '../../lib/segmentation/sentenceEnd';
@@ -29,6 +29,7 @@ import SubtitleIdle from './SubtitleIdle';
 import type { SubtitleIdleState } from './subtitleIdleState';
 import { useSubtitleChrome, type SubtitleSurfaceKind } from './useSubtitleChrome';
 import './SubtitleApp.scss';
+import { useSubtitleCapture } from './useSubtitleCapture';
 
 /** Fork: a video's words (VRChat), heard apart from the other side's. */
 const isVideo = (e: Entry) => e.kind === 'exchange' && e.lane === 'video';
@@ -41,6 +42,8 @@ export interface SubtitleModel {
   session: SubtitleSession | null;
   /** The Electron takeover's panel notes (spec 2026-10-05 §5): drawn in the expanded list only, never in the bands (Ruling 8). */
   notes?: readonly Entry[];
+  /** Fork: the lines the lanes held, as recorded (`replaySubtitleCapture`): a replay draws what was on screen. */
+  held?: Partial<Record<LegName, string>>;
 }
 
 export interface SubtitleControls {
@@ -112,6 +115,7 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
   // Fork: the typing field keeps the bar on show while it is open, as a held key does.
   const [typingOpen, setTypingOpen] = useState(false);
   const chrome = useSubtitleChrome({ surface, onExit: controls.exit, forceVisible: holdHeld || typingOpen });
+  useSubtitleCapture(chrome.rootRef, model, surface);
   const subtitle = useSubtitleSettings();
   const speaker = useSubtitleSpeakerDisplayMode();
   const participant = useSubtitleParticipantDisplayMode();
@@ -317,6 +321,7 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
             legs={laneLegs}
             onHeight={fitWindow}
             pair={pair}
+            {...(model.held ? { held: model.held } : {})}
           />
         )
       ) : (

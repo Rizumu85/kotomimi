@@ -2091,6 +2091,12 @@
       "unheard": "kan geen {{language}} verstaan",
       "noDetect": "kan talen niet automatisch herkennen",
       "fix": "Gebruik {{model}} voor alles"
+    },
+    "capture": {
+      "save": "Recente ondertiteling opslaan",
+      "saved": "Opgeslagen",
+      "failed": "Opslaan is niet gelukt.",
+      "hint": "Slaat de ondertiteling van de afgelopen minuut op in een bestand. Gaat er iets mis met de opmaak? Stuur het bestand naar de ontwikkelaar om het probleem precies te reproduceren."
     }
   }
 }

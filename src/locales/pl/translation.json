@@ -2091,6 +2091,12 @@
       "unheard": "nie rozpoznaje mowy w języku {{language}}",
       "noDetect": "nie rozróżnia języków automatycznie",
       "fix": "Użyj {{model}} do wszystkiego"
+    },
+    "capture": {
+      "save": "Zapisz ostatnie napisy",
+      "saved": "Zapisano",
+      "failed": "Nie udało się zapisać.",
+      "hint": "Zapisuje do pliku napisy wyświetlone w ostatniej minucie. Jeśli układ napisów jest nieprawidłowy, wyślij plik twórcy aplikacji, aby mógł dokładnie odtworzyć problem."
     }
   }
 }

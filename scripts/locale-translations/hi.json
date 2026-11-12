@@ -107,6 +107,22 @@
     "en": "Start in the background when I sign in to Windows",
     "text": "Windows में साइन इन करते ही बैकग्राउंड में शुरू करें"
   },
+  "fork.capture.failed": {
+    "en": "Could not save it.",
+    "text": "सहेजा नहीं जा सका।"
+  },
+  "fork.capture.hint": {
+    "en": "Saves the last minute of what the subtitle showed to a file. When the layout goes wrong, send it to the developer to replay it exactly.",
+    "text": "पिछले एक मिनट में दिखे सबटाइटल एक फ़ाइल में सहेजता है। लेआउट में गड़बड़ी होने पर इसे डेवलपर को भेजें, ताकि वे उसे ठीक उसी तरह दोबारा देख सकें।"
+  },
+  "fork.capture.save": {
+    "en": "Save what the subtitle just showed",
+    "text": "अभी दिखे सबटाइटल सहेजें"
+  },
+  "fork.capture.saved": {
+    "en": "Saved",
+    "text": "सहेजा गया"
+  },
   "fork.custom.add": {
     "en": "Add",
     "text": "जोड़ें"

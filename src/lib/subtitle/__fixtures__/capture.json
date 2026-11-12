@@ -1,0 +1,32 @@
+{
+  "format": "kotomimi-subtitle",
+  "version": 1,
+  "appVersion": "0.43.159",
+  "platform": "win32",
+  "language": "zh-CN",
+  "startedAt": 1794400000000,
+  "durationMs": 1000,
+  "truncated": false,
+  "frames": [{
+    "at": 0,
+    "state": {
+      "entries": [{
+        "kind": "exchange", "id": "one", "leg": "participant",
+        "languages": { "source": "ja", "target": "en" }, "pairing": "stated", "t": 1794400000000,
+        "source": [{ "key": "s:0", "segmentId": "s", "side": "source", "start": 0, "end": 2, "text": "はい", "final": true }],
+        "translation": [
+          { "key": "t:0", "segmentId": "t", "side": "translation", "start": 0, "end": 39, "text": "Yes, this translation is much longer. 好。", "final": true, "language": "en" },
+          { "key": "t2:0", "segmentId": "t2", "side": "translation", "start": 0, "end": 2, "text": "好的", "final": true, "language": "zh" }
+        ]
+      }],
+      "session": { "phase": "running", "since": 1794399900000, "legs": ["participant"], "pair": { "source": "ja", "target": "en" }, "holdToTalk": false, "canStart": false, "idle": { "kind": "ended" } },
+      "lit": [["t", 12]],
+      "settings": { "fontSize": 24, "compactMode": true, "bgOpacity": 80, "bgColor": "#000000", "sourceTextColor": "#ffffff", "translationTextColor": "#9ad0ff", "newItemHighlightEnabled": true, "alwaysOnTop": false, "positionLocked": false, "speakerDisplayMode": "both", "participantDisplayMode": "both" },
+      "look": { "look": "panel", "shadow": 30, "align": "left" },
+      "annotation": { "furigana": true, "romanization": false, "romanizationOff": [], "pinyin": false, "jyutping": false, "sourceItalic": true },
+      "viewport": { "width": 800, "height": 200, "dpr": 1.25 },
+      "surface": "electron",
+      "held": { "participant": "one" }
+    }
+  }]
+}

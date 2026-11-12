@@ -13,6 +13,7 @@ const { setupCaptionDoubleClick } = require('./window-caption-dblclick.js');
 const { setupCaptionContextMenu } = require('./window-caption-menu.js');
 const { setupPopoverWindowHandlers } = require('./popover-windows.js');
 const { setupTranscriptSaveHandler } = require('./transcript-save.js');
+const { setupSubtitleCaptureHandler } = require('./subtitle-capture.js');
 const { setupCaptionShare } = require('./caption-share.js');
 const { setupVRChat } = require('./vrchat.js');
 const { setupVrOverlay } = require('./vr-overlay.js');
@@ -750,6 +751,7 @@ app.whenReady().then(async () => {
     getDownloadsDir: () => app.getPath('downloads'),
     isTrustedSender: (sender) => sender === mainWindow?.webContents,
   });
+  setupSubtitleCaptureHandler({ ipcMain, app, shell, isTrustedSender: (sender) => sender === mainWindow?.webContents });
 
   createWindow();
 

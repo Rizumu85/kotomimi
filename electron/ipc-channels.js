@@ -144,6 +144,7 @@ export const INVOKE_CHANNELS = [
   'theme:set',
   // Subtitle mode
   'subtitle:enter',
+  'subtitle:save-capture',
   'subtitle:exit',
   'subtitle:show-main',
   'subtitle:set-always-on-top',

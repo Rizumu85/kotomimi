@@ -2091,6 +2091,12 @@
       "unheard": "no reconoce el habla en {{language}}",
       "noDetect": "no distingue idiomas automáticamente",
       "fix": "Usar {{model}} para todo"
+    },
+    "capture": {
+      "save": "Guardar los últimos subtítulos",
+      "saved": "Guardado",
+      "failed": "No se pudo guardar.",
+      "hint": "Guarda en un archivo los subtítulos mostrados durante el último minuto. Si hay problemas de formato, envíaselo al desarrollador para que pueda reproducirlos tal como aparecieron."
     }
   }
 }

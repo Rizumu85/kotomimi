@@ -111,6 +111,22 @@
     "en": "Start in the background when I sign in to Windows",
     "text": "Chạy nền khi tôi đăng nhập Windows"
   },
+  "fork.capture.failed": {
+    "en": "Could not save it.",
+    "text": "Không lưu được."
+  },
+  "fork.capture.hint": {
+    "en": "Saves the last minute of what the subtitle showed to a file. When the layout goes wrong, send it to the developer to replay it exactly.",
+    "text": "Lưu nội dung phụ đề đã hiển thị trong một phút vừa qua vào tệp. Khi bố cục bị lỗi, hãy gửi tệp cho nhà phát triển để tái hiện chính xác."
+  },
+  "fork.capture.save": {
+    "en": "Save what the subtitle just showed",
+    "text": "Lưu phụ đề vừa hiển thị"
+  },
+  "fork.capture.saved": {
+    "en": "Saved",
+    "text": "Đã lưu"
+  },
   "fork.custom.add": {
     "en": "Add",
     "text": "Thêm"

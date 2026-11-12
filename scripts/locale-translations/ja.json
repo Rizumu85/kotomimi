@@ -107,6 +107,22 @@
     "en": "Start in the background when I sign in to Windows",
     "text": "Windows へのサインイン時にバックグラウンドで起動"
   },
+  "fork.capture.failed": {
+    "en": "Could not save it.",
+    "text": "保存できませんでした。"
+  },
+  "fork.capture.hint": {
+    "en": "Saves the last minute of what the subtitle showed to a file. When the layout goes wrong, send it to the developer to replay it exactly.",
+    "text": "直近1分間に表示された字幕をファイルに保存します。レイアウトが崩れたときに開発者へ送ると、そのまま再現できます。"
+  },
+  "fork.capture.save": {
+    "en": "Save what the subtitle just showed",
+    "text": "直前の字幕を保存"
+  },
+  "fork.capture.saved": {
+    "en": "Saved",
+    "text": "保存しました"
+  },
   "fork.custom.add": {
     "en": "Add",
     "text": "追加"

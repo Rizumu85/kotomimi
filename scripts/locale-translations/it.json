@@ -119,6 +119,22 @@
     "en": "Start in the background when I sign in to Windows",
     "text": "Avvia in background all'accesso a Windows"
   },
+  "fork.capture.failed": {
+    "en": "Could not save it.",
+    "text": "Impossibile salvare."
+  },
+  "fork.capture.hint": {
+    "en": "Saves the last minute of what the subtitle showed to a file. When the layout goes wrong, send it to the developer to replay it exactly.",
+    "text": "Salva in un file i sottotitoli mostrati nell'ultimo minuto. Se ci sono problemi di impaginazione, invialo allo sviluppatore per riprodurli esattamente."
+  },
+  "fork.capture.save": {
+    "en": "Save what the subtitle just showed",
+    "text": "Salva i sottotitoli appena mostrati"
+  },
+  "fork.capture.saved": {
+    "en": "Saved",
+    "text": "Salvato"
+  },
   "fork.custom.add": {
     "en": "Add",
     "text": "Aggiungi"

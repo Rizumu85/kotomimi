@@ -107,6 +107,22 @@
     "en": "Start in the background when I sign in to Windows",
     "text": "Windows-এ সাইন ইন করলে পটভূমিতে চালু করুন"
   },
+  "fork.capture.failed": {
+    "en": "Could not save it.",
+    "text": "সংরক্ষণ করা যায়নি।"
+  },
+  "fork.capture.hint": {
+    "en": "Saves the last minute of what the subtitle showed to a file. When the layout goes wrong, send it to the developer to replay it exactly.",
+    "text": "গত এক মিনিটে দেখানো সাবটাইটেল একটি ফাইলে সংরক্ষণ করে। লেখার বিন্যাসে সমস্যা হলে ফাইলটি ডেভেলপারকে পাঠান, যাতে ঠিক যেভাবে দেখিয়েছিল সেভাবেই আবার দেখা যায়।"
+  },
+  "fork.capture.save": {
+    "en": "Save what the subtitle just showed",
+    "text": "এইমাত্র দেখানো সাবটাইটেল সংরক্ষণ করুন"
+  },
+  "fork.capture.saved": {
+    "en": "Saved",
+    "text": "সংরক্ষিত"
+  },
   "fork.custom.add": {
     "en": "Add",
     "text": "যোগ করুন"

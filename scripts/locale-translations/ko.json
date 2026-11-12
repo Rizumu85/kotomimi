@@ -107,6 +107,22 @@
     "en": "Start in the background when I sign in to Windows",
     "text": "Windows 로그인 시 백그라운드에서 시작"
   },
+  "fork.capture.failed": {
+    "en": "Could not save it.",
+    "text": "저장하지 못했어요."
+  },
+  "fork.capture.hint": {
+    "en": "Saves the last minute of what the subtitle showed to a file. When the layout goes wrong, send it to the developer to replay it exactly.",
+    "text": "최근 1분 동안 표시된 자막을 파일로 저장해요. 자막 배치에 문제가 생기면 개발자에게 보내 주세요. 당시 화면을 그대로 재현할 수 있어요."
+  },
+  "fork.capture.save": {
+    "en": "Save what the subtitle just showed",
+    "text": "방금 표시된 자막 저장"
+  },
+  "fork.capture.saved": {
+    "en": "Saved",
+    "text": "저장됨"
+  },
   "fork.custom.add": {
     "en": "Add",
     "text": "추가"

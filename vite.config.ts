@@ -164,6 +164,7 @@ export default defineConfig(({ command, mode }) => {
             'subtitle-window': 'electron/subtitle-window.js',
             'popover-windows': 'electron/popover-windows.js',
             'transcript-save': 'electron/transcript-save.js',
+            'subtitle-capture': 'electron/subtitle-capture.js',
             'close-handshake': 'electron/close-handshake.js',
             'update-manager': 'electron/update-manager.js',
             'update-payload': 'electron/update-payload.js',
