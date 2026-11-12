@@ -90,16 +90,21 @@ const CHATBOX_MOST = 144;
 
 /** The most a line holds the chatbox from what comes after it: past this, the talk outruns what can be read. */
 const CHATBOX_HOLD_MOST_S = 6;
+/**
+ * The most a page of a long line holds it: a page is cut to fill the chatbox, and one of Chinese or Japanese takes far
+ * longer than a line's most to read; at 6 s the next page came before it was read (the user, 2026-11-11).
+ */
+export const CHATBOX_PAGE_MOST_S = 12;
 
-/** Reading time for the visible chatbox text, independent of recognition/subtitle pacing. */
-export function chatboxReadingMs(text: string): number {
+/** Reading time for the visible chatbox text, independent of recognition/subtitle pacing. `most`: its cap, in seconds. */
+export function chatboxReadingMs(text: string, most = CHATBOX_HOLD_MOST_S): number {
   const visible = [...text.split('\n').map((line) => line.replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n')].slice(0, CHATBOX_MOST);
   let seconds = 1;
   for (const character of visible) {
     if (/\s/u.test(character)) continue;
     seconds += /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(character) ? 1 / 6 : 1 / 22;
   }
-  return Math.round(Math.max(3, Math.min(CHATBOX_HOLD_MOST_S, seconds)) * 1000);
+  return Math.round(Math.max(3, Math.min(most, seconds)) * 1000);
 }
 
 /** What goes up after a wait: every line waiting that fits together, oldest first. The talk has moved on: what does not fit is dropped. */
@@ -385,8 +390,11 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     if (sending) return;
     if (!allowed()) { queue.length = 0; rest = []; return; }
     let line: string;
+    // A page of a long line is read whole before the next: its own time, up to a page's most.
+    let page = false;
     if (rest.length > 0) {
       line = rest.shift()!;
+      page = true;
     } else {
       if (queue.length === 0) return;
       // The newest line: one of several pages goes up page by page; one that fits, together with the ones of a page
@@ -394,6 +402,7 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
       const newest = queue[queue.length - 1];
       if (newest.length > 1) {
         [line, ...rest] = newest;
+        page = true;
       } else {
         let single = queue.length - 1;
         while (single > 0 && queue[single - 1].length === 1) single--;
@@ -404,7 +413,7 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     sending = true;
     void ipc.invoke('vrchat:chatbox', { text: line }).catch(() => {});
     showTyping();
-    later(() => { sending = false; pump(); }, Math.max(gap, chatboxReadingMs(line)));
+    later(() => { sending = false; pump(); }, Math.max(gap, chatboxReadingMs(line, page ? CHATBOX_PAGE_MOST_S : undefined)));
   };
   const look = () => {
     const shows = store.getState().chatbox;

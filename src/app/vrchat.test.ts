@@ -153,6 +153,23 @@ describe('a long line in the chatbox (fork)', () => {
     expect(chatboxPages(`${original}\n${translation}`)).toEqual([original, translation]);
   });
 
+  it('holds each page of a long line for its own reading time, up to a page’s most, longer than a line’s (fork)', () => {
+    useVRChatStore.setState({ chatbox: 'translation' });
+    const waits: number[] = [];
+    const pending: Array<() => void> = [];
+    const t = setup({ setTimeout: (fn, ms) => { waits.push(ms); pending.push(fn); } });
+    t.show([exchange('a', '长', `${'長'.repeat(100)}。${'続'.repeat(60)}`)]);
+    expect(waits.at(-1)).toBe(12_000);
+    pending.shift()!();
+    // The last page: 60 characters, about 11 s to read.
+    expect(waits.at(-1)).toBe(chatboxReadingMs('続'.repeat(60), 12));
+    pending.shift()!();
+    // A line that fits stays at a line's most.
+    t.show([exchange('a', '长', `${'長'.repeat(100)}。${'続'.repeat(60)}`), exchange('b', '短', '短'.repeat(60))]);
+    expect(waits.at(-1)).toBe(6_000);
+    t.controller.stop();
+  });
+
   it('sends every page of a long line, one after another', () => {
     useVRChatStore.setState({ chatbox: 'translation' });
     const t = setup();
