@@ -294,7 +294,9 @@ interface Cut {
   done: string;
   rest: { ref: Ref; origin?: string } | null;
   waiting: { text: string; since: number } | null;
+  /** The stretch's language so far: what the recognizer said (`said`), or what its writing shows. */
   language?: string;
+  said?: string;
 }
 
 class PipelineLeg implements AdapterSession {
@@ -525,8 +527,10 @@ class PipelineLeg implements AdapterSession {
             return;
           }
           const last = this.restOf(cut);
-          this.events.segmentText({ ref: last.ref, text: rest, ...(cut.language ? { language: cut.language } : {}) });
-          this.closed({ ref: last.ref, origin: last.origin }, { origin: last.origin, text: rest }, rest, cut.language);
+          cut.said = source.language;
+          const language = this.pieceLanguage(cut, rest);
+          this.events.segmentText({ ref: last.ref, text: rest, ...(language ? { language } : {}) });
+          this.closed({ ref: last.ref, origin: last.origin }, { origin: last.origin, text: rest }, rest, language === AUTO ? undefined : language);
           return;
         }
         // A coached speaker's sentence may be the other side's voice, come back through the microphone.
@@ -641,7 +645,7 @@ class PipelineLeg implements AdapterSession {
    * unchanged for a moment, is closed — its own segment, sent for its answer — and what follows shows in a segment
    * of its own from then on.
    */
-  private heardSoFar(ref: Ref, source: { origin?: string; text: string }, language: string | undefined): void {
+  private heardSoFar(ref: Ref, source: { origin?: string; text: string; language?: string }, language: string | undefined): void {
     const { clock } = this.request;
     let cut = this.cuts.get(ref);
     if (!cut) {
@@ -650,6 +654,7 @@ class PipelineLeg implements AdapterSession {
       this.cuts.set(ref, cut);
     }
     cut.language = language;
+    cut.said = source.language;
     const rest = source.text.slice(restFrom(source.text, cut.done));
     const end = cutAt(rest);
     if (end >= 0) {
@@ -671,12 +676,30 @@ class PipelineLeg implements AdapterSession {
     const shown = this.restOf(cut);
     // The first of a stretch is the inner session's segment, which may not know yet what it answers to: said here.
     const origin = shown.origin ?? `kotomimi_piece_${++this.pieceIds}`;
-    this.events.segmentText({ ref: shown.ref, text: sentence, ...(cut.language ? { language: cut.language } : {}) });
+    const language = this.pieceLanguage(cut, sentence);
+    this.events.segmentText({ ref: shown.ref, text: sentence, ...(language ? { language } : {}) });
     this.frame('in', 'speech.sentence', { chars: sentence.length });
     cut.done = source.text.slice(0, upTo);
     cut.rest = null;
     cut.waiting = null;
-    this.closed({ ref: shown.ref, origin }, { origin, text: sentence }, sentence, cut.language);
+    this.closed({ ref: shown.ref, origin }, { origin, text: sentence }, sentence, language === AUTO ? undefined : language);
+  }
+
+  /**
+   * The language of a piece of a stretch: a sentence closed from it, or what is left after one. A speaker who goes
+   * from one language into another without a pause is one stretch, and the stretch has one language — the
+   * recognizer's, or what most of its writing shows — which is not that of each sentence in it (a Chinese sentence
+   * before a Japanese one went to be translated out of Japanese). So a piece is read by its own writing first, where
+   * the writing itself settles it; then by what the recognizer said of the stretch; then by what the piece's text
+   * suggests. Until a sentence is closed, the stretch is its own one piece, and keeps its language.
+   */
+  private pieceLanguage(cut: Cut, text: string): string | undefined {
+    if (this.stages.heard === AUTO) {
+      const written = this.written(text);
+      return (written?.sure ? written.language : undefined) ?? cut.said ?? written?.language ?? AUTO;
+    }
+    // Told its language: in the leg's other one where the writing says so, as a stretch closed whole is asked.
+    return this.otherThanHeard(text) ?? cut.said ?? this.stages.heard;
   }
 
   /** What is left of a stretch, as it now reads: in its segment, opened when there first is something to show. */
@@ -684,7 +707,8 @@ class PipelineLeg implements AdapterSession {
     const text = cut.done ? rest.trimStart() : rest;
     // A mark or two is not yet something to open a segment for.
     if (!cut.rest && letters(text) === 0) return;
-    this.events.segmentText({ ref: this.restOf(cut).ref, text, ...(cut.language ? { language: cut.language } : {}) });
+    const language = cut.done ? this.pieceLanguage(cut, text) : cut.language;
+    this.events.segmentText({ ref: this.restOf(cut).ref, text, ...(language ? { language } : {}) });
   }
 
   /** A source sentence, closed: said so, and handed to what answers it. `language`: what the recognizer said it heard it in. */
@@ -780,11 +804,17 @@ class PipelineLeg implements AdapterSession {
 
   /** The language a sentence of a leg left to detect it is written in: of a speaker who speaks both, one of the two. */
   private byWriting(text: string): string | undefined {
+    return this.written(text)?.language;
+  }
+
+  /** The same, with whether the writing itself names the language (`sure`) or the small detector's statistics do. */
+  private written(text: string): { language: string; sure: boolean } | undefined {
     const back = this.stages.back;
     // The writing first; a small text detector for the pairs it cannot tell apart (English/French, Spanish/Portuguese).
-    const found = identifyLanguage(text, back ? [back.own, ...(back.languages?.length ? back.languages : [back.language])] : [])?.language;
+    const found = identifyLanguage(text, back ? [back.own, ...(back.languages?.length ? back.languages : [back.language])] : []);
+    if (!found) return undefined;
     // Han characters are Chinese's and Cantonese's alike: spoken Cantonese written down has words of its own.
-    return found === 'zh' && writtenInCantonese(text) ? 'yue' : found;
+    return { language: found.language === 'zh' && writtenInCantonese(text) ? 'yue' : found.language, sure: found.source === 'script' };
   }
 
   /** Whether a leg left to detect its language may be in `language`: among its others, or any where none are named. */

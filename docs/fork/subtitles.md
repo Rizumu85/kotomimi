@@ -68,16 +68,16 @@ Each side shows source, translation, both or off.
 
 ## Sentence by sentence
 
-A recognizer closes a stretch at a pause (1.4 s) or its longest turn (15 s by default). With `translateBySentence` on (the default), a leg that translates what it hears closes finished sentences as they come. Sound is not cut, only text; off, a stretch is translated whole.
+A recognizer closes a stretch at a pause (1.4 s) or its longest turn (15 s by default). With `translateBySentence` on (the default), a translating leg closes finished sentences as they come. Sound is not cut, only text; off, a stretch is translated whole.
 
 A closed caption cannot be taken back, so right beats early. `cutAt` (`src/providers/openai/sentenceCut.ts`) cuts only:
 
-- at a sentence end (`src/lib/segmentation/sentenceEnd.ts`), never at a comma or a mere pause: half a Japanese sentence has no verb yet;
+- at a sentence end (`src/lib/segmentation/sentenceEnd.ts`), never at a comma or a pause: half a Japanese sentence has no verb yet;
 - with about two seconds said after it (`PIECE_LEAST_DENSE`, `PIECE_LEAST`), because recognizers rewrite their newest words and end any partial on a full stop;
 - with as much before it, so short sentences join the next;
 - once the text has stood unchanged for `SETTLE_MS`.
 
-Each piece is its own segment with a `kotomimi_piece_N` origin, so answers pair one to one. What is closed stands; `restFrom` finds the rest in the final text by the closed text's last letters. A rest with no letters makes no caption.
+Each piece is a segment of its own (`kotomimi_piece_N`), so answers pair one to one, and has its own language (`pieceLanguage`): its writing's where that settles it, else the stretch's. What is closed stands; `restFrom` finds the rest by the closed text's last letters. A rest with no letters makes no caption.
 
 `cutsSentences` excludes a coached leg, feedback beside translation, paired recognition and a leg with no stage. A recognizer that writes little punctuation (R2T2) stays whole.
 

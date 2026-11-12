@@ -820,6 +820,56 @@ describe('a stretch of several sentences, of a leg that translates what it hears
   });
 });
 
+describe('a stretch in two languages, of a speaker who speaks both (fork)', () => {
+  const delta = (text: string) => SERVER.inputDelta('item_1', text);
+  const both = (config: LocalAIConfig) => {
+    config.stages = {
+      ...config.stages!, heard: 'auto',
+      back: { own: 'zh-CN', language: 'ja', languages: ['ja'], stage: { kind: 'translate', model: 'back', baseUrl: '', system: 'Translate into Chinese', language: 'zh-CN' } },
+    };
+    delete config.stages.leakCheck;
+  };
+  const CHINESE = '今天我们去哪里吃饭比较好呢？';
+
+  it('answers each sentence by its own writing, not by the stretch’s', async () => {
+    const h = await live(SPEAKER, VIA_MODEL, [sse('今日はどこで食べるのがいいかな？'), sse('我想吃拉面，正在想怎么办。')], K, both);
+    // Their own language, then the other side's without a pause: the stretch so far is mostly kana.
+    h.receive(SERVER.committed('item_1'), delta(`${CHINESE}ラーメンがたべたいんですけどね、どうしようかなとおもっ`));
+    expect(h.lastText(1)).toMatchObject({ language: 'ja' });
+    h.clock.advance(400);
+    h.receive(delta('て'));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(1));
+    // Chinese: translated forward, and labelled as what it is.
+    expect(h.calls[0].body.model).toBe('hy-mt2-1.8b');
+    expect(h.lastText(1)).toMatchObject({ text: CHINESE, language: 'zh' });
+    h.receive(SERVER.inputDone('item_1', `${CHINESE}ラーメンがたべたいんですけどね、どうしようかなとおもっています。`));
+    await h.settled();
+    // What is left is Japanese: translated back into their own.
+    expect(h.calls.map((c) => c.body.model)).toEqual(['hy-mt2-1.8b', 'back']);
+    const rest = h.of('segmentOpened').map((e) => e.payload).filter((p) => p.side === 'source')[1].ref;
+    expect(h.lastText(rest)).toMatchObject({ language: 'ja' });
+    await h.session.stop();
+  });
+
+  it('still answers a stretch in one language as before, where two languages share their letters', async () => {
+    const context = { ...SPEAKER, direction: { source: 'en', target: 'fr' } };
+    const latin = (config: LocalAIConfig) => {
+      config.stages = {
+        ...config.stages!, heard: 'auto',
+        back: { own: 'en', language: 'fr', languages: ['fr'], stage: { kind: 'translate', model: 'back', baseUrl: '', system: 'Translate into English', language: 'en' } },
+      };
+      delete config.stages.leakCheck;
+    };
+    const h = await live(context, VIA_MODEL, [sse('one'), sse('two')], K, latin);
+    h.receive(SERVER.committed('item_1'), delta('Non merci pas maintenant vraiment pas. Je passerai demain matin vers neuf heur'));
+    h.clock.advance(400);
+    h.receive(delta('es'));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(1));
+    expect(h.calls[0].body.model).toBe('back');
+    await h.session.stop();
+  });
+});
+
 describe('a coached speaker’s stretch of several sentences', () => {
   it('is answered whole: the feedback is on what they said', async () => {
     const h = await live(SPEAKER, { coach: true, coachServerModel: 'qwen3-4b', translateServerModel: 'hy-mt2-1.8b' }, [sse('✓')]);
