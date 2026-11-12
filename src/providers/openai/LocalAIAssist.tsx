@@ -572,12 +572,28 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
     </button>
   );
 
+  // Fork: the recognition rows all on one model — which one engine's rows must be — are one choice, drawn as one row:
+  // two menus that could only say the same were noise (the user, 2026-11-11). A model that hears only some of their
+  // languages (X-ASR: Chinese and English) is offered for those, and the rows come apart once it is chosen.
+  const shared = stage === 'asr' && slots.length > 1 && using(slots[0]) !== null && slots.every((slot) => using(slot)?.id === using(slots[0])?.id);
+  const shownSlots = shared ? [slots[0]] : slots;
+  /** Of the shared row, which row a model goes to: every row (it takes them all), one it alone can take, or none. */
+  const sharedTarget = (id: string): { slot: DeviceNeed; only: string | null } | { blocked: string } => {
+    const all = slots.find((slot) => { const c = nativeRowChoice(choiceRows, slot.leg, id); return c.ok && slots.every((other) => other === slot || c.moves.includes(other.leg) || using(other)?.id === id); });
+    if (all) return { slot: all, only: null };
+    const one = slots.find((slot) => nativeRowChoice(choiceRows, slot.leg, id).ok);
+    if (one) return { slot: one, only: (choiceRows.find((row) => row.key === one.leg)?.languages ?? []).map(nameOf).join('、') };
+    return { blocked: blockedFor(slots[0], id) ?? '' };
+  };
+
   return (
     <div className="kt-here" {...(tour ? { 'data-tour': 'engine-chips' } : {})}>
-      {slots.map((slot) => {
-        const label = title(slot);
+      {shownSlots.map((slot) => {
+        const label = shared
+          ? t('fork.rows.hearsAll', { languages: [...new Set(choiceRows.flatMap((row) => row.languages))].map(nameOf).join('、') })
+          : title(slot);
         const mine = using(slot);
-        const natives = nativeFor(slot);
+        const natives = shared ? [...new Map(slots.flatMap(nativeFor).map((m) => [m.id, m])).values()] : nativeFor(slot);
         const nothing = mine ? null : t('providers.localai.nativeNone');
         return (
           <div className="kt-here__row" key={slot.dir}>
@@ -592,7 +608,11 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
               onChange={(e) => {
                 const value = e.target.value;
                 if (value === NONE_ENTRY) return;
-                if (value.startsWith(NATIVE_ENTRY)) native.onPick(value.slice(NATIVE_ENTRY.length), slot);
+                if (value.startsWith(NATIVE_ENTRY)) {
+                  const id = value.slice(NATIVE_ENTRY.length);
+                  const target = shared ? sharedTarget(id) : null;
+                  native.onPick(id, target && 'slot' in target ? target.slot : slot);
+                }
 
               }}
               disabled={disabled}
@@ -601,6 +621,11 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
               {natives.length > 0 && (
                 <optgroup label={t('providers.localai.groupNative')}>
                   {natives.map((m) => {
+                    if (shared && m.id !== mine?.id) {
+                      const target = sharedTarget(m.id);
+                      if ('blocked' in target) return <option key={m.id} value={`${NATIVE_ENTRY}${m.id}`} disabled>{`${m.name}（${target.blocked}）`}</option>;
+                      return <option key={m.id} value={`${NATIVE_ENTRY}${m.id}`}>{target.only ? `${m.name}（${t('fork.rows.only', { languages: target.only })}）` : m.name}</option>;
+                    }
                     const blocked = m.id === mine?.id ? null : blockedFor(slot, m.id);
                     return <option key={m.id} value={`${NATIVE_ENTRY}${m.id}`} disabled={blocked !== null}>{blocked ? `${m.name}（${blocked}）` : m.name}</option>;
                   })}

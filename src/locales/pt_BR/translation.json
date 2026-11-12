@@ -2090,7 +2090,9 @@
     "rows": {
       "unheard": "não entende áudio em {{language}}",
       "noDetect": "não identifica idiomas automaticamente",
-      "fix": "Usar {{model}} para tudo"
+      "fix": "Usar {{model}} para tudo",
+      "hearsAll": "Reconhecer {{languages}}",
+      "only": "Apenas {{languages}}"
     },
     "capture": {
       "save": "Salvar as legendas recentes",

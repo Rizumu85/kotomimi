@@ -2090,7 +2090,9 @@
     "rows": {
       "unheard": "ei tunnista kieltä {{language}}",
       "noDetect": "ei erota kieliä automaattisesti",
-      "fix": "Käytä mallia {{model}} kaikille"
+      "fix": "Käytä mallia {{model}} kaikille",
+      "hearsAll": "Tunnista {{languages}}",
+      "only": "Vain {{languages}}"
     },
     "capture": {
       "save": "Tallenna viimeisimmät tekstitykset",

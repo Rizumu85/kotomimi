@@ -2090,7 +2090,9 @@
     "rows": {
       "unheard": "kan inte uppfatta {{language}}",
       "noDetect": "kan inte identifiera språk automatiskt",
-      "fix": "Använd {{model}} för alla"
+      "fix": "Använd {{model}} för alla",
+      "hearsAll": "Känn igen {{languages}}",
+      "only": "Endast {{languages}}"
     },
     "capture": {
       "save": "Spara de senaste undertexterna",

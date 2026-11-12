@@ -2090,7 +2090,9 @@
     "rows": {
       "unheard": "không nghe được {{language}}",
       "noDetect": "không tự động phân biệt được ngôn ngữ",
-      "fix": "Dùng {{model}} cho tất cả"
+      "fix": "Dùng {{model}} cho tất cả",
+      "hearsAll": "Nhận dạng {{languages}}",
+      "only": "Chỉ {{languages}}"
     },
     "capture": {
       "save": "Lưu phụ đề vừa hiển thị",

@@ -2090,7 +2090,9 @@
     "rows": {
       "unheard": "tidak dapat mendengar {{language}}",
       "noDetect": "tidak dapat membezakan bahasa secara automatik",
-      "fix": "Guna {{model}} untuk semua"
+      "fix": "Guna {{model}} untuk semua",
+      "hearsAll": "Kenal pasti {{languages}}",
+      "only": "{{languages}} sahaja"
     },
     "capture": {
       "save": "Simpan sari kata tadi",

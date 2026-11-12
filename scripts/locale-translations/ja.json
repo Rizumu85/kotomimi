@@ -723,9 +723,17 @@
     "en": "Use {{model}} for all",
     "text": "すべて {{model}} を使う"
   },
+  "fork.rows.hearsAll": {
+    "en": "Recognize {{languages}}",
+    "text": "{{languages}}を認識"
+  },
   "fork.rows.noDetect": {
     "en": "cannot tell languages apart",
     "text": "言語を自動判別できません"
+  },
+  "fork.rows.only": {
+    "en": "{{languages}} only",
+    "text": "{{languages}}のみ"
   },
   "fork.rows.unheard": {
     "en": "cannot hear {{language}}",

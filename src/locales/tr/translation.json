@@ -2090,7 +2090,9 @@
     "rows": {
       "unheard": "{{language}} dilini algılayamaz",
       "noDetect": "dilleri otomatik ayırt edemez",
-      "fix": "Hepsi için {{model}} kullan"
+      "fix": "Hepsi için {{model}} kullan",
+      "hearsAll": "{{languages}} dillerini tanı",
+      "only": "Yalnızca {{languages}}"
     },
     "capture": {
       "save": "Son altyazıları kaydet",

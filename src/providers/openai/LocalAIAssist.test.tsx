@@ -537,6 +537,23 @@ describe('one menu for a stage of this computer, whoever runs it', () => {
     }
   });
 
+  it('draws the rows on one model as one, offers a model that hears only some of them for those, and parts them once chosen', () => {
+    useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'downloaded', 'x-asr-zh-en': 'downloaded' }) });
+    const settings = { asrVia: 'device' as const, asrHere: 'native' as const, asrNativeModel: 'qwen3-asr-1.7b-q8', asrNativeByLanguage: { zh: 'qwen3-asr-1.7b-q8', ja: 'qwen3-asr-1.7b-q8' }, translateAt: 'device' as const };
+    const { card, update } = draw({ legs: ['speaker', 'participant'], pair: { source: 'zh-CN', target: 'ja' }, settings });
+    const menus = card(HEAR).getAllByRole('combobox') as HTMLSelectElement[];
+    expect(menus.map((m) => m.getAttribute('aria-label'))).toEqual(['fork.rows.hearsAll']);
+    const only = [...menus[0].options].find((o) => o.value === '\u0000native:x-asr-zh-en')!;
+    expect(only.disabled).toBe(false);
+    expect(only.textContent).toContain('fork.rows.only');
+    fireEvent.change(menus[0], { target: { value: only.value } });
+    // The user's Chinese goes to X-ASR; the other side's Japanese stays on Qwen3-ASR.
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrNativeByLanguage: expect.objectContaining({ zh: 'x-asr-zh-en', ja: 'qwen3-asr-1.7b-q8' }) }));
+    cleanup();
+    const parted = draw({ legs: ['speaker', 'participant'], pair: { source: 'zh-CN', target: 'ja' }, settings: { ...settings, asrNativeByLanguage: { zh: 'x-asr-zh-en', ja: 'qwen3-asr-1.7b-q8' } } });
+    expect(parted.card(HEAR).getAllByRole('combobox')).toHaveLength(2);
+  });
+
   it('does not select a completed download that would conflict with another row', () => {
     const previous = useNativeEngineStore.getState().download;
     useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'downloaded', 'sensevoice-small-q8': 'absent' }), download: vi.fn(async () => {}) });
@@ -546,7 +563,7 @@ describe('one menu for a stage of this computer, whoever runs it', () => {
       fireEvent.click(card(HEAR).getAllByRole('button', { name: 'providers.localai.browse' })[0]);
       fireEvent.click(within(screen.getByTestId('model-card-native:sensevoice-small-q8')).getByRole('button', { name: 'models.download' }));
       act(() => useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'downloaded', 'sensevoice-small-q8': 'downloading' }) }));
-      fireEvent.click(card(HEAR).getAllByRole('button', { name: 'providers.localai.browse' })[1]);
+      fireEvent.click(card(HEAR).getAllByRole('button', { name: 'providers.localai.browse' }).at(-1)!);
       act(() => useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'downloaded', 'sensevoice-small-q8': 'downloaded' }) }));
       const picked = update.mock.calls.find(([patch]) => patch.asrNativeByLanguage?.zh === 'sensevoice-small-q8')?.[0];
       expect(picked).toBeUndefined();
@@ -712,7 +729,7 @@ describe('the other side\u2019s language left to be detected', () => {
     // Japanese is heard by R2T2, which tells no language; the other side is whatever it turns out to be.
     const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'r2t2-q8', asrDetectOther: true, translateAt: 'device' }, legs: BOTH });
     const menus = card(HEAR).getAllByRole('combobox') as HTMLSelectElement[];
-    const other = menus.find((m) => m.getAttribute('aria-label') === 'providers.localai.hearsOther')!;
+    const other = menus.find((m) => ['providers.localai.hearsOther', 'fork.rows.hearsAll'].includes(m.getAttribute('aria-label') ?? ''))!;
     expect(other.selectedOptions[0].textContent).toBe('Confucius4 R2T2 GGUF');
     // Every model downloaded that hears the pair's language is there to choose.
     expect([...other.querySelectorAll('optgroup')[0].querySelectorAll('option')].map((o) => o.textContent).sort()).toEqual(['Confucius4 R2T2 GGUF', 'Qwen3-ASR 1.7B GGUF']);
@@ -720,8 +737,8 @@ describe('the other side\u2019s language left to be detected', () => {
     expect([...other.querySelectorAll('optgroup')].map((g) => g.label)).toEqual(['providers.localai.groupNative']);
     // And while the other side's language is detected, the same model hears the user's own (the engine runs one at
     // a time): its row shows that model.
-    const named = menus.find((m) => m !== other)!;
-    expect(named.selectedOptions[0].textContent).toBe('Confucius4 R2T2 GGUF');
+    // One model for both, so one row: the user's own is this menu.
+    expect(menus).toEqual([other]);
     // No switch in the card: the choice is made among the languages. The row's title says what it hears; nothing under it.
     expect(card(HEAR).queryByText('providers.localai.detectOther')).toBeNull();
     expect(card(HEAR).queryByText('providers.localai.detectOtherNote')).toBeNull();
@@ -734,9 +751,10 @@ describe('the other side\u2019s language left to be detected', () => {
   it.each([false, true])('offers paired Apple recognition without ending bilingual speech (feedback: %s)', async (coach) => {
     useNativeEngineStore.setState({ status: engineOf({ 'apple-speech:zh': 'downloaded', 'apple-speech:ja': 'downloaded', 'qwen3-asr-1.7b-q8': 'downloaded' }) });
     const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'qwen3-asr-1.7b-q8', speakBoth: true, coach, translateAt: 'device' }, legs: BOTH });
-    const mine = (card(HEAR).getAllByRole('combobox') as HTMLSelectElement[]).find((m) => m.getAttribute('aria-label') === 'providers.localai.hearsEither')!;
+    const mine = (card(HEAR).getAllByRole('combobox') as HTMLSelectElement[]).find((m) => ['providers.localai.hearsEither', 'fork.rows.hearsAll'].includes(m.getAttribute('aria-label') ?? ''))!;
     expect(mine.selectedOptions[0].textContent).toBe('Qwen3-ASR 1.7B GGUF');
-    expect([...mine.querySelectorAll('optgroup')[0].querySelectorAll('option')].map((o) => o.textContent).sort()).toEqual(['Apple Speech', 'Qwen3-ASR 1.7B GGUF']);
+    // Both rows on one model are one menu: Apple Speech is offered for the user's languages (and the other side's).
+    expect([...mine.querySelectorAll('optgroup')[0].querySelectorAll('option')].map((o) => o.value)).toEqual(expect.arrayContaining([' native:apple-speech:zh', ' native:qwen3-asr-1.7b-q8']));
     await act(async () => { fireEvent.change(mine, { target: { value: '\u0000native:apple-speech:zh' } }); });
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native', asrNativeModel: 'apple-speech:zh', asrNativeByLanguage: expect.objectContaining({ zh: 'apple-speech:zh' }) }));
     expect(update.mock.calls[update.mock.calls.length - 1][0]).not.toHaveProperty('speakBoth');
@@ -757,7 +775,8 @@ describe('the other side\u2019s language left to be detected', () => {
     useNativeEngineStore.setState({ status: engineOf({ 'r2t2-q8': 'downloaded', 'qwen3-asr-1.7b-q8': 'downloaded' }) });
     const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'qwen3-asr-1.7b-q8', speakBoth: true, coach, translateAt: 'device' }, legs: BOTH });
     const menus = card(HEAR).getAllByRole('combobox') as HTMLSelectElement[];
-    expect(menus.map((m) => m.getAttribute('aria-label'))).toEqual(['providers.localai.hearsEither', 'providers.localai.hears']);
+    // On one model, the two rows are one.
+    expect(menus.map((m) => m.getAttribute('aria-label'))).toEqual(['fork.rows.hearsAll']);
     await act(async () => { fireEvent.change(menus[0], { target: { value: '\u0000native:r2t2-q8' } }); });
     // Feedback remains enabled: the writing and the detector route what was said, best effort.
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native', asrNativeModel: 'r2t2-q8' }));
@@ -770,7 +789,7 @@ describe('the other side\u2019s language left to be detected', () => {
     useNativeEngineStore.setState({ status: engineOf({ 'r2t2-q8': 'downloaded', 'qwen3-asr-1.7b-q8': 'downloaded' }) });
     const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrDetectOther: true, speakBoth: true, translateAt: 'device' }, legs: BOTH });
     const menus = card(HEAR).getAllByRole('combobox') as HTMLSelectElement[];
-    fireEvent.change(menus[1], { target: { value: '\u0000native:qwen3-asr-1.7b-q8' } });
+    fireEvent.change(menus[menus.length - 1], { target: { value: '\u0000native:qwen3-asr-1.7b-q8' } });
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native' }));
     expect(update.mock.calls[update.mock.calls.length - 1][0]).not.toHaveProperty('asrDetectOther');
     expect(update.mock.calls[update.mock.calls.length - 1][0]).not.toHaveProperty('speakBoth');
@@ -781,7 +800,7 @@ describe('the other side\u2019s language left to be detected', () => {
     const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrDetectOther: true, translateAt: 'device' }, legs: BOTH });
     const menus = card(HEAR).getAllByRole('combobox') as HTMLSelectElement[];
     // The app's models hear: the other side is heard in Japanese, its row the second.
-    fireEvent.change(menus[1], { target: { value: '\u0000native:r2t2-q8' } });
+    fireEvent.change(menus[menus.length - 1], { target: { value: '\u0000native:r2t2-q8' } });
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ asrHere: 'native' }));
     expect(update.mock.calls[update.mock.calls.length - 1][0]).not.toHaveProperty('asrDetectOther');
   });
@@ -789,7 +808,7 @@ describe('the other side\u2019s language left to be detected', () => {
   it('keeps the model that cannot tell languages apart for the other side, as a best effort', () => {
     useNativeEngineStore.setState({ status: engineOf({ 'r2t2-q8': 'downloaded' }) });
     const { card } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrNativeModel: 'r2t2-q8', asrDetectOther: true, translateAt: 'device' }, legs: BOTH });
-    const other = (card(HEAR).getAllByRole('combobox') as HTMLSelectElement[]).find((m) => m.getAttribute('aria-label') === 'providers.localai.hearsOther')!;
+    const other = (card(HEAR).getAllByRole('combobox') as HTMLSelectElement[]).find((m) => ['providers.localai.hearsOther', 'fork.rows.hearsAll'].includes(m.getAttribute('aria-label') ?? ''))!;
     expect(other.selectedOptions[0].textContent).toBe('Confucius4 R2T2 GGUF');
     expect(card(HEAR).queryByText('providers.localai.detectOtherNeeds')).toBeNull();
   });

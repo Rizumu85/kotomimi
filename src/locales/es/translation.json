@@ -2090,7 +2090,9 @@
     "rows": {
       "unheard": "no reconoce el habla en {{language}}",
       "noDetect": "no distingue idiomas automáticamente",
-      "fix": "Usar {{model}} para todo"
+      "fix": "Usar {{model}} para todo",
+      "hearsAll": "Reconocer {{languages}}",
+      "only": "Solo {{languages}}"
     },
     "capture": {
       "save": "Guardar los últimos subtítulos",

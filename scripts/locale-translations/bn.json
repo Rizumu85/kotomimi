@@ -723,9 +723,17 @@
     "en": "Use {{model}} for all",
     "text": "সবকিছুর জন্য {{model}} ব্যবহার করুন"
   },
+  "fork.rows.hearsAll": {
+    "en": "Recognize {{languages}}",
+    "text": "{{languages}} শনাক্ত করুন"
+  },
   "fork.rows.noDetect": {
     "en": "cannot tell languages apart",
     "text": "স্বয়ংক্রিয়ভাবে ভাষা চিনতে পারে না"
+  },
+  "fork.rows.only": {
+    "en": "{{languages}} only",
+    "text": "শুধু {{languages}}"
   },
   "fork.rows.unheard": {
     "en": "cannot hear {{language}}",

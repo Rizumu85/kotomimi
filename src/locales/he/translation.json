@@ -2090,7 +2090,9 @@
     "rows": {
       "unheard": "לא מזהה דיבור ב{{language}}",
       "noDetect": "לא מזהה שפות אוטומטית",
-      "fix": "להשתמש ב־{{model}} לכולן"
+      "fix": "להשתמש ב־{{model}} לכולן",
+      "hearsAll": "זיהוי {{languages}}",
+      "only": "{{languages}} בלבד"
     },
     "capture": {
       "save": "שמירת הכתוביות האחרונות",

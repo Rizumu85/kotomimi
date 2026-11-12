@@ -2090,7 +2090,9 @@
     "rows": {
       "unheard": "ฟังภาษา{{language}}ไม่ได้",
       "noDetect": "แยกภาษาอัตโนมัติไม่ได้",
-      "fix": "ใช้ {{model}} ทั้งหมด"
+      "fix": "ใช้ {{model}} ทั้งหมด",
+      "hearsAll": "รู้จำ{{languages}}",
+      "only": "เฉพาะ{{languages}}"
     },
     "capture": {
       "save": "บันทึกคำบรรยายเมื่อสักครู่",

@@ -2090,7 +2090,9 @@
     "rows": {
       "unheard": "cannot hear {{language}}",
       "noDetect": "cannot tell languages apart",
-      "fix": "Use {{model}} for all"
+      "fix": "Use {{model}} for all",
+      "hearsAll": "Recognize {{languages}}",
+      "only": "{{languages}} only"
     },
     "capture": {
       "save": "Save what the subtitle just showed",

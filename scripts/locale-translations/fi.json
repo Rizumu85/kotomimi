@@ -719,9 +719,17 @@
     "en": "Use {{model}} for all",
     "text": "Käytä mallia {{model}} kaikille"
   },
+  "fork.rows.hearsAll": {
+    "en": "Recognize {{languages}}",
+    "text": "Tunnista {{languages}}"
+  },
   "fork.rows.noDetect": {
     "en": "cannot tell languages apart",
     "text": "ei erota kieliä automaattisesti"
+  },
+  "fork.rows.only": {
+    "en": "{{languages}} only",
+    "text": "Vain {{languages}}"
   },
   "fork.rows.unheard": {
     "en": "cannot hear {{language}}",

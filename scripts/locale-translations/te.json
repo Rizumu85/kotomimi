@@ -723,9 +723,17 @@
     "en": "Use {{model}} for all",
     "text": "అన్నింటికీ {{model}} వాడండి"
   },
+  "fork.rows.hearsAll": {
+    "en": "Recognize {{languages}}",
+    "text": "{{languages}} గుర్తింపు"
+  },
   "fork.rows.noDetect": {
     "en": "cannot tell languages apart",
     "text": "భాషలను స్వయంచాలకంగా గుర్తించలేదు"
+  },
+  "fork.rows.only": {
+    "en": "{{languages}} only",
+    "text": "{{languages}} మాత్రమే"
   },
   "fork.rows.unheard": {
     "en": "cannot hear {{language}}",

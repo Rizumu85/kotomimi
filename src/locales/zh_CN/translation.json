@@ -2090,7 +2090,9 @@
     "rows": {
       "unheard": "听不了{{language}}",
       "noDetect": "不能自动分辨语言",
-      "fix": "都用 {{model}}"
+      "fix": "都用 {{model}}",
+      "hearsAll": "识别{{languages}}",
+      "only": "仅{{languages}}"
     },
     "capture": {
       "save": "保存刚才的字幕",

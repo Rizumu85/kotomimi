@@ -2090,7 +2090,9 @@
     "rows": {
       "unheard": "nie rozpoznaje mowy w języku {{language}}",
       "noDetect": "nie rozróżnia języków automatycznie",
-      "fix": "Użyj {{model}} do wszystkiego"
+      "fix": "Użyj {{model}} do wszystkiego",
+      "hearsAll": "Rozpoznawanie: {{languages}}",
+      "only": "Tylko {{languages}}"
     },
     "capture": {
       "save": "Zapisz ostatnie napisy",

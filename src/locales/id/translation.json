@@ -2090,7 +2090,9 @@
     "rows": {
       "unheard": "tidak bisa mengenali ucapan {{language}}",
       "noDetect": "tidak bisa membedakan bahasa otomatis",
-      "fix": "Gunakan {{model}} untuk semua"
+      "fix": "Gunakan {{model}} untuk semua",
+      "hearsAll": "Kenali {{languages}}",
+      "only": "Hanya {{languages}}"
     },
     "capture": {
       "save": "Simpan subtitel tadi",

@@ -2090,7 +2090,9 @@
     "rows": {
       "unheard": "{{language}}を聞き取れません",
       "noDetect": "言語を自動判別できません",
-      "fix": "すべて {{model}} を使う"
+      "fix": "すべて {{model}} を使う",
+      "hearsAll": "{{languages}}を認識",
+      "only": "{{languages}}のみ"
     },
     "capture": {
       "save": "直前の字幕を保存",

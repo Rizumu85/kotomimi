@@ -2090,7 +2090,9 @@
     "rows": {
       "unheard": "kan geen {{language}} verstaan",
       "noDetect": "kan talen niet automatisch herkennen",
-      "fix": "Gebruik {{model}} voor alles"
+      "fix": "Gebruik {{model}} voor alles",
+      "hearsAll": "{{languages}} herkennen",
+      "only": "Alleen {{languages}}"
     },
     "capture": {
       "save": "Recente ondertiteling opslaan",

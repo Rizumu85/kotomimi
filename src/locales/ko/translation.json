@@ -2090,7 +2090,9 @@
     "rows": {
       "unheard": "{{language}} 음성 인식 불가",
       "noDetect": "언어 자동 구분 불가",
-      "fix": "모두 {{model}} 사용"
+      "fix": "모두 {{model}} 사용",
+      "hearsAll": "{{languages}} 인식",
+      "only": "{{languages}}만"
     },
     "capture": {
       "save": "방금 표시된 자막 저장",

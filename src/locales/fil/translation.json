@@ -2090,7 +2090,9 @@
     "rows": {
       "unheard": "hindi makilala ang pagsasalita sa {{language}}",
       "noDetect": "hindi awtomatikong matukoy ang wika",
-      "fix": "Gamitin ang {{model}} sa lahat"
+      "fix": "Gamitin ang {{model}} sa lahat",
+      "hearsAll": "Kilalanin ang {{languages}}",
+      "only": "{{languages}} lang"
     },
     "capture": {
       "save": "I-save ang mga huling subtitle",

@@ -2090,7 +2090,9 @@
     "rows": {
       "unheard": "لا يفهم {{language}}",
       "noDetect": "لا يميّز اللغات تلقائيًا",
-      "fix": "استخدام {{model}} للكل"
+      "fix": "استخدام {{model}} للكل",
+      "hearsAll": "التعرّف على {{languages}}",
+      "only": "{{languages}} فقط"
     },
     "capture": {
       "save": "حفظ الترجمة التي ظهرت للتو",

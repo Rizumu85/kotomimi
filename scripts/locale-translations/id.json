@@ -723,9 +723,17 @@
     "en": "Use {{model}} for all",
     "text": "Gunakan {{model}} untuk semua"
   },
+  "fork.rows.hearsAll": {
+    "en": "Recognize {{languages}}",
+    "text": "Kenali {{languages}}"
+  },
   "fork.rows.noDetect": {
     "en": "cannot tell languages apart",
     "text": "tidak bisa membedakan bahasa otomatis"
+  },
+  "fork.rows.only": {
+    "en": "{{languages}} only",
+    "text": "Hanya {{languages}}"
   },
   "fork.rows.unheard": {
     "en": "cannot hear {{language}}",

@@ -723,9 +723,17 @@
     "en": "Use {{model}} for all",
     "text": "Hepsi için {{model}} kullan"
   },
+  "fork.rows.hearsAll": {
+    "en": "Recognize {{languages}}",
+    "text": "{{languages}} dillerini tanı"
+  },
   "fork.rows.noDetect": {
     "en": "cannot tell languages apart",
     "text": "dilleri otomatik ayırt edemez"
+  },
+  "fork.rows.only": {
+    "en": "{{languages}} only",
+    "text": "Yalnızca {{languages}}"
   },
   "fork.rows.unheard": {
     "en": "cannot hear {{language}}",

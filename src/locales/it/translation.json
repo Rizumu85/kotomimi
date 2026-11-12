@@ -2090,7 +2090,9 @@
     "rows": {
       "unheard": "non riconosce l'audio in {{language}}",
       "noDetect": "non distingue automaticamente le lingue",
-      "fix": "Usa {{model}} per tutti"
+      "fix": "Usa {{model}} per tutti",
+      "hearsAll": "Riconosce {{languages}}",
+      "only": "Solo {{languages}}"
     },
     "capture": {
       "save": "Salva i sottotitoli appena mostrati",
