@@ -262,6 +262,12 @@ interface Heard { leg: object; ref: Ref; text: string; from: number; until: numb
 const heardLately: Heard[] = [];
 /** A stretch ended this long ago is forgotten. */
 const HEARD_KEPT_MS = 30_000;
+function forgetHeard(now: number): void {
+  for (let i = heardLately.length - 1; i >= 0; i--) {
+    const h = heardLately[i];
+    if (h.until !== null && now - h.until > HEARD_KEPT_MS) heardLately.splice(i, 1);
+  }
+}
 /** Two recognizers do not hear one voice begin at the same instant. */
 const HEARD_SLACK_MS = 1000;
 /** A stretch is closed by the pause after it: a sentence begun in the last of that pause is an answer, not the same voice. */
@@ -462,7 +468,10 @@ class PipelineLeg implements AdapterSession {
       case 'segmentOpened':
         if (e.payload.side === 'source') {
           this.sources.set(e.payload.ref, { origin: e.payload.origin, text: '' });
-          heardLately.push({ leg: this, ref: e.payload.ref, text: '', from: this.request.clock.now(), until: null });
+          const from = this.request.clock.now();
+          // Forgotten here too: a leg that never compares (`heardElsewhere`) would keep every stretch of a long run.
+          forgetHeard(from);
+          heardLately.push({ leg: this, ref: e.payload.ref, text: '', from, until: null });
         }
         this.events.segmentOpened(e.payload);
         return;
@@ -737,11 +746,7 @@ class PipelineLeg implements AdapterSession {
    * was hearing anything. Older stretches are forgotten here.
    */
   private heardElsewhere(mine: Heard, text: string = mine.text): 'same' | 'open' | 'other' | 'none' {
-    const now = this.request.clock.now();
-    for (let i = heardLately.length - 1; i >= 0; i--) {
-      const h = heardLately[i];
-      if (h.until !== null && now - h.until > HEARD_KEPT_MS) heardLately.splice(i, 1);
-    }
+    forgetHeard(this.request.clock.now());
     const there = heardLately.filter((h) => h.leg !== this && mine.from >= h.from - HEARD_SLACK_MS && (h.until === null || mine.from <= h.until - HEARD_TRAIL_MS));
     if (there.length === 0) return 'none';
     if (sameSpeech(text, there.map((h) => h.text).join(' '))) return 'same';

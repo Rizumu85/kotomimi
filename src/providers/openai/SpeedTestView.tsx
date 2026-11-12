@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Gauge, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { SAMPLE_RATE } from '../../lib/contract/adapter';
 import { realClock } from '../../lib/contract/clock';
@@ -137,21 +137,6 @@ export function SpeedLine({ stage, result, advice, disabled }: { stage: SpeedSta
         </div>
       )}
     </div>
-  );
-}
-
-/** The button beside the readiness check: shown until a result stands, and while a test runs, the way to stop it. */
-export function SpeedButton({ state, ready, disabled }: { state: SpeedTestState; ready: boolean; disabled?: boolean }) {
-  const { t } = useTranslation();
-  if (state.phase.name === 'running') {
-    return <button type="button" className="kt-ready__again" onClick={state.stop}><span>{t('providers.localai.speedStop')}</span></button>;
-  }
-  if (state.report || !ready) return null;
-  return (
-    <button type="button" className="kt-ready__again" onClick={state.start} disabled={disabled}>
-      <Gauge size={12} />
-      <span>{t('providers.localai.speedTest')}</span>
-    </button>
   );
 }
 

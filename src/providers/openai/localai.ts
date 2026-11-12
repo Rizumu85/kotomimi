@@ -85,10 +85,6 @@ import { loadPhoneKeys, phoneKey } from '../../lib/lan/phoneKeys';
 import { knownDeviceLabel, markKnownDevice, useKnownDeviceStore } from '../../lib/lan/knownDevices';
 import { normalizeTranscriptionLanguage, type TranscriptionHint } from './transcription';
 
-/** Where a stage runs (`localaiDevice.ts`): the same three places for what hears, what translates and what gives feedback. */
-export const ASR_VIAS = PLACES;
-export type AsrVia = Place;
-
 export interface LocalAISettings extends RealtimeSettings {
   /** Where it hears: the other device's Realtime session, an API each sentence is uploaded to (this computer cuts the sentences), or this computer's own recognizer. */
   asrVia: Place;
