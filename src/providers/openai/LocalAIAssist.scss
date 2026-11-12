@@ -107,11 +107,13 @@
 
   .kt-plan__options {
     display: grid;
+    margin-top: 4px;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 6px;
   }
 
   .kt-plan__option {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -141,12 +143,31 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    white-space: nowrap;
     font-size: vars.$font-body;
     font-weight: vars.$weight-semibold;
   }
 
-  .kt-plan__star { color: vars.$color-recommended; }
-  .kt-plan__mark { color: vars.$color-primary; }
+  // The model cards' own mark (`model-card__recommended-badge`), its words alone, hung on the choice's top edge: a
+  // choice is too narrow in the sidebar for it beside the name. Opaque, as it sits over the border.
+  .kt-plan__recommended {
+    position: absolute;
+    top: -8px;
+    right: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: vars.$chip-padding-y 5px;
+    border-radius: 3px;
+    font-size: vars.$chip-font-size;
+    font-weight: vars.$weight-medium;
+    line-height: vars.$chip-line-height;
+    white-space: nowrap;
+    color: vars.$color-recommended;
+    background: color-mix(in srgb, vars.$color-recommended 15%, vars.$bg-surface);
+    border: 1px solid color-mix(in srgb, vars.$color-recommended 40%, transparent);
+  }
+  .kt-plan__chip--current { color: vars.$color-primary; }
 
   .kt-plan__chip {
     display: inline-flex;
@@ -212,19 +233,25 @@
     white-space: nowrap;
   }
 
+  // As the model library's button (`kt-here__browse`): a setting's action, not the session's.
   .kt-plan__apply {
-    align-self: stretch;
-    min-height: vars.$control-height-compact;
+    display: inline-flex;
+    align-self: flex-end;
+    align-items: center;
+    gap: 5px;
+    height: vars.$control-height-compact;
+    padding: 0 10px;
     font: inherit;
     font-size: vars.$font-caption;
-    font-weight: vars.$weight-medium;
-    color: vars.$color-on-primary;
-    background: vars.$color-primary-fill;
-    border: none;
-    border-radius: vars.$radius-md;
+    white-space: nowrap;
+    color: vars.$color-primary;
+    background: vars.$bg-control;
+    border: 1px solid vars.$color-primary;
+    border-radius: vars.$radius-sm;
     cursor: pointer;
+    transition: background-color vars.$transition-fast;
 
-    &:hover:not(:disabled) { background: vars.$color-primary-fill-hover; }
+    &:hover:not(:disabled) { background: color-mix(in srgb, vars.$color-primary 10%, transparent); }
     &:focus-visible { @include vars.focus-ring; }
     &:disabled { cursor: not-allowed; opacity: vars.$disabled-opacity; }
   }

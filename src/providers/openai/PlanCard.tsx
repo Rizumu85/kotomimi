@@ -9,7 +9,7 @@
 import { useState } from 'react';
 import { useStore } from 'zustand';
 import { useTranslation } from 'react-i18next';
-import { CircleCheck, Download, Gauge, Languages, Loader, MemoryStick, Mic, SlidersHorizontal, Star, Users, X } from 'lucide-react';
+import { Check, CircleCheck, Download, Gauge, Languages, Loader, MemoryStick, Mic, SlidersHorizontal, Users, X } from 'lucide-react';
 import Tooltip from '../../components/Tooltip/Tooltip';
 import { sizeText } from '../../lib/native/modelStorage';
 import type { LanguagePair } from '../../lib/provider/types';
@@ -18,7 +18,7 @@ import type { LocalAISettings } from './localai';
 import { NATIVE_MODELS } from './localaiNative';
 import { NATIVE_TRANSLATORS } from './nativeTranslators';
 import type { NativePlan, NativePlanId } from './nativePlans';
-import type { SpeedTestState } from './SpeedTestView';
+import { SpeedReportView, type SpeedTestState } from './SpeedTestView';
 import { nativeName as nameOf, usePlans } from './usePlans';
 
 const CATALOG = [...NATIVE_MODELS, ...NATIVE_TRANSLATORS];
@@ -86,16 +86,17 @@ export function PlanCard({ settings, pair, speed, ready, disabled }: { settings:
                 {t(`fork.plans.${plan.id}`)}
                 {known && plan.recommended && (
                   <Tooltip content={t(`fork.plans.why.${planWhy(inputs.memoryMB, inputs.lending)}`)} icon="none" position="top" maxWidth={240}>
-                    <Star size={12} className="kt-plan__star" aria-label={t('models.recommended', 'Recommended')} />
+                    <span className="kt-plan__recommended">{t('models.recommended', 'Recommended')}</span>
                   </Tooltip>
                 )}
-                {plan.id === current && <CircleCheck size={12} className="kt-plan__mark" aria-label={t('fork.plans.inUse')} />}
               </span>
               <Tooltip content={t('fork.plans.vram', { size: gb(plan.vramMB) })} icon="none" position="top">
                 <span className="kt-plan__chip"><MemoryStick size={11} />{gb(plan.vramMB)}</span>
               </Tooltip>
-              <span className="kt-plan__chip">
-                {left > 0 ? <><Download size={11} />{sizeText(left)}</> : <><CircleCheck size={11} />{t('fork.plans.downloaded')}</>}
+              {/* In use, it is downloaded: the line says the one that matters. */}
+              <span className={`kt-plan__chip${plan.id === current ? ' kt-plan__chip--current' : ''}`}>
+                {plan.id === current ? <><CircleCheck size={11} />{t('fork.plans.inUse')}</>
+                  : left > 0 ? <><Download size={11} />{sizeText(left)}</> : <><CircleCheck size={11} />{t('fork.plans.downloaded')}</>}
               </span>
             </button>
           );
@@ -129,9 +130,12 @@ export function PlanCard({ settings, pair, speed, ready, disabled }: { settings:
         </div>
       ) : shown.id !== current && (
         <button type="button" className="kt-plan__apply" onClick={() => nativePlanStore.getState().apply(shown)} disabled={disabled || !shown.speaker.model || !shown.participant.model}>
-          {t('fork.plans.apply')}
+          {shown.downloadBytes > 0 ? <Download size={13} /> : <Check size={13} />}
+          <span>{t('fork.plans.apply')}</span>
         </button>
       )}
+      {/* The speed test pressed in the corner: its progress and what it found, here under it. */}
+      <SpeedReportView state={speed} ready={ready} disabled={disabled} />
     </section>
   );
 }

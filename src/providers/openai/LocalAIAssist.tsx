@@ -36,7 +36,7 @@ import { useNativeRecommendationInputs } from './useNativeRecommendationInputs';
 import { fitsPair, isKotomimiServer, modelsFor, SERVER_SILENT, serverDefaultModel, translationDefault, type LocalAIModel } from './localaiModels';
 import { choiceOf, perLanguage, recognizerChoices } from './serverRecognizers';
 import { isRealtimeModelId } from './settings';
-import { SpeedLine, SpeedReportView, useSpeedTest } from './SpeedTestView';
+import { SpeedLine, useSpeedTest } from './SpeedTestView';
 import { PlanCard, gb } from './PlanCard';
 import { usePlans } from './usePlans';
 import { currentNativeModels, nativeModelFit, type NativeStage } from './nativePlans';
@@ -1337,7 +1337,6 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
           )}
         </span>
       </div>
-      <SpeedReportView state={speed} ready={ready} disabled={disabled} />
     </div>
   );
 }
