@@ -11,7 +11,7 @@ const { spawn, spawnSync } = require('child_process');
  * `DisplayIcon` either, which is set here instead.
  */
 function placeUninstallIcon({ execPath = process.execPath, resourcesPath = process.resourcesPath, beta = /-beta\./.test(app.getVersion()), files = fs, run = spawnSync } = {}) {
-  const root = path.resolve(execPath, '..', '..');
+  const root = path.dirname(path.dirname(execPath));
   const target = path.join(root, 'app.ico');
   const source = [path.join(resourcesPath, beta ? 'assets/beta' : 'assets', 'icon.ico'), path.join(resourcesPath, 'assets', 'icon.ico')].find((file) => files.existsSync(file));
   if (!source) return null;

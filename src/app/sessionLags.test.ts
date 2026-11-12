@@ -50,6 +50,12 @@ describe('session lag measurement', () => {
     expect(lags.average('speaker', 'mine')).toBe(1000);
     expect(lags.average('translation', 'translator')).toBe(3600);
   });
+  it('does not measure a line that comes back after sound started again', () => {
+    const lags = createSessionLags(); lags.begin();
+    lags.sound('participant', true, 0); lags.sound('participant', false, 500); lags.sound('participant', true, 750);
+    lags.measure([entry('a', 'participant')], models, 6000);
+    expect(lags.average('participant', 'theirs')).toBeUndefined();
+  });
   it('does not discard severe lag, and leaves unknown/unsounded stages unmeasured', () => {
     const lags = createSessionLags(); lags.begin();
     lags.sound('speaker', true, 0); lags.sound('speaker', false, 500);

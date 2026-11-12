@@ -54,6 +54,9 @@ export function createSessionLags() {
       if (!active) return;
       const sound = sounds[leg];
       if (sound.on && !heard) sound.ended = now;
+      // Sound again before a line came back: which ending that line belongs to is unknown. A game or a crowded room
+      // keeps a leg loud, and an old pause would be read as seconds of lag.
+      if (!sound.on && heard) sound.ended = null;
       sound.on = heard;
     },
     measure(entries: readonly Entry[], models: LagModels, now: number) {
