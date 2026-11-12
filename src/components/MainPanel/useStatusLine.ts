@@ -6,6 +6,8 @@ import { statusLine, type StatusEntry } from '../../lib/view/statusLine';
 import { useSelectedInputDevice } from '../../stores/audioStore';
 import { useSubtitleEntryHint } from '../../stores/subtitleStore';
 import { useVRChatStore, vrchatHolds } from '../../stores/vrchatStore';
+import { useStore } from 'zustand';
+import { sessionLags, type FallingBehind } from '../../app/sessionLags';
 
 export interface UseStatusLineArgs {
   run: RunState;
@@ -14,6 +16,8 @@ export interface UseStatusLineArgs {
   dismissedEnd: RunEnd | null;
   /** `useEchoNotice`'s visible notice; null where no echo is watched (the takeover window). */
   echo: EchoNoticeState | null;
+  /** Fork: the falling-behind notice the user dismissed: compared by identity, so the next run's draws again. */
+  lagDismissed?: FallingBehind | null;
 }
 
 /**
@@ -25,7 +29,9 @@ export interface UseStatusLineArgs {
 /** Fork: how long the start may be held off by a check before the line says so. */
 const GETTING_READY_AFTER_MS = 1000;
 
-export function useStatusLine({ run, idle, canStart, dismissedEnd, echo }: UseStatusLineArgs): StatusEntry | null {
+export function useStatusLine({ run, idle, canStart, dismissedEnd, echo, lagDismissed = null }: UseStatusLineArgs): StatusEntry | null {
+  const lag = useStore(sessionLags.state, (s) => s.notice);
+  const fallingBehind = lag && lag !== lagDismissed ? lag.stage : null;
   const selectedInput = useSelectedInputDevice();
   const entryHint = useSubtitleEntryHint();
   // No usable input is selected: `audioStore` clears the selection when none is left (#596).
@@ -43,7 +49,7 @@ export function useStatusLine({ run, idle, canStart, dismissedEnd, echo }: UseSt
     return () => clearTimeout(timer);
   }, [waiting]);
   return useMemo(
-    () => statusLine({ run, idle, canStart, dismissedEnd, waitingForMicrophone, mutedInVRChat, gettingReady: waiting && gettingReady, subtitleEntryHint: entryHint === 'refresh', echo }),
-    [run, idle, canStart, dismissedEnd, waitingForMicrophone, mutedInVRChat, waiting, gettingReady, entryHint, echo],
+    () => statusLine({ run, idle, canStart, dismissedEnd, waitingForMicrophone, mutedInVRChat, gettingReady: waiting && gettingReady, subtitleEntryHint: entryHint === 'refresh', echo, fallingBehind }),
+    [run, idle, canStart, dismissedEnd, waitingForMicrophone, mutedInVRChat, waiting, gettingReady, entryHint, echo, fallingBehind],
   );
 }

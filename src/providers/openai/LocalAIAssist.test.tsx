@@ -395,18 +395,20 @@ describe('the stage cards: on this computer', () => {
 });
 
 describe('the stage cards: whether it can all start', () => {
-  it('says so in words, and asks again on a press', () => {
+  it('says so in words, and asks again on a press only while it is not ready', () => {
     const ready = draw({ readiness: { state: 'ready', models: [] } });
     expect(screen.getByText('providers.localai.ready')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'providers.localai.recheck' }));
-    expect(ready.check).toHaveBeenCalledTimes(1);
+    // Ready, it is asked again by itself after every edit: there is nothing to press.
+    expect(screen.queryByRole('button', { name: 'providers.localai.recheck' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'providers.localai.checkNow' })).toBeNull();
     ready.unmount();
     const checking = draw({ readiness: { state: 'checking' } });
     expect(screen.getByText('providers.localai.checking')).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'providers.localai.recheck' })).toBeNull();
     checking.unmount();
-    draw({ readiness: { state: 'not-ready', reason: 'no' } });
-    expect(screen.getByRole('button', { name: 'providers.localai.checkNow' })).toBeTruthy();
+    const notReady = draw({ readiness: { state: 'not-ready', reason: 'no' } });
+    fireEvent.click(screen.getByRole('button', { name: 'providers.localai.checkNow' }));
+    expect(notReady.check).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -623,7 +625,10 @@ describe('one menu for a stage of this computer, whoever runs it', () => {
     useNativeEngineStore.setState({ status: engineOf(EVERY) });
     for (const source of ['ja', 'zh-CN', 'en', 'ko']) {
       const view = await settled({ source, target: 'ru' });
-      expect(cards(view.container), source).toEqual(['qwen3-asr-0.6b-q8 ★', 'qwen3-asr-1.7b-q8', 'r2t2-q8', 'sensevoice-small-q8', 'nemotron-asr-0.6b-q8']);
+      // This fixture predates X-ASR: when the plan's CPU choice is absent, no substitute is marked.
+      expect(cards(view.container), source).toEqual(source === 'zh-CN' || source === 'en'
+        ? ['qwen3-asr-1.7b-q8', 'r2t2-q8', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8']
+        : ['qwen3-asr-0.6b-q8 ★', 'qwen3-asr-1.7b-q8', 'r2t2-q8', 'sensevoice-small-q8', 'nemotron-asr-0.6b-q8']);
       view.unmount();
     }
     // Cantonese: R2T2 and Nemotron do not hear it.

@@ -15,6 +15,7 @@
  *   end of the other side's sound to their sentence's last word; for a
  *   translator, from a sentence's last word to its translation's.
  */
+import { sessionLags, type SessionLags } from './sessionLags';
 import type { Entry } from '../lib/projection/types';
 import type { LegName } from '../lib/conversation/types';
 import type { LevelMeter } from '../lib/audio/levelMeter';
@@ -87,6 +88,7 @@ export interface VrOverlayDeps {
   captionLook(): Pick<VrCaptions, 'filters' | 'coached' | 'aids'>;
   subscribeCaptionLook(listener: () => void): () => void;
   store?: typeof useVrStore;
+  lags?: SessionLags;
   now?(): number;
   setInterval?(fn: () => void, ms: number): unknown;
   clearInterval?(handle: unknown): void;
@@ -99,11 +101,6 @@ export interface VrOverlayController {
 /** How many lines the headset gets; the strip reads the last, the wrist three. */
 const LINES = 6;
 const HEARD_LOOK_MS = 250;
-/** A sentence ending later than this after the sound stopped is not counted against the recognizer: a pause, not a lag. */
-const LAG_MOST_MS = 10_000;
-/** The last few runs of a model, averaged. */
-const LAG_SAMPLES = 5;
-
 const textOf = (rows: readonly { text: string }[]) => rows.map((r) => r.text).join(' ').trim();
 
 /** The last lines of the conversation, as the headset draws them. */
@@ -143,25 +140,9 @@ export function captionEntries(entries: readonly Entry[]): Entry[] {
   return people.slice(-CAPTION_ENTRIES);
 }
 
-/** A model's last few runs: their average. */
-class Lags {
-  private samples = new Map<string, number[]>();
-  add(model: string, ms: number) {
-    const list = this.samples.get(model) ?? [];
-    list.push(ms);
-    if (list.length > LAG_SAMPLES) list.shift();
-    this.samples.set(model, list);
-  }
-  of(model: string): number | undefined {
-    const list = this.samples.get(model);
-    return list && list.length ? list.reduce((a, b) => a + b, 0) / list.length : undefined;
-  }
-}
-
 export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
   const store = deps.store ?? useVrStore;
   const { ipc, runner, settings } = deps;
-  const now = deps.now ?? (() => Date.now());
   const every = deps.setInterval ?? ((fn: () => void, ms: number) => setInterval(fn, ms));
   const clear = deps.clearInterval ?? ((h: unknown) => clearInterval(h as ReturnType<typeof setInterval>));
   const offs: Array<() => void> = [];
@@ -169,16 +150,15 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
 
   let switching: VrState['switching'] = null;
   let heard: VrState['heard'] = null;
-  const hearLags = new Lags();
-  const translateLags = new Lags();
+  const lags = deps.lags ?? sessionLags;
 
   // ── The headset's state, sent when it changes ──────────────────────────────
   let last = '';
   let queued = false;
   const label = (code: string) => languageLabel(code, deps.uiLanguage());
   const choices = (codes: readonly string[]): VrChoice[] => codes.map((value) => ({ value, label: label(value) }));
-  const models = (list: ReturnType<VrSettingsPort['hearers']>, lags: Lags): VrState['hear'] => (list
-    ? { value: list.value, options: list.options.map((m): VrModel => ({ id: m.id, label: m.label, ...(lags.of(m.id) !== undefined ? { ms: Math.round(lags.of(m.id)!) } : {}) })) }
+  const models = (list: ReturnType<VrSettingsPort['hearers']>, stage: 'participant' | 'translation'): VrState['hear'] => (list
+    ? { value: list.value, options: list.options.map((m): VrModel => ({ id: m.id, label: m.label, ...(lags.average(stage, m.id) !== undefined ? { ms: Math.round(lags.average(stage, m.id)!) } : {}) })) }
     : { value: '', options: [] });
 
   const build = (): VrState => {
@@ -201,8 +181,8 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
         ? { value: pair.target, ...(switched.lit && switched.lit !== 'auto' ? { lit: switched.lit } : {}), options: choices(theirs), quick: switched.row.filter((code) => code !== 'auto'), row: true }
         : { value: pair.target, options: choices(theirs), quick: quickLanguages(pair.target, theirs, settings.pins()) },
       mine: { value: pair.source, options: choices(myQuick) },
-      hear: models(settings.hearers(), hearLags),
-      translate: models(settings.translators(), translateLags),
+      hear: models(settings.hearers(), 'participant'),
+      translate: models(settings.translators(), 'translation'),
       // The app's own switch (`vrStore.on`): hiding the strip from the wrist turns it off there too, and the other way.
       strip: store.getState().on,
       chatbox: deps.chatbox() !== 'off',
@@ -238,8 +218,6 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
   // ── Whether each side is heard, while a run is on and SteamVR shows it ─────
   let levels: Readonly<Record<LegName, LevelMeter>> | null = null;
   let look: unknown = null;
-  /** When the other side's sound last stopped: what a recognizer's lag is counted from. */
-  let soundEnded: number | null = null;
   const watchHeard = () => {
     const want = !stopped && shown() && runner.state.getState().phase === 'running';
     if (want && look === null) {
@@ -248,8 +226,6 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
         if (!levels) return;
         const next: NonNullable<VrState['heard']> = {};
         for (const leg of deps.legs()) next[leg] = levels[leg].heard();
-        if (heard?.participant && !next.participant) soundEnded = now();
-        if (next.participant) soundEnded = null;
         if (JSON.stringify(next) !== JSON.stringify(heard)) {
           heard = next;
           publish();
@@ -259,35 +235,11 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
       clear(look);
       look = null;
       heard = null;
-      soundEnded = null;
       publish();
     }
   };
 
   // ── How each model ran ──────────────────────────────────────────────────
-  /** Per entry: when its words were final, and whether its translation was counted. */
-  const timed = new Map<string, { said?: number; translated?: boolean }>();
-  const measure = () => {
-    const hearer = settings.hearers()?.value;
-    const translator = settings.translators()?.value;
-    for (const entry of deps.view.get().entries) {
-      if (entry.kind !== 'exchange' || entry.lane === 'video') continue;
-      let t = timed.get(entry.id);
-      const said = entry.source.length > 0 && entry.source.every((r) => r.final);
-      if (said && !t) {
-        t = { said: now() };
-        timed.set(entry.id, t);
-        if (entry.leg === 'participant' && hearer && soundEnded !== null && now() - soundEnded < LAG_MOST_MS) hearLags.add(hearer, now() - soundEnded);
-      }
-      if (t && !t.translated && t.said !== undefined && entry.translation.length > 0 && entry.translation.every((r) => r.final)) {
-        t.translated = true;
-        if (translator) translateLags.add(translator, now() - t.said);
-      }
-    }
-    if (timed.size > 200) for (const key of [...timed.keys()].slice(0, 100)) timed.delete(key);
-  };
-
-  // ── What the wrist asks ───────────────────────────────────────────────────
   /** Bumped by the user's own start or stop: a restart under way then does not start the run again. */
   let asked = 0;
   /**
@@ -404,7 +356,8 @@ export function startVrOverlay(deps: VrOverlayDeps): VrOverlayController {
   offs.push(store.subscribe((s) => s.panel, (on) => { sendPanel(on); last = ''; watchHeard(); publish(); }));
   offs.push(store.subscribe((s) => s.link, () => { last = ''; watchHeard(); publish(); }));
   offs.push(runner.state.subscribe(() => { watchHeard(); publish(); }));
-  offs.push(deps.view.subscribe(() => { measure(); publish(); }));
+  offs.push(deps.view.subscribe(publish));
+  offs.push(lags.state.subscribe(publish));
   offs.push(settings.subscribe(publish));
   offs.push(deps.subscribeMuted(publish));
   offs.push(deps.subscribeCaptionLook(publish));

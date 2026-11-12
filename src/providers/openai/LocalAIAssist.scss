@@ -73,6 +73,186 @@
     min-width: 0;
   }
 
+  // The plans for this computer (PlanCard.tsx): three choices, the open one's models, and putting it to use.
+  .kt-plan__custom {
+    font-size: vars.$font-caption;
+    font-weight: vars.$weight-normal;
+    color: vars.$text-muted;
+  }
+
+  .kt-plan__corner {
+    display: inline-flex;
+    margin-left: auto;
+  }
+
+  .kt-plan__icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: none;
+    border-radius: vars.$radius-sm;
+    background: transparent;
+    color: vars.$text-muted;
+    cursor: pointer;
+
+    &:hover:not(:disabled) { color: vars.$text-primary; background: vars.$bg-hover; }
+    &:focus-visible { @include vars.focus-ring; }
+    &:disabled { cursor: not-allowed; opacity: vars.$disabled-opacity; }
+  }
+
+  .kt-plan__spin { animation: kt-plan-spin 1s linear infinite; }
+
+  .kt-plan__options {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .kt-plan__option {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    min-width: 0;
+    padding: 8px;
+    font: inherit;
+    text-align: left;
+    color: vars.$text-secondary;
+    background: vars.$bg-control;
+    border: 1px solid vars.$border-default;
+    border-radius: vars.$radius-md;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+
+    &:hover:not(.is-open) { background: vars.$bg-hover; }
+    &:focus-visible { @include vars.focus-ring; }
+
+    &.is-open {
+      color: vars.$text-primary;
+      border-color: vars.$color-primary;
+      background: color-mix(in srgb, vars.$color-primary 8%, transparent);
+    }
+  }
+
+  .kt-plan__name {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: vars.$font-body;
+    font-weight: vars.$weight-semibold;
+  }
+
+  .kt-plan__star { color: vars.$color-recommended; }
+  .kt-plan__mark { color: vars.$color-primary; }
+
+  .kt-plan__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    max-width: 100%;
+    font-size: vars.$font-caption;
+    color: vars.$text-muted;
+    white-space: nowrap;
+
+    svg { flex-shrink: 0; }
+  }
+
+  .kt-plan__rows {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .kt-plan__row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    padding: 6px 0;
+    font-size: vars.$font-caption;
+    color: vars.$text-secondary;
+
+    &:not(:first-child) { border-top: 1px solid vars.$border-subtle; }
+  }
+
+  .kt-plan__row-icon { display: inline-flex; color: vars.$text-muted; }
+  .kt-plan__row-label { flex-shrink: 0; color: vars.$text-tertiary; }
+
+  .kt-plan__row-model {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: vars.$text-primary;
+  }
+
+  .kt-plan__cpu {
+    flex-shrink: 0;
+    padding: vars.$chip-padding-y 5px;
+    border-radius: 3px;
+    font-size: vars.$chip-font-size;
+    line-height: vars.$chip-line-height;
+    color: vars.$color-primary;
+    background: color-mix(in srgb, vars.$color-primary 12%, transparent);
+  }
+
+  .kt-plan__row-state {
+    display: inline-flex;
+    flex-shrink: 0;
+    min-width: 13px;
+    justify-content: flex-end;
+    color: vars.$text-muted;
+    white-space: nowrap;
+  }
+
+  .kt-plan__apply {
+    align-self: stretch;
+    min-height: vars.$control-height-compact;
+    font: inherit;
+    font-size: vars.$font-caption;
+    font-weight: vars.$weight-medium;
+    color: vars.$color-on-primary;
+    background: vars.$color-primary-fill;
+    border: none;
+    border-radius: vars.$radius-md;
+    cursor: pointer;
+
+    &:hover:not(:disabled) { background: vars.$color-primary-fill-hover; }
+    &:focus-visible { @include vars.focus-ring; }
+    &:disabled { cursor: not-allowed; opacity: vars.$disabled-opacity; }
+  }
+
+  .kt-plan__pending {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: vars.$font-caption;
+    color: vars.$text-secondary;
+  }
+
+  .kt-plan__failed { color: vars.$color-error; }
+
+  .kt-plan__cancel {
+    display: inline-flex;
+    margin-left: auto;
+    padding: 2px;
+    border: none;
+    border-radius: vars.$radius-sm;
+    background: transparent;
+    color: vars.$text-muted;
+    cursor: pointer;
+
+    &:hover { color: vars.$text-primary; background: vars.$bg-hover; }
+    &:focus-visible { @include vars.focus-ring; }
+  }
+
   // The three places: one row, three equal buttons, the chosen one filled.
   .kt-seg {
     display: flex;
@@ -761,4 +941,8 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+@keyframes kt-plan-spin {
+  to { transform: rotate(360deg); }
 }

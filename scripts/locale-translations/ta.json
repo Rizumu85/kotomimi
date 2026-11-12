@@ -263,6 +263,22 @@
     "en": "Use {{name}}",
     "text": "{{name}} பயன்படுத்து"
   },
+  "fork.fit.cannot": {
+    "en": "Cannot run",
+    "text": "இயக்க முடியாது"
+  },
+  "fork.fit.hint": {
+    "en": "Needs about {{need}} of video memory; about {{left}} is left beside the other models.",
+    "text": "சுமார் {{need}} வரைகலை நினைவகம் தேவை. மற்ற மாதிரிகள் பயன்படுத்தியது போக சுமார் {{left}} மீதமுள்ளது."
+  },
+  "fork.fit.maybeSlow": {
+    "en": "May lag",
+    "text": "தடுமாறலாம்"
+  },
+  "fork.fit.smooth": {
+    "en": "Runs smoothly",
+    "text": "சீராக இயங்கும்"
+  },
   "fork.fonts.add": {
     "en": "Add a language…",
     "text": "மொழியைச் சேர்…"
@@ -343,6 +359,18 @@
     "en": "Furigana over kanji (Japanese)",
     "text": "காஞ்சிக்கு மேலே கனா காட்டு (ஜப்பானிய மொழி)"
   },
+  "fork.gap.cannot": {
+    "en": "{{model}} cannot hear {{languages}}",
+    "text": "{{model}} மாதிரியால் {{languages}} பேச்சை அறிய முடியாது"
+  },
+  "fork.gap.noDetect": {
+    "en": "{{model}} cannot tell languages apart",
+    "text": "{{model}} மாதிரியால் மொழியைத் தானாகக் கண்டறிய முடியாது"
+  },
+  "fork.gap.switch": {
+    "en": "Switch to {{model}}",
+    "text": "{{model}} மாதிரிக்கு மாறு"
+  },
   "fork.help.issues": {
     "en": "Report a problem",
     "text": "சிக்கலைத் தெரிவி"
@@ -354,6 +382,18 @@
   "fork.jyutping": {
     "en": "Jyutping over Cantonese",
     "text": "கான்டனீஸ் உரைக்கு மேலே ஜியுட்பிங்"
+  },
+  "fork.lag.hear": {
+    "en": "Recognition cannot keep up with the speech. Try a lighter plan?",
+    "text": "பேசும் வேகத்துக்கு ஈடாகப் பேச்சை அறிய முடியவில்லை. இலகுவான திட்டத்துக்கு மாறலாமா?"
+  },
+  "fork.lag.open": {
+    "en": "See plans",
+    "text": "திட்டங்களைப் பார்"
+  },
+  "fork.lag.translate": {
+    "en": "Translation cannot keep up. Try a lighter plan?",
+    "text": "மொழிபெயர்ப்பு வேகம் போதவில்லை. இலகுவான திட்டத்துக்கு மாறலாமா?"
   },
   "fork.lan.asked": {
     "en": "The other device wants to hear {{language}}",
@@ -586,6 +626,78 @@
   "fork.pinyin": {
     "en": "Pinyin over Chinese",
     "text": "சீன உரைக்கு மேலே பின்யின் காட்டு"
+  },
+  "fork.plans.accurate": {
+    "en": "Accurate",
+    "text": "துல்லியமானது"
+  },
+  "fork.plans.apply": {
+    "en": "Use this plan",
+    "text": "இந்தத் திட்டத்தைப் பயன்படுத்து"
+  },
+  "fork.plans.balanced": {
+    "en": "Balanced",
+    "text": "சமநிலையானது"
+  },
+  "fork.plans.cancel": {
+    "en": "Cancel",
+    "text": "ரத்துசெய்"
+  },
+  "fork.plans.custom": {
+    "en": "Custom",
+    "text": "தனிப்பயன்"
+  },
+  "fork.plans.downloaded": {
+    "en": "Downloaded",
+    "text": "பதிவிறக்கப்பட்டது"
+  },
+  "fork.plans.failed": {
+    "en": "A download failed. Try again from the model library.",
+    "text": "சில மாதிரிகளைப் பதிவிறக்க முடியவில்லை. மாதிரி நூலகத்தில் மீண்டும் முயலலாம்."
+  },
+  "fork.plans.inUse": {
+    "en": "In use",
+    "text": "பயன்பாட்டில் உள்ளது"
+  },
+  "fork.plans.light": {
+    "en": "Light",
+    "text": "இலகுவானது"
+  },
+  "fork.plans.speedTest": {
+    "en": "Test this computer's speed",
+    "text": "இந்தக் கணினியின் வேகத்தைச் சோதி"
+  },
+  "fork.plans.switching": {
+    "en": "Downloading, then switching: {{percent}}%",
+    "text": "பதிவிறக்கம் முடிந்ததும் தானாக மாறும்: {{percent}}%"
+  },
+  "fork.plans.title": {
+    "en": "Plans",
+    "text": "திட்டங்கள்"
+  },
+  "fork.plans.translation": {
+    "en": "Translation",
+    "text": "மொழிபெயர்ப்பு"
+  },
+  "fork.plans.vram": {
+    "en": "Takes about {{size}} of video memory",
+    "text": "சுமார் {{size}} வரைகலை நினைவகத்தைப் பயன்படுத்தும்"
+  },
+  "fork.plans.why.big": {
+    "en": "This computer has the video memory for the more accurate models.",
+    "text": "அதிகத் துல்லியமான மாதிரிகளை இயக்க இந்தக் கணினியில் போதுமான வரைகலை நினைவகம் உள்ளது."
+  },
+  "fork.plans.why.default": {
+    "en": "Accurate enough, with room left for a game.",
+    "text": "போதுமான துல்லியம் கிடைக்கும். விளையாட்டையும் சேர்த்து இயக்க நினைவகம் இருக்கும்."
+  },
+  "fork.plans.why.lending": {
+    "en": "This computer lends its models to other devices: the more accurate models.",
+    "text": "இந்தக் கணினியின் மாதிரிகளை மற்ற சாதனங்களும் பயன்படுத்துவதால், அதிகத் துல்லியமான மாதிரிகளைப் பயன்படுத்தலாம்."
+  },
+  "fork.plans.why.small": {
+    "en": "This computer has little video memory: the plan that takes least.",
+    "text": "இந்தக் கணினியில் வரைகலை நினைவகம் குறைவு. இந்தத் திட்டமே மிகக் குறைவாகப் பயன்படுத்தும்."
   },
   "fork.romanization": {
     "en": "Romanization",
@@ -2308,8 +2420,8 @@
     "text": "மொழிகள்"
   },
   "tour.steps.models.content_kotomimi": {
-    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
-    "text": "மாதிரிகளைப் பதிவிறக்க, படியின் அட்டையிலுள்ள \"மாதிரி நூலகம்\" என்பதைத் திறக்கவும். உண்மையான உரையாடல்களில் சிறப்பாகச் செயல்பட்டவற்றுக்கு \"பரிந்துரை\" குறி இருக்கும். ஒவ்வொரு மாதிரிப் பெயருக்கும் அருகிலுள்ள சிறு குறியீட்டில் சோதனை முடிவுகளைக் காணலாம். பதிவிறக்கியதும் மாதிரி தானாகவே பயன்பாட்டுக்கு வரும்."
+    "en": "At the top, Plans pairs the models for this computer in three levels; pick one and press \"Use this plan\", and it downloads and switches by itself. The two sides can use different models, one on the processor and one on the graphics card, which saves video memory. To pick yourself, open \"Model library\" in a stage card: each model says whether this computer runs it smoothly.",
+    "text": "மேலே உள்ள «திட்டங்கள்» பகுதியில், இந்தக் கணினிக்கு ஏற்ற மாதிரிகள் மூன்று நிலைகளில் இணைக்கப்பட்டுள்ளன. ஒன்றைத் தேர்ந்தெடுத்து «இந்தத் திட்டத்தைப் பயன்படுத்து» என்பதை அழுத்தினால், தானாகவே பதிவிறக்கி மாற்றிக்கொள்ளும். இரு பக்கங்களிலும் வெவ்வேறு மாதிரிகளைப் பயன்படுத்தலாம். ஒன்று செயலியிலும் மற்றொன்று கிராபிக்ஸ் கார்டிலும் இயங்குவதால், கிராபிக்ஸ் நினைவகம் மிச்சமாகும். நீங்களே தேர்ந்தெடுக்க, அந்தந்த படிநிலையின் அட்டையில் «மாதிரித் தொகுப்பு» என்பதைத் திறக்கவும். ஒவ்வொரு மாதிரியும் இந்தக் கணினியில் சீராக இயங்குமா என்று குறிப்பிடப்பட்டிருக்கும்."
   },
   "tour.steps.provider-settings.content_kotomimi": {
     "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",

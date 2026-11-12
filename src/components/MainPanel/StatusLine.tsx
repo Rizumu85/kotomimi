@@ -14,7 +14,7 @@ const ICON: Record<StatusIcon, typeof MicOff> = {
 export interface StatusLineProps {
   entry: StatusEntry;
   onAction(spec: NoticeActionSpec): void;
-  onDismiss(what: 'echo' | 'subtitle-entry'): void;
+  onDismiss(what: 'echo' | 'subtitle-entry' | 'lag'): void;
 }
 
 /**

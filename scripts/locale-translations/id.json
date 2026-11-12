@@ -263,6 +263,22 @@
     "en": "Use {{name}}",
     "text": "Gunakan {{name}}"
   },
+  "fork.fit.cannot": {
+    "en": "Cannot run",
+    "text": "Tidak bisa dijalankan"
+  },
+  "fork.fit.hint": {
+    "en": "Needs about {{need}} of video memory; about {{left}} is left beside the other models.",
+    "text": "Perlu sekitar {{need}} memori grafis; tersisa sekitar {{left}} setelah dipakai model lain."
+  },
+  "fork.fit.maybeSlow": {
+    "en": "May lag",
+    "text": "Mungkin tersendat"
+  },
+  "fork.fit.smooth": {
+    "en": "Runs smoothly",
+    "text": "Berjalan lancar"
+  },
   "fork.fonts.add": {
     "en": "Add a language…",
     "text": "Tambah bahasa…"
@@ -343,6 +359,18 @@
     "en": "Furigana over kanji (Japanese)",
     "text": "Furigana di atas kanji (Jepang)"
   },
+  "fork.gap.cannot": {
+    "en": "{{model}} cannot hear {{languages}}",
+    "text": "{{model}} tidak bisa mengenali ucapan dalam {{languages}}"
+  },
+  "fork.gap.noDetect": {
+    "en": "{{model}} cannot tell languages apart",
+    "text": "{{model}} tidak bisa membedakan bahasa secara otomatis"
+  },
+  "fork.gap.switch": {
+    "en": "Switch to {{model}}",
+    "text": "Ganti ke {{model}}"
+  },
   "fork.help.issues": {
     "en": "Report a problem",
     "text": "Laporkan masalah"
@@ -354,6 +382,18 @@
   "fork.jyutping": {
     "en": "Jyutping over Cantonese",
     "text": "Jyutping di atas teks Kanton"
+  },
+  "fork.lag.hear": {
+    "en": "Recognition cannot keep up with the speech. Try a lighter plan?",
+    "text": "Pengenalan ucapan tidak bisa mengimbangi kecepatan bicara. Coba konfigurasi yang lebih ringan?"
+  },
+  "fork.lag.open": {
+    "en": "See plans",
+    "text": "Lihat konfigurasi"
+  },
+  "fork.lag.translate": {
+    "en": "Translation cannot keep up. Try a lighter plan?",
+    "text": "Terjemahan tidak bisa mengimbangi kecepatan bicara. Coba konfigurasi yang lebih ringan?"
   },
   "fork.lan.asked": {
     "en": "The other device wants to hear {{language}}",
@@ -586,6 +626,78 @@
   "fork.pinyin": {
     "en": "Pinyin over Chinese",
     "text": "Pinyin di atas teks Mandarin"
+  },
+  "fork.plans.accurate": {
+    "en": "Accurate",
+    "text": "Akurat"
+  },
+  "fork.plans.apply": {
+    "en": "Use this plan",
+    "text": "Gunakan konfigurasi ini"
+  },
+  "fork.plans.balanced": {
+    "en": "Balanced",
+    "text": "Seimbang"
+  },
+  "fork.plans.cancel": {
+    "en": "Cancel",
+    "text": "Batal"
+  },
+  "fork.plans.custom": {
+    "en": "Custom",
+    "text": "Kustom"
+  },
+  "fork.plans.downloaded": {
+    "en": "Downloaded",
+    "text": "Sudah diunduh"
+  },
+  "fork.plans.failed": {
+    "en": "A download failed. Try again from the model library.",
+    "text": "Ada model yang gagal diunduh. Coba lagi di pustaka model."
+  },
+  "fork.plans.inUse": {
+    "en": "In use",
+    "text": "Sedang digunakan"
+  },
+  "fork.plans.light": {
+    "en": "Light",
+    "text": "Ringan"
+  },
+  "fork.plans.speedTest": {
+    "en": "Test this computer's speed",
+    "text": "Uji kecepatan komputer ini"
+  },
+  "fork.plans.switching": {
+    "en": "Downloading, then switching: {{percent}}%",
+    "text": "Beralih otomatis setelah unduhan selesai: {{percent}}%"
+  },
+  "fork.plans.title": {
+    "en": "Plans",
+    "text": "Pilihan konfigurasi"
+  },
+  "fork.plans.translation": {
+    "en": "Translation",
+    "text": "Terjemahan"
+  },
+  "fork.plans.vram": {
+    "en": "Takes about {{size}} of video memory",
+    "text": "Memakai sekitar {{size}} memori grafis"
+  },
+  "fork.plans.why.big": {
+    "en": "This computer has the video memory for the more accurate models.",
+    "text": "Memori grafis komputer ini cukup untuk model yang lebih akurat."
+  },
+  "fork.plans.why.default": {
+    "en": "Accurate enough, with room left for a game.",
+    "text": "Cukup akurat, dan masih muat saat bermain game."
+  },
+  "fork.plans.why.lending": {
+    "en": "This computer lends its models to other devices: the more accurate models.",
+    "text": "Komputer ini berbagi model dengan perangkat lain, jadi gunakan model yang lebih akurat."
+  },
+  "fork.plans.why.small": {
+    "en": "This computer has little video memory: the plan that takes least.",
+    "text": "Memori grafis komputer ini terbatas. Konfigurasi ini paling hemat."
   },
   "fork.romanization": {
     "en": "Romanization",
@@ -2376,8 +2488,8 @@
     "text": "Bahasa"
   },
   "tour.steps.models.content_kotomimi": {
-    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
-    "text": "Unduh model di sini: klik \"Pustaka model\" pada kartu tahap. Model bertanda Direkomendasikan memiliki hasil uji terbaik pada percakapan nyata. Ikon kecil di samping nama model berisi hasil pengujiannya. Model otomatis diaktifkan setelah diunduh."
+    "en": "At the top, Plans pairs the models for this computer in three levels; pick one and press \"Use this plan\", and it downloads and switches by itself. The two sides can use different models, one on the processor and one on the graphics card, which saves video memory. To pick yourself, open \"Model library\" in a stage card: each model says whether this computer runs it smoothly.",
+    "text": "Di bagian atas, \"Paket\" menyediakan tiga pilihan kombinasi model yang disesuaikan untuk komputer ini. Pilih satu lalu tekan \"Gunakan paket ini\". Model akan diunduh dan diganti secara otomatis. Kedua sisi bisa memakai model berbeda, satu di prosesor dan satu di kartu grafis, agar lebih hemat memori grafis. Untuk memilih sendiri, buka \"Pustaka model\" di kartu tahap. Setiap model diberi keterangan apakah bisa berjalan lancar di komputer ini."
   },
   "tour.steps.provider-settings.content_kotomimi": {
     "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",

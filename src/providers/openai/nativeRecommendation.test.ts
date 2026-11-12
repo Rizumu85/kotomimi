@@ -37,7 +37,7 @@ describe('native model recommendation', () => {
   });
 
   it.each([0, 4096, 7679])('recommends the small translator below 7.5 GiB (%s MB)', (memory) => {
-    expect(recommendNativeModel('translation', TRANSLATION, memory, true, ['en', 'ja']))
+    expect(recommendNativeModel('translation', TRANSLATION, memory, false, ['en', 'ja']))
       .toEqual({ id: 'plamo-3-translate-0.8b', reason: 'small' });
   });
 

@@ -267,6 +267,22 @@
     "en": "Use {{name}}",
     "text": "Użyj {{name}}"
   },
+  "fork.fit.cannot": {
+    "en": "Cannot run",
+    "text": "Nie da się uruchomić"
+  },
+  "fork.fit.hint": {
+    "en": "Needs about {{need}} of video memory; about {{left}} is left beside the other models.",
+    "text": "Wymaga około {{need}} pamięci graficznej. Po uwzględnieniu pozostałych modeli zostaje około {{left}}."
+  },
+  "fork.fit.maybeSlow": {
+    "en": "May lag",
+    "text": "Może się zacinać"
+  },
+  "fork.fit.smooth": {
+    "en": "Runs smoothly",
+    "text": "Działa płynnie"
+  },
   "fork.fonts.add": {
     "en": "Add a language…",
     "text": "Dodaj język…"
@@ -347,6 +363,18 @@
     "en": "Furigana over kanji (Japanese)",
     "text": "Furigana nad kanji (japoński)"
   },
+  "fork.gap.cannot": {
+    "en": "{{model}} cannot hear {{languages}}",
+    "text": "{{model}} nie rozpoznaje mowy w tych językach: {{languages}}"
+  },
+  "fork.gap.noDetect": {
+    "en": "{{model}} cannot tell languages apart",
+    "text": "{{model}} nie wykrywa automatycznie języka"
+  },
+  "fork.gap.switch": {
+    "en": "Switch to {{model}}",
+    "text": "Zmień na {{model}}"
+  },
   "fork.help.issues": {
     "en": "Report a problem",
     "text": "Zgłoś problem"
@@ -358,6 +386,18 @@
   "fork.jyutping": {
     "en": "Jyutping over Cantonese",
     "text": "Jyutping nad tekstem kantońskim"
+  },
+  "fork.lag.hear": {
+    "en": "Recognition cannot keep up with the speech. Try a lighter plan?",
+    "text": "Rozpoznawanie mowy nie nadąża za rozmową. Zmienić zestaw na lżejszy?"
+  },
+  "fork.lag.open": {
+    "en": "See plans",
+    "text": "Zobacz zestawy"
+  },
+  "fork.lag.translate": {
+    "en": "Translation cannot keep up. Try a lighter plan?",
+    "text": "Tłumaczenie nie nadąża. Zmienić zestaw na lżejszy?"
   },
   "fork.lan.asked": {
     "en": "The other device wants to hear {{language}}",
@@ -590,6 +630,78 @@
   "fork.pinyin": {
     "en": "Pinyin over Chinese",
     "text": "Pinyin nad chińskim tekstem"
+  },
+  "fork.plans.accurate": {
+    "en": "Accurate",
+    "text": "Dokładny"
+  },
+  "fork.plans.apply": {
+    "en": "Use this plan",
+    "text": "Użyj tego zestawu"
+  },
+  "fork.plans.balanced": {
+    "en": "Balanced",
+    "text": "Zrównoważony"
+  },
+  "fork.plans.cancel": {
+    "en": "Cancel",
+    "text": "Anuluj"
+  },
+  "fork.plans.custom": {
+    "en": "Custom",
+    "text": "Własny"
+  },
+  "fork.plans.downloaded": {
+    "en": "Downloaded",
+    "text": "Pobrano"
+  },
+  "fork.plans.failed": {
+    "en": "A download failed. Try again from the model library.",
+    "text": "Nie udało się pobrać któregoś z modeli. Spróbuj ponownie w bibliotece modeli."
+  },
+  "fork.plans.inUse": {
+    "en": "In use",
+    "text": "W użyciu"
+  },
+  "fork.plans.light": {
+    "en": "Light",
+    "text": "Lekki"
+  },
+  "fork.plans.speedTest": {
+    "en": "Test this computer's speed",
+    "text": "Sprawdź szybkość tego komputera"
+  },
+  "fork.plans.switching": {
+    "en": "Downloading, then switching: {{percent}}%",
+    "text": "Automatyczne przełączenie po pobraniu: {{percent}}%"
+  },
+  "fork.plans.title": {
+    "en": "Plans",
+    "text": "Zestawy"
+  },
+  "fork.plans.translation": {
+    "en": "Translation",
+    "text": "Tłumaczenie"
+  },
+  "fork.plans.vram": {
+    "en": "Takes about {{size}} of video memory",
+    "text": "Zajmuje około {{size}} pamięci graficznej"
+  },
+  "fork.plans.why.big": {
+    "en": "This computer has the video memory for the more accurate models.",
+    "text": "Ten komputer ma dość pamięci graficznej na dokładniejsze modele."
+  },
+  "fork.plans.why.default": {
+    "en": "Accurate enough, with room left for a game.",
+    "text": "Wystarczająca dokładność i dość wolnej pamięci na grę."
+  },
+  "fork.plans.why.lending": {
+    "en": "This computer lends its models to other devices: the more accurate models.",
+    "text": "Ten komputer udostępnia modele innym urządzeniom, więc używa dokładniejszych modeli."
+  },
+  "fork.plans.why.small": {
+    "en": "This computer has little video memory: the plan that takes least.",
+    "text": "Ten komputer ma mało pamięci graficznej. Ten zestaw zajmuje jej najmniej."
   },
   "fork.romanization": {
     "en": "Romanization",
@@ -2352,8 +2464,8 @@
     "text": "Języki"
   },
   "tour.steps.models.content_kotomimi": {
-    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
-    "text": "Tutaj pobierasz modele: kliknij „Biblioteka modeli” na karcie danego etapu. Modele oznaczone jako „Polecane” wypadły najlepiej w testach prawdziwych rozmów. Ikona obok nazwy modelu zawiera wyniki testów. Pobrany model włącza się automatycznie."
+    "en": "At the top, Plans pairs the models for this computer in three levels; pick one and press \"Use this plan\", and it downloads and switches by itself. The two sides can use different models, one on the processor and one on the graphics card, which saves video memory. To pick yourself, open \"Model library\" in a stage card: each model says whether this computer runs it smoothly.",
+    "text": "U góry znajdziesz trzy „Zestawy” modeli dobrane do tego komputera. Wybierz jeden i kliknij „Użyj tego zestawu”, a aplikacja sama pobierze modele i je włączy. Obie strony mogą używać różnych modeli: jeden na procesorze, drugi na karcie graficznej, co oszczędza pamięć karty. Jeśli chcesz wybrać samodzielnie, kliknij „Biblioteka modeli” na karcie etapu. Przy każdym modelu zobaczysz, czy będzie działał płynnie na tym komputerze."
   },
   "tour.steps.provider-settings.content_kotomimi": {
     "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",

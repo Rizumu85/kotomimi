@@ -263,6 +263,22 @@
     "en": "Use {{name}}",
     "text": "{{name}} వాడండి"
   },
+  "fork.fit.cannot": {
+    "en": "Cannot run",
+    "text": "నడవదు"
+  },
+  "fork.fit.hint": {
+    "en": "Needs about {{need}} of video memory; about {{left}} is left beside the other models.",
+    "text": "సుమారు {{need}} వీడియో మెమరీ కావాలి. ఇతర మోడళ్లు వాడేది పోగా సుమారు {{left}} మిగిలి ఉంది."
+  },
+  "fork.fit.maybeSlow": {
+    "en": "May lag",
+    "text": "నెమ్మదించవచ్చు"
+  },
+  "fork.fit.smooth": {
+    "en": "Runs smoothly",
+    "text": "సాఫీగా నడుస్తుంది"
+  },
   "fork.fonts.add": {
     "en": "Add a language…",
     "text": "భాషను జోడించండి…"
@@ -343,6 +359,18 @@
     "en": "Furigana over kanji (Japanese)",
     "text": "కాంజి పైన ఫురిగానా (జపనీస్)"
   },
+  "fork.gap.cannot": {
+    "en": "{{model}} cannot hear {{languages}}",
+    "text": "{{model}} మోడల్ {{languages}} భాషల్లో మాటలను గుర్తించలేదు"
+  },
+  "fork.gap.noDetect": {
+    "en": "{{model}} cannot tell languages apart",
+    "text": "{{model}} భాషలను స్వయంగా గుర్తించలేదు"
+  },
+  "fork.gap.switch": {
+    "en": "Switch to {{model}}",
+    "text": "{{model}}కి మారండి"
+  },
   "fork.help.issues": {
     "en": "Report a problem",
     "text": "సమస్యను నివేదించండి"
@@ -354,6 +382,18 @@
   "fork.jyutping": {
     "en": "Jyutping over Cantonese",
     "text": "కాంటనీస్ పైన జ్యుట్‌పింగ్ చూపించు"
+  },
+  "fork.lag.hear": {
+    "en": "Recognition cannot keep up with the speech. Try a lighter plan?",
+    "text": "మాటల వేగానికి తగ్గట్టు గుర్తించలేకపోతోంది. మరింత తేలికైన ఎంపికకు మారాలా?"
+  },
+  "fork.lag.open": {
+    "en": "See plans",
+    "text": "ఎంపికలు చూడండి"
+  },
+  "fork.lag.translate": {
+    "en": "Translation cannot keep up. Try a lighter plan?",
+    "text": "అనువాదం వేగం సరిపోవడం లేదు. మరింత తేలికైన ఎంపికకు మారాలా?"
   },
   "fork.lan.asked": {
     "en": "The other device wants to hear {{language}}",
@@ -586,6 +626,78 @@
   "fork.pinyin": {
     "en": "Pinyin over Chinese",
     "text": "చైనీస్ పైన పిన్‌యిన్"
+  },
+  "fork.plans.accurate": {
+    "en": "Accurate",
+    "text": "ఖచ్చితమైనది"
+  },
+  "fork.plans.apply": {
+    "en": "Use this plan",
+    "text": "ఈ ఎంపికను వాడండి"
+  },
+  "fork.plans.balanced": {
+    "en": "Balanced",
+    "text": "సమతుల్యం"
+  },
+  "fork.plans.cancel": {
+    "en": "Cancel",
+    "text": "రద్దు"
+  },
+  "fork.plans.custom": {
+    "en": "Custom",
+    "text": "మీ ఇష్టం"
+  },
+  "fork.plans.downloaded": {
+    "en": "Downloaded",
+    "text": "డౌన్‌లోడ్ అయింది"
+  },
+  "fork.plans.failed": {
+    "en": "A download failed. Try again from the model library.",
+    "text": "ఒక మోడల్ డౌన్‌లోడ్ కాలేదు. మోడల్ లైబ్రరీలో మళ్లీ ప్రయత్నించండి."
+  },
+  "fork.plans.inUse": {
+    "en": "In use",
+    "text": "వాడుకలో ఉంది"
+  },
+  "fork.plans.light": {
+    "en": "Light",
+    "text": "తేలికైనది"
+  },
+  "fork.plans.speedTest": {
+    "en": "Test this computer's speed",
+    "text": "ఈ కంప్యూటర్ వేగాన్ని పరీక్షించండి"
+  },
+  "fork.plans.switching": {
+    "en": "Downloading, then switching: {{percent}}%",
+    "text": "డౌన్‌లోడ్ పూర్తయ్యాక స్వయంగా మారుతుంది: {{percent}}%"
+  },
+  "fork.plans.title": {
+    "en": "Plans",
+    "text": "ఎంపికలు"
+  },
+  "fork.plans.translation": {
+    "en": "Translation",
+    "text": "అనువాదం"
+  },
+  "fork.plans.vram": {
+    "en": "Takes about {{size}} of video memory",
+    "text": "సుమారు {{size}} వీడియో మెమరీ వాడుతుంది"
+  },
+  "fork.plans.why.big": {
+    "en": "This computer has the video memory for the more accurate models.",
+    "text": "మరింత ఖచ్చితమైన మోడళ్లకు సరిపడా వీడియో మెమరీ ఈ కంప్యూటర్‌లో ఉంది."
+  },
+  "fork.plans.why.default": {
+    "en": "Accurate enough, with room left for a game.",
+    "text": "తగినంత ఖచ్చితత్వం ఉంటుంది. గేమ్ నడుస్తున్నా మెమరీ సరిపోతుంది."
+  },
+  "fork.plans.why.lending": {
+    "en": "This computer lends its models to other devices: the more accurate models.",
+    "text": "ఇతర పరికరాలు ఈ కంప్యూటర్ మోడళ్లను వాడుతున్నాయి. మరింత ఖచ్చితమైన మోడళ్లను వాడండి."
+  },
+  "fork.plans.why.small": {
+    "en": "This computer has little video memory: the plan that takes least.",
+    "text": "ఈ కంప్యూటర్‌లో వీడియో మెమరీ తక్కువగా ఉంది. ఈ ఎంపిక అతి తక్కువ మెమరీ వాడుతుంది."
   },
   "fork.romanization": {
     "en": "Romanization",
@@ -2284,8 +2396,8 @@
     "text": "భాషలు"
   },
   "tour.steps.models.content_kotomimi": {
-    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
-    "text": "మోడళ్లను ఇక్కడ డౌన్‌లోడ్ చేయవచ్చు: దశ కార్డ్‌లో “మోడల్ లైబ్రరీ” తెరవండి. నిజమైన సంభాషణల పరీక్షల్లో ఉత్తమంగా పనిచేసిన వాటికి “సిఫార్సు” గుర్తు ఉంటుంది. మోడల్ పేరు పక్కనున్న చిన్న చిహ్నంలో పరీక్ష ఫలితాలు ఉంటాయి. డౌన్‌లోడ్ పూర్తయ్యాక ఆటోమేటిక్‌గా వాడుతుంది."
+    "en": "At the top, Plans pairs the models for this computer in three levels; pick one and press \"Use this plan\", and it downloads and switches by itself. The two sides can use different models, one on the processor and one on the graphics card, which saves video memory. To pick yourself, open \"Model library\" in a stage card: each model says whether this computer runs it smoothly.",
+    "text": "పైన ఉన్న “ప్లాన్‌లు” ఈ కంప్యూటర్‌కు సరిపోయే మోడళ్లను మూడు స్థాయిల్లో జత చేస్తాయి. ఒకటి ఎంచుకుని “ఈ ప్లాన్ వాడు” నొక్కితే, అవసరమైనవి ఆటోమేటిక్‌గా డౌన్‌లోడ్ అయి మారిపోతాయి. రెండు వైపులా వేర్వేరు మోడళ్లను వాడవచ్చు: ఒకటి ప్రాసెసర్‌పై, మరొకటి గ్రాఫిక్స్ కార్డుపై నడిస్తే వీడియో మెమరీ ఆదా అవుతుంది. మీరే ఎంచుకోవాలంటే, దశ కార్డులో “మోడల్ లైబ్రరీ” తెరవండి. ప్రతి మోడల్ ఈ కంప్యూటర్‌లో సాఫీగా నడుస్తుందో లేదో చూపిస్తుంది."
   },
   "tour.steps.provider-settings.content_kotomimi": {
     "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",

@@ -42,6 +42,33 @@ describe('the Kotomimi step\'s answer (fork)', () => {
     expect([...seq].sort((a, b) => a - b)).toEqual(seq);
   });
 
+  it('puts the plan the last step shows to use on this computer, after the settings, before the record', async () => {
+    const d = deps({ applyPlan: vi.fn(async () => {}) });
+    await applySetupDraft({ ...kotomimi('device'), plan: 'light' }, d);
+    expect(d.applyPlan).toHaveBeenCalledWith('light');
+    const seq = order([d.applyProvider, d.applyPlan, d.completeSetup] as any);
+    expect([...seq].sort((a, b) => a - b)).toEqual(seq);
+    // Nothing chosen: the recommended one (null), as on the step.
+    const none = deps({ applyPlan: vi.fn(async () => {}) });
+    await applySetupDraft(kotomimi('share'), none);
+    expect(none.applyPlan).toHaveBeenCalledWith(null);
+  });
+
+  it('puts no plan to use for another device, nor on a re-run that chose none, and is not undone by one that fails', async () => {
+    const server = deps({ applyPlan: vi.fn(async () => {}) });
+    await applySetupDraft(kotomimi('server'), server);
+    expect(server.applyPlan).not.toHaveBeenCalled();
+    const rerun = deps({ applyPlan: vi.fn(async () => {}) });
+    await applySetupDraft(draft({ provider: 'localai' as Provider, credentials: {}, credentialChoice: null }), rerun);
+    expect(rerun.applyPlan).not.toHaveBeenCalled();
+    const picked = deps({ applyPlan: vi.fn(async () => {}) });
+    await applySetupDraft(draft({ provider: 'localai' as Provider, credentials: {}, credentialChoice: null, plan: 'accurate' }), picked);
+    expect(picked.applyPlan).toHaveBeenCalledWith('accurate');
+    const failing = deps({ applyPlan: vi.fn(async () => { throw new Error('no memory'); }) });
+    await expect(applySetupDraft(kotomimi('device'), failing)).resolves.toBeUndefined();
+    expect(failing.completeSetup).toHaveBeenCalledTimes(1);
+  });
+
   it('asks the other device for the access key the step was given, and for none where none was', async () => {
     const keyed = deps();
     await applySetupDraft(draft({ provider: 'localai' as Provider, credentials: { endpoint: '192.168.1.20:8790', serverKey: 's3cret' }, credentialChoice: { setting: 'asrVia', value: 'server' } }), keyed);

@@ -279,6 +279,21 @@
   &__lang-tag--accel { border-color: tk.$color-success; color: tk.$color-success; }  // GPU live
   &__lang-tag--warn  { border-color: tk.$color-error; color: tk.$color-error; }  // degraded CPU
 
+  // Fork: whether this computer runs the model well beside the other stages' (`nativeFit`), tinted by how well.
+  &__fit {
+    display: inline-flex;
+    align-items: center;
+    padding: vars.$chip-padding-y 6px;
+    border-radius: 3px;
+    font-size: vars.$chip-font-size;
+    line-height: vars.$chip-line-height;
+    cursor: help;
+
+    &--ok { color: tk.$color-success; background: color-mix(in srgb, tk.$color-success 12%, transparent); }
+    &--warn { color: tk.$color-warning; background: color-mix(in srgb, tk.$color-warning 12%, transparent); }
+    &--bad { color: tk.$color-error; background: color-mix(in srgb, tk.$color-error 12%, transparent); }
+  }
+
   // Fork: the chip that says what kind of model this is (a native engine's); it answers on hover.
   &__kind-tag {
     cursor: help;

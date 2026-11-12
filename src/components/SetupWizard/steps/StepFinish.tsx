@@ -5,11 +5,13 @@ import { getScenario } from '../../../lib/setup/scenarios';
 import { pairSentence } from '../languageSentence';
 import StatusMessage from '../../Settings/shared/StatusMessage';
 import { textOnlyCapabilityOf, wizardProvider } from '../providerPaths';
-import type { SetupDraft } from '../setupDraft';
+import type { SetupAction, SetupDraft } from '../setupDraft';
+import { FinishPlans } from './FinishPlans';
+import { useProviderStore } from '../../../stores/providerStore';
 
-interface Props { draft: SetupDraft; isSignedIn: boolean; error: string | null }
+interface Props { draft: SetupDraft; dispatch?: React.Dispatch<SetupAction>; isSignedIn: boolean; error: string | null }
 
-const StepFinish: React.FC<Props> = ({ draft, isSignedIn, error }) => {
+const StepFinish: React.FC<Props> = ({ draft, dispatch, isSignedIn, error }) => {
   const { t } = useTranslation();
   const label = useLanguageLabel();
   const preset = getScenario(draft.scenario!);
@@ -34,6 +36,9 @@ const StepFinish: React.FC<Props> = ({ draft, isSignedIn, error }) => {
   });
   // Fork: the Kotomimi provider's pair is whose language each one is, as the pair step and its Settings name it.
   const owners = (p.id as string) === 'localai';
+  // Fork: this computer, as chosen in the Kotomimi step, or, where a re-run left that choice alone, as saved.
+  const savedPlace = useProviderStore((st) => (st.entries.localai?.settings as Record<string, unknown> | undefined)?.asrVia);
+  const here = draft.credentialChoice ? draft.credentialChoice.value === 'device' || draft.credentialChoice.value === 'share' : savedPlace === 'device';
   const ownersLine = `${t('fork.languageMenu.mine', 'My language')} ${sourceName} · ${t('fork.languageMenu.theirs', 'Their language')} ${targetName}`;
   // Same source as the scenario cards and the ModePicker itself.
   const modeLabel = preset.mode === 'speaker'
@@ -56,6 +61,10 @@ const StepFinish: React.FC<Props> = ({ draft, isSignedIn, error }) => {
         {/* Fork: the Kotomimi step's third start — what Finish does besides writing the settings. */}
         {(draft.provider as string | null) === 'localai' && draft.credentialChoice?.value === 'share' && (
           <><dt>{t('fork.wizard.shareSummary')}</dt><dd>{t('fork.wizard.shareSummaryOn')}</dd></>
+        )}
+        {/* Fork: the Kotomimi provider on this computer: which plan its models come from (`FinishPlans`). */}
+        {owners && dispatch && draft.sourceLanguage && draft.targetLanguage && here && (
+          <><dt>{t('fork.plans.title')}</dt><dd><FinishPlans draft={draft} dispatch={dispatch} keep={!draft.credentialChoice} /></dd></>
         )}
         <dt>{t('setup.summary.languages', 'Languages')}</dt>
         <dd>

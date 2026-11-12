@@ -259,6 +259,22 @@
     "en": "Use {{name}}",
     "text": "Використовувати {{name}}"
   },
+  "fork.fit.cannot": {
+    "en": "Cannot run",
+    "text": "Не запуститься"
+  },
+  "fork.fit.hint": {
+    "en": "Needs about {{need}} of video memory; about {{left}} is left beside the other models.",
+    "text": "Потрібно близько {{need}} відеопам’яті. Після завантаження інших моделей залишиться близько {{left}}."
+  },
+  "fork.fit.maybeSlow": {
+    "en": "May lag",
+    "text": "Можливі затримки"
+  },
+  "fork.fit.smooth": {
+    "en": "Runs smoothly",
+    "text": "Працюватиме плавно"
+  },
   "fork.fonts.add": {
     "en": "Add a language…",
     "text": "Додати мову…"
@@ -339,6 +355,18 @@
     "en": "Furigana over kanji (Japanese)",
     "text": "Фуріґана над ієрогліфами (японська)"
   },
+  "fork.gap.cannot": {
+    "en": "{{model}} cannot hear {{languages}}",
+    "text": "{{model}} не розпізнає мовлення такими мовами: {{languages}}"
+  },
+  "fork.gap.noDetect": {
+    "en": "{{model}} cannot tell languages apart",
+    "text": "{{model}} не може автоматично визначати мову"
+  },
+  "fork.gap.switch": {
+    "en": "Switch to {{model}}",
+    "text": "Перейти на {{model}}"
+  },
   "fork.help.issues": {
     "en": "Report a problem",
     "text": "Повідомити про проблему"
@@ -350,6 +378,18 @@
   "fork.jyutping": {
     "en": "Jyutping over Cantonese",
     "text": "Ютпхін над кантонським текстом"
+  },
+  "fork.lag.hear": {
+    "en": "Recognition cannot keep up with the speech. Try a lighter plan?",
+    "text": "Розпізнавання не встигає за мовленням. Перейти на легший варіант?"
+  },
+  "fork.lag.open": {
+    "en": "See plans",
+    "text": "Переглянути варіанти"
+  },
+  "fork.lag.translate": {
+    "en": "Translation cannot keep up. Try a lighter plan?",
+    "text": "Переклад не встигає. Перейти на легший варіант?"
   },
   "fork.lan.asked": {
     "en": "The other device wants to hear {{language}}",
@@ -582,6 +622,78 @@
   "fork.pinyin": {
     "en": "Pinyin over Chinese",
     "text": "Піньїнь над китайським текстом"
+  },
+  "fork.plans.accurate": {
+    "en": "Accurate",
+    "text": "Точний"
+  },
+  "fork.plans.apply": {
+    "en": "Use this plan",
+    "text": "Вибрати цей варіант"
+  },
+  "fork.plans.balanced": {
+    "en": "Balanced",
+    "text": "Збалансований"
+  },
+  "fork.plans.cancel": {
+    "en": "Cancel",
+    "text": "Скасувати"
+  },
+  "fork.plans.custom": {
+    "en": "Custom",
+    "text": "Власний"
+  },
+  "fork.plans.downloaded": {
+    "en": "Downloaded",
+    "text": "Завантажено"
+  },
+  "fork.plans.failed": {
+    "en": "A download failed. Try again from the model library.",
+    "text": "Не вдалося завантажити деякі моделі. Спробуйте ще раз у бібліотеці моделей."
+  },
+  "fork.plans.inUse": {
+    "en": "In use",
+    "text": "Використовується"
+  },
+  "fork.plans.light": {
+    "en": "Light",
+    "text": "Легкий"
+  },
+  "fork.plans.speedTest": {
+    "en": "Test this computer's speed",
+    "text": "Перевірити швидкість комп’ютера"
+  },
+  "fork.plans.switching": {
+    "en": "Downloading, then switching: {{percent}}%",
+    "text": "Після завантаження перемкнеться автоматично: {{percent}}%"
+  },
+  "fork.plans.title": {
+    "en": "Plans",
+    "text": "Варіанти"
+  },
+  "fork.plans.translation": {
+    "en": "Translation",
+    "text": "Переклад"
+  },
+  "fork.plans.vram": {
+    "en": "Takes about {{size}} of video memory",
+    "text": "Займає близько {{size}} відеопам’яті"
+  },
+  "fork.plans.why.big": {
+    "en": "This computer has the video memory for the more accurate models.",
+    "text": "На цьому комп’ютері достатньо відеопам’яті для точніших моделей."
+  },
+  "fork.plans.why.default": {
+    "en": "Accurate enough, with room left for a game.",
+    "text": "Достатньо точний, і пам’яті вистачить ще й на гру."
+  },
+  "fork.plans.why.lending": {
+    "en": "This computer lends its models to other devices: the more accurate models.",
+    "text": "Цей комп’ютер надає свої моделі іншим пристроям, тож варто вибрати точніші."
+  },
+  "fork.plans.why.small": {
+    "en": "This computer has little video memory: the plan that takes least.",
+    "text": "На цьому комп’ютері мало відеопам’яті. Цей варіант займає найменше."
   },
   "fork.romanization": {
     "en": "Romanization",
@@ -2304,8 +2416,8 @@
     "text": "Мови"
   },
   "tour.steps.models.content_kotomimi": {
-    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
-    "text": "Моделі завантажуються тут: натисніть «Бібліотека моделей» у картці етапу. Позначку «Рекомендовано» мають моделі, що показали найкращі результати в реальних розмовах. Значок біля назви містить результати перевірки. Після завантаження модель вмикається автоматично."
+    "en": "At the top, Plans pairs the models for this computer in three levels; pick one and press \"Use this plan\", and it downloads and switches by itself. The two sides can use different models, one on the processor and one on the graphics card, which saves video memory. To pick yourself, open \"Model library\" in a stage card: each model says whether this computer runs it smoothly.",
+    "text": "Угорі в розділі «Варіанти» є три готові набори моделей для цього комп’ютера. Виберіть один і натисніть «Використати цей варіант» — моделі автоматично завантажаться й увімкнуться. Для двох етапів можна використовувати різні моделі: одну на процесорі, іншу на відеокарті. Це заощаджує відеопам’ять. Щоб вибрати моделі самостійно, відкрийте «Бібліотеку моделей» у картці етапу. Біля кожної моделі вказано, чи працюватиме вона плавно на цьому комп’ютері."
   },
   "tour.steps.provider-settings.content_kotomimi": {
     "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",

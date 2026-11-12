@@ -263,6 +263,22 @@
     "en": "Use {{name}}",
     "text": "שימוש ב-{{name}}"
   },
+  "fork.fit.cannot": {
+    "en": "Cannot run",
+    "text": "לא ניתן להפעיל"
+  },
+  "fork.fit.hint": {
+    "en": "Needs about {{need}} of video memory; about {{left}} is left beside the other models.",
+    "text": "נדרשים כ־{{need}} מזיכרון הכרטיס הגרפי; אחרי שאר המודלים נשארים כ־{{left}}."
+  },
+  "fork.fit.maybeSlow": {
+    "en": "May lag",
+    "text": "ייתכנו האטות"
+  },
+  "fork.fit.smooth": {
+    "en": "Runs smoothly",
+    "text": "פועל חלק"
+  },
   "fork.fonts.add": {
     "en": "Add a language…",
     "text": "הוספת שפה…"
@@ -343,6 +359,18 @@
     "en": "Furigana over kanji (Japanese)",
     "text": "פוריגנה מעל קאנג'י (יפנית)"
   },
+  "fork.gap.cannot": {
+    "en": "{{model}} cannot hear {{languages}}",
+    "text": "{{model}} לא יכול לזהות דיבור בשפות {{languages}}"
+  },
+  "fork.gap.noDetect": {
+    "en": "{{model}} cannot tell languages apart",
+    "text": "{{model}} לא יכול להבחין אוטומטית בין שפות"
+  },
+  "fork.gap.switch": {
+    "en": "Switch to {{model}}",
+    "text": "מעבר ל־{{model}}"
+  },
   "fork.help.issues": {
     "en": "Report a problem",
     "text": "דיווח על בעיה"
@@ -354,6 +382,18 @@
   "fork.jyutping": {
     "en": "Jyutping over Cantonese",
     "text": "ג׳יוטפינג מעל הקנטונזית"
+  },
+  "fork.lag.hear": {
+    "en": "Recognition cannot keep up with the speech. Try a lighter plan?",
+    "text": "זיהוי הדיבור לא עומד בקצב. לעבור לתצורה קלה יותר?"
+  },
+  "fork.lag.open": {
+    "en": "See plans",
+    "text": "הצגת תצורות"
+  },
+  "fork.lag.translate": {
+    "en": "Translation cannot keep up. Try a lighter plan?",
+    "text": "התרגום לא עומד בקצב. לעבור לתצורה קלה יותר?"
   },
   "fork.lan.asked": {
     "en": "The other device wants to hear {{language}}",
@@ -586,6 +626,78 @@
   "fork.pinyin": {
     "en": "Pinyin over Chinese",
     "text": "פין-יין מעל הטקסט בסינית"
+  },
+  "fork.plans.accurate": {
+    "en": "Accurate",
+    "text": "מדויקת"
+  },
+  "fork.plans.apply": {
+    "en": "Use this plan",
+    "text": "שימוש בתצורה הזו"
+  },
+  "fork.plans.balanced": {
+    "en": "Balanced",
+    "text": "מאוזנת"
+  },
+  "fork.plans.cancel": {
+    "en": "Cancel",
+    "text": "ביטול"
+  },
+  "fork.plans.custom": {
+    "en": "Custom",
+    "text": "מותאמת אישית"
+  },
+  "fork.plans.downloaded": {
+    "en": "Downloaded",
+    "text": "ההורדה הושלמה"
+  },
+  "fork.plans.failed": {
+    "en": "A download failed. Try again from the model library.",
+    "text": "ההורדה של אחד המודלים נכשלה. אפשר לנסות שוב בספריית המודלים."
+  },
+  "fork.plans.inUse": {
+    "en": "In use",
+    "text": "בשימוש"
+  },
+  "fork.plans.light": {
+    "en": "Light",
+    "text": "קלה"
+  },
+  "fork.plans.speedTest": {
+    "en": "Test this computer's speed",
+    "text": "בדיקת המהירות של המחשב הזה"
+  },
+  "fork.plans.switching": {
+    "en": "Downloading, then switching: {{percent}}%",
+    "text": "המעבר יתבצע בסיום ההורדה: {{percent}}%"
+  },
+  "fork.plans.title": {
+    "en": "Plans",
+    "text": "תצורות"
+  },
+  "fork.plans.translation": {
+    "en": "Translation",
+    "text": "תרגום"
+  },
+  "fork.plans.vram": {
+    "en": "Takes about {{size}} of video memory",
+    "text": "תופסת כ־{{size}} מזיכרון הכרטיס הגרפי"
+  },
+  "fork.plans.why.big": {
+    "en": "This computer has the video memory for the more accurate models.",
+    "text": "למחשב הזה יש מספיק זיכרון בכרטיס הגרפי למודלים מדויקים יותר."
+  },
+  "fork.plans.why.default": {
+    "en": "Accurate enough, with room left for a game.",
+    "text": "מדויקת מספיק ומשאירה מספיק זיכרון גם למשחק."
+  },
+  "fork.plans.why.lending": {
+    "en": "This computer lends its models to other devices: the more accurate models.",
+    "text": "המחשב הזה משתף את המודלים שלו עם מכשירים אחרים, לכן כדאי להשתמש במודלים מדויקים יותר."
+  },
+  "fork.plans.why.small": {
+    "en": "This computer has little video memory: the plan that takes least.",
+    "text": "למחשב הזה יש מעט זיכרון בכרטיס הגרפי. התצורה הזו תופסת הכי מעט."
   },
   "fork.romanization": {
     "en": "Romanization",
@@ -2308,8 +2420,8 @@
     "text": "שפות"
   },
   "tour.steps.models.content_kotomimi": {
-    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
-    "text": "כאן מורידים מודלים: פותחים את \"ספריית המודלים\" בכרטיס של השלב. המודלים שמסומנים כ\"מומלץ\" הם אלה שהצליחו הכי טוב בבדיקות עם שיחות אמיתיות. הסמל שליד שם המודל מציג את תוצאות הבדיקה. בסיום ההורדה המודל מופעל אוטומטית."
+    "en": "At the top, Plans pairs the models for this computer in three levels; pick one and press \"Use this plan\", and it downloads and switches by itself. The two sides can use different models, one on the processor and one on the graphics card, which saves video memory. To pick yourself, open \"Model library\" in a stage card: each model says whether this computer runs it smoothly.",
+    "text": "בחלק העליון, תחת „תוכניות”, יש שלוש רמות של שילובי מודלים שהותאמו למחשב הזה. בוחרים תוכנית ולוחצים על „שימוש בתוכנית הזו”, והמודלים יורדים ומתחלפים אוטומטית. שני הצדדים יכולים להשתמש במודלים שונים, אחד על המעבד ואחד על כרטיס המסך, וכך לחסוך בזיכרון של כרטיס המסך. לבחירה ידנית, פותחים את „ספריית המודלים” בכרטיס של השלב הרצוי. ליד כל מודל מצוין אם הוא יפעל בצורה חלקה במחשב הזה."
   },
   "tour.steps.provider-settings.content_kotomimi": {
     "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",

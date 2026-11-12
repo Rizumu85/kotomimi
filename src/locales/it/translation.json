@@ -1535,7 +1535,7 @@
       "models": {
         "title": "Modelli",
         "content": "Scarica i modelli qui — uno per fase. Provane alcuni; la prima scelta non è l'unica valida.",
-        "content_kotomimi": "Per scaricare i modelli, apri \"Libreria modelli\" nella scheda di una fase. Quelli contrassegnati come Consigliati hanno dato i risultati migliori nei test su conversazioni reali. L'icona accanto al nome riporta i risultati dei test. Dopo il download, il modello si attiva automaticamente."
+        "content_kotomimi": "In alto, «Configurazioni» propone tre combinazioni di modelli adatte a questo computer. Scegline una e premi «Usa questa configurazione»: i modelli verranno scaricati e attivati automaticamente. Le due fasi possono usare modelli diversi, uno sul processore e uno sulla scheda grafica, per risparmiare memoria video. Per scegliere tu, apri «Libreria modelli» nella scheda di una fase: per ogni modello è indicato se questo computer riesce a eseguirlo senza rallentamenti."
       },
       "start": {
         "title": "Avvia",
@@ -2048,6 +2048,44 @@
         "copy_failed": "Lo spostamento non è terminato. I modelli sono nella posizione precedente.",
         "move_failed": "Lo spostamento non è terminato. I modelli sono nella posizione precedente."
       }
+    },
+    "plans": {
+      "title": "Configurazioni",
+      "light": "Leggera",
+      "balanced": "Bilanciata",
+      "accurate": "Precisa",
+      "custom": "Personalizzata",
+      "inUse": "In uso",
+      "vram": "Occupa circa {{size}} di memoria video",
+      "downloaded": "Scaricata",
+      "apply": "Usa questa configurazione",
+      "switching": "Cambio automatico al termine del download: {{percent}}%",
+      "failed": "Il download di un modello non è riuscito. Riprova dalla libreria dei modelli.",
+      "cancel": "Annulla",
+      "translation": "Traduzione",
+      "speedTest": "Verifica la velocità di questo computer",
+      "why": {
+        "lending": "Questo computer condivide i suoi modelli con altri dispositivi: usa quelli più precisi.",
+        "big": "Questo computer ha abbastanza memoria video per i modelli più precisi.",
+        "small": "Questo computer ha poca memoria video: questa configurazione ne occupa meno.",
+        "default": "Abbastanza precisa, con memoria libera anche per un gioco."
+      }
+    },
+    "fit": {
+      "smooth": "Funziona senza rallentamenti",
+      "maybeSlow": "Potrebbe rallentare",
+      "cannot": "Non può funzionare",
+      "hint": "Richiede circa {{need}} di memoria video; con gli altri modelli ne restano circa {{left}}."
+    },
+    "gap": {
+      "cannot": "{{model}} non riconosce il parlato in {{languages}}",
+      "noDetect": "{{model}} non distingue automaticamente le lingue",
+      "switch": "Passa a {{model}}"
+    },
+    "lag": {
+      "hear": "Il riconoscimento non tiene il passo con chi parla. Vuoi provare una configurazione più leggera?",
+      "translate": "La traduzione non tiene il passo. Vuoi provare una configurazione più leggera?",
+      "open": "Vedi configurazioni"
     }
   }
 }

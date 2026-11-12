@@ -1535,7 +1535,7 @@
       "models": {
         "title": "Modeller",
         "content": "Modelleri buradan indirin — her aşama için bir tane. Birkaçını deneyin; ilk seçtiğiniz tek iyi seçenek olmak zorunda değil.",
-        "content_kotomimi": "Modeller buradan indirilir: bir aşamanın kartında \"Model kitaplığı\"nı açın. Önerilen olarak işaretlenenler gerçek konuşmalarda en iyi sonuç verenlerdir; adın yanındaki işaret, model hakkında yapılan ölçümü gösterir. İndirdiğiniz model hemen kullanılmaya başlanır."
+        "content_kotomimi": "En üstteki \"Planlar\", bu bilgisayara uygun modelleri üç düzeyde eşleştirir. Birini seçip \"Bu planı kullan\" düğmesine basın; modeller otomatik indirilir ve devreye girer. İki tarafta farklı modeller kullanılabilir: biri işlemcide, diğeri ekran kartında çalışarak ekran kartı belleğinden tasarruf sağlar. Kendiniz seçmek için aşama kartındaki \"Model kitaplığı\"nı açın. Her modelin yanında bu bilgisayarda akıcı çalışıp çalışmayacağı belirtilir."
       },
       "start": {
         "title": "Başlat",
@@ -2048,6 +2048,44 @@
         "copy_failed": "Taşıma tamamlanamadı. Modeller eski konumunda.",
         "move_failed": "Taşıma tamamlanamadı. Modeller eski konumunda."
       }
+    },
+    "plans": {
+      "title": "Seçenekler",
+      "light": "Hafif",
+      "balanced": "Dengeli",
+      "accurate": "Hassas",
+      "custom": "Özel",
+      "inUse": "Kullanımda",
+      "vram": "Yaklaşık {{size}} ekran kartı belleği kullanır",
+      "downloaded": "İndirildi",
+      "apply": "Bu seçeneği kullan",
+      "switching": "İndirme bitince otomatik geçilecek: {{percent}}%",
+      "failed": "Bazı modeller indirilemedi. Model kitaplığından tekrar deneyebilirsiniz.",
+      "cancel": "İptal",
+      "translation": "Çeviri",
+      "speedTest": "Bu bilgisayarın hızını test et",
+      "why": {
+        "lending": "Bu bilgisayar modellerini diğer cihazlarla paylaşıyor, bu yüzden daha doğru sonuç veren modelleri kullanır.",
+        "big": "Bu bilgisayarın ekran kartı belleği, daha doğru sonuç veren modeller için yeterli.",
+        "small": "Bu bilgisayarın ekran kartı belleği az. Bu seçenek en az belleği kullanır.",
+        "default": "Yeterince doğru sonuç verir, oyun için de bellekte yer bırakır."
+      }
+    },
+    "fit": {
+      "smooth": "Akıcı çalışır",
+      "maybeSlow": "Takılabilir",
+      "cannot": "Çalıştırılamaz",
+      "hint": "Yaklaşık {{need}} ekran kartı belleği gerekir. Diğer modellerin kullandığı bellek çıkarıldığında yaklaşık {{left}} kalır."
+    },
+    "gap": {
+      "cannot": "{{model}}, şu dillerdeki konuşmaları tanıyamaz: {{languages}}",
+      "noDetect": "{{model}}, dili otomatik algılayamaz",
+      "switch": "{{model}} modeline geç"
+    },
+    "lag": {
+      "hear": "Konuşma tanıma, konuşma hızına yetişemiyor. Daha hafif bir seçeneğe geçelim mi?",
+      "translate": "Çeviri yetişemiyor. Daha hafif bir seçeneğe geçelim mi?",
+      "open": "Seçenekleri gör"
     }
   }
 }

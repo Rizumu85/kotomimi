@@ -1535,7 +1535,7 @@
       "models": {
         "title": "Modeller",
         "content": "Ladda ner modeller här — en per steg. Prova några olika; det första valet är inte det enda som fungerar bra.",
-        "content_kotomimi": "Hämta modeller genom att öppna ”Modellbibliotek” på ett stegs kort. Modeller märkta ”Rekommenderas” har gett bäst resultat i tester med riktiga samtal. Den lilla ikonen vid modellnamnet visar testresultaten. Modellen aktiveras automatiskt när den har hämtats."
+        "content_kotomimi": "Högst upp finns tre färdiga modellpaket anpassade för den här datorn. Välj ett och tryck på ”Använd det här paketet”, så laddas modellerna ner och aktiveras automatiskt. De två sidorna kan använda olika modeller, en på processorn och en på grafikkortet, vilket sparar grafikminne. Vill du välja själv öppnar du ”Modellbibliotek” i kortet för ett steg. Vid varje modell står det om den kan köras smidigt på den här datorn."
       },
       "start": {
         "title": "Starta",
@@ -2048,6 +2048,44 @@
         "copy_failed": "Flytten slutfördes inte. Modellerna är kvar på sin ursprungliga plats.",
         "move_failed": "Flytten slutfördes inte. Modellerna är kvar på sin ursprungliga plats."
       }
+    },
+    "plans": {
+      "title": "Alternativ",
+      "light": "Lätt",
+      "balanced": "Balanserat",
+      "accurate": "Exakt",
+      "custom": "Anpassat",
+      "inUse": "Används",
+      "vram": "Använder cirka {{size}} grafikminne",
+      "downloaded": "Nedladdat",
+      "apply": "Använd det här alternativet",
+      "switching": "Byter automatiskt när nedladdningen är klar: {{percent}}%",
+      "failed": "En modell kunde inte laddas ned. Försök igen i modellbiblioteket.",
+      "cancel": "Avbryt",
+      "translation": "Översättning",
+      "speedTest": "Testa datorns hastighet",
+      "why": {
+        "lending": "Den här datorn delar sina modeller med andra enheter och använder därför mer exakta modeller.",
+        "big": "Den här datorn har tillräckligt med grafikminne för mer exakta modeller.",
+        "small": "Den här datorn har lite grafikminne. Det här alternativet använder minst.",
+        "default": "Tillräckligt exakt, med minne kvar för ett spel."
+      }
+    },
+    "fit": {
+      "smooth": "Körs utan problem",
+      "maybeSlow": "Kan hacka",
+      "cannot": "Kan inte köras",
+      "hint": "Behöver cirka {{need}} grafikminne. Cirka {{left}} finns kvar när de andra modellerna har räknats bort."
+    },
+    "gap": {
+      "cannot": "{{model}} kan inte känna igen tal på {{languages}}",
+      "noDetect": "{{model}} kan inte identifiera språk automatiskt",
+      "switch": "Byt till {{model}}"
+    },
+    "lag": {
+      "hear": "Taligenkänningen hinner inte med. Vill du byta till ett lättare alternativ?",
+      "translate": "Översättningen hinner inte med. Vill du byta till ett lättare alternativ?",
+      "open": "Visa alternativ"
     }
   }
 }

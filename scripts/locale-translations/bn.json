@@ -263,6 +263,22 @@
     "en": "Use {{name}}",
     "text": "{{name}} ব্যবহার করুন"
   },
+  "fork.fit.cannot": {
+    "en": "Cannot run",
+    "text": "চালানো যাবে না"
+  },
+  "fork.fit.hint": {
+    "en": "Needs about {{need}} of video memory; about {{left}} is left beside the other models.",
+    "text": "প্রায় {{need}} ভিডিও মেমরি দরকার। অন্য ধাপের মডেলগুলোর মেমরি বাদ দিলে প্রায় {{left}} বাকি থাকে।"
+  },
+  "fork.fit.maybeSlow": {
+    "en": "May lag",
+    "text": "আটকে যেতে পারে"
+  },
+  "fork.fit.smooth": {
+    "en": "Runs smoothly",
+    "text": "মসৃণভাবে চলে"
+  },
   "fork.fonts.add": {
     "en": "Add a language…",
     "text": "ভাষা যোগ করুন…"
@@ -343,6 +359,18 @@
     "en": "Furigana over kanji (Japanese)",
     "text": "কানজির উপরে কানা দেখান (জাপানি)"
   },
+  "fork.gap.cannot": {
+    "en": "{{model}} cannot hear {{languages}}",
+    "text": "{{model}} {{languages}} ভাষার কথা চিনতে পারে না"
+  },
+  "fork.gap.noDetect": {
+    "en": "{{model}} cannot tell languages apart",
+    "text": "{{model}} নিজে থেকে ভাষা আলাদা করে চিনতে পারে না"
+  },
+  "fork.gap.switch": {
+    "en": "Switch to {{model}}",
+    "text": "{{model}} ব্যবহার করুন"
+  },
   "fork.help.issues": {
     "en": "Report a problem",
     "text": "সমস্যা জানান"
@@ -354,6 +382,18 @@
   "fork.jyutping": {
     "en": "Jyutping over Cantonese",
     "text": "ক্যান্টোনিজ লেখার উপরে জ্যুতপিং"
+  },
+  "fork.lag.hear": {
+    "en": "Recognition cannot keep up with the speech. Try a lighter plan?",
+    "text": "কথা শনাক্ত করার গতি বলার গতির সঙ্গে তাল মেলাতে পারছে না। আরও হালকা পরিকল্পনা ব্যবহার করবেন?"
+  },
+  "fork.lag.open": {
+    "en": "See plans",
+    "text": "পরিকল্পনা দেখুন"
+  },
+  "fork.lag.translate": {
+    "en": "Translation cannot keep up. Try a lighter plan?",
+    "text": "অনুবাদের গতি তাল মেলাতে পারছে না। আরও হালকা পরিকল্পনা ব্যবহার করবেন?"
   },
   "fork.lan.asked": {
     "en": "The other device wants to hear {{language}}",
@@ -586,6 +626,78 @@
   "fork.pinyin": {
     "en": "Pinyin over Chinese",
     "text": "চীনা লেখার উপরে পিনইন"
+  },
+  "fork.plans.accurate": {
+    "en": "Accurate",
+    "text": "নির্ভুল"
+  },
+  "fork.plans.apply": {
+    "en": "Use this plan",
+    "text": "এই পরিকল্পনা ব্যবহার করুন"
+  },
+  "fork.plans.balanced": {
+    "en": "Balanced",
+    "text": "ভারসাম্যপূর্ণ"
+  },
+  "fork.plans.cancel": {
+    "en": "Cancel",
+    "text": "বাতিল"
+  },
+  "fork.plans.custom": {
+    "en": "Custom",
+    "text": "নিজের মতো"
+  },
+  "fork.plans.downloaded": {
+    "en": "Downloaded",
+    "text": "ডাউনলোড হয়েছে"
+  },
+  "fork.plans.failed": {
+    "en": "A download failed. Try again from the model library.",
+    "text": "একটি মডেল ডাউনলোড হয়নি। মডেল লাইব্রেরি থেকে আবার চেষ্টা করুন।"
+  },
+  "fork.plans.inUse": {
+    "en": "In use",
+    "text": "ব্যবহার হচ্ছে"
+  },
+  "fork.plans.light": {
+    "en": "Light",
+    "text": "হালকা"
+  },
+  "fork.plans.speedTest": {
+    "en": "Test this computer's speed",
+    "text": "এই কম্পিউটারের গতি যাচাই করুন"
+  },
+  "fork.plans.switching": {
+    "en": "Downloading, then switching: {{percent}}%",
+    "text": "ডাউনলোড শেষে নিজে থেকেই বদলাবে: {{percent}}%"
+  },
+  "fork.plans.title": {
+    "en": "Plans",
+    "text": "পরিকল্পনা"
+  },
+  "fork.plans.translation": {
+    "en": "Translation",
+    "text": "অনুবাদ"
+  },
+  "fork.plans.vram": {
+    "en": "Takes about {{size}} of video memory",
+    "text": "প্রায় {{size}} ভিডিও মেমরি লাগে"
+  },
+  "fork.plans.why.big": {
+    "en": "This computer has the video memory for the more accurate models.",
+    "text": "এই কম্পিউটারে আরও নির্ভুল মডেল চালানোর মতো ভিডিও মেমরি আছে।"
+  },
+  "fork.plans.why.default": {
+    "en": "Accurate enough, with room left for a game.",
+    "text": "যথেষ্ট নির্ভুল, গেম চালানোর জন্যও মেমরি বাকি থাকে।"
+  },
+  "fork.plans.why.lending": {
+    "en": "This computer lends its models to other devices: the more accurate models.",
+    "text": "এই কম্পিউটারের মডেল অন্য ডিভাইসও ব্যবহার করছে, তাই আরও নির্ভুল মডেল বেছে নেওয়া হয়েছে।"
+  },
+  "fork.plans.why.small": {
+    "en": "This computer has little video memory: the plan that takes least.",
+    "text": "এই কম্পিউটারে ভিডিও মেমরি কম। এই পরিকল্পনায় সবচেয়ে কম মেমরি লাগে।"
   },
   "fork.romanization": {
     "en": "Romanization",
@@ -2308,8 +2420,8 @@
     "text": "ভাষা"
   },
   "tour.steps.models.content_kotomimi": {
-    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
-    "text": "মডেল ডাউনলোড করতে ধাপের কার্ডে “মডেল লাইব্রেরি” খুলুন। বাস্তব কথোপকথনে পরীক্ষায় সেরা মডেলগুলোতে “প্রস্তাবিত” চিহ্ন আছে। প্রতিটি মডেলের নামের পাশের ছোট আইকনে পরীক্ষার ফল পাবেন। ডাউনলোড শেষ হলেই মডেলটি চালু হবে।"
+    "en": "At the top, Plans pairs the models for this computer in three levels; pick one and press \"Use this plan\", and it downloads and switches by itself. The two sides can use different models, one on the processor and one on the graphics card, which saves video memory. To pick yourself, open \"Model library\" in a stage card: each model says whether this computer runs it smoothly.",
+    "text": "একদম ওপরে \"পরিকল্পনা\" বিভাগে এই কম্পিউটারের জন্য তিন স্তরের মডেল সাজানো আছে। একটি বেছে \"এই পরিকল্পনা ব্যবহার করুন\" চাপুন, নিজে থেকেই ডাউনলোড হয়ে চালু হবে। দুই দিকে আলাদা মডেল ব্যবহার করা যায়, একটি প্রসেসরে আর অন্যটি গ্রাফিক্স কার্ডে চালালে গ্রাফিক্স মেমরি কম লাগে। নিজে বেছে নিতে চাইলে ধাপের কার্ডে \"মডেল লাইব্রেরি\" খুলুন। প্রতিটি মডেলের পাশে লেখা আছে, এই কম্পিউটারে সেটি মসৃণভাবে চলবে কি না।"
   },
   "tour.steps.provider-settings.content_kotomimi": {
     "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",

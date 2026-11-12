@@ -259,6 +259,22 @@
     "en": "Use {{name}}",
     "text": "Использовать {{name}}"
   },
+  "fork.fit.cannot": {
+    "en": "Cannot run",
+    "text": "Не запустится"
+  },
+  "fork.fit.hint": {
+    "en": "Needs about {{need}} of video memory; about {{left}} is left beside the other models.",
+    "text": "Нужно около {{need}} видеопамяти. С учётом других моделей остаётся около {{left}}."
+  },
+  "fork.fit.maybeSlow": {
+    "en": "May lag",
+    "text": "Может тормозить"
+  },
+  "fork.fit.smooth": {
+    "en": "Runs smoothly",
+    "text": "Работает плавно"
+  },
   "fork.fonts.add": {
     "en": "Add a language…",
     "text": "Добавить язык…"
@@ -339,6 +355,18 @@
     "en": "Furigana over kanji (Japanese)",
     "text": "Фуригана над иероглифами (японский)"
   },
+  "fork.gap.cannot": {
+    "en": "{{model}} cannot hear {{languages}}",
+    "text": "{{model}} не распознаёт речь на следующих языках: {{languages}}"
+  },
+  "fork.gap.noDetect": {
+    "en": "{{model}} cannot tell languages apart",
+    "text": "{{model}} не умеет автоматически определять язык"
+  },
+  "fork.gap.switch": {
+    "en": "Switch to {{model}}",
+    "text": "Перейти на {{model}}"
+  },
   "fork.help.issues": {
     "en": "Report a problem",
     "text": "Сообщить о проблеме"
@@ -350,6 +378,18 @@
   "fork.jyutping": {
     "en": "Jyutping over Cantonese",
     "text": "Ютпхин над кантонским текстом"
+  },
+  "fork.lag.hear": {
+    "en": "Recognition cannot keep up with the speech. Try a lighter plan?",
+    "text": "Распознавание не успевает за речью. Выбрать более лёгкий профиль?"
+  },
+  "fork.lag.open": {
+    "en": "See plans",
+    "text": "Посмотреть профили"
+  },
+  "fork.lag.translate": {
+    "en": "Translation cannot keep up. Try a lighter plan?",
+    "text": "Перевод не успевает. Выбрать более лёгкий профиль?"
   },
   "fork.lan.asked": {
     "en": "The other device wants to hear {{language}}",
@@ -582,6 +622,78 @@
   "fork.pinyin": {
     "en": "Pinyin over Chinese",
     "text": "Пиньинь над китайским текстом"
+  },
+  "fork.plans.accurate": {
+    "en": "Accurate",
+    "text": "Точный"
+  },
+  "fork.plans.apply": {
+    "en": "Use this plan",
+    "text": "Выбрать профиль"
+  },
+  "fork.plans.balanced": {
+    "en": "Balanced",
+    "text": "Сбалансированный"
+  },
+  "fork.plans.cancel": {
+    "en": "Cancel",
+    "text": "Отмена"
+  },
+  "fork.plans.custom": {
+    "en": "Custom",
+    "text": "Свой"
+  },
+  "fork.plans.downloaded": {
+    "en": "Downloaded",
+    "text": "Скачано"
+  },
+  "fork.plans.failed": {
+    "en": "A download failed. Try again from the model library.",
+    "text": "Не удалось скачать некоторые модели. Повторите попытку в библиотеке моделей."
+  },
+  "fork.plans.inUse": {
+    "en": "In use",
+    "text": "Используется"
+  },
+  "fork.plans.light": {
+    "en": "Light",
+    "text": "Лёгкий"
+  },
+  "fork.plans.speedTest": {
+    "en": "Test this computer's speed",
+    "text": "Проверить скорость компьютера"
+  },
+  "fork.plans.switching": {
+    "en": "Downloading, then switching: {{percent}}%",
+    "text": "Загрузка с автопереключением: {{percent}}%"
+  },
+  "fork.plans.title": {
+    "en": "Plans",
+    "text": "Профили"
+  },
+  "fork.plans.translation": {
+    "en": "Translation",
+    "text": "Перевод"
+  },
+  "fork.plans.vram": {
+    "en": "Takes about {{size}} of video memory",
+    "text": "Занимает около {{size}} видеопамяти"
+  },
+  "fork.plans.why.big": {
+    "en": "This computer has the video memory for the more accurate models.",
+    "text": "На этом компьютере достаточно видеопамяти для более точных моделей."
+  },
+  "fork.plans.why.default": {
+    "en": "Accurate enough, with room left for a game.",
+    "text": "Достаточно точно, и видеопамяти хватит ещё и на игру."
+  },
+  "fork.plans.why.lending": {
+    "en": "This computer lends its models to other devices: the more accurate models.",
+    "text": "Этот компьютер предоставляет модели другим устройствам, поэтому выбраны более точные."
+  },
+  "fork.plans.why.small": {
+    "en": "This computer has little video memory: the plan that takes least.",
+    "text": "На этом компьютере мало видеопамяти. Этот профиль занимает меньше всего."
   },
   "fork.romanization": {
     "en": "Romanization",
@@ -2304,8 +2416,8 @@
     "text": "Языки"
   },
   "tour.steps.models.content_kotomimi": {
-    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
-    "text": "Чтобы скачать модель, откройте «Библиотеку моделей» в карточке этапа. Меткой «Рекомендуем» отмечены модели, показавшие лучшие результаты на реальных разговорах. Значок рядом с названием показывает результаты проверки. После скачивания модель включится автоматически."
+    "en": "At the top, Plans pairs the models for this computer in three levels; pick one and press \"Use this plan\", and it downloads and switches by itself. The two sides can use different models, one on the processor and one on the graphics card, which saves video memory. To pick yourself, open \"Model library\" in a stage card: each model says whether this computer runs it smoothly.",
+    "text": "Вверху, в разделе «Наборы», уже подобраны три варианта моделей для этого компьютера. Выберите один и нажмите «Использовать набор» — приложение само скачает модели и переключится на них. Для двух этапов можно выбрать разные модели: одну запускать на процессоре, другую — на видеокарте, чтобы экономить видеопамять. Чтобы выбрать модели самостоятельно, откройте «Библиотеку моделей» в карточке этапа. У каждой модели указано, сможет ли этот компьютер запускать её без задержек."
   },
   "tour.steps.provider-settings.content_kotomimi": {
     "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",

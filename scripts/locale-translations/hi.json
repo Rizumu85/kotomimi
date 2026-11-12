@@ -263,6 +263,22 @@
     "en": "Use {{name}}",
     "text": "{{name}} इस्तेमाल करें"
   },
+  "fork.fit.cannot": {
+    "en": "Cannot run",
+    "text": "नहीं चल सकता"
+  },
+  "fork.fit.hint": {
+    "en": "Needs about {{need}} of video memory; about {{left}} is left beside the other models.",
+    "text": "लगभग {{need}} वीडियो मेमोरी चाहिए। दूसरे मॉडल की मेमोरी निकालकर लगभग {{left}} बचती है।"
+  },
+  "fork.fit.maybeSlow": {
+    "en": "May lag",
+    "text": "अटक सकता है"
+  },
+  "fork.fit.smooth": {
+    "en": "Runs smoothly",
+    "text": "बिना अटके चलेगा"
+  },
   "fork.fonts.add": {
     "en": "Add a language…",
     "text": "भाषा जोड़ें…"
@@ -343,6 +359,18 @@
     "en": "Furigana over kanji (Japanese)",
     "text": "कांजी के ऊपर फ़ुरिगाना दिखाएँ (जापानी)"
   },
+  "fork.gap.cannot": {
+    "en": "{{model}} cannot hear {{languages}}",
+    "text": "{{model}}, {{languages}} में कही गई बात पहचान नहीं सकता"
+  },
+  "fork.gap.noDetect": {
+    "en": "{{model}} cannot tell languages apart",
+    "text": "{{model}} अपने आप भाषा पहचान नहीं सकता"
+  },
+  "fork.gap.switch": {
+    "en": "Switch to {{model}}",
+    "text": "{{model}} पर बदलें"
+  },
   "fork.help.issues": {
     "en": "Report a problem",
     "text": "समस्या बताएँ"
@@ -354,6 +382,18 @@
   "fork.jyutping": {
     "en": "Jyutping over Cantonese",
     "text": "कैंटोनीज़ के ऊपर ज्यूटपिंग दिखाएँ"
+  },
+  "fork.lag.hear": {
+    "en": "Recognition cannot keep up with the speech. Try a lighter plan?",
+    "text": "बोली पहचानने की रफ़्तार बोलने से धीमी है। हल्का विकल्प चुनें?"
+  },
+  "fork.lag.open": {
+    "en": "See plans",
+    "text": "विकल्प देखें"
+  },
+  "fork.lag.translate": {
+    "en": "Translation cannot keep up. Try a lighter plan?",
+    "text": "अनुवाद पीछे रह रहा है। हल्का विकल्प चुनें?"
   },
   "fork.lan.asked": {
     "en": "The other device wants to hear {{language}}",
@@ -586,6 +626,78 @@
   "fork.pinyin": {
     "en": "Pinyin over Chinese",
     "text": "चीनी के ऊपर पिनयिन दिखाएँ"
+  },
+  "fork.plans.accurate": {
+    "en": "Accurate",
+    "text": "सटीक"
+  },
+  "fork.plans.apply": {
+    "en": "Use this plan",
+    "text": "यह विकल्प इस्तेमाल करें"
+  },
+  "fork.plans.balanced": {
+    "en": "Balanced",
+    "text": "संतुलित"
+  },
+  "fork.plans.cancel": {
+    "en": "Cancel",
+    "text": "रद्द करें"
+  },
+  "fork.plans.custom": {
+    "en": "Custom",
+    "text": "कस्टम"
+  },
+  "fork.plans.downloaded": {
+    "en": "Downloaded",
+    "text": "डाउनलोड हो गया"
+  },
+  "fork.plans.failed": {
+    "en": "A download failed. Try again from the model library.",
+    "text": "कुछ मॉडल डाउनलोड नहीं हो पाए। मॉडल लाइब्रेरी से फिर कोशिश करें।"
+  },
+  "fork.plans.inUse": {
+    "en": "In use",
+    "text": "इस्तेमाल में"
+  },
+  "fork.plans.light": {
+    "en": "Light",
+    "text": "हल्का"
+  },
+  "fork.plans.speedTest": {
+    "en": "Test this computer's speed",
+    "text": "इस कंप्यूटर की रफ़्तार जाँचें"
+  },
+  "fork.plans.switching": {
+    "en": "Downloading, then switching: {{percent}}%",
+    "text": "डाउनलोड के बाद अपने आप बदल जाएगा: {{percent}}%"
+  },
+  "fork.plans.title": {
+    "en": "Plans",
+    "text": "विकल्प"
+  },
+  "fork.plans.translation": {
+    "en": "Translation",
+    "text": "अनुवाद"
+  },
+  "fork.plans.vram": {
+    "en": "Takes about {{size}} of video memory",
+    "text": "लगभग {{size}} वीडियो मेमोरी लेता है"
+  },
+  "fork.plans.why.big": {
+    "en": "This computer has the video memory for the more accurate models.",
+    "text": "इस कंप्यूटर में ज़्यादा सटीक मॉडल चलाने के लिए पर्याप्त वीडियो मेमोरी है।"
+  },
+  "fork.plans.why.default": {
+    "en": "Accurate enough, with room left for a game.",
+    "text": "सटीकता काफ़ी है और गेम चलाने के लिए भी मेमोरी बचती है।"
+  },
+  "fork.plans.why.lending": {
+    "en": "This computer lends its models to other devices: the more accurate models.",
+    "text": "इस कंप्यूटर के मॉडल दूसरे डिवाइस भी इस्तेमाल कर रहे हैं, इसलिए ज़्यादा सटीक मॉडल चुनें।"
+  },
+  "fork.plans.why.small": {
+    "en": "This computer has little video memory: the plan that takes least.",
+    "text": "इस कंप्यूटर में वीडियो मेमोरी कम है। यह विकल्प सबसे कम मेमोरी लेता है।"
   },
   "fork.romanization": {
     "en": "Romanization",
@@ -2284,8 +2396,8 @@
     "text": "भाषाएँ"
   },
   "tour.steps.models.content_kotomimi": {
-    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
-    "text": "मॉडल यहाँ डाउनलोड करें: चरण के कार्ड में \"मॉडल लाइब्रेरी\" खोलें। \"सुझाया गया\" निशान वाले मॉडल असली बातचीत के परीक्षण में सबसे अच्छे रहे हैं। हर मॉडल के नाम के पास छोटे आइकन में परीक्षण के नतीजे हैं। डाउनलोड होते ही मॉडल अपने आप इस्तेमाल होने लगता है।"
+    "en": "At the top, Plans pairs the models for this computer in three levels; pick one and press \"Use this plan\", and it downloads and switches by itself. The two sides can use different models, one on the processor and one on the graphics card, which saves video memory. To pick yourself, open \"Model library\" in a stage card: each model says whether this computer runs it smoothly.",
+    "text": "सबसे ऊपर \"योजनाएँ\" में इस कंप्यूटर के लिए तीन स्तरों पर मॉडल चुने गए हैं। कोई एक चुनकर \"यह योजना अपनाएँ\" दबाएँ। ज़रूरी मॉडल अपने आप डाउनलोड होकर चालू हो जाएँगे। दोनों ओर अलग-अलग मॉडल चल सकते हैं, एक प्रोसेसर पर और दूसरा ग्राफ़िक्स कार्ड पर। इससे ग्राफ़िक्स मेमोरी कम लगती है। खुद चुनने के लिए किसी चरण के कार्ड में \"मॉडल लाइब्रेरी\" खोलें। हर मॉडल के साथ बताया गया है कि वह इस कंप्यूटर पर सुचारु रूप से चलेगा या नहीं।"
   },
   "tour.steps.provider-settings.content_kotomimi": {
     "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",

@@ -1,4 +1,4 @@
-import { ChevronRight, Mic, Plus, X } from 'lucide-react';
+import { ChevronRight, Mic, Plus, TriangleAlert, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Hearer, LanguageOption } from '../../lib/provider/types';
 import { addMine, addTheirs, isLit, pressMine, pressTheirs, removeMine, removeTheirs, type MyNext, type TheirNext } from '../../lib/language/theirLanguages';
@@ -43,8 +43,22 @@ export interface SideLanguages {
  * one lit beside it, whether two can be lit at once, whether "any language" is offered, and what a change writes —
  * the pair's target and the provider's settings together.
  */
+/**
+ * Fork: a side whose recognizer on this computer does not hear one of its languages in use (`nativeLanguageGap`):
+ * those languages, what hears the side now, and the model that would hear them all, put to use on a press. Shown only
+ * while it is so: nothing switches by itself.
+ */
+export interface HearingGap {
+  /** Language codes; `auto`: the side is left to be detected and its recognizer cannot. */
+  codes: readonly string[];
+  by: string;
+  to: string;
+  fix(): void;
+}
+
 export interface TheirSide {
   hearer?: Hearer;
+  gap?: HearingGap;
   main: string;
   row: readonly string[];
   lit: string;
@@ -60,11 +74,28 @@ export interface TheirSide {
  */
 export interface MySide {
   hearer?: Hearer;
+  gap?: HearingGap;
   main: string;
   row: readonly string[];
   using: readonly string[];
   more: boolean;
   apply(next: MyNext): void;
+}
+
+const baseCode = (code: string) => code.toLowerCase().split(/[-_]/)[0];
+const unheard = (gap: HearingGap | undefined, code: string) => !!gap && gap.codes.some((one) => baseCode(one) === baseCode(code));
+
+/** Under a row whose recognizer misses some of its languages: which, and the one press that puts it right. */
+function GapNote({ gap, name, disabled }: { gap: HearingGap; name(code: string): string; disabled?: boolean }) {
+  const { t } = useTranslation();
+  const named = gap.codes.filter((code) => code !== 'auto');
+  return (
+    <div className="language-hearing__gap" role="status">
+      <TriangleAlert size={13} aria-hidden />
+      <span>{named.length ? t('fork.gap.cannot', { model: gap.by, languages: named.map(name).join('、') }) : t('fork.gap.noDetect', { model: gap.by })}</span>
+      <button type="button" className="language-hearing__gap-fix" onClick={gap.fix} disabled={disabled}>{t('fork.gap.switch', { model: gap.to })}</button>
+    </div>
+  );
 }
 
 function HearerButton({ hearer, onOpen }: { hearer: Hearer; onOpen?(): void }) {
@@ -186,7 +217,7 @@ function MyRow({ side, ordered, suggested, name, showHearer, onOpenHearing, disa
             <button
               key={code}
               type="button"
-              className={`language-chip language-chip--switch${own ? ' is-lit' : idle ? ' is-idle' : ' is-used'}`}
+              className={`language-chip language-chip--switch${own ? ' is-lit' : idle ? ' is-idle' : ' is-used'}${unheard(side.gap, code) ? ' is-unheard' : ''}`}
               aria-pressed={own}
               onClick={() => { const next = pressMine(now, code); if (next) side.apply(next); }}
               disabled={disabled}
@@ -208,6 +239,7 @@ function MyRow({ side, ordered, suggested, name, showHearer, onOpenHearing, disa
         )}
         {menu.list}
       </div>
+      {side.gap && <GapNote gap={side.gap} name={name} disabled={disabled} />}
     </div>
   );
 }
@@ -261,7 +293,7 @@ function TheirRow({ side, own, ordered, suggested, name, showHearer, onOpenHeari
             <button
               key={code}
               type="button"
-              className={`language-chip language-chip--switch${lit ? ' is-lit' : ''}`}
+              className={`language-chip language-chip--switch${lit ? ' is-lit' : ''}${lit && unheard(side.gap, code) ? ' is-unheard' : ''}`}
               aria-pressed={lit}
               onClick={() => { const next = pressTheirs(now, code); if (next) side.apply(next); }}
               disabled={disabled}
@@ -275,6 +307,7 @@ function TheirRow({ side, own, ordered, suggested, name, showHearer, onOpenHeari
         </button>
         {menu.list}
       </div>
+      {side.gap && <GapNote gap={side.gap} name={nameOf} disabled={disabled} />}
     </div>
   );
 }

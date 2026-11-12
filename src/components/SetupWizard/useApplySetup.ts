@@ -62,6 +62,11 @@ export function useApplySetup(): (draft: SetupDraft) => Promise<void> {
       completeSetup: useSetupStore.getState().completeSetup,
       // Fork: loaded when asked for — the sharing brings the app's engines with it.
       shareModels: async () => { await (await import('../../stores/lanStore')).useLanStore.getState().setEnabled(true); },
+      applyPlan: async (chosen) => {
+        const { planFromStores } = await import('../../providers/openai/usePlans');
+        const plan = await planFromStores(chosen);
+        if (plan) (await import('../../stores/nativePlanStore')).nativePlanStore.getState().apply(plan);
+      },
     });
   }, []);
 }

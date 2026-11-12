@@ -184,7 +184,7 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ variant, onClose }) => {
         {draft.step === 2 && <StepProviderPath draft={draft} dispatch={dispatch} />}
         {draft.step === 3 && <StepCredentials draft={draft} dispatch={dispatch} />}
         {draft.step === 4 && <StepLanguagePair draft={draft} dispatch={dispatch} />}
-        {draft.step === 5 && <StepFinish draft={draft} isSignedIn={isSignedIn} error={finishError} />}
+        {draft.step === 5 && <StepFinish draft={draft} dispatch={dispatch} isSignedIn={isSignedIn} error={finishError} />}
       </main>
 
       <footer className="setup-wizard__footer">

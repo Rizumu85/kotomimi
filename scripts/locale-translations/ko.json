@@ -263,6 +263,22 @@
     "en": "Use {{name}}",
     "text": "{{name}} 사용"
   },
+  "fork.fit.cannot": {
+    "en": "Cannot run",
+    "text": "실행 불가"
+  },
+  "fork.fit.hint": {
+    "en": "Needs about {{need}} of video memory; about {{left}} is left beside the other models.",
+    "text": "그래픽 메모리가 약 {{need}} 필요해요. 다른 모델이 사용하는 양을 빼면 약 {{left}} 남아요."
+  },
+  "fork.fit.maybeSlow": {
+    "en": "May lag",
+    "text": "버벅일 수 있음"
+  },
+  "fork.fit.smooth": {
+    "en": "Runs smoothly",
+    "text": "원활하게 실행 가능"
+  },
   "fork.fonts.add": {
     "en": "Add a language…",
     "text": "언어 추가…"
@@ -343,6 +359,18 @@
     "en": "Furigana over kanji (Japanese)",
     "text": "한자 위에 후리가나 표시(일본어)"
   },
+  "fork.gap.cannot": {
+    "en": "{{model}} cannot hear {{languages}}",
+    "text": "{{model}} 모델은 {{languages}} 음성을 인식할 수 없어요"
+  },
+  "fork.gap.noDetect": {
+    "en": "{{model}} cannot tell languages apart",
+    "text": "{{model}} 모델은 언어를 자동으로 구분할 수 없어요"
+  },
+  "fork.gap.switch": {
+    "en": "Switch to {{model}}",
+    "text": "{{model}} 모델로 전환"
+  },
   "fork.help.issues": {
     "en": "Report a problem",
     "text": "문제 신고"
@@ -354,6 +382,18 @@
   "fork.jyutping": {
     "en": "Jyutping over Cantonese",
     "text": "광둥어 위에 윗핑 표시"
+  },
+  "fork.lag.hear": {
+    "en": "Recognition cannot keep up with the speech. Try a lighter plan?",
+    "text": "음성 인식이 말하는 속도를 따라가지 못해요. 더 가벼운 조합으로 바꿔 볼까요?"
+  },
+  "fork.lag.open": {
+    "en": "See plans",
+    "text": "설정 조합 보기"
+  },
+  "fork.lag.translate": {
+    "en": "Translation cannot keep up. Try a lighter plan?",
+    "text": "번역이 따라가지 못해요. 더 가벼운 조합으로 바꿔 볼까요?"
   },
   "fork.lan.asked": {
     "en": "The other device wants to hear {{language}}",
@@ -586,6 +626,78 @@
   "fork.pinyin": {
     "en": "Pinyin over Chinese",
     "text": "중국어 위에 병음 표시"
+  },
+  "fork.plans.accurate": {
+    "en": "Accurate",
+    "text": "정확"
+  },
+  "fork.plans.apply": {
+    "en": "Use this plan",
+    "text": "이 조합 사용"
+  },
+  "fork.plans.balanced": {
+    "en": "Balanced",
+    "text": "균형"
+  },
+  "fork.plans.cancel": {
+    "en": "Cancel",
+    "text": "취소"
+  },
+  "fork.plans.custom": {
+    "en": "Custom",
+    "text": "사용자 지정"
+  },
+  "fork.plans.downloaded": {
+    "en": "Downloaded",
+    "text": "다운로드 완료"
+  },
+  "fork.plans.failed": {
+    "en": "A download failed. Try again from the model library.",
+    "text": "일부 모델을 다운로드하지 못했어요. 모델 라이브러리에서 다시 시도해 주세요."
+  },
+  "fork.plans.inUse": {
+    "en": "In use",
+    "text": "사용 중"
+  },
+  "fork.plans.light": {
+    "en": "Light",
+    "text": "경량"
+  },
+  "fork.plans.speedTest": {
+    "en": "Test this computer's speed",
+    "text": "이 컴퓨터 속도 측정"
+  },
+  "fork.plans.switching": {
+    "en": "Downloading, then switching: {{percent}}%",
+    "text": "다운로드 후 자동 전환: {{percent}}%"
+  },
+  "fork.plans.title": {
+    "en": "Plans",
+    "text": "설정 조합"
+  },
+  "fork.plans.translation": {
+    "en": "Translation",
+    "text": "번역"
+  },
+  "fork.plans.vram": {
+    "en": "Takes about {{size}} of video memory",
+    "text": "그래픽 메모리 약 {{size}} 사용"
+  },
+  "fork.plans.why.big": {
+    "en": "This computer has the video memory for the more accurate models.",
+    "text": "이 컴퓨터는 그래픽 메모리가 충분해서 더 정확한 모델을 쓸 수 있어요."
+  },
+  "fork.plans.why.default": {
+    "en": "Accurate enough, with room left for a game.",
+    "text": "정확도도 충분하고 게임을 켜도 메모리에 여유가 있어요."
+  },
+  "fork.plans.why.lending": {
+    "en": "This computer lends its models to other devices: the more accurate models.",
+    "text": "다른 기기에서도 이 컴퓨터의 모델을 사용하므로 더 정확한 모델을 써요."
+  },
+  "fork.plans.why.small": {
+    "en": "This computer has little video memory: the plan that takes least.",
+    "text": "이 컴퓨터는 그래픽 메모리가 적어서 가장 가벼운 조합이 좋아요."
   },
   "fork.romanization": {
     "en": "Romanization",
@@ -2300,8 +2412,8 @@
     "text": "언어"
   },
   "tour.steps.models.content_kotomimi": {
-    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
-    "text": "모델은 여기서 다운로드해요. 각 단계 카드에서 \"모델 라이브러리\"를 누르세요. \"추천\" 모델은 실제 대화 테스트에서 가장 좋은 결과를 보인 모델이에요. 모델 이름 옆 작은 아이콘에서 테스트 결과를 확인할 수 있어요. 다운로드가 끝나면 자동으로 사용돼요."
+    "en": "At the top, Plans pairs the models for this computer in three levels; pick one and press \"Use this plan\", and it downloads and switches by itself. The two sides can use different models, one on the processor and one on the graphics card, which saves video memory. To pick yourself, open \"Model library\" in a stage card: each model says whether this computer runs it smoothly.",
+    "text": "맨 위의 ‘추천 구성’에는 이 컴퓨터에 맞춘 세 가지 구성이 있어요. 하나를 고르고 ‘이 구성 사용’을 누르면 자동으로 다운로드하고 전환해요. 양쪽에 서로 다른 모델을 쓸 수도 있어요. 하나는 프로세서에서, 다른 하나는 그래픽 카드에서 실행하면 그래픽 메모리를 아낄 수 있어요. 직접 고르려면 단계 카드에서 ‘모델 라이브러리’를 여세요. 각 모델에 이 컴퓨터에서 원활하게 실행되는지 표시되어 있어요."
   },
   "tour.steps.provider-settings.content_kotomimi": {
     "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",

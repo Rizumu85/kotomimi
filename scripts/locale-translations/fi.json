@@ -259,6 +259,22 @@
     "en": "Use {{name}}",
     "text": "Käytä: {{name}}"
   },
+  "fork.fit.cannot": {
+    "en": "Cannot run",
+    "text": "Ei toimi"
+  },
+  "fork.fit.hint": {
+    "en": "Needs about {{need}} of video memory; about {{left}} is left beside the other models.",
+    "text": "Tarvitsee noin {{need}} näyttömuistia. Muiden mallien jälkeen vapaana on noin {{left}}."
+  },
+  "fork.fit.maybeSlow": {
+    "en": "May lag",
+    "text": "Saattaa takerrella"
+  },
+  "fork.fit.smooth": {
+    "en": "Runs smoothly",
+    "text": "Toimii sujuvasti"
+  },
   "fork.fonts.add": {
     "en": "Add a language…",
     "text": "Lisää kieli…"
@@ -339,6 +355,18 @@
     "en": "Furigana over kanji (Japanese)",
     "text": "Furigana kanjimerkkien yläpuolella (japani)"
   },
+  "fork.gap.cannot": {
+    "en": "{{model}} cannot hear {{languages}}",
+    "text": "{{model}} ei tunnista näitä kieliä: {{languages}}"
+  },
+  "fork.gap.noDetect": {
+    "en": "{{model}} cannot tell languages apart",
+    "text": "{{model}} ei erota kieliä automaattisesti"
+  },
+  "fork.gap.switch": {
+    "en": "Switch to {{model}}",
+    "text": "Vaihda malliin {{model}}"
+  },
   "fork.help.issues": {
     "en": "Report a problem",
     "text": "Ilmoita ongelmasta"
@@ -350,6 +378,18 @@
   "fork.jyutping": {
     "en": "Jyutping over Cantonese",
     "text": "Jyutping kantoninkiinankielisen tekstin yläpuolella"
+  },
+  "fork.lag.hear": {
+    "en": "Recognition cannot keep up with the speech. Try a lighter plan?",
+    "text": "Puheentunnistus ei pysy puheen tahdissa. Vaihdetaanko kevyempään vaihtoehtoon?"
+  },
+  "fork.lag.open": {
+    "en": "See plans",
+    "text": "Näytä vaihtoehdot"
+  },
+  "fork.lag.translate": {
+    "en": "Translation cannot keep up. Try a lighter plan?",
+    "text": "Käännös ei pysy tahdissa. Vaihdetaanko kevyempään vaihtoehtoon?"
   },
   "fork.lan.asked": {
     "en": "The other device wants to hear {{language}}",
@@ -582,6 +622,78 @@
   "fork.pinyin": {
     "en": "Pinyin over Chinese",
     "text": "Pinyin kiinankielisen tekstin yläpuolella"
+  },
+  "fork.plans.accurate": {
+    "en": "Accurate",
+    "text": "Tarkka"
+  },
+  "fork.plans.apply": {
+    "en": "Use this plan",
+    "text": "Ota käyttöön"
+  },
+  "fork.plans.balanced": {
+    "en": "Balanced",
+    "text": "Tasapainoinen"
+  },
+  "fork.plans.cancel": {
+    "en": "Cancel",
+    "text": "Peruuta"
+  },
+  "fork.plans.custom": {
+    "en": "Custom",
+    "text": "Mukautettu"
+  },
+  "fork.plans.downloaded": {
+    "en": "Downloaded",
+    "text": "Ladattu"
+  },
+  "fork.plans.failed": {
+    "en": "A download failed. Try again from the model library.",
+    "text": "Jonkin mallin lataus epäonnistui. Voit yrittää uudelleen mallikirjastossa."
+  },
+  "fork.plans.inUse": {
+    "en": "In use",
+    "text": "Käytössä"
+  },
+  "fork.plans.light": {
+    "en": "Light",
+    "text": "Kevyt"
+  },
+  "fork.plans.speedTest": {
+    "en": "Test this computer's speed",
+    "text": "Testaa tämän tietokoneen nopeus"
+  },
+  "fork.plans.switching": {
+    "en": "Downloading, then switching: {{percent}}%",
+    "text": "Vaihtuu latauksen valmistuttua: {{percent}}%"
+  },
+  "fork.plans.title": {
+    "en": "Plans",
+    "text": "Vaihtoehdot"
+  },
+  "fork.plans.translation": {
+    "en": "Translation",
+    "text": "Käännös"
+  },
+  "fork.plans.vram": {
+    "en": "Takes about {{size}} of video memory",
+    "text": "Vie noin {{size}} näyttömuistia"
+  },
+  "fork.plans.why.big": {
+    "en": "This computer has the video memory for the more accurate models.",
+    "text": "Tämän tietokoneen näyttömuisti riittää tarkemmille malleille."
+  },
+  "fork.plans.why.default": {
+    "en": "Accurate enough, with room left for a game.",
+    "text": "Riittävän tarkka, ja muistia riittää myös pelille."
+  },
+  "fork.plans.why.lending": {
+    "en": "This computer lends its models to other devices: the more accurate models.",
+    "text": "Tämä tietokone jakaa mallejaan muille laitteille, joten käytetään tarkempia malleja."
+  },
+  "fork.plans.why.small": {
+    "en": "This computer has little video memory: the plan that takes least.",
+    "text": "Tässä tietokoneessa on vähän näyttömuistia. Tämä vaihtoehto vie sitä vähiten."
   },
   "fork.romanization": {
     "en": "Romanization",
@@ -2320,8 +2432,8 @@
     "text": "Kielet"
   },
   "tour.steps.models.content_kotomimi": {
-    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
-    "text": "Lataa malleja avaamalla vaiheen kortista ”Mallikirjasto”. Suositellut mallit ovat menestyneet parhaiten aidoilla keskusteluilla tehdyissä testeissä. Mallin nimen vieressä olevasta kuvakkeesta näet testitulokset. Ladattu malli otetaan käyttöön automaattisesti."
+    "en": "At the top, Plans pairs the models for this computer in three levels; pick one and press \"Use this plan\", and it downloads and switches by itself. The two sides can use different models, one on the processor and one on the graphics card, which saves video memory. To pick yourself, open \"Model library\" in a stage card: each model says whether this computer runs it smoothly.",
+    "text": "Ylhäällä kohdassa ”Kokoonpanot” on tälle tietokoneelle kolme eritasoista malliyhdistelmää. Valitse yksi ja paina ”Käytä tätä kokoonpanoa”, niin sovellus lataa mallit ja ottaa ne käyttöön automaattisesti. Kumpikin puoli voi käyttää eri mallia: toinen suorittimella ja toinen näytönohjaimella. Näin näytönohjaimen muistia säästyy. Jos haluat valita mallit itse, avaa vaiheen kortista ”Mallikirjasto”. Kunkin mallin kohdalla kerrotaan, toimiiko se sujuvasti tällä tietokoneella."
   },
   "tour.steps.provider-settings.content_kotomimi": {
     "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",

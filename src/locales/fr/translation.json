@@ -1535,7 +1535,7 @@
       "models": {
         "title": "Modèles",
         "content": "Téléchargez des modèles ici — un par étape. Essayez-en plusieurs ; le premier choix n'est pas forcément le seul bon.",
-        "content_kotomimi": "Pour télécharger des modèles, ouvrez « Bibliothèque de modèles » dans la fiche d’une étape. Les modèles marqués « Recommandé » ont obtenu les meilleurs résultats lors de tests sur de vraies conversations. La petite icône à côté de chaque nom indique les résultats du test. Le modèle est activé automatiquement après le téléchargement."
+        "content_kotomimi": "Tout en haut, les « Configurations » proposent trois combinaisons de modèles adaptées à cet ordinateur. Choisissez-en une et cliquez sur « Utiliser cette configuration » : les modèles sont téléchargés et activés automatiquement. Les deux côtés peuvent utiliser des modèles différents, l’un sur le processeur et l’autre sur la carte graphique, pour économiser la mémoire vidéo. Pour choisir vous-même, ouvrez la « Bibliothèque de modèles » dans la fiche d’une étape : chaque modèle indique si cet ordinateur peut le faire fonctionner de manière fluide."
       },
       "start": {
         "title": "Démarrer",
@@ -2048,6 +2048,44 @@
         "copy_failed": "Le déplacement n’est pas terminé. Les modèles sont restés à leur emplacement d’origine.",
         "move_failed": "Le déplacement n’est pas terminé. Les modèles sont restés à leur emplacement d’origine."
       }
+    },
+    "plans": {
+      "title": "Configurations",
+      "light": "Légère",
+      "balanced": "Équilibrée",
+      "accurate": "Précise",
+      "custom": "Personnalisée",
+      "inUse": "En cours d’utilisation",
+      "vram": "Utilise environ {{size}} de mémoire vidéo",
+      "downloaded": "Téléchargée",
+      "apply": "Utiliser cette configuration",
+      "switching": "Activation après le téléchargement : {{percent}}%",
+      "failed": "Le téléchargement d’un modèle a échoué. Réessayez dans la bibliothèque de modèles.",
+      "cancel": "Annuler",
+      "translation": "Traduction",
+      "speedTest": "Tester la vitesse de cet ordinateur",
+      "why": {
+        "lending": "Cet ordinateur partage ses modèles avec d’autres appareils, autant utiliser les plus précis.",
+        "big": "Cet ordinateur a assez de mémoire vidéo pour des modèles plus précis.",
+        "small": "Cet ordinateur a peu de mémoire vidéo. Cette configuration en utilise le moins.",
+        "default": "Assez précise, avec de la mémoire disponible pour un jeu."
+      }
+    },
+    "fit": {
+      "smooth": "Fonctionne sans ralentissement",
+      "maybeSlow": "Risque de ralentissements",
+      "cannot": "Ne peut pas fonctionner",
+      "hint": "Nécessite environ {{need}} de mémoire vidéo. Les autres modèles en laissent environ {{left}} de disponible."
+    },
+    "gap": {
+      "cannot": "{{model}} ne reconnaît pas la parole dans ces langues : {{languages}}",
+      "noDetect": "{{model}} ne peut pas détecter automatiquement la langue",
+      "switch": "Passer à {{model}}"
+    },
+    "lag": {
+      "hear": "La reconnaissance ne suit pas le rythme de la parole. Passer à une configuration plus légère ?",
+      "translate": "La traduction ne suit pas le rythme. Passer à une configuration plus légère ?",
+      "open": "Voir les configurations"
     }
   }
 }

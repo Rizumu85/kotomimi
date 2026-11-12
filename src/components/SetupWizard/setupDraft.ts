@@ -63,6 +63,8 @@ export interface SetupDraft {
   credentialsPending: boolean;
   sourceLanguage: string | null;
   targetLanguage: string | null;
+  /** Fork: the Kotomimi provider on this computer: the plan Finish puts to use. Null: the one recommended. */
+  plan: 'light' | 'balanced' | 'accurate' | null;
 }
 
 export type SetupAction =
@@ -75,6 +77,7 @@ export type SetupAction =
   | { type: 'credentialsValidated' }
   | { type: 'skipCredentials'; keepExisting?: boolean }
   | { type: 'setLanguages'; source: string; target: string }
+  | { type: 'setPlan'; plan: 'light' | 'balanced' | 'accurate' }
   | { type: 'next' }
   | { type: 'back' };
 
@@ -94,6 +97,7 @@ export function initialDraft(): SetupDraft {
     credentialsPending: false,
     sourceLanguage: null,
     targetLanguage: null,
+    plan: null,
   };
 }
 
@@ -183,6 +187,8 @@ export function setupReducer(d: SetupDraft, a: SetupAction): SetupDraft {
         : { ...d, credentials: {}, credentialsValidated: false, credentialsPending: true };
     case 'setLanguages':
       return { ...d, sourceLanguage: a.source, targetLanguage: a.target };
+    case 'setPlan':
+      return { ...d, plan: a.plan };
     case 'next': {
       const next = shownSteps().find((step) => step > d.step);
       if (next === undefined) return d;

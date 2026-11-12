@@ -1,31 +1,22 @@
-import { baseLanguage } from '../../lib/language/code';
-import { nativeModel } from './localaiNative';
+import { planRecognizer, planTranslator, recommendedNativePlan, type NativePlan, type NativeStage } from './nativePlans';
 
 export interface NativeRecommendation {
   id: string | null;
   reason: 'lending' | 'big' | 'small' | 'default';
 }
 
-/** Advice for the native model list, after its direction/language filters. An empty list has no recommendation. */
+/** Advice from the plan rules. Pass the recommended plan and row stage to include cross-side engine constraints. */
 export function recommendNativeModel(
   kind: 'asr' | 'translation', offered: readonly string[], memoryMB: number | null,
-  lending: boolean, languages: readonly string[],
+  lending: boolean, languages: readonly string[], context?: { plan: NativePlan; stage: NativeStage },
 ): NativeRecommendation {
-  // Leave room below nominal 8/16 GiB: cards can report slightly less dedicated memory.
-  const small = memoryMB !== null && memoryMB < 7680;
-  let id: string;
+  const plan = context?.plan.id ?? recommendedNativePlan(memoryMB, lending);
+  const id = context
+    ? context.stage === 'translation' ? context.plan.translation : context.plan[context.stage].model
+    : kind === 'translation' ? planTranslator(plan, [])
+      : planRecognizer(plan, languages.includes('auto') ? null : languages, offered.some((id) => id.startsWith('apple-speech:')) ? 'darwin' : 'win32');
   let reason: NativeRecommendation['reason'] = 'default';
-  if (kind === 'translation') {
-    id = small ? 'plamo-3-translate-0.8b' : 'index-translate-2b';
-    if (small) reason = 'small';
-  } else if (lending || (memoryMB !== null && memoryMB >= 15360)) {
-    id = 'qwen3-asr-1.7b-q8';
-    reason = lending ? 'lending' : 'big';
-  } else if (small && languages.length > 0 && languages.every((language) => nativeModel('sensevoice-small-q8').languages.includes(baseLanguage(language) ?? ''))) {
-    id = 'sensevoice-small-q8';
-    reason = 'small';
-  } else {
-    id = 'qwen3-asr-0.6b-q8';
-  }
-  return offered.includes(id) ? { id, reason } : { id: offered[0] ?? null, reason: 'default' };
+  if (kind === 'asr' && plan === 'accurate') reason = lending ? 'lending' : 'big';
+  if (plan === 'light' && (kind === 'translation' || id === 'sensevoice-small-q8' || id === 'x-asr-zh-en')) reason = 'small';
+  return id && offered.includes(id) ? { id, reason } : { id: context ? null : offered[0] ?? null, reason: 'default' };
 }

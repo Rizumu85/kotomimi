@@ -1,3 +1,4 @@
+import { createSessionLags } from './sessionLags';
 import type { TheirLanguages } from '../lib/language/theirLanguages';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Entry } from '../lib/projection/types';
@@ -11,7 +12,7 @@ import { quickLanguages, startVrOverlay, vrLines, type VrOverlayDeps, type VrSet
 vi.mock('../services/persistSetting', () => ({ persistSetting: vi.fn(async () => true) }));
 
 const row = (text: string, final = true) => ({ key: `${text}:0`, segmentId: text, side: 'source' as const, start: 0, end: text.length, text, final });
-const exchange = (id: string, source: string, translation: string, { leg = 'participant', final = true } = {}): Entry => ({
+const exchange = (id: string, source: string, translation: string, { leg = 'participant', final = true } = {}): Extract<Entry, { kind: 'exchange' }> => ({
   kind: 'exchange', id, leg: leg as 'speaker' | 'participant', languages: { source: 'ja', target: 'zh' }, pairing: 'stated',
   source: source ? [row(source, final)] : [], translation: translation ? [{ ...row(translation, final), side: 'translation' }] : [], t: 0,
 });
@@ -249,7 +250,7 @@ describe('startVrOverlay', () => {
     t.command({ type: 'theirs', value: 'en' });
     await flush();
     expect(t.order).toEqual(['pair zh-CN>en']);
-    expect(t.sent.at(-1)!.theirs.value).toBe('en');
+    expect(t.sent[t.sent.length - 1]!.theirs.value).toBe('en');
     t.controller.stop();
   });
 
@@ -262,8 +263,8 @@ describe('startVrOverlay', () => {
     await flush();
     expect(t.order).toEqual(['stop', 'hear sense', 'flush', 'start']);
     expect(t.sent.some((s) => s.switching?.label === 'SenseVoice')).toBe(true);
-    expect(t.sent.at(-1)!.switching).toBeNull();
-    expect(t.sent.at(-1)!.hear.value).toBe('sense');
+    expect(t.sent[t.sent.length - 1]!.switching).toBeNull();
+    expect(t.sent[t.sent.length - 1]!.hear.value).toBe('sense');
     t.controller.stop();
   });
 
@@ -299,7 +300,7 @@ describe('startVrOverlay', () => {
     await flush();
     await flush();
     expect(t.start).not.toHaveBeenCalled();
-    expect(t.sent.at(-1)!.switching).toBeNull();
+    expect(t.sent[t.sent.length - 1]!.switching).toBeNull();
     t.controller.stop();
   });
 
@@ -312,23 +313,18 @@ describe('startVrOverlay', () => {
     t.controller.stop();
   });
 
-  it('measures a recognizer from the end of the other side’s sound to their sentence’s last word', async () => {
-    const t = setup();
+  it('reads recognition averages from the session measurement, without measuring the view again', async () => {
+    const lags = createSessionLags();
+    lags.begin();
+    const t = setup({ lags });
     await t.connect();
-    t.setRun({ phase: 'running', since: 0, legs: {} });
+    lags.sample('participant', 'qwen', 900);
+    t.setEntries([exchange('a', 'words', 'translation')]);
     await flush();
-    expect(t.ticks).toHaveLength(1);
-    t.heard.participant = true;
-    t.ticks[0]();
-    t.heard.participant = false;
-    t.ticks[0]();
-    t.advance(900);
-    t.setEntries([exchange('a', 'こんばんは', '')]);
-    t.advance(300);
-    t.setEntries([exchange('a', 'こんばんは', '晚上好')]);
+    expect(t.sent[t.sent.length - 1]!.hear.options.find((m) => m.id === 'qwen')?.ms).toBe(900);
+    lags.end();
     await flush();
-    const hear = t.sent.at(-1)!.hear.options.find((m) => m.id === 'qwen');
-    expect(hear?.ms).toBe(900);
+    expect(t.sent[t.sent.length - 1]!.hear.options.find((m) => m.id === 'qwen')?.ms).toBeUndefined();
     t.controller.stop();
   });
 });

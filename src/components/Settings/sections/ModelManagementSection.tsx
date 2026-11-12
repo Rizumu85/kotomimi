@@ -91,6 +91,7 @@ export function ModelCard({
   onImport,
   note,
   tag,
+  fit,
   recommendHint,
   children,
   downloadBlocked = false,
@@ -115,6 +116,8 @@ export function ModelCard({
   note?: React.ReactNode;
   /** Fork: what kind of model this is, as a chip that says on hover what all of its kind share. */
   tag?: { label: string; hint: string };
+  /** Fork: whether this computer runs it well beside the other stages' models, the numbers on hover. */
+  fit?: { label: string; hint: string; tone: 'ok' | 'warn' | 'bad' };
   /** Fork: why this one is recommended here, said on hover over the mark. */
   recommendHint?: string;
   children?: React.ReactNode;
@@ -177,6 +180,11 @@ export function ModelCard({
               {tag && (
                 <Tooltip content={tag.hint} icon="none" position="top" maxWidth={260}>
                   <span className="model-card__lang-tag model-card__kind-tag">{tag.label}</span>
+                </Tooltip>
+              )}
+              {fit && (
+                <Tooltip content={fit.hint} icon="none" position="top" maxWidth={260}>
+                  <span className={`model-card__fit model-card__fit--${fit.tone}`}>{fit.label}</span>
                 </Tooltip>
               )}
               {entry.recommended && (() => {

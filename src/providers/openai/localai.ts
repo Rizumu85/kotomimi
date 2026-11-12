@@ -957,6 +957,27 @@ export const runHearing = (s: LocalAISettings, pair: { source: string; target: s
   });
 };
 
+/** Resolve an explicit side choice before auto merges the two legs. */
+export function runSideHearing(s: LocalAISettings, pair: { source: string; target: string }, leg: 'speaker' | 'participant', models: readonly LocalAIModel[] = []): NativePick {
+  const fallback = runHearing(s, pair, models);
+  const own = leg === 'speaker' ? pair.source : pair.target;
+  const key = leg === 'participant' && s.asrDetectOther ? 'auto' : own.toLowerCase().split(/[-_]/)[0];
+  const chosen = s.asrNativeByLanguage[key];
+  if (!chosen || !NATIVE_MODELS.some((m) => m.id === chosen)) return fallback;
+  const others = leg === 'speaker' ? alsoSpoken(s, pair) : theirLitLanguages(s, pair).filter((code) => code !== own);
+  const pick: NativePick = { model: chosen, byLanguage: { ...s.asrNativeByLanguage, auto: chosen, [own.toLowerCase().split(/[-_]/)[0]]: chosen }, bestEffort: !nativeModelFor(chosen, AUTO)?.detects && !isApple(chosen) };
+  if (isApple(chosen) && others.length) pick.either = { own, others };
+  return pick;
+}
+
+/** The same picks readiness and startup must load, even when both legs are auto. */
+function runHearingNeeds(s: LocalAISettings, pair: { source: string; target: string }, legs: readonly ('speaker' | 'participant')[]): { pick: NativePick; heard: string[] } {
+  const heard = legs.map((leg) => heardForModel(s, pair, leg));
+  const pick = runHearing(s, pair);
+  if (Object.keys(s.asrNativeByLanguage).length) pick.selections = legs.map((leg, index) => ({ pick: runSideHearing(s, pair, leg), language: heard[index] }));
+  return { pick, heard };
+}
+
 /**
  * The language a native model is told for a leg. A leg left to be detected
  * (`AUTO`) is told `auto` only when its selected recognizer detects language;
@@ -968,7 +989,7 @@ const heardForModel = (s: LocalAISettings, pair: { source: string; target: strin
   const heard = heardBy(s, pair, leg);
   if (heard !== AUTO) return heard;
   // Only a model that names the language is asked for `auto`; a best-effort one is told the leg's source.
-  const pick = runHearing(s, pair);
+  const pick = runSideHearing(s, pair, leg);
   return nativePicked(pick, AUTO)?.detects ? AUTO : (leg === 'speaker' ? pair.source : pair.target);
 };
 
@@ -985,7 +1006,7 @@ const APPLE_NAME = 'apple-speech';
 function hearerOf(s: LocalAISettings, models: readonly LocalAIModel[], pair: { source: string; target: string }, leg: LegName): { name: string; languages: readonly string[] | null; apple?: true; detects?: true; listed?: true } | undefined {
   if (hearsNatively(s)) {
     const heard = heardBy(s, pair, leg, models);
-    const model = nativePicked(runHearing(s, pair, models), heard) ?? nativePicked(runHearing(s, pair, models), leg === 'speaker' ? pair.source : pair.target);
+    const model = nativePicked(runSideHearing(s, pair, leg, models), heard) ?? nativePicked(runSideHearing(s, pair, leg, models), leg === 'speaker' ? pair.source : pair.target);
     if (!model) return undefined;
     return { name: model.name.replace(/ GGUF$/, ''), languages: model.languages, ...(isApple(model.id) ? { apple: true as const } : {}), ...(model.detects ? { detects: true as const } : {}) };
   }
@@ -1015,7 +1036,7 @@ function hearerOf(s: LocalAISettings, models: readonly LocalAIModel[], pair: { s
 
 function nativeNeeds(s: LocalAISettings, pair: { source: string; target: string }, legs: readonly ('speaker' | 'participant')[]): NativeNeeds {
   return {
-    ...(hearsNatively(s) ? { hears: { pick: runHearing(s, pair), heard: legs.map((leg) => heardForModel(s, pair, leg)) } } : {}),
+    ...(hearsNatively(s) ? { hears: runHearingNeeds(s, pair, legs) } : {}),
     // Not where every leg is shown as said: nothing would ask it.
     ...(translatesNatively(s) && legs.some((leg) => !shownAsSaid(s, pair, leg)) ? { translates: s.translateNativeModel } : {}),
     ...(coachesNatively(s) && legs.includes('speaker') ? { coaches: s.coachNativeModel } : {}),
@@ -1087,8 +1108,8 @@ export async function prepareLocalAI(shape: { pair: { source: string; target: st
   // that never opened, the page going away — the run's signal is aborted on every one of them. Not only from the
   // moment a leg opens: its source may take a minute to open, and the minute's rest would have stopped them by then.
   if (signal && (needs.hears || needs.translates || needs.coaches)) {
-    const asrModels = needs.hears ? needs.hears.heard.flatMap((language) => {
-      const model = nativePicked(needs.hears!.pick, language);
+    const asrModels = needs.hears ? (needs.hears.pick.selections ?? needs.hears.heard.map((language) => ({ pick: needs.hears!.pick, language }))).flatMap(({ pick, language }) => {
+      const model = nativePicked(pick, language);
       return model ? [model.id] : [];
     }) : [];
     const done = holdNativeForRun(undefined, { asr: !!needs.hears && hearsByDownloaded(needs.hears.pick, needs.hears.heard), asrModels, translation: !!needs.translates });
@@ -1132,7 +1153,8 @@ export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISe
   let hears: ReturnType<typeof nativeGap> | null = null;
   if (hearsNatively(s)) {
     // What each leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
-    hears = native.gap(runHearing(s, ctx.pair), ctx.legs.map((leg) => heardForModel(s, ctx.pair, leg)));
+    const needs = runHearingNeeds(s, ctx.pair, ctx.legs);
+    hears = native.gap(needs.pick, needs.heard);
     hears.catch(() => undefined);
   } else {
     native.idle();
@@ -1291,7 +1313,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
     let recognizer: Pick<DeviceHearing, 'modelId' | 'streaming' | 'api' | 'native'> | null;
     if (hearsNatively(s)) {
       // Of the run: each engine runs one model, while separate engines can serve the two legs.
-      const pick = runHearing(s, runPair, models);
+      const pick = runSideHearing(s, runPair, participant ? 'participant' : 'speaker', models);
       // Resolve the actual leg once. Looking up an unrelated detector first would replace an explicit choice.
       // The run's pick already applies detection and bilingual rules where they are enabled.
       const picked = nativePicked(pick, modelHeard);

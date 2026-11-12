@@ -1535,7 +1535,7 @@
       "models": {
         "title": "Modele",
         "content": "Tutaj pobierasz modele — jeden na etap. Wypróbuj kilka; pierwszy wybór nie jest jedynym dobrym.",
-        "content_kotomimi": "Tutaj pobierasz modele: kliknij „Biblioteka modeli” na karcie danego etapu. Modele oznaczone jako „Polecane” wypadły najlepiej w testach prawdziwych rozmów. Ikona obok nazwy modelu zawiera wyniki testów. Pobrany model włącza się automatycznie."
+        "content_kotomimi": "U góry znajdziesz trzy „Zestawy” modeli dobrane do tego komputera. Wybierz jeden i kliknij „Użyj tego zestawu”, a aplikacja sama pobierze modele i je włączy. Obie strony mogą używać różnych modeli: jeden na procesorze, drugi na karcie graficznej, co oszczędza pamięć karty. Jeśli chcesz wybrać samodzielnie, kliknij „Biblioteka modeli” na karcie etapu. Przy każdym modelu zobaczysz, czy będzie działał płynnie na tym komputerze."
       },
       "start": {
         "title": "Start",
@@ -2048,6 +2048,44 @@
         "copy_failed": "Przenoszenie nie zostało ukończone. Modele pozostały na swoim miejscu.",
         "move_failed": "Przenoszenie nie zostało ukończone. Modele pozostały na swoim miejscu."
       }
+    },
+    "plans": {
+      "title": "Zestawy",
+      "light": "Lekki",
+      "balanced": "Zrównoważony",
+      "accurate": "Dokładny",
+      "custom": "Własny",
+      "inUse": "W użyciu",
+      "vram": "Zajmuje około {{size}} pamięci graficznej",
+      "downloaded": "Pobrano",
+      "apply": "Użyj tego zestawu",
+      "switching": "Automatyczne przełączenie po pobraniu: {{percent}}%",
+      "failed": "Nie udało się pobrać któregoś z modeli. Spróbuj ponownie w bibliotece modeli.",
+      "cancel": "Anuluj",
+      "translation": "Tłumaczenie",
+      "speedTest": "Sprawdź szybkość tego komputera",
+      "why": {
+        "lending": "Ten komputer udostępnia modele innym urządzeniom, więc używa dokładniejszych modeli.",
+        "big": "Ten komputer ma dość pamięci graficznej na dokładniejsze modele.",
+        "small": "Ten komputer ma mało pamięci graficznej. Ten zestaw zajmuje jej najmniej.",
+        "default": "Wystarczająca dokładność i dość wolnej pamięci na grę."
+      }
+    },
+    "fit": {
+      "smooth": "Działa płynnie",
+      "maybeSlow": "Może się zacinać",
+      "cannot": "Nie da się uruchomić",
+      "hint": "Wymaga około {{need}} pamięci graficznej. Po uwzględnieniu pozostałych modeli zostaje około {{left}}."
+    },
+    "gap": {
+      "cannot": "{{model}} nie rozpoznaje mowy w tych językach: {{languages}}",
+      "noDetect": "{{model}} nie wykrywa automatycznie języka",
+      "switch": "Zmień na {{model}}"
+    },
+    "lag": {
+      "hear": "Rozpoznawanie mowy nie nadąża za rozmową. Zmienić zestaw na lżejszy?",
+      "translate": "Tłumaczenie nie nadąża. Zmienić zestaw na lżejszy?",
+      "open": "Zobacz zestawy"
     }
   }
 }

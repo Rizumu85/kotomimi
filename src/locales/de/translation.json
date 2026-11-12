@@ -1535,7 +1535,7 @@
       "models": {
         "title": "Modelle",
         "content": "Laden Sie hier Modelle herunter — eines pro Stufe. Probieren Sie ein paar aus; die erste Wahl ist nicht die einzig gute.",
-        "content_kotomimi": "Modelle lädst du hier herunter: Öffne „Modellbibliothek“ auf der Karte eines Schritts. Als „Empfohlen“ markierte Modelle haben in Tests mit echten Gesprächen am besten abgeschnitten. Das kleine Symbol neben dem Modellnamen zeigt die Testergebnisse. Nach dem Download wird das Modell automatisch aktiviert."
+        "content_kotomimi": "Oben unter „Modellpläne“ findest du drei auf diesen Computer abgestimmte Kombinationen. Wähle eine aus und klicke auf „Diesen Plan verwenden“. Die Modelle werden automatisch heruntergeladen und aktiviert. Beide Seiten können unterschiedliche Modelle nutzen: eines auf dem Prozessor, eines auf der Grafikkarte. Das spart Grafikspeicher. Wenn du selbst wählen möchtest, öffne die „Modellbibliothek“ in der Karte des jeweiligen Schritts. Bei jedem Modell steht, ob es auf diesem Computer flüssig läuft."
       },
       "start": {
         "title": "Starten",
@@ -2048,6 +2048,44 @@
         "copy_failed": "Das Verschieben wurde nicht abgeschlossen. Die Modelle befinden sich weiterhin am ursprünglichen Speicherort.",
         "move_failed": "Das Verschieben wurde nicht abgeschlossen. Die Modelle befinden sich weiterhin am ursprünglichen Speicherort."
       }
+    },
+    "plans": {
+      "title": "Profile",
+      "light": "Leicht",
+      "balanced": "Ausgewogen",
+      "accurate": "Präzise",
+      "custom": "Benutzerdefiniert",
+      "inUse": "Aktiv",
+      "vram": "Belegt etwa {{size}} Grafikspeicher",
+      "downloaded": "Heruntergeladen",
+      "apply": "Dieses Profil verwenden",
+      "switching": "Nach dem Download wird automatisch gewechselt: {{percent}}%",
+      "failed": "Ein Modell konnte nicht heruntergeladen werden. Versuche es in der Modellbibliothek erneut.",
+      "cancel": "Abbrechen",
+      "translation": "Übersetzung",
+      "speedTest": "Geschwindigkeit dieses Computers testen",
+      "why": {
+        "lending": "Dieser Computer stellt anderen Geräten Modelle bereit. Dafür eignen sich genauere Modelle.",
+        "big": "Dieser Computer hat genug Grafikspeicher für genauere Modelle.",
+        "small": "Dieser Computer hat wenig Grafikspeicher. Dieses Profil braucht am wenigsten.",
+        "default": "Genau genug und lässt noch Platz für ein Spiel."
+      }
+    },
+    "fit": {
+      "smooth": "Läuft flüssig",
+      "maybeSlow": "Kann stocken",
+      "cannot": "Nicht ausführbar",
+      "hint": "Benötigt etwa {{need}} Grafikspeicher. Neben den anderen Modellen sind noch etwa {{left}} frei."
+    },
+    "gap": {
+      "cannot": "{{model}} kann {{languages}} nicht erkennen",
+      "noDetect": "{{model}} kann Sprachen nicht automatisch unterscheiden",
+      "switch": "Zu {{model}} wechseln"
+    },
+    "lag": {
+      "hear": "Die Spracherkennung kommt nicht hinterher. Zu einem leichteren Profil wechseln?",
+      "translate": "Die Übersetzung kommt nicht hinterher. Zu einem leichteren Profil wechseln?",
+      "open": "Profile ansehen"
     }
   }
 }

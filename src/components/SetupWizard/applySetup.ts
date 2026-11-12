@@ -29,6 +29,8 @@ export interface ApplySetupDeps {
   completeSetup: (r: { scenario: ScenarioId; providerPath: ProviderPath; provider: string }) => Promise<void>;
   /** Fork: turns on the sharing of this computer's models (the Kotomimi step's third start). Absent where nothing can be shared. */
   shareModels?: () => Promise<void>;
+  /** Fork: puts a plan for this computer to use (`nativePlanStore`): what is missing starts downloading. Null: the recommended one. */
+  applyPlan?: (plan: SetupDraft['plan']) => Promise<void>;
 }
 
 export async function applySetupDraft(draft: SetupDraft, deps: ApplySetupDeps): Promise<void> {
@@ -63,5 +65,8 @@ export async function applySetupDraft(draft: SetupDraft, deps: ApplySetupDeps): 
   // Fork: the sharing is a convenience of this setup, not a condition of it — a port that is taken must not leave
   // the setup undone. Its section in Settings says what is wrong, and how to put it right.
   if (shares) await deps.shareModels?.().catch(() => undefined);
+  // Fork: on this computer, the plan shown on the last step; its downloads follow the setup, they are not part of it.
+  // A re-run that left the step alone keeps the place saved: a plan chosen there is put to use too.
+  if ((kotomimi && (shares || choice.value === 'device')) || ((provider as string) === 'localai' && !choice && draft.plan)) await deps.applyPlan?.(draft.plan).catch(() => undefined);
   await deps.completeSetup({ scenario, providerPath, provider });
 }

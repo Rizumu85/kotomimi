@@ -267,6 +267,22 @@
     "en": "Use {{name}}",
     "text": "Utiliser {{name}}"
   },
+  "fork.fit.cannot": {
+    "en": "Cannot run",
+    "text": "Ne peut pas fonctionner"
+  },
+  "fork.fit.hint": {
+    "en": "Needs about {{need}} of video memory; about {{left}} is left beside the other models.",
+    "text": "Nécessite environ {{need}} de mémoire vidéo. Les autres modèles en laissent environ {{left}} de disponible."
+  },
+  "fork.fit.maybeSlow": {
+    "en": "May lag",
+    "text": "Risque de ralentissements"
+  },
+  "fork.fit.smooth": {
+    "en": "Runs smoothly",
+    "text": "Fonctionne sans ralentissement"
+  },
   "fork.fonts.add": {
     "en": "Add a language…",
     "text": "Ajouter une langue…"
@@ -347,6 +363,18 @@
     "en": "Furigana over kanji (Japanese)",
     "text": "Furigana au-dessus des kanji (japonais)"
   },
+  "fork.gap.cannot": {
+    "en": "{{model}} cannot hear {{languages}}",
+    "text": "{{model}} ne reconnaît pas la parole dans ces langues : {{languages}}"
+  },
+  "fork.gap.noDetect": {
+    "en": "{{model}} cannot tell languages apart",
+    "text": "{{model}} ne peut pas détecter automatiquement la langue"
+  },
+  "fork.gap.switch": {
+    "en": "Switch to {{model}}",
+    "text": "Passer à {{model}}"
+  },
   "fork.help.issues": {
     "en": "Report a problem",
     "text": "Signaler un problème"
@@ -358,6 +386,18 @@
   "fork.jyutping": {
     "en": "Jyutping over Cantonese",
     "text": "Jyutping au-dessus du cantonais"
+  },
+  "fork.lag.hear": {
+    "en": "Recognition cannot keep up with the speech. Try a lighter plan?",
+    "text": "La reconnaissance ne suit pas le rythme de la parole. Passer à une configuration plus légère ?"
+  },
+  "fork.lag.open": {
+    "en": "See plans",
+    "text": "Voir les configurations"
+  },
+  "fork.lag.translate": {
+    "en": "Translation cannot keep up. Try a lighter plan?",
+    "text": "La traduction ne suit pas le rythme. Passer à une configuration plus légère ?"
   },
   "fork.lan.asked": {
     "en": "The other device wants to hear {{language}}",
@@ -590,6 +630,78 @@
   "fork.pinyin": {
     "en": "Pinyin over Chinese",
     "text": "Pinyin au-dessus du chinois"
+  },
+  "fork.plans.accurate": {
+    "en": "Accurate",
+    "text": "Précise"
+  },
+  "fork.plans.apply": {
+    "en": "Use this plan",
+    "text": "Utiliser cette configuration"
+  },
+  "fork.plans.balanced": {
+    "en": "Balanced",
+    "text": "Équilibrée"
+  },
+  "fork.plans.cancel": {
+    "en": "Cancel",
+    "text": "Annuler"
+  },
+  "fork.plans.custom": {
+    "en": "Custom",
+    "text": "Personnalisée"
+  },
+  "fork.plans.downloaded": {
+    "en": "Downloaded",
+    "text": "Téléchargée"
+  },
+  "fork.plans.failed": {
+    "en": "A download failed. Try again from the model library.",
+    "text": "Le téléchargement d’un modèle a échoué. Réessayez dans la bibliothèque de modèles."
+  },
+  "fork.plans.inUse": {
+    "en": "In use",
+    "text": "En cours d’utilisation"
+  },
+  "fork.plans.light": {
+    "en": "Light",
+    "text": "Légère"
+  },
+  "fork.plans.speedTest": {
+    "en": "Test this computer's speed",
+    "text": "Tester la vitesse de cet ordinateur"
+  },
+  "fork.plans.switching": {
+    "en": "Downloading, then switching: {{percent}}%",
+    "text": "Activation après le téléchargement : {{percent}}%"
+  },
+  "fork.plans.title": {
+    "en": "Plans",
+    "text": "Configurations"
+  },
+  "fork.plans.translation": {
+    "en": "Translation",
+    "text": "Traduction"
+  },
+  "fork.plans.vram": {
+    "en": "Takes about {{size}} of video memory",
+    "text": "Utilise environ {{size}} de mémoire vidéo"
+  },
+  "fork.plans.why.big": {
+    "en": "This computer has the video memory for the more accurate models.",
+    "text": "Cet ordinateur a assez de mémoire vidéo pour des modèles plus précis."
+  },
+  "fork.plans.why.default": {
+    "en": "Accurate enough, with room left for a game.",
+    "text": "Assez précise, avec de la mémoire disponible pour un jeu."
+  },
+  "fork.plans.why.lending": {
+    "en": "This computer lends its models to other devices: the more accurate models.",
+    "text": "Cet ordinateur partage ses modèles avec d’autres appareils, autant utiliser les plus précis."
+  },
+  "fork.plans.why.small": {
+    "en": "This computer has little video memory: the plan that takes least.",
+    "text": "Cet ordinateur a peu de mémoire vidéo. Cette configuration en utilise le moins."
   },
   "fork.romanization": {
     "en": "Romanization",
@@ -2372,8 +2484,8 @@
     "text": "Langues"
   },
   "tour.steps.models.content_kotomimi": {
-    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
-    "text": "Pour télécharger des modèles, ouvrez « Bibliothèque de modèles » dans la fiche d’une étape. Les modèles marqués « Recommandé » ont obtenu les meilleurs résultats lors de tests sur de vraies conversations. La petite icône à côté de chaque nom indique les résultats du test. Le modèle est activé automatiquement après le téléchargement."
+    "en": "At the top, Plans pairs the models for this computer in three levels; pick one and press \"Use this plan\", and it downloads and switches by itself. The two sides can use different models, one on the processor and one on the graphics card, which saves video memory. To pick yourself, open \"Model library\" in a stage card: each model says whether this computer runs it smoothly.",
+    "text": "Tout en haut, les « Configurations » proposent trois combinaisons de modèles adaptées à cet ordinateur. Choisissez-en une et cliquez sur « Utiliser cette configuration » : les modèles sont téléchargés et activés automatiquement. Les deux côtés peuvent utiliser des modèles différents, l’un sur le processeur et l’autre sur la carte graphique, pour économiser la mémoire vidéo. Pour choisir vous-même, ouvrez la « Bibliothèque de modèles » dans la fiche d’une étape : chaque modèle indique si cet ordinateur peut le faire fonctionner de manière fluide."
   },
   "tour.steps.provider-settings.content_kotomimi": {
     "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",

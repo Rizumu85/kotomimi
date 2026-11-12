@@ -263,6 +263,22 @@
     "en": "Use {{name}}",
     "text": "{{name}}を使う"
   },
+  "fork.fit.cannot": {
+    "en": "Cannot run",
+    "text": "動作不可"
+  },
+  "fork.fit.hint": {
+    "en": "Needs about {{need}} of video memory; about {{left}} is left beside the other models.",
+    "text": "ビデオメモリが約 {{need}} 必要です。他の処理のモデルを除くと、残りは約 {{left}} です。"
+  },
+  "fork.fit.maybeSlow": {
+    "en": "May lag",
+    "text": "動作が遅くなる可能性あり"
+  },
+  "fork.fit.smooth": {
+    "en": "Runs smoothly",
+    "text": "快適に動作"
+  },
   "fork.fonts.add": {
     "en": "Add a language…",
     "text": "言語を追加…"
@@ -343,6 +359,18 @@
     "en": "Furigana over kanji (Japanese)",
     "text": "漢字の上にふりがなを表示（日本語）"
   },
+  "fork.gap.cannot": {
+    "en": "{{model}} cannot hear {{languages}}",
+    "text": "{{model}} は{{languages}}の音声を認識できません"
+  },
+  "fork.gap.noDetect": {
+    "en": "{{model}} cannot tell languages apart",
+    "text": "{{model}} は言語を自動判別できません"
+  },
+  "fork.gap.switch": {
+    "en": "Switch to {{model}}",
+    "text": "{{model}} に切り替える"
+  },
   "fork.help.issues": {
     "en": "Report a problem",
     "text": "問題を報告"
@@ -354,6 +382,18 @@
   "fork.jyutping": {
     "en": "Jyutping over Cantonese",
     "text": "広東語の上に粤拼を表示"
+  },
+  "fork.lag.hear": {
+    "en": "Recognition cannot keep up with the speech. Try a lighter plan?",
+    "text": "音声認識が話す速さに追いついていません。もっと軽い構成に切り替えますか？"
+  },
+  "fork.lag.open": {
+    "en": "See plans",
+    "text": "構成を見る"
+  },
+  "fork.lag.translate": {
+    "en": "Translation cannot keep up. Try a lighter plan?",
+    "text": "翻訳が追いついていません。もっと軽い構成に切り替えますか？"
   },
   "fork.lan.asked": {
     "en": "The other device wants to hear {{language}}",
@@ -586,6 +626,78 @@
   "fork.pinyin": {
     "en": "Pinyin over Chinese",
     "text": "中国語の上にピンインを表示"
+  },
+  "fork.plans.accurate": {
+    "en": "Accurate",
+    "text": "高精度"
+  },
+  "fork.plans.apply": {
+    "en": "Use this plan",
+    "text": "この構成を使う"
+  },
+  "fork.plans.balanced": {
+    "en": "Balanced",
+    "text": "バランス"
+  },
+  "fork.plans.cancel": {
+    "en": "Cancel",
+    "text": "キャンセル"
+  },
+  "fork.plans.custom": {
+    "en": "Custom",
+    "text": "カスタム"
+  },
+  "fork.plans.downloaded": {
+    "en": "Downloaded",
+    "text": "ダウンロード済み"
+  },
+  "fork.plans.failed": {
+    "en": "A download failed. Try again from the model library.",
+    "text": "ダウンロードできなかったモデルがあります。モデルライブラリで再試行できます。"
+  },
+  "fork.plans.inUse": {
+    "en": "In use",
+    "text": "使用中"
+  },
+  "fork.plans.light": {
+    "en": "Light",
+    "text": "軽量"
+  },
+  "fork.plans.speedTest": {
+    "en": "Test this computer's speed",
+    "text": "このパソコンの速度を測る"
+  },
+  "fork.plans.switching": {
+    "en": "Downloading, then switching: {{percent}}%",
+    "text": "ダウンロード後に自動で切り替え：{{percent}}%"
+  },
+  "fork.plans.title": {
+    "en": "Plans",
+    "text": "構成"
+  },
+  "fork.plans.translation": {
+    "en": "Translation",
+    "text": "翻訳"
+  },
+  "fork.plans.vram": {
+    "en": "Takes about {{size}} of video memory",
+    "text": "ビデオメモリを約 {{size}} 使用"
+  },
+  "fork.plans.why.big": {
+    "en": "This computer has the video memory for the more accurate models.",
+    "text": "このパソコンには、より高精度なモデルを使えるだけのビデオメモリがあります。"
+  },
+  "fork.plans.why.default": {
+    "en": "Accurate enough, with room left for a game.",
+    "text": "十分な精度で、ゲームを起動していてもメモリに収まります。"
+  },
+  "fork.plans.why.lending": {
+    "en": "This computer lends its models to other devices: the more accurate models.",
+    "text": "他の端末にもモデルを貸し出しているので、より高精度なモデルを使います。"
+  },
+  "fork.plans.why.small": {
+    "en": "This computer has little video memory: the plan that takes least.",
+    "text": "このパソコンはビデオメモリが少ないため、使用量が最も少ない構成です。"
   },
   "fork.romanization": {
     "en": "Romanization",
@@ -2284,8 +2396,8 @@
     "text": "言語"
   },
   "tour.steps.models.content_kotomimi": {
-    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
-    "text": "モデルは各処理のカードにある「モデルライブラリ」からダウンロードできます。「おすすめ」は実際の会話での検証で高い評価を得たモデルです。名前の横のアイコンで検証結果を確認できます。ダウンロードしたモデルは自動で有効になります。"
+    "en": "At the top, Plans pairs the models for this computer in three levels; pick one and press \"Use this plan\", and it downloads and switches by itself. The two sides can use different models, one on the processor and one on the graphics card, which saves video memory. To pick yourself, open \"Model library\" in a stage card: each model says whether this computer runs it smoothly.",
+    "text": "一番上の「プラン」には、このパソコンに合わせた3段階のモデル構成があります。選んで「このプランを使う」を押すと、自動でダウンロードして切り替わります。両側で別々のモデルを使い、片方をCPU、もう片方をGPUで動かすと、ビデオメモリを節約できます。自分で選ぶには、各ステップのカードから「モデルライブラリ」を開いてください。このパソコンで快適に動くかどうかが、モデルごとに表示されています。"
   },
   "tour.steps.provider-settings.content_kotomimi": {
     "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",

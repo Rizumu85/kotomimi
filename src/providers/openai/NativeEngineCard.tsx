@@ -87,7 +87,7 @@ function entryOf(kind: NativeKind, model: NativeCardModel, recommended: boolean)
   };
 }
 
-export function NativeEngineCard({ kind, model, recommended = true, recommendHint, selected, onSelect, onDownloadStarted, disabled }: { kind: NativeKind; model: NativeCardModel; /** The one recommended for this computer (`nativeRecommendation.ts`): the others are there to be chosen, without the mark. */ recommended?: boolean; /** Why, on hover over the mark. */ recommendHint?: string; selected: boolean; onSelect?(): void; onDownloadStarted?(): void; disabled?: boolean }) {
+export function NativeEngineCard({ kind, model, recommended = true, recommendHint, fit, selected, onSelect, onDownloadStarted, disabled }: { kind: NativeKind; model: NativeCardModel; /** The one recommended for this computer (`nativeRecommendation.ts`): the others are there to be chosen, without the mark. */ recommended?: boolean; /** Why, on hover over the mark. */ recommendHint?: string; /** How well this computer runs it here (`nativeFit`); absent: nothing said. */ fit?: { label: string; hint: string; tone: 'ok' | 'warn' | 'bad' }; selected: boolean; onSelect?(): void; onDownloadStarted?(): void; disabled?: boolean }) {
   const { t } = useTranslation();
   const useStore = nativeStoreOf(kind);
   const status = useStore((s) => s.status);
@@ -129,6 +129,7 @@ export function NativeEngineCard({ kind, model, recommended = true, recommendHin
       note={note ? t(`providers.localai.${note}`) : undefined}
       tag={{ label: t(`providers.localai.tag_${tagOf(model.id)}`), hint: t(`providers.localai.tagHint_${tagOf(model.id)}`) }}
       {...(recommended && recommendHint ? { recommendHint } : {})}
+      {...(fit ? { fit } : {})}
       onSelect={onSelect}
       onDownload={() => { onDownloadStarted?.(); void store().download(model.id); }}
       onCancel={() => { void store().cancel(model.id); }}

@@ -4,6 +4,7 @@
  * controls, the toolbar with the export menu, the footers over the run's
  * state.
  */
+import { sessionLags, type FallingBehind } from '../../app/sessionLags';
 import { VideoPrompt } from '../VRChat/VideoPrompt';
 import { useNativeEnginesComing } from '../../stores/nativeEngineStore';
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
@@ -267,9 +268,13 @@ export default function MainPanel() {
     },
   );
   const setEntryHint = useSetSubtitleEntryHint();
-  const status = useStatusLine({ run, idle, canStart: subtitle.canStart, dismissedEnd, echo });
-  const onDismissStatus = useCallback((what: 'echo' | 'subtitle-entry') => {
-    if (what === 'echo') dismissEcho(); else setEntryHint(null);
+  // Fork: the falling-behind notice, put away for the rest of its run.
+  const [lagDismissed, setLagDismissed] = useState<FallingBehind | null>(null);
+  const status = useStatusLine({ run, idle, canStart: subtitle.canStart, dismissedEnd, echo, lagDismissed });
+  const onDismissStatus = useCallback((what: 'echo' | 'subtitle-entry' | 'lag') => {
+    if (what === 'echo') dismissEcho();
+    else if (what === 'lag') setLagDismissed(sessionLags.state.getState().notice);
+    else setEntryHint(null);
   }, [dismissEcho, setEntryHint]);
   const testTone = useTestTone(audio);   // dev only: { playing, toggle } | undefined
   useUpdateAndAudioSystemListeners();    // today's two listener inits, pre-switch MainPanel.tsx:1111-1125

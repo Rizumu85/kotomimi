@@ -267,6 +267,22 @@
     "en": "Use {{name}}",
     "text": "Använd {{name}}"
   },
+  "fork.fit.cannot": {
+    "en": "Cannot run",
+    "text": "Kan inte köras"
+  },
+  "fork.fit.hint": {
+    "en": "Needs about {{need}} of video memory; about {{left}} is left beside the other models.",
+    "text": "Behöver cirka {{need}} grafikminne. Cirka {{left}} finns kvar när de andra modellerna har räknats bort."
+  },
+  "fork.fit.maybeSlow": {
+    "en": "May lag",
+    "text": "Kan hacka"
+  },
+  "fork.fit.smooth": {
+    "en": "Runs smoothly",
+    "text": "Körs utan problem"
+  },
   "fork.fonts.add": {
     "en": "Add a language…",
     "text": "Lägg till språk…"
@@ -347,6 +363,18 @@
     "en": "Furigana over kanji (Japanese)",
     "text": "Furigana ovanför kanji (japanska)"
   },
+  "fork.gap.cannot": {
+    "en": "{{model}} cannot hear {{languages}}",
+    "text": "{{model}} kan inte känna igen tal på {{languages}}"
+  },
+  "fork.gap.noDetect": {
+    "en": "{{model}} cannot tell languages apart",
+    "text": "{{model}} kan inte identifiera språk automatiskt"
+  },
+  "fork.gap.switch": {
+    "en": "Switch to {{model}}",
+    "text": "Byt till {{model}}"
+  },
   "fork.help.issues": {
     "en": "Report a problem",
     "text": "Rapportera ett problem"
@@ -358,6 +386,18 @@
   "fork.jyutping": {
     "en": "Jyutping over Cantonese",
     "text": "Jyutping ovanför kantonesisk text"
+  },
+  "fork.lag.hear": {
+    "en": "Recognition cannot keep up with the speech. Try a lighter plan?",
+    "text": "Taligenkänningen hinner inte med. Vill du byta till ett lättare alternativ?"
+  },
+  "fork.lag.open": {
+    "en": "See plans",
+    "text": "Visa alternativ"
+  },
+  "fork.lag.translate": {
+    "en": "Translation cannot keep up. Try a lighter plan?",
+    "text": "Översättningen hinner inte med. Vill du byta till ett lättare alternativ?"
   },
   "fork.lan.asked": {
     "en": "The other device wants to hear {{language}}",
@@ -590,6 +630,78 @@
   "fork.pinyin": {
     "en": "Pinyin over Chinese",
     "text": "Visa pinyin ovanför kinesiskan"
+  },
+  "fork.plans.accurate": {
+    "en": "Accurate",
+    "text": "Exakt"
+  },
+  "fork.plans.apply": {
+    "en": "Use this plan",
+    "text": "Använd det här alternativet"
+  },
+  "fork.plans.balanced": {
+    "en": "Balanced",
+    "text": "Balanserat"
+  },
+  "fork.plans.cancel": {
+    "en": "Cancel",
+    "text": "Avbryt"
+  },
+  "fork.plans.custom": {
+    "en": "Custom",
+    "text": "Anpassat"
+  },
+  "fork.plans.downloaded": {
+    "en": "Downloaded",
+    "text": "Nedladdat"
+  },
+  "fork.plans.failed": {
+    "en": "A download failed. Try again from the model library.",
+    "text": "En modell kunde inte laddas ned. Försök igen i modellbiblioteket."
+  },
+  "fork.plans.inUse": {
+    "en": "In use",
+    "text": "Används"
+  },
+  "fork.plans.light": {
+    "en": "Light",
+    "text": "Lätt"
+  },
+  "fork.plans.speedTest": {
+    "en": "Test this computer's speed",
+    "text": "Testa datorns hastighet"
+  },
+  "fork.plans.switching": {
+    "en": "Downloading, then switching: {{percent}}%",
+    "text": "Byter automatiskt när nedladdningen är klar: {{percent}}%"
+  },
+  "fork.plans.title": {
+    "en": "Plans",
+    "text": "Alternativ"
+  },
+  "fork.plans.translation": {
+    "en": "Translation",
+    "text": "Översättning"
+  },
+  "fork.plans.vram": {
+    "en": "Takes about {{size}} of video memory",
+    "text": "Använder cirka {{size}} grafikminne"
+  },
+  "fork.plans.why.big": {
+    "en": "This computer has the video memory for the more accurate models.",
+    "text": "Den här datorn har tillräckligt med grafikminne för mer exakta modeller."
+  },
+  "fork.plans.why.default": {
+    "en": "Accurate enough, with room left for a game.",
+    "text": "Tillräckligt exakt, med minne kvar för ett spel."
+  },
+  "fork.plans.why.lending": {
+    "en": "This computer lends its models to other devices: the more accurate models.",
+    "text": "Den här datorn delar sina modeller med andra enheter och använder därför mer exakta modeller."
+  },
+  "fork.plans.why.small": {
+    "en": "This computer has little video memory: the plan that takes least.",
+    "text": "Den här datorn har lite grafikminne. Det här alternativet använder minst."
   },
   "fork.romanization": {
     "en": "Romanization",
@@ -2384,8 +2496,8 @@
     "text": "Språk"
   },
   "tour.steps.models.content_kotomimi": {
-    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
-    "text": "Hämta modeller genom att öppna ”Modellbibliotek” på ett stegs kort. Modeller märkta ”Rekommenderas” har gett bäst resultat i tester med riktiga samtal. Den lilla ikonen vid modellnamnet visar testresultaten. Modellen aktiveras automatiskt när den har hämtats."
+    "en": "At the top, Plans pairs the models for this computer in three levels; pick one and press \"Use this plan\", and it downloads and switches by itself. The two sides can use different models, one on the processor and one on the graphics card, which saves video memory. To pick yourself, open \"Model library\" in a stage card: each model says whether this computer runs it smoothly.",
+    "text": "Högst upp finns tre färdiga modellpaket anpassade för den här datorn. Välj ett och tryck på ”Använd det här paketet”, så laddas modellerna ner och aktiveras automatiskt. De två sidorna kan använda olika modeller, en på processorn och en på grafikkortet, vilket sparar grafikminne. Vill du välja själv öppnar du ”Modellbibliotek” i kortet för ett steg. Vid varje modell står det om den kan köras smidigt på den här datorn."
   },
   "tour.steps.provider-settings.content_kotomimi": {
     "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",

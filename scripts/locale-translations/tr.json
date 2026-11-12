@@ -263,6 +263,22 @@
     "en": "Use {{name}}",
     "text": "{{name}} kullan"
   },
+  "fork.fit.cannot": {
+    "en": "Cannot run",
+    "text": "Çalıştırılamaz"
+  },
+  "fork.fit.hint": {
+    "en": "Needs about {{need}} of video memory; about {{left}} is left beside the other models.",
+    "text": "Yaklaşık {{need}} ekran kartı belleği gerekir. Diğer modellerin kullandığı bellek çıkarıldığında yaklaşık {{left}} kalır."
+  },
+  "fork.fit.maybeSlow": {
+    "en": "May lag",
+    "text": "Takılabilir"
+  },
+  "fork.fit.smooth": {
+    "en": "Runs smoothly",
+    "text": "Akıcı çalışır"
+  },
   "fork.fonts.add": {
     "en": "Add a language…",
     "text": "Dil ekle…"
@@ -343,6 +359,18 @@
     "en": "Furigana over kanji (Japanese)",
     "text": "Kanjilerin üzerinde furigana (Japonca)"
   },
+  "fork.gap.cannot": {
+    "en": "{{model}} cannot hear {{languages}}",
+    "text": "{{model}}, şu dillerdeki konuşmaları tanıyamaz: {{languages}}"
+  },
+  "fork.gap.noDetect": {
+    "en": "{{model}} cannot tell languages apart",
+    "text": "{{model}}, dili otomatik algılayamaz"
+  },
+  "fork.gap.switch": {
+    "en": "Switch to {{model}}",
+    "text": "{{model}} modeline geç"
+  },
   "fork.help.issues": {
     "en": "Report a problem",
     "text": "Sorun bildir"
@@ -354,6 +382,18 @@
   "fork.jyutping": {
     "en": "Jyutping over Cantonese",
     "text": "Kantonca metnin üzerinde jyutping"
+  },
+  "fork.lag.hear": {
+    "en": "Recognition cannot keep up with the speech. Try a lighter plan?",
+    "text": "Konuşma tanıma, konuşma hızına yetişemiyor. Daha hafif bir seçeneğe geçelim mi?"
+  },
+  "fork.lag.open": {
+    "en": "See plans",
+    "text": "Seçenekleri gör"
+  },
+  "fork.lag.translate": {
+    "en": "Translation cannot keep up. Try a lighter plan?",
+    "text": "Çeviri yetişemiyor. Daha hafif bir seçeneğe geçelim mi?"
   },
   "fork.lan.asked": {
     "en": "The other device wants to hear {{language}}",
@@ -586,6 +626,78 @@
   "fork.pinyin": {
     "en": "Pinyin over Chinese",
     "text": "Çince metnin üzerinde pinyin"
+  },
+  "fork.plans.accurate": {
+    "en": "Accurate",
+    "text": "Hassas"
+  },
+  "fork.plans.apply": {
+    "en": "Use this plan",
+    "text": "Bu seçeneği kullan"
+  },
+  "fork.plans.balanced": {
+    "en": "Balanced",
+    "text": "Dengeli"
+  },
+  "fork.plans.cancel": {
+    "en": "Cancel",
+    "text": "İptal"
+  },
+  "fork.plans.custom": {
+    "en": "Custom",
+    "text": "Özel"
+  },
+  "fork.plans.downloaded": {
+    "en": "Downloaded",
+    "text": "İndirildi"
+  },
+  "fork.plans.failed": {
+    "en": "A download failed. Try again from the model library.",
+    "text": "Bazı modeller indirilemedi. Model kitaplığından tekrar deneyebilirsiniz."
+  },
+  "fork.plans.inUse": {
+    "en": "In use",
+    "text": "Kullanımda"
+  },
+  "fork.plans.light": {
+    "en": "Light",
+    "text": "Hafif"
+  },
+  "fork.plans.speedTest": {
+    "en": "Test this computer's speed",
+    "text": "Bu bilgisayarın hızını test et"
+  },
+  "fork.plans.switching": {
+    "en": "Downloading, then switching: {{percent}}%",
+    "text": "İndirme bitince otomatik geçilecek: {{percent}}%"
+  },
+  "fork.plans.title": {
+    "en": "Plans",
+    "text": "Seçenekler"
+  },
+  "fork.plans.translation": {
+    "en": "Translation",
+    "text": "Çeviri"
+  },
+  "fork.plans.vram": {
+    "en": "Takes about {{size}} of video memory",
+    "text": "Yaklaşık {{size}} ekran kartı belleği kullanır"
+  },
+  "fork.plans.why.big": {
+    "en": "This computer has the video memory for the more accurate models.",
+    "text": "Bu bilgisayarın ekran kartı belleği, daha doğru sonuç veren modeller için yeterli."
+  },
+  "fork.plans.why.default": {
+    "en": "Accurate enough, with room left for a game.",
+    "text": "Yeterince doğru sonuç verir, oyun için de bellekte yer bırakır."
+  },
+  "fork.plans.why.lending": {
+    "en": "This computer lends its models to other devices: the more accurate models.",
+    "text": "Bu bilgisayar modellerini diğer cihazlarla paylaşıyor, bu yüzden daha doğru sonuç veren modelleri kullanır."
+  },
+  "fork.plans.why.small": {
+    "en": "This computer has little video memory: the plan that takes least.",
+    "text": "Bu bilgisayarın ekran kartı belleği az. Bu seçenek en az belleği kullanır."
   },
   "fork.romanization": {
     "en": "Romanization",
@@ -2316,8 +2428,8 @@
     "text": "Diller"
   },
   "tour.steps.models.content_kotomimi": {
-    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
-    "text": "Modeller buradan indirilir: bir aşamanın kartında \"Model kitaplığı\"nı açın. Önerilen olarak işaretlenenler gerçek konuşmalarda en iyi sonuç verenlerdir; adın yanındaki işaret, model hakkında yapılan ölçümü gösterir. İndirdiğiniz model hemen kullanılmaya başlanır."
+    "en": "At the top, Plans pairs the models for this computer in three levels; pick one and press \"Use this plan\", and it downloads and switches by itself. The two sides can use different models, one on the processor and one on the graphics card, which saves video memory. To pick yourself, open \"Model library\" in a stage card: each model says whether this computer runs it smoothly.",
+    "text": "En üstteki \"Planlar\", bu bilgisayara uygun modelleri üç düzeyde eşleştirir. Birini seçip \"Bu planı kullan\" düğmesine basın; modeller otomatik indirilir ve devreye girer. İki tarafta farklı modeller kullanılabilir: biri işlemcide, diğeri ekran kartında çalışarak ekran kartı belleğinden tasarruf sağlar. Kendiniz seçmek için aşama kartındaki \"Model kitaplığı\"nı açın. Her modelin yanında bu bilgisayarda akıcı çalışıp çalışmayacağı belirtilir."
   },
   "tour.steps.provider-settings.content_kotomimi": {
     "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",

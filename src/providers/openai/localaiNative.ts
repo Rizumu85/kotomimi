@@ -23,6 +23,8 @@ export interface NativeModel {
   name: string;
   /** The whole download: the model, in bytes. The runtime itself is fetched with the first one. 0: the system fetches it, and does not say how large it is. */
   bytes: number;
+  /** Estimated video memory while loaded, in MB. */
+  vramMB: number;
   /** What it hears, in the app's base codes. */
   languages: readonly string[];
   /** How long one recognition of it may run, where that is not the default (`nativeAsr.ts`). */
@@ -87,28 +89,28 @@ const SENSEVOICE_LANGUAGES = ['zh', 'yue', 'en', 'ja', 'ko'] as const;
  * A system is offered the ones it can run.
  */
 export const NATIVE_MODELS: readonly NativeModel[] = [
-  ...APPLE_LANGUAGES.map((language) => ({ id: `${APPLE_PREFIX}${language}`, name: 'Apple Speech', bytes: 0, languages: [language], limits: APPLE_LIMITS })),
+  ...APPLE_LANGUAGES.map((language) => ({ id: `${APPLE_PREFIX}${language}`, name: 'Apple Speech', bytes: 0, vramMB: 0, languages: [language], limits: APPLE_LIMITS })),
   // It reads a whole stretch before it writes, and names the language right from that: measured 2026-10-05 on
   // Korean, Russian, Spanish, English, Chinese and noisy Japanese with no language given. (R2T2 can be left to
   // detect too, but writes the first words of a stretch in the wrong language: it is not offered for that.)
-  { id: 'qwen3-asr-1.7b-q8', name: 'Qwen3-ASR 1.7B GGUF', bytes: 2473010048, languages: QWEN_LANGUAGES, limits: WINDOW_LIMITS, detects: true },
-  { id: 'r2t2-q8', name: 'Confucius4 R2T2 GGUF', bytes: 2477512064, languages: ['ja', 'zh', 'en', 'ko', 'fr', 'de', 'it', 'pt', 'ru', 'es', 'ar'] },
+  { id: 'qwen3-asr-1.7b-q8', vramMB: 3072, name: 'Qwen3-ASR 1.7B GGUF', bytes: 2473010048, languages: QWEN_LANGUAGES, limits: WINDOW_LIMITS, detects: true },
+  { id: 'r2t2-q8', vramMB: 3072, name: 'Confucius4 R2T2 GGUF', bytes: 2477512064, languages: ['ja', 'zh', 'en', 'ko', 'fr', 'de', 'it', 'pt', 'ru', 'es', 'ar'] },
   // The lightest and the quickest: 0.3-0.4 GB of video memory, a stretch read in a twentieth of a second, and as
   // right as the small Qwen3 below. Read a stretch at a time, as that one is, and begun again as often: its
   // measurement is of stretches cut that way. Five languages, and told none it tells them apart (measured
   // 2026-11-06 on whole clips of each); it has no way to say that what it hears is none of them, and writes any other
   // language as one of its five — so it detects among those five, and the settings say which they are.
-  { id: 'sensevoice-small-q8', name: 'SenseVoice-Small GGUF', bytes: 254211200, languages: SENSEVOICE_LANGUAGES, limits: WINDOW_LIMITS, detects: true },
+  { id: 'sensevoice-small-q8', vramMB: 410, name: 'SenseVoice-Small GGUF', bytes: 254211200, languages: SENSEVOICE_LANGUAGES, limits: WINDOW_LIMITS, detects: true },
   // The small one of thirty languages: for a computer that runs a game beside it. Two thirds of the video memory of
   // the two at the top, and about 22 % of the characters wrong where the 1.7B has 16 (measured 2026-10-06 on the
   // stretches the app cuts). Told none it wrote Korean, Japanese, English, Chinese, Spanish, Portuguese, French,
   // German and Russian each in its own language, as the 1.7B did (measured 2026-11-06 on whole clips of each).
-  { id: 'qwen3-asr-0.6b-q8', name: 'Qwen3-ASR 0.6B GGUF', bytes: 1151272416, languages: QWEN_LANGUAGES, limits: WINDOW_LIMITS, detects: true },
+  { id: 'qwen3-asr-0.6b-q8', vramMB: 1843, name: 'Qwen3-ASR 0.6B GGUF', bytes: 1151272416, languages: QWEN_LANGUAGES, limits: WINDOW_LIMITS, detects: true },
   // The last choice: half the video memory of the small Qwen3 again, and about 27 % of the characters wrong in the
   // app — of the sentences the app cuts, it writes nothing for one short one in five. What it has over
   // SenseVoice-Small, which is lighter and more right, is its languages.
-  { id: 'nemotron-asr-0.6b-q8', name: 'Nemotron 3.5 ASR 0.6B GGUF', bytes: 930625888, languages: NEMOTRON_LANGUAGES, limits: WINDOW_LIMITS },
-  { id: 'x-asr-zh-en', name: 'X-ASR-zh-en', bytes: 614596718, languages: ['zh', 'en'], detects: true, engine: 'sherpa-onnx', usesGpu: false, takesHints: false },
+  { id: 'nemotron-asr-0.6b-q8', vramMB: 1024, name: 'Nemotron 3.5 ASR 0.6B GGUF', bytes: 930625888, languages: NEMOTRON_LANGUAGES, limits: WINDOW_LIMITS },
+  { id: 'x-asr-zh-en', vramMB: 0, name: 'X-ASR-zh-en', bytes: 614596718, languages: ['zh', 'en'], detects: true, engine: 'sherpa-onnx', usesGpu: false, takesHints: false },
 ];
 
 /** Models on different engines can hear together; each downloaded engine holds one model at a time. */
@@ -142,6 +144,8 @@ export function nativeModelFor(id: string, language: string): NativeModel | null
  * the one that was chosen for it.
  */
 export interface NativePick {
+  /** Per-leg selections where both legs ask for auto on independent engines. */
+  selections?: ReadonlyArray<{ pick: NativePick; language: string }>;
   model: string;
   byLanguage?: Readonly<Record<string, string>>;
   /**
@@ -333,7 +337,9 @@ export async function nativeGap(chosen: NativePick | string, heard: readonly str
   if (!status.supported) return { ok: false, reason: 'The native recognition engine is not available for this system.', code: 'native_unsupported' };
   // The model of each language heard: the one chosen for it, or the one in use.
   const has = (id: string) => nativeDownloaded(status, id);
-  const unchosen = heard.find((language) => !nativePicked(pick, language, has));
+  const unchosen = pick.selections
+    ? pick.selections.find((side) => !nativePicked(side.pick, side.language, has))?.language
+    : heard.find((language) => !nativePicked(pick, language, has));
   if (unchosen !== undefined) return { ok: false, reason: `No native recognition model is chosen for ${unchosen}.`, code: 'native_unchosen', params: { source: unchosen } };
   const models = hearing(pick, heard, has);
   const kept = models.find((one) => nativeUpdating(status, one.id));
@@ -352,7 +358,7 @@ export async function nativeGap(chosen: NativePick | string, heard: readonly str
 }
 
 /** The models that hear a run's languages: each once. */
-const hearing = (pick: NativePick, heard: readonly string[], has?: (id: string) => boolean): NativeModel[] => [...new Map(heard.flatMap((language) => { const one = nativePicked(pick, language, has); return one ? [[one.id, one] as const] : []; })).values()];
+const hearing = (pick: NativePick, heard: readonly string[], has?: (id: string) => boolean): NativeModel[] => [...new Map((pick.selections ?? heard.map((language) => ({ pick, language }))).flatMap((side) => { const one = nativePicked(side.pick, side.language, has); return one ? [[one.id, one] as const] : []; })).values()];
 
 /** What brings an engine up, and says how it went: the store's by default. */
 export interface NativeUpDeps {

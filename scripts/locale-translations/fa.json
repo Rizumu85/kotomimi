@@ -263,6 +263,22 @@
     "en": "Use {{name}}",
     "text": "استفاده از {{name}}"
   },
+  "fork.fit.cannot": {
+    "en": "Cannot run",
+    "text": "قابل اجرا نیست"
+  },
+  "fork.fit.hint": {
+    "en": "Needs about {{need}} of video memory; about {{left}} is left beside the other models.",
+    "text": "حدود {{need}} حافظهٔ گرافیکی لازم دارد؛ با احتساب مدل‌های دیگر، حدود {{left}} باقی می‌ماند."
+  },
+  "fork.fit.maybeSlow": {
+    "en": "May lag",
+    "text": "ممکن است کند شود"
+  },
+  "fork.fit.smooth": {
+    "en": "Runs smoothly",
+    "text": "روان اجرا می‌شود"
+  },
   "fork.fonts.add": {
     "en": "Add a language…",
     "text": "افزودن زبان…"
@@ -343,6 +359,18 @@
     "en": "Furigana over kanji (Japanese)",
     "text": "نمایش فوریگانا بالای کانجی (ژاپنی)"
   },
+  "fork.gap.cannot": {
+    "en": "{{model}} cannot hear {{languages}}",
+    "text": "{{model}} گفتار به زبان‌های {{languages}} را تشخیص نمی‌دهد"
+  },
+  "fork.gap.noDetect": {
+    "en": "{{model}} cannot tell languages apart",
+    "text": "{{model}} نمی‌تواند زبان‌ها را خودکار از هم تشخیص دهد"
+  },
+  "fork.gap.switch": {
+    "en": "Switch to {{model}}",
+    "text": "تغییر به {{model}}"
+  },
   "fork.help.issues": {
     "en": "Report a problem",
     "text": "گزارش مشکل"
@@ -354,6 +382,18 @@
   "fork.jyutping": {
     "en": "Jyutping over Cantonese",
     "text": "نمایش جوت‌پینگ بالای متن کانتونی"
+  },
+  "fork.lag.hear": {
+    "en": "Recognition cannot keep up with the speech. Try a lighter plan?",
+    "text": "تشخیص گفتار از صحبت عقب می‌ماند. پیکربندی سبک‌تری امتحان می‌کنید؟"
+  },
+  "fork.lag.open": {
+    "en": "See plans",
+    "text": "دیدن پیکربندی‌ها"
+  },
+  "fork.lag.translate": {
+    "en": "Translation cannot keep up. Try a lighter plan?",
+    "text": "ترجمه عقب می‌ماند. پیکربندی سبک‌تری امتحان می‌کنید؟"
   },
   "fork.lan.asked": {
     "en": "The other device wants to hear {{language}}",
@@ -586,6 +626,78 @@
   "fork.pinyin": {
     "en": "Pinyin over Chinese",
     "text": "نمایش پین‌یین بالای متن چینی"
+  },
+  "fork.plans.accurate": {
+    "en": "Accurate",
+    "text": "دقیق"
+  },
+  "fork.plans.apply": {
+    "en": "Use this plan",
+    "text": "استفاده از این پیکربندی"
+  },
+  "fork.plans.balanced": {
+    "en": "Balanced",
+    "text": "متعادل"
+  },
+  "fork.plans.cancel": {
+    "en": "Cancel",
+    "text": "لغو"
+  },
+  "fork.plans.custom": {
+    "en": "Custom",
+    "text": "سفارشی"
+  },
+  "fork.plans.downloaded": {
+    "en": "Downloaded",
+    "text": "دانلود شده"
+  },
+  "fork.plans.failed": {
+    "en": "A download failed. Try again from the model library.",
+    "text": "دانلود بعضی مدل‌ها ناموفق بود. از کتابخانهٔ مدل‌ها دوباره امتحان کنید."
+  },
+  "fork.plans.inUse": {
+    "en": "In use",
+    "text": "در حال استفاده"
+  },
+  "fork.plans.light": {
+    "en": "Light",
+    "text": "سبک"
+  },
+  "fork.plans.speedTest": {
+    "en": "Test this computer's speed",
+    "text": "سنجش سرعت این رایانه"
+  },
+  "fork.plans.switching": {
+    "en": "Downloading, then switching: {{percent}}%",
+    "text": "پس از دانلود، خودکار عوض می‌شود: {{percent}}%"
+  },
+  "fork.plans.title": {
+    "en": "Plans",
+    "text": "پیکربندی‌ها"
+  },
+  "fork.plans.translation": {
+    "en": "Translation",
+    "text": "ترجمه"
+  },
+  "fork.plans.vram": {
+    "en": "Takes about {{size}} of video memory",
+    "text": "حدود {{size}} از حافظهٔ گرافیکی را می‌گیرد"
+  },
+  "fork.plans.why.big": {
+    "en": "This computer has the video memory for the more accurate models.",
+    "text": "حافظهٔ گرافیکی این رایانه برای مدل‌های دقیق‌تر کافی است."
+  },
+  "fork.plans.why.default": {
+    "en": "Accurate enough, with room left for a game.",
+    "text": "دقت کافی دارد و برای اجرای بازی هم جا می‌ماند."
+  },
+  "fork.plans.why.lending": {
+    "en": "This computer lends its models to other devices: the more accurate models.",
+    "text": "این رایانه مدل‌هایش را در اختیار دستگاه‌های دیگر می‌گذارد؛ از مدل‌های دقیق‌تر استفاده کنید."
+  },
+  "fork.plans.why.small": {
+    "en": "This computer has little video memory: the plan that takes least.",
+    "text": "حافظهٔ گرافیکی این رایانه کم است؛ این پیکربندی کمترین فضا را می‌گیرد."
   },
   "fork.romanization": {
     "en": "Romanization",
@@ -2308,8 +2420,8 @@
     "text": "زبان‌ها"
   },
   "tour.steps.models.content_kotomimi": {
-    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
-    "text": "مدل‌ها را از اینجا دانلود کنید: در کارت هر مرحله، «کتابخانه مدل‌ها» را باز کنید. مدل‌های دارای نشان «پیشنهادی» در آزمون با گفت‌وگوهای واقعی بهترین نتیجه را داشته‌اند. نماد کوچک کنار نام هر مدل، نتیجه آزمون آن را نشان می‌دهد. مدل پس از دانلود خودکار فعال می‌شود."
+    "en": "At the top, Plans pairs the models for this computer in three levels; pick one and press \"Use this plan\", and it downloads and switches by itself. The two sides can use different models, one on the processor and one on the graphics card, which saves video memory. To pick yourself, open \"Model library\" in a stage card: each model says whether this computer runs it smoothly.",
+    "text": "در بالای صفحه، «طرح‌ها» مدل‌های مناسب این رایانه را در سه سطح پیشنهاد می‌دهد؛ یکی را انتخاب کنید و «استفاده از این طرح» را بزنید تا مدل‌ها خودکار دانلود و فعال شوند. دو بخش می‌توانند از مدل‌های متفاوت استفاده کنند؛ یکی روی پردازنده و دیگری روی کارت گرافیک، تا حافظهٔ گرافیکی کمتری مصرف شود. برای انتخاب دستی، در کارت هر مرحله «کتابخانهٔ مدل‌ها» را باز کنید؛ کنار هر مدل مشخص شده که روی این رایانه روان اجرا می‌شود یا نه."
   },
   "tour.steps.provider-settings.content_kotomimi": {
     "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",

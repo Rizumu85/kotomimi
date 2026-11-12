@@ -72,6 +72,12 @@ describe('statusLine — while running (priorities 2–5)', () => {
   it('the subtitle layer’s hint, dismissible, above echo (the user just pressed the button)', () => {
     expect(statusLine(input({ run: running(), subtitleEntryHint: true, echo }))).toMatchObject({ key: 'subtitle-entry', icon: 'captions', words: { kind: 'key', key: 'subtitle.enterButton.refreshPageHint' }, dismiss: 'subtitle-entry' });
   });
+  it('a stage falling behind offers the plans, dismissible, above echo and below the subtitle layer’s hint (fork)', () => {
+    expect(statusLine(input({ run: running(), fallingBehind: 'speaker', echo }))).toMatchObject({ key: 'lag:speaker', words: { kind: 'key', key: 'fork.lag.hear' }, action: { kind: 'settings', target: 'provider' }, dismiss: 'lag' });
+    expect(statusLine(input({ run: running(), fallingBehind: 'translation' }))).toMatchObject({ words: { kind: 'key', key: 'fork.lag.translate' } });
+    expect(statusLine(input({ run: running(), fallingBehind: 'speaker', subtitleEntryHint: true }))?.key).toBe('subtitle-entry');
+    expect(statusLine(input({ fallingBehind: 'speaker' }))?.key).not.toBe('lag:speaker');
+  });
   it('the microphone wait outranks the subtitle layer’s hint', () => {
     expect(statusLine(input({ run: running(), waitingForMicrophone: true, subtitleEntryHint: true }))).toMatchObject({ key: 'mic-waiting', icon: 'mic-off', dismiss: null });
   });

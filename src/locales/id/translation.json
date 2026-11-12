@@ -1535,7 +1535,7 @@
       "models": {
         "title": "Model",
         "content": "Unduh model di sini — satu untuk tiap tahap. Coba beberapa; pilihan pertama bukan satu-satunya yang bagus.",
-        "content_kotomimi": "Unduh model di sini: klik \"Pustaka model\" pada kartu tahap. Model bertanda Direkomendasikan memiliki hasil uji terbaik pada percakapan nyata. Ikon kecil di samping nama model berisi hasil pengujiannya. Model otomatis diaktifkan setelah diunduh."
+        "content_kotomimi": "Di bagian atas, \"Paket\" menyediakan tiga pilihan kombinasi model yang disesuaikan untuk komputer ini. Pilih satu lalu tekan \"Gunakan paket ini\". Model akan diunduh dan diganti secara otomatis. Kedua sisi bisa memakai model berbeda, satu di prosesor dan satu di kartu grafis, agar lebih hemat memori grafis. Untuk memilih sendiri, buka \"Pustaka model\" di kartu tahap. Setiap model diberi keterangan apakah bisa berjalan lancar di komputer ini."
       },
       "start": {
         "title": "Mulai",
@@ -2048,6 +2048,44 @@
         "copy_failed": "Pemindahan tidak selesai. Model tetap berada di lokasi semula.",
         "move_failed": "Pemindahan tidak selesai. Model tetap berada di lokasi semula."
       }
+    },
+    "plans": {
+      "title": "Pilihan konfigurasi",
+      "light": "Ringan",
+      "balanced": "Seimbang",
+      "accurate": "Akurat",
+      "custom": "Kustom",
+      "inUse": "Sedang digunakan",
+      "vram": "Memakai sekitar {{size}} memori grafis",
+      "downloaded": "Sudah diunduh",
+      "apply": "Gunakan konfigurasi ini",
+      "switching": "Beralih otomatis setelah unduhan selesai: {{percent}}%",
+      "failed": "Ada model yang gagal diunduh. Coba lagi di pustaka model.",
+      "cancel": "Batal",
+      "translation": "Terjemahan",
+      "speedTest": "Uji kecepatan komputer ini",
+      "why": {
+        "lending": "Komputer ini berbagi model dengan perangkat lain, jadi gunakan model yang lebih akurat.",
+        "big": "Memori grafis komputer ini cukup untuk model yang lebih akurat.",
+        "small": "Memori grafis komputer ini terbatas. Konfigurasi ini paling hemat.",
+        "default": "Cukup akurat, dan masih muat saat bermain game."
+      }
+    },
+    "fit": {
+      "smooth": "Berjalan lancar",
+      "maybeSlow": "Mungkin tersendat",
+      "cannot": "Tidak bisa dijalankan",
+      "hint": "Perlu sekitar {{need}} memori grafis; tersisa sekitar {{left}} setelah dipakai model lain."
+    },
+    "gap": {
+      "cannot": "{{model}} tidak bisa mengenali ucapan dalam {{languages}}",
+      "noDetect": "{{model}} tidak bisa membedakan bahasa secara otomatis",
+      "switch": "Ganti ke {{model}}"
+    },
+    "lag": {
+      "hear": "Pengenalan ucapan tidak bisa mengimbangi kecepatan bicara. Coba konfigurasi yang lebih ringan?",
+      "translate": "Terjemahan tidak bisa mengimbangi kecepatan bicara. Coba konfigurasi yang lebih ringan?",
+      "open": "Lihat konfigurasi"
     }
   }
 }

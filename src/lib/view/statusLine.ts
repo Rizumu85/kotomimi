@@ -28,7 +28,7 @@ export interface StatusEntry {
   words: StatusWords;
   action: NoticeActionSpec | null;
   /** What a dismiss means, when the line offers one. */
-  dismiss: 'echo' | 'subtitle-entry' | null;
+  dismiss: 'echo' | 'subtitle-entry' | 'lag' | null;
 }
 
 export interface StatusLineInput {
@@ -52,6 +52,11 @@ export interface StatusLineInput {
   subtitleEntryHint: boolean;
   /** `useEchoNotice`'s visible notice: already null while its cause is dismissed. */
   echo: EchoNoticeState | null;
+  /**
+   * Fork: a stage of this run keeps falling behind (`sessionLags`' notice, once a run, not yet dismissed): the line
+   * offers the plans, where a lighter one is a press away. Never a switch by itself.
+   */
+  fallingBehind?: 'speaker' | 'participant' | 'translation' | null;
 }
 
 const KEY_CODES: ReadonlySet<string> = new Set(['credentials_missing', 'sign_in_required', 'sign_in_pending', 'auth']);
@@ -75,7 +80,7 @@ function blocker(key: string, code: string | undefined, message: string, params?
 }
 
 export function statusLine(input: StatusLineInput): StatusEntry | null {
-  const { run, idle, canStart, dismissedEnd, waitingForMicrophone, mutedInVRChat, gettingReady, subtitleEntryHint, echo } = input;
+  const { run, idle, canStart, dismissedEnd, waitingForMicrophone, mutedInVRChat, gettingReady, subtitleEntryHint, echo, fallingBehind } = input;
   if (run.phase === 'idle') {
     // 1a. The live gate: what the stores refuse now (a stale failure never outranks it).
     // Fork: an answer that could not find out is said though the start stays offered (it asks again).
@@ -109,6 +114,17 @@ export function statusLine(input: StatusLineInput): StatusEntry | null {
   // Only while running: the overlay opens only then (Ruling 11), and an ended run leaves nothing to enter.
   if (run.phase === 'running' && subtitleEntryHint) {
     return { key: 'subtitle-entry', icon: 'captions', words: { kind: 'key', key: 'subtitle.enterButton.refreshPageHint', fallback: 'Refresh the meeting tab and try again' }, action: null, dismiss: 'subtitle-entry' };
+  }
+  // Fork: a stage falling behind, while running: the plans, one press away.
+  if (run.phase === 'running' && fallingBehind) {
+    const translation = fallingBehind === 'translation';
+    return {
+      key: `lag:${fallingBehind}`,
+      icon: 'triangle-alert',
+      words: { kind: 'key', key: translation ? 'fork.lag.translate' : 'fork.lag.hear', fallback: translation ? 'Translation cannot keep up. Try a lighter plan?' : 'Recognition cannot keep up with the speech. Try a lighter plan?' },
+      action: { kind: 'settings', target: 'provider', label: { key: 'fork.lag.open', fallback: 'See plans' } },
+      dismiss: 'lag',
+    };
   }
   // 5. Echo: per-cause dismissal and the all-clear reset stay on `useEchoNotice`.
   if (echo) return { key: `echo:${echo.cause}`, icon: 'triangle-alert', words: { kind: 'echo', cause: echo.cause }, action: null, dismiss: 'echo' };

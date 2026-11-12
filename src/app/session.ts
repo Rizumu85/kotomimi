@@ -5,6 +5,10 @@
  * `getAppSession()` builds on its first call, and the playback loads on the
  * first `audio()` or leg.
  */
+import { driveSessionLags, type LagModels } from './sessionLags';
+import { runSideHearing, type LocalAISettings } from '../providers/openai/localai';
+import { nativePicked } from '../providers/openai/localaiNative';
+import { heardBy } from '../providers/openai/localaiDevice';
 import { getAppAudio, type AppAudio } from '../lib/audio/appAudio';
 import { createAppCapture, type AppCapture } from '../lib/audio/appCapture';
 import type { Playback } from '../lib/audio/playback';
@@ -121,10 +125,27 @@ export function createAppSession(options: AppSessionOptions = {}): AppSession {
     void refetch().catch((error: unknown) => reportWarning('AppSession', `Refreshing the account after the session failed: ${describeCause(error)}`, { cause: error, dedupeKey: 'session:refetch' }));
   };
 
+  let lagModels: LagModels = { speaker: null, participant: null, translation: null };
   const runner: Runner = createRunner({
     clock,
     platform: getEnvironment(),
-    readShape: () => (options.refuse?.() ? null : readShapeFromStores(bridges.auth)),
+    readShape: () => {
+      const shape = options.refuse?.() ? null : readShapeFromStores(bridges.auth);
+      if (shape) {
+        const s = shape.settings as LocalAISettings;
+        if (shape.provider.id === 'localai') {
+          const hearing = (leg: 'speaker' | 'participant') => s.asrVia === 'device'
+            ? nativePicked(runSideHearing(s, shape.pair, leg), heardBy(s, shape.pair, leg))?.id ?? null
+            : s.asrVia === 'api' ? s.asrApiModel : s.asrOther.trim() ? s.asrOtherModel : s.asrModel;
+          lagModels = { speaker: hearing('speaker'), participant: hearing('participant'), translation: s.translateAt === 'device' ? s.translateNativeModel
+            : s.translateAt === 'api' ? s.translateModel : s.translateOther.trim() ? s.translateOtherModel : s.translateServerModel };
+        } else {
+          const model = typeof s.model === 'string' && s.model ? s.model : shape.provider.id;
+          lagModels = { speaker: model, participant: model, translation: model };
+        }
+      }
+      return shape;
+    },
     ensureReady: ensureReadyFromStores,
     persistIfUnchanged,
     replayAudio: appReplayAudio,
@@ -273,6 +294,11 @@ export function createAppSession(options: AppSessionOptions = {}): AppSession {
         watchCoachingFromStores(),
         // Fork: a language picked while a session runs: the session goes on in it, without a stop.
         watchPairFromStores(() => { const { phase } = runner.state.getState(); if (phase === 'running' || phase === 'starting') void runner.retarget(); }),
+        driveSessionLags({ runner, view, clock, levels: () => audio().then((a) => a.capture.levels, () => null), models: () => ({
+          ...lagModels,
+          ...useHeardByStore.getState().byLeg,
+          translation: lagModels.translation || useTranslatedByStore.getState().byLeg.speaker || useTranslatedByStore.getState().byLeg.participant || null,
+        }) }),
         driveReadiness({
           runner, providers: () => presentProviders(), auth: () => bridges.auth, clock,
           watchSignIn: (fn) => { signInWatchers.add(fn); return () => { signInWatchers.delete(fn); }; },

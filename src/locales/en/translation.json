@@ -1127,7 +1127,7 @@
       "models": {
         "title": "Models",
         "content": "Download models here — one per stage. Try a few; the first pick is not the only good one.",
-        "content_kotomimi": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once."
+        "content_kotomimi": "At the top, Plans pairs the models for this computer in three levels; pick one and press \"Use this plan\", and it downloads and switches by itself. The two sides can use different models, one on the processor and one on the graphics card, which saves video memory. To pick yourself, open \"Model library\" in a stage card: each model says whether this computer runs it smoothly."
       },
       "start": {
         "title": "Start",
@@ -2048,6 +2048,44 @@
         "copy_failed": "The move didn’t finish. The models are where they were.",
         "move_failed": "The move didn’t finish. The models are where they were."
       }
+    },
+    "plans": {
+      "title": "Plans",
+      "light": "Light",
+      "balanced": "Balanced",
+      "accurate": "Accurate",
+      "custom": "Custom",
+      "inUse": "In use",
+      "vram": "Takes about {{size}} of video memory",
+      "downloaded": "Downloaded",
+      "apply": "Use this plan",
+      "switching": "Downloading, then switching: {{percent}}%",
+      "failed": "A download failed. Try again from the model library.",
+      "cancel": "Cancel",
+      "translation": "Translation",
+      "speedTest": "Test this computer's speed",
+      "why": {
+        "lending": "This computer lends its models to other devices: the more accurate models.",
+        "big": "This computer has the video memory for the more accurate models.",
+        "small": "This computer has little video memory: the plan that takes least.",
+        "default": "Accurate enough, with room left for a game."
+      }
+    },
+    "fit": {
+      "smooth": "Runs smoothly",
+      "maybeSlow": "May lag",
+      "cannot": "Cannot run",
+      "hint": "Needs about {{need}} of video memory; about {{left}} is left beside the other models."
+    },
+    "gap": {
+      "cannot": "{{model}} cannot hear {{languages}}",
+      "noDetect": "{{model}} cannot tell languages apart",
+      "switch": "Switch to {{model}}"
+    },
+    "lag": {
+      "hear": "Recognition cannot keep up with the speech. Try a lighter plan?",
+      "translate": "Translation cannot keep up. Try a lighter plan?",
+      "open": "See plans"
     }
   }
 }

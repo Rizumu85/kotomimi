@@ -1535,7 +1535,7 @@
       "models": {
         "title": "Mga Modelo",
         "content": "I-download ang mga modelo dito — isa kada stage. Sumubok ng ilan; hindi lang ang unang pinili ang mabuti.",
-        "content_kotomimi": "Dito ida-download ang mga modelo: buksan ang \"Koleksyon ng modelo\" sa card ng isang yugto. Ang may markang Inirerekomenda ang pinakamahusay sa mga pagsubok gamit ang tunay na usapan. Nasa maliit na icon sa tabi ng pangalan ang resulta ng pagsubok. Awtomatikong gagamitin ang modelo matapos ma-download."
+        "content_kotomimi": "Sa itaas, may tatlong antas ng plano na may mga modelong bagay sa computer na ito. Pumili at pindutin ang \"Gamitin ang planong ito\" para awtomatikong i-download at gamitin ang mga modelo. Puwedeng magkaiba ang modelo sa magkabilang panig: isa sa processor at isa sa graphics card para makatipid sa memory ng graphics card. Para ikaw ang pumili, buksan ang \"Mga modelo\" sa card ng bawat yugto. Nakalagay sa bawat modelo kung kaya itong patakbuhin nang maayos ng computer na ito."
       },
       "start": {
         "title": "Simulan",
@@ -2048,6 +2048,44 @@
         "copy_failed": "Hindi natapos ang paglilipat. Nasa dati pa ring lokasyon ang mga modelo.",
         "move_failed": "Hindi natapos ang paglilipat. Nasa dati pa ring lokasyon ang mga modelo."
       }
+    },
+    "plans": {
+      "title": "Mga opsyon",
+      "light": "Magaan",
+      "balanced": "Balanse",
+      "accurate": "Tumpak",
+      "custom": "Sariling ayos",
+      "inUse": "Kasalukuyang gamit",
+      "vram": "Gumagamit ng mga {{size}} na memorya ng video",
+      "downloaded": "Na-download na",
+      "apply": "Gamitin ito",
+      "switching": "Kusang lilipat pagkaraang ma-download: {{percent}}%",
+      "failed": "May modelong hindi na-download. Subukan ulit sa koleksyon ng mga modelo.",
+      "cancel": "Kanselahin",
+      "translation": "Pagsasalin",
+      "speedTest": "Subukan ang bilis ng computer",
+      "why": {
+        "lending": "Ipinapagamit ng computer na ito ang mga modelo nito sa ibang device, kaya mas tumpak na mga modelo ang gamitin.",
+        "big": "Sapat ang memorya ng video ng computer na ito para sa mas tumpak na mga modelo.",
+        "small": "Kaunti ang memorya ng video ng computer na ito. Ito ang pinakamatipid dito.",
+        "default": "Sapat ang katumpakan, at may puwang pa kahit may bukas na laro."
+      }
+    },
+    "fit": {
+      "smooth": "Maayos na tatakbo",
+      "maybeSlow": "Maaaring bumagal",
+      "cannot": "Hindi kayang patakbuhin",
+      "hint": "Kailangan ng mga {{need}} na memorya ng video; mga {{left}} ang natitira matapos ibawas ang gamit ng ibang modelo."
+    },
+    "gap": {
+      "cannot": "Hindi makilala ng {{model}} ang pananalita sa {{languages}}",
+      "noDetect": "Hindi kusang matukoy ng {{model}} ang wika",
+      "switch": "Lumipat sa {{model}}"
+    },
+    "lag": {
+      "hear": "Hindi makahabol sa pagsasalita ang pagkilala ng boses. Lumipat sa mas magaan na opsyon?",
+      "translate": "Hindi makahabol ang pagsasalin. Lumipat sa mas magaan na opsyon?",
+      "open": "Tingnan ang mga opsyon"
     }
   }
 }

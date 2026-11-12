@@ -1535,7 +1535,7 @@
       "models": {
         "title": "Mô hình",
         "content": "Tải mô hình xuống ở đây — mỗi mô hình cho một giai đoạn. Hãy thử vài mô hình; lựa chọn đầu tiên không phải là lựa chọn tốt duy nhất.",
-        "content_kotomimi": "Tải mô hình tại đây: nhấn \"Thư viện mô hình\" trong thẻ của từng bước. Các mô hình có nhãn \"Đề xuất\" đạt kết quả tốt nhất khi thử với hội thoại thực tế. Biểu tượng nhỏ cạnh tên mô hình cho biết kết quả thử nghiệm. Mô hình sẽ tự động được sử dụng sau khi tải xong."
+        "content_kotomimi": "Mục “Phương án” ở trên cùng có sẵn ba mức kết hợp mô hình phù hợp với máy này. Chọn một mức rồi nhấn “Dùng phương án này” để tự động tải xuống và chuyển đổi. Hai bên có thể dùng mô hình khác nhau, một chạy trên bộ xử lý, một chạy trên card đồ họa, giúp tiết kiệm bộ nhớ đồ họa. Muốn tự chọn, hãy mở “Thư viện mô hình” trong thẻ của từng công đoạn: mỗi mô hình đều ghi rõ máy này có chạy mượt được hay không."
       },
       "start": {
         "title": "Bắt đầu",
@@ -2048,6 +2048,44 @@
         "copy_failed": "Chuyển chưa hoàn tất. Model vẫn ở vị trí cũ.",
         "move_failed": "Chuyển chưa hoàn tất. Model vẫn ở vị trí cũ."
       }
+    },
+    "plans": {
+      "title": "Cấu hình",
+      "light": "Nhẹ",
+      "balanced": "Cân bằng",
+      "accurate": "Chính xác",
+      "custom": "Tùy chỉnh",
+      "inUse": "Đang dùng",
+      "vram": "Dùng khoảng {{size}} bộ nhớ đồ họa",
+      "downloaded": "Đã tải",
+      "apply": "Dùng cấu hình này",
+      "switching": "Tải xong sẽ tự chuyển: {{percent}}%",
+      "failed": "Có mô hình tải không thành công. Bạn có thể thử lại trong thư viện mô hình.",
+      "cancel": "Hủy",
+      "translation": "Dịch",
+      "speedTest": "Kiểm tra tốc độ máy này",
+      "why": {
+        "lending": "Máy này đang chia sẻ mô hình cho thiết bị khác, nên dùng mô hình chính xác hơn.",
+        "big": "Máy này có đủ bộ nhớ đồ họa để dùng mô hình chính xác hơn.",
+        "small": "Máy này có ít bộ nhớ đồ họa. Cấu hình này dùng ít nhất.",
+        "default": "Đủ chính xác, vẫn còn bộ nhớ để chơi game."
+      }
+    },
+    "fit": {
+      "smooth": "Chạy mượt",
+      "maybeSlow": "Có thể bị giật",
+      "cannot": "Không chạy được",
+      "hint": "Cần khoảng {{need}} bộ nhớ đồ họa; sau khi trừ các mô hình khác, còn khoảng {{left}}."
+    },
+    "gap": {
+      "cannot": "{{model}} không nhận dạng được {{languages}}",
+      "noDetect": "{{model}} không tự phân biệt được ngôn ngữ",
+      "switch": "Chuyển sang {{model}}"
+    },
+    "lag": {
+      "hear": "Nhận dạng không theo kịp tốc độ nói. Đổi sang cấu hình nhẹ hơn nhé?",
+      "translate": "Dịch không theo kịp. Đổi sang cấu hình nhẹ hơn nhé?",
+      "open": "Xem cấu hình"
     }
   }
 }

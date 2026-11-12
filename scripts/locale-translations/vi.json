@@ -267,6 +267,22 @@
     "en": "Use {{name}}",
     "text": "Dùng {{name}}"
   },
+  "fork.fit.cannot": {
+    "en": "Cannot run",
+    "text": "Không chạy được"
+  },
+  "fork.fit.hint": {
+    "en": "Needs about {{need}} of video memory; about {{left}} is left beside the other models.",
+    "text": "Cần khoảng {{need}} bộ nhớ đồ họa; sau khi trừ các mô hình khác, còn khoảng {{left}}."
+  },
+  "fork.fit.maybeSlow": {
+    "en": "May lag",
+    "text": "Có thể bị giật"
+  },
+  "fork.fit.smooth": {
+    "en": "Runs smoothly",
+    "text": "Chạy mượt"
+  },
   "fork.fonts.add": {
     "en": "Add a language…",
     "text": "Thêm ngôn ngữ…"
@@ -347,6 +363,18 @@
     "en": "Furigana over kanji (Japanese)",
     "text": "Hiện furigana trên kanji (tiếng Nhật)"
   },
+  "fork.gap.cannot": {
+    "en": "{{model}} cannot hear {{languages}}",
+    "text": "{{model}} không nhận dạng được {{languages}}"
+  },
+  "fork.gap.noDetect": {
+    "en": "{{model}} cannot tell languages apart",
+    "text": "{{model}} không tự phân biệt được ngôn ngữ"
+  },
+  "fork.gap.switch": {
+    "en": "Switch to {{model}}",
+    "text": "Chuyển sang {{model}}"
+  },
   "fork.help.issues": {
     "en": "Report a problem",
     "text": "Báo sự cố"
@@ -358,6 +386,18 @@
   "fork.jyutping": {
     "en": "Jyutping over Cantonese",
     "text": "Hiện jyutping trên tiếng Quảng Đông"
+  },
+  "fork.lag.hear": {
+    "en": "Recognition cannot keep up with the speech. Try a lighter plan?",
+    "text": "Nhận dạng không theo kịp tốc độ nói. Đổi sang cấu hình nhẹ hơn nhé?"
+  },
+  "fork.lag.open": {
+    "en": "See plans",
+    "text": "Xem cấu hình"
+  },
+  "fork.lag.translate": {
+    "en": "Translation cannot keep up. Try a lighter plan?",
+    "text": "Dịch không theo kịp. Đổi sang cấu hình nhẹ hơn nhé?"
   },
   "fork.lan.asked": {
     "en": "The other device wants to hear {{language}}",
@@ -590,6 +630,78 @@
   "fork.pinyin": {
     "en": "Pinyin over Chinese",
     "text": "Hiện bính âm trên tiếng Trung"
+  },
+  "fork.plans.accurate": {
+    "en": "Accurate",
+    "text": "Chính xác"
+  },
+  "fork.plans.apply": {
+    "en": "Use this plan",
+    "text": "Dùng cấu hình này"
+  },
+  "fork.plans.balanced": {
+    "en": "Balanced",
+    "text": "Cân bằng"
+  },
+  "fork.plans.cancel": {
+    "en": "Cancel",
+    "text": "Hủy"
+  },
+  "fork.plans.custom": {
+    "en": "Custom",
+    "text": "Tùy chỉnh"
+  },
+  "fork.plans.downloaded": {
+    "en": "Downloaded",
+    "text": "Đã tải"
+  },
+  "fork.plans.failed": {
+    "en": "A download failed. Try again from the model library.",
+    "text": "Có mô hình tải không thành công. Bạn có thể thử lại trong thư viện mô hình."
+  },
+  "fork.plans.inUse": {
+    "en": "In use",
+    "text": "Đang dùng"
+  },
+  "fork.plans.light": {
+    "en": "Light",
+    "text": "Nhẹ"
+  },
+  "fork.plans.speedTest": {
+    "en": "Test this computer's speed",
+    "text": "Kiểm tra tốc độ máy này"
+  },
+  "fork.plans.switching": {
+    "en": "Downloading, then switching: {{percent}}%",
+    "text": "Tải xong sẽ tự chuyển: {{percent}}%"
+  },
+  "fork.plans.title": {
+    "en": "Plans",
+    "text": "Cấu hình"
+  },
+  "fork.plans.translation": {
+    "en": "Translation",
+    "text": "Dịch"
+  },
+  "fork.plans.vram": {
+    "en": "Takes about {{size}} of video memory",
+    "text": "Dùng khoảng {{size}} bộ nhớ đồ họa"
+  },
+  "fork.plans.why.big": {
+    "en": "This computer has the video memory for the more accurate models.",
+    "text": "Máy này có đủ bộ nhớ đồ họa để dùng mô hình chính xác hơn."
+  },
+  "fork.plans.why.default": {
+    "en": "Accurate enough, with room left for a game.",
+    "text": "Đủ chính xác, vẫn còn bộ nhớ để chơi game."
+  },
+  "fork.plans.why.lending": {
+    "en": "This computer lends its models to other devices: the more accurate models.",
+    "text": "Máy này đang chia sẻ mô hình cho thiết bị khác, nên dùng mô hình chính xác hơn."
+  },
+  "fork.plans.why.small": {
+    "en": "This computer has little video memory: the plan that takes least.",
+    "text": "Máy này có ít bộ nhớ đồ họa. Cấu hình này dùng ít nhất."
   },
   "fork.romanization": {
     "en": "Romanization",
@@ -2324,8 +2436,8 @@
     "text": "Ngôn ngữ"
   },
   "tour.steps.models.content_kotomimi": {
-    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
-    "text": "Tải mô hình tại đây: nhấn \"Thư viện mô hình\" trong thẻ của từng bước. Các mô hình có nhãn \"Đề xuất\" đạt kết quả tốt nhất khi thử với hội thoại thực tế. Biểu tượng nhỏ cạnh tên mô hình cho biết kết quả thử nghiệm. Mô hình sẽ tự động được sử dụng sau khi tải xong."
+    "en": "At the top, Plans pairs the models for this computer in three levels; pick one and press \"Use this plan\", and it downloads and switches by itself. The two sides can use different models, one on the processor and one on the graphics card, which saves video memory. To pick yourself, open \"Model library\" in a stage card: each model says whether this computer runs it smoothly.",
+    "text": "Mục “Phương án” ở trên cùng có sẵn ba mức kết hợp mô hình phù hợp với máy này. Chọn một mức rồi nhấn “Dùng phương án này” để tự động tải xuống và chuyển đổi. Hai bên có thể dùng mô hình khác nhau, một chạy trên bộ xử lý, một chạy trên card đồ họa, giúp tiết kiệm bộ nhớ đồ họa. Muốn tự chọn, hãy mở “Thư viện mô hình” trong thẻ của từng công đoạn: mỗi mô hình đều ghi rõ máy này có chạy mượt được hay không."
   },
   "tour.steps.provider-settings.content_kotomimi": {
     "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",

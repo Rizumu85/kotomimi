@@ -263,6 +263,22 @@
     "en": "Use {{name}}",
     "text": "ใช้ {{name}}"
   },
+  "fork.fit.cannot": {
+    "en": "Cannot run",
+    "text": "ใช้งานไม่ได้"
+  },
+  "fork.fit.hint": {
+    "en": "Needs about {{need}} of video memory; about {{left}} is left beside the other models.",
+    "text": "ต้องใช้หน่วยความจำการ์ดจอประมาณ {{need}} หลังหักส่วนที่โมเดลอื่นใช้แล้วเหลือประมาณ {{left}}"
+  },
+  "fork.fit.maybeSlow": {
+    "en": "May lag",
+    "text": "อาจกระตุก"
+  },
+  "fork.fit.smooth": {
+    "en": "Runs smoothly",
+    "text": "ทำงานได้ลื่นไหล"
+  },
   "fork.fonts.add": {
     "en": "Add a language…",
     "text": "เพิ่มภาษา…"
@@ -343,6 +359,18 @@
     "en": "Furigana over kanji (Japanese)",
     "text": "แสดงฟุริงานะเหนือคันจิ (ภาษาญี่ปุ่น)"
   },
+  "fork.gap.cannot": {
+    "en": "{{model}} cannot hear {{languages}}",
+    "text": "{{model}} ไม่รองรับการรู้จำเสียงภาษา {{languages}}"
+  },
+  "fork.gap.noDetect": {
+    "en": "{{model}} cannot tell languages apart",
+    "text": "{{model}} แยกภาษาอัตโนมัติไม่ได้"
+  },
+  "fork.gap.switch": {
+    "en": "Switch to {{model}}",
+    "text": "เปลี่ยนเป็น {{model}}"
+  },
   "fork.help.issues": {
     "en": "Report a problem",
     "text": "แจ้งปัญหา"
@@ -354,6 +382,18 @@
   "fork.jyutping": {
     "en": "Jyutping over Cantonese",
     "text": "แสดงยฺหวิดเพ็งเหนือข้อความภาษากวางตุ้ง"
+  },
+  "fork.lag.hear": {
+    "en": "Recognition cannot keep up with the speech. Try a lighter plan?",
+    "text": "รู้จำเสียงไม่ทันความเร็วที่พูด ลองเปลี่ยนเป็นรูปแบบที่เบากว่าไหม?"
+  },
+  "fork.lag.open": {
+    "en": "See plans",
+    "text": "ดูรูปแบบการใช้งาน"
+  },
+  "fork.lag.translate": {
+    "en": "Translation cannot keep up. Try a lighter plan?",
+    "text": "แปลไม่ทัน ลองเปลี่ยนเป็นรูปแบบที่เบากว่าไหม?"
   },
   "fork.lan.asked": {
     "en": "The other device wants to hear {{language}}",
@@ -586,6 +626,78 @@
   "fork.pinyin": {
     "en": "Pinyin over Chinese",
     "text": "แสดงพินอินเหนือข้อความภาษาจีน"
+  },
+  "fork.plans.accurate": {
+    "en": "Accurate",
+    "text": "แม่นยำ"
+  },
+  "fork.plans.apply": {
+    "en": "Use this plan",
+    "text": "ใช้รูปแบบนี้"
+  },
+  "fork.plans.balanced": {
+    "en": "Balanced",
+    "text": "สมดุล"
+  },
+  "fork.plans.cancel": {
+    "en": "Cancel",
+    "text": "ยกเลิก"
+  },
+  "fork.plans.custom": {
+    "en": "Custom",
+    "text": "กำหนดเอง"
+  },
+  "fork.plans.downloaded": {
+    "en": "Downloaded",
+    "text": "ดาวน์โหลดแล้ว"
+  },
+  "fork.plans.failed": {
+    "en": "A download failed. Try again from the model library.",
+    "text": "มีโมเดลที่ดาวน์โหลดไม่สำเร็จ ลองใหม่ได้ในคลังโมเดล"
+  },
+  "fork.plans.inUse": {
+    "en": "In use",
+    "text": "กำลังใช้งาน"
+  },
+  "fork.plans.light": {
+    "en": "Light",
+    "text": "เบา"
+  },
+  "fork.plans.speedTest": {
+    "en": "Test this computer's speed",
+    "text": "ทดสอบความเร็วคอมเครื่องนี้"
+  },
+  "fork.plans.switching": {
+    "en": "Downloading, then switching: {{percent}}%",
+    "text": "ดาวน์โหลดเสร็จแล้วจะเปลี่ยนให้อัตโนมัติ: {{percent}}%"
+  },
+  "fork.plans.title": {
+    "en": "Plans",
+    "text": "รูปแบบการใช้งาน"
+  },
+  "fork.plans.translation": {
+    "en": "Translation",
+    "text": "การแปล"
+  },
+  "fork.plans.vram": {
+    "en": "Takes about {{size}} of video memory",
+    "text": "ใช้หน่วยความจำการ์ดจอประมาณ {{size}}"
+  },
+  "fork.plans.why.big": {
+    "en": "This computer has the video memory for the more accurate models.",
+    "text": "คอมเครื่องนี้มีหน่วยความจำการ์ดจอพอสำหรับโมเดลที่แม่นยำกว่า"
+  },
+  "fork.plans.why.default": {
+    "en": "Accurate enough, with room left for a game.",
+    "text": "แม่นยำเพียงพอ และยังเหลือหน่วยความจำให้เล่นเกมไปด้วยได้"
+  },
+  "fork.plans.why.lending": {
+    "en": "This computer lends its models to other devices: the more accurate models.",
+    "text": "คอมเครื่องนี้แชร์โมเดลให้อุปกรณ์อื่นใช้ จึงเลือกโมเดลที่แม่นยำกว่า"
+  },
+  "fork.plans.why.small": {
+    "en": "This computer has little video memory: the plan that takes least.",
+    "text": "คอมเครื่องนี้มีหน่วยความจำการ์ดจอน้อย รูปแบบนี้ใช้หน่วยความจำน้อยที่สุด"
   },
   "fork.romanization": {
     "en": "Romanization",
@@ -2308,8 +2420,8 @@
     "text": "ภาษา"
   },
   "tour.steps.models.content_kotomimi": {
-    "en": "Models are downloaded here: open \"Model library\" in the card of a stage. The ones marked Recommended are the ones measured best on real conversation, and the mark beside each name says what was found of it. A model you download is put to use at once.",
-    "text": "ดาวน์โหลดโมเดลได้โดยกด \"คลังโมเดล\" ในการ์ดของแต่ละขั้นตอน โมเดลที่ติดป้าย \"แนะนำ\" คือโมเดลที่ทดสอบกับบทสนทนาจริงแล้วได้ผลดีที่สุด ดูผลทดสอบได้จากไอคอนข้างชื่อโมเดล เมื่อดาวน์โหลดเสร็จจะเปิดใช้งานให้อัตโนมัติ"
+    "en": "At the top, Plans pairs the models for this computer in three levels; pick one and press \"Use this plan\", and it downloads and switches by itself. The two sides can use different models, one on the processor and one on the graphics card, which saves video memory. To pick yourself, open \"Model library\" in a stage card: each model says whether this computer runs it smoothly.",
+    "text": "ด้านบนมี \"แผน\" ให้เลือก 3 ระดับ โดยจับคู่โมเดลให้เหมาะกับคอมพิวเตอร์เครื่องนี้แล้ว เลือกแผนแล้วกด \"ใช้แผนนี้\" แอปจะดาวน์โหลดและสลับโมเดลให้เอง ทั้งสองฝั่งใช้โมเดลต่างกันได้ โดยให้ฝั่งหนึ่งใช้หน่วยประมวลผล อีกฝั่งใช้การ์ดจอ เพื่อประหยัดหน่วยความจำการ์ดจอ หากอยากเลือกเอง ให้กด \"คลังโมเดล\" ในการ์ดของแต่ละขั้นตอน แต่ละโมเดลจะระบุว่าเครื่องนี้ใช้งานได้ลื่นไหลหรือไม่"
   },
   "tour.steps.provider-settings.content_kotomimi": {
     "en": "Each stage has a card here: recognition, translation, grammar feedback. In its card you choose where it runs — another device on your network, an API model, or this computer — and, right under that, its model. Under Settings → Provider this computer's models can also be shared with another device.",

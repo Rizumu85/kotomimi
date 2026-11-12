@@ -15,6 +15,8 @@ export interface NativeTranslator {
   name: string;
   /** The download, in bytes. The runtime itself is fetched with the first one. */
   bytes: number;
+  /** Estimated video memory while loaded, in MB; absent for unmeasured retired models. */
+  vramMB?: number;
   /** Whose form of request it takes. */
   prompt: 'index' | 'hunyuan' | 'plamo';
   /** What it translates between, in the app's base codes; `'any'` for a model of well over a hundred languages. */
@@ -52,10 +54,10 @@ const PLAMO = ['ja', 'en', 'zh', 'ko', 'ar', 'az', 'be', 'bg', 'bn', 'ca', 'ceb'
  * never listed together, and the languages both name are the same (`HUNYUAN`).
  */
 export const NATIVE_TRANSLATORS: readonly NativeTranslator[] = [
-  { id: 'index-translate-2b', name: 'Index-Translate 2B', bytes: 1312164352, prompt: 'index', languages: 'any' },
-  { id: 'plamo-3-translate-2b', name: 'PLaMo 3 Translate 2B', bytes: 1807201888, prompt: 'plamo', languages: PLAMO },
-  { id: 'hy-mt2-1.8b', name: 'Hunyuan MT 2 1.8B', bytes: 1133080448, prompt: 'hunyuan', languages: HUNYUAN },
-  { id: 'plamo-3-translate-0.8b', name: 'PLaMo 3 Translate 0.8B', bytes: 573125696, prompt: 'plamo', languages: PLAMO },
+  { id: 'index-translate-2b', vramMB: 1536, name: 'Index-Translate 2B', bytes: 1312164352, prompt: 'index', languages: 'any' },
+  { id: 'plamo-3-translate-2b', vramMB: 1946, name: 'PLaMo 3 Translate 2B', bytes: 1807201888, prompt: 'plamo', languages: PLAMO },
+  { id: 'hy-mt2-1.8b', vramMB: 1434, name: 'Hunyuan MT 2 1.8B', bytes: 1133080448, prompt: 'hunyuan', languages: HUNYUAN },
+  { id: 'plamo-3-translate-0.8b', vramMB: 614, name: 'PLaMo 3 Translate 0.8B', bytes: 573125696, prompt: 'plamo', languages: PLAMO },
   { id: 'hy-mt1.5-1.8b', name: 'Hunyuan MT 1.5 1.8B', bytes: 1133080512, prompt: 'hunyuan', languages: HUNYUAN, retired: true },
 ];
 

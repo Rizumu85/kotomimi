@@ -1535,7 +1535,7 @@
       "models": {
         "title": "Mallit",
         "content": "Lataa mallit täältä — yksi jokaista vaihetta kohden. Kokeile muutamaa; ensimmäinen valinta ei ole ainoa hyvä vaihtoehto.",
-        "content_kotomimi": "Lataa malleja avaamalla vaiheen kortista ”Mallikirjasto”. Suositellut mallit ovat menestyneet parhaiten aidoilla keskusteluilla tehdyissä testeissä. Mallin nimen vieressä olevasta kuvakkeesta näet testitulokset. Ladattu malli otetaan käyttöön automaattisesti."
+        "content_kotomimi": "Ylhäällä kohdassa ”Kokoonpanot” on tälle tietokoneelle kolme eritasoista malliyhdistelmää. Valitse yksi ja paina ”Käytä tätä kokoonpanoa”, niin sovellus lataa mallit ja ottaa ne käyttöön automaattisesti. Kumpikin puoli voi käyttää eri mallia: toinen suorittimella ja toinen näytönohjaimella. Näin näytönohjaimen muistia säästyy. Jos haluat valita mallit itse, avaa vaiheen kortista ”Mallikirjasto”. Kunkin mallin kohdalla kerrotaan, toimiiko se sujuvasti tällä tietokoneella."
       },
       "start": {
         "title": "Aloita",
@@ -2048,6 +2048,44 @@
         "copy_failed": "Siirto ei valmistunut. Mallit ovat alkuperäisessä sijainnissaan.",
         "move_failed": "Siirto ei valmistunut. Mallit ovat alkuperäisessä sijainnissaan."
       }
+    },
+    "plans": {
+      "title": "Vaihtoehdot",
+      "light": "Kevyt",
+      "balanced": "Tasapainoinen",
+      "accurate": "Tarkka",
+      "custom": "Mukautettu",
+      "inUse": "Käytössä",
+      "vram": "Vie noin {{size}} näyttömuistia",
+      "downloaded": "Ladattu",
+      "apply": "Ota käyttöön",
+      "switching": "Vaihtuu latauksen valmistuttua: {{percent}}%",
+      "failed": "Jonkin mallin lataus epäonnistui. Voit yrittää uudelleen mallikirjastossa.",
+      "cancel": "Peruuta",
+      "translation": "Käännös",
+      "speedTest": "Testaa tämän tietokoneen nopeus",
+      "why": {
+        "lending": "Tämä tietokone jakaa mallejaan muille laitteille, joten käytetään tarkempia malleja.",
+        "big": "Tämän tietokoneen näyttömuisti riittää tarkemmille malleille.",
+        "small": "Tässä tietokoneessa on vähän näyttömuistia. Tämä vaihtoehto vie sitä vähiten.",
+        "default": "Riittävän tarkka, ja muistia riittää myös pelille."
+      }
+    },
+    "fit": {
+      "smooth": "Toimii sujuvasti",
+      "maybeSlow": "Saattaa takerrella",
+      "cannot": "Ei toimi",
+      "hint": "Tarvitsee noin {{need}} näyttömuistia. Muiden mallien jälkeen vapaana on noin {{left}}."
+    },
+    "gap": {
+      "cannot": "{{model}} ei tunnista näitä kieliä: {{languages}}",
+      "noDetect": "{{model}} ei erota kieliä automaattisesti",
+      "switch": "Vaihda malliin {{model}}"
+    },
+    "lag": {
+      "hear": "Puheentunnistus ei pysy puheen tahdissa. Vaihdetaanko kevyempään vaihtoehtoon?",
+      "translate": "Käännös ei pysy tahdissa. Vaihdetaanko kevyempään vaihtoehtoon?",
+      "open": "Näytä vaihtoehdot"
     }
   }
 }

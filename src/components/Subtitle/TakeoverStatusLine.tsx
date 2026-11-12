@@ -1,4 +1,5 @@
-import { useCallback } from 'react';
+import { sessionLags, type FallingBehind } from '../../app/sessionLags';
+import { useCallback, useState } from 'react';
 import { getAppSession } from '../../app/session';
 import { useRunState } from '../../app/useRun';
 import type { NoticeActionSpec } from '../../lib/view/noticeActions';
@@ -22,13 +23,16 @@ export function TakeoverStatusLine() {
   const exitSubtitleMode = useExitSubtitleMode();
   const navigateToSettings = useNavigateToSettings();
   const setEntryHint = useSetSubtitleEntryHint();
-  const entry = useStatusLine({ run, idle: subtitle.idle, canStart: subtitle.canStart, dismissedEnd: null, echo: null });
+  const [lagDismissed, setLagDismissed] = useState<FallingBehind | null>(null);
+  const entry = useStatusLine({ run, idle: subtitle.idle, canStart: subtitle.canStart, dismissedEnd: null, echo: null, lagDismissed });
   const onAction = useCallback((spec: NoticeActionSpec) => {
     if (spec.kind !== 'settings') return;
     void exitSubtitleMode();
     navigateToSettings(spec.target);
   }, [exitSubtitleMode, navigateToSettings]);
-  const onDismiss = useCallback(() => setEntryHint(null), [setEntryHint]);
+  const onDismiss = useCallback((what: 'echo' | 'subtitle-entry' | 'lag') => {
+    if (what === 'lag') setLagDismissed(sessionLags.state.getState().notice); else setEntryHint(null);
+  }, [setEntryHint]);
   if (!entry) return null;
   return <StatusLine entry={entry} onAction={onAction} onDismiss={onDismiss} />;
 }

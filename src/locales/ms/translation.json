@@ -1535,7 +1535,7 @@
       "models": {
         "title": "Model",
         "content": "Muat turun model di sini — satu bagi setiap peringkat. Cuba beberapa; pilihan pertama bukan satu-satunya yang baik.",
-        "content_kotomimi": "Muat turun model di sini: klik \"Pustaka model\" dalam kad peringkat. Model bertanda \"Disyorkan\" memberikan hasil terbaik dalam ujian perbualan sebenar. Ikon kecil di sebelah nama model menunjukkan hasil ujiannya. Model diaktifkan secara automatik selepas dimuat turun."
+        "content_kotomimi": "Di bahagian atas, \"Pelan\" menyediakan tiga pilihan gabungan model yang sesuai untuk komputer ini. Pilih satu dan tekan \"Guna pelan ini\" untuk memuat turun dan bertukar model secara automatik. Kedua-dua bahagian boleh menggunakan model berbeza, satu pada pemproses dan satu lagi pada kad grafik, untuk menjimatkan memori grafik. Untuk memilih sendiri, buka \"Pustaka model\" dalam kad peringkat. Setiap model menunjukkan sama ada komputer ini boleh menjalankannya dengan lancar."
       },
       "start": {
         "title": "Mula",
@@ -2048,6 +2048,44 @@
         "copy_failed": "Pemindahan tidak selesai. Model kekal di lokasi asal.",
         "move_failed": "Pemindahan tidak selesai. Model kekal di lokasi asal."
       }
+    },
+    "plans": {
+      "title": "Pilihan",
+      "light": "Ringan",
+      "balanced": "Seimbang",
+      "accurate": "Tepat",
+      "custom": "Tersuai",
+      "inUse": "Sedang digunakan",
+      "vram": "Menggunakan kira-kira {{size}} memori video",
+      "downloaded": "Dimuat turun",
+      "apply": "Guna pilihan ini",
+      "switching": "Bertukar secara automatik selepas muat turun: {{percent}}%",
+      "failed": "Ada model yang gagal dimuat turun. Cuba lagi di pustaka model.",
+      "cancel": "Batal",
+      "translation": "Terjemahan",
+      "speedTest": "Uji kelajuan komputer ini",
+      "why": {
+        "lending": "Komputer ini berkongsi model dengan peranti lain, jadi gunakan model yang lebih tepat.",
+        "big": "Memori video komputer ini cukup untuk model yang lebih tepat.",
+        "small": "Memori video komputer ini terhad. Pilihan ini menggunakan paling sedikit memori.",
+        "default": "Cukup tepat, dengan baki memori untuk bermain permainan."
+      }
+    },
+    "fit": {
+      "smooth": "Berjalan lancar",
+      "maybeSlow": "Mungkin tersekat-sekat",
+      "cannot": "Tidak dapat dijalankan",
+      "hint": "Memerlukan kira-kira {{need}} memori video; baki kira-kira {{left}} selepas digunakan oleh model lain."
+    },
+    "gap": {
+      "cannot": "{{model}} tidak dapat mengecam pertuturan dalam {{languages}}",
+      "noDetect": "{{model}} tidak dapat membezakan bahasa secara automatik",
+      "switch": "Tukar ke {{model}}"
+    },
+    "lag": {
+      "hear": "Pengecaman pertuturan tidak dapat mengikuti kelajuan percakapan. Cuba pilihan yang lebih ringan?",
+      "translate": "Terjemahan tidak dapat mengikuti kelajuan percakapan. Cuba pilihan yang lebih ringan?",
+      "open": "Lihat pilihan"
     }
   }
 }

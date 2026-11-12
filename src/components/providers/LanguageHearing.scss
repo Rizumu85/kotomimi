@@ -118,6 +118,15 @@
     &:hover:not(:disabled) { background: color-mix(in srgb, vars.$color-primary 22%, transparent); color: vars.$color-primary; }
   }
 
+  // Fork: in use, and not heard by the side's recognizer on this computer (`GapNote` says which and offers the fix).
+  &.is-unheard {
+    border-style: dashed;
+    border-color: vars.$color-warning;
+    color: vars.$color-warning;
+    background: transparent;
+    font-weight: 400;
+  }
+
   // Lit: heard, and the user's speech translated into it. Filled, with a mark of its own.
   &.is-lit {
     padding-left: 10px;
@@ -189,4 +198,32 @@
 #languages-section h3 .language-hearing__hearer {
   margin-left: auto;
   font-weight: 400;
+}
+
+// Fork: a side's recognizer misses some of its languages: which, and the one press that puts it right.
+.language-hearing__gap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: vars.$font-caption;
+  color: vars.$color-warning;
+
+  svg { flex-shrink: 0; }
+}
+
+.language-hearing__gap-fix {
+  margin-left: auto;
+  padding: 3px 9px;
+  border: 1px solid vars.$border-default;
+  border-radius: vars.$radius-md;
+  background: vars.$bg-control;
+  color: vars.$text-primary;
+  font: inherit;
+  font-size: vars.$font-caption;
+  cursor: pointer;
+
+  &:hover:not(:disabled) { background: vars.$bg-hover; }
+  &:focus-visible { @include vars.focus-ring; }
+  &:disabled { cursor: not-allowed; opacity: vars.$disabled-opacity; }
 }

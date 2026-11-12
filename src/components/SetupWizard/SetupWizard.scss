@@ -1,4 +1,5 @@
 @use '../Settings/shared/variables' as vars;
+@use '../../styles/tokens' as tk;
 
 .setup-wizard {
   position: fixed;
@@ -144,4 +145,54 @@
   dt { color: vars.$text-muted; font-size: vars.$font-caption; }
   dd { margin: 0; color: vars.$text-primary; font-size: vars.$font-body; }
   &__mirror { margin-top: 2px; font-size: vars.$font-caption; color: vars.$text-muted; }
+}
+
+// Fork: the plans on the last step (FinishPlans.tsx): one row of three choices.
+.setup-plans {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.setup-plans__option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+  padding: 6px 8px;
+  font: inherit;
+  text-align: left;
+  color: vars.$text-secondary;
+  background: vars.$bg-control;
+  border: 1px solid vars.$border-default;
+  border-radius: vars.$radius-md;
+  cursor: pointer;
+
+  &:hover:not(.is-chosen) { background: vars.$bg-hover; }
+  &:focus-visible { @include vars.focus-ring; }
+
+  &.is-chosen {
+    color: vars.$text-primary;
+    border-color: tk.$color-primary;
+    background: color-mix(in srgb, tk.$color-primary 8%, transparent);
+  }
+}
+
+.setup-plans__name {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: vars.$weight-semibold;
+}
+
+.setup-plans__star { color: tk.$color-recommended; }
+
+.setup-plans__size {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: vars.$font-caption;
+  color: vars.$text-muted;
+  white-space: nowrap;
 }

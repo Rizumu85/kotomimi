@@ -1535,7 +1535,7 @@
       "models": {
         "title": "Modelos",
         "content": "Descarga aquí los modelos — uno por etapa. Prueba varios; la primera elección no es la única buena.",
-        "content_kotomimi": "Para descargar modelos, abre «Biblioteca de modelos» en la tarjeta de una etapa. Los marcados como recomendados son los que mejor han funcionado en pruebas con conversaciones reales. El icono junto al nombre muestra los resultados. Al terminar la descarga, el modelo se activa automáticamente."
+        "content_kotomimi": "Arriba, en «Planes», tienes tres opciones de modelos adaptadas a tu equipo. Elige una y pulsa «Usar este plan»: los modelos se descargarán y se activarán automáticamente. Cada parte puede usar un modelo distinto, uno en el procesador y otro en la tarjeta gráfica, para ahorrar memoria gráfica. Si prefieres elegirlos, abre «Biblioteca de modelos» en la tarjeta de cada etapa. Cada modelo indica si tu equipo puede ejecutarlo con fluidez."
       },
       "start": {
         "title": "Iniciar",
@@ -2048,6 +2048,44 @@
         "copy_failed": "El traslado no terminó. Los modelos siguen donde estaban.",
         "move_failed": "El traslado no terminó. Los modelos siguen donde estaban."
       }
+    },
+    "plans": {
+      "title": "Configuraciones",
+      "light": "Ligera",
+      "balanced": "Equilibrada",
+      "accurate": "Precisa",
+      "custom": "Personalizada",
+      "inUse": "En uso",
+      "vram": "Usa unos {{size}} de memoria gráfica",
+      "downloaded": "Descargada",
+      "apply": "Usar esta configuración",
+      "switching": "Se cambiará al terminar la descarga: {{percent}}%",
+      "failed": "No se pudo descargar algún modelo. Puedes reintentarlo en la biblioteca de modelos.",
+      "cancel": "Cancelar",
+      "translation": "Traducción",
+      "speedTest": "Probar la velocidad de este equipo",
+      "why": {
+        "lending": "Este equipo comparte sus modelos con otros dispositivos, por eso usa modelos más precisos.",
+        "big": "Este equipo tiene suficiente memoria gráfica para usar modelos más precisos.",
+        "small": "Este equipo tiene poca memoria gráfica. Esta configuración es la que menos usa.",
+        "default": "Ofrece suficiente precisión y deja memoria para jugar."
+      }
+    },
+    "fit": {
+      "smooth": "Funciona con fluidez",
+      "maybeSlow": "Puede ir lento",
+      "cannot": "No puede ejecutarse",
+      "hint": "Necesita unos {{need}} de memoria gráfica; quedan unos {{left}} tras descontar lo que usan los demás modelos."
+    },
+    "gap": {
+      "cannot": "{{model}} no reconoce voz en {{languages}}",
+      "noDetect": "{{model}} no detecta el idioma automáticamente",
+      "switch": "Cambiar a {{model}}"
+    },
+    "lag": {
+      "hear": "El reconocimiento no sigue el ritmo del habla. ¿Probamos una configuración más ligera?",
+      "translate": "La traducción no sigue el ritmo. ¿Probamos una configuración más ligera?",
+      "open": "Ver configuraciones"
     }
   }
 }

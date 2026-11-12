@@ -36,7 +36,13 @@ import { useNativeRecommendationInputs } from './useNativeRecommendationInputs';
 import { fitsPair, isKotomimiServer, modelsFor, SERVER_SILENT, serverDefaultModel, translationDefault, type LocalAIModel } from './localaiModels';
 import { choiceOf, perLanguage, recognizerChoices } from './serverRecognizers';
 import { isRealtimeModelId } from './settings';
-import { SpeedButton, SpeedLine, SpeedReportView, useSpeedTest } from './SpeedTestView';
+import { SpeedLine, SpeedReportView, useSpeedTest } from './SpeedTestView';
+import { PlanCard, gb } from './PlanCard';
+import { usePlans } from './usePlans';
+import { currentNativeModels, nativeModelFit, type NativeStage } from './nativePlans';
+import { sessionLags } from '../../app/sessionLags';
+import { useStore } from 'zustand';
+import { useNativeEngineStore } from '../../stores/nativeEngineStore';
 import './LocalAIAssist.scss';
 
 type Props = CredentialAssistProps<S>;
@@ -434,19 +440,30 @@ function DeviceModels({ stage, settings, pair, legs, models, disabled, tour, nat
     const mine = using(slot);
     return mine && !ready.some((m) => m.id === mine.id) ? [mine, ...ready] : ready;
   };
-  // Fork: the one model recommended in a list, by what this computer can run (`nativeRecommendation.ts`), and why.
+  // Fork: the one model recommended in a list: the recommended plan's for this stage (`nativePlans.ts`), and why.
   const { memoryMB, lending } = useNativeRecommendationInputs();
-  const advise = (kind: 'asr' | 'translation', offered: readonly NativeCardModel[], languages: readonly string[]): { id: string | null; hint?: string } => {
+  const { plans, recommended } = usePlans(settings, pair);
+  const plan = plans.find((p) => p.id === recommended)!;
+  const advise = (kind: 'asr' | 'translation', offered: readonly NativeCardModel[], languages: readonly string[], at: NativeStage): { id: string | null; hint?: string } => {
     // The Mac's own recognition is the most accurate there, and leads its list.
     if (kind === 'asr' && offered[0] && isApple(offered[0].id)) return { id: offered[0].id };
     // Not answered yet: no mark, and the list in its own order, rather than one that moves when the answer comes.
     if (memoryMB === undefined) return { id: null };
-    const advice: NativeRecommendation = recommendNativeModel(kind, offered.map((m) => m.id), memoryMB, lending, languages);
+    const advice: NativeRecommendation = recommendNativeModel(kind, offered.map((m) => m.id), memoryMB, lending, languages, { plan, stage: at });
     const said = advice.reason !== 'default' ? advice.reason
       : advice.id === 'qwen3-asr-0.6b-q8' ? 'hearDefault'
         : advice.id === 'index-translate-2b' ? 'translateDefault'
           : null;
     return { id: advice.id, ...(said ? { hint: t(`providers.localai.recommendWhy.${said}`) } : {}) };
+  };
+  // Fork: how well each model runs here beside the other stages' models (`nativeModelFit`), as its card's chip.
+  const behind = useStore(sessionLags.state, (s) => s.fallingBehind);
+  const fitOf = (id: string, at: NativeStage) => {
+    const { fit, needMB, leftMB } = nativeModelFit(id, at, currentNativeModels(settings, pair), memoryMB, Object.values(behind).map((one) => one!.model));
+    if (fit === null || fit === 'cpu') return undefined;
+    const tone = fit === 'smooth' ? 'ok' as const : fit === 'maybe-slow' ? 'warn' as const : 'bad' as const;
+    const label = t(fit === 'smooth' ? 'fork.fit.smooth' : fit === 'maybe-slow' ? 'fork.fit.maybeSlow' : 'fork.fit.cannot');
+    return { label, tone, hint: t('fork.fit.hint', { need: gb(needMB ?? 0), left: gb(Math.max(0, leftMB ?? 0)) }) };
   };
   /** The list with the recommended one first. */
   const leading = <M extends NativeCardModel>(list: readonly M[], id: string | null): M[] => [...list.filter((m) => m.id === id), ...list.filter((m) => m.id !== id)];
@@ -467,7 +484,7 @@ function DeviceModels({ stage, settings, pair, legs, models, disabled, tour, nat
     const missingModel = mine === null || !nativeDownloaded(status, mine.id);
     const libraryOpen = picked === undefined ? (looked && missingModel) : picked === ENGINE_ROW;
     const fittingAll = engine.offered.filter((m) => engineFits(m.id));
-    const advice = advise('translation', fittingAll, []);
+    const advice = advise('translation', fittingAll, [], 'translation');
     const label = slots.length > 1
       ? `${nameOf(source)} ⇄ ${nameOf(target)}`
       : `${nameOf(deviceLanguage(slots[0]!.source))} → ${nameOf(deviceLanguage(slots[0]!.target))}`;
@@ -507,7 +524,7 @@ function DeviceModels({ stage, settings, pair, legs, models, disabled, tour, nat
               <div className="model-management-section kt-here__native">
                 <div className="model-subgroup">
                   <div className="model-subgroup__label"><Star size={11} />{t('models.recommendedGroup', 'Recommended')}</div>
-                  {leading(fittingAll, advice.id).map((m) => <NativeEngineCard key={m.id} kind="translation" model={m} onDownloadStarted={() => downloading(m.id)} recommended={m.id === advice.id} {...(advice.hint ? { recommendHint: advice.hint } : {})} selected={mine?.id === m.id} onSelect={() => { if (mine?.id !== m.id) native.onPick(m.id); }} disabled={disabled} />)}
+                  {leading(fittingAll, advice.id).map((m) => <NativeEngineCard key={m.id} kind="translation" model={m} onDownloadStarted={() => downloading(m.id)} recommended={m.id === advice.id} {...(advice.hint ? { recommendHint: advice.hint } : {})} fit={fitOf(m.id, 'translation')} selected={mine?.id === m.id} onSelect={() => { if (mine?.id !== m.id) native.onPick(m.id); }} disabled={disabled} />)}
                 </div>
               </div>
             )}
@@ -528,7 +545,8 @@ function DeviceModels({ stage, settings, pair, legs, models, disabled, tour, nat
   const mustBeTold = detectRow && native ? engine.offered.filter((m) => !tellApart.includes(m)) : [];
   // What the open row must hear: its language; where it is detected, the user's own languages; else unknown.
   const rowLanguages = !openSlot ? [] : !detectRow ? [heardIn(openSlot)] : openSlot.leg === 'speaker' ? [pair.source, ...alsoSpoken(settings, pair)] : [];
-  const advice = advise(stage === 'asr' ? 'asr' : 'translation', tellApart, rowLanguages);
+  const at: NativeStage = stage === 'asr' ? (openSlot?.leg === 'participant' ? 'participant' : 'speaker') : 'translation';
+  const advice = advise(stage === 'asr' ? 'asr' : 'translation', tellApart, rowLanguages, at);
 
   const title = (slot: DeviceNeed) => {
     if (stage !== 'asr') return `${nameOf(deviceLanguage(slot.source))} → ${nameOf(deviceLanguage(slot.target))}`;
@@ -593,7 +611,7 @@ function DeviceModels({ stage, settings, pair, legs, models, disabled, tour, nat
               {tellApart.length > 0 && (
                 <div className="model-subgroup">
                   <div className="model-subgroup__label">{detectRow ? t('models.detectsGroup') : <><Star size={11} />{t('models.recommendedGroup', 'Recommended')}</>}</div>
-                  {leading(tellApart, advice.id).map((m) => <NativeEngineCard key={m.id} kind={stage} model={m} onDownloadStarted={() => downloading(m.id, openSlot)} recommended={m.id === advice.id} {...(advice.hint ? { recommendHint: advice.hint } : {})} selected={usedThere?.id === m.id} onSelect={() => { if (usedThere?.id !== m.id) native.onPick(m.id, openSlot); }} disabled={disabled} />)}
+                  {leading(tellApart, advice.id).map((m) => <NativeEngineCard key={m.id} kind={stage} model={m} onDownloadStarted={() => downloading(m.id, openSlot)} recommended={m.id === advice.id} {...(advice.hint ? { recommendHint: advice.hint } : {})} fit={fitOf(m.id, at)} selected={usedThere?.id === m.id} onSelect={() => { if (usedThere?.id !== m.id) native.onPick(m.id, openSlot); }} disabled={disabled} />)}
                 </div>
               )}
               {mustBeTold.length > 0 && (
@@ -967,6 +985,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   // The speed test, asked for beside the readiness check; each stage's result in its card (`SpeedTestView.tsx`).
   const ready = readiness.state === 'ready';
   const speed = useSpeedTest({ settings, values, pair, legs, models, ready, disabled: !!disabled });
+  const nativeSupported = useNativeEngineStore((s) => s.status.supported);
   // Where a stage on this computer's native engine falls behind: a smaller model of it, downloaded and fit for the
   // languages, the largest of them. Elsewhere — another device, an API — the suggestion names none.
   const nativeAsr = useNativeModels('asr');
@@ -1013,6 +1032,8 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
 
   return (
     <div className="kt-stages-assist">
+      {/* Fork: the plans for this computer, where its native engines can run (`PlanCard.tsx`). */}
+      {nativeSupported && <PlanCard settings={settings} pair={pair} speed={speed} ready={ready} disabled={disabled} />}
       <section className={`kt-device${serverInUse ? ' is-used' : ''}`} aria-label={t('providers.localai.placeServer')}>
         <ServerFinder
           key={searchTurn}
@@ -1302,16 +1323,16 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
         )}
       </StageCard>
 
-      {/* Whether all of it can start, in words: asked again by itself after an edit, and by hand here. */}
+      {/* Whether all of it can start, in words: asked again by itself after an edit, and by hand here while it is not
+          ready (another device come back, a model fetched elsewhere). The speed test is on the plans. */}
       <div className={`kt-ready kt-ready--${readiness.state}`} role="status">
         {readiness.state === 'ready' && <><CircleCheck size={15} /><span>{t('providers.localai.ready')}</span></>}
         {readiness.state === 'checking' && <><Loader size={15} className="kt-ready__spin" /><span>{t('providers.localai.checking')}</span></>}
         <span className="kt-ready__actions">
-          <SpeedButton state={speed} ready={ready} disabled={disabled} />
-          {check && readiness.state !== 'checking' && speed.phase.name !== 'running' && (
+          {check && readiness.state !== 'checking' && readiness.state !== 'ready' && speed.phase.name !== 'running' && (
             <button type="button" className="kt-ready__again" onClick={check} disabled={disabled}>
               <RefreshCw size={12} />
-              <span>{readiness.state === 'ready' ? t('providers.localai.recheck') : t('providers.localai.checkNow')}</span>
+              <span>{t('providers.localai.checkNow')}</span>
             </button>
           )}
         </span>

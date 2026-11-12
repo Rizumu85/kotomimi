@@ -1535,7 +1535,7 @@
       "models": {
         "title": "Modellen",
         "content": "Download hier modellen — één per fase. Probeer er een paar; de eerste keuze is niet de enige goede.",
-        "content_kotomimi": "Hier download je modellen: klik op \"Modelbibliotheek\" op de kaart van een stap. Modellen met het label Aanbevolen kwamen het beste uit tests met echte gesprekken. Het pictogram naast de modelnaam toont de testresultaten. Na het downloaden wordt het model automatisch ingeschakeld."
+        "content_kotomimi": "Bovenaan staan onder ‘Plannen’ drie modelcombinaties die passen bij deze computer. Kies er een en klik op ‘Dit plan gebruiken’. De modellen worden automatisch gedownload en ingeschakeld. Beide kanten kunnen verschillende modellen gebruiken: één op de processor en één op de videokaart. Zo bespaar je videogeheugen. Wil je zelf kiezen? Klik dan op ‘Modelbibliotheek’ in de kaart van een stap. Bij elk model staat of het soepel draait op deze computer."
       },
       "start": {
         "title": "Starten",
@@ -2048,6 +2048,44 @@
         "copy_failed": "De verplaatsing is niet voltooid. De modellen staan nog op hun oorspronkelijke locatie.",
         "move_failed": "De verplaatsing is niet voltooid. De modellen staan nog op hun oorspronkelijke locatie."
       }
+    },
+    "plans": {
+      "title": "Profielen",
+      "light": "Licht",
+      "balanced": "Gebalanceerd",
+      "accurate": "Nauwkeurig",
+      "custom": "Aangepast",
+      "inUse": "In gebruik",
+      "vram": "Gebruikt ongeveer {{size}} videogeheugen",
+      "downloaded": "Gedownload",
+      "apply": "Dit profiel gebruiken",
+      "switching": "Na het downloaden automatisch overschakelen: {{percent}}%",
+      "failed": "Een model kon niet worden gedownload. Probeer het opnieuw in de modelbibliotheek.",
+      "cancel": "Annuleren",
+      "translation": "Vertaling",
+      "speedTest": "Snelheid van deze computer testen",
+      "why": {
+        "lending": "Deze computer deelt modellen met andere apparaten. Gebruik daarom nauwkeurigere modellen.",
+        "big": "Deze computer heeft genoeg videogeheugen voor nauwkeurigere modellen.",
+        "small": "Deze computer heeft weinig videogeheugen. Dit profiel gebruikt het minst.",
+        "default": "Nauwkeurig genoeg, met nog ruimte voor een game."
+      }
+    },
+    "fit": {
+      "smooth": "Draait soepel",
+      "maybeSlow": "Kan haperen",
+      "cannot": "Kan niet draaien",
+      "hint": "Heeft ongeveer {{need}} videogeheugen nodig. Naast de andere modellen is er nog ongeveer {{left}} over."
+    },
+    "gap": {
+      "cannot": "{{model}} kan geen spraak in {{languages}} herkennen",
+      "noDetect": "{{model}} kan talen niet automatisch herkennen",
+      "switch": "Overschakelen naar {{model}}"
+    },
+    "lag": {
+      "hear": "De spraakherkenning kan het spreektempo niet bijhouden. Een lichter profiel proberen?",
+      "translate": "De vertaling kan het niet bijhouden. Een lichter profiel proberen?",
+      "open": "Profielen bekijken"
     }
   }
 }

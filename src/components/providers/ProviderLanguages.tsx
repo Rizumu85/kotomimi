@@ -1,3 +1,6 @@
+import { nativePlanStore } from '../../stores/nativePlanStore';
+import { nativeName, useHearingGaps } from '../../providers/openai/usePlans';
+import type { LocalAISettings } from '../../providers/openai/localai';
 import { useAnalytics } from '../../lib/analytics';
 import type { AnyProvider, LanguagePair } from '../../lib/provider/types';
 import { languageContext } from '../../lib/session/shape';
@@ -32,6 +35,13 @@ export function ProviderLanguages({ providers, disabled, sentence }: ProviderLan
   const speech = useProviderStore((st) => st.speech);
   // Read only to draw again when a recognizer downloads: whether a language can be detected may depend on it.
   useNativeEngineStore((st) => st.status);
+  // Fork: a side whose recognizer on this computer misses one of its languages, with the press that puts it right.
+  const kotomimiEntry = (selection?.provider.id as string) === 'localai' ? selection?.entry : undefined;
+  const gaps = useHearingGaps(kotomimiEntry ? (kotomimiEntry.settings as unknown as LocalAISettings) : null, kotomimiEntry?.pair ?? null);
+  const gapOf = (side: 'speaker' | 'participant') => {
+    const gap = gaps[side];
+    return gap ? { gap: { codes: gap.codes, by: nativeName(gap.by), to: nativeName(gap.to), fix: () => nativePlanStore.getState().applyRecognition(side, gap.replacement) } } : {};
+  };
   if (!selection?.entry) return null;
   const { provider, entry } = selection;
   const { setPair, updateSettings } = useProviderStore.getState();
@@ -47,6 +57,7 @@ export function ProviderLanguages({ providers, disabled, sentence }: ProviderLan
   const side = more?.theirs;
   const theirs = side?.light ? {
     ...(side.hearer ? { hearer: side.hearer } : {}),
+    ...gapOf('participant'),
     main: entry.pair.target,
     row: side.chosen,
     lit: side.lit ?? '',
@@ -65,6 +76,7 @@ export function ProviderLanguages({ providers, disabled, sentence }: ProviderLan
   const own = more?.mine;
   const myRow = theirs ? {
     ...(own?.hearer ? { hearer: own.hearer } : {}),
+    ...gapOf('speaker'),
     main: entry.pair.source,
     row: own?.row ?? [entry.pair.source],
     using: legs.includes('speaker') ? own?.using ?? [] : [],
