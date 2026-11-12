@@ -955,8 +955,8 @@ class Share(private val context: Context, private val engine: Engine, private va
         private const val UNREAD_MOST = 8L * 1024 * 1024
 
         /**
-         * How long a text model may take over one answer. The desktop gives up after a minute
-         * (`TEXT_TIMEOUT_MS` in src/providers/openai/textModel.ts), and the door then stops the engine; this is for
+         * How long a text model may take over one answer. The desktop gives up after two minutes
+         * (`PHONE_TEXT_TIMEOUT_MS` in src/providers/openai/phoneText.ts), and the door then stops the engine; this is for
          * whoever else asks, and is patient.
          */
         private const val TEXT_TIMEOUT_MS = 180_000L

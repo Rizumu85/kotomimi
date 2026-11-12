@@ -296,7 +296,6 @@ The microphone source (`openMic`, `src/lib/audio/capture/mic.ts`) reads its devi
 - **Settings** (`src/components/Settings/Settings.tsx`): one panel with three categories, General, Audio and Provider (`AdvancedSettings.tsx`); `NAVIGATION_TAB_MAP` says which category a deep link opens
 - **MainPanel**: Unified conversation panel with `uiMode`-driven layout (basic: status footer, advanced: waveform footer with controls)
 - **Tooltip**: @floating-ui/react powered tooltips
-- **ConnectionStatus**: Real-time connection state indicator
 
 ### UI Design System
 - Two schemes, dark (the default, R1) and light, and an Appearance setting in Help

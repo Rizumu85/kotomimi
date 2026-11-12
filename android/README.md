@@ -9,11 +9,13 @@
 | 识别 · SenseVoice-Small | audio.cpp | 254 MB | 最小最快，只听中文、粤语、英语、日语、韩语 |
 | 识别 · Qwen3-ASR 0.6B | audio.cpp 或 llama.cpp | 1.1 GB / 0.9 GB | 两行是两份文件 |
 | 识别 · Qwen3-ASR 1.7B | audio.cpp 或 llama.cpp | 2.4 GB / 2.3 GB | 两行是两份文件 |
+| 翻译 · PLaMo 3 Translate 0.8B | llama.cpp | 0.6 GB | 和电脑版同一个文件；仅限非商业使用 |
 | 翻译 · Hunyuan MT 2 1.8B | llama.cpp | 1.1 GB | 和电脑版同一个文件 |
 | 翻译 · Index-Translate 2B | llama.cpp | 1.2 GB | 和电脑版同一个文件 |
+| 翻译 · PLaMo 3 Translate 2B | llama.cpp | 1.8 GB | 和电脑版同一个文件；仅限非商业使用 |
 | 语法反馈 · Gemma 4 E2B | llama.cpp | 2.9 GB | 和电脑版同一个文件；4 GB 的手机放不下 |
 
-[audio.cpp](https://github.com/0xShug0/audio.cpp) 0.9.0 是电脑版用的引擎；[llama.cpp](https://github.com/ggml-org/llama.cpp) b12182 在手机处理器上读 Qwen3-ASR 快一倍左右。两个引擎都只在处理器上跑（见"量过、去掉了的三种"）。
+[audio.cpp](https://github.com/0xShug0/audio.cpp) 0.9.0 是电脑版用的那个引擎（电脑版在 0.9.4）；[llama.cpp](https://github.com/ggml-org/llama.cpp) b12182 在手机处理器上读 Qwen3-ASR 快一倍左右。两个引擎都只在处理器上跑（见"量过、去掉了的三种"）。
 
 ## 给朋友测
 
@@ -101,9 +103,9 @@
 
 `Share.ensure` 按当时的内存来，所以小手机轮流装，大手机都留着。每个模型记着引擎自己占、系统拿不回去的内存（`Model.holdsMb`，MB）：
 
-| SenseVoice-Small | 0.6B audio.cpp | 0.6B llama.cpp | 1.7B audio.cpp | 1.7B llama.cpp | Hunyuan MT 2 | Index-Translate | Gemma 4 E2B |
-|---|---|---|---|---|---|---|---|
-| 250 | 1870 | 1300 | 4000（估的） | 3200（估的） | 1210 | 1541 | 3250（估的） |
+| SenseVoice-Small | 0.6B audio.cpp | 0.6B llama.cpp | 1.7B audio.cpp | 1.7B llama.cpp | PLaMo 0.8B | Hunyuan MT 2 | Index-Translate | PLaMo 2B | Gemma 4 E2B |
+|---|---|---|---|---|---|---|---|---|---|
+| 250 | 1870 | 1300 | 4000（估的） | 3200（估的） | 720 | 1210 | 1541 | 2120 | 3250（估的） |
 
 - 旁边还有别的引擎时，起完要剩 400 MB，不够就停最久没被问过的那个，再算。旁边没别的了，够它自己占就起。
 - 文字模型把别的全停掉还不够：什么都不停，回 503。识别模型是主人要借的：别的都停了还不够也照样起。

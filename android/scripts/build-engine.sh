@@ -22,7 +22,7 @@ AUDIOCPP_TAG=v0.9.0
 # The Vulkan headers audio.cpp's own releases are built against.
 VULKAN_TAG=vulkan-sdk-1.4.357.0
 # The model families the desktop app offers: Qwen3-ASR (both sizes), Nemotron, Confucius4 R2T2.
-# And SenseVoice-Small (sense_asr), which the desktop does not offer: on a phone it read 3.4x real time where
+# And SenseVoice-Small (sense_asr): on a phone it read 3.4x real time where
 # Qwen3-ASR 0.6B read 1.1x, in 0.3 GB, as right on real conversation as 0.6B (2026-10-13).
 MODELS="qwen3_asr,nemotron_asr,confucius4_r2t2,sense_asr"
 ABI=arm64-v8a
