@@ -291,6 +291,18 @@ describe('the chatbox', () => {
     expect(t.chatboxLines()).toEqual(['First']);
     t.controller.stop();
   });
+  it('does not send what was said while it was off, once it is turned on again', () => {
+    useVRChatStore.setState({ chatbox: 'translation' });
+    const t = setup();
+    useVRChatStore.setState({ chatbox: 'off' });
+    // Said with the chatbox off: one translated already, one whose translation is still to come.
+    t.show([exchange('a', '这句不发', 'これは送らない'), exchange('b', '这句也不发', '')]);
+    useVRChatStore.setState({ chatbox: 'translation' });
+    // Whatever comes on screen next must not carry them up: not a new sentence, not the late translation.
+    t.show([exchange('a', '这句不发', 'これは送らない'), exchange('b', '这句也不发', 'これも送らない'), exchange('c', '你好', 'こんにちは')]);
+    expect(t.chatboxLines()).toEqual(['こんにちは']);
+    t.controller.stop();
+  });
   it('sends each finished sentence of the user\'s once, a gap apart, and nothing that was on screen before', () => {
     useVRChatStore.setState({ chatbox: 'translation' });
     const t = setup({}, [exchange('old', '旧的', '古い')]);

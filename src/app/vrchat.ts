@@ -434,6 +434,15 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
       store.getState().setRecent({ said: textOf(entry.source), translation: answersOf(entry.translation).join('\n') });
       break;
     }
+    // Said with the chatbox off: for the user alone, and not sent once it is turned on again — whatever of it is
+    // translated only then. (Turned off to say something aside, the aside went up with the next sentence.)
+    if (shows === 'off') {
+      for (const entry of state.entries) {
+        if (entry.kind === 'exchange' && entry.leg === 'speaker' && entry.source.length > 0 && entry.source.every((row) => row.final)) sent.add(entry.id);
+      }
+      showTyping();
+      return;
+    }
     // The newest of the user's sentences that is translated: every one before it has all the translations it will get.
     let newest = -1;
     state.entries.forEach((entry, i) => { if (entry.kind === 'exchange' && entry.leg === 'speaker' && answersOf(entry.translation).length > 0) newest = i; });
