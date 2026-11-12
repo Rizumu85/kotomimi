@@ -6,13 +6,6 @@
 // everything inside to the page — which answers through `reply`, `send` and
 // `closeSocket`.
 //
-// One thing is not the page's: a model server on this same computer (a
-// LocalAI), when the door is given one (`upstream`, `lan-upstream.js`). Its
-// models join the lists the page answers, and what asks for one of them — a
-// chat request by its model's name, a socket by the recognizer its first
-// `session.update` names — is passed on to it. That is all the door reads of a
-// request: a model's name.
-//
 // What is served, and only this:
 //   GET  /v1/models, /v1/models/capabilities
 //   POST /v1/chat/completions
@@ -51,10 +44,6 @@ const SPEECH = /"input_audio_buffer\.speech_started"|"conversation\.item\.input_
 const MAX_SOCKETS = 6;
 /** And from one device: a session of two legs, and one more of each while it reconnects. The rest are for the others. */
 const MAX_SOCKETS_PER_DEVICE = 4;
-/** What is kept of a socket's messages while it is decided whose the socket is: a minute of audio is under 4 MiB as base64. */
-const MAX_HELD_BYTES = 8 * 1024 * 1024;
-/** How long that decision may take before the page takes the socket, as it takes every other. */
-const DECIDE_TIMEOUT_MS = 15_000;
 /** A socket says what it wants (`session.update`) within this long of opening, or it is closed: an open socket holds a place. */
 const HANDSHAKE_TIMEOUT_MS = 30_000;
 /** Wrong keys from one address, within a minute, before it is turned away for a minute: a short key is not guessed at a thousand tries a second. */
@@ -63,12 +52,6 @@ const KEY_WINDOW_MS = 60_000;
 
 const REALTIME_PATH = '/v1/realtime';
 const ROUTES = new Set(['GET /v1/models', 'GET /v1/models/capabilities', 'POST /v1/chat/completions']);
-
-/** On a model list that holds a local model server's models too: a searching device then lists this computer once (`lan-discover.js`). */
-const INCLUDES_HEADER = 'X-Kotomimi-Includes';
-const INCLUDES_MODEL_SERVER = 'model-server';
-/** The owner the passed-on models name: anything but the app's own (`src/lib/lan/protocol.ts`), by which a client knows a model is a chat model like any other. */
-const UPSTREAM_OWNER = 'localai';
 
 /**
  * The origins a request may name. The app's own page is a file, and its
@@ -86,7 +69,7 @@ const corsFor = (request) => {
   return {
     'Access-Control-Allow-Origin': origin,
     Vary: 'Origin',
-    'Access-Control-Expose-Headers': 'X-Kotomimi-Name, X-Kotomimi-Includes',
+    'Access-Control-Expose-Headers': 'X-Kotomimi-Name',
     'Access-Control-Allow-Headers': 'Authorization, Content-Type',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Max-Age': '600',
@@ -152,7 +135,7 @@ function keyOf(request) {
 /**
  * A close's reason as a close frame can carry it: 123 bytes of UTF-8 at most
  * (RFC 6455), cut on a character's edge. Longer, the socket throws rather than
- * close — and words from LocalAI or a path in a user's home need not be ASCII.
+ * close — and a path in a user's home need not be ASCII.
  */
 function closeReason(text) {
   const chars = Array.from(String(text ?? '')).slice(0, 123);
@@ -184,15 +167,12 @@ function sameKey(given, wanted) {
  *   socketOpen({ id, model, address })
  *   socketMessage({ id, data })
  *   socketClose({ id })
- *   socketProxied({ id })                  the socket is the model server's from here on: the page lets go of it, and still counts it
- * `upstream` is the model server on this computer, when there is one to share
- * (`lan-upstream.js`): asked for its models, and for whether a request is its.
  * Resolves once listening, with what the page then calls back; rejects when
  * the port cannot be bound. `name` is this computer's: every answer carries it
  * in a header, so a device searching the network (`lan-discover.js`) can list
  * this one by a name its owner knows.
  */
-function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname(), upstream = null, idleSessionMs = IDLE_SESSION_MS, idleCheckMs = IDLE_CHECK_MS, heldMaxBytes = MAX_HELD_BYTES, decideTimeoutMs = DECIDE_TIMEOUT_MS, handshakeTimeoutMs = HANDSHAKE_TIMEOUT_MS, keyTries = KEY_TRIES, keyWindowMs = KEY_WINDOW_MS, addressOf = (request) => request.socket.remoteAddress }, handlers) {
+function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname(), idleSessionMs = IDLE_SESSION_MS, idleCheckMs = IDLE_CHECK_MS, handshakeTimeoutMs = HANDSHAKE_TIMEOUT_MS, keyTries = KEY_TRIES, keyWindowMs = KEY_WINDOW_MS, addressOf = (request) => request.socket.remoteAddress }, handlers) {
   const wanted = String(key ?? '');
   const NAME = { 'X-Kotomimi-Name': encodeURIComponent(String(name).slice(0, 80)) };
   /** A response's own headers: this computer's name, and what its request's origin is owed. */
@@ -233,8 +213,6 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
   const waiting = new Map();
   /** Open sockets, by the id the page knows them by. */
   const sockets = new Map();
-  /** The model server's side of a socket that was passed on to it, by the same id. */
-  const links = new Map();
   /** The device each socket came from, and when speech was last carried for each device. */
   const devices = new Map();
   const spoken = new Map();
@@ -316,31 +294,22 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
           return;
         }
       }
-      /** To the page, as everything is; `extra` is the model server's list, joined to the page's when both have come. */
-      const hand = (extra = null) => {
-        const id = `r${++nextId}`;
-        const timer = setTimeout(() => {
-          if (!waiting.delete(id)) return;
-          refuse(response, 504, 'timeout', 'Kotomimi did not answer in time.');
-        }, REPLY_TIMEOUT_MS);
-        waiting.set(id, { response, timer, extra, path });
-        // The caller went away: the page's answer has no one to go to.
-        response.on('close', () => {
-          const pending = waiting.get(id);
-          if (pending && !response.writableEnded) {
-            clearTimeout(pending.timer);
-            waiting.delete(id);
-          }
-        });
-        handlers.request({ id, method: request.method, path, body, ...(request.method === 'GET' && url.search ? { query: Object.fromEntries(url.searchParams) } : {}) });
-      };
-      if (!upstream) return hand();
-      if (request.method === 'GET') return hand(Promise.resolve().then(() => upstream.models()).catch(() => []));
-      // A chat request: the model server's when it names one of its models, or leaves the choice to a computer that has one.
-      Promise.resolve().then(() => upstream.chatModel(body?.model, body)).then((model) => {
-        if (model) upstream.complete(body, model, response, named(request));
-        else hand();
-      }, () => hand());
+      // To the page, as everything is.
+      const id = `r${++nextId}`;
+      const timer = setTimeout(() => {
+        if (!waiting.delete(id)) return;
+        refuse(response, 504, 'timeout', 'Kotomimi did not answer in time.');
+      }, REPLY_TIMEOUT_MS);
+      waiting.set(id, { response, timer });
+      // The caller went away: the page's answer has no one to go to.
+      response.on('close', () => {
+        const pending = waiting.get(id);
+        if (pending && !response.writableEnded) {
+          clearTimeout(pending.timer);
+          waiting.delete(id);
+        }
+      });
+      handlers.request({ id, method: request.method, path, body, ...(request.method === 'GET' && url.search ? { query: Object.fromEntries(url.searchParams) } : {}) });
     });
   });
 
@@ -374,52 +343,11 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
       devices.set(id, device);
       // A device that opens a session is using this computer now: its quiet time starts over.
       spoken.set(device, Date.now());
-      // Whose the socket is. The page opens every session; the first `session.update` then says which recognizer is
-      // wanted, and one of the model server's makes the socket its own from there on.
-      let whose = upstream ? 'undecided' : 'page';
-      const held = [];
-      let heldBytes = 0;
-      /** Ends the wait for the decision, when the socket goes first. */
-      let deciding = () => {};
       // A socket that never says what it wants holds a place for nothing: it is given a while, then closed.
       let configured = false;
       const handshake = setTimeout(() => { if (!configured && ws.readyState === 1) ws.close(1008, 'No session was set up.'); }, handshakeTimeoutMs);
       handshake.unref?.();
       const toPage = (text) => handlers.socketMessage({ id, data: text });
-      const decide = (text, wanted, language) => {
-        whose = 'deciding';
-        // A model server slow to say what it serves does not keep the device waiting, or the door holding its
-        // messages, for ever: after a while the page takes the socket, as it takes every other.
-        let patience = null;
-        const tooLong = new Promise((resolve) => { patience = setTimeout(() => resolve(null), decideTimeoutMs); patience.unref?.(); });
-        deciding = () => clearTimeout(patience);
-        Promise.race([Promise.resolve().then(() => upstream.recognizer(wanted, language)).catch(() => null), tooLong]).then((route) => {
-          clearTimeout(patience);
-          if (!sockets.has(id) || whose !== 'deciding') return;
-          heldBytes = 0;
-          if (!route) {
-            whose = 'page';
-            toPage(text);
-            for (const later of held.splice(0)) toPage(later);
-            return;
-          }
-          whose = 'upstream';
-          handlers.socketProxied?.({ id });
-          let update = {};
-          try {
-            update = JSON.parse(text);
-          } catch {
-            update = {};
-          }
-          const link = upstream.bridge(route, {
-            update,
-            send: (data) => { out(id, ws, data); },
-            close: (code, reason) => ws.close(code, closeReason(reason)),
-          });
-          links.set(id, link);
-          for (const later of held.splice(0)) link.send(later);
-        });
-      };
       ws.on('message', (data, isBinary) => {
         // The Realtime wire is JSON text; a binary frame is none of it.
         if (isBinary) return;
@@ -428,37 +356,10 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
           configured = true;
           clearTimeout(handshake);
         }
-        if (whose === 'page') return toPage(text);
-        if (whose === 'upstream') return links.get(id)?.send(text);
-        if (whose === 'deciding') {
-          // Kept only up to a bound: a device that streams while the decision is awaited does not fill this
-          // computer's memory (security review, 2026-10-06: one socket took the process to 900 MB in six seconds).
-          heldBytes += text.length;
-          if (heldBytes > heldMaxBytes) {
-            held.length = 0;
-            whose = 'closed';
-            return ws.close(1009, 'Too much was sent before the session was set up.');
-          }
-          return held.push(text);
-        }
-        if (whose === 'closed') return undefined;
-        let event = null;
-        try {
-          event = JSON.parse(text);
-        } catch {
-          event = null;
-        }
-        if (event?.type !== 'session.update') return toPage(text);
-        const named = event.session?.audio?.input?.transcription?.model;
-        const language = event.session?.audio?.input?.transcription?.language;
-        return decide(text, typeof named === 'string' ? named : '', typeof language === 'string' ? language : '');
+        return toPage(text);
       });
-      ws.on('close', (code, reason) => {
+      ws.on('close', () => {
         clearTimeout(handshake);
-        deciding();
-        held.length = 0;
-        links.get(id)?.close(code, reason);
-        links.delete(id);
         devices.delete(id);
         if (![...devices.values()].includes(device)) spoken.delete(device);
         if (sockets.delete(id)) handlers.socketClose({ id });
@@ -486,14 +387,6 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
           if (contentType) {
             pending.response.writeHead(status, { 'Content-Type': contentType, ...named(pending.response.req) });
             pending.response.end(String(body ?? ''));
-          } else if (pending.extra && status === 200 && body && Array.isArray(body.data)) {
-            // A model list: the model server's models after the page's, each once.
-            pending.extra.then((extra) => {
-              const have = new Set(body.data.map((m) => m?.id));
-              const more = (Array.isArray(extra) ? extra : []).filter((m) => m && typeof m.id === 'string' && !have.has(m.id));
-              const data = [...body.data, ...more.map((m) => (pending.path.endsWith('/capabilities') ? { id: m.id, capabilities: m.capabilities } : { id: m.id, object: 'model', owned_by: UPSTREAM_OWNER }))];
-              json(pending.response, status, { ...body, data }, more.length > 0 ? { [INCLUDES_HEADER]: INCLUDES_MODEL_SERVER } : {});
-            });
           } else {
             json(pending.response, status, body);
           }
@@ -517,8 +410,6 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
             refuse(pending.response, 503, 'stopped', 'Kotomimi stopped sharing.');
             waiting.delete(id);
           }
-          for (const link of links.values()) link.close();
-          links.clear();
           for (const ws of sockets.values()) ws.terminate();
           sockets.clear();
           wss.close();
@@ -532,4 +423,4 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
   });
 }
 
-module.exports = { startLanServer, lanAddresses, isNeighbour, isLocalHost, MAX_SOCKETS, MAX_SOCKETS_PER_DEVICE, MAX_HELD_BYTES, IDLE_SESSION_MS };
+module.exports = { startLanServer, lanAddresses, isNeighbour, isLocalHost, MAX_SOCKETS, MAX_SOCKETS_PER_DEVICE, IDLE_SESSION_MS };

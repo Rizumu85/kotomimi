@@ -82,7 +82,6 @@ const validReceiveChannels = [
   'lan:socket-open',
   'lan:socket-message',
   'lan:socket-close',
-  'lan:socket-proxied',
   // Fork: the window is about to be maximized or restored, for the page to play (electron/window-maximize.js)
   'window:shift',
   // Fork: the native recognition engine — its state as it changes, and the text of a live recognition (electron/native-engine.js)

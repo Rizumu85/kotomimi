@@ -1387,7 +1387,6 @@ ipcMain.handle('lan:start', async (event, args) => {
       socketOpen: (socket) => toPage('lan:socket-open', socket),
       socketMessage: (message) => toPage('lan:socket-message', message),
       socketClose: (socket) => toPage('lan:socket-close', socket),
-      socketProxied: (socket) => toPage('lan:socket-proxied', socket),
     });
     console.log(`[Kotomimi] [Main] Sharing models on port ${lanServer.port}`);
     return { ok: true, port: lanServer.port, addresses: lanServer.addresses, name: lanServer.name };
