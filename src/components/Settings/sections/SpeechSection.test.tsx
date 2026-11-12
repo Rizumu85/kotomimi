@@ -116,7 +116,7 @@ describe('SpeechSection', () => {
 
   it('clicking the active mode does nothing', () => {
     render(<SpeechSection locked={false} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Auto', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Auto' }));
     expect(trackEvent).not.toHaveBeenCalled();
     expect(useTurnModeStore.getState().turnMode).toBe('auto');
   });
@@ -172,7 +172,7 @@ describe("SpeechSection — automatic speech detection", () => {
     fireEvent.click(disclosure());
     fireEvent.click(screen.getByText(mode === 'push-to-talk' ? 'Push-to-Talk' : 'Push-to-Translate'));
     expect(screen.queryByRole('button', { name: /Speech detection/ })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Auto', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Auto' }));
     expect(disclosure()).toHaveAttribute('aria-expanded', 'false');
   });
 

@@ -10,7 +10,12 @@ vi.mock('react-i18next', () => ({
 
 // The page switches language through the app's own loader (the catalogs load on demand).
 const changeLanguageWithLoad = vi.hoisted(() => vi.fn(async (lng: string) => lng));
-vi.mock('../../locales', () => ({ changeLanguageWithLoad }));
+// The footer reaches the app's session through the recording switch, and with it the subtitle surface, which reads
+// the instance itself.
+vi.mock('../../locales', () => ({
+  default: { language: 'en', on: vi.fn(), off: vi.fn(), t: (key: string) => key },
+  changeLanguageWithLoad,
+}));
 
 afterEach(() => { cleanup(); changeLanguageWithLoad.mockClear(); });
 
