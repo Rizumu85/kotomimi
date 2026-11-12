@@ -2099,6 +2099,15 @@
       "saved": "Guardado",
       "failed": "No se pudo guardar.",
       "hint": "Guarda en un archivo los subtítulos mostrados durante el último minuto. Si hay problemas de formato, envíaselo al desarrollador para que pueda reproducirlos tal como aparecieron."
+    },
+    "recording": {
+      "toggle": "Grabar sesiones",
+      "tooltip": "Guarda el audio y el texto de cada sesión en este equipo para revisar problemas después: marca las frases con errores en la conversación. También se graban las voces de las otras personas. Se conservan durante 7 días, hasta un máximo de 2 GB.",
+      "open": "Abrir carpeta de grabaciones",
+      "on": "Grabando esta sesión",
+      "mark": "Marcar un problema en esta frase",
+      "marked": "Marcada",
+      "notRecorded": "Esta frase no tiene grabación de audio"
     }
   }
 }

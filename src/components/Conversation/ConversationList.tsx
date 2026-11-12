@@ -13,6 +13,7 @@ import type { DisplayItem, NoticeEntry } from '../../lib/view/filter';
 import { SystemRow, type NoticeAction } from './SystemRow';
 import { useFollowLatest } from './useFollowLatest';
 import { WordFix } from './WordFix';
+import { RowMark } from './RowMark';
 import '../MainPanel/MainPanel.scss';
 import '../MainPanel/ConversationRow.scss';
 import '../../styles/karaoke.scss';
@@ -33,6 +34,8 @@ export interface ConversationListProps {
   onReplay(leg: LegName, segmentId: SegmentId): void;
   /** Set while replay is gated session-wide (plan 1e-3b-1 ruling 15): every slot is disabled and shows this as its title. */
   replayBlocked?: string | null;
+  /** Fork: a session is recorded (Help → Record sessions): a line of the user's or theirs can be marked as wrong. */
+  markLines?: boolean;
   /** The action a notice's bubble offers, if any (plan 1e-3b-1 ruling 13). */
   noticeAction?(notice: NoticeEntry): NoticeAction | null;
   compact: boolean;
@@ -57,7 +60,7 @@ function formatTime(ts: number): string {
 }
 
 export function ConversationList({
-  items, lit, replaying, replayLegs, canReplay, onReplay, replayBlocked, noticeAction, compact, fontSize, empty, tone,
+  items, lit, replaying, replayLegs, canReplay, onReplay, replayBlocked, noticeAction, compact, fontSize, empty, tone, markLines = false,
 }: ConversationListProps) {
   const display = useRef<HTMLDivElement>(null);
   // The newest line stays in view while the reader is at the bottom; reading back
@@ -105,6 +108,7 @@ export function ConversationList({
                   blocked={slot ? replayBlocked ?? null : null}
                   onReplay={replay}
                   compact={compact}
+                  markLines={markLines}
                 />
               );
             })}
@@ -140,9 +144,10 @@ interface RowBubbleProps {
   blocked: string | null;
   onReplay(leg: LegName, segmentId: SegmentId): void;
   compact: boolean;
+  markLines: boolean;
 }
 
-const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, replayingThis, replayingOther, blocked, onReplay, compact }: RowBubbleProps) {
+const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, replayingThis, replayingOther, blocked, onReplay, compact, markLines }: RowBubbleProps) {
   const { t } = useTranslation();
   const { row, leg, languages } = item;
   const isTranslation = row.side === 'translation';
@@ -165,6 +170,8 @@ const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, r
   // Fork: grammar feedback that changes something, drawn as the sentence said, marked — on its answer's first row;
   // the answer's other rows (where sentences are cut into rows) are then part of it.
   const coached = useCoached();
+  // Fork: a recorded session's line can be marked as wrong, once its words are final.
+  const markable = markLines && !isTranslation && item.endsSegment && !video && row.final;
   const isFeedback = row.purpose === 'feedback' || (row.purpose === undefined && isTranslation && leg === 'speaker' && coached);
   const fix = isFeedback && item.answers ? fixOf(item.answers.said, item.answers.saidLanguage, item.answers.answer, row.purpose === 'feedback' ? undefined : languages.target) : null;
   if (fix && row.start > 0) return null;
@@ -226,6 +233,7 @@ const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, r
             <Play size={10} />
           </button>
         )}
+        {markable && <RowMark leg={leg} t={item.t} />}
       </div>
     </div>
   );

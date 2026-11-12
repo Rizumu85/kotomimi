@@ -162,4 +162,16 @@ describe('createConversationView', () => {
     clock.advance(VIEW_INTERVAL_MS);
     expect(reportErrorSpy).toHaveBeenCalledTimes(2);
   });
+
+  it('flushes pending final text synchronously at run end and cancels the scheduled projection', () => {
+    const clock = createVirtualClock(0);
+    const conv = conversation([legWith('partial')]);
+    const view = createConversationView(conv, settings(DEFAULT_PROJECTION), clock);
+    conv.set([legWith('final sentence')]);
+    expect(firstSourceTexts(view)).toEqual(['partial']);
+    view.flush();
+    expect(firstSourceTexts(view)).toEqual(['final sentence']);
+    expect(clock.pending()).toBe(0);
+    view.dispose();
+  });
 });

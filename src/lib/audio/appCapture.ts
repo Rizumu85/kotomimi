@@ -100,6 +100,8 @@ function withCleanup(source: Source, cleanup: () => void): Source {
 }
 
 export interface AppCaptureOptions {
+  onPcm?(leg: LegName, pcm: Int16Array): void;
+  onMicTrack?: MicSettings['trackOpened'];
   /** Checked per chunk: false, and the leg's meter reads flat. Absent: every chunk moves it. */
   meterGate?(leg: LegName): boolean;
 }
@@ -110,7 +112,7 @@ export function createAppCapture(playback: Playback, platform: Platform = getEnv
   const levels: Record<LegName, LevelMeter> = { speaker: createLevelMeter(), participant: createLevelMeter() };
 
   const open = (leg: LegName, signal: AbortSignal): Promise<Source> => {
-    if (leg === 'speaker') return openMic(micSettings(), signal);
+    if (leg === 'speaker') return openMic({ ...micSettings(), trackOpened: options.onMicTrack }, signal);
     if (platform === 'electron') return openSystemAudio(systemAudioSettings(), signal);
     if (platform === 'extension') return openTab(tabSettings(), signal);
     return Promise.reject(new Error('This build has no participant source.'));
@@ -127,6 +129,7 @@ export function createAppCapture(playback: Playback, platform: Platform = getEnv
       // spell later: reset once on the way in, never per chunk.
       let metering = true;
       const offLevel = source.onPcm((pcm) => {
+        options.onPcm?.(leg, pcm);
         if (!meterGate || meterGate(leg)) {
           metering = true;
           levels[leg].push(pcm);

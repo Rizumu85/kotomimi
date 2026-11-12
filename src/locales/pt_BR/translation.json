@@ -2099,6 +2099,15 @@
       "saved": "Salvo",
       "failed": "Não foi possível salvar.",
       "hint": "Salva em um arquivo as legendas exibidas no último minuto. Se houver um problema de layout, envie o arquivo ao desenvolvedor para reproduzir exatamente o que aconteceu."
+    },
+    "recording": {
+      "toggle": "Gravar sessões",
+      "tooltip": "Salva o áudio e o texto de cada sessão neste computador para você conferir problemas depois: marque na conversa as frases com erro. As vozes das outras pessoas também são gravadas. As gravações ficam salvas por 7 dias, até o limite de 2 GB.",
+      "open": "Abrir pasta de gravações",
+      "on": "Gravando esta sessão",
+      "mark": "Marcar problema nesta frase",
+      "marked": "Marcada",
+      "notRecorded": "Esta frase não tem gravação de áudio"
     }
   }
 }

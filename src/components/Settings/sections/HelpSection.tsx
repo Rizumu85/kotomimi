@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { HelpCircle, RefreshCw, Check, CircleAlert, MessageSquare, Globe, Wand2, SunMoon } from 'lucide-react';
+import { HelpCircle, RefreshCw, Check, CircleAlert, MessageSquare, Globe, Wand2, SunMoon, FolderOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Tooltip from '../../Tooltip/Tooltip';
 import { isElectron } from '../../../utils/environment';
 import { useStartBasicsTour } from '../../Tour/useStartBasicsTour';
 import { useSetSetupWizardOpen } from '../../../stores/layoutStore';
 import { useUpdateStatus, useCheckForUpdates, useOpenUpdateDialog } from '../../../stores/updateStore';
-import { useSetUILanguage, useDiagnosticLogs, useSetDiagnosticLogs, useThemeSetting, useSetThemeSetting } from '../../../stores/settingsStore';
+import { useSetUILanguage, useDiagnosticLogs, useSetDiagnosticLogs, useThemeSetting, useSetThemeSetting, useRecordSessions, useSetRecordSessions } from '../../../stores/settingsStore';
+import { openSessionRecordings } from '../../../app/sessionRecording';
 import { useAnalytics } from '../../../lib/analytics';
 import { changeLanguageWithLoad } from '../../../locales';
 import { INTERFACE_LANGUAGES } from './interfaceLanguages';
@@ -33,6 +34,8 @@ const HelpSection: React.FC<HelpSectionProps> = ({ toggleSettings, isSessionActi
   const setUILanguage = useSetUILanguage();
   const diagnosticLogs = useDiagnosticLogs();
   const setDiagnosticLogs = useSetDiagnosticLogs();
+  const recordSessions = useRecordSessions();
+  const setRecordSessions = useSetRecordSessions();
   const themeSetting = useThemeSetting();
   const setThemeSetting = useSetThemeSetting();
   const { trackEvent } = useAnalytics();
@@ -299,6 +302,30 @@ const HelpSection: React.FC<HelpSectionProps> = ({ toggleSettings, isSessionActi
             <span>{t('settings.diagnosticLogs', 'Diagnostic logs')}</span>
           </button>
         </Tooltip>
+        {/*
+          Fork: every session recorded to this computer, for looking back at what went wrong (echo, lost words, odd
+          recognitions): the microphone as used and unprocessed, the other side, and the lines. Desktop only.
+        */}
+        {isElectron() && (
+          <Tooltip content={t('fork.recording.tooltip', 'Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.')} position="top">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={recordSessions}
+              className={`help-link help-link--toggle${recordSessions ? ' is-on' : ''}`}
+              onClick={() => { void setRecordSessions(!recordSessions); }}
+            >
+              <span className="help-link__switch" aria-hidden="true" />
+              <span>{t('fork.recording.toggle', 'Record sessions')}</span>
+            </button>
+          </Tooltip>
+        )}
+        {isElectron() && recordSessions && (
+          <button type="button" className="help-link" onClick={() => { void openSessionRecordings(); }}>
+            <FolderOpen size={13} />
+            <span>{t('fork.recording.open', 'Open recordings')}</span>
+          </button>
+        )}
         {/*
           Fork: upstream's support address and discussion board are Sokuji's own, and answer for Sokuji.
           This build is not theirs to support: its one link goes to the fork's own issues.

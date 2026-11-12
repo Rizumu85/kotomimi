@@ -23,7 +23,10 @@ vi.mock('../../../stores/settingsStore', () => ({
   useSetDiagnosticLogs: () => setDiagnosticLogs,
   useThemeSetting: () => themeSetting,
   useSetThemeSetting: () => setTheme,
+  useRecordSessions: () => false,
+  useSetRecordSessions: () => vi.fn(),
 }));
+vi.mock('../../../app/sessionRecording', () => ({ openSessionRecordings: vi.fn() }));
 
 const trackEvent = vi.fn();
 vi.mock('../../../lib/analytics', () => ({ useAnalytics: () => ({ trackEvent }) }));

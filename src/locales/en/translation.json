@@ -2099,6 +2099,15 @@
       "saved": "Saved",
       "failed": "Could not save it.",
       "hint": "Saves the last minute of what the subtitle showed to a file. When the layout goes wrong, send it to the developer to replay it exactly."
+    },
+    "recording": {
+      "toggle": "Record sessions",
+      "tooltip": "Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.",
+      "open": "Open recordings",
+      "on": "Recording this session",
+      "mark": "Mark this line as wrong",
+      "marked": "Marked",
+      "notRecorded": "This line was not recorded"
     }
   }
 }

@@ -46,6 +46,7 @@ import {
   useSpeakerDisplayMode,
   useSubtitleModeActive,
   useUIMode,
+  useRecordSessions,
 } from '../../stores/settingsStore';
 import { useSetSubtitleEntryHint } from '../../stores/subtitleStore';
 import { useCleanupUpdateListeners, useInitUpdateListeners } from '../../stores/updateStore';
@@ -249,6 +250,7 @@ export default function MainPanel() {
   const speakerLive = run.phase === 'running' && run.legs.speaker === 'live';
   const ptt = usePushToTalk({ enabled: speakerLive && subtitle.holdToTalk, press: runner.press, release: runner.release });
   const duration = useSessionClock(run);
+  const recordSessions = useRecordSessions();
   // The stored settings are the run's: they are locked while it is live.
   const canSendText = speakerLive && !!provider && providerSettings !== undefined && provider.textInput(providerSettings);
 
@@ -350,6 +352,7 @@ export default function MainPanel() {
             }}
             replayBlocked={blocked} noticeAction={noticeAction}
             compact={display.compactMode} fontSize={display.fontSize}
+            markLines={recordSessions && isElectron()}
             // Fork: a session's first step loads this computer's engines, which nothing held in memory until now:
             // the empty page says so while it lasts.
             empty={loadingEngines

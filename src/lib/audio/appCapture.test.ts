@@ -44,6 +44,23 @@ beforeEach(() => {
 });
 
 describe('createAppCapture', () => {
+  it('taps both sources exactly as delivered even while the level meter is gated', async () => {
+    const onPcm = vi.fn();
+    const capture = createAppCapture(fakePlayback(), 'electron', { onPcm, meterGate: () => false });
+    const speaker = await capture.openSource('speaker', live());
+    opened.sources.push(createFakeSource(clock, { voiced: true }));
+    const participant = await capture.openSource('participant', live());
+    const heard = vi.fn();
+    speaker.onPcm((pcm) => heard('speaker', pcm));
+    participant.onPcm((pcm) => heard('participant', pcm));
+    clock.advance(100);
+    expect(onPcm.mock.calls).toEqual(heard.mock.calls);
+    expect(onPcm.mock.calls.map(([leg]) => leg)).toEqual(['speaker', 'participant']);
+    await speaker.stop(); await participant.stop();
+    onPcm.mockClear(); clock.advance(200);
+    expect(onPcm).not.toHaveBeenCalled();
+  });
+
   it('opens the microphone for the speaker and feeds its chunks to passthrough', async () => {
     const playback = fakePlayback();
     const capture = createAppCapture(playback, 'electron');

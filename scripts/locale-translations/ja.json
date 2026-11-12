@@ -715,6 +715,34 @@
     "en": "This computer has little video memory: the plan that takes least.",
     "text": "このパソコンはビデオメモリが少ないため、使用量が最も少ない構成です。"
   },
+  "fork.recording.mark": {
+    "en": "Mark this line as wrong",
+    "text": "この文の問題をマーク"
+  },
+  "fork.recording.marked": {
+    "en": "Marked",
+    "text": "マーク済み"
+  },
+  "fork.recording.notRecorded": {
+    "en": "This line was not recorded",
+    "text": "この文の録音はありません"
+  },
+  "fork.recording.on": {
+    "en": "Recording this session",
+    "text": "このセッションを記録中"
+  },
+  "fork.recording.open": {
+    "en": "Open recordings",
+    "text": "録音フォルダーを開く"
+  },
+  "fork.recording.toggle": {
+    "en": "Record sessions",
+    "text": "セッションを記録"
+  },
+  "fork.recording.tooltip": {
+    "en": "Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.",
+    "text": "セッションごとの音声とテキストをこのパソコンに保存します。会話の中で問題のある文にマークを付けて、後から確認できます。相手の音声も録音されます。保存期間は7日間、容量は最大2 GBです。"
+  },
   "fork.romanization": {
     "en": "Romanization",
     "text": "ローマ字を表示"

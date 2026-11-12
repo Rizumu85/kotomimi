@@ -715,6 +715,34 @@
     "en": "This computer has little video memory: the plan that takes least.",
     "text": "এই কম্পিউটারে ভিডিও মেমরি কম। এই পরিকল্পনায় সবচেয়ে কম মেমরি লাগে।"
   },
+  "fork.recording.mark": {
+    "en": "Mark this line as wrong",
+    "text": "এই কথায় সমস্যা চিহ্নিত করুন"
+  },
+  "fork.recording.marked": {
+    "en": "Marked",
+    "text": "চিহ্নিত হয়েছে"
+  },
+  "fork.recording.notRecorded": {
+    "en": "This line was not recorded",
+    "text": "এই কথার অডিও রেকর্ড হয়নি"
+  },
+  "fork.recording.on": {
+    "en": "Recording this session",
+    "text": "এই সেশন রেকর্ড হচ্ছে"
+  },
+  "fork.recording.open": {
+    "en": "Open recordings",
+    "text": "রেকর্ডিং ফোল্ডার খুলুন"
+  },
+  "fork.recording.toggle": {
+    "en": "Record sessions",
+    "text": "সেশন রেকর্ড করুন"
+  },
+  "fork.recording.tooltip": {
+    "en": "Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.",
+    "text": "পরে সমস্যা খুঁজে দেখতে প্রতিটি সেশনের অডিও ও কথাগুলো এই কম্পিউটারে রাখুন। কথোপকথনে যে কথাগুলোতে সমস্যা হয়েছে, সেগুলো চিহ্নিত করুন। অন্য পক্ষের কণ্ঠও রেকর্ড হবে। 7 দিন রাখা হবে, সর্বোচ্চ 2 GB।"
+  },
   "fork.romanization": {
     "en": "Romanization",
     "text": "রোমান হরফে উচ্চারণ দেখান"

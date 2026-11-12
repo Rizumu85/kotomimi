@@ -2099,6 +2099,15 @@
       "saved": "Guardado",
       "failed": "Não foi possível guardar.",
       "hint": "Guarda num ficheiro as legendas apresentadas no último minuto. Se houver um problema na disposição do texto, envie o ficheiro ao programador para que possa reproduzi-lo exatamente."
+    },
+    "recording": {
+      "toggle": "Gravar sessões",
+      "tooltip": "Guarda o áudio e o texto de cada sessão neste computador para poder verificar problemas mais tarde: marque na conversa as frases com erros. As vozes das outras pessoas também são gravadas. As gravações são guardadas durante 7 dias, até um máximo de 2 GB.",
+      "open": "Abrir pasta de gravações",
+      "on": "A gravar esta sessão",
+      "mark": "Marcar um problema nesta frase",
+      "marked": "Marcada",
+      "notRecorded": "Esta frase não tem gravação"
     }
   }
 }

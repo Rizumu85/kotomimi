@@ -2099,6 +2099,15 @@
       "saved": "Salvato",
       "failed": "Impossibile salvare.",
       "hint": "Salva in un file i sottotitoli mostrati nell'ultimo minuto. Se ci sono problemi di impaginazione, invialo allo sviluppatore per riprodurli esattamente."
+    },
+    "recording": {
+      "toggle": "Registra le sessioni",
+      "tooltip": "Salva l’audio e il testo di ogni sessione su questo computer per poter verificare eventuali problemi in seguito: segna nella conversazione le frasi con errori. Vengono registrate anche le voci degli altri partecipanti. Le registrazioni vengono conservate per 7 giorni, fino a un massimo di 2 GB.",
+      "open": "Apri cartella registrazioni",
+      "on": "Registrazione della sessione in corso",
+      "mark": "Segnala un problema in questa frase",
+      "marked": "Segnalata",
+      "notRecorded": "L’audio di questa frase non è stato registrato"
     }
   }
 }

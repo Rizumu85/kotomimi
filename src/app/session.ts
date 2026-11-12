@@ -5,6 +5,7 @@
  * `getAppSession()` builds on its first call, and the playback loads on the
  * first `audio()` or leg.
  */
+import { createSessionRecording } from './sessionRecording';
 import { driveSessionLags, type LagModels } from './sessionLags';
 import { runSideHearing, type LocalAISettings } from '../providers/openai/localai';
 import { nativePicked } from '../providers/openai/localaiNative';
@@ -125,6 +126,12 @@ export function createAppSession(options: AppSessionOptions = {}): AppSession {
     void refetch().catch((error: unknown) => reportWarning('AppSession', `Refreshing the account after the session failed: ${describeCause(error)}`, { cause: error, dedupeKey: 'session:refetch' }));
   };
 
+  const recording = createSessionRecording();
+  let recordingMetadata: {
+    provider?: string;
+    languages?: { source: string; target: string };
+    stages?: Record<keyof LagModels, { location?: string; model: string | null }>;
+  } = {};
   let lagModels: LagModels = { speaker: null, participant: null, translation: null };
   const runner: Runner = createRunner({
     clock,
@@ -143,6 +150,13 @@ export function createAppSession(options: AppSessionOptions = {}): AppSession {
           const model = typeof s.model === 'string' && s.model ? s.model : shape.provider.id;
           lagModels = { speaker: model, participant: model, translation: model };
         }
+      }
+      if (shape) {
+        const settings = shape.settings as LocalAISettings;
+        recordingMetadata = { provider: shape.provider.id, languages: shape.pair,
+          stages: { speaker: { location: settings.asrVia, model: lagModels.speaker },
+            participant: { location: settings.asrVia, model: lagModels.participant },
+            translation: { location: settings.translateAt, model: lagModels.translation } } };
       }
       return shape;
     },
@@ -229,6 +243,8 @@ export function createAppSession(options: AppSessionOptions = {}): AppSession {
           // The mic strip shows whether the voice is fed into processing
           // (the owner's rule, 2026-09-26): flat under push-to-talk until a
           // turn is held; the participant's strip shows what it captures.
+          onPcm: recording.pcm,
+          onMicTrack: (track, echoCancellation) => recording.track({ kind: 'processed', label: track.label, echoCancellation, settings: track.getSettings() }),
           meterGate: (leg) => leg !== 'speaker' || runner.speakerAudioInUse(),
         });
         playback = app.playback;
@@ -294,6 +310,22 @@ export function createAppSession(options: AppSessionOptions = {}): AppSession {
         watchCoachingFromStores(),
         // Fork: a language picked while a session runs: the session goes on in it, without a stop.
         watchPairFromStores(() => { const { phase } = runner.state.getState(); if (phase === 'running' || phase === 'starting') void runner.retarget(); }),
+        recording.drive({ runner, view, metadata: () => {
+          // During checking the conversation still belongs to the previous run.
+          const resolved = runner.state.getState().phase === 'starting' ? null : runner.conversation.info;
+          const heard = useHeardByStore.getState().byLeg;
+          const translated = useTranslatedByStore.getState().byLeg;
+          const modelFor = (leg: 'speaker' | 'participant') => heard[leg]
+            || (recordingMetadata.provider === 'localai' ? lagModels[leg] : resolved?.models.asrModel)
+            || lagModels[leg];
+          return { ...recordingMetadata,
+            stages: {
+              speaker: { ...recordingMetadata.stages?.speaker, model: modelFor('speaker') },
+              participant: { ...recordingMetadata.stages?.participant, model: modelFor('participant') },
+              translation: { ...recordingMetadata.stages?.translation,
+                model: translated.speaker || translated.participant || resolved?.models.translationModel || lagModels.translation },
+            }, heardBy: heard, translatedBy: translated };
+        } }),
         driveSessionLags({ runner, view, clock, levels: () => audio().then((a) => a.capture.levels, () => null), models: () => ({
           ...lagModels,
           ...useHeardByStore.getState().byLeg,
@@ -364,6 +396,7 @@ export function createAppSession(options: AppSessionOptions = {}): AppSession {
             try {
               await runner.stop('window');
               await runner.settled();
+              await recording.settled();
             } finally {
               void ipc.invoke('app:close-ready').catch((error: unknown) =>
                 reportWarning('AppSession', `Answering the close request failed: ${describeCause(error)}`, { cause: error, dedupeKey: 'session:close-ready' }));

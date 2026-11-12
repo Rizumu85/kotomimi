@@ -715,6 +715,34 @@
     "en": "This computer has little video memory: the plan that takes least.",
     "text": "इस कंप्यूटर में वीडियो मेमोरी कम है। यह विकल्प सबसे कम मेमोरी लेता है।"
   },
+  "fork.recording.mark": {
+    "en": "Mark this line as wrong",
+    "text": "इस वाक्य में समस्या चिह्नित करें"
+  },
+  "fork.recording.marked": {
+    "en": "Marked",
+    "text": "चिह्नित"
+  },
+  "fork.recording.notRecorded": {
+    "en": "This line was not recorded",
+    "text": "इस वाक्य की रिकॉर्डिंग नहीं है"
+  },
+  "fork.recording.on": {
+    "en": "Recording this session",
+    "text": "यह सत्र रिकॉर्ड हो रहा है"
+  },
+  "fork.recording.open": {
+    "en": "Open recordings",
+    "text": "रिकॉर्डिंग फ़ोल्डर खोलें"
+  },
+  "fork.recording.toggle": {
+    "en": "Record sessions",
+    "text": "सत्र रिकॉर्ड करें"
+  },
+  "fork.recording.tooltip": {
+    "en": "Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.",
+    "text": "हर सत्र की आवाज़ और टेक्स्ट इस कंप्यूटर पर सेव करें, ताकि बाद में समस्या की जाँच कर सकें: बातचीत में जिन वाक्यों में गड़बड़ी हो, उन्हें चिह्नित करें। दूसरे पक्ष की आवाज़ भी रिकॉर्ड होगी। रिकॉर्डिंग 7 दिन तक रखी जाएँगी, अधिकतम 2 GB।"
+  },
   "fork.romanization": {
     "en": "Romanization",
     "text": "रोमन लिप्यंतरण दिखाएँ"

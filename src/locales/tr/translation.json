@@ -2099,6 +2099,15 @@
       "saved": "Kaydedildi",
       "failed": "Kaydedilemedi.",
       "hint": "Son bir dakikada gösterilen altyazıları bir dosyaya kaydeder. Görünümde bir sorun olduğunda dosyayı geliştiriciye göndererek sorunun aynen yeniden oluşturulmasını sağlayabilirsiniz."
+    },
+    "recording": {
+      "toggle": "Oturumları kaydet",
+      "tooltip": "Sorunları sonradan inceleyebilmek için her oturumun sesini ve metnini bu bilgisayara kaydeder. Sorunlu cümleleri konuşmada işaretleyebilirsiniz. Karşı tarafın sesi de kaydedilir. Kayıtlar 7 gün saklanır, en fazla 2 GB yer kaplar.",
+      "open": "Kayıt klasörünü aç",
+      "on": "Bu oturum kaydediliyor",
+      "mark": "Bu cümleyi sorunlu olarak işaretle",
+      "marked": "İşaretlendi",
+      "notRecorded": "Bu cümlenin ses kaydı yok"
     }
   }
 }

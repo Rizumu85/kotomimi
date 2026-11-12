@@ -2099,6 +2099,15 @@
       "saved": "Zapisano",
       "failed": "Nie udało się zapisać.",
       "hint": "Zapisuje do pliku napisy wyświetlone w ostatniej minucie. Jeśli układ napisów jest nieprawidłowy, wyślij plik twórcy aplikacji, aby mógł dokładnie odtworzyć problem."
+    },
+    "recording": {
+      "toggle": "Nagrywaj sesje",
+      "tooltip": "Zapisuj dźwięk i tekst każdej sesji na tym komputerze, aby później móc sprawdzić problemy. Zdania z błędami możesz oznaczyć w rozmowie. Głosy rozmówców też będą nagrywane. Nagrania są przechowywane przez 7 dni i zajmują maksymalnie 2 GB.",
+      "open": "Otwórz folder nagrań",
+      "on": "Trwa nagrywanie tej sesji",
+      "mark": "Oznacz błąd w tym zdaniu",
+      "marked": "Oznaczono",
+      "notRecorded": "To zdanie nie ma nagrania"
     }
   }
 }

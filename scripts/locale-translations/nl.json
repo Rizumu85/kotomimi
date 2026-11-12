@@ -719,6 +719,34 @@
     "en": "This computer has little video memory: the plan that takes least.",
     "text": "Deze computer heeft weinig videogeheugen. Dit profiel gebruikt het minst."
   },
+  "fork.recording.mark": {
+    "en": "Mark this line as wrong",
+    "text": "Probleem met deze zin markeren"
+  },
+  "fork.recording.marked": {
+    "en": "Marked",
+    "text": "Gemarkeerd"
+  },
+  "fork.recording.notRecorded": {
+    "en": "This line was not recorded",
+    "text": "Van deze zin is geen geluidsopname"
+  },
+  "fork.recording.on": {
+    "en": "Recording this session",
+    "text": "Deze sessie wordt opgenomen"
+  },
+  "fork.recording.open": {
+    "en": "Open recordings",
+    "text": "Opnamemap openen"
+  },
+  "fork.recording.toggle": {
+    "en": "Record sessions",
+    "text": "Sessies opnemen"
+  },
+  "fork.recording.tooltip": {
+    "en": "Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.",
+    "text": "Bewaar het geluid en de tekst van elke sessie op deze computer om problemen achteraf te bekijken: markeer zinnen waar iets misging in het gesprek. De stemmen van anderen worden ook opgenomen. Opnames worden 7 dagen bewaard, tot maximaal 2 GB."
+  },
   "fork.romanization": {
     "en": "Romanization",
     "text": "Romanisatie tonen"

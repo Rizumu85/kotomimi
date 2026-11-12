@@ -24,6 +24,13 @@ describe('IPC channel registry drift guard', () => {
   const external = new Set(EXTERNAL_INVOKE_CHANNELS);
   const bridge = new Set(BRIDGE_ONLY_CHANNELS);
 
+  it('exposes every session recording operation through the invoke bridge', () => {
+    for (const op of ['start', 'write', 'end', 'mark', 'open']) {
+      expect(invokeSet.has(`session-recording:${op}`)).toBe(true);
+      expect(handlers.has(`session-recording:${op}`)).toBe(true);
+    }
+  });
+
   it('every allowlisted invoke channel resolves to a handler (or is externally registered)', () => {
     // Catches dead placeholders like the old 'invoke-channel': an allowlist
     // entry with no handler behind it.

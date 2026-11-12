@@ -2099,6 +2099,15 @@
       "saved": "Gespeichert",
       "failed": "Speichern fehlgeschlagen.",
       "hint": "Speichert die angezeigten Untertitel der letzten Minute in einer Datei. Bei Darstellungsproblemen kannst du sie an den Entwickler schicken, damit er das Problem genau nachvollziehen kann."
+    },
+    "recording": {
+      "toggle": "Sitzungen aufzeichnen",
+      "tooltip": "Speichert Ton und Text jeder Sitzung auf diesem Computer, damit du Probleme später prüfen kannst: Markiere fehlerhafte Sätze im Gespräch. Die Stimmen der anderen werden ebenfalls aufgezeichnet. Aufbewahrung: 7 Tage, maximal 2 GB.",
+      "open": "Aufnahmeordner öffnen",
+      "on": "Diese Sitzung wird aufgezeichnet",
+      "mark": "Diesen Satz als fehlerhaft markieren",
+      "marked": "Markiert",
+      "notRecorded": "Für diesen Satz gibt es keine Tonaufnahme"
     }
   }
 }

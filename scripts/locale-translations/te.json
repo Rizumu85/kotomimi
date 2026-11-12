@@ -715,6 +715,34 @@
     "en": "This computer has little video memory: the plan that takes least.",
     "text": "ఈ కంప్యూటర్‌లో వీడియో మెమరీ తక్కువగా ఉంది. ఈ ఎంపిక అతి తక్కువ మెమరీ వాడుతుంది."
   },
+  "fork.recording.mark": {
+    "en": "Mark this line as wrong",
+    "text": "ఈ వాక్యంలో సమస్య ఉందని గుర్తు పెట్టు"
+  },
+  "fork.recording.marked": {
+    "en": "Marked",
+    "text": "గుర్తు పెట్టబడింది"
+  },
+  "fork.recording.notRecorded": {
+    "en": "This line was not recorded",
+    "text": "ఈ వాక్యానికి ఆడియో రికార్డింగ్ లేదు"
+  },
+  "fork.recording.on": {
+    "en": "Recording this session",
+    "text": "ఈ సంభాషణ రికార్డ్ అవుతోంది"
+  },
+  "fork.recording.open": {
+    "en": "Open recordings",
+    "text": "రికార్డింగ్‌ల ఫోల్డర్ తెరువు"
+  },
+  "fork.recording.toggle": {
+    "en": "Record sessions",
+    "text": "సంభాషణలను రికార్డ్ చేయి"
+  },
+  "fork.recording.tooltip": {
+    "en": "Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.",
+    "text": "ప్రతి సంభాషణలోని ఆడియో, వచనాన్ని ఈ కంప్యూటర్‌లో భద్రపరుస్తుంది. తర్వాత సమస్యలను పరిశీలించడానికి, సంభాషణలో తప్పుగా వచ్చిన వాక్యాలను గుర్తు పెట్టవచ్చు. అవతలి వారి గొంతులు కూడా రికార్డ్ అవుతాయి. 7 రోజుల పాటు, గరిష్ఠంగా 2 GB వరకు ఉంచుతుంది."
+  },
   "fork.romanization": {
     "en": "Romanization",
     "text": "రోమన్ లిప్యంతరీకరణ చూపించు"

@@ -719,6 +719,34 @@
     "en": "This computer has little video memory: the plan that takes least.",
     "text": "Máy này có ít bộ nhớ đồ họa. Cấu hình này dùng ít nhất."
   },
+  "fork.recording.mark": {
+    "en": "Mark this line as wrong",
+    "text": "Đánh dấu câu này có vấn đề"
+  },
+  "fork.recording.marked": {
+    "en": "Marked",
+    "text": "Đã đánh dấu"
+  },
+  "fork.recording.notRecorded": {
+    "en": "This line was not recorded",
+    "text": "Câu này không có bản ghi âm"
+  },
+  "fork.recording.on": {
+    "en": "Recording this session",
+    "text": "Đang ghi lại phiên trò chuyện này"
+  },
+  "fork.recording.open": {
+    "en": "Open recordings",
+    "text": "Mở thư mục bản ghi"
+  },
+  "fork.recording.toggle": {
+    "en": "Record sessions",
+    "text": "Ghi lại phiên trò chuyện"
+  },
+  "fork.recording.tooltip": {
+    "en": "Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.",
+    "text": "Lưu âm thanh và văn bản của mỗi phiên trò chuyện trên máy tính này để có thể kiểm tra lại khi có vấn đề: đánh dấu những câu bị lỗi trong cuộc trò chuyện. Giọng nói của người bên kia cũng được ghi lại. Lưu trong 7 ngày, tối đa 2 GB."
+  },
   "fork.romanization": {
     "en": "Romanization",
     "text": "Hiện phiên âm Latinh"

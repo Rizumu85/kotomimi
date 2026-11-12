@@ -2099,6 +2099,15 @@
       "saved": "Sparat",
       "failed": "Det gick inte att spara.",
       "hint": "Sparar den senaste minutens undertexter i en fil. Om layouten blir fel kan du skicka filen till utvecklaren för att återskapa exakt hur det såg ut."
+    },
+    "recording": {
+      "toggle": "Spela in samtal",
+      "tooltip": "Spara ljud och text från varje samtal på den här datorn för att kunna undersöka problem i efterhand: markera de rader som blev fel i samtalet. Även de andras röster spelas in. Sparas i 7 dagar, högst 2 GB.",
+      "open": "Öppna inspelningsmappen",
+      "on": "Spelar in det här samtalet",
+      "mark": "Markera ett problem med den här raden",
+      "marked": "Markerad",
+      "notRecorded": "Den här raden har ingen ljudinspelning"
     }
   }
 }

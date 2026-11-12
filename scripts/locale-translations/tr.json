@@ -715,6 +715,34 @@
     "en": "This computer has little video memory: the plan that takes least.",
     "text": "Bu bilgisayarın ekran kartı belleği az. Bu seçenek en az belleği kullanır."
   },
+  "fork.recording.mark": {
+    "en": "Mark this line as wrong",
+    "text": "Bu cümleyi sorunlu olarak işaretle"
+  },
+  "fork.recording.marked": {
+    "en": "Marked",
+    "text": "İşaretlendi"
+  },
+  "fork.recording.notRecorded": {
+    "en": "This line was not recorded",
+    "text": "Bu cümlenin ses kaydı yok"
+  },
+  "fork.recording.on": {
+    "en": "Recording this session",
+    "text": "Bu oturum kaydediliyor"
+  },
+  "fork.recording.open": {
+    "en": "Open recordings",
+    "text": "Kayıt klasörünü aç"
+  },
+  "fork.recording.toggle": {
+    "en": "Record sessions",
+    "text": "Oturumları kaydet"
+  },
+  "fork.recording.tooltip": {
+    "en": "Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.",
+    "text": "Sorunları sonradan inceleyebilmek için her oturumun sesini ve metnini bu bilgisayara kaydeder. Sorunlu cümleleri konuşmada işaretleyebilirsiniz. Karşı tarafın sesi de kaydedilir. Kayıtlar 7 gün saklanır, en fazla 2 GB yer kaplar."
+  },
   "fork.romanization": {
     "en": "Romanization",
     "text": "Latinleştirme"

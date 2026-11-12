@@ -2099,6 +2099,15 @@
       "saved": "Đã lưu",
       "failed": "Không lưu được.",
       "hint": "Lưu nội dung phụ đề đã hiển thị trong một phút vừa qua vào tệp. Khi bố cục bị lỗi, hãy gửi tệp cho nhà phát triển để tái hiện chính xác."
+    },
+    "recording": {
+      "toggle": "Ghi lại phiên trò chuyện",
+      "tooltip": "Lưu âm thanh và văn bản của mỗi phiên trò chuyện trên máy tính này để có thể kiểm tra lại khi có vấn đề: đánh dấu những câu bị lỗi trong cuộc trò chuyện. Giọng nói của người bên kia cũng được ghi lại. Lưu trong 7 ngày, tối đa 2 GB.",
+      "open": "Mở thư mục bản ghi",
+      "on": "Đang ghi lại phiên trò chuyện này",
+      "mark": "Đánh dấu câu này có vấn đề",
+      "marked": "Đã đánh dấu",
+      "notRecorded": "Câu này không có bản ghi âm"
     }
   }
 }

@@ -711,6 +711,34 @@
     "en": "This computer has little video memory: the plan that takes least.",
     "text": "На этом компьютере мало видеопамяти. Этот профиль занимает меньше всего."
   },
+  "fork.recording.mark": {
+    "en": "Mark this line as wrong",
+    "text": "Отметить проблему в этой фразе"
+  },
+  "fork.recording.marked": {
+    "en": "Marked",
+    "text": "Отмечено"
+  },
+  "fork.recording.notRecorded": {
+    "en": "This line was not recorded",
+    "text": "Для этой фразы нет аудиозаписи"
+  },
+  "fork.recording.on": {
+    "en": "Recording this session",
+    "text": "Идёт запись сеанса"
+  },
+  "fork.recording.open": {
+    "en": "Open recordings",
+    "text": "Открыть папку записей"
+  },
+  "fork.recording.toggle": {
+    "en": "Record sessions",
+    "text": "Записывать сеансы"
+  },
+  "fork.recording.tooltip": {
+    "en": "Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.",
+    "text": "Сохранять звук и текст каждого сеанса на этом компьютере, чтобы потом разобраться в проблемах: отмечайте в разговоре фразы с ошибками. Голоса собеседников тоже записываются. Записи хранятся 7 дней и занимают не более 2 GB."
+  },
   "fork.romanization": {
     "en": "Romanization",
     "text": "Показывать транслитерацию"

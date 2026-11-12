@@ -71,6 +71,7 @@ export interface CommonSettings {
   keepReplayAudio: boolean;
   autoSaveOnStop: boolean;
   diagnosticLogs: boolean;
+  recordSessions: boolean;
   /**
    * How bubbles are cut: Off, By pause, or By sentences (Amendment A2).
    * Stored once for every provider and clamped on read to what the current
@@ -168,6 +169,7 @@ const defaultCommonSettings: CommonSettings = {
   keepReplayAudio: false,
   autoSaveOnStop: false,
   diagnosticLogs: false,
+  recordSessions: false,
   segmentationMode: SENTENCE_SEGMENTATION_SHOWN ? 'pause' : 'off',
   sentenceSegmentationChunkSentences: DEFAULT_CHUNK_SENTENCES,
   segmentationSourcePause: DEFAULT_SEGMENT_PAUSE_SECONDS,
@@ -237,6 +239,7 @@ export interface SettingsStore {
   // Diagnostic logs (Help). Opt-in: while off, logStore records nothing and
   // the title bar offers no logs button.
   diagnosticLogs: boolean;
+  recordSessions: boolean;
   /** Appearance: follow the OS, or light or dark (spec 2026-10-22 §4). */
   theme: ThemeSetting;
 
@@ -274,6 +277,7 @@ export interface SettingsStore {
   setTextOnly: (textOnly: boolean) => void;
   setKeepReplayAudio: (keepReplayAudio: boolean) => Promise<void>;
   setAutoSaveOnStop: (autoSaveOnStop: boolean) => Promise<void>;
+  setRecordSessions: (recordSessions: boolean) => Promise<void>;
   setDiagnosticLogs: (diagnosticLogs: boolean) => Promise<void>;
   setTheme: (theme: ThemeSetting) => Promise<void>;
   setSegmentationMode: (mode: SegmentationMode) => Promise<void>;
@@ -461,6 +465,14 @@ const useSettingsStore = create<SettingsStore>()(
       set({autoSaveOnStop});
       if (!await persistSetting('settings.common.autoSaveOnStop', autoSaveOnStop)) {
         set({autoSaveOnStop: previous});
+      }
+    },
+
+    setRecordSessions: async (recordSessions) => {
+      const previous = get().recordSessions;
+      set({recordSessions});
+      if (!await persistSetting('settings.common.recordSessions', recordSessions) && get().recordSessions === recordSessions) {
+        set({recordSessions: previous});
       }
     },
 
@@ -677,6 +689,8 @@ const useSettingsStore = create<SettingsStore>()(
         const diagnosticLogs = await service.getSetting('settings.common.diagnosticLogs', defaultCommonSettings.diagnosticLogs);
         useLogStore.getState().setEnabled(diagnosticLogs);
 
+        const recordSessions = await service.getSetting('settings.common.recordSessions', defaultCommonSettings.recordSessions);
+
         // Load common settings
         const provider = await service.getSetting('settings.common.provider', defaultCommonSettings.provider);
         const uiLanguage = await service.getSetting('settings.common.uiLanguage', defaultCommonSettings.uiLanguage);
@@ -734,6 +748,7 @@ const useSettingsStore = create<SettingsStore>()(
           keepReplayAudio,
           autoSaveOnStop,
           diagnosticLogs,
+          recordSessions,
           segmentationMode,
           sentenceSegmentationChunkSentences,
           segmentationSourcePause,
@@ -898,3 +913,6 @@ export { useSettingsStore };
 export default useSettingsStore;
 
 // The old path's mode-aware revalidation lived here; readiness is the app session's since plan 1e-3b-2 (it re-ran the old gate, whose prune wrote the old slice).
+
+export const useRecordSessions = () => useSettingsStore((state) => state.recordSessions);
+export const useSetRecordSessions = () => useSettingsStore((state) => state.setRecordSessions);

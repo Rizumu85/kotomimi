@@ -715,6 +715,34 @@
     "en": "This computer has little video memory: the plan that takes least.",
     "text": "이 컴퓨터는 그래픽 메모리가 적어서 가장 가벼운 조합이 좋아요."
   },
+  "fork.recording.mark": {
+    "en": "Mark this line as wrong",
+    "text": "문제가 있는 문장으로 표시"
+  },
+  "fork.recording.marked": {
+    "en": "Marked",
+    "text": "표시됨"
+  },
+  "fork.recording.notRecorded": {
+    "en": "This line was not recorded",
+    "text": "이 문장은 녹음되지 않았어요"
+  },
+  "fork.recording.on": {
+    "en": "Recording this session",
+    "text": "현재 세션 녹음 중"
+  },
+  "fork.recording.open": {
+    "en": "Open recordings",
+    "text": "녹음 폴더 열기"
+  },
+  "fork.recording.toggle": {
+    "en": "Record sessions",
+    "text": "세션 녹음"
+  },
+  "fork.recording.tooltip": {
+    "en": "Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.",
+    "text": "문제가 생기면 나중에 확인할 수 있도록 세션마다 음성과 텍스트를 이 컴퓨터에 저장해요. 대화에서 문제가 있는 문장을 표시해 두세요. 상대방의 목소리도 함께 녹음돼요. 7일 동안 보관하며, 최대 2 GB까지 저장해요."
+  },
   "fork.romanization": {
     "en": "Romanization",
     "text": "로마자 발음 표시"

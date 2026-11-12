@@ -145,6 +145,11 @@ export const INVOKE_CHANNELS = [
   // Subtitle mode
   'subtitle:enter',
   'subtitle:save-capture',
+  'session-recording:start',
+  'session-recording:write',
+  'session-recording:end',
+  'session-recording:mark',
+  'session-recording:open',
   'subtitle:exit',
   'subtitle:show-main',
   'subtitle:set-always-on-top',

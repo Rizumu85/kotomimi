@@ -133,6 +133,19 @@ const settle = async () => {
 
 const live = () => new AbortController().signal;
 
+it('reports the real processed track and echo mode on initial open and device changes', async () => {
+  const fake = fakeRecorder();
+  const { settings, set } = settingsFixture();
+  settings.trackOpened = vi.fn();
+  const source = await openMic(settings, live(), () => fake.recorder);
+  expect(settings.trackOpened).toHaveBeenLastCalledWith(fake.track, 'all');
+  set({ deviceId: 'mic-2', echoCancellation: 'app' });
+  await settle();
+  expect(settings.trackOpened).toHaveBeenLastCalledWith(fake.track, 'app');
+  expect(settings.trackOpened).toHaveBeenCalledTimes(2);
+  await source.stop();
+});
+
 describe('microphone noise suppression status', () => {
   it('follows a preference changed while the microphone was opening', async () => {
     const fake = fakeRecorder();

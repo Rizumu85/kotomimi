@@ -9,6 +9,7 @@ import type { RunState } from '../../../lib/session/types';
 import type { AudioMode } from '../../../stores/audioStore';
 import type { LanguagePair } from '../../../lib/provider/types';
 import type { Heard } from './useHeard';
+import { useSessionRecording } from '../../../app/sessionRecording';
 
 export interface PanelFooterProps {
   site: 'basic' | 'advanced';
@@ -73,6 +74,11 @@ export function PanelFooter(props: PanelFooterProps) {
     testTone,
     heard,
   } = props;
+  // Fork: this session is being recorded (Help → Record sessions): a dot before the clock.
+  const recording = useSessionRecording();
+  const recordingDot = recording && (
+    <span className="session-recording-dot" role="img" aria-label={t('fork.recording.on', 'Recording this session')} title={t('fork.recording.on', 'Recording this session')} />
+  );
 
   const isIdle = run.phase === 'idle';
   const isStarting = run.phase === 'starting';
@@ -152,7 +158,7 @@ export function PanelFooter(props: PanelFooterProps) {
             {languagePairText}
           </span>
           {isRunning && duration && (
-            <span className="session-duration">{duration}</span>
+            <span className="session-duration">{recordingDot}{duration}</span>
           )}
           {run.phase === 'running' && run.budget && <SessionCountdown budget={run.budget} />}
         </div>
@@ -236,7 +242,7 @@ export function PanelFooter(props: PanelFooterProps) {
           {languagePairText}
         </span>
         {isRunning && duration && (
-          <span className="session-duration">{duration}</span>
+          <span className="session-duration">{recordingDot}{duration}</span>
         )}
         {run.phase === 'running' && run.budget && <SessionCountdown budget={run.budget} />}
       </div>

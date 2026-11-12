@@ -49,6 +49,8 @@ export type EchoCancellation = 'app' | 'all';
 
 /** The settings a microphone follows, read live. */
 export interface MicSettings {
+  /** Recording diagnostics: the actual track on every open, including a device change. */
+  trackOpened?(track: MediaStreamTrack, echo: EchoCancellation): void;
   /** The selected device; undefined while none is, and the source waits for one. */
   deviceId(): string | undefined;
   /** The selected device's name, for the notices. */
@@ -203,6 +205,7 @@ export async function openMic(
     if (!(await recorder.begin(deviceId))) throw new Error('The microphone could not be opened. Reload the page and try again.');
     open = true;
     label = name;
+    if (settings.trackOpened) settings.trackOpened(recorder.getStream()!.getAudioTracks()[0], echo);
     const mine = ++generation;
     unwatch = core.watch(recorder.getStream(), () => queue(() => trackEnded(mine)));
     await recorder.record((data) => gate.push(data.mono));

@@ -33,7 +33,7 @@ export function createConversationView(
   settings: Readable<ProjectionSettings>,
   clock: Pick<Clock, 'setTimeout'>,
   intervalMs = VIEW_INTERVAL_MS,
-): Readable<ConversationViewState> & { dispose(): void } {
+): Readable<ConversationViewState> & { dispose(): void; flush(): void } {
   const projector = createProjector();
   const listeners = new Set<() => void>();
   const compute = (): ConversationViewState => {
@@ -78,6 +78,7 @@ export function createConversationView(
 
   return {
     get: () => state,
+    flush() { cancel?.(); flush(); },
     subscribe(listener) {
       listeners.add(listener);
       return () => { listeners.delete(listener); };

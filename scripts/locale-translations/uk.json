@@ -711,6 +711,34 @@
     "en": "This computer has little video memory: the plan that takes least.",
     "text": "На цьому комп’ютері мало відеопам’яті. Цей варіант займає найменше."
   },
+  "fork.recording.mark": {
+    "en": "Mark this line as wrong",
+    "text": "Позначити проблему в цій репліці"
+  },
+  "fork.recording.marked": {
+    "en": "Marked",
+    "text": "Позначено"
+  },
+  "fork.recording.notRecorded": {
+    "en": "This line was not recorded",
+    "text": "Ця репліка не має аудіозапису"
+  },
+  "fork.recording.on": {
+    "en": "Recording this session",
+    "text": "Триває запис цього сеансу"
+  },
+  "fork.recording.open": {
+    "en": "Open recordings",
+    "text": "Відкрити папку із записами"
+  },
+  "fork.recording.toggle": {
+    "en": "Record sessions",
+    "text": "Записувати сеанси"
+  },
+  "fork.recording.tooltip": {
+    "en": "Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.",
+    "text": "Зберігати звук і текст кожного сеансу на цьому комп’ютері, щоб потім можна було з’ясувати причину проблем: позначайте в розмові репліки з помилками. Голоси співрозмовників теж записуються. Записи зберігаються 7 днів, загалом до 2 GB."
+  },
   "fork.romanization": {
     "en": "Romanization",
     "text": "Показувати латинізацію"

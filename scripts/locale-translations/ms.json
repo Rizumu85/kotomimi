@@ -711,6 +711,34 @@
     "en": "This computer has little video memory: the plan that takes least.",
     "text": "Memori video komputer ini terhad. Pilihan ini menggunakan paling sedikit memori."
   },
+  "fork.recording.mark": {
+    "en": "Mark this line as wrong",
+    "text": "Tandakan ayat ini bermasalah"
+  },
+  "fork.recording.marked": {
+    "en": "Marked",
+    "text": "Ditandakan"
+  },
+  "fork.recording.notRecorded": {
+    "en": "This line was not recorded",
+    "text": "Tiada rakaman audio untuk ayat ini"
+  },
+  "fork.recording.on": {
+    "en": "Recording this session",
+    "text": "Sedang merakam sesi ini"
+  },
+  "fork.recording.open": {
+    "en": "Open recordings",
+    "text": "Buka folder rakaman"
+  },
+  "fork.recording.toggle": {
+    "en": "Record sessions",
+    "text": "Rakam sesi"
+  },
+  "fork.recording.tooltip": {
+    "en": "Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.",
+    "text": "Simpan audio dan teks setiap sesi pada komputer ini untuk menyemak masalah kemudian: tandakan ayat yang bermasalah dalam perbualan. Suara pihak lain turut dirakam. Disimpan selama 7 hari, maksimum 2 GB."
+  },
   "fork.romanization": {
     "en": "Romanization",
     "text": "Paparkan perumian"

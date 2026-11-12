@@ -767,6 +767,34 @@
     "en": "This computer has little video memory: the plan that takes least.",
     "text": "Kaunti ang memorya ng video ng computer na ito. Ito ang pinakamatipid dito."
   },
+  "fork.recording.mark": {
+    "en": "Mark this line as wrong",
+    "text": "Markahang may mali ang linyang ito"
+  },
+  "fork.recording.marked": {
+    "en": "Marked",
+    "text": "Namarkahan"
+  },
+  "fork.recording.notRecorded": {
+    "en": "This line was not recorded",
+    "text": "Walang recording ang linyang ito"
+  },
+  "fork.recording.on": {
+    "en": "Recording this session",
+    "text": "Nire-record ang sesyong ito"
+  },
+  "fork.recording.open": {
+    "en": "Open recordings",
+    "text": "Buksan ang folder ng mga recording"
+  },
+  "fork.recording.toggle": {
+    "en": "Record sessions",
+    "text": "I-record ang mga sesyon"
+  },
+  "fork.recording.tooltip": {
+    "en": "Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.",
+    "text": "I-save sa computer na ito ang audio at teksto ng bawat sesyon para mabalikan ang mga problema: markahan sa usapan ang mga linyang may mali. Mare-record din ang boses ng kausap. Itatago sa loob ng 7 araw, hanggang 2 GB."
+  },
   "fork.romanization": {
     "en": "Romanization",
     "text": "Ipakita ang romanisasyon"

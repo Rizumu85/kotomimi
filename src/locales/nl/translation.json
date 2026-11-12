@@ -2099,6 +2099,15 @@
       "saved": "Opgeslagen",
       "failed": "Opslaan is niet gelukt.",
       "hint": "Slaat de ondertiteling van de afgelopen minuut op in een bestand. Gaat er iets mis met de opmaak? Stuur het bestand naar de ontwikkelaar om het probleem precies te reproduceren."
+    },
+    "recording": {
+      "toggle": "Sessies opnemen",
+      "tooltip": "Bewaar het geluid en de tekst van elke sessie op deze computer om problemen achteraf te bekijken: markeer zinnen waar iets misging in het gesprek. De stemmen van anderen worden ook opgenomen. Opnames worden 7 dagen bewaard, tot maximaal 2 GB.",
+      "open": "Opnamemap openen",
+      "on": "Deze sessie wordt opgenomen",
+      "mark": "Probleem met deze zin markeren",
+      "marked": "Gemarkeerd",
+      "notRecorded": "Van deze zin is geen geluidsopname"
     }
   }
 }

@@ -715,6 +715,34 @@
     "en": "This computer has little video memory: the plan that takes least.",
     "text": "ذاكرة الرسوميات في هذا الكمبيوتر محدودة، وهذا الخيار يستهلك أقل قدر منها."
   },
+  "fork.recording.mark": {
+    "en": "Mark this line as wrong",
+    "text": "وضع علامة على مشكلة في هذه الجملة"
+  },
+  "fork.recording.marked": {
+    "en": "Marked",
+    "text": "تم وضع علامة"
+  },
+  "fork.recording.notRecorded": {
+    "en": "This line was not recorded",
+    "text": "لا يوجد تسجيل صوتي لهذه الجملة"
+  },
+  "fork.recording.on": {
+    "en": "Recording this session",
+    "text": "جارٍ تسجيل هذه الجلسة"
+  },
+  "fork.recording.open": {
+    "en": "Open recordings",
+    "text": "فتح مجلد التسجيلات"
+  },
+  "fork.recording.toggle": {
+    "en": "Record sessions",
+    "text": "تسجيل الجلسات"
+  },
+  "fork.recording.tooltip": {
+    "en": "Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.",
+    "text": "احفظ صوت كل جلسة ونصها على هذا الكمبيوتر لمراجعة المشكلات لاحقًا: ضع علامة على الجمل التي فيها أخطاء في المحادثة. تُسجَّل أصوات الطرف الآخر أيضًا. تُحفظ التسجيلات لمدة 7 أيام، بحد أقصى 2 GB."
+  },
   "fork.romanization": {
     "en": "Romanization",
     "text": "إظهار النطق بحروف لاتينية"

@@ -2099,6 +2099,15 @@
       "saved": "Na-save na",
       "failed": "Hindi na-save.",
       "hint": "Sine-save sa file ang mga subtitle na ipinakita sa nakaraang isang minuto. Kapag may problema sa pagkakaayos, ipadala ang file sa developer para maipakita niya ulit ang eksaktong nangyari."
+    },
+    "recording": {
+      "toggle": "I-record ang mga sesyon",
+      "tooltip": "I-save sa computer na ito ang audio at teksto ng bawat sesyon para mabalikan ang mga problema: markahan sa usapan ang mga linyang may mali. Mare-record din ang boses ng kausap. Itatago sa loob ng 7 araw, hanggang 2 GB.",
+      "open": "Buksan ang folder ng mga recording",
+      "on": "Nire-record ang sesyong ito",
+      "mark": "Markahang may mali ang linyang ito",
+      "marked": "Namarkahan",
+      "notRecorded": "Walang recording ang linyang ito"
     }
   }
 }

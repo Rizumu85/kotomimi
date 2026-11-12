@@ -2099,6 +2099,15 @@
       "saved": "Tersimpan",
       "failed": "Gagal menyimpan.",
       "hint": "Menyimpan tampilan subtitel selama satu menit terakhir ke file. Jika tata letaknya bermasalah, kirim file ini ke pengembang agar masalahnya bisa ditampilkan ulang persis seperti semula."
+    },
+    "recording": {
+      "toggle": "Rekam sesi",
+      "tooltip": "Simpan suara dan teks setiap sesi di komputer ini agar masalah bisa diperiksa nanti: tandai kalimat yang bermasalah dalam percakapan. Suara lawan bicara juga ikut direkam. Disimpan selama 7 hari, maksimal 2 GB.",
+      "open": "Buka folder rekaman",
+      "on": "Sedang merekam sesi ini",
+      "mark": "Tandai kalimat ini bermasalah",
+      "marked": "Ditandai",
+      "notRecorded": "Kalimat ini tidak memiliki rekaman suara"
     }
   }
 }

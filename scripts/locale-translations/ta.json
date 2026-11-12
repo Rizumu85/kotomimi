@@ -715,6 +715,34 @@
     "en": "This computer has little video memory: the plan that takes least.",
     "text": "இந்தக் கணினியில் வரைகலை நினைவகம் குறைவு. இந்தத் திட்டமே மிகக் குறைவாகப் பயன்படுத்தும்."
   },
+  "fork.recording.mark": {
+    "en": "Mark this line as wrong",
+    "text": "இந்த வரியில் பிழை உள்ளதாகக் குறி"
+  },
+  "fork.recording.marked": {
+    "en": "Marked",
+    "text": "குறிக்கப்பட்டது"
+  },
+  "fork.recording.notRecorded": {
+    "en": "This line was not recorded",
+    "text": "இந்த வரிக்கு ஒலிப்பதிவு இல்லை"
+  },
+  "fork.recording.on": {
+    "en": "Recording this session",
+    "text": "இந்த உரையாடல் பதிவாகிறது"
+  },
+  "fork.recording.open": {
+    "en": "Open recordings",
+    "text": "பதிவுகள் கோப்புறையைத் திற"
+  },
+  "fork.recording.toggle": {
+    "en": "Record sessions",
+    "text": "உரையாடல்களைப் பதிவு செய்"
+  },
+  "fork.recording.tooltip": {
+    "en": "Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.",
+    "text": "பின்னர் சிக்கல்களை ஆராய, ஒவ்வொரு உரையாடலின் ஒலியையும் உரையையும் இந்தக் கணினியில் சேமிக்கும். உரையாடலில் பிழையுள்ள வரிகளைக் குறிக்கலாம். மறுமுனையில் இருப்பவர்களின் குரல்களும் பதிவாகும். 7 நாட்கள் வரை வைத்திருக்கும்; அதிகபட்சம் 2 GB."
+  },
   "fork.romanization": {
     "en": "Romanization",
     "text": "இலத்தீன் எழுத்தாக்கத்தைக் காட்டு"

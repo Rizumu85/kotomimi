@@ -719,6 +719,34 @@
     "en": "This computer has little video memory: the plan that takes least.",
     "text": "Den här datorn har lite grafikminne. Det här alternativet använder minst."
   },
+  "fork.recording.mark": {
+    "en": "Mark this line as wrong",
+    "text": "Markera ett problem med den här raden"
+  },
+  "fork.recording.marked": {
+    "en": "Marked",
+    "text": "Markerad"
+  },
+  "fork.recording.notRecorded": {
+    "en": "This line was not recorded",
+    "text": "Den här raden har ingen ljudinspelning"
+  },
+  "fork.recording.on": {
+    "en": "Recording this session",
+    "text": "Spelar in det här samtalet"
+  },
+  "fork.recording.open": {
+    "en": "Open recordings",
+    "text": "Öppna inspelningsmappen"
+  },
+  "fork.recording.toggle": {
+    "en": "Record sessions",
+    "text": "Spela in samtal"
+  },
+  "fork.recording.tooltip": {
+    "en": "Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.",
+    "text": "Spara ljud och text från varje samtal på den här datorn för att kunna undersöka problem i efterhand: markera de rader som blev fel i samtalet. Även de andras röster spelas in. Sparas i 7 dagar, högst 2 GB."
+  },
   "fork.romanization": {
     "en": "Romanization",
     "text": "Visa romanisering"

@@ -727,6 +727,34 @@
     "en": "This computer has little video memory: the plan that takes least.",
     "text": "Questo computer ha poca memoria video: questa configurazione ne occupa meno."
   },
+  "fork.recording.mark": {
+    "en": "Mark this line as wrong",
+    "text": "Segnala un problema in questa frase"
+  },
+  "fork.recording.marked": {
+    "en": "Marked",
+    "text": "Segnalata"
+  },
+  "fork.recording.notRecorded": {
+    "en": "This line was not recorded",
+    "text": "L’audio di questa frase non è stato registrato"
+  },
+  "fork.recording.on": {
+    "en": "Recording this session",
+    "text": "Registrazione della sessione in corso"
+  },
+  "fork.recording.open": {
+    "en": "Open recordings",
+    "text": "Apri cartella registrazioni"
+  },
+  "fork.recording.toggle": {
+    "en": "Record sessions",
+    "text": "Registra le sessioni"
+  },
+  "fork.recording.tooltip": {
+    "en": "Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.",
+    "text": "Salva l’audio e il testo di ogni sessione su questo computer per poter verificare eventuali problemi in seguito: segna nella conversazione le frasi con errori. Vengono registrate anche le voci degli altri partecipanti. Le registrazioni vengono conservate per 7 giorni, fino a un massimo di 2 GB."
+  },
   "fork.romanization": {
     "en": "Romanization",
     "text": "Mostra romanizzazione"

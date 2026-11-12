@@ -676,3 +676,14 @@
   line-height: 1.7;
   text-align: center;
 }
+
+// Fork: the session is being recorded (Help → Record sessions).
+.session-recording-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: tk.$color-error;
+  vertical-align: 1px;
+}

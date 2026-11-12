@@ -715,6 +715,34 @@
     "en": "This computer has little video memory: the plan that takes least.",
     "text": "คอมเครื่องนี้มีหน่วยความจำการ์ดจอน้อย รูปแบบนี้ใช้หน่วยความจำน้อยที่สุด"
   },
+  "fork.recording.mark": {
+    "en": "Mark this line as wrong",
+    "text": "ทำเครื่องหมายว่าประโยคนี้มีปัญหา"
+  },
+  "fork.recording.marked": {
+    "en": "Marked",
+    "text": "ทำเครื่องหมายแล้ว"
+  },
+  "fork.recording.notRecorded": {
+    "en": "This line was not recorded",
+    "text": "ประโยคนี้ไม่มีเสียงบันทึก"
+  },
+  "fork.recording.on": {
+    "en": "Recording this session",
+    "text": "กำลังบันทึกการสนทนานี้"
+  },
+  "fork.recording.open": {
+    "en": "Open recordings",
+    "text": "เปิดโฟลเดอร์เสียงบันทึก"
+  },
+  "fork.recording.toggle": {
+    "en": "Record sessions",
+    "text": "บันทึกการสนทนา"
+  },
+  "fork.recording.tooltip": {
+    "en": "Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.",
+    "text": "เก็บเสียงและข้อความของแต่ละการสนทนาไว้ในคอมพิวเตอร์เครื่องนี้ เพื่อย้อนดูปัญหาภายหลัง โดยทำเครื่องหมายประโยคที่มีปัญหาในบทสนทนา เสียงของอีกฝ่ายจะถูกบันทึกด้วย เก็บไว้ 7 วัน สูงสุด 2 GB"
+  },
   "fork.romanization": {
     "en": "Romanization",
     "text": "แสดงคำอ่านอักษรโรมัน"

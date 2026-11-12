@@ -2099,6 +2099,15 @@
       "saved": "Tallennettu",
       "failed": "Tallennus epäonnistui.",
       "hint": "Tallentaa viimeisen minuutin aikana näytetyt tekstitykset tiedostoon. Jos asettelussa on ongelmia, lähetä tiedosto kehittäjälle, jotta hän voi toistaa tilanteen täsmälleen."
+    },
+    "recording": {
+      "toggle": "Tallenna keskustelut",
+      "tooltip": "Tallenna kunkin keskustelun ääni ja teksti tälle tietokoneelle, jotta voit selvittää ongelmia jälkikäteen: merkitse virheelliset lauseet keskustelussa. Myös muiden osallistujien äänet tallennetaan. Tallenteet säilytetään 7 päivää, enintään 2 GB.",
+      "open": "Avaa tallennekansio",
+      "on": "Keskustelua tallennetaan",
+      "mark": "Merkitse lauseessa oleva ongelma",
+      "marked": "Merkitty",
+      "notRecorded": "Tästä lauseesta ei ole äänitallennetta"
     }
   }
 }

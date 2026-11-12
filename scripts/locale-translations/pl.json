@@ -719,6 +719,34 @@
     "en": "This computer has little video memory: the plan that takes least.",
     "text": "Ten komputer ma mało pamięci graficznej. Ten zestaw zajmuje jej najmniej."
   },
+  "fork.recording.mark": {
+    "en": "Mark this line as wrong",
+    "text": "Oznacz błąd w tym zdaniu"
+  },
+  "fork.recording.marked": {
+    "en": "Marked",
+    "text": "Oznaczono"
+  },
+  "fork.recording.notRecorded": {
+    "en": "This line was not recorded",
+    "text": "To zdanie nie ma nagrania"
+  },
+  "fork.recording.on": {
+    "en": "Recording this session",
+    "text": "Trwa nagrywanie tej sesji"
+  },
+  "fork.recording.open": {
+    "en": "Open recordings",
+    "text": "Otwórz folder nagrań"
+  },
+  "fork.recording.toggle": {
+    "en": "Record sessions",
+    "text": "Nagrywaj sesje"
+  },
+  "fork.recording.tooltip": {
+    "en": "Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.",
+    "text": "Zapisuj dźwięk i tekst każdej sesji na tym komputerze, aby później móc sprawdzić problemy. Zdania z błędami możesz oznaczyć w rozmowie. Głosy rozmówców też będą nagrywane. Nagrania są przechowywane przez 7 dni i zajmują maksymalnie 2 GB."
+  },
   "fork.romanization": {
     "en": "Romanization",
     "text": "Latynizacja"

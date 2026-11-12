@@ -149,6 +149,41 @@
   }
 }
 
+.row-mark-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  margin-left: 4px;
+  background: none;
+  border: none;
+  border-radius: 3px;
+  color: vars.$text-tertiary;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, background-color 0.15s, color 0.15s;
+
+  .conversation-row:hover &,
+  &:focus-visible,
+  &.is-marked,
+  &.is-missing {
+    opacity: 1;
+  }
+
+  &:hover:not(.is-marked) {
+    background: color-mix(in srgb, vars.$overlay-fg 12%, transparent);
+    color: vars.$text-primary;
+  }
+
+  &.is-marked {
+    color: tk.$color-warning;
+    cursor: default;
+  }
+}
+
 .row-play-btn {
   flex-shrink: 0;
   display: inline-flex;

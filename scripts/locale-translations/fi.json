@@ -711,6 +711,34 @@
     "en": "This computer has little video memory: the plan that takes least.",
     "text": "Tässä tietokoneessa on vähän näyttömuistia. Tämä vaihtoehto vie sitä vähiten."
   },
+  "fork.recording.mark": {
+    "en": "Mark this line as wrong",
+    "text": "Merkitse lauseessa oleva ongelma"
+  },
+  "fork.recording.marked": {
+    "en": "Marked",
+    "text": "Merkitty"
+  },
+  "fork.recording.notRecorded": {
+    "en": "This line was not recorded",
+    "text": "Tästä lauseesta ei ole äänitallennetta"
+  },
+  "fork.recording.on": {
+    "en": "Recording this session",
+    "text": "Keskustelua tallennetaan"
+  },
+  "fork.recording.open": {
+    "en": "Open recordings",
+    "text": "Avaa tallennekansio"
+  },
+  "fork.recording.toggle": {
+    "en": "Record sessions",
+    "text": "Tallenna keskustelut"
+  },
+  "fork.recording.tooltip": {
+    "en": "Save each session’s sound and lines on this computer, so a problem can be looked at afterwards: mark the lines that went wrong in the conversation. The other side’s voices are recorded too. Kept for 7 days, at most 2 GB.",
+    "text": "Tallenna kunkin keskustelun ääni ja teksti tälle tietokoneelle, jotta voit selvittää ongelmia jälkikäteen: merkitse virheelliset lauseet keskustelussa. Myös muiden osallistujien äänet tallennetaan. Tallenteet säilytetään 7 päivää, enintään 2 GB."
+  },
   "fork.romanization": {
     "en": "Romanization",
     "text": "Näytä latinalaistus"
