@@ -53,7 +53,9 @@ module.exports = {
       if (filePath === '/package.json') return false;
       if (filePath.startsWith('/dist-electron')) return false;
       if (filePath.startsWith('/node_modules')) {
-        // Strip dev-only junk inside node_modules
+        // Strip dev-only junk inside node_modules: vite's dependency cache and npm's hidden lock
+        // file are there on any machine that has run the dev server or `npm install`.
+        if (/^\/node_modules\/(\.vite|\.package-lock\.json)(\/|$)/.test(filePath)) return true;
         if (/\/((@testing-library|jest|eslint|babel)[^/]*|@parcel\/watcher)(\/|$)/.test(filePath)) return true;
         if (/\.(ts|flow|markdown)$/.test(filePath)) return true;
         return false;

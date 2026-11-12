@@ -3,6 +3,8 @@ const path = require('path');
 // Set the beta profile before importing modules that construct persistent stores.
 const isBeta = /-beta\./.test(app.getVersion());
 const applicationName = isBeta ? 'kotomimi-beta' : 'kotomimi';
+// The name a person reads: in menus, and beside the app's entry in macOS's privacy lists.
+const displayName = isBeta ? 'Kotomimi Beta' : 'Kotomimi';
 if (isBeta) {
   app.setName(applicationName);
   app.setPath('userData', path.join(app.getPath('appData'), applicationName));
@@ -24,7 +26,7 @@ const { startLanServer } = require('./lan-server');
 const { keepMaximizeHonest, pageShift } = require('./window-maximize');
 const { firewallStatus, allowThroughFirewall } = require('./lan-firewall');
 const { discoverServers } = require('./lan-discover');
-const { createNativeEngine, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME, modelHears: nativeModelHears, translatorFits } = require('./native-engine');
+const { createNativeEngine, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME } = require('./native-engine');
 const { joinEngines } = require('./native-engines');
 const { createSherpaEngine } = require('./sherpa-engine');
 const { createRemoteEngine } = require('./remote-engine');
@@ -354,18 +356,18 @@ function createApplicationMenu() {
   const menuTemplate = [
     // App menu (macOS only)
     ...(isMac ? [{
-      label: app.getName(),
+      label: displayName,
       submenu: [
         {
-          label: `About ${app.getName()}`,
+          label: `About ${displayName}`,
           click: () => {
             dialog.showMessageBox({
               type: 'info',
-              title: `About ${app.getName()}`,
+              title: `About ${displayName}`,
               message: 'Kotomimi - Real-time AI Translation',
               detail: `Version: ${app.getVersion()}\n\nAI-powered real-time translation application\n\nKotomimi is a fork of Sokuji (AGPL-3.0).\nSokuji © 2026 Kizuna AI Lab`,
               buttons: ['OK'],
-              icon: path.join(__dirname, '../assets/icon.png')
+              icon: iconFile({ beta: isBeta, exists: (file) => require('fs').existsSync(file) }) ?? undefined
             });
           }
         },
@@ -454,15 +456,15 @@ function createApplicationMenu() {
       role: 'help',
       submenu: [
         ...(isMac ? [] : [{
-          label: `About ${app.getName()}`,
+          label: `About ${displayName}`,
           click: () => {
             dialog.showMessageBox({
               type: 'info',
-              title: `About ${app.getName()}`,
+              title: `About ${displayName}`,
               message: 'Kotomimi - Real-time AI Translation',
               detail: `Version: ${app.getVersion()}\n\nAI-powered real-time translation application\n\nKotomimi is a fork of Sokuji (AGPL-3.0).\nSokuji © 2026 Kizuna AI Lab`,
               buttons: ['OK'],
-              icon: path.join(__dirname, '../assets/icon.png')
+              icon: iconFile({ beta: isBeta, exists: (file) => require('fs').existsSync(file) }) ?? undefined
             });
           }
         },
@@ -476,12 +478,6 @@ function createApplicationMenu() {
           }
         },
         { type: 'separator' },
-        {
-          label: 'Official Website',
-          click: async () => {
-            await shell.openExternal('https://sokuji.kizuna.ai/');
-          }
-        },
         {
           label: 'Source Code',
           click: async () => {
@@ -763,8 +759,8 @@ app.whenReady().then(async () => {
   global.updateManager = new UpdateManager(mainWindow, {
     beforeInstall: (fn) => closeHandshake.endSessionThen(fn),
   });
-  // Fork: no check at startup. The fork has published no release yet, and a check with nothing to find reports an error
-  // on every launch. "Check for updates" in Help still asks, and asks the fork's releases alone (update-manager.js).
+  // Fork: no check at startup. Releases come often, and a check on every launch would ask about one each time.
+  // "Check for updates" in Help still asks, and asks the fork's releases alone (update-manager.js).
 
   // electron-audio-loopback handles setDisplayMediaRequestHandler automatically via initMain()
 });
@@ -1716,18 +1712,18 @@ const PRIVACY_PANES = {
 /**
  * The name macOS shows for this process in the privacy lists.
  *
- * In a packaged build that is "Sokuji", but `npm run dev` runs Electron's own
+ * In a packaged build that is the bundle's name, but `npm run dev` runs Electron's own
  * bundle (com.github.Electron), so the user has to grant the permission to
- * "Electron". Telling them to look for "Sokuji" there sends them hunting for an
+ * "Electron". Telling them to look for the app's name there sends them hunting for an
  * entry that does not exist.
  */
 ipcMain.handle('get-tcc-display-name', async () => {
-  if (process.platform !== 'darwin') return { name: app.getName(), isDev: false };
-  // app.getName() is overridden to 'sokuji' at startup, so read the bundle the
-  // OS actually launched instead of what the app calls itself.
+  if (process.platform !== 'darwin') return { name: displayName, isDev: false };
+  // app.getName() is the lower-case profile name set at startup, not what the lists show, so
+  // read the bundle the OS actually launched instead of what the app calls itself.
   const exe = app.getPath('exe');
   const isDev = exe.includes('node_modules/electron/dist/');
-  return { name: isDev ? 'Electron' : app.getName(), isDev };
+  return { name: isDev ? 'Electron' : displayName, isDev };
 });
 
 /**
