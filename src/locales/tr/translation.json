@@ -2086,6 +2086,11 @@
       "hear": "Konuşma tanıma, konuşma hızına yetişemiyor. Daha hafif bir seçeneğe geçelim mi?",
       "translate": "Çeviri yetişemiyor. Daha hafif bir seçeneğe geçelim mi?",
       "open": "Seçenekleri gör"
+    },
+    "rows": {
+      "unheard": "{{language}} dilini algılayamaz",
+      "noDetect": "dilleri otomatik ayırt edemez",
+      "fix": "Hepsi için {{model}} kullan"
     }
   }
 }

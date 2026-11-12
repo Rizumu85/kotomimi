@@ -34,6 +34,8 @@ const NAVIGATION_TAB_MAP: Record<string, string> = {
   'glossary': 'general',
   // Fork: the tour's VRChat step.
   'vrchat': 'general',
+  // Fork: the plans for this computer (the falling-behind notice's "See plans").
+  'plans': 'provider',
   'sentence-segmentation': 'general',
   'microphone': 'audio',
   'speaker': 'audio',

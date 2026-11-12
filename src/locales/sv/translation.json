@@ -2086,6 +2086,11 @@
       "hear": "Taligenkänningen hinner inte med. Vill du byta till ett lättare alternativ?",
       "translate": "Översättningen hinner inte med. Vill du byta till ett lättare alternativ?",
       "open": "Visa alternativ"
+    },
+    "rows": {
+      "unheard": "kan inte uppfatta {{language}}",
+      "noDetect": "kan inte identifiera språk automatiskt",
+      "fix": "Använd {{model}} för alla"
     }
   }
 }

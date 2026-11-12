@@ -2086,6 +2086,11 @@
       "hear": "Hindi makahabol sa pagsasalita ang pagkilala ng boses. Lumipat sa mas magaan na opsyon?",
       "translate": "Hindi makahabol ang pagsasalin. Lumipat sa mas magaan na opsyon?",
       "open": "Tingnan ang mga opsyon"
+    },
+    "rows": {
+      "unheard": "hindi makilala ang pagsasalita sa {{language}}",
+      "noDetect": "hindi awtomatikong matukoy ang wika",
+      "fix": "Gamitin ang {{model}} sa lahat"
     }
   }
 }

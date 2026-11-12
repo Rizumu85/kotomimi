@@ -703,6 +703,18 @@
     "en": "Romanization",
     "text": "இலத்தீன் எழுத்தாக்கத்தைக் காட்டு"
   },
+  "fork.rows.fix": {
+    "en": "Use {{model}} for all",
+    "text": "அனைத்திற்கும் {{model}} பயன்படுத்தவும்"
+  },
+  "fork.rows.noDetect": {
+    "en": "cannot tell languages apart",
+    "text": "மொழிகளைத் தானாக வேறுபடுத்த முடியாது"
+  },
+  "fork.rows.unheard": {
+    "en": "cannot hear {{language}}",
+    "text": "{{language}} மொழியைக் கேட்க முடியாது"
+  },
   "fork.sourceItalic": {
     "en": "Source text in italics",
     "text": "மூல உரையைச் சாய்வெழுத்தில் காட்டு"

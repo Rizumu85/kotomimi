@@ -87,7 +87,7 @@ function entryOf(kind: NativeKind, model: NativeCardModel, recommended: boolean)
   };
 }
 
-export function NativeEngineCard({ kind, model, recommended = true, recommendHint, fit, selected, onSelect, onDownloadStarted, disabled }: { kind: NativeKind; model: NativeCardModel; /** The one recommended for this computer (`nativeRecommendation.ts`): the others are there to be chosen, without the mark. */ recommended?: boolean; /** Why, on hover over the mark. */ recommendHint?: string; /** How well this computer runs it here (`nativeFit`); absent: nothing said. */ fit?: { label: string; hint: string; tone: 'ok' | 'warn' | 'bad' }; selected: boolean; onSelect?(): void; onDownloadStarted?(): void; disabled?: boolean }) {
+export function NativeEngineCard({ kind, model, recommended = true, recommendHint, fit, blocked = null, selected, onSelect, onDownloadStarted, disabled }: { kind: NativeKind; model: NativeCardModel; /** The one recommended for this computer (`nativeRecommendation.ts`): the others are there to be chosen, without the mark. */ recommended?: boolean; /** Why, on hover over the mark. */ recommendHint?: string; /** How well this computer runs it here (`nativeFit`); absent: nothing said. */ fit?: { label: string; hint: string; tone: 'ok' | 'warn' | 'bad' }; /** Why it cannot be chosen here now (`nativeRowChoice`); null: it can. */ blocked?: string | null; selected: boolean; onSelect?(): void; onDownloadStarted?(): void; disabled?: boolean }) {
   const { t } = useTranslation();
   const useStore = nativeStoreOf(kind);
   const status = useStore((s) => s.status);
@@ -124,8 +124,8 @@ export function NativeEngineCard({ kind, model, recommended = true, recommendHin
       isSessionActive={Boolean(disabled) || mine?.waiting === true}
       isSelected={selected}
       // Before the main process has answered, "no engine for this system" is its blank.
-      isCompatible={status.supported || !asked}
-      compatibilityHint={status.supported || !asked ? undefined : t('providers.localai.nativeUnsupportedShort')}
+      isCompatible={(status.supported || !asked) && blocked === null}
+      compatibilityHint={blocked ?? (status.supported || !asked ? undefined : t('providers.localai.nativeUnsupportedShort'))}
       note={note ? t(`providers.localai.${note}`) : undefined}
       tag={{ label: t(`providers.localai.tag_${tagOf(model.id)}`), hint: t(`providers.localai.tagHint_${tagOf(model.id)}`) }}
       {...(recommended && recommendHint ? { recommendHint } : {})}

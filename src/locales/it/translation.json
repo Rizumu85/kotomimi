@@ -2086,6 +2086,11 @@
       "hear": "Il riconoscimento non tiene il passo con chi parla. Vuoi provare una configurazione più leggera?",
       "translate": "La traduzione non tiene il passo. Vuoi provare una configurazione più leggera?",
       "open": "Vedi configurazioni"
+    },
+    "rows": {
+      "unheard": "non riconosce l'audio in {{language}}",
+      "noDetect": "non distingue automaticamente le lingue",
+      "fix": "Usa {{model}} per tutti"
     }
   }
 }

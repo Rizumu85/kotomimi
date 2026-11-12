@@ -703,6 +703,18 @@
     "en": "Romanization",
     "text": "로마자 발음 표시"
   },
+  "fork.rows.fix": {
+    "en": "Use {{model}} for all",
+    "text": "모두 {{model}} 사용"
+  },
+  "fork.rows.noDetect": {
+    "en": "cannot tell languages apart",
+    "text": "언어 자동 구분 불가"
+  },
+  "fork.rows.unheard": {
+    "en": "cannot hear {{language}}",
+    "text": "{{language}} 음성 인식 불가"
+  },
   "fork.sourceItalic": {
     "en": "Source text in italics",
     "text": "원문 기울임꼴"

@@ -2086,6 +2086,11 @@
       "hear": "Pengecaman pertuturan tidak dapat mengikuti kelajuan percakapan. Cuba pilihan yang lebih ringan?",
       "translate": "Terjemahan tidak dapat mengikuti kelajuan percakapan. Cuba pilihan yang lebih ringan?",
       "open": "Lihat pilihan"
+    },
+    "rows": {
+      "unheard": "tidak dapat mendengar {{language}}",
+      "noDetect": "tidak dapat membezakan bahasa secara automatik",
+      "fix": "Guna {{model}} untuk semua"
     }
   }
 }

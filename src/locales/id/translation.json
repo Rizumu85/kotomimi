@@ -2086,6 +2086,11 @@
       "hear": "Pengenalan ucapan tidak bisa mengimbangi kecepatan bicara. Coba konfigurasi yang lebih ringan?",
       "translate": "Terjemahan tidak bisa mengimbangi kecepatan bicara. Coba konfigurasi yang lebih ringan?",
       "open": "Lihat konfigurasi"
+    },
+    "rows": {
+      "unheard": "tidak bisa mengenali ucapan {{language}}",
+      "noDetect": "tidak bisa membedakan bahasa otomatis",
+      "fix": "Gunakan {{model}} untuk semua"
     }
   }
 }

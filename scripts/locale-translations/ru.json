@@ -699,6 +699,18 @@
     "en": "Romanization",
     "text": "Показывать транслитерацию"
   },
+  "fork.rows.fix": {
+    "en": "Use {{model}} for all",
+    "text": "Использовать {{model}} для всех"
+  },
+  "fork.rows.noDetect": {
+    "en": "cannot tell languages apart",
+    "text": "не определяет язык автоматически"
+  },
+  "fork.rows.unheard": {
+    "en": "cannot hear {{language}}",
+    "text": "не распознаёт речь на языке {{language}}"
+  },
   "fork.sourceItalic": {
     "en": "Source text in italics",
     "text": "Исходный текст курсивом"

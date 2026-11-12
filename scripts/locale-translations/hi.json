@@ -703,6 +703,18 @@
     "en": "Romanization",
     "text": "रोमन लिप्यंतरण दिखाएँ"
   },
+  "fork.rows.fix": {
+    "en": "Use {{model}} for all",
+    "text": "सभी के लिए {{model}} इस्तेमाल करें"
+  },
+  "fork.rows.noDetect": {
+    "en": "cannot tell languages apart",
+    "text": "भाषा अपने आप नहीं पहचान सकता"
+  },
+  "fork.rows.unheard": {
+    "en": "cannot hear {{language}}",
+    "text": "{{language}} सुन नहीं सकता"
+  },
   "fork.sourceItalic": {
     "en": "Source text in italics",
     "text": "मूल पाठ तिरछे अक्षरों में"

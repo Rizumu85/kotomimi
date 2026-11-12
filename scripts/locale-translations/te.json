@@ -703,6 +703,18 @@
     "en": "Romanization",
     "text": "రోమన్ లిప్యంతరీకరణ చూపించు"
   },
+  "fork.rows.fix": {
+    "en": "Use {{model}} for all",
+    "text": "అన్నింటికీ {{model}} వాడండి"
+  },
+  "fork.rows.noDetect": {
+    "en": "cannot tell languages apart",
+    "text": "భాషలను స్వయంచాలకంగా గుర్తించలేదు"
+  },
+  "fork.rows.unheard": {
+    "en": "cannot hear {{language}}",
+    "text": "{{language}} వినలేదు"
+  },
   "fork.sourceItalic": {
     "en": "Source text in italics",
     "text": "మూల వచనం ఇటాలిక్‌లో"

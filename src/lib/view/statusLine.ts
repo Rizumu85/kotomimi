@@ -122,7 +122,7 @@ export function statusLine(input: StatusLineInput): StatusEntry | null {
       key: `lag:${fallingBehind}`,
       icon: 'triangle-alert',
       words: { kind: 'key', key: translation ? 'fork.lag.translate' : 'fork.lag.hear', fallback: translation ? 'Translation cannot keep up. Try a lighter plan?' : 'Recognition cannot keep up with the speech. Try a lighter plan?' },
-      action: { kind: 'settings', target: 'provider', label: { key: 'fork.lag.open', fallback: 'See plans' } },
+      action: { kind: 'settings', target: 'plans', label: { key: 'fork.lag.open', fallback: 'See plans' } },
       dismiss: 'lag',
     };
   }

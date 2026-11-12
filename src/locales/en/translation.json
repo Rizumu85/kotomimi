@@ -2086,6 +2086,11 @@
       "hear": "Recognition cannot keep up with the speech. Try a lighter plan?",
       "translate": "Translation cannot keep up. Try a lighter plan?",
       "open": "See plans"
+    },
+    "rows": {
+      "unheard": "cannot hear {{language}}",
+      "noDetect": "cannot tell languages apart",
+      "fix": "Use {{model}} for all"
     }
   }
 }

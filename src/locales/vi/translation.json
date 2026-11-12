@@ -2086,6 +2086,11 @@
       "hear": "Nhận dạng không theo kịp tốc độ nói. Đổi sang cấu hình nhẹ hơn nhé?",
       "translate": "Dịch không theo kịp. Đổi sang cấu hình nhẹ hơn nhé?",
       "open": "Xem cấu hình"
+    },
+    "rows": {
+      "unheard": "không nghe được {{language}}",
+      "noDetect": "không tự động phân biệt được ngôn ngữ",
+      "fix": "Dùng {{model}} cho tất cả"
     }
   }
 }

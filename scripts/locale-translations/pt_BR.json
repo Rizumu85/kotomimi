@@ -703,6 +703,18 @@
     "en": "Romanization",
     "text": "Mostrar romanização"
   },
+  "fork.rows.fix": {
+    "en": "Use {{model}} for all",
+    "text": "Usar {{model}} para tudo"
+  },
+  "fork.rows.noDetect": {
+    "en": "cannot tell languages apart",
+    "text": "não identifica idiomas automaticamente"
+  },
+  "fork.rows.unheard": {
+    "en": "cannot hear {{language}}",
+    "text": "não entende áudio em {{language}}"
+  },
   "fork.sourceItalic": {
     "en": "Source text in italics",
     "text": "Texto original em itálico"

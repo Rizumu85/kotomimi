@@ -2055,7 +2055,7 @@
       "balanced": "均衡",
       "accurate": "精准",
       "custom": "自定义",
-      "inUse": "正在使用",
+      "inUse": "使用中",
       "vram": "约占 {{size}} 显存",
       "downloaded": "已下载",
       "apply": "用这个方案",
@@ -2086,6 +2086,11 @@
       "hear": "识别跟不上说话的速度，换个更轻的方案？",
       "translate": "翻译跟不上，换个更轻的方案？",
       "open": "看看方案"
+    },
+    "rows": {
+      "unheard": "听不了{{language}}",
+      "noDetect": "不能自动分辨语言",
+      "fix": "都用 {{model}}"
     }
   }
 }

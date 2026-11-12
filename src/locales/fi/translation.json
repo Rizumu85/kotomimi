@@ -2086,6 +2086,11 @@
       "hear": "Puheentunnistus ei pysy puheen tahdissa. Vaihdetaanko kevyempään vaihtoehtoon?",
       "translate": "Käännös ei pysy tahdissa. Vaihdetaanko kevyempään vaihtoehtoon?",
       "open": "Näytä vaihtoehdot"
+    },
+    "rows": {
+      "unheard": "ei tunnista kieltä {{language}}",
+      "noDetect": "ei erota kieliä automaattisesti",
+      "fix": "Käytä mallia {{model}} kaikille"
     }
   }
 }

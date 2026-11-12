@@ -2086,6 +2086,11 @@
       "hear": "La reconnaissance ne suit pas le rythme de la parole. Passer à une configuration plus légère ?",
       "translate": "La traduction ne suit pas le rythme. Passer à une configuration plus légère ?",
       "open": "Voir les configurations"
+    },
+    "rows": {
+      "unheard": "ne comprend pas {{language}} à l’oral",
+      "noDetect": "ne distingue pas automatiquement les langues",
+      "fix": "Utiliser {{model}} pour tout"
     }
   }
 }

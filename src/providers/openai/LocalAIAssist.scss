@@ -74,15 +74,45 @@
   }
 
   // The plans for this computer (PlanCard.tsx): three choices, the open one's models, and putting it to use.
-  .kt-plan__custom {
-    font-size: vars.$font-caption;
-    font-weight: vars.$weight-normal;
-    color: vars.$text-muted;
-  }
-
   .kt-plan__corner {
     display: inline-flex;
+    align-items: center;
+    gap: 2px;
     margin-left: auto;
+  }
+
+  // Set up, the card is one line: the plan in use, a press away from the rest.
+  .kt-plan--folded {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .kt-plan--folded .kt-plan__fold { margin-left: auto; }
+
+  .kt-plan__fold {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 26px;
+    padding: 0 4px 0 8px;
+    font: inherit;
+    font-size: vars.$font-caption;
+    font-weight: vars.$weight-normal;
+    color: vars.$text-secondary;
+    background: transparent;
+    border: none;
+    border-radius: vars.$radius-sm;
+    cursor: pointer;
+
+    &:hover { color: vars.$text-primary; background: vars.$bg-hover; }
+    &:focus-visible { @include vars.focus-ring; }
+  }
+
+  .kt-plan__chevron {
+    color: vars.$text-muted;
+    transition: transform vars.$transition-fast;
+
+    &.is-open { transform: rotate(180deg); }
   }
 
   .kt-plan__icon-btn {
@@ -107,7 +137,6 @@
 
   .kt-plan__options {
     display: grid;
-    margin-top: 4px;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 6px;
   }
@@ -140,34 +169,23 @@
   }
 
   .kt-plan__name {
-    display: inline-flex;
+    display: flex;
+    align-self: stretch;
     align-items: center;
+    justify-content: space-between;
     gap: 4px;
     white-space: nowrap;
     font-size: vars.$font-body;
     font-weight: vars.$weight-semibold;
   }
 
-  // The model cards' own mark (`model-card__recommended-badge`), its words alone, hung on the choice's top edge: a
-  // choice is too narrow in the sidebar for it beside the name. Opaque, as it sits over the border.
+  // Which one fits this computer: a small star at the end of the name's line, centred on it; the reason on hover.
   .kt-plan__recommended {
-    position: absolute;
-    top: -8px;
-    right: 6px;
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-    padding: vars.$chip-padding-y 5px;
-    border-radius: 3px;
-    font-size: vars.$chip-font-size;
-    font-weight: vars.$weight-medium;
-    line-height: vars.$chip-line-height;
-    white-space: nowrap;
+    display: block;
+    flex-shrink: 0;
     color: vars.$color-recommended;
-    background: color-mix(in srgb, vars.$color-recommended 15%, vars.$bg-surface);
-    border: 1px solid color-mix(in srgb, vars.$color-recommended 40%, transparent);
+    cursor: help;
   }
-  .kt-plan__chip--current { color: vars.$color-primary; }
 
   .kt-plan__chip {
     display: inline-flex;
@@ -179,6 +197,12 @@
     white-space: nowrap;
 
     svg { flex-shrink: 0; }
+  }
+
+  .kt-plan__chip-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .kt-plan__rows {
@@ -611,6 +635,22 @@
   .kt-here__select--missing {
     color: vars.$color-warning;
     border-color: vars.$color-warning-border;
+  }
+
+  // Fork: the one press that puts every recognition row on one model (`nativeChoiceFix`), at the end of its note.
+  .kt-here__fix {
+    margin-left: 8px;
+    padding: 1px 8px;
+    font: inherit;
+    font-size: vars.$font-caption;
+    color: vars.$text-primary;
+    background: vars.$bg-control;
+    border: 1px solid vars.$border-default;
+    border-radius: vars.$radius-sm;
+    cursor: pointer;
+
+    &:hover:not(:disabled) { background: vars.$bg-hover; }
+    &:focus-visible { @include vars.focus-ring; }
   }
 
   .kt-here__browse {

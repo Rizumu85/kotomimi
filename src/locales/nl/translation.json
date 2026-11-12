@@ -2086,6 +2086,11 @@
       "hear": "De spraakherkenning kan het spreektempo niet bijhouden. Een lichter profiel proberen?",
       "translate": "De vertaling kan het niet bijhouden. Een lichter profiel proberen?",
       "open": "Profielen bekijken"
+    },
+    "rows": {
+      "unheard": "kan geen {{language}} verstaan",
+      "noDetect": "kan talen niet automatisch herkennen",
+      "fix": "Gebruik {{model}} voor alles"
     }
   }
 }

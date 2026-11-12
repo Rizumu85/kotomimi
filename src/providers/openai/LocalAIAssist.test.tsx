@@ -528,12 +528,19 @@ describe('one menu for a stage of this computer, whoever runs it', () => {
     } finally {
       same.unmount();
     }
+    useNativeEngineStore.setState({ status: engineOf({ 'x-asr-zh-en': 'downloaded', 'qwen3-asr-1.7b-q8': 'downloaded' }) });
+    const separate = draw({ legs: ['speaker', 'participant'], pair: { source: 'zh-CN', target: 'ru' }, settings: { asrVia: 'device', asrNativeModel: 'qwen3-asr-1.7b-q8', asrNativeByLanguage: { zh: 'x-asr-zh-en', ru: 'qwen3-asr-1.7b-q8' } } });
+    try {
+      expect(separate.card(HEAR).queryByText(/providers\.localai\.nativeTwoModels/)).toBeNull();
+    } finally {
+      separate.unmount();
+    }
   });
 
-  it('keeps a recognition download assigned to the row that requested it', () => {
+  it('does not select a completed download that would conflict with another row', () => {
     const previous = useNativeEngineStore.getState().download;
     useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'downloaded', 'sensevoice-small-q8': 'absent' }), download: vi.fn(async () => {}) });
-    // Russian, which SenseVoice does not hear: the other row keeps its model (and is told the two cannot run together).
+    // Russian is on the same engine: a download cannot bypass the choice guard.
     const { card, update, unmount } = draw({ legs: ['speaker', 'participant'], pair: { source: 'zh-CN', target: 'ru' }, settings: { asrVia: 'device', asrNativeModel: 'qwen3-asr-1.7b-q8', asrNativeByLanguage: {} } });
     try {
       fireEvent.click(card(HEAR).getAllByRole('button', { name: 'providers.localai.browse' })[0]);
@@ -542,8 +549,7 @@ describe('one menu for a stage of this computer, whoever runs it', () => {
       fireEvent.click(card(HEAR).getAllByRole('button', { name: 'providers.localai.browse' })[1]);
       act(() => useNativeEngineStore.setState({ status: engineOf({ 'qwen3-asr-1.7b-q8': 'downloaded', 'sensevoice-small-q8': 'downloaded' }) }));
       const picked = update.mock.calls.find(([patch]) => patch.asrNativeByLanguage?.zh === 'sensevoice-small-q8')?.[0];
-      expect(picked).toBeDefined();
-      expect(picked!.asrNativeByLanguage?.ru).toBe('qwen3-asr-1.7b-q8');
+      expect(picked).toBeUndefined();
     } finally {
       unmount();
       useNativeEngineStore.setState({ download: previous });

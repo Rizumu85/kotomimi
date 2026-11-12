@@ -2086,6 +2086,11 @@
       "hear": "Rozpoznawanie mowy nie nadąża za rozmową. Zmienić zestaw na lżejszy?",
       "translate": "Tłumaczenie nie nadąża. Zmienić zestaw na lżejszy?",
       "open": "Zobacz zestawy"
+    },
+    "rows": {
+      "unheard": "nie rozpoznaje mowy w języku {{language}}",
+      "noDetect": "nie rozróżnia języków automatycznie",
+      "fix": "Użyj {{model}} do wszystkiego"
     }
   }
 }

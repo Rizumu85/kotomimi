@@ -703,6 +703,18 @@
     "en": "Romanization",
     "text": "Latinleştirme"
   },
+  "fork.rows.fix": {
+    "en": "Use {{model}} for all",
+    "text": "Hepsi için {{model}} kullan"
+  },
+  "fork.rows.noDetect": {
+    "en": "cannot tell languages apart",
+    "text": "dilleri otomatik ayırt edemez"
+  },
+  "fork.rows.unheard": {
+    "en": "cannot hear {{language}}",
+    "text": "{{language}} dilini algılayamaz"
+  },
   "fork.sourceItalic": {
     "en": "Source text in italics",
     "text": "Kaynak metin italik"

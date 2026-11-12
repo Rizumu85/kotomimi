@@ -703,6 +703,18 @@
     "en": "Romanization",
     "text": "ローマ字を表示"
   },
+  "fork.rows.fix": {
+    "en": "Use {{model}} for all",
+    "text": "すべて {{model}} を使う"
+  },
+  "fork.rows.noDetect": {
+    "en": "cannot tell languages apart",
+    "text": "言語を自動判別できません"
+  },
+  "fork.rows.unheard": {
+    "en": "cannot hear {{language}}",
+    "text": "{{language}}を聞き取れません"
+  },
   "fork.sourceItalic": {
     "en": "Source text in italics",
     "text": "原文を斜体にする"

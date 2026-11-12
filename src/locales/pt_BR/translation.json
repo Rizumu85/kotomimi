@@ -2086,6 +2086,11 @@
       "hear": "O reconhecimento não acompanha a fala. Que tal uma configuração mais leve?",
       "translate": "A tradução não está acompanhando. Que tal uma configuração mais leve?",
       "open": "Ver configurações"
+    },
+    "rows": {
+      "unheard": "não entende áudio em {{language}}",
+      "noDetect": "não identifica idiomas automaticamente",
+      "fix": "Usar {{model}} para tudo"
     }
   }
 }

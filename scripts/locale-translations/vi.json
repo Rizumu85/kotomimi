@@ -707,6 +707,18 @@
     "en": "Romanization",
     "text": "Hiện phiên âm Latinh"
   },
+  "fork.rows.fix": {
+    "en": "Use {{model}} for all",
+    "text": "Dùng {{model}} cho tất cả"
+  },
+  "fork.rows.noDetect": {
+    "en": "cannot tell languages apart",
+    "text": "không tự động phân biệt được ngôn ngữ"
+  },
+  "fork.rows.unheard": {
+    "en": "cannot hear {{language}}",
+    "text": "không nghe được {{language}}"
+  },
   "fork.sourceItalic": {
     "en": "Source text in italics",
     "text": "In nghiêng văn bản gốc"

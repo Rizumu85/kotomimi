@@ -703,6 +703,18 @@
     "en": "Romanization",
     "text": "הצגת תעתיק לטיני"
   },
+  "fork.rows.fix": {
+    "en": "Use {{model}} for all",
+    "text": "להשתמש ב־{{model}} לכולן"
+  },
+  "fork.rows.noDetect": {
+    "en": "cannot tell languages apart",
+    "text": "לא מזהה שפות אוטומטית"
+  },
+  "fork.rows.unheard": {
+    "en": "cannot hear {{language}}",
+    "text": "לא מזהה דיבור ב{{language}}"
+  },
   "fork.sourceItalic": {
     "en": "Source text in italics",
     "text": "טקסט המקור בכתב נטוי"

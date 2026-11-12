@@ -703,6 +703,18 @@
     "en": "Romanization",
     "text": "রোমান হরফে উচ্চারণ দেখান"
   },
+  "fork.rows.fix": {
+    "en": "Use {{model}} for all",
+    "text": "সবকিছুর জন্য {{model}} ব্যবহার করুন"
+  },
+  "fork.rows.noDetect": {
+    "en": "cannot tell languages apart",
+    "text": "স্বয়ংক্রিয়ভাবে ভাষা চিনতে পারে না"
+  },
+  "fork.rows.unheard": {
+    "en": "cannot hear {{language}}",
+    "text": "{{language}} শুনে বুঝতে পারে না"
+  },
   "fork.sourceItalic": {
     "en": "Source text in italics",
     "text": "মূল লেখা তির্যক হরফে"

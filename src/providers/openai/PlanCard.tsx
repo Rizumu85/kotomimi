@@ -6,10 +6,11 @@
  * The two sides on different models (a CPU one for the user, one on the graphics card for the other side) is shown
  * by the plan itself, not explained. The speed test lives in the corner, for whoever wants it.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useStore } from 'zustand';
 import { useTranslation } from 'react-i18next';
-import { Check, CircleCheck, Download, Gauge, Languages, Loader, MemoryStick, Mic, SlidersHorizontal, Users, X } from 'lucide-react';
+import { Check, ChevronDown, CircleCheck, Download, Gauge, Languages, Loader, MemoryStick, Mic, SlidersHorizontal, Star, Users, X } from 'lucide-react';
+import { useSettingsNavigationTarget } from '../../stores/settingsStore';
 import Tooltip from '../../components/Tooltip/Tooltip';
 import { sizeText } from '../../lib/native/modelStorage';
 import type { LanguagePair } from '../../lib/provider/types';
@@ -31,11 +32,21 @@ export function planWhy(memoryMB: number | null | undefined, lending: boolean): 
   return lending ? 'lending' : memoryMB != null && memoryMB >= 15360 ? 'big' : memoryMB != null && memoryMB < 7680 ? 'small' : 'default';
 }
 
-export function PlanCard({ settings, pair, speed, ready, disabled }: { settings: LocalAISettings; pair: LanguagePair; speed: SpeedTestState; ready: boolean; disabled?: boolean }) {
+/**
+ * `speedShown`: a speed test was run in this visit, so its findings show; before that nothing of an earlier one does.
+ * `onSpeedTest`: starts one (and says so to the stage cards, which show their lines then too).
+ */
+export function PlanCard({ settings, pair, speed, speedShown, onSpeedTest, ready, disabled }: { settings: LocalAISettings; pair: LanguagePair; speed: SpeedTestState; speedShown: boolean; onSpeedTest(): void; ready: boolean; disabled?: boolean }) {
   const { t } = useTranslation();
   const { plans, recommended, current, inputs } = usePlans(settings, pair);
   const pending = useStore(nativePlanStore, (s) => s.pending);
   const [open, setOpen] = useState<NativePlanId | null>(null);
+  // Quiet once set up: one line, the plan in use. Open on a first use (nothing downloaded), while a plan is being
+  // put to use, when sent here (the falling-behind notice's "See plans"), or by a press.
+  const target = useSettingsNavigationTarget();
+  const [expanded, setExpanded] = useState(() => inputs.downloaded.length === 0);
+  useEffect(() => { if (target === 'plans') setExpanded(true); }, [target]);
+  const unfolded = expanded || pending !== null;
   const known = inputs.memoryMB !== undefined;
   const shown = plans.find((p) => p.id === (open ?? current ?? (known ? recommended : 'balanced')))!;
   const has = (id: string) => inputs.downloaded.includes(id);
@@ -51,12 +62,29 @@ export function PlanCard({ settings, pair, speed, ready, disabled }: { settings:
   const received = waiting.reduce((sum, p) => sum + p.received, 0);
   const failed = waiting.find((p) => p.state === 'failed');
 
+  const fold = (
+    <button type="button" className="kt-plan__fold" onClick={() => setExpanded(!unfolded)} aria-expanded={unfolded}>
+      <span className="kt-plan__now">{current ? t(`fork.plans.${current}`) : t('fork.plans.custom')}</span>
+      <ChevronDown size={14} className={`kt-plan__chevron${unfolded ? ' is-open' : ''}`} />
+    </button>
+  );
+  if (!unfolded) {
+    return (
+      <section className="kt-card kt-plan kt-plan--folded" id="plans-section" aria-label={t('fork.plans.title')}>
+        <h4 className="kt-card__head">
+          <span className="kt-card__icon"><SlidersHorizontal size={14} /></span>
+          <span className="kt-card__title">{t('fork.plans.title')}</span>
+          {fold}
+        </h4>
+      </section>
+    );
+  }
+
   return (
-    <section className="kt-card kt-plan" aria-label={t('fork.plans.title')}>
+    <section className="kt-card kt-plan" id="plans-section" aria-label={t('fork.plans.title')}>
       <h4 className="kt-card__head">
         <span className="kt-card__icon"><SlidersHorizontal size={14} /></span>
         <span className="kt-card__title">{t('fork.plans.title')}</span>
-        {current === null && <span className="kt-plan__custom">{t('fork.plans.custom')}</span>}
         <span className="kt-plan__corner">
           {speed.phase.name === 'running' ? (
             <Tooltip content={t('providers.localai.speedStop')} icon="none" position="top">
@@ -64,9 +92,10 @@ export function PlanCard({ settings, pair, speed, ready, disabled }: { settings:
             </Tooltip>
           ) : ready && (
             <Tooltip content={t('fork.plans.speedTest')} icon="none" position="top">
-              <button type="button" className="kt-plan__icon-btn" onClick={speed.start} disabled={disabled} aria-label={t('fork.plans.speedTest')}><Gauge size={14} /></button>
+              <button type="button" className="kt-plan__icon-btn" onClick={onSpeedTest} disabled={disabled} aria-label={t('fork.plans.speedTest')}><Gauge size={14} /></button>
             </Tooltip>
           )}
+          {fold}
         </span>
       </h4>
 
@@ -86,7 +115,7 @@ export function PlanCard({ settings, pair, speed, ready, disabled }: { settings:
                 {t(`fork.plans.${plan.id}`)}
                 {known && plan.recommended && (
                   <Tooltip content={t(`fork.plans.why.${planWhy(inputs.memoryMB, inputs.lending)}`)} icon="none" position="top" maxWidth={240}>
-                    <span className="kt-plan__recommended">{t('models.recommended', 'Recommended')}</span>
+                    <Star size={12} className="kt-plan__recommended" aria-label={t('models.recommended', 'Recommended')} />
                   </Tooltip>
                 )}
               </span>
@@ -94,10 +123,16 @@ export function PlanCard({ settings, pair, speed, ready, disabled }: { settings:
                 <span className="kt-plan__chip"><MemoryStick size={11} />{gb(plan.vramMB)}</span>
               </Tooltip>
               {/* In use, it is downloaded: the line says the one that matters. */}
-              <span className={`kt-plan__chip${plan.id === current ? ' kt-plan__chip--current' : ''}`}>
-                {plan.id === current ? <><CircleCheck size={11} />{t('fork.plans.inUse')}</>
-                  : left > 0 ? <><Download size={11} />{sizeText(left)}</> : <><CircleCheck size={11} />{t('fork.plans.downloaded')}</>}
-              </span>
+              {(() => {
+                // A word longer than the choice is wide (French, Tamil) ends in an ellipsis, whole on hover.
+                const said = plan.id === current ? t('fork.plans.inUse') : left > 0 ? sizeText(left) : t('fork.plans.downloaded');
+                return (
+                  <span className={`kt-plan__chip${plan.id === current ? ' kt-plan__chip--current' : ''}`} title={said}>
+                    {left > 0 && plan.id !== current ? <Download size={11} /> : <CircleCheck size={11} />}
+                    <span className="kt-plan__chip-text">{said}</span>
+                  </span>
+                );
+              })()}
             </button>
           );
         })}
@@ -134,8 +169,8 @@ export function PlanCard({ settings, pair, speed, ready, disabled }: { settings:
           <span>{t('fork.plans.apply')}</span>
         </button>
       )}
-      {/* The speed test pressed in the corner: its progress and what it found, here under it. */}
-      <SpeedReportView state={speed} ready={ready} disabled={disabled} />
+      {/* The speed test pressed in the corner: its progress and what it found, here under it, once run in this visit. */}
+      {speedShown && <SpeedReportView state={speed} ready={ready} disabled={disabled} />}
     </section>
   );
 }

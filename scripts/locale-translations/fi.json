@@ -699,6 +699,18 @@
     "en": "Romanization",
     "text": "Näytä latinalaistus"
   },
+  "fork.rows.fix": {
+    "en": "Use {{model}} for all",
+    "text": "Käytä mallia {{model}} kaikille"
+  },
+  "fork.rows.noDetect": {
+    "en": "cannot tell languages apart",
+    "text": "ei erota kieliä automaattisesti"
+  },
+  "fork.rows.unheard": {
+    "en": "cannot hear {{language}}",
+    "text": "ei tunnista kieltä {{language}}"
+  },
   "fork.sourceItalic": {
     "en": "Source text in italics",
     "text": "Alkuteksti kursiivilla"

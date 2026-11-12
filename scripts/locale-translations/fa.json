@@ -703,6 +703,18 @@
     "en": "Romanization",
     "text": "نمایش آوانویسی لاتین"
   },
+  "fork.rows.fix": {
+    "en": "Use {{model}} for all",
+    "text": "استفاده از {{model}} برای همه"
+  },
+  "fork.rows.noDetect": {
+    "en": "cannot tell languages apart",
+    "text": "زبان‌ها را خودکار تشخیص نمی‌دهد"
+  },
+  "fork.rows.unheard": {
+    "en": "cannot hear {{language}}",
+    "text": "گفتار {{language}} را نمی‌فهمد"
+  },
   "fork.sourceItalic": {
     "en": "Source text in italics",
     "text": "نمایش متن اصلی به‌صورت مورب"

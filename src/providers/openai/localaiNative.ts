@@ -144,6 +144,8 @@ export function nativeModelFor(id: string, language: string): NativeModel | null
  * the one that was chosen for it.
  */
 export interface NativePick {
+  /** Concrete languages an auto row must hear; best effort never relaxes this coverage. */
+  autoLanguages?: readonly string[];
   /** Per-leg selections where both legs ask for auto on independent engines. */
   selections?: ReadonlyArray<{ pick: NativePick; language: string }>;
   model: string;
@@ -250,19 +252,19 @@ export function nativePicked(pick: NativePick, language: string, has: (id: strin
 }
 
 /**
- * A model chosen for some languages: it is the one in use from now on and
- * theirs by name — and the other languages now heard keep, by name too, the
- * model they were heard by, so that choosing for one does not change another.
+ * An atomic choice: every row on this downloaded engine follows, provided the
+ * model hears them all. Other engines keep their models. Invalid choices are unchanged.
  */
 export function chooseNative(pick: NativePick, id: string, languages: readonly string[], heard: readonly string[] = languages): Required<Pick<NativePick, 'model' | 'byLanguage'>> {
+  const choice = nativeChoice(pick, id, languages, heard);
+  if (!choice.ok) return { model: pick.model, byLanguage: { ...pick.byLanguage } };
   const byLanguage: Record<string, string> = { ...pick.byLanguage };
   const chosenFor = new Set(languages.map(baseOf));
   for (const language of heard) {
     const base = baseOf(language);
     if (chosenFor.has(base) || byLanguage[base]) continue;
-    // What it was heard by for want of a choice — a default — is not written down as one; nor is what hears it only
-    // while the other side's language is detected.
-    const now = nativePicked({ ...pick, detecting: false }, language, () => false);
+    // Pin independent defaults before changing the fallback model.
+    const now = nativePicked({ ...pick, detecting: false }, language);
     if (now) byLanguage[base] = now.id;
   }
   for (const language of languages) {
@@ -271,22 +273,29 @@ export function chooseNative(pick: NativePick, id: string, languages: readonly s
       ?? (pick.bestEffort && isAutoLanguage(language) ? nativeModel(id) : null);
     if (model) byLanguage[baseOf(language)] = model.id;
   }
-  // Each downloaded engine runs one model at a time (`nativeGap`'s `native_two_models`): a language heard by
-  // another of its models goes over to this one where this one hears it, so the card never shows two that cannot
-  // run together. Where it does not hear it, the row says so (on the card). Other engines run beside it.
-  // A model chosen to tell languages apart already hears every language it can while it does (`nativePicked`'s
-  // `detecting`): the choices of the others stand, for when it no longer does.
-  if (!isApple(id) && !pick.detecting && !languages.some(isAutoLanguage)) {
-    for (const language of heard) {
-      const base = baseOf(language);
-      if (chosenFor.has(base)) continue;
-      const now = byLanguage[base];
-      if (!now || isApple(now) || now === id || nativeEngineOf(now) !== nativeEngineOf(id)) continue;
-      const follows = nativeModelFor(id, language) ?? (pick.bestEffort && isAutoLanguage(language) ? nativeModel(id) : null);
-      if (follows && !isApple(follows.id)) byLanguage[base] = follows.id;
-    }
-  }
+  for (const language of choice.moves) byLanguage[baseOf(language)] = id;
   return { model: id, byLanguage };
+}
+
+export type NativeChoice = { ok: true; moves: string[] } | { ok: false; unheard: string };
+
+/** Preview the same atomic choice chooseNative applies. Moves exclude the requested rows. */
+export function nativeChoice(pick: NativePick, id: string, languages: readonly string[], heard: readonly string[] = languages): NativeChoice {
+  const model = NATIVE_MODELS.find((one) => one.id === id);
+  if (!model || languages.length === 0) return { ok: false, unheard: baseOf(languages[0] ?? 'auto') };
+  const requested = new Set(languages.map(baseOf));
+  const moves: string[] = [];
+  for (const language of [...new Set([...languages, ...heard].map(baseOf))]) {
+    const current = nativePicked({ ...pick, detecting: false }, language);
+    const follows = !isApple(id) && current && !isApple(current.id) && nativeEngineOf(current.id) === nativeEngineOf(id);
+    if (!requested.has(language) && !follows) continue;
+    const needed = isAutoLanguage(language) ? pick.autoLanguages ?? [] : [language];
+    const unheard = needed.find((code) => !model || !nativeModelFor(id, code));
+    if (unheard) return { ok: false, unheard: baseOf(unheard) };
+    if (!model || (!nativeModelFor(id, language) && !(pick.bestEffort && isAutoLanguage(language) && !isApple(id)))) return { ok: false, unheard: language };
+    if (!requested.has(language) && current?.id !== id) moves.push(language);
+  }
+  return { ok: true, moves };
 }
 
 /** Whether a model hears speech in this language. */

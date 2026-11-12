@@ -755,6 +755,18 @@
     "en": "Romanization",
     "text": "Ipakita ang romanisasyon"
   },
+  "fork.rows.fix": {
+    "en": "Use {{model}} for all",
+    "text": "Gamitin ang {{model}} sa lahat"
+  },
+  "fork.rows.noDetect": {
+    "en": "cannot tell languages apart",
+    "text": "hindi awtomatikong matukoy ang wika"
+  },
+  "fork.rows.unheard": {
+    "en": "cannot hear {{language}}",
+    "text": "hindi makilala ang pagsasalita sa {{language}}"
+  },
   "fork.sourceItalic": {
     "en": "Source text in italics",
     "text": "Pahilig ang orihinal na teksto"

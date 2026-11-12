@@ -703,6 +703,18 @@
     "en": "Romanization",
     "text": "Tampilkan romanisasi"
   },
+  "fork.rows.fix": {
+    "en": "Use {{model}} for all",
+    "text": "Gunakan {{model}} untuk semua"
+  },
+  "fork.rows.noDetect": {
+    "en": "cannot tell languages apart",
+    "text": "tidak bisa membedakan bahasa otomatis"
+  },
+  "fork.rows.unheard": {
+    "en": "cannot hear {{language}}",
+    "text": "tidak bisa mengenali ucapan {{language}}"
+  },
   "fork.sourceItalic": {
     "en": "Source text in italics",
     "text": "Teks asli dicetak miring"

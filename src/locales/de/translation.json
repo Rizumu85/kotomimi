@@ -2086,6 +2086,11 @@
       "hear": "Die Spracherkennung kommt nicht hinterher. Zu einem leichteren Profil wechseln?",
       "translate": "Die Übersetzung kommt nicht hinterher. Zu einem leichteren Profil wechseln?",
       "open": "Profile ansehen"
+    },
+    "rows": {
+      "unheard": "versteht kein {{language}}",
+      "noDetect": "kann Sprachen nicht automatisch unterscheiden",
+      "fix": "Für alle {{model}} verwenden"
     }
   }
 }

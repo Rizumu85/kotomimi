@@ -2086,6 +2086,11 @@
       "hear": "O reconhecimento não acompanha a velocidade da fala. Experimentar uma configuração mais leve?",
       "translate": "A tradução não consegue acompanhar. Experimentar uma configuração mais leve?",
       "open": "Ver configurações"
+    },
+    "rows": {
+      "unheard": "não reconhece {{language}}",
+      "noDetect": "não distingue idiomas automaticamente",
+      "fix": "Usar {{model}} para tudo"
     }
   }
 }

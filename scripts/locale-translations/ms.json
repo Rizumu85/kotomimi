@@ -699,6 +699,18 @@
     "en": "Romanization",
     "text": "Paparkan perumian"
   },
+  "fork.rows.fix": {
+    "en": "Use {{model}} for all",
+    "text": "Guna {{model}} untuk semua"
+  },
+  "fork.rows.noDetect": {
+    "en": "cannot tell languages apart",
+    "text": "tidak dapat membezakan bahasa secara automatik"
+  },
+  "fork.rows.unheard": {
+    "en": "cannot hear {{language}}",
+    "text": "tidak dapat mendengar {{language}}"
+  },
   "fork.sourceItalic": {
     "en": "Source text in italics",
     "text": "Teks asal dalam huruf condong"

@@ -196,8 +196,8 @@ describe('the native recognizer, language by language', () => {
     expect(nativePicked(after, 'ko')?.id).toBe('qwen3-asr-1.7b-q8');
     // The system's recognition chosen for a language is that language's model of it.
     expect(chooseNative(after, `${APPLE_PREFIX}ja`, ['ko'], ['ko']).byLanguage.ko).toBe(`${APPLE_PREFIX}ko`);
-    // Chosen for a language it does not hear, nothing is written for that language.
-    expect(chooseNative({ model: 'qwen3-asr-1.7b-q8' }, 'r2t2-q8', ['th', 'ja'], ['th', 'ja']).byLanguage).toEqual({ ja: 'r2t2-q8' });
+    // A choice that would leave Thai unheard is refused atomically.
+    expect(chooseNative({ model: 'qwen3-asr-1.7b-q8' }, 'r2t2-q8', ['th', 'ja'], ['th', 'ja'])).toEqual({ model: 'qwen3-asr-1.7b-q8', byLanguage: {} });
   });
 
   it('is kept across a restart as a map of language to model, and nothing else', () => {
@@ -291,16 +291,16 @@ describe('the other side\u2019s language left to be detected', () => {
     expect(nativePicked({ model: `${APPLE_PREFIX}ja` }, 'auto')).toBeNull();
     // Chosen for it by name, as for any language.
     expect(nativePicked({ model: 'r2t2-q8', byLanguage: { auto: 'qwen3-asr-1.7b-q8' } }, 'auto')?.id).toBe('qwen3-asr-1.7b-q8');
-    expect(chooseNative({ model: 'r2t2-q8' }, 'qwen3-asr-1.7b-q8', ['auto'], ['ja', 'auto']).byLanguage).toEqual({ ja: 'r2t2-q8', auto: 'qwen3-asr-1.7b-q8' });
+    expect(chooseNative({ model: 'r2t2-q8' }, 'qwen3-asr-1.7b-q8', ['auto'], ['ja', 'auto']).byLanguage).toEqual({ ja: 'qwen3-asr-1.7b-q8', auto: 'qwen3-asr-1.7b-q8' });
   });
 
   it('moves the other language over to a model chosen for one, where it hears it: the engine runs one at a time', () => {
     const pick = { model: 'qwen3-asr-1.7b-q8', byLanguage: { ja: 'qwen3-asr-1.7b-q8', ko: 'qwen3-asr-1.7b-q8' } };
     // SenseVoice hears Korean too: one model for both.
     expect(chooseNative(pick, 'sensevoice-small-q8', ['ja'], ['ja', 'ko']).byLanguage).toEqual({ ja: 'sensevoice-small-q8', ko: 'sensevoice-small-q8' });
-    // It does not hear Russian: that one stays, and the card says the two cannot run together.
+    // It does not hear Russian: the entire choice is refused.
     expect(chooseNative({ model: 'qwen3-asr-1.7b-q8', byLanguage: { ja: 'qwen3-asr-1.7b-q8', ru: 'qwen3-asr-1.7b-q8' } }, 'sensevoice-small-q8', ['ja'], ['ja', 'ru']).byLanguage)
-      .toEqual({ ja: 'sensevoice-small-q8', ru: 'qwen3-asr-1.7b-q8' });
+      .toEqual({ ja: 'qwen3-asr-1.7b-q8', ru: 'qwen3-asr-1.7b-q8' });
     // The Mac's recognition runs beside the engine's model: neither moves the other.
     expect(chooseNative({ model: 'qwen3-asr-1.7b-q8', byLanguage: { ja: `${APPLE_PREFIX}ja`, ko: 'qwen3-asr-1.7b-q8' } }, 'sensevoice-small-q8', ['ko'], ['ja', 'ko']).byLanguage)
       .toEqual({ ja: `${APPLE_PREFIX}ja`, ko: 'sensevoice-small-q8' });
@@ -986,12 +986,12 @@ describe('a language\u2019s model by default', () => {
     expect(nativePicked({ model: 'r2t2-q8', byLanguage: { th: 'qwen3-asr-0.6b-q8' } }, 'th', here)?.id).toBe('qwen3-asr-0.6b-q8');
   });
 
-  it('is not written down as a choice when another language is chosen for', () => {
-    // Thai was heard by default; choosing for Japanese leaves Thai without a name of its own.
+  it('refuses a choice that would conflict with another language\'s downloaded default', () => {
+    // Thai is heard by Qwen by default; R2T2 cannot hear it on the same engine.
     useNativeEngineStore.setState({ status: { ...NO_NATIVE_ENGINE, supported: true, engine: 'ready', models: { 'r2t2-q8': { state: 'downloaded', received: 1, total: 1 }, 'qwen3-asr-1.7b-q8': { state: 'downloaded', received: 1, total: 1 } } } });
     try {
       const next = chooseNative({ model: 'r2t2-q8' }, 'r2t2-q8', ['ja'], ['ja', 'th']);
-      expect(next.byLanguage).toEqual({ ja: 'r2t2-q8' });
+      expect(next).toEqual({ model: 'r2t2-q8', byLanguage: {} });
     } finally {
       useNativeEngineStore.setState({ status: NO_NATIVE_ENGINE });
     }
@@ -1019,11 +1019,11 @@ describe('one model for a run that detects the other side\u2019s language', () =
     expect(nativePicked(pick, 'auto', HERE('r2t2-q8'))).toBeNull();
   });
 
-  it('is not written down as anyone\u2019s choice', () => {
+  it('writes the same model for every affected language when detection is chosen', () => {
     useNativeEngineStore.setState({ status: { ...NO_NATIVE_ENGINE, supported: true, engine: 'ready', models: { 'r2t2-q8': { state: 'downloaded', received: 1, total: 1 }, 'qwen3-asr-1.7b-q8': { state: 'downloaded', received: 1, total: 1 } } } });
     try {
       const next = chooseNative({ model: 'r2t2-q8', byLanguage: { ja: 'r2t2-q8' }, detecting: true }, 'qwen3-asr-1.7b-q8', ['auto'], ['ja', 'auto']);
-      expect(next.byLanguage.ja).toBe('r2t2-q8');
+      expect(next.byLanguage.ja).toBe('qwen3-asr-1.7b-q8');
       expect(next).not.toHaveProperty('detecting');
     } finally {
       useNativeEngineStore.setState({ status: NO_NATIVE_ENGINE });
