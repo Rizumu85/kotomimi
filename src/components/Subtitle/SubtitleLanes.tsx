@@ -291,8 +291,8 @@ export interface SubtitleLanesProps {
 /**
  * Fork: the subtitle view (`src/lib/subtitle/lanes.ts`) — the other side's
  * newest sentence and its translation, and under it the user's own with what
- * answers it. Each text keeps its place and its number of lines; what does
- * not fit is drawn smaller.
+ * answers it. Each text keeps its place, its size and its number of lines;
+ * what does not fit loses its oldest line (`Slot`).
  */
 export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight, pair, held: replayHeld }: SubtitleLanesProps) {
   const { t } = useTranslation();

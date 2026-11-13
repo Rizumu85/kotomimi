@@ -83,7 +83,6 @@ export function capabilityList(models: readonly SharedModel[]): { object: 'list'
   };
 }
 
-/** An error as OpenAI words one, for an HTTP body or a socket's `error` event. */
 /**
  * A failure's words as another device may read them: a file of this computer
  * is not named. An engine's own message often carries one — a model's file
@@ -97,6 +96,7 @@ export function withoutPaths(message: string): string {
     .replace(/(^|[\s"'(=:])\/(?:Users|home|var|tmp|private|opt|usr|Applications|Library|Volumes|mnt)\/[^\s"'<>)]*/g, '$1…');
 }
 
+/** An error as OpenAI words one, for an HTTP body or a socket's `error` event. */
 export function wireError(code: string, message: string): { message: string; type: 'invalid_request_error'; code: string } {
   return { message: withoutPaths(message), type: 'invalid_request_error', code };
 }

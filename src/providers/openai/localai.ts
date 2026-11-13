@@ -431,14 +431,13 @@ export { detectsOther, heardBy, needsServer, PLACES, type Place } from './locala
 export const hasTranscriptionLeg = (s: Pick<LocalAISettings, 'asrVia' | 'asrOther' | 'translateAt' | 'translateOther' | 'translateServerModel' | 'coach'>) => hearingPlace(s) === 'server' && (translatePlace(s) !== 'server' || s.translateServerModel.trim() !== '' || s.coach);
 
 /**
- * The settings as everything past the stage cards reads them. A text stage
- * this computer's LocalAI runs is a text model at an address — what an API
- * is — with no key: read as one, it is checked, built and run by the code an
- * API's is. (What hears there is no API: a Realtime session, built as such.)
+ * The settings as everything past the stage cards reads them: a hearing stage
+ * on a device of its own is the API it is asked as, with no key, so it is
+ * checked, built and run by the code an API's is.
  */
 export function settled(stored: LocalAISettings): LocalAISettings {
-  // The same of a hearing stage on a device of its own (a phone): its address and the model it lends, asked as an
-  // API's are. The run finds out what it is and reads it live (`pipeline.ts`, `remoteEngine.ts`).
+  // A phone that lends its recognizer: its address and the model it lends, asked as an API's are. The run finds out
+  // what it is and reads it live (`pipeline.ts`, `remoteEngine.ts`).
   const s: LocalAISettings = hearsAtOwnDevice(stored)
     ? { ...stored, asrVia: 'api', asrApiBaseUrl: phoneBase({ address: plainAddress(stored.asrOther) }), asrApiModel: stored.asrOtherModel, asrApiNeedsKey: false }
     : stored;
@@ -989,16 +988,16 @@ const heardForModel = (s: LocalAISettings, pair: { source: string; target: strin
   return nativePicked(pick, AUTO)?.detects ? AUTO : (leg === 'speaker' ? pair.source : pair.target);
 };
 
-/**
- * Fork: what hears a leg, as the language section names it (`languages.hearing`): this computer's model by its name and
- * the languages it tells apart; another device's or an API's by the model named, its languages not known here.
- */
 /** Fork: a recognizer that tells more languages apart than this offers "any language" (SenseVoice's five do not). */
 const ANY_PAST = 5;
 
 /** The Mac's recognition as another device's model names it whole (its languages are `apple-speech:<code>`). */
 const APPLE_NAME = 'apple-speech';
 
+/**
+ * Fork: what hears a leg, as the language section names it (`languages.hearing`): this computer's model by its name and
+ * the languages it tells apart; another device's or an API's by the model named, its languages not known here.
+ */
 function hearerOf(s: LocalAISettings, models: readonly LocalAIModel[], pair: { source: string; target: string }, leg: LegName): { name: string; languages: readonly string[] | null; apple?: true; detects?: true; listed?: true } | undefined {
   if (hearsNatively(s)) {
     const heard = heardBy(s, pair, leg, models);
@@ -1606,7 +1605,7 @@ export const localaiProvider: Provider<LocalAISettings, LocalAICredentials, Loca
   // This computer's own models are chosen and downloaded in the stage's own card (`LocalAIAssist`): there is no page of them apart.
   TurnDetection: { Summary: LocalAITurnDetectionSummary, Controls: LocalAITurnDetectionControls, Help: LocalAITurnDetectionHelp },
 
-  // A stage this computer's LocalAI runs is read as the text model at an address it is (`settled`): no key is asked for it.
+  // A hearing stage on a device of its own is read as the API it is asked as (`settled`): no key field is shown for it.
   credentials: { ...localaiCredentials, fields: (s) => localaiCredentials.fields(settled(s)) },
   check: (k, s, ctx) => checkLocalAIWithNative(k, s, ctx),
   // What decides the credential fields, the endpoints the check reaches, and the models it asks this computer for.

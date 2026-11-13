@@ -331,7 +331,7 @@ const LINES_ORDER: ReadonlyArray<keyof LaneLines> = ['row', 'answer', 'source', 
  * The lines a strip's texts have room for in a window `spare` pixels higher
  * than the strip is laid out for. A window the user made higher is for the
  * sentence on screen: a long one is written out on more lines at the size
- * chosen, where the fitted window would draw it smaller. (Showing the
+ * chosen, where the fitted window would roll its oldest away. (Showing the
  * sentences before in that room was tried, 2026-10-06; it is not what a
  * higher window is asked for.) Each further line is given in turn, while
  * there is room for it. Pure.
