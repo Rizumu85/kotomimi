@@ -85,7 +85,7 @@ object Sharing {
  */
 class ShareService : Service() {
     private val worker = Executors.newSingleThreadExecutor()
-    private var share: Share? = null
+    @Volatile private var share: Share? = null
     private var awake: PowerManager.WakeLock? = null
     private var wifi: WifiManager.WifiLock? = null
 
@@ -109,13 +109,22 @@ class ShareService : Service() {
         hold()
         val sharing = Share(this, Engine(this), Llama(this), store)
         share = sharing
+        // The state is told every 0.7 s, for the screen (`Share`'s watch); the notice is posted again only when its
+        // words changed. Posted each time, it was rebuilt for hours with the screen off.
+        var noticed: Pair<String, String>? = null
         sharing.onState = { state ->
             Sharing.tell(state)
-            if (state.phase != Share.Phase.OFF) getSystemService(NotificationManager::class.java).notify(NOTICE, noticeOf(state))
+            val words = wordsOf(state)
+            if (state.phase != Share.Phase.OFF && words != noticed) {
+                noticed = words
+                getSystemService(NotificationManager::class.java).notify(NOTICE, noticeOf(state))
+            }
         }
         worker.execute {
             runCatching { sharing.start(model, startWith) }
-                .onFailure { error -> Sharing.tell(Share.State(Share.Phase.FAILED, model, message = error.message ?: error.javaClass.simpleName)) }
+                // Not where sharing was ended meanwhile: stopped while it started, the wait is interrupted, and that
+                // was shown as a failure to start.
+                .onFailure { error -> if (share === sharing) Sharing.tell(Share.State(Share.Phase.FAILED, model, message = error.message ?: error.javaClass.simpleName)) }
             // Not up: nothing to keep alive for.
             if (Sharing.state.phase == Share.Phase.FAILED) Handler(Looper.getMainLooper()).post { end(keep = Sharing.state) }
         }

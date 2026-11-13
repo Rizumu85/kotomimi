@@ -208,6 +208,8 @@ class TextCheck(private val llama: Llama, private val store: ModelStore) {
          * - Hunyuan MT: its card's request in Chinese with the sampling the card names; and for the second sentence
          *   its card's form with what was said before, which is what the desktop sends for a sentence said soon
          *   after another (`wrapAfter`).
+         * - PLaMo 3 Translate: the sentence alone, its languages in the template's options, greedy, with the two
+         *   marks that end its answer; each sentence alone.
          * - The feedback model: the instructions and the seven examples of a Chinese speaker practising Japanese,
          *   then the sentence; greedy, thinking off, and no end said to the answer (the door sets one).
          */
@@ -217,6 +219,12 @@ class TextCheck(private val llama: Llama, private val store: ModelStore) {
                     if (index == 0) "短句" else "长句", sentence,
                     body(model, JSONObject().put("temperature", 0).put("max_tokens", 512).put("chat_template_kwargs", unthinking()), listOf("user" to "请将以下日语文本翻译为中文，直接输出翻译结果，不要进行任何解释。\n\n$sentence")),
                 )
+            }
+            "plamo" -> listOf("短句" to SHORT, "长句" to LONG).map { (label, sentence) ->
+                val options = JSONObject().put("temperature", 0).put("max_tokens", 512)
+                    .put("stop", JSONArray(listOf("<|plamo:tag|>", "<|plamo:bos|>")))
+                    .put("chat_template_kwargs", JSONObject().put("source_lang", "ja").put("target_lang", "zh-hans"))
+                Asking(label, sentence, body(model, options, listOf("user" to sentence)))
             }
             "hunyuan" -> listOf(
                 Asking("短句", SHORT, body(model, hunyuanSampling(), listOf("user" to "将以下文本翻译为中文，注意只需要输出翻译后的结果，不要额外解释：\n\n$SHORT"))),

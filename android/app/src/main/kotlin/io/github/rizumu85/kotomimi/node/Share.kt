@@ -449,6 +449,29 @@ class Share(private val context: Context, private val engine: Engine, private va
 
     // ── The door ────────────────────────────────────────────────────────────────────────────────────────────────
 
+    private enum class KeyAnswer { OK, REFUSED, THROTTLED }
+
+    /** Wrong access keys by address: how many, since when. */
+    private val keyTries = HashMap<String, Pair<Int, Long>>()
+
+    /**
+     * Whether a request carries the owner's key, counted as a sharing computer's door counts (`keyCheck` in the
+     * desktop's electron/lan-server.js): after `KEY_TRIES` wrong keys from one address within `KEY_WINDOW_MS`, that
+     * address is turned away until the time is over — six letters are not guessed a few at a time. A key that is
+     * right, or none at all (a computer only looking for the phone), counts for nothing.
+     */
+    private fun keyCheck(wanted: String, given: String?, address: String): KeyAnswer {
+        synchronized(keyTries) {
+            val now = System.currentTimeMillis()
+            keyTries.entries.removeAll { now - it.value.second >= KEY_WINDOW_MS }
+            val seen = keyTries[address]
+            if (seen != null && seen.first >= KEY_TRIES) return KeyAnswer.THROTTLED
+            if (given == "Bearer $wanted") return KeyAnswer.OK
+            if (!given.isNullOrEmpty()) keyTries[address] = ((seen?.first ?: 0) + 1) to (seen?.second ?: now)
+            return KeyAnswer.REFUSED
+        }
+    }
+
     private fun answer(client: Socket) {
         client.soTimeout = CLIENT_TIMEOUT_MS
         val input = BufferedInputStream(client.getInputStream())
@@ -466,13 +489,18 @@ class Share(private val context: Context, private val engine: Engine, private va
         if (!own || !localName(headers["host"])) return reply(out, 403, errorOf("This phone answers the devices around it only."))
 
         // The app's own page, where it says where it comes from, is told it may read the answer.
-        val allow = origin?.let { "Access-Control-Allow-Origin: $it\r\nVary: Origin\r\nAccess-Control-Expose-Headers: X-Kotomimi-Name, X-Kotomimi-Node\r\n" }.orEmpty()
+        val allow = origin?.let { "Access-Control-Allow-Origin: $it\r\nVary: Origin\r\nAccess-Control-Expose-Headers: X-Kotomimi-Name, X-Kotomimi-Node, Retry-After\r\n" }.orEmpty()
 
         // The owner's access key, where one is set (`DoorKey`): without it, nothing but the phone's name is answered.
         val key = DoorKey.of(context)
-        if (key.isNotEmpty() && method != "OPTIONS" && headers["authorization"] != "Bearer $key") {
-            val asks = "This phone asks for its access key."
-            return if (method == "POST") refuseUnread(client, input, out, asks, allow, status = 401) else reply(out, 401, errorOf(asks), allow)
+        if (key.isNotEmpty() && method != "OPTIONS") {
+            val answer = keyCheck(key, headers["authorization"], client.inetAddress?.hostAddress.orEmpty())
+            if (answer != KeyAnswer.OK) {
+                val throttled = answer == KeyAnswer.THROTTLED
+                val asks = if (throttled) "Too many wrong access keys from this device. Try again in a minute." else "This phone asks for its access key."
+                val status = if (throttled) 429 else 401
+                return if (method == "POST") refuseUnread(client, input, out, asks, allow, status = status) else reply(out, status, errorOf(asks), allow)
+            }
         }
 
         when {
@@ -946,6 +974,9 @@ class Share(private val context: Context, private val engine: Engine, private va
         /** The requests in hand at once, of every kind; and of those, the ones for a text model, waiting or being answered. */
         private const val MOST_OPEN = 12
         private const val MOST_ASKING = 4
+        /** Wrong access keys an address may send within the time below, as a sharing computer allows. */
+        private const val KEY_TRIES = 10
+        private const val KEY_WINDOW_MS = 60_000L
 
         /** A text request: the feedback model's, the longest the desktop sends, is under six kilobytes. */
         private const val CHAT_BODY_MOST = 256 * 1024

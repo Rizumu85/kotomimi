@@ -1585,8 +1585,8 @@ class MainActivity : Activity() {
     /** How far ahead of speech recognition keeps, from what it has read: null before anything was read. */
     private fun speedOf(work: Work): Double? = if (work.spentMs <= 0 || work.soundMs <= 0) null else work.soundMs.toDouble() / work.spentMs
 
-    /** For a model in two rows — the same model for each engine —, which of the two this is; null for any other. */
-    private fun twinWords(model: Model): String? = if (!model.twin) null else if (model.reader == Reader.AUDIO_CPP) "GPU 版" else "CPU 版"
+    /** For a model in two rows — the same model for each engine —, which of the two this is, by the engine's name: both run on the processor. Null for any other. */
+    private fun twinWords(model: Model): String? = if (!model.twin) null else "${model.reader.words} 版"
 
     private fun ago(at: Long): String {
         val seconds = (System.currentTimeMillis() - at) / 1000
