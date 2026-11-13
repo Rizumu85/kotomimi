@@ -186,23 +186,26 @@ export async function completeText(request: TextRequest, deps: TextDeps): Promis
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let pending = '';
+      const take = (line: string): void => {
+        const data = line.startsWith('data:') ? line.slice(5).trim() : '';
+        if (!data || data === '[DONE]') return;
+        let chunk: Chunk;
+        try { chunk = JSON.parse(data) as Chunk; } catch { return; }
+        if (typeof chunk.error?.message === 'string') throw new Error(chunk.error.message);
+        named(chunk);
+        const piece = chunk.choices?.[0]?.delta?.content;
+        if (typeof piece === 'string' && piece) grow(piece);
+      };
       for (;;) {
         const { done, value } = await reader.read();
         if (done) break;
         pending += decoder.decode(value, { stream: true });
         const lines = pending.split('\n');
         pending = lines.pop() ?? '';
-        for (const line of lines) {
-          const data = line.startsWith('data:') ? line.slice(5).trim() : '';
-          if (!data || data === '[DONE]') continue;
-          let chunk: Chunk;
-          try { chunk = JSON.parse(data) as Chunk; } catch { continue; }
-          if (typeof chunk.error?.message === 'string') throw new Error(chunk.error.message);
-          named(chunk);
-          const piece = chunk.choices?.[0]?.delta?.content;
-          if (typeof piece === 'string' && piece) grow(piece);
-        }
+        for (const line of lines) take(line);
       }
+      // A stream that ends without a line break after its last line: that line is read too.
+      take(pending + decoder.decode());
     }
     return { text: shown, ...(firstMs !== undefined ? { firstMs } : {}), totalMs: clock.now() - started, ...(served ? { model: served } : {}) };
   } catch (error) {

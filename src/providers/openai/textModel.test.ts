@@ -65,6 +65,14 @@ describe('one answer from a text model', () => {
     expect(await completeText(REQUEST, deps(async () => sse('你好')))).not.toHaveProperty('model');
   });
 
+  it('reads the last line of a stream that ends without a line break (fork)', async () => {
+    const cut = new Response(
+      `data: ${JSON.stringify({ choices: [{ delta: { content: 'こん' } }] })}\n\ndata: ${JSON.stringify({ choices: [{ delta: { content: 'にちは' } }] })}`,
+      { headers: { 'Content-Type': 'text/event-stream' } },
+    );
+    expect((await completeText(REQUEST, deps(async () => cut))).text).toBe('こんにちは');
+  });
+
   it('says the answer each time it grows, thinking left out', async () => {
     const said: string[] = [];
     await completeText(REQUEST, deps(async () => sse('<think>hm', '</think>', 'こん', 'にちは'), { onText: (t) => said.push(t) }));
