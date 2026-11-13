@@ -139,8 +139,11 @@ ipcMain.handle('subtitle:get-screen-bounds', () => {
 ipcMain.handle('subtitle:enter', (_event, payload) => {
   const win = getLiveWindow();
   if (!win) return { ok: false };
-  const work = screen.getPrimaryDisplay().workArea;
-  const requested = payload?.bounds ?? defaultSubtitleBounds(work);
+  // Fork: a strip left on a second screen opens there again. Held to the main screen, it came back on it every time.
+  const kept = payload?.bounds;
+  const placed = kept && [kept.x, kept.y, kept.width, kept.height].every(Number.isFinite);
+  const work = (placed ? screen.getDisplayMatching(kept) : screen.getPrimaryDisplay()).workArea;
+  const requested = kept ?? defaultSubtitleBounds(work);
   const clamped = clampToScreen(requested, work);
 
   entered = true;

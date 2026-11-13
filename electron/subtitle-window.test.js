@@ -667,3 +667,42 @@ describe('subtitle-window click-through (fork)', () => {
     expect(told()).toEqual([]);
   });
 });
+
+describe('subtitle-window on a second screen (fork)', () => {
+  const enter = (payload) => ipcHandlers.get('subtitle:enter')({}, payload);
+  const second = { x: 1920, y: 0, width: 2560, height: 1400 };
+  let win;
+  let matching;
+
+  beforeEach(() => {
+    ipcHandlers.clear();
+    matching = fakeElectron.screen.getDisplayMatching;
+    // The screen a rectangle is on: the second, for one that begins past the first's right edge.
+    fakeElectron.screen.getDisplayMatching = (rect) => ({ workArea: rect.x >= 1920 ? second : { x: 0, y: 0, width: 1920, height: 1040 } });
+    const { setupSubtitleHandlers } = loadSubtitleWindowModule();
+    win = makeFakeWindow();
+    setupSubtitleHandlers(win);
+  });
+
+  afterEach(() => {
+    fakeElectron.screen.getDisplayMatching = matching;
+    win.destroyed = true;
+    win.emit('closed');
+  });
+
+  it('opens the strip where it was left, on the screen it was left on', async () => {
+    const kept = { x: 2400, y: 1100, width: 900, height: 160 };
+    expect(await enter({ bounds: kept })).toEqual({ ok: true, bounds: kept });
+    expect(win.setBounds).toHaveBeenCalledWith(kept);
+  });
+
+  it('keeps it within that screen', async () => {
+    const result = await enter({ bounds: { x: 4300, y: 1350, width: 900, height: 160 } });
+    expect(result.bounds).toEqual({ x: 1920 + 2560 - 900, y: 1400 - 160, width: 900, height: 160 });
+  });
+
+  it('opens a first strip on the main screen', async () => {
+    const result = await enter({});
+    expect(result.bounds.x).toBeLessThan(1920);
+  });
+});
