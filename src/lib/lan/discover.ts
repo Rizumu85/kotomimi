@@ -79,7 +79,10 @@ export function phoneTextModels(value: unknown, room: number | null = null): Pho
     if (out.some((seen) => seen.id === m.id)) continue;
     const loaded = m.loaded === true;
     const holds = typeof m.holds_mb === 'number' && Number.isFinite(m.holds_mb) ? m.holds_mb : null;
-    out.push({ id: m.id.slice(0, 80), kind: m.kind, name: typeof m.name === 'string' ? m.name.slice(0, 80) : '', loaded, ...(room !== null && holds !== null ? { fits: loaded || holds <= room } : {}) });
+    // Reckoned here from the phone's own list, or as the search already reckoned it (`electron/lan-discover.js`): its
+    // answer has no `holds_mb` left to reckon from, and the settings never said a model was too big for the phone.
+    const fits = room !== null && holds !== null ? loaded || holds <= room : typeof m.fits === 'boolean' ? m.fits : null;
+    out.push({ id: m.id.slice(0, 80), kind: m.kind, name: typeof m.name === 'string' ? m.name.slice(0, 80) : '', loaded, ...(fits !== null ? { fits } : {}) });
     if (out.length >= 16) break;
   }
   return out;
