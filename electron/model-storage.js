@@ -114,14 +114,20 @@ function createModelStorage({ userData, files = fs, statfs = (p) => files.statfs
     // Into one of the folders that move: it would be copied into itself.
     const within = (a, b) => norm(a) === norm(b) || norm(a).startsWith(norm(b) + path.sep);
     if (KINDS.some((kind) => within(target, path.join(from, kind)))) return { ...base, error: 'inside' };
+    // Made only to be tried, where it was not there: gone again afterwards, so that a place looked at and not chosen
+    // is left as it was (`move` makes it).
+    const made = !exists(target);
+    const unmake = () => { if (made) { try { files.rmdirSync(target); } catch { /* not empty, or not made: left */ } } };
     try {
       files.mkdirSync(target, { recursive: true });
       const probe = path.join(target, `.kotomimi-${process.pid}-${now()}`);
       files.writeFileSync(probe, '');
       files.rmSync(probe, { force: true });
     } catch {
+      unmake();
       return { ...base, error: 'not_writable' };
     }
+    unmake();
     const renames = exists(from) && sameDrive(from, target);
     if (!renames && drive.freeBytes !== null && needBytes + MARGIN > drive.freeBytes) return { ...base, error: 'no_space' };
     return { ...base, sameDrive: renames };
@@ -142,6 +148,7 @@ function createModelStorage({ userData, files = fs, statfs = (p) => files.statfs
     const checked = plan(target);
     if (checked.error) throw Object.assign(new Error(`The models cannot move there (${checked.error}).`), { code: checked.error });
     const to = checked.target;
+    files.mkdirSync(to, { recursive: true });
     const aborted = () => signal?.aborted;
 
     // Folders renamed on one drive: taken back if anything after fails, so the models stay where the app looks.

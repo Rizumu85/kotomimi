@@ -17,6 +17,7 @@ const { setupPopoverWindowHandlers } = require('./popover-windows.js');
 const { setupTranscriptSaveHandler } = require('./transcript-save.js');
 const { setupSessionRecordingHandlers } = require('./session-recording.js');
 const { setupSubtitleCaptureHandler } = require('./subtitle-capture.js');
+const { webUrl, folderPath } = require('./open-guards.js');
 const { setupCaptionShare } = require('./caption-share.js');
 const { setupVRChat } = require('./vrchat.js');
 const { setupVrOverlay } = require('./vr-overlay.js');
@@ -801,9 +802,10 @@ process.on('uncaughtException', (error) => {
   console.error('[Sokuji] [Main] Uncaught exception:', error);
   handleExit('uncaughtException');
 });
+// Fork: logged, and the app goes on. A promise nobody waited for — a request in the background that failed, a
+// window gone before its answer — closed the whole app, and a run under way with it.
 process.on('unhandledRejection', (reason, promise) => {
   console.error('[Sokuji] [Main] Unhandled rejection at:', promise, 'reason:', reason);
-  handleExit('unhandledRejection');
 });
 
 // Quit when all windows are closed, except on macOS
@@ -1095,9 +1097,11 @@ ipcMain.handle('check-sokuji-audio', async () => {
 // Handler to open a directory in the file explorer
 ipcMain.handle('open-directory', (event, dirPath) => {
   try {
-    // Open the directory using the default file explorer
+    // Fork: a folder that is there, and nothing else — the system's "open" runs a program it is handed (open-guards.js).
+    const folder = folderPath(dirPath);
+    if (!folder) return { success: false, error: 'Not a folder.' };
     const { shell } = require('electron');
-    shell.openPath(dirPath);
+    shell.openPath(folder);
     return { success: true };
   } catch (error) {
     console.error('[Sokuji] [Main] Error opening directory:', error);
@@ -1108,8 +1112,11 @@ ipcMain.handle('open-directory', (event, dirPath) => {
 // Handler to open external URL in system default browser
 ipcMain.handle('open-external', async (event, url) => {
   try {
+    // Fork: a web address, and no other scheme a program of this computer answers to (open-guards.js).
+    const address = webUrl(url);
+    if (!address) return { success: false, error: 'Not a web address.' };
     const { shell } = require('electron');
-    await shell.openExternal(url);
+    await shell.openExternal(address);
     return { success: true };
   } catch (error) {
     console.error('[Sokuji] [Main] Error opening external URL:', error);

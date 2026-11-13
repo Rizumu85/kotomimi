@@ -62,6 +62,18 @@ describe('a move, asked first', () => {
     expect(tight.plan(target).error).toBe('no_space');
   });
 
+  it('leaves nothing behind in a place looked at and not chosen', () => {
+    model(userData, 'native-engine', 'asr.gguf', 3000);
+    const target = path.join(scratch, 'elsewhere', 'Kotomimi');
+    const storage = createModelStorage({ userData, statfs: disk(10 ** 10), platform: 'linux' });
+    expect(storage.plan(target).error).toBeUndefined();
+    expect(existsSync(target)).toBe(false);
+    // A folder that was there is left as it was.
+    mkdirSync(target, { recursive: true });
+    expect(storage.plan(target).error).toBeUndefined();
+    expect(existsSync(target)).toBe(true);
+  });
+
   it('refuses a folder not named in full: one relative to wherever the app runs from is no place a person chose', () => {
     const storage = createModelStorage({ userData, statfs: disk(10 ** 10), platform: 'linux' });
     expect(storage.plan('kt-storage-test').error).toBe('not_writable');
