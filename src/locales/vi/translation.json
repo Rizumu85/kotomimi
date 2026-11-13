@@ -561,7 +561,6 @@
       "serverNeedsKey": "Thiết bị yêu cầu khóa truy cập",
       "bySentence": "Dịch từng câu",
       "bySentenceTooltip": "Bật: dịch ngay khi người nói nói hết một câu, bản dịch hiện sớm hơn nhưng thiếu ngữ cảnh. Tắt: dịch cả đoạn khi người nói tạm dừng, có đầy đủ ngữ cảnh nhưng phải chờ lâu hơn.",
-      "speedTest": "Kiểm tra tốc độ",
       "speedTesting": "Đang kiểm tra tốc độ: gửi bản ghi âm dài khoảng 10 giây qua từng bước theo tốc độ nói bình thường. Không dùng micrô hay phát âm thanh.",
       "speedStop": "Dừng",
       "speedRetest": "Kiểm tra lại",

@@ -561,7 +561,6 @@
       "serverNeedsKey": "Toegangssleutel vereist",
       "bySentence": "Zin voor zin vertalen",
       "bySentenceTooltip": "Aan: elke zin wordt meteen vertaald zodra de spreker die afmaakt. De vertaling verschijnt eerder, maar mist de context van de omliggende zinnen. Uit: het hele stuk wordt vertaald zodra de spreker pauzeert. De context is volledig, maar je wacht langer.",
-      "speedTest": "Snelheid testen",
       "speedTesting": "Snelheid wordt getest: een opname van ongeveer 10 seconden wordt op normaal spreektempo door alle stappen geleid. De microfoon wordt niet gebruikt en er wordt geen geluid afgespeeld.",
       "speedStop": "Stoppen",
       "speedRetest": "Opnieuw testen",

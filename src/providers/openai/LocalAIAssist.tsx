@@ -397,9 +397,9 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
   const nameOf = (code: string) => languageLabel(deviceLanguage(code), i18n.language);
   const slots = useNativeStageSlots(settings, pair, legs, models).filter((slot) => slot.stage === stage);
   /**
-   * Fork: the native translation engine runs one model for the whole stage, not a copy for each direction (unlike
-   * the app's own models). Its rows are drawn as the one choice it is, and the menu lists only models that take
-   * every direction this run translates: a model offered for one direction would be the wrong one for the other
+   * Fork: the native translation engine runs one model for the whole stage, not a copy for each direction. Its
+   * rows are drawn as the one choice it is, and the menu lists only models that take every direction this run
+   * translates: a model offered for one direction would be the wrong one for the other
    * (`translatorUnfit`). The recognizer's engine keeps its rows, one a language (`byLanguage`).
    */
   const engineOne = stage === 'translation';
@@ -408,7 +408,7 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
   const looked = nativeStoreOf(stage)((one) => one.asked);
   /** The language a row hears: where the engine hears, the other side's may be left to be detected. */
   const heardIn = (slot: DeviceNeed): string => (stage === 'asr' ? heardBy(settings, pair, slot.leg) : slot.source);
-  /** The engine's model that serves a row; null: the engine runs the stage and none is chosen for the row; undefined: the app's own models run it. */
+  /** The engine's model that serves a row; null: none is chosen for the row. */
   const using = (slot: DeviceNeed): NativeCardModel | null => native.inUse(slot);
   /**
    * Fork: the speaker heard in either of the pair's languages: the Mac's recognition hears that too, where it has both
@@ -434,7 +434,6 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
   const open = picked === undefined ? missing?.dir ?? null : picked;
   /** The engine's models a row can be given: the downloaded ones that serve it, and the one in use whatever its state. */
   const nativeFor = (slot: DeviceNeed): readonly NativeCardModel[] => {
-    if (!native) return [];
     const ready = engine.ready.filter((m) => offers(m.id, slot));
     const mine = using(slot);
     return mine && !ready.some((m) => m.id === mine.id) ? [mine, ...ready] : ready;
@@ -517,8 +516,7 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
         {below}
         {libraryOpen && (
           <div className="kt-here__library">
-            {/* The engine's models that take every direction: one model, so one list. The app's own are chosen a
-                direction at a time, in the rows the menu's "app's own models" entry goes back to. */}
+            {/* The engine's models that take every direction: one model, so one list. */}
             {fittingAll.length > 0 && (
               <div className="model-management-section kt-here__native">
                 <div className="model-subgroup">
@@ -535,13 +533,13 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
 
   // The native models that serve the direction whose library is open, best first.
   const openSlot = slots.find((slot) => slot.dir === open);
-  const fitting = native && openSlot ? engine.offered.filter((m) => offers(m.id, openSlot)) : [];
+  const fitting = openSlot ? engine.offered.filter((m) => offers(m.id, openSlot)) : [];
   const usedThere = openSlot ? using(openSlot) : undefined;
   // Fork: a row whose language is left to be detected lists apart the models that tell languages apart and those that
   // must be told one: the latter greyed, under a name of their own, so that what can hear it shows by where it is.
   const detectRow = stage === 'asr' && !!openSlot && isAutoLanguage(heardIn(openSlot));
   const tellApart = detectRow ? fitting.filter((m) => nativeModel(m.id).detects || hearsEither(m.id, openSlot!)) : fitting;
-  const mustBeTold = detectRow && native ? engine.offered.filter((m) => !tellApart.includes(m)) : [];
+  const mustBeTold = detectRow ? engine.offered.filter((m) => !tellApart.includes(m)) : [];
   // What the open row must hear: its language; where it is detected, the user's own languages; else unknown.
   const rowLanguages = !openSlot ? [] : !detectRow ? [heardIn(openSlot)] : openSlot.leg === 'speaker' ? [pair.source, ...alsoSpoken(settings, pair)] : [];
   const at: NativeStage = stage === 'asr' ? (openSlot?.leg === 'participant' ? 'participant' : 'speaker') : 'translation';
@@ -717,7 +715,7 @@ function DeviceChat({ disabled, native }: { disabled?: boolean; native: NativeRu
       {open && (
         <div className="kt-here__library">
           {/* The native feedback engine's models first, as a group of their own. */}
-          {native && engine.offered.length > 0 && (
+          {engine.offered.length > 0 && (
             <div className="model-management-section kt-here__native">
               <div className="model-subgroup">
                 <div className="model-subgroup__label"><Star size={11} />{t('models.recommendedGroup', 'Recommended')}</div>

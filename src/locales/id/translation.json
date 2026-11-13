@@ -561,7 +561,6 @@
       "serverNeedsKey": "Perlu kunci akses",
       "bySentence": "Terjemahkan per kalimat",
       "bySentenceTooltip": "Aktif: terjemahan muncul begitu satu kalimat selesai diucapkan, lebih cepat tetapi tanpa konteks kalimat di sekitarnya. Nonaktif: seluruh bagian diterjemahkan saat pembicara berhenti sejenak, dengan konteks lengkap tetapi lebih lama.",
-      "speedTest": "Uji kecepatan",
       "speedTesting": "Menguji kecepatan: rekaman sekitar 10 detik dikirim ke setiap tahap dengan kecepatan bicara normal. Mikrofon tidak digunakan dan tidak ada suara yang diputar.",
       "speedStop": "Hentikan",
       "speedRetest": "Uji ulang",

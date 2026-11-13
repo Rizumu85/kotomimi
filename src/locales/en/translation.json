@@ -561,7 +561,6 @@
       "serverNeedsKey": "It asks for an access key",
       "bySentence": "Translate sentence by sentence",
       "bySentenceTooltip": "On: each sentence is translated as soon as it ends — sooner, but without the sentences around it. Off: the whole stretch is translated once the speaker pauses — with its context, but later.",
-      "speedTest": "Test speed",
       "speedTesting": "Testing speed: a recording of about ten seconds is sent through each step at speaking pace. Nothing is recorded or played.",
       "speedStop": "Stop",
       "speedRetest": "Test again",

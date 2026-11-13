@@ -561,7 +561,6 @@
       "serverNeedsKey": "Laite vaatii pääsyavaimen",
       "bySentence": "Käännä lause kerrallaan",
       "bySentenceTooltip": "Päällä: jokainen lause käännetään heti sen päätyttyä. Käännös näkyy nopeammin, mutta ympäröivät lauseet eivät anna sille asiayhteyttä. Pois: koko puhejakso käännetään puhujan pitäessä tauon. Asiayhteys säilyy, mutta odotus on pidempi.",
-      "speedTest": "Testaa nopeus",
       "speedTesting": "Testataan nopeutta: noin 10 sekunnin äänite syötetään jokaiseen vaiheeseen normaalilla puhenopeudella. Mikrofonia ei käytetä eikä ääntä toisteta.",
       "speedStop": "Pysäytä",
       "speedRetest": "Testaa uudelleen",

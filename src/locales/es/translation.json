@@ -561,7 +561,6 @@
       "serverNeedsKey": "Requiere una clave de acceso",
       "bySentence": "Traducir frase por frase",
       "bySentenceTooltip": "Activado: cada frase se traduce en cuanto termina, con menos espera pero sin el contexto de las demás. Desactivado: se traduce todo el fragmento cuando la otra persona hace una pausa, con todo el contexto pero con más espera.",
-      "speedTest": "Probar velocidad",
       "speedTesting": "Probando la velocidad: se envía una grabación de unos 10 segundos a cada paso, a un ritmo de habla normal. No se usa el micrófono ni se reproduce sonido.",
       "speedStop": "Detener",
       "speedRetest": "Repetir prueba",

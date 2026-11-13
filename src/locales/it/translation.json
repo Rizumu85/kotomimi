@@ -561,7 +561,6 @@
       "serverNeedsKey": "Richiede una chiave di accesso",
       "bySentence": "Traduci frase per frase",
       "bySentenceTooltip": "Attivo: ogni frase viene tradotta appena termina. La traduzione arriva prima, ma manca il contesto delle altre frasi. Disattivato: l'intero intervento viene tradotto quando chi parla fa una pausa. Il contesto è completo, ma l'attesa è più lunga.",
-      "speedTest": "Testa la velocità",
       "speedTesting": "Test di velocità in corso: una registrazione di circa 10 secondi viene inviata a ogni fase al ritmo del parlato. Il microfono non viene usato e non viene riprodotto alcun suono.",
       "speedStop": "Interrompi",
       "speedRetest": "Ripeti il test",

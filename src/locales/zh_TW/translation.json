@@ -561,7 +561,6 @@
       "serverNeedsKey": "它需要存取金鑰",
       "bySentence": "逐句翻譯",
       "bySentenceTooltip": "開啟：對方每說完一句即翻譯，譯文出現更早，但單句缺少上下文。關閉：對方停頓後整段翻譯，上下文完整，但等待更久。",
-      "speedTest": "測試速度",
       "speedTesting": "正在測試速度：以正常語速向各個步驟送入一段約 10 秒的錄音，不使用麥克風，也不會播放聲音。",
       "speedStop": "停止",
       "speedRetest": "重新測速",

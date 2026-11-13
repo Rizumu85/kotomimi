@@ -561,7 +561,6 @@
       "serverNeedsKey": "Zugriffsschlüssel erforderlich",
       "bySentence": "Satzweise übersetzen",
       "bySentenceTooltip": "Ein: Jeder Satz wird direkt nach seinem Ende übersetzt. Die Übersetzung erscheint früher, aber der Kontext fehlt. Aus: Erst bei einer Sprechpause wird der ganze Abschnitt übersetzt. Der Kontext bleibt erhalten, aber du wartest länger.",
-      "speedTest": "Geschwindigkeit testen",
       "speedTesting": "Geschwindigkeit wird getestet: Eine etwa 10 Sekunden lange Aufnahme wird in normalem Sprechtempo durch alle Schritte geleitet. Das Mikrofon wird nicht verwendet und kein Ton abgespielt.",
       "speedStop": "Stoppen",
       "speedRetest": "Erneut testen",

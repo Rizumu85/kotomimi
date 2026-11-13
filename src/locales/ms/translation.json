@@ -561,7 +561,6 @@
       "serverNeedsKey": "Peranti ini memerlukan kunci akses",
       "bySentence": "Terjemah ayat demi ayat",
       "bySentenceTooltip": "Aktif: setiap ayat diterjemahkan sebaik sahaja selesai dituturkan. Terjemahan muncul lebih awal, tetapi tanpa konteks ayat lain. Tidak aktif: seluruh bahagian diterjemahkan apabila penutur berhenti seketika. Konteks lebih lengkap, tetapi perlu menunggu lebih lama.",
-      "speedTest": "Uji kelajuan",
       "speedTesting": "Menguji kelajuan: rakaman kira-kira 10 saat dihantar melalui setiap langkah pada kadar pertuturan biasa. Mikrofon tidak digunakan dan tiada audio dimainkan.",
       "speedStop": "Hentikan",
       "speedRetest": "Uji semula",

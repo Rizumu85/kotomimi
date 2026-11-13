@@ -561,7 +561,6 @@
       "serverNeedsKey": "Wymaga klucza dostępu",
       "bySentence": "Tłumacz zdanie po zdaniu",
       "bySentenceTooltip": "Włączone: każde zdanie jest tłumaczone zaraz po jego zakończeniu. Tłumaczenie pojawia się szybciej, ale bez kontekstu sąsiednich zdań. Wyłączone: cały fragment jest tłumaczony po przerwie w wypowiedzi. Kontekst jest pełny, ale trzeba dłużej poczekać.",
-      "speedTest": "Sprawdź szybkość",
       "speedTesting": "Testowanie szybkości: nagranie trwające około 10 sekund przechodzi przez każdy etap w normalnym tempie mowy. Mikrofon nie jest używany i żaden dźwięk nie jest odtwarzany.",
       "speedStop": "Zatrzymaj",
       "speedRetest": "Powtórz test",

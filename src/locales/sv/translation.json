@@ -561,7 +561,6 @@
       "serverNeedsKey": "Den kräver en åtkomstnyckel",
       "bySentence": "Översätt mening för mening",
       "bySentenceTooltip": "På: varje mening översätts så snart den är avslutad. Översättningen visas tidigare, men saknar sammanhang från meningarna runt omkring. Av: hela stycket översätts när personen pausar. Då finns hela sammanhanget med, men väntan blir längre.",
-      "speedTest": "Testa hastigheten",
       "speedTesting": "Testar hastigheten: en inspelning på cirka 10 sekunder skickas genom varje steg i normal talhastighet. Mikrofonen används inte och inget ljud spelas upp.",
       "speedStop": "Stoppa",
       "speedRetest": "Testa igen",

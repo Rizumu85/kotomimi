@@ -561,7 +561,6 @@
       "serverNeedsKey": "Une clé d’accès est requise",
       "bySentence": "Traduire phrase par phrase",
       "bySentenceTooltip": "Activé : chaque phrase est traduite dès qu’elle est terminée. La traduction apparaît plus tôt, mais sans le contexte des autres phrases. Désactivé : le passage entier est traduit après une pause, avec tout son contexte, mais l’attente est plus longue.",
-      "speedTest": "Tester la vitesse",
       "speedTesting": "Test de vitesse en cours : un enregistrement d’environ 10 secondes est envoyé à chaque étape au rythme normal de la parole. Le microphone n’est pas utilisé et aucun son n’est diffusé.",
       "speedStop": "Arrêter",
       "speedRetest": "Relancer le test",

@@ -561,7 +561,6 @@
       "serverNeedsKey": "Kailangan nito ng susi sa pag-access",
       "bySentence": "Isalin bawat pangungusap",
       "bySentenceTooltip": "Naka-on: isinasalin agad ang bawat pangungusap pagkasabi nito. Mas maagang lalabas ang salin, pero kulang sa konteksto. Naka-off: isinasalin ang buong bahagi kapag huminto sandali ang kausap. Kumpleto ang konteksto, pero mas matagal ang hintay.",
-      "speedTest": "Subukan ang bilis",
       "speedTesting": "Sinusubukan ang bilis: ipinapasa sa bawat hakbang ang isang recording na humigit-kumulang 10 segundo sa normal na bilis ng pagsasalita. Hindi gagamitin ang mikropono at walang tutugtog na tunog.",
       "speedStop": "Ihinto",
       "speedRetest": "Subukan ulit",

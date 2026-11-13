@@ -561,7 +561,6 @@
       "serverNeedsKey": "Erişim anahtarı gerekiyor",
       "bySentence": "Cümle cümle çevir",
       "bySentenceTooltip": "Açık: Her cümle biter bitmez çevrilir. Çeviri daha erken görünür, ancak çevredeki cümlelerin bağlamı eksik kalır. Kapalı: Konuşan kişi durakladığında tüm bölüm çevrilir. Bağlam korunur, ancak daha uzun beklersiniz.",
-      "speedTest": "Hızı test et",
       "speedTesting": "Hız test ediliyor: Yaklaşık 10 saniyelik bir kayıt, normal konuşma hızında her aşamaya gönderiliyor. Mikrofon kullanılmaz ve ses çalınmaz.",
       "speedStop": "Durdur",
       "speedRetest": "Yeniden test et",
