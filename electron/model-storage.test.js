@@ -38,7 +38,8 @@ describe('where the models are', () => {
     expect(storage.status()).toMatchObject({ root: userData, isDefault: true, missing: false, usedBytes: 5000, drive: { freeBytes: 10 ** 9 } });
   });
 
-  it('names a Windows drive by its letter', () => {
+  // On Windows alone: elsewhere 'D:\' is no whole path, and the plan refuses it before it names anything.
+  it.skipIf(process.platform !== 'win32')('names a Windows drive by its letter', () => {
     const storage = createModelStorage({ userData, statfs: disk(10 ** 9), platform: 'win32' });
     expect(storage.plan('D:\\').target).toBe(path.join(path.resolve('D:\\'), 'Kotomimi'));
   });
