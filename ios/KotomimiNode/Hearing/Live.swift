@@ -242,10 +242,12 @@ final class LiveHearing {
     private func stopFast() async -> Int {
         guard let stopped = quick else { return 0 }
         quick = nil
+        // Counted off before the wait: a stretch that ends meanwhile gives back what it holds (`end`), and this place
+        // was then given back twice — a third recognizer was let start, which the system refuses.
+        holds -= 1
         stopped.finish()
         await stopped.analyzer.cancelAndFinishNow()
         for task in shown { task.cancel() }
-        holds -= 1
         return 1
     }
 

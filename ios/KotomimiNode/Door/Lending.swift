@@ -218,6 +218,29 @@ final class Lending {
 
     // ── The door's answers ────────────────────────────────────────────────────────────────────────────────────
 
+    private enum KeyAnswer { case ok, refused, throttled }
+    private static let keyTriesMost = 10
+    private static let keyWindow: TimeInterval = 60
+    private static let tooManyKeys = "Too many wrong access keys from this device. Try again in a minute."
+    /// Wrong access keys by address: how many, since when.
+    private var keyTries: [String: (count: Int, since: Date)] = [:]
+
+    /// Whether a request carries the owner's key, counted as a sharing computer's door counts (`keyCheck` in
+    /// electron/lan-server.js): after ten wrong keys from one address within a minute, that address is turned away
+    /// until the minute is over — six letters are not guessed a few at a time. A key that is right, or none at all (a
+    /// computer only looking for the device), counts for nothing.
+    private func keyCheck(_ request: Request, _ key: String) -> KeyAnswer {
+        let now = Date()
+        keyTries = keyTries.filter { now.timeIntervalSince($0.value.since) < Lending.keyWindow }
+        let address = request.peer ?? ""
+        let seen = keyTries[address]
+        if let seen, seen.count >= Lending.keyTriesMost { return .throttled }
+        let given = request.headers["authorization"] ?? ""
+        if given == "Bearer \(key)" { return .ok }
+        if !given.isEmpty { keyTries[address] = (count: (seen?.count ?? 0) + 1, since: seen?.since ?? now) }
+        return .refused
+    }
+
     private func answer(_ request: Request) async -> Response {
         let origin = request.headers["origin"]
         let own = origin == nil || origin == "null" || origin!.hasPrefix("file://")
@@ -226,12 +249,16 @@ final class Lending {
         }
         // The app's own page, where it says where it comes from, is told it may read the answer.
         let allow: [(String, String)] = origin.map {
-            [("Access-Control-Allow-Origin", $0), ("Vary", "Origin"), ("Access-Control-Expose-Headers", "X-Kotomimi-Name, X-Kotomimi-Node, X-Kotomimi-Form")]
+            [("Access-Control-Allow-Origin", $0), ("Vary", "Origin"), ("Access-Control-Expose-Headers", "X-Kotomimi-Name, X-Kotomimi-Node, X-Kotomimi-Form, Retry-After")]
         } ?? []
         // The owner's access key, where one is set: without it, nothing but the device's name is answered.
         let key = DoorKey.value
-        if !key.isEmpty, request.method != "OPTIONS", request.headers["authorization"] != "Bearer \(key)" {
-            return .error(401, "This device asks for its access key.", allow)
+        if !key.isEmpty, request.method != "OPTIONS" {
+            switch keyCheck(request, key) {
+            case .ok: break
+            case .throttled: return .error(429, Lending.tooManyKeys, allow)
+            case .refused: return .error(401, "This device asks for its access key.", allow)
+            }
         }
         switch (request.method, request.path) {
         case ("OPTIONS", _):
@@ -258,7 +285,13 @@ final class Lending {
         let own = origin == nil || origin == "null" || origin!.hasPrefix("file://")
         guard own, Lending.localName(request.headers["host"]) else { return .refuse(.error(403, "This device answers the devices around it only.")) }
         let key = DoorKey.value
-        if !key.isEmpty, request.headers["authorization"] != "Bearer \(key)" { return .refuse(.error(401, "This device asks for its access key.")) }
+        if !key.isEmpty {
+            switch keyCheck(request, key) {
+            case .ok: break
+            case .throttled: return .refuse(.error(429, Lending.tooManyKeys))
+            case .refused: return .refuse(.error(401, "This device asks for its access key."))
+            }
+        }
         guard request.path == "/v1/audio/stream" || request.path == "/audio/stream" else { return .refuse(.error(404, "Not here.")) }
         guard !hearing.ready.isEmpty else { return .refuse(.error(404, "This device lends no speech recognition now: no language is downloaded there.")) }
         seen = request.peer
