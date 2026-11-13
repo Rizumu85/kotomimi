@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 
 vi.mock('../../app/vrchatHandle', () => ({ vrchatOffered: () => true }));
@@ -11,6 +11,10 @@ import { VrHeadsetSection } from './VrHeadsetSection';
 beforeEach(() => {
   useVrStore.setState({ on: false, panel: false, link: 'off' });
 });
+
+// The store writes a setting through a module it loads when first needed: waited for, so that the load does not
+// land after the test's world is gone (a slow runner failed a release on it).
+afterEach(async () => { await vi.dynamicImportSettled(); });
 
 describe('VrHeadsetSection — the SteamVR overlay, a card of its own (fork)', () => {
   it('is two parts pressed on or off, the captions and the wrist panel, and no state while off', () => {

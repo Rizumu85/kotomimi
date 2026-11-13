@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 
 vi.mock('../../app/vrchatHandle', () => ({ vrchatOffered: () => true }));
@@ -11,6 +11,10 @@ import { ChatboxToggle } from './ChatboxToggle';
 beforeEach(() => {
   useVRChatStore.setState({ chatbox: 'off', chatboxLast: null });
 });
+
+// The store writes a setting through a module it loads when first needed: waited for, so that the load does not
+// land after the test's world is gone (a slow runner failed a release on it).
+afterEach(async () => { await vi.dynamicImportSettled(); });
 
 describe('ChatboxToggle — the chatbox on or off from the main panel (fork)', () => {
   it('is not there before a look was ever chosen', () => {

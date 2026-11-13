@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 
 vi.mock('../../app/vrchatHandle', () => ({ vrchatOffered: () => true }));
@@ -14,6 +14,10 @@ beforeEach(() => {
   useVRChatStore.setState({ chatbox: 'off', chatboxTranslationFirst: false, recent: null, viewers: 0 });
   useProviderStore.setState({ selected: 'localai', entries: { localai: { settings: {}, credentials: {}, pair: { source: 'zh-CN', target: 'ja' } } } as never });
 });
+
+// The store writes a setting through a module it loads when first needed: waited for, so that the load does not
+// land after the test's world is gone (a slow runner failed a release on it).
+afterEach(async () => { await vi.dynamicImportSettled(); });
 
 describe('VRChatSection — the chatbox chosen from pictures of it (fork)', () => {
   it('chooses what is shown and which goes on top, and shows the chatbox as it will look', () => {
