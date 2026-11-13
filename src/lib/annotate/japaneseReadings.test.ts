@@ -233,3 +233,20 @@ describe('the corrections', () => {
     expect(correctReadings([])).toEqual([]);
   });
 });
+
+describe('a number in full-width digits (fork)', () => {
+  it('is read as the same number in plain digits is', () => {
+    for (const [wide, plainDigits] of [['２０日', '20日'], ['１４日', '14日'], ['１０日', '10日'], ['２０歳です', '20歳です'], ['１２人', '12人'], ['１０分', '10分']] as const) {
+      expect(read(wide), wide).toBe(read(plainDigits).replace(/[0-9]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0xfee0)));
+      expect(roman(wide), wide).toBe((roman(plainDigits) ?? '').replace(/[0-9]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0xfee0)));
+    }
+    expect(read('２０日')).toBe('はつか');
+    expect(roman('２０日')).toBe('hatsuka');
+    expect(read('１４日')).toBe('じゅうよっか');
+  });
+
+  it('leaves one digit the word the dictionary has for it', () => {
+    expect(read('８人')).toBe('８にん');
+    expect(plain('８')).toBe('はち');
+  });
+});
