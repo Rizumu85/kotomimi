@@ -337,7 +337,7 @@ export function deviceNeeds(s: DeviceChoices, pair: LanguagePair, legs: readonly
       for (const cross of crossings(s, pair)) out.push({ leg, dir: slot(cross.source, cross.target), stage: 'translation', source: cross.source, target: cross.target, required: true });
     }
     // Fork: the other side's second language lit: the user's speech goes into it as well (`Stages.into`).
-    const into = leg === 'speaker' && !coached ? alsoInto(s, pair) : undefined;
+    const into = leg === 'speaker' && !(coached && !both) ? alsoInto(s, pair) : undefined;
     if (s.translateAt === 'device' && into) out.push({ leg, dir: slot(source, into), stage: 'translation', source, target: into, required: true });
   }
   return out;

@@ -5,7 +5,7 @@ import { noticeText } from '../../lib/view/noticeText';
 import zhCN from '../../locales/zh_CN/translation.json';
 import { coachPrompt } from './coachPrompt';
 import {
-  buildLocalAI, createLocalAICheck, hasTranscriptionLeg, LOCALAI_DEFAULTS, localaiProvider, migrateLocalAISettings, phoneWarms, prepareLocalAI, settled,
+  buildLocalAI, createLocalAICheck, LOCALAI_DEFAULTS, localaiProvider, migrateLocalAISettings, phoneWarms, prepareLocalAI, settled,
   type LocalAICredentials, type LocalAISettings, type NativeUps,
 } from './localai';
 import { coachesAtOwnDevice, needsServer, translatePlace, translatesAtOwnDevice } from './localaiDevice';
@@ -72,8 +72,6 @@ describe('a text stage on a phone, as everything past the cards reads it', () =>
   });
 
   it('makes the leg the shared device hears one that only transcribes there', () => {
-    expect(hasTranscriptionLeg(settings({ asrVia: 'server', translateAt: 'server', translateOther: PHONE }))).toBe(true);
-    expect(hasTranscriptionLeg(settings({ asrVia: 'server', translateAt: 'server' }))).toBe(false);
     const built = buildLocalAI(PARTICIPANT, settings({ asrVia: 'server', translateAt: 'server', translateOther: PHONE, translateOtherModel: 'hy-mt2-1.8b' }), { ...shared, models: [{ id: 'gpt-realtime' }] });
     expect(built).toMatchObject({ transcribeOnly: true });
   });

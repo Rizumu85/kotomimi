@@ -427,9 +427,6 @@ export function localaiModelsUrl(endpoint: string): string {
 export { kindOf, modelsFor, serverDefaultModel, translationDefault, type LocalAIModel, type LocalAIModelKind, type LocalAIModelSlot } from './localaiModels';
 export { detectsOther, heardBy, needsServer, PLACES, type Place } from './localaiDevice';
 
-/** A leg of this run only transcribes on the other device — its answers come from a stage of its own — so LocalAI lets no recognizer be chosen (`transcriptionFor`). */
-export const hasTranscriptionLeg = (s: Pick<LocalAISettings, 'asrVia' | 'asrOther' | 'translateAt' | 'translateOther' | 'translateServerModel' | 'coach'>) => hearingPlace(s) === 'server' && (translatePlace(s) !== 'server' || s.translateServerModel.trim() !== '' || s.coach);
-
 /**
  * The settings as everything past the stage cards reads them: a hearing stage
  * on a device of its own is the API it is asked as, with no key, so it is
@@ -1163,7 +1160,8 @@ export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISe
     // Fork: a sentence in one of two lit languages of theirs goes into the other; the speech into their second one lit.
     const cross = both ? crossings(s, ctx.pair) : [];
     const into = alsoInto(s, ctx.pair);
-    const forward = [ctx.pair, ...back, ...cross, ...(into && !s.coach ? [{ source: ctx.pair.source, target: into }] : [])];
+    // As the start builds it (`buildLocalAI`): not for a speaker coached in their own language alone, whose speech nothing translates.
+    const forward = [ctx.pair, ...back, ...cross, ...(into && !(s.coach && !both) ? [{ source: ctx.pair.source, target: into }] : [])];
     translates = (native.translatorGap ?? translatorGap)(s.translateNativeModel, ctx.legs.flatMap((leg) => (leg === 'speaker' ? forward : [reverse])));
     translates.catch(() => undefined);
   } else {

@@ -827,6 +827,16 @@ describe('the provider\'s check, with the engine', () => {
     expect(await checkLocalAIWithNative(NONE, s, CTX, async () => OK, { ...native, translatorGap: async () => missing })).toMatchObject(missing);
   });
 
+  it('checks the translation into their second language lit for a coached speaker who speaks both, as the start asks for it (fork)', async () => {
+    const translatorGap = vi.fn(async (_model: string, _pairs: ReadonlyArray<{ source: string; target: string }>) => null);
+    const s = settings({ ...NATIVE, speakBoth: true, coach: true, theyAlso: ['en'], theyLit: 'en', asrDetectOther: true, translateAt: 'device', translateHere: 'native', translateNativeModel: 'index-translate-2b', coachAt: 'device', coachHere: 'native', coachNativeModel: 'gemma-4-e2b' });
+    await checkLocalAIWithNative(NONE, s, CTX, async () => OK, { gap: vi.fn(async () => null), idle: () => undefined, translatorGap, coachGap: vi.fn(async () => null) });
+    expect(translatorGap.mock.calls[0][1]).toContainEqual({ source: 'ja', target: 'en' });
+    // Coached and speaking their own language alone, what they say is answered by feedback: nothing translates it.
+    await checkLocalAIWithNative(NONE, { ...s, speakBoth: false }, CTX, async () => OK, { gap: vi.fn(async () => null), idle: () => undefined, translatorGap, coachGap: vi.fn(async () => null) });
+    expect(translatorGap.mock.calls[1][1]).not.toContainEqual({ source: 'ja', target: 'en' });
+  });
+
   it('refuses in the engine\'s words, with what the servers listed', async () => {
     const refusal = { ok: false as const, reason: 'The native recognition engine could not start: no vulkan device', code: 'native_failed' };
     const result = await checkLocalAIWithNative(NONE, settings(NATIVE), CTX, async () => OK, { gap: async () => refusal, idle: () => undefined });
